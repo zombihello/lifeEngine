@@ -1,3 +1,4 @@
+cmake_minimum_required( VERSION 3.10 )
 project( lifeEngine )
 
 include( ../CMake/InstallExtlibs.cmake )
@@ -19,8 +20,16 @@ if( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
         set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -static )
     elseif( MSVC )
     endif()
+
+    if( ${ARCH_TYPE} EQUAL 64 )
+        set( PLATFORM_NAME "Win64" )
+    else()
+        set( PLATFORM_NAME "Win32" )
+    endif()
+elseif( ${CMAKE_SYSTEM_NAME} MATCHES "Android" )
+    set( PLATFORM_NAME "Android" )
 else()
-    message( SEND_ERROR "Unknow platform" )
+    message( SEND_ERROR "Unknow platform '" ${CMAKE_SYSTEM_NAME} "'" )
 endif()
 
 #
@@ -34,13 +43,16 @@ set( MODULE_ENGINE ${CMAKE_CURRENT_SOURCE_DIR}/Engine/Runtime/Engine )
 set( ENGINE_INCLUDE_DIR ${MODULE_ENGINE}/Include )
 
 set( MODULE_GAME ${CMAKE_CURRENT_SOURCE_DIR}/Games/Testbed CACHE PATH "Path to game module" )
-set( GAME_NAME Testbed CACHE STRING "Game name" )
+set( GAME_NAME TestbedGame CACHE STRING "Game name" )
 set( GAME_INCLUDE_DIR ${MODULE_GAME}/Include )
 
 if( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
     set( MODULE_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/Engine/Runtime/Platforms/Windows )
-    set( PLATFORM_INCLUDE_DIR ${MODULE_PLATFORM}/Include )
+elseif( ${CMAKE_SYSTEM_NAME} MATCHES "Android" )
+    set( MODULE_PLATFORM ${CMAKE_CURRENT_SOURCE_DIR}/Engine/Runtime/Platforms/Android )
 endif()
+
+set( PLATFORM_INCLUDE_DIR ${MODULE_PLATFORM}/Include )
 
 #
 #   --- Build settings ---
@@ -55,7 +67,7 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../CMake" )
 set( EXTLIBS_DIR "${PROJECT_SOURCE_DIR}/../Extlibs" )
-set( BUILD_BIN_DIR Binaries )
+set( BUILD_BIN_DIR Binaries/${PLATFORM_NAME} )
 set( BUILD_LIB_DIR Libs )
 set( BUILD_ENGINE_DIR Engine )
 set( BUILD_DIR ${CMAKE_INSTALL_PREFIX} )

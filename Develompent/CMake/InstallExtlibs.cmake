@@ -7,8 +7,6 @@ function( InstallExtlibs EXTLIBS_DIR INSTALL_DIR )
 		endif()
 		
 		set( BINARES "${EXTLIBS_DIR}/SDL2/${BIN_DIR}/SDL2.dll" )
-	else()
-		message( SEND_ERROR "Unknow platform" )
 	endif()	
 	
 	install( FILES ${BINARES} DESTINATION ${INSTALL_DIR} )

@@ -11,12 +11,12 @@
 
 /**
  * @ingroup Core
- * @brief The base class from which all others in the engine inherit
+ * @brief The base class of all objects
  */
-class Object
+class LObject
 {
 public:
-    virtual ~Object() {}
+    virtual ~LObject() {}
 };
 
 #endif //LIFEENGINE_OBJECT_H

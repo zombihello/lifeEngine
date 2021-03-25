@@ -1,24 +1,24 @@
 #include "WindowsWindow.h"
 
-WindowsWindow::WindowsWindow()
+FWindowsWindow::FWindowsWindow()
 {}
 
-WindowsWindow::~WindowsWindow()
+FWindowsWindow::~FWindowsWindow()
 {
     Close();
 }
 
-bool WindowsWindow::PollEvent()
+bool FWindowsWindow::PollEvent()
 {
     return false;
 }
 
-bool WindowsWindow::Create( const tchar *InTitle, int32 InWidth, int32 InHeight, EStyle InStyle )
+bool FWindowsWindow::Create( const tchar *InTitle, int32 InWidth, int32 InHeight, EStyle InStyle )
 {
     return false;
 }
 
-void WindowsWindow::Close()
+void FWindowsWindow::Close()
 {
 
 }

@@ -9,7 +9,7 @@ set( ALL_SOURCE_FILES Source/Main.cpp )
 #   --- Settings project ---
 #
 
-add_library( ${MODULE_NAME} ${ALL_SOURCE_FILES} )
+add_library( ${MODULE_NAME} STATIC ${ALL_SOURCE_FILES} )
 
 include_directories( Include )
 include_directories( ${CORE_INCLUDE_DIR} )

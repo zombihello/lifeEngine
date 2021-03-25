@@ -1,0 +1,93 @@
+plugins {
+    id 'com.android.application'
+}
+
+def archiveBuildTypes   = [ "release", "debug" ]
+def buildRootDir        = "../../../../../../../../"
+def buildBinDir         = "$buildRootDir/Binaries/Android"
+def intermediateDir     = "../../../../../../../Intermediate/Android/Java"
+def appName             = "lifeEngine"
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "ua.bsodgames.lifeengine"
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                arguments "-DLE_DEBUG=ON", "-DDO_CHECK=ON", "-DCMAKE_INSTALL_PREFIX=$buildBinDir"
+                cppFlags ""
+            }
+        }
+
+        project.buildDir = intermediateDir
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            if ( variant.buildType.name in archiveBuildTypes ) {
+                // Update output filename
+                if ( variant.versionName != null ) {
+                    String name = "$appName-${variant.versionName}-${output.baseName}.apk"
+                    outputFileName = new File( name )
+                }
+
+                def taskSuffix          = variant.name.capitalize()
+                def assembleTaskName    = "assemble${taskSuffix}"
+
+                if ( tasks.findByName( assembleTaskName ) ) {
+                    def copyAPKFolderTask = tasks.create( name: "archive${taskSuffix}", type: org.gradle.api.tasks.Copy ) {
+                        description "Archive/copy APK folder to a shared folder."
+
+                        def sourceFolder        = "$buildDir/outputs/apk/${output.baseName.replace( "-", "/" )}"
+                        def destinationFolder   = "$buildBinDir"
+
+                        print "Copying APK folder from: $sourceFolder into $destinationFolder\n"
+                        from( sourceFolder )
+                        into destinationFolder
+                        eachFile { file -> file.path = file.name }
+                        includeEmptyDirs = false
+                    }
+
+                    tasks[ assembleTaskName ].finalizedBy = [ copyAPKFolderTask ]
+                }
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile( 'proguard-android-optimize.txt' ), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "../../../../../../CMakeLists.txt"
+            buildStagingDirectory "../../../../../../../Intermediate/Android/CMake"
+            version "3.10.2"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}

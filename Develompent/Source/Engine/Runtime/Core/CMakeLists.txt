@@ -3,13 +3,13 @@
 #
 
 set( MODULE_NAME Core )
-set( ALL_SOURCE_FILES Include/CoreDefines.h Include/Core.h Include/Types.h Source/Core.cpp Include/Object.h)
+file( GLOB_RECURSE SOURCE_FILES "Include/*.h" "Source/*.cpp" )
 
 #
 #   --- Project settings ---
 #
 
-add_library( ${MODULE_NAME} STATIC ${ALL_SOURCE_FILES} )
+add_library( ${MODULE_NAME} STATIC ${SOURCE_FILES} )
 
 set_target_properties (${MODULE_NAME} PROPERTIES FOLDER Runtime )
 set_target_properties( ${MODULE_NAME} PROPERTIES PREFIX "" )

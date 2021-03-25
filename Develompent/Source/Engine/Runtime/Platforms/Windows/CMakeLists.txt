@@ -2,7 +2,7 @@
 #   --- Set values ---
 #
 
-set( MODULE_NAME ${GAME_NAME} )
+set( MODULE_NAME WindowsPlatform )
 set( ALL_SOURCE_FILES Include/WindowsPlatform.h Source/WindowsLaunch.cpp Include/WindowsWindow.h Source/WindowsWindow.cpp )
 
 #
@@ -12,10 +12,12 @@ set( ALL_SOURCE_FILES Include/WindowsPlatform.h Source/WindowsLaunch.cpp Include
 add_executable( ${MODULE_NAME} WIN32 ${ALL_SOURCE_FILES} )
 install( TARGETS ${MODULE_NAME} DESTINATION ${BUILD_DIR}/${BUILD_BIN_DIR} )
 
+set_target_properties( ${MODULE_NAME} PROPERTIES PREFIX "" )
+set_target_properties( ${MODULE_NAME} PROPERTIES OUTPUT_NAME "${GAME_NAME}$<$<CONFIG:Debug>:-Debug>" )
+
 target_link_libraries( ${MODULE_NAME} ${CMAKE_DL_LIBS} )
 target_link_libraries( ${MODULE_NAME} Core )
 #target_link_libraries( ${MODULE_NAME} Engine )
-target_link_libraries( ${MODULE_NAME} Platform )
 target_link_libraries( ${MODULE_NAME} Game )
 
 include_directories( Include )

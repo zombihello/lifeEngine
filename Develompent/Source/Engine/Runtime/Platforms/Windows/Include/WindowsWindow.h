@@ -10,13 +10,12 @@
 #define LIFEENGINE_WINDOWSWINDOW_H
 
 #include "Core.h"
-#include "Object.h"
 
 /**
  * @ingroup WindowsPlatform
  * @brief Class for working with the application window
  */
-class WindowsWindow : public Object
+class FWindowsWindow
 {
 public:
 
@@ -35,8 +34,8 @@ public:
         Default         = Decorated | Resizable        /**< The default style is a combination of Decorated and Resizable */
     };
 
-    WindowsWindow();
-    ~WindowsWindow();
+    FWindowsWindow();
+    ~FWindowsWindow();
 
     /**
      * @ingroup WindowsPlatform
