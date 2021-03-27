@@ -9,6 +9,10 @@
 #ifndef LIFEENGINE_ANDROIDPLATFORM_H
 #define LIFEENGINE_ANDROIDPLATFORM_H
 
+#include <stdarg.h>
+
+#include "Types.h"
+
 #define PLATFORM_ANDROID					    1
 
 #if SHIPPING_BUILD && !PLATFORM_DOXYGEN
@@ -77,5 +81,31 @@
  * @brief JNI Method
  */
 #define JNI_METHOD			__attribute__( ( visibility( "default" ) ) ) extern "C"
+
+/**
+ * @ingroup AndroidPlatform
+ * @brief Get formatted string (for Unicode strings)
+ *
+ * @param[in,out] InOutDest Pointer to destination buffer
+ * @param[in] InDestSize Size of destination buffer
+ * @param[in] InCount umber of characters to write (not including null terminating character)
+ * @param[in] InFormat String to print
+ * @param[in] InArgPtr Argument list
+ * @return Number of characters written or -1 if truncated
+ */
+int appGetVarArgs( tchar* InOutDest, uint32 InDestSize, uint32 InCount, const tchar*& InFormat, va_list InArgPtr );
+
+/**
+ * @ingroup AndroidPlatform
+ * @brief Get formatted string (for ANSI strings)
+ *
+ * @param[in,out] InOutDest Pointer to destination buffer
+ * @param[in] InDestSize Size of destination buffer
+ * @param[in] InCount umber of characters to write (not including null terminating character)
+ * @param[in] InFormat String to print
+ * @param[in] InArgPtr Argument list
+ * @return Number of characters written or -1 if truncated
+ */
+int appGetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, uint32 InCount, const achar*& InFormat, va_list InArgPtr );
 
 #endif //LIFEENGINE_ANDROIDPLATFORM_H

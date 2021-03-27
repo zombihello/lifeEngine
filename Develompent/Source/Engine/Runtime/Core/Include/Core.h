@@ -11,18 +11,31 @@
 
 #include "CoreDefines.h"
 #include "Types.h"
+#include "Globals.h"
 
 #undef TEXT
 
 /**
  * @ingroup Core
- * @brief Macros for convert string to WChar
+ * @brief Macro for convert string to WChar
  *
  * @param[in] String Input string
  *
  *  Example usage: @code TEXT( "Hello World" ) @endcode
  */
 #define TEXT( String ) L##String
+
+/**
+ * @ingroup Core
+ * @brief Macro for print debug message to log
+ */
+#define debugf				GLog->Logf
+
+/**
+ * @ingroup Core
+ * @brief Macro for print warning to log
+ */
+#define warnf				GWarn->Logf
 
  /**
   * @ingroup Core
@@ -178,5 +191,85 @@ void VARARGS appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, i
     #define checkNoEntry()                  {}
     #define checkNoReentry()                {}
 #endif // DO_CHECK
+
+/**
+ * @ingroup Core
+ * @brief Macro to get formatted string (for Unicode strings)
+ *
+ * @param[in,out] Dest Pointer to destination buffer
+ * @param[in] DestSize Size of destination buffer
+ * @param[in] Size Number of characters to write (not including null terminating character)
+ * @param[in] Format String to print
+ */
+#define GET_VARARGS( Dest, DestSize, Size, Format ) \
+{ \
+	va_list         vaList; \
+	va_start( vaList, Format ); \
+	appGetVarArgs( Dest, DestSize, Size, Format, vaList ); \
+	va_end( vaList ); \
+}
+
+/**
+ * @ingroup Core
+ * @brief Macro to get formatted string (for ANSI strings)
+ *
+ * @param[in,out] Dest Pointer to destination buffer
+ * @param[in] DestSize Size of destination buffer
+ * @param[in] Size Number of characters to write (not including null terminating character)
+ * @param[in] Format String to print
+ */
+#define GET_VARARGS_ANSI( Dest, DestSize, Size, Format ) \
+{ \
+	va_list         vaList; \
+	va_start( vaList, Format ); \
+	appGetVarArgsAnsi( Dest, DestSize, Size, Format, vaList ); \
+	va_end( vaList ); \
+}
+
+/**
+ * @ingroup Core
+ * @brief Macro to get formatted string with result (for Unicode strings)
+ *
+ * @param[in,out] Dest Pointer to destination buffer
+ * @param[in] DestSize Size of destination buffer
+ * @param[in] Size Number of characters to write (not including null terminating character)
+ * @param[in] Format String to print
+ * @param[out] Result Function execution result
+ * @return -1 a sign that the entire line has been processed, otherwise the number of characters written
+ */
+#define GET_VARARGS_RESULT( Dest, DestSize, Size, Format, Result ) \
+{ \
+	va_list         vaList; \
+	va_start( vaList, Format ); \
+	Result = appGetVarArgs( Dest, DestSize, Size, Format, vaList ); \
+	if ( Result >= DestSize ) \
+	{ \
+		Result = -1; \
+	} \
+	va_end( vaList ); \
+}
+
+/**
+ * @ingroup Core
+ * @brief Macro to get formatted string with result (for ANSI strings)
+ *
+ * @param[in,out] Dest Pointer to destination buffer
+ * @param[in] DestSize Size of destination buffer
+ * @param[in] Size Number of characters to write (not including null terminating character)
+ * @param[in] Format String to print
+ * @param[out] Result Function execution result
+ * @return -1 a sign that the entire line has been processed, otherwise the number of characters written
+ */
+#define GET_VARARGS_RESULT_ANSI( Dest, DestSize, Size, Format, Result ) \
+{ \
+	va_list         vaList; \
+	va_start( vaList, Format ); \
+	Result = appGetVarArgsAnsi( Dest, DestSize, Size, Format, vaList ); \
+	if ( Result >= DestSize ) \
+	{ \
+		Result = -1; \
+	} \
+	va_end( vaList ); \
+}
 
 #endif //LIFEENGINE_CORE_H

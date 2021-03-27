@@ -1,5 +1,3 @@
-#include <stdarg.h>
-#include <string.h>
 #include <memory>
 
 #include "OutputDevices.h"
@@ -14,18 +12,12 @@ void FOutputDevice::Logf( FOutputDevice::EEventType InEvent, const tchar* InMess
     {
         free( buffer );
         buffer = ( tchar* )malloc( bufferSize * sizeof( tchar ) );
-
-        va_list			argList;
-        va_start( argList, InMessage );
-        result = vswprintf( buffer, bufferSize, InMessage, argList );
-        va_end( argList );
-
-        if ( result >= bufferSize )
-        {
-            result = 1;
-        }
-
+        GET_VARARGS_RESULT( buffer, bufferSize, bufferSize-1, InMessage, result );
         bufferSize *= 2;
     }
+    buffer[ result ] = 0;
+
+    Serialize( buffer, InEvent );
+    free( buffer );
 }
 

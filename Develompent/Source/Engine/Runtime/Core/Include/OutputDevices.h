@@ -63,6 +63,18 @@ public:
      * @ingroup Core
      * @brief Print message to output device
      *
+     * @param[in] InMessage Message
+     * @param[in] ... Other arguments of message
+     */
+    FORCEINLINE void Logf( const tchar* InMessage, ... )
+    {
+        Logf( EEventType::Log, InMessage );
+    }
+
+    /**
+     * @ingroup Core
+     * @brief Print message to output device
+     *
      * @param[in] InEvent Type event of message
      * @param[in] InMessage Message
      * @param[in] ... Other arguments of message

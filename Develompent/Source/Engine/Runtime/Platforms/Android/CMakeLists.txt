@@ -3,7 +3,13 @@
 #
 
 set( MODULE_NAME AndroidPlatform )
-set( ALL_SOURCE_FILES Include/AndroidPlatform.h Source/native-lib.cpp )
+set( ALL_SOURCE_FILES
+        Include/AndroidOutputDevices.h
+        Include/AndroidPlatform.h
+
+        Source/AndroidOutputDevices.cpp
+        Source/AndroidPlatform.cpp
+        Source/AndroidLaunch.cpp )
 
 #
 #   --- Project settings ---

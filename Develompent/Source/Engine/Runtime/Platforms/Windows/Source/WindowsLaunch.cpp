@@ -16,5 +16,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
     // Initialize console for print log in debug
     appInitConsole();
 
+    check( false );
+
     return 0;
 }
