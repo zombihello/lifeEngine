@@ -69,6 +69,7 @@ namespace lifeBuildTool
                     // Configurations
                     case "DEBUG":
                         configuration = LETargetConfiguration.Debug;
+                        linkEnvironment.isCreateDebugInfo = true;
                         break;
 
                     case "RELEASE":

@@ -6,9 +6,22 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\Core.h" />
+    <ClInclude Include="Include\CoreDefines.h" />
+    <ClInclude Include="Include\Globals.h" />
+    <ClInclude Include="Include\LEBuild.h" />
+    <ClInclude Include="Include\Object.h" />
+    <ClInclude Include="Include\OutputDevices.h" />
+    <ClInclude Include="Include\Types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Core.cpp" />
+    <ClCompile Include="Source\OutputDevices.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{AA00A0FC-2BF3-4B61-B45F-BD0C22579D94}</ProjectGuid>
+    <ProjectGuid>{CF0AB3D0-F7A6-406B-BFC4-556955893BCC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -2,7 +2,7 @@
 
 int main()
 {
-	std::cout << "sss\n";
+	std::cout << "Hello frsssom Launch\n";
 	getchar();
 	return 0;
 }

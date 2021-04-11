@@ -10,8 +10,12 @@ namespace lifeBuildTool
     partial class LEBuildTarget
     {
         void SetUpWindowsEnvironment()
-        { 
+        {
+            // Set depency projects for Windows platform
+            depencyProjects.Add( new LEProjectDesc( "Engine/Platforms/Windows/Windows.vcxproj" ) );            
             
+            // Set include paths
+            cppEnvironment.includePaths.Add( "Engine/Platforms/Windows/Include" );
         }
 
         List< string > GetWindowsOutputItems( out bool OutIsSuccessed )

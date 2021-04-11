@@ -6,9 +6,18 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\AndroidOutputDevices.h" />
+    <ClInclude Include="Include\AndroidPlatform.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\AndroidLaunch.cpp" />
+    <ClCompile Include="Source\AndroidOutputDevices.cpp" />
+    <ClCompile Include="Source\AndroidPlatform.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{AA00A0FC-2BF3-4B61-B45F-BD0C22579D94}</ProjectGuid>
+    <ProjectGuid>{9745C372-55A9-4B73-B7D0-CC25DE13764B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -30,8 +39,8 @@
     <NMakeOutput />
     <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine />
-    <OutDir>..\..\..\Intermediate\Unused\</OutDir>
-    <IntDir>..\..\..\Intermediate\Unused\</IntDir>
+    <OutDir>..\..\..\..\Intermediate\Unused\</OutDir>
+    <IntDir>..\..\..\..\Intermediate\Unused\</IntDir>
     <NMakeIncludeSearchPath>$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>

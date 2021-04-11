@@ -25,7 +25,6 @@ namespace lifeBuildTool
                         case LETargetConfiguration.Shipping:    return false;
                         default:                                return true;
                     }
-                    break;
 
                 default:    return true;
             }

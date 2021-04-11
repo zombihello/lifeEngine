@@ -19,7 +19,6 @@ namespace lifeBuildTool
         public List< string >                   inputFiles = new List< string >();
         public List< string >                   additionalLibraries = new List< string >();
         public string                           additionalArguments = "";
-        public bool                             isDebugConsole = false;
         public bool                             isShippingBinary = false;
         public bool                             isCreateDebugInfo = false;
         
@@ -36,7 +35,6 @@ namespace lifeBuildTool
             delayLoadDLLs.AddRange( InCopyEnvironment.delayLoadDLLs );
             inputFiles.AddRange( InCopyEnvironment.inputFiles );
             additionalArguments = InCopyEnvironment.additionalArguments;
-            isDebugConsole = InCopyEnvironment.isDebugConsole;
             isShippingBinary = InCopyEnvironment.isShippingBinary;
             isCreateDebugInfo = InCopyEnvironment.isCreateDebugInfo;
         }

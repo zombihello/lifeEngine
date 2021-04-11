@@ -113,6 +113,12 @@ namespace lifeBuildTool
             // Level 4 warnings.
             result += " /W4";
 
+            // Disable warning C4996 'This function or variable may be unsafe _CRT_SECURE_NO_WARNINGS'
+            result += " /wd4996";
+
+            // Disable warning C4100 'Unreferenced formal parameter'
+            result += " /wd4100";
+
             return result;
         }
 
@@ -193,6 +199,8 @@ namespace lifeBuildTool
                 compile.BeginErrorReadLine();
 
                 compile.WaitForExit();
+                compile.CancelOutputRead();
+                compile.CancelErrorRead();
 
                 OutIsSuccessed = compile.ExitCode == 0 && OutIsSuccessed ? true : false;      
             }
@@ -259,6 +267,8 @@ namespace lifeBuildTool
                 compile.BeginErrorReadLine();
 
                 compile.WaitForExit();
+                compile.CancelOutputRead();
+                compile.CancelErrorRead();
 
                 OutIsSuccessed = compile.ExitCode == 0 && OutIsSuccessed ? true : false;        
             }
@@ -304,7 +314,7 @@ namespace lifeBuildTool
                 }
 
                 // Link for Windows.
-                result += " /SUBSYSTEM:CONSOLE"; // WINDOWS
+                result += " /SUBSYSTEM:WINDOWS";
 
                 // Allow the OS to load the EXE at different base addresses than its preferred base address.
                 result += " /FIXED:No";
@@ -457,8 +467,10 @@ namespace lifeBuildTool
             link.BeginErrorReadLine();
 
             link.WaitForExit();
-            OutIsSuccessed = link.ExitCode == 0 ? true : false;
+            link.CancelOutputRead();
+            link.CancelErrorRead();
 
+            OutIsSuccessed = link.ExitCode == 0 ? true : false;
             return InLinkEnvironment.outputFilePath;
         }
 

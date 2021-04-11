@@ -6,9 +6,20 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\WindowsLaunch.cpp" />
+    <ClCompile Include="Source\WindowsOutputDevices.cpp" />
+    <ClCompile Include="Source\WindowsPlatform.cpp" />
+    <ClCompile Include="Source\WindowsWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\WindowsOutputDevices.h" />
+    <ClInclude Include="Include\WindowsPlatform.h" />
+    <ClInclude Include="Include\WindowsWindow.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{AA00A0FC-2BF3-4B61-B45F-BD0C22579D94}</ProjectGuid>
+    <ProjectGuid>{621FEF43-58E6-4E1F-91DE-FE553EB3E626}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -30,8 +41,8 @@
     <NMakeOutput />
     <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine />
-    <OutDir>..\..\..\Intermediate\Unused\</OutDir>
-    <IntDir>..\..\..\Intermediate\Unused\</IntDir>
+    <OutDir>..\..\..\..\Intermediate\Unused\</OutDir>
+    <IntDir>..\..\..\..\Intermediate\Unused\</IntDir>
     <NMakeIncludeSearchPath>$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
