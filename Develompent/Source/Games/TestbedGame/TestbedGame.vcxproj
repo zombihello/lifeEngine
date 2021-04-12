@@ -71,7 +71,7 @@
     <OutDir>..\..\..\Intermediate\$(ProjectName) $(Configuration)\</OutDir>
     <IntDir>..\..\..\Intermediate\$(ProjectName) $(Configuration)\</IntDir>
     <NMakeReBuildCommandLine>@cd ../../
-@call Tools/lifeBuildTool/Targets/Build.bat $(ProjectName) $(PlatformName) $(Configuration) -output "../../Binaries/$(PlatformName)/$(ProjectName)-$(PlatformName)-$(Configuration).exe"</NMakeReBuildCommandLine>
+@call Tools/lifeBuildTool/Targets/Build.bat $(ProjectName) $(PlatformName) $(Configuration) -output "../../Binaries/$(PlatformName)/$(ProjectName)-$(PlatformName)-$(Configuration).exe" -clean</NMakeReBuildCommandLine>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeOutput>../../../../Binaries/Win64/$(ProjectName)-Win64-$(Configuration).exe</NMakeOutput>
@@ -91,7 +91,7 @@
     <NMakeBuildCommandLine>@cd ../../
 @call Tools/lifeBuildTool/Targets/Build.bat $(ProjectName) $(PlatformName) $(Configuration) -output "../../Binaries/$(PlatformName)/$(ProjectName)-$(PlatformName)-$(Configuration).exe"</NMakeBuildCommandLine>
     <NMakeReBuildCommandLine>@cd ../../
-@call Tools/lifeBuildTool/Targets/Build.bat $(ProjectName) $(PlatformName) $(Configuration) -output "../../Binaries/$(PlatformName)/$(ProjectName)-$(PlatformName)-$(Configuration).exe"</NMakeReBuildCommandLine>
+@call Tools/lifeBuildTool/Targets/Build.bat $(ProjectName) $(PlatformName) $(Configuration) -output "../../Binaries/$(PlatformName)/$(ProjectName)-$(PlatformName)-$(Configuration).exe" -clean</NMakeReBuildCommandLine>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeOutput>../../../../Binaries/Win64/$(ProjectName)-Win64-$(Configuration).exe</NMakeOutput>

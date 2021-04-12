@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace lifeBuildTool
@@ -10,17 +11,24 @@ namespace lifeBuildTool
     {
         public static bool CompileProjects( CPPEnvironment InCppEnvironment, LinkEnvironment InLinkEnvironment, List<LEProjectDesc> InProjects )
         {
+            bool                isSuccessed = true;
+
             foreach ( LEProjectDesc projectDesc in InProjects )
             {
-                Logging.WriteLine( string.Format( "\nCompiling '{0}' project", Path.GetFileNameWithoutExtension( projectDesc.projectPath ) ) );
+                string          projectName = Path.GetFileNameWithoutExtension( projectDesc.projectPath );
 
                 // If the project file doesn't exist, display a friendly error.
                 if ( !File.Exists( projectDesc.projectPath ) )
                     throw new BuildException( "Project file \"{0}\" doesn't exist.", projectDesc.projectPath );
 
                 // Set output dir
-                InCppEnvironment.outputDirectory = Path.GetFullPath( string.Format( "..\\Intermediate\\{0}\\", Path.GetFileNameWithoutExtension( projectDesc.projectPath ) ) );
+                InCppEnvironment.outputDirectory = Path.GetFullPath( string.Format( "..\\Intermediate\\{0}\\", projectName ) );
                 Directory.CreateDirectory( InCppEnvironment.outputDirectory );
+
+                // Create and loading compiled cache
+                string                  compileCachePath = InCppEnvironment.outputDirectory + string.Format( "CompileCache-{0}.xml", projectName );
+                CompileCache            compileCache = new CompileCache();
+                compileCache.Load( compileCachePath );
 
                 // Load the list of files from the specified project file.
                 string              projectDirectory = Path.GetDirectoryName( projectDesc.projectPath );
@@ -33,6 +41,13 @@ namespace lifeBuildTool
 
                 foreach ( string projectFilePath in projectFilePaths )
                 {
+                    CompileCacheItem        cacheItem = compileCache.FindItem( projectFilePath );
+                    if ( cacheItem != null && cacheItem.md5Hash == ComputeMD5Checksum( projectFilePath ) && File.Exists( cacheItem.pathToCompiledFile ) )
+                    {
+                        InLinkEnvironment.inputFiles.Add( cacheItem.pathToCompiledFile );
+                        continue;
+                    }
+
                     string      extension = Path.GetExtension( projectFilePath ).ToUpperInvariant();
                     switch ( extension )
                     {
@@ -50,22 +65,40 @@ namespace lifeBuildTool
                     }
                 }
 
-                bool                isSuccessed = false;
+                // If we have nothing to compile, go to the next project
+                if ( cppFiles.Count == 0 && cFiles.Count == 0 && rcFiles.Count == 0 )
+                {
+                    continue;
+                }
+
+                Logging.WriteLine( string.Format( "\nCompiling '{0}' project", projectName ) );
 
                 // Compile C++ source files
-                InLinkEnvironment.inputFiles.AddRange( InCppEnvironment.CompileFiles( cppFiles, out isSuccessed ).objectFiles );
-                if ( !isSuccessed )         return false;
+                if ( cppFiles.Count > 0 )
+                {
+                    InLinkEnvironment.inputFiles.AddRange( InCppEnvironment.CompileFiles( cppFiles, compileCache, out isSuccessed ).objectFiles );
+                }
 
                 // Compile C files
-                InLinkEnvironment.inputFiles.AddRange( InCppEnvironment.CompileFiles( cFiles, out isSuccessed ).objectFiles );
-                if ( !isSuccessed )         return false;
+                if ( isSuccessed && cFiles.Count > 0 )
+                {
+                    InLinkEnvironment.inputFiles.AddRange( InCppEnvironment.CompileFiles( cFiles, compileCache, out isSuccessed ).objectFiles );
+                }
 
                 // Compile RC files
-                InLinkEnvironment.inputFiles.AddRange( InCppEnvironment.CompileRCFiles( rcFiles, out isSuccessed ).objectFiles );
-                if ( !isSuccessed )         return false;
+                if ( isSuccessed && rcFiles.Count > 0 )
+                {
+                    InLinkEnvironment.inputFiles.AddRange( InCppEnvironment.CompileRCFiles( rcFiles, compileCache, out isSuccessed ).objectFiles );
+                }
+
+                // Updating file of compile cache
+                compileCache.Save( compileCachePath );
+
+                // If there was a compilation error, then there is no point in continuing to compile projects
+                if ( !isSuccessed )         break;
             }
 
-            return true;
+            return isSuccessed;
         }
 
         /// <summary>
@@ -142,6 +175,17 @@ namespace lifeBuildTool
                 try { File.Delete( envReaderTempFileName ); } catch { }
                 try { File.Delete( envReaderBatchFileName ); } catch { }
                 try { File.Delete( envOutputFileName ); } catch { }
+            }
+        }
+
+        public static string ComputeMD5Checksum( string InPath )
+        {
+            using ( FileStream fileStream = File.OpenRead( InPath ) )
+            using ( MD5 md5 = new MD5CryptoServiceProvider() )
+            {
+                byte[]          checkSum = md5.ComputeHash( fileStream );
+                string          result = BitConverter.ToString( checkSum ).Replace( "-", String.Empty );
+                return result;
             }
         }
     }

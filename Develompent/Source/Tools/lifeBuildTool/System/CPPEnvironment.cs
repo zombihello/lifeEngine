@@ -35,7 +35,7 @@ namespace lifeBuildTool
             isCreateDebugInfo = InCopy.isCreateDebugInfo;
         }
 
-        public CPPOutput CompileFiles( List< string > InCPPFiles, out bool OutIsSuccessed )
+        public CPPOutput CompileFiles( List< string > InCPPFiles, CompileCache InOutCompileCache, out bool OutIsSuccessed )
         {
             OutIsSuccessed = false;
 
@@ -43,7 +43,7 @@ namespace lifeBuildTool
             {
                 case LETargetPlatform.Win32:
                 case LETargetPlatform.Win64:
-                    return VCToolChain.CompileCPPFiles( this, InCPPFiles, out OutIsSuccessed );
+                    return VCToolChain.CompileCPPFiles( this, InCPPFiles, InOutCompileCache, out OutIsSuccessed );
 
                 default:
                     Debug.Fail( "Unrecognized C++ target platform." );
@@ -51,7 +51,7 @@ namespace lifeBuildTool
             }
         }
 
-        public CPPOutput CompileRCFiles( List< string > InRCFiles, out bool OutIsSuccessed )
+        public CPPOutput CompileRCFiles( List< string > InRCFiles, CompileCache InOutCompileCache, out bool OutIsSuccessed )
         {
             OutIsSuccessed = false;
 
@@ -59,7 +59,7 @@ namespace lifeBuildTool
             {
                 case LETargetPlatform.Win32:
                 case LETargetPlatform.Win64:
-                    return VCToolChain.CompileRCFiles( this, InRCFiles, out OutIsSuccessed);
+                    return VCToolChain.CompileRCFiles( this, InRCFiles, InOutCompileCache, out OutIsSuccessed );
 
                 default:
                     return new CPPOutput();

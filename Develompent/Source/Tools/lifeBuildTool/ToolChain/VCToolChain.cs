@@ -135,7 +135,7 @@ namespace lifeBuildTool
             return result;
         }
 
-        public static CPPOutput CompileCPPFiles( CPPEnvironment InCompileEnvironment, List< string > InSourceFiles, out bool OutIsSuccessed )
+        public static CPPOutput CompileCPPFiles( CPPEnvironment InCompileEnvironment, List< string > InSourceFiles, CompileCache InOutCompileCache, out bool OutIsSuccessed )
         {
             OutIsSuccessed = true;
             string      arguments = GetCLArguments_Global( InCompileEnvironment );
@@ -176,9 +176,7 @@ namespace lifeBuildTool
             {
                 bool            isPlainCFile = Path.GetExtension( sourceFile.ToUpper() ) == ".C";
                 string          outputFile = string.Format( "{0}{1}.obj", InCompileEnvironment.outputDirectory, Path.GetFileNameWithoutExtension( sourceFile ) );
-                string          finalArguments = arguments + string.Format( " \"{0}\" /Fo\"{1}\"", sourceFile, outputFile );
-
-                cppOutput.objectFiles.Add( outputFile );
+                string          finalArguments = arguments + string.Format( " \"{0}\" /Fo\"{1}\"", sourceFile, outputFile );             
 
                 if ( isPlainCFile )
                     finalArguments += GetCLArguments_C();
@@ -202,13 +200,18 @@ namespace lifeBuildTool
                 compile.CancelOutputRead();
                 compile.CancelErrorRead();
 
-                OutIsSuccessed = compile.ExitCode == 0 && OutIsSuccessed ? true : false;      
+                OutIsSuccessed = compile.ExitCode == 0 && OutIsSuccessed ? true : false;
+                if ( OutIsSuccessed )
+                {
+                    InOutCompileCache.AddItem( new CompileCacheItem( sourceFile, outputFile, Utils.ComputeMD5Checksum( sourceFile ) ) );
+                    cppOutput.objectFiles.Add( outputFile );
+                }
             }
 
             return cppOutput;
         }
 
-        public static CPPOutput CompileRCFiles( CPPEnvironment InCompileEnvironment, List<string> InRCFiles, out bool OutIsSuccessed )
+        public static CPPOutput CompileRCFiles( CPPEnvironment InCompileEnvironment, List<string> InRCFiles, CompileCache InOutCompileCache, out bool OutIsSuccessed )
         {
             OutIsSuccessed = true;
 
@@ -259,8 +262,6 @@ namespace lifeBuildTool
                 string      outputFile = string.Format( "{0}{1}.res", InCompileEnvironment.outputDirectory, Path.GetFileNameWithoutExtension( rcFile ) );
                 string      finalArguments = arguments + string.Format( " \"{0}\" /fo\"{1}\"", rcFile, outputFile );
 
-                cppOutput.objectFiles.Add( outputFile );
-
                 compileStartInfo.Arguments = finalArguments;
                 compile.Start();
                 compile.BeginOutputReadLine();
@@ -270,7 +271,12 @@ namespace lifeBuildTool
                 compile.CancelOutputRead();
                 compile.CancelErrorRead();
 
-                OutIsSuccessed = compile.ExitCode == 0 && OutIsSuccessed ? true : false;        
+                OutIsSuccessed = compile.ExitCode == 0 && OutIsSuccessed ? true : false;
+                if ( OutIsSuccessed )
+                {
+                    InOutCompileCache.AddItem( new CompileCacheItem( rcFile, outputFile, Utils.ComputeMD5Checksum( rcFile ) ) );
+                    cppOutput.objectFiles.Add( outputFile );
+                }
             }
 
             return cppOutput;

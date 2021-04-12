@@ -48,6 +48,7 @@
     <Compile Include="Configurations\Platforms\LEBuildWindows.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="System\BuildException.cs" />
+    <Compile Include="System\CompileCache.cs" />
     <Compile Include="System\CPPEnvironment.cs" />
     <Compile Include="System\LEBuildTarget.cs" />
     <Compile Include="System\lifeBuildTool.cs" />
