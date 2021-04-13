@@ -2,16 +2,16 @@
 #include <stdio.h>
 #include <wchar.h>
 
-#include "Types.h"
+#include "Misc/Types.h"
 #include "WindowsOutputDevices.h"
 
 // ----
 // Platform specific globals variables
 // ----
 
-FOutputDevice*       GLog = new FWindowsOutputDevice();
-FOutputDevice*       GWarn = GLog;
-FOutputDevice*       GError = GLog;
+OutputDevice*       GLog = new WindowsOutputDevice();
+OutputDevice*       GWarn = GLog;
+OutputDevice*       GError = GLog;
 
 // ----
 // Platform specific functions

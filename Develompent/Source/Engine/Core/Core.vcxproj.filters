@@ -7,6 +7,18 @@
     <Filter Include="Source">
       <UniqueIdentifier>{ebee0972-c623-4ec7-932e-c01358cf0f77}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Containers">
+      <UniqueIdentifier>{8a9b9928-a2a1-42c0-86b8-95d5711458da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Misc">
+      <UniqueIdentifier>{09e2d5e8-d841-4c8d-84f6-7f880741d3a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Containers">
+      <UniqueIdentifier>{f45e7b16-5b64-498b-9f79-45ce55443519}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Misc">
+      <UniqueIdentifier>{9ca453ac-8b77-4d27-92ee-1015e9a14d55}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Core.h">
@@ -15,28 +27,31 @@
     <ClInclude Include="Include\CoreDefines.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Globals.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Object.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\OutputDevices.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Types.h">
-      <Filter>Include</Filter>
-    </ClInclude>
     <ClInclude Include="Include\LEBuild.h">
       <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\Globals.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\Object.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\OutputDevices.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\Types.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Containers\StringConv.h">
+      <Filter>Include\Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\OutputDevices.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="Source\Misc\OutputDevices.cpp">
+      <Filter>Source\Misc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

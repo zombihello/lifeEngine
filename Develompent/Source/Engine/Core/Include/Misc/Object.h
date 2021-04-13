@@ -13,10 +13,10 @@
  * @ingroup Core
  * @brief The base class of all objects
  */
-class LObject
+class Object
 {
 public:
-    virtual ~LObject() {}
+    virtual ~Object() {}
 };
 
 #endif // !OBJECT_H

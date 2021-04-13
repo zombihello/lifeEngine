@@ -15,7 +15,7 @@
  * @ingroup Core
  * @brief Base class of output device
  */
-class FOutputDevice
+class OutputDevice
 {
 public:
 
@@ -25,14 +25,14 @@ public:
     */
     enum class EEventType : uint8
     {
-        Log,             /**< Normal message display event */
+        Log,            /**< Normal message display event */
         Warning,        /**< Displaying a warning */
         Critical,       /**< Critical error output */
         Init            /**< Displaying the initialization message */
     };
 
-    FOutputDevice() {}
-    virtual ~FOutputDevice() {}
+    OutputDevice() {}
+    virtual ~OutputDevice() {}
 
     /**
      * @ingroup Core

@@ -1,8 +1,8 @@
 #include <memory>
 
-#include "OutputDevices.h"
+#include "Misc/OutputDevices.h"
 
-void FOutputDevice::Logf( FOutputDevice::EEventType InEvent, const tchar* InMessage, ... )
+void OutputDevice::Logf( OutputDevice::EEventType InEvent, const tchar* InMessage, ... )
 {
     int32           bufferSize = 1024;
     tchar*          buffer = nullptr;

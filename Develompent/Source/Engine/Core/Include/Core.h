@@ -11,8 +11,8 @@
 
 #include "LEBuild.h"
 #include "CoreDefines.h"
-#include "Types.h"
-#include "Globals.h"
+#include "Misc/Types.h"
+#include "Misc/Globals.h"
 
 #undef TEXT
 

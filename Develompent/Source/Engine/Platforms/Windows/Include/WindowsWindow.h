@@ -15,7 +15,7 @@
  * @ingroup WindowsPlatform
  * @brief Class for working with the application window
  */
-class FWindowsWindow
+class WindowsWindow
 {
 public:
 
@@ -34,8 +34,8 @@ public:
         Default         = Decorated | Resizable        /**< The default style is a combination of Decorated and Resizable */
     };
 
-    FWindowsWindow();
-    ~FWindowsWindow();
+    WindowsWindow();
+    ~WindowsWindow();
 
     /**
      * @ingroup WindowsPlatform

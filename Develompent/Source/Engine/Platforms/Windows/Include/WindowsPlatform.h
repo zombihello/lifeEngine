@@ -9,9 +9,10 @@
 #ifndef WINDOWSPLATFORM_H
 #define WINDOWSPLATFORM_H
 
+#include <Windows.h>
 #include <stdarg.h>
 
-#include "Types.h"
+#include "Misc/Types.h"
 
 #define PLATFORM_WINDOWS					        1
 

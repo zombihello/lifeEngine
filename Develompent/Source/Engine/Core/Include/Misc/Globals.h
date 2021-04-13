@@ -13,18 +13,18 @@
  * @ingroup Core
  * @brief Regular logging
  */
-extern class FOutputDevice*       GLog;
+extern class OutputDevice*       GLog;
 
 /**
  * @ingroup Core
  * @brief User interaction and non critical warnings
  */
-extern class FOutputDevice*       GWarn;
+extern class OutputDevice*       GWarn;
 
 /**
  * @ingroup Core
  * @brief Critical errors
  */
-extern class FOutputDevice*       GError;
+extern class OutputDevice*       GError;
 
 #endif // !GLOBALS_H

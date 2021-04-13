@@ -7,17 +7,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\Containers\StringConv.h" />
     <ClInclude Include="Include\Core.h" />
     <ClInclude Include="Include\CoreDefines.h" />
-    <ClInclude Include="Include\Globals.h" />
     <ClInclude Include="Include\LEBuild.h" />
-    <ClInclude Include="Include\Object.h" />
-    <ClInclude Include="Include\OutputDevices.h" />
-    <ClInclude Include="Include\Types.h" />
+    <ClInclude Include="Include\Misc\Globals.h" />
+    <ClInclude Include="Include\Misc\Object.h" />
+    <ClInclude Include="Include\Misc\OutputDevices.h" />
+    <ClInclude Include="Include\Misc\Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp" />
-    <ClCompile Include="Source\OutputDevices.cpp" />
+    <ClCompile Include="Source\Misc\OutputDevices.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
