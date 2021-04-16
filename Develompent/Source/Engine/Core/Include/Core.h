@@ -11,6 +11,7 @@
 
 #include "LEBuild.h"
 #include "CoreDefines.h"
+#include "Logger/LoggerMacros.h"
 #include "Misc/Types.h"
 #include "Misc/Globals.h"
 
@@ -26,18 +27,6 @@
  */
 #define TEXT( String )      L##String
 
-/**
- * @ingroup Core
- * @brief Macro for print debug message to log
- */
-#define debugf				GLog->Logf
-
-/**
- * @ingroup Core
- * @brief Macro for print warning to log
- */
-#define warnf				GWarn->Logf
-
  /**
   * @ingroup Core
   * @brief Failed assertion handler
@@ -50,7 +39,7 @@
   *
   * Example usage: @code appFailAssertFunc( "Value != 0", __FILE__, __LINE__, TEXT( "Value = %i" ), Value ); @endcode
   */
-void VARARGS appFailAssertFunc( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
+void VARARGS            appFailAssertFunc( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
 
 /**
  * @ingroup Core
@@ -64,7 +53,33 @@ void VARARGS appFailAssertFunc( const achar* InExpr, const achar* InFile, int In
  *
  * Example usage: @code appFailAssertFuncDebug( "Value != 0", __FILE__, __LINE__, TEXT( "Value = %i" ), Value ); @endcode
  */
-void VARARGS appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
+void VARARGS            appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
+
+/**
+ * @ingroup Core
+ * @brief Get formatted string (for Unicode strings)
+ *
+ * @param[in,out] InOutDest Pointer to destination buffer
+ * @param[in] InDestSize Size of destination buffer
+ * @param[in] InCount umber of characters to write (not including null terminating character)
+ * @param[in] InFormat String to print
+ * @param[in] InArgPtr Argument list
+ * @return Number of characters written or -1 if truncated
+ */
+extern int              appGetVarArgs( tchar* InOutDest, uint32 InDestSize, uint32 InCount, const tchar*& InFormat, va_list InArgPtr );
+
+/**
+ * @ingroup Core
+ * @brief Get formatted string (for ANSI strings)
+ *
+ * @param[in,out] InOutDest Pointer to destination buffer
+ * @param[in] InDestSize Size of destination buffer
+ * @param[in] InCount umber of characters to write (not including null terminating character)
+ * @param[in] InFormat String to print
+ * @param[in] InArgPtr Argument list
+ * @return Number of characters written or -1 if truncated
+ */
+extern int              appGetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, uint32 InCount, const achar*& InFormat, va_list InArgPtr );
 
 /**
  * @ingroup Core
@@ -192,85 +207,5 @@ void VARARGS appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, i
     #define checkNoEntry()                  {}
     #define checkNoReentry()                {}
 #endif // DO_CHECK
-
-/**
- * @ingroup Core
- * @brief Macro to get formatted string (for Unicode strings)
- *
- * @param[in,out] Dest Pointer to destination buffer
- * @param[in] DestSize Size of destination buffer
- * @param[in] Size Number of characters to write (not including null terminating character)
- * @param[in] Format String to print
- */
-#define GET_VARARGS( Dest, DestSize, Size, Format ) \
-{ \
-	va_list         vaList; \
-	va_start( vaList, Format ); \
-	appGetVarArgs( Dest, DestSize, Size, Format, vaList ); \
-	va_end( vaList ); \
-}
-
-/**
- * @ingroup Core
- * @brief Macro to get formatted string (for ANSI strings)
- *
- * @param[in,out] Dest Pointer to destination buffer
- * @param[in] DestSize Size of destination buffer
- * @param[in] Size Number of characters to write (not including null terminating character)
- * @param[in] Format String to print
- */
-#define GET_VARARGS_ANSI( Dest, DestSize, Size, Format ) \
-{ \
-	va_list         vaList; \
-	va_start( vaList, Format ); \
-	appGetVarArgsAnsi( Dest, DestSize, Size, Format, vaList ); \
-	va_end( vaList ); \
-}
-
-/**
- * @ingroup Core
- * @brief Macro to get formatted string with result (for Unicode strings)
- *
- * @param[in,out] Dest Pointer to destination buffer
- * @param[in] DestSize Size of destination buffer
- * @param[in] Size Number of characters to write (not including null terminating character)
- * @param[in] Format String to print
- * @param[out] Result Function execution result
- * @return -1 a sign that the entire line has been processed, otherwise the number of characters written
- */
-#define GET_VARARGS_RESULT( Dest, DestSize, Size, Format, Result ) \
-{ \
-	va_list         vaList; \
-	va_start( vaList, Format ); \
-	Result = appGetVarArgs( Dest, DestSize, Size, Format, vaList ); \
-	if ( Result >= DestSize ) \
-	{ \
-		Result = -1; \
-	} \
-	va_end( vaList ); \
-}
-
-/**
- * @ingroup Core
- * @brief Macro to get formatted string with result (for ANSI strings)
- *
- * @param[in,out] Dest Pointer to destination buffer
- * @param[in] DestSize Size of destination buffer
- * @param[in] Size Number of characters to write (not including null terminating character)
- * @param[in] Format String to print
- * @param[out] Result Function execution result
- * @return -1 a sign that the entire line has been processed, otherwise the number of characters written
- */
-#define GET_VARARGS_RESULT_ANSI( Dest, DestSize, Size, Format, Result ) \
-{ \
-	va_list         vaList; \
-	va_start( vaList, Format ); \
-	Result = appGetVarArgsAnsi( Dest, DestSize, Size, Format, vaList ); \
-	if ( Result >= DestSize ) \
-	{ \
-		Result = -1; \
-	} \
-	va_end( vaList ); \
-}
 
 #endif //CORE_H

@@ -1,14 +1,22 @@
 #include "Core.h"
-#include "WindowsOutputDevices.h"
+#include "BaseArchive.h"
+#include "WindowsLogger.h"
+#include "WindowsFileSystem.h"
+#include "Logger/LoggerMacros.h"
 
+/**
+ * Main function
+ */
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nCmdShow )
 {
-    static_cast< WindowsOutputDevice* >( GLog )->Show( true );
+    GLog->Init();
+    static_cast< WindowsLogger* >( GLog )->Show( true );
 
     // This for test
-    debugf( TEXT( "This is test" ) );
-    warnf( OutputDevice::EEventType::Warning, TEXT( "This is warning" ) );
+    LE_LOG( LT_Log, LC_General, TEXT( "This is test. Value = %i" ), 25 );
+    LE_LOG( LT_Warning, LC_General, TEXT( "This is warning" ) );
     check( false );
 
+    GLog->TearDown();
     return 0;
 }

@@ -19,6 +19,12 @@
     <Filter Include="Source\Misc">
       <UniqueIdentifier>{9ca453ac-8b77-4d27-92ee-1015e9a14d55}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Logger">
+      <UniqueIdentifier>{1f990812-4d39-42ce-924f-fbe1d5e50356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Logger">
+      <UniqueIdentifier>{bd638748-e52d-409d-b6a6-6b657fa23d24}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Core.h">
@@ -36,22 +42,40 @@
     <ClInclude Include="Include\Misc\Object.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Misc\OutputDevices.h">
-      <Filter>Include\Misc</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Misc\Types.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
     <ClInclude Include="Include\Containers\StringConv.h">
       <Filter>Include\Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Containers\String.h">
+      <Filter>Include\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\BaseFileSystem.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\BaseArchive.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Logger\BaseLogger.h">
+      <Filter>Include\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Logger\LoggerMacros.h">
+      <Filter>Include\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\Template.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Misc\OutputDevices.cpp">
+    <ClCompile Include="Source\Containers\String.cpp">
       <Filter>Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Logger\BaseLogger.cpp">
+      <Filter>Source\Logger</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

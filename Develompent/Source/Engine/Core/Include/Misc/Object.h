@@ -16,7 +16,10 @@
 class Object
 {
 public:
-    virtual ~Object() {}
+    /**
+     * @brief Destructor
+     */
+    virtual             ~Object() {}
 };
 
 #endif // !OBJECT_H

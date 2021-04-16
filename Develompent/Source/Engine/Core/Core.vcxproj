@@ -7,18 +7,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\BaseArchive.h" />
+    <ClInclude Include="Include\BaseFileSystem.h" />
+    <ClInclude Include="Include\Containers\String.h" />
     <ClInclude Include="Include\Containers\StringConv.h" />
     <ClInclude Include="Include\Core.h" />
     <ClInclude Include="Include\CoreDefines.h" />
     <ClInclude Include="Include\LEBuild.h" />
+    <ClInclude Include="Include\Logger\BaseLogger.h" />
+    <ClInclude Include="Include\Logger\LoggerMacros.h" />
     <ClInclude Include="Include\Misc\Globals.h" />
     <ClInclude Include="Include\Misc\Object.h" />
-    <ClInclude Include="Include\Misc\OutputDevices.h" />
+    <ClInclude Include="Include\Misc\Template.h" />
     <ClInclude Include="Include\Misc\Types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Containers\String.cpp" />
     <ClCompile Include="Source\Core.cpp" />
-    <ClCompile Include="Source\Misc\OutputDevices.cpp" />
+    <ClCompile Include="Source\Logger\BaseLogger.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

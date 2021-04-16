@@ -10,7 +10,7 @@
 #define LEBUILD_H
 
 #ifndef SHIPPING_BUILD
-	#define SHIPPING_BUILD			0
+	#define SHIPPING_BUILD			SHIPPING
 #endif // !SHIPPING_BUILD
 
 #ifndef DO_CHECK

@@ -78,30 +78,4 @@
  */
 #define DLLIMPORT			__declspec( dllimport )
 
- /**
-  * @ingroup WindowsPlatform
-  * @brief Get formatted string (for Unicode strings)
-  *
-  * @param[in,out] InOutDest Pointer to destination buffer
-  * @param[in] InDestSize Size of destination buffer
-  * @param[in] InCount umber of characters to write (not including null terminating character)
-  * @param[in] InFormat String to print
-  * @param[in] InArgPtr Argument list
-  * @return Number of characters written or -1 if truncated
-  */
-int appGetVarArgs( tchar* InOutDest, uint32 InDestSize, uint32 InCount, const tchar*& InFormat, va_list InArgPtr );
-
-/**
- * @ingroup WindowsPlatform
- * @brief Get formatted string (for ANSI strings)
- *
- * @param[in,out] InOutDest Pointer to destination buffer
- * @param[in] InDestSize Size of destination buffer
- * @param[in] InCount umber of characters to write (not including null terminating character)
- * @param[in] InFormat String to print
- * @param[in] InArgPtr Argument list
- * @return Number of characters written or -1 if truncated
- */
-int appGetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, uint32 InCount, const achar*& InFormat, va_list InArgPtr );
-
 #endif // !WINDOWSPLATFORM_H

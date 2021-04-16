@@ -11,20 +11,14 @@
 
 /**
  * @ingroup Core
- * @brief Regular logging
+ * @brief Logger
  */
-extern class OutputDevice*       GLog;
+extern class BaseLogger*			GLog;
 
 /**
  * @ingroup Core
- * @brief User interaction and non critical warnings
+ * @brief File system
  */
-extern class OutputDevice*       GWarn;
-
-/**
- * @ingroup Core
- * @brief Critical errors
- */
-extern class OutputDevice*       GError;
+extern class BaseFileSystem*		GFileSystem;
 
 #endif // !GLOBALS_H

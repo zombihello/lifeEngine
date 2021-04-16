@@ -32,7 +32,7 @@ public:
 	 * @param[in] InSize The size of the dest buffer in bytes
 	 * @return Return converted string
 	 */
-	FORCEINLINE tchar* Convert( const achar* InSource, tchar* InDest, uint32 InSize )
+	FORCEINLINE tchar*				Convert( const achar* InSource, tchar* InDest, uint32 InSize )
 	{
 		// Determine whether we need to allocate memory or not
 		uint32		length = ( uint32 )strlen( InSource ) + 1;
@@ -56,7 +56,7 @@ public:
 	 * @brief Get length of string
 	 * @return Return the string length without the null terminator
 	 */
-	FORCEINLINE uint32 GetLength( tchar* InDest )
+	FORCEINLINE uint32				GetLength( tchar* InDest )
 	{
 		return ( uint32 )wcslen( InDest );
 	}
@@ -80,7 +80,7 @@ public:
 	  * @param[in] InSize The size of the dest buffer in bytes
 	  * @return Return converted string
 	  */
-	FORCEINLINE achar* Convert( const tchar* InSource, achar* InDest, uint32 InSize )
+	FORCEINLINE achar*				Convert( const tchar* InSource, achar* InDest, uint32 InSize )
 	{
 		// Determine whether we need to allocate memory or not
 		uint32		lengthW = ( uint32 )wcslen( InSource );
@@ -106,7 +106,7 @@ public:
 	 * @brief Get length of string
 	 * @return Return the string length without the null terminator
 	 */
-	FORCEINLINE uint32 GetLength( achar* InDest )
+	FORCEINLINE uint32				GetLength( achar* InDest )
 	{
 		return ( uint32 )strlen( InDest );
 	}
@@ -130,7 +130,7 @@ public:
 	 * 
 	 * @param[in] InSource Input data
 	 */
-	explicit FORCEINLINE TStringConversion( const ConvertFrom* InSource )
+	explicit FORCEINLINE			TStringConversion( const ConvertFrom* InSource )
 	{
 		if ( InSource )
 		{
@@ -146,7 +146,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	FORCEINLINE ~TStringConversion()
+	FORCEINLINE						~TStringConversion()
 	{
 		if ( !convertedString )		return;
 
@@ -163,7 +163,7 @@ public:
 	/**
 	 * @brief Operator to get access to the converted string
 	 */
-	FORCEINLINE operator ConverTo* ( void ) const
+	FORCEINLINE operator ConverTo*	( void ) const
 	{
 		return convertedString;
 	}
@@ -173,7 +173,7 @@ public:
 	 * 
 	 * @return returns the length of the string in number of CONVERT_TO units, excluding the NULL terminator
 	 */
-	FORCEINLINE uint32 GetLength() const
+	FORCEINLINE uint32				GetLength() const
 	{
 		return convertedString ? BaseConverter::GetLength( convertedString ) : nullptr;
 	}
@@ -182,8 +182,8 @@ private:
 	/**
 	 * @brief Hide the default ctor
 	 */
-	TStringConversion() : 
-		convertedString( nullptr ) 
+	FORCEINLINE			TStringConversion() : 
+							convertedString( nullptr ) 
 	{};
 
 	ConverTo			buffer[ defaultConversionSize ];			/**< Holds the converted data if the size is large enough */

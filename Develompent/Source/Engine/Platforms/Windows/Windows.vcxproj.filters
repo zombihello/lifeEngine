@@ -18,7 +18,13 @@
     <ClCompile Include="Source\WindowsPlatform.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\WindowsOutputDevices.cpp">
+    <ClCompile Include="Source\WindowsLogger.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\WindowsFileSystem.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\WindowsArchive.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +35,13 @@
     <ClInclude Include="Include\WindowsWindow.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\WindowsOutputDevices.h">
+    <ClInclude Include="Include\WindowsLogger.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\WindowsFileSystem.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\WindowsArchive.h">
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>
