@@ -21,6 +21,7 @@
     <ClInclude Include="Include\System\BaseArchive.h" />
     <ClInclude Include="Include\System\BaseFileSystem.h" />
     <ClInclude Include="Include\System\BaseWindow.h" />
+    <ClInclude Include="Include\System\WindowEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Containers\String.cpp" />

@@ -80,7 +80,7 @@ public:
 	}
 
 private:
-	std::ifstream*				file;
+	std::ifstream*				file;			/**< Pointer to file */
 };
 
 /**
@@ -149,7 +149,7 @@ public:
 	}
 
 private:
-	std::ofstream*			file;
+	std::ofstream*			file;		/**< Pointer to file */
 };
 
 #endif // !WINDOWSARCHIVE_H

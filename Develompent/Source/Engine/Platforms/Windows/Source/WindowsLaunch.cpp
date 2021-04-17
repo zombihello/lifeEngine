@@ -18,8 +18,24 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
     LE_LOG( LT_Warning, LC_General, TEXT( "This is warning" ) );
     
     GWindow->Create( TEXT( "TestbedGame" ), 1280, 720 );
+    GWindow->ShowCursor();
+    bool isLoop = true;
 
-    GWindow->Close();
+    while( isLoop )
+    {
+        SWindowEvent      event;
+        while ( GWindow->PollEvent( event ) ) 
+        {
+            if ( event.type == SWindowEvent::T_WindowClose )
+            {
+                isLoop = false;
+                GWindow->Close();
+                break;
+            }
+        }
+    }
+
+    //GWindow->Close();
     GLog->TearDown();
     return 0;
 }

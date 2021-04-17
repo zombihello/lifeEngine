@@ -69,13 +69,13 @@ public:
      * @brief Is showed console
      * @return Return true if console is shown or false if not
      */
-    FORCEINLINE bool        IsShow() const                 { return handle; }
+    FORCEINLINE bool        IsShow() const                 { return consoleHandle; }
 
 private:
-    std::chrono::steady_clock::time_point		startLogging;
+    std::chrono::steady_clock::time_point		startLogging;       /**< Time of start logging */
 
-    void*                                       handle;
-    BaseArchive*                                archiveLogs;
+    HANDLE                                      consoleHandle;      /**< OS handle on console*/
+    BaseArchive*                                archiveLogs;        /**< Archive of logs */
 };
 
 #endif // !WINDOWSLOGGER_H

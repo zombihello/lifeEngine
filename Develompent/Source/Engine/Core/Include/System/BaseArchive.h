@@ -93,7 +93,7 @@ FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, achar* InStringC )
 /**
  * @brief Overload operator << for serialize int32
  */
-FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, int32 InValue )
+FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, int32& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( int32 ) );
 	return InArchive;
@@ -102,7 +102,7 @@ FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, int32 InValue )
 /**
  * @brief Overload operator << for serialize uint32
  */
-FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, uint32 InValue )
+FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, uint32& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( uint32 ) );
 	return InArchive;

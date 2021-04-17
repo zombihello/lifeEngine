@@ -23,7 +23,7 @@ const tchar* GLogCategoryNames[] =
  */
 WindowsLogger::WindowsLogger() :
 	startLogging( std::chrono::steady_clock::now() ),
-	handle( nullptr ),
+	consoleHandle( nullptr ),
 	archiveLogs( nullptr )
 {}
 
@@ -40,10 +40,10 @@ void WindowsLogger::Show( bool InShowWindow )
 {
 	if ( InShowWindow )
 	{
-		if ( handle )		return;
+		if ( consoleHandle )		return;
 
 		AllocConsole();
-		handle = GetStdHandle( STD_OUTPUT_HANDLE );
+		consoleHandle = GetStdHandle( STD_OUTPUT_HANDLE );
 
 		freopen( "conin$", "r", stdin );
 		freopen( "conout$", "w", stdout );
@@ -51,7 +51,7 @@ void WindowsLogger::Show( bool InShowWindow )
 	}
 	else
 	{
-		handle = nullptr;
+		consoleHandle = nullptr;
 		FreeConsole();
 	}
 }
@@ -69,6 +69,8 @@ void WindowsLogger::Init()
  */
 void WindowsLogger::TearDown()
 {
+	Show( false );
+
 	if ( archiveLogs )
 	{
 		delete archiveLogs;
@@ -85,10 +87,10 @@ void WindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELogC
 	// and change to color by event type
 	uint16				currentTextAttribute = 0;
 
-	if ( handle )
+	if ( consoleHandle )
 	{
 		CONSOLE_SCREEN_BUFFER_INFO		consoleScreenBufferInfo;
-		if ( GetConsoleScreenBufferInfo( handle, &consoleScreenBufferInfo ) )
+		if ( GetConsoleScreenBufferInfo( consoleHandle, &consoleScreenBufferInfo ) )
 		{
 			currentTextAttribute = consoleScreenBufferInfo.wAttributes;
 		}
@@ -97,11 +99,11 @@ void WindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELogC
 		switch ( InLogType )
 		{
 		case LT_Error:
-			SetConsoleTextAttribute( handle, 0xC );		// Red color
+			SetConsoleTextAttribute( consoleHandle, 0xC );		// Red color
 			break;
 
 		case LT_Warning:
-			SetConsoleTextAttribute( handle, 0xE );		// Yealow color
+			SetConsoleTextAttribute( consoleHandle, 0xE );		// Yealow color
 			break;
 		}
 	}
@@ -125,9 +127,9 @@ void WindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELogC
 #endif // !SHIPPING_BUILD
 
 	// Change text attribute to default
-	if ( handle )
+	if ( consoleHandle )
 	{
-		SetConsoleTextAttribute( handle, currentTextAttribute );
+		SetConsoleTextAttribute( consoleHandle, currentTextAttribute );
 	}
 
 	free( finalMessage );
