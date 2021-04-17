@@ -5,13 +5,15 @@
 #include "Misc/Types.h"
 #include "WindowsLogger.h"
 #include "WindowsFileSystem.h"
+#include "WindowsWindow.h"
 
 // ----
 // Platform specific globals variables
 // ----
 
-BaseLogger*         GLog = new WindowsLogger();
-BaseFileSystem*     GFileSystem = new WindowsFileSystem();
+BaseLogger*         GLog            = new WindowsLogger();
+BaseFileSystem*     GFileSystem     = new WindowsFileSystem();
+BaseWindow*         GWindow         = new WindowsWindow();
 
 // ----
 // Platform specific functions

@@ -46,9 +46,10 @@ public:
 		// Now do the conversion
 		for ( uint32 index = 0; index < length; ++index )
 		{
-			InDest[ index ] = ( byte ) InSource[ index ];
+			InDest[ index ] = ( byte )InSource[ index ];
 		}
 
+		InDest[ length ] = '\0';
 		return InDest;
 	}
 
@@ -99,6 +100,7 @@ public:
 			InDest[ index ] = InSource[ index ] & 0xFF;
 		}
 
+		InDest[ lengthW ] = '\0';
 		return InDest;
 	}
 

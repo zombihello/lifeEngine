@@ -10,58 +10,50 @@
 #define WINDOWSWINDOW_H
 
 #include "Core.h"
+#include "System/BaseWindow.h"
+
+struct SDL_Window;
+struct SDL_SysWMinfo;
 
 /**
  * @ingroup WindowsPlatform
- * @brief Class for working with the application window
+ * @brief The class for work with window on Windows
  */
-class WindowsWindow
+class WindowsWindow : public BaseWindow
 {
 public:
+	/**
+	 * @brief Constructor
+	 */
+					WindowsWindow();
 
-    /**
-    * @ingroup WindowsPlatform
-    * @brief Enumerating window styles
-    */
-    enum class EStyle : uint8
-    {
-        None			= 0,                           /**< Without style */
-        Resizable 	    = 1 << 0,                      /**< Resizable style */
-        Decorated	    = 1 << 1,                      /**< Decorated style */
-        Floating		= 1 << 2,                      /**< Floating style */
-        Fullscreen	    = 1 << 3,                      /**< Fullscreen style */
+	/**
+	 * @brief Destructor
+	 */
+					~WindowsWindow();
 
-        Default         = Decorated | Resizable        /**< The default style is a combination of Decorated and Resizable */
-    };
+	/**
+	 * @brief Create window
+	 *
+	 * @param[in] InTitle Title
+	 * @param[in] InWidth Width
+	 * @param[in] InHeight Height
+	 * @param[in] InFlags Combinations flags of EStyleWindow for set style of window
+	 * @return True if window created successed, else false
+	 */
+	void			Create( const tchar* InTitle, uint32 InWidth, uint32 InHeight, uint32 InFlags = SW_Default ) override;
 
-    WindowsWindow();
-    ~WindowsWindow();
+	/**
+	 * @brief Close window
+	 */
+	void			Close() override;
 
-    /**
-     * @ingroup WindowsPlatform
-     * @brief Handle an event from the queue
-     *
-     * @return True if queue not empty else false
-     */
-    bool PollEvent();
+private:
+	bool					isFullscreen;
 
-    /**
-     * @ingroup WindowsPlatform
-     * @brief Create window
-     *
-     * @param InTitle Title of window
-     * @param InWidth Width window
-     * @param InHeight Height window
-     * @param InStyle Style of window
-     * @return True if window is opened else false
-     */
-    bool Create( const tchar* InTitle, int32 InWidth, int32 InHeight, EStyle InStyle = EStyle::Default );
-
-    /**
-     * @ingroup WindowsPlatform
-     * @brief Close window
-     */
-    void Close();
+	SDL_Window*				sdlWindow;
+	SDL_SysWMinfo*			sdlWindowInfo;
+	HANDLE					handle;
 };
 
 #endif // !WINDOWSWINDOW_H

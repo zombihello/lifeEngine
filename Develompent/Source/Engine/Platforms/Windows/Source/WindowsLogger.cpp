@@ -1,19 +1,28 @@
 #include <stdio.h>
 
 #include "Containers/String.h"
-#include "BaseFileSystem.h"
+#include "System/BaseFileSystem.h"
 #include "WindowsLogger.h"
+
+const tchar* GLogTypeNames[] =
+{
+	TEXT( "Log" ),
+	TEXT( "Warning" ),
+	TEXT( "Error" )
+};
 
 const tchar* GLogCategoryNames[] =
 {
 	TEXT( "None" ),
-	TEXT( "General" )
+	TEXT( "General" ),
+	TEXT( "Init" )
 };
 
 /**
  * Constructor
  */
 WindowsLogger::WindowsLogger() :
+	startLogging( std::chrono::steady_clock::now() ),
 	handle( nullptr ),
 	archiveLogs( nullptr )
 {}
@@ -97,7 +106,7 @@ void WindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELogC
 		}
 	}
 	
-	tchar*			finalMessage = String::Format( TEXT( "[%s] %s\n" ), GLogCategoryNames[ ( uint32 )InLogCategory ], InMessage );
+	tchar*			finalMessage = String::Format( TEXT( "[%is][%s][%s] %s\n" ), std::chrono::duration_cast< std::chrono::seconds >( std::chrono::steady_clock::now() - startLogging ).count(), GLogTypeNames[ ( uint32 )InLogType ], GLogCategoryNames[ ( uint32 )InLogCategory ], InMessage );
 	wprintf( finalMessage );
 
 	// Serialize log to file

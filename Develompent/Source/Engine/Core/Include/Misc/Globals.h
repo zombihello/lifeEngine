@@ -21,4 +21,10 @@ extern class BaseLogger*			GLog;
  */
 extern class BaseFileSystem*		GFileSystem;
 
+/**
+ * @ingroup Core
+ * @brief Window
+ */
+extern class BaseWindow*			GWindow;
+
 #endif // !GLOBALS_H

@@ -28,8 +28,9 @@ enum ELogType
  */
 enum ELogCategory
 {
-    LC_None,            /**< No category */
-    LC_General          /**< General category */
+    LC_None,                /**< No category */
+    LC_General,             /**< General category */
+    LC_Init                 /**< Initialize category  */
 };
 
 /**

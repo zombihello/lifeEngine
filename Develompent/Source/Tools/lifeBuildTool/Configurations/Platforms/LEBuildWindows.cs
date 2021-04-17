@@ -11,11 +11,47 @@ namespace lifeBuildTool
     {
         void SetUpWindowsEnvironment()
         {
+            //
+            // External libs
+            //
+
+            // SDL2
+            SetUpSDL2Environment();
+
+            //
+            // Engine/Game/Tools projects
+            //
+
             // Set depency projects for Windows platform
             depencyProjects.Add( new LEProjectDesc( "Engine/Platforms/Windows/Windows.vcxproj" ) );            
             
             // Set include paths
             cppEnvironment.includePaths.Add( "Engine/Platforms/Windows/Include" );
+        }
+
+        void SetUpSDL2Environment()
+        {
+            string              sdl2Home = "../External/SDL2-2.0.14";
+
+            // Settings includes
+            cppEnvironment.includePaths.Add( sdl2Home + "/include" );
+
+            // Settings path to libs
+            switch ( platform )
+            {
+                case LETargetPlatform.Win32:
+                    linkEnvironment.libraryPaths.Add( sdl2Home + "/lib/Win32" );
+                    break;
+
+                case LETargetPlatform.Win64:
+                    linkEnvironment.libraryPaths.Add( sdl2Home + "/lib/Win64" );
+                    break;
+
+                default:
+                    throw new BuildException( "Not supported platform for SDL2" );
+            }
+
+            linkEnvironment.additionalLibraries.Add( "SDL2.lib" );
         }
 
         List< string > GetWindowsOutputItems( out bool OutIsSuccessed )

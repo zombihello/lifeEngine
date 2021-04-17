@@ -47,7 +47,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>Include;../../Core/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>Include;../../Core/Include;../../../../External/SDL2-2.0.14/include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

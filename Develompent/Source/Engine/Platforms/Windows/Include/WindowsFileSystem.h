@@ -9,7 +9,7 @@
 #ifndef WINDOWSFILESYSTEM_H
 #define WINDOWSFILESYSTEM_H
 
-#include "BaseFileSystem.h"
+#include "System/BaseFileSystem.h"
 
 /**
  * @ingroup WindowsPlatform

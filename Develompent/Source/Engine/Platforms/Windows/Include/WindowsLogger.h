@@ -9,6 +9,8 @@
 #ifndef WINDOWSLOGGER_H
 #define WINDOWSLOGGER_H
 
+#include <chrono>
+
 #include "Logger/BaseLogger.h"
 #include "WindowsArchive.h"
 
@@ -70,8 +72,10 @@ public:
     FORCEINLINE bool        IsShow() const                 { return handle; }
 
 private:
-    void*               handle;
-    BaseArchive*        archiveLogs;
+    std::chrono::steady_clock::time_point		startLogging;
+
+    void*                                       handle;
+    BaseArchive*                                archiveLogs;
 };
 
 #endif // !WINDOWSLOGGER_H

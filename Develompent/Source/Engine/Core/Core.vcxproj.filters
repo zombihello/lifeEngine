@@ -25,6 +25,9 @@
     <Filter Include="Source\Logger">
       <UniqueIdentifier>{bd638748-e52d-409d-b6a6-6b657fa23d24}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\System">
+      <UniqueIdentifier>{299458ff-21fc-46de-9a3b-d7f7db3ae7aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Core.h">
@@ -51,12 +54,6 @@
     <ClInclude Include="Include\Containers\String.h">
       <Filter>Include\Containers</Filter>
     </ClInclude>
-    <ClInclude Include="Include\BaseFileSystem.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\BaseArchive.h">
-      <Filter>Include</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Logger\BaseLogger.h">
       <Filter>Include\Logger</Filter>
     </ClInclude>
@@ -65,6 +62,15 @@
     </ClInclude>
     <ClInclude Include="Include\Misc\Template.h">
       <Filter>Include\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\System\BaseArchive.h">
+      <Filter>Include\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\System\BaseFileSystem.h">
+      <Filter>Include\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\System\BaseWindow.h">
+      <Filter>Include\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

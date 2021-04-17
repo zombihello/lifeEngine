@@ -7,8 +7,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\BaseArchive.h" />
-    <ClInclude Include="Include\BaseFileSystem.h" />
     <ClInclude Include="Include\Containers\String.h" />
     <ClInclude Include="Include\Containers\StringConv.h" />
     <ClInclude Include="Include\Core.h" />
@@ -20,6 +18,9 @@
     <ClInclude Include="Include\Misc\Object.h" />
     <ClInclude Include="Include\Misc\Template.h" />
     <ClInclude Include="Include\Misc\Types.h" />
+    <ClInclude Include="Include\System\BaseArchive.h" />
+    <ClInclude Include="Include\System\BaseFileSystem.h" />
+    <ClInclude Include="Include\System\BaseWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Containers\String.cpp" />
