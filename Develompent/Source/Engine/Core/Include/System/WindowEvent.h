@@ -10,6 +10,7 @@
 #define WINDOWEVENT_H
 
 #include "Misc/Types.h"
+#include "System/ButtonCode.h"
 
 /**
  * @ingroup Core
@@ -41,7 +42,7 @@ struct SWindowEvent
 	 */
 	struct SKeyEvent
 	{
-		//EButtonCode			code;		/**< Code of key */
+		EButtonCode			code;			/**< Code of key */
 		bool				isAlt;			/**< Is event with alt */
 		bool				isControl;		/**< Is event with ctrl */
 		bool				isShift;		/**< Is event with shift */
@@ -55,9 +56,9 @@ struct SWindowEvent
 	 */
 	struct SMouseButtonEvent
 	{
-		//BUTTON_CODE			code;		/**< Code of mouse button */
-		int32		x;				/**< Mouse position by X */
-		int32		y;				/**< Mouse position by Y */
+		EButtonCode			code;		/**< Code of mouse button */
+		int32				x;			/**< Mouse position by X */
+		int32				y;			/**< Mouse position by Y */
 	};
 
 	/**

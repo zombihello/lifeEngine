@@ -28,6 +28,9 @@
     <Filter Include="Include\System">
       <UniqueIdentifier>{299458ff-21fc-46de-9a3b-d7f7db3ae7aa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\System">
+      <UniqueIdentifier>{b4235f26-aa03-4f8d-b49b-efff82694d91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Core.h">
@@ -75,6 +78,9 @@
     <ClInclude Include="Include\System\WindowEvent.h">
       <Filter>Include\System</Filter>
     </ClInclude>
+    <ClInclude Include="Include\System\ButtonCode.h">
+      <Filter>Include\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">
@@ -85,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="Source\Logger\BaseLogger.cpp">
       <Filter>Source\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\ButtonCode.cpp">
+      <Filter>Source\System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

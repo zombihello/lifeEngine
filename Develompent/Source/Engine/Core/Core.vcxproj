@@ -21,12 +21,14 @@
     <ClInclude Include="Include\System\BaseArchive.h" />
     <ClInclude Include="Include\System\BaseFileSystem.h" />
     <ClInclude Include="Include\System\BaseWindow.h" />
+    <ClInclude Include="Include\System\ButtonCode.h" />
     <ClInclude Include="Include\System\WindowEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Containers\String.cpp" />
     <ClCompile Include="Source\Core.cpp" />
     <ClCompile Include="Source\Logger\BaseLogger.cpp" />
+    <ClCompile Include="Source\System\ButtonCode.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
