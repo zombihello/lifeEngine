@@ -16,7 +16,7 @@ namespace lifeBuildTool
             try
             {
                 // Change the working directory to be the Development/Source folder.
-                Directory.SetCurrentDirectory( Path.Combine( Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ), "..\\..\\..\\Source" ) );
+                Directory.SetCurrentDirectory( Path.Combine( Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ), "..\\Develompent\\Source" ) );
 
                 LEBuildTarget       buildTarget = new LEBuildTarget( InArguments );
                 success = buildTarget.Build();

@@ -9,6 +9,7 @@
 #ifndef BASEFILESYSTEM_H
 #define BASEFILESYSTEM_H
 
+#include "Core.h"
 #include "Misc/Types.h"
 
 /**
