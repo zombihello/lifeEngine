@@ -67,6 +67,19 @@ public:
 	 * @warning After use need delete file writer
 	 */
     virtual class BaseArchive*          CreateFileWriter( const tchar* InFileName, uint32 InFlags )         { return nullptr; }
+
+    /**
+     * @brief Set current directory
+     * 
+     * @param[in] InDirectory Path to directory
+     */
+    virtual void                        SetCurrentDirectory( const tchar* InDirectory )                     {}
+
+    /**
+     * @brief Get current directory
+     * @return Return current directory
+     */
+    virtual const tchar*                GetCurrentDirectory() const                                         { return TEXT( "" ); }
 };
 
 #endif

@@ -14,7 +14,7 @@
     <ClInclude Include="Include\LEBuild.h" />
     <ClInclude Include="Include\Logger\BaseLogger.h" />
     <ClInclude Include="Include\Logger\LoggerMacros.h" />
-    <ClInclude Include="Include\Misc\Globals.h" />
+    <ClInclude Include="Include\Misc\CoreGlobals.h" />
     <ClInclude Include="Include\Misc\Object.h" />
     <ClInclude Include="Include\Misc\Template.h" />
     <ClInclude Include="Include\Misc\Types.h" />

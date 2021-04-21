@@ -11,7 +11,12 @@ namespace lifeBuildTool
         public void SetUpProjectEnvironment( CPPEnvironment InOutCPPEnvironment, List< LEProjectDesc > InOutDepencyProjects, List< LEProjectDesc > InOutProjects )
         {
             InOutDepencyProjects.Add( new LEProjectDesc( "Engine/Core/Core.vcxproj" ) );
+            InOutDepencyProjects.Add( new LEProjectDesc( "Engine/Engine/Engine.vcxproj" ) );
+            InOutDepencyProjects.Add( new LEProjectDesc( "Engine/Launch/Launch.vcxproj" ) );
+
             InOutCPPEnvironment.includePaths.Add( "Engine/Core/Include" );
+            InOutCPPEnvironment.includePaths.Add( "Engine/Engine/Include" );
+            InOutCPPEnvironment.includePaths.Add( "Engine/Launch/Include" );
         }
 
         public string GetName()

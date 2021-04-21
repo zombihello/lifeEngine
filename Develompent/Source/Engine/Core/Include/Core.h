@@ -13,7 +13,7 @@
 #include "CoreDefines.h"
 #include "Logger/LoggerMacros.h"
 #include "Misc/Types.h"
-#include "Misc/Globals.h"
+#include "Misc/CoreGlobals.h"
 
 #undef TEXT
 

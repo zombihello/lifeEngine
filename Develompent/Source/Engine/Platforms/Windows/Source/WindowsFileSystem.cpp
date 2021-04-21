@@ -65,3 +65,20 @@ class BaseArchive* WindowsFileSystem::CreateFileWriter( const tchar* InFileName,
 
 	return new WindowsArchiveWriter( outputFile );
 }
+
+/**
+ * Set current directory
+ */
+void WindowsFileSystem::SetCurrentDirectory( const tchar* InDirectory )
+{
+	SetCurrentDirectoryW( InDirectory );
+}
+
+/**
+ * Get current directory
+ */
+const tchar* WindowsFileSystem::GetCurrentDirectory() const
+{
+	// TODO BG yehor.pohuliaka - Need add return current directory
+	return TEXT( "" );
+}

@@ -23,10 +23,15 @@ namespace lifeBuildTool
             //
 
             // Set depency projects for Windows platform
-            depencyProjects.Add( new LEProjectDesc( "Engine/Platforms/Windows/Windows.vcxproj" ) );            
-            
+            depencyProjects.Add( new LEProjectDesc( "Engine/Platforms/Windows/Windows.vcxproj" ) );
+            depencyProjects.Add( new LEProjectDesc( "Engine/RHI/D3D11RHI/D3D11RHI.vcxproj" ) );
+
             // Set include paths
             cppEnvironment.includePaths.Add( "Engine/Platforms/Windows/Include" );
+            cppEnvironment.includePaths.Add( "Engine/RHI/D3D11RHI/Include" );
+
+            linkEnvironment.additionalLibraries.Add( "d3d11.lib" );
+            linkEnvironment.additionalLibraries.Add( "dxgi.lib" );
         }
 
         void SetUpSDL2Environment()

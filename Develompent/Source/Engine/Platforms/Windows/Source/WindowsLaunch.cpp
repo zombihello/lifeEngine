@@ -1,6 +1,9 @@
 #include <SDL.h>
 
 #include "Core.h"
+#include "Misc/EngineGlobals.h"
+#include "D3D11RHI.h"
+#include "D3D11ViewportRHI.h"
 #include "System/BaseArchive.h"
 #include "WindowsLogger.h"
 #include "WindowsFileSystem.h"
@@ -12,6 +15,7 @@
  */
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nCmdShow )
 {
+    GFileSystem->SetCurrentDirectory( TEXT( "../../" ) );
     GLog->Init();
     static_cast< WindowsLogger* >( GLog )->Show( true );
 
@@ -26,6 +30,13 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
     GWindow->ShowCursor();
     bool isLoop = true;
 
+    uint32          width = 0;
+    uint32          height = 0;
+    GWindow->GetSize( width, height );
+
+    GRHI->Init( false );
+    BaseViewportRHI*        viewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), width, height );
+
     while( isLoop )
     {
         SWindowEvent      event;
@@ -34,13 +45,14 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
             if ( event.type == SWindowEvent::T_WindowClose || ( event.type == SWindowEvent::T_KeyPressed && event.events.key.code == BC_KeyQ ) )
             {
                 isLoop = false;
-                GWindow->Close();
                 break;
             }         
         }
+
+        viewportRHI->Present();
     }
 
-    //GWindow->Close();
+    GWindow->Close();
     GLog->TearDown();
     return 0;
 }

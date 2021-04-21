@@ -42,9 +42,6 @@
     <ClInclude Include="Include\LEBuild.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Misc\Globals.h">
-      <Filter>Include\Misc</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Misc\Object.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
@@ -80,6 +77,9 @@
     </ClInclude>
     <ClInclude Include="Include\System\ButtonCode.h">
       <Filter>Include\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\CoreGlobals.h">
+      <Filter>Include\Misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
