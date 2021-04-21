@@ -3,7 +3,8 @@
 #include "Core.h"
 #include "Misc/EngineGlobals.h"
 #include "D3D11RHI.h"
-#include "D3D11ViewportRHI.h"
+#include "D3D11Viewport.h"
+#include "D3D11DeviceContext.h"
 #include "System/BaseArchive.h"
 #include "WindowsLogger.h"
 #include "WindowsFileSystem.h"
@@ -49,7 +50,8 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
             }         
         }
 
-        viewportRHI->Present();
+        GRHI->BeginDrawingViewport( GRHI->GetImmediateContext(), viewportRHI );
+        GRHI->EndDrawingViewport( GRHI->GetImmediateContext(), viewportRHI, true, false );
     }
 
     GWindow->Close();

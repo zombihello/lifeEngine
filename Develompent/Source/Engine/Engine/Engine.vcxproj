@@ -10,6 +10,7 @@
     <ClInclude Include="Include\Misc\EngineGlobals.h" />
     <ClInclude Include="Include\RHI\BaseRHI.h" />
     <ClInclude Include="Include\RHI\BaseViewportRHI.h" />
+    <ClInclude Include="Include\RHI\BaseDeviceContextRHI.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -7,12 +7,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\D3D11DeviceContext.h" />
     <ClInclude Include="Include\D3D11RHI.h" />
-    <ClInclude Include="Include\D3D11ViewportRHI.h" />
+    <ClInclude Include="Include\D3D11Surface.h" />
+    <ClInclude Include="Include\D3D11Viewport.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\D3D11DeviceContext.cpp" />
     <ClCompile Include="Source\D3D11RHI.cpp" />
-    <ClCompile Include="Source\D3D11ViewportRHI.cpp" />
+    <ClCompile Include="Source\D3D11Surface.cpp" />
+    <ClCompile Include="Source\D3D11Viewport.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

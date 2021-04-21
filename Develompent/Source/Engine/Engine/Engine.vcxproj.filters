@@ -27,5 +27,8 @@
     <ClInclude Include="Include\Misc\EngineGlobals.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Include\RHI\BaseDeviceContextRHI.h">
+      <Filter>Include\RHI</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
