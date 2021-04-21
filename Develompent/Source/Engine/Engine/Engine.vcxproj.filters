@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Include">
+      <UniqueIdentifier>{4c6c8bd9-f7c0-4edc-b5b0-a22db16cf635}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{ebee0972-c623-4ec7-932e-c01358cf0f77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\RHI">
+      <UniqueIdentifier>{a5fbf995-37a7-4695-acc8-3614cdc208c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RHI">
+      <UniqueIdentifier>{02ab1d24-9f9d-45de-a912-e6a4ec4f4769}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Misc">
+      <UniqueIdentifier>{b21a85f0-9dde-4635-9c87-37059ebaf0fb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\RHI\BaseRHI.h">
+      <Filter>Include\RHI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RHI\BaseViewportRHI.h">
+      <Filter>Include\RHI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\EngineGlobals.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
