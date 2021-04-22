@@ -3,6 +3,7 @@
 #include <wchar.h>
 
 #include "Misc/Types.h"
+#include "EngineLoop.h"
 #include "D3D11RHI.h"
 #include "WindowsLogger.h"
 #include "WindowsFileSystem.h"
@@ -16,6 +17,7 @@ BaseLogger*         GLog            = new WindowsLogger();
 BaseFileSystem*     GFileSystem     = new WindowsFileSystem();
 BaseWindow*         GWindow         = new WindowsWindow();
 BaseRHI*            GRHI            = new D3D11RHI();
+EngineLoop*         GEngineLoop     = new EngineLoop();
 
 // ----
 // Platform specific functions

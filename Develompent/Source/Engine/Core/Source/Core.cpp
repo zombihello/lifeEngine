@@ -4,6 +4,12 @@
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
 
+// ----------------
+// GLOBALS
+// ----------------
+
+bool	        GIsRequestingExit           = false;
+
 /**
  * Failed assertion handler
  */

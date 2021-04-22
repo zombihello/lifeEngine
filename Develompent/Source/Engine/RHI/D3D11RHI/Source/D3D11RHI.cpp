@@ -9,6 +9,7 @@
  * Constructor
  */
 D3D11RHI::D3D11RHI() :
+	isInitialize( false ),
 	immediateContext( nullptr ),
 	d3d11Device( nullptr )
 {}
@@ -18,8 +19,7 @@ D3D11RHI::D3D11RHI() :
  */
 D3D11RHI::~D3D11RHI()
 {
-	// BG yehor.pohuliaka - Add release objects
-	delete immediateContext;
+	Destroy();
 }
 
 /**
@@ -27,7 +27,7 @@ D3D11RHI::~D3D11RHI()
  */
 void D3D11RHI::Init( bool InIsEditor )
 {
-	if ( d3d11Device )			return;
+	if ( IsInitialize() )			return;
 
 	uint32					deviceFlags = 0;
 
@@ -68,6 +68,34 @@ void D3D11RHI::Init( bool InIsEditor )
 			adapterDesc.DedicatedVideoMemory / ( 1024 * 1024 ),
 			adapterDesc.DedicatedSystemMemory / ( 1024 * 1024 ),
 			adapterDesc.SharedSystemMemory / ( 1024 * 1024 ) );
+
+	isInitialize = true;
+}
+
+/**
+ * Is initialized RHI
+ */
+bool D3D11RHI::IsInitialize() const
+{
+	return isInitialize;
+}
+
+/**
+ * Destroy RHI
+ */
+void D3D11RHI::Destroy()
+{
+	if ( !isInitialize )		return;
+
+	delete immediateContext;
+	d3d11Device->Release();
+	dxgiAdapter->Release();
+	dxgiFactory->Release();
+
+	immediateContext = nullptr;
+	d3d11Device = nullptr;
+	dxgiAdapter = nullptr;
+	dxgiFactory = nullptr;
 }
 
 /**

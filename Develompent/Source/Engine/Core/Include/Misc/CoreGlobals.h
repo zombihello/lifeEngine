@@ -27,4 +27,10 @@ extern class BaseFileSystem*		GFileSystem;
  */
 extern class BaseWindow*			GWindow;
 
+/**
+ * @ingroup Core
+ * @brief Indicates that MainLoop() should be exited at the end of the current iteration
+ */
+extern bool							GIsRequestingExit;
+
 #endif // !COREGLOBALS_H

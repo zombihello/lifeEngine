@@ -31,6 +31,12 @@
     <Filter Include="Source\System">
       <UniqueIdentifier>{b4235f26-aa03-4f8d-b49b-efff82694d91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Math">
+      <UniqueIdentifier>{76e07a53-9ab7-494d-8cc8-5cec1fdbc514}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math">
+      <UniqueIdentifier>{e683b571-c649-472d-ac8b-86b93f2087e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Core.h">
@@ -81,6 +87,9 @@
     <ClInclude Include="Include\Misc\CoreGlobals.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Math\Color.h">
+      <Filter>Include\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">
@@ -94,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="Source\System\ButtonCode.cpp">
       <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Color.cpp">
+      <Filter>Source\Math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

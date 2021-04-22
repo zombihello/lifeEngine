@@ -63,6 +63,12 @@ public:
 	 */
 	virtual uint32							GetHeight() const override;
 
+	/**
+	 * @breif Get surface of viewport
+	 * @return Pointer to surface of viewport
+	 */
+	virtual class BaseSurfaceRHI*			GetSurface() const override;
+
 private:
 	class D3D11Surface*			backBuffer;
 	IDXGISwapChain*				dxgiSwapChain;				/**< DXGI swap chain */

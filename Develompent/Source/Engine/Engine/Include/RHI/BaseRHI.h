@@ -31,6 +31,11 @@ public:
 	virtual void								Init( bool InIsEditor )	{}
 
 	/**
+	 * @brief Destroy RHI
+	 */
+	virtual void								Destroy() {}
+
+	/**
 	 * @brief Create viewport
 	 * 
 	 * @param[in] InWindowHandle OS handle on window
@@ -70,6 +75,12 @@ public:
 	 * @param[in] InMaxZ Max z
 	 */
 	virtual void								SetViewport( class BaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) {}
+
+	/**
+	 * @brief Is initialized RHI
+	 * @return Return true if RHI is initialized, else false
+	 */
+	virtual bool								IsInitialize() const { return false; }
 
 	/**
 	 * @brief Get device context

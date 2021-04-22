@@ -33,6 +33,14 @@ public:
 											~D3D11DeviceContext();
 
 	/**
+	 * @brief Clear surface
+	 *
+	 * @param[in] InSurface Surface for rendering
+	 * @param[in] InColor Color for clearing render target
+	 */
+	virtual void							ClearSurface( class BaseSurfaceRHI* InSurface, const class Color& InColor ) override;
+
+	/**
 	 * @brief Get D3D11 device context
 	 * @return Pointer to D3D11 device context
 	 */

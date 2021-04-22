@@ -21,26 +21,32 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual				~BaseViewportRHI() {}
+	virtual								~BaseViewportRHI() {}
 
 	/**
 	 * @brief Presents the swap chain
 	 * 
 	 * @param[in] InLockToVsync Is it necessary to block for Vsync
 	 */
-	virtual void		Present( bool InLockToVsync ) {}
+	virtual void						Present( bool InLockToVsync ) {}
 
 	/**
 	 * @brief Get width
 	 * @return Width of viewport
 	 */
-	virtual uint32		GetWidth() const { return 0; }
+	virtual uint32						GetWidth() const { return 0; }
 
 	/**
 	 * @brief Get height
 	 * @return Height of viewport
 	 */
-	virtual uint32		GetHeight() const { return 0; }
+	virtual uint32						GetHeight() const { return 0; }
+
+	/**
+	 * @breif Get surface of viewport
+	 * @return Pointer to surface of viewport
+	 */
+	virtual class BaseSurfaceRHI*		GetSurface() const { return nullptr; }
 };
 
 #endif // !BASEVIEWPORTRHI_H

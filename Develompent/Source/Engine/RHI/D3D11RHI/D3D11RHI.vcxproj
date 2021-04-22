@@ -42,8 +42,8 @@
     <NMakeOutput />
     <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine />
-    <OutDir>..\..\..\Intermediate\Unused\</OutDir>
-    <IntDir>..\..\..\Intermediate\Unused\</IntDir>
+    <OutDir>..\..\..\..\Intermediate\Unused\</OutDir>
+    <IntDir>..\..\..\..\Intermediate\Unused\</IntDir>
     <NMakeIncludeSearchPath>Include;../../Core/Include;../../Engine/Include;../../Platforms/Windows/Include;../../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>

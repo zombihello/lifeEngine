@@ -20,6 +20,14 @@ public:
 	 * @brief Destructor
 	 */
 	virtual						~BaseDeviceContextRHI() {}
+
+	/**
+	 * @brief Clear surface
+	 * 
+	 * @param[in] InSurface Surface for rendering
+	 * @param[in] InColor Color for clearing render target
+	 */
+	virtual void				ClearSurface( class BaseSurfaceRHI* InSurface, const class Color& InColor ) {}
 };
 
 #endif // !BASEDEVICECONTEXTRHI_H

@@ -39,6 +39,11 @@ public:
 	virtual void									Init( bool InIsEditor ) override;
 
 	/**
+	 * @brief Destroy RHI
+	 */
+	virtual void									Destroy() override;
+
+	/**
 	 * @brief Create viewport
 	 *
 	 * @param[in] InWindowHandle OS handle on window
@@ -80,6 +85,12 @@ public:
 	virtual void									SetViewport( class BaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) override;
 
 	/**
+	 * @brief Is initialized RHI
+	 * @return Return true if RHI is initialized, else false
+	 */
+	virtual bool									IsInitialize() const override;
+
+	/**
 	 * @brief Get device context
 	 * @return Pointer to device context
 	 */
@@ -113,6 +124,7 @@ public:
 	}
 
 private:
+	bool							isInitialize;				/**< Is RHI is initialized */
 	class D3D11DeviceContext*		immediateContext;			/**< Immediate context */
 
 	ID3D11Device*					d3d11Device;				/**< D3D11 Device */

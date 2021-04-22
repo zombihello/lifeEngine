@@ -79,8 +79,11 @@ D3D11Viewport::D3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InHei
  */
 D3D11Viewport::~D3D11Viewport()
 {
-	// TODO BG yehor.pohuliaka - Add release objects
 	delete backBuffer;
+	dxgiSwapChain->Release();
+
+	backBuffer = nullptr;
+	dxgiSwapChain = nullptr;
 }
 
 /**
@@ -106,4 +109,12 @@ uint32 D3D11Viewport::GetWidth() const
 uint32 D3D11Viewport::GetHeight() const
 {
 	return height;
+}
+
+/**
+ * Get surface of viewport
+ */
+BaseSurfaceRHI* D3D11Viewport::GetSurface() const
+{
+	return backBuffer;
 }

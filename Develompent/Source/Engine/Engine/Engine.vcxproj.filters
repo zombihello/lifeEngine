@@ -30,5 +30,8 @@
     <ClInclude Include="Include\RHI\BaseDeviceContextRHI.h">
       <Filter>Include\RHI</Filter>
     </ClInclude>
+    <ClInclude Include="Include\RHI\BaseSurfaceRHI.h">
+      <Filter>Include\RHI</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

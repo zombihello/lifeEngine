@@ -12,12 +12,13 @@
 #include <d3d11.h>
 
 #include "Core.h"
+#include "RHI/BaseSurfaceRHI.h"
 
 /**
  * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 surface
  */
-class D3D11Surface
+class D3D11Surface : public BaseSurfaceRHI
 {
 public:
 	/**
