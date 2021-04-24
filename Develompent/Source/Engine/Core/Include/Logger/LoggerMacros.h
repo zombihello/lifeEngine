@@ -9,6 +9,7 @@
 #ifndef LOGGERMACROS_H
 #define LOGGERMACROS_H
 
+#include "MIsc/CoreGlobals.h"
 #include "BaseLogger.h"
 
 // If configuration is not shipping - we using logs for debug

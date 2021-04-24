@@ -18,6 +18,9 @@ namespace lifeBuildTool
             // SDL2
             SetUpSDL2Environment();
 
+            // RapidJSON
+            SetUpRapidJSONEnvironment();
+
             //
             // Engine/Game/Tools projects
             //
@@ -58,6 +61,14 @@ namespace lifeBuildTool
             }
 
             linkEnvironment.additionalLibraries.Add( "SDL2.lib" );
+        }
+
+        void SetUpRapidJSONEnvironment()
+        {
+            string          rapidJSONHome = "../External/rapidjson";
+
+            // Settings includes
+            cppEnvironment.includePaths.Add( rapidJSONHome + "/include" );
         }
 
         List< string > GetWindowsOutputItems( out bool OutIsSuccessed )

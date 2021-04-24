@@ -55,7 +55,7 @@ public:
      * 
      * @warning After use need delete file reader
      */
-    virtual class BaseArchive*          CreateFileReader( const tchar* InFileName, uint32 InFlags )         { return nullptr; }
+    virtual class BaseArchive*          CreateFileReader( const tchar* InFileName, uint32 InFlags = AR_None )         { return nullptr; }
 
     /**
 	 * @brief Create file writer
@@ -67,7 +67,7 @@ public:
 	 *
 	 * @warning After use need delete file writer
 	 */
-    virtual class BaseArchive*          CreateFileWriter( const tchar* InFileName, uint32 InFlags )         { return nullptr; }
+    virtual class BaseArchive*          CreateFileWriter( const tchar* InFileName, uint32 InFlags = AW_None )         { return nullptr; }
 
     /**
      * @brief Set current directory

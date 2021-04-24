@@ -23,6 +23,7 @@
     <ClInclude Include="Include\System\BaseFileSystem.h" />
     <ClInclude Include="Include\System\BaseWindow.h" />
     <ClInclude Include="Include\System\ButtonCode.h" />
+    <ClInclude Include="Include\System\Config.h" />
     <ClInclude Include="Include\System\WindowEvent.h" />
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +32,7 @@
     <ClCompile Include="Source\Logger\BaseLogger.cpp" />
     <ClCompile Include="Source\Math\Color.cpp" />
     <ClCompile Include="Source\System\ButtonCode.cpp" />
+    <ClCompile Include="Source\System\Config.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -58,7 +60,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../../External/rapidjson/include;Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

@@ -32,6 +32,7 @@ class BaseArchive* WindowsFileSystem::CreateFileReader( const tchar* InFileName,
 			appErrorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName, InFlags );
 		}
 
+		delete inputFile;
 		return nullptr;
 	}
 
@@ -60,6 +61,7 @@ class BaseArchive* WindowsFileSystem::CreateFileWriter( const tchar* InFileName,
 			appErrorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName, InFlags );
 		}
 
+		delete outputFile;
 		return nullptr;
 	}
 

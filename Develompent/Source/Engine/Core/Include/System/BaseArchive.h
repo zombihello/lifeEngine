@@ -10,6 +10,7 @@
 #define BASEARCHIVE_H
 
 #include "Misc/Types.h"
+#include "Core.h"
 
 /**
  * @ingroup Core
@@ -87,24 +88,6 @@ FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, tchar* InStringC )
 FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, achar* InStringC )
 {
 	InArchive.Serialize( InStringC, ( uint32 )strlen( InStringC ) );
-	return InArchive;
-}
-
-/**
- * @brief Overload operator << for serialize int32
- */
-FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, int32& InValue )
-{
-	InArchive.Serialize( &InValue, sizeof( int32 ) );
-	return InArchive;
-}
-
-/**
- * @brief Overload operator << for serialize uint32
- */
-FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, uint32& InValue )
-{
-	InArchive.Serialize( &InValue, sizeof( uint32 ) );
 	return InArchive;
 }
 

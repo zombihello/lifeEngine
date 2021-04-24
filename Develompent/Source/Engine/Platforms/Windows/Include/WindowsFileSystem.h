@@ -37,7 +37,7 @@ public:
      *
      * @warning After use need delete file reader
      */
-    virtual class BaseArchive*          CreateFileReader( const tchar* InFileName, uint32 InFlags ) override;
+    virtual class BaseArchive*          CreateFileReader( const tchar* InFileName, uint32 InFlags = AR_None ) override;
 
     /**
      * @brief Create file writer
@@ -48,7 +48,7 @@ public:
      *
      * @warning After use need delete file writer
      */
-    virtual class BaseArchive*          CreateFileWriter( const tchar* InFileName, uint32 InFlags ) override;
+    virtual class BaseArchive*          CreateFileWriter( const tchar* InFileName, uint32 InFlags = AW_None ) override;
 
     /**
      * @brief Set current directory

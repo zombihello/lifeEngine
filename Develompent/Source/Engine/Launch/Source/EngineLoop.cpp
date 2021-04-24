@@ -2,8 +2,10 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Logger/BaseLogger.h"
+#include "System/BaseArchive.h"
 #include "System/BaseFileSystem.h"
 #include "System/BaseWindow.h"
+#include "System/Config.h"
 #include "Math/Color.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseViewportRHI.h"
@@ -38,7 +40,16 @@ int32 EngineLoop::PreInit( const tchar* InCmdLine )
 	GFileSystem->SetCurrentDirectory( TEXT( "../../" ) );
 	GLog->Init();
 	
-	return appPlatformPreInit( InCmdLine );
+	int32		errorCode = appPlatformPreInit( InCmdLine );
+
+	BaseArchive*		archiveConfig = GFileSystem->CreateFileReader( TEXT( "Config/DefaultEngine.json" ) );
+	if ( archiveConfig )
+	{
+		GConfig.Serialize( *archiveConfig );
+		delete archiveConfig;
+	}
+
+	return errorCode;
 }
 
 /**
@@ -47,7 +58,10 @@ int32 EngineLoop::PreInit( const tchar* InCmdLine )
 int32 EngineLoop::Init( const tchar* InCmdLine )
 {
 	// Create window
-	GWindow->Create( TEXT( "lifeEngine" ), 1280, 720 );
+	std::wstring				windowTitle = GConfig.GetString( TEXT( "GameInfo" ), TEXT( "Name" ), TEXT( "lifeEngine" ) );
+	uint32						windowWidth = GConfig.GetInt( TEXT( "SystemSettings" ), TEXT( "WindowWidth" ), 1280 );
+	uint32						windowHeight = GConfig.GetInt( TEXT( "SystemSettings" ), TEXT( "WindowHeight" ), 720 );
+	GWindow->Create( windowTitle.c_str(), windowWidth, windowHeight );
 	
 	// Create viewport for render
 	uint32			width = 0;

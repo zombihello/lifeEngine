@@ -3,11 +3,13 @@
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
+#include "System/Config.h"
 
 // ----------------
 // GLOBALS
 // ----------------
 
+Config          GConfig;
 bool	        GIsRequestingExit           = false;
 
 /**

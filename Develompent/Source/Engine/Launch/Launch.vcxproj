@@ -39,7 +39,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../RHI/D3D11RHI/Include;../Platforms/Windows/Include;../Engine/Include;../Core/Include;Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../../External/rapidjson/include;../RHI/D3D11RHI/Include;../Platforms/Windows/Include;../Engine/Include;../Core/Include;Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
