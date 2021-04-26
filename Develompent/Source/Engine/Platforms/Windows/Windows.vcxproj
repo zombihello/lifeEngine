@@ -47,7 +47,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../../../../External/rapidjson/include;../../Launch/Include;Include;../../Core/Include;../../Engine/Include;../../RHI/D3D11RHI/Include;../../../../External/SDL2-2.0.14/include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../../../../External/angelscript-2.35.0/include;../../../../../External/rapidjson/include;../../Launch/Include;Include;../../Core/Include;../../Engine/Include;../../RHI/D3D11RHI/Include;../../../../External/SDL2-2.0.14/include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

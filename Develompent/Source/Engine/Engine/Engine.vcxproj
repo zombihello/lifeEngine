@@ -12,6 +12,43 @@
     <ClInclude Include="Include\RHI\BaseSurfaceRHI.h" />
     <ClInclude Include="Include\RHI\BaseViewportRHI.h" />
     <ClInclude Include="Include\RHI\BaseDeviceContextRHI.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\autowrapper\aswrappedcall.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\contextmgr\contextmgr.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\datetime\datetime.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\debugger\debugger.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptany\scriptany.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptarray\scriptarray.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptbuilder\scriptbuilder.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptdictionary\scriptdictionary.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptgrid\scriptgrid.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scripthandle\scripthandle.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scripthelper\scripthelper.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptmath\scriptmath.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptmath\scriptmathcomplex.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptstdstring\scriptstdstring.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\serializer\serializer.h" />
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\weakref\weakref.h" />
+    <ClInclude Include="Include\Scripts\ScriptEngine.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Misc\EngineGlobals.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\contextmgr\contextmgr.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\datetime\datetime.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\debugger\debugger.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptany\scriptany.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptarray\scriptarray.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptbuilder\scriptbuilder.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptdictionary\scriptdictionary.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptgrid\scriptgrid.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scripthandle\scripthandle.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scripthelper\scripthelper.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptmath\scriptmath.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptmath\scriptmathcomplex.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptstdstring\scriptstdstring.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptstdstring\scriptstdstring_utils.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\serializer\serializer.cpp" />
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\weakref\weakref.cpp" />
+    <ClCompile Include="Source\Scripts\ScriptEngine.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -39,7 +76,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../../External/rapidjson/include;Include;../Core/Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../../External/angelscript-2.35.0/include;../../../External/rapidjson/include;Include;../Core/Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

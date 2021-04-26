@@ -2,8 +2,8 @@
  * @file
  * @addtogroup Engine Engine
  *
- * @authors: Yehor Pohuliaka
- * @date: 4/19/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef ENGINEGLOBALS_H
@@ -14,5 +14,11 @@
   * @brief RHI
   */
 extern class BaseRHI*				GRHI;
+
+/**
+ * @ingroup Engine
+ * @brief Script engine
+ */
+extern class ScriptEngine*			GScriptEngine;
 
 #endif // !ENGINEGLOBALS_H

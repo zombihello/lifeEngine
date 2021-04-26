@@ -24,7 +24,7 @@ class BaseArchive* WindowsFileSystem::CreateFileReader( const tchar* InFileName,
 	std::ifstream*			inputFile = new std::ifstream();
 
 	// Create file and create archive reader
-	inputFile->open( InFileName );
+	inputFile->open( InFileName, std::ios::binary );
 	if ( !inputFile->is_open() )
 	{
 		if ( InFlags & AR_NoFail )

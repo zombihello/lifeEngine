@@ -2,8 +2,8 @@
  * @file
  * @addtogroup Core Core
  *
- * @authors: Yehor Pohuliaka
- * @date: 3/27/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef COREGLOBALS_H
@@ -29,9 +29,15 @@ extern class BaseWindow*			GWindow;
 
 /**
  * @ingroup Core
- * @brief Config
+ * @brief Config of engine
  */
-extern class Config					GConfig;
+extern class Config					GEngineConfig;
+
+/**
+ * @ingroup Core
+ * @brief Config of game
+ */
+extern class Config					GGameConfig;
 
 /**
  * @ingroup Core

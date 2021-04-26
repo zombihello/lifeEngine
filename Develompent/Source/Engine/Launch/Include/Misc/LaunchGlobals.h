@@ -2,8 +2,8 @@
  * @file
  * @addtogroup Launch Launch
  *
- * @authors: Yehor Pohuliaka
- * @date: 4/22/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef LAUNCHGLOBALS_H

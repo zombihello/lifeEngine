@@ -9,7 +9,8 @@
 // GLOBALS
 // ----------------
 
-Config          GConfig;
+Config          GEngineConfig;
+Config          GGameConfig;
 bool	        GIsRequestingExit           = false;
 
 /**

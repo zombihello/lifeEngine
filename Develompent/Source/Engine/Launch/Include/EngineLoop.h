@@ -2,8 +2,8 @@
  * @file
  * @addtogroup Launch Launch
  *
- * @authors: Yehor Pohuliaka
- * @date: 4/23/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef ENGINELOOP_H
@@ -55,6 +55,11 @@ public:
 	void				Exit();
 
 private:
+	/**
+	 * @brief Serialize configs
+	 */
+	void				SerializeConfigs();
+
 	bool			isInitialize;		/**< Is initialized engine */
 };
 

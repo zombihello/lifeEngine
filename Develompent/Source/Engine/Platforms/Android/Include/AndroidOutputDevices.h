@@ -2,13 +2,14 @@
  * @file
  * @addtogroup AndroidPlatform Android platform
  *
- * @authors: Yehor Pohuliaka
- * @date: 3/27/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef LIFEENGINE_ANDROIDOUTPUTDEVICES_H
 #define LIFEENGINE_ANDROIDOUTPUTDEVICES_H
 
+#error Deprected interface
 #include "OutputDevices.h"
 
 /**

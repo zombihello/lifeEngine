@@ -11,6 +11,7 @@
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
+#include "Scripts/ScriptEngine.h"
 #include "EngineLoop.h"
 
 // --------------
@@ -33,22 +34,39 @@ EngineLoop::~EngineLoop()
 {}
 
 /**
+ * Serialize configs
+ */
+void EngineLoop::SerializeConfigs()
+{
+	// Loading engine config
+	BaseArchive*		arConfig = GFileSystem->CreateFileReader( TEXT( "Config/Engine.json" ) );
+	if ( arConfig )
+	{
+		GEngineConfig.Serialize( *arConfig );
+		delete arConfig;
+	}
+
+	// Loading game config
+	arConfig = GFileSystem->CreateFileReader( TEXT( "Config/Game.json" ) );
+	if ( arConfig )
+	{
+		GGameConfig.Serialize( *arConfig );
+		delete arConfig;
+	}
+}
+
+/**
  * Pre-Initialize the main loop
  */
 int32 EngineLoop::PreInit( const tchar* InCmdLine )
 {
 	GFileSystem->SetCurrentDirectory( TEXT( "../../" ) );
 	GLog->Init();
-	
+	GScriptEngine->Init();
+
 	int32		errorCode = appPlatformPreInit( InCmdLine );
-
-	BaseArchive*		archiveConfig = GFileSystem->CreateFileReader( TEXT( "Config/DefaultEngine.json" ) );
-	if ( archiveConfig )
-	{
-		GConfig.Serialize( *archiveConfig );
-		delete archiveConfig;
-	}
-
+	
+	SerializeConfigs();
 	return errorCode;
 }
 
@@ -58,9 +76,9 @@ int32 EngineLoop::PreInit( const tchar* InCmdLine )
 int32 EngineLoop::Init( const tchar* InCmdLine )
 {
 	// Create window
-	std::wstring				windowTitle = GConfig.GetString( TEXT( "GameInfo" ), TEXT( "Name" ), TEXT( "lifeEngine" ) );
-	uint32						windowWidth = GConfig.GetInt( TEXT( "SystemSettings" ), TEXT( "WindowWidth" ), 1280 );
-	uint32						windowHeight = GConfig.GetInt( TEXT( "SystemSettings" ), TEXT( "WindowHeight" ), 720 );
+	std::wstring				windowTitle = GGameConfig.GetString( TEXT( "GameInfo" ), TEXT( "Name" ), TEXT( "lifeEngine" ) );
+	uint32						windowWidth = GEngineConfig.GetInt( TEXT( "SystemSettings" ), TEXT( "WindowWidth" ), 1280 );
+	uint32						windowHeight = GEngineConfig.GetInt( TEXT( "SystemSettings" ), TEXT( "WindowHeight" ), 720 );
 	GWindow->Create( windowTitle.c_str(), windowWidth, windowHeight );
 	
 	// Create viewport for render

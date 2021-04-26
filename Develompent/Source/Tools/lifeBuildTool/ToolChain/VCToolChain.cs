@@ -383,7 +383,7 @@ namespace lifeBuildTool
                 // Disable identical COMDAT folding.
                 result += " /OPT:NOICF";
 
-                //Result += " /VERBOSE"; // Verbose
+                // result += " /VERBOSE"; // Verbose
             }
 
             return result;

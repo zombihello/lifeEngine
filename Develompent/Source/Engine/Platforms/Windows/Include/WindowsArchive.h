@@ -2,8 +2,8 @@
  * @file
  * @addtogroup WindowsPlatform Windows platform
  *
- * @authors: Yehor Pohuliaka
- * @date: 4/13/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef WINDOWSARCHIVE_H

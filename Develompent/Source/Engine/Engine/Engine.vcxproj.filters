@@ -7,14 +7,116 @@
     <Filter Include="Source">
       <UniqueIdentifier>{ebee0972-c623-4ec7-932e-c01358cf0f77}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Include\RHI">
-      <UniqueIdentifier>{a5fbf995-37a7-4695-acc8-3614cdc208c1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\RHI">
       <UniqueIdentifier>{02ab1d24-9f9d-45de-a912-e6a4ec4f4769}</UniqueIdentifier>
     </Filter>
     <Filter Include="Include\Misc">
       <UniqueIdentifier>{b21a85f0-9dde-4635-9c87-37059ebaf0fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts">
+      <UniqueIdentifier>{41a61504-3f81-4c50-9f08-480f15e17b3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons">
+      <UniqueIdentifier>{a0318ebd-916e-4037-a1c3-9263f4ca4e45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\contextmgr">
+      <UniqueIdentifier>{7ca29306-5138-4a4f-9c28-771c74779ad4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\datetime">
+      <UniqueIdentifier>{8b6ea277-e529-4249-a265-1bf8a672b0a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\debugger">
+      <UniqueIdentifier>{1ca376c8-9ef8-4016-b36a-c6c247de90e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\scriptany">
+      <UniqueIdentifier>{99b5f61e-bcb0-4891-af50-17729f8fafa5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\scriptarray">
+      <UniqueIdentifier>{5942a84e-46c7-44e5-b328-840b74048741}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\RHI">
+      <UniqueIdentifier>{a5fbf995-37a7-4695-acc8-3614cdc208c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\scriptbuilder">
+      <UniqueIdentifier>{c86d618c-53e3-400a-8f72-071107979aec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\scriptdictionary">
+      <UniqueIdentifier>{57915926-d69f-462f-8f2c-e6df445a4155}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\scriptgrid">
+      <UniqueIdentifier>{0abe9b33-2b03-460e-9ac6-e4a8199dd134}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\scripthandle">
+      <UniqueIdentifier>{77338dfc-addd-4d35-a451-ac132d2eba2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\scripthelper">
+      <UniqueIdentifier>{5c6ff76d-6fae-4782-8e8e-b1483fe6191a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\scriptmath">
+      <UniqueIdentifier>{8f6b9a22-1398-43f5-8e09-d041b3a350bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\scriptstdstring">
+      <UniqueIdentifier>{30a2a36d-4363-4ae2-9af3-e57ac6dd7505}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\serializer">
+      <UniqueIdentifier>{d4ee0684-1a12-45ae-91f7-6f28ee38b219}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\weakref">
+      <UniqueIdentifier>{7280df4d-77d1-4abb-821a-5321b3ebad35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts">
+      <UniqueIdentifier>{57251b36-2b62-419a-9727-3e1d89baaa30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons">
+      <UniqueIdentifier>{a31e4797-a459-403e-991f-124e56be852b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\contextmgr">
+      <UniqueIdentifier>{08e3ddc6-ff06-4882-b218-8f1c4d552597}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\datetime">
+      <UniqueIdentifier>{dfd52b9f-a11d-4d71-9b0e-6beb5809570b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\debugger">
+      <UniqueIdentifier>{bb9bde7e-4f3c-462e-83c4-2da2f1eeef2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\scriptany">
+      <UniqueIdentifier>{20a29588-0652-481d-82ec-1889f197b529}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\scriptarray">
+      <UniqueIdentifier>{fd28193a-fc9e-45b6-b11a-9691b7b487b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\scriptbuilder">
+      <UniqueIdentifier>{c8e260e7-ea9f-4d26-8bdd-76ac41febfd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\scriptdictionary">
+      <UniqueIdentifier>{e08392cd-27d7-4060-b06f-e1e0e3f7dae8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\scriptgrid">
+      <UniqueIdentifier>{1f1cc2df-466d-4e3f-b486-72cae062cce6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\scripthandle">
+      <UniqueIdentifier>{544165ef-0533-43a7-ac31-11eee38dced3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\scripthelper">
+      <UniqueIdentifier>{9eff4d04-359f-4236-94cf-1eba0a422ff9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\scriptmath">
+      <UniqueIdentifier>{cb64b9cb-4f3a-4e49-8f8f-d24a33f6c6c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\scriptstdstring">
+      <UniqueIdentifier>{ce99b99f-0740-4058-870d-4ec904a890c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\serializer">
+      <UniqueIdentifier>{5e42c375-3300-405e-a712-cac3d8a4e426}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts\AngelScriptAddons\weakref">
+      <UniqueIdentifier>{6da0f179-2f79-4348-9eda-8cac15e9076e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Scripts\AngelScriptAddons\autowrapper">
+      <UniqueIdentifier>{266e90a9-fa19-4003-9a25-d2b8c72c5118}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Misc">
+      <UniqueIdentifier>{65e5297e-704a-4c2d-aa23-02b281ff20f0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -33,5 +135,112 @@
     <ClInclude Include="Include\RHI\BaseSurfaceRHI.h">
       <Filter>Include\RHI</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\contextmgr\contextmgr.h">
+      <Filter>Include\Scripts\AngelScriptAddons\contextmgr</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\datetime\datetime.h">
+      <Filter>Include\Scripts\AngelScriptAddons\datetime</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\debugger\debugger.h">
+      <Filter>Include\Scripts\AngelScriptAddons\debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptany\scriptany.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scriptany</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptarray\scriptarray.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scriptarray</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptbuilder\scriptbuilder.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scriptbuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptdictionary\scriptdictionary.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scriptdictionary</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptgrid\scriptgrid.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scriptgrid</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scripthandle\scripthandle.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scripthandle</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scripthelper\scripthelper.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scripthelper</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptmath\scriptmathcomplex.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scriptmath</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptmath\scriptmath.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scriptmath</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\scriptstdstring\scriptstdstring.h">
+      <Filter>Include\Scripts\AngelScriptAddons\scriptstdstring</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\serializer\serializer.h">
+      <Filter>Include\Scripts\AngelScriptAddons\serializer</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\weakref\weakref.h">
+      <Filter>Include\Scripts\AngelScriptAddons\weakref</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\AngelScriptAddons\autowrapper\aswrappedcall.h">
+      <Filter>Include\Scripts\AngelScriptAddons\autowrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\ScriptEngine.h">
+      <Filter>Include\Scripts</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\contextmgr\contextmgr.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\contextmgr</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\datetime\datetime.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\debugger\debugger.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptany\scriptany.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scriptany</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptarray\scriptarray.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scriptarray</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptbuilder\scriptbuilder.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scriptbuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptdictionary\scriptdictionary.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scriptdictionary</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptgrid\scriptgrid.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scriptgrid</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scripthandle\scripthandle.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scripthandle</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scripthelper\scripthelper.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scripthelper</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptmath\scriptmathcomplex.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scriptmath</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptmath\scriptmath.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scriptmath</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptstdstring\scriptstdstring_utils.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scriptstdstring</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\scriptstdstring\scriptstdstring.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\scriptstdstring</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\serializer\serializer.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\serializer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\AngelScriptAddons\weakref\weakref.cpp">
+      <Filter>Source\Scripts\AngelScriptAddons\weakref</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\ScriptEngine.cpp">
+      <Filter>Source\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Misc\EngineGlobals.cpp">
+      <Filter>Source\Misc</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

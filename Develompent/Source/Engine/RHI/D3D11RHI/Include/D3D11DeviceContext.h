@@ -2,8 +2,8 @@
  * @file
  * @addtogroup D3D11RHI D3D11RHI
  *
- * @authors: Yehor Pohuliaka
- * @date: 4/22/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef D3D11DEVICECONTEXT_H

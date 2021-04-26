@@ -2,8 +2,8 @@
  * @file
  * @addtogroup Core Core
  *
- * @authors: Yehor Pohuliaka
- * @date: 4/24/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef CONFIG_H

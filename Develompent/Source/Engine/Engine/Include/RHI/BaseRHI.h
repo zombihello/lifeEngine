@@ -2,8 +2,8 @@
  * @file
  * @addtogroup Engine Engine
  *
- * @authors: Yehor Pohuliaka
- * @date: 4/19/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef BASERHI_H

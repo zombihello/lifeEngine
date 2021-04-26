@@ -2,8 +2,8 @@
  * @file
  * @addtogroup Core Core
  *
- * @authors: Yehor Pohuliaka
- * @date: 3/25/2021
+ * Copyright BSOD-Games, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
  */
 
 #ifndef BASELOGGER_H
@@ -30,7 +30,8 @@ enum ELogCategory
 {
     LC_None,                /**< No category */
     LC_General,             /**< General category */
-    LC_Init                 /**< Initialize category  */
+    LC_Init,                /**< Initialize category  */
+    LC_Script               /**< Log from script */
 };
 
 /**
