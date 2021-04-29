@@ -10,12 +10,14 @@
     <ClInclude Include="Include\Containers\String.h" />
     <ClInclude Include="Include\Containers\StringConv.h" />
     <ClInclude Include="Include\Core.h" />
+    <ClInclude Include="Include\CoreClasses.h" />
     <ClInclude Include="Include\CoreDefines.h" />
     <ClInclude Include="Include\LEBuild.h" />
     <ClInclude Include="Include\Logger\BaseLogger.h" />
     <ClInclude Include="Include\Logger\LoggerMacros.h" />
     <ClInclude Include="Include\Math\Color.h" />
     <ClInclude Include="Include\Misc\CoreGlobals.h" />
+    <ClInclude Include="Include\Misc\Misc.h" />
     <ClInclude Include="Include\Misc\Object.h" />
     <ClInclude Include="Include\Misc\Template.h" />
     <ClInclude Include="Include\Misc\Types.h" />

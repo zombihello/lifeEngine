@@ -1,6 +1,7 @@
 #include "Core.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/Misc.h"
 #include "Logger/BaseLogger.h"
 #include "System/BaseArchive.h"
 #include "System/BaseFileSystem.h"
@@ -75,6 +76,19 @@ int32 EngineLoop::PreInit( const tchar* InCmdLine )
  */
 int32 EngineLoop::Init( const tchar* InCmdLine )
 {
+	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
+
+#if WITH_EDITOR
+	// Start 'MAKE' tool for compilation scripts
+	if ( appParseParam( InCmdLine, TEXT( "make" ) ) )
+	{
+		GScriptEngine->Make( InCmdLine );
+		GIsRequestingExit = true;
+		
+		return 0;
+	}
+#endif // WITH_EDITOR
+	
 	// Create window
 	std::wstring				windowTitle = GGameConfig.GetString( TEXT( "GameInfo" ), TEXT( "Name" ), TEXT( "lifeEngine" ) );
 	uint32						windowWidth = GEngineConfig.GetInt( TEXT( "SystemSettings" ), TEXT( "WindowWidth" ), 1280 );

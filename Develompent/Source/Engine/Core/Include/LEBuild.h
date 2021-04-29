@@ -17,4 +17,8 @@
 	#define DO_CHECK				!SHIPPING_BUILD
 #endif // !DO_CHECK
 
+#ifndef WITH_EDITOR
+	#define  WITH_EDITOR			!SHIPPING_BUILD
+#endif // !WITH_EDITOR
+
 #endif // !LEBUILD_H

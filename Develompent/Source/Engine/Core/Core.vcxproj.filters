@@ -93,6 +93,12 @@
     <ClInclude Include="Include\System\Config.h">
       <Filter>Include\System</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Misc\Misc.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\CoreClasses.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">

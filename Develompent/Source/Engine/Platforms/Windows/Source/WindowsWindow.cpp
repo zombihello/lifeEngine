@@ -308,7 +308,7 @@ void WindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeigh
  */
 void WindowsWindow::Close()
 {
-	check( sdlWindow );
+	if ( !sdlWindow )		return;
 
 	SDL_DestroyWindow( sdlWindow );
 	delete sdlWindowInfo;

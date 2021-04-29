@@ -44,22 +44,43 @@ int32 appPlatformInit( const tchar* InCmdLine )
 }
 
 /**
+ * Get arguments from command line
+ */
+std::wstring appGetCommandLine()
+{
+	int32			argc = 0;
+	LPWSTR*			argv = CommandLineToArgvW( GetCommandLineW(), &argc );
+	std::wstring	commandLine;
+	
+	for ( int32 index = 0; index < argc; ++index )
+	{
+		commandLine += argv[ index ];
+		commandLine += TEXT( " " );
+	}
+
+	LocalFree( argv );
+	return commandLine;
+}
+
+/**
  * Main function
  */
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nCmdShow )
 {
 	try
 	{
+		std::wstring		commandLine = appGetCommandLine();
+
 		int32		errorLevel = 0;
 		if ( !GIsRequestingExit )
 		{
-			errorLevel = GEngineLoop->PreInit( TEXT( "" ) );
+			errorLevel = GEngineLoop->PreInit( commandLine.c_str() );
 			check( errorLevel == 0 );
 		}
 
 		if ( !GIsRequestingExit )
 		{
-			errorLevel = GEngineLoop->Init( TEXT( "" ) );
+			errorLevel = GEngineLoop->Init( commandLine.c_str() );
 			check( errorLevel == 0 );
 		}
 

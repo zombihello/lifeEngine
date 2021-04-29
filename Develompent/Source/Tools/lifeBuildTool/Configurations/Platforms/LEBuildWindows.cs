@@ -39,6 +39,7 @@ namespace lifeBuildTool
             linkEnvironment.additionalLibraries.Add( "d3d11.lib" );
             linkEnvironment.additionalLibraries.Add( "dxgi.lib" );
             linkEnvironment.additionalLibraries.Add( "dxguid.lib" );
+            linkEnvironment.additionalLibraries.Add( "Shell32.lib" );
         }
 
         void SetUpSDL2Environment()
