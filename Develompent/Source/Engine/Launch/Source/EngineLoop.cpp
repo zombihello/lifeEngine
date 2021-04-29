@@ -54,6 +54,16 @@ void EngineLoop::SerializeConfigs()
 		GGameConfig.Serialize( *arConfig );
 		delete arConfig;
 	}
+
+	// Loading editor config
+#if WITH_EDITOR
+	arConfig = GFileSystem->CreateFileReader( TEXT( "Config/Editor.json" ) );
+	if ( arConfig )
+	{
+		GEditorConfig.Serialize( *arConfig );
+		delete arConfig;
+	}
+#endif // WITH_EDITOR
 }
 
 /**
@@ -90,9 +100,9 @@ int32 EngineLoop::Init( const tchar* InCmdLine )
 #endif // WITH_EDITOR
 	
 	// Create window
-	std::wstring				windowTitle = GGameConfig.GetString( TEXT( "GameInfo" ), TEXT( "Name" ), TEXT( "lifeEngine" ) );
-	uint32						windowWidth = GEngineConfig.GetInt( TEXT( "SystemSettings" ), TEXT( "WindowWidth" ), 1280 );
-	uint32						windowHeight = GEngineConfig.GetInt( TEXT( "SystemSettings" ), TEXT( "WindowHeight" ), 720 );
+	std::wstring				windowTitle = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();
+	uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
+	uint32						windowHeight = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
 	GWindow->Create( windowTitle.c_str(), windowWidth, windowHeight );
 	
 	// Create viewport for render

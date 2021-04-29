@@ -7,10 +7,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\Classes\CoreClasses.h" />
     <ClInclude Include="Include\Containers\String.h" />
     <ClInclude Include="Include\Containers\StringConv.h" />
     <ClInclude Include="Include\Core.h" />
-    <ClInclude Include="Include\CoreClasses.h" />
     <ClInclude Include="Include\CoreDefines.h" />
     <ClInclude Include="Include\LEBuild.h" />
     <ClInclude Include="Include\Logger\BaseLogger.h" />

@@ -39,6 +39,14 @@ extern class Config					GEngineConfig;
  */
 extern class Config					GGameConfig;
 
+#if WITH_EDITOR
+/**
+ * @ingroup Core
+ * @brief Config of editor
+ */
+extern class Config					GEditorConfig;
+#endif // WITH_EDITOR
+
 /**
  * @ingroup Core
  * @brief Indicates that MainLoop() should be exited at the end of the current iteration

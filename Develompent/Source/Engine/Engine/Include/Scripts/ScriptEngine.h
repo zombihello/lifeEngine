@@ -9,7 +9,9 @@
 #ifndef SCRIPTENGINE_H
 #define SCRIPTENGINE_H
 
-#include "LEBuild.h"
+#include <string>
+
+#include "Core.h"
 #include "Misc/Types.h"
 
 /**

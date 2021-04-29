@@ -37,6 +37,9 @@
     <Filter Include="Source\Math">
       <UniqueIdentifier>{e683b571-c649-472d-ac8b-86b93f2087e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Classes">
+      <UniqueIdentifier>{049cc95b-2d9b-4732-b52c-e644d997370d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Core.h">
@@ -96,8 +99,8 @@
     <ClInclude Include="Include\Misc\Misc.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
-    <ClInclude Include="Include\CoreClasses.h">
-      <Filter>Include</Filter>
+    <ClInclude Include="Include\Classes\CoreClasses.h">
+      <Filter>Include\Classes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

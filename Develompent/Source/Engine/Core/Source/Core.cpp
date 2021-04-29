@@ -11,6 +11,7 @@
 
 Config          GEngineConfig;
 Config          GGameConfig;
+Config          GEditorConfig;
 bool	        GIsRequestingExit           = false;
 
 /**

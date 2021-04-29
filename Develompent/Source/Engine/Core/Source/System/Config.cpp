@@ -1,9 +1,9 @@
+#include <sstream>
+
 #include "Logger/LoggerMacros.h"
 #include "Containers/StringConv.h"
 #include "System/BaseArchive.h"
 #include "System/Config.h"
-
-#undef GetObject
 
 /**
  * Serialize
@@ -37,19 +37,9 @@ void Config::Serialize( BaseArchive& InArchive )
 
 			if ( itGroup->value.IsObject() )
 			{
-				for ( auto itValue = itGroup->value.GetObject().MemberBegin(), itValueEnd = itGroup->value.GetObject().MemberEnd(); itValue != itValueEnd; ++itValue )
-				{					
-					std::wstring		valueName = ANSI_TO_TCHAR( itValue->name.GetString() );
-					if ( itValue->value.IsObject() )
-					{
-						LE_LOG( LT_Warning, LC_General, TEXT( "Groups in group not supported. Group %s" ), ( groupName + TEXT( "::" ) + valueName ).c_str() );
-						continue;
-					}
-
-					Value				value;
-					value.Set( itValue->value, ( groupName + TEXT( "::" ) + valueName ).c_str() );
-					values[ groupName ][ valueName ] = value;
-				}
+				ConfigObject		object;
+				object.Set( itGroup->value, groupName.c_str() );
+				groups[ groupName ] = object;
 			}
 			else
 			{
@@ -60,42 +50,9 @@ void Config::Serialize( BaseArchive& InArchive )
 	else
 	{
 		InArchive << "{\n";
-		for ( MapGroups::const_iterator itGroup = values.begin(), itGroupEnd = values.end(); itGroup != itGroupEnd; ++itGroup )
+		for ( MapGroups::const_iterator itGroup = groups.begin(), itGroupEnd = groups.end(); itGroup != itGroupEnd; ++itGroup )
 		{
-			InArchive << "\t\"" << TCHAR_TO_ANSI( itGroup->first.c_str() ) << "\": {\n";	
-			for ( MapValues::const_iterator itValue = itGroup->second.begin(), itValueEnd = itGroup->second.end(); itValue != itValueEnd; ++itValue )
-			{
-				const Value&		value = itValue->second;
-				InArchive << "\t\t\"" << TCHAR_TO_ANSI( itValue->first.c_str() ) << "\": ";
-
-				switch ( value.GetType() )
-				{
-				case Value::T_Bool:
-				case Value::T_Float:
-				case Value::T_Int:
-					InArchive << TCHAR_TO_ANSI( value.ToString().c_str() );
-					break;
-
-				case Value::T_String:	
-					InArchive << "\"" << TCHAR_TO_ANSI( value.ToString().c_str() ) << "\"";
-					break;
-
-				default:				
-					InArchive << "null";
-					break;
-				}
-
-				if ( std::next( itValue ) != itValueEnd )
-				{
-					InArchive << ",\n";
-				}
-				else
-				{
-					InArchive << "\n";
-				}
-			}
-			InArchive << "\t}";
-
+			InArchive << "\t\"" << TCHAR_TO_ANSI( itGroup->first.c_str() ) << "\": " << ( achar* )itGroup->second.ToJSON( 1 ).c_str();
 			if ( std::next( itGroup ) != itGroupEnd )
 			{
 				InArchive << ",\n\n";
@@ -110,144 +67,60 @@ void Config::Serialize( BaseArchive& InArchive )
 }
 
 /**
- * Set value bool
+ * Convert value to JSON string
  */
-void Config::SetBool( const tchar* InGroup, const tchar* InName, bool InValue )
+std::string ConfigValue::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 {
-	Value		value;
-	value.SetBool( InValue );
-
-	values[ InGroup ][ InName ] = value;
-}
-
-/**
- * Set value int
- */
-void Config::SetInt( const tchar* InGroup, const tchar* InName, int32 InValue )
-{
-	Value		value;
-	value.SetInt( InValue );
-
-	values[ InGroup ][ InName ] = value;
-}
-
-/**
- * Set value float
- */
-void Config::SetFloat( const tchar* InGroup, const tchar* InName, float InValue )
-{
-	Value		value;
-	value.SetFloat( InValue );
-
-	values[ InGroup ][ InName ] = value;
-}
-
-/**
- * Set value string
- */
-void Config::SetString( const tchar* InGroup, const tchar* InName, const tchar* InValue )
-{
-	Value		value;
-	value.SetString( InValue );
-
-	values[ InGroup ][ InName ] = value;
-}
-
-/**
- * Find value
- */
-Config::Value* Config::FindValue( const tchar* InGroup, const tchar* InName ) const
-{
-	MapGroups::const_iterator		itGroup = values.find( InGroup );
-	if ( itGroup == values.end() )
-	{
-		return nullptr;
-	}
-
-	MapValues::const_iterator		itValue = itGroup->second.find( InName );
-	if ( itValue == itGroup->second.end() )
-	{
-		return nullptr;
-	}
-
-	return ( Config::Value* ) &itValue->second;
-}
-
-/**
- * Get value bool
- */
-bool Config::GetBool( const tchar* InGroup, const tchar* InName, bool InDefaultValue /* = false */ ) const
-{
-	Value*		value = FindValue( InGroup, InName );
-	if ( !value || value->GetType() != Value::T_Bool )
-	{
-		return InDefaultValue;
-	}
-
-	return value->GetBool();
-}
-
-/**
- * Get value int
- */
-int32 Config::GetInt( const tchar* InGroup, const tchar* InName, int32 InDefaultValue /* = 0 */ ) const
-{
-	Value*		value = FindValue( InGroup, InName );
-	if ( !value || value->GetType() != Value::T_Int )
-	{
-		return InDefaultValue;
-	}
-
-	return value->GetInt();
-}
-
-/**
- * Get value float
- */
-float Config::GetFloat( const tchar* InGroup, const tchar* InName, float InDefaultValue /* = 0.f */ ) const
-{
-	Value* value = FindValue( InGroup, InName );
-	if ( !value || value->GetType() != Value::T_Float )
-	{
-		return InDefaultValue;
-	}
-
-	return value->GetFloat();
-}
-
-/**
- * Get value string
- */
-std::wstring Config::GetString( const tchar* InGroup, const tchar* InName, const tchar* InDefaultValue /* = TEXT( "" ) */ ) const
-{
-	Value* value = FindValue( InGroup, InName );
-	if ( !value || value->GetType() != Value::T_String )
-	{
-		return InDefaultValue;
-	}
-
-	return value->GetString();
-}
-
-/**
- * Convert value to string
- */
-std::wstring Config::Value::ToString() const
-{
+	std::stringstream	strStream;
+	
 	switch ( type )
 	{
-	case T_Bool:	return this->GetBool() ? TEXT( "true" ) : TEXT( "false" );
-	case T_Float:	return std::to_wstring( this->GetFloat() );
-	case T_Int:		return std::to_wstring( this->GetInt() );
-	case T_String:	return this->GetString();
-	default:		return TEXT( "null" );
+	case T_Bool:	strStream << this->GetBool() ? "true" : "false";							break;
+	case T_Float:	strStream << this->GetFloat();												break;
+	case T_Int:		strStream << this->GetInt();												break;
+	case T_String:	strStream << "\"" << TCHAR_TO_ANSI( this->GetString().c_str() ) << "\"";	break;
+	case T_Object:	strStream << this->GetObject().ToJSON( InCountTabs + 1 );					break;
+	default:		strStream << "null";														break;
 	}
+
+	return strStream.str();
+}
+
+/**
+ * Convert object to JSON string
+ */
+std::string ConfigObject::ToJSON( uint32 InCountTabs /* = 0 */ ) const
+{
+	std::stringstream	strStream;
+	std::string			tabs;
+	for ( uint32 index = 0; index < InCountTabs; ++index )
+	{
+		tabs += "\t";
+	}
+
+	strStream << "{\n";
+
+	for ( auto itValue = values.begin(), itValueEnd = values.end(); itValue != itValueEnd; ++itValue )
+	{
+		strStream << tabs << "\t\"" << TCHAR_TO_ANSI( itValue->first.c_str() ) << "\": " << itValue->second.ToJSON( InCountTabs );
+		if ( std::next( itValue ) != itValueEnd )
+		{
+			strStream << ",\n";
+		}
+		else
+		{
+			strStream << "\n";
+		}
+	}
+
+	strStream << tabs << "}";
+	return strStream.str();
 }
 
 /**
  * Set value from RapidJSON value
  */
-void Config::Value::Set( const rapidjson::Value& InValue, const tchar* InName )
+void ConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
 {
 	if ( InValue.IsNull() )
 	{
@@ -269,6 +142,12 @@ void Config::Value::Set( const rapidjson::Value& InValue, const tchar* InName )
 	{
 		SetString( ANSI_TO_TCHAR( InValue.GetString() ) );
 	}
+	else if ( InValue.IsObject() )
+	{
+		ConfigObject		object;
+		object.Set( InValue, InName );
+		SetObject( object );
+	}
 	else
 	{
 		LE_LOG( LT_Warning, LC_General, TEXT( "Unsupported type of config value in %s" ), InName );
@@ -276,9 +155,48 @@ void Config::Value::Set( const rapidjson::Value& InValue, const tchar* InName )
 }
 
 /**
+ * Set object from RapidJSON value
+ */
+void ConfigObject::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
+{
+	std::wstring			objectName = InName;
+
+	for ( auto itValue = InValue.MemberBegin(), itValueEnd = InValue.MemberEnd(); itValue != itValueEnd; ++itValue )
+	{
+		std::wstring		valueName = ANSI_TO_TCHAR( itValue->name.GetString() );
+		ConfigValue			value;
+
+		value.Set( itValue->value, ( objectName + TEXT( "::" ) + valueName ).c_str() );
+		values[ valueName ] = value;
+	}
+}
+
+/**
+ * Set value
+ */
+void ConfigObject::SetValue( const tchar* InName, const ConfigValue& InValue )
+{
+	values[ InName ] = InValue;
+}
+
+/**
+ * Get value
+ */
+ConfigValue ConfigObject::GetValue( const tchar* InName ) const
+{
+	auto		itValue = values.find( InName );
+	if ( itValue == values.end() )
+	{
+		return ConfigValue();
+	}
+
+	return itValue->second;
+}
+
+/**
  * Copy value
  */
-void Config::Value::Copy( const Value& InCopy )
+void ConfigValue::Copy( const ConfigValue& InCopy )
 {
 	type = InCopy.type;
 
@@ -288,6 +206,7 @@ void Config::Value::Copy( const Value& InCopy )
 	case T_Int:			SetInt( InCopy.GetInt() );			break;
 	case T_Float:		SetFloat( InCopy.GetFloat() );		break;
 	case T_String:		SetString( InCopy.GetString() );	break;
+	case T_Object:		SetObject( InCopy.GetObject() );	break;
 	default:			value = nullptr; type = T_None;		break;
 	}
 }
@@ -295,7 +214,7 @@ void Config::Value::Copy( const Value& InCopy )
 /**
  * Clear value
  */
-void Config::Value::Clear()
+void ConfigValue::Clear()
 {
 	if ( !value ) return;
 
@@ -305,6 +224,7 @@ void Config::Value::Clear()
 	case T_Int:				delete static_cast< int32* >( value );			break;
 	case T_Float:			delete static_cast< float* >( value );			break;
 	case T_String:			delete static_cast< std::wstring* >( value );	break;
+	case T_Object:			delete static_cast< ConfigObject* >( value );	break;
 	}
 
 	value = nullptr;

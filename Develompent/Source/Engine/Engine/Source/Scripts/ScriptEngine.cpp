@@ -8,9 +8,11 @@
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
+#include "System/Config.h"
 #include "Scripts/ScriptEngine.h"
 
 #include "Misc/CoreGlobals.h"
+#include "Misc/EngineGlobals.h"
 #include "System/BaseArchive.h"
 #include "System/BaseFileSystem.h"
 
@@ -82,8 +84,15 @@ void ScriptEngine::Init()
 void ScriptEngine::Make( const tchar* InCmdLine )
 {
 	CScriptBuilder		asScriptBuilder;
-	CompileModule( &asScriptBuilder, TEXT( "Core" ), TEXT( "Script" ), TEXT( "Script" )  );
-	GenerateHeadersForModule( asScriptEngine->GetModule( "Core" ), TEXT( "Develompent/Source/Engine/Core/Include" ) );
+	ConfigObject		modules = GEditorConfig.GetValue( TEXT( "ScriptEngine.Make" ), TEXT( "Modules" ) ).GetObject();
+
+	std::wstring		nameModule = modules.GetValue( TEXT( "Name" ) ).GetString();
+	std::wstring		sourcesModule = modules.GetValue( TEXT( "Sources" ) ).GetString();
+	std::wstring		outputCPPHeaderModule = modules.GetValue( TEXT( "OutputCPPHeader" ) ).GetString();
+	std::wstring		outputModule = GEngineConfig.GetValue( TEXT( "ScriptEngine.ScriptEngine" ), TEXT( "DirBinary" ) ).GetString();
+
+	CompileModule( &asScriptBuilder, nameModule.c_str(), sourcesModule.c_str(), outputModule.c_str() );
+	GenerateHeadersForModule( asScriptEngine->GetModule( TCHAR_TO_ANSI( nameModule.c_str() ) ), outputCPPHeaderModule.c_str() );
 }
 
 /**
@@ -95,14 +104,14 @@ void ScriptEngine::CompileModule( class CScriptBuilder* InScriptBuilder, const t
 
 	InScriptBuilder->StartNewModule( asScriptEngine, TCHAR_TO_ANSI( InNameModule ) );
 	
-	BaseArchive*		arTestScript = GFileSystem->CreateFileReader( TEXT( "Script/Test.as" ), AR_NoFail );
+	BaseArchive*		arTestScript = GFileSystem->CreateFileReader( String::Format( TEXT( "%s/Core.as" ), InPathToModuleDir ), AR_NoFail );
 	uint32				arSize = arTestScript->GetSize() + 1;
 	byte*				buffer = new byte[ arSize + 1 ];
 	memset( buffer, '\0', arSize );
 
 	arTestScript->Serialize( buffer, arSize );
 
-	int32		result = InScriptBuilder->AddSectionFromMemory( "Test", ( achar* )buffer, arSize-1 );
+	int32		result = InScriptBuilder->AddSectionFromMemory( "Core", ( achar* )buffer, arSize-1 );
 	check( result >= 0 );
 
 	result = InScriptBuilder->BuildModule();
