@@ -13,10 +13,13 @@ namespace lifeBuildTool
             InOutDepencyProjects.Add( new LEProjectDesc( "Engine/Core/Core.vcxproj" ) );
             InOutDepencyProjects.Add( new LEProjectDesc( "Engine/Engine/Engine.vcxproj" ) );
             InOutDepencyProjects.Add( new LEProjectDesc( "Engine/Launch/Launch.vcxproj" ) );
+            InOutDepencyProjects.Add( new LEProjectDesc( "Games/TestbedGame/TestbedGame.vcxproj" ) );
 
             InOutCPPEnvironment.includePaths.Add( "Engine/Core/Include" );
             InOutCPPEnvironment.includePaths.Add( "Engine/Engine/Include" );
             InOutCPPEnvironment.includePaths.Add( "Engine/Launch/Include" );
+            InOutCPPEnvironment.includePaths.Add( "Games/TestbedGame/Include" );
+            InOutCPPEnvironment.definitions.Add( "IS_TESTBED=1" );
         }
 
         public string GetName()

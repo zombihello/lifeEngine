@@ -15,6 +15,12 @@
 #include "Scripts/ScriptEngine.h"
 #include "EngineLoop.h"
 
+#if IS_TESTBED
+#include "Classes/TestbedGameClasses.h"
+#else
+#error Game not set
+#endif // IS_TESTBED
+
 // --------------
 // GLOBALS
 // --------------
@@ -115,7 +121,9 @@ int32 EngineLoop::Init( const tchar* InCmdLine )
 	GRHI->Init( false );
 	GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), width, height );
 
-	return appPlatformInit( InCmdLine );
+	int32		result = appPlatformInit( InCmdLine );
+	result = execGameInit();
+	return result;
 }
 
 /**

@@ -40,11 +40,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='BuiltWithLifeBuildTool|Win32'">
     <NMakeOutput />
-    <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>IS_TESTBED=1;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../../../../External/angelscript-2.35.0/include;../../../../../External/rapidjson/include;Include;../../Core/Include;../../Engine/Include;../../Platforms/Windows/Include;../../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../../Games/TestbedGame/Include;../../../../../External/angelscript-2.35.0/include;../../../../../External/rapidjson/include;Include;../../Core/Include;../../Engine/Include;../../Platforms/Windows/Include;../../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

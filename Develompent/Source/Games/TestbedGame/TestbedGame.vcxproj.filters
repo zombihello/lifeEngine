@@ -1,2 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" />
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Include">
+      <UniqueIdentifier>{f1c338e7-ed09-4635-a33a-8a401c7043f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{5af264c6-dc8a-404f-bd16-749eae575418}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Classes">
+      <UniqueIdentifier>{fa513b55-81e3-447d-b4dd-70f21d8dc768}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\Classes\TestbedGameClasses.h">
+      <Filter>Include\Classes</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

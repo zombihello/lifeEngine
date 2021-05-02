@@ -5,6 +5,11 @@
 				"Name": "Core",
 				"Sources": "Develompent/Source/Engine/Core/Classes",
 				"OutputCPPHeader": "Develompent/Source/Engine/Core/Include/Classes"
+			},
+			{
+				"Name": "TestbedGame",
+				"Sources": "Develompent/Source/Games/TestbedGame/Classes",
+				"OutputCPPHeader": "Develompent/Source/Games/TestbedGame/Include/Classes"
 			}
 		]
 	}

@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "WindowsFileSystem.h"
 #include "WindowsArchive.h"
+#include "Containers/String.h"
 
 /**
  * Constructor
@@ -66,6 +67,36 @@ class BaseArchive* WindowsFileSystem::CreateFileWriter( const tchar* InFileName,
 	}
 
 	return new WindowsArchiveWriter( outputFile );
+}
+
+/**
+ * Find files in directory
+ */
+std::vector< std::wstring > WindowsFileSystem::FindFiles( const tchar* InDirectory, bool InIsFiles, bool InIsDirectories )
+{
+	HANDLE								handle = nullptr;
+	WIN32_FIND_DATAW					data;
+	std::vector< std::wstring >			result;
+
+	handle = FindFirstFileW( String::Format( TEXT( "%s/*" ), InDirectory ), &data );
+	if ( handle != INVALID_HANDLE_VALUE )
+	{
+		do
+		{
+			if ( wcscmp( data.cFileName, TEXT( "." ) ) && wcscmp( data.cFileName, TEXT( ".." ) ) &&
+				 ( ( data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) ? InIsDirectories : InIsFiles ) )
+			{
+				result.push_back( data.cFileName );
+			}
+		}
+		while ( FindNextFileW( handle, &data ) );
+	}
+	if ( handle != INVALID_HANDLE_VALUE )
+	{
+		FindClose( handle );
+	}
+
+	return result;
 }
 
 /**

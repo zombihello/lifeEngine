@@ -116,12 +116,8 @@ void ScriptEngine::Init()
 	// The script compiler will send any compiler messages to the callback
 	asScriptEngine->SetMessageCallback( asFUNCTION( ASMessageCallback ), 0, asCALL_CDECL );
 
-	// Register std strings in scripts
-	RegisterStdString( asScriptEngine );
-
-#if WITH_EDITOR
-	RegisterTypeASToCPP( "string", "std::string" );
-#endif // WITH_EDITOR
+	// Register native type for AngelScript
+	RegisterNativeTypes();
 }
 
 /**
@@ -150,16 +146,51 @@ void ScriptEngine::LoadModules()
 	}
 }
 
-#if WITH_EDITOR
 /**
- * Register name of type from AngelScript to C++
+ * Register native types for AngelScript
  */
-void ScriptEngine::RegisterTypeASToCPP( const std::string& InASType, const std::string& InCPPType )
+void ScriptEngine::RegisterNativeTypes()
 {
-	asITypeInfo*		typeInfo = asScriptEngine->GetTypeInfoByDecl( InASType.c_str() );
+	// Register std strings in scripts
+	RegisterStdString( asScriptEngine );
+
+	// Register native types for generate CPP headers
+#if WITH_EDITOR
+	// std::string
+	asITypeInfo*		typeInfo = asScriptEngine->GetTypeInfoByDecl( "string" );
 	check( typeInfo );
 
-	tableTypesASToCPP[ typeInfo->GetTypeId() ] = InCPPType;
+	tableTypesASToCPP[ typeInfo->GetTypeId() ] = SASType{ "std::string", typeInfo };
+#endif // WITH_EDITOR
+}
+
+#if WITH_EDITOR
+/**
+ * Register name of types from AngelScript to C++
+ */
+void ScriptEngine::RegisterTypesASToCPP( class asIScriptModule* InScriptModule )
+{
+	check( InScriptModule );
+
+	// Register enums
+	uint32		countEnums = InScriptModule->GetEnumCount();
+	for ( uint32 indexEnum = 0; indexEnum < countEnums; ++indexEnum )
+	{
+		asITypeInfo*		typeInfo = InScriptModule->GetEnumByIndex( indexEnum );
+		check( typeInfo );
+
+		tableTypesASToCPP[ typeInfo->GetTypeId() ] = SASType{ typeInfo->GetName(), typeInfo };
+	}
+
+	// Register typedefs
+	uint32		countTypedef = InScriptModule->GetTypedefCount();
+	for ( uint32 indexTypedef = 0; indexTypedef < countTypedef; ++indexTypedef )
+	{
+		asITypeInfo*		typeInfo =InScriptModule->GetTypedefByIndex( indexTypedef );
+		check( typeInfo );
+
+		tableTypesASToCPP[ typeInfo->GetTypeId() ] = SASType{ typeInfo->GetName(), typeInfo };
+	}
 }
 
 /**
@@ -179,11 +210,14 @@ void ScriptEngine::Make( const tchar* InCmdLine )
 		std::wstring				sources = module.GetValue( TEXT( "Sources" ) ).GetString();
 		std::wstring				outputCPPHeaders = module.GetValue( TEXT( "OutputCPPHeader" ) ).GetString();
 
-		LE_LOG( LT_Log, LC_Script, TEXT( "--------------- %s ---------------" ), name.c_str() );
-		
+		LE_LOG( LT_Log, LC_Script, TEXT( "--------------- %s ---------------" ), name.c_str() );	
 		CompileModule( &asScriptBuilder, name.c_str(), sources.c_str(), outputPath.c_str() );
-		GenerateHeadersForModule( asScriptEngine->GetModule( TCHAR_TO_ANSI( name.c_str() ) ), outputCPPHeaders.c_str() );
 		
+		asIScriptModule*			scriptModule = asScriptEngine->GetModule( TCHAR_TO_ANSI( name.c_str() ) );
+		check( scriptModule );
+
+		RegisterTypesASToCPP( scriptModule );
+		GenerateHeadersForModule( scriptModule, outputCPPHeaders.c_str() );	
 		LE_LOG( LT_Log, LC_Script, TEXT( "" ) );
 	}
 }
@@ -198,26 +232,35 @@ void ScriptEngine::CompileModule( class CScriptBuilder* InScriptBuilder, const t
 	
 	InScriptBuilder->StartNewModule( asScriptEngine, TCHAR_TO_ANSI( InNameModule ) );
 	
-	BaseArchive*		arTestScript = GFileSystem->CreateFileReader( String::Format( TEXT( "%s/Core.as" ), InPathToModuleDir ), AR_NoFail );
-	uint32				arSize = arTestScript->GetSize() + 1;
-	byte*				buffer = new byte[ arSize + 1 ];
-	memset( buffer, '\0', arSize );
+	std::vector< std::wstring >			sources = GFileSystem->FindFiles( InPathToModuleDir, true, false );
+	check( !sources.empty() );
 
-	arTestScript->Serialize( buffer, arSize );
+	for ( uint32 index = 0, count = ( uint32 ) sources.size(); index < count; ++index )
+	{
+		const std::wstring&		file = sources[ index ];
 
-	int32		result = InScriptBuilder->AddSectionFromMemory( "Core", ( achar* )buffer, arSize-1 );
+		BaseArchive*			arArchive = GFileSystem->CreateFileReader( String::Format( TEXT( "%s/%s" ), InPathToModuleDir, file.c_str() ), AR_NoFail );
+		uint32					arSize = arArchive->GetSize() + 1;
+		byte*					buffer = new byte[ arSize + 1 ];
+		memset( buffer, '\0', arSize );
+
+		arArchive->Serialize( buffer, arSize );
+
+		int32		result = InScriptBuilder->AddSectionFromMemory( TCHAR_TO_ANSI( file.c_str() ), ( achar* )buffer, arSize-1 );
+		check( result >= 0 );
+
+		delete[] buffer;
+		delete arArchive;
+	}
+
+	// Compile module
+	int32		result = InScriptBuilder->BuildModule();
 	check( result >= 0 );
-
-	result = InScriptBuilder->BuildModule();
-	check( result >= 0 );
-
-	delete[] buffer;
-	delete arTestScript;
-
-	asIScriptModule*	module = asScriptEngine->GetModule( TCHAR_TO_ANSI( InNameModule ) );
-	check( module );
 
 	// Save compiled module to cache
+	asIScriptModule*	module = asScriptEngine->GetModule( TCHAR_TO_ANSI( InNameModule ) );
+	check( module );
+	
 	BaseArchive*		arByteCode = GFileSystem->CreateFileWriter( String::Format( TEXT( "%s/%s.bin" ), InOutputPath, InNameModule ), AW_NoFail );
 	ScriptByteCode		scriptByteCode;
 	scriptByteCode.SetArchive( arByteCode );
@@ -247,18 +290,118 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 
 	*arCPPHeader << "#include <angelscript.h>\n\n";
 
-	uint32			coutFunctions = InScriptModule->GetFunctionCount();
-	for ( uint32 indexFunction = 0; indexFunction < coutFunctions; ++indexFunction )
+	// Write typedefs
+	uint32			countTypedefs = InScriptModule->GetTypedefCount();
+	if ( countTypedefs > 0 )
 	{
-		*arCPPHeader << ( achar* )GenerateCPPFunction( InScriptModule, indexFunction ).c_str() << "\n";
+		*arCPPHeader << "// ----------------------------------\n";
+		*arCPPHeader << "// TYPEDEFS\n";
+		*arCPPHeader << "// ----------------------------------\n\n";
 
-		if ( indexFunction + 1 < coutFunctions )
+		for ( uint32 indexTypedef = 0; indexTypedef < countTypedefs; ++indexTypedef )
 		{
-			*arCPPHeader << "\n";
+			*arCPPHeader << ( achar* )GenerateCPPTypedef( InScriptModule, indexTypedef ).c_str() << "\n";
+
+			if ( indexTypedef + 1 < countTypedefs )
+			{
+				*arCPPHeader << "\n";
+			}
+		}
+
+		*arCPPHeader << "\n";
+	}
+
+	// Write enums
+	uint32			countEnums = InScriptModule->GetEnumCount();
+	if ( countEnums > 0 )
+	{
+		*arCPPHeader << "// ----------------------------------\n";
+		*arCPPHeader << "// ENUMS\n";
+		*arCPPHeader << "// ----------------------------------\n\n";
+
+		for ( uint32 indexEnum = 0; indexEnum < countEnums; ++indexEnum )
+		{
+			*arCPPHeader << ( achar* )GenerateCPPEnum( InScriptModule, indexEnum ).c_str() << "\n";
+
+			if ( indexEnum + 1 < countEnums )
+			{
+				*arCPPHeader << "\n";
+			}
+		}
+
+		*arCPPHeader << "\n";
+	}
+
+	// Write functions
+	uint32			coutFunctions = InScriptModule->GetFunctionCount();
+	if ( coutFunctions > 0 )
+	{
+		*arCPPHeader << "// ----------------------------------\n";
+		*arCPPHeader << "// FUNCTIONS\n";
+		*arCPPHeader << "// ----------------------------------\n\n";
+
+		for ( uint32 indexFunction = 0; indexFunction < coutFunctions; ++indexFunction )
+		{
+			*arCPPHeader << ( achar* ) GenerateCPPFunction( InScriptModule, indexFunction ).c_str() << "\n";
+
+			if ( indexFunction + 1 < coutFunctions )
+			{
+				*arCPPHeader << "\n";
+			}
 		}
 	}
 
 	delete arCPPHeader;
+}
+
+/**
+ * Generate C++ code of typedefs
+ */
+std::string ScriptEngine::GenerateCPPTypedef( class asIScriptModule* InScriptModule, uint32 InIndexTypedef )
+{
+	check( InScriptModule && InIndexTypedef >= 0 && InIndexTypedef < InScriptModule->GetTypedefCount() );
+
+	asITypeInfo*		typeInfo = InScriptModule->GetTypedefByIndex( InIndexTypedef );
+	check( typeInfo );
+
+	std::stringstream		strStream;
+	strStream << "typedef " << TypeIDToString( typeInfo->GetTypedefTypeId() ) << "\t\t" << typeInfo->GetName() << ";";
+	return strStream.str();
+}
+
+/**
+ * Generate C++ code of enum
+ */
+std::string ScriptEngine::GenerateCPPEnum( class asIScriptModule* InScriptModule, uint32 InIndexEnum )
+{
+	check( InScriptModule && InIndexEnum >= 0 && InIndexEnum < InScriptModule->GetEnumCount() );
+
+	std::stringstream	strStream;
+	asITypeInfo*		typeInfo = InScriptModule->GetEnumByIndex( InIndexEnum );
+	check( typeInfo );
+
+	strStream << "enum " << typeInfo->GetName() << "\n";
+	strStream << "{\n";
+	
+	uint32			valueCount = typeInfo->GetEnumValueCount();
+	for ( uint32 indexValue = 0; indexValue < valueCount; ++indexValue )
+	{
+		int32			value = 0;
+		const achar*	name = typeInfo->GetEnumValueByIndex( indexValue, &value );
+		strStream << "\t" << name << "\t\t\t=" << value;
+
+		if ( indexValue + 1 < valueCount )
+		{
+			strStream << ",\n";
+		}
+		else
+		{
+			strStream << "\n";
+		}
+	}
+	
+	strStream << "};";
+	return strStream.str();
 }
 
 /**
@@ -351,16 +494,37 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 			callMethod = "SetArgDouble( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
 			break;
 
+			// C++ and AngelScript user types
 		default:
-			// If is C++ type
-			if ( cppParam.typeID & asTYPEID_APPOBJECT )
+			auto		itType = tableTypesASToCPP.find( cppParam.typeID );
+			if ( itType == tableTypesASToCPP.end() )
 			{
-				callMethod = "SetArgObject( " + std::to_string( indexParam ) + ", &" + cppParam.name + " )";
+				appErrorf( TEXT( "Unknown AngelScript type 0x%X in param %s" ), cppParam.typeID, ANSI_TO_TCHAR( cppParam.name.c_str() ) );
 				break;
 			}
 
+			asITypeInfo*		typeInfo = itType->second.asTypeInfo;
+			check( typeInfo );
+			int32				flags = typeInfo->GetFlags();
+
+			// Objects
+			if ( flags & asOBJ_VALUE )
+			{
+				callMethod = "SetArgObject( " + std::to_string( indexParam ) + ", &" + cppParam.name + " )";
+			}
+
+			// Enums
+			else if ( flags & asOBJ_ENUM )
+			{
+				callMethod = "SetArgDWord( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
+			}
+
 			// Else unsupported type
-			appErrorf( TEXT( "AngelScript type 0x%X in param %s not supported" ), cppParam.typeID, ANSI_TO_TCHAR( cppParam.name.c_str() ) );
+			else
+			{
+				appErrorf( TEXT( "AngelScript type 0x%X in param %s not supported" ), cppParam.typeID, ANSI_TO_TCHAR( cppParam.name.c_str() ) );
+			}
+
 			break;
 		}
 
@@ -424,16 +588,37 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 		strStream << "scriptContext->GetReturnDouble();\n";
 		break;
 
+		// C++ and AngelScript user types
 	default:
-		// If is C++ type
-		if ( retTypeId & asTYPEID_APPOBJECT )
+		auto		itType = tableTypesASToCPP.find( retTypeId );
+		if ( itType == tableTypesASToCPP.end() )
 		{
-			strStream << "*( ( " << TypeIDToString( retTypeId ) << "* )scriptContext->GetReturnObject() );\n";
+			appErrorf( TEXT( "Unknown returning AngelScript type 0x%X in function %s::%s" ), retTypeId, ANSI_TO_TCHAR( function->GetModuleName() ), ANSI_TO_TCHAR( function->GetName() ) );
 			break;
 		}
 
+		asITypeInfo* typeInfo = itType->second.asTypeInfo;
+		check( typeInfo );
+		int32				flags = typeInfo->GetFlags();
+
+		// Objects
+		if ( flags & asOBJ_VALUE )
+		{
+			strStream << "*( ( " << TypeIDToString( retTypeId ) << "* )scriptContext->GetReturnObject() );\n";
+		}
+
+		// Enums
+		else if ( flags & asOBJ_ENUM )
+		{
+			strStream << "( " << TypeIDToString( retTypeId ) << " )scriptContext->GetReturnDWord();\n";
+		}
+
 		// Else unsupported type
-		appErrorf( TEXT( "Not supported AngelScript type 0x%X in function %s::%s" ), retTypeId, ANSI_TO_TCHAR( function->GetModuleName() ), ANSI_TO_TCHAR( function->GetName() ) );
+		else
+		{
+			appErrorf( TEXT( "Not supported AngelScript type 0x%X in function %s::%s" ), retTypeId, ANSI_TO_TCHAR( function->GetModuleName() ), ANSI_TO_TCHAR( function->GetName() ) );
+		}
+
 		break;
 	}
 
@@ -464,13 +649,6 @@ ScriptEngine::SCPPParam ScriptEngine::GetCPPParamFromFunction( class asIScriptFu
 
 	int32			result = InScriptFunction->GetParam( InIndexParam, &typeId, &flags, &name, &defaultArg );
 	check( result >= 0 );
-
-	asITypeInfo* a = asScriptEngine->GetTypeInfoById( typeId );
-	if ( a )
-	{
-		const char* q = a->GetName();
-		q++;
-	}
 
 	return SCPPParam{ name, typeId };
 }
@@ -505,7 +683,17 @@ std::string ScriptEngine::TypeIDToString( int32 InTypeID )
 	// C++ user types
 	else if ( InTypeID & asTYPEID_APPOBJECT )
 	{
-		return GScriptEngine->tableTypesASToCPP[ InTypeID ];
+		return GScriptEngine->tableTypesASToCPP[ InTypeID ].cppName;
+	}
+
+	// AngelScript user types
+	else
+	{
+		auto		itType = GScriptEngine->tableTypesASToCPP.find( InTypeID );
+		if ( itType != GScriptEngine->tableTypesASToCPP.end() )
+		{
+			return itType->second.cppName;
+		}
 	}
 
 	appErrorf( TEXT( "Unknown type 0x%X of AngelScript" ), InTypeID );

@@ -78,8 +78,17 @@ private:
 			return TypeIDToString( typeID ) + " " + name;
 		}
 
-		std::string		name;		/**< Name of param */
-		int32			typeID;		/**< AngelScript type id */
+		std::string			name;			/**< Name of param */
+		int32				typeID;			/**< AngelScript type id */
+	};
+
+	/**
+	 * @brief Struct of declaration AngleScript type
+	 */
+	struct SASType
+	{
+		std::string				cppName;		/**< Name of type in C++ */
+		class asITypeInfo*		asTypeInfo;		/**< AngleScript type info */
 	};
 
 	/**
@@ -103,6 +112,16 @@ private:
 	void				GenerateHeadersForModule( class asIScriptModule* InScriptModule, const tchar* InOutputPath );
 
 	/**
+	 * @brief Generate C++ code of typedefs
+	 * @warning This method only available with enabled macro WITH_EDITOR
+	 * 
+	 * @param[in] InScriptModule Pointer to script module
+	 * @param[in] InIndexTypedef Index of typedef in script module
+	 * @return Code of C++ typedef
+	 */
+	std::string			GenerateCPPTypedef( class asIScriptModule* InScriptModule, uint32 InIndexTypedef );
+
+	/**
 	 * @brief Generate C++ code of function
 	 * @warning This method only available with enabled macro WITH_EDITOR
 	 * 
@@ -111,6 +130,16 @@ private:
 	 * @return Code of C++ function
 	 */
 	std::string			GenerateCPPFunction( class asIScriptModule* InScriptModule, uint32 InIndexFunction );
+
+	/**
+	 * @brief Generate C++ code of enum
+	 * @warning This method only available with enabled macro WITH_EDITOR
+	 * 
+	 * @param[in] InScriptModule Pointer to script module
+	 * @param[in] InIndexEnum Index of enum in script module
+	 * @return Code of C++ enum
+	 */
+	std::string			GenerateCPPEnum( class asIScriptModule* InScriptModule, uint32 InIndexEnum );
 
 	/**
 	 * @brief Get C++ param from function
@@ -132,16 +161,20 @@ private:
 	static std::string	TypeIDToString( int32 InTypeID );
 
 	/**
-	 * @brief Register name of type from AngelScript to C++
+	 * @brief Register name of types from AngelScript to C++
 	 * @warning This method only available with enabled macro WITH_EDITOR
 	 * 
-	 * @param[in] InASType Name of type in AngelScript
-	 * @param[in] InCPPType Name of type in C++
+	 * @param[in] InScriptModule Pointer to script module
 	 */
-	void				RegisterTypeASToCPP( const std::string& InASType, const std::string& InCPPType );
+	void				RegisterTypesASToCPP( class asIScriptModule* InScriptModule );
 
-	std::unordered_map< int32, std::string >				tableTypesASToCPP;			/**< Table of types for convert from AngelScript to C++ */
+	std::unordered_map< int32, SASType >					tableTypesASToCPP;			/**< Table of types for convert from AngelScript to C++ */
 #endif // WITH_EDITOR
+
+	/**
+	 * @brief Register native types for AngelScript
+	 */
+	void				RegisterNativeTypes();
 
 	class asIScriptEngine*									asScriptEngine;				/**< Point to AngelScript engine */
 };
