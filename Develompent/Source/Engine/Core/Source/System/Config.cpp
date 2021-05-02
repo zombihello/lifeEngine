@@ -1,6 +1,7 @@
 #include <sstream>
 
 #include "Logger/LoggerMacros.h"
+#include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "System/BaseArchive.h"
 #include "System/Config.h"
@@ -148,6 +149,20 @@ void ConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* =
 		object.Set( InValue, InName );
 		SetObject( object );
 	}
+	else if ( InValue.IsArray() )
+	{
+		auto							array = InValue.GetArray();
+		std::vector< ConfigValue >		configValues;
+
+		for ( uint32 index = 0, count = array.Size(); index < count; ++index )
+		{
+			ConfigValue		configValue;
+			configValue.Set( array[ index ], String::Format( TEXT( "%s[%i]" ), InName, index ) );
+			configValues.push_back( configValue );
+		}
+
+		SetArray( configValues );
+	}
 	else
 	{
 		LE_LOG( LT_Warning, LC_General, TEXT( "Unsupported type of config value in %s" ), InName );
@@ -207,6 +222,7 @@ void ConfigValue::Copy( const ConfigValue& InCopy )
 	case T_Float:		SetFloat( InCopy.GetFloat() );		break;
 	case T_String:		SetString( InCopy.GetString() );	break;
 	case T_Object:		SetObject( InCopy.GetObject() );	break;
+	case T_Array:		SetArray( InCopy.GetArray() );		break;
 	default:			value = nullptr; type = T_None;		break;
 	}
 }
@@ -220,11 +236,12 @@ void ConfigValue::Clear()
 
 	switch ( type )
 	{
-	case T_Bool:            delete static_cast< bool* >( value );			break;
-	case T_Int:				delete static_cast< int32* >( value );			break;
-	case T_Float:			delete static_cast< float* >( value );			break;
-	case T_String:			delete static_cast< std::wstring* >( value );	break;
-	case T_Object:			delete static_cast< ConfigObject* >( value );	break;
+	case T_Bool:            delete static_cast< bool* >( value );							break;
+	case T_Int:				delete static_cast< int32* >( value );							break;
+	case T_Float:			delete static_cast< float* >( value );							break;
+	case T_String:			delete static_cast< std::wstring* >( value );					break;
+	case T_Object:			delete static_cast< ConfigObject* >( value );					break;
+	case T_Array:			delete static_cast< std::vector< ConfigValue >* >( value );		break;
 	}
 
 	value = nullptr;

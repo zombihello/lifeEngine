@@ -21,6 +21,49 @@
 	#include <sstream>
 #endif // WITH_EDITOR
 
+class ScriptByteCode : public asIBinaryStream
+{
+public:
+	/**
+	 * Constructor
+	 */
+				ScriptByteCode() : archive( nullptr )
+	{}
+
+	/**
+	 * Set archive for serialize
+	 */
+	void		SetArchive( BaseArchive* InArchive )
+	{
+		archive = InArchive;
+	}
+
+	/**
+	 * Write to archive of script byte code
+	 */
+	int			Write( const void* InBuffer, asUINT InSize )
+	{
+		check( archive && archive->IsSaving() );
+
+		archive->Serialize( ( void* )InBuffer, InSize );
+		return 0;
+	}
+
+	/**
+	 * Read from archive of script byte code
+	 */
+	int			Read( void* InBuffer, asUINT InSize ) 
+	{ 
+		check( archive && archive->IsLoading() );
+
+		archive->Serialize( InBuffer, InSize );
+		return 0;
+	}
+
+private:
+	BaseArchive*			archive;
+};
+
 /**
  * Message callback from AngleScript engine
  */
@@ -75,24 +118,74 @@ void ScriptEngine::Init()
 
 	// Register std strings in scripts
 	RegisterStdString( asScriptEngine );
+
+#if WITH_EDITOR
+	RegisterTypeASToCPP( "string", "std::string" );
+#endif // WITH_EDITOR
+}
+
+/**
+ * Load script modules
+ */
+void ScriptEngine::LoadModules()
+{
+	std::wstring					scriptPath = GEngineConfig.GetValue( TEXT( "ScriptEngine.ScriptEngine" ), TEXT( "DirBinary" ) ).GetString();
+	std::vector< ConfigValue >		modules = GEngineConfig.GetValue( TEXT( "ScriptEngine.ScriptEngine" ), TEXT( "LoadingModules" ) ).GetArray();
+	ScriptByteCode					scriptByteCode;
+
+	for ( uint32 index = 0, count = ( uint32 ) modules.size(); index < count; ++index )
+	{
+		std::wstring			name = modules[ index ].GetString();
+		LE_LOG( LT_Log, LC_Init, TEXT( "Loading script module %s" ), name.c_str() );
+
+		BaseArchive*			arByteCode = GFileSystem->CreateFileReader( String::Format( TEXT( "%s/%s.bin" ), scriptPath.c_str(), name.c_str() ), AR_NoFail );
+		scriptByteCode.SetArchive( arByteCode );
+
+		asIScriptModule*		module = asScriptEngine->GetModule( TCHAR_TO_ANSI( name.c_str() ), asGM_ALWAYS_CREATE );
+		check( module );
+
+		int32	result = module->LoadByteCode( &scriptByteCode );
+		check( result >= 0 );
+		delete arByteCode;
+	}
 }
 
 #if WITH_EDITOR
+/**
+ * Register name of type from AngelScript to C++
+ */
+void ScriptEngine::RegisterTypeASToCPP( const std::string& InASType, const std::string& InCPPType )
+{
+	asITypeInfo*		typeInfo = asScriptEngine->GetTypeInfoByDecl( InASType.c_str() );
+	check( typeInfo );
+
+	tableTypesASToCPP[ typeInfo->GetTypeId() ] = InCPPType;
+}
+
 /**
  * Compile scripts and generate headers for C++
  */
 void ScriptEngine::Make( const tchar* InCmdLine )
 {
-	CScriptBuilder		asScriptBuilder;
-	ConfigObject		modules = GEditorConfig.GetValue( TEXT( "ScriptEngine.Make" ), TEXT( "Modules" ) ).GetObject();
+	CScriptBuilder					asScriptBuilder;
+	std::wstring					outputPath = GEngineConfig.GetValue( TEXT( "ScriptEngine.ScriptEngine" ), TEXT( "DirBinary" ) ).GetString();
+	std::vector< ConfigValue >		modules = GEditorConfig.GetValue( TEXT( "ScriptEngine.Make" ), TEXT( "Modules" ) ).GetArray();
 
-	std::wstring		nameModule = modules.GetValue( TEXT( "Name" ) ).GetString();
-	std::wstring		sourcesModule = modules.GetValue( TEXT( "Sources" ) ).GetString();
-	std::wstring		outputCPPHeaderModule = modules.GetValue( TEXT( "OutputCPPHeader" ) ).GetString();
-	std::wstring		outputModule = GEngineConfig.GetValue( TEXT( "ScriptEngine.ScriptEngine" ), TEXT( "DirBinary" ) ).GetString();
+	LE_LOG( LT_Log, LC_Script, TEXT( "" ) );
+	for ( uint32 index = 0, count = ( uint32 )modules.size(); index < count; ++index )
+	{
+		const ConfigObject&			module = modules[ index ].GetObject();
+		std::wstring				name = module.GetValue( TEXT( "Name" ) ).GetString();
+		std::wstring				sources = module.GetValue( TEXT( "Sources" ) ).GetString();
+		std::wstring				outputCPPHeaders = module.GetValue( TEXT( "OutputCPPHeader" ) ).GetString();
 
-	CompileModule( &asScriptBuilder, nameModule.c_str(), sourcesModule.c_str(), outputModule.c_str() );
-	GenerateHeadersForModule( asScriptEngine->GetModule( TCHAR_TO_ANSI( nameModule.c_str() ) ), outputCPPHeaderModule.c_str() );
+		LE_LOG( LT_Log, LC_Script, TEXT( "--------------- %s ---------------" ), name.c_str() );
+		
+		CompileModule( &asScriptBuilder, name.c_str(), sources.c_str(), outputPath.c_str() );
+		GenerateHeadersForModule( asScriptEngine->GetModule( TCHAR_TO_ANSI( name.c_str() ) ), outputCPPHeaders.c_str() );
+		
+		LE_LOG( LT_Log, LC_Script, TEXT( "" ) );
+	}
 }
 
 /**
@@ -101,7 +194,8 @@ void ScriptEngine::Make( const tchar* InCmdLine )
 void ScriptEngine::CompileModule( class CScriptBuilder* InScriptBuilder, const tchar* InNameModule, const tchar* InPathToModuleDir, const tchar* InOutputPath )
 {
 	check( InScriptBuilder && InNameModule && InPathToModuleDir && InOutputPath );
-
+	LE_LOG( LT_Log, LC_Script, TEXT( "Compiling script module %s" ), InNameModule );
+	
 	InScriptBuilder->StartNewModule( asScriptEngine, TCHAR_TO_ANSI( InNameModule ) );
 	
 	BaseArchive*		arTestScript = GFileSystem->CreateFileReader( String::Format( TEXT( "%s/Core.as" ), InPathToModuleDir ), AR_NoFail );
@@ -119,6 +213,19 @@ void ScriptEngine::CompileModule( class CScriptBuilder* InScriptBuilder, const t
 
 	delete[] buffer;
 	delete arTestScript;
+
+	asIScriptModule*	module = asScriptEngine->GetModule( TCHAR_TO_ANSI( InNameModule ) );
+	check( module );
+
+	// Save compiled module to cache
+	BaseArchive*		arByteCode = GFileSystem->CreateFileWriter( String::Format( TEXT( "%s/%s.bin" ), InOutputPath, InNameModule ), AW_NoFail );
+	ScriptByteCode		scriptByteCode;
+	scriptByteCode.SetArchive( arByteCode );
+	
+	result = module->SaveByteCode( &scriptByteCode );
+	check( result >= 0 );
+
+	delete arByteCode;
 }
 
 /**
@@ -127,6 +234,7 @@ void ScriptEngine::CompileModule( class CScriptBuilder* InScriptBuilder, const t
 void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModule, const tchar* InOutputPath )
 {
 	check( InScriptModule && InOutputPath );
+	LE_LOG( LT_Log, LC_Script, TEXT( "Generate CPP headers for script module %s" ), ANSI_TO_TCHAR( InScriptModule->GetName() ) );
 
 	BaseArchive*			arCPPHeader = GFileSystem->CreateFileWriter( String::Format( TEXT( "%s/%sClasses.h" ), InOutputPath, ANSI_TO_TCHAR( InScriptModule->GetName() ) ), AW_NoFail );
 
@@ -165,13 +273,8 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 
 	// Get return type of function
 	std::stringstream		strStream;	
-	ECPPType				cppReturnType = CPPT_Unknown;
-	{
-		asDWORD		retTypeFlags = 0;
-		int32		retTypeId = function->GetReturnTypeId( &retTypeFlags );
-
-		cppReturnType = TypeID_To_ECPPType( retTypeId );
-	}
+	asDWORD					retTypeFlags = 0;
+	int32					retTypeId = function->GetReturnTypeId( &retTypeFlags );
 
 	// Get all params in function
 	std::vector< SCPPParam >		params;
@@ -192,7 +295,7 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 
 	// Generate header of function
 	// Example: float execTest( float InA )
-	strStream << ECPPType_To_String( cppReturnType ) << " exec" << function->GetName() << ( params.empty() ? "()" : ( "( " + strParamsDeclaration + " )" ) ) << "\n";
+	strStream << TypeIDToString( retTypeId ) << " exec" << function->GetName() << ( params.empty() ? "()" : ( "( " + strParamsDeclaration + " )" ) ) << "\n";
 	strStream << "{\n";
 
 	// Generate prepare to execute script function
@@ -211,45 +314,53 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 		const SCPPParam&		cppParam = params[ indexParam ];
 		std::string				callMethod;
 
-		switch ( cppParam.type )
+		switch ( cppParam.typeID )
 		{
 			// Int8/UInt8 and Bool
-		case CPPT_Int8:
-		case CPPT_UInt8:
-		case CPPT_Bool:
+		case asTYPEID_INT8:
+		case asTYPEID_UINT8:
+		case asTYPEID_BOOL:
 			callMethod = "SetArgByte( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
 			break;
 
 			// Int16 and UInt16
-		case CPPT_Int16:
-		case CPPT_UInt16:
+		case asTYPEID_INT16:
+		case asTYPEID_UINT16:
 			callMethod = "SetArgWord( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
 			break;
 
 			// Int32 and UInt32
-		case CPPT_Int32:
-		case CPPT_UInt32:
+		case asTYPEID_INT32:
+		case asTYPEID_UINT32:
 			callMethod = "SetArgDWord( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
 			break;
 
 			// Int64 and UInt64
-		case CPPT_Int64:
-		case CPPT_UInt64:
+		case asTYPEID_INT64:
+		case asTYPEID_UINT64:
 			callMethod = "SetArgQWord( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
 			break;
 
 			// Float
-		case CPPT_Float:
+		case asTYPEID_FLOAT:
 			callMethod = "SetArgFloat( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
 			break;
 
 			// Double
-		case CPPT_Double:
+		case asTYPEID_DOUBLE:
 			callMethod = "SetArgDouble( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
 			break;
 
 		default:
-			appErrorf( TEXT( "CPPType 0x%X in param %s not supported" ), cppParam.type, ANSI_TO_TCHAR( cppParam.name.c_str() ) );
+			// If is C++ type
+			if ( cppParam.typeID & asTYPEID_APPOBJECT )
+			{
+				callMethod = "SetArgObject( " + std::to_string( indexParam ) + ", &" + cppParam.name + " )";
+				break;
+			}
+
+			// Else unsupported type
+			appErrorf( TEXT( "AngelScript type 0x%X in param %s not supported" ), cppParam.typeID, ANSI_TO_TCHAR( cppParam.name.c_str() ) );
 			break;
 		}
 
@@ -266,62 +377,70 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 	strStream << "\tcheck( result >= 0 );\n";
 
 	// Return value from function after execute
-	if ( cppReturnType != CPPT_Void )
+	if ( retTypeId != asTYPEID_VOID )
 	{
 		strStream << "\n";
-		strStream << "\t" << ECPPType_To_String( cppReturnType ) << "	returnValue = ";
+		strStream << "\t" << TypeIDToString( retTypeId ) << "\t\treturnValue = ";
 	}
 
-	switch ( cppReturnType )
+	switch ( retTypeId )
 	{
 		// Nothing return
-	case CPPT_Void:
+	case asTYPEID_VOID:
 		break;
 
 		// Return bool or int8 or uint8
-	case CPPT_Bool:
-	case CPPT_Int8:
-	case CPPT_UInt8:
+	case asTYPEID_BOOL:
+	case asTYPEID_INT8:
+	case asTYPEID_UINT8:
 		strStream << "scriptContext->GetReturnByte();\n";
 		break;
 
 		// Return int16 or uint16
-	case CPPT_Int16:
-	case CPPT_UInt16:
+	case asTYPEID_INT16:
+	case asTYPEID_UINT16:
 		strStream << "scriptContext->GetReturnWord();\n";
 		break;
 
 		// Return int32 or uint32
-	case CPPT_Int32:
-	case CPPT_UInt32:
+	case asTYPEID_INT32:
+	case asTYPEID_UINT32:
 		strStream << "scriptContext->GetReturnDWord();\n";
 		break;
 
 		// Return int64 or uint64
-	case CPPT_Int64:
-	case CPPT_UInt64:
+	case asTYPEID_INT64:
+	case asTYPEID_UINT64:
 		strStream << "scriptContext->GetReturnQWord();\n";
 		break;
 
 		// Return float
-	case CPPT_Float:
+	case asTYPEID_FLOAT:
 		strStream << "scriptContext->GetReturnFloat();\n";
 		break;
 
 		// Return double
-	case CPPT_Double:
+	case asTYPEID_DOUBLE:
 		strStream << "scriptContext->GetReturnDouble();\n";
 		break;
 
 	default:
-		appErrorf( TEXT( "Not supported CPP type 0x%X in function %s::%s" ), cppReturnType, ANSI_TO_TCHAR( function->GetModuleName() ), ANSI_TO_TCHAR( function->GetName() ) );
+		// If is C++ type
+		if ( retTypeId & asTYPEID_APPOBJECT )
+		{
+			strStream << "*( ( " << TypeIDToString( retTypeId ) << "* )scriptContext->GetReturnObject() );\n";
+			break;
+		}
+
+		// Else unsupported type
+		appErrorf( TEXT( "Not supported AngelScript type 0x%X in function %s::%s" ), retTypeId, ANSI_TO_TCHAR( function->GetModuleName() ), ANSI_TO_TCHAR( function->GetName() ) );
 		break;
 	}
 
 	// End of function
 	strStream << "\tscriptContext->Release();\n";
 	
-	if ( cppReturnType != CPPT_Void )
+	if ( retTypeId != asTYPEID_VOID )
 	{
 		strStream << "\treturn returnValue;\n";
 	}
@@ -346,119 +465,50 @@ ScriptEngine::SCPPParam ScriptEngine::GetCPPParamFromFunction( class asIScriptFu
 	int32			result = InScriptFunction->GetParam( InIndexParam, &typeId, &flags, &name, &defaultArg );
 	check( result >= 0 );
 
-	return SCPPParam{ name, TypeID_To_ECPPType( typeId ) };
+	asITypeInfo* a = asScriptEngine->GetTypeInfoById( typeId );
+	if ( a )
+	{
+		const char* q = a->GetName();
+		q++;
+	}
+
+	return SCPPParam{ name, typeId };
 }
 
 /**
- * Convert AngleScript TypeID to ECPPType
+ * Convert AngelScript type ID to C++ name
  */
-ScriptEngine::ECPPType ScriptEngine::TypeID_To_ECPPType( int32 InTypeID )
+std::string ScriptEngine::TypeIDToString( int32 InTypeID )
 {
-	asETypeIdFlags		asType = ( asETypeIdFlags ) InTypeID;
-
-	// Void
-	if ( asType == asTYPEID_VOID )
+	// Standart types
+	if ( InTypeID >= 0 && InTypeID <= 11 )
 	{
-		return CPPT_Void;
+		static const char*			nameCPPType[] =
+		{
+			"void",			// CPPT_Void
+			"bool",			// CPPT_Bool
+			"int8",			// CPPT_Int8
+			"int16",		// CPPT_Int16
+			"int32",		// CPPT_Int32
+			"int64",		// CPPT_Int64
+			"uint8",		// CPPT_UInt8
+			"uint16",		// CPPT_UInt16
+			"uint32",		// CPPT_UInt32
+			"uint64",		// CPPT_UInt64
+			"float",		// CPPT_Float
+			"double"		// CPPT_Double
+		};
+
+		return nameCPPType[ InTypeID ];
 	}
 
-	// Bool
-	else if ( asType == asTYPEID_BOOL )
+	// C++ user types
+	else if ( InTypeID & asTYPEID_APPOBJECT )
 	{
-		return CPPT_Bool;
+		return GScriptEngine->tableTypesASToCPP[ InTypeID ];
 	}
 
-	// Int8
-	else if ( asType == asTYPEID_INT8 )
-	{
-		return CPPT_Int8;
-	}
-
-	// Int16
-	else if ( asType == asTYPEID_INT16 )
-	{
-		return CPPT_Int16;
-	}
-
-	// Int32
-	else if ( asType == asTYPEID_INT32 )
-	{
-		return CPPT_Int32;
-	}
-
-	// Int64
-	else if ( asType == asTYPEID_INT64 )
-	{
-		return CPPT_Int64;
-	}
-
-	// Uint8
-	else if ( asType == asTYPEID_UINT8 )
-	{
-		return CPPT_UInt8;
-	}
-
-	// Uint16
-	else if ( asType == asTYPEID_UINT16 )
-	{
-		return CPPT_UInt16;
-	}
-
-	// Uint32
-	else if ( asType == asTYPEID_UINT32 )
-	{
-		return CPPT_UInt32;
-	}
-
-	// Uint64
-	else if ( asType == asTYPEID_UINT64 )
-	{
-		return CPPT_UInt64;
-	}
-
-	// Float
-	else if ( asType == asTYPEID_FLOAT )
-	{
-		return CPPT_Float;
-	}
-
-	// Double
-	else if ( asType == asTYPEID_DOUBLE )
-	{
-		return CPPT_Double;
-	}
-
-	// Unknown type - critiacal error
-	else
-	{
-		appErrorf( TEXT( "Unknown type 0x%X of AngelScript" ), asType );
-	}
-
-	return CPPT_Unknown;
-}
-
-/**
- * Convert ECPPType to string
- */
-std::string ScriptEngine::ECPPType_To_String( ECPPType InCPPType )
-{
-	static const char* nameCPPType[] =
-	{
-		"Unknown",		// CPPT_Unknown
-		"void",			// CPPT_Void
-		"bool",			// CPPT_Bool
-		"int8",			// CPPT_Int8
-		"int16",		// CPPT_Int16
-		"int32",		// CPPT_Int32
-		"int64",		// CPPT_Int64
-		"uint8",		// CPPT_UInt8
-		"uint16",		// CPPT_UInt16
-		"uint32",		// CPPT_UInt32
-		"uint64",		// CPPT_UInt64
-		"float",		// CPPT_Float
-		"double"		// CPPT_Double
-	};
-
-	return nameCPPType[ ( uint32 )InCPPType ];
+	appErrorf( TEXT( "Unknown type 0x%X of AngelScript" ), InTypeID );
+	return "Unknown";
 }
 #endif // WITH_EDITOR

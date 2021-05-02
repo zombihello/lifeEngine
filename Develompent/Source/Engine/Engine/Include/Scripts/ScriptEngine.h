@@ -10,6 +10,7 @@
 #define SCRIPTENGINE_H
 
 #include <string>
+#include <unordered_map>
 
 #include "Core.h"
 #include "Misc/Types.h"
@@ -36,6 +37,11 @@ public:
 	 */
 	void										Init();
 
+	/**
+	 * @brief Load script modules
+	 */
+	void										LoadModules();
+
 #if WITH_EDITOR
 	/**
 	 * @brief Compile scripts and generate headers for C++
@@ -59,26 +65,6 @@ private:
 
 #if WITH_EDITOR
 	/**
-	 * @brief Enumeration of C++ types from AngelScript
-	 */
-	enum ECPPType
-	{
-		CPPT_Unknown,		/**< Unknown C++ type */
-		CPPT_Void,			/**< Void */
-		CPPT_Bool,			/**< Bool */
-		CPPT_Int8,			/**< Signed int8 */
-		CPPT_Int16,			/**< Signed int16 */
-		CPPT_Int32,			/**< Signed int32 */
-		CPPT_Int64,			/**< Signed int64 */
-		CPPT_UInt8,			/**< Unsigned int8 */
-		CPPT_UInt16,		/**< Unsigned int16 */
-		CPPT_UInt32,		/**< Unsigned int32 */
-		CPPT_UInt64,		/**< Unsigned int64 */
-		CPPT_Float,			/**< Float */
-		CPPT_Double			/**< Double */
-	};
-
-	/**
 	 * @brief Struct of declaration param of functions/methods
 	 */
 	struct SCPPParam
@@ -89,11 +75,11 @@ private:
 		 */
 		FORCEINLINE std::string			ToString() const
 		{
-			return ECPPType_To_String( type ) + " " + name;
+			return TypeIDToString( typeID ) + " " + name;
 		}
 
 		std::string		name;		/**< Name of param */
-		ECPPType		type;		/**< Type of param */
+		int32			typeID;		/**< AngelScript type id */
 	};
 
 	/**
@@ -137,26 +123,27 @@ private:
 	SCPPParam			GetCPPParamFromFunction( class asIScriptFunction* InScriptFunction, uint32 InIndexParam ) const;
 
 	/**
-	 * @brief Convert AngleScript TypeID to ECPPType
+	 * @brief Convert AngelScript type ID to C++ name
 	 * @warning This method only available with enabled macro WITH_EDITOR
 	 * 
-	 * @param[in] InTypeID Type id from AngelScript
-	 * @return Return type in C++ ECPPType. If type not supported return CPPT_Unknown
+	 * @param[in] InTypeID AngelScript type ID
+	 * @return Converted AngelScript type ID to C++ name
 	 */
-	static ECPPType		TypeID_To_ECPPType( int32 InTypeID );
+	static std::string	TypeIDToString( int32 InTypeID );
 
 	/**
-	 * @brief Convert ECPPType to string
+	 * @brief Register name of type from AngelScript to C++
 	 * @warning This method only available with enabled macro WITH_EDITOR
 	 * 
-	 * @param[in] InCPPType CPP type
-	 * @return Converted enum to string
+	 * @param[in] InASType Name of type in AngelScript
+	 * @param[in] InCPPType Name of type in C++
 	 */
-	static std::string	ECPPType_To_String( ECPPType InCPPType );
+	void				RegisterTypeASToCPP( const std::string& InASType, const std::string& InCPPType );
 
+	std::unordered_map< int32, std::string >				tableTypesASToCPP;			/**< Table of types for convert from AngelScript to C++ */
 #endif // WITH_EDITOR
 
-	class asIScriptEngine*		asScriptEngine;			/**< Point to AngelScript engine */
+	class asIScriptEngine*									asScriptEngine;				/**< Point to AngelScript engine */
 };
 
 #endif // !SCRIPTENGINE_H

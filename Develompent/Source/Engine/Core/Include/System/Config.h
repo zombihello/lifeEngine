@@ -125,13 +125,14 @@ public:
 		T_Int,				/**< Integer type */
 		T_Float,			/**< Float type */
 		T_String,			/**< String type */
-		T_Object			/**< Object type (ConfigObject) */
+		T_Object,			/**< Object type (ConfigObject) */
+		T_Array				/**< Array type */
 	};
 
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE								ConfigValue() :
+	FORCEINLINE										ConfigValue() :
 		type( T_None ),
 		value( nullptr )
 	{}
@@ -140,7 +141,7 @@ public:
 	 * @brief Constructor of copy
 	 * @param[in] InCopy Copy of value
 	 */
-	FORCEINLINE								ConfigValue( const ConfigValue& InCopy ) :
+	FORCEINLINE										ConfigValue( const ConfigValue& InCopy ) :
 		type( T_None ),
 		value( nullptr )
 	{
@@ -150,7 +151,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	FORCEINLINE								~ConfigValue()
+	FORCEINLINE										~ConfigValue()
 	{
 		Clear();
 	}
@@ -158,13 +159,13 @@ public:
 	/**
 	 * @brief Clear value
 	 */
-	void									Clear();
+	void											Clear();
 
 	/**
 	 * @brief Copy value
 	 * @param[in] InCopy Copy
 	 */
-	void									Copy( const ConfigValue& InCopy );
+	void											Copy( const ConfigValue& InCopy );
 
 	/**
 	 * @brief Convert value to JSON string
@@ -172,20 +173,20 @@ public:
 	 * @param[in] InCountTabs Number of tabs for indentation
 	 * @return Return converted value in JSON string
 	 */
-	std::string								ToJSON( uint32 InCountTabs = 0 ) const;
+	std::string										ToJSON( uint32 InCountTabs = 0 ) const;
 
 	/**
 	 * @brief Set value from RapidJSON value
 	 * @param[in] InValue RapidJSON value
 	 * @param[in] InName RapidJSON name for print name of value in log while error
 	 */
-	void									Set( const rapidjson::Value& InValue, const tchar* InName = TEXT( "UNKNOWN" ) );
+	void											Set( const rapidjson::Value& InValue, const tchar* InName = TEXT( "UNKNOWN" ) );
 
 	/**
 	 * @brief Set bool
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void						SetBool( bool InValue )
+	FORCEINLINE void								SetBool( bool InValue )
 	{
 		if ( type != T_Bool )
 		{
@@ -205,7 +206,7 @@ public:
 	 * @brief Set int
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void						SetInt( int32 InValue )
+	FORCEINLINE void								SetInt( int32 InValue )
 	{
 		if ( type != T_Int )
 		{
@@ -225,7 +226,7 @@ public:
 	 * @brief Set float
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void						SetFloat( float InValue )
+	FORCEINLINE void								SetFloat( float InValue )
 	{
 		if ( type != T_Float )
 		{
@@ -245,7 +246,7 @@ public:
 	 * @brief Set string
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void						SetString( const std::wstring& InValue )
+	FORCEINLINE void								SetString( const std::wstring& InValue )
 	{
 		if ( type != T_String )
 		{
@@ -265,7 +266,7 @@ public:
 	 * @brief Set object
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void						SetObject( const ConfigObject& InValue )
+	FORCEINLINE void								SetObject( const ConfigObject& InValue )
 	{
 		if ( type != T_Object )
 		{
@@ -282,10 +283,30 @@ public:
 	}
 
 	/**
+	 * @brief Set array
+	 * @param[in] InValue Value
+	 */
+	FORCEINLINE void								SetArray( const std::vector< ConfigValue >& InValue )
+	{
+		if ( type != T_Array )
+		{
+			Clear();
+		}
+
+		if ( !value )
+		{
+			value = new std::vector< ConfigValue >();
+		}
+
+		*static_cast< std::vector< ConfigValue >* >( value ) = InValue;
+		type = T_Array;
+	}
+
+	/**
 	 * @brief Get type value
 	 * @return Type of value
 	 */
-	FORCEINLINE EType						GetType() const
+	FORCEINLINE EType								GetType() const
 	{
 		return type;
 	}
@@ -294,7 +315,7 @@ public:
 	 * @brief Get bool
 	 * @return Value with type bool, if type not correct return false
 	 */
-	FORCEINLINE bool						GetBool() const
+	FORCEINLINE bool								GetBool() const
 	{
 		if ( type != T_Bool || !value )
 		{
@@ -308,7 +329,7 @@ public:
 	 * @brief Get int
 	 * @return Value with type integer, if type not correct return 0
 	 */
-	FORCEINLINE int32						GetInt() const
+	FORCEINLINE int32								GetInt() const
 	{
 		if ( type != T_Int || !value )
 		{
@@ -322,7 +343,7 @@ public:
 	 * @brief Get float
 	 * @return Value with type float, if type not correct return 0.f
 	 */
-	FORCEINLINE float						GetFloat() const
+	FORCEINLINE float								GetFloat() const
 	{
 		if ( type != T_Float || !value )
 		{
@@ -336,7 +357,7 @@ public:
 	 * @brief Get string
 	 * @return Value with type string, if type not correct return TEXT( "" )
 	 */
-	FORCEINLINE std::wstring				GetString() const
+	FORCEINLINE std::wstring						GetString() const
 	{
 		if ( type != T_String || !value )
 		{
@@ -350,7 +371,7 @@ public:
 	 * @brief Get object
 	 * @return Value with type object, if type not correct return empty object
 	 */
-	FORCEINLINE ConfigObject				GetObject() const
+	FORCEINLINE ConfigObject						GetObject() const
 	{
 		if ( type != T_Object || !value )
 		{
@@ -361,10 +382,24 @@ public:
 	}
 
 	/**
+	 * @brief Get array
+	 * @return Value with type array, if type not correct return empty array
+	 */
+	FORCEINLINE std::vector< ConfigValue >			GetArray() const
+	{
+		if ( type != T_Array || !value )
+		{
+			return std::vector< ConfigValue >();
+		}
+
+		return *static_cast< std::vector< ConfigValue >* >( value );
+	}
+
+	/**
 	 * @brief Operator = for copy value
 	 * @param[in] InCopy Copy of value
 	 */
-	FORCEINLINE ConfigValue&				operator=( const ConfigValue& InCopy )
+	FORCEINLINE ConfigValue&						operator=( const ConfigValue& InCopy )
 	{
 		Copy( InCopy );
 		return *this;

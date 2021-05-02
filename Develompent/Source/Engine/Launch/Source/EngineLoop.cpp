@@ -72,13 +72,12 @@ void EngineLoop::SerializeConfigs()
 int32 EngineLoop::PreInit( const tchar* InCmdLine )
 {
 	GFileSystem->SetCurrentDirectory( TEXT( "../../" ) );
+	SerializeConfigs();
+
 	GLog->Init();
 	GScriptEngine->Init();
 
-	int32		errorCode = appPlatformPreInit( InCmdLine );
-	
-	SerializeConfigs();
-	return errorCode;
+	return appPlatformPreInit( InCmdLine );
 }
 
 /**
@@ -98,7 +97,10 @@ int32 EngineLoop::Init( const tchar* InCmdLine )
 		return 0;
 	}
 #endif // WITH_EDITOR
-	
+
+	// Loading script modules
+	GScriptEngine->LoadModules();
+
 	// Create window
 	std::wstring				windowTitle = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();
 	uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();

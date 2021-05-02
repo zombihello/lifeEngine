@@ -1,9 +1,11 @@
 {
 	"ScriptEngine.Make": {		
-		"Modules": {
-			"Name": "Core",
-			"Sources": "Develompent/Source/Engine/Core/Classes",
-			"OutputCPPHeader": "Develompent/Source/Engine/Core/Include/Classes"
-		}
+		"Modules": [
+			{
+				"Name": "Core",
+				"Sources": "Develompent/Source/Engine/Core/Classes",
+				"OutputCPPHeader": "Develompent/Source/Engine/Core/Include/Classes"
+			}
+		]
 	}
 }
