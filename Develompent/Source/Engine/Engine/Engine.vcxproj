@@ -29,6 +29,7 @@
     <ClInclude Include="Include\Scripts\AngelScriptAddons\serializer\serializer.h" />
     <ClInclude Include="Include\Scripts\AngelScriptAddons\weakref\weakref.h" />
     <ClInclude Include="Include\Scripts\ScriptEngine.h" />
+    <ClInclude Include="Include\Scripts\ScriptVar.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp" />

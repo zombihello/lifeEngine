@@ -186,6 +186,9 @@
     <ClInclude Include="Include\Scripts\ScriptEngine.h">
       <Filter>Include\Scripts</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Scripts\ScriptVar.h">
+      <Filter>Include\Scripts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scripts\AngelScriptAddons\contextmgr\contextmgr.cpp">

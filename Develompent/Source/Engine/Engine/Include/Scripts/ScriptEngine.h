@@ -11,6 +11,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "Core.h"
 #include "Misc/Types.h"
@@ -92,6 +93,15 @@ private:
 	};
 
 	/**
+	 * @brief Structure for describing the necessary parameters that must be initialized when the engine starts
+	 */
+	struct ModuleInitDesc
+	{
+		std::vector< std::string >		externDefine;			/**< Array for define an external values */
+		std::vector< std::string >		globalVarInit;			/**< Array for initialize global values */
+	};
+
+	/**
 	 * @brief Compile module script
 	 * @warning This method only available with enabled macro WITH_EDITOR
 	 *
@@ -100,7 +110,7 @@ private:
 	 * @param[in] InPathToModuleDir Path to directory with source scripts	 
 	 * @param[in] InOutputPath Path to directory for save bytecode of module
 	 */
-	void				CompileModule( class CScriptBuilder* InScriptBuilder, const tchar* InNameModule, const tchar* InPathToModuleDir, const tchar* InOutputPath  );
+	void				CompileModule( class CScriptBuilder* InScriptBuilder, const tchar* InNameModule, const tchar* InPathToModuleDir, const tchar* InOutputPath );
 
 	/**
 	 * @brief Generate C++ headers for module
@@ -140,6 +150,17 @@ private:
 	 * @return Code of C++ enum
 	 */
 	std::string			GenerateCPPEnum( class asIScriptModule* InScriptModule, uint32 InIndexEnum );
+
+	/**
+	 * @brief Generate C++ code of global value
+	 * @warning This method only available with enabled macro WITH_EDITOR
+	 * 
+	 * @param[in] InScriptModule Pointer to script module
+	 * @param[in] InIndexGlobalValue Index of global value in script module
+	 * @param[in,out] InOutModuleInitDesc Pointer to descriptor for init module
+	 * @return Code of C++ global value
+	 */
+	std::string			GenerateCPPGlobalValue( class asIScriptModule* InScriptModule, uint32 InIndexGlobalValue, ModuleInitDesc* InOutModuleInitDesc );
 
 	/**
 	 * @brief Get C++ param from function

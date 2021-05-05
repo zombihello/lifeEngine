@@ -15,8 +15,12 @@
 #include "Scripts/ScriptEngine.h"
 #include "EngineLoop.h"
 
+#include "Classes/CoreClasses.h"
+DECLARATE_GLOBALVALUES_SCRIPTMODULE_Core
+
 #if IS_TESTBED
 #include "Classes/TestbedGameClasses.h"
+DECLARATE_GLOBALVALUES_SCRIPTMODULE_TestbedGame
 #else
 #error Game not set
 #endif // IS_TESTBED
@@ -106,6 +110,10 @@ int32 EngineLoop::Init( const tchar* InCmdLine )
 
 	// Loading script modules
 	GScriptEngine->LoadModules();
+
+	// Initialize script modules
+	InitScriptModule_Core();
+	InitScriptModule_TestbedGame();
 
 	// Create window
 	std::wstring				windowTitle = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();

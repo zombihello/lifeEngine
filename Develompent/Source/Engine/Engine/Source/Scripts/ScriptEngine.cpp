@@ -235,7 +235,7 @@ void ScriptEngine::CompileModule( class CScriptBuilder* InScriptBuilder, const t
 	std::vector< std::wstring >			sources = GFileSystem->FindFiles( InPathToModuleDir, true, false );
 	check( !sources.empty() );
 
-	for ( uint32 index = 0, count = ( uint32 ) sources.size(); index < count; ++index )
+	for ( uint32 index = 0, count = ( uint32 )sources.size(); index < count; ++index )
 	{
 		const std::wstring&		file = sources[ index ];
 
@@ -280,6 +280,7 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 	LE_LOG( LT_Log, LC_Script, TEXT( "Generate CPP headers for script module %s" ), ANSI_TO_TCHAR( InScriptModule->GetName() ) );
 
 	BaseArchive*			arCPPHeader = GFileSystem->CreateFileWriter( String::Format( TEXT( "%s/%sClasses.h" ), InOutputPath, ANSI_TO_TCHAR( InScriptModule->GetName() ) ), AW_NoFail );
+	ModuleInitDesc			moduleInitDesc;
 
 	*arCPPHeader << "/*=========================================\n";
 	*arCPPHeader << " C++ class definitions exported from AngelScript.\n";
@@ -288,7 +289,10 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 	*arCPPHeader << " BSOD-Games, All Rights Reserved.\n";
 	*arCPPHeader << "==========================================*/\n\n";
 
-	*arCPPHeader << "#include <angelscript.h>\n\n";
+	*arCPPHeader << "#pragma once\n\n";
+
+	*arCPPHeader << "#include <angelscript.h>\n";
+	*arCPPHeader << "#include \"Scripts/ScriptVar.h\"\n\n";
 
 	// Write typedefs
 	uint32			countTypedefs = InScriptModule->GetTypedefCount();
@@ -332,6 +336,22 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 		*arCPPHeader << "\n";
 	}
 
+	// Write global values
+	uint32			countGlobalValues = InScriptModule->GetGlobalVarCount();
+	if ( countGlobalValues > 0 )
+	{
+		*arCPPHeader << "// ----------------------------------\n";
+		*arCPPHeader << "// GLOBAL VALUES\n";
+		*arCPPHeader << "// ----------------------------------\n\n";
+
+		for ( uint32 indexGlobalValue = 0; indexGlobalValue < countGlobalValues; ++indexGlobalValue )
+		{
+			*arCPPHeader << "extern " << ( achar* )GenerateCPPGlobalValue( InScriptModule, indexGlobalValue, &moduleInitDesc ).c_str() << "\n";
+		}
+
+		*arCPPHeader << "\n";
+	}
+
 	// Write functions
 	uint32			coutFunctions = InScriptModule->GetFunctionCount();
 	if ( coutFunctions > 0 )
@@ -348,8 +368,48 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 			{
 				*arCPPHeader << "\n";
 			}
+		}	
+	}
+
+	// Generate initialization macros and functions
+	*arCPPHeader << "\n";
+	*arCPPHeader << "// ----------------------------------\n";
+	*arCPPHeader << "// INITIALIZATION MACROS\n";
+	*arCPPHeader << "// ----------------------------------\n\n";
+
+	*arCPPHeader << "#define DECLARATE_GLOBALVALUES_SCRIPTMODULE_" << ( achar* )InScriptModule->GetName(); 
+	
+	if ( !moduleInitDesc.externDefine.empty() )
+	{
+		*arCPPHeader << " \\\n";
+		for ( uint32 indexExtern = 0, countExterns = ( uint32 )moduleInitDesc.externDefine.size(); indexExtern < countExterns; ++indexExtern )
+		{
+			*arCPPHeader << "\t" << ( achar* ) moduleInitDesc.externDefine[ indexExtern ].c_str() << ";";
+
+			if ( indexExtern + 1 < countExterns )
+			{
+				*arCPPHeader << "\\\n";
+			}
 		}
 	}
+	*arCPPHeader << "\n";
+
+	*arCPPHeader << "\n";
+	*arCPPHeader << "// ----------------------------------\n";
+	*arCPPHeader << "// INITIALIZATION FUNCTION\n";
+	*arCPPHeader << "// ----------------------------------\n\n";
+	*arCPPHeader << "void InitScriptModule_"<< ( achar* )InScriptModule->GetName() << "()\n";
+	*arCPPHeader << "{\n";
+
+	if ( !moduleInitDesc.globalVarInit.empty() )
+	{
+		for ( uint32 indexGlobalVar = 0, countGlobalVars = ( uint32 ) moduleInitDesc.globalVarInit.size(); indexGlobalVar < countGlobalVars; ++indexGlobalVar )
+		{
+			*arCPPHeader << "\t" << ( achar* ) moduleInitDesc.globalVarInit[ indexGlobalVar ].c_str() << ";\n";
+		}
+	}
+
+	*arCPPHeader << "}";
 
 	delete arCPPHeader;
 }
@@ -401,6 +461,34 @@ std::string ScriptEngine::GenerateCPPEnum( class asIScriptModule* InScriptModule
 	}
 	
 	strStream << "};";
+	return strStream.str();
+}
+
+/**
+ * Generate C++ code of global value
+ */
+std::string ScriptEngine::GenerateCPPGlobalValue( class asIScriptModule* InScriptModule, uint32 InIndexGlobalValue, ModuleInitDesc* InOutModuleInitDesc )
+{
+	check( InScriptModule && InIndexGlobalValue >= 0 && InIndexGlobalValue < InScriptModule->GetGlobalVarCount() );
+	
+	const achar*		name = nullptr;
+	const achar*		nameSpace = nullptr;
+	int32				typeId = 0;
+	bool				isConst = false;
+	int32				result = InScriptModule->GetGlobalVar( InIndexGlobalValue, &name, &nameSpace, &typeId, &isConst );
+	check( result >= 0 );
+
+	std::stringstream		strStream;
+	strStream << "ScriptVar< " << TypeIDToString( typeId ) << " >\t\t" << name;
+	
+	// If InOutModuleInitDesc not nullptr - we write info for generate macros and functions for initialize module
+	if ( InOutModuleInitDesc )
+	{
+		InOutModuleInitDesc->externDefine.push_back( strStream.str() );
+		InOutModuleInitDesc->globalVarInit.push_back( std::string( name ) + ".Init( " + std::to_string( InIndexGlobalValue ) + ", TEXT( \"" + InScriptModule->GetName() + "\" ) )" );
+	}
+	
+	strStream << ";";
 	return strStream.str();
 }
 

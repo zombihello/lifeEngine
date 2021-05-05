@@ -5,7 +5,26 @@
  BSOD-Games, All Rights Reserved.
 ==========================================*/
 
+#pragma once
+
 #include <angelscript.h>
+#include "Scripts/ScriptVar.h"
+
+// ----------------------------------
+// ENUMS
+// ----------------------------------
+
+enum EGameMode
+{
+	GM_Menu			=0,
+	GM_Game			=1
+};
+
+// ----------------------------------
+// GLOBAL VALUES
+// ----------------------------------
+
+extern ScriptVar< EGameMode >		GGameMode;
 
 // ----------------------------------
 // FUNCTIONS
@@ -28,4 +47,57 @@ int32 execGameInit()
 	int32		returnValue = scriptContext->GetReturnDWord();
 	scriptContext->Release();
 	return returnValue;
+}
+
+EGameMode execGetCurrentGameMode()
+{
+	asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
+	check( scriptContext );
+
+	asIScriptFunction*		function = GScriptEngine->GetASScriptEngine()->GetModule( "TestbedGame" )->GetFunctionByIndex( 1 );
+	check( function );
+
+	int32	result = scriptContext->Prepare( function );
+	check( result >= 0 );
+
+	result = scriptContext->Execute();
+	check( result >= 0 );
+
+	EGameMode		returnValue = ( EGameMode )scriptContext->GetReturnDWord();
+	scriptContext->Release();
+	return returnValue;
+}
+
+void execSetCurrentGameMode( EGameMode InGameMode )
+{
+	asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
+	check( scriptContext );
+
+	asIScriptFunction*		function = GScriptEngine->GetASScriptEngine()->GetModule( "TestbedGame" )->GetFunctionByIndex( 2 );
+	check( function );
+
+	int32	result = scriptContext->Prepare( function );
+	check( result >= 0 );
+
+	scriptContext->SetArgDWord( 0, InGameMode );
+
+	result = scriptContext->Execute();
+	check( result >= 0 );
+	scriptContext->Release();
+}
+
+// ----------------------------------
+// INITIALIZATION MACROS
+// ----------------------------------
+
+#define DECLARATE_GLOBALVALUES_SCRIPTMODULE_TestbedGame \
+	ScriptVar< EGameMode >		GGameMode;
+
+// ----------------------------------
+// INITIALIZATION FUNCTION
+// ----------------------------------
+
+void InitScriptModule_TestbedGame()
+{
+	GGameMode.Init( 0, TEXT( "TestbedGame" ) );
 }
