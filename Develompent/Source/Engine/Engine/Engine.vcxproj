@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\Classes\EngineClasses.h" />
     <ClInclude Include="Include\Misc\EngineGlobals.h" />
     <ClInclude Include="Include\RHI\BaseRHI.h" />
     <ClInclude Include="Include\RHI\BaseSurfaceRHI.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="Include\Scripts\AngelScriptAddons\serializer\serializer.h" />
     <ClInclude Include="Include\Scripts\AngelScriptAddons\weakref\weakref.h" />
     <ClInclude Include="Include\Scripts\ScriptEngine.h" />
+    <ClInclude Include="Include\Scripts\ScriptObject.h" />
     <ClInclude Include="Include\Scripts\ScriptVar.h" />
   </ItemGroup>
   <ItemGroup>
@@ -50,6 +52,7 @@
     <ClCompile Include="Source\Scripts\AngelScriptAddons\serializer\serializer.cpp" />
     <ClCompile Include="Source\Scripts\AngelScriptAddons\weakref\weakref.cpp" />
     <ClCompile Include="Source\Scripts\ScriptEngine.cpp" />
+    <ClCompile Include="Source\Scripts\ScriptObject.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

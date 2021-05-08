@@ -9,22 +9,12 @@
 
 #include <angelscript.h>
 #include "Scripts/ScriptVar.h"
+#include "Scripts/ScriptObject.h"
 
 // ----------------------------------
 // ENUMS
 // ----------------------------------
 
-enum EGameMode
-{
-	GM_Menu			=0,
-	GM_Game			=1
-};
-
-// ----------------------------------
-// GLOBAL VALUES
-// ----------------------------------
-
-extern ScriptVar< EGameMode >		GGameMode;
 
 // ----------------------------------
 // FUNCTIONS
@@ -49,49 +39,79 @@ int32 execGameInit()
 	return returnValue;
 }
 
-EGameMode execGetCurrentGameMode()
+// ----------------------------------
+// CLASSES
+// ----------------------------------
+
+class OTBGameInfo : public ScriptObject
 {
-	asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
-	check( scriptContext );
+	//## BEGIN PROPS TBGameInfo
+public:
+	ScriptVar< EGameMode > gameMode;
+	//## END PROPS TBGameInfo
 
-	asIScriptFunction*		function = GScriptEngine->GetASScriptEngine()->GetModule( "TestbedGame" )->GetFunctionByIndex( 1 );
-	check( function );
+public:
+	OTBGameInfo() : ScriptObject( 1, TEXT( "TestbedGame" ) )
+	{
+		gameMode.Init( 0, self );
+	}
 
-	int32	result = scriptContext->Prepare( function );
-	check( result >= 0 );
+	std::string execGetGameName()
+	{
+		asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
+		check( scriptContext );
+	
+		asIScriptFunction*		function = typeInfo->GetMethodByIndex( 0 );
+		check( function );
+	
+		int32	result = scriptContext->Prepare( function );
+		check( result >= 0 );
+	
+		result = scriptContext->SetObject( self );
+		check( result >= 0 );
+	
+		result = scriptContext->Execute();
+		check( result >= 0 );
+	
+		std::string		returnValue = *( ( std::string* )scriptContext->GetReturnObject() );
+		scriptContext->Release();
+		return returnValue;
+	}
 
-	result = scriptContext->Execute();
-	check( result >= 0 );
+	void execSetGameMode( EGameMode Param0 )
+	{
+		asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
+		check( scriptContext );
+	
+		asIScriptFunction*		function = typeInfo->GetMethodByIndex( 1 );
+		check( function );
+	
+		int32	result = scriptContext->Prepare( function );
+		check( result >= 0 );
+	
+		result = scriptContext->SetObject( self );
+		check( result >= 0 );
+	
+		scriptContext->SetArgDWord( 0, Param0 );
+	
+		result = scriptContext->Execute();
+		check( result >= 0 );
+		scriptContext->Release();
+	}
+};
 
-	EGameMode		returnValue = ( EGameMode )scriptContext->GetReturnDWord();
-	scriptContext->Release();
-	return returnValue;
-}
+// ----------------------------------
+// GLOBAL VALUES
+// ----------------------------------
 
-void execSetCurrentGameMode( EGameMode InGameMode )
-{
-	asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
-	check( scriptContext );
-
-	asIScriptFunction*		function = GScriptEngine->GetASScriptEngine()->GetModule( "TestbedGame" )->GetFunctionByIndex( 2 );
-	check( function );
-
-	int32	result = scriptContext->Prepare( function );
-	check( result >= 0 );
-
-	scriptContext->SetArgDWord( 0, InGameMode );
-
-	result = scriptContext->Execute();
-	check( result >= 0 );
-	scriptContext->Release();
-}
+extern ScriptVar< OTBGameInfo >		GTBGameInfo;
 
 // ----------------------------------
 // INITIALIZATION MACROS
 // ----------------------------------
 
 #define DECLARATE_GLOBALVALUES_SCRIPTMODULE_TestbedGame \
-	ScriptVar< EGameMode >		GGameMode;
+	ScriptVar< OTBGameInfo >		GTBGameInfo;
 
 // ----------------------------------
 // INITIALIZATION FUNCTION
@@ -99,5 +119,5 @@ void execSetCurrentGameMode( EGameMode InGameMode )
 
 void InitScriptModule_TestbedGame()
 {
-	GGameMode.Init( 0, TEXT( "TestbedGame" ) );
+	GTBGameInfo.Init( 0, TEXT( "TestbedGame" ) );
 }

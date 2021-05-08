@@ -36,10 +36,25 @@ public:
 
 	/**
 	 * @brief Initialize value
+	 * 
+	 * @param[in] InValueID Index of global value in script module
+	 * @param[in] InModuleName Script module name
 	 */
 	FORCEINLINE void		Init( int32 InValueID, const tchar* InModuleName )
 	{
 		value = ( Type* )GScriptEngine->GetASScriptEngine()->GetModule( TCHAR_TO_ANSI( InModuleName ) )->GetAddressOfGlobalVar( InValueID );
+	}
+
+	/**
+	 * @brief Initialize value
+	 * 
+	 * @param[in] InValueID Index of property in script object
+	 * @param[in] InScriptObject Pointer to script object
+	 */
+	FORCEINLINE void		Init( int32 InValueID, asIScriptObject* InScriptObject )
+	{
+		check( InScriptObject );
+		value = ( Type* )InScriptObject->GetAddressOfProperty( InValueID );
 	}
 
 	/**

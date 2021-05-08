@@ -118,6 +118,9 @@
     <Filter Include="Source\Misc">
       <UniqueIdentifier>{65e5297e-704a-4c2d-aa23-02b281ff20f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Classes">
+      <UniqueIdentifier>{d05ec744-6514-41f5-b8c2-2146d76d4608}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHI\BaseRHI.h">
@@ -189,6 +192,12 @@
     <ClInclude Include="Include\Scripts\ScriptVar.h">
       <Filter>Include\Scripts</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Scripts\ScriptObject.h">
+      <Filter>Include\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Classes\EngineClasses.h">
+      <Filter>Include\Classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Scripts\AngelScriptAddons\contextmgr\contextmgr.cpp">
@@ -244,6 +253,9 @@
     </ClCompile>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
       <Filter>Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\ScriptObject.cpp">
+      <Filter>Source\Scripts</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

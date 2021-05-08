@@ -1,22 +1,23 @@
-enum EGameMode
-{
-	GM_Menu,
-	GM_Game
-};
+external shared class GameInfo;
+external shared enum EGameMode;
 
-EGameMode		GGameMode = GM_Game;
+class TBGameInfo : GameInfo
+{
+	string GetGameName()
+	{
+		return "TestbedGame";
+	}
+	
+	void SetGameMode( EGameMode GameMode )
+	{
+		gameMode = GameMode;
+	}
+}
+
+TBGameInfo GTBGameInfo;
 
 int GameInit()
 {
+	GTBGameInfo.SetGameMode( GM_Game );
 	return 0;
-}
-
-EGameMode GetCurrentGameMode()
-{
-	return GGameMode;
-}
-
-void SetCurrentGameMode( EGameMode InGameMode )
-{
-	GGameMode = InGameMode;
 }

@@ -18,6 +18,9 @@
 #include "Classes/CoreClasses.h"
 DECLARATE_GLOBALVALUES_SCRIPTMODULE_Core
 
+#include "Classes/EngineClasses.h"
+DECLARATE_GLOBALVALUES_SCRIPTMODULE_Engine
+
 #if IS_TESTBED
 #include "Classes/TestbedGameClasses.h"
 DECLARATE_GLOBALVALUES_SCRIPTMODULE_TestbedGame
@@ -113,6 +116,7 @@ int32 EngineLoop::Init( const tchar* InCmdLine )
 
 	// Initialize script modules
 	InitScriptModule_Core();
+	InitScriptModule_Engine();
 	InitScriptModule_TestbedGame();
 
 	// Create window

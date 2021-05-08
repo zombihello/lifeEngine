@@ -1,3 +1,6 @@
+// STL
+#include <regex>
+
 // AngleScript
 #include <angelscript.h>
 
@@ -179,6 +182,12 @@ void ScriptEngine::RegisterTypesASToCPP( class asIScriptModule* InScriptModule )
 		asITypeInfo*		typeInfo = InScriptModule->GetEnumByIndex( indexEnum );
 		check( typeInfo );
 
+		// If enum in other module - skip
+		if ( strcmp( typeInfo->GetModule()->GetName(), InScriptModule->GetName() ) )
+		{
+			continue;
+		}
+
 		tableTypesASToCPP[ typeInfo->GetTypeId() ] = SASType{ typeInfo->GetName(), typeInfo };
 	}
 
@@ -186,10 +195,29 @@ void ScriptEngine::RegisterTypesASToCPP( class asIScriptModule* InScriptModule )
 	uint32		countTypedef = InScriptModule->GetTypedefCount();
 	for ( uint32 indexTypedef = 0; indexTypedef < countTypedef; ++indexTypedef )
 	{
-		asITypeInfo*		typeInfo =InScriptModule->GetTypedefByIndex( indexTypedef );
+		asITypeInfo*		typeInfo = InScriptModule->GetTypedefByIndex( indexTypedef );
 		check( typeInfo );
 
 		tableTypesASToCPP[ typeInfo->GetTypeId() ] = SASType{ typeInfo->GetName(), typeInfo };
+	}
+
+	// Register script classes
+	uint32		countClasses = InScriptModule->GetObjectTypeCount();
+	for ( uint32 indexClass = 0; indexClass < countClasses; ++indexClass )
+	{
+		asITypeInfo*		typeInfo = InScriptModule->GetObjectTypeByIndex( indexClass );
+		check( typeInfo );
+		
+		// If class in other module - skip
+		if ( strcmp( typeInfo->GetModule()->GetName(), InScriptModule->GetName() ) )
+		{
+			continue;
+		}
+
+		const char* q = typeInfo->GetName();
+		( void ) q;
+
+		tableTypesASToCPP[ typeInfo->GetTypeId() ] = SASType{ std::string( "O" ) + typeInfo->GetName(), typeInfo };
 	}
 }
 
@@ -231,7 +259,7 @@ void ScriptEngine::CompileModule( class CScriptBuilder* InScriptBuilder, const t
 	LE_LOG( LT_Log, LC_Script, TEXT( "Compiling script module %s" ), InNameModule );
 	
 	InScriptBuilder->StartNewModule( asScriptEngine, TCHAR_TO_ANSI( InNameModule ) );
-	
+
 	std::vector< std::wstring >			sources = GFileSystem->FindFiles( InPathToModuleDir, true, false );
 	check( !sources.empty() );
 
@@ -292,7 +320,8 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 	*arCPPHeader << "#pragma once\n\n";
 
 	*arCPPHeader << "#include <angelscript.h>\n";
-	*arCPPHeader << "#include \"Scripts/ScriptVar.h\"\n\n";
+	*arCPPHeader << "#include \"Scripts/ScriptVar.h\"\n";
+	*arCPPHeader << "#include \"Scripts/ScriptObject.h\"\n\n";
 
 	// Write typedefs
 	uint32			countTypedefs = InScriptModule->GetTypedefCount();
@@ -325,9 +354,77 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 
 		for ( uint32 indexEnum = 0; indexEnum < countEnums; ++indexEnum )
 		{
-			*arCPPHeader << ( achar* )GenerateCPPEnum( InScriptModule, indexEnum ).c_str() << "\n";
+			asITypeInfo*		typeInfo = InScriptModule->GetEnumByIndex( indexEnum );
+			check( typeInfo );
+
+			// If enum in other module - skip
+			if ( strcmp( typeInfo->GetModule()->GetName(), InScriptModule->GetName() ) )
+			{
+				continue;
+			}
+
+			*arCPPHeader << ( achar* )GenerateCPPEnum( typeInfo, indexEnum ).c_str() << "\n";
 
 			if ( indexEnum + 1 < countEnums )
+			{
+				*arCPPHeader << "\n";
+			}
+		}
+
+		*arCPPHeader << "\n";
+	}
+
+	// Write functions
+	uint32			countFunctions = InScriptModule->GetFunctionCount();
+	if ( countFunctions > 0 )
+	{
+		*arCPPHeader << "// ----------------------------------\n";
+		*arCPPHeader << "// FUNCTIONS\n";
+		*arCPPHeader << "// ----------------------------------\n\n";
+
+		for ( uint32 indexFunction = 0; indexFunction < countFunctions; ++indexFunction )
+		{
+			asIScriptFunction*		function = InScriptModule->GetFunctionByIndex( indexFunction );
+			check( function );
+
+			// If function in other module - skip
+			if ( strcmp( function->GetModule()->GetName(), InScriptModule->GetName() ) )
+			{
+				continue;
+			}
+
+			*arCPPHeader << ( achar* )GenerateCPPFunction( function, indexFunction ).c_str() << "\n";
+
+			if ( indexFunction + 1 < countFunctions )
+			{
+				*arCPPHeader << "\n";
+			}
+		}
+
+		*arCPPHeader << "\n";
+	}
+
+	// Write classes
+	uint32		countClasses = InScriptModule->GetObjectTypeCount();
+	if ( countClasses > 0 )
+	{
+		*arCPPHeader << "// ----------------------------------\n";
+		*arCPPHeader << "// CLASSES\n";
+		*arCPPHeader << "// ----------------------------------\n\n";
+
+		for ( uint32 indexClass = 0; indexClass < countClasses; ++indexClass )
+		{
+			asITypeInfo*		typeInfo = InScriptModule->GetObjectTypeByIndex( indexClass );
+			check( typeInfo );
+
+			// If class in other module - skip
+			if ( strcmp( typeInfo->GetModule()->GetName(), InScriptModule->GetName() ) )
+			{
+				continue;
+			}
+
+			*arCPPHeader << ( achar* )GenerateCPPClass( typeInfo, indexClass ).c_str() << "\n";
+			if ( indexClass + 1 < countClasses )
 			{
 				*arCPPHeader << "\n";
 			}
@@ -346,33 +443,13 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 
 		for ( uint32 indexGlobalValue = 0; indexGlobalValue < countGlobalValues; ++indexGlobalValue )
 		{
-			*arCPPHeader << "extern " << ( achar* )GenerateCPPGlobalValue( InScriptModule, indexGlobalValue, &moduleInitDesc ).c_str() << "\n";
+			*arCPPHeader << "extern " << ( achar* ) GenerateCPPGlobalValue( InScriptModule, indexGlobalValue, &moduleInitDesc ).c_str() << "\n";
 		}
 
 		*arCPPHeader << "\n";
 	}
 
-	// Write functions
-	uint32			coutFunctions = InScriptModule->GetFunctionCount();
-	if ( coutFunctions > 0 )
-	{
-		*arCPPHeader << "// ----------------------------------\n";
-		*arCPPHeader << "// FUNCTIONS\n";
-		*arCPPHeader << "// ----------------------------------\n\n";
-
-		for ( uint32 indexFunction = 0; indexFunction < coutFunctions; ++indexFunction )
-		{
-			*arCPPHeader << ( achar* ) GenerateCPPFunction( InScriptModule, indexFunction ).c_str() << "\n";
-
-			if ( indexFunction + 1 < coutFunctions )
-			{
-				*arCPPHeader << "\n";
-			}
-		}	
-	}
-
 	// Generate initialization macros and functions
-	*arCPPHeader << "\n";
 	*arCPPHeader << "// ----------------------------------\n";
 	*arCPPHeader << "// INITIALIZATION MACROS\n";
 	*arCPPHeader << "// ----------------------------------\n\n";
@@ -432,22 +509,17 @@ std::string ScriptEngine::GenerateCPPTypedef( class asIScriptModule* InScriptMod
 /**
  * Generate C++ code of enum
  */
-std::string ScriptEngine::GenerateCPPEnum( class asIScriptModule* InScriptModule, uint32 InIndexEnum )
+std::string ScriptEngine::GenerateCPPEnum( class asITypeInfo* InEnumType, uint32 InIndexEnum )
 {
-	check( InScriptModule && InIndexEnum >= 0 && InIndexEnum < InScriptModule->GetEnumCount() );
-
 	std::stringstream	strStream;
-	asITypeInfo*		typeInfo = InScriptModule->GetEnumByIndex( InIndexEnum );
-	check( typeInfo );
-
-	strStream << "enum " << typeInfo->GetName() << "\n";
+	strStream << "enum " << InEnumType->GetName() << "\n";
 	strStream << "{\n";
 	
-	uint32			valueCount = typeInfo->GetEnumValueCount();
+	uint32			valueCount = InEnumType->GetEnumValueCount();
 	for ( uint32 indexValue = 0; indexValue < valueCount; ++indexValue )
 	{
 		int32			value = 0;
-		const achar*	name = typeInfo->GetEnumValueByIndex( indexValue, &value );
+		const achar*	name = InEnumType->GetEnumValueByIndex( indexValue, &value );
 		strStream << "\t" << name << "\t\t\t=" << value;
 
 		if ( indexValue + 1 < valueCount )
@@ -495,25 +567,22 @@ std::string ScriptEngine::GenerateCPPGlobalValue( class asIScriptModule* InScrip
 /**
  * Generate C++ code of function
  */
-std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptModule, uint32 InIndexFunction )
+std::string ScriptEngine::GenerateCPPFunction( class asIScriptFunction* InScriptFunction, uint32 InIndexFunction, bool InIsMethod /* = false */ )
 {
-	check( InScriptModule && InIndexFunction >= 0 && InIndexFunction < InScriptModule->GetFunctionCount() );
-
-	asIScriptFunction*		function = InScriptModule->GetFunctionByIndex( InIndexFunction );
-	check( function );
+	check( InScriptFunction );
 
 	// Get return type of function
 	std::stringstream		strStream;	
 	asDWORD					retTypeFlags = 0;
-	int32					retTypeId = function->GetReturnTypeId( &retTypeFlags );
+	int32					retTypeId = InScriptFunction->GetReturnTypeId( &retTypeFlags );
 
 	// Get all params in function
 	std::vector< SCPPParam >		params;
 	std::string						strParamsDeclaration;
 
-	for ( uint32 indexParam = 0, countParams = function->GetParamCount(); indexParam < countParams; ++indexParam )
+	for ( uint32 indexParam = 0, countParams = InScriptFunction->GetParamCount(); indexParam < countParams; ++indexParam )
 	{
-		SCPPParam		cppParam = GetCPPParamFromFunction( function, indexParam );
+		SCPPParam		cppParam = GetCPPParamFromFunction( InScriptFunction, indexParam );
 		params.push_back( cppParam );
 
 		// Generate declaration of params for header function
@@ -526,18 +595,37 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 
 	// Generate header of function
 	// Example: float execTest( float InA )
-	strStream << TypeIDToString( retTypeId ) << " exec" << function->GetName() << ( params.empty() ? "()" : ( "( " + strParamsDeclaration + " )" ) ) << "\n";
+	strStream << TypeIDToString( retTypeId ) << " exec" << InScriptFunction->GetName() << ( params.empty() ? "()" : ( "( " + strParamsDeclaration + " )" ) ) << "\n";
 	strStream << "{\n";
 
 	// Generate prepare to execute script function
 	strStream << "\tasIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();\n";
 	strStream << "\tcheck( scriptContext );\n\n";
 
-	strStream << "\tasIScriptFunction*		function = GScriptEngine->GetASScriptEngine()->GetModule( \"" << function->GetModuleName() << "\" )->GetFunctionByIndex( " << InIndexFunction << " );\n";
+	strStream << "\tasIScriptFunction*		function = ";
+
+	// If this function
+	if ( !InIsMethod )
+	{
+		strStream << "GScriptEngine->GetASScriptEngine()->GetModule( \"" << InScriptFunction->GetModuleName() << "\" )->GetFunctionByIndex( " << InIndexFunction << " );\n";
+	}
+	// Else this method of class
+	else
+	{
+		strStream << "typeInfo->GetMethodByIndex( " << InIndexFunction << " );\n";
+	}
+
 	strStream << "\tcheck( function );\n\n";
 
 	strStream << "\tint32	result = scriptContext->Prepare( function );\n";
 	strStream << "\tcheck( result >= 0 );\n\n";
+
+	// If this method of class need set object
+	if ( InIsMethod )
+	{
+		strStream << "\tresult = scriptContext->SetObject( self );\n";
+		strStream << "\tcheck( result >= 0 );\n\n";
+	}
 
 	// Generate code for set arguments for start function
 	for ( uint32 indexParam = 0, countParams = ( uint32 )params.size(); indexParam < countParams; ++indexParam )
@@ -681,7 +769,7 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 		auto		itType = tableTypesASToCPP.find( retTypeId );
 		if ( itType == tableTypesASToCPP.end() )
 		{
-			appErrorf( TEXT( "Unknown returning AngelScript type 0x%X in function %s::%s" ), retTypeId, ANSI_TO_TCHAR( function->GetModuleName() ), ANSI_TO_TCHAR( function->GetName() ) );
+			appErrorf( TEXT( "Unknown returning AngelScript type 0x%X in function %s::%s from module %s" ), retTypeId, ANSI_TO_TCHAR( InScriptFunction->GetObjectName() ), ANSI_TO_TCHAR( InScriptFunction->GetName() ), ANSI_TO_TCHAR( InScriptFunction->GetModuleName() ) );
 			break;
 		}
 
@@ -704,7 +792,7 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 		// Else unsupported type
 		else
 		{
-			appErrorf( TEXT( "Not supported AngelScript type 0x%X in function %s::%s" ), retTypeId, ANSI_TO_TCHAR( function->GetModuleName() ), ANSI_TO_TCHAR( function->GetName() ) );
+			appErrorf( TEXT( "Not supported AngelScript type 0x%X in function %s::%s from module %s" ), retTypeId, ANSI_TO_TCHAR( InScriptFunction->GetObjectName() ), ANSI_TO_TCHAR( InScriptFunction->GetName() ), ANSI_TO_TCHAR( InScriptFunction->GetModuleName() ) );
 		}
 
 		break;
@@ -724,6 +812,143 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptModule* InScriptMo
 }
 
 /**
+ * Generate C++ code of class
+ */
+std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint32 InIndexClass )
+{
+	struct CPPProperty
+	{
+		uint32			id;
+		std::string		name;
+		std::string		declaration;
+	};
+
+	check( InClassType );
+
+	std::stringstream				strStream;
+	std::vector< CPPProperty >		publicProperties;
+	std::vector< CPPProperty >		protectedProperties;
+	std::vector< CPPProperty >		privateProperties;
+
+	// Getting all properties from script class
+	{
+		uint32		countProperties = InClassType->GetPropertyCount();
+		for ( uint32 indexProperty = 0; indexProperty < countProperties; ++indexProperty )
+		{
+			const achar*		name = nullptr;
+			int32				typeId = 0;
+			bool				isPrivate = false;
+			bool				isProtected = false;
+			int32				result = InClassType->GetProperty( indexProperty, &name, &typeId, &isPrivate, &isProtected );
+			check( result >= 0 );
+
+			CPPProperty			cppProperty;
+			cppProperty.id = indexProperty;
+			cppProperty.name = name;
+			cppProperty.declaration = "ScriptVar< " + TypeIDToString( typeId ) + " > " + name;
+
+			if ( !isPrivate && !isProtected )
+			{
+				publicProperties.push_back( cppProperty );
+			}
+			else if ( isProtected )
+			{
+				protectedProperties.push_back( cppProperty );
+			}
+			else if ( isPrivate )
+			{
+				privateProperties.push_back( cppProperty );
+			}
+		}
+	}
+
+	strStream << "class O" << InClassType->GetName() << " : public ScriptObject\n";
+	strStream << "{\n";
+
+	// Generate section of props
+	strStream << "\t//## BEGIN PROPS " << InClassType->GetName() << "\n";
+	{
+		// Public properties
+		if ( !publicProperties.empty() )
+		{
+			strStream << "public:\n";
+			for ( uint32 indexProperty = 0, countProperty = ( uint32 )publicProperties.size(); indexProperty < countProperty; ++indexProperty )
+			{
+				strStream << "\t" << publicProperties[ indexProperty ].declaration << ";\n";
+			}
+		}
+
+		// Protected properties
+		if ( !protectedProperties.empty() )
+		{
+			strStream << "protected:\n";
+			for ( uint32 indexProperty = 0, countProperty = ( uint32 )protectedProperties.size(); indexProperty < countProperty; ++indexProperty )
+			{
+				strStream << "\t" << protectedProperties[ indexProperty ].declaration << ";\n";
+			}
+		}
+
+		// Private properties
+		if ( !privateProperties.empty() )
+		{
+			strStream << "private:\n";
+			for ( uint32 indexProperty = 0, countProperty = ( uint32 )privateProperties.size(); indexProperty < countProperty; ++indexProperty )
+			{
+				strStream << "\t" << privateProperties[ indexProperty ].declaration << ";\n";
+			}
+		}
+	}
+	strStream << "\t//## END PROPS " << InClassType->GetName() << "\n\n";
+
+	// Generate constructor
+	strStream << "public:\n";
+	strStream << "\tO" << InClassType->GetName() << "() : ScriptObject( " << InIndexClass << ", TEXT( \"" << InClassType->GetModule()->GetName() << "\" ) )\n";
+	strStream << "\t{\n";
+
+	// Generate code for init properties
+	// Public properties
+	for ( uint32 indexProperty = 0, countProperties = ( uint32 )publicProperties.size(); indexProperty < countProperties; ++indexProperty )
+	{
+		const CPPProperty&			cppProperty = publicProperties[ indexProperty ];
+		strStream << "\t\t" << cppProperty.name << ".Init( " << cppProperty.id << ", self );\n";
+	}
+
+	// Protected properties
+	for ( uint32 indexProperty = 0, countProperties = ( uint32 )protectedProperties.size(); indexProperty < countProperties; ++indexProperty )
+	{
+		const CPPProperty&			cppProperty = protectedProperties[ indexProperty ];
+		strStream << "\t\t" << cppProperty.name << ".Init( " << cppProperty.id << ", self );\n";
+	}
+
+	// Private properties
+	for ( uint32 indexProperty = 0, countProperties = ( uint32 )privateProperties.size(); indexProperty < countProperties; ++indexProperty )
+	{
+		const CPPProperty&			cppProperty = privateProperties[ indexProperty ];
+		strStream << "\t\t" << cppProperty.name << ".Init( " << cppProperty.id << ", self );\n";
+	}
+
+	strStream << "\t}\n\n";
+
+	// Generate methods
+	uint32		countMethods = InClassType->GetMethodCount();
+	for ( uint32 indexMethod = 0; indexMethod < countMethods; ++indexMethod )
+	{
+		// Getting method and generating cpp function with indent 1 tab
+		asIScriptFunction*		function = InClassType->GetMethodByIndex( indexMethod );
+		LE_LOG( LT_Log, LC_Script, TEXT( "func = %s" ), ANSI_TO_TCHAR( function->GetName() ) );
+		strStream << "\t" << std::regex_replace( GenerateCPPFunction( function, indexMethod, true ), std::regex( "\n" ), "\n\t" ) << "\n";
+
+		if ( indexMethod + 1 < countMethods )
+		{
+			strStream << "\n";
+		}
+	}
+
+	strStream << "};";
+	return strStream.str();
+}
+
+/**
  * Get C++ param from function
  */
 ScriptEngine::SCPPParam ScriptEngine::GetCPPParamFromFunction( class asIScriptFunction* InScriptFunction, uint32 InIndexParam ) const
@@ -738,7 +963,7 @@ ScriptEngine::SCPPParam ScriptEngine::GetCPPParamFromFunction( class asIScriptFu
 	int32			result = InScriptFunction->GetParam( InIndexParam, &typeId, &flags, &name, &defaultArg );
 	check( result >= 0 );
 
-	return SCPPParam{ name, typeId };
+	return SCPPParam{ name ? name : std::string( "Param" ) + std::to_string( InIndexParam ), typeId };
 }
 
 /**

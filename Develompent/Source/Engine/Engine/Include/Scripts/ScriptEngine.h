@@ -134,22 +134,23 @@ private:
 	/**
 	 * @brief Generate C++ code of function
 	 * @warning This method only available with enabled macro WITH_EDITOR
-	 * 
-	 * @param[in] InScriptModule Pointer to script module
-	 * @param[in] InIndexFunction Index of function in script module
+	 *
+	 * @param[in] InScriptFunction Pointer to script function
+	 * @param[in] InIndexFunction Index of function in script module or class 
+	 * @param[in] InIsMethod Is method of script class?
 	 * @return Code of C++ function
 	 */
-	std::string			GenerateCPPFunction( class asIScriptModule* InScriptModule, uint32 InIndexFunction );
+	std::string			GenerateCPPFunction( class asIScriptFunction* InScriptFunction, uint32 InIndexFunction, bool InIsMethod = false );
 
 	/**
 	 * @brief Generate C++ code of enum
 	 * @warning This method only available with enabled macro WITH_EDITOR
 	 * 
-	 * @param[in] InScriptModule Pointer to script module
+	 * @param[in] InEnumType Pointer to script enum
 	 * @param[in] InIndexEnum Index of enum in script module
 	 * @return Code of C++ enum
 	 */
-	std::string			GenerateCPPEnum( class asIScriptModule* InScriptModule, uint32 InIndexEnum );
+	std::string			GenerateCPPEnum( class asITypeInfo* InEnumType, uint32 InIndexEnum );
 
 	/**
 	 * @brief Generate C++ code of global value
@@ -161,6 +162,16 @@ private:
 	 * @return Code of C++ global value
 	 */
 	std::string			GenerateCPPGlobalValue( class asIScriptModule* InScriptModule, uint32 InIndexGlobalValue, ModuleInitDesc* InOutModuleInitDesc );
+
+	/**
+	 * @brief Generate C++ code of class
+	 * @warning This method only available with enabled macro WITH_EDITOR
+	 * 
+	 * @param[in] InClassType Pointer to script class
+	 * @param[in] InIndexClass Index of class in script module
+	 * @return Code of C++ class
+	 */
+	std::string			GenerateCPPClass( class asITypeInfo* InClassType, uint32 InIndexClass );
 
 	/**
 	 * @brief Get C++ param from function

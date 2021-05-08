@@ -6,6 +6,6 @@
 	
 	"ScriptEngine.ScriptEngine": {
 		"DirBinary": "Script",
-		"LoadingModules": [ "Core", "TestbedGame" ]
+		"LoadingModules": [ "Core", "Engine", "TestbedGame" ]
 	}
 }
