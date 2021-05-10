@@ -11,6 +11,10 @@
 
 #include "Misc/Types.h"
 
+#define DECLARE_CLASS( TClass, TBaseClass ) \
+	typedef TClass		ThisClass; \
+	typedef TBaseClass	Super;
+
 /**
  * @ingroup Engine
  * @brief Class for work with script object
@@ -19,18 +23,22 @@ class ScriptObject
 {
 public:
 	/**
-	 * @brief Constructor
-	 * @param[in] InObjectTypeIndex Index of script object type in module
-	 * @param[in] InModuleName Script module name
-	 */
-					ScriptObject( uint32 InObjectTypeIndex, const tchar* InModuleName );
-
-	/**
 	 * @brief Destructor
 	 */
-	virtual			~ScriptObject();
+	virtual				~ScriptObject();
 
 protected:
+	/**
+	 * @brief Enumeration for disable creating script object in constructor
+	 */
+	enum ENoInit		{ NoInit };
+
+	/**
+	 * @brief Initialize script object
+	 * @param[in] InScriptObject Pointer to script object
+	 */
+	virtual void		Init( class asIScriptObject* InScriptObject );
+
 	class asITypeInfo*				typeInfo;	/**< Type info */
 	class asIScriptObject*			self;		/**< Pointer to script object */
 };

@@ -22,10 +22,11 @@
 
 int32 execGameInit()
 {
-	asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
+	asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
+	asIScriptContext*		scriptContext = scriptEngine->CreateContext();
 	check( scriptContext );
 
-	asIScriptFunction*		function = GScriptEngine->GetASScriptEngine()->GetModule( "TestbedGame" )->GetFunctionByIndex( 0 );
+	asIScriptFunction*		function = scriptEngine->GetModule( "TestbedGame" )->GetFunctionByIndex( 0 );
 	check( function );
 
 	int32	result = scriptContext->Prepare( function );
@@ -43,44 +44,43 @@ int32 execGameInit()
 // CLASSES
 // ----------------------------------
 
-class OTBGameInfo : public ScriptObject
+class OTBGameInfo : public OGameInfo
 {
-	//## BEGIN PROPS TBGameInfo
-public:
-	ScriptVar< EGameMode > gameMode;
-	//## END PROPS TBGameInfo
+	DECLARE_CLASS( OTBGameInfo, OGameInfo )
+
+	//## BEGIN PROPS OTBGameInfo
+	//## END PROPS OTBGameInfo
 
 public:
-	OTBGameInfo() : ScriptObject( 1, TEXT( "TestbedGame" ) )
+	OTBGameInfo() : OGameInfo( ScriptObject::NoInit )
 	{
-		gameMode.Init( 0, self );
-	}
+		asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
+		asIScriptModule*		scriptModule = scriptEngine->GetModule( "TestbedGame" );
+		asIScriptContext*		scriptContext = scriptEngine->CreateContext();
+		check( scriptContext && scriptModule );
 
-	std::string execGetGameName()
-	{
-		asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
-		check( scriptContext );
-	
-		asIScriptFunction*		function = typeInfo->GetMethodByIndex( 0 );
-		check( function );
-	
-		int32	result = scriptContext->Prepare( function );
+		asITypeInfo*			objectType = scriptModule->GetObjectTypeByIndex( 1 );
+		check( objectType );
+
+		asIScriptFunction*		factory = objectType->GetFactoryByIndex( 0 );
+		check( factory );
+
+		int32					result = scriptContext->Prepare( factory );
 		check( result >= 0 );
-	
-		result = scriptContext->SetObject( self );
-		check( result >= 0 );
-	
+
 		result = scriptContext->Execute();
 		check( result >= 0 );
-	
-		std::string		returnValue = *( ( std::string* )scriptContext->GetReturnObject() );
-		scriptContext->Release();
-		return returnValue;
+
+		Init( *( asIScriptObject** )scriptContext->GetAddressOfReturnValue() );
 	}
+
+	OTBGameInfo( class asIScriptObject* InScriptObject ) : OGameInfo( ScriptObject::NoInit ) { Init( InScriptObject ); }
+	OTBGameInfo( ENoInit ) : OGameInfo( ScriptObject::NoInit ) {}
 
 	void execSetGameMode( EGameMode Param0 )
 	{
-		asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
+		asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
+		asIScriptContext*		scriptContext = scriptEngine->CreateContext();
 		check( scriptContext );
 	
 		asIScriptFunction*		function = typeInfo->GetMethodByIndex( 1 );
@@ -97,6 +97,12 @@ public:
 		result = scriptContext->Execute();
 		check( result >= 0 );
 		scriptContext->Release();
+	}
+
+protected:
+	void Init( asIScriptObject* InScriptObject ) override
+	{
+		Super::Init( InScriptObject );
 	}
 };
 

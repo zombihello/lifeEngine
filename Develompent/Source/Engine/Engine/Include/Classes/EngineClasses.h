@@ -27,20 +27,43 @@ enum EGameMode
 
 class OGameInfo : public ScriptObject
 {
-	//## BEGIN PROPS GameInfo
+	DECLARE_CLASS( OGameInfo, ScriptObject )
+
+	//## BEGIN PROPS OGameInfo
 public:
 	ScriptVar< EGameMode > gameMode;
-	//## END PROPS GameInfo
+	//## END PROPS OGameInfo
 
 public:
-	OGameInfo() : ScriptObject( 0, TEXT( "Engine" ) )
+	OGameInfo()
 	{
-		gameMode.Init( 0, self );
+		asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
+		asIScriptModule*		scriptModule = scriptEngine->GetModule( "Engine" );
+		asIScriptContext*		scriptContext = scriptEngine->CreateContext();
+		check( scriptContext && scriptModule );
+
+		asITypeInfo*			objectType = scriptModule->GetObjectTypeByIndex( 0 );
+		check( objectType );
+
+		asIScriptFunction*		factory = objectType->GetFactoryByIndex( 0 );
+		check( factory );
+
+		int32					result = scriptContext->Prepare( factory );
+		check( result >= 0 );
+
+		result = scriptContext->Execute();
+		check( result >= 0 );
+
+		Init( *( asIScriptObject** )scriptContext->GetAddressOfReturnValue() );
 	}
+
+	OGameInfo( class asIScriptObject* InScriptObject ) { Init( InScriptObject ); }
+	OGameInfo( ENoInit ) {}
 
 	std::string execGetGameName()
 	{
-		asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
+		asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
+		asIScriptContext*		scriptContext = scriptEngine->CreateContext();
 		check( scriptContext );
 	
 		asIScriptFunction*		function = typeInfo->GetMethodByIndex( 0 );
@@ -58,6 +81,13 @@ public:
 		std::string		returnValue = *( ( std::string* )scriptContext->GetReturnObject() );
 		scriptContext->Release();
 		return returnValue;
+	}
+
+protected:
+	void Init( asIScriptObject* InScriptObject ) override
+	{
+		Super::Init( InScriptObject );
+		gameMode.Init( 0, self );
 	}
 };
 

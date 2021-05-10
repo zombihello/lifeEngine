@@ -9,6 +9,7 @@
 
 #include <angelscript.h>
 #include "Scripts/ScriptVar.h"
+#include "Scripts/ScriptObject.h"
 
 // ----------------------------------
 // FUNCTIONS
@@ -16,10 +17,11 @@
 
 void execEmptyFile()
 {
-	asIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();
+	asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
+	asIScriptContext*		scriptContext = scriptEngine->CreateContext();
 	check( scriptContext );
 
-	asIScriptFunction*		function = GScriptEngine->GetASScriptEngine()->GetModule( "Core" )->GetFunctionByIndex( 0 );
+	asIScriptFunction*		function = scriptEngine->GetModule( "Core" )->GetFunctionByIndex( 0 );
 	check( function );
 
 	int32	result = scriptContext->Prepare( function );

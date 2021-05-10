@@ -9,6 +9,8 @@
 #ifndef SCRIPTVAR_H
 #define SCRIPTVAR_H
 
+#include <type_traits>
+
 #include "Misc/Types.h"
 #include "Misc/EngineGlobals.h"
 #include "ScriptEngine.h"
@@ -18,21 +20,26 @@
  * @ingroup Engine
  * @brief Class for work with script values
  */
-template< typename Type >
+template< typename Type, bool InIsScriptObject = std::is_base_of< class ScriptObject, Type >::value >
 class ScriptVar
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-							ScriptVar() : value( nullptr )
+							ScriptVar() : value( nullptr ), isNeedFree( false )
 	{}
 
 	/**
 	 * @brief Destructor
 	 */
 							~ScriptVar()
-	{}
+	{
+		if ( isNeedFree )
+		{
+			delete value;
+		}
+	}
 
 	/**
 	 * @brief Initialize value
@@ -42,7 +49,8 @@ public:
 	 */
 	FORCEINLINE void		Init( int32 InValueID, const tchar* InModuleName )
 	{
-		value = ( Type* )GScriptEngine->GetASScriptEngine()->GetModule( TCHAR_TO_ANSI( InModuleName ) )->GetAddressOfGlobalVar( InValueID );
+		void*		address = GScriptEngine->GetASScriptEngine()->GetModule( TCHAR_TO_ANSI( InModuleName ) )->GetAddressOfGlobalVar( InValueID );		
+		SetValue< InIsScriptObject >( address );
 	}
 
 	/**
@@ -54,7 +62,8 @@ public:
 	FORCEINLINE void		Init( int32 InValueID, asIScriptObject* InScriptObject )
 	{
 		check( InScriptObject );
-		value = ( Type* )InScriptObject->GetAddressOfProperty( InValueID );
+		void*		address = InScriptObject->GetAddressOfProperty( InValueID );
+		SetValue< InIsScriptObject >( address );
 	}
 
 	/**
@@ -94,6 +103,43 @@ public:
 	}
 
 private:
+	/**
+	 * @brief Set pointer to script value
+	 * @warning This method cannot be called, since it is used to compile different variations of SetValue (for simple types and classes derived from ScriptObject)
+	 * 
+	 * @param[in] InAddress Pointer to script value
+	 */
+	template< bool >
+	void SetValue( void* InAddress )
+	{
+		check( false );
+	}
+
+	/**
+	 * @brief Set pointer to script value for simple and C++ types (float, int, std::string, etc)
+	 * 
+	 * @param[in] InAddress Pointer to script value
+	 */
+	template<>
+	void SetValue< false >( void* InAddress )
+	{
+		value = ( Type* )InAddress;
+		isNeedFree = false;
+	}
+
+	/**
+	 * @brief Set pointer to script value for classes derived from ScriptObject
+	 * 
+	 * @param[in] InAddress Pointer to script value
+	 */
+	template<>
+	void SetValue< true >( void* InAddress )
+	{
+		value = new Type( ( asIScriptObject* )InAddress );
+		isNeedFree = true;
+	}
+
+	bool		isNeedFree;		/**< Is need free memory when object destroyed */
 	Type*		value;			/**< Pointer on script value */
 };
 

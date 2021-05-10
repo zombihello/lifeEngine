@@ -214,9 +214,6 @@ void ScriptEngine::RegisterTypesASToCPP( class asIScriptModule* InScriptModule )
 			continue;
 		}
 
-		const char* q = typeInfo->GetName();
-		( void ) q;
-
 		tableTypesASToCPP[ typeInfo->GetTypeId() ] = SASType{ std::string( "O" ) + typeInfo->GetName(), typeInfo };
 	}
 }
@@ -230,7 +227,6 @@ void ScriptEngine::Make( const tchar* InCmdLine )
 	std::wstring					outputPath = GEngineConfig.GetValue( TEXT( "ScriptEngine.ScriptEngine" ), TEXT( "DirBinary" ) ).GetString();
 	std::vector< ConfigValue >		modules = GEditorConfig.GetValue( TEXT( "ScriptEngine.Make" ), TEXT( "Modules" ) ).GetArray();
 
-	LE_LOG( LT_Log, LC_Script, TEXT( "" ) );
 	for ( uint32 index = 0, count = ( uint32 )modules.size(); index < count; ++index )
 	{
 		const ConfigObject&			module = modules[ index ].GetObject();
@@ -565,6 +561,87 @@ std::string ScriptEngine::GenerateCPPGlobalValue( class asIScriptModule* InScrip
 }
 
 /**
+ * Get C++ code for set arg of function/constructor/method
+ */
+std::string ScriptEngine::GetCallMethodOfScriptContext( const SCPPParam& InParam )
+{
+	std::string				callMethod;
+
+	switch ( InParam.typeID )
+	{
+		// Int8/UInt8 and Bool
+	case asTYPEID_INT8:
+	case asTYPEID_UINT8:
+	case asTYPEID_BOOL:
+		callMethod = "SetArgByte( " + std::to_string( InParam.id ) + ", " + InParam.name + " )";
+		break;
+
+		// Int16 and UInt16
+	case asTYPEID_INT16:
+	case asTYPEID_UINT16:
+		callMethod = "SetArgWord( " + std::to_string( InParam.id ) + ", " + InParam.name + " )";
+		break;
+
+		// Int32 and UInt32
+	case asTYPEID_INT32:
+	case asTYPEID_UINT32:
+		callMethod = "SetArgDWord( " + std::to_string( InParam.id ) + ", " + InParam.name + " )";
+		break;
+
+		// Int64 and UInt64
+	case asTYPEID_INT64:
+	case asTYPEID_UINT64:
+		callMethod = "SetArgQWord( " + std::to_string( InParam.id ) + ", " + InParam.name + " )";
+		break;
+
+		// Float
+	case asTYPEID_FLOAT:
+		callMethod = "SetArgFloat( " + std::to_string( InParam.id ) + ", " + InParam.name + " )";
+		break;
+
+		// Double
+	case asTYPEID_DOUBLE:
+		callMethod = "SetArgDouble( " + std::to_string( InParam.id ) + ", " + InParam.name + " )";
+		break;
+
+		// C++ and AngelScript user types
+	default:
+		auto		itType = tableTypesASToCPP.find( InParam.typeID );
+		if ( itType == tableTypesASToCPP.end() )
+		{
+			appErrorf( TEXT( "Unknown AngelScript type 0x%X in param %s" ), InParam.typeID, ANSI_TO_TCHAR( InParam.name.c_str() ) );
+			break;
+		}
+
+		asITypeInfo* typeInfo = itType->second.asTypeInfo;
+		check( typeInfo );
+		int32				flags = typeInfo->GetFlags();
+
+		// Objects
+		if ( flags & asOBJ_VALUE )
+		{
+			callMethod = "SetArgObject( " + std::to_string( InParam.id ) + ", &" + InParam.name + " )";
+		}
+
+		// Enums
+		else if ( flags & asOBJ_ENUM )
+		{
+			callMethod = "SetArgDWord( " + std::to_string( InParam.id ) + ", " + InParam.name + " )";
+		}
+
+		// Else unsupported type
+		else
+		{
+			appErrorf( TEXT( "AngelScript type 0x%X in param %s not supported" ), InParam.typeID, ANSI_TO_TCHAR( InParam.name.c_str() ) );
+		}
+
+		break;
+	}
+
+	return callMethod;
+}
+
+/**
  * Generate C++ code of function
  */
 std::string ScriptEngine::GenerateCPPFunction( class asIScriptFunction* InScriptFunction, uint32 InIndexFunction, bool InIsMethod /* = false */ )
@@ -599,7 +676,8 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptFunction* InScript
 	strStream << "{\n";
 
 	// Generate prepare to execute script function
-	strStream << "\tasIScriptContext*		scriptContext = GScriptEngine->GetASScriptEngine()->CreateContext();\n";
+	strStream << "\tasIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();\n";
+	strStream << "\tasIScriptContext*		scriptContext = scriptEngine->CreateContext();\n";
 	strStream << "\tcheck( scriptContext );\n\n";
 
 	strStream << "\tasIScriptFunction*		function = ";
@@ -607,7 +685,7 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptFunction* InScript
 	// If this function
 	if ( !InIsMethod )
 	{
-		strStream << "GScriptEngine->GetASScriptEngine()->GetModule( \"" << InScriptFunction->GetModuleName() << "\" )->GetFunctionByIndex( " << InIndexFunction << " );\n";
+		strStream << "scriptEngine->GetModule( \"" << InScriptFunction->GetModuleName() << "\" )->GetFunctionByIndex( " << InIndexFunction << " );\n";
 	}
 	// Else this method of class
 	else
@@ -630,82 +708,7 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptFunction* InScript
 	// Generate code for set arguments for start function
 	for ( uint32 indexParam = 0, countParams = ( uint32 )params.size(); indexParam < countParams; ++indexParam )
 	{
-		const SCPPParam&		cppParam = params[ indexParam ];
-		std::string				callMethod;
-
-		switch ( cppParam.typeID )
-		{
-			// Int8/UInt8 and Bool
-		case asTYPEID_INT8:
-		case asTYPEID_UINT8:
-		case asTYPEID_BOOL:
-			callMethod = "SetArgByte( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
-			break;
-
-			// Int16 and UInt16
-		case asTYPEID_INT16:
-		case asTYPEID_UINT16:
-			callMethod = "SetArgWord( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
-			break;
-
-			// Int32 and UInt32
-		case asTYPEID_INT32:
-		case asTYPEID_UINT32:
-			callMethod = "SetArgDWord( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
-			break;
-
-			// Int64 and UInt64
-		case asTYPEID_INT64:
-		case asTYPEID_UINT64:
-			callMethod = "SetArgQWord( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
-			break;
-
-			// Float
-		case asTYPEID_FLOAT:
-			callMethod = "SetArgFloat( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
-			break;
-
-			// Double
-		case asTYPEID_DOUBLE:
-			callMethod = "SetArgDouble( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
-			break;
-
-			// C++ and AngelScript user types
-		default:
-			auto		itType = tableTypesASToCPP.find( cppParam.typeID );
-			if ( itType == tableTypesASToCPP.end() )
-			{
-				appErrorf( TEXT( "Unknown AngelScript type 0x%X in param %s" ), cppParam.typeID, ANSI_TO_TCHAR( cppParam.name.c_str() ) );
-				break;
-			}
-
-			asITypeInfo*		typeInfo = itType->second.asTypeInfo;
-			check( typeInfo );
-			int32				flags = typeInfo->GetFlags();
-
-			// Objects
-			if ( flags & asOBJ_VALUE )
-			{
-				callMethod = "SetArgObject( " + std::to_string( indexParam ) + ", &" + cppParam.name + " )";
-			}
-
-			// Enums
-			else if ( flags & asOBJ_ENUM )
-			{
-				callMethod = "SetArgDWord( " + std::to_string( indexParam ) + ", " + cppParam.name + " )";
-			}
-
-			// Else unsupported type
-			else
-			{
-				appErrorf( TEXT( "AngelScript type 0x%X in param %s not supported" ), cppParam.typeID, ANSI_TO_TCHAR( cppParam.name.c_str() ) );
-			}
-
-			break;
-		}
-
-		strStream << "\tscriptContext->" << callMethod << ";\n";
-
+		strStream << "\tscriptContext->" << GetCallMethodOfScriptContext( params[ indexParam ] ) << ";\n";
 		if ( indexParam + 1 == countParams )
 		{
 			strStream << "\n";
@@ -812,6 +815,34 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptFunction* InScript
 }
 
 /**
+ * Is script class property inherited from base type
+ */
+bool IsScriptClassPropertyInherited( asITypeInfo* InClassType, const achar* InPropertyName )
+{
+	if ( !InClassType )
+	{
+		return false;
+	}
+
+	for ( uint32 indexProperty = 0, countProperties = InClassType->GetPropertyCount(); indexProperty < countProperties; ++indexProperty )
+	{
+		const achar*		name = nullptr;
+		int32				result = InClassType->GetProperty( indexProperty, &name );
+		check( result >= 0 );
+
+		// If property not equal InPropertyName - this other value
+		if ( strcmp( InPropertyName, name ) )
+		{
+			continue;
+		}
+
+		return true;
+	}
+
+	return IsScriptClassPropertyInherited( InClassType->GetBaseType(), InPropertyName );
+}
+
+/**
  * Generate C++ code of class
  */
 std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint32 InIndexClass )
@@ -829,6 +860,14 @@ std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint
 	std::vector< CPPProperty >		publicProperties;
 	std::vector< CPPProperty >		protectedProperties;
 	std::vector< CPPProperty >		privateProperties;
+	asITypeInfo*					baseType = InClassType->GetBaseType();
+
+	// If the base type is nullptr means that the class did not inherit from any class - in this case, 
+	// the base class will be ScriptObest, otherwise we inherit from the base type in scripts 
+	// (the "O" prefix + the name of the base type from the script) 
+	std::string						cppClassName = std::string( "O" ) + InClassType->GetName();
+	std::string						cppBaseClassName = !baseType ? "ScriptObject" : ( std::string( "O" ) + baseType->GetName() );
+	std::string						cppBaseClassCtrArgs = !baseType ? "" : "ScriptObject::NoInit";
 
 	// Getting all properties from script class
 	{
@@ -841,6 +880,12 @@ std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint
 			bool				isProtected = false;
 			int32				result = InClassType->GetProperty( indexProperty, &name, &typeId, &isPrivate, &isProtected );
 			check( result >= 0 );
+
+			// Is property inherited from base type - skip
+			if ( IsScriptClassPropertyInherited( baseType, name ) )
+			{
+				continue;
+			}
 
 			CPPProperty			cppProperty;
 			cppProperty.id = indexProperty;
@@ -862,11 +907,14 @@ std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint
 		}
 	}
 
-	strStream << "class O" << InClassType->GetName() << " : public ScriptObject\n";
+	strStream << "class " << cppClassName << " : public " << cppBaseClassName << "\n";	
 	strStream << "{\n";
 
+	// Insert macros DECLARE_CLASS
+	strStream << "\tDECLARE_CLASS( " << cppClassName << ", " << cppBaseClassName << " )\n\n";
+
 	// Generate section of props
-	strStream << "\t//## BEGIN PROPS " << InClassType->GetName() << "\n";
+	strStream << "\t//## BEGIN PROPS " << cppClassName << "\n";
 	{
 		// Public properties
 		if ( !publicProperties.empty() )
@@ -898,36 +946,79 @@ std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint
 			}
 		}
 	}
-	strStream << "\t//## END PROPS " << InClassType->GetName() << "\n\n";
+	strStream << "\t//## END PROPS " << cppClassName << "\n\n";
 
 	// Generate constructor
 	strStream << "public:\n";
-	strStream << "\tO" << InClassType->GetName() << "() : ScriptObject( " << InIndexClass << ", TEXT( \"" << InClassType->GetModule()->GetName() << "\" ) )\n";
-	strStream << "\t{\n";
-
-	// Generate code for init properties
-	// Public properties
-	for ( uint32 indexProperty = 0, countProperties = ( uint32 )publicProperties.size(); indexProperty < countProperties; ++indexProperty )
+	
+	uint32		countConstructors = InClassType->GetFactoryCount();
+	for ( uint32 indexConstructor = 0; indexConstructor < countConstructors; ++indexConstructor )
 	{
-		const CPPProperty&			cppProperty = publicProperties[ indexProperty ];
-		strStream << "\t\t" << cppProperty.name << ".Init( " << cppProperty.id << ", self );\n";
+		asIScriptFunction*		function = InClassType->GetFactoryByIndex( indexConstructor );
+
+		// Get all params in constructor
+		std::vector< SCPPParam >		params;
+		std::string						strParamsDeclaration;
+
+		for ( uint32 indexParam = 0, countParams = function->GetParamCount(); indexParam < countParams; ++indexParam )
+		{
+			SCPPParam		cppParam = GetCPPParamFromFunction( function, indexParam );
+			params.push_back( cppParam );
+
+			// Generate declaration of params for header function
+			strParamsDeclaration += cppParam.ToString();
+			if ( indexParam + 1 < countParams )
+			{
+				strParamsDeclaration += ", ";
+			}
+		}
+
+		// Generate header of constructor
+		// Example: Class( float InA ) : Super( ScriptObject::NoInit )
+		strStream << "\t" << cppClassName << "(" << ( strParamsDeclaration.empty() ? "" : " " + strParamsDeclaration + " " ) << ")" << ( !baseType ? "" : " : " + cppBaseClassName + "( " + cppBaseClassCtrArgs + " )" ) << "\n";
+		strStream << "\t{\n";
+
+		// Getting script engine, script module and creating script context for executable
+		strStream << "\t\tasIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();\n";
+		strStream << "\t\tasIScriptModule*		scriptModule = scriptEngine->GetModule( \"" << InClassType->GetModule()->GetName() << "\" );\n";
+		strStream << "\t\tasIScriptContext*		scriptContext = scriptEngine->CreateContext();\n";
+		strStream << "\t\tcheck( scriptContext && scriptModule );\n\n";
+
+		// Getting object type
+		strStream << "\t\tasITypeInfo*			objectType = scriptModule->GetObjectTypeByIndex( " << InIndexClass << " );\n";
+		strStream << "\t\tcheck( objectType );\n\n";
+
+		// Getting factory function
+		strStream << "\t\tasIScriptFunction*		factory = objectType->GetFactoryByIndex( " << indexConstructor << " );\n";
+		strStream << "\t\tcheck( factory );\n\n";
+
+		strStream << "\t\tint32					result = scriptContext->Prepare( factory );\n";
+		strStream << "\t\tcheck( result >= 0 );\n\n";
+
+		// Generate code for set arguments for start constructor
+		for ( uint32 indexParam = 0, countParams = ( uint32 ) params.size(); indexParam < countParams; ++indexParam )
+		{
+			strStream << "\t\tscriptContext->" << GetCallMethodOfScriptContext( params[ indexParam ] ) << ";\n";
+			if ( indexParam + 1 == countParams )
+			{
+				strStream << "\n";
+			}
+		}
+
+		// Execute constructor
+		strStream << "\t\tresult = scriptContext->Execute();\n";
+		strStream << "\t\tcheck( result >= 0 );\n\n";
+
+		// Init object
+		strStream << "\t\tInit( *( asIScriptObject** )scriptContext->GetAddressOfReturnValue() );\n";
+		strStream << "\t}\n\n";
 	}
 
-	// Protected properties
-	for ( uint32 indexProperty = 0, countProperties = ( uint32 )protectedProperties.size(); indexProperty < countProperties; ++indexProperty )
-	{
-		const CPPProperty&			cppProperty = protectedProperties[ indexProperty ];
-		strStream << "\t\t" << cppProperty.name << ".Init( " << cppProperty.id << ", self );\n";
-	}
+	// Constructor with already created script object
+	strStream << "\t" << cppClassName << "( class asIScriptObject* InScriptObject )" << ( !baseType ? "" : " : " + cppBaseClassName + "( " + cppBaseClassCtrArgs + " )" ) << " { Init( InScriptObject ); }\n";
 
-	// Private properties
-	for ( uint32 indexProperty = 0, countProperties = ( uint32 )privateProperties.size(); indexProperty < countProperties; ++indexProperty )
-	{
-		const CPPProperty&			cppProperty = privateProperties[ indexProperty ];
-		strStream << "\t\t" << cppProperty.name << ".Init( " << cppProperty.id << ", self );\n";
-	}
-
-	strStream << "\t}\n\n";
+	// Constructor with no init option
+	strStream << "\t" << cppClassName << "( ENoInit )" << ( !baseType ? "" : " : " + cppBaseClassName + "( " + cppBaseClassCtrArgs + " )" ) << " {}\n\n";
 
 	// Generate methods
 	uint32		countMethods = InClassType->GetMethodCount();
@@ -935,15 +1026,45 @@ std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint
 	{
 		// Getting method and generating cpp function with indent 1 tab
 		asIScriptFunction*		function = InClassType->GetMethodByIndex( indexMethod );
-		LE_LOG( LT_Log, LC_Script, TEXT( "func = %s" ), ANSI_TO_TCHAR( function->GetName() ) );
-		strStream << "\t" << std::regex_replace( GenerateCPPFunction( function, indexMethod, true ), std::regex( "\n" ), "\n\t" ) << "\n";
 
-		if ( indexMethod + 1 < countMethods )
+		// If function in other class - skip
+		if ( strcmp( function->GetObjectName(), cppClassName.c_str() + 1 ) )		// Move the pointer by one to skip the "O" prefix
 		{
-			strStream << "\n";
+			continue;
 		}
+
+		strStream << "\t" << std::regex_replace( GenerateCPPFunction( function, indexMethod, true ), std::regex( "\n" ), "\n\t" ) << "\n\n";
 	}
 
+	// Insert in private section method for init class
+	strStream << "protected:\n";
+	strStream << "\tvoid Init( asIScriptObject* InScriptObject ) override\n";
+	strStream << "\t{\n";
+	strStream << "\t\tSuper::Init( InScriptObject );\n";
+
+	// Generate code for init properties
+	// Public properties
+	for ( uint32 indexProperty = 0, countProperties = ( uint32 ) publicProperties.size(); indexProperty < countProperties; ++indexProperty )
+	{
+		const CPPProperty&			cppProperty = publicProperties[ indexProperty ];
+		strStream << "\t\t" << cppProperty.name << ".Init( " << cppProperty.id << ", self );\n";
+	}
+
+	// Protected properties
+	for ( uint32 indexProperty = 0, countProperties = ( uint32 ) protectedProperties.size(); indexProperty < countProperties; ++indexProperty )
+	{
+		const CPPProperty&			cppProperty = protectedProperties[ indexProperty ];
+		strStream << "\t\t" << cppProperty.name << ".Init( " << cppProperty.id << ", self );\n";
+	}
+
+	// Private properties
+	for ( uint32 indexProperty = 0, countProperties = ( uint32 ) privateProperties.size(); indexProperty < countProperties; ++indexProperty )
+	{
+		const CPPProperty&			cppProperty = privateProperties[ indexProperty ];
+		strStream << "\t\t" << cppProperty.name << ".Init( " << cppProperty.id << ", self );\n";
+	}
+
+	strStream << "\t}\n";
 	strStream << "};";
 	return strStream.str();
 }
@@ -963,7 +1084,7 @@ ScriptEngine::SCPPParam ScriptEngine::GetCPPParamFromFunction( class asIScriptFu
 	int32			result = InScriptFunction->GetParam( InIndexParam, &typeId, &flags, &name, &defaultArg );
 	check( result >= 0 );
 
-	return SCPPParam{ name ? name : std::string( "Param" ) + std::to_string( InIndexParam ), typeId };
+	return SCPPParam{ InIndexParam, name ? name : std::string( "Param" ) + std::to_string( InIndexParam ), typeId };
 }
 
 /**

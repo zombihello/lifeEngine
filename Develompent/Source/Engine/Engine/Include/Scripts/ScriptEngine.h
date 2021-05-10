@@ -79,6 +79,7 @@ private:
 			return TypeIDToString( typeID ) + " " + name;
 		}
 
+		uint32				id;				/**< ID of param */
 		std::string			name;			/**< Name of param */
 		int32				typeID;			/**< AngelScript type id */
 	};
@@ -199,6 +200,14 @@ private:
 	 * @param[in] InScriptModule Pointer to script module
 	 */
 	void				RegisterTypesASToCPP( class asIScriptModule* InScriptModule );
+
+	/**
+	 * @brief Get C++ code for set arg of function/constructor/method
+	 * @warning This method only available with enabled macro WITH_EDITOR
+	 * 
+	 * @param[in] InParam Param for set arg
+	 */
+	std::string			GetCallMethodOfScriptContext( const SCPPParam& InParam );
 
 	std::unordered_map< int32, SASType >					tableTypesASToCPP;			/**< Table of types for convert from AngelScript to C++ */
 #endif // WITH_EDITOR
