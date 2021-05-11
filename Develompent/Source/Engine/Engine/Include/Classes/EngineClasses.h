@@ -12,6 +12,10 @@
 #include "Scripts/ScriptObject.h"
 
 // ----------------------------------
+// TYPEDEFS
+// ----------------------------------
+
+// ----------------------------------
 // ENUMS
 // ----------------------------------
 
@@ -20,6 +24,10 @@ enum EGameMode
 	GM_Menu			=0,
 	GM_Game			=1
 };
+
+// ----------------------------------
+// FUNCTIONS
+// ----------------------------------
 
 // ----------------------------------
 // CLASSES
@@ -83,6 +91,29 @@ public:
 		return returnValue;
 	}
 
+	EGameMode execGetGameMode()
+	{
+		asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
+		asIScriptContext*		scriptContext = scriptEngine->CreateContext();
+		check( scriptContext );
+	
+		asIScriptFunction*		function = typeInfo->GetMethodByIndex( 1 );
+		check( function );
+	
+		int32	result = scriptContext->Prepare( function );
+		check( result >= 0 );
+	
+		result = scriptContext->SetObject( self );
+		check( result >= 0 );
+	
+		result = scriptContext->Execute();
+		check( result >= 0 );
+	
+		EGameMode		returnValue = ( EGameMode )scriptContext->GetReturnDWord();
+		scriptContext->Release();
+		return returnValue;
+	}
+
 protected:
 	void Init( asIScriptObject* InScriptObject ) override
 	{
@@ -90,6 +121,10 @@ protected:
 		gameMode.Init( 0, self );
 	}
 };
+
+// ----------------------------------
+// GLOBAL VALUES
+// ----------------------------------
 
 // ----------------------------------
 // INITIALIZATION MACROS

@@ -76,12 +76,13 @@ private:
 		 */
 		FORCEINLINE std::string			ToString() const
 		{
-			return TypeIDToString( typeID ) + " " + name;
+			return TypeIDToString( typeID, flags ) + " " + name;
 		}
 
 		uint32				id;				/**< ID of param */
 		std::string			name;			/**< Name of param */
 		int32				typeID;			/**< AngelScript type id */
+		int64				flags;			/**< Modifiers of type */
 	};
 
 	/**
@@ -189,9 +190,10 @@ private:
 	 * @warning This method only available with enabled macro WITH_EDITOR
 	 * 
 	 * @param[in] InTypeID AngelScript type ID
+	 * @param[in] InFlags Modifiers of type
 	 * @return Converted AngelScript type ID to C++ name
 	 */
-	static std::string	TypeIDToString( int32 InTypeID );
+	static std::string	TypeIDToString( int32 InTypeID, int64 InFlags = 0 );
 
 	/**
 	 * @brief Register name of types from AngelScript to C++

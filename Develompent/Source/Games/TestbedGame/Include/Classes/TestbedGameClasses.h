@@ -12,9 +12,12 @@
 #include "Scripts/ScriptObject.h"
 
 // ----------------------------------
-// ENUMS
+// TYPEDEFS
 // ----------------------------------
 
+// ----------------------------------
+// ENUMS
+// ----------------------------------
 
 // ----------------------------------
 // FUNCTIONS
@@ -83,7 +86,7 @@ public:
 		asIScriptContext*		scriptContext = scriptEngine->CreateContext();
 		check( scriptContext );
 	
-		asIScriptFunction*		function = typeInfo->GetMethodByIndex( 1 );
+		asIScriptFunction*		function = typeInfo->GetMethodByIndex( 2 );
 		check( function );
 	
 		int32	result = scriptContext->Prepare( function );
@@ -110,14 +113,14 @@ protected:
 // GLOBAL VALUES
 // ----------------------------------
 
-extern ScriptVar< OTBGameInfo >		GTBGameInfo;
+extern ScriptVar< OTBGameInfo > GTBGameInfo;
 
 // ----------------------------------
 // INITIALIZATION MACROS
 // ----------------------------------
 
 #define DECLARATE_GLOBALVALUES_SCRIPTMODULE_TestbedGame \
-	ScriptVar< OTBGameInfo >		GTBGameInfo;
+	ScriptVar< OTBGameInfo > GTBGameInfo;
 
 // ----------------------------------
 // INITIALIZATION FUNCTION

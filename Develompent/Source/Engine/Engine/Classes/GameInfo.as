@@ -16,5 +16,10 @@ shared class GameInfo
 		return "UnknownGame";
 	}
 	
+	EGameMode GetGameMode()
+	{
+		return gameMode;
+	}
+	
 	EGameMode		gameMode;
 }
