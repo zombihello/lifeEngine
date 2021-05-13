@@ -23,9 +23,19 @@
  *
  * @param[in] String Input string
  *
- *  Example usage: @code TEXT( "Hello World" ) @endcode
+ * Example usage: @code TEXT( "Hello World" ) @endcode
  */
 #define TEXT( String )      L##String
+
+/**
+ * @ingroup Core
+ * @brief Macro for labeling a variable that it is not used
+ * 
+ * @param[in] Value Value
+ * 
+ * Example usage: @code UNUSED_VAR( health ); @endcode
+ */
+#define UNUSED_VAR( Value )     ( void )Value
 
  /**
   * @ingroup Core

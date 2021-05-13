@@ -25,7 +25,16 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual				~ScriptObject();
+	virtual										~ScriptObject();
+
+	/**
+	 * @brief Get script object
+	 * @return Return pointer to script object. If not created return nullptr
+	 */
+	FORCEINLINE class asIScriptObject*			GetHandle() const
+	{
+		return self;
+	}
 
 protected:
 	/**

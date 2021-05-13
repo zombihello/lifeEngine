@@ -20,27 +20,10 @@
  * @ingroup Engine
  * @brief Class for work with script values
  */
-template< typename Type, bool InIsScriptObject = std::is_base_of< class ScriptObject, Type >::value >
+template< typename Type, bool InIsPointer = std::is_pointer< Type >::value, bool InIsScriptObject = std::is_base_of< class ScriptObject, Type >::value >
 class ScriptVar
 {
 public:
-	/**
-	 * @brief Constructor
-	 */
-							ScriptVar() : value( nullptr ), isNeedFree( false )
-	{}
-
-	/**
-	 * @brief Destructor
-	 */
-							~ScriptVar()
-	{
-		if ( isNeedFree )
-		{
-			delete value;
-		}
-	}
-
 	/**
 	 * @brief Initialize value
 	 * 
@@ -50,7 +33,7 @@ public:
 	FORCEINLINE void		Init( int32 InValueID, const tchar* InModuleName )
 	{
 		void*		address = GScriptEngine->GetASScriptEngine()->GetModule( TCHAR_TO_ANSI( InModuleName ) )->GetAddressOfGlobalVar( InValueID );		
-		SetValue< InIsScriptObject >( address );
+		handle.SetValue< InIsScriptObject >( address );
 	}
 
 	/**
@@ -63,84 +46,196 @@ public:
 	{
 		check( InScriptObject );
 		void*		address = InScriptObject->GetAddressOfProperty( InValueID );
-		SetValue< InIsScriptObject >( address );
+		handle.SetValue< InIsScriptObject >( address );
 	}
 
 	/**
 	 * @brief Get value
 	 * @return Return pointer on script value. If not initialize or empty return nullptr
 	 */
-	FORCEINLINE Type*		GetValue() const
+	FORCEINLINE Type*		GetValue()
 	{
-		return value;
+		return handle.GetValue();
 	}
 
 	/**
 	 * @brief Operator for cast to Type*
 	 * @return Pointer on script value
 	 */
-	FORCEINLINE				operator Type*() const
+	FORCEINLINE				operator Type*()
 	{
-		return value;
+		return handle.GetValue();
 	}
 
 	/**
 	 * @brief Operator for cast to Type
 	 * @return Script value
 	 */
-	FORCEINLINE				operator Type() const
+	FORCEINLINE				operator Type()
 	{
-		return *value;
+		return *handle.GetValue();
 	}
 
 	/**
 	 * @brief Operator ->
 	 * @return Pointer on script value
 	 */
-	FORCEINLINE Type*		operator->() const
+	FORCEINLINE Type*		operator->()
 	{
-		return value;
+		return handle.GetValue();
 	}
 
 private:
 	/**
-	 * @brief Set pointer to script value
-	 * @warning This method cannot be called, since it is used to compile different variations of SetValue (for simple types and classes derived from ScriptObject)
-	 * 
-	 * @param[in] InAddress Pointer to script value
+	 * @brief Class of description script value
 	 */
 	template< bool >
-	void SetValue( void* InAddress )
+	class Handle
 	{
-		check( false );
-	}
+	public:
+		/**
+		 * @brief Constructor
+		 */
+		FORCEINLINE				Handle() : isNeedFree( false ), value( nullptr )
+		{}
+
+		/**
+		 * @brief Destructor
+		 */
+		FORCEINLINE				~Handle()
+		{
+			if ( isNeedFree )
+			{
+				delete value;
+			}
+		}
+
+		/**
+		 * @brief Set pointer to script value for simple and C++ types (float, int, std::string, etc)
+		 *
+		 * @param[in] InAddress Pointer to script value
+		 */
+		template< bool InIsScriptObject >
+		void						SetValue( void* InAddress )
+		{
+			value = ( Type* )InAddress;
+			isNeedFree = false;
+		}
+
+		/**
+		 * @brief Set pointer to script value for classes derived from ScriptObject
+		 *
+		 * @param[in] InAddress Pointer to script value
+		 */
+		template<>
+		void						SetValue< true >( void* InAddress )
+		{
+			value = new Type( ( asIScriptObject* )InAddress );
+			isNeedFree = true;
+		}
+
+		/**
+		 * @brief Get value
+		 * @return Return pointer on script value. If not initialize or empty return nullptr
+		 */
+		FORCEINLINE Type*			GetValue()
+		{
+			return value;
+		}
+
+	private:
+		bool			isNeedFree;		/**< Is need free memory when object destroyed */
+		Type*			value;			/**< Pointer to script value */
+	};
 
 	/**
-	 * @brief Set pointer to script value for simple and C++ types (float, int, std::string, etc)
-	 * 
-	 * @param[in] InAddress Pointer to script value
+	 * @brief Class of description pointer to script value
 	 */
 	template<>
-	void SetValue< false >( void* InAddress )
+	class Handle< true >
 	{
-		value = ( Type* )InAddress;
-		isNeedFree = false;
-	}
+	public:
+		/**
+		 * @brief Constructor
+		 */
+		FORCEINLINE						Handle() : pointer( nullptr )
+		{}
 
-	/**
-	 * @brief Set pointer to script value for classes derived from ScriptObject
-	 * 
-	 * @param[in] InAddress Pointer to script value
-	 */
-	template<>
-	void SetValue< true >( void* InAddress )
-	{
-		value = new Type( ( asIScriptObject* )InAddress );
-		isNeedFree = true;
-	}
+		/**
+		 * @brief Set pointer to script value
+		 *
+		 * @param[in] InAddress Pointer to handle script value
+		 */
+		template< bool InIsScriptObject >
+		void							SetValue( void* InAddress )
+		{
+			pointer = InAddress;
+			if ( !pointer )
+			{
+				return;
+			}
 
-	bool		isNeedFree;		/**< Is need free memory when object destroyed */
-	Type*		value;			/**< Pointer on script value */
+			void*		address = nullptr;
+			memcpy( &address, pointer, sizeof( void* ) );
+			if ( !address )
+			{
+				return;
+			}
+
+			value.SetValue< InIsScriptObject >( address );
+		}
+
+		/**
+		 * @brief Get value
+		 * @return Return pointer on script value. If not initialize or empty return nullptr
+		 */
+		FORCEINLINE Type*				GetValue()
+		{
+			return GetValueInternal< InIsScriptObject >();
+		}
+
+	private:
+		/**
+		 * @brief Internal of getting value for simple type (int, float, etc)
+		 *
+		 * @return Return pointer on script value. If not initialize or empty return nullptr
+		 */
+		template< bool InIsScriptObject >
+		FORCEINLINE Type*				GetValueInternal()
+		{
+			return ( Type* )pointer;
+		}
+
+		/**
+		 * @brief Internal of getting value for classes derived from ScriptObject
+		 *
+		 * @return Return pointer on script value. If not initialize or empty return nullptr
+		 */
+		template<>
+		FORCEINLINE Type*				GetValueInternal< true >()
+		{
+			if ( !pointer )
+			{
+				return nullptr;
+			}
+
+			// If the pointer refers to another script object, you need to update the stored values
+			if ( !value.GetValue() || ( class asIScriptObject* )pointer != value.GetValue()->GetHandle() )
+			{
+				void*			address = nullptr;
+				memcpy( &address, pointer, sizeof( void* ) );
+
+				value.SetValue< InIsScriptObject >( address );
+			}
+
+			return value.GetValue();
+		}
+
+		void*				pointer;		/**< Address to pointer script variable */
+		Handle< false >		value;			/**< Handle on script value */
+	};
+
+	Handle< InIsPointer >		handle;			/**< Handle of script variable */
 };
 
 #endif // !SCRIPTVAR_H

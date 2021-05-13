@@ -104,6 +104,9 @@ namespace lifeBuildTool
         {
             string      result = "";
 
+            // Set C++ language standart
+            result += " /std:c++14";
+
             // Explicitly compile the file as C++.
             result += " /TP";
 
@@ -125,6 +128,9 @@ namespace lifeBuildTool
         static string GetCLArguments_C()
         {
             string      result = "";
+
+            // Set C language standart
+            result += " /std:c11";
 
             // Explicitly compile the file as C.
             result += " /TC";

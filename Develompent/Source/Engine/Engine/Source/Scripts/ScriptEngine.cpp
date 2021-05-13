@@ -563,7 +563,9 @@ std::string ScriptEngine::GenerateCPPGlobalValue( class asIScriptModule* InScrip
 	check( result >= 0 );
 
 	std::stringstream		strStream;
-	strStream << "ScriptVar< " << TypeIDToString( typeId, isConst ? asTM_CONST : 0 ) << " > " << name;
+	bool					isPointer = false;
+	std::string				typeCpp = TypeIDToString( typeId, isConst ? asTM_CONST : 0, &isPointer );
+	strStream << "ScriptVar< " << typeCpp << ( isPointer ? ", true" : "" ) << " > " << name;
 	
 	// If InOutModuleInitDesc not nullptr - we write info for generate macros and functions for initialize module
 	if ( InOutModuleInitDesc )
@@ -911,10 +913,11 @@ std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint
 				continue;
 			}
 
+			bool				isPointer = false;
 			CPPProperty			cppProperty;
 			cppProperty.id = indexProperty;
 			cppProperty.name = name;
-			cppProperty.declaration = "ScriptVar< " + TypeIDToString( typeId ) + " > " + name;
+			cppProperty.declaration = "ScriptVar< " + TypeIDToString( typeId, 0, &isPointer ) + ( isPointer ? ", true" : "" ) + " > " + name;
 
 			if ( !isPrivate && !isProtected )
 			{
@@ -1114,14 +1117,31 @@ ScriptEngine::SCPPParam ScriptEngine::GetCPPParamFromFunction( class asIScriptFu
 /**
  * Convert AngelScript type ID to C++ name
  */
-std::string ScriptEngine::TypeIDToString( int32 InTypeID, int64 InFlags )
+std::string ScriptEngine::TypeIDToString( int32 InTypeID, int64 InFlags, bool* OutIsPointer /*= nullptr*/ )
 {
-	bool				isConst = InFlags & asTM_CONST;
+	int32				typeId = InTypeID;
+	bool				isConst = InFlags & asTM_CONST || InTypeID & asTYPEID_HANDLETOCONST;
 	bool				isReference = InFlags & asTM_INREF || InFlags & asTM_OUTREF || InFlags & asTM_INOUTREF;
+	bool				isObjHandle = InTypeID & asTYPEID_OBJHANDLE;	
 	std::string			nameType;
 
+	if ( InTypeID & asTYPEID_OBJHANDLE )
+	{
+		typeId &= ~asTYPEID_OBJHANDLE;
+	}
+
+	if ( InTypeID & asTYPEID_HANDLETOCONST )
+	{
+		typeId &= ~asTYPEID_HANDLETOCONST;
+	}
+
+	if ( OutIsPointer )
+	{
+		*OutIsPointer = isObjHandle;
+	}
+
 	// Standart types
-	if ( InTypeID >= 0 && InTypeID <= 11 )
+	if ( typeId >= 0 && typeId <= 11 )
 	{
 		static const char*			nameCPPType[] =
 		{
@@ -1139,19 +1159,19 @@ std::string ScriptEngine::TypeIDToString( int32 InTypeID, int64 InFlags )
 			"double"		// CPPT_Double
 		};
 
-		nameType = nameCPPType[ InTypeID ];
+		nameType = nameCPPType[ typeId ];
 	}
 
 	// C++ user types
 	else if ( InTypeID & asTYPEID_APPOBJECT )
 	{
-		nameType = GScriptEngine->tableTypesASToCPP[ InTypeID ].cppName;
+		nameType = GScriptEngine->tableTypesASToCPP[ typeId ].cppName;
 	}
 
 	// AngelScript user types
 	else
 	{
-		auto		itType = GScriptEngine->tableTypesASToCPP.find( InTypeID );
+		auto		itType = GScriptEngine->tableTypesASToCPP.find( typeId );
 		if ( itType != GScriptEngine->tableTypesASToCPP.end() )
 		{
 			nameType = itType->second.cppName;

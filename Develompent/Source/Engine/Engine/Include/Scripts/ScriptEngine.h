@@ -191,9 +191,10 @@ private:
 	 * 
 	 * @param[in] InTypeID AngelScript type ID
 	 * @param[in] InFlags Modifiers of type
+	 * @param[out] OutIsPointer Is pointer?
 	 * @return Converted AngelScript type ID to C++ name
 	 */
-	static std::string	TypeIDToString( int32 InTypeID, int64 InFlags = 0 );
+	static std::string	TypeIDToString( int32 InTypeID, int64 InFlags = 0, bool* OutIsPointer = nullptr );
 
 	/**
 	 * @brief Register name of types from AngelScript to C++
