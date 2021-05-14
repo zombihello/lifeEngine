@@ -25,6 +25,21 @@ class ScriptVar
 {
 public:
 	/**
+	 * @brief Constructor
+	 */
+	FORCEINLINE			ScriptVar()
+	{}
+
+	/**
+	 * @brief Constructor of copy
+	 * @param[in] InCopy Copy
+	 */
+	FORCEINLINE			ScriptVar( const ScriptVar& InCopy )
+	{
+		handle.SetValue< InIsScriptObject >( InCopy.handle.GetAddress< InIsScriptObject >() );
+	}
+
+	/**
 	 * @brief Initialize value
 	 * 
 	 * @param[in] InValueID Index of global value in script module
@@ -47,6 +62,25 @@ public:
 		check( InScriptObject );
 		void*		address = InScriptObject->GetAddressOfProperty( InValueID );
 		handle.SetValue< InIsScriptObject >( address );
+	}
+
+	/**
+	 * @brief Initialize value
+	 * @param[in] InAddress Address on script variable
+	 */
+	FORCEINLINE void		Init( void* InAddress )
+	{
+		handle.SetValue< InIsScriptObject >( InAddress );
+	}
+
+	/**
+	 * @brief Overrload operator of copy
+	 * @param[in] InCopy Copy
+	 */
+	FORCEINLINE ScriptVar&	operator=( const ScriptVar& InCopy )
+	{
+		handle.SetValue< InIsScriptObject >( InCopy.handle.GetAddress() );
+		return *this;
 	}
 
 	/**
@@ -130,8 +164,23 @@ private:
 		template<>
 		void						SetValue< true >( void* InAddress )
 		{
-			value = new Type( ( asIScriptObject* )InAddress );
-			isNeedFree = true;
+			asIScriptObject*		scriptObject = ( asIScriptObject* )InAddress;
+			if ( !scriptObject )
+			{
+				return;
+			}
+
+			Type*			userData = ( Type* )scriptObject->GetUserData();
+			if ( !userData )
+			{
+				value = new Type( ( asIScriptObject* )InAddress );
+				isNeedFree = true;
+			}
+			else
+			{
+				value = userData;
+				userData->GetHandle()->AddRef();
+			}		
 		}
 
 		/**
@@ -141,6 +190,26 @@ private:
 		FORCEINLINE Type*			GetValue()
 		{
 			return value;
+		}
+
+		/**
+		 * @brief Get address on script variable for simple and C++ types (float, int, std::string, etc) 
+		 * @return Address on script variable
+		 */
+		template< bool InIsScriptObject >
+		FORCEINLINE void*			GetAddress() const
+		{
+			return value;
+		}
+
+		/**
+		 * @brief Get address on script variable for script object
+		 * @return Address on script variable
+		 */
+		template<>
+		FORCEINLINE void*			GetAddress< true >() const
+		{
+			return value->GetHandle();
 		}
 
 	private:
@@ -192,6 +261,16 @@ private:
 		FORCEINLINE Type*				GetValue()
 		{
 			return GetValueInternal< InIsScriptObject >();
+		}
+
+		/**
+		 * @brief Get address on script variable
+		 * @return Address on script variable
+		 */
+		template< bool InIsScriptObject >
+		FORCEINLINE void*				GetAddress() const
+		{
+			return pointer;
 		}
 
 	private:

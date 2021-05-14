@@ -20,30 +20,6 @@
 // ----------------------------------
 
 // ----------------------------------
-// FUNCTIONS
-// ----------------------------------
-
-int32 execGameInit()
-{
-	asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
-	asIScriptContext*		scriptContext = scriptEngine->CreateContext();
-	check( scriptContext );
-
-	asIScriptFunction*		function = scriptEngine->GetModule( "TestbedGame" )->GetFunctionByIndex( 0 );
-	check( function );
-
-	int32	result = scriptContext->Prepare( function );
-	check( result >= 0 );
-
-	result = scriptContext->Execute();
-	check( result >= 0 );
-
-	int32		returnValue = scriptContext->GetReturnDWord();
-	scriptContext->Release();
-	return returnValue;
-}
-
-// ----------------------------------
 // CLASSES
 // ----------------------------------
 
@@ -80,6 +56,15 @@ public:
 	OTBGameInfo( class asIScriptObject* InScriptObject ) : OGameInfo( ScriptObject::NoInit ) { Init( InScriptObject ); }
 	OTBGameInfo( ENoInit ) : OGameInfo( ScriptObject::NoInit ) {}
 
+	FORCEINLINE OTBGameInfo& operator=( const OTBGameInfo& InCopy )
+	{
+		asIScriptObject*		scriptObject = ScriptObject::StasticASCreateCopy( InCopy.self );
+		check( scriptObject );
+
+		Init( scriptObject );
+		return *this;
+	}
+
 	void execSetGameMode( EGameMode Param0 )
 	{
 		asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
@@ -110,17 +95,57 @@ protected:
 };
 
 // ----------------------------------
-// GLOBAL VALUES
+// FUNCTIONS
 // ----------------------------------
 
-extern ScriptVar< OTBGameInfo > GTBGameInfo;
+void execGameExec3( OTBGameInfo*& OutTest )
+{
+	asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
+	asIScriptContext*		scriptContext = scriptEngine->CreateContext();
+	check( scriptContext );
+
+	asIScriptFunction*		function = scriptEngine->GetModule( "TestbedGame" )->GetFunctionByIndex( 0 );
+	check( function );
+
+	int32	result = scriptContext->Prepare( function );
+	check( result >= 0 );
+
+	scriptContext->SetArgAddress( 0, OutTest->GetHandle() );
+
+	result = scriptContext->Execute();
+	check( result >= 0 );
+	scriptContext->Release();
+}
+
+int32 execGameInit()
+{
+	asIScriptEngine*		scriptEngine = GScriptEngine->GetASScriptEngine();
+	asIScriptContext*		scriptContext = scriptEngine->CreateContext();
+	check( scriptContext );
+
+	asIScriptFunction*		function = scriptEngine->GetModule( "TestbedGame" )->GetFunctionByIndex( 1 );
+	check( function );
+
+	int32	result = scriptContext->Prepare( function );
+	check( result >= 0 );
+
+	result = scriptContext->Execute();
+	check( result >= 0 );
+
+	int32		returnValue = scriptContext->GetReturnDWord();
+	scriptContext->Release();
+	return returnValue;
+}
+
+// ----------------------------------
+// GLOBAL VALUES
+// ----------------------------------
 
 // ----------------------------------
 // INITIALIZATION MACROS
 // ----------------------------------
 
-#define DECLARATE_GLOBALVALUES_SCRIPTMODULE_TestbedGame \
-	ScriptVar< OTBGameInfo > GTBGameInfo;
+#define DECLARATE_GLOBALVALUES_SCRIPTMODULE_TestbedGame
 
 // ----------------------------------
 // INITIALIZATION FUNCTION
@@ -128,5 +153,4 @@ extern ScriptVar< OTBGameInfo > GTBGameInfo;
 
 void InitScriptModule_TestbedGame()
 {
-	GTBGameInfo.Init( 0, TEXT( "TestbedGame" ) );
 }

@@ -227,6 +227,9 @@ void ScriptEngine::Make( const tchar* InCmdLine )
 	std::wstring					outputPath = GEngineConfig.GetValue( TEXT( "ScriptEngine.ScriptEngine" ), TEXT( "DirBinary" ) ).GetString();
 	std::vector< ConfigValue >		modules = GEditorConfig.GetValue( TEXT( "ScriptEngine.Make" ), TEXT( "Modules" ) ).GetArray();
 
+	// Enable show warnings from scripts
+	asScriptEngine->SetEngineProperty( asEP_COMPILER_WARNINGS, 1 );		// 0 - dismiss, 1 - emit, 2 - treat as error.
+
 	for ( uint32 index = 0, count = ( uint32 )modules.size(); index < count; ++index )
 	{
 		const ConfigObject&			module = modules[ index ].GetObject();
@@ -244,6 +247,9 @@ void ScriptEngine::Make( const tchar* InCmdLine )
 		GenerateHeadersForModule( scriptModule, outputCPPHeaders.c_str() );	
 		LE_LOG( LT_Log, LC_Script, TEXT( "" ) );
 	}
+
+	// Disable show warnings from scripts
+	asScriptEngine->SetEngineProperty( asEP_COMPILER_WARNINGS, 0 );
 }
 
 /**
@@ -375,41 +381,6 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 		}
 	}
 
-	// Write functions
-	*arCPPHeader << "// ----------------------------------\n";
-	*arCPPHeader << "// FUNCTIONS\n";
-	*arCPPHeader << "// ----------------------------------\n\n";
-
-	uint32			countFunctions = InScriptModule->GetFunctionCount();
-	if ( countFunctions > 0 )
-	{
-		uint32			countFunctionsInHeader = 0;
-		for ( uint32 indexFunction = 0; indexFunction < countFunctions; ++indexFunction )
-		{
-			asIScriptFunction*		function = InScriptModule->GetFunctionByIndex( indexFunction );
-			check( function );
-
-			// If function in other module - skip
-			if ( strcmp( function->GetModule()->GetName(), InScriptModule->GetName() ) )
-			{
-				continue;
-			}
-
-			*arCPPHeader << ( achar* )GenerateCPPFunction( function, indexFunction ).c_str() << "\n";
-			++countFunctionsInHeader;
-
-			if ( indexFunction + 1 < countFunctions )
-			{
-				*arCPPHeader << "\n";
-			}
-		}
-
-		if ( countFunctionsInHeader > 0 )
-		{
-			*arCPPHeader << "\n";
-		}
-	}
-
 	// Write classes
 	*arCPPHeader << "// ----------------------------------\n";
 	*arCPPHeader << "// CLASSES\n";
@@ -440,6 +411,41 @@ void ScriptEngine::GenerateHeadersForModule( class asIScriptModule* InScriptModu
 		}
 
 		if ( countClassesInHeader > 0 )
+		{
+			*arCPPHeader << "\n";
+		}
+	}
+
+	// Write functions
+	*arCPPHeader << "// ----------------------------------\n";
+	*arCPPHeader << "// FUNCTIONS\n";
+	*arCPPHeader << "// ----------------------------------\n\n";
+
+	uint32			countFunctions = InScriptModule->GetFunctionCount();
+	if ( countFunctions > 0 )
+	{
+		uint32			countFunctionsInHeader = 0;
+		for ( uint32 indexFunction = 0; indexFunction < countFunctions; ++indexFunction )
+		{
+			asIScriptFunction*		function = InScriptModule->GetFunctionByIndex( indexFunction );
+			check( function );
+
+			// If function in other module - skip
+			if ( strcmp( function->GetModule()->GetName(), InScriptModule->GetName() ) )
+			{
+				continue;
+			}
+
+			*arCPPHeader << ( achar* )GenerateCPPFunction( function, indexFunction ).c_str() << "\n";
+			++countFunctionsInHeader;
+
+			if ( indexFunction + 1 < countFunctions )
+			{
+				*arCPPHeader << "\n";
+			}
+		}
+
+		if ( countFunctionsInHeader > 0 )
 		{
 			*arCPPHeader << "\n";
 		}
@@ -564,7 +570,7 @@ std::string ScriptEngine::GenerateCPPGlobalValue( class asIScriptModule* InScrip
 
 	std::stringstream		strStream;
 	bool					isPointer = false;
-	std::string				typeCpp = TypeIDToString( typeId, isConst ? asTM_CONST : 0, &isPointer );
+	std::string				typeCpp = TypeIDToString( typeId, isConst ? asTM_CONST : 0, true, &isPointer );
 	strStream << "ScriptVar< " << typeCpp << ( isPointer ? ", true" : "" ) << " > " << name;
 	
 	// If InOutModuleInitDesc not nullptr - we write info for generate macros and functions for initialize module
@@ -586,9 +592,23 @@ std::string ScriptEngine::GetCallMethodOfScriptContext( const SCPPParam& InParam
 	std::string				callMethod;
 
 	// If parameter is referenced - need set arg by address
-	if ( InParam.flags & asTM_INREF || InParam.flags & asTM_OUTREF || InParam.flags & asTM_INOUTREF )
+	if ( InParam.flags & asTM_INREF || InParam.flags & asTM_OUTREF || InParam.flags & asTM_INOUTREF || InParam.typeID & asTYPEID_OBJHANDLE )
 	{
-		callMethod = "SetArgAddress( " + std::to_string( InParam.id ) + ", ( void* ) &" + InParam.name + " )";
+		// If is script object need get handle to asIScriptObject
+		if ( InParam.typeID & asTYPEID_OBJHANDLE )
+		{
+			callMethod = "SetArgAddress( " + std::to_string( InParam.id ) + ", " + InParam.name + "->GetHandle() )";
+		}
+		else if ( InParam.typeID & asTYPEID_SCRIPTOBJECT )
+		{
+			callMethod = "SetArgAddress( " + std::to_string( InParam.id ) + ", " + InParam.name + ".GetHandle() )";
+		}
+
+		// Else set address to param of function
+		else
+		{
+			callMethod = "SetArgAddress( " + std::to_string( InParam.id ) + ", ( void* ) &" + InParam.name + " )";
+		}
 	}
 	else
 	{
@@ -642,10 +662,16 @@ std::string ScriptEngine::GetCallMethodOfScriptContext( const SCPPParam& InParam
 			check( typeInfo );
 			int32				flags = typeInfo->GetFlags();
 
-			// Objects
+			// C++ Objects
 			if ( flags & asOBJ_VALUE )
 			{
 				callMethod = "SetArgObject( " + std::to_string( InParam.id ) + ", &" + InParam.name + " )";
+			}
+
+			// AngelScript objects
+			else if ( flags & asOBJ_SCRIPT_OBJECT )
+			{
+				callMethod = "SetArgObject( " + std::to_string( InParam.id ) + ", " + InParam.name + ".GetHandle() )";
 			}
 
 			// Enums
@@ -698,7 +724,14 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptFunction* InScript
 
 	// Generate header of function
 	// Example: float execTest( float InA )
-	strStream << TypeIDToString( retTypeId ) << " exec" << InScriptFunction->GetName() << ( params.empty() ? "()" : ( "( " + strParamsDeclaration + " )" ) ) << "\n";
+	bool			isPointer = false;
+	std::string		retCppType = TypeIDToString( retTypeId, retTypeFlags, true, &isPointer );
+	if ( isPointer )
+	{
+		retCppType = "ScriptVar< " + retCppType + " >";
+	}
+
+	strStream << retCppType << " exec" << InScriptFunction->GetName() << ( params.empty() ? "()" : ( "( " + strParamsDeclaration + " )" ) ) << "\n";
 	strStream << "{\n";
 
 	// Generate prepare to execute script function
@@ -749,82 +782,94 @@ std::string ScriptEngine::GenerateCPPFunction( class asIScriptFunction* InScript
 	if ( retTypeId != asTYPEID_VOID )
 	{
 		strStream << "\n";
-		strStream << "\t" << TypeIDToString( retTypeId ) << "\t\treturnValue = ";
+		strStream << "\t" << retCppType << "\t\treturnValue";
 	}
-
-	switch ( retTypeId )
+	
+	if ( retTypeId & asTYPEID_OBJHANDLE )
 	{
-		// Nothing return
-	case asTYPEID_VOID:
-		break;
+		strStream << ";\n";
+		strStream << "\treturnValue.Init( scriptContext->GetReturnAddress() );\n\n";
+	}
+	else if ( retTypeId != asTYPEID_VOID )
+	{	
+		strStream << " = ";
 
-		// Return bool or int8 or uint8
-	case asTYPEID_BOOL:
-	case asTYPEID_INT8:
-	case asTYPEID_UINT8:
-		strStream << "scriptContext->GetReturnByte();\n";
-		break;
-
-		// Return int16 or uint16
-	case asTYPEID_INT16:
-	case asTYPEID_UINT16:
-		strStream << "scriptContext->GetReturnWord();\n";
-		break;
-
-		// Return int32 or uint32
-	case asTYPEID_INT32:
-	case asTYPEID_UINT32:
-		strStream << "scriptContext->GetReturnDWord();\n";
-		break;
-
-		// Return int64 or uint64
-	case asTYPEID_INT64:
-	case asTYPEID_UINT64:
-		strStream << "scriptContext->GetReturnQWord();\n";
-		break;
-
-		// Return float
-	case asTYPEID_FLOAT:
-		strStream << "scriptContext->GetReturnFloat();\n";
-		break;
-
-		// Return double
-	case asTYPEID_DOUBLE:
-		strStream << "scriptContext->GetReturnDouble();\n";
-		break;
-
-		// C++ and AngelScript user types
-	default:
-		auto		itType = tableTypesASToCPP.find( retTypeId );
-		if ( itType == tableTypesASToCPP.end() )
+		switch ( retTypeId )
 		{
-			appErrorf( TEXT( "Unknown returning AngelScript type 0x%X in function %s::%s from module %s" ), retTypeId, ANSI_TO_TCHAR( InScriptFunction->GetObjectName() ), ANSI_TO_TCHAR( InScriptFunction->GetName() ), ANSI_TO_TCHAR( InScriptFunction->GetModuleName() ) );
+			// Return bool or int8 or uint8
+		case asTYPEID_BOOL:
+		case asTYPEID_INT8:
+		case asTYPEID_UINT8:
+			strStream << "scriptContext->GetReturnByte();\n";
+			break;
+
+			// Return int16 or uint16
+		case asTYPEID_INT16:
+		case asTYPEID_UINT16:
+			strStream << "scriptContext->GetReturnWord();\n";
+			break;
+
+			// Return int32 or uint32
+		case asTYPEID_INT32:
+		case asTYPEID_UINT32:
+			strStream << "scriptContext->GetReturnDWord();\n";
+			break;
+
+			// Return int64 or uint64
+		case asTYPEID_INT64:
+		case asTYPEID_UINT64:
+			strStream << "scriptContext->GetReturnQWord();\n";
+			break;
+
+			// Return float
+		case asTYPEID_FLOAT:
+			strStream << "scriptContext->GetReturnFloat();\n";
+			break;
+
+			// Return double
+		case asTYPEID_DOUBLE:
+			strStream << "scriptContext->GetReturnDouble();\n";
+			break;
+
+			// C++ and AngelScript user types
+		default:
+			auto		itType = tableTypesASToCPP.find( retTypeId );
+			if ( itType == tableTypesASToCPP.end() )
+			{
+				appErrorf( TEXT( "Unknown returning AngelScript type 0x%X in function %s::%s from module %s" ), retTypeId, ANSI_TO_TCHAR( InScriptFunction->GetObjectName() ), ANSI_TO_TCHAR( InScriptFunction->GetName() ), ANSI_TO_TCHAR( InScriptFunction->GetModuleName() ) );
+				break;
+			}
+
+			asITypeInfo* typeInfo = itType->second.asTypeInfo;
+			check( typeInfo );
+			int32				flags = typeInfo->GetFlags();
+
+			// Objects
+			if ( flags & asOBJ_VALUE )
+			{
+				strStream << "*( ( " << TypeIDToString( retTypeId ) << "* )scriptContext->GetReturnObject() );\n";
+			}
+
+			// AngelScript objects
+			else if ( flags & asOBJ_SCRIPT_OBJECT )
+			{
+				strStream << TypeIDToString( retTypeId ) << "( ScriptObject::StasticASCreateCopy( ( asIScriptObject* )scriptContext->GetReturnObject() ) );\n";
+			}
+
+			// Enums
+			else if ( flags & asOBJ_ENUM )
+			{
+				strStream << "( " << TypeIDToString( retTypeId ) << " )scriptContext->GetReturnDWord();\n";
+			}
+
+			// Else unsupported type
+			else
+			{
+				appErrorf( TEXT( "Not supported AngelScript type 0x%X in function %s::%s from module %s" ), retTypeId, ANSI_TO_TCHAR( InScriptFunction->GetObjectName() ), ANSI_TO_TCHAR( InScriptFunction->GetName() ), ANSI_TO_TCHAR( InScriptFunction->GetModuleName() ) );
+			}
+
 			break;
 		}
-
-		asITypeInfo* typeInfo = itType->second.asTypeInfo;
-		check( typeInfo );
-		int32				flags = typeInfo->GetFlags();
-
-		// Objects
-		if ( flags & asOBJ_VALUE )
-		{
-			strStream << "*( ( " << TypeIDToString( retTypeId ) << "* )scriptContext->GetReturnObject() );\n";
-		}
-
-		// Enums
-		else if ( flags & asOBJ_ENUM )
-		{
-			strStream << "( " << TypeIDToString( retTypeId ) << " )scriptContext->GetReturnDWord();\n";
-		}
-
-		// Else unsupported type
-		else
-		{
-			appErrorf( TEXT( "Not supported AngelScript type 0x%X in function %s::%s from module %s" ), retTypeId, ANSI_TO_TCHAR( InScriptFunction->GetObjectName() ), ANSI_TO_TCHAR( InScriptFunction->GetName() ), ANSI_TO_TCHAR( InScriptFunction->GetModuleName() ) );
-		}
-
-		break;
 	}
 
 	// End of function
@@ -914,10 +959,12 @@ std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint
 			}
 
 			bool				isPointer = false;
+			std::string			typeCpp = TypeIDToString( typeId, 0, true, &isPointer );
+
 			CPPProperty			cppProperty;
 			cppProperty.id = indexProperty;
 			cppProperty.name = name;
-			cppProperty.declaration = "ScriptVar< " + TypeIDToString( typeId, 0, &isPointer ) + ( isPointer ? ", true" : "" ) + " > " + name;
+			cppProperty.declaration = "ScriptVar< " + typeCpp + ( isPointer ? ", true" : "" ) + " > " + name;
 
 			if ( !isPrivate && !isProtected )
 			{
@@ -1047,6 +1094,15 @@ std::string ScriptEngine::GenerateCPPClass( class asITypeInfo* InClassType, uint
 	// Constructor with no init option
 	strStream << "\t" << cppClassName << "( ENoInit )" << ( !baseType ? "" : " : " + cppBaseClassName + "( " + cppBaseClassCtrArgs + " )" ) << " {}\n\n";
 
+	// Overrload operator =
+	strStream << "\tFORCEINLINE " << cppClassName << "& operator=( const " << cppClassName << "& InCopy )\n";
+	strStream << "\t{\n";
+	strStream << "\t\tasIScriptObject*		scriptObject = ScriptObject::StasticASCreateCopy( InCopy.self );\n";
+	strStream << "\t\tcheck( scriptObject );\n\n";
+	strStream << "\t\tInit( scriptObject );\n";
+	strStream << "\t\treturn *this;\n";
+	strStream << "\t}\n\n";
+
 	// Generate methods
 	uint32		countMethods = InClassType->GetMethodCount();
 	for ( uint32 indexMethod = 0; indexMethod < countMethods; ++indexMethod )
@@ -1117,7 +1173,7 @@ ScriptEngine::SCPPParam ScriptEngine::GetCPPParamFromFunction( class asIScriptFu
 /**
  * Convert AngelScript type ID to C++ name
  */
-std::string ScriptEngine::TypeIDToString( int32 InTypeID, int64 InFlags, bool* OutIsPointer /*= nullptr*/ )
+std::string ScriptEngine::TypeIDToString( int32 InTypeID, int64 InFlags, bool InNoPointer /*= false*/, bool* OutIsPointer /*= nullptr*/ )
 {
 	int32				typeId = InTypeID;
 	bool				isConst = InFlags & asTM_CONST || InTypeID & asTYPEID_HANDLETOCONST;
@@ -1184,9 +1240,10 @@ std::string ScriptEngine::TypeIDToString( int32 InTypeID, int64 InFlags, bool* O
 		return "Unknown";
 	}
 
-	return TCHAR_TO_ANSI( String::Format( TEXT( "%s%s%s" ),					// Format: <const><typeName><&>
-						  isConst ? TEXT( "const " ) : TEXT( "" ),			// Const modifier						  
-						  ANSI_TO_TCHAR( nameType.c_str() ),				// Type name
-						  isReference ? TEXT( "&" ) : TEXT( "" ) ) );		// Reference modifier		
+	return TCHAR_TO_ANSI( String::Format( TEXT( "%s%s%s%s" ),								// Format: <const><typeName><&>
+						  isConst ? TEXT( "const " ) : TEXT( "" ),							// Const modifier						  
+						  ANSI_TO_TCHAR( nameType.c_str() ),								// Type name						  
+						  !InNoPointer && isObjHandle ? TEXT( "*" ) : TEXT( "" ),			// Pointer modifier
+						  isReference ? TEXT( "&" ) : TEXT( "" ) ) );						// Reference modifier		
 }
 #endif // WITH_EDITOR

@@ -26,10 +26,6 @@ enum EGameMode
 };
 
 // ----------------------------------
-// FUNCTIONS
-// ----------------------------------
-
-// ----------------------------------
 // CLASSES
 // ----------------------------------
 
@@ -67,6 +63,15 @@ public:
 
 	OGameInfo( class asIScriptObject* InScriptObject ) { Init( InScriptObject ); }
 	OGameInfo( ENoInit ) {}
+
+	FORCEINLINE OGameInfo& operator=( const OGameInfo& InCopy )
+	{
+		asIScriptObject*		scriptObject = ScriptObject::StasticASCreateCopy( InCopy.self );
+		check( scriptObject );
+
+		Init( scriptObject );
+		return *this;
+	}
 
 	std::string execGetGameName()
 	{
@@ -121,6 +126,10 @@ protected:
 		gameMode.Init( 0, self );
 	}
 };
+
+// ----------------------------------
+// FUNCTIONS
+// ----------------------------------
 
 // ----------------------------------
 // GLOBAL VALUES

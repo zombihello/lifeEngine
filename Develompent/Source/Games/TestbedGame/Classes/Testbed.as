@@ -14,10 +14,13 @@ class TBGameInfo : GameInfo
 	}
 }
 
-TBGameInfo GTBGameInfo;
+// TODO BG yehor.pohuliaka - Need fix generate C++ code with 'TBGameInfo@ &out OutTest' params
+void GameExec3( TBGameInfo@ &out OutTest ) 
+{
+	@OutTest = null;
+}
 
 int GameInit()
 {
-	GTBGameInfo.SetGameMode( GM_Game );
 	return 0;
 }

@@ -25,15 +25,26 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual										~ScriptObject();
+	virtual											~ScriptObject();
 
 	/**
 	 * @brief Get script object
 	 * @return Return pointer to script object. If not created return nullptr
 	 */
-	FORCEINLINE class asIScriptObject*			GetHandle() const
+	FORCEINLINE class asIScriptObject*				GetHandle() const
 	{
 		return self;
+	}
+
+	/**
+	 * @brief Create copy of script object
+	 * @param[in] InScriptObject Pointer to script object
+	 */
+	static FORCEINLINE class asIScriptObject*		StasticASCreateCopy( class asIScriptObject* InScriptObject )
+	{
+		asIScriptEngine*	scriptEngine = GScriptEngine->GetASScriptEngine();
+		asIScriptObject*	scriptObject = ( asIScriptObject* )scriptEngine->CreateScriptObjectCopy( InScriptObject, InScriptObject->GetObjectType() );
+		return scriptObject;
 	}
 
 protected:
@@ -46,7 +57,7 @@ protected:
 	 * @brief Initialize script object
 	 * @param[in] InScriptObject Pointer to script object
 	 */
-	virtual void		Init( class asIScriptObject* InScriptObject );
+	virtual void									Init( class asIScriptObject* InScriptObject );
 
 	class asITypeInfo*				typeInfo;	/**< Type info */
 	class asIScriptObject*			self;		/**< Pointer to script object */
