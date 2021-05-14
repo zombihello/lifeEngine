@@ -9,6 +9,7 @@
 #ifndef SCRIPTOBJECT_H
 #define SCRIPTOBJECT_H
 
+#include "Misc/RefCounted.h"
 #include "Misc/Types.h"
 
 #define DECLARE_CLASS( TClass, TBaseClass ) \
@@ -19,7 +20,7 @@
  * @ingroup Engine
  * @brief Class for work with script object
  */
-class ScriptObject
+class ScriptObject : public RefCounted
 {
 public:
 	/**

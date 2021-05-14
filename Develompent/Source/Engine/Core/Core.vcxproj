@@ -19,6 +19,8 @@
     <ClInclude Include="Include\Misc\CoreGlobals.h" />
     <ClInclude Include="Include\Misc\Misc.h" />
     <ClInclude Include="Include\Misc\Object.h" />
+    <ClInclude Include="Include\Misc\RefCounted.h" />
+    <ClInclude Include="Include\Misc\RefCountPtr.h" />
     <ClInclude Include="Include\Misc\Template.h" />
     <ClInclude Include="Include\Misc\Types.h" />
     <ClInclude Include="Include\System\BaseArchive.h" />
@@ -33,6 +35,7 @@
     <ClCompile Include="Source\Core.cpp" />
     <ClCompile Include="Source\Logger\BaseLogger.cpp" />
     <ClCompile Include="Source\Math\Color.cpp" />
+    <ClCompile Include="Source\Misc\RefCounted.cpp" />
     <ClCompile Include="Source\System\ButtonCode.cpp" />
     <ClCompile Include="Source\System\Config.cpp" />
   </ItemGroup>

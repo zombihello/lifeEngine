@@ -102,13 +102,16 @@
     <ClInclude Include="Include\Classes\CoreClasses.h">
       <Filter>Include\Classes</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Misc\RefCounted.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\RefCountPtr.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Containers\String.cpp">
-      <Filter>Source\Misc</Filter>
     </ClCompile>
     <ClCompile Include="Source\Logger\BaseLogger.cpp">
       <Filter>Source\Logger</Filter>
@@ -121,6 +124,12 @@
     </ClCompile>
     <ClCompile Include="Source\System\Config.cpp">
       <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Containers\String.cpp">
+      <Filter>Source\Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Misc\RefCounted.cpp">
+      <Filter>Source\Misc</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
