@@ -7,13 +7,5 @@
     <Filter Include="Source">
       <UniqueIdentifier>{5af264c6-dc8a-404f-bd16-749eae575418}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Include\Classes">
-      <UniqueIdentifier>{fa513b55-81e3-447d-b4dd-70f21d8dc768}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Include\Classes\TestbedGameClasses.h">
-      <Filter>Include\Classes</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

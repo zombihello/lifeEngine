@@ -6,9 +6,6 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Include\Classes\TestbedGameClasses.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{9A36BCDE-2524-4CC3-A857-AA9B940FCD71}</ProjectGuid>

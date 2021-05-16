@@ -174,6 +174,36 @@ public:
 	}
 
 	/**
+	 * @brief Overloaded operator PtrType&
+	 *
+	 * @return Returning reference on value
+	 */
+	FORCEINLINE							operator PtrType&() const
+	{
+		return *ptr;
+	}
+
+	/**
+	 * @brief Overloaded operator PtrType*
+	 * 
+	 * @return Returning pointer to value
+	 */
+	FORCEINLINE							operator PtrType*() const
+	{
+		return ptr;
+	}
+
+	/**
+	 * @brief Overloaded operator PtrType*&
+	 *
+	 * @return Returning reference to pointer value
+	 */
+	FORCEINLINE							operator PtrType*&()
+	{
+		return ptr;
+	}
+
+	/**
 	 * @brief Overloaded operator ->
 	 *
 	 * @return Return pointer to PtrType value

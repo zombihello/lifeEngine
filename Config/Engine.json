@@ -2,10 +2,5 @@
 	"Engine.SystemSettings": {
 		"WindowWidth": 1280,
 		"WindowHeight": 720
-	},
-	
-	"ScriptEngine.ScriptEngine": {
-		"DirBinary": "Script",
-		"LoadingModules": [ "Core", "Engine", "TestbedGame" ]
 	}
 }

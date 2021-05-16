@@ -21,9 +21,6 @@ namespace lifeBuildTool
             // RapidJSON
             SetUpRapidJSONEnvironment();
 
-            // AngelScript
-            SetUpAngelScriptEnvironment();
-
             //
             // Engine/Game/Tools projects
             //
@@ -74,39 +71,6 @@ namespace lifeBuildTool
 
             // Settings includes
             cppEnvironment.includePaths.Add( rapidJSONHome + "/include" );
-        }
-
-        void SetUpAngelScriptEnvironment()
-        {
-            string          angelScriptHome = "../External/angelscript-2.35.0";
-
-            // Settings includes
-            cppEnvironment.includePaths.Add( angelScriptHome + "/include" );
-
-            // Settings path to libs
-            switch ( platform )
-            {
-                case LETargetPlatform.Win32:
-                    linkEnvironment.libraryPaths.Add( angelScriptHome + "/lib/Win32" );
-                    break;
-
-                case LETargetPlatform.Win64:
-                    linkEnvironment.libraryPaths.Add( angelScriptHome + "/lib/Win64" );
-                    break;
-
-                default:
-                    throw new BuildException( "Not supported platform for Angel Script" );
-            }
-
-            // Include libs
-            if ( configuration == LETargetConfiguration.Debug )
-            {
-                linkEnvironment.additionalLibraries.Add( "angelscriptd.lib" );
-            }
-            else
-            {
-                linkEnvironment.additionalLibraries.Add( "angelscript.lib" );
-            }
         }
 
         List< string > GetWindowsOutputItems( out bool OutIsSuccessed )

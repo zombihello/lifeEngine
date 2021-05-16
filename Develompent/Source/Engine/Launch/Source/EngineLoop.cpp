@@ -12,21 +12,7 @@
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
-#include "Scripts/ScriptEngine.h"
 #include "EngineLoop.h"
-
-#include "Classes/CoreClasses.h"
-DECLARATE_GLOBALVALUES_SCRIPTMODULE_Core
-
-#include "Classes/EngineClasses.h"
-DECLARATE_GLOBALVALUES_SCRIPTMODULE_Engine
-
-#if IS_TESTBED
-#include "Classes/TestbedGameClasses.h"
-DECLARATE_GLOBALVALUES_SCRIPTMODULE_TestbedGame
-#else
-#error Game not set
-#endif // IS_TESTBED
 
 // --------------
 // GLOBALS
@@ -88,7 +74,6 @@ int32 EngineLoop::PreInit( const tchar* InCmdLine )
 	SerializeConfigs();
 
 	GLog->Init();
-	GScriptEngine->Init();
 
 	return appPlatformPreInit( InCmdLine );
 }
@@ -99,25 +84,6 @@ int32 EngineLoop::PreInit( const tchar* InCmdLine )
 int32 EngineLoop::Init( const tchar* InCmdLine )
 {
 	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
-
-#if WITH_EDITOR
-	// Start 'MAKE' tool for compilation scripts
-	if ( appParseParam( InCmdLine, TEXT( "make" ) ) )
-	{
-		GScriptEngine->Make( InCmdLine );
-		GIsRequestingExit = true;
-		
-		return 0;
-	}
-#endif // WITH_EDITOR
-
-	// Loading script modules
-	GScriptEngine->LoadModules();
-
-	// Initialize script modules
-	InitScriptModule_Core();
-	InitScriptModule_Engine();
-	InitScriptModule_TestbedGame();
 
 	// Create window
 	std::wstring				windowTitle = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();
@@ -133,9 +99,7 @@ int32 EngineLoop::Init( const tchar* InCmdLine )
 	GRHI->Init( false );
 	GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), width, height );
 
-	int32		result = appPlatformInit( InCmdLine );
-	result = execGameInit();
-	return result;
+	return appPlatformInit( InCmdLine );
 }
 
 /**

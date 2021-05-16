@@ -15,10 +15,4 @@
   */
 extern class BaseRHI*				GRHI;
 
-/**
- * @ingroup Engine
- * @brief Script engine
- */
-extern class ScriptEngine*			GScriptEngine;
-
 #endif // !ENGINEGLOBALS_H

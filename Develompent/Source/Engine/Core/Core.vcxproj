@@ -7,7 +7,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\Classes\CoreClasses.h" />
     <ClInclude Include="Include\Containers\String.h" />
     <ClInclude Include="Include\Containers\StringConv.h" />
     <ClInclude Include="Include\Core.h" />
@@ -16,6 +15,7 @@
     <ClInclude Include="Include\Logger\BaseLogger.h" />
     <ClInclude Include="Include\Logger\LoggerMacros.h" />
     <ClInclude Include="Include\Math\Color.h" />
+    <ClInclude Include="Include\Misc\Class.h" />
     <ClInclude Include="Include\Misc\CoreGlobals.h" />
     <ClInclude Include="Include\Misc\Misc.h" />
     <ClInclude Include="Include\Misc\Object.h" />
@@ -35,6 +35,8 @@
     <ClCompile Include="Source\Core.cpp" />
     <ClCompile Include="Source\Logger\BaseLogger.cpp" />
     <ClCompile Include="Source\Math\Color.cpp" />
+    <ClCompile Include="Source\Misc\Class.cpp" />
+    <ClCompile Include="Source\Misc\Object.cpp" />
     <ClCompile Include="Source\Misc\RefCounted.cpp" />
     <ClCompile Include="Source\System\ButtonCode.cpp" />
     <ClCompile Include="Source\System\Config.cpp" />

@@ -19,7 +19,6 @@ namespace lifeBuildTool
             InOutCPPEnvironment.includePaths.Add( "Engine/Engine/Include" );
             InOutCPPEnvironment.includePaths.Add( "Engine/Launch/Include" );
             InOutCPPEnvironment.includePaths.Add( "Games/TestbedGame/Include" );
-            InOutCPPEnvironment.definitions.Add( "IS_TESTBED=1" );
         }
 
         public string GetName()
