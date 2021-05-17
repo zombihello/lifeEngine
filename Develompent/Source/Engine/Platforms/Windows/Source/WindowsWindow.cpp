@@ -154,7 +154,7 @@ EButtonCode appMouseButtonToButtonCode( uint8 InButtonIndex )
 /**
  * Constructor
  */
-WindowsWindow::WindowsWindow() :
+FWindowsWindow::FWindowsWindow() :
 	isShowCursor( false ),
 	isFullscreen( false ),
     sdlWindow( nullptr ),
@@ -165,7 +165,7 @@ WindowsWindow::WindowsWindow() :
 /**
  * Destructor
  */
-WindowsWindow::~WindowsWindow()
+FWindowsWindow::~FWindowsWindow()
 {
     Close();
 }
@@ -173,7 +173,7 @@ WindowsWindow::~WindowsWindow()
 /**
  * Show cursor
  */
-void WindowsWindow::ShowCursor()
+void FWindowsWindow::ShowCursor()
 {
 	SDL_SetRelativeMouseMode( SDL_FALSE );
 	isShowCursor = true;
@@ -182,7 +182,7 @@ void WindowsWindow::ShowCursor()
 /**
  * Hide cursor
  */
-void WindowsWindow::HideCursor()
+void FWindowsWindow::HideCursor()
 {
 	SDL_SetRelativeMouseMode( SDL_TRUE );
 	isShowCursor = false;
@@ -191,7 +191,7 @@ void WindowsWindow::HideCursor()
 /**
  * Set title of window
  */
-void WindowsWindow::SetTitle( const tchar* InTitle )
+void FWindowsWindow::SetTitle( const tchar* InTitle )
 {
 	check( sdlWindow );
 	SDL_SetWindowTitle( sdlWindow, TCHAR_TO_ANSI( InTitle ) );
@@ -200,7 +200,7 @@ void WindowsWindow::SetTitle( const tchar* InTitle )
 /**
  * Set size of window
  */
-void WindowsWindow::SetSize( uint32 InWidth, uint32 InHeight )
+void FWindowsWindow::SetSize( uint32 InWidth, uint32 InHeight )
 {
 	check( sdlWindow );
 
@@ -211,7 +211,7 @@ void WindowsWindow::SetSize( uint32 InWidth, uint32 InHeight )
 /**
  * Set fullscreen mode
  */
-void WindowsWindow::SetFullscreen( bool InIsFullscreen )
+void FWindowsWindow::SetFullscreen( bool InIsFullscreen )
 {
 	check( sdlWindow );
 
@@ -222,7 +222,7 @@ void WindowsWindow::SetFullscreen( bool InIsFullscreen )
 /**
  * Is window open
  */
-bool WindowsWindow::IsOpen() const
+bool FWindowsWindow::IsOpen() const
 {
 	return sdlWindow;
 }
@@ -230,7 +230,7 @@ bool WindowsWindow::IsOpen() const
 /**
  * Is showing cursor
  */
-bool WindowsWindow::IsShowingCursor() const
+bool FWindowsWindow::IsShowingCursor() const
 {
 	return isShowCursor;
 }
@@ -238,7 +238,7 @@ bool WindowsWindow::IsShowingCursor() const
 /**
  * Is enabled fullscreen mode
  */
-bool WindowsWindow::IsFullscreen() const
+bool FWindowsWindow::IsFullscreen() const
 {
 	return isFullscreen;
 }
@@ -246,7 +246,7 @@ bool WindowsWindow::IsFullscreen() const
 /**
  * Get size window
  */
-void WindowsWindow::GetSize( uint32& OutWidth, uint32& OutHeight ) const
+void FWindowsWindow::GetSize( uint32& OutWidth, uint32& OutHeight ) const
 {
 	check( sdlWindow );
 	SDL_GetWindowSize( sdlWindow, ( int* ) &OutWidth, ( int* ) &OutHeight );
@@ -255,7 +255,7 @@ void WindowsWindow::GetSize( uint32& OutWidth, uint32& OutHeight ) const
 /**
  * Get OS handle
  */
-void* WindowsWindow::GetHandle() const
+void* FWindowsWindow::GetHandle() const
 {
 	return handle;
 }
@@ -263,7 +263,7 @@ void* WindowsWindow::GetHandle() const
 /**
  * Create window
  */
-void WindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeight, uint32 InFlags /* = SW_Default */ )
+void FWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeight, uint32 InFlags /* = SW_Default */ )
 {
     check( !sdlWindow );
 
@@ -306,7 +306,7 @@ void WindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeigh
 /**
  * Close window
  */
-void WindowsWindow::Close()
+void FWindowsWindow::Close()
 {
 	if ( !sdlWindow )		return;
 
@@ -330,7 +330,7 @@ void WindowsWindow::Close()
 /**
  * Handle window event
  */
-bool WindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
+bool FWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 {
 	check( sdlWindow );
 

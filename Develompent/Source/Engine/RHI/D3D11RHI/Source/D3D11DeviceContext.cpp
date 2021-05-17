@@ -6,14 +6,14 @@
 /**
  * Constructor
  */
-D3D11DeviceContext::D3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext ) :
+FD3D11DeviceContext::FD3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext ) :
 	d3d11DeviceContext( InD3D11DeviceContext )
 {}
 
 /**
  * Destructor
  */
-D3D11DeviceContext::~D3D11DeviceContext()
+FD3D11DeviceContext::~FD3D11DeviceContext()
 {
 	d3d11DeviceContext->Release();
 	d3d11DeviceContext = nullptr;
@@ -22,10 +22,10 @@ D3D11DeviceContext::~D3D11DeviceContext()
 /**
  * Clear surface
  */
-void D3D11DeviceContext::ClearSurface( class BaseSurfaceRHI* InSurface, const class Color& InColor )
+void FD3D11DeviceContext::ClearSurface( class FBaseSurfaceRHI* InSurface, const class FColor& InColor )
 {
 	check( d3d11DeviceContext && InSurface );
-	D3D11Surface*			d3d11Surface = ( D3D11Surface* )InSurface;
+	FD3D11Surface*			d3d11Surface = ( FD3D11Surface* )InSurface;
 
 	float		clearColor[ 4 ] = { InColor.GetR() / 255.f, InColor.GetG() / 255.f, InColor.GetB() / 255.f, InColor.GetA() / 255.f };
 	d3d11DeviceContext->ClearRenderTargetView( d3d11Surface->GetD3D11RenderTargetView(), clearColor );

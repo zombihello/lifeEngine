@@ -15,13 +15,13 @@
   * @ingroup Engine
   * @brief Base class for work with viewport RHI
   */
-class BaseViewportRHI
+class FBaseViewportRHI
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual								~BaseViewportRHI() {}
+	virtual								~FBaseViewportRHI() {}
 
 	/**
 	 * @brief Presents the swap chain
@@ -46,7 +46,7 @@ public:
 	 * @breif Get surface of viewport
 	 * @return Pointer to surface of viewport
 	 */
-	virtual class BaseSurfaceRHI*		GetSurface() const { return nullptr; }
+	virtual class FBaseSurfaceRHI*		GetSurface() const { return nullptr; }
 };
 
 #endif // !BASEVIEWPORTRHI_H

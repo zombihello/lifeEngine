@@ -1,5 +1,7 @@
 #include "Misc/Class.h"
 
-std::unordered_map< std::wstring, const LClass* >			LClass::classesTable;
+// ----------------
+// STATIC VALUES
+// ----------------
 
-IMPLEMENT_CLASS( LClass )
+std::unordered_map< std::wstring, const LClass* >			LClass::classesTable;

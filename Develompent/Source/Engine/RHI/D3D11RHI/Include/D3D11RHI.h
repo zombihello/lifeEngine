@@ -18,18 +18,18 @@
  * @ingroup D3D11RHI
  * @brief Main class of DirectX 11
  */
-class D3D11RHI : public BaseRHI
+class FD3D11RHI : public FBaseRHI
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-													D3D11RHI();
+													FD3D11RHI();
 
 	/**
 	 * @brief Destructor
 	 */
-													~D3D11RHI();
+													~FD3D11RHI();
 
 	/**
 	 * @brief Initialize RHI
@@ -51,7 +51,7 @@ public:
 	 * @param[in] InHeight Height of viewport
 	 * @return Pointer on viewport
 	 */
-	virtual class BaseViewportRHI*					CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight ) override;
+	virtual class FBaseViewportRHI*					CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight ) override;
 
 	/**
 	 * @brief Begin drawing viewport
@@ -59,7 +59,7 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InViewport Viewport
 	 */
-	virtual void									BeginDrawingViewport( class BaseDeviceContextRHI* InDeviceContext, class BaseViewportRHI* InViewport ) override;
+	virtual void									BeginDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport ) override;
 
 	/**
 	 * @brief End drawing viewport
@@ -69,7 +69,7 @@ public:
 	 * @param[in] InIsPresent Whether to display the frame on the screen
 	 * @param[in] InLockToVsync Is it necessary to block for Vsync
 	 */
-	virtual void									EndDrawingViewport( class BaseDeviceContextRHI* InDeviceContext, class BaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync ) override;
+	virtual void									EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync ) override;
 
 	/**
 	 * @brief Set viewport
@@ -82,7 +82,7 @@ public:
 	 * @param[in] InMaxY Max y
 	 * @param[in] InMaxZ Max z
 	 */
-	virtual void									SetViewport( class BaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) override;
+	virtual void									SetViewport( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) override;
 
 	/**
 	 * @brief Is initialized RHI
@@ -94,7 +94,7 @@ public:
 	 * @brief Get device context
 	 * @return Pointer to device context
 	 */
-	virtual class BaseDeviceContextRHI*				GetImmediateContext() const override;
+	virtual class FBaseDeviceContextRHI*			GetImmediateContext() const override;
 
 	/**
 	 * @brief Get D3D11 device
@@ -125,7 +125,7 @@ public:
 
 private:
 	bool							isInitialize;				/**< Is RHI is initialized */
-	class D3D11DeviceContext*		immediateContext;			/**< Immediate context */
+	class FD3D11DeviceContext*		immediateContext;			/**< Immediate context */
 
 	ID3D11Device*					d3d11Device;				/**< D3D11 Device */
 	IDXGIFactory*					dxgiFactory;				/**< DXGI factory */

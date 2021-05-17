@@ -13,38 +13,38 @@
  * @ingroup Core
  * @brief Logger
  */
-extern class BaseLogger*			GLog;
+extern class FBaseLogger*			GLog;
 
 /**
  * @ingroup Core
  * @brief File system
  */
-extern class BaseFileSystem*		GFileSystem;
+extern class FBaseFileSystem*		GFileSystem;
 
 /**
  * @ingroup Core
  * @brief Window
  */
-extern class BaseWindow*			GWindow;
+extern class FBaseWindow*			GWindow;
 
 /**
  * @ingroup Core
  * @brief Config of engine
  */
-extern class Config					GEngineConfig;
+extern class FConfig				GEngineConfig;
 
 /**
  * @ingroup Core
  * @brief Config of game
  */
-extern class Config					GGameConfig;
+extern class FConfig				GGameConfig;
 
 #if WITH_EDITOR
 /**
  * @ingroup Core
  * @brief Config of editor
  */
-extern class Config					GEditorConfig;
+extern class FConfig				GEditorConfig;
 #endif // WITH_EDITOR
 
 /**

@@ -15,13 +15,13 @@
  * @ingroup Engine
  * @brief Base class of RHI
  */
-class BaseRHI
+class FBaseRHI
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual										~BaseRHI() {}
+	virtual										~FBaseRHI() {}
 
 	/**
 	 * @brief Initialize RHI
@@ -43,7 +43,7 @@ public:
 	 * @param[in] InHeight Height of viewport
 	 * @return Pointer on viewport
 	 */
-	virtual class BaseViewportRHI*				CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )	{ return nullptr; }
+	virtual class FBaseViewportRHI*				CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )	{ return nullptr; }
 
 	/**
 	 * @brief Begin drawing viewport
@@ -51,7 +51,7 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InViewport Viewport
 	 */
-	virtual void								BeginDrawingViewport( class BaseDeviceContextRHI* InDeviceContext, class BaseViewportRHI* InViewport ) {}
+	virtual void								BeginDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport ) {}
 
 	/**
 	 * @brief End drawing viewport
@@ -61,7 +61,7 @@ public:
 	 * @param[in] InIsPresent Whether to display the frame on the screen
 	 * @param[in] InLockToVsync Is it necessary to block for Vsync
 	 */
-	virtual void								EndDrawingViewport( class BaseDeviceContextRHI* InDeviceContext, class BaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync ) {}
+	virtual void								EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync ) {}
 
 	/**
 	 * @brief Set viewport
@@ -74,7 +74,7 @@ public:
 	 * @param[in] InMaxY Max y
 	 * @param[in] InMaxZ Max z
 	 */
-	virtual void								SetViewport( class BaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) {}
+	virtual void								SetViewport( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) {}
 
 	/**
 	 * @brief Is initialized RHI
@@ -86,7 +86,7 @@ public:
 	 * @brief Get device context
 	 * @return Pointer to device context
 	 */
-	virtual class BaseDeviceContextRHI*			GetImmediateContext() const	{ return nullptr; }
+	virtual class FBaseDeviceContextRHI*		GetImmediateContext() const	{ return nullptr; }
 };
 
 #endif // !BASERHI_H

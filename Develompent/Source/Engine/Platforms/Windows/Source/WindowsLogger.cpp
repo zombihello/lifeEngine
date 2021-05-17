@@ -16,13 +16,14 @@ const tchar* GLogCategoryNames[] =
 	TEXT( "None" ),
 	TEXT( "General" ),
 	TEXT( "Init" ),
-	TEXT( "Script" )
+	TEXT( "Script" ),
+	TEXT( "Dev" )
 };
 
 /**
  * Constructor
  */
-WindowsLogger::WindowsLogger() :
+FWindowsLogger::FWindowsLogger() :
 	startLogging( std::chrono::steady_clock::now() ),
 	consoleHandle( nullptr ),
 	archiveLogs( nullptr )
@@ -31,13 +32,13 @@ WindowsLogger::WindowsLogger() :
 /**
  * Destructor
  */
-WindowsLogger::~WindowsLogger()
+FWindowsLogger::~FWindowsLogger()
 {}
 
 /**
  * Shows or hides the console window
  */
-void WindowsLogger::Show( bool InShowWindow )
+void FWindowsLogger::Show( bool InShowWindow )
 {
 	if ( InShowWindow )
 	{
@@ -60,15 +61,15 @@ void WindowsLogger::Show( bool InShowWindow )
 /**
  * Initialize logger
  */
-void WindowsLogger::Init()
+void FWindowsLogger::Init()
 {
-	archiveLogs = GFileSystem->CreateFileWriter( TEXT( "Launch.log" ), AW_None );
+	archiveLogs = GFileSystem->CreateFileWriter( TEXT( "../../Launch.log" ), AW_None );
 }
 
 /**
  * Closes output device and cleans up
  */
-void WindowsLogger::TearDown()
+void FWindowsLogger::TearDown()
 {
 	Show( false );
 
@@ -82,7 +83,7 @@ void WindowsLogger::TearDown()
 /**
  * Serialize message
  */
-void WindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELogCategory InLogCategory )
+void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELogCategory InLogCategory )
 {
 	// If console is opened - get current text color
 	// and change to color by event type
@@ -109,7 +110,7 @@ void WindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELogC
 		}
 	}
 	
-	tchar*			finalMessage = String::Format( TEXT( "[%is][%s][%s] %s\n" ), std::chrono::duration_cast< std::chrono::seconds >( std::chrono::steady_clock::now() - startLogging ).count(), GLogTypeNames[ ( uint32 )InLogType ], GLogCategoryNames[ ( uint32 )InLogCategory ], InMessage );
+	tchar*			finalMessage = FString::Format( TEXT( "[%is][%s][%s] %s\n" ), std::chrono::duration_cast< std::chrono::seconds >( std::chrono::steady_clock::now() - startLogging ).count(), GLogTypeNames[ ( uint32 )InLogType ], GLogCategoryNames[ ( uint32 )InLogCategory ], InMessage );
 	wprintf( finalMessage );
 
 	// Serialize log to file

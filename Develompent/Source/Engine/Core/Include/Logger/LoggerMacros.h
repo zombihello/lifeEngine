@@ -9,8 +9,8 @@
 #ifndef LOGGERMACROS_H
 #define LOGGERMACROS_H
 
-#include "MIsc/CoreGlobals.h"
-#include "BaseLogger.h"
+#include "Misc/CoreGlobals.h"
+#include "Logger/BaseLogger.h"
 
 // If configuration is not shipping - we using logs for debug
 #if !SHIPPING_BUILD || PLATFORM_DOXYGEN

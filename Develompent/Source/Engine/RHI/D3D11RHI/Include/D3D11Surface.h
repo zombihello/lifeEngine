@@ -18,7 +18,7 @@
  * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 surface
  */
-class D3D11Surface : public BaseSurfaceRHI
+class FD3D11Surface : public FBaseSurfaceRHI
 {
 public:
 	/**
@@ -26,12 +26,12 @@ public:
 	 * 
 	 * @param[in] InRenderTargetView Render target view
 	 */
-												D3D11Surface( ID3D11RenderTargetView* InRenderTargetView );
+												FD3D11Surface( ID3D11RenderTargetView* InRenderTargetView );
 
 	/**
 	 * @brief Destructor
 	 */
-												~D3D11Surface();
+												~FD3D11Surface();
 
 	/**
 	 * @brief Get render target view

@@ -16,13 +16,13 @@
  * @ingroup Core
  * @brief The class for work with color
  */
-class Color
+class FColor
 {
 public:
 	/**
 	 * @brief Default constructor
 	 */
-	FORCEINLINE					Color() :
+	FORCEINLINE					FColor() :
 		r( 0 ),
 		g( 0 ),
 		b( 0 ),
@@ -37,7 +37,7 @@ public:
 	 * @param[in] InBlue Blue component of color
 	 * @param[in] InAlpha Alpha component of color
 	 */
-	FORCEINLINE					Color( uint8 InRed, uint8 InGreen, uint8 InBlue, uint8 InAlpha = 255 )
+	FORCEINLINE					FColor( uint8 InRed, uint8 InGreen, uint8 InBlue, uint8 InAlpha = 255 )
 	{
 		Set( InRed, InGreen, InBlue, InAlpha );
 	}
@@ -130,8 +130,8 @@ public:
 		return a;
 	}
 
-	static Color			black;			/**< Black color */
-	static Color			white;			/**< White color */
+	static FColor			black;			/**< Black color */
+	static FColor			white;			/**< White color */
 
 private:
 	uint8			r;			/**< Red component of color */

@@ -8,7 +8,7 @@
 /**
  * Constructor
  */
-D3D11RHI::D3D11RHI() :
+FD3D11RHI::FD3D11RHI() :
 	isInitialize( false ),
 	immediateContext( nullptr ),
 	d3d11Device( nullptr )
@@ -17,7 +17,7 @@ D3D11RHI::D3D11RHI() :
 /**
  * Destructor
  */
-D3D11RHI::~D3D11RHI()
+FD3D11RHI::~FD3D11RHI()
 {
 	Destroy();
 }
@@ -25,7 +25,7 @@ D3D11RHI::~D3D11RHI()
 /**
  * Initialize RHI
  */
-void D3D11RHI::Init( bool InIsEditor )
+void FD3D11RHI::Init( bool InIsEditor )
 {
 	if ( IsInitialize() )			return;
 
@@ -57,7 +57,7 @@ void D3D11RHI::Init( bool InIsEditor )
 	result = D3D11CreateDevice( dxgiAdapter, driverType, nullptr, deviceFlags, &maxFeatureLevel, 1, D3D11_SDK_VERSION, &d3d11Device, &featureLevel, &d3d11DeviceContext );
 	check( result == S_OK );
 
-	immediateContext = new D3D11DeviceContext( d3d11DeviceContext );
+	immediateContext = new FD3D11DeviceContext( d3d11DeviceContext );
 	
 	// Print info adapter
 	DXGI_ADAPTER_DESC				adapterDesc;
@@ -75,7 +75,7 @@ void D3D11RHI::Init( bool InIsEditor )
 /**
  * Is initialized RHI
  */
-bool D3D11RHI::IsInitialize() const
+bool FD3D11RHI::IsInitialize() const
 {
 	return isInitialize;
 }
@@ -83,7 +83,7 @@ bool D3D11RHI::IsInitialize() const
 /**
  * Destroy RHI
  */
-void D3D11RHI::Destroy()
+void FD3D11RHI::Destroy()
 {
 	if ( !isInitialize )		return;
 
@@ -101,15 +101,15 @@ void D3D11RHI::Destroy()
 /**
  * Create viewport
  */
-class BaseViewportRHI* D3D11RHI::CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )
+class FBaseViewportRHI* FD3D11RHI::CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )
 {
-	return new D3D11Viewport( InWindowHandle, InWidth, InHeight );
+	return new FD3D11Viewport( InWindowHandle, InWidth, InHeight );
 }
 
 /**
  * Get device context
  */
-class BaseDeviceContextRHI* D3D11RHI::GetImmediateContext() const
+class FBaseDeviceContextRHI* FD3D11RHI::GetImmediateContext() const
 {
 	return immediateContext;
 }
@@ -117,23 +117,23 @@ class BaseDeviceContextRHI* D3D11RHI::GetImmediateContext() const
 /**
  * Set viewport
  */
-void D3D11RHI::SetViewport( class BaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ )
+void FD3D11RHI::SetViewport( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ )
 {
 	D3D11_VIEWPORT			d3d11Viewport = { ( float )InMinX, ( float )InMinY, ( float )InMaxX - InMinX, ( float )InMaxY - InMinY, ( float )InMinZ, InMaxZ };
 	if ( d3d11Viewport.Width > 0 && d3d11Viewport.Height > 0 )
 	{
-		static_cast< D3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->RSSetViewports( 1, &d3d11Viewport );
+		static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->RSSetViewports( 1, &d3d11Viewport );
 	}
 }
 
 /**
  * Begin drawing viewport
  */
-void D3D11RHI::BeginDrawingViewport( class BaseDeviceContextRHI* InDeviceContext, class BaseViewportRHI* InViewport )
+void FD3D11RHI::BeginDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport )
 {
 	check( InDeviceContext && InViewport );
-	D3D11DeviceContext*				deviceContext = ( D3D11DeviceContext* )InDeviceContext;
-	D3D11Viewport*					viewport = ( D3D11Viewport* )InViewport;
+	FD3D11DeviceContext*			deviceContext = ( FD3D11DeviceContext* )InDeviceContext;
+	FD3D11Viewport*					viewport = ( FD3D11Viewport* )InViewport;
 
 	ID3D11RenderTargetView*			d3d11RenderTargetView = viewport->GetBackBuffer()->GetD3D11RenderTargetView();
 	deviceContext->GetD3D11DeviceContext()->OMSetRenderTargets( 1, &d3d11RenderTargetView, nullptr );
@@ -143,7 +143,7 @@ void D3D11RHI::BeginDrawingViewport( class BaseDeviceContextRHI* InDeviceContext
 /**
  * End drawing viewport
  */
-void D3D11RHI::EndDrawingViewport( class BaseDeviceContextRHI* InDeviceContext, class BaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync )
+void FD3D11RHI::EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync )
 {
 	check( InViewport );
 

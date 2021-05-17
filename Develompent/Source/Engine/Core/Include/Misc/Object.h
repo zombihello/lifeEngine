@@ -11,24 +11,55 @@
 
 #include <string>
 
-#include "System/BaseArchive.h"
-
+/**
+ * @ingroup Core
+ * @brief Macro for declare class
+ * 
+ * @param[in] TClass Class
+ * @param[in] TSuperClass Super class
+ * 
+ * Example usage: @code DECLARE_CLASS( LClass, LObject ) @endcode
+ */
 #define DECLARE_CLASS( TClass, TSuperClass ) \
     private: \
-        static class LClass*        staticClass; \
+        static class LClass*        staticClass;    /**< Pointer to class of object */ \
     public: \
-	    typedef TClass		        ThisClass; \
-	    typedef TSuperClass	        Super; \
+	    typedef TClass		        ThisClass;      /**< Typedef of this class */ \
+	    typedef TSuperClass	        Super;          /**< Typedef of super class */ \
+        /** */\
+        /** @brief Static method for create object of this class */ \
+        /** @return Return new object of this class */ \
+        /** */\
         static LObject*             StaticConstructor(); \
+        /** */\
+        /** @brief Get class of description of this C++ class */ \
+        /** @return Return pointer to class of description */ \
+        /** */\
         static class LClass*        StaticClass(); \
+        /** */\
+        /** @brief Get class of this object */ \
+        /** @return Return pointer to class of this object */ \
+        /** */\
         virtual class LClass*       GetClass() const;
 
+/**
+ * @ingroup Core
+ * @brief Macro for implement class
+ * 
+ * @param[in] TClass Class
+ * 
+ * Example usage: @code IMPLEMENT_CLASS( LObject ) @endcode
+ */
 #define IMPLEMENT_CLASS( TClass ) \
     LClass*     TClass::staticClass = nullptr; \
+    \
+    /** Static method for create object of this class */ \
     LObject*    TClass::StaticConstructor() \
     { \
         return new ThisClass(); \
     } \
+    \
+    /** Get class of description of this C++ class */ \
     LClass*     TClass::StaticClass() \
     { \
         if ( !staticClass ) \
@@ -39,10 +70,13 @@
         \
         return staticClass; \
     } \
+    \
+    /** Get class of this object */ \
     LClass*     TClass::GetClass() const \
     { \
         return StaticClass(); \
     } \
+    \
     struct SRegister##TClass \
     { \
         SRegister##TClass() \
@@ -69,7 +103,7 @@ public:
      * @brief Serialize object
      * @param[in] InArchive Archive for serialize
      */
-    virtual void                    Serialize( BaseArchive& InArchive );
+    virtual void                    Serialize( class FBaseArchive& InArchive );
 
     /**
      * @brief Set name object

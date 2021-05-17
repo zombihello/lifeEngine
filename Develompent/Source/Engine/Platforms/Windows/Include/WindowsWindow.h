@@ -19,18 +19,18 @@ struct SDL_SysWMinfo;
  * @ingroup WindowsPlatform
  * @brief The class for work with window on Windows
  */
-class WindowsWindow : public BaseWindow
+class FWindowsWindow : public FBaseWindow
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-									WindowsWindow();
+									FWindowsWindow();
 
 	/**
 	 * @brief Destructor
 	 */
-									~WindowsWindow();
+									~FWindowsWindow();
 
 	/**
 	 * @brief Create window

@@ -8,19 +8,19 @@
 /**
  * Constructor
  */
-WindowsFileSystem::WindowsFileSystem()
+FWindowsFileSystem::FWindowsFileSystem()
 {}
 
 /**
  * Destructor
  */
-WindowsFileSystem::~WindowsFileSystem()
+FWindowsFileSystem::~FWindowsFileSystem()
 {}
 
 /**
  * Create file reader
  */
-class BaseArchive* WindowsFileSystem::CreateFileReader( const tchar* InFileName, uint32 InFlags )
+class FBaseArchive* FWindowsFileSystem::CreateFileReader( const std::wstring& InFileName, uint32 InFlags )
 {
 	std::ifstream*			inputFile = new std::ifstream();
 
@@ -30,20 +30,20 @@ class BaseArchive* WindowsFileSystem::CreateFileReader( const tchar* InFileName,
 	{
 		if ( InFlags & AR_NoFail )
 		{
-			appErrorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName, InFlags );
+			appErrorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName.c_str(), InFlags );
 		}
 
 		delete inputFile;
 		return nullptr;
 	}
 
-	return new WindowsArchiveReading( inputFile );
+	return new FWindowsArchiveReading( inputFile );
 }
 
 /**
  * Create file writer
  */
-class BaseArchive* WindowsFileSystem::CreateFileWriter( const tchar* InFileName, uint32 InFlags )
+class FBaseArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& InFileName, uint32 InFlags )
 {
 	std::ofstream*			outputFile = new std::ofstream();
 	int						flags = 0;
@@ -59,26 +59,26 @@ class BaseArchive* WindowsFileSystem::CreateFileWriter( const tchar* InFileName,
 	{
 		if ( InFlags & AW_NoFail )
 		{
-			appErrorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName, InFlags );
+			appErrorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName.c_str(), InFlags );
 		}
 
 		delete outputFile;
 		return nullptr;
 	}
 
-	return new WindowsArchiveWriter( outputFile );
+	return new FWindowsArchiveWriter( outputFile );
 }
 
 /**
  * Find files in directory
  */
-std::vector< std::wstring > WindowsFileSystem::FindFiles( const tchar* InDirectory, bool InIsFiles, bool InIsDirectories )
+std::vector< std::wstring > FWindowsFileSystem::FindFiles( const std::wstring& InDirectory, bool InIsFiles, bool InIsDirectories )
 {
 	HANDLE								handle = nullptr;
 	WIN32_FIND_DATAW					data;
 	std::vector< std::wstring >			result;
 
-	handle = FindFirstFileW( String::Format( TEXT( "%s/*" ), InDirectory ), &data );
+	handle = FindFirstFileW( FString::Format( TEXT( "%s/*" ), InDirectory.c_str() ), &data );
 	if ( handle != INVALID_HANDLE_VALUE )
 	{
 		do
@@ -100,18 +100,33 @@ std::vector< std::wstring > WindowsFileSystem::FindFiles( const tchar* InDirecto
 }
 
 /**
+ * Convert to absolute path
+ */
+std::wstring FWindowsFileSystem::ConvertToAbsolutePath( const std::wstring& InPath ) const
+{
+	std::wstring		path = InPath;
+	if ( path.find( TEXT( ".." ) ) != std::wstring::npos )
+	{
+		path = GetCurrentDirectory() + TEXT( "/" ) + path;
+	}
+
+	return path;
+}
+
+/**
  * Set current directory
  */
-void WindowsFileSystem::SetCurrentDirectory( const tchar* InDirectory )
+void FWindowsFileSystem::SetCurrentDirectory( const std::wstring& InDirectory )
 {
-	SetCurrentDirectoryW( InDirectory );
+	SetCurrentDirectoryW( InDirectory.c_str() );
 }
 
 /**
  * Get current directory
  */
-const tchar* WindowsFileSystem::GetCurrentDirectory() const
+std::wstring FWindowsFileSystem::GetCurrentDirectory() const
 {
-	// TODO BG yehor.pohuliaka - Need add return current directory
-	return TEXT( "" );
+	tchar		path[ MAX_PATH ];
+	::GetCurrentDirectoryW( MAX_PATH, path );
+	return path;
 }

@@ -21,6 +21,12 @@ namespace lifeBuildTool
             // RapidJSON
             SetUpRapidJSONEnvironment();
 
+            // LuaJIT
+            SetUpLuaJITEnvironment();
+
+            //  LuaBridge
+            SetUpLuaBridgeEnvironment();
+
             //
             // Engine/Game/Tools projects
             //
@@ -40,8 +46,9 @@ namespace lifeBuildTool
         }
 
         void SetUpSDL2Environment()
-        {
+        {      
             string              sdl2Home = "../External/SDL2-2.0.14";
+            Logging.WriteLine( String.Format( "Set up SDL2 environment [{0}]", sdl2Home ) );
 
             // Settings includes
             cppEnvironment.includePaths.Add( sdl2Home + "/include" );
@@ -68,9 +75,47 @@ namespace lifeBuildTool
         void SetUpRapidJSONEnvironment()
         {
             string          rapidJSONHome = "../External/rapidjson";
+            Logging.WriteLine( String.Format( "Set up RapidJSON environment [{0}]", rapidJSONHome ) );
 
             // Settings includes
             cppEnvironment.includePaths.Add( rapidJSONHome + "/include" );
+        }
+
+        void SetUpLuaJITEnvironment()
+        {
+            string          luaJITHome = "../External/LuaJIT-2.1";
+            Logging.WriteLine( String.Format( "Set up LuaJIT environment [{0}]", luaJITHome ) );
+
+            // Settings includes
+            cppEnvironment.includePaths.Add( luaJITHome + "/include" );
+
+            // Settings path to libs
+            switch ( platform )
+            {
+                case LETargetPlatform.Win32:
+                    linkEnvironment.libraryPaths.Add( luaJITHome + "/lib/Win32" );
+                    break;
+
+                case LETargetPlatform.Win64:
+                    linkEnvironment.libraryPaths.Add( luaJITHome + "/lib/Win64" );
+                    break;
+
+                default:
+                    throw new BuildException( "Not supported platform for LuaJIT" );
+            }
+
+            // Include libs
+            linkEnvironment.additionalLibraries.Add( "lua51.lib" );
+            linkEnvironment.additionalLibraries.Add( "luajit.lib" );
+        }
+
+        void SetUpLuaBridgeEnvironment()
+        {
+            string          luaBridgeHome = "../External/LuaBridge-2.6";
+            Logging.WriteLine( String.Format( "Set up LuaBridge environment [{0}]", luaBridgeHome ) );
+
+            // Settings includes
+            cppEnvironment.includePaths.Add( luaBridgeHome + "/include" );
         }
 
         List< string > GetWindowsOutputItems( out bool OutIsSuccessed )

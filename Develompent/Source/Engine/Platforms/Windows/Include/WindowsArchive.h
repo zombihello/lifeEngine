@@ -18,19 +18,19 @@
   * @ingroup WindowsPlatform
   * @brief The class for reading archive on Windows
   */
-class WindowsArchiveReading : public BaseArchive
+class FWindowsArchiveReading : public FBaseArchive
 {
 public:
 	/**
 	 * @brief Constructor
 	 * @param[in] InFile Link to file
 	 */
-									WindowsArchiveReading( std::ifstream* InFile );
+									FWindowsArchiveReading( std::ifstream* InFile );
 
 	/**
 	 * @brief Destructor
 	 */
-									~WindowsArchiveReading();
+									~FWindowsArchiveReading();
 
 	/**
 	 * @brief Serialize data
@@ -87,19 +87,19 @@ private:
  * @ingroup WindowsPlatform
  * @brief The class for writing archive on Windows
  */
-class WindowsArchiveWriter : public BaseArchive
+class FWindowsArchiveWriter : public FBaseArchive
 {
 public:
 	/**
 	 * @brief Constructor
 	 * @param[in] InFile Link to file
 	 */
-							WindowsArchiveWriter( std::ofstream* InFile );
+							FWindowsArchiveWriter( std::ofstream* InFile );
 
 	/**
 	 * @brief Destructor
 	 */
-							~WindowsArchiveWriter();
+							~FWindowsArchiveWriter();
 
 	/**
 	 * @brief Serialize data

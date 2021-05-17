@@ -15,18 +15,18 @@
  * @ingroup Launch
  * @brief Class for initialize and tick engine
  */
-class EngineLoop
+class FEngineLoop
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-						EngineLoop();
+						FEngineLoop();
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual				~EngineLoop();
+	virtual				~FEngineLoop();
 
 	/**
 	 * @brief Pre-Initialize the main loop

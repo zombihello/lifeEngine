@@ -6,7 +6,7 @@
 /**
  * Getting a formatted string
  */
-tchar* String::Format( const tchar* InFormat, ... )
+tchar* FString::Format( const tchar* InFormat, ... )
 {
 	va_list			arguments;
 	va_start( arguments, InFormat );
@@ -20,7 +20,7 @@ tchar* String::Format( const tchar* InFormat, ... )
 /**
  * Getting a formatted string
  */
-tchar* String::Format( const tchar* InFormat, va_list InArguments )
+tchar* FString::Format( const tchar* InFormat, va_list InArguments )
 {
 	int32           bufferSize = 1024;
 	tchar* buffer = nullptr;

@@ -1,17 +1,19 @@
 #include "Core.h"
+#include "Misc/Class.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
 #include "System/Config.h"
+#include "Scripts/ScriptEngine.h"
 
 // ----------------
 // GLOBALS
 // ----------------
 
-Config          GEngineConfig;
-Config          GGameConfig;
-Config          GEditorConfig;
+FConfig         GEngineConfig;
+FConfig         GGameConfig;
+FConfig         GEditorConfig;
 bool	        GIsRequestingExit           = false;
 
 /**
@@ -22,7 +24,7 @@ void VARARGS appFailAssertFunc( const achar* InExpr, const achar* InFile, int In
     va_list     arguments;
     va_start( arguments, InFormat );
 
-    tchar*      message = String::Format( InFormat, arguments );
+    tchar*      message = FString::Format( InFormat, arguments );
     LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, message );
 
     va_end( arguments );
@@ -37,7 +39,7 @@ void VARARGS appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, i
 	va_list     arguments;
 	va_start( arguments, InFormat );
 
-	tchar*      message = String::Format( InFormat, arguments );
+	tchar*      message = FString::Format( InFormat, arguments );
     LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, message );
 
 	va_end( arguments );

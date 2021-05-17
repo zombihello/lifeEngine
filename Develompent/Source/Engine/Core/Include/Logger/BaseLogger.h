@@ -10,6 +10,7 @@
 #define BASELOGGER_H
 
 #include "Core.h"
+#include "Scripts/ScriptEngine.h"
 
 /**
  * @ingroup Core
@@ -31,25 +32,28 @@ enum ELogCategory
     LC_None,                /**< No category */
     LC_General,             /**< General category */
     LC_Init,                /**< Initialize category  */
-    LC_Script               /**< Log from script */
+    LC_Script,              /**< Log from script */
+    LC_Dev                  /**< Development category */
 };
 
 /**
  * @ingroup Core
  * @brief Base class of logging
  */
-class BaseLogger
+class FBaseLogger
 {
+    DECLARE_SCRIPT_API()
+
 public:
     /**
      * @brief Constructor
      */
-                        BaseLogger() {}
+                        FBaseLogger() {}
 
     /**
      * @brief Destructor
      */
-    virtual             ~BaseLogger() {}
+    virtual             ~FBaseLogger() {}
 
     /**
      * @brief Initialize logger

@@ -9,20 +9,20 @@
 #ifndef BASEARCHIVE_H
 #define BASEARCHIVE_H
 
-#include "Misc/Types.h"
 #include "Core.h"
+#include "Misc/Types.h"
 
 /**
  * @ingroup Core
  * @brief The base class for work with file
  */
-class BaseArchive
+class FBaseArchive
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual					~BaseArchive() {}
+	virtual					~FBaseArchive() {}
 
 	/**
 	 * @brief Serialize data
@@ -76,7 +76,7 @@ public:
 /**
  * @brief Overload operator << for serialize TCHAR string
  */
-FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, tchar* InStringC )
+FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, tchar* InStringC )
 {
 	InArchive.Serialize( InStringC, ( uint32 )wcslen( InStringC ) * 2 );
 	return InArchive;
@@ -85,7 +85,7 @@ FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, tchar* InStringC )
 /**
  * @brief Overload operator << for serialize ANSI string
  */
-FORCEINLINE BaseArchive&		operator<<( BaseArchive& InArchive, achar* InStringC )
+FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, achar* InStringC )
 {
 	InArchive.Serialize( InStringC, ( uint32 )strlen( InStringC ) );
 	return InArchive;

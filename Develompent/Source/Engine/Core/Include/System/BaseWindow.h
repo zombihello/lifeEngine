@@ -31,13 +31,13 @@ enum EStyleWindow
  * @ingroup Core
  * @brief The base class for work with window
  */
-class BaseWindow
+class FBaseWindow
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual					~BaseWindow() {}
+	virtual					~FBaseWindow() {}
 
 	/**
 	 * @brief Create window

@@ -13,6 +13,12 @@
   * @ingroup Engine
   * @brief RHI
   */
-extern class BaseRHI*				GRHI;
+extern class FBaseRHI*				GRHI;
+
+/**
+ * @ingroup Engine
+ * @brief Script engine
+ */
+extern class FScriptEngine*			GScriptEngine;
 
 #endif // !ENGINEGLOBALS_H

@@ -13,13 +13,13 @@
  * @ingroup Engine
  * @brief Base class for work with device context RHI
  */
-class BaseDeviceContextRHI
+class FBaseDeviceContextRHI
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual						~BaseDeviceContextRHI() {}
+	virtual						~FBaseDeviceContextRHI() {}
 
 	/**
 	 * @brief Clear surface
@@ -27,7 +27,7 @@ public:
 	 * @param[in] InSurface Surface for rendering
 	 * @param[in] InColor Color for clearing render target
 	 */
-	virtual void				ClearSurface( class BaseSurfaceRHI* InSurface, const class Color& InColor ) {}
+	virtual void				ClearSurface( class FBaseSurfaceRHI* InSurface, const class FColor& InColor ) {}
 };
 
 #endif // !BASEDEVICECONTEXTRHI_H

@@ -17,7 +17,7 @@
  * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 device context
 */
-class D3D11DeviceContext : public BaseDeviceContextRHI
+class FD3D11DeviceContext : public FBaseDeviceContextRHI
 {
 public:
 	/**
@@ -25,12 +25,12 @@ public:
 	 * 
 	 * @param[in] InD3D11DeviceContext Pointer to D3D11 device context
 	 */
-											D3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext );
+											FD3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext );
 
 	/**
 	 * @brief Destructor
 	 */
-											~D3D11DeviceContext();
+											~FD3D11DeviceContext();
 
 	/**
 	 * @brief Clear surface
@@ -38,7 +38,7 @@ public:
 	 * @param[in] InSurface Surface for rendering
 	 * @param[in] InColor Color for clearing render target
 	 */
-	virtual void							ClearSurface( class BaseSurfaceRHI* InSurface, const class Color& InColor ) override;
+	virtual void							ClearSurface( class FBaseSurfaceRHI* InSurface, const class FColor& InColor ) override;
 
 	/**
 	 * @brief Get D3D11 device context

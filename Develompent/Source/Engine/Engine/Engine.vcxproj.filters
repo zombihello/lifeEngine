@@ -19,6 +19,12 @@
     <Filter Include="Source\Misc">
       <UniqueIdentifier>{65e5297e-704a-4c2d-aa23-02b281ff20f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Scripts">
+      <UniqueIdentifier>{3f13501c-929a-48ca-a67a-897742112eed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scripts">
+      <UniqueIdentifier>{6bdb5c3c-80d7-4ee6-86a8-c2b68184088c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHI\BaseRHI.h">
@@ -36,10 +42,22 @@
     <ClInclude Include="Include\RHI\BaseSurfaceRHI.h">
       <Filter>Include\RHI</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Scripts\ScriptEngine.h">
+      <Filter>Include\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Scripts\Script.h">
+      <Filter>Include\Scripts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
       <Filter>Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\ScriptEngine.cpp">
+      <Filter>Source\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scripts\Script.cpp">
+      <Filter>Source\Scripts</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

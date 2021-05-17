@@ -9,7 +9,7 @@
 /**
  * Serialize
  */
-void Config::Serialize( BaseArchive& InArchive )
+void FConfig::Serialize( FBaseArchive& InArchive )
 {
 	if ( InArchive.IsLoading() )
 	{
@@ -38,7 +38,7 @@ void Config::Serialize( BaseArchive& InArchive )
 
 			if ( itGroup->value.IsObject() )
 			{
-				ConfigObject		object;
+				FConfigObject		object;
 				object.Set( itGroup->value, groupName.c_str() );
 				groups[ groupName ] = object;
 			}
@@ -70,7 +70,7 @@ void Config::Serialize( BaseArchive& InArchive )
 /**
  * Convert value to JSON string
  */
-std::string ConfigValue::ToJSON( uint32 InCountTabs /* = 0 */ ) const
+std::string FConfigValue::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 {
 	std::stringstream	strStream;
 	
@@ -90,7 +90,7 @@ std::string ConfigValue::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 /**
  * Convert object to JSON string
  */
-std::string ConfigObject::ToJSON( uint32 InCountTabs /* = 0 */ ) const
+std::string FConfigObject::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 {
 	std::stringstream	strStream;
 	std::string			tabs;
@@ -121,7 +121,7 @@ std::string ConfigObject::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 /**
  * Set value from RapidJSON value
  */
-void ConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
+void FConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
 {
 	if ( InValue.IsNull() )
 	{
@@ -145,19 +145,19 @@ void ConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* =
 	}
 	else if ( InValue.IsObject() )
 	{
-		ConfigObject		object;
+		FConfigObject		object;
 		object.Set( InValue, InName );
 		SetObject( object );
 	}
 	else if ( InValue.IsArray() )
 	{
 		auto							array = InValue.GetArray();
-		std::vector< ConfigValue >		configValues;
+		std::vector< FConfigValue >		configValues;
 
 		for ( uint32 index = 0, count = array.Size(); index < count; ++index )
 		{
-			ConfigValue		configValue;
-			configValue.Set( array[ index ], String::Format( TEXT( "%s[%i]" ), InName, index ) );
+			FConfigValue		configValue;
+			configValue.Set( array[ index ], FString::Format( TEXT( "%s[%i]" ), InName, index ) );
 			configValues.push_back( configValue );
 		}
 
@@ -172,14 +172,14 @@ void ConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* =
 /**
  * Set object from RapidJSON value
  */
-void ConfigObject::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
+void FConfigObject::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
 {
 	std::wstring			objectName = InName;
 
 	for ( auto itValue = InValue.MemberBegin(), itValueEnd = InValue.MemberEnd(); itValue != itValueEnd; ++itValue )
 	{
 		std::wstring		valueName = ANSI_TO_TCHAR( itValue->name.GetString() );
-		ConfigValue			value;
+		FConfigValue		value;
 
 		value.Set( itValue->value, ( objectName + TEXT( "::" ) + valueName ).c_str() );
 		values[ valueName ] = value;
@@ -189,7 +189,7 @@ void ConfigObject::Set( const rapidjson::Value& InValue, const tchar* InName /* 
 /**
  * Set value
  */
-void ConfigObject::SetValue( const tchar* InName, const ConfigValue& InValue )
+void FConfigObject::SetValue( const tchar* InName, const FConfigValue& InValue )
 {
 	values[ InName ] = InValue;
 }
@@ -197,12 +197,12 @@ void ConfigObject::SetValue( const tchar* InName, const ConfigValue& InValue )
 /**
  * Get value
  */
-ConfigValue ConfigObject::GetValue( const tchar* InName ) const
+FConfigValue FConfigObject::GetValue( const tchar* InName ) const
 {
 	auto		itValue = values.find( InName );
 	if ( itValue == values.end() )
 	{
-		return ConfigValue();
+		return FConfigValue();
 	}
 
 	return itValue->second;
@@ -211,7 +211,7 @@ ConfigValue ConfigObject::GetValue( const tchar* InName ) const
 /**
  * Copy value
  */
-void ConfigValue::Copy( const ConfigValue& InCopy )
+void FConfigValue::Copy( const FConfigValue& InCopy )
 {
 	type = InCopy.type;
 
@@ -230,7 +230,7 @@ void ConfigValue::Copy( const ConfigValue& InCopy )
 /**
  * Clear value
  */
-void ConfigValue::Clear()
+void FConfigValue::Clear()
 {
 	if ( !value ) return;
 
@@ -240,8 +240,8 @@ void ConfigValue::Clear()
 	case T_Int:				delete static_cast< int32* >( value );							break;
 	case T_Float:			delete static_cast< float* >( value );							break;
 	case T_String:			delete static_cast< std::wstring* >( value );					break;
-	case T_Object:			delete static_cast< ConfigObject* >( value );					break;
-	case T_Array:			delete static_cast< std::vector< ConfigValue >* >( value );		break;
+	case T_Object:			delete static_cast< FConfigObject* >( value );					break;
+	case T_Array:			delete static_cast< std::vector< FConfigValue >* >( value );	break;
 	}
 
 	value = nullptr;

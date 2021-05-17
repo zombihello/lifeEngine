@@ -18,20 +18,20 @@
  * @ingroup WindowsPlatform
  * @brief Class for logging on Windows
  */
-class WindowsLogger : public BaseLogger
+class FWindowsLogger : public FBaseLogger
 {
 public:
     /**
      * @ingroup WindowsPlatform
      * @brief Constructor
      */
-                            WindowsLogger();
+                            FWindowsLogger();
 
     /**
      * @ingroup WindowsPlatform
      * @brief Destructor
      */
-                            ~WindowsLogger();
+                            ~FWindowsLogger();
 
     /**
      * @brief Initialize logger
@@ -75,7 +75,7 @@ private:
     std::chrono::steady_clock::time_point		startLogging;       /**< Time of start logging */
 
     HANDLE                                      consoleHandle;      /**< OS handle on console*/
-    BaseArchive*                                archiveLogs;        /**< Archive of logs */
+    FBaseArchive*                               archiveLogs;        /**< Archive of logs */
 };
 
 #endif // !WINDOWSLOGGER_H

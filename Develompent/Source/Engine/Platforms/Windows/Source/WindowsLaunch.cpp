@@ -22,13 +22,13 @@
  */
 int32 appPlatformPreInit( const tchar* InCmdLine )
 {
-	static_cast< WindowsLogger* >( GLog )->Show( true );
+	static_cast< FWindowsLogger* >( GLog )->Show( true );
 
 	// Print version SDL to logs
 	{
 		SDL_version		sdlVersion;
 		SDL_GetVersion( &sdlVersion );
-		LE_LOG( LT_Log, LC_General, TEXT( "SDL version: %i.%i.%i" ), sdlVersion.major, sdlVersion.minor, sdlVersion.patch );
+		LE_LOG( LT_Log, LC_Init, TEXT( "SDL version: %i.%i.%i" ), sdlVersion.major, sdlVersion.minor, sdlVersion.patch );
 	}
 
 	return 0;

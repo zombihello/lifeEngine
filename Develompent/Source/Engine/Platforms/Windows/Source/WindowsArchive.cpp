@@ -3,6 +3,7 @@
 
 #include "Core.h"
 #include "Misc/Template.h"
+#include "Misc/Class.h"
 #include "WindowsArchive.h"
 
 // ====================================
@@ -12,14 +13,14 @@
 /**
  * Constructor
  */
-WindowsArchiveReading::WindowsArchiveReading( std::ifstream* InFile ) :
+FWindowsArchiveReading::FWindowsArchiveReading( std::ifstream* InFile ) :
 	file( InFile )
 {}
 
 /**
  * Destructor
  */
-WindowsArchiveReading::~WindowsArchiveReading()
+FWindowsArchiveReading::~FWindowsArchiveReading()
 {
 	delete file;
 }
@@ -27,7 +28,7 @@ WindowsArchiveReading::~WindowsArchiveReading()
 /**
  * Get size of archive
  */
-uint32 WindowsArchiveReading::GetSize()
+uint32 FWindowsArchiveReading::GetSize()
 {
 	uint32			currentPosition = ( uint32 )Tell();
 	uint32			sizeFile = 0;
@@ -42,7 +43,7 @@ uint32 WindowsArchiveReading::GetSize()
 /**
  * Set current position in archive
  */
-void WindowsArchiveReading::Seek( uint32 InPosition )
+void FWindowsArchiveReading::Seek( uint32 InPosition )
 {
 	file->seekg( InPosition, std::ios::beg );
 }
@@ -50,13 +51,13 @@ void WindowsArchiveReading::Seek( uint32 InPosition )
 /**
  * Flush data
  */
-void WindowsArchiveReading::Flush()
+void FWindowsArchiveReading::Flush()
 {}
 
 /**
  * Get current position in archive
  */
-uint32 WindowsArchiveReading::Tell()
+uint32 FWindowsArchiveReading::Tell()
 {
 	return ( uint32 )file->tellg();
 }
@@ -64,7 +65,7 @@ uint32 WindowsArchiveReading::Tell()
 /**
  * Serialize data
  */
-void WindowsArchiveReading::Serialize( void* InBuffer, uint32 InSize )
+void FWindowsArchiveReading::Serialize( void* InBuffer, uint32 InSize )
 {
 	file->read( ( achar* )InBuffer, InSize );
 }
@@ -72,7 +73,7 @@ void WindowsArchiveReading::Serialize( void* InBuffer, uint32 InSize )
 /**
  * Is loading archive
  */
-bool WindowsArchiveReading::IsLoading() const
+bool FWindowsArchiveReading::IsLoading() const
 {
 	return true;
 }
@@ -84,14 +85,14 @@ bool WindowsArchiveReading::IsLoading() const
 /**
  * Constructor
  */
-WindowsArchiveWriter::WindowsArchiveWriter( std::ofstream* InFile ) :
+FWindowsArchiveWriter::FWindowsArchiveWriter( std::ofstream* InFile ) :
 	file( InFile )
 {}
 
 /**
  * Destructor
  */
-WindowsArchiveWriter::~WindowsArchiveWriter()
+FWindowsArchiveWriter::~FWindowsArchiveWriter()
 {
 	Flush();
 	delete file;
@@ -100,7 +101,7 @@ WindowsArchiveWriter::~WindowsArchiveWriter()
 /**
  * Get size of archive
  */
-uint32 WindowsArchiveWriter::GetSize()
+uint32 FWindowsArchiveWriter::GetSize()
 {
 	// Make sure that all data is written before looking at file size.
 	Flush();
@@ -118,7 +119,7 @@ uint32 WindowsArchiveWriter::GetSize()
 /**
  * Set current position in archive
  */
-void WindowsArchiveWriter::Seek( uint32 InPosition )
+void FWindowsArchiveWriter::Seek( uint32 InPosition )
 {
 	Flush();
 	file->seekp( InPosition, std::ios::beg );
@@ -127,7 +128,7 @@ void WindowsArchiveWriter::Seek( uint32 InPosition )
 /**
  * Flush data
  */
-void WindowsArchiveWriter::Flush()
+void FWindowsArchiveWriter::Flush()
 {
 	file->flush();
 }
@@ -135,7 +136,7 @@ void WindowsArchiveWriter::Flush()
 /**
  * Get current position in archive
  */
-uint32 WindowsArchiveWriter::Tell()
+uint32 FWindowsArchiveWriter::Tell()
 {
 	Flush();
 	return ( uint32 )file->tellp();
@@ -144,7 +145,7 @@ uint32 WindowsArchiveWriter::Tell()
 /**
  * Serialize data
  */
-void WindowsArchiveWriter::Serialize( void* InBuffer, uint32 InSize )
+void FWindowsArchiveWriter::Serialize( void* InBuffer, uint32 InSize )
 {
 	file->write( ( achar* )InBuffer, InSize );
 	Flush();
@@ -153,7 +154,7 @@ void WindowsArchiveWriter::Serialize( void* InBuffer, uint32 InSize )
 /**
  * Is saving archive
  */
-bool WindowsArchiveWriter::IsSaving() const
+bool FWindowsArchiveWriter::IsSaving() const
 {
 	return true;
 }

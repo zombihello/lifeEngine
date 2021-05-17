@@ -11,7 +11,6 @@
 
 #include "LEBuild.h"
 #include "CoreDefines.h"
-#include "Logger/LoggerMacros.h"
 #include "Misc/Types.h"
 #include "Misc/CoreGlobals.h"
 
@@ -26,6 +25,12 @@
  * Example usage: @code TEXT( "Hello World" ) @endcode
  */
 #define TEXT( String )      L##String
+
+/**
+ * @ingroup Core
+ * @brief Macro for empty code
+ */
+#define NOOP                ( void )0
 
 /**
  * @ingroup Core
@@ -98,7 +103,7 @@ extern int              appGetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, 
  * @param[in] InCmdLine Command line
  * @return Returns the error level, 0 if successful and > 0 if there were errors
  */
-extern int32             appPlatformPreInit( const tchar* InCmdLine );
+int32                   appPlatformPreInit( const tchar* InCmdLine );
 
 /**
  * @ingroup Core
@@ -107,7 +112,31 @@ extern int32             appPlatformPreInit( const tchar* InCmdLine );
  * @param[in] InCmdLine Command line
  * @return Returns the error level, 0 if successful and > 0 if there were errors 
  */
-extern int32             appPlatformInit( const tchar* InCmdLine );
+int32                   appPlatformInit( const tchar* InCmdLine );
+
+/**
+ * @ingroup Core
+ * @brief Create process
+ * 
+ * @param[in] InPathToProcess Executable name
+ * @param[in] InParams Command line arguments
+ * @param[in] InLaunchDetached If true, the new process will have its own window
+ * @param[in] InLaunchReallyHidden If true, the new process will not have a window or be in the task bar
+ * @param[in] InPriorityModifier -2 idle, -1 low, 0 normal, 1 high, 2 higher
+ * @param[in] OutProcessId if non-NULL, this will be filled in with the ProcessId
+ * @return The process handle for use in other process functions
+ */
+void*                   appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool InLaunchDetached, bool InLaunchHidden, bool InLaunchReallyHidden, int32 InPriorityModifier, uint64* OutProcessId = nullptr );
+
+/**
+ * @ingroup Core
+ * @brief Retrieves the termination status of the specified process
+ * 
+ * @param[in] InProcHandle Handle of process
+ * @param[out] OutReturnCode Return code
+ * @return Return true if process is end, else returning false
+ */
+bool                    appGetProcReturnCode( void* InProcHandle, int32* OutReturnCode );
 
 /**
  * @ingroup Core

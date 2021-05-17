@@ -113,7 +113,7 @@ namespace lifeBuildTool
                 string          executableName = project.GetName() + "-" + platform.ToString() + "-" + configuration.ToString() + GetOutputExtension( platform );
 
                 // Example: Binaries\\Win32\\ExampleGame.exe
-                if ( configuration == LETargetConfiguration.Release )
+                if ( configuration == LETargetConfiguration.Shipping )
                 {
                     executableName = project.GetName() + GetOutputExtension( platform );
                 }

@@ -13,13 +13,13 @@
  * @ingroup Engine
  * @brief Base class of surface for RHI
  */
-class BaseSurfaceRHI
+class FBaseSurfaceRHI
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual					~BaseSurfaceRHI() {}
+	virtual					~FBaseSurfaceRHI() {}
 };
 
 #endif // !BASESURFACERHI_H

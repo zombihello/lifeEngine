@@ -15,18 +15,18 @@
  * @ingroup WindowsPlatform
  * @brief Class for work with file system in Windows
  */
-class WindowsFileSystem : public BaseFileSystem
+class FWindowsFileSystem : public FBaseFileSystem
 {
 public:
     /**
      * @brief Constructor
      */
-                                                    WindowsFileSystem();
+                                                    FWindowsFileSystem();
 
     /**
      * @brief Destructor
      */
-                                                    ~WindowsFileSystem();
+                                                    ~FWindowsFileSystem();
 
     /**
      * @brief Create file reader
@@ -37,7 +37,7 @@ public:
      *
      * @warning After use need delete file reader
      */
-    virtual class BaseArchive*                      CreateFileReader( const tchar* InFileName, uint32 InFlags = AR_None ) override;
+    virtual class FBaseArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None ) override;
 
     /**
      * @brief Create file writer
@@ -48,7 +48,7 @@ public:
      *
      * @warning After use need delete file writer
      */
-    virtual class BaseArchive*                      CreateFileWriter( const tchar* InFileName, uint32 InFlags = AW_None ) override;
+    virtual class FBaseArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None ) override;
 
     /**
      * @brief Find files in directory
@@ -58,20 +58,28 @@ public:
      * @param[in] InIsDirectories Whether to search directories
      * @return Array of paths to files in directory
      */
-    virtual std::vector< std::wstring >             FindFiles( const tchar* InDirectory, bool InIsFiles, bool InIsDirectories ) override;
+    virtual std::vector< std::wstring >             FindFiles( const std::wstring& InDirectory, bool InIsFiles, bool InIsDirectories ) override;
+
+    /**
+     * @brief Convert to absolute path
+     *
+     * @param[in] InPath Path
+     * @return Absolute path
+     */
+    virtual std::wstring                           ConvertToAbsolutePath( const std::wstring& InPath ) const override;
 
     /**
      * @brief Set current directory
      *
      * @param[in] InDirectory Path to directory
      */
-    virtual void                                    SetCurrentDirectory( const tchar* InDirectory ) override;
+    virtual void                                    SetCurrentDirectory( const std::wstring& InDirectory ) override;
 
     /**
      * @brief Get current directory
      * @return Return current directory
      */
-    virtual const tchar*                            GetCurrentDirectory() const override;
+    virtual std::wstring                            GetCurrentDirectory() const override;
 };
 
 #endif

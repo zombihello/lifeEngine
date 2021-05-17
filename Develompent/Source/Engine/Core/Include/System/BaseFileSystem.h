@@ -40,13 +40,13 @@ enum EArchiveWrite
  * @ingroup Core
  * @brief The base class for work with file system
  */
-class BaseFileSystem
+class FBaseFileSystem
 {
 public:
     /**
      * @brief Destructor
      */
-    virtual                                         ~BaseFileSystem() {}
+    virtual                                         ~FBaseFileSystem() {}
 
     /**
      * @brief Create file reader
@@ -58,7 +58,7 @@ public:
      * 
      * @warning After use need delete file reader
      */
-    virtual class BaseArchive*                      CreateFileReader( const tchar* InFileName, uint32 InFlags = AR_None )         { return nullptr; }
+    virtual class FBaseArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None )            { return nullptr; }
 
     /**
 	 * @brief Create file writer
@@ -70,7 +70,7 @@ public:
 	 *
 	 * @warning After use need delete file writer
 	 */
-    virtual class BaseArchive*                      CreateFileWriter( const tchar* InFileName, uint32 InFlags = AW_None )         { return nullptr; }
+    virtual class FBaseArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None )            { return nullptr; }
 
     /**
      * @brief Find files in directory
@@ -80,20 +80,28 @@ public:
      * @param[in] InIsDirectories Whether to search directories
      * @return Array of paths to files in directory
      */
-    virtual std::vector< std::wstring >             FindFiles( const tchar* InDirectory, bool InIsFiles, bool InIsDirectories )     { return std::vector< std::wstring >(); }
+    virtual std::vector< std::wstring >             FindFiles( const std::wstring& InDirectory, bool InIsFiles, bool InIsDirectories )     { return std::vector< std::wstring >(); }
+
+    /**
+     * @brief Convert to absolute path
+     * 
+     * @param[in] InPath Path
+     * @return Absolute path
+     */
+    virtual std::wstring                          ConvertToAbsolutePath( const std::wstring& InPath ) const                                 { return TEXT( "" ); }
 
     /**
      * @brief Set current directory
      * 
      * @param[in] InDirectory Path to directory
      */
-    virtual void                                    SetCurrentDirectory( const tchar* InDirectory )                                 {}
+    virtual void                                    SetCurrentDirectory( const std::wstring& InDirectory )                                  {}
 
     /**
      * @brief Get current directory
      * @return Return current directory
      */
-    virtual const tchar*                            GetCurrentDirectory() const                                                     { return TEXT( "" ); }
+    virtual std::wstring                            GetCurrentDirectory() const                                                             { return TEXT( "" ); }
 };
 
 #endif

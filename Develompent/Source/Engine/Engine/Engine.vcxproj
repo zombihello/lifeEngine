@@ -12,9 +12,13 @@
     <ClInclude Include="Include\RHI\BaseSurfaceRHI.h" />
     <ClInclude Include="Include\RHI\BaseViewportRHI.h" />
     <ClInclude Include="Include\RHI\BaseDeviceContextRHI.h" />
+    <ClInclude Include="Include\Scripts\Script.h" />
+    <ClInclude Include="Include\Scripts\ScriptEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp" />
+    <ClCompile Include="Source\Scripts\Script.cpp" />
+    <ClCompile Include="Source\Scripts\ScriptEngine.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -42,7 +46,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../Games/TestbedGame/Include;../../../External/angelscript-2.35.0/include;../../../External/rapidjson/include;Include;../Core/Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../Games/TestbedGame/Include;../../../External/LuaBridge-2.6/include;../../../External/LuaJIT-2.1/include;../../../External/rapidjson/include;Include;../Core/Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

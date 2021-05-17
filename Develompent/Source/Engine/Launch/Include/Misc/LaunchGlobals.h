@@ -13,6 +13,6 @@
   * @ingroup Launch
   * @brief Engine loop
   */
-extern class EngineLoop*			GEngineLoop;
+extern class FEngineLoop*			GEngineLoop;
 
 #endif // !LAUNCHGLOBALS_H

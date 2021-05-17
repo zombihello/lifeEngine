@@ -15,15 +15,14 @@
 #include "Core.h"
 #include "Misc/Object.h"
 #include "System/BaseArchive.h"
+#include "Scripts/ScriptEngine.h"
 
 /**
  * @ingroup Core
  * @brief Class description for reflection
  */
-class LClass : public LObject
+class LClass
 {
-	DECLARE_CLASS( LClass, LObject )
-
 public:
 	/**
 	 * @brief Constructor
@@ -38,6 +37,7 @@ public:
 	 * 
 	 * @param[in] InClassName Class name
 	 * @param[in] InClassConstructor Pointer to class constructor
+	 * @param[in] InSuperClass Pointer to super class
 	 */
 	FORCEINLINE										LClass( const std::wstring& InClassName, class LObject*( *InClassConstructor )(), LClass* InSuperClass = nullptr ) :
 		ClassConstructor( InClassConstructor ),
