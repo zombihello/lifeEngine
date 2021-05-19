@@ -172,6 +172,7 @@ public:
     template< typename TClass >
     static FORCEINLINE TClass*      StaticNewObject( const LClass* InClass )
     {
+        check( InClass );
         return InClass->CreateObject< TClass >();
     }
 

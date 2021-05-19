@@ -9,6 +9,15 @@
 #ifndef SCRIPTENGINE_H
 #define SCRIPTENGINE_H
 
+extern "C"
+{
+    #include <lua.h>
+    #include <lauxlib.h>
+    #include <lualib.h>
+    #include <luajit.h>
+}
+
+#include <LuaBridge/LuaBridge.h>
 #include <unordered_map>
 
 #include "Core.h"

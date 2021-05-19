@@ -14,6 +14,17 @@
 
 /**
  * @ingroup Core
+ * @brief Enumeration of types resource in archive
+ */
+enum EArchiveResourceType
+{
+	ART_Unknown,		/**< Unknown resource */
+	ART_Script,			/**< Script resource */
+	ART_Count			/**< Count of resources */
+};
+
+/**
+ * @ingroup Core
  * @brief The base class for work with file
  */
 class FBaseArchive
@@ -88,6 +99,16 @@ FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, tchar* InStringC
 FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, achar* InStringC )
 {
 	InArchive.Serialize( InStringC, ( uint32 )strlen( InStringC ) );
+	return InArchive;
+}
+
+/**
+ * @brief Overload operator << for all types
+ */
+template< typename TType >
+FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, const TType& InValue )
+{
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 

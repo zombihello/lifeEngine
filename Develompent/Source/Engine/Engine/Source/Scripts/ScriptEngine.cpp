@@ -1,9 +1,3 @@
-extern "C"
-{
-	#include <lua.h>
-	#include <luajit.h>
-}
-
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Scripts/ScriptEngine.h"
