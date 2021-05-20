@@ -7,25 +7,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\WindowsArchive.cpp" />
-    <ClCompile Include="Source\WindowsFileSystem.cpp" />
-    <ClCompile Include="Source\WindowsImGUI.cpp" />
-    <ClCompile Include="Source\WindowsLaunch.cpp" />
-    <ClCompile Include="Source\WindowsLogger.cpp" />
-    <ClCompile Include="Source\WindowsPlatform.cpp" />
-    <ClCompile Include="Source\WindowsWindow.cpp" />
+    <ClInclude Include="Include\ImGUI\imconfig.h" />
+    <ClInclude Include="Include\ImGUI\imgui.h" />
+    <ClInclude Include="Include\ImGUI\ImGUIEngine.h" />
+    <ClInclude Include="Include\ImGUI\imgui_internal.h" />
+    <ClInclude Include="Include\ImGUI\imstb_rectpack.h" />
+    <ClInclude Include="Include\ImGUI\imstb_textedit.h" />
+    <ClInclude Include="Include\ImGUI\imstb_truetype.h" />
+    <ClInclude Include="Include\Misc\WorldEdGlobals.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\WindowsArchive.h" />
-    <ClInclude Include="Include\WindowsFileSystem.h" />
-    <ClInclude Include="Include\WindowsImGUI.h" />
-    <ClInclude Include="Include\WindowsLogger.h" />
-    <ClInclude Include="Include\WindowsPlatform.h" />
-    <ClInclude Include="Include\WindowsWindow.h" />
+    <ClCompile Include="Source\ImGUI\imgui.cpp" />
+    <ClCompile Include="Source\ImGUI\ImGUIEngine.cpp" />
+    <ClCompile Include="Source\ImGUI\imgui_demo.cpp" />
+    <ClCompile Include="Source\ImGUI\imgui_draw.cpp" />
+    <ClCompile Include="Source\ImGUI\imgui_tables.cpp" />
+    <ClCompile Include="Source\ImGUI\imgui_widgets.cpp" />
+    <ClCompile Include="Source\Misc\WorldEdGlobals.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{621FEF43-58E6-4E1F-91DE-FE553EB3E626}</ProjectGuid>
+    <ProjectGuid>{3BA6D285-B58E-4120-9012-406611EB319B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -45,11 +47,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='BuiltWithLifeBuildTool|Win32'">
     <NMakeOutput />
-    <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>IS_TESTBED=1;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine />
-    <OutDir>..\..\..\..\Intermediate\Unused\</OutDir>
-    <IntDir>..\..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../WorldEd/Include;../../../Games/TestbedGame/Include;../../../../../External/LuaJIT-2.1/include;../../../../../External/LuaBridge-2.6/include;../../../../../External/rapidjson/include;../../Launch/Include;Include;../../Core/Include;../../Engine/Include;../../RHI/D3D11RHI/Include;../../../../External/SDL2-2.0.14/include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <OutDir>..\..\..\Intermediate\Unused\</OutDir>
+    <IntDir>..\..\..\Intermediate\Unused\</IntDir>
+    <NMakeIncludeSearchPath>../../Games/TestbedGame/Include;../../../External/LuaBridge-2.6/include;../../../External/LuaJIT-2.1/include;../../../External/rapidjson/include;Include;../Engine/Include;../Core/Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

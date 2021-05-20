@@ -95,7 +95,7 @@ struct SWindowEvent
 	 */
 	struct STextInputEvent
 	{
-		tchar*			text;			/**< Entered text */
+		achar*			text;			/**< Entered text */
 	};
 
 	/**

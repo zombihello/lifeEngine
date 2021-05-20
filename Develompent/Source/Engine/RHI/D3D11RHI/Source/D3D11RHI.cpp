@@ -5,6 +5,8 @@
 #include "D3D11DeviceContext.h"
 #include "D3D11Surface.h"
 
+#include "D3D11ImGUI.h"
+
 /**
  * Constructor
  */
@@ -152,6 +154,42 @@ void FD3D11RHI::EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext
 		InViewport->Present( InLockToVsync );
 	}
 }
+
+#if WITH_EDITOR
+/**
+ * Initialize ImGUI
+ */
+bool FD3D11RHI::InitImGUI( class FBaseDeviceContextRHI* InDeviceContext )
+{
+	check( d3d11Device && InDeviceContext );
+	FD3D11DeviceContext*		deviceContext = ( FD3D11DeviceContext* )InDeviceContext;
+	return ImGui_ImplDX11_Init( d3d11Device, deviceContext->GetD3D11DeviceContext() );
+}
+
+/**
+ * Shutdown render of ImGUI
+ */
+void FD3D11RHI::ShutdownImGUI( class FBaseDeviceContextRHI* InDeviceContext )
+{
+	ImGui_ImplDX11_Shutdown();
+}
+
+/**
+ * Begin drawing ImGUI
+ */
+void FD3D11RHI::BeginDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext )
+{
+	ImGui_ImplDX11_NewFrame();
+}
+
+/**
+ * End drawing ImGUI
+ */
+void FD3D11RHI::EndDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext )
+{
+	ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
+}
+#endif // WITH_EDITOR
 
 /**
  * Set debug name fore DirectX 11 resource

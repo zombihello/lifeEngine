@@ -8,12 +8,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\D3D11DeviceContext.h" />
+    <ClInclude Include="Include\D3D11ImGUI.h" />
     <ClInclude Include="Include\D3D11RHI.h" />
     <ClInclude Include="Include\D3D11Surface.h" />
     <ClInclude Include="Include\D3D11Viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\D3D11DeviceContext.cpp" />
+    <ClCompile Include="Source\D3D11ImGUI.cpp" />
     <ClCompile Include="Source\D3D11RHI.cpp" />
     <ClCompile Include="Source\D3D11Surface.cpp" />
     <ClCompile Include="Source\D3D11Viewport.cpp" />
@@ -40,11 +42,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='BuiltWithLifeBuildTool|Win32'">
     <NMakeOutput />
-    <NMakePreprocessorDefinitions>IS_TESTBED=1;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../../Games/TestbedGame/Include;../../../../../External/LuaJIT-2.1/include;../../../../../External/LuaBridge-2.6/include;../../../../../External/rapidjson/include;Include;../../Core/Include;../../Engine/Include;../../Platforms/Windows/Include;../../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../WorldEd/Include;../../../Games/TestbedGame/Include;../../../../../External/LuaJIT-2.1/include;../../../../../External/LuaBridge-2.6/include;../../../../../External/rapidjson/include;Include;../../Core/Include;../../Engine/Include;../../Platforms/Windows/Include;../../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

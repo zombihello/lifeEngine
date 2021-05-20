@@ -67,7 +67,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../Engine/Include;../../Games/TestbedGame/Include;../../../External/LuaJIT-2.1/include;../../../External/LuaBridge-2.6/include;../../../External/rapidjson/include;Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../WorldEd/Include;../Engine/Include;../../Games/TestbedGame/Include;../../../External/LuaJIT-2.1/include;../../../External/LuaBridge-2.6/include;../../../External/rapidjson/include;Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

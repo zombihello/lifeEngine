@@ -27,6 +27,9 @@
     <ClCompile Include="Source\WindowsArchive.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\WindowsImGUI.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\WindowsPlatform.h">
@@ -42,6 +45,9 @@
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="Include\WindowsArchive.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\WindowsImGUI.h">
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>

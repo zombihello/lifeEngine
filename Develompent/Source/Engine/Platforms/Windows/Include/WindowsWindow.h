@@ -17,6 +17,24 @@ struct SDL_SysWMinfo;
 
 /**
  * @ingroup WindowsPlatform
+ * @brief Convert scancode to engine keycode
+ * 
+ * @param[in] InScancode SDL scancode
+ * @return Return engine keycode
+ */
+EButtonCode appScanCodeToButtonCode( uint32 InScancode );
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Convert engine keycode scancode
+ * 
+ * @param[in] InButtonCode Engine keycode
+ * @return Return SDL scancode
+ */
+uint32 appButtonCodeToScanCode( EButtonCode InButtonCode );
+
+/**
+ * @ingroup WindowsPlatform
  * @brief The class for work with window on Windows
  */
 class FWindowsWindow : public FBaseWindow

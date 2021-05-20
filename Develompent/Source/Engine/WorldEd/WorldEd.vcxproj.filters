@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Include">
+      <UniqueIdentifier>{dbfd0778-c3b1-455e-8a07-2fd66f663b77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{a43391e9-4843-4bb9-9c6c-28c5e330fdd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\ImGUI">
+      <UniqueIdentifier>{e20bfe88-6077-417f-9054-1337729a94e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\ImGUI">
+      <UniqueIdentifier>{a6d04722-29e9-4110-8069-2ddf9fc44801}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Misc">
+      <UniqueIdentifier>{ad019645-0dfd-44d0-ad72-5f9d577e2489}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Misc">
+      <UniqueIdentifier>{a05a9651-cfd7-4237-91fb-e22a7def98e7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\ImGUI\imconfig.h">
+      <Filter>Include\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ImGUI\imgui.h">
+      <Filter>Include\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ImGUI\imgui_internal.h">
+      <Filter>Include\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ImGUI\imstb_rectpack.h">
+      <Filter>Include\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ImGUI\imstb_textedit.h">
+      <Filter>Include\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ImGUI\imstb_truetype.h">
+      <Filter>Include\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ImGUI\ImGUIEngine.h">
+      <Filter>Include\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\WorldEdGlobals.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\ImGUI\imgui.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGUI\imgui_demo.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGUI\imgui_draw.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGUI\imgui_tables.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGUI\imgui_widgets.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGUI\ImGUIEngine.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Misc\WorldEdGlobals.cpp">
+      <Filter>Source\Misc</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

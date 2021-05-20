@@ -42,11 +42,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='BuiltWithLifeBuildTool|Win32'">
     <NMakeOutput />
-    <NMakePreprocessorDefinitions>IS_TESTBED=1;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../Games/TestbedGame/Include;../../../External/LuaBridge-2.6/include;../../../External/LuaJIT-2.1/include;../../../External/rapidjson/include;Include;../Core/Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../WorldEd/Include;../../Games/TestbedGame/Include;../../../External/LuaBridge-2.6/include;../../../External/LuaJIT-2.1/include;../../../External/rapidjson/include;Include;../Core/Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

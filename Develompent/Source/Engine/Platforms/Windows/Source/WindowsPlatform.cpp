@@ -11,6 +11,7 @@
 #include "WindowsLogger.h"
 #include "WindowsFileSystem.h"
 #include "WindowsWindow.h"
+#include "WindowsImGUI.h"
 
 // ----
 // Platform specific globals variables

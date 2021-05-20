@@ -85,7 +85,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 		}
 
 		while ( !GIsRequestingExit )
-		{
+		{			
 			GEngineLoop->Tick();
 		}
 

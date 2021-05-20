@@ -16,6 +16,12 @@
 #include "RHI/BaseSurfaceRHI.h"
 #include "EngineLoop.h"
 
+#if WITH_EDITOR
+	#include "Misc/WorldEdGlobals.h"	
+	#include "ImGUI/ImGUIEngine.h"
+	#include "ImGUI/imgui.h"
+#endif // WITH_EDITOR
+
 // --------------
 // GLOBALS
 // --------------
@@ -103,7 +109,13 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	GRHI->Init( false );
 	GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), width, height );
 
-	return appPlatformInit( InCmdLine );
+	int32		result = appPlatformInit( InCmdLine );
+
+#if WITH_EDITOR
+	GImGUIEngine->Init( GRHI->GetImmediateContext() );
+#endif // WITH_EDITOR
+
+	return result;
 }
 
 /**
@@ -121,12 +133,24 @@ void FEngineLoop::Tick()
 				GIsRequestingExit = true;
 				break;
 			}
+
+#if WITH_EDITOR
+			GImGUIEngine->ProcessEvent( windowEvent );
+#endif // WITH_EDITOR
 		}
 	}
 
 	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 	GRHI->BeginDrawingViewport( immediateContext, GViewportRHI );
 	immediateContext->ClearSurface( GViewportRHI->GetSurface(), FColor::black );
+
+#if WITH_EDITOR
+	// This test drawing of ImGUI
+	GImGUIEngine->BeginDrawing( immediateContext );
+	ImGui::ShowDemoWindow();
+	GImGUIEngine->EndDrawing( immediateContext );
+#endif // WITH_EDITOR
+
 	GRHI->EndDrawingViewport( immediateContext, GViewportRHI, true, false );
 }
 
@@ -135,6 +159,10 @@ void FEngineLoop::Tick()
  */
 void FEngineLoop::Exit()
 {
+#if WITH_EDITOR
+	GImGUIEngine->Shutdown( GRHI->GetImmediateContext() );
+#endif // WITH_EDITOR
+
 	delete GViewportRHI;
 	GRHI->Destroy();
 

@@ -5,6 +5,7 @@
 #include <Logger/BaseLogger.h>
 #include <Logger/LoggerMacros.h>
 #include "WindowsWindow.h"
+#include "WindowsImGUI.h"
 
 static SDL_Scancode		GScanCodeToButtonCode[] =
 {
@@ -121,15 +122,24 @@ static SDL_Scancode		GScanCodeToButtonCode[] =
 /**
  * Convert scancode to engine keycode
  */
-EButtonCode appScanCodeToButtonCode( SDL_Scancode InScancode )
+EButtonCode appScanCodeToButtonCode( uint32 InScancode )
 {
 	for ( uint32 index = 0; index < BC_KeyCount; ++index )
-		if ( GScanCodeToButtonCode[ index ] == InScancode )
+		if ( GScanCodeToButtonCode[ index ] == ( SDL_Scancode )InScancode )
 		{
 			return ( EButtonCode )index;
 		}
 
 	return BC_None;
+}
+
+/**
+ * Convert engine keycode scancode
+ */
+uint32 appButtonCodeToScanCode( EButtonCode InButtonCode )
+{
+	check( InButtonCode >= BC_KeyFirst && InButtonCode <= BC_KeyLast );
+	return GScanCodeToButtonCode[ ( uint32 )InButtonCode ];
 }
 
 /**
@@ -343,7 +353,7 @@ bool FWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 	case SDL_TEXTINPUT:
 		// TODO BG yehor.pohuliaka: I don't like this shit, I'm not sure about this kind of storage of the input string.
 		OutWindowEvent.type = SWindowEvent::T_TextInput;
-		OutWindowEvent.events.textInputEvent.text = ANSI_TO_TCHAR( sdlEvent.text.text );
+		OutWindowEvent.events.textInputEvent.text = sdlEvent.text.text;
 		break;
 
 		// Event of key pressed and released buttons

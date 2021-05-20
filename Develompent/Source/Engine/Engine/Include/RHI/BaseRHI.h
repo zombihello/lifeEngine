@@ -63,6 +63,36 @@ public:
 	 */
 	virtual void								EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync ) {}
 
+#if WITH_EDITOR
+	/**
+	 * @brief Initialize render of ImGUI
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 */
+	virtual bool								InitImGUI( class FBaseDeviceContextRHI* InDeviceContext )				{ return false; }
+
+	/**
+	 * @brief Shutdown render of ImGUI
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 */
+	virtual void								ShutdownImGUI( class FBaseDeviceContextRHI* InDeviceContext )			{}
+
+	/**
+	 * @brief Begin drawing ImGUI
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 */
+	virtual void								BeginDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext )		{}
+
+	/**
+	 * @brief End drawing ImGUI
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 */
+	virtual void								EndDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext )			{}
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Set viewport
 	 * 

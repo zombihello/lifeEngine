@@ -103,7 +103,7 @@ extern int              appGetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, 
  * @param[in] InCmdLine Command line
  * @return Returns the error level, 0 if successful and > 0 if there were errors
  */
-int32                   appPlatformPreInit( const tchar* InCmdLine );
+extern int32           appPlatformPreInit( const tchar* InCmdLine );
 
 /**
  * @ingroup Core
@@ -112,7 +112,7 @@ int32                   appPlatformPreInit( const tchar* InCmdLine );
  * @param[in] InCmdLine Command line
  * @return Returns the error level, 0 if successful and > 0 if there were errors 
  */
-int32                   appPlatformInit( const tchar* InCmdLine );
+extern int32           appPlatformInit( const tchar* InCmdLine );
 
 /**
  * @ingroup Core
@@ -126,7 +126,7 @@ int32                   appPlatformInit( const tchar* InCmdLine );
  * @param[in] OutProcessId if non-NULL, this will be filled in with the ProcessId
  * @return The process handle for use in other process functions
  */
-void*                   appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool InLaunchDetached, bool InLaunchHidden, bool InLaunchReallyHidden, int32 InPriorityModifier, uint64* OutProcessId = nullptr );
+extern void*           appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool InLaunchDetached, bool InLaunchHidden, bool InLaunchReallyHidden, int32 InPriorityModifier, uint64* OutProcessId = nullptr );
 
 /**
  * @ingroup Core
@@ -136,7 +136,7 @@ void*                   appCreateProc( const tchar* InPathToProcess, const tchar
  * @param[out] OutReturnCode Return code
  * @return Return true if process is end, else returning false
  */
-bool                    appGetProcReturnCode( void* InProcHandle, int32* OutReturnCode );
+extern bool            appGetProcReturnCode( void* InProcHandle, int32* OutReturnCode );
 
 /**
  * @ingroup Core
