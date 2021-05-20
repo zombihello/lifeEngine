@@ -105,6 +105,9 @@
     <ClInclude Include="Include\Misc\Class.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Include\LEVersion.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">

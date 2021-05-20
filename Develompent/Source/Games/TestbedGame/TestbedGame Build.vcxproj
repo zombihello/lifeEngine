@@ -65,21 +65,21 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <NMakeOutput>../../../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe</NMakeOutput>
-    <NMakePreprocessorDefinitions>IS_TESTBED=1;WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeBuildCommandLine>@cd ../../
-@call Targets/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeBuildCommandLine>
     <OutDir>..\..\..\Intermediate\$(ProjectName) Win32 $(Configuration)\</OutDir>
     <IntDir>..\..\..\Intermediate\$(ProjectName) Win32 $(Configuration)\</IntDir>
-    <NMakeReBuildCommandLine>@cd ../../
-@call Targets/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeReBuildCommandLine>
+    <NMakeReBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeReBuildCommandLine>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeOutput>../../../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe</NMakeOutput>
-    <NMakePreprocessorDefinitions>IS_TESTBED=1;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <NMakeBuildCommandLine>@cd ../../
-@call Targets/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>@cd ../../
-@call Targets/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeReBuildCommandLine>
     <OutDir>..\..\..\Intermediate\$(ProjectName) Win64 $(Configuration)\</OutDir>
     <IntDir>..\..\..\Intermediate\$(ProjectName) Win64 $(Configuration)\</IntDir>
     <NMakeCleanCommandLine>
@@ -87,23 +87,23 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NMakeOutput>../../../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe</NMakeOutput>
-    <NMakePreprocessorDefinitions>IS_TESTBED=1;WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>..\..\..\Intermediate\$(ProjectName) Win32 $(Configuration)\</OutDir>
     <IntDir>..\..\..\Intermediate\$(ProjectName) Win32 $(Configuration)\</IntDir>
-    <NMakeBuildCommandLine>@cd ../../
-@call Targets/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>@cd ../../
-@call Targets/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeReBuildCommandLine>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeOutput>../../../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe</NMakeOutput>
-    <NMakePreprocessorDefinitions>IS_TESTBED=1;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>..\..\..\Intermediate\$(ProjectName) Win64 $(Configuration)\</OutDir>
     <IntDir>..\..\..\Intermediate\$(ProjectName) Win64 $(Configuration)\</IntDir>
-    <NMakeBuildCommandLine>@cd ../../
-@call Targets/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeBuildCommandLine>
-    <NMakeReBuildCommandLine>@cd ../../
-@call Targets/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>
     </NMakeCleanCommandLine>
   </PropertyGroup>

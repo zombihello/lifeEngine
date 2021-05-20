@@ -9,6 +9,7 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include "LEVersion.h"
 #include "LEBuild.h"
 #include "CoreDefines.h"
 #include "Misc/Types.h"

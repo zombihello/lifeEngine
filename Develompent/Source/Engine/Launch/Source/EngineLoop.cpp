@@ -93,6 +93,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
  */
 int32 FEngineLoop::Init( const tchar* InCmdLine )
 {
+	LE_LOG( LT_Log, LC_Init, TEXT( "Engine version: %i" ), ENGINE_VERSION );
 	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
 
 	// Create window

@@ -12,6 +12,7 @@
     <ClInclude Include="Include\Core.h" />
     <ClInclude Include="Include\CoreDefines.h" />
     <ClInclude Include="Include\LEBuild.h" />
+    <ClInclude Include="Include\LEVersion.h" />
     <ClInclude Include="Include\Logger\BaseLogger.h" />
     <ClInclude Include="Include\Logger\LoggerMacros.h" />
     <ClInclude Include="Include\Math\Color.h" />
