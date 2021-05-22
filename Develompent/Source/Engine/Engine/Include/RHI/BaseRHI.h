@@ -10,6 +10,7 @@
 #define BASERHI_H
 
 #include "Misc/Types.h"
+#include "TypesRHI.h"
 
 /**
  * @ingroup Engine
@@ -44,6 +45,46 @@ public:
 	 * @return Pointer on viewport
 	 */
 	virtual class FBaseViewportRHI*				CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )	{ return nullptr; }
+
+	/**
+	 * @brief Create vertex shader
+	 * 
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FVertexShaderRHIRef					CreateVertexShader( const byte* InData, uint32 InSize )					{ return nullptr; }
+
+	/**
+	 * @brief Create hull shader
+	 *
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FHullShaderRHIRef					CreateHullShader( const byte* InData, uint32 InSize )					{ return nullptr; }
+
+	/**
+	 * @brief Create domain shader
+	 *
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FDomainShaderRHIRef					CreateDomainShader( const byte* InData, uint32 InSize )					{ return nullptr; }
+
+	/**
+	 * @brief Create pixel shader
+	 *
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FPixelShaderRHIRef					CreatePixelShader( const byte* InData, uint32 InSize )					{ return nullptr; }
+
+	/**
+	 * @brief Create geometry shader
+	 *
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FGeometryShaderRHIRef				CreateGeometryShader( const byte* InData, uint32 InSize )				{ return nullptr; }
 
 	/**
 	 * @brief Begin drawing viewport

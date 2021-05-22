@@ -24,6 +24,9 @@
     <ClInclude Include="Include\D3D11ImGUI.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\D3D11Shader.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\D3D11RHI.cpp">
@@ -39,6 +42,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\D3D11ImGUI.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3D11Shader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

@@ -54,6 +54,46 @@ public:
 	virtual class FBaseViewportRHI*					CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight ) override;
 
 	/**
+	 * @brief Create vertex shader
+	 *
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FVertexShaderRHIRef						CreateVertexShader( const byte* InData, uint32 InSize ) override;
+
+	/**
+	 * @brief Create hull shader
+	 *
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FHullShaderRHIRef						CreateHullShader( const byte* InData, uint32 InSize ) override;
+
+	/**
+	 * @brief Create domain shader
+	 *
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FDomainShaderRHIRef						CreateDomainShader( const byte* InData, uint32 InSize ) override;
+
+	/**
+	 * @brief Create pixel shader
+	 *
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FPixelShaderRHIRef						CreatePixelShader( const byte* InData, uint32 InSize ) override;
+
+	/**
+	 * @brief Create geometry shader
+	 *
+	 * @param[in] InData Data to shader code
+	 * @param[in] InSize Size of data
+	 */
+	virtual FGeometryShaderRHIRef					CreateGeometryShader( const byte* InData, uint32 InSize ) override;
+
+	/**
 	 * @brief Begin drawing viewport
 	 *
 	 * @param[in] InDeviceContext Device context

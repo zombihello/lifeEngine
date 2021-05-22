@@ -4,6 +4,7 @@
 #include "D3D11Viewport.h"
 #include "D3D11DeviceContext.h"
 #include "D3D11Surface.h"
+#include "D3D11Shader.h"
 
 #include "D3D11ImGUI.h"
 
@@ -106,6 +107,46 @@ void FD3D11RHI::Destroy()
 class FBaseViewportRHI* FD3D11RHI::CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )
 {
 	return new FD3D11Viewport( InWindowHandle, InWidth, InHeight );
+}
+
+/**
+ * Create vertex shader
+ */
+FVertexShaderRHIRef FD3D11RHI::CreateVertexShader( const byte* InData, uint32 InSize )
+{
+	return new FD3D11VertexShaderRHI( InData, InSize );
+}
+
+/**
+ * Create hull shader
+ */
+FHullShaderRHIRef FD3D11RHI::CreateHullShader( const byte* InData, uint32 InSize )
+{
+	return new FD3D11HullShaderRHI( InData, InSize );
+}
+
+/**
+ * Create domain shader
+ */
+FDomainShaderRHIRef FD3D11RHI::CreateDomainShader( const byte* InData, uint32 InSize )
+{
+	return new FD3D11DomainShaderRHI( InData, InSize );
+}
+
+/**
+ * Create pixel shader
+ */
+FPixelShaderRHIRef FD3D11RHI::CreatePixelShader( const byte* InData, uint32 InSize )
+{
+	return new FD3D11PixelShaderRHI( InData, InSize );
+}
+
+/**
+ * Create geometry shader
+ */
+FGeometryShaderRHIRef FD3D11RHI::CreateGeometryShader( const byte* InData, uint32 InSize )
+{
+	return new FD3D11GeometryShaderRHI( InData, InSize );
 }
 
 /**

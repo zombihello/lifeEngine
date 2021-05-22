@@ -48,6 +48,12 @@
     <ClInclude Include="Include\Scripts\Script.h">
       <Filter>Include\Scripts</Filter>
     </ClInclude>
+    <ClInclude Include="Include\RHI\BaseShaderRHI.h">
+      <Filter>Include\RHI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RHI\TypesRHI.h">
+      <Filter>Include\RHI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
