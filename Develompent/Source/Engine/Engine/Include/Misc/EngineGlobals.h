@@ -21,4 +21,10 @@ extern class FBaseRHI*				GRHI;
  */
 extern class FScriptEngine*			GScriptEngine;
 
+/**
+ * @ingroup Engine
+ * @brief Shader manager
+ */
+extern class FShaderManager*		GShaderManager;
+
 #endif // !ENGINEGLOBALS_H

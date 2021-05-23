@@ -112,41 +112,41 @@ class FBaseViewportRHI* FD3D11RHI::CreateViewport( void* InWindowHandle, uint32 
 /**
  * Create vertex shader
  */
-FVertexShaderRHIRef FD3D11RHI::CreateVertexShader( const byte* InData, uint32 InSize )
+FVertexShaderRHIRef FD3D11RHI::CreateVertexShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
-	return new FD3D11VertexShaderRHI( InData, InSize );
+	return new FD3D11VertexShaderRHI( InData, InSize, InShaderName );
 }
 
 /**
  * Create hull shader
  */
-FHullShaderRHIRef FD3D11RHI::CreateHullShader( const byte* InData, uint32 InSize )
+FHullShaderRHIRef FD3D11RHI::CreateHullShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
-	return new FD3D11HullShaderRHI( InData, InSize );
+	return new FD3D11HullShaderRHI( InData, InSize, InShaderName );
 }
 
 /**
  * Create domain shader
  */
-FDomainShaderRHIRef FD3D11RHI::CreateDomainShader( const byte* InData, uint32 InSize )
+FDomainShaderRHIRef FD3D11RHI::CreateDomainShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
-	return new FD3D11DomainShaderRHI( InData, InSize );
+	return new FD3D11DomainShaderRHI( InData, InSize, InShaderName );
 }
 
 /**
  * Create pixel shader
  */
-FPixelShaderRHIRef FD3D11RHI::CreatePixelShader( const byte* InData, uint32 InSize )
+FPixelShaderRHIRef FD3D11RHI::CreatePixelShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
-	return new FD3D11PixelShaderRHI( InData, InSize );
+	return new FD3D11PixelShaderRHI( InData, InSize, InShaderName );
 }
 
 /**
  * Create geometry shader
  */
-FGeometryShaderRHIRef FD3D11RHI::CreateGeometryShader( const byte* InData, uint32 InSize )
+FGeometryShaderRHIRef FD3D11RHI::CreateGeometryShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
-	return new FD3D11GeometryShaderRHI( InData, InSize );
+	return new FD3D11GeometryShaderRHI( InData, InSize, InShaderName );
 }
 
 /**
@@ -197,6 +197,166 @@ void FD3D11RHI::EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext
 }
 
 #if WITH_EDITOR
+#include <d3dcompiler.h>
+
+#include "Containers/StringConv.h"
+#include "Misc/CoreGlobals.h"
+#include "System/BaseArchive.h"
+#include "System/BaseFileSystem.h"
+
+/**
+ * TranslateCompilerFlag - Translates the platform-independent compiler flags into D3DX defines
+ * @param[in] CompilerFlag - The platform-independent compiler flag to translate
+ * @return DWORD - The value of the appropriate D3DX enum
+ */
+static DWORD TranslateCompilerFlagD3D11( ECompilerFlags CompilerFlag )
+{
+	switch ( CompilerFlag )
+	{
+	case CF_PreferFlowControl:			return D3D10_SHADER_PREFER_FLOW_CONTROL;
+	case CF_Debug:						return D3D10_SHADER_DEBUG | D3D10_SHADER_SKIP_OPTIMIZATION;
+	case CF_AvoidFlowControl:			return D3D10_SHADER_AVOID_FLOW_CONTROL;
+	default:							return 0;
+	};
+}
+
+/**
+ * Compile shader
+ */
+bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const FShaderCompilerEnvironment& InEnvironment, FShaderCompilerOutput& OutOutput, bool InDebugDump /* = false */, const tchar* InShaderSubDir /* = TEXT( "" ) */ )
+{
+	FBaseArchive*		shaderArchive = GFileSystem->CreateFileReader( InSourceFileName );
+	if ( !shaderArchive )
+	{
+		return false;
+	}
+
+	// Create string buffer and fill '\0'
+	uint32				archiveSize = shaderArchive->GetSize() + 1;
+	byte*				buffer = new byte[ archiveSize ];
+	memset( buffer, '\0', archiveSize );
+
+	// Serialize data to string buffer
+	shaderArchive->Serialize( buffer, archiveSize );
+
+	// Getting shader profile
+	std::string			shaderProfile;
+	switch ( InFrequency )
+	{
+	case SF_Vertex:
+		shaderProfile = "vs_5_0";
+		break;
+
+	case SF_Hull:
+		shaderProfile = "hs_5_0";
+		break;
+
+	case SF_Domain:
+		shaderProfile = "ds_5_0";
+		break;
+
+	case SF_Geometry:
+		shaderProfile = "gs_5_0";
+		break;
+
+	case SF_Pixel:
+		shaderProfile = "ps_5_0";
+		break;
+
+	case SF_Compute:
+		shaderProfile = "cs_5_0";
+		break;
+
+	default:
+		appErrorf( TEXT( "Unknown shader frequency %i" ), InFrequency );
+		return false;
+	}
+
+	// Translate the input environment's definitions to D3DXMACROs
+	std::vector< D3D_SHADER_MACRO >				macros;
+	for ( auto it = InEnvironment.difinitions.begin(), itEnd = InEnvironment.difinitions.end(); it != itEnd; ++it )
+	{
+		const std::wstring&			name = it->first;
+		const std::wstring&			difinition = it->second;
+
+		// Create temp C-string of name and value difinition
+		achar*						tName = new achar[ name.size() + 1 ];
+		achar*						tDifinition = new achar[ difinition.size() + 1 ];
+		strncpy( tName, TCHAR_TO_ANSI( name.c_str() ), name.size() + 1 );
+		strncpy( tDifinition, TCHAR_TO_ANSI( difinition.c_str() ), difinition.size() + 1 );
+
+		D3D_SHADER_MACRO			d3dMacro;
+		d3dMacro.Name = tName;
+		d3dMacro.Definition = tDifinition;
+		macros.push_back( d3dMacro );
+	}
+
+	// Terminate the Macros list
+	macros.push_back( D3D_SHADER_MACRO{ nullptr, nullptr } );
+
+	// Getting compile flags
+	DWORD				compileFlags = D3D10_SHADER_OPTIMIZATION_LEVEL3;
+	for ( uint32 indexFlag = 0, countFlags = ( uint32 )InEnvironment.compilerFlags.size(); indexFlag < countFlags; ++indexFlag )
+	{
+		// Accumulate flags set by the shader
+		compileFlags |= TranslateCompilerFlagD3D11( InEnvironment.compilerFlags[ indexFlag ] );
+	}
+
+	ID3DBlob*		shaderBlob = nullptr;
+	ID3DBlob*		errorsBlob = nullptr;
+	HRESULT			result = D3DCompile( buffer, archiveSize, TCHAR_TO_ANSI( InSourceFileName ), macros.data(), nullptr, TCHAR_TO_ANSI( InFunctionName ), shaderProfile.c_str(), compileFlags, 0, &shaderBlob, &errorsBlob );
+	if ( FAILED( result ) )
+	{
+		// Copy the error text to the output.
+		void*		errorBuffer = errorsBlob ? errorsBlob->GetBufferPointer() : nullptr;
+		if ( errorBuffer )
+		{
+			LE_LOG( LT_Error, LC_Shader, ANSI_TO_TCHAR( errorBuffer ) );
+			errorsBlob->Release();
+		}
+		else
+		{
+			LE_LOG( LT_Error, LC_Shader, TEXT( "Compile Failed without warnings!" ) );
+		}
+
+		return false;
+	}
+
+	// Save code of shader and getting reflector of shader
+	uint32		numShaderBytes = ( uint32 )shaderBlob->GetBufferSize();
+	OutOutput.code.resize( numShaderBytes );
+	memcpy( OutOutput.code.data(), shaderBlob->GetBufferPointer(), numShaderBytes );
+
+	ID3D11ShaderReflection*				reflector = nullptr;
+	result = D3DReflect( OutOutput.code.data(), OutOutput.code.size(), IID_ID3D11ShaderReflection, ( void** ) &reflector );
+	check( result == S_OK );
+
+	// Read the constant table description.
+	D3D11_SHADER_DESC					shaderDesc;
+	reflector->GetDesc( &shaderDesc );
+
+	// TODO BG yehor.pohuliaka - Added her getting reflection information by shader (constant buffers, etc)
+
+	// Set the number of instructions
+	OutOutput.numInstructions = shaderDesc.InstructionCount;
+
+	// Reflector is a com interface, so it needs to be released.
+	reflector->Release();
+
+	// Free temporary strings allocated for the macros
+	for ( uint32 indexMacro = 0, countMacros = ( uint32 ) macros.size(); indexMacro < countMacros; ++indexMacro )
+	{
+		D3D_SHADER_MACRO&			macro = macros[ indexMacro ];
+		delete[] macro.Name;
+		delete[] macro.Definition;
+	}
+
+	shaderBlob->Release();
+	delete[] buffer;
+	delete shaderArchive;
+	return true;
+}
+
 /**
  * Initialize ImGUI
  */
@@ -231,6 +391,14 @@ void FD3D11RHI::EndDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext )
 	ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
 }
 #endif // WITH_EDITOR
+
+/**
+ * Get RHI name
+ */
+const tchar* FD3D11RHI::GetRHIName() const
+{
+	return TEXT( "D3D11RHI" );
+}
 
 /**
  * Set debug name fore DirectX 11 resource

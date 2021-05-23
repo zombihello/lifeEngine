@@ -53,6 +53,14 @@ class FBaseArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& In
 		flags = std::ios::app;
 	}
 
+	// Create directory for file
+	{
+		std::wstring			path = InFileName;
+		path.erase( path.find_last_of( TEXT( "/" ) ), path.size() );
+
+		CreateDirectoryW( path.c_str(), nullptr );
+	}
+
 	// Create file and create archive writer
 	outputFile->open( InFileName, flags | std::ios::binary );
 	if ( !outputFile->is_open() )

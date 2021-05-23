@@ -14,6 +14,7 @@
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
+#include "Render/Shaders/ShaderManager.h"
 #include "EngineLoop.h"
 
 #if WITH_EDITOR
@@ -88,6 +89,8 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 	return result;
 }
 
+#include "Render/Shaders/TestShader.h"
+
 /**
  * Initialize the main loop
  */
@@ -111,6 +114,10 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), width, height );
 
 	int32		result = appPlatformInit( InCmdLine );
+
+	GShaderManager->Init();
+	FShaderRef		s = GShaderManager->FindInstance< FTestShader >();
+	UNUSED_VAR( s );
 
 #if WITH_EDITOR
 	GImGUIEngine->Init( GRHI->GetImmediateContext() );

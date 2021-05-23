@@ -58,40 +58,45 @@ public:
 	 *
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FVertexShaderRHIRef						CreateVertexShader( const byte* InData, uint32 InSize ) override;
+	virtual FVertexShaderRHIRef						CreateVertexShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
 
 	/**
 	 * @brief Create hull shader
 	 *
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FHullShaderRHIRef						CreateHullShader( const byte* InData, uint32 InSize ) override;
+	virtual FHullShaderRHIRef						CreateHullShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
 
 	/**
 	 * @brief Create domain shader
 	 *
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FDomainShaderRHIRef						CreateDomainShader( const byte* InData, uint32 InSize ) override;
+	virtual FDomainShaderRHIRef						CreateDomainShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
 
 	/**
 	 * @brief Create pixel shader
 	 *
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FPixelShaderRHIRef						CreatePixelShader( const byte* InData, uint32 InSize ) override;
+	virtual FPixelShaderRHIRef						CreatePixelShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
 
 	/**
 	 * @brief Create geometry shader
 	 *
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FGeometryShaderRHIRef					CreateGeometryShader( const byte* InData, uint32 InSize ) override;
+	virtual FGeometryShaderRHIRef					CreateGeometryShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
 
 	/**
 	 * @brief Begin drawing viewport
@@ -112,6 +117,20 @@ public:
 	virtual void									EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync ) override;
 
 #if WITH_EDITOR
+	/**
+	 * @brief Compile shader
+	 *
+	 * @param[in] InSourceFileName Path to source file of shader
+	 * @param[in] InFunctionName Main function in shader
+	 * @param[in] InFrequency Frequency of shader (Vertex, pixel, etc)
+	 * @param[in] InEnvironment Environment of shader
+	 * @param[out] InOutput Output data after compiling
+	 * @param[in] InDebugDump Is need create debug dump of shader?
+	 * @param[in] InShaderSubDir SubDir for debug dump
+	 * @return Return true if compilation is succeed, else returning false
+	 */
+	virtual bool									CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const FShaderCompilerEnvironment& InEnvironment, FShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) ) override;
+
 	/**
 	 * @brief Initialize ImGUI
 	 */
@@ -157,6 +176,12 @@ public:
 	 * @return Return true if RHI is initialized, else false
 	 */
 	virtual bool									IsInitialize() const override;
+
+	/**
+	 * @brief Get RHI name
+	 * @return Return RHI name
+	 */
+	virtual const tchar*							GetRHIName() const override;
 
 	/**
 	 * @brief Get device context

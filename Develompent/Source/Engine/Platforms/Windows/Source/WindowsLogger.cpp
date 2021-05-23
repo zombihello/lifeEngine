@@ -17,7 +17,8 @@ const tchar* GLogCategoryNames[] =
 	TEXT( "General" ),
 	TEXT( "Init" ),
 	TEXT( "Script" ),
-	TEXT( "Dev" )
+	TEXT( "Dev" ),
+	TEXT( "Shader" )
 };
 
 /**

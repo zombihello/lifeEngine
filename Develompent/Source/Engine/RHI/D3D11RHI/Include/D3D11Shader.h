@@ -24,8 +24,9 @@ public:
 	 * @param[in] InFrequency Frequency of shader
 	 * @param[in] InData Data of shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InData, uint32 InSize );
+	FD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InData, uint32 InSize, const tchar* InShaderName );
 
 private:
 	/**
@@ -55,9 +56,10 @@ public:
 	 *
 	 * @param[in] InData Data of shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11VertexShaderRHI( const byte* InData, uint32 InSize ) :
-		FD3D11ShaderRHI( SF_Vertex, InData, InSize )
+	FD3D11VertexShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		FD3D11ShaderRHI( SF_Vertex, InData, InSize, InShaderName )
 	{}
 };
 
@@ -73,9 +75,10 @@ public:
 	 *
 	 * @param[in] InData Data of shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11HullShaderRHI( const byte* InData, uint32 InSize ) :
-		FD3D11ShaderRHI( SF_Hull, InData, InSize )
+	FD3D11HullShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		FD3D11ShaderRHI( SF_Hull, InData, InSize, InShaderName )
 	{}
 };
 
@@ -91,9 +94,10 @@ public:
 	 *
 	 * @param[in] InData Data of shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11DomainShaderRHI( const byte* InData, uint32 InSize ) :
-		FD3D11ShaderRHI( SF_Domain, InData, InSize )
+	FD3D11DomainShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		FD3D11ShaderRHI( SF_Domain, InData, InSize, InShaderName )
 	{}
 };
 
@@ -109,9 +113,10 @@ public:
 	 *
 	 * @param[in] InData Data of shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11PixelShaderRHI( const byte* InData, uint32 InSize ) :
-		FD3D11ShaderRHI( SF_Pixel, InData, InSize )
+	FD3D11PixelShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		FD3D11ShaderRHI( SF_Pixel, InData, InSize, InShaderName )
 	{}
 };
 
@@ -127,9 +132,10 @@ public:
 	 *
 	 * @param[in] InData Data of shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11GeometryShaderRHI( const byte* InData, uint32 InSize ) :
-		FD3D11ShaderRHI( SF_Geometry, InData, InSize )
+	FD3D11GeometryShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		FD3D11ShaderRHI( SF_Geometry, InData, InSize, InShaderName )
 	{}
 };
 

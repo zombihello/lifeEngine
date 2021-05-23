@@ -20,6 +20,7 @@ enum EArchiveResourceType
 {
 	ART_Unknown,		/**< Unknown resource */
 	ART_Script,			/**< Script resource */
+	ART_ShaderCache,	/**< Shader cache resource */
 	ART_Count			/**< Count of resources */
 };
 

@@ -25,6 +25,18 @@
     <Filter Include="Source\Scripts">
       <UniqueIdentifier>{6bdb5c3c-80d7-4ee6-86a8-c2b68184088c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Render">
+      <UniqueIdentifier>{43b92b5e-26cb-4f89-9b3a-13d0eb56f0d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render">
+      <UniqueIdentifier>{5b978806-f0b1-48d3-a3f7-76efc128a376}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Render\Shaders">
+      <UniqueIdentifier>{c97ab6ee-b8c3-492e-8979-d90001e1d084}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Render\Shaders">
+      <UniqueIdentifier>{b2929880-4452-4b40-a095-120f13b20bf4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHI\BaseRHI.h">
@@ -54,6 +66,21 @@
     <ClInclude Include="Include\RHI\TypesRHI.h">
       <Filter>Include\RHI</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Render\Shaders\TestShader.h">
+      <Filter>Include\Render\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Render\Shaders\Shader.h">
+      <Filter>Include\Render\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Render\Shaders\ShaderManager.h">
+      <Filter>Include\Render\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Render\Shaders\ShaderCompiler.h">
+      <Filter>Include\Render\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Render\Shaders\ShaderCache.h">
+      <Filter>Include\Render\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
@@ -64,6 +91,21 @@
     </ClCompile>
     <ClCompile Include="Source\Scripts\Script.cpp">
       <Filter>Source\Scripts</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\Shader\TestShader.cpp">
+      <Filter>Source\Render\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\Shader\ShaderManager.cpp">
+      <Filter>Source\Render\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\Shader\ShaderCompiler.cpp">
+      <Filter>Source\Render\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\Shader\ShaderCache.cpp">
+      <Filter>Source\Render\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\Shader\Shader.cpp">
+      <Filter>Source\Render\Shaders</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,8 +1,6 @@
 ----------------------------------------------------------------
  Version 20210521
 ----------------------------------------------------------------
-	- Implement compiling shaders in bytecode and save to cache
-	- Implement loading shaders
 	- Implement rendering of triangle
 	- Implement loading textures
 	- Implement rendering of triangle with texture

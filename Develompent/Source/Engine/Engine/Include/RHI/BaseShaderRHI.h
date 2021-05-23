@@ -39,21 +39,14 @@ public:
 	/**
 	 * @brief Constructor
 	 * @param[in] InFrequency Frequency of shader
-	 */
-	explicit									FBaseShaderRHI( EShaderFrequency InFrequency ) :
-		frequency( InFrequency )
-	{}
-
-	/**
-	 * @brief Set shader name
 	 * @param[in] InShaderName Shader name
 	 */
-	FORCEINLINE void							SetShaderName( const tchar* InShaderName )
-	{
+	explicit									FBaseShaderRHI( EShaderFrequency InFrequency, const tchar* InShaderName ) :
+		frequency( InFrequency )
 #if !SHIPPING
-		shaderName = InShaderName;
+		, shaderName( InShaderName )
 #endif // !SHIPPING
-	}
+	{}
 
 	/**
 	 * @brief Get shader name

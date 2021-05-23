@@ -33,7 +33,8 @@ enum ELogCategory
     LC_General,             /**< General category */
     LC_Init,                /**< Initialize category  */
     LC_Script,              /**< Log from script */
-    LC_Dev                  /**< Development category */
+    LC_Dev,                 /**< Development category */
+    LC_Shader               /**< Shader category */
 };
 
 /**

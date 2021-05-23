@@ -10,6 +10,7 @@
 #define BASERHI_H
 
 #include "Misc/Types.h"
+#include "Render/Shaders/ShaderCompiler.h"
 #include "TypesRHI.h"
 
 /**
@@ -44,47 +45,52 @@ public:
 	 * @param[in] InHeight Height of viewport
 	 * @return Pointer on viewport
 	 */
-	virtual class FBaseViewportRHI*				CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )	{ return nullptr; }
+	virtual class FBaseViewportRHI*				CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )								{ return nullptr; }
 
 	/**
 	 * @brief Create vertex shader
 	 * 
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FVertexShaderRHIRef					CreateVertexShader( const byte* InData, uint32 InSize )					{ return nullptr; }
+	virtual FVertexShaderRHIRef					CreateVertexShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
 
 	/**
 	 * @brief Create hull shader
 	 *
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FHullShaderRHIRef					CreateHullShader( const byte* InData, uint32 InSize )					{ return nullptr; }
+	virtual FHullShaderRHIRef					CreateHullShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
 
 	/**
 	 * @brief Create domain shader
 	 *
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FDomainShaderRHIRef					CreateDomainShader( const byte* InData, uint32 InSize )					{ return nullptr; }
+	virtual FDomainShaderRHIRef					CreateDomainShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
 
 	/**
 	 * @brief Create pixel shader
 	 *
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FPixelShaderRHIRef					CreatePixelShader( const byte* InData, uint32 InSize )					{ return nullptr; }
+	virtual FPixelShaderRHIRef					CreatePixelShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
 
 	/**
 	 * @brief Create geometry shader
 	 *
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
+	 * @param[in] InShaderName Shader name
 	 */
-	virtual FGeometryShaderRHIRef				CreateGeometryShader( const byte* InData, uint32 InSize )				{ return nullptr; }
+	virtual FGeometryShaderRHIRef				CreateGeometryShader( const tchar* InShaderName, const byte* InData, uint32 InSize )				{ return nullptr; }
 
 	/**
 	 * @brief Begin drawing viewport
@@ -105,6 +111,20 @@ public:
 	virtual void								EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync ) {}
 
 #if WITH_EDITOR
+	/**
+	 * @brief Compile shader
+	 * 
+	 * @param[in] InSourceFileName Path to source file of shader
+	 * @param[in] InFunctionName Main function in shader
+	 * @param[in] InFrequency Frequency of shader (Vertex, pixel, etc)
+	 * @param[in] InEnvironment Environment of shader
+	 * @param[out] InOutput Output data after compiling
+	 * @param[in] InDebugDump Is need create debug dump of shader?
+	 * @param[in] InShaderSubDir SubDir for debug dump
+	 * @return Return true if compilation is succeed, else returning false
+	 */
+	virtual bool								CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const FShaderCompilerEnvironment& InEnvironment, FShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) )			{ return false; }
+
 	/**
 	 * @brief Initialize render of ImGUI
 	 * 
@@ -151,13 +171,19 @@ public:
 	 * @brief Is initialized RHI
 	 * @return Return true if RHI is initialized, else false
 	 */
-	virtual bool								IsInitialize() const { return false; }
+	virtual bool								IsInitialize() const			{ return false; }
+
+	/**
+	 * @brief Get RHI name
+	 * @return Return RHI name
+	 */
+	virtual const tchar*						GetRHIName() const				{ return TEXT( "NullRHI" ); }
 
 	/**
 	 * @brief Get device context
 	 * @return Pointer to device context
 	 */
-	virtual class FBaseDeviceContextRHI*		GetImmediateContext() const	{ return nullptr; }
+	virtual class FBaseDeviceContextRHI*		GetImmediateContext() const		{ return nullptr; }
 };
 
 #endif // !BASERHI_H

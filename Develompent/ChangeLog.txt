@@ -17,3 +17,5 @@
 	- Added function for create child process
 	- Implemented serialization of FScript
 	- Added support ImGUI
+	- Implemented compiling shaders in bytecode and save to cache
+	- Implemented loading shaders
