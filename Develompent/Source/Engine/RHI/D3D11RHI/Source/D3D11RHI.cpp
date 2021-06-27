@@ -5,6 +5,7 @@
 #include "D3D11DeviceContext.h"
 #include "D3D11Surface.h"
 #include "D3D11Shader.h"
+#include "D3D11Buffer.h"
 
 #include "D3D11ImGUI.h"
 
@@ -150,6 +151,14 @@ FGeometryShaderRHIRef FD3D11RHI::CreateGeometryShader( const tchar* InShaderName
 }
 
 /**
+ * Create vertex buffer
+ */
+FVertexBufferRHIRef FD3D11RHI::CreateVertexBuffer( const tchar* InBufferName, uint32 InSize, const byte* InData, uint32 InUsage )
+{
+	return new FD3D11VertexBufferRHI( InUsage, InSize, InData, InBufferName );
+}
+
+/**
  * Get device context
  */
 class FBaseDeviceContextRHI* FD3D11RHI::GetImmediateContext() const
@@ -168,6 +177,28 @@ void FD3D11RHI::SetViewport( class FBaseDeviceContextRHI* InDeviceContext, uint3
 		static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->RSSetViewports( 1, &d3d11Viewport );
 	}
 }
+
+/**
+ * Lock vertex buffer
+ */
+void FD3D11RHI::LockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, uint32 InSize, FLockedData& OutLockedData )
+{
+	check( OutLockedData.data == nullptr );
+
+	D3D11_MAP						writeMode = D3D11_MAP_WRITE_DISCARD;
+	D3D11_MAPPED_SUBRESOURCE		mappedSubresource;
+	
+	static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->Map( static_cast< FD3D11VertexBufferRHI* >( InVertexBuffer.GetPtr() )->GetD3D11Buffer(), 0, writeMode, 0, &mappedSubresource );
+	OutLockedData.data			= ( byte* )mappedSubresource.pData;
+	OutLockedData.pitch			= mappedSubresource.RowPitch;
+	OutLockedData.isNeedFree	= false;
+}
+
+/**
+ * Unlock vertex buffer
+ */
+void FD3D11RHI::UnlockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, FLockedData& InLockedData )
+{}
 
 /**
  * Begin drawing viewport

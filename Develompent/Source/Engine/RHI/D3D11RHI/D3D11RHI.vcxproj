@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\D3D11Buffer.h" />
     <ClInclude Include="Include\D3D11DeviceContext.h" />
     <ClInclude Include="Include\D3D11ImGUI.h" />
     <ClInclude Include="Include\D3D11RHI.h" />
@@ -15,6 +16,7 @@
     <ClInclude Include="Include\D3D11Viewport.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\D3D11Buffer.cpp" />
     <ClCompile Include="Source\D3D11DeviceContext.cpp" />
     <ClCompile Include="Source\D3D11ImGUI.cpp" />
     <ClCompile Include="Source\D3D11RHI.cpp" />

@@ -90,7 +90,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 }
 
 #include "Render/Shaders/TestShader.h"
-
+FVertexBufferRHIRef		vertexBuffer;
 /**
  * Initialize the main loop
  */
@@ -118,6 +118,12 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	GShaderManager->Init();
 	FShaderRef		s = GShaderManager->FindInstance< FTestShader >();
 	UNUSED_VAR( s );
+
+	vertexBuffer = GRHI->CreateVertexBuffer( TEXT( "TestVertexBuffer" ), 4, nullptr, RUF_Dynamic );
+	FLockedData				lockedData;
+	GRHI->LockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, 4, lockedData );
+	memset( lockedData.data, 1, 4 );
+	GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
 
 #if WITH_EDITOR
 	GImGUIEngine->Init( GRHI->GetImmediateContext() );

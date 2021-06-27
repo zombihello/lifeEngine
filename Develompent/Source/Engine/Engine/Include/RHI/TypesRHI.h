@@ -11,6 +11,7 @@
 
 #include "Misc/RefCountPtr.h"
 #include "BaseShaderRHI.h"
+#include "BaseBufferRHI.h"
 
  /**
   * @ingroup Engine Engine
@@ -47,5 +48,11 @@ typedef TRefCountPtr< FBaseShaderRHI >					FGeometryShaderRHIRef;
  * @brief Reference to FBoundShaderStateRHI
  */
 typedef TRefCountPtr< FBoundShaderStateRHI >			FBoundShaderStateRHIRef;
+
+/**
+ * @ingroup Engine Engine
+ * @brief Reference to FBaseVertexBufferRHI
+ */
+typedef TRefCountPtr< FBaseVertexBufferRHI >			FVertexBufferRHIRef;
 
 #endif // !TYPESRHI_H

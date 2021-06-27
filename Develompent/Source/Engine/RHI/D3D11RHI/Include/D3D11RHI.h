@@ -56,47 +56,63 @@ public:
 	/**
 	 * @brief Create vertex shader
 	 *
+	 * @param[in] InShaderName Shader name
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
-	 * @param[in] InShaderName Shader name
+	 * @return Pointer to vertex shader
 	 */
 	virtual FVertexShaderRHIRef						CreateVertexShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
 
 	/**
 	 * @brief Create hull shader
 	 *
+	 * @param[in] InShaderName Shader name
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
-	 * @param[in] InShaderName Shader name
+	 * @return Pointer to hull shader
 	 */
 	virtual FHullShaderRHIRef						CreateHullShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
 
 	/**
 	 * @brief Create domain shader
 	 *
+	 * @param[in] InShaderName Shader name
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
-	 * @param[in] InShaderName Shader name
+	 * @return Pointer to domain shader
 	 */
 	virtual FDomainShaderRHIRef						CreateDomainShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
 
 	/**
 	 * @brief Create pixel shader
 	 *
+	 * @param[in] InShaderName Shader name
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
-	 * @param[in] InShaderName Shader name
+	 * @return Pointer to pixel shader
 	 */
 	virtual FPixelShaderRHIRef						CreatePixelShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
 
 	/**
 	 * @brief Create geometry shader
 	 *
+	 * @param[in] InShaderName Shader name
 	 * @param[in] InData Data to shader code
 	 * @param[in] InSize Size of data
-	 * @param[in] InShaderName Shader name
+	 * @return Pointer to geometry shader
 	 */
 	virtual FGeometryShaderRHIRef					CreateGeometryShader( const tchar* InShaderName, const byte* InData, uint32 InSize ) override;
+
+	/**
+	 * @brief Create vertex buffer
+	 *
+	 * @param[in] InBufferName Buffer name
+	 * @param[in] InSize Size buffer
+	 * @param[in] InData Pointer to data
+	 * @param[in] InUsage Usage flags
+	 * @return Pointer to vertex buffer
+	 */
+	virtual FVertexBufferRHIRef						CreateVertexBuffer( const tchar* InBufferName, uint32 InSize, const byte* InData, uint32 InUsage ) override;
 
 	/**
 	 * @brief Begin drawing viewport
@@ -170,6 +186,25 @@ public:
 	 * @param[in] InMaxZ Max z
 	 */
 	virtual void									SetViewport( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) override;
+
+	/**
+	 * @brief Lock vertex buffer
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InVertexBuffer Pointer to vertex buffer
+	 * @param[in] InSize Size
+	 * @param[out] OutLockedData Locked data in buffer
+	 */
+	virtual void									LockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, uint32 InSize, FLockedData& OutLockedData ) override;
+
+	/**
+	 * @brief Unlock vertex buffer
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InVertexBuffer Pointer to vertex buffer
+	 * @param[in] InLockedData Locked data in buffer
+	 */
+	virtual void									UnlockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, FLockedData& InLockedData ) override;
 
 	/**
 	 * @brief Is initialized RHI

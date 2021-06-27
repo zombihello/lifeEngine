@@ -13,6 +13,7 @@
     <ClInclude Include="Include\Render\Shaders\ShaderCompiler.h" />
     <ClInclude Include="Include\Render\Shaders\ShaderManager.h" />
     <ClInclude Include="Include\Render\Shaders\TestShader.h" />
+    <ClInclude Include="Include\RHI\BaseBufferRHI.h" />
     <ClInclude Include="Include\RHI\BaseRHI.h" />
     <ClInclude Include="Include\RHI\BaseShaderRHI.h" />
     <ClInclude Include="Include\RHI\BaseSurfaceRHI.h" />

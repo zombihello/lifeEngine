@@ -81,6 +81,9 @@
     <ClInclude Include="Include\Render\Shaders\ShaderCache.h">
       <Filter>Include\Render\Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="Include\RHI\BaseBufferRHI.h">
+      <Filter>Include\RHI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
