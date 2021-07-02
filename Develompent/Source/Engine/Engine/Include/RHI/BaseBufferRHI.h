@@ -100,4 +100,49 @@ private:
 	uint32			size;		/**< Size of buffer */
 };
 
+/**
+ * @ingroup Engine
+ * @brief Base class for work with index buffer
+ */
+class FBaseIndexBufferRHI : public FRefCounted
+{
+public:
+	/**
+	 * @brief Constructor
+	 * @param[in] InUsage Usage flags
+	 * @param[in] InStride Stride of struct
+	 * @param[in] InSize Size of buffer
+	 */
+	FBaseIndexBufferRHI( uint32 InUsage, uint32 InStride, uint32 InSize )
+	{}
+
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~FBaseIndexBufferRHI()							{}
+
+	/**
+	 * @brief Get usage flags
+	 * @return Usage flags
+	 */
+	FORCEINLINE uint32 GetUsage() const						{ return usage; }
+
+	/**
+	 * @brief Get buffer size
+	 * @return Buffer size
+	 */
+	FORCEINLINE uint32 GetSize() const						{ return size; }
+
+	/**
+	 * @brief Get stride
+	 * @return Stride of struct
+	 */
+	FORCEINLINE uint32 GetStride() const					{ return stride; }
+
+private:
+	uint32			usage;		/**< Usage flags */
+	uint32			stride;		/**< Stride of struct */
+	uint32			size;		/**< Size of buffer */
+};
+
 #endif // !BASEBUFFERRHI_H

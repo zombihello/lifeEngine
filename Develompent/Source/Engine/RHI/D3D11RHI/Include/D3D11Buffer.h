@@ -47,4 +47,39 @@ private:
 	ID3D11Buffer*			d3d11Buffer;		/**< Pointer to DirectX 11 buffer */
 };
 
+/**
+ * @ingroup Engine
+ * @brief Class for work with DirectX 11 index buffer
+ */
+class FD3D11IndexBufferRHI : public FBaseIndexBufferRHI
+{
+public:
+	/**
+	 * @brief Constructor
+	 * @param[in] InUsage Usage flags
+	 * @param[in] InStride Stride of struct
+	 * @param[in] InSize Size of buffer
+	 * @param[in] InData Pointer to data for buffer
+	 * @param[in] InBufferName Buffer name
+	 */
+	FD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uint32 InSize, const byte* InData, const tchar* InBufferName );
+
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~FD3D11IndexBufferRHI();
+
+	/**
+	 * @brief Get pointer to DirectX 11 buffer
+	 * @return Pointer to DirectX 11 buffer
+	 */
+	FORCEINLINE ID3D11Buffer* GetD3D11Buffer() const
+	{
+		return d3d11Buffer;
+	}
+
+private:
+	ID3D11Buffer*			d3d11Buffer;		/**< Pointer to DirectX 11 buffer */
+};
+
 #endif // !D3D11BUFFERRHI_H

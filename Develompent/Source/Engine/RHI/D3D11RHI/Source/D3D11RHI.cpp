@@ -159,6 +159,14 @@ FVertexBufferRHIRef FD3D11RHI::CreateVertexBuffer( const tchar* InBufferName, ui
 }
 
 /**
+ * Create index buffer
+ */
+FIndexBufferRHIRef FD3D11RHI::CreateIndexBuffer( const tchar* InBufferName, uint32 InStride, uint32 InSize, const byte* InData, uint32 InUsage )
+{
+	return new FD3D11IndexBufferRHI( InUsage, InStride, InSize, InData, InBufferName );
+}
+
+/**
  * Get device context
  */
 class FBaseDeviceContextRHI* FD3D11RHI::GetImmediateContext() const
@@ -181,15 +189,15 @@ void FD3D11RHI::SetViewport( class FBaseDeviceContextRHI* InDeviceContext, uint3
 /**
  * Lock vertex buffer
  */
-void FD3D11RHI::LockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, uint32 InSize, FLockedData& OutLockedData )
+void FD3D11RHI::LockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, uint32 InSize, uint32 InOffset, FLockedData& OutLockedData )
 {
-	check( OutLockedData.data == nullptr );
+	check( OutLockedData.data == nullptr && InOffset < InSize );
 
 	D3D11_MAP						writeMode = D3D11_MAP_WRITE_DISCARD;
 	D3D11_MAPPED_SUBRESOURCE		mappedSubresource;
 	
 	static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->Map( static_cast< FD3D11VertexBufferRHI* >( InVertexBuffer.GetPtr() )->GetD3D11Buffer(), 0, writeMode, 0, &mappedSubresource );
-	OutLockedData.data			= ( byte* )mappedSubresource.pData;
+	OutLockedData.data			= ( byte* )mappedSubresource.pData + InOffset;
 	OutLockedData.pitch			= mappedSubresource.RowPitch;
 	OutLockedData.isNeedFree	= false;
 }
@@ -198,7 +206,39 @@ void FD3D11RHI::LockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, 
  * Unlock vertex buffer
  */
 void FD3D11RHI::UnlockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, FLockedData& InLockedData )
-{}
+{
+	check( InLockedData.data );
+
+	static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->Unmap( static_cast< FD3D11VertexBufferRHI* >( InVertexBuffer.GetPtr() )->GetD3D11Buffer(), 0 );
+	InLockedData.data = nullptr;
+}
+
+/**
+ * Lock index buffer
+ */
+void FD3D11RHI::LockIndexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FIndexBufferRHIRef InIndexBuffer, uint32 InSize, uint32 InOffset, FLockedData& OutLockedData )
+{
+	check( OutLockedData.data == nullptr && InOffset < InSize );
+
+	D3D11_MAP						writeMode = D3D11_MAP_WRITE_DISCARD;
+	D3D11_MAPPED_SUBRESOURCE		mappedSubresource;
+
+	static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->Map( static_cast< FD3D11IndexBufferRHI* >( InIndexBuffer.GetPtr() )->GetD3D11Buffer(), 0, writeMode, 0, &mappedSubresource );
+	OutLockedData.data = ( byte* )mappedSubresource.pData + InOffset;
+	OutLockedData.pitch = mappedSubresource.RowPitch;
+	OutLockedData.isNeedFree = false;
+}
+
+/**
+ * Unlock index buffer
+ */
+void FD3D11RHI::UnlockIndexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FIndexBufferRHIRef InIndexBuffer, FLockedData& InLockedData )
+{
+	check( InLockedData.data );
+
+	static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->Unmap( static_cast< FD3D11IndexBufferRHI* >( InIndexBuffer.GetPtr() )->GetD3D11Buffer(), 0 );
+	InLockedData.data = nullptr;
+}
 
 /**
  * Begin drawing viewport

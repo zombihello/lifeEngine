@@ -115,6 +115,18 @@ public:
 	virtual FVertexBufferRHIRef						CreateVertexBuffer( const tchar* InBufferName, uint32 InSize, const byte* InData, uint32 InUsage ) override;
 
 	/**
+	 * @brief Create index buffer
+	 *
+	 * @param[in] InBufferName Buffer name
+	 * @param[in] InStride Stride of struct
+	 * @param[in] InSize Size buffer
+	 * @param[in] InData Pointer to data
+	 * @param[in] InUsage Usage flags
+	 * @return Pointer to index buffer
+	 */
+	virtual FIndexBufferRHIRef						CreateIndexBuffer( const tchar* InBufferName, uint32 InStride, uint32 InSize, const byte* InData, uint32 InUsage ) override;
+
+	/**
 	 * @brief Begin drawing viewport
 	 *
 	 * @param[in] InDeviceContext Device context
@@ -193,9 +205,10 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InVertexBuffer Pointer to vertex buffer
 	 * @param[in] InSize Size
+	 * @param[in] InOffset Offset in buffer
 	 * @param[out] OutLockedData Locked data in buffer
 	 */
-	virtual void									LockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, uint32 InSize, FLockedData& OutLockedData ) override;
+	virtual void									LockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, uint32 InSize, uint32 InOffset, FLockedData& OutLockedData ) override;
 
 	/**
 	 * @brief Unlock vertex buffer
@@ -205,6 +218,26 @@ public:
 	 * @param[in] InLockedData Locked data in buffer
 	 */
 	virtual void									UnlockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, FLockedData& InLockedData ) override;
+
+	/**
+	 * @brief Lock index buffer
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InIndexBuffer Pointer to index buffer
+	 * @param[in] InSize Size
+	 * @param[in] InOffset Offset in buffer
+	 * @param[out] OutLockedData Locked data in buffer
+	 */
+	virtual void									LockIndexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FIndexBufferRHIRef InIndexBuffer, uint32 InSize, uint32 InOffset, FLockedData& OutLockedData ) override;
+
+	/**
+	 * @brief Unlock index buffer
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InIndexBuffer Pointer to index buffer
+	 * @param[in] InLockedData Locked data in buffer
+	 */
+	virtual void									UnlockIndexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FIndexBufferRHIRef InIndexBuffer, FLockedData& InLockedData ) override;
 
 	/**
 	 * @brief Is initialized RHI

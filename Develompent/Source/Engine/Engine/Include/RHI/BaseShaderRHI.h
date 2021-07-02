@@ -31,6 +31,59 @@ enum EShaderFrequency
 
 /**
  * @ingroup Engine
+ * @brief Struct of vertex element
+ */
+struct FVertexElement
+{
+	uint32			stride;						/**< Stride element */
+	byte			streamIndex;				/**< Index of buffer */
+	byte			offset;						/**< Offset in buffer */
+	byte			type;						/**< Type element */
+	byte			usage;						/**< Usage type */
+	byte			usageIndex;					/**< Usage index */
+	bool			isUseInstanceIndex;			/**< Is use instance index */
+	uint32			numVerticesPerInstance;		/**< Number vertices per one instance */
+
+	/**
+	 * @brief Constructor
+	 */
+	FVertexElement() :
+		streamIndex( 0 ),
+		stride( 0 ),
+		offset( 0 ),
+		type( 0 ),
+		usage( 0 ),
+		usageIndex( 0 ),
+		isUseInstanceIndex( false ),
+		numVerticesPerInstance( 0 )
+	{}
+
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param[in] InStreamIndex Index of buffer
+	 * @param[in] InStride Stride element
+	 * @param[in] InOffset Offset in buffer
+	 * @param[in] InType Type element
+	 * @param[in] InUsage Usage type
+	 * @param[in] InUsageIndex Usage index
+	 * @param[in] InIsUseInstanceIndex Is use instance index
+	 * @param[in] InNumVerticesPerInstance Number vertices per one instance
+	 */
+	FVertexElement( byte InStreamIndex, uint32 InStride, byte InOffset, byte InType, byte InUsage, byte InUsageIndex, bool InIsUseInstanceIndex = false, uint32 InNumVerticesPerInstance = 0 ) :
+		streamIndex( InStreamIndex ),
+		stride( InStride ),
+		offset( InOffset ),
+		type( InType ),
+		usage( InUsage ),
+		usageIndex( InUsageIndex ),
+		isUseInstanceIndex( InIsUseInstanceIndex ),
+		numVerticesPerInstance( InNumVerticesPerInstance )
+	{}
+};
+
+/**
+ * @ingroup Engine
  * @brief Base class for work with shader
  */
 class FBaseShaderRHI : public FRefCounted
@@ -43,9 +96,9 @@ public:
 	 */
 	explicit									FBaseShaderRHI( EShaderFrequency InFrequency, const tchar* InShaderName ) :
 		frequency( InFrequency )
-#if !SHIPPING
+#if !SHIPPING_BUILD
 		, shaderName( InShaderName )
-#endif // !SHIPPING
+#endif // !SHIPPING_BUILD
 	{}
 
 	/**
@@ -54,11 +107,11 @@ public:
 	 */
 	FORCEINLINE const tchar*					GetShaderName() const
 	{
-#if !SHIPPING
+#if !SHIPPING_BUILD
 		return shaderName.c_str();
 #else
 		return TEXT( "" );
-#endif // !SHIPPING
+#endif // !SHIPPING_BUILD
 	}
 
 	/**
@@ -71,9 +124,9 @@ public:
 	}
 
 private:
-#if !SHIPPING
+#if !SHIPPING_BUILD
 	std::wstring				shaderName;		/**< Shader name */
-#endif // !SHIPPING
+#endif // !SHIPPING_BUILD
 
 	EShaderFrequency			frequency;		/**< Frequency of shader */
 };

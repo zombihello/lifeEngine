@@ -55,4 +55,10 @@ typedef TRefCountPtr< FBoundShaderStateRHI >			FBoundShaderStateRHIRef;
  */
 typedef TRefCountPtr< FBaseVertexBufferRHI >			FVertexBufferRHIRef;
 
+/**
+ * @ingroup Engine Engine
+ * @brief Reference to FBaseIndexBufferRHI
+ */
+typedef TRefCountPtr< FBaseIndexBufferRHI >				FIndexBufferRHIRef;
+
 #endif // !TYPESRHI_H

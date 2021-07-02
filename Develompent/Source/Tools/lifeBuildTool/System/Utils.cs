@@ -22,7 +22,7 @@ namespace lifeBuildTool
                     throw new BuildException( "Project file \"{0}\" doesn't exist.", projectDesc.projectPath );
 
                 // Set output dir
-                InCppEnvironment.outputDirectory = Path.GetFullPath( string.Format( "..\\Intermediate\\{0}\\", projectName ) );
+                InCppEnvironment.outputDirectory = Path.GetFullPath( string.Format( "..\\Intermediate\\{0}\\{1}\\", InCppEnvironment.configuration, projectName ) );
                 Directory.CreateDirectory( InCppEnvironment.outputDirectory );
 
                 // Create and loading compiled cache
