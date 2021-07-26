@@ -12,6 +12,7 @@
 #include "LEVersion.h"
 #include "LEBuild.h"
 #include "CoreDefines.h"
+#include "Misc/Template.h"
 #include "Misc/Types.h"
 #include "Misc/CoreGlobals.h"
 

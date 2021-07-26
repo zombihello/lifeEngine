@@ -61,4 +61,10 @@ typedef TRefCountPtr< FBaseVertexBufferRHI >			FVertexBufferRHIRef;
  */
 typedef TRefCountPtr< FBaseIndexBufferRHI >				FIndexBufferRHIRef;
 
+/**
+ * @ingroup Engine Engine
+ * @brief Reference to FBaseVertexDeclarationRHI
+ */
+typedef TRefCountPtr< FBaseVertexDeclarationRHI >		FVertexDeclarationRHIRef;
+
 #endif // !TYPESRHI_H

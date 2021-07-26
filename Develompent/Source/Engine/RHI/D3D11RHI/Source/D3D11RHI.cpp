@@ -167,6 +167,14 @@ FIndexBufferRHIRef FD3D11RHI::CreateIndexBuffer( const tchar* InBufferName, uint
 }
 
 /**
+ * Create vertex declaration
+ */
+FVertexDeclarationRHIRef FD3D11RHI::CreateVertexDeclaration( const FVertexDeclarationElementList& InElementList )
+{
+	return new FD3D11VertexDeclarationRHI( InElementList );
+}
+
+/**
  * Get device context
  */
 class FBaseDeviceContextRHI* FD3D11RHI::GetImmediateContext() const

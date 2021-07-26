@@ -31,6 +31,40 @@ enum EShaderFrequency
 
 /**
  * @ingroup Engine
+ * @brief Enumeration of types vertex element
+ */
+enum EVertexElementType
+{
+	VET_None,			/**< Unknown type */
+	VET_Float1,			/**< Float type */
+	VET_Float2,			/**< Vector of 2 floats */
+	VET_Float3,			/**< Vector of 3 floats */
+	VET_Float4,			/**< Vector of 4 floats */
+	VET_UByte4,			/**< Vector of 4 unsigned bytes */
+	VET_UByte4N,		/**< Vector of 4 unsigned bytes normalized */
+	VET_Color,			/**< Color type */
+	VET_Max
+};
+
+/**
+ * @ingroup Engine
+ * @brief Enumeration of vertex element usage
+ */
+enum EVertexElementUsage
+{
+	VEU_Position,					/**< Position usage */
+	VEU_TextureCoordinate,			/**< Texture coordinate usage */
+	VEU_BlendWeight,				/**< Blend wight usage */
+	VEU_BlendIndices,				/**< Blend indices usage */
+	VEU_Normal,						/**< Normal usage */
+	VEU_Tangent,					/**< Tangent usage */
+	VEU_Binormal,					/**< Binormal usage */
+	VEU_Color,						/**< Color usage */
+	VEU_SplitPos					/**< Split position usage */
+};
+
+/**
+ * @ingroup Engine
  * @brief Struct of vertex element
  */
 struct FVertexElement
@@ -129,6 +163,26 @@ private:
 #endif // !SHIPPING_BUILD
 
 	EShaderFrequency			frequency;		/**< Frequency of shader */
+};
+
+/**
+ * @ingroup Engine Engine
+ * @brief Element list for vertex declaration
+ */
+typedef std::vector< FVertexElement >		FVertexDeclarationElementList;
+
+/**
+ * @ingroup Engine
+ * @breif Base class of vertex declaration
+ */
+class FBaseVertexDeclarationRHI : public FRefCounted
+{
+public:
+	/**
+	 * @brief Constructor
+	 */
+	FBaseVertexDeclarationRHI( const FVertexDeclarationElementList& InElementList )					
+	{}
 };
 
 /**

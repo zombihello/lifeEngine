@@ -139,4 +139,21 @@ public:
 	{}
 };
 
+/**
+ * @ingroup D3D11RHI
+ * @breif Class of vertex declaration
+ */
+class FD3D11VertexDeclarationRHI : public FBaseVertexDeclarationRHI
+{
+public:
+	/**
+	 * @brief Constructor
+	 */
+	FD3D11VertexDeclarationRHI( const FVertexDeclarationElementList& InElementList );
+
+private:
+	std::vector< D3D11_INPUT_ELEMENT_DESC >			vertexElements;		/**< Array of vertex elements for D3D11 */
+	uint32											streamCount;		/**< Stram count */
+};
+
 #endif // !D3D11SHADER_H

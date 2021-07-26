@@ -127,6 +127,14 @@ public:
 	virtual FIndexBufferRHIRef						CreateIndexBuffer( const tchar* InBufferName, uint32 InStride, uint32 InSize, const byte* InData, uint32 InUsage ) override;
 
 	/**
+	 * @brief Create vertex declaration
+	 *
+	 * @param[in] InElementList Array of vertex elements
+	 * @return Pointer to vertex declaration
+	 */
+	virtual FVertexDeclarationRHIRef				CreateVertexDeclaration( const FVertexDeclarationElementList& InElementList ) override;
+
+	/**
 	 * @brief Begin drawing viewport
 	 *
 	 * @param[in] InDeviceContext Device context
