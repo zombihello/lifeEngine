@@ -28,7 +28,7 @@ public:
 	 */
 	FD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InData, uint32 InSize, const tchar* InShaderName );
 
-private:
+protected:
 	/**
 	 * @brief Union of shaders
 	 */
@@ -74,6 +74,15 @@ public:
 		return code;
 	}
 
+	/**
+	 * @brief Get D3D11 resource
+	 * @return Pointer to D3D11 resource
+	 */
+	FORCEINLINE ID3D11VertexShader* GetResource() const
+	{
+		return shader.vertexShader;
+	}
+
 private:
 	std::vector< byte >			code;		/**< Bytecode of shader for create D3D11 input layout */
 };
@@ -95,6 +104,15 @@ public:
 	FD3D11HullShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
 		FD3D11ShaderRHI( SF_Hull, InData, InSize, InShaderName )
 	{}
+
+	/**
+	 * @brief Get D3D11 resource
+	 * @return Pointer to D3D11 resource
+	 */
+	FORCEINLINE ID3D11HullShader* GetResource() const
+	{
+		return shader.hullShader;
+	}
 };
 
 /**
@@ -114,6 +132,15 @@ public:
 	FD3D11DomainShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
 		FD3D11ShaderRHI( SF_Domain, InData, InSize, InShaderName )
 	{}
+
+	/**
+	 * @brief Get D3D11 resource
+	 * @return Pointer to D3D11 resource
+	 */
+	FORCEINLINE ID3D11DomainShader* GetResource() const
+	{
+		return shader.domainShader;
+	}
 };
 
 /**
@@ -133,6 +160,15 @@ public:
 	FD3D11PixelShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
 		FD3D11ShaderRHI( SF_Pixel, InData, InSize, InShaderName )
 	{}
+
+	/**
+	 * @brief Get D3D11 resource
+	 * @return Pointer to D3D11 resource
+	 */
+	FORCEINLINE ID3D11PixelShader* GetResource() const
+	{
+		return shader.pixelShader;
+	}
 };
 
 /**
@@ -152,6 +188,15 @@ public:
 	FD3D11GeometryShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
 		FD3D11ShaderRHI( SF_Geometry, InData, InSize, InShaderName )
 	{}
+
+	/**
+	 * @brief Get D3D11 resource
+	 * @return Pointer to D3D11 resource
+	 */
+	FORCEINLINE ID3D11GeometryShader* GetResource() const
+	{
+		return shader.geometryShader;
+	}
 };
 
 /**
@@ -221,6 +266,69 @@ public:
 	 * @brief Destructor
 	 */
 	virtual ~FD3D11BoundShaderStateRHI();
+
+	/**
+	 * @brief Get vertex declaration
+	 * @return Pointer to vertex declaration
+	 */
+	FORCEINLINE FVertexDeclarationRHIRef GetVertexDeclaration() const
+	{
+		return vertexDeclaration;
+	}
+
+	/**
+	 * @brief Get D3D11 input layout
+	 * @return Pointer to D3D11 input layout
+	 */
+	FORCEINLINE ID3D11InputLayout* GetD3D11InputLayout() const
+	{
+		return d3d11InputLayout;
+	}
+
+	/**
+	 * @brief Get vertex shader
+	 * @return Pointer to vertex shader
+	 */
+	FORCEINLINE FVertexShaderRHIRef GetVertexShader() const
+	{
+		return vertexShader;
+	}
+
+	/**
+	 * @brief Get pixel shader
+	 * @return Pointer to pixel shader
+	 */
+	FORCEINLINE FPixelShaderRHIRef GetPixelShader() const
+	{
+		return pixelShader;
+	}
+
+	/**
+	 * @brief Get hull shader
+	 * @return Pointer to hull shader
+	 */
+	FORCEINLINE FHullShaderRHIRef GetHullShader() const
+	{
+		return hullShader;
+	}
+
+	/**
+	 * @brief Get domain shader
+	 * @return Pointer to domain shader
+	 */
+	FORCEINLINE FDomainShaderRHIRef GetDomainShader() const
+	{
+		return domainShader;
+	}
+
+	/**
+	 * @brief Get geometry shader
+	 * @return Pointer to geometry shader
+	 */
+	FORCEINLINE FGeometryShaderRHIRef GetGeometryShader() const
+	{
+		return geometryShader;
+	}
 
 private:
 	FBoundShaderStateKey			key;					/**< Bound shader state key */

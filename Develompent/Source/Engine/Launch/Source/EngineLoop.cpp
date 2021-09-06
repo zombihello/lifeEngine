@@ -91,6 +91,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 
 #include "Render/Shaders/TestShader.h"
 FVertexBufferRHIRef		vertexBuffer;
+FBoundShaderStateRHIRef				boundShaderState;
 
 /**
  * Initialize the main loop
@@ -128,13 +129,21 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	FShaderRef		testPixelShader = GShaderManager->FindInstance< FTestPixelShader >();
 	check( testVertexShader && testPixelShader );
 
-	vertexBuffer = GRHI->CreateVertexBuffer( TEXT( "TestVertexBuffer" ), 4, nullptr, RUF_Dynamic );
+	vertexBuffer = GRHI->CreateVertexBuffer( TEXT( "TestVertexBuffer" ), strideVertex * 3, nullptr, RUF_Dynamic );
 	FLockedData				lockedData;
-	GRHI->LockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, 4, 0, lockedData );
-	memset( lockedData.data, 1, 4 );
+	GRHI->LockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, strideVertex * 3, 0, lockedData );
+
+	float tempData[] =
+	{
+		-0.5f, -0.5f, 0.0f,				0.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f,				1.0f, 0.0f,
+		 0.0f,  0.5f, 0.0f,				0.5f, 1.0f
+	};
+	memcpy( lockedData.data, &tempData, strideVertex * 3 );
+
 	GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
 
-	FBoundShaderStateRHIRef				boundShaderState = GRHI->CreateBoundShaderState( TEXT( "TestBoundShaderState" ), vertexDeclRHI, testVertexShader->GetVertexShader(), testPixelShader->GetPixelShader() );
+	boundShaderState = GRHI->CreateBoundShaderState( TEXT( "TestBoundShaderState" ), vertexDeclRHI, testVertexShader->GetVertexShader(), testPixelShader->GetPixelShader() );
 
 #if WITH_EDITOR
 	GImGUIEngine->Init( GRHI->GetImmediateContext() );
@@ -176,6 +185,9 @@ void FEngineLoop::Tick()
 	GImGUIEngine->EndDrawing( immediateContext );
 #endif // WITH_EDITOR
 
+	GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, (3 * sizeof(float)) + (2 * sizeof(float)), 0 );
+	GRHI->SetBoundShaderState( immediateContext, boundShaderState );
+	GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
 	GRHI->EndDrawingViewport( immediateContext, GViewportRHI, true, false );
 }
 

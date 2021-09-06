@@ -223,6 +223,25 @@ public:
 	virtual void									SetViewport( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) override;
 
 	/**
+	 * @brief Set bound shader state
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InBoundShaderState Bound shader state
+	 */
+	virtual void									SetBoundShaderState( class FBaseDeviceContextRHI* InDeviceContext, FBoundShaderStateRHIParamRef InBoundShaderState ) override;
+
+	/**
+	 * @brief Set stream source
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InStreamIndex Stream index
+	 * @param[in] InVertexBuffer Vertex buffer
+	 * @param[in] InStride Stride
+	 * @param[in] InOffset Offset
+	 */
+	virtual void									SetStreamSource( class FBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, FVertexBufferRHIParamRef InVertexBuffer, uint32 InStride, uint32 InOffset ) override;
+
+	/**
 	 * @brief Lock vertex buffer
 	 *
 	 * @param[in] InDeviceContext Device context
@@ -261,6 +280,16 @@ public:
 	 * @param[in] InLockedData Locked data in buffer
 	 */
 	virtual void									UnlockIndexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FIndexBufferRHIRef InIndexBuffer, FLockedData& InLockedData ) override;
+
+	/**
+	 * @brief Draw primitive
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InPrimitiveType Primitive type
+	 * @param[in] InBaseVertexIndex Base vertex index
+	 * @param[in] InNumPrimitives Number primitives for render
+	 */
+	virtual void									DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives ) override;
 
 	/**
 	 * @brief Is initialized RHI

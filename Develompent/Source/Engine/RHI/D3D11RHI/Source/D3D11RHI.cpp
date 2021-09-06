@@ -10,6 +10,46 @@
 #include "D3D11ImGUI.h"
 
 /**
+ * Get vertex count for primitive count
+ */
+FORCEINLINE uint32 GetVertexCountForPrimitiveCount( uint32 InNumPrimitives, EPrimitiveType InPrimitiveType )
+{
+	uint32		vertexCount = 0;
+	switch (InPrimitiveType)
+	{
+	case PT_PointList:			vertexCount = InNumPrimitives;		break;
+	case PT_TriangleList:		vertexCount = InNumPrimitives * 3;	break;
+	case PT_TriangleStrip:		vertexCount = InNumPrimitives + 2;	break;
+	case PT_LineList:			vertexCount = InNumPrimitives * 2;	break;
+
+	default:
+		appErrorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType);
+	}
+
+	return vertexCount;
+}
+
+/**
+ * Get D3D11 primitive type from engine primitive type
+ */
+FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrimitiveType, bool InIsUsingTessellation )
+{
+	checkMsg( !InIsUsingTessellation, TEXT( "Tessellation not supported!" ) );
+	switch ( InPrimitiveType )
+	{
+	case PT_PointList:			return D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+	case PT_TriangleList:		return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	case PT_TriangleStrip:		return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+	case PT_LineList:			return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+
+	default: 
+		appErrorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
+	};
+
+	return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+}
+
+/**
  * Constructor
  */
 FD3D11RHI::FD3D11RHI() :
@@ -211,6 +251,38 @@ void FD3D11RHI::SetViewport( class FBaseDeviceContextRHI* InDeviceContext, uint3
 }
 
 /**
+ * Set bound shader state
+ */
+void FD3D11RHI::SetBoundShaderState( class FBaseDeviceContextRHI* InDeviceContext, FBoundShaderStateRHIParamRef InBoundShaderState )
+{
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	FD3D11BoundShaderStateRHI*		boundShaderState = ( FD3D11BoundShaderStateRHI* )InBoundShaderState;
+	FD3D11VertexShaderRHI*			vertexShader = ( FD3D11VertexShaderRHI* )boundShaderState->GetVertexShader().GetPtr();
+	FD3D11PixelShaderRHI*			pixelShader = ( FD3D11PixelShaderRHI* )boundShaderState->GetPixelShader().GetPtr();
+	FD3D11HullShaderRHI*			hullShader = ( FD3D11HullShaderRHI* )boundShaderState->GetHullShader().GetPtr();
+	FD3D11DomainShaderRHI*			domainShader = ( FD3D11DomainShaderRHI* )boundShaderState->GetDomainShader().GetPtr();
+	FD3D11GeometryShaderRHI*		geometryShader = ( FD3D11GeometryShaderRHI* )boundShaderState->GetGeometryShader().GetPtr();
+
+	d3d11DeviceContext->IASetInputLayout( boundShaderState->GetD3D11InputLayout() );
+	d3d11DeviceContext->VSSetShader( vertexShader ? vertexShader->GetResource() : nullptr, nullptr, 0 );
+	d3d11DeviceContext->PSSetShader( pixelShader ? pixelShader->GetResource() : nullptr, nullptr, 0 );
+	d3d11DeviceContext->GSSetShader( geometryShader ? geometryShader->GetResource() : nullptr, nullptr, 0 );
+	d3d11DeviceContext->HSSetShader( hullShader ? hullShader->GetResource() : nullptr, nullptr, 0 );
+	d3d11DeviceContext->DSSetShader( domainShader ? domainShader->GetResource() : nullptr, nullptr, 0 );
+}
+
+/**
+ * Set stream source
+ */
+void FD3D11RHI::SetStreamSource( class FBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, FVertexBufferRHIParamRef InVertexBuffer, uint32 InStride, uint32 InOffset )
+{
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	ID3D11Buffer*					d3d11Buffer = ( ( FD3D11VertexBufferRHI* )InVertexBuffer )->GetD3D11Buffer();
+	
+	d3d11DeviceContext->IASetVertexBuffers( InStreamIndex, 1, &d3d11Buffer, &InStride, &InOffset );
+}
+
+/**
  * Lock vertex buffer
  */
 void FD3D11RHI::LockVertexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FVertexBufferRHIRef InVertexBuffer, uint32 InSize, uint32 InOffset, FLockedData& OutLockedData )
@@ -262,6 +334,18 @@ void FD3D11RHI::UnlockIndexBuffer( class FBaseDeviceContextRHI* InDeviceContext,
 
 	static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->Unmap( static_cast< FD3D11IndexBufferRHI* >( InIndexBuffer.GetPtr() )->GetD3D11Buffer(), 0 );
 	InLockedData.data = nullptr;
+}
+
+/**
+ * Draw primitive
+ */
+void FD3D11RHI::DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives )
+{
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	uint32							vertexCount = GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
+
+	d3d11DeviceContext->IASetPrimitiveTopology( GetD3D11PrimitiveType( InPrimitiveType, false ) );
+	d3d11DeviceContext->Draw( vertexCount, InBaseVertexIndex );
 }
 
 /**
