@@ -7,9 +7,9 @@
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------
-float4 VS( float4 Pos : POSITION ) : SV_POSITION
+float4 VS( float3 Pos : POSITION, float2 TexCord : TEXCOORD ) : SV_POSITION
 {
-    return Pos;
+    return float4( Pos, 1.f );
 }
 
 

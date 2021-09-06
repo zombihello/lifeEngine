@@ -183,13 +183,34 @@ public:
 	 */
 	FBaseVertexDeclarationRHI( const FVertexDeclarationElementList& InElementList )					
 	{}
+
+	/**
+	 * @brief Destructor 
+	 */
+	virtual ~FBaseVertexDeclarationRHI()
+	{}
+
+	/**
+	 * @brief Get hash
+	 * 
+	 * @param[in] InHash Start hash
+	 * @return Return calculated hash
+	 */
+	virtual uint32 GetHash( uint32 InHash = 0 ) const					{ return 0; }
 };
 
 /**
  * @ingroup Engine
  * @brief Base class of bound shader state
  */
-class FBoundShaderStateRHI : public FRefCounted
-{};
+class FBaseBoundShaderStateRHI : public FRefCounted
+{
+public:
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~FBaseBoundShaderStateRHI()
+	{}
+};
 
 #endif // !BASESHADERRHI_H

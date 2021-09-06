@@ -14,11 +14,22 @@
 
 /**
  * @ingroup Engine
- * @brief Class of test shader. Need delete after test
+ * @brief Class of test vertex shader. Need delete after test
  */
-class FTestShader : public FShader
+class FTestVertexShader : public FShader
 {
-	DECLARE_SHADER_TYPE( FTestShader )
+	DECLARE_SHADER_TYPE( FTestVertexShader )
+
+public:
+};
+
+/**
+ * @ingroup Engine
+ * @brief Class of test pixel shader. Need delete after test
+ */
+class FTestPixelShader : public FShader
+{
+	DECLARE_SHADER_TYPE( FTestPixelShader )
 
 public:
 };

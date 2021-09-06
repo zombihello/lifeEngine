@@ -12,6 +12,7 @@
 #include <d3d11.h>
 
 #include "Misc/EngineGlobals.h"
+#include "Render/BoundShaderStateCache.h"
 #include "RHI/BaseRHI.h"
 
 /**
@@ -133,6 +134,20 @@ public:
 	 * @return Pointer to vertex declaration
 	 */
 	virtual FVertexDeclarationRHIRef				CreateVertexDeclaration( const FVertexDeclarationElementList& InElementList ) override;
+
+	/**
+	 * @brief Create bound shader state
+	 *
+	 * @param[in] InBoundShaderStateName Bound shader state name for debug
+	 * @param[in] InVertexDeclaration Vertex declaration
+	 * @param[in] InVertexShader Vertex shader
+	 * @param[in] InPixelShader Pixel shader
+	 * @param[in] InHullShader Hull shader
+	 * @param[in] InDomainShader Domain shader
+	 * @param[in] InGeometryShader Geometry shader
+	 * @return Pointer to bound shader state
+	 */
+	virtual FBoundShaderStateRHIRef					CreateBoundShaderState( const tchar* InBoundShaderStateName, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader = nullptr, FDomainShaderRHIRef InDomainShader = nullptr, FGeometryShaderRHIRef InGeometryShader = nullptr ) override;
 
 	/**
 	 * @brief Begin drawing viewport
@@ -292,9 +307,19 @@ public:
 		return dxgiAdapter;
 	}
 
+	/**
+	 * @brief Get bound shader state history
+	 * @return Reference to bound shader state history
+	 */
+	FORCEINLINE FBoundShaderStateHistory&			GetBoundShaderStateHistory()
+	{
+		return boundShaderStateHistory;
+	}
+
 private:
 	bool							isInitialize;				/**< Is RHI is initialized */
 	class FD3D11DeviceContext*		immediateContext;			/**< Immediate context */
+	FBoundShaderStateHistory		boundShaderStateHistory;	/**< History of using bound shader states */
 
 	ID3D11Device*					d3d11Device;				/**< D3D11 Device */
 	IDXGIFactory*					dxgiFactory;				/**< DXGI factory */

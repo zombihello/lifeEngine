@@ -91,6 +91,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 
 #include "Render/Shaders/TestShader.h"
 FVertexBufferRHIRef		vertexBuffer;
+
 /**
  * Initialize the main loop
  */
@@ -115,15 +116,25 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 
 	int32		result = appPlatformInit( InCmdLine );
 
+	// -- Test section --
+	FVertexDeclarationElementList		vertexDeclElementList;
+	uint32								strideVertex = ( 3 * sizeof( float ) ) + ( 2 * sizeof( float ) );
+	vertexDeclElementList.push_back( FVertexElement( 0, strideVertex, 0, VET_Float3, VEU_Position, 0 ) );
+	vertexDeclElementList.push_back( FVertexElement( 0, strideVertex, 3 * sizeof(float), VET_Float2, VEU_TextureCoordinate, 0 ) );
+	FVertexDeclarationRHIRef			vertexDeclRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
+
 	GShaderManager->Init();
-	FShaderRef		s = GShaderManager->FindInstance< FTestShader >();
-	UNUSED_VAR( s );
+	FShaderRef		testVertexShader = GShaderManager->FindInstance< FTestVertexShader >();
+	FShaderRef		testPixelShader = GShaderManager->FindInstance< FTestPixelShader >();
+	check( testVertexShader && testPixelShader );
 
 	vertexBuffer = GRHI->CreateVertexBuffer( TEXT( "TestVertexBuffer" ), 4, nullptr, RUF_Dynamic );
 	FLockedData				lockedData;
-	GRHI->LockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, 4, lockedData );
+	GRHI->LockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, 4, 0, lockedData );
 	memset( lockedData.data, 1, 4 );
 	GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
+
+	FBoundShaderStateRHIRef				boundShaderState = GRHI->CreateBoundShaderState( TEXT( "TestBoundShaderState" ), vertexDeclRHI, testVertexShader->GetVertexShader(), testPixelShader->GetPixelShader() );
 
 #if WITH_EDITOR
 	GImGUIEngine->Init( GRHI->GetImmediateContext() );

@@ -60,7 +60,22 @@ public:
 	 */
 	FD3D11VertexShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
 		FD3D11ShaderRHI( SF_Vertex, InData, InSize, InShaderName )
-	{}
+	{
+		code.resize( InSize );
+		memcpy( code.data(), InData, InSize );
+	}
+
+	/**
+	 * @brief Get bytecode
+	 * @return Return reference to bytecode of vertex shader
+	 */
+	FORCEINLINE const std::vector< byte >& GetCode() const
+	{
+		return code;
+	}
+
+private:
+	std::vector< byte >			code;		/**< Bytecode of shader for create D3D11 input layout */
 };
 
 /**
@@ -151,9 +166,71 @@ public:
 	 */
 	FD3D11VertexDeclarationRHI( const FVertexDeclarationElementList& InElementList );
 
+	/**
+	 * @brief Get hash
+	 *
+	 * @param[in] InHash Start hash
+	 * @return Return calculated hash
+	 */
+	virtual uint32 GetHash( uint32 InHash = 0 ) const override;
+
+	/**
+	 * @brief Get vertex elements
+	 * @return Return reference to vertex elements
+	 */
+	FORCEINLINE const std::vector< D3D11_INPUT_ELEMENT_DESC >& GetVertexElements()
+	{
+		return vertexElements;
+	}
+
+	/**
+	 * @brief Get stream count
+	 * @return Return stream count
+	 */
+	FORCEINLINE uint32 GetStreamCount() const
+	{
+		return streamCount;
+	}
+
 private:
 	std::vector< D3D11_INPUT_ELEMENT_DESC >			vertexElements;		/**< Array of vertex elements for D3D11 */
 	uint32											streamCount;		/**< Stram count */
+};
+
+/**
+ * @ingroup D3D11RHI
+ * @brief Class of bound shader state
+ */
+class FD3D11BoundShaderStateRHI : public FBaseBoundShaderStateRHI
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param[in] InDebugName Bound shader state name for debug
+	 * @param[in] InVertexDeclaration Vertex declaration
+	 * @param[in] InVertexShader Vertex shader
+	 * @param[in] InPixelShader Pixel shader
+	 * @param[in] InHullShader Hull shader
+	 * @param[in] InDomainShader Domain shader
+	 * @param[in] InGeometryShader Geometry shader
+	 */
+	FD3D11BoundShaderStateRHI( const tchar* InDebugName, const FBoundShaderStateKey& InKey, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader = nullptr, FDomainShaderRHIRef InDomainShader = nullptr, FGeometryShaderRHIRef InGeometryShader = nullptr );
+
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~FD3D11BoundShaderStateRHI();
+
+private:
+	FBoundShaderStateKey			key;					/**< Bound shader state key */
+	ID3D11InputLayout*				d3d11InputLayout;		/**< D3D11 input layout */
+	FVertexDeclarationRHIRef		vertexDeclaration;		/**< Vertex declaration */
+	FVertexShaderRHIRef				vertexShader;			/**< Vertex shader */
+	FPixelShaderRHIRef				pixelShader;			/**< Pixel shader */
+	FHullShaderRHIRef				hullShader;				/**< Hull shader */
+	FDomainShaderRHIRef				domainShader;			/**< Domain shader */
+	FGeometryShaderRHIRef			geometryShader;			/**< Geometry shader */
 };
 
 #endif // !D3D11SHADER_H

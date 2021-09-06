@@ -175,6 +175,22 @@ FVertexDeclarationRHIRef FD3D11RHI::CreateVertexDeclaration( const FVertexDeclar
 }
 
 /**
+ * Create bound shader state
+ */
+FBoundShaderStateRHIRef FD3D11RHI::CreateBoundShaderState( const tchar* InBoundShaderStateName, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader /*= nullptr*/, FDomainShaderRHIRef InDomainShader /*= nullptr*/, FGeometryShaderRHIRef InGeometryShader /*= nullptr*/ )
+{
+	FBoundShaderStateKey		key( InVertexDeclaration, InVertexShader, InPixelShader, InHullShader, InDomainShader, InGeometryShader );
+	FBoundShaderStateRHIRef		boundShaderStateRHI = boundShaderStateHistory.Find( key );
+	if ( !boundShaderStateRHI )
+	{
+		boundShaderStateRHI = new FD3D11BoundShaderStateRHI( InBoundShaderStateName, key, InVertexDeclaration, InVertexShader, InPixelShader, InHullShader, InDomainShader, InGeometryShader );
+		boundShaderStateHistory.Add( key, boundShaderStateRHI );
+	}
+
+	return boundShaderStateRHI;
+}
+
+/**
  * Get device context
  */
 class FBaseDeviceContextRHI* FD3D11RHI::GetImmediateContext() const

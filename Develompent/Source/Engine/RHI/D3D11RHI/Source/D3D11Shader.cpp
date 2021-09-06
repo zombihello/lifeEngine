@@ -1,8 +1,13 @@
+#include <d3dcompiler.h>
+
 #include "Containers/StringConv.h"
 
 #include "Core.h"
 #include "D3D11RHI.h"
 #include "D3D11Shader.h"
+#include "Containers/StringConv.h"
+#include "Logger/LoggerMacros.h"
+#include "Logger/BaseLogger.h"
 
 /**
  * Constructor
@@ -97,4 +102,79 @@ FD3D11VertexDeclarationRHI::FD3D11VertexDeclarationRHI( const FVertexDeclaration
 		vertexElements.push_back( d3dElement );
 		streamCount = Max( streamCount, d3dElement.InputSlot );
 	}
+}
+
+/**
+ * Get hash of vertex declaration
+ */
+uint32 FD3D11VertexDeclarationRHI::GetHash( uint32 InHash /*= 0*/ ) const
+{
+	return appMemFastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint32 )vertexElements.size(), InHash );
+}
+
+/**
+ * Constructor of FD3D11BoundShaderStateRHI
+ */
+FD3D11BoundShaderStateRHI::FD3D11BoundShaderStateRHI( const tchar* InDebugName, const FBoundShaderStateKey& InKey, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader /*= nullptr*/, FDomainShaderRHIRef InDomainShader /*= nullptr*/, FGeometryShaderRHIRef InGeometryShader /*= nullptr*/ ) :
+	key( InKey ),
+	d3d11InputLayout( nullptr ),
+	vertexDeclaration( InVertexDeclaration ),
+	vertexShader( InVertexShader ),
+	pixelShader( InPixelShader ),
+	hullShader( InHullShader ),
+	domainShader( InDomainShader ),
+	geometryShader( InGeometryShader )
+{
+	FD3D11RHI*		rhi = ( FD3D11RHI* )GRHI;
+	check( rhi );
+
+	ID3D11Device*	d3d11Device = rhi->GetD3D11Device();
+	check( d3d11Device );
+
+	const std::vector< D3D11_INPUT_ELEMENT_DESC >&		d3d11VertexElements = ( ( FD3D11VertexDeclarationRHI* )InVertexDeclaration.GetPtr() )->GetVertexElements();
+	const std::vector< byte >&							vertexShaderBytecode = ( ( FD3D11VertexShaderRHI* )InVertexShader.GetPtr() )->GetCode();
+	
+	HRESULT			result = d3d11Device->CreateInputLayout( d3d11VertexElements.data(), ( uint32 )d3d11VertexElements.size(), vertexShaderBytecode.data(), vertexShaderBytecode.size(), &d3d11InputLayout );
+
+#if !DO_CHECK
+	check( result == S_OK );
+#else
+	if ( result != S_OK )
+	{
+		LE_LOG( LT_Warning, LC_Shader, TEXT( "d3d11Device->CreateInputLayout failed. Dumping the vertex-shader assembly and the vertex declaration.\n" ) );
+		for ( uint32 index = 0, count = ( uint32 )d3d11VertexElements.size(); index < count; ++index )
+		{
+			const D3D11_INPUT_ELEMENT_DESC&			d3d11InputElementDesc = d3d11VertexElements[ index ];
+
+			LE_LOG( LT_Warning, LC_Shader, TEXT( "VertexElements[%d]: SemanticName=%s SemanticIndex=%d InputSlot=%d AlignedByteOffset=%d" ),
+											index,
+											ANSI_TO_TCHAR( d3d11InputElementDesc.SemanticName ),
+											d3d11InputElementDesc.SemanticIndex,
+											d3d11InputElementDesc.InputSlot,
+											d3d11InputElementDesc.AlignedByteOffset );
+		}
+
+		ID3D10Blob*			vertexShaderAssembly = nullptr;
+		result = D3DDisassemble( vertexShaderBytecode.data(), vertexShaderBytecode.size(), false, nullptr, &vertexShaderAssembly );
+		if ( result == S_OK )
+		{
+			LE_LOG( LT_Warning, LC_Shader, TEXT( "VertexShaderAssembly: %s" ), ANSI_TO_TCHAR( vertexShaderAssembly->GetBufferPointer() ) );
+			vertexShaderAssembly->Release();
+			vertexShaderAssembly = nullptr;
+		}
+
+		check( false );
+	}
+#endif // !DO_CHECK
+}
+
+/**
+ * Destructor of FD3D11BoundShaderStateRHI
+ */
+FD3D11BoundShaderStateRHI::~FD3D11BoundShaderStateRHI()
+{
+	FD3D11RHI*		rhi = ( FD3D11RHI* )GRHI;
+	check( rhi );
+
+	rhi->GetBoundShaderStateHistory().Remove( key );
 }

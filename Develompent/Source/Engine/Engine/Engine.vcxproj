@@ -8,6 +8,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Misc\EngineGlobals.h" />
+    <ClInclude Include="Include\Render\BoundShaderStateCache.h" />
     <ClInclude Include="Include\Render\Shaders\ShaderCache.h" />
     <ClInclude Include="Include\Render\Shaders\Shader.h" />
     <ClInclude Include="Include\Render\Shaders\ShaderCompiler.h" />
@@ -25,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp" />
+    <ClCompile Include="Source\Render\BoundShaderStateCache.cpp" />
     <ClCompile Include="Source\Render\Shader\Shader.cpp" />
     <ClCompile Include="Source\Render\Shader\ShaderCache.cpp" />
     <ClCompile Include="Source\Render\Shader\ShaderCompiler.cpp" />

@@ -129,6 +129,20 @@ public:
 	virtual FVertexDeclarationRHIRef			CreateVertexDeclaration( const FVertexDeclarationElementList& InElementList ) { return nullptr; }
 
 	/**
+	 * @brief Create bound shader state
+	 * 
+	 * @param[in] InBoundShaderStateName Bound shader state name for debug
+	 * @param[in] InVertexDeclaration Vertex declaration
+	 * @param[in] InVertexShader Vertex shader
+	 * @param[in] InPixelShader Pixel shader
+	 * @param[in] InHullShader Hull shader
+	 * @param[in] InDomainShader Domain shader
+	 * @param[in] InGeometryShader Geometry shader
+	 * @return Pointer to bound shader state
+	 */
+	virtual FBoundShaderStateRHIRef				CreateBoundShaderState( const tchar* InBoundShaderStateName, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader = nullptr, FDomainShaderRHIRef InDomainShader = nullptr, FGeometryShaderRHIRef InGeometryShader = nullptr ) { return nullptr; }
+
+	/**
 	 * @brief Begin drawing viewport
 	 * 
 	 * @param[in] InDeviceContext Device context
