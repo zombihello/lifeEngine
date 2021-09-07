@@ -12,6 +12,23 @@
 #include "Misc/Types.h"
 #include "System/ThreadingBase.h"
 
+FORCEINLINE uint32 appGetCurrentThreadId()
+{
+	return GetCurrentThreadId();
+}
+
+FORCEINLINE void appSetThreadPriority( void* InThreadHandle, EThreadPriority InThreadPriority )
+{
+	check( InThreadPriority == TP_Normal || InThreadPriority == TP_Low || InThreadPriority == TP_AboveNormal || InThreadPriority == TP_BelowNormal || InThreadPriority == TP_High || InThreadPriority == TP_Realtime );
+	SetThreadPriority( InThreadHandle,
+		InThreadPriority == TP_Low ? THREAD_PRIORITY_LOWEST :
+		InThreadPriority == TP_BelowNormal ? THREAD_PRIORITY_BELOW_NORMAL :
+		InThreadPriority == TP_AboveNormal ? THREAD_PRIORITY_NORMAL :
+		InThreadPriority == TP_High ? THREAD_PRIORITY_ABOVE_NORMAL :
+		InThreadPriority == TP_Realtime ? THREAD_PRIORITY_HIGHEST :
+		THREAD_PRIORITY_NORMAL );
+}
+
  /**
   * @ingroup WindowsPlatform
   * @brief Runnable thread for Windows
@@ -109,6 +126,7 @@ private:
 	HANDLE					thread;					/**< Windows handle of thread */
 	FRunnable*				runnable;				/**< Runnable object */
 	FEvent*					threadInitSyncEvent;	/**< Sync event to make sure that Init() has been completed before allowing the main thread to continue */
+	EThreadPriority			threadPriority;			/**< The priority to run the thread at */
 	bool					isAutoDeleteSelf;		/**< Is need delete self*/
 	bool					isAutoDeleteRunnable;	/**< Is need delete runnable object */
 };

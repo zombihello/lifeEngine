@@ -46,6 +46,12 @@ enum EThreadPriority
 
 /**
  * @ingroup Core
+ * Set thread priority
+ */
+extern FORCEINLINE void appSetThreadPriority( void* InThreadHandle, EThreadPriority InThreadPriority );
+
+/**
+ * @ingroup Core
  * @brief This is the base interface for "runnable" object.
  * 
  * This is the base interface for "runnable" object. A runnable object is an

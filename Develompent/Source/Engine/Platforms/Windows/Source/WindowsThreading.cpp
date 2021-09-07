@@ -42,16 +42,12 @@ void SetThreadName( HANDLE InThreadHandle, const achar* InThreadName )
 	}
 }
 
-FORCEINLINE uint32 appGetCurrentThreadId()
-{
-	return GetCurrentThreadId();
-}
-
 FRunnableThreadWindows::FRunnableThreadWindows() :
 	threadId( 0 ),
 	thread( nullptr ),
 	runnable( nullptr ),
 	threadInitSyncEvent( nullptr ),
+	threadPriority( TP_Normal ),
 	isAutoDeleteSelf( false ),
 	isAutoDeleteRunnable( false )
 {}
@@ -144,6 +140,7 @@ bool FRunnableThreadWindows::Create( FRunnable* InRunnable, const tchar* InThrea
 	runnable = InRunnable;
 	isAutoDeleteSelf = InIsAutoDeleteSelf;
 	isAutoDeleteRunnable = InIsAutoDeleteRunnable;
+	threadPriority = InThreadPriority;
 
 	// Create a sync event to guarantee the Init() function is called first
 	threadInitSyncEvent = GSynchronizeFactory->CreateSynchEvent( true );
@@ -183,6 +180,7 @@ DWORD FRunnableThreadWindows::StaticMainProc( LPVOID InThis )
 uint32 FRunnableThreadWindows::Run()
 {
 	check( runnable );
+	appSetThreadPriority( thread, threadPriority );
 
 	// Initialize the runnable object
 	bool		initReturn = runnable->Init();
