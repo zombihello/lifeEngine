@@ -11,6 +11,17 @@
 
 #include "../CoreDefines.h"
 
+#ifndef DEFINED_appMemzero
+	/**
+	 * @ingroup Core
+	 * @brief Fill memory zero
+	 * 
+	 * @param[in] InDest Destination for fill zero
+	 * @param[in] InCount Size of data
+	 */
+	#define appMemzero( InDest, InCount )		memset( InDest, 0, InCount )
+#endif
+
 /**
  * @ingroup Core
  * @brief Fast memory hashing function that doesn't require a table lookup for each element

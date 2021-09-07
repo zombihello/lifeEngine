@@ -121,4 +121,16 @@ typedef TRefCountPtr< FBaseVertexDeclarationRHI >		FVertexDeclarationRHIRef;
  */
 typedef FBaseVertexDeclarationRHI*						FVertexDeclarationRHIParamRef;
 
+/**
+ * @ingroup Engine Engine
+ * @brief Reference to FBaseRasterizerStateRHI
+ */
+typedef TRefCountPtr< class FBaseRasterizerStateRHI >	FRasterizerStateRHIRef;
+
+/**
+ * @ingroup Engine Engine
+ * @brief Pointer to FBaseRasterizerStateRHI
+ */
+typedef class FBaseRasterizerStateRHI*					FRasterizerStateRHIParamRef;
+
 #endif // !TYPESRHI_H

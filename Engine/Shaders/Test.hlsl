@@ -1,22 +1,28 @@
-//--------------------------------------------------------------------------------------
-// File: Tutorial02.fx
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
+struct VS_IN
+{
+	float3 position		: POSITION;
+	float2 texCoord0	: TEXCOORD0;
+};
+
+struct VS_OUT
+{
+	float2 texCoord0	: TEXCOORD0;
+};
 
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------
-float4 VS( float3 Pos : POSITION, float2 TexCord : TEXCOORD ) : SV_POSITION
+void VS( in VS_IN In, out VS_OUT Out, out float4 OutPosition : SV_POSITION )
 {
-    return float4( Pos, 1.f );
+	OutPosition		= float4( In.position, 1.f );
+	Out.texCoord0	= In.texCoord0;
 }
 
 
 //--------------------------------------------------------------------------------------
 // Pixel Shader
 //--------------------------------------------------------------------------------------
-float4 PS( float4 Pos : SV_POSITION ) : SV_Target
+float4 PS( VS_OUT In ) : SV_Target
 {
-    return float4( 1.0f, 1.0f, 0.0f, 1.0f );    // Yellow, with Alpha = 1
+    return float4( In.texCoord0.x, In.texCoord0.y, 0.0f, 1.0f );    // Yellow, with Alpha = 1
 }

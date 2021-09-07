@@ -92,6 +92,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 #include "Render/Shaders/TestShader.h"
 FVertexBufferRHIRef		vertexBuffer;
 FBoundShaderStateRHIRef				boundShaderState;
+FRasterizerStateRHIRef				rasterizerState;
 
 /**
  * Initialize the main loop
@@ -145,6 +146,13 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 
 	boundShaderState = GRHI->CreateBoundShaderState( TEXT( "TestBoundShaderState" ), vertexDeclRHI, testVertexShader->GetVertexShader(), testPixelShader->GetPixelShader() );
 
+	FRasterizerStateInitializerRHI		rasterizerStateInitializerRHI;
+	appMemzero( &rasterizerStateInitializerRHI, sizeof( FRasterizerStateInitializerRHI ) );
+
+	rasterizerStateInitializerRHI.cullMode = CM_CW;
+	rasterizerStateInitializerRHI.fillMode = FM_Solid;
+	rasterizerState = GRHI->CreateRasterizerState( rasterizerStateInitializerRHI );
+
 #if WITH_EDITOR
 	GImGUIEngine->Init( GRHI->GetImmediateContext() );
 #endif // WITH_EDITOR
@@ -187,6 +195,7 @@ void FEngineLoop::Tick()
 
 	GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, (3 * sizeof(float)) + (2 * sizeof(float)), 0 );
 	GRHI->SetBoundShaderState( immediateContext, boundShaderState );
+	GRHI->SetRasterizerState( immediateContext, rasterizerState );
 	GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
 	GRHI->EndDrawingViewport( immediateContext, GViewportRHI, true, false );
 }

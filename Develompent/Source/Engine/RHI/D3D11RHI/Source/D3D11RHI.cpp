@@ -12,7 +12,7 @@
 /**
  * Get vertex count for primitive count
  */
-FORCEINLINE uint32 GetVertexCountForPrimitiveCount( uint32 InNumPrimitives, EPrimitiveType InPrimitiveType )
+static FORCEINLINE uint32 GetVertexCountForPrimitiveCount( uint32 InNumPrimitives, EPrimitiveType InPrimitiveType )
 {
 	uint32		vertexCount = 0;
 	switch (InPrimitiveType)
@@ -32,7 +32,7 @@ FORCEINLINE uint32 GetVertexCountForPrimitiveCount( uint32 InNumPrimitives, EPri
 /**
  * Get D3D11 primitive type from engine primitive type
  */
-FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrimitiveType, bool InIsUsingTessellation )
+static FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrimitiveType, bool InIsUsingTessellation )
 {
 	checkMsg( !InIsUsingTessellation, TEXT( "Tessellation not supported!" ) );
 	switch ( InPrimitiveType )
@@ -47,6 +47,69 @@ FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrimitiveTy
 	};
 
 	return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+}
+
+/**
+ * Translate cull mode from engine to DirectX 11
+ */
+static FORCEINLINE D3D11_CULL_MODE TranslateCullMode( ERasterizerCullMode InCullMode )
+{
+	switch ( InCullMode )
+	{
+	case CM_CW:			return D3D11_CULL_BACK;
+	case CM_CCW:		return D3D11_CULL_FRONT;
+	default:			return D3D11_CULL_NONE;
+	};
+}
+
+/**
+ * Translate fill mode from engine to DirectX 11
+ */
+static FORCEINLINE D3D11_FILL_MODE TranslateFillMode( ERasterizerFillMode InFillMode )
+{
+	switch ( InFillMode )
+	{
+	case FM_Wireframe:		return D3D11_FILL_WIREFRAME;
+	default:				return D3D11_FILL_SOLID;
+	};
+}
+
+/**
+ * Constructor FD3D11RasterizerStateRHI
+ */
+FD3D11RasterizerStateRHI::FD3D11RasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer ) :
+	d3d11RasterizerState( nullptr )
+{
+	D3D11_RASTERIZER_DESC			d3d11RasterizerDesc;
+	appMemzero( &d3d11RasterizerDesc, sizeof( D3D11_RASTERIZER_DESC ) );
+
+	d3d11RasterizerDesc.CullMode					= TranslateCullMode( InInitializer.cullMode );
+	d3d11RasterizerDesc.FillMode					= TranslateFillMode( InInitializer.fillMode );
+	d3d11RasterizerDesc.SlopeScaledDepthBias		= InInitializer.slopeScaleDepthBias;
+	d3d11RasterizerDesc.DepthBias					= ( int32 )floor( InInitializer.depthBias * ( float )( 1 << 24 ) );
+	d3d11RasterizerDesc.DepthClipEnable				= true;
+	d3d11RasterizerDesc.MultisampleEnable			= InInitializer.isAllowMSAA;
+
+	if ( InInitializer.cullMode == CM_NoneReversed )
+	{
+		d3d11RasterizerDesc.FrontCounterClockwise	= false;
+	}
+	else
+	{
+		d3d11RasterizerDesc.FrontCounterClockwise	= true;
+	}
+
+	ID3D11Device*			d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
+	HRESULT		result = d3d11Device->CreateRasterizerState( &d3d11RasterizerDesc, &d3d11RasterizerState );
+	check( result == S_OK );
+}
+
+/**
+ * Destructor FD3D11RasterizerStateRHI
+ */
+FD3D11RasterizerStateRHI::~FD3D11RasterizerStateRHI()
+{
+	d3d11RasterizerState->Release();
 }
 
 /**
@@ -231,6 +294,15 @@ FBoundShaderStateRHIRef FD3D11RHI::CreateBoundShaderState( const tchar* InBoundS
 }
 
 /**
+ * Create rasterizer state
+ */
+FRasterizerStateRHIRef FD3D11RHI::CreateRasterizerState( const FRasterizerStateInitializerRHI& InInitializer )
+{
+	FD3D11RasterizerStateRHI*		rasterizerState = new FD3D11RasterizerStateRHI( InInitializer );
+	return rasterizerState;
+}
+
+/**
  * Get device context
  */
 class FBaseDeviceContextRHI* FD3D11RHI::GetImmediateContext() const
@@ -280,6 +352,15 @@ void FD3D11RHI::SetStreamSource( class FBaseDeviceContextRHI* InDeviceContext, u
 	ID3D11Buffer*					d3d11Buffer = ( ( FD3D11VertexBufferRHI* )InVertexBuffer )->GetD3D11Buffer();
 	
 	d3d11DeviceContext->IASetVertexBuffers( InStreamIndex, 1, &d3d11Buffer, &InStride, &InOffset );
+}
+
+/**
+ * Set rasterizer state
+ */
+void FD3D11RHI::SetRasterizerState( class FBaseDeviceContextRHI* InDeviceContext, FRasterizerStateRHIParamRef InNewState )
+{
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	d3d11DeviceContext->RSSetState( ( ( FD3D11RasterizerStateRHI* )InNewState )->GetResource() );
 }
 
 /**

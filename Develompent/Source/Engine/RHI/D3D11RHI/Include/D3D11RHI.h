@@ -17,6 +17,38 @@
 
 /**
  * @ingroup D3D11RHI
+ * @brief Class of resterize state DirectX 11
+ */
+class FD3D11RasterizerStateRHI : public FBaseRasterizerStateRHI
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param[in] InInitializer Initializer of rasterizer state
+	 */
+	FD3D11RasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer );
+
+	/**
+	 * @brief Destructor
+	 */
+	~FD3D11RasterizerStateRHI();
+
+	/**
+	 * @brief Get DirectX resource
+	 * @return Pointer to DirectX resource
+	 */
+	FORCEINLINE ID3D11RasterizerState* GetResource() const
+	{
+		return d3d11RasterizerState;
+	}
+
+private:
+	ID3D11RasterizerState*			d3d11RasterizerState;		/**< Pointer to DirectX 11 rasterizer state */
+};
+
+/**
+ * @ingroup D3D11RHI
  * @brief Main class of DirectX 11
  */
 class FD3D11RHI : public FBaseRHI
@@ -150,6 +182,14 @@ public:
 	virtual FBoundShaderStateRHIRef					CreateBoundShaderState( const tchar* InBoundShaderStateName, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader = nullptr, FDomainShaderRHIRef InDomainShader = nullptr, FGeometryShaderRHIRef InGeometryShader = nullptr ) override;
 
 	/**
+	 * @brief Create rasterizer state
+	 *
+	 * @param[in] InInitializer Initializer of rasterizer state
+	 * @return Pointer to rasterizer state
+	 */
+	virtual FRasterizerStateRHIRef					CreateRasterizerState( const FRasterizerStateInitializerRHI& InInitializer ) override;
+
+	/**
 	 * @brief Begin drawing viewport
 	 *
 	 * @param[in] InDeviceContext Device context
@@ -240,6 +280,14 @@ public:
 	 * @param[in] InOffset Offset
 	 */
 	virtual void									SetStreamSource( class FBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, FVertexBufferRHIParamRef InVertexBuffer, uint32 InStride, uint32 InOffset ) override;
+
+	/**
+	 * @brief Set rasterizer state
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InNewState New rasterizer state
+	 */
+	virtual void									SetRasterizerState( class FBaseDeviceContextRHI* InDeviceContext, FRasterizerStateRHIParamRef InNewState ) override;
 
 	/**
 	 * @brief Lock vertex buffer

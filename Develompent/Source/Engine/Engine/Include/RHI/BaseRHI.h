@@ -28,6 +28,56 @@ enum EPrimitiveType
 
 /**
  * @ingroup Engine
+ * @brief Enumeration of types fill mode
+ */
+enum ERasterizerFillMode
+{
+	FM_Point,			/**< Point */
+	FM_Wireframe,		/**< Wireframe */
+	FM_Solid			/**< Solid */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Enumeration of types cull mode
+ */
+enum ERasterizerCullMode
+{
+	CM_None,				/**< Cull mode is disabled */
+	CM_NoneReversed,		/**< In this mode enabled front counter clockwise */
+	CM_CW,					/**< Cull back */
+	CM_CCW					/**< Cull front */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Structc for create resterize state in RHI
+ */
+struct FRasterizerStateInitializerRHI
+{
+	ERasterizerFillMode			fillMode;				/**< Fill mode */
+	ERasterizerCullMode			cullMode;				/**< Cull mode */
+	float						depthBias;				/**< Depth bias */
+	float						slopeScaleDepthBias;	/**< Slope scale depth bias */
+	bool						isAllowMSAA;			/**< Is allow MSAA */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Base class of resterize state
+ */
+class FBaseRasterizerStateRHI : public FRefCounted
+{
+public:
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~FBaseRasterizerStateRHI()
+	{}
+};
+
+/**
+ * @ingroup Engine
  * @brief Base class of RHI
  */
 class FBaseRHI
@@ -156,6 +206,14 @@ public:
 	virtual FBoundShaderStateRHIRef				CreateBoundShaderState( const tchar* InBoundShaderStateName, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader = nullptr, FDomainShaderRHIRef InDomainShader = nullptr, FGeometryShaderRHIRef InGeometryShader = nullptr ) { return nullptr; }
 
 	/**
+	 * @brief Create rasterizer state
+	 * 
+	 * @param[in] InInitializer Initializer of rasterizer state
+	 * @return Pointer to rasterizer state
+	 */
+	virtual FRasterizerStateRHIRef				CreateRasterizerState( const FRasterizerStateInitializerRHI& InInitializer ) { return nullptr; }
+
+	/**
 	 * @brief Begin drawing viewport
 	 * 
 	 * @param[in] InDeviceContext Device context
@@ -248,6 +306,14 @@ public:
 	 * @param[in] InOffset Offset
 	 */
 	virtual void								SetStreamSource( class FBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, FVertexBufferRHIParamRef InVertexBuffer, uint32 InStride, uint32 InOffset ) {}
+
+	/**
+	 * @brief Set rasterizer state
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InNewState New rasterizer state
+	 */
+	virtual void								SetRasterizerState( class FBaseDeviceContextRHI* InDeviceContext, FRasterizerStateRHIParamRef InNewState ) {}
 
 	/**
 	 * @brief Lock vertex buffer
