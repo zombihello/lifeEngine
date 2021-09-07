@@ -23,6 +23,7 @@ enum EStyleWindow
 	SW_Decorated		= 1 << 1,							/**< Decorated window  */
 	SW_Floating			= 1 << 2,							/**< Floating window  */
 	SW_Fullscreen		= 1 << 3,							/**< Fullscreen window  */
+	SW_Hidden			= 1 << 4,							/**< Hidden window */
 
 	SW_Default			= SW_Decorated | SW_Resizable		/**< Default style - combined decorated and resizable style  */
 };
@@ -63,6 +64,16 @@ public:
 	 * @brief Hide cursor
 	 */
 	virtual void			HideCursor() {}
+
+	/**
+	 * @brief Show window
+	 */
+	virtual void			Show() {}
+
+	/**
+	 * @brief Hide window
+	 */
+	virtual void			Hide() {}
 
 	/**
 	 * @brief Handle window event

@@ -30,6 +30,7 @@
     <ClInclude Include="Include\System\ButtonCode.h" />
     <ClInclude Include="Include\System\Config.h" />
     <ClInclude Include="Include\System\MemoryBase.h" />
+    <ClInclude Include="Include\System\ThreadingBase.h" />
     <ClInclude Include="Include\System\WindowEvent.h" />
   </ItemGroup>
   <ItemGroup>
@@ -69,7 +70,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../WorldEd/Include;../Engine/Include;../../Games/TestbedGame/Include;../../../External/LuaJIT-2.1/include;../../../External/LuaBridge-2.6/include;../../../External/rapidjson/include;Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../WorldEd/Include;../Engine/Include;../../Games/TestbedGame/Include;../../../External/LuaJIT-2.1/include;../../../External/LuaBridge-2.6/include;../../../External/stb;../../../External/rapidjson/include;Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

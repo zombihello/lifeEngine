@@ -27,6 +27,9 @@ namespace lifeBuildTool
             //  LuaBridge
             SetUpLuaBridgeEnvironment();
 
+            // STB
+            SetUpSTBEnvironment();
+
             //
             // Engine/Game/Tools projects
             //
@@ -107,6 +110,15 @@ namespace lifeBuildTool
             // Include libs
             linkEnvironment.additionalLibraries.Add( "lua51.lib" );
             linkEnvironment.additionalLibraries.Add( "luajit.lib" );
+        }
+
+        void SetUpSTBEnvironment()
+        {
+            string      stbHome = "../External/stb";
+            Logging.WriteLine( String.Format( "Set up STB environment [{0}]", stbHome ) );
+
+            // Settings includes
+            cppEnvironment.includePaths.Add( stbHome );
         }
 
         void SetUpLuaBridgeEnvironment()

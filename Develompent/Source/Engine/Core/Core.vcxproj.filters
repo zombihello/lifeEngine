@@ -111,6 +111,9 @@
     <ClInclude Include="Include\System\MemoryBase.h">
       <Filter>Include\System</Filter>
     </ClInclude>
+    <ClInclude Include="Include\System\ThreadingBase.h">
+      <Filter>Include\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">

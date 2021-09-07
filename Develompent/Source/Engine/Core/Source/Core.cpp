@@ -15,6 +15,7 @@ FConfig         GEngineConfig;
 FConfig         GGameConfig;
 FConfig         GEditorConfig;
 bool	        GIsRequestingExit           = false;
+uint32			GGameThreadId               = 0;
 
 /**
  * Failed assertion handler

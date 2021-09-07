@@ -131,7 +131,7 @@ namespace lifeBuildTool
             linkEnvironment.platform = platform;
             linkEnvironment.configuration = configuration;
 
-            linkEnvironment.intermediateDirectory = Path.GetFullPath( string.Format( "..\\Intermediate\\{0}\\", configuration ) );
+            linkEnvironment.intermediateDirectory = Path.GetFullPath( string.Format( "..\\Intermediate\\{0}\\{1}\\", platform.ToString(), configuration ) );
             Directory.CreateDirectory( linkEnvironment.intermediateDirectory );
         }
 

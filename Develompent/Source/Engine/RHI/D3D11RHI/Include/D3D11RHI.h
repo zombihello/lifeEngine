@@ -77,6 +77,16 @@ public:
 	virtual void									Destroy() override;
 
 	/**
+	 * @brief Acquire thread ownership
+	 */
+	virtual void									AcquireThreadOwnership() override;
+
+	/**
+	 * @brief Release thread ownership
+	 */
+	virtual void									ReleaseThreadOwnership() override;
+
+	/**
 	 * @brief Create viewport
 	 *
 	 * @param[in] InWindowHandle OS handle on window

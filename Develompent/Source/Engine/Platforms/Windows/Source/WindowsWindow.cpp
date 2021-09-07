@@ -278,7 +278,16 @@ void FWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
     check( !sdlWindow );
 
 	// Combine flags for SDL2
-    uint32              flags = SDL_WINDOW_SHOWN;
+    uint32              flags = 0;
+	if ( InFlags & SW_Hidden )
+	{
+		flags = SDL_WINDOW_HIDDEN;
+	}
+	else
+	{
+		flags = SDL_WINDOW_SHOWN;
+	}
+
 	if ( isFullscreen || InFlags & SW_Fullscreen )
 	{
 		flags |= SDL_WINDOW_FULLSCREEN;
@@ -295,7 +304,7 @@ void FWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 	}
-
+	
 	// Creating window
 	sdlWindow = SDL_CreateWindow( TCHAR_TO_ANSI( InTitle ), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, InWidth, InHeight, flags );
 	if ( !sdlWindow )
@@ -335,6 +344,24 @@ void FWindowsWindow::Close()
 	handle = nullptr;
 	isFullscreen = false;
 	isShowCursor = false;
+}
+
+/**
+ * Show window
+ */
+void FWindowsWindow::Show()
+{
+	check( sdlWindow );
+	SDL_ShowWindow( sdlWindow );
+}
+
+/**
+ * Hide window
+ */
+void FWindowsWindow::Hide()
+{
+	check( sdlWindow );
+	SDL_HideWindow( sdlWindow );
 }
 
 /**

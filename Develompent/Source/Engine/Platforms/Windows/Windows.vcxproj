@@ -13,6 +13,7 @@
     <ClCompile Include="Source\WindowsLaunch.cpp" />
     <ClCompile Include="Source\WindowsLogger.cpp" />
     <ClCompile Include="Source\WindowsPlatform.cpp" />
+    <ClCompile Include="Source\WindowsThreading.cpp" />
     <ClCompile Include="Source\WindowsWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -21,6 +22,7 @@
     <ClInclude Include="Include\WindowsImGUI.h" />
     <ClInclude Include="Include\WindowsLogger.h" />
     <ClInclude Include="Include\WindowsPlatform.h" />
+    <ClInclude Include="Include\WindowsThreading.h" />
     <ClInclude Include="Include\WindowsWindow.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -49,7 +51,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../WorldEd/Include;../../../Games/TestbedGame/Include;../../../../../External/LuaJIT-2.1/include;../../../../../External/LuaBridge-2.6/include;../../../../../External/rapidjson/include;../../Launch/Include;Include;../../Core/Include;../../Engine/Include;../../RHI/D3D11RHI/Include;../../../../External/SDL2-2.0.14/include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../WorldEd/Include;../../../Games/TestbedGame/Include;../../../../../External/LuaJIT-2.1/include;../../../../../External/LuaBridge-2.6/include;../../../../../External/rapidjson/include;../../Launch/Include;Include;../../Core/Include;../../Engine/Include;../../RHI/D3D11RHI/Include;../../../../External/SDL2-2.0.14/include;../../../../External/stb;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

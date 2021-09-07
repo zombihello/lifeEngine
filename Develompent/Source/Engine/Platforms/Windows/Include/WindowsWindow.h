@@ -77,6 +77,16 @@ public:
 	virtual void					HideCursor() override;
 
 	/**
+	 * @brief Show window
+	 */
+	virtual void					Show() override;
+
+	/**
+	 * @brief Hide window
+	 */
+	virtual void					Hide() override;
+
+	/**
 	 * @brief Handle window event
 	 *
 	 * @param[out] OutWindowEvent Occurred window event

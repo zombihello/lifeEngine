@@ -180,6 +180,19 @@ void FD3D11RHI::Init( bool InIsEditor )
 }
 
 /**
+ * Acquire thread ownership
+ */
+void FD3D11RHI::AcquireThreadOwnership()
+{}
+
+/**
+ * Release thread ownership
+ */
+void FD3D11RHI::ReleaseThreadOwnership()
+{
+}
+
+/**
  * Is initialized RHI
  */
 bool FD3D11RHI::IsInitialize() const

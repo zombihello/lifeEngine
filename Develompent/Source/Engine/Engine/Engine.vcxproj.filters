@@ -87,6 +87,15 @@
     <ClInclude Include="Include\Render\BoundShaderStateCache.h">
       <Filter>Include\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Render\Texture.h">
+      <Filter>Include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Render\RenderResource.h">
+      <Filter>Include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Render\RenderingThread.h">
+      <Filter>Include\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
@@ -114,6 +123,15 @@
       <Filter>Source\Render\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="Source\Render\BoundShaderStateCache.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\Texture.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\RenderResource.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\RenderingThread.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>

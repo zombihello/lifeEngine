@@ -143,6 +143,14 @@ extern bool            appGetProcReturnCode( void* InProcHandle, int32* OutRetur
 
 /**
  * @ingroup Core
+ * @brief Get ID of current thread
+ *
+ * @return Return ID of current thread
+ */
+extern FORCEINLINE uint32          appGetCurrentThreadId();
+
+/**
+ * @ingroup Core
  * @brief Macros for call fail assert
  *
  * @param[in] Expr Condition that was not met

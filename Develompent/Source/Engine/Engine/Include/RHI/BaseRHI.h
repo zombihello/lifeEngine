@@ -101,6 +101,16 @@ public:
 	virtual void								Destroy() {}
 
 	/**
+	 * @brief Acquire thread ownership
+	 */
+	virtual void								AcquireThreadOwnership() {}
+
+	/**
+	 * @brief Release thread ownership
+	 */
+	virtual void								ReleaseThreadOwnership() {}
+
+	/**
 	 * @brief Create viewport
 	 * 
 	 * @param[in] InWindowHandle OS handle on window

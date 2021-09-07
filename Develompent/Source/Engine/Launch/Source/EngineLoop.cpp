@@ -8,6 +8,7 @@
 #include "System/BaseFileSystem.h"
 #include "System/BaseWindow.h"
 #include "System/Config.h"
+#include "System/ThreadingBase.h"
 #include "Math/Color.h"
 #include "Scripts/ScriptEngine.h"
 #include "RHI/BaseRHI.h"
@@ -79,6 +80,7 @@ void FEngineLoop::SerializeConfigs()
  */
 int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 {
+	GGameThreadId = appGetCurrentThreadId();
 	SerializeConfigs();
 
 	GLog->Init();
@@ -94,6 +96,9 @@ FVertexBufferRHIRef		vertexBuffer;
 FBoundShaderStateRHIRef				boundShaderState;
 FRasterizerStateRHIRef				rasterizerState;
 
+#include "System/ThreadingBase.h"
+#include "Render/RenderingThread.h"
+
 /**
  * Initialize the main loop
  */
@@ -106,7 +111,7 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	std::wstring				windowTitle = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();
 	uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
 	uint32						windowHeight = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
-	GWindow->Create( windowTitle.c_str(), windowWidth, windowHeight );
+	GWindow->Create( windowTitle.c_str(), windowWidth, windowHeight, SW_Default | SW_Hidden );
 	
 	// Create viewport for render
 	uint32			width = 0;
@@ -117,6 +122,7 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), width, height );
 
 	int32		result = appPlatformInit( InCmdLine );
+	StartRenderingThread();
 
 	// -- Test section --
 	FVertexDeclarationElementList		vertexDeclElementList;
@@ -157,6 +163,7 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	GImGUIEngine->Init( GRHI->GetImmediateContext() );
 #endif // WITH_EDITOR
 
+	GWindow->Show();
 	return result;
 }
 
@@ -186,6 +193,11 @@ void FEngineLoop::Tick()
 	GRHI->BeginDrawingViewport( immediateContext, GViewportRHI );
 	immediateContext->ClearSurface( GViewportRHI->GetSurface(), FColor::black );
 
+	GRHI->SetStreamSource(immediateContext, 0, vertexBuffer, (3 * sizeof(float)) + (2 * sizeof(float)), 0);
+	GRHI->SetBoundShaderState(immediateContext, boundShaderState);
+	GRHI->SetRasterizerState(immediateContext, rasterizerState);
+	GRHI->DrawPrimitive(immediateContext, PT_TriangleList, 0, 1);
+
 #if WITH_EDITOR
 	// This test drawing of ImGUI
 	GImGUIEngine->BeginDrawing( immediateContext );
@@ -193,10 +205,6 @@ void FEngineLoop::Tick()
 	GImGUIEngine->EndDrawing( immediateContext );
 #endif // WITH_EDITOR
 
-	GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, (3 * sizeof(float)) + (2 * sizeof(float)), 0 );
-	GRHI->SetBoundShaderState( immediateContext, boundShaderState );
-	GRHI->SetRasterizerState( immediateContext, rasterizerState );
-	GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
 	GRHI->EndDrawingViewport( immediateContext, GViewportRHI, true, false );
 }
 
@@ -208,6 +216,8 @@ void FEngineLoop::Exit()
 #if WITH_EDITOR
 	GImGUIEngine->Shutdown( GRHI->GetImmediateContext() );
 #endif // WITH_EDITOR
+
+	StopRenderingThread();
 
 	delete GViewportRHI;
 	GRHI->Destroy();
