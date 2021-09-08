@@ -43,4 +43,18 @@ FORCEINLINE TType Min( const TType& InA, const TType& InB )
 	return ( InA <= InB ) ? InA : InB;
 }
 
+/**
+ * @ingroup Core
+ * @brief Aligns a value to the nearest higher multiple of 'Alignment', which must be a power of two
+ *
+ * @param[in] InPtr	Value to align
+ * @param[in] InAlignment Alignment, must be a power of two
+ * @return Aligned value
+ */
+template< typename TType > 
+FORCEINLINE TType Align( const TType InPtr, uint32 InAlignment )
+{
+	return ( TType )( ( ( int32 )InPtr + InAlignment - 1 ) & ~( InAlignment - 1 ) );
+}
+
 #endif // !TEMPLATE_H

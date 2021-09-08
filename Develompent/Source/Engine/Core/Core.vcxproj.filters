@@ -114,6 +114,9 @@
     <ClInclude Include="Include\System\ThreadingBase.h">
       <Filter>Include\System</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Containers\RingBuffer.h">
+      <Filter>Include\Containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">
@@ -142,6 +145,9 @@
     </ClCompile>
     <ClCompile Include="Source\Misc\Class.cpp">
       <Filter>Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Containers\RingBuffer.cpp">
+      <Filter>Source\Containers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

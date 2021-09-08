@@ -7,6 +7,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\Containers\RingBuffer.h" />
     <ClInclude Include="Include\Containers\String.h" />
     <ClInclude Include="Include\Containers\StringConv.h" />
     <ClInclude Include="Include\Core.h" />
@@ -34,6 +35,7 @@
     <ClInclude Include="Include\System\WindowEvent.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Containers\RingBuffer.cpp" />
     <ClCompile Include="Source\Containers\String.cpp" />
     <ClCompile Include="Source\Core.cpp" />
     <ClCompile Include="Source\Logger\BaseLogger.cpp" />

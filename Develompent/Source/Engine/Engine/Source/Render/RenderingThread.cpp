@@ -4,11 +4,49 @@
 #include "Logger/LoggerMacros.h"
 #include "Render/RenderingThread.h"
 
+//
+// Definitions
+//
+
+/* The size of the rendering command buffer, in bytes. */
+#define RENDERING_COMMAND_BUFFER_SIZE			( 1024 * 1024 )
+
+//
+// Globals
+//
+
 /* Whether the renderer is currently running in a separate thread */
 bool			GIsThreadedRendering = false;
 
 /* ID of rendering thread */
 uint32			GRenderingThreadId = 0;
+
+/* The rendering command queue */
+FRingBuffer		GRenderCommandBuffer( RENDERING_COMMAND_BUFFER_SIZE, 16 );
+
+FSkipRenderCommand::FSkipRenderCommand( uint32 InNumSkipBytes ) :
+	numSkipBytes( InNumSkipBytes )
+{}
+
+uint32 FSkipRenderCommand::Execute()
+{
+	return numSkipBytes;
+}
+
+uint32 FSkipRenderCommand::GetSize() const
+{
+	return numSkipBytes;
+}
+
+const tchar* FSkipRenderCommand::DescribeCommand() const
+{
+	return TEXT( "FSkipRenderCommand" );
+}
+
+const char* FSkipRenderCommand::DescribeCommandChar() const
+{
+	return "FSkipRenderCommand";
+}
 
 bool FRenderingThread::Init()
 {
@@ -20,8 +58,25 @@ bool FRenderingThread::Init()
 
 uint32 FRenderingThread::Run()
 {
+	void*		readPointer = nullptr;
+	uint32		numReadBytes = 0;
+
 	while ( GIsThreadedRendering )
 	{
+		// Command processing loop
+		while ( GIsThreadedRendering && GRenderCommandBuffer.BeginRead( readPointer, numReadBytes ) )
+		{
+			// Process one render command
+			{
+				// Execute the Render Command
+				FRenderCommand*		command = ( FRenderCommand* )readPointer;
+				{
+					uint32		commandSize = command->Execute();
+					command->~FRenderCommand();
+					GRenderCommandBuffer.FinishRead( commandSize );
+				}
+			}
+		}
 	}
 
 	return 0;

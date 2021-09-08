@@ -9,6 +9,7 @@
 #ifndef THREADINGBASE_H
 #define THREADINGBASE_H
 
+#include "CoreDefines.h"
 #include "Misc/Types.h"
 
 /**
@@ -16,6 +17,14 @@
  * ID of game thread
  */
 extern uint32			GGameThreadId;
+
+/**
+ * @ingroup Core
+ * @brief Get ID of current thread
+ *
+ * @return Return ID of current thread
+ */
+extern FORCEINLINE uint32 appGetCurrentThreadId();
 
 /**
  * @ingroup Core
@@ -49,6 +58,14 @@ enum EThreadPriority
  * Set thread priority
  */
 extern FORCEINLINE void appSetThreadPriority( void* InThreadHandle, EThreadPriority InThreadPriority );
+
+/**
+ * @ingroup Core
+ * Sleep this thread
+ * 
+ * @param[in] InSeconds Seconds of sleep
+ */
+extern FORCEINLINE void appSleep( float InSeconds );
 
 /**
  * @ingroup Core
@@ -229,27 +246,9 @@ public:
 };
 
 /**
- * @ingroup Core
- * Base interface of critical section
+ * Forward declaration for a platform specific implementation
  */
-class FCriticalSection : public FSynchronize
-{
-public:
-	/**
-	 * Destructor
-	 */
-	virtual ~FCriticalSection() {}
-
-	/**
-	 * Lock section
-	 */
-	virtual void Lock() = 0;
-
-	/**
-	 * Unlock section
-	 */
-	virtual void Unlock() = 0;
-};
+class FCriticalSection;
 
 /**
  * @ingroup Core
@@ -414,5 +413,11 @@ public:
  * Global factory for creating synchronization objects
  */
 extern FSynchronizeFactory*				GSynchronizeFactory;
+
+#if PLATFORM_WINDOWS
+	#include "WindowsThreading.h"
+#else
+	#error Unknown platform
+#endif // PLATFORM_WINDOWS
 
 #endif // !THREADINGBASE_H

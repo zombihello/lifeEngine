@@ -29,6 +29,11 @@ FORCEINLINE void appSetThreadPriority( void* InThreadHandle, EThreadPriority InT
 		THREAD_PRIORITY_NORMAL );
 }
 
+FORCEINLINE void appSleep( float InSeconds )
+{
+	Sleep( ( DWORD )( InSeconds * 1000.0 ) );
+}
+
  /**
   * @ingroup WindowsPlatform
   * @brief Runnable thread for Windows
@@ -164,7 +169,7 @@ public:
  * @ingroup WindowsPlatform
  * This is the Windows version of a critical section
  */
-class FCriticalSectionWindows : public FCriticalSection
+class FCriticalSection : public FSynchronize
 {
 public:
 	/**
@@ -181,22 +186,39 @@ public:
 	 * @param[in] InDebugName Debug name
 	 * @param[in] InSpinCount Spin count
 	 */
-	FCriticalSectionWindows( const tchar* InDebugName = nullptr, uint32 InSpinCount = DEFAULT_SPIN_COUNT );
+	FORCEINLINE FCriticalSection( const tchar* InDebugName = nullptr, uint32 InSpinCount = DEFAULT_SPIN_COUNT )
+	{
+		InitializeCriticalSection(&criticalSection);
+		SetCriticalSectionSpinCount(&criticalSection, InSpinCount);
+	}
 
 	/**
 	 * Destructor
 	 */
-	~FCriticalSectionWindows();
+	FORCEINLINE ~FCriticalSection()
+	{
+		DeleteCriticalSection(&criticalSection);
+	}
 
 	/**
 	 * Lock section
 	 */
-	virtual void Lock() override;
+	FORCEINLINE void Lock()
+	{	
+		// Spin first before entering critical section, causing ring-0 transition and context switch.
+		if ( TryEnterCriticalSection( &criticalSection ) == 0 )
+		{
+			EnterCriticalSection( &criticalSection );
+		}
+	}
 
 	/**
 	 * Unlock section
 	 */
-	virtual void Unlock() override;
+	FORCEINLINE void Unlock()
+	{
+		LeaveCriticalSection( &criticalSection );
+	}
 
 private:
 	CRITICAL_SECTION			criticalSection;			/**< The windows specific critical section */

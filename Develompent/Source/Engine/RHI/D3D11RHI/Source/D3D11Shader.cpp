@@ -135,6 +135,7 @@ FD3D11BoundShaderStateRHI::FD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 	const std::vector< byte >&							vertexShaderBytecode = ( ( FD3D11VertexShaderRHI* )InVertexShader.GetPtr() )->GetCode();
 	
 	HRESULT			result = d3d11Device->CreateInputLayout( d3d11VertexElements.data(), ( uint32 )d3d11VertexElements.size(), vertexShaderBytecode.data(), vertexShaderBytecode.size(), &d3d11InputLayout );
+	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( InDebugName ) );
 
 #if !DO_CHECK
 	check( result == S_OK );

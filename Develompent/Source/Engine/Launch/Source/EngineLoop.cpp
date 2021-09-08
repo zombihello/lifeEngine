@@ -122,42 +122,51 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), width, height );
 
 	int32		result = appPlatformInit( InCmdLine );
+	GShaderManager->Init();
 	StartRenderingThread();
 
-	// -- Test section --
-	FVertexDeclarationElementList		vertexDeclElementList;
-	uint32								strideVertex = ( 3 * sizeof( float ) ) + ( 2 * sizeof( float ) );
-	vertexDeclElementList.push_back( FVertexElement( 0, strideVertex, 0, VET_Float3, VEU_Position, 0 ) );
-	vertexDeclElementList.push_back( FVertexElement( 0, strideVertex, 3 * sizeof(float), VET_Float2, VEU_TextureCoordinate, 0 ) );
-	FVertexDeclarationRHIRef			vertexDeclRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
-
-	GShaderManager->Init();
-	FShaderRef		testVertexShader = GShaderManager->FindInstance< FTestVertexShader >();
-	FShaderRef		testPixelShader = GShaderManager->FindInstance< FTestPixelShader >();
-	check( testVertexShader && testPixelShader );
-
-	vertexBuffer = GRHI->CreateVertexBuffer( TEXT( "TestVertexBuffer" ), strideVertex * 3, nullptr, RUF_Dynamic );
-	FLockedData				lockedData;
-	GRHI->LockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, strideVertex * 3, 0, lockedData );
-
-	float tempData[] =
+	struct FInitializeTriangleCommandHelper
 	{
-		-0.5f, -0.5f, 0.0f,				0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f,				1.0f, 0.0f,
-		 0.0f,  0.5f, 0.0f,				0.5f, 1.0f
+		static void Execute()
+		{
+			FVertexDeclarationElementList		vertexDeclElementList;
+			uint32								strideVertex = (3 * sizeof(float)) + (2 * sizeof(float));
+			vertexDeclElementList.push_back(FVertexElement(0, strideVertex, 0, VET_Float3, VEU_Position, 0));
+			vertexDeclElementList.push_back(FVertexElement(0, strideVertex, 3 * sizeof(float), VET_Float2, VEU_TextureCoordinate, 0));
+			FVertexDeclarationRHIRef			vertexDeclRHI = GRHI->CreateVertexDeclaration(vertexDeclElementList);
+			
+			FShaderRef		testVertexShader = GShaderManager->FindInstance< FTestVertexShader >();
+			FShaderRef		testPixelShader = GShaderManager->FindInstance< FTestPixelShader >();
+			check(testVertexShader && testPixelShader);
+			
+			vertexBuffer = GRHI->CreateVertexBuffer(TEXT("TestVertexBuffer"), strideVertex * 3, nullptr, RUF_Dynamic);
+			FLockedData				lockedData;
+			GRHI->LockVertexBuffer(GRHI->GetImmediateContext(), vertexBuffer, strideVertex * 3, 0, lockedData);
+			
+			float tempData[] =
+			{
+				-0.5f, -0.5f, 0.0f,				0.0f, 0.0f,
+				 0.5f, -0.5f, 0.0f,				1.0f, 0.0f,
+				 0.0f,  0.5f, 0.0f,				0.5f, 1.0f
+			};
+			memcpy(lockedData.data, &tempData, strideVertex * 3);
+			
+			GRHI->UnlockVertexBuffer(GRHI->GetImmediateContext(), vertexBuffer, lockedData);
+			
+			boundShaderState = GRHI->CreateBoundShaderState(TEXT("TestBoundShaderState"), vertexDeclRHI, testVertexShader->GetVertexShader(), testPixelShader->GetPixelShader());
+			
+			FRasterizerStateInitializerRHI		rasterizerStateInitializerRHI;
+			appMemzero(&rasterizerStateInitializerRHI, sizeof(FRasterizerStateInitializerRHI));
+			rasterizerStateInitializerRHI.cullMode = CM_CW;
+			rasterizerStateInitializerRHI.fillMode = FM_Solid;
+			rasterizerState = GRHI->CreateRasterizerState(rasterizerStateInitializerRHI);
+		}
 	};
-	memcpy( lockedData.data, &tempData, strideVertex * 3 );
 
-	GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
-
-	boundShaderState = GRHI->CreateBoundShaderState( TEXT( "TestBoundShaderState" ), vertexDeclRHI, testVertexShader->GetVertexShader(), testPixelShader->GetPixelShader() );
-
-	FRasterizerStateInitializerRHI		rasterizerStateInitializerRHI;
-	appMemzero( &rasterizerStateInitializerRHI, sizeof( FRasterizerStateInitializerRHI ) );
-
-	rasterizerStateInitializerRHI.cullMode = CM_CW;
-	rasterizerStateInitializerRHI.fillMode = FM_Solid;
-	rasterizerState = GRHI->CreateRasterizerState( rasterizerStateInitializerRHI );
+	UNIQUE_RENDER_COMMAND( FInitializeTriangleCommand, 
+		{
+			FInitializeTriangleCommandHelper::Execute();
+		} );
 
 #if WITH_EDITOR
 	GImGUIEngine->Init( GRHI->GetImmediateContext() );
@@ -189,23 +198,37 @@ void FEngineLoop::Tick()
 		}
 	}
 
-	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	GRHI->BeginDrawingViewport( immediateContext, GViewportRHI );
-	immediateContext->ClearSurface( GViewportRHI->GetSurface(), FColor::black );
+	UNIQUE_RENDER_COMMAND( FBeginRenderCommand,
+		{
+			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+			GRHI->BeginDrawingViewport( immediateContext, GViewportRHI );
+			immediateContext->ClearSurface( GViewportRHI->GetSurface(), FColor::black );
+		} );
 
-	GRHI->SetStreamSource(immediateContext, 0, vertexBuffer, (3 * sizeof(float)) + (2 * sizeof(float)), 0);
-	GRHI->SetBoundShaderState(immediateContext, boundShaderState);
-	GRHI->SetRasterizerState(immediateContext, rasterizerState);
-	GRHI->DrawPrimitive(immediateContext, PT_TriangleList, 0, 1);
+	UNIQUE_RENDER_COMMAND( FTriangleRenderCommand,
+		{
+			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+			GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, (3 * sizeof(float)) + (2 * sizeof(float)), 0 );
+			GRHI->SetBoundShaderState( immediateContext, boundShaderState );
+			GRHI->SetRasterizerState( immediateContext, rasterizerState );
+			GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
+		} );
 
 #if WITH_EDITOR
-	// This test drawing of ImGUI
-	GImGUIEngine->BeginDrawing( immediateContext );
-	ImGui::ShowDemoWindow();
-	GImGUIEngine->EndDrawing( immediateContext );
+	UNIQUE_RENDER_COMMAND( FImGUIRenderCommand,
+		{
+			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+			GImGUIEngine->BeginDrawing( immediateContext );
+			ImGui::ShowDemoWindow();
+			GImGUIEngine->EndDrawing( immediateContext );
+		} );
 #endif // WITH_EDITOR
 
-	GRHI->EndDrawingViewport( immediateContext, GViewportRHI, true, false );
+	UNIQUE_RENDER_COMMAND( FEndRenderCommand,
+		{
+			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+			GRHI->EndDrawingViewport( immediateContext, GViewportRHI, true, false );
+		} );
 }
 
 /**

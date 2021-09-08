@@ -227,31 +227,6 @@ void FThreadFactoryWindows::Destroy( FRunnableThread* InThread )
 	delete ( FRunnableThreadWindows* )InThread;
 }
 
-FCriticalSectionWindows::FCriticalSectionWindows( const tchar* InDebugName /*= nullptr*/, uint32 InSpinCount /*= DEFAULT_SPIN_COUNT*/ )
-{
-	InitializeCriticalSection( &criticalSection );
-	SetCriticalSectionSpinCount( &criticalSection, InSpinCount );
-}
-
-FCriticalSectionWindows::~FCriticalSectionWindows()
-{
-	DeleteCriticalSection( &criticalSection );
-}
-
-void FCriticalSectionWindows::Lock()
-{
-	// Spin first before entering critical section, causing ring-0 transition and context switch.
-	if ( TryEnterCriticalSection( &criticalSection ) == 0 )
-	{
-		EnterCriticalSection( &criticalSection );
-	}
-}
-
-void FCriticalSectionWindows::Unlock()
-{
-	LeaveCriticalSection( &criticalSection );
-}
-
 FEventWindows::FEventWindows() :
 	event( nullptr )
 {}
@@ -376,7 +351,7 @@ bool FSemaphoreWindows::WaitTimeoutMs( uint32 InMilliseconds )
 
 FCriticalSection* FSynchronizeFactoryWindows::CreateCriticalSection()
 {
-	return new FCriticalSectionWindows();
+	return new FCriticalSection();
 }
 
 FEvent* FSynchronizeFactoryWindows::CreateSynchEvent( bool InIsManualReset /*= false*/, const tchar* InName /*= nullptr*/ )
