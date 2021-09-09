@@ -20,3 +20,4 @@
 	- Implemented compiling shaders in bytecode and save to cache
 	- Implemented loading shaders
 	- Implemented rendering of triangle
+	- Implemented render thread

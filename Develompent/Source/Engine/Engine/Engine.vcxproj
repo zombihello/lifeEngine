@@ -11,6 +11,7 @@
     <ClInclude Include="Include\Render\BoundShaderStateCache.h" />
     <ClInclude Include="Include\Render\RenderingThread.h" />
     <ClInclude Include="Include\Render\RenderResource.h" />
+    <ClInclude Include="Include\Render\RenderUtils.h" />
     <ClInclude Include="Include\Render\Shaders\ShaderCache.h" />
     <ClInclude Include="Include\Render\Shaders\Shader.h" />
     <ClInclude Include="Include\Render\Shaders\ShaderCompiler.h" />
@@ -32,6 +33,7 @@
     <ClCompile Include="Source\Render\BoundShaderStateCache.cpp" />
     <ClCompile Include="Source\Render\RenderingThread.cpp" />
     <ClCompile Include="Source\Render\RenderResource.cpp" />
+    <ClCompile Include="Source\Render\RenderUtils.cpp" />
     <ClCompile Include="Source\Render\Shader\Shader.cpp" />
     <ClCompile Include="Source\Render\Shader\ShaderCache.cpp" />
     <ClCompile Include="Source\Render\Shader\ShaderCompiler.cpp" />

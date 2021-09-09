@@ -96,6 +96,9 @@
     <ClInclude Include="Include\Render\RenderingThread.h">
       <Filter>Include\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Render\RenderUtils.h">
+      <Filter>Include\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
@@ -132,6 +135,9 @@
       <Filter>Source\Render</Filter>
     </ClCompile>
     <ClCompile Include="Source\Render\RenderingThread.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\RenderUtils.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>

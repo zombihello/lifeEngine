@@ -45,4 +45,101 @@ private:
 	ID3D11RenderTargetView*				d3d11RenderTargetView;		/**< A view of the surface as a render target */
 };
 
+/**
+ * @ingroup D3D11RHI
+ * Class of base texture for DirectX 11
+ */
+class FD3D11TextureRHI : public FBaseTextureRHI
+{
+public:
+	/**
+	 * Constructor
+	 * 
+	 * @param[in] InSizeX Width of texture
+	 * @param[in] InSizeY Height of texture
+	 * @param[in] InNumMips Number of mip-maps in texture
+	 * @param[in] InFormat Pixel format in texture
+	 * @param[in] InFlags Texture create flags (use ETextureCreateFlags)
+	 */
+	FD3D11TextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags );
+
+	/**
+	 * Destructor
+	 */
+	virtual ~FD3D11TextureRHI();
+
+	/**
+	 * Get shader resource view
+	 * @return Return pointer to shader resource view
+	 */
+	FORCEINLINE const ID3D11ShaderResourceView* GetShaderResourceView() const
+	{
+		return d3d11ShaderResourceView;
+	}
+
+protected:
+	ID3D11ShaderResourceView*				d3d11ShaderResourceView;		/**< The view that is used to access the texture from a shader */
+};
+
+/**
+ * @ingroup D3D11RHI
+ * Class for work with texture 2D in DirectX 11
+ */
+class FD3D11Texture2DRHI : public FD3D11TextureRHI
+{
+public:
+	/**
+	 * Constructor
+	 * 
+	 * @param[in] InDebugName Debug name of texture
+	 * @param[in] InSizeX Width of texture
+	 * @param[in] InSizeY Height of texture
+	 * @param[in] InNumMips Number of mip-maps in texture
+	 * @param[in] InFormat Pixel format in texture
+	 * @param[in] InFlags Texture create flags (use ETextureCreateFlags)
+	 * @param[in] InData Pointer to data texture
+	 */
+	FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags, void* InData = nullptr );
+
+	/**
+	 * Destructor
+	 */
+	~FD3D11Texture2DRHI();
+
+	/**
+	 * Lock texture for read/write
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InMipIndex Mip index
+	 * @param[in] InArrayIndex Index in array texture
+	 * @param[in] InIsDataWrite Is begin written to texture
+	 * @param[in] InIsUseCPUShadow Is use CPU shadow
+	 * @param[out] OutLockedData Locked data in texture
+	 */
+	void Lock( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, uint32 InArrayIndex, bool InIsDataWrite, bool InIsUseCPUShadow, struct FLockedData& OutLockedData );
+
+	/**
+	 * Unlock texture for apply changes to texture
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InMipIndex Mip index
+	 * @param[in] InArrayIndex Index in array texture
+	 * @param[in] InLockedData Locked data
+	 * @param[in] InDiscardUpdate Disczrd update
+	 */
+	void Unlock( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, uint32 InArrayIndex, struct FLockedData& InLockedData, bool InDiscardUpdate = false );
+
+	/**
+	 * Get DirectX resource
+	 * @return Return pointer to DirectX texture 2D
+	 */
+	FORCEINLINE ID3D11Texture2D* GetResource()
+	{
+		return d3d11Texture2D;
+	}
+
+private:
+	ID3D11Texture2D*			d3d11Texture2D;			/**< Pointer to DirectX texture 2D */
+};
+
 #endif // D3D11SURFACE_H

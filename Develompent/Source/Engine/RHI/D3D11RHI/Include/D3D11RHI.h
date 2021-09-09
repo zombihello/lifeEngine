@@ -200,6 +200,19 @@ public:
 	virtual FRasterizerStateRHIRef					CreateRasterizerState( const FRasterizerStateInitializerRHI& InInitializer ) override;
 
 	/**
+	 * @brief Create texture 2D
+	 *
+	 * @param[in] InDebugName Debug name
+	 * @param[in] InSizeX Width
+	 * @param[in] InSizeY Height
+	 * @param[in] InFormat Pixel format
+	 * @param[in] InNumMips Count mips
+	 * @param[in] InFlags Texture create flags (use ETextureCreateFlags)
+	 * @param[in] InData Pointer to data texture
+	 */
+	virtual FTexture2DRHIRef						CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData = nullptr ) override;
+
+	/**
 	 * @brief Begin drawing viewport
 	 *
 	 * @param[in] InDeviceContext Device context
@@ -332,6 +345,28 @@ public:
 	 * @param[in] InLockedData Locked data in buffer
 	 */
 	virtual void									UnlockIndexBuffer( class FBaseDeviceContextRHI* InDeviceContext, const FIndexBufferRHIRef InIndexBuffer, FLockedData& InLockedData ) override;
+
+	/**
+	 * @brief Lock texture 2D
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InTexture Pointer to texture 2D
+	 * @param[in] InMipIndex Mip index
+	 * @param[in] InIsDataWrite Is begin written to texture
+	 * @param[out] OutLockedData Locked data in texture
+	 * @param[in] InIsUseCPUShadow Is use CPU shadow
+	 */
+	virtual void									LockTexture2D( class FBaseDeviceContextRHI* InDeviceContext, FTexture2DRHIParamRef InTexture, uint32 InMipIndex, bool InIsDataWrite, FLockedData& OutLockedData, bool InIsUseCPUShadow = false ) override;
+
+	/**
+	 * @brief Unlock texture 2D
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InTexture Pointer to texture 2D
+	 * @param[in] InMipIndex Mip index
+	 * @param[in] InLockedData Locked data in texture
+	 */
+	virtual void									UnlockTexture2D( class FBaseDeviceContextRHI* InDeviceContext, FTexture2DRHIParamRef InTexture, uint32 InMipIndex, FLockedData& InLockedData ) override;
 
 	/**
 	 * @brief Draw primitive

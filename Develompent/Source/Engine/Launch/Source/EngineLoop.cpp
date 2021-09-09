@@ -217,7 +217,52 @@ void FEngineLoop::Tick()
 
 #if WITH_EDITOR
 	GImGUIEngine->BeginDraw();
-	ImGui::ShowDemoWindow();
+
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Exit"))
+			{
+				GIsRequestingExit = true;
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
+	ImGui::Begin( "Debug window" );
+	if (ImGui::Button("Start render thread"))
+	{
+		StartRenderingThread();
+	}
+	if (ImGui::Button("Stop render thread"))
+	{
+		StopRenderingThread();
+	}
+	static bool			GIsTextureTested = false;
+	if ( ImGui::Button( "Create and fill texture" ) )
+	{
+		if ( !GIsTextureTested )
+		{
+			UNIQUE_RENDER_COMMAND(FTextureTestCommand,
+				{
+					FBaseDeviceContextRHI*	immediateContext = GRHI->GetImmediateContext();
+					FTexture2DRHIRef		texture2D = GRHI->CreateTexture2D( TEXT( "TestTexture" ), 256, 256, PF_A8R8G8B8, 1, TCF_None );
+			
+					FLockedData				lockedData;
+					GRHI->LockTexture2D( immediateContext, texture2D, 0, true, lockedData );
+					//memset( lockedData.data, 255, lockedData.size );
+					GRHI->UnlockTexture2D( immediateContext, texture2D, 0, lockedData );
+				} );
+
+			GIsTextureTested = true;
+		}		
+	}
+	ImGui::Spacing();
+	ImGui::Text("Render thread: %s", GIsThreadedRendering ? "worked" : "disabled");
+	ImGui::End();
+	//ImGui::ShowDemoWindow();
 	GImGUIEngine->EndDraw();
 #endif // WITH_EDITOR
 

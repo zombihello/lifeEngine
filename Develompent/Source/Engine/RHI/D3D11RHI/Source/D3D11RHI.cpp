@@ -1,12 +1,12 @@
 #include "Core.h"
 #include "Logger/LoggerMacros.h"
+#include "Render/RenderUtils.h"
 #include "D3D11RHI.h"
 #include "D3D11Viewport.h"
 #include "D3D11DeviceContext.h"
 #include "D3D11Surface.h"
 #include "D3D11Shader.h"
 #include "D3D11Buffer.h"
-
 #include "D3D11ImGUI.h"
 
 /**
@@ -176,6 +176,10 @@ void FD3D11RHI::Init( bool InIsEditor )
 			adapterDesc.DedicatedSystemMemory / ( 1024 * 1024 ),
 			adapterDesc.SharedSystemMemory / ( 1024 * 1024 ) );
 
+	// Initialize the platform pixel format map
+	GPixelFormats[ PF_Unknown ].platformFormat		= DXGI_FORMAT_UNKNOWN;
+	GPixelFormats[ PF_A8R8G8B8 ].platformFormat		= DXGI_FORMAT_R8G8B8A8_UNORM;
+
 	isInitialize = true;
 }
 
@@ -315,6 +319,11 @@ FRasterizerStateRHIRef FD3D11RHI::CreateRasterizerState( const FRasterizerStateI
 	return rasterizerState;
 }
 
+FTexture2DRHIRef FD3D11RHI::CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData /*= nullptr*/ )
+{
+	return new FD3D11Texture2DRHI( InDebugName, InSizeX, InSizeY, InNumMips, InFormat, InFlags, InData );
+}
+
 /**
  * Get device context
  */
@@ -428,6 +437,16 @@ void FD3D11RHI::UnlockIndexBuffer( class FBaseDeviceContextRHI* InDeviceContext,
 
 	static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->Unmap( static_cast< FD3D11IndexBufferRHI* >( InIndexBuffer.GetPtr() )->GetD3D11Buffer(), 0 );
 	InLockedData.data = nullptr;
+}
+
+void FD3D11RHI::LockTexture2D( class FBaseDeviceContextRHI* InDeviceContext, FTexture2DRHIParamRef InTexture, uint32 InMipIndex, bool InIsDataWrite, FLockedData& OutLockedData, bool InIsUseCPUShadow /*= false*/ )
+{
+	( ( FD3D11Texture2DRHI* )InTexture )->Lock( InDeviceContext, InMipIndex, 0, InIsDataWrite, InIsUseCPUShadow, OutLockedData );
+}
+
+void FD3D11RHI::UnlockTexture2D( class FBaseDeviceContextRHI* InDeviceContext, FTexture2DRHIParamRef InTexture, uint32 InMipIndex, FLockedData& InLockedData )
+{
+	( ( FD3D11Texture2DRHI* )InTexture )->Unlock( InDeviceContext, InMipIndex, 0, InLockedData );
 }
 
 /**
