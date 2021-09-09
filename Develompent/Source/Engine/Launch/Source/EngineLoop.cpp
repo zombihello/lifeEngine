@@ -123,7 +123,7 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 
 	int32		result = appPlatformInit( InCmdLine );
 	GShaderManager->Init();
-	StartRenderingThread();
+	
 
 	struct FInitializeTriangleCommandHelper
 	{
@@ -169,9 +169,10 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 		} );
 
 #if WITH_EDITOR
-	GImGUIEngine->Init( GRHI->GetImmediateContext() );
+	GImGUIEngine->Init();
 #endif // WITH_EDITOR
 
+	StartRenderingThread();
 	GWindow->Show();
 	return result;
 }
@@ -215,13 +216,9 @@ void FEngineLoop::Tick()
 		} );
 
 #if WITH_EDITOR
-	UNIQUE_RENDER_COMMAND( FImGUIRenderCommand,
-		{
-			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-			GImGUIEngine->BeginDrawing( immediateContext );
-			ImGui::ShowDemoWindow();
-			GImGUIEngine->EndDrawing( immediateContext );
-		} );
+	GImGUIEngine->BeginDraw();
+	ImGui::ShowDemoWindow();
+	GImGUIEngine->EndDraw();
 #endif // WITH_EDITOR
 
 	UNIQUE_RENDER_COMMAND( FEndRenderCommand,
@@ -236,11 +233,11 @@ void FEngineLoop::Tick()
  */
 void FEngineLoop::Exit()
 {
-#if WITH_EDITOR
-	GImGUIEngine->Shutdown( GRHI->GetImmediateContext() );
-#endif // WITH_EDITOR
-
 	StopRenderingThread();
+
+#if WITH_EDITOR
+	GImGUIEngine->Shutdown();
+#endif // WITH_EDITOR
 
 	delete GViewportRHI;
 	GRHI->Destroy();

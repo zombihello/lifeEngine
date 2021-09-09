@@ -235,7 +235,7 @@ public:
 	/**
 	 * @brief Initialize ImGUI
 	 */
-	virtual bool									InitImGUI( class FBaseDeviceContextRHI* InDeviceContext ) override;
+	virtual void									InitImGUI( class FBaseDeviceContextRHI* InDeviceContext ) override;
 
 	/**
 	 * @brief Shutdown render of ImGUI
@@ -245,18 +245,12 @@ public:
 	virtual void									ShutdownImGUI( class FBaseDeviceContextRHI* InDeviceContext ) override;
 
 	/**
-	 * @brief Begin drawing ImGUI
+	 * @brief Draw ImGUI
 	 *
 	 * @param[in] InDeviceContext Device context
+	 * @param[in] InImGUIDrawData Pointer to draw data of ImGUI
 	 */
-	virtual void									BeginDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext ) override;
-
-	/**
-	 * @brief End drawing ImGUI
-	 *
-	 * @param[in] InDeviceContext Device context
-	 */
-	virtual void									EndDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext ) override;
+	virtual void									DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, struct ImDrawData* InImGUIDrawData ) override;
 #endif // WITH_EDITOR
 
 	/**

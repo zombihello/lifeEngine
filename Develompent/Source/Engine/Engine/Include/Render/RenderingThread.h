@@ -150,8 +150,9 @@ private:
  * Send render command to render thread
  * 
  * @param[in] InTypeName Type name of render command
+ * @param[in] InParam Parameters of render command
  */
-#define SEND_RENDER_COMMAND( InTypeName ) \
+#define SEND_RENDER_COMMAND( InTypeName, InParam ) \
 	{ \
 		check( IsInGameThread() ); \
 		if ( GIsThreadedRendering ) \
@@ -162,16 +163,16 @@ private:
 				check( allocationContext.GetAllocatedSize() >= sizeof( FSkipRenderCommand ) ); \
 				new( allocationContext ) FSkipRenderCommand( allocationContext.GetAllocatedSize() ); \
 				allocationContext.Commit(); \
-				new( FRingBuffer::AllocationContext( GRenderCommandBuffer, sizeof(InTypeName) ) ) InTypeName; \
+				new( FRingBuffer::AllocationContext( GRenderCommandBuffer, sizeof(InTypeName) ) ) InTypeName InParam; \
 			} \
 			else \
 			{ \
-				new( allocationContext ) InTypeName; \
+				new( allocationContext ) InTypeName InParam; \
 			} \
 		} \
 		else \
 		{ \
-			InTypeName		InTypeName##Command; \
+			InTypeName		InTypeName##Command InParam; \
 			InTypeName##Command.Execute(); \
 		} \
 	}
@@ -205,7 +206,46 @@ private:
 			return #InTypeName ; \
 		} \
 	}; \
-	SEND_RENDER_COMMAND( InTypeName );
+	SEND_RENDER_COMMAND( InTypeName, );
+
+/**
+ * @ingroup Engine
+ * Declares a rendering command type with 1 parameters
+ * 
+ * @param[in] InTypeName Type name of render command
+ * @param[in] InParamType1 Type of param 1
+ * @param[in] InParamName1 Name of param 1
+ * @param[in] InParamValue1 Value of param 1
+ * @param[in] InCode Executable code in render thread
+ */
+#define UNIQUE_RENDER_COMMAND_ONEPARAMETER( InTypeName, InParamType1, InParamName1, InParamValue1, InCode ) \
+	class InTypeName : public FRenderCommand \
+	{ \
+	public: \
+		InTypeName( InParamType1 In##InParamName1 ) : \
+			InParamName1( In##InParamName1 ) \
+		{} \
+		virtual uint32 Execute() override \
+		{ \
+			InCode; \
+			return sizeof( *this ); \
+		} \
+		virtual uint32 GetSize() const override \
+		{ \
+			return sizeof( *this ); \
+		} \
+		virtual const tchar* DescribeCommand() const override \
+		{ \
+			return TEXT( #InTypeName ); \
+		} \
+		virtual const char* DescribeCommandChar() const override \
+		{ \
+			return #InTypeName ; \
+		} \
+	private: \
+		InParamType1			InParamName1; \
+	}; \
+	SEND_RENDER_COMMAND( InTypeName, ( InParamValue1 ) );
 
 /**
  * @ingroup Engine

@@ -9,6 +9,16 @@
 #ifndef IMGUIENGINE_H
 #define IMGUIENGINE_H
 
+#include "Core.h"
+#include "System/ThreadingBase.h"
+#include "ImGUI/imgui.h"
+
+/**
+ * @ingroup WorldEd
+ * Count draw data buffers for render ImGUI
+ */
+#define IMGUI_DRAWBUFFERS_COUNT		3
+
 /**
  * @ingroup WorldEd
  * @brief Initialize ImGUI on platform
@@ -43,6 +53,76 @@ extern void				appImGUIProcessEvent( struct SWindowEvent& InWindowEvent );
 
 /**
  * @ingroup WorldEd
+ * @brief Class for draw data of ImGUI
+ */
+class FImGUIDrawData
+{
+public:
+	/**
+	 * Constructor
+	 */
+	FImGUIDrawData();
+
+	/**
+	 * Destructor
+	 */
+	~FImGUIDrawData();
+
+	/**
+	 * Mark buffer is free
+	 */
+	FORCEINLINE void MarkFree()
+	{
+		isFree = true;
+	}
+
+	/**
+	 * Clear buffer
+	 */
+	void Clear();
+
+	/**
+	 * Set draw data
+	 * @param[in] InDrawData Pointer to draw data of ImGUI
+	 */
+	void SetDrawData( ImDrawData* InDrawData );
+
+	 /**
+	  * Get ImGUI draw data. Const version
+	  *
+	  * @return Return pointer to ImGUI draw data
+	  */
+	FORCEINLINE const ImDrawData* GetDrawData() const
+	{
+		return &drawData;
+	}
+
+	/**
+	 * Get ImGUI draw data
+	 *
+	 * @return Return pointer to ImGUI draw data
+	 */
+	FORCEINLINE ImDrawData* GetDrawData()
+	{
+		return &drawData;
+	}
+
+	/**
+	 * Is free buffer
+	 * @return Return true if buffer is free, else return false
+	 */
+	FORCEINLINE bool IsFree() const
+	{
+		return isFree;
+	}
+
+private:
+	bool					isFree;				/**< Is free buffer */
+	ImDrawData				drawData;			/**< ImGUI draw data */
+};
+
+/**
+ * @ingroup WorldEd
  * @brief Class for work with ImGUI and initialize her on platforms
  */
 class FImGUIEngine
@@ -60,18 +140,13 @@ public:
 
 	/**
 	 * @brief Initialize ImGUI
-	 * 
-	 * @param[in] InDeviceContext Device context
-	 * @return Return true if initialization was successful, else returning false
 	 */
-	bool					Init( class FBaseDeviceContextRHI* InDeviceContext );
+	void					Init();
 
 	/**
 	 * @brief Shutdown ImGUI on platform
-	 * 
-	 * @param[in] InDeviceContext Device context
 	 */
-	void					Shutdown( class FBaseDeviceContextRHI* InDeviceContext );
+	void					Shutdown();
 
 	/**
 	 * @brief Process event for ImGUI
@@ -81,21 +156,20 @@ public:
 	void					ProcessEvent( struct SWindowEvent& InWindowEvent );
 
 	/**
-	 * @brief Begin drawing ImGUI
-	 * 
-	 * @param[in] InDeviceContext Device context
+	 * @brief Begin draw commands for render ImGUI
 	 */
-	void					BeginDrawing( class FBaseDeviceContextRHI* InDeviceContext );
+	void					BeginDraw();
 
 	/**
-	 * @brief End drawing ImGUI
-	 * 
-	 * @param[in] InDeviceContext Device context
+	 * @brief End draw commands for render ImGUI
 	 */
-	void					EndDrawing( class FBaseDeviceContextRHI* InDeviceContext );
+	void					EndDraw();
 
 private:
-	struct ImGuiContext*		imguiContext;		/**< Pointer to ImGUI context */
+	struct ImGuiContext*		imguiContext;									/**< Pointer to ImGUI context */
+	FCriticalSection			criticalSection;								/**< Critical section */
+	FImGUIDrawData				drawDataBuffers[ IMGUI_DRAWBUFFERS_COUNT ];		/**< Buffers of ImDrawData for draw. In one buffer write, from one read */
+	uint32						indexCurrentBuffer;								/**< Index of current buffer */
 };
 
 #endif // !IMGUIENGINE_H

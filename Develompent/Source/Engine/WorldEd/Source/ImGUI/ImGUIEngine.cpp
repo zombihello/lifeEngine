@@ -4,13 +4,59 @@
 #include "Misc/EngineGlobals.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
+#include "Render/RenderingThread.h"
 #include "ImGUI/ImGUIEngine.h"
+#include "Misc/WorldEdGlobals.h"
+
+FImGUIDrawData::FImGUIDrawData() :
+	isFree( true )
+{
+	appMemzero( &drawData, sizeof( sizeof( ImDrawData ) ) );
+}
+
+FImGUIDrawData::~FImGUIDrawData()
+{
+	Clear();
+}
+
+void FImGUIDrawData::Clear()
+{
+	check( isFree );
+	if ( drawData.CmdLists )
+	{
+		for ( uint32 index = 0; index < ( uint32 )drawData.CmdListsCount; index++ )
+		{
+			delete drawData.CmdLists[ index ];
+		}
+
+		delete drawData.CmdLists;
+		drawData.CmdLists = nullptr;
+	}
+
+	drawData.Clear();
+}
+
+void FImGUIDrawData::SetDrawData( ImDrawData* InDrawData )
+{
+	check( isFree && InDrawData && InDrawData->Valid );
+	Clear();
+
+	isFree = false;
+	drawData = *InDrawData;
+
+	drawData.CmdLists = new ImDrawList*[ InDrawData->CmdListsCount ];
+	for ( uint32 index = 0; index < ( uint32 )InDrawData->CmdListsCount; index++ )
+	{
+		drawData.CmdLists[ index ] = InDrawData->CmdLists[ index ]->CloneOutput();
+	}
+}
 
 /**
  * Constructor
  */
 FImGUIEngine::FImGUIEngine() :
-	imguiContext( nullptr )
+	imguiContext( nullptr ),
+	indexCurrentBuffer( 0 )
 {}
 
 /**
@@ -22,40 +68,34 @@ FImGUIEngine::~FImGUIEngine()
 /**
  * Initialize ImGUI
  */
-bool FImGUIEngine::Init( class FBaseDeviceContextRHI* InDeviceContext )
+void FImGUIEngine::Init()
 {
 	// Create ImGUI context
 	imguiContext = ImGui::CreateContext();
-	if ( !imguiContext )
-	{
-		return false;
-	}
+	check( imguiContext );
 
 	// Initialize platform for ImGUI
-	bool		result = appImGUIInit();
-	if ( !result )
-	{
-		return false;
-	}
+	check( appImGUIInit() );
 
 	// Initialize RHI for ImGUI
-	result = GRHI->InitImGUI( InDeviceContext );
-	if ( !result )
-	{
-		return false;
-	}
-
-	return true;
+	UNIQUE_RENDER_COMMAND( FInitImGUICommand,
+		{
+			GRHI->InitImGUI( GRHI->GetImmediateContext() );
+		} );
 }
 
 /**
  * Shutdown ImGUI on platform
  */
-void FImGUIEngine::Shutdown( class FBaseDeviceContextRHI* InDeviceContext )
+void FImGUIEngine::Shutdown()
 {
 	check( imguiContext );
 
-	GRHI->ShutdownImGUI( InDeviceContext );
+	UNIQUE_RENDER_COMMAND( FShutdownImGUICommand,
+		{
+			GRHI->ShutdownImGUI( GRHI->GetImmediateContext() );
+		} );
+
 	appImGUIShutdown();
 	ImGui::DestroyContext( imguiContext );
 
@@ -71,21 +111,41 @@ void FImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 }
 
 /**
- * Begin drawing ImGUI
+ * Begin draw commands for render ImGUI
  */
-void FImGUIEngine::BeginDrawing( class FBaseDeviceContextRHI* InDeviceContext )
+void FImGUIEngine::BeginDraw()
 {
-	GRHI->BeginDrawingImGUI( InDeviceContext );
 	appImGUIBeginDrawing();
 	ImGui::NewFrame();
 }
 
 /**
- * End drawing ImGUI
+ * End draw commands for render ImGUI
  */
-void FImGUIEngine::EndDrawing( class FBaseDeviceContextRHI* InDeviceContext )
+void FImGUIEngine::EndDraw()
 {
 	ImGui::Render();
 	appImGUIEndDrawing();
-	GRHI->EndDrawingImGUI( InDeviceContext );
+	
+	FImGUIDrawData*			currentBuffer = &drawDataBuffers[ indexCurrentBuffer ];
+	while ( !currentBuffer->IsFree() )
+	{
+		for ( uint32 index = 0; index < IMGUI_DRAWBUFFERS_COUNT; ++index, indexCurrentBuffer = ++indexCurrentBuffer % IMGUI_DRAWBUFFERS_COUNT )
+		{
+			currentBuffer = &drawDataBuffers[indexCurrentBuffer];
+			if ( currentBuffer->IsFree() )
+			{
+				break;
+			}
+		}
+	}
+
+	currentBuffer->SetDrawData( ImGui::GetDrawData() );
+	indexCurrentBuffer = ++indexCurrentBuffer % IMGUI_DRAWBUFFERS_COUNT;
+
+	UNIQUE_RENDER_COMMAND_ONEPARAMETER( FDrawImGUICommand, FImGUIDrawData*, imGuiDrawData, currentBuffer,
+		{
+			GRHI->DrawImGUI( GRHI->GetImmediateContext(), ( ImDrawData* )imGuiDrawData->GetDrawData() );
+			imGuiDrawData->MarkFree();
+		} );
 }

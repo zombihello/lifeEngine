@@ -633,11 +633,13 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 /**
  * Initialize ImGUI
  */
-bool FD3D11RHI::InitImGUI( class FBaseDeviceContextRHI* InDeviceContext )
+void FD3D11RHI::InitImGUI( class FBaseDeviceContextRHI* InDeviceContext )
 {
 	check( d3d11Device && InDeviceContext );
 	FD3D11DeviceContext*		deviceContext = ( FD3D11DeviceContext* )InDeviceContext;
-	return ImGui_ImplDX11_Init( d3d11Device, deviceContext->GetD3D11DeviceContext() );
+
+	check( ImGui_ImplDX11_Init( d3d11Device, deviceContext->GetD3D11DeviceContext() ) );
+	ImGui_ImplDX11_NewFrame();
 }
 
 /**
@@ -649,19 +651,11 @@ void FD3D11RHI::ShutdownImGUI( class FBaseDeviceContextRHI* InDeviceContext )
 }
 
 /**
- * Begin drawing ImGUI
+ * Draw ImGUI
  */
-void FD3D11RHI::BeginDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext )
+void FD3D11RHI::DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, ImDrawData* InImGUIDrawData )
 {
-	ImGui_ImplDX11_NewFrame();
-}
-
-/**
- * End drawing ImGUI
- */
-void FD3D11RHI::EndDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext )
-{
-	ImGui_ImplDX11_RenderDrawData( ImGui::GetDrawData() );
+	ImGui_ImplDX11_RenderDrawData( InImGUIDrawData );
 }
 #endif // WITH_EDITOR
 

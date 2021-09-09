@@ -261,28 +261,22 @@ public:
 	 * 
 	 * @param[in] InDeviceContext Device context
 	 */
-	virtual bool								InitImGUI( class FBaseDeviceContextRHI* InDeviceContext )				{ return false; }
+	virtual void								InitImGUI( class FBaseDeviceContextRHI* InDeviceContext ){}
 
 	/**
 	 * @brief Shutdown render of ImGUI
 	 * 
 	 * @param[in] InDeviceContext Device context
 	 */
-	virtual void								ShutdownImGUI( class FBaseDeviceContextRHI* InDeviceContext )			{}
+	virtual void								ShutdownImGUI( class FBaseDeviceContextRHI* InDeviceContext ){}
 
 	/**
-	 * @brief Begin drawing ImGUI
+	 * @brief Draw ImGUI
 	 * 
 	 * @param[in] InDeviceContext Device context
+	 * @param[in] InImGUIDrawData Pointer to draw data of ImGUI
 	 */
-	virtual void								BeginDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext )		{}
-
-	/**
-	 * @brief End drawing ImGUI
-	 * 
-	 * @param[in] InDeviceContext Device context
-	 */
-	virtual void								EndDrawingImGUI( class FBaseDeviceContextRHI* InDeviceContext )			{}
+	virtual void								DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, struct ImDrawData* InImGUIDrawData ){}
 #endif // WITH_EDITOR
 
 	/**
