@@ -99,6 +99,12 @@
     <ClInclude Include="Include\Render\RenderUtils.h">
       <Filter>Include\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Include\RHI\BaseResourceRHI.h">
+      <Filter>Include\RHI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\RHI\BaseStateRHI.h">
+      <Filter>Include\RHI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">

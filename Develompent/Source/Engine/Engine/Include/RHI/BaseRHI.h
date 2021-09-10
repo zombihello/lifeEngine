@@ -11,7 +11,10 @@
 
 #include "Misc/Types.h"
 #include "Render/Shaders/ShaderCompiler.h"
-#include "TypesRHI.h"
+#include "RHI/TypesRHI.h"
+#include "RHI/BaseSurfaceRHI.h"
+#include "RHI/BaseBufferRHI.h"
+#include "RHI/BaseStateRHI.h"
 
 /**
  * @ingroup Engine
@@ -24,56 +27,6 @@ enum EPrimitiveType
 	PT_TriangleStrip,		/**< Triangles strip */
 	PT_LineList,			/**< Lines */
 	PT_Num					/**< Count primitives */
-};
-
-/**
- * @ingroup Engine
- * @brief Enumeration of types fill mode
- */
-enum ERasterizerFillMode
-{
-	FM_Point,			/**< Point */
-	FM_Wireframe,		/**< Wireframe */
-	FM_Solid			/**< Solid */
-};
-
-/**
- * @ingroup Engine
- * @brief Enumeration of types cull mode
- */
-enum ERasterizerCullMode
-{
-	CM_None,				/**< Cull mode is disabled */
-	CM_NoneReversed,		/**< In this mode enabled front counter clockwise */
-	CM_CW,					/**< Cull back */
-	CM_CCW					/**< Cull front */
-};
-
-/**
- * @ingroup Engine
- * @brief Structc for create resterize state in RHI
- */
-struct FRasterizerStateInitializerRHI
-{
-	ERasterizerFillMode			fillMode;				/**< Fill mode */
-	ERasterizerCullMode			cullMode;				/**< Cull mode */
-	float						depthBias;				/**< Depth bias */
-	float						slopeScaleDepthBias;	/**< Slope scale depth bias */
-	bool						isAllowMSAA;			/**< Is allow MSAA */
-};
-
-/**
- * @ingroup Engine
- * @brief Base class of resterize state
- */
-class FBaseRasterizerStateRHI : public FRefCounted
-{
-public:
-	/**
-	 * @brief Destructor
-	 */
-	virtual ~FBaseRasterizerStateRHI()
-	{}
 };
 
 /**
@@ -224,6 +177,14 @@ public:
 	virtual FRasterizerStateRHIRef				CreateRasterizerState( const FRasterizerStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
+	 * @brief Create sampler state
+	 * 
+	 * @param[in] InInitializer Initializer of sampler state
+	 * @return Pointer to sampler state
+	 */
+	virtual FSamplerStateRHIRef					CreateSamplerState( const FSamplerStateInitializerRHI& InInitializer ) { return nullptr; }
+
+	/**
 	 * @brief Create texture 2D
 	 * 
 	 * @param[in] InDebugName Debug name
@@ -331,6 +292,26 @@ public:
 	 * @param[in] InNewState New rasterizer state
 	 */
 	virtual void								SetRasterizerState( class FBaseDeviceContextRHI* InDeviceContext, FRasterizerStateRHIParamRef InNewState ) {}
+
+	/**
+	 * @brief Set sampler state
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InPixelShader Pointer to pixel shader
+	 * @param[in] InNewState New sampler state
+	 * @param[in] InStateIndex Slot for bind sampler
+	 */
+	virtual void								SetSamplerState( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FSamplerStateRHIParamRef InNewState, uint32 InStateIndex ) {}
+
+	/**
+	 * Set texture parameter in pixel shader
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InPixelShader Pointer to pixel shader
+	 * @param[in] InTexture Pointer to texture
+	 * @param[in] InTextureIndex Slot for bind texture
+	 */
+	virtual void								SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FTextureRHIParamRef InTexture, uint32 InTextureIndex ) {}
 
 	/**
 	 * @brief Lock vertex buffer

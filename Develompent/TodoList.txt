@@ -2,6 +2,5 @@
  Version 20210521
 ----------------------------------------------------------------
 	- Implement loading textures
-	- Implement rendering of triangle with texture
 	- Implement camera and the ability to fly around the stage
 	- Implement caching render states

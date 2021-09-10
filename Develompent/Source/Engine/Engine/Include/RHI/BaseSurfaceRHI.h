@@ -10,6 +10,7 @@
 #define BASESURFACERHI_H
 
 #include "Misc/RefCounted.h"
+#include "RHI/BaseResourceRHI.h"
 
 /**
  * @ingroup Engine
@@ -29,14 +30,15 @@ enum EPixelFormat
 enum ETextureCreateFlags
 {
 	TCF_None			= 0,		/**< Null flag */
-	TCF_sRGB			= 1 << 0	/**< Texture is encoded in sRGB gamma space */
+	TCF_sRGB			= 1 << 0,	/**< Texture is encoded in sRGB gamma space */
+	TCF_Dynamic			= 1 << 1	/**< Texture that may be updated every frame */
 };
 
 /**
  * @ingroup Engine
  * @brief Base class of surface for RHI
  */
-class FBaseSurfaceRHI : public FRefCounted
+class FBaseSurfaceRHI : public FBaseResourceRHI
 {
 public:
 	/**
@@ -49,7 +51,7 @@ public:
  * @ingroup Engine
  * Base class of texture for RHI
  */
-class FBaseTextureRHI : public FRefCounted
+class FBaseTextureRHI : public FBaseResourceRHI
 {
 public:
 	/**

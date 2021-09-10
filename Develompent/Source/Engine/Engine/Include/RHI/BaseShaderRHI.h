@@ -13,6 +13,9 @@
 
 #include "Core.h"
 #include "Misc/RefCounted.h"
+#include "Render/BoundShaderStateCache.h"
+#include "RHI/TypesRHI.h"
+#include "RHI/BaseResourceRHI.h"
 
 /**
  * @ingroup Engine
@@ -120,7 +123,7 @@ struct FVertexElement
  * @ingroup Engine
  * @brief Base class for work with shader
  */
-class FBaseShaderRHI : public FRefCounted
+class FBaseShaderRHI : public FBaseResourceRHI
 {
 public:
 	/**
@@ -175,7 +178,7 @@ typedef std::vector< FVertexElement >		FVertexDeclarationElementList;
  * @ingroup Engine
  * @breif Base class of vertex declaration
  */
-class FBaseVertexDeclarationRHI : public FRefCounted
+class FBaseVertexDeclarationRHI : public FBaseResourceRHI
 {
 public:
 	/**
@@ -203,14 +206,98 @@ public:
  * @ingroup Engine
  * @brief Base class of bound shader state
  */
-class FBaseBoundShaderStateRHI : public FRefCounted
+class FBaseBoundShaderStateRHI : public FBaseResourceRHI
 {
 public:
+	/**
+	 * Constructor
+	 * 
+	 * @param[in] InKey Key of bound shader state
+	 * @param[in] InVertexDeclaration Vertex declaration
+	 * @param[in] InVertexShader Vertex shader
+	 * @param[in] InPixelShader Pixel shader
+	 * @param[in] InHullShader Hull shader
+	 * @param[in] InDomainShader Domain shader
+	 * @param[in] InGeometryShader Geometry shader
+	 */
+	FBaseBoundShaderStateRHI( const FBoundShaderStateKey& InKey, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader = nullptr, FDomainShaderRHIRef InDomainShader = nullptr, FGeometryShaderRHIRef InGeometryShader = nullptr ) :
+		key( InKey ),
+		vertexDeclaration( InVertexDeclaration ),
+		vertexShader( InVertexShader ),
+		pixelShader( InPixelShader ),
+		hullShader( InHullShader ),
+		domainShader( InDomainShader ),
+		geometryShader( InGeometryShader )
+	{}
+
 	/**
 	 * @brief Destructor
 	 */
 	virtual ~FBaseBoundShaderStateRHI()
 	{}
+
+	/**
+	 * @brief Get vertex declaration
+	 * @return Pointer to vertex declaration
+	 */
+	FORCEINLINE FVertexDeclarationRHIRef GetVertexDeclaration() const
+	{
+		return vertexDeclaration;
+	}
+
+	/**
+	 * @brief Get vertex shader
+	 * @return Pointer to vertex shader
+	 */
+	FORCEINLINE FVertexShaderRHIRef GetVertexShader() const
+	{
+		return vertexShader;
+	}
+
+	/**
+	 * @brief Get pixel shader
+	 * @return Pointer to pixel shader
+	 */
+	FORCEINLINE FPixelShaderRHIRef GetPixelShader() const
+	{
+		return pixelShader;
+	}
+
+	/**
+	 * @brief Get hull shader
+	 * @return Pointer to hull shader
+	 */
+	FORCEINLINE FHullShaderRHIRef GetHullShader() const
+	{
+		return hullShader;
+	}
+
+	/**
+	 * @brief Get domain shader
+	 * @return Pointer to domain shader
+	 */
+	FORCEINLINE FDomainShaderRHIRef GetDomainShader() const
+	{
+		return domainShader;
+	}
+
+	/**
+	 * @brief Get geometry shader
+	 * @return Pointer to geometry shader
+	 */
+	FORCEINLINE FGeometryShaderRHIRef GetGeometryShader() const
+	{
+		return geometryShader;
+	}
+
+protected:
+	FBoundShaderStateKey			key;					/**< Bound shader state key */
+	FVertexDeclarationRHIRef		vertexDeclaration;		/**< Vertex declaration */
+	FVertexShaderRHIRef				vertexShader;			/**< Vertex shader */
+	FPixelShaderRHIRef				pixelShader;			/**< Pixel shader */
+	FHullShaderRHIRef				hullShader;				/**< Hull shader */
+	FDomainShaderRHIRef				domainShader;			/**< Domain shader */
+	FGeometryShaderRHIRef			geometryShader;			/**< Geometry shader */
 };
 
 #endif // !BASESHADERRHI_H

@@ -30,6 +30,9 @@
     <ClInclude Include="Include\D3D11Buffer.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\D3D11State.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\D3D11RHI.cpp">
@@ -51,6 +54,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\D3D11Buffer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3D11State.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

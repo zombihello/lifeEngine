@@ -95,6 +95,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 FVertexBufferRHIRef		vertexBuffer;
 FBoundShaderStateRHIRef				boundShaderState;
 FRasterizerStateRHIRef				rasterizerState;
+FSamplerStateRHIRef					samplerState;
 
 #include "System/ThreadingBase.h"
 #include "Render/RenderingThread.h"
@@ -160,6 +161,13 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 			rasterizerStateInitializerRHI.cullMode = CM_CW;
 			rasterizerStateInitializerRHI.fillMode = FM_Solid;
 			rasterizerState = GRHI->CreateRasterizerState(rasterizerStateInitializerRHI);
+
+			FSamplerStateInitializerRHI			samplerStateInitializerRHI;
+			appMemzero(&samplerStateInitializerRHI, sizeof(FSamplerStateInitializerRHI));
+			samplerStateInitializerRHI.filter = SF_Bilinear;
+			samplerStateInitializerRHI.addressU = SAM_Wrap;
+			samplerStateInitializerRHI.addressV = SAM_Wrap;
+			samplerState = GRHI->CreateSamplerState( samplerStateInitializerRHI );
 		}
 	};
 
@@ -176,7 +184,7 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	GWindow->Show();
 	return result;
 }
-
+static FTexture2DRHIRef		texture2D;
 /**
  * Advances main loop
  */
@@ -212,6 +220,8 @@ void FEngineLoop::Tick()
 			GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, (3 * sizeof(float)) + (2 * sizeof(float)), 0 );
 			GRHI->SetBoundShaderState( immediateContext, boundShaderState );
 			GRHI->SetRasterizerState( immediateContext, rasterizerState );
+			GRHI->SetTextureParameter( immediateContext, boundShaderState->GetPixelShader(), texture2D, 0 );
+			GRHI->SetSamplerState( immediateContext, boundShaderState->GetPixelShader(), samplerState, 0 );
 			GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
 		} );
 
@@ -248,19 +258,24 @@ void FEngineLoop::Tick()
 			UNIQUE_RENDER_COMMAND(FTextureTestCommand,
 				{
 					FBaseDeviceContextRHI*	immediateContext = GRHI->GetImmediateContext();
-					FTexture2DRHIRef		texture2D = GRHI->CreateTexture2D( TEXT( "TestTexture" ), 256, 256, PF_A8R8G8B8, 1, TCF_None );
+					texture2D = GRHI->CreateTexture2D( TEXT( "TestTexture" ), 256, 256, PF_A8R8G8B8, 1, TCF_None );
 			
 					FLockedData				lockedData;
 					GRHI->LockTexture2D( immediateContext, texture2D, 0, true, lockedData );
-					//memset( lockedData.data, 255, lockedData.size );
+					memset( lockedData.data, 0xFF, lockedData.size );
 					GRHI->UnlockTexture2D( immediateContext, texture2D, 0, lockedData );
 				} );
 
 			GIsTextureTested = true;
-		}		
+		}
 	}
 	ImGui::Spacing();
 	ImGui::Text("Render thread: %s", GIsThreadedRendering ? "worked" : "disabled");
+	ImGui::Spacing();
+	ImGui::Spacing();
+	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+	ImGui::Text("For render triangle need press button\n'Create and fill texture', because\ntexture not created on start.");
+	ImGui::PopStyleColor();
 	ImGui::End();
 	//ImGui::ShowDemoWindow();
 	GImGUIEngine->EndDraw();

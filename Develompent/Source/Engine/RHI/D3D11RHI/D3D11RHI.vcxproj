@@ -12,6 +12,7 @@
     <ClInclude Include="Include\D3D11ImGUI.h" />
     <ClInclude Include="Include\D3D11RHI.h" />
     <ClInclude Include="Include\D3D11Shader.h" />
+    <ClInclude Include="Include\D3D11State.h" />
     <ClInclude Include="Include\D3D11Surface.h" />
     <ClInclude Include="Include\D3D11Viewport.h" />
   </ItemGroup>
@@ -21,6 +22,7 @@
     <ClCompile Include="Source\D3D11ImGUI.cpp" />
     <ClCompile Include="Source\D3D11RHI.cpp" />
     <ClCompile Include="Source\D3D11Shader.cpp" />
+    <ClCompile Include="Source\D3D11State.cpp" />
     <ClCompile Include="Source\D3D11Surface.cpp" />
     <ClCompile Include="Source\D3D11Viewport.cpp" />
   </ItemGroup>

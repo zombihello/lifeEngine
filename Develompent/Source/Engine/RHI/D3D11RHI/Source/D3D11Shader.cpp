@@ -116,14 +116,8 @@ uint32 FD3D11VertexDeclarationRHI::GetHash( uint32 InHash /*= 0*/ ) const
  * Constructor of FD3D11BoundShaderStateRHI
  */
 FD3D11BoundShaderStateRHI::FD3D11BoundShaderStateRHI( const tchar* InDebugName, const FBoundShaderStateKey& InKey, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader /*= nullptr*/, FDomainShaderRHIRef InDomainShader /*= nullptr*/, FGeometryShaderRHIRef InGeometryShader /*= nullptr*/ ) :
-	key( InKey ),
-	d3d11InputLayout( nullptr ),
-	vertexDeclaration( InVertexDeclaration ),
-	vertexShader( InVertexShader ),
-	pixelShader( InPixelShader ),
-	hullShader( InHullShader ),
-	domainShader( InDomainShader ),
-	geometryShader( InGeometryShader )
+	FBaseBoundShaderStateRHI( InKey, InVertexDeclaration, InVertexShader, InPixelShader, InHullShader, InDomainShader, InGeometryShader ),
+	d3d11InputLayout( nullptr )
 {
 	FD3D11RHI*		rhi = ( FD3D11RHI* )GRHI;
 	check( rhi );

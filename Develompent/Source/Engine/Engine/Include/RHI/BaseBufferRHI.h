@@ -11,6 +11,7 @@
 
 #include "Core.h"
 #include "Misc/RefCounted.h"
+#include "TypesRHI.h"
 
 /**
  * @ingroup Engine
@@ -55,17 +56,18 @@ struct FLockedData
 		data = nullptr;
 	}
 
-	byte*		data;			/**< Pointer to data */
-	bool		isNeedFree;		/**< Need free data? */
-	uint32		size;			/**< Size of data */
-	uint32		pitch;			/**< Pitch of data */
+	byte*					data;				/**< Pointer to data */
+	bool					isNeedFree;			/**< Need free data? */
+	uint32					size;				/**< Size of data */
+	uint32					pitch;				/**< Pitch of data */
+	FResourceRHIRef			stagingResource;	/**< Staging resource for read/write operations */
 };
 
 /**
  * @ingroup Engine
  * @brief Base class for work with vertex buffer
  */
-class FBaseVertexBufferRHI : public FRefCounted
+class FBaseVertexBufferRHI : public FBaseResourceRHI
 {
 public:
 	/**
@@ -104,7 +106,7 @@ private:
  * @ingroup Engine
  * @brief Base class for work with index buffer
  */
-class FBaseIndexBufferRHI : public FRefCounted
+class FBaseIndexBufferRHI : public FBaseResourceRHI
 {
 public:
 	/**

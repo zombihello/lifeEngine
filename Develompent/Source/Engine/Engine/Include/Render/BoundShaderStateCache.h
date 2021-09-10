@@ -10,7 +10,7 @@
 #define BOUNDSHADERSTATECACHE_H
 
 #include <unordered_map>
-#include "../RHI/BaseRHI.h"
+#include "RHI/TypesRHI.h"
 
 /**
  * @ingroup Engine

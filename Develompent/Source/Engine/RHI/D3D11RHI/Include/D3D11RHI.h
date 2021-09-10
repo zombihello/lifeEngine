@@ -17,38 +17,6 @@
 
 /**
  * @ingroup D3D11RHI
- * @brief Class of resterize state DirectX 11
- */
-class FD3D11RasterizerStateRHI : public FBaseRasterizerStateRHI
-{
-public:
-	/**
-	 * @brief Constructor
-	 * 
-	 * @param[in] InInitializer Initializer of rasterizer state
-	 */
-	FD3D11RasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer );
-
-	/**
-	 * @brief Destructor
-	 */
-	~FD3D11RasterizerStateRHI();
-
-	/**
-	 * @brief Get DirectX resource
-	 * @return Pointer to DirectX resource
-	 */
-	FORCEINLINE ID3D11RasterizerState* GetResource() const
-	{
-		return d3d11RasterizerState;
-	}
-
-private:
-	ID3D11RasterizerState*			d3d11RasterizerState;		/**< Pointer to DirectX 11 rasterizer state */
-};
-
-/**
- * @ingroup D3D11RHI
  * @brief Main class of DirectX 11
  */
 class FD3D11RHI : public FBaseRHI
@@ -200,6 +168,14 @@ public:
 	virtual FRasterizerStateRHIRef					CreateRasterizerState( const FRasterizerStateInitializerRHI& InInitializer ) override;
 
 	/**
+	 * @brief Create sampler state
+	 *
+	 * @param[in] InInitializer Initializer of sampler state
+	 * @return Pointer to sampler state
+	 */
+	virtual FSamplerStateRHIRef					CreateSamplerState( const FSamplerStateInitializerRHI& InInitializer ) override;
+
+	/**
 	 * @brief Create texture 2D
 	 *
 	 * @param[in] InDebugName Debug name
@@ -305,6 +281,26 @@ public:
 	 * @param[in] InNewState New rasterizer state
 	 */
 	virtual void									SetRasterizerState( class FBaseDeviceContextRHI* InDeviceContext, FRasterizerStateRHIParamRef InNewState ) override;
+
+	/**
+	 * @brief Set sampler state
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InPixelShader Pointer to pixel shader
+	 * @param[in] InNewState New sampler state
+	 * @param[in] InStateIndex Slot for bind sampler
+	 */
+	virtual void									SetSamplerState( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FSamplerStateRHIParamRef InNewState, uint32 InStateIndex ) override;
+
+	/**
+	 * Set texture parameter in pixel shader
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InPixelShader Pointer to pixel shader
+	 * @param[in] InTexture Pointer to texture
+	 * @param[in] InTextureIndex Slot for bind texture
+	 */
+	virtual void									SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FTextureRHIParamRef InTexture, uint32 InTextureIndex ) override;
 
 	/**
 	 * @brief Lock vertex buffer

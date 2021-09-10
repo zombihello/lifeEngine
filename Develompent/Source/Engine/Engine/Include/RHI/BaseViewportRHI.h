@@ -10,12 +10,13 @@
 #define BASEVIEWPORTRHI_H
 
 #include "Misc/Types.h"
+#include "RHI/BaseRHI.h"
 
  /**
   * @ingroup Engine
   * @brief Base class for work with viewport RHI
   */
-class FBaseViewportRHI
+class FBaseViewportRHI : public FBaseResourceRHI
 {
 public:
 	/**

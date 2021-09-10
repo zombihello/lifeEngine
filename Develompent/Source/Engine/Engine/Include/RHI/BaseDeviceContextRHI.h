@@ -9,11 +9,13 @@
 #ifndef BASEDEVICECONTEXTRHI_H
 #define BASEDEVICECONTEXTRHI_H
 
+#include "RHI/BaseRHI.h"
+
 /**
  * @ingroup Engine
  * @brief Base class for work with device context RHI
  */
-class FBaseDeviceContextRHI
+class FBaseDeviceContextRHI : public FBaseResourceRHI
 {
 public:
 	/**

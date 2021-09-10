@@ -9,6 +9,9 @@ struct VS_OUT
 	float2 texCoord0	: TEXCOORD0;
 };
 
+Texture2D		diffuse			: register( t0 );
+SamplerState	samplerLine		: register( s0 );
+
 //--------------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------------
@@ -24,5 +27,6 @@ void VS( in VS_IN In, out VS_OUT Out, out float4 OutPosition : SV_POSITION )
 //--------------------------------------------------------------------------------------
 float4 PS( VS_OUT In ) : SV_Target
 {
-    return float4( In.texCoord0.x, In.texCoord0.y, 0.0f, 1.0f );    // Yellow, with Alpha = 1
+    return diffuse.Sample( samplerLine, In.texCoord0 );
+// float4( In.texCoord0.x, In.texCoord0.y, 0.0f, 1.0f );    // Yellow, with Alpha = 1
 }

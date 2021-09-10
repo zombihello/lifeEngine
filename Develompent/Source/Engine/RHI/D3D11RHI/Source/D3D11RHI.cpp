@@ -8,6 +8,7 @@
 #include "D3D11Shader.h"
 #include "D3D11Buffer.h"
 #include "D3D11ImGUI.h"
+#include "D3D11State.h"
 
 /**
  * Get vertex count for primitive count
@@ -15,7 +16,7 @@
 static FORCEINLINE uint32 GetVertexCountForPrimitiveCount( uint32 InNumPrimitives, EPrimitiveType InPrimitiveType )
 {
 	uint32		vertexCount = 0;
-	switch (InPrimitiveType)
+	switch ( InPrimitiveType )
 	{
 	case PT_PointList:			vertexCount = InNumPrimitives;		break;
 	case PT_TriangleList:		vertexCount = InNumPrimitives * 3;	break;
@@ -23,7 +24,7 @@ static FORCEINLINE uint32 GetVertexCountForPrimitiveCount( uint32 InNumPrimitive
 	case PT_LineList:			vertexCount = InNumPrimitives * 2;	break;
 
 	default:
-		appErrorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType);
+		appErrorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
 	}
 
 	return vertexCount;
@@ -47,69 +48,6 @@ static FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrim
 	};
 
 	return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-}
-
-/**
- * Translate cull mode from engine to DirectX 11
- */
-static FORCEINLINE D3D11_CULL_MODE TranslateCullMode( ERasterizerCullMode InCullMode )
-{
-	switch ( InCullMode )
-	{
-	case CM_CW:			return D3D11_CULL_BACK;
-	case CM_CCW:		return D3D11_CULL_FRONT;
-	default:			return D3D11_CULL_NONE;
-	};
-}
-
-/**
- * Translate fill mode from engine to DirectX 11
- */
-static FORCEINLINE D3D11_FILL_MODE TranslateFillMode( ERasterizerFillMode InFillMode )
-{
-	switch ( InFillMode )
-	{
-	case FM_Wireframe:		return D3D11_FILL_WIREFRAME;
-	default:				return D3D11_FILL_SOLID;
-	};
-}
-
-/**
- * Constructor FD3D11RasterizerStateRHI
- */
-FD3D11RasterizerStateRHI::FD3D11RasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer ) :
-	d3d11RasterizerState( nullptr )
-{
-	D3D11_RASTERIZER_DESC			d3d11RasterizerDesc;
-	appMemzero( &d3d11RasterizerDesc, sizeof( D3D11_RASTERIZER_DESC ) );
-
-	d3d11RasterizerDesc.CullMode					= TranslateCullMode( InInitializer.cullMode );
-	d3d11RasterizerDesc.FillMode					= TranslateFillMode( InInitializer.fillMode );
-	d3d11RasterizerDesc.SlopeScaledDepthBias		= InInitializer.slopeScaleDepthBias;
-	d3d11RasterizerDesc.DepthBias					= ( int32 )floor( InInitializer.depthBias * ( float )( 1 << 24 ) );
-	d3d11RasterizerDesc.DepthClipEnable				= true;
-	d3d11RasterizerDesc.MultisampleEnable			= InInitializer.isAllowMSAA;
-
-	if ( InInitializer.cullMode == CM_NoneReversed )
-	{
-		d3d11RasterizerDesc.FrontCounterClockwise	= false;
-	}
-	else
-	{
-		d3d11RasterizerDesc.FrontCounterClockwise	= true;
-	}
-
-	ID3D11Device*			d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
-	HRESULT		result = d3d11Device->CreateRasterizerState( &d3d11RasterizerDesc, &d3d11RasterizerState );
-	check( result == S_OK );
-}
-
-/**
- * Destructor FD3D11RasterizerStateRHI
- */
-FD3D11RasterizerStateRHI::~FD3D11RasterizerStateRHI()
-{
-	d3d11RasterizerState->Release();
 }
 
 /**
@@ -144,7 +82,7 @@ void FD3D11RHI::Init( bool InIsEditor )
 	D3D_DRIVER_TYPE			driverType = D3D_DRIVER_TYPE_UNKNOWN;
 
 #if !SHIPPING_BUILD
-	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	//deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif // !SHIPPING_BUILD
 
 	// Create DXGI factory and adapter
@@ -315,8 +253,12 @@ FBoundShaderStateRHIRef FD3D11RHI::CreateBoundShaderState( const tchar* InBoundS
  */
 FRasterizerStateRHIRef FD3D11RHI::CreateRasterizerState( const FRasterizerStateInitializerRHI& InInitializer )
 {
-	FD3D11RasterizerStateRHI*		rasterizerState = new FD3D11RasterizerStateRHI( InInitializer );
-	return rasterizerState;
+	return new FD3D11RasterizerStateRHI( InInitializer );
+}
+
+FSamplerStateRHIRef FD3D11RHI::CreateSamplerState( const FSamplerStateInitializerRHI& InInitializer )
+{
+	return new FD3D11SamplerStateRHI( InInitializer );
 }
 
 FTexture2DRHIRef FD3D11RHI::CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData /*= nullptr*/ )
@@ -385,6 +327,27 @@ void FD3D11RHI::SetRasterizerState( class FBaseDeviceContextRHI* InDeviceContext
 	d3d11DeviceContext->RSSetState( ( ( FD3D11RasterizerStateRHI* )InNewState )->GetResource() );
 }
 
+void FD3D11RHI::SetSamplerState( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FSamplerStateRHIParamRef InNewState, uint32 InStateIndex )
+{
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	ID3D11SamplerState*				d3d11SamplerState = ( ( FD3D11SamplerStateRHI* )InNewState )->GetResource();
+	d3d11DeviceContext->PSSetSamplers( InStateIndex, 1, &d3d11SamplerState );
+}
+
+void FD3D11RHI::SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FTextureRHIParamRef InTexture, uint32 InTextureIndex )
+{
+	ID3D11ShaderResourceView*		d3d11ShaderResourceView = nullptr;
+	if ( InTexture )
+	{
+		d3d11ShaderResourceView = ( ( FD3D11TextureRHI* )InTexture )->GetShaderResourceView();
+	}
+
+	// Trying to set a valid texture with a nullptr shader resource view is probably a code mistake
+	check( !InTexture || d3d11ShaderResourceView );
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	d3d11DeviceContext->PSSetShaderResources( InTextureIndex, 1, &d3d11ShaderResourceView );
+}
+
 /**
  * Lock vertex buffer
  */
@@ -441,12 +404,12 @@ void FD3D11RHI::UnlockIndexBuffer( class FBaseDeviceContextRHI* InDeviceContext,
 
 void FD3D11RHI::LockTexture2D( class FBaseDeviceContextRHI* InDeviceContext, FTexture2DRHIParamRef InTexture, uint32 InMipIndex, bool InIsDataWrite, FLockedData& OutLockedData, bool InIsUseCPUShadow /*= false*/ )
 {
-	( ( FD3D11Texture2DRHI* )InTexture )->Lock( InDeviceContext, InMipIndex, 0, InIsDataWrite, InIsUseCPUShadow, OutLockedData );
+	( ( FD3D11Texture2DRHI* )InTexture )->Lock( InDeviceContext, InMipIndex, InIsDataWrite, InIsUseCPUShadow, OutLockedData );
 }
 
 void FD3D11RHI::UnlockTexture2D( class FBaseDeviceContextRHI* InDeviceContext, FTexture2DRHIParamRef InTexture, uint32 InMipIndex, FLockedData& InLockedData )
 {
-	( ( FD3D11Texture2DRHI* )InTexture )->Unlock( InDeviceContext, InMipIndex, 0, InLockedData );
+	( ( FD3D11Texture2DRHI* )InTexture )->Unlock( InDeviceContext, InMipIndex, InLockedData );
 }
 
 /**

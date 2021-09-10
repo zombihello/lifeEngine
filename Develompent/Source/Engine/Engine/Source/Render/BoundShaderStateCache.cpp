@@ -1,4 +1,5 @@
 #include "Render/BoundShaderStateCache.h"
+#include "RHI/BaseShaderRHI.h"
 
 /**
  * Constructor

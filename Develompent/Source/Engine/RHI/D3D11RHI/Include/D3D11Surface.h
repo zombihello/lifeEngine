@@ -72,7 +72,7 @@ public:
 	 * Get shader resource view
 	 * @return Return pointer to shader resource view
 	 */
-	FORCEINLINE const ID3D11ShaderResourceView* GetShaderResourceView() const
+	FORCEINLINE ID3D11ShaderResourceView* GetShaderResourceView()
 	{
 		return d3d11ShaderResourceView;
 	}
@@ -111,23 +111,21 @@ public:
 	 * 
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InMipIndex Mip index
-	 * @param[in] InArrayIndex Index in array texture
 	 * @param[in] InIsDataWrite Is begin written to texture
 	 * @param[in] InIsUseCPUShadow Is use CPU shadow
 	 * @param[out] OutLockedData Locked data in texture
 	 */
-	void Lock( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, uint32 InArrayIndex, bool InIsDataWrite, bool InIsUseCPUShadow, struct FLockedData& OutLockedData );
+	void Lock( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, struct FLockedData& OutLockedData );
 
 	/**
 	 * Unlock texture for apply changes to texture
 	 * 
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InMipIndex Mip index
-	 * @param[in] InArrayIndex Index in array texture
 	 * @param[in] InLockedData Locked data
 	 * @param[in] InDiscardUpdate Disczrd update
 	 */
-	void Unlock( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, uint32 InArrayIndex, struct FLockedData& InLockedData, bool InDiscardUpdate = false );
+	void Unlock( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, struct FLockedData& InLockedData, bool InDiscardUpdate = false );
 
 	/**
 	 * Get DirectX resource
@@ -139,6 +137,31 @@ public:
 	}
 
 private:
+	/**
+	 * Constructor for copy already created DirectX texture
+	 * 
+	 * @param[in] InD3D11Texture2D Pointer to DirectX texture 2D
+	 * @param[in] InSizeX Width of texture
+	 * @param[in] InSizeY Height of texture
+	 * @param[in] InNumMips Number of mip-maps in texture
+	 * @param[in] InFormat Pixel format in texture
+	 * @param[in] InFlags Texture create flags (use ETextureCreateFlags)
+	 */
+	FD3D11Texture2DRHI( ID3D11Texture2D* InD3D11Texture2D, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags );
+
+	/**
+	 * Create staging resource for lock
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InMipSizeX Mip-map width
+	 * @param[in] InMipSizeY Mip-map height
+	 * @param[in] InSubresource Index of subresource in texture
+	 * @param[in] InIsDataWrite Is begin written to texture
+	 * @param[in] InIsUseCPUShadow Is use CPU shadow
+	 * @return Pointer to created staging texture 2D
+	 */
+	FD3D11Texture2DRHI* CreateStagingResource( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipSizeX, uint32 InMipSizeY, uint32 InSubresource, bool InIsDataWrite, bool InIsUseCPUShadow );
+
 	ID3D11Texture2D*			d3d11Texture2D;			/**< Pointer to DirectX texture 2D */
 };
 

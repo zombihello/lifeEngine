@@ -253,6 +253,7 @@ public:
 	 * @brief Constructor
 	 * 
 	 * @param[in] InDebugName Bound shader state name for debug
+	 * @param[in] InKey Key of bound shader state
 	 * @param[in] InVertexDeclaration Vertex declaration
 	 * @param[in] InVertexShader Vertex shader
 	 * @param[in] InPixelShader Pixel shader
@@ -268,15 +269,6 @@ public:
 	virtual ~FD3D11BoundShaderStateRHI();
 
 	/**
-	 * @brief Get vertex declaration
-	 * @return Pointer to vertex declaration
-	 */
-	FORCEINLINE FVertexDeclarationRHIRef GetVertexDeclaration() const
-	{
-		return vertexDeclaration;
-	}
-
-	/**
 	 * @brief Get D3D11 input layout
 	 * @return Pointer to D3D11 input layout
 	 */
@@ -285,60 +277,8 @@ public:
 		return d3d11InputLayout;
 	}
 
-	/**
-	 * @brief Get vertex shader
-	 * @return Pointer to vertex shader
-	 */
-	FORCEINLINE FVertexShaderRHIRef GetVertexShader() const
-	{
-		return vertexShader;
-	}
-
-	/**
-	 * @brief Get pixel shader
-	 * @return Pointer to pixel shader
-	 */
-	FORCEINLINE FPixelShaderRHIRef GetPixelShader() const
-	{
-		return pixelShader;
-	}
-
-	/**
-	 * @brief Get hull shader
-	 * @return Pointer to hull shader
-	 */
-	FORCEINLINE FHullShaderRHIRef GetHullShader() const
-	{
-		return hullShader;
-	}
-
-	/**
-	 * @brief Get domain shader
-	 * @return Pointer to domain shader
-	 */
-	FORCEINLINE FDomainShaderRHIRef GetDomainShader() const
-	{
-		return domainShader;
-	}
-
-	/**
-	 * @brief Get geometry shader
-	 * @return Pointer to geometry shader
-	 */
-	FORCEINLINE FGeometryShaderRHIRef GetGeometryShader() const
-	{
-		return geometryShader;
-	}
-
 private:
-	FBoundShaderStateKey			key;					/**< Bound shader state key */
 	ID3D11InputLayout*				d3d11InputLayout;		/**< D3D11 input layout */
-	FVertexDeclarationRHIRef		vertexDeclaration;		/**< Vertex declaration */
-	FVertexShaderRHIRef				vertexShader;			/**< Vertex shader */
-	FPixelShaderRHIRef				pixelShader;			/**< Pixel shader */
-	FHullShaderRHIRef				hullShader;				/**< Hull shader */
-	FDomainShaderRHIRef				domainShader;			/**< Domain shader */
-	FGeometryShaderRHIRef			geometryShader;			/**< Geometry shader */
 };
 
 #endif // !D3D11SHADER_H

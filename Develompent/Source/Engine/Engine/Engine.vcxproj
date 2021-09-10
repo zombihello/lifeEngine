@@ -19,8 +19,10 @@
     <ClInclude Include="Include\Render\Shaders\TestShader.h" />
     <ClInclude Include="Include\Render\Texture.h" />
     <ClInclude Include="Include\RHI\BaseBufferRHI.h" />
+    <ClInclude Include="Include\RHI\BaseResourceRHI.h" />
     <ClInclude Include="Include\RHI\BaseRHI.h" />
     <ClInclude Include="Include\RHI\BaseShaderRHI.h" />
+    <ClInclude Include="Include\RHI\BaseStateRHI.h" />
     <ClInclude Include="Include\RHI\BaseSurfaceRHI.h" />
     <ClInclude Include="Include\RHI\BaseViewportRHI.h" />
     <ClInclude Include="Include\RHI\BaseDeviceContextRHI.h" />
