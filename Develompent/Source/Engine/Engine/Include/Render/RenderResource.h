@@ -46,13 +46,13 @@ public:
 	 * @brief Initializes the resource.
 	 * This is only called by the rendering thread.
 	 */
-	virtual void InitResource();
+	void InitResource();
 
 	/**
 	 * @brief Prepares the resource for deletion.
 	 * This is only called by the rendering thread.
 	 */
-	virtual void ReleaseResource();
+	void ReleaseResource();
 
 	/**
 	 * @brief If the resource's RHI has been initialized, then release and reinitialize it.  Otherwise, do nothing.
@@ -72,5 +72,29 @@ public:
 protected:
 	volatile bool				isInitialized;		/**< Is resource initialized */
 };
+
+/**
+ * @ingroup Engine
+ * Sends message to rendering thread to initialize a resource
+ * 
+ * @param[in] InResource Pointer to resource
+ */
+extern void BeginInitResource( FRenderResource* InResource );
+
+/**
+ * @ingroup Engine
+ * Sends message to rendering thread to update a resource
+ * 
+ * @param[in] InResource Pointer to resource
+ */
+extern void BeginUpdateResource( FRenderResource* InResource );
+
+/**
+ * @ingroup Engine
+ * Sends message to rendering thread to release resource
+ * 
+ * @param[in] InResource Pointer to resource
+ */
+extern void BeginReleaseResource( FRenderResource* InResource );
 
 #endif // !RENDERRESOURCE_H

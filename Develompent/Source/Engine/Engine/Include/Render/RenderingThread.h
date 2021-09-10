@@ -84,7 +84,7 @@ public:
 	 * @param[in] InSize Size
 	 * @param[in] InAllocation Allocation context in ring buffer
 	 */
-	FORCEINLINE void* operator new( std::size_t InSize, const FRingBuffer::AllocationContext& InAllocation )
+	FORCEINLINE void* operator new( size_t InSize, const FRingBuffer::AllocationContext& InAllocation )
 	{
 		return InAllocation.GetAllocation();
 	}

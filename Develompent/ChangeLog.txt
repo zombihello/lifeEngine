@@ -22,3 +22,4 @@
 	- Implemented rendering of triangle
 	- Implemented render thread
 	- Implemented rendering of triangle with texture
+	- Implemented loading textures

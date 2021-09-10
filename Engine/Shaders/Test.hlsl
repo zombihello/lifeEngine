@@ -28,5 +28,4 @@ void VS( in VS_IN In, out VS_OUT Out, out float4 OutPosition : SV_POSITION )
 float4 PS( VS_OUT In ) : SV_Target
 {
     return diffuse.Sample( samplerLine, In.texCoord0 );
-// float4( In.texCoord0.x, In.texCoord0.y, 0.0f, 1.0f );    // Yellow, with Alpha = 1
 }
