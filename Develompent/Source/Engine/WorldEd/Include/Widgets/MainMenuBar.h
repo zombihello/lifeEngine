@@ -57,7 +57,7 @@ public:
 		/**
 		 * Set name
 		 *
-		 * @param[in] InName Name of menu
+		 * @param[in] InName Name item
 		 */
 		FORCEINLINE void SetName( const tchar* InName )
 		{
@@ -67,11 +67,30 @@ public:
 		/**
 		 * Get name
 		 *
-		 * @return Return name of menu bar
+		 * @return Return name item
 		 */
 		FORCEINLINE std::wstring GetName() const
 		{
 			return ANSI_TO_TCHAR( name.c_str() );
+		}
+
+		/**
+		 * Set callback
+		 *
+		 * @param[in] InCallback Function called when item triggered
+		 */
+		FORCEINLINE void SetCallback( FCallbackFunction InCallback )
+		{
+			callback = InCallback;
+		}
+
+		/**
+		 * Get callback
+		 * @return Return callback for triggered item
+		 */
+		FORCEINLINE FCallbackFunction GetCallback() const
+		{
+			return callback;
 		}
 
 	private:

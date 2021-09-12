@@ -19,8 +19,20 @@ typedef TRefCountPtr< class WBaseWidget >				FWBaseWidgetRef;
 
 /**
  * @ingroup WorldEd
- * Pointer to FBaseWidget object
+ * Pointer to WBaseWidget object
  */
 typedef class WBaseWidget*								FWBaseWidgetParamRef;
+
+/**
+ * @ingroup WorldEd
+ * Reference to WBaseWindow object
+ */
+typedef TRefCountPtr< class WBaseWindow >				FWBaseWindowRef;
+
+/**
+ * @ingroup WorldEd
+ * Pointer to WBaseWindow object
+ */
+typedef class WBaseWindow*								FWBaseWindowParamRef;
 
 #endif // !WORLDEDTYPES_H

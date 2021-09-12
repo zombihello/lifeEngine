@@ -20,7 +20,12 @@
     <ClInclude Include="Include\Misc\WorldEdTypes.h" />
     <ClInclude Include="Include\System\Dirent\dirent.h" />
     <ClInclude Include="Include\Widgets\BaseWidget.h" />
+    <ClInclude Include="Include\Widgets\Button.h" />
     <ClInclude Include="Include\Widgets\MainMenuBar.h" />
+    <ClInclude Include="Include\Widgets\Text.h" />
+    <ClInclude Include="Include\Windows\BaseWindow.h" />
+    <ClInclude Include="Include\Windows\WindowImportTexture.h" />
+    <ClInclude Include="Include\Windows\WindowsManager.h" />
     <ClInclude Include="Include\WorldEd.h" />
   </ItemGroup>
   <ItemGroup>
@@ -32,7 +37,12 @@
     <ClCompile Include="Source\ImGUI\imgui_tables.cpp" />
     <ClCompile Include="Source\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp" />
+    <ClCompile Include="Source\Widgets\Button.cpp" />
     <ClCompile Include="Source\Widgets\MainMenuBar.cpp" />
+    <ClCompile Include="Source\Widgets\Text.cpp" />
+    <ClCompile Include="Source\Windows\BaseWindow.cpp" />
+    <ClCompile Include="Source\Windows\WindowImportTexture.cpp" />
+    <ClCompile Include="Source\Windows\WindowsManager.cpp" />
     <ClCompile Include="Source\WorldEd.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -15,4 +15,10 @@
   */
 extern class FImGUIEngine*				GImGUIEngine;
 
+/**
+ * @ingroup WorldEd
+ * Windows manager
+ */
+extern class FWindowsManager*			GWindowsManager;
+
 #endif // !WORLDEDGLOBALS_H

@@ -31,6 +31,12 @@
     <Filter Include="Source\Widgets">
       <UniqueIdentifier>{1652599b-3328-43d1-a540-c784ffeee911}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Windows">
+      <UniqueIdentifier>{49560be0-7a17-43dd-8dae-95d777c60b97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Windows">
+      <UniqueIdentifier>{4f84bdd4-da13-47b6-9392-9e30ce26b24e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\ImGUI\imconfig.h">
@@ -78,6 +84,21 @@
     <ClInclude Include="Include\Misc\WorldEdTypes.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Windows\BaseWindow.h">
+      <Filter>Include\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Windows\WindowsManager.h">
+      <Filter>Include\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Widgets\Button.h">
+      <Filter>Include\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Widgets\Text.h">
+      <Filter>Include\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Windows\WindowImportTexture.h">
+      <Filter>Include\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\ImGUI\imgui.cpp">
@@ -109,6 +130,21 @@
     </ClCompile>
     <ClCompile Include="Source\Widgets\MainMenuBar.cpp">
       <Filter>Source\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\BaseWindow.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\WindowsManager.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Widgets\Button.cpp">
+      <Filter>Source\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Widgets\Text.cpp">
+      <Filter>Source\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\WindowImportTexture.cpp">
+      <Filter>Source\Windows</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

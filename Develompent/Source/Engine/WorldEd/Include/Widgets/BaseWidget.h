@@ -19,15 +19,25 @@ class WBaseWidget : public FRefCounted
 {
 public:
 	/**
+	 * Constructor
+	 */
+	WBaseWidget() :
+		isInitialized( false )
+	{}
+
+	/**
 	 * Destructor
 	 */
-	virtual ~WBaseWidget() {}
+	virtual ~WBaseWidget() 
+	{}
 
 	/**
 	 * Initialize widget
 	 */
 	virtual void Init() 
-	{}
+	{
+		isInitialized = true;
+	}
 
 	/**
 	 * Update logic of widget
@@ -36,17 +46,23 @@ public:
 	{}
 
 	/**
-	 * Shutdown widget
-	 */
-	virtual void Shutdown() 
-	{}
-
-	/**
 	 * Process event
 	 *
 	 * @param[in] InWindowEvent Window event
 	 */
 	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) {}
+
+	/**
+	 * Is initialized widget
+	 * @return Return true if widget is initialized, else false
+	 */
+	FORCEINLINE bool IsInitialized() const
+	{
+		return isInitialized;
+	}
+
+private:
+	bool			isInitialized;			/**< Is widget initialized */
 };
 
 #endif
