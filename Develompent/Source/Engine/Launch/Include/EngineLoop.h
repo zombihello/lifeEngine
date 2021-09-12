@@ -60,7 +60,11 @@ private:
 	 */
 	void				SerializeConfigs();
 
-	bool			isInitialize;		/**< Is initialized engine */
+	bool				isInitialize;		/**< Is initialized engine */
+
+#if WITH_EDITOR
+	class FWorldEd*		worldEd;			/**< Pointer to world editor */
+#endif // WITH_EDITOR
 };
 
 #endif // !ENGINELOOP_H

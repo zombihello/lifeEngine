@@ -19,6 +19,18 @@
     <Filter Include="Source\Misc">
       <UniqueIdentifier>{a05a9651-cfd7-4237-91fb-e22a7def98e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\System">
+      <UniqueIdentifier>{ca52a225-343e-4c8f-8722-2adda57f7558}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\System\Dirent">
+      <UniqueIdentifier>{947715be-a3de-4825-8710-fdd81761b212}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Widgets">
+      <UniqueIdentifier>{d3d0e755-ba44-4fe7-bf54-0ee055065ac8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Widgets">
+      <UniqueIdentifier>{1652599b-3328-43d1-a540-c784ffeee911}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\ImGUI\imconfig.h">
@@ -45,6 +57,27 @@
     <ClInclude Include="Include\Misc\WorldEdGlobals.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Include\ImGUI\ImGuiFileDialog.h">
+      <Filter>Include\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ImGUI\ImGuiFileDialogConfig.h">
+      <Filter>Include\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\System\Dirent\dirent.h">
+      <Filter>Include\System\Dirent</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\WorldEd.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Widgets\MainMenuBar.h">
+      <Filter>Include\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Widgets\BaseWidget.h">
+      <Filter>Include\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Misc\WorldEdTypes.h">
+      <Filter>Include\Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\ImGUI\imgui.cpp">
@@ -67,6 +100,15 @@
     </ClCompile>
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp">
       <Filter>Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ImGUI\ImGuiFileDialog.cpp">
+      <Filter>Source\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\WorldEd.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Widgets\MainMenuBar.cpp">
+      <Filter>Source\Widgets</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

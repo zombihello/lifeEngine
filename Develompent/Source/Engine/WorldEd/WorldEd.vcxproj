@@ -10,20 +10,30 @@
     <ClInclude Include="Include\ImGUI\imconfig.h" />
     <ClInclude Include="Include\ImGUI\imgui.h" />
     <ClInclude Include="Include\ImGUI\ImGUIEngine.h" />
+    <ClInclude Include="Include\ImGUI\ImGuiFileDialog.h" />
+    <ClInclude Include="Include\ImGUI\ImGuiFileDialogConfig.h" />
     <ClInclude Include="Include\ImGUI\imgui_internal.h" />
     <ClInclude Include="Include\ImGUI\imstb_rectpack.h" />
     <ClInclude Include="Include\ImGUI\imstb_textedit.h" />
     <ClInclude Include="Include\ImGUI\imstb_truetype.h" />
     <ClInclude Include="Include\Misc\WorldEdGlobals.h" />
+    <ClInclude Include="Include\Misc\WorldEdTypes.h" />
+    <ClInclude Include="Include\System\Dirent\dirent.h" />
+    <ClInclude Include="Include\Widgets\BaseWidget.h" />
+    <ClInclude Include="Include\Widgets\MainMenuBar.h" />
+    <ClInclude Include="Include\WorldEd.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\ImGUI\imgui.cpp" />
     <ClCompile Include="Source\ImGUI\ImGUIEngine.cpp" />
+    <ClCompile Include="Source\ImGUI\ImGuiFileDialog.cpp" />
     <ClCompile Include="Source\ImGUI\imgui_demo.cpp" />
     <ClCompile Include="Source\ImGUI\imgui_draw.cpp" />
     <ClCompile Include="Source\ImGUI\imgui_tables.cpp" />
     <ClCompile Include="Source\ImGUI\imgui_widgets.cpp" />
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp" />
+    <ClCompile Include="Source\Widgets\MainMenuBar.cpp" />
+    <ClCompile Include="Source\WorldEd.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -10,7 +10,7 @@
 #define WORLDEDGLOBALS_H
 
  /**
-  * @ingroup Engine
+  * @ingroup WorldEd
   * @brief ImGUI engine
   */
 extern class FImGUIEngine*				GImGUIEngine;

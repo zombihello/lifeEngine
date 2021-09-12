@@ -19,9 +19,7 @@
 #include "EngineLoop.h"
 
 #if WITH_EDITOR
-	#include "Misc/WorldEdGlobals.h"	
-	#include "ImGUI/ImGUIEngine.h"
-	#include "ImGUI/imgui.h"
+#include "WorldEd.h"
 #endif // WITH_EDITOR
 
 // --------------
@@ -35,6 +33,9 @@ FBaseViewportRHI*			GViewportRHI = nullptr;
  */
 FEngineLoop::FEngineLoop() :
 	isInitialize( false )
+#if WITH_EDITOR
+	, worldEd( nullptr )
+#endif // WITH_EDITOR
 {}
 
 /**
@@ -171,7 +172,8 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 		} );
 
 #if WITH_EDITOR
-	GImGUIEngine->Init();
+	worldEd = new FWorldEd();
+	worldEd->Init();
 #endif // WITH_EDITOR
 
 	StartRenderingThread();
@@ -196,7 +198,7 @@ void FEngineLoop::Tick()
 			}
 
 #if WITH_EDITOR
-			GImGUIEngine->ProcessEvent( windowEvent );
+			worldEd->ProcessEvent( windowEvent );
 #endif // WITH_EDITOR
 		}
 	}
@@ -220,40 +222,7 @@ void FEngineLoop::Tick()
 		} );
 
 #if WITH_EDITOR
-	GImGUIEngine->BeginDraw();
-
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
-			if (ImGui::MenuItem("Exit"))
-			{
-				GIsRequestingExit = true;
-			}
-			ImGui::EndMenu();
-		}
-		ImGui::EndMainMenuBar();
-	}
-
-	ImGui::Begin( "Debug window" );
-	if (ImGui::Button("Start render thread"))
-	{
-		StartRenderingThread();
-	}
-	if (ImGui::Button("Stop render thread"))
-	{
-		StopRenderingThread();
-	}
-	ImGui::Spacing();
-	ImGui::Text("Render thread: %s", GIsThreadedRendering ? "worked" : "disabled");
-	ImGui::Spacing();
-	ImGui::Spacing();
-	ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-	ImGui::Text("For render triangle need press button\n'Create and fill texture', because\ntexture not created on start.");
-	ImGui::PopStyleColor();
-	ImGui::End();
-	//ImGui::ShowDemoWindow();
-	GImGUIEngine->EndDraw();
+	worldEd->Tick();
 #endif // WITH_EDITOR
 
 	UNIQUE_RENDER_COMMAND( FEndRenderCommand,
@@ -271,7 +240,8 @@ void FEngineLoop::Exit()
 	StopRenderingThread();
 
 #if WITH_EDITOR
-	GImGUIEngine->Shutdown();
+	delete worldEd;
+	worldEd = nullptr;
 #endif // WITH_EDITOR
 
 	delete GViewportRHI;
