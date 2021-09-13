@@ -444,6 +444,7 @@ bool FWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 			// Event of close window
 		case SDL_WINDOWEVENT_CLOSE:
 			OutWindowEvent.type = SWindowEvent::T_WindowClose;
+			OutWindowEvent.events.windowClose.windowId = sdlEvent.window.windowID;
 			break;
 
 			// Event of resize window
@@ -452,11 +453,13 @@ bool FWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 			OutWindowEvent.type = SWindowEvent::T_WindowResize;
 			OutWindowEvent.events.windowResize.width = sdlEvent.window.data1;
 			OutWindowEvent.events.windowResize.height = sdlEvent.window.data2;
+			OutWindowEvent.events.windowResize.windowId = sdlEvent.window.windowID;
 			break;
 
 			// Event of gained focus
 		case SDL_WINDOWEVENT_FOCUS_GAINED:
 			OutWindowEvent.type = SWindowEvent::T_WindowFocusGained;
+			OutWindowEvent.events.windowFocusGained.windowId = sdlEvent.window.windowID;
 
 			if ( !isShowCursor )
 			{
@@ -467,13 +470,22 @@ bool FWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 			// Event of lost focus
 		case SDL_WINDOWEVENT_FOCUS_LOST:
 			OutWindowEvent.type = SWindowEvent::T_WindowFocusLost;
+			OutWindowEvent.events.windowFocusLost.windowId = sdlEvent.window.windowID;
 
 			if ( !isShowCursor )
 			{
 				SDL_SetRelativeMouseMode( SDL_FALSE );
 			}
 			break;
+
+			// Event of move
+		case SDL_WINDOWEVENT_MOVED:
+			OutWindowEvent.type = SWindowEvent::T_WindowMove;
+			OutWindowEvent.events.windowMove.x = sdlEvent.window.data1;
+			OutWindowEvent.events.windowMove.y = sdlEvent.window.data2;
+			break;
 		}
+
 		break;
 
 		// In default cast we not getting event

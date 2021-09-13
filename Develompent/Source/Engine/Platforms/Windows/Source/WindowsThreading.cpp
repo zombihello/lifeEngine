@@ -185,6 +185,7 @@ uint32 FRunnableThreadWindows::Run()
 	// Initialize the runnable object
 	bool		initReturn = runnable->Init();
 	check( initReturn );
+	UNUSED_VAR( initReturn );
 
 	// Initialization has completed, release the sync event
 	threadInitSyncEvent->Trigger();
@@ -338,6 +339,7 @@ void FSemaphoreWindows::Wait()
 	
 	uint32		ret = ( uint32 )WaitForSingleObject( semaphore, INFINITE );
 	check( ret == WAIT_OBJECT_0 );
+	UNUSED_VAR( ret );
 }
 
 bool FSemaphoreWindows::WaitTimeoutMs( uint32 InMilliseconds )

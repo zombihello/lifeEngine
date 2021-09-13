@@ -82,7 +82,7 @@ void FD3D11RHI::Init( bool InIsEditor )
 	D3D_DRIVER_TYPE			driverType = D3D_DRIVER_TYPE_UNKNOWN;
 
 #if !SHIPPING_BUILD
-	//deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif // !SHIPPING_BUILD
 
 	// Create DXGI factory and adapter

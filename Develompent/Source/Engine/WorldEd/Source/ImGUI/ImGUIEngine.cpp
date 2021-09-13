@@ -74,6 +74,10 @@ void FImGUIEngine::Init()
 	imguiContext = ImGui::CreateContext();
 	check( imguiContext );
 
+	ImGuiIO&		imguiIO = ImGui::GetIO();
+	imguiIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+	// imguiIO.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+
 	// Initialize platform for ImGUI
 	check( appImGUIInit() );
 
@@ -126,7 +130,7 @@ void FImGUIEngine::EndDraw()
 {
 	ImGui::Render();
 	appImGUIEndDrawing();
-	
+
 	FImGUIDrawData*			currentBuffer = &drawDataBuffers[ indexCurrentBuffer ];
 	while ( !currentBuffer->IsFree() )
 	{
@@ -148,4 +152,10 @@ void FImGUIEngine::EndDraw()
 			GRHI->DrawImGUI( GRHI->GetImmediateContext(), ( ImDrawData* )imGuiDrawData->GetDrawData() );
 			imGuiDrawData->MarkFree();
 		} );
+
+	if ( ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
+	{
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+	}
 }

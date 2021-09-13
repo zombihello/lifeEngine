@@ -28,6 +28,7 @@ struct SWindowEvent
 		T_WindowResize,				/**< Resize window */
 		T_WindowFocusGained,		/**< Window is gained focus */
 		T_WindowFocusLost,			/**< Window is lost focus */
+		T_WindowMove,				/**< Window moved */
 		T_KeyPressed,				/**< Key pressed */
 		T_KeyReleased,				/**< Key released */
 		T_MousePressed,				/**< Mouse pressed */
@@ -86,8 +87,43 @@ struct SWindowEvent
 	 */
 	struct SWindowResizeEvent
 	{
+		uint32		windowId;			/**< Id of window */
 		int32		width;				/**< New width window */
 		int32		height;				/**< New height window */
+	};
+
+	/**
+	 * Event of window close
+	 */
+	struct SWindowCloseEvent
+	{
+		uint32		windowId;			/**< Id window */
+	};
+
+	/**
+	 * Event of window focus gained
+	 */
+	struct SWindowFocusGainedEvent
+	{
+		uint32		windowId;			/**< Id window */
+	};
+
+	/**
+	 * Event of window focus lost
+	 */
+	struct SWindowFocusLostEvent
+	{
+		uint32		windowId;			/**< Id window */
+	};
+
+	/**
+	 * Event of window move
+	 */
+	struct SWindowMoveEvent
+	{
+		uint32		windowId;			/**< Id window */
+		int32		x;					/**< Current position by X */
+		int32		y;					/**< Current position by Y */
 	};
 
 	/**
@@ -103,7 +139,11 @@ struct SWindowEvent
 	 */
 	union UEvents
 	{
+		SWindowCloseEvent			windowClose;		/**< Event of window close */
 		SWindowResizeEvent			windowResize;		/**< Event of window resize */
+		SWindowFocusGainedEvent		windowFocusGained;	/**< Event of window focus gained */
+		SWindowFocusLostEvent		windowFocusLost;	/**< Event of window focus lost */
+		SWindowMoveEvent			windowMove;			/**< Event of window move */
 		SKeyEvent					key;				/**< Event of key pressed/released */
 		SMouseButtonEvent			mouseButton;		/**< Event of mouse button pressed/released */
 		SMouseMoveEvent				mouseMove;			/**< Event of mouse moving */

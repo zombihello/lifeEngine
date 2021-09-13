@@ -91,7 +91,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 
 		GEngineLoop->Exit();
 	}
-	catch ( const std::exception& InException )
+	catch ( std::exception InException )
 	{
 		appErrorf( ANSI_TO_TCHAR( InException.what() ) );
 		return 1;
