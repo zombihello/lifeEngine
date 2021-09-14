@@ -6,12 +6,12 @@
 #include "CoreDefines.h"
 
 WBaseWindow::WBaseWindow() :
-	isOpen( true ),
+	isOpen( false ),
 	title( "None" )
 {}
 
 WBaseWindow::WBaseWindow( const tchar* InTitle /* = TEXT( "" ) */, uint32 InFlags /* = 0 */ ) :
-	isOpen( true ),
+	isOpen( false ),
 	title( TCHAR_TO_ANSI( InTitle ) ),
 	flags( InFlags )
 {}

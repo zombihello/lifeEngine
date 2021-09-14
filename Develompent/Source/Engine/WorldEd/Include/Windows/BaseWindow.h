@@ -15,6 +15,10 @@
 #include "Misc/WorldEdTypes.h"
 #include "Containers/StringConv.h"
 #include "Widgets/BaseWidget.h"
+#include "System/Delegate.h"
+
+DECLARE_DELEGATE( FOnWindowOpened, class WBaseWindow* )
+DECLARE_DELEGATE( FOnWindowClosed, class WBaseWindow* )
 
 /**
  * @ingroup WorldEd
@@ -52,6 +56,7 @@ public:
 	FORCEINLINE void Open()
 	{
 		isOpen = true;
+		onWindowOpened.Broadcast( this );
 	}
 
 	/**
@@ -60,6 +65,7 @@ public:
 	FORCEINLINE void Close()
 	{
 		isOpen = false;
+		onWindowClosed.Broadcast( this );
 	}
 
 	/**
@@ -154,11 +160,31 @@ public:
 		return flags;
 	}
 
+	/**
+	 * Get delegate to event of open window
+	 * @return Return reference to delegate event of open window
+	 */
+	FORCEINLINE FOnWindowOpened& OnWindowOpened()
+	{
+		return onWindowOpened;
+	}
+
+	/**
+	 * Get delegate to event of close window
+	 * @return Return reference to delegate event of close window
+	 */
+	FORCEINLINE FOnWindowClosed& OnWindowClosed()
+	{
+		return onWindowClosed;
+	}
+
 private:
-	bool														isOpen;			/**< Is opened window */
-	std::string													title;			/**< Title window */
-	uint32														flags;			/**< Flags window for ImGUI */
-	std::unordered_map< std::wstring, FWBaseWidgetRef >			widgets;		/**< Map of widgets in window */
+	bool														isOpen;				/**< Is opened window */
+	std::string													title;				/**< Title window */
+	uint32														flags;				/**< Flags window for ImGUI */
+	std::unordered_map< std::wstring, FWBaseWidgetRef >			widgets;			/**< Map of widgets in window */
+	FOnWindowOpened												onWindowOpened;		/**< Event of open window */
+	FOnWindowClosed												onWindowClosed;		/**< Event of close window */
 };
 
 #endif // !WORLDED_BASEWINDOW_H

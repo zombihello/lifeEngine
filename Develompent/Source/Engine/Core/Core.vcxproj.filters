@@ -117,6 +117,9 @@
     <ClInclude Include="Include\Containers\RingBuffer.h">
       <Filter>Include\Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Include\System\Delegate.h">
+      <Filter>Include\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">

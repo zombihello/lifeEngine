@@ -30,6 +30,7 @@
     <ClInclude Include="Include\System\BaseWindow.h" />
     <ClInclude Include="Include\System\ButtonCode.h" />
     <ClInclude Include="Include\System\Config.h" />
+    <ClInclude Include="Include\System\Delegate.h" />
     <ClInclude Include="Include\System\MemoryBase.h" />
     <ClInclude Include="Include\System\ThreadingBase.h" />
     <ClInclude Include="Include\System\WindowEvent.h" />

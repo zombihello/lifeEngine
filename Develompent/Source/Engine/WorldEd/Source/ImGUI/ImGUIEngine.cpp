@@ -2,6 +2,8 @@
 
 #include "Core.h"
 #include "Misc/EngineGlobals.h"
+#include "Logger/BaseLogger.h"
+#include "Logger/LoggerMacros.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
 #include "Render/RenderingThread.h"
@@ -157,6 +159,8 @@ void FImGUIEngine::Init()
 		{
 			GRHI->InitImGUI( GRHI->GetImmediateContext() );
 		} );
+
+	LE_LOG( LT_Log, LC_Init, TEXT( "ImGui version: " IMGUI_VERSION ) );
 
 	// Open main window
 	ImGuiPlatformIO&	imguiPlatformIO = ImGui::GetPlatformIO();
