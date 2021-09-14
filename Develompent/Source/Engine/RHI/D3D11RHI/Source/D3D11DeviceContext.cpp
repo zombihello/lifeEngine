@@ -22,7 +22,7 @@ FD3D11DeviceContext::~FD3D11DeviceContext()
 /**
  * Clear surface
  */
-void FD3D11DeviceContext::ClearSurface( class FBaseSurfaceRHI* InSurface, const class FColor& InColor )
+void FD3D11DeviceContext::ClearSurface( FSurfaceRHIParamRef InSurface, const class FColor& InColor )
 {
 	check( d3d11DeviceContext && InSurface );
 	FD3D11Surface*			d3d11Surface = ( FD3D11Surface* )InSurface;

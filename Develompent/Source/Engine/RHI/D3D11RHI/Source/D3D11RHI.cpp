@@ -81,9 +81,9 @@ void FD3D11RHI::Init( bool InIsEditor )
 	//		Software must be NULL. 
 	D3D_DRIVER_TYPE			driverType = D3D_DRIVER_TYPE_UNKNOWN;
 
-#if !SHIPPING_BUILD
+#if DEBUG
 	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif // !SHIPPING_BUILD
+#endif // DEBUG
 
 	// Create DXGI factory and adapter
 	HRESULT		result = CreateDXGIFactory( __uuidof( IDXGIFactory ), ( void** ) &dxgiFactory );
@@ -433,7 +433,7 @@ void FD3D11RHI::BeginDrawingViewport( class FBaseDeviceContextRHI* InDeviceConte
 	FD3D11DeviceContext*			deviceContext = ( FD3D11DeviceContext* )InDeviceContext;
 	FD3D11Viewport*					viewport = ( FD3D11Viewport* )InViewport;
 
-	ID3D11RenderTargetView*			d3d11RenderTargetView = viewport->GetBackBuffer()->GetD3D11RenderTargetView();
+	ID3D11RenderTargetView*			d3d11RenderTargetView = ( ( FD3D11Surface* )viewport->GetSurface().GetPtr() )->GetD3D11RenderTargetView();
 	deviceContext->GetD3D11DeviceContext()->OMSetRenderTargets( 1, &d3d11RenderTargetView, nullptr );
 	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );
 }

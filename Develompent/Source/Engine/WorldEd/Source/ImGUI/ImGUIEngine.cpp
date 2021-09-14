@@ -104,16 +104,16 @@ void FImGUIWindow::Tick()
 											  FViewportRHIRef, viewportRHI, imguiViewport->ViewportRHI,
 											  bool, isNeedClear, !( imguiViewport->Flags & ImGuiViewportFlags_NoRendererClear ),
 											  {
-													FBaseDeviceContextRHI * immediateContext = GRHI->GetImmediateContext();
-
+													FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 													GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
+													
 													if ( isNeedClear )
 													{
 														immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
 													}
-
 													GRHI->DrawImGUI( immediateContext, ( ImDrawData* )imGuiDrawData->GetDrawData() );
-													GRHI->EndDrawingViewport( immediateContext, viewportRHI, true, false );
+													
+													GRHI->EndDrawingViewport( immediateContext, viewportRHI, true, false );												
 													imGuiDrawData->MarkFree();
 											  } );
 	}

@@ -43,13 +43,13 @@ public:
 	virtual void							Present( bool InLockToVsync ) override;
 
 	/**
-	 * @brief Get back buffer
-	 * @return Pointer to back buffer
+	 * Resize viewport
+	 *
+	 * @param[in] InWidth New width
+	 * @param[in] InHeight New height
+	 * @param[in] InIsFullscreen Is fullscreen
 	 */
-	FORCEINLINE class FD3D11Surface*		GetBackBuffer() const
-	{
-		return backBuffer;
-	}
+	virtual void							Resize( uint32 InWidth, uint32 InHeight ) override;
 
 	/**
 	 * @brief Get width
@@ -67,10 +67,10 @@ public:
 	 * @breif Get surface of viewport
 	 * @return Pointer to surface of viewport
 	 */
-	virtual class FBaseSurfaceRHI*			GetSurface() const override;
+	virtual FSurfaceRHIRef					GetSurface() const override;
 
 private:
-	class FD3D11Surface*		backBuffer;					/**< Pointer to back buffer */
+	FSurfaceRHIRef				backBuffer;					/**< Pointer to back buffer */
 	IDXGISwapChain*				dxgiSwapChain;				/**< DXGI swap chain */
 	uint32						width;						/**< Width of viewport */
 	uint32						height;						/**< Height of viewport */

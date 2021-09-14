@@ -17,6 +17,14 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Shipping|Win32">
+      <Configuration>Shipping</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Shipping|x64">
+      <Configuration>Shipping</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -35,12 +43,22 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
@@ -56,10 +74,16 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -95,6 +119,16 @@
     <NMakeReBuildCommandLine>@cd ../../../
 @call BatchFiles/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeReBuildCommandLine>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|Win32'">
+    <NMakeOutput>../../../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe</NMakeOutput>
+    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <OutDir>..\..\..\Intermediate\$(ProjectName) Win32 $(Configuration)\</OutDir>
+    <IntDir>..\..\..\Intermediate\$(ProjectName) Win32 $(Configuration)\</IntDir>
+    <NMakeBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win32 $(Configuration) -output "../../Binaries/Win32/TestbedGame-Win32-$(Configuration).exe"</NMakeReBuildCommandLine>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NMakeOutput>../../../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe</NMakeOutput>
     <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
@@ -106,6 +140,17 @@
 @call BatchFiles/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeReBuildCommandLine>
     <NMakeCleanCommandLine>
     </NMakeCleanCommandLine>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+    <NMakeOutput>../../../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe</NMakeOutput>
+    <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <OutDir>..\..\..\Intermediate\$(ProjectName) Win64 $(Configuration)\</OutDir>
+    <IntDir>..\..\..\Intermediate\$(ProjectName) Win64 $(Configuration)\</IntDir>
+    <NMakeBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>@cd ../../../
+@call BatchFiles/Build.bat TestbedGame Win64 $(Configuration) -output "../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe"</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine />
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <BuildLog>
@@ -122,7 +167,17 @@
       <Path>..\..\..\Intermediate\BuildLogs\$(ProjectName) Win64 $(Configuration)\BuildLog.log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+    <BuildLog>
+      <Path>..\..\..\Intermediate\BuildLogs\$(ProjectName) Win64 $(Configuration)\BuildLog.log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <BuildLog>
+      <Path>..\..\..\Intermediate\BuildLogs\$(ProjectName) Win32 $(Configuration)\BuildLog.log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|Win32'">
     <BuildLog>
       <Path>..\..\..\Intermediate\BuildLogs\$(ProjectName) Win32 $(Configuration)\BuildLog.log</Path>
     </BuildLog>

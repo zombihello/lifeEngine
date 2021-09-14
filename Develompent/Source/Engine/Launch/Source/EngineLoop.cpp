@@ -191,9 +191,25 @@ void FEngineLoop::Tick()
 		SWindowEvent			windowEvent;
 		while ( GWindow->PollEvent( windowEvent ) )
 		{
-			if ( windowEvent.type == SWindowEvent::T_WindowClose && windowEvent.events.windowClose.windowId == GWindow->GetID() )
+			switch ( windowEvent.type )
 			{
-				GIsRequestingExit = true;
+			case SWindowEvent::T_WindowClose:
+				if ( windowEvent.events.windowClose.windowId == GWindow->GetID() )
+				{
+					GIsRequestingExit = true;
+				}
+				break;
+
+			case SWindowEvent::T_WindowResize:
+				if ( windowEvent.events.windowResize.windowId == GWindow->GetID() )
+				{
+					UNIQUE_RENDER_COMMAND_TWOPARAMETER( FResizeViewportCommand,
+														uint32, newWidth, windowEvent.events.windowResize.width,
+														uint32, newHeight, windowEvent.events.windowResize.height,
+														{
+															GViewportRHI->Resize( newWidth, newHeight );
+														} );		
+				}
 				break;
 			}
 

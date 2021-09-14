@@ -32,6 +32,15 @@ public:
 	virtual void						Present( bool InLockToVsync ) {}
 
 	/**
+	 * Resize viewport
+	 * 
+	 * @param[in] InWidth New width
+	 * @param[in] InHeight New height
+	 * @param[in] InIsFullscreen Is fullscreen
+	 */
+	virtual void						Resize( uint32 InWidth, uint32 InHeight ) {}
+
+	/**
 	 * @brief Get width
 	 * @return Width of viewport
 	 */
@@ -47,7 +56,7 @@ public:
 	 * @breif Get surface of viewport
 	 * @return Pointer to surface of viewport
 	 */
-	virtual class FBaseSurfaceRHI*		GetSurface() const { return nullptr; }
+	virtual FSurfaceRHIRef				GetSurface() const { return nullptr; }
 };
 
 #endif // !BASEVIEWPORTRHI_H

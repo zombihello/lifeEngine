@@ -657,25 +657,8 @@ static void ImGui_ImplDX11_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
     public:
         static void Execute( ImGuiViewport* InViewport, ImVec2 InSize )
         {
-            // TODO BS yehor.pohuliaka - Need implement resize viewport
-            check( false );
-
-			//ImGui_ImplDX11_Data*            bd = ImGui_ImplDX11_GetBackendData();
-			//ImGui_ImplDX11_ViewportData*    vd = ( ImGui_ImplDX11_ViewportData* )InViewport->RendererUserData;
-			//if ( vd->RTView )
-			//{
-			//	vd->RTView->Release();
-			//	vd->RTView = NULL;
-			//}
-			//if ( vd->SwapChain )
-			//{
-			//	ID3D11Texture2D* pBackBuffer = NULL;
-			//	vd->SwapChain->ResizeBuffers( 0, ( UINT )InSize.x, ( UINT )InSize.y, DXGI_FORMAT_UNKNOWN, 0 );
-			//	vd->SwapChain->GetBuffer( 0, IID_PPV_ARGS( &pBackBuffer ) );
-			//	if ( pBackBuffer == NULL ) { fprintf( stderr, "ImGui_ImplDX11_SetWindowSize() failed creating buffers.\n" ); return; }
-			//	bd->pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &vd->RTView );
-			//	pBackBuffer->Release();
-			//}
+            check( InViewport && InViewport->ViewportRHI.IsValid() );
+            InViewport->ViewportRHI->Resize( ( uint32 )InSize.x, ( uint32 )InSize.y );
         }
     };
 

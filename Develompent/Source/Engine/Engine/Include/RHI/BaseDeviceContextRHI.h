@@ -29,7 +29,7 @@ public:
 	 * @param[in] InSurface Surface for rendering
 	 * @param[in] InColor Color for clearing render target
 	 */
-	virtual void				ClearSurface( class FBaseSurfaceRHI* InSurface, const class FColor& InColor ) {}
+	virtual void				ClearSurface( FSurfaceRHIParamRef InSurface, const class FColor& InColor ) {}
 };
 
 #endif // !BASEDEVICECONTEXTRHI_H

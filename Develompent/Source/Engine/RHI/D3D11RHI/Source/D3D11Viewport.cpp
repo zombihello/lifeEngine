@@ -79,10 +79,8 @@ FD3D11Viewport::FD3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InH
  */
 FD3D11Viewport::~FD3D11Viewport()
 {
-	delete backBuffer;
+	backBuffer.SafeRelease();
 	dxgiSwapChain->Release();
-
-	backBuffer = nullptr;
 	dxgiSwapChain = nullptr;
 }
 
@@ -93,6 +91,25 @@ void FD3D11Viewport::Present( bool InLockToVsync )
 {
 	check( dxgiSwapChain );
 	dxgiSwapChain->Present( InLockToVsync ? 1 : 0, 0 );
+}
+
+void FD3D11Viewport::Resize( uint32 InWidth, uint32 InHeight )
+{
+	if ( width == InWidth && height == InHeight )
+	{
+		return;
+	}
+
+	// Release our backbuffer reference, as required by DXGI before calling ResizeBuffers.
+	backBuffer.SafeRelease();
+	check( dxgiSwapChain );
+
+	HRESULT			result = dxgiSwapChain->ResizeBuffers( 1, InWidth, InHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH );
+	check( result == S_OK );
+
+	width = InWidth;
+	height = InHeight;
+	backBuffer = GetSwapChainSurface( dxgiSwapChain );
 }
 
 /**
@@ -114,7 +131,7 @@ uint32 FD3D11Viewport::GetHeight() const
 /**
  * Get surface of viewport
  */
-FBaseSurfaceRHI* FD3D11Viewport::GetSurface() const
+FSurfaceRHIRef FD3D11Viewport::GetSurface() const
 {
 	return backBuffer;
 }
