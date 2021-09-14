@@ -34,7 +34,14 @@
 #include "LEBuild.h"
 
 #if WITH_EDITOR
+
+#include "Core.h"
 #include "ImGUI/imgui.h"
+#include "Render/RenderingThread.h"
+#include "Misc/EngineGlobals.h"
+#include "RHI/TypesRHI.h"
+#include "D3D11Viewport.h"
+#include "D3D11RHI.h"
 #include "D3D11ImGUI.h"
 
 // DirectX
@@ -75,7 +82,7 @@ struct VERTEX_CONSTANT_BUFFER
 
 // Backend data stored in io.BackendRendererUserData to allow support for multiple Dear ImGui contexts
 // It is STRONGLY preferred that you use docking branch with multi-viewports (== single Dear ImGui context + multiple windows) instead of multiple Dear ImGui contexts.
-static ImGui_ImplDX11_Data* ImGui_ImplDX11_GetBackendData()
+ImGui_ImplDX11_Data* ImGui_ImplDX11_GetBackendData()
 {
     return ImGui::GetCurrentContext() ? (ImGui_ImplDX11_Data*)ImGui::GetIO().BackendRendererUserData : NULL;
 }
@@ -612,106 +619,72 @@ void ImGui_ImplDX11_NewFrame()
 // If you are new to dear imgui or creating a new binding for dear imgui, it is recommended that you completely ignore this section first..
 //--------------------------------------------------------------------------------------------------------
 
-// Helper structure we store in the void* RenderUserData field of each ImGuiViewport to easily retrieve our backend data.
-struct ImGui_ImplDX11_ViewportData
-{
-    IDXGISwapChain*                 SwapChain;
-    ID3D11RenderTargetView*         RTView;
-
-    ImGui_ImplDX11_ViewportData()   { SwapChain = NULL; RTView = NULL; }
-    ~ImGui_ImplDX11_ViewportData()  { IM_ASSERT(SwapChain == NULL && RTView == NULL); }
-};
-
 static void ImGui_ImplDX11_CreateWindow(ImGuiViewport* viewport)
 {
-    ImGui_ImplDX11_Data* bd = ImGui_ImplDX11_GetBackendData();
-    ImGui_ImplDX11_ViewportData* vd = IM_NEW(ImGui_ImplDX11_ViewportData)();
-    viewport->RendererUserData = vd;
-
-    // PlatformHandleRaw should always be a HWND, whereas PlatformHandle might be a higher-level handle (e.g. GLFWWindow*, SDL_Window*).
-    // Some backend will leave PlatformHandleRaw NULL, in which case we assume PlatformHandle will contain the HWND.
-    HWND hwnd = viewport->PlatformHandleRaw ? (HWND)viewport->PlatformHandleRaw : (HWND)viewport->PlatformHandle;
-    IM_ASSERT(hwnd != 0);
-
-    // Create swap chain
-    DXGI_SWAP_CHAIN_DESC sd;
-    ZeroMemory(&sd, sizeof(sd));
-    sd.BufferDesc.Width = (UINT)viewport->Size.x;
-    sd.BufferDesc.Height = (UINT)viewport->Size.y;
-    sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    sd.SampleDesc.Count = 1;
-    sd.SampleDesc.Quality = 0;
-    sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sd.BufferCount = 1;
-    sd.OutputWindow = hwnd;
-    sd.Windowed = TRUE;
-    sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    sd.Flags = 0;
-
-    IM_ASSERT(vd->SwapChain == NULL && vd->RTView == NULL);
-    bd->pFactory->CreateSwapChain(bd->pd3dDevice, &sd, &vd->SwapChain);
-
-    // Create the render target
-    if (vd->SwapChain)
+    class Helper
     {
-        ID3D11Texture2D* pBackBuffer;
-        vd->SwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
-        bd->pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &vd->RTView);
-        pBackBuffer->Release();
-    }
+    public:
+        static void Execute( ImGuiViewport* InViewport )
+        {
+            check( InViewport );
+
+			// PlatformHandleRaw should always be a HWND, whereas PlatformHandle might be a higher-level handle (e.g. GLFWWindow*, SDL_Window*).
+			// Some backend will leave PlatformHandleRaw NULL, in which case we assume PlatformHandle will contain the HWND.
+            HWND        windowHandle = InViewport->PlatformHandleRaw ? ( HWND )InViewport->PlatformHandleRaw : ( HWND )InViewport->PlatformHandle;
+            check( windowHandle );
+
+            InViewport->ViewportRHI = GRHI->CreateViewport( windowHandle, ( uint32 )InViewport->Size.x, ( uint32 )InViewport->Size.y );
+            check( InViewport->ViewportRHI );
+        }
+    };
+
+    UNIQUE_RENDER_COMMAND_ONEPARAMETER( FCreateWindowImGUICommand,
+                                        ImGuiViewport*, viewport, viewport,
+                                        {
+                                            Helper::Execute( viewport );
+                                        } );
 }
 
 static void ImGui_ImplDX11_DestroyWindow(ImGuiViewport* viewport)
 {
-    // The main viewport (owned by the application) will always have RendererUserData == NULL since we didn't create the data for it.
-    if (ImGui_ImplDX11_ViewportData* vd = (ImGui_ImplDX11_ViewportData*)viewport->RendererUserData)
-    {
-        if (vd->SwapChain)
-            vd->SwapChain->Release();
-        vd->SwapChain = NULL;
-        if (vd->RTView)
-            vd->RTView->Release();
-        vd->RTView = NULL;
-        IM_DELETE(vd);
-    }
-    viewport->RendererUserData = NULL;
+    // We nothing doing because TRefCountPtr auto delete created Viewport RHI
 }
 
 static void ImGui_ImplDX11_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
 {
-    ImGui_ImplDX11_Data* bd = ImGui_ImplDX11_GetBackendData();
-    ImGui_ImplDX11_ViewportData* vd = (ImGui_ImplDX11_ViewportData*)viewport->RendererUserData;
-    if (vd->RTView)
+    class Helper
     {
-        vd->RTView->Release();
-        vd->RTView = NULL;
-    }
-    if (vd->SwapChain)
-    {
-        ID3D11Texture2D* pBackBuffer = NULL;
-        vd->SwapChain->ResizeBuffers(0, (UINT)size.x, (UINT)size.y, DXGI_FORMAT_UNKNOWN, 0);
-        vd->SwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
-        if (pBackBuffer == NULL) { fprintf(stderr, "ImGui_ImplDX11_SetWindowSize() failed creating buffers.\n"); return; }
-        bd->pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &vd->RTView);
-        pBackBuffer->Release();
-    }
-}
+    public:
+        static void Execute( ImGuiViewport* InViewport, ImVec2 InSize )
+        {
+            // TODO BS yehor.pohuliaka - Need implement resize viewport
+            check( false );
 
-static void ImGui_ImplDX11_RenderWindow(ImGuiViewport* viewport, void*)
-{
-    ImGui_ImplDX11_Data* bd = ImGui_ImplDX11_GetBackendData();
-    ImGui_ImplDX11_ViewportData* vd = (ImGui_ImplDX11_ViewportData*)viewport->RendererUserData;
-    ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-    bd->pd3dDeviceContext->OMSetRenderTargets(1, &vd->RTView, NULL);
-    if (!(viewport->Flags & ImGuiViewportFlags_NoRendererClear))
-        bd->pd3dDeviceContext->ClearRenderTargetView(vd->RTView, (float*)&clear_color);
-    ImGui_ImplDX11_RenderDrawData(viewport->DrawData);
-}
+			//ImGui_ImplDX11_Data*            bd = ImGui_ImplDX11_GetBackendData();
+			//ImGui_ImplDX11_ViewportData*    vd = ( ImGui_ImplDX11_ViewportData* )InViewport->RendererUserData;
+			//if ( vd->RTView )
+			//{
+			//	vd->RTView->Release();
+			//	vd->RTView = NULL;
+			//}
+			//if ( vd->SwapChain )
+			//{
+			//	ID3D11Texture2D* pBackBuffer = NULL;
+			//	vd->SwapChain->ResizeBuffers( 0, ( UINT )InSize.x, ( UINT )InSize.y, DXGI_FORMAT_UNKNOWN, 0 );
+			//	vd->SwapChain->GetBuffer( 0, IID_PPV_ARGS( &pBackBuffer ) );
+			//	if ( pBackBuffer == NULL ) { fprintf( stderr, "ImGui_ImplDX11_SetWindowSize() failed creating buffers.\n" ); return; }
+			//	bd->pd3dDevice->CreateRenderTargetView( pBackBuffer, NULL, &vd->RTView );
+			//	pBackBuffer->Release();
+			//}
+        }
+    };
 
-static void ImGui_ImplDX11_SwapBuffers(ImGuiViewport* viewport, void*)
-{
-    ImGui_ImplDX11_ViewportData* vd = (ImGui_ImplDX11_ViewportData*)viewport->RendererUserData;
-    vd->SwapChain->Present(0, 0); // Present without vsync
+	UNIQUE_RENDER_COMMAND_TWOPARAMETER( FSetWindowSizeImGUICommand,
+										ImGuiViewport*, viewport, viewport,
+                                        ImVec2, size, size,
+										{
+											Helper::Execute( viewport, size );
+										} );
 }
 
 static void ImGui_ImplDX11_InitPlatformInterface()
@@ -720,8 +693,8 @@ static void ImGui_ImplDX11_InitPlatformInterface()
     platform_io.Renderer_CreateWindow = ImGui_ImplDX11_CreateWindow;
     platform_io.Renderer_DestroyWindow = ImGui_ImplDX11_DestroyWindow;
     platform_io.Renderer_SetWindowSize = ImGui_ImplDX11_SetWindowSize;
-    platform_io.Renderer_RenderWindow = ImGui_ImplDX11_RenderWindow;
-    platform_io.Renderer_SwapBuffers = ImGui_ImplDX11_SwapBuffers;
+    platform_io.Renderer_RenderWindow = nullptr;        // Implemented in D3D11RHI method BeginDrawViewport()
+    platform_io.Renderer_SwapBuffers = nullptr;         // Implemented in D3D11RHI method EndDrawViewport()
 }
 
 static void ImGui_ImplDX11_ShutdownPlatformInterface()

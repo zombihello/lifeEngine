@@ -247,6 +247,99 @@ private:
 	}; \
 	SEND_RENDER_COMMAND( InTypeName, ( InParamValue1 ) );
 
+ /**
+  * @ingroup Engine
+  * Declares a rendering command type with 2 parameters
+  *
+  * @param[in] InTypeName Type name of render command
+  * @param[in] InParamType1 Type of param 1
+  * @param[in] InParamName1 Name of param 1
+  * @param[in] InParamValue1 Value of param 1
+  * @param[in] InParamType2 Type of param 2
+  * @param[in] InParamName2 Name of param 2
+  * @param[in] InParamValue2 Value of param 2
+  * @param[in] InCode Executable code in render thread
+  */
+#define UNIQUE_RENDER_COMMAND_TWOPARAMETER( InTypeName, InParamType1, InParamName1, InParamValue1, InParamType2, InParamName2, InParamValue2, InCode ) \
+	class InTypeName : public FRenderCommand \
+	{ \
+	public: \
+		InTypeName( InParamType1 In##InParamName1, InParamType2 In##InParamName2 ) : \
+			InParamName1( In##InParamName1 ), \
+			InParamName2( In##InParamName2 ) \
+		{} \
+		virtual uint32 Execute() override \
+		{ \
+			InCode; \
+			return sizeof( *this ); \
+		} \
+		virtual uint32 GetSize() const override \
+		{ \
+			return sizeof( *this ); \
+		} \
+		virtual const tchar* DescribeCommand() const override \
+		{ \
+			return TEXT( #InTypeName ); \
+		} \
+		virtual const char* DescribeCommandChar() const override \
+		{ \
+			return #InTypeName ; \
+		} \
+	private: \
+		InParamType1			InParamName1; \
+		InParamType2			InParamName2; \
+	}; \
+	SEND_RENDER_COMMAND( InTypeName, ( InParamValue1, InParamValue2 ) );
+
+	/**
+	 * @ingroup Engine
+	 * Declares a rendering command type with 3 parameters
+	 *
+	 * @param[in] InTypeName Type name of render command
+	 * @param[in] InParamType1 Type of param 1
+	 * @param[in] InParamName1 Name of param 1
+	 * @param[in] InParamValue1 Value of param 1
+	 * @param[in] InParamType2 Type of param 2
+	 * @param[in] InParamName2 Name of param 2
+	 * @param[in] InParamValue2 Value of param 2
+	 * @param[in] InParamType3 Type of param 3
+	 * @param[in] InParamName3 Name of param 3
+	 * @param[in] InParamValue3 Value of param 3
+	 * @param[in] InCode Executable code in render thread
+	 */
+#define UNIQUE_RENDER_COMMAND_THREEPARAMETER( InTypeName, InParamType1, InParamName1, InParamValue1, InParamType2, InParamName2, InParamValue2, InParamType3, InParamName3, InParamValue3, InCode ) \
+	class InTypeName : public FRenderCommand \
+	{ \
+	public: \
+		InTypeName( InParamType1 In##InParamName1, InParamType2 In##InParamName2, InParamType3 In##InParamName3 ) : \
+			InParamName1( In##InParamName1 ), \
+			InParamName2( In##InParamName2 ), \
+			InParamName3( In##InParamName3 ) \
+		{} \
+		virtual uint32 Execute() override \
+		{ \
+			InCode; \
+			return sizeof( *this ); \
+		} \
+		virtual uint32 GetSize() const override \
+		{ \
+			return sizeof( *this ); \
+		} \
+		virtual const tchar* DescribeCommand() const override \
+		{ \
+			return TEXT( #InTypeName ); \
+		} \
+		virtual const char* DescribeCommandChar() const override \
+		{ \
+			return #InTypeName ; \
+		} \
+	private: \
+		InParamType1			InParamName1; \
+		InParamType2			InParamName2; \
+		InParamType3			InParamName3; \
+	}; \
+	SEND_RENDER_COMMAND( InTypeName, ( InParamValue1, InParamValue2, InParamValue3 ) );
+
 /**
  * @ingroup Engine
  * @brief The rendering thread runnable object

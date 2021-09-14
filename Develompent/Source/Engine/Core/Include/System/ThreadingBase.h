@@ -39,6 +39,28 @@ FORCEINLINE bool IsInGameThread()
 	return ( GGameThreadId == 0 ) || ( appGetCurrentThreadId() == GGameThreadId );
 }
 
+//
+// Interlocked style functions for threadsafe atomic operations
+//
+
+/**
+ * @ingroup Core
+ * Atomically increments the value pointed to and returns that to the caller
+ * 
+ * @param[in] InValue Pointer to value
+ * @return Returns the incremented value
+ */
+extern FORCEINLINE int32 appInterlockedIncrement( volatile int32* InValue );
+
+/**
+ * @ingroup Core
+ * Atomically decrements the value pointed to and returns that to the caller
+ * 
+ * @param[in] InValue Pointer to value
+ * @return Returns the minified value
+ */
+extern FORCEINLINE int32 appInterlockedDecrement( volatile int32* InValue );
+
 /**
  * @ingroup Core
  * The list of enumerated thread priorities we support

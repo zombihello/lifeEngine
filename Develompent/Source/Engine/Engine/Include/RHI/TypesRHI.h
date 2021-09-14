@@ -11,6 +11,18 @@
 
 #include "Misc/RefCountPtr.h"
 
+/**
+ * @ingroup Engine Engine
+ * @brief Reference to viewport
+ */
+typedef TRefCountPtr< class FBaseViewportRHI >			FViewportRHIRef;
+
+/**
+ * @ingroup Engine Engine
+ * @brief Pointer to viewport
+ */
+typedef class FBaseViewportRHI*							FViewportRHIParamRef;
+
  /**
   * @ingroup Engine Engine
   * @brief Reference to vertex shader

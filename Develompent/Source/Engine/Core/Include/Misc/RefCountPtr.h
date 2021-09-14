@@ -237,6 +237,14 @@ public:
 	}
 
 	/**
+	 * Safe release
+	 */
+	FORCEINLINE void SafeRelease()
+	{
+		*this = nullptr;
+	}
+
+	/**
 	 * @brief Is valid pointer
 	 *
 	 * @return Returning true if pointer is valid, else returning false

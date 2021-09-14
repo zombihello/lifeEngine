@@ -12,6 +12,16 @@
 #include "Misc/Types.h"
 #include "System/ThreadingBase.h"
 
+FORCEINLINE int32 appInterlockedIncrement( volatile int32* InValue )
+{
+	return ( int32 )InterlockedIncrement( ( LPLONG )InValue );
+}
+
+FORCEINLINE int32 appInterlockedDecrement( volatile int32* InValue )
+{
+	return ( int32 )InterlockedDecrement( ( LPLONG )InValue );
+}
+
 FORCEINLINE uint32 appGetCurrentThreadId()
 {
 	return GetCurrentThreadId();

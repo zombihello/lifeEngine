@@ -136,6 +136,12 @@ public:
 	 * @return Return OS handle
 	 */
 	virtual void*			GetHandle() const { return nullptr; }
+
+	/**
+	 * @brief Get ID window
+	 * @return Return ID window. If window not created return ( uint32 )-1
+	 */
+	virtual uint32			GetID() const { return ( uint32 )-1; }
 };
 
 #endif // !BASEWINDOW_H

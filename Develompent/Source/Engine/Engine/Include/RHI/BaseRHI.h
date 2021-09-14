@@ -12,6 +12,7 @@
 #include "Misc/Types.h"
 #include "Render/Shaders/ShaderCompiler.h"
 #include "RHI/TypesRHI.h"
+#include "RHI/BaseViewportRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
 #include "RHI/BaseBufferRHI.h"
 #include "RHI/BaseStateRHI.h"
@@ -71,7 +72,7 @@ public:
 	 * @param[in] InHeight Height of viewport
 	 * @return Pointer on viewport
 	 */
-	virtual class FBaseViewportRHI*				CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )								{ return nullptr; }
+	virtual FViewportRHIRef						CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )								{ return nullptr; }
 
 	/**
 	 * @brief Create vertex shader

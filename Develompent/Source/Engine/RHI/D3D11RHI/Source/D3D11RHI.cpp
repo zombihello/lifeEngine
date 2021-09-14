@@ -163,7 +163,7 @@ void FD3D11RHI::Destroy()
 /**
  * Create viewport
  */
-class FBaseViewportRHI* FD3D11RHI::CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )
+FViewportRHIRef FD3D11RHI::CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )
 {
 	return new FD3D11Viewport( InWindowHandle, InWidth, InHeight );
 }

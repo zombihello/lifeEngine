@@ -59,6 +59,7 @@ void FWorldEd::Tick()
 	mainMenuBar.Tick();
 
 	GWindowsManager->Tick();
+	ImGui::ShowDemoWindow();
 	GImGUIEngine->EndDraw();
 }
 

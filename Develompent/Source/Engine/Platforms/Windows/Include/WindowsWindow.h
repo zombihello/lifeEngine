@@ -149,6 +149,12 @@ public:
 	virtual void*					GetHandle() const override;
 
 	/**
+	 * @brief Get ID window
+	 * @return Return ID window. If window not created return ( uint32 )-1
+	 */
+	virtual uint32					GetID() const override;
+
+	/**
 	 * @brief Get SDL window handle
 	 * @return Return SDL window handle
 	 */
@@ -158,6 +164,7 @@ private:
 	bool					isShowCursor;			/**< Is showed cursor */
 	bool					isFullscreen;			/**< Is enabled fullscreen mode */
 
+	uint32					id;						/**< Id window */
 	SDL_Window*				sdlWindow;				/**< Pointer on SDL window */
 	SDL_SysWMinfo*			sdlWindowInfo;			/**< Pointer on system info from SDL */
 	HANDLE					handle;					/**< OS handle on window */

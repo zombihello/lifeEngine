@@ -26,7 +26,7 @@
 // GLOBALS
 // --------------
 
-FBaseViewportRHI*			GViewportRHI = nullptr;
+FViewportRHIRef			GViewportRHI;
 
 /**
  * Constructor
@@ -191,7 +191,7 @@ void FEngineLoop::Tick()
 		SWindowEvent			windowEvent;
 		while ( GWindow->PollEvent( windowEvent ) )
 		{
-			if ( windowEvent.type == SWindowEvent::T_WindowClose )
+			if ( windowEvent.type == SWindowEvent::T_WindowClose && windowEvent.events.windowClose.windowId == GWindow->GetID() )
 			{
 				GIsRequestingExit = true;
 				break;
@@ -244,7 +244,7 @@ void FEngineLoop::Exit()
 	worldEd = nullptr;
 #endif // WITH_EDITOR
 
-	delete GViewportRHI;
+	GViewportRHI.SafeRelease();
 	GRHI->Destroy();
 
 	GWindow->Close();

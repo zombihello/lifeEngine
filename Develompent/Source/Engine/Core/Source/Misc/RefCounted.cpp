@@ -20,7 +20,7 @@ FRefCounted::~FRefCounted()
  */
 void FRefCounted::ReleaseRef()
 {	 
-	if ( !countReferences || !--countReferences )
+	if ( !countReferences || !appInterlockedDecrement( ( int32* )&countReferences ) )
 	{
 		delete this;
 	}

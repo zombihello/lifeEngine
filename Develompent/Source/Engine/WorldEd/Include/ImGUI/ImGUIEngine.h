@@ -9,9 +9,14 @@
 #ifndef IMGUIENGINE_H
 #define IMGUIENGINE_H
 
+#include <vector>
+
 #include "Core.h"
+#include "Misc/RefCounted.h"
+#include "Misc/RefCountPtr.h"
 #include "System/ThreadingBase.h"
 #include "ImGUI/imgui.h"
+#include "RHI/TypesRHI.h"
 
 /**
  * @ingroup WorldEd
@@ -55,7 +60,7 @@ extern void				appImGUIProcessEvent( struct SWindowEvent& InWindowEvent );
  * @ingroup WorldEd
  * @brief Class for draw data of ImGUI
  */
-class FImGUIDrawData
+class FImGUIDrawData : public FRefCounted
 {
 public:
 	/**
@@ -123,6 +128,39 @@ private:
 
 /**
  * @ingroup WorldEd
+ * Class of update window ImGUI
+ */
+class FImGUIWindow
+{
+public:
+	/**
+	 * Constructor
+	 * @param[in] InViewport Pointer to viewport of ImGUI
+	 */
+	FImGUIWindow( ImGuiViewport* InViewport );
+
+	/**
+	 * Update ImGUI windows
+	 */
+	void Tick();
+
+	/**
+	 * Get ImGUI viewport
+	 * @return Return Pointer to ImGUI viewport
+	 */
+	FORCEINLINE ImGuiViewport* GetViewport() const
+	{
+		return imguiViewport;
+	}
+
+private:
+	ImGuiViewport*						imguiViewport;									/**< Pointer to ImGUI viewport */
+	TRefCountPtr< FImGUIDrawData >		drawDataBuffers[ IMGUI_DRAWBUFFERS_COUNT ];		/**< Buffers of ImDrawData for draw. In one buffer write, from one read */
+	uint32								indexCurrentBuffer;								/**< Index of current buffer */
+};
+
+/**
+ * @ingroup WorldEd
  * @brief Class for work with ImGUI and initialize her on platforms
  */
 class FImGUIEngine
@@ -165,11 +203,21 @@ public:
 	 */
 	void					EndDraw();
 
+	/**
+	 * @brief Open new ImGUI window
+	 * @param[in] InViewport Pointer to viewport of ImGUI
+	 */
+	void					OpenWindow( ImGuiViewport* InViewport );
+
+	/**
+	 * @brief Close ImGUI window
+	 * @param[in] InViewport Pointer to viewport of ImGUI
+	 */
+	void					CloseWindow( ImGuiViewport* InViewport );
+
 private:
-	struct ImGuiContext*		imguiContext;									/**< Pointer to ImGUI context */
-	FCriticalSection			criticalSection;								/**< Critical section */
-	FImGUIDrawData				drawDataBuffers[ IMGUI_DRAWBUFFERS_COUNT ];		/**< Buffers of ImDrawData for draw. In one buffer write, from one read */
-	uint32						indexCurrentBuffer;								/**< Index of current buffer */
+	struct ImGuiContext*				imguiContext;	/**< Pointer to ImGUI context */
+	std::vector< FImGUIWindow* >		windows;		/**< Array of windows ImGUI */
 };
 
 #endif // !IMGUIENGINE_H

@@ -172,21 +172,30 @@ void appImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
     case SWindowEvent::T_WindowClose:
     {
         ImGuiViewport*          viewport = ImGui::FindViewportByPlatformHandle( ( void* )SDL_GetWindowFromID( InWindowEvent.events.windowClose.windowId ) );
-        viewport->PlatformRequestClose = true;
+        if ( viewport )
+        {
+            viewport->PlatformRequestClose = true;
+        }
         break;
     }
 
     case SWindowEvent::T_WindowResize:
     {
-        ImGuiViewport*          viewport = ImGui::FindViewportByPlatformHandle( ( void* ) SDL_GetWindowFromID( InWindowEvent.events.windowResize.windowId ) );
-        viewport->PlatformRequestResize = true;
+        ImGuiViewport*          viewport = ImGui::FindViewportByPlatformHandle( ( void* )SDL_GetWindowFromID( InWindowEvent.events.windowResize.windowId ) );
+        if ( viewport )
+        {
+            viewport->PlatformRequestResize = true;
+        }
         break;
     }
 
 	case SWindowEvent::T_WindowMove:
 	{
-        ImGuiViewport*          viewport = ImGui::FindViewportByPlatformHandle( ( void* ) SDL_GetWindowFromID( InWindowEvent.events.windowResize.windowId ) );
-        viewport->PlatformRequestMove = true;
+        ImGuiViewport*          viewport = ImGui::FindViewportByPlatformHandle( ( void* )SDL_GetWindowFromID( InWindowEvent.events.windowResize.windowId ) );
+        if ( viewport )
+        {
+            viewport->PlatformRequestMove = true;
+        }
 		break;
 	}
 

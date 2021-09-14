@@ -62,7 +62,7 @@ public:
 	 * @param[in] InHeight Height of viewport
 	 * @return Pointer on viewport
 	 */
-	virtual class FBaseViewportRHI*					CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight ) override;
+	virtual FViewportRHIRef							CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight ) override;
 
 	/**
 	 * @brief Create vertex shader

@@ -788,6 +788,7 @@ CODE
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include "Core.h"
 #include "ImGUI/imgui.h"
 #ifndef IMGUI_DISABLE
 
@@ -11699,7 +11700,8 @@ static ImGuiViewportP* FindHoveredViewportFromPlatformWindowStack(const ImVec2 m
     }
     return best_candidate;
 }
-
+#include "Misc/WorldEdGlobals.h"
+#include "ImGUI/ImGUIEngine.h"
 // Update viewports and monitor infos
 // Note that this is running even if 'ImGuiConfigFlags_ViewportsEnable' is not set, in order to clear unused viewports (if any) and update monitor info.
 static void ImGui::UpdateViewportsNewFrame()
@@ -11751,7 +11753,9 @@ static void ImGui::UpdateViewportsNewFrame()
         // Erase unused viewports
         if (n > 0 && viewport->LastFrameActive < g.FrameCount - 2)
         {
+            GImGUIEngine->CloseWindow( viewport );
             DestroyViewport(viewport);
+            
             n--;
             continue;
         }
@@ -12208,6 +12212,9 @@ void ImGui::WindowSyncOwnedViewport(ImGuiWindow* window, ImGuiWindow* parent_win
         window->Viewport->ParentViewportId = g.IO.ConfigViewportsNoDefaultParent ? 0 : IMGUI_VIEWPORT_DEFAULT_ID;
 }
 
+#include "Misc/WorldEdGlobals.h"
+#include "ImGUI/ImGUIEngine.h"
+
 // Called by user at the end of the main loop, after EndFrame()
 // This will handle the creation/update of all OS windows via function defined in the ImGuiPlatformIO api.
 void ImGui::UpdatePlatformWindows()
@@ -12233,6 +12240,7 @@ void ImGui::UpdatePlatformWindows()
         if (destroy_platform_window)
         {
             DestroyPlatformWindow(viewport);
+            GImGUIEngine->CloseWindow( viewport );
             continue;
         }
 
@@ -12252,6 +12260,8 @@ void ImGui::UpdatePlatformWindows()
             viewport->LastPlatformPos = viewport->LastPlatformSize = ImVec2(FLT_MAX, FLT_MAX); // By clearing those we'll enforce a call to Platform_SetWindowPos/Size below, before Platform_ShowWindow (FIXME: Is that necessary?)
             viewport->LastRendererSize = viewport->Size;                                       // We don't need to call Renderer_SetWindowSize() as it is expected Renderer_CreateWindow() already did it.
             viewport->PlatformWindowCreated = true;
+
+            GImGUIEngine->OpenWindow( viewport );
         }
 
         // Apply Position and Size (from ImGui to Platform/Renderer backends)
@@ -12348,6 +12358,8 @@ void ImGui::UpdatePlatformWindows()
 //
 void ImGui::RenderPlatformWindowsDefault(void* platform_render_arg, void* renderer_render_arg)
 {
+    checkMsg( false, "This function is deprecated" );
+
     // Skip the main viewport (index 0), which is always fully handled by the application!
     ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
     for (int i = 1; i < platform_io.Viewports.Size; i++)
@@ -12355,16 +12367,11 @@ void ImGui::RenderPlatformWindowsDefault(void* platform_render_arg, void* render
         ImGuiViewport* viewport = platform_io.Viewports[i];
         if (viewport->Flags & ImGuiViewportFlags_Minimized)
             continue;
-        if (platform_io.Platform_RenderWindow) platform_io.Platform_RenderWindow(viewport, platform_render_arg);
-        if (platform_io.Renderer_RenderWindow) platform_io.Renderer_RenderWindow(viewport, renderer_render_arg);
-    }
-    for (int i = 1; i < platform_io.Viewports.Size; i++)
-    {
-        ImGuiViewport* viewport = platform_io.Viewports[i];
-        if (viewport->Flags & ImGuiViewportFlags_Minimized)
-            continue;
-        if (platform_io.Platform_SwapBuffers) platform_io.Platform_SwapBuffers(viewport, platform_render_arg);
-        if (platform_io.Renderer_SwapBuffers) platform_io.Renderer_SwapBuffers(viewport, renderer_render_arg);
+
+		if ( platform_io.Platform_RenderWindow )        platform_io.Platform_RenderWindow( viewport, platform_render_arg );
+		if ( platform_io.Renderer_RenderWindow )        platform_io.Renderer_RenderWindow( viewport, renderer_render_arg );
+		if ( platform_io.Platform_SwapBuffers )         platform_io.Platform_SwapBuffers( viewport, platform_render_arg );
+        if ( platform_io.Renderer_SwapBuffers )         platform_io.Renderer_SwapBuffers( viewport, renderer_render_arg );
     }
 }
 
@@ -12436,11 +12443,12 @@ void ImGui::DestroyPlatformWindow(ImGuiViewportP* viewport)
     ImGuiContext& g = *GImGui;
     if (viewport->PlatformWindowCreated)
     {
+        IM_ASSERT( g.PlatformIO.Renderer_DestroyWindow && g.PlatformIO.Platform_DestroyWindow );
+
         if (g.PlatformIO.Renderer_DestroyWindow)
             g.PlatformIO.Renderer_DestroyWindow(viewport);
         if (g.PlatformIO.Platform_DestroyWindow)
             g.PlatformIO.Platform_DestroyWindow(viewport);
-        IM_ASSERT(viewport->RendererUserData == NULL && viewport->PlatformUserData == NULL);
 
         // Don't clear PlatformWindowCreated for the main viewport, as we initially set that up to true in Initialize()
         // The righter way may be to leave it to the backend to set this flag all-together, and made the flag public.
@@ -12449,9 +12457,10 @@ void ImGui::DestroyPlatformWindow(ImGuiViewportP* viewport)
     }
     else
     {
-        IM_ASSERT(viewport->RendererUserData == NULL && viewport->PlatformUserData == NULL && viewport->PlatformHandle == NULL);
+        IM_ASSERT( viewport->PlatformUserData == NULL && viewport->PlatformHandle == NULL);
     }
-    viewport->RendererUserData = viewport->PlatformUserData = viewport->PlatformHandle = NULL;
+
+    viewport->PlatformUserData = viewport->PlatformHandle = NULL;
     viewport->ClearRequestFlags();
 }
 

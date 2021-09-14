@@ -167,6 +167,7 @@ EButtonCode appMouseButtonToButtonCode( uint8 InButtonIndex )
 FWindowsWindow::FWindowsWindow() :
 	isShowCursor( false ),
 	isFullscreen( false ),
+	id( ( uint32 )-1 ),
     sdlWindow( nullptr ),
     sdlWindowInfo( nullptr ),
     handle( nullptr )
@@ -312,6 +313,8 @@ void FWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
 		appErrorf( TEXT( "Failed created window (%ix%i) with title '%s' and flags 0x%X. SDL error: %s" ), InWidth, InHeight, InTitle, InFlags, SDL_GetError() );
 	}
 
+	id = SDL_GetWindowID( sdlWindow );
+
 	// Getting OS handle on window
 	sdlWindowInfo = new SDL_SysWMinfo();
 
@@ -339,6 +342,7 @@ void FWindowsWindow::Close()
 
 	LE_LOG( LT_Log, LC_General, TEXT( "Window with handle 0x%X closed" ), handle );
 
+	id = ( uint32 )-1;
 	sdlWindow = nullptr;
 	sdlWindowInfo = nullptr;
 	handle = nullptr;
@@ -495,4 +499,9 @@ bool FWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 	}
 
 	return isNotEndEvent;
+}
+
+uint32 FWindowsWindow::GetID() const
+{
+	return id;
 }

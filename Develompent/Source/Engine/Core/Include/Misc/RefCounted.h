@@ -11,6 +11,7 @@
 
 #include "Core.h"
 #include "Misc/Types.h"
+#include "System/ThreadingBase.h"
 
 /**
  * @ingroup Core
@@ -34,7 +35,7 @@ public:
 	 */
 	FORCEINLINE void		AddRef()					
 	{ 
-		++countReferences; 
+		appInterlockedIncrement( ( int32* )&countReferences );
 	}
 
 	/**
