@@ -193,8 +193,13 @@ void FD3D11Texture2DRHI::Lock( FBaseDeviceContextRHI* InDeviceContext, uint32 In
 		// Map the staging resource, and return the mapped address
 		ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 		D3D11_MAPPED_SUBRESOURCE		d3d11MappedTexture2D;
+
+#if DO_CHECK
 		HRESULT							result = d3d11DeviceContext->Map( stagingResource->GetResource(), 0, InIsDataWrite ? D3D11_MAP_WRITE : D3D11_MAP_READ, 0, &d3d11MappedTexture2D );
 		check( result == S_OK );
+#else
+		d3d11DeviceContext->Map( stagingResource->GetResource(), 0, InIsDataWrite ? D3D11_MAP_WRITE : D3D11_MAP_READ, 0, &d3d11MappedTexture2D );
+#endif // DO_CHECK
 
 		OutLockedData.data = ( byte* )d3d11MappedTexture2D.pData;
 		OutLockedData.pitch = d3d11MappedTexture2D.RowPitch;
@@ -240,9 +245,17 @@ FD3D11Texture2DRHI* FD3D11Texture2DRHI::CreateStagingResource( class FBaseDevice
 	d3d11StagingTextureDesc.CPUAccessFlags		= InIsDataWrite ? D3D11_CPU_ACCESS_WRITE : D3D11_CPU_ACCESS_READ;
 
 	ID3D11Texture2D*		d3d11StagingTexture2D = nullptr;
+
+#if DO_CHECK
 	HRESULT					result = ( ( FD3D11RHI* )GRHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
 	check( result == S_OK );
+#else
+	( ( FD3D11RHI* )GRHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
+#endif // DO_CHECK
+
+#if !SHIPPING_BUILD
 	D3D11SetDebugName( d3d11StagingTexture2D, "LockingStaging2DTexture" );
+#endif // !SHIPPING_BUILD
 
 	// Copy the mip-map data from the real resource into the staging resource
 	if ( !InIsDataWrite || InIsUseCPUShadow )

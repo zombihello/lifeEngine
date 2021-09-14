@@ -104,8 +104,12 @@ void FD3D11Viewport::Resize( uint32 InWidth, uint32 InHeight )
 	backBuffer.SafeRelease();
 	check( dxgiSwapChain );
 
+#if DO_CHECK
 	HRESULT			result = dxgiSwapChain->ResizeBuffers( 1, InWidth, InHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH );
 	check( result == S_OK );
+#else
+	dxgiSwapChain->ResizeBuffers( 1, InWidth, InHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH );
+#endif // DO_CHECK
 
 	width = InWidth;
 	height = InHeight;

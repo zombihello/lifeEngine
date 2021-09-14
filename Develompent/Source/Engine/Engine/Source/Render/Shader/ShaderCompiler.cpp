@@ -1,3 +1,6 @@
+#include "LEBuild.h"
+#if WITH_EDITOR
+
 #include "Logger/LoggerMacros.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
@@ -48,3 +51,4 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
 	
 	return true;
 }
+#endif // WITH_EDITOR

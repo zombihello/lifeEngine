@@ -39,8 +39,13 @@ FD3D11VertexBufferRHI::FD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, con
 
 	// Creating DirectX 11 vertex buffer
 	ID3D11Device*		device = static_cast< FD3D11RHI* >( GRHI )->GetD3D11Device();
+
+#if DO_CHECK
 	HRESULT				result = device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
 	check( result == S_OK );
+#else
+	device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
+#endif // DO_CHECK
 
 	d3d11Buffer->AddRef();
 
@@ -95,8 +100,13 @@ FD3D11IndexBufferRHI::FD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uin
 
 	// Creating DirectX 11 vertex buffer
 	ID3D11Device*		device = static_cast< FD3D11RHI* >( GRHI )->GetD3D11Device();
+
+#if DO_CHECK
 	HRESULT				result = device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
 	check( result == S_OK );
+#else
+	device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
+#endif // DO_CHECK
 
 	d3d11Buffer->AddRef();
 

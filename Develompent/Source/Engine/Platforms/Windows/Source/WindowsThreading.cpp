@@ -147,10 +147,10 @@ bool FRunnableThreadWindows::Create( FRunnable* InRunnable, const tchar* InThrea
 
 	// Create the new thread
 	thread = CreateThread( nullptr, InStackSize, &FRunnableThreadWindows::StaticMainProc, this, 0, ( LPDWORD ) &threadId );
-
+	
 	// If it fails, clear all the vars
 	if ( !thread )
-	{
+	{		
 		if ( isAutoDeleteRunnable )
 		{
 			delete runnable;
@@ -219,7 +219,13 @@ uint32 FRunnableThreadWindows::Run()
 FRunnableThread* FThreadFactoryWindows::CreateThread( FRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf /*= false*/, bool InIsAutoDeleteRunnable /*= false*/, uint32 InStackSize /*= 0*/, EThreadPriority InThreadPriority /*= TP_Normal*/ )
 {
 	FRunnableThreadWindows*		newThread = new FRunnableThreadWindows();
+	
+#if DO_CHECK
 	check( newThread->Create( InRunnable, InThreadName, InIsAutoDeleteSelf, InIsAutoDeleteRunnable, InStackSize, InThreadPriority ) );
+#else
+	newThread->Create( InRunnable, InThreadName, InIsAutoDeleteSelf, InIsAutoDeleteRunnable, InStackSize, InThreadPriority );
+#endif // DO_CHECK
+	
 	return newThread;
 }
 

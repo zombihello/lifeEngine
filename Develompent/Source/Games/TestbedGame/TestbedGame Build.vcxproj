@@ -143,7 +143,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
     <NMakeOutput>../../../../Binaries/Win64/TestbedGame-Win64-$(Configuration).exe</NMakeOutput>
-    <NMakePreprocessorDefinitions>NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>SHIPPING;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>..\..\..\Intermediate\$(ProjectName) Win64 $(Configuration)\</OutDir>
     <IntDir>..\..\..\Intermediate\$(ProjectName) Win64 $(Configuration)\</IntDir>
     <NMakeBuildCommandLine>@cd ../../../

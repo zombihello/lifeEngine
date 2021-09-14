@@ -62,7 +62,7 @@ uint32 FRenderingThread::Run()
 	uint32		numReadBytes = 0;
 
 	while ( GIsThreadedRendering )
-	{
+	{	
 		// Command processing loop
 		while ( GIsThreadedRendering && GRenderCommandBuffer.BeginRead( readPointer, numReadBytes ) )
 		{

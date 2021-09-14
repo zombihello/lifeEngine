@@ -193,7 +193,7 @@ namespace lifeBuildTool
                     break;
 
                 case LETargetConfiguration.Release:
-                    cppEnvironment.definitions.Add( "DEBUG=1" );
+                    cppEnvironment.definitions.Add( "DEBUG=0" );
                     cppEnvironment.definitions.Add( "RELEASE=1" );
                     cppEnvironment.definitions.Add( "SHIPPING=0" );
                     break;

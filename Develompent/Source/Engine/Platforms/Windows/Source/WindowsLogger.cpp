@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "LEBuild.h"
 #include "Containers/String.h"
 #include "System/BaseFileSystem.h"
 #include "WindowsLogger.h"
@@ -41,6 +42,7 @@ FWindowsLogger::~FWindowsLogger()
  */
 void FWindowsLogger::Show( bool InShowWindow )
 {
+#if !NO_LOGGING
 	if ( InShowWindow )
 	{
 		if ( consoleHandle )		return;
@@ -57,6 +59,7 @@ void FWindowsLogger::Show( bool InShowWindow )
 		consoleHandle = nullptr;
 		FreeConsole();
 	}
+#endif // !NO_LOGGING
 }
 
 /**
@@ -64,7 +67,9 @@ void FWindowsLogger::Show( bool InShowWindow )
  */
 void FWindowsLogger::Init()
 {
+#if !NO_LOGGING
 	archiveLogs = GFileSystem->CreateFileWriter( TEXT( "../../Launch.log" ), AW_None );
+#endif // !NO_LOGGING
 }
 
 /**

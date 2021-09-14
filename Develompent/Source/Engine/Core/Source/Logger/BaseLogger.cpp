@@ -33,6 +33,7 @@ IMPLEMENT_SCRIPT_API( FBaseLogger,
  */
 void FBaseLogger::Logf( ELogType InLogType, ELogCategory InLogCategory, const tchar* InMessage, ... )
 {
+#if !NO_LOGGING
 	va_list			arguments;
 	va_start( arguments, InMessage );
 	
@@ -41,4 +42,5 @@ void FBaseLogger::Logf( ELogType InLogType, ELogCategory InLogCategory, const tc
    
 	va_end( arguments );
 	free( buffer );
+#endif // !NO_LOGGING
 }

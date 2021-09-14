@@ -128,12 +128,8 @@ FD3D11BoundShaderStateRHI::FD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 	const std::vector< D3D11_INPUT_ELEMENT_DESC >&		d3d11VertexElements = ( ( FD3D11VertexDeclarationRHI* )InVertexDeclaration.GetPtr() )->GetVertexElements();
 	const std::vector< byte >&							vertexShaderBytecode = ( ( FD3D11VertexShaderRHI* )InVertexShader.GetPtr() )->GetCode();
 	
+#if DO_CHECK
 	HRESULT			result = d3d11Device->CreateInputLayout( d3d11VertexElements.data(), ( uint32 )d3d11VertexElements.size(), vertexShaderBytecode.data(), vertexShaderBytecode.size(), &d3d11InputLayout );
-	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( InDebugName ) );
-
-#if !DO_CHECK
-	check( result == S_OK );
-#else
 	if ( result != S_OK )
 	{
 		LE_LOG( LT_Warning, LC_Shader, TEXT( "d3d11Device->CreateInputLayout failed. Dumping the vertex-shader assembly and the vertex declaration.\n" ) );
@@ -142,12 +138,12 @@ FD3D11BoundShaderStateRHI::FD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 			const D3D11_INPUT_ELEMENT_DESC&			d3d11InputElementDesc = d3d11VertexElements[ index ];
 
 			LE_LOG( LT_Warning, LC_Shader, TEXT( "VertexElements[%d]: SemanticName=%s SemanticIndex=%d InputSlot=%d AlignedByteOffset=%d" ),
-											index,
-											ANSI_TO_TCHAR( d3d11InputElementDesc.SemanticName ),
-											d3d11InputElementDesc.SemanticIndex,
-											d3d11InputElementDesc.InputSlot,
-											d3d11InputElementDesc.AlignedByteOffset );
-		}
+					index,
+					ANSI_TO_TCHAR( d3d11InputElementDesc.SemanticName ),
+					d3d11InputElementDesc.SemanticIndex,
+					d3d11InputElementDesc.InputSlot,
+					d3d11InputElementDesc.AlignedByteOffset );
+	}
 
 		ID3D10Blob*			vertexShaderAssembly = nullptr;
 		result = D3DDisassemble( vertexShaderBytecode.data(), vertexShaderBytecode.size(), false, nullptr, &vertexShaderAssembly );
@@ -160,7 +156,13 @@ FD3D11BoundShaderStateRHI::FD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 
 		check( false );
 	}
-#endif // !DO_CHECK
+#else
+	d3d11Device->CreateInputLayout( d3d11VertexElements.data(), ( uint32 )d3d11VertexElements.size(), vertexShaderBytecode.data(), vertexShaderBytecode.size(), &d3d11InputLayout );
+#endif // DO_CHECK
+	
+#if !SHIPPING_BUILD
+	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( InDebugName ) );
+#endif // !SHIPPING_BUILD
 }
 
 /**

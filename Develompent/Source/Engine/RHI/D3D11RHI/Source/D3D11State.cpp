@@ -80,8 +80,13 @@ FD3D11RasterizerStateRHI::FD3D11RasterizerStateRHI( const FRasterizerStateInitia
 	}
 
 	ID3D11Device*		d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
+
+#if DO_CHECK
 	HRESULT				result = d3d11Device->CreateRasterizerState( &d3d11RasterizerDesc, &d3d11RasterizerState );
 	check( result == S_OK );
+#else
+	d3d11Device->CreateRasterizerState( &d3d11RasterizerDesc, &d3d11RasterizerState );
+#endif // DO_CHECK
 }
 
 /**
@@ -135,8 +140,13 @@ FD3D11SamplerStateRHI::FD3D11SamplerStateRHI( const FSamplerStateInitializerRHI&
 	d3d11SamplerDesc.ComparisonFunc = TranslateSamplerCompareFunction( InInitializer.comparisonFunction );
 
 	ID3D11Device*		d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
+
+#if DO_CHECK
 	HRESULT				result = d3d11Device->CreateSamplerState( &d3d11SamplerDesc, &d3d11SamplerState );
 	check(result == S_OK);
+#else
+	d3d11Device->CreateSamplerState( &d3d11SamplerDesc, &d3d11SamplerState );
+#endif // DO_CHECK
 }
 
 FD3D11SamplerStateRHI::~FD3D11SamplerStateRHI()
