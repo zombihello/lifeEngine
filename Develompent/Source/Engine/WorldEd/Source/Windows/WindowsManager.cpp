@@ -4,10 +4,10 @@ void FWindowsManager::Remove( FWBaseWindowParamRef InWindow )
 {
 	for ( uint32 index = 0, count = ( uint32 )windows.size(); index < count; ++index )
 	{
-		WBaseWindow*		window = windows[ index ];
-		if ( window == InWindow )
+		FWindowInfo&		windowInfo = windows[ index ];
+		if ( windowInfo.window == InWindow )
 		{
-			windows.erase( windows.begin() + index );
+			windowInfo.isNeedRemove = true;
 			return;
 		}
 	}
@@ -15,8 +15,17 @@ void FWindowsManager::Remove( FWBaseWindowParamRef InWindow )
 
 void FWindowsManager::Tick()
 {
-	for ( uint32 index = 0, count = ( uint32 )windows.size(); index < count; ++index )
+	for ( uint32 index = 0; index < ( uint32 )windows.size(); )
 	{
-		windows[ index ]->Tick();
+		const FWindowInfo&		windowInfo = windows[ index ];
+		if ( windowInfo.isNeedRemove )
+		{
+			windows.erase( windows.begin() + index );
+			--index;
+			continue;
+		}
+
+		windowInfo.window->Tick();
+		++index;
 	}
 }

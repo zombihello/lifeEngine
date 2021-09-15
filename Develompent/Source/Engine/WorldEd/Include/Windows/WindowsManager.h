@@ -28,7 +28,7 @@ public:
 	 */
 	FORCEINLINE void Add( FWBaseWindowParamRef InWindow )
 	{
-		windows.push_back( InWindow );
+		windows.push_back( FWindowInfo{ false, InWindow } );
 	}
 
 	/**
@@ -52,7 +52,16 @@ public:
 	void Tick();
 
 private:
-	std::vector< FWBaseWindowRef >			windows;	/**< Array of opened windows */
+	/**
+	 * Struct of containing windows in manager
+	 */
+	struct FWindowInfo
+	{
+		bool					isNeedRemove;		/**< Is need remove this window from array in next tick */
+		FWBaseWindowRef			window;				/**< Pointer to window */
+	};
+
+	std::vector< FWindowInfo >			windows;	/**< Array of opened windows */
 };
 
 #endif // !WORLDED_WINDOWSMANAGER_H

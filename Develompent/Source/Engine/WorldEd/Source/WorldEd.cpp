@@ -24,23 +24,9 @@ void FWorldEd::Init()
 	InitUI();
 }
 
-TRefCountPtr< WWindowImportTexture >			GImportTexture = new WWindowImportTexture();	// This is for test
-
 void FWorldEd::InitUI()
 {
 	mainMenuBar.Init();
-	GImportTexture->Init();
-
-	GImportTexture->OnWindowOpened().Add( []( class WBaseWindow* InWindow )
-										  {
-											  check( InWindow );
-											  GWindowsManager->Add( InWindow );
-										  } );
-	GImportTexture->OnWindowClosed().Add( []( class WBaseWindow* InWindow )
-										  {
-											  check( InWindow );
-											  GWindowsManager->Remove( InWindow );
-										  } );
 
 	// Add menu 'File'
 	{
@@ -54,7 +40,20 @@ void FWorldEd::InitUI()
 		WMainMenuBar::FMenu*		menu = new WMainMenuBar::FMenu( TEXT( "Tools" ) );
 		menu->AddItem( new WMainMenuBar::FMenuItem( TEXT( "Import texture" ), []() 
 					   {
-						   GImportTexture->Open();
+						   WWindowImportTexture*		importTexture = new WWindowImportTexture();
+						   importTexture->Init();
+
+						   importTexture->OnWindowOpened().Add( []( class WBaseWindow* InWindow )
+																 {
+																	 check( InWindow );
+																	 GWindowsManager->Add( InWindow );
+																 } );
+						   importTexture->OnWindowClosed().Add( []( class WBaseWindow* InWindow )
+																 {
+																	 check( InWindow );
+																	 GWindowsManager->Remove( InWindow );
+																 } );
+						   importTexture->Open();
 					   } ) );
 		mainMenuBar.AddMenu( menu );
 	}

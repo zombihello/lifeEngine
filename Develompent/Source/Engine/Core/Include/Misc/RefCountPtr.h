@@ -153,6 +153,17 @@ public:
 	}
 
 	/**
+	 * @brief Overloaded operator ==
+	 * @param[in] InRight Right operand
+	 *
+	 * @return Returning true if pointers is equal, else returning false
+	 */
+	FORCEINLINE bool					operator==( PtrType* InRight ) const
+	{
+		return ptr == InRight;
+	}
+
+	/**
 	 * @brief Overloaded operator !=
 	 * @param[in] InRight Right operand
 	 *
@@ -161,6 +172,17 @@ public:
 	FORCEINLINE bool					operator!=( const TRefCountPtr& InRight ) const 
 	{ 
 		return ptr != InRight.ptr; 
+	}
+
+	/**
+	 * @brief Overloaded operator !=
+	 * @param[in] InRight Right operand
+	 *
+	 * @return Returning true if pointers is not equal, else returning false
+	 */
+	FORCEINLINE bool					operator!=( PtrType* InRight ) const
+	{
+		return ptr != InRight;
 	}
 
 	/**
