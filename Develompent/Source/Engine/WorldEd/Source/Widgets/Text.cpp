@@ -7,6 +7,7 @@ WText::WText( const tchar* InText /* = TEXT( "" ) */ ) :
 
 void WText::Tick()
 {
+	WBaseWidget::Tick();
 	check( IsInitialized() );
 	ImGui::Text( text.c_str() );
 }

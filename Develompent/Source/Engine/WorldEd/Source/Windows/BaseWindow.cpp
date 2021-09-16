@@ -24,15 +24,24 @@ void WBaseWindow::Tick()
 		return;
 	}
 
-	bool	result = ImGui::Begin( title.c_str(), &isOpen, ( ImGuiWindowFlags )flags );
+	// If size not 0 set window size
+	if ( size.x != 0.f || size.y != 0.f )
+	{
+		ImGui::SetNextWindowSize( ImVec2( size.x, size.y ) );
+	}
+
+	// Update window and widgets
+	ImGui::BeginDisabled( !IsEnabled() );
+	bool	result = ImGui::Begin( title.c_str(), &isOpen, ( ImGuiWindowFlags )flags );	
 	if ( result && isOpen )
 	{
 		for ( auto it = widgets.begin(), itEnd = widgets.end(); it != itEnd; ++it )
 		{
-			it->second->Tick();
+			( *it )->Tick();
 		}
-	}
+	}	
 	ImGui::End();
+	ImGui::EndDisabled();
 
 	if ( !isOpen )
 	{

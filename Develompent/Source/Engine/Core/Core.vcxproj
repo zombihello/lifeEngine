@@ -17,6 +17,7 @@
     <ClInclude Include="Include\Logger\BaseLogger.h" />
     <ClInclude Include="Include\Logger\LoggerMacros.h" />
     <ClInclude Include="Include\Math\Color.h" />
+    <ClInclude Include="Include\Math\Vector2D.h" />
     <ClInclude Include="Include\Misc\Class.h" />
     <ClInclude Include="Include\Misc\CoreGlobals.h" />
     <ClInclude Include="Include\Misc\Misc.h" />

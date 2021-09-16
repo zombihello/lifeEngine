@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctime>
 
 #include "LEBuild.h"
 #include "Containers/String.h"
@@ -68,7 +69,15 @@ void FWindowsLogger::Show( bool InShowWindow )
 void FWindowsLogger::Init()
 {
 #if !NO_LOGGING
-	archiveLogs = GFileSystem->CreateFileWriter( TEXT( "../../Launch.log" ), AW_None );
+	time_t		timeNow = time( nullptr );
+	tm*			tmTimeNow = localtime( &timeNow );
+
+	std::wstring		logFile = FString::Format( TEXT( "../../Logs/Launch-%i.%02i.%02i-%02i.%02i.%02i.log" ), 1900 + tmTimeNow->tm_year, 1 + tmTimeNow->tm_mon, tmTimeNow->tm_mday, tmTimeNow->tm_hour, tmTimeNow->tm_min, tmTimeNow->tm_sec );
+	archiveLogs = GFileSystem->CreateFileWriter( logFile.c_str(), AW_None );
+	if ( archiveLogs )
+	{
+		Logf( LT_Log, LC_Init, TEXT( "Opened log file '%s'" ), logFile.c_str() );
+	}
 #endif // !NO_LOGGING
 }
 

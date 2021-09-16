@@ -15,15 +15,17 @@
 #include "ImGUI/ImGUIEngine.h"
 #include "Containers/StringConv.h"
 #include "Widgets/BaseWidget.h"
+#include "System/Delegate.h"
 
+DECLARE_DELEGATE( FOnButtonClicked, class WButton* )
+
+/**
+ * @ingroup WorldEd
+ * Class for work with button
+ */
 class WButton : public WBaseWidget
 {
 public:
-	/**
-	 * Callback function type
-	 */
-	typedef std::function< void() >				FCallbackFunction;
-
 	/**
 	 * Constructor
 	 */
@@ -34,9 +36,8 @@ public:
 	 *
 	 * @param[in] InName Name button
 	 * @param[in] InSize Size button
-	 * @param[in] InCallback Function called when button clicked
 	 */
-	WButton( const tchar* InName, const ImVec2& InSize, FCallbackFunction InCallback );
+	WButton( const tchar* InName, const ImVec2& InSize );
 
 	/**
 	 * Update logic of widget
@@ -82,28 +83,18 @@ public:
 	}
 
 	/**
-	 * Set callback
-	 * 
-	 * @param[in] InCallback Function called when button clicked
+	 * Get delegate to event of button clicked
+	 * @return Return delegate to event of button clicked
 	 */
-	FORCEINLINE void SetCallback( FCallbackFunction InCallback )
+	FORCEINLINE FOnButtonClicked& OnButtonClicked()
 	{
-		callback = InCallback;
-	}
-
-	/**
-	 * Get callback
-	 * @return Return callback for clicked event
-	 */
-	FORCEINLINE FCallbackFunction GetCallback() const
-	{
-		return callback;
+		return onButtonClicked;
 	}
 
 private:
-	ImVec2					size;		/**< Button size */
-	FCallbackFunction		callback;	/**< Function called when button clicked */
-	std::string				name;		/**< Name button */
+	ImVec2					size;				/**< Button size */
+	FOnButtonClicked		onButtonClicked;	/**< Event dispatcher of button clicked */
+	std::string				name;				/**< Name button */
 };
 
 #endif // !WORLDED_BUTTON_H

@@ -10,9 +10,10 @@
 #define WORLDED_BASEWINDOW_H
 
 #include <string>
-#include <unordered_map>
+#include <list>
 
 #include "Misc/WorldEdTypes.h"
+#include "Math/Vector2D.h"
 #include "Containers/StringConv.h"
 #include "Widgets/BaseWidget.h"
 #include "System/Delegate.h"
@@ -71,47 +72,36 @@ public:
 	/**
 	 * Add widget
 	 * 
-	 * @param[in] InName Name widget
 	 * @param[in] InWidget Pointer to widget
 	 */
-	FORCEINLINE void AddWidget( const tchar* InName, FWBaseWidgetParamRef InWidget )
+	FORCEINLINE void AddWidget( FWBaseWidgetParamRef InWidget )
 	{
-		widgets[ InName ] = InWidget;
+		widgets.push_back( InWidget );
 	}
 
 	/**
 	 * Remove widget
 	 * 
-	 * @param[in] InName Name widget
+	 * @param[in] InWidget Pointer to widget
 	 */
-	FORCEINLINE void RemoveWidget( const tchar* InName )
+	FORCEINLINE void RemoveWidget( FWBaseWidgetParamRef InWidget )
 	{
-		widgets.erase( InName );
+		for ( auto it = widgets.begin(), itEnd = widgets.end(); it != itEnd; ++it )
+		{
+			if ( ( *it ) == InWidget )
+			{
+				widgets.erase( it );
+				return;
+			}
+		}
 	}
 
 	/**
 	 * Remove all widgets
 	 */
-	FORCEINLINE void RemoveAllWidget()
+	FORCEINLINE void RemoveAllWidgets()
 	{
 		widgets.clear();
-	}
-
-	/**
-	 * Find widget
-	 * 
-	 * @param[in] InName Name widget
-	 * @return Return pointer to widget. If not found return nullptr
-	 */
-	FORCEINLINE FWBaseWidgetRef FindWidget( const tchar* InName ) const
-	{
-		auto	it = widgets.find( InName );
-		if ( it == widgets.end() )
-		{
-			return nullptr;
-		}
-
-		return it->second;
 	}
 
 	/**
@@ -134,6 +124,15 @@ public:
 	}
 
 	/**
+	 * Get ANSI title window
+	 * @return Return title window in ANSI format
+	 */
+	FORCEINLINE std::string GetATitle() const
+	{
+		return title;
+	}
+
+	/**
 	 * Get is opened window
 	 * @return Return true if window is open, else return false
 	 */
@@ -152,12 +151,30 @@ public:
 	}
 
 	/**
+	 * Set size window
+	 * @param[in] InSize Window size
+	 */
+	FORCEINLINE void SetSize( const FVector2D& InSize )
+	{
+		size = InSize;
+	}
+
+	/**
 	 * Get flags window
 	 * @return Return flags window
 	 */
 	FORCEINLINE uint32 GetFlags() const
 	{
 		return flags;
+	}
+
+	/**
+	 * Get size window
+	 * @return Return size window
+	 */
+	FORCEINLINE const FVector2D& GetSize() const
+	{
+		return size;
 	}
 
 	/**
@@ -179,12 +196,13 @@ public:
 	}
 
 private:
-	bool														isOpen;				/**< Is opened window */
-	std::string													title;				/**< Title window */
-	uint32														flags;				/**< Flags window for ImGUI */
-	std::unordered_map< std::wstring, FWBaseWidgetRef >			widgets;			/**< Map of widgets in window */
-	FOnWindowOpened												onWindowOpened;		/**< Event of open window */
-	FOnWindowClosed												onWindowClosed;		/**< Event of close window */
+	bool								isOpen;				/**< Is opened window */
+	std::string							title;				/**< Title window */
+	uint32								flags;				/**< Flags window for ImGUI */
+	std::list< FWBaseWidgetRef >		widgets;			/**< Array of widgets in window */
+	FVector2D							size;				/**< Size window */
+	FOnWindowOpened						onWindowOpened;		/**< Event of open window */
+	FOnWindowClosed						onWindowClosed;		/**< Event of close window */
 };
 
 #endif // !WORLDED_BASEWINDOW_H

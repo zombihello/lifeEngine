@@ -2,24 +2,21 @@
 
 WButton::WButton() :
 	name( "None" ),
-	size( ImVec2( 0, 0 ) ),
-	callback( nullptr )
+	size( ImVec2( 0, 0 ) )
 {}
 
-WButton::WButton( const tchar* InName, const ImVec2& InSize, FCallbackFunction InCallback ) :
+WButton::WButton( const tchar* InName, const ImVec2& InSize ) :
 	name( TCHAR_TO_ANSI( InName ) ),
-	size( InSize ),
-	callback( InCallback )
+	size( InSize )
 {}
 
 void WButton::Tick()
 {
+	WBaseWidget::Tick();
+
 	check( IsInitialized() );
 	if ( ImGui::Button( name.c_str(), size ) )
 	{
-		if ( callback )
-		{
-			callback();
-		}
+		onButtonClicked.Broadcast( this );
 	}
 }

@@ -99,6 +99,15 @@
     <ClInclude Include="Include\Windows\WindowImportTexture.h">
       <Filter>Include\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Widgets\InputText.h">
+      <Filter>Include\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Widgets\SameLine.h">
+      <Filter>Include\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Windows\WindowFileDialog.h">
+      <Filter>Include\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\ImGUI\imgui.cpp">
@@ -144,6 +153,18 @@
       <Filter>Source\Widgets</Filter>
     </ClCompile>
     <ClCompile Include="Source\Windows\WindowImportTexture.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Widgets\InputText.cpp">
+      <Filter>Source\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Widgets\BaseWidget.cpp">
+      <Filter>Source\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Widgets\SameLine.cpp">
+      <Filter>Source\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Windows\WindowFileDialog.cpp">
       <Filter>Source\Windows</Filter>
     </ClCompile>
   </ItemGroup>

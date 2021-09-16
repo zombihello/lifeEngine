@@ -14,6 +14,10 @@
 #include "Containers/StringConv.h"
 #include "Widgets/BaseWidget.h"
 
+/**
+ * @ingroup WorldEd
+ * Class of work with text
+ */
 class WText : public WBaseWidget
 {
 public:

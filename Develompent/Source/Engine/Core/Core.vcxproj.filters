@@ -120,6 +120,9 @@
     <ClInclude Include="Include\System\Delegate.h">
       <Filter>Include\System</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Math\Vector2D.h">
+      <Filter>Include\Math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Core.cpp">
