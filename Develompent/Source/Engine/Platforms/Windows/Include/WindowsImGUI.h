@@ -20,7 +20,8 @@
 #ifndef WINDOWSIMGUI_H
 #define WINDOWSIMGUI_H
 
-#if WITH_EDITOR
+#include "LEBuild.h"
+#if WITH_IMGUI
 #include "ImGUI/imgui.h"      // IMGUI_IMPL_API
 
 struct SDL_Window;
@@ -39,4 +40,4 @@ static inline void ImGui_ImplSDL2_NewFrame(SDL_Window*) { ImGui_ImplSDL2_NewFram
 #endif
 #endif // WITH_EDITOR
 
-#endif // !WINDOWSIMGUI_H
+#endif // !WITH_IMGUI

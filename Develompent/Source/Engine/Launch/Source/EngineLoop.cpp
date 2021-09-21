@@ -16,6 +16,8 @@
 #include "RHI/BaseDeviceContextRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
 #include "Render/Shaders/ShaderManager.h"
+#include "UIEngine.h"
+#include "Misc/UIGlobals.h"
 #include "EngineLoop.h"
 
 #if WITH_EDITOR
@@ -125,6 +127,7 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 
 	int32		result = appPlatformInit( InCmdLine );
 	GShaderManager->Init();
+	GUIEngine->Init();
 
 	texture2D.SetFilename( TEXT( "../../Content/Textures/TestTexture2D.jpg" ) );
 
@@ -241,6 +244,9 @@ void FEngineLoop::Tick()
 	worldEd->Tick();
 #endif // WITH_EDITOR
 
+	GUIEngine->BeginDraw();
+	GUIEngine->EndDraw();
+
 	UNIQUE_RENDER_COMMAND( FEndRenderCommand,
 		{
 			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
@@ -259,6 +265,8 @@ void FEngineLoop::Exit()
 	delete worldEd;
 	worldEd = nullptr;
 #endif // WITH_EDITOR
+
+	GUIEngine->Shutdown();
 
 	GViewportRHI.SafeRelease();
 	GRHI->Destroy();

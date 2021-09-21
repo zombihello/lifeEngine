@@ -14,7 +14,9 @@
 #ifndef D3D11IMGUI_H
 #define D3D11IMGUI_H
 
-#if WITH_EDITOR
+#include "LEBuild.h"
+
+#if WITH_IMGUI
 #include "ImGUI/imgui.h"      // IMGUI_IMPL_API
 
 struct ID3D11Device;
@@ -28,5 +30,5 @@ IMGUI_IMPL_API void     ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data);
 // Use if you want to reset your rendering device without losing Dear ImGui state.
 IMGUI_IMPL_API void     ImGui_ImplDX11_InvalidateDeviceObjects();
 IMGUI_IMPL_API bool     ImGui_ImplDX11_CreateDeviceObjects();
-#endif // WITH_EDITOR
+#endif // WITH_IMGUI
 #endif // !D3D11IMGUI_H

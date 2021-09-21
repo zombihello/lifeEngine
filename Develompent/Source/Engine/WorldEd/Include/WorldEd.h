@@ -9,8 +9,6 @@
 #ifndef WORLDED_H
 #define WORLDED_H
 
-#include "Widgets/MainMenuBar.h"
-
 /**
  * @ingroup WorldEd
  * @brief Main class for work world editor
@@ -57,7 +55,6 @@ protected:
 	virtual void InitUI();
 
 private:
-	WMainMenuBar				mainMenuBar;		/**< Widget of main menu bar */
 };
 
 #endif // !WORLDED_H

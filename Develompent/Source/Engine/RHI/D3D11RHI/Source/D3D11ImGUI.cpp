@@ -33,7 +33,7 @@
 
 #include "LEBuild.h"
 
-#if WITH_EDITOR
+#if WITH_IMGUI
 
 #include "Core.h"
 #include "ImGUI/imgui.h"
@@ -684,4 +684,4 @@ static void ImGui_ImplDX11_ShutdownPlatformInterface()
 {
     ImGui::DestroyPlatformWindows();
 }
-#endif // WITH_EDITOR
+#endif // WITH_IMGUI

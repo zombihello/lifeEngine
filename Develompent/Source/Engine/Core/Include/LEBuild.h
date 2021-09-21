@@ -14,6 +14,13 @@
 	#define SHIPPING_BUILD			SHIPPING
 #endif // !SHIPPING_BUILD
 
+// If current build not shipping - use  ImGui for debug
+#if !SHIPPING_BUILD
+	#define WITH_IMGUI 1
+#else
+	#define WITH_IMGUI 0
+#endif // !SHIPPING_BUILD
+
 // Enable or disable checks in build
 #ifndef DO_CHECK
 	#define DO_CHECK				!SHIPPING_BUILD

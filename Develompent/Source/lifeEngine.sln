@@ -38,6 +38,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestbedGame", "Games\Testbe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WorldEd", "Engine\WorldEd\WorldEd.vcxproj", "{3BA6D285-B58E-4120-9012-406611EB319B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UI", "Engine\UI\UI.vcxproj", "{6234F084-AB04-4F4B-98A7-D2646EDFD554}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		BuiltWithLifeBuildTool|Any CPU = BuiltWithLifeBuildTool|Any CPU
@@ -231,6 +233,28 @@ Global
 		{3BA6D285-B58E-4120-9012-406611EB319B}.Shipping|Any CPU.Build.0 = BuiltWithLifeBuildTool|Win32
 		{3BA6D285-B58E-4120-9012-406611EB319B}.Shipping|x64.ActiveCfg = BuiltWithLifeBuildTool|Win32
 		{3BA6D285-B58E-4120-9012-406611EB319B}.Shipping|x86.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.BuiltWithLifeBuildTool|Any CPU.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.BuiltWithLifeBuildTool|x64.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.BuiltWithLifeBuildTool|x86.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.BuiltWithLifeBuildTool|x86.Build.0 = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Debug|Any CPU.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Debug|Any CPU.Build.0 = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Debug|x64.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Debug|x64.Build.0 = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Debug|x86.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Debug|x86.Build.0 = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Release|Any CPU.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Release|Any CPU.Build.0 = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Release|x64.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Release|x64.Build.0 = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Release|x86.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Release|x86.Build.0 = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Shipping|Any CPU.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Shipping|Any CPU.Build.0 = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Shipping|x64.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Shipping|x64.Build.0 = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Shipping|x86.ActiveCfg = BuiltWithLifeBuildTool|Win32
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554}.Shipping|x86.Build.0 = BuiltWithLifeBuildTool|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -248,6 +272,7 @@ Global
 		{53E75960-6C45-4D82-A990-839C70ACCF4F} = {C04C0733-70DF-4B77-80FD-FD44A5FD5A3A}
 		{9A36BCDE-2524-4CC3-A857-AA9B940FCD71} = {8E9C9536-CB17-4C39-85A2-F268F76EB064}
 		{3BA6D285-B58E-4120-9012-406611EB319B} = {EC316654-27C9-4DCD-AFCC-50D96F679EF3}
+		{6234F084-AB04-4F4B-98A7-D2646EDFD554} = {EC316654-27C9-4DCD-AFCC-50D96F679EF3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F4654BC-6C7E-49A4-AC05-725551979A45}

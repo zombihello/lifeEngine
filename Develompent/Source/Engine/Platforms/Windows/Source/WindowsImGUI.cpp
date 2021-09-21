@@ -55,7 +55,7 @@
 
 #include "Core.h"
 
-#if WITH_EDITOR
+#if WITH_IMGUI
 #include "ImGUI/imgui.h"
 #include "System/WindowEvent.h"
 #include "WindowsImGUI.h"
@@ -901,4 +901,4 @@ void appImGUIBeginDrawing()
  */
 void appImGUIEndDrawing()
 {}
-#endif // !WITH_EDITOR
+#endif // !WITH_IMGUI
