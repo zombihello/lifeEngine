@@ -39,7 +39,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../Games/TestbedGame/Include;../../../External/LuaJIT-2.1/include;../../../External/LuaBridge-2.6/include;../../../External/stb;../../../External/rapidjson/include;../RHI/D3D11RHI/Include;../Platforms/Windows/Include;../Engine/Include;../UI/Include;../WorldEd/Include;../Core/Include;Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../Games/TestbedGame/Include;../../../External/wxwidgets-3.1.5/include;../../../External/LuaJIT-2.1/include;../../../External/LuaBridge-2.6/include;../../../External/stb;../../../External/rapidjson/include;../RHI/D3D11RHI/Include;../Platforms/Windows/Include;../Engine/Include;../UI/Include;../WorldEd/Include;../Core/Include;Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

@@ -12,6 +12,12 @@ namespace lifeBuildTool
         void SetUpWindowsEnvironment()
         {
             //
+            // OS definitions
+            //
+            cppEnvironment.definitions.Add( "_UNICODE" );
+            cppEnvironment.definitions.Add( "UNICODE" );
+
+            //
             // External libs
             //
 
@@ -29,6 +35,9 @@ namespace lifeBuildTool
 
             // STB
             SetUpSTBEnvironment();
+
+            // WxWidgets
+            SetUpWxWidgetsEnvironment();
 
             //
             // Engine/Game/Tools projects
@@ -130,6 +139,51 @@ namespace lifeBuildTool
 
             // Settings includes
             cppEnvironment.includePaths.Add( luaBridgeHome + "/include" );
+        }
+
+        void SetUpWxWidgetsEnvironment()
+        {
+            string      wxWidgetsHome = "../External/wxwidgets-3.1.5";
+            Logging.WriteLine( String.Format( "Set up WxWidgets environment [{0}]", wxWidgetsHome ) );
+
+            // Settings definitions
+            cppEnvironment.definitions.Add( "WXUSINGDLL" );
+            cppEnvironment.definitions.Add( "wxMSVC_VERSION_AUTO" );
+
+            // Settings includes
+            cppEnvironment.includePaths.Add( wxWidgetsHome + "/include" );
+            cppEnvironment.includePaths.Add( wxWidgetsHome + "/include/msvc" );
+
+            // Settings path to libs
+            switch ( platform )
+            {
+                case LETargetPlatform.Win32:
+                    linkEnvironment.libraryPaths.Add( wxWidgetsHome + "/lib/vc142_dll" );
+                    break;
+
+                case LETargetPlatform.Win64:
+                    linkEnvironment.libraryPaths.Add( wxWidgetsHome + "/lib/vc142_x64_dll" );
+                    break;
+
+                default:
+                    throw new BuildException( "Not supported platform for WxWidgets" );
+            }
+
+            // Include libs
+            switch ( configuration )
+            {
+                case LETargetConfiguration.Debug:
+                    linkEnvironment.additionalLibraries.Add( "wxbase31ud.lib" );
+                    break;
+
+                case LETargetConfiguration.Release:
+                case LETargetConfiguration.Shipping:
+                    linkEnvironment.additionalLibraries.Add( "wxbase31u.lib" );
+                    break;
+
+                default:
+                    throw new BuildException( "Not supported WxWidgets for current configuration" );
+            }
         }
 
         List< string > GetWindowsOutputItems( out bool OutIsSuccessed )

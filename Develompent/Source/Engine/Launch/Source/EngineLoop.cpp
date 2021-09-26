@@ -19,6 +19,7 @@
 #include "UIEngine.h"
 #include "Misc/UIGlobals.h"
 #include "EngineLoop.h"
+#include "Render/RenderingThread.h"
 
 #if WITH_EDITOR
 #include "WorldEd.h"
@@ -94,15 +95,6 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 	return result;
 }
 
-#include "Render/Shaders/TestShader.h"
-#include "Render/Texture.h"
-FVertexBufferRHIRef		vertexBuffer;
-FBoundShaderStateRHIRef				boundShaderState;
-FRasterizerStateRHIRef				rasterizerState;
-FTexture2D							texture2D;
-#include "System/ThreadingBase.h"
-#include "Render/RenderingThread.h"
-
 /**
  * Initialize the main loop
  */
@@ -128,56 +120,6 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	int32		result = appPlatformInit( InCmdLine );
 	GShaderManager->Init();
 	GUIEngine->Init();
-
-	texture2D.SetFilename( TEXT( "../../Content/Textures/TestTexture2D.jpg" ) );
-
-	struct FInitializeTriangleCommandHelper
-	{
-		static void Execute()
-		{
-			FVertexDeclarationElementList		vertexDeclElementList;
-			uint32								strideVertex = (3 * sizeof(float)) + (2 * sizeof(float));
-			vertexDeclElementList.push_back(FVertexElement(0, strideVertex, 0, VET_Float3, VEU_Position, 0));
-			vertexDeclElementList.push_back(FVertexElement(0, strideVertex, 3 * sizeof(float), VET_Float2, VEU_TextureCoordinate, 0));
-			FVertexDeclarationRHIRef			vertexDeclRHI = GRHI->CreateVertexDeclaration(vertexDeclElementList);
-			
-			FShaderRef		testVertexShader = GShaderManager->FindInstance< FTestVertexShader >();
-			FShaderRef		testPixelShader = GShaderManager->FindInstance< FTestPixelShader >();
-			check(testVertexShader && testPixelShader);
-			
-			vertexBuffer = GRHI->CreateVertexBuffer(TEXT("TestVertexBuffer"), strideVertex * 3, nullptr, RUF_Dynamic);
-			FLockedData				lockedData;
-			GRHI->LockVertexBuffer(GRHI->GetImmediateContext(), vertexBuffer, strideVertex * 3, 0, lockedData);
-			
-			float tempData[] =
-			{
-				-0.5f, -0.5f, 0.0f,				0.0f, 0.0f,
-				 0.5f, -0.5f, 0.0f,				1.0f, 0.0f,
-				 0.0f,  0.5f, 0.0f,				0.5f, 1.0f
-			};
-			memcpy(lockedData.data, &tempData, strideVertex * 3);
-			
-			GRHI->UnlockVertexBuffer(GRHI->GetImmediateContext(), vertexBuffer, lockedData);
-			
-			boundShaderState = GRHI->CreateBoundShaderState(TEXT("TestBoundShaderState"), vertexDeclRHI, testVertexShader->GetVertexShader(), testPixelShader->GetPixelShader());
-			
-			FRasterizerStateInitializerRHI		rasterizerStateInitializerRHI;
-			appMemzero(&rasterizerStateInitializerRHI, sizeof(FRasterizerStateInitializerRHI));
-			rasterizerStateInitializerRHI.cullMode = CM_CW;
-			rasterizerStateInitializerRHI.fillMode = FM_Solid;
-			rasterizerState = GRHI->CreateRasterizerState(rasterizerStateInitializerRHI);
-		}
-	};
-
-	UNIQUE_RENDER_COMMAND( FInitializeTriangleCommand, 
-		{
-			FInitializeTriangleCommandHelper::Execute();
-		} );
-
-#if WITH_EDITOR
-	worldEd = new FWorldEd();
-	worldEd->Init();
-#endif // WITH_EDITOR
 
 	StartRenderingThread();
 	GWindow->Show();
@@ -215,10 +157,6 @@ void FEngineLoop::Tick()
 				}
 				break;
 			}
-
-#if WITH_EDITOR
-			worldEd->ProcessEvent( windowEvent );
-#endif // WITH_EDITOR
 		}
 	}
 
@@ -228,21 +166,6 @@ void FEngineLoop::Tick()
 			GRHI->BeginDrawingViewport( immediateContext, GViewportRHI );
 			immediateContext->ClearSurface( GViewportRHI->GetSurface(), FColor::black );
 		} );
-
-	UNIQUE_RENDER_COMMAND( FTriangleRenderCommand,
-		{
-			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-			GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, (3 * sizeof(float)) + (2 * sizeof(float)), 0 );
-			GRHI->SetBoundShaderState( immediateContext, boundShaderState );
-			GRHI->SetRasterizerState( immediateContext, rasterizerState );
-			GRHI->SetTextureParameter( immediateContext, boundShaderState->GetPixelShader(), texture2D.GetTexture2DRHI(), 0 );
-			GRHI->SetSamplerState( immediateContext, boundShaderState->GetPixelShader(), texture2D.GetSamplerStateRHI(), 0 );
-			GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
-		} );
-
-#if WITH_EDITOR
-	worldEd->Tick();
-#endif // WITH_EDITOR
 
 	GUIEngine->BeginDraw();
 	GUIEngine->EndDraw();
@@ -260,11 +183,6 @@ void FEngineLoop::Tick()
 void FEngineLoop::Exit()
 {
 	StopRenderingThread();
-
-#if WITH_EDITOR
-	delete worldEd;
-	worldEd = nullptr;
-#endif // WITH_EDITOR
 
 	GUIEngine->Shutdown();
 

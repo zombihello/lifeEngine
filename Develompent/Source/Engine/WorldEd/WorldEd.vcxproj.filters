@@ -13,6 +13,12 @@
     <Filter Include="Source\Misc">
       <UniqueIdentifier>{a05a9651-cfd7-4237-91fb-e22a7def98e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\System">
+      <UniqueIdentifier>{956efe8c-9201-4898-aa79-e662ee4412c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\System">
+      <UniqueIdentifier>{4f051591-1bb9-4ede-ac05-5acf15ffa2f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Misc\WorldEdGlobals.h">
@@ -24,12 +30,24 @@
     <ClInclude Include="Include\Misc\WorldEdTypes.h">
       <Filter>Include\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Include\System\LaunchApp.h">
+      <Filter>Include\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\WorldEdApp.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp">
       <Filter>Source\Misc</Filter>
     </ClCompile>
     <ClCompile Include="Source\WorldEd.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\LaunchApp.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\WorldEdApp.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

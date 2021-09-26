@@ -9,11 +9,15 @@
   <ItemGroup>
     <ClInclude Include="Include\Misc\WorldEdGlobals.h" />
     <ClInclude Include="Include\Misc\WorldEdTypes.h" />
+    <ClInclude Include="Include\System\LaunchApp.h" />
     <ClInclude Include="Include\WorldEd.h" />
+    <ClInclude Include="Include\WorldEdApp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp" />
+    <ClCompile Include="Source\System\LaunchApp.cpp" />
     <ClCompile Include="Source\WorldEd.cpp" />
+    <ClCompile Include="Source\WorldEdApp.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -41,7 +45,7 @@
     <NMakeBuildCommandLine />
     <OutDir>..\..\..\Intermediate\Unused\</OutDir>
     <IntDir>..\..\..\Intermediate\Unused\</IntDir>
-    <NMakeIncludeSearchPath>../../Games/TestbedGame/Include;../../../External/LuaBridge-2.6/include;../../../External/LuaJIT-2.1/include;../../../External/stb;../../../External/rapidjson/include;Include;../Engine/Include;../Core/Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>../../Games/TestbedGame/Include;../../../External/LuaBridge-2.6/include;../../../External/LuaJIT-2.1/include;../../../External/stb;../../../External/wxwidgets-3.1.5/include;../../../External/rapidjson/include;Include;../Engine/Include;../Launch/Include;../Core/Include;../Platforms/Windows/Include;../Platforms/Android/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath>$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies>$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>

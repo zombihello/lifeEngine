@@ -16,6 +16,11 @@
 #include "Logger/LoggerMacros.h"
 #include "Math/Color.h"
 #include "RHI/BaseSurfaceRHI.h"
+#include "Misc/Misc.h"
+
+#if WITH_EDITOR
+#include <wx/wx.h>
+#endif // WITH_EDITOR
 
 /**
  * Pre-Initialize platform
@@ -78,15 +83,25 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 			check( errorLevel == 0 );
 		}
 
-		if ( !GIsRequestingExit )
+#if WITH_EDITOR
+		if ( appParseParam( commandLine.c_str(), TEXT( "editor" ) ) )
 		{
-			errorLevel = GEngineLoop->Init( commandLine.c_str() );
+			errorLevel = wxEntry( hInst, hPreInst, "", nCmdShow );
 			check( errorLevel == 0 );
 		}
+		else
+#endif // WITH_EDITOR
+		{
+			if ( !GIsRequestingExit )
+			{
+				errorLevel = GEngineLoop->Init( commandLine.c_str() );
+				check( errorLevel == 0 );
+			}
 
-		while ( !GIsRequestingExit )
-		{			
-			GEngineLoop->Tick();
+			while ( !GIsRequestingExit )
+			{
+				GEngineLoop->Tick();
+			}
 		}
 
 		GEngineLoop->Exit();

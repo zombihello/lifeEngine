@@ -37,4 +37,14 @@ FORCEINLINE bool				appParseParam( const tchar* InStream, const tchar* InParam )
 	return false;
 }
 
+/**
+ * @ingroup Core
+ * Return base directory of the game
+ * @return Return base directory of the game
+ */
+FORCEINLINE std::wstring appBaseDir()
+{
+	return TEXT( "../../" );
+}
+
 #endif // !MISC_H

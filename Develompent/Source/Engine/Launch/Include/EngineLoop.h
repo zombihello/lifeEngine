@@ -63,7 +63,7 @@ private:
 	bool				isInitialize;		/**< Is initialized engine */
 
 #if WITH_EDITOR
-	class FWorldEd*		worldEd;			/**< Pointer to world editor */
+	class WxWorldEd*		worldEd;			/**< Pointer to world editor */
 #endif // WITH_EDITOR
 };
 
