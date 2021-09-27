@@ -9,6 +9,8 @@
 #ifndef ENGINEGLOBALS_H
 #define ENGINEGLOBALS_H
 
+#include <string>
+
  /**
   * @ingroup Engine
   * @brief RHI
@@ -26,5 +28,11 @@ extern class FScriptEngine*			GScriptEngine;
  * @brief Shader manager
  */
 extern class FShaderManager*		GShaderManager;
+
+/**
+ * @ingroup Engine
+ * Game name
+ */
+extern std::wstring					GGameName;
 
 #endif // !ENGINEGLOBALS_H

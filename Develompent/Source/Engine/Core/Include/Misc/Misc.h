@@ -9,7 +9,7 @@
 #ifndef MISC_H
 #define MISC_H
 
-#include <cstring>
+#include <string>
 
 #include "Misc/Types.h"
 #include "Core.h"

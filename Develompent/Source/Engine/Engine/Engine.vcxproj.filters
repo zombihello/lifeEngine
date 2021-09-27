@@ -40,9 +40,6 @@
     <Filter Include="Include\System">
       <UniqueIdentifier>{e75fc818-0781-4f3c-ba8d-bd7f92f13ad0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\System">
-      <UniqueIdentifier>{eae67fce-f16e-409f-a8ed-c6bd1297c921}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHI\BaseRHI.h">
@@ -154,9 +151,6 @@
     </ClCompile>
     <ClCompile Include="Source\Render\RenderUtils.cpp">
       <Filter>Source\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\SplashScreen.cpp">
-      <Filter>Source\System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -14,8 +14,8 @@ bool WxWorldEdApp::OnInit()
 {
 	WxLaunchApp::OnInit();
 
-	WxTest* t = new WxTest( wxT( "SSSS" ) );
-	t->Show();
+	//WxTest* t = new WxTest( wxT( "SSSS" ) );
+	//t->Show();
 
 	return true;
 }

@@ -11,7 +11,6 @@
 
 #include "Core.h"
 
-#if PLATFORM_WINDOWS
 /**
  * @ingroup Engine
  * SplashTextType defines the types of text on the splash screen
@@ -21,7 +20,7 @@ enum ESplashTextType
 	STT_StartupProgress = 0,		/**< Startup progress text */
 	STT_VersionInfo1,				/**< Version information text line 1 */
 	STT_CopyrightInfo,				/**< Copyright information text */
-	STT_ThirdPartyCopyrightInfo,	/**< Third party copyright information text */
+	STT_GameName,					/**< Game name */
 	STT_NumTextTypes				/**< Number of text types (must be final enum value) */
 };
 
@@ -33,14 +32,14 @@ enum ESplashTextType
  *
  * @param[in] InSplashName Name of splash screen file (and relative path if needed)
  */
-void appShowSplash( const tchar* InSplashName );
+extern void appShowSplash( const tchar* InSplashName );
 
 /**
  * @ingroup Engine
  * Destroys the splash window that was previously shown by appShowSplash(). If the splash screen isn't active,
  * it will do nothing.
  */
-void appHideSplash();
+extern void appHideSplash();
 
 /**
  * @ingroup Engine
@@ -49,7 +48,6 @@ void appHideSplash();
  * @param[in] InType Type of text to change
  * @param[in] InText Text to display
  */
-void appSetSplashText( const ESplashTextType InType, const tchar* InText );
-#endif // PLATFORM_WINDOWS
+extern void appSetSplashText( const ESplashTextType InType, const tchar* InText );
 
 #endif // !SPLASHSCREEN_H

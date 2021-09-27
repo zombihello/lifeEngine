@@ -1,5 +1,5 @@
 ----------------------------------------------------------------
- Version 20210521 :: Now
+ Version 0.0.1 :: Now
 ----------------------------------------------------------------
 	- Implemented lifeBuildTool for build engine
 	- Implemented compile cache in lifeBuildTool
@@ -23,3 +23,4 @@
 	- Implemented render thread
 	- Implemented rendering of triangle with texture
 	- Implemented loading textures
+	- Implemented splash screen

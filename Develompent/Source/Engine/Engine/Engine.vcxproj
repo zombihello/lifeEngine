@@ -45,7 +45,6 @@
     <ClCompile Include="Source\Render\Texture.cpp" />
     <ClCompile Include="Source\Scripts\Script.cpp" />
     <ClCompile Include="Source\Scripts\ScriptEngine.cpp" />
-    <ClCompile Include="Source\System\SplashScreen.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

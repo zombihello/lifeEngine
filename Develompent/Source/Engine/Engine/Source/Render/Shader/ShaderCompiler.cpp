@@ -1,10 +1,12 @@
 #include "LEBuild.h"
 #if WITH_EDITOR
 
+#include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "System/BaseFileSystem.h"
+#include "System/SplashScreen.h"
 #include "RHI/BaseRHI.h"
 #include "Render/Shaders/ShaderCompiler.h"
 #include "Render/Shaders/ShaderManager.h"
@@ -23,6 +25,7 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
 		FShaderCompilerEnvironment			environment( metaType->GetFrequency() );
 		FShaderCompilerOutput				output;
 
+		appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s..." ), metaType->GetName().c_str() ) );
 		bool		result = GRHI->CompileShader( metaType->GetFileName().c_str(), metaType->GetFunctionName().c_str(), metaType->GetFrequency(), environment, output );
 		if ( !result )
 		{

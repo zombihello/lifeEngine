@@ -9,9 +9,12 @@
 #ifndef LEVERSION_H
 #define LEVERSION_H
 
-#define ENGINE_VERSION			20210521
-#define MAJOR_VERSION			2021
-#define MINOR_VERSION			05
-#define PATH_VERSION			0
+#define ENGINE_VERSION			001
+#define MAJOR_VERSION			0
+#define MINOR_VERSION			0
+#define PATH_VERSION			1
+
+#define ENGINE_NAME				"lifeEngine"
+#define ENGINE_VERSION_STRING	"0.0.1"
 
 #endif // !LEVERSION_H

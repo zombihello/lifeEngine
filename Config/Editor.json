@@ -17,5 +17,9 @@
 				"OutputCPPHeader": "Develompent/Source/Games/TestbedGame/Include/Classes"
 			}
 		]
+	},
+	
+	"Editor.Testbed": {
+		"Splash": "EdSplash.bmp"
 	}
 }

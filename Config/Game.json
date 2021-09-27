@@ -1,5 +1,6 @@
 {
 	"Game.GameInfo": {
-		"Name": "Testbed"
+		"Name": "Testbed",
+		"Splash": "Splash.bmp"
 	}
 }

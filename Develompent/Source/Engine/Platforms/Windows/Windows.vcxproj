@@ -13,6 +13,7 @@
     <ClCompile Include="Source\WindowsLaunch.cpp" />
     <ClCompile Include="Source\WindowsLogger.cpp" />
     <ClCompile Include="Source\WindowsPlatform.cpp" />
+    <ClCompile Include="Source\WindowsSplashScreen.cpp" />
     <ClCompile Include="Source\WindowsThreading.cpp" />
     <ClCompile Include="Source\WindowsWindow.cpp" />
   </ItemGroup>

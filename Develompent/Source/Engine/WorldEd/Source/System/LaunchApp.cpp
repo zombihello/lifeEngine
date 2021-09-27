@@ -1,6 +1,10 @@
 #include "Misc/LaunchGlobals.h"
 #include "Misc/CoreGlobals.h"
+#include "Misc/EngineGlobals.h"
+#include "Containers/String.h"
+#include "System/Config.h"
 #include "EngineLoop.h"
+#include "System/SplashScreen.h"
 #include "System/LaunchApp.h"
 #include "WorldEdApp.h"
 
@@ -10,8 +14,11 @@ WxLaunchApp::~WxLaunchApp()
 bool WxLaunchApp::OnInit()
 {
 	wxApp::OnInit();
+	
+	appShowSplash( GEditorConfig.GetValue( FString::Format( TEXT( "Editor.%s" ), GGameName.c_str() ), TEXT( "Splash" ) ).GetString().c_str() );	
+	int32		result = GEngineLoop->Init( nullptr );	
+	appHideSplash();
 
-	int32		result = GEngineLoop->Init( nullptr );
 	if ( result )
 	{
 		return false;

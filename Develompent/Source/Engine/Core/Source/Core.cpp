@@ -17,6 +17,10 @@ FConfig         GEditorConfig;
 bool	        GIsRequestingExit           = false;
 uint32			GGameThreadId               = 0;
 
+#if WITH_EDITOR
+bool			GIsEditor = false;
+#endif // WITH_EDITOR
+
 /**
  * Failed assertion handler
  */

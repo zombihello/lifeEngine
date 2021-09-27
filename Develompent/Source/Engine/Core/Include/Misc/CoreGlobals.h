@@ -53,4 +53,14 @@ extern class FConfig				GEditorConfig;
  */
 extern bool							GIsRequestingExit;
 
+#if WITH_EDITOR
+/**
+ * @ingroup Core
+ * Whether engine was launched for editing
+ */
+extern bool							GIsEditor;
+#else
+#define								GIsEditor 0
+#endif // WITH_EDITOR
+
 #endif // !COREGLOBALS_H

@@ -17,6 +17,8 @@
 #include "Math/Color.h"
 #include "RHI/BaseSurfaceRHI.h"
 #include "Misc/Misc.h"
+#include "System/Config.h"
+#include "System/SplashScreen.h"
 
 #if WITH_EDITOR
 #include <wx/wx.h>
@@ -86,17 +88,20 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 #if WITH_EDITOR
 		if ( appParseParam( commandLine.c_str(), TEXT( "editor" ) ) )
 		{
+			GIsEditor = true;
 			errorLevel = wxEntry( hInst, hPreInst, "", nCmdShow );
 			check( errorLevel == 0 );
 		}
 		else
 #endif // WITH_EDITOR
 		{
+			appShowSplash( GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );
 			if ( !GIsRequestingExit )
 			{
 				errorLevel = GEngineLoop->Init( commandLine.c_str() );
 				check( errorLevel == 0 );
 			}
+			appHideSplash();
 
 			while ( !GIsRequestingExit )
 			{

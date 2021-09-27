@@ -33,6 +33,9 @@
     <ClCompile Include="Source\WindowsThreading.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\WindowsSplashScreen.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\WindowsPlatform.h">

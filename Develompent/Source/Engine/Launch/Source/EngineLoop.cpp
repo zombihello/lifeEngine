@@ -20,6 +20,7 @@
 #include "Misc/UIGlobals.h"
 #include "EngineLoop.h"
 #include "Render/RenderingThread.h"
+#include "System/SplashScreen.h"
 
 #if WITH_EDITOR
 #include "WorldEd.h"
@@ -68,6 +69,8 @@ void FEngineLoop::SerializeConfigs()
 		delete arConfig;
 	}
 
+	GGameName = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();
+
 	// Loading editor config
 #if WITH_EDITOR
 	arConfig = GFileSystem->CreateFileReader( TEXT( "../../Config/Editor.json" ) );
@@ -104,19 +107,19 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
 
 	// Create window
-	std::wstring				windowTitle = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();
 	uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
 	uint32						windowHeight = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
-	GWindow->Create( windowTitle.c_str(), windowWidth, windowHeight, SW_Default | SW_Hidden );
+	GWindow->Create( GGameName.c_str(), windowWidth, windowHeight, SW_Default | SW_Hidden );
 	
 	// Create viewport for render
 	uint32			width = 0;
 	uint32			height = 0;
 	GWindow->GetSize( width, height );
 
+	appSetSplashText( STT_StartupProgress, TEXT( "Init render system..." ) );
 	GRHI->Init( false );
 	GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), width, height );
-
+	
 	int32		result = appPlatformInit( InCmdLine );
 	GShaderManager->Init();
 	GUIEngine->Init();
