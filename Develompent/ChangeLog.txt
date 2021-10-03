@@ -1,5 +1,5 @@
 ----------------------------------------------------------------
- Version 0.0.1 :: Now
+ Version 0.1.0 :: Now
 ----------------------------------------------------------------
 	- Implemented lifeBuildTool for build engine
 	- Implemented compile cache in lifeBuildTool

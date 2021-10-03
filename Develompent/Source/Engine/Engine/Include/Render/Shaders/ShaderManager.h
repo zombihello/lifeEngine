@@ -169,6 +169,11 @@ public:
     void                                    Init();
 
     /**
+     * Shutdown shader manager
+     */
+    void Shutdown();
+
+    /**
      * @brief Find instance of shader
      */
     template< typename TShaderClass >

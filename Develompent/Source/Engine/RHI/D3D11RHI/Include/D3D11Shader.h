@@ -28,12 +28,18 @@ public:
 	 */
 	FD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InData, uint32 InSize, const tchar* InShaderName );
 
+	/**
+	 * Destructor
+	 */
+	virtual ~FD3D11ShaderRHI();
+
 protected:
 	/**
 	 * @brief Union of shaders
 	 */
 	union UShaderHandle
 	{
+		IUnknown*					object;				/**< General pointer to DirectX 11 object of shader */
 		ID3D11VertexShader*			vertexShader;		/**< Pointer to DirectX 11 vertex shader */
 		ID3D11HullShader*			hullShader;			/**< Pointer to DirectX 11 hull shader */
 		ID3D11DomainShader*			domainShader;		/**< Pointer to DirectX 11 domain shader */

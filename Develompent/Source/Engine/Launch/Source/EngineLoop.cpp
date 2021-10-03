@@ -22,10 +22,6 @@
 #include "Render/RenderingThread.h"
 #include "System/SplashScreen.h"
 
-#if WITH_EDITOR
-#include "WorldEd.h"
-#endif // WITH_EDITOR
-
 // --------------
 // GLOBALS
 // --------------
@@ -37,9 +33,6 @@ FViewportRHIRef			GViewportRHI;
  */
 FEngineLoop::FEngineLoop() :
 	isInitialize( false )
-#if WITH_EDITOR
-	, worldEd( nullptr )
-#endif // WITH_EDITOR
 {}
 
 /**
@@ -90,42 +83,45 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 	GGameThreadId = appGetCurrentThreadId();
 	SerializeConfigs();
 
+#if WITH_EDITOR
+	GIsEditor = appParseParam( InCmdLine, TEXT( "editor" ) );
+#endif // WITH_EDITOR
+
 	GLog->Init();
-	
+
 	int32		result = appPlatformPreInit( InCmdLine );
 	GScriptEngine->Init();
+	GRHI->Init( GIsEditor );
 
+	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
 	return result;
 }
 
 /**
  * Initialize the main loop
  */
-int32 FEngineLoop::Init( const tchar* InCmdLine )
+int32 FEngineLoop::Init()
 {
-	LE_LOG( LT_Log, LC_Init, TEXT( "Engine version: %i" ), ENGINE_VERSION );
-	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
+	LE_LOG( LT_Log, LC_Init, TEXT( "Engine version: " ENGINE_VERSION_STRING ) );
 
-	// Create window
-	uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
-	uint32						windowHeight = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
-	GWindow->Create( GGameName.c_str(), windowWidth, windowHeight, SW_Default | SW_Hidden );
+	appSetSplashText( STT_StartupProgress, TEXT( "Init platform..." ) );
+	int32		result = appPlatformInit();
 	
-	// Create viewport for render
-	uint32			width = 0;
-	uint32			height = 0;
-	GWindow->GetSize( width, height );
-
 	appSetSplashText( STT_StartupProgress, TEXT( "Init render system..." ) );
-	GRHI->Init( false );
-	GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), width, height );
-	
-	int32		result = appPlatformInit( InCmdLine );
 	GShaderManager->Init();
-	GUIEngine->Init();
+//	GUIEngine->Init();
+
+	// If started game - create window
+	if ( !GIsEditor )
+	{
+		uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
+		uint32						windowHeight = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
+		
+		GWindow->Create( GGameName.c_str(), windowWidth, windowHeight, SW_Default );
+		GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), windowWidth, windowHeight );
+	}
 
 	StartRenderingThread();
-	GWindow->Show();
 	return result;
 }
 
@@ -170,8 +166,8 @@ void FEngineLoop::Tick()
 			immediateContext->ClearSurface( GViewportRHI->GetSurface(), FColor::black );
 		} );
 
-	GUIEngine->BeginDraw();
-	GUIEngine->EndDraw();
+	//GUIEngine->BeginDraw();
+	//GUIEngine->EndDraw();
 
 	UNIQUE_RENDER_COMMAND( FEndRenderCommand,
 		{
@@ -187,9 +183,10 @@ void FEngineLoop::Exit()
 {
 	StopRenderingThread();
 
-	GUIEngine->Shutdown();
+	//GUIEngine->Shutdown();
 
 	GViewportRHI.SafeRelease();
+	GShaderManager->Shutdown();
 	GRHI->Destroy();
 
 	GWindow->Close();

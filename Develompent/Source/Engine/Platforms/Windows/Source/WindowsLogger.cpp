@@ -20,7 +20,11 @@ const tchar* GLogCategoryNames[] =
 	TEXT( "Init" ),
 	TEXT( "Script" ),
 	TEXT( "Dev" ),
-	TEXT( "Shader" )
+	TEXT( "Shader" ),
+
+#if WITH_EDITOR
+	TEXT( "Editor" ),
+#endif // WITH_EDITOR
 };
 
 /**

@@ -1,25 +1,14 @@
 {
-	"ScriptEngine.Make": {		
-		"Modules": [
-			{
-				"Name": "Core",
-				"Sources": "Develompent/Source/Engine/Core/Classes",
-				"OutputCPPHeader": "Develompent/Source/Engine/Core/Include/Classes"
-			},
-			{
-				"Name": "Engine",
-				"Sources": "Develompent/Source/Engine/Engine/Classes",
-				"OutputCPPHeader": "Develompent/Source/Engine/Engine/Include/Classes"
-			},
-			{
-				"Name": "TestbedGame",
-				"Sources": "Develompent/Source/Games/TestbedGame/Classes",
-				"OutputCPPHeader": "Develompent/Source/Games/TestbedGame/Include/Classes"
-			}
-		]
+	"Editor.Editor": 
+	{
+		"Splash": 		"EdSplash.bmp"
 	},
 	
-	"Editor.Testbed": {
-		"Splash": "EdSplash.bmp"
+	"Editor.EditorFrame": 
+	{
+		"ClassName": 	"WxEditorFrame",
+		"Pos": 			{ "X": 0, "Y": 0 },
+		"Size": 		{ "X": 1280, "Y": 720 },
+		"IsMaximized": 	true
 	}
 }

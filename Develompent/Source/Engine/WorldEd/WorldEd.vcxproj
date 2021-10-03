@@ -7,16 +7,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\Misc\ResourceIDs.h" />
     <ClInclude Include="Include\Misc\WorldEdGlobals.h" />
     <ClInclude Include="Include\Misc\WorldEdTypes.h" />
+    <ClInclude Include="Include\System\EditorFrame.h" />
     <ClInclude Include="Include\System\LaunchApp.h" />
-    <ClInclude Include="Include\WorldEd.h" />
+    <ClInclude Include="Include\Windows\WindowAbout.h" />
     <ClInclude Include="Include\WorldEdApp.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp" />
+    <ClCompile Include="Source\System\EditorFrame.cpp" />
     <ClCompile Include="Source\System\LaunchApp.cpp" />
-    <ClCompile Include="Source\WorldEd.cpp" />
+    <ClCompile Include="Source\Windows\WindowAbout.cpp" />
     <ClCompile Include="Source\WorldEdApp.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

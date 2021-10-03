@@ -15,6 +15,7 @@ static RECT					GSplashScreenTextRects[ STT_NumTextTypes ];
 static HFONT				GSplashScreenSmallTextFontHandle = nullptr;
 static HFONT				GSplashScreenNormalTextFontHandle = nullptr;
 static FCriticalSection		GSplashScreenSynchronizationObject;
+static FEvent*				GThreadInitSyncEvent = nullptr;
 
 /**
  * Window's proc for splash screen
@@ -249,6 +250,11 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			appSetSplashText( STT_CopyrightInfo, TEXT( "(Ñ) Broken Singularity. All rights reserved" ) );			
 		}
 
+		if ( GThreadInitSyncEvent )
+		{
+			GThreadInitSyncEvent->Trigger();
+		}
+
 		if ( GSplashScreenWnd )
 		{
 			ShowWindow( GSplashScreenWnd, SW_SHOW );
@@ -273,7 +279,13 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 void appShowSplash( const tchar* InSplashName )
 {
 	GSplashScreenFileName	= appBaseDir() + FString::Format( TEXT( "/Content/Splash/%s" ), InSplashName );
+	GThreadInitSyncEvent	= GSynchronizeFactory->CreateSynchEvent( true );
 	GSplashScreenThread		= CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE )SplashScreenThread, nullptr, 0, nullptr );
+
+	// Wait of open splash screen
+	GThreadInitSyncEvent->Wait( INFINITE );
+	GSynchronizeFactory->Destroy( GThreadInitSyncEvent );
+	GThreadInitSyncEvent = nullptr;
 }
 
 void appHideSplash()

@@ -13,18 +13,11 @@ WxLaunchApp::~WxLaunchApp()
 
 bool WxLaunchApp::OnInit()
 {
-	wxApp::OnInit();
-	
-	appShowSplash( GEditorConfig.GetValue( FString::Format( TEXT( "Editor.%s" ), GGameName.c_str() ), TEXT( "Splash" ) ).GetString().c_str() );	
-	int32		result = GEngineLoop->Init( nullptr );	
+	appShowSplash( GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "Splash" ) ).GetString().c_str() );	
+	int32		result = GEngineLoop->Init();	
 	appHideSplash();
 
-	if ( result )
-	{
-		return false;
-	}
-
-	return true;
+	return result == 0;
 }
 
 int WxLaunchApp::OnExit()

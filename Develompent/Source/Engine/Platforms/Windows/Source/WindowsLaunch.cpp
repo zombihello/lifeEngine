@@ -44,7 +44,7 @@ int32 appPlatformPreInit( const tchar* InCmdLine )
 /**
  * Initialize platform
  */
-int32 appPlatformInit( const tchar* InCmdLine )
+int32 appPlatformInit()
 {
 	GWindow->ShowCursor();
 	return 0;
@@ -86,9 +86,8 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 		}
 
 #if WITH_EDITOR
-		if ( appParseParam( commandLine.c_str(), TEXT( "editor" ) ) )
+		if ( GIsEditor )
 		{
-			GIsEditor = true;
 			errorLevel = wxEntry( hInst, hPreInst, "", nCmdShow );
 			check( errorLevel == 0 );
 		}
@@ -98,7 +97,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 			appShowSplash( GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );
 			if ( !GIsRequestingExit )
 			{
-				errorLevel = GEngineLoop->Init( commandLine.c_str() );
+				errorLevel = GEngineLoop->Init();
 				check( errorLevel == 0 );
 			}
 			appHideSplash();

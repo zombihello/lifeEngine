@@ -54,6 +54,11 @@ FD3D11ShaderRHI::FD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InDa
 	check( result == S_OK );
 }
 
+FD3D11ShaderRHI::~FD3D11ShaderRHI()
+{
+	shader.object->Release();
+}
+
 /**
  * Constructor
  */

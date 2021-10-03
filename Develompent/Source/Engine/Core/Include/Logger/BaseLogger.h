@@ -34,7 +34,11 @@ enum ELogCategory
     LC_Init,                /**< Initialize category  */
     LC_Script,              /**< Log from script */
     LC_Dev,                 /**< Development category */
-    LC_Shader               /**< Shader category */
+    LC_Shader,              /**< Shader category */
+
+#if WITH_EDITOR
+    LC_Editor,              /**< Editor category */
+#endif // WITH_EDITOR
 };
 
 /**

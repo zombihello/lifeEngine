@@ -1,5 +1,14 @@
 ----------------------------------------------------------------
- Version 0.0.1
+ Version 0.1.0
 ----------------------------------------------------------------
+	- Implement call WxLaunchApp::TickLE from wxWidget loop for real time update engine logic
+	- Implement commandlet for import texture
 	- Implement camera and the ability to fly around the stage
+	
+----------------------------------------------------------------
+ Version 0.2.0
+----------------------------------------------------------------
+	- Implement base material system
+	- Implement class of static meshes
+	- Implement commandlet for import static meshes
 	- Implement caching render states

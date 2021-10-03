@@ -115,3 +115,9 @@ void FShaderManager::Init()
 #endif // WITH_EDITOR
 	}
 }
+
+void FShaderManager::Shutdown()
+{
+	shaders.clear();
+	LE_LOG( LT_Log, LC_Shader, TEXT( "All shaders unloaded" ) );
+}
