@@ -24,3 +24,4 @@
 	- Implemented rendering of triangle with texture
 	- Implemented loading textures
 	- Implemented splash screen
+	- Implemented call WxLaunchApp::TickLE from wxWidget loop for real time update engine logic

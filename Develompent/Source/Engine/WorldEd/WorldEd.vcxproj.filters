@@ -48,6 +48,9 @@
     <ClInclude Include="Include\Windows\WindowAbout.h">
       <Filter>Include\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="Include\System\EditorEngine.h">
+      <Filter>Include\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp">
@@ -64,6 +67,9 @@
     </ClCompile>
     <ClCompile Include="Source\Windows\WindowAbout.cpp">
       <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\EditorEngine.cpp">
+      <Filter>Source\System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

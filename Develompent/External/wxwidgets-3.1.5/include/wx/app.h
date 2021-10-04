@@ -89,6 +89,9 @@ public:
     // class version!
     virtual bool Initialize(int& argc, wxChar **argv);
 
+    // @LE 2021-10-04: lifeEngine integration.
+    virtual void TickLE() {}
+
     // This gives wxCocoa a chance to call OnInit() with a memory pool in place
     virtual bool CallOnInit() { return OnInit(); }
 

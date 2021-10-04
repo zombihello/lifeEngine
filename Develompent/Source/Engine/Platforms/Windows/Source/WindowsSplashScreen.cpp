@@ -250,15 +250,15 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			appSetSplashText( STT_CopyrightInfo, TEXT( "(Ñ) Broken Singularity. All rights reserved" ) );			
 		}
 
-		if ( GThreadInitSyncEvent )
-		{
-			GThreadInitSyncEvent->Trigger();
-		}
-
 		if ( GSplashScreenWnd )
 		{
 			ShowWindow( GSplashScreenWnd, SW_SHOW );
 			UpdateWindow( GSplashScreenWnd );
+
+			if ( GThreadInitSyncEvent )
+			{
+				GThreadInitSyncEvent->Trigger();
+			}
 
 			MSG			message;
 			while ( GetMessage( &message, nullptr, 0, 0 ) )

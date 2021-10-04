@@ -54,6 +54,13 @@ public:
 	 */
 	void				Exit();
 
+	/**
+	 * @brief Process event
+	 *
+	 * @param[in] InWindowEvent Window event
+	 */
+	void				ProcessEvent( struct SWindowEvent& InWindowEvent );
+
 private:
 	/**
 	 * @brief Serialize configs

@@ -1,7 +1,6 @@
 ----------------------------------------------------------------
  Version 0.1.0
 ----------------------------------------------------------------
-	- Implement call WxLaunchApp::TickLE from wxWidget loop for real time update engine logic
 	- Implement commandlet for import texture
 	- Implement camera and the ability to fly around the stage
 	

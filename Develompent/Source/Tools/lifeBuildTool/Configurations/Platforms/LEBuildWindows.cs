@@ -148,21 +148,21 @@ namespace lifeBuildTool
 
             // Settings definitions
             cppEnvironment.definitions.Add( "WXUSINGDLL" );
-            cppEnvironment.definitions.Add( "wxMSVC_VERSION_AUTO" );
+            cppEnvironment.definitions.Add( "__WXMSW__" );
 
             // Settings includes
-            cppEnvironment.includePaths.Add( wxWidgetsHome + "/include" );
+            cppEnvironment.includePaths.Add( wxWidgetsHome + "/include/" );
             cppEnvironment.includePaths.Add( wxWidgetsHome + "/include/msvc" );
 
             // Settings path to libs
             switch ( platform )
             {
                 case LETargetPlatform.Win32:
-                    linkEnvironment.libraryPaths.Add( wxWidgetsHome + "/lib/vc142_dll" );
+                    linkEnvironment.libraryPaths.Add( wxWidgetsHome + "/lib/vc_dll" );
                     break;
 
                 case LETargetPlatform.Win64:
-                    linkEnvironment.libraryPaths.Add( wxWidgetsHome + "/lib/vc142_x64_dll" );
+                    linkEnvironment.libraryPaths.Add( wxWidgetsHome + "/lib/vc_x64_dll" );
                     break;
 
                 default:

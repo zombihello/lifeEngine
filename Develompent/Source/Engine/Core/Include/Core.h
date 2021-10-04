@@ -190,7 +190,7 @@ extern bool            appGetProcReturnCode( void* InProcHandle, int32* OutRetur
     *
     * Example usage: @code checkMsg( Value == 0, TEXT( "Value = %i" ), Value ) @endcode
     */
-    #define checkMsg( Expr, Msg )		    { if ( !( Expr ) ) { appFailAssert( #Expr " : " #Msg , __FILE__, __LINE__ ); } }
+    #define checkMsg( Expr, Msg, ... )		{ if ( !( Expr ) ) { appFailAssert( #Expr, __FILE__, __LINE__, Msg, __VA_ARGS__ ); } }
 
     /**
     * @ingroup Core
@@ -259,12 +259,19 @@ extern bool            appGetProcReturnCode( void* InProcHandle, int32* OutRetur
                                                 s_beenHere##__LINE__ = true; }
 #else
     #define checkCode( Code )		        {}
-    #define checkMsg( Expr, Msg )		    {}
+    #define checkMsg( Expr, Msg, ... )		{}
     #define checkFunc( Expr, Func )	        {}
     #define verify( Expr )			        {}
     #define check( Expr )				    {}
     #define checkNoEntry()                  {}
     #define checkNoReentry()                {}
 #endif // DO_CHECK
+
+// This define must come after the class declaration for FBaseLogger, since the macro uses GLog->Logf
+#if CHECK_PUREVIRTUALS
+    #define PURE_VIRTUAL( InFunc, InExtra ) =0;
+#else
+    #define PURE_VIRTUAL( InFunc, InExtra ) { appErrorf( TEXT( "Pure virtual not implemented (%s)" ), TEXT( #InFunc ) ); InExtra }
+#endif
 
 #endif //CORE_H

@@ -9,3 +9,4 @@
 FScriptEngine*		GScriptEngine = new FScriptEngine();
 FShaderManager*		GShaderManager = new FShaderManager();
 std::wstring		GGameName = TEXT( "" );
+class LBaseEngine*	GEngine = nullptr;

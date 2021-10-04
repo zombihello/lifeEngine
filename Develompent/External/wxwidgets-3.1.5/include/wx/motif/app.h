@@ -61,6 +61,9 @@ protected:
     bool                  m_showOnInit;
 
 public:
+    // @LE 2021-10-04: lifeEngine integration.
+    virtual void TickLE() {}
+
     // Implementation
     virtual bool Initialize(int& argc, wxChar **argv);
     virtual void CleanUp();

@@ -12358,7 +12358,7 @@ void ImGui::UpdatePlatformWindows()
 //
 void ImGui::RenderPlatformWindowsDefault(void* platform_render_arg, void* renderer_render_arg)
 {
-    checkMsg( false, "This function is deprecated" );
+    checkMsg( false, TEXT( "This function is deprecated" ) );
 
     // Skip the main viewport (index 0), which is always fully handled by the application!
     ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();

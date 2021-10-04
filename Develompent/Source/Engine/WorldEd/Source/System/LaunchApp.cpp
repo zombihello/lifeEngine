@@ -1,3 +1,4 @@
+#include "System/LaunchApp.h"
 #include "Misc/LaunchGlobals.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
@@ -5,7 +6,6 @@
 #include "System/Config.h"
 #include "EngineLoop.h"
 #include "System/SplashScreen.h"
-#include "System/LaunchApp.h"
 #include "WorldEdApp.h"
 
 WxLaunchApp::~WxLaunchApp()

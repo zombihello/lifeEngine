@@ -1,7 +1,8 @@
 {
 	"Editor.Editor": 
 	{
-		"Splash": 		"EdSplash.bmp"
+		"Splash": 		"EdSplash.bmp",
+		"ClassName":	"LEditorEngine"
 	},
 	
 	"Editor.EditorFrame": 

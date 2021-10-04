@@ -10,6 +10,7 @@
     <ClInclude Include="Include\Misc\ResourceIDs.h" />
     <ClInclude Include="Include\Misc\WorldEdGlobals.h" />
     <ClInclude Include="Include\Misc\WorldEdTypes.h" />
+    <ClInclude Include="Include\System\EditorEngine.h" />
     <ClInclude Include="Include\System\EditorFrame.h" />
     <ClInclude Include="Include\System\LaunchApp.h" />
     <ClInclude Include="Include\Windows\WindowAbout.h" />
@@ -17,6 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp" />
+    <ClCompile Include="Source\System\EditorEngine.cpp" />
     <ClCompile Include="Source\System\EditorFrame.cpp" />
     <ClCompile Include="Source\System\LaunchApp.cpp" />
     <ClCompile Include="Source\Windows\WindowAbout.cpp" />

@@ -15,11 +15,13 @@
 #endif // !SHIPPING_BUILD
 
 // If current build not shipping - use  ImGui for debug
-#if !SHIPPING_BUILD
-	#define WITH_IMGUI 1
-#else
-	#define WITH_IMGUI 0
-#endif // !SHIPPING_BUILD
+#ifndef WITH_IMGUI
+	#if !SHIPPING_BUILD
+		#define WITH_IMGUI 1
+	#else
+		#define WITH_IMGUI 0
+	#endif // !SHIPPING_BUILD
+#endif // !WITH_IMGUI
 
 // Enable or disable checks in build
 #ifndef DO_CHECK
@@ -35,5 +37,15 @@
 #ifndef NO_LOGGING
 	#define NO_LOGGING				SHIPPING_BUILD
 #endif // !NO_LOGGING
+
+/**
+ * @ingroup Core
+ * Checks to see if pure virtual has actually been implemented
+ * 
+ * @see Core.h
+ */
+#ifndef CHECK_PUREVIRTUALS
+	#define CHECK_PUREVIRTUALS 0
+#endif
 
 #endif // !LEBUILD_H

@@ -220,18 +220,22 @@ public:
 	 * @return Return true if compilation is succeed, else returning false
 	 */
 	virtual bool									CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const FShaderCompilerEnvironment& InEnvironment, FShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) ) override;
+#endif // WITH_EDITOR
 
+#if WITH_IMGUI
 	/**
-	 * @brief Initialize ImGUI
+	 * @brief Initialize render of ImGUI
+	 *
+	 * @param[in] InDeviceContext Device context
 	 */
-	virtual void									InitImGUI( class FBaseDeviceContextRHI* InDeviceContext ) override;
+	virtual void								InitImGUI( class FBaseDeviceContextRHI* InDeviceContext ) override;
 
 	/**
 	 * @brief Shutdown render of ImGUI
 	 *
 	 * @param[in] InDeviceContext Device context
 	 */
-	virtual void									ShutdownImGUI( class FBaseDeviceContextRHI* InDeviceContext ) override;
+	virtual void								ShutdownImGUI( class FBaseDeviceContextRHI* InDeviceContext ) override;
 
 	/**
 	 * @brief Draw ImGUI
@@ -239,8 +243,8 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InImGUIDrawData Pointer to draw data of ImGUI
 	 */
-	virtual void									DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, struct ImDrawData* InImGUIDrawData ) override;
-#endif // WITH_EDITOR
+	virtual void								DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, struct ImDrawData* InImGUIDrawData ) override;
+#endif // WITH_IMGUI
 
 	/**
 	 * @brief Set viewport

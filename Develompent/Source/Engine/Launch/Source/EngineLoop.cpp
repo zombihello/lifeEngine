@@ -9,6 +9,7 @@
 #include "System/BaseWindow.h"
 #include "System/Config.h"
 #include "System/ThreadingBase.h"
+#include "Misc/Class.h"
 #include "Math/Color.h"
 #include "Scripts/ScriptEngine.h"
 #include "RHI/BaseRHI.h"
@@ -21,6 +22,7 @@
 #include "EngineLoop.h"
 #include "Render/RenderingThread.h"
 #include "System/SplashScreen.h"
+#include "System/BaseEngine.h"
 
 // --------------
 // GLOBALS
@@ -93,6 +95,27 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 	GScriptEngine->Init();
 	GRHI->Init( GIsEditor );
 
+	// Creating engine from config
+	{
+		std::wstring		classEngineName = TEXT( "LBaseEngine" );
+		if ( !GIsEditor )
+		{
+			classEngineName = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "ClassName" ) ).GetString().c_str();
+		}
+#if WITH_EDITOR
+		else
+		{
+			classEngineName = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "ClassName" ) ).GetString().c_str();
+		}
+#endif // WITH_EDITOR
+
+		const LClass*		lclass = LClass::StaticFindClass( classEngineName.c_str() );
+		checkMsg( lclass, TEXT( "Class engine %s not found" ), classEngineName.c_str() );
+		
+		GEngine = lclass->CreateObject< LBaseEngine >();
+		check( GEngine );
+	}
+
 	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
 	return result;
 }
@@ -104,12 +127,15 @@ int32 FEngineLoop::Init()
 {
 	LE_LOG( LT_Log, LC_Init, TEXT( "Engine version: " ENGINE_VERSION_STRING ) );
 
-	appSetSplashText( STT_StartupProgress, TEXT( "Init platform..." ) );
+	appSetSplashText( STT_StartupProgress, TEXT( "Init platform" ) );
 	int32		result = appPlatformInit();
 	
-	appSetSplashText( STT_StartupProgress, TEXT( "Init render system..." ) );
+	appSetSplashText( STT_StartupProgress, TEXT( "Init render system" ) );
 	GShaderManager->Init();
-//	GUIEngine->Init();
+	//GUIEngine->Init();
+
+	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
+	GEngine->Init();
 
 	// If started game - create window
 	if ( !GIsEditor )
@@ -126,38 +152,43 @@ int32 FEngineLoop::Init()
 }
 
 /**
+ * Process event
+ */
+void FEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
+{
+	// Handling system events
+	switch ( InWindowEvent.type )
+	{
+	case SWindowEvent::T_WindowClose:
+		if ( InWindowEvent.events.windowClose.windowId == GWindow->GetID() )
+		{
+			GIsRequestingExit = true;
+		}
+		break;
+
+	case SWindowEvent::T_WindowResize:
+		if ( InWindowEvent.events.windowResize.windowId == GWindow->GetID() )
+		{
+			UNIQUE_RENDER_COMMAND_TWOPARAMETER( FResizeViewportCommand,
+												uint32, newWidth, InWindowEvent.events.windowResize.width,
+												uint32, newHeight, InWindowEvent.events.windowResize.height,
+												{
+													GViewportRHI->Resize( newWidth, newHeight );
+												} );
+		}
+		break;
+	}
+
+	GEngine->ProcessEvent( InWindowEvent );
+}
+
+/**
  * Advances main loop
  */
 void FEngineLoop::Tick()
 {
-	// Handling system events
-	{
-		SWindowEvent			windowEvent;
-		while ( GWindow->PollEvent( windowEvent ) )
-		{
-			switch ( windowEvent.type )
-			{
-			case SWindowEvent::T_WindowClose:
-				if ( windowEvent.events.windowClose.windowId == GWindow->GetID() )
-				{
-					GIsRequestingExit = true;
-				}
-				break;
-
-			case SWindowEvent::T_WindowResize:
-				if ( windowEvent.events.windowResize.windowId == GWindow->GetID() )
-				{
-					UNIQUE_RENDER_COMMAND_TWOPARAMETER( FResizeViewportCommand,
-														uint32, newWidth, windowEvent.events.windowResize.width,
-														uint32, newHeight, windowEvent.events.windowResize.height,
-														{
-															GViewportRHI->Resize( newWidth, newHeight );
-														} );		
-				}
-				break;
-			}
-		}
-	}
+	// Update engine
+	GEngine->Tick( 0.f );
 
 	UNIQUE_RENDER_COMMAND( FBeginRenderCommand,
 		{
@@ -183,9 +214,12 @@ void FEngineLoop::Exit()
 {
 	StopRenderingThread();
 
-	//GUIEngine->Shutdown();
+	GEngine->Shutdown();
+	delete GEngine;
+	GEngine = nullptr;
 
 	GViewportRHI.SafeRelease();
+	//GUIEngine->Shutdown();
 	GShaderManager->Shutdown();
 	GRHI->Destroy();
 

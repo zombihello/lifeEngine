@@ -40,6 +40,9 @@
     <Filter Include="Include\System">
       <UniqueIdentifier>{e75fc818-0781-4f3c-ba8d-bd7f92f13ad0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\System">
+      <UniqueIdentifier>{44ded40d-d1b6-490b-a96a-b6f09f8fdeaf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\RHI\BaseRHI.h">
@@ -111,6 +114,12 @@
     <ClInclude Include="Include\System\SplashScreen.h">
       <Filter>Include\System</Filter>
     </ClInclude>
+    <ClInclude Include="Include\System\BaseEngine.h">
+      <Filter>Include\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\System\GameEngine.h">
+      <Filter>Include\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
@@ -151,6 +160,12 @@
     </ClCompile>
     <ClCompile Include="Source\Render\RenderUtils.cpp">
       <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\BaseEngine.cpp">
+      <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\GameEngine.cpp">
+      <Filter>Source\System</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

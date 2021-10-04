@@ -29,6 +29,8 @@
     <ClInclude Include="Include\RHI\TypesRHI.h" />
     <ClInclude Include="Include\Scripts\Script.h" />
     <ClInclude Include="Include\Scripts\ScriptEngine.h" />
+    <ClInclude Include="Include\System\BaseEngine.h" />
+    <ClInclude Include="Include\System\GameEngine.h" />
     <ClInclude Include="Include\System\SplashScreen.h" />
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +47,8 @@
     <ClCompile Include="Source\Render\Texture.cpp" />
     <ClCompile Include="Source\Scripts\Script.cpp" />
     <ClCompile Include="Source\Scripts\ScriptEngine.cpp" />
+    <ClCompile Include="Source\System\BaseEngine.cpp" />
+    <ClCompile Include="Source\System\GameEngine.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

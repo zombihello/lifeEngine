@@ -94,7 +94,7 @@ void FD3D11RHI::Init( bool InIsEditor )
 	{
 		++currentAdapter;
 	}
-	checkMsg( dxgiAdapter, "GPU adapter not found" );
+	checkMsg( dxgiAdapter, TEXT( "GPU adapter not found" ) );
 
 	D3D_FEATURE_LEVEL				maxFeatureLevel = D3D_FEATURE_LEVEL_11_0;
 	D3D_FEATURE_LEVEL				featureLevel;
@@ -611,14 +611,16 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 	delete shaderArchive;
 	return true;
 }
+#endif // WITH_EDITOR
 
+#if WITH_IMGUI
 /**
  * Initialize ImGUI
  */
 void FD3D11RHI::InitImGUI( class FBaseDeviceContextRHI* InDeviceContext )
 {
 	check( d3d11Device && InDeviceContext );
-	FD3D11DeviceContext*		deviceContext = ( FD3D11DeviceContext* )InDeviceContext;
+	FD3D11DeviceContext* deviceContext = ( FD3D11DeviceContext* ) InDeviceContext;
 
 	check( ImGui_ImplDX11_Init( d3d11Device, deviceContext->GetD3D11DeviceContext() ) );
 	ImGui_ImplDX11_NewFrame();
@@ -639,7 +641,7 @@ void FD3D11RHI::DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, ImDrawD
 {
 	ImGui_ImplDX11_RenderDrawData( InImGUIDrawData );
 }
-#endif // WITH_EDITOR
+#endif // WITH_IMGUI
 
 /**
  * Get RHI name

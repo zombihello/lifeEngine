@@ -1,6 +1,10 @@
 #include <exception>
 #include <SDL.h>
 
+#if WITH_EDITOR
+#include <wx/wx.h>
+#endif // WITH_EDITOR
+
 #include "Core.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/LaunchGlobals.h"
@@ -19,10 +23,6 @@
 #include "Misc/Misc.h"
 #include "System/Config.h"
 #include "System/SplashScreen.h"
-
-#if WITH_EDITOR
-#include <wx/wx.h>
-#endif // WITH_EDITOR
 
 /**
  * Pre-Initialize platform
@@ -104,6 +104,13 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 
 			while ( !GIsRequestingExit )
 			{
+				// Handling system events
+				SWindowEvent		windowEvent;
+				while ( GWindow->PollEvent( windowEvent ) )
+				{
+					GEngineLoop->ProcessEvent( windowEvent );
+				}
+
 				GEngineLoop->Tick();
 			}
 		}
