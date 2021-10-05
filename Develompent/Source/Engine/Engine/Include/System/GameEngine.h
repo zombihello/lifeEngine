@@ -10,6 +10,7 @@
 #define GAMEENGINE_H
 
 #include "System/BaseEngine.h"
+#include "Render/Viewport.h"
 
 /**
  * @ingroup Engine
@@ -46,6 +47,16 @@ public:
 	 * Shutdown engine
 	 */
 	virtual void Shutdown();
+
+	/**
+	 * @brief Process event
+	 *
+	 * @param[in] InWindowEvent Window event
+	 */
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
+
+private:
+	FViewport			viewport;		/**< Viewport */
 };
 
 #endif // !GAMEENGINE_H

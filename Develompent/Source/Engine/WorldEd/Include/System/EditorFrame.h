@@ -19,7 +19,7 @@ class WxEditorFrame : public wxFrame
 {
 	// Used for dynamic creation of the window. This must be declared for any
 	// subclasses of WxEditorFrame
-	DECLARE_DYNAMIC_CLASS( WxEditorFrame );
+	wxDECLARE_DYNAMIC_CLASS( WxEditorFrame );
 
 public:
 	/**
@@ -62,6 +62,7 @@ private:
 	wxPoint					framePos;		/**< Window position */
 	wxSize					frameSize;		/**< Window size */
 	bool					frameMaximized;	/**< Window maximized state */
+	class FViewport*		viewport;		/**< Viewport of render */
 
 	DECLARE_EVENT_TABLE();
 };

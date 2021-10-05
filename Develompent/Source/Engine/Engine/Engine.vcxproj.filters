@@ -120,6 +120,9 @@
     <ClInclude Include="Include\System\GameEngine.h">
       <Filter>Include\System</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Render\Viewport.h">
+      <Filter>Include\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
@@ -161,10 +164,13 @@
     <ClCompile Include="Source\Render\RenderUtils.cpp">
       <Filter>Source\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Source\System\BaseEngine.cpp">
+    <ClCompile Include="Source\System\GameEngine.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
-    <ClCompile Include="Source\System\GameEngine.cpp">
+    <ClCompile Include="Source\Render\Viewport.cpp">
+      <Filter>Source\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\BaseEngine.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
   </ItemGroup>

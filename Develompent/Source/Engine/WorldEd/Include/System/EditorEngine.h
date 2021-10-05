@@ -9,6 +9,8 @@
 #ifndef EDITORENGINE_H
 #define EDITORENGINE_H
 
+#include <vector>
+
 #include "System/BaseEngine.h"
 
 /**
@@ -46,6 +48,44 @@ public:
 	 * Shutdown engine
 	 */
 	virtual void Shutdown();
+
+	/**
+	 * @brief Process event
+	 *
+	 * @param[in] InWindowEvent Window event
+	 */
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
+
+	/**
+	 * Add viewport to render list
+	 * 
+	 * @param[in] InViewport Viewport
+	 */
+	FORCEINLINE void AddViewport( class FViewport* InViewport )
+	{
+		viewports.push_back( InViewport );
+	}
+
+	/**
+	 * Remove viewport from render list
+	 * 
+	 * @param[in] InViewport Viewport
+	 */
+	FORCEINLINE void RemoveViewport( class FViewport* InViewport )
+	{
+		for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
+		{
+			class FViewport*&		viewport = viewports[ index ];
+			if ( viewport == InViewport )
+			{
+				viewports.erase( viewports.begin() + index );
+				return;
+			}
+		}
+	}
+
+private:
+	std::vector< class FViewport* >			viewports;		/**< Array of viewports for render */
 };
 
 #endif // !EDITORENGINE_H

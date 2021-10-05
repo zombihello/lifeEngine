@@ -1,6 +1,6 @@
 {
 	"Engine.Engine": {
-		"ClassName": "LGameEngine"
+		"Class": "LGameEngine"
 	},
 	"Engine.SystemSettings": {
 		"WindowWidth": 1280,

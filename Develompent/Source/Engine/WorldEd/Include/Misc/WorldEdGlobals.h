@@ -9,4 +9,10 @@
 #ifndef WORLDEDGLOBALS_H
 #define WORLDEDGLOBALS_H
 
+/**
+ * @ingroup Engine
+ * Editor engine
+ */
+extern class LEditorEngine*			GEditorEngine;
+
 #endif // !WORLDEDGLOBALS_H

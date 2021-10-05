@@ -27,7 +27,7 @@ FRenderResource::~FRenderResource()
  */
 void FRenderResource::InitResource()
 {
-	if ( isInitialized )
+	if ( !isInitialized )
 	{
 		InitRHI();
 		isInitialized = true;

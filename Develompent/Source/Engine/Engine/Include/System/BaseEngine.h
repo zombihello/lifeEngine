@@ -14,12 +14,6 @@
 
 /**
  * @ingroup Engine
- * Pointer to engine object
- */
-extern class LBaseEngine*		GEngine;
-
-/**
- * @ingroup Engine
  * Class of base engine
  */
 class LBaseEngine : public LObject
@@ -28,19 +22,14 @@ class LBaseEngine : public LObject
 
 public:
 	/**
-	 * Constructor
-	 */
-	LBaseEngine();
-
-	/**
 	 * Destructor
 	 */
-	virtual ~LBaseEngine();
+	virtual ~LBaseEngine() {}
 
 	/**
 	 * Initialize engine
 	 */
-	virtual void Init();
+	virtual void Init() PURE_VIRTUAL( LBaseEngine::Init, );
 
 	/**
 	 * Update logic of engine
@@ -52,14 +41,14 @@ public:
 	/**
 	 * Shutdown engine
 	 */
-	virtual void Shutdown();
+	virtual void Shutdown() PURE_VIRTUAL( LBaseEngine::Shutdown, );
 
 	/**
 	 * @brief Process event
 	 *
 	 * @param[in] InWindowEvent Window event
 	 */
-	void ProcessEvent( struct SWindowEvent& InWindowEvent );
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) PURE_VIRTUAL( LBaseEngine::ProcessEvent, );
 };
 
 #endif // !BASEENGINE_H

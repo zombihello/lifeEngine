@@ -24,12 +24,6 @@
 #include "System/SplashScreen.h"
 #include "System/BaseEngine.h"
 
-// --------------
-// GLOBALS
-// --------------
-
-FViewportRHIRef			GViewportRHI;
-
 /**
  * Constructor
  */
@@ -100,12 +94,12 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 		std::wstring		classEngineName = TEXT( "LBaseEngine" );
 		if ( !GIsEditor )
 		{
-			classEngineName = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "ClassName" ) ).GetString().c_str();
+			classEngineName = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "Class" ) ).GetString().c_str();
 		}
 #if WITH_EDITOR
 		else
 		{
-			classEngineName = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "ClassName" ) ).GetString().c_str();
+			classEngineName = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "Class" ) ).GetString().c_str();
 		}
 #endif // WITH_EDITOR
 
@@ -137,16 +131,6 @@ int32 FEngineLoop::Init()
 	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
 	GEngine->Init();
 
-	// If started game - create window
-	if ( !GIsEditor )
-	{
-		uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
-		uint32						windowHeight = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
-		
-		GWindow->Create( GGameName.c_str(), windowWidth, windowHeight, SW_Default );
-		GViewportRHI = GRHI->CreateViewport( GWindow->GetHandle(), windowWidth, windowHeight );
-	}
-
 	StartRenderingThread();
 	return result;
 }
@@ -157,28 +141,6 @@ int32 FEngineLoop::Init()
 void FEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// Handling system events
-	switch ( InWindowEvent.type )
-	{
-	case SWindowEvent::T_WindowClose:
-		if ( InWindowEvent.events.windowClose.windowId == GWindow->GetID() )
-		{
-			GIsRequestingExit = true;
-		}
-		break;
-
-	case SWindowEvent::T_WindowResize:
-		if ( InWindowEvent.events.windowResize.windowId == GWindow->GetID() )
-		{
-			UNIQUE_RENDER_COMMAND_TWOPARAMETER( FResizeViewportCommand,
-												uint32, newWidth, InWindowEvent.events.windowResize.width,
-												uint32, newHeight, InWindowEvent.events.windowResize.height,
-												{
-													GViewportRHI->Resize( newWidth, newHeight );
-												} );
-		}
-		break;
-	}
-
 	GEngine->ProcessEvent( InWindowEvent );
 }
 
@@ -189,22 +151,6 @@ void FEngineLoop::Tick()
 {
 	// Update engine
 	GEngine->Tick( 0.f );
-
-	UNIQUE_RENDER_COMMAND( FBeginRenderCommand,
-		{
-			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-			GRHI->BeginDrawingViewport( immediateContext, GViewportRHI );
-			immediateContext->ClearSurface( GViewportRHI->GetSurface(), FColor::black );
-		} );
-
-	//GUIEngine->BeginDraw();
-	//GUIEngine->EndDraw();
-
-	UNIQUE_RENDER_COMMAND( FEndRenderCommand,
-		{
-			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-			GRHI->EndDrawingViewport( immediateContext, GViewportRHI, true, false );
-		} );
 }
 
 /**
@@ -218,7 +164,6 @@ void FEngineLoop::Exit()
 	delete GEngine;
 	GEngine = nullptr;
 
-	GViewportRHI.SafeRelease();
 	//GUIEngine->Shutdown();
 	GShaderManager->Shutdown();
 	GRHI->Destroy();

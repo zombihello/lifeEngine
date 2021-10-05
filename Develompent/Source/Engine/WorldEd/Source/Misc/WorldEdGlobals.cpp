@@ -3,3 +3,5 @@
 // -------------
 // GLOBALS
 // -------------
+
+class LEditorEngine*			GEditorEngine = nullptr;

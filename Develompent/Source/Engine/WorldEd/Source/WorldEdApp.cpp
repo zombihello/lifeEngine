@@ -27,7 +27,7 @@ bool WxWorldEdApp::OnInit()
 WxEditorFrame* WxWorldEdApp::CreateEditorFrame()
 {
 	// Look up the name of the frame we are creating
-	std::wstring		editorFrameName = GEditorConfig.GetValue( TEXT( "Editor.EditorFrame" ), TEXT( "ClassName" ) ).GetString();
+	std::wstring		editorFrameName = GEditorConfig.GetValue( TEXT( "Editor.EditorFrame" ), TEXT( "Class" ) ).GetString();
 
 	// In case the config file is messed up
 	if ( editorFrameName.empty() )

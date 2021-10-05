@@ -35,4 +35,10 @@ extern class FShaderManager*		GShaderManager;
  */
 extern std::wstring					GGameName;
 
+/**
+ * @ingroup Engine
+ * Engine
+ */
+extern class LBaseEngine*			GEngine;
+
 #endif // !ENGINEGLOBALS_H

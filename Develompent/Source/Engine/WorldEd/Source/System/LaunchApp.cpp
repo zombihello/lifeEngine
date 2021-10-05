@@ -2,10 +2,12 @@
 #include "Misc/LaunchGlobals.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "Containers/String.h"
 #include "System/Config.h"
 #include "EngineLoop.h"
 #include "System/SplashScreen.h"
+#include "System/EditorEngine.h"
 #include "WorldEdApp.h"
 
 WxLaunchApp::~WxLaunchApp()
@@ -14,9 +16,12 @@ WxLaunchApp::~WxLaunchApp()
 bool WxLaunchApp::OnInit()
 {
 	appShowSplash( GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "Splash" ) ).GetString().c_str() );	
-	int32		result = GEngineLoop->Init();	
-	appHideSplash();
+	
+	int32		result = GEngineLoop->Init();
+	GEditorEngine = GEngine->Cast< LEditorEngine >();
+	checkMsg( GEditorEngine, TEXT( "Class of engine for editor must be inherited from LEditorEngine" ) );
 
+	appHideSplash();
 	return result == 0;
 }
 

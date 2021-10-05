@@ -1,10 +1,13 @@
 #include "System/EditorFrame.h"
 #include "Containers/String.h"
 #include "System/Config.h"
+#include "Render/Viewport.h"
 #include "Logger/LoggerMacros.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "Misc/ResourceIDs.h"
+#include "System/EditorEngine.h"
 #include "WorldEdApp.h"
 
 // Windows
@@ -12,7 +15,7 @@
 
 // Used for dynamic creation of the window. This must be declared for any
 // subclasses of WxEditorFrame
-IMPLEMENT_DYNAMIC_CLASS( WxEditorFrame, wxFrame );
+wxIMPLEMENT_DYNAMIC_CLASS( WxEditorFrame, wxFrame );
 
 //----------------------------------------------------
 //   WxMainMenu
@@ -62,11 +65,14 @@ WxEditorFrame::WxEditorFrame() :
 	mainMenuBar( nullptr ),
 	framePos( 0, 0 ),
 	frameSize( 1280, 720 ),
-	frameMaximized( true )
+	frameMaximized( true ),
+	viewport( nullptr )
 {}
 
 WxEditorFrame::~WxEditorFrame()
-{}
+{
+	delete viewport;
+}
 
 void WxEditorFrame::Create()
 {
@@ -101,6 +107,11 @@ void WxEditorFrame::Create()
 	// Create components of editor frame
 	mainMenuBar = new WxMainMenu();
 	SetMenuBar( mainMenuBar );
+
+	// Create viewport for render
+	viewport = new FViewport();
+	viewport->Update( false, frameSize.x, frameSize.y, GetHWND() );
+	GEditorEngine->AddViewport( viewport );
 }
 
 void WxEditorFrame::UI_MenuFileNewMap( wxCommandEvent& InCommandEvent )
@@ -113,6 +124,16 @@ void WxEditorFrame::UI_MenuFileExit( wxCommandEvent& InCommandEvent )
 
 void WxEditorFrame::OnClose( wxCloseEvent& InEvent )
 {
+	// Destroy viewport
+	viewport->Update( true, 0, 0, nullptr );
+	GEditorEngine->RemoveViewport( viewport );
+
+	// Wait while viewport RHI is not deleted
+	while ( viewport->IsValid() )
+	{
+		appSleep( 0.1f );
+	}
+
 	Destroy();
 }
 

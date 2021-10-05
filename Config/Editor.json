@@ -2,12 +2,12 @@
 	"Editor.Editor": 
 	{
 		"Splash": 		"EdSplash.bmp",
-		"ClassName":	"LEditorEngine"
+		"Class":		"LEditorEngine"
 	},
 	
 	"Editor.EditorFrame": 
 	{
-		"ClassName": 	"WxEditorFrame",
+		"Class": 		"WxEditorFrame",
 		"Pos": 			{ "X": 0, "Y": 0 },
 		"Size": 		{ "X": 1280, "Y": 720 },
 		"IsMaximized": 	true
