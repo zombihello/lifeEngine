@@ -100,7 +100,7 @@ public:
 	 * 
 	 * @return Return pointer to class. If not found returning nullptr
 	 */
-	static FORCEINLINE const LClass*				StaticFindClass( const tchar* InClassName )
+	static FORCEINLINE LClass*					StaticFindClass( const tchar* InClassName )
 	{
 		auto		itClass = classesTable.find( InClassName );
 		if ( itClass == classesTable.end() )
@@ -108,7 +108,7 @@ public:
 			return nullptr;
 		}
 
-		return itClass->second;
+		return ( LClass* )itClass->second;
 	}
 
 private:

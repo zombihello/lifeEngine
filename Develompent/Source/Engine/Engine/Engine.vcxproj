@@ -18,6 +18,7 @@
     <ClInclude Include="Include\Render\Shaders\ShaderManager.h" />
     <ClInclude Include="Include\Render\Shaders\TestShader.h" />
     <ClInclude Include="Include\Render\Texture.h" />
+    <ClInclude Include="Include\Render\TextureFileCache.h" />
     <ClInclude Include="Include\Render\Viewport.h" />
     <ClInclude Include="Include\RHI\BaseBufferRHI.h" />
     <ClInclude Include="Include\RHI\BaseResourceRHI.h" />
@@ -46,6 +47,7 @@
     <ClCompile Include="Source\Render\Shader\ShaderManager.cpp" />
     <ClCompile Include="Source\Render\Shader\TestShader.cpp" />
     <ClCompile Include="Source\Render\Texture.cpp" />
+    <ClCompile Include="Source\Render\TextureFileCache.cpp" />
     <ClCompile Include="Source\Render\Viewport.cpp" />
     <ClCompile Include="Source\Scripts\Script.cpp" />
     <ClCompile Include="Source\Scripts\ScriptEngine.cpp" />

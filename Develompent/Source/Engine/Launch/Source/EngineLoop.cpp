@@ -24,6 +24,10 @@
 #include "System/SplashScreen.h"
 #include "System/BaseEngine.h"
 
+#if WITH_EDITOR
+#include "Commandlets/BaseCommandlet.h"
+#endif // WITH_EDITOR
+
 /**
  * Constructor
  */
@@ -109,6 +113,42 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 		GEngine = lclass->CreateObject< LBaseEngine >();
 		check( GEngine );
 	}
+
+	// Parse cmd line for start commandlets
+#if WITH_EDITOR
+	{
+		std::vector< std::wstring >		tokens;
+		std::vector< std::wstring >		switches;
+		appParseCommandLine( InCmdLine, tokens, switches );
+
+		// If tokens more two we creating commandlet and execute it
+		// PS: 0 index - path to exe file, 1 index - name commandlet
+		if ( tokens.size() >= 2 )
+		{
+			const std::wstring&			nameCommandlet = tokens[ 1 ];
+			LClass*						lclassCommandlet = LClass::StaticFindClass( nameCommandlet.c_str() );
+
+			// If class not found try to search by added 'L' in prefix and 'Commandlet' in sufix
+			if ( !lclassCommandlet )
+			{
+				lclassCommandlet = LClass::StaticFindClass( ( std::wstring( TEXT( "L" ) ) + nameCommandlet + TEXT( "Commandlet" ) ).c_str() );
+			}
+
+			// Create and execute commandlet
+			if ( lclassCommandlet )
+			{
+				LBaseCommandlet*			commandlet = lclassCommandlet->CreateObject< LBaseCommandlet >();
+				check( commandlet );
+				LE_LOG( LT_Log, LC_Commandlet, TEXT( "Started commandlet '%s'" ), nameCommandlet.c_str() );
+				commandlet->Main( InCmdLine );
+				delete commandlet;
+
+				GIsRequestingExit = true;
+				return result;
+			}
+		}
+	}
+#endif // WITH_EDITOR
 
 	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
 	return result;

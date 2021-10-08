@@ -67,8 +67,11 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
 	// BS yehor.pohuliaka - Place court render scene
-	
-	check( isInitialized );
+	if ( !isInitialized )
+	{
+		return;
+	}
+
 	UNIQUE_RENDER_COMMAND_ONEPARAMETER( FBeginRenderCommand,
 										FViewportRHIRef, viewportRHI, viewportRHI,
 										{
@@ -76,7 +79,7 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 											GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
 											immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
 										} );
-	
+
 	UNIQUE_RENDER_COMMAND_TWOPARAMETER( FEndRenderCommand,
 										bool, isShouldPresent, InIsShouldPresent,
 										FViewportRHIRef, viewportRHI, viewportRHI,

@@ -1,37 +1,26 @@
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 #include "Containers/StringConv.h"
+#include "System/BaseArchive.h"
 #include "Misc/EngineGlobals.h"
 #include "Render/Texture.h"
+#include "Render/RenderUtils.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
+#include "Render/TextureFileCache.h"
 
 FTexture2D::FTexture2D() :
 	sizeX( 0 ),
 	sizeY( 0 ),
-	data( nullptr )
+	pixelFormat( PF_Unknown )
 {}
-
-FTexture2D::FTexture2D( const std::wstring& InFilename ) :
-	sizeX( 0 ),
-	sizeY( 0 ),
-	data( nullptr )
-{
-	SetFilename( InFilename );
-}
 
 FTexture2D::~FTexture2D()
 {
-	if ( data )
-	{
-		stbi_image_free( data );
-	}
 }
 
 void FTexture2D::InitRHI()
 {
-	texture = GRHI->CreateTexture2D( TEXT( "" ), sizeX, sizeY, PF_A8R8G8B8, 1, 0, data );
+	check( !data.empty() );
+	texture = GRHI->CreateTexture2D( TEXT( "" ), sizeX, sizeY, pixelFormat, 1, 0, data.data() );
 
 	FSamplerStateInitializerRHI			samplerStateInitializerRHI;
 	appMemzero( &samplerStateInitializerRHI, sizeof( FSamplerStateInitializerRHI ) );
@@ -39,12 +28,7 @@ void FTexture2D::InitRHI()
 	samplerStateInitializerRHI.addressU		= SAM_Wrap;
 	samplerStateInitializerRHI.addressV		= SAM_Wrap;
 	samplerState = GRHI->CreateSamplerState( samplerStateInitializerRHI );
-
-	if ( data )
-	{
-		stbi_image_free( data );
-		data = nullptr;
-	}
+	data.clear();
 }
 
 void FTexture2D::ReleaseRHI()
@@ -52,9 +36,15 @@ void FTexture2D::ReleaseRHI()
 	texture = nullptr;
 }
 
-void FTexture2D::SetFilename( const std::wstring& InFilename )
+void FTexture2D::SetData( const struct FTextureCacheItem& InTextureCache )
 {
-	int				numComponents = 0;
-	data = stbi_load( TCHAR_TO_ANSI( InFilename.c_str() ), ( int* )&sizeX, ( int* )&sizeY, &numComponents, 4 );
+	check( InTextureCache.hash != FTextureCacheItem::INVALID_HASH );
+	
+	// Copy new parameters of texture
+	sizeX			= InTextureCache.sizeX;
+	sizeY			= InTextureCache.sizeY;
+	pixelFormat		= InTextureCache.pixelFormat;
+	data			= InTextureCache.data;
+
 	BeginUpdateResource( this );
 }

@@ -93,15 +93,15 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 		}
 		else
 #endif // WITH_EDITOR
-		{
-			appShowSplash( GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );
+		{		
 			if ( !GIsRequestingExit )
 			{
+				appShowSplash( GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );		
 				errorLevel = GEngineLoop->Init();
-				check( errorLevel == 0 );
+				check( errorLevel == 0 );		
+				appHideSplash();
 			}
-			appHideSplash();
-
+			
 			while ( !GIsRequestingExit )
 			{
 				// Handling system events

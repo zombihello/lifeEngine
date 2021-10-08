@@ -10,9 +10,22 @@
 #define MISC_H
 
 #include <string>
+#include <vector>
 
 #include "Misc/Types.h"
 #include "Core.h"
+
+/**
+ * @ingroup Core
+ * Is char is whitespace
+ * 
+ * @param[in] InChar Tested char
+ * @return Return true if InChar is whitespace, else return false
+ */
+FORCEINLINE bool appIsWhitespace( tchar InChar )
+{
+	return InChar == TEXT( ' ' ) || InChar == TEXT( '\t' );
+}
 
 /**
  * @ingroup Core
@@ -36,6 +49,17 @@ FORCEINLINE bool				appParseParam( const tchar* InStream, const tchar* InParam )
 
 	return false;
 }
+
+/**
+ * @ingroup Core
+ * Parses a string into tokens, separating switches (beginning with - or /) from
+ * other parameters
+ * 
+ * @param[in] InCmdLine The string to parse
+ * @param[out] OutTokens Filled with all parameters found in the string
+ * @param[out] OutSwitches Filled with all switches found in the string
+ */
+void appParseCommandLine( const tchar* InCmdLine, std::vector< std::wstring >& OutTokens, std::vector< std::wstring >& OutSwitches );
 
 /**
  * @ingroup Core

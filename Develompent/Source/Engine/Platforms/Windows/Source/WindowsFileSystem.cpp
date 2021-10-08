@@ -56,8 +56,13 @@ class FBaseArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& In
 	// Create directory for file
 	{
 		std::wstring			path = InFileName;
-		path.erase( path.find_last_of( TEXT( "/" ) ), path.size() );
+		std::size_t				slashIndex = path.find_last_of( TEXT( "/" ) );
+		if ( slashIndex == std::wstring::npos )
+		{
+			slashIndex = path.find_last_of( TEXT( "\\" ) );
+		}
 
+		path.erase( slashIndex, path.size() );
 		CreateDirectoryW( path.c_str(), nullptr );
 	}
 

@@ -155,5 +155,8 @@
     <ClCompile Include="Source\Containers\RingBuffer.cpp">
       <Filter>Source\Containers</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Misc\Misc.cpp">
+      <Filter>Source\Misc</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -18,12 +18,12 @@ void FShaderCache::FShaderCacheItem::Serialize( FBaseArchive& InArchive )
 		// Load shader class name
 		InArchive << nameSize;
 		name.resize( nameSize / sizeof( std::wstring::value_type ) );
-		InArchive.Serialize( ( void* ) name.data(), nameSize );
+		InArchive.Serialize( ( void* )name.data(), nameSize );
 
 		// Load byte code of shader
 		InArchive << codeSize;
 		code.resize( codeSize );
-		InArchive.Serialize( ( void* ) code.data(), codeSize );
+		InArchive.Serialize( ( void* )code.data(), codeSize );
 	}
 	else if ( InArchive.IsSaving() )
 	{

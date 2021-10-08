@@ -98,16 +98,17 @@ void WxEditorFrame::Create()
 	// Assert if this fails
 	const bool			success = wxFrame::Create( nullptr, -1, WxWorldEdApp::GetEditorName(), framePos, frameSize );
 	check( success );
-
+	
 	if ( frameMaximized )
 	{
 		Maximize( true );
+		frameSize = GetSize();
 	}
 
 	// Create components of editor frame
 	mainMenuBar = new WxMainMenu();
 	SetMenuBar( mainMenuBar );
-
+	
 	// Create viewport for render
 	viewport = new FViewport();
 	viewport->Update( false, frameSize.x, frameSize.y, GetHWND() );

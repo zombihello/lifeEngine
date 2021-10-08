@@ -14,7 +14,7 @@
 #include "System/BaseEngine.h"
 
 /**
- * @ingroup Engine
+ * @ingroup WorldEd
  * Class of editor engine
  */
 class LEditorEngine : public LBaseEngine

@@ -25,6 +25,12 @@
     <Filter Include="Source\Windows">
       <UniqueIdentifier>{bdc379d2-8024-4dcd-9d76-101355d0abcd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Commandlets">
+      <UniqueIdentifier>{818060de-86e7-4d33-90b4-a94df76be09a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Commandlets">
+      <UniqueIdentifier>{4ec82132-e6b0-44a9-974b-25b3e6cd17ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Misc\WorldEdGlobals.h">
@@ -51,6 +57,12 @@
     <ClInclude Include="Include\System\EditorEngine.h">
       <Filter>Include\System</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Commandlets\BaseCommandlet.h">
+      <Filter>Include\Commandlets</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Commandlets\ImportTextureCommandlet.h">
+      <Filter>Include\Commandlets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp">
@@ -70,6 +82,12 @@
     </ClCompile>
     <ClCompile Include="Source\System\EditorEngine.cpp">
       <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Commandlets\BaseCommandlet.cpp">
+      <Filter>Source\Commandlets</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Commandlets\ImportTextureCommandlet.cpp">
+      <Filter>Source\Commandlets</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

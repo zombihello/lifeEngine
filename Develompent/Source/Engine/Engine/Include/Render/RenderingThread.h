@@ -154,9 +154,9 @@ private:
  */
 #define SEND_RENDER_COMMAND( InTypeName, InParam ) \
 	{ \
-		check( IsInGameThread() ); \
-		if ( GIsThreadedRendering ) \
+		if ( GIsThreadedRendering && !IsInRenderingThread() ) \
 		{ \
+			check( IsInGameThread() ); \
 			FRingBuffer::AllocationContext			allocationContext( GRenderCommandBuffer, sizeof( InTypeName ) ); \
 			if ( allocationContext.GetAllocatedSize() < sizeof( InTypeName ) ) \
 			{ \

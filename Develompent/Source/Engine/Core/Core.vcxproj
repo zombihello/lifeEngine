@@ -43,6 +43,7 @@
     <ClCompile Include="Source\Logger\BaseLogger.cpp" />
     <ClCompile Include="Source\Math\Color.cpp" />
     <ClCompile Include="Source\Misc\Class.cpp" />
+    <ClCompile Include="Source\Misc\Misc.cpp" />
     <ClCompile Include="Source\Misc\Object.cpp" />
     <ClCompile Include="Source\Misc\RefCounted.cpp" />
     <ClCompile Include="Source\System\ButtonCode.cpp" />

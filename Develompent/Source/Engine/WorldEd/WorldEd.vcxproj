@@ -7,6 +7,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\Commandlets\BaseCommandlet.h" />
+    <ClInclude Include="Include\Commandlets\ImportTextureCommandlet.h" />
     <ClInclude Include="Include\Misc\ResourceIDs.h" />
     <ClInclude Include="Include\Misc\WorldEdGlobals.h" />
     <ClInclude Include="Include\Misc\WorldEdTypes.h" />
@@ -17,6 +19,8 @@
     <ClInclude Include="Include\WorldEdApp.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Commandlets\BaseCommandlet.cpp" />
+    <ClCompile Include="Source\Commandlets\ImportTextureCommandlet.cpp" />
     <ClCompile Include="Source\Misc\WorldEdGlobals.cpp" />
     <ClCompile Include="Source\System\EditorEngine.cpp" />
     <ClCompile Include="Source\System\EditorFrame.cpp" />

@@ -13,6 +13,8 @@
 #include <vector>
 
 #include "RenderResource.h"
+#include "RHI/BaseSurfaceRHI.h"
+#include "RHI/BaseStateRHI.h"
 #include "RHI/TypesRHI.h"
 
 /**
@@ -26,13 +28,6 @@ public:
 	 * Constructor
 	 */
 	FTexture2D();
-
-	/**
-	 * Constructor
-	 * 
-	 * @param[in] InFilename Path to file with texture
-	 */
-	FTexture2D( const std::wstring& InFilename );
 
 	/**
 	 * Destructor
@@ -54,20 +49,11 @@ public:
 	virtual void ReleaseRHI() override;
 
 	/**
-	 * Set path to file with texture
+	 * Set data texture
 	 * 
-	 * @param[in] InFilename Path to file with texture
+	 * @param[in] InTextureCache Texture cache
 	 */
-	void SetFilename( const std::wstring& InFilename );
-
-	/**
-	 * Get path to file with texture
-	 * @return Return path to file with texture
-	 */
-	FORCEINLINE const std::wstring& GetFilename() const
-	{
-		return filename;
-	}
+	void SetData( const struct FTextureCacheItem& InTextureCache );
 
 	/**
 	 * Get RHI texture 2D
@@ -87,11 +73,20 @@ public:
 		return samplerState;
 	}
 
+	/**
+	 * Get pixel format
+	 * @return Return pixel format in texture
+	 */
+	FORCEINLINE EPixelFormat GetPixelFormat() const
+	{
+		return pixelFormat;
+	}
+
 private:
-	std::wstring				filename;		/**< Path to file with texture */
 	uint32						sizeX;			/**< Width of texture */
 	uint32						sizeY;			/**< Height of texture */
-	byte*						data;			/**< Pointer to data used when loading texture */
+	std::vector< byte >			data;			/**< Data used when loading texture */
+	EPixelFormat				pixelFormat;	/**< Pixel format of texture */
 	FTexture2DRHIRef			texture;		/**< Reference to RHI texture */
 	FSamplerStateRHIRef			samplerState;	/**< Reference to sampler state */
 };

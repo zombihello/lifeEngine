@@ -38,6 +38,7 @@ enum ELogCategory
 
 #if WITH_EDITOR
     LC_Editor,              /**< Editor category */
+    LC_Commandlet,          /**< Commandlet category */
 #endif // WITH_EDITOR
 };
 

@@ -123,6 +123,9 @@
     <ClInclude Include="Include\Render\Viewport.h">
       <Filter>Include\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Render\TextureFileCache.h">
+      <Filter>Include\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Misc\EngineGlobals.cpp">
@@ -172,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="Source\System\BaseEngine.cpp">
       <Filter>Source\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Render\TextureFileCache.cpp">
+      <Filter>Source\Render</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
