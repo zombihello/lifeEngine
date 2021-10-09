@@ -173,7 +173,7 @@ public:
 	 * @param[in] InInitializer Initializer of sampler state
 	 * @return Pointer to sampler state
 	 */
-	virtual FSamplerStateRHIRef					CreateSamplerState( const FSamplerStateInitializerRHI& InInitializer ) override;
+	virtual FSamplerStateRHIRef						CreateSamplerState( const FSamplerStateInitializerRHI& InInitializer ) override;
 
 	/**
 	 * @brief Create texture 2D
@@ -307,6 +307,30 @@ public:
 	virtual void									SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FTextureRHIParamRef InTexture, uint32 InTextureIndex ) override;
 
 	/**
+	 * Set shader parameter in vertex shader
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InVertexShader Pointer to vertex shader
+	 * @param[in] InBufferIndex Buffer index
+	 * @param[in] InBaseIndex Offset value in buffer
+	 * @param[in] InNumBytes Size value in bytes
+	 * @param[in] InNewValue Pointer to value
+	 */
+	//virtual void									SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FVertexShaderRHIParamRef InVertexShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) override;
+
+	/**
+	 * Set shader parameter in pixel shader
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InPixelShader Pointer to pixel shader
+	 * @param[in] InBufferIndex Buffer index
+	 * @param[in] InBaseIndex Offset value in buffer
+	 * @param[in] InNumBytes Size value in bytes
+	 * @param[in] InNewValue Pointer to value
+	 */
+	virtual void									SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) override;
+
+	/**
 	 * @brief Lock vertex buffer
 	 *
 	 * @param[in] InDeviceContext Device context
@@ -435,6 +459,7 @@ public:
 private:
 	bool							isInitialize;				/**< Is RHI is initialized */
 	class FD3D11DeviceContext*		immediateContext;			/**< Immediate context */
+	class FD3D11ConstantBuffer*		psConstantBuffer;			/**< Constant buffer for pixel shader */
 	FBoundShaderStateHistory		boundShaderStateHistory;	/**< History of using bound shader states */
 
 	ID3D11Device*					d3d11Device;				/**< D3D11 Device */

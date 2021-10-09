@@ -33,6 +33,9 @@
     <ClInclude Include="Include\D3D11State.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="Include\D3D11Types.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\D3D11RHI.cpp">

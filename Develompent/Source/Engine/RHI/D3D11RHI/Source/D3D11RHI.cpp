@@ -56,6 +56,7 @@ static FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrim
 FD3D11RHI::FD3D11RHI() :
 	isInitialize( false ),
 	immediateContext( nullptr ),
+	psConstantBuffer( nullptr ),
 	d3d11Device( nullptr )
 {}
 
@@ -104,6 +105,10 @@ void FD3D11RHI::Init( bool InIsEditor )
 
 	immediateContext = new FD3D11DeviceContext( d3d11DeviceContext );
 	
+	// Create constant buffers for shaders
+	psConstantBuffer = new FD3D11ConstantBuffer( sizeof( float ) * 4, TEXT( "PixelCB" ) );
+	psConstantBuffer->Bind( immediateContext );
+
 	// Print info adapter
 	DXGI_ADAPTER_DESC				adapterDesc;
 	dxgiAdapter->GetDesc( &adapterDesc );
@@ -346,6 +351,18 @@ void FD3D11RHI::SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContex
 	check( !InTexture || d3d11ShaderResourceView );
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	d3d11DeviceContext->PSSetShaderResources( InTextureIndex, 1, &d3d11ShaderResourceView );
+}
+
+//void FD3D11RHI::SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FVertexShaderRHIParamRef InVertexShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
+//{
+//	check( false );
+//}
+
+void FD3D11RHI::SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
+{
+	check( psConstantBuffer );
+	psConstantBuffer->Update( ( byte* )InNewValue, InBaseIndex, InNumBytes );
+	psConstantBuffer->CommitConstantsToDevice( ( FD3D11DeviceContext* )InDeviceContext );
 }
 
 /**

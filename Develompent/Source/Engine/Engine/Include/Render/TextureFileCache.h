@@ -46,7 +46,7 @@ struct FTextureCacheItem
 	 */
 	FORCEINLINE static uint32 CalcHash( const std::wstring& InName )
 	{
-		return appMemFastHash( InName.data(), ( uint32 ) InName.size() * sizeof( std::wstring::value_type ), 0 );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
+		return appMemFastHash( InName.data(), ( uint32 )InName.size() * sizeof( std::wstring::value_type ), 0 );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
 	}
 
 	uint32						hash;			/**< Hash of texture */

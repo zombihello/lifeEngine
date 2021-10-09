@@ -9,6 +9,11 @@ struct VS_OUT
 	float2 texCoord0	: TEXCOORD0;
 };
 
+cbuffer PSConstatBuffer : register( b0 )
+{
+	float4		color;
+}
+
 Texture2D		diffuse			: register( t0 );
 SamplerState	samplerLine		: register( s0 );
 
@@ -27,5 +32,5 @@ void VS( in VS_IN In, out VS_OUT Out, out float4 OutPosition : SV_POSITION )
 //--------------------------------------------------------------------------------------
 float4 PS( VS_OUT In ) : SV_Target
 {
-    return diffuse.Sample( samplerLine, In.texCoord0 );
+    return diffuse.Sample( samplerLine, In.texCoord0 ) * color;
 }

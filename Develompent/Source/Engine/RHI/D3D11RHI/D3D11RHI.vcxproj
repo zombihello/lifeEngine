@@ -14,6 +14,7 @@
     <ClInclude Include="Include\D3D11Shader.h" />
     <ClInclude Include="Include\D3D11State.h" />
     <ClInclude Include="Include\D3D11Surface.h" />
+    <ClInclude Include="Include\D3D11Types.h" />
     <ClInclude Include="Include\D3D11Viewport.h" />
   </ItemGroup>
   <ItemGroup>

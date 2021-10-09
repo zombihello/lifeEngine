@@ -317,6 +317,30 @@ public:
 	virtual void								SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FTextureRHIParamRef InTexture, uint32 InTextureIndex ) {}
 
 	/**
+	 * Set shader parameter in vertex shader
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InVertexShader Pointer to vertex shader
+	 * @param[in] InBufferIndex Buffer index
+	 * @param[in] InBaseIndex Offset value in buffer
+	 * @param[in] InNumBytes Size value in bytes
+	 * @param[in] InNewValue Pointer to value
+	 */
+	//virtual void								SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FVertexShaderRHIParamRef InVertexShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) {}
+
+	/**
+	 * Set shader parameter in pixel shader
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InPixelShader Pointer to pixel shader
+	 * @param[in] InBufferIndex Buffer index
+	 * @param[in] InBaseIndex Offset value in buffer
+	 * @param[in] InNumBytes Size value in bytes
+	 * @param[in] InNewValue Pointer to value
+	 */
+	virtual void								SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) {}
+
+	/**
 	 * @brief Lock vertex buffer
 	 * 
 	 * @param[in] InDeviceContext Device context
