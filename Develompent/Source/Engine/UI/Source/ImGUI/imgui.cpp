@@ -12212,7 +12212,10 @@ void ImGui::WindowSyncOwnedViewport(ImGuiWindow* window, ImGuiWindow* parent_win
         window->Viewport->ParentViewportId = g.IO.ConfigViewportsNoDefaultParent ? 0 : IMGUI_VIEWPORT_DEFAULT_ID;
 }
 
+#if WITH_EDITOR
 #include "Misc/WorldEdGlobals.h"
+#endif // WITH_EDITOR
+
 #include "ImGUI/ImGUIEngine.h"
 
 // Called by user at the end of the main loop, after EndFrame()

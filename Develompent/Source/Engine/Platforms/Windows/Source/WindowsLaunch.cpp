@@ -1,10 +1,6 @@
 #include <exception>
 #include <SDL.h>
 
-#if WITH_EDITOR
-#include <wx/wx.h>
-#endif // WITH_EDITOR
-
 #include "Core.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/LaunchGlobals.h"
@@ -88,8 +84,8 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 #if WITH_EDITOR
 		if ( GIsEditor )
 		{
-			errorLevel = wxEntry( hInst, hPreInst, "", nCmdShow );
-			check( errorLevel == 0 );
+			errorLevel = 0;// wxEntry( hInst, hPreInst, "", nCmdShow );
+			//check( errorLevel == 0 );
 		}
 		else
 #endif // WITH_EDITOR
