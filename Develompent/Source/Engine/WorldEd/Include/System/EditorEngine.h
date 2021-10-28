@@ -84,8 +84,16 @@ public:
 		}
 	}
 
+	/**
+	 * Get editor name
+	 * 
+	 * @return Return editor name
+	 */
+	virtual std::wstring GetEditorName() const;
+
 private:
 	std::vector< class FViewport* >			viewports;		/**< Array of viewports for render */
+	class WeMainWindow*						mainWindow;		/**< Main editor window */
 };
 
 #endif // !EDITORENGINE_H

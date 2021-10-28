@@ -13,7 +13,7 @@
 #include <unordered_map>
 
 #include "Core.h"
-#include "Misc/Object.h"
+//#include "Misc/Object.h"
 #include "System/BaseArchive.h"
 #include "Scripts/ScriptEngine.h"
 
@@ -77,11 +77,10 @@ public:
 	 * @brief Create instance of class object
 	 * @return Return pointer to instance of class object
 	 */
-	template< typename LObject >
-	FORCEINLINE LObject*							CreateObject() const
+	template< typename TObject >
+	FORCEINLINE TObject*							CreateObject() const
 	{
-		check( ClassConstructor );
-		return ( LObject* )ClassConstructor();
+		return ( TObject* )CreateObject();
 	}
 
 	/**

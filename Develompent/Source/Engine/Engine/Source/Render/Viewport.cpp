@@ -147,8 +147,16 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 		}
 	}
 
-	// Initialize the viewport's resources
-	BeginInitResource( this );
+	// Initialize the viewport's resources if viewport RHI not created
+	if ( !viewportRHI )
+	{
+		BeginInitResource( this );
+	}
+	// Else update resource
+	else
+	{
+		BeginUpdateResource( this );
+	}
 }
 bool a = false;
 void FViewport::Draw( bool InIsShouldPresent /* = true */ )

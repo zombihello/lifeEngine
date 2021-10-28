@@ -1,10 +1,15 @@
+#include "Windows/MainWindow.h"
+
+#include "Containers/String.h"
 #include "Misc/Class.h"
+#include "Misc/EngineGlobals.h"
 #include "Render/Viewport.h"
 #include "System/EditorEngine.h"
 
 IMPLEMENT_CLASS( LEditorEngine )
 
-LEditorEngine::LEditorEngine()
+LEditorEngine::LEditorEngine() :
+	mainWindow( nullptr )
 {}
 
 LEditorEngine::~LEditorEngine()
@@ -12,6 +17,8 @@ LEditorEngine::~LEditorEngine()
 
 void LEditorEngine::Init()
 {
+	mainWindow = new WeMainWindow();
+	mainWindow->showMaximized();
 }
 
 void LEditorEngine::Tick( float InDeltaSeconds )
@@ -23,7 +30,28 @@ void LEditorEngine::Tick( float InDeltaSeconds )
 }
 
 void LEditorEngine::Shutdown()
-{}
+{
+	if ( mainWindow )
+	{
+		delete mainWindow;
+		mainWindow = nullptr;
+	}
+}
 
 void LEditorEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {}
+
+std::wstring LEditorEngine::GetEditorName() const
+{
+#if PLATFORM_WINDOWS
+#if _WIN64
+	const std::wstring				platformBitsString( TEXT( "64" ) );
+#else
+	const std::wstring				platformBitsString( TEXT( "32" ) );
+#endif // _WIN64
+#else
+#error Insert court bitness of your platform
+#endif // PLATFORM_WINDOWS
+
+	return FString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
+}

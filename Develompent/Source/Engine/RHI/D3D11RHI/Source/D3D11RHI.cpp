@@ -671,7 +671,7 @@ const tchar* FD3D11RHI::GetRHIName() const
 /**
  * Set debug name fore DirectX 11 resource
  */
-void D3D11SetDebugName( ID3D11DeviceChild* InObject, achar* InName )
+void D3D11SetDebugName( ID3D11DeviceChild* InObject, const achar* InName )
 {
 	if ( !InName )			return;
 	InObject->SetPrivateData( WKPDID_D3DDebugObjectName, ( uint32 )strlen( InName ), InName );
@@ -680,7 +680,7 @@ void D3D11SetDebugName( ID3D11DeviceChild* InObject, achar* InName )
 /**
  * Set debug name fore DirectX 11 resource
  */
-void D3D11SetDebugName( IDXGIObject* InObject, achar* InName )
+void D3D11SetDebugName( IDXGIObject* InObject, const achar* InName )
 {
 	if ( !InName )			return;
 	InObject->SetPrivateData( WKPDID_D3DDebugObjectName, ( uint32 )strlen( InName ), InName );

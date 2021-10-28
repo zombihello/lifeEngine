@@ -20,6 +20,10 @@
 #include "System/Config.h"
 #include "System/SplashScreen.h"
 
+#if WITH_EDITOR
+#include "WorldEd.h"
+#endif // WITH_EDITOR
+
 /**
  * Pre-Initialize platform
  */
@@ -84,8 +88,8 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 #if WITH_EDITOR
 		if ( GIsEditor )
 		{
-			errorLevel = 0;// wxEntry( hInst, hPreInst, "", nCmdShow );
-			//check( errorLevel == 0 );
+			errorLevel = WorldEdEntry( commandLine.c_str() );
+			check( errorLevel == 0 );
 		}
 		else
 #endif // WITH_EDITOR

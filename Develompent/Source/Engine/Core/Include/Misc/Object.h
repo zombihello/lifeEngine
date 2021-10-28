@@ -10,6 +10,7 @@
 #define OBJECT_H
 
 #include <string>
+#include "Misc/Class.h"
 
 /**
  * @ingroup Core
@@ -22,24 +23,12 @@
  */
 #define DECLARE_CLASS( TClass, TSuperClass ) \
     private: \
-        static class LClass*        staticClass;    /**< Pointer to class of object */ \
+        static class LClass*        staticClass; \
     public: \
-	    typedef TClass		        ThisClass;      /**< Typedef of this class */ \
-	    typedef TSuperClass	        Super;          /**< Typedef of super class */ \
-        /** */\
-        /** @brief Static method for create object of this class */ \
-        /** @return Return new object of this class */ \
-        /** */\
+	    typedef TClass		        ThisClass; \
+	    typedef TSuperClass	        Super; \
         static LObject*             StaticConstructor(); \
-        /** */\
-        /** @brief Get class of description of this C++ class */ \
-        /** @return Return pointer to class of description */ \
-        /** */\
         static class LClass*        StaticClass(); \
-        /** */\
-        /** @brief Get class of this object */ \
-        /** @return Return pointer to class of this object */ \
-        /** */\
         virtual class LClass*       GetClass() const;
 
 /**
@@ -52,14 +41,11 @@
  */
 #define IMPLEMENT_CLASS( TClass ) \
     LClass*     TClass::staticClass = nullptr; \
-    \
-    /** Static method for create object of this class */ \
     LObject*    TClass::StaticConstructor() \
     { \
         return new ThisClass(); \
     } \
     \
-    /** Get class of description of this C++ class */ \
     LClass*     TClass::StaticClass() \
     { \
         if ( !staticClass ) \
@@ -71,7 +57,6 @@
         return staticClass; \
     } \
     \
-    /** Get class of this object */ \
     LClass*     TClass::GetClass() const \
     { \
         return StaticClass(); \
@@ -170,7 +155,7 @@ public:
      * @return Return pointer to new object
      */
     template< typename TClass >
-    static FORCEINLINE TClass*      StaticNewObject( const LClass* InClass )
+    static FORCEINLINE LObject*      StaticNewObject( const LClass* InClass )
     {
         check( InClass );
         return InClass->CreateObject< TClass >();

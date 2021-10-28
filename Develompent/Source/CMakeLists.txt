@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 3.19 )
-project( lifeEngine )
+project( lifeEngine LANGUAGES CXX )
 
 #
 # General settings
@@ -10,8 +10,11 @@ set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../CMake" )
 set( INSTALL_DIR ${PROJECT_SOURCE_DIR}/../.. )
 set( INSTALL_BINARIES_DIR ${PROJECT_SOURCE_DIR}/../../Binaries )
 set( CMAKE_INCLUDE_CURRENT_DIR ON )
-set( CMAKE_CXX_STANDARD 14 )
+set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set( DEBUG_NAME Debug )
+set( RELEASE_NAME Release )
+set( PLATFORM_NAME Unknown )
 
 include( ${PROJECT_SOURCE_DIR}/../CMake/ExternalsUtils.cmake )
 
@@ -40,17 +43,22 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
         enable_language( RC )
         set( CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> <FLAGS> <DEFINES> -i <SOURCE> -o <OBJECT>" )
         set( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -static )
-        set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -static )		
+        set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -static )
     endif()
 	
 	if ( PLATFORM_64BIT )
 		set( INSTALL_BINARIES_DIR ${INSTALL_BINARIES_DIR}/Win64 )
+		set( PLATFORM_NAME Win64 )
 	elseif( PLATFORM_32BIT )
 		set( INSTALL_BINARIES_DIR ${INSTALL_BINARIES_DIR}/Win32 )
+		set( PLATFORM_NAME Win32 )
 	endif()
 else()
 	message( SEND_ERROR "Unknow platform" )
 endif()
+
+set( CMAKE_DEBUG_POSTFIX "-${PLATFORM_NAME}-${DEBUG_NAME}" )
+set( CMAKE_RELEASE_POSTFIX "-${PLATFORM_NAME}-${RELEASE_NAME}" )
 
 #
 # Set path to externals
@@ -62,7 +70,9 @@ set( LUABRIDGE_PATH ${EXTERNAL_DIR}/LuaBridge-2.6 )
 set( STB_PATH ${EXTERNAL_DIR}/stb )
 
 if ( WITH_EDITOR )
-	set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${EXTERNAL_DIR}/Qt-6.2.0/msvc2019_64 )
+	set( QT6_PATH ${EXTERNAL_DIR}/Qt-6.2.0/msvc2019_64 )
+	set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT6_PATH} )
+	set( QT_PLUGIN_DIR ${INSTALL_BINARIES_DIR}/Plugins )
 endif()
 
 #
@@ -89,6 +99,7 @@ if ( WITH_EDITOR )
 	add_definitions( -DWITH_EDITOR=1 )
 else()
 	add_definitions( -DWITH_EDITOR=0 )
+	set( QT_PLUGIN_DIR )
 endif()
 
 option( WITH_IMGUI "Build with ImGUI" ON )
@@ -141,7 +152,11 @@ if ( PLATFORM_WINDOWS )
 endif()
 
 add_executable( ${GAME_NAME} WIN32 ${ALL_SOURCE_FILES} )
-set_target_properties( ${GAME_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${INSTALL_BINARIES_DIR}")
+set_target_properties( ${GAME_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${INSTALL_BINARIES_DIR}
+											   VS_DEBUGGER_ENVIRONMENT 		 "QT_PLUGIN_PATH=${QT_PLUGIN_DIR}" )
+set_target_properties( ${GAME_NAME} PROPERTIES 
+									DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
+									RELEASE_POSTFIX ${CMAKE_RELEASE_POSTFIX} )
 
 # Include directories and libs
 include_directories( ${INCLUDE_DIRS} )

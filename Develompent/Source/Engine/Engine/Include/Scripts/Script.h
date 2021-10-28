@@ -10,6 +10,8 @@
 #define SCRIPT_H
 
 #include <string>
+
+#include "Logger/LoggerMacros.h"
 #include "Containers/StringConv.h"
 
 /**

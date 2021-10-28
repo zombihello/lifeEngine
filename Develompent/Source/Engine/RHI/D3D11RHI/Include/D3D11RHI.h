@@ -473,7 +473,7 @@ private:
  * @param[in] InObject Object of D3D11
  * @param[in] InName Debug name of resource
  */
-void				D3D11SetDebugName( ID3D11DeviceChild* InObject, achar* InName );
+void				D3D11SetDebugName( ID3D11DeviceChild* InObject, const achar* InName );
 
 /**
  * @brief Set debug name fore DirectX 11 resource
@@ -481,6 +481,6 @@ void				D3D11SetDebugName( ID3D11DeviceChild* InObject, achar* InName );
  * @param[in] InObject Object of D3D11
  * @param[in] InName Debug name of resource
  */
-void				D3D11SetDebugName( IDXGIObject* InObject, achar* InName );
+void				D3D11SetDebugName( IDXGIObject* InObject, const achar* InName );
 
 #endif // !D3D11RHI_H

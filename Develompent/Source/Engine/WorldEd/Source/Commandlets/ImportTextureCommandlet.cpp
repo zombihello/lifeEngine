@@ -58,7 +58,7 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 	}
 
 	// If source and destination files is empty - this error
-	check( !srcFilename.empty() || !dstFilename.empty() );
+	checkMsg( !srcFilename.empty() || !dstFilename.empty(), TEXT( "Not entered source file name and destination file name" ) );
 
 	// If name texture not seted - use name from srcFilename
 	if ( nameTexture.empty() )

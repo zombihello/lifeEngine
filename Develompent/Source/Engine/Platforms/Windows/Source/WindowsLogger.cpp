@@ -24,7 +24,7 @@ const tchar* GLogCategoryNames[] =
 
 #if WITH_EDITOR
 	TEXT( "Editor" ),
-	TEXT( "Commandlet" ),
+	TEXT( "Commandlet" )
 #endif // WITH_EDITOR
 };
 
