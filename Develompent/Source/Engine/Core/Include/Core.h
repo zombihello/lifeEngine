@@ -21,6 +21,15 @@
 
 /**
  * @ingroup Core
+ * Enumeration for no init structs and classes
+ */
+enum ENoInit
+{
+    NoInit
+};
+
+/**
+ * @ingroup Core
  * @brief Macro for convert string to WChar
  *
  * @param[in] String Input string

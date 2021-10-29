@@ -33,6 +33,14 @@ function( IncludeExternals MODULE_NAME )
 		message( SEND_ERROR "Failed to find LuaBridge" )
 	endif()
 	
+	# GLM
+	find_package( GLM REQUIRED )
+	if ( GLM_FOUND )
+		include_directories( ${GLM_INCLUDE} )
+	else()
+		message( SEND_ERROR "Failed to find GLM" )
+	endif()
+	
 	#
 	# Externals for WorldEd
 	#

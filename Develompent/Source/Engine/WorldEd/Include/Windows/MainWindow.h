@@ -44,6 +44,16 @@ private slots:
 	 */
 	void OnTickLE();
 
+	/**
+	 * Trigger 'About Qt'
+	 */
+	void on_actionAbout_Qt_triggered();
+
+	/**
+	 * Trigger 'About WorldEd'
+	 */
+	void on_actionAbout_triggered();
+
 private:
 	Ui::MainWindow*					ui;					/**< Qt UI */
 	QTimer							timerTick;			/**< Timer for tick engine */

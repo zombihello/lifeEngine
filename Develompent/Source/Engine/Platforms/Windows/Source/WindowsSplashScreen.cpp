@@ -151,6 +151,22 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 
 	// Load splash screen image, display it and handle all window's messages
 	GSplashScreenBitmap = ( HBITMAP )LoadImage( hInstance, ( LPCTSTR )GSplashScreenFileName.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
+	
+	// If splash screen not loaded - try load engine splash
+	if ( !GSplashScreenBitmap )
+	{
+		if ( GIsEditor )
+		{
+			GSplashScreenFileName = appBaseDir() + TEXT( "Engine/Content/Splash/EdSplash.bmp" );
+		}
+		else
+		{
+			GSplashScreenFileName = appBaseDir() + TEXT( "Engine/Content/Splash/Splash.bmp" );
+		}
+
+		GSplashScreenBitmap = ( HBITMAP ) LoadImage( hInstance, ( LPCTSTR ) GSplashScreenFileName.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
+	}
+
 	if ( GSplashScreenBitmap )
 	{
 		BITMAP			bitmap;
@@ -247,7 +263,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 
 			// Set version info and copyright
 			appSetSplashText( STT_VersionInfo1, ENGINE_NAME TEXT( " (version " ) ENGINE_VERSION_STRING TEXT( ")" ) );
-			appSetSplashText( STT_CopyrightInfo, TEXT( "(Ñ) Broken Singularity. All rights reserved" ) );			
+			appSetSplashText( STT_CopyrightInfo, TEXT( "(C) Broken Singularity. All rights reserved" ) );			
 		}
 
 		if ( GSplashScreenWnd )

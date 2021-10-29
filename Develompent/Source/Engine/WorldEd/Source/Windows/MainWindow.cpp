@@ -1,3 +1,5 @@
+#include <qmessagebox.h>
+
 #include "ui_MainWindow.h"
 #include "Windows/MainWindow.h"
 
@@ -34,4 +36,14 @@ void WeMainWindow::OnTickLE()
 	{
 		GEngineLoop->Tick();
 	}
+}
+
+void WeMainWindow::on_actionAbout_Qt_triggered()
+{
+	QMessageBox::aboutQt( this, "About Qt" );
+}
+
+void WeMainWindow::on_actionAbout_triggered()
+{
+	QMessageBox::about( this, ui->actionAbout->text(), "Place about text" );
 }

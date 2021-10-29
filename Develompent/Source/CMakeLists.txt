@@ -67,9 +67,10 @@ set( SDL2_PATH ${EXTERNAL_DIR}/SDL2-2.0.14 )
 set( RAPIDJSON_PATH ${EXTERNAL_DIR}/rapidjson )
 set( LUAJIT_PATH ${EXTERNAL_DIR}/LuaJIT-2.1 )
 set( LUABRIDGE_PATH ${EXTERNAL_DIR}/LuaBridge-2.6 )
-set( STB_PATH ${EXTERNAL_DIR}/stb )
+set( GLM_PATH ${EXTERNAL_DIR}/glm-0.9.9.8 )
 
 if ( WITH_EDITOR )
+	set( STB_PATH ${EXTERNAL_DIR}/stb )
 	set( QT6_PATH ${EXTERNAL_DIR}/Qt-6.2.0/msvc2019_64 )
 	set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT6_PATH} )
 	set( QT_PLUGIN_DIR ${INSTALL_BINARIES_DIR}/Plugins )
@@ -109,7 +110,10 @@ else()
 	add_definitions( -DWITH_IMGUI=0 )
 endif()
 
-set( GAME_NAME "ExampleGame" CACHE STRING "Game name" )
+set( GAME_SOURCE_PATH "" CACHE PATH "Path to source code of game with <NAME_GAME>.Build.cmake file" )
+if ( NOT GAME_SOURCE_PATH )
+	message( SEND_ERROR "Value GAME_SOURCE_PATH not setted" )
+endif()
 
 #
 # Add projects to build
@@ -141,6 +145,10 @@ if ( WITH_EDITOR )
 	include( ${PROJECT_SOURCE_DIR}/${PROJECT_WORLDED}/WorldEd.Build.cmake )
 	WorldEdBuild( ${PROJECT_WORLDED} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
 endif()
+
+# Add Game module
+include( ${GAME_SOURCE_PATH}/Game.Build.cmake )
+GameBuild( ${GAME_SOURCE_PATH} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
 
 # Add platform modules
 if ( PLATFORM_WINDOWS )
