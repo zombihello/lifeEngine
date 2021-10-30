@@ -54,7 +54,7 @@ struct FMath
 {
 	/**
 	 * @ingroup Core
-	 * Convert from angles to quaternion
+	 * Convert from euler angles to quaternion
 	 * 
 	 * @param[in] InEulerAngleX Euler angle by X
 	 * @param[in] InEulerAngleY Euler angle by Y
@@ -70,13 +70,47 @@ struct FMath
 
 	/**
 	 * @ingroup Core
-	 * Convert from angles to quaternion
+	 * Convert from euler angles to quaternion
 	 * 
 	 * @param[in] InEulerAngles Euler angles
 	 */
-	static FORCEINLINE FQuaternion AnglesToQuaternion( const glm::vec3& InEulerAngles )
+	static FORCEINLINE FQuaternion AnglesToQuaternion( const FVector& InEulerAngles )
 	{
 		return AnglesToQuaternion( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
+	}
+
+	/**
+	 * @ingroup Core
+	 * Convert from quaternion to euler angles
+	 * 
+	 * @param[in] InQuaternion Quaternion
+	 * @return Return euler angles in radians
+	 */
+	static FORCEINLINE FVector QuaternionToAngles( const FQuaternion& InQuaternion )
+	{
+		return glm::eulerAngles( InQuaternion );
+	}
+
+	/**
+	 * @ingroup Core
+	 * Convert radians to degrees
+	 * 
+	 * @param[in] InRadians Radians
+	 */
+	static FORCEINLINE float RadiansToDegrees( float InRadians )
+	{
+		return glm::degrees( InRadians );
+	}
+
+	/**
+	 * @ingroup Core
+	 * Convert degrees to radians
+	 * 
+	 * @param[in] InDegrees Degrees
+	 */
+	static FORCEINLINE float DegreesToRadians( float InDegrees )
+	{
+		return glm::radians( InDegrees );
 	}
 
 	static const FVector			vectorZero;			/**< Zero 3D vector */

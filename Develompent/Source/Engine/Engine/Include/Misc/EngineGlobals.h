@@ -41,4 +41,10 @@ extern std::wstring					GGameName;
  */
 extern class LBaseEngine*			GEngine;
 
+/**
+ * @ingroup Engine
+ * Input system
+ */
+extern class FInputSystem*			GInputSystem;
+
 #endif // !ENGINEGLOBALS_H

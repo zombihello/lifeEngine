@@ -9,6 +9,7 @@
 #include "System/BaseWindow.h"
 #include "System/Config.h"
 #include "System/ThreadingBase.h"
+#include "System/InputSystem.h"
 #include "Misc/Class.h"
 #include "Math/Color.h"
 #include "Scripts/ScriptEngine.h"
@@ -164,7 +165,7 @@ int32 FEngineLoop::Init()
 	appSetSplashText( STT_StartupProgress, TEXT( "Init platform" ) );
 	int32		result = appPlatformInit();
 	
-	appSetSplashText( STT_StartupProgress, TEXT( "Init render system" ) );
+	appSetSplashText( STT_StartupProgress, TEXT( "Init shader manager" ) );
 	GShaderManager->Init();
 	//GUIEngine->Init();
 
@@ -191,6 +192,9 @@ void FEngineLoop::Tick()
 {
 	// Update engine
 	GEngine->Tick( 0.f );
+
+	// Reset input events after game frame
+	GInputSystem->ResetEvents();
 }
 
 /**

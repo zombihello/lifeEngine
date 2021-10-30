@@ -17,6 +17,8 @@ LEditorEngine::~LEditorEngine()
 
 void LEditorEngine::Init()
 {
+	Super::Init();
+
 	mainWindow = new WeMainWindow();
 	mainWindow->showMaximized();
 }
@@ -37,9 +39,6 @@ void LEditorEngine::Shutdown()
 		mainWindow = nullptr;
 	}
 }
-
-void LEditorEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
-{}
 
 std::wstring LEditorEngine::GetEditorName() const
 {

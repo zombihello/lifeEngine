@@ -29,7 +29,7 @@ public:
 	/**
 	 * Initialize engine
 	 */
-	virtual void Init() PURE_VIRTUAL( LBaseEngine::Init, );
+	virtual void Init();
 
 	/**
 	 * Update logic of engine
@@ -48,7 +48,7 @@ public:
 	 *
 	 * @param[in] InWindowEvent Window event
 	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) PURE_VIRTUAL( LBaseEngine::ProcessEvent, );
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
 };
 
 #endif // !BASEENGINE_H

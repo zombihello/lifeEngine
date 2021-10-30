@@ -1,3 +1,5 @@
+#include "Misc/EngineGlobals.h"
+#include "System/InputSystem.h"
 #include "Components/CameraComponent.h"
 #include "EngineDefines.h"
 
@@ -12,6 +14,51 @@ LCameraComponent::LCameraComponent() :
 	farClipPlane( WORLD_MAX ),
 	aspectRatio( 1.777778f )
 {}
+
+void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ )
+{	
+	const float		degress90InRadians		= 1.5708f;		// 1.5708 radians = 90 degrees
+	const float		degress360InRadians		= 6.28319f;		// 6.28319 radians = 360 degrees
+
+	FVector2D		mouseOffset = GInputSystem->GetMouseOffset();
+	if ( mouseOffset.x == 0.f && mouseOffset.y == 0.f )
+	{
+		return;
+	}
+
+	float			sensitivity = GInputSystem->GetMouseSensitivity();
+	FVector2D		eulerRotation = FMath::QuaternionToAngles( GetComponentRotation() );
+	if ( mouseOffset.x != 0.f )
+	{
+		eulerRotation.y += FMath::DegreesToRadians( mouseOffset.x * sensitivity );
+		if ( eulerRotation.x < -degress360InRadians || eulerRotation.x > degress360InRadians )
+		{
+			eulerRotation.x = 0.f;
+		}
+	}
+
+	if ( mouseOffset.y != 0.f )
+	{
+		eulerRotation.x += FMath::DegreesToRadians( mouseOffset.y * sensitivity );
+		if ( InConstrainYaw )
+		{
+			if ( eulerRotation.x > degress90InRadians )
+			{
+				eulerRotation.x = degress90InRadians;
+			}
+			else if ( eulerRotation.x < -degress90InRadians )
+			{
+				eulerRotation.x = -degress90InRadians;
+			}
+		}
+		else if ( eulerRotation.x < -degress360InRadians || eulerRotation.x > degress360InRadians )
+		{
+			eulerRotation.x = 0.f;
+		}
+	}
+
+	SetRotationComponent( FMath::AnglesToQuaternion( FVector( eulerRotation.x, eulerRotation.y, 0.f ) ) );
+}
 
 void LCameraComponent::GetCameraView( FCameraView& OutDesiredView )
 {

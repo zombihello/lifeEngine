@@ -50,13 +50,6 @@ public:
 	virtual void Shutdown();
 
 	/**
-	 * @brief Process event
-	 *
-	 * @param[in] InWindowEvent Window event
-	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
-
-	/**
 	 * Add viewport to render list
 	 * 
 	 * @param[in] InViewport Viewport

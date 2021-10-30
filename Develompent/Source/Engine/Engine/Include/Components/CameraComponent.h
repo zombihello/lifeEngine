@@ -27,6 +27,13 @@ public:
 	LCameraComponent();
 
 	/**
+	 * Rotate camera by mouse
+	 * 
+	 * @param[in] InConstrainYaw Is constrain Yaw 
+	 */
+	void RotateComponentByMouse( bool InConstrainYaw = true );
+
+	/**
 	 * Set projection mode
 	 * 
 	 * @param[in] InProjectionMode Projection mode

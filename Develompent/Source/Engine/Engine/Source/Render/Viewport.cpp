@@ -25,6 +25,7 @@ FViewport::~FViewport()
 #include "Misc/Misc.h"
 #include "Components/CameraComponent.h"
 #include "Render/Scene.h"
+#include "System/InputSystem.h"
 
 FSceneView			sceneView;
 LCameraComponent	cameraComponent;
@@ -177,6 +178,15 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 		return;
 	}
 
+	cameraComponent.RotateComponentByMouse();
+	if ( GInputSystem->IsKeyDown( BC_KeyW ) )
+	{
+		cameraComponent.MoveComponent( FVector( 0.f, 0.f, 0.01f ) );
+	}
+	if ( GInputSystem->IsKeyDown( BC_KeyS ) )
+	{
+		cameraComponent.MoveComponent( FVector( 0.f, 0.f, -0.01f ) );
+	}
 	sceneView.SetCameraView( &cameraComponent );
 
 	UNIQUE_RENDER_COMMAND_TWOPARAMETER( FBeginRenderCommand,

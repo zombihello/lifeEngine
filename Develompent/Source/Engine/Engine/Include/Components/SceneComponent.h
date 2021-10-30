@@ -32,6 +32,26 @@ public:
 	}
 
 	/**
+	 * Rotate component
+	 * 
+	 * @param[in] InRotationDelta Rotation delta
+	 */
+	FORCEINLINE void RotateComponent( const FQuaternion& InRotationDelta )
+	{
+		transform.ConcatenateRotation( InRotationDelta );
+	}
+
+	/**
+	 * Set rotation component
+	 * 
+	 * @param[in] InRotation New rotation of component
+	 */
+	FORCEINLINE void SetRotationComponent( const FQuaternion& InRotation )
+	{
+		transform.SetRotation( InRotation );
+	}
+
+	/**
 	 * Get the current transform for this component
 	 * @return Return current transform for this component
 	 */

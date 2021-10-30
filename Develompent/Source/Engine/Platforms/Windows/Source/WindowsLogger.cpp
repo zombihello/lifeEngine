@@ -21,6 +21,7 @@ const tchar* GLogCategoryNames[] =
 	TEXT( "Script" ),
 	TEXT( "Dev" ),
 	TEXT( "Shader" ),
+	TEXT( "Input" ),
 
 #if WITH_EDITOR
 	TEXT( "Editor" ),

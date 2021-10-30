@@ -13,7 +13,7 @@ void FSceneView::SetCameraView( const FCameraView& InCameraView )
 	// Update projection matrix
 	if ( InCameraView.projectionMode == CPM_Perspective )
 	{
-		projectionMatrix = glm::perspective( glm::radians( InCameraView.fov ), InCameraView.aspectRatio, InCameraView.nearClipPlane, InCameraView.farClipPlane );
+		projectionMatrix = glm::perspective( FMath::DegreesToRadians( InCameraView.fov ), InCameraView.aspectRatio, InCameraView.nearClipPlane, InCameraView.farClipPlane );
 	}
 	else
 	{
@@ -23,9 +23,9 @@ void FSceneView::SetCameraView( const FCameraView& InCameraView )
 	// Update view matrix
 	{
 		// BS yehor.pohuliaka - Maybe it not correct work
-		glm::vec3		targetDirection = glm::vec3( 0.f, 0.f, -1.f ) * InCameraView.rotation;
-		glm::vec3		axisUp = glm::vec3( 0.f, 1.f, 0.f ) * InCameraView.rotation;
-		glm::vec3		axisRight = glm::normalize( glm::cross( targetDirection, glm::vec3( 0.f, 1.f, 0.f ) ) );
+		FVector		targetDirection = FVector( 0.f, 0.f, -1.f ) * InCameraView.rotation;
+		FVector		axisUp = FVector( 0.f, 1.f, 0.f ) * InCameraView.rotation;
+		FVector		axisRight = glm::normalize( glm::cross( targetDirection, FVector( 0.f, 1.f, 0.f ) ) );
 		viewMatrix = glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
 	}
 

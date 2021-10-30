@@ -35,6 +35,7 @@ enum ELogCategory
     LC_Script,              /**< Log from script */
     LC_Dev,                 /**< Development category */
     LC_Shader,              /**< Shader category */
+    LC_Input,               /**< Input category */
 
 #if WITH_EDITOR
     LC_Editor,              /**< Editor category */
