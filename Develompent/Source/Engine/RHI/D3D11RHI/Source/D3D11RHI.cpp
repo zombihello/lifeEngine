@@ -1,6 +1,7 @@
 #include "Core.h"
 #include "Logger/LoggerMacros.h"
 #include "Render/RenderUtils.h"
+#include "Render/GlobalConstantsHelper.h"
 #include "D3D11RHI.h"
 #include "D3D11Viewport.h"
 #include "D3D11DeviceContext.h"
@@ -56,7 +57,7 @@ static FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrim
 FD3D11RHI::FD3D11RHI() :
 	isInitialize( false ),
 	immediateContext( nullptr ),
-	psConstantBuffer( nullptr ),
+	globalConstantBuffer( nullptr ),
 	d3d11Device( nullptr )
 {}
 
@@ -106,8 +107,14 @@ void FD3D11RHI::Init( bool InIsEditor )
 	immediateContext = new FD3D11DeviceContext( d3d11DeviceContext );
 	
 	// Create constant buffers for shaders
-	psConstantBuffer = new FD3D11ConstantBuffer( sizeof( float ) * 4, TEXT( "PixelCB" ) );
-	psConstantBuffer->Bind( immediateContext );
+	globalConstantBuffer = new class FD3D11ConstantBuffer( GConstantBufferSizes[ SOB_GlobalConstants ], TEXT( "GlobalConstantBuffer" ) );
+	{
+		ID3D11Buffer*		d3d11GlobalConstantBuffer = globalConstantBuffer->GetD3D11Buffer();
+		d3d11DeviceContext->VSSetConstantBuffers( SOB_GlobalConstants, 1, &d3d11GlobalConstantBuffer );
+		d3d11DeviceContext->PSSetConstantBuffers( SOB_GlobalConstants, 1, &d3d11GlobalConstantBuffer );
+		d3d11DeviceContext->GSSetConstantBuffers( SOB_GlobalConstants, 1, &d3d11GlobalConstantBuffer );
+		d3d11DeviceContext->CSSetConstantBuffers( SOB_GlobalConstants, 1, &d3d11GlobalConstantBuffer );
+	}
 
 	// Print info adapter
 	DXGI_ADAPTER_DESC				adapterDesc;
@@ -154,6 +161,7 @@ void FD3D11RHI::Destroy()
 {
 	if ( !isInitialize )		return;
 
+	delete globalConstantBuffer;
 	delete immediateContext;
 	d3d11Device->Release();
 	dxgiAdapter->Release();
@@ -358,12 +366,19 @@ void FD3D11RHI::SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContex
 //	check( false );
 //}
 
-void FD3D11RHI::SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
+void FD3D11RHI::SetViewParameters( class FBaseDeviceContextRHI* InDeviceContext, class FSceneView& InSceneView )
 {
-	check( psConstantBuffer );
-	psConstantBuffer->Update( ( byte* )InNewValue, InBaseIndex, InNumBytes );
-	psConstantBuffer->CommitConstantsToDevice( ( FD3D11DeviceContext* )InDeviceContext );
+	check( InDeviceContext );
+
+	FGlobalConstantBufferContents			globalContents;
+	SetGlobalConstants( globalContents, InSceneView );
+
+	globalConstantBuffer->Update( ( byte* ) &globalContents, 0, sizeof( globalContents ) );
+	globalConstantBuffer->CommitConstantsToDevice( ( FD3D11DeviceContext* )InDeviceContext );
 }
+
+void FD3D11RHI::SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
+{}
 
 /**
  * Lock vertex buffer
@@ -470,11 +485,78 @@ void FD3D11RHI::EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext
 
 #if WITH_EDITOR
 #include <d3dcompiler.h>
+#include <string>
 
 #include "Containers/StringConv.h"
 #include "Misc/CoreGlobals.h"
+#include "Misc/Misc.h"
 #include "System/BaseArchive.h"
 #include "System/BaseFileSystem.h"
+
+/**
+ * @ingroup D3D11RHI
+ * An implementation of the D3DX include interface to access a FShaderCompilerEnvironment
+ */
+class FD3D11IncludeEnvironment : public ID3DInclude
+{
+public:
+	/**
+	 * Constructor
+	 * 
+	 * @param[in] InEnvironment Shader compiler environment
+	 */
+	FD3D11IncludeEnvironment( const FShaderCompilerEnvironment& InEnvironment ) :
+		environment( InEnvironment )
+	{}
+
+	/**
+	 * Open file
+	 * 
+	 * @param[in] InType Include type
+	 * @param[in] InName File name
+	 * @param[in] InParentData ???
+	 * @param[Out] OutData Readed data from file
+	 * @param[Out] OutBytes Count readed bytes from file
+	 */
+	STDMETHOD( Open )( D3D_INCLUDE_TYPE InType, LPCSTR InName, LPCVOID InParentData, LPCVOID* OutData, UINT* OutBytes )
+	{
+		std::wstring		filename( ANSI_TO_TCHAR( InName ) );
+		filename = appShaderDir() + TEXT( "/" ) + filename;
+
+		FBaseArchive*		archive = GFileSystem->CreateFileReader( filename );
+		if ( !archive )
+		{
+			LE_LOG( LT_Error, LC_Shader, TEXT( "Not found included shader file '%s'" ), filename.c_str() );
+			return E_FAIL;
+		}
+
+		// Create data buffer and fill '\0'
+		*OutBytes = archive->GetSize() + 1;
+		byte*		data = new byte[ *OutBytes ];
+		appMemzero( data, *OutBytes );
+
+		// Serialize data to buffer
+		archive->Serialize( data, *OutBytes );
+
+		*OutData = ( LPCVOID )data;
+		delete archive;
+		return S_OK;
+	}
+
+	/**
+	 * Close file
+	 * 
+	 * @param[in] InData Readed data from file
+	 */
+	STDMETHOD( Close )( LPCVOID InData )
+	{
+		delete[] InData;
+		return S_OK;
+	}
+
+private:
+	FShaderCompilerEnvironment			environment;		/**< Shader compiler environment */
+};
 
 /**
  * TranslateCompilerFlag - Translates the platform-independent compiler flags into D3DX defines
@@ -574,9 +656,10 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 		compileFlags |= TranslateCompilerFlagD3D11( InEnvironment.compilerFlags[ indexFlag ] );
 	}
 
-	ID3DBlob*		shaderBlob = nullptr;
-	ID3DBlob*		errorsBlob = nullptr;
-	HRESULT			result = D3DCompile( buffer, archiveSize, TCHAR_TO_ANSI( InSourceFileName ), macros.data(), nullptr, TCHAR_TO_ANSI( InFunctionName ), shaderProfile.c_str(), compileFlags, 0, &shaderBlob, &errorsBlob );
+	FD3D11IncludeEnvironment		includeEnvironment( InEnvironment );
+	ID3DBlob*						shaderBlob = nullptr;
+	ID3DBlob*						errorsBlob = nullptr;
+	HRESULT							result = D3DCompile( buffer, archiveSize, TCHAR_TO_ANSI( InSourceFileName ), macros.data(), &includeEnvironment, TCHAR_TO_ANSI( InFunctionName ), shaderProfile.c_str(), compileFlags, 0, &shaderBlob, &errorsBlob );
 	if ( FAILED( result ) )
 	{
 		// Copy the error text to the output.

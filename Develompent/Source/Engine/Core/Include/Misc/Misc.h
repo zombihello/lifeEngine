@@ -71,4 +71,14 @@ FORCEINLINE std::wstring appBaseDir()
 	return TEXT( "../../" );
 }
 
+/**
+ * @ingroup Core
+ * Return shader directory
+ * @return Return shader directory
+ */
+FORCEINLINE std::wstring appShaderDir()
+{
+	return TEXT( "../../Engine/Shaders" );
+}
+
 #endif // !MISC_H

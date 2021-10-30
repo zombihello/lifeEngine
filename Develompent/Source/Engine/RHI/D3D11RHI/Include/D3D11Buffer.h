@@ -15,6 +15,23 @@
 
 /**
  * @ingroup D3D11RHI
+ * Enumeration of constant buffer slots
+ * @warning These offsets must match the cbuffer register definitions in Common.hlsl
+ */
+enum ED3D11ShaderOffsetBuffer
+{
+	SOB_GlobalConstants,	/**< Vertex shader view-dependent constants set in RHISetViewParameters */
+	SOB_Max					/**< Max count constant buffer slots */
+};
+
+/**
+ * @ingroup D3D11RHI
+ * Sizes of constant buffers defined in ED3D11ShaderOffsetBuffer
+ */
+extern const uint32 GConstantBufferSizes[ SOB_Max ];
+
+/**
+ * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 vertex buffer
  */
 class FD3D11VertexBufferRHI : public FBaseVertexBufferRHI
@@ -110,13 +127,6 @@ public:
 	 * @param[in] InSize Size data to update
 	 */
 	void Update( const byte* InData, uint32 InOffset, uint32 InSize );
-
-	/**
-	 * Bind constant buffer
-	 * 
-	 * @param[in] InDeviceContext Device context
-	 */
-	void Bind( class FD3D11DeviceContext* InDeviceContext );
 
 	/**
 	 * Flush data to GPU

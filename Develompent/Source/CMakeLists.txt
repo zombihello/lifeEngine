@@ -95,6 +95,7 @@ endif()
 #
 # Options of build
 #
+# Enable/Disable editor
 option( WITH_EDITOR "Build with editor. Only for Windows platform" ON )
 if ( WITH_EDITOR )
 	add_definitions( -DWITH_EDITOR=1 )
@@ -103,6 +104,7 @@ else()
 	set( QT_PLUGIN_DIR )
 endif()
 
+# Enable/Disable ImGUI
 option( WITH_IMGUI "Build with ImGUI" ON )
 if ( WITH_IMGUI )
 	add_definitions( -DWITH_IMGUI=1 )
@@ -110,6 +112,7 @@ else()
 	add_definitions( -DWITH_IMGUI=0 )
 endif()
 
+# Game source path
 set( GAME_SOURCE_PATH "" CACHE PATH "Path to source code of game with <NAME_GAME>.Build.cmake file" )
 if ( NOT GAME_SOURCE_PATH )
 	message( SEND_ERROR "Value GAME_SOURCE_PATH not setted" )
@@ -168,6 +171,7 @@ set_target_properties( ${GAME_NAME} PROPERTIES
 
 # Include directories and libs
 include_directories( ${INCLUDE_DIRS} )
+include_directories( ../../Engine/Shaders )
 IncludeExternals( ${GAME_NAME} )
 target_link_libraries( ${GAME_NAME} ${CMAKE_DL_LIBS} )
 

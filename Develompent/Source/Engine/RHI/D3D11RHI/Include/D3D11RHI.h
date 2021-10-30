@@ -331,6 +331,14 @@ public:
 	virtual void									SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) override;
 
 	/**
+	 * Set view parameters
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InSceneView Scene view
+	 */
+	virtual void									SetViewParameters( class FBaseDeviceContextRHI* InDeviceContext, class FSceneView& InSceneView ) override;
+
+	/**
 	 * @brief Lock vertex buffer
 	 *
 	 * @param[in] InDeviceContext Device context
@@ -458,8 +466,8 @@ public:
 
 private:
 	bool							isInitialize;				/**< Is RHI is initialized */
+	class FD3D11ConstantBuffer*		globalConstantBuffer;		/**< Global constant buffer */
 	class FD3D11DeviceContext*		immediateContext;			/**< Immediate context */
-	class FD3D11ConstantBuffer*		psConstantBuffer;			/**< Constant buffer for pixel shader */
 	FBoundShaderStateHistory		boundShaderStateHistory;	/**< History of using bound shader states */
 
 	ID3D11Device*					d3d11Device;				/**< D3D11 Device */

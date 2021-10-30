@@ -5,6 +5,7 @@
 #include "Render/RenderingThread.h"
 #include "Render/Viewport.h"
 
+
 FViewport::FViewport() :
 	windowHandle( nullptr ),
 	sizeX( 0 ),
@@ -22,6 +23,11 @@ FViewport::~FViewport()
 #include "System/BaseFileSystem.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/Misc.h"
+#include "Components/CameraComponent.h"
+#include "Render/Scene.h"
+
+FSceneView			sceneView;
+LCameraComponent	cameraComponent;
 
 struct FPSConstantBuffer
 {
@@ -69,9 +75,9 @@ void FViewport::InitRHI()
 
 		float tempData[] =
 		{
-			-0.5f, -0.5f, 0.0f,				0.0f, 0.0f,
-			 0.5f, -0.5f, 0.0f,				1.0f, 0.0f,
-			 0.0f,  0.5f, 0.0f,				0.5f, 1.0f
+			-50.f, -50.f, 0.0f,				0.0f, 0.0f,
+			 50.f, -50.f, 0.0f,				1.0f, 0.0f,
+			 0.0f,  50.f, 0.0f,				0.5f, 1.0f
 		};
 		memcpy( lockedData.data, &tempData, strideVertex * 3 );
 
@@ -129,6 +135,10 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 	sizeX = InNewSizeX;
 	sizeY = InNewSizeY;
 
+	cameraComponent.SetAspectRatio( ( float )InNewSizeX / InNewSizeY );
+	cameraComponent.SetProjectionMode( CPM_Perspective );
+	cameraComponent.MoveComponent( FVector( 0.f, 0.f, 50.f ) );
+
 #if DO_CHECK
 	if ( !InIsDestroyed )
 	{
@@ -167,12 +177,16 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 		return;
 	}
 
-	UNIQUE_RENDER_COMMAND_ONEPARAMETER( FBeginRenderCommand,
+	sceneView.SetCameraView( &cameraComponent );
+
+	UNIQUE_RENDER_COMMAND_TWOPARAMETER( FBeginRenderCommand,
 										FViewportRHIRef, viewportRHI, viewportRHI,
+										FSceneView, sceneView, sceneView,
 										{
 											FBaseDeviceContextRHI* immediateContext = GRHI->GetImmediateContext();
 											GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
 											immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
+											GRHI->SetViewParameters( immediateContext, sceneView );
 										} );
 	
 	UNIQUE_RENDER_COMMAND( FTriangleRenderCommand,

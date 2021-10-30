@@ -341,6 +341,14 @@ public:
 	virtual void								SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) {}
 
 	/**
+	 * Set view parameters
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InSceneView Scene view
+	 */
+	virtual void								SetViewParameters( class FBaseDeviceContextRHI* InDeviceContext, class FSceneView& InSceneView ) {}
+
+	/**
 	 * @brief Lock vertex buffer
 	 * 
 	 * @param[in] InDeviceContext Device context

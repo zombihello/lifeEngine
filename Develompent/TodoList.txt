@@ -11,3 +11,4 @@
 	- Implement class of static meshes
 	- Implement commandlet for import static meshes
 	- Implement caching render states
+	- Add support SHIPPING build

@@ -36,7 +36,7 @@ public:
 	 * 
 	 * @param[in] InTranslation The value to use for the translation component
 	 */
-	FORCEINLINE explicit FTransform( const glm::vec3& InTranslation ) :
+	FORCEINLINE explicit FTransform( const FVector& InTranslation ) :
 		translation( InTranslation ),
 		rotation( FMath::quaternionZero ),
 		scale( FMath::vectorOne )
@@ -47,7 +47,7 @@ public:
 	 * 
 	 * @param[in] InRotation The value to use for rotation component
 	 */
-	FORCEINLINE explicit FTransform( const glm::quat& InRotation ) :
+	FORCEINLINE explicit FTransform( const FQuaternion& InRotation ) :
 		translation( FMath::vectorZero ),
 		rotation( InRotation ),
 		scale( FMath::vectorOne )
@@ -60,7 +60,7 @@ public:
 	 * @param[in] InTranslation The value to use for the translation component
 	 * @param[in] InScale The value to use for the scale component
 	 */
-	FORCEINLINE FTransform( const glm::quat& InRotation, const glm::vec3& InTranslation, const glm::vec3& InScale = FMath::vectorOne ) :
+	FORCEINLINE FTransform( const FQuaternion& InRotation, const FVector& InTranslation, const FVector& InScale = FMath::vectorOne ) :
 		translation( InTranslation ),
 		rotation( InRotation ),
 		scale( InScale )
@@ -87,7 +87,7 @@ public:
 	 * 
 	 * @param[in] InDeltaTranslation The translation to add in the following fashion: Translation += InDeltaTranslation
 	 */
-	FORCEINLINE void AddToTranslation( const glm::vec3& InDeltaTranslation )
+	FORCEINLINE void AddToTranslation( const FVector& InDeltaTranslation )
 	{
 		translation += InDeltaTranslation;
 	}
@@ -97,7 +97,7 @@ public:
 	 * 
 	 * @param[in] InDeltaRotation The rotation to concatenate in the following fashion: Rotation = Rotation * DeltaRotation
 	 */
-	FORCEINLINE void ConcatenateRotation( const glm::quat& InDeltaRotation )
+	FORCEINLINE void ConcatenateRotation( const FQuaternion& InDeltaRotation )
 	{
 		rotation *= InDeltaRotation;
 	}
@@ -107,7 +107,7 @@ public:
 	 * 
 	 * @param[in] InDeltaScale The scale to add in the following fashion: Scale += InDeltaScale
 	 */
-	FORCEINLINE void AddToScale( const glm::vec3& InDeltaScale )
+	FORCEINLINE void AddToScale( const FVector& InDeltaScale )
 	{
 		scale += InDeltaScale;
 	}
@@ -137,7 +137,7 @@ public:
 	 * 
 	 * @param[in] InLocation New location
 	 */
-	FORCEINLINE void SetLocation( const glm::vec3& InLocation )
+	FORCEINLINE void SetLocation( const FVector& InLocation )
 	{
 		translation = InLocation;
 	}
@@ -147,7 +147,7 @@ public:
 	 * 
 	 * @param[in] InRotation New rotation
 	 */
-	FORCEINLINE void SetRotation( const glm::quat& InRotation )
+	FORCEINLINE void SetRotation( const FQuaternion& InRotation )
 	{
 		rotation = InRotation;
 	}
@@ -157,7 +157,7 @@ public:
 	 * 
 	 * @param[in] InScale New scale
 	 */
-	FORCEINLINE void SetScale( const glm::vec3& InScale )
+	FORCEINLINE void SetScale( const FVector& InScale )
 	{
 		scale = InScale;
 	}
@@ -176,7 +176,7 @@ public:
 	 * Get location
 	 * @return Return location of transform
 	 */
-	FORCEINLINE glm::vec3 GetLocation() const
+	FORCEINLINE FVector GetLocation() const
 	{
 		return translation;
 	}
@@ -185,7 +185,7 @@ public:
 	 * Get rotation
 	 * @return Return rotation of transform
 	 */
-	FORCEINLINE glm::quat GetRotation() const
+	FORCEINLINE FQuaternion GetRotation() const
 	{
 		return rotation;
 	}
@@ -194,15 +194,15 @@ public:
 	 * Get scale
 	 * @return Return scale of transform
 	 */
-	FORCEINLINE glm::vec3 GetScale() const
+	FORCEINLINE FVector GetScale() const
 	{
 		return scale;
 	}
 
 protected:
-	glm::vec3			translation;			/**< Translation of this transformation */
-	glm::quat			rotation;				/**< Rotation of this transformation */
-	glm::vec3			scale;					/**< 3D scale */
+	FVector			translation;			/**< Translation of this transformation */
+	FQuaternion		rotation;				/**< Rotation of this transformation */
+	FVector			scale;					/**< 3D scale */
 };
 
 #endif // TRANSFORM_H

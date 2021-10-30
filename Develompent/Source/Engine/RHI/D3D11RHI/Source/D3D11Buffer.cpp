@@ -1,9 +1,20 @@
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 
+#include "CPP_GlobalConstantBuffers.hlsl"
 #include "D3D11RHI.h"
 #include "D3D11Buffer.h"
 #include "D3D11DeviceContext.h"
+
+// ------------------------------------
+// GLOBALS
+// ------------------------------------
+
+const uint32 GConstantBufferSizes[ SOB_Max ] =
+{
+	// CBs must be a multiple of 16
+	Align( ( uint32 )sizeof( FGlobalConstantBufferContents ), 16 )
+};
 
 // ------------------------------------
 // VERTEX BUFFER
@@ -195,13 +206,6 @@ void FD3D11ConstantBuffer::Update( const byte* InData, uint32 InOffset, uint32 I
 	memcpy( shadowData + InOffset, InData, InSize );
 	currentUpdateSize = Max( currentUpdateSize, ( uint32 )InOffset + InSize );
 	isNeedCommit = true;
-}
-
-void FD3D11ConstantBuffer::Bind( class FD3D11DeviceContext* InDeviceContext )
-{
-	check( InDeviceContext );
-	ID3D11DeviceContext*		d3d11DeviceContext = InDeviceContext->GetD3D11DeviceContext();
-	d3d11DeviceContext->PSSetConstantBuffers( 0, 1, &d3d11Buffer );
 }
 
 void FD3D11ConstantBuffer::CommitConstantsToDevice( class FD3D11DeviceContext* InDeviceContext )
