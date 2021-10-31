@@ -39,6 +39,12 @@ extern class FConfig				GEngineConfig;
  */
 extern class FConfig				GGameConfig;
 
+/**
+ * @ingroup Core
+ * @brief Config of input system
+ */
+extern class FConfig				GInputConfig;
+
 #if WITH_EDITOR
 /**
  * @ingroup Core

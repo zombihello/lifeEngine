@@ -10,13 +10,16 @@
 #define ACTORCOMPONENT_H
 
 #include "Misc/Object.h"
+#include "Misc/RefCounted.h"
+#include "Misc/EngineTypes.h"
+#include "Actors/Actor.h"
 
 /**
  * @ingroup Engine
  * ActorComponent is the base class for components that define reusable behavior that can be added to different types of Actors.
  * ActorComponents that have a transform are known as SceneComponents and those that can be rendered are PrimitiveComponents.
  */
-class LActorComponent : public LObject
+class LActorComponent : public LObject, public FRefCounted
 {
 	DECLARE_CLASS( LActorComponent, LObject )
 
@@ -38,6 +41,27 @@ public:
 	 * @param[in] InDeltaTime The time since the last tick.
 	 */
 	virtual void TickComponent( float InDeltaTime );
+
+	/**
+	 * Set owner
+	 * @param[in] InOwner Actor owner
+	 */
+	FORCEINLINE void SetOwner( AActorRef InOwner )
+	{
+		owner = InOwner;
+	}
+
+	/**
+	 * Get owner
+	 * @return Return owner
+	 */
+	FORCEINLINE AActorRef GetOwner() const
+	{
+		return owner;
+	}
+
+private:
+	AActorRef			owner;		/**< Actor owner */
 };
 
 #endif // !ACTORCOMPONENT_H

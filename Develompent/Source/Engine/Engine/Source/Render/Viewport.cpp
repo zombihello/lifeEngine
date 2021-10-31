@@ -189,38 +189,37 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 	}
 	sceneView.SetCameraView( &cameraComponent );
 
-	UNIQUE_RENDER_COMMAND_TWOPARAMETER( FBeginRenderCommand,
-										FViewportRHIRef, viewportRHI, viewportRHI,
-										FSceneView, sceneView, sceneView,
-										{
-											FBaseDeviceContextRHI* immediateContext = GRHI->GetImmediateContext();
-											GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
-											immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
-											GRHI->SetViewParameters( immediateContext, sceneView );
-										} );
-	
-	UNIQUE_RENDER_COMMAND( FTriangleRenderCommand,
-						   {
-							   FBaseDeviceContextRHI * immediateContext = GRHI->GetImmediateContext();
-								GRHI->SetShaderParameter( immediateContext, boundShaderState->GetPixelShader(), 0, 0, sizeof( float ) * 4, &GPSConstantBuffer );
-								GPSConstantBuffer.r += a ? -0.0005f : 0.0005f;
-								if ( GPSConstantBuffer.r >= 1 || GPSConstantBuffer.r <= 0 )
-								{
-									a = !a;
-								}
-							   GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, ( 3 * sizeof( float ) ) + ( 2 * sizeof( float ) ), 0 );
-							   GRHI->SetBoundShaderState( immediateContext, boundShaderState );
-							   GRHI->SetRasterizerState( immediateContext, rasterizerState );
-							   GRHI->SetTextureParameter( immediateContext, boundShaderState->GetPixelShader(), texture2D.GetTexture2DRHI(), 0 );
-							   GRHI->SetSamplerState( immediateContext, boundShaderState->GetPixelShader(), samplerState, 0 );
-							   GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
-						   } );
+	struct Helper
+	{
+		static void Execute( FViewportRHIRef viewportRHI, FSceneView sceneView, bool isShouldPresent )
+		{
+			FBaseDeviceContextRHI* immediateContext = GRHI->GetImmediateContext();
+			GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
+			immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
+			GRHI->SetViewParameters( immediateContext, sceneView );
 
-	UNIQUE_RENDER_COMMAND_TWOPARAMETER( FEndRenderCommand,
-										bool, isShouldPresent, InIsShouldPresent,
-										FViewportRHIRef, viewportRHI, viewportRHI,
-										{
-											FBaseDeviceContextRHI* immediateContext = GRHI->GetImmediateContext();
-											GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
-										} );
+			GRHI->SetShaderParameter( immediateContext, boundShaderState->GetPixelShader(), 0, 0, sizeof( float ) * 4, &GPSConstantBuffer );
+			GPSConstantBuffer.r += a ? -0.0005f : 0.0005f;
+			if ( GPSConstantBuffer.r >= 1 || GPSConstantBuffer.r <= 0 )
+			{
+				a = !a;
+			}
+			GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, ( 3 * sizeof( float ) ) + ( 2 * sizeof( float ) ), 0 );
+			GRHI->SetBoundShaderState( immediateContext, boundShaderState );
+			GRHI->SetRasterizerState( immediateContext, rasterizerState );
+			GRHI->SetTextureParameter( immediateContext, boundShaderState->GetPixelShader(), texture2D.GetTexture2DRHI(), 0 );
+			GRHI->SetSamplerState( immediateContext, boundShaderState->GetPixelShader(), samplerState, 0 );
+			GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
+
+			GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
+		}
+	};
+
+	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FQRenderCommand,
+										  FViewportRHIRef, viewportRHI, viewportRHI,
+										  FSceneView, sceneView, sceneView,
+										  bool, isShouldPresent, InIsShouldPresent,
+										  {
+											  Helper::Execute( viewportRHI,sceneView,isShouldPresent );
+										  } );
 }

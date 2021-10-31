@@ -10,6 +10,7 @@
 #include "System/Config.h"
 #include "System/ThreadingBase.h"
 #include "System/InputSystem.h"
+#include "Containers/String.h"
 #include "Misc/Class.h"
 #include "Math/Color.h"
 #include "Scripts/ScriptEngine.h"
@@ -52,6 +53,14 @@ void FEngineLoop::SerializeConfigs()
 	if ( arConfig )
 	{
 		GEngineConfig.Serialize( *arConfig );
+		delete arConfig;
+	}
+
+	// Loading input config
+	arConfig = GFileSystem->CreateFileReader( TEXT( "../../Config/Input.json" ) );
+	if ( arConfig )
+	{
+		GInputConfig.Serialize( *arConfig );
 		delete arConfig;
 	}
 
@@ -164,13 +173,65 @@ int32 FEngineLoop::Init()
 
 	appSetSplashText( STT_StartupProgress, TEXT( "Init platform" ) );
 	int32		result = appPlatformInit();
-	
+	check( !result );
+
 	appSetSplashText( STT_StartupProgress, TEXT( "Init shader manager" ) );
 	GShaderManager->Init();
 	//GUIEngine->Init();
 
 	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
 	GEngine->Init();
+
+	// Loading map
+	std::wstring		map;
+
+#if WITH_EDITOR
+	if ( GIsEditor )
+	{
+		// Get map for loading in editor
+		FConfigValue		configEditorStartupMap = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
+		if ( configEditorStartupMap.IsA( FConfigValue::T_String ) )
+		{
+			map = configEditorStartupMap.GetString();
+		}
+	}
+	else
+#endif // WITH_EDITOR
+	{
+		// Get map for loading in game
+		FConfigValue		configGameDefaultMap = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
+		if ( configGameDefaultMap.IsA( FConfigValue::T_String ) )
+		{
+			map = configGameDefaultMap.GetString();
+		}
+	}
+
+	if ( !map.empty() )
+	{
+		appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ) );
+
+		std::wstring		error;
+		bool				successed = GEngine->LoadMap( map, error );
+		if ( !successed )
+		{
+#if WITH_EDITOR
+			if ( GIsEditor )
+			{
+				LE_LOG( LT_Warning, LC_Init, TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
+			}
+			else
+#endif // WITH_EDITOR
+			{
+				appErrorf( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
+				result = 2;
+			}
+		}
+	}
+	else if ( !GIsEditor )
+	{
+		appErrorf( TEXT( "In game config not setted or not valid default map (parameter 'GameDefaultMap')" ) );
+		result = 1;
+	}
 
 	StartRenderingThread();
 	return result;

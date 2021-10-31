@@ -34,14 +34,14 @@ public:
 	/**
 	 * Initialize engine
 	 */
-	virtual void Init();
+	virtual void Init() override;
 
 	/**
 	 * Update logic of engine
 	 *
 	 * @param[in] InDeltaTime Delta time
 	 */
-	virtual void Tick( float InDeltaSeconds );
+	virtual void Tick( float InDeltaSeconds ) override;
 
 	/**
 	 * Shutdown engine
@@ -49,11 +49,20 @@ public:
 	virtual void Shutdown();
 
 	/**
+	 * Load map
+	 *
+	 * @param[in] InMap Path to map
+	 * @param[out] OutError Error of loading map
+	 * @return Return true if map loaded successed, else return false
+	 */
+	virtual bool LoadMap( const std::wstring& InMap, std::wstring& OutError ) override;
+
+	/**
 	 * @brief Process event
 	 *
 	 * @param[in] InWindowEvent Window event
 	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
 
 private:
 	FViewport			viewport;		/**< Viewport */

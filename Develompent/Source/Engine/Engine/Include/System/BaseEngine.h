@@ -9,6 +9,8 @@
 #ifndef BASEENGINE_H
 #define BASEENGINE_H
 
+#include <string>
+
 #include "Misc/Object.h"
 #include "Core.h"
 
@@ -42,6 +44,15 @@ public:
 	 * Shutdown engine
 	 */
 	virtual void Shutdown() PURE_VIRTUAL( LBaseEngine::Shutdown, );
+
+	/**
+	 * Load map
+	 * 
+	 * @param[in] InMap Path to map
+	 * @param[out] OutError Error of loading map
+	 * @return Return true if map loaded successed, else return false
+	 */
+	virtual bool LoadMap( const std::wstring& InMap, std::wstring& OutError ) PURE_VIRTUAL( LBaseEngine::LoadMap, return false; );
 
 	/**
 	 * @brief Process event

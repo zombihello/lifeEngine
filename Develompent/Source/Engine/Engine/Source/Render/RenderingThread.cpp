@@ -52,6 +52,7 @@ bool FRenderingThread::Init()
 {
 	// Acquire rendering context ownership on the current thread
 	GRHI->AcquireThreadOwnership();
+	GRenderingThreadId = appGetCurrentThreadId();
 
 	return true;
 }
@@ -89,6 +90,7 @@ void FRenderingThread::Exit()
 {
 	// Release rendering context ownership on the current thread
 	GRHI->ReleaseThreadOwnership();
+	GRenderingThreadId = 0;
 }
 
 /** Thread used for rendering */

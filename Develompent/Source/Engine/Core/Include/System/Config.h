@@ -176,6 +176,26 @@ public:
 	std::string										ToJSON( uint32 InCountTabs = 0 ) const;
 
 	/**
+	 * Is valid config value
+	 * @return Return true if value is valid, else false
+	 */
+	FORCEINLINE bool IsValid() const
+	{
+		return type != T_None;
+	}
+
+	/**
+	 * Is config value is a type
+	 * 
+	 * @param[in] InType Checked type
+	 * @return Return if type value is InType return true, else returned false
+	 */
+	FORCEINLINE bool IsA( EType InType ) const
+	{
+		return type == InType;
+	}
+
+	/**
 	 * @brief Set value from RapidJSON value
 	 * @param[in] InValue RapidJSON value
 	 * @param[in] InName RapidJSON name for print name of value in log while error
@@ -323,6 +343,27 @@ public:
 		}
 
 		return *static_cast< bool* >( value );
+	}
+
+	/**
+	 * Get number
+	 * @return Return int type if value is T_Int, return float type if value is T_Float, else return 0.f
+	 */
+	FORCEINLINE float GetNumber() const
+	{
+		if ( type != T_Int && type != T_Float || !value )
+		{
+			return 0.f;
+		}
+
+		if ( type == T_Int )
+		{
+			return ( float )GetInt();
+		}
+		else
+		{
+			return GetFloat();
+		}
 	}
 
 	/**

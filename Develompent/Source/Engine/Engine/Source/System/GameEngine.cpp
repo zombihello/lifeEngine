@@ -2,6 +2,7 @@
 #include "System/GameEngine.h"
 #include "System/Config.h"
 #include "System/BaseWindow.h"
+#include "System/World.h"
 #include "Render/RenderingThread.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/CoreGlobals.h"
@@ -31,6 +32,7 @@ void LGameEngine::Init()
 
 void LGameEngine::Tick( float InDeltaSeconds )
 {
+	GWorld->Tick( InDeltaSeconds );
 	viewport.Draw();
 }
 
@@ -44,6 +46,11 @@ void LGameEngine::Shutdown()
 	{
 		appSleep( 0.1f );
 	}
+}
+
+bool LGameEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
+{
+	return true;
 }
 
 void LGameEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )

@@ -47,4 +47,10 @@ extern class LBaseEngine*			GEngine;
  */
 extern class FInputSystem*			GInputSystem;
 
+/**
+ * @ingroup Engine
+ * World
+ */
+extern class FWorld*				GWorld;
+
 #endif // !ENGINEGLOBALS_H

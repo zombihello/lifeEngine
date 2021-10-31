@@ -13,11 +13,12 @@
 
 FConfig         GEngineConfig;
 FConfig         GGameConfig;
-FConfig         GEditorConfig;
+FConfig         GInputConfig;
 bool	        GIsRequestingExit           = false;
 uint32			GGameThreadId               = 0;
 
 #if WITH_EDITOR
+FConfig         GEditorConfig;
 bool			GIsEditor = false;
 #endif // WITH_EDITOR
 
