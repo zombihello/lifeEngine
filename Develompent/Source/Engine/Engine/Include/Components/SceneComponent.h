@@ -36,7 +36,7 @@ public:
 	 * 
 	 * @param[in] InRotationDelta Rotation delta
 	 */
-	FORCEINLINE void RotateComponent( const FQuaternion& InRotationDelta )
+	FORCEINLINE void RotateComponent( const FRotator& InRotationDelta )
 	{
 		transform.ConcatenateRotation( InRotationDelta );
 	}
@@ -46,7 +46,7 @@ public:
 	 * 
 	 * @param[in] InRotation New rotation of component
 	 */
-	FORCEINLINE void SetRotationComponent( const FQuaternion& InRotation )
+	FORCEINLINE void SetRotationComponent( const FRotator& InRotation )
 	{
 		transform.SetRotation( InRotation );
 	}
@@ -73,7 +73,7 @@ public:
 	 * Get rotation of the component
 	 * @return Return rotation of the component
 	 */
-	FORCEINLINE FQuaternion GetComponentRotation() const
+	FORCEINLINE FRotator GetComponentRotation() const
 	{
 		return transform.GetRotation();
 	}

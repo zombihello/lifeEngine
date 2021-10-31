@@ -17,9 +17,6 @@ LCameraComponent::LCameraComponent() :
 
 void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ )
 {	
-	const float		degress90InRadians		= 1.5708f;		// 1.5708 radians = 90 degrees
-	const float		degress360InRadians		= 6.28319f;		// 6.28319 radians = 360 degrees
-
 	FVector2D		mouseOffset = GInputSystem->GetMouseOffset();
 	if ( mouseOffset.x == 0.f && mouseOffset.y == 0.f )
 	{
@@ -27,37 +24,40 @@ void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ 
 	}
 
 	float			sensitivity = GInputSystem->GetMouseSensitivity();
-	FVector2D		eulerRotation = FMath::QuaternionToAngles( GetComponentRotation() );
+	FRotator		rotator = GetComponentRotation();
+	
+	// Update Yaw axis
 	if ( mouseOffset.x != 0.f )
 	{
-		eulerRotation.y += FMath::DegreesToRadians( mouseOffset.x * sensitivity );
-		if ( eulerRotation.x < -degress360InRadians || eulerRotation.x > degress360InRadians )
+		rotator.yaw += mouseOffset.x * sensitivity;
+		if ( rotator.yaw < -360.f || rotator.yaw > 360.f )
 		{
-			eulerRotation.x = 0.f;
+			rotator.yaw = 360.f;
 		}
 	}
 
+	// Update Pitch axis
 	if ( mouseOffset.y != 0.f )
 	{
-		eulerRotation.x += FMath::DegreesToRadians( mouseOffset.y * sensitivity );
+		rotator.pitch += mouseOffset.y * sensitivity;
 		if ( InConstrainYaw )
 		{
-			if ( eulerRotation.x > degress90InRadians )
+			if ( rotator.pitch > 90.f )
 			{
-				eulerRotation.x = degress90InRadians;
+				rotator.pitch = 90.f;
 			}
-			else if ( eulerRotation.x < -degress90InRadians )
+			else if ( rotator.pitch < -90.f )
 			{
-				eulerRotation.x = -degress90InRadians;
+				rotator.pitch = -90.f;
 			}
 		}
-		else if ( eulerRotation.x < -degress360InRadians || eulerRotation.x > degress360InRadians )
+		else if ( rotator.pitch < -360.f || rotator.pitch > 360.f )
 		{
-			eulerRotation.x = 0.f;
+			rotator.pitch = 0.f;
 		}
 	}
 
-	SetRotationComponent( FMath::AnglesToQuaternion( FVector( eulerRotation.x, eulerRotation.y, 0.f ) ) );
+	SetRotationComponent( rotator );
 }
 
 void LCameraComponent::GetCameraView( FCameraView& OutDesiredView )

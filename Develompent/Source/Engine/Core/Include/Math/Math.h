@@ -113,10 +113,11 @@ struct FMath
 		return glm::radians( InDegrees );
 	}
 
-	static const FVector			vectorZero;			/**< Zero 3D vector */
-	static const FVector			vectorOne;			/**< One 3D vector */
-	static const FQuaternion		quaternionZero;		/**< Quaternion zero */
-	static const FMatrix			matrixIdentity;		/**< Identity matrix */
+	static const FVector				vectorZero;			/**< Zero 3D vector */
+	static const FVector				vectorOne;			/**< One 3D vector */
+	static const FQuaternion			quaternionZero;		/**< Quaternion zero */
+	static const FMatrix				matrixIdentity;		/**< Identity matrix */
+	static const class FRotator			rotatorZero;		/**< A rotator of zero degrees on each axis */
 };
 
 #endif // !MATH_H

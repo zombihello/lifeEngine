@@ -4,7 +4,7 @@
 FInputSystem::FInputSystem() :
 	mouseLocation( FMath::vectorZero ),
 	mouseOffset( FMath::vectorZero ),
-	mouseSensitivity( 1.5f )
+	mouseSensitivity( 0.5f )
 {
 	memset( &buttonEvents, BE_None, BC_Count * sizeof( EButtonEvent ) );
 }

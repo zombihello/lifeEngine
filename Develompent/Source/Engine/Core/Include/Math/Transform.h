@@ -9,10 +9,8 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
 
-#include <glm.hpp>
-#include <gtx/quaternion.hpp>
-
 #include "Math/Math.h"
+#include "Math/Rotator.h"
 #include "System/BaseArchive.h"
 
 /**
@@ -27,7 +25,7 @@ public:
 	 */
 	FORCEINLINE FTransform() :
 		translation( FMath::vectorZero ),
-		rotation( FMath::quaternionZero ),
+		rotation( FMath::rotatorZero ),
 		scale( FMath::vectorOne )
 	{}
 
@@ -38,7 +36,7 @@ public:
 	 */
 	FORCEINLINE explicit FTransform( const FVector& InTranslation ) :
 		translation( InTranslation ),
-		rotation( FMath::quaternionZero ),
+		rotation( FMath::rotatorZero ),
 		scale( FMath::vectorOne )
 	{}
 
@@ -47,7 +45,7 @@ public:
 	 * 
 	 * @param[in] InRotation The value to use for rotation component
 	 */
-	FORCEINLINE explicit FTransform( const FQuaternion& InRotation ) :
+	FORCEINLINE explicit FTransform( const FRotator& InRotation ) :
 		translation( FMath::vectorZero ),
 		rotation( InRotation ),
 		scale( FMath::vectorOne )
@@ -60,7 +58,7 @@ public:
 	 * @param[in] InTranslation The value to use for the translation component
 	 * @param[in] InScale The value to use for the scale component
 	 */
-	FORCEINLINE FTransform( const FQuaternion& InRotation, const FVector& InTranslation, const FVector& InScale = FMath::vectorOne ) :
+	FORCEINLINE FTransform( const FRotator& InRotation, const FVector& InTranslation, const FVector& InScale = FMath::vectorOne ) :
 		translation( InTranslation ),
 		rotation( InRotation ),
 		scale( InScale )
@@ -97,9 +95,9 @@ public:
 	 * 
 	 * @param[in] InDeltaRotation The rotation to concatenate in the following fashion: Rotation = Rotation * DeltaRotation
 	 */
-	FORCEINLINE void ConcatenateRotation( const FQuaternion& InDeltaRotation )
+	FORCEINLINE void ConcatenateRotation( const FRotator& InDeltaRotation )
 	{
-		rotation *= InDeltaRotation;
+		rotation += InDeltaRotation;
 	}
 
 	/**
@@ -147,7 +145,7 @@ public:
 	 * 
 	 * @param[in] InRotation New rotation
 	 */
-	FORCEINLINE void SetRotation( const FQuaternion& InRotation )
+	FORCEINLINE void SetRotation( const FRotator& InRotation )
 	{
 		rotation = InRotation;
 	}
@@ -168,7 +166,7 @@ public:
 	FORCEINLINE void SetIdentity()
 	{
 		translation = FMath::vectorZero;
-		rotation = FMath::quaternionZero;
+		rotation = FMath::rotatorZero;
 		scale = FMath::vectorOne;
 	}
 
@@ -185,7 +183,7 @@ public:
 	 * Get rotation
 	 * @return Return rotation of transform
 	 */
-	FORCEINLINE FQuaternion GetRotation() const
+	FORCEINLINE FRotator GetRotation() const
 	{
 		return rotation;
 	}
@@ -201,7 +199,7 @@ public:
 
 protected:
 	FVector			translation;			/**< Translation of this transformation */
-	FQuaternion		rotation;				/**< Rotation of this transformation */
+	FRotator		rotation;				/**< Rotation of this transformation */
 	FVector			scale;					/**< 3D scale */
 };
 
