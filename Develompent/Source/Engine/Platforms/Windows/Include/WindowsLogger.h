@@ -72,8 +72,6 @@ public:
     FORCEINLINE bool        IsShow() const                 { return consoleHandle; }
 
 private:
-    std::chrono::steady_clock::time_point		startLogging;       /**< Time of start logging */
-
     HANDLE                                      consoleHandle;      /**< OS handle on console*/
     FBaseArchive*                               archiveLogs;        /**< Archive of logs */
 };

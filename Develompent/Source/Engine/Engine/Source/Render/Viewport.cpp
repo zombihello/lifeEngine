@@ -191,7 +191,7 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 
 	struct Helper
 	{
-		static void Execute( FViewportRHIRef viewportRHI, FSceneView sceneView, bool isShouldPresent )
+		static void Execute( FBaseViewportRHI* viewportRHI, FSceneView sceneView, bool isShouldPresent )
 		{
 			FBaseDeviceContextRHI* immediateContext = GRHI->GetImmediateContext();
 			GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
@@ -216,7 +216,7 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 	};
 
 	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FQRenderCommand,
-										  FViewportRHIRef, viewportRHI, viewportRHI,
+										  FBaseViewportRHI*, viewportRHI, viewportRHI,
 										  FSceneView, sceneView, sceneView,
 										  bool, isShouldPresent, InIsShouldPresent,
 										  {

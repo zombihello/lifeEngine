@@ -31,6 +31,19 @@
 #endif // WITH_EDITOR
 
 /**
+ * Update GCurrentTime and GDeltaTime while taking into account max tick rate
+ */
+void appUpdateTimeAndHandleMaxTickRate()
+{
+	GLastTime = GCurrentTime;
+	GCurrentTime = appSeconds();
+	GDeltaTime = GCurrentTime - GLastTime;
+
+	float		maxTickRate = Max( GEngine->GetMaxTickRate(), 1.f );
+	appSleep( Max( 1.f / maxTickRate - GDeltaTime, 0.0 ) );		// BS yehor.pohuliaka - It is possible that you need to somehow fix the stalling of the render thread another way
+}
+
+/**
  * Constructor
  */
 FEngineLoop::FEngineLoop() :
@@ -251,8 +264,10 @@ void FEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
  */
 void FEngineLoop::Tick()
 {
+	appUpdateTimeAndHandleMaxTickRate();
+
 	// Update engine
-	GEngine->Tick( 0.f );
+	GEngine->Tick( GDeltaTime );
 
 	// Reset input events after game frame
 	GInputSystem->ResetEvents();

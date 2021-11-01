@@ -81,4 +81,18 @@ FORCEINLINE std::wstring appShaderDir()
 	return TEXT( "../../Engine/Shaders" );
 }
 
+/**
+ * @ingroup Core
+ * Does per platform initialization of timing information and returns the current time
+ * @return Return current time
+ */
+extern double appInitTiming();
+
+// Platform specific functions
+#if PLATFORM_WINDOWS
+#include "WindowsMisc.h"
+#else
+#error Unknown platform
+#endif // PLATFORM_WINDOWS
+
 #endif // !MISC_H

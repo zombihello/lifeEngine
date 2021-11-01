@@ -60,6 +60,12 @@ public:
 	 * @param[in] InWindowEvent Window event
 	 */
 	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
+
+	/**
+	 * Get max tick rate in second
+	 * @return Return max tick rate
+	 */
+	virtual float GetMaxTickRate() const;
 };
 
 #endif // !BASEENGINE_H

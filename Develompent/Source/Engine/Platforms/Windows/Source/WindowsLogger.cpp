@@ -2,6 +2,8 @@
 #include <ctime>
 
 #include "LEBuild.h"
+#include "Misc/CoreGlobals.h"
+#include "Misc/Misc.h"
 #include "Containers/String.h"
 #include "System/BaseFileSystem.h"
 #include "WindowsLogger.h"
@@ -33,7 +35,6 @@ const tchar* GLogCategoryNames[] =
  * Constructor
  */
 FWindowsLogger::FWindowsLogger() :
-	startLogging( std::chrono::steady_clock::now() ),
 	consoleHandle( nullptr ),
 	archiveLogs( nullptr )
 {}
@@ -131,7 +132,7 @@ void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 		}
 	}
 	
-	tchar*			finalMessage = FString::Format( TEXT( "[%is][%s][%s] %s\n" ), std::chrono::duration_cast< std::chrono::seconds >( std::chrono::steady_clock::now() - startLogging ).count(), GLogTypeNames[ ( uint32 )InLogType ], GLogCategoryNames[ ( uint32 )InLogCategory ], InMessage );
+	tchar*			finalMessage = FString::Format( TEXT( "[%07.2f][%s][%s] %s\n" ), appSeconds() - GStartTime, GLogTypeNames[ ( uint32 )InLogType ], GLogCategoryNames[ ( uint32 )InLogCategory ], InMessage );
 	wprintf( finalMessage );
 
 	// Serialize log to file

@@ -1,6 +1,7 @@
 {
 	"Engine.Engine": {
-		"Class": "LGameEngine"
+		"Class": "LGameEngine",
+		"MaxTickRate": 900
 	},
 	"Engine.SystemSettings": {
 		"WindowWidth": 1280,

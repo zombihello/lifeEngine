@@ -69,4 +69,34 @@ extern bool							GIsEditor;
 #define								GIsEditor 0
 #endif // WITH_EDITOR
 
+/**
+ * @ingroup Core
+ * Seconds per CPU cycle for this PC 
+ */
+extern double						GSecondsPerCycle;
+
+/**
+* @ingroup Core
+* Time at which appSeconds() was first initialized (very early on)
+*/
+extern double						GStartTime;
+
+/**
+ * @ingroup Core
+ * Current delta time in seconds
+ */
+extern double						GDeltaTime;
+
+/**
+ * @ingroup Core
+ * Current time in seconds
+ */
+extern double						GCurrentTime;
+
+/**
+ * @ingroup Core
+ * Last time in seconds
+ */
+extern double						GLastTime;
+
 #endif // !COREGLOBALS_H

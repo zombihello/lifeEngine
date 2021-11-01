@@ -56,7 +56,7 @@ bool FRenderingThread::Init()
 
 	return true;
 }
-
+#include <chrono>
 uint32 FRenderingThread::Run()
 {
 	void*		readPointer = nullptr;
@@ -71,7 +71,7 @@ uint32 FRenderingThread::Run()
 			{
 				// Execute the Render Command
 				FRenderCommand*		command = ( FRenderCommand* )readPointer;
-				{
+				{			
 					uint32		commandSize = command->Execute();
 					command->~FRenderCommand();
 					GRenderCommandBuffer.FinishRead( commandSize );

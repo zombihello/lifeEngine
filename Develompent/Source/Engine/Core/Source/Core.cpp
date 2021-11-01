@@ -1,5 +1,6 @@
 #include "Core.h"
 #include "Misc/Class.h"
+#include "Misc/Misc.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
@@ -16,6 +17,11 @@ FConfig         GGameConfig;
 FConfig         GInputConfig;
 bool	        GIsRequestingExit           = false;
 uint32			GGameThreadId               = 0;
+double          GSecondsPerCycle            = 0.0;
+double          GStartTime                  = appInitTiming();
+double          GCurrentTime                = GStartTime;
+double          GLastTime                   = 0.0;
+double          GDeltaTime                  = 0.0;
 
 #if WITH_EDITOR
 FConfig         GEditorConfig;
