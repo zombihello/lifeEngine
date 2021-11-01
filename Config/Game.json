@@ -1,8 +1,9 @@
 {
 	"Game.GameInfo": {
-		"Name": "Eleot: Episodic",
-		"Splash": "Splash.bmp",
-		"EditorStartupMap": "ExampleEntry.lmap",
-		"GameDefaultMap": "ExampleEntry.lmap"
+		"Name": 					"Eleot: Episodic",
+		"Splash": 					"Splash.bmp",
+		"EditorStartupMap": 		"ExampleEntry.lmap",
+		"GameDefaultMap": 			"ExampleEntry.lmap",
+		"DefaultPlayerController": 	"APlayerController"
 	}
 }

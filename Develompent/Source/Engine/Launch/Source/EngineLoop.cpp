@@ -62,7 +62,7 @@ FEngineLoop::~FEngineLoop()
 void FEngineLoop::SerializeConfigs()
 {
 	// Loading engine config
-	FBaseArchive*		arConfig = GFileSystem->CreateFileReader( TEXT( "../../Config/Engine.json" ) );
+	FBaseArchive*		arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Engine.json" ) );
 	if ( arConfig )
 	{
 		GEngineConfig.Serialize( *arConfig );
@@ -70,7 +70,7 @@ void FEngineLoop::SerializeConfigs()
 	}
 
 	// Loading input config
-	arConfig = GFileSystem->CreateFileReader( TEXT( "../../Config/Input.json" ) );
+	arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Input.json" ) );
 	if ( arConfig )
 	{
 		GInputConfig.Serialize( *arConfig );
@@ -78,7 +78,7 @@ void FEngineLoop::SerializeConfigs()
 	}
 
 	// Loading game config
-	arConfig = GFileSystem->CreateFileReader( TEXT( "../../Config/Game.json" ) );
+	arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Game.json" ) );
 	if ( arConfig )
 	{
 		GGameConfig.Serialize( *arConfig );
@@ -89,7 +89,7 @@ void FEngineLoop::SerializeConfigs()
 
 	// Loading editor config
 #if WITH_EDITOR
-	arConfig = GFileSystem->CreateFileReader( TEXT( "../../Config/Editor.json" ) );
+	arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Editor.json" ) );
 	if ( arConfig )
 	{
 		GEditorConfig.Serialize( *arConfig );
@@ -246,6 +246,7 @@ int32 FEngineLoop::Init()
 		result = 1;
 	}
 
+	// Start render thread
 	StartRenderingThread();
 	return result;
 }

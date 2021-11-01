@@ -43,6 +43,12 @@ public:
 	virtual void ReleaseRHI() {}
 
 	/**
+	 * @brief If the resource's RHI has been initialized, then release and reinitialize it.  Otherwise, do nothing.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void UpdateRHI();
+
+	/**
 	 * @brief Initializes the resource.
 	 * This is only called by the rendering thread.
 	 */
@@ -55,10 +61,10 @@ public:
 	void ReleaseResource();
 
 	/**
-	 * @brief If the resource's RHI has been initialized, then release and reinitialize it.  Otherwise, do nothing.
+	 * @brief Prepares the resource for update.
 	 * This is only called by the rendering thread.
 	 */
-	void UpdateRHI();
+	void UpdateResource();
 
 	/**
 	 * @brief Is resource initialized

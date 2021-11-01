@@ -14,7 +14,12 @@
 #include "Misc/Object.h"
 #include "Misc/RefCounted.h"
 #include "Misc/EngineTypes.h"
+#include "Components/ActorComponent.h"
 
+/**
+ * @ingroup Engine
+ * Base class of all actors in world
+ */
 class AActor : public LObject, public FRefCounted
 {
 	DECLARE_CLASS( AActor, LObject )

@@ -28,8 +28,7 @@ FViewport::~FViewport()
 #include "System/InputSystem.h"
 
 FSceneView			sceneView;
-LCameraComponent	cameraComponent;
-
+extern LCameraComponent* cameraComponent;
 struct FPSConstantBuffer
 {
 	float		r;
@@ -136,10 +135,6 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 	sizeX = InNewSizeX;
 	sizeY = InNewSizeY;
 
-	cameraComponent.SetAspectRatio( ( float )InNewSizeX / InNewSizeY );
-	cameraComponent.SetProjectionMode( CPM_Perspective );
-	cameraComponent.MoveComponent( FVector( 0.f, 0.f, 50.f ) );
-
 #if DO_CHECK
 	if ( !InIsDestroyed )
 	{
@@ -178,20 +173,14 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 		return;
 	}
 
-	cameraComponent.RotateComponentByMouse();
-	if ( GInputSystem->IsKeyDown( BC_KeyW ) )
+	if ( cameraComponent )
 	{
-		cameraComponent.MoveComponent( FVector( 0.f, 0.f, 0.01f ) );
+		sceneView.SetCameraView( cameraComponent );
 	}
-	if ( GInputSystem->IsKeyDown( BC_KeyS ) )
-	{
-		cameraComponent.MoveComponent( FVector( 0.f, 0.f, -0.01f ) );
-	}
-	sceneView.SetCameraView( &cameraComponent );
 
 	struct Helper
 	{
-		static void Execute( FBaseViewportRHI* viewportRHI, FSceneView sceneView, bool isShouldPresent )
+		static void Execute( FViewportRHIRef viewportRHI, FSceneView sceneView, bool isShouldPresent )
 		{
 			FBaseDeviceContextRHI* immediateContext = GRHI->GetImmediateContext();
 			GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
@@ -216,7 +205,7 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 	};
 
 	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FQRenderCommand,
-										  FBaseViewportRHI*, viewportRHI, viewportRHI,
+										  FViewportRHIRef, viewportRHI, viewportRHI,
 										  FSceneView, sceneView, sceneView,
 										  bool, isShouldPresent, InIsShouldPresent,
 										  {

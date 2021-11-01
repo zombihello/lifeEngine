@@ -40,6 +40,11 @@ void LEditorEngine::Shutdown()
 	}
 }
 
+bool LEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
+{
+	return false;
+}
+
 std::wstring LEditorEngine::GetEditorName() const
 {
 #if PLATFORM_WINDOWS

@@ -23,6 +23,15 @@ FRenderResource::~FRenderResource()
 }
 
 /**
+ * Update RHI resource
+ */
+void FRenderResource::UpdateRHI()
+{
+	ReleaseResource();
+	InitResource();
+}
+
+/**
  * Initializes the resource
  */
 void FRenderResource::InitResource()
@@ -41,22 +50,17 @@ void FRenderResource::ReleaseResource()
 {
 	if ( isInitialized )
 	{
-		ReleaseRHI();
 		isInitialized = false;
+		ReleaseRHI();
 	}
 }
 
 /**
  * If the resource's RHI has been initialized, then release and reinitialize it.  Otherwise, do nothing
  */
-void FRenderResource::UpdateRHI()
+void FRenderResource::UpdateResource()
 {
-	if ( isInitialized )
-	{
-		ReleaseRHI();
-	}
-
-	InitRHI();
+	UpdateRHI();
 }
 
 void BeginInitResource( FRenderResource* InResource )
@@ -71,7 +75,7 @@ void BeginUpdateResource( FRenderResource* InResource )
 {
 	UNIQUE_RENDER_COMMAND_ONEPARAMETER( FUpdateResourceCommand, FRenderResource*, resource, InResource,
 		{
-			resource->UpdateRHI();
+			resource->UpdateResource();
 		} );
 }
 

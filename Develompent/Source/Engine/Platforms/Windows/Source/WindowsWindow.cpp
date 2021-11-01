@@ -374,6 +374,7 @@ void FWindowsWindow::Hide()
 bool FWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 {
 	check( sdlWindow );
+	OutWindowEvent.type = SWindowEvent::T_None;
 
 	SDL_Event			sdlEvent;
 	bool				isNotEndEvent = SDL_PollEvent( &sdlEvent );

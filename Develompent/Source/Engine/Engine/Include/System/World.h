@@ -64,7 +64,8 @@ public:
 	}
 
 private:
-	std::vector< AActorRef >		actors;		/**< Array actors in world */
+	bool							isBeginPlay;	/**< Is started gameplay */
+	std::vector< AActorRef >		actors;			/**< Array actors in world */
 };
 
 #endif // !WORLD_H

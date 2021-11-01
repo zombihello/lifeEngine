@@ -9,6 +9,7 @@
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
+#include "Actors/PlayerStart.h"
 
 IMPLEMENT_CLASS( LGameEngine )
 
@@ -50,6 +51,8 @@ void LGameEngine::Shutdown()
 
 bool LGameEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
+	GWorld->SpawnActor( APlayerStart::StaticClass() );
+	GWorld->BeginPlay();
 	return true;
 }
 
