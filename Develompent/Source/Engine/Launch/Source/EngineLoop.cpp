@@ -85,7 +85,7 @@ void FEngineLoop::SerializeConfigs()
 		delete arConfig;
 	}
 
-	GGameName = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();
+	GGameName = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "ShortName" ) ).GetString();
 
 	// Loading editor config
 #if WITH_EDITOR

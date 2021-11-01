@@ -22,73 +22,166 @@ class LSceneComponent : public LActorComponent
 
 public:
 	/**
-	 * Move component
+	 * Attaches a component to a given parent
+	 * @warning Need use only in constructor or BeginPlay()
 	 * 
-	 * @param[in] InLocationDelta Location delta
+	 * @param[in] InParent Parent component
 	 */
-	FORCEINLINE void MoveComponent( const FVector& InLocationDelta )
+	void SetupAttachment( LSceneComponent* InParent );
+
+	/**
+	 * Add to relative location component
+	 * 
+	 * @param[in] InLocationDelta Relative location delta
+	 */
+	FORCEINLINE void AddRelativeLocation( const FVector& InLocationDelta )
 	{
 		transform.AddToTranslation( InLocationDelta );
 	}
 
 	/**
-	 * Rotate component
+	 * Add to relative rotate component
 	 * 
-	 * @param[in] InRotationDelta Rotation delta
+	 * @param[in] InRotationDelta Relative rotation delta
 	 */
-	FORCEINLINE void RotateComponent( const FRotator& InRotationDelta )
+	FORCEINLINE void AddRelativeRotate( const FRotator& InRotationDelta )
 	{
-		transform.ConcatenateRotation( InRotationDelta );
+		transform.AddToRotation( InRotationDelta );
 	}
 
 	/**
-	 * Set rotation component
+	 * Add to relative scale component
 	 * 
-	 * @param[in] InRotation New rotation of component
+	 * @param[in] InScaleDelta Relative scale delta
 	 */
-	FORCEINLINE void SetRotationComponent( const FRotator& InRotation )
+	FORCEINLINE void AddRelativeScale( const FVector& InScaleDelta )
+	{
+		transform.AddToScale( InScaleDelta );
+	}
+
+	/**
+	 * Set relative location component
+	 * 
+	 * @param[in] InLocation New relative location
+	 */
+	FORCEINLINE void SetRelativeLocation( const FVector& InLocation )
+	{
+		transform.SetLocation( InLocation );
+	}
+
+	/**
+	 * Set relative rotation component
+	 * 
+	 * @param[in] InRotation New relative rotation of component
+	 */
+	FORCEINLINE void SetRelativeRotation( const FRotator& InRotation )
 	{
 		transform.SetRotation( InRotation );
 	}
 
 	/**
-	 * Get the current transform for this component
-	 * @return Return current transform for this component
+	 * Set relative scale component
+	 * 
+	 * @param[in] InScale New relative scale
 	 */
-	FORCEINLINE const FTransform& GetComponentTransform() const
+	FORCEINLINE void SetRelativeScale( const FVector& InScale )
+	{
+		transform.SetScale( InScale );
+	}
+
+	/**
+	 * Get the relative current transform for this component
+	 * @return Return relative current transform for this component
+	 */
+	FORCEINLINE FTransform GetRelativeTransform() const
 	{
 		return transform;
 	}
 
 	/**
-	 * Get location of the component
-	 * @return Return location of the component
+	 * Get the current transform for this component in world space
+	 * @return Return current transform in world space for this component
 	 */
-	FORCEINLINE FVector GetComponentLocation() const
+	FORCEINLINE FTransform GetComponentTransform() const
+	{
+		return attachParent ? attachParent->GetComponentTransform() + GetRelativeTransform() : GetRelativeTransform();
+	}
+
+	/**
+	 * Get relative location
+	 * @return Return relative location
+	 */
+	FORCEINLINE FVector GetRelativeLocation() const
 	{
 		return transform.GetLocation();
 	}
 
 	/**
-	 * Get rotation of the component
-	 * @return Return rotation of the component
+	 * Get relative rotation
+	 * @return Return relative rotation
 	 */
-	FORCEINLINE FRotator GetComponentRotation() const
+	FORCEINLINE FRotator GetRelativeRotation() const
 	{
 		return transform.GetRotation();
 	}
 
 	/**
-	 * Get scale of the component
-	 * @return Return scale of the component
+	 * Get relative scale
+	 * @return Return relative scale
 	 */
-	FORCEINLINE FVector GetComponentScale() const
+	FORCEINLINE FVector GetRelativeScale() const
 	{
 		return transform.GetScale();
 	}
 
+	/**
+	 * Get location of the component in world space
+	 * @return Return location of the component in world space
+	 */
+	FORCEINLINE FVector GetComponentLocation() const
+	{
+		return attachParent ? attachParent->GetComponentLocation() + GetRelativeLocation() : GetRelativeLocation();
+	}
+
+	/**
+	 * Get rotation of the component in world space
+	 * @return Return rotation of the component in world space
+	 */
+	FORCEINLINE FRotator GetComponentRotation() const
+	{
+		return attachParent ? attachParent->GetComponentRotation() + GetRelativeRotation() : GetRelativeRotation();
+	}
+
+	/**
+	 * Get scale of the component in world space
+	 * @return Return scale of the component in world space
+	 */
+	FORCEINLINE FVector GetComponentScale() const
+	{
+		return attachParent ? attachParent->GetComponentScale() + GetRelativeScale() : GetRelativeScale();
+	}
+
+	/**
+	 * Walks up the attachment chain to see if this component is attached to the supplied component
+	 * 
+	 * @param[in] InTestComp Test component
+	 * @return Return true if we attached to test component, else return false. If InTestComp == this, returns false
+	 */
+	bool IsAttachedTo( LSceneComponent* InTestComp ) const;
+
+	/**
+	 * Get the SceneComponent we are attached to
+	 * @return Return SceneComponent we are attached to, if parent not exist - return nullptr
+	 */
+	FORCEINLINE TRefCountPtr< LSceneComponent > GetAttachParent() const
+	{
+		return attachParent;
+	}
+
 private:
-	FTransform			transform;		/**< Transform of component */
+	// TODO BS yehor.pohuliaka - Need add array of child components
+	TRefCountPtr< LSceneComponent >		attachParent;	/**< What we are currently attached to. If valid, transform are used relative to this object */
+	FTransform							transform;		/**< Transform of component */
 };
 
 #endif // !SCENECOMPONENT_H

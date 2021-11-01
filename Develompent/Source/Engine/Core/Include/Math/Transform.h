@@ -91,13 +91,33 @@ public:
 	}
 
 	/**
-	 * Concatenates another rotation to this transformation 
-	 * 
-	 * @param[in] InDeltaRotation The rotation to concatenate in the following fashion: Rotation = Rotation * DeltaRotation
+	 * Subtract from the translation component of this transformation
+	 *
+	 * @param[in] InDeltaTranslation Delta translation
 	 */
-	FORCEINLINE void ConcatenateRotation( const FRotator& InDeltaRotation )
+	FORCEINLINE void SubtractFromTranslation( const FVector& InDeltaTranslation )
+	{
+		translation -= InDeltaTranslation;
+	}
+
+	/**
+	 * Add another rotation to this transformation 
+	 * 
+	 * @param[in] InDeltaRotation The rotation to add in the following fashion: Rotation = Rotation * DeltaRotation
+	 */
+	FORCEINLINE void AddToRotation( const FRotator& InDeltaRotation )
 	{
 		rotation += InDeltaRotation;
+	}
+
+	/**
+	 * Subtract another rotation from this transformation
+	 *
+	 * @param[in] InDeltaRotation Delta rotation
+	 */
+	FORCEINLINE void SubtractFromRotation( const FRotator& InDeltaRotation )
+	{
+		rotation -= InDeltaRotation;
 	}
 
 	/**
@@ -108,6 +128,16 @@ public:
 	FORCEINLINE void AddToScale( const FVector& InDeltaScale )
 	{
 		scale += InDeltaScale;
+	}
+
+	/**
+	 * Subtract from the scale component of this transformation
+	 *
+	 * @param[in] InDeltaScale Delta scale
+	 */
+	FORCEINLINE void SubtractFromScale( const FVector& InDeltaScale )
+	{
+		scale -= InDeltaScale;
 	}
 
 	/**
@@ -128,6 +158,30 @@ public:
 	FORCEINLINE void CopyScale( const FTransform& InOther )
 	{
 		scale = InOther.scale;
+	}
+
+	/**
+	 * Add transform to transform
+	 * 
+	 * @param[in] InOther Another transform
+	 */
+	FORCEINLINE void Add( const FTransform& InOther )
+	{
+		translation += InOther.translation;
+		rotation += InOther.rotation;
+		scale += InOther.scale;
+	}
+
+	/**
+	 * Subtract transform from transform
+	 * 
+	 * @param[in] InOther Another transform
+	 */
+	FORCEINLINE void Subtract( const FTransform& InOther )
+	{
+		translation -= InOther.translation;
+		rotation -= InOther.rotation;
+		scale -= InOther.scale;
 	}
 
 	/**
@@ -195,6 +249,22 @@ public:
 	FORCEINLINE FVector GetScale() const
 	{
 		return scale;
+	}
+
+	/**
+	 * Override operator +
+	 */
+	FORCEINLINE FTransform operator+( const FTransform& InOther ) const
+	{
+		return FTransform( rotation + InOther.rotation, translation + InOther.translation, scale + InOther.scale );
+	}
+
+	/**
+	 * Override operator -
+	 */
+	FORCEINLINE FTransform operator-( const FTransform& InOther ) const
+	{
+		return FTransform( rotation - InOther.rotation, translation - InOther.translation, scale - InOther.scale );
 	}
 
 protected:

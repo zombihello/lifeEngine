@@ -12,3 +12,11 @@
 	- Implement commandlet for import static meshes
 	- Implement caching render states
 	- Add support SHIPPING build
+	
+----------------------------------------------------------------
+ Version 0.3.0
+----------------------------------------------------------------
+	- Implement in WorldEd fly on scene
+	- Implement in WorldEd adding actor on scene
+	- Implement in WorldEd base tools: move, rotate and scale actors
+	- Implement save map in WorldEd and load in game

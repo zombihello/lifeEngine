@@ -33,15 +33,17 @@ void FWorld::CleanupWorld()
 	actors.clear();
 }
 
-AActorRef FWorld::SpawnActor( class LClass* InClass )
+AActorRef FWorld::SpawnActor( class LClass* InClass, const FVector& InLocation, const FRotator& InRotation /* = FMath::rotatorZero */ )
 {
 	check( InClass );
 
 	AActor*		actor = InClass->CreateObject< AActor >();
 	check( actor );
 
-	// Set default actor name
+	// Set default actor name and location with rotation
 	actor->SetName( InClass->GetName().c_str() );
+	actor->SetActorLocation( InLocation );
+	actor->SetActorRotation( InRotation );
 
 	// If gameplay is started - call BeginPlay in spawned actor
 	if ( isBeginPlay )

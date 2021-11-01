@@ -1,6 +1,11 @@
+#include "Actors/Actor.h"
 #include "Components/ActorComponent.h"
 
 IMPLEMENT_CLASS( LActorComponent )
+
+LActorComponent::LActorComponent() :
+	owner( nullptr )
+{}
 
 LActorComponent::~LActorComponent()
 {}

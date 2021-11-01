@@ -8,13 +8,11 @@ IMPLEMENT_CLASS( APlayerController )
 
 LCameraComponent* cameraComponent;
 
-APlayerController::APlayerController() :
-	cameraComponent( new LCameraComponent() )
+APlayerController::APlayerController()
 {
+	cameraComponent = CreateComponent< LCameraComponent >( TEXT( "CameraComponent0" ) );
 	::cameraComponent = this->cameraComponent;
-	AddOwnedComponent( cameraComponent );
 }
-
 APlayerController::~APlayerController()
 {}
 
@@ -39,18 +37,18 @@ void APlayerController::Tick( float InDeltaTime )
 	}
 	if ( GInputSystem->IsKeyDown( BC_KeyS ) )
 	{
-		cameraComponent->MoveComponent( FVector( 0.f, 0.f, 0.1f ) );
+		AddActorLocation( FVector( 0.f, 0.f, 0.1f ) );
 	}
 	if ( GInputSystem->IsKeyDown( BC_KeyW ) )
 	{
-		cameraComponent->MoveComponent( FVector( 0.f, 0.f, -0.1f ) );
+		AddActorLocation( FVector( 0.f, 0.f, -0.1f ) );
 	}
 	if ( GInputSystem->IsKeyDown( BC_KeyA ) )
 	{
-		cameraComponent->MoveComponent( FVector( -0.1f, 0.f, 0.f ) );
+		AddActorLocation( FVector( -0.1f, 0.f, 0.f ) );
 	}
 	if ( GInputSystem->IsKeyDown( BC_KeyD ) )
 	{
-		cameraComponent->MoveComponent( FVector( 0.1f, 0.f, 0.f ) );
+		AddActorLocation( FVector( 0.1f, 0.f, 0.f ) );
 	}
 }

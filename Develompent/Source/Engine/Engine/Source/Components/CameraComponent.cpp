@@ -24,7 +24,7 @@ void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ 
 	}
 
 	float			sensitivity = GInputSystem->GetMouseSensitivity();
-	FRotator		rotator = GetComponentRotation();
+	FRotator		rotator = GetRelativeRotation();
 	
 	// Update Yaw axis
 	if ( mouseOffset.x != 0.f )
@@ -57,7 +57,7 @@ void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ 
 		}
 	}
 
-	SetRotationComponent( rotator );
+	SetRelativeRotation( rotator );
 }
 
 void LCameraComponent::GetCameraView( FCameraView& OutDesiredView )

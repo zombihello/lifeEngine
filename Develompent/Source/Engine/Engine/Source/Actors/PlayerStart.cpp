@@ -7,6 +7,11 @@
 
 IMPLEMENT_CLASS( APlayerStart )
 
+APlayerStart::APlayerStart()
+{
+	rootComponent = CreateComponent< LSceneComponent >( TEXT( "RootComponent0" ) );
+}
+
 APlayerStart::~APlayerStart()
 {}
 
@@ -34,5 +39,5 @@ void APlayerStart::BeginPlay()
 		}
 	}
 
-	GWorld->SpawnActor( classPlayerController );
+	GWorld->SpawnActor( classPlayerController, GetActorLocation(), GetActorRotation() );
 }

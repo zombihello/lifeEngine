@@ -118,6 +118,7 @@ struct FMath
 	static const FQuaternion			quaternionZero;		/**< Quaternion zero */
 	static const FMatrix				matrixIdentity;		/**< Identity matrix */
 	static const class FRotator			rotatorZero;		/**< A rotator of zero degrees on each axis */
+	static const struct FTransform		transformZero;		/**< Transform zero */
 };
 
 #endif // !MATH_H

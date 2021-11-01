@@ -21,6 +21,11 @@ class APlayerStart : public AActor
 
 public:
 	/**
+	 * Constructor
+	 */
+	APlayerStart();
+
+	/**
 	 * Destructor
 	 */
 	virtual ~APlayerStart();

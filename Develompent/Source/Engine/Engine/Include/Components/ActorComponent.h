@@ -12,7 +12,6 @@
 #include "Misc/Object.h"
 #include "Misc/RefCounted.h"
 #include "Misc/EngineTypes.h"
-#include "Actors/Actor.h"
 
 /**
  * @ingroup Engine
@@ -24,6 +23,11 @@ class LActorComponent : public LObject, public FRefCounted
 	DECLARE_CLASS( LActorComponent, LObject )
 
 public:
+	/**
+	 * Constructor
+	 */
+	LActorComponent();
+
 	/**
 	 * Destructor
 	 */
@@ -46,7 +50,7 @@ public:
 	 * Set owner
 	 * @param[in] InOwner Actor owner
 	 */
-	FORCEINLINE void SetOwner( AActorRef InOwner )
+	FORCEINLINE void SetOwner( class AActor* InOwner )
 	{
 		owner = InOwner;
 	}
@@ -55,13 +59,13 @@ public:
 	 * Get owner
 	 * @return Return owner
 	 */
-	FORCEINLINE AActorRef GetOwner() const
+	FORCEINLINE class AActor* GetOwner() const
 	{
 		return owner;
 	}
 
 private:
-	AActorRef			owner;		/**< Actor owner */
+	class AActor*			owner;		/**< Actor owner */
 };
 
 #endif // !ACTORCOMPONENT_H

@@ -11,6 +11,7 @@
 
 #include <vector>
 
+#include "Math/Math.h"
 #include "Misc/EngineTypes.h"
 
 /**
@@ -51,16 +52,21 @@ public:
 	 * Spawn actor in world
 	 * 
 	 * @param[in] InClass Class of spawned actor
+	 * @param[in] InLocation Location actor on spawn
+	 * @param[in] InRotation Rotation actor on spawn
 	 */
-	AActorRef SpawnActor( class LClass* InClass );
+	AActorRef SpawnActor( class LClass* InClass, const FVector& InLocation, const FRotator& InRotation = FMath::rotatorZero );
 
 	/**
 	 * Spawn actor in world
+	 * 
+	 * @param[in] InLocation Location actor on spawn
+	 * @param[in] InRotation Rotation actor on spawn
 	 */
 	template< typename TClass >
-	TRefCountPtr< TClass > SpawnActor()
+	TRefCountPtr< TClass > SpawnActor( const FVector& InLocation, const FRotator& InRotation = FMath::rotatorZero )
 	{
-		return SpawnActor( TClass::StaticClass() );
+		return SpawnActor( TClass::StaticClass(), InLocation, InRotation );
 	}
 
 private:

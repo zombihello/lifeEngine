@@ -22,6 +22,7 @@ enum EArchiveResourceType
 	ART_Script,			/**< Script resource */
 	ART_ShaderCache,	/**< Shader cache resource */
 	ART_TextureCahce,	/**< Texture cache resource */
+	ART_World,			/**< World resource */
 	ART_Count			/**< Count of resources */
 };
 

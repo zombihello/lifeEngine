@@ -24,10 +24,11 @@ void LGameEngine::Init()
 	Super::Init();
 
 	// Create window and viewport
+	std::wstring				gameName = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();;
 	uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
 	uint32						windowHeight = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
 	
-	GWindow->Create( GGameName.c_str(), windowWidth, windowHeight, SW_Default );
+	GWindow->Create( gameName.c_str(), windowWidth, windowHeight, SW_Default );
 	viewport.Update( false, windowWidth, windowHeight, GWindow->GetHandle() );
 }
 
@@ -51,7 +52,7 @@ void LGameEngine::Shutdown()
 
 bool LGameEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
-	GWorld->SpawnActor( APlayerStart::StaticClass() );
+	GWorld->SpawnActor( APlayerStart::StaticClass(), FVector( 0, 50.f, 50.f ), FRotator( 50.f, 0.f, 0.f ) );
 	GWorld->BeginPlay();
 	return true;
 }
