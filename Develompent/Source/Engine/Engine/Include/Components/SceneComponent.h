@@ -90,6 +90,33 @@ public:
 	}
 
 	/**
+	 * Get forward vector
+	 * @return Return forward vector
+	 */
+	FORCEINLINE FVector GetForwardVector() const
+	{
+		return transform.GetUnitAxis( A_Z );
+	}
+
+	/**
+	 * Get right vector
+	 * @return Return right vector
+	 */
+	FORCEINLINE FVector GetRightVector() const
+	{
+		return transform.GetUnitAxis( A_X );
+	}
+
+	/**
+	 * Get up vector
+	 * @return Return right vector
+	 */
+	FORCEINLINE FVector GetUpVector() const
+	{
+		return transform.GetUnitAxis( A_Y );
+	}
+
+	/**
 	 * Get the relative current transform for this component
 	 * @return Return relative current transform for this component
 	 */

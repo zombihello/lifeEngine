@@ -11,6 +11,7 @@
 
 #include "Math/Math.h"
 #include "Math/Rotator.h"
+#include "Math/Axis.h"
 #include "System/BaseArchive.h"
 
 /**
@@ -185,6 +186,17 @@ public:
 	}
 
 	/**
+	 * Rotate vector
+	 * 
+	 * @param[in] InVector Vector
+	 * @return Return rotated vector
+	 */
+	FORCEINLINE FVector RotateVector( const FVector& InVector ) const
+	{
+		return InVector * rotation.ToQuaternion();
+	}
+
+	/**
 	 * Set location
 	 * 
 	 * @param[in] InLocation New location
@@ -222,6 +234,24 @@ public:
 		translation = FMath::vectorZero;
 		rotation = FMath::rotatorZero;
 		scale = FMath::vectorOne;
+	}
+
+	/**
+	 * Get unit axis
+	 * 
+	 * @param[in] InAxis Axis
+	 * @return Return unit axis, if InAxis = A_None return FMath::vectorZero
+	 */
+	FORCEINLINE FVector GetUnitAxis( EAxis InAxis ) const
+	{
+		switch ( InAxis )
+		{
+		case A_X:		return RotateVector( FVector( 1.f, 0.f, 0.f ) );	break;
+		case A_Y:		return RotateVector( FVector( 0.f, 1.f, 0.f ) );	break;
+		case A_Z:		return RotateVector( FVector( 0.f, 0.f, 1.f ) );	break;
+		}
+
+		return FMath::vectorZero;
 	}
 
 	/**

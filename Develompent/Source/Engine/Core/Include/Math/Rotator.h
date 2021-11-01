@@ -107,6 +107,17 @@ public:
 	}
 
 	/**
+	 * Rotate vector
+	 * 
+	 * @param[in] InVector Vector
+	 * @return Return rotated vector
+	 */
+	FORCEINLINE FVector RotateVector( const FVector& InVector ) const
+	{
+		return InVector * ToQuaternion();
+	}
+
+	/**
 	 * Convert to quaternion
 	 * @return Return quaternion
 	 */

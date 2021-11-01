@@ -153,6 +153,33 @@ public:
 		return rootComponent ? rootComponent->GetComponentTransform() : FMath::transformZero;
 	}
 
+	/**
+	 * Get actor forward vector
+	 * @return Return actor forward vector
+	 */
+	FORCEINLINE FVector GetActorForwardVector() const
+	{
+		return rootComponent ? rootComponent->GetForwardVector() : FMath::vectorForward;
+	}
+
+	/**
+	 * Get actor right vector
+	 * @return Return actor right vector
+	 */
+	FORCEINLINE FVector GetActorRightVector() const
+	{
+		return rootComponent ? rootComponent->GetRightVector() : FMath::vectorRight;
+	}
+
+	/**
+	 * Get actor up vector
+	 * @return Return actor up vector
+	 */
+	FORCEINLINE FVector GetActorUpVector() const
+	{
+		return rootComponent ? rootComponent->GetUpVector() : FMath::vectorUp;
+	}
+
 protected:
 	/**
 	 * Create component and add to array of owned components

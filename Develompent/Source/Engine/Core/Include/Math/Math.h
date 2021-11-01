@@ -119,6 +119,9 @@ struct FMath
 	static const FMatrix				matrixIdentity;		/**< Identity matrix */
 	static const class FRotator			rotatorZero;		/**< A rotator of zero degrees on each axis */
 	static const struct FTransform		transformZero;		/**< Transform zero */
+	static const FVector				vectorForward;		/**< Forward vector */
+	static const FVector				vectorRight;		/**< Right vector */
+	static const FVector				vectorUp;			/**< Up vector */
 };
 
 #endif // !MATH_H

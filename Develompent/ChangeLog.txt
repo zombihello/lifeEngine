@@ -1,5 +1,9 @@
 ----------------------------------------------------------------
- Version 0.1.0 :: Now
+ Version 0.2.0 :: Now
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+ Version 0.1.0 :: 02.11.2021
 ----------------------------------------------------------------
 	- Implemented lifeBuildTool for build engine
 	- Implemented compile cache in lifeBuildTool
@@ -24,5 +28,6 @@
 	- Implemented rendering of triangle with texture
 	- Implemented loading textures
 	- Implemented splash screen
-	- Implemented call WxLaunchApp::TickLE from wxWidget loop for real time update engine logic
+	- Implemented base WorldEd functions for entry
 	- Implemented commandlet for import texture
+	- Implemented camera and the ability to fly around the stage
