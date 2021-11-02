@@ -55,7 +55,7 @@ bool LGameEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
 	
-	GWorld->SpawnActor( APlayerStart::StaticClass(), FVector( 0, 50.f, 50.f ), FRotator( 50.f, 0.f, 0.f ) );
+	GWorld->SpawnActor( APlayerStart::StaticClass(), FVector( 0, 50.f, 50.f ), FRotator( -50.f, 180.f, 0.f ) );
 	GWorld->BeginPlay();
 	return true;
 }

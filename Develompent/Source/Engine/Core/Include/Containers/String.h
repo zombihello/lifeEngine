@@ -26,7 +26,7 @@ public:
 	 * @param[in] ... Other arguments string
 	 * @return Return formated string. This line must be removed manually
 	 */
-	static tchar*			Format( const tchar* InFormat, ... );
+	static std::wstring			Format( const tchar* InFormat, ... );
 
 	/**
 	 * @brief Getting a formatted string
@@ -35,7 +35,7 @@ public:
 	 * @param[in] InArguments Other arguments string
 	 * @return Return formated string. This line must be removed manually
 	 */
-	static tchar*			Format( const tchar* InFormat, va_list InArguments );
+	static std::wstring			Format( const tchar* InFormat, va_list InArguments );
 };
 
 #endif // !STRING_H

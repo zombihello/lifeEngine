@@ -56,6 +56,6 @@ std::wstring LEditorEngine::GetEditorName() const
 #else
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
-
+	
 	return FString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
 }

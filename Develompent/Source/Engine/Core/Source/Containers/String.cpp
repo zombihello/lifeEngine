@@ -6,12 +6,12 @@
 /**
  * Getting a formatted string
  */
-tchar* FString::Format( const tchar* InFormat, ... )
+std::wstring FString::Format( const tchar* InFormat, ... )
 {
 	va_list			arguments;
 	va_start( arguments, InFormat );
 
-	tchar*			formatedString = Format( InFormat, arguments );
+	std::wstring	formatedString = Format( InFormat, arguments );
 
 	va_end( arguments );
 	return formatedString;
@@ -20,10 +20,10 @@ tchar* FString::Format( const tchar* InFormat, ... )
 /**
  * Getting a formatted string
  */
-tchar* FString::Format( const tchar* InFormat, va_list InArguments )
+std::wstring FString::Format( const tchar* InFormat, va_list InArguments )
 {
 	int32           bufferSize = 1024;
-	tchar* buffer = nullptr;
+	tchar*			buffer = nullptr;
 	int             result = -1;
 
 	while ( result == -1 )
@@ -42,5 +42,7 @@ tchar* FString::Format( const tchar* InFormat, va_list InArguments )
 	}
 	buffer[ result ] = 0;
 
-	return buffer;
+	std::wstring		formatedString = buffer;
+	free( buffer );
+	return formatedString;
 }

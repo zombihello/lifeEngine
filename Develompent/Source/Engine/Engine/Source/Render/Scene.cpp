@@ -23,10 +23,8 @@ void FSceneView::SetCameraView( const FCameraView& InCameraView )
 	// Update view matrix
 	{
 		// BS yehor.pohuliaka - Maybe it not correct work
-		FQuaternion	quaternion = InCameraView.rotation.ToQuaternion();
-		FVector		targetDirection = FVector( 0.f, 0.f, -1.f ) * quaternion;
-		FVector		axisUp = FVector( 0.f, 1.f, 0.f ) * quaternion;
-		FVector		axisRight = glm::normalize( glm::cross( targetDirection, FVector( 0.f, 1.f, 0.f ) ) );
+		FVector		targetDirection		= InCameraView.rotation.RotateVector( FMath::vectorForward );
+		FVector		axisUp				= InCameraView.rotation.RotateVector( FMath::vectorUp );
 		viewMatrix = glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
 	}
 

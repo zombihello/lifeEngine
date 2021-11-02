@@ -56,7 +56,7 @@ bool FRenderingThread::Init()
 
 	return true;
 }
-#include <chrono>
+
 uint32 FRenderingThread::Run()
 {
 	void*		readPointer = nullptr;

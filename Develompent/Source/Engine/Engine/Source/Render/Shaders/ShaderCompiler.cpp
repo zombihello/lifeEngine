@@ -25,7 +25,7 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
 		FShaderCompilerEnvironment			environment( metaType->GetFrequency() );
 		FShaderCompilerOutput				output;
 
-		appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s..." ), metaType->GetName().c_str() ) );
+		appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s..." ), metaType->GetName().c_str() ).c_str() );
 		bool		result = GRHI->CompileShader( metaType->GetFileName().c_str(), metaType->GetFunctionName().c_str(), metaType->GetFrequency(), environment, output );
 		if ( !result )
 		{

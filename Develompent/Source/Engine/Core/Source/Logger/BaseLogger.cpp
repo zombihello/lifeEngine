@@ -36,11 +36,7 @@ void FBaseLogger::Logf( ELogType InLogType, ELogCategory InLogCategory, const tc
 #if !NO_LOGGING
 	va_list			arguments;
 	va_start( arguments, InMessage );
-	
-	tchar*		buffer = FString::Format( InMessage, arguments );
-    Serialize( buffer, InLogType, InLogCategory );
-   
+    Serialize( FString::Format( InMessage, arguments ).c_str(), InLogType, InLogCategory );  
 	va_end( arguments );
-	free( buffer );
 #endif // !NO_LOGGING
 }

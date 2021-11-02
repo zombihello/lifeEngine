@@ -32,14 +32,14 @@ void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ 
 		rotator.yaw += mouseOffset.x * sensitivity;
 		if ( rotator.yaw < -360.f || rotator.yaw > 360.f )
 		{
-			rotator.yaw = 360.f;
+			rotator.yaw = 0.f;
 		}
 	}
 
 	// Update Pitch axis
 	if ( mouseOffset.y != 0.f )
 	{
-		rotator.pitch += mouseOffset.y * sensitivity;
+		rotator.pitch -= mouseOffset.y * sensitivity;
 		if ( InConstrainYaw )
 		{
 			if ( rotator.pitch > 90.f )

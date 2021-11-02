@@ -77,7 +77,7 @@ void FViewport::InitRHI()
 		{
 			-50.f, -50.f, 0.0f,				0.0f, 0.0f,
 			 50.f, -50.f, 0.0f,				1.0f, 0.0f,
-			 0.0f,  50.f, 0.0f,				0.5f, 1.0f
+			 0.0f,  50.f, 0.0f,				0.5f, -1.0f
 		};
 		memcpy( lockedData.data, &tempData, strideVertex * 3 );
 

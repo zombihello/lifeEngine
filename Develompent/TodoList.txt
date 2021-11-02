@@ -1,7 +1,6 @@
 ----------------------------------------------------------------
  Version 0.2.0
 ----------------------------------------------------------------
-	- Fix memory leek in FString::Format
 	- Implement base material system
 	- Implement class of static meshes
 	- Implement commandlet for import static meshes

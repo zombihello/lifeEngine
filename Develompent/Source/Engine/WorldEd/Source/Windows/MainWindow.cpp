@@ -18,7 +18,7 @@ WeMainWindow::WeMainWindow( QWidget* InParent /* = nullptr */ ) :
 	setWindowTitle( QString::fromStdWString( GEditorEngine->GetEditorName() ) );
 
 	// Update text in menu action 'About'
-	ui->actionAbout->setText( QString::fromWCharArray( FString::Format( TEXT( "About %s" ), GEditorEngine->GetEditorName().c_str() ) ) );
+	ui->actionAbout->setText( QString::fromStdWString( FString::Format( TEXT( "About %s" ), GEditorEngine->GetEditorName().c_str() ) ) );
 
 	// Start timer for tick engine
 	connect( &timerTick, &QTimer::timeout, this, &WeMainWindow::OnTickLE );

@@ -2,4 +2,4 @@
 setlocal
 
 cd ../Binaries/Win64/
-TestbedGame-Win64-Debug.exe editor
+HeliumGame-Win64-Debug.exe editor

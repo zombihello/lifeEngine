@@ -1,6 +1,6 @@
 #include "Actors/Actor.h"
 #include "System/World.h"
-
+#include "Logger/LoggerMacros.h"
 FWorld::FWorld() :
 	isBeginPlay( false )
 {}

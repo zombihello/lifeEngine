@@ -133,8 +133,8 @@ void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 		}
 	}
 	
-	tchar*			finalMessage = FString::Format( TEXT( "[%07.2f][%s][%s] %s\n" ), appSeconds() - GStartTime, GLogTypeNames[ ( uint32 )InLogType ], GLogCategoryNames[ ( uint32 )InLogCategory ], InMessage );
-	wprintf( finalMessage );
+	std::wstring			finalMessage = FString::Format( TEXT( "[%07.2f][%s][%s] %s\n" ), appSeconds() - GStartTime, GLogTypeNames[ ( uint32 )InLogType ], GLogCategoryNames[ ( uint32 )InLogCategory ], InMessage );
+	wprintf( finalMessage.c_str() );
 
 	// Serialize log to file
 	if ( archiveLogs )
@@ -147,7 +147,7 @@ void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 #if !SHIPPING_BUILD
 	if ( appIsDebuggerPresent() )
 	{
-		OutputDebugStringW( finalMessage );
+		OutputDebugStringW( finalMessage.c_str() );
 	}
 #endif // !SHIPPING_BUILD
 
@@ -156,6 +156,4 @@ void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 	{
 		SetConsoleTextAttribute( consoleHandle, currentTextAttribute );
 	}
-
-	free( finalMessage );
 }

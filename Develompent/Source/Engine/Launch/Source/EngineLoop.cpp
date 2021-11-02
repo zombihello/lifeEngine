@@ -221,7 +221,7 @@ int32 FEngineLoop::Init()
 
 	if ( !map.empty() )
 	{
-		appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ) );
+		appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
 
 		std::wstring		error;
 		bool				successed = GEngine->LoadMap( map, error );

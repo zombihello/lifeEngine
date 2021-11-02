@@ -35,12 +35,8 @@ void VARARGS appFailAssertFunc( const achar* InExpr, const achar* InFile, int In
 {
     va_list     arguments;
     va_start( arguments, InFormat );
-
-    tchar*      message = FString::Format( InFormat, arguments );
-    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, message );
-
+    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, FString::Format( InFormat, arguments ).c_str() );
     va_end( arguments );
-    free( message );
 }
 
 /**
@@ -50,10 +46,6 @@ void VARARGS appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, i
 {
 	va_list     arguments;
 	va_start( arguments, InFormat );
-
-	tchar*      message = FString::Format( InFormat, arguments );
-    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, message );
-
+    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, FString::Format( InFormat, arguments ).c_str() );
 	va_end( arguments );
-	free( message );
 }

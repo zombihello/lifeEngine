@@ -63,7 +63,7 @@ function( IncludeExternals MODULE_NAME )
 	endif()
 	
 	if ( PLATFORM_WINDOWS )
-		target_link_libraries( ${MODULE_NAME} d3d11 dxgi dxguid )
+		target_link_libraries( ${MODULE_NAME} d3d11 dxgi dxguid d3dcompiler )
 	endif()
 endfunction()
 

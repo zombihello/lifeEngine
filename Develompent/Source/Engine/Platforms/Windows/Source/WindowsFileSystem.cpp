@@ -91,7 +91,7 @@ std::vector< std::wstring > FWindowsFileSystem::FindFiles( const std::wstring& I
 	WIN32_FIND_DATAW					data;
 	std::vector< std::wstring >			result;
 
-	handle = FindFirstFileW( FString::Format( TEXT( "%s/*" ), InDirectory.c_str() ), &data );
+	handle = FindFirstFileW( FString::Format( TEXT( "%s/*" ), InDirectory.c_str() ).c_str(), &data );
 	if ( handle != INVALID_HANDLE_VALUE )
 	{
 		do
