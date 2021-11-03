@@ -174,19 +174,30 @@ public:
     void Shutdown();
 
     /**
+     * Find instance of shader by name
+     * 
+     * @param[in] InShaderName Shader name
+     * @return Return reference to shader
+     */
+    FORCEINLINE FShaderRef FindInstance( const std::wstring& InShaderName )
+    {
+		auto        itShader = shaders.find( InShaderName );
+		if ( itShader == shaders.end() )
+		{
+			appErrorf( TEXT( "Shader %s not found in cache" ), InShaderName.c_str() );
+			return nullptr;
+		}
+
+		return itShader->second;
+    }
+
+    /**
      * @brief Find instance of shader
      */
     template< typename TShaderClass >
     FORCEINLINE FShaderRef                  FindInstance()
     {
-        auto        itShader = shaders.find( TShaderClass::staticType.GetName() );
-        if ( itShader == shaders.end() )
-        {
-            appErrorf( TEXT( "Shader %s not found in cache" ), TShaderClass::staticType.GetName().c_str() );
-            return nullptr;
-        }
-
-        return itShader->second;
+        return FindInstance( TShaderClass::staticType.GetName() );
     }
 
     /**

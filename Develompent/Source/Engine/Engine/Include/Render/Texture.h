@@ -18,6 +18,12 @@
 #include "RHI/TypesRHI.h"
 
 /**
+ * @ingroup Engine Engine
+ * @brief Reference to FTexture2D
+ */
+typedef TRefCountPtr< class FTexture2D >				FTexture2DRef;
+
+/**
  * @ingroup Engine
  * @brief Implementation for 2D textures
  */
@@ -56,21 +62,32 @@ public:
 	void SetData( const struct FTextureCacheItem& InTextureCache );
 
 	/**
+	 * Set address mod for U coord
+	 * 
+	 * @param[in] InAdressU Address mode for U coord
+	 */
+	FORCEINLINE void SetAddressU( ESamplerAddressMode InAdressU )
+	{
+		addressU = InAdressU;
+	}
+
+	/**
+	 * Set address mod for V coord
+	 *
+	 * @param[in] InAdressV Address mode for V coord
+	 */
+	FORCEINLINE void SetAddressV( ESamplerAddressMode InAdressV )
+	{
+		addressV = InAdressV;
+	}
+
+	/**
 	 * Get RHI texture 2D
 	 * @return Return pointer to RHI texture 2D
 	 */
 	FORCEINLINE FTexture2DRHIRef GetTexture2DRHI()
 	{
 		return texture;
-	}
-
-	/**
-	 * Get RHI sampler state
-	 * @return Return pointer to THI sampler state
-	 */
-	FORCEINLINE FSamplerStateRHIRef GetSamplerStateRHI()
-	{
-		return samplerState;
 	}
 
 	/**
@@ -82,13 +99,29 @@ public:
 		return pixelFormat;
 	}
 
+	/**
+	 * Get sampler state initializer for RHI
+	 * @return Return sampler state initializer
+	 */
+	FORCEINLINE FSamplerStateInitializerRHI GetSamplerStateInitialiser() const
+	{
+		FSamplerStateInitializerRHI		samplerStateInitializer;
+		appMemzero( &samplerStateInitializer, sizeof( FSamplerStateInitializerRHI ) );
+
+		samplerStateInitializer.filter = SF_Bilinear;
+		samplerStateInitializer.addressU = addressU;
+		samplerStateInitializer.addressV = addressV;
+		return samplerStateInitializer;
+	}
+
 private:
 	uint32						sizeX;			/**< Width of texture */
 	uint32						sizeY;			/**< Height of texture */
 	std::vector< byte >			data;			/**< Data used when loading texture */
 	EPixelFormat				pixelFormat;	/**< Pixel format of texture */
 	FTexture2DRHIRef			texture;		/**< Reference to RHI texture */
-	FSamplerStateRHIRef			samplerState;	/**< Reference to sampler state */
+	ESamplerAddressMode			addressU;		/**< Address mode for U coord */
+	ESamplerAddressMode			addressV;		/**< Address mode for V coord */
 };
 
 #endif // !TEXTURE_H

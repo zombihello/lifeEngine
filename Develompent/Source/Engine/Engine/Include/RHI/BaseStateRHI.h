@@ -37,7 +37,7 @@ enum ERasterizerCullMode
 
 /**
  * @ingroup Engine
- * @brief Structc for create resterize state in RHI
+ * @brief Struct for create resterize state in RHI
  */
 struct FRasterizerStateInitializerRHI
 {

@@ -21,13 +21,6 @@ void FTexture2D::InitRHI()
 {
 	check( !data.empty() );
 	texture = GRHI->CreateTexture2D( TEXT( "" ), sizeX, sizeY, pixelFormat, 1, 0, data.data() );
-
-	FSamplerStateInitializerRHI			samplerStateInitializerRHI;
-	appMemzero( &samplerStateInitializerRHI, sizeof( FSamplerStateInitializerRHI ) );
-	samplerStateInitializerRHI.filter		= SF_Bilinear;
-	samplerStateInitializerRHI.addressU		= SAM_Wrap;
-	samplerStateInitializerRHI.addressV		= SAM_Wrap;
-	samplerState = GRHI->CreateSamplerState( samplerStateInitializerRHI );
 	data.clear();
 }
 

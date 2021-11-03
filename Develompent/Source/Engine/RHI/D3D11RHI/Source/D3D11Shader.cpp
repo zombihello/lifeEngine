@@ -178,5 +178,6 @@ FD3D11BoundShaderStateRHI::~FD3D11BoundShaderStateRHI()
 	FD3D11RHI*		rhi = ( FD3D11RHI* )GRHI;
 	check( rhi );
 
+	d3d11InputLayout->Release();
 	rhi->GetBoundShaderStateHistory().Remove( key );
 }

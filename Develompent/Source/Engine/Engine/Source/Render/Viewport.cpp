@@ -26,22 +26,16 @@ FViewport::~FViewport()
 #include "Components/CameraComponent.h"
 #include "Render/Scene.h"
 #include "System/InputSystem.h"
+#include "Render/Material.h"
+#include "Render/SceneRendering.h"
 
 FSceneView			sceneView;
 extern LCameraComponent* cameraComponent;
-struct FPSConstantBuffer
-{
-	float		r;
-	float		g;
-	float		b;
-	float		a;
-} GPSConstantBuffer;
 
 FVertexBufferRHIRef		vertexBuffer;
-FBoundShaderStateRHIRef				boundShaderState;
-FRasterizerStateRHIRef				rasterizerState;
-FSamplerStateRHIRef					samplerState;
-FTexture2D							texture2D;
+FTexture2DRef						texture2D = new FTexture2D();
+FMaterialRef						material = new FMaterial();
+FVertexDeclarationRHIRef			vertexDeclRHI;
 bool			q = false;
 
 void FViewport::InitRHI()
@@ -63,11 +57,7 @@ void FViewport::InitRHI()
 		uint32								strideVertex = ( 3 * sizeof( float ) ) + ( 2 * sizeof( float ) );
 		vertexDeclElementList.push_back( FVertexElement( 0, strideVertex, 0, VET_Float3, VEU_Position, 0 ) );
 		vertexDeclElementList.push_back( FVertexElement( 0, strideVertex, 3 * sizeof( float ), VET_Float2, VEU_TextureCoordinate, 0 ) );
-		FVertexDeclarationRHIRef			vertexDeclRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
-
-		FShaderRef		testVertexShader = GShaderManager->FindInstance< FTestVertexShader >();
-		FShaderRef		testPixelShader = GShaderManager->FindInstance< FTestPixelShader >();
-		check( testVertexShader && testPixelShader );
+		vertexDeclRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
 
 		vertexBuffer = GRHI->CreateVertexBuffer( TEXT( "TestVertexBuffer" ), strideVertex * 3, nullptr, RUF_Dynamic );
 		FLockedData				lockedData;
@@ -80,23 +70,7 @@ void FViewport::InitRHI()
 			 0.0f,  50.f, 0.0f,				0.5f, -1.0f
 		};
 		memcpy( lockedData.data, &tempData, strideVertex * 3 );
-
 		GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
-
-		boundShaderState = GRHI->CreateBoundShaderState( TEXT( "TestBoundShaderState" ), vertexDeclRHI, testVertexShader->GetVertexShader(), testPixelShader->GetPixelShader() );
-
-		FRasterizerStateInitializerRHI		rasterizerStateInitializerRHI;
-		appMemzero( &rasterizerStateInitializerRHI, sizeof( FRasterizerStateInitializerRHI ) );
-		rasterizerStateInitializerRHI.cullMode = CM_CW;
-		rasterizerStateInitializerRHI.fillMode = FM_Solid;
-		rasterizerState = GRHI->CreateRasterizerState( rasterizerStateInitializerRHI );
-
-		FSamplerStateInitializerRHI			samplerStateInitializerRHI;
-		appMemzero( &samplerStateInitializerRHI, sizeof( FSamplerStateInitializerRHI ) );
-		samplerStateInitializerRHI.filter = SF_Bilinear;
-		samplerStateInitializerRHI.addressU = SAM_Wrap;
-		samplerStateInitializerRHI.addressV = SAM_Wrap;
-		samplerState = GRHI->CreateSamplerState( samplerStateInitializerRHI );
 
 		FBaseArchive*	ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
 		if ( ar )
@@ -107,15 +81,17 @@ void FViewport::InitRHI()
 			FTextureCacheItem		textureCacheItem;
 			if ( textureFileCache.Find( FTextureCacheItem::CalcHash( TEXT( "DefaultTexture" ) ), &textureCacheItem ) )
 			{
-				texture2D.SetData( textureCacheItem );
+				texture2D->SetAddressU( SAM_Wrap );
+				texture2D->SetAddressV( SAM_Wrap );
+				texture2D->SetData( textureCacheItem );
 			}
 
 			delete ar;
 		}
 
-		appMemzero( &GPSConstantBuffer, sizeof( FPSConstantBuffer ) );
-		GPSConstantBuffer.r = 1;
-		GPSConstantBuffer.a = 1;
+		material->SetShader( FTestVertexShader::staticType, SF_Vertex );
+		material->SetShader( FTestPixelShader::staticType, SF_Pixel );
+		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
 
 		q = true;
 	}
@@ -164,6 +140,7 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 		BeginUpdateResource( this );
 	}
 }
+
 bool a = false;
 void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
@@ -187,18 +164,12 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 			immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
 			GRHI->SetViewParameters( immediateContext, sceneView );
 
-			GRHI->SetShaderParameter( immediateContext, boundShaderState->GetPixelShader(), 0, 0, sizeof( float ) * 4, &GPSConstantBuffer );
-			GPSConstantBuffer.r += a ? -0.0005f : 0.0005f;
-			if ( GPSConstantBuffer.r >= 1 || GPSConstantBuffer.r <= 0 )
-			{
-				a = !a;
-			}
 			GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, ( 3 * sizeof( float ) ) + ( 2 * sizeof( float ) ), 0 );
-			GRHI->SetBoundShaderState( immediateContext, boundShaderState );
-			GRHI->SetRasterizerState( immediateContext, rasterizerState );
-			GRHI->SetTextureParameter( immediateContext, boundShaderState->GetPixelShader(), texture2D.GetTexture2DRHI(), 0 );
-			GRHI->SetSamplerState( immediateContext, boundShaderState->GetPixelShader(), samplerState, 0 );
-			GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
+			
+			FTestDrawPolicy		drawPolicy( material );
+			drawPolicy.SetRenderState( immediateContext, vertexDeclRHI );
+			drawPolicy.SetShaderParameters( immediateContext );
+			drawPolicy.Draw( immediateContext, sceneView );
 
 			GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
 		}

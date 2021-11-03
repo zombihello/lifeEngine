@@ -51,6 +51,7 @@ public:
 			if ( ( *it ) == InDelegate )
 			{
 				delegates.erase( it );
+				criticalSection.Unlock();
 				return;
 			}
 		}
