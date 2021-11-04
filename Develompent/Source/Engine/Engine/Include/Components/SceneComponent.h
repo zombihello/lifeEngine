@@ -30,6 +30,12 @@ public:
 	void SetupAttachment( LSceneComponent* InParent );
 
 	/**
+	 * @brief Serialize component
+	 * @param[in] InArchive Archive for serialize
+	 */
+	virtual void Serialize( class FArchive& InArchive ) override;
+
+	/**
 	 * Add to relative location component
 	 * 
 	 * @param[in] InLocationDelta Relative location delta

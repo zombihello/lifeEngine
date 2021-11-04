@@ -73,7 +73,7 @@ public:
 
 private:
     HANDLE                                      consoleHandle;      /**< OS handle on console*/
-    FBaseArchive*                               archiveLogs;        /**< Archive of logs */
+    FArchive*                               archiveLogs;        /**< Archive of logs */
 };
 
 #endif // !WINDOWSLOGGER_H

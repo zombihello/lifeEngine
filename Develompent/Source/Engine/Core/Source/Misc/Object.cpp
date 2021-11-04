@@ -6,7 +6,7 @@ IMPLEMENT_CLASS( LObject )
 /**
  * Serialize object
  */
-void LObject::Serialize( FBaseArchive& InArchive )
+void LObject::Serialize( FArchive& InArchive )
 {}
 
 /**

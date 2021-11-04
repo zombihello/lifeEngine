@@ -43,6 +43,12 @@ public:
 	virtual void Tick( float InDeltaTime );
 
 	/**
+	 * @brief Serialize actor
+	 * @param[in] InArchive Archive for serialize
+	 */
+	virtual void Serialize( class FArchive& InArchive );
+
+	/**
 	 * Get array of owned components
 	 * @return Return array owned components
 	 */

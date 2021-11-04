@@ -9,7 +9,7 @@ FTextureCacheItem::FTextureCacheItem() :
 	hash( ( uint32 )INVALID_HASH )
 {}
 
-void FTextureCacheItem::Serialize( FBaseArchive& InArchive )
+void FTextureCacheItem::Serialize( FArchive& InArchive )
 {
 	InArchive << hash;
 	InArchive << pixelFormat;
@@ -32,20 +32,12 @@ void FTextureCacheItem::Serialize( FBaseArchive& InArchive )
 	}
 }
 
-void FTextureFileCache::Serialize( FBaseArchive& InArchive )
+void FTextureFileCache::Serialize( FArchive& InArchive )
 {
+	check( InArchive.Type() == AT_TextureCache );
+
 	if ( InArchive.IsLoading() )
 	{
-		EArchiveResourceType		resourceType;
-		InArchive << resourceType;
-
-		// If resource type not texture cache - this is error
-		if ( resourceType != ART_TextureCahce )
-		{
-			appErrorf( TEXT( "The current section in the archive is not a texture cache" ) );
-			return;
-		}
-
 		// Check version of texture cache
 		uint32			textureCacheVersion = 0;
 		InArchive << textureCacheVersion;
@@ -69,8 +61,6 @@ void FTextureFileCache::Serialize( FBaseArchive& InArchive )
 	else if ( InArchive.IsSaving() )
 	{
 		uint32		countItems = ( uint32 )items.size();
-
-		InArchive << ART_TextureCahce;
 		InArchive << TEXTURE_CACHE_VERSION;
 		InArchive << countItems;
 

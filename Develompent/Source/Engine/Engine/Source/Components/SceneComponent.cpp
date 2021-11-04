@@ -17,6 +17,12 @@ bool LSceneComponent::IsAttachedTo( LSceneComponent* InTestComp ) const
 	return false;
 }
 
+void LSceneComponent::Serialize( class FArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << transform;
+}
+
 void LSceneComponent::SetupAttachment( LSceneComponent* InParent )
 {
 	checkMsg( InParent != this, TEXT( "Cannot attach a component to itself" ) );

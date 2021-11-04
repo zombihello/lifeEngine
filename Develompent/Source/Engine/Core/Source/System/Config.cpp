@@ -3,13 +3,13 @@
 #include "Logger/LoggerMacros.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "System/Config.h"
 
 /**
  * Serialize
  */
-void FConfig::Serialize( FBaseArchive& InArchive )
+void FConfig::Serialize( FArchive& InArchive )
 {
 	if ( InArchive.IsLoading() )
 	{

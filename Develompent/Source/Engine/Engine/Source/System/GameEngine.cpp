@@ -1,9 +1,12 @@
 #include "Misc/Class.h"
+#include "Misc/Misc.h"
 #include "Logger/LoggerMacros.h"
+#include "Containers/String.h"
 #include "System/GameEngine.h"
 #include "System/Config.h"
 #include "System/BaseWindow.h"
 #include "System/World.h"
+#include "System/BaseFileSystem.h"
 #include "Render/RenderingThread.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/CoreGlobals.h"
@@ -55,7 +58,16 @@ bool LGameEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
 	
-	GWorld->SpawnActor( APlayerStart::StaticClass(), FVector( 0, 50.f, 50.f ), FRotator( -50.f, 180.f, 0.f ) );
+	FArchive*		archive = GFileSystem->CreateFileReader( appBaseDir() + FString::Format( TEXT( "Content/Maps/%s" ), InMap.c_str() ) );
+	if ( !archive )
+	{
+		OutError = TEXT( "Map not found" );
+		return false;
+	}
+
+	archive->SerializePackageHeader();
+	GWorld->Serialize( *archive );
+
 	GWorld->BeginPlay();
 	return true;
 }

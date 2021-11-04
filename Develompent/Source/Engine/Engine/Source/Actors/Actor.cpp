@@ -24,6 +24,15 @@ void AActor::Tick( float InDeltaTime )
 	}
 }
 
+void AActor::Serialize( class FArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
+	{
+		ownedComponents[ index ]->Serialize( InArchive );
+	}
+}
+
 LActorComponentRef AActor::CreateComponent( LClass* InClass, const tchar* InName )
 {
 	check( InClass );

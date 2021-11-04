@@ -28,9 +28,60 @@ void FWorld::Tick( float InDeltaTime )
 	}
 }
 
+void FWorld::Serialize( FArchive& InArchive )
+{
+	check( InArchive.Type() == AT_World );
+
+	if ( InArchive.IsSaving() )
+	{
+		InArchive << ( uint32 )actors.size();
+		for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
+		{
+			AActor*			actor = actors[ index ];
+		
+			// Serialize class name
+			{
+				std::wstring		actorClassName = actor->GetClass()->GetName();
+				uint32				classNameSize = ( uint32 )actorClassName.size() * sizeof( std::wstring::value_type );
+				InArchive << classNameSize;
+				InArchive.Serialize( ( void* )actorClassName.data(), classNameSize );
+			}
+
+			// Serialize actor data
+			actors[ index ]->Serialize( InArchive );
+		}
+	}
+	else
+	{
+		// Clear world
+		CleanupWorld();
+
+		uint32		countActors = 0;
+		InArchive << countActors;
+
+		actors.resize( countActors );
+		for ( uint32 index = 0; index < countActors; ++index )
+		{
+			// Serialize class name
+			uint32				classNameSize = 0;
+			std::wstring		className;
+
+			InArchive << classNameSize;
+			className.resize( classNameSize / sizeof( std::wstring::value_type ) );
+			InArchive.Serialize( ( void* )className.data(), classNameSize );
+
+			// Spawn actor, serialize and add to array
+			AActor*			actor = SpawnActor( LClass::StaticFindClass( className.c_str() ), FMath::vectorZero, FMath::rotatorZero );
+			actor->Serialize( InArchive );
+			actors[ index ] = actor;
+		}
+	}
+}
+
 void FWorld::CleanupWorld()
 {
 	actors.clear();
+	isBeginPlay = false;
 }
 
 AActorRef FWorld::SpawnActor( class LClass* InClass, const FVector& InLocation, const FRotator& InRotation /* = FMath::rotatorZero */ )

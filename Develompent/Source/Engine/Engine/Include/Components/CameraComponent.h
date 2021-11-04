@@ -34,6 +34,12 @@ public:
 	void RotateComponentByMouse( bool InConstrainYaw = true );
 
 	/**
+	 * @brief Serialize component
+	 * @param[in] InArchive Archive for serialize
+	 */
+	virtual void Serialize( class FArchive& InArchive ) override;
+
+	/**
 	 * Set projection mode
 	 * 
 	 * @param[in] InProjectionMode Projection mode

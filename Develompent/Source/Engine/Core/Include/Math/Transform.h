@@ -12,7 +12,7 @@
 #include "Math/Math.h"
 #include "Math/Rotator.h"
 #include "Math/Axis.h"
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 
 /**
  * @ingroup Core

@@ -12,13 +12,13 @@
 #include <fstream>
 
 #include "Core.h"
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 
  /**
   * @ingroup WindowsPlatform
   * @brief The class for reading archive on Windows
   */
-class FWindowsArchiveReading : public FBaseArchive
+class FWindowsArchiveReading : public FArchive
 {
 public:
 	/**
@@ -87,7 +87,7 @@ private:
  * @ingroup WindowsPlatform
  * @brief The class for writing archive on Windows
  */
-class FWindowsArchiveWriter : public FBaseArchive
+class FWindowsArchiveWriter : public FArchive
 {
 public:
 	/**

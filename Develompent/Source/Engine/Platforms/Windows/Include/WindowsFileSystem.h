@@ -37,7 +37,7 @@ public:
      *
      * @warning After use need delete file reader
      */
-    virtual class FBaseArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None ) override;
+    virtual class FArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None ) override;
 
     /**
      * @brief Create file writer
@@ -48,7 +48,7 @@ public:
      *
      * @warning After use need delete file writer
      */
-    virtual class FBaseArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None ) override;
+    virtual class FArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None ) override;
 
     /**
      * @brief Find files in directory

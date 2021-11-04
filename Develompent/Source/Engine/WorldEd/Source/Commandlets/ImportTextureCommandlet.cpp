@@ -84,17 +84,26 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 	// Serialize texture cache if his already created
 	FTextureFileCache		textureCache;
 	{
-		FBaseArchive*		archive = GFileSystem->CreateFileReader( dstFilename.c_str() );
+		FArchive*		archive = GFileSystem->CreateFileReader( dstFilename.c_str() );
 		if ( archive )
 		{
-			textureCache.Serialize( *archive );
+			archive->SerializePackageHeader();
+			if ( archive->Type() == AT_TextureCache )
+			{
+				textureCache.Serialize( *archive );
+			}
+
 			delete archive;
 		}
 	}
 
 	// Add and save update texture cache
-	FBaseArchive*			archive = GFileSystem->CreateFileWriter( dstFilename.c_str(), AW_NoFail | ( isAppend ? AW_Append : AW_None ) );	
 	textureCache.Add( textureCacheItem );
+
+	FArchive*			archive = GFileSystem->CreateFileWriter( dstFilename.c_str(), AW_NoFail | ( isAppend ? AW_Append : AW_None ) );
+	archive->SetType( AT_TextureCache );
+
+	archive->SerializePackageHeader();
 	textureCache.Serialize( *archive );
 
 	// Clean up all data

@@ -22,7 +22,6 @@ void FSceneView::SetCameraView( const FCameraView& InCameraView )
 
 	// Update view matrix
 	{
-		// BS yehor.pohuliaka - Maybe it not correct work
 		FVector		targetDirection		= InCameraView.rotation.RotateVector( FMath::vectorForward );
 		FVector		axisUp				= InCameraView.rotation.RotateVector( FMath::vectorUp );
 		viewMatrix = glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );

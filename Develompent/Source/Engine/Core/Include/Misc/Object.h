@@ -88,7 +88,7 @@ public:
      * @brief Serialize object
      * @param[in] InArchive Archive for serialize
      */
-    virtual void                    Serialize( class FBaseArchive& InArchive );
+    virtual void                    Serialize( class FArchive& InArchive );
 
     /**
      * @brief Set name object
@@ -161,6 +161,11 @@ public:
         return InClass->CreateObject< TClass >();
     }
 
+    /**
+     * Overload operator of serialization in archive
+     */
+    friend FArchive& operator<<( FArchive& InArchive, LObject& InObject );
+
 private:
     /**
      * @brief Whether the object is of the specified class
@@ -172,5 +177,15 @@ private:
 
     std::wstring            name;               /**< Name object */
 };
+
+/**
+ * @ingroup Core
+ * @brief Overload operator << for serialize LObject
+ */
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, LObject& InObject )
+{
+    InObject.Serialize( InArchive );
+    return InArchive;
+}
 
 #endif // !OBJECT_H

@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "RHI/BaseShaderRHI.h"
 
 /**
@@ -31,7 +31,7 @@ public:
 		 * @brief Serialize
 		 * @param[in] InArchive Archive
 		 */
-		void						Serialize( FBaseArchive& InArchive );
+		void						Serialize( FArchive& InArchive );
 
 		std::wstring				name;				/**< Name of class shader */
 		EShaderFrequency			frequency;			/**< Frequency of shader */
@@ -43,7 +43,7 @@ public:
 	 * @brief Serialize
 	 * @param[in] InArchive Archive
 	 */
-	void													Serialize( FBaseArchive& InArchive );
+	void													Serialize( FArchive& InArchive );
 
 	/**
 	 * @brief Add to cache compiled shader

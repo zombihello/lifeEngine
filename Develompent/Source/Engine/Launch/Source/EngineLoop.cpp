@@ -4,7 +4,7 @@
 #include "Misc/Misc.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "System/BaseFileSystem.h"
 #include "System/BaseWindow.h"
 #include "System/Config.h"
@@ -62,7 +62,7 @@ FEngineLoop::~FEngineLoop()
 void FEngineLoop::SerializeConfigs()
 {
 	// Loading engine config
-	FBaseArchive*		arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Engine.json" ) );
+	FArchive*		arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Engine.json" ) );
 	if ( arConfig )
 	{
 		GEngineConfig.Serialize( *arConfig );

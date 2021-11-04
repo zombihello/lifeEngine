@@ -49,7 +49,7 @@ public:
 	 *
 	 * @param[in] InArchive Archive
 	 */
-	void Serialize( class FBaseArchive& InArchive );
+	void Serialize( class FArchive& InArchive );
 
 	/**
 	 * Set shader

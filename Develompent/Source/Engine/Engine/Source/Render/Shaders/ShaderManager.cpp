@@ -3,7 +3,7 @@
 #include "Logger/BaseLogger.h"
 #include "Logger/LoggerMacros.h"
 #include "Containers/String.h"
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "System/BaseFileSystem.h"
 #include "RHI/BaseRHI.h"
 #include "Render/Shaders/Shader.h"
@@ -60,13 +60,14 @@ FShaderRef FShaderManager::FContainerShaderTypes::CreateShaderInstance( const tc
  */
 bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 {
-	FBaseArchive*		archive = GFileSystem->CreateFileReader( InPathShaderCache );
+	FArchive*		archive = GFileSystem->CreateFileReader( InPathShaderCache );
 	if ( !archive )
 	{
 		return false;
 	}
 
 	FShaderCache		shaderCache;
+	archive->SerializePackageHeader();
 	shaderCache.Serialize( *archive );
 	delete archive;
 

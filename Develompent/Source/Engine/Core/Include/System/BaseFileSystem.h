@@ -58,7 +58,7 @@ public:
      * 
      * @warning After use need delete file reader
      */
-    virtual class FBaseArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None )            { return nullptr; }
+    virtual class FArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None )            { return nullptr; }
 
     /**
 	 * @brief Create file writer
@@ -70,7 +70,7 @@ public:
 	 *
 	 * @warning After use need delete file writer
 	 */
-    virtual class FBaseArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None )            { return nullptr; }
+    virtual class FArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None )            { return nullptr; }
 
     /**
      * @brief Find files in directory

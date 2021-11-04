@@ -20,7 +20,7 @@ FWindowsFileSystem::~FWindowsFileSystem()
 /**
  * Create file reader
  */
-class FBaseArchive* FWindowsFileSystem::CreateFileReader( const std::wstring& InFileName, uint32 InFlags )
+class FArchive* FWindowsFileSystem::CreateFileReader( const std::wstring& InFileName, uint32 InFlags )
 {
 	std::ifstream*			inputFile = new std::ifstream();
 
@@ -43,7 +43,7 @@ class FBaseArchive* FWindowsFileSystem::CreateFileReader( const std::wstring& In
 /**
  * Create file writer
  */
-class FBaseArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& InFileName, uint32 InFlags )
+class FArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& InFileName, uint32 InFlags )
 {
 	std::ofstream*			outputFile = new std::ofstream();
 	int						flags = 0;

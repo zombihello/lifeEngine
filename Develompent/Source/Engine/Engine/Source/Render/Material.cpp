@@ -8,7 +8,7 @@ FMaterial::FMaterial() :
 FMaterial::~FMaterial()
 {}
 
-void FMaterial::Serialize( class FBaseArchive& InArchive )
+void FMaterial::Serialize( class FArchive& InArchive )
 {
 	checkMsg( false, TEXT( "Not implemented" ) );
 }

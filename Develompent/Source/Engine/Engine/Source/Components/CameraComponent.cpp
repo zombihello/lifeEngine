@@ -60,6 +60,19 @@ void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ 
 	SetRelativeRotation( rotator );
 }
 
+void LCameraComponent::Serialize( class FArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+
+	InArchive << projectionMode;
+	InArchive << fieldOfView;
+	InArchive << orthoWidth;
+	InArchive << orthoHeight;
+	InArchive << nearClipPlane;
+	InArchive << farClipPlane;
+	InArchive << aspectRatio;
+}
+
 void LCameraComponent::GetCameraView( FCameraView& OutDesiredView )
 {
 	OutDesiredView.location			= GetComponentLocation();

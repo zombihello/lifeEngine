@@ -463,7 +463,7 @@ public:
 	 * 
 	 * @param[in] InArchive Archive for serialization
 	 */
-	void						Serialize( class FBaseArchive& InArchive );
+	void						Serialize( class FArchive& InArchive );
 
 	/**
 	 * @brief Set value

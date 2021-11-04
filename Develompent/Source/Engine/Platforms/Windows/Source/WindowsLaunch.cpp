@@ -9,7 +9,7 @@
 #include "D3D11RHI.h"
 #include "D3D11Viewport.h"
 #include "D3D11DeviceContext.h"
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "WindowsLogger.h"
 #include "WindowsFileSystem.h"
 #include "WindowsWindow.h"

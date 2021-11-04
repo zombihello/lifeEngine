@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "RHI/BaseSurfaceRHI.h"
 
 /**
@@ -37,7 +37,7 @@ struct FTextureCacheItem
 	 * @brief Serialize
 	 * @param[in] InArchive Archive
 	 */
-	void Serialize( FBaseArchive& InArchive );
+	void Serialize( FArchive& InArchive );
 
 	/**
 	 * Calculate hash from name
@@ -67,7 +67,7 @@ public:
 	 * @brief Serialize
 	 * @param[in] InArchive Archive
 	 */
-	void Serialize( FBaseArchive& InArchive );
+	void Serialize( FArchive& InArchive );
 
 	/**
 	 * @brief Add to cache texture data

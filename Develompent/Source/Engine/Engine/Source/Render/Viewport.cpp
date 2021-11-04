@@ -19,7 +19,7 @@ FViewport::~FViewport()
 #include "Render/Shaders/TestShader.h"
 #include "Render/Texture.h"
 #include "Render/TextureFileCache.h"
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "System/BaseFileSystem.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/Misc.h"
@@ -72,17 +72,17 @@ void FViewport::InitRHI()
 		memcpy( lockedData.data, &tempData, strideVertex * 3 );
 		GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
 
-		FBaseArchive*	ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
+		FArchive*	ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.lpak" ) );
 		if ( ar )
 		{
+			ar->SerializePackageHeader();
+
 			FTextureFileCache		textureFileCache;
 			textureFileCache.Serialize( *ar );
 			
 			FTextureCacheItem		textureCacheItem;
-			if ( textureFileCache.Find( FTextureCacheItem::CalcHash( TEXT( "DefaultTexture" ) ), &textureCacheItem ) )
+			if ( textureFileCache.Find( FTextureCacheItem::CalcHash( TEXT( "DefaultDiffuse" ) ), &textureCacheItem ) )
 			{
-				texture2D->SetAddressU( SAM_Wrap );
-				texture2D->SetAddressV( SAM_Wrap );
 				texture2D->SetData( textureCacheItem );
 			}
 

@@ -13,6 +13,7 @@
 
 #include "Math/Math.h"
 #include "Misc/EngineTypes.h"
+#include "System/Archive.h"
 
 /**
  * @ingroup Engine
@@ -42,6 +43,13 @@ public:
 	 * @param[in] InDeltaTime The time since the last tick
 	 */
 	void Tick( float InDeltaTime );
+
+	/**
+	 * Serialize world
+	 * 
+	 * @param[in] InArchive Archive
+	 */
+	void Serialize( FArchive& InArchive );
 
 	/**
 	 * Clean up all world

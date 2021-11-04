@@ -490,7 +490,7 @@ void FD3D11RHI::EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext
 #include "Containers/StringConv.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/Misc.h"
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "System/BaseFileSystem.h"
 
 /**
@@ -523,7 +523,7 @@ public:
 		std::wstring		filename( ANSI_TO_TCHAR( InName ) );
 		filename = appShaderDir() + TEXT( "/" ) + filename;
 
-		FBaseArchive*		archive = GFileSystem->CreateFileReader( filename );
+		FArchive*		archive = GFileSystem->CreateFileReader( filename );
 		if ( !archive )
 		{
 			LE_LOG( LT_Error, LC_Shader, TEXT( "Not found included shader file '%s'" ), filename.c_str() );
@@ -579,7 +579,7 @@ static DWORD TranslateCompilerFlagD3D11( ECompilerFlags CompilerFlag )
  */
 bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const FShaderCompilerEnvironment& InEnvironment, FShaderCompilerOutput& OutOutput, bool InDebugDump /* = false */, const tchar* InShaderSubDir /* = TEXT( "" ) */ )
 {
-	FBaseArchive*		shaderArchive = GFileSystem->CreateFileReader( InSourceFileName );
+	FArchive*		shaderArchive = GFileSystem->CreateFileReader( InSourceFileName );
 	if ( !shaderArchive )
 	{
 		return false;

@@ -6,37 +6,41 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#ifndef BASEARCHIVE_H
-#define BASEARCHIVE_H
+#ifndef Archive_H
+#define Archive_H
 
 #include "Core.h"
 #include "Misc/Types.h"
 
 /**
  * @ingroup Core
- * @brief Enumeration of types resource in archive
+ * Enumeration of type archive
  */
-enum EArchiveResourceType
+enum EArchiveType
 {
-	ART_Unknown,		/**< Unknown resource */
-	ART_Script,			/**< Script resource */
-	ART_ShaderCache,	/**< Shader cache resource */
-	ART_TextureCahce,	/**< Texture cache resource */
-	ART_World,			/**< World resource */
-	ART_Count			/**< Count of resources */
+	AT_TextFile,		/**< Archive is text file */
+	AT_ShaderCache,		/**< Archive contains shader cache */
+	AT_TextureCache,	/**< Archive contains texture cache */
+	AT_Scripts,			/**< Archive contains scripts */
+	AT_World			/**< Archive contains world */
 };
 
 /**
  * @ingroup Core
- * @brief The base class for work with file
+ * @brief The base class for work with archive
  */
-class FBaseArchive
+class FArchive
 {
 public:
 	/**
+	 * Constructor
+	 */
+	FArchive();
+
+	/**
 	 * @brief Destructor
 	 */
-	virtual					~FBaseArchive() {}
+	virtual					~FArchive() {}
 
 	/**
 	 * @brief Serialize data
@@ -45,6 +49,11 @@ public:
 	 * @param[in] InSize Size of buffer
 	 */
 	virtual void			Serialize( void* InBuffer, uint32 InSize ) {}
+
+	/**
+	 * Serialize package header
+	 */
+	void SerializePackageHeader();
 
 	/**
 	 * @brief Get current position in archive
@@ -65,6 +74,16 @@ public:
 	virtual void			Flush() {}
 
 	/**
+	 * Set archive type
+	 * 
+	 * @param[in] InType Archive type
+	 */
+	FORCEINLINE void SetType( EArchiveType InType )
+	{
+		arType = InType;
+	}
+
+	/**
 	 * @brief Is saving archive
 	 * @return True if archive saving, false if archive loading
 	 */
@@ -81,6 +100,28 @@ public:
 	 * @return Size of archive
 	 */
 	virtual uint32			GetSize() { return 0; }
+
+	/**
+	 * Get archive version
+	 * @return Return archive version
+	 */
+	FORCEINLINE uint32		Ver() const
+	{
+		return arVer;
+	}
+
+	/**
+	 * Get archive type
+	 * @return Return type archive
+	 */
+	FORCEINLINE EArchiveType Type() const
+	{
+		return arType;
+	}
+
+protected:
+	uint32					arVer;		/**< Archive version (look ELifeEnginePackageVersion) */
+	EArchiveType			arType;		/**< Archive type */
 };
 
 //
@@ -90,7 +131,7 @@ public:
 /**
  * @brief Overload operator << for serialize TCHAR string
  */
-FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, tchar* InStringC )
+FORCEINLINE FArchive&		operator<<( FArchive& InArchive, tchar* InStringC )
 {
 	InArchive.Serialize( InStringC, ( uint32 )wcslen( InStringC ) * 2 );
 	return InArchive;
@@ -99,7 +140,7 @@ FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, tchar* InStringC
 /**
  * @brief Overload operator << for serialize ANSI string
  */
-FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, achar* InStringC )
+FORCEINLINE FArchive&		operator<<( FArchive& InArchive, achar* InStringC )
 {
 	InArchive.Serialize( InStringC, ( uint32 )strlen( InStringC ) );
 	return InArchive;
@@ -109,10 +150,10 @@ FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, achar* InStringC
  * @brief Overload operator << for all types
  */
 template< typename TType >
-FORCEINLINE FBaseArchive&		operator<<( FBaseArchive& InArchive, const TType& InValue )
+FORCEINLINE FArchive&		operator<<( FArchive& InArchive, const TType& InValue )
 {
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-#endif // !BASEARCHIVE_H
+#endif // !Archive_H

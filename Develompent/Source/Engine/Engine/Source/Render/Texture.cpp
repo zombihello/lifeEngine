@@ -1,5 +1,5 @@
 #include "Containers/StringConv.h"
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "Misc/EngineGlobals.h"
 #include "Render/Texture.h"
 #include "Render/RenderUtils.h"
@@ -10,7 +10,9 @@
 FTexture2D::FTexture2D() :
 	sizeX( 0 ),
 	sizeY( 0 ),
-	pixelFormat( PF_Unknown )
+	pixelFormat( PF_Unknown ),
+	addressU( SAM_Wrap ),
+	addressV( SAM_Wrap )
 {}
 
 FTexture2D::~FTexture2D()

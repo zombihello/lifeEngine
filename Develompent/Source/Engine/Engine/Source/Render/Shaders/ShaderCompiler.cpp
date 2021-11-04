@@ -45,9 +45,12 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
 	}
 
 	// Save shader cache
-	FBaseArchive*			archive = GFileSystem->CreateFileWriter( InOutputCache, AW_NoFail );
+	FArchive*			archive = GFileSystem->CreateFileWriter( InOutputCache, AW_NoFail );
 	if ( archive )
 	{
+		archive->SetType( AT_ShaderCache );
+
+		archive->SerializePackageHeader();
 		shaderCache.Serialize( *archive );
 		delete archive;
 	}

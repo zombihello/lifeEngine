@@ -1,4 +1,4 @@
-#include "System/BaseArchive.h"
+#include "System/Archive.h"
 #include "Misc/Class.h"
 #include "Scripts/Script.h"
 
@@ -34,15 +34,13 @@ FScript::~FScript()
 /**
  * Serialize script
  */
-void FScript::Serialize( FBaseArchive& InArchive )
+void FScript::Serialize( FArchive& InArchive )
 {
+	check( InArchive.Type() == AT_Scripts );
+
 	if ( InArchive.IsLoading() )
 	{
-		EArchiveResourceType		resourceType;
-		InArchive << resourceType;
-
-		// If resource type not valid - this regular file and we try load source code of script
-		if ( resourceType > ART_Count )
+		if ( InArchive.Type() == AT_TextFile )
 		{
 			// Go to start of file
 			InArchive.Seek( 0 );
@@ -59,9 +57,7 @@ void FScript::Serialize( FBaseArchive& InArchive )
 			SetByteCode( buffer, archiveSize );
 			delete[] buffer;
 		}
-
-		// Else if resourceType is ART_Script - this is section of script
-		else if ( resourceType == ART_Script )
+		else
 		{
 			// Read name of script
 			uint32			nameSize = 0;
@@ -80,17 +76,9 @@ void FScript::Serialize( FBaseArchive& InArchive )
 			SetByteCode( buffer, byteCodeSize );
 			delete[] buffer;
 		}
-		else
-		{
-			appErrorf( TEXT( "The current section in the archive is not a script" ) );
-			return;
-		}
 	}
 	else
 	{
-		// Write type of resource
-		InArchive << ART_Script;
-
 		// Write name
 		InArchive << ( uint32 )name.size();
 		InArchive.Serialize( ( byte* )name.data(), ( uint32 )name.size() );

@@ -5,7 +5,7 @@
 /**
  * Serialize of FShaderCacheItem
  */
-void FShaderCache::FShaderCacheItem::Serialize( FBaseArchive& InArchive )
+void FShaderCache::FShaderCacheItem::Serialize( FArchive& InArchive )
 {
 	uint32		nameSize = 0;
 	uint32		codeSize = 0;
@@ -43,20 +43,12 @@ void FShaderCache::FShaderCacheItem::Serialize( FBaseArchive& InArchive )
 /**
  * Serialize
  */
-void FShaderCache::Serialize( FBaseArchive& InArchive )
+void FShaderCache::Serialize( FArchive& InArchive )
 {
+	check( InArchive.Type() == AT_ShaderCache );
+
 	if ( InArchive.IsLoading() )
 	{
-		EArchiveResourceType		resourceType;
-		InArchive << resourceType;
-
-		// If resource type not shader cache - this is error
-		if ( resourceType != ART_ShaderCache )
-		{
-			appErrorf( TEXT( "The current section in the archive is not a shader cache" ) );
-			return;
-		}
-
 		// Check version of shader cache
 		uint32			shaderCacheVersion = 0;
 		InArchive << shaderCacheVersion;
@@ -80,8 +72,6 @@ void FShaderCache::Serialize( FBaseArchive& InArchive )
 	else if ( InArchive.IsSaving() )
 	{
 		uint32		countItems = ( uint32 )items.size();
-
-		InArchive << ART_ShaderCache;
 		InArchive << SHADER_CACHE_VERSION;
 		InArchive << countItems;
 
