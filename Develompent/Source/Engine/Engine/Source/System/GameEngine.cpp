@@ -65,7 +65,7 @@ bool LGameEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 		return false;
 	}
 
-	archive->SerializePackageHeader();
+	archive->SerializeHeader();
 	GWorld->Serialize( *archive );
 
 	GWorld->BeginPlay();

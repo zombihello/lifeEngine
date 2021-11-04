@@ -1,3 +1,4 @@
+#include "Misc/Misc.h"
 #include "Render/TextureFileCache.h"
 
 #define TEXTURE_CACHE_VERSION			1

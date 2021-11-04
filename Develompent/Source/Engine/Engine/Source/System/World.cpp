@@ -1,6 +1,7 @@
 #include "Actors/Actor.h"
 #include "System/World.h"
 #include "Logger/LoggerMacros.h"
+
 FWorld::FWorld() :
 	isBeginPlay( false )
 {}
@@ -30,25 +31,14 @@ void FWorld::Tick( float InDeltaTime )
 
 void FWorld::Serialize( FArchive& InArchive )
 {
-	check( InArchive.Type() == AT_World );
-
 	if ( InArchive.IsSaving() )
 	{
 		InArchive << ( uint32 )actors.size();
 		for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
 		{
 			AActor*			actor = actors[ index ];
-		
-			// Serialize class name
-			{
-				std::wstring		actorClassName = actor->GetClass()->GetName();
-				uint32				classNameSize = ( uint32 )actorClassName.size() * sizeof( std::wstring::value_type );
-				InArchive << classNameSize;
-				InArchive.Serialize( ( void* )actorClassName.data(), classNameSize );
-			}
-
-			// Serialize actor data
-			actors[ index ]->Serialize( InArchive );
+			InArchive << actor->GetClass()->GetName();
+			actor->Serialize( InArchive );
 		}
 	}
 	else
@@ -65,10 +55,7 @@ void FWorld::Serialize( FArchive& InArchive )
 			// Serialize class name
 			uint32				classNameSize = 0;
 			std::wstring		className;
-
-			InArchive << classNameSize;
-			className.resize( classNameSize / sizeof( std::wstring::value_type ) );
-			InArchive.Serialize( ( void* )className.data(), classNameSize );
+			InArchive << className;
 
 			// Spawn actor, serialize and add to array
 			AActor*			actor = SpawnActor( LClass::StaticFindClass( className.c_str() ), FMath::vectorZero, FMath::rotatorZero );

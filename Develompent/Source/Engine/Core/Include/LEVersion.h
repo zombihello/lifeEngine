@@ -31,25 +31,32 @@
 enum ELifeEnginePackageVersion
 {
 	VER_PackageBase						= 1,					/**< Min version for serialize content*/
+	VER_Assets							= 2,					/**< Added in archive assets (FTexture2D, FMaterial, etc) */
 
 	//
 	// New versions can be added here
 	//
 
 	VER_MinVersion						= VER_PackageBase,		/**< This need for check min supported version */
-	VER_AutomaticVersionPlusOne									/**< This needs for automatic update last version of package */
+	VER_AutomaticVersion										/**< This needs for automatic update last version of package */
 };
 
 /**
  * @ingroup Core
  * Latest version of package
  */
-#define VER_PACKAGE_LATEST					( PREPROCESSOR_ENUM_PROTECT( VER_AutomaticVersionPlusOne ) - 1 )
+#define VER_PACKAGE_LATEST					( PREPROCESSOR_ENUM_PROTECT( VER_AutomaticVersion ) )
+
+/**
+ * @ingroup Core
+ * Archive tag in file
+ */
+#define ARCHIVE_FILE_TAG					0xAFEB3A00
 
 /**
  * @ingroup Core
  * Package tag in file
  */
-#define PACKAGE_FILE_TAG					0x5241454C
+#define PACKAGE_FILE_TAG					0x4B50454C
 
 #endif // !LEVERSION_H

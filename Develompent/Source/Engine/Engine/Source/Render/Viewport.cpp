@@ -28,6 +28,7 @@ FViewport::~FViewport()
 #include "System/InputSystem.h"
 #include "Render/Material.h"
 #include "Render/SceneRendering.h"
+#include "System/Package.h"
 
 FSceneView			sceneView;
 extern LCameraComponent* cameraComponent;
@@ -72,17 +73,18 @@ void FViewport::InitRHI()
 		memcpy( lockedData.data, &tempData, strideVertex * 3 );
 		GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
 
-		FArchive*	ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.lpak" ) );
+		FArchive*	ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
 		if ( ar )
 		{
-			ar->SerializePackageHeader();
+			ar->SerializeHeader();
 
 			FTextureFileCache		textureFileCache;
 			textureFileCache.Serialize( *ar );
 			
 			FTextureCacheItem		textureCacheItem;
-			if ( textureFileCache.Find( FTextureCacheItem::CalcHash( TEXT( "DefaultDiffuse" ) ), &textureCacheItem ) )
+			if ( textureFileCache.Find( appCalcHash( TEXT( "DefaultDiffuse" ) ), &textureCacheItem ) )
 			{
+				texture2D->SetHash( appCalcHash( TEXT( "T_Test" ) ) );
 				texture2D->SetData( textureCacheItem );
 			}
 
@@ -92,6 +94,16 @@ void FViewport::InitRHI()
 		material->SetShader( FTestVertexShader::staticType, SF_Vertex );
 		material->SetShader( FTestPixelShader::staticType, SF_Pixel );
 		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
+		material->SetHash( appCalcHash( TEXT( "DefaultMat" ) ) );
+
+		FPackage		pak;
+		if ( pak.Open( appBaseDir() + TEXT( "Test.lpak" ), false ) )
+		{
+			//pak.Add( material );
+			//pak.Add( texture2D );
+			pak.Serialize();
+			FMaterialRef		mat = pak.Find( appCalcHash( TEXT( "DefaultMat" ) ) );
+		}
 
 		q = true;
 	}

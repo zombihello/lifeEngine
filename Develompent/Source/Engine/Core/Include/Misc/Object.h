@@ -178,14 +178,4 @@ private:
     std::wstring            name;               /**< Name object */
 };
 
-/**
- * @ingroup Core
- * @brief Overload operator << for serialize LObject
- */
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, LObject& InObject )
-{
-    InObject.Serialize( InArchive );
-    return InArchive;
-}
-
 #endif // !OBJECT_H

@@ -21,6 +21,9 @@
 struct FTransform
 {
 public:
+	friend FArchive& operator<<( FArchive& InArchive, FTransform& InValue );
+	friend FArchive& operator<<( FArchive& InArchive, const FTransform& InValue );
+
 	/**
 	 * Constructor with initialization to the identity transform
 	 */
@@ -302,5 +305,31 @@ protected:
 	FRotator		rotation;				/**< Rotation of this transformation */
 	FVector			scale;					/**< 3D scale */
 };
+
+//
+// Serialization
+//
+
+/**
+ * Overload operator << for serialize FTransform
+ */
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTransform& InValue )
+{
+	InArchive << InValue.translation;
+	InArchive << InValue.rotation;
+	InArchive << InValue.scale;
+	return InArchive;
+}
+
+/**
+ * Overload operator << for serialize FTransform
+ */
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FTransform& InValue )
+{
+	InArchive << InValue.translation;
+	InArchive << InValue.rotation;
+	InArchive << InValue.scale;
+	return InArchive;
+}
 
 #endif // TRANSFORM_H

@@ -30,6 +30,18 @@ enum ENoInit
 
 /**
  * @ingroup Core
+ * Invalid hash
+ */
+enum { INVALID_HASH = ( uint32 )-1 };
+
+/**
+ * @ingroup Core
+ * Invalid id
+ */
+enum { INVALID_ID = ( uint32 )-1 };
+
+/**
+ * @ingroup Core
  * @brief Macro for convert string to WChar
  *
  * @param[in] String Input string

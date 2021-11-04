@@ -67,7 +67,7 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 	}
 
 	FShaderCache		shaderCache;
-	archive->SerializePackageHeader();
+	archive->SerializeHeader();
 	shaderCache.Serialize( *archive );
 	delete archive;
 

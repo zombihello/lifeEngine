@@ -8,6 +8,7 @@
 #include "Render/TextureFileCache.h"
 
 FTexture2D::FTexture2D() :
+	FAsset( AT_Texture2D ),
 	sizeX( 0 ),
 	sizeY( 0 ),
 	pixelFormat( PF_Unknown ),
@@ -33,7 +34,7 @@ void FTexture2D::ReleaseRHI()
 
 void FTexture2D::SetData( const struct FTextureCacheItem& InTextureCache )
 {
-	check( InTextureCache.hash != FTextureCacheItem::INVALID_HASH );
+	check( InTextureCache.hash != ( uint32 )INVALID_HASH );
 	
 	// Copy new parameters of texture
 	sizeX			= InTextureCache.sizeX;

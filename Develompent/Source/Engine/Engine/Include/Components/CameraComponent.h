@@ -188,4 +188,21 @@ private:
 	float							aspectRatio;		/**< Aspect Ratio (Width/Height) (ignored in Orthographic mode) */
 };
 
+//
+// Serialization
+//
+
+FORCEINLINE FArchive operator<<( FArchive& InArchive, ECameraProjectionMode& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive operator<<( FArchive& InArchive, const ECameraProjectionMode& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
 #endif // !CAMERACOMPONENT_H

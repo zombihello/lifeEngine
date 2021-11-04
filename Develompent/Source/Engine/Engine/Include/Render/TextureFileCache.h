@@ -24,11 +24,6 @@ struct FTextureCacheItem
 	friend class FTextureFileCache;
 
 	/**
-	 * Invalid hash of texture cache item
-	 */
-	enum { INVALID_HASH = ( uint32 )-1 };
-
-	/**
 	 * Constructor
 	 */
 	FTextureCacheItem();
@@ -38,16 +33,6 @@ struct FTextureCacheItem
 	 * @param[in] InArchive Archive
 	 */
 	void Serialize( FArchive& InArchive );
-
-	/**
-	 * Calculate hash from name
-	 *
-	 * @param[in] InName Name
-	 */
-	FORCEINLINE static uint32 CalcHash( const std::wstring& InName )
-	{
-		return appMemFastHash( InName.data(), ( uint32 )InName.size() * sizeof( std::wstring::value_type ), 0 );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
-	}
 
 	uint32						hash;			/**< Hash of texture */
 	EPixelFormat				pixelFormat;	/**< Pixel format */

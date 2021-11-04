@@ -11,6 +11,7 @@
 
 #include "Misc/RefCounted.h"
 #include "RHI/BaseResourceRHI.h"
+#include "System/Archive.h"
 
 /**
  * @ingroup Engine
@@ -128,5 +129,22 @@ protected:
 	EPixelFormat	format;			/**< Pixel format in texture */
 	uint32			flags;			/**< Flags used when the texture was created (contain ETextureCreateFlags) */
 };
+
+//
+// Overloaded operators for serialize in archive
+//
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, EPixelFormat& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EPixelFormat& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
 
 #endif // !BASESURFACERHI_H

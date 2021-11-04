@@ -13,12 +13,13 @@
 
 #include "Logger/LoggerMacros.h"
 #include "Containers/StringConv.h"
+#include "System/Package.h"
 
 /**
  * @ingroup Engine
  * @brief Class for work with scripts
  */
-class FScript
+class FScript : public FAsset
 {
 public:
 	/**
@@ -34,7 +35,7 @@ public:
 	/**
 	 * @brief Serialize script
 	 */
-	void								Serialize( class FArchive& InArchive );
+	virtual void						Serialize( class FArchive& InArchive ) override;
 
 	/**
 	 * @brief Execute function

@@ -1,4 +1,7 @@
+#include "System/Archive.h"
 #include "Misc/EngineGlobals.h"
+#include "Render/Shaders/ShaderManager.h"
+#include "Logger/LoggerMacros.h"
 #include "RHI/BaseRHI.h"
 #include "Render/Shaders/Shader.h"
 
@@ -44,4 +47,23 @@ void FShader::Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem )
 		appErrorf( TEXT( "Unsupported shader frequency %i" ), frequency );
 		break;
 	}
+}
+
+FArchive& operator<<( FArchive& InArchive, FShaderRef& InValue )
+{
+	if ( InArchive.IsSaving() )
+	{
+		InArchive << ( InValue ? InValue->GetName() : std::wstring() );
+	}
+	else
+	{
+		std::wstring			shaderName;
+		InArchive << shaderName;		
+		if ( !shaderName.empty() )
+		{
+			InValue = GShaderManager->FindInstance( shaderName );
+		}
+	}
+
+	return InArchive;
 }

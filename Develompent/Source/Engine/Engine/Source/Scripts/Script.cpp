@@ -6,6 +6,7 @@
  * Constructor
  */
 FScript::FScript() : 
+	FAsset( AT_Script ),
 	luaVM( luaL_newstate() )
 {
 	check( luaVM );
@@ -36,7 +37,10 @@ FScript::~FScript()
  */
 void FScript::Serialize( FArchive& InArchive )
 {
-	check( InArchive.Type() == AT_Scripts );
+	if ( InArchive.Type() != AT_TextFile )
+	{
+		FAsset::Serialize( InArchive );
+	}
 
 	if ( InArchive.IsLoading() )
 	{

@@ -50,7 +50,7 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
 	{
 		archive->SetType( AT_ShaderCache );
 
-		archive->SerializePackageHeader();
+		archive->SerializeHeader();
 		shaderCache.Serialize( *archive );
 		delete archive;
 	}

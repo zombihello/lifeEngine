@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Misc/Types.h"
+#include "System/MemoryBase.h"
 #include "Core.h"
 
 /**
@@ -79,6 +80,18 @@ FORCEINLINE std::wstring appBaseDir()
 FORCEINLINE std::wstring appShaderDir()
 {
 	return TEXT( "../../Engine/Shaders" );
+}
+
+/**
+ * @ingroup Core
+ * Calculate hash from name
+ *
+ * @param[in] InName Name
+ * @return Return hash
+ */
+FORCEINLINE uint32 appCalcHash( const std::wstring& InName )
+{
+	return appMemFastHash( InName.data(), ( uint32 )InName.size() * sizeof( std::wstring::value_type ), 0 );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
 }
 
 /**

@@ -19,6 +19,9 @@
 class FRotator
 {
 public:
+	friend FArchive& operator<<( FArchive& InArchive, FRotator& InValue );
+	friend FArchive& operator<<( FArchive& InArchive, const FRotator& InValue );
+
 	/**
 	 * Constructor
 	 */
@@ -185,5 +188,25 @@ public:
 	float			yaw;		/**< Rotation around the up axis */
 	float			roll;		/**< Rotation around the forward axis */
 };
+
+//
+// Serialization
+//
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FRotator& InValue )
+{
+	InArchive << InValue.pitch;
+	InArchive << InValue.yaw;
+	InArchive << InValue.roll;
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FRotator& InValue )
+{
+	InArchive << InValue.pitch;
+	InArchive << InValue.yaw;
+	InArchive << InValue.roll;
+	return InArchive;
+}
 
 #endif // !ROTATOR_H

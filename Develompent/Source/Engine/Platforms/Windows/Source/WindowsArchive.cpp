@@ -70,6 +70,12 @@ void FWindowsArchiveReading::Serialize( void* InBuffer, uint32 InSize )
 	file->read( ( achar* )InBuffer, InSize );
 }
 
+bool FWindowsArchiveReading::IsEndOfFile()
+{
+	uint32		sizeFile = GetSize();
+	return Tell() == sizeFile;
+}
+
 /**
  * Is loading archive
  */
@@ -149,6 +155,12 @@ void FWindowsArchiveWriter::Serialize( void* InBuffer, uint32 InSize )
 {
 	file->write( ( achar* )InBuffer, InSize );
 	Flush();
+}
+
+bool FWindowsArchiveWriter::IsEndOfFile()
+{
+	uint32		sizeFile = GetSize();
+	return Tell() == sizeFile;
 }
 
 /**

@@ -11,6 +11,7 @@
 
 #include "Core.h"
 #include "Misc/Types.h"
+#include "System/Archive.h"
 
 /**
  * @ingroup Core
@@ -19,6 +20,9 @@
 class FColor
 {
 public:
+	friend FArchive& operator<<( FArchive& InArchive, FColor& InValue );
+	friend FArchive& operator<<( FArchive& InArchive, const FColor& InValue );
+
 	/**
 	 * @brief Default constructor
 	 */
@@ -139,5 +143,27 @@ private:
 	uint8			b;			/**< Blue component of color */
 	uint8			a;			/**< Alpha component of color */
 };
+
+//
+// Serialization
+//
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FColor& InValue )
+{
+	InArchive << InValue.r;
+	InArchive << InValue.g;
+	InArchive << InValue.b;
+	InArchive << InValue.a;
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FColor& InValue )
+{
+	InArchive << InValue.r;
+	InArchive << InValue.g;
+	InArchive << InValue.b;
+	InArchive << InValue.a;
+	return InArchive;
+}
 
 #endif // !COLOR_H

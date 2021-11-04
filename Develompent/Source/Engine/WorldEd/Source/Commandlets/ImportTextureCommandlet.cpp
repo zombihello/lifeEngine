@@ -74,7 +74,7 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 	check( data );
 
 	FTextureCacheItem				textureCacheItem;
-	textureCacheItem.hash			= FTextureCacheItem::CalcHash( nameTexture );
+	textureCacheItem.hash			= appCalcHash( nameTexture );
 	textureCacheItem.pixelFormat	= PF_A8R8G8B8;
 	textureCacheItem.sizeX			= sizeX;
 	textureCacheItem.sizeY			= sizeY;
@@ -87,7 +87,7 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 		FArchive*		archive = GFileSystem->CreateFileReader( dstFilename.c_str() );
 		if ( archive )
 		{
-			archive->SerializePackageHeader();
+			archive->SerializeHeader();
 			if ( archive->Type() == AT_TextureCache )
 			{
 				textureCache.Serialize( *archive );
@@ -103,7 +103,7 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 	FArchive*			archive = GFileSystem->CreateFileWriter( dstFilename.c_str(), AW_NoFail | ( isAppend ? AW_Append : AW_None ) );
 	archive->SetType( AT_TextureCache );
 
-	archive->SerializePackageHeader();
+	archive->SerializeHeader();
 	textureCache.Serialize( *archive );
 
 	// Clean up all data

@@ -65,6 +65,12 @@ public:
 	virtual bool					IsLoading() const;
 
 	/**
+	 * Is end of file
+	 * @return Return true if end of file, else return false
+	 */
+	virtual bool					IsEndOfFile() override;
+
+	/**
 	 * @brief Get size of archive
 	 * @return Size of archive
 	 */
@@ -132,6 +138,12 @@ public:
 	 * @return True if archive saving, false if archive loading
 	 */
 	virtual bool			IsSaving() const;
+
+	/**
+	 * Is end of file
+	 * @return Return true if end of file, else return false
+	 */
+	virtual bool			IsEndOfFile() override;
 
 	/**
 	 * @brief Get size of archive

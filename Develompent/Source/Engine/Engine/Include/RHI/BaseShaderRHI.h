@@ -16,6 +16,7 @@
 #include "Render/BoundShaderStateCache.h"
 #include "RHI/TypesRHI.h"
 #include "RHI/BaseResourceRHI.h"
+#include "System/Archive.h"
 
 /**
  * @ingroup Engine
@@ -299,5 +300,22 @@ protected:
 	FDomainShaderRHIRef				domainShader;			/**< Domain shader */
 	FGeometryShaderRHIRef			geometryShader;			/**< Geometry shader */
 };
+
+//
+// Overloaded operators for serialize in archive
+//
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, EShaderFrequency& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EShaderFrequency& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
 
 #endif // !BASESHADERRHI_H

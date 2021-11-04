@@ -50,7 +50,7 @@ class FArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 
 	if ( InFlags & AW_Append )
 	{
-		flags = std::ios::app;
+		flags = std::ios::app;		
 	}
 
 	// Create directory for file
@@ -67,7 +67,7 @@ class FArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 	}
 
 	// Create file and create archive writer
-	outputFile->open( InFileName, flags | std::ios::binary );
+	outputFile->open( InFileName, flags | std::ios::binary | std::ios::ate );
 	if ( !outputFile->is_open() )
 	{
 		if ( InFlags & AW_NoFail )

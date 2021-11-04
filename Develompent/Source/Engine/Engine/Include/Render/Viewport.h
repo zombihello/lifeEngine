@@ -10,6 +10,7 @@
 #define VIEWPORT_H
 
 #include "RenderResource.h"
+#include "Misc/RefCounted.h"
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/TypesRHI.h"
 
@@ -17,7 +18,7 @@
  * @ingroup Engine
  * Implementation for work with viewport
  */
-class FViewport : public FRenderResource
+class FViewport : public FRenderResource, public FRefCounted
 {
 public:
 	/**

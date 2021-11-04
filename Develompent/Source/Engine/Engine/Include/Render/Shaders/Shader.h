@@ -117,5 +117,24 @@ private:
 	FPixelShaderRHIRef			pixelShader;		/**< Pointer to RHI pixel shader */
 };
 
+//
+// Serializations
+//
+
+/**
+ * Overload operator << for serialize bool
+ */
+FArchive& operator<<( FArchive& InArchive, FShaderRef& InValue );
+
+/**
+ * Overload operator << for serialize bool
+ */
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FShaderRef& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive << InValue->GetName();
+	return InArchive;
+}
+
 #endif // !SHADER_H
 

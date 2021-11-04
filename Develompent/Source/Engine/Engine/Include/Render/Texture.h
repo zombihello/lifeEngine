@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "RenderResource.h"
+#include "System/Package.h"
 #include "RHI/BaseSurfaceRHI.h"
 #include "RHI/BaseStateRHI.h"
 #include "RHI/TypesRHI.h"
@@ -27,7 +28,7 @@ typedef TRefCountPtr< class FTexture2D >				FTexture2DRef;
  * @ingroup Engine
  * @brief Implementation for 2D textures
  */
-class FTexture2D : public FRenderResource
+class FTexture2D : public FAsset, public FRenderResource
 {
 public:
 	/**
@@ -123,5 +124,42 @@ private:
 	ESamplerAddressMode			addressU;		/**< Address mode for U coord */
 	ESamplerAddressMode			addressV;		/**< Address mode for V coord */
 };
+
+//
+// Serialization
+//
+
+/**
+ * Overload operator << for serialize bool
+ */
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTexture2DRef& InValue )
+{
+	if ( InArchive.IsSaving() )
+	{
+		InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
+	}
+	else
+	{	
+		FAssetReference			assetReference;
+		InArchive << assetReference;
+
+		if ( assetReference.IsValid() )
+		{
+			// TODO BS yehor.pohuliaka - Add loading asset with help PackageManager
+		}
+	}
+
+	return InArchive;
+}
+
+/**
+ * Overload operator << for serialize bool
+ */
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FTexture2DRef& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
+	return InArchive;
+}
 
 #endif // !TEXTURE_H

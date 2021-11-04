@@ -9,14 +9,13 @@
 #ifndef RENDERRESOURCE_H
 #define RENDERRESOURCE_H
 
-#include "Misc/RefCounted.h"
 #include "Core.h"
 
 /**
  * @ingroup Engine
  * @brief A rendering resource which is owned by the rendering thread
  */
-class FRenderResource : public FRefCounted
+class FRenderResource
 {
 public:
 	/**

@@ -13,8 +13,8 @@
 #include <string>
 
 #include "Math/Math.h"
-#include "Misc/RefCounted.h"
 #include "Misc/EngineGlobals.h"
+#include "System/Package.h"
 #include "RHI/BaseShaderRHI.h"
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/Shaders/Shader.h"
@@ -31,7 +31,7 @@ typedef TRefCountPtr< class FMaterial >				FMaterialRef;
  * @ingroup Engine
  * Material
  */
-class FMaterial : public FRefCounted
+class FMaterial : public FAsset
 {
 public:
 	/**
@@ -49,7 +49,7 @@ public:
 	 *
 	 * @param[in] InArchive Archive
 	 */
-	void Serialize( class FArchive& InArchive );
+	virtual void Serialize( class FArchive& InArchive ) override;
 
 	/**
 	 * Set shader

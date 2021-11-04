@@ -7,34 +7,23 @@
  */
 void FShaderCache::FShaderCacheItem::Serialize( FArchive& InArchive )
 {
-	uint32		nameSize = 0;
-	uint32		codeSize = 0;
-
 	InArchive << frequency;
 	InArchive << numInstructions;
+	InArchive << name;
 
 	if ( InArchive.IsLoading() )
 	{
-		// Load shader class name
-		InArchive << nameSize;
-		name.resize( nameSize / sizeof( std::wstring::value_type ) );
-		InArchive.Serialize( ( void* )name.data(), nameSize );
-
 		// Load byte code of shader
+		uint32		codeSize = 0;
 		InArchive << codeSize;
+
 		code.resize( codeSize );
 		InArchive.Serialize( ( void* )code.data(), codeSize );
 	}
 	else if ( InArchive.IsSaving() )
 	{
-		nameSize = ( uint32 )name.size() * sizeof( std::wstring::value_type );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
-		codeSize = ( uint32 )code.size();
-
-		// Save shader class name
-		InArchive << nameSize;
-		InArchive.Serialize( ( void* )name.data(), nameSize );
-
 		// Save byte code of shader
+		uint32		codeSize = ( uint32 )code.size();
 		InArchive << codeSize;
 		InArchive.Serialize( ( void* )code.data(), codeSize );
 	}

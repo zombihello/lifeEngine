@@ -9,6 +9,8 @@
 #ifndef Archive_H
 #define Archive_H
 
+#include <string>
+
 #include "Core.h"
 #include "Misc/Types.h"
 
@@ -21,8 +23,8 @@ enum EArchiveType
 	AT_TextFile,		/**< Archive is text file */
 	AT_ShaderCache,		/**< Archive contains shader cache */
 	AT_TextureCache,	/**< Archive contains texture cache */
-	AT_Scripts,			/**< Archive contains scripts */
-	AT_World			/**< Archive contains world */
+	AT_World,			/**< Archive contains world */
+	AT_Package			/**< Archive contains assets */
 };
 
 /**
@@ -51,9 +53,9 @@ public:
 	virtual void			Serialize( void* InBuffer, uint32 InSize ) {}
 
 	/**
-	 * Serialize package header
+	 * Serialize archive header
 	 */
-	void SerializePackageHeader();
+	void SerializeHeader();
 
 	/**
 	 * @brief Get current position in archive
@@ -96,6 +98,12 @@ public:
 	virtual bool			IsLoading() const { return false; }
 
 	/**
+	 * Is end of file
+	 * @return Return true if end of file, else return false
+	 */
+	virtual bool			IsEndOfFile() { return false; }
+
+	/**
 	 * @brief Get size of archive
 	 * @return Size of archive
 	 */
@@ -128,31 +136,184 @@ protected:
 // Overloaded operators for serialize in archive
 //
 
-/**
- * @brief Overload operator << for serialize TCHAR string
- */
-FORCEINLINE FArchive&		operator<<( FArchive& InArchive, tchar* InStringC )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, int8& InValue )
 {
-	InArchive.Serialize( InStringC, ( uint32 )wcslen( InStringC ) * 2 );
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-/**
- * @brief Overload operator << for serialize ANSI string
- */
-FORCEINLINE FArchive&		operator<<( FArchive& InArchive, achar* InStringC )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const int8& InValue )
 {
-	InArchive.Serialize( InStringC, ( uint32 )strlen( InStringC ) );
-	return InArchive;
-}
-
-/**
- * @brief Overload operator << for all types
- */
-template< typename TType >
-FORCEINLINE FArchive&		operator<<( FArchive& InArchive, const TType& InValue )
-{
+	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, uint8& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const uint8& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, int16& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const int16& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, uint16& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const uint16& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, int32& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const int32& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, uint32& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const uint32& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, bool& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const bool& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, float& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const float& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, EArchiveType& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EArchiveType& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::string& InValue )
+{
+	uint32		stringSize = InValue.size();
+	InArchive << stringSize;
+
+	if ( stringSize > 0 )
+	{
+		if ( InArchive.IsLoading() )
+		{
+			InValue.resize( stringSize );
+		}
+
+		InArchive.Serialize( InValue.data(), stringSize );
+	}
+
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::string& InValue )
+{
+	check( InArchive.IsSaving() );
+	uint32		stringSize = InValue.size();
+	InArchive << stringSize;
+
+	if ( stringSize > 0 )
+	{
+		InArchive.Serialize( ( void* )InValue.data(), stringSize );
+	}
+
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::wstring& InValue )
+{
+	uint32		stringSize = InValue.size() * sizeof( std::wstring::value_type );
+	InArchive << stringSize;
+
+	if ( stringSize > 0 )
+	{
+		if ( InArchive.IsLoading() )
+		{
+			InValue.resize( stringSize / sizeof( std::wstring::value_type ) );
+		}
+
+		InArchive.Serialize( InValue.data(), stringSize );
+	}
+
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::wstring& InValue )
+{
+	check( InArchive.IsSaving() );
+	uint32		stringSize = InValue.size() * sizeof( std::wstring::value_type );
+	InArchive << stringSize;
+
+	if ( stringSize > 0 )
+	{
+		InArchive.Serialize( ( void* )InValue.data(), stringSize );
+	}
+
 	return InArchive;
 }
 
