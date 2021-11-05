@@ -10,6 +10,7 @@
 #include "System/Config.h"
 #include "System/ThreadingBase.h"
 #include "System/InputSystem.h"
+#include "System/Package.h"
 #include "Containers/String.h"
 #include "Misc/Class.h"
 #include "Math/Color.h"
@@ -188,7 +189,10 @@ int32 FEngineLoop::Init()
 	int32		result = appPlatformInit();
 	check( !result );
 
-	appSetSplashText( STT_StartupProgress, TEXT( "Init shader manager" ) );
+	appSetSplashText( STT_StartupProgress, TEXT( "Init package manager" ) );
+	GPackageManager->Init();
+
+	appSetSplashText( STT_StartupProgress, TEXT( "Init shaders" ) );
 	GShaderManager->Init();
 	//GUIEngine->Init();
 
@@ -267,6 +271,9 @@ void FEngineLoop::Tick()
 {
 	appUpdateTimeAndHandleMaxTickRate();
 
+	// Update package manager
+	GPackageManager->Tick();
+	
 	// Update engine
 	GEngine->Tick( GDeltaTime );
 

@@ -1,3 +1,5 @@
+#include "Misc/CoreGlobals.h"
+#include "System/Package.h"
 #include "Actors/Actor.h"
 #include "System/World.h"
 #include "Logger/LoggerMacros.h"
@@ -68,6 +70,7 @@ void FWorld::Serialize( FArchive& InArchive )
 void FWorld::CleanupWorld()
 {
 	actors.clear();
+	GPackageManager->CleanupUnusedPackages();
 	isBeginPlay = false;
 }
 

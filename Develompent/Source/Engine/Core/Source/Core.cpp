@@ -7,25 +7,27 @@
 #include "Logger/BaseLogger.h"
 #include "System/Config.h"
 #include "Scripts/ScriptEngine.h"
+#include "System/Package.h"
 
 // ----------------
 // GLOBALS
 // ----------------
 
-FConfig         GEngineConfig;
-FConfig         GGameConfig;
-FConfig         GInputConfig;
-bool	        GIsRequestingExit           = false;
-uint32			GGameThreadId               = 0;
-double          GSecondsPerCycle            = 0.0;
-double          GStartTime                  = appInitTiming();
-double          GCurrentTime                = GStartTime;
-double          GLastTime                   = 0.0;
-double          GDeltaTime                  = 0.0;
+FConfig                 GEngineConfig;
+FConfig                 GGameConfig;
+FConfig                 GInputConfig;
+bool	                GIsRequestingExit           = false;
+uint32			        GGameThreadId               = 0;
+double                  GSecondsPerCycle            = 0.0;
+double                  GStartTime                  = appInitTiming();
+double                  GCurrentTime                = GStartTime;
+double                  GLastTime                   = 0.0;
+double                  GDeltaTime                  = 0.0;
+FPackageManager*        GPackageManager             = new FPackageManager();
 
 #if WITH_EDITOR
-FConfig         GEditorConfig;
-bool			GIsEditor = false;
+FConfig                 GEditorConfig;
+bool			        GIsEditor                   = false;
 #endif // WITH_EDITOR
 
 /**

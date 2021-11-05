@@ -6,5 +6,8 @@
 	"Engine.SystemSettings": {
 		"WindowWidth": 1280,
 		"WindowHeight": 720
+	},
+	"Engine.PackageManager": {
+		"CleaningFrequency": 60
 	}
 }

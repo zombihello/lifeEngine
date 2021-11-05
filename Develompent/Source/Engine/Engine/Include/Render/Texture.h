@@ -56,11 +56,19 @@ public:
 	virtual void ReleaseRHI() override;
 
 	/**
-	 * Set data texture
+	 * Serialize
+	 *
+	 * @param[in] InArchive Archive
+	 */
+	virtual void Serialize( class FArchive& InArchive ) override;
+
+	/**
+	 * Set texture cache
 	 * 
 	 * @param[in] InTextureCache Texture cache
+	 * @param[in] InTextureCachePath Path to file with this texture cache
 	 */
-	void SetData( const struct FTextureCacheItem& InTextureCache );
+	void SetTextureCache( const struct FTextureCacheItem& InTextureCache, const std::wstring& InTextureCachePath );
 
 	/**
 	 * Set address mod for U coord
@@ -116,22 +124,21 @@ public:
 	}
 
 private:
-	uint32						sizeX;			/**< Width of texture */
-	uint32						sizeY;			/**< Height of texture */
-	std::vector< byte >			data;			/**< Data used when loading texture */
-	EPixelFormat				pixelFormat;	/**< Pixel format of texture */
-	FTexture2DRHIRef			texture;		/**< Reference to RHI texture */
-	ESamplerAddressMode			addressU;		/**< Address mode for U coord */
-	ESamplerAddressMode			addressV;		/**< Address mode for V coord */
+	std::wstring				textureCachePath;	/**< Path to file with texture cache */
+	uint32						textureCacheHash;	/**< Texture cache hash */
+	uint32						sizeX;				/**< Width of texture */
+	uint32						sizeY;				/**< Height of texture */
+	std::vector< byte >			data;				/**< Data used when loading texture */
+	EPixelFormat				pixelFormat;		/**< Pixel format of texture */
+	FTexture2DRHIRef			texture;			/**< Reference to RHI texture */
+	ESamplerAddressMode			addressU;			/**< Address mode for U coord */
+	ESamplerAddressMode			addressV;			/**< Address mode for V coord */
 };
 
 //
 // Serialization
 //
 
-/**
- * Overload operator << for serialize bool
- */
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTexture2DRef& InValue )
 {
 	if ( InArchive.IsSaving() )
@@ -142,19 +149,15 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTexture2DRef& InValue )
 	{	
 		FAssetReference			assetReference;
 		InArchive << assetReference;
-
 		if ( assetReference.IsValid() )
 		{
-			// TODO BS yehor.pohuliaka - Add loading asset with help PackageManager
+			InValue = GPackageManager->FindAsset( assetReference.pathPackage, assetReference.hash );
 		}
 	}
 
 	return InArchive;
 }
 
-/**
- * Overload operator << for serialize bool
- */
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FTexture2DRef& InValue )
 {
 	check( InArchive.IsSaving() );

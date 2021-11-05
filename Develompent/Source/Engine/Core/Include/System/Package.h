@@ -9,17 +9,25 @@
 #ifndef PACKAGE_H
 #define PACKAGE_H
 
+#include <unordered_set>
 #include <unordered_map>
 
 #include "Misc/Types.h"
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
+#include "Misc/Misc.h"
 
- /**
-  * @ingroup Core
-  * Reference to FAsset
-  */
+/**
+ * @ingroup Core
+ * Reference to FAsset
+ */
 typedef TRefCountPtr< class FAsset >			FAssetRef;
+
+/**
+ * @ingroup Core
+ * Reference to FPackage
+ */
+typedef TRefCountPtr< class FPackage >			FPackageRef;
 
 /**
  * @ingroup Core
@@ -44,7 +52,7 @@ struct FAssetReference
 	 * @param[in] InHash Hash asset
 	 * @param[in] InPath Path to package with asset
 	 */
-	FAssetReference( uint32 InHash = ( uint32 )INVALID_HASH, const std::wstring& InPath = TEXT( "" ) ) :
+	FORCEINLINE FAssetReference( uint32 InHash = ( uint32 )INVALID_HASH, const std::wstring& InPath = TEXT( "" ) ) :
 		hash( InHash ),
 		pathPackage( InPath )
 	{}
@@ -140,7 +148,7 @@ private:
  * @ingroup Core
  * Class for help add, remove and find assets in package
  */
-class FPackage
+class FPackage : public FRefCounted
 {
 public:
 	friend class FAsset;
@@ -223,9 +231,18 @@ public:
 	 * Get path to package
 	 * @return Return path to package
 	 */
-	FORCEINLINE const std::wstring GetPath() const
+	FORCEINLINE const std::wstring& GetPath() const
 	{
 		return path;
+	}
+
+	/**
+	 * Get number usage assets from package
+	 * @retun Return number assets in usage
+	 */
+	FORCEINLINE uint32 GetNumUsageAssets() const
+	{
+		return numUsageAssets;
 	}
 
 private:
@@ -254,9 +271,97 @@ private:
 	 */
 	void MarkHashAssetUpdate( uint32 InOldHash, uint32 InNewHash );
 
-	FArchive*										archive;		/**< Archive of package */
-	std::wstring									path;			/**< Path to package */
-	std::unordered_map< uint32, FAssetInfo >		assetsTable;	/**< Table of assets in package */
+	FArchive*										archive;			/**< Archive of package */
+	uint32											numUsageAssets;		/**< Number assets in usage */
+	std::wstring									path;				/**< Path to package */
+	std::unordered_map< uint32, FAssetInfo >		assetsTable;		/**< Table of assets in package */
+};
+
+/**
+ * @ingroup Core
+ * Class manager all packages in engine
+ */
+class FPackageManager
+{
+public:
+	friend FPackage;
+
+	/**
+	 * Contructor
+	 */
+	FPackageManager();
+
+	/**
+	 * Init package manager
+	 */
+	void Init();
+
+	/**
+	 * Update package manager
+	 * This method removes unused packages
+	 */
+	void Tick();
+
+	/**
+	 * Find asset in package
+	 * 
+	 * @param[in] InPath Package path
+	 * @param[in] InHash Asset hash
+	 */
+	FAssetRef FindAsset( const std::wstring& InPath, uint32 InHash );
+
+	/**
+	 * Forcibly cleanup unused packages
+	 */
+	void CleanupUnusedPackages();
+
+private:
+	/**
+	 * Struct package info
+	 */
+	struct FPackageInfo
+	{
+		bool				isUnused;				/**< Is package not used */
+		FPackageRef			package;				/**< Package */
+	};
+
+	/**
+	 * Typedef of list loaded packages
+	 */
+	typedef std::unordered_map< std::wstring, FPackageInfo >				FPackageList;
+
+	/**
+	 * Typedef of unused list packages
+	 */
+	typedef std::unordered_set< std::wstring >								FUnusedPackageList;
+
+	/**
+	 * Check usage package
+	 * 
+	 * @param[in] InPath Path to package
+	 */
+	FORCEINLINE void CheckUsagePackage( const std::wstring& InPath )
+	{
+		auto		itPackage = packages.find( InPath );
+		if ( itPackage == packages.end() )
+		{
+			return;
+		}
+
+		CheckUsagePackage( itPackage->second );
+	}
+
+	/**
+	 * Check usage package
+	 * 
+	 * @param[in/out] InOutPackageInfo Info package
+	 */
+	void CheckUsagePackage( FPackageInfo& InOutPackageInfo );
+
+	float					cleaningFrequency;		/**< Rate of removes unused packages */
+	double					lastCleaningTime;		/**< Last time removes unused packages */
+	FUnusedPackageList		unusedPackages;			/**< List unused packages. After a specified time will be unloaded */
+	FPackageList			packages;				/**< Opened packages */
 };
 
 //

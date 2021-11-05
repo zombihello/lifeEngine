@@ -99,4 +99,10 @@ extern double						GCurrentTime;
  */
 extern double						GLastTime;
 
+/**
+ * @ingroup Core
+ * Package manager
+ */
+extern class FPackageManager*		GPackageManager;
+
 #endif // !COREGLOBALS_H

@@ -30,14 +30,12 @@ FViewport::~FViewport()
 #include "Render/SceneRendering.h"
 #include "System/Package.h"
 
-FSceneView			sceneView;
-extern LCameraComponent* cameraComponent;
-
-FVertexBufferRHIRef		vertexBuffer;
-FTexture2DRef						texture2D = new FTexture2D();
-FMaterialRef						material = new FMaterial();
+FSceneView							sceneView;
+extern LCameraComponent*			cameraComponent;
+FVertexBufferRHIRef					vertexBuffer;
+FMaterialRef						material;
 FVertexDeclarationRHIRef			vertexDeclRHI;
-bool			q = false;
+bool								q = false;
 
 void FViewport::InitRHI()
 {
@@ -72,7 +70,8 @@ void FViewport::InitRHI()
 		};
 		memcpy( lockedData.data, &tempData, strideVertex * 3 );
 		GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
-
+		
+		/*FTexture2DRef texture2D = new FTexture2D();
 		FArchive*	ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
 		if ( ar )
 		{
@@ -80,31 +79,29 @@ void FViewport::InitRHI()
 
 			FTextureFileCache		textureFileCache;
 			textureFileCache.Serialize( *ar );
-			
+
 			FTextureCacheItem		textureCacheItem;
 			if ( textureFileCache.Find( appCalcHash( TEXT( "DefaultDiffuse" ) ), &textureCacheItem ) )
 			{
 				texture2D->SetHash( appCalcHash( TEXT( "T_Test" ) ) );
-				texture2D->SetData( textureCacheItem );
+				texture2D->SetTextureCache( textureCacheItem, TEXT( "/Engine/Content/EngineTextures.tfc" ) );
 			}
 
 			delete ar;
 		}
-
+		material = new FMaterial();
 		material->SetShader( FTestVertexShader::staticType, SF_Vertex );
 		material->SetShader( FTestPixelShader::staticType, SF_Pixel );
 		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
 		material->SetHash( appCalcHash( TEXT( "DefaultMat" ) ) );
 
-		FPackage		pak;
-		if ( pak.Open( appBaseDir() + TEXT( "Test.lpak" ), false ) )
-		{
-			//pak.Add( material );
-			//pak.Add( texture2D );
-			pak.Serialize();
-			FMaterialRef		mat = pak.Find( appCalcHash( TEXT( "DefaultMat" ) ) );
-		}
+		FPackage	pak;
+		pak.Open( TEXT( "Content/PackageTest.lpak" ), true );
+		pak.Add( material );
+		pak.Add( texture2D );
+		pak.Serialize();*/
 
+		material = GPackageManager->FindAsset( TEXT( "Content/PackageTest.lpak" ), appCalcHash( TEXT( "DefaultMat" ) ) );
 		q = true;
 	}
 }

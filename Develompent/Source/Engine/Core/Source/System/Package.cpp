@@ -1,3 +1,4 @@
+#include "System/Config.h"
 #include "Misc/CoreGlobals.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
@@ -54,7 +55,8 @@ FAssetReference FAsset::GetAssetReference() const
 }
 
 FPackage::FPackage() :
-	archive( nullptr )
+	archive( nullptr ),
+	numUsageAssets( 0 )
 {}
 
 FPackage::~FPackage()
@@ -66,11 +68,11 @@ bool FPackage::Open( const std::wstring& InPath, bool InIsWrite /* = false */ )
 {
 	if ( InIsWrite )
 	{
-		archive = GFileSystem->CreateFileWriter( InPath );
+		archive = GFileSystem->CreateFileWriter( appBaseDir() + InPath );
 	}
 	else
 	{
-		archive = GFileSystem->CreateFileReader( InPath );
+		archive = GFileSystem->CreateFileReader( appBaseDir() + InPath );
 	}
 
 	if ( !archive )
@@ -169,10 +171,14 @@ void FPackage::MarkAssetUnlnoad( uint32 InHash )
 
 	FAssetInfo&		assetInfo = itAsset->second;
 	assetInfo.data = nullptr;
+	if ( --numUsageAssets <= 0 )
+	{
+		GPackageManager->CheckUsagePackage( path );
+	}
 
 	if ( assetInfo.offset == INVALID_HASH && assetInfo.size == INVALID_HASH )
 	{
-		LE_LOG( LT_Warning, LC_General, TEXT( "An asset was uploaded that was not recorded on the HDD. This asset has been removed from the package and will not be written" ) );
+		LE_LOG( LT_Warning, LC_Package, TEXT( "An asset was uploaded that was not recorded on the HDD. This asset has been removed from the package and will not be written" ) );
 		assetsTable.erase( itAsset );
 	}
 }
@@ -262,5 +268,119 @@ FAssetRef FPackage::Find( uint32 InHash )
 
 	// Seek to old offset and exit
 	archive->Seek( oldOffset );
+	
+	if ( ++numUsageAssets == 1 )
+	{
+		GPackageManager->CheckUsagePackage( path );
+	}
 	return assetInfo.data;
+}
+
+FPackageManager::FPackageManager() :
+	cleaningFrequency( 60.f ),
+	lastCleaningTime( GStartTime )
+{}
+
+void FPackageManager::Init()
+{
+	FConfigValue		configCleaningFrequency = GEngineConfig.GetValue( TEXT( "Engine.PackageManager" ), TEXT( "CleaningFrequency" ) );
+	if ( configCleaningFrequency.IsValid() )
+	{
+		cleaningFrequency = configCleaningFrequency.GetNumber();
+	}
+}
+
+void FPackageManager::Tick()
+{
+	// We clean the bags every 'cleaningFrequency' seconds
+	if ( GCurrentTime - lastCleaningTime >= cleaningFrequency )
+	{	
+		CleanupUnusedPackages();
+		lastCleaningTime = GCurrentTime;
+	}
+}
+
+void FPackageManager::CleanupUnusedPackages()
+{
+	if ( unusedPackages.empty() )
+	{
+		return;
+	}
+
+	for ( auto itUnusedPackage = unusedPackages.begin(), itUnusedPackageEnd = unusedPackages.end(); itUnusedPackage != itUnusedPackageEnd; ++itUnusedPackage )
+	{
+		const std::wstring& packagePath = *itUnusedPackage;
+		auto						itPackage = packages.find( packagePath );
+		if ( itPackage == packages.end() )
+		{
+			continue;
+		}
+
+		LE_LOG( LT_Log, LC_Package, TEXT( "Unloaded package '%s'" ), packagePath.c_str() );
+		packages.erase( packagePath );
+	}
+
+	unusedPackages.clear();
+}
+
+FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, uint32 InHash )
+{
+	check( InHash != ( uint32 )INVALID_HASH );
+
+	// Find package and open he
+	FPackageRef			package;
+	FPackageInfo*		packageInfo = nullptr;
+	{
+		auto		itPackage = packages.find( InPath );
+		if ( itPackage == packages.end() )
+		{
+			package = new FPackage();
+			if ( !package->Open( InPath ) )
+			{
+				package = nullptr;
+			}
+			else
+			{
+				package->Serialize();
+
+				packages[ InPath ] = FPackageInfo{ true, package };
+				packageInfo = &packages[ InPath ];
+				LE_LOG( LT_Log, LC_Package, TEXT( "Package '%s' opened" ), InPath.c_str() );
+			}
+		}
+		else
+		{
+			packageInfo = &itPackage->second;
+			package = itPackage->second.package;
+		}
+	}
+
+	if ( !package )
+	{
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Package '%s' not found" ), InPath.c_str() );
+		return nullptr;
+	}
+
+	// Find asset in package
+	FAssetRef		asset = package->Find( InHash );
+	CheckUsagePackage( *packageInfo );
+	return asset;
+}
+
+void FPackageManager::CheckUsagePackage( FPackageInfo& InOutPackageInfo )
+{
+	// If package in current time not used, we add he to unused list for remove in future
+	check( InOutPackageInfo.package );
+	bool					oldIsUnused = InOutPackageInfo.isUnused;
+	const std::wstring&		packagePath = InOutPackageInfo.package->GetPath();
+
+	InOutPackageInfo.isUnused = InOutPackageInfo.package->GetNumUsageAssets() <= 0;
+	if ( InOutPackageInfo.isUnused && !oldIsUnused )
+	{
+		unusedPackages.insert( packagePath );
+	}
+	else if ( !InOutPackageInfo.isUnused && oldIsUnused )
+	{
+		unusedPackages.erase( packagePath );
+	}
 }

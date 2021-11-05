@@ -11,6 +11,7 @@
 
 #include "Math/Color.h"
 #include "RHI/BaseResourceRHI.h"
+#include "System/Archive.h"
 
  /**
   * @ingroup Engine
@@ -126,5 +127,22 @@ public:
 	virtual ~FBaseSamplerStateRHI()
 	{}
 };
+
+//
+// Serialization
+//
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, ESamplerAddressMode& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ESamplerAddressMode& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
 
 #endif // !BASESTATERHI_H
