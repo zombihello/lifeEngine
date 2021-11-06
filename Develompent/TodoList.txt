@@ -6,6 +6,7 @@
 	- Implement commandlet for import static meshes
 	- Implement caching render states
 	- Add support SHIPPING build
+	- Implement FScopeLock for auto lock and unclok FCriticalSection
 	
 ----------------------------------------------------------------
  Version 0.3.0
@@ -14,3 +15,4 @@
 	- Implement in WorldEd adding actor on scene
 	- Implement in WorldEd base tools: move, rotate and scale actors
 	- Implement save map in WorldEd and load in game
+	- Implement TOC file (Table Of Content)

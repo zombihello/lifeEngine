@@ -85,6 +85,7 @@ void FWindowsLogger::Init()
 	archiveLogs = GFileSystem->CreateFileWriter( logFile.c_str(), AW_None );
 	if ( archiveLogs )
 	{
+		archiveLogs->SetType( AT_TextFile );
 		Logf( LT_Log, LC_Init, TEXT( "Opened log file '%s'" ), logFile.c_str() );
 	}
 #endif // !NO_LOGGING

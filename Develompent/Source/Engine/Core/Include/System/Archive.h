@@ -253,19 +253,68 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EArchiveType& InVal
 	return InArchive;
 }
 
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, achar& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const achar& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, tchar& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const tchar& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const tchar* InStringC )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* )InStringC, ( uint32 )wcslen( InStringC ) * 2 );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const achar* InStringC )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* )InStringC, ( uint32 )strlen( InStringC ) );
+	return InArchive;
+}
+
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::string& InValue )
 {
-	uint32		stringSize = InValue.size();
-	InArchive << stringSize;
-
-	if ( stringSize > 0 )
+	// If we serialize text file
+	if ( InArchive.Type() == AT_TextFile )
 	{
-		if ( InArchive.IsLoading() )
-		{
-			InValue.resize( stringSize );
-		}
+		InArchive.Serialize( InValue.data(), InValue.size() );
+	}
+	// Else we serialize binary archive
+	else
+	{
+		uint32		stringSize = InValue.size();
+		InArchive << stringSize;
 
-		InArchive.Serialize( InValue.data(), stringSize );
+		if ( stringSize > 0 )
+		{
+			if ( InArchive.IsLoading() )
+			{
+				InValue.resize( stringSize );
+			}
+
+			InArchive.Serialize( InValue.data(), stringSize );
+		}
 	}
 
 	return InArchive;
@@ -274,30 +323,49 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::string& InValue )
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::string& InValue )
 {
 	check( InArchive.IsSaving() );
-	uint32		stringSize = InValue.size();
-	InArchive << stringSize;
 
-	if ( stringSize > 0 )
+	// If we serialize text file
+	if ( InArchive.Type() == AT_TextFile )
 	{
-		InArchive.Serialize( ( void* )InValue.data(), stringSize );
+		InArchive.Serialize( ( void* )InValue.data(), InValue.size() );
+	}
+	// Else we serialize binary archive
+	else
+	{
+		uint32		stringSize = InValue.size();
+		InArchive << stringSize;
+
+		if ( stringSize > 0 )
+		{
+			InArchive.Serialize( ( void* )InValue.data(), stringSize );
+		}
 	}
 
 	return InArchive;
 }
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::wstring& InValue )
-{
-	uint32		stringSize = InValue.size() * sizeof( std::wstring::value_type );
-	InArchive << stringSize;
-
-	if ( stringSize > 0 )
+{	
+	// If we serialize text file
+	if ( InArchive.Type() == AT_TextFile )
 	{
-		if ( InArchive.IsLoading() )
-		{
-			InValue.resize( stringSize / sizeof( std::wstring::value_type ) );
-		}
+		InArchive.Serialize( InValue.data(), InValue.size() * sizeof( std::wstring::value_type ) );
+	}
+	// Else we serialize binary archive
+	else
+	{
+		uint32		stringSize = InValue.size() * sizeof( std::wstring::value_type );
+		InArchive << stringSize;
 
-		InArchive.Serialize( InValue.data(), stringSize );
+		if ( stringSize > 0 )
+		{
+			if ( InArchive.IsLoading() )
+			{
+				InValue.resize( stringSize / sizeof( std::wstring::value_type ) );
+			}
+
+			InArchive.Serialize( InValue.data(), stringSize );
+		}
 	}
 
 	return InArchive;
@@ -306,12 +374,22 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::wstring& InValue )
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::wstring& InValue )
 {
 	check( InArchive.IsSaving() );
-	uint32		stringSize = InValue.size() * sizeof( std::wstring::value_type );
-	InArchive << stringSize;
 
-	if ( stringSize > 0 )
+	// If we serialize text file
+	if ( InArchive.Type() == AT_TextFile )
 	{
-		InArchive.Serialize( ( void* )InValue.data(), stringSize );
+		InArchive.Serialize( ( void* )InValue.data(), InValue.size() * sizeof( std::wstring::value_type ) );
+	}
+	// Else we serialize binary archive
+	else
+	{
+		uint32		stringSize = InValue.size() * sizeof( std::wstring::value_type );
+		InArchive << stringSize;
+
+		if ( stringSize > 0 )
+		{
+			InArchive.Serialize( ( void* )InValue.data(), stringSize );
+		}
 	}
 
 	return InArchive;

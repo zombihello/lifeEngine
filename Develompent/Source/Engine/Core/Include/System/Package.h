@@ -16,6 +16,7 @@
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
 #include "Misc/Misc.h"
+#include "System/Archive.h"
 
 /**
  * @ingroup Core
