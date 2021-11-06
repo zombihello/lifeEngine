@@ -53,6 +53,15 @@ public:
 	}
 
 	/**
+	 * Get vertex factory hash
+	 * @return Return vertex factory hash if frequency SF_Vertex, else return INVALID_HASH
+	 */
+	FORCEINLINE uint32 GetVertexFactoryHash() const
+	{
+		return vertexFactoryHash;
+	}
+
+	/**
 	 * @brief Get count instructions in shader
 	 * @return Return count instruction in shader
 	 */
@@ -109,6 +118,7 @@ public:
 private:
 	std::wstring				name;				/**< Name of class shader */
 	EShaderFrequency			frequency;			/**< Frequency of shader */
+	uint32						vertexFactoryHash;	/**< Vertex factory hash */
 	uint32						numInstructions;	/**< Number instructions in shader */
 	FVertexShaderRHIRef			vertexShader;		/**< Pointer to RHI vertex shader */
 	FHullShaderRHIRef			hullShader;			/**< Pointer to RHI hull shader */
@@ -132,7 +142,17 @@ FArchive& operator<<( FArchive& InArchive, FShaderRef& InValue );
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FShaderRef& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << InValue->GetName();
+	if ( InValue )
+	{
+		InArchive << InValue->GetName();
+		InArchive << InValue->GetVertexFactoryHash();
+	}
+	else
+	{
+		InArchive << std::wstring();
+		InArchive << ( uint32 )INVALID_HASH;
+	}
+
 	return InArchive;
 }
 

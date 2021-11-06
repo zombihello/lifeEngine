@@ -1,7 +1,6 @@
 ----------------------------------------------------------------
  Version 0.2.0
 ----------------------------------------------------------------
-	- Implement vertex factory
 	- Implement class of static meshes
 	- Implement commandlet for import static meshes
 	- Implement caching render states

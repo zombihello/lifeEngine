@@ -4,6 +4,7 @@
 	- Fixed memory leek while using FString::Format
 	- Implemented base material system
 	- Implemented serialize assets to package
+	- Implemented vertex factory
 
 ----------------------------------------------------------------
  Version 0.1.0 :: 02.11.2021

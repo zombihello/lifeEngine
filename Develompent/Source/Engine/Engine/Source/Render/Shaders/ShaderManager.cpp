@@ -8,6 +8,7 @@
 #include "RHI/BaseRHI.h"
 #include "Render/Shaders/Shader.h"
 #include "Render/Shaders/ShaderManager.h"
+#include "Render/VertexFactory/VertexFactory.h"
 
 #if WITH_EDITOR
 	#include "Render/Shaders/ShaderCompiler.h"
@@ -81,11 +82,29 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 			LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s not loaded, because not found meta type" ), item.name.c_str() );
 			continue;
 		}
-
 		shader->Init( item );
 
-		LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s loaded" ), item.name.c_str() );
-		shaders.insert( std::make_pair( item.name, shader ) );
+		FShaderKey			shaderKey( item.name, item.vertexFactoryHash );
+		if ( item.frequency == SF_Vertex )
+		{
+			check( item.vertexFactoryHash != ( uint32 )INVALID_HASH );
+			
+			FVertexFactoryMetaType*			vertexFactoryType = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
+			if ( vertexFactoryType )
+			{
+				LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s loaded" ), item.name.c_str(), vertexFactoryType->GetName().c_str() );
+			}
+			else
+			{
+				LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s not loaded, because vertex factory with hash 0x%X not found" ), item.vertexFactoryHash );
+			}
+		}
+		else
+		{
+			LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s loaded" ), item.name.c_str() );
+		}	
+
+		shaders.insert( std::make_pair( shaderKey, shader ) );
 	}
 
 	return true;

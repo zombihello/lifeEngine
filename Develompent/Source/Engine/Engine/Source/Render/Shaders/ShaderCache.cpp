@@ -1,6 +1,6 @@
 #include "Render/Shaders/ShaderCache.h"
 
-#define SHADER_CACHE_VERSION			1
+#define SHADER_CACHE_VERSION			2
 
 /**
  * Serialize of FShaderCacheItem
@@ -8,6 +8,7 @@
 void FShaderCache::FShaderCacheItem::Serialize( FArchive& InArchive )
 {
 	InArchive << frequency;
+	InArchive << vertexFactoryHash;
 	InArchive << numInstructions;
 	InArchive << name;
 

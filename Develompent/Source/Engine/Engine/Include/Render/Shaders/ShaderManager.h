@@ -12,11 +12,13 @@
 #include <string>
 #include <unordered_map>
 
+#include "Misc/Misc.h"
 #include "RHI/BaseRHI.h"
 #include "Shader.h"
 #include "ShaderCache.h"
 
 /**
+ * @ingroup Engine
  * @brief A macro to declare a new shader type
  * 
  * @warning This should be called in the class body of the new shader type
@@ -37,6 +39,7 @@
         static FShader*			        ConstructCompiledInstance()             { return new ShaderClass(); }
 
 /**
+ * @ingroup Engine
  * @brief A macro to implement a shader type
  * 
  * @param[in] ShaderClass The name of the class representing an instance of the shader type
@@ -166,7 +169,7 @@ public:
     /**
      * @brief Initialize shader manager
      */
-    void                                    Init();
+    void Init();
 
     /**
      * Shutdown shader manager
@@ -177,14 +180,15 @@ public:
      * Find instance of shader by name
      * 
      * @param[in] InShaderName Shader name
+     * @param[in] InVertexFactoryHash Vertex factory hash
      * @return Return reference to shader
      */
-    FORCEINLINE FShaderRef FindInstance( const std::wstring& InShaderName )
+    FORCEINLINE FShaderRef FindInstance( const std::wstring& InShaderName, uint32 InVertexFactoryHash = ( uint32 )INVALID_HASH )
     {
-		auto        itShader = shaders.find( InShaderName );
+        auto        itShader = shaders.find( FShaderKey{ InShaderName, InVertexFactoryHash } );
 		if ( itShader == shaders.end() )
 		{
-			appErrorf( TEXT( "Shader %s not found in cache" ), InShaderName.c_str() );
+			appErrorf( TEXT( "Shader %s with vertex factory hash 0x%X not found in cache" ), InShaderName.c_str(), InVertexFactoryHash );
 			return nullptr;
 		}
 
@@ -193,11 +197,24 @@ public:
 
     /**
      * @brief Find instance of shader
+     * 
+     * @param[in] InVertexFactoryHash Vertex factory hash
+     * @return Return reference to shader
      */
     template< typename TShaderClass >
+    FORCEINLINE FShaderRef                  FindInstance( uint32 InVertexFactoryHash )
+    {
+        return FindInstance( TShaderClass::staticType.GetName(), InVertexFactoryHash );
+    }
+
+    /**
+     * @brief Find instance of shader
+     * @return Return reference to shader
+     */
+    template< typename TShaderClass, typename TVertexFactoryClass >
     FORCEINLINE FShaderRef                  FindInstance()
     {
-        return FindInstance( TShaderClass::staticType.GetName() );
+        return FindInstance( TShaderClass::staticType.GetName(), TVertexFactoryClass::staticType.GetHash() );
     }
 
     /**
@@ -210,6 +227,48 @@ public:
     }
 
 private:
+    /**
+     * Struct shader key
+     */
+    struct FShaderKey
+    {
+        /**
+         * Constructor
+         * 
+         * @param[in] InShaderName Shader name
+         * @param[in] InVertexFactoryHash Vertex factory hash
+         */
+        FShaderKey( const std::wstring& InShaderName, uint32 InVertexFactoryHash = ( uint32 )INVALID_HASH )
+            : shaderName( InShaderName )
+            , vertexFactoryHash( InVertexFactoryHash )
+        {}
+
+        /**
+         * Overload operator ==
+         */
+        FORCEINLINE bool operator==( const FShaderKey& InOther ) const
+        {
+            return vertexFactoryHash == InOther.vertexFactoryHash && shaderName == InOther.shaderName;
+        }
+
+        std::wstring        shaderName;             /**< Shader name */
+        uint32              vertexFactoryHash;      /**< Vertex factory hash */
+    };
+
+    /**
+     * Shader key hasher
+     */
+    struct FShaderKeyHasher
+    {
+        /**
+         * Calculate hash
+         */
+		std::size_t operator()( const FShaderKey& InShaderKey ) const
+		{
+			return appCalcHash( InShaderKey.shaderName, InShaderKey.vertexFactoryHash );
+		}
+    };
+
     /**
      * @brief Class container for storage global shader types
      */
@@ -261,7 +320,7 @@ private:
      */
     bool                                                    LoadShaders( const tchar* InPathShaderCache );
 
-    std::unordered_map< std::wstring, FShaderRef >            shaders;            /**< Map of loaded shaders */
+    std::unordered_map< FShaderKey, FShaderRef, FShaderKeyHasher >            shaders;            /**< Map of loaded shaders */
 };
 
 #endif // !TESTSHADER_H

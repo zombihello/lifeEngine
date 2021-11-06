@@ -4,6 +4,7 @@
 #include "RHI/BaseViewportRHI.h"
 #include "Render/RenderingThread.h"
 #include "Render/Viewport.h"
+#include "Render/VertexFactory/TestVertexFactory.h"
 
 
 FViewport::FViewport() :
@@ -30,12 +31,12 @@ FViewport::~FViewport()
 #include "Render/SceneRendering.h"
 #include "System/Package.h"
 
-FSceneView							sceneView;
-extern LCameraComponent*			cameraComponent;
-FVertexBufferRHIRef					vertexBuffer;
-FMaterialRef						material;
-FVertexDeclarationRHIRef			vertexDeclRHI;
-bool								q = false;
+FSceneView								sceneView;
+extern LCameraComponent*				cameraComponent;
+FVertexBufferRHIRef						vertexBuffer;
+FMaterialRef							material;
+TRefCountPtr< FTestVertexFactory >		vertexFactory;
+bool									q = false;
 
 void FViewport::InitRHI()
 {
@@ -52,25 +53,24 @@ void FViewport::InitRHI()
 
 	if ( !q )
 	{
-		FVertexDeclarationElementList		vertexDeclElementList;
-		uint32								strideVertex = ( 3 * sizeof( float ) ) + ( 2 * sizeof( float ) );
-		vertexDeclElementList.push_back( FVertexElement( 0, strideVertex, 0, VET_Float3, VEU_Position, 0 ) );
-		vertexDeclElementList.push_back( FVertexElement( 0, strideVertex, 3 * sizeof( float ), VET_Float2, VEU_TextureCoordinate, 0 ) );
-		vertexDeclRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
-
-		vertexBuffer = GRHI->CreateVertexBuffer( TEXT( "TestVertexBuffer" ), strideVertex * 3, nullptr, RUF_Dynamic );
+		vertexBuffer = GRHI->CreateVertexBuffer( TEXT( "TestVertexBuffer" ), sizeof( FTestVertexType ) * 3, nullptr, RUF_Dynamic );
 		FLockedData				lockedData;
-		GRHI->LockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, strideVertex * 3, 0, lockedData );
+		GRHI->LockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, sizeof( FTestVertexType ) * 3, 0, lockedData );
 
-		float tempData[] =
+		FTestVertexType tempData[] =
 		{
-			-50.f, -50.f, 0.0f,				0.0f, 0.0f,
-			 50.f, -50.f, 0.0f,				1.0f, 0.0f,
-			 0.0f,  50.f, 0.0f,				0.5f, -1.0f
+			 FTestVertexType{ FVector( -50.f, -50.f, 0.0f ),	FVector2D( 0.0f, 0.0f ) },
+			 FTestVertexType{ FVector( 50.f, -50.f, 0.0f ),		FVector2D( 1.0f, 0.0f ) },
+			 FTestVertexType{ FVector( 0.f, 50.f, 0.0f ),		FVector2D( 0.5f, -1.0f ) }
 		};
-		memcpy( lockedData.data, &tempData, strideVertex * 3 );
+
+		memcpy( lockedData.data, &tempData, sizeof( FTestVertexType ) * 3 );
 		GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
 		
+		vertexFactory = new FTestVertexFactory();
+		vertexFactory->AddVertexStream( FVertexStream{ vertexBuffer, sizeof( FTestVertexType ) } );		// 0 stream slot
+		vertexFactory->Init();
+
 		/*FTexture2DRef texture2D = new FTexture2D();
 		FArchive*	ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
 		if ( ar )
@@ -90,8 +90,7 @@ void FViewport::InitRHI()
 			delete ar;
 		}
 		material = new FMaterial();
-		material->SetShader( FTestVertexShader::staticType, SF_Vertex );
-		material->SetShader( FTestPixelShader::staticType, SF_Pixel );
+		material->SetShader( FTestPixelShader::staticType );
 		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
 		material->SetHash( appCalcHash( TEXT( "DefaultMat" ) ) );
 
@@ -154,7 +153,7 @@ bool a = false;
 void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
 	// BS yehor.pohuliaka - Place court render scene
-	if ( !isInitialized )
+	if ( !IsInitialized() )
 	{
 		return;
 	}
@@ -173,10 +172,8 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 			immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
 			GRHI->SetViewParameters( immediateContext, sceneView );
 
-			GRHI->SetStreamSource( immediateContext, 0, vertexBuffer, ( 3 * sizeof( float ) ) + ( 2 * sizeof( float ) ), 0 );
-			
-			FTestDrawPolicy		drawPolicy( material );
-			drawPolicy.SetRenderState( immediateContext, vertexDeclRHI );
+			FTestDrawPolicy		drawPolicy( material, vertexFactory );
+			drawPolicy.SetRenderState( immediateContext );
 			drawPolicy.SetShaderParameters( immediateContext );
 			drawPolicy.Draw( immediateContext, sceneView );
 

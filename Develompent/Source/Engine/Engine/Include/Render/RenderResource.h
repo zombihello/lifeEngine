@@ -75,7 +75,7 @@ public:
 		return isInitialized;
 	}
 
-protected:
+private:
 	volatile bool				isInitialized;		/**< Is resource initialized */
 };
 

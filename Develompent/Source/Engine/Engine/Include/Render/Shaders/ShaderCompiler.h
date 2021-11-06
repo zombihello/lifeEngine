@@ -43,8 +43,10 @@ struct FShaderCompilerEnvironment
 	/**
 	 * @brief Constructor
 	 * @param[in] InFrequency Shader frequency
+	 * @param[in] InVertexFactoryFileName Vertex factory file name
 	 */
-	FShaderCompilerEnvironment( EShaderFrequency InFrequency )
+	FShaderCompilerEnvironment( EShaderFrequency InFrequency, const std::wstring InVertexFactoryFileName = TEXT( "" ) ) :
+		vertexFactoryFileName( InVertexFactoryFileName )
 	{
 		difinitions.insert( std::make_pair( TEXT( "VERTEXSHADER" ), InFrequency == SF_Vertex ? TEXT( "1" ) : TEXT( "0" ) ) );
 		difinitions.insert( std::make_pair( TEXT( "DOMAINSHADER" ), InFrequency == SF_Domain ? TEXT( "1" ) : TEXT( "0" ) ) );
@@ -60,11 +62,13 @@ struct FShaderCompilerEnvironment
 	 */
 	FShaderCompilerEnvironment( const FShaderCompilerEnvironment& InCopy )
 	{
+		vertexFactoryFileName = InCopy.vertexFactoryFileName;
 		includeFiles = InCopy.includeFiles;
 		difinitions = InCopy.difinitions;
 		compilerFlags = InCopy.compilerFlags;
 	}
 
+	std::wstring												vertexFactoryFileName;	/**< Vertex factory file name */
 	std::unordered_map< std::wstring, std::wstring >			includeFiles;			/**< Include files for compiling shader */
 	std::unordered_map< std::wstring, std::wstring >			difinitions;			/**< Difinitions for compiling shader */
 	std::vector< ECompilerFlags >								compilerFlags;			/**< Array of flags compiling */
@@ -99,7 +103,21 @@ public:
 	 * @param[in] InOutputCache	Path to output file with cache (example: ../../Content/GlobalShaderCache.bin)
 	 * @return Return true if all shader compile successed, else return false
 	 */
-	bool					CompileAll( const tchar* InOutputCache );
+	bool CompileAll( const tchar* InOutputCache );
+
+private:
+	/**
+	 * Compile shader
+	 * 
+	 * @param[in] InShaderName Shader name
+	 * @param[in] InShaderSourceFileName Path to shader source file
+	 * @param[in] InFunctionName Function of entry point in shader
+	 * @param[in] InShaderFrequency Shader frequency
+	 * @param[in,out] InOutShaderCache Shader cache
+	 * @param[in] InVertexFactoryType Vertex factory type
+	 * @return Return true if shader compile successed, else return false
+	 */
+	bool CompileShader( const std::wstring& InShaderName, const std::wstring& InShaderSourceFileName, const std::wstring& InFunctionName, EShaderFrequency InShaderFrequency, class FShaderCache& InOutShaderCache, class FVertexFactoryMetaType* InVertexFactoryType = nullptr );
 };
 
 #endif // !WITH_EDITOR

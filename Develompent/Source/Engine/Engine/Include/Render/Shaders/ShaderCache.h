@@ -35,6 +35,7 @@ public:
 
 		std::wstring				name;				/**< Name of class shader */
 		EShaderFrequency			frequency;			/**< Frequency of shader */
+		uint32						vertexFactoryHash;	/**< Vertex factory hash */
 		std::vector< byte >			code;				/**< Byte code of shader */
 		uint32						numInstructions;	/**< Number instructions in shader */
 	};

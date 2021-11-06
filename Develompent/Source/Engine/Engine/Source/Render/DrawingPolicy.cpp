@@ -2,19 +2,21 @@
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseStateRHI.h"
 #include "RHI/TypesRHI.h"
+#include "Render/VertexFactory/VertexFactory.h"
 #include "Render/DrawingPolicy.h"
 
-FMeshDrawingPolicy::FMeshDrawingPolicy( class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) :
+FMeshDrawingPolicy::FMeshDrawingPolicy( class FMaterial* InMaterial, class FVertexFactory* InVertexFactory, float InDepthBias /* = 0.f */ ) :
 	material( InMaterial ),
+	vertexFactory( InVertexFactory ),
 	depthBias( InDepthBias )
 {}
 
 FMeshDrawingPolicy::~FMeshDrawingPolicy()
 {}
 
-void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceContextRHI, FVertexDeclarationRHIParamRef InVertexDeclaration )
+void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceContextRHI )
 {
-	check( material );
+	check( material && vertexFactory );
 	const FRasterizerStateInitializerRHI		initializer =
 	{
 		material->IsWireframe() ? FM_Wireframe : FM_Solid,
@@ -24,12 +26,20 @@ void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceCo
 		true
 	};
 
-	FVertexShaderRHIRef		vertexShader = material->GetShader( SF_Vertex )->GetVertexShader();
-	FPixelShaderRHIRef		pixelShader = material->GetShader( SF_Pixel )->GetPixelShader();
+	FShaderRef			materialShader = material->GetShader();
+	check( materialShader );
 
+	vertexFactory->Set( InDeviceContextRHI );
 	GRHI->SetRasterizerState( InDeviceContextRHI, GRHI->CreateRasterizerState( initializer ) );
-	GRHI->SetBoundShaderState( InDeviceContextRHI, GRHI->CreateBoundShaderState( TEXT( "BoundShaderState" ), InVertexDeclaration, vertexShader, pixelShader ) );
+	GRHI->SetBoundShaderState( InDeviceContextRHI, GRHI->CreateBoundShaderState( 
+		TEXT( "BoundShaderState" ), 
+		vertexFactory->GetDeclaration(), 
+		vertexFactory->GetShader()->GetVertexShader(), 
+		materialShader->GetPixelShader() ) );
 }
 
 void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
-{}
+{
+	check( vertexFactory );
+	vertexFactory->SetShaderParameters( InDeviceContextRHI );
+}

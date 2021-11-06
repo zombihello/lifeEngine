@@ -23,9 +23,10 @@ public:
 	 * Constructor
 	 *
 	 * @param[in] InMaterial Material
+	 * @param[in] InVertexFactory Vertex factory
 	 * @param[in] InDepthBias Depth bias
 	 */
-	FTestDrawPolicy( class FMaterial* InMaterial, float InDepthBias = 0.f );
+	FTestDrawPolicy( class FMaterial* InMaterial, class FVertexFactory* InVertexFactory, float InDepthBias = 0.f );
 
 	/**
 	 * Set shader parameters

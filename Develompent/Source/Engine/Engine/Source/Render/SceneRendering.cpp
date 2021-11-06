@@ -4,15 +4,16 @@
 #include "RHI/TypesRHI.h"
 #include "Render/Texture.h"
 
-FTestDrawPolicy::FTestDrawPolicy( class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) :
-	FMeshDrawingPolicy( InMaterial, InDepthBias )
+FTestDrawPolicy::FTestDrawPolicy( class FMaterial* InMaterial, class FVertexFactory* InVertexFactory, float InDepthBias /* = 0.f */ ) :
+	FMeshDrawingPolicy( InMaterial, InVertexFactory, InDepthBias )
 {
-	pixelShader = InMaterial->GetShader( SF_Pixel );
+	pixelShader = InMaterial->GetShader();
 }
 
 void FTestDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
 {
 	check( pixelShader );
+	FMeshDrawingPolicy::SetShaderParameters( InDeviceContextRHI );
 
 	FTexture2DRef		texture2d;
 	if ( material->GetTextureParameterValue( TEXT( "diffuse" ), texture2d ) )

@@ -30,22 +30,24 @@
  */
 enum ELifeEnginePackageVersion
 {
-	VER_PackageBase						= 1,					/**< Min version for serialize content*/
-	VER_Assets							= 2,					/**< Added in archive assets (FTexture2D, FMaterial, etc) */
+	VER_PackageBase							= 1,					/**< Min version for serialize content*/
+	VER_Assets								= 2,					/**< Added in archive assets (FTexture2D, FMaterial, etc) */
+	VER_LeftOnlyPixelShaderInMaterial		= 3,					/**< Removed all shaders except pixel shader from FMaterial */
+	VER_VertexFactory						= 4,					/**< Implemented vertex factory */
 
 	//
 	// New versions can be added here
 	//
 
-	VER_MinVersion						= VER_PackageBase,		/**< This need for check min supported version */
-	VER_AutomaticVersion										/**< This needs for automatic update last version of package */
+	VER_AutomaticVersionPlusOne,								/**< This needs for automatic update last version of package */
+	VER_MinVersion						= VER_PackageBase,		/**< This need for check min supported version */	
 };
 
 /**
  * @ingroup Core
  * Latest version of package
  */
-#define VER_PACKAGE_LATEST					( PREPROCESSOR_ENUM_PROTECT( VER_AutomaticVersion ) )
+#define VER_PACKAGE_LATEST					( PREPROCESSOR_ENUM_PROTECT( VER_AutomaticVersionPlusOne )-1 )
 
 /**
  * @ingroup Core

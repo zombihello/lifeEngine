@@ -1,4 +1,5 @@
 #include "System/Archive.h"
+#include "Logger/LoggerMacros.h"
 #include "Misc/EngineGlobals.h"
 #include "Render/Shaders/ShaderManager.h"
 #include "Logger/LoggerMacros.h"
@@ -14,6 +15,7 @@ void FShader::Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem )
 
 	name = InShaderCacheItem.name;
 	frequency = InShaderCacheItem.frequency;
+	vertexFactoryHash = InShaderCacheItem.vertexFactoryHash;
 	numInstructions = InShaderCacheItem.numInstructions;
 
 	switch ( frequency )
@@ -53,15 +55,41 @@ FArchive& operator<<( FArchive& InArchive, FShaderRef& InValue )
 {
 	if ( InArchive.IsSaving() )
 	{
-		InArchive << ( InValue ? InValue->GetName() : std::wstring() );
+		if ( InValue )
+		{
+			InArchive << InValue->GetName();
+			InArchive << InValue->GetVertexFactoryHash();
+		}
+		else
+		{
+			InArchive << std::wstring();
+			InArchive << ( uint32 )INVALID_HASH;
+		}
 	}
 	else
 	{
 		std::wstring			shaderName;
-		InArchive << shaderName;		
+		uint32					vertexShaderHash;
+		InArchive << shaderName;
+
+		if ( InArchive.Ver() >= VER_VertexFactory )
+		{
+			InArchive << vertexShaderHash;
+		}
+		else
+		{
+			if ( !shaderName.empty() )
+			{
+				LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package version (0x%X), shader %s not loaded" ), InArchive.Ver(), shaderName.c_str() );
+			}
+
+			InValue = nullptr;
+			return InArchive;
+		}
+
 		if ( !shaderName.empty() )
 		{
-			InValue = GShaderManager->FindInstance( shaderName );
+			InValue = GShaderManager->FindInstance( shaderName, vertexShaderHash );
 		}
 	}
 

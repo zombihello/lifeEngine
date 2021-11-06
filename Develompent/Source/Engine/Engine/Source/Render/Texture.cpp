@@ -22,8 +22,7 @@ FTexture2D::FTexture2D() :
 {}
 
 FTexture2D::~FTexture2D()
-{
-}
+{}
 
 void FTexture2D::InitRHI()
 {

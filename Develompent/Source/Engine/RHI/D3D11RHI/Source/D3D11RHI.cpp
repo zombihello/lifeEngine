@@ -521,7 +521,17 @@ public:
 	STDMETHOD( Open )( D3D_INCLUDE_TYPE InType, LPCSTR InName, LPCVOID InParentData, LPCVOID* OutData, UINT* OutBytes )
 	{
 		std::wstring		filename( ANSI_TO_TCHAR( InName ) );
-		filename = appShaderDir() + TEXT( "/" ) + filename;
+
+		// For including 'VertexFactory.hlsl' we take path from Environment
+		if ( filename == TEXT( "VertexFactory.hlsl" ) )
+		{
+			filename = appShaderDir() + TEXT( "VertexFactory/" ) + environment.vertexFactoryFileName;
+		}
+		// Else we search in root shader dir
+		else
+		{
+			filename = appShaderDir() + filename;
+		}
 
 		FArchive*		archive = GFileSystem->CreateFileReader( filename );
 		if ( !archive )

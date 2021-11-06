@@ -79,7 +79,7 @@ FORCEINLINE std::wstring appBaseDir()
  */
 FORCEINLINE std::wstring appShaderDir()
 {
-	return TEXT( "../../Engine/Shaders" );
+	return TEXT( "../../Engine/Shaders/" );
 }
 
 /**
@@ -87,11 +87,12 @@ FORCEINLINE std::wstring appShaderDir()
  * Calculate hash from name
  *
  * @param[in] InName Name
+ * @param[in] InHash Start hash
  * @return Return hash
  */
-FORCEINLINE uint32 appCalcHash( const std::wstring& InName )
+FORCEINLINE uint32 appCalcHash( const std::wstring& InName, uint32 InHash = 0 )
 {
-	return appMemFastHash( InName.data(), ( uint32 )InName.size() * sizeof( std::wstring::value_type ), 0 );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
+	return appMemFastHash( InName.data(), ( uint32 )InName.size() * sizeof( std::wstring::value_type ), InHash );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
 }
 
 /**

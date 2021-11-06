@@ -24,9 +24,20 @@ void FMaterial::Serialize( class FArchive& InArchive )
 	InArchive << isWireframe;
 
 	// Serialize shaders
-	for ( uint32 index = 0; index < SF_NumFrequencies; ++index )
+	if ( InArchive.Ver() < VER_LeftOnlyPixelShaderInMaterial )
 	{
-		InArchive << shaders[ index ];
+		FShaderRef		shaders[ SF_NumFrequencies ];
+		for ( uint32 index = 0; index < SF_NumFrequencies; ++index )
+		{
+			InArchive << shaders[ index ];
+		}
+
+		shader = shaders[ SF_Pixel ];
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package '%s', in future can be removed support it version" ), GetPackage()->GetPath().c_str() );
+	}
+	else
+	{
+		InArchive << shader;
 	}
 
 	// Serialize shader parameters

@@ -52,15 +52,13 @@ public:
 	virtual void Serialize( class FArchive& InArchive ) override;
 
 	/**
-	 * Set shader
+	 * Set pixel shader
 	 *
 	 * @param[in] InShaderMetaType Meta info about shader
-	 * @param[in] InShaderFrequency Frequency
 	 */
-	FORCEINLINE void SetShader( const class FShaderMetaType& InShaderMetaType, EShaderFrequency InShaderFrequency )
+	FORCEINLINE void SetShader( const class FShaderMetaType& InShaderMetaType )
 	{
-		check( InShaderFrequency < SF_NumFrequencies );
-		shaders[ InShaderFrequency ] = GShaderManager->FindInstance( InShaderMetaType.GetName() );
+		shader = GShaderManager->FindInstance( InShaderMetaType.GetName() );
 	}
 
 	/**
@@ -106,15 +104,13 @@ public:
 	}
 
 	/**
-	 * Get shader
+	 * Get pixel shader
 	 *
-	 * @param[in] InShaderFrequency Frequency
-	 * @return Return pointer to shader
+	 * @return Return pointer to pixel shader
 	 */
-	FORCEINLINE FShaderRef GetShader( EShaderFrequency InShaderFrequency ) const
+	FORCEINLINE FShaderRef GetShader() const
 	{
-		check( InShaderFrequency < SF_NumFrequencies );
-		return shaders[ InShaderFrequency ];
+		return shader;
 	}
 
 	/**
@@ -156,7 +152,7 @@ public:
 private:
 	bool													isTwoSided;							/**< Is two sided material */
 	bool													isWireframe;						/**< Is wireframe material */
-	FShaderRef												shaders[ SF_NumFrequencies ];		/**< Shader for each stage */
+	FShaderRef												shader;								/**< Pixel shader */
 	std::unordered_map< std::wstring, float >				scalarParameters;					/**< Array scalar parameters */
 	std::unordered_map< std::wstring, FTexture2DRef >		textureParameters;					/**< Array texture parameters */
 };

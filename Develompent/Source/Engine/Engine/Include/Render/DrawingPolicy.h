@@ -11,6 +11,7 @@
 
 #include "Misc/RefCountPtr.h"
 #include "Render/Material.h"
+#include "Render/VertexFactory/VertexFactory.h"
 #include "Core.h"
 
 /**
@@ -26,9 +27,10 @@ public:
 	 * Constructor
 	 * 
 	 * @param[in] InMaterial Material
+	 * @param[in] InVertexFactory Vertex factory
 	 * @param[in] InDepthBias Depth bias
 	 */
-	FMeshDrawingPolicy( class FMaterial* InMaterial, float InDepthBias = 0.f );
+	FMeshDrawingPolicy( class FMaterial* InMaterial, class FVertexFactory* InVertexFactory, float InDepthBias = 0.f );
 
 	/**
 	 * Destructor
@@ -36,13 +38,11 @@ public:
 	virtual ~FMeshDrawingPolicy();
 
 	/**
-	 * Set render state
-	 * In this method setted FBoundShaderState, rasterizer state, etc
+	 * Set render state for drawing
 	 * 
 	 * @param[in] InDeviceContextRHI RHI device context
-	 * @param[in] InVertexDeclaration Vertex declaration
 	 */
-	virtual void SetRenderState( class FBaseDeviceContextRHI* InDeviceContextRHI, FVertexDeclarationRHIParamRef InVertexDeclaration );
+	virtual void SetRenderState( class FBaseDeviceContextRHI* InDeviceContextRHI );
 
 	/**
 	 * Set shader parameters
@@ -60,8 +60,9 @@ public:
 	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FSceneView& InSceneView ) PURE_VIRTUAL( FMeshDrawingPolicy::Draw, );
 
 protected:
-	FMaterialRef		material;		/**< Material */
-	float				depthBias;		/**< Depth bias */
+	FMaterialRef				material;			/**< Material */
+	FVertexFactoryRef			vertexFactory;		/**< Vertex factory */
+	float						depthBias;			/**< Depth bias */
 };
 
 #endif // !DRAWINGPOLICY_H
