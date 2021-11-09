@@ -53,7 +53,7 @@ void FViewport::InitRHI()
 	if ( !q )
 	{
 		/*FTexture2DRef texture2D = new FTexture2D();
-		FArchive*	ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
+		FArchive* ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
 		if ( ar )
 		{
 			ar->SerializeHeader();
@@ -64,7 +64,8 @@ void FViewport::InitRHI()
 			FTextureCacheItem		textureCacheItem;
 			if ( textureFileCache.Find( appCalcHash( TEXT( "DefaultDiffuse" ) ), &textureCacheItem ) )
 			{
-				texture2D->SetHash( appCalcHash( TEXT( "T_Test" ) ) );
+				texture2D->SetAssetName( TEXT( "T_Test" ) );
+				texture2D->SetAssetHash( appCalcHash( TEXT( "T_Test" ) ) );
 				texture2D->SetTextureCache( textureCacheItem, TEXT( "/Engine/Content/EngineTextures.tfc" ) );
 			}
 
@@ -75,7 +76,8 @@ void FViewport::InitRHI()
 		material->SetShader( FBasePassPixelShader::staticType );
 		material->UsageOnStaticMesh( true );
 		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
-		material->SetHash( appCalcHash( TEXT( "DefaultMat" ) ) );
+		material->SetAssetName( TEXT( "DefaultMaterial" ) );
+		material->SetAssetHash( appCalcHash( TEXT( "DefaultMaterial" ) ) );
 
 		FPackage	pak;
 		pak.Open( TEXT( "Content/PackageTest.lpak" ), true );
@@ -83,8 +85,8 @@ void FViewport::InitRHI()
 		pak.Add( texture2D );
 		pak.Serialize();*/
 
-		material = GPackageManager->FindAsset( TEXT( "Content/PackageTest.lpak" ), appCalcHash( TEXT( "DefaultMat" ) ) );
-		staticMesh = GPackageManager->FindAsset( TEXT( "Content/BunkerTunnelDoor.lpak" ), appCalcHash( TEXT( "Door" ) ) );
+		material = GPackageManager->FindAsset( TEXT( "Content/PackageTest.lpak" ), appCalcHash( TEXT( "DefaultMaterial" ) ) );
+		staticMesh = GPackageManager->FindAsset( TEXT( "Content/BunkerTunnelDoor.lpak" ), appCalcHash( TEXT( "BunkerTunnelDoor" ) ) );
 		staticMesh->SetMaterial( 0, material );
 		q = true;
 	}

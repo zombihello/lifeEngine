@@ -36,6 +36,7 @@ enum ELifeEnginePackageVersion
 	VER_VertexFactory						= 4,					/**< Implemented vertex factory */
 	VER_StaticMesh							= 5,					/**< Implemented static mesh */
 	VER_ShaderMap							= 6,					/**< Added in material shader map */
+	VER_AssetName							= 7,					/**< Added asset name in package */
 
 	//
 	// New versions can be added here

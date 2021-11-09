@@ -1,6 +1,7 @@
 #include <d3dcompiler.h>
 
 #include "Containers/StringConv.h"
+#include "Containers/String.h"
 
 #include "Core.h"
 #include "D3D11RHI.h"
@@ -166,7 +167,7 @@ FD3D11BoundShaderStateRHI::FD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 #endif // DO_CHECK
 	
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( InDebugName ) );
+	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( FString::Format( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 

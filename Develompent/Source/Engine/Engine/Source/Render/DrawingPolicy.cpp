@@ -1,4 +1,5 @@
 #include "Misc/EngineGlobals.h"
+#include "Containers/String.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseStateRHI.h"
 #include "RHI/TypesRHI.h"
@@ -36,7 +37,7 @@ void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceCo
 	vertexFactory->Set( InDeviceContextRHI );
 	GRHI->SetRasterizerState( InDeviceContextRHI, GRHI->CreateRasterizerState( initializer ) );
 	GRHI->SetBoundShaderState( InDeviceContextRHI, GRHI->CreateBoundShaderState( 
-		TEXT( "BoundShaderState" ), 
+		FString::Format( TEXT( "%s" ), material->GetAssetName().c_str() ).c_str(),
 		vertexFactory->GetDeclaration(), 
 		vertexShader->GetVertexShader(), 
 		pixelShader->GetPixelShader() ) );

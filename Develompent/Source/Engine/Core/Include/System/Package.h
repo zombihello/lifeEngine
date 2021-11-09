@@ -105,16 +105,16 @@ public:
 	 * 
 	 * @param[in] InHash Hash asset
 	 */
-	void SetHash( uint32 InHash );
+	void SetAssetHash( uint32 InHash );
 
 	/**
-	 * Set asset hash from name
+	 * Set asset name
 	 * 
-	 * @param[in] InName Name
+	 * @param[in] InName Asset name
 	 */
-	FORCEINLINE void SetHashFromName( const std::wstring& InName )
+	FORCEINLINE void SetAssetName( const std::wstring& InName )
 	{
-		SetHash( appCalcHash( InName ) );
+		name = InName;
 	}
 
 	/**
@@ -136,6 +136,15 @@ public:
 	}
 
 	/**
+	 * Get name asset
+	 * @return Return name asset
+	 */
+	FORCEINLINE const std::wstring& GetAssetName() const
+	{
+		return name;
+	}
+
+	/**
 	 * Get package
 	 * @return Return package where the asset is located. If asset not located in package return nullptr
 	 */
@@ -152,6 +161,7 @@ public:
 
 private:
 	class FPackage*		package;	/**< The package where the asset is located */
+	std::wstring		name;		/**< Name asset */
 	uint32				hash;		/**< Asset hash */
 	EAssetType			type;		/**< Asset type */
 };

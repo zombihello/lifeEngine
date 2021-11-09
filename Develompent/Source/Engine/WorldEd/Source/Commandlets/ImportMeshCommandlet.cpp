@@ -187,7 +187,8 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 
 	// Serialize static mesh in archive
 	FStaticMesh		staticMesh;
-	staticMesh.SetHashFromName( nameMesh );
+	staticMesh.SetAssetHash( appCalcHash( nameMesh ) );
+	staticMesh.SetAssetName( nameMesh );
 	staticMesh.SetData( verteces, indeces, surfaces, materials );
 
 	FPackage		package;

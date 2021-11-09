@@ -1,3 +1,4 @@
+#include "Containers/String.h"
 #include "System/Archive.h"
 #include "Render/StaticMesh.h"
 
@@ -14,7 +15,7 @@ void FStaticMesh::InitRHI()
 	uint32			numVerteces = ( uint32 )verteces.size();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "VertexBuffer" ), sizeof( FStaticMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = GRHI->CreateVertexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( FStaticMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 		verteces.clear();
 
 		// Initialize vertex factory
@@ -27,7 +28,7 @@ void FStaticMesh::InitRHI()
 	uint32			numIndeces = ( uint32 ) indeces.size();
 	if ( numIndeces > 0 )
 	{
-		indexBufferRHI = GRHI->CreateIndexBuffer( TEXT( "IndexBuffer" ), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
+		indexBufferRHI = GRHI->CreateIndexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
 		indeces.clear();
 	}
 }
@@ -46,6 +47,7 @@ void FStaticMesh::Serialize( class FArchive& InArchive )
 		return;
 	}
 
+	FAsset::Serialize( InArchive );
 	InArchive << verteces;
 	InArchive << indeces;
 	InArchive << surfaces;

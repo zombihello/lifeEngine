@@ -1,4 +1,5 @@
 #include "Containers/StringConv.h"
+#include "Containers/String.h"
 #include "Misc/CoreGlobals.h"
 #include "System/Archive.h"
 #include "System/BaseFileSystem.h"
@@ -27,7 +28,7 @@ FTexture2D::~FTexture2D()
 void FTexture2D::InitRHI()
 {
 	check( !data.empty() );
-	texture = GRHI->CreateTexture2D( TEXT( "" ), sizeX, sizeY, pixelFormat, 1, 0, data.data() );
+	texture = GRHI->CreateTexture2D( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeX, sizeY, pixelFormat, 1, 0, data.data() );
 	data.clear();
 }
 
@@ -53,6 +54,7 @@ void FTexture2D::SetTextureCache( const struct FTextureCacheItem& InTextureCache
 
 void FTexture2D::Serialize( class FArchive& InArchive )
 {
+	FAsset::Serialize( InArchive );
 	InArchive << textureCachePath;
 	InArchive << textureCacheHash;
 	InArchive << sizeX;

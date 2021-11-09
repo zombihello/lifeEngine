@@ -44,9 +44,16 @@ FAsset::~FAsset()
 }
 
 void FAsset::Serialize( class FArchive& InArchive )
-{}
+{
+	if ( InArchive.IsLoading() && InArchive.Ver() < VER_AssetName )
+	{
+		return;
+	}
 
-void FAsset::SetHash( uint32 InHash )
+	InArchive << name;
+}
+
+void FAsset::SetAssetHash( uint32 InHash )
 {
 	if ( package )
 	{
