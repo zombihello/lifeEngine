@@ -14,19 +14,19 @@
 
 /**
  * @ingroup Engine
- * Draw policy of test geometry
+ * Draw policy of static mesh
  */
-class FTestDrawPolicy : public FMeshDrawingPolicy
+class FStaticMeshDrawPolicy : public FMeshDrawingPolicy
 {
 public:
 	/**
 	 * Constructor
 	 *
-	 * @param[in] InMaterial Material
 	 * @param[in] InVertexFactory Vertex factory
+	 * @param[in] InMaterial Material
 	 * @param[in] InDepthBias Depth bias
 	 */
-	FTestDrawPolicy( class FMaterial* InMaterial, class FVertexFactory* InVertexFactory, float InDepthBias = 0.f );
+	FStaticMeshDrawPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias = 0.f );
 
 	/**
 	 * Set shader parameters
@@ -39,12 +39,10 @@ public:
 	 * Draw mesh
 	 *
 	 * @param[in] InDeviceContextRHI RHI device context
+	 * @param[in] InMeshBatch Mesh batch to draw
 	 * @param[in] InSceneView Scene view
 	 */
-	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FSceneView& InSceneView ) override;
-
-private:
-	FShaderRef			pixelShader;		/**< Pixel shader */
+	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView ) override;
 };
 
 #endif // !SCENERENDERING_H

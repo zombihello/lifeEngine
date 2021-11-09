@@ -24,13 +24,14 @@
  */
 enum EShaderFrequency
 {
-	SF_Vertex,				/**< Vertex shader */
-	SF_Hull,				/**< Hull shader */
-	SF_Domain,				/**< Domain shader */
-	SF_Pixel,				/**< Pixel shader */
-	SF_Geometry,			/**< Geometry shader */
-	SF_Compute,				/**< Compute shader */
-	SF_NumFrequencies		/**< Count frequencies */
+	SF_Vertex,											/**< Vertex shader */
+	SF_Hull,											/**< Hull shader */
+	SF_Domain,											/**< Domain shader */
+	SF_Pixel,											/**< Pixel shader */
+	SF_Geometry,										/**< Geometry shader */
+	SF_Compute,											/**< Compute shader */
+	SF_NumFrequencies,									/**< Count frequencies */
+	SF_NumDrawFrequencies	= SF_NumFrequencies - 1		/**< Count frequencies part of pipeline (without compute shader) */
 };
 
 /**

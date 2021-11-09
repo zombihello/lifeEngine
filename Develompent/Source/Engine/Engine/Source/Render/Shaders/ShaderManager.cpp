@@ -81,33 +81,41 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 		{
 			LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s not loaded, because not found meta type" ), item.name.c_str() );
 			continue;
-		}
+		}	
 		shader->Init( item );
 
-		FShaderKey			shaderKey( item.name, item.vertexFactoryHash );
-		if ( item.frequency == SF_Vertex )
+		FVertexFactoryMetaType*			vertexFactoryType = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
+		if ( vertexFactoryType )
 		{
-			check( item.vertexFactoryHash != ( uint32 )INVALID_HASH );
-			
-			FVertexFactoryMetaType*			vertexFactoryType = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
-			if ( vertexFactoryType )
-			{
-				LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s loaded" ), item.name.c_str(), vertexFactoryType->GetName().c_str() );
-			}
-			else
-			{
-				LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s not loaded, because vertex factory with hash 0x%X not found" ), item.name.c_str(), item.vertexFactoryHash );
-			}
+			LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s loaded" ), item.name.c_str(), vertexFactoryType->GetName().c_str() );
+			shaders[ item.vertexFactoryHash ][ item.name ] = shader;
 		}
 		else
 		{
-			LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s loaded" ), item.name.c_str() );
+			LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s for vertex factory with hash 0x%X not loaded, because factory not found" ), item.name.c_str(), item.vertexFactoryHash );
 		}	
-
-		shaders.insert( std::make_pair( shaderKey, shader ) );
 	}
 
 	return true;
+}
+
+FShaderRef FShaderManager::FindInstance( const std::wstring& InShaderName, uint32 InVertexFactoryHash )
+{
+	FMeshShaderMap::const_iterator		itMeshShaderMap = shaders.find( InVertexFactoryHash );
+	if ( itMeshShaderMap == shaders.end() )
+	{
+		LE_LOG( LT_Warning, LC_Shader, TEXT( "For vertex factory hash 0x%X does not exist in the shaders cache" ), InVertexFactoryHash );
+		return nullptr;
+	}
+
+	FShaderMap::const_iterator			itShaderMap = itMeshShaderMap->second.find( InShaderName );
+	if ( itShaderMap == itMeshShaderMap->second.end() )
+	{
+		LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s with vertex factory hash 0x%X not found in cache" ), InShaderName.c_str(), InVertexFactoryHash );
+		return nullptr;
+	}
+
+	return itShaderMap->second;
 }
 
 /**

@@ -35,6 +35,7 @@ enum ELifeEnginePackageVersion
 	VER_LeftOnlyPixelShaderInMaterial		= 3,					/**< Removed all shaders except pixel shader from FMaterial */
 	VER_VertexFactory						= 4,					/**< Implemented vertex factory */
 	VER_StaticMesh							= 5,					/**< Implemented static mesh */
+	VER_ShaderMap							= 6,					/**< Added in material shader map */
 
 	//
 	// New versions can be added here

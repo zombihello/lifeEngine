@@ -115,6 +115,12 @@ public:
 		return pixelShader;
 	}
 
+	/**
+	 * Get meta type of this shader
+	 * @return Return meta type shader
+	 */
+	virtual class FShaderMetaType* GetType() const = 0;
+
 private:
 	std::wstring				name;				/**< Name of class shader */
 	EShaderFrequency			frequency;			/**< Frequency of shader */

@@ -421,6 +421,18 @@ public:
 	virtual void								DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives ) {}
 
 	/**
+	 * @brief Draw primitive
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InIndexBuffer Index buffer
+	 * @param[in] InPrimitiveType Primitive type
+	 * @param[in] InBaseVertexIndex Base vertex index
+	 * @param[in] InStartIndex Start index in index buffer
+	 * @param[in] InNumPrimitives Number primitives for render
+	 */
+	virtual void								DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceContext, class FBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives ) {}
+
+	/**
 	 * @brief Is initialized RHI
 	 * @return Return true if RHI is initialized, else false
 	 */

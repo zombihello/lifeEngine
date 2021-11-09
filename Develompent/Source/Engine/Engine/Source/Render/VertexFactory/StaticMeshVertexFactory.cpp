@@ -1,7 +1,6 @@
 #include "Render/VertexFactory/StaticMeshVertexFactory.h"
-#include "Render/Shaders/TestShader.h"
 
-IMPLEMENT_VERTEX_FACTORY_TYPE( FStaticMeshVertexFactory, FTestVertexShader, TEXT( "StaticMeshVertexFactory.hlsl" ) )
+IMPLEMENT_VERTEX_FACTORY_TYPE( FStaticMeshVertexFactory, TEXT( "StaticMeshVertexFactory.hlsl" ) )
 
 void FStaticMeshVertexFactory::InitRHI()
 {

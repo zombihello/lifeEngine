@@ -4,7 +4,6 @@
 #include "RHI/BaseViewportRHI.h"
 #include "Render/RenderingThread.h"
 #include "Render/Viewport.h"
-#include "Render/VertexFactory/TestVertexFactory.h"
 
 
 FViewport::FViewport() :
@@ -17,7 +16,7 @@ FViewport::~FViewport()
 {}
 
 // BS yehor.pohuliaka - This code for test, need delete it
-#include "Render/Shaders/TestShader.h"
+#include "Render/Shaders/BasePassShader.h"
 #include "Render/Texture.h"
 #include "Render/TextureFileCache.h"
 #include "System/Archive.h"
@@ -34,10 +33,8 @@ FViewport::~FViewport()
 
 FSceneView								sceneView;
 extern LCameraComponent*				cameraComponent;
-FVertexBufferRHIRef						vertexBuffer;
 FMaterialRef							material;
 FStaticMeshRef							staticMesh;
-TRefCountPtr< FTestVertexFactory >		vertexFactory;
 bool									q = false;
 
 void FViewport::InitRHI()
@@ -55,24 +52,6 @@ void FViewport::InitRHI()
 
 	if ( !q )
 	{
-		vertexBuffer = GRHI->CreateVertexBuffer( TEXT( "TestVertexBuffer" ), sizeof( FTestVertexType ) * 3, nullptr, RUF_Dynamic );
-		FLockedData				lockedData;
-		GRHI->LockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, sizeof( FTestVertexType ) * 3, 0, lockedData );
-
-		FTestVertexType tempData[] =
-		{
-			 FTestVertexType{ FVector( -50.f, -50.f, 0.0f ),	FVector2D( 0.0f, 0.0f ) },
-			 FTestVertexType{ FVector( 50.f, -50.f, 0.0f ),		FVector2D( 1.0f, 0.0f ) },
-			 FTestVertexType{ FVector( 0.f, 50.f, 0.0f ),		FVector2D( 0.5f, -1.0f ) }
-		};
-
-		memcpy( lockedData.data, &tempData, sizeof( FTestVertexType ) * 3 );
-		GRHI->UnlockVertexBuffer( GRHI->GetImmediateContext(), vertexBuffer, lockedData );
-		
-		vertexFactory = new FTestVertexFactory();
-		vertexFactory->AddVertexStream( FVertexStream{ vertexBuffer, sizeof( FTestVertexType ) } );		// 0 stream slot
-		vertexFactory->Init();
-
 		/*FTexture2DRef texture2D = new FTexture2D();
 		FArchive*	ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
 		if ( ar )
@@ -92,7 +71,9 @@ void FViewport::InitRHI()
 			delete ar;
 		}
 		material = new FMaterial();
-		material->SetShader( FTestPixelShader::staticType );
+		material->SetShader( FBasePassVertexShader::staticType );
+		material->SetShader( FBasePassPixelShader::staticType );
+		material->UsageOnStaticMesh( true );
 		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
 		material->SetHash( appCalcHash( TEXT( "DefaultMat" ) ) );
 
@@ -176,10 +157,22 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 			immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
 			GRHI->SetViewParameters( immediateContext, sceneView );
 
-			FTestDrawPolicy		drawPolicy( material, staticMesh->GetVertexFactory() );
-			drawPolicy.SetRenderState( immediateContext );
-			drawPolicy.SetShaderParameters( immediateContext );
-			drawPolicy.Draw( immediateContext, sceneView );
+			// Render test static mesh
+			const std::vector< FStaticMeshSurface >&		staticMeshSurfaces = staticMesh->GetSurfaces();
+			const std::vector< FMaterialRef >&				staticMeshMaterials = staticMesh->GetMaterials();
+
+			for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )staticMeshSurfaces.size(); indexSurface < numSurfaces; ++indexSurface )
+			{
+				const FStaticMeshSurface&		surface = staticMeshSurfaces[ indexSurface ];
+				FMeshBatch						meshBatch;
+				meshBatch.primitiveType = PT_TriangleList;
+				meshBatch.elements.push_back( FMeshBatchElement{ staticMesh->GetIndexBufferRHI(), surface.baseVertexIndex, surface.firstIndex, surface.numPrimitives } );
+
+				FStaticMeshDrawPolicy		drawPolicy( staticMesh->GetVertexFactory(), staticMeshMaterials[ surface.materialID ] );
+				drawPolicy.SetRenderState( immediateContext );
+				drawPolicy.SetShaderParameters( immediateContext );
+				drawPolicy.Draw( immediateContext, meshBatch, sceneView );
+			}
 
 			GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
 		}

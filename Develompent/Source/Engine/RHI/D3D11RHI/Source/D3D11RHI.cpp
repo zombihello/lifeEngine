@@ -458,6 +458,23 @@ void FD3D11RHI::DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPr
 	d3d11DeviceContext->Draw( vertexCount, InBaseVertexIndex );
 }
 
+void FD3D11RHI::DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceContext, class FBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives )
+{
+	check( InIndexBuffer );
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	FD3D11IndexBufferRHI*			indexBuffer = ( FD3D11IndexBufferRHI* )InIndexBuffer;
+
+	// Bind index buffer
+	const DXGI_FORMAT				format = ( indexBuffer->GetStride() == sizeof( uint16 ) ) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+	ID3D11Buffer*					d3d11IndexBuffer = indexBuffer->GetD3D11Buffer();
+	d3d11DeviceContext->IASetIndexBuffer( d3d11IndexBuffer, format, 0 );
+
+	// Draw indexed primitive
+	uint32							indexCount = GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
+	d3d11DeviceContext->IASetPrimitiveTopology( GetD3D11PrimitiveType( InPrimitiveType, false ) );
+	d3d11DeviceContext->DrawIndexed( indexCount, InStartIndex, InBaseVertexIndex );
+}
+
 /**
  * Begin drawing viewport
  */

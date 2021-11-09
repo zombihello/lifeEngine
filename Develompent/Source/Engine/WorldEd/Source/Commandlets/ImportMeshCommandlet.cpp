@@ -89,7 +89,7 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 		appMemzero( &vertex, sizeof( FStaticMeshVertexType ) );
 		appMemzero( &surface, sizeof( FStaticMeshSurface ) );
 
-		surface.startVertexIndex = indeces.size();
+		surface.firstIndex = indeces.size();
 		surface.materialID = materials.size();
 
 		for ( auto itMesh = itRoot->second.begin(), itMeshEnd = itRoot->second.end(); itMesh != itMeshEnd; ++itMesh )
@@ -180,7 +180,7 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 				continue;
 			}
 
-			surface.numVertexIndeces = indeces.size() - surface.startVertexIndex;
+			surface.numPrimitives = ( indeces.size() - surface.firstIndex ) / 3.f;		// 1 primitive = 3 indeces (triangles)
 			surfaces.push_back( surface );
 		}
 	}

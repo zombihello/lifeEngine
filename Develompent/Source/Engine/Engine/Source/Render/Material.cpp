@@ -1,97 +1,106 @@
 #include "Logger/LoggerMacros.h"
 #include "Render/Material.h"
+#include "Render/VertexFactory/StaticMeshVertexFactory.h"
 
 FMaterial::FMaterial() :
 	FAsset( AT_Material ),
+	isNeedUpdateShaderMap( false ),
 	isTwoSided( false ),
-	isWireframe( false )
-{}
+	isWireframe( false ),
+	usage( MU_AllMeshes )
+{
+	appMemzero( &shadersType, sizeof( shadersType ) );
+}
 
 FMaterial::~FMaterial()
 {}
 
 void FMaterial::Serialize( class FArchive& InArchive )
 {
-	if ( InArchive.Ver() < VER_Assets )
+	if ( InArchive.Ver() < VER_ShaderMap )
 	{
 		return;
 	}
 
-	FAsset::Serialize( InArchive );
+	if ( InArchive.IsSaving() && isNeedUpdateShaderMap )
+	{
+		CacheShaderMap();
+	}
+	else if ( InArchive.IsLoading() )
+	{
+		isNeedUpdateShaderMap = true;
+	}
 
-	// Serialize base parameters
+	FAsset::Serialize( InArchive );
 	InArchive << isTwoSided;
 	InArchive << isWireframe;
+	InArchive << usage;
 
-	// Serialize shaders
-	if ( InArchive.Ver() < VER_LeftOnlyPixelShaderInMaterial )
+	for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )
 	{
-		FShaderRef		shaders[ SF_NumFrequencies ];
-		for ( uint32 index = 0; index < SF_NumFrequencies; ++index )
-		{
-			InArchive << shaders[ index ];
-		}
-
-		shader = shaders[ SF_Pixel ];
-		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package '%s', in future can be removed support it version" ), GetPackage()->GetPath().c_str() );
-	}
-	else
-	{
-		InArchive << shader;
+		InArchive << shadersType[ index ];
 	}
 
-	// Serialize shader parameters
-	if ( InArchive.IsSaving() )
+	InArchive << scalarParameters;
+	InArchive << textureParameters;
+}
+
+FShaderRef FMaterial::GetShader( uint32 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
+{
+	check( InShaderFrequency < SF_NumDrawFrequencies );
+	if ( isNeedUpdateShaderMap )
 	{
-		InArchive << ( uint32 )scalarParameters.size();
-		for ( auto itParam = scalarParameters.begin(), itParamEnd = scalarParameters.end(); itParam != itParamEnd; ++itParam )
-		{
-			InArchive << itParam->first;
-			InArchive << itParam->second;
+		CacheShaderMap();
+	}
+
+	FMeshShaderMap::const_iterator		itVT = shaderMap.find( InVertexFactoryHash );
+	if ( itVT == shaderMap.end() )
+	{
+		return nullptr;
+	}
+	return itVT->second[ InShaderFrequency ];
+}
+
+void FMaterial::CacheShaderMap()
+{
+	if ( !isNeedUpdateShaderMap )
+	{
+		return;
+	}
+
+	// If material usage for render static mesh
+	{
+		const uint32			vertexFactoryHash = FStaticMeshVertexFactory::staticType.GetHash();
+		if ( usage & MU_StaticMesh )
+		{	
+			shaderMap[ vertexFactoryHash ] = GetMeshShaders( vertexFactoryHash );
 		}
-
-		InArchive << ( uint32 )textureParameters.size();
-		for ( auto itParam = textureParameters.begin(), itParamEnd = textureParameters.end(); itParam != itParamEnd; ++itParam )
+		else
 		{
-			if ( !itParam->second )
-			{
-				continue;
-			}
-
-			InArchive << itParam->first;
-			InArchive << itParam->second;
+			shaderMap.erase( vertexFactoryHash );
 		}
 	}
-	else
+
+	isNeedUpdateShaderMap = false;
+}
+
+std::vector< FShaderRef > FMaterial::GetMeshShaders( uint32 InVertexFactoryHash ) const
+{
+	std::vector< FShaderRef >		result;
+	result.resize( SF_NumDrawFrequencies );
+
+	for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )
 	{
-		uint32			numScalarParameters = 0;
-		InArchive << numScalarParameters;
-		for ( uint32 index = 0; index < numScalarParameters; ++index )
+		const FShaderMetaType*		shaderType = shadersType[ index ];
+		if ( !shaderType || InVertexFactoryHash == ( uint32 )INVALID_HASH )
 		{
-			std::wstring		paramName;
-			float				paramValue = 0.f;
-
-			InArchive << paramName;
-			InArchive << paramValue;
-			scalarParameters[ paramName ] = paramValue;
+			continue;
 		}
 
-		uint32			numTextureParameters = 0;
-		InArchive << numTextureParameters;
-		for ( uint32 index = 0; index < numTextureParameters; ++index )
-		{
-			std::wstring		paramName;
-			FTexture2DRef		paramValue;
-
-			InArchive << paramName;
-			InArchive << paramValue;
-
-			if ( paramValue )
-			{
-				textureParameters[ paramName ] = paramValue;
-			}
-		}
+		result[ index ] = GShaderManager->FindInstance( shaderType->GetName(), InVertexFactoryHash );
 	}
+
+	return result;
 }
 
 bool FMaterial::GetScalarParameterValue( const std::wstring& InParameterName, float& OutValue ) const

@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "Core.h"
 #include "Misc/Types.h"
@@ -436,6 +437,64 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::vector< TType 
 		for ( uint32 index = 0; index < arraySize; ++index )
 		{
 			InArchive << InValue[ index ];
+		}
+	}
+
+	return InArchive;
+}
+
+template< typename TKey, typename TValue >
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::unordered_map< TKey, TValue >& InValue )
+{
+	if ( InArchive.IsLoading() && InArchive.Ver() < VER_ShaderMap )
+	{
+		return InArchive;
+	}
+
+	uint32		arraySize = InValue.size();
+	InArchive << arraySize;
+
+	if ( arraySize > 0 )
+	{
+		if ( InArchive.IsLoading() )
+		{
+			for ( uint32 index = 0; index < arraySize; ++index )
+			{
+				TKey		key;
+				TValue		value;
+
+				InArchive << key;
+				InArchive << value;
+				InValue[ key ] = value;
+			}
+		}
+		else
+		{
+			for ( auto itValue = InValue.begin(), itValueEnd = InValue.end(); itValue != itValueEnd; ++itValue )
+			{
+				InArchive << itValue->first;
+				InArchive << itValue->second;
+			}
+		}		
+	}
+
+	return InArchive;
+}
+
+template< typename TKey, typename TValue >
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::unordered_map< TKey, TValue >& InValue )
+{
+	check( InArchive.IsSaving() );
+
+	uint32		arraySize = InValue.size();
+	InArchive << arraySize;
+
+	if ( arraySize > 0 )
+	{
+		for ( auto itValue = InValue.begin(), itValueEnd = InValue.end(); itValue != itValueEnd; ++itValue )
+		{
+			InArchive << itValue->first;
+			InArchive << itValue->second;
 		}
 	}
 

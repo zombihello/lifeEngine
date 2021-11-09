@@ -1,18 +1,17 @@
 #include "Render/SceneRendering.h"
+#include "Render/Scene.h"
 #include "Misc/EngineGlobals.h"
 #include "RHI/BaseRHI.h"
+#include "RHI/BaseBufferRHI.h"
 #include "RHI/TypesRHI.h"
 #include "Render/Texture.h"
 
-FTestDrawPolicy::FTestDrawPolicy( class FMaterial* InMaterial, class FVertexFactory* InVertexFactory, float InDepthBias /* = 0.f */ ) :
-	FMeshDrawingPolicy( InMaterial, InVertexFactory, InDepthBias )
-{
-	pixelShader = InMaterial->GetShader();
-}
+FStaticMeshDrawPolicy::FStaticMeshDrawPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) :
+	FMeshDrawingPolicy( InVertexFactory, InMaterial, InDepthBias )
+{}
 
-void FTestDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
+void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
 {
-	check( pixelShader );
 	FMeshDrawingPolicy::SetShaderParameters( InDeviceContextRHI );
 
 	FTexture2DRef		texture2d;
@@ -23,7 +22,13 @@ void FTestDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDevice
 	}
 }
 
-void FTestDrawPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FSceneView& InSceneView )
+void FStaticMeshDrawPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView )
 {
-	GRHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, 1 );
+	for ( uint32 indexBatch = 0, numBatches = ( uint32 )InMeshBatch.elements.size(); indexBatch < numBatches; ++indexBatch )
+	{
+		const FMeshBatchElement&		batchElement = InMeshBatch.elements[ indexBatch ];
+		check( batchElement.indexBufferRHI );
+
+		GRHI->DrawIndexedPrimitive( InDeviceContextRHI, batchElement.indexBufferRHI, InMeshBatch.primitiveType, batchElement.baseVertexIndex, batchElement.firstIndex, batchElement.numPrimitives );
+	}
 }

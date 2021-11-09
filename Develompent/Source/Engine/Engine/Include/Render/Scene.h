@@ -9,9 +9,14 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include <vector>
+
 #include "Math/Math.h"
 #include "Render/CameraTypes.h"
 #include "Components/CameraComponent.h"
+#include "RHI/BaseRHI.h"
+#include "RHI/BaseBufferRHI.h"
+#include "RHI/TypesRHI.h"
 
 /**
  * @ingroup Engine
@@ -87,6 +92,28 @@ private:
 	FMatrix			projectionMatrix;		/**< Projection matrix */
 	FMatrix			viewProjectionMatrix;	/**< View * Projection matrix */
 	FCameraView		cameraView;				/**< View info of camera */
+};
+
+/**
+ * @ingroup Engine
+ * A batch mesh element definition
+ */
+struct FMeshBatchElement
+{
+	FIndexBufferRHIRef			indexBufferRHI;		/**< Index buffer */
+	uint32						baseVertexIndex;	/**< First index vertex in vertex buffer */
+	uint32						firstIndex;			/**< First index */
+	uint32						numPrimitives;		/**< Number primitives to render */
+};
+
+/**
+ * @ingroup Engine
+ * A batch of mesh elements, all with the same material and vertex buffer
+ */
+struct FMeshBatch
+{
+	std::vector< FMeshBatchElement >	elements;		/**< Elements in batch */
+	EPrimitiveType						primitiveType;	/**< Primitive type */
 };
 
 #endif // !SCENE_H

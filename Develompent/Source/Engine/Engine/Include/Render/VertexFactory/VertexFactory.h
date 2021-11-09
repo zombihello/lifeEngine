@@ -107,10 +107,9 @@ public:
 	 * Constructor
 	 *
 	 * @param[in] InFactoryName Vertex factory name
-	 * @param[in] InShaderName Vertex shader name to use this factory
 	 * @param[in] InFileName File name of source vertex factory
 	 */
-	FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InShaderName, const std::wstring& InFileName );
+	FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName );
 
 	/**
 	 * Get factory name
@@ -119,15 +118,6 @@ public:
 	FORCEINLINE const std::wstring& GetName() const
 	{
 		return factoryName;
-	}
-
-	/**
-	 * Get shader name
-	 * @return Return name vertex shader to use this factory
-	 */
-	FORCEINLINE const std::wstring& GetShaderName() const
-	{
-		return shaderName;
 	}
 
 	/**
@@ -152,7 +142,6 @@ public:
 
 private:
 	std::wstring			factoryName;		/**< Vertex factory name */
-	std::wstring			shaderName;			/**< Vertex shader name */
 	uint32					hash;				/**< Vertex factory hash */
 
 #if WITH_EDITOR
@@ -178,14 +167,10 @@ private:
  * A macro to implement a vertex shader type
  *
  * @param[in] FactoryClass The name of the class representing an instance of the vertex factory type
- * @param[in] ShaderClass The name vertex shader for use factory
  * @param[in] FileName File name of source vertex factory
  */
-#define IMPLEMENT_VERTEX_FACTORY_TYPE( FactoryClass, ShaderClass, FileName ) \
-	FVertexFactoryMetaType			FactoryClass::staticType( \
-		TEXT( #FactoryClass ), \
-		TEXT( #ShaderClass ), \
-		FileName );
+#define IMPLEMENT_VERTEX_FACTORY_TYPE( FactoryClass, FileName ) \
+	FVertexFactoryMetaType			FactoryClass::staticType( TEXT( #FactoryClass ), FileName );
 
 /**
  * @ingroup Engine
@@ -258,15 +243,6 @@ public:
 	virtual FVertexFactoryMetaType* GetType() const = 0;
 
 	/**
-	 * Get vertex shader for factory
-	 * @return Return vertex shader
-	 */
-	FORCEINLINE FShaderRef GetShader() const
-	{
-		return shader;
-	}
-
-	/**
 	 * Get RHI vertex declaration
 	 * @return Return RHI vertex declaration, if factory not initialized return nullptr
 	 */
@@ -286,7 +262,6 @@ public:
 private:
 	std::vector< FVertexStream >	streams;		/**< Array vertex streams */
 	FVertexDeclarationRHIRef		declaration;	/**< Vertex declaration */
-	FShaderRef						shader;			/**< Vertex shader */
 };
 
 #endif // !VERTEXFACTORY_H

@@ -26,11 +26,11 @@ public:
 	/**
 	 * Constructor
 	 * 
-	 * @param[in] InMaterial Material
 	 * @param[in] InVertexFactory Vertex factory
+	 * @param[in] InMaterial Material
 	 * @param[in] InDepthBias Depth bias
 	 */
-	FMeshDrawingPolicy( class FMaterial* InMaterial, class FVertexFactory* InVertexFactory, float InDepthBias = 0.f );
+	FMeshDrawingPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias = 0.f );
 
 	/**
 	 * Destructor
@@ -55,13 +55,16 @@ public:
 	 * Draw mesh
 	 * 
 	 * @param[in] InDeviceContextRHI RHI device context
+	 * @param[in] InMeshBatch Mesh batch to draw
 	 * @param[in] InSceneView Scene view
 	 */
-	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FSceneView& InSceneView ) PURE_VIRTUAL( FMeshDrawingPolicy::Draw, );
+	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView ) PURE_VIRTUAL( FMeshDrawingPolicy::Draw, );
 
 protected:
 	FMaterialRef				material;			/**< Material */
 	FVertexFactoryRef			vertexFactory;		/**< Vertex factory */
+	FShaderRef					vertexShader;		/**< Vertex shader */
+	FShaderRef					pixelShader;		/**< Pixel shader */
 	float						depthBias;			/**< Depth bias */
 };
 

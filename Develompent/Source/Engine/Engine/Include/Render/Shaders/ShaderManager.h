@@ -28,6 +28,11 @@
 	public: \
         static FShaderMetaType          staticType;             /**< Static meta type of shader */ \
         /** */\
+        /** Get meta type of this shader */\
+        /** @return Return meta type shader */\
+        /** */\
+        virtual FShaderMetaType*        GetType() const override                { return &staticType; }\
+        /** */\
         /** @brief Static method for create object of this shader for serialize */ \
         /** @return Return new object of this class */ \
         /** */\
@@ -178,26 +183,16 @@ public:
 
     /**
      * Find instance of shader by name
-     * 
+     *
      * @param[in] InShaderName Shader name
      * @param[in] InVertexFactoryHash Vertex factory hash
      * @return Return reference to shader
      */
-    FORCEINLINE FShaderRef FindInstance( const std::wstring& InShaderName, uint32 InVertexFactoryHash = ( uint32 )INVALID_HASH )
-    {
-        auto        itShader = shaders.find( FShaderKey{ InShaderName, InVertexFactoryHash } );
-		if ( itShader == shaders.end() )
-		{
-			appErrorf( TEXT( "Shader %s with vertex factory hash 0x%X not found in cache" ), InShaderName.c_str(), InVertexFactoryHash );
-			return nullptr;
-		}
-
-		return itShader->second;
-    }
+    FShaderRef FindInstance( const std::wstring& InShaderName, uint32 InVertexFactoryHash );
 
     /**
      * @brief Find instance of shader
-     * 
+     *
      * @param[in] InVertexFactoryHash Vertex factory hash
      * @return Return reference to shader
      */
@@ -217,48 +212,38 @@ public:
         return FindInstance( TShaderClass::staticType.GetName(), TVertexFactoryClass::staticType.GetHash() );
     }
 
-private:
     /**
-     * Struct shader key
+     * Find shader type by name
+     *
+     * @param[in] InShaderName Shader name
+     * @return Return pointer to shader type, if not found return nullptr
      */
-    struct FShaderKey
+    static FORCEINLINE FShaderMetaType* FindShaderType( const std::wstring& InShaderName )
     {
-        /**
-         * Constructor
-         * 
-         * @param[in] InShaderName Shader name
-         * @param[in] InVertexFactoryHash Vertex factory hash
-         */
-        FShaderKey( const std::wstring& InShaderName, uint32 InVertexFactoryHash = ( uint32 )INVALID_HASH )
-            : shaderName( InShaderName )
-            , vertexFactoryHash( InVertexFactoryHash )
-        {}
+        FContainerShaderTypes* container = FContainerShaderTypes::Get();
+        check( container );
 
-        /**
-         * Overload operator ==
-         */
-        FORCEINLINE bool operator==( const FShaderKey& InOther ) const
+        auto        itShaderType = container->shaderMetaTypes.find( InShaderName );
+        if ( itShaderType == container->shaderMetaTypes.end() )
         {
-            return vertexFactoryHash == InOther.vertexFactoryHash && shaderName == InOther.shaderName;
+            return nullptr;
         }
 
-        std::wstring        shaderName;             /**< Shader name */
-        uint32              vertexFactoryHash;      /**< Vertex factory hash */
-    };
+        return itShaderType->second;
+    }
+
+private:
+    /**
+     * @ingroup Engine
+     * Typedef shader map
+     */
+    typedef std::unordered_map< std::wstring, FShaderRef >     FShaderMap;
 
     /**
-     * Shader key hasher
+     * @ingroup Engine
+     * Typedef mesh shader map
      */
-    struct FShaderKeyHasher
-    {
-        /**
-         * Calculate hash
-         */
-		std::size_t operator()( const FShaderKey& InShaderKey ) const
-		{
-			return appCalcHash( InShaderKey.shaderName, InShaderKey.vertexFactoryHash );
-		}
-    };
+    typedef std::unordered_map< uint32, FShaderMap >            FMeshShaderMap;
 
     /**
      * @brief Class container for storage global shader types
@@ -311,8 +296,39 @@ private:
      */
     bool                                                    LoadShaders( const tchar* InPathShaderCache );
 
-    std::unordered_map< FShaderKey, FShaderRef, FShaderKeyHasher >            shaders;            /**< Map of loaded shaders */
+    FMeshShaderMap            shaders;            /**< Map of loaded shaders */
 };
+
+//
+// Serialization
+//
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FShaderMetaType*& InValue )
+{
+	if ( InArchive.IsLoading() )
+	{
+		std::wstring		shaderTypeName;
+		InArchive << shaderTypeName;
+
+		if ( !shaderTypeName.empty() )
+		{
+            InValue = FShaderManager::FindShaderType( shaderTypeName );
+		}
+	}
+	else
+	{
+		InArchive << ( InValue ? InValue->GetName() : std::wstring() );
+	}
+
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FShaderMetaType*& InValue )
+{
+	check( InArchive.IsSaving() );
+    InArchive << ( InValue ? InValue->GetName() : std::wstring() );
+	return InArchive;
+}
 
 #endif // !TESTSHADER_H
 

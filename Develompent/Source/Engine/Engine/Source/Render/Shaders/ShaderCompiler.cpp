@@ -31,28 +31,16 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
 		std::wstring						functionName = metaType->GetFunctionName();
 		bool								result = false;
 
-		// If the current shader is a vertex shader, then we compile it for each vertex factory	
-		if ( frequency == SF_Vertex )
+		// Compile shader for each vertex factory
+		for ( auto itVFType = vertexFactoryTypes.begin(), itVFTypeEnd = vertexFactoryTypes.end(); itVFType != itVFTypeEnd; ++itVFType )
 		{
-			for ( auto itVFType = vertexFactoryTypes.begin(), itVFTypeEnd = vertexFactoryTypes.end(); itVFType != itVFTypeEnd; ++itVFType )
-			{
-				FVertexFactoryMetaType*			vertexFactoryType = itVFType->second;
-				
-				appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );			
-				result = CompileShader( shaderName, shaderSourceFileName, functionName, frequency, shaderCache, vertexFactoryType );
-				check( result );
+			FVertexFactoryMetaType* vertexFactoryType = itVFType->second;
 
-				LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s compiled" ), shaderName.c_str(), vertexFactoryType->GetName().c_str() );
-			}
-		}
-		// Otherwise, compile the shader once
-		else
-		{
-			appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s..." ), shaderName.c_str() ).c_str() );
-			result = CompileShader( shaderName, shaderSourceFileName, functionName, frequency, shaderCache );
+			appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
+			result = CompileShader( shaderName, shaderSourceFileName, functionName, frequency, shaderCache, vertexFactoryType );
 			check( result );
 
-			LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s compiled" ), shaderName.c_str() );
+			LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s compiled" ), shaderName.c_str(), vertexFactoryType->GetName().c_str() );
 		}
 	}
 

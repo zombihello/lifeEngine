@@ -4,9 +4,8 @@
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
-FVertexFactoryMetaType::FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InShaderName, const std::wstring& InFileName )
+FVertexFactoryMetaType::FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName )
 	: factoryName( InFactoryName )
-	, shaderName( InShaderName )
 	, hash( appCalcHash( InFactoryName ) )
 
 #if WITH_EDITOR
@@ -22,7 +21,6 @@ FVertexFactory::~FVertexFactory()
 void FVertexFactory::ReleaseRHI()
 {
 	declaration.SafeRelease();
-	shader.SafeRelease();
 	streams.clear();
 }
 
@@ -47,9 +45,5 @@ void FVertexFactory::InitDeclaration( const FVertexDeclarationElementList& InEle
 
 void FVertexFactory::Init()
 {
-	FVertexFactoryMetaType*			vertexFactoryType = GetType();
-	shader = GShaderManager->FindInstance( vertexFactoryType->GetShaderName(), vertexFactoryType->GetHash() );
-	check( shader );
-
 	BeginInitResource( this );
 }

@@ -32,8 +32,9 @@ typedef TRefCountPtr< class FStaticMesh >				FStaticMeshRef;
 struct FStaticMeshSurface
 {
 	uint32			materialID;				/**< Material ID */
-	uint32			startVertexIndex;		/**< Start vertex index in buffer */
-	uint32			numVertexIndeces;		/**< Number vertex indeces in surface */
+	uint32			baseVertexIndex;		/**< First index vertex in vertex buffer */
+	uint32			firstIndex;				/**< First index */
+	uint32			numPrimitives;			/**< Number primitives in the surface */
 };
 
 /**
@@ -101,6 +102,42 @@ public:
 		return vertexFactory;
 	}
 
+	/**
+	 * Get surfaces
+	 * @return Return array surfaces
+	 */
+	FORCEINLINE const std::vector< FStaticMeshSurface > GetSurfaces() const
+	{
+		return surfaces;
+	}
+
+	/**
+	 * Get materials
+	 * @return Return array materials
+	 */
+	FORCEINLINE const std::vector< FMaterialRef > GetMaterials() const
+	{
+		return materials;
+	}
+
+	/**
+	 * Get RHI vertex buffer
+	 * @return Return RHI vertex buffer, if not created return nullptr
+	 */
+	FORCEINLINE FVertexBufferRHIRef GetVertexBufferRHI() const
+	{
+		return vertexBufferRHI;
+	}
+
+	/**
+	 * Get RHI index buffer
+	 * @return Return RHI index buffer, if not created return nullptr
+	 */
+	FORCEINLINE FIndexBufferRHIRef GetIndexBufferRHI() const
+	{
+		return indexBufferRHI;
+	}
+
 private:
 	TRefCountPtr< FStaticMeshVertexFactory >	vertexFactory;			/**< Vertex factory */
 	std::vector< FMaterialRef >					materials;				/**< Array materials in mesh */
@@ -118,16 +155,18 @@ private:
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshSurface& InValue )
 {
 	InArchive << InValue.materialID;
-	InArchive << InValue.startVertexIndex;
-	InArchive << InValue.numVertexIndeces;
+	InArchive << InValue.baseVertexIndex;
+	InArchive << InValue.firstIndex;
+	InArchive << InValue.numPrimitives;
 	return InArchive;
 }
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshSurface& InValue )
 {
 	InArchive << InValue.materialID;
-	InArchive << InValue.startVertexIndex;
-	InArchive << InValue.numVertexIndeces;
+	InArchive << InValue.baseVertexIndex;
+	InArchive << InValue.firstIndex;
+	InArchive << InValue.numPrimitives;
 	return InArchive;
 }
 

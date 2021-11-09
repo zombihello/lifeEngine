@@ -5,6 +5,10 @@
 	- Implemented base material system
 	- Implemented serialize assets to package
 	- Implemented vertex factory
+	- Implemented bind index buffer and draw indexed primitives
+	- Removed from vertex factory vertex shader, and revert shader array in materials
+	- Implemented class of static meshes
+	- Implemented commandlet for import static meshes
 
 ----------------------------------------------------------------
  Version 0.1.0 :: 02.11.2021

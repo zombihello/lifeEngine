@@ -5,11 +5,18 @@
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/DrawingPolicy.h"
 
-FMeshDrawingPolicy::FMeshDrawingPolicy( class FMaterial* InMaterial, class FVertexFactory* InVertexFactory, float InDepthBias /* = 0.f */ ) :
+FMeshDrawingPolicy::FMeshDrawingPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) :
 	material( InMaterial ),
 	vertexFactory( InVertexFactory ),
 	depthBias( InDepthBias )
-{}
+{
+	check( InVertexFactory && InMaterial );
+
+	uint32			vertexFactoryHash = vertexFactory->GetType()->GetHash();
+	vertexShader	= material->GetShader( vertexFactoryHash, SF_Vertex );
+	pixelShader		= material->GetShader( vertexFactoryHash, SF_Pixel );
+	check( vertexShader && pixelShader );
+}
 
 FMeshDrawingPolicy::~FMeshDrawingPolicy()
 {}
@@ -25,17 +32,14 @@ void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceCo
 		0.f,
 		true
 	};
-
-	FShaderRef			materialShader = material->GetShader();
-	check( materialShader );
-
+	
 	vertexFactory->Set( InDeviceContextRHI );
 	GRHI->SetRasterizerState( InDeviceContextRHI, GRHI->CreateRasterizerState( initializer ) );
 	GRHI->SetBoundShaderState( InDeviceContextRHI, GRHI->CreateBoundShaderState( 
 		TEXT( "BoundShaderState" ), 
 		vertexFactory->GetDeclaration(), 
-		vertexFactory->GetShader()->GetVertexShader(), 
-		materialShader->GetPixelShader() ) );
+		vertexShader->GetVertexShader(), 
+		pixelShader->GetPixelShader() ) );
 }
 
 void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
