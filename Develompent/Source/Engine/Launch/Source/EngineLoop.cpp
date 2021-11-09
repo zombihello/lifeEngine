@@ -288,6 +288,8 @@ void FEngineLoop::Exit()
 {
 	StopRenderingThread();
 
+	GPackageManager->Shutdown();
+
 	GEngine->Shutdown();
 	delete GEngine;
 	GEngine = nullptr;

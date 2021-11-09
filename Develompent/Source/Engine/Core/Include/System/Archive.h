@@ -10,6 +10,7 @@
 #define Archive_H
 
 #include <string>
+#include <vector>
 
 #include "Core.h"
 #include "Misc/Types.h"
@@ -389,6 +390,52 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::wstring& InVal
 		if ( stringSize > 0 )
 		{
 			InArchive.Serialize( ( void* )InValue.data(), stringSize );
+		}
+	}
+
+	return InArchive;
+}
+
+template< typename TType >
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::vector< TType >& InValue )
+{
+	if ( InArchive.IsLoading() && InArchive.Ver() < VER_StaticMesh )
+	{
+		return InArchive;
+	}
+
+	uint32		arraySize = InValue.size();
+	InArchive << arraySize;
+
+	if ( arraySize > 0 )
+	{
+		if ( InArchive.IsLoading() )
+		{
+			InValue.resize( arraySize );
+		}
+
+		for ( uint32 index = 0; index < arraySize; ++index )
+		{
+			InArchive << InValue[ index ];
+		}
+	}
+
+	return InArchive;
+}
+
+template< typename TType >
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::vector< TType >& InValue )
+{
+	check( InArchive.IsSaving() );
+
+	uint32		arraySize = InValue.size();
+	InArchive << arraySize;
+
+	if ( arraySize > 0 )
+	{
+		for ( uint32 index = 0; index < arraySize; ++index )
+		{
+			InArchive << InValue[ index ];
 		}
 	}
 

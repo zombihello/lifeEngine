@@ -30,6 +30,80 @@ class FVertexFactoryMetaType
 {
 public:
 	/**
+	 * @brief Class container for storage global vertex factory types
+	 */
+	struct FContainerVertexFactoryMetaType
+	{
+		/**
+		 * Typedef for vertex factory type map
+		 */
+		typedef std::unordered_map< uint32, FVertexFactoryMetaType* >		FVertexFactoryMap;
+
+		/**
+		 * @brief Get instance of container
+		 * @return Return instance of container
+		 */
+		static FORCEINLINE FContainerVertexFactoryMetaType* Get()
+		{
+			static FContainerVertexFactoryMetaType*			container = nullptr;
+			if ( !container )
+			{
+				container = new FContainerVertexFactoryMetaType();
+			}
+
+			return container;
+		}
+
+		/**
+		 * Register vertex factory type
+		 *
+		 * @param[in] InVertexFactoryMetaType Pointer to vertex factory meta type
+		 */
+		FORCEINLINE void RegisterType( FVertexFactoryMetaType* InVertexFactoryMetaType )
+		{
+			check( InVertexFactoryMetaType );
+			vertexFactoryMetaTypes[ InVertexFactoryMetaType->hash ] = InVertexFactoryMetaType;
+		}
+
+		/**
+		 * Get all registered types
+		 * @return Return array vertex factory meta types
+		 */
+		FORCEINLINE const FVertexFactoryMap& GetRegisteredTypes() const
+		{
+			return vertexFactoryMetaTypes;
+		}
+
+		/**
+		 * Find registered type
+		 *
+		 * @param[in] InHash Vertex factory hash
+		 * @return Return pointer to vertex factory meta type
+		 */
+		FORCEINLINE FVertexFactoryMetaType* FindRegisteredType( uint32 InHash ) const
+		{
+			auto		itType = vertexFactoryMetaTypes.find( InHash );
+			if ( itType == vertexFactoryMetaTypes.end() )
+			{
+				return nullptr;
+			}
+
+			return itType->second;
+		}
+
+		/**
+		 * Get number registered types
+		 * @return Return number registered vertex factory meta types
+		 */
+		FORCEINLINE uint32 GetNumRegisteredTypes() const
+		{
+			return vertexFactoryMetaTypes.size();
+		}
+
+		FVertexFactoryMap			vertexFactoryMetaTypes;		/**< Array vertex factory meta types */
+	};
+
+	/**
 	 * Constructor
 	 *
 	 * @param[in] InFactoryName Vertex factory name
@@ -66,80 +140,6 @@ public:
 	}
 
 #if WITH_EDITOR
-	/**
-	 * @brief Class container for storage global vertex factory types
-	 */
-	struct FContainerVertexFactoryMetaType
-	{
-		/**
-		 * Typedef for vertex factory type map
-		 */
-		typedef std::unordered_map< uint32, FVertexFactoryMetaType* >		FVertexFactoryMap;
-
-		/**
-		 * @brief Get instance of container
-		 * @return Return instance of container
-		 */
-		static FORCEINLINE FContainerVertexFactoryMetaType* Get()
-		{
-			static FContainerVertexFactoryMetaType* container = nullptr;
-			if ( !container )
-			{
-				container = new FContainerVertexFactoryMetaType();
-			}
-
-			return container;
-		}
-
-		/**
-		 * Register vertex factory type
-		 *
-		 * @param[in] InVertexFactoryMetaType Pointer to vertex factory meta type
-		 */
-		FORCEINLINE void RegisterType( FVertexFactoryMetaType* InVertexFactoryMetaType )
-		{
-			check( InVertexFactoryMetaType );
-			vertexFactoryMetaTypes[ InVertexFactoryMetaType->hash ] = InVertexFactoryMetaType;
-		}
-
-		/**
-		 * Get all registered types
-		 * @return Return array vertex factory meta types
-		 */
-		FORCEINLINE const FVertexFactoryMap& GetRegisteredTypes() const
-		{
-			return vertexFactoryMetaTypes;
-		}
-
-		/**
-		 * Find registered type
-		 * 
-		 * @param[in] InHash Vertex factory hash
-		 * @return Return pointer to vertex factory meta type
-		 */
-		FORCEINLINE FVertexFactoryMetaType* FindRegisteredType( uint32 InHash ) const
-		{
-			auto		itType = vertexFactoryMetaTypes.find( InHash );
-			if ( itType == vertexFactoryMetaTypes.end() )
-			{
-				return nullptr;
-			}
-
-			return itType->second;
-		}
-
-		/**
-		 * Get number registered types
-		 * @return Return number registered vertex factory meta types
-		 */
-		FORCEINLINE uint32 GetNumRegisteredTypes() const
-		{
-			return vertexFactoryMetaTypes.size();
-		}
-
-		FVertexFactoryMap			vertexFactoryMetaTypes;		/**< Array vertex factory meta types */
-	};
-
 	/**
 	 * @brief Get file name of vertex factory
 	 * @return Return file name of vertex factory

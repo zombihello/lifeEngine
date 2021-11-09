@@ -13,9 +13,7 @@ FVertexFactoryMetaType::FVertexFactoryMetaType( const std::wstring& InFactoryNam
 	, sourceFilename( InFileName )
 #endif // WITH_EDITOR
 {
-#if WITH_EDITOR
 	FContainerVertexFactoryMetaType::Get()->RegisterType( this );
-#endif // WITH_EDITOR
 }
 
 FVertexFactory::~FVertexFactory()

@@ -167,6 +167,8 @@ void FD3D11RHI::Destroy()
 	dxgiAdapter->Release();
 	dxgiFactory->Release();
 
+	isInitialize = false;
+	globalConstantBuffer = nullptr;
 	immediateContext = nullptr;
 	d3d11Device = nullptr;
 	dxgiAdapter = nullptr;

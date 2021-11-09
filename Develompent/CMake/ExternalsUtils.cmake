@@ -53,6 +53,15 @@ function( IncludeExternals MODULE_NAME )
 			message( SEND_ERROR "Failed to find STB" )
 		endif()
 	
+		# Assimp
+		find_package( Assimp REQUIRED )
+		if ( ASSIMP_FOUND )
+			include_directories( ${ASSIMP_INCLUDE} )
+			target_link_libraries( ${MODULE_NAME} ${ASSIMP_LIB} )
+		else()
+			message( SEND_ERROR "Failed to find Assimp" )
+		endif()
+	
 		# Qt6
 		set( CMAKE_AUTOUIC ON )
 		set( CMAKE_AUTOMOC ON )
@@ -68,23 +77,36 @@ function( IncludeExternals MODULE_NAME )
 endfunction()
 
 function( InstallExternals INSTALL_DIR )
+	set( PLATFORM_BIN_DIR "Unknown" )
+	set( PLATFORM_DLL_EXTENSION "Unknown" )
+	
 	if ( PLATFORM_WINDOWS )
 		if ( PLATFORM_64BIT )
-			set( BINARES 
-			"${SDL2_PATH}/lib/Win64/SDL2.dll" )
+			set( PLATFORM_BIN_DIR "Win64" )	
 		elseif( PLATFORM_32BIT )
-			set( BINARES "${SDL2_PATH}/lib/Win32/SDL2.dll" )
+			set( PLATFORM_BIN_DIR "Win32" )
 		endif()
 		
+		set( PLATFORM_DLL_EXTENSION ".dll" )
+	else()
+		message( SEND_ERROR "Unknown platform" )
+	endif()
+		
+	set( BINARES "${SDL2_PATH}/lib/${PLATFORM_BIN_DIR}/SDL2${PLATFORM_DLL_EXTENSION}" )	
+		
+	if ( WITH_EDITOR )
 		set( BINARES ${BINARES}
-			 "${QT6_PATH}/bin/Qt6Cored.dll" "${QT6_PATH}/bin/Qt6Core.dll"
-			 "${QT6_PATH}/bin/Qt6Guid.dll" "${QT6_PATH}/bin/Qt6Gui.dll"
-			 "${QT6_PATH}/bin/Qt6Widgetsd.dll" "${QT6_PATH}/bin/Qt6Widgets.dll" )
+			 "${QT6_PATH}/bin/Qt6Cored${PLATFORM_DLL_EXTENSION}" 							"${QT6_PATH}/bin/Qt6Core${PLATFORM_DLL_EXTENSION}"
+			 "${QT6_PATH}/bin/Qt6Guid${PLATFORM_DLL_EXTENSION}" 							"${QT6_PATH}/bin/Qt6Gui${PLATFORM_DLL_EXTENSION}"
+			 "${QT6_PATH}/bin/Qt6Widgetsd${PLATFORM_DLL_EXTENSION}" 						"${QT6_PATH}/bin/Qt6Widgets${PLATFORM_DLL_EXTENSION}"
+			 "${ASSIMP_PATH}/bin/${PLATFORM_BIN_DIR}/assimp${PLATFORM_DLL_EXTENSION}" 		"${ASSIMP_PATH}/bin/${PLATFORM_BIN_DIR}/assimpd${PLATFORM_DLL_EXTENSION}" )
 	else()
 		message( SEND_ERROR "Unknown platform" )
 	endif()
 	
-	install( DIRECTORY "${QT6_PATH}/plugins/platforms" DESTINATION ${QT_PLUGIN_DIR} )
-	install( DIRECTORY "${QT6_PATH}/plugins/styles" DESTINATION ${QT_PLUGIN_DIR} )
+	if ( WITH_EDITOR )
+		install( DIRECTORY "${QT6_PATH}/plugins/platforms" DESTINATION ${QT_PLUGIN_DIR} )
+		install( DIRECTORY "${QT6_PATH}/plugins/styles" DESTINATION ${QT_PLUGIN_DIR} )
+	endif()
 	install( FILES ${BINARES} DESTINATION ${INSTALL_DIR} )
 endfunction()

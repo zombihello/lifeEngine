@@ -6,6 +6,7 @@
 #include "System/Package.h"
 #include "Render/Texture.h"
 #include "Render/Material.h"
+#include "Render/StaticMesh.h"
 #include "Scripts/Script.h"
 
 FORCEINLINE FAsset* AssetFactory( EAssetType InType )
@@ -15,6 +16,11 @@ FORCEINLINE FAsset* AssetFactory( EAssetType InType )
 	case AT_Texture2D:		return new FTexture2D();
 	case AT_Material:		return new FMaterial();
 	case AT_Script:			return new FScript();
+	case AT_StaticMesh:		return new FStaticMesh();
+
+	//
+	// Instert new asset type her
+	//
 
 	default:	
 		appErrorf( TEXT( "Unknown asset type %i" ), InType );
@@ -299,6 +305,9 @@ void FPackageManager::Tick()
 		lastCleaningTime = GCurrentTime;
 	}
 }
+
+void FPackageManager::Shutdown()
+{}
 
 void FPackageManager::CleanupUnusedPackages()
 {

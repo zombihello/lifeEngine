@@ -64,6 +64,7 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 	if ( nameTexture.empty() )
 	{
 		nameTexture = srcFilename;
+		LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Texture name is not specified, by default it is assigned %s" ), srcFilename.c_str() );
 	}
 
 	// Loading data from image

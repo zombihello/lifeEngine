@@ -34,6 +34,7 @@ enum ELifeEnginePackageVersion
 	VER_Assets								= 2,					/**< Added in archive assets (FTexture2D, FMaterial, etc) */
 	VER_LeftOnlyPixelShaderInMaterial		= 3,					/**< Removed all shaders except pixel shader from FMaterial */
 	VER_VertexFactory						= 4,					/**< Implemented vertex factory */
+	VER_StaticMesh							= 5,					/**< Implemented static mesh */
 
 	//
 	// New versions can be added here

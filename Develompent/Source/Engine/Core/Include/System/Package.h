@@ -38,7 +38,8 @@ enum EAssetType
 {
 	AT_Texture2D,		/**< Texture 2D */
 	AT_Material,		/**< Material */
-	AT_Script			/**< Script */
+	AT_Script,			/**< Script */
+	AT_StaticMesh		/**< Static mesh */
 };
 
 /**
@@ -105,6 +106,16 @@ public:
 	 * @param[in] InHash Hash asset
 	 */
 	void SetHash( uint32 InHash );
+
+	/**
+	 * Set asset hash from name
+	 * 
+	 * @param[in] InName Name
+	 */
+	FORCEINLINE void SetHashFromName( const std::wstring& InName )
+	{
+		SetHash( appCalcHash( InName ) );
+	}
 
 	/**
 	 * Get asset type
@@ -304,6 +315,11 @@ public:
 	void Tick();
 
 	/**
+	 * Shutdown package manager
+	 */
+	void Shutdown();
+
+	/**
 	 * Find asset in package
 	 * 
 	 * @param[in] InPath Package path
@@ -369,9 +385,6 @@ private:
 // Serialization
 //
 
-/**
- * Overload operator << for serialize FAssetReference
- */
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetReference& InValue )
 {
 	InArchive << InValue.hash;
@@ -379,9 +392,6 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetReference& InValue 
 	return InArchive;
 }
 
-/**
- * Overload operator << for serialize FAssetReference
- */
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetReference& InValue )
 {
 	InArchive << InValue.hash;
@@ -389,18 +399,12 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetReference& In
 	return InArchive;
 }
 
-/**
- * Overload operator << for serialize EAssetType
- */
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, EAssetType& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( EAssetType ) );
 	return InArchive;
 }
 
-/**
- * Overload operator << for serialize EAssetType
- */
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EAssetType& InValue )
 {
 	check( InArchive.IsSaving() );

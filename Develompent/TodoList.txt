@@ -1,6 +1,10 @@
 ----------------------------------------------------------------
  Version 0.2.0
 ----------------------------------------------------------------
+	- Remove from vertex factory vertex shader, and revert shader array in materials
+	- Implement bind index buffer and draw indexed primitives
+	- Refactoring serialize in FArchive and FPackage (remove duplicate code)
+	- Refactoring serialize FTexture2D. Need remove texture file cache and save data in asset packages
 	- Implement class of static meshes
 	- Implement commandlet for import static meshes
 	- Implement caching render states

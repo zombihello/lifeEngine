@@ -19,7 +19,7 @@ FRenderResource::~FRenderResource()
 	}
 
 	// Deleting an initialized FRenderResource will result in a crash later since it is still linked
-	appErrorf( TEXT( "An FRenderResource was deleted without being released first!" ) );
+	//appErrorf( TEXT( "An FRenderResource was deleted without being released first!" ) );
 }
 
 /**

@@ -30,11 +30,13 @@ FViewport::~FViewport()
 #include "Render/Material.h"
 #include "Render/SceneRendering.h"
 #include "System/Package.h"
+#include "Render/StaticMesh.h"
 
 FSceneView								sceneView;
 extern LCameraComponent*				cameraComponent;
 FVertexBufferRHIRef						vertexBuffer;
 FMaterialRef							material;
+FStaticMeshRef							staticMesh;
 TRefCountPtr< FTestVertexFactory >		vertexFactory;
 bool									q = false;
 
@@ -101,6 +103,8 @@ void FViewport::InitRHI()
 		pak.Serialize();*/
 
 		material = GPackageManager->FindAsset( TEXT( "Content/PackageTest.lpak" ), appCalcHash( TEXT( "DefaultMat" ) ) );
+		staticMesh = GPackageManager->FindAsset( TEXT( "Content/BunkerTunnelDoor.lpak" ), appCalcHash( TEXT( "Door" ) ) );
+		staticMesh->SetMaterial( 0, material );
 		q = true;
 	}
 }
@@ -172,7 +176,7 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 			immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
 			GRHI->SetViewParameters( immediateContext, sceneView );
 
-			FTestDrawPolicy		drawPolicy( material, vertexFactory );
+			FTestDrawPolicy		drawPolicy( material, staticMesh->GetVertexFactory() );
 			drawPolicy.SetRenderState( immediateContext );
 			drawPolicy.SetShaderParameters( immediateContext );
 			drawPolicy.Draw( immediateContext, sceneView );

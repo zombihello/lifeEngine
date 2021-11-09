@@ -15,7 +15,7 @@
  * @ingroup WorldEd
  * Commandlet for import texture to engine
  */
-class LImportTextureCommandlet : public LObject
+class LImportTextureCommandlet : public LBaseCommandlet
 {
 	DECLARE_CLASS( LImportTextureCommandlet, LBaseCommandlet )
 

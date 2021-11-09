@@ -19,7 +19,7 @@
  */
 FShaderMetaType::FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance ) :
 	name( InName ),
-	fileName( FString::Format( TEXT( "%s/%s" ), FShaderManager::GetShaderDir(), InFileName.c_str() ) ),
+	fileName( appShaderDir() + InFileName.c_str() ),
 	functionName( InFunctionName ),
 	frequency( InFrequency ),
 	ConstructSerializedInstance( InConstructSerializedInstance ),
@@ -96,7 +96,7 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 			}
 			else
 			{
-				LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s not loaded, because vertex factory with hash 0x%X not found" ), item.vertexFactoryHash );
+				LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s not loaded, because vertex factory with hash 0x%X not found" ), item.name.c_str(), item.vertexFactoryHash );
 			}
 		}
 		else

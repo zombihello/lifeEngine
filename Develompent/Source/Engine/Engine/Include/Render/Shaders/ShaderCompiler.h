@@ -36,12 +36,6 @@ struct FShaderCompilerEnvironment
 {
 	/**
 	 * @brief Constructor
-	 */
-	FShaderCompilerEnvironment()
-	{}
-
-	/**
-	 * @brief Constructor
 	 * @param[in] InFrequency Shader frequency
 	 * @param[in] InVertexFactoryFileName Vertex factory file name
 	 */

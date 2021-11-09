@@ -1,6 +1,6 @@
 #include "LEBuild.h"
-#if WITH_EDITOR
 
+#if WITH_EDITOR
 #include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 #include "Misc/CoreGlobals.h"
@@ -38,7 +38,7 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
 			{
 				FVertexFactoryMetaType*			vertexFactoryType = itVFType->second;
 				
-				appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName() ).c_str() );			
+				appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );			
 				result = CompileShader( shaderName, shaderSourceFileName, functionName, frequency, shaderCache, vertexFactoryType );
 				check( result );
 

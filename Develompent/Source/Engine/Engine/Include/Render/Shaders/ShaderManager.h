@@ -217,15 +217,6 @@ public:
         return FindInstance( TShaderClass::staticType.GetName(), TVertexFactoryClass::staticType.GetHash() );
     }
 
-    /**
-     * @brief Get path to shader dir
-     * @return Return path to shader dir
-     */
-    static FORCEINLINE const tchar*         GetShaderDir()
-    {
-        return TEXT( "../../Engine/Shaders" );
-    }
-
 private:
     /**
      * Struct shader key
