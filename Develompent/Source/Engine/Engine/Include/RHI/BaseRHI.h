@@ -195,8 +195,22 @@ public:
 	 * @param[in] InNumMips Count mips
 	 * @param[in] InFlags Texture create flags (use ETextureCreateFlags)
 	 * @param[in] InData Pointer to data texture
+	 * @return Return pointer to created texture 2D
 	 */
 	virtual FTexture2DRHIRef					CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData = nullptr ) { return nullptr; }
+
+	/**
+	 * Creates a RHI surface that can be bound as a render target
+	 * 
+	 * @param[in] InDebugName Debug name
+	 * @param[in] InSizeX The width of the surface to create
+	 * @param[in] InSizeY The height of the surface to create
+	 * @param[in] InFormat The surface format to create
+	 * @param[in] InResolveTargetTexture The 2d texture which the surface will be resolved to.  It must have been allocated with bResolveTargetable=TRUE
+	 * @param[in] InFlags Surface creation flags
+	 * @return Return pointer to created surface
+	 */
+	virtual FSurfaceRHIRef						CreateTargetableSurface( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, FTexture2DRHIParamRef InResolveTargetTexture, uint32 InFlags ) { return nullptr; }
 
 	/**
 	 * @brief Begin drawing viewport
@@ -347,6 +361,15 @@ public:
 	 * @param[in] InSceneView Scene view
 	 */
 	virtual void								SetViewParameters( class FBaseDeviceContextRHI* InDeviceContext, class FSceneView& InSceneView ) {}
+
+	/**
+	 * Set render target
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InNewRenderTarget New render target
+	 * @param[in] InNewDepthStencilTarget New depth stencil target
+	 */
+	virtual void								SetRenderTarget( class FBaseDeviceContextRHI* InDeviceContext, FSurfaceRHIParamRef InNewRenderTarget , FSurfaceRHIParamRef InNewDepthStencilTarget ) {}
 
 	/**
 	 * @brief Lock vertex buffer

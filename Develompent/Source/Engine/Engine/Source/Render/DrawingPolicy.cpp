@@ -37,7 +37,7 @@ void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceCo
 	vertexFactory->Set( InDeviceContextRHI );
 	GRHI->SetRasterizerState( InDeviceContextRHI, GRHI->CreateRasterizerState( initializer ) );
 	GRHI->SetBoundShaderState( InDeviceContextRHI, GRHI->CreateBoundShaderState( 
-		FString::Format( TEXT( "%s" ), material->GetAssetName().c_str() ).c_str(),
+		material->GetAssetName().c_str(),
 		vertexFactory->GetDeclaration(), 
 		vertexShader->GetVertexShader(), 
 		pixelShader->GetPixelShader() ) );

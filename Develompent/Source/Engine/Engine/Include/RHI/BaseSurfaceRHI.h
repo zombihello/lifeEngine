@@ -19,9 +19,13 @@
  */
 enum EPixelFormat
 {
-    PF_Unknown,			/**< Unknown pixel format */
-    PF_A8R8G8B8,		/**< ARGB with 8 bit per channel */
-	PF_Max				/**< Max count pixel formats */
+	PF_Unknown,					/**< Unknown pixel format */
+	PF_A8R8G8B8,				/**< ARGB with 8 bit per channel */
+	PF_DepthStencil,			/**< Depth stencil format */
+	PF_ShadowDepth,				/**< Shadow depth format */
+	PF_FilteredShadowDepth,		/**< Filtered shadow depth format*/
+	PF_D32,						/**< Depth buffer 32 bit */
+	PF_Max						/**< Max count pixel formats */
 };
 
 /**
@@ -30,9 +34,11 @@ enum EPixelFormat
  */
 enum ETextureCreateFlags
 {
-	TCF_None			= 0,		/**< Null flag */
-	TCF_sRGB			= 1 << 0,	/**< Texture is encoded in sRGB gamma space */
-	TCF_Dynamic			= 1 << 1	/**< Texture that may be updated every frame */
+	TCF_None					= 0,		/**< Null flag */
+	TCF_sRGB					= 1 << 0,	/**< Texture is encoded in sRGB gamma space */
+	TCF_Dynamic					= 1 << 1,	/**< Texture that may be updated every frame */
+	TCF_ResolveTargetable		= 1 << 2,	/**< Texture can be used as a resolve target */
+	TCF_DepthStencil			= 1 << 3	/**< Texture is a depth stencil format that can be sampled */
 };
 
 /**

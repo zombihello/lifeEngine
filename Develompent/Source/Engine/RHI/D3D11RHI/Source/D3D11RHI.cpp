@@ -127,8 +127,13 @@ void FD3D11RHI::Init( bool InIsEditor )
 			adapterDesc.SharedSystemMemory / ( 1024 * 1024 ) );
 
 	// Initialize the platform pixel format map
-	GPixelFormats[ PF_Unknown ].platformFormat		= DXGI_FORMAT_UNKNOWN;
-	GPixelFormats[ PF_A8R8G8B8 ].platformFormat		= DXGI_FORMAT_R8G8B8A8_UNORM;
+	GPixelFormats[ PF_Unknown ].platformFormat					= DXGI_FORMAT_UNKNOWN;
+	GPixelFormats[ PF_A8R8G8B8 ].platformFormat					= DXGI_FORMAT_R8G8B8A8_UNORM;
+	GPixelFormats[ PF_DepthStencil ].platformFormat				= DXGI_FORMAT_R32G8X24_TYPELESS;
+	GPixelFormats[ PF_DepthStencil ].blockBytes					= 8;
+	GPixelFormats[ PF_ShadowDepth ].platformFormat				= DXGI_FORMAT_R16_TYPELESS;
+	GPixelFormats[ PF_FilteredShadowDepth ].platformFormat		= DXGI_FORMAT_D32_FLOAT;
+	GPixelFormats[ PF_D32 ].platformFormat						= DXGI_FORMAT_R32_TYPELESS;
 
 	isInitialize = true;
 }
@@ -279,6 +284,11 @@ FSamplerStateRHIRef FD3D11RHI::CreateSamplerState( const FSamplerStateInitialize
 FTexture2DRHIRef FD3D11RHI::CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData /*= nullptr*/ )
 {
 	return new FD3D11Texture2DRHI( InDebugName, InSizeX, InSizeY, InNumMips, InFormat, InFlags, InData );
+}
+
+FSurfaceRHIRef FD3D11RHI::CreateTargetableSurface( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, FTexture2DRHIParamRef InResolveTargetTexture, uint32 InFlags )
+{
+	return new FD3D11Surface( InResolveTargetTexture );
 }
 
 /**
@@ -484,9 +494,21 @@ void FD3D11RHI::BeginDrawingViewport( class FBaseDeviceContextRHI* InDeviceConte
 	FD3D11DeviceContext*			deviceContext = ( FD3D11DeviceContext* )InDeviceContext;
 	FD3D11Viewport*					viewport = ( FD3D11Viewport* )InViewport;
 
-	ID3D11RenderTargetView*			d3d11RenderTargetView = ( ( FD3D11Surface* )viewport->GetSurface().GetPtr() )->GetD3D11RenderTargetView();
+	ID3D11RenderTargetView*			d3d11RenderTargetView = ( ( FD3D11Surface* )viewport->GetSurface().GetPtr() )->GetRenderTargetView();
 	deviceContext->GetD3D11DeviceContext()->OMSetRenderTargets( 1, &d3d11RenderTargetView, nullptr );
-	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );
+	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );	
+}
+
+void FD3D11RHI::SetRenderTarget( class FBaseDeviceContextRHI* InDeviceContext, FSurfaceRHIParamRef InNewRenderTarget, FSurfaceRHIParamRef InNewDepthStencilTarget )
+{
+	check( InDeviceContext );
+	FD3D11DeviceContext*			deviceContext = ( FD3D11DeviceContext* ) InDeviceContext;
+	FD3D11Surface*					renderTarget = ( FD3D11Surface* )InNewRenderTarget;
+	FD3D11Surface*					depthStencilTarget = ( FD3D11Surface* )InNewDepthStencilTarget;
+
+	ID3D11RenderTargetView*			d3d11RenderTargetView = renderTarget ? renderTarget->GetRenderTargetView() : nullptr;
+	ID3D11DepthStencilView*			d3d11DepthStencilView = depthStencilTarget ? depthStencilTarget->GetDepthStencilView() : nullptr;
+	deviceContext->GetD3D11DeviceContext()->OMSetRenderTargets( 1, &d3d11RenderTargetView, d3d11DepthStencilView );
 }
 
 /**

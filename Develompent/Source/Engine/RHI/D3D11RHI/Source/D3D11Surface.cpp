@@ -59,18 +59,49 @@ FORCEINLINE DXGI_FORMAT FindDXGIFormat( DXGI_FORMAT InFormat, bool InIsSRGB )
 	return InFormat;
 }
 
-FD3D11Surface::FD3D11Surface( ID3D11RenderTargetView* InRenderTargetView ) :
-	d3d11RenderTargetView( InRenderTargetView )
+FD3D11Surface::FD3D11Surface( ID3D11RenderTargetView* InRenderTargetView ) 
+	: d3d11ShaderResourceView( nullptr )
+	, d3d11RenderTargetView( InRenderTargetView )
+	, d3d11DepthStencilView( nullptr )
 {}
+
+FD3D11Surface::FD3D11Surface( FTexture2DRHIParamRef InResolveTargetTexture ) 
+	: d3d11ShaderResourceView( nullptr )
+	, d3d11RenderTargetView( nullptr )
+	, d3d11DepthStencilView( nullptr )
+	, resolveTarget2D( ( FD3D11Texture2DRHI* )InResolveTargetTexture )
+{
+	check( resolveTarget2D );
+	d3d11ShaderResourceView = resolveTarget2D->GetShaderResourceView();
+	d3d11RenderTargetView = resolveTarget2D->GetRenderTargetView();
+	d3d11DepthStencilView = resolveTarget2D->GetDepthStencilView();
+}
 
 FD3D11Surface::~FD3D11Surface()
 {
-	d3d11RenderTargetView->Release();
+	if ( d3d11ShaderResourceView )
+	{
+		d3d11ShaderResourceView->Release();
+	}
+
+	if ( d3d11RenderTargetView )
+	{
+		d3d11RenderTargetView->Release();
+	}
+
+	if ( d3d11DepthStencilView )
+	{
+		d3d11DepthStencilView->Release();
+	}
+	
+	resolveTarget2D.SafeRelease();
 }
 
 FD3D11TextureRHI::FD3D11TextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) :
 	FBaseTextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags ),
-	d3d11ShaderResourceView( nullptr )
+	d3d11ShaderResourceView( nullptr ),
+	d3d11RenderTargetView( nullptr ),
+	d3d11DepthStencilView( nullptr )
 {}
 
 FD3D11TextureRHI::~FD3D11TextureRHI()
@@ -78,6 +109,16 @@ FD3D11TextureRHI::~FD3D11TextureRHI()
 	if ( d3d11ShaderResourceView )
 	{
 		d3d11ShaderResourceView->Release();
+	}
+
+	if ( d3d11RenderTargetView )
+	{
+		d3d11RenderTargetView->Release();
+	}
+
+	if ( d3d11DepthStencilView )
+	{
+		d3d11DepthStencilView->Release();
 	}
 }
 
@@ -98,6 +139,22 @@ FD3D11Texture2DRHI::FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 	d3d11Texture2DDesc.BindFlags			= D3D11_BIND_SHADER_RESOURCE;
 	d3d11Texture2DDesc.CPUAccessFlags		= 0;
 	d3d11Texture2DDesc.MiscFlags			= 0;
+
+	if ( InFlags & TCF_DepthStencil )
+	{
+		d3d11Texture2DDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	}
+	else if ( InFlags & TCF_ResolveTargetable )
+	{
+		if ( InFormat == PF_DepthStencil || InFormat == PF_ShadowDepth || InFormat == PF_FilteredShadowDepth || InFormat == PF_D32 )
+		{
+			d3d11Texture2DDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		}
+		else
+		{
+			d3d11Texture2DDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+		}
+	}
 
 	ID3D11Device*	d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
 	check( d3d11Device );
@@ -137,8 +194,70 @@ FD3D11Texture2DRHI::FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 		d3d11ShaderResourceViewDesc.Texture2D.MostDetailedMip	= 0;
 		d3d11ShaderResourceViewDesc.Texture2D.MipLevels			= InNumMips;
 
+		if ( d3d11Texture2DDesc.Format == DXGI_FORMAT_R32_TYPELESS )
+		{
+			// Use the typed shader resource view format corresponding to DXGI_FORMAT_D32_FLOAT
+			d3d11ShaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		}
+		else if ( d3d11Texture2DDesc.Format == DXGI_FORMAT_R16_TYPELESS )
+		{
+			d3d11ShaderResourceViewDesc.Format = DXGI_FORMAT_R16_UNORM;
+		}
+		else if ( d3d11Texture2DDesc.Format == DXGI_FORMAT_R32G8X24_TYPELESS )
+		{
+			d3d11ShaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+		}
+
 		result = d3d11Device->CreateShaderResourceView( d3d11Texture2D, &d3d11ShaderResourceViewDesc, &d3d11ShaderResourceView );
 		check( result == S_OK );
+	}
+
+	if ( InFlags & TCF_ResolveTargetable )
+	{
+		if ( d3d11Texture2DDesc.BindFlags & D3D11_BIND_RENDER_TARGET )
+		{
+			// Create a render-target-view for the texture if it is resolve targetable
+			D3D11_RENDER_TARGET_VIEW_DESC					d3d11RenderTargetViewDesc;
+			d3d11RenderTargetViewDesc.Format				= platformFormat;
+			d3d11RenderTargetViewDesc.ViewDimension			= D3D11_RTV_DIMENSION_TEXTURE2D;
+			d3d11RenderTargetViewDesc.Texture2D.MipSlice	= 0;
+
+			result = d3d11Device->CreateRenderTargetView( d3d11Texture2D, &d3d11RenderTargetViewDesc, &d3d11RenderTargetView );
+			check( result == S_OK );
+		}
+		else if ( d3d11Texture2DDesc.BindFlags & D3D11_BIND_DEPTH_STENCIL )
+		{
+			// Create a depth-stencil-view for the texture if it is resolve targetable
+			D3D11_DEPTH_STENCIL_VIEW_DESC			d3d11DepthStencilViewDesc;
+			memset( &d3d11DepthStencilViewDesc, 0, sizeof( D3D11_DEPTH_STENCIL_VIEW_DESC ) );
+			d3d11DepthStencilViewDesc.Flags = 0;
+
+			if ( d3d11Texture2DDesc.Format == DXGI_FORMAT_R32_TYPELESS )
+			{
+				// Use the typed depth format corresponding to DXGI_FORMAT_D32_FLOAT
+				d3d11DepthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
+			}
+			//@ROCK - Dustin: Changed Shadow Depth to D32. We're not using the other 8 bits for shadows anyways!
+			else if ( d3d11Texture2DDesc.Format == DXGI_FORMAT_R16_TYPELESS )
+			{
+				d3d11DepthStencilViewDesc.Format = DXGI_FORMAT_D16_UNORM;
+			}
+			//@Rock Bleees
+			else if ( d3d11Texture2DDesc.Format == DXGI_FORMAT_R32G8X24_TYPELESS )
+			{
+				d3d11DepthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+			}
+			else
+			{
+				d3d11DepthStencilViewDesc.Format = d3d11Texture2DDesc.Format;
+			}
+
+			d3d11DepthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+			d3d11DepthStencilViewDesc.Texture2D.MipSlice = 0;
+			
+			result = d3d11Device->CreateDepthStencilView( d3d11Texture2D, &d3d11DepthStencilViewDesc, &d3d11DepthStencilView );
+			check( result == S_OK );
+		}
 	}
 }
 

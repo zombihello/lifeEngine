@@ -9,6 +9,7 @@
 	- Removed from vertex factory vertex shader, and revert shader array in materials
 	- Implemented class of static meshes
 	- Implemented commandlet for import static meshes
+	- Added render to depth buffer
 
 ----------------------------------------------------------------
  Version 0.1.0 :: 02.11.2021

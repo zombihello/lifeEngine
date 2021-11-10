@@ -10,7 +10,7 @@ LCameraComponent::LCameraComponent() :
 	fieldOfView( 90.f ),
 	orthoWidth( 512.f ),
 	orthoHeight( 512.f ),
-	nearClipPlane( 0.f ),
+	nearClipPlane( 0.01f ),
 	farClipPlane( WORLD_MAX ),
 	aspectRatio( 1.777778f )
 {}
@@ -71,6 +71,11 @@ void LCameraComponent::Serialize( class FArchive& InArchive )
 	InArchive << nearClipPlane;
 	InArchive << farClipPlane;
 	InArchive << aspectRatio;
+
+	if ( nearClipPlane <= 0.f )
+	{
+		nearClipPlane = 0.01f;
+	}
 }
 
 void LCameraComponent::GetCameraView( FCameraView& OutDesiredView )

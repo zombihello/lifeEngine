@@ -16,37 +16,6 @@
 
 /**
  * @ingroup D3D11RHI
- * @brief Class for work with DirectX 11 surface
- */
-class FD3D11Surface : public FBaseSurfaceRHI
-{
-public:
-	/**
-	 * @brief Constructor
-	 * 
-	 * @param[in] InRenderTargetView Render target view
-	 */
-												FD3D11Surface( ID3D11RenderTargetView* InRenderTargetView );
-
-	/**
-	 * @brief Destructor
-	 */
-												~FD3D11Surface();
-
-	/**
-	 * @brief Get render target view
-	 */
-	FORCEINLINE ID3D11RenderTargetView*			GetD3D11RenderTargetView() const
-	{
-		return d3d11RenderTargetView;
-	}
-
-private:
-	ID3D11RenderTargetView*				d3d11RenderTargetView;		/**< A view of the surface as a render target */
-};
-
-/**
- * @ingroup D3D11RHI
  * Class of base texture for DirectX 11
  */
 class FD3D11TextureRHI : public FBaseTextureRHI
@@ -77,8 +46,28 @@ public:
 		return d3d11ShaderResourceView;
 	}
 
+	/**
+	 * Get render target view
+	 * @return Return pointer to render target view
+	 */
+	FORCEINLINE ID3D11RenderTargetView* GetRenderTargetView()
+	{
+		return d3d11RenderTargetView;
+	}
+
+	/**
+	 * Get depth stencil view
+	 * @return Return pointer to depth stencil view
+	 */
+	FORCEINLINE ID3D11DepthStencilView* GetDepthStencilView()
+	{
+		return d3d11DepthStencilView;
+	}
+
 protected:
 	ID3D11ShaderResourceView*				d3d11ShaderResourceView;		/**< The view that is used to access the texture from a shader */
+	ID3D11RenderTargetView*					d3d11RenderTargetView;			/**< The view that is used to render to the texture for shader-based resolve */
+	ID3D11DepthStencilView*					d3d11DepthStencilView;			/**< The view that is used to render to the texture for shader-based resolve of depth format textures */
 };
 
 /**
@@ -163,6 +152,66 @@ private:
 	FD3D11Texture2DRHI* CreateStagingResource( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipSizeX, uint32 InMipSizeY, uint32 InSubresource, bool InIsDataWrite, bool InIsUseCPUShadow );
 
 	ID3D11Texture2D*			d3d11Texture2D;			/**< Pointer to DirectX texture 2D */
+};
+
+/**
+ * @ingroup D3D11RHI
+ * @brief Class for work with DirectX 11 surface
+ */
+class FD3D11Surface : public FBaseSurfaceRHI
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param[in] InRenderTargetView Render target view
+	 */
+	FD3D11Surface( ID3D11RenderTargetView* InRenderTargetView );
+
+	/**
+	 * Constructor
+	 * 
+	 * @param[in] InResolveTargetTexture The 2d texture which the surface will be resolved to.  It must have been allocated with bResolveTargetable=TRUE
+	 */
+	FD3D11Surface( FTexture2DRHIParamRef InResolveTargetTexture );
+
+	/**
+	 * @brief Destructor
+	 */
+	~FD3D11Surface();
+
+	/**
+	 * @brief Get render target view
+	 * @return Return pointer to DirectX 11 render target view
+	 */
+	FORCEINLINE ID3D11RenderTargetView*	GetRenderTargetView() const
+	{
+		return d3d11RenderTargetView;
+	}
+
+	/**
+	 * Get shader resource view
+	 * @return Return pointer to DirectX 11 shader resource view
+	 */
+	FORCEINLINE ID3D11ShaderResourceView* GetShaderResourceView() const
+	{
+		return d3d11ShaderResourceView;
+	}
+
+	/**
+	 * Get depth stencil view
+	 * @return Return pointer to DirectX 11 depth stencil view
+	 */
+	FORCEINLINE ID3D11DepthStencilView* GetDepthStencilView() const
+	{
+		return d3d11DepthStencilView;
+	}
+
+private:
+	ID3D11ShaderResourceView*				d3d11ShaderResourceView;		/**< The view that is used to access the texture from a shader */
+	ID3D11RenderTargetView*					d3d11RenderTargetView;			/**< The view that is used to render to the texture for shader-based resolve */
+	ID3D11DepthStencilView*					d3d11DepthStencilView;			/**< The view that is used to render to the texture for shader-based resolve of depth format textures */
+	TRefCountPtr< FD3D11Texture2DRHI >		resolveTarget2D;				/**< 2D texture to resolve surface to */
 };
 
 #endif // D3D11SURFACE_H

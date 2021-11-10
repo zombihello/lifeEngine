@@ -41,6 +41,17 @@ public:
 	virtual void							ClearSurface( FSurfaceRHIParamRef InSurface, const class FColor& InColor ) override;
 
 	/**
+	 * Clear depth stencil
+	 * 
+	 * @param[in] InSurface Surface for clear
+	 * @param[in] InIsClearDepth Is need clear depth buffer
+	 * @param[in] InIsClearStencil Is need clear stencil buffer
+	 * @param[in] InDepthValue Clear the depth buffer with this value
+	 * @param[in] InStencilValue Clear the stencil buffer with this value
+	 */
+	virtual void							ClearDepthStencil( FSurfaceRHIParamRef InSurface, bool InIsClearDepth = true, bool InIsClearStencil = true, float InDepthValue = 1.f, uint8 InStencilValue = 0 ) override;
+
+	/**
 	 * @brief Get D3D11 device context
 	 * @return Pointer to D3D11 device context
 	 */

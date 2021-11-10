@@ -35,6 +35,8 @@ FSceneView								sceneView;
 extern LCameraComponent*				cameraComponent;
 FMaterialRef							material;
 FStaticMeshRef							staticMesh;
+FTexture2DRHIRef						depthBufferTexture2D;
+FSurfaceRHIRef							depthBufferSurface;
 bool									q = false;
 
 void FViewport::InitRHI()
@@ -52,6 +54,9 @@ void FViewport::InitRHI()
 
 	if ( !q )
 	{
+		depthBufferTexture2D = GRHI->CreateTexture2D( TEXT( "DepthBuffer" ), sizeX, sizeY, PF_DepthStencil, 1, TCF_ResolveTargetable | TCF_DepthStencil );
+		depthBufferSurface = GRHI->CreateTargetableSurface( TEXT( "DepthBuffer" ), sizeX, sizeY, PF_DepthStencil, depthBufferTexture2D, TCF_ResolveTargetable | TCF_DepthStencil );
+
 		/*FTexture2DRef texture2D = new FTexture2D();
 		FArchive* ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
 		if ( ar )
@@ -156,7 +161,9 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 		{
 			FBaseDeviceContextRHI* immediateContext = GRHI->GetImmediateContext();
 			GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
+			GRHI->SetRenderTarget( immediateContext, viewportRHI->GetSurface(), depthBufferSurface );
 			immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
+			immediateContext->ClearDepthStencil( depthBufferSurface );
 			GRHI->SetViewParameters( immediateContext, sceneView );
 
 			// Render test static mesh
