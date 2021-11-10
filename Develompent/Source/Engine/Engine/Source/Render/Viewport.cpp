@@ -33,7 +33,6 @@ FViewport::~FViewport()
 
 FSceneView								sceneView;
 extern LCameraComponent*				cameraComponent;
-FMaterialRef							material;
 FStaticMeshRef							staticMesh;
 FTexture2DRHIRef						depthBufferTexture2D;
 FSurfaceRHIRef							depthBufferSurface;
@@ -56,43 +55,116 @@ void FViewport::InitRHI()
 	{
 		depthBufferTexture2D = GRHI->CreateTexture2D( TEXT( "DepthBuffer" ), sizeX, sizeY, PF_DepthStencil, 1, TCF_ResolveTargetable | TCF_DepthStencil );
 		depthBufferSurface = GRHI->CreateTargetableSurface( TEXT( "DepthBuffer" ), sizeX, sizeY, PF_DepthStencil, depthBufferTexture2D, TCF_ResolveTargetable | TCF_DepthStencil );
+		staticMesh = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "Tiger" ) ) );
+		
+		/*FPackage		pak;
+		pak.Open( TEXT( "Content/Tiger.lpak" ), true );
 
-		/*FTexture2DRef texture2D = new FTexture2D();
-		FArchive* ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Engine/Content/EngineTextures.tfc" ) );
-		if ( ar )
 		{
-			ar->SerializeHeader();
-
-			FTextureFileCache		textureFileCache;
-			textureFileCache.Serialize( *ar );
-
-			FTextureCacheItem		textureCacheItem;
-			if ( textureFileCache.Find( appCalcHash( TEXT( "DefaultDiffuse" ) ), &textureCacheItem ) )
+			FTexture2DRef texture2D = new FTexture2D();
+			FArchive* ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Content/Tiger.tfc" ) );
+			if ( ar )
 			{
-				texture2D->SetAssetName( TEXT( "T_Test" ) );
-				texture2D->SetAssetHash( appCalcHash( TEXT( "T_Test" ) ) );
-				texture2D->SetTextureCache( textureCacheItem, TEXT( "/Engine/Content/EngineTextures.tfc" ) );
+				ar->SerializeHeader();
+
+				FTextureFileCache		textureFileCache;
+				textureFileCache.Serialize( *ar );
+
+				FTextureCacheItem		textureCacheItem;
+				if ( textureFileCache.Find( appCalcHash( TEXT( "TankBody" ) ), &textureCacheItem ) )
+				{
+					texture2D->SetAssetName( TEXT( "TankBody_C" ) );
+					texture2D->SetAssetHash( appCalcHash( TEXT( "TankBody_C" ) ) );
+					texture2D->SetTextureCache( textureCacheItem, appBaseDir() + TEXT( "/Content/Tiger.tfc" ) );
+				}
+
+				delete ar;
 			}
 
-			delete ar;
+
+			FMaterialRef		material = new FMaterial();
+			material->SetShader( FBasePassVertexShader::staticType );
+			material->SetShader( FBasePassPixelShader::staticType );
+			material->UsageOnStaticMesh( true );
+			material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
+			material->SetAssetName( TEXT( "TankBody_Mat" ) );
+			material->SetAssetHash( appCalcHash( TEXT( "TankBody_Mat" ) ) );
+			staticMesh->SetMaterial( 1, material );
+			pak.Add( texture2D );
+			pak.Add( material );
 		}
-		material = new FMaterial();
-		material->SetShader( FBasePassVertexShader::staticType );
-		material->SetShader( FBasePassPixelShader::staticType );
-		material->UsageOnStaticMesh( true );
-		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
-		material->SetAssetName( TEXT( "DefaultMaterial" ) );
-		material->SetAssetHash( appCalcHash( TEXT( "DefaultMaterial" ) ) );
 
-		FPackage	pak;
-		pak.Open( TEXT( "Content/PackageTest.lpak" ), true );
-		pak.Add( material );
-		pak.Add( texture2D );
+		{
+			FTexture2DRef texture2D = new FTexture2D();
+			FArchive* ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Content/Tiger.tfc" ) );
+			if ( ar )
+			{
+				ar->SerializeHeader();
+
+				FTextureFileCache		textureFileCache;
+				textureFileCache.Serialize( *ar );
+
+				FTextureCacheItem		textureCacheItem;
+				if ( textureFileCache.Find( appCalcHash( TEXT( "TigerMG" ) ), &textureCacheItem ) )
+				{
+					texture2D->SetAssetName( TEXT( "TigerMG_C" ) );
+					texture2D->SetAssetHash( appCalcHash( TEXT( "TigerMG_C" ) ) );
+					texture2D->SetTextureCache( textureCacheItem, appBaseDir() + TEXT( "/Content/Tiger.tfc" ) );
+				}
+
+				delete ar;
+			}
+
+
+			FMaterialRef		material = new FMaterial();
+			material->SetShader( FBasePassVertexShader::staticType );
+			material->SetShader( FBasePassPixelShader::staticType );
+			material->UsageOnStaticMesh( true );
+			material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
+			material->SetAssetName( TEXT( "TigerMG_Mat" ) );
+			material->SetAssetHash( appCalcHash( TEXT( "TigerMG_Mat" ) ) );
+			staticMesh->SetMaterial( 0, material );
+			pak.Add( texture2D );
+			pak.Add( material );
+		}
+
+		{
+			FTexture2DRef texture2D = new FTexture2D();
+			FArchive* ar = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "/Content/Tiger.tfc" ) );
+			if ( ar )
+			{
+				ar->SerializeHeader();
+
+				FTextureFileCache		textureFileCache;
+				textureFileCache.Serialize( *ar );
+
+				FTextureCacheItem		textureCacheItem;
+				if ( textureFileCache.Find( appCalcHash( TEXT( "TigerTrack" ) ), &textureCacheItem ) )
+				{
+					texture2D->SetAssetName( TEXT( "TigerTrack_C" ) );
+					texture2D->SetAssetHash( appCalcHash( TEXT( "TigerTrack_C" ) ) );
+					texture2D->SetTextureCache( textureCacheItem, appBaseDir() + TEXT( "/Content/Tiger.tfc" ) );
+				}
+
+				delete ar;
+			}
+
+
+			FMaterialRef		material = new FMaterial();
+			material->SetShader( FBasePassVertexShader::staticType );
+			material->SetShader( FBasePassPixelShader::staticType );
+			material->UsageOnStaticMesh( true );
+			material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
+			material->SetAssetName( TEXT( "TigerTrack_Mat" ) );
+			material->SetAssetHash( appCalcHash( TEXT( "TigerTrack_Mat" ) ) );
+			staticMesh->SetMaterial( 2, material );
+			pak.Add( texture2D );
+			pak.Add( material );
+		}
+
+		pak.Add( staticMesh );
 		pak.Serialize();*/
-
-		material = GPackageManager->FindAsset( TEXT( "Content/PackageTest.lpak" ), appCalcHash( TEXT( "DefaultMaterial" ) ) );
-		staticMesh = GPackageManager->FindAsset( TEXT( "Content/BunkerTunnelDoor.lpak" ), appCalcHash( TEXT( "BunkerTunnelDoor" ) ) );
-		staticMesh->SetMaterial( 0, material );
+		
 		q = true;
 	}
 }

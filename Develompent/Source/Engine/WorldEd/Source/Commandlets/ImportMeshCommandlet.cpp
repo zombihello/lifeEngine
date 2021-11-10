@@ -82,11 +82,8 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 	std::vector< FStaticMeshSurface >			surfaces;
 	std::vector< FMaterialRef >					materials;
 	for ( auto itRoot = meshes.begin(), itRootEnd = meshes.end(); itRoot != itRootEnd; ++itRoot )
-	{
-		std::vector< FStaticMeshVertexType >		vertexBuffer;
-		FStaticMeshVertexType						vertex;
-		FStaticMeshSurface							surface;
-		appMemzero( &vertex, sizeof( FStaticMeshVertexType ) );
+	{	
+		FStaticMeshSurface							surface;	
 		appMemzero( &surface, sizeof( FStaticMeshSurface ) );
 
 		surface.firstIndex = indeces.size();
@@ -94,7 +91,10 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 
 		for ( auto itMesh = itRoot->second.begin(), itMeshEnd = itRoot->second.end(); itMesh != itMeshEnd; ++itMesh )
 		{
-			aiMesh*				mesh = ( *itMesh ).mesh;
+			std::vector< FStaticMeshVertexType >	vertexBuffer;
+			FStaticMeshVertexType					vertex;
+			aiMesh*									mesh = ( *itMesh ).mesh;
+			appMemzero( &vertex, sizeof( FStaticMeshVertexType ) );
 
 			// Prepare the vertex buffer.
 			// If the vertices of the mesh do not fit into the buffer, then
@@ -168,21 +168,21 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 						indeces.push_back( it - verteces.begin() );
 				}
 			}
-
-			// We process material
-			if ( itRoot->first < aiScene->mNumMaterials )
-			{
-				materials.push_back( FMaterialRef() );
-			}
-			else
-			{
-				LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Material with id %i large. Surface not created" ), itRoot->first );
-				continue;
-			}
-
-			surface.numPrimitives = ( indeces.size() - surface.firstIndex ) / 3.f;		// 1 primitive = 3 indeces (triangles)
-			surfaces.push_back( surface );
 		}
+
+		// We process material
+		if ( itRoot->first < aiScene->mNumMaterials )
+		{
+			materials.push_back( FMaterialRef() );
+		}
+		else
+		{
+			LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Material with id %i large. Surface not created" ), itRoot->first );
+			continue;
+		}
+
+		surface.numPrimitives = ( indeces.size() - surface.firstIndex ) / 3.f;		// 1 primitive = 3 indeces (triangles)
+		surfaces.push_back( surface );
 	}
 
 	// Serialize static mesh in archive

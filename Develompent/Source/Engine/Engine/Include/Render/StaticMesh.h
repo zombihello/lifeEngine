@@ -121,6 +121,22 @@ public:
 	}
 
 	/**
+	 * Get material by index
+	 * 
+	 * @param[in] InMaterialIndex Material index
+	 * @return Return material, if index not valid return nullptr
+	 */
+	FORCEINLINE FMaterialRef GetMaterial( uint32 InMaterialIndex ) const
+	{
+		if ( InMaterialIndex >= materials.size() )
+		{
+			return nullptr;
+		}
+
+		return materials[ InMaterialIndex ];
+	}
+
+	/**
 	 * Get RHI vertex buffer
 	 * @return Return RHI vertex buffer, if not created return nullptr
 	 */
@@ -136,6 +152,15 @@ public:
 	FORCEINLINE FIndexBufferRHIRef GetIndexBufferRHI() const
 	{
 		return indexBufferRHI;
+	}
+
+	/**
+	 * Get number materials
+	 * @return Return number materials in mesh
+	 */
+	FORCEINLINE uint32 GetNumMaterials() const
+	{
+		return materials.size();
 	}
 
 private:

@@ -100,8 +100,6 @@ function( InstallExternals INSTALL_DIR )
 			 "${QT6_PATH}/bin/Qt6Guid${PLATFORM_DLL_EXTENSION}" 							"${QT6_PATH}/bin/Qt6Gui${PLATFORM_DLL_EXTENSION}"
 			 "${QT6_PATH}/bin/Qt6Widgetsd${PLATFORM_DLL_EXTENSION}" 						"${QT6_PATH}/bin/Qt6Widgets${PLATFORM_DLL_EXTENSION}"
 			 "${ASSIMP_PATH}/bin/${PLATFORM_BIN_DIR}/assimp${PLATFORM_DLL_EXTENSION}" 		"${ASSIMP_PATH}/bin/${PLATFORM_BIN_DIR}/assimpd${PLATFORM_DLL_EXTENSION}" )
-	else()
-		message( SEND_ERROR "Unknown platform" )
 	endif()
 	
 	if ( WITH_EDITOR )

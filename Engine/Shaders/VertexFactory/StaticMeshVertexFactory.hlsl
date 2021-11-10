@@ -19,7 +19,7 @@ float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 
 float2 VertexFactory_GetTexCoord( FVertexFactoryInput InInput, uint InTexCoordIndex )
 {
-	return InInput.texCoord0;
+	return float2( InInput.texCoord0.x, -InInput.texCoord0.y );
 }
 
 #endif // !VERTEXFACTORY_H

@@ -66,7 +66,7 @@ void FTexture2D::Serialize( class FArchive& InArchive )
 	// If we loading Texture2D - load texture cache
 	if ( InArchive.IsLoading() )
 	{
-		FArchive*		archive = GFileSystem->CreateFileReader( appBaseDir() + textureCachePath );
+		FArchive*		archive = GFileSystem->CreateFileReader( textureCachePath );
 		if ( !archive )
 		{
 			LE_LOG( LT_Warning, LC_Package, TEXT( "Texture cache '%s' not found" ), textureCachePath.c_str() );
