@@ -117,6 +117,8 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 	GScriptEngine->Init();
 	GRHI->Init( GIsEditor );
 
+	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
+
 	// Creating engine from config
 	{
 		std::wstring		classEngineName = TEXT( "LBaseEngine" );
@@ -163,6 +165,8 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 			{
 				LBaseCommandlet*			commandlet = lclassCommandlet->CreateObject< LBaseCommandlet >();
 				check( commandlet );
+
+				GIsCommandlet = true;
 				LE_LOG( LT_Log, LC_Commandlet, TEXT( "Started commandlet '%s'" ), nameCommandlet.c_str() );
 				commandlet->Main( InCmdLine );
 				delete commandlet;
@@ -174,7 +178,6 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 	}
 #endif // WITH_EDITOR
 
-	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
 	return result;
 }
 

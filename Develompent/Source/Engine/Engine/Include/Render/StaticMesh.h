@@ -197,27 +197,20 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshSurface&
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshRef& InValue )
 {
-	if ( InArchive.IsSaving() )
-	{
-		InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
-	}
-	else
-	{
-		FAssetReference			assetReference;
-		InArchive << assetReference;
-		if ( assetReference.IsValid() )
-		{
-			InValue = GPackageManager->FindAsset( assetReference.pathPackage, assetReference.hash );
-		}
-	}
+	FAssetRef			asset = InValue;
+	InArchive << asset;
 
+	if ( InArchive.IsLoading() )
+	{
+		InValue = asset;
+	}
 	return InArchive;
 }
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshRef& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
+	InArchive << ( FAssetRef )InValue;
 	return InArchive;
 }
 

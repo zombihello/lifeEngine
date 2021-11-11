@@ -75,7 +75,7 @@ void FViewport::InitRHI()
 				{
 					texture2D->SetAssetName( TEXT( "TankBody_C" ) );
 					texture2D->SetAssetHash( appCalcHash( TEXT( "TankBody_C" ) ) );
-					texture2D->SetTextureCache( textureCacheItem, appBaseDir() + TEXT( "/Content/Tiger.tfc" ) );
+					texture2D->SetData( PF_A8R8G8B8, textureCacheItem.sizeX, textureCacheItem.sizeY, textureCacheItem.data );
 				}
 
 				delete ar;
@@ -109,7 +109,7 @@ void FViewport::InitRHI()
 				{
 					texture2D->SetAssetName( TEXT( "TigerMG_C" ) );
 					texture2D->SetAssetHash( appCalcHash( TEXT( "TigerMG_C" ) ) );
-					texture2D->SetTextureCache( textureCacheItem, appBaseDir() + TEXT( "/Content/Tiger.tfc" ) );
+					texture2D->SetData( PF_A8R8G8B8, textureCacheItem.sizeX, textureCacheItem.sizeY, textureCacheItem.data );
 				}
 
 				delete ar;
@@ -143,7 +143,7 @@ void FViewport::InitRHI()
 				{
 					texture2D->SetAssetName( TEXT( "TigerTrack_C" ) );
 					texture2D->SetAssetHash( appCalcHash( TEXT( "TigerTrack_C" ) ) );
-					texture2D->SetTextureCache( textureCacheItem, appBaseDir() + TEXT( "/Content/Tiger.tfc" ) );
+					texture2D->SetData( PF_A8R8G8B8, textureCacheItem.sizeX, textureCacheItem.sizeY, textureCacheItem.data );
 				}
 
 				delete ar;

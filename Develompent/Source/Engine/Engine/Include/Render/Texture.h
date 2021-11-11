@@ -63,12 +63,14 @@ public:
 	virtual void Serialize( class FArchive& InArchive ) override;
 
 	/**
-	 * Set texture cache
+	 * Set texture data
 	 * 
-	 * @param[in] InTextureCache Texture cache
-	 * @param[in] InTextureCachePath Path to file with this texture cache
+	 * @param[in] InPixelFormat Pixel format
+	 * @param[in] InSizeX Width
+	 * @param[in] InSizeY Height
+	 * @param[in] InData Data
 	 */
-	void SetTextureCache( const struct FTextureCacheItem& InTextureCache, const std::wstring& InTextureCachePath );
+	void SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector< byte >& InData );
 
 	/**
 	 * Set address mod for U coord
@@ -124,8 +126,6 @@ public:
 	}
 
 private:
-	std::wstring				textureCachePath;	/**< Path to file with texture cache */
-	uint32						textureCacheHash;	/**< Texture cache hash */
 	uint32						sizeX;				/**< Width of texture */
 	uint32						sizeY;				/**< Height of texture */
 	std::vector< byte >			data;				/**< Data used when loading texture */
@@ -141,27 +141,20 @@ private:
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTexture2DRef& InValue )
 {
-	if ( InArchive.IsSaving() )
-	{
-		InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
-	}
-	else
-	{	
-		FAssetReference			assetReference;
-		InArchive << assetReference;
-		if ( assetReference.IsValid() )
-		{
-			InValue = GPackageManager->FindAsset( assetReference.pathPackage, assetReference.hash );
-		}
-	}
+	FAssetRef			asset = InValue;
+	InArchive << asset;
 
+	if ( InArchive.IsLoading() )
+	{
+		InValue = asset;
+	}
 	return InArchive;
 }
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FTexture2DRef& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
+	InArchive << ( FAssetRef )InValue;
 	return InArchive;
 }
 

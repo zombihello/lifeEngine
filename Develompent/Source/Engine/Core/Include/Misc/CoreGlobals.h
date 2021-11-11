@@ -65,8 +65,15 @@ extern bool							GIsRequestingExit;
  * Whether engine was launched for editing
  */
 extern bool							GIsEditor;
+
+/**
+ * @ingroup Core
+ * Whether engine was launched for commandlet
+ */
+extern bool							GIsCommandlet;
 #else
 #define								GIsEditor 0
+#define								GIsCommandlet 0
 #endif // WITH_EDITOR
 
 /**

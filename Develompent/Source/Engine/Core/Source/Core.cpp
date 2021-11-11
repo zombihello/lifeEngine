@@ -28,6 +28,7 @@ FPackageManager*        GPackageManager             = new FPackageManager();
 #if WITH_EDITOR
 FConfig                 GEditorConfig;
 bool			        GIsEditor                   = false;
+bool                    GIsCommandlet               = false;
 #endif // WITH_EDITOR
 
 /**

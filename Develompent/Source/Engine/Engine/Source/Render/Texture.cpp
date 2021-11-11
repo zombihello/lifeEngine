@@ -7,14 +7,11 @@
 #include "Misc/EngineGlobals.h"
 #include "Render/Texture.h"
 #include "Render/RenderUtils.h"
-#include "Render/TextureFileCache.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
-#include "Render/TextureFileCache.h"
 
 FTexture2D::FTexture2D() :
 	FAsset( AT_Texture2D ),
-	textureCacheHash( ( uint32 )INVALID_HASH ),
 	sizeX( 0 ),
 	sizeY( 0 ),
 	pixelFormat( PF_Unknown ),
@@ -29,65 +26,54 @@ void FTexture2D::InitRHI()
 {
 	check( !data.empty() );
 	texture = GRHI->CreateTexture2D( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeX, sizeY, pixelFormat, 1, 0, data.data() );
-	data.clear();
+
+	if ( !GIsEditor && !GIsCommandlet )
+	{
+		data.clear();
+	}
 }
 
 void FTexture2D::ReleaseRHI()
 {
-	texture = nullptr;
+	texture.SafeRelease();
 }
 
-void FTexture2D::SetTextureCache( const struct FTextureCacheItem& InTextureCache, const std::wstring& InTextureCachePath )
+void FTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector<byte>& InData )
 {
-	check( InTextureCache.hash != ( uint32 )INVALID_HASH );
-	
-	// Copy new parameters of texture
-	textureCachePath		= InTextureCachePath;
-	textureCacheHash		= InTextureCache.hash;
-	sizeX					= InTextureCache.sizeX;
-	sizeY					= InTextureCache.sizeY;
-	pixelFormat				= InTextureCache.pixelFormat;
-	data					= InTextureCache.data;
-
+	pixelFormat		= InPixelFormat;
+	sizeX			= InSizeX;
+	sizeY			= InSizeY;
+	data			= InData;
 	BeginUpdateResource( this );
 }
 
 void FTexture2D::Serialize( class FArchive& InArchive )
 {
 	FAsset::Serialize( InArchive );
-	InArchive << textureCachePath;
-	InArchive << textureCacheHash;
+
+	if ( InArchive.Ver() < VER_RemovedTFC )
+	{
+		std::wstring		textureCachePath;
+		uint32				textureCacheHash;
+
+		InArchive << textureCachePath;
+		InArchive << textureCacheHash;
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated version FTexture2D in package. Texture not loaded correctly" ) );
+	}
+	else
+	{
+		InArchive << data;
+	}
+
 	InArchive << sizeX;
 	InArchive << sizeY;
 	InArchive << pixelFormat;
 	InArchive << addressU;
 	InArchive << addressV;
 
-	// If we loading Texture2D - load texture cache
+	// If we loading Texture2D - update render resource
 	if ( InArchive.IsLoading() )
 	{
-		FArchive*		archive = GFileSystem->CreateFileReader( textureCachePath );
-		if ( !archive )
-		{
-			LE_LOG( LT_Warning, LC_Package, TEXT( "Texture cache '%s' not found" ), textureCachePath.c_str() );
-			return;
-		}
-
-		FTextureFileCache		textureFileCache;
-		archive->SerializeHeader();
-		textureFileCache.Serialize( *archive );
-
-		FTextureCacheItem		textureCacheItem;
-		if ( textureFileCache.Find( textureCacheHash, &textureCacheItem ) )
-		{
-			data = textureCacheItem.data;
-			BeginUpdateResource( this );
-		}
-		else
-		{
-			LE_LOG( LT_Warning, LC_Package, TEXT( "In Texture cache '%s' not found item with hash 0x%X" ), textureCachePath.c_str(), textureCacheHash );
-		}
-
-		delete archive;
+		BeginUpdateResource( this );
 	}
 }

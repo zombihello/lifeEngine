@@ -1,8 +1,7 @@
 ----------------------------------------------------------------
  Version 0.2.0
 ----------------------------------------------------------------
-	- Refactoring serialize in FArchive and FPackage (remove duplicate code)
-	- Refactoring serialize FTexture2D and FStaticMesh. Need remove texture file cache and save data in asset packages
+	- Optimize serialize bulk data
 	- Implement caching render states
 	- Add support SHIPPING build
 	- Implement FScopeLock for auto lock and unclok FCriticalSection

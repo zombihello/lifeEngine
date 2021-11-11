@@ -5,9 +5,10 @@
 #include "Misc/Misc.h"
 #include "Misc/CoreGlobals.h"
 #include "System/BaseFileSystem.h"
+#include "System/Package.h"
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
-#include "Render/TextureFileCache.h"
+#include "Render/Texture.h"
 #include "Render/RenderUtils.h"
 #include "Commandlets/ImportTextureCommandlet.h"
 
@@ -74,40 +75,22 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 	void*			data = stbi_load( TCHAR_TO_ANSI( srcFilename.c_str() ), ( int* ) &sizeX, ( int* ) &sizeY, &numComponents, 4 );
 	check( data );
 
-	FTextureCacheItem				textureCacheItem;
-	textureCacheItem.hash			= appCalcHash( nameTexture );
-	textureCacheItem.pixelFormat	= PF_A8R8G8B8;
-	textureCacheItem.sizeX			= sizeX;
-	textureCacheItem.sizeY			= sizeY;
-	textureCacheItem.data.resize( sizeX * sizeY * GPixelFormats[ PF_A8R8G8B8 ].blockBytes );
-	memcpy( textureCacheItem.data.data(), data, textureCacheItem.data.size() );
-
-	// Serialize texture cache if his already created
-	FTextureFileCache		textureCache;
+	// Create texture 2D and serialize to package
+	FTexture2D		texture2D;
+	texture2D.SetAssetName( nameTexture );
+	texture2D.SetAssetHash( appCalcHash( nameTexture ) );
 	{
-		FArchive*		archive = GFileSystem->CreateFileReader( dstFilename.c_str() );
-		if ( archive )
-		{
-			archive->SerializeHeader();
-			if ( archive->Type() == AT_TextureCache )
-			{
-				textureCache.Serialize( *archive );
-			}
-
-			delete archive;
-		}
+		std::vector< byte >		tempData;
+		tempData.resize( sizeX * sizeY * GPixelFormats[ PF_A8R8G8B8 ].blockBytes );
+		memcpy( tempData.data(), data, tempData.size() );
+		texture2D.SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 	}
 
-	// Add and save update texture cache
-	textureCache.Add( textureCacheItem );
-
-	FArchive*			archive = GFileSystem->CreateFileWriter( dstFilename.c_str(), AW_NoFail | ( isAppend ? AW_Append : AW_None ) );
-	archive->SetType( AT_TextureCache );
-
-	archive->SerializeHeader();
-	textureCache.Serialize( *archive );
+	FPackage		package;
+	check( package.Open( dstFilename, true ) );
+	package.Add( &texture2D );
+	package.Serialize();
 
 	// Clean up all data
 	stbi_image_free( data );
-	delete archive;
 }

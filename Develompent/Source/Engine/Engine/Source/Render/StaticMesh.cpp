@@ -16,7 +16,6 @@ void FStaticMesh::InitRHI()
 	if ( numVerteces > 0 )
 	{
 		vertexBufferRHI = GRHI->CreateVertexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( FStaticMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
-		verteces.clear();
 
 		// Initialize vertex factory
 		vertexFactory = new FStaticMeshVertexFactory();
@@ -25,10 +24,15 @@ void FStaticMesh::InitRHI()
 	}
 
 	// Create index buffer
-	uint32			numIndeces = ( uint32 ) indeces.size();
+	uint32			numIndeces = ( uint32 )indeces.size();
 	if ( numIndeces > 0 )
 	{
 		indexBufferRHI = GRHI->CreateIndexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
+	}
+
+	if ( !GIsEditor && !GIsCommandlet )
+	{
+		verteces.clear();
 		indeces.clear();
 	}
 }

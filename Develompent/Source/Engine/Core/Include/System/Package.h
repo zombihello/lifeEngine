@@ -422,4 +422,30 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EAssetType& InValue
 	return InArchive;
 }
 
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetRef& InValue )
+{
+	if ( InArchive.IsSaving() )
+	{
+		InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
+	}
+	else
+	{
+		FAssetReference			assetReference;
+		InArchive << assetReference;
+		if ( assetReference.IsValid() )
+		{
+			InValue = GPackageManager->FindAsset( assetReference.pathPackage, assetReference.hash );
+		}
+	}
+
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetRef& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
+	return InArchive;
+}
+
 #endif // !PACKAGE_H
