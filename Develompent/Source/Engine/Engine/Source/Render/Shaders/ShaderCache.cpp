@@ -1,6 +1,6 @@
 #include "Render/Shaders/ShaderCache.h"
 
-#define SHADER_CACHE_VERSION			2
+#define SHADER_CACHE_VERSION			3
 
 /**
  * Serialize of FShaderCacheItem
@@ -12,21 +12,15 @@ void FShaderCache::FShaderCacheItem::Serialize( FArchive& InArchive )
 	InArchive << numInstructions;
 	InArchive << name;
 
-	if ( InArchive.IsLoading() )
+	if ( InArchive.Ver() < VER_CompressedZlib )
 	{
-		// Load byte code of shader
-		uint32		codeSize = 0;
-		InArchive << codeSize;
-
-		code.resize( codeSize );
-		InArchive.Serialize( ( void* )code.data(), codeSize );
+		std::vector<byte>		tmpCode;
+		InArchive << tmpCode;
+		code = tmpCode;
 	}
-	else if ( InArchive.IsSaving() )
+	else
 	{
-		// Save byte code of shader
-		uint32		codeSize = ( uint32 )code.size();
-		InArchive << codeSize;
-		InArchive.Serialize( ( void* )code.data(), codeSize );
+		InArchive << code;
 	}
 }
 

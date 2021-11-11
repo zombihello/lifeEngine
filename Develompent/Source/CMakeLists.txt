@@ -68,6 +68,7 @@ set( RAPIDJSON_PATH ${EXTERNAL_DIR}/rapidjson )
 set( LUAJIT_PATH ${EXTERNAL_DIR}/LuaJIT-2.1 )
 set( LUABRIDGE_PATH ${EXTERNAL_DIR}/LuaBridge-2.6 )
 set( GLM_PATH ${EXTERNAL_DIR}/glm-0.9.9.8 )
+set( ZLIB_PATH ${EXTERNAL_DIR}/zlib )
 
 if ( WITH_EDITOR )
 	set( STB_PATH ${EXTERNAL_DIR}/stb )

@@ -1,7 +1,6 @@
 ----------------------------------------------------------------
  Version 0.2.0
 ----------------------------------------------------------------
-	- Optimize serialize bulk data
 	- Implement caching render states
 	- Add support SHIPPING build
 	- Implement FScopeLock for auto lock and unclok FCriticalSection

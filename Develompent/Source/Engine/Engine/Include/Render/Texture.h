@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "RenderResource.h"
+#include "Containers/BulkData.h"
 #include "System/Package.h"
 #include "RHI/BaseSurfaceRHI.h"
 #include "RHI/BaseStateRHI.h"
@@ -128,7 +129,7 @@ public:
 private:
 	uint32						sizeX;				/**< Width of texture */
 	uint32						sizeY;				/**< Height of texture */
-	std::vector< byte >			data;				/**< Data used when loading texture */
+	FBulkData<byte>				data;				/**< Data used when loading texture */
 	EPixelFormat				pixelFormat;		/**< Pixel format of texture */
 	FTexture2DRHIRef			texture;			/**< Reference to RHI texture */
 	ESamplerAddressMode			addressU;			/**< Address mode for U coord */

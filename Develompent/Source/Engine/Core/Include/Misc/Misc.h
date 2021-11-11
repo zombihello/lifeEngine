@@ -18,6 +18,28 @@
 
 /**
  * @ingroup Core
+ * Flags controlling [de]compression
+ */
+enum ECompressionFlags
+{
+	CF_None = 0,		/**< No compression */
+	CF_ZLIB = 1 << 0,	/**< Compress with ZLIB */
+};
+
+/**
+ * @ingroup Core
+ * Size of chunk for loading compression data
+ */
+#define LOADING_COMPRESSION_CHUNK_SIZE			131072
+
+/**
+ * @ingroup Core
+ * Size of chunk for saving compression data
+ */
+#define SAVING_COMPRESSION_CHUNK_SIZE			LOADING_COMPRESSION_CHUNK_SIZE
+
+/**
+ * @ingroup Core
  * Is char is whitespace
  * 
  * @param[in] InChar Tested char
@@ -94,6 +116,34 @@ FORCEINLINE uint32 appCalcHash( const std::wstring& InName, uint32 InHash = 0 )
 {
 	return appMemFastHash( InName.data(), ( uint32 )InName.size() * sizeof( std::wstring::value_type ), InHash );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
 }
+
+/**
+ * @ingroup Core
+ * Thread-safe abstract compression routine. Compresses memory from uncompressed buffer and writes it to compressed
+ * buffer. Updates CompressedSize with size of compressed data. Compression controlled by the passed in flags.
+ *
+ * @param[in] InFlags Flags to control what method to use and optionally control memory vs speed
+ * @param[in] InCompressedBuffer Buffer compressed data is going to be written to
+ * @param[in/out] OutCompressedSize Size of CompressedBuffer, at exit will be size of compressed data
+ * @param[in] InUncompressedBuffer Buffer containing uncompressed data
+ * @param[in] InUncompressedSize Size of uncompressed data in bytes
+ * @return true if compression succeeds, false if it fails because CompressedBuffer was too small or other reasons
+ */
+bool appCompressMemory( ECompressionFlags InFlags, void* InCompressedBuffer, uint32& InOutCompressedSize, const void* InUncompressedBuffer, uint32 InUncompressedSize );
+
+/**
+ * @ingroup Core
+ * Thread-safe abstract decompression routine. Uncompresses memory from compressed buffer and writes it to uncompressed
+ * buffer. UncompressedSize is expected to be the exact size of the data after decompression.
+ *
+ * @param[in] InFlags Flags to control what method to use to decompress
+ * @param[in] InUncompressedBuffer Buffer containing uncompressed data
+ * @param[in] InUncompressedSize Size of uncompressed data in bytes
+ * @param[in] InCompressedBuffer Buffer compressed data is going to be read from
+ * @param[in] InCompressedSize Size of CompressedBuffer data in bytes
+ * @return true if compression succeeds, false if it fails because CompressedBuffer was too small or other reasons
+ */
+bool appUncompressMemory( ECompressionFlags InFlags, void* InUncompressedBuffer, uint32 InUncompressedSize, const void* InCompressedBuffer, uint32 InCompressedSize );
 
 /**
  * @ingroup Core

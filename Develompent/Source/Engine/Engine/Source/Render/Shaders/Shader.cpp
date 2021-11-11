@@ -21,27 +21,27 @@ void FShader::Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem )
 	switch ( frequency )
 	{
 	case SF_Vertex:
-		vertexShader = shaderRHI = GRHI->CreateVertexShader( name.c_str(), InShaderCacheItem.code.data(), ( uint32 )InShaderCacheItem.code.size() );
+		vertexShader = shaderRHI = GRHI->CreateVertexShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
 		check( vertexShader );
 		break;
 
 	case SF_Hull:
-		hullShader = shaderRHI = GRHI->CreateHullShader( name.c_str(), InShaderCacheItem.code.data(), ( uint32 )InShaderCacheItem.code.size() );
+		hullShader = shaderRHI = GRHI->CreateHullShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
 		check( hullShader );
 		break;
 
 	case SF_Domain:
-		domainShader = shaderRHI = GRHI->CreateDomainShader( name.c_str(), InShaderCacheItem.code.data(), ( uint32 )InShaderCacheItem.code.size() );
+		domainShader = shaderRHI = GRHI->CreateDomainShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
 		check( domainShader );
 		break;
 
 	case SF_Pixel:
-		pixelShader = shaderRHI = GRHI->CreatePixelShader( name.c_str(), InShaderCacheItem.code.data(), ( uint32 )InShaderCacheItem.code.size() );
+		pixelShader = shaderRHI = GRHI->CreatePixelShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
 		check( pixelShader );
 		break;
 
 	case SF_Geometry:
-		geometryShader = shaderRHI = GRHI->CreateGeometryShader( name.c_str(), InShaderCacheItem.code.data(), ( uint32 )InShaderCacheItem.code.size() );
+		geometryShader = shaderRHI = GRHI->CreateGeometryShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
 		check( geometryShader );
 		break;
 

@@ -15,6 +15,7 @@
 
 #include "Core.h"
 #include "Misc/Types.h"
+#include "Misc/Misc.h"
 
 /**
  * @ingroup Core
@@ -53,6 +54,15 @@ public:
 	 * @param[in] InSize Size of buffer
 	 */
 	virtual void			Serialize( void* InBuffer, uint32 InSize ) {}
+
+	/**
+	 * Serialize compression data
+	 * 
+	 * @param[in] InBuffer Pointer to buffer for serialize
+	 * @param[in] InSize Size of buffer
+	 * @param[in] InFlags Compression flags (see ECompressionFlags)
+	 */
+	void SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionFlags InFlags );
 
 	/**
 	 * Serialize archive header
@@ -132,6 +142,17 @@ public:
 protected:
 	uint32					arVer;		/**< Archive version (look ELifeEnginePackageVersion) */
 	EArchiveType			arType;		/**< Archive type */
+};
+
+/**
+ * @ingroup Core
+ * Helper structure for compression support, containing information on compressed
+ * and uncompressed size of a chunk of data.
+ */
+struct FCompressedChunkInfo
+{
+	uint32		compressedSize;			/**< Compressed size of data */
+	uint32		uncompressedSize;		/**< Uncompresses size of data */
 };
 
 //
@@ -249,6 +270,19 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, EArchiveType& InValue )
 }
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EArchiveType& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FCompressedChunkInfo& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FCompressedChunkInfo& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );

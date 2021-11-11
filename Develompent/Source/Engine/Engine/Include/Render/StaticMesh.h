@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "RenderResource.h"
+#include "Containers/BulkData.h"
 #include "System/Package.h"
 #include "Render/Material.h"
 #include "Render/VertexFactory/StaticMeshVertexFactory.h"
@@ -167,8 +168,8 @@ private:
 	TRefCountPtr< FStaticMeshVertexFactory >	vertexFactory;			/**< Vertex factory */
 	std::vector< FMaterialRef >					materials;				/**< Array materials in mesh */
 	std::vector< FStaticMeshSurface >			surfaces;				/**< Array surfaces in mesh */
-	std::vector< FStaticMeshVertexType >		verteces;				/**< Array verteces to create RHI vertex buffer */
-	std::vector< uint32 >						indeces;				/**< Array indeces to create RHI index buffer */
+	FBulkData< FStaticMeshVertexType >			verteces;				/**< Array verteces to create RHI vertex buffer */	
+	FBulkData< uint32 >							indeces;				/**< Array indeces to create RHI index buffer */
 	FVertexBufferRHIRef							vertexBufferRHI;		/**< RHI vertex buffer */
 	FIndexBufferRHIRef							indexBufferRHI;			/**< RHI index buffer */
 };

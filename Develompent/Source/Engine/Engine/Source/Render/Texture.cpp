@@ -24,12 +24,12 @@ FTexture2D::~FTexture2D()
 
 void FTexture2D::InitRHI()
 {
-	check( !data.empty() );
-	texture = GRHI->CreateTexture2D( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeX, sizeY, pixelFormat, 1, 0, data.data() );
+	check( data.Num() > 0 );
+	texture = GRHI->CreateTexture2D( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeX, sizeY, pixelFormat, 1, 0, data.GetData() );
 
 	if ( !GIsEditor && !GIsCommandlet )
 	{
-		data.clear();
+		data.RemoveAllElements();
 	}
 }
 
@@ -59,6 +59,13 @@ void FTexture2D::Serialize( class FArchive& InArchive )
 		InArchive << textureCachePath;
 		InArchive << textureCacheHash;
 		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated version FTexture2D in package. Texture not loaded correctly" ) );
+	}
+	else if ( InArchive.Ver() < VER_CompressedZlib )
+	{
+		std::vector<byte>		tmpData;
+		InArchive << tmpData;
+		data = tmpData;
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package version, in future must be removed supports" ) );
 	}
 	else
 	{

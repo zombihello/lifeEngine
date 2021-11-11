@@ -12,6 +12,7 @@
 	- Added render to depth buffer
 	- Refactored serialize in FArchive and FPackage (remove duplicate code)
 	- Refactored serialize FTexture2D and FStaticMesh. Removed texture file cache and save data in asset packages
+	- Optimized serialize bulk data
 
 ----------------------------------------------------------------
  Version 0.1.0 :: 02.11.2021

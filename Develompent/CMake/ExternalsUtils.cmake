@@ -41,6 +41,15 @@ function( IncludeExternals MODULE_NAME )
 		message( SEND_ERROR "Failed to find GLM" )
 	endif()
 	
+	# Zlib
+	find_package( Zlib REQUIRED )
+	if ( ZLIB_FOUND )
+		include_directories( ${ZLIB_INCLUDE} )
+		target_link_libraries( ${MODULE_NAME} ${ZLIB_LIB} )
+	else()
+		message( SEND_ERROR "Failed to find ZLIB" )
+	endif()
+	
 	#
 	# Externals for WorldEd
 	#

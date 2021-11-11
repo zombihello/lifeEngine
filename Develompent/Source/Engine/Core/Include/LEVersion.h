@@ -38,6 +38,7 @@ enum ELifeEnginePackageVersion
 	VER_ShaderMap							= 6,					/**< Added in material shader map */
 	VER_AssetName							= 7,					/**< Added asset name in package */
 	VER_RemovedTFC							= 8,					/**< Removed texture file cache */
+	VER_CompressedZlib						= 9,					/**< Added in archive compression ZLIB */
 
 	//
 	// New versions can be added here

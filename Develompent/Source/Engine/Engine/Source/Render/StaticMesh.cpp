@@ -1,4 +1,5 @@
 #include "Containers/String.h"
+#include "Logger/LoggerMacros.h"
 #include "System/Archive.h"
 #include "Render/StaticMesh.h"
 
@@ -12,10 +13,10 @@ FStaticMesh::~FStaticMesh()
 void FStaticMesh::InitRHI()
 {
 	// Create vertex buffer
-	uint32			numVerteces = ( uint32 )verteces.size();
+	uint32			numVerteces = ( uint32 )verteces.Num();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = GRHI->CreateVertexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( FStaticMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = GRHI->CreateVertexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( FStaticMeshVertexType ) * numVerteces, ( byte* )verteces.GetData(), RUF_Static );
 
 		// Initialize vertex factory
 		vertexFactory = new FStaticMeshVertexFactory();
@@ -24,16 +25,16 @@ void FStaticMesh::InitRHI()
 	}
 
 	// Create index buffer
-	uint32			numIndeces = ( uint32 )indeces.size();
+	uint32			numIndeces = ( uint32 )indeces.Num();
 	if ( numIndeces > 0 )
 	{
-		indexBufferRHI = GRHI->CreateIndexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
+		indexBufferRHI = GRHI->CreateIndexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.GetData(), RUF_Static );
 	}
 
 	if ( !GIsEditor && !GIsCommandlet )
 	{
-		verteces.clear();
-		indeces.clear();
+		verteces.RemoveAllElements();
+		indeces.RemoveAllElements();
 	}
 }
 
@@ -52,8 +53,24 @@ void FStaticMesh::Serialize( class FArchive& InArchive )
 	}
 
 	FAsset::Serialize( InArchive );
-	InArchive << verteces;
-	InArchive << indeces;
+
+	if ( InArchive.Ver() < VER_CompressedZlib )
+	{
+		std::vector<FStaticMeshVertexType>		tmpVerteces;
+		std::vector<uint32>						tmpIndeces;
+		InArchive << tmpVerteces;
+		InArchive << tmpIndeces;
+
+		verteces = tmpVerteces;
+		indeces = tmpIndeces;
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package version, in future must be removed supports" ) );
+	}
+	else
+	{
+		InArchive << verteces;
+		InArchive << indeces;
+	}
+
 	InArchive << surfaces;
 	InArchive << materials;
 
