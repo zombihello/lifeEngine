@@ -178,6 +178,7 @@ void FD3D11RHI::Destroy()
 	d3d11Device = nullptr;
 	dxgiAdapter = nullptr;
 	dxgiFactory = nullptr;
+	appMemzero( &stateCache, sizeof( FD3D11StateCache ) );
 }
 
 /**
@@ -305,9 +306,10 @@ class FBaseDeviceContextRHI* FD3D11RHI::GetImmediateContext() const
 void FD3D11RHI::SetViewport( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ )
 {
 	D3D11_VIEWPORT			d3d11Viewport = { ( float )InMinX, ( float )InMinY, ( float )InMaxX - InMinX, ( float )InMaxY - InMinY, ( float )InMinZ, InMaxZ };
-	if ( d3d11Viewport.Width > 0 && d3d11Viewport.Height > 0 )
+	if ( d3d11Viewport.Width > 0 && d3d11Viewport.Height > 0 && d3d11Viewport != stateCache.viewport )
 	{
 		static_cast< FD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->RSSetViewports( 1, &d3d11Viewport );
+		stateCache.viewport = d3d11Viewport;
 	}
 }
 
@@ -318,18 +320,71 @@ void FD3D11RHI::SetBoundShaderState( class FBaseDeviceContextRHI* InDeviceContex
 {
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	FD3D11BoundShaderStateRHI*		boundShaderState = ( FD3D11BoundShaderStateRHI* )InBoundShaderState;
-	FD3D11VertexShaderRHI*			vertexShader = ( FD3D11VertexShaderRHI* )boundShaderState->GetVertexShader().GetPtr();
-	FD3D11PixelShaderRHI*			pixelShader = ( FD3D11PixelShaderRHI* )boundShaderState->GetPixelShader().GetPtr();
-	FD3D11HullShaderRHI*			hullShader = ( FD3D11HullShaderRHI* )boundShaderState->GetHullShader().GetPtr();
-	FD3D11DomainShaderRHI*			domainShader = ( FD3D11DomainShaderRHI* )boundShaderState->GetDomainShader().GetPtr();
-	FD3D11GeometryShaderRHI*		geometryShader = ( FD3D11GeometryShaderRHI* )boundShaderState->GetGeometryShader().GetPtr();
 
-	d3d11DeviceContext->IASetInputLayout( boundShaderState->GetD3D11InputLayout() );
-	d3d11DeviceContext->VSSetShader( vertexShader ? vertexShader->GetResource() : nullptr, nullptr, 0 );
-	d3d11DeviceContext->PSSetShader( pixelShader ? pixelShader->GetResource() : nullptr, nullptr, 0 );
-	d3d11DeviceContext->GSSetShader( geometryShader ? geometryShader->GetResource() : nullptr, nullptr, 0 );
-	d3d11DeviceContext->HSSetShader( hullShader ? hullShader->GetResource() : nullptr, nullptr, 0 );
-	d3d11DeviceContext->DSSetShader( domainShader ? domainShader->GetResource() : nullptr, nullptr, 0 );
+	// Bind input layout
+	{
+		ID3D11InputLayout*			d3d11InputLayout = boundShaderState ? boundShaderState->GetD3D11InputLayout() : nullptr;
+		if ( d3d11InputLayout != stateCache.inputLayout )
+		{
+			d3d11DeviceContext->IASetInputLayout( d3d11InputLayout );
+			stateCache.inputLayout = d3d11InputLayout;
+		}
+	}
+
+	// Bind vertex shader
+	{
+		FD3D11VertexShaderRHI*		vertexShader		= boundShaderState ? ( FD3D11VertexShaderRHI* )boundShaderState->GetVertexShader().GetPtr() : nullptr;
+		ID3D11VertexShader*			d3d11VertexShader	= vertexShader ? vertexShader->GetResource() : nullptr;
+		if ( d3d11VertexShader != stateCache.vertexShader )
+		{
+			d3d11DeviceContext->VSSetShader( d3d11VertexShader, nullptr, 0 );
+			stateCache.vertexShader = d3d11VertexShader;
+		}
+	}
+
+	// Bind pixel shader
+	{
+		FD3D11PixelShaderRHI*		pixelShader			= boundShaderState ? ( FD3D11PixelShaderRHI* )boundShaderState->GetPixelShader().GetPtr() : nullptr;
+		ID3D11PixelShader*			d3d11PixelShader	= pixelShader ? pixelShader->GetResource() : nullptr;
+		if ( d3d11PixelShader != stateCache.pixelShader )
+		{
+			d3d11DeviceContext->PSSetShader( d3d11PixelShader, nullptr, 0 );
+			stateCache.pixelShader = d3d11PixelShader;
+		}
+	}
+
+	// Bind geometry shader
+	{
+		FD3D11GeometryShaderRHI*	geometryShader		= boundShaderState ? ( FD3D11GeometryShaderRHI* )boundShaderState->GetGeometryShader().GetPtr() : nullptr;
+		ID3D11GeometryShader*		d3d11GeometryShader = geometryShader ? geometryShader->GetResource() : nullptr;
+		if ( d3d11GeometryShader != stateCache.geometryShader )
+		{
+			d3d11DeviceContext->GSSetShader( d3d11GeometryShader, nullptr, 0 );
+			stateCache.geometryShader = d3d11GeometryShader;
+		}
+	}
+
+	// Bind hull shader
+	{
+		FD3D11HullShaderRHI*		hullShader			= boundShaderState ? ( FD3D11HullShaderRHI* )boundShaderState->GetHullShader().GetPtr() : nullptr;
+		ID3D11HullShader*			d3d11HullShader		= hullShader ? hullShader->GetResource() : nullptr;
+		if ( d3d11HullShader != stateCache.hullShader )
+		{
+			d3d11DeviceContext->HSSetShader( d3d11HullShader, nullptr, 0 );
+			stateCache.hullShader = d3d11HullShader;
+		}
+	}
+
+	// Bind domain shader
+	{
+		FD3D11DomainShaderRHI*		domainShader		= boundShaderState ? ( FD3D11DomainShaderRHI* )boundShaderState->GetDomainShader().GetPtr() : nullptr;
+		ID3D11DomainShader*			d3d11DomainShader	= domainShader ? domainShader->GetResource() : nullptr;
+		if ( d3d11DomainShader != stateCache.domainShader )
+		{
+			d3d11DeviceContext->DSSetShader( d3d11DomainShader, nullptr, 0 );
+			stateCache.domainShader = d3d11DomainShader;
+		}
+	}
 }
 
 /**
@@ -337,10 +392,15 @@ void FD3D11RHI::SetBoundShaderState( class FBaseDeviceContextRHI* InDeviceContex
  */
 void FD3D11RHI::SetStreamSource( class FBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, FVertexBufferRHIParamRef InVertexBuffer, uint32 InStride, uint32 InOffset )
 {
-	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
-	ID3D11Buffer*					d3d11Buffer = ( ( FD3D11VertexBufferRHI* )InVertexBuffer )->GetD3D11Buffer();
-	
-	d3d11DeviceContext->IASetVertexBuffers( InStreamIndex, 1, &d3d11Buffer, &InStride, &InOffset );
+	ID3D11DeviceContext*			d3d11DeviceContext		= ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	ID3D11Buffer*					d3d11Buffer				= InVertexBuffer ? ( ( FD3D11VertexBufferRHI* )InVertexBuffer )->GetD3D11Buffer() : nullptr;
+	FD3D11StateVertexBuffer			stateVertexBuffer		= { d3d11Buffer, InStride, InOffset };
+
+	if ( stateVertexBuffer != stateCache.vertexBuffers[ InStreamIndex ] )
+	{
+		d3d11DeviceContext->IASetVertexBuffers( InStreamIndex, 1, &d3d11Buffer, &InStride, &InOffset );
+		stateCache.vertexBuffers[ InStreamIndex ] = stateVertexBuffer;
+	}
 }
 
 /**
@@ -348,29 +408,38 @@ void FD3D11RHI::SetStreamSource( class FBaseDeviceContextRHI* InDeviceContext, u
  */
 void FD3D11RHI::SetRasterizerState( class FBaseDeviceContextRHI* InDeviceContext, FRasterizerStateRHIParamRef InNewState )
 {
-	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
-	d3d11DeviceContext->RSSetState( ( ( FD3D11RasterizerStateRHI* )InNewState )->GetResource() );
+	ID3D11DeviceContext*			d3d11DeviceContext		= ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	ID3D11RasterizerState*			d3d11RasterizerState	= InNewState ? ( ( FD3D11RasterizerStateRHI* )InNewState )->GetResource() : nullptr;
+
+	if ( d3d11RasterizerState != stateCache.rasterizerState )
+	{
+		d3d11DeviceContext->RSSetState( d3d11RasterizerState );
+		stateCache.rasterizerState = d3d11RasterizerState;
+	}
 }
 
 void FD3D11RHI::SetSamplerState( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FSamplerStateRHIParamRef InNewState, uint32 InStateIndex )
 {
-	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
-	ID3D11SamplerState*				d3d11SamplerState = ( ( FD3D11SamplerStateRHI* )InNewState )->GetResource();
-	d3d11DeviceContext->PSSetSamplers( InStateIndex, 1, &d3d11SamplerState );
+	ID3D11DeviceContext*			d3d11DeviceContext		= ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	ID3D11SamplerState*				d3d11SamplerState		= InNewState ? ( ( FD3D11SamplerStateRHI* )InNewState )->GetResource() : nullptr;
+	
+	if ( d3d11SamplerState != stateCache.psSamplerStates[ InStateIndex ] )
+	{
+		d3d11DeviceContext->PSSetSamplers( InStateIndex, 1, &d3d11SamplerState );
+		stateCache.psSamplerStates[ InStateIndex ] = d3d11SamplerState;
+	}
 }
 
 void FD3D11RHI::SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FTextureRHIParamRef InTexture, uint32 InTextureIndex )
 {
-	ID3D11ShaderResourceView*		d3d11ShaderResourceView = nullptr;
-	if ( InTexture )
-	{
-		d3d11ShaderResourceView = ( ( FD3D11TextureRHI* )InTexture )->GetShaderResourceView();
-	}
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* ) InDeviceContext )->GetD3D11DeviceContext();
+	ID3D11ShaderResourceView*		d3d11ShaderResourceView = InTexture ? ( ( FD3D11TextureRHI* )InTexture )->GetShaderResourceView() : nullptr;		// BS yehor.pohuliaka - Nullptr shader resource view is probably a code mistake
 
-	// Trying to set a valid texture with a nullptr shader resource view is probably a code mistake
-	check( !InTexture || d3d11ShaderResourceView );
-	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
-	d3d11DeviceContext->PSSetShaderResources( InTextureIndex, 1, &d3d11ShaderResourceView );
+	if ( d3d11ShaderResourceView != stateCache.psShaderResourceViews[ InTextureIndex ] )
+	{
+		d3d11DeviceContext->PSSetShaderResources( InTextureIndex, 1, &d3d11ShaderResourceView );
+		stateCache.psShaderResourceViews[ InTextureIndex ] = d3d11ShaderResourceView;
+	}
 }
 
 //void FD3D11RHI::SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FVertexShaderRHIParamRef InVertexShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
@@ -464,7 +533,17 @@ void FD3D11RHI::DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPr
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	uint32							vertexCount = GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
 
-	d3d11DeviceContext->IASetPrimitiveTopology( GetD3D11PrimitiveType( InPrimitiveType, false ) );
+	// Set primitive topology
+	{
+		D3D11_PRIMITIVE_TOPOLOGY		d3d11PrimitiveTopology = GetD3D11PrimitiveType( InPrimitiveType, false );
+		if ( d3d11PrimitiveTopology != stateCache.primitiveTopology )
+		{
+			d3d11DeviceContext->IASetPrimitiveTopology( d3d11PrimitiveTopology );
+			stateCache.primitiveTopology = d3d11PrimitiveTopology;
+		}
+	}
+
+	// Draw primitive
 	d3d11DeviceContext->Draw( vertexCount, InBaseVertexIndex );
 }
 
@@ -475,13 +554,30 @@ void FD3D11RHI::DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceConte
 	FD3D11IndexBufferRHI*			indexBuffer = ( FD3D11IndexBufferRHI* )InIndexBuffer;
 
 	// Bind index buffer
-	const DXGI_FORMAT				format = ( indexBuffer->GetStride() == sizeof( uint16 ) ) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
-	ID3D11Buffer*					d3d11IndexBuffer = indexBuffer->GetD3D11Buffer();
-	d3d11DeviceContext->IASetIndexBuffer( d3d11IndexBuffer, format, 0 );
+	{
+		const DXGI_FORMAT				format = ( indexBuffer->GetStride() == sizeof( uint16 ) ) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+		ID3D11Buffer*					d3d11IndexBuffer = indexBuffer->GetD3D11Buffer();
+		FD3D11StateIndexBuffer			stateIndexBuffer = { d3d11IndexBuffer, format, 0 };
+		
+		if ( stateIndexBuffer != stateCache.indexBuffer )
+		{
+			d3d11DeviceContext->IASetIndexBuffer( d3d11IndexBuffer, format, 0 );
+			stateCache.indexBuffer = stateIndexBuffer;
+		}
+	}
 
-	// Draw indexed primitive
+	// Set primitive topology
+	{
+		D3D11_PRIMITIVE_TOPOLOGY		d3d11PrimitiveTopology = GetD3D11PrimitiveType( InPrimitiveType, false );
+		if ( d3d11PrimitiveTopology != stateCache.primitiveTopology )
+		{
+			d3d11DeviceContext->IASetPrimitiveTopology( d3d11PrimitiveTopology );
+			stateCache.primitiveTopology = d3d11PrimitiveTopology;
+		}
+	}
+
+	// Draw indexed primitive	
 	uint32							indexCount = GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
-	d3d11DeviceContext->IASetPrimitiveTopology( GetD3D11PrimitiveType( InPrimitiveType, false ) );
 	d3d11DeviceContext->DrawIndexed( indexCount, InStartIndex, InBaseVertexIndex );
 }
 
@@ -493,22 +589,31 @@ void FD3D11RHI::BeginDrawingViewport( class FBaseDeviceContextRHI* InDeviceConte
 	check( InDeviceContext && InViewport );
 	FD3D11DeviceContext*			deviceContext = ( FD3D11DeviceContext* )InDeviceContext;
 	FD3D11Viewport*					viewport = ( FD3D11Viewport* )InViewport;
+	check( viewport );
 
-	ID3D11RenderTargetView*			d3d11RenderTargetView = ( ( FD3D11Surface* )viewport->GetSurface().GetPtr() )->GetRenderTargetView();
-	deviceContext->GetD3D11DeviceContext()->OMSetRenderTargets( 1, &d3d11RenderTargetView, nullptr );
+	SetRenderTarget( InDeviceContext, viewport->GetSurface(), nullptr );
 	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );	
 }
 
 void FD3D11RHI::SetRenderTarget( class FBaseDeviceContextRHI* InDeviceContext, FSurfaceRHIParamRef InNewRenderTarget, FSurfaceRHIParamRef InNewDepthStencilTarget )
 {
 	check( InDeviceContext );
-	FD3D11DeviceContext*			deviceContext = ( FD3D11DeviceContext* ) InDeviceContext;
-	FD3D11Surface*					renderTarget = ( FD3D11Surface* )InNewRenderTarget;
-	FD3D11Surface*					depthStencilTarget = ( FD3D11Surface* )InNewDepthStencilTarget;
+	FD3D11DeviceContext*			deviceContext				= ( FD3D11DeviceContext* ) InDeviceContext;
+	FD3D11Surface*					renderTarget				= ( FD3D11Surface* )InNewRenderTarget;
+	FD3D11Surface*					depthStencilTarget			= ( FD3D11Surface* )InNewDepthStencilTarget;
 
-	ID3D11RenderTargetView*			d3d11RenderTargetView = renderTarget ? renderTarget->GetRenderTargetView() : nullptr;
-	ID3D11DepthStencilView*			d3d11DepthStencilView = depthStencilTarget ? depthStencilTarget->GetDepthStencilView() : nullptr;
-	deviceContext->GetD3D11DeviceContext()->OMSetRenderTargets( 1, &d3d11RenderTargetView, d3d11DepthStencilView );
+	// Set render target
+	{
+		ID3D11RenderTargetView*		d3d11RenderTargetView		= renderTarget ? renderTarget->GetRenderTargetView() : nullptr;
+		ID3D11DepthStencilView*		d3d11DepthStencilView		= depthStencilTarget ? depthStencilTarget->GetDepthStencilView() : nullptr;
+		
+		if ( d3d11RenderTargetView != stateCache.renderTargetViews[ 0 ] || d3d11DepthStencilView != stateCache.depthStencilView )
+		{
+			deviceContext->GetD3D11DeviceContext()->OMSetRenderTargets( 1, &d3d11RenderTargetView, d3d11DepthStencilView );
+			stateCache.renderTargetViews[ 0 ] = d3d11RenderTargetView;
+			stateCache.depthStencilView = d3d11DepthStencilView;
+		}
+	}
 }
 
 /**

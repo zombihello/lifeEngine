@@ -54,6 +54,24 @@ static FORCEINLINE D3D11_COMPARISON_FUNC TranslateSamplerCompareFunction( ESampl
 	};
 }
 
+FD3D11StateCache::FD3D11StateCache()
+	: inputLayout( nullptr )
+	, vertexShader( nullptr )
+	, pixelShader( nullptr )
+	, geometryShader( nullptr )
+	, hullShader( nullptr )
+	, domainShader( nullptr )
+	, rasterizerState( nullptr )
+	, primitiveTopology( D3D_PRIMITIVE_TOPOLOGY_UNDEFINED )
+	, depthStencilView( nullptr )
+{
+	appMemzero( &vertexBuffers, sizeof( vertexBuffers ) );
+	appMemzero( &psSamplerStates, sizeof( psSamplerStates ) );
+	appMemzero( &psShaderResourceViews, sizeof( psShaderResourceViews ) );
+	appMemzero( &indexBuffer, sizeof( FD3D11StateIndexBuffer ) );
+	appMemzero( &renderTargetViews, sizeof( renderTargetViews ) );
+}
+
 /**
  * Constructor FD3D11RasterizerStateRHI
  */

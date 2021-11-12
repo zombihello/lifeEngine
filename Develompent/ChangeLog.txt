@@ -1,5 +1,9 @@
 ----------------------------------------------------------------
- Version 0.2.0 :: Now
+ Version 0.3.0 :: Now
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+ Version 0.2.0 :: 13.11.2021
 ----------------------------------------------------------------
 	- Changed lifeBuildTool to CMake for build engine
 	- Fixed memory leek while using FString::Format
@@ -16,6 +20,7 @@
 	- Optimized serialize bulk data and implemented compress with ZLIB
 	- Added support SHIPPING build
 	- Implemented FScopeLock for auto lock and unlock FCriticalSection
+	- Implemented caching render states in D3D11RHI
 
 ----------------------------------------------------------------
  Version 0.1.0 :: 02.11.2021

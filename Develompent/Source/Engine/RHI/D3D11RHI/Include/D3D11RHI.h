@@ -13,6 +13,7 @@
 
 #include "Misc/EngineGlobals.h"
 #include "Render/BoundShaderStateCache.h"
+#include "D3D11State.h"
 #include "RHI/BaseRHI.h"
 
 /**
@@ -503,6 +504,7 @@ private:
 	class FD3D11ConstantBuffer*		globalConstantBuffer;		/**< Global constant buffer */
 	class FD3D11DeviceContext*		immediateContext;			/**< Immediate context */
 	FBoundShaderStateHistory		boundShaderStateHistory;	/**< History of using bound shader states */
+	FD3D11StateCache				stateCache;					/**< DirectX 11 state cache */
 
 	ID3D11Device*					d3d11Device;				/**< D3D11 Device */
 	IDXGIFactory*					dxgiFactory;				/**< DXGI factory */

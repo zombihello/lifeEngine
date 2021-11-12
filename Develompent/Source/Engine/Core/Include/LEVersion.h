@@ -9,13 +9,13 @@
 #ifndef LEVERSION_H
 #define LEVERSION_H
 
-#define ENGINE_VERSION			20
+#define ENGINE_VERSION			30
 #define MAJOR_VERSION			0
-#define MINOR_VERSION			2
+#define MINOR_VERSION			3
 #define PATH_VERSION			0
 
 #define ENGINE_NAME				"lifeEngine"
-#define ENGINE_VERSION_STRING	"0.2.0"
+#define ENGINE_VERSION_STRING	"0.3.0"
 
 /**
  * @ingroup Core
