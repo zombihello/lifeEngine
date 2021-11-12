@@ -34,9 +34,8 @@ public:
 	 */
 	FORCEINLINE void Add( const FDelegate& InDelegate )
 	{
-		criticalSection.Lock();
+		FScopeLock		scopeLock( criticalSection );
 		delegates.push_back( InDelegate );
-		criticalSection.Unlock();
 	}
 
 	/**
@@ -45,7 +44,7 @@ public:
 	 */
 	FORCEINLINE void Remove( const FDelegate& InDelegate )
 	{
-		criticalSection.Lock();
+		FScopeLock		scopeLock( criticalSection );
 		for ( auto it = delegates.begin(), itEnd = delegates.end(); it != itEnd; ++it )
 		{
 			if ( ( *it ) == InDelegate )
@@ -55,7 +54,6 @@ public:
 				return;
 			}
 		}
-		criticalSection.Unlock();
 	}
 
 	/**
@@ -64,12 +62,11 @@ public:
 	 */
 	FORCEINLINE void Broadcast( TParamTypes... InParams )
 	{
-		criticalSection.Lock();
+		FScopeLock		scopeLock( criticalSection );
 		for ( auto it = delegates.begin(), itEnd = delegates.end(); it != itEnd; ++it )
 		{
 			( *it )( InParams... );
 		}
-		criticalSection.Unlock();
 	}
 
 private:

@@ -1,4 +1,5 @@
 #include "Core.h"
+#include "System/ThreadingBase.h"
 #include "WindowsThreading.h"
 #include "Containers/StringConv.h"
 

@@ -36,7 +36,7 @@ LRESULT CALLBACK SplashScreenWindowProc( HWND InHWND, UINT InMessage, WPARAM InW
 
 		{
 			// Take a critical section since another thread may be trying to set the splash text
-			GSplashScreenSynchronizationObject.Lock();
+			FScopeLock		scopeLock( GSplashScreenSynchronizationObject );
 
 			// Draw splash text
 			for ( int32 curTypeIndex = 0; curTypeIndex < STT_NumTextTypes; ++curTypeIndex )
@@ -101,8 +101,6 @@ LRESULT CALLBACK SplashScreenWindowProc( HWND InHWND, UINT InMessage, WPARAM InW
 					TextOut( hdc, textRect.left, textRect.top, splashText.c_str(), ( int32 )splashText.size() );
 				}
 			}
-
-			GSplashScreenSynchronizationObject.Unlock();
 		}
 
 		EndPaint( InHWND, &ps );
@@ -336,12 +334,10 @@ void appSetSplashText( const ESplashTextType InType, const tchar* InText )
 		{
 			{
 				// Take a critical section since the splash thread may already be repainting using this text
-				GSplashScreenSynchronizationObject.Lock();
+				FScopeLock			scopeLock( GSplashScreenSynchronizationObject );
 				
 				// Update splash text
 				GSplashScreenText[ InType ] = InText;
-
-				GSplashScreenSynchronizationObject.Unlock();
 			}
 
 			// Repaint the window

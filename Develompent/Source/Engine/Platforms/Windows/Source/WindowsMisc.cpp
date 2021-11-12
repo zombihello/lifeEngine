@@ -7,7 +7,8 @@
 double appInitTiming()
 {
 	LARGE_INTEGER		frequency;
-	check( QueryPerformanceFrequency( &frequency ) );
+	bool				result = QueryPerformanceFrequency( &frequency );
+	check( result );
 
 	GSecondsPerCycle = 1.0 / frequency.QuadPart;
 	return appSeconds();

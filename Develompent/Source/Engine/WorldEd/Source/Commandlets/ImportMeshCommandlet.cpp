@@ -192,10 +192,11 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 	staticMesh.SetData( verteces, indeces, surfaces, materials );
 
 	FPackage		package;
-	check( package.Open( dstFilename, true ) );
+	bool			isOpened = package.Open( dstFilename, true );
+	check( isOpened );
+
 	package.Add( &staticMesh );
 	package.Serialize();
-
 	aiImport.FreeScene();
 }
 

@@ -87,7 +87,9 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 	}
 
 	FPackage		package;
-	check( package.Open( dstFilename, true ) );
+	bool			isOpened = package.Open( dstFilename, true );
+	check( isOpened );
+
 	package.Add( &texture2D );
 	package.Serialize();
 

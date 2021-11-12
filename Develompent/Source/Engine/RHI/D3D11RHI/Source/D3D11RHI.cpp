@@ -773,7 +773,8 @@ void FD3D11RHI::InitImGUI( class FBaseDeviceContextRHI* InDeviceContext )
 	check( d3d11Device && InDeviceContext );
 	FD3D11DeviceContext* deviceContext = ( FD3D11DeviceContext* ) InDeviceContext;
 
-	check( ImGui_ImplDX11_Init( d3d11Device, deviceContext->GetD3D11DeviceContext() ) );
+	bool		result = ImGui_ImplDX11_Init( d3d11Device, deviceContext->GetD3D11DeviceContext() );
+	check( result );
 	ImGui_ImplDX11_NewFrame();
 }
 

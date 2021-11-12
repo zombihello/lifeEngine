@@ -10,7 +10,6 @@
 #define WINDOWSTHREADING_H
 
 #include "Misc/Types.h"
-#include "System/ThreadingBase.h"
 
 FORCEINLINE int32 appInterlockedIncrement( volatile int32* InValue )
 {

@@ -75,6 +75,21 @@ FD3D11Surface::FD3D11Surface( FTexture2DRHIParamRef InResolveTargetTexture )
 	d3d11ShaderResourceView = resolveTarget2D->GetShaderResourceView();
 	d3d11RenderTargetView = resolveTarget2D->GetRenderTargetView();
 	d3d11DepthStencilView = resolveTarget2D->GetDepthStencilView();
+
+	if ( d3d11ShaderResourceView )
+	{
+		d3d11ShaderResourceView->AddRef();
+	}
+
+	if ( d3d11RenderTargetView )
+	{
+		d3d11RenderTargetView->AddRef();
+	}
+
+	if ( d3d11DepthStencilView )
+	{
+		d3d11DepthStencilView->AddRef();
+	}
 }
 
 FD3D11Surface::~FD3D11Surface()
@@ -185,6 +200,7 @@ FD3D11Texture2DRHI::FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 	HRESULT			result = d3d11Device->CreateTexture2D( &d3d11Texture2DDesc, InData ? subResourceData.data() : nullptr, &d3d11Texture2D );
 	check( result == S_OK );
 	D3D11SetDebugName( d3d11Texture2D, TCHAR_TO_ANSI( InDebugName ) );
+	d3d11Texture2D->AddRef();
 
 	if ( d3d11Texture2DDesc.BindFlags & D3D11_BIND_SHADER_RESOURCE )
 	{
@@ -210,6 +226,7 @@ FD3D11Texture2DRHI::FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 
 		result = d3d11Device->CreateShaderResourceView( d3d11Texture2D, &d3d11ShaderResourceViewDesc, &d3d11ShaderResourceView );
 		check( result == S_OK );
+		d3d11ShaderResourceView->AddRef();
 	}
 
 	if ( InFlags & TCF_ResolveTargetable )
@@ -224,6 +241,7 @@ FD3D11Texture2DRHI::FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 
 			result = d3d11Device->CreateRenderTargetView( d3d11Texture2D, &d3d11RenderTargetViewDesc, &d3d11RenderTargetView );
 			check( result == S_OK );
+			d3d11RenderTargetView->AddRef();
 		}
 		else if ( d3d11Texture2DDesc.BindFlags & D3D11_BIND_DEPTH_STENCIL )
 		{
@@ -257,13 +275,14 @@ FD3D11Texture2DRHI::FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 			
 			result = d3d11Device->CreateDepthStencilView( d3d11Texture2D, &d3d11DepthStencilViewDesc, &d3d11DepthStencilView );
 			check( result == S_OK );
+			d3d11DepthStencilView->AddRef();
 		}
 	}
 }
 
-FD3D11Texture2DRHI::FD3D11Texture2DRHI( ID3D11Texture2D* InD3D11Texture2D, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) :
-	FD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags ),
-	d3d11Texture2D( InD3D11Texture2D )
+FD3D11Texture2DRHI::FD3D11Texture2DRHI( ID3D11Texture2D* InD3D11Texture2D, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) 
+	: FD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags )
+	, d3d11Texture2D( InD3D11Texture2D )
 {
 	check( d3d11Texture2D );
 	d3d11Texture2D->AddRef();

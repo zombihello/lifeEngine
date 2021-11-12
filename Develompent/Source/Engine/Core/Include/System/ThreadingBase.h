@@ -436,10 +436,90 @@ public:
  */
 extern FSynchronizeFactory*				GSynchronizeFactory;
 
+// Include platform specific implementation
 #if PLATFORM_WINDOWS
 	#include "WindowsThreading.h"
 #else
 	#error Unknown platform
 #endif // PLATFORM_WINDOWS
 
+/**
+ * @ingroup Core
+ * This is a utility class that handles scope level locking. It's very useful
+ * to keep from causing deadlocks due to exceptions being caught and knowing
+ * about the number of locks a given thread has on a resource. Example:
+ *
+ * <code>
+ *	{
+ *		// Syncronize thread access to the following data
+ *		FScopeLock		scopeLock( criticalSection );
+ *		// Access data that is shared among multiple threads
+ *		...
+ *		// When ScopeLock goes out of scope, other threads can access data
+ *	}
+ * </code>
+ */
+class FScopeLock
+{
+public:
+	/**
+	 * Constructor that performs a lock on the synchronization object
+	 *
+	 * @param[in] InSynchObject The synchronization object to manage
+	 */
+	FScopeLock( FCriticalSection* InSynchObject ) :
+		synchObject( InSynchObject )
+	{
+		check( synchObject );
+		synchObject->Lock();
+	}
+
+	/**
+	 * Constructor that performs a lock on the synchronization object
+	 *
+	 * @param[in] InSynchObject The synchronization object to manage
+	 */
+	FScopeLock( FCriticalSection& InSynchObject ) :
+		synchObject( &InSynchObject )
+	{
+		check( synchObject );
+		synchObject->Lock();
+	}
+
+	/**
+	 * Destructor that performs a release on the synchronization object
+	 */
+	~FScopeLock()
+	{
+		check( synchObject );
+		synchObject->Unlock();
+	}
+
+private:
+	/**
+	 * Default constructor hidden on purpose
+	 */
+	FScopeLock() : synchObject( nullptr ) 
+	{}
+
+	/**
+	 * Copy constructor hidden on purpose
+	 *
+	 * @param[in] InScopeLock Ignored
+	 */
+	FScopeLock( FScopeLock* InScopeLock ) : synchObject( nullptr )
+	{}
+
+	/**
+	 * Assignment operator hidden on purpose
+	 *
+	 * @param[in] InScopeLock Ignored
+	 */
+	FORCEINLINE FScopeLock& operator=( FScopeLock& InScopeLock ) 
+	{ 
+		return *this; 
+	}
+
+	FCriticalSection*		synchObject;		/**< The synchronization object to aggregate and scope manage */
+};
 #endif // !THREADINGBASE_H

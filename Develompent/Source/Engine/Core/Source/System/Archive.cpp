@@ -62,7 +62,8 @@ void FArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 			Serialize( compressedBuffer, chunk.compressedSize );
 			
 			// Decompress into dest pointer directly.
-			check( appUncompressMemory( InFlags, dest, chunk.uncompressedSize, compressedBuffer, chunk.compressedSize ) );
+			bool		result = appUncompressMemory( InFlags, dest, chunk.uncompressedSize, compressedBuffer, chunk.compressedSize );
+			check( result );
 			
 			// And advance it by read amount.
 			dest += chunk.uncompressedSize;
@@ -103,7 +104,8 @@ void FArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 			uint32		bytesToCompress = Min( bytesRemaining, SAVING_COMPRESSION_CHUNK_SIZE );
 			uint32		compressedSize = compressedBufferSize;
 
-			check( appCompressMemory( InFlags, compressedBuffer, compressedSize, src, bytesToCompress ) );
+			bool		result = appCompressMemory( InFlags, compressedBuffer, compressedSize, src, bytesToCompress );
+			check( result );
 
 			// Move to next chunk
 			src += bytesToCompress;

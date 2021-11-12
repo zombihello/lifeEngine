@@ -155,7 +155,8 @@ void FImGUIEngine::Init()
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 
 	// Initialize platform for ImGUI
-	check( appImGUIInit() );
+	bool			result = appImGUIInit();
+	check( result );
 
 	// Initialize RHI for ImGUI
 	UNIQUE_RENDER_COMMAND( FInitImGUICommand,

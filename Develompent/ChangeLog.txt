@@ -1,6 +1,7 @@
 ----------------------------------------------------------------
  Version 0.2.0 :: Now
 ----------------------------------------------------------------
+	- Changed lifeBuildTool to CMake for build engine
 	- Fixed memory leek while using FString::Format
 	- Implemented base material system
 	- Implemented serialize assets to package
@@ -12,7 +13,9 @@
 	- Added render to depth buffer
 	- Refactored serialize in FArchive and FPackage (remove duplicate code)
 	- Refactored serialize FTexture2D and FStaticMesh. Removed texture file cache and save data in asset packages
-	- Optimized serialize bulk data
+	- Optimized serialize bulk data and implemented compress with ZLIB
+	- Added support SHIPPING build
+	- Implemented FScopeLock for auto lock and unlock FCriticalSection
 
 ----------------------------------------------------------------
  Version 0.1.0 :: 02.11.2021

@@ -2,8 +2,6 @@
  Version 0.2.0
 ----------------------------------------------------------------
 	- Implement caching render states
-	- Add support SHIPPING build
-	- Implement FScopeLock for auto lock and unclok FCriticalSection
 	
 ----------------------------------------------------------------
  Version 0.3.0
