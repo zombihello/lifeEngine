@@ -6,6 +6,10 @@
 #include "WindowsThreading.h"
 #include "System/Config.h"
 
+#if WITH_EDITOR
+#include "WorldEd.h"
+#endif // WITH_EDITOR
+
 static std::wstring			GSplashScreenFileName;
 static HANDLE				GSplashScreenThread = nullptr;
 static HBITMAP				GSplashScreenBitmap = nullptr;
@@ -246,13 +250,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 
 			// Set game name
 			{
-#if _WIN64
-				const std::wstring				platformBitsString( TEXT( "64" ) );
-#else
-				const std::wstring				platformBitsString( TEXT( "32" ) );
-#endif // _WIN64
-
-				const std::wstring				finalGameName = FString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );			
+				std::wstring		finalGameName = appGetWorldEdName();				
 				appSetSplashText( STT_GameName, finalGameName.c_str() );
 
 				// Change the window text (which will be displayed in the taskbar)

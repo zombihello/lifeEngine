@@ -88,7 +88,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 #if WITH_EDITOR
 		if ( GIsEditor )
 		{
-			errorLevel = WorldEdEntry( commandLine.c_str() );
+			errorLevel = appWorldEdEntry( commandLine.c_str() );
 			check( errorLevel == 0 );
 		}
 		else

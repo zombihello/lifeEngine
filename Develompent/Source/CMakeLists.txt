@@ -17,7 +17,7 @@ set( RELEASE_NAME Release )
 set( SHIPPING_NAME Shipping )
 set( PLATFORM_NAME Unknown )
 set( CMAKE_CONFIGURATION_TYPES Debug Release Shipping )
-
+		
 # TODO BS yehor.pohuliaka - Need move to ToolChain files
 set( CMAKE_CXX_FLAGS_SHIPPING "${CMAKE_CXX_FLAGS_RELEASE}" )
 set( CMAKE_RC_FLAGS_SHIPPING "${CMAKE_RC_FLAGS_RELEASE}" )
@@ -45,6 +45,8 @@ endif()
 
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
 	set( PLATFORM_WINDOWS ON )
+	add_definitions( -D_CRT_SECURE_NO_DEPRECATE )
+	add_definitions( -D_CRT_NONSTDC_NO_DEPRECATE )
 	add_definitions( -D_UNICODE )
 	add_definitions( -DUNICODE )
 	
@@ -56,6 +58,7 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
         set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -static )
 	else( MSVC )
 		# TODO BS yehor.pohuliaka - Need move to ToolChain files
+		set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP" )
 		set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /DDEBUG=1 /DRELEASE=0 /DSHIPPING=0" )
 		set( CMAKE_RC_FLAGS_DEBUG "${CMAKE_RC_FLAGS_DEBUG} /DDEBUG=1 /DRELEASE=0 /DSHIPPING=0" )
 		set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /DDEBUG=0 /DRELEASE=1 /DSHIPPING=0" )
@@ -90,10 +93,10 @@ set( GLM_PATH ${EXTERNAL_DIR}/glm-0.9.9.8 )
 set( ZLIB_PATH ${EXTERNAL_DIR}/zlib )
 
 if ( WITH_EDITOR )
+	set( QT5_PATH ${EXTERNAL_DIR}/Qt-5.15.2/msvc2019_64 )
+	set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_PATH} )
 	set( STB_PATH ${EXTERNAL_DIR}/stb )
 	set( ASSIMP_PATH ${EXTERNAL_DIR}/assimp-5.0.1 )
-	set( QT6_PATH ${EXTERNAL_DIR}/Qt-6.2.0/msvc2019_64 )
-	set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT6_PATH} )
 	set( QT_PLUGIN_DIR ${INSTALL_BINARIES_DIR}/Plugins )
 endif()
 
@@ -142,45 +145,23 @@ endif()
 #
 # Add projects to build
 #
-# Include directories
 set( INCLUDE_DIRS )
-
-# Add modules to build
 set( ALL_SOURCE_FILES )
 
-# Add Core
-include( ${PROJECT_SOURCE_DIR}/${PROJECT_CORE}/Core.Build.cmake )
-CoreBuild( ${PROJECT_CORE} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
+# Add modules to build
+include( ${PROJECT_SOURCE_DIR}/${PROJECT_CORE}/Core.Build.cmake )				# Core
+include( ${PROJECT_SOURCE_DIR}/${PROJECT_ENGINE}/Engine.Build.cmake )			# Engine
+include( ${PROJECT_SOURCE_DIR}/${PROJECT_LAUNCH}/Launch.Build.cmake )			# Launch
+include( ${PROJECT_SOURCE_DIR}/${PROJECT_UI}/UI.Build.cmake )					# UI
+include( ${GAME_SOURCE_PATH}/Game.Build.cmake )									# Game
 
-# Add Engine
-include( ${PROJECT_SOURCE_DIR}/${PROJECT_ENGINE}/Engine.Build.cmake )
-EngineBuild( ${PROJECT_ENGINE} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
-
-# Add Launch
-include( ${PROJECT_SOURCE_DIR}/${PROJECT_LAUNCH}/Launch.Build.cmake )
-LaunchBuild( ${PROJECT_LAUNCH} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
-
-# Add UI
-include( ${PROJECT_SOURCE_DIR}/${PROJECT_UI}/UI.Build.cmake )
-UIBuild( ${PROJECT_UI} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
-
-# Add WorldEd
 if ( WITH_EDITOR )
-	include( ${PROJECT_SOURCE_DIR}/${PROJECT_WORLDED}/WorldEd.Build.cmake )
-	WorldEdBuild( ${PROJECT_WORLDED} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
+	include( ${PROJECT_SOURCE_DIR}/${PROJECT_WORLDED}/WorldEd.Build.cmake )		# Map editor (TrenchBroom)
 endif()
 
-# Add Game module
-include( ${GAME_SOURCE_PATH}/Game.Build.cmake )
-GameBuild( ${GAME_SOURCE_PATH} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
-
-# Add platform modules
 if ( PLATFORM_WINDOWS )
-	include( ${PROJECT_SOURCE_DIR}/${PROJECT_PLATFORM}/Windows.Build.cmake )
-	WindowsBuild( ${PROJECT_PLATFORM} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
-	
-	include( ${PROJECT_SOURCE_DIR}/${PROJECT_RHI}/D3D11RHI.Build.cmake )
-	D3D11RHIBuild( ${PROJECT_RHI} "${ALL_SOURCE_FILES}" "${INCLUDE_DIRS}" )
+	include( ${PROJECT_SOURCE_DIR}/${PROJECT_PLATFORM}/Windows.Build.cmake )	# Windows
+	include( ${PROJECT_SOURCE_DIR}/${PROJECT_RHI}/D3D11RHI.Build.cmake )		# D3D11RHI
 endif()
 
 add_executable( ${GAME_NAME} WIN32 ${ALL_SOURCE_FILES} )

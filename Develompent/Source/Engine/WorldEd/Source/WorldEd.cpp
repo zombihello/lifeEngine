@@ -6,6 +6,7 @@
 #include <vector>
 #include <sstream>
 
+#include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "System/Config.h"
@@ -41,7 +42,7 @@ void QtMessageOutput( QtMsgType InType, const QMessageLogContext& InContext, con
 	}
 }
 
-int32 WorldEdEntry( const tchar* InCmdLine )
+int32 appWorldEdEntry( const tchar* InCmdLine )
 {
 	// Parse arguments of start for create QApplication
 	std::stringstream		strStream;
@@ -93,5 +94,22 @@ int32 WorldEdEntry( const tchar* InCmdLine )
 
 	// Start Qt execute
 	appHideSplash();
-	return application.exec();
+	result = application.exec();
+	GEditorEngine->Shutdown();
+	return result;
+}
+
+std::wstring appGetWorldEdName()
+{
+#if PLATFORM_WINDOWS
+#if _WIN64
+	const std::wstring				platformBitsString( TEXT( "64" ) );
+#else
+	const std::wstring				platformBitsString( TEXT( "32" ) );
+#endif // _WIN64
+#else
+#error Insert court bitness of your platform
+#endif // PLATFORM_WINDOWS
+
+	return FString::Format( TEXT( "WorldEd for %s (%s-bit)" ), GGameName.c_str(), platformBitsString.c_str() );
 }

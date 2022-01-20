@@ -216,7 +216,7 @@ public:
 		checkMsg( InAsset->hash != INVALID_HASH, TEXT( "For add asset to package need hash is valid" ) );
 
 		InAsset->package = this;
-		assetsTable[ InAsset->hash ] = FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset };
+		assetsTable[ InAsset->hash ] = FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset };
 	}
 
 	/**
@@ -275,6 +275,7 @@ private:
 	{
 		uint32			offset;		/**< Offset in archive to asset */
 		uint32			size;		/**< Size data in archive */
+		EAssetType		type;		/**< Asset type */
 		FAsset*			data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
 	};
 

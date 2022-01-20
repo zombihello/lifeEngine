@@ -1,3 +1,11 @@
+macro( InitQt5 )
+	# Finding Qt library here, because for set AUTOMOC, AUTORCC and AUTOUIC need seting their before create build target
+	find_package( Qt5 COMPONENTS Widgets Core Svg REQUIRED )
+	set( CMAKE_AUTOUIC ON )
+	set( CMAKE_AUTOMOC ON )
+	set( CMAKE_AUTORCC ON )
+endmacro()
+
 function( IncludeExternals MODULE_NAME )
 	# SDL2
 	find_package( SDL2 REQUIRED )
@@ -71,13 +79,8 @@ function( IncludeExternals MODULE_NAME )
 			message( SEND_ERROR "Failed to find Assimp" )
 		endif()
 	
-		# Qt6
-		set( CMAKE_AUTOUIC ON )
-		set( CMAKE_AUTOMOC ON )
-		set( CMAKE_AUTORCC ON )
-		
-		find_package( Qt6 COMPONENTS Widgets Core REQUIRED )
-		target_link_libraries( ${MODULE_NAME} Qt6::Widgets Qt6::Core )
+		# Qt5
+		target_link_libraries( ${MODULE_NAME} Qt5::Widgets Qt5::Core Qt5::Svg )	
 	endif()
 	
 	if ( PLATFORM_WINDOWS )
@@ -105,15 +108,16 @@ function( InstallExternals INSTALL_DIR )
 		
 	if ( WITH_EDITOR )
 		set( BINARES ${BINARES}
-			 "${QT6_PATH}/bin/Qt6Cored${PLATFORM_DLL_EXTENSION}" 							"${QT6_PATH}/bin/Qt6Core${PLATFORM_DLL_EXTENSION}"
-			 "${QT6_PATH}/bin/Qt6Guid${PLATFORM_DLL_EXTENSION}" 							"${QT6_PATH}/bin/Qt6Gui${PLATFORM_DLL_EXTENSION}"
-			 "${QT6_PATH}/bin/Qt6Widgetsd${PLATFORM_DLL_EXTENSION}" 						"${QT6_PATH}/bin/Qt6Widgets${PLATFORM_DLL_EXTENSION}"
+			 "${QT5_PATH}/bin/Qt5Cored${PLATFORM_DLL_EXTENSION}" 							"${QT5_PATH}/bin/Qt5Core${PLATFORM_DLL_EXTENSION}"
+			 "${QT5_PATH}/bin/Qt5Guid${PLATFORM_DLL_EXTENSION}" 							"${QT5_PATH}/bin/Qt5Gui${PLATFORM_DLL_EXTENSION}"
+			 "${QT5_PATH}/bin/Qt5Widgetsd${PLATFORM_DLL_EXTENSION}" 						"${QT5_PATH}/bin/Qt5Widgets${PLATFORM_DLL_EXTENSION}"
+			 "${QT5_PATH}/bin/Qt5Svgd${PLATFORM_DLL_EXTENSION}" 							"${QT5_PATH}/bin/Qt5Svg${PLATFORM_DLL_EXTENSION}"
 			 "${ASSIMP_PATH}/bin/${PLATFORM_BIN_DIR}/assimp${PLATFORM_DLL_EXTENSION}" 		"${ASSIMP_PATH}/bin/${PLATFORM_BIN_DIR}/assimpd${PLATFORM_DLL_EXTENSION}" )
 	endif()
 	
 	if ( WITH_EDITOR )
-		install( DIRECTORY "${QT6_PATH}/plugins/platforms" DESTINATION ${QT_PLUGIN_DIR} )
-		install( DIRECTORY "${QT6_PATH}/plugins/styles" DESTINATION ${QT_PLUGIN_DIR} )
+		install( DIRECTORY "${QT5_PATH}/plugins/platforms" DESTINATION ${QT_PLUGIN_DIR} )
+		install( DIRECTORY "${QT5_PATH}/plugins/styles" DESTINATION ${QT_PLUGIN_DIR} )
 	endif()
 	install( FILES ${BINARES} DESTINATION ${INSTALL_DIR} )
 endfunction()

@@ -20,6 +20,14 @@
  * @param[in] InCmdLine Arguments of start
  * @return Returns the error level, 0 if successful and > 0 if there were errors
  */
-int32 WorldEdEntry( const tchar* InCmdLine );
+int32 appWorldEdEntry( const tchar* InCmdLine );
+
+/**
+ * @ingroup WorldEd
+ * Get WorldEd name
+ * 
+ * @return Return WorldEd name
+ */
+std::wstring appGetWorldEdName();
 
 #endif // !WORLDED_H

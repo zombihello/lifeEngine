@@ -81,11 +81,11 @@ bool FPackage::Open( const std::wstring& InPath, bool InIsWrite /* = false */ )
 {
 	if ( InIsWrite )
 	{
-		archive = GFileSystem->CreateFileWriter( appBaseDir() + InPath );
+		archive = GFileSystem->CreateFileWriter( InPath );
 	}
 	else
 	{
-		archive = GFileSystem->CreateFileReader( appBaseDir() + InPath );
+		archive = GFileSystem->CreateFileReader( TEXT( "../../") + InPath);
 	}
 
 	if ( !archive )
@@ -129,19 +129,18 @@ void FPackage::Serialize()
 			check( assetInfo.data );
 
 			// Serialize asset header	
-			assetInfo.offset = archive->Tell();
-			*archive << assetInfo.data->type;
+			*archive << assetInfo.type;
 			*archive << assetInfo.data->hash;
 			*archive << assetInfo.size;
 
 			// Serialize asset
-			uint32		startOffset = archive->Tell();
+			assetInfo.offset = archive->Tell();
 			assetInfo.data->Serialize( *archive );
 			uint32		currentOffset = archive->Tell();
 
 			// Update asset size in header
-			assetInfo.size = currentOffset - startOffset;
-			archive->Seek( startOffset - sizeof( assetInfo.size ) );
+			assetInfo.size = currentOffset - assetInfo.offset;
+			archive->Seek( assetInfo.offset - sizeof( assetInfo.size ) );
 			*archive << assetInfo.size;
 			archive->Seek( currentOffset );
 		}
@@ -155,14 +154,14 @@ void FPackage::Serialize()
 			FAssetInfo			assetInfo;
 			uint32				assetHash;
 			appMemzero( &assetInfo, sizeof( FAssetInfo ) );
-			assetInfo.offset = archive->Tell();
 
-			// Skip asset type and serialize hash with size data
-			archive->Seek( assetInfo.offset + sizeof( EAssetType ) );
+			// Serialize hash with size data
+			*archive << assetInfo.type;
 			*archive << assetHash;
 			*archive << assetInfo.size;
+			assetInfo.offset = archive->Tell();
 
-			// Skip asset data
+			// Skip asset data		
 			if ( assetInfo.size > 0 )
 			{
 				archive->Seek( archive->Tell() + assetInfo.size );
@@ -259,19 +258,15 @@ FAssetRef FPackage::Find( uint32 InHash )
 		return assetInfo.data;
 	}
 
-	// Else we create asset from package
-	EAssetType			assetType;
-	archive->Seek( assetInfo.offset );
-
-	*archive << assetType;
-	assetInfo.data = AssetFactory( assetType );
+	// Else we create asset from package	
+	assetInfo.data = AssetFactory( assetInfo.type );
 
 	// Init asset
 	assetInfo.data->hash = itAsset->first;
 	assetInfo.data->package = this;
 
-	// Skip hash with size asset and serialize data
-	archive->Seek( archive->Tell() + sizeof( uint32 ) * 2 );
+	// Seek to asset data
+	archive->Seek( assetInfo.offset );
 
 	uint32		startOffset = archive->Tell();
 	assetInfo.data->Serialize( *archive );
