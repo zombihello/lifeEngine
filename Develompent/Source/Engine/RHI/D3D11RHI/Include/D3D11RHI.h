@@ -260,6 +260,24 @@ public:
 	virtual void								DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, struct ImDrawData* InImGUIDrawData ) override;
 #endif // WITH_IMGUI
 
+#if FRAME_CAPTURE_MARKERS
+	/**
+	 * @brief Begin draw event
+	 *
+	 * @param InDeviceContext Device context
+	 * @param InColor Color event
+	 * @param InName Event name
+	 */
+	virtual void								BeginDrawEvent( class FBaseDeviceContextRHI* InDeviceContext, const FColor& InColor, const tchar* InName ) override;
+
+	/**
+	 * @brief End draw event
+	 *
+	 * @param[in] InDeviceContext Device context
+	 */
+	virtual void								EndDrawEvent( class FBaseDeviceContextRHI* InDeviceContext ) override;
+#endif // FRAME_CAPTURE_MARKERS
+
 	/**
 	 * @brief Set viewport
 	 *

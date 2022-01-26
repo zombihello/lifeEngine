@@ -1,3 +1,5 @@
+#include <d3d9.h>
+
 #include "Core.h"
 #include "Logger/LoggerMacros.h"
 #include "Render/RenderUtils.h"
@@ -899,6 +901,18 @@ void FD3D11RHI::DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, ImDrawD
 	ImGui_ImplDX11_RenderDrawData( InImGUIDrawData );
 }
 #endif // WITH_IMGUI
+
+#if FRAME_CAPTURE_MARKERS
+void FD3D11RHI::BeginDrawEvent( class FBaseDeviceContextRHI* InDeviceContext, const FColor& InColor, const tchar* InName )
+{
+	D3DPERF_BeginEvent( D3DCOLOR_RGBA( InColor.GetR(), InColor.GetG(), InColor.GetB(), InColor.GetA() ), InName );
+}
+
+void FD3D11RHI::EndDrawEvent( class FBaseDeviceContextRHI* InDeviceContext )
+{
+	D3DPERF_EndEvent();
+}
+#endif // FRAME_CAPTURE_MARKERS
 
 /**
  * Get RHI name

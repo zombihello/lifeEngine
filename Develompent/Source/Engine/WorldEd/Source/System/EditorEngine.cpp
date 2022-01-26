@@ -9,6 +9,7 @@
 #include "System/World.h"
 #include "Render/Viewport.h"
 #include "System/EditorEngine.h"
+#include "Actors/PlayerStart.h"
 
 IMPLEMENT_CLASS( LEditorEngine )
 
@@ -50,17 +51,11 @@ void LEditorEngine::Shutdown()
 
 bool LEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
-	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
-
-	FArchive*		archive = GFileSystem->CreateFileReader( appBaseDir() + FString::Format( TEXT( "Content/Maps/%s" ), InMap.c_str() ) );
-	if ( !archive )
+	if ( !Super::LoadMap( InMap, OutError ) )
 	{
-		OutError = TEXT( "Map not found" );
-		return false;
+		LE_LOG( LT_Warning, LC_General, TEXT( "Failed loading map '%s'. Error: %s" ), InMap.c_str(), OutError.c_str() );
+		GWorld->SpawnActor< APlayerStart >( FVector( 0.f, 0.f, 0.f ) );
 	}
-
-	archive->SerializeHeader();
-	GWorld->Serialize( *archive );
 
 	return true;
 }

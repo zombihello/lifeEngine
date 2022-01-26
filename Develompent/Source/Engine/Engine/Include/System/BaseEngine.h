@@ -52,7 +52,7 @@ public:
 	 * @param[out] OutError Error of loading map
 	 * @return Return true if map loaded successed, else return false
 	 */
-	virtual bool LoadMap( const std::wstring& InMap, std::wstring& OutError ) PURE_VIRTUAL( LBaseEngine::LoadMap, return false; );
+	virtual bool LoadMap( const std::wstring& InMap, std::wstring& OutError );
 
 	/**
 	 * @brief Process event

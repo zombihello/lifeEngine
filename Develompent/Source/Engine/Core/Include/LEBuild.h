@@ -38,6 +38,11 @@
 	#define NO_LOGGING				SHIPPING_BUILD
 #endif // !NO_LOGGING
 
+// Enable or disable frame capture markers
+#ifndef FRAME_CAPTURE_MARKERS
+	#define FRAME_CAPTURE_MARKERS	!SHIPPING_BUILD
+#endif // !FRAME_CAPTURE_MARKERS
+
 /**
  * @ingroup Core
  * Checks to see if pure virtual has actually been implemented

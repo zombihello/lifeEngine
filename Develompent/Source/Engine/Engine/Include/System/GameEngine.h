@@ -49,15 +49,6 @@ public:
 	virtual void Shutdown();
 
 	/**
-	 * Load map
-	 *
-	 * @param[in] InMap Path to map
-	 * @param[out] OutError Error of loading map
-	 * @return Return true if map loaded successed, else return false
-	 */
-	virtual bool LoadMap( const std::wstring& InMap, std::wstring& OutError ) override;
-
-	/**
 	 * @brief Process event
 	 *
 	 * @param[in] InWindowEvent Window event

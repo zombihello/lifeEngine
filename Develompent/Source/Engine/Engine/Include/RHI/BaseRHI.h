@@ -9,6 +9,7 @@
 #ifndef BASERHI_H
 #define BASERHI_H
 
+#include "LEBuild.h"
 #include "Misc/Types.h"
 #include "Render/Shaders/ShaderCompiler.h"
 #include "RHI/TypesRHI.h"
@@ -269,6 +270,24 @@ public:
 	 */
 	virtual void								DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, struct ImDrawData* InImGUIDrawData ) {}
 #endif // WITH_IMGUI
+
+#if FRAME_CAPTURE_MARKERS
+	/**
+	 * @brief Begin draw event
+	 *
+	 * @param InDeviceContext Device context
+	 * @param InColor Color event
+	 * @param InName Event name
+	 */
+	virtual void								BeginDrawEvent( class FBaseDeviceContextRHI* InDeviceContext, const FColor& InColor, const tchar* InName ) {}
+
+	/**
+	 * @brief End draw event
+	 *
+	 * @param[in] InDeviceContext Device context
+	 */
+	virtual void								EndDrawEvent( class FBaseDeviceContextRHI* InDeviceContext ) {}
+#endif // FRAME_CAPTURE_MARKERS
 
 	/**
 	 * @brief Set viewport

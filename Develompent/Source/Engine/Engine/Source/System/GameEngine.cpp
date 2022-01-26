@@ -54,24 +54,6 @@ void LGameEngine::Shutdown()
 	}
 }
 
-bool LGameEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
-{
-	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
-	
-	FArchive*		archive = GFileSystem->CreateFileReader( appBaseDir() + FString::Format( TEXT( "Content/Maps/%s" ), InMap.c_str() ) );
-	if ( !archive )
-	{
-		OutError = TEXT( "Map not found" );
-		return false;
-	}
-
-	archive->SerializeHeader();
-	GWorld->Serialize( *archive );
-
-	GWorld->BeginPlay();
-	return true;
-}
-
 void LGameEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	Super::ProcessEvent( InWindowEvent );

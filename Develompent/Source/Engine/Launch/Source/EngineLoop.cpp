@@ -234,17 +234,8 @@ int32 FEngineLoop::Init()
 		bool				successed = GEngine->LoadMap( map, error );
 		if ( !successed )
 		{
-#if WITH_EDITOR
-			if ( GIsEditor )
-			{
-				LE_LOG( LT_Warning, LC_Init, TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
-			}
-			else
-#endif // WITH_EDITOR
-			{
-				appErrorf( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
-				result = 2;
-			}
+			appErrorf( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
+			result = 2;
 		}
 	}
 	else if ( !GIsEditor )
