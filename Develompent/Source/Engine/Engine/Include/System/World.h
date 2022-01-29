@@ -72,13 +72,23 @@ public:
 	 * @param[in] InRotation Rotation actor on spawn
 	 */
 	template< typename TClass >
-	TRefCountPtr< TClass > SpawnActor( const FVector& InLocation, const FRotator& InRotation = FMath::rotatorZero )
+	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const FVector& InLocation, const FRotator& InRotation = FMath::rotatorZero )
 	{
 		return SpawnActor( TClass::StaticClass(), InLocation, InRotation );
 	}
 
+	/**
+	 * @brief Get scene manager
+	 * @return Return pointer to scene manager
+	 */
+	FORCEINLINE class FBaseScene* GetScene() const
+	{
+		return scene;
+	}
+
 private:
 	bool							isBeginPlay;	/**< Is started gameplay */
+	class FBaseScene*				scene;			/**< Scene manager */
 	std::vector< AActorRef >		actors;			/**< Array actors in world */
 };
 

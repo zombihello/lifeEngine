@@ -30,7 +30,7 @@ float LBaseEngine::GetMaxTickRate() const
 
 	return 0.f;
 }
-
+#include "Actors/StaticMesh.h"
 bool LBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
@@ -44,7 +44,7 @@ bool LBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 
 	archive->SerializeHeader();
 	GWorld->Serialize( *archive );
-
+	GWorld->SpawnActor< AStaticMesh >( FVector( 0.f, 0.f, 0.f ) );
 	GWorld->BeginPlay();
 	return true;
 }

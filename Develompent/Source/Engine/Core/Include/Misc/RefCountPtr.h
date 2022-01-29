@@ -75,6 +75,22 @@ public:
 	}
 
 	/**
+	 * @brief Hash function for STL containers
+	 */
+	struct FHashFunction
+	{
+		/**
+		 * @brief Calculate hash of TRefCountPtr
+		 * 
+		 * @param InRefPtr Reference to object
+		 */
+		FORCEINLINE std::size_t operator()( const TRefCountPtr& InRefPtr ) const
+		{
+			return appMemFastHash( InRefPtr );
+		}
+	};
+
+	/**
 	 * @brief Overloaded operator =
 	 * @param[in] InCopy Pointer to PtrType value
 	 * 

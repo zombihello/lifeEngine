@@ -52,6 +52,12 @@ public:
 	virtual void SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI );
 
 	/**
+	 * @brief Get bound shader state
+	 * @return Return bound shader state of current drawing policy
+	 */
+	virtual FBoundShaderStateRHIRef GetBoundShaderState() const;
+
+	/**
 	 * Draw mesh
 	 * 
 	 * @param[in] InDeviceContextRHI RHI device context
@@ -59,6 +65,28 @@ public:
 	 * @param[in] InSceneView Scene view
 	 */
 	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView ) PURE_VIRTUAL( FMeshDrawingPolicy::Draw, );
+
+	/**
+	 * @brief Get type hash
+	 * @return Return hash of drawing policy
+	 */
+	virtual uint32 GetTypeHash() const;
+
+	/**
+	 * @brief Compare drawing policy
+	 * 
+	 * @param InOtherDrawer Other drawer
+	 * @return Return true if equal with InOtherDrawer, else returning false
+	 */
+	virtual bool Matches( const FMeshDrawingPolicy& InOtherDrawer ) const;
+
+	/**
+	 * @brief Overload operator '=='
+	 */
+	FORCEINLINE bool operator==( const FMeshDrawingPolicy& InOther ) const
+	{
+		return Matches( InOther );
+	}
 
 protected:
 	FMaterialRef				material;			/**< Material */

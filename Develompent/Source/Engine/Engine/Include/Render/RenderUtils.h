@@ -36,4 +36,49 @@ struct FPixelFormatInfo
  */
 extern FPixelFormatInfo			GPixelFormats[ PF_Max ];
 
+/**
+ * @ingroup Engine
+ * Handles initialization/release for a global resource
+ */
+template< class ResourceType >
+class TGlobalResource : public ResourceType
+{
+public:
+	/**
+	 * Constructor
+	 */
+	TGlobalResource()
+	{
+		// If the resource is constructed in the rendering thread, directly initialize it
+		if ( !IsInGameThread() )
+		{
+			( ( ResourceType* )this )->InitResource();
+		}
+
+		// If the resource is constructed outside of the rendering thread, enqueue a command to initialize it
+		else
+		{
+			BeginInitResource( ( ResourceType* )this );
+		}
+	}
+
+	/**
+	 * @brief Is global resource
+	 * @return Return true if this resource is global, else return false
+	 */
+	virtual bool IsGlobal() const override 
+	{ 
+		return true; 
+	}
+
+	/**
+	 * Destructor
+	 */
+	virtual ~TGlobalResource()
+	{
+		// Cleanup the resource
+		( ( ResourceType* )this )->ReleaseResource();
+	}
+};
+
 #endif // !RENDERUTILS_H

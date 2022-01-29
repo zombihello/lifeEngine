@@ -1,5 +1,12 @@
+#include <set>
+
 #include "Render/RenderResource.h"
 #include "Render/RenderingThread.h"
+#include "Misc/EngineGlobals.h"
+#include "RHI/BaseRHI.h"
+
+static std::set< FRenderResource* >				GGlobalResources;		/**< Global render resources */
+FCriticalSection								GGlobalResourcesCS;		/**< Critical section of add/remove in GGlobalResources*/
 
 /**
  * Constructor
@@ -22,6 +29,11 @@ FRenderResource::~FRenderResource()
 	//appErrorf( TEXT( "An FRenderResource was deleted without being released first!" ) );
 }
 
+std::set< FRenderResource* >& FRenderResource::GetResourceList()
+{
+	return GGlobalResources;
+}
+
 /**
  * Update RHI resource
  */
@@ -36,11 +48,26 @@ void FRenderResource::UpdateRHI()
  */
 void FRenderResource::InitResource()
 {
-	if ( !isInitialized )
+	if ( isInitialized )
+	{
+		return;
+	}
+
+	// If resource is global - add he to global list of resource
+	if ( IsGlobal() )
+	{
+		GGlobalResourcesCS.Lock();
+		GGlobalResources.insert( this );
+		GGlobalResourcesCS.Unlock();
+	}
+
+	// Init resource if RHI is initialized
+	if ( GRHI && GRHI->IsInitialize() )
 	{
 		InitRHI();
-		isInitialized = true;
 	}
+
+	isInitialized = true;
 }
 
 /**
@@ -48,11 +75,26 @@ void FRenderResource::InitResource()
  */
 void FRenderResource::ReleaseResource()
 {
-	if ( isInitialized )
+	if ( !isInitialized )
 	{
-		isInitialized = false;
+		return;
+	}
+
+	// If resource is global - remove he from global list of resource
+	if ( IsGlobal() )
+	{
+		GGlobalResourcesCS.Lock();
+		GGlobalResources.erase( this );
+		GGlobalResourcesCS.Unlock();
+	}
+
+	// Release resource if RHI is initialized
+	if ( GRHI && GRHI->IsInitialize() )
+	{
 		ReleaseRHI();
 	}
+
+	isInitialized = false;
 }
 
 /**
@@ -61,6 +103,11 @@ void FRenderResource::ReleaseResource()
 void FRenderResource::UpdateResource()
 {
 	UpdateRHI();
+}
+
+bool FRenderResource::IsGlobal() const
+{
+	return false;
 }
 
 void BeginInitResource( FRenderResource* InResource )

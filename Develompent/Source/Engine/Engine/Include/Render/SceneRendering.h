@@ -11,6 +11,8 @@
 
 #include "Render/Shaders/Shader.h"
 #include "Render/DrawingPolicy.h"
+#include "RHI/BaseViewportRHI.h"
+#include "RHI/TypesRHI.h"
 
 /**
  * @ingroup Engine
@@ -43,6 +45,31 @@ public:
 	 * @param[in] InSceneView Scene view
 	 */
 	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView ) override;
+};
+
+/**
+ * @ingroup Engine
+ * Class for render scene
+ */
+class FSceneRenderer
+{
+public:
+	/**
+	 * Constructor
+	 * 
+	 * @param InSceneView Scene view
+	 */
+	FSceneRenderer( FSceneView* InSceneView );
+
+	/**
+	 * Render scene
+	 * 
+	 * @param InViewportRHI Viewport
+	 */
+	void Render( FViewportRHIParamRef InViewportRHI );
+
+private:
+	FSceneView*			sceneView;		/**< Scene view */
 };
 
 #endif // !SCENERENDERING_H

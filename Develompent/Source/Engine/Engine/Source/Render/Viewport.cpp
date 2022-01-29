@@ -4,6 +4,8 @@
 #include "RHI/BaseViewportRHI.h"
 #include "Render/RenderingThread.h"
 #include "Render/Viewport.h"
+#include "Render/SceneRenderTargets.h"
+#include "Render/SceneRendering.h"
 
 
 FViewport::FViewport() :
@@ -21,6 +23,7 @@ FViewport::~FViewport()
 #include "System/Archive.h"
 #include "System/BaseFileSystem.h"
 #include "Misc/CoreGlobals.h"
+#include "System/World.h"
 #include "Misc/Misc.h"
 #include "Components/CameraComponent.h"
 #include "Render/Scene.h"
@@ -29,19 +32,10 @@ FViewport::~FViewport()
 #include "Render/SceneRendering.h"
 #include "System/Package.h"
 #include "Render/StaticMesh.h"
+#include "Render/SceneUtils.h"
+#include "Containers/String.h"
 
-FSceneView								sceneView;
 extern LCameraComponent*				cameraComponent;
-FStaticMeshRef							staticMesh;
-FTexture2DRHIRef						depthBufferTexture2D;
-FSurfaceRHIRef							depthBufferSurface;
-bool									q = false;
-
-struct FTees
-{
-	float X;
-	FVector z;
-};
 
 void FViewport::InitRHI()
 {
@@ -56,62 +50,55 @@ void FViewport::InitRHI()
 		viewportRHI = GRHI->CreateViewport( windowHandle, sizeX, sizeY );
 	}
 
-	if ( !q )
+	GSceneRenderTargets.Allocate( sizeX, sizeY );
+
+	/*FPackage		pak;
+	pak.Open( TEXT( "Content/Tiger.lpak" ), true );
+
 	{
-		depthBufferTexture2D = GRHI->CreateTexture2D( TEXT( "DepthBuffer" ), sizeX, sizeY, PF_DepthStencil, 1, TCF_ResolveTargetable | TCF_DepthStencil );
-		depthBufferSurface = GRHI->CreateTargetableSurface( TEXT( "DepthBuffer" ), sizeX, sizeY, PF_DepthStencil, depthBufferTexture2D, TCF_ResolveTargetable | TCF_DepthStencil );
-		staticMesh = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "Tiger" ) ) );
-
-		/*FPackage		pak;
-		pak.Open( TEXT( "Content/Tiger.lpak" ), true );
-
-		{
-			FTexture2DRef		texture2D = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "TankBody_C" ) ) );
-			FMaterialRef		material = new FMaterial();
-			material->SetShader( FBasePassVertexShader::staticType );
-			material->SetShader( FBasePassPixelShader::staticType );
-			material->UsageOnStaticMesh( true );
-			material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
-			material->SetAssetName( TEXT( "TankBody_Mat" ) );
-			material->SetAssetHash( appCalcHash( TEXT( "TankBody_Mat" ) ) );
-			staticMesh->SetMaterial( 1, material );
-			pak.Add( texture2D );
-			pak.Add( material );
-		}
-
-		{
-			FTexture2DRef		texture2D = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "TigerMG_C" ) ) );
-			FMaterialRef		material = new FMaterial();
-			material->SetShader( FBasePassVertexShader::staticType );
-			material->SetShader( FBasePassPixelShader::staticType );
-			material->UsageOnStaticMesh( true );
-			material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
-			material->SetAssetName( TEXT( "TigerMG_Mat" ) );
-			material->SetAssetHash( appCalcHash( TEXT( "TigerMG_Mat" ) ) );
-			staticMesh->SetMaterial( 0, material );
-			pak.Add( texture2D );
-			pak.Add( material );
-		}
-
-		{
-			FTexture2DRef		texture2D = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "TigerTrack_C" ) ) );
-			FMaterialRef		material = new FMaterial();
-			material->SetShader( FBasePassVertexShader::staticType );
-			material->SetShader( FBasePassPixelShader::staticType );
-			material->UsageOnStaticMesh( true );
-			material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
-			material->SetAssetName( TEXT( "TigerTrack_Mat" ) );
-			material->SetAssetHash( appCalcHash( TEXT( "TigerTrack_Mat" ) ) );
-			staticMesh->SetMaterial( 2, material );
-			pak.Add( texture2D );
-			pak.Add( material );
-		}
-
-		pak.Add( staticMesh );
-		pak.Serialize();*/
-		
-		q = true;
+		FTexture2DRef		texture2D = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "TankBody_C" ) ) );
+		FMaterialRef		material = new FMaterial();
+		material->SetShader( FBasePassVertexShader::staticType );
+		material->SetShader( FBasePassPixelShader::staticType );
+		material->UsageOnStaticMesh( true );
+		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
+		material->SetAssetName( TEXT( "TankBody_Mat" ) );
+		material->SetAssetHash( appCalcHash( TEXT( "TankBody_Mat" ) ) );
+		staticMesh->SetMaterial( 1, material );
+		pak.Add( texture2D );
+		pak.Add( material );
 	}
+
+	{
+		FTexture2DRef		texture2D = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "TigerMG_C" ) ) );
+		FMaterialRef		material = new FMaterial();
+		material->SetShader( FBasePassVertexShader::staticType );
+		material->SetShader( FBasePassPixelShader::staticType );
+		material->UsageOnStaticMesh( true );
+		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
+		material->SetAssetName( TEXT( "TigerMG_Mat" ) );
+		material->SetAssetHash( appCalcHash( TEXT( "TigerMG_Mat" ) ) );
+		staticMesh->SetMaterial( 0, material );
+		pak.Add( texture2D );
+		pak.Add( material );
+	}
+
+	{
+		FTexture2DRef		texture2D = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "TigerTrack_C" ) ) );
+		FMaterialRef		material = new FMaterial();
+		material->SetShader( FBasePassVertexShader::staticType );
+		material->SetShader( FBasePassPixelShader::staticType );
+		material->UsageOnStaticMesh( true );
+		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
+		material->SetAssetName( TEXT( "TigerTrack_Mat" ) );
+		material->SetAssetHash( appCalcHash( TEXT( "TigerTrack_Mat" ) ) );
+		staticMesh->SetMaterial( 2, material );
+		pak.Add( texture2D );
+		pak.Add( material );
+	}
+
+	pak.Add( staticMesh );
+	pak.Serialize();*/
 }
 
 void FViewport::ReleaseRHI()
@@ -158,57 +145,39 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 	}
 }
 
-bool a = false;
 void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
-	// BS yehor.pohuliaka - Place court render scene
 	if ( !IsInitialized() )
 	{
 		return;
 	}
 
+	FSceneView*		sceneView = new FSceneView();
 	if ( cameraComponent )
 	{
-		sceneView.SetCameraView( cameraComponent );
+		sceneView->SetCameraView( cameraComponent );
 	}
 
 	struct Helper
 	{
-		static void Execute( FViewportRHIRef viewportRHI, FSceneView sceneView, bool isShouldPresent )
+		static void Execute( FViewportRHIRef viewportRHI, FSceneView* sceneView, bool isShouldPresent )
 		{
-			FBaseDeviceContextRHI* immediateContext = GRHI->GetImmediateContext();
+			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+			FSceneRenderer				sceneRenderer( sceneView );
+			
 			GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
-			GRHI->SetRenderTarget( immediateContext, viewportRHI->GetSurface(), depthBufferSurface );
-			immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
-			immediateContext->ClearDepthStencil( depthBufferSurface );
-			GRHI->SetViewParameters( immediateContext, sceneView );
-
-			// Render test static mesh
-			const std::vector< FStaticMeshSurface >&		staticMeshSurfaces = staticMesh->GetSurfaces();
-			const std::vector< FMaterialRef >&				staticMeshMaterials = staticMesh->GetMaterials();
-
-			for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )staticMeshSurfaces.size(); indexSurface < numSurfaces; ++indexSurface )
-			{
-				const FStaticMeshSurface&		surface = staticMeshSurfaces[ indexSurface ];
-				FMeshBatch						meshBatch;
-				meshBatch.primitiveType = PT_TriangleList;
-				meshBatch.elements.push_back( FMeshBatchElement{ staticMesh->GetIndexBufferRHI(), surface.baseVertexIndex, surface.firstIndex, surface.numPrimitives } );
-
-				FStaticMeshDrawPolicy		drawPolicy( staticMesh->GetVertexFactory(), staticMeshMaterials[ surface.materialID ] );
-				drawPolicy.SetRenderState( immediateContext );
-				drawPolicy.SetShaderParameters( immediateContext );
-				drawPolicy.Draw( immediateContext, meshBatch, sceneView );
-			}
-
+			sceneRenderer.Render( viewportRHI );
 			GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
+			
+			delete sceneView;
 		}
 	};
 
 	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FQRenderCommand,
 										  FViewportRHIRef, viewportRHI, viewportRHI,
-										  FSceneView, sceneView, sceneView,
+										  FSceneView*, sceneView, sceneView,
 										  bool, isShouldPresent, InIsShouldPresent,
 										  {
-											  Helper::Execute( viewportRHI,sceneView,isShouldPresent );
+											  Helper::Execute( viewportRHI, sceneView, isShouldPresent );
 										  } );
 }

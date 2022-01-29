@@ -3,14 +3,17 @@
 #include "Actors/Actor.h"
 #include "System/World.h"
 #include "Logger/LoggerMacros.h"
+#include "Render/Scene.h"
 
-FWorld::FWorld() :
-	isBeginPlay( false )
+FWorld::FWorld() 
+	: isBeginPlay( false )
+	, scene( new FScene() )
 {}
 
 FWorld::~FWorld()
 {
 	CleanupWorld();
+	delete scene;
 }
 
 void FWorld::BeginPlay()

@@ -9,6 +9,7 @@
 #ifndef RENDERRESOURCE_H
 #define RENDERRESOURCE_H
 
+#include <set>
 #include "Core.h"
 
 /**
@@ -27,6 +28,12 @@ public:
 	 * @brief Destructor
 	 */
 	virtual ~FRenderResource();
+
+	/**
+	 * @brief Get global resource list
+	 * @return Return reference to list of global resources
+	 */
+	static std::set< FRenderResource* >& GetResourceList();
 
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -74,6 +81,12 @@ public:
 	{
 		return isInitialized;
 	}
+
+	/**
+	 * @brief Is global resource
+	 * @return Return true if this resource is global, else return false
+	 */
+	virtual bool IsGlobal() const;
 
 private:
 	volatile bool				isInitialized;		/**< Is resource initialized */

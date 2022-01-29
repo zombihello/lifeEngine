@@ -36,15 +36,36 @@ void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceCo
 	
 	vertexFactory->Set( InDeviceContextRHI );
 	GRHI->SetRasterizerState( InDeviceContextRHI, GRHI->CreateRasterizerState( initializer ) );
-	GRHI->SetBoundShaderState( InDeviceContextRHI, GRHI->CreateBoundShaderState( 
-		material->GetAssetName().c_str(),
-		vertexFactory->GetDeclaration(), 
-		vertexShader->GetVertexShader(), 
-		pixelShader->GetPixelShader() ) );
+	GRHI->SetBoundShaderState( InDeviceContextRHI, GetBoundShaderState() );
 }
 
 void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
 {
 	check( vertexFactory );
 	vertexFactory->SetShaderParameters( InDeviceContextRHI );
+}
+
+uint32 FMeshDrawingPolicy::GetTypeHash() const
+{
+	uint32		hash = appMemFastHash( vertexFactory );
+	return appMemFastHash( material, hash );
+}
+
+FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const
+{
+	check( material && vertexFactory && vertexShader && pixelShader );
+	return GRHI->CreateBoundShaderState(
+				material->GetAssetName().c_str(),
+				vertexFactory->GetDeclaration(),
+				vertexShader->GetVertexShader(),
+				pixelShader->GetPixelShader() );
+}
+
+bool FMeshDrawingPolicy::Matches( const FMeshDrawingPolicy& InOtherDrawer ) const
+{
+	return
+		material == InOtherDrawer.material &&
+		vertexFactory == InOtherDrawer.vertexFactory &&
+		vertexShader == InOtherDrawer.vertexShader &&
+		pixelShader == InOtherDrawer.pixelShader;
 }

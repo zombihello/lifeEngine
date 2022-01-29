@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "Logger/LoggerMacros.h"
+#include "Render/RenderResource.h"
 #include "Render/RenderUtils.h"
 #include "Render/GlobalConstantsHelper.h"
 #include "D3D11RHI.h"
@@ -136,6 +137,13 @@ void FD3D11RHI::Init( bool InIsEditor )
 	GPixelFormats[ PF_ShadowDepth ].platformFormat				= DXGI_FORMAT_R16_TYPELESS;
 	GPixelFormats[ PF_FilteredShadowDepth ].platformFormat		= DXGI_FORMAT_D32_FLOAT;
 	GPixelFormats[ PF_D32 ].platformFormat						= DXGI_FORMAT_R32_TYPELESS;
+
+	// Initialize all global render resources
+	std::set< FRenderResource* >&			globalResourceList = FRenderResource::GetResourceList();
+	for ( auto it = globalResourceList.begin(), itEnd = globalResourceList.end(); it != itEnd; ++it )
+	{
+		( *it )->InitRHI();
+	}
 
 	isInitialize = true;
 }

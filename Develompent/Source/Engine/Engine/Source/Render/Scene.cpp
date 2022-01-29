@@ -33,3 +33,36 @@ void FSceneView::SetCameraView( const FCameraView& InCameraView )
 	// Copy view info
 	cameraView = InCameraView;
 }
+
+
+void FScene::AddPrimitive( class LPrimitiveComponent* InPrimitive )
+{
+	primitives.push_back( InPrimitive );
+}
+
+void FScene::RemovePrimitive( class LPrimitiveComponent* InPrimitive )
+{
+	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
+	{
+		if ( *it == InPrimitive )
+		{
+			primitives.erase( it );
+			return;
+		}
+	}
+}
+
+void FScene::BuildSDGs( const FSceneView& InSceneView )
+{
+	// Clear scene depth groups
+	for ( uint32 index = 0; index < SDG_Max; ++index )
+	{
+		SDGs[ index ].Clear();
+	}
+
+	// Add to SDGs primitives
+	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
+	{
+		( *it )->AddToDrawList( this );
+	}
+}
