@@ -42,7 +42,7 @@ void FStaticMeshDrawPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRH
 }
 
 
-FORCEINLINE const tchar* GetSceneDPGName( ESceneDepthGroup SDG )
+FORCEINLINE const tchar* GetSceneSDGName( ESceneDepthGroup SDG )
 {
 	switch ( SDG )
 	{
@@ -69,7 +69,7 @@ void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 	// Render scene layers
 	for ( uint32 SDGIndex = 0; SDGIndex < SDG_Max; ++SDGIndex )
 	{
-		SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, FString::Format( TEXT( "SDG %s" ), GetSceneDPGName( ( ESceneDepthGroup )SDGIndex ) ).c_str());
+		SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, FString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str());
 		FSceneDepthGroup&		SDG = scene->GetSDG( ( ESceneDepthGroup )SDGIndex );
 		SDG.staticMeshDrawList.Draw( immediateContext, *sceneView );
 	}

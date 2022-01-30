@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup Engine Engine
+ * @addtogroup WorldEd WorldEd
  *
  * Copyright Broken Singularity, All Rights Reserved.
  * Authors: Yehor Pohuliaka (zombiHello)

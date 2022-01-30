@@ -6,7 +6,7 @@
 #include "Render/Viewport.h"
 #include "Render/SceneRenderTargets.h"
 #include "Render/SceneRendering.h"
-
+#include "Render/Scene.h"
 
 FViewport::FViewport() :
 	windowHandle( nullptr ),
@@ -17,24 +17,7 @@ FViewport::FViewport() :
 FViewport::~FViewport()
 {}
 
-// BS yehor.pohuliaka - This code for test, need delete it
-#include "Render/Shaders/BasePassShader.h"
-#include "Render/Texture.h"
-#include "System/Archive.h"
-#include "System/BaseFileSystem.h"
-#include "Misc/CoreGlobals.h"
-#include "System/World.h"
-#include "Misc/Misc.h"
 #include "Components/CameraComponent.h"
-#include "Render/Scene.h"
-#include "System/InputSystem.h"
-#include "Render/Material.h"
-#include "Render/SceneRendering.h"
-#include "System/Package.h"
-#include "Render/StaticMesh.h"
-#include "Render/SceneUtils.h"
-#include "Containers/String.h"
-
 extern LCameraComponent*				cameraComponent;
 
 void FViewport::InitRHI()
