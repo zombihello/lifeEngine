@@ -1,10 +1,11 @@
 #include <qmessagebox.h>
 #include <QKeyEvent>
+#include <qlabel.h>
 #include <qdebug.h>
 
 #include "ui_MainWindow.h"
+#include "ADS/SectionWidget.h"
 #include "Windows/MainWindow.h"
-
 #include "Containers/String.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Misc/LaunchGlobals.h"
@@ -13,13 +14,48 @@
 #include "System/WindowEvent.h"
 #include "EngineLoop.h"
 
-WeMainWindow::WeMainWindow( QWidget* InParent /* = nullptr */ ) : 
-	QMainWindow( InParent ),
-	ui( new Ui::MainWindow() )
+// Widgets
+#include "Widgets/ViewportWidget.h"
+#include "Widgets/LogWidget.h"
+#include "Widgets/ActorPropertiesWidget.h"
+#include "Widgets/ExploerLevelWidget.h"
+
+/**
+ * @ingroup WorldEd
+ * Create widget in ADS dock panel
+ * 
+ * @param InContainerWidget ADS container widget
+ * @param InDropArea Area for drop created dock panel
+ * @param InWidget Addable widget in dock panel
+ * @param InUniqueName Unique name of dock panel for ID
+ * @param InTitle Title of dock panel
+ * @param InSectionWidget Add dock panel to other dock panel. If InSectionWidget is nullptr - dock panel not adding to other panel
+ * @return Return pointer to created section widget of new dock panel
+ */
+FORCEINLINE ADS_NS::SectionWidget* CreateWidget( ADS_NS::ContainerWidget* InContainerWidget, ADS_NS::DropArea InDropArea, QWidget* InWidget, const QString& InUniqueName, const QString& InTitle, ADS_NS::SectionWidget* InSectionWidget = nullptr )
+{
+	ADS_NS::SectionContent::RefPtr			refPtr = ADS_NS::SectionContent::newSectionContent( InUniqueName, InContainerWidget, new QLabel( InTitle ), InWidget );
+	return InContainerWidget->addSectionContent( refPtr, InSectionWidget, InDropArea );
+}
+
+WeMainWindow::WeMainWindow( QWidget* InParent /* = nullptr */ ) 
+	: QMainWindow( InParent )
+	, ui( new Ui::MainWindow() )
+	, logWidget( nullptr )
 {
 	// Init Qt UI
 	ui->setupUi( this );
 	setWindowTitle( QString::fromStdWString( GEditorEngine->GetEditorName() ) );
+	setCentralWidget( &containerWidget );
+
+	// Create widgets of editor
+	logWidget = new WeLogWidget();
+	ADS_NS::SectionWidget*		sectionWidget = nullptr;
+
+	sectionWidget = CreateWidget( &containerWidget, ADS_NS::CenterDropArea, new WeViewportWidget(), "#viewport", "Scene" );
+	sectionWidget = CreateWidget( &containerWidget, ADS_NS::RightDropArea, new WeExploerLevelWidget(), "#exploer_level", "Exploer level" );
+	sectionWidget = CreateWidget( &containerWidget, ADS_NS::BottomDropArea, new WeActorPropertiesWidget(), "#actor_properties", "Actor properties", sectionWidget );
+	sectionWidget = CreateWidget( &containerWidget, ADS_NS::CenterDropArea, logWidget, "#log", "Logs", sectionWidget );
 
 	// Update text in menu action 'About'
 	ui->actionAbout->setText( QString::fromStdWString( FString::Format( TEXT( "About %s" ), GEditorEngine->GetEditorName().c_str() ) ) );
@@ -32,6 +68,7 @@ WeMainWindow::WeMainWindow( QWidget* InParent /* = nullptr */ ) :
 WeMainWindow::~WeMainWindow()
 {
 	delete ui;
+	delete logWidget;
 }
 
 void WeMainWindow::keyPressEvent( QKeyEvent* InEvent )

@@ -10,6 +10,7 @@
 #include "Render/Viewport.h"
 #include "System/EditorEngine.h"
 #include "Actors/PlayerStart.h"
+#include "Widgets/LogWidget.h"
 
 IMPLEMENT_CLASS( LEditorEngine )
 
@@ -46,6 +47,20 @@ void LEditorEngine::Shutdown()
 	{
 		delete mainWindow;
 		mainWindow = nullptr;
+	}
+}
+
+void LEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage )
+{
+	if ( !mainWindow )
+	{
+		return;
+	}
+
+	WeLogWidget*		logWidget = mainWindow->GetLogWidget();
+	if ( logWidget )
+	{
+		logWidget->Print( InLogType, InMessage );
 	}
 }
 

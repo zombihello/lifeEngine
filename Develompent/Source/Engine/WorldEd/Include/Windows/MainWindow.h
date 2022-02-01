@@ -12,6 +12,10 @@
 #include <QMainWindow>
 #include <QTimer>
 
+#include "ADS/API.h"
+#include "ADS/ContainerWidget.h"
+#include "Core.h"
+
 namespace Ui
 {
 	class MainWindow;
@@ -73,6 +77,15 @@ public:
 	 */
 	virtual void mouseMoveEvent( QMouseEvent* InEvent ) override;
 
+	/**
+	 * Get log widget
+	 * @return Return log widget. If not created returning nullptr
+	 */
+	FORCEINLINE class WeLogWidget* GetLogWidget() const
+	{
+		return logWidget;
+	}
+
 private slots:
 	/**
 	 * Slot on tick LE
@@ -93,6 +106,8 @@ private:
 	Ui::MainWindow*					ui;					/**< Qt UI */
 	QTimer							timerTick;			/**< Timer for tick engine */
 	QPoint							mousePosition;		/**< Mouse position */
+	ADS_NS::ContainerWidget			containerWidget;	/**< Main ADS widget for Advance dockable widgets */
+	class WeLogWidget*				logWidget;			/**< Log widget */
 };
 
 #endif // MAINWINDOW_H

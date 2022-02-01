@@ -11,6 +11,7 @@
 
 #include <vector>
 
+#include "Logger/LoggerMacros.h"
 #include "System/BaseEngine.h"
 
 /**
@@ -48,6 +49,14 @@ public:
 	 * Shutdown engine
 	 */
 	virtual void Shutdown();
+
+	/**
+	 * Print log to log widget
+	 * 
+	 * @param InLogType Log type
+	 * @param InMessage Message of log
+	 */
+	virtual void PrintLogToWidget( ELogType InLogType, const tchar* InMessage );
 
 	/**
 	 * Add viewport to render list

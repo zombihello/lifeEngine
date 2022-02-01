@@ -9,6 +9,11 @@
 #include "System/BaseFileSystem.h"
 #include "WindowsLogger.h"
 
+#if WITH_EDITOR
+#include "System/EditorEngine.h"
+#include "Misc/WorldEdGlobals.h"
+#endif // WITH_EDITOR
+
 const tchar* GLogTypeNames[] =
 {
 	TEXT( "Log" ),
@@ -135,8 +140,17 @@ void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 		}
 	}
 	
-	std::wstring			finalMessage = FString::Format( TEXT( "[%07.2f][%s][%s] %s\n" ), appSeconds() - GStartTime, GLogTypeNames[ ( uint32 )InLogType ], GLogCategoryNames[ ( uint32 )InLogCategory ], InMessage );
+	std::wstring			message = FString::Format( TEXT( "[%07.2f][%s][%s] %s" ), appSeconds() - GStartTime, GLogTypeNames[ ( uint32 ) InLogType ], GLogCategoryNames[ ( uint32 ) InLogCategory ], InMessage );
+	std::wstring			finalMessage = message + TEXT( "\n" );
 	wprintf( finalMessage.c_str() );
+
+	// Print to log widget in WorldEd
+#if WITH_EDITOR
+	if ( GEditorEngine )
+	{
+		GEditorEngine->PrintLogToWidget( InLogType, message.c_str() );
+	}
+#endif // WITH_EDITOR
 
 	// Serialize log to file
 	if ( archiveLogs )

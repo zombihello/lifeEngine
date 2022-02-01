@@ -21,23 +21,25 @@
 
 void QtMessageOutput( QtMsgType InType, const QMessageLogContext& InContext, const QString& InMessage )
 {
+	std::wstring		message = InMessage.toStdWString();
 	switch ( InType )
 	{
 	case QtDebugMsg:
 	case QtInfoMsg:
-		LE_LOG( LT_Log, LC_Editor, InMessage.toStdWString().c_str() );
+		LE_LOG( LT_Log, LC_Editor, message.c_str() );
 		break;
 
 	case QtWarningMsg:
-		LE_LOG( LT_Warning, LC_Editor, InMessage.toStdWString().c_str() );
+		LE_LOG( LT_Warning, LC_Editor, message.c_str() );
 		break;
 
 	case QtCriticalMsg:
-		LE_LOG( LT_Error, LC_Editor, InMessage.toStdWString().c_str() );
+		LE_LOG( LT_Error, LC_Editor, message.c_str() );
 		break;
 
 	case QtFatalMsg:
-		appErrorf( InMessage.toStdWString().c_str() );
+		GEditorEngine->PrintLogToWidget( LT_Error, message.c_str() );
+		appErrorf( message.c_str() );
 		break;
 	}
 }
@@ -96,6 +98,7 @@ int32 appWorldEdEntry( const tchar* InCmdLine )
 	appHideSplash();
 	result = application.exec();
 	GEditorEngine->Shutdown();
+	GEditorEngine = nullptr;
 	return result;
 }
 
