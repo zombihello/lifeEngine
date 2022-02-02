@@ -19,6 +19,7 @@
 #include "Widgets/LogWidget.h"
 #include "Widgets/ActorPropertiesWidget.h"
 #include "Widgets/ExploerLevelWidget.h"
+#include "Widgets/ContentBrowserWidget.h"
 
 /**
  * @ingroup WorldEd
@@ -55,6 +56,7 @@ WeMainWindow::WeMainWindow( QWidget* InParent /* = nullptr */ )
 	sectionWidget = CreateWidget( &containerWidget, ADS_NS::CenterDropArea, new WeViewportWidget(), "#viewport", "Scene" );
 	sectionWidget = CreateWidget( &containerWidget, ADS_NS::RightDropArea, new WeExploerLevelWidget(), "#exploer_level", "Exploer level" );
 	sectionWidget = CreateWidget( &containerWidget, ADS_NS::BottomDropArea, new WeActorPropertiesWidget(), "#actor_properties", "Actor properties", sectionWidget );
+	sectionWidget = CreateWidget( &containerWidget, ADS_NS::CenterDropArea, new WeContentBrowserWidget( FString::Format( TEXT( "%s/Content/" ), appBaseDir().c_str() ).c_str() ), "#content_browser", "Content browser", sectionWidget);
 	sectionWidget = CreateWidget( &containerWidget, ADS_NS::CenterDropArea, logWidget, "#log", "Logs", sectionWidget );
 
 	// Update text in menu action 'About'

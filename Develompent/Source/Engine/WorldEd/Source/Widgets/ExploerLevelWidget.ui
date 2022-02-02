@@ -30,11 +30,18 @@
     <number>1</number>
    </property>
    <item>
-    <widget class="QTreeView" name="treeView_level"/>
+    <widget class="WeExploerLevel" name="treeView_level"/>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>WeExploerLevel</class>
+   <extends>QTreeView</extends>
+   <header>System/ExploerLevel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
