@@ -3,6 +3,7 @@
 #include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
+#include "EngineDefines.h"
 #include "Misc/Class.h"
 #include "Misc/Misc.h"
 #include "Misc/EngineGlobals.h"
@@ -25,6 +26,11 @@ void LEditorEngine::Init()
 {
 	Super::Init();
 
+	// Init world grid
+	worldGrid = new FWorldGrid();
+	worldGrid->Update( -6000.f, 6000.f, 256.f );
+
+	// Create main window of editor
 	mainWindow = new WeMainWindow();
 	mainWindow->showMaximized();
 }
@@ -43,6 +49,8 @@ void LEditorEngine::Tick( float InDeltaSeconds )
 
 void LEditorEngine::Shutdown()
 {
+	worldGrid.SafeRelease();
+
 	if ( mainWindow )
 	{
 		delete mainWindow;

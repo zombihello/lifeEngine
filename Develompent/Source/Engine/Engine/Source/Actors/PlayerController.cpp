@@ -37,18 +37,18 @@ void APlayerController::Tick( float InDeltaTime )
 	}
 	if ( GInputSystem->IsKeyDown( BC_KeyS ) )
 	{
-		AddActorLocation( GetActorForwardVector() * -0.1f );
+		AddActorLocation( GetActorForwardVector() * -2.f );
 	}
 	if ( GInputSystem->IsKeyDown( BC_KeyW ) )
 	{
-		AddActorLocation( GetActorForwardVector() * 0.1f );
+		AddActorLocation( GetActorForwardVector() * 2.f );
 	}
 	if ( GInputSystem->IsKeyDown( BC_KeyA ) )
 	{
-		AddActorLocation( GetActorRightVector() * 0.1f );
+		AddActorLocation( GetActorRightVector() * 2.f );
 	}
 	if ( GInputSystem->IsKeyDown( BC_KeyD ) )
 	{
-		AddActorLocation( GetActorRightVector() * -0.1f );
+		AddActorLocation( GetActorRightVector() * -2.f );
 	}
 }

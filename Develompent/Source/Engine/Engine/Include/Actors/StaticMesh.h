@@ -9,6 +9,8 @@
 #ifndef ASTATICMESH_H
 #define ASTATICMESH_H
 
+#include <string>
+
 #include "Actors/Actor.h"
 #include "Components/StaticMeshComponent.h"
 

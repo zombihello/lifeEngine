@@ -14,7 +14,7 @@ FMaterial::FMaterial() :
 
 FMaterial::~FMaterial()
 {}
-
+#include "Render/Shaders/WorldGridShader.h"
 void FMaterial::Serialize( class FArchive& InArchive )
 {
 	if ( InArchive.Ver() < VER_ShaderMap )

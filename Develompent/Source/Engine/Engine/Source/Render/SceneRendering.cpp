@@ -14,6 +14,14 @@
 #include "Render/Texture.h"
 #include "Render/SceneRenderTargets.h"
 
+#if WITH_EDITOR
+#include "Render/WorldGrid.h"
+#include "Misc/WorldEdGlobals.h"
+#include "System/EditorEngine.h"
+#include "Render/Shaders/WorldGridShader.h"
+#include "Render/VertexFactory/WorldGridVertexFactory.h"
+#endif // WITH_EDITOR
+
 FStaticMeshDrawPolicy::FStaticMeshDrawPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) :
 	FMeshDrawingPolicy( InVertexFactory, InMaterial, InDepthBias )
 {}
@@ -32,6 +40,7 @@ void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* In
 
 void FStaticMeshDrawPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView )
 {
+	SCOPED_DRAW_EVENT( EventDraw, DEC_STATIC_MESH, FString::Format( TEXT( "Material %s" ), material->GetAssetName().c_str() ).c_str() );
 	for ( uint32 indexBatch = 0, numBatches = ( uint32 )InMeshBatch.elements.size(); indexBatch < numBatches; ++indexBatch )
 	{
 		const FMeshBatchElement&		batchElement = InMeshBatch.elements[ indexBatch ];
@@ -67,10 +76,39 @@ void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 	scene->BuildSDGs( *sceneView );
 
 	// Render scene layers
-	for ( uint32 SDGIndex = 0; SDGIndex < SDG_Max; ++SDGIndex )
 	{
-		SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, FString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str());
-		FSceneDepthGroup&		SDG = scene->GetSDG( ( ESceneDepthGroup )SDGIndex );
-		SDG.staticMeshDrawList.Draw( immediateContext, *sceneView );
+		SCOPED_DRAW_EVENT( EventSDGs, DEC_SCENE_ITEMS, TEXT( "SDGs" ) );
+		for ( uint32 SDGIndex = 0; SDGIndex < SDG_Max; ++SDGIndex )
+		{
+			SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, FString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup ) SDGIndex ) ).c_str() );
+			FSceneDepthGroup& SDG = scene->GetSDG( ( ESceneDepthGroup ) SDGIndex );
+			SDG.staticMeshDrawList.Draw( immediateContext, *sceneView );
+		}
 	}
+
+	// Render world grid for editor
+#if WITH_EDITOR
+	if ( GIsEditor )
+	{
+		SCOPED_DRAW_EVENT( EventWorldGrid, DEC_SCENE_ITEMS, TEXT( "WorldGrid" ) );
+		FWorldGridRef		worldGrid = GEditorEngine->GetWorldGrid();
+
+		if ( worldGrid )
+		{
+			FVertexBufferRHIRef							vertexBuffer = worldGrid->GetVertexBufferRHI();
+			TRefCountPtr< FWorldGridVertexFactory >		vertexFactory = worldGrid->GetVertexFactory();
+			
+			if ( vertexBuffer && vertexFactory )
+			{
+				FShaderRef					vertexShader = GShaderManager->FindInstance< FWorldGridVertexShader, FWorldGridVertexFactory >();
+				FShaderRef					pixelShader = GShaderManager->FindInstance< FWorldGridPixelShader, FWorldGridVertexFactory >();
+				FBoundShaderStateRHIRef		boundShaderState = GRHI->CreateBoundShaderState( TEXT( "WorldGridBSS" ), vertexFactory->GetDeclaration(), vertexShader->GetVertexShader(), pixelShader->GetPixelShader() );
+
+				vertexFactory->Set( immediateContext );
+				GRHI->SetBoundShaderState( immediateContext, boundShaderState );
+				GRHI->DrawPrimitive( immediateContext, PT_LineList, 0, worldGrid->GetNumVerteces() / 2 );
+			}
+		}
+	}
+#endif // WITH_EDITOR
 }

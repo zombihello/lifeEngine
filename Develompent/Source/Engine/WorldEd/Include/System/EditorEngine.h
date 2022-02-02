@@ -13,6 +13,7 @@
 
 #include "Logger/LoggerMacros.h"
 #include "System/BaseEngine.h"
+#include "Render/WorldGrid.h"
 
 /**
  * @ingroup WorldEd
@@ -102,8 +103,19 @@ public:
 	 */
 	virtual std::wstring GetEditorName() const;
 
+	/**
+	 * Get world grid
+	 * 
+	 * @return Return world grid
+	 */
+	FORCEINLINE FWorldGridRef GetWorldGrid() const
+	{
+		return worldGrid;
+	}
+
 private:
 	std::vector< class FViewport* >			viewports;		/**< Array of viewports for render */
+	FWorldGridRef							worldGrid;		/**< World grid */
 	class WeMainWindow*						mainWindow;		/**< Main editor window */
 };
 
