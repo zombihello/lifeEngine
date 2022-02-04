@@ -7,17 +7,26 @@
 #include "Misc/EngineGlobals.h"
 #include "System/BaseEngine.h"
 #include "System/InputSystem.h"
+#include "Misc/UIGlobals.h"
+#include "UIEngine.h"
 
 IMPLEMENT_CLASS( LBaseEngine )
 
 void LBaseEngine::Init()
 {
 	GInputSystem->Init();
+	GUIEngine->Init();
+}
+
+void LBaseEngine::Shutdown()
+{
+	GUIEngine->Shutdown();
 }
 
 void LBaseEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	GInputSystem->ProcessEvent( InWindowEvent );
+	GUIEngine->ProcessEvent( InWindowEvent );
 }
 
 float LBaseEngine::GetMaxTickRate() const

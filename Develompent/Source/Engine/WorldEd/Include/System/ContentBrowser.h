@@ -14,6 +14,7 @@
 #include <qproxystyle.h>
 
 #include "FileSystemModel.h"
+#include "System/Package.h"
 
 /**
  * @ingroup WorldEd
@@ -91,6 +92,19 @@ protected:
 	 * @param InEvent Event of drop item
 	 */
 	void dropEvent( QDropEvent* Event );
+
+private slots:
+	/**
+	 * Event of double click on item
+	 */
+	void on_treeView_contentBrowser_doubleClicked( const QModelIndex& InIndex );
+
+signals:
+	/**
+	 * Event on open package
+	 * @param InPackage Package
+	 */
+	void OnOpenPackage( FPackage* InPackage );
 
 private:
 	QDir					rootDir;			/**< Root dir for content browser */

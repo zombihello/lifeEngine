@@ -46,6 +46,9 @@ WeContentBrowserWidget::WeContentBrowserWidget( const tchar* InRootDir, QWidget*
 	// Set root dir for content browser
 	check( InRootDir );
 	ui->treeView_contentBrowser->SetRootDir( QFileInfo( QString::fromStdWString( InRootDir ) ).dir() );
+
+	// Connect to slots
+	connect( ui->treeView_contentBrowser, SIGNAL( OnOpenPackage() ), this, SLOT( on_treeView_contentBrowser_OnOpenPackage( class FPackage* InPackage ) ) );
 }
 
 WeContentBrowserWidget::~WeContentBrowserWidget()
@@ -212,3 +215,8 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createFolder
 
 void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createMaterial()
 {}
+
+void WeContentBrowserWidget::on_treeView_contentBrowser_OnOpenPackage( class FPackage* InPackage )
+{
+	ui->listView_packageBrowser->SetPackage( InPackage );
+}

@@ -43,7 +43,7 @@ public:
 	/**
 	 * Shutdown engine
 	 */
-	virtual void Shutdown() PURE_VIRTUAL( LBaseEngine::Shutdown, );
+	virtual void Shutdown();
 
 	/**
 	 * Load map

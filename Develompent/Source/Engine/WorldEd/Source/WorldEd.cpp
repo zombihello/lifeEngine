@@ -16,6 +16,7 @@
 #include "Misc/LaunchGlobals.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Misc/Misc.h"
+#include "RHI/BaseRHI.h"
 #include "EngineLoop.h"
 #include "WorldEd.h"
 
@@ -114,5 +115,5 @@ std::wstring appGetWorldEdName()
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
 
-	return FString::Format( TEXT( "WorldEd for %s (%s-bit)" ), GGameName.c_str(), platformBitsString.c_str() );
+	return FString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
 }

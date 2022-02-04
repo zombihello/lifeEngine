@@ -15,6 +15,18 @@
 
 /**
  * @ingroup WorldEd
+ * Package extension
+ */
+#define FILE_PACKAGE_EXTENSION		"lpak"
+
+/**
+ * @ingroup WorldEd
+ * Map extension
+ */
+#define  FILE_MAP_EXTENSION			"lmap"
+
+/**
+ * @ingroup WorldEd
  * Qt file system model
  */
 class WeFileSystemModel : public QFileSystemModel
@@ -36,6 +48,11 @@ public:
 	 * File move event on widget
 	 */
 	bool dropMimeData( const QMimeData* InData, Qt::DropAction InAction, int InRow, int InColumn, const QModelIndex& InParent );
+
+	/**
+	 * Returns the data stored under the given role for the item referred to by the index
+	 */
+	QVariant data( const QModelIndex& InIndex, int InRole = Qt::DisplayRole ) const override;
 
 private:
 	/**

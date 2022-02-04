@@ -28,7 +28,7 @@ void LEditorEngine::Init()
 
 	// Init world grid
 	worldGrid = new FWorldGrid();
-	worldGrid->Update( -6000.f, 6000.f, 256.f );
+	worldGrid->Update( -10000.f, 10000.f, 256.f );
 
 	// Create main window of editor
 	mainWindow = new WeMainWindow();
@@ -49,6 +49,7 @@ void LEditorEngine::Tick( float InDeltaSeconds )
 
 void LEditorEngine::Shutdown()
 {
+	Super::Shutdown();
 	worldGrid.SafeRelease();
 
 	if ( mainWindow )

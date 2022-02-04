@@ -243,6 +243,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 		GSplashScreenTextRects[ STT_StartupProgress ].right				= bitmap.bmWidth - 20;
 
 		// In the editor, we'll display loading info
+#if WITH_EDITOR
 		if ( GIsEditor )
 		{
 			// Set initial startup progress info
@@ -261,6 +262,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			appSetSplashText( STT_VersionInfo1, ENGINE_NAME TEXT( " (version " ) ENGINE_VERSION_STRING TEXT( ")" ) );
 			appSetSplashText( STT_CopyrightInfo, TEXT( "(C) Broken Singularity. All rights reserved" ) );			
 		}
+#endif // WITH_EDITOR
 
 		if ( GSplashScreenWnd )
 		{

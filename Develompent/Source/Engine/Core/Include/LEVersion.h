@@ -39,6 +39,7 @@ enum ELifeEnginePackageVersion
 	VER_AssetName							= 7,					/**< Added asset name in package */
 	VER_RemovedTFC							= 8,					/**< Removed texture file cache */
 	VER_CompressedZlib						= 9,					/**< Added in archive compression ZLIB */
+	VER_AssetName_V2						= 10,					/**< Moved asset name from him to table of info about this asset */
 
 	//
 	// New versions can be added here

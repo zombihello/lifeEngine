@@ -7,6 +7,7 @@
 #include "ADS/SectionWidget.h"
 #include "Windows/MainWindow.h"
 #include "Containers/String.h"
+#include "Containers/StringConv.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Misc/LaunchGlobals.h"
 #include "System/EditorEngine.h"

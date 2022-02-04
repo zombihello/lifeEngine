@@ -8,6 +8,8 @@
 #include <qpainter.h>
 
 #include "System/ContentBrowser.h"
+#include "Misc/CoreGlobals.h"
+#include "System/Package.h"
 
 void WeContentBrowser::WeStyle::drawPrimitive( PrimitiveElement InElement, const QStyleOption* InOption, QPainter* InPainter, const QWidget* InWidget ) const
 {
@@ -46,8 +48,15 @@ void WeContentBrowser::WeStyle::drawPrimitive( PrimitiveElement InElement, const
 WeContentBrowser::WeContentBrowser( QWidget* InParent /* = nullptr */ )
 	: QTreeView( InParent )
 {
+	// Build support list of file extensions
+	QStringList			filters;
+	filters << "*." FILE_PACKAGE_EXTENSION;
+	filters << "*." FILE_MAP_EXTENSION;
+
 	fileSystemModel = new WeFileSystemModel( this );
-	fileSystemModel->setFilter( QDir::QDir::AllEntries | QDir::QDir::NoDotAndDotDot | QDir::QDir::NoSymLinks );
+	fileSystemModel->setFilter( QDir::AllDirs | QDir::QDir::AllEntries | QDir::QDir::NoDotAndDotDot | QDir::QDir::NoSymLinks );
+	fileSystemModel->setNameFilters( filters );
+	fileSystemModel->setNameFilterDisables( false );
 	fileSystemModel->setRootPath( "" );
 
 	setModel( fileSystemModel );
@@ -61,6 +70,8 @@ WeContentBrowser::WeContentBrowser( QWidget* InParent /* = nullptr */ )
 
 	style = new WeStyle();
 	setStyle( style );
+
+	connect( this, SIGNAL( doubleClicked( QModelIndex ) ), this, SLOT( on_treeView_contentBrowser_doubleClicked( QModelIndex ) ) );
 }
 
 WeContentBrowser::~WeContentBrowser()
@@ -152,5 +163,22 @@ void WeContentBrowser::dropEvent( QDropEvent* InEvent )
 	else
 	{
 		InEvent->ignore();
+	}
+}
+
+void WeContentBrowser::on_treeView_contentBrowser_doubleClicked( const QModelIndex& InIndex )
+{
+	QFileInfo		fileInfo = fileSystemModel->fileInfo( InIndex );
+	if ( fileInfo.isFile() )
+	{
+		QDir			baseDir( QString::fromStdWString( appBaseDir() ) );
+		FPackageRef		package = GPackageManager->OpenPackage( baseDir.relativeFilePath( fileInfo.absoluteFilePath() ).toStdWString() );
+		if ( package )
+		{
+
+			emit OnOpenPackage( package );
+		}
+
+		repaint();
 	}
 }

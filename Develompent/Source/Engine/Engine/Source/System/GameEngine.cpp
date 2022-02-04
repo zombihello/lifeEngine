@@ -44,6 +44,8 @@ void LGameEngine::Tick( float InDeltaSeconds )
 
 void LGameEngine::Shutdown()
 {
+	Super::Shutdown();
+
 	// Destroy viewport
 	viewport.Update( true, 0, 0, nullptr );
 

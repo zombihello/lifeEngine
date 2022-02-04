@@ -168,6 +168,19 @@ private:
 
 /**
  * @ingroup Core
+ * Asset info in package
+ */
+struct FAssetInfo
+{
+	uint32			offset;		/**< Offset in archive to asset */
+	uint32			size;		/**< Size data in archive */
+	EAssetType		type;		/**< Asset type */
+	std::wstring	name;		/**< Name of asset */
+	FAsset*			data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
+};
+
+/**
+ * @ingroup Core
  * Class for help add, remove and find assets in package
  */
 class FPackage : public FRefCounted
@@ -216,7 +229,7 @@ public:
 		checkMsg( InAsset->hash != INVALID_HASH, TEXT( "For add asset to package need hash is valid" ) );
 
 		InAsset->package = this;
-		assetsTable[ InAsset->hash ] = FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset };
+		assetsTable[ InAsset->hash ] = FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset->name, InAsset };
 	}
 
 	/**
@@ -267,18 +280,37 @@ public:
 		return numUsageAssets;
 	}
 
-private:
 	/**
-	 * Asset info in package
+	 * Get number assets in package
+	 * @return Return number assets in package
 	 */
-	struct FAssetInfo
+	FORCEINLINE uint32 GetNumAssets() const
 	{
-		uint32			offset;		/**< Offset in archive to asset */
-		uint32			size;		/**< Size data in archive */
-		EAssetType		type;		/**< Asset type */
-		FAsset*			data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
-	};
+		return assetsTable.size();
+	}
 
+	/**
+	 * Get asset info by index
+	 * 
+	 * @param InIndex Index of asset in package
+	 * @param OutAssetInfo Output reference to asset info
+	 */
+	FORCEINLINE void GetAssetInfo( uint32 InIndex, FAssetInfo& OutAssetInfo ) const
+	{
+		check( !assetsTable.empty() );
+
+		uint32		index = 0;
+		for ( auto itAsset = assetsTable.cbegin(), itAssetEnd = assetsTable.cend(); itAsset != itAssetEnd; ++itAsset, ++index )
+		{
+			if ( InIndex == index )
+			{
+				OutAssetInfo = itAsset->second;
+				break;
+			}
+		}
+	}
+
+private:
 	/**
 	 * Mark that the asset is unloaded
 	 * 
@@ -335,8 +367,29 @@ public:
 	 * 
 	 * @param[in] InPath Package path
 	 * @param[in] InHash Asset hash
+	 * @return Return finded asset. If not found returning nullptr
 	 */
 	FAssetRef FindAsset( const std::wstring& InPath, uint32 InHash );
+
+	/**
+	 * Open package
+	 * 
+	 * @param InPath Package path
+	 * @return Return opened package. If not found returning nullptr
+	 */
+	FPackageRef OpenPackage( const std::wstring& InPath );
+
+	/**
+	 * Is package opened
+	 * 
+	 * @param InPath package path
+	 * @return Return true if package is opened, else return false
+	 */
+	FORCEINLINE bool IsPackageOpened( const std::wstring& InPath ) const
+	{
+		auto		itPackage = packages.find( InPath );
+		return itPackage != packages.end();
+	}
 
 	/**
 	 * Forcibly cleanup unused packages

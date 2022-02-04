@@ -64,6 +64,12 @@ private slots:
 	 */
 	void on_treeView_contentBrowser_contextMenu_createMaterial();
 
+	/**
+	 * Event open package
+	 * @param InPackage Package
+	 */
+	void on_treeView_contentBrowser_OnOpenPackage( class FPackage* InPackage );
+
 private:
 	Ui::WeContentBrowserWidget*				ui;			/**< Qt UI */
 

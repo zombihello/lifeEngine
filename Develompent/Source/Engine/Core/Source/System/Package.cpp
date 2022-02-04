@@ -45,12 +45,10 @@ FAsset::~FAsset()
 
 void FAsset::Serialize( class FArchive& InArchive )
 {
-	if ( InArchive.IsLoading() && InArchive.Ver() < VER_AssetName )
+	if ( InArchive.IsLoading() && ( InArchive.Ver() >= VER_AssetName && InArchive.Ver() < VER_AssetName_V2 ) )
 	{
-		return;
+		InArchive << name;
 	}
-
-	InArchive << name;
 }
 
 void FAsset::SetAssetHash( uint32 InHash )
@@ -130,6 +128,7 @@ void FPackage::Serialize()
 
 			// Serialize asset header	
 			*archive << assetInfo.type;
+			*archive << assetInfo.name;
 			*archive << assetInfo.data->hash;
 			*archive << assetInfo.size;
 
@@ -157,6 +156,12 @@ void FPackage::Serialize()
 
 			// Serialize hash with size data
 			*archive << assetInfo.type;
+
+			if ( archive->Ver() >= VER_AssetName_V2 )
+			{
+				*archive << assetInfo.name;
+			}
+
 			*archive << assetHash;
 			*archive << assetInfo.size;
 			assetInfo.offset = archive->Tell();
@@ -264,6 +269,7 @@ FAssetRef FPackage::Find( uint32 InHash )
 	// Init asset
 	assetInfo.data->hash = itAsset->first;
 	assetInfo.data->package = this;
+	assetInfo.data->name = assetInfo.name;
 
 	// Seek to asset data
 	archive->Seek( assetInfo.offset );
@@ -271,8 +277,13 @@ FAssetRef FPackage::Find( uint32 InHash )
 	uint32		startOffset = archive->Tell();
 	assetInfo.data->Serialize( *archive );
 	uint32		currentOffset = archive->Tell();
-
+	
 	check( currentOffset - startOffset == assetInfo.size );
+
+	if ( archive->Ver() < VER_AssetName_V2 )
+	{
+		assetInfo.name = assetInfo.data->name;
+	}
 
 	// Seek to old offset and exit
 	archive->Seek( oldOffset );
@@ -300,8 +311,8 @@ void FPackageManager::Init()
 
 void FPackageManager::Tick()
 {
-	// We clean the bags every 'cleaningFrequency' seconds
-	if ( GCurrentTime - lastCleaningTime >= cleaningFrequency )
+	// We clean the packages every 'cleaningFrequency' seconds and only for build game (in editor not execute)
+	if ( !GIsEditor && GCurrentTime - lastCleaningTime >= cleaningFrequency )
 	{	
 		CleanupUnusedPackages();
 		lastCleaningTime = GCurrentTime;
@@ -339,43 +350,53 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, uint32 InHash 
 	check( InHash != ( uint32 )INVALID_HASH );
 
 	// Find package and open he
-	FPackageRef			package;
-	FPackageInfo*		packageInfo = nullptr;
+	FPackageRef			package = OpenPackage( InPath );
+	if ( !package )
 	{
-		auto		itPackage = packages.find( InPath );
-		if ( itPackage == packages.end() )
-		{
-			package = new FPackage();
-			if ( !package->Open( InPath ) )
-			{
-				package = nullptr;
-			}
-			else
-			{
-				package->Serialize();
+		return nullptr;
+	}
 
-				packages[ InPath ] = FPackageInfo{ true, package };
-				packageInfo = &packages[ InPath ];
-				LE_LOG( LT_Log, LC_Package, TEXT( "Package '%s' opened" ), InPath.c_str() );
-			}
+	// Find asset in package
+	FPackageInfo*	packageInfo = &packages[ InPath ];
+	FAssetRef		asset = package->Find( InHash );
+	CheckUsagePackage( *packageInfo );
+	return asset;
+}
+
+FPackageRef FPackageManager::OpenPackage( const std::wstring& InPath )
+{
+	FPackageRef			package;
+	auto				itPackage = packages.find( InPath );
+	
+	if ( itPackage == packages.end() )
+	{
+		package = new FPackage();
+		if ( !package->Open( InPath ) )
+		{
+			package = nullptr;
 		}
 		else
 		{
-			packageInfo = &itPackage->second;
-			package = itPackage->second.package;
+			package->Serialize();
+			packages[ InPath ] = FPackageInfo{ false, package };
+			LE_LOG( LT_Log, LC_Package, TEXT( "Package '%s' opened" ), InPath.c_str() );
 		}
+	}
+	else
+	{
+		package = itPackage->second.package;
 	}
 
 	if ( !package )
 	{
 		LE_LOG( LT_Warning, LC_Package, TEXT( "Package '%s' not found" ), InPath.c_str() );
-		return nullptr;
+	}
+	else
+	{
+		CheckUsagePackage( packages[ InPath ] );
 	}
 
-	// Find asset in package
-	FAssetRef		asset = package->Find( InHash );
-	CheckUsagePackage( *packageInfo );
-	return asset;
+	return package;
 }
 
 void FPackageManager::CheckUsagePackage( FPackageInfo& InOutPackageInfo )

@@ -4,6 +4,9 @@
 #include <qdebug.h>
 #include <qapplication.h>
 
+#include "Misc/Misc.h"
+#include "Misc/CoreGlobals.h"
+#include "System/Package.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "System/FileSystemModel.h"
@@ -369,4 +372,40 @@ int WeFileSystemModel::CountFilesInDir( const QString& InDir, int& OutCountFiles
 	}
 
 	return OutCountFiles;
+}
+
+QVariant WeFileSystemModel::data( const QModelIndex& InIndex, int InRole /* = Qt::DisplayRole */ ) const
+{
+	if ( InRole == Qt::DecorationRole )
+	{
+		QFileInfo		fileInfo = WeFileSystemModel::fileInfo( InIndex );
+		if ( fileInfo.isFile() )
+		{
+			// Icon for packages
+			if ( fileInfo.suffix() == FILE_PACKAGE_EXTENSION )
+			{
+				QDir		baseDir( QString::fromStdWString( appBaseDir() ) );
+				if ( GPackageManager->IsPackageOpened( baseDir.relativeFilePath( fileInfo.absoluteFilePath() ).toStdWString() ) )
+				{
+					return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/CB_PackageOpen.png" ) ).c_str() ) );
+				}
+				else
+				{
+					return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/CB_Package.png" ) ).c_str() ) );
+				}
+			}
+
+			// Icon for maps
+			else if ( fileInfo.suffix() == FILE_MAP_EXTENSION )
+			{
+				return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/CB_Map.png" ) ).c_str() ) );
+			}
+		}
+		else if ( fileInfo.isDir() )
+		{
+			return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/CB_FolderClosed.png" ) ).c_str() ) );
+		}
+	}
+
+	return QFileSystemModel::data( InIndex, InRole );
 }
