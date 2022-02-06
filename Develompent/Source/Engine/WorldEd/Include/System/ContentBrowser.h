@@ -97,7 +97,7 @@ private slots:
 	/**
 	 * Event of double click on item
 	 */
-	void on_treeView_contentBrowser_doubleClicked( const QModelIndex& InIndex );
+	void on_treeView_contentBrowser_clicked( const QModelIndex& InIndex );
 
 signals:
 	/**

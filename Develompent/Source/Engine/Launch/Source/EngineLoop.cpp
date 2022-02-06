@@ -14,6 +14,7 @@
 #include "Containers/String.h"
 #include "Misc/Class.h"
 #include "Math/Color.h"
+#include "Misc/TableOfContents.h"
 #include "Scripts/ScriptEngine.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseViewportRHI.h"
@@ -109,11 +110,39 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 
 #if WITH_EDITOR
 	GIsEditor = appParseParam( InCmdLine, TEXT( "editor" ) );
+
+	// Are we launching a commandlet
+	{
+		std::vector< std::wstring >		tokens;
+		std::vector< std::wstring >		switches;
+		appParseCommandLine( InCmdLine, tokens, switches );
+
+		// PS: 0 index - path to exe file, 1 index - name commandlet
+		if ( tokens.size() >= 2 )
+		{
+			GIsCommandlet = true;
+		}
+	}
 #endif // WITH_EDITOR
 
 	GLog->Init();
-
 	int32		result = appPlatformPreInit( InCmdLine );
+	
+	// Loading table of contents
+	{
+		std::wstring	tocPath = appBaseDir() + TEXT( "/" ) + FTableOfContets::GetNameTOC();
+		FArchive*		archiveTOC = GFileSystem->CreateFileReader( tocPath );
+		if ( archiveTOC )
+		{
+			GTableOfContents.Serialize( *archiveTOC );
+			delete archiveTOC;
+		}
+		else
+		{
+			LE_LOG( LT_Warning, LC_Package, TEXT( "TOC file '%s' not found.." ), tocPath.c_str() );
+		}
+	}
+
 	GScriptEngine->Init();
 	GRHI->Init( GIsEditor );
 
@@ -140,51 +169,13 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 		check( GEngine );
 	}
 
-	// Parse cmd line for start commandlets
-#if WITH_EDITOR
-	{
-		std::vector< std::wstring >		tokens;
-		std::vector< std::wstring >		switches;
-		appParseCommandLine( InCmdLine, tokens, switches );
-
-		// If tokens more two we creating commandlet and execute it
-		// PS: 0 index - path to exe file, 1 index - name commandlet
-		if ( tokens.size() >= 2 )
-		{
-			const std::wstring&			nameCommandlet = tokens[ 1 ];
-			LClass*						lclassCommandlet = LClass::StaticFindClass( nameCommandlet.c_str() );
-
-			// If class not found try to search by added 'L' in prefix and 'Commandlet' in sufix
-			if ( !lclassCommandlet )
-			{
-				lclassCommandlet = LClass::StaticFindClass( ( std::wstring( TEXT( "L" ) ) + nameCommandlet + TEXT( "Commandlet" ) ).c_str() );
-			}
-
-			// Create and execute commandlet
-			if ( lclassCommandlet )
-			{
-				LBaseCommandlet*			commandlet = lclassCommandlet->CreateObject< LBaseCommandlet >();
-				check( commandlet );
-
-				GIsCommandlet = true;
-				LE_LOG( LT_Log, LC_Commandlet, TEXT( "Started commandlet '%s'" ), nameCommandlet.c_str() );
-				commandlet->Main( InCmdLine );
-				delete commandlet;
-
-				GIsRequestingExit = true;
-				return result;
-			}
-		}
-	}
-#endif // WITH_EDITOR
-
 	return result;
 }
 
 /**
  * Initialize the main loop
  */
-int32 FEngineLoop::Init()
+int32 FEngineLoop::Init( const tchar* InCmdLine )
 {
 	LE_LOG( LT_Log, LC_Init, TEXT( "Engine version: " ENGINE_VERSION_STRING ) );
 
@@ -197,10 +188,50 @@ int32 FEngineLoop::Init()
 
 	appSetSplashText( STT_StartupProgress, TEXT( "Init shaders" ) );
 	GShaderManager->Init();
-	//GUIEngine->Init();
 
 	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
 	GEngine->Init();
+
+	// Parse cmd line for start commandlets
+#if WITH_EDITOR
+	{
+		std::vector< std::wstring >		tokens;
+		std::vector< std::wstring >		switches;
+		appParseCommandLine( InCmdLine, tokens, switches );
+
+		// If tokens more two we creating commandlet and execute it
+		// PS: 0 index - path to exe file, 1 index - name commandlet
+		if ( tokens.size() >= 2 )
+		{
+			const std::wstring& nameCommandlet = tokens[ 1 ];
+			LClass* lclassCommandlet = LClass::StaticFindClass( nameCommandlet.c_str() );
+
+			// If class not found try to search by added 'L' in prefix and 'Commandlet' in sufix
+			if ( !lclassCommandlet )
+			{
+				lclassCommandlet = LClass::StaticFindClass( ( std::wstring( TEXT( "L" ) ) + nameCommandlet + TEXT( "Commandlet" ) ).c_str() );
+			}
+
+			// Create and execute commandlet
+			if ( lclassCommandlet )
+			{
+				LBaseCommandlet* commandlet = lclassCommandlet->CreateObject< LBaseCommandlet >();
+				check( commandlet );
+
+				GIsCommandlet = true;
+				LE_LOG( LT_Log, LC_Commandlet, TEXT( "Started commandlet '%s'" ), nameCommandlet.c_str() );
+				double		beginCommandletTime = appSeconds();
+				commandlet->Main( InCmdLine );
+				double		endCommandletTime = appSeconds();
+				delete commandlet;
+
+				LE_LOG( LT_Log, LC_Commandlet, TEXT( "Commandlet took time %fs" ), endCommandletTime - beginCommandletTime );
+				GIsRequestingExit = true;
+				return result;
+			}
+		}
+	}
+#endif // WITH_EDITOR
 
 	// Loading map
 	std::wstring		map;
@@ -244,8 +275,9 @@ int32 FEngineLoop::Init()
 		result = 1;
 	}
 
-	// Start render thread
+	// Start render thread and show window
 	StartRenderingThread();
+	GWindow->Show();
 	return result;
 }
 

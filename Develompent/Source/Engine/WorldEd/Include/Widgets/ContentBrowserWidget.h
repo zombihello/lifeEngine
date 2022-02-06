@@ -62,7 +62,22 @@ private slots:
 	/**
 	 * File explorer context menu selection event "Create Material"
 	 */
-	void on_treeView_contentBrowser_contextMenu_createMaterial();
+	void on_treeView_contentBrowser_contextMenu_createPackage();
+
+	/**
+	 * File explorer context menu selection event "Save package"
+	 */
+	void on_treeView_contentBrowser_contextMenu_SavePackage();
+
+	/**
+	 * File explorer context menu selection event "Open package"
+	 */
+	void on_treeView_contentBrowser_contextMenu_OpenPackage();
+
+	/**
+	 * File explorer context menu selection event "Unload of package"
+	 */
+	void on_treeView_contentBrowser_contextMenu_UnloadPackage();
 
 	/**
 	 * Event open package

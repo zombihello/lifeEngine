@@ -112,4 +112,10 @@ extern double						GLastTime;
  */
 extern class FPackageManager*		GPackageManager;
 
+/**
+ * @ingroup Core
+ * Table of contents
+ */
+extern class FTableOfContets		GTableOfContents;
+
 #endif // !COREGLOBALS_H

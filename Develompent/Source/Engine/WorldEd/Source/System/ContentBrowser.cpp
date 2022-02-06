@@ -10,6 +10,7 @@
 #include "System/ContentBrowser.h"
 #include "Misc/CoreGlobals.h"
 #include "System/Package.h"
+#include "WorldEd.h"
 
 void WeContentBrowser::WeStyle::drawPrimitive( PrimitiveElement InElement, const QStyleOption* InOption, QPainter* InPainter, const QWidget* InWidget ) const
 {
@@ -71,7 +72,7 @@ WeContentBrowser::WeContentBrowser( QWidget* InParent /* = nullptr */ )
 	style = new WeStyle();
 	setStyle( style );
 
-	connect( this, SIGNAL( doubleClicked( QModelIndex ) ), this, SLOT( on_treeView_contentBrowser_doubleClicked( QModelIndex ) ) );
+	connect( this, SIGNAL( clicked( QModelIndex ) ), this, SLOT( on_treeView_contentBrowser_clicked( QModelIndex ) ) );
 }
 
 WeContentBrowser::~WeContentBrowser()
@@ -101,6 +102,7 @@ void WeContentBrowser::mousePressEvent( QMouseEvent* InEvent )
 	if ( !indexAt( InEvent->pos() ).isValid() )
 	{
 		setCurrentIndex( QModelIndex() );
+		emit OnOpenPackage( nullptr );
 	}
 
 	QTreeView::mousePressEvent( InEvent );
@@ -166,13 +168,12 @@ void WeContentBrowser::dropEvent( QDropEvent* InEvent )
 	}
 }
 
-void WeContentBrowser::on_treeView_contentBrowser_doubleClicked( const QModelIndex& InIndex )
+void WeContentBrowser::on_treeView_contentBrowser_clicked( const QModelIndex& InIndex )
 {
 	QFileInfo		fileInfo = fileSystemModel->fileInfo( InIndex );
-	if ( fileInfo.isFile() )
+	if ( fileInfo.isFile() && fileInfo.suffix() == FILE_PACKAGE_EXTENSION )
 	{
-		QDir			baseDir( QString::fromStdWString( appBaseDir() ) );
-		FPackageRef		package = GPackageManager->OpenPackage( baseDir.relativeFilePath( fileInfo.absoluteFilePath() ).toStdWString() );
+		FPackageRef		package = GPackageManager->OpenPackage( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) );
 		if ( package )
 		{
 

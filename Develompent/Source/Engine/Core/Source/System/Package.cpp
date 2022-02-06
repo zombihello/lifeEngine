@@ -4,6 +4,7 @@
 #include "System/BaseFileSystem.h"
 #include "System/Archive.h"
 #include "System/Package.h"
+#include "System/BaseEngine.h"
 #include "Render/Texture.h"
 #include "Render/Material.h"
 #include "Render/StaticMesh.h"
@@ -62,92 +63,167 @@ void FAsset::SetAssetHash( uint32 InHash )
 
 FAssetReference FAsset::GetAssetReference() const
 {
-	return FAssetReference( hash, package ? package->GetPath() : TEXT( "" ) );
+	return FAssetReference( type, hash, package ? package->GetGUID() : FGuid() );
 }
 
-FPackage::FPackage() :
-	archive( nullptr ),
-	numUsageAssets( 0 )
+FPackage::FPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
+	: guid( appCreateGuid() )
+	, name( InName )
+	, numUsageAssets( 0 )
 {}
 
 FPackage::~FPackage()
 {
-	Close();
+	RemoveAll();
 }
 
-bool FPackage::Open( const std::wstring& InPath, bool InIsWrite /* = false */ )
+bool FPackage::Load( const std::wstring& InPath )
 {
-	if ( InIsWrite )
-	{
-		archive = GFileSystem->CreateFileWriter( InPath );
-	}
-	else
-	{
-		archive = GFileSystem->CreateFileReader( TEXT( "../../") + InPath);
-	}
+	RemoveAll();
 
+	FArchive*		archive = GFileSystem->CreateFileReader( InPath );
 	if ( !archive )
 	{
 		return false;
 	}
 
-	// Serialize header of archive and package
-	archive->SetType( AT_Package );
-	archive->SerializeHeader();
+	filename		= InPath;
 
-	uint32		packageFileTag = PACKAGE_FILE_TAG;
-	*archive << packageFileTag;
-	checkMsg( packageFileTag == PACKAGE_FILE_TAG, TEXT( "Unknown package file tag. Current package file tag is 0x%X, need 0x%X" ), packageFileTag, PACKAGE_FILE_TAG );
-	
-	path = InPath;
+	// Serialize header of archive
+	archive->SerializeHeader();
+	Serialize( *archive );
+
+	delete archive;
 	return true;
 }
 
-void FPackage::Close()
+bool FPackage::Save( const std::wstring& InPath )
 {
-	RemoveAll();
+	// Before saving package it needs to be fully loaded into memory
+	std::vector< FAssetRef >		loadedAsset;
+	FullyLoad( loadedAsset );
 
-	path = TEXT( "" );
-	if ( archive )
+	FArchive*		archive = GFileSystem->CreateFileWriter( InPath );
+	if ( !archive )
 	{
-		delete archive;
-		archive = nullptr;
+		return false;
 	}
+
+	// Serialize header of archive
+	archive->SetType( AT_Package );
+	archive->SerializeHeader();
+	Serialize( *archive );
+
+	delete archive;
+	return true;
 }
 
-void FPackage::Serialize()
+void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 {
-	check( archive && archive->Ver() >= VER_Assets );
+	// If we not load package from HDD - exit from function
+	if ( filename.empty() )
+	{
+		return;
+	}
 
-	if ( archive->IsSaving() )
+	// Serialize all assets to memory
+	FArchive*		archive = GFileSystem->CreateFileReader( filename, AR_NoFail );
+	archive->SerializeHeader();
+	SerializeHeader( *archive );
+
+	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
+	{
+		FAssetInfo&		assetInfo = itAsset->second;
+
+		// If asset info is not valid - return nullptr
+		if ( assetInfo.offset == ( uint32 )INVALID_ID || assetInfo.size == ( uint32 )INVALID_ID )
+		{
+			continue;
+		}
+
+		// Load asset
+		FAssetRef		asset = LoadAsset( *archive, itAsset->first, assetInfo );
+		if ( asset )
+		{
+			OutAssetArray.push_back( asset );
+		}
+		else
+		{
+			LE_LOG( LT_Warning, LC_Package, TEXT( "Asset '%s' not loaded" ), assetInfo.name.c_str() );
+		}
+	}
+
+	delete archive;
+}
+
+FAssetRef FPackage::Find( uint32 InHash )
+{
+	// If we not load package from HDD - exit from function
+	if ( filename.empty() )
+	{
+		return nullptr;
+	}
+
+	// Find asset in table
+	auto		itAsset = assetsTable.find( InHash );
+	if ( itAsset == assetsTable.end() )
+	{
+		return nullptr;
+	}
+
+	// Serialize asset from package
+	FArchive*	archive = GFileSystem->CreateFileReader( filename );
+	if ( !archive )
+	{
+		return nullptr;
+	}
+
+	archive->SerializeHeader();
+	SerializeHeader( *archive );
+	FAssetRef		asset = LoadAsset( *archive, itAsset->first, itAsset->second );
+
+	delete archive;
+	return asset;
+}
+
+void FPackage::Serialize( FArchive& InArchive )
+{
+	SerializeHeader( InArchive );
+	check( InArchive.Ver() >= VER_Assets );
+
+	if ( InArchive.IsSaving() )
 	{
 		for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 		{
 			FAssetInfo&			assetInfo = itAsset->second;
-			check( assetInfo.data );
+			if ( !assetInfo.data )
+			{
+				LE_LOG( LT_Warning, LC_Package, TEXT( "Asset '%s' is not valid, skiped saving to package" ), assetInfo.name.c_str() );
+				continue;
+			}
 
 			// Serialize asset header	
-			*archive << assetInfo.type;
-			*archive << assetInfo.name;
-			*archive << assetInfo.data->hash;
-			*archive << assetInfo.size;
+			InArchive << assetInfo.type;
+			InArchive << assetInfo.name;
+			InArchive << assetInfo.data->hash;
+			InArchive << assetInfo.size;
 
 			// Serialize asset
-			assetInfo.offset = archive->Tell();
-			assetInfo.data->Serialize( *archive );
-			uint32		currentOffset = archive->Tell();
+			assetInfo.offset = InArchive.Tell();
+			assetInfo.data->Serialize( InArchive );
+			uint32		currentOffset = InArchive.Tell();
 
 			// Update asset size in header
 			assetInfo.size = currentOffset - assetInfo.offset;
-			archive->Seek( assetInfo.offset - sizeof( assetInfo.size ) );
-			*archive << assetInfo.size;
-			archive->Seek( currentOffset );
+			InArchive.Seek( assetInfo.offset - sizeof( assetInfo.size ) );
+			InArchive << assetInfo.size;
+			InArchive.Seek( currentOffset );
 		}
 	}
 	else
 	{
 		// Build asset table
-		while ( !archive->IsEndOfFile() )
+		while ( !InArchive.IsEndOfFile() )
 		{
 			// Serialize asset header and add to table
 			FAssetInfo			assetInfo;
@@ -155,27 +231,93 @@ void FPackage::Serialize()
 			appMemzero( &assetInfo, sizeof( FAssetInfo ) );
 
 			// Serialize hash with size data
-			*archive << assetInfo.type;
+			InArchive << assetInfo.type;
 
-			if ( archive->Ver() >= VER_AssetName_V2 )
+			if ( InArchive.Ver() >= VER_AssetName_V2 )
 			{
-				*archive << assetInfo.name;
+				InArchive << assetInfo.name;
 			}
 
-			*archive << assetHash;
-			*archive << assetInfo.size;
-			assetInfo.offset = archive->Tell();
+			InArchive << assetHash;
+			InArchive << assetInfo.size;
+			assetInfo.offset = InArchive.Tell();
 
-			// Skip asset data		
+			// Skip asset data	
 			if ( assetInfo.size > 0 )
 			{
-				archive->Seek( archive->Tell() + assetInfo.size );
+				InArchive.Seek( InArchive.Tell() + assetInfo.size );
 			}
 
 			// Add asset info in table
 			assetsTable[ assetHash ] = assetInfo;
 		}
 	}
+}
+
+void FPackage::SerializeHeader( FArchive& InArchive )
+{
+	check( InArchive.Ver() >= VER_NamePackage );
+	uint32		packageFileTag = PACKAGE_FILE_TAG;
+	InArchive << packageFileTag;
+	checkMsg( packageFileTag == PACKAGE_FILE_TAG, TEXT( "Unknown package file tag. Current package file tag is 0x%X, need 0x%X" ), packageFileTag, PACKAGE_FILE_TAG );
+
+#if DO_CHECK
+	if ( InArchive.IsSaving() )
+	{
+		checkMsg( !name.empty(), TEXT( "The package must have a name" ) );
+	}
+#endif // DO_CHECK
+
+	InArchive << guid;
+	InArchive << name;
+}
+
+FAssetRef FPackage::LoadAsset( FArchive& InArchive, uint32 InAssetHash, FAssetInfo& InAssetInfo )
+{
+	uint32		oldOffset = InArchive.Tell();
+
+	// If asset info is not valid - return nullptr
+	if ( InAssetInfo.offset == ( uint32 )INVALID_ID || InAssetInfo.size == ( uint32 )INVALID_ID )
+	{
+		return nullptr;
+	}
+
+	// If asset already created - return it
+	if ( InAssetInfo.data )
+	{
+		return InAssetInfo.data;
+	}
+
+	// Else we create asset from package	
+	InAssetInfo.data = AssetFactory( InAssetInfo.type );
+
+	// Init asset
+	InAssetInfo.data->hash = InAssetHash;
+	InAssetInfo.data->package = this;
+	InAssetInfo.data->name = InAssetInfo.name;
+
+	// Seek to asset data
+	InArchive.Seek( InAssetInfo.offset );
+
+	uint32		startOffset = InArchive.Tell();
+	InAssetInfo.data->Serialize( InArchive );
+	uint32		currentOffset = InArchive.Tell();
+
+	check( currentOffset - startOffset == InAssetInfo.size );
+
+	if ( InArchive.Ver() < VER_AssetName_V2 )
+	{
+		InAssetInfo.name = InAssetInfo.data->name;
+	}
+
+	// Seek to old offset and exit
+	InArchive.Seek( oldOffset );
+
+	if ( ++numUsageAssets == 1 )
+	{
+		//GPackageManager->CheckUsagePackage( path );
+	}
+	return InAssetInfo.data;
 }
 
 void FPackage::MarkAssetUnlnoad( uint32 InHash )
@@ -190,7 +332,7 @@ void FPackage::MarkAssetUnlnoad( uint32 InHash )
 	assetInfo.data = nullptr;
 	if ( --numUsageAssets <= 0 )
 	{
-		GPackageManager->CheckUsagePackage( path );
+		//GPackageManager->CheckUsagePackage( path );
 	}
 
 	if ( assetInfo.offset == INVALID_HASH && assetInfo.size == INVALID_HASH )
@@ -244,57 +386,6 @@ void FPackage::RemoveAll()
 	assetsTable.clear();
 }
 
-FAssetRef FPackage::Find( uint32 InHash )
-{
-	auto		itAsset = assetsTable.find( InHash );
-	uint32		oldOffset = archive->Tell();
-
-	// If asset with this hash not found - return nullptr
-	if ( itAsset == assetsTable.end() )
-	{
-		return nullptr;
-	}
-
-	FAssetInfo&			assetInfo = itAsset->second;
-
-	// If asset allrady created - return it
-	if ( assetInfo.data )
-	{
-		return assetInfo.data;
-	}
-
-	// Else we create asset from package	
-	assetInfo.data = AssetFactory( assetInfo.type );
-
-	// Init asset
-	assetInfo.data->hash = itAsset->first;
-	assetInfo.data->package = this;
-	assetInfo.data->name = assetInfo.name;
-
-	// Seek to asset data
-	archive->Seek( assetInfo.offset );
-
-	uint32		startOffset = archive->Tell();
-	assetInfo.data->Serialize( *archive );
-	uint32		currentOffset = archive->Tell();
-	
-	check( currentOffset - startOffset == assetInfo.size );
-
-	if ( archive->Ver() < VER_AssetName_V2 )
-	{
-		assetInfo.name = assetInfo.data->name;
-	}
-
-	// Seek to old offset and exit
-	archive->Seek( oldOffset );
-	
-	if ( ++numUsageAssets == 1 )
-	{
-		GPackageManager->CheckUsagePackage( path );
-	}
-	return assetInfo.data;
-}
-
 FPackageManager::FPackageManager() :
 	cleaningFrequency( 60.f ),
 	lastCleaningTime( GStartTime )
@@ -331,8 +422,8 @@ void FPackageManager::CleanupUnusedPackages()
 
 	for ( auto itUnusedPackage = unusedPackages.begin(), itUnusedPackageEnd = unusedPackages.end(); itUnusedPackage != itUnusedPackageEnd; ++itUnusedPackage )
 	{
-		const std::wstring& packagePath = *itUnusedPackage;
-		auto						itPackage = packages.find( packagePath );
+		const std::wstring&		packagePath = *itUnusedPackage;
+		auto					itPackage = packages.find( packagePath );
 		if ( itPackage == packages.end() )
 		{
 			continue;
@@ -345,7 +436,33 @@ void FPackageManager::CleanupUnusedPackages()
 	unusedPackages.clear();
 }
 
-FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, uint32 InHash )
+FAssetRef FPackageManager::FindAsset( const std::wstring& InString, EAssetType InType /* = AT_Unknown */ )
+{
+	// Divide the string into two parts: package name and asset name
+	std::size_t			posSpliter = InString.find( TEXT( ":" ) );
+	if ( posSpliter == std::wstring::npos )
+	{
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Not correct input string '%s', reference to asset must be splitted by '<Package name>:<Asset name>'" ), InString.c_str() );
+		return nullptr;
+	}
+
+	std::wstring		packageName = InString;
+	std::wstring		assetName = InString;
+	packageName.erase( posSpliter, packageName.size() );
+	assetName.erase( 0, posSpliter + 1 );
+
+	// Find in TOC path to the package and calculate hash of asset from him name
+	std::wstring	packagePath = GTableOfContents.GetPackagePath( packageName );
+	if ( packagePath.empty() )
+	{
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Package with name '%s' not found in TOC file" ), packageName.c_str() );
+		return nullptr;
+	}
+
+	return FindAsset( packagePath, appCalcHash( assetName ), InType );
+}
+
+FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, uint32 InHash, EAssetType InType /* = AT_Unknown */ )
 {
 	check( InHash != ( uint32 )INVALID_HASH );
 
@@ -359,6 +476,15 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, uint32 InHash 
 	// Find asset in package
 	FPackageInfo*	packageInfo = &packages[ InPath ];
 	FAssetRef		asset = package->Find( InHash );
+	if ( !asset )
+	{
+		switch ( InType )
+		{
+		case AT_Texture2D:		asset = GEngine->GetDefaultTexture();
+		case AT_Material:		asset = GEngine->GetDefaultMaterial();
+		}
+	}
+
 	CheckUsagePackage( *packageInfo );
 	return asset;
 }
@@ -371,13 +497,12 @@ FPackageRef FPackageManager::OpenPackage( const std::wstring& InPath )
 	if ( itPackage == packages.end() )
 	{
 		package = new FPackage();
-		if ( !package->Open( InPath ) )
+		if ( !package->Load( InPath ) )
 		{
 			package = nullptr;
 		}
 		else
 		{
-			package->Serialize();
 			packages[ InPath ] = FPackageInfo{ false, package };
 			LE_LOG( LT_Log, LC_Package, TEXT( "Package '%s' opened" ), InPath.c_str() );
 		}
@@ -399,12 +524,27 @@ FPackageRef FPackageManager::OpenPackage( const std::wstring& InPath )
 	return package;
 }
 
+bool FPackageManager::ClosePackage( const std::wstring& InPath )
+{
+	auto		itPackage = packages.find( InPath );
+	if ( itPackage == packages.end() || itPackage->second.package->GetNumUsageAssets() > 0 )
+	{
+		return false;
+	}
+
+	unusedPackages.erase( InPath );
+	packages.erase( itPackage );
+
+	LE_LOG( LT_Log, LC_Package, TEXT( "Unloaded package '%s'" ), InPath.c_str() );
+	return true;
+}
+
 void FPackageManager::CheckUsagePackage( FPackageInfo& InOutPackageInfo )
 {
 	// If package in current time not used, we add he to unused list for remove in future
 	check( InOutPackageInfo.package );
 	bool					oldIsUnused = InOutPackageInfo.isUnused;
-	const std::wstring&		packagePath = InOutPackageInfo.package->GetPath();
+	const std::wstring&		packagePath = InOutPackageInfo.package->GetFileName();
 
 	InOutPackageInfo.isUnused = InOutPackageInfo.package->GetNumUsageAssets() <= 0;
 	if ( InOutPackageInfo.isUnused && !oldIsUnused )

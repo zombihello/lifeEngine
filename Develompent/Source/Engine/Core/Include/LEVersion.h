@@ -40,13 +40,15 @@ enum ELifeEnginePackageVersion
 	VER_RemovedTFC							= 8,					/**< Removed texture file cache */
 	VER_CompressedZlib						= 9,					/**< Added in archive compression ZLIB */
 	VER_AssetName_V2						= 10,					/**< Moved asset name from him to table of info about this asset */
+	VER_GUIDPackages						= 11,					/**< Added GUID in package */
+	VER_NamePackage							= 12,					/**< Added name package */
 
 	//
 	// New versions can be added here
 	//
 
-	VER_AutomaticVersionPlusOne,								/**< This needs for automatic update last version of package */
-	VER_MinVersion						= VER_PackageBase,		/**< This need for check min supported version */	
+	VER_AutomaticVersionPlusOne,									/**< This needs for automatic update last version of package */
+	VER_MinVersion							= VER_PackageBase,		/**< This need for check min supported version */
 };
 
 /**

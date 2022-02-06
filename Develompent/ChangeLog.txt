@@ -1,6 +1,7 @@
 ----------------------------------------------------------------
  Version 0.3.0 :: Now
 ----------------------------------------------------------------
+	- Fixed serialize already created FPackage (for rewrite package with adding new assets)
 	- Implemented draw events for debug render
 	- Implemented scene manager and scene renderer
 	- Implemented in WorldEd fly on scene

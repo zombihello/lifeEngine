@@ -4,6 +4,7 @@
 #include "Core.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/LaunchGlobals.h"
+#include "Misc/Guid.h"
 #include "Containers/StringConv.h"
 #include "EngineLoop.h"
 #include "D3D11RHI.h"
@@ -97,7 +98,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 			if ( !GIsRequestingExit )
 			{
 				appShowSplash( GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );		
-				errorLevel = GEngineLoop->Init();
+				errorLevel = GEngineLoop->Init( commandLine.c_str() );
 				check( errorLevel == 0 );		
 				appHideSplash();
 			}

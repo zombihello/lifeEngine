@@ -18,14 +18,14 @@
  */
 enum EStyleWindow
 {
-	SW_None				= 0,								/**< No styles */
-	SW_Resizable		= 1 << 0,							/**< Resizable window */
-	SW_Decorated		= 1 << 1,							/**< Decorated window  */
-	SW_Floating			= 1 << 2,							/**< Floating window  */
-	SW_Fullscreen		= 1 << 3,							/**< Fullscreen window  */
-	SW_Hidden			= 1 << 4,							/**< Hidden window */
+	SW_None				= 0,											/**< No styles */
+	SW_Resizable		= 1 << 0,										/**< Resizable window */
+	SW_Decorated		= 1 << 1,										/**< Decorated window  */
+	SW_Floating			= 1 << 2,										/**< Floating window  */
+	SW_Fullscreen		= 1 << 3,										/**< Fullscreen window  */
+	SW_Hidden			= 1 << 4,										/**< Hidden window */
 
-	SW_Default			= SW_Decorated | SW_Resizable		/**< Default style - combined decorated and resizable style  */
+	SW_Default			= SW_Decorated | SW_Resizable | SW_Hidden		/**< Default style - combined decorated and resizable style  */
 };
 
 /**

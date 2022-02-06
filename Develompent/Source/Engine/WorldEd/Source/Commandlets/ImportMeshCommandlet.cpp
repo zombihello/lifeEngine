@@ -7,8 +7,10 @@
 #include "Misc/Class.h"
 #include "Misc/Misc.h"
 #include "Misc/CoreGlobals.h"
+#include "Misc/EngineGlobals.h"
 #include "Logger/LoggerMacros.h"
 #include "System/Package.h"
+#include "System/BaseEngine.h"
 #include "Containers/StringConv.h"
 #include "Render/StaticMesh.h"
 #include "Commandlets/ImportMeshCommandlet.h"
@@ -173,7 +175,7 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 		// We process material
 		if ( itRoot->first < aiScene->mNumMaterials )
 		{
-			materials.push_back( FMaterialRef() );
+			materials.push_back( GEngine->GetDefaultMaterial() );
 		}
 		else
 		{
@@ -192,11 +194,39 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 	staticMesh.SetData( verteces, indeces, surfaces, materials );
 
 	FPackage		package;
-	bool			isOpened = package.Open( dstFilename, true );
-	check( isOpened );
+	if ( !package.Load( dstFilename ) )
+	{
+		std::wstring		packageName = dstFilename;
+
+		// Find and remove first section of the string (before last '/')
+		{
+			std::size_t			posSlash = packageName.find_last_of( TEXT( "/" ) );
+			if ( posSlash == std::wstring::npos )
+			{
+				posSlash = packageName.find_last_of( TEXT( "\\" ) );
+			}
+
+			if ( posSlash != std::wstring::npos )
+			{
+				packageName.erase( 0, posSlash + 1 );
+			}
+		}
+
+		// Find and remove second section of the string (after last '.')
+		{
+			std::size_t			posDot = packageName.find_last_of( TEXT( "." ) );
+			if ( posDot != std::wstring::npos )
+			{
+				packageName.erase( posDot, packageName.size() );
+			}
+		}
+
+		// Set package name
+		package.SetName( packageName );
+	}
 
 	package.Add( &staticMesh );
-	package.Serialize();
+	package.Save( dstFilename );
 	aiImport.FreeScene();
 }
 

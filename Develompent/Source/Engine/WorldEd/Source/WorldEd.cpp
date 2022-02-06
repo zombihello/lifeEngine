@@ -85,7 +85,7 @@ int32 appWorldEdEntry( const tchar* InCmdLine )
 	GEditorEngine = GEngine->Cast< LEditorEngine >();
 	checkMsg( GEditorEngine, TEXT( "Class of engine for editor must be inherited from LEditorEngine" ) );
 
-	int32		result = GEngineLoop->Init();
+	int32		result = GEngineLoop->Init( InCmdLine );
 	check( result == 0 );
 
 	// Free allocated memory for arguments

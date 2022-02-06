@@ -4,6 +4,7 @@
 
 #include "Misc/Types.h"
 #include "Misc/CoreGlobals.h"
+#include "Misc/Guid.h"
 #include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 #include "EngineLoop.h"
@@ -137,4 +138,12 @@ void* appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool I
 bool appGetProcReturnCode( void* InProcHandle, int32* OutReturnCode )
 {
     return GetExitCodeProcess( ( HANDLE )InProcHandle, ( DWORD* )OutReturnCode ) && *( ( DWORD* )OutReturnCode ) != STILL_ACTIVE;
+}
+
+FGuid appCreateGuid()
+{
+	FGuid	guid;
+	HRESULT result = CoCreateGuid( ( GUID* ) &guid );
+	check( result == S_OK );
+	return guid;
 }

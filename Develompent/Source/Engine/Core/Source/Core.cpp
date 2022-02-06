@@ -8,6 +8,7 @@
 #include "System/Config.h"
 #include "Scripts/ScriptEngine.h"
 #include "System/Package.h"
+#include "Misc/TableOfContents.h"
 
 // ----------------
 // GLOBALS
@@ -24,6 +25,7 @@ double                  GCurrentTime                = GStartTime;
 double                  GLastTime                   = 0.0;
 double                  GDeltaTime                  = 0.0;
 FPackageManager*        GPackageManager             = new FPackageManager();
+FTableOfContets		    GTableOfContents;
 
 #if WITH_EDITOR
 FConfig                 GEditorConfig;

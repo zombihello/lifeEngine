@@ -12,6 +12,8 @@
 #include <string>
 
 #include "Misc/Object.h"
+#include "Render/Texture.h"
+#include "Render/Material.h"
 #include "Core.h"
 
 /**
@@ -66,6 +68,28 @@ public:
 	 * @return Return max tick rate
 	 */
 	virtual float GetMaxTickRate() const;
+
+	/**
+	 * Get default texture
+	 * @return Return default texture
+	 */
+	FORCEINLINE FTexture2DRef GetDefaultTexture() const
+	{
+		return defaultTexture;
+	}
+
+	/**
+	 * Get default material
+	 * @return Return default material
+	 */
+	FORCEINLINE FMaterialRef GetDefaultMaterial() const
+	{
+		return defaultMaterial;
+	}
+
+protected:
+	FTexture2DRef			defaultTexture;			/**< Default texture */
+	FMaterialRef			defaultMaterial;		/**< Default material */
 };
 
 #endif // !BASEENGINE_H

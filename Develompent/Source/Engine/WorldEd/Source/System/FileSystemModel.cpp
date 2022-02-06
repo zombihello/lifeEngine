@@ -10,6 +10,7 @@
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "System/FileSystemModel.h"
+#include "WorldEd.h"
 
 WeFileSystemModel::WeFileSystemModel( QObject* InParent ) 
 	: QFileSystemModel( InParent )
@@ -384,8 +385,7 @@ QVariant WeFileSystemModel::data( const QModelIndex& InIndex, int InRole /* = Qt
 			// Icon for packages
 			if ( fileInfo.suffix() == FILE_PACKAGE_EXTENSION )
 			{
-				QDir		baseDir( QString::fromStdWString( appBaseDir() ) );
-				if ( GPackageManager->IsPackageOpened( baseDir.relativeFilePath( fileInfo.absoluteFilePath() ).toStdWString() ) )
+				if ( GPackageManager->IsPackageOpened( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) ) )
 				{
 					return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/CB_PackageOpen.png" ) ).c_str() ) );
 				}

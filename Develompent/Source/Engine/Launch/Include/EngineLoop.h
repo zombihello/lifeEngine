@@ -42,7 +42,7 @@ public:
 	 * @param[in] InCmdLine Command line
 	 * @return Returns the error level, 0 if successful and > 0 if there were errors
 	 */
-	int32				Init();
+	int32				Init( const tchar* InCmdLine );
 
 	/**
 	 * @brief Advances main loop 

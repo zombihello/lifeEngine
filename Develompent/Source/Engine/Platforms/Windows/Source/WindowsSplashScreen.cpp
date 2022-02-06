@@ -292,14 +292,17 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 
 void appShowSplash( const tchar* InSplashName )
 {
-	GSplashScreenFileName	= appBaseDir() + FString::Format( TEXT( "/Content/Splash/%s" ), InSplashName );
-	GThreadInitSyncEvent	= GSynchronizeFactory->CreateSynchEvent( true );
-	GSplashScreenThread		= CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE )SplashScreenThread, nullptr, 0, nullptr );
+	if ( !GIsCommandlet )
+	{
+		GSplashScreenFileName = appBaseDir() + FString::Format( TEXT( "/Content/Splash/%s" ), InSplashName );
+		GThreadInitSyncEvent = GSynchronizeFactory->CreateSynchEvent( true );
+		GSplashScreenThread = CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
 
-	// Wait of open splash screen
-	GThreadInitSyncEvent->Wait( INFINITE );
-	GSynchronizeFactory->Destroy( GThreadInitSyncEvent );
-	GThreadInitSyncEvent = nullptr;
+		// Wait of open splash screen
+		GThreadInitSyncEvent->Wait( INFINITE );
+		GSynchronizeFactory->Destroy( GThreadInitSyncEvent );
+		GThreadInitSyncEvent = nullptr;
+	}
 }
 
 void appHideSplash()

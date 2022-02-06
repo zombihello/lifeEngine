@@ -76,13 +76,13 @@ bool WePackageModel::removeRows( int InRow, int InCount, const QModelIndex& InPa
 
 void WePackageModel::SetPackage( FPackage* InPackage )
 {
-	if ( package )
+	if ( package && !package->IsEmpty() )
 	{
 		removeRows( 0, package->GetNumAssets(), QModelIndex() );
 	}
 
 	package = InPackage;
-	if ( package )
+	if ( package && !package->IsEmpty() )
 	{
 		insertRows( 0, package->GetNumAssets(), QModelIndex() );
 	}

@@ -16,6 +16,9 @@
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
 #include "Misc/Misc.h"
+#include "Misc/Guid.h"
+#include "Misc/TableOfContents.h"
+#include "Misc/CoreGlobals.h"
 #include "System/Archive.h"
 
 /**
@@ -36,6 +39,7 @@ typedef TRefCountPtr< class FPackage >			FPackageRef;
  */
 enum EAssetType
 {
+	AT_Unknown,			/**< Unknown asset */
 	AT_Texture2D,		/**< Texture 2D */
 	AT_Material,		/**< Material */
 	AT_Script,			/**< Script */
@@ -51,12 +55,12 @@ struct FAssetReference
 	/**
 	 * Constructor
 	 * 
+	 * @param[in] InType Asset type
 	 * @param[in] InHash Hash asset
-	 * @param[in] InPath Path to package with asset
+	 * @param[in] InGUID GUID of the package
 	 */
-	FORCEINLINE FAssetReference( uint32 InHash = ( uint32 )INVALID_HASH, const std::wstring& InPath = TEXT( "" ) ) :
-		hash( InHash ),
-		pathPackage( InPath )
+	FORCEINLINE FAssetReference( EAssetType InType = AT_Unknown, uint32 InHash = ( uint32 )INVALID_HASH, const FGuid& InGUID = FGuid() ) 
+		: type( InType ), hash( InHash ), guidPackage( InGUID )
 	{}
 
 	/**
@@ -65,11 +69,12 @@ struct FAssetReference
 	 */
 	FORCEINLINE bool IsValid() const
 	{
-		return hash != ( uint32 )INVALID_HASH && !pathPackage.empty();
+		return type != AT_Unknown && hash != ( uint32 )INVALID_HASH && guidPackage.IsValid();
 	}
 
+	EAssetType		type;				/**< Asset type */
 	uint32			hash;				/**< Asset hash */
-	std::wstring	pathPackage;		/**< Path to package */
+	FGuid			guidPackage;		/**< GUID of the package */
 };
 
 /**
@@ -190,8 +195,10 @@ public:
 
 	/**
 	 * Constructor
+	 * 
+	 * @param InName Name of the package
 	 */
-	FPackage();
+	FPackage( const std::wstring& InName = TEXT( "" ) );
 
 	/**
 	 * Destructor
@@ -199,24 +206,20 @@ public:
 	~FPackage();
 
 	/**
-	 * Open package
+	 * Load package
 	 * 
-	 * @param[in] InPath Path to package
-	 * @param[in] InIsWrite Open package in write mode
-	 * @return Return true if package is opened, else return false
+	 * @param InPath Path to package
+	 * @return Return true if package is loaded, else false
 	 */
-	bool Open( const std::wstring& InPath, bool InIsWrite = false );
+	bool Load( const std::wstring& InPath );
 
 	/**
-	 * Close package
-	 * This method delete handle of archive and clean asset table
+	 * Save package
+	 * 
+	 * @param InPath Path to package
+	 * @return Return true if package is saved, else false
 	 */
-	void Close();
-
-	/**
-	 * Serialize package
-	 */
-	void Serialize();
+	bool Save( const std::wstring& InPath );
 
 	/**
 	 * Add asset to package
@@ -263,12 +266,22 @@ public:
 	FAssetRef Find( uint32 InHash );
 
 	/**
-	 * Get path to package
-	 * @return Return path to package
+	 * Set name of the package
+	 * 
+	 * @param InName New name of the package
 	 */
-	FORCEINLINE const std::wstring& GetPath() const
+	FORCEINLINE void SetName( const std::wstring& InName )
 	{
-		return path;
+		name = InName;
+	}
+
+	/**
+	 * Get GUID of package
+	 * @return Return GUID of package
+	 */
+	FORCEINLINE FGuid GetGUID() const
+	{
+		return guid;
 	}
 
 	/**
@@ -287,6 +300,33 @@ public:
 	FORCEINLINE uint32 GetNumAssets() const
 	{
 		return assetsTable.size();
+	}
+
+	/**
+	 * Is empty package
+	 * @return Return true if package is empty, else return false
+	 */
+	FORCEINLINE bool IsEmpty() const
+	{
+		return GetNumAssets() == 0;
+	}
+
+	/**
+	 * Get path to the package from which data was last loaded
+	 * @return Return path, if package is not loaded from other packages return empty string
+	 */
+	FORCEINLINE const std::wstring& GetFileName() const
+	{
+		return filename;
+	}
+
+	/**
+	 * Get name of the package
+	 * @return Return name of the package
+	 */
+	FORCEINLINE const std::wstring& GetName() const
+	{
+		return name;
 	}
 
 	/**
@@ -312,6 +352,41 @@ public:
 
 private:
 	/**
+	 * Typedef map of assets table
+	 */
+	typedef std::unordered_map< uint32, FAssetInfo >		FAssetTable;
+
+	/**
+	 * Fully load
+	 * @param OutAssetArray Array of loaded asset from package
+	 */
+	void FullyLoad( std::vector< FAssetRef >& OutAssetArray );
+
+	/**
+	 * Serialize package
+	 * 
+	 * @param InArchive Archive
+	 */
+	void Serialize( FArchive& InArchive );
+
+	/**
+	 * Serialize header of the package
+	 * 
+	 * @param InArchive Archive
+	 */
+	void SerializeHeader( FArchive& InArchive );
+
+	/**
+	 * Load asset from package
+	 * 
+	 * @param InArchive Archive
+	 * @param InAssetHash Asset hash
+	 * @param InAssetInfo Asset info
+	 * @return Return loaded asset from package, if failed returning nullptr
+	 */
+	FAssetRef LoadAsset( FArchive& InArchive, uint32 InAssetHash, FAssetInfo& InAssetInfo );
+
+	/**
 	 * Mark that the asset is unloaded
 	 * 
 	 * @param[in] InHash Hash of asset
@@ -326,10 +401,11 @@ private:
 	 */
 	void MarkHashAssetUpdate( uint32 InOldHash, uint32 InNewHash );
 
-	FArchive*										archive;			/**< Archive of package */
-	uint32											numUsageAssets;		/**< Number assets in usage */
-	std::wstring									path;				/**< Path to package */
-	std::unordered_map< uint32, FAssetInfo >		assetsTable;		/**< Table of assets in package */
+	FGuid			guid;				/**< GUID of package */
+	std::wstring	filename;			/**< Path to the package from which data was last loaded */
+	std::wstring	name;				/**< Package name */
+	uint32			numUsageAssets;		/**< Number assets in usage */
+	FAssetTable		assetsTable;		/**< Table of assets in package */
 };
 
 /**
@@ -363,13 +439,41 @@ public:
 	void Shutdown();
 
 	/**
-	 * Find asset in package
+	 * Find asset in package by <PackageName>:<AssetName>
 	 * 
-	 * @param[in] InPath Package path
-	 * @param[in] InHash Asset hash
+	 * @param InString
+	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 * @return Return finded asset. If not found returning nullptr
 	 */
-	FAssetRef FindAsset( const std::wstring& InPath, uint32 InHash );
+	FAssetRef FindAsset( const std::wstring& InString, EAssetType InType = AT_Unknown );
+
+	/**
+	 * Find asset in package
+	 * 
+	 * @param InGUID GUID of the package
+	 * @param InHash Asset hash
+	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
+	 * @return Return finded asset. If not found returning nullptr
+	 */
+	FORCEINLINE FAssetRef FindAsset( const FGuid& InGUID, uint32 InHash, EAssetType InType = AT_Unknown )
+	{
+		std::wstring		path = GTableOfContents.GetPackagePath( InGUID );
+		if ( path.empty() )
+		{
+			return nullptr;
+		}
+
+		return FindAsset( path, InHash, InType );
+	}
+
+	/**
+	 * Find asset in package
+	 * 
+	 * @param InPath Path to the package
+	 * @param InHash Asset hash
+	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
+	 */
+	FAssetRef FindAsset( const std::wstring& InPath, uint32 InHash, EAssetType InType = AT_Unknown );
 
 	/**
 	 * Open package
@@ -378,6 +482,14 @@ public:
 	 * @return Return opened package. If not found returning nullptr
 	 */
 	FPackageRef OpenPackage( const std::wstring& InPath );
+
+	/**
+	 * Close package
+	 * 
+	 * @param InPath Package path
+	 * @return Return true if package is closed. If in package used asset(s) or package not found return false
+	 */
+	bool ClosePackage( const std::wstring& InPath );
 
 	/**
 	 * Is package opened
@@ -409,17 +521,17 @@ private:
 	/**
 	 * Typedef of list loaded packages
 	 */
-	typedef std::unordered_map< std::wstring, FPackageInfo >				FPackageList;
+	typedef std::unordered_map< std::wstring, FPackageInfo >			FPackageList;
 
 	/**
 	 * Typedef of unused list packages
 	 */
-	typedef std::unordered_set< std::wstring >								FUnusedPackageList;
+	typedef std::unordered_set< std::wstring >							FUnusedPackageList;
 
 	/**
 	 * Check usage package
 	 * 
-	 * @param[in] InPath Path to package
+	 * @param InPath Path to the package
 	 */
 	FORCEINLINE void CheckUsagePackage( const std::wstring& InPath )
 	{
@@ -449,20 +561,6 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetReference& InValue )
-{
-	InArchive << InValue.hash;
-	InArchive << InValue.pathPackage;
-	return InArchive;
-}
-
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetReference& InValue )
-{
-	InArchive << InValue.hash;
-	InArchive << InValue.pathPackage;
-	return InArchive;
-}
-
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, EAssetType& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( EAssetType ) );
@@ -473,6 +571,24 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EAssetType& InValue
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( EAssetType ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetReference& InValue )
+{
+	check( InArchive.Ver() >= VER_GUIDPackages );
+	InArchive << InValue.type;
+	InArchive << InValue.hash;
+	InArchive << InValue.guidPackage;
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetReference& InValue )
+{
+	check( InArchive.IsSaving() && InArchive.Ver() >= VER_GUIDPackages );
+	InArchive << InValue.type;
+	InArchive << InValue.hash;
+	InArchive << InValue.guidPackage;
 	return InArchive;
 }
 
@@ -488,7 +604,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetRef& InValue )
 		InArchive << assetReference;
 		if ( assetReference.IsValid() )
 		{
-			InValue = GPackageManager->FindAsset( assetReference.pathPackage, assetReference.hash );
+			InValue = GPackageManager->FindAsset( assetReference.guidPackage, assetReference.hash, assetReference.type );
 		}
 	}
 

@@ -9,6 +9,7 @@
 #include "Containers/StringConv.h"
 #include "Widgets/ContentBrowserWidget.h"
 #include "System/ContentBrowser.h"
+#include "WorldEd.h"
 #include "ui_ContentBrowserWidget.h"
 
 /**
@@ -58,41 +59,133 @@ WeContentBrowserWidget::~WeContentBrowserWidget()
 
 void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequested( QPoint InPoint )
 {
-	QMenu			contextMenu( this );
-	QAction			actionDelete( "Delete", this);
-	QAction			actionRename( "Rename", this);
-
-	QMenu			menuCreate( "Create", this);
-	QAction			actionCreateFolder( "Folder", this);
-	QAction			actionCreateMaterial( "Material", this );
-
+	// Create menu content for each format of file 
+	QModelIndex				modelIndex = ui->treeView_contentBrowser->indexAt( InPoint );
+	QFileSystemModel*		fileSystemModel = ui->treeView_contentBrowser->GetFileSystemModel();
+	QFileInfo				fileInfo = fileSystemModel->fileInfo( modelIndex );
+	
+	// Menu 'Create'
+	QMenu			menuCreate( "Create", this );
+	QAction			actionCreateFolder( "Folder", this );
+	QAction			actionCreatePackage( "Package", this );
 	menuCreate.addAction( &actionCreateFolder );
-	menuCreate.addAction( &actionCreateMaterial );
+	menuCreate.addAction( &actionCreatePackage );
 
-	if ( !ui->treeView_contentBrowser->indexAt( InPoint ).isValid() )
+	// Main menu
+	QMenu			contextMenu( this );
+	QAction			actionSavePackage( "Save", this );				//
+	QAction			actionOpenPackage( "Open", this );				// } Actions with package
+	QAction			actionUnloadPackage( "Unload", this );			//
+	QAction			actionOpenLevel( "Open level", this );			//
+	QAction			actionSaveLevel( "Save level", this );			// } Actions with map
+	QAction			actionDeleteFile( "Delete", this );				//
+	QAction			actionRenameFile( "Rename", this );				// } Actions with all files
+	contextMenu.addAction( &actionSavePackage );
+	contextMenu.addAction( &actionOpenPackage );
+	contextMenu.addAction( &actionUnloadPackage );
+	contextMenu.addSeparator();
+	contextMenu.addAction( &actionOpenLevel );
+	contextMenu.addAction( &actionSaveLevel );
+	contextMenu.addSeparator();
+	contextMenu.addMenu( &menuCreate );
+	contextMenu.addAction( &actionDeleteFile );
+	contextMenu.addAction( &actionRenameFile );
+
+	// Disable actions with package if current file is not package
+	if ( fileInfo.suffix() != FILE_PACKAGE_EXTENSION )
 	{
-		actionDelete.setEnabled( false );
-		actionRename.setEnabled( false );
+		actionSavePackage.setEnabled( false );
+		actionOpenPackage.setEnabled( false );
+		actionUnloadPackage.setEnabled( false );
 	}
 	else
 	{
-		if ( ui->treeView_contentBrowser->selectionModel()->selectedRows().length() > 1 )
+		bool		bIsPackageOpened = GPackageManager->IsPackageOpened( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) );
+		actionOpenPackage.setEnabled( !bIsPackageOpened );
+		actionUnloadPackage.setEnabled( bIsPackageOpened );
+	}
+
+	// Disable actions with map if current file is not map
+	if ( fileInfo.suffix() != FILE_MAP_EXTENSION )
+	{
+		actionOpenLevel.setEnabled( false );
+		actionSaveLevel.setEnabled( false );
+	}
+
+	// Disable actions if current file is not valid
+	if ( !modelIndex.isValid() )
+	{
+		actionDeleteFile.setEnabled( false );
+		actionRenameFile.setEnabled( false );
+	}
+
+	// Connect to signal of acntions
+	connect( &actionDeleteFile, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_delete() ) );
+	connect( &actionRenameFile, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_rename() ) );
+	connect( &actionCreateFolder, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_createFolder() ) );
+	connect( &actionCreatePackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_createPackage() ) );
+	connect( &actionSavePackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_SavePackage() ) );
+	connect( &actionOpenPackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_OpenPackage() ) );
+	connect( &actionUnloadPackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_UnloadPackage() ) );
+
+	contextMenu.exec( QCursor::pos() );
+}
+
+void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_SavePackage()
+{
+	QModelIndexList			modelIndexList = ui->treeView_contentBrowser->selectionModel()->selectedRows();
+	QFileSystemModel*		fileSystemModel = ui->treeView_contentBrowser->GetFileSystemModel();
+
+	for ( int index = 0, count = modelIndexList.length(); index < count; ++index )
+	{
+		QFileInfo		fileInfo = fileSystemModel->fileInfo( modelIndexList[ index ] );
+		std::wstring	pathPackage = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
+	}
+}
+
+void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_OpenPackage()
+{}
+
+void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_UnloadPackage()
+{
+	QModelIndexList			modelIndexList = ui->treeView_contentBrowser->selectionModel()->selectedRows();
+	QFileSystemModel*		fileSystemModel = ui->treeView_contentBrowser->GetFileSystemModel();
+	FPackageRef				currentPackage = ui->listView_packageBrowser->GetPackage();
+
+	// Unload packages
+	bool		bIsNeedRepaint = false;
+	ui->listView_packageBrowser->SetPackage( nullptr );
+	
+	for ( int index = 0, count = modelIndexList.length(); index < count; ++index )
+	{
+		QFileInfo		fileInfo = fileSystemModel->fileInfo( modelIndexList[ index ] );
+		std::wstring	pathPackage = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
+		bool			bSeccussed = GPackageManager->ClosePackage( pathPackage );
+
+		// If successed close package, we mark about need repaint content browser
+		if ( bSeccussed && !bIsNeedRepaint )
 		{
-			actionRename.setEnabled( false );
+			bIsNeedRepaint = true;
+		}
+
+		// If current package in viewer is closed, we forget about him
+		if ( currentPackage && bSeccussed && pathPackage == currentPackage->GetFileName() )
+		{
+			currentPackage.SafeRelease();
 		}
 	}
 
-	connect( &actionDelete, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_delete() ) );
-	connect( &actionRename, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_rename() ) );
-	connect( &actionCreateFolder, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_createFolder() ) );
-	connect( &actionCreateMaterial, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_createMaterial() ) );
+	// If current package not closed, we restore viewer
+	if ( currentPackage )
+	{
+		ui->listView_packageBrowser->SetPackage( currentPackage );
+	}
 
-	contextMenu.addMenu( &menuCreate );
-	contextMenu.addAction( &actionDelete );
-	contextMenu.addAction( &actionRename );
-	contextMenu.addAction( contextMenu.addSeparator() );
-
-	contextMenu.exec( QCursor::pos() );
+	// Repaint content browser is need
+	if ( bIsNeedRepaint )
+	{
+		ui->treeView_contentBrowser->repaint();
+	}
 }
 
 void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_delete()
@@ -213,8 +306,31 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createFolder
 	dir.mkdir( dirName );
 }
 
-void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createMaterial()
-{}
+void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createPackage()
+{
+	bool				isOk = false;
+	QFileSystemModel*	fileSystemModel = ui->treeView_contentBrowser->GetFileSystemModel();
+	QFileInfo			fileInfo = fileSystemModel->fileInfo( ui->treeView_contentBrowser->currentIndex() );
+	
+	QString				packageName = QInputDialog::getText( this, "Enter", "Enter package name", QLineEdit::Normal, "new folder", &isOk );
+	if ( !isOk || packageName.isEmpty() )
+	{
+		return;
+	}
+
+	QDir			dir;
+	if ( fileInfo.fileName().isEmpty() )
+	{
+		dir = ui->treeView_contentBrowser->GetRootDir();
+	}
+	else
+	{
+		dir.cd( !fileInfo.isDir() ? fileInfo.absolutePath() : fileInfo.absoluteFilePath() );
+	}
+
+	FPackage		package;
+	package.Save( appQtAbsolutePathToEngine( dir.absolutePath() + "/" + packageName + ".lpak" ) );
+}
 
 void WeContentBrowserWidget::on_treeView_contentBrowser_OnOpenPackage( class FPackage* InPackage )
 {

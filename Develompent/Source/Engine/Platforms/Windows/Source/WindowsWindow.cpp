@@ -355,8 +355,10 @@ void FWindowsWindow::Close()
  */
 void FWindowsWindow::Show()
 {
-	check( sdlWindow );
-	SDL_ShowWindow( sdlWindow );
+	if ( sdlWindow )
+	{
+		SDL_ShowWindow( sdlWindow );
+	}
 }
 
 /**
@@ -364,8 +366,10 @@ void FWindowsWindow::Show()
  */
 void FWindowsWindow::Hide()
 {
-	check( sdlWindow );
-	SDL_HideWindow( sdlWindow );
+	if ( sdlWindow )
+	{
+		SDL_HideWindow( sdlWindow );
+	}
 }
 
 /**

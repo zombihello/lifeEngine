@@ -87,11 +87,39 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 	}
 
 	FPackage		package;
-	bool			isOpened = package.Open( dstFilename, true );
-	check( isOpened );
+	if ( !package.Load( dstFilename ) )
+	{
+		std::wstring		packageName = dstFilename;
+
+		// Find and remove first section of the string (before last '/')
+		{
+			std::size_t			posSlash = packageName.find_last_of( TEXT( "/" ) );
+			if ( posSlash == std::wstring::npos )
+			{
+				posSlash = packageName.find_last_of( TEXT( "\\" ) );
+			}
+
+			if ( posSlash != std::wstring::npos )
+			{
+				packageName.erase( 0, posSlash + 1 );
+			}
+		}
+
+		// Find and remove second section of the string (after last '.')
+		{
+			std::size_t			posDot = packageName.find_last_of( TEXT( "." ) );
+			if ( posDot != std::wstring::npos )
+			{
+				packageName.erase( posDot, packageName.size() );
+			}
+		}
+
+		// Set package name
+		package.SetName( packageName );
+	}
 
 	package.Add( &texture2D );
-	package.Serialize();
+	package.Save( dstFilename );
 
 	// Clean up all data
 	stbi_image_free( data );

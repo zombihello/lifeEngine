@@ -10,6 +10,7 @@
 #define WORLDED_H
 
 #include <string>
+#include <qdir.h>
 
 #include "Misc/Types.h"
 
@@ -29,5 +30,18 @@ int32 appWorldEdEntry( const tchar* InCmdLine );
  * @return Return WorldEd name
  */
 std::wstring appGetWorldEdName();
+
+/**
+ * @ingroup WorldEd
+ * Get engine path from Qt absolute path
+ * 
+ * @param InPath Absolute path
+ * @return Return engine path
+ */
+FORCEINLINE std::wstring appQtAbsolutePathToEngine( const QString& InPath )
+{
+	static QDir			baseDir( "./" );
+	return baseDir.relativeFilePath( InPath ).toStdWString();
+}
 
 #endif // !WORLDED_H

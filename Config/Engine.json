@@ -1,7 +1,9 @@
 {
 	"Engine.Engine": {
 		"Class": "LGameEngine",
-		"MaxTickRate": 900
+		"MaxTickRate": 900,
+		"DefaultTexture": "EngineTextures:LE_DefaultDiffuse",
+		"DefaultMaterial": "EngineMaterials:DefaultMaterial_Mat"
 	},
 	"Engine.SystemSettings": {
 		"WindowWidth": 1280,
