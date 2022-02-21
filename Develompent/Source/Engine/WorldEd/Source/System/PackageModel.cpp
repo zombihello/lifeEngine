@@ -5,6 +5,7 @@
 
 WePackageModel::WePackageModel( QObject* InParent /* = nullptr */ )
 	: QAbstractItemModel( InParent )
+	, numItems( 0 )
 {}
 
 WePackageModel::~WePackageModel()
@@ -69,19 +70,37 @@ bool WePackageModel::insertRows( int InRow, int InCount, const QModelIndex& InPa
 
 bool WePackageModel::removeRows( int InRow, int InCount, const QModelIndex& InParent /* = QModelIndex() */ )
 {
+	if ( InCount <= 0 )
+	{
+		return false;
+	}
+
 	beginRemoveRows( InParent, InRow, InRow + InCount - 1 );
 	endRemoveRows();
 	return true;
+}
+
+void WePackageModel::Refresh()
+{
+	removeRows( 0, numItems, QModelIndex() );
+	if ( !package )
+	{
+		return;
+	}
+
+	insertRows( 0, package->GetNumAssets(), QModelIndex() );
 }
 
 void WePackageModel::SetPackage( FPackage* InPackage )
 {
 	if ( package && !package->IsEmpty() )
 	{
-		removeRows( 0, package->GetNumAssets(), QModelIndex() );
+		removeRows( 0, numItems, QModelIndex() );
 	}
 
 	package = InPackage;
+	numItems = package ? package->GetNumAssets() : 0;
+
 	if ( package && !package->IsEmpty() )
 	{
 		insertRows( 0, package->GetNumAssets(), QModelIndex() );

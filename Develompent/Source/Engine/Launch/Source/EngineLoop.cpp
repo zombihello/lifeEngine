@@ -118,7 +118,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 		appParseCommandLine( InCmdLine, tokens, switches );
 
 		// PS: 0 index - path to exe file, 1 index - name commandlet
-		if ( tokens.size() >= 2 )
+		if ( !GIsEditor && tokens.size() >= 2 )
 		{
 			GIsCommandlet = true;
 		}

@@ -24,8 +24,9 @@ public:
 	 * Main method of execute commandlet
 	 *
 	 * @param[in] InCommands Arguments of start commandlet
+	 * @return Return true if commandlet executed is seccussed, else returning false
 	 */
-	virtual void Main( const std::wstring& InCommand );
+	virtual bool Main( const std::wstring& InCommand ) override;
 
 	/**
 	 * Add content entries from file system

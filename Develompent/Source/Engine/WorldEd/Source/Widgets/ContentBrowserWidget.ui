@@ -122,7 +122,11 @@
         </widget>
        </item>
        <item>
-        <widget class="WePackageBrowser" name="listView_packageBrowser"/>
+        <widget class="WePackageBrowser" name="listView_packageBrowser">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

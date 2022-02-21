@@ -65,6 +65,11 @@ public:
 	virtual bool removeRows( int InRow, int InCount, const QModelIndex& InParent = QModelIndex() ) override;
 
 	/**
+	 * Refresh package model
+	 */
+	void Refresh();
+
+	/**
 	 * Set selected package
 	 * @param InPackage Package
 	 */
@@ -80,6 +85,7 @@ public:
 	}
 
 private:
+	uint32				numItems;		/**< Number created items */
 	FPackageRef			package;		/**< Current package */
 };
 

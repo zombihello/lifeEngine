@@ -41,7 +41,7 @@ void LCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 	}
 }
 
-void LCookerSyncCommandlet::Main( const std::wstring& InCommand )
+bool LCookerSyncCommandlet::Main( const std::wstring& InCommand )
 {
 	GTableOfContents.Clear();
 	AddContentEntries( appBaseDir() );
@@ -50,4 +50,6 @@ void LCookerSyncCommandlet::Main( const std::wstring& InCommand )
 	FArchive*		archiveTOC = GFileSystem->CreateFileWriter( appBaseDir() + TEXT( "/" ) + FTableOfContets::GetNameTOC(), AW_NoFail );
 	GTableOfContents.Serialize( *archiveTOC );
 	delete archiveTOC;
+
+	return true;
 }

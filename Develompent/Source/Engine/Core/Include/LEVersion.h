@@ -42,6 +42,7 @@ enum ELifeEnginePackageVersion
 	VER_AssetName_V2						= 10,					/**< Moved asset name from him to table of info about this asset */
 	VER_GUIDPackages						= 11,					/**< Added GUID in package */
 	VER_NamePackage							= 12,					/**< Added name package */
+	VER_GUIDAssets							= 13,					/**< Added GUID to assets */
 
 	//
 	// New versions can be added here

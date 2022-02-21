@@ -385,7 +385,7 @@ QVariant WeFileSystemModel::data( const QModelIndex& InIndex, int InRole /* = Qt
 			// Icon for packages
 			if ( fileInfo.suffix() == FILE_PACKAGE_EXTENSION )
 			{
-				if ( GPackageManager->IsPackageOpened( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) ) )
+				if ( GPackageManager->IsPackageLoaded( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) ) )
 				{
 					return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/CB_PackageOpen.png" ) ).c_str() ) );
 				}

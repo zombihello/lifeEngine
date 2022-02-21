@@ -10,6 +10,16 @@
 #include "Render/StaticMesh.h"
 #include "Scripts/Script.h"
 
+FORCEINLINE FAssetRef GetDefaultAsset( EAssetType InType )
+{
+	switch ( InType )
+	{
+	case AT_Texture2D:		return GEngine->GetDefaultTexture();
+	case AT_Material:		return GEngine->GetDefaultMaterial();
+	default:				return nullptr;
+	}
+}
+
 FORCEINLINE FAsset* AssetFactory( EAssetType InType )
 {
 	switch ( InType )
@@ -29,10 +39,10 @@ FORCEINLINE FAsset* AssetFactory( EAssetType InType )
 	}
 }
 
-FAsset::FAsset( EAssetType InType ) :
-	hash( ( uint32 )INVALID_HASH ),
-	type( InType ),
-	package( nullptr )
+FAsset::FAsset( EAssetType InType ) 
+	: package( nullptr )
+	, guid( appCreateGuid() )
+	, type( InType )
 {}
 
 FAsset::~FAsset()
@@ -40,7 +50,7 @@ FAsset::~FAsset()
 	// If asset in package, mark unload state
 	if ( package )
 	{
-		package->MarkAssetUnlnoad( hash );
+		package->MarkAssetUnlnoad( guid );
 	}
 }
 
@@ -50,24 +60,21 @@ void FAsset::Serialize( class FArchive& InArchive )
 	{
 		InArchive << name;
 	}
-}
 
-void FAsset::SetAssetHash( uint32 InHash )
-{
-	if ( package )
+	if ( InArchive.Ver() >= VER_GUIDAssets )
 	{
-		package->MarkHashAssetUpdate( hash, InHash );
+		InArchive << guid;
 	}
-	hash = InHash;
 }
 
 FAssetReference FAsset::GetAssetReference() const
 {
-	return FAssetReference( type, hash, package ? package->GetGUID() : FGuid() );
+	return FAssetReference( type, guid, package ? package->GetGUID() : FGuid() );
 }
 
 FPackage::FPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
-	: guid( appCreateGuid() )
+	: bIsDirty( false )
+	, guid( appCreateGuid() )
 	, name( InName )
 	, numUsageAssets( 0 )
 {}
@@ -102,6 +109,35 @@ bool FPackage::Save( const std::wstring& InPath )
 	// Before saving package it needs to be fully loaded into memory
 	std::vector< FAssetRef >		loadedAsset;
 	FullyLoad( loadedAsset );
+
+	// If package name not setted - take from path name of file
+	if ( name.empty() )
+	{
+		name = InPath;
+
+		// Find and remove first section of the string (before last '/')
+		{
+			std::size_t			posSlash = name.find_last_of( TEXT( "/" ) );
+			if ( posSlash == std::wstring::npos )
+			{
+				posSlash = name.find_last_of( TEXT( "\\" ) );
+			}
+
+			if ( posSlash != std::wstring::npos )
+			{
+				name.erase( 0, posSlash + 1 );
+			}
+		}
+
+		// Find and remove second section of the string (after last '.')
+		{
+			std::size_t			posDot = name.find_last_of( TEXT( "." ) );
+			if ( posDot != std::wstring::npos )
+			{
+				name.erase( posDot, name.size() );
+			}
+		}
+	}
 
 	FArchive*		archive = GFileSystem->CreateFileWriter( InPath );
 	if ( !archive )
@@ -156,7 +192,7 @@ void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 	delete archive;
 }
 
-FAssetRef FPackage::Find( uint32 InHash )
+FAssetRef FPackage::Find( const FGuid& InGUID )
 {
 	// If we not load package from HDD - exit from function
 	if ( filename.empty() )
@@ -165,7 +201,7 @@ FAssetRef FPackage::Find( uint32 InHash )
 	}
 
 	// Find asset in table
-	auto		itAsset = assetsTable.find( InHash );
+	auto		itAsset = assetsTable.find( InGUID );
 	if ( itAsset == assetsTable.end() )
 	{
 		return nullptr;
@@ -205,7 +241,7 @@ void FPackage::Serialize( FArchive& InArchive )
 			// Serialize asset header	
 			InArchive << assetInfo.type;
 			InArchive << assetInfo.name;
-			InArchive << assetInfo.data->hash;
+			InArchive << assetInfo.data->guid;
 			InArchive << assetInfo.size;
 
 			// Serialize asset
@@ -227,7 +263,7 @@ void FPackage::Serialize( FArchive& InArchive )
 		{
 			// Serialize asset header and add to table
 			FAssetInfo			assetInfo;
-			uint32				assetHash;
+			FGuid				assetGUID;
 			appMemzero( &assetInfo, sizeof( FAssetInfo ) );
 
 			// Serialize hash with size data
@@ -238,7 +274,17 @@ void FPackage::Serialize( FArchive& InArchive )
 				InArchive << assetInfo.name;
 			}
 
-			InArchive << assetHash;
+			if ( InArchive.Ver() < VER_GUIDAssets )
+			{
+				uint32		hash = 0;
+				InArchive << hash;
+				assetGUID.Set( hash, 0, 0, 0 );
+			}
+			else
+			{
+				InArchive << assetGUID;
+			}
+
 			InArchive << assetInfo.size;
 			assetInfo.offset = InArchive.Tell();
 
@@ -249,9 +295,12 @@ void FPackage::Serialize( FArchive& InArchive )
 			}
 
 			// Add asset info in table
-			assetsTable[ assetHash ] = assetInfo;
+			assetGUIDTable[ assetInfo.name ] = assetGUID;
+			assetsTable[ assetGUID ] = assetInfo;
 		}
 	}
+
+	bIsDirty = false;
 }
 
 void FPackage::SerializeHeader( FArchive& InArchive )
@@ -272,7 +321,7 @@ void FPackage::SerializeHeader( FArchive& InArchive )
 	InArchive << name;
 }
 
-FAssetRef FPackage::LoadAsset( FArchive& InArchive, uint32 InAssetHash, FAssetInfo& InAssetInfo )
+FAssetRef FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo )
 {
 	uint32		oldOffset = InArchive.Tell();
 
@@ -292,7 +341,7 @@ FAssetRef FPackage::LoadAsset( FArchive& InArchive, uint32 InAssetHash, FAssetIn
 	InAssetInfo.data = AssetFactory( InAssetInfo.type );
 
 	// Init asset
-	InAssetInfo.data->hash = InAssetHash;
+	InAssetInfo.data->guid = InAssetGUID;
 	InAssetInfo.data->package = this;
 	InAssetInfo.data->name = InAssetInfo.name;
 
@@ -315,14 +364,14 @@ FAssetRef FPackage::LoadAsset( FArchive& InArchive, uint32 InAssetHash, FAssetIn
 
 	if ( ++numUsageAssets == 1 )
 	{
-		//GPackageManager->CheckUsagePackage( path );
+		GPackageManager->CheckUsagePackage( filename );		// TODO BS yehor.pohuliaka - AHTUNG! Need change 'filename' to GUID of the package
 	}
 	return InAssetInfo.data;
 }
 
-void FPackage::MarkAssetUnlnoad( uint32 InHash )
+void FPackage::MarkAssetUnlnoad( const FGuid& InGUID )
 {
-	auto		itAsset = assetsTable.find( InHash );
+	auto		itAsset = assetsTable.find( InGUID );
 	if ( itAsset == assetsTable.end() )
 	{
 		return;
@@ -332,7 +381,7 @@ void FPackage::MarkAssetUnlnoad( uint32 InHash )
 	assetInfo.data = nullptr;
 	if ( --numUsageAssets <= 0 )
 	{
-		//GPackageManager->CheckUsagePackage( path );
+		GPackageManager->CheckUsagePackage( filename );		// TODO BS yehor.pohuliaka - AHTUNG! Need change 'filename' to GUID of the package
 	}
 
 	if ( assetInfo.offset == INVALID_HASH && assetInfo.size == INVALID_HASH )
@@ -342,22 +391,9 @@ void FPackage::MarkAssetUnlnoad( uint32 InHash )
 	}
 }
 
-void FPackage::MarkHashAssetUpdate( uint32 InOldHash, uint32 InNewHash )
+void FPackage::Remove( const FGuid& InGUID )
 {
-	auto		itAsset = assetsTable.find( InOldHash );
-	if ( itAsset == assetsTable.end() )
-	{
-		return;
-	}
-
-	FAssetInfo&		assetInfo = itAsset->second;
-	assetsTable[ InNewHash ] = assetInfo;
-	assetsTable.erase( InOldHash );
-}
-
-void FPackage::Remove( uint32 InHash )
-{
-	auto		itAsset = assetsTable.find( InHash );
+	auto		itAsset = assetsTable.find( InGUID );
 	if ( itAsset == assetsTable.end() )
 	{
 		return;
@@ -370,6 +406,7 @@ void FPackage::Remove( uint32 InHash )
 	}
 
 	assetsTable.erase( itAsset );
+	bIsDirty = true;
 }
 
 void FPackage::RemoveAll()
@@ -384,6 +421,7 @@ void FPackage::RemoveAll()
 	}
 
 	assetsTable.clear();
+	bIsDirty = true;
 }
 
 FPackageManager::FPackageManager() :
@@ -459,37 +497,70 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InString, EAssetType I
 		return nullptr;
 	}
 
-	return FindAsset( packagePath, appCalcHash( assetName ), InType );
+	return FindAsset( packagePath, assetName, InType );
 }
 
-FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, uint32 InHash, EAssetType InType /* = AT_Unknown */ )
+FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType /* = AT_Unknown */ )
 {
-	check( InHash != ( uint32 )INVALID_HASH );
+	check( InGUIDAsset.IsValid() );
 
 	// Find package and open he
-	FPackageRef			package = OpenPackage( InPath );
+	FAssetRef			asset;
+	FPackageRef			package = LoadPackage( InPath );
 	if ( !package )
 	{
-		return nullptr;
+		asset = GetDefaultAsset( InType );
 	}
 
 	// Find asset in package
-	FPackageInfo*	packageInfo = &packages[ InPath ];
-	FAssetRef		asset = package->Find( InHash );
-	if ( !asset )
+	if ( package )
 	{
-		switch ( InType )
+		FPackageInfo* packageInfo = &packages[ InPath ];
+		asset = package->Find( InGUIDAsset );
+		if ( !asset )
 		{
-		case AT_Texture2D:		asset = GEngine->GetDefaultTexture();
-		case AT_Material:		asset = GEngine->GetDefaultMaterial();
+			asset = GetDefaultAsset( InType );
+		}
+		else
+		{
+			CheckUsagePackage( *packageInfo );
 		}
 	}
 
-	CheckUsagePackage( *packageInfo );
 	return asset;
 }
 
-FPackageRef FPackageManager::OpenPackage( const std::wstring& InPath )
+FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType /* = AT_Unknown */ )
+{
+	check( !InAsset.empty() );
+
+	// Find package and open he
+	FAssetRef			asset;
+	FPackageRef			package = LoadPackage( InPath );
+	if ( !package )
+	{
+		asset = GetDefaultAsset( InType );
+	}
+
+	// Find asset in package
+	if ( package )
+	{
+		FPackageInfo* packageInfo = &packages[ InPath ];
+		asset = package->Find( InAsset );
+		if ( !asset )
+		{
+			asset = GetDefaultAsset( InType );
+		}
+		else
+		{
+			CheckUsagePackage( *packageInfo );
+		}
+	}
+
+	return asset;
+}
+
+FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath )
 {
 	FPackageRef			package;
 	auto				itPackage = packages.find( InPath );
@@ -524,7 +595,7 @@ FPackageRef FPackageManager::OpenPackage( const std::wstring& InPath )
 	return package;
 }
 
-bool FPackageManager::ClosePackage( const std::wstring& InPath )
+bool FPackageManager::UnloadPackage( const std::wstring& InPath )
 {
 	auto		itPackage = packages.find( InPath );
 	if ( itPackage == packages.end() || itPackage->second.package->GetNumUsageAssets() > 0 )

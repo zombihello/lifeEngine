@@ -173,7 +173,7 @@ void WeContentBrowser::on_treeView_contentBrowser_clicked( const QModelIndex& In
 	QFileInfo		fileInfo = fileSystemModel->fileInfo( InIndex );
 	if ( fileInfo.isFile() && fileInfo.suffix() == FILE_PACKAGE_EXTENSION )
 	{
-		FPackageRef		package = GPackageManager->OpenPackage( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) );
+		FPackageRef		package = GPackageManager->LoadPackage( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) );
 		if ( package )
 		{
 

@@ -32,8 +32,9 @@ public:
 	 * Main method of execute commandlet
 	 * 
 	 * @param[in] InCommands Arguments of start commandlet
+	 * @return Return true if commandlet executed is seccussed, else returning false
 	 */
-	virtual void Main( const std::wstring& InCommands ) PURE_VIRTUAL( LBaseCommandlet::Main, );
+	virtual bool Main( const std::wstring& InCommands ) PURE_VIRTUAL( LBaseCommandlet::Main, return false; );
 };
 
 #endif // !BASECOMMANDLET_H

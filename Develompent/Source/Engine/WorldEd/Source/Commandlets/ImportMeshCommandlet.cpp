@@ -17,7 +17,7 @@
 
 IMPLEMENT_CLASS( LImportMeshCommandlet )
 
-void LImportMeshCommandlet::Main( const std::wstring& InCommand )
+bool LImportMeshCommandlet::Main( const std::wstring& InCommand )
 {
 	std::wstring			srcFilename;
 	std::wstring			dstFilename;
@@ -64,17 +64,41 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 		LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Mesh name is not specified, by default it is assigned %s" ), srcFilename.c_str() );
 	}
 
+	// Convert static mesh
+	FStaticMeshRef		staticMesh = ConvertStaticMesh( srcFilename, nameMesh );
+	if ( !staticMesh )
+	{
+		return false;
+	}
+
+	FPackage		package;
+	package.Load( dstFilename );
+	package.Add( staticMesh );
+	package.Save( dstFilename );
+	return true;
+}
+
+FStaticMeshRef LImportMeshCommandlet::ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName )
+{
 	// Loading mesh with help Assimp
 	Assimp::Importer		aiImport;
-	const aiScene*			aiScene = aiImport.ReadFile( 
-		TCHAR_TO_ANSI( srcFilename.c_str() ), 
+	const aiScene*			aiScene = aiImport.ReadFile(
+		TCHAR_TO_ANSI( InPath.c_str() ),
 		aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals | aiProcess_LimitBoneWeights | aiProcess_Triangulate );
-	check( aiScene );
+	if ( !aiScene )
+	{
+		return nullptr;
+	}
 
 	// Fill array meshes from Assimp scene
 	FAiMeshesMap			meshes;
 	ProcessNode( aiScene->mRootNode, aiScene, meshes );
-	checkMsg( !meshes.empty(), TEXT( "In file not found meshes" ) );
+	if ( meshes.empty() )
+	{
+		LE_LOG( LT_Error, LC_Commandlet, TEXT( "In file not found meshes" ) );
+		aiImport.FreeScene();
+		return nullptr;
+	}
 
 	// TODO BS yehor.pohuliaka - I'm not sure how correct this code is, it may need to be rewritten
 	// Go through the material ID, take the mesh and write its vertices, and indices
@@ -84,8 +108,8 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 	std::vector< FStaticMeshSurface >			surfaces;
 	std::vector< FMaterialRef >					materials;
 	for ( auto itRoot = meshes.begin(), itRootEnd = meshes.end(); itRoot != itRootEnd; ++itRoot )
-	{	
-		FStaticMeshSurface							surface;	
+	{
+		FStaticMeshSurface							surface;
 		appMemzero( &surface, sizeof( FStaticMeshSurface ) );
 
 		surface.firstIndex = indeces.size();
@@ -115,7 +139,7 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 				vertex.position.z = tempVector.z;
 				vertex.position.w = 1.f;
 
-				tempVector = ( aiMatrix3x3 )( *itMesh ).transformation * mesh->mNormals[ index ];
+				tempVector = ( aiMatrix3x3 ) ( *itMesh ).transformation * mesh->mNormals[ index ];
 				vertex.normal.x = tempVector.x;
 				vertex.normal.y = tempVector.y;
 				vertex.normal.z = tempVector.z;
@@ -123,7 +147,7 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 
 				if ( mesh->mTangents )
 				{
-					tempVector = ( aiMatrix3x3 )( *itMesh ).transformation * mesh->mTangents[ index ];
+					tempVector = ( aiMatrix3x3 ) ( *itMesh ).transformation * mesh->mTangents[ index ];
 					vertex.tangent.x = tempVector.x;
 					vertex.tangent.y = tempVector.y;
 					vertex.tangent.z = tempVector.z;
@@ -132,7 +156,7 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 
 				if ( mesh->mBitangents )
 				{
-					tempVector = ( aiMatrix3x3 )( *itMesh ).transformation * mesh->mBitangents[ index ];
+					tempVector = ( aiMatrix3x3 ) ( *itMesh ).transformation * mesh->mBitangents[ index ];
 					vertex.binormal.x = tempVector.x;
 					vertex.binormal.y = tempVector.y;
 					vertex.binormal.z = tempVector.z;
@@ -152,7 +176,7 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 			// Read all indeces
 			for ( uint32 index = 0; index < mesh->mNumFaces; ++index )
 			{
-				aiFace*				face = &mesh->mFaces[ index ];
+				aiFace* face = &mesh->mFaces[ index ];
 				for ( uint32 indexVertex = 0; indexVertex < face->mNumIndices; ++indexVertex )
 				{
 					uint32		index = face->mIndices[ indexVertex ];
@@ -167,7 +191,9 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 						verteces.push_back( vertexBuffer[ index ] );
 					}
 					else
+					{
 						indeces.push_back( it - verteces.begin() );
+					}
 				}
 			}
 		}
@@ -188,46 +214,13 @@ void LImportMeshCommandlet::Main( const std::wstring& InCommand )
 	}
 
 	// Serialize static mesh in archive
-	FStaticMesh		staticMesh;
-	staticMesh.SetAssetHash( appCalcHash( nameMesh ) );
-	staticMesh.SetAssetName( nameMesh );
-	staticMesh.SetData( verteces, indeces, surfaces, materials );
+	FStaticMeshRef		staticMesh = new FStaticMesh();
+	staticMesh->SetAssetName( InAssetName );
+	staticMesh->SetData( verteces, indeces, surfaces, materials );
 
-	FPackage		package;
-	if ( !package.Load( dstFilename ) )
-	{
-		std::wstring		packageName = dstFilename;
-
-		// Find and remove first section of the string (before last '/')
-		{
-			std::size_t			posSlash = packageName.find_last_of( TEXT( "/" ) );
-			if ( posSlash == std::wstring::npos )
-			{
-				posSlash = packageName.find_last_of( TEXT( "\\" ) );
-			}
-
-			if ( posSlash != std::wstring::npos )
-			{
-				packageName.erase( 0, posSlash + 1 );
-			}
-		}
-
-		// Find and remove second section of the string (after last '.')
-		{
-			std::size_t			posDot = packageName.find_last_of( TEXT( "." ) );
-			if ( posDot != std::wstring::npos )
-			{
-				packageName.erase( posDot, packageName.size() );
-			}
-		}
-
-		// Set package name
-		package.SetName( packageName );
-	}
-
-	package.Add( &staticMesh );
-	package.Save( dstFilename );
+	// Clean up all data
 	aiImport.FreeScene();
+	return staticMesh;
 }
 
 void LImportMeshCommandlet::ProcessNode( aiNode* InNode, const aiScene* InScene, FAiMeshesMap& OutMeshes )

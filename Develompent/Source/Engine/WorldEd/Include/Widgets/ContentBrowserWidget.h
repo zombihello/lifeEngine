@@ -45,6 +45,31 @@ private slots:
 	void on_treeView_contentBrowser_customContextMenuRequested( QPoint InPoint );
 
 	/**
+	 * Package explorer context menu selection event 'Import asset'
+	 */
+	void on_listView_packageBrowser_ImportAsset();
+
+	/**
+	 * Package explorer context menu selection event 'Create material'
+	 */
+	void on_listView_packageBrowser_CreateMaterial();
+
+	/**
+	 * Package explorer context menu selection event 'Delete asset'
+	 */
+	void on_listView_packageBrowser_DeleteAsset();
+
+	/**
+	 * Package explorer context menu selection event 'Rename asset'
+	 */
+	void on_listView_packageBrowser_RenameAsset();
+
+	/**
+	 * Package explorer context menu open event
+	 */
+	void on_listView_packageBrowser_customContextMenuRequested( QPoint InPoint );
+
+	/**
 	 * File Explorer context menu selection event "Delete"
 	 */
 	void on_treeView_contentBrowser_contextMenu_delete();
@@ -60,7 +85,7 @@ private slots:
 	void on_treeView_contentBrowser_contextMenu_createFolder();
 
 	/**
-	 * File explorer context menu selection event "Create Material"
+	 * File explorer context menu selection event "Create package"
 	 */
 	void on_treeView_contentBrowser_contextMenu_createPackage();
 

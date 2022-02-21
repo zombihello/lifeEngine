@@ -4,11 +4,15 @@
 #include <qdebug.h>
 #include <qmessagebox.h>
 #include <qinputdialog.h>
+#include <qfiledialog.h>
 
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
+#include "Commandlets/ImportTextureCommandlet.h"
+#include "Commandlets/ImportMeshCommandlet.h"
 #include "Widgets/ContentBrowserWidget.h"
 #include "System/ContentBrowser.h"
+#include "Render/Material.h"
 #include "WorldEd.h"
 #include "ui_ContentBrowserWidget.h"
 
@@ -100,7 +104,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 	}
 	else
 	{
-		bool		bIsPackageOpened = GPackageManager->IsPackageOpened( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) );
+		bool		bIsPackageOpened = GPackageManager->IsPackageLoaded( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) );
 		actionOpenPackage.setEnabled( !bIsPackageOpened );
 		actionUnloadPackage.setEnabled( bIsPackageOpened );
 	}
@@ -131,15 +135,160 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 	contextMenu.exec( QCursor::pos() );
 }
 
+void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequested( QPoint InPoint )
+{
+	QModelIndex				modelIndex = ui->listView_packageBrowser->indexAt( InPoint );
+
+	// Menu 'Create'
+	QMenu			menuCreate( "Create", this );
+	QAction			actionCreateMaterial( "Material", this );
+	menuCreate.addAction( &actionCreateMaterial );
+
+	// Main menu
+	QMenu			contextMenu( this );
+	QAction			actionImportAsset( "Import asset", this );
+	QAction			actionDeleteFile( "Delete", this );
+	QAction			actionRenameFile( "Rename", this );
+	contextMenu.addAction( &actionImportAsset );
+	contextMenu.addSeparator();
+	contextMenu.addMenu( &menuCreate );
+	contextMenu.addSeparator();
+	contextMenu.addAction( &actionDeleteFile );
+	contextMenu.addAction( &actionRenameFile );
+
+	// Disable actions if item is not valid
+	if ( !modelIndex.isValid() )
+	{
+		actionDeleteFile.setEnabled( false );
+		actionRenameFile.setEnabled( false );
+	}
+
+	// Connect to signal of a actions
+	connect( &actionImportAsset, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_ImportAsset() ) );
+	connect( &actionCreateMaterial, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_CreateMaterial() ) );
+	connect( &actionDeleteFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_DeleteAsset() ) );
+	connect( &actionRenameFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_RenameAsset() ) );
+
+	contextMenu.exec( QCursor::pos() );
+}
+
+void WeContentBrowserWidget::on_listView_packageBrowser_ImportAsset()
+{
+	FPackageRef		package = ui->listView_packageBrowser->GetPackage();
+	QString			supportedFileExtensions;
+	check( package );
+
+	// Texture formats
+	{
+		QString									finalString;
+		const std::vector< std::wstring >&		textureExtension = LImportTextureCommandlet::GetSupportedExtensins();
+		
+		finalString += "Texture formats (";
+		for ( uint32 index = 0, count = textureExtension.size(); index < count; ++index )
+		{
+			finalString += FString::Format( TEXT( "*.%s%s" ), textureExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+		}
+		finalString += ");;";
+		supportedFileExtensions += finalString;
+	}
+
+	// Mesh formats
+	{
+		QString									finalString;
+		const std::vector< std::wstring >&		meshExtension = LImportMeshCommandlet::GetSupportedExtensins();
+
+		finalString += "Mesh formats (";
+		for ( uint32 index = 0, count = meshExtension.size(); index < count; ++index )
+		{
+			finalString += FString::Format( TEXT( "*.%s%s" ), meshExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+		}
+		finalString += ")";
+		supportedFileExtensions += finalString;
+	}
+
+	QString			srcPath = QFileDialog::getOpenFileName( this, "Select asset to import", QString(), supportedFileExtensions );
+	if ( srcPath.isEmpty() )
+	{
+		return;
+	}
+
+	bool			bSeccussed = false;
+	QFileInfo		fileInfo( srcPath );
+	std::wstring	fileExtension = fileInfo.suffix().toStdWString();
+
+	// We import texture
+	if ( LImportTextureCommandlet::IsSupportedExtension( fileExtension ) )
+	{
+		std::wstring					engineSrcPath = appQtAbsolutePathToEngine( srcPath );
+		std::wstring					engineDstPath = appQtAbsolutePathToEngine( QString::fromStdWString( package->GetFileName() ) );
+
+		LImportTextureCommandlet		importTextureCommandlet;
+		FTexture2DRef					texture2D = importTextureCommandlet.ConvertTexture2D( engineSrcPath, fileInfo.baseName().toStdWString() );
+		if ( texture2D )
+		{
+			package->Add( texture2D );
+			bSeccussed = package->Save( engineDstPath );
+		}
+	}
+
+	// We import mesh
+	if ( LImportMeshCommandlet::IsSupportedExtension( fileExtension ) )
+	{
+		std::wstring					engineSrcPath = appQtAbsolutePathToEngine( srcPath );
+		std::wstring					engineDstPath = appQtAbsolutePathToEngine( QString::fromStdWString( package->GetFileName() ) );
+
+		LImportMeshCommandlet			importMeshCommandlet;
+		FStaticMeshRef					staticMesh = importMeshCommandlet.ConvertStaticMesh( engineSrcPath, fileInfo.baseName().toStdWString() );
+		if ( staticMesh )
+		{
+			package->Add( staticMesh );
+			bSeccussed = package->Save( engineDstPath );
+		}
+	}
+
+	// If we added to package new asset - need refresh package browser
+	if ( bSeccussed )
+	{
+		ui->listView_packageBrowser->Refresh();
+	}
+}
+
+void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
+{}
+
+void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
+{
+	// Getting selected items and current package
+	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
+	check( package );
+
+	// Remove all selected assets from package
+	for ( int index = 0, count = modelIndexList.length(); index < count; ++index )
+	{
+	}
+}
+
+void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
+{}
+
 void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_SavePackage()
 {
+	// Getting selected items and file system model
 	QModelIndexList			modelIndexList = ui->treeView_contentBrowser->selectionModel()->selectedRows();
 	QFileSystemModel*		fileSystemModel = ui->treeView_contentBrowser->GetFileSystemModel();
 
+	// Save all selected packages if is need
 	for ( int index = 0, count = modelIndexList.length(); index < count; ++index )
 	{
 		QFileInfo		fileInfo = fileSystemModel->fileInfo( modelIndexList[ index ] );
 		std::wstring	pathPackage = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
+		
+		FPackageRef		package = GPackageManager->LoadPackage( pathPackage );
+		if ( package && package->IsDirty() )
+		{
+			package->Save( pathPackage );
+		}
 	}
 }
 
@@ -148,6 +297,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_OpenPackage(
 
 void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_UnloadPackage()
 {
+	// Getting selected items, file system model and current package in package browser
 	QModelIndexList			modelIndexList = ui->treeView_contentBrowser->selectionModel()->selectedRows();
 	QFileSystemModel*		fileSystemModel = ui->treeView_contentBrowser->GetFileSystemModel();
 	FPackageRef				currentPackage = ui->listView_packageBrowser->GetPackage();
@@ -160,7 +310,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_UnloadPackag
 	{
 		QFileInfo		fileInfo = fileSystemModel->fileInfo( modelIndexList[ index ] );
 		std::wstring	pathPackage = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
-		bool			bSeccussed = GPackageManager->ClosePackage( pathPackage );
+		bool			bSeccussed = GPackageManager->UnloadPackage( pathPackage );
 
 		// If successed close package, we mark about need repaint content browser
 		if ( bSeccussed && !bIsNeedRepaint )
@@ -328,6 +478,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createPackag
 		dir.cd( !fileInfo.isDir() ? fileInfo.absolutePath() : fileInfo.absoluteFilePath() );
 	}
 
+	// Create package
 	FPackage		package;
 	package.Save( appQtAbsolutePathToEngine( dir.absolutePath() + "/" + packageName + ".lpak" ) );
 }

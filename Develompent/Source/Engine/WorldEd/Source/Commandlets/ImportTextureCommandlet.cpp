@@ -14,7 +14,7 @@
 
 IMPLEMENT_CLASS( LImportTextureCommandlet )
 
-void LImportTextureCommandlet::Main( const std::wstring& InCommand )
+bool LImportTextureCommandlet::Main( const std::wstring& InCommand )
 {
 	std::wstring			srcFilename;
 	std::wstring			dstFilename;
@@ -23,14 +23,20 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 
 	// Parse arguments
 	{
+		uint32							offsetInTokens = 0;		// For skip in cmdline path to exe "C:/HeliumGame.exe"
 		std::vector< std::wstring >		tokens;
 		std::vector< std::wstring >		switches;
 		appParseCommandLine( InCommand.c_str(), tokens, switches );
 
+		if ( tokens.size() > switches.size() )
+		{
+			offsetInTokens = tokens.size() - switches.size();
+		}
+
 		for ( uint32 index = 0, count = ( uint32 )switches.size(); index < count; ++index )
 		{
 			const std::wstring&		param = switches[ index ];
-			const std::wstring&		token = tokens[ index + 2 ];
+			const std::wstring&		token = tokens[ index + offsetInTokens ];
 
 			// Source filename
 			if ( param == TEXT( "src" ) || param == TEXT( "source" ) )
@@ -68,59 +74,44 @@ void LImportTextureCommandlet::Main( const std::wstring& InCommand )
 		LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Texture name is not specified, by default it is assigned %s" ), srcFilename.c_str() );
 	}
 
+	// Convert image to texture 2D
+	FTexture2DRef		texture2D = ConvertTexture2D( srcFilename, nameTexture );
+	if ( !texture2D )
+	{
+		return false;
+	}
+
+	FPackage		package;
+	package.Load( dstFilename );
+	package.Add( texture2D );
+	package.Save( dstFilename );
+	return true;
+}
+
+FTexture2DRef LImportTextureCommandlet::ConvertTexture2D( const std::wstring& InPath, const std::wstring& InAssetName )
+{
 	// Loading data from image
 	int				numComponents = 0;
 	uint32			sizeX = 0;
 	uint32			sizeY = 0;
-	void*			data = stbi_load( TCHAR_TO_ANSI( srcFilename.c_str() ), ( int* ) &sizeX, ( int* ) &sizeY, &numComponents, 4 );
-	check( data );
 
-	// Create texture 2D and serialize to package
-	FTexture2D		texture2D;
-	texture2D.SetAssetName( nameTexture );
-	texture2D.SetAssetHash( appCalcHash( nameTexture ) );
+	void*			data = stbi_load( TCHAR_TO_ANSI( InPath.c_str() ), ( int* ) &sizeX, ( int* ) &sizeY, &numComponents, 4 );
+	if ( !data )
+	{
+		return nullptr;
+	}
+
+	// Create texture 2D and init him
+	FTexture2DRef		texture2D = new FTexture2D();
+	texture2D->SetAssetName( InAssetName );
 	{
 		std::vector< byte >		tempData;
 		tempData.resize( sizeX * sizeY * GPixelFormats[ PF_A8R8G8B8 ].blockBytes );
 		memcpy( tempData.data(), data, tempData.size() );
-		texture2D.SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
+		texture2D->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 	}
-
-	FPackage		package;
-	if ( !package.Load( dstFilename ) )
-	{
-		std::wstring		packageName = dstFilename;
-
-		// Find and remove first section of the string (before last '/')
-		{
-			std::size_t			posSlash = packageName.find_last_of( TEXT( "/" ) );
-			if ( posSlash == std::wstring::npos )
-			{
-				posSlash = packageName.find_last_of( TEXT( "\\" ) );
-			}
-
-			if ( posSlash != std::wstring::npos )
-			{
-				packageName.erase( 0, posSlash + 1 );
-			}
-		}
-
-		// Find and remove second section of the string (after last '.')
-		{
-			std::size_t			posDot = packageName.find_last_of( TEXT( "." ) );
-			if ( posDot != std::wstring::npos )
-			{
-				packageName.erase( posDot, packageName.size() );
-			}
-		}
-
-		// Set package name
-		package.SetName( packageName );
-	}
-
-	package.Add( &texture2D );
-	package.Save( dstFilename );
 
 	// Clean up all data
 	stbi_image_free( data );
+	return texture2D;
 }

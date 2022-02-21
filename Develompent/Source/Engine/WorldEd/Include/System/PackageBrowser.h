@@ -46,6 +46,15 @@ public:
     virtual ~WePackageBrowser();
 
 	/**
+	 * Refresh browser
+	 */
+	FORCEINLINE void Refresh()
+	{
+		packageModel->Refresh();
+		repaint();
+	}
+
+	/**
 	 * Set selected package
 	 * @param InPackage Package
 	 */
