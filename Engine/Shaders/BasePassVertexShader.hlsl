@@ -11,6 +11,6 @@
 
 void MainVS( in FVertexFactoryInput In, out VS_OUT Out, out float4 OutPosition : SV_POSITION )
 {
-	OutPosition		= VertexFactory_GetWorldPosition( In );
+	OutPosition		= MulMatrix( viewProjectionMatrix, VertexFactory_GetWorldPosition( In ) );
 	Out.texCoord0	= VertexFactory_GetTexCoord( In, 0 );
 }

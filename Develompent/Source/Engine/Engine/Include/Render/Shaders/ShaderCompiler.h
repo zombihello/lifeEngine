@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "RHI/BaseShaderRHI.h"
+#include "ShaderCache.h"
 
 #if WITH_EDITOR
 /**
@@ -82,6 +83,7 @@ struct FShaderCompilerOutput
 	{}
 
 	std::vector< byte >			code;				/**< Output compiled code of shader */
+	FShaderParameterMap			parameterMap;		/**< Shader parameter map */
 	uint32						numInstructions;	/**< Number instructions in shader */
 };
 

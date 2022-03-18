@@ -32,16 +32,19 @@ include( ${PROJECT_SOURCE_DIR}/../CMake/ExternalsUtils.cmake )
 # Platform settings
 #
 set( PLATFORM_WINDOWS OFF )
-set( PLATFORM_32BIT OFF )
-set( PLATFORM_64BIT OFF )
+set( PLATFORM_32BIT 0 )
+set( PLATFORM_64BIT 0 )
 
 if ( ${CMAKE_SIZEOF_VOID_P} EQUAL 8 )
-	set( PLATFORM_64BIT ON )
+        set( PLATFORM_64BIT 1 )
 elseif( ${CMAKE_SIZEOF_VOID_P} EQUAL 4 )
-	set( PLATFORM_32BIT ON )
+        set( PLATFORM_32BIT 1 )
 else()
 	message( SEND_ERROR "Unknown bit platform" )
 endif()
+
+add_definitions( -DPLATFORM_64BIT=${PLATFORM_64BIT} )
+add_definitions( -DPLATFORM_32BIT=${PLATFORM_32BIT} )
 
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Windows" )
 	set( PLATFORM_WINDOWS ON )
@@ -139,7 +142,8 @@ endif()
 # Game source path
 set( GAME_SOURCE_PATH "" CACHE PATH "Path to source code of game with <NAME_GAME>.Build.cmake file" )
 if ( NOT GAME_SOURCE_PATH )
-	message( SEND_ERROR "Value GAME_SOURCE_PATH not setted" )
+	message( "Value GAME_SOURCE_PATH not setted" )
+	set( GAME_SOURCE_PATH "${PROJECT_SOURCE_DIR}/Games/HeliumGame" )			# Default game
 endif()
 
 #

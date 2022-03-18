@@ -1,6 +1,36 @@
 #include "Render/Shaders/ShaderCache.h"
+#include "System/Archive.h"
 
-#define SHADER_CACHE_VERSION			3
+#define SHADER_CACHE_VERSION			4
+
+bool FShaderParameterMap::FindParameterAllocation( const tchar* InParameterName, uint32& OutBufferIndex, uint32& OutBaseIndex, uint32& OutSize, uint32& OutSamplerIndex ) const
+{
+	auto		itParamAllocation = parameterMap.find( InParameterName );
+	if ( itParamAllocation != parameterMap.end() )
+	{
+		const FParameterAllocation&		allocation = itParamAllocation->second;
+		OutBufferIndex = allocation.bufferIndex;
+		OutBaseIndex = allocation.baseIndex;
+		OutSize = allocation.size;
+		OutSamplerIndex = allocation.samplerIndex;
+		allocation.isBound = true;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void FShaderParameterMap::AddParameterAllocation( const tchar* InParameterName, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InSize, uint32 InSamplerIndex )
+{
+	FParameterAllocation 		allocation;
+	allocation.bufferIndex = InBufferIndex;
+	allocation.baseIndex = InBaseIndex;
+	allocation.size = InSize;
+	allocation.samplerIndex = InSamplerIndex;
+	parameterMap[ InParameterName ] = allocation;
+}
 
 /**
  * Serialize of FShaderCacheItem
@@ -11,6 +41,11 @@ void FShaderCache::FShaderCacheItem::Serialize( FArchive& InArchive )
 	InArchive << vertexFactoryHash;
 	InArchive << numInstructions;
 	InArchive << name;
+
+	if ( InArchive.Ver() >= VER_ShaderParameterMap )
+	{
+		InArchive << parameterMap;
+	}
 
 	if ( InArchive.Ver() < VER_CompressedZlib )
 	{

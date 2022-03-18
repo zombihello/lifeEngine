@@ -41,8 +41,11 @@ void appUpdateTimeAndHandleMaxTickRate()
 	GCurrentTime = appSeconds();
 	GDeltaTime = GCurrentTime - GLastTime;
 
-	float		maxTickRate = Max( GEngine->GetMaxTickRate(), 1.f );
-	appSleep( Max( 1.f / maxTickRate - GDeltaTime, 0.0 ) );		// BS yehor.pohuliaka - It is possible that you need to somehow fix the stalling of the render thread another way
+	if ( GUseMaxTickRate )
+	{
+		float		maxTickRate = Max( GEngine->GetMaxTickRate(), 1.f );
+		appSleep( Max( 1.f / maxTickRate - GDeltaTime, 0.0 ) );		// BS yehor.pohuliaka - It is possible that you need to somehow fix the stalling of the render thread another way
+	}
 }
 
 /**
@@ -70,6 +73,9 @@ void FEngineLoop::SerializeConfigs()
 		GEngineConfig.Serialize( *arConfig );
 		delete arConfig;
 	}
+
+	GUseMaxTickRate = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
+	GAllowRenderThread = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "AllowRenderThread" ) ).GetBool();
 
 	// Loading input config
 	arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Input.json" ) );

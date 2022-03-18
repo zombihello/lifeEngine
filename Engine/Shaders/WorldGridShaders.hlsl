@@ -10,7 +10,7 @@
 
 void MainVS( in FVertexFactoryInput In, out float4 Out : POSITION, out float4 OutPosition : SV_POSITION )
 {
-	OutPosition	= VertexFactory_GetWorldPosition( In );
+	OutPosition	= MulMatrix( viewProjectionMatrix, VertexFactory_GetWorldPosition( In ) );
 }
 
 float4 MainPS() : SV_Target

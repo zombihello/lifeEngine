@@ -4,9 +4,10 @@
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
-FVertexFactoryMetaType::FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName )
+FVertexFactoryMetaType::FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName, ConstructParametersType InConstructParameters )
 	: factoryName( InFactoryName )
 	, hash( appCalcHash( InFactoryName ) )
+	, ConstructParameters( InConstructParameters )
 
 #if WITH_EDITOR
 	, sourceFilename( InFileName )

@@ -1,6 +1,8 @@
 {
 	"Engine.Engine": {
 		"Class": "LGameEngine",
+		"UseMaxTickRate": false,
+		"AllowRenderThread": true,
 		"MaxTickRate": 900,
 		"DefaultTexture": "EngineTextures:LE_DefaultDiffuse",
 		"DefaultMaterial": "EngineMaterials:DefaultMaterial_Mat"

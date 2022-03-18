@@ -14,3 +14,5 @@ std::wstring		GGameName = TEXT( "" );
 class LBaseEngine*	GEngine = nullptr;
 FInputSystem*		GInputSystem = new FInputSystem();
 FWorld*				GWorld = new FWorld();
+bool                GUseMaxTickRate = true;
+bool                GAllowRenderThread = true;

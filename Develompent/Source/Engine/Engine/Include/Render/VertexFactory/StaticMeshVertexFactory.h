@@ -57,6 +57,14 @@ public:
 	 * This is only called by the rendering thread.
 	 */
 	virtual void InitRHI() override;
+
+	/**
+	 * @brief Construct vertex factory shader parameters
+	 * 
+	 * @param InShaderFrequency Shader frequency
+	 * @return Return instance of vertex factory shader parameters
+	 */
+	static FVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
 };
 
 //

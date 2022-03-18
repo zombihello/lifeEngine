@@ -61,8 +61,11 @@ FD3D11RHI::FD3D11RHI() :
 	isInitialize( false ),
 	immediateContext( nullptr ),
 	globalConstantBuffer( nullptr ),
+	psConstantBuffer( nullptr ),
 	d3d11Device( nullptr )
-{}
+{
+	appMemzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
+}
 
 /**
  * Destructor
@@ -110,6 +113,7 @@ void FD3D11RHI::Init( bool InIsEditor )
 	immediateContext = new FD3D11DeviceContext( d3d11DeviceContext );
 	
 	// Create constant buffers for shaders
+	// Global constant buffer
 	globalConstantBuffer = new class FD3D11ConstantBuffer( GConstantBufferSizes[ SOB_GlobalConstants ], TEXT( "GlobalConstantBuffer" ) );
 	{
 		ID3D11Buffer*		d3d11GlobalConstantBuffer = globalConstantBuffer->GetD3D11Buffer();
@@ -117,6 +121,28 @@ void FD3D11RHI::Init( bool InIsEditor )
 		d3d11DeviceContext->PSSetConstantBuffers( SOB_GlobalConstants, 1, &d3d11GlobalConstantBuffer );
 		d3d11DeviceContext->GSSetConstantBuffers( SOB_GlobalConstants, 1, &d3d11GlobalConstantBuffer );
 		d3d11DeviceContext->CSSetConstantBuffers( SOB_GlobalConstants, 1, &d3d11GlobalConstantBuffer );
+	}
+
+	// Vertex constant buffer
+	vsConstantBuffers[ SOB_ShaderConstants ] = new FD3D11ConstantBuffer( GConstantBufferSizes[ SOB_ShaderConstants ], TEXT( "ShaderConstantBuffer" ) );
+	vsConstantBuffers[ SOB_GlobalConstants ] = nullptr;
+	{
+		for ( uint32 index = 0, num = ARRAY_COUNT( vsConstantBuffers ); index < num; ++index )
+		{
+			FD3D11ConstantBuffer*		constantBuffer = vsConstantBuffers[ index ];
+			if ( constantBuffer )
+			{
+				ID3D11Buffer*		d3d11ConstantBuffer = constantBuffer->GetD3D11Buffer();
+				d3d11DeviceContext->VSSetConstantBuffers( SOB_ShaderConstants, 1, &d3d11ConstantBuffer );
+			}
+		}
+	}
+
+	// Pixel constant buffer
+	psConstantBuffer = new FD3D11ConstantBuffer( GConstantBufferSizes[ SOB_ShaderConstants ], TEXT( "ShaderConstantBuffer" ) );
+	{
+		ID3D11Buffer*		d3d11ConstantBuffer = psConstantBuffer->GetD3D11Buffer();
+		d3d11DeviceContext->PSSetConstantBuffers( SOB_ShaderConstants, 1, &d3d11ConstantBuffer );
 	}
 
 	// Print info adapter
@@ -176,7 +202,17 @@ void FD3D11RHI::Destroy()
 {
 	if ( !isInitialize )		return;
 
+	for ( uint32 index = 0, num = ARRAY_COUNT( vsConstantBuffers ); index < num; ++index )
+	{
+		FD3D11ConstantBuffer*		constantBuffer = vsConstantBuffers[ index ];
+		if ( constantBuffer )
+		{
+			delete constantBuffer;
+		}
+	}
+
 	delete globalConstantBuffer;
+	delete psConstantBuffer;
 	delete immediateContext;
 	d3d11Device->Release();
 	dxgiAdapter->Release();
@@ -184,11 +220,14 @@ void FD3D11RHI::Destroy()
 
 	isInitialize = false;
 	globalConstantBuffer = nullptr;
+	psConstantBuffer = nullptr;
 	immediateContext = nullptr;
 	d3d11Device = nullptr;
 	dxgiAdapter = nullptr;
 	dxgiFactory = nullptr;
+
 	appMemzero( &stateCache, sizeof( FD3D11StateCache ) );
+	appMemzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
 }
 
 /**
@@ -452,11 +491,6 @@ void FD3D11RHI::SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContex
 	}
 }
 
-//void FD3D11RHI::SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FVertexShaderRHIParamRef InVertexShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
-//{
-//	check( false );
-//}
-
 void FD3D11RHI::SetViewParameters( class FBaseDeviceContextRHI* InDeviceContext, class FSceneView& InSceneView )
 {
 	check( InDeviceContext );
@@ -468,8 +502,31 @@ void FD3D11RHI::SetViewParameters( class FBaseDeviceContextRHI* InDeviceContext,
 	globalConstantBuffer->CommitConstantsToDevice( ( FD3D11DeviceContext* )InDeviceContext );
 }
 
-void FD3D11RHI::SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
-{}
+void FD3D11RHI::SetVertexShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
+{
+	vsConstantBuffers[ InBufferIndex ]->Update( ( const byte* )InNewValue, InBaseIndex, InNumBytes );
+}
+
+void FD3D11RHI::SetPixelShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
+{
+	psConstantBuffer->Update( ( const byte* )InNewValue, InBaseIndex, InNumBytes );
+}
+
+void FD3D11RHI::CommitConstants( class FBaseDeviceContextRHI* InDeviceContext )
+{
+	// Commit vertex shader constants
+	for ( uint32 index = 0, num = ARRAY_COUNT( vsConstantBuffers ); index < num; ++index )
+	{
+		FD3D11ConstantBuffer*		constantBuffer = vsConstantBuffers[ index ];
+		if ( constantBuffer )
+		{
+			constantBuffer->CommitConstantsToDevice( ( FD3D11DeviceContext* )InDeviceContext );
+		}
+	}
+
+	// Commit pixel shader constants
+	psConstantBuffer->CommitConstantsToDevice( ( FD3D11DeviceContext* )InDeviceContext );
+}
 
 /**
  * Lock vertex buffer
@@ -602,7 +659,7 @@ void FD3D11RHI::BeginDrawingViewport( class FBaseDeviceContextRHI* InDeviceConte
 	check( viewport );
 
 	SetRenderTarget( InDeviceContext, viewport->GetSurface(), nullptr );
-	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );	
+	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );
 }
 
 void FD3D11RHI::SetRenderTarget( class FBaseDeviceContextRHI* InDeviceContext, FSurfaceRHIParamRef InNewRenderTarget, FSurfaceRHIParamRef InNewDepthStencilTarget )
@@ -856,7 +913,48 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 	D3D11_SHADER_DESC					shaderDesc;
 	reflector->GetDesc( &shaderDesc );
 
-	// TODO BG yehor.pohuliaka - Added her getting reflection information by shader (constant buffers, etc)
+	// Add parameters for shader resources (constant buffers, textures, samplers, etc) */
+	for ( uint32 resourceIndex = 0; resourceIndex < shaderDesc.BoundResources; ++resourceIndex )
+	{
+		D3D11_SHADER_INPUT_BIND_DESC 		bindDesc;
+		reflector->GetResourceBindingDesc( resourceIndex, &bindDesc );
+
+		if ( bindDesc.Type == D3D10_SIT_CBUFFER || bindDesc.Type == D3D10_SIT_TBUFFER )
+		{
+			const uint32 								cbIndex = bindDesc.BindPoint;
+			ID3D11ShaderReflectionConstantBuffer* 		constantBuffer = reflector->GetConstantBufferByName( bindDesc.Name );
+			D3D11_SHADER_BUFFER_DESC 					cbDesc;
+			constantBuffer->GetDesc( &cbDesc );
+
+			if ( cbDesc.Size > GConstantBufferSizes[ cbIndex ] )
+			{
+				appErrorf( TEXT( "Set GConstantBufferSizes[%d] to >= %d" ), cbIndex, cbDesc.Size) ;
+			}
+
+			// Track all of the variables in this constant buffer
+			for ( uint32 constantIndex = 0; constantIndex < cbDesc.Variables; ++constantIndex )
+			{
+				ID3D11ShaderReflectionVariable* 		variable = constantBuffer->GetVariableByIndex( constantIndex );
+				D3D11_SHADER_VARIABLE_DESC 				variableDesc;
+				variable->GetDesc( &variableDesc );
+
+				if ( variableDesc.uFlags & D3D10_SVF_USED )
+				{
+					OutOutput.parameterMap.AddParameterAllocation(
+						ANSI_TO_TCHAR( variableDesc.Name ),
+						cbIndex,
+						variableDesc.StartOffset,
+						variableDesc.Size,
+						0
+						);
+				}
+				else
+				{
+					LE_LOG( LT_Warning, LC_Shader, TEXT( "Found Unused shader parameter: %s at offset: %i size: %i" ), ANSI_TO_TCHAR( variableDesc.Name ), variableDesc.StartOffset, variableDesc.Size );
+				}
+			}
+		}
+	}
 
 	// Set the number of instructions
 	OutOutput.numInstructions = shaderDesc.InstructionCount;

@@ -21,6 +21,34 @@ class FBasePassVertexShader : public FShader
 	DECLARE_SHADER_TYPE( FBasePassVertexShader )
 
 public:
+	/**
+	 * @brief Construct a new FBasePassVertexShader object
+	 */
+	FBasePassVertexShader();
+
+    /**
+     * @brief Destructor of a FBasePassVertexShader object
+     */
+    virtual ~FBasePassVertexShader();
+
+	/**
+	 * @brief Initialize shader
+	 * @param[in] InShaderCacheItem Cache of shader
+	 */
+	virtual void Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem ) override;
+
+	/**
+	 * @brief Set the l2w transform shader
+	 * 
+	 * @param InDeviceContextRHI RHI device context
+	 * @param InMesh Mesh data
+	 * @param InBatchElementIndex Batch element index
+	 * @param InView Scene view
+	 */
+	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, uint32 InBatchElementIndex, const class FSceneView* InView ) const override;
+
+private:
+	class FVertexFactoryShaderParameters*		vertexFactoryParameters;		/**< Vertex factory shader parameters */
 };
 
 /**

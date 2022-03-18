@@ -9,6 +9,18 @@
 #ifndef LEBUILD_H
 #define LEBUILD_H
 
+#ifndef PLATFORM_32BIT
+    #define PLATFORM_32BIT 0
+#endif // !PLATFORM_32BIT
+
+#ifndef PLATFORM_64BIT
+    #define PLATFORM_64BIT 0
+#endif // !PLATFORM_64BIT
+
+#if !PLATFORM_32BIT && !PLATFORM_64BIT
+    #error Unknown bit platform
+#endif // !PLATFORM_32BIT && !PLATFORM_64BIT
+
 // Current build is shipping?
 #ifndef SHIPPING_BUILD
 	#define SHIPPING_BUILD			SHIPPING

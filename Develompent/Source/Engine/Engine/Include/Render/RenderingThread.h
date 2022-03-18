@@ -33,6 +33,12 @@ extern FRingBuffer		GRenderCommandBuffer;
 
 /**
  * @ingroup Engine
+ * @brief Event of finished rendering frame
+ */
+extern FEvent*			GRenderFrameFinished;
+
+/**
+ * @ingroup Engine
  * Is current thread is render
  *
  * @return True if called from the rendering thread
@@ -448,5 +454,17 @@ extern void StartRenderingThread();
  * Stops the rendering thread
  */
 extern void StopRenderingThread();
+
+/**
+ * @ingroup Engine
+ * Wait while frame is rendering
+ */
+FORCEINLINE void WaitWhileRenderingFrame()
+{
+	if ( GRenderFrameFinished )
+	{
+		GRenderFrameFinished->Wait();
+	}
+}
 
 #endif // !RENDERINGTHREAD_H

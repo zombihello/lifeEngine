@@ -285,6 +285,15 @@ public:
 	}
 
 	/**
+	 * Convert transform to matrix
+	 * @return Return matrix with location, scale and rotation
+	 */
+	FORCEINLINE FMatrix ToMatrix() const
+	{
+		return glm::scale( scale ) * glm::translate( translation ) * rotation.ToMatrix();		// TODO BS yehor.pohuliaka - Need optimize it
+	}
+
+	/**
 	 * Override operator +
 	 */
 	FORCEINLINE FTransform operator+( const FTransform& InOther ) const

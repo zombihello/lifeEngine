@@ -15,11 +15,18 @@
 
 /**
  * @ingroup D3D11RHI
+ * Size of the default constant buffer
+ */
+#define MAX_GLOBAL_CONSTANT_BUFFER_SIZE		4096
+
+/**
+ * @ingroup D3D11RHI
  * Enumeration of constant buffer slots
  * @warning These offsets must match the cbuffer register definitions in Common.hlsl
  */
 enum ED3D11ShaderOffsetBuffer
 {
+	SOB_ShaderConstants,	/**< Global constants in shader */
 	SOB_GlobalConstants,	/**< Vertex shader view-dependent constants set in RHISetViewParameters */
 	SOB_Max					/**< Max count constant buffer slots */
 };

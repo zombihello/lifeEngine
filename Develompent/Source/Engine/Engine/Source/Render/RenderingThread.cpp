@@ -24,6 +24,9 @@ uint32			GRenderingThreadId = 0;
 /* The rendering command queue */
 FRingBuffer		GRenderCommandBuffer( RENDERING_COMMAND_BUFFER_SIZE, 16 );
 
+/* Event of finished rendering frame */
+FEvent*			GRenderFrameFinished = nullptr;
+
 FSkipRenderCommand::FSkipRenderCommand( uint32 InNumSkipBytes ) :
 	numSkipBytes( InNumSkipBytes )
 {}
@@ -78,6 +81,12 @@ uint32 FRenderingThread::Run()
 				}
 			}
 		}
+
+		// Trigger event of end rendering frame
+		if ( GRenderFrameFinished )
+		{
+			GRenderFrameFinished->Trigger();
+		}
 	}
 
 	return 0;
@@ -99,7 +108,7 @@ FRunnable*			GRenderingThreadRunnable = nullptr;
 
 void StartRenderingThread()
 {
-	if ( !GIsThreadedRendering )
+	if ( GAllowRenderThread && !GIsThreadedRendering )
 	{
 		// Turn on the threaded rendering flag.
 		GIsThreadedRendering = true;
@@ -112,7 +121,8 @@ void StartRenderingThread()
 
 		const uint32		stackSize = 0;
 		GRenderingThread = GThreadFactory->CreateThread( GRenderingThreadRunnable, TEXT( "RenderingThread" ), 0, 0, stackSize, TP_Realtime );
-		check( GRenderingThread );
+		GRenderFrameFinished = GSynchronizeFactory->CreateSynchEvent( false, TEXT( "RenderFrameFinished" ) );
+		check( GRenderingThread && GRenderFrameFinished );
 	}
 }
 
@@ -146,10 +156,12 @@ void StopRenderingThread()
 
 			// Destroy the rendering thread objects.
 			GThreadFactory->Destroy( GRenderingThread );
+			GSynchronizeFactory->Destroy( GRenderFrameFinished );
 			delete GRenderingThreadRunnable;
 
 			GRenderingThread = nullptr;
 			GRenderingThreadRunnable = nullptr;
+			GRenderFrameFinished = nullptr;
 
 			// Acquire rendering context ownership on the current thread
 			GRHI->AcquireThreadOwnership();

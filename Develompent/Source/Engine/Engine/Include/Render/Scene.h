@@ -104,10 +104,11 @@ private:
  */
 struct FMeshBatchElement
 {
-	FIndexBufferRHIRef			indexBufferRHI;		/**< Index buffer */
-	uint32						baseVertexIndex;	/**< First index vertex in vertex buffer */
-	uint32						firstIndex;			/**< First index */
-	uint32						numPrimitives;		/**< Number primitives to render */
+	FIndexBufferRHIRef			indexBufferRHI;				/**< Index buffer */
+	uint32						baseVertexIndex;			/**< First index vertex in vertex buffer */
+	uint32						firstIndex;					/**< First index */
+	uint32						numPrimitives;				/**< Number primitives to render */
+	FMatrix						transformationMatrix;		/**< Transformation matrix of element */
 };
 
 /**

@@ -14,6 +14,15 @@
 	#include "Render/Shaders/ShaderCompiler.h"
 #endif // WITH_EDITOR
 
+void FShaderParameter::Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional /*= false*/ )
+{
+	uint32 			unusedSamplerIndex = 0;
+	if ( !InParameterMap.FindParameterAllocation( InParameterName, bufferIndex, baseIndex, numBytes, unusedSamplerIndex ) && !InIsOptional )
+	{
+		appErrorf( TEXT( "Failure to bind non-optional shader parameter %s! The parameter is either not present in the shader, or the shader compiler optimized it out" ), InParameterName );
+	}
+}
+
 /**
  * Constructor of FShaderMetaType
  */

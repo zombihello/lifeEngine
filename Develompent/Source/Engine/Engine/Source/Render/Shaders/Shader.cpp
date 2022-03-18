@@ -51,6 +51,12 @@ void FShader::Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem )
 	}
 }
 
+void FShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FMaterial* InMaterialResource ) const
+{}
+
+void FShader::SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, uint32 InBatchElementIndex, const class FSceneView* InView ) const
+{}
+
 FArchive& operator<<( FArchive& InArchive, FShaderRef& InValue )
 {
 	if ( InArchive.IsSaving() )

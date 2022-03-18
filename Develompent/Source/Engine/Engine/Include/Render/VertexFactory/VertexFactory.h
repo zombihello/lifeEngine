@@ -24,11 +24,55 @@
 
 /**
  * @ingroup Engine
+ * An interface to the parameter bindings for the vertex factory used by a shader
+ */
+class FVertexFactoryShaderParameters
+{
+public:
+	/**
+	 * @brief Destroy the FVertexFactoryShaderParameters object
+	 */
+	virtual ~FVertexFactoryShaderParameters() {}
+
+	/**
+	 * @brief Bind shader parameters
+	 * 
+	 * @param InParameterMap Shader parameter map
+	 */
+	virtual void Bind( const class FShaderParameterMap& InParameterMap ) = 0;
+
+	/**
+	 * @brief Set any shader data specific to this vertex factory
+	 * 
+	 * @param InDeviceContextRHI RHI device context
+	 * @param InVertexFactory Vertex factory
+	 * @param InView Scene view
+	 */
+	virtual void Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FSceneView* InView ) const = 0;
+	
+	/**
+	 * @brief Set the l2w transform shader
+	 * 
+	 * @param InDeviceContextRHI RHI device context
+	 * @param InMesh Mesh data
+	 * @param InBatchElementIndex Batch element index
+	 * @param InView Scene view
+	 */
+	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, uint32 InBatchElementIndex, const class FSceneView* InView ) const = 0;
+};
+
+/**
+ * @ingroup Engine
  * An object used to represent the type of a vertex factory
  */
 class FVertexFactoryMetaType
 {
 public:
+	/**
+	 * @brief Typedef of function for create shader parameters for vertex factory
+	 */
+	typedef FVertexFactoryShaderParameters* ( *ConstructParametersType )( EShaderFrequency InShaderFrequency );
+
 	/**
 	 * @brief Class container for storage global vertex factory types
 	 */
@@ -108,8 +152,9 @@ public:
 	 *
 	 * @param[in] InFactoryName Vertex factory name
 	 * @param[in] InFileName File name of source vertex factory
+	 * @param[in] InConstructParameters Function for create vertex factory shader parameters
 	 */
-	FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName );
+	FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName, ConstructParametersType InConstructParameters );
 
 	/**
 	 * Get factory name
@@ -129,6 +174,17 @@ public:
 		return hash;
 	}
 
+	/**
+	 * @brief Create a vertex factory shader parameters
+	 * 
+	 * @param InShaderFrequency Shader frequency
+	 * @return Return vertex factory shader parameters object
+	 */
+	FORCEINLINE FVertexFactoryShaderParameters* CreateShaderParameters( EShaderFrequency InShaderFrequency ) const 
+	{ 
+		return ( *ConstructParameters )( InShaderFrequency ); 
+	}
+
 #if WITH_EDITOR
 	/**
 	 * @brief Get file name of vertex factory
@@ -141,8 +197,9 @@ public:
 #endif // WITH_EDITOR
 
 private:
-	std::wstring			factoryName;		/**< Vertex factory name */
-	uint32					hash;				/**< Vertex factory hash */
+	std::wstring				factoryName;				/**< Vertex factory name */
+	uint32						hash;						/**< Vertex factory hash */
+	ConstructParametersType		ConstructParameters;		/**< Function of create vertex factory shader parameters */
 
 #if WITH_EDITOR
 	std::wstring			sourceFilename;		/**< Source file name of vertex factory */
@@ -170,7 +227,8 @@ private:
  * @param[in] FileName File name of source vertex factory
  */
 #define IMPLEMENT_VERTEX_FACTORY_TYPE( FactoryClass, FileName ) \
-	FVertexFactoryMetaType			FactoryClass::staticType( TEXT( #FactoryClass ), FileName );
+	FVertexFactoryShaderParameters* Construct##FactoryClass##ShaderParameters( EShaderFrequency InShaderFrequency ) { return FactoryClass::ConstructShaderParameters( InShaderFrequency ); } \
+	FVertexFactoryMetaType			FactoryClass::staticType( TEXT( #FactoryClass ), FileName, Construct##FactoryClass##ShaderParameters );
 
 /**
  * @ingroup Engine

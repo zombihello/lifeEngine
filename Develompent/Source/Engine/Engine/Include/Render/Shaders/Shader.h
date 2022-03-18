@@ -32,7 +32,26 @@ public:
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	void										Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem );
+	virtual void								Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem );
+
+	/**
+	 * @brief Set the constant shader parameters
+	 * 
+	 * @param InDeviceContextRHI Device context
+	 * @param InVertexFactory Vertex factory
+	 * @param InMaterialResource Material
+	 */
+	virtual void SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FMaterial* InMaterialResource ) const;
+
+	/**
+	 * @brief Set the l2w transform shader
+	 * 
+	 * @param InDeviceContextRHI RHI device context
+	 * @param InMesh Mesh data
+	 * @param InBatchElementIndex Batch element index
+	 * @param InView Scene view
+	 */
+	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, uint32 InBatchElementIndex, const class FSceneView* InView ) const;
 
 	/**
 	 * @brief Get name of shader

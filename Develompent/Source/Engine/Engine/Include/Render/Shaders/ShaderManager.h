@@ -13,6 +13,7 @@
 #include <unordered_map>
 
 #include "Misc/Misc.h"
+#include "Misc/EngineGlobals.h"
 #include "RHI/BaseRHI.h"
 #include "Shader.h"
 #include "ShaderCache.h"
@@ -60,6 +61,114 @@
 		Frequency, \
 		ShaderClass::ConstructSerializedInstance, \
 		ShaderClass::ConstructCompiledInstance );
+
+/**
+ * @ingroup Engine
+ * @brief A shader parameter's register binding
+ */
+class FShaderParameter
+{
+public:
+    /**
+     * @brief Bind shader parameter
+     * 
+     * @param InParameterMap Shader prarameter map
+     * @param InParameterName Parameter name
+     * @param InIsOptional Is optional parameter
+     */
+    void Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional = false );
+
+    /**
+     * @brief Shader parameter is bounded
+     * @return Return true if shader parameter is bounded, else returning false 
+     */
+    FORCEINLINE bool IsBound() const 
+    { 
+        return numBytes > 0; 
+    }
+
+    /**
+     * @brief Get the buffer index
+     * @return Return buffer index 
+     */
+	FORCEINLINE uint32 GetBufferIndex() const 
+    { 
+        return bufferIndex; 
+    }
+
+    /**
+     * @brief Get the base index
+     * @return Return base index 
+     */
+	FORCEINLINE uint32 GetBaseIndex() const 
+    { 
+        return baseIndex; 
+    }
+
+    /**
+     * @brief Get the num bytes
+     * @return Return number bytes of parameter 
+     */
+	FORCEINLINE uint32 GetNumBytes() const 
+    { 
+        return numBytes; 
+    }
+
+private:
+    uint32      bufferIndex;     /**< Buffer index */
+    uint32      baseIndex;       /**< Base index */
+    uint32      numBytes;        /**< Num bytes of parameter. 0 if the parameter wasn't bound */
+};
+
+/**
+ * @brief Sets the value of a vertex shader parameter
+ *
+ * @param InDeviceContextRHI Device context
+ * @param InParameter Shader parameter
+ * @param InValue Value
+ * @param InElementIndex Eelement index
+ */
+template< class TParameterType >
+FORCEINLINE void SetVertexShaderValue( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderParameter& InParameter, const TParameterType& InValue, uint32 InElementIndex = 0 )
+{
+    const uint32       alignedTypeSize = Align( sizeof( TParameterType ), ShaderArrayElementAlignBytes );
+    const int32        numBytesToSet = Min<int32>( sizeof( TParameterType ), InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
+
+    if ( numBytesToSet > 0 )
+    {
+        GRHI->SetVertexShaderParameter(
+                    InDeviceContextRHI,
+                    InParameter.GetBufferIndex(),
+                    InParameter.GetBaseIndex() + InElementIndex * alignedTypeSize,
+                    ( uint32 )numBytesToSet,
+                    &InValue );
+    }
+}
+
+/**
+ * @brief Sets the value of a pixel shader parameter
+ *
+ * @param InDeviceContextRHI Device context
+ * @param InParameter Shader parameter
+ * @param InValue Value
+ * @param InElementIndex Eelement index
+ */
+template< class TParameterType >
+FORCEINLINE void SetPixelShaderValue( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderParameter& InParameter, const TParameterType& InValue, uint32 InElementIndex = 0 )
+{
+    const uint32       alignedTypeSize = Align( sizeof( TParameterType ), ShaderArrayElementAlignBytes );
+    const int32        numBytesToSet = Min<int32>( sizeof( TParameterType ), InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
+
+    if ( numBytesToSet > 0 )
+    {
+        GRHI->SetPixelShaderParameter(
+                    InDeviceContextRHI,
+                    InParameter.GetBufferIndex(),
+                    InParameter.GetBaseIndex() + InElementIndex * alignedTypeSize,
+                    ( uint32 )numBytesToSet,
+                    &InValue );
+    }
+}
 
 /**
  * @ingroup Engine

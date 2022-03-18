@@ -152,9 +152,19 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 			sceneRenderer.Render( viewportRHI );
 			GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
 			
+			// Trigger event of end rendering frame
+			if ( GRenderFrameFinished )
+			{
+				GRenderFrameFinished->Trigger();
+			}
+
+			// Delete scene view
 			delete sceneView;
 		}
 	};
+
+	// Wait while render thread is rendering of the frame
+	WaitWhileRenderingFrame();
 
 	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FQRenderCommand,
 										  FViewportRHIRef, viewportRHI, viewportRHI,

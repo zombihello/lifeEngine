@@ -51,6 +51,18 @@ extern class FInputSystem*			GInputSystem;
  * @ingroup Engine
  * World
  */
-extern class FWorld*				GWorld;
+extern class FWorld*				  GWorld;
+
+/**
+ * @ingroup Core
+ * Is need use max tick rate
+ */
+extern bool                   GUseMaxTickRate;
+
+/**
+ * @ingroup Core
+ * Is allow render thread
+ */
+extern bool                   GAllowRenderThread;
 
 #endif // !ENGINEGLOBALS_H

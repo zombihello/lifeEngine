@@ -9,6 +9,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include "LEBuild.h"
+
 /**
  * @ingroup Core Core
  * @brief Signed int 8-bit
@@ -74,5 +76,23 @@ typedef char				achar;
  * @brief Unicode char
  */
 typedef wchar_t				tchar;
+
+#if PLATFORM_64BIT
+    /**
+     * @ingroup Core Core
+     * @brief Pointer type
+     */
+    typedef int64           ptrint;
+
+    /**
+     * @ingroup Core Core
+     * @brief Unsigned pointer type
+     */
+    typedef uint64          uptrint;
+#elif PLATFORM_32BIT
+    typedef int32           ptrint;
+    typedef uint32          uptrint;
+#else
+#endif // PLATFORM_64BIT
 
 #endif // !TYPES_H

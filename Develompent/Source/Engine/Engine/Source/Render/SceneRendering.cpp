@@ -46,6 +46,8 @@ void FStaticMeshDrawPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRH
 		const FMeshBatchElement&		batchElement = InMeshBatch.elements[ indexBatch ];
 		check( batchElement.indexBufferRHI );
 
+		vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, indexBatch, &InSceneView );
+		GRHI->CommitConstants( InDeviceContextRHI );
 		GRHI->DrawIndexedPrimitive( InDeviceContextRHI, batchElement.indexBufferRHI, InMeshBatch.primitiveType, batchElement.baseVertexIndex, batchElement.firstIndex, batchElement.numPrimitives );
 	}
 }

@@ -51,7 +51,7 @@ void LStaticMeshComponent::AddToDrawList( class FScene* InScene )
 			const FStaticMeshSurface&				surface = surfaces[ indexSurface ];
 
 			std::vector< FMeshBatchElement >		meshElements;
-			meshElements.push_back( FMeshBatchElement{ indexBuffer, surface.baseVertexIndex, surface.firstIndex, surface.numPrimitives } );
+			meshElements.push_back( FMeshBatchElement{ indexBuffer, surface.baseVertexIndex, surface.firstIndex, surface.numPrimitives, GetComponentTransform().ToMatrix() } );
 			staticMeshDatas.push_back( FStaticMeshData( FStaticMeshDrawPolicy( vertexFactory, materials[ surface.materialID ] ), meshElements, PT_TriangleList ) );
 		}
 	}

@@ -13,7 +13,8 @@
 const uint32 GConstantBufferSizes[ SOB_Max ] =
 {
 	// CBs must be a multiple of 16
-	Align( ( uint32 )sizeof( FGlobalConstantBufferContents ), 16 )
+	Align( ( uint32 )MAX_GLOBAL_CONSTANT_BUFFER_SIZE, 16 ),
+	Align( ( uint32 )sizeof( FGlobalConstantBufferContents ), 16 ),
 };
 
 // ------------------------------------

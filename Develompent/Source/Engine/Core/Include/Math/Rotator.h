@@ -139,6 +139,15 @@ public:
 	}
 
 	/**
+	 * Convert to matrix
+	 * @return Return rotation as a matrix
+	 */
+	FORCEINLINE FMatrix ToMatrix() const
+	{
+		return glm::mat4_cast( ToQuaternion() );
+	}
+
+	/**
 	 * Get the result of adding a rotator to this
 	 * 
 	 * @param[in] InOther The other rotator

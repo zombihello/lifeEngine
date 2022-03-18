@@ -17,6 +17,88 @@
 #include "RHI/BaseShaderRHI.h"
 
 /**
+ * @ingroup Engine
+ * @brief A map of shader parameter names to registers allocated to that parameter
+ */
+class FShaderParameterMap
+{
+public:
+	struct FParameterAllocation
+	{
+		/**
+		 * @brief Construct a new FParameterAllocation object
+		 */
+		FParameterAllocation() :
+			isBound( false )
+		{}
+
+		/**
+		 * Overload operator << for serialize
+		 */
+		FORCEINLINE friend FArchive& operator<<( FArchive& InAr, FParameterAllocation& InParameterAllocation )
+		{
+			return InAr << InParameterAllocation.bufferIndex << InParameterAllocation.baseIndex << InParameterAllocation.size << InParameterAllocation.samplerIndex << InParameterAllocation.isBound;
+		}
+
+		/**
+		 * Overload operator << for serialize
+		 */
+		FORCEINLINE friend FArchive& operator<<( FArchive& InAr, const FParameterAllocation& InParameterAllocation )
+		{
+			return InAr << InParameterAllocation.bufferIndex << InParameterAllocation.baseIndex << InParameterAllocation.size << InParameterAllocation.samplerIndex << InParameterAllocation.isBound;
+		}
+
+		uint32			bufferIndex;		/**< Buffer index */
+		uint32			baseIndex;			/**< Base index */
+		uint32			size;				/**< Size parameter */
+		uint32			samplerIndex;		/**< Sampler index */
+		mutable bool 	isBound;			/**< Is bound */
+	};
+
+	/**
+	 * @brief Find parameter allocation
+	 * 
+	 * @param InParameterName Parameter name
+	 * @param OutBufferIndex Output buffer index
+	 * @param OutBaseIndex Output base index
+	 * @param OutSize Output size
+	 * @param OutSamplerIndex Output sampler index
+	 * @return Return true if parameter is finded, else return false
+	 */
+	bool FindParameterAllocation( const tchar* InParameterName, uint32& OutBufferIndex, uint32& OutBaseIndex, uint32& OutSize, uint32& OutSamplerIndex ) const;
+
+	/**
+	 * @brief Add parameter allocation
+	 * 
+	 * @param InParameterName Parameter name
+	 * @param InBufferIndex Buffer index
+	 * @param InBaseIndex Base index
+	 * @param InSize Size
+	 * @param InSamplerIndex Sampler index
+	 */
+	void AddParameterAllocation( const tchar* InParameterName, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InSize, uint32 InSamplerIndex );
+
+	/**
+	 * Overload operator << for serialize
+	 */
+	FORCEINLINE friend FArchive& operator<<( FArchive& InAr, FShaderParameterMap& InShaderParameterMap )
+	{
+		return InAr << InShaderParameterMap.parameterMap;
+	}
+
+	/**
+	 * Overload operator << for serialize
+	 */
+	FORCEINLINE friend FArchive& operator<<( FArchive& InAr, const FShaderParameterMap& InShaderParameterMap )
+	{
+		return InAr << InShaderParameterMap.parameterMap;
+	}
+
+private:
+	std::unordered_map< std::wstring, FParameterAllocation >		parameterMap;		/**< Parameter map */
+};
+
+/**
  * @ingroup Engine 
  * @brief Class of serialize shader cache
  */
@@ -39,6 +121,7 @@ public:
 		uint32						vertexFactoryHash;	/**< Vertex factory hash */
 		FBulkData< byte >			code;				/**< Byte code of shader */
 		uint32						numInstructions;	/**< Number instructions in shader */
+		FShaderParameterMap			parameterMap;		/**< Parameter map */
 	};
 
 	/**

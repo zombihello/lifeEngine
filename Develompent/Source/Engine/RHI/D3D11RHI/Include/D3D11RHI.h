@@ -14,6 +14,7 @@
 #include "Misc/EngineGlobals.h"
 #include "Render/BoundShaderStateCache.h"
 #include "D3D11State.h"
+#include "D3D11Buffer.h"
 #include "RHI/BaseRHI.h"
 
 /**
@@ -339,30 +340,6 @@ public:
 	virtual void									SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, FTextureRHIParamRef InTexture, uint32 InTextureIndex ) override;
 
 	/**
-	 * Set shader parameter in vertex shader
-	 *
-	 * @param[in] InDeviceContext Device context
-	 * @param[in] InVertexShader Pointer to vertex shader
-	 * @param[in] InBufferIndex Buffer index
-	 * @param[in] InBaseIndex Offset value in buffer
-	 * @param[in] InNumBytes Size value in bytes
-	 * @param[in] InNewValue Pointer to value
-	 */
-	//virtual void									SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FVertexShaderRHIParamRef InVertexShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) override;
-
-	/**
-	 * Set shader parameter in pixel shader
-	 *
-	 * @param[in] InDeviceContext Device context
-	 * @param[in] InPixelShader Pointer to pixel shader
-	 * @param[in] InBufferIndex Buffer index
-	 * @param[in] InBaseIndex Offset value in buffer
-	 * @param[in] InNumBytes Size value in bytes
-	 * @param[in] InNewValue Pointer to value
-	 */
-	virtual void									SetShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, FPixelShaderRHIParamRef InPixelShader, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) override;
-
-	/**
 	 * Set view parameters
 	 *
 	 * @param[in] InDeviceContext Device context
@@ -378,6 +355,35 @@ public:
 	 * @param[in] InNewDepthStencilTarget New depth stencil target
 	 */
 	virtual void									SetRenderTarget( class FBaseDeviceContextRHI* InDeviceContext, FSurfaceRHIParamRef InNewRenderTarget, FSurfaceRHIParamRef InNewDepthStencilTarget ) override;
+
+	/**
+	 * Set vertex shader parameter
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InBufferIndex Buffer index
+	 * @param[in] InBaseIndex Offset in bytes to begin parameter
+	 * @param[in] InNumBytes Number bytes of parameter
+	 * @param[in] InNewValue New value
+	 */
+	virtual void									SetVertexShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) override;
+
+	/**
+	 * Set pixel shader parameter
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InBufferIndex Buffer index
+	 * @param[in] InBaseIndex Offset in bytes to begin parameter
+	 * @param[in] InNumBytes Number bytes of parameter
+	 * @param[in] InNewValue New value
+	 */
+	virtual void									SetPixelShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) override;
+
+	/**
+	 * Commit constants
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 */
+	virtual void									CommitConstants( class FBaseDeviceContextRHI* InDeviceContext ) override;
 
 	/**
 	 * @brief Lock vertex buffer
@@ -518,15 +524,17 @@ public:
 	}
 
 private:
-	bool							isInitialize;				/**< Is RHI is initialized */
-	class FD3D11ConstantBuffer*		globalConstantBuffer;		/**< Global constant buffer */
-	class FD3D11DeviceContext*		immediateContext;			/**< Immediate context */
-	FBoundShaderStateHistory		boundShaderStateHistory;	/**< History of using bound shader states */
-	FD3D11StateCache				stateCache;					/**< DirectX 11 state cache */
+	bool							isInitialize;						/**< Is RHI is initialized */
+	class FD3D11ConstantBuffer*		globalConstantBuffer;				/**< Global constant buffer */
+	class FD3D11ConstantBuffer*		vsConstantBuffers[ SOB_Max ];		/**< Constant buffers for vertex shader */
+	class FD3D11ConstantBuffer*		psConstantBuffer;					/**< Constant buffer for pixel shader */
+	class FD3D11DeviceContext*		immediateContext;					/**< Immediate context */
+	FBoundShaderStateHistory		boundShaderStateHistory;			/**< History of using bound shader states */
+	FD3D11StateCache				stateCache;							/**< DirectX 11 state cache */
 
-	ID3D11Device*					d3d11Device;				/**< D3D11 Device */
-	IDXGIFactory*					dxgiFactory;				/**< DXGI factory */
-	IDXGIAdapter*					dxgiAdapter;				/**< DXGI adapter */
+	ID3D11Device*					d3d11Device;						/**< D3D11 Device */
+	IDXGIFactory*					dxgiFactory;						/**< DXGI factory */
+	IDXGIAdapter*					dxgiAdapter;						/**< DXGI adapter */
 };
 
 /**

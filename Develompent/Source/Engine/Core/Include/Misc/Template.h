@@ -10,6 +10,7 @@
 #define TEMPLATE_H
 
 #include "CoreDefines.h"
+#include "Misc/Types.h"
 
 /**
  * @ingroup Core
@@ -18,6 +19,15 @@
  * @param[in] InArray Array
  */
 #define ARRAY_COUNT( InArray )				( sizeof( InArray ) / sizeof( ( InArray )[0] ) )
+
+/**
+ * @ingroup Core
+ * @brief Macro for calculate offset to member in struct
+ *
+ * @param InStruc Struct name
+ * @param InMember Member name
+ */
+#define STRUCT_OFFSET( InStruc, InMember )	( ( ptrint ) &( ( InStruc* )0 )->InMember )
 
 /**
  * @ingroup Core

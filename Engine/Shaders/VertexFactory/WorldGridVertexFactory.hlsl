@@ -1,7 +1,8 @@
 #ifndef VERTEXFACTORY_H
 #define VERTEXFACTORY_H 0
 
-#include "CPP_GlobalConstantBuffers.hlsl"
+#include "Common.hlsl"
+#include "VertexFactory/VertexFactoryCommon.hlsl"
 
 struct FVertexFactoryInput
 {
@@ -10,7 +11,7 @@ struct FVertexFactoryInput
 
 float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 {
-	return mul( viewProjectionMatrix, InInput.position );
+	return MulMatrix( localToWorldMatrix, InInput.position );
 }
 
 float2 VertexFactory_GetTexCoord( FVertexFactoryInput InInput, uint InTexCoordIndex )

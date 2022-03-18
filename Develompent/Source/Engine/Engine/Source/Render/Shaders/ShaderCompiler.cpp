@@ -79,6 +79,7 @@ bool FShaderCompiler::CompileShader( const std::wstring& InShaderName, const std
 		shaderCacheItem.vertexFactoryHash = vertexFactoryHash;
 		shaderCacheItem.code = output.code;
 		shaderCacheItem.numInstructions = output.numInstructions;
+		shaderCacheItem.parameterMap = output.parameterMap;
 		InOutShaderCache.Add( shaderCacheItem );
 	}
 
