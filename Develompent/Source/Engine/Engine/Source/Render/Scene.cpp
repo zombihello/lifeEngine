@@ -63,6 +63,6 @@ void FScene::BuildSDGs( const FSceneView& InSceneView )
 	// Add to SDGs primitives
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
 	{
-		( *it )->AddToDrawList( this );
+        ( *it )->AddToDrawList( this, InSceneView );
 	}
 }

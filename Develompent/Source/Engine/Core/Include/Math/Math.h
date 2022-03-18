@@ -92,6 +92,17 @@ struct FMath
 		return glm::eulerAngles( InQuaternion );
 	}
 
+    /**
+     * @brief Convert from quaternion to matrix
+     *
+     * @param InQuaternion Quaternion
+     * @return Return matrix of ratation
+     */
+    static FORCEINLINE FMatrix QuaternionToMatrix( const FQuaternion& InQuaternion )
+    {
+        return glm::mat4_cast( InQuaternion );
+    }
+
 	/**
 	 * @ingroup Core
 	 * Convert radians to degrees
@@ -113,6 +124,28 @@ struct FMath
 	{
 		return glm::radians( InDegrees );
 	}
+
+    /**
+     * @brief Create translate matrix
+     *
+     * @param InLocation Location
+     * @return Return created translate matrix
+     */
+    static FORCEINLINE FMatrix CreateTranslateMatrix( const FVector& InLocation )
+    {
+        return glm::translate( InLocation );
+    }
+
+    /**
+     * @brief Create scale matrix
+     *
+     * @param InScale Scale
+     * @return Return created scale matrix
+     */
+    static FORCEINLINE FMatrix CreateScaleMatrix( const FVector& InScale )
+    {
+        return glm::scale( InScale );
+    }
 
 	static const FVector				vectorZero;			/**< Zero 3D vector */
 	static const FVector				vectorOne;			/**< One 3D vector */

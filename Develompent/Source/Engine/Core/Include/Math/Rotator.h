@@ -144,7 +144,7 @@ public:
 	 */
 	FORCEINLINE FMatrix ToMatrix() const
 	{
-		return glm::mat4_cast( ToQuaternion() );
+        return FMath::QuaternionToMatrix( ToQuaternion() );
 	}
 
 	/**

@@ -31,5 +31,5 @@ void LPrimitiveComponent::SetVisibility( bool InNewVisibility )
 	}
 }
 
-void LPrimitiveComponent::AddToDrawList( class FScene* InScene )
+void LPrimitiveComponent::AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView )
 {}

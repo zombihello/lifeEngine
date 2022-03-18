@@ -22,7 +22,7 @@ void APlayerController::BeginPlay()
 
 	GWindow->HideCursor();
 	cameraComponent->SetAspectRatio( ( float )1280 / 720 );
-	cameraComponent->SetProjectionMode( CPM_Perspective );
+    cameraComponent->SetProjectionMode( CPM_Perspective );
 }
 
 void APlayerController::Tick( float InDeltaTime )

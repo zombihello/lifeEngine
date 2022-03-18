@@ -41,8 +41,9 @@ public:
 	 * @brief Add primitive to draw list
 	 * 
 	 * @param InScene Scene
+     * @param InSceneView Current view of scene
 	 */
-	virtual void AddToDrawList( class FScene* InScene );
+    virtual void AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView );
 
 	/**
 	 * @brief Set visibility

@@ -290,7 +290,7 @@ public:
 	 */
 	FORCEINLINE FMatrix ToMatrix() const
 	{
-		return glm::scale( scale ) * glm::translate( translation ) * rotation.ToMatrix();		// TODO BS yehor.pohuliaka - Need optimize it
+        return FMath::CreateTranslateMatrix( translation ) * FMath::CreateScaleMatrix( scale ) * rotation.ToMatrix();		// TODO BS yehor.pohuliaka - Need optimize it
 	}
 
 	/**

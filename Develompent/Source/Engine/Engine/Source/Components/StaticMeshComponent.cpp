@@ -26,12 +26,15 @@ struct FStaticMeshData
 	std::vector< FMeshBatchElement >									elements;				/**< Array of mesh elements */
 };
 
-void LStaticMeshComponent::TickComponent( float InDeltaTime )
+LStaticMeshComponent::~LStaticMeshComponent()
+{}
+
+FMatrix LStaticMeshComponent::CalcTransformationMatrix( const class FSceneView& InSceneView ) const
 {
-	Super::TickComponent( InDeltaTime );
+    return GetComponentTransform().ToMatrix();
 }
 
-void LStaticMeshComponent::AddToDrawList( class FScene* InScene )
+void LStaticMeshComponent::AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView )
 {
 	if ( !staticMesh )
 	{
@@ -44,14 +47,14 @@ void LStaticMeshComponent::AddToDrawList( class FScene* InScene )
 		FVertexFactoryRef								vertexFactory = staticMesh->GetVertexFactory();
 		FIndexBufferRHIRef								indexBuffer = staticMesh->GetIndexBufferRHI();
 		const std::vector< FStaticMeshSurface >&		surfaces = staticMesh->GetSurfaces();
-		const std::vector< FMaterialRef >&				materials = staticMesh->GetMaterials();
+        const FMatrix                                   transformationMatrix = CalcTransformationMatrix( InSceneView );
 
 		for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )surfaces.size(); indexSurface < numSurfaces; ++indexSurface )
 		{
 			const FStaticMeshSurface&				surface = surfaces[ indexSurface ];
 
 			std::vector< FMeshBatchElement >		meshElements;
-			meshElements.push_back( FMeshBatchElement{ indexBuffer, surface.baseVertexIndex, surface.firstIndex, surface.numPrimitives, GetComponentTransform().ToMatrix() } );
+            meshElements.push_back( FMeshBatchElement{ indexBuffer, surface.baseVertexIndex, surface.firstIndex, surface.numPrimitives, transformationMatrix } );
 			staticMeshDatas.push_back( FStaticMeshData( FStaticMeshDrawPolicy( vertexFactory, materials[ surface.materialID ] ), meshElements, PT_TriangleList ) );
 		}
 	}

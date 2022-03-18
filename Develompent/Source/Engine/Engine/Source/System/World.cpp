@@ -86,8 +86,8 @@ AActorRef FWorld::SpawnActor( class LClass* InClass, const FVector& InLocation, 
 
 	// Set default actor name and location with rotation
 	actor->SetName( InClass->GetName().c_str() );
-	actor->SetActorLocation( InLocation );
-	actor->SetActorRotation( InRotation );
+    actor->AddActorLocation( InLocation );
+    actor->AddActorRotation( InRotation );
 
 	// If gameplay is started - call BeginPlay in spawned actor
 	if ( isBeginPlay )

@@ -11,6 +11,7 @@
 
 #include "Components/PrimitiveComponent.h"
 #include "Render/StaticMesh.h"
+#include "Render/Material.h"
 
  /**
   * @ingroup Engine
@@ -21,19 +22,30 @@ class LStaticMeshComponent : public LPrimitiveComponent
 	DECLARE_CLASS( LStaticMeshComponent, LPrimitiveComponent )
 
 public:
-	/**
-	 * Function called every frame on this ActorComponent. Override this function to implement custom logic to be executed every frame.
-	 *
-	 * @param[in] InDeltaTime The time since the last tick.
-	 */
-	virtual void TickComponent( float InDeltaTime ) override;
+    /**
+     * @brief Destructor
+     */
+    virtual ~LStaticMeshComponent();
 
 	/**
 	 * @brief Add primitive to draw list
 	 *
 	 * @param InScene Scene
+     * @param InSceneView Current view of scene
 	 */
-	virtual void AddToDrawList( class FScene* InScene ) override;
+    virtual void AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView ) override;
+
+    /**
+     * @brief Set material
+     *
+     * @param InIndex Index of material layer in mesh
+     * @param InMaterial Material
+     */
+    FORCEINLINE void SetMaterial( uint32 InIndex, class FMaterial* InMaterial )
+    {
+        check( InIndex < materials.size() );
+        materials[ InIndex ] = InMaterial;
+    }
 
 	/**
 	 * @brief Set static mesh
@@ -42,6 +54,7 @@ public:
 	FORCEINLINE void SetStaticMesh( class FStaticMesh* InNewStaticMesh )
 	{
 		staticMesh = InNewStaticMesh;
+        materials = staticMesh->GetMaterials();
 	}
 
 	/**
@@ -53,8 +66,30 @@ public:
 		return staticMesh;
 	}
 
+    /**
+     * @brief Get material in mesh
+     *
+     * @param InIndex Index of material layer in mesh
+     * @return Return pointer to material. If material not exist returning nullptr
+     */
+    FORCEINLINE FMaterialRef GetMaterial( uint32 InIndex ) const
+    {
+        check( InIndex < materials.size() );
+        return materials[ InIndex ];
+    }
+
+protected:
+    /**
+     * @brief Calculate transformation matrix
+     *
+     * @param InSceneView Current view of scene
+     * @return Return calculated transformation matrix
+     */
+    virtual FMatrix CalcTransformationMatrix( const class FSceneView& InSceneView ) const;
+
 private:
-	FStaticMeshRef			staticMesh;			/**< Static mesh */
+    FStaticMeshRef                      staticMesh;     /**< Static mesh */
+    std::vector< FMaterialRef >         materials;      /**< Override materials */
 };
 
 #endif // !STATICMESHCOMPONENT_H
