@@ -220,6 +220,15 @@ public:
 	}
 
 	/**
+	 * @brief Get number items in list
+	 * @return Return number items in list
+	 */
+	FORCEINLINE uint32 GetNum() const
+	{
+		return meshes.size();
+	}
+
+	/**
 	 * @brief Draw list
 	 * 
 	 * @param[in] InDeviceContext Device context
@@ -262,9 +271,11 @@ struct FSceneDepthGroup
 	FORCEINLINE void Clear()
 	{
 		staticMeshDrawList.Clear();
+		spriteDrawList.Clear();
 	}
 
-	FMeshDrawList< FStaticMeshDrawPolicy >		staticMeshDrawList;		/**< Draw list of static meshes */			
+	FMeshDrawList< FStaticMeshDrawPolicy >		staticMeshDrawList;		/**< Draw list of static meshes */
+	FMeshDrawList< FStaticMeshDrawPolicy >		spriteDrawList;			/**< Draw list of sprites */
 };
 
 /**

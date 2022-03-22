@@ -67,6 +67,12 @@
  */
 #define DEC_PARTICLE		FColor( 128,	0,		128,	255 )
 
+ /**
+  * @ingroup Engine
+  * @brief Macro of color draw event for sprites
+  */
+#define DEC_SPRITE			FColor( 128,	255,	255,	255 )
+
 /**
  * @ingroup Engine
  * @brief Macro of color general scene draw events

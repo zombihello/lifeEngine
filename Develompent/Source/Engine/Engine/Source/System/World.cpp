@@ -54,7 +54,6 @@ void FWorld::Serialize( FArchive& InArchive )
 		uint32		countActors = 0;
 		InArchive << countActors;
 
-		actors.resize( countActors );
 		for ( uint32 index = 0; index < countActors; ++index )
 		{
 			// Serialize class name
@@ -65,7 +64,6 @@ void FWorld::Serialize( FArchive& InArchive )
 			// Spawn actor, serialize and add to array
 			AActor*			actor = SpawnActor( LClass::StaticFindClass( className.c_str() ), FMath::vectorZero, FMath::rotatorZero );
 			actor->Serialize( InArchive );
-			actors[ index ] = actor;
 		}
 	}
 }

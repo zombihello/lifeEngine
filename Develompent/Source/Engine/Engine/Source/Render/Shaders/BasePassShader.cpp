@@ -28,6 +28,12 @@ void FBasePassVertexShader::Init( const FShaderCache::FShaderCacheItem& InShader
     vertexFactoryParameters->Bind( InShaderCacheItem.parameterMap );
 }
 
+void FBasePassVertexShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FMaterial* InMaterialResource ) const
+{
+    check( vertexFactoryParameters );
+    vertexFactoryParameters->Set( InDeviceContextRHI, InVertexFactory, nullptr );
+}
+
 void FBasePassVertexShader::SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, uint32 InBatchElementIndex, const class FSceneView* InView ) const
 {
     check( vertexFactoryParameters );

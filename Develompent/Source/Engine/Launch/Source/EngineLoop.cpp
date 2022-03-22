@@ -200,42 +200,9 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 
 	// Parse cmd line for start commandlets
 #if WITH_EDITOR
+	if ( LBaseCommandlet::ExecCommandlet( InCmdLine, 1 ) )
 	{
-		std::vector< std::wstring >		tokens;
-		std::vector< std::wstring >		switches;
-		appParseCommandLine( InCmdLine, tokens, switches );
-
-		// If tokens more two we creating commandlet and execute it
-		// PS: 0 index - path to exe file, 1 index - name commandlet
-		if ( tokens.size() >= 2 )
-		{
-			const std::wstring& nameCommandlet = tokens[ 1 ];
-			LClass* lclassCommandlet = LClass::StaticFindClass( nameCommandlet.c_str() );
-
-			// If class not found try to search by added 'L' in prefix and 'Commandlet' in sufix
-			if ( !lclassCommandlet )
-			{
-				lclassCommandlet = LClass::StaticFindClass( ( std::wstring( TEXT( "L" ) ) + nameCommandlet + TEXT( "Commandlet" ) ).c_str() );
-			}
-
-			// Create and execute commandlet
-			if ( lclassCommandlet )
-			{
-				LBaseCommandlet* commandlet = lclassCommandlet->CreateObject< LBaseCommandlet >();
-				check( commandlet );
-
-				GIsCommandlet = true;
-				LE_LOG( LT_Log, LC_Commandlet, TEXT( "Started commandlet '%s'" ), nameCommandlet.c_str() );
-				double		beginCommandletTime = appSeconds();
-				commandlet->Main( InCmdLine );
-				double		endCommandletTime = appSeconds();
-				delete commandlet;
-
-				LE_LOG( LT_Log, LC_Commandlet, TEXT( "Commandlet took time %fs" ), endCommandletTime - beginCommandletTime );
-				GIsRequestingExit = true;
-				return result;
-			}
-		}
+		return result;
 	}
 #endif // WITH_EDITOR
 

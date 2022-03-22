@@ -3,6 +3,7 @@
 #include "System/Package.h"
 #include "Render/Scene.h"
 #include "Math/Math.h"
+#include "Math/Rect.h"
 #include "Render/Shaders/BasePassShader.h"
 #include "Render/Texture.h"
 
@@ -10,16 +11,35 @@ IMPLEMENT_CLASS( LSpriteComponent )
 
 LSpriteComponent::LSpriteComponent()
     : type( ST_Rotating )
+	, sprite( new FSprite() )
 {
-    SetRelativeRotation( FRotator( 90.f, 0.f, 0.f ) );
+	BeginInitResource( sprite );
 }
 
 void LSpriteComponent::BeginPlay()
 {
     Super::BeginPlay();
+}
 
-    // Find static mesh of quad for render sprite
-    SetStaticMesh( ( FStaticMeshRef )GPackageManager->FindAsset( TEXT( "EngineMeshes:Plane_SM" ), AT_StaticMesh ) );
+void LSpriteComponent::Serialize( class FArchive& InArchive )
+{
+    Super::Serialize( InArchive );
+
+    FRectFloat      textureRect     = GetTextureRect();
+    FVector2D       spriteSize      = GetSpriteSize();
+    FMaterialRef    material        = GetMaterial();
+
+    InArchive << type;
+    InArchive << textureRect;
+    InArchive << spriteSize;
+    InArchive << material;
+
+    if ( InArchive.IsLoading() )
+    {
+        SetTextureRect( textureRect );
+        SetSpriteSize( spriteSize );
+        SetMaterial( material );
+    }
 }
 
 FMatrix LSpriteComponent::CalcTransformationMatrix( const class FSceneView& InSceneView ) const
@@ -57,4 +77,19 @@ FMatrix LSpriteComponent::CalcTransformationMatrix( const class FSceneView& InSc
     resultMatrix *= FMath::CreateScaleMatrix( transform.GetScale() );
     resultMatrix *= transform.GetRotation().ToMatrix();
     return resultMatrix;
+}
+
+void LSpriteComponent::AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView )
+{
+	FSpriteSurface													surface = sprite->GetSurface();
+	FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLink		drawPolicyLink( FStaticMeshDrawPolicy( sprite->GetVertexFactory(), sprite->GetMaterial() ) );
+	drawPolicyLink.meshBatch.primitiveType = PT_TriangleList;
+
+	std::vector< FMeshBatchElement >								meshElements =
+	{
+		FMeshBatchElement{ sprite->GetIndexBufferRHI(), surface.baseVertexIndex, surface.firstIndex, surface.numPrimitives, CalcTransformationMatrix( InSceneView ) }
+	};
+
+	FSceneDepthGroup&		SDG = InScene->GetSDG( SDG_World );
+	SDG.spriteDrawList.AddItem( drawPolicyLink, meshElements );
 }

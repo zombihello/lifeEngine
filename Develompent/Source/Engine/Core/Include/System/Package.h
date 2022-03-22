@@ -478,7 +478,7 @@ public:
 	/**
 	 * Find asset in package by <PackageName>:<AssetName>
 	 * 
-	 * @param InString
+	 * @param InString Reference to asset
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 * @return Return finded asset. If not found returning nullptr
 	 */
@@ -602,6 +602,17 @@ private:
 	FUnusedPackageList		unusedPackages;			/**< List unused packages. After a specified time will be unloaded */
 	FPackageList			packages;				/**< Opened packages */
 };
+
+/**
+ * @ingroup Core
+ * @brief Parse reference to asset in format <PackageName>:<AssetName>
+ *
+ * @param InString Reference to asset
+ * @param OutPackageName Package name
+ * @param OutAssetName Asset name
+ * @return Return true if InString parsed is seccussed, else returning false
+ */
+bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPackageName, std::wstring& OutAssetName );
 
 //
 // Serialization

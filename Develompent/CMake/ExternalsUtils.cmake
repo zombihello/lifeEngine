@@ -79,6 +79,15 @@ function( IncludeExternals MODULE_NAME )
 			message( SEND_ERROR "Failed to find Assimp" )
 		endif()
 	
+		# TMXLite
+		find_package( TMXLite REQUIRED )
+		if ( TMXLITE_FOUND )
+			include_directories( ${TMXLITE_INCLUDE} )
+			target_link_libraries( ${MODULE_NAME} optimized ${TMXLITE_LIB} debug ${TMXLITE_DEBUG_LIB} )
+		else()
+			message( SEND_ERROR "Failed to find TMXLite" )
+		endif()
+	
 		# Qt5
 		target_link_libraries( ${MODULE_NAME} Qt5::Widgets Qt5::Core Qt5::Svg )	
 	endif()

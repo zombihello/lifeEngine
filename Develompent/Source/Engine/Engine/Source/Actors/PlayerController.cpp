@@ -3,26 +3,32 @@
 #include "System/BaseWindow.h"
 #include "Actors/PlayerController.h"
 #include "Components/CameraComponent.h"
+#include "System/CameraManager.h"
+#include "Misc/EngineGlobals.h"
 
 IMPLEMENT_CLASS( APlayerController )
 
-LCameraComponent* cameraComponent;
-
 APlayerController::APlayerController()
 {
-	cameraComponent = CreateComponent< LCameraComponent >( TEXT( "CameraComponent0" ) );
-	::cameraComponent = this->cameraComponent;
+	cameraComponent = CreateComponent< LCameraComponent >( TEXT( "CameraComponent0" ) );   
 }
+
 APlayerController::~APlayerController()
-{}
+{
+	// Deactive player camera if need
+	if ( cameraComponent->IsActive() )
+	{
+		GCameraManager->SetActiveCamera( nullptr );
+	}
+}
 
 void APlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	GWindow->HideCursor();
-	cameraComponent->SetAspectRatio( ( float )1280 / 720 );
-    cameraComponent->SetProjectionMode( CPM_Perspective );
+	GCameraManager->SetActiveCamera( cameraComponent );
+	cameraComponent->SetProjectionMode( CPM_Perspective );
 }
 
 void APlayerController::Tick( float InDeltaTime )

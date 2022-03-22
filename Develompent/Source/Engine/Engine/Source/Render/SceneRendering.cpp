@@ -75,7 +75,7 @@ void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 	GRHI->SetViewParameters( immediateContext, *sceneView );
 
 	FScene*			scene = ( FScene* )GWorld->GetScene();
-	scene->BuildSDGs( *sceneView );
+    scene->BuildSDGs( *sceneView );
 
 	// Render scene layers
 	{
@@ -83,17 +83,30 @@ void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 		for ( uint32 SDGIndex = 0; SDGIndex < SDG_Max; ++SDGIndex )
 		{
 			SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, FString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup ) SDGIndex ) ).c_str() );
-			FSceneDepthGroup& SDG = scene->GetSDG( ( ESceneDepthGroup ) SDGIndex );
-			SDG.staticMeshDrawList.Draw( immediateContext, *sceneView );
+			FSceneDepthGroup&		SDG = scene->GetSDG( ( ESceneDepthGroup ) SDGIndex );
+
+			// Draw static meshes
+			if ( SDG.staticMeshDrawList.GetNum() > 0 )
+			{
+				SCOPED_DRAW_EVENT( EventSDG, DEC_STATIC_MESH, TEXT( "Static meshes" ) );
+				SDG.staticMeshDrawList.Draw( immediateContext, *sceneView );
+			}
+
+			// Draw sprites
+			if ( SDG.spriteDrawList.GetNum() > 0 )
+			{
+				SCOPED_DRAW_EVENT( EventSDG, DEC_SPRITE, TEXT( "Sprites" ) );
+				SDG.spriteDrawList.Draw( immediateContext, *sceneView );
+			}
 		}
 	}
 
 	// Render world grid for editor
 #if WITH_EDITOR
-	if ( GIsEditor )
+    if ( GIsEditor )
 	{
 		SCOPED_DRAW_EVENT( EventWorldGrid, DEC_SCENE_ITEMS, TEXT( "WorldGrid" ) );
-		FWorldGridRef		worldGrid = GEditorEngine->GetWorldGrid();
+        FWorldGridRef		worldGrid = GEditorEngine->GetWorldGrid();
 
 		if ( worldGrid )
 		{

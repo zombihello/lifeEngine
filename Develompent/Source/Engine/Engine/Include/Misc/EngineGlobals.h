@@ -54,15 +54,21 @@ extern class FInputSystem*			GInputSystem;
 extern class FWorld*				  GWorld;
 
 /**
- * @ingroup Core
+ * @ingroup Engine
  * Is need use max tick rate
  */
-extern bool                   GUseMaxTickRate;
+extern bool                     GUseMaxTickRate;
 
 /**
- * @ingroup Core
+ * @ingroup Engine
  * Is allow render thread
  */
-extern bool                   GAllowRenderThread;
+extern bool                     GAllowRenderThread;
+
+/**
+ * @ingroup Engine
+ * @brief Camera manager
+ */
+extern class FCameraManager*    GCameraManager;
 
 #endif // !ENGINEGLOBALS_H

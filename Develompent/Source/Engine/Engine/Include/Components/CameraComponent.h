@@ -21,6 +21,8 @@ class LCameraComponent : public LSceneComponent
 	DECLARE_CLASS( LCameraComponent, LSceneComponent )
 
 public:
+    friend class FCameraManager;
+
 	/**
 	 * Constructor
 	 */
@@ -110,6 +112,16 @@ public:
 	}
 
 	/**
+	 * @brief Set ignore rotate camera by mouse
+	 * 
+	 * @param InIsIgnoreRotateByMouse Is need ignore rotate camera by mouse
+	 */
+	FORCEINLINE void SetIgnoreRotateByMouse( bool InIsIgnoreRotateByMouse )
+	{
+		bIsIgnoreRotateByMouse = InIsIgnoreRotateByMouse;
+	}
+
+	/**
 	 * Get projection mode
 	 * @return Return projection mode
 	 */
@@ -178,14 +190,34 @@ public:
 	 */
 	void GetCameraView( FCameraView& OutDesiredView );
 
+    /**
+     * @brief Is active camera
+     * @return Return true if camera is active, else returing false
+     */
+    FORCEINLINE bool IsActive() const
+    {
+        return bIsActive;
+    }
+
+	/**
+	 * @brief Is ignore rotate camera by mouse
+	 * @return Return true if ignore rotate camera by mouse, else returing false
+	 */
+	FORCEINLINE bool IsIgnoreRotateByMouse() const
+	{
+		return bIsIgnoreRotateByMouse;
+	}
+
 private:
-	ECameraProjectionMode			projectionMode;		/**< Projection mode */
-	float							fieldOfView;		/**< The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode) */
-	float							orthoWidth;			/**< The desired width (in world units) of the orthographic view (ignored in Perspective mode) */
-	float							orthoHeight;		/**< The desired height (in world units) of the orthographic view (ignored in Perspective mode) */
-	float							nearClipPlane;		/**< The near plane distance (in world units) */
-	float							farClipPlane;		/**< The far plane distance (in world units) */
-	float							aspectRatio;		/**< Aspect Ratio (Width/Height) (ignored in Orthographic mode) */
+    bool                            bIsActive;					/**< Is active camera. This field setted from FCameraManager::SetActiveCamera */
+	bool							bIsIgnoreRotateByMouse;		/**< Is ignore rotate camera by mouse */
+	ECameraProjectionMode			projectionMode;				/**< Projection mode */
+	float							fieldOfView;				/**< The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode) */
+	float							orthoWidth;					/**< The desired width (in world units) of the orthographic view (ignored in Perspective mode) */
+	float							orthoHeight;				/**< The desired height (in world units) of the orthographic view (ignored in Perspective mode) */
+	float							nearClipPlane;				/**< The near plane distance (in world units) */
+	float							farClipPlane;				/**< The far plane distance (in world units) */
+	float							aspectRatio;				/**< Aspect Ratio (Width/Height) (ignored in Orthographic mode) */
 };
 
 //

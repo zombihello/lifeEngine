@@ -39,5 +39,5 @@ void APlayerStart::BeginPlay()
 		}
 	}
 
-	GWorld->SpawnActor( classPlayerController, GetActorLocation(), GetActorRotation() );
+    GWorld->SpawnActor( classPlayerController, GetActorLocation(), GetActorRotation() );
 }

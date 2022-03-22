@@ -7,6 +7,7 @@
 #include "Render/SceneRenderTargets.h"
 #include "Render/SceneRendering.h"
 #include "Render/Scene.h"
+#include "System/CameraManager.h"
 
 FViewport::FViewport() :
 	windowHandle( nullptr ),
@@ -16,9 +17,6 @@ FViewport::FViewport() :
 
 FViewport::~FViewport()
 {}
-
-#include "Components/CameraComponent.h"
-extern LCameraComponent*				cameraComponent;
 
 void FViewport::InitRHI()
 {
@@ -135,7 +133,8 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 		return;
 	}
 
-	FSceneView*		sceneView = new FSceneView();
+	TRefCountPtr< LCameraComponent >        cameraComponent = GCameraManager->GetActiveCamera();
+	FSceneView*                             sceneView = new FSceneView();
 	if ( cameraComponent )
 	{
 		sceneView->SetCameraView( cameraComponent );
@@ -166,7 +165,7 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 	// Wait while render thread is rendering of the frame
 	WaitWhileRenderingFrame();
 
-	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FQRenderCommand,
+	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FRenderFrameCommand,
 										  FViewportRHIRef, viewportRHI, viewportRHI,
 										  FSceneView*, sceneView, sceneView,
 										  bool, isShouldPresent, InIsShouldPresent,

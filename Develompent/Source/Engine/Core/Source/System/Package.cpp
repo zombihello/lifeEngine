@@ -474,20 +474,31 @@ void FPackageManager::CleanupUnusedPackages()
 	unusedPackages.clear();
 }
 
-FAssetRef FPackageManager::FindAsset( const std::wstring& InString, EAssetType InType /* = AT_Unknown */ )
+bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPackageName, std::wstring& OutAssetName )
 {
 	// Divide the string into two parts: package name and asset name
 	std::size_t			posSpliter = InString.find( TEXT( ":" ) );
 	if ( posSpliter == std::wstring::npos )
 	{
 		LE_LOG( LT_Warning, LC_Package, TEXT( "Not correct input string '%s', reference to asset must be splitted by '<Package name>:<Asset name>'" ), InString.c_str() );
-		return nullptr;
+		return false;
 	}
 
-	std::wstring		packageName = InString;
-	std::wstring		assetName = InString;
-	packageName.erase( posSpliter, packageName.size() );
-	assetName.erase( 0, posSpliter + 1 );
+	OutPackageName = InString;
+	OutAssetName = InString;
+	OutPackageName.erase( posSpliter, OutPackageName.size() );
+	OutAssetName.erase( 0, posSpliter + 1 );
+	return true;
+}
+
+FAssetRef FPackageManager::FindAsset( const std::wstring& InString, EAssetType InType /* = AT_Unknown */ )
+{
+	std::wstring		packageName;
+	std::wstring		assetName;
+	if ( !ParseReferenceToAsset( InString, packageName, assetName ) )
+	{
+		return nullptr;
+	}
 
 	// Find in TOC path to the package and calculate hash of asset from him name
 	std::wstring	packagePath = GTableOfContents.GetPackagePath( packageName );

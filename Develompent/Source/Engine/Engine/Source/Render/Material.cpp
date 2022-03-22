@@ -1,6 +1,7 @@
 #include "Logger/LoggerMacros.h"
 #include "Render/Material.h"
 #include "Render/VertexFactory/StaticMeshVertexFactory.h"
+#include "Render/VertexFactory/SpriteVertexFactory.h"
 
 FMaterial::FMaterial() :
 	FAsset( AT_Material ),
@@ -78,6 +79,19 @@ void FMaterial::CacheShaderMap()
 		else
 		{
 			shaderMap.erase( vertexFactoryHash );
+		}
+	}
+
+	// If material usage for render sprite mesh
+	{
+		const uint32			vertexFactoryHash = FSpriteVertexFactory::staticType.GetHash();
+		//if ( usage & MU_Sprite )
+		{
+			shaderMap[ vertexFactoryHash ] = GetMeshShaders( vertexFactoryHash );
+		}
+		//else
+		{
+		//	shaderMap.erase( vertexFactoryHash );
 		}
 	}
 

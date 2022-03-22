@@ -3,8 +3,8 @@
 		"Name": 					"Eleot: Episodic",
 		"ShortName":				"HeliumGame",
 		"Splash": 					"Splash.bmp",
-		"EditorStartupMap": 		"ExampleEntry.lmap",
-		"GameDefaultMap": 			"ExampleEntry.lmap",
-		"DefaultPlayerController": 	"APlayerController"
+		"EditorStartupMap": 		"Frontend.lmap",
+		"GameDefaultMap": 			"Frontend.lmap",
+		"DefaultPlayerController": 	"AHEPlayerController"
 	}
 }

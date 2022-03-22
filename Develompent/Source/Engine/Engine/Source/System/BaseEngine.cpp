@@ -11,6 +11,7 @@
 #include "Misc/UIGlobals.h"
 #include "UIEngine.h"
 #include "Render/Shaders/BasePassShader.h"
+#include "System/CameraManager.h"
 
 IMPLEMENT_CLASS( LBaseEngine )
 
@@ -81,6 +82,7 @@ void LBaseEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	GInputSystem->ProcessEvent( InWindowEvent );
 	GUIEngine->ProcessEvent( InWindowEvent );
+	GCameraManager->ProcessEvent( InWindowEvent );
 }
 
 float LBaseEngine::GetMaxTickRate() const
@@ -95,6 +97,7 @@ float LBaseEngine::GetMaxTickRate() const
 }
 #include "Actors/StaticMesh.h"
 #include "Actors/Sprite.h"
+#include "Actors/PlayerStart.h"
 bool LBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
@@ -108,8 +111,6 @@ bool LBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 
 	archive->SerializeHeader();
 	GWorld->Serialize( *archive );
-	GWorld->SpawnActor< AStaticMesh >( FVector( 0.f, 0.f, 0.f ) );
-    GWorld->SpawnActor< ASprite >( FVector( 0.f, -150.f, 0.f ) );
 	GWorld->BeginPlay();
 	return true;
 }

@@ -10,6 +10,7 @@
 #define PLAYERCONTROLLER_H
 
 #include "Actors/Actor.h"
+#include "Components/CameraComponent.h"
 
 /**
  * @ingroup Engine
@@ -41,6 +42,15 @@ public:
 	 * @param[in] InDeltaTime The time since the last tick.
 	 */
 	virtual void Tick( float InDeltaTime ) override;
+
+    /**
+     * @brief Get camera component
+     * @return Return camera component
+     */
+    FORCEINLINE TRefCountPtr< class LCameraComponent > GetCameraComponent() const
+    {
+        return cameraComponent;
+    }
 
 private:
 	TRefCountPtr< class LCameraComponent >			cameraComponent;		/**< Player camera */

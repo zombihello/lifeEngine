@@ -33,9 +33,10 @@ typedef TRefCountPtr< class FMaterial >				FMaterialRef;
  */
 enum EMaterialUsage
 {
-	MU_None				= 0,				/**< Material not used on the all meshes */
-	MU_StaticMesh		= 1 << 0,			/**< Material used on the static meshes */
-	MU_AllMeshes		= MU_StaticMesh		/**< Material used on all type meshes */
+	MU_None				= 0,							/**< Material not used on the all meshes */
+	MU_StaticMesh		= 1 << 0,						/**< Material used on the static meshes */
+	MU_Sprite			= 1 << 1,						/**< Material used on the sprite meshes */
+	MU_AllMeshes		= MU_StaticMesh | MU_Sprite		/**< Material used on all type meshes */
 };
 
 /**
@@ -130,6 +131,25 @@ public:
 		else
 		{
 			usage &= ~MU_StaticMesh;
+		}
+
+		isNeedUpdateShaderMap = true;
+	}
+
+	/**
+	 * Set use material on sprite meshes
+	 *
+	 * @param[in] InIsUseOnSpriteMeshes Is use this material on sprite meshes
+	 */
+	FORCEINLINE void UsageOnSpriteMesh( bool InIsUseOnSpriteMeshes )
+	{
+		if ( InIsUseOnSpriteMeshes )
+		{
+			usage |= MU_Sprite;
+		}
+		else
+		{
+			usage &= ~MU_Sprite;
 		}
 
 		isNeedUpdateShaderMap = true;

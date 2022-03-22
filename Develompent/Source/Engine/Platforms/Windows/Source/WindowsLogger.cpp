@@ -127,7 +127,7 @@ void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 			currentTextAttribute = consoleScreenBufferInfo.wAttributes;
 		}
 
-		// Cahnge color by event type
+		// Change color by event type
 		switch ( InLogType )
 		{
 		case LT_Error:

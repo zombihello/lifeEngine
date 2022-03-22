@@ -33,6 +33,15 @@ public:
      */
     virtual ~ASprite();
 
+    /**
+     * Get sprite component
+     * @return Return pointer to sprite component
+     */
+    FORCEINLINE TRefCountPtr< LSpriteComponent > GetSpriteComponent() const
+    {
+        return spriteComponent;
+    }
+
 private:
     TRefCountPtr< LSpriteComponent >			spriteComponent;		/**< Sprite component */
 };

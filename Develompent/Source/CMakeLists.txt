@@ -100,6 +100,7 @@ if ( WITH_EDITOR )
 	set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_PATH} )
 	set( STB_PATH ${EXTERNAL_DIR}/stb )
 	set( ASSIMP_PATH ${EXTERNAL_DIR}/assimp-5.0.1 )
+	set( TMXLITE_PATH ${EXTERNAL_DIR}/tmxlite/tmxlite )
 	set( QT_PLUGIN_DIR ${INSTALL_BINARIES_DIR}/Plugins )
 endif()
 

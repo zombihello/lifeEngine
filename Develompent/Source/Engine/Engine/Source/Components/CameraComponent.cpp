@@ -5,18 +5,24 @@
 
 IMPLEMENT_CLASS( LCameraComponent )
 
-LCameraComponent::LCameraComponent() :
-	projectionMode( CPM_Perspective ),
-	fieldOfView( 90.f ),
-	orthoWidth( 512.f ),
-	orthoHeight( 512.f ),
-	nearClipPlane( 0.01f ),
-	farClipPlane( WORLD_MAX ),
-	aspectRatio( 1.777778f )
+LCameraComponent::LCameraComponent()
+    : bIsActive( false )
+    , projectionMode( CPM_Perspective )
+    , fieldOfView( 90.f )
+    , orthoWidth( 512.f )
+    , orthoHeight( 512.f )
+    , nearClipPlane( 0.01f )
+    , farClipPlane( WORLD_MAX )
+    , aspectRatio( 1.777778f )
 {}
 
 void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ )
 {	
+	if ( bIsIgnoreRotateByMouse )
+	{
+		return;
+	}
+
 	FVector2D		mouseOffset = GInputSystem->GetMouseOffset();
 	if ( mouseOffset.x == 0.f && mouseOffset.y == 0.f )
 	{
@@ -64,6 +70,8 @@ void LCameraComponent::Serialize( class FArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 
+	InArchive << bIsActive;
+	InArchive << bIsIgnoreRotateByMouse;
 	InArchive << projectionMode;
 	InArchive << fieldOfView;
 	InArchive << orthoWidth;

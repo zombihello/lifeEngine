@@ -44,7 +44,6 @@ void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDev
 	check( vertexFactory );
 	vertexShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, material );
 	pixelShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, material );
-	GRHI->CommitConstants( InDeviceContextRHI );
 }
 
 uint32 FMeshDrawingPolicy::GetTypeHash() const

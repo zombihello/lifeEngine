@@ -29,11 +29,6 @@ struct FStaticMeshData
 LStaticMeshComponent::~LStaticMeshComponent()
 {}
 
-FMatrix LStaticMeshComponent::CalcTransformationMatrix( const class FSceneView& InSceneView ) const
-{
-    return GetComponentTransform().ToMatrix();
-}
-
 void LStaticMeshComponent::AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView )
 {
 	if ( !staticMesh )
@@ -47,7 +42,7 @@ void LStaticMeshComponent::AddToDrawList( class FScene* InScene, const class FSc
 		FVertexFactoryRef								vertexFactory = staticMesh->GetVertexFactory();
 		FIndexBufferRHIRef								indexBuffer = staticMesh->GetIndexBufferRHI();
 		const std::vector< FStaticMeshSurface >&		surfaces = staticMesh->GetSurfaces();
-        const FMatrix                                   transformationMatrix = CalcTransformationMatrix( InSceneView );
+		const FMatrix                                   transformationMatrix = GetComponentTransform().ToMatrix();
 
 		for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )surfaces.size(); indexSurface < numSurfaces; ++indexSurface )
 		{

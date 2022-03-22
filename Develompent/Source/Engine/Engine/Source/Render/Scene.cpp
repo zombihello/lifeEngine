@@ -10,25 +10,25 @@ FSceneView::FSceneView() :
 
 void FSceneView::SetCameraView( const FCameraView& InCameraView )
 {
-	// Update projection matrix
-	if ( InCameraView.projectionMode == CPM_Perspective )
-	{
-		projectionMatrix = glm::perspective( FMath::DegreesToRadians( InCameraView.fov ), InCameraView.aspectRatio, InCameraView.nearClipPlane, InCameraView.farClipPlane );
+    // Update projection and view matrix
+    if ( InCameraView.projectionMode == CPM_Perspective )
+    {
+        projectionMatrix = glm::perspective( FMath::DegreesToRadians( InCameraView.fov ), InCameraView.aspectRatio, InCameraView.nearClipPlane, InCameraView.farClipPlane );
 	}
 	else
 	{
-		projectionMatrix = glm::ortho( 0.f, InCameraView.orthoWidth, 0.f, InCameraView.orthoHeight, InCameraView.nearClipPlane, InCameraView.farClipPlane );
+        projectionMatrix = glm::ortho( 0.f, InCameraView.orthoWidth, 0.f, InCameraView.orthoHeight, InCameraView.nearClipPlane, InCameraView.farClipPlane );
 	}
 
-	// Update view matrix
-	{
-		FVector		targetDirection		= InCameraView.rotation.RotateVector( FMath::vectorForward );
-		FVector		axisUp				= InCameraView.rotation.RotateVector( FMath::vectorUp );
-		viewMatrix = glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
-	}
+    // Update view matrix
+    {
+        FVector		targetDirection		= InCameraView.rotation.RotateVector( FMath::vectorForward );
+        FVector		axisUp				= InCameraView.rotation.RotateVector( FMath::vectorUp );
+        viewMatrix = glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
+    }
 
 	// Update view*projection matrix
-	viewProjectionMatrix = projectionMatrix * viewMatrix;
+    viewProjectionMatrix = projectionMatrix * viewMatrix;
 
 	// Copy view info
 	cameraView = InCameraView;

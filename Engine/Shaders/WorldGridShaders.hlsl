@@ -8,7 +8,7 @@
 #include "CPP_GlobalConstantBuffers.hlsl"
 #include "VertexFactory.hlsl"
 
-void MainVS( in FVertexFactoryInput In, out float4 Out : POSITION, out float4 OutPosition : SV_POSITION )
+void MainVS( in FVertexFactoryInput In, out float4 OutPosition : SV_POSITION )
 {
 	OutPosition	= MulMatrix( viewProjectionMatrix, VertexFactory_GetWorldPosition( In ) );
 }

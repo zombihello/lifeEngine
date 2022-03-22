@@ -78,15 +78,6 @@ public:
         return materials[ InIndex ];
     }
 
-protected:
-    /**
-     * @brief Calculate transformation matrix
-     *
-     * @param InSceneView Current view of scene
-     * @return Return calculated transformation matrix
-     */
-    virtual FMatrix CalcTransformationMatrix( const class FSceneView& InSceneView ) const;
-
 private:
     FStaticMeshRef                      staticMesh;     /**< Static mesh */
     std::vector< FMaterialRef >         materials;      /**< Override materials */

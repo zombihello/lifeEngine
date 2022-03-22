@@ -3,6 +3,7 @@
 #include "Render/Shaders/ShaderManager.h"
 #include "System/InputSystem.h"
 #include "System/World.h"
+#include "System/CameraManager.h"
 
 // -------------
 // GLOBALS
@@ -16,3 +17,4 @@ FInputSystem*		GInputSystem = new FInputSystem();
 FWorld*				GWorld = new FWorld();
 bool                GUseMaxTickRate = true;
 bool                GAllowRenderThread = true;
+FCameraManager*     GCameraManager = new FCameraManager();
