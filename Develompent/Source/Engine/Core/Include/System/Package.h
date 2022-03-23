@@ -636,7 +636,7 @@ private:
 		 * Get hash of type
 		 * @return Return hash of this FNormalizedPath
 		 */
-		FORCEINLINE uint32 GetTypeHash() const
+		FORCEINLINE uint64 GetTypeHash() const
 		{
 			return appMemFastHash( ( const void* ) path.c_str(), path.size() );
 		}

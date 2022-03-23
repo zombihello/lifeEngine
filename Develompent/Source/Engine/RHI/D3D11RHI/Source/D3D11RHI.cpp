@@ -5,6 +5,7 @@
 #include "Render/RenderResource.h"
 #include "Render/RenderUtils.h"
 #include "Render/GlobalConstantsHelper.h"
+#include "Render/SceneUtils.h"
 #include "D3D11RHI.h"
 #include "D3D11Viewport.h"
 #include "D3D11DeviceContext.h"
@@ -658,6 +659,10 @@ void FD3D11RHI::BeginDrawingViewport( class FBaseDeviceContextRHI* InDeviceConte
 	FD3D11Viewport*					viewport = ( FD3D11Viewport* )InViewport;
 	check( viewport );
 
+#if FRAME_CAPTURE_MARKERS
+	BeginDrawEvent( InDeviceContext, DEC_SCENE_ITEMS, TEXT( "Viewport" ) );
+#endif // FRAME_CAPTURE_MARKERS
+
 	SetRenderTarget( InDeviceContext, viewport->GetSurface(), nullptr );
 	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );
 }
@@ -689,6 +694,10 @@ void FD3D11RHI::SetRenderTarget( class FBaseDeviceContextRHI* InDeviceContext, F
 void FD3D11RHI::EndDrawingViewport( class FBaseDeviceContextRHI* InDeviceContext, class FBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync )
 {
 	check( InViewport );
+
+#if FRAME_CAPTURE_MARKERS
+	EndDrawEvent( InDeviceContext );
+#endif // FRAME_CAPTURE_MARKERS
 
 	if ( InIsPresent )
 	{

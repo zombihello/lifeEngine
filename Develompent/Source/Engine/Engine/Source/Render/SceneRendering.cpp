@@ -40,7 +40,7 @@ void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* In
 
 void FStaticMeshDrawPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView )
 {
-	SCOPED_DRAW_EVENT( EventDraw, DEC_STATIC_MESH, FString::Format( TEXT( "Material %s" ), material->GetAssetName().c_str() ).c_str() );
+	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, FString::Format( TEXT( "Material %s" ), material->GetAssetName().c_str() ).c_str() );
 	for ( uint32 indexBatch = 0, numBatches = ( uint32 )InMeshBatch.elements.size(); indexBatch < numBatches; ++indexBatch )
 	{
 		const FMeshBatchElement&		batchElement = InMeshBatch.elements[ indexBatch ];
@@ -88,14 +88,14 @@ void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 			// Draw static meshes
 			if ( SDG.staticMeshDrawList.GetNum() > 0 )
 			{
-				SCOPED_DRAW_EVENT( EventSDG, DEC_STATIC_MESH, TEXT( "Static meshes" ) );
+				SCOPED_DRAW_EVENT( EventStaticMeshes, DEC_STATIC_MESH, TEXT( "Static meshes" ) );
 				SDG.staticMeshDrawList.Draw( immediateContext, *sceneView );
 			}
 
 			// Draw sprites
 			if ( SDG.spriteDrawList.GetNum() > 0 )
 			{
-				SCOPED_DRAW_EVENT( EventSDG, DEC_SPRITE, TEXT( "Sprites" ) );
+				SCOPED_DRAW_EVENT( EventSprites, DEC_SPRITE, TEXT( "Sprites" ) );
 				SDG.spriteDrawList.Draw( immediateContext, *sceneView );
 			}
 		}

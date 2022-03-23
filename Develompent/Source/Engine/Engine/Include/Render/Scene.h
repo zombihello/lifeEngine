@@ -174,13 +174,13 @@ public:
 		FORCEINLINE bool operator()( const FDrawingPolicyLink& InA, const FDrawingPolicyLink& InB ) const
 		{
 			// Calculate hash for InA
-			uint32		hashA = InA.drawingPolicy.GetTypeHash();
-			hashA = appMemFastHash( InA.boundShaderState, hashA );
+			uint64		hashA = InA.drawingPolicy.GetTypeHash();
+			hashA = appMemFastHash( InA.boundShaderState->GetHash(), hashA );
 			hashA = appMemFastHash( InA.meshBatch.primitiveType, hashA );
 
 			// Calculate hash for InB
-			uint32		hashB = InB.drawingPolicy.GetTypeHash();
-			hashB = appMemFastHash( InB.boundShaderState, hashB );
+			uint64		hashB = InB.drawingPolicy.GetTypeHash();
+			hashB = appMemFastHash( InB.boundShaderState->GetHash(), hashB );
 			hashB = appMemFastHash( InB.meshBatch.primitiveType, hashB );
 
 			return hashA < hashB;

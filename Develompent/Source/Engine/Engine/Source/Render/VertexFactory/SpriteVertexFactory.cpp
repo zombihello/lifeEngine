@@ -25,6 +25,12 @@ FSpriteVertexFactory::FSpriteVertexFactory()
 	, spriteSize( 1.f, 1.f )
 {}
 
+uint64 FSpriteVertexFactory::GetTypeHash() const
+{
+	uint64		hash = appMemFastHash( textureRect, staticType.GetHash() );
+	return appMemFastHash( spriteSize, hash );
+}
+
 void FSpriteVertexFactory::InitRHI()
 {
 	FVertexDeclarationElementList		vertexDeclElementList =

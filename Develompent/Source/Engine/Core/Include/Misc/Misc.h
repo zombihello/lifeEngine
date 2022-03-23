@@ -144,9 +144,9 @@ FORCEINLINE std::wstring appShaderDir()
  * @param[in] InHash Start hash
  * @return Return hash
  */
-FORCEINLINE uint32 appCalcHash( const std::wstring& InName, uint32 InHash = 0 )
+FORCEINLINE uint64 appCalcHash( const std::wstring& InName, uint64 InHash = 0 )
 {
-	return appMemFastHash( InName.data(), ( uint32 )InName.size() * sizeof( std::wstring::value_type ), InHash );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
+	return appMemFastHash( InName.data(), ( uint64 )InName.size() * sizeof( std::wstring::value_type ), InHash );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
 }
 
 /**

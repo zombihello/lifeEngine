@@ -44,6 +44,7 @@ enum ELifeEnginePackageVersion
 	VER_NamePackage							= 12,					/**< Added name package */
 	VER_GUIDAssets							= 13,					/**< Added GUID to assets */
 	VER_ShaderParameterMap 					= 14,					/**< Added shader parameter map in shader cache */
+	VER_HashUInt64							= 15,					/**< Changed type of hashes from uint32 to uint64 */
 
 	//
 	// New versions can be added here

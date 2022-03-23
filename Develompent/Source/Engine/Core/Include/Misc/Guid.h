@@ -207,7 +207,7 @@ public:
 	 * Get hash of type
 	 * @return Return hash of this GUID
 	 */
-	FORCEINLINE uint32 GetTypeHash() const
+	FORCEINLINE uint64 GetTypeHash() const
 	{
 		return appMemFastHash( *this );
 	}

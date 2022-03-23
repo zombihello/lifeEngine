@@ -113,9 +113,9 @@ FD3D11VertexDeclarationRHI::FD3D11VertexDeclarationRHI( const FVertexDeclaration
 /**
  * Get hash of vertex declaration
  */
-uint32 FD3D11VertexDeclarationRHI::GetHash( uint32 InHash /*= 0*/ ) const
+uint64 FD3D11VertexDeclarationRHI::GetHash( uint64 InHash /*= 0*/ ) const
 {
-	return appMemFastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint32 )vertexElements.size(), InHash );
+	return appMemFastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint64 )vertexElements.size(), InHash );
 }
 
 /**

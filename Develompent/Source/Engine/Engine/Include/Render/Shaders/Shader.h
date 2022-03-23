@@ -32,7 +32,7 @@ public:
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void								Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem );
+	virtual void Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem );
 
 	/**
 	 * @brief Set the constant shader parameters
@@ -75,7 +75,7 @@ public:
 	 * Get vertex factory hash
 	 * @return Return vertex factory hash if frequency SF_Vertex, else return INVALID_HASH
 	 */
-	FORCEINLINE uint32 GetVertexFactoryHash() const
+	FORCEINLINE uint64 GetVertexFactoryHash() const
 	{
 		return vertexFactoryHash;
 	}
@@ -143,7 +143,7 @@ public:
 private:
 	std::wstring				name;				/**< Name of class shader */
 	EShaderFrequency			frequency;			/**< Frequency of shader */
-	uint32						vertexFactoryHash;	/**< Vertex factory hash */
+	uint64						vertexFactoryHash;	/**< Vertex factory hash */
 	uint32						numInstructions;	/**< Number instructions in shader */
 	FVertexShaderRHIRef			vertexShader;		/**< Pointer to RHI vertex shader */
 	FHullShaderRHIRef			hullShader;			/**< Pointer to RHI hull shader */
@@ -175,7 +175,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FShaderRef& InValue
 	else
 	{
 		InArchive << std::wstring();
-		InArchive << ( uint32 )INVALID_HASH;
+		InArchive << ( uint64 )INVALID_HASH;
 	}
 
 	return InArchive;

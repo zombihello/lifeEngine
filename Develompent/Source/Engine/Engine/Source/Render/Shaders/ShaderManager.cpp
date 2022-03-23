@@ -108,7 +108,7 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 	return true;
 }
 
-FShaderRef FShaderManager::FindInstance( const std::wstring& InShaderName, uint32 InVertexFactoryHash )
+FShaderRef FShaderManager::FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash )
 {
 	FMeshShaderMap::const_iterator		itMeshShaderMap = shaders.find( InVertexFactoryHash );
 	if ( itMeshShaderMap == shaders.end() )

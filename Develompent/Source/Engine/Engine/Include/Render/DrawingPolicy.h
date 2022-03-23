@@ -70,7 +70,7 @@ public:
 	 * @brief Get type hash
 	 * @return Return hash of drawing policy
 	 */
-	virtual uint32 GetTypeHash() const;
+	virtual uint64 GetTypeHash() const;
 
 	/**
 	 * @brief Compare drawing policy

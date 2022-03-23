@@ -46,7 +46,7 @@ void FMaterial::Serialize( class FArchive& InArchive )
 	InArchive << textureParameters;
 }
 
-FShaderRef FMaterial::GetShader( uint32 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
+FShaderRef FMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
 {
 	check( InShaderFrequency < SF_NumDrawFrequencies );
 	if ( isNeedUpdateShaderMap )
@@ -71,7 +71,7 @@ void FMaterial::CacheShaderMap()
 
 	// If material usage for render static mesh
 	{
-		const uint32			vertexFactoryHash = FStaticMeshVertexFactory::staticType.GetHash();
+		const uint64			vertexFactoryHash = FStaticMeshVertexFactory::staticType.GetHash();
 		if ( usage & MU_StaticMesh )
 		{	
 			shaderMap[ vertexFactoryHash ] = GetMeshShaders( vertexFactoryHash );
@@ -84,7 +84,7 @@ void FMaterial::CacheShaderMap()
 
 	// If material usage for render sprite mesh
 	{
-		const uint32			vertexFactoryHash = FSpriteVertexFactory::staticType.GetHash();
+		const uint64			vertexFactoryHash = FSpriteVertexFactory::staticType.GetHash();
 		//if ( usage & MU_Sprite )
 		{
 			shaderMap[ vertexFactoryHash ] = GetMeshShaders( vertexFactoryHash );
@@ -98,7 +98,7 @@ void FMaterial::CacheShaderMap()
 	isNeedUpdateShaderMap = false;
 }
 
-std::vector< FShaderRef > FMaterial::GetMeshShaders( uint32 InVertexFactoryHash ) const
+std::vector< FShaderRef > FMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) const
 {
 	std::vector< FShaderRef >		result;
 	result.resize( SF_NumDrawFrequencies );

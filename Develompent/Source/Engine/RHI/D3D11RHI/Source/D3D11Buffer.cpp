@@ -6,6 +6,9 @@
 #include "D3D11Buffer.h"
 #include "D3D11DeviceContext.h"
 
+/** Macro for enable fill full constant buffer for fix bug with updating sub region in buffer */
+#define D3D11_FILLFULL_CONSTANTBUFFER 1
+
 // ------------------------------------
 // GLOBALS
 // ------------------------------------
@@ -221,7 +224,13 @@ void FD3D11ConstantBuffer::CommitConstantsToDevice( class FD3D11DeviceContext* I
 	D3D11_MAPPED_SUBRESOURCE		d3d11Mapped;
 
 	d3d11DeviceContext->Map( d3d11Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3d11Mapped );
+
+#if !D3D11_FILLFULL_CONSTANTBUFFER
 	memcpy( ( byte* )d3d11Mapped.pData, shadowData, currentUpdateSize );
+#else
+	memcpy( ( byte* )d3d11Mapped.pData, shadowData, size );
+#endif // !D3D11_FILLFULL_CONSTANTBUFFER
+
 	d3d11DeviceContext->Unmap( d3d11Buffer, 0 );
 
 	isNeedCommit = false;
@@ -231,5 +240,8 @@ void FD3D11ConstantBuffer::CommitConstantsToDevice( class FD3D11DeviceContext* I
 void FD3D11ConstantBuffer::Clear()
 {
 	if ( !shadowData )		return;
+
 	appMemzero( shadowData, size );
+	isNeedCommit = true;
+	currentUpdateSize = size;
 }

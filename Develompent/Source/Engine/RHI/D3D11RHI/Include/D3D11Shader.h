@@ -223,7 +223,7 @@ public:
 	 * @param[in] InHash Start hash
 	 * @return Return calculated hash
 	 */
-	virtual uint32 GetHash( uint32 InHash = 0 ) const override;
+	virtual uint64 GetHash( uint64 InHash = 0 ) const override;
 
 	/**
 	 * @brief Get vertex elements

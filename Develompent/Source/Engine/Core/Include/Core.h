@@ -32,7 +32,7 @@ enum ENoInit
  * @ingroup Core
  * Invalid hash
  */
-enum { INVALID_HASH = ( uint32 )-1 };
+enum { INVALID_HASH = ( uint64 )-1 };
 
 /**
  * @ingroup Core

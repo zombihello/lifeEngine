@@ -13,7 +13,7 @@ FMeshDrawingPolicy::FMeshDrawingPolicy( class FVertexFactory* InVertexFactory, c
 {
 	check( InVertexFactory && InMaterial );
 
-	uint32			vertexFactoryHash = vertexFactory->GetType()->GetHash();
+	uint64			vertexFactoryHash = vertexFactory->GetType()->GetHash();
 	vertexShader	= material->GetShader( vertexFactoryHash, SF_Vertex );
 	pixelShader		= material->GetShader( vertexFactoryHash, SF_Pixel );
 	check( vertexShader && pixelShader );
@@ -46,10 +46,9 @@ void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDev
 	pixelShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, material );
 }
 
-uint32 FMeshDrawingPolicy::GetTypeHash() const
+uint64 FMeshDrawingPolicy::GetTypeHash() const
 {
-	uint32		hash = appMemFastHash( vertexFactory );
-	return appMemFastHash( material, hash );
+	return appMemFastHash( material, vertexFactory ? vertexFactory->GetTypeHash() : 0 );
 }
 
 FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const

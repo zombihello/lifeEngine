@@ -31,7 +31,7 @@
  * @param[in] InHash Start hash
  * @return Return calculated hash
  */
-FORCEINLINE uint32 appMemFastHash( const void* InData, uint32 InLength, uint32 InHash = 0 )
+FORCEINLINE uint64 appMemFastHash( const void* InData, uint64 InLength, uint64 InHash = 0 )
 {
 	byte*		data = ( byte* )InData;
 	for ( uint64 index = 0; index < InLength; ++index )
@@ -51,7 +51,7 @@ FORCEINLINE uint32 appMemFastHash( const void* InData, uint32 InLength, uint32 I
  * @return Return calculated hash
  */
 template< typename TType >
-FORCEINLINE uint32 appMemFastHash( const TType& InValue, uint32 InHash = 0 )
+FORCEINLINE uint64 appMemFastHash( const TType& InValue, uint64 InHash = 0 )
 {
 	return appMemFastHash( &InValue, sizeof( InValue ), InHash);
 }

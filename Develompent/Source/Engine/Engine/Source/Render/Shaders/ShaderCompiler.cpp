@@ -62,7 +62,7 @@ bool FShaderCompiler::CompileShader( const std::wstring& InShaderName, const std
 {
 	FShaderCompilerEnvironment		environment( InShaderFrequency );
 	FShaderCompilerOutput			output;
-	uint32							vertexFactoryHash = ( uint32 )INVALID_HASH;
+	uint64							vertexFactoryHash = ( uint64 )INVALID_HASH;
 
 	if ( InVertexFactoryType )
 	{

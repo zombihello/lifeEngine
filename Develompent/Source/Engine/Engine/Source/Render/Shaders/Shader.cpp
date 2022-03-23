@@ -69,18 +69,27 @@ FArchive& operator<<( FArchive& InArchive, FShaderRef& InValue )
 		else
 		{
 			InArchive << std::wstring();
-			InArchive << ( uint32 )INVALID_HASH;
+			InArchive << ( uint64 )INVALID_HASH;
 		}
 	}
 	else
 	{
 		std::wstring			shaderName;
-		uint32					vertexShaderHash;
+		uint64					vertexFactoryHash;
 		InArchive << shaderName;
 
 		if ( InArchive.Ver() >= VER_VertexFactory )
 		{
-			InArchive << vertexShaderHash;
+			if ( InArchive.Ver() < VER_HashUInt64 )
+			{
+				uint32		tmpVertexFactoryHash = 0;
+				InArchive << tmpVertexFactoryHash;
+				vertexFactoryHash = tmpVertexFactoryHash;
+			}
+			else
+			{
+				InArchive << vertexFactoryHash;
+			}
 		}
 		else
 		{
@@ -95,7 +104,7 @@ FArchive& operator<<( FArchive& InArchive, FShaderRef& InValue )
 
 		if ( !shaderName.empty() )
 		{
-			InValue = GShaderManager->FindInstance( shaderName, vertexShaderHash );
+			InValue = GShaderManager->FindInstance( shaderName, vertexFactoryHash );
 		}
 	}
 

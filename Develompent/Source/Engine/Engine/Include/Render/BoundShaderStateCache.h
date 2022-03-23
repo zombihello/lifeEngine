@@ -35,7 +35,7 @@ public:
 	 * @brief Get hash of key
 	 * @return Return hash of this key
 	 */
-	FORCEINLINE uint32 GetHash() const
+	FORCEINLINE uint64 GetHash() const
 	{
 		return hash;
 	}
@@ -59,7 +59,7 @@ public:
 	}
 
 private:
-	uint32								hash;					/**< Hash of key */
+	uint64								hash;					/**< Hash of key */
 	FVertexDeclarationRHIParamRef		vertexDeclaration;		/**< Vertex decl for this combination */
 	FVertexShaderRHIParamRef			vertexShader;			/**< VS for this combination */
 	FPixelShaderRHIParamRef				pixelShader;			/**< PS for this combination */

@@ -17,6 +17,9 @@
 	- Fixed working of package manager and packages
 	- Added allow set custom text color in logs
 	- Implemented frustum culling
+	- Changed hash type from uint32 to uint64
+	- Fixed commit constants buffer to device in D3D11RHI
+	- Fixed containing FDrawingPolicyLink in std::set 
 
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

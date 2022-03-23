@@ -81,7 +81,7 @@ public:
 		/**
 		 * Typedef for vertex factory type map
 		 */
-		typedef std::unordered_map< uint32, FVertexFactoryMetaType* >		FVertexFactoryMap;
+		typedef std::unordered_map< uint64, FVertexFactoryMetaType* >		FVertexFactoryMap;
 
 		/**
 		 * @brief Get instance of container
@@ -124,7 +124,7 @@ public:
 		 * @param[in] InHash Vertex factory hash
 		 * @return Return pointer to vertex factory meta type
 		 */
-		FORCEINLINE FVertexFactoryMetaType* FindRegisteredType( uint32 InHash ) const
+		FORCEINLINE FVertexFactoryMetaType* FindRegisteredType( uint64 InHash ) const
 		{
 			auto		itType = vertexFactoryMetaTypes.find( InHash );
 			if ( itType == vertexFactoryMetaTypes.end() )
@@ -169,7 +169,7 @@ public:
 	 * Get vertex factory hash
 	 * @return Return vertex factory hash
 	 */
-	FORCEINLINE uint32 GetHash() const
+	FORCEINLINE uint64 GetHash() const
 	{
 		return hash;
 	}
@@ -198,7 +198,7 @@ public:
 
 private:
 	std::wstring				factoryName;				/**< Vertex factory name */
-	uint32						hash;						/**< Vertex factory hash */
+	uint64						hash;						/**< Vertex factory hash */
 	ConstructParametersType		ConstructParameters;		/**< Function of create vertex factory shader parameters */
 
 #if WITH_EDITOR
@@ -299,6 +299,12 @@ public:
 	 * @return The vertex factory's type.
 	 */
 	virtual FVertexFactoryMetaType* GetType() const = 0;
+
+	/**
+	 * @brief Get type hash
+	 * @return Return hash of vertex factory
+	 */
+	virtual uint64 GetTypeHash() const = 0;
 
 	/**
 	 * Get RHI vertex declaration

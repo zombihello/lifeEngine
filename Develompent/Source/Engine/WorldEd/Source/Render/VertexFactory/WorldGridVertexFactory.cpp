@@ -14,6 +14,11 @@ void FWorldGridVertexFactory::InitRHI()
 	InitDeclaration( vertexDeclElementList );
 }
 
+uint64 FWorldGridVertexFactory::GetTypeHash() const
+{
+	return staticType.GetHash();
+}
+
 FVertexFactoryShaderParameters* FWorldGridVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )
 {
     return InShaderFrequency == SF_Vertex ? new FGeneralVertexShaderParameters() : nullptr;

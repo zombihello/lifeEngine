@@ -297,7 +297,7 @@ public:
      * @param[in] InVertexFactoryHash Vertex factory hash
      * @return Return reference to shader
      */
-    FShaderRef FindInstance( const std::wstring& InShaderName, uint32 InVertexFactoryHash );
+    FShaderRef FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash );
 
     /**
      * @brief Find instance of shader
@@ -306,7 +306,7 @@ public:
      * @return Return reference to shader
      */
     template< typename TShaderClass >
-    FORCEINLINE FShaderRef                  FindInstance( uint32 InVertexFactoryHash )
+    FORCEINLINE FShaderRef                  FindInstance( uint64 InVertexFactoryHash )
     {
         return FindInstance( TShaderClass::staticType.GetName(), InVertexFactoryHash );
     }
@@ -352,7 +352,7 @@ private:
      * @ingroup Engine
      * Typedef mesh shader map
      */
-    typedef std::unordered_map< uint32, FShaderMap >            FMeshShaderMap;
+    typedef std::unordered_map< uint64, FShaderMap >            FMeshShaderMap;
 
     /**
      * @brief Class container for storage global shader types

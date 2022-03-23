@@ -118,7 +118,7 @@ public:
 
 		std::wstring				name;				/**< Name of class shader */
 		EShaderFrequency			frequency;			/**< Frequency of shader */
-		uint32						vertexFactoryHash;	/**< Vertex factory hash */
+		uint64						vertexFactoryHash;	/**< Vertex factory hash */
 		FBulkData< byte >			code;				/**< Byte code of shader */
 		uint32						numInstructions;	/**< Number instructions in shader */
 		FShaderParameterMap			parameterMap;		/**< Parameter map */

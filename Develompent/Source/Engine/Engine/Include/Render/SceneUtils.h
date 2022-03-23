@@ -79,6 +79,12 @@
  */
 #define DEC_SCENE_ITEMS		FColor( 128,	128,	128,	255 )
 
+/**
+ * @ingroup Engine
+ * @brief Macro of color draw event for materials
+ */
+#define DEC_MATERIAL		FColor( 0,		128,	255,	255 )
+
 #if FRAME_CAPTURE_MARKERS
 /**
  * @ingroup Engine

@@ -201,7 +201,7 @@ public:
 	 * @param[in] InHash Start hash
 	 * @return Return calculated hash
 	 */
-	virtual uint32 GetHash( uint32 InHash = 0 ) const					{ return 0; }
+	virtual uint64 GetHash( uint64 InHash = 0 ) const					{ return 0; }
 };
 
 /**
@@ -290,6 +290,15 @@ public:
 	FORCEINLINE FGeometryShaderRHIRef GetGeometryShader() const
 	{
 		return geometryShader;
+	}
+
+	/**
+	 * @brief Get hash
+	 * @return Return calculated hash
+	 */
+	FORCEINLINE uint64 GetHash() const			
+	{ 
+		return key.GetHash(); 
 	}
 
 protected:

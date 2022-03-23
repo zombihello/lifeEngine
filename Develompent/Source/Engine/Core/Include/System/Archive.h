@@ -237,6 +237,32 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const uint32& InValue )
 	return InArchive;
 }
 
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, int64& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const int64& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, uint64& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const uint64& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, bool& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );

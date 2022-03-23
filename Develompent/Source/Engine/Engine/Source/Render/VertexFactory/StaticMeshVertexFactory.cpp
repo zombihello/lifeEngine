@@ -18,6 +18,11 @@ void FStaticMeshVertexFactory::InitRHI()
 	InitDeclaration( vertexDeclElementList );
 }
 
+uint64 FStaticMeshVertexFactory::GetTypeHash() const
+{
+    return staticType.GetHash();
+}
+
 FVertexFactoryShaderParameters* FStaticMeshVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )
 {
     return InShaderFrequency == SF_Vertex ? new FGeneralVertexShaderParameters() : nullptr;

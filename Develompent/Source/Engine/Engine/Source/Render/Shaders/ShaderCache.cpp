@@ -38,7 +38,18 @@ void FShaderParameterMap::AddParameterAllocation( const tchar* InParameterName, 
 void FShaderCache::FShaderCacheItem::Serialize( FArchive& InArchive )
 {
 	InArchive << frequency;
-	InArchive << vertexFactoryHash;
+
+	if ( InArchive.Ver() < VER_HashUInt64 )
+	{
+		uint32		tmpVertexFactoryHash = vertexFactoryHash;
+		InArchive << tmpVertexFactoryHash;
+		vertexFactoryHash = tmpVertexFactoryHash;
+	}
+	else
+	{
+		InArchive << vertexFactoryHash;
+	}
+
 	InArchive << numInstructions;
 	InArchive << name;
 
