@@ -147,6 +147,39 @@ struct FMath
         return glm::scale( InScale );
     }
 
+	/**
+	 * @brief Normalize vector
+	 * 
+	 * @param InVector Vector
+	 * @return Return normalized vector
+	 */
+	static FORCEINLINE FVector2D NormalizeVector( const FVector2D& InVector )
+	{
+		return glm::normalize( InVector );
+	}
+
+	/**
+	 * @brief Normalize vector
+	 *
+	 * @param InVector Vector
+	 * @return Return normalized vector
+	 */
+	static FORCEINLINE FVector NormalizeVector( const FVector& InVector )
+	{
+		return glm::normalize( InVector );
+	}
+
+	/**
+	 * @brief Normalize vector
+	 *
+	 * @param InVector Vector
+	 * @return Return normalized vector
+	 */
+	static FORCEINLINE FVector4D NormalizeVector( const FVector4D& InVector )
+	{
+		return glm::normalize( InVector );
+	}
+
 	static const FVector				vectorZero;			/**< Zero 3D vector */
 	static const FVector				vectorOne;			/**< One 3D vector */
 	static const FQuaternion			quaternionZero;		/**< Quaternion zero */

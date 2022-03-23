@@ -92,4 +92,7 @@ void LSpriteComponent::AddToDrawList( class FScene* InScene, const class FSceneV
 
 	FSceneDepthGroup&		SDG = InScene->GetSDG( SDG_World );
 	SDG.spriteDrawList.AddItem( drawPolicyLink, meshElements );
+
+    // Update AABB
+    boundbox = FBox::BuildAABB( GetComponentLocation(), FVector( GetSpriteSize(), 1.f ) );
 }

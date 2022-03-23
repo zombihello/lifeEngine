@@ -32,6 +32,9 @@ void FSceneView::SetCameraView( const FCameraView& InCameraView )
 
 	// Copy view info
 	cameraView = InCameraView;
+
+	// Update frustum
+	frustum.Update( viewProjectionMatrix );
 }
 
 
@@ -63,6 +66,9 @@ void FScene::BuildSDGs( const FSceneView& InSceneView )
 	// Add to SDGs primitives
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
 	{
-        ( *it )->AddToDrawList( this, InSceneView );
+		if ( InSceneView.GetFrustum().IsIn( ( *it )->GetBoundBox() ) )
+		{
+			( *it )->AddToDrawList( this, InSceneView );
+		}
 	}
 }

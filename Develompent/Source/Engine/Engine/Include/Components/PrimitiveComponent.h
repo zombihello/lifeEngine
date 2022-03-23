@@ -9,6 +9,7 @@
 #ifndef PRIMITIVECOMPONENT_H
 #define PRIMITIVECOMPONENT_H
 
+#include "Math/Box.h"
 #include "Components/SceneComponent.h"
 
 /**
@@ -60,6 +61,18 @@ public:
 	{
 		return bVisibility;
 	}
+
+	/**
+	 * @brief Get bound box
+	 * @return Return bound box
+	 */
+	FORCEINLINE const FBox& GetBoundBox() const
+	{
+		return boundbox;
+	}
+
+protected:
+	FBox		boundbox;			/**< Bound box */
 
 private:
 	bool		bVisibility;		/**< Is primitive visibility */

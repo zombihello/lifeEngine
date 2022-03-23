@@ -16,6 +16,7 @@
 #include "Render/CameraTypes.h"
 #include "Render/Material.h"
 #include "Render/SceneRendering.h"
+#include "Render/Frustum.h"
 #include "Components/CameraComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "RHI/BaseRHI.h"
@@ -91,11 +92,21 @@ public:
 		return viewProjectionMatrix;
 	}
 
+	/**
+	 * Get frustum
+	 * @return Return frustum
+	 */
+	FORCEINLINE const FFrustum& GetFrustum() const
+	{
+		return frustum;
+	}
+
 private:
 	FMatrix			viewMatrix;				/**< View matrix */
 	FMatrix			projectionMatrix;		/**< Projection matrix */
 	FMatrix			viewProjectionMatrix;	/**< View * Projection matrix */
 	FCameraView		cameraView;				/**< View info of camera */
+	FFrustum		frustum;				/**< Frustum */
 };
 
 /**
