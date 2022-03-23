@@ -21,7 +21,7 @@ float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 
 float2 VertexFactory_GetTexCoord( FVertexFactoryInput InInput, uint InTexCoordIndex )
 {
-	return textureRect.xy + ( float2( InInput.texCoord0.x, -InInput.texCoord0.y ) * textureRect.zw );
+	return textureRect.xy + ( InInput.texCoord0 * textureRect.zw );
 }
 
 #endif // !VERTEXFACTORY_H

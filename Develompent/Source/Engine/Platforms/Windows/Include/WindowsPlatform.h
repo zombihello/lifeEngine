@@ -78,4 +78,24 @@
  */
 #define DLLIMPORT			__declspec( dllimport )
 
+/**
+ * @ingroup WindowsPlatform
+ * @brief Line terminator
+ */
+#define LINE_TERMINATOR     TEXT( "\n" )
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Path separator
+ */
+#define PATH_SEPARATOR      TEXT( "/" )
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Macro for check on char is path separator
+ * 
+ * @param InCh Char
+ */
+#define appIsPathSeparator( InCh )	( ( InCh ) == PATH_SEPARATOR[ 0 ] )
+
 #endif // !WINDOWSPLATFORM_H

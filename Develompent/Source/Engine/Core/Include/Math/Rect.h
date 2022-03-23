@@ -31,12 +31,12 @@ public:
 	 * @brief Constructor
 	 *
 	 * @param InLeft Coord by X
-	 * @param InBottom Cooed by Y
+	 * @param InTop Cooed by Y
 	 * @param InWidth Width of rect
 	 * @param InHeight Height of rect
 	 */
-	FORCEINLINE FRect( const TType& InLeft, const TType& InBottom, const TType& InWidth, const TType& InHeight )
-		: left( InLeft ), bottom( InBottom ), width( InWidth ), height( InHeight )
+	FORCEINLINE FRect( const TType& InLeft, const TType& InTop, const TType& InWidth, const TType& InHeight )
+		: left( InLeft ), top( InTop ), width( InWidth ), height( InHeight )
 	{}
 
 	/**
@@ -44,7 +44,7 @@ public:
 	 * @param InCopy Copy of object
 	 */
 	FORCEINLINE FRect( const FRect< TType >& InCopy )
-		: left( InCopy.left ), bottom( InCopy.bottom ), width( InCopy.width ), height( InCopy.height )
+		: left( InCopy.left ), top( InCopy.top ), width( InCopy.width ), height( InCopy.height )
 	{}
 
 
@@ -54,7 +54,7 @@ public:
 	FORCEINLINE FRect< TType >& operator=( const FRect< TType >& InRight )
 	{
 		left = InRight.left;
-		bottom = InRight.bottom;
+		top = InRight.top;
 		width = InRight.width;
 		height = InRight.height;
 		return *this;
@@ -66,7 +66,7 @@ public:
 	FORCEINLINE const FRect< TType >& operator=( const FRect< TType >& InRight ) const
 	{
 		left = InRight.left;
-		bottom = InRight.bottom;
+		top = InRight.top;
 		width = InRight.width;
 		height = InRight.height;
 		return *this;
@@ -91,7 +91,7 @@ public:
 	}
 
 	TType		left;		/**< Coord by X */
-	TType		bottom;		/**< Cooed by Y */
+	TType		top;		/**< Cooed by Y */
 	TType		width;		/**< Width of rect */
 	TType		height;		/**< Height of rect */
 };

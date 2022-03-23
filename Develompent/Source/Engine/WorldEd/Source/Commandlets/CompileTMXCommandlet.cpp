@@ -202,22 +202,21 @@ bool LCompileTMXCommandlet::LoadTMXTilests( const std::wstring& InPackageDir )
 		tileset.tileOffset	= FVector2D( ( float )tmxTileSize.x / mapTileSize.x, ( float )tmxTileSize.y / mapTileSize.y );
 
 		// Precalculates rectangles in tileset
-		// The Y pass starts from the end, because the Tiled Map Editor scores from the top
-		for ( int32 y = countRows-1; y >= 0; --y )
+		for ( uint32 y = 0; y < countRows; ++y )
 		{
-			for ( int32 x = 0; x < countCulumns; ++x )
+			for ( uint32 x = 0; x < countCulumns; ++x )
 			{
 				FRectFloat		rect;
-				rect.bottom		= y * tmxTileSize.y;
-				rect.left		= x * tmxTileSize.x;
 				rect.width		= tmxTileSize.x;
 				rect.height		= tmxTileSize.y;
+				rect.top		= y * tmxTileSize.y;
+				rect.left		= x * tmxTileSize.x;
 
 				// Convert texture rect in range from 0 to 1
-				rect.left		/= tmxTilesetSize.x;
-				rect.bottom		/= tmxTilesetSize.y;
 				rect.width		/= tmxTilesetSize.x;
 				rect.height		/= tmxTilesetSize.y;
+				rect.left		/= tmxTilesetSize.x;
+				rect.top		/= tmxTilesetSize.y;
 
 				tileset.textureRects.push_back( rect );
 			}
@@ -270,10 +269,9 @@ bool LCompileTMXCommandlet::ConvertTileset( const tmx::Tileset &InTileset, const
 		OutTilesetMaterial->SetAssetName( FString::Format( TEXT( "%s_Mat" ), assetName.c_str() ) );
 		OutTilesetMaterial->SetTextureParameterValue( TEXT( "diffuse" ), OutTilesetTexture );
 
-		FPackage		package;
-		package.Load( packagePath );
-		package.Add( OutTilesetMaterial );
-		if ( !package.Save( packagePath ) )
+		FPackageRef		package = GPackageManager->LoadPackage( packagePath, true );
+		package->Add( OutTilesetMaterial );
+		if ( !package->Save( packagePath ) )
 		{
 			result = false;
 		}

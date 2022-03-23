@@ -46,6 +46,18 @@ enum ELogCategory
 
 /**
  * @ingroup Core
+ * @brief Enumerating of log color
+ */
+enum ELogColor
+{
+    LC_Default,         /**< Default color */
+    LC_Red,             /**< Red */
+    LC_Yellow,          /**< Yellow */
+    LC_Green            /**< Green */
+};
+
+/**
+ * @ingroup Core
  * @brief Base class of logging
  */
 class FBaseLogger
@@ -104,6 +116,18 @@ public:
      * @param[in] ... Other arguments of message
      */
     void                Logf( ELogType InLogType, ELogCategory InLogCategory, const tchar* InMessage, ... );
+
+    /**
+     * @brief Set color for text in log
+     * 
+     * @param InLogColor Log color
+     */
+    virtual void        SetTextColor( ELogColor InLogColor ) {}
+
+    /**
+     * @brief Reset color text to default
+     */
+    virtual void        ResetTextColor() {}
 };
 
 #endif // !BASELOGGER_H

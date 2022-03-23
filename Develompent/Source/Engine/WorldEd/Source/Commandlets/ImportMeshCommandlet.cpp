@@ -71,11 +71,9 @@ bool LImportMeshCommandlet::Main( const std::wstring& InCommand )
 		return false;
 	}
 
-	FPackage		package;
-	package.Load( dstFilename );
-	package.Add( staticMesh );
-	package.Save( dstFilename );
-	return true;
+	FPackageRef		package = GPackageManager->LoadPackage( dstFilename, true );
+	package->Add( staticMesh );
+	return package->Save( dstFilename );
 }
 
 FStaticMeshRef LImportMeshCommandlet::ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName )

@@ -151,6 +151,7 @@ bool FPackage::Save( const std::wstring& InPath )
 	Serialize( *archive );
 
 	delete archive;
+	filename = InPath;
 	return true;
 }
 
@@ -194,15 +195,21 @@ void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 
 FAssetRef FPackage::Find( const FGuid& InGUID )
 {
-	// If we not load package from HDD - exit from function
-	if ( filename.empty() )
+	// Find asset in table
+	auto		itAsset = assetsTable.find( InGUID );
+	if ( itAsset == assetsTable.end() )
 	{
 		return nullptr;
 	}
 
-	// Find asset in table
-	auto		itAsset = assetsTable.find( InGUID );
-	if ( itAsset == assetsTable.end() )
+	// If asset already in memory - return it
+	if ( itAsset->second.data )
+	{
+		return itAsset->second.data;
+	}
+
+	// If we not load package from HDD - exit from function
+	if ( filename.empty() )
 	{
 		return nullptr;
 	}
@@ -403,6 +410,7 @@ void FPackage::Remove( const FGuid& InGUID )
 	if ( assetInfo.data )
 	{
 		assetInfo.data->package = nullptr;
+		--numUsageAssets;
 	}
 
 	assetsTable.erase( itAsset );
@@ -421,6 +429,7 @@ void FPackage::RemoveAll()
 	}
 
 	assetsTable.clear();
+	numUsageAssets = 0;
 	bIsDirty = true;
 }
 
@@ -571,7 +580,7 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, const std::wst
 	return asset;
 }
 
-FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath )
+FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath, bool InCreateIfNotExist /*= false */ )
 {
 	FPackageRef			package;
 	auto				itPackage = packages.find( InPath );
@@ -579,7 +588,7 @@ FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath )
 	if ( itPackage == packages.end() )
 	{
 		package = new FPackage();
-		if ( !package->Load( InPath ) )
+		if ( !package->Load( InPath ) && !InCreateIfNotExist )
 		{
 			package = nullptr;
 		}

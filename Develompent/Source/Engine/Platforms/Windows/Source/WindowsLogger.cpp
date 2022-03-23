@@ -38,12 +38,21 @@ const tchar* GLogCategoryNames[] =
 #endif // WITH_EDITOR
 };
 
+const uint16 GLogColors[] =
+{
+	0x7,			// LC_Default
+	0xC,			// LC_Red
+	0xE,			// LC_Yellow
+	0x2				// LC_Green
+};
+
 /**
  * Constructor
  */
-FWindowsLogger::FWindowsLogger() :
-	consoleHandle( nullptr ),
-	archiveLogs( nullptr )
+FWindowsLogger::FWindowsLogger()
+	: consoleHandle( nullptr )
+	, archiveLogs( nullptr )
+	, textColor( LC_Default )
 {}
 
 /**
@@ -110,6 +119,28 @@ void FWindowsLogger::TearDown()
 	}
 }
 
+void FWindowsLogger::SetTextColor( ELogColor InLogColor )
+{
+#if !NO_LOGGING
+	textColor = InLogColor;
+	if ( consoleHandle )
+	{
+		SetConsoleTextAttribute( consoleHandle, GLogColors[ ( uint32 )textColor ] );
+	}
+#endif // !NO_LOGGING
+}
+
+void FWindowsLogger::ResetTextColor()
+{
+#if !NO_LOGGING
+	textColor = LC_Default;
+	if ( consoleHandle )
+	{
+		SetConsoleTextAttribute( consoleHandle, GLogColors[ ( uint32 )textColor ] );
+	}
+#endif // !NO_LOGGING
+}
+
 /**
  * Serialize message
  */
@@ -117,25 +148,24 @@ void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 {
 	// If console is opened - get current text color
 	// and change to color by event type
-	uint16				currentTextAttribute = 0;
+	ELogColor			currentLogColor = textColor;
+	bool				bIsNeedResetLogColor = true;
 
 	if ( consoleHandle )
 	{
-		CONSOLE_SCREEN_BUFFER_INFO		consoleScreenBufferInfo;
-		if ( GetConsoleScreenBufferInfo( consoleHandle, &consoleScreenBufferInfo ) )
-		{
-			currentTextAttribute = consoleScreenBufferInfo.wAttributes;
-		}
-
 		// Change color by event type
 		switch ( InLogType )
 		{
 		case LT_Error:
-			SetConsoleTextAttribute( consoleHandle, 0xC );		// Red color
+			SetTextColor( LC_Red );
 			break;
 
 		case LT_Warning:
-			SetConsoleTextAttribute( consoleHandle, 0xE );		// Yealow color
+			SetTextColor( LC_Yellow );
+			break;
+
+		default:
+			bIsNeedResetLogColor = false;
 			break;
 		}
 	}
@@ -168,8 +198,8 @@ void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 #endif // !SHIPPING_BUILD
 
 	// Change text attribute to default
-	if ( consoleHandle )
+	if ( consoleHandle && bIsNeedResetLogColor )
 	{
-		SetConsoleTextAttribute( consoleHandle, currentTextAttribute );
+		SetTextColor( currentLogColor );
 	}
 }

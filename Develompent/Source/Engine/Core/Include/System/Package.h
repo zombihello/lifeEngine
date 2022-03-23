@@ -158,10 +158,10 @@ public:
 	FAssetReference GetAssetReference() const;
 
 private:
-	class FPackage*		package;	/**< The package where the asset is located */
-	std::wstring		name;		/**< Name asset */
-	FGuid				guid;		/**< GUID of asset */
-	EAssetType			type;		/**< Asset type */
+	class FPackage*		package;		/**< The package where the asset is located */
+	std::wstring		name;			/**< Name asset */
+	FGuid				guid;			/**< GUID of asset */
+	EAssetType			type;			/**< Asset type */
 };
 
 /**
@@ -185,26 +185,12 @@ class FPackage : public FRefCounted
 {
 public:
 	friend class FAsset;
-
-	/**
-	 * Constructor
-	 * 
-	 * @param InName Name of the package
-	 */
-	FPackage( const std::wstring& InName = TEXT( "" ) );
+	friend class FPackageManager;
 
 	/**
 	 * Destructor
 	 */
 	~FPackage();
-
-	/**
-	 * Load package
-	 * 
-	 * @param InPath Path to package
-	 * @return Return true if package is loaded, else false
-	 */
-	bool Load( const std::wstring& InPath );
 
 	/**
 	 * Save package
@@ -227,6 +213,7 @@ public:
 		InAsset->package = this;
 		assetGUIDTable[ InAsset->name ] = InAsset->guid;
 		assetsTable[ InAsset->guid ] = FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset->name, InAsset };
+		++numUsageAssets;
 		bIsDirty = true;
 	}
 
@@ -400,6 +387,21 @@ private:
 	typedef std::unordered_map< FGuid, FAssetInfo, FGuid::FGuidKeyFunc >			FAssetTable;
 
 	/**
+	 * Constructor
+	 *
+	 * @param InName Name of the package
+	 */
+	FPackage( const std::wstring& InName = TEXT( "" ) );
+
+	/**
+	 * Load package
+	 *
+	 * @param InPath Path to package
+	 * @return Return true if package is loaded, else false
+	 */
+	bool Load( const std::wstring& InPath );
+
+	/**
 	 * Fully load
 	 * @param OutAssetArray Array of loaded asset from package
 	 */
@@ -525,9 +527,10 @@ public:
 	 * Load package
 	 * 
 	 * @param InPath Package path
+	 * @param InCreateIfNotExist Is need create package if not exist
 	 * @return Return loaded package. If not found returning nullptr
 	 */
-	FPackageRef LoadPackage( const std::wstring& InPath );
+	FPackageRef LoadPackage( const std::wstring& InPath, bool InCreateIfNotExist = false );
 
 	/**
 	 * Unload package
@@ -565,14 +568,117 @@ private:
 	};
 
 	/**
+	 * Struct of normalized path in file system
+	 */
+	struct FNormalizedPath
+	{
+		/**
+		 * @brief Functions to extract the FNormalizedPath as a key for std::unordered_map and std::unordered_set
+		 */
+		struct FNormalizedPathKeyFunc
+		{
+			/**
+			 * @brief Calculate hash of the FNormalizedPath
+			 *
+			 * @param InPath Path
+			 * @return Return hash of this FNormalizedPath
+			 */
+			FORCEINLINE std::size_t operator()( const FNormalizedPath& InPath ) const
+			{
+				return InPath.GetTypeHash();
+			}
+
+			/**
+			 * @brief Compare FNormalizedPath
+			 *
+			 * @param InA First FNormalizedPath
+			 * @param InB Second FNormalizedPath
+			 * @return Return true if InA and InB equal, else returning false
+			 */
+			FORCEINLINE bool operator()( const FNormalizedPath& InA, const FNormalizedPath& InB ) const
+			{
+				return InA.GetTypeHash() < InB.GetTypeHash();
+			}
+		};
+
+		/**
+		 * Constructor
+		 * 
+		 * @param InPath Path
+		 */
+		FORCEINLINE FNormalizedPath( const std::wstring& InPath )
+			: path( InPath )
+		{
+			appNormalizePathSeparators( path );
+		}
+
+		/**
+		 * Set new path
+		 *
+		 * @param InPath Path
+		 */
+		FORCEINLINE void Set( const std::wstring& InPath )
+		{
+			path = InPath;
+			appNormalizePathSeparators( path );
+		}
+
+		/**
+		 * Convert path in string
+		 * @return Return path in string
+		 */
+		FORCEINLINE const std::wstring& ToString() const
+		{
+			return path;
+		}
+
+		/**
+		 * Get hash of type
+		 * @return Return hash of this FNormalizedPath
+		 */
+		FORCEINLINE uint32 GetTypeHash() const
+		{
+			return appMemFastHash( ( const void* ) path.c_str(), path.size() );
+		}
+
+		/**
+		 * Override operator for set new path
+		 */
+		FORCEINLINE FNormalizedPath& operator=( const std::wstring& InRight )
+		{
+			Set( InRight );
+			return *this;
+		}
+
+		/**
+		 * Override operator for compare to FNormalizedPath
+		 */
+		FORCEINLINE bool operator==( const FNormalizedPath& InRight ) const
+		{
+			return path == InRight.path;
+		}
+
+		/**
+		 * @brief Overloaded operator std::wstring
+		 */
+		FORCEINLINE operator std::wstring() const
+		{
+			return path;
+		}
+
+	private:
+		std::wstring		path;			/**< Normalized path */
+	};
+
+	/**
 	 * Typedef of list loaded packages
 	 */
-	typedef std::unordered_map< std::wstring, FPackageInfo >			FPackageList;
+	typedef std::unordered_map< FNormalizedPath, FPackageInfo, FNormalizedPath::FNormalizedPathKeyFunc >			FPackageList;
 
 	/**
 	 * Typedef of unused list packages
 	 */
-	typedef std::unordered_set< std::wstring >							FUnusedPackageList;
+	typedef std::unordered_set< FNormalizedPath, FNormalizedPath::FNormalizedPathKeyFunc >							FUnusedPackageList;
 
 	/**
 	 * Check usage package
@@ -665,6 +771,14 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetRef& InValue )
 	if ( InArchive.IsSaving() )
 	{
 		InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
+
+#if DO_CHECK
+		if ( InValue )
+		{
+			FAssetReference		assetRef = InValue->GetAssetReference();
+			check( assetRef.guidAsset.IsValid() && assetRef.guidPackage.IsValid() );
+		}
+#endif // DO_CHECK
 	}
 	else
 	{

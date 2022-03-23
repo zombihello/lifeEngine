@@ -479,8 +479,10 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createPackag
 	}
 
 	// Create package
-	FPackage		package;
-	package.Save( appQtAbsolutePathToEngine( dir.absolutePath() + "/" + packageName + ".lpak" ) );
+	std::wstring	fullPath = appQtAbsolutePathToEngine( dir.absolutePath() + "/" + packageName + ".lpak" );
+	FPackageRef		package = GPackageManager->LoadPackage( fullPath, true );
+	package->Save( fullPath );
+	GPackageManager->UnloadPackage( fullPath );
 }
 
 void WeContentBrowserWidget::on_treeView_contentBrowser_OnOpenPackage( class FPackage* InPackage )

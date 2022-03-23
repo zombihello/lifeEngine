@@ -52,6 +52,38 @@ FORCEINLINE bool appIsWhitespace( tchar InChar )
 
 /**
  * @ingroup Core
+ * Normalize path separators
+ * 
+ * @param InOutFilename Path to file
+ */
+FORCEINLINE void appNormalizePathSeparators( std::wstring& InOutFilename )
+{
+	bool		bIsNeedDeleteNextSeparator = false;
+	for ( uint32 index = 0, count = InOutFilename.size(); index < count; ++index )
+	{
+		tchar&		ch = InOutFilename[ index ];
+		if ( bIsNeedDeleteNextSeparator && appIsPathSeparator( ch ) )
+		{
+			InOutFilename.erase( index, 1 );
+			count = InOutFilename.size();
+			--index;
+			continue;
+		}
+
+		if ( appIsPathSeparator( ch ) )
+		{
+			ch = PATH_SEPARATOR[ 0 ];
+			bIsNeedDeleteNextSeparator = true;
+		}
+		else
+		{
+			bIsNeedDeleteNextSeparator = false;
+		}
+	}
+}
+
+/**
+ * @ingroup Core
  * @brief Checks if a command-line parameter exists in the stream
  * 
  * @param[in] InStream String with command-line parameters

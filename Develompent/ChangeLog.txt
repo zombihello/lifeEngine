@@ -6,6 +6,16 @@
 	- Implemented draw events for debug render
 	- Implemented scene manager and scene renderer
 	- Implemented in WorldEd fly on scene
+	- Implemented rendering sprites with help sprite vertex factory
+	- Implemented compile TMX map to LMAP
+	- Fixed serialization FWorld
+	- Added actor and component of sprite
+	- Added allow enable/disable of using max tick rate and render thread
+	- Added synchronization main thread and render thread, due to the fact that the render does not have time to process frames
+	- Added shader parameters
+	- Changed hash in assets to GUID
+	- Fixed working of package manager and packages
+	- Added allow set custom text color in logs
 
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

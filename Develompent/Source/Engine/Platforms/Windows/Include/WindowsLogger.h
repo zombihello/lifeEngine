@@ -71,9 +71,22 @@ public:
      */
     FORCEINLINE bool        IsShow() const                 { return consoleHandle; }
 
+    /**
+     * @brief Set color for text in log
+     *
+     * @param InLogColor Log color
+     */
+    virtual void        SetTextColor( ELogColor InLogColor ) override;
+
+    /**
+     * @brief Reset color text to default
+     */
+    virtual void        ResetTextColor() override;
+
 private:
-    HANDLE                                      consoleHandle;      /**< OS handle on console*/
-    FArchive*                               archiveLogs;        /**< Archive of logs */
+    HANDLE              consoleHandle;      /**< OS handle on console*/
+    FArchive*           archiveLogs;        /**< Archive of logs */
+    ELogColor           textColor;          /**< Current text color */
 };
 
 #endif // !WINDOWSLOGGER_H

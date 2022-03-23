@@ -32,11 +32,12 @@ void LCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 		extension.erase( 0, dotPos + 1 );
 		if ( extension == TEXT( "lpak" ) )
 		{
-			FPackage		package;
-			package.Load( fullPath );
+			FPackageRef		package = GPackageManager->LoadPackage( fullPath );
+			check( package );
 
 			LE_LOG( LT_Log, LC_Commandlet, TEXT( "Added package '%s'" ), fullPath.c_str() );
-			GTableOfContents.AddEntry( package.GetGUID(), package.GetName(), fullPath );
+			GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), fullPath );
+			GPackageManager->UnloadPackage( fullPath );
 		}
 	}
 }

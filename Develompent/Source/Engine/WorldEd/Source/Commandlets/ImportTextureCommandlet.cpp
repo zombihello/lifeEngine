@@ -20,6 +20,7 @@ bool LImportTextureCommandlet::Main( const std::wstring& InCommand )
 	std::wstring			dstFilename;
 	std::wstring			nameTexture;
 	bool					isAppend = false;
+	bool					bFlipVertically = false;
 
 	// Parse arguments
 	{
@@ -61,11 +62,22 @@ bool LImportTextureCommandlet::Main( const std::wstring& InCommand )
 			{
 				isAppend = true;
 			}
+
+			// Is need flip vertically
+			else if ( param == TEXT( "fv" ) || param == TEXT( "flip-vertically" ) )
+			{
+				bFlipVertically = true;
+			}
 		}
 	}
 
 	// If source and destination files is empty - this error
 	checkMsg( !srcFilename.empty() || !dstFilename.empty(), TEXT( "Not entered source file name and destination file name" ) );
+
+	if ( bFlipVertically )
+	{
+		stbi_set_flip_vertically_on_load( true );
+	}
 
 	// If name texture not seted - use name from srcFilename
 	if ( nameTexture.empty() )
@@ -81,11 +93,9 @@ bool LImportTextureCommandlet::Main( const std::wstring& InCommand )
 		return false;
 	}
 
-	FPackage		package;
-	package.Load( dstFilename );
-	package.Add( texture2D );
-	package.Save( dstFilename );
-	return true;
+	FPackageRef		package = GPackageManager->LoadPackage( dstFilename, true );
+	package->Add( texture2D );
+	return package->Save( dstFilename );
 }
 
 FTexture2DRef LImportTextureCommandlet::ConvertTexture2D( const std::wstring& InPath, const std::wstring& InAssetName )
