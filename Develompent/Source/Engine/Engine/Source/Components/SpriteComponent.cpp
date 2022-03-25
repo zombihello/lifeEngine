@@ -10,8 +10,11 @@
 IMPLEMENT_CLASS( LSpriteComponent )
 
 LSpriteComponent::LSpriteComponent()
-    : type( ST_Rotating )
+    : bIsDirtyDrawingPolicyLink( false )
+    , scene( nullptr )
+    , type( ST_Rotating )
 	, sprite( new FSprite() )
+    , meshBatchLink( nullptr )
 {
 	BeginInitResource( sprite );
 }
@@ -79,29 +82,125 @@ FMatrix LSpriteComponent::CalcTransformationMatrix( const class FSceneView& InSc
     return resultMatrix;
 }
 
-void LSpriteComponent::AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView )
+void LSpriteComponent::LinkDrawList( class FScene* InScene )
 {
-    if ( !sprite )
-    {
-        return;
-    }
+    check( InScene );
 
-    FSceneDepthGroup&                                               SDGWorld = InScene->GetSDG( SDG_World );
-    FSpriteSurface													surface = sprite->GetSurface();
-	FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLink		drawPolicyLink( FStaticMeshDrawPolicy( sprite->GetVertexFactory(), sprite->GetMaterial() ) );
+	// If the primitive is already connected to another scene - remove the link 
+	if ( scene && scene != InScene )
+	{
+		UnlinkDrawList();
+	}
 
-	FMeshBatch			            meshBatch;
-	meshBatch.baseVertexIndex       = surface.baseVertexIndex;
-	meshBatch.firstIndex            = surface.firstIndex;
-	meshBatch.numPrimitives         = surface.numPrimitives;
-	meshBatch.indexBufferRHI        = sprite->GetIndexBufferRHI();
-	meshBatch.numInstances          = 1;
-	meshBatch.primitiveType         = PT_TriangleList;
-	meshBatch.transformationMatrices.push_back( CalcTransformationMatrix( InSceneView ) );
-    drawPolicyLink.meshBatchList.insert( meshBatch );
+	// Memorize a new scene 
+	scene = InScene;
 
-    // Add meshes to SDG_World (scene layer 'World')
-    SDGWorld.spriteDrawList.AddItem( drawPolicyLink );
+    // If sprite is valid - add to scene draw policy link
+    AddDrawingPolicyLink();
+    bIsDirtyDrawingPolicyLink = false;
+}
+
+void LSpriteComponent::UnlinkDrawList()
+{
+	// If the primitive not connected to scene - exit from method
+	if ( !scene )
+	{
+		return;
+	}
+
+	// If the primitive already added to scene - remove all draw policy links
+	RemoveDrawingPolicyLink();
+	bIsDirtyDrawingPolicyLink = false;
+
+	// Forget the scene 
+	scene = nullptr;
+}
+
+void LSpriteComponent::AddDrawingPolicyLink()
+{
+    check( scene );
+
+	// If the primitive already added to scene - remove all draw policy links
+	if ( drawingPolicyLink )
+	{
+		RemoveDrawingPolicyLink();
+	}
+
+	// If sprite is valid - add to scene draw policy link
+	if ( sprite )
+	{
+		FSceneDepthGroup&               SDGWorld = scene->GetSDG( SDG_World );
+		FSpriteSurface					surface = sprite->GetSurface();
+		FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( FStaticMeshDrawPolicy( sprite->GetVertexFactory(), sprite->GetMaterial() ) );
+
+		// Generate mesh batch of sprite
+		FMeshBatch			            meshBatch;
+		meshBatch.baseVertexIndex       = surface.baseVertexIndex;
+		meshBatch.firstIndex            = surface.firstIndex;
+		meshBatch.numPrimitives         = surface.numPrimitives;
+		meshBatch.indexBufferRHI        = sprite->GetIndexBufferRHI();
+		meshBatch.primitiveType         = PT_TriangleList;
+		tmpDrawPolicyLink->meshBatchList.insert( meshBatch );
+
+		// Add to new scene draw policy link
+		drawingPolicyLink = SDGWorld.spriteDrawList.AddItem( tmpDrawPolicyLink );
+		check( drawingPolicyLink );
+
+		// Get link to mesh batch. If not founded insert new
+		FMeshBatchList::iterator        itMeshBatchLink = drawingPolicyLink->meshBatchList.find( meshBatch );
+		if ( itMeshBatchLink != drawingPolicyLink->meshBatchList.end() )
+		{
+			meshBatchLink = &( *itMeshBatchLink );
+		}
+		else
+		{
+			meshBatchLink = &( *drawingPolicyLink->meshBatchList.insert( meshBatch ).first );
+		}
+	}
+}
+
+void LSpriteComponent::RemoveDrawingPolicyLink()
+{
+    check( scene );
+
+	// If the primitive already added to scene - remove all draw policy links
+	if ( drawingPolicyLink )
+	{
+		FSceneDepthGroup&		SDGWorld = scene->GetSDG( SDG_World );
+		SDGWorld.spriteDrawList.RemoveItem( drawingPolicyLink );
+
+		drawingPolicyLink = nullptr;
+		meshBatchLink = nullptr;
+	}
+}
+
+void LSpriteComponent::AddToDrawList( const class FSceneView& InSceneView )
+{
+	// If primitive is empty - exit from method
+	if ( !bIsDirtyDrawingPolicyLink && !meshBatchLink )
+	{
+		return;
+	}
+
+	// If drawing policy link is dirty - we update it
+	if ( bIsDirtyDrawingPolicyLink )
+	{
+		bIsDirtyDrawingPolicyLink = false;
+
+		if ( sprite )
+		{
+			AddDrawingPolicyLink();
+		}
+		else
+		{
+			RemoveDrawingPolicyLink();
+			return;
+		}	
+	}
+
+    // Add to mesh batch new instance
+    ++meshBatchLink->numInstances;
+    meshBatchLink->transformationMatrices.push_back( CalcTransformationMatrix( InSceneView ) );
 
     // Update AABB
     boundbox = FBox::BuildAABB( GetComponentLocation(), FVector( GetSpriteSize(), 1.f ) );

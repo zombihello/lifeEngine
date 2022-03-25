@@ -39,12 +39,23 @@ public:
 	virtual void BeginPlay() override;
 
 	/**
-	 * @brief Add primitive to draw list
+	 * @brief Adds a draw policy link in SDGs
 	 * 
 	 * @param InScene Scene
+	 */
+	virtual void LinkDrawList( class FScene* InScene ) PURE_VIRTUAL( LPrimitiveComponent::LinkDrawList, );
+
+	/**
+	 * @brief Removes a draw policy link from SDGs
+	 */
+	virtual void UnlinkDrawList() PURE_VIRTUAL( LPrimitiveComponent::UnlinkDrawList, );
+
+	/**
+	 * @brief Adds mesh batches for draw in scene
+	 * 
      * @param InSceneView Current view of scene
 	 */
-    virtual void AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView );
+	virtual void AddToDrawList( const class FSceneView& InSceneView ) PURE_VIRTUAL( LPrimitiveComponent::AddToDrawList, );
 
 	/**
 	 * @brief Set visibility

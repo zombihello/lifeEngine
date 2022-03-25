@@ -89,11 +89,15 @@ public:
 	}
 
 protected:
-	FMaterialRef				material;			/**< Material */
-	FVertexFactoryRef			vertexFactory;		/**< Vertex factory */
-	FShaderRef					vertexShader;		/**< Vertex shader */
-	FShaderRef					pixelShader;		/**< Pixel shader */
-	float						depthBias;			/**< Depth bias */
+	FMaterialRef						material;			/**< Material */
+	FVertexFactoryRef					vertexFactory;		/**< Vertex factory */
+	FShaderRef							vertexShader;		/**< Vertex shader */
+	FShaderRef							pixelShader;		/**< Pixel shader */
+	float								depthBias;			/**< Depth bias */
+	uint64								hash;				/**< Hash */
+
+private:
+	mutable FBoundShaderStateRHIRef		boundShaderState;	/**< Bound shader state */
 };
 
 #endif // !DRAWINGPOLICY_H

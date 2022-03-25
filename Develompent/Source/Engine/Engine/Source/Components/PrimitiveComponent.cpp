@@ -30,6 +30,3 @@ void LPrimitiveComponent::SetVisibility( bool InNewVisibility )
 		scene->RemovePrimitive( this );
 	}
 }
-
-void LPrimitiveComponent::AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView )
-{}

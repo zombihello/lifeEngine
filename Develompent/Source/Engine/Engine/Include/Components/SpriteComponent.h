@@ -10,6 +10,7 @@
 #define SPRITECOMPONENT_H
 
 #include "Components/PrimitiveComponent.h"
+#include "Render/Scene.h"
 #include "Render/Sprite.h"
 
 enum ESpriteType
@@ -40,12 +41,23 @@ public:
     virtual void BeginPlay() override;
 
 	/**
-	 * @brief Add primitive to draw list
+	 * @brief Adds a draw policy link in SDGs
 	 *
 	 * @param InScene Scene
+	 */
+	virtual void LinkDrawList( class FScene* InScene ) override;
+
+	/**
+	 * @brief Removes a draw policy link from SDGs
+	 */
+	virtual void UnlinkDrawList() override;
+
+	/**
+	 * @brief Adds mesh batches for draw in scene
+	 *
 	 * @param InSceneView Current view of scene
 	 */
-	virtual void AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView ) override;
+	virtual void AddToDrawList( const class FSceneView& InSceneView ) override;
 
 	/**
 	 * @brief Serialize component
@@ -79,6 +91,7 @@ public:
 	FORCEINLINE void SetTextureRect( const FRectFloat& InTextureRect )
 	{
 		sprite->SetTextureRect( InTextureRect );
+		bIsDirtyDrawingPolicyLink = true;
 	}
 
 	/**
@@ -97,6 +110,7 @@ public:
 	FORCEINLINE void SetSpriteSize( const FVector2D& InSpriteSize )
 	{
 		sprite->SetSpriteSize( InSpriteSize );
+		bIsDirtyDrawingPolicyLink = true;
 	}
 
 	/**
@@ -115,6 +129,7 @@ public:
 	FORCEINLINE void SetMaterial( FMaterial* InMaterial )
 	{
 		sprite->SetMaterial( InMaterial );
+		bIsDirtyDrawingPolicyLink = true;
 	}
 
 	/**
@@ -128,6 +143,16 @@ public:
 
 private:
 	/**
+	 * @brief Typedef of drawing policy link
+	 */
+	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLink			FDrawingPolicyLink;
+
+	/**
+	 * @brief Typedef of reference on drawing policy link in scene
+	 */
+	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLinkRef		FDrawingPolicyLinkRef;
+
+	/**
 	 * @brief Calculate transformation matrix
 	 *
 	 * @param InSceneView Current view of scene
@@ -135,8 +160,22 @@ private:
 	 */
 	FMatrix CalcTransformationMatrix( const class FSceneView& InSceneView ) const;
 
-    ESpriteType         type;       /**< Sprite type */
-	FSpriteRef			sprite;		/**< Sprite mesh */
+	/**
+	 * @brief Add to scene drawing policy link
+	 */
+	void AddDrawingPolicyLink();
+
+	/**
+	 * @brief Remove from scene drawing policy link
+	 */
+	void RemoveDrawingPolicyLink();
+
+	bool						bIsDirtyDrawingPolicyLink;		/**< Is dirty drawing policy link. If flag equal true - need update drawing policy link */
+	class FScene*				scene;							/**< The current scene where the primitive is located  */
+    ESpriteType					type;							/**< Sprite type */
+	FSpriteRef					sprite;							/**< Sprite mesh */
+	FDrawingPolicyLinkRef		drawingPolicyLink;				/**< Reference to drawing policy link in scene */
+	const FMeshBatch*			meshBatchLink;					/**< Reference to mesh batch in drawing policy link */
 };
 
 //

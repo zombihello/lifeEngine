@@ -12,6 +12,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "Render/StaticMesh.h"
 #include "Render/Material.h"
+#include "Render/Scene.h"
 
  /**
   * @ingroup Engine
@@ -22,18 +23,34 @@ class LStaticMeshComponent : public LPrimitiveComponent
 	DECLARE_CLASS( LStaticMeshComponent, LPrimitiveComponent )
 
 public:
+	/**
+	 * @brief Constructor
+	 */
+	LStaticMeshComponent();
+
     /**
      * @brief Destructor
      */
     virtual ~LStaticMeshComponent();
 
 	/**
-	 * @brief Add primitive to draw list
+	 * @brief Adds a draw policy link in SDGs
 	 *
 	 * @param InScene Scene
-     * @param InSceneView Current view of scene
 	 */
-    virtual void AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView ) override;
+	virtual void LinkDrawList( class FScene* InScene ) override;
+
+	/**
+	 * @brief Removes a draw policy link from SDGs
+	 */
+	virtual void UnlinkDrawList() override;
+
+	/**
+	 * @brief Adds mesh batches for draw in scene
+	 *
+	 * @param InSceneView Current view of scene
+	 */
+	virtual void AddToDrawList( const class FSceneView& InSceneView ) override;
 
     /**
      * @brief Set material
@@ -45,6 +62,7 @@ public:
     {
         check( InIndex < materials.size() );
         materials[ InIndex ] = InMaterial;
+		bIsDirtyDrawingPolicyLink = true;
     }
 
 	/**
@@ -55,6 +73,7 @@ public:
 	{
 		staticMesh = InNewStaticMesh;
         materials = staticMesh->GetMaterials();
+		bIsDirtyDrawingPolicyLink = true;
 	}
 
 	/**
@@ -79,8 +98,32 @@ public:
     }
 
 private:
-    FStaticMeshRef                      staticMesh;     /**< Static mesh */
-    std::vector< FMaterialRef >         materials;      /**< Override materials */
+	/**
+	 * @brief Typedef of drawing policy link
+	 */
+	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLink			FDrawingPolicyLink;
+
+	/**
+	 * @brief Typedef of reference on drawing policy link in scene
+	 */
+	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLinkRef		FDrawingPolicyLinkRef;
+
+	/**
+	 * @brief Add to scene drawing policy link
+	 */
+	void AddDrawingPolicyLink();
+
+	/**
+	 * @brief Remove from scene drawing policy link
+	 */
+	void RemoveDrawingPolicyLink();
+
+	bool										bIsDirtyDrawingPolicyLink;		/**< Is dirty drawing policy link. If flag equal true - need update drawing policy link */
+	class FScene*								scene;							/**< The current scene where the primitive is located  */
+	FStaticMeshRef								staticMesh;						/**< Static mesh */
+	std::vector< FMaterialRef >					materials;						/**< Override materials */
+	std::vector< FDrawingPolicyLinkRef >		drawingPolicyLinks;				/**< Array of reference to drawing policy link in scene */
+	std::vector< const FMeshBatch* >			meshBatchLinks;					/**< Array of references to mesh batch in drawing policy link */
 };
 
 #endif // !STATICMESHCOMPONENT_H

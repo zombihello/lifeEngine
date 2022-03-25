@@ -129,23 +129,61 @@ struct FMeshBatch
 		 */
 		FORCEINLINE bool operator()( const FMeshBatch& InA, const FMeshBatch& InB ) const
 		{
-			// Calculate hash for InA
-			uint64		hashA = appMemFastHash( InA.indexBufferRHI );
-			hashA = appMemFastHash( InA.primitiveType, hashA );
-			hashA = appMemFastHash( InA.baseVertexIndex, hashA );
-			hashA = appMemFastHash( InA.firstIndex, hashA );
-			hashA = appMemFastHash( InA.numPrimitives, hashA );
+			return InA.GetTypeHash() < InB.GetTypeHash();
+		}
 
-			// Calculate hash for InB
-			uint64		hashB = appMemFastHash( InB.indexBufferRHI );
-			hashB = appMemFastHash( InB.primitiveType, hashB );
-			hashB = appMemFastHash( InB.baseVertexIndex, hashB );
-			hashB = appMemFastHash( InB.firstIndex, hashB );
-			hashB = appMemFastHash( InB.numPrimitives, hashB );
-
-			return hashA < hashB;
+		/**
+		 * @brief Calculate hash of the FMeshBatch
+		 *
+		 * @param InMeshBatch Mesh batch
+		 * @return Return hash of this FMeshBatch
+		 */
+		FORCEINLINE std::size_t operator()( const FMeshBatch& InMeshBatch ) const
+		{
+			return InMeshBatch.GetTypeHash();
 		}
 	};
+
+	/**
+	 * Constructor
+	 */
+	FORCEINLINE FMeshBatch()
+		: baseVertexIndex( 0 ), firstIndex( 0 ), numPrimitives( 0 ), numInstances( 0 )
+	{}
+
+	/**
+	 * Overrload operator ==
+	 */
+	FORCEINLINE friend bool operator==( const FMeshBatch& InA, const FMeshBatch& InB )
+	{
+		return	InA.indexBufferRHI == InB.indexBufferRHI		&& 
+				InA.primitiveType == InB.primitiveType			&& 
+				InA.baseVertexIndex == InB.baseVertexIndex		&& 
+				InA.firstIndex == InB.firstIndex				&& 
+				InA.numPrimitives == InB.numPrimitives;
+	}
+
+	/**
+	 * Overrload operator !=
+	 */
+	FORCEINLINE friend bool operator!=( const FMeshBatch& InA, const FMeshBatch& InB )
+	{
+		return !( InA == InB );
+	}
+
+	/**
+	 * Get type hash
+	 * @return Return calculated hash
+	 */
+	FORCEINLINE uint64 GetTypeHash() const
+	{
+		uint64		hash = appMemFastHash( indexBufferRHI );
+		hash = appMemFastHash( primitiveType, hash );
+		hash = appMemFastHash( baseVertexIndex, hash );
+		hash = appMemFastHash( firstIndex, hash );
+		hash = appMemFastHash( numPrimitives, hash );
+		return hash;
+	}
 
 	FIndexBufferRHIRef					indexBufferRHI;				/**< Index buffer */
 	EPrimitiveType						primitiveType;				/**< Primitive type */
@@ -155,6 +193,11 @@ struct FMeshBatch
 	mutable uint32						numInstances;				/**< Number instances of mesh */
 	mutable std::vector< FMatrix >		transformationMatrices;		/**< Array of transformation matrix for instances */
 };
+
+/**
+ * @brief Typedef set of mesh batches
+ */
+typedef std::unordered_set< FMeshBatch, FMeshBatch::FMeshBatchKeyFunc >		FMeshBatchList;
 
 /**
  * @ingroup Engine
@@ -167,26 +210,48 @@ public:
 	/**
 	 * @brief A set of draw list elements with the same drawing policy
 	 */
-	struct FDrawingPolicyLink
+	struct FDrawingPolicyLink : public FRefCounted
 	{
-		/**
-		 * @brief Typedef set of mesh batches
-		 */
-		typedef std::set< FMeshBatch, FMeshBatch::FMeshBatchKeyFunc >		FMeshBatchList;
-
 		/**
 		 * @brief Constructor
 		 */
 		FDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy )
 			: drawingPolicy( InDrawingPolicy )
+		{}
+
+		/**
+		 * Overrload operator ==
+		 */
+		FORCEINLINE friend bool operator==( const FDrawingPolicyLink& InA, const FDrawingPolicyLink& InB )
 		{
-			boundShaderState = drawingPolicy.GetBoundShaderState();
+			return InA.drawingPolicy.GetTypeHash() == InB.drawingPolicy.GetTypeHash();
+		}
+
+		/**
+		 * Overrload operator !=
+		 */
+		FORCEINLINE friend bool operator!=( const FDrawingPolicyLink& InA, const FDrawingPolicyLink& InB )
+		{
+			return !( InA == InB );
+		}
+
+		/**
+		 * Get type hash
+		 * @return Return calculated hash
+		 */
+		FORCEINLINE uint64 GetTypeHash() const
+		{
+			return drawingPolicy.GetTypeHash();
 		}
 
 		mutable FMeshBatchList					meshBatchList;			/**< Mesh batch list */
 		mutable TDrawingPolicyType				drawingPolicy;			/**< Drawing policy */
-		mutable FBoundShaderStateRHIRef			boundShaderState;		/**< Bound shader state */
 	};
+
+	/**
+	 * @brief Typedef of reference to drawing policy link
+	 */
+	typedef TRefCountPtr< FDrawingPolicyLink >		FDrawingPolicyLinkRef;
 
 	/**
 	 * @brief Functions to extract the drawing policy from FDrawingPolicyLink as a key for std::set
@@ -200,70 +265,80 @@ public:
 		 * @param InB Second drawing policy
 		 * @return Return true if InA and InB equal, else returning false
 		 */
-		FORCEINLINE bool operator()( const FDrawingPolicyLink& InA, const FDrawingPolicyLink& InB ) const
+		FORCEINLINE bool operator()( const FDrawingPolicyLinkRef& InA, const FDrawingPolicyLinkRef& InB ) const
 		{
-			// Calculate hash for InA
-			uint64 hashA = appMemFastHash( InA.boundShaderState->GetHash(), InA.drawingPolicy.GetTypeHash() );
+			return InA->GetTypeHash() < InB->GetTypeHash();
+		}
 
-			// Calculate hash for InB
-			uint64 hashB = appMemFastHash( InB.boundShaderState->GetHash(), InB.drawingPolicy.GetTypeHash() );
+		/**
+		 * @brief Calculate hash of the FDrawingPolicyLink
+		 *
+		 * @param InDrawingPolicyLink Drawing policy link
+		 * @return Return hash of this FDrawingPolicyLink
+		 */
+		FORCEINLINE std::size_t operator()( const FDrawingPolicyLinkRef& InDrawingPolicyLink ) const
+		{
+			return InDrawingPolicyLink->GetTypeHash();
+		}
+	};
 
-			return hashA < hashB;
+	/**
+	 * @brief Functions for custom equal the drawing policy in std::set 
+	 */
+	struct FDrawingPolicyEqualFunc
+	{
+		/**
+		  * @brief Compare FDrawingPolicyLinkRef
+		  *
+		  * @param InA First drawing policy
+		  * @param InB Second drawing policy
+		  * @return Return true if InA and InB equal, else returning false
+		  */
+		FORCEINLINE bool operator()( const FDrawingPolicyLinkRef& InA, const FDrawingPolicyLinkRef& InB ) const
+		{
+			return ( *InA ) == ( *InB );
 		}
 	};
 
 	/**
 	 * @brief Typedef map of draw data
 	 */
-	typedef std::set< FDrawingPolicyLink, FDrawingPolicyKeyFunc >		FMapDrawData;
+	typedef std::unordered_set< FDrawingPolicyLinkRef, FDrawingPolicyKeyFunc, FDrawingPolicyEqualFunc >		FMapDrawData;
 
 	/**
 	 * @brief Add item
 	 * 
 	 * @param InDrawingPolicyLink Drawing policy link
+	 * @return Return reference to drawing policy link in SDG
 	 */
-	void AddItem( const FDrawingPolicyLink& InDrawingPolicyLink )
+	FDrawingPolicyLinkRef AddItem( const FDrawingPolicyLinkRef& InDrawingPolicyLink )
 	{
+		check( InDrawingPolicyLink );
+
 		// Get drawing policy link in std::set
-		FMapDrawData::iterator	it = meshes.find( InDrawingPolicyLink );
-		
+		FMapDrawData::iterator		it = meshes.find( InDrawingPolicyLink );
+
 		// If drawing policy link is not exist - we insert
 		if ( it == meshes.end() )
 		{
 			it = meshes.insert( InDrawingPolicyLink ).first;
-		}	
-		// Else add mesh batches to link
-		else
+		}
+
+		// Return drawing policy link in SDG
+		return *it;
+	}
+
+	/**
+	 * @brief Remove item
+	 *
+	 * @param InDrawingPolicyLink Drawing policy link
+	 */
+	void RemoveItem( const FDrawingPolicyLinkRef& InDrawingPolicyLink )
+	{
+		check( InDrawingPolicyLink );
+		if ( InDrawingPolicyLink->GetRefCount() == 1 )
 		{
-			for ( auto itNewBatch = InDrawingPolicyLink.meshBatchList.begin(), itNewBatchEnd = InDrawingPolicyLink.meshBatchList.end(); itNewBatch != itNewBatchEnd; ++itNewBatch )
-			{
-				// If in new batch num instances less 0 - we continue to next step
-				if ( itNewBatch->numInstances <= 0 )
-				{
-					continue;
-				}
-
-				// Find already created mesh batch, if not exist - we insert new batch
-				FDrawingPolicyLink::FMeshBatchList::iterator		itOldBatch = it->meshBatchList.find( *itNewBatch );
-				if ( itOldBatch == it->meshBatchList.end() )
-				{
-					it->meshBatchList.insert( *itNewBatch );
-				}
-				// Else we update numInstances and add new transformation matrix for new instances
-				else
-				{
-					uint32		srcNumInstances = itOldBatch->numInstances;
-					uint32		needNumInstances = itNewBatch->numInstances;
-					uint32		newNumInstances = srcNumInstances + needNumInstances;
-					itOldBatch->numInstances = newNumInstances;
-
-					itOldBatch->transformationMatrices.resize( newNumInstances );
-					for ( uint32 globalIndex = srcNumInstances, localIndex = 0; globalIndex < newNumInstances && localIndex < newNumInstances; ++globalIndex, ++localIndex )
-					{
-						itOldBatch->transformationMatrices[ globalIndex ] = itNewBatch->transformationMatrices[ localIndex ];
-					}
-				}
-			}
+			meshes.erase( InDrawingPolicyLink );
 		}
 	}
 
@@ -272,7 +347,15 @@ public:
 	 */
 	FORCEINLINE void Clear()
 	{
-		meshes.clear();
+		for ( FMapDrawData::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
+		{
+			FDrawingPolicyLinkRef		drawingPolicyLink = *it;
+			for ( FMeshBatchList::const_iterator itMeshBatch = drawingPolicyLink->meshBatchList.begin(), itMeshBatchEnd = drawingPolicyLink->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
+			{
+				itMeshBatch->numInstances = 0;
+				itMeshBatch->transformationMatrices.clear();
+			}
+		}
 	}
 
 	/**
@@ -295,13 +378,28 @@ public:
 		check( IsInRenderingThread() );
 		for ( FMapDrawData::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
 		{
-			it->drawingPolicy.SetRenderState( InDeviceContext );
-			it->drawingPolicy.SetShaderParameters( InDeviceContext );
+			bool						bIsInitedRenderState = false;
+			FDrawingPolicyLinkRef		drawingPolicyLink = *it;
 
 			// Draw all mesh batches
-			for ( FDrawingPolicyLink::FMeshBatchList::const_iterator itMeshBatch = it->meshBatchList.begin(), itMeshBatchEnd = it->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
+			for ( FMeshBatchList::const_iterator itMeshBatch = drawingPolicyLink->meshBatchList.begin(), itMeshBatchEnd = drawingPolicyLink->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
 			{
-				it->drawingPolicy.Draw( InDeviceContext, *itMeshBatch, InSceneView );
+				// If in mesh batch not exist instance - continue to next step
+				if ( itMeshBatch->numInstances <= 0 )
+				{
+					continue;
+				}
+
+				// If we not initialized render state - do it!
+				if ( !bIsInitedRenderState )
+				{
+					drawingPolicyLink->drawingPolicy.SetRenderState( InDeviceContext );
+					drawingPolicyLink->drawingPolicy.SetShaderParameters( InDeviceContext );
+					bIsInitedRenderState = true;
+				}
+
+				// Draw mesh batch
+				drawingPolicyLink->drawingPolicy.Draw( InDeviceContext, *itMeshBatch, InSceneView );
 			}
 		}
 	}
@@ -421,7 +519,7 @@ public:
 	}
 
 private:
-	FSceneDepthGroup							SDGs[ SDG_Max ];			/** Scene depth groups */
+	FSceneDepthGroup							SDGs[ SDG_Max ];			/**< Scene depth groups */
 	std::list< LPrimitiveComponentRef >			primitives;					/**< List of primitives on scene */
 };
 

@@ -21,6 +21,7 @@
 	- Fixed commit constants buffer to device in D3D11RHI
 	- Fixed containing FDrawingPolicyLink in std::set
 	- Implemented instancing rendering
+	- Optimized building SDGs in scene
 
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

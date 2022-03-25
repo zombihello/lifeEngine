@@ -352,7 +352,18 @@ class FBaseDeviceContextRHI* FD3D11RHI::GetImmediateContext() const
 
 void FD3D11RHI::SetupInstancing( class FBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, void* InInstanceData, uint32 InInstanceStride, uint32 InInstanceSize, uint32 InNumInstances )
 {
-	instanceBuffer = new FD3D11VertexBufferRHI( RUF_Static, InInstanceSize, ( byte* )InInstanceData, TEXT( "Instance" ) );
+	if ( !instanceBuffer || instanceBuffer->GetSize() < InInstanceSize )
+	{
+		instanceBuffer = new FD3D11VertexBufferRHI( RUF_Dynamic, InInstanceSize, ( byte* )InInstanceData, TEXT( "Instance" ) );
+	}
+	else
+	{
+		FLockedData		lockedData;
+		LockVertexBuffer( InDeviceContext, instanceBuffer, InInstanceSize, 0, lockedData );
+		memcpy( lockedData.data, InInstanceData, InInstanceSize );
+		UnlockVertexBuffer( InDeviceContext, instanceBuffer, lockedData );
+	}
+
 	SetStreamSource( InDeviceContext, InStreamIndex, instanceBuffer, InInstanceStride, 0 );
 }
 

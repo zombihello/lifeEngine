@@ -40,6 +40,9 @@ void FSceneView::SetCameraView( const FCameraView& InCameraView )
 
 void FScene::AddPrimitive( class LPrimitiveComponent* InPrimitive )
 {
+	check( InPrimitive );
+
+	InPrimitive->LinkDrawList( this );
 	primitives.push_back( InPrimitive );
 }
 
@@ -49,6 +52,7 @@ void FScene::RemovePrimitive( class LPrimitiveComponent* InPrimitive )
 	{
 		if ( *it == InPrimitive )
 		{
+			InPrimitive->UnlinkDrawList();
 			primitives.erase( it );
 			return;
 		}
@@ -68,7 +72,7 @@ void FScene::BuildSDGs( const FSceneView& InSceneView )
 	{
 		if ( InSceneView.GetFrustum().IsIn( ( *it )->GetBoundBox() ) )
 		{
-			( *it )->AddToDrawList( this, InSceneView );
+			( *it )->AddToDrawList( InSceneView );
 		}
 	}
 }

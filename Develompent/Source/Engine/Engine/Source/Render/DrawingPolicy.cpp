@@ -6,10 +6,11 @@
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/DrawingPolicy.h"
 
-FMeshDrawingPolicy::FMeshDrawingPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) :
-	material( InMaterial ),
-	vertexFactory( InVertexFactory ),
-	depthBias( InDepthBias )
+FMeshDrawingPolicy::FMeshDrawingPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) 
+	: material( InMaterial )
+	, vertexFactory( InVertexFactory )
+	, depthBias( InDepthBias )
+	, hash( appMemFastHash( material, vertexFactory ? vertexFactory->GetTypeHash() : 0 ) )
 {
 	check( InVertexFactory && InMaterial );
 
@@ -48,17 +49,22 @@ void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDev
 
 uint64 FMeshDrawingPolicy::GetTypeHash() const
 {
-	return appMemFastHash( material, vertexFactory ? vertexFactory->GetTypeHash() : 0 );
+	return hash;
 }
 
 FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const
 {
-	check( material && vertexFactory && vertexShader && pixelShader );
-	return GRHI->CreateBoundShaderState(
-				material->GetAssetName().c_str(),
-				vertexFactory->GetDeclaration(),
-				vertexShader->GetVertexShader(),
-				pixelShader->GetPixelShader() );
+	if ( !boundShaderState )
+	{
+		check( material && vertexFactory && vertexShader && pixelShader );
+		boundShaderState = GRHI->CreateBoundShaderState(
+			material->GetAssetName().c_str(),
+			vertexFactory->GetDeclaration(),
+			vertexShader->GetVertexShader(),
+			pixelShader->GetPixelShader() );
+	}
+
+	return boundShaderState;
 }
 
 bool FMeshDrawingPolicy::Matches( const FMeshDrawingPolicy& InOtherDrawer ) const
