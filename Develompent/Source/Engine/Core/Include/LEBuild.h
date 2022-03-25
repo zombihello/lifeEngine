@@ -55,6 +55,11 @@
 	#define FRAME_CAPTURE_MARKERS	!SHIPPING_BUILD
 #endif // !FRAME_CAPTURE_MARKERS
 
+// Is instancing allowed? 
+#ifndef USE_INSTANCING
+	#define USE_INSTANCING			1
+#endif // !USE_INSTANCING
+
 /**
  * @ingroup Core
  * Checks to see if pure virtual has actually been implemented
@@ -62,7 +67,7 @@
  * @see Core.h
  */
 #ifndef CHECK_PUREVIRTUALS
-	#define CHECK_PUREVIRTUALS 0
+	#define CHECK_PUREVIRTUALS		0
 #endif
 
 #endif // !LEBUILD_H

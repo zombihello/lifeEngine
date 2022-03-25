@@ -251,6 +251,12 @@ public:
 	 * @return Return true if compilation is succeed, else returning false
 	 */
 	virtual bool								CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const FShaderCompilerEnvironment& InEnvironment, FShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) )			{ return false; }
+
+	/**
+	 * @brief Get shader platform
+	 * @return Return shader platform
+	 */
+	virtual EShaderPlatform						GetShaderPlatform() const			{ return SP_NumPlatforms; }
 #endif // WITH_EDITOR
 
 #if WITH_IMGUI
@@ -294,6 +300,18 @@ public:
 	 */
 	virtual void								EndDrawEvent( class FBaseDeviceContextRHI* InDeviceContext ) {}
 #endif // FRAME_CAPTURE_MARKERS
+
+	/**
+	 * @brief Setup instancing
+	 * 
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InStreamIndex Stream index
+	 * @param[in] InInstanceData Pointer to instance data
+	 * @param[in] InInstanceStride Stride of instance data
+	 * @param[in] InInstanceSize Size in bytes of instance data
+	 * @param[in] InNumInstances Number of instances
+	 */
+	virtual void								SetupInstancing( class FBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, void* InInstanceData, uint32 InInstanceStride, uint32 InInstanceSize, uint32 InNumInstances ) {}
 
 	/**
 	 * @brief Set viewport
@@ -470,8 +488,9 @@ public:
 	 * @param[in] InPrimitiveType Primitive type
 	 * @param[in] InBaseVertexIndex Base vertex index
 	 * @param[in] InNumPrimitives Number primitives for render
+	 * @param[in] InNumInstances Number instances to draw
 	 */
-	virtual void								DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives ) {}
+	virtual void								DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) {}
 
 	/**
 	 * @brief Draw primitive
@@ -482,8 +501,9 @@ public:
 	 * @param[in] InBaseVertexIndex Base vertex index
 	 * @param[in] InStartIndex Start index in index buffer
 	 * @param[in] InNumPrimitives Number primitives for render
+	 * @param[in] InNumInstances Number instances to draw
 	 */
-	virtual void								DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceContext, class FBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives ) {}
+	virtual void								DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceContext, class FBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) {}
 
 	/**
 	 * @brief Is initialized RHI

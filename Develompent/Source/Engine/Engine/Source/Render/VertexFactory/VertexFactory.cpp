@@ -1,16 +1,28 @@
+#include "LEBuild.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/Misc.h"
 #include "RHI/BaseRHI.h"
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
-FVertexFactoryMetaType::FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName, ConstructParametersType InConstructParameters )
+FVertexFactoryMetaType::FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName, bool InSupportsInstancing, uint32 InInstanceStreamIndex, ConstructParametersType InConstructParameters
+#if WITH_EDITOR
+												, FShouldCacheFunc InShouldCacheFunc, FModifyCompilationEnvironmentFunc InModifyCompilationEnvironmentFunc
+#endif // WITH_EDITOR
+)
 	: factoryName( InFactoryName )
 	, hash( appCalcHash( InFactoryName ) )
 	, ConstructParameters( InConstructParameters )
-
+#if USE_INSTANCING
+	, bSupportsInstancing( InSupportsInstancing )
+#else
+	, bSupportsInstancing( false )
+#endif // USE_INSTANCING
+	, instanceStreamIndex( InInstanceStreamIndex )
 #if WITH_EDITOR
 	, sourceFilename( InFileName )
+	, ShouldCacheFunc( InShouldCacheFunc )
+	, ModifyCompilationEnvironmentFunc( InModifyCompilationEnvironmentFunc )
 #endif // WITH_EDITOR
 {
 	FContainerVertexFactoryMetaType::Get()->RegisterType( this );
@@ -36,6 +48,11 @@ void FVertexFactory::Set( class FBaseDeviceContextRHI* InDeviceContextRHI ) cons
 	}
 }
 
+void FVertexFactory::SetupInstancing( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+{
+	appErrorf( TEXT( "FVertexFactory::SetupInstancing :: Not implemented" ) );
+}
+
 void FVertexFactory::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
 {}
 
@@ -48,3 +65,13 @@ void FVertexFactory::Init()
 {
 	BeginInitResource( this );
 }
+
+#if WITH_EDITOR
+bool FVertexFactory::ShouldCache( EShaderPlatform InShaderPlatform )
+{
+	return true;
+}
+
+void FVertexFactory::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment )
+{}
+#endif // WITH_EDITOR

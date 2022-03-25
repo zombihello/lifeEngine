@@ -22,6 +22,10 @@
 #include "RHI/BaseBufferRHI.h"
 #include "RHI/TypesRHI.h"
 
+#if WITH_EDITOR
+#include "Render/Shaders/ShaderCompiler.h"
+#endif // WITH_EDITOR
+
 /**
  * @ingroup Engine
  * An interface to the parameter bindings for the vertex factory used by a shader
@@ -46,19 +50,20 @@ public:
 	 * 
 	 * @param InDeviceContextRHI RHI device context
 	 * @param InVertexFactory Vertex factory
-	 * @param InView Scene view
 	 */
-	virtual void Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FSceneView* InView ) const = 0;
+	virtual void Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory ) const = 0;
 	
 	/**
 	 * @brief Set the l2w transform shader
 	 * 
 	 * @param InDeviceContextRHI RHI device context
 	 * @param InMesh Mesh data
-	 * @param InBatchElementIndex Batch element index
+	 * @param InVertexFactory Vertex factory
 	 * @param InView Scene view
+	 * @param InNumInstances Number instances
+	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, uint32 InBatchElementIndex, const class FSceneView* InView ) const = 0;
+	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const = 0;
 };
 
 /**
@@ -72,6 +77,18 @@ public:
 	 * @brief Typedef of function for create shader parameters for vertex factory
 	 */
 	typedef FVertexFactoryShaderParameters* ( *ConstructParametersType )( EShaderFrequency InShaderFrequency );
+
+#if WITH_EDITOR
+	/**
+	 * @brief Pointer to static method for check is need compile shader
+	 */
+	typedef bool ( *FShouldCacheFunc )( EShaderPlatform InShaderPlatform );
+
+	/**
+	 * @brief Pointer to static method for modify compilation environment of shader
+	 */
+	typedef void ( *FModifyCompilationEnvironmentFunc )( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment );
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Class container for storage global vertex factory types
@@ -152,9 +169,17 @@ public:
 	 *
 	 * @param[in] InFactoryName Vertex factory name
 	 * @param[in] InFileName File name of source vertex factory
+	 * @param[in] InSupportsInstancing Is supported instancing
+	 * @param[in] InInstanceStreamIndex Instance stream index
 	 * @param[in] InConstructParameters Function for create vertex factory shader parameters
+	 * @param[in] InShouldCacheFunc Pointer to static method for check is need compile shader. WARNING! Only with enabled define WITH_EDITOR
+	 * @param[in] InModifyCompilationEnvironmentFunc Pointer to static method for modify compilation environment of shader. WARNING! Only with enabled define WITH_EDITOR
 	 */
-	FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName, ConstructParametersType InConstructParameters );
+	FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName, bool InSupportsInstancing, uint32 InInstanceStreamIndex, ConstructParametersType InConstructParameters
+#if WITH_EDITOR
+							, FShouldCacheFunc InShouldCacheFunc, FModifyCompilationEnvironmentFunc InModifyCompilationEnvironmentFunc
+#endif // WITH_EDITOR
+	);
 
 	/**
 	 * Get factory name
@@ -194,15 +219,63 @@ public:
 	{
 		return sourceFilename;
 	}
+
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @return Return true if need compile shader, else returning false
+	 */
+	FORCEINLINE bool ShouldCache( EShaderPlatform InShaderPlatform ) const
+	{
+		check( ShouldCacheFunc );
+		return ShouldCacheFunc( InShaderPlatform );
+	}
+
+	/**
+	 * @brief Modify compilation environment
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InEnvironment Shader compiler environment
+	 */
+	FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment ) const
+	{
+		check( ModifyCompilationEnvironmentFunc );
+		ModifyCompilationEnvironmentFunc( InShaderPlatform, InEnvironment );
+
+		InEnvironment.difinitions.insert( std::make_pair( TEXT( "USE_INSTANCING" ), bSupportsInstancing ? TEXT( "1" ) : TEXT( "0" ) ) );	
+	}
 #endif // WITH_EDITOR
 
+	/**
+	 * @brief Is supports instancing
+	 * @return Return true if vertex factory is supported instancing, else returning false
+	 */
+	FORCEINLINE bool SupportsInstancing() const
+	{
+		return bSupportsInstancing;
+	}
+
+	/**
+	 * @brief Get instance stream index
+	 * @return Return instance stream index
+	 */
+	FORCEINLINE uint32 GetInstanceStreamIndex() const
+	{
+		return instanceStreamIndex;
+	}
+
 private:
-	std::wstring				factoryName;				/**< Vertex factory name */
-	uint64						hash;						/**< Vertex factory hash */
-	ConstructParametersType		ConstructParameters;		/**< Function of create vertex factory shader parameters */
+	std::wstring							factoryName;						/**< Vertex factory name */
+	uint64									hash;								/**< Vertex factory hash */
+	ConstructParametersType					ConstructParameters;				/**< Function of create vertex factory shader parameters */
+	bool									bSupportsInstancing;				/**< Is supported instancing */
+	uint32									instanceStreamIndex;				/**< Instance stream index */
 
 #if WITH_EDITOR
-	std::wstring			sourceFilename;		/**< Source file name of vertex factory */
+	std::wstring							sourceFilename;						/**< Source file name of vertex factory */
+	FShouldCacheFunc						ShouldCacheFunc;                    /**< Pointer to static method for check if need compile shader for platform */
+	FModifyCompilationEnvironmentFunc		ModifyCompilationEnvironmentFunc;   /**< Pointer to static method for modify compilation environment */
 #endif // WITH_EDITOR
 };
 
@@ -225,10 +298,18 @@ private:
  *
  * @param[in] FactoryClass The name of the class representing an instance of the vertex factory type
  * @param[in] FileName File name of source vertex factory
+ * @param[in] SupportsInstancing Is supported instancing
+ * @param[in] InstanceStreamIndex Instance stream index
  */
-#define IMPLEMENT_VERTEX_FACTORY_TYPE( FactoryClass, FileName ) \
+#if WITH_EDITOR
+#define IMPLEMENT_VERTEX_FACTORY_TYPE( FactoryClass, FileName, SupportsInstancing, InstanceStreamIndex ) \
 	FVertexFactoryShaderParameters* Construct##FactoryClass##ShaderParameters( EShaderFrequency InShaderFrequency ) { return FactoryClass::ConstructShaderParameters( InShaderFrequency ); } \
-	FVertexFactoryMetaType			FactoryClass::staticType( TEXT( #FactoryClass ), FileName, Construct##FactoryClass##ShaderParameters );
+	FVertexFactoryMetaType			FactoryClass::staticType( TEXT( #FactoryClass ), FileName, SupportsInstancing, InstanceStreamIndex, Construct##FactoryClass##ShaderParameters, FactoryClass::ShouldCache, FactoryClass::ModifyCompilationEnvironment );
+#else
+#define IMPLEMENT_VERTEX_FACTORY_TYPE( FactoryClass, FileName, SupportsInstancing ) \
+	FVertexFactoryShaderParameters* Construct##FactoryClass##ShaderParameters( EShaderFrequency InShaderFrequency ) { return FactoryClass::ConstructShaderParameters( InShaderFrequency ); } \
+	FVertexFactoryMetaType			FactoryClass::staticType( TEXT( #FactoryClass ), FileName, SupportsInstancing, InstanceStreamIndex, Construct##FactoryClass##ShaderParameters );
+#endif // WITH_EDITOR
 
 /**
  * @ingroup Engine
@@ -281,6 +362,17 @@ public:
 	}
 
 	/**
+	 * @brief Setup instancing
+	 * 
+	 * @param InDeviceContextRHI RHI device context
+	 * @param InMesh Mesh data
+	 * @param InView Scene view
+	 * @param InNumInstances Number instances
+	 * @param InStartInstanceID ID of first instance
+	 */
+	virtual void SetupInstancing( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+
+	/**
 	 * Activates the vertex factory
 	 *
 	 * @param[in] InDeviceContextRHI RHI device context
@@ -293,6 +385,42 @@ public:
 	 * @param[in] InDeviceContextRHI RHI device context
 	 */
 	virtual void SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI );
+
+#if WITH_EDITOR
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform );
+
+	/**
+	 * @brief Modify compilation environment
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InEnvironment Shader compiler environment
+	 */
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment );
+#endif // WITH_EDITOR
+
+	/**
+	 * @brief Is supports instancing
+	 * @return Return true if vertex factory is supported instancing, else returning false
+	 */
+	FORCEINLINE bool SupportsInstancing() const
+	{
+		return GetType()->SupportsInstancing();
+	}
+
+	/**
+	 * @brief Get instance stream index
+	 * @return Return instance stream index
+	 */
+	FORCEINLINE uint32 GetInstanceStreamIndex() const
+	{
+		return GetType()->GetInstanceStreamIndex();
+	}
 
 	/**
 	 * Get vertex factory type
@@ -324,8 +452,8 @@ public:
 	void InitDeclaration( const FVertexDeclarationElementList& InElements );
 
 private:
-	std::vector< FVertexStream >	streams;		/**< Array vertex streams */
-	FVertexDeclarationRHIRef		declaration;	/**< Vertex declaration */
+	std::vector< FVertexStream >	streams;					/**< Array vertex streams */
+	FVertexDeclarationRHIRef		declaration;				/**< Vertex declaration */
 };
 
 #endif // !VERTEXFACTORY_H

@@ -81,17 +81,27 @@ FMatrix LSpriteComponent::CalcTransformationMatrix( const class FSceneView& InSc
 
 void LSpriteComponent::AddToDrawList( class FScene* InScene, const class FSceneView& InSceneView )
 {
-	FSpriteSurface													surface = sprite->GetSurface();
+    if ( !sprite )
+    {
+        return;
+    }
+
+    FSceneDepthGroup&                                               SDGWorld = InScene->GetSDG( SDG_World );
+    FSpriteSurface													surface = sprite->GetSurface();
 	FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLink		drawPolicyLink( FStaticMeshDrawPolicy( sprite->GetVertexFactory(), sprite->GetMaterial() ) );
-	drawPolicyLink.meshBatch.primitiveType = PT_TriangleList;
 
-	std::vector< FMeshBatchElement >								meshElements =
-	{
-		FMeshBatchElement{ sprite->GetIndexBufferRHI(), surface.baseVertexIndex, surface.firstIndex, surface.numPrimitives, CalcTransformationMatrix( InSceneView ) }
-	};
+	FMeshBatch			            meshBatch;
+	meshBatch.baseVertexIndex       = surface.baseVertexIndex;
+	meshBatch.firstIndex            = surface.firstIndex;
+	meshBatch.numPrimitives         = surface.numPrimitives;
+	meshBatch.indexBufferRHI        = sprite->GetIndexBufferRHI();
+	meshBatch.numInstances          = 1;
+	meshBatch.primitiveType         = PT_TriangleList;
+	meshBatch.transformationMatrices.push_back( CalcTransformationMatrix( InSceneView ) );
+    drawPolicyLink.meshBatchList.insert( meshBatch );
 
-	FSceneDepthGroup&		SDG = InScene->GetSDG( SDG_World );
-	SDG.spriteDrawList.AddItem( drawPolicyLink, meshElements );
+    // Add meshes to SDG_World (scene layer 'World')
+    SDGWorld.spriteDrawList.AddItem( drawPolicyLink );
 
     // Update AABB
     boundbox = FBox::BuildAABB( GetComponentLocation(), FVector( GetSpriteSize(), 1.f ) );

@@ -19,5 +19,5 @@ AStaticMesh::~AStaticMesh()
 void AStaticMesh::BeginPlay()
 {
 	Super::BeginPlay();
-	staticMeshComponent->SetStaticMesh( ( FStaticMeshRef )GPackageManager->FindAsset( TEXT( "Tiger:TigerDestructable_SM" ), AT_StaticMesh ) );
+	staticMeshComponent->SetStaticMesh( ( FStaticMeshRef )GPackageManager->FindAsset( TEXT( "Tiger:Tiger_SM" ), AT_StaticMesh ) );
 }

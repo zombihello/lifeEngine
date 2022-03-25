@@ -26,13 +26,21 @@ void FShaderParameter::Bind( const FShaderParameterMap& InParameterMap, const tc
 /**
  * Constructor of FShaderMetaType
  */
-FShaderMetaType::FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance ) :
-	name( InName ),
-	fileName( appShaderDir() + InFileName.c_str() ),
-	functionName( InFunctionName ),
-	frequency( InFrequency ),
-	ConstructSerializedInstance( InConstructSerializedInstance ),
-	ConstructCompiledInstance( InConstructCompiledInstance )
+FShaderMetaType::FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance
+#if WITH_EDITOR
+								  , FShouldCacheFunc InShouldCacheFunc, FModifyCompilationEnvironmentFunc InModifyCompilationEnvironmentFunc
+#endif // WITH_EDITOR
+)
+	: name( InName )
+	, fileName( appShaderDir() + InFileName.c_str() )
+	, functionName( InFunctionName )
+	, frequency( InFrequency )
+	, ConstructSerializedInstance( InConstructSerializedInstance )
+	, ConstructCompiledInstance( InConstructCompiledInstance )
+#if WITH_EDITOR
+	, ShouldCacheFunc( InShouldCacheFunc )
+	, ModifyCompilationEnvironmentFunc( InModifyCompilationEnvironmentFunc )
+#endif // WITH_EDITOR
 {
 	FShaderManager::RegisterShaderType( this );
 }
@@ -137,7 +145,7 @@ void FShaderManager::Init()
 	{
 #if WITH_EDITOR
 		FShaderCompiler			shaderCompiler;
-		bool					result = shaderCompiler.CompileAll( pathShaderCache.c_str() );
+		bool					result = shaderCompiler.CompileAll( pathShaderCache.c_str(), GRHI->GetShaderPlatform() );
 		check( result );
 
 		result = LoadShaders( pathShaderCache.c_str() );

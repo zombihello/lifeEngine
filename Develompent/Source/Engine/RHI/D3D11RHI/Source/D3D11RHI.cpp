@@ -350,6 +350,12 @@ class FBaseDeviceContextRHI* FD3D11RHI::GetImmediateContext() const
 	return immediateContext;
 }
 
+void FD3D11RHI::SetupInstancing( class FBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, void* InInstanceData, uint32 InInstanceStride, uint32 InInstanceSize, uint32 InNumInstances )
+{
+	instanceBuffer = new FD3D11VertexBufferRHI( RUF_Static, InInstanceSize, ( byte* )InInstanceData, TEXT( "Instance" ) );
+	SetStreamSource( InDeviceContext, InStreamIndex, instanceBuffer, InInstanceStride, 0 );
+}
+
 /**
  * Set viewport
  */
@@ -596,7 +602,7 @@ void FD3D11RHI::UnlockTexture2D( class FBaseDeviceContextRHI* InDeviceContext, F
 /**
  * Draw primitive
  */
-void FD3D11RHI::DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives )
+void FD3D11RHI::DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumInstances /* = 1 */ )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	uint32							vertexCount = GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
@@ -612,10 +618,17 @@ void FD3D11RHI::DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPr
 	}
 
 	// Draw primitive
-	d3d11DeviceContext->Draw( vertexCount, InBaseVertexIndex );
+	if ( InNumInstances > 1 )
+	{
+		d3d11DeviceContext->DrawInstanced( vertexCount, InNumInstances, InBaseVertexIndex, 0 );
+	}
+	else
+	{
+		d3d11DeviceContext->Draw( vertexCount, InBaseVertexIndex );
+	}
 }
 
-void FD3D11RHI::DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceContext, class FBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives )
+void FD3D11RHI::DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceContext, class FBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives, uint32 InNumInstances /* = 1 */ )
 {
 	check( InIndexBuffer );
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -646,7 +659,14 @@ void FD3D11RHI::DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceConte
 
 	// Draw indexed primitive	
 	uint32							indexCount = GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
-	d3d11DeviceContext->DrawIndexed( indexCount, InStartIndex, InBaseVertexIndex );
+	if ( InNumInstances > 1 )
+	{
+		d3d11DeviceContext->DrawIndexedInstanced( indexCount, InNumInstances, InStartIndex, InBaseVertexIndex, 0 );
+	}
+	else
+	{
+		d3d11DeviceContext->DrawIndexed( indexCount, InStartIndex, InBaseVertexIndex );
+	}
 }
 
 /**
@@ -983,6 +1003,11 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 	delete[] buffer;
 	delete shaderArchive;
 	return true;
+}
+
+EShaderPlatform FD3D11RHI::GetShaderPlatform() const
+{
+	return SP_D3D11;
 }
 #endif // WITH_EDITOR
 

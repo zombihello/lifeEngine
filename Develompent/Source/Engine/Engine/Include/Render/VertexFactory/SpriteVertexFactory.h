@@ -43,6 +43,11 @@ class FSpriteVertexShaderParameters : public FGeneralVertexShaderParameters
 {
 public:
 	/**
+	 * Constructor
+	 */
+	FSpriteVertexShaderParameters();
+
+	/**
 	 * @brief Bind shader parameters
 	 *
 	 * @param InParameterMap Shader parameter map
@@ -54,9 +59,8 @@ public:
 	 *
 	 * @param InDeviceContextRHI RHI device context
 	 * @param InVertexFactory Vertex factory
-	 * @param InView Scene view
 	 */
-	virtual void Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FSceneView* InView ) const override;
+	virtual void Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory ) const override;
 
 private:
 	FShaderParameter		textureRectParameter;		/**< Texture rect parameter */
@@ -74,7 +78,8 @@ class FSpriteVertexFactory : public FVertexFactory
 public:
 	enum EStreamSourceSlot
 	{
-		SSS_Main = 0		/**< Main vertex buffer */
+		SSS_Main		= 0,	/**< Main vertex buffer */
+		SSS_Instance	= 1		/**< Instance buffer */
 	};
 
 	/**
@@ -88,6 +93,17 @@ public:
 	 * This is only called by the rendering thread.
 	 */
 	virtual void InitRHI() override;
+
+	/**
+	 * @brief Setup instancing
+	 *
+	 * @param InDeviceContextRHI RHI device context
+	 * @param InMesh Mesh data
+	 * @param InView Scene view
+	 * @param InNumInstances Number instances
+	 * @param InStartInstanceID ID of first instance
+	 */
+	virtual void SetupInstancing( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 	/**
 	 * @brief Get type hash

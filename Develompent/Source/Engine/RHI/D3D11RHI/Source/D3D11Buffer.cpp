@@ -63,8 +63,6 @@ FD3D11VertexBufferRHI::FD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, con
 	device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
 #endif // DO_CHECK
 
-	d3d11Buffer->AddRef();
-
 #if !SHIPPING_BUILD
 	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( FString::Format( TEXT( "%s[VERTEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD

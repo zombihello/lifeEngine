@@ -235,6 +235,12 @@ public:
 	 * @return Return true if compilation is succeed, else returning false
 	 */
 	virtual bool									CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const FShaderCompilerEnvironment& InEnvironment, FShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) ) override;
+
+	/**
+	 * @brief Get shader platform
+	 * @return Return shader platform
+	 */
+	virtual EShaderPlatform						GetShaderPlatform() const override;
 #endif // WITH_EDITOR
 
 #if WITH_IMGUI
@@ -278,6 +284,18 @@ public:
 	 */
 	virtual void								EndDrawEvent( class FBaseDeviceContextRHI* InDeviceContext ) override;
 #endif // FRAME_CAPTURE_MARKERS
+
+	/**
+	 * @brief Setup instancing
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InStreamIndex Stream index
+	 * @param[in] InInstanceData Pointer to instance data
+	 * @param[in] InInstanceStride Stride of instance data
+	 * @param[in] InInstanceSize Size in bytes of instance data
+	 * @param[in] InNumInstances Number of instances
+	 */
+	virtual void								SetupInstancing( class FBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, void* InInstanceData, uint32 InInstanceStride, uint32 InInstanceSize, uint32 InNumInstances ) override;
 
 	/**
 	 * @brief Set viewport
@@ -454,8 +472,9 @@ public:
 	 * @param[in] InPrimitiveType Primitive type
 	 * @param[in] InBaseVertexIndex Base vertex index
 	 * @param[in] InNumPrimitives Number primitives for render
+	 * @param[in] InNumInstances Number instances to draw
 	 */
-	virtual void									DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives ) override;
+	virtual void								DrawPrimitive( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) override;
 
 	/**
 	 * @brief Draw primitive
@@ -466,8 +485,9 @@ public:
 	 * @param[in] InBaseVertexIndex Base vertex index
 	 * @param[in] InStartIndex Start index in index buffer
 	 * @param[in] InNumPrimitives Number primitives for render
+	 * @param[in] InNumInstances Number instances to draw
 	 */
-	virtual void									DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceContext, class FBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives ) override;
+	virtual void								DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceContext, class FBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) override;
 
 	/**
 	 * @brief Is initialized RHI
@@ -524,17 +544,18 @@ public:
 	}
 
 private:
-	bool							isInitialize;						/**< Is RHI is initialized */
-	class FD3D11ConstantBuffer*		globalConstantBuffer;				/**< Global constant buffer */
-	class FD3D11ConstantBuffer*		vsConstantBuffers[ SOB_Max ];		/**< Constant buffers for vertex shader */
-	class FD3D11ConstantBuffer*		psConstantBuffer;					/**< Constant buffer for pixel shader */
-	class FD3D11DeviceContext*		immediateContext;					/**< Immediate context */
-	FBoundShaderStateHistory		boundShaderStateHistory;			/**< History of using bound shader states */
-	FD3D11StateCache				stateCache;							/**< DirectX 11 state cache */
+	bool										isInitialize;						/**< Is RHI is initialized */
+	class FD3D11ConstantBuffer*					globalConstantBuffer;				/**< Global constant buffer */
+	class FD3D11ConstantBuffer*					vsConstantBuffers[ SOB_Max ];		/**< Constant buffers for vertex shader */
+	class FD3D11ConstantBuffer*					psConstantBuffer;					/**< Constant buffer for pixel shader */
+	class FD3D11DeviceContext*					immediateContext;					/**< Immediate context */
+	FBoundShaderStateHistory					boundShaderStateHistory;			/**< History of using bound shader states */
+	FD3D11StateCache							stateCache;							/**< DirectX 11 state cache */
+	TRefCountPtr< FD3D11VertexBufferRHI >		instanceBuffer;						/**< Instance buffer */
 
-	ID3D11Device*					d3d11Device;						/**< D3D11 Device */
-	IDXGIFactory*					dxgiFactory;						/**< DXGI factory */
-	IDXGIAdapter*					dxgiAdapter;						/**< DXGI adapter */
+	ID3D11Device*								d3d11Device;						/**< D3D11 Device */
+	IDXGIFactory*								dxgiFactory;						/**< DXGI factory */
+	IDXGIAdapter*								dxgiAdapter;						/**< DXGI adapter */
 };
 
 /**

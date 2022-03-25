@@ -41,14 +41,24 @@ void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* In
 void FStaticMeshDrawPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView )
 {
 	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, FString::Format( TEXT( "Material %s" ), material->GetAssetName().c_str() ).c_str() );
-	for ( uint32 indexBatch = 0, numBatches = ( uint32 )InMeshBatch.elements.size(); indexBatch < numBatches; ++indexBatch )
-	{
-		const FMeshBatchElement&		batchElement = InMeshBatch.elements[ indexBatch ];
-		check( batchElement.indexBufferRHI );
+	check( InMeshBatch.indexBufferRHI );
 
-		vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, indexBatch, &InSceneView );
+	// If vertex factory not support instancig - draw without it
+	if ( !vertexFactory->SupportsInstancing() )
+	{
+		for ( uint32 instanceId = 0; instanceId < InMeshBatch.numInstances; ++instanceId )
+		{
+			vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, vertexFactory, &InSceneView, 1, instanceId );
+			GRHI->CommitConstants( InDeviceContextRHI );
+			GRHI->DrawIndexedPrimitive( InDeviceContextRHI, InMeshBatch.indexBufferRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.firstIndex, InMeshBatch.numPrimitives );
+		}
+	}
+	// Else we draw geometry with help instancing
+	else
+	{
+		vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, vertexFactory, &InSceneView, InMeshBatch.numInstances );
 		GRHI->CommitConstants( InDeviceContextRHI );
-		GRHI->DrawIndexedPrimitive( InDeviceContextRHI, batchElement.indexBufferRHI, InMeshBatch.primitiveType, batchElement.baseVertexIndex, batchElement.firstIndex, batchElement.numPrimitives );
+		GRHI->DrawIndexedPrimitive( InDeviceContextRHI, InMeshBatch.indexBufferRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.firstIndex, InMeshBatch.numPrimitives, InMeshBatch.numInstances );
 	}
 }
 

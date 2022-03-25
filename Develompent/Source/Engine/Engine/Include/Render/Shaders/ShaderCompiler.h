@@ -89,6 +89,34 @@ struct FShaderCompilerOutput
 
 /**
  * @ingroup Engine
+ * @brief Enumeration of shader platform type
+ */
+enum EShaderPlatform
+{
+	SP_D3D11,			/**< DirectX 11 */
+	SP_NumPlatforms,	/**< Number of shader platforms */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Converts shader platform to human readable string
+ *
+ * @param InShaderPlatform	Shader platform enum
+ * @return Return text representation of enum
+ */
+FORCEINLINE const tchar* ShaderPlatformToText( EShaderPlatform InShaderPlatform )
+{
+	switch ( InShaderPlatform )
+	{
+	case SP_D3D11:		return TEXT( "D3D11" );
+	default:			
+		appErrorf( TEXT( "Unknown shader platform 0x%X" ), InShaderPlatform );
+		return TEXT( "UNKNOWN");
+	}
+}
+
+/**
+ * @ingroup Engine
  * @brief Class-manager for compiler shaders
  */
 class FShaderCompiler
@@ -96,24 +124,24 @@ class FShaderCompiler
 public:
 	/**
 	 * @brief Compile all shaders
+	 * 
 	 * @param[in] InOutputCache	Path to output file with cache (example: ../../Content/GlobalShaderCache.bin)
+	 * @param[in] InShaderPlatform Shader platform enum
 	 * @return Return true if all shader compile successed, else return false
 	 */
-	bool CompileAll( const tchar* InOutputCache );
+	bool CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform );
 
 private:
 	/**
 	 * Compile shader
 	 * 
-	 * @param[in] InShaderName Shader name
-	 * @param[in] InShaderSourceFileName Path to shader source file
-	 * @param[in] InFunctionName Function of entry point in shader
-	 * @param[in] InShaderFrequency Shader frequency
+	 * @param[in] InShaderMetaType Shader meta type
+	 * @param[in] InShaderPlatform Shader platform enum
 	 * @param[in,out] InOutShaderCache Shader cache
 	 * @param[in] InVertexFactoryType Vertex factory type
 	 * @return Return true if shader compile successed, else return false
 	 */
-	bool CompileShader( const std::wstring& InShaderName, const std::wstring& InShaderSourceFileName, const std::wstring& InFunctionName, EShaderFrequency InShaderFrequency, class FShaderCache& InOutShaderCache, class FVertexFactoryMetaType* InVertexFactoryType = nullptr );
+	bool CompileShader( class FShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class FShaderCache& InOutShaderCache, class FVertexFactoryMetaType* InVertexFactoryType = nullptr );
 };
 
 #endif // !WITH_EDITOR

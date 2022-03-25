@@ -18,6 +18,10 @@
 #include "Shader.h"
 #include "ShaderCache.h"
 
+#if WITH_EDITOR
+#include "ShaderCompiler.h"
+#endif // WITH_EDITOR
+
 /**
  * @ingroup Engine
  * @brief A macro to declare a new shader type
@@ -53,6 +57,18 @@
  * @param[in] FunctionName Main function name in shader
  * @param[in] Frequency Frequency of shader
  */
+#if WITH_EDITOR
+#define IMPLEMENT_SHADER_TYPE( ShaderClass, SourceFilename, FunctionName, Frequency ) \
+	FShaderMetaType       ShaderClass::staticType( \
+		TEXT( #ShaderClass ), \
+		SourceFilename, \
+		FunctionName, \
+		Frequency, \
+		ShaderClass::ConstructSerializedInstance, \
+		ShaderClass::ConstructCompiledInstance, \
+        ShaderClass::ShouldCache, \
+        ShaderClass::ModifyCompilationEnvironment );
+#else
 #define IMPLEMENT_SHADER_TYPE( ShaderClass, SourceFilename, FunctionName, Frequency ) \
 	FShaderMetaType       ShaderClass::staticType( \
 		TEXT( #ShaderClass ), \
@@ -61,6 +77,7 @@
 		Frequency, \
 		ShaderClass::ConstructSerializedInstance, \
 		ShaderClass::ConstructCompiledInstance );
+#endif // WITH_EDITOR
 
 /**
  * @ingroup Engine
@@ -187,6 +204,18 @@ public:
      */
     typedef class FShader*        ( *FConstructCompiledInstance )();
 
+#if WITH_EDITOR
+    /**
+     * @brief Pointer to static method for check is need compile shader
+     */
+    typedef bool                  ( *FShouldCacheFunc )( EShaderPlatform InShaderPlatform );
+
+    /**
+     * @brief Pointer to static method for modify compilation environment of shader
+     */
+    typedef void                  ( *FModifyCompilationEnvironmentFunc )( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment );
+#endif // WITH_EDITOR
+
     /**
      * @brief Constructor
      * 
@@ -196,8 +225,14 @@ public:
      * @param[in] InFrequency Frequency of shader
      * @param[in] InConstructSerializedInstance Pointer to static method for create object of shader for serialize
      * @param[in] InConstructCompiledInstance Pointer to static method for create object of shader for compiling
+     * @param[in] InShouldCacheFunc Pointer to static method for check is need compile shader. WARNING! Only with enabled define WITH_EDITOR
+     * @param[in] InModifyCompilationEnvironmentFunc Pointer to static method for modify compilation environment of shader. WARNING! Only with enabled define WITH_EDITOR
      */
-    FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance );
+    FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance
+#if WITH_EDITOR
+                     , FShouldCacheFunc InShouldCacheFunc, FModifyCompilationEnvironmentFunc InModifyCompilationEnvironmentFunc
+#endif // WITH_EDITOR
+    );
 
     /**
      * @brief Constructor of copy
@@ -261,13 +296,44 @@ public:
         return ConstructCompiledInstance();
     }
 
+#if WITH_EDITOR
+    /**
+     * @brief Is need compile shader for platform
+     * 
+     * @param InShaderPlatform Shader platform
+     * @return Return true if need compile shader, else returning false
+     */
+    FORCEINLINE bool ShouldCache( EShaderPlatform InShaderPlatform ) const
+    {
+        check( ShouldCacheFunc );
+        return ShouldCacheFunc( InShaderPlatform );
+    }
+
+    /**
+     * @brief Modify compilation environment
+     *
+     * @param InShaderPlatform Shader platform
+     * @param InEnvironment Shader compiler environment
+     */
+    FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment ) const
+    {
+        check( ModifyCompilationEnvironmentFunc );
+        ModifyCompilationEnvironmentFunc( InShaderPlatform, InEnvironment );
+    }
+#endif // WITH_EDITOR
+
 private:
-    std::wstring                        name;                               /**< Name of shader */
-    std::wstring                        fileName;                           /**< Source file name */
-    std::wstring                        functionName;                       /**< Main function in shader */
-    EShaderFrequency                    frequency;                          /**< Frequency of shader */
-    FConstructSerializedInstance        ConstructSerializedInstance;        /**< Pointer to static method for create object of shader for serialize */
-    FConstructCompiledInstance          ConstructCompiledInstance;          /**< Pointer to static method for create object of shader for compiling */
+    std::wstring                        name;                                   /**< Name of shader */
+    std::wstring                        fileName;                               /**< Source file name */
+    std::wstring                        functionName;                           /**< Main function in shader */
+    EShaderFrequency                    frequency;                              /**< Frequency of shader */
+    FConstructSerializedInstance        ConstructSerializedInstance;            /**< Pointer to static method for create object of shader for serialize */
+    FConstructCompiledInstance          ConstructCompiledInstance;              /**< Pointer to static method for create object of shader for compiling */
+
+#if WITH_EDITOR
+    FShouldCacheFunc                     ShouldCacheFunc;                        /**< Pointer to static method for check if need compile shader for platform */
+    FModifyCompilationEnvironmentFunc    ModifyCompilationEnvironmentFunc;       /**< Pointer to static method for modify compilation environment */
+#endif // WITH_EDITOR
 };
 
 /**

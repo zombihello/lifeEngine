@@ -85,13 +85,13 @@ void FMaterial::CacheShaderMap()
 	// If material usage for render sprite mesh
 	{
 		const uint64			vertexFactoryHash = FSpriteVertexFactory::staticType.GetHash();
-		//if ( usage & MU_Sprite )
+		if ( usage & MU_Sprite )
 		{
 			shaderMap[ vertexFactoryHash ] = GetMeshShaders( vertexFactoryHash );
 		}
-		//else
+		else
 		{
-		//	shaderMap.erase( vertexFactoryHash );
+			shaderMap.erase( vertexFactoryHash );
 		}
 	}
 

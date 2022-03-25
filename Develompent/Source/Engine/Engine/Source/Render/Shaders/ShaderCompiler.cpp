@@ -15,7 +15,7 @@
 /**
  * Compile all shaders
  */
-bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
+bool FShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform )
 {
 	const std::unordered_map< std::wstring, FShaderMetaType* >&								shaderTypes = FShaderManager::FContainerShaderTypes::Get()->shaderMetaTypes;
 	const FVertexFactoryMetaType::FContainerVertexFactoryMetaType::FVertexFactoryMap&		vertexFactoryTypes = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->GetRegisteredTypes();
@@ -25,19 +25,23 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
 	for ( auto itShader = shaderTypes.begin(), itShaderEnd = shaderTypes.end(); itShader != itShaderEnd; ++itShader )
 	{
 		FShaderMetaType*					metaType = itShader->second;
-		EShaderFrequency					frequency = metaType->GetFrequency();
-		std::wstring						shaderName = metaType->GetName();
-		std::wstring						shaderSourceFileName = metaType->GetFileName();
-		std::wstring						functionName = metaType->GetFunctionName();
-		bool								result = false;
+		if ( !metaType->ShouldCache( InShaderPlatform ) )
+		{
+			continue;
+		}
+		const std::wstring&					shaderName = metaType->GetName();
 
 		// Compile shader for each vertex factory
 		for ( auto itVFType = vertexFactoryTypes.begin(), itVFTypeEnd = vertexFactoryTypes.end(); itVFType != itVFTypeEnd; ++itVFType )
 		{
-			FVertexFactoryMetaType* vertexFactoryType = itVFType->second;
+			FVertexFactoryMetaType*			vertexFactoryType = itVFType->second;
+			if ( !vertexFactoryType->ShouldCache( InShaderPlatform ) )
+			{
+				continue;
+			}
 
 			appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
-			result = CompileShader( shaderName, shaderSourceFileName, functionName, frequency, shaderCache, vertexFactoryType );
+			bool		result = CompileShader( metaType, InShaderPlatform, shaderCache, vertexFactoryType );
 			check( result );
 
 			LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s compiled" ), shaderName.c_str(), vertexFactoryType->GetName().c_str() );
@@ -58,24 +62,28 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache )
 	return true;
 }
 
-bool FShaderCompiler::CompileShader( const std::wstring& InShaderName, const std::wstring& InShaderSourceFileName, const std::wstring& InFunctionName, EShaderFrequency InShaderFrequency, class FShaderCache& InOutShaderCache, class FVertexFactoryMetaType* InVertexFactoryType /* = nullptr */ )
+bool FShaderCompiler::CompileShader( class FShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class FShaderCache& InOutShaderCache, class FVertexFactoryMetaType* InVertexFactoryType /* = nullptr */ )
 {
-	FShaderCompilerEnvironment		environment( InShaderFrequency );
 	FShaderCompilerOutput			output;
 	uint64							vertexFactoryHash = ( uint64 )INVALID_HASH;
+	EShaderFrequency				shaderFrequency = InShaderMetaType->GetFrequency();
+	
+	FShaderCompilerEnvironment		environment( shaderFrequency );
+	InShaderMetaType->ModifyCompilationEnvironment( InShaderPlatform, environment );
 
 	if ( InVertexFactoryType )
 	{
 		environment.vertexFactoryFileName = InVertexFactoryType->GetFileName();
 		vertexFactoryHash = InVertexFactoryType->GetHash();
+		InVertexFactoryType->ModifyCompilationEnvironment( InShaderPlatform, environment );
 	}
 
-	bool		result = GRHI->CompileShader( InShaderSourceFileName.c_str(), InFunctionName.c_str(), InShaderFrequency, environment, output );
+	bool		result = GRHI->CompileShader( InShaderMetaType->GetFileName().c_str(), InShaderMetaType->GetFunctionName().c_str(), shaderFrequency, environment, output );
 	if ( result )
 	{
 		FShaderCache::FShaderCacheItem			shaderCacheItem;
-		shaderCacheItem.name = InShaderName;
-		shaderCacheItem.frequency = InShaderFrequency;
+		shaderCacheItem.name = InShaderMetaType->GetName();
+		shaderCacheItem.frequency = shaderFrequency;
 		shaderCacheItem.vertexFactoryHash = vertexFactoryHash;
 		shaderCacheItem.code = output.code;
 		shaderCacheItem.numInstructions = output.numInstructions;

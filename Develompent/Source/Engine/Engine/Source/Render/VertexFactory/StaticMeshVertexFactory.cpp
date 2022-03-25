@@ -2,7 +2,7 @@
 #include "Render/VertexFactory/StaticMeshVertexFactory.h"
 #include "Render/VertexFactory/GeneralVertexFactoryParams.h"
 
-IMPLEMENT_VERTEX_FACTORY_TYPE( FStaticMeshVertexFactory, TEXT( "StaticMeshVertexFactory.hlsl" ) )
+IMPLEMENT_VERTEX_FACTORY_TYPE( FStaticMeshVertexFactory, TEXT( "StaticMeshVertexFactory.hlsl" ), false, 0 )
 
 void FStaticMeshVertexFactory::InitRHI()
 {
@@ -25,5 +25,5 @@ uint64 FStaticMeshVertexFactory::GetTypeHash() const
 
 FVertexFactoryShaderParameters* FStaticMeshVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )
 {
-    return InShaderFrequency == SF_Vertex ? new FGeneralVertexShaderParameters() : nullptr;
+    return InShaderFrequency == SF_Vertex ? new FGeneralVertexShaderParameters( staticType.SupportsInstancing() ) : nullptr;
 }

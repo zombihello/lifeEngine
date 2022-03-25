@@ -111,25 +111,49 @@ private:
 
 /**
  * @ingroup Engine
- * A batch mesh element definition
- */
-struct FMeshBatchElement
-{
-	FIndexBufferRHIRef			indexBufferRHI;				/**< Index buffer */
-	uint32						baseVertexIndex;			/**< First index vertex in vertex buffer */
-	uint32						firstIndex;					/**< First index */
-	uint32						numPrimitives;				/**< Number primitives to render */
-	FMatrix						transformationMatrix;		/**< Transformation matrix of element */
-};
-
-/**
- * @ingroup Engine
  * A batch of mesh elements, all with the same material and vertex buffer
  */
 struct FMeshBatch
 {
-	std::vector< FMeshBatchElement >	elements;		/**< Elements in batch */
-	EPrimitiveType						primitiveType;	/**< Primitive type */
+	/**
+	 * @brief Functions to extract the mesh batch from FMeshBatch as a key for std::set
+	 */
+	struct FMeshBatchKeyFunc
+	{
+		/**
+		 * @brief Compare FMeshBatch
+		 *
+		 * @param InA First mesh batch
+		 * @param InB Second mesh batch
+		 * @return Return true if InA and InB equal, else returning false
+		 */
+		FORCEINLINE bool operator()( const FMeshBatch& InA, const FMeshBatch& InB ) const
+		{
+			// Calculate hash for InA
+			uint64		hashA = appMemFastHash( InA.indexBufferRHI );
+			hashA = appMemFastHash( InA.primitiveType, hashA );
+			hashA = appMemFastHash( InA.baseVertexIndex, hashA );
+			hashA = appMemFastHash( InA.firstIndex, hashA );
+			hashA = appMemFastHash( InA.numPrimitives, hashA );
+
+			// Calculate hash for InB
+			uint64		hashB = appMemFastHash( InB.indexBufferRHI );
+			hashB = appMemFastHash( InB.primitiveType, hashB );
+			hashB = appMemFastHash( InB.baseVertexIndex, hashB );
+			hashB = appMemFastHash( InB.firstIndex, hashB );
+			hashB = appMemFastHash( InB.numPrimitives, hashB );
+
+			return hashA < hashB;
+		}
+	};
+
+	FIndexBufferRHIRef					indexBufferRHI;				/**< Index buffer */
+	EPrimitiveType						primitiveType;				/**< Primitive type */
+	uint32								baseVertexIndex;			/**< First index vertex in vertex buffer */
+	uint32								firstIndex;					/**< First index */
+	uint32								numPrimitives;				/**< Number primitives to render */
+	mutable uint32						numInstances;				/**< Number instances of mesh */
+	mutable std::vector< FMatrix >		transformationMatrices;		/**< Array of transformation matrix for instances */
 };
 
 /**
@@ -146,6 +170,11 @@ public:
 	struct FDrawingPolicyLink
 	{
 		/**
+		 * @brief Typedef set of mesh batches
+		 */
+		typedef std::set< FMeshBatch, FMeshBatch::FMeshBatchKeyFunc >		FMeshBatchList;
+
+		/**
 		 * @brief Constructor
 		 */
 		FDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy )
@@ -154,7 +183,7 @@ public:
 			boundShaderState = drawingPolicy.GetBoundShaderState();
 		}
 
-		mutable FMeshBatch						meshBatch;				/**< Mesh batch */
+		mutable FMeshBatchList					meshBatchList;			/**< Mesh batch list */
 		mutable TDrawingPolicyType				drawingPolicy;			/**< Drawing policy */
 		mutable FBoundShaderStateRHIRef			boundShaderState;		/**< Bound shader state */
 	};
@@ -174,14 +203,10 @@ public:
 		FORCEINLINE bool operator()( const FDrawingPolicyLink& InA, const FDrawingPolicyLink& InB ) const
 		{
 			// Calculate hash for InA
-			uint64		hashA = InA.drawingPolicy.GetTypeHash();
-			hashA = appMemFastHash( InA.boundShaderState->GetHash(), hashA );
-			hashA = appMemFastHash( InA.meshBatch.primitiveType, hashA );
+			uint64 hashA = appMemFastHash( InA.boundShaderState->GetHash(), InA.drawingPolicy.GetTypeHash() );
 
 			// Calculate hash for InB
-			uint64		hashB = InB.drawingPolicy.GetTypeHash();
-			hashB = appMemFastHash( InB.boundShaderState->GetHash(), hashB );
-			hashB = appMemFastHash( InB.meshBatch.primitiveType, hashB );
+			uint64 hashB = appMemFastHash( InB.boundShaderState->GetHash(), InB.drawingPolicy.GetTypeHash() );
 
 			return hashA < hashB;
 		}
@@ -196,28 +221,48 @@ public:
 	 * @brief Add item
 	 * 
 	 * @param InDrawingPolicyLink Drawing policy link
-	 * @param InMeshElements Array of mesh elements
 	 */
-	void AddItem( const FDrawingPolicyLink& InDrawingPolicyLink, const std::vector< FMeshBatchElement >& InMeshElements )
+	void AddItem( const FDrawingPolicyLink& InDrawingPolicyLink )
 	{
 		// Get drawing policy link in std::set
-		auto	it = meshes.find( InDrawingPolicyLink );
+		FMapDrawData::iterator	it = meshes.find( InDrawingPolicyLink );
+		
+		// If drawing policy link is not exist - we insert
 		if ( it == meshes.end() )
 		{
 			it = meshes.insert( InDrawingPolicyLink ).first;
-		}
-
-		// Add elements to link
-		if ( !InMeshElements.empty() )
+		}	
+		// Else add mesh batches to link
+		else
 		{
-			uint32		srcNum = it->meshBatch.elements.size();
-			uint32		needNum = InMeshElements.size();
-			uint32		newNum = srcNum + needNum;
-
-			it->meshBatch.elements.resize( newNum );
-			for ( uint32 globalIndex = srcNum, localIndex = 0; globalIndex < newNum && localIndex < newNum; ++globalIndex, ++localIndex )
+			for ( auto itNewBatch = InDrawingPolicyLink.meshBatchList.begin(), itNewBatchEnd = InDrawingPolicyLink.meshBatchList.end(); itNewBatch != itNewBatchEnd; ++itNewBatch )
 			{
-				it->meshBatch.elements[ globalIndex ] = InMeshElements[ localIndex ];
+				// If in new batch num instances less 0 - we continue to next step
+				if ( itNewBatch->numInstances <= 0 )
+				{
+					continue;
+				}
+
+				// Find already created mesh batch, if not exist - we insert new batch
+				FDrawingPolicyLink::FMeshBatchList::iterator		itOldBatch = it->meshBatchList.find( *itNewBatch );
+				if ( itOldBatch == it->meshBatchList.end() )
+				{
+					it->meshBatchList.insert( *itNewBatch );
+				}
+				// Else we update numInstances and add new transformation matrix for new instances
+				else
+				{
+					uint32		srcNumInstances = itOldBatch->numInstances;
+					uint32		needNumInstances = itNewBatch->numInstances;
+					uint32		newNumInstances = srcNumInstances + needNumInstances;
+					itOldBatch->numInstances = newNumInstances;
+
+					itOldBatch->transformationMatrices.resize( newNumInstances );
+					for ( uint32 globalIndex = srcNumInstances, localIndex = 0; globalIndex < newNumInstances && localIndex < newNumInstances; ++globalIndex, ++localIndex )
+					{
+						itOldBatch->transformationMatrices[ globalIndex ] = itNewBatch->transformationMatrices[ localIndex ];
+					}
+				}
 			}
 		}
 	}
@@ -252,7 +297,12 @@ public:
 		{
 			it->drawingPolicy.SetRenderState( InDeviceContext );
 			it->drawingPolicy.SetShaderParameters( InDeviceContext );
-			it->drawingPolicy.Draw( InDeviceContext, it->meshBatch, InSceneView );
+
+			// Draw all mesh batches
+			for ( FDrawingPolicyLink::FMeshBatchList::const_iterator itMeshBatch = it->meshBatchList.begin(), itMeshBatchEnd = it->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
+			{
+				it->drawingPolicy.Draw( InDeviceContext, *itMeshBatch, InSceneView );
+			}
 		}
 	}
 

@@ -2,7 +2,7 @@
 #include "Render/VertexFactory/WorldGridVertexFactory.h"
 #include "Render/VertexFactory/GeneralVertexFactoryParams.h"
 
-IMPLEMENT_VERTEX_FACTORY_TYPE( FWorldGridVertexFactory, TEXT( "WorldGridVertexFactory.hlsl" ) )
+IMPLEMENT_VERTEX_FACTORY_TYPE( FWorldGridVertexFactory, TEXT( "WorldGridVertexFactory.hlsl" ), false, 0 )
 
 void FWorldGridVertexFactory::InitRHI()
 {
@@ -21,5 +21,5 @@ uint64 FWorldGridVertexFactory::GetTypeHash() const
 
 FVertexFactoryShaderParameters* FWorldGridVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )
 {
-    return InShaderFrequency == SF_Vertex ? new FGeneralVertexShaderParameters() : nullptr;
+    return InShaderFrequency == SF_Vertex ? new FGeneralVertexShaderParameters( staticType.SupportsInstancing() ) : nullptr;
 }

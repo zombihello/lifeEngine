@@ -48,13 +48,15 @@ public:
 
 	/**
 	 * @brief Set the l2w transform shader
-	 * 
+	 *
 	 * @param InDeviceContextRHI RHI device context
 	 * @param InMesh Mesh data
-	 * @param InBatchElementIndex Batch element index
+	 * @param InVertexFactory Vertex factory
 	 * @param InView Scene view
+	 * @param InNumInstances Number instances
+	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, uint32 InBatchElementIndex, const class FSceneView* InView ) const override;
+	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 private:
 	class FVertexFactoryShaderParameters*		vertexFactoryParameters;		/**< Vertex factory shader parameters */

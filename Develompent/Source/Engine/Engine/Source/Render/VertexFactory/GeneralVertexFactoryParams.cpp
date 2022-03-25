@@ -1,16 +1,31 @@
 #include "Render/VertexFactory/GeneralVertexFactoryParams.h"
 #include "Render/Scene.h"
 
-void FGeneralVertexShaderParameters::Bind( const class FShaderParameterMap& InParameterMap )
-{
-    localToWorldMatrixParameter.Bind( InParameterMap, TEXT( "localToWorldMatrix" ) );
-}
-
-void FGeneralVertexShaderParameters::Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FSceneView* InView ) const
+FGeneralVertexShaderParameters::FGeneralVertexShaderParameters( bool InSupportsInstancing )
+    : bSupportsInstancing( InSupportsInstancing )
 {}
 
-void FGeneralVertexShaderParameters::SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, uint32 InBatchElementIndex, const class FSceneView* InView ) const
+void FGeneralVertexShaderParameters::Bind( const class FShaderParameterMap& InParameterMap )
 {
-    const FMeshBatchElement&		batchElement = InMesh.elements[ InBatchElementIndex ];
-    SetVertexShaderValue( InDeviceContextRHI, localToWorldMatrixParameter, batchElement.transformationMatrix );
+    if ( !bSupportsInstancing )
+    {
+        localToWorldMatrixParameter.Bind( InParameterMap, TEXT( "localToWorldMatrix" ) );
+    }
+}
+
+void FGeneralVertexShaderParameters::Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory ) const
+{}
+
+void FGeneralVertexShaderParameters::SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+{
+    if ( !bSupportsInstancing )
+    {
+        check( InNumInstances == 1 );
+        SetVertexShaderValue( InDeviceContextRHI, localToWorldMatrixParameter, InMesh.transformationMatrices[ InStartInstanceID ] );
+    }
+    else
+    {
+        check( InVertexFactory );
+        InVertexFactory->SetupInstancing( InDeviceContextRHI, InMesh, InView, InNumInstances, InStartInstanceID );
+    }
 }

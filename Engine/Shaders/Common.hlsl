@@ -8,6 +8,8 @@
 #ifndef COMMON_HLSL
 #define COMMON_HLSL 0
 
+#include "Definitions.hlsl"
+
 #define MulMatrix( Mtx, Vect )	    mul( Mtx, Vect )
 #define MulBone( Mtx, Vect )		mul( Vect, Mtx )
 

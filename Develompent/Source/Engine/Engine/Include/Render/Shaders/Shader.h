@@ -15,6 +15,10 @@
 #include "RHI/TypesRHI.h"
 #include "ShaderCache.h"
 
+#if WITH_EDITOR
+#include "ShaderCompiler.h"
+#endif // WITH_EDITOR
+
 /**
  * @ingroup Engine Engine
  * @brief Reference to FShader
@@ -48,10 +52,30 @@ public:
 	 * 
 	 * @param InDeviceContextRHI RHI device context
 	 * @param InMesh Mesh data
-	 * @param InBatchElementIndex Batch element index
+	 * @param InVertexFactory Vertex factory
 	 * @param InView Scene view
+	 * @param InNumInstances Number instances
+	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, uint32 InBatchElementIndex, const class FSceneView* InView ) const;
+	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform );
+
+	/**
+	 * @brief Modify compilation environment
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InEnvironment Shader compiler environment
+	 */
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment );
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Get name of shader

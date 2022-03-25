@@ -95,9 +95,7 @@ float LBaseEngine::GetMaxTickRate() const
 
 	return 0.f;
 }
-#include "Actors/StaticMesh.h"
-#include "Actors/Sprite.h"
-#include "Actors/PlayerStart.h"
+
 bool LBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
