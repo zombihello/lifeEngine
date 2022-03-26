@@ -45,41 +45,42 @@ void LSpriteComponent::Serialize( class FArchive& InArchive )
     }
 }
 
-FMatrix LSpriteComponent::CalcTransformationMatrix( const class FSceneView& InSceneView ) const
+void LSpriteComponent::CalcTransformationMatrix( const class FSceneView& InSceneView, FMatrix& OutResult ) const
 {
     FTransform      transform = GetComponentTransform();
     if ( type == ST_Static )
     {
-        return transform.ToMatrix();
+        transform.ToMatrix( OutResult );
+		return;
     }
 
-    FMatrix             resultMatrix = FMath::CreateTranslateMatrix( transform.GetLocation() );
-    const FMatrix&      viewMatrix = InSceneView.GetViewMatrix();
-
-    resultMatrix[ 0 ].x = viewMatrix[ 0 ].x;
-    resultMatrix[ 0 ].y = viewMatrix[ 1 ].x;
-    resultMatrix[ 0 ].z = viewMatrix[ 2 ].x;
+	FMath::IdentityMatrix( OutResult );
+	FMath::TranslateMatrix( transform.GetLocation(), OutResult );
+    
+	const FMatrix&      viewMatrix = InSceneView.GetViewMatrix();
+	OutResult[ 0 ].x = viewMatrix[ 0 ].x;
+	OutResult[ 0 ].y = viewMatrix[ 1 ].x;
+	OutResult[ 0 ].z = viewMatrix[ 2 ].x;
 
     if ( type == ST_RotatingOnlyVertical )
     {
-        resultMatrix[ 1 ].x = 0;
-        resultMatrix[ 1 ].y = 1;
-        resultMatrix[ 1 ].z = 0;
+		OutResult[ 1 ].x = 0;
+		OutResult[ 1 ].y = 1;
+		OutResult[ 1 ].z = 0;
     }
     else
     {
-        resultMatrix[ 1 ].x = viewMatrix[ 0 ].y;
-        resultMatrix[ 1 ].y = viewMatrix[ 1 ].y;
-        resultMatrix[ 1 ].z = viewMatrix[ 2 ].y;
+		OutResult[ 1 ].x = viewMatrix[ 0 ].y;
+		OutResult[ 1 ].y = viewMatrix[ 1 ].y;
+		OutResult[ 1 ].z = viewMatrix[ 2 ].y;
     }
 
-    resultMatrix[ 2 ].x = viewMatrix[ 0 ].z;
-    resultMatrix[ 2 ].y = viewMatrix[ 1 ].z;
-    resultMatrix[ 2 ].z = viewMatrix[ 2 ].z;
+	OutResult[ 2 ].x = viewMatrix[ 0 ].z;
+	OutResult[ 2 ].y = viewMatrix[ 1 ].z;
+	OutResult[ 2 ].z = viewMatrix[ 2 ].z;
 
-    resultMatrix *= FMath::CreateScaleMatrix( transform.GetScale() );
-    resultMatrix *= transform.GetRotation().ToMatrix();
-    return resultMatrix;
+	OutResult *= FMath::ScaleMatrix( transform.GetScale() );
+	OutResult *= transform.GetRotation().ToMatrix();
 }
 
 void LSpriteComponent::LinkDrawList( class FScene* InScene )
@@ -200,7 +201,8 @@ void LSpriteComponent::AddToDrawList( const class FSceneView& InSceneView )
 
     // Add to mesh batch new instance
     ++meshBatchLink->numInstances;
-    meshBatchLink->transformationMatrices.push_back( CalcTransformationMatrix( InSceneView ) );
+	meshBatchLink->transformationMatrices.resize( meshBatchLink->numInstances );
+	CalcTransformationMatrix( InSceneView, meshBatchLink->transformationMatrices[ meshBatchLink->numInstances-1 ] );
 
     // Update AABB
     boundbox = FBox::BuildAABB( GetComponentLocation(), FVector( GetSpriteSize(), 1.f ) );

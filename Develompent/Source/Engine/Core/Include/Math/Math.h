@@ -125,26 +125,96 @@ struct FMath
 		return glm::radians( InDegrees );
 	}
 
-    /**
-     * @brief Create translate matrix
-     *
-     * @param InLocation Location
-     * @return Return created translate matrix
-     */
-    static FORCEINLINE FMatrix CreateTranslateMatrix( const FVector& InLocation )
-    {
-        return glm::translate( InLocation );
-    }
+	/**
+	 * @brief Create identity matrix
+	 * @param OutResult Output created identity matrix
+	 */
+	static FORCEINLINE void IdentityMatrix( FMatrix& OutResult )
+	{
+		OutResult = glm::identity< FMatrix >();
+	}
+
+	/**
+	 * @brief Create identity matrix
+	 * @return Return created identity matrix
+	 */
+	static FORCEINLINE FMatrix IdentityMatrix()
+	{
+		return glm::identity< FMatrix >();
+	}
+
+	/**
+	 * @brief Create translate matrix
+	 *
+	 * @param InLocation Location
+	 * @param OutResult Output created translate matrix
+	 */
+	static FORCEINLINE void TranslateMatrix( const FVector& InLocation, FMatrix& OutResult )
+	{
+		OutResult[ 3 ].x = InLocation.x;
+		OutResult[ 3 ].y = InLocation.y;
+		OutResult[ 3 ].z = InLocation.z;
+	}
+
+	/**
+	 * @brief Translate matrix
+	 *
+	 * @param InLocation Location
+	 * @param InInitMatrix Initial matrix
+	 * @param OutResult Output result translated matrix
+	 */
+	static FORCEINLINE void TranslateMatrix( const FVector& InLocation, const FMatrix& InInitMatrix, FMatrix& OutResult )
+	{
+		OutResult = glm::translate( InInitMatrix, InLocation );
+	}
 
     /**
-     * @brief Create scale matrix
+     * @brief Translate matrix
+     *
+     * @param InLocation Location
+	 * @param InInitMatrix Initial matrix
+     * @return Return translated matrix
+     */
+    static FORCEINLINE FMatrix TranslateMatrix( const FVector& InLocation, const FMatrix& InInitMatrix = FMatrix( 1.f ) )
+    {
+		return glm::translate( InInitMatrix, InLocation );
+    }
+
+	/**
+	 * @brief Create scale matrix
+	 *
+	 * @param InScale Scale
+	 * @param OutResult Output created scale matrix
+	 */
+	static FORCEINLINE void ScaleMatrix( const FVector& InScale, FMatrix& OutResult )
+	{
+		OutResult[ 0 ].x = InScale.x;
+		OutResult[ 1 ].y = InScale.y;
+		OutResult[ 2 ].z = InScale.z;
+	}
+
+	/**
+	 * @brief Scale matrix
+	 *
+	 * @param InScale Scale
+	 * @param InInitMatrix Initial matrix
+	 * @param OutResult Output result scaled matrix
+	 */
+	static FORCEINLINE void ScaleMatrix( const FVector& InScale, const FMatrix& InInitMatrix, FMatrix& OutResult )
+	{
+		OutResult = glm::scale( InInitMatrix, InScale );
+	}
+
+    /**
+     * @brief Scale matrix
      *
      * @param InScale Scale
-     * @return Return created scale matrix
+	 * @param InInitMatrix Initial matrix
+     * @return Return scaled matrix
      */
-    static FORCEINLINE FMatrix CreateScaleMatrix( const FVector& InScale )
+    static FORCEINLINE FMatrix ScaleMatrix( const FVector& InScale, const FMatrix& InInitMatrix = FMatrix( 1.f ) )
     {
-        return glm::scale( InScale );
+        return glm::scale( InInitMatrix, InScale );
     }
 
 	/**

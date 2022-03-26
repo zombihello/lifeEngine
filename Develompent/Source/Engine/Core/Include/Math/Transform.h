@@ -290,7 +290,60 @@ public:
 	 */
 	FORCEINLINE FMatrix ToMatrix() const
 	{
-        return FMath::CreateTranslateMatrix( translation ) * FMath::CreateScaleMatrix( scale ) * rotation.ToMatrix();		// TODO BS yehor.pohuliaka - Need optimize it
+		FMatrix		result;
+		ToMatrix( result );
+		return result;
+	}
+
+	/**
+	 * Convert transform to matrix
+	 * @param OutMatrix Output matrix with location, scale and rotation
+	 */
+	FORCEINLINE void ToMatrix( FMatrix& OutMatrix ) const
+	{
+		const FQuaternion		quaternion = rotation.ToQuaternion();
+		OutMatrix[ 3 ].x = translation.x;
+		OutMatrix[ 3 ].y = translation.y;
+		OutMatrix[ 3 ].z = translation.z;
+
+		const float				x2 = quaternion.x + quaternion.x;
+		const float				y2 = quaternion.y + quaternion.y;
+		const float				z2 = quaternion.z + quaternion.z;
+		{
+			const float			xx2 = quaternion.x * x2;
+			const float			yy2 = quaternion.y * y2;
+			const float			zz2 = quaternion.z * z2;
+
+			OutMatrix[ 0 ].x = ( 1.0f - ( yy2 + zz2 ) ) * scale.x;
+			OutMatrix[ 1 ].y = ( 1.0f - ( xx2 + zz2 ) ) * scale.y;
+			OutMatrix[ 2 ].z = ( 1.0f - ( xx2 + yy2 ) ) * scale.z;
+		}
+		{
+			const float			yz2 = quaternion.y * z2;
+			const float			wx2 = quaternion.w * x2;
+
+			OutMatrix[ 2 ].y = ( yz2 - wx2 ) * scale.z;
+			OutMatrix[ 1 ].z = ( yz2 + wx2 ) * scale.y;
+		}
+		{
+			const float			xy2 = quaternion.x * y2;
+			const float			wz2 = quaternion.w * z2;
+
+			OutMatrix[ 1 ].x = ( xy2 - wz2 ) * scale.y;
+			OutMatrix[ 0 ].y = ( xy2 + wz2 ) * scale.x;
+		}
+		{
+			const float			xz2 = quaternion.x * z2;
+			const float			wy2 = quaternion.w * y2;
+
+			OutMatrix[ 2 ].x = ( xz2 + wy2 ) * scale.z;
+			OutMatrix[ 0 ].z = ( xz2 - wy2 ) * scale.x;
+		}
+
+		OutMatrix[ 0 ].w = 0.0f;
+		OutMatrix[ 1 ].w = 0.0f;
+		OutMatrix[ 2 ].w = 0.0f;
+		OutMatrix[ 3 ].w = 1.0f;
 	}
 
 	/**

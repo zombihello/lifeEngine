@@ -156,9 +156,9 @@ private:
 	 * @brief Calculate transformation matrix
 	 *
 	 * @param InSceneView Current view of scene
-	 * @return Return calculated transformation matrix
+	 * @param OutResult Output calculated transformation matrix
 	 */
-	FMatrix CalcTransformationMatrix( const class FSceneView& InSceneView ) const;
+	void CalcTransformationMatrix( const class FSceneView& InSceneView, FMatrix& OutResult ) const;
 
 	/**
 	 * @brief Add to scene drawing policy link
