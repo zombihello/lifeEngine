@@ -1,3 +1,5 @@
+#include <unordered_set>
+
 #include "System/Config.h"
 #include "Misc/EngineGlobals.h"
 #include "Logger/LoggerMacros.h"
@@ -53,6 +55,52 @@ void LInputComponent::BeginPlay()
 			inputActionMap.insert( std::make_pair( inputAction.name, inputAction ) );
 		}	
 	}
+
+	// Axis
+	std::vector< FConfigValue >		configArrayAxis = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Axis" ) ).GetArray();
+	for ( uint32 indexAxis = 0, countAxis = configArrayAxis.size(); indexAxis < countAxis; ++indexAxis )
+	{
+		// Get JSON object of action item
+		const FConfigValue&		configAxis = configArrayAxis[ indexAxis ];
+		check( configAxis.GetType() == FConfigValue::T_Object );
+		FConfigObject			configObject = configAxis.GetObject();
+
+		// Get name of axis
+		FInputAxis			inputAxis;
+		inputAxis.name = configObject.GetValue( TEXT( "Name" ) ).GetString();
+		if ( inputAxis.name.empty() )
+		{
+			continue;
+		}
+
+		// Get buttons
+		std::vector< FConfigValue >		configButtons = configObject.GetValue( TEXT( "Buttons" ) ).GetArray();
+		for ( uint32 indexButton = 0, countButtons = configButtons.size(); indexButton < countButtons; ++indexButton )
+		{
+			// Get JSON item
+			const FConfigValue&		configButton = configButtons[ indexButton ];
+			check( configAxis.GetType() == FConfigValue::T_Object );
+			FConfigObject			configButtonObject = configButton.GetObject();
+			
+			std::wstring			buttonName = configButtonObject.GetValue( TEXT( "Name" ) ).GetString();
+			float					scale = configButtonObject.GetValue( TEXT( "Scale" ) ).GetNumber();
+
+			// Get button code from name of button
+			EButtonCode			buttonCode = appGetButtonCodeByName( buttonName.c_str() );
+			if ( buttonCode == BC_None )
+			{
+				LE_LOG( LT_Warning, LC_Input, TEXT( "Axis '%s' with scale %f: unknown button name '%s'" ), inputAxis.name.c_str(), scale, buttonName.c_str() );
+				continue;
+			}
+			inputAxis.buttons.push_back( std::make_pair( buttonCode, scale ) );
+		}
+
+		// If array of buttons not empty - add to input axis map
+		if ( !inputAxis.buttons.empty() )
+		{
+			inputAxisMap.insert( std::make_pair( inputAxis.name, inputAxis ) );
+		}
+	}
 }
 
 /**
@@ -104,6 +152,32 @@ void LInputComponent::TickComponent( float InDeltaTime )
 		if ( executeFlags & IAF_Released )
 		{
 			it->second.inputActionDelegate[ IE_Released ].Execute();
+		}
+	}
+
+	// Find triggered axis and execute it
+	for ( FInputAxisMap::iterator it = inputAxisMap.begin(), itEnd = inputAxisMap.end(); it != itEnd; ++it )
+	{
+		std::unordered_set< float >		triggeredScales;
+		for ( uint32 indexButton = 0, countButtons = it->second.buttons.size(); indexButton < countButtons; ++indexButton )
+		{
+			const FInputAxis::FPairAxisButton&		pairAxisButton = it->second.buttons[ indexButton ];
+			switch ( GInputSystem->GetButtonEvent( pairAxisButton.first ) )
+			{
+			case BE_Pressed:
+			case BE_Released:
+			case BE_Scrolled:
+				triggeredScales.insert( pairAxisButton.second );
+				break;
+
+			default:	continue;
+			}
+		}
+
+		// Trigger all scales
+		for ( auto itTriggerScale = triggeredScales.begin(), itTriggerScaleEnd = triggeredScales.end(); itTriggerScale != itTriggerScaleEnd; ++itTriggerScale )
+		{
+			it->second.inputAxisDelegate.Execute( *itTriggerScale );
 		}
 	}
 }

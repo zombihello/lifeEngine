@@ -336,7 +336,7 @@ public:
 	void RemoveItem( const FDrawingPolicyLinkRef& InDrawingPolicyLink )
 	{
 		check( InDrawingPolicyLink );
-		if ( InDrawingPolicyLink->GetRefCount() == 1 )
+		if ( InDrawingPolicyLink->GetRefCount() <= 2 )
 		{
 			meshes.erase( InDrawingPolicyLink );
 		}

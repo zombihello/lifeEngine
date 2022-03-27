@@ -14,6 +14,8 @@
 
 #include "System/Delegate.h"
 #include "System/ButtonCode.h"
+#include "System/BaseWindow.h"
+#include "Misc/CoreGlobals.h"
 #include "Components/ActorComponent.h"
 
 /**
@@ -21,6 +23,12 @@
  * Declare delegate of process input action
  */
 DECLARE_DELEGATE( FOnInputActionDelegate );
+
+/**
+ * @ingroup Engine
+ * Declare delegate of process input axis
+ */
+DECLARE_DELEGATE( FOnInputAxisDelegate, float );
 
 /**
  * @ingroup Engine
@@ -54,6 +62,22 @@ public:
 	 * @param[in] InDeltaTime The time since the last tick.
 	 */
 	virtual void TickComponent( float InDeltaTime );
+
+	/**
+	 * Show cursor
+	 */
+	FORCEINLINE void ShowCursor()
+	{
+		GWindow->ShowCursor();
+	}
+
+	/**
+	 * Hide cursor
+	 */
+	FORCEINLINE void HideCursor()
+	{
+		GWindow->HideCursor();
+	}
 
 	/**
 	 * Bind to action
@@ -108,6 +132,52 @@ public:
 		BindAction( InName, InTriggerEvent, ( LObject* )InObject, ( FOnInputActionDelegate::FDelegateMethod )InDelegate );
 	}
 
+	/**
+	 * Bind to axis
+	 *
+	 * @param InName Name axis
+	 * @param InDelegate Delegate
+	 */
+	FORCEINLINE void BindAxis( const std::wstring& InName, const FOnInputAxisDelegate::FDelegateFunction& InDelegate )
+	{
+		FInputAxisMap::iterator		it = inputAxisMap.find( InName );
+		if ( it == inputAxisMap.end() )
+		{
+			return;
+		}
+		it->second.inputAxisDelegate.BindFunction( InDelegate );
+	}
+
+	/**
+	 * Bind to axis
+	 *
+	 * @param InName Name axis
+	 * @param InObject Object
+	 * @param InDelegate Delegate
+	 */
+	FORCEINLINE void BindAxis( const std::wstring& InName, LObject* InObject, const FOnInputAxisDelegate::FDelegateMethod& InDelegate )
+	{
+		FInputAxisMap::iterator		it = inputAxisMap.find( InName );
+		if ( it == inputAxisMap.end() )
+		{
+			return;
+		}
+		it->second.inputAxisDelegate.BindMethod( InObject, InDelegate );
+	}
+
+	/**
+	 * Bind to axis
+	 *
+	 * @param InName Name axis
+	 * @param InObject Object
+	 * @param InDelegate Delegate
+	 */
+	template< class TClass, typename TMethod >
+	FORCEINLINE void BindAxis( const std::wstring& InName, TClass* InObject, const TMethod& InDelegate )
+	{
+		BindAxis( InName, ( LObject* )InObject, ( FOnInputAxisDelegate::FDelegateMethod )InDelegate );
+	}
+
 private:
 	/**
 	 * Struct description of input action
@@ -120,11 +190,32 @@ private:
 	};
 
 	/**
+	 * Struct description of input axis
+	 */
+	struct FInputAxis
+	{
+		/**
+		 * Typedef of pair EButtonCode and float (scale)
+		 */
+		typedef std::pair< EButtonCode, float >			FPairAxisButton;
+
+		std::wstring							name;				/**< Name of action */
+		std::vector< FPairAxisButton >			buttons;			/**< Buttons for trigger action */
+		FOnInputAxisDelegate					inputAxisDelegate;	/**< Array of delegates per input event */
+	};
+
+	/**
 	 * Typedef of input action map
 	 */
 	typedef std::unordered_map< std::wstring, FInputAction >		FInputActionMap;
 
-	FInputActionMap				inputActionMap;					/**< Input action map */
+	/**
+	 * Typedef of input axis map
+	 */
+	typedef std::unordered_map< std::wstring, FInputAxis >			FInputAxisMap;
+
+	FInputActionMap				inputActionMap;		/**< Input action map */
+	FInputAxisMap				inputAxisMap;		/**< Input axis map */
 };
 
 #endif // !INPUTCOMPONENT_H

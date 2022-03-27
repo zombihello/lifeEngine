@@ -34,12 +34,6 @@ public:
      */
     LSpriteComponent();
 
-    /**
-     * Begins Play for the component.
-     * Called when the owning Actor begins play or when the component is created if the Actor has already begun play.
-     */
-    virtual void BeginPlay() override;
-
 	/**
 	 * @brief Adds a draw policy link in SDGs
 	 *

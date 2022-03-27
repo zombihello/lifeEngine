@@ -44,9 +44,14 @@ LActorComponentRef AActor::CreateComponent( LClass* InClass, const tchar* InName
 	check( component );
 
 	// If created component is a LSceneComponent and RootComponent not setted - set it!
-	if ( !rootComponent && component->IsA< LSceneComponent >() )
+	bool		bIsASceneComponent = component->IsA< LSceneComponent >();
+	if ( !rootComponent && bIsASceneComponent )
 	{
 		rootComponent = component->Cast< LSceneComponent >();
+	}
+	else if ( rootComponent && bIsASceneComponent )
+	{
+		( ( LSceneComponent* )component )->SetupAttachment( rootComponent );
 	}
 
 	component->SetName( InName );

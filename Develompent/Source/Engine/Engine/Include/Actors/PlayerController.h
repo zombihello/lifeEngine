@@ -9,17 +9,17 @@
 #ifndef PLAYERCONTROLLER_H
 #define PLAYERCONTROLLER_H
 
-#include "Actors/Actor.h"
-#include "Components/CameraComponent.h"
+#include "Actors/BaseController.h"
+#include "Actors/Character.h"
 #include "Components/InputComponent.h"
 
 /**
  * @ingroup Engine
  * Actor of base implementation player controller
  */
-class APlayerController : public AActor
+class APlayerController : public ABaseController
 {
-	DECLARE_CLASS( APlayerController, AActor )
+	DECLARE_CLASS( APlayerController, ABaseController )
 
 public:
 	/**
@@ -38,20 +38,23 @@ public:
 	virtual void BeginPlay() override;
 
 	/**
-	 * Function called every frame on this Actor. Override this function to implement custom logic to be executed every frame.
-	 *
-	 * @param[in] InDeltaTime The time since the last tick.
+	 * @brief Set controlled character
+	 * @param InCharacter Character
 	 */
-	virtual void Tick( float InDeltaTime ) override;
+	FORCEINLINE void SetCharacter( ACharacter* InCharacter )
+	{
+		if ( character )
+		{
+			character->SetController( nullptr );
+		}
 
-    /**
-     * @brief Get camera component
-     * @return Return camera component
-     */
-    FORCEINLINE TRefCountPtr< LCameraComponent > GetCameraComponent() const
-    {
-        return cameraComponent;
-    }
+		character = InCharacter;
+	
+		if ( character )
+		{
+			character->SetController( this );
+		}
+	}
 
 	/**
 	 * @brief Get input component
@@ -62,18 +65,22 @@ public:
 		return inputComponent;
 	}
 
+	/**
+	 * @brief Get controlled character
+	 * @return Return controlled character. If not exist return nullptr
+	 */
+	FORCEINLINE TRefCountPtr< ACharacter > GetCharacter() const
+	{
+		return character;
+	}
+
 protected:
 	/**
 	 * @brief Setup input player
 	 */
 	virtual void SetupInputComponent();
 
-private:
-	void ExitFromGame();
-	void MoveRight();
-	void MoveLeft();
-
-	TRefCountPtr< LCameraComponent >			cameraComponent;		/**< Player camera */
+	TRefCountPtr< ACharacter >					character;				/**< Character controlled by this controller */
 	TRefCountPtr< LInputComponent >				inputComponent;			/**< Input component */
 };
 

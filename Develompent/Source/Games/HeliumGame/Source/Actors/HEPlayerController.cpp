@@ -2,13 +2,27 @@
 
 IMPLEMENT_CLASS( AHEPlayerController )
 
-void AHEPlayerController::BeginPlay()
+void AHEPlayerController::SetupInputComponent()
 {
-	Super::BeginPlay();
-	
-	LCameraComponent*		cameraComponent = GetCameraComponent();
-	cameraComponent->SetProjectionMode( CPM_Orthographic );
-	cameraComponent->SetIgnoreRotateByMouse( true );
-	cameraComponent->SetNearClipPlane( -100.f );
-	cameraComponent->SetFarClipPlane( 100.f );
+	// Bind actions
+	inputComponent->BindAction( TEXT( "Exit" ), IE_Released, this, &AHEPlayerController::ExitFromGame );
+
+	// Bind axis
+	inputComponent->BindAxis( TEXT( "MoveRight" ), this, &AHEPlayerController::MoveRight );
+	inputComponent->BindAxis( TEXT( "MoveUp" ), this, &AHEPlayerController::MoveUp );
+}
+
+void AHEPlayerController::ExitFromGame()
+{
+	GIsRequestingExit = true;
+}
+
+void AHEPlayerController::MoveRight( float InValue )
+{
+	character->AddActorLocation( character->GetActorRightVector() * InValue );
+}
+
+void AHEPlayerController::MoveUp( float InValue )
+{
+	character->AddActorLocation( character->GetActorUpVector() * InValue );
 }

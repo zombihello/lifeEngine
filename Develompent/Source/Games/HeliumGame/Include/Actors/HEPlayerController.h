@@ -19,11 +19,29 @@ class AHEPlayerController : public APlayerController
 {
 	DECLARE_CLASS( AHEPlayerController, APlayerController )
 
-public:
+protected:
 	/**
-	 * Overridable native event for when play begins for this actor
+	 * @brief Setup input player
 	 */
-	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
+
+private:
+	/**
+	 * @brief Exit from game
+	 */
+	void ExitFromGame();
+
+	/**
+	 * @brief Move right
+	 * @param InValue Scale of axis
+	 */
+	void MoveRight( float InValue );
+
+	/**
+	 * @brief Move up
+	 * @param InValue Scale of axis
+	 */
+	void MoveUp( float InValue );
 };
 
 #endif // !HEPLAYERCONTROLLER_H

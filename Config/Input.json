@@ -4,15 +4,17 @@
 		"Actions": [
 			{ 
 				"Name": "Exit",
-				"Buttons": [ "ESC", "Q" ]
-			},
+				"Buttons": [ "ESC" ]
+			}
+		],
+		"Axis": [
 			{
 				"Name": "MoveRight",
-				"Buttons": [ "D" ]
+				"Buttons": [ { "Name": "D", "Scale": -1 }, { "Name": "A", "Scale": 1 } ]
 			},
 			{
-				"Name": "MoveLeft",
-				"Buttons": [ "A" ]
+				"Name": "MoveUp",
+				"Buttons": [ { "Name": "W", "Scale": 1 }, { "Name": "S", "Scale": -1 } ]
 			}
 		]
 	}

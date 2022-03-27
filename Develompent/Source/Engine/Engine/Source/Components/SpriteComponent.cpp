@@ -19,11 +19,6 @@ LSpriteComponent::LSpriteComponent()
 	BeginInitResource( sprite );
 }
 
-void LSpriteComponent::BeginPlay()
-{
-    Super::BeginPlay();
-}
-
 void LSpriteComponent::Serialize( class FArchive& InArchive )
 {
     Super::Serialize( InArchive );

@@ -4,7 +4,8 @@
 		"ShortName":				"HeliumGame",
 		"Splash": 					"Splash.bmp",
 		"EditorStartupMap": 		"Frontend.lmap",
-		"GameDefaultMap": 			"Frontend.lmap",
-		"DefaultPlayerController": 	"AHEPlayerController"
+		"GameDefaultMap": 			"A0A0.lmap",
+		"DefaultPlayerController": 	"AHEPlayerController",
+		"DefaultPlayerCharacter":	"AHEPlayerCharacter"
 	}
 }
