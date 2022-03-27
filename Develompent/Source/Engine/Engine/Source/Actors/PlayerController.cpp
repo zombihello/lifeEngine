@@ -10,7 +10,8 @@ IMPLEMENT_CLASS( APlayerController )
 
 APlayerController::APlayerController()
 {
-	cameraComponent = CreateComponent< LCameraComponent >( TEXT( "CameraComponent0" ) );   
+	cameraComponent = CreateComponent< LCameraComponent >( TEXT( "CameraComponent0" ) );
+	inputComponent = CreateComponent< LInputComponent >( TEXT( "InputComponent0" ) );
 }
 
 APlayerController::~APlayerController()
@@ -25,10 +26,33 @@ APlayerController::~APlayerController()
 void APlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	SetupInputComponent();
 
 	GWindow->HideCursor();
 	GCameraManager->SetActiveCamera( cameraComponent );
 	cameraComponent->SetProjectionMode( CPM_Perspective );
+}
+
+void APlayerController::SetupInputComponent()
+{
+	inputComponent->BindAction( TEXT( "Exit" ), IE_Released, this, &APlayerController::ExitFromGame );
+	inputComponent->BindAction( TEXT( "MoveRight" ), IE_Pressed, this, &APlayerController::MoveRight );
+	inputComponent->BindAction( TEXT( "MoveLeft" ), IE_Pressed, this, &APlayerController::MoveLeft );
+}
+
+void APlayerController::ExitFromGame()
+{
+	GIsRequestingExit = true;
+}
+
+void APlayerController::MoveRight()
+{
+	AddActorLocation( GetActorRightVector() * -2.f );
+}
+
+void APlayerController::MoveLeft()
+{
+	AddActorLocation( GetActorRightVector() * 2.f );
 }
 
 void APlayerController::Tick( float InDeltaTime )
@@ -37,7 +61,7 @@ void APlayerController::Tick( float InDeltaTime )
 
 	// BS yehor.pohuliaka - This code for test and need refactor
 	cameraComponent->RotateComponentByMouse();
-	if ( GInputSystem->IsKeyDown( BC_KeyQ ) )
+	/*if ( GInputSystem->IsKeyDown( BC_KeyQ ) )
 	{
 		GIsRequestingExit = true;
 	}
@@ -56,5 +80,5 @@ void APlayerController::Tick( float InDeltaTime )
 	if ( GInputSystem->IsKeyDown( BC_KeyD ) )
 	{
 		AddActorLocation( GetActorRightVector() * -2.f );
-	}
+	}*/
 }

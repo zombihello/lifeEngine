@@ -18,10 +18,10 @@
  */
 enum EButtonEvent
 {
-	BE_None,			/**< No event */
-	BE_Pressed,			/**< Pressed button */
-	BE_Released,		/**< Released button */
-	BE_Scrolled			/**< Button is scrolled */
+	BE_None,		/**< No event */
+	BE_Pressed,		/**< Pressed button */
+	BE_Released,	/**< Released button */
+	BE_Scrolled,	/**< Button is scrolled */
 };
 
 /**
@@ -155,11 +155,22 @@ public:
 		return mouseSensitivity;
 	}
 
+	/**
+	 * Get current event in button
+	 * 
+	 * @param InButtonCode Button code
+	 * @return Return current event in button
+	 */
+	FORCEINLINE EButtonEvent GetButtonEvent( EButtonCode InButtonCode ) const
+	{
+		return buttonEvents[ InButtonCode ];
+	}
+
 private:
-	EButtonEvent			buttonEvents[ BC_Count ];		/**< Events button */
-	FVector2D				mouseLocation;					/**< Location mouse on screen */
-	FVector2D				mouseOffset;					/**< Offset mouse on current frame */
-	float					mouseSensitivity;				/**< Mouse sensitivity */
+	EButtonEvent						buttonEvents[ BC_Count ];		/**< Events button */
+	FVector2D							mouseLocation;					/**< Location mouse on screen */
+	FVector2D							mouseOffset;					/**< Offset mouse on current frame */
+	float								mouseSensitivity;				/**< Mouse sensitivity */
 };
 
 #endif // !INPUTSYSTEM_H

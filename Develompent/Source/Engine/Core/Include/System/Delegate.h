@@ -13,6 +13,7 @@
 #include <list>
 
 #include "Core.h"
+#include "Misc/Object.h"
 #include "ThreadingBase.h"
 
 /**
@@ -26,34 +27,94 @@ public:
 	/**
 	 * Typedef of function delegate for callback
 	 */
-	typedef std::function< void( TParamTypes... ) >			FDelegate;
+	typedef void ( *FDelegateFunction )( TParamTypes... );
+
+	/**
+	 * Typedef of method delegate for callback
+	 */
+	typedef void ( LObject::*FDelegateMethod )( TParamTypes... );
 
 	/**
 	 * Add delegate
 	 * @param[in] InDelegate Delegate
 	 */
-	FORCEINLINE void Add( const FDelegate& InDelegate )
+	FORCEINLINE void Add( const FDelegateFunction& InDelegate )
 	{
 		FScopeLock		scopeLock( criticalSection );
-		delegates.push_back( InDelegate );
+		delegateFunctions.push_back( InDelegate );
+	}
+
+	/**
+	 * Add delegate
+	 * 
+	 * @param[in] InObject Object
+	 * @param[in] InDelegate Delegate
+	 */
+	FORCEINLINE void Add( LObject* InObject, const FDelegateMethod& InDelegate )
+	{
+		FScopeLock		scopeLock( criticalSection );
+		delegateMethods.push_back( FDelegateMethodInfo{ InObject, InDelegate } );
+	}
+
+	/**
+	 * Add delegate
+	 *
+	 * @param[in] InObject Object
+	 * @param[in] InDelegate Delegate
+	 */
+	template< class TClass, typename TMethod >
+	FORCEINLINE void Add( TClass* InObject, const TMethod& InDelegate )
+	{
+		Add( ( LObject* )InObject, ( FDelegateMethod )InDelegate );
 	}
 
 	/**
 	 * Remove delegate
 	 * @param[in] InDelegate Delegate
 	 */
-	FORCEINLINE void Remove( const FDelegate& InDelegate )
+	FORCEINLINE void Remove( const FDelegateFunction& InDelegate )
 	{
 		FScopeLock		scopeLock( criticalSection );
-		for ( auto it = delegates.begin(), itEnd = delegates.end(); it != itEnd; ++it )
+		for ( uint32 index = 0, count = delegateFunctions.size(); index < count; ++index )
 		{
-			if ( ( *it ) == InDelegate )
+			if ( delegateFunctions[ index ] == InDelegate )
 			{
-				delegates.erase( it );
-				criticalSection.Unlock();
+				delegateFunctions.erase( delegateFunctions.begin() + index );
 				return;
 			}
 		}
+	}
+
+	/**
+	 * Remove delegate
+	 * 
+	 * @param[in] InObject Object
+	 * @param[in] InDelegate Delegate
+	 */
+	FORCEINLINE void Remove( LObject* InObject, const FDelegateMethod& InDelegate )
+	{
+		FScopeLock		scopeLock( criticalSection );
+		for ( uint32 index = 0, count = delegateMethods.size(); index < count; ++index )
+		{
+			const FDelegateMethodInfo&		delegateInfo = delegateMethods[ index ];
+			if ( delegateInfo.object == InObject && delegateInfo.method == InDelegate )
+			{
+				delegateMethods.erase( delegateMethods.begin() + index );
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Remove delegate
+	 *
+	 * @param[in] InObject Object
+	 * @param[in] InDelegate Delegate
+	 */
+	template< class TClass, typename TMethod >
+	FORCEINLINE void Remove( TClass* InObject, const TMethod& InDelegate )
+	{
+		Remove( ( LObject* )InObject, ( FDelegateMethod )InDelegate );
 	}
 
 	/**
@@ -63,25 +124,222 @@ public:
 	FORCEINLINE void Broadcast( TParamTypes... InParams )
 	{
 		FScopeLock		scopeLock( criticalSection );
-		for ( auto it = delegates.begin(), itEnd = delegates.end(); it != itEnd; ++it )
+		
+		// Call function delegates
+		if ( !delegateFunctions.empty() )
 		{
-			( *it )( InParams... );
+			for ( uint32 index = 0, count = delegateFunctions.size(); index < count; ++index )
+			{
+				delegateFunctions[ index ]( InParams... );
+			}
+		}
+
+		// Call method delegates
+		if ( !delegateMethods.empty() )
+		{
+			for ( uint32 index = 0, count = delegateMethods.size(); index < count; ++index )
+			{
+				const FDelegateMethodInfo& delegateInfo = delegateMethods[ index ];
+				( delegateInfo.object->*delegateInfo.method )( InParams... );
+			}
 		}
 	}
 
 private:
-	std::vector< FDelegate >			delegates;			/**< Array of delegates */
-	FCriticalSection					criticalSection;	/**< Critical section for thread safe broadcast */
+	/**
+	 * Struct of info about delegate method
+	 */
+	struct FDelegateMethodInfo
+	{
+		LObject*			object;		/**< Pointer to object */
+		FDelegateMethod		method;		/**< Pointer to method */
+	};
+
+	std::vector< FDelegateFunction >			delegateFunctions;		/**< Array of function delegates */
+	std::vector< FDelegateMethodInfo >			delegateMethods;		/**< Array of method delegates */
+	FCriticalSection							criticalSection;		/**< Critical section for thread safe broadcast */
 };
 
 /**
  * @ingroup Core
- * Macro for declare delegate
+ * Single cast delegate
+ */
+template< typename... TParamTypes >
+class TDelegate
+{
+public:
+	/**
+	 * Typedef of function delegate for callback
+	 */
+	typedef void ( *FDelegateFunction )( TParamTypes... );
+
+	/**
+	 * Typedef of method delegate for callback
+	 */
+	typedef void ( LObject::*FDelegateMethod )( TParamTypes... );
+
+	/**
+	 * Constructor
+	 */
+	FORCEINLINE TDelegate()
+		: type( DT_None ), delegate( nullptr )
+	{}
+
+	/**
+	 * Destructor
+	 */
+	FORCEINLINE ~TDelegate()
+	{
+		Unbind();
+	}
+
+	/**
+	 * Bind delegate
+	 * 
+	 * @param InDelegate Delegate
+	 */
+	FORCEINLINE void BindFunction( const FDelegateFunction& InDelegate )
+	{
+		FScopeLock		scopeLock( criticalSection );
+		if ( type != DT_Function )
+		{
+			Unbind();
+		}
+
+		if ( !delegate )
+		{
+			delegate = new FDelegateFunction;
+		}
+
+		*static_cast< FDelegateFunction* >( delegate ) = InDelegate;
+		type = DT_Function;
+	}
+
+	/**
+	 * Bind delegate
+	 *
+	 * @param InObject Object
+	 * @param InDelegate Delegate
+	 */
+	FORCEINLINE void BindMethod( LObject* InObject, const FDelegateMethod& InDelegate )
+	{
+		FScopeLock		scopeLock( criticalSection );
+		if ( type != DT_Method )
+		{
+			Unbind();
+		}
+
+		if ( !delegate )
+		{
+			delegate = new FDelegateMethodInfo();
+		}
+
+		*static_cast< FDelegateMethodInfo* >( delegate ) = FDelegateMethodInfo{ InObject, InDelegate };
+		type = DT_Method;
+	}
+
+	/**
+	 * Bind delegate
+	 *
+	 * @param InObject Object
+	 * @param InDelegate Delegate
+	 */
+	template< class TClass, typename TMethod >
+	FORCEINLINE void BindMethod( TClass* InObject, const TMethod& InDelegate )
+	{
+		BindMethod( ( LObject* )InObject, ( FDelegateMethod )InDelegate );
+	}
+
+	/**
+	 * Unbind delegate
+	 */
+	FORCEINLINE void Unbind()
+	{
+		FScopeLock		scopeLock( criticalSection );
+		if ( !delegate )
+		{
+			return;
+		}
+
+		switch ( type )
+		{
+		case DT_Function:		delete static_cast< FDelegateFunction* >( delegate );		break;
+		case DT_Method:			delete static_cast< FDelegateMethodInfo* >( delegate );		break;
+		}
+
+		delegate = nullptr;
+		type = DT_None;
+	}
+
+	/**
+	 * Execute delegate
+	 * 
+	 * @param InParams Params for call delegate
+	 */
+	FORCEINLINE void Execute( TParamTypes... InParams )
+	{
+		FScopeLock		scopeLock( criticalSection );
+		if ( !delegate )
+		{
+			return;
+		}
+
+		switch ( type )
+		{
+		case DT_Function:
+			( *static_cast< FDelegateFunction* >( delegate ) )( InParams... );
+			break;
+
+		case DT_Method:
+			FDelegateMethodInfo*		delegateInfo = ( FDelegateMethodInfo* )delegate;
+			( delegateInfo->object->*delegateInfo->method )( InParams... );
+			break;
+		}
+	}
+
+private:
+	/**
+	 * Enumeration of delegate type
+	 */
+	enum EDelegateType
+	{
+		DT_Function,							/**< Function delegate */
+		DT_Method,								/**< Method delegate */
+		DT_None									/**< Not valid delegate type */
+	};
+
+	/**
+	 * Struct of info about delegate method
+	 */
+	struct FDelegateMethodInfo
+	{
+		LObject*			object;				/**< Pointer to object */
+		FDelegateMethod		method;				/**< Pointer to method */
+	};
+
+	EDelegateType		type;					/**< Delegate type */
+	void*				delegate;				/**< Pointer to delegate */
+	FCriticalSection	criticalSection;		/**< Critical section for thread safe execute */
+};
+
+/**
+ * @ingroup Core
+ * Macro for declare multi cast delegate
  * 
  * @param[in] InDelegateName Delegate name
  * @param[in] ... Other parameters of delegate
  */
-#define DECLARE_DELEGATE( InDelegateName, ... )	\
+#define DECLARE_MULTICAST_DELEGATE( InDelegateName, ... )	\
 	typedef TMulticastDelegate< __VA_ARGS__ >			InDelegateName;
+
+ /**
+  * @ingroup Core
+  * Macro for declare single cast delegate
+  *
+  * @param[in] InDelegateName Delegate name
+  * @param[in] ... Other parameters of delegate
+  */
+#define DECLARE_DELEGATE( InDelegateName, ... )	\
+	typedef TDelegate< __VA_ARGS__ >					InDelegateName;
 
 #endif // !DELEGATE_H

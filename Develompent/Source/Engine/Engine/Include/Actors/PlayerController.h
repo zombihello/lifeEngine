@@ -11,6 +11,7 @@
 
 #include "Actors/Actor.h"
 #include "Components/CameraComponent.h"
+#include "Components/InputComponent.h"
 
 /**
  * @ingroup Engine
@@ -47,13 +48,33 @@ public:
      * @brief Get camera component
      * @return Return camera component
      */
-    FORCEINLINE TRefCountPtr< class LCameraComponent > GetCameraComponent() const
+    FORCEINLINE TRefCountPtr< LCameraComponent > GetCameraComponent() const
     {
         return cameraComponent;
     }
 
+	/**
+	 * @brief Get input component
+	 * @return Return input component
+	 */
+	FORCEINLINE TRefCountPtr< LInputComponent > GetInputComponent() const
+	{
+		return inputComponent;
+	}
+
+protected:
+	/**
+	 * @brief Setup input player
+	 */
+	virtual void SetupInputComponent();
+
 private:
-	TRefCountPtr< class LCameraComponent >			cameraComponent;		/**< Player camera */
+	void ExitFromGame();
+	void MoveRight();
+	void MoveLeft();
+
+	TRefCountPtr< LCameraComponent >			cameraComponent;		/**< Player camera */
+	TRefCountPtr< LInputComponent >				inputComponent;			/**< Input component */
 };
 
 

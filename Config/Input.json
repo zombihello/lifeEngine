@@ -1,5 +1,19 @@
 {
 	"InputSystem.InputSettings": {
-		"Sensitivity": 0.5
+		"Sensitivity": 0.5,
+		"Actions": [
+			{ 
+				"Name": "Exit",
+				"Buttons": [ "ESC", "Q" ]
+			},
+			{
+				"Name": "MoveRight",
+				"Buttons": [ "D" ]
+			},
+			{
+				"Name": "MoveLeft",
+				"Buttons": [ "A" ]
+			}
+		]
 	}
 }

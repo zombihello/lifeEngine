@@ -1,4 +1,5 @@
 #include "System/Config.h"
+#include "Logger/LoggerMacros.h"
 #include "Misc/EngineGlobals.h"
 #include "System/InputSystem.h"
 #include "System/WindowEvent.h"
@@ -13,6 +14,7 @@ FInputSystem::FInputSystem() :
 
 void FInputSystem::Init()
 {
+	// Get mouse sensitivity
 	FConfigValue		configSensitivity = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Sensitivity" ) );
 	if ( configSensitivity.IsValid() )
 	{
