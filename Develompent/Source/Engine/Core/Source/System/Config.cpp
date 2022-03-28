@@ -23,7 +23,7 @@ void FConfig::Serialize( FArchive& InArchive )
 
 		// Parse JSON with help RapidJSON
 		rapidjson::Document		jsonDocument;
-		jsonDocument.Parse( ( achar* )buffer );
+		jsonDocument.Parse<rapidjson::kParseDefaultFlags | rapidjson::kParseCommentsFlag>( ( achar* )buffer );
 		delete[] buffer;
 
 		if ( jsonDocument.HasParseError() )

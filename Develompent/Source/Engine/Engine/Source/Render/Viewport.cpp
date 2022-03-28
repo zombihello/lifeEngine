@@ -32,54 +32,11 @@ void FViewport::InitRHI()
 	}
 
 	GSceneRenderTargets.Allocate( sizeX, sizeY );
+}
 
-	/*FPackage		pak;
-	pak.Open( TEXT( "Content/Tiger.lpak" ), true );
-
-	{
-		FTexture2DRef		texture2D = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "TankBody_C" ) ) );
-		FMaterialRef		material = new FMaterial();
-		material->SetShader( FBasePassVertexShader::staticType );
-		material->SetShader( FBasePassPixelShader::staticType );
-		material->UsageOnStaticMesh( true );
-		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
-		material->SetAssetName( TEXT( "TankBody_Mat" ) );
-		material->SetAssetHash( appCalcHash( TEXT( "TankBody_Mat" ) ) );
-		staticMesh->SetMaterial( 1, material );
-		pak.Add( texture2D );
-		pak.Add( material );
-	}
-
-	{
-		FTexture2DRef		texture2D = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "TigerMG_C" ) ) );
-		FMaterialRef		material = new FMaterial();
-		material->SetShader( FBasePassVertexShader::staticType );
-		material->SetShader( FBasePassPixelShader::staticType );
-		material->UsageOnStaticMesh( true );
-		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
-		material->SetAssetName( TEXT( "TigerMG_Mat" ) );
-		material->SetAssetHash( appCalcHash( TEXT( "TigerMG_Mat" ) ) );
-		staticMesh->SetMaterial( 0, material );
-		pak.Add( texture2D );
-		pak.Add( material );
-	}
-
-	{
-		FTexture2DRef		texture2D = GPackageManager->FindAsset( TEXT( "Content/Tiger.lpak" ), appCalcHash( TEXT( "TigerTrack_C" ) ) );
-		FMaterialRef		material = new FMaterial();
-		material->SetShader( FBasePassVertexShader::staticType );
-		material->SetShader( FBasePassPixelShader::staticType );
-		material->UsageOnStaticMesh( true );
-		material->SetTextureParameterValue( TEXT( "diffuse" ), texture2D );
-		material->SetAssetName( TEXT( "TigerTrack_Mat" ) );
-		material->SetAssetHash( appCalcHash( TEXT( "TigerTrack_Mat" ) ) );
-		staticMesh->SetMaterial( 2, material );
-		pak.Add( texture2D );
-		pak.Add( material );
-	}
-
-	pak.Add( staticMesh );
-	pak.Serialize();*/
+void FViewport::UpdateRHI()
+{
+	InitRHI();
 }
 
 void FViewport::ReleaseRHI()

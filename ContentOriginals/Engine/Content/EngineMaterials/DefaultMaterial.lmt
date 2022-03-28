@@ -1,0 +1,19 @@
+{
+	"Material": {
+		"IsTwoSided":		false,
+		"IsWireframe":		false,
+		
+		"Usage": {
+			"StaticMesh":	true,
+			"Sprite":		true
+		},
+		
+		"ShadersType" : [ "FBasePassVertexShader", "FBasePassPixelShader" ],	
+		"TextureParameters": [
+			{
+				"Name": 			"diffuse",
+				"AssetReference":	"EngineTextures:DefaultTexture_C"
+			}
+		]
+	}
+}

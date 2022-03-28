@@ -39,8 +39,8 @@ std::set< FRenderResource* >& FRenderResource::GetResourceList()
  */
 void FRenderResource::UpdateRHI()
 {
-	ReleaseResource();
-	InitResource();
+	ReleaseRHI();
+	InitRHI();
 }
 
 /**
@@ -102,7 +102,14 @@ void FRenderResource::ReleaseResource()
  */
 void FRenderResource::UpdateResource()
 {
-	UpdateRHI();
+	if ( !isInitialized )
+	{
+		InitResource();
+	}
+	else
+	{
+		UpdateRHI();
+	}
 }
 
 bool FRenderResource::IsGlobal() const

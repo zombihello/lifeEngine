@@ -46,6 +46,12 @@ public:
 	virtual void ReleaseRHI() override;
 
 	/**
+	 * @brief If the resource's RHI has been initialized, then release and reinitialize it.  Otherwise, do nothing.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void UpdateRHI() override;
+
+	/**
 	 * Update RHI viewport
 	 * 
 	 * @param[in] InIsDestroyed Is need destroy viewport

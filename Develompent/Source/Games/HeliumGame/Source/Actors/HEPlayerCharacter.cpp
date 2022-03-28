@@ -10,13 +10,12 @@ AHEPlayerCharacter::AHEPlayerCharacter()
 	// Create camera component
 	cameraComponent = CreateComponent< LCameraComponent >( TEXT( "CameraComponent0" ) );
 	cameraComponent->SetProjectionMode( CPM_Orthographic );
-	cameraComponent->SetIgnoreRotateByMouse( true );
+	cameraComponent->SetAutoViewData( true );
 	cameraComponent->SetNearClipPlane( -100.f );
 	cameraComponent->SetFarClipPlane( 100.f );
 
 	// Create sprite component
-	spriteComponent = CreateComponent< LSpriteComponent >( TEXT( "Player" ) );
-	spriteComponent->AddRelativeRotate( FRotator( 0.f, 180.f, 0.f ) );
+	spriteComponent = CreateComponent< LSpriteComponent >( TEXT( "SpriteComponent0" ) );
 	spriteComponent->SetSpriteSize( FVector2D( 32.f, 32.f ) );
 	spriteComponent->SetType( ST_Static );
 }

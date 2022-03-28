@@ -6,22 +6,19 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#ifndef IMPORTTEXTURECOMMANDLET_H
-#define IMPORTTEXTURECOMMANDLET_H
-
-#include <string>
-#include <vector>
+#ifndef IMPORTMATERIALCOMMANDLET_H
+#define IMPORTMATERIALCOMMANDLET_H
 
 #include "Commandlets/BaseCommandlet.h"
-#include "Render/Texture.h"
+#include "Render/Material.h"
 
 /**
  * @ingroup WorldEd
- * Commandlet for import texture to engine
+ * Commandlet for import material from LMT (JSON) to engine class and save to package
  */
-class LImportTextureCommandlet : public LBaseCommandlet
+class LImportMaterialCommandlet : public LBaseCommandlet
 {
-	DECLARE_CLASS( LImportTextureCommandlet, LBaseCommandlet )
+	DECLARE_CLASS( LImportMaterialCommandlet, LBaseCommandlet )
 
 public:
 	/**
@@ -33,32 +30,22 @@ public:
 	virtual bool Main( const std::wstring& InCommand ) override;
 
 	/**
-	 * Convert image (png, jpg, etc) to texture 2D
-	 * 
-	 * @param InPath Path to image
-	 * @param InAssetName Asset name for new texture
-	 * @return Return converted texture 2D, if failed returning false
-	 */
-	FTexture2DRef ConvertTexture2D( const std::wstring& InPath, const std::wstring& InAssetName );
-
-	/**
-	 * Get supported texture extensions
+	 * Get supported material extensions
 	 * @retun Return array of supported extensions (e.g "png", "jpg", etc)
 	 */
 	FORCEINLINE static std::vector< std::wstring > GetSupportedExtensins()
 	{
 		static std::vector< std::wstring >		supportedExtensions =
 		{
-			TEXT( "png" ),
-			TEXT( "jpg" )
+			TEXT( "lmt" )
 		};
 		return supportedExtensions;
 	}
 
 	/**
-	 * Is supported texture extension
-	 * 
-	 * @param InExtension Texture extensions ("png", "jpg", etc)
+	 * Is supported material extension
+	 *
+	 * @param InExtension Material extensions ("png", "jpg", etc)
 	 * @return Return true if supported, else return false
 	 */
 	FORCEINLINE static bool IsSupportedExtension( const std::wstring& InExtension )
@@ -74,6 +61,16 @@ public:
 
 		return false;
 	}
+
+private:
+	/**
+	 * Import material
+	 * 
+	 * @param InPath Path to material in JSON format
+	 * @param InName Name material
+	 * @return Return imported material. If failed return nullptr
+	 */
+	FMaterialRef ImportMaterial( const std::wstring& InPath, const std::wstring& InName );
 };
 
-#endif // !IMPORTTEXTURECOMMANDLET_H
+#endif // !IMPORTMATERIALCOMMANDLET_H

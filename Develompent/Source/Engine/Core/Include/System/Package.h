@@ -210,6 +210,13 @@ public:
 		check( InAsset );
 		checkMsg( InAsset->guid.IsValid(), TEXT( "For add asset to package need GUID is valid" ) );
 
+		// If asset in package already containing, remove from table old GUID
+		auto		it = assetGUIDTable.find( InAsset->name );
+		if ( it != assetGUIDTable.end() && it->second != InAsset->guid )
+		{
+			assetsTable.erase( it->second );
+		}
+
 		InAsset->package = this;
 		assetGUIDTable[ InAsset->name ] = InAsset->guid;
 		assetsTable[ InAsset->guid ] = FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset->name, InAsset };

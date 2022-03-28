@@ -20,6 +20,11 @@ class FCameraManager
 {
 public:
     /**
+	 * Begin play of game in world
+	 */
+    virtual void BeginPlay();
+
+    /**
      * @brief Process event
      *
      * @param InWindowEvent Window event

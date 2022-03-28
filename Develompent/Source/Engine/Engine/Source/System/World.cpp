@@ -1,4 +1,6 @@
 #include "Misc/CoreGlobals.h"
+#include "Misc/EngineGlobals.h"
+#include "System/CameraManager.h"
 #include "System/Package.h"
 #include "Actors/Actor.h"
 #include "System/World.h"
@@ -23,6 +25,7 @@ void FWorld::BeginPlay()
 		actors[ index ]->BeginPlay();
 	}
 
+	GCameraManager->BeginPlay();
 	isBeginPlay = true;
 }
 

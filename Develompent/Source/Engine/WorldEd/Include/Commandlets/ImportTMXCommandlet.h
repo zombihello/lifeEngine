@@ -1,13 +1,13 @@
 /**
  * @file
- * @addtogroup Engine Engine
+ * @addtogroup WorldEd World editor
  *
  * Copyright Broken Singularity, All Rights Reserved.
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#ifndef COMPILETMXCOMMANDLET_H
-#define COMPILETMXCOMMANDLET_H
+#ifndef IMPORTTMXCOMMANDLET_H
+#define IMPORTTMXCOMMANDLET_H
 
 #include <tmxlite/Map.hpp>
 #include <tmxlite/Tileset.hpp>
@@ -36,11 +36,11 @@ struct FTMXTileset
 
 /**
  * @ingroup WorldEd
- * Commandlet for compile TMX maps
+ * Commandlet for import TMX maps
  */
-class LCompileTMXCommandlet : public LBaseCommandlet
+class LImportTMXCommandlet : public LBaseCommandlet
 {
-	DECLARE_CLASS( LCompileTMXCommandlet, LBaseCommandlet )
+	DECLARE_CLASS( LImportTMXCommandlet, LBaseCommandlet )
 
 public:
 	/**
@@ -53,23 +53,10 @@ public:
 
 private:
 	/**
-	 * @brief Convert tileset to engine format
-	 *
-	 * @param InTileset TMX tileset
-	 * @param InPackageDir Path to directory for new packages
-	 * @param OutTilesetTexture Output converted tileset texture
-	 * @param OutTilesetMaterial Output converted tileset material
-	 * @return Return true if tileset is seccussed converted, else returning false
-	 */
-	bool ConvertTileset( const tmx::Tileset& InTileset, const std::wstring& InPackageDir, FTexture2DRef& OutTilesetTexture, FMaterialRef& OutTilesetMaterial );
-
-	/**
 	 * @brief Loading tilesets from TMX
-	 *
-	 * @param InPackageDir Path to directory for new packages
 	 * @return Return true if tileset is seccussed loaded, else returning false
 	 */
-	bool LoadTMXTilests( const std::wstring& InPackageDir );
+	bool LoadTMXTilests();
 
 	/**
 	 * @brief Spawn tiles in world
@@ -90,4 +77,4 @@ private:
 	std::vector< FTMXTileset >		tilesets;		/**< Array of tilesets */
 };
 
-#endif // !COMPILETMXCOMMANDLET_H
+#endif // !IMPORTTMXCOMMANDLET_H

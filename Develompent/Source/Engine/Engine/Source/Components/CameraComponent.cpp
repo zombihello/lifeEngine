@@ -7,6 +7,7 @@ IMPLEMENT_CLASS( LCameraComponent )
 
 LCameraComponent::LCameraComponent()
     : bIsActive( false )
+	, bAutoViewData( false )
     , projectionMode( CPM_Perspective )
     , fieldOfView( 90.f )
     , orthoWidth( 512.f )
@@ -18,11 +19,6 @@ LCameraComponent::LCameraComponent()
 
 void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ )
 {	
-	if ( bIsIgnoreRotateByMouse )
-	{
-		return;
-	}
-
 	FVector2D		mouseOffset = GInputSystem->GetMouseOffset();
 	if ( mouseOffset.x == 0.f && mouseOffset.y == 0.f )
 	{
@@ -71,7 +67,7 @@ void LCameraComponent::Serialize( class FArchive& InArchive )
 	Super::Serialize( InArchive );
 
 	InArchive << bIsActive;
-	InArchive << bIsIgnoreRotateByMouse;
+	InArchive << bAutoViewData;
 	InArchive << projectionMode;
 	InArchive << fieldOfView;
 	InArchive << orthoWidth;

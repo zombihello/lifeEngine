@@ -1,5 +1,22 @@
 #include "System/CameraManager.h"
+#include "Misc/CoreGlobals.h"
+#include "System/BaseWindow.h"
 #include "System/WindowEvent.h"
+
+void FCameraManager::BeginPlay()
+{
+	// If camera is active - we update aspect ratio and width/height
+	if ( activeCamera && activeCamera->IsAutoViewData() )
+	{
+		uint32		windowWidth;
+		uint32		windowHeight;
+		GWindow->GetSize( windowWidth, windowHeight );
+
+		activeCamera->SetAspectRatio( ( float )windowWidth / windowHeight );
+		activeCamera->SetOrthoWidth( windowWidth );
+		activeCamera->SetOrthoHeight( windowHeight );
+	}
+}
 
 void FCameraManager::ProcessEvent( struct SWindowEvent &InWindowEvent )
 {
@@ -11,9 +28,12 @@ void FCameraManager::ProcessEvent( struct SWindowEvent &InWindowEvent )
 	switch ( InWindowEvent.type )
 	{
 	case SWindowEvent::T_WindowResize:
-		activeCamera->SetAspectRatio( ( float )InWindowEvent.events.windowResize.width / InWindowEvent.events.windowResize.height );
-		activeCamera->SetOrthoWidth( InWindowEvent.events.windowResize.width );
-		activeCamera->SetOrthoHeight( InWindowEvent.events.windowResize.height );
+		if ( activeCamera && activeCamera->IsAutoViewData() )
+		{
+			activeCamera->SetAspectRatio( ( float )InWindowEvent.events.windowResize.width / InWindowEvent.events.windowResize.height );
+			activeCamera->SetOrthoWidth( InWindowEvent.events.windowResize.width );
+			activeCamera->SetOrthoHeight( InWindowEvent.events.windowResize.height );
+		}
 		break;
 	}
 }

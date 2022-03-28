@@ -62,7 +62,7 @@ FORCEINLINE void appNormalizePathSeparators( std::wstring& InOutFilename )
 	for ( uint32 index = 0, count = InOutFilename.size(); index < count; ++index )
 	{
 		tchar&		ch = InOutFilename[ index ];
-		if ( bIsNeedDeleteNextSeparator && appIsPathSeparator( ch ) )
+		if ( bIsNeedDeleteNextSeparator && ( ch == TEXT( '/' ) || ch == TEXT( '\\' ) ) )
 		{
 			InOutFilename.erase( index, 1 );
 			count = InOutFilename.size();
@@ -70,7 +70,7 @@ FORCEINLINE void appNormalizePathSeparators( std::wstring& InOutFilename )
 			continue;
 		}
 
-		if ( appIsPathSeparator( ch ) )
+		if ( ch == TEXT( '/' ) || ch == TEXT( '\\' ) )
 		{
 			ch = PATH_SEPARATOR[ 0 ];
 			bIsNeedDeleteNextSeparator = true;

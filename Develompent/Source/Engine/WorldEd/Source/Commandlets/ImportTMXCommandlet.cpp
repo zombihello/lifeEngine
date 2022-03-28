@@ -8,7 +8,7 @@
 #include "Misc/EngineGlobals.h"
 #include "Containers/StringConv.h"
 #include "Containers/String.h"
-#include "Commandlets/CompileTMXCommandlet.h"
+#include "Commandlets/ImportTMXCommandlet.h"
 #include "System/BaseFileSystem.h"
 #include "System/Archive.h"
 #include "System/Package.h"
@@ -19,13 +19,12 @@
 #include "Actors/Sprite.h"
 #include "Actors/PlayerStart.h"
 
-IMPLEMENT_CLASS( LCompileTMXCommandlet )
+IMPLEMENT_CLASS( LImportTMXCommandlet )
 
-bool LCompileTMXCommandlet::Main( const std::wstring& InCommand )
+bool LImportTMXCommandlet::Main( const std::wstring& InCommand )
 {
 	std::wstring			srcFilename;
 	std::wstring			dstFilename;
-	std::wstring			dstNewPackages;
 
 	// Parse arguments
 	{
@@ -49,12 +48,6 @@ bool LCompileTMXCommandlet::Main( const std::wstring& InCommand )
 			{
 				dstFilename = token;
 			}
-
-			// Destination new packages
-			else if ( param == TEXT( "dstNewPackages" ) )
-			{
-				dstNewPackages = token;
-			}
 		}
 	}
 
@@ -69,7 +62,7 @@ bool LCompileTMXCommandlet::Main( const std::wstring& InCommand )
 		}
 
 		// Loading tilesets from TMX
-		if ( !LoadTMXTilests( dstNewPackages ) )
+		if ( !LoadTMXTilests() )
 		{
 			throw;
 		}
@@ -106,7 +99,7 @@ bool LCompileTMXCommandlet::Main( const std::wstring& InCommand )
 	return true;
 }
 
-void LCompileTMXCommandlet::SpawnTilesInWorld()
+void LImportTMXCommandlet::SpawnTilesInWorld()
 {
 	check( tmxMap );
 	const std::vector< tmx::Layer::Ptr >&		tmxLayers = tmxMap->getLayers();
@@ -134,7 +127,7 @@ void LCompileTMXCommandlet::SpawnTilesInWorld()
 					bool			result = FindTileset( tile.ID, tileset, textureRect );
 					check( result );
 
-					ASprite*				sprite = GWorld->SpawnActor< ASprite >( FVector( x * mapTileSize.x / tileset.tileOffset.x, y * mapTileSize.y / tileset.tileOffset.y, indexLayer ), FRotator( 0.f, 180.f, 0.f ) );
+					ASprite*				sprite = GWorld->SpawnActor< ASprite >( FVector( x * mapTileSize.x / tileset.tileOffset.x, y * mapTileSize.y / tileset.tileOffset.y, indexLayer ) );
 					LSpriteComponent*		spriteComponent = sprite->GetSpriteComponent();
 					spriteComponent->SetType( ST_Static );
 					spriteComponent->SetMaterial( tileset.material );
@@ -153,7 +146,7 @@ void LCompileTMXCommandlet::SpawnTilesInWorld()
 	}
 }
 
-bool LCompileTMXCommandlet::FindTileset( uint32 InIDTile, FTMXTileset& OutTileset, FRectFloat& OutTextureRect ) const
+bool LImportTMXCommandlet::FindTileset( uint32 InIDTile, FTMXTileset& OutTileset, FRectFloat& OutTextureRect ) const
 {
 	for ( uint32 indexTileset = 0, countTilesets = tilesets.size(); indexTileset < countTilesets; ++indexTileset )
 	{
@@ -171,7 +164,7 @@ bool LCompileTMXCommandlet::FindTileset( uint32 InIDTile, FTMXTileset& OutTilese
 	return false;
 }
 
-bool LCompileTMXCommandlet::LoadTMXTilests( const std::wstring& InPackageDir )
+bool LImportTMXCommandlet::LoadTMXTilests()
 {
 	check( tmxMap );
 	const std::vector< tmx::Tileset >&		tmxTilesets = tmxMap->getTilesets();
@@ -184,14 +177,8 @@ bool LCompileTMXCommandlet::LoadTMXTilests( const std::wstring& InPackageDir )
 		tmx::Vector2u			tmxTileSize			= tmxTileset.getTileSize();
 		int32					countCulumns		= tmxTilesetSize.x / tmxTileSize.x;
 		int32					countRows			= tmxTilesetSize.y / tmxTileSize.y;
-		FTexture2DRef			tilesetTexture;
-		FMaterialRef			tilesetMaterial;
-
-		// Convert tileset to engine format
-		if ( !ConvertTileset( tmxTileset, InPackageDir, tilesetTexture, tilesetMaterial ) )
-		{
-			return false;
-		}
+		FMaterialRef			tilesetMaterial		= ( FMaterialRef )GPackageManager->FindAsset( ANSI_TO_TCHAR( tmxTileset.getName().c_str() ), AT_Unknown );
+		check( tilesetMaterial );
 
 		// Save info about tileset
 		FTMXTileset			tileset;
@@ -226,61 +213,4 @@ bool LCompileTMXCommandlet::LoadTMXTilests( const std::wstring& InPackageDir )
 	}
 
 	return true;
-}
-
-bool LCompileTMXCommandlet::ConvertTileset( const tmx::Tileset &InTileset, const std::wstring &InPackageDir, FTexture2DRef& OutTilesetTexture, FMaterialRef& OutTilesetMaterial )
-{
-	// Parse from tilesetName package and asset name
-	const std::string&		tilesetName = InTileset.getName();
-	std::wstring			packageName;
-	std::wstring			assetName;
-	if ( !ParseReferenceToAsset( ANSI_TO_TCHAR( tilesetName.c_str() ), packageName, assetName ) )
-	{
-		return false;
-	}
-
-	// If asset is exist - we exit from method
-	OutTilesetTexture = ( FTexture2DRef )GPackageManager->FindAsset( ANSI_TO_TCHAR( tilesetName.c_str() ), AT_Unknown );
-	OutTilesetMaterial = ( FMaterialRef )GPackageManager->FindAsset( FString::Format( TEXT( "%s:%s_Mat" ), packageName.c_str(), assetName.c_str() ), AT_Unknown );
-	if ( OutTilesetTexture && OutTilesetMaterial )
-	{
-		return true;
-	}
-
-	// Convert texture
-	bool				result = false;
-	std::wstring		packagePath = FString::Format( TEXT( "%s/%s.lpak" ), InPackageDir.c_str(), packageName.c_str() );
-	if ( !OutTilesetTexture )
-	{
-		const std::string&		tilesetPath = InTileset.getImagePath();
-		LBaseCommandlet::ExecCommandlet( FString::Format( TEXT( "ImportTexture -src \"%s\" -dst \"%s\" -name \"%s\"" ), ANSI_TO_TCHAR( tilesetPath.c_str() ), packagePath.c_str(), assetName.c_str() ), 0, &result );
-	}
-
-	// If texture is seccussed created - we make material for use on sprites
-	if ( result && !OutTilesetMaterial )
-	{
-		OutTilesetTexture = ( FTexture2DRef )GPackageManager->FindAsset( packagePath, assetName, AT_Unknown );
-		check( OutTilesetTexture );
-
-		OutTilesetMaterial = new FMaterial();
-		OutTilesetMaterial->SetShader( FBasePassVertexShader::staticType );
-		OutTilesetMaterial->SetShader( FBasePassPixelShader::staticType );
-		OutTilesetMaterial->SetUsageFlags( MU_Sprite );
-		OutTilesetMaterial->SetAssetName( FString::Format( TEXT( "%s_Mat" ), assetName.c_str() ) );
-		OutTilesetMaterial->SetTextureParameterValue( TEXT( "diffuse" ), OutTilesetTexture );
-
-		FPackageRef		package = GPackageManager->LoadPackage( packagePath, true );
-		package->Add( OutTilesetMaterial );
-		if ( !package->Save( packagePath ) )
-		{
-			result = false;
-		}
-	}
-
-	// Update table of content if we added new packages
-	if ( result )
-	{
-		LBaseCommandlet::ExecCommandlet( TEXT( "CookerSync" ) );
-	}
-	return result;
 }

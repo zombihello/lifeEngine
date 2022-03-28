@@ -112,13 +112,13 @@ public:
 	}
 
 	/**
-	 * @brief Set ignore rotate camera by mouse
+	 * @brief Set enable auto view data
 	 * 
-	 * @param InIsIgnoreRotateByMouse Is need ignore rotate camera by mouse
+	 * @param InAutoViewData Is need enable auto view data
 	 */
-	FORCEINLINE void SetIgnoreRotateByMouse( bool InIsIgnoreRotateByMouse )
+	FORCEINLINE void SetAutoViewData( bool InAutoViewData )
 	{
-		bIsIgnoreRotateByMouse = InIsIgnoreRotateByMouse;
+		bAutoViewData = InAutoViewData;
 	}
 
 	/**
@@ -200,17 +200,17 @@ public:
     }
 
 	/**
-	 * @brief Is ignore rotate camera by mouse
-	 * @return Return true if ignore rotate camera by mouse, else returing false
+	 * @brief Is enabled auto view data
+	 * @return Return true if enabled auto view data, else returning false
 	 */
-	FORCEINLINE bool IsIgnoreRotateByMouse() const
+	FORCEINLINE bool IsAutoViewData() const
 	{
-		return bIsIgnoreRotateByMouse;
+		return bAutoViewData;
 	}
 
 private:
     bool                            bIsActive;					/**< Is active camera. This field setted from FCameraManager::SetActiveCamera */
-	bool							bIsIgnoreRotateByMouse;		/**< Is ignore rotate camera by mouse */
+	bool							bAutoViewData;				/**< Auto view data. If this flag is true, FCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic) */
 	ECameraProjectionMode			projectionMode;				/**< Projection mode */
 	float							fieldOfView;				/**< The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode) */
 	float							orthoWidth;					/**< The desired width (in world units) of the orthographic view (ignored in Perspective mode) */

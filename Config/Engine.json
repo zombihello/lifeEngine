@@ -4,8 +4,8 @@
 		"UseMaxTickRate": false,
 		"AllowRenderThread": true,
 		"MaxTickRate": 900,
-		"DefaultTexture": "EngineTextures:LE_DefaultDiffuse",
-		"DefaultMaterial": "EngineMaterials:DefaultMaterial_Mat"
+		"DefaultTexture": "EngineTextures:DefaultTexture_C",
+		"DefaultMaterial": "EngineMaterials:DefaultMaterial"
 	},
 	"Engine.SystemSettings": {
 		"WindowWidth": 1280,
