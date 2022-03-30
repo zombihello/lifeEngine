@@ -23,23 +23,27 @@ void LBaseEngine::Init()
 		defaultTexture = new FTexture2D();						// } Default texture without packages
 		defaultTexture->SetData( PF_A8R8G8B8, 1, 1, data );
 		
-		FConfigValue		configDefaultTexture = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
-		if ( configDefaultTexture.IsValid() )
+		// Loading default texture from packages only when we in game
+		if ( !GIsCooker && !GIsCommandlet )
 		{
-			std::wstring	pathAsset = configDefaultTexture.GetString();
-			FAssetRef		asset = GPackageManager->FindAsset( pathAsset );
-			if ( asset )
+			FConfigValue		configDefaultTexture = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
+			if ( configDefaultTexture.IsValid() )
 			{
-				defaultTexture = asset;
+				std::wstring	pathAsset = configDefaultTexture.GetString();
+				FAssetRef		asset = GPackageManager->FindAsset( pathAsset );
+				if ( asset )
+				{
+					defaultTexture = asset;
+				}
+				else
+				{
+					LE_LOG( LT_Warning, LC_Init, TEXT( "Default texture '%s' not loaded" ), pathAsset.c_str() );
+				}
 			}
 			else
 			{
-				LE_LOG( LT_Warning, LC_Init, TEXT( "Default texture '%s' not loaded" ), pathAsset.c_str() );
+				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default texture in section 'Engine.Engine:DefaultTexture'" ) );
 			}
-		}
-		else
-		{
-			LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default texture in section 'Engine.Engine:DefaultTexture'" ) );
 		}
 	}
 
@@ -49,23 +53,27 @@ void LBaseEngine::Init()
 		defaultMaterial->SetShader( FBasePassVertexShader::staticType );
 		defaultMaterial->SetShader( FBasePassPixelShader::staticType );
 
-		FConfigValue		configDefaultMaterial = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
-		if ( configDefaultMaterial.IsValid() )
+		// Loading default material from packages only when we in game
+		if ( !GIsCooker && !GIsCommandlet )
 		{
-			std::wstring	pathAsset = configDefaultMaterial.GetString();
-			FAssetRef		asset = GPackageManager->FindAsset( pathAsset );
-			if ( asset )
+			FConfigValue		configDefaultMaterial = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
+			if ( configDefaultMaterial.IsValid() )
 			{
-				defaultMaterial = asset;
+				std::wstring	pathAsset = configDefaultMaterial.GetString();
+				FAssetRef		asset = GPackageManager->FindAsset( pathAsset );
+				if ( asset )
+				{
+					defaultMaterial = asset;
+				}
+				else
+				{
+					LE_LOG( LT_Warning, LC_Init, TEXT( "Default material '%s' not loaded" ), pathAsset.c_str() );
+				}
 			}
 			else
 			{
-				LE_LOG( LT_Warning, LC_Init, TEXT( "Default material '%s' not loaded" ), pathAsset.c_str() );
+				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default texture in section 'Engine.Engine:DefaultMaterial'" ) );
 			}
-		}
-		else
-		{
-			LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default texture in section 'Engine.Engine:DefaultMaterial'" ) );
 		}
 	}
 
@@ -100,7 +108,7 @@ bool LBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
 
-	FArchive* archive = GFileSystem->CreateFileReader( appBaseDir() + FString::Format( TEXT( "Content/Maps/%s" ), InMap.c_str() ) );
+	FArchive*		archive = GFileSystem->CreateFileReader( FString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), GCookedDir.c_str(), InMap.c_str() ) );
 	if ( !archive )
 	{
 		OutError = TEXT( "Map not found" );

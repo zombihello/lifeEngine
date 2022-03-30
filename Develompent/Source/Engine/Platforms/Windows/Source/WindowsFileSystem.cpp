@@ -4,6 +4,7 @@
 #include "WindowsFileSystem.h"
 #include "WindowsArchive.h"
 #include "Containers/String.h"
+#include "Logger/LoggerMacros.h"
 
 /**
  * Constructor
@@ -109,6 +110,47 @@ std::vector< std::wstring > FWindowsFileSystem::FindFiles( const std::wstring& I
 		FindClose( handle );
 	}
 
+	return result;
+}
+
+bool FWindowsFileSystem::Delete( const std::wstring& InPath, bool InIsEvenReadOnly /* = false */ )
+{
+	if ( InIsEvenReadOnly )
+	{
+		SetFileAttributesW( InPath.c_str(), FILE_ATTRIBUTE_NORMAL );
+	}
+
+	int32		result	= DeleteFile( InPath.c_str() ) != 0;
+	int32		error	= GetLastError();
+	result = result || error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND;
+	if ( !result )
+	{
+		if ( GIsCommandlet )
+		{
+			// This is not an error while doing commandlets
+			LE_LOG( LT_Warning, LC_General, TEXT( "Could not delete '%s'" ), InPath.c_str() );
+		}
+		else
+		{
+			appErrorf( TEXT( "Error deleting file '%s' (GetLastError: %d)" ), InPath.c_str(), error );
+		}
+	}
+
+	return result != 0;
+}
+
+bool FWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree )
+{
+	if ( InIsTree )
+	{
+		return FBaseFileSystem::DeleteDirectory( InPath, InIsTree );
+	}
+
+	bool		result = RemoveDirectoryW( InPath.c_str() );
+	if ( !result )
+	{
+		LE_LOG( LT_Warning, LC_General, TEXT( "Failed deleting directory '%s'. GetLastError() = 0x%X" ), InPath.c_str(), GetLastError() );
+	}
 	return result;
 }
 

@@ -12,6 +12,7 @@
 #include "System/InputSystem.h"
 #include "System/Package.h"
 #include "Containers/String.h"
+#include "Containers/StringConv.h"
 #include "Misc/Class.h"
 #include "Math/Color.h"
 #include "Misc/TableOfContents.h"
@@ -27,10 +28,22 @@
 #include "Render/RenderingThread.h"
 #include "System/SplashScreen.h"
 #include "System/BaseEngine.h"
+#include "LEBuild.h"
 
 #if WITH_EDITOR
 #include "Commandlets/BaseCommandlet.h"
 #endif // WITH_EDITOR
+
+/**
+ *	Returns the path to the cooked data for the given platform
+ *
+ *	@param InPlatform The platform of interest
+ *	@param OutPath The path to the cooked content for that platform
+ */
+void appGetCookedContentPath( EPlatformType InPlatform, std::wstring& OutPath )
+{
+	OutPath = appGameDir() + PATH_SEPARATOR + TEXT( "Cooked" ) + appPlatformTypeToString( InPlatform ) + PATH_SEPARATOR;
+}
 
 /**
  * Update GCurrentTime and GDeltaTime while taking into account max tick rate
@@ -67,18 +80,18 @@ FEngineLoop::~FEngineLoop()
 void FEngineLoop::SerializeConfigs()
 {
 	// Loading engine config
-	FArchive*		arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Engine.json" ) );
+	FArchive*		arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Engine.json" ) );
 	if ( arConfig )
 	{
 		GEngineConfig.Serialize( *arConfig );
 		delete arConfig;
 	}
 
-	GUseMaxTickRate = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
-	GAllowRenderThread = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "AllowRenderThread" ) ).GetBool();
+	GUseMaxTickRate			= GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
+	GAllowRenderThread		= GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "AllowRenderThread" ) ).GetBool();
 
 	// Loading input config
-	arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Input.json" ) );
+	arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Input.json" ) );
 	if ( arConfig )
 	{
 		GInputConfig.Serialize( *arConfig );
@@ -86,18 +99,16 @@ void FEngineLoop::SerializeConfigs()
 	}
 
 	// Loading game config
-	arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Game.json" ) );
+	arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Game.json" ) );
 	if ( arConfig )
 	{
 		GGameConfig.Serialize( *arConfig );
 		delete arConfig;
 	}
 
-	GGameName = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "ShortName" ) ).GetString();
-
 	// Loading editor config
 #if WITH_EDITOR
-	arConfig = GFileSystem->CreateFileReader( appBaseDir() + TEXT( "Config/Editor.json" ) );
+	arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Editor.json" ) );
 	if ( arConfig )
 	{
 		GEditorConfig.Serialize( *arConfig );
@@ -112,10 +123,13 @@ void FEngineLoop::SerializeConfigs()
 int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 {
 	GGameThreadId = appGetCurrentThreadId();
+	GGameName = ANSI_TO_TCHAR( GAMENAME );
+	appGetCookedContentPath( GPlatform, GCookedDir );
 	SerializeConfigs();
 
 #if WITH_EDITOR
 	GIsEditor = appParseParam( InCmdLine, TEXT( "editor" ) );
+	GIsCooker = appParseParam( InCmdLine, TEXT( "CookPackages" ) ) || appParseParam( InCmdLine, TEXT( "LCookPackagesCommandlet" ) );
 
 	// Are we launching a commandlet
 	{
@@ -135,9 +149,10 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 	int32		result = appPlatformPreInit( InCmdLine );
 	
 	// Loading table of contents
+	if ( !GIsCooker )
 	{
-		std::wstring	tocPath = appBaseDir() + TEXT( "/" ) + FTableOfContets::GetNameTOC();
-		FArchive*		archiveTOC = GFileSystem->CreateFileReader( tocPath );
+		std::wstring	tocPath		= GCookedDir + PATH_SEPARATOR + FTableOfContets::GetNameTOC();
+		FArchive*		archiveTOC	= GFileSystem->CreateFileReader( tocPath );
 		if ( archiveTOC )
 		{
 			GTableOfContents.Serialize( *archiveTOC );

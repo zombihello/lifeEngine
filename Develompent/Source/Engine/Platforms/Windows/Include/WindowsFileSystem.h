@@ -61,6 +61,24 @@ public:
     virtual std::vector< std::wstring >             FindFiles( const std::wstring& InDirectory, bool InIsFiles, bool InIsDirectories ) override;
 
     /**
+     * @brief Delete file
+     *
+     * @param InPath Path to file
+     * @param InIsEvenReadOnly Is even read only
+     * @return Return true if file is seccussed deleted, else returning false
+     */
+    virtual bool                                    Delete( const std::wstring& InPath, bool InIsEvenReadOnly = false ) override;
+
+    /**
+     * @brief Delete directory
+     *
+     * @param InPath Path to directory
+     * @param InIsTree Is need delete all tree
+     * @return Return true if directory is seccussed deleted, else returning false
+     */
+    virtual bool                                    DeleteDirectory( const std::wstring& InPath, bool InIsTree ) override;
+
+    /**
      * @brief Convert to absolute path
      *
      * @param[in] InPath Path

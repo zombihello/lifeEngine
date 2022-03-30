@@ -299,6 +299,13 @@ public:
 	}
 
 	/**
+	 * Set name from path
+	 * 
+	 * @param InPath Path
+	 */
+	void SetNameFromPath( const std::wstring& InPath );
+
+	/**
 	 * Get GUID of package
 	 * @return Return GUID of package
 	 */
@@ -445,6 +452,7 @@ private:
 	 */
 	void MarkAssetUnlnoad( const FGuid& InGUID );
 
+	bool				bIsLoaded;			/**< Is package loaded from HDD */
 	bool				bIsDirty;			/**< Is dirty package */
 	FGuid				guid;				/**< GUID of package */
 	std::wstring		filename;			/**< Path to the package from which data was last loaded */

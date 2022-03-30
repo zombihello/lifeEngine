@@ -13,7 +13,9 @@
 #include <vector>
 
 #include "Misc/Types.h"
+#include "Misc/CoreGlobals.h"
 #include "System/MemoryBase.h"
+#include "Containers/String.h"
 #include "Core.h"
 
 /**
@@ -123,7 +125,17 @@ void appParseCommandLine( const tchar* InCmdLine, std::vector< std::wstring >& O
  */
 FORCEINLINE std::wstring appBaseDir()
 {
-	return TEXT( "../../" );
+	return TEXT( ".." ) PATH_SEPARATOR TEXT( ".." ) PATH_SEPARATOR;
+}
+
+/**
+ * @ingroup Core
+ * Return directory of the game
+ * @return Return directory of the game
+ */
+FORCEINLINE std::wstring appGameDir()
+{
+	return FString::Format( TEXT( ".." ) PATH_SEPARATOR TEXT( ".." ) PATH_SEPARATOR TEXT( "%s" ) PATH_SEPARATOR, GGameName.c_str() );
 }
 
 /**
@@ -133,7 +145,7 @@ FORCEINLINE std::wstring appBaseDir()
  */
 FORCEINLINE std::wstring appShaderDir()
 {
-	return TEXT( "../../Engine/Shaders/" );
+	return TEXT( ".." ) PATH_SEPARATOR TEXT( ".." ) PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Shaders" ) PATH_SEPARATOR;
 }
 
 /**

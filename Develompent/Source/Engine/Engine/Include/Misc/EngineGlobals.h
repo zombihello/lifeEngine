@@ -31,9 +31,9 @@ extern class FShaderManager*		GShaderManager;
 
 /**
  * @ingroup Engine
- * Game name
+ * Cooked directory
  */
-extern std::wstring					GGameName;
+extern std::wstring					GCookedDir;
 
 /**
  * @ingroup Engine

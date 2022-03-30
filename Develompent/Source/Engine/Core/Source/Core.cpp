@@ -26,11 +26,14 @@ double                  GLastTime                   = 0.0;
 double                  GDeltaTime                  = 0.0;
 FPackageManager*        GPackageManager             = new FPackageManager();
 FTableOfContets		    GTableOfContents;
+std::wstring            GGameName                   = TEXT( "ExampleGame" );
 
 #if WITH_EDITOR
 FConfig                 GEditorConfig;
 bool			        GIsEditor                   = false;
 bool                    GIsCommandlet               = false;
+bool					GIsCooker                   = false;
+bool                    GShouldPauseBeforeExit      = false;
 #endif // WITH_EDITOR
 
 /**
@@ -53,4 +56,25 @@ void VARARGS appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, i
 	va_start( arguments, InFormat );
     LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, FString::Format( InFormat, arguments ).c_str() );
 	va_end( arguments );
+}
+
+std::wstring appPlatformTypeToString( EPlatformType InPlatform )
+{
+    switch ( InPlatform )
+    {
+    case PLATFORM_Windows:      return TEXT( "PC" );
+    default:                    return TEXT( "" );
+    }
+}
+
+EPlatformType appPlatformStringToType( const std::wstring& InPlatformStr )
+{
+    if ( InPlatformStr == TEXT( "PC" ) )
+    {
+        return PLATFORM_Windows;
+    }
+    else
+    {
+        return PLATFORM_Unknown;
+    }
 }

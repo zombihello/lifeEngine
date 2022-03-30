@@ -60,6 +60,11 @@
 	#define USE_INSTANCING			1
 #endif // !USE_INSTANCING
 
+// Default game name if not defined macro
+#ifndef GAMENAME
+	#define GAMENAME				"ExampleGame"
+#endif // !GAMENAME
+
 /**
  * @ingroup Core
  * Checks to see if pure virtual has actually been implemented

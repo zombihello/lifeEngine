@@ -8,7 +8,7 @@
 
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
-#include "Commandlets/ImportTextureCommandlet.h"
+//#include "Commandlets/ImportTextureCommandlet.h"
 #include "Commandlets/ImportMeshCommandlet.h"
 #include "Widgets/ContentBrowserWidget.h"
 #include "System/ContentBrowser.h"
@@ -174,83 +174,83 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 
 void WeContentBrowserWidget::on_listView_packageBrowser_ImportAsset()
 {
-	FPackageRef		package = ui->listView_packageBrowser->GetPackage();
-	QString			supportedFileExtensions;
-	check( package );
+	//FPackageRef		package = ui->listView_packageBrowser->GetPackage();
+	//QString			supportedFileExtensions;
+	//check( package );
 
-	// Texture formats
-	{
-		QString									finalString;
-		const std::vector< std::wstring >&		textureExtension = LImportTextureCommandlet::GetSupportedExtensins();
-		
-		finalString += "Texture formats (";
-		for ( uint32 index = 0, count = textureExtension.size(); index < count; ++index )
-		{
-			finalString += FString::Format( TEXT( "*.%s%s" ), textureExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
-		}
-		finalString += ");;";
-		supportedFileExtensions += finalString;
-	}
+	//// Texture formats
+	//{
+	//	QString									finalString;
+	//	const std::vector< std::wstring >&		textureExtension = LImportTextureCommandlet::GetSupportedExtensins();
+	//	
+	//	finalString += "Texture formats (";
+	//	for ( uint32 index = 0, count = textureExtension.size(); index < count; ++index )
+	//	{
+	//		finalString += FString::Format( TEXT( "*.%s%s" ), textureExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+	//	}
+	//	finalString += ");;";
+	//	supportedFileExtensions += finalString;
+	//}
 
-	// Mesh formats
-	{
-		QString									finalString;
-		const std::vector< std::wstring >&		meshExtension = LImportMeshCommandlet::GetSupportedExtensins();
+	//// Mesh formats
+	//{
+	//	QString									finalString;
+	//	const std::vector< std::wstring >&		meshExtension = LImportMeshCommandlet::GetSupportedExtensins();
 
-		finalString += "Mesh formats (";
-		for ( uint32 index = 0, count = meshExtension.size(); index < count; ++index )
-		{
-			finalString += FString::Format( TEXT( "*.%s%s" ), meshExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
-		}
-		finalString += ")";
-		supportedFileExtensions += finalString;
-	}
+	//	finalString += "Mesh formats (";
+	//	for ( uint32 index = 0, count = meshExtension.size(); index < count; ++index )
+	//	{
+	//		finalString += FString::Format( TEXT( "*.%s%s" ), meshExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+	//	}
+	//	finalString += ")";
+	//	supportedFileExtensions += finalString;
+	//}
 
-	QString			srcPath = QFileDialog::getOpenFileName( this, "Select asset to import", QString(), supportedFileExtensions );
-	if ( srcPath.isEmpty() )
-	{
-		return;
-	}
+	//QString			srcPath = QFileDialog::getOpenFileName( this, "Select asset to import", QString(), supportedFileExtensions );
+	//if ( srcPath.isEmpty() )
+	//{
+	//	return;
+	//}
 
-	bool			bSeccussed = false;
-	QFileInfo		fileInfo( srcPath );
-	std::wstring	fileExtension = fileInfo.suffix().toStdWString();
+	//bool			bSeccussed = false;
+	//QFileInfo		fileInfo( srcPath );
+	//std::wstring	fileExtension = fileInfo.suffix().toStdWString();
 
-	// We import texture
-	if ( LImportTextureCommandlet::IsSupportedExtension( fileExtension ) )
-	{
-		std::wstring					engineSrcPath = appQtAbsolutePathToEngine( srcPath );
-		std::wstring					engineDstPath = appQtAbsolutePathToEngine( QString::fromStdWString( package->GetFileName() ) );
+	//// We import texture
+	//if ( LImportTextureCommandlet::IsSupportedExtension( fileExtension ) )
+	//{
+	//	std::wstring					engineSrcPath = appQtAbsolutePathToEngine( srcPath );
+	//	std::wstring					engineDstPath = appQtAbsolutePathToEngine( QString::fromStdWString( package->GetFileName() ) );
 
-		LImportTextureCommandlet		importTextureCommandlet;
-		FTexture2DRef					texture2D = importTextureCommandlet.ConvertTexture2D( engineSrcPath, fileInfo.baseName().toStdWString() );
-		if ( texture2D )
-		{
-			package->Add( texture2D );
-			bSeccussed = package->Save( engineDstPath );
-		}
-	}
+	//	LImportTextureCommandlet		importTextureCommandlet;
+	//	FTexture2DRef					texture2D = importTextureCommandlet.ConvertTexture2D( engineSrcPath, fileInfo.baseName().toStdWString() );
+	//	if ( texture2D )
+	//	{
+	//		package->Add( texture2D );
+	//		bSeccussed = package->Save( engineDstPath );
+	//	}
+	//}
 
-	// We import mesh
-	if ( LImportMeshCommandlet::IsSupportedExtension( fileExtension ) )
-	{
-		std::wstring					engineSrcPath = appQtAbsolutePathToEngine( srcPath );
-		std::wstring					engineDstPath = appQtAbsolutePathToEngine( QString::fromStdWString( package->GetFileName() ) );
+	//// We import mesh
+	//if ( LImportMeshCommandlet::IsSupportedExtension( fileExtension ) )
+	//{
+	//	std::wstring					engineSrcPath = appQtAbsolutePathToEngine( srcPath );
+	//	std::wstring					engineDstPath = appQtAbsolutePathToEngine( QString::fromStdWString( package->GetFileName() ) );
 
-		LImportMeshCommandlet			importMeshCommandlet;
-		FStaticMeshRef					staticMesh = importMeshCommandlet.ConvertStaticMesh( engineSrcPath, fileInfo.baseName().toStdWString() );
-		if ( staticMesh )
-		{
-			package->Add( staticMesh );
-			bSeccussed = package->Save( engineDstPath );
-		}
-	}
+	//	LImportMeshCommandlet			importMeshCommandlet;
+	//	FStaticMeshRef					staticMesh = importMeshCommandlet.ConvertStaticMesh( engineSrcPath, fileInfo.baseName().toStdWString() );
+	//	if ( staticMesh )
+	//	{
+	//		package->Add( staticMesh );
+	//		bSeccussed = package->Save( engineDstPath );
+	//	}
+	//}
 
-	// If we added to package new asset - need refresh package browser
-	if ( bSeccussed )
-	{
-		ui->listView_packageBrowser->Refresh();
-	}
+	//// If we added to package new asset - need refresh package browser
+	//if ( bSeccussed )
+	//{
+	//	ui->listView_packageBrowser->Refresh();
+	//}
 }
 
 void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()

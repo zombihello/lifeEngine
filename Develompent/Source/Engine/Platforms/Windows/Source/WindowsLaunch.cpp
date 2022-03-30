@@ -116,6 +116,14 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 			}
 		}
 
+#if WITH_EDITOR
+		// Pause if we should
+		if ( GShouldPauseBeforeExit )
+		{
+			Sleep( INFINITE );
+		}
+#endif // WITH_EDITOR
+
 		GEngineLoop->Exit();
 	}
 	catch ( std::exception InException )

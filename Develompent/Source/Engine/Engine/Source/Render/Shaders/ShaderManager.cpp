@@ -9,10 +9,7 @@
 #include "Render/Shaders/Shader.h"
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/VertexFactory/VertexFactory.h"
-
-#if WITH_EDITOR
-	#include "Render/Shaders/ShaderCompiler.h"
-#endif // WITH_EDITOR
+#include "Render/Shaders/ShaderCompiler.h"
 
 void FShaderParameter::Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional /*= false*/ )
 {
@@ -135,29 +132,51 @@ FShaderRef FShaderManager::FindInstance( const std::wstring& InShaderName, uint6
 	return itShaderMap->second;
 }
 
+std::wstring FShaderManager::GetShaderCacheFilename( EShaderPlatform InShaderPlatform )
+{
+	return FString::Format( TEXT( "GlobalShaderCache-%s.bin" ), ShaderPlatformToText( InShaderPlatform ) );
+}
+
 /**
  * Initialize shader manager
  */
 void FShaderManager::Init()
 {
-	std::wstring		pathShaderCache = FString::Format( TEXT( "../../Content/GlobalShaderCache-%s.bin" ), GRHI->GetRHIName() );
+	std::wstring		pathShaderCache;
+#if WITH_EDITOR
+	if ( GIsCooker || GIsCommandlet )
+	{
+		pathShaderCache = appGameDir() + PATH_SEPARATOR + TEXT( "Content" ) + PATH_SEPARATOR + GetShaderCacheFilename( GRHI->GetShaderPlatform() );
+	}
+#endif // WITH_EDITOR
+	else
+	{
+		pathShaderCache = GCookedDir + PATH_SEPARATOR + GetShaderCacheFilename( GRHI->GetShaderPlatform() );
+	}
+		
 	if ( !LoadShaders( pathShaderCache.c_str() ) )
 	{
 #if WITH_EDITOR
-		FShaderCompiler			shaderCompiler;
-		bool					result = shaderCompiler.CompileAll( pathShaderCache.c_str(), GRHI->GetShaderPlatform() );
-		check( result );
-
-		result = LoadShaders( pathShaderCache.c_str() );
-		if ( !result )
+		// Compile shaders only in cooker or commandlets
+		if ( GIsCooker || GIsCommandlet )
 		{
-			appErrorf( TEXT( "Failed loading shader cache [%s]" ), pathShaderCache.c_str() );
+			FShaderCompiler			shaderCompiler;
+			bool					result = shaderCompiler.CompileAll( pathShaderCache.c_str(), GRHI->GetShaderPlatform() );
+			check( result );
+
+			result = LoadShaders( pathShaderCache.c_str() );
+			if ( !result )
+			{
+				appErrorf( TEXT( "Failed loading shader cache [%s]" ), pathShaderCache.c_str() );
+				return;
+			}
+		}
+		else
+#endif // WITH_EDITOR
+		{
+			appErrorf( TEXT( "Shader cache [%s] not found" ), pathShaderCache.c_str() );
 			return;
 		}
-#else
-		appErrorf( TEXT( "Shader cache [%s] not found" ), pathShaderCache.c_str() );
-		return;
-#endif // WITH_EDITOR
 	}
 }
 

@@ -11,7 +11,7 @@
 
 FScriptEngine*		GScriptEngine = new FScriptEngine();
 FShaderManager*		GShaderManager = new FShaderManager();
-std::wstring		GGameName = TEXT( "" );
+std::wstring		GCookedDir = TEXT( "" );
 class LBaseEngine*	GEngine = nullptr;
 FInputSystem*		GInputSystem = new FInputSystem();
 FWorld*				GWorld = new FWorld();

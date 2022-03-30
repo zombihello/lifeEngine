@@ -97,6 +97,7 @@ void FShaderCache::Serialize( FArchive& InArchive )
 		{
 			FShaderCacheItem&		item = items[ indexItem ];
 			item.Serialize( InArchive );
+			itemsMap[ item.vertexFactoryHash ].insert( item.name );
 		}
 	}
 	else if ( InArchive.IsSaving() )

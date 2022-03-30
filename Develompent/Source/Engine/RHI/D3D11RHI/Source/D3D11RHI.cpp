@@ -1018,7 +1018,7 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 
 EShaderPlatform FD3D11RHI::GetShaderPlatform() const
 {
-	return SP_D3D11;
+	return SP_PCD3D_SM5;
 }
 #endif // WITH_EDITOR
 

@@ -9,6 +9,8 @@
 #ifndef COREGLOBALS_H
 #define COREGLOBALS_H
 
+#include <string>
+
 /**
  * @ingroup Core
  * @brief Logger
@@ -71,9 +73,22 @@ extern bool							GIsEditor;
  * Whether engine was launched for commandlet
  */
 extern bool							GIsCommandlet;
+
+/**
+ * @ingroup Core
+ * Whether engine was launched for cooked packages
+ */
+extern bool							GIsCooker;
+
+/**
+ * @ingroup Core
+ * Whether we should pause before exiting. Used by commandlets
+ */
+extern bool							GShouldPauseBeforeExit;
 #else
 #define								GIsEditor 0
 #define								GIsCommandlet 0
+#define								GIsCooker 0
 #endif // WITH_EDITOR
 
 /**
@@ -117,5 +132,17 @@ extern class FPackageManager*		GPackageManager;
  * Table of contents
  */
 extern class FTableOfContets		GTableOfContents;
+
+/**
+ * @ingroup Core
+ * Game name
+ */
+extern std::wstring					GGameName;
+
+/**
+ * @ingroup Core
+ * Platform type
+ */
+extern enum EPlatformType			GPlatform;
 
 #endif // !COREGLOBALS_H

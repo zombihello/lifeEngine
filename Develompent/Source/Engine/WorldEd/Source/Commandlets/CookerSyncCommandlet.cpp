@@ -48,7 +48,7 @@ bool LCookerSyncCommandlet::Main( const std::wstring& InCommand )
 	AddContentEntries( appBaseDir() );
 
 	// Serialize table of contents
-	FArchive*		archiveTOC = GFileSystem->CreateFileWriter( appBaseDir() + TEXT( "/" ) + FTableOfContets::GetNameTOC(), AW_NoFail );
+	FArchive*		archiveTOC = GFileSystem->CreateFileWriter( appBaseDir() + PATH_SEPARATOR + GCookedDir + PATH_SEPARATOR + FTableOfContets::GetNameTOC(), AW_NoFail );
 	GTableOfContents.Serialize( *archiveTOC );
 	delete archiveTOC;
 

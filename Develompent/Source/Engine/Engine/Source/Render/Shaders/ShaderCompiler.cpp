@@ -43,8 +43,6 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform In
 			appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
 			bool		result = CompileShader( metaType, InShaderPlatform, shaderCache, vertexFactoryType );
 			check( result );
-
-			LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s compiled" ), shaderName.c_str(), vertexFactoryType->GetName().c_str() );
 		}
 	}
 
@@ -88,7 +86,13 @@ bool FShaderCompiler::CompileShader( class FShaderMetaType* InShaderMetaType, ES
 		shaderCacheItem.code = output.code;
 		shaderCacheItem.numInstructions = output.numInstructions;
 		shaderCacheItem.parameterMap = output.parameterMap;
+
 		InOutShaderCache.Add( shaderCacheItem );
+		LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s compiled" ), InShaderMetaType->GetName().c_str(), InVertexFactoryType->GetName().c_str() );
+	}
+	else
+	{
+		LE_LOG( LT_Error, LC_Shader, TEXT( "Failed compiling shader %s for %s" ), InShaderMetaType->GetName().c_str(), InVertexFactoryType->GetName().c_str() );
 	}
 
 	return result;

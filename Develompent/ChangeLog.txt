@@ -26,6 +26,7 @@
 	- Added flag bAutoViewData in camera component for auto setting view data by FCameraManager (aspect ratio, ortho width/height)
 	- Fixed crush on resize window
 	- Implemented commandlet for import materials from LMT (JSON) to package (LPAK)
+	- Implemented commandlet for cook content
 
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

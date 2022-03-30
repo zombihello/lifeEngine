@@ -159,14 +159,14 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 	{
 		if ( GIsEditor )
 		{
-			GSplashScreenFileName = appBaseDir() + TEXT( "Engine/Content/Splash/EdSplash.bmp" );
+			GSplashScreenFileName = appBaseDir() + TEXT( "Engine/Splash/EdSplash.bmp" );
 		}
 		else
 		{
-			GSplashScreenFileName = appBaseDir() + TEXT( "Engine/Content/Splash/Splash.bmp" );
+			GSplashScreenFileName = appBaseDir() + TEXT( "Engine/Splash/Splash.bmp" );
 		}
 
-		GSplashScreenBitmap = ( HBITMAP ) LoadImage( hInstance, ( LPCTSTR ) GSplashScreenFileName.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
+		GSplashScreenBitmap = ( HBITMAP )LoadImage( hInstance, ( LPCTSTR )GSplashScreenFileName.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
 	}
 
 	if ( GSplashScreenBitmap )
@@ -294,7 +294,7 @@ void appShowSplash( const tchar* InSplashName )
 {
 	if ( !GIsCommandlet )
 	{
-		GSplashScreenFileName = appBaseDir() + FString::Format( TEXT( "/Content/Splash/%s" ), InSplashName );
+		GSplashScreenFileName = appGameDir() + FString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
 		GThreadInitSyncEvent = GSynchronizeFactory->CreateSynchEvent( true );
 		GSplashScreenThread = CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
 

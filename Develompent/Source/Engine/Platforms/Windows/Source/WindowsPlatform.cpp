@@ -18,11 +18,12 @@
 // Platform specific globals variables
 // ----
 
-FBaseLogger*         GLog            = new FWindowsLogger();
-FBaseFileSystem*     GFileSystem     = new FWindowsFileSystem();
-FBaseWindow*         GWindow         = new FWindowsWindow();
-FBaseRHI*            GRHI            = new FD3D11RHI();
-FEngineLoop*         GEngineLoop     = new FEngineLoop();
+FBaseLogger*         GLog			= new FWindowsLogger();
+FBaseFileSystem*     GFileSystem	= new FWindowsFileSystem();
+FBaseWindow*         GWindow		= new FWindowsWindow();
+FBaseRHI*            GRHI			= new FD3D11RHI();
+FEngineLoop*         GEngineLoop	= new FEngineLoop();
+EPlatformType        GPlatform		= PLATFORM_Windows;
 
 // ----
 // Platform specific functions

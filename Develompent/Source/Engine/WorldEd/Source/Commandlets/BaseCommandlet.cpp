@@ -39,11 +39,16 @@ bool LBaseCommandlet::ExecCommandlet( const std::wstring& InCommands, uint32 InB
 		double		endCommandletTime = appSeconds();
 		delete commandlet;
 
-		LE_LOG_COLOR( result ? LC_Green : LC_Red, LT_Log, LC_Commandlet, TEXT( "Result: %s" ), result ? TEXT( "seccussed" ) : TEXT( "error" ) );
-		LE_LOG( LT_Log, LC_Commandlet, TEXT( "Commandlet took time %fs" ), endCommandletTime - beginCommandletTime );
+		ELogColor		logColor = result ? LC_Green : LC_Red;
+		LE_LOG( LT_Log, LC_Commandlet, TEXT( "" ) );
+		LE_LOG_COLOR( logColor, LT_Log, LC_Commandlet, TEXT( "----------------------" ) );
+		LE_LOG_COLOR( logColor, LT_Log, LC_Commandlet, TEXT( "Result: %s" ), result ? TEXT( "seccussed" ) : TEXT( "error" ) );
+		LE_LOG( LT_Log, LC_Commandlet, TEXT( "" ) );
+		LE_LOG( LT_Log, LC_Commandlet, TEXT( "Execution of commandlet took: %f seconds" ), endCommandletTime - beginCommandletTime );
 
 		GIsCommandlet = oldIsCommandlet;
 		GIsRequestingExit = true;
+		GShouldPauseBeforeExit = true;
 		if ( OutResultCommand )
 		{
 			*OutResultCommand = result;

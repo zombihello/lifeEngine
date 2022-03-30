@@ -16,6 +16,35 @@
 #include "RHI/BaseShaderRHI.h"
 #include "ShaderCache.h"
 
+/**
+ * @ingroup Engine
+ * @brief Enumeration of shader platform type
+ */
+enum EShaderPlatform
+{
+	SP_PCD3D_SM5,		/**< PC shader model 5 (DirectX 11) */
+	SP_Unknown,			/**< Unknown */
+	SP_NumPlatforms,	/**< Number of shader platforms */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Converts shader platform to human readable string
+ *
+ * @param InShaderPlatform	Shader platform enum
+ * @return Return text representation of enum
+ */
+FORCEINLINE const tchar* ShaderPlatformToText( EShaderPlatform InShaderPlatform )
+{
+	switch ( InShaderPlatform )
+	{
+	case SP_PCD3D_SM5:		return TEXT( "PC-D3D-SM5" );
+	default:
+		appErrorf( TEXT( "Unknown shader platform 0x%X" ), InShaderPlatform );
+		return TEXT( "UNKNOWN" );
+	}
+}
+
 #if WITH_EDITOR
 /**
  * @ingroup Engine
@@ -89,34 +118,6 @@ struct FShaderCompilerOutput
 
 /**
  * @ingroup Engine
- * @brief Enumeration of shader platform type
- */
-enum EShaderPlatform
-{
-	SP_D3D11,			/**< DirectX 11 */
-	SP_NumPlatforms,	/**< Number of shader platforms */
-};
-
-/**
- * @ingroup Engine
- * @brief Converts shader platform to human readable string
- *
- * @param InShaderPlatform	Shader platform enum
- * @return Return text representation of enum
- */
-FORCEINLINE const tchar* ShaderPlatformToText( EShaderPlatform InShaderPlatform )
-{
-	switch ( InShaderPlatform )
-	{
-	case SP_D3D11:		return TEXT( "D3D11" );
-	default:			
-		appErrorf( TEXT( "Unknown shader platform 0x%X" ), InShaderPlatform );
-		return TEXT( "UNKNOWN");
-	}
-}
-
-/**
- * @ingroup Engine
  * @brief Class-manager for compiler shaders
  */
 class FShaderCompiler
@@ -131,7 +132,6 @@ public:
 	 */
 	bool CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform );
 
-private:
 	/**
 	 * Compile shader
 	 * 

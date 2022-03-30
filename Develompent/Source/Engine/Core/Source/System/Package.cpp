@@ -73,7 +73,8 @@ FAssetReference FAsset::GetAssetReference() const
 }
 
 FPackage::FPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
-	: bIsDirty( false )
+	: bIsLoaded( false )
+	, bIsDirty( false )
 	, guid( appCreateGuid() )
 	, name( InName )
 	, numUsageAssets( 0 )
@@ -104,6 +105,34 @@ bool FPackage::Load( const std::wstring& InPath )
 	return true;
 }
 
+void FPackage::SetNameFromPath( const std::wstring& InPath )
+{
+	name = InPath;
+
+	// Find and remove first section of the string (before last '/')
+	{
+		std::size_t			posSlash = name.find_last_of( TEXT( "/" ) );
+		if ( posSlash == std::wstring::npos )
+		{
+			posSlash = name.find_last_of( TEXT( "\\" ) );
+		}
+
+		if ( posSlash != std::wstring::npos )
+		{
+			name.erase( 0, posSlash + 1 );
+		}
+	}
+
+	// Find and remove second section of the string (after last '.')
+	{
+		std::size_t			posDot = name.find_last_of( TEXT( "." ) );
+		if ( posDot != std::wstring::npos )
+		{
+			name.erase( posDot, name.size() );
+		}
+	}
+}
+
 bool FPackage::Save( const std::wstring& InPath )
 {
 	// Before saving package it needs to be fully loaded into memory
@@ -113,30 +142,7 @@ bool FPackage::Save( const std::wstring& InPath )
 	// If package name not setted - take from path name of file
 	if ( name.empty() )
 	{
-		name = InPath;
-
-		// Find and remove first section of the string (before last '/')
-		{
-			std::size_t			posSlash = name.find_last_of( TEXT( "/" ) );
-			if ( posSlash == std::wstring::npos )
-			{
-				posSlash = name.find_last_of( TEXT( "\\" ) );
-			}
-
-			if ( posSlash != std::wstring::npos )
-			{
-				name.erase( 0, posSlash + 1 );
-			}
-		}
-
-		// Find and remove second section of the string (after last '.')
-		{
-			std::size_t			posDot = name.find_last_of( TEXT( "." ) );
-			if ( posDot != std::wstring::npos )
-			{
-				name.erase( posDot, name.size() );
-			}
-		}
+		SetNameFromPath( InPath );
 	}
 
 	FArchive*		archive = GFileSystem->CreateFileWriter( InPath );
@@ -158,7 +164,7 @@ bool FPackage::Save( const std::wstring& InPath )
 void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 {
 	// If we not load package from HDD - exit from function
-	if ( filename.empty() )
+	if ( !bIsLoaded || filename.empty() )
 	{
 		return;
 	}
@@ -513,7 +519,10 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InString, EAssetType I
 	std::wstring	packagePath = GTableOfContents.GetPackagePath( packageName );
 	if ( packagePath.empty() )
 	{
-		LE_LOG( LT_Warning, LC_Package, TEXT( "Package with name '%s' not found in TOC file" ), packageName.c_str() );
+		if ( !GIsCooker )
+		{
+			LE_LOG( LT_Warning, LC_Package, TEXT( "Package with name '%s' not found in TOC file" ), packageName.c_str() );
+		}
 		return nullptr;
 	}
 
@@ -596,6 +605,9 @@ FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath, bool InCre
 		{
 			packages[ InPath ] = FPackageInfo{ false, package };
 			LE_LOG( LT_Log, LC_Package, TEXT( "Package '%s' opened" ), InPath.c_str() );
+			
+			package->SetNameFromPath( InPath );
+			GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), InPath );
 		}
 	}
 	else

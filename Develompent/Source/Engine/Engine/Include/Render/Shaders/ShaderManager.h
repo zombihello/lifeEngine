@@ -407,6 +407,14 @@ public:
         return itShaderType->second;
     }
 
+    /**
+     * Get shader cache filename
+     * 
+     * @param InShaderPlatform Shader platform
+     * @return Return shader cache filename
+     */
+    static std::wstring GetShaderCacheFilename( EShaderPlatform InShaderPlatform );
+
 private:
     /**
      * @ingroup Engine

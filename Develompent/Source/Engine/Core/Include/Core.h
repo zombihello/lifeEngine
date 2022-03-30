@@ -42,6 +42,32 @@ enum { INVALID_ID = ( uint32 )-1 };
 
 /**
  * @ingroup Core
+ * Platform type
+ */
+enum EPlatformType
+{
+    PLATFORM_Unknown,           /**< Unknown platform */
+    PLATFORM_Windows            /**< Windows */
+};
+
+/**
+ * Returns the string name of the given platform
+ *
+ * @param InPlatform The platform of interest
+ * @return The name of the platform, "" if not found
+ */
+std::wstring appPlatformTypeToString( EPlatformType InPlatform );
+
+/**
+ * Returns the enumeration value for the given platform
+ *
+ * @param InPlatformStr The platform of interest
+ * @return The platform type, or PLATFORM_Unknown if bad input
+ */
+EPlatformType appPlatformStringToType( const std::wstring& InPlatformStr );
+
+/**
+ * @ingroup Core
  * @brief Macro for convert string to WChar
  *
  * @param[in] String Input string

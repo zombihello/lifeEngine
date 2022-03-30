@@ -11,6 +11,8 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "Containers/BulkData.h"
 #include "System/Archive.h"
@@ -137,6 +139,7 @@ public:
 	FORCEINLINE void										Add( const FShaderCacheItem& InShaderCacheItem )
 	{
 		items.push_back( InShaderCacheItem );
+		itemsMap[ InShaderCacheItem.vertexFactoryHash ].insert( InShaderCacheItem.name );
 	}
 
 	/**
@@ -148,8 +151,33 @@ public:
 		return items;
 	}
 
+	/**
+	 * @brief Is shader exist in cache
+	 * 
+	 * @param InShaderName Shader name
+	 * @param InVertexFactoryHash Vertex factory hash
+	 * @return Return true if shader exist in cache, else return false
+	 */
+	FORCEINLINE bool IsExist( const std::wstring& InShaderName, uint64 InVertexFactoryHash ) const
+	{
+		auto		itVFtype = itemsMap.find( InVertexFactoryHash );
+		if ( itVFtype == itemsMap.end() )
+		{
+			return false;
+		}
+
+		auto		itShader = itVFtype->second.find( InShaderName );
+		if ( itShader == itVFtype->second.end() )
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 private:
-	std::vector< FShaderCacheItem >			items;			/**< Array of items shader cache */
+	std::vector< FShaderCacheItem >											items;		/**< Array of items shader cache */
+	std::unordered_map< uint64, std::unordered_set< std::wstring > >		itemsMap;	/**< Map of items separated by vertex factory. Need for check on exist in cache */
 };
 
 #endif // !SHADERCACHE_H
