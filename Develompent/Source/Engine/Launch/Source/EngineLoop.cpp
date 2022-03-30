@@ -164,6 +164,12 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 		}
 	}
 
+	if ( !GIsCooker && !GFileSystem->IsExistFile( GCookedDir, true ) )
+	{
+		appErrorf( TEXT( "Cooked directory '%s' not exist. For work need cook packages" ), GCookedDir.c_str() );
+		return -1;
+	}
+
 	GScriptEngine->Init();
 	GRHI->Init( GIsEditor );
 

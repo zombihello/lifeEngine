@@ -101,6 +101,15 @@ public:
     virtual bool                                    DeleteDirectory( const std::wstring& InPath, bool InIsTree );
 
     /**
+     * @brief Is exist file or directory
+     * 
+     * @param InPath Path to directory or file
+     * @param InIsDirectory Checlable file is directory?
+     * @return Return true if file or directory exist, false is not
+     */
+    virtual bool                                   IsExistFile( const std::wstring& InPath, bool InIsDirectory = false )                    { return false; }
+
+    /**
      * @brief Convert to absolute path
      * 
      * @param[in] InPath Path

@@ -154,6 +154,22 @@ bool FWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsT
 	return result;
 }
 
+bool FWindowsFileSystem::IsExistFile( const std::wstring& InPath, bool InIsDirectory /* = false */ )
+{
+	DWORD		fileAttributes = GetFileAttributesW( InPath.c_str() );
+	if ( fileAttributes == INVALID_FILE_ATTRIBUTES )
+	{
+		return false;
+	}
+
+	if ( InIsDirectory && ( fileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
+	{
+		return true;
+	}
+
+	return !InIsDirectory;
+}
+
 /**
  * Convert to absolute path
  */

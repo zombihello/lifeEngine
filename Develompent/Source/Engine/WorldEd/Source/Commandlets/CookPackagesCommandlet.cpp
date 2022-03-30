@@ -656,7 +656,10 @@ bool LCookPackagesCommandlet::Main( const std::wstring& InCommand )
 
 	// Clear table of content and if cooked dir already created remove it
 	GTableOfContents.Clear();
-	GFileSystem->DeleteDirectory( GCookedDir, true );
+	if ( GFileSystem->IsExistFile( GCookedDir, true ) )
+	{
+		GFileSystem->DeleteDirectory( GCookedDir, true );
+	}
 
 	// Cook all resource with flag bAlwaysCook = true
 	CookAllResources( true );
