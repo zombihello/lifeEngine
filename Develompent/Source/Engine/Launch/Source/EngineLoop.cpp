@@ -1,6 +1,7 @@
 #include "Core.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/AudioGlobals.h"
 #include "Misc/Misc.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
@@ -11,6 +12,7 @@
 #include "System/ThreadingBase.h"
 #include "System/InputSystem.h"
 #include "System/Package.h"
+#include "System/AudioEngine.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Misc/Class.h"
@@ -216,6 +218,9 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	appSetSplashText( STT_StartupProgress, TEXT( "Init shaders" ) );
 	GShaderManager->Init();
 
+	appSetSplashText( STT_StartupProgress, TEXT( "Init audio" ) );
+	GAudioEngine.Init();
+
 	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
 	GEngine->Init();
 
@@ -315,6 +320,7 @@ void FEngineLoop::Exit()
 	GEngine = nullptr;
 
 	//GUIEngine->Shutdown();
+	GAudioEngine.Shutdown();
 	GShaderManager->Shutdown();
 	GRHI->Destroy();
 

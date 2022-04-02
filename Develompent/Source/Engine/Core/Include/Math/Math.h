@@ -250,6 +250,18 @@ struct FMath
 		return glm::normalize( InVector );
 	}
 
+	/**
+	 * @brief Pow
+	 * 
+	 * @param InA Value A
+	 * @param InB Value B
+	 * @return Return A to the extent  B
+	 */
+	static FORCEINLINE float Pow( float InA, float InB )
+	{
+		return powf( InA, InB );
+	}
+
 	static const FVector				vectorZero;			/**< Zero 3D vector */
 	static const FVector				vectorOne;			/**< One 3D vector */
 	static const FQuaternion			quaternionZero;		/**< Quaternion zero */

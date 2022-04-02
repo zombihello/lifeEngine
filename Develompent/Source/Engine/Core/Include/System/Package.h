@@ -43,7 +43,8 @@ enum EAssetType
 	AT_Texture2D,		/**< Texture 2D */
 	AT_Material,		/**< Material */
 	AT_Script,			/**< Script */
-	AT_StaticMesh		/**< Static mesh */
+	AT_StaticMesh,		/**< Static mesh */
+	AT_AudioBuffer		/**< Audio buffer */
 };
 
 /**

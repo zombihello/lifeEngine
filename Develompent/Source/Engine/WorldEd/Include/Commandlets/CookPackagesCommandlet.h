@@ -20,6 +20,7 @@
 #include "Commandlets/BaseCommandlet.h"
 #include "Render/Shaders/ShaderCache.h"
 #include "Render/Shaders/ShaderCompiler.h"
+#include "System/AudioBuffer.h"
 
 /**
  * @ingroup WorldEd
@@ -56,6 +57,36 @@ public:
 	 * @return Return true if commandlet executed is seccussed, else returning false
 	 */
 	virtual bool Main( const std::wstring& InCommand ) override;
+
+	/**
+	 * Cook audio buffer
+	 *
+	 * @param InAssetRef Reference to asset in format <PackageName>:<AssetName>
+	 * @param OutAudioBuffer Output cooked audio buffer
+	 * @return Return true if seccussed cook, else returning false
+	 */
+	FORCEINLINE bool CookAudioBuffer( const std::wstring& InAssetRef, FAudioBufferRef& OutAudioBuffer )
+	{
+		std::wstring		packageName;
+		std::wstring		assetName;
+		FResourceInfo		resourceInfo;
+
+		ParseReferenceToAsset( InAssetRef, packageName, assetName );
+		if ( !FindResource( audiosMap, packageName, assetName, resourceInfo ) )
+		{
+			appErrorf( TEXT( "Audio buffer '%s' not founded" ), InAssetRef.c_str() );
+			return false;
+		}
+
+		bool	result = CookAudioBuffer( resourceInfo, OutAudioBuffer );
+		if ( !result )
+		{
+			appErrorf( TEXT( "Failed cooking audio buffer '%s'" ), InAssetRef.c_str() );
+			return false;
+		}
+
+		return true;
+	}
 
 	/**
 	 * Get supported map extensions
@@ -130,6 +161,30 @@ public:
 		return IsSupportedExtension( InExtension, GetSupportedTextureExtensins() );
 	}
 
+	/**
+	 * Get supported audio extensions
+	 * @retun Return array of supported extensions (e.g "png", "jpg", etc)
+	 */
+	FORCEINLINE static std::vector< std::wstring > GetSupportedAudioExtensins()
+	{
+		static std::vector< std::wstring >		supportedExtensions =
+		{
+			TEXT( "ogg" )
+		};
+		return supportedExtensions;
+	}
+
+	/**
+	 * Is supported audio extension
+	 *
+	 * @param InExtension Audio extensions ("png", "jpg", etc)
+	 * @return Return true if supported, else return false
+	 */
+	FORCEINLINE static bool IsSupportedAudioExtension( const std::wstring& InExtension )
+	{
+		return IsSupportedExtension( InExtension, GetSupportedAudioExtensins() );
+	}
+
 private:
 	/**
 	 * Struct info about resource
@@ -194,6 +249,14 @@ private:
 	void SpawnTilesInWorld( const tmx::Map& InTMXMap, const std::vector< FTMXTileset >& InTilesets );
 
 	/**
+	 * @brief Spawn actors in world
+	 * 
+	 * @param InTMXMap TMX map
+	 * @param InTilesets Array of tilesets
+	 */
+	void SpawnActorsInWorld( const tmx::Map& InTMXMap, const std::vector< FTMXTileset >& InTileset );
+
+	/**
 	 * Find tileset by ID tile
 	 *
 	 * @param InTilesets Array of tilesets
@@ -210,8 +273,9 @@ private:
 	 * @param InRootDir Path to root directory
 	 * @param InIsRootDir Is door door
 	 * @param InIsAlwaysCookDir Is always cook dir
+	 * @param InParentDirName Parent directory name
 	 */
-	void IndexingResources( const std::wstring& InRootDir, bool InIsRootDir = false, bool InIsAlwaysCookDir = false );
+	void IndexingResources( const std::wstring& InRootDir, bool InIsRootDir = false, bool InIsAlwaysCookDir = false, const std::wstring& InParentDirName = TEXT( "" ) );
 
 	/**
 	 * Cook all resources
@@ -245,6 +309,15 @@ private:
 	 * @return Return true if seccussed cook, else returning false
 	 */
 	bool CookTexture2D( const FResourceInfo& InTexture2DInfo, FTexture2DRef& OutTexture2D );
+
+	/**
+	 * Cook audio buffer
+	 * 
+	 * @param InAudioBufferInfo Info about audio buffer
+	 * @param OutAudioBuffer Output cooked audio buffer
+	 * @return Return true if seccussed cook, else returning false
+	 */
+	bool CookAudioBuffer( const FResourceInfo& InAudioBufferInfo, FAudioBufferRef& OutAudioBuffer );
 
 	/**
 	 * Find resource
@@ -285,6 +358,7 @@ private:
 	FExtensionInfo											extensionInfo;			/**< Info about extensions of output formats */
 	FResourceMap											texturesMap;			/**< All textures */
 	FResourceMap											materialsMap;			/**< All materials */
+	FResourceMap											audiosMap;				/**< All audios */
 	std::unordered_map< std::wstring, FResourceInfo >		mapsMap;				/**< All maps */
 	FShaderCache											shaderCache;			/**< Cooked shader cache */
 	EShaderPlatform											cookedShaderPlatform;	/**< Cooked shader platform */

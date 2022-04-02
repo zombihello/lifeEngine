@@ -58,6 +58,33 @@ function( IncludeExternals MODULE_NAME )
 		message( SEND_ERROR "Failed to find ZLIB" )
 	endif()
 	
+	# OpenAL
+	find_package( OpenAL REQUIRED )
+	if ( OPENAL_FOUND )
+		include_directories( ${OPENAL_INCLUDE} )
+		target_link_libraries( ${MODULE_NAME} ${OPENAL_LIB} )
+	else()
+		message( SEND_ERROR "Failed to find OpenAL" )
+	endif()
+
+	# Ogg
+	find_package( Ogg REQUIRED )
+	if ( OGG_FOUND )
+		include_directories( ${OGG_INCLUDE} )
+		target_link_libraries( ${MODULE_NAME} ${OGG_LIB} )
+	else()
+		message( SEND_ERROR "Failed to find Ogg" )
+	endif()
+	
+	# Vorbis
+	find_package( Vorbis REQUIRED )
+	if ( VORBIS_FOUND )
+		include_directories( ${VORBIS_INCLUDE} )
+		target_link_libraries( ${MODULE_NAME} ${VORBIS_LIB} ${VORBISSENC_LIB} ${VORBISFILE_LIB} )
+	else()
+		message( SEND_ERROR "Failed to find Vorbis" )
+	endif()
+	
 	#
 	# Externals for WorldEd
 	#
@@ -87,7 +114,7 @@ function( IncludeExternals MODULE_NAME )
 		else()
 			message( SEND_ERROR "Failed to find TMXLite" )
 		endif()
-	
+
 		# Qt5
 		target_link_libraries( ${MODULE_NAME} Qt5::Widgets Qt5::Core Qt5::Svg )	
 	endif()
@@ -113,7 +140,8 @@ function( InstallExternals INSTALL_DIR )
 		message( SEND_ERROR "Unknown platform" )
 	endif()
 		
-	set( BINARES "${SDL2_PATH}/lib/${PLATFORM_BIN_DIR}/SDL2${PLATFORM_DLL_EXTENSION}" )	
+	set( BINARES "${SDL2_PATH}/lib/${PLATFORM_BIN_DIR}/SDL2${PLATFORM_DLL_EXTENSION}"
+				 "${OPENAL_PATH}/bin/${PLATFORM_BIN_DIR}/OpenAL32${PLATFORM_DLL_EXTENSION}" )	
 		
 	if ( WITH_EDITOR )
 		set( BINARES ${BINARES}

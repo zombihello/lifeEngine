@@ -37,6 +37,7 @@ enum ELogCategory
     LC_Shader,              /**< Shader category */
     LC_Input,               /**< Input category */
     LC_Package,             /**< Package category */
+    LC_Audio,               /**< Audio category */
 
 #if WITH_EDITOR
     LC_Editor,              /**< Editor category */

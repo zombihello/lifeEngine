@@ -94,7 +94,10 @@ set( LUAJIT_PATH ${EXTERNAL_DIR}/LuaJIT-2.1 )
 set( LUABRIDGE_PATH ${EXTERNAL_DIR}/LuaBridge-2.6 )
 set( GLM_PATH ${EXTERNAL_DIR}/glm-0.9.9.8 )
 set( ZLIB_PATH ${EXTERNAL_DIR}/zlib )
-
+set( OPENAL_PATH ${EXTERNAL_DIR}/openal-soft-1.21.1 )
+set( OGG_PATH ${EXTERNAL_DIR}/libogg-1.3.5 )
+set( VORBIS_PATH ${EXTERNAL_DIR}/libvorbis-1.3.7 )
+	
 if ( WITH_EDITOR )
 	set( QT5_PATH ${EXTERNAL_DIR}/Qt-5.15.2/msvc2019_64 )
 	set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_PATH} )
@@ -112,6 +115,7 @@ set( PROJECT_ENGINE Engine/Engine )
 set( PROJECT_LAUNCH Engine/Launch )
 set( PROJECT_UI Engine/UI )
 set( PROJECT_WORLDED Engine/WorldEd )
+set( PROJECT_AUDIO Engine/Audio )
 
 if ( PLATFORM_WINDOWS )
 	set( PROJECT_PLATFORM Engine/Platforms/Windows )
@@ -158,6 +162,7 @@ include( ${PROJECT_SOURCE_DIR}/${PROJECT_CORE}/Core.Build.cmake )				# Core
 include( ${PROJECT_SOURCE_DIR}/${PROJECT_ENGINE}/Engine.Build.cmake )			# Engine
 include( ${PROJECT_SOURCE_DIR}/${PROJECT_LAUNCH}/Launch.Build.cmake )			# Launch
 include( ${PROJECT_SOURCE_DIR}/${PROJECT_UI}/UI.Build.cmake )					# UI
+include( ${PROJECT_SOURCE_DIR}/${PROJECT_AUDIO}/Audio.Build.cmake )				# Audio
 include( ${GAME_SOURCE_PATH}/Game.Build.cmake )									# Game
 
 if ( WITH_EDITOR )

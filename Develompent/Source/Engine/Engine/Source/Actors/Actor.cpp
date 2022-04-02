@@ -3,6 +3,44 @@
 
 IMPLEMENT_CLASS( AActor )
 
+#if WITH_EDITOR
+FActorVar::FActorVar()
+	: type( AVT_Unknown )
+	, value( nullptr )
+{}
+
+FActorVar::FActorVar( const FActorVar& InCopy )
+{
+	*this = InCopy;
+}
+
+void FActorVar::Clear()
+{
+	if ( !value )
+	{
+		return;
+	}
+
+	switch ( type )
+	{
+	case AVT_Int:		delete static_cast< int32* >( value );			break;
+	case AVT_Float:		delete static_cast< float* >( value );			break;
+	case AVT_Bool:		delete static_cast< bool* >( value );			break;
+	case AVT_Vector2D:	delete static_cast< FVector2D* >( value );		break;
+	case AVT_Vector3D:	delete static_cast< FVector* >( value );		break;
+	case AVT_Vector4D:	delete static_cast< FVector4D* >( value );		break;
+	case AVT_RectInt:	delete static_cast< FRectInt32* >( value );		break;
+	case AVT_RectFloat:	delete static_cast< FRectFloat* >( value );		break;
+	case AVT_Color:		delete static_cast< FColor* >( value );			break;
+	case AVT_String:	delete static_cast< std::wstring* >( value );	break;
+	case AVT_Material:	delete static_cast< FMaterialRef* >( value );	break;
+	}
+
+	value = nullptr;
+	type = AVT_Unknown;
+}
+#endif // WITH_EDITOR
+
 AActor::~AActor()
 {
 	ResetOwnedComponents();
@@ -32,6 +70,13 @@ void AActor::Serialize( class FArchive& InArchive )
 		ownedComponents[ index ]->Serialize( InArchive );
 	}
 }
+
+#if WITH_EDITOR
+bool AActor::InitProperties( const std::vector<FActorVar>& InActorVars, class LCookPackagesCommandlet* InCooker )
+{
+	return true;
+}
+#endif // WITH_EDITOR
 
 LActorComponentRef AActor::CreateComponent( LClass* InClass, const tchar* InName )
 {

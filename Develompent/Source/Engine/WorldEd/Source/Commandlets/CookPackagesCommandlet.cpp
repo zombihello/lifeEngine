@@ -16,6 +16,7 @@
 #include "System/Config.h"
 #include "System/World.h"
 #include "System/Config.h"
+#include "System/AudioBuffer.h"
 #include "Logger/LoggerMacros.h"
 #include "Render/Shaders/ShaderCompiler.h"
 
@@ -34,6 +35,36 @@ IMPLEMENT_CLASS( LCookPackagesCommandlet )
 
 /** Default map extension */
 #define DEFAULT_MAP_EXTENSION			TEXT( "lmap" )
+
+/**
+ * Struct of TMX object for spawn actor in world
+ */
+struct FTMXObject
+{
+	std::wstring					name;		/**< Actor name */
+	std::wstring					className;	/**< Class actor */
+	FTransform						transform;	/**< Transform */
+	std::vector< FActorVar >		actorVars;	/**< Actor properties */
+};
+
+/**
+ * Convert TMX property type to text
+*/
+FORCEINLINE std::wstring TMXPropertyTypeToText( tmx::Property::Type InTmxPropertyType )
+{
+	switch ( InTmxPropertyType )
+	{
+	case tmx::Property::Type::Boolean:		return TEXT( "Boolean" );
+	case tmx::Property::Type::Colour:		return TEXT( "Colour" );
+	case tmx::Property::Type::File:			return TEXT( "File" );
+	case tmx::Property::Type::Float:		return TEXT( "Float" );
+	case tmx::Property::Type::Int:			return TEXT( "Int" );
+	case tmx::Property::Type::Object:		return TEXT( "Object" );
+	case tmx::Property::Type::String:		return TEXT( "String" );
+	case tmx::Property::Type::Undef:		return TEXT( "Undef" );
+	default:								return TEXT( "Unknown" );
+	}
+}
 
 LCookPackagesCommandlet::LCookPackagesCommandlet()
 	: cookedShaderPlatform( SP_Unknown )
@@ -72,6 +103,9 @@ bool LCookPackagesCommandlet::CookMap( const FResourceInfo& InMapInfo )
 
 	// Spawn tiles
 	SpawnTilesInWorld( tmxMap, tilesets );
+
+	// Spawn actors
+	SpawnActorsInWorld( tmxMap, tilesets );
 
 	// Serialize world to HDD
 	FArchive*		archive = GFileSystem->CreateFileWriter( FString::Format( TEXT( "%s") PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InMapInfo.filename.c_str(), extensionInfo.map.c_str() ), AW_NoFail );
@@ -181,10 +215,9 @@ void LCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 			tmx::TileLayer*									tmxLayer = ( tmx::TileLayer* )tmxLayers[ indexLayer ].get();
 			const std::vector< tmx::TileLayer::Tile >&		tmxTiles = tmxLayer->getTiles();
 
-			float		x = 0.f;
-			float		y = 0.f;
-			float		maxX = mapSize.x;
-			for ( int32 indexTile = tmxTiles.size() - 1; indexTile >= 0; --indexTile )
+			int32		x = 0;
+			int32		y = mapSize.y;
+			for ( uint32 indexTile = 0, countTiles = tmxTiles.size(); indexTile < countTiles; ++indexTile )
 			{
 				const tmx::TileLayer::Tile&			tile = tmxTiles[ indexTile ];
 				if ( tile.ID != 0 )
@@ -203,11 +236,165 @@ void LCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 					spriteComponent->SetTextureRect( textureRect );
 				}
 
-				--x;
-				if ( -x >= maxX )
+				++x;
+				if ( x >= mapSize.x )
 				{
-					x = 0.f;
-					++y;
+					x = 0;
+					--y;
+				}
+			}
+		}
+	}
+}
+
+void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, const std::vector<FTMXTileset>& InTileset )
+{
+	const std::vector< tmx::Layer::Ptr >&		tmxLayers = InTMXMap.getLayers();
+
+	// Getting max coord XY in coords system of Tiled Map Editor
+	FVector2D		tmxMaxXY;
+	{
+		const tmx::Vector2u&	mapSize			= InTMXMap.getTileCount();
+		const tmx::Vector2u&	mapTileSize		= InTMXMap.getTileSize();
+		tmxMaxXY.x = mapSize.x * mapTileSize.x;
+		tmxMaxXY.y = mapSize.y * mapTileSize.y;
+	}
+
+	for ( uint32 indexLayer = 0, countLayers = tmxLayers.size(); indexLayer < countLayers; ++indexLayer )
+	{
+		if ( tmxLayers[ indexLayer ]->getType() == tmx::Layer::Type::Object )
+		{
+			tmx::ObjectGroup*					tmxObjectGroup	= ( tmx::ObjectGroup* )tmxLayers[ indexLayer ].get();
+			const std::vector< tmx::Object >&	tmxObjects		= tmxObjectGroup->getObjects();
+
+			for ( uint32 indexObject = 0, countObjects = tmxObjects.size(); indexObject < countObjects; ++indexObject )
+			{			
+				// Getting all parameters from object
+				const tmx::Object&		object = tmxObjects[ indexObject ];							
+				FTMXObject				tmxObject;
+				tmxObject.name = ANSI_TO_TCHAR( object.getName().c_str() );
+
+				// Getting transformation and settings from object
+				{
+					const tmx::FloatRect&		objectAABB = object.getAABB();
+
+					// Getting position
+					{
+						const tmx::Vector2f&		location = object.getPosition();
+						tmxObject.transform.SetLocation( FVector( objectAABB.left, tmxMaxXY.y - objectAABB.top, indexLayer ) );
+					}
+
+					// Getting rotation
+					{
+						tmxObject.transform.SetRotation( FRotator( 0.f, 0.f, object.getRotation() ) );
+					}
+
+					// Getting size
+					{
+						FActorVar		actorVar;
+						actorVar.SetName( TEXT( "Size" ) );
+						actorVar.SetValueVector3D( FVector( objectAABB.width, objectAABB.height, 1.f ) );
+						tmxObject.actorVars.push_back( actorVar );
+					}
+
+					// If tile id in object more 0 - getting tile for setting actor view
+					uint32		tileID = object.getTileID();
+					if ( tileID > 0 )
+					{
+						// Find material for tile
+						FTMXTileset			tileset;
+						FRectFloat			textureRect;
+						if ( FindTileset( InTileset, tileID, tileset, textureRect ) )
+						{
+							FActorVar		varMaterial;
+							varMaterial.SetName( TEXT( "Material" ) );
+							varMaterial.SetValueMaterial( tileset.material );
+
+							FActorVar		varTextureRect;
+							varTextureRect.SetName( TEXT( "TextureRect" ) );
+							varTextureRect.SetValueRectFloat( textureRect );
+
+							tmxObject.actorVars.push_back( varMaterial );
+							tmxObject.actorVars.push_back( varTextureRect );
+						}
+						else
+						{
+							LE_LOG( LT_Warning, LC_Commandlet, TEXT( "For actor '%s' not founded tile with ID %i" ), tmxObject.name.c_str(), tileID );
+						}
+					}
+				}
+
+				// Getting all parameters from object
+				const std::vector< tmx::Property >&			objectProperties = object.getProperties();
+				for ( uint32 indexPropery = 0, countProperties = objectProperties.size(); indexPropery < countProperties; ++indexPropery )
+				{
+					const tmx::Property&		objectProperty = objectProperties[ indexPropery ];
+					bool						bIsClassName = false;
+					FActorVar					actorVar;
+
+					actorVar.SetName( ANSI_TO_TCHAR( objectProperty.getName().c_str() ) );
+					if ( actorVar.GetName() == TEXT( "Class" ) )
+					{
+						bIsClassName = true;
+						checkMsg( objectProperty.getType() == tmx::Property::Type::String, TEXT( "Class name must be is string" ) );
+						tmxObject.className = ANSI_TO_TCHAR( objectProperty.getStringValue().c_str() );
+						continue;
+					}
+
+					switch ( objectProperty.getType() )
+					{
+					case tmx::Property::Type::Boolean:
+						actorVar.SetValueBool( objectProperty.getBoolValue() );
+						break;
+
+					case tmx::Property::Type::Colour:
+					{
+						const tmx::Colour&		tmxColor = objectProperty.getColourValue();
+						actorVar.SetValueColor( FColor( tmxColor.r, tmxColor.g, tmxColor.b, tmxColor.a ) );
+						break;
+					}
+
+					case tmx::Property::Type::Float:
+						actorVar.SetValueFloat( objectProperty.getFloatValue() );
+						break;
+
+					case tmx::Property::Type::Int:
+						actorVar.SetValueInt( objectProperty.getIntValue() );
+						break;
+
+					case tmx::Property::Type::String:
+						actorVar.SetValueString( ANSI_TO_TCHAR( objectProperty.getStringValue().c_str() ) );
+						break;
+
+					default:
+						LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Property '%s' in actor '%s' have not supported type '%s'" ), actorVar.GetName().c_str(), tmxObject.name.c_str(), TMXPropertyTypeToText( objectProperty.getType() ).c_str() );
+						break;
+					}
+
+					tmxObject.actorVars.push_back( actorVar );
+				}
+
+				// Spawn actor and init properties if class name is valid
+				if ( !tmxObject.className.empty() )
+				{
+					LClass*		classActor = LClass::StaticFindClass( tmxObject.className.c_str() );
+					if ( !classActor )
+					{
+						LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Actor '%s' not spanwed because class '%s' not founded" ), tmxObject.className.c_str() );
+						continue;
+					}
+
+					AActorRef		actor = GWorld->SpawnActor( classActor, tmxObject.transform.GetLocation(), tmxObject.transform.GetRotation() );
+					actor->SetName( tmxObject.name.c_str() );
+					if ( !actor->InitProperties( tmxObject.actorVars, this ) )
+					{
+						appErrorf( TEXT( "Failed init properties in actor '%s'" ), tmxObject.name.c_str() );
+						return;
+					}
+				}
+				else
+				{
+					LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Actor '%s' not spawned because class name in properties not setted" ), tmxObject.name.c_str() );
 				}
 			}
 		}
@@ -480,6 +667,59 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			}
 		}
 	}
+
+	// Cook audio
+	for ( auto itPackage = audiosMap.begin(), itPackageEnd = audiosMap.end(); itPackage != itPackageEnd; ++itPackage )
+	{
+		for ( auto itAsset = itPackage->second.begin(), itAssetEnd = itPackage->second.end(); itAsset != itAssetEnd; ++itAsset )
+		{
+			if ( InIsOnlyAlwaysCook && !itAsset->second.bAlwaysCook )
+			{
+				continue;
+			}
+
+			FAudioBufferRef		audioBuffer;
+			bool	result = CookAudioBuffer( itAsset->second, audioBuffer );
+			if ( !result )
+			{
+				appErrorf( TEXT( "Failed cooking audio buffer '%s'" ), itAsset->second.filename.c_str() );
+				return;
+			}
+		}
+	}
+}
+
+/**
+ * ----------------------
+ * Cook audio buffer
+ * ----------------------
+ */
+
+bool LCookPackagesCommandlet::CookAudioBuffer( const FResourceInfo& InAudioBufferInfo, FAudioBufferRef& OutAudioBuffer )
+{
+	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking audio buffer '%s:%s'" ), InAudioBufferInfo.packageName.c_str(), InAudioBufferInfo.filename.c_str() );
+
+	// Read raw data of Ogg/Vorbis file
+	FArchive*		archive = GFileSystem->CreateFileReader( InAudioBufferInfo.path.c_str() );
+	if ( !archive )
+	{
+		appErrorf( TEXT( "Failed open archive '%s'" ), InAudioBufferInfo.path.c_str() );
+		return false;
+	}
+
+	// Serialize audio buffer to memory
+	uint64			size = archive->GetSize();
+	byte*			data = ( byte* )malloc( size );
+	archive->Serialize( data, size );
+	delete archive;
+
+	// Create audio buffer and init him
+	OutAudioBuffer = new FAudioBuffer();
+	OutAudioBuffer->SetAssetName( InAudioBufferInfo.filename );
+	OutAudioBuffer->SetRawData( data, size );
+
+	free( data );
+	return SaveToPackage( InAudioBufferInfo, OutAudioBuffer );
 }
 
 /**
@@ -504,7 +744,7 @@ bool LCookPackagesCommandlet::SaveToPackage( const FResourceInfo& InResourceInfo
 	return true;
 }
 
-void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, bool InIsRootDir /* = false */, bool InIsAlwaysCookDir /* = false */ )
+void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, bool InIsRootDir /* = false */, bool InIsAlwaysCookDir /* = false */, const std::wstring& InParentDirName /* = TEXT( "" ) */ )
 {
 	// Getting package name from dir name
 	std::wstring		packageName = GGameName;
@@ -519,6 +759,12 @@ void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 		}
 	}
 
+	// Split package names in format: <ParentDirName>_<CurrentDirName>. Example: PlayerCharacters_Materials
+	if ( !InParentDirName.empty() )
+	{
+		packageName = InParentDirName + TEXT( "_" ) + packageName;
+	}
+
 	std::vector< std::wstring >		files = GFileSystem->FindFiles( InRootDir, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
 	{
@@ -528,7 +774,7 @@ void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 
 		if ( dotPos == std::wstring::npos )
 		{
-			IndexingResources( fullPath, false, InIsAlwaysCookDir );
+			IndexingResources( fullPath, false, InIsAlwaysCookDir, !InIsRootDir ? packageName : TEXT( "" ) );
 			continue;
 		}
 
@@ -562,6 +808,11 @@ void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 		else if ( IsSupportedMaterialExtension( extension ) )
 		{
 			materialsMap[ packageName ][ filename ]		= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+		}
+		// If this resource is audio
+		else if ( IsSupportedAudioExtension( extension ) )
+		{
+			audiosMap[ packageName ][ filename ]		= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
 		}
 		// If this resource is map
 		else if ( IsSupportedMapExtension( extension ) )

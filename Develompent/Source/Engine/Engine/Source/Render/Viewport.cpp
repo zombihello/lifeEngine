@@ -1,4 +1,5 @@
 #include "Misc/EngineGlobals.h"
+#include "Misc/AudioGlobals.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
 #include "RHI/BaseViewportRHI.h"
@@ -8,6 +9,7 @@
 #include "Render/SceneRendering.h"
 #include "Render/Scene.h"
 #include "System/CameraManager.h"
+#include "System/AudioDevice.h"
 
 FViewport::FViewport() :
 	windowHandle( nullptr ),
@@ -82,7 +84,7 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 		BeginUpdateResource( this );
 	}
 }
-
+#include "Logger/LoggerMacros.h"
 void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
 	if ( !IsInitialized() )
@@ -95,6 +97,12 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 	if ( cameraComponent )
 	{
 		sceneView->SetCameraView( cameraComponent );
+	}
+
+	// Update audio listener spatial
+	{
+		const FCameraView&		cameraView = sceneView->GetCameraView();
+		GAudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation.RotateVector( FMath::vectorForward ), cameraView.rotation.RotateVector( FMath::vectorUp ) );
 	}
 
 	struct Helper
