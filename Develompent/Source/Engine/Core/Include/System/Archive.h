@@ -39,8 +39,10 @@ class FArchive
 public:
 	/**
 	 * Constructor
+	 * 
+	 * @param InPath Path to archive
 	 */
-	FArchive();
+	FArchive( const std::wstring& InPath );
 
 	/**
 	 * @brief Destructor
@@ -139,9 +141,19 @@ public:
 		return arType;
 	}
 
+	/**
+	 * Get path to archive
+	 * @return Return path to archive
+	 */
+	FORCEINLINE const std::wstring& GetPath() const
+	{
+		return arPath;
+	}
+
 protected:
 	uint32					arVer;		/**< Archive version (look ELifeEnginePackageVersion) */
 	EArchiveType			arType;		/**< Archive type */
+	std::wstring			arPath;		/**< Path to archive */
 };
 
 /**

@@ -9,10 +9,11 @@
 #ifndef AUDIOBUFFER_H
 #define AUDIOBUFFER_H
 
-#include <vector>
+#include <AL/al.h>
+#include <AL/alc.h>
 
-#include "System/Package.h"
-#include "Containers/BulkData.h"
+#include "Misc/RefCounted.h"
+#include "Misc/RefCountPtr.h"
 #include "System/AudioDevice.h"
 
 /**
@@ -25,34 +26,56 @@ typedef TRefCountPtr< class FAudioBuffer >				FAudioBufferRef;
  * @ingroup Audio
  * @brief Audio buffer
  */
-class FAudioBuffer : public FAsset
+class FAudioBuffer : public FRefCounted
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FAudioBuffer();
+	FORCEINLINE FAudioBuffer()
+		: alHandle( 0 )
+	{}
 
 	/**
 	 * Destructor
 	 */
-	~FAudioBuffer();
+	FORCEINLINE ~FAudioBuffer()
+	{
+		Clear();
+	}
 
 	/**
-	 * Serialize
-	 *
-	 * @param[in] InArchive Archive
-	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
-
-	/**
-	 * Set raw data
-	 * This method takes an Ogg/Vorbis file, which it decodes and applies in the audio engine 
+	 * Append buffer
 	 * 
-	 * @param InData Pointer to raw data of Ogg/Vorbis file
-	 * @param InSize Size of raw data
+	 * @param InSampleFormat Sample format
+	 * @param InSampleData Array of samples
+	 * @param InSamplesSize Size of samples in bytes
+	 * @param InSampleRate Rate of sample
 	 */
-	void SetRawData( const byte* InData, uint64 InSize );
+	FORCEINLINE void Append( ESampleFormat InSampleFormat, byte* InSampleData, uint32 InSamplesSize, uint32 InSampleRate )
+	{
+		if ( alHandle != 0 )
+		{
+			Clear();
+		}
+
+		alGenBuffers( 1, &alHandle );
+		alBufferData( alHandle, appSampleFormatToEngine( InSampleFormat ), InSampleData, InSamplesSize, InSampleRate );
+	}
+
+	/**
+	 * Clear buffer
+	 */
+	FORCEINLINE void Clear()
+	{
+		if ( alHandle == 0 )
+		{
+			return;
+		}
+
+		alDeleteBuffers( 1, &alHandle );
+		alHandle = 0;
+	}
 
 	/**
 	 * Get OpenAL handle
@@ -64,44 +87,7 @@ public:
 	}
 
 private:
-	/**
-	 * Load bank from memory to OpenAL
-	 */
-	void LoadBank();
-
-	/**
-	 * Unload bank
-	 */
-	void UnloadBank();
-
-	FBulkData<byte>		rawData;			/**< Raw data of Ogg/Vorbis file */
-	ESampleFormat		format;				/**< Format of samples */
-	uint32				rate;				/**< Sample rate */
-	uint32				channelCount;		/**< Channel count */
-	uint32				alHandle;			/**< Handle to OpenAL buffer */
+	uint32		alHandle;			/**< Handle to OpenAL buffer */
 };
-
-//
-// Serialization
-//
-
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAudioBufferRef& InValue )
-{
-	FAssetRef			asset = InValue;
-	InArchive << asset;
-
-	if ( InArchive.IsLoading() )
-	{
-		InValue = asset;
-	}
-	return InArchive;
-}
-
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAudioBufferRef& InValue )
-{
-	check( InArchive.IsSaving() );
-	InArchive << ( FAssetRef )InValue;
-	return InArchive;
-}
 
 #endif // !AUDIOBUFFER_H

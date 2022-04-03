@@ -21,4 +21,10 @@ extern class FAudioEngine			GAudioEngine;
  */
 extern class FAudioDevice			GAudioDevice;
 
+/**
+ * @ingroup Audio
+ * Audio buffer manager
+ */
+extern class FAudioBufferManager	GAudioBufferManager;
+
 #endif // !AUDIOGLOBALS_H

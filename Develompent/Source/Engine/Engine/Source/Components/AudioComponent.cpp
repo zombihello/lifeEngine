@@ -24,7 +24,7 @@ void LAudioComponent::Serialize( class FArchive& InArchive )
 	InArchive << minDistance;
 	InArchive << attenuation;
 	InArchive << pitch;
-	InArchive << buffer;
+	InArchive << bank;
 
 	// If we archive loading - init audio source
 	if ( InArchive.IsLoading() )
@@ -35,7 +35,7 @@ void LAudioComponent::Serialize( class FArchive& InArchive )
 		source.SetVolume( volume );
 		source.SetMinDistance( minDistance );
 		source.SetAttenuation( attenuation );
-		source.SetAudioBuffer( buffer );
+		source.SetAudioBank( bank );
 
 		// If sound is UI - set location on {0,0,0}
 		if ( bIsUISound )

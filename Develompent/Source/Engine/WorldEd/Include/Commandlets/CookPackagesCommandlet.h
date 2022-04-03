@@ -20,7 +20,7 @@
 #include "Commandlets/BaseCommandlet.h"
 #include "Render/Shaders/ShaderCache.h"
 #include "Render/Shaders/ShaderCompiler.h"
-#include "System/AudioBuffer.h"
+#include "System/AudioBank.h"
 
 /**
  * @ingroup WorldEd
@@ -59,13 +59,13 @@ public:
 	virtual bool Main( const std::wstring& InCommand ) override;
 
 	/**
-	 * Cook audio buffer
+	 * Cook audio bank
 	 *
 	 * @param InAssetRef Reference to asset in format <PackageName>:<AssetName>
-	 * @param OutAudioBuffer Output cooked audio buffer
+	 * @param OutAudioBank Output cooked audio bank
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	FORCEINLINE bool CookAudioBuffer( const std::wstring& InAssetRef, FAudioBufferRef& OutAudioBuffer )
+	FORCEINLINE bool CookAudioBank( const std::wstring& InAssetRef, FAudioBankRef& OutAudioBank )
 	{
 		std::wstring		packageName;
 		std::wstring		assetName;
@@ -74,14 +74,14 @@ public:
 		ParseReferenceToAsset( InAssetRef, packageName, assetName );
 		if ( !FindResource( audiosMap, packageName, assetName, resourceInfo ) )
 		{
-			appErrorf( TEXT( "Audio buffer '%s' not founded" ), InAssetRef.c_str() );
+			appErrorf( TEXT( "Audio bank '%s' not founded" ), InAssetRef.c_str() );
 			return false;
 		}
 
-		bool	result = CookAudioBuffer( resourceInfo, OutAudioBuffer );
+		bool	result = CookAudioBank( resourceInfo, OutAudioBank );
 		if ( !result )
 		{
-			appErrorf( TEXT( "Failed cooking audio buffer '%s'" ), InAssetRef.c_str() );
+			appErrorf( TEXT( "Failed cooking audio bank '%s'" ), InAssetRef.c_str() );
 			return false;
 		}
 
@@ -311,13 +311,13 @@ private:
 	bool CookTexture2D( const FResourceInfo& InTexture2DInfo, FTexture2DRef& OutTexture2D );
 
 	/**
-	 * Cook audio buffer
+	 * Cook audio bank
 	 * 
-	 * @param InAudioBufferInfo Info about audio buffer
-	 * @param OutAudioBuffer Output cooked audio buffer
+	 * @param InAudioBankInfo Info about audio bank
+	 * @param OutAudioBank Output cooked audio bank
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookAudioBuffer( const FResourceInfo& InAudioBufferInfo, FAudioBufferRef& OutAudioBuffer );
+	bool CookAudioBank( const FResourceInfo& InAudioBankInfo, FAudioBankRef& OutAudioBank );
 
 	/**
 	 * Find resource

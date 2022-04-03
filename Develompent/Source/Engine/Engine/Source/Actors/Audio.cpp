@@ -27,14 +27,14 @@ bool AAudio::InitProperties( const std::vector<FActorVar>& InActorVars, class LC
 		if ( actorVar.GetName() == TEXT( "Source" ) )
 		{
 			check( actorVar.GetType() == AVT_String );
-			std::wstring			audioBufferName = actorVar.GetValueString();
-			FAudioBufferRef			audioBuffer = ( FAudioBufferRef )GPackageManager->FindAsset( audioBufferName, AT_Unknown );
-			if ( !audioBuffer && !InCooker->CookAudioBuffer( audioBufferName, audioBuffer ) )
+			std::wstring			audioBankName = actorVar.GetValueString();
+			FAudioBankRef			audioBank = ( FAudioBankRef )GPackageManager->FindAsset( audioBankName, AT_Unknown );
+			if ( !audioBank && !InCooker->CookAudioBank( audioBankName, audioBank ) )
 			{
 				return false;
 			}
 
-			audioComponent->SetAudioBuffer( audioBuffer );
+			audioComponent->SetAudioBank( audioBank );
 		}
 
 		// If property is flag loop sound

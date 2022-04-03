@@ -9,7 +9,7 @@
 #ifndef AUDIOCOMPONENT_H
 #define AUDIOCOMPONENT_H
 
-#include "System/AudioBuffer.h"
+#include "System/AudioBank.h"
 #include "System/AudioSource.h"
 #include "Components/SceneComponent.h"
 
@@ -131,13 +131,13 @@ public:
 	}
 
 	/**
-	 * @brief Set audio buffer
-	 * @param InAudioBuffer Audio buffer
+	 * @brief Set audio bank
+	 * @param InAudioBank Audio bank
 	 */
-	FORCEINLINE void SetAudioBuffer( FAudioBuffer* InAudioBuffer )
+	FORCEINLINE void SetAudioBank( FAudioBank* InAudioBank )
 	{
-		buffer = InAudioBuffer;
-		source.SetAudioBuffer( buffer );
+		bank = InAudioBank;
+		source.SetAudioBank( bank );
 	}
 
 	/**
@@ -150,12 +150,12 @@ public:
 	}
 
 	/**
-	 * @brief Get audio buffer
-	 * @return Return audio buffer. If not setted return nullptr
+	 * @brief Get audio bank
+	 * @return Return audio bank. If not setted return nullptr
 	 */
-	FORCEINLINE FAudioBufferRef GetAudioBuffer() const
+	FORCEINLINE FAudioBankRef GetAudioBank() const
 	{
-		return buffer;
+		return bank;
 	}
 
 	/**
@@ -238,7 +238,7 @@ private:
 	float					pitch;						/**< Pitch */
 	float					minDistance;				/**< Min distance */
 	float					attenuation;				/**< Attenuation */
-	FAudioBufferRef			buffer;						/**< Audio buffer */
+	FAudioBankRef			bank;						/**< Audio bank */
 	FAudioSource			source;						/**< Audio source */
 	FVector					oldSourceLocation;			/**< Old source location */
 };

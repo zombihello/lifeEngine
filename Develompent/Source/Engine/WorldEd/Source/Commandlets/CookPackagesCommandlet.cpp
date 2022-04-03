@@ -678,11 +678,11 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 				continue;
 			}
 
-			FAudioBufferRef		audioBuffer;
-			bool	result = CookAudioBuffer( itAsset->second, audioBuffer );
+			FAudioBankRef	audioBank;
+			bool	result = CookAudioBank( itAsset->second, audioBank );
 			if ( !result )
 			{
-				appErrorf( TEXT( "Failed cooking audio buffer '%s'" ), itAsset->second.filename.c_str() );
+				appErrorf( TEXT( "Failed cooking audio bank '%s'" ), itAsset->second.filename.c_str() );
 				return;
 			}
 		}
@@ -695,31 +695,15 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
  * ----------------------
  */
 
-bool LCookPackagesCommandlet::CookAudioBuffer( const FResourceInfo& InAudioBufferInfo, FAudioBufferRef& OutAudioBuffer )
+bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInfo, FAudioBankRef& OutAudioBank )
 {
-	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking audio buffer '%s:%s'" ), InAudioBufferInfo.packageName.c_str(), InAudioBufferInfo.filename.c_str() );
+	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking audio bank '%s:%s'" ), InAudioBankInfo.packageName.c_str(), InAudioBankInfo.filename.c_str() );
 
-	// Read raw data of Ogg/Vorbis file
-	FArchive*		archive = GFileSystem->CreateFileReader( InAudioBufferInfo.path.c_str() );
-	if ( !archive )
-	{
-		appErrorf( TEXT( "Failed open archive '%s'" ), InAudioBufferInfo.path.c_str() );
-		return false;
-	}
-
-	// Serialize audio buffer to memory
-	uint64			size = archive->GetSize();
-	byte*			data = ( byte* )malloc( size );
-	archive->Serialize( data, size );
-	delete archive;
-
-	// Create audio buffer and init him
-	OutAudioBuffer = new FAudioBuffer();
-	OutAudioBuffer->SetAssetName( InAudioBufferInfo.filename );
-	OutAudioBuffer->SetRawData( data, size );
-
-	free( data );
-	return SaveToPackage( InAudioBufferInfo, OutAudioBuffer );
+	// Create audio bank and init him
+	OutAudioBank = new FAudioBank();
+	OutAudioBank->SetAssetName( InAudioBankInfo.filename );
+	OutAudioBank->SetSourceOGGFile( InAudioBankInfo.path );
+	return SaveToPackage( InAudioBankInfo, OutAudioBank );
 }
 
 /**

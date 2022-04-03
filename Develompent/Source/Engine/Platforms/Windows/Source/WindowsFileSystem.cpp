@@ -38,7 +38,7 @@ class FArchive* FWindowsFileSystem::CreateFileReader( const std::wstring& InFile
 		return nullptr;
 	}
 
-	return new FWindowsArchiveReading( inputFile );
+	return new FWindowsArchiveReading( inputFile, InFileName );
 }
 
 /**
@@ -80,7 +80,7 @@ class FArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 		return nullptr;
 	}
 
-	return new FWindowsArchiveWriter( outputFile );
+	return new FWindowsArchiveWriter( outputFile, InFileName );
 }
 
 /**

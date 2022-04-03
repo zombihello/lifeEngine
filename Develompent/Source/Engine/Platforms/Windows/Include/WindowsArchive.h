@@ -23,9 +23,11 @@ class FWindowsArchiveReading : public FArchive
 public:
 	/**
 	 * @brief Constructor
-	 * @param[in] InFile Link to file
+	 * 
+	 * @param InFile Link to file
+	 * @param InPath Path to archive
 	 */
-									FWindowsArchiveReading( std::ifstream* InFile );
+									FWindowsArchiveReading( std::ifstream* InFile, const std::wstring& InPath );
 
 	/**
 	 * @brief Destructor
@@ -98,9 +100,11 @@ class FWindowsArchiveWriter : public FArchive
 public:
 	/**
 	 * @brief Constructor
-	 * @param[in] InFile Link to file
+	 * 
+	 * @param InFile Link to file
+	 * @param InPath Path to archive
 	 */
-							FWindowsArchiveWriter( std::ofstream* InFile );
+							FWindowsArchiveWriter( std::ofstream* InFile, const std::wstring& InPath );
 
 	/**
 	 * @brief Destructor

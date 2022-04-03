@@ -15,6 +15,7 @@
 #include "Math/Math.h"
 #include "Misc/AudioGlobals.h"
 #include "System/AudioDevice.h"
+#include "System/AudioBank.h"
 #include "System/AudioBuffer.h"
 
  /**
@@ -125,12 +126,18 @@ public:
 	}
 
 	/**
-	 * Set audio buffer
-	 * @param InAudioBuffer Audio buffer
+	 * Set audio bank
+	 * @param InAudioBank Audio bank
 	 */
-	FORCEINLINE void SetAudioBuffer( FAudioBuffer* InAudioBuffer )
+	FORCEINLINE void SetAudioBank( FAudioBank* InAudioBank )
 	{
-		audioBuffer = InAudioBuffer;
+		FAudioBufferRef		audioBuffer;
+		audioBank = InAudioBank;
+		
+		if ( audioBank )
+		{
+			audioBuffer = audioBank->GetAudioBuffer();
+		}
 		alSourcei( alHandle, AL_BUFFER, audioBuffer ? audioBuffer->GetALHandle() : 0 );
 	}
 
@@ -226,12 +233,12 @@ public:
 	}
 
 	/**
-	 * Get audio buffer
-	 * @return Return audio buffer. If not setted return nullptr
+	 * Get audio bank
+	 * @return Return audio bank. If not setted return nullptr
 	 */
-	FORCEINLINE FAudioBufferRef GetAudioBuffer() const
+	FORCEINLINE FAudioBankRef GetAudioBank() const
 	{
-		return audioBuffer;
+		return audioBank;
 	}
 
 	/**
@@ -247,7 +254,7 @@ public:
 
 private:
 	uint32				alHandle;		/**< OpenAL of sound source */
-	FAudioBufferRef		audioBuffer;	/**< Audio buffer */
+	FAudioBankRef		audioBank;		/**< Audio bank */
 	float				volume;			/**< Volume */
 };
 

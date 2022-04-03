@@ -13,8 +13,9 @@
 /**
  * Constructor
  */
-FWindowsArchiveReading::FWindowsArchiveReading( std::ifstream* InFile ) :
-	file( InFile )
+FWindowsArchiveReading::FWindowsArchiveReading( std::ifstream* InFile, const std::wstring& InPath )
+	: FArchive( InPath )
+	, file( InFile )
 {}
 
 /**
@@ -91,8 +92,9 @@ bool FWindowsArchiveReading::IsLoading() const
 /**
  * Constructor
  */
-FWindowsArchiveWriter::FWindowsArchiveWriter( std::ofstream* InFile ) :
-	file( InFile )
+FWindowsArchiveWriter::FWindowsArchiveWriter( std::ofstream* InFile, const std::wstring& InPath )
+	: FArchive( InPath )
+	, file( InFile )
 {}
 
 /**

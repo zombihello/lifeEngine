@@ -2,9 +2,10 @@
 #include "Misc/Template.h"
 #include "LEVersion.h"
 
-FArchive::FArchive() :
-	arVer( VER_PACKAGE_LATEST ),
-	arType( AT_TextFile )
+FArchive::FArchive( const std::wstring& InPath )
+	: arVer( VER_PACKAGE_LATEST )
+	, arType( AT_TextFile )
+	, arPath( InPath )
 {}
 
 void FArchive::SerializeHeader()

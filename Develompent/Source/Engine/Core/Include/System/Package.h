@@ -44,7 +44,7 @@ enum EAssetType
 	AT_Material,		/**< Material */
 	AT_Script,			/**< Script */
 	AT_StaticMesh,		/**< Static mesh */
-	AT_AudioBuffer		/**< Audio buffer */
+	AT_AudioBank		/**< Audio bank */
 };
 
 /**

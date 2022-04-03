@@ -9,7 +9,7 @@
 #include "Render/Material.h"
 #include "Render/StaticMesh.h"
 #include "Scripts/Script.h"
-#include "System/AudioBuffer.h"
+#include "System/AudioBank.h"
 
 FORCEINLINE FAssetRef GetDefaultAsset( EAssetType InType )
 {
@@ -29,7 +29,7 @@ FORCEINLINE FAsset* AssetFactory( EAssetType InType )
 	case AT_Material:		return new FMaterial();
 	case AT_Script:			return new FScript();
 	case AT_StaticMesh:		return new FStaticMesh();
-	case AT_AudioBuffer:	return new FAudioBuffer();
+	case AT_AudioBank:		return new FAudioBank();
 
 	//
 	// Instert new asset type her
