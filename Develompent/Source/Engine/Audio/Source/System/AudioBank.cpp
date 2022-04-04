@@ -35,7 +35,7 @@ struct FAudioBankOGG
 	OggVorbis_File		oggVorbisFile;		/**< Ogg/Vorbis file parser */
 	vorbis_info*		vorbisInfo;			/**< Vorbis info */
 	FAudioBankInfo		info;				/**< Info about bank */
-	uint32				sampleOffset;		/**< Sample offset */
+	uint64				sampleOffset;		/**< Sample offset */
 };
 
 /**
@@ -274,6 +274,13 @@ void FAudioBank::SeekBankPCM( FAudioBankHandle InBankHandle, uint64 InSampleOffs
 	FAudioBankOGG*		audioBankOgg = ( FAudioBankOGG* )InBankHandle;
 	ov_pcm_seek( &audioBankOgg->oggVorbisFile, InSampleOffset / audioBankOgg->info.numChannels );
 	audioBankOgg->sampleOffset = InSampleOffset;
+}
+
+uint64 FAudioBank::GetOffsetBankPCM( FAudioBankHandle InBankHandle ) const
+{
+	check( InBankHandle );
+	FAudioBankOGG*		audioBankOgg = ( FAudioBankOGG* )InBankHandle;
+	return audioBankOgg->sampleOffset;
 }
 
 #if WITH_EDITOR

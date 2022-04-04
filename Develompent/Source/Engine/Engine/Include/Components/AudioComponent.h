@@ -11,6 +11,7 @@
 
 #include "System/AudioBank.h"
 #include "System/AudioSource.h"
+#include "System/AudioStreamSource.h"
 #include "Components/SceneComponent.h"
 
 /**
@@ -26,6 +27,11 @@ public:
 	 * @brief Constructor
 	 */
 	LAudioComponent();
+
+	/**
+	 * @brief Destructor
+	 */
+	~LAudioComponent();
 
 	/**
 	 * @brief Serialize component
@@ -51,7 +57,7 @@ public:
 	 */
 	FORCEINLINE void Play()
 	{
-		source.Play();
+		source->Play();
 	}
 
 	/**
@@ -59,7 +65,7 @@ public:
 	 */
 	FORCEINLINE void Pause()
 	{
-		source.Pause();
+		source->Pause();
 	}
 
 	/**
@@ -67,7 +73,7 @@ public:
 	 */
 	FORCEINLINE void Stop()
 	{
-		source.Stop();
+		source->Stop();
 	}
 
 	/**
@@ -76,7 +82,7 @@ public:
 	 */
 	FORCEINLINE void SetLoop( bool InIsLoop )
 	{
-		source.SetLoop( InIsLoop );
+		source->SetLoop( InIsLoop );
 		bIsLoop = InIsLoop;
 	}
 
@@ -86,7 +92,7 @@ public:
 	 */
 	FORCEINLINE void SetUISound( bool InIsUISound )
 	{
-		source.SetRelativeToListener( InIsUISound );
+		source->SetRelativeToListener( InIsUISound );
 		bIsUISound = InIsUISound;
 	}
 
@@ -96,7 +102,7 @@ public:
 	 */
 	FORCEINLINE void SetVolume( float InVolume )
 	{
-		source.SetVolume( InVolume );
+		source->SetVolume( InVolume );
 		volume = InVolume;
 	}
 
@@ -106,7 +112,7 @@ public:
 	 */
 	FORCEINLINE void SetPitch( float InPitch )
 	{
-		source.SetPitch( InPitch );
+		source->SetPitch( InPitch );
 		pitch = InPitch;
 	}
 
@@ -116,7 +122,7 @@ public:
 	 */
 	FORCEINLINE void SetMinDistance( float InMinDistance )
 	{
-		source.SetMinDistance( InMinDistance );
+		source->SetMinDistance( InMinDistance );
 		minDistance = InMinDistance;
 	}
 
@@ -126,7 +132,7 @@ public:
 	 */
 	FORCEINLINE void SetAttenuation( float InAttenuation )
 	{
-		source.SetAttenuation( InAttenuation );
+		source->SetAttenuation( InAttenuation );
 		attenuation = InAttenuation;
 	}
 
@@ -137,7 +143,7 @@ public:
 	FORCEINLINE void SetAudioBank( FAudioBank* InAudioBank )
 	{
 		bank = InAudioBank;
-		source.SetAudioBank( bank );
+		source->SetAudioBank( bank );
 	}
 
 	/**
@@ -147,6 +153,20 @@ public:
 	FORCEINLINE void SetAutoPlay( bool InIsAutoPlay )
 	{
 		bIsAutoPlay = InIsAutoPlay;
+	}
+
+	/**
+	 * @brief Set is streamable audio
+	 * @param InIsStreamable Is streamable audio
+	 */
+	FORCEINLINE void SetStreamable( bool InIsStreamable )
+	{
+		bool		oldFlag = bIsStreamable;
+		bIsStreamable = InIsStreamable;
+		if ( bIsStreamable != oldFlag )
+		{
+			UpdateAudioSourceType();
+		}
 	}
 
 	/**
@@ -227,19 +247,34 @@ public:
 	 */
 	FORCEINLINE EAudioSourceStatus GetStatus() const
 	{
-		return source.GetStatus();
+		return source->GetStatus();
+	}
+
+	/**
+	 * @brief Is streamable audio
+	 * @return Return true if audio is streamable, else return false
+	 */
+	FORCEINLINE bool IsStreamable() const
+	{
+		return bIsStreamable;
 	}
 
 private:
+	/**
+	 * Update audio source type
+	 */
+	void UpdateAudioSourceType();
+
 	bool					bIsLoop;					/**< Is looped */
 	bool					bIsUISound;					/**< Is UI sound */
 	bool					bIsAutoPlay;				/**< Is need auto play on begin play */
+	bool					bIsStreamable;				/**< Is streamable */
 	float					volume;						/**< Volume of sound */
 	float					pitch;						/**< Pitch */
 	float					minDistance;				/**< Min distance */
 	float					attenuation;				/**< Attenuation */
 	FAudioBankRef			bank;						/**< Audio bank */
-	FAudioSource			source;						/**< Audio source */
+	FAudioSource*			source;						/**< Audio source */
 	FVector					oldSourceLocation;			/**< Old source location */
 };
 

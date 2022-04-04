@@ -99,7 +99,7 @@ bool LCookPackagesCommandlet::CookMap( const FResourceInfo& InMapInfo )
 
 	// Clear world for spawn new actors
 	GWorld->CleanupWorld();
-	GWorld->SpawnActor< APlayerStart >( FVector( 0.f, 0.f, -10.f ) );
+	GWorld->SpawnActor< APlayerStart >( FVector( 0.f, 0.f, -1.f ) );
 
 	// Spawn tiles
 	SpawnTilesInWorld( tmxMap, tilesets );

@@ -32,6 +32,17 @@ enum ESampleFormat
 
 /**
  * @ingroup Audio
+ * @brief Enumeration of status audio source
+ */
+enum EAudioSourceStatus
+{
+	ASS_Playing,		/**< Audio source is playing */
+	ASS_Paused,			/**< Audio source on pause */
+	ASS_Stoped			/**< Audio source is stoped */
+};
+
+/**
+ * @ingroup Audio
  * @brief Convert sample format from ESampleFormat to OpenAL
  * 
  * @param InSampleFormat Sample format
@@ -111,7 +122,7 @@ public:
 	 */
 	FORCEINLINE void SetGlobalVolume( float InVolume )
 	{
-		alListenerf( AL_GAIN, InVolume * 0.01f );
+		alListenerf( AL_GAIN, InVolume * platformAudioHeadroom * 0.01f );
 		globalVolume = InVolume;
 	}
 

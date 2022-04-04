@@ -3,7 +3,6 @@
 ----------------------------------------------------------------
 	- Fix link count for DirectX 11 objects 
 	- Implement console system
-	- Implement audio system
 	- Implement physics system
 	- Implement global and material shaders
 

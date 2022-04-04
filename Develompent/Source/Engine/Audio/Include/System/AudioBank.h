@@ -96,6 +96,14 @@ public:
 	 */
 	void SeekBankPCM( FAudioBankHandle InBankHandle, uint64 InSampleOffset );
 
+	/**
+	 * Get PCM offset in bank
+	 * 
+	 * @param InBankHandle Handle to opened bank
+	 * @return Return current offset PCM in bank
+	 */
+	uint64 GetOffsetBankPCM( FAudioBankHandle InBankHandle ) const;
+
 #if WITH_EDITOR
 	/**
 	 * Set source OGG file

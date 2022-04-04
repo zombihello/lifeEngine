@@ -58,6 +58,13 @@ bool AAudio::InitProperties( const std::vector<FActorVar>& InActorVars, class LC
 			audioComponent->SetAutoPlay( actorVar.GetValueBool() );
 		}
 
+		// If property is flag streamable
+		else if ( actorVar.GetName() == TEXT( "IsStreamable" ) )
+		{
+			check( actorVar.GetType() == AVT_Bool );
+			audioComponent->SetStreamable( actorVar.GetValueBool() );
+		}
+
 		// If property is volume
 		else if ( actorVar.GetName() == TEXT( "Volume" ) )
 		{

@@ -9,25 +9,11 @@
 #ifndef AUDIOSOURCE_H
 #define AUDIOSOURCE_H
 
-#include <AL/al.h>
-#include <AL/alc.h>
-
 #include "Math/Math.h"
 #include "Misc/AudioGlobals.h"
 #include "System/AudioDevice.h"
 #include "System/AudioBank.h"
 #include "System/AudioBuffer.h"
-
- /**
-  * @ingroup Audio
-  * @brief Enumeration of status audio source
-  */
-enum EAudioSourceStatus
-{
-	ASS_Playing,		/**< Audio source is playing */
-	ASS_Paused,			/**< Audio source on pause */
-	ASS_Stoped			/**< Audio source is stoped */
-};
 
 /**
  * @ingroup Audio
@@ -44,218 +30,140 @@ public:
 	/**
 	 * Destructor
 	 */
-	~FAudioSource();
+	virtual ~FAudioSource();
 
 	/**
 	 * Play
 	 */
-	FORCEINLINE void Play()
-	{
-		alSourcePlay( alHandle );
-	}
+	virtual void Play();
 
 	/**
 	 * Pause
 	 */
-	FORCEINLINE void Pause()
-	{
-		alSourcePause( alHandle );
-	}
+	virtual void Pause();
 
 	/**
 	 * Stop
 	 */
-	FORCEINLINE void Stop()
-	{
-		alSourceStop( alHandle );
-	}
+	virtual void Stop();
 
 	/**
 	 * Set loop
 	 * @param InIsLoop Is need loop sound
 	 */
-	FORCEINLINE void SetLoop( bool InIsLoop )
-	{
-		alSourcei( alHandle, AL_LOOPING, InIsLoop );
-	}
+	virtual void SetLoop( bool InIsLoop );
 
 	/**
 	 * Set relative to listener
 	 * @param InIsRelativeToListener Is this sound relative to listener
 	 */
-	FORCEINLINE void SetRelativeToListener( bool InIsRelativeToListener )
-	{
-		alSourcei( alHandle, AL_SOURCE_RELATIVE, InIsRelativeToListener );
-	}
+	virtual void SetRelativeToListener( bool InIsRelativeToListener );
 
 	/**
 	 * Set volume
 	 * @param InVolume Volume
 	 */
-	FORCEINLINE void SetVolume( float InVolume )
-	{
-		alSourcef( alHandle, AL_GAIN, InVolume * GAudioDevice.GetPlatformAudioHeadroom() * 0.01f );
-		volume = InVolume;
-	}
+	virtual void SetVolume( float InVolume );
 
 	/**
 	 * Set pitch
 	 * @param InPitch Pitch
 	 */
-	FORCEINLINE void SetPitch( float InPitch )
-	{
-		alSourcef( alHandle, AL_PITCH, InPitch );
-	}
+	virtual void SetPitch( float InPitch );
 
 	/**
 	 * Set min distance
 	 * @param InMinDistance Min distance
 	 */
-	FORCEINLINE void SetMinDistance( float InMinDistance )
-	{
-		alSourcef( alHandle, AL_REFERENCE_DISTANCE, InMinDistance );
-	}
+	virtual void SetMinDistance( float InMinDistance );
 
 	/**
 	 * Set attenuation
 	 * @param InAttenuation Attenuation
 	 */
-	FORCEINLINE void SetAttenuation( float InAttenuation )
-	{
-		alSourcef( alHandle, AL_ROLLOFF_FACTOR, InAttenuation );
-	}
+	virtual void SetAttenuation( float InAttenuation );
 
 	/**
 	 * Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	FORCEINLINE void SetAudioBank( FAudioBank* InAudioBank )
-	{
-		FAudioBufferRef		audioBuffer;
-		audioBank = InAudioBank;
-		
-		if ( audioBank )
-		{
-			audioBuffer = audioBank->GetAudioBuffer();
-		}
-		alSourcei( alHandle, AL_BUFFER, audioBuffer ? audioBuffer->GetALHandle() : 0 );
-	}
+	virtual void SetAudioBank( FAudioBank* InAudioBank );
 
 	/**
 	 * Set location
 	 * @param InLocation Location
 	 */
-	FORCEINLINE void SetLocation( const FVector& InLocation )
-	{
-		alSource3f( alHandle, AL_POSITION, InLocation.x, InLocation.y, InLocation.z );
-	}
+	virtual void SetLocation( const FVector& InLocation );
 
 	/**
 	 * Is looped
 	 * @return Return true if sound is looped, else return false
 	 */
-	FORCEINLINE bool IsLooped() const
-	{
-		ALint			isLoop = 0;
-		alGetSourcei( alHandle, AL_LOOPING, &isLoop );
-		return isLoop != 0;
-	}
+	virtual bool IsLooped() const;
 
 	/**
 	 * Is this sound relative to listener
 	 * @return Return true if sound relative to listener, else return false
 	 */
-	FORCEINLINE bool IsRelativeToListener() const
-	{
-		ALint			isRelativeToListener = 0;
-		alGetSourcei( alHandle, AL_SOURCE_RELATIVE, &isRelativeToListener );
-		return isRelativeToListener != 0;
-	}
+	virtual bool IsRelativeToListener() const;
 
 	/**
 	 * Get volume
 	 * @return Return volume of sound
 	 */
-	FORCEINLINE float GetVolume() const
-	{
-		return volume;
-	}
+	virtual float GetVolume() const;
 
 	/**
 	 * Get pitch
 	 * @return Return pitch
 	 */
-	FORCEINLINE float GetPitch() const
-	{
-		ALfloat			pitch = 0.f;
-		alGetSourcef( alHandle, AL_PITCH, &pitch );
-		return pitch;
-	}
+	virtual float GetPitch() const;
 
 	/**
 	 * Get min distance
 	 * @return Return min distance
 	 */
-	FORCEINLINE float GetMinDistance() const
-	{
-		ALfloat			distance = 0.f;
-		alGetSourcef( alHandle, AL_REFERENCE_DISTANCE, &distance );
-		return distance;
-	}
+	virtual float GetMinDistance() const;
 
 	/**
 	 * Get attenuation
 	 * @return Return attenuation
 	 */
-	FORCEINLINE float GetAttenuation() const
-	{
-		ALfloat			attenuation = 0.f;
-		alGetSourcef( alHandle, AL_ROLLOFF_FACTOR, &attenuation );
-		return attenuation;
-	}
+	virtual float GetAttenuation() const;
 
 	/**
 	 * Get audio source status
 	 * @return Return audio source status
 	 */
-	FORCEINLINE EAudioSourceStatus GetStatus() const
-	{
-		ALint			alStatus = 0;
-		alGetSourcei( alHandle, AL_SOURCE_STATE, &alStatus );
-
-		switch ( alStatus )
-		{
-		case AL_PLAYING:	return ASS_Playing;
-		case AL_PAUSED:		return ASS_Paused;		
-		case AL_STOPPED:
-		default:			return ASS_Stoped;
-		}
-	}
+	virtual EAudioSourceStatus GetStatus() const;
 
 	/**
 	 * Get audio bank
 	 * @return Return audio bank. If not setted return nullptr
 	 */
-	FORCEINLINE FAudioBankRef GetAudioBank() const
-	{
-		return audioBank;
-	}
+	virtual FAudioBankRef GetAudioBank() const;
 
 	/**
 	 * Get location
 	 * @return Return location of source audio
 	 */
-	FORCEINLINE FVector GetLocation() const
+	virtual FVector GetLocation() const;
+
+	/**
+	 * Get OpenAL handle to source
+	 * @return Return OpenAL handle to source
+	 */
+	FORCEINLINE uint32 GetALHandle() const
 	{
-		FVector			location;
-		alGetSource3f( alHandle, AL_POSITION, &location.x, &location.y, &location.z );
-		return location;
+		return alHandle;
 	}
+
+protected:
+	FAudioBankRef		audioBank;		/**< Audio bank */
+	float				volume;			/**< Volume */
 
 private:
 	uint32				alHandle;		/**< OpenAL of sound source */
-	FAudioBankRef		audioBank;		/**< Audio bank */
-	float				volume;			/**< Volume */
 };
 
 #endif // !AUDIOSOURCE_H

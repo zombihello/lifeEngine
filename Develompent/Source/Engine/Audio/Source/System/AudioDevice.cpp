@@ -75,10 +75,6 @@ void FAudioDevice::Init()
 	LE_LOG( LT_Log, LC_Init, TEXT( "OpenAL version: %s" ),		ANSI_TO_TCHAR( alGetString( AL_VERSION ) ) );
 	LE_LOG( LT_Log, LC_Init, TEXT( "OpenAL extensions: %s" ),	ANSI_TO_TCHAR( alGetString( AL_EXTENSIONS ) ) );
 
-	// Initialize listener spatial
-	SetListenerSpatial( FMath::vectorZero, FMath::vectorForward, FMath::vectorUp );
-	SetGlobalVolume( 100.f );
-
 	// Init platform audio headroom
 	float		headroom = GEngineConfig.GetValue( TEXT( "Audio.Audio" ), TEXT( "PlatformHeadroomDB" ) ).GetNumber();
 	if ( headroom != 0.f )
@@ -90,6 +86,10 @@ void FAudioDevice::Init()
 	{
 		platformAudioHeadroom = 1.f;
 	}
+
+	// Initialize listener spatial
+	SetListenerSpatial( FMath::vectorZero, FMath::vectorForward, FMath::vectorUp );
+	SetGlobalVolume( 100.f );
 }
 
 void FAudioDevice::Shutdown()

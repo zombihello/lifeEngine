@@ -27,6 +27,7 @@
 	- Fixed crush on resize window
 	- Implemented commandlet for import materials from LMT (JSON) to package (LPAK)
 	- Implemented commandlet for cook content
+	- Implemented audio system
 
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021
