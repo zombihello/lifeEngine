@@ -540,6 +540,11 @@ class AActor : public LObject, public FRefCounted
 
 public:
 	/**
+	 * Constructor
+	 */
+	AActor();
+
+	/**
 	 * Destructor
 	 */
 	virtual ~AActor();
@@ -561,6 +566,21 @@ public:
 	 * @param[in] InArchive Archive for serialize
 	 */
 	virtual void Serialize( class FArchive& InArchive );
+
+	/**
+	 * @brief Init physics body
+	 */
+	void InitPhysics();
+
+	/**
+	 * @brief Terminate physics body
+	 */
+	void TermPhysics();
+
+	/**
+	 * @brief Sync actor to physics body
+	 */
+	void SyncPhysics();
 
 #if WITH_EDITOR
 	/**
@@ -650,6 +670,15 @@ public:
 	}
 
 	/**
+	 * Set static actor
+	 * @param InIsStatic Is actor static
+	 */
+	FORCEINLINE void SetStatic( bool InIsStatic )
+	{
+		bIsStatic = InIsStatic;
+	}
+
+	/**
 	 * Get actor location in world space
 	 * @return Return actor location, if root component is not valid return zero vector
 	 */
@@ -712,6 +741,15 @@ public:
 		return rootComponent ? rootComponent->GetUpVector() : FMath::vectorUp;
 	}
 
+	/**
+	 * Is static actor
+	 * @return Return true if actor is static, else return false
+	 */
+	FORCEINLINE bool IsStatic() const
+	{
+		return bIsStatic;
+	}
+
 protected:
 	/**
 	 * Create component and add to array of owned components
@@ -756,6 +794,7 @@ protected:
 	TRefCountPtr< LSceneComponent >				rootComponent;			/**< Root component, default is null */
 
 private:
+	bool										bIsStatic;				/**< Is static actor */
 	std::vector< LActorComponentRef >			ownedComponents;		/**< Owned components */
 };
 

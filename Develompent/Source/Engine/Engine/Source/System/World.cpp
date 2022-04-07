@@ -1,7 +1,9 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/PhysicsGlobals.h"
 #include "System/CameraManager.h"
 #include "System/Package.h"
+#include "System/PhysicsScene.h"
 #include "Actors/Actor.h"
 #include "System/World.h"
 #include "Logger/LoggerMacros.h"
@@ -20,9 +22,16 @@ FWorld::~FWorld()
 
 void FWorld::BeginPlay()
 {
+	// Init all actors
 	for ( uint32 index = 0; index < ( uint32 )actors.size(); ++index )
 	{
 		actors[ index ]->BeginPlay();
+	}
+
+	// Init all physics in actors
+	for ( uint32 index = 0; index < actors.size(); ++index )
+	{
+		actors[ index ]->InitPhysics();
 	}
 
 	GCameraManager->BeginPlay();
@@ -33,7 +42,9 @@ void FWorld::Tick( float InDeltaTime )
 {
 	for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
 	{
-		actors[ index ]->Tick( InDeltaTime );
+		AActor*		actor = actors[ index ];
+		actor->Tick( InDeltaTime );
+		actor->SyncPhysics();
 	}
 }
 
@@ -73,6 +84,7 @@ void FWorld::Serialize( FArchive& InArchive )
 
 void FWorld::CleanupWorld()
 {
+	GPhysicsScene.RemoveAllBodies();
 	actors.clear();
 	GPackageManager->CleanupUnusedPackages();
 	isBeginPlay = false;
@@ -90,10 +102,11 @@ AActorRef FWorld::SpawnActor( class LClass* InClass, const FVector& InLocation, 
     actor->AddActorLocation( InLocation );
     actor->AddActorRotation( InRotation );
 
-	// If gameplay is started - call BeginPlay in spawned actor
+	// If gameplay is started - call BeginPlay in spawned actor and init physics
 	if ( isBeginPlay )
 	{
 		actor->BeginPlay();
+		actor->InitPhysics();
 	}
 
 	actors.push_back( actor );

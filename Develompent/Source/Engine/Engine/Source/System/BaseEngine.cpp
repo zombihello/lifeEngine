@@ -72,7 +72,7 @@ void LBaseEngine::Init()
 			}
 			else
 			{
-				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default texture in section 'Engine.Engine:DefaultMaterial'" ) );
+				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default material in section 'Engine.Engine:DefaultMaterial'" ) );
 			}
 		}
 	}

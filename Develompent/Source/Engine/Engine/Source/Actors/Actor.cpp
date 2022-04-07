@@ -1,5 +1,6 @@
 #include "Actors/Actor.h"
 #include "Components/ActorComponent.h"
+#include "Components/PrimitiveComponent.h"
 
 IMPLEMENT_CLASS( AActor )
 
@@ -41,6 +42,10 @@ void FActorVar::Clear()
 }
 #endif // WITH_EDITOR
 
+AActor::AActor()
+	: bIsStatic( false )
+{}
+
 AActor::~AActor()
 {
 	ResetOwnedComponents();
@@ -65,9 +70,56 @@ void AActor::Tick( float InDeltaTime )
 void AActor::Serialize( class FArchive& InArchive )
 {
 	Super::Serialize( InArchive );
+	InArchive << bIsStatic;
+
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
 	{
 		ownedComponents[ index ]->Serialize( InArchive );
+	}
+}
+
+void AActor::InitPhysics()
+{
+	// TODO BS yehor.pohuliaka - Need add weld all rigid bodies of a primitives to one
+	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
+	{
+		LPrimitiveComponent*		primitiveComponent = ownedComponents[ index ]->Cast< LPrimitiveComponent >();
+		if ( primitiveComponent )
+		{
+			primitiveComponent->InitPrimitivePhysics();
+		}
+	}
+}
+
+void AActor::TermPhysics()
+{
+	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
+	{
+		LPrimitiveComponent*		primitiveComponent = ownedComponents[ index ]->Cast< LPrimitiveComponent >();
+		if ( primitiveComponent )
+		{
+			primitiveComponent->TermPrimitivePhysics();
+		}
+	}
+}
+
+void AActor::SyncPhysics()
+{
+	for ( uint32 index = 0, count = ( uint32 ) ownedComponents.size(); index < count; ++index )
+	{
+		LPrimitiveComponent* primitiveComponent = ownedComponents[ index ]->Cast< LPrimitiveComponent >();
+		if ( primitiveComponent )
+		{
+			// This for test
+			const FPhysicsBodyInstance*		bi = primitiveComponent->GetBodyInstance();
+			if ( bi->IsValid() )
+			{
+				FTransform tr = bi->GetLEWorldTransform();
+				SetActorLocation( tr.GetLocation() );
+				SetActorRotation( tr.GetRotation() );
+				return;
+			}
+		}
 	}
 }
 
@@ -141,7 +193,12 @@ void AActor::ResetOwnedComponents()
 {
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
 	{
+		if ( LPrimitiveComponent* primitiveComponent = ownedComponents[ index ]->Cast<LPrimitiveComponent>() )
+		{
+			primitiveComponent->TermPrimitivePhysics();
+		}
 		ownedComponents[ index ]->SetOwner( nullptr );
 	}
+
 	ownedComponents.clear();
 }

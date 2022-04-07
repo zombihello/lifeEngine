@@ -2,7 +2,6 @@
 
 IMPLEMENT_CLASS( LAudioComponent )
 
-
 LAudioComponent::LAudioComponent()
 	: bIsLoop( false )
 	, bIsUISound( false )
@@ -67,26 +66,10 @@ void LAudioComponent::BeginPlay()
 	}
 	source->SetLocation( oldSourceLocation );
 }
-#include "Misc/EngineGlobals.h"
-#include "System/InputSystem.h"
+
 void LAudioComponent::TickComponent( float InDeltaTime )
 {
 	Super::TickComponent( InDeltaTime );
-
-	if ( GInputSystem->IsKeyUp( BC_KeyF5 ) )
-	{
-		source->Play();
-	}
-	
-	if ( GInputSystem->IsKeyUp( BC_KeyF6 ) )
-	{
-		source->Pause();
-	}
-
-	if ( GInputSystem->IsKeyUp( BC_KeyF7 ) )
-	{
-		source->Stop();
-	}
 
 	// If audio component is moved - update audio source location if this not UI sound
 	if ( !bIsUISound )
@@ -130,4 +113,9 @@ void LAudioComponent::UpdateAudioSourceType()
 	source->SetAttenuation( attenuation );
 	source->SetAudioBank( bank );
 	source->SetLocation( oldSourceLocation );
+
+	if ( status == ASS_Playing )
+	{
+		source->Play();
+	}
 }

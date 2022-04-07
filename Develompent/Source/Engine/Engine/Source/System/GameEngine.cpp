@@ -7,9 +7,11 @@
 #include "System/BaseWindow.h"
 #include "System/World.h"
 #include "System/BaseFileSystem.h"
+#include "System/PhysicsEngine.h"
 #include "Render/RenderingThread.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/CoreGlobals.h"
+#include "Misc/PhysicsGlobals.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
@@ -38,6 +40,7 @@ void LGameEngine::Init()
 
 void LGameEngine::Tick( float InDeltaSeconds )
 {
+	GPhysicsEngine.Tick();
 	GWorld->Tick( InDeltaSeconds );
 	viewport.Draw();
 }

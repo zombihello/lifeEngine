@@ -1,18 +1,23 @@
 #include "Actors/HEPlayerCharacter.h"
 #include "System/CameraManager.h"
 #include "System/Package.h"
+#include "Components/BoxComponent.h"
 #include "Misc/EngineGlobals.h"
 
 IMPLEMENT_CLASS( AHEPlayerCharacter )
 
 AHEPlayerCharacter::AHEPlayerCharacter()
 {
+	// Create box component
+	CreateComponent<LBoxComponent>( TEXT( "BoxComponent0" ) );
+
 	// Create camera component
 	cameraComponent = CreateComponent< LCameraComponent >( TEXT( "CameraComponent0" ) );
 	cameraComponent->SetProjectionMode( CPM_Orthographic );
 	cameraComponent->SetAutoViewData( true );
 	cameraComponent->SetNearClipPlane( -100.f );
 	cameraComponent->SetFarClipPlane( 100.f );
+	cameraComponent->AddRelativeLocation( FVector( 0, 0, -10.f ) );
 
 	// Create sprite component
 	spriteComponent = CreateComponent< LSpriteComponent >( TEXT( "SpriteComponent0" ) );

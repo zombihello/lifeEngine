@@ -2,6 +2,7 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/AudioGlobals.h"
+#include "Misc/PhysicsGlobals.h"
 #include "Misc/Misc.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
@@ -13,6 +14,7 @@
 #include "System/InputSystem.h"
 #include "System/Package.h"
 #include "System/AudioEngine.h"
+#include "System/PhysicsEngine.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Misc/Class.h"
@@ -66,8 +68,9 @@ void appUpdateTimeAndHandleMaxTickRate()
 /**
  * Constructor
  */
-FEngineLoop::FEngineLoop() :
-	isInitialize( false )
+FEngineLoop::FEngineLoop() 
+	: isInitialize( false )
+	, bIsFocus( true )
 {}
 
 /**
@@ -221,6 +224,9 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	appSetSplashText( STT_StartupProgress, TEXT( "Init audio" ) );
 	GAudioEngine.Init();
 
+	appSetSplashText( STT_StartupProgress, TEXT( "Init physics" ) );
+	GPhysicsEngine.Init();
+
 	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
 	GEngine->Init();
 
@@ -287,6 +293,20 @@ void FEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// Handling system events
 	GEngine->ProcessEvent( InWindowEvent );
+
+	// Handling window focus event
+	switch ( InWindowEvent.type )
+	{
+	case SWindowEvent::T_WindowFocusGained:
+		bIsFocus = true;
+		GAudioDevice.SetMutedDevice( false );
+		break;
+
+	case SWindowEvent::T_WindowFocusLost:
+		bIsFocus = false;
+		GAudioDevice.SetMutedDevice( true );
+		break;
+	}
 }
 
 /**
@@ -294,6 +314,12 @@ void FEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
  */
 void FEngineLoop::Tick()
 {
+	// If we lost focus - not update engine tick
+	if ( !bIsFocus )
+	{
+		return;
+	}
+
 	appUpdateTimeAndHandleMaxTickRate();
 
 	// Update package manager
@@ -320,6 +346,7 @@ void FEngineLoop::Exit()
 	GEngine = nullptr;
 
 	//GUIEngine->Shutdown();
+	GPhysicsEngine.Shutdown();
 	GAudioEngine.Shutdown();
 	GShaderManager->Shutdown();
 	GRHI->Destroy();

@@ -21,6 +21,7 @@
 #include "Render/Shaders/ShaderCache.h"
 #include "Render/Shaders/ShaderCompiler.h"
 #include "System/AudioBank.h"
+#include "System/PhysicsMaterial.h"
 
 /**
  * @ingroup WorldEd
@@ -185,6 +186,30 @@ public:
 		return IsSupportedExtension( InExtension, GetSupportedAudioExtensins() );
 	}
 
+	/**
+	 * Get supported physics material extensions
+	 * @retun Return array of supported extensions (e.g "png", "jpg", etc)
+	 */
+	FORCEINLINE static std::vector< std::wstring > GetSupportedPhysMaterialExtensins()
+	{
+		static std::vector< std::wstring >		supportedExtensions =
+		{
+			TEXT( "pmt" )
+		};
+		return supportedExtensions;
+	}
+
+	/**
+	 * Is supported physics material extension
+	 *
+	 * @param InExtension Physics material extensions ("png", "jpg", etc)
+	 * @return Return true if supported, else return false
+	 */
+	FORCEINLINE static bool IsSupportedPhysMaterialExtension( const std::wstring& InExtension )
+	{
+		return IsSupportedExtension( InExtension, GetSupportedPhysMaterialExtensins() );
+	}
+
 private:
 	/**
 	 * Struct info about resource
@@ -320,6 +345,15 @@ private:
 	bool CookAudioBank( const FResourceInfo& InAudioBankInfo, FAudioBankRef& OutAudioBank );
 
 	/**
+	 * Cook physics material
+	 *
+	 * @param InPhysMaterialInfo Info about physics material
+	 * @param OutPhysMaterial Output cooked physics material
+	 * @return Return true if seccussed cook, else returning false
+	 */
+	bool CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, FPhysicsMaterialRef& OutPhysMaterial );
+
+	/**
 	 * Find resource
 	 * 
 	 * @param InResourceMap Resource map
@@ -359,6 +393,7 @@ private:
 	FResourceMap											texturesMap;			/**< All textures */
 	FResourceMap											materialsMap;			/**< All materials */
 	FResourceMap											audiosMap;				/**< All audios */
+	FResourceMap											physMaterialsMap;		/**< All physics materials */
 	std::unordered_map< std::wstring, FResourceInfo >		mapsMap;				/**< All maps */
 	FShaderCache											shaderCache;			/**< Cooked shader cache */
 	EShaderPlatform											cookedShaderPlatform;	/**< Cooked shader platform */

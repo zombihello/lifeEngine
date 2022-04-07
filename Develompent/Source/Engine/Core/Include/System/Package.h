@@ -39,12 +39,13 @@ typedef TRefCountPtr< class FPackage >			FPackageRef;
  */
 enum EAssetType
 {
-	AT_Unknown,			/**< Unknown asset */
-	AT_Texture2D,		/**< Texture 2D */
-	AT_Material,		/**< Material */
-	AT_Script,			/**< Script */
-	AT_StaticMesh,		/**< Static mesh */
-	AT_AudioBank		/**< Audio bank */
+	AT_Unknown,				/**< Unknown asset */
+	AT_Texture2D,			/**< Texture 2D */
+	AT_Material,			/**< Material */
+	AT_Script,				/**< Script */
+	AT_StaticMesh,			/**< Static mesh */
+	AT_AudioBank,			/**< Audio bank */
+	AT_PhysicsMaterial		/**< Physics material */
 };
 
 /**

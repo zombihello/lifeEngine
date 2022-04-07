@@ -163,6 +163,12 @@ protected:
 	float				volume;			/**< Volume */
 
 private:
+	/**
+	 * On audio device muted/unmuted
+	 * @param InIsAudioDeviceMuted Is audio device muted
+	 */
+	void OnAudioDeviceMuted( bool InIsAudioDeviceMuted );
+
 	uint32				alHandle;		/**< OpenAL of sound source */
 };
 

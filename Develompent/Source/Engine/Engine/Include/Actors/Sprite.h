@@ -13,6 +13,7 @@
 
 #include "Actors/Actor.h"
 #include "Components/SpriteComponent.h"
+#include "Components/BoxComponent.h"
 
  /**
   * @ingroup Engine
@@ -44,6 +45,7 @@ public:
 
 private:
     TRefCountPtr< LSpriteComponent >			spriteComponent;		/**< Sprite component */
+    TRefCountPtr< LBoxComponent >               boxComponent;           /**< Box component */
 };
 
 #endif // !ASPRITE_H

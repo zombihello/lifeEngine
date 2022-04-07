@@ -10,6 +10,7 @@
 #include "Render/StaticMesh.h"
 #include "Scripts/Script.h"
 #include "System/AudioBank.h"
+#include "System/PhysicsMaterial.h"
 
 FORCEINLINE FAssetRef GetDefaultAsset( EAssetType InType )
 {
@@ -25,11 +26,12 @@ FORCEINLINE FAsset* AssetFactory( EAssetType InType )
 {
 	switch ( InType )
 	{
-	case AT_Texture2D:		return new FTexture2D();
-	case AT_Material:		return new FMaterial();
-	case AT_Script:			return new FScript();
-	case AT_StaticMesh:		return new FStaticMesh();
-	case AT_AudioBank:		return new FAudioBank();
+	case AT_Texture2D:			return new FTexture2D();
+	case AT_Material:			return new FMaterial();
+	case AT_Script:				return new FScript();
+	case AT_StaticMesh:			return new FStaticMesh();
+	case AT_AudioBank:			return new FAudioBank();
+	case AT_PhysicsMaterial:	return new FPhysicsMaterial();
 
 	//
 	// Instert new asset type her
@@ -166,7 +168,7 @@ bool FPackage::Save( const std::wstring& InPath )
 void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 {
 	// If we not load package from HDD - exit from function
-	if ( !bIsLoaded || filename.empty() )
+	if ( !bIsLoaded && filename.empty() )
 	{
 		return;
 	}

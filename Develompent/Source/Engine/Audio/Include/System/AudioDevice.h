@@ -16,6 +16,10 @@
 #include "System/Archive.h"
 #include "Misc/Types.h"
 #include "Math/Math.h"
+#include "System/Delegate.h"
+
+/** Delegate called when audio device muted/unmuted */
+DECLARE_MULTICAST_DELEGATE( FOnAudioDeviceMuted, bool )
 
 /**
  * @ingroup Audio
@@ -122,8 +126,18 @@ public:
 	 */
 	FORCEINLINE void SetGlobalVolume( float InVolume )
 	{
-		alListenerf( AL_GAIN, InVolume * platformAudioHeadroom * 0.01f );
+		alListenerf( AL_GAIN, InVolume * platformAudioHeadroom );
 		globalVolume = InVolume;
+	}
+
+	/**
+	 * @brief Set mute device
+	 * @param InIsMutedDevice Is need mute device
+	 */
+	FORCEINLINE void SetMutedDevice( bool InIsMutedDevice )
+	{
+		bIsMuted = InIsMutedDevice;
+		onAudioDeviceMuted.Broadcast( InIsMutedDevice );
 	}
 
 	/**
@@ -161,12 +175,32 @@ public:
 		return platformAudioHeadroom;
 	}
 
+	/**
+	 * @brief Is muted device
+	 * @return Return true if device is muted, else return false
+	 */
+	FORCEINLINE bool IsMutedDevice() const
+	{
+		return bIsMuted;
+	}
+
+	/**
+	 * @brief Get delegate of audio device muted/unmute
+	 * @return Return delegate of audio device muted/unmute
+	 */
+	FORCEINLINE FOnAudioDeviceMuted& GetOnAudioDeviceMuted()
+	{
+		return onAudioDeviceMuted;
+	}
+
 private:
+	bool					bIsMuted;				/**< Is muted device */
 	class ALCdevice*		alDevice;				/**< OpenAL device */
 	class ALCcontext*		alContext;				/**< OpenAL context */
 	FListenerSpatial		listener;				/**< Listener */
 	float					globalVolume;			/**< Global volume */
 	float					platformAudioHeadroom;	/**< Defines a platform-specific volume headroom (in dB) for audio to provide better platform consistency with respect to volume levels */
+	FOnAudioDeviceMuted		onAudioDeviceMuted;		/**< Delegate called when audio device muted/unmuted */
 };
 
 //

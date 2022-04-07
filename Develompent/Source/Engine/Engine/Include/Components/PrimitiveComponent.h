@@ -10,6 +10,8 @@
 #define PRIMITIVECOMPONENT_H
 
 #include "Math/Box.h"
+#include "System/PhysicsBodySetup.h"
+#include "System/PhysicsBodyInstance.h"
 #include "Components/SceneComponent.h"
 
 /**
@@ -58,11 +60,35 @@ public:
 	virtual void AddToDrawList( const class FSceneView& InSceneView ) PURE_VIRTUAL( LPrimitiveComponent::AddToDrawList, );
 
 	/**
+	 * @brief Init physics component
+	 */
+	void InitPrimitivePhysics();
+
+	/**
+	 * @brief Move this component to match the physics rigid body pose. Note, a warning will be generated if you call this function on a component that is attached to something
+	 */
+	void SyncComponentToPhysics();
+
+	/**
+	 * @brief Terminate physics component
+	 */
+	void TermPrimitivePhysics();
+
+	/**
 	 * @brief Set visibility
 	 * 
 	 * @param InNewVisibility New visibility
 	 */
 	virtual void SetVisibility( bool InNewVisibility );
+
+	/**
+	 * @brief Set body setup
+	 * @param InBodySetup Body setup
+	 */
+	FORCEINLINE void SetBodySetup( FPhysicsBodySetup* InBodySetup )
+	{
+		bodySetup = InBodySetup;
+	}
 
 	/**
 	 * @brief Get visibility
@@ -82,11 +108,31 @@ public:
 		return boundbox;
 	}
 
+	/**
+	 * @brief Get body setup
+	 * @return Return body setup
+	 */
+	FORCEINLINE FPhysicsBodySetupRef GetBodySetup() const
+	{
+		return bodySetup;
+	}
+
+	/**
+	 * @brief Get body instance
+	 * @return Return pointer to body instance
+	 */
+	FORCEINLINE const FPhysicsBodyInstance* GetBodyInstance() const
+	{
+		return &bodyInstance;
+	}
+
 protected:
-	FBox		boundbox;			/**< Bound box */
+	FBox						boundbox;		/**< Bound box */
+	FPhysicsBodySetupRef		bodySetup;		/**< Physics body setup */
+	FPhysicsBodyInstance		bodyInstance;	/**< Physics body instance */
 
 private:
-	bool		bVisibility;		/**< Is primitive visibility */
+	bool						bVisibility;		/**< Is primitive visibility */
 };
 
 #endif // !PRIMITIVECOMPONENT_H

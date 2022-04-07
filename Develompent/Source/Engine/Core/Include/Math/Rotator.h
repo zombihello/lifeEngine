@@ -56,6 +56,19 @@ public:
 	{}
 
 	/**
+	 * Constructor
+	 * 
+	 * @param[in] InQuaternion Quaternion
+	 */
+	FORCEINLINE FRotator( const FQuaternion& InQuaternion )
+	{
+		FVector		eulerAngles = FMath::QuaternionToAngles( InQuaternion );
+		pitch	= eulerAngles.x;
+		yaw		= eulerAngles.y;
+		roll	= eulerAngles.z;
+	}
+
+	/**
 	 * Constructor with leaving uninitialized memory
 	 */
 	FORCEINLINE explicit FRotator( ENoInit )
@@ -191,6 +204,19 @@ public:
 	{
 		Subtract( InOther );
 		return *this;
+	}
+
+	/**
+	 * Compare two FRotator
+	 * 
+	 * @param InRight Right rotator
+	 * @return Return if two rotators is equal, else return false
+	 */
+	FORCEINLINE bool operator==( const FRotator& InRight ) const
+	{
+		return pitch == InRight.pitch &&
+			yaw == InRight.yaw &&
+			roll == InRight.roll;
 	}
 
 	float			pitch;		/**< Rotation around the right axis */

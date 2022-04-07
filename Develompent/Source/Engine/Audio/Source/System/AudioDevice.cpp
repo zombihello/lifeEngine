@@ -24,7 +24,8 @@ uint32 appSampleFormatToEngine( ESampleFormat InSampleFormat )
 }
 
 FAudioDevice::FAudioDevice()
-	: alDevice( nullptr )
+	: bIsMuted( false )
+	, alDevice( nullptr )
 	, alContext( nullptr )
 	, globalVolume( 100.f )
 	, platformAudioHeadroom( 1.f )
@@ -89,7 +90,7 @@ void FAudioDevice::Init()
 
 	// Initialize listener spatial
 	SetListenerSpatial( FMath::vectorZero, FMath::vectorForward, FMath::vectorUp );
-	SetGlobalVolume( 100.f );
+	SetGlobalVolume( 1.f );
 }
 
 void FAudioDevice::Shutdown()

@@ -1,0 +1,7 @@
+{
+	"PhysicsMaterial": {
+		"StaticFriction": 1,
+		"DynamicFriction": 1,
+		"Restitution": 1
+	}
+}

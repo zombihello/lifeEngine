@@ -68,6 +68,7 @@ private:
 	void				SerializeConfigs();
 
 	bool				isInitialize;		/**< Is initialized engine */
+	bool				bIsFocus;			/**< Is focus on window */
 };
 
 #endif // !ENGINELOOP_H

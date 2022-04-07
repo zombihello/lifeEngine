@@ -99,7 +99,6 @@ bool LCookPackagesCommandlet::CookMap( const FResourceInfo& InMapInfo )
 
 	// Clear world for spawn new actors
 	GWorld->CleanupWorld();
-	GWorld->SpawnActor< APlayerStart >( FVector( 0.f, 0.f, -1.f ) );
 
 	// Spawn tiles
 	SpawnTilesInWorld( tmxMap, tilesets );
@@ -228,12 +227,13 @@ void LCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 					bool			result = FindTileset( InTilesets, tile.ID, tileset, textureRect );
 					checkMsg( result, TEXT( "Not founded tileset for tile with ID %i" ), tile.ID );
 
-					ASprite*			sprite				= GWorld->SpawnActor< ASprite >( FVector( x * mapTileSize.x / tileset.tileOffset.x, y * mapTileSize.y / tileset.tileOffset.y, indexLayer ) );
+					ASprite*			sprite				= GWorld->SpawnActor< ASprite >( FVector( x * mapTileSize.x / tileset.tileOffset.x, y * mapTileSize.y / tileset.tileOffset.y, indexLayer ) );					
 					LSpriteComponent*	spriteComponent		= sprite->GetSpriteComponent();
 					spriteComponent->SetType( ST_Static );
 					spriteComponent->SetMaterial( tileset.material );
 					spriteComponent->SetSpriteSize( FVector2D( mapTileSize.x, mapTileSize.y ) );
 					spriteComponent->SetTextureRect( textureRect );
+					sprite->SetStatic( true );
 				}
 
 				++x;
@@ -687,11 +687,31 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			}
 		}
 	}
+
+	// Cook physics material
+	for ( auto itPackage = physMaterialsMap.begin(), itPackageEnd = physMaterialsMap.end(); itPackage != itPackageEnd; ++itPackage )
+	{
+		for ( auto itAsset = itPackage->second.begin(), itAssetEnd = itPackage->second.end(); itAsset != itAssetEnd; ++itAsset )
+		{
+			if ( InIsOnlyAlwaysCook && !itAsset->second.bAlwaysCook )
+			{
+				continue;
+			}
+
+			FPhysicsMaterialRef		physMaterial;
+			bool					result = CookPhysMaterial( itAsset->second, physMaterial );
+			if ( !result )
+			{
+				appErrorf( TEXT( "Failed cooking physics material '%s'" ), itAsset->second.filename.c_str() );
+				return;
+			}
+		}
+	}
 }
 
 /**
  * ----------------------
- * Cook audio buffer
+ * Cook audio bank
  * ----------------------
  */
 
@@ -704,6 +724,40 @@ bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInf
 	OutAudioBank->SetAssetName( InAudioBankInfo.filename );
 	OutAudioBank->SetSourceOGGFile( InAudioBankInfo.path );
 	return SaveToPackage( InAudioBankInfo, OutAudioBank );
+}
+
+/**
+ * --------------------
+ * Cooking physics material
+ * --------------------
+ */
+
+bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, FPhysicsMaterialRef& OutPhysMaterial )
+{
+	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking physics material '%s:%s'" ), InPhysMaterialInfo.packageName.c_str(), InPhysMaterialInfo.filename.c_str() );
+	
+	// Parse physics material in JSON format
+	FConfig		pmtMaterial;
+	{
+		FArchive*	arMaterial = GFileSystem->CreateFileReader( InPhysMaterialInfo.path, AR_NoFail );
+		pmtMaterial.Serialize( *arMaterial );
+		delete arMaterial;
+	}
+
+	// Getting general data
+	float	staticFriction	= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "StaticFriction" ) ).GetNumber();
+	float	dynamicFriction	= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "DynamicFriction" ) ).GetNumber();
+	float	restitution		= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Restitution" ) ).GetNumber();
+
+	// Create physics material and saving to package
+	OutPhysMaterial = new FPhysicsMaterial();
+	OutPhysMaterial->SetAssetName( InPhysMaterialInfo.filename );
+	OutPhysMaterial->SetStaticFriction( staticFriction );
+	OutPhysMaterial->SetDynamicFriction( dynamicFriction );
+	OutPhysMaterial->SetRestitution( restitution );
+
+	// Save to package
+	return SaveToPackage( InPhysMaterialInfo, OutPhysMaterial );
 }
 
 /**
@@ -786,22 +840,27 @@ void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 		// If this resource is texture
 		if ( IsSupportedTextureExtension( extension ) )
 		{
-			texturesMap[ packageName ][ filename ]		= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+			texturesMap[ packageName ][ filename ]			= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
 		}
 		// If this resource is material
 		else if ( IsSupportedMaterialExtension( extension ) )
 		{
-			materialsMap[ packageName ][ filename ]		= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+			materialsMap[ packageName ][ filename ]			= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
 		}
 		// If this resource is audio
 		else if ( IsSupportedAudioExtension( extension ) )
 		{
-			audiosMap[ packageName ][ filename ]		= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+			audiosMap[ packageName ][ filename ]			= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+		}
+		// If this resource is physics material
+		else if ( IsSupportedPhysMaterialExtension( extension ) )
+		{
+			physMaterialsMap[ packageName ][ filename ]		= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
 		}
 		// If this resource is map
 		else if ( IsSupportedMapExtension( extension ) )
 		{
-			mapsMap[ filename ]							= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+			mapsMap[ filename ]								= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
 		}
 	}
 }

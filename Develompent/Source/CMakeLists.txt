@@ -97,7 +97,12 @@ set( ZLIB_PATH ${EXTERNAL_DIR}/zlib )
 set( OPENAL_PATH ${EXTERNAL_DIR}/openal-soft-1.21.1 )
 set( OGG_PATH ${EXTERNAL_DIR}/libogg-1.3.5 )
 set( VORBIS_PATH ${EXTERNAL_DIR}/libvorbis-1.3.7 )
-	
+set( PHYSX_PATH ${EXTERNAL_DIR}/PhysX-4.1/physx/install )
+
+if ( PLATFORM_WINDOWS )
+	set( PHYSX_PATH ${PHYSX_PATH}/vc15win64 )
+endif()
+
 if ( WITH_EDITOR )
 	set( QT5_PATH ${EXTERNAL_DIR}/Qt-5.15.2/msvc2019_64 )
 	set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_PATH} )
@@ -116,6 +121,7 @@ set( PROJECT_LAUNCH Engine/Launch )
 set( PROJECT_UI Engine/UI )
 set( PROJECT_WORLDED Engine/WorldEd )
 set( PROJECT_AUDIO Engine/Audio )
+set( PROJECT_PHYSICS Engine/Physics )
 
 if ( PLATFORM_WINDOWS )
 	set( PROJECT_PLATFORM Engine/Platforms/Windows )
@@ -163,6 +169,7 @@ include( ${PROJECT_SOURCE_DIR}/${PROJECT_ENGINE}/Engine.Build.cmake )			# Engine
 include( ${PROJECT_SOURCE_DIR}/${PROJECT_LAUNCH}/Launch.Build.cmake )			# Launch
 include( ${PROJECT_SOURCE_DIR}/${PROJECT_UI}/UI.Build.cmake )					# UI
 include( ${PROJECT_SOURCE_DIR}/${PROJECT_AUDIO}/Audio.Build.cmake )				# Audio
+include( ${PROJECT_SOURCE_DIR}/${PROJECT_PHYSICS}/Physics.Build.cmake )			# Physics
 include( ${GAME_SOURCE_PATH}/Game.Build.cmake )									# Game
 
 if ( WITH_EDITOR )

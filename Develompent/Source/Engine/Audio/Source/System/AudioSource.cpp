@@ -1,3 +1,5 @@
+#include "Misc/AudioGlobals.h"
+#include "System/AudioDevice.h"
 #include "System/AudioSource.h"
 
 FAudioSource::FAudioSource()
@@ -14,11 +16,17 @@ FAudioSource::FAudioSource()
 	SetMinDistance( 1.f );
 	SetAttenuation( 1.f );
 	SetLocation( FMath::vectorZero );
+
+	// Subscribe to event of muted/unmuted audio device
+	GAudioDevice.GetOnAudioDeviceMuted().Add( this, &FAudioSource::OnAudioDeviceMuted );
 }
 
 FAudioSource::~FAudioSource()
 {
 	alDeleteSources( 1, &alHandle );
+
+	// Unsubscribe from event of muted/unmuted audio device
+	GAudioDevice.GetOnAudioDeviceMuted().Remove( this, &FAudioSource::OnAudioDeviceMuted );
 }
 
 void FAudioSource::Play()
@@ -48,7 +56,7 @@ void FAudioSource::SetRelativeToListener( bool InIsRelativeToListener )
 
 void FAudioSource::SetVolume( float InVolume )
 {
-	alSourcef( alHandle, AL_GAIN, InVolume * GAudioDevice.GetPlatformAudioHeadroom() * 0.01f );
+	alSourcef( alHandle, AL_GAIN, InVolume * GAudioDevice.GetPlatformAudioHeadroom() );
 	volume = InVolume;
 }
 
@@ -148,4 +156,16 @@ FVector FAudioSource::GetLocation() const
 	FVector			location;
 	alGetSource3f( alHandle, AL_POSITION, &location.x, &location.y, &location.z );
 	return location;
+}
+
+void FAudioSource::OnAudioDeviceMuted( bool InIsAudioDeviceMuted )
+{
+	if ( InIsAudioDeviceMuted )
+	{
+		Pause();
+	}
+	else
+	{
+		Play();
+	}
 }

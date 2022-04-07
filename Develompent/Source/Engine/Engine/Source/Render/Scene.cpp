@@ -72,7 +72,7 @@ void FScene::BuildSDGs( const FSceneView& InSceneView )
 	// Add to SDGs primitives
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
 	{
-		//if ( InSceneView.GetFrustum().IsIn( ( *it )->GetBoundBox() ) )
+		if ( InSceneView.GetFrustum().IsIn( ( *it )->GetBoundBox() ) )
 		{
 			( *it )->AddToDrawList( InSceneView );
 		}
