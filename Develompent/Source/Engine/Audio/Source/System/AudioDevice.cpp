@@ -88,9 +88,19 @@ void FAudioDevice::Init()
 		platformAudioHeadroom = 1.f;
 	}
 
+	// Getting global volume from config
+	float		globalVolume = 1.f;
+	{
+		FConfigValue		configGlobalVolume = GEngineConfig.GetValue( TEXT( "Audio.Audio" ), TEXT( "GlobalVolume" ) );
+		if ( configGlobalVolume.IsValid() && ( configGlobalVolume.GetType() == FConfigValue::T_Int || configGlobalVolume.GetType() == FConfigValue::T_Float ) )
+		{
+			globalVolume = configGlobalVolume.GetNumber();
+		}
+	}
+
 	// Initialize listener spatial
 	SetListenerSpatial( FMath::vectorZero, FMath::vectorForward, FMath::vectorUp );
-	SetGlobalVolume( 1.f );
+	SetGlobalVolume( globalVolume );
 }
 
 void FAudioDevice::Shutdown()

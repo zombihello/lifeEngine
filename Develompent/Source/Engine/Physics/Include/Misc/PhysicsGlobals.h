@@ -13,12 +13,12 @@
  * @ingroup Physics
  * Physics engine
  */
-extern class FPhysicsEngine			GPhysicsEngine;
+extern class FPhysicsEngine				GPhysicsEngine;
 
 /**
  * @ingroup Physics
  * Physics scene
  */
-extern class FPhysicsScene			GPhysicsScene;
+extern class FPhysicsScene				GPhysicsScene;
 
 #endif // !PHYSICSGLOBALS_H

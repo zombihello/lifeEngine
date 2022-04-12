@@ -6,5 +6,5 @@
 // GLOBALS
 // -------------
 
-FPhysicsEngine			GPhysicsEngine;
-FPhysicsScene			GPhysicsScene;
+FPhysicsEngine				GPhysicsEngine;
+FPhysicsScene				GPhysicsScene;

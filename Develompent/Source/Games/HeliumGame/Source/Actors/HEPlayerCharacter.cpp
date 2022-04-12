@@ -8,9 +8,6 @@ IMPLEMENT_CLASS( AHEPlayerCharacter )
 
 AHEPlayerCharacter::AHEPlayerCharacter()
 {
-	// Create box component
-	CreateComponent<LBoxComponent>( TEXT( "BoxComponent0" ) );
-
 	// Create camera component
 	cameraComponent = CreateComponent< LCameraComponent >( TEXT( "CameraComponent0" ) );
 	cameraComponent->SetProjectionMode( CPM_Orthographic );
@@ -23,6 +20,11 @@ AHEPlayerCharacter::AHEPlayerCharacter()
 	spriteComponent = CreateComponent< LSpriteComponent >( TEXT( "SpriteComponent0" ) );
 	spriteComponent->SetSpriteSize( FVector2D( 32.f, 32.f ) );
 	spriteComponent->SetType( ST_Static );
+
+	// Create box component
+	collisionComponent = CreateComponent< LBoxComponent >( TEXT( "BoxComponent0" ) );
+	collisionComponent->SetBodyLockFlags( BLF_LockMoveZ | BLF_LockRotateX | BLF_LockRotateY | BLF_LockRotateZ );
+	collisionComponent->SetBodyMass( 1000.f );
 }
 
 AHEPlayerCharacter::~AHEPlayerCharacter()

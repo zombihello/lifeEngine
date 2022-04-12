@@ -137,8 +137,10 @@ public:
 
 	/**
 	 * @brief Tick engine
+	 * 
+	 * @param InDeltaTime The time since the last tick
 	 */
-	void Tick();
+	void Tick( float InDeltaTime );
 
 	/**
 	 * @brief Shutdown engine

@@ -7,6 +7,7 @@
 FPhysicsBodyInstance::FPhysicsBodyInstance()
 	: bIsStatic( true )
 	, lockFlags( BLF_None )
+	, mass( 1.f )
 	, pxRigidBody( nullptr )
 {}
 
@@ -36,6 +37,7 @@ void FPhysicsBodyInstance::InitBody( FPhysicsBodySetup* InBodySetup, const FTran
 	{
 		physx::PxRigidDynamic*		pxRigidDinamic = GPhysicsEngine.GetPxPhysics()->createRigidDynamic( pxTransform );
 		pxRigidDinamic->setRigidDynamicLockFlags( LE2PLockFlags( lockFlags ) );
+		pxRigidDinamic->setMass( mass );
 		pxRigidBody = pxRigidDinamic;
 	}
 	check( pxRigidBody );
@@ -55,7 +57,13 @@ void FPhysicsBodyInstance::InitBody( FPhysicsBodySetup* InBodySetup, const FTran
 			pxRigidBody->attachShape( *boxGeometry.pxShape );
 		}
 	}
-	
+
+	// Update mass and inertia if rigid body is not static
+	if ( !bIsStatic )
+	{
+		physx::PxRigidBodyExt::updateMassAndInertia( *( physx::PxRigidDynamic* )pxRigidBody, 10.0f );
+	}
+
 	// Add rigid body to PhysX scene
 	GPhysicsScene.AddBody( this );
 }

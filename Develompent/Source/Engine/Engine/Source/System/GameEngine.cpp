@@ -40,7 +40,7 @@ void LGameEngine::Init()
 
 void LGameEngine::Tick( float InDeltaSeconds )
 {
-	GPhysicsEngine.Tick();
+	GPhysicsEngine.Tick( InDeltaSeconds );
 	GWorld->Tick( InDeltaSeconds );
 	viewport.Draw();
 }

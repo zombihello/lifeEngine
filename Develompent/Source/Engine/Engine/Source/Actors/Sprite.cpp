@@ -10,8 +10,7 @@ IMPLEMENT_CLASS( ASprite )
 
 ASprite::ASprite()
 {
-    spriteComponent = CreateComponent< LSpriteComponent >( TEXT( "SpriteComponent0" ) );   
-    boxComponent = CreateComponent< LBoxComponent >( TEXT( "BoxComponent0" ) );
+    spriteComponent     = CreateComponent< LSpriteComponent >( TEXT( "SpriteComponent0" ) );   
 }
 
 ASprite::~ASprite()

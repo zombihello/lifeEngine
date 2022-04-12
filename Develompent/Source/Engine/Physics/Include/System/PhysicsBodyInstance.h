@@ -130,6 +130,15 @@ public:
 	}
 
 	/**
+	 * @brief Set body mass
+	 * @param InMass Mass
+	 */
+	FORCEINLINE void SetMass( float InMass )
+	{
+		mass = InMass;
+	}
+
+	/**
 	 * @brief Is dynamic rigid body
 	 * @return Returns true if the body is not static
 	 */
@@ -174,9 +183,19 @@ public:
 		return lockFlags;
 	}
 
+	/**
+	 * @brief Get body mass
+	 * @return Return body mass
+	 */
+	FORCEINLINE float GetMass() const
+	{
+		return mass;
+	}
+
 private:
 	bool											bIsStatic;			/**< Is static rigid body */
 	uint32											lockFlags;			/**< Lock flags */
+	float											mass;				/**< Mass of body */
 	TRefCountPtr< class LPrimitiveComponent >		ownerComponent;		/**< PrimitiveComponent containing this body */	
 	FPhysicsBodySetupRef							bodySetup;			/**< Body setup */
 	physx::PxRigidActor*							pxRigidBody;		/**< PhysX rigid body */

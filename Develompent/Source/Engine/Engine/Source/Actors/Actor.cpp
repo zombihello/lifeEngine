@@ -1,6 +1,5 @@
 #include "Actors/Actor.h"
 #include "Components/ActorComponent.h"
-#include "Components/PrimitiveComponent.h"
 
 IMPLEMENT_CLASS( AActor )
 
@@ -44,6 +43,7 @@ void FActorVar::Clear()
 
 AActor::AActor()
 	: bIsStatic( false )
+	, bNeedReinitCollision( false )
 {}
 
 AActor::~AActor()
@@ -65,6 +65,14 @@ void AActor::Tick( float InDeltaTime )
 	{
 		ownedComponents[ index ]->TickComponent( InDeltaTime );
 	}
+
+	// Reinit collision if need
+	if ( bNeedReinitCollision )
+	{
+		TermPhysics();
+		InitPhysics();
+		bNeedReinitCollision = false;
+	}
 }
 
 void AActor::Serialize( class FArchive& InArchive )
@@ -80,46 +88,25 @@ void AActor::Serialize( class FArchive& InArchive )
 
 void AActor::InitPhysics()
 {
-	// TODO BS yehor.pohuliaka - Need add weld all rigid bodies of a primitives to one
-	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
+	if ( collisionComponent && collisionComponent->IsCollision() )
 	{
-		LPrimitiveComponent*		primitiveComponent = ownedComponents[ index ]->Cast< LPrimitiveComponent >();
-		if ( primitiveComponent )
-		{
-			primitiveComponent->InitPrimitivePhysics();
-		}
+		collisionComponent->InitPrimitivePhysics();
 	}
 }
 
 void AActor::TermPhysics()
 {
-	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
+	if ( collisionComponent )
 	{
-		LPrimitiveComponent*		primitiveComponent = ownedComponents[ index ]->Cast< LPrimitiveComponent >();
-		if ( primitiveComponent )
-		{
-			primitiveComponent->TermPrimitivePhysics();
-		}
+		collisionComponent->TermPrimitivePhysics();
 	}
 }
 
 void AActor::SyncPhysics()
 {
-	for ( uint32 index = 0, count = ( uint32 ) ownedComponents.size(); index < count; ++index )
+	if ( collisionComponent && collisionComponent->IsCollision() )
 	{
-		LPrimitiveComponent* primitiveComponent = ownedComponents[ index ]->Cast< LPrimitiveComponent >();
-		if ( primitiveComponent )
-		{
-			// This for test
-			const FPhysicsBodyInstance*		bi = primitiveComponent->GetBodyInstance();
-			if ( bi->IsValid() )
-			{
-				FTransform tr = bi->GetLEWorldTransform();
-				SetActorLocation( tr.GetLocation() );
-				SetActorRotation( tr.GetRotation() );
-				return;
-			}
-		}
+		collisionComponent->SyncComponentToPhysics();
 	}
 }
 
@@ -140,8 +127,9 @@ LActorComponentRef AActor::CreateComponent( LClass* InClass, const tchar* InName
 	LActorComponent*		component = newObject->Cast< LActorComponent >();
 	check( component );
 
+	bool		bIsASceneComponent		= component->IsA< LSceneComponent >();
+
 	// If created component is a LSceneComponent and RootComponent not setted - set it!
-	bool		bIsASceneComponent = component->IsA< LSceneComponent >();
 	if ( !rootComponent && bIsASceneComponent )
 	{
 		rootComponent = component->Cast< LSceneComponent >();
@@ -182,6 +170,16 @@ void AActor::RemoveOwnedComponent( class LActorComponent* InComponent )
 		LActorComponent*		component = ownedComponents[ index ];
 		if ( component == InComponent )
 		{
+			if ( component == collisionComponent )
+			{
+				collisionComponent->TermPrimitivePhysics();
+				collisionComponent = nullptr;
+			}
+			else if ( component == rootComponent )
+			{
+				check( false && "Need implement change root component" );
+			}
+
 			InComponent->SetOwner( nullptr );
 			ownedComponents.erase( ownedComponents.begin() + index );
 			return;
@@ -193,12 +191,14 @@ void AActor::ResetOwnedComponents()
 {
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
 	{
-		if ( LPrimitiveComponent* primitiveComponent = ownedComponents[ index ]->Cast<LPrimitiveComponent>() )
+		if ( collisionComponent == ownedComponents[ index ] )
 		{
-			primitiveComponent->TermPrimitivePhysics();
+			collisionComponent->TermPrimitivePhysics();
 		}
 		ownedComponents[ index ]->SetOwner( nullptr );
 	}
 
 	ownedComponents.clear();
+	collisionComponent	= nullptr;
+	rootComponent		= nullptr;
 }

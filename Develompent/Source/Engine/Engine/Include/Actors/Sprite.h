@@ -45,7 +45,6 @@ public:
 
 private:
     TRefCountPtr< LSpriteComponent >			spriteComponent;		/**< Sprite component */
-    TRefCountPtr< LBoxComponent >               boxComponent;           /**< Box component */
 };
 
 #endif // !ASPRITE_H

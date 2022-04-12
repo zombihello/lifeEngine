@@ -18,6 +18,7 @@
 #include "Math/Color.h"
 #include "Render/Material.h"
 #include "Components/SceneComponent.h"
+#include "Components/PrimitiveComponent.h"
 
 #if WITH_EDITOR
 /**
@@ -675,6 +676,7 @@ public:
 	 */
 	FORCEINLINE void SetStatic( bool InIsStatic )
 	{
+		bNeedReinitCollision = InIsStatic != bIsStatic ? true : bNeedReinitCollision;
 		bIsStatic = InIsStatic;
 	}
 
@@ -742,6 +744,15 @@ public:
 	}
 
 	/**
+	 * Get collision component
+	 * @return Return collision component. If not exist return nullptr
+	 */
+	FORCEINLINE TRefCountPtr< LPrimitiveComponent > GetCollisionComponent() const
+	{
+		return collisionComponent;
+	}
+
+	/**
 	 * Is static actor
 	 * @return Return true if actor is static, else return false
 	 */
@@ -792,9 +803,11 @@ protected:
 	void ResetOwnedComponents();
 
 	TRefCountPtr< LSceneComponent >				rootComponent;			/**< Root component, default is null */
+	TRefCountPtr< LPrimitiveComponent >			collisionComponent;		/**< Collision component */
 
 private:
 	bool										bIsStatic;				/**< Is static actor */
+	bool										bNeedReinitCollision;	/**< Is need reinit collision component */
 	std::vector< LActorComponentRef >			ownedComponents;		/**< Owned components */
 };
 

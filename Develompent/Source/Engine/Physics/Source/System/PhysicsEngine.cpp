@@ -33,7 +33,7 @@ void FPhysicsEngine::Init()
 #endif // !SHIPPING_BUILD
 
 	// Create PhysX core
-	pxPhysics = PxCreatePhysics( PX_PHYSICS_VERSION, *pxFoundation, physx::PxTolerancesScale(), true
+	pxPhysics = PxCreatePhysics( PX_PHYSICS_VERSION, *pxFoundation, physx::PxTolerancesScale(), false
 #if !SHIPPING_BUILD
 								 , pxPvd
 #endif // !SHIPPING_BUILD
@@ -72,9 +72,9 @@ void FPhysicsEngine::Init()
 	}
 }
 
-void FPhysicsEngine::Tick()
+void FPhysicsEngine::Tick( float InDeltaTime )
 {
-	GPhysicsScene.Tick();
+	GPhysicsScene.Tick( InDeltaTime );
 }
 
 void FPhysicsEngine::Shutdown()

@@ -200,6 +200,28 @@ public:
 	}
 
 	/**
+	 * @brief Compare transform without scale
+	 *
+	 * @param InOtherTransform Other transform
+	 * @return Return true if equal with InOtherTransform, else returning false
+	 */
+	FORCEINLINE bool MatchesNoScale( const FTransform& InOtherTransform ) const
+	{
+		return translation == InOtherTransform.translation && rotation == InOtherTransform.rotation;
+	}
+
+	/**
+	 * @brief Compare transform
+	 *
+	 * @param InOtherTransform Other transform
+	 * @return Return true if equal with InOtherTransform, else returning false
+	 */
+	FORCEINLINE bool Matches( const FTransform& InOtherTransform ) const
+	{
+		return MatchesNoScale( InOtherTransform ) && scale == InOtherTransform.scale;
+	}
+
+	/**
 	 * Set location
 	 * 
 	 * @param[in] InLocation New location
