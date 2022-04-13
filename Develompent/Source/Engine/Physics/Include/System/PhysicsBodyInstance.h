@@ -9,73 +9,8 @@
 #ifndef PHYSICSBODYINSTANCE_H
 #define PHYSICSBODYINSTANCE_H
 
-#include <PxPhysics.h>
-#include <PxPhysicsAPI.h>
-
 #include "System/PhysicsEngine.h"
 #include "System/PhysicsBodySetup.h"
-
-/**
- * @ingroup Physics
- * @brief Enumeration of rigid body lock flag
- */
-enum EBodyLockFlag
-{
-	BLF_None		= 0,		/**< Nope flag */
-	BLF_LockMoveX	= 1 << 0,	/**< Lock moving by X axis */
-	BLF_LockMoveY	= 1 << 1,	/**< Lock moving by Y axis */
-	BLF_LockMoveZ	= 1 << 2,	/**< Lock moving by Z axis */
-	BLF_LockRotateX	= 1 << 3,	/**< Lock rotating by X axis */
-	BLF_LockRotateY	= 1 << 4,	/**< Lock rotating by Y axis */
-	BLF_LockRotateZ	= 1 << 5	/**< Lock rotating by Z axis */
-};
-
-/**
- * @ingroup Physics
- * @brief Convert lock flags from LE to PhysX
- */
-FORCEINLINE physx::PxRigidDynamicLockFlags LE2PLockFlags( uint32 InLockFlags )
-{
-	physx::PxRigidDynamicLockFlags		pxFlags;
-
-	// Lock moving by X
-	if ( InLockFlags & BLF_LockMoveX )
-	{
-		pxFlags |= physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_X;
-	}
-
-	// Lock moving by Y
-	if ( InLockFlags & BLF_LockMoveY )
-	{
-		pxFlags |= physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_Y;
-	}
-
-	// Lock moving by Z
-	if ( InLockFlags & BLF_LockMoveZ )
-	{
-		pxFlags |= physx::PxRigidDynamicLockFlag::eLOCK_LINEAR_Z;
-	}
-
-	// Lock rotating by X
-	if ( InLockFlags & BLF_LockRotateX )
-	{
-		pxFlags |= physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_X;
-	}
-
-	// Lock rotating by Y
-	if ( InLockFlags & BLF_LockRotateY )
-	{
-		pxFlags |= physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y;
-	}
-
-	// Lock rotating by Z
-	if ( InLockFlags & BLF_LockRotateZ )
-	{
-		pxFlags |= physx::PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z;
-	}
-
-	return pxFlags;
-}
 
 /**
  * @ingroup Physics
@@ -153,16 +88,7 @@ public:
 	 */
 	FORCEINLINE FTransform GetLEWorldTransform() const
 	{
-		return pxRigidBody ? P2LETransform( pxRigidBody->getGlobalPose() ) : FTransform();
-	}
-
-	/**
-	 * @brief Get PhysX rigid body
-	 * @return Return PhysX rigid body. Is not inited return nullptr
-	 */
-	FORCEINLINE physx::PxRigidActor* GetPhysXRigidBody() const
-	{
-		return pxRigidBody;
+		return FPhysicsInterface::GetTransform( handle );
 	}
 
 	/**
@@ -171,7 +97,7 @@ public:
 	 */
 	FORCEINLINE bool IsValid() const
 	{
-		return pxRigidBody;
+		return FPhysicsInterface::IsValidActor( handle );
 	}
 
 	/**
@@ -192,13 +118,22 @@ public:
 		return mass;
 	}
 
+	/**
+	 * @brief Get handle to physics actor
+	 * @return Return physics actor handle
+	 */
+	FORCEINLINE FPhysicsActorHandle GetActorHandle() const
+	{
+		return handle;
+	}
+
 private:
 	bool											bIsStatic;			/**< Is static rigid body */
 	uint32											lockFlags;			/**< Lock flags */
 	float											mass;				/**< Mass of body */
 	TRefCountPtr< class LPrimitiveComponent >		ownerComponent;		/**< PrimitiveComponent containing this body */	
 	FPhysicsBodySetupRef							bodySetup;			/**< Body setup */
-	physx::PxRigidActor*							pxRigidBody;		/**< PhysX rigid body */
+	FPhysicsActorHandle								handle;				/**< Handle to physics actor */
 };
 
 #endif // !PHYSICSBODYINSTANCE_H

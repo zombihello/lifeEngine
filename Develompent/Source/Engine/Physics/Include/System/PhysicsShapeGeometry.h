@@ -9,9 +9,6 @@
 #ifndef PHYSICSSHAPEGEOMETRY_H
 #define PHYSICSSHAPEGEOMETRY_H
 
-#include <PxPhysics.h>
-#include <PxPhysicsAPI.h>
-
 #include "System/Archive.h"
 #include "System/PhysicsMaterial.h"
 #include "Core.h"
@@ -50,13 +47,28 @@ struct FPhysicsShapeGeometry
 	virtual void Serialize( class FArchive& InArchive );
 
 	/**
-	 * @brief Init PhysX shape
+	 * @brief Get physics shape handle
+	 * @return Return physics shape handle
 	 */
-	virtual void InitPhysXShape() = 0;
+	FORCEINLINE const FPhysicsShapeHandle& GetShapeHandle() const
+	{
+		if ( !FPhysicsInterface::IsValidShapeGeometry( handle ) )
+		{
+			InitPhysicsShape();
+		}
+		return handle;
+	}
 
-	ECollisionShape			collisionShape;		/**< Collision shape */
-	physx::PxShape*			pxShape;			/**< PhysX shape. Is is nullptr need before use call InitPhysXShape */
-	FPhysicsMaterialRef		material;			/**< Physics material */
+	ECollisionShape					collisionShape;		/**< Collision shape */	
+	FPhysicsMaterialRef				material;			/**< Physics material */
+
+protected:
+	/**
+	 * @brief Init physics shape
+	 */
+	virtual void InitPhysicsShape() const = 0;
+
+	mutable FPhysicsShapeHandle		handle;				/**< Physics shape */
 };
 
 //

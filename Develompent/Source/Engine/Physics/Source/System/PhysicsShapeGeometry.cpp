@@ -4,17 +4,12 @@
 
 FPhysicsShapeGeometry::FPhysicsShapeGeometry( ECollisionShape InCollisionShape )
 	: collisionShape( InCollisionShape )
-	, pxShape( nullptr )
 	, material( GPhysicsEngine.GetDefaultPhysMaterial() )
 {}
 
 FPhysicsShapeGeometry::~FPhysicsShapeGeometry()
 {
-	if ( pxShape )
-	{
-		pxShape->release();
-		pxShape = nullptr;
-	}
+	FPhysicsInterface::ReleaseShapeGeometry( handle );
 }
 
 void FPhysicsShapeGeometry::Serialize( class FArchive& InArchive )

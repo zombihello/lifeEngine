@@ -98,6 +98,7 @@ set( OPENAL_PATH ${EXTERNAL_DIR}/openal-soft-1.21.1 )
 set( OGG_PATH ${EXTERNAL_DIR}/libogg-1.3.5 )
 set( VORBIS_PATH ${EXTERNAL_DIR}/libvorbis-1.3.7 )
 set( PHYSX_PATH ${EXTERNAL_DIR}/PhysX-4.1/physx/install )
+set( BOX2D_PATH ${EXTERNAL_DIR}/box2d-2.4.1/install )
 
 if ( PLATFORM_WINDOWS )
 	set( PHYSX_PATH ${PHYSX_PATH}/vc15win64 )
@@ -155,6 +156,14 @@ set( GAME_SOURCE_PATH "" CACHE PATH "Path to source code of game with <NAME_GAME
 if ( NOT GAME_SOURCE_PATH )
 	message( "Value GAME_SOURCE_PATH not setted" )
 	set( GAME_SOURCE_PATH "${PROJECT_SOURCE_DIR}/Games/HeliumGame" )			# Default game
+endif()
+
+# Build engine for 2D game
+option( ENGINE_2D "Build engine for 2D game" OFF )
+if ( ENGINE_2D )
+	add_definitions( -DENGINE_2D=1 )
+else()
+	add_definitions( -DENGINE_2D=0 )
 endif()
 
 #

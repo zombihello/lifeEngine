@@ -1,7 +1,19 @@
+set( WITH_PHYSX 0 )
+set( WITH_BOX2D 0 )
+
+if ( ENGINE_2D )
+	set( WITH_BOX2D 1 )
+else()
+	set( WITH_PHYSX 1 )
+endif()
+
+add_definitions( -DWITH_PHYSX=${WITH_PHYSX} )
+add_definitions( -DWITH_BOX2D=${WITH_BOX2D} )
+
 # *.H
 file( GLOB INCLUDE_FILES "${PROJECT_PHYSICS}/Include/*.h" )
-file( GLOB INCLUDE_SYSTEM_FILES "${PROJECT_PHYSICS}/Include/System/*.h" )
 file( GLOB INCLUDE_MISC_FILES "${PROJECT_PHYSICS}/Include/Misc/*.h" )
+file( GLOB INCLUDE_SYSTEM_FILES "${PROJECT_PHYSICS}/Include/System/*.h" )
 
 # *.CPP
 file( GLOB SOURCE_FILES "${PROJECT_PHYSICS}/Source/*.cpp" )

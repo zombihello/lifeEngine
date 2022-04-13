@@ -65,6 +65,11 @@
 	#define GAMENAME				"ExampleGame"
 #endif // !GAMENAME
 
+// Build engine for 2D game
+#ifndef ENGINE_2D
+	#define ENGINE_2D				0
+#endif // !ENGINE_2D
+
 /**
  * @ingroup Core
  * Checks to see if pure virtual has actually been implemented

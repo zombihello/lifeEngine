@@ -2,16 +2,15 @@
 #include "System/PhysicsEngine.h"
 #include "System/PhysicsBoxGeometry.h"
 
-void FPhysicsBoxGeometry::InitPhysXShape()
+void FPhysicsBoxGeometry::InitPhysicsShape() const
 {
-	if ( pxShape )
+	if ( FPhysicsInterface::IsValidShapeGeometry( handle ) )
 	{
 		return;
 	}
 
 	check( material );
-	pxShape = GPhysicsEngine.GetPxPhysics()->createShape( physx::PxBoxGeometry( extent.x, extent.y, extent.z ), *material->GetPhysXMaterial() );
-	check( pxShape );
+	handle = FPhysicsInterface::CreateBoxGeometry( extent, material->GetMaterialHandle() );
 }
 
 void FPhysicsBoxGeometry::Serialize( class FArchive& InArchive )

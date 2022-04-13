@@ -85,16 +85,28 @@ function( IncludeExternals MODULE_NAME )
 		message( SEND_ERROR "Failed to find Vorbis" )
 	endif()
 	
-	# PhysX
-	find_package( PhysX REQUIRED )
-	if ( PHYSX_FOUND )
-		include_directories( ${PHYSX_INCLUDE} )
-		target_link_libraries( ${MODULE_NAME} optimized ${PHYSX_LIB} debug ${PHYSX_DEBUG_LIB}
-											  optimized ${PHYSX_FOUNDATION_LIB} debug ${PHYSX_FOUNDATION_DEBUG_LIB}
-											  optimized ${PHYSX_COMMON_LIB} debug ${PHYSX_COMMON_DEBUG_LIB}
-											  optimized ${PHYSX_EXTENSIONS_LIB} debug ${PHYSX_EXTENSIONS_DEBUG_LIB} )
+	# For physics in 2D engine we use Box2D, else using PhysX
+	if ( ENGINE_2D )
+		# Box2D
+		find_package( Box2D REQUIRED )
+		if ( BOX2D_FOUND )
+			include_directories( ${BOX2D_INCLUDE} )
+			target_link_libraries( ${MODULE_NAME} optimized ${BOX2D_LIB} debug ${BOX2D_DEBUG_LIB} )
+		else()
+			message( SEND_ERROR "Failed to find Box2D" )
+		endif()		
 	else()
-		message( SEND_ERROR "Failed to find PhysX" )
+		# PhysX
+		find_package( PhysX REQUIRED )
+		if ( PHYSX_FOUND )
+			include_directories( ${PHYSX_INCLUDE} )
+			target_link_libraries( ${MODULE_NAME} optimized ${PHYSX_LIB} debug ${PHYSX_DEBUG_LIB}
+												  optimized ${PHYSX_FOUNDATION_LIB} debug ${PHYSX_FOUNDATION_DEBUG_LIB}
+												  optimized ${PHYSX_COMMON_LIB} debug ${PHYSX_COMMON_DEBUG_LIB}
+												  optimized ${PHYSX_EXTENSIONS_LIB} debug ${PHYSX_EXTENSIONS_DEBUG_LIB} )
+		else()
+			message( SEND_ERROR "Failed to find PhysX" )
+		endif()
 	endif()
 	
 	#
@@ -130,8 +142,10 @@ function( IncludeExternals MODULE_NAME )
 		# Qt5
 		target_link_libraries( ${MODULE_NAME} Qt5::Widgets Qt5::Core Qt5::Svg )	
 		
-		# PhysX
-		target_link_libraries( ${MODULE_NAME} optimized ${PHYSX_PVDSDK_LIB} debug ${PHYSX_PVDSDK_DEBUG_LIB} )
+		if ( NOT ENGINE_2D )
+			# PhysX PVD
+			target_link_libraries( ${MODULE_NAME} optimized ${PHYSX_PVDSDK_LIB} debug ${PHYSX_PVDSDK_DEBUG_LIB} )
+		endif()
 	endif()
 	
 	if ( PLATFORM_WINDOWS )
@@ -158,17 +172,23 @@ function( InstallExternals INSTALL_DIR )
 	else()
 		message( SEND_ERROR "Unknown platform" )
 	endif()
-		
+	
+	if ( ENGINE_2D )
+		set( PHYSICS_BINARES )
+	else()
+		set( PHYSICS_BINARES 	"${PLATFORM_PHYSX_BIN_DIR}/debug/PhysXCommonDEBUG${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"
+								"${PLATFORM_PHYSX_BIN_DIR}/debug/PhysXCookingDEBUG${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"
+								"${PLATFORM_PHYSX_BIN_DIR}/debug/PhysXDEBUG${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}" 
+								"${PLATFORM_PHYSX_BIN_DIR}/debug/PhysXFoundationDEBUG${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"
+								"${PLATFORM_PHYSX_BIN_DIR}/release/PhysXCommon${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"
+								"${PLATFORM_PHYSX_BIN_DIR}/release/PhysXCooking${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"		# BS yehor.pohuliaka - Maybe PhysXCooking need use only with WITH_EDITOR
+								"${PLATFORM_PHYSX_BIN_DIR}/release/PhysX${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}" 
+								"${PLATFORM_PHYSX_BIN_DIR}/release/PhysXFoundation${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}" )
+	endif()
+	
 	set( BINARES "${SDL2_PATH}/lib/${PLATFORM_BIN_DIR}/SDL2${PLATFORM_DLL_EXTENSION}"
 				 "${OPENAL_PATH}/bin/${PLATFORM_BIN_DIR}/OpenAL32${PLATFORM_DLL_EXTENSION}"
-				 "${PLATFORM_PHYSX_BIN_DIR}/debug/PhysXCommonDEBUG${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"
-				 "${PLATFORM_PHYSX_BIN_DIR}/debug/PhysXCookingDEBUG${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"
-				 "${PLATFORM_PHYSX_BIN_DIR}/debug/PhysXDEBUG${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}" 
-				 "${PLATFORM_PHYSX_BIN_DIR}/debug/PhysXFoundationDEBUG${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"
-				 "${PLATFORM_PHYSX_BIN_DIR}/release/PhysXCommon${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"
-				 "${PLATFORM_PHYSX_BIN_DIR}/release/PhysXCooking${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}"		# BS yehor.pohuliaka - Maybe PhysXCooking need use only with WITH_EDITOR
-				 "${PLATFORM_PHYSX_BIN_DIR}/release/PhysX${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}" 
-				 "${PLATFORM_PHYSX_BIN_DIR}/release/PhysXFoundation${PLATFORM_PHYSX_BIT_SUFIX}${PLATFORM_DLL_EXTENSION}" )	
+				 ${PHYSICS_BINARES} )	
 		
 	if ( WITH_EDITOR )
 		set( BINARES ${BINARES}

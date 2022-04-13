@@ -9,12 +9,10 @@
 #ifndef PHYSICSMATERIAL_H
 #define PHYSICSMATERIAL_H
 
-#include <PxPhysics.h>
-#include <PxPhysicsAPI.h>
-
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
 #include "System/Package.h"
+#include "PhysicsInterface.h"
 #include "Core.h"
 
 /**
@@ -32,7 +30,6 @@ class FPhysicsMaterial : public FAsset
 public:
 	/**
 	 * @brief Constructor
-	 * @warning Before call must need initialized FPhysicsEngine
 	 */
 	FPhysicsMaterial();
 
@@ -54,8 +51,8 @@ public:
 	 */
 	FORCEINLINE void SetStaticFriction( float InStaticFriction )
 	{
-		pxMaterial->setStaticFriction( InStaticFriction );
 		staticFriction = InStaticFriction;
+		FPhysicsInterface::UpdateMaterial( handle, this );
 	}
 
 	/**
@@ -64,8 +61,8 @@ public:
 	 */
 	FORCEINLINE void SetDynamicFriction( float InDynamicFriction )
 	{
-		pxMaterial->setDynamicFriction( InDynamicFriction );
 		dynamicFriction = InDynamicFriction;
+		FPhysicsInterface::UpdateMaterial( handle, this );
 	}
 
 	/**
@@ -74,8 +71,8 @@ public:
 	 */
 	FORCEINLINE void SetRestitution( float InRestitution )
 	{
-		pxMaterial->setRestitution( InRestitution );
 		restitution = InRestitution;
+		FPhysicsInterface::UpdateMaterial( handle, this );
 	}
 
 	/**
@@ -106,19 +103,19 @@ public:
 	}
 
 	/**
-	 * @brief Get PhysX material
-	 * @return Get PhysX material
+	 * @brief Get physics material handle
+	 * @return Return physics material handle
 	 */
-	FORCEINLINE physx::PxMaterial* GetPhysXMaterial() const
+	FORCEINLINE FPhysicsMaterialHandle GetMaterialHandle() const
 	{
-		return pxMaterial;
+		return handle;
 	}
 
 private:
 	float					staticFriction;		/**< The coefficient of static friction */
 	float					dynamicFriction;	/**< The coefficient of dynamic friction */
 	float					restitution;		/**< The coefficient of restitution */
-	physx::PxMaterial*		pxMaterial;			/**< PhysX material */
+	FPhysicsMaterialHandle	handle;				/**< Physics material handle */
 };
 
 //

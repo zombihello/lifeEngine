@@ -1,38 +1,40 @@
+#if WITH_PHYSX
 #include "Misc/PhysicsGlobals.h"
 #include "System/PhysicsEngine.h"
-#include "System/PhysicsScene.h"
+#include "System/PhysicsBodyInstance.h"
+#include "System/PhysXScene.h"
 
-FPhysicsScene::FPhysicsScene()
+FPhysXScene::FPhysXScene()
 	: pxScene( nullptr )
 	, pxDefaultCpuDispatcher( nullptr )
 {}
 
-FPhysicsScene::~FPhysicsScene()
+FPhysXScene::~FPhysXScene()
 {
 	Shutdown();
 }
 
-void FPhysicsScene::Init()
+void FPhysXScene::Init()
 {
 	// Create CPU dispatcher
 	pxDefaultCpuDispatcher = physx::PxDefaultCpuDispatcherCreate( 2 );
 	
 	// Create PhysX scene
-	physx::PxSceneDesc			pxSceneDescriptor( GPhysicsEngine.GetPxPhysics()->getTolerancesScale() );
+	physx::PxSceneDesc			pxSceneDescriptor( GPhysXSDK->getTolerancesScale() );
 	pxSceneDescriptor.gravity			= physx::PxVec3( 0.0f, -9.81f, 0.0f );	
 	pxSceneDescriptor.cpuDispatcher		= pxDefaultCpuDispatcher;
 	pxSceneDescriptor.filterShader		= physx::PxDefaultSimulationFilterShader;
-	pxScene = GPhysicsEngine.GetPxPhysics()->createScene( pxSceneDescriptor );
+	pxScene = GPhysXSDK->createScene( pxSceneDescriptor );
 	check( pxScene );
 }
 
-void FPhysicsScene::Tick( float InDeltaTime )
+void FPhysXScene::Tick( float InDeltaTime )
 {
-	pxScene->simulate( 1.f / 60.f );
+	pxScene->simulate( InDeltaTime );
 	pxScene->fetchResults( true );
 }
 
-void FPhysicsScene::Shutdown()
+void FPhysXScene::Shutdown()
 {
 	// Free allocated memory
 	if ( pxScene )
@@ -48,14 +50,23 @@ void FPhysicsScene::Shutdown()
 	}
 }
 
-void FPhysicsScene::RemoveBody( FPhysicsBodyInstance* InBodyInstance )
+void FPhysXScene::AddBody( class FPhysicsBodyInstance* InBodyInstance )
+{
+	physx::PxRigidActor*		pxRigidBody = InBodyInstance->GetActorHandle().pxRigidActor;
+	check( pxRigidBody );
+
+	pxScene->addActor( *pxRigidBody );
+	bodies.push_back( InBodyInstance );
+}
+
+void FPhysXScene::RemoveBody( FPhysicsBodyInstance* InBodyInstance )
 {
 	for ( uint32 index = 0, count = bodies.size(); index < count; ++index )
 	{
 		FPhysicsBodyInstance*		bodyInstance = bodies[ index ];
 		if ( bodyInstance == InBodyInstance )
 		{
-			physx::PxRigidActor*		pxRigidBody = bodyInstance->GetPhysXRigidBody();
+			physx::PxRigidActor*		pxRigidBody = bodyInstance->GetActorHandle().pxRigidActor;
 			check( pxRigidBody );
 
 			pxScene->removeActor( *pxRigidBody );
@@ -65,15 +76,16 @@ void FPhysicsScene::RemoveBody( FPhysicsBodyInstance* InBodyInstance )
 	}
 }
 
-void FPhysicsScene::RemoveAllBodies()
+void FPhysXScene::RemoveAllBodies()
 {
 	for ( uint32 index = 0, count = bodies.size(); index < count; ++index )
 	{
 		FPhysicsBodyInstance*		bodyInstance = bodies[ index ];
-		physx::PxRigidActor*		pxRigidBody = bodyInstance->GetPhysXRigidBody();
+		physx::PxRigidActor*		pxRigidBody = bodyInstance->GetActorHandle().pxRigidActor;
 		check( pxRigidBody );
 
 		pxScene->removeActor( *pxRigidBody );
 	}
 	bodies.clear();
 }
+#endif // WITH_PHYSX

@@ -15,10 +15,4 @@
  */
 extern class FPhysicsEngine				GPhysicsEngine;
 
-/**
- * @ingroup Physics
- * Physics scene
- */
-extern class FPhysicsScene				GPhysicsScene;
-
 #endif // !PHYSICSGLOBALS_H

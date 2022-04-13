@@ -3,7 +3,7 @@
 #include "Misc/PhysicsGlobals.h"
 #include "System/CameraManager.h"
 #include "System/Package.h"
-#include "System/PhysicsScene.h"
+#include "PhysicsInterface.h"
 #include "Actors/Actor.h"
 #include "System/World.h"
 #include "Logger/LoggerMacros.h"

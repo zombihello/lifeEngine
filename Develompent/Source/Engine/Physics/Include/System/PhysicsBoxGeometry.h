@@ -63,11 +63,6 @@ public:
 	virtual void Serialize( class FArchive& InArchive ) override;
 
 	/**
-	 * @brief Init PhysX shape
-	 */
-	virtual void InitPhysXShape() override;
-
-	/**
 	 * Overload operator << for serialize
 	 */
 	FORCEINLINE friend FArchive& operator<<( FArchive& InAr, FPhysicsBoxGeometry& InBoxGometry )
@@ -102,6 +97,12 @@ public:
 	FVector			center;		/**< Position of the box's origin */
 	FRotator		rotation;	/**< Rotation of the box */
 	FVector			extent;		/**< Extent of the box */
+
+protected:
+	/**
+	 * @brief Init physics shape
+	 */
+	virtual void InitPhysicsShape() const override;
 };
 
 #endif // !PHYSICSSBOXGEOMETRY_H
