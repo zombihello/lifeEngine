@@ -28,6 +28,7 @@
 	- Implemented commandlet for import materials from LMT (JSON) to package (LPAK)
 	- Implemented commandlet for cook content
 	- Implemented audio system
+	- Fixed working with scale (while multipy, add, substract, etc) in FTransform
 
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

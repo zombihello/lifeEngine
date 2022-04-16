@@ -8,6 +8,18 @@ IMPLEMENT_CLASS( AHEPlayerCharacter )
 
 AHEPlayerCharacter::AHEPlayerCharacter()
 {
+	// Create box component
+	LBoxComponent* boxComponent = CreateComponent< LBoxComponent >( TEXT( "BoxComponent0" ) );
+	boxComponent->SetSize( FVector( 32.f, 32.f, 1.f ) );
+	{
+		FPhysicsBodyInstance*	bodyInstance = &boxComponent->GetBodyInstance();
+		bodyInstance->SetLockFlags( BLF_LockMoveZ | BLF_LockRotateX | BLF_LockRotateY | BLF_LockRotateZ );
+		bodyInstance->SetMass( 10.f );
+		bodyInstance->SetEnableGravity( true );
+		bodyInstance->SetSimulatePhysics( true );
+	}
+	collisionComponent = boxComponent;
+
 	// Create camera component
 	cameraComponent = CreateComponent< LCameraComponent >( TEXT( "CameraComponent0" ) );
 	cameraComponent->SetProjectionMode( CPM_Orthographic );
@@ -19,12 +31,7 @@ AHEPlayerCharacter::AHEPlayerCharacter()
 	// Create sprite component
 	spriteComponent = CreateComponent< LSpriteComponent >( TEXT( "SpriteComponent0" ) );
 	spriteComponent->SetSpriteSize( FVector2D( 32.f, 32.f ) );
-	spriteComponent->SetType( ST_Static );
-
-	// Create box component
-	collisionComponent = CreateComponent< LBoxComponent >( TEXT( "BoxComponent0" ) );
-	collisionComponent->SetBodyLockFlags( BLF_LockMoveZ | BLF_LockRotateX | BLF_LockRotateY | BLF_LockRotateZ );
-	collisionComponent->SetBodyMass( 1000.f );
+	spriteComponent->SetType( ST_Static );	
 }
 
 AHEPlayerCharacter::~AHEPlayerCharacter()

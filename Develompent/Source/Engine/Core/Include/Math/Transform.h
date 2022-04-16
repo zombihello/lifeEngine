@@ -173,7 +173,7 @@ public:
 	{
 		translation += InOther.translation;
 		rotation += InOther.rotation;
-		scale += InOther.scale;
+		scale *= InOther.scale;
 	}
 
 	/**
@@ -185,7 +185,7 @@ public:
 	{
 		translation -= InOther.translation;
 		rotation -= InOther.rotation;
-		scale -= InOther.scale;
+		scale /= InOther.scale;
 	}
 
 	/**
@@ -373,7 +373,7 @@ public:
 	 */
 	FORCEINLINE FTransform operator+( const FTransform& InOther ) const
 	{
-		return FTransform( rotation + InOther.rotation, translation + InOther.translation, scale + InOther.scale );
+		return FTransform( rotation + InOther.rotation, translation + InOther.translation, scale * InOther.scale );
 	}
 
 	/**
@@ -381,7 +381,7 @@ public:
 	 */
 	FORCEINLINE FTransform operator-( const FTransform& InOther ) const
 	{
-		return FTransform( rotation - InOther.rotation, translation - InOther.translation, scale - InOther.scale );
+		return FTransform( rotation - InOther.rotation, translation - InOther.translation, scale / InOther.scale );
 	}
 
 protected:

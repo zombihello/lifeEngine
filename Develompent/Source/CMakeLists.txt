@@ -182,7 +182,7 @@ include( ${PROJECT_SOURCE_DIR}/${PROJECT_PHYSICS}/Physics.Build.cmake )			# Phys
 include( ${GAME_SOURCE_PATH}/Game.Build.cmake )									# Game
 
 if ( WITH_EDITOR )
-	include( ${PROJECT_SOURCE_DIR}/${PROJECT_WORLDED}/WorldEd.Build.cmake )		# Map editor (TrenchBroom)
+	include( ${PROJECT_SOURCE_DIR}/${PROJECT_WORLDED}/WorldEd.Build.cmake )		# Map editor
 endif()
 
 if ( PLATFORM_WINDOWS )

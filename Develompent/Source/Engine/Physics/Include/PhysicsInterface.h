@@ -33,6 +33,8 @@ typedef FPhysicsActorHandlePhysX				FPhysicsActorHandle;
 // Box 2D implementation
 #elif WITH_BOX2D
 #include "PhysicsInterfaceBox2D.h"
+#include "Misc/Box2DGlobals.h"
+#include "System/Box2DScene.h"
 
 typedef FPhysicsInterfaceBox2D					FPhysicsInterface;
 typedef FPhysicsMaterialHandleBox2D				FPhysicsMaterialHandle;

@@ -10,13 +10,13 @@ void FPhysicsBoxGeometry::InitPhysicsShape() const
 	}
 
 	check( material );
-	handle = FPhysicsInterface::CreateBoxGeometry( extent, material->GetMaterialHandle() );
+	handle = FPhysicsInterface::CreateShapeGeometry( *this );
 }
 
 void FPhysicsBoxGeometry::Serialize( class FArchive& InArchive )
 {
 	FPhysicsShapeGeometry::Serialize( InArchive );
-	InArchive << center;
+	InArchive << location;
 	InArchive << rotation;
 	InArchive << extent;
 }

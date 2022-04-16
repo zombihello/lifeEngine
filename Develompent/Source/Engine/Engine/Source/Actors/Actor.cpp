@@ -88,7 +88,7 @@ void AActor::Serialize( class FArchive& InArchive )
 
 void AActor::InitPhysics()
 {
-	if ( collisionComponent && collisionComponent->IsCollision() )
+	if ( collisionComponent )
 	{
 		collisionComponent->InitPrimitivePhysics();
 	}
@@ -104,7 +104,7 @@ void AActor::TermPhysics()
 
 void AActor::SyncPhysics()
 {
-	if ( collisionComponent && collisionComponent->IsCollision() )
+	if ( collisionComponent )
 	{
 		collisionComponent->SyncComponentToPhysics();
 	}

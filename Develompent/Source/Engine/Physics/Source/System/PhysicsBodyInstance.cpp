@@ -4,7 +4,11 @@
 #include "Components/PrimitiveComponent.h"
 
 FPhysicsBodyInstance::FPhysicsBodyInstance()
-	: bIsStatic( true )
+	: bStatic( true )
+	, bEnableGravity( false )
+	, bSimulatePhysics( false )
+	, bStartAwake( true )
+	, bDirty( false )
 	, lockFlags( BLF_None )
 	, mass( 1.f )
 {}
@@ -16,6 +20,8 @@ FPhysicsBodyInstance::~FPhysicsBodyInstance()
 
 void FPhysicsBodyInstance::InitBody( FPhysicsBodySetup* InBodySetup, const FTransform& InTransform, LPrimitiveComponent* InPrimComp )
 {
+	bDirty = false;
+
 	// If body is inited - terminate body for reinit
 	if ( FPhysicsInterface::IsValidActor( handle ) )
 	{
@@ -26,11 +32,14 @@ void FPhysicsBodyInstance::InitBody( FPhysicsBodySetup* InBodySetup, const FTran
 	ownerComponent	= InPrimComp;
 	bodySetup		= InBodySetup;
 
-	FActorCreationParams		params;
-	params.bStatic		= bIsStatic;
-	params.lockFlags	= lockFlags;
-	params.initialTM	= InTransform;
-	params.mass			= mass;
+	FActorCreationParams	params;
+	params.bStatic			= bStatic;
+	params.lockFlags		= lockFlags;
+	params.initialTM		= InTransform;
+	params.mass				= mass;
+	params.bSimulatePhysics = bSimulatePhysics;
+	params.bEnableGravity	= bEnableGravity;
+	params.bStartAwake		= bStartAwake;
 	handle = FPhysicsInterface::CreateActor( params );
 	check( FPhysicsInterface::IsValidActor( handle ) );
 
@@ -45,7 +54,7 @@ void FPhysicsBodyInstance::InitBody( FPhysicsBodySetup* InBodySetup, const FTran
 	}
 
 	// Update mass and inertia if rigid body is not static
-	if ( !bIsStatic )
+	if ( !bStatic )
 	{
 		FPhysicsInterface::UpdateMassAndInertia( handle, 10.f );
 	}
@@ -68,4 +77,5 @@ void FPhysicsBodyInstance::TermBody()
 	FPhysicsInterface::ReleaseActor( handle );
 	ownerComponent = nullptr;
 	bodySetup = nullptr;
+	bDirty = false;
 }

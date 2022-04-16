@@ -215,7 +215,7 @@ void LCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 			const std::vector< tmx::TileLayer::Tile >&		tmxTiles = tmxLayer->getTiles();
 
 			int32		x = 0;
-			int32		y = mapSize.y;
+			int32		y = mapSize.y-1;
 			for ( uint32 indexTile = 0, countTiles = tmxTiles.size(); indexTile < countTiles; ++indexTile )
 			{
 				const tmx::TileLayer::Tile&			tile = tmxTiles[ indexTile ];
@@ -281,7 +281,7 @@ void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					// Getting position
 					{
 						const tmx::Vector2f&		location = object.getPosition();
-						tmxObject.transform.SetLocation( FVector( objectAABB.left, tmxMaxXY.y - objectAABB.top, indexLayer ) );
+						tmxObject.transform.SetLocation( FVector( objectAABB.left, tmxMaxXY.y - objectAABB.top - objectAABB.height, indexLayer ) );
 					}
 
 					// Getting rotation
@@ -748,6 +748,7 @@ bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMater
 	float	staticFriction	= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "StaticFriction" ) ).GetNumber();
 	float	dynamicFriction	= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "DynamicFriction" ) ).GetNumber();
 	float	restitution		= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Restitution" ) ).GetNumber();
+	float	density			= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Density" ) ).GetNumber();
 
 	// Create physics material and saving to package
 	OutPhysMaterial = new FPhysicsMaterial();
@@ -755,6 +756,7 @@ bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMater
 	OutPhysMaterial->SetStaticFriction( staticFriction );
 	OutPhysMaterial->SetDynamicFriction( dynamicFriction );
 	OutPhysMaterial->SetRestitution( restitution );
+	OutPhysMaterial->SetDensity( density );
 
 	// Save to package
 	return SaveToPackage( InPhysMaterialInfo, OutPhysMaterial );

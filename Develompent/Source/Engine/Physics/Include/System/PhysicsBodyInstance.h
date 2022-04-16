@@ -51,7 +51,8 @@ public:
 	 */
 	FORCEINLINE void SetDynamic( bool InIsDynamic )
 	{
-		bIsStatic = !InIsDynamic;
+		bDirty = !bStatic != InIsDynamic ? true : bDirty;
+		bStatic = !InIsDynamic;
 	}
 
 	/**
@@ -74,12 +75,40 @@ public:
 	}
 
 	/**
+	 * @brief Set enable gravity
+	 * @param InEnableGravity Is need enable gravity for body
+	 */
+	FORCEINLINE void SetEnableGravity( bool InEnableGravity )
+	{
+		bEnableGravity = InEnableGravity;
+	}
+
+	/**
+	 * @brief Set simulate physics
+	 * @param InSimulatePhysics Is need simulate physics for body
+	 */
+	FORCEINLINE void SetSimulatePhysics( bool InSimulatePhysics )
+	{
+		bDirty = bSimulatePhysics != InSimulatePhysics ? true : bDirty;
+		bSimulatePhysics = InSimulatePhysics;
+	}
+
+	/**
+	 * @brief Set body awake on start
+	 * @param InStartAwake Is need awake body on start
+	 */
+	FORCEINLINE void SetStartAwake( bool InStartAwake )
+	{
+		bStartAwake = InStartAwake;
+	}
+
+	/**
 	 * @brief Is dynamic rigid body
 	 * @return Returns true if the body is not static
 	 */
  	FORCEINLINE bool IsDynamic() const
 	{
-		return !bIsStatic;
+		return !bStatic;
 	}
 
 	/**
@@ -89,6 +118,15 @@ public:
 	FORCEINLINE FTransform GetLEWorldTransform() const
 	{
 		return FPhysicsInterface::GetTransform( handle );
+	}
+
+	/**
+	 * @brief Get body setup
+	 * @return Return body setup
+	 */
+	FORCEINLINE FPhysicsBodySetupRef GetBodySetup() const
+	{
+		return bodySetup;
 	}
 
 	/**
@@ -127,8 +165,48 @@ public:
 		return handle;
 	}
 
+	/**
+	 * @brief Is enabled gravity
+	 * @return Return true if for body enabled gravity, else return false
+	 */
+	FORCEINLINE bool IsEnableGravity() const
+	{
+		return bEnableGravity;
+	}
+
+	/**
+	 * @brief Is simulate physics
+	 * @return Return true if for body enabled simulate physics, else return false
+	 */
+	FORCEINLINE bool IsSimulatePhysics() const
+	{
+		return bSimulatePhysics;
+	}
+
+	/**
+	 * @brief Is body awake on start
+	 * @return Return true if body awake on start, else return false
+	 */
+	FORCEINLINE bool IsStartAwake() const
+	{
+		return bStartAwake;
+	}
+
+	/**
+	 * @brief Is body need reinit
+	 * @return Return true if body is ditrty, else return false
+	 */
+	FORCEINLINE bool IsDirty() const
+	{
+		return bDirty;
+	}
+
 private:
-	bool											bIsStatic;			/**< Is static rigid body */
+	bool											bStatic;			/**< Is static rigid body */
+	bool											bEnableGravity;		/**< Enable gravity */
+	bool											bSimulatePhysics;	/**< Need simulate physics */
+	bool											bStartAwake;		/**< Start awake */
+	bool											bDirty;				/**< Is body is dirty and need reinit hem */
 	uint32											lockFlags;			/**< Lock flags */
 	float											mass;				/**< Mass of body */
 	TRefCountPtr< class LPrimitiveComponent >		ownerComponent;		/**< PrimitiveComponent containing this body */	

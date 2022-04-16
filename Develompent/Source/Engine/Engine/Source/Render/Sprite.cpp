@@ -20,7 +20,7 @@ void FSpriteMesh::InitRHI()
 		{ FVector4D( x1, y1, 0.f, 1.f ), FVector2D( 1.f, 0.f ),		FVector4D( x1, y1, 0.f, 0.f ) },		// 2
 		{ FVector4D( x1, y0, 0.f, 1.f ), FVector2D( 1.f, 1.f ),		FVector4D( x1, y0, 0.f, 0.f ) }			// 3
 	};
-	uint32					indeces[] = { 2, 3, 0, 2, 0, 1 };
+	uint32					indeces[] = { 0, 1, 2, 0, 2, 3 };
 
 	vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "SpriteMesh" ), sizeof( FSpriteVertexType ) * ARRAY_COUNT( verteces ), ( byte* ) &verteces[ 0 ], RUF_Static );
 	indexBufferRHI = GRHI->CreateIndexBuffer( TEXT( "SpriteMesh" ), sizeof( uint32 ), sizeof( uint32 ) * ARRAY_COUNT( indeces ), ( byte* ) &indeces[ 0 ], RUF_Static );

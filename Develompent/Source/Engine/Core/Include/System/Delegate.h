@@ -121,7 +121,7 @@ public:
 	 * Broadcast all delegates
 	 * @param[in] InParams Params for call delegate
 	 */
-	FORCEINLINE void Broadcast( TParamTypes... InParams )
+	FORCEINLINE void Broadcast( TParamTypes... InParams ) const
 	{
 		FScopeLock		scopeLock( criticalSection );
 		
@@ -157,7 +157,7 @@ private:
 
 	std::vector< FDelegateFunction >			delegateFunctions;		/**< Array of function delegates */
 	std::vector< FDelegateMethodInfo >			delegateMethods;		/**< Array of method delegates */
-	FCriticalSection							criticalSection;		/**< Critical section for thread safe broadcast */
+	mutable FCriticalSection					criticalSection;		/**< Critical section for thread safe broadcast */
 };
 
 /**

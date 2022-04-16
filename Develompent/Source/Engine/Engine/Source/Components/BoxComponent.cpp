@@ -5,7 +5,7 @@ IMPLEMENT_CLASS( LBoxComponent )
 LBoxComponent::LBoxComponent()
 	: size( 1.f, 1.f, 1.f )
 {
-	SetCollision( true );
+	bodyInstance.SetSimulatePhysics( true );
 }
 
 void LBoxComponent::UpdateBodySetup()

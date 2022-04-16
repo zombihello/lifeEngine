@@ -2,6 +2,7 @@
 	"PhysicsMaterial": {
 		"StaticFriction": 1,
 		"DynamicFriction": 1,
-		"Restitution": 1
+		"Restitution": 0.2,
+		"Density": 1
 	}
 }

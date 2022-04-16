@@ -104,7 +104,7 @@ FPhysicsActorHandlePhysX FPhysicsInterfacePhysX::CreateActor( const FActorCreati
 		pxRigidDynamic->setRigidDynamicLockFlags( LE2PLockFlags( InParams.lockFlags ) );
 		pxRigidDynamic->setMass( InParams.mass );
 		
-		if ( InParams.bEnableGravity )
+		if ( !InParams.bEnableGravity )
 		{
 			actorHandle.pxRigidActor->setActorFlag( physx::PxActorFlag::eDISABLE_GRAVITY, true );
 		}

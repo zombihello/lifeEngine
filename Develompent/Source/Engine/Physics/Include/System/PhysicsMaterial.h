@@ -12,8 +12,15 @@
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
 #include "System/Package.h"
+#include "System/Delegate.h"
 #include "PhysicsInterface.h"
 #include "Core.h"
+
+/**
+ * @ingroup Physics
+ * @brief Delegate for called event when physics materials is updated
+ */
+DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialUpdate, class FPhysicsMaterial* )
 
 /**
  * @ingroup Physics
@@ -52,7 +59,7 @@ public:
 	FORCEINLINE void SetStaticFriction( float InStaticFriction )
 	{
 		staticFriction = InStaticFriction;
-		FPhysicsInterface::UpdateMaterial( handle, this );
+		UpdateMaterial();
 	}
 
 	/**
@@ -62,7 +69,7 @@ public:
 	FORCEINLINE void SetDynamicFriction( float InDynamicFriction )
 	{
 		dynamicFriction = InDynamicFriction;
-		FPhysicsInterface::UpdateMaterial( handle, this );
+		UpdateMaterial();
 	}
 
 	/**
@@ -72,7 +79,17 @@ public:
 	FORCEINLINE void SetRestitution( float InRestitution )
 	{
 		restitution = InRestitution;
-		FPhysicsInterface::UpdateMaterial( handle, this );
+		UpdateMaterial();
+	}
+
+	/**
+	 * @brief Set density
+	 * @param InDensity Density
+	 */
+	FORCEINLINE void SetDensity( float InDensity )
+	{
+		density = InDensity;
+		
 	}
 
 	/**
@@ -103,6 +120,15 @@ public:
 	}
 
 	/**
+	 * @brief Get density
+	 * @return Get density
+	 */
+	FORCEINLINE float GetDensity() const
+	{
+		return density;
+	}
+
+	/**
 	 * @brief Get physics material handle
 	 * @return Return physics material handle
 	 */
@@ -111,11 +137,31 @@ public:
 		return handle;
 	}
 
+	/**
+	 * @brief Get delegate of physics material is update
+	 * @return Return delegate of physics material update
+	 */
+	FORCEINLINE FOnPhysicsMaterialUpdate& OnPhysicsMaterialUpdate() const
+	{
+		return onPhysicsMaterialUpdate;
+	}
+
 private:
-	float					staticFriction;		/**< The coefficient of static friction */
-	float					dynamicFriction;	/**< The coefficient of dynamic friction */
-	float					restitution;		/**< The coefficient of restitution */
-	FPhysicsMaterialHandle	handle;				/**< Physics material handle */
+	/**
+	 * @brief Update material
+	 */
+	FORCEINLINE void UpdateMaterial()
+	{
+		FPhysicsInterface::UpdateMaterial( handle, this );
+		onPhysicsMaterialUpdate.Broadcast( this );
+	}
+
+	float									staticFriction;					/**< The coefficient of static friction */
+	float									dynamicFriction;				/**< The coefficient of dynamic friction */
+	float									restitution;					/**< The coefficient of restitution */
+	float									density;						/**< Density */
+	FPhysicsMaterialHandle					handle;							/**< Physics material handle */
+	mutable FOnPhysicsMaterialUpdate		onPhysicsMaterialUpdate;		/**< Event called when physics material is updated */
 };
 
 //

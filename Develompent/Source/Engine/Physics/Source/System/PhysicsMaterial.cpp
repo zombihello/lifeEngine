@@ -7,6 +7,7 @@ FPhysicsMaterial::FPhysicsMaterial()
 	, staticFriction( 0.f )
 	, dynamicFriction( 0.f )
 	, restitution( 0.f )
+	, density( 0.f )
 {
 	handle = FPhysicsInterface::CreateMaterial( this );
 }
@@ -22,6 +23,7 @@ void FPhysicsMaterial::Serialize( class FArchive& InArchive )
 	InArchive << staticFriction;
 	InArchive << dynamicFriction;
 	InArchive << restitution;
+	InArchive << density;
 
 	if ( InArchive.IsLoading() )
 	{

@@ -15,15 +15,6 @@
 
 /**
  * @ingroup Physics
- * @brief Enumeration of type shape collision
- */
-enum ECollisionShape
-{
-	CS_Box			/**< Collision box */
-};
-
-/**
- * @ingroup Physics
  * @brief Base shape used for collision
  */
 struct FPhysicsShapeGeometry

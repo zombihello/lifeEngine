@@ -144,7 +144,7 @@ void FShaderManager::Init()
 {
 	std::wstring		pathShaderCache;
 #if WITH_EDITOR
-	if ( GIsCooker || GIsCommandlet )
+	if ( GIsEditor || GIsCooker || GIsCommandlet )
 	{
 		pathShaderCache = appGameDir() + PATH_SEPARATOR + TEXT( "Content" ) + PATH_SEPARATOR + GetShaderCacheFilename( GRHI->GetShaderPlatform() );
 	}

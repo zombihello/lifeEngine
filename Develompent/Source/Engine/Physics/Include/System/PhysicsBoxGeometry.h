@@ -25,7 +25,7 @@ public:
 	 */
 	FORCEINLINE FPhysicsBoxGeometry()
 		: FPhysicsShapeGeometry( CS_Box )
-		, center( FMath::vectorZero )
+		, location( FMath::vectorZero )
 		, rotation( FMath::rotatorZero )
 		, extent( FMath::vectorZero )
 	{}
@@ -36,7 +36,7 @@ public:
 	 */
 	FORCEINLINE FPhysicsBoxGeometry( float InSize )
 		: FPhysicsShapeGeometry( CS_Box )
-		, center( FMath::vectorZero )
+		, location( FMath::vectorZero )
 		, rotation( FMath::rotatorZero )
 		, extent( InSize, InSize, InSize )
 	{}
@@ -50,7 +50,7 @@ public:
 	 */
 	FORCEINLINE FPhysicsBoxGeometry( float InSizeX, float InSizeY, float InSizeZ )
 		: FPhysicsShapeGeometry( CS_Box )
-		, center( FMath::vectorZero )
+		, location( FMath::vectorZero )
 		, rotation( FMath::rotatorZero )
 		, extent( InSizeX, InSizeY, InSizeZ )
 	{}
@@ -89,12 +89,12 @@ public:
 		return
 			collisionShape == InBoxGometry.collisionShape &&
 			material == InBoxGometry.material &&
-			center == InBoxGometry.center &&
+			location == InBoxGometry.location &&
 			rotation == InBoxGometry.rotation &&
 			extent == InBoxGometry.extent;
 	}
 
-	FVector			center;		/**< Position of the box's origin */
+	FVector			location;	/**< Position of the box's origin */
 	FRotator		rotation;	/**< Rotation of the box */
 	FVector			extent;		/**< Extent of the box */
 

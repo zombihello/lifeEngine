@@ -188,19 +188,19 @@ public:
 	 * @brief Get delegate of audio device muted/unmute
 	 * @return Return delegate of audio device muted/unmute
 	 */
-	FORCEINLINE FOnAudioDeviceMuted& GetOnAudioDeviceMuted()
+	FORCEINLINE FOnAudioDeviceMuted& OnAudioDeviceMuted() const
 	{
 		return onAudioDeviceMuted;
 	}
 
 private:
-	bool					bIsMuted;				/**< Is muted device */
-	class ALCdevice*		alDevice;				/**< OpenAL device */
-	class ALCcontext*		alContext;				/**< OpenAL context */
-	FListenerSpatial		listener;				/**< Listener */
-	float					globalVolume;			/**< Global volume */
-	float					platformAudioHeadroom;	/**< Defines a platform-specific volume headroom (in dB) for audio to provide better platform consistency with respect to volume levels */
-	FOnAudioDeviceMuted		onAudioDeviceMuted;		/**< Delegate called when audio device muted/unmuted */
+	bool							bIsMuted;				/**< Is muted device */
+	class ALCdevice*				alDevice;				/**< OpenAL device */
+	class ALCcontext*				alContext;				/**< OpenAL context */
+	FListenerSpatial				listener;				/**< Listener */
+	float							globalVolume;			/**< Global volume */
+	float							platformAudioHeadroom;	/**< Defines a platform-specific volume headroom (in dB) for audio to provide better platform consistency with respect to volume levels */
+	mutable FOnAudioDeviceMuted		onAudioDeviceMuted;		/**< Delegate called when audio device muted/unmuted */
 };
 
 //

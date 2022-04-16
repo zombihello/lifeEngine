@@ -100,44 +100,7 @@ public:
 	 */
 	FORCEINLINE void SetBodySetup( FPhysicsBodySetup* InBodySetup )
 	{
-		bDirtyBodyInstance = InBodySetup != bodySetup ? true : bDirtyBodyInstance;
 		bodySetup = InBodySetup;
-	}
-
-	/**
-	 * @brief Enable collision
-	 * @param InIsCollision Is need enable collision
-	 */
-	FORCEINLINE void SetCollision( bool InIsCollision )
-	{
-		bDirtyBodyInstance = InIsCollision != bCollision ? true : bDirtyBodyInstance;
-		bCollision = InIsCollision;
-	}
-
-	/**
-	 * @brief Set body lock flags
-	 * @param InBodyLockFlags Body lock flags (see EBodyLockFlag)
-	 */
-	FORCEINLINE void SetBodyLockFlags( uint32 InBodyLockFlags )
-	{
-		bodyLockFlags = InBodyLockFlags;
-		if ( FPhysicsBodyInstance* bodyInstance = GetBodyInstance() )
-		{
-			bodyInstance->SetLockFlags( bodyLockFlags );
-		}
-	}
-
-	/**
-	 * @brief Set body mass
-	 * @param InBodyMass Body mass
-	 */
-	FORCEINLINE void SetBodyMass( float InBodyMass )
-	{
-		bodyMass = InBodyMass;
-		if ( FPhysicsBodyInstance* bodyInstance = GetBodyInstance() )
-		{
-			bodyInstance->SetMass( bodyMass );
-		}
 	}
 
 	/**
@@ -147,24 +110,6 @@ public:
 	FORCEINLINE bool IsVisibility() const
 	{
 		return bVisibility;
-	}
-
-	/**
-	 * @brief Is enabled collision
-	 * @return Return true if enabled collision, else return false
-	 */
-	FORCEINLINE bool IsCollision() const
-	{
-		return bCollision;
-	}
-
-	/**
-	 * @brief Get body lock flags
-	 * @return Return body lock flags
-	 */
-	FORCEINLINE uint32 GetBodyLockFlags() const
-	{
-		return bodyLockFlags;
 	}
 
 	/**
@@ -187,36 +132,29 @@ public:
 
 	/**
 	 * @brief Get body instance
-	 * @return Return pointer to body instance. If current primitive not is collision component in owner, return owner instance. If collision component is not valid return nullptr
+	 * @return Return body instance
 	 */
-	const FPhysicsBodyInstance* GetBodyInstance() const;
+	FORCEINLINE const FPhysicsBodyInstance& GetBodyInstance() const
+	{
+		return bodyInstance;
+	}
 
 	/**
 	 * @brief Get body instance
-	 * @return Return pointer to body instance. If current primitive not is collision component in owner, return owner instance. If collision component is not valid return nullptr
+	 * @return Return body instance
 	 */
-	FPhysicsBodyInstance* GetBodyInstance();
-
-	/**
-	 * @brief Get body mass
-	 * @return Return body mass
-	 */
-	FORCEINLINE float GetBodyMass() const
+	FORCEINLINE FPhysicsBodyInstance& GetBodyInstance()
 	{
-		return bodyMass;
+		return bodyInstance;
 	}
 
 protected:
 	FBox						boundbox;		/**< Bound box */
 	FPhysicsBodySetupRef		bodySetup;		/**< Physics body setup */
-	
-private:
-	bool						bVisibility;		/**< Is primitive visibility */
-	bool						bCollision;			/**< Is enabled collision in primitive */
-	bool						bDirtyBodyInstance;	/**< Is need reinit body instance */
-	uint32						bodyLockFlags;		/**< Body lock flags (see EBodyLockFlag) */
-	float						bodyMass;			/**< Body mass */
 	FPhysicsBodyInstance		bodyInstance;		/**< Physics body instance */
+
+private:
+	bool						bVisibility;		/**< Is primitive visibility */	
 };
 
 #endif // !PRIMITIVECOMPONENT_H

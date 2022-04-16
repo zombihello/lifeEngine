@@ -8,10 +8,6 @@ IMPLEMENT_CLASS( LPrimitiveComponent )
 
 LPrimitiveComponent::LPrimitiveComponent()
 	: bVisibility( true )
-	, bCollision( false )
-	, bDirtyBodyInstance( false )
-	, bodyLockFlags( BLF_None )
-	, bodyMass( 1.f )
 {}
 
 void LPrimitiveComponent::BeginPlay()
@@ -25,11 +21,10 @@ void LPrimitiveComponent::TickComponent( float InDeltaTime )
 	Super::TickComponent( InDeltaTime );
 
 	// If body instance is dirty - reinit physics component
-	if ( bDirtyBodyInstance )
+	if ( bodyInstance.IsDirty() || bodySetup != bodyInstance.GetBodySetup() )
 	{
 		TermPrimitivePhysics();
 		InitPrimitivePhysics();
-		bDirtyBodyInstance = false;
 	}
 }
 
@@ -37,8 +32,6 @@ void LPrimitiveComponent::Serialize( class FArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << bVisibility;
-	InArchive << bCollision;
-	InArchive << bodyLockFlags;
 }
 
 void LPrimitiveComponent::SetVisibility( bool InNewVisibility )
@@ -59,12 +52,10 @@ void LPrimitiveComponent::SetVisibility( bool InNewVisibility )
 
 void LPrimitiveComponent::InitPrimitivePhysics()
 {
-	if ( bodySetup && bCollision )
+	if ( bodySetup )
 	{
 		AActor*			actorOwner = GetOwner();
 		bodyInstance.SetDynamic( actorOwner ? !actorOwner->IsStatic() : false );
-		bodyInstance.SetLockFlags( bodyLockFlags );
-		bodyInstance.SetMass( bodyMass );
 		bodyInstance.InitBody( bodySetup, GetComponentTransform(), this );
 	}
 }
@@ -78,6 +69,12 @@ void LPrimitiveComponent::SyncComponentToPhysics()
 
 		FTransform		oldTransform = actorOwner->GetActorTransform();
 		FTransform		newTransform = bodyInstance.GetLEWorldTransform();
+
+#if ENGINE_2D
+		// For 2D game we copy to new transform Z coord (in 2D this is layer)
+		newTransform.AddToTranslation( FVector( 0.f, 0.f, oldTransform.GetLocation().z ) );
+#endif // ENGINE_2D
+
 		if ( !oldTransform.MatchesNoScale( newTransform ) )
 		{
 			actorOwner->SetActorLocation( newTransform.GetLocation() );
@@ -92,38 +89,4 @@ void LPrimitiveComponent::TermPrimitivePhysics()
 	{
 		bodyInstance.TermBody();
 	}
-}
-
-FPhysicsBodyInstance* LPrimitiveComponent::GetBodyInstance()
-{
-	AActor*					actorOwner = GetOwner();
-	if ( !actorOwner )
-	{
-		return nullptr;
-	}
-
-	LPrimitiveComponent*	collisionComponent = actorOwner->GetCollisionComponent();
-	if ( !collisionComponent )
-	{
-		return nullptr;
-	}
-
-	return collisionComponent == this ? &bodyInstance : collisionComponent->GetBodyInstance();
-}
-
-const FPhysicsBodyInstance* LPrimitiveComponent::GetBodyInstance() const
-{
-	AActor*					actorOwner = GetOwner();
-	if ( !actorOwner )
-	{
-		return nullptr;
-	}
-
-	LPrimitiveComponent*	collisionComponent = actorOwner->GetCollisionComponent();
-	if ( !collisionComponent )
-	{
-		return nullptr;
-	}
-
-	return collisionComponent == this ? &bodyInstance : collisionComponent->GetBodyInstance();
 }

@@ -18,7 +18,7 @@ FAudioSource::FAudioSource()
 	SetLocation( FMath::vectorZero );
 
 	// Subscribe to event of muted/unmuted audio device
-	GAudioDevice.GetOnAudioDeviceMuted().Add( this, &FAudioSource::OnAudioDeviceMuted );
+	GAudioDevice.OnAudioDeviceMuted().Add( this, &FAudioSource::OnAudioDeviceMuted );
 }
 
 FAudioSource::~FAudioSource()
@@ -26,7 +26,7 @@ FAudioSource::~FAudioSource()
 	alDeleteSources( 1, &alHandle );
 
 	// Unsubscribe from event of muted/unmuted audio device
-	GAudioDevice.GetOnAudioDeviceMuted().Remove( this, &FAudioSource::OnAudioDeviceMuted );
+	GAudioDevice.OnAudioDeviceMuted().Remove( this, &FAudioSource::OnAudioDeviceMuted );
 }
 
 void FAudioSource::Play()
