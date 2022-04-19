@@ -1,10 +1,12 @@
 #include "Misc/Class.h"
+#include "Misc/PhysicsGlobals.h"
 #include "Logger/LoggerMacros.h"
 #include "Containers/String.h"
 #include "System/Config.h"
 #include "System/World.h"
 #include "System/Package.h"
 #include "System/BaseFileSystem.h"
+#include "System/PhysicsEngine.h"
 #include "Misc/EngineGlobals.h"
 #include "System/BaseEngine.h"
 #include "System/InputSystem.h"
@@ -79,11 +81,18 @@ void LBaseEngine::Init()
 
 	GInputSystem->Init();
 	GUIEngine->Init();
+	GPhysicsEngine.Init();
 }
 
 void LBaseEngine::Shutdown()
 {
 	GUIEngine->Shutdown();
+	GPhysicsEngine.Shutdown();
+}
+
+void LBaseEngine::Tick( float InDeltaSeconds )
+{
+	GPhysicsEngine.Tick( InDeltaSeconds );
 }
 
 void LBaseEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )

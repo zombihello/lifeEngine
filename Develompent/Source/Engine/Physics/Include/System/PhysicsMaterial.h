@@ -11,6 +11,7 @@
 
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
+#include "Misc/PhysicsTypes.h"
 #include "System/Package.h"
 #include "System/Delegate.h"
 #include "PhysicsInterface.h"
@@ -89,7 +90,16 @@ public:
 	FORCEINLINE void SetDensity( float InDensity )
 	{
 		density = InDensity;
-		
+		UpdateMaterial();
+	}
+
+	/**
+	 * @brief Set surface type
+	 * @param InNewSurfaceType New surface type
+	 */
+	FORCEINLINE void SetSurfaceType( ESurfaceType InNewSurfaceType )
+	{
+		surfaceType = InNewSurfaceType;
 	}
 
 	/**
@@ -138,6 +148,15 @@ public:
 	}
 
 	/**
+	 * @brief Get surface type
+	 * @return Return surface type
+	 */
+	FORCEINLINE ESurfaceType GetSurfaceType() const
+	{
+		return surfaceType;
+	}
+
+	/**
 	 * @brief Get delegate of physics material is update
 	 * @return Return delegate of physics material update
 	 */
@@ -160,6 +179,7 @@ private:
 	float									dynamicFriction;				/**< The coefficient of dynamic friction */
 	float									restitution;					/**< The coefficient of restitution */
 	float									density;						/**< Density */
+	ESurfaceType							surfaceType;					/**< Surface type */
 	FPhysicsMaterialHandle					handle;							/**< Physics material handle */
 	mutable FOnPhysicsMaterialUpdate		onPhysicsMaterialUpdate;		/**< Event called when physics material is updated */
 };

@@ -28,15 +28,6 @@ enum EBodyLockFlag
 
 /**
  * @ingroup Physics
- * @brief Enumeration of type shape collision
- */
-enum ECollisionShape
-{
-	CS_Box			/**< Collision box */
-};
-
-/**
- * @ingroup Physics
  * @brief Parameters to create physics actor
  */
 struct FActorCreationParams

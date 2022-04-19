@@ -13,7 +13,9 @@
 
 #include "Math/Math.h"
 #include "Misc/EngineTypes.h"
+#include "Misc/PhysicsGlobals.h"
 #include "System/Archive.h"
+#include "PhysicsInterface.h"
 
 /**
  * @ingroup Engine
@@ -75,6 +77,21 @@ public:
 	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const FVector& InLocation, const FRotator& InRotation = FMath::rotatorZero )
 	{
 		return SpawnActor( TClass::StaticClass(), InLocation, InRotation );
+	}
+
+	/**
+	 * Trace a ray against the world using a specific channel and return the first blocking hit
+	 * 
+	 * @param OutHitResult Hit result
+	 * @param InStart Start ray
+	 * @param InEnd End ray
+	 * @param InTraceChannel Trace channel
+	 * @param InCollisionQueryParams Collision query params
+	 * @return Return TRUE if a blocking hit is found, else false
+	 */
+	FORCEINLINE bool LineTraceSingleByChannel( FHitResult& OutHitResult, const FVector& InStart, const FVector& InEnd, ECollisionChannel InTraceChannel, const FCollisionQueryParams& InCollisionQueryParams = FCollisionQueryParams::defaultQueryParam )
+	{
+		return GPhysicsScene.LineTraceSingleByChannel( OutHitResult, InStart, InEnd, InTraceChannel, InCollisionQueryParams );
 	}
 
 	/**

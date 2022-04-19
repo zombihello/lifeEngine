@@ -1,5 +1,6 @@
 #include "Misc/EngineGlobals.h"
 #include "Misc/AudioGlobals.h"
+#include "Misc/UIGlobals.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
 #include "RHI/BaseViewportRHI.h"
@@ -10,6 +11,7 @@
 #include "Render/Scene.h"
 #include "System/CameraManager.h"
 #include "System/AudioDevice.h"
+#include "UIEngine.h"
 
 FViewport::FViewport() :
 	windowHandle( nullptr ),
@@ -111,9 +113,15 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 		{
 			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 			FSceneRenderer				sceneRenderer( sceneView );
-			
 			GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
+			
+			// Scene render
 			sceneRenderer.Render( viewportRHI );
+			
+			// UI render
+			GUIEngine->BeginDraw();
+			GUIEngine->EndDraw();
+
 			GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
 			
 			// Trigger event of end rendering frame

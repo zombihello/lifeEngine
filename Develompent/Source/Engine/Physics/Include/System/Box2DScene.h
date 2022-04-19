@@ -13,6 +13,8 @@
 #include <box2d/box2d.h>
 #include <vector>
 
+#include "Math/Math.h"
+#include "Misc/PhysicsTypes.h"
 #include "CoreDefines.h"
 
 /**
@@ -53,10 +55,7 @@ public:
 	 * @brief Add body on scene
 	 * @param InBodyInstance Pointer to body instance
 	 */
-	FORCEINLINE void AddBody( class FPhysicsBodyInstance* InBodyInstance )
-	{
-		bodies.push_back( InBodyInstance );
-	}
+	void AddBody( class FPhysicsBodyInstance* InBodyInstance );
 
 	/**
 	 * @brief Remove body from scene
@@ -70,7 +69,23 @@ public:
 	FORCEINLINE void RemoveAllBodies()
 	{
 		bodies.clear();
+		for ( uint32 index = 0; index < CC_Max; ++index )
+		{
+			fixturesMap[ index ].clear();
+		}
 	}
+
+	/**
+	 * Trace a ray against the world using a specific channel and return the first blocking hit
+	 *
+	 * @param OutHitResult Hit result
+	 * @param InStart Start ray
+	 * @param InEnd End ray
+	 * @param InTraceChannel Trace channel
+	 * @param InCollisionQueryParams Collision query params
+	 * @return Return TRUE if a blocking hit is found, else false
+	 */
+	bool LineTraceSingleByChannel( FHitResult& OutHitResult, const FVector& InStart, const FVector& InEnd, ECollisionChannel InTraceChannel, const FCollisionQueryParams& InCollisionQueryParams = FCollisionQueryParams::defaultQueryParam );
 
 	/**
 	 * @brief Get Box2D world
@@ -82,8 +97,9 @@ public:
 	}
 
 private:
-	b2World*										bx2World;						/**< Box2D world */
-	std::vector< class FPhysicsBodyInstance* >		bodies;							/**< Array of bodies on scene */
+	b2World*																		bx2World;						/**< Box2D world */
+	std::vector< class FPhysicsBodyInstance* >										bodies;							/**< Array of bodies on scene */
+	std::unordered_map< class FPhysicsBodyInstance*, std::vector< b2Fixture* > >	fixturesMap[ CC_Max ];			/**< Map of fixtures each collision channel */
 };
 #endif // WITH_BOX2D
 

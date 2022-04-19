@@ -8,6 +8,7 @@ FPhysicsMaterial::FPhysicsMaterial()
 	, dynamicFriction( 0.f )
 	, restitution( 0.f )
 	, density( 0.f )
+	, surfaceType( ST_Default )
 {
 	handle = FPhysicsInterface::CreateMaterial( this );
 }
@@ -24,6 +25,7 @@ void FPhysicsMaterial::Serialize( class FArchive& InArchive )
 	InArchive << dynamicFriction;
 	InArchive << restitution;
 	InArchive << density;
+	InArchive << surfaceType;
 
 	if ( InArchive.IsLoading() )
 	{

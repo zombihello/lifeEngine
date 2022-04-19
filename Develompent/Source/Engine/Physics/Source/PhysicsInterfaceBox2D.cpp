@@ -4,22 +4,30 @@
 #include "System/PhysicsBoxGeometry.h"
 #include "PhysicsInterfaceBox2D.h"
 
+static uint32 GCollisionChannelBits[] =
+{
+	0x0001,			// CC_WorldStatic
+	0x0002,			// CC_Visibility
+	0x0004,			// CC_Character
+};
+static_assert( ARRAY_COUNT( GCollisionChannelBits ) == CC_Max, "Need full init GCollisionChannelBits array" );
+
 void FPhysicsActorHandleBox2D::OnMaterialUpdated( class FPhysicsMaterial* InPhysMaterial )
 {
 	for ( auto itFixture = fixtureMap.begin(), itFixtureEnd = fixtureMap.end(); itFixture != itFixtureEnd; ++itFixture )
 	{
-		b2Fixture*				bx2Fixture = itFixture->second;
-		FPhysicsMaterial*		physMaterial = ( FPhysicsMaterial* )bx2Fixture->GetUserData().pointer;
-		check( physMaterial );
+		b2Fixture*						bx2Fixture = itFixture->second;
+		FPhysicsShapeHandleBox2D*		shapeHandle = ( FPhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
+		check( shapeHandle );
 
-		if ( physMaterial != InPhysMaterial )
+		if ( shapeHandle->physMaterial != InPhysMaterial )
 		{
 			continue;
 		}
 
-		bx2Fixture->SetDensity( physMaterial->GetDensity() );
-		bx2Fixture->SetFriction( bx2Body->GetType() == b2_staticBody ? physMaterial->GetStaticFriction() : physMaterial->GetDynamicFriction() );
-		bx2Fixture->SetRestitution( physMaterial->GetRestitution() );
+		bx2Fixture->SetDensity( shapeHandle->physMaterial->GetDensity() );
+		bx2Fixture->SetFriction( bx2Body->GetType() == b2_staticBody ? shapeHandle->physMaterial->GetStaticFriction() : shapeHandle->physMaterial->GetDynamicFriction() );
+		bx2Fixture->SetRestitution( shapeHandle->physMaterial->GetRestitution() );
 	}
 }
 
@@ -54,8 +62,9 @@ FPhysicsShapeHandleBox2D FPhysicsInterfaceBox2D::CreateShapeGeometry( const stru
 	}
 	bx2BoxGeometry->Set( &boxVerteces[ 0 ], ARRAY_COUNT( boxVerteces ) );
 	
-	shapeHandle.bx2Shape		= bx2BoxGeometry;
-	shapeHandle.physMaterial	= InBoxGeometry.material;
+	shapeHandle.bx2Shape			= bx2BoxGeometry;
+	shapeHandle.physMaterial		= InBoxGeometry.material;
+	shapeHandle.collisionProfile	= InBoxGeometry.collisionProfile;
 	return shapeHandle;
 }
 
@@ -98,14 +107,25 @@ void FPhysicsInterfaceBox2D::AttachShape( FPhysicsActorHandleBox2D& InActorHandl
 	}
 
 	b2FixtureUserData			bx2FixtureUserData;
-	bx2FixtureUserData.pointer	= ( uintptr_t )InShapeHandle.physMaterial;
+	bx2FixtureUserData.pointer	= ( uintptr_t )( &InShapeHandle );
 
-	b2FixtureDef				bx2FixtureDef;
-	bx2FixtureDef.shape			= InShapeHandle.bx2Shape;
-	bx2FixtureDef.friction		= InActorHandle.bx2Body->GetType() == b2_staticBody ? InShapeHandle.physMaterial->GetStaticFriction() : InShapeHandle.physMaterial->GetDynamicFriction();
-	bx2FixtureDef.density		= InShapeHandle.physMaterial->GetDensity();
-	bx2FixtureDef.restitution	= InShapeHandle.physMaterial->GetRestitution();
-	bx2FixtureDef.userData		= bx2FixtureUserData;
+	b2FixtureDef						bx2FixtureDef;
+	bx2FixtureDef.shape					= InShapeHandle.bx2Shape;
+	bx2FixtureDef.friction				= InActorHandle.bx2Body->GetType() == b2_staticBody ? InShapeHandle.physMaterial->GetStaticFriction() : InShapeHandle.physMaterial->GetDynamicFriction();
+	bx2FixtureDef.density				= InShapeHandle.physMaterial->GetDensity();
+	bx2FixtureDef.restitution			= InShapeHandle.physMaterial->GetRestitution();
+	bx2FixtureDef.userData				= bx2FixtureUserData;
+	bx2FixtureDef.filter.categoryBits	= GCollisionChannelBits[ InShapeHandle.collisionProfile->objectType ];
+	bx2FixtureDef.filter.maskBits		= 0x0;
+	for ( uint32 indexCollisionChannel = 0; indexCollisionChannel < CC_Max; ++indexCollisionChannel )
+	{
+		if ( InShapeHandle.collisionProfile->responses[ indexCollisionChannel ] != CR_Block )
+		{
+			continue;
+		}
+
+		bx2FixtureDef.filter.maskBits |= GCollisionChannelBits[ indexCollisionChannel ];
+	}
 
 	b2Fixture*		bx2Fixture = InActorHandle.bx2Body->CreateFixture( &bx2FixtureDef );
 	InActorHandle.fixtureMap[ InShapeHandle.bx2Shape ]		= bx2Fixture;

@@ -5,6 +5,7 @@
 	- Implement console system
 	- Implement physics system
 	- Implement global and material shaders
+	- Add FName for optimization use memory
 
 ----------------------------------------------------------------
  Postponed for later 

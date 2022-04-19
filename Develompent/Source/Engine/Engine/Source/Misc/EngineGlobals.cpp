@@ -9,12 +9,16 @@
 // GLOBALS
 // -------------
 
-FScriptEngine*		GScriptEngine = new FScriptEngine();
-FShaderManager*		GShaderManager = new FShaderManager();
-std::wstring		GCookedDir = TEXT( "" );
-class LBaseEngine*	GEngine = nullptr;
-FInputSystem*		GInputSystem = new FInputSystem();
-FWorld*				GWorld = new FWorld();
-bool                GUseMaxTickRate = true;
-bool                GAllowRenderThread = true;
-FCameraManager*     GCameraManager = new FCameraManager();
+FScriptEngine*												GScriptEngine = new FScriptEngine();
+FShaderManager*												GShaderManager = new FShaderManager();
+std::wstring												GCookedDir = TEXT( "" );
+class LBaseEngine*											GEngine = nullptr;
+FInputSystem*												GInputSystem = new FInputSystem();
+FWorld*														GWorld = new FWorld();
+bool														GUseMaxTickRate = true;
+bool														GAllowRenderThread = true;
+FCameraManager*												GCameraManager = new FCameraManager();
+
+#if WITH_EDITOR
+std::vector< std::pair< std::wstring, ESurfaceType > >		GSurfaceTypeNames( 1, std::make_pair( TEXT( "Default" ), ST_Default ) );
+#endif // WITH_EDITOR

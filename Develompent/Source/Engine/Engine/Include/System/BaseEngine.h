@@ -40,7 +40,7 @@ public:
 	 * 
 	 * @param[in] InDeltaTime Delta time
 	 */
-	virtual void Tick( float InDeltaSeconds ) PURE_VIRTUAL( LBaseEngine::Tick, );
+	virtual void Tick( float InDeltaSeconds );
 
 	/**
 	 * Shutdown engine

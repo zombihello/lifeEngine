@@ -11,7 +11,10 @@ LBoxComponent::LBoxComponent()
 void LBoxComponent::UpdateBodySetup()
 {
 	bodySetup = new FPhysicsBodySetup();
-	bodySetup->AddBoxGeometry( FPhysicsBoxGeometry( size.x, size.y, size.z ) );
+
+	FPhysicsBoxGeometry		boxGeometry( size.x, size.y, size.z );
+	boxGeometry.collisionProfile = collisionProfile;
+	bodySetup->AddBoxGeometry( boxGeometry );
 }
 
 void LBoxComponent::Serialize( class FArchive& InArchive )

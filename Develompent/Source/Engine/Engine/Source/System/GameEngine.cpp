@@ -7,11 +7,9 @@
 #include "System/BaseWindow.h"
 #include "System/World.h"
 #include "System/BaseFileSystem.h"
-#include "System/PhysicsEngine.h"
 #include "Render/RenderingThread.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/CoreGlobals.h"
-#include "Misc/PhysicsGlobals.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
@@ -34,13 +32,14 @@ void LGameEngine::Init()
 	uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
 	uint32						windowHeight = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
 	
-	GWindow->Create( gameName.c_str(), windowWidth, windowHeight, SW_Default );
+	GWindow->SetTitle( gameName.c_str() );
+	GWindow->SetSize( windowWidth, windowHeight );
 	viewport.Update( false, windowWidth, windowHeight, GWindow->GetHandle() );
 }
 
 void LGameEngine::Tick( float InDeltaSeconds )
 {
-	GPhysicsEngine.Tick( InDeltaSeconds );
+	Super::Tick( InDeltaSeconds );
 	GWorld->Tick( InDeltaSeconds );
 	viewport.Draw();
 }

@@ -11,6 +11,7 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/TableOfContents.h"
+#include "Misc/EngineMisc.h"
 #include "System/BaseFileSystem.h"
 #include "System/Archive.h"
 #include "System/Config.h"
@@ -233,6 +234,7 @@ void LCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 					spriteComponent->SetMaterial( tileset.material );
 					spriteComponent->SetSpriteSize( FVector2D( mapTileSize.x, mapTileSize.y ) );
 					spriteComponent->SetTextureRect( textureRect );
+					sprite->SetName( TEXT( "ASprite_Tile" ) );
 					sprite->SetStatic( true );
 				}
 
@@ -745,10 +747,11 @@ bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMater
 	}
 
 	// Getting general data
-	float	staticFriction	= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "StaticFriction" ) ).GetNumber();
-	float	dynamicFriction	= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "DynamicFriction" ) ).GetNumber();
-	float	restitution		= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Restitution" ) ).GetNumber();
-	float	density			= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Density" ) ).GetNumber();
+	float			staticFriction	= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "StaticFriction" ) ).GetNumber();
+	float			dynamicFriction	= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "DynamicFriction" ) ).GetNumber();
+	float			restitution		= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Restitution" ) ).GetNumber();
+	float			density			= pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Density" ) ).GetNumber();
+	std::wstring	surfaceTypeName = pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Surface" ) ).GetString();
 
 	// Create physics material and saving to package
 	OutPhysMaterial = new FPhysicsMaterial();
@@ -757,6 +760,7 @@ bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMater
 	OutPhysMaterial->SetDynamicFriction( dynamicFriction );
 	OutPhysMaterial->SetRestitution( restitution );
 	OutPhysMaterial->SetDensity( density );
+	OutPhysMaterial->SetSurfaceType( appTextToESurfaceType( surfaceTypeName ) );
 
 	// Save to package
 	return SaveToPackage( InPhysMaterialInfo, OutPhysMaterial );
@@ -784,10 +788,27 @@ bool LCookPackagesCommandlet::SaveToPackage( const FResourceInfo& InResourceInfo
 	return true;
 }
 
+void LCookPackagesCommandlet::InsertResourceToList( FResourceMap& InOutResourceMap, const std::wstring& InPackageName, const std::wstring& InFilename, const FResourceInfo& InResourceInfo )
+{
+	auto		itPackage = InOutResourceMap.find( InPackageName );
+	if ( itPackage == InOutResourceMap.end() )
+	{
+		InOutResourceMap[ InPackageName ][ InFilename ] = InResourceInfo;
+		return;
+	}
+
+	auto		itAsset = itPackage->second.find( InFilename );
+	if ( itAsset == itPackage->second.end() )
+	{
+		InOutResourceMap[ InPackageName ][ InFilename ] = InResourceInfo;
+		return;
+	}
+}
+
 void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, bool InIsRootDir /* = false */, bool InIsAlwaysCookDir /* = false */, const std::wstring& InParentDirName /* = TEXT( "" ) */ )
 {
 	// Getting package name from dir name
-	std::wstring		packageName = GGameName;
+	std::wstring		packageName = InParentDirName;
 	if ( !InIsRootDir )
 	{
 		packageName = InRootDir;
@@ -797,12 +818,12 @@ void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 		{
 			packageName.erase( 0, pathSeparatorPos + 1 );
 		}
-	}
 
-	// Split package names in format: <ParentDirName>_<CurrentDirName>. Example: PlayerCharacters_Materials
-	if ( !InParentDirName.empty() )
-	{
-		packageName = InParentDirName + TEXT( "_" ) + packageName;
+		// Split package names in format: <ParentDirName>_<CurrentDirName>. Example: PlayerCharacters_Materials
+		if ( !InParentDirName.empty() )
+		{
+			packageName = InParentDirName + TEXT( "_" ) + packageName;
+		}
 	}
 
 	std::vector< std::wstring >		files = GFileSystem->FindFiles( InRootDir, true, true );
@@ -814,7 +835,7 @@ void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 
 		if ( dotPos == std::wstring::npos )
 		{
-			IndexingResources( fullPath, false, InIsAlwaysCookDir, !InIsRootDir ? packageName : TEXT( "" ) );
+			IndexingResources( fullPath, false, InIsAlwaysCookDir, packageName );
 			continue;
 		}
 
@@ -840,29 +861,30 @@ void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 		}
 
 		// If this resource is texture
+		FResourceInfo			resourceInfo = FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
 		if ( IsSupportedTextureExtension( extension ) )
 		{
-			texturesMap[ packageName ][ filename ]			= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+			InsertResourceToList( texturesMap, packageName, filename, resourceInfo );
 		}
 		// If this resource is material
 		else if ( IsSupportedMaterialExtension( extension ) )
 		{
-			materialsMap[ packageName ][ filename ]			= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+			InsertResourceToList( materialsMap, packageName, filename, resourceInfo );
 		}
 		// If this resource is audio
 		else if ( IsSupportedAudioExtension( extension ) )
 		{
-			audiosMap[ packageName ][ filename ]			= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+			InsertResourceToList( audiosMap, packageName, filename, resourceInfo );
 		}
 		// If this resource is physics material
 		else if ( IsSupportedPhysMaterialExtension( extension ) )
 		{
-			physMaterialsMap[ packageName ][ filename ]		= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+			InsertResourceToList( physMaterialsMap, packageName, filename, resourceInfo );
 		}
 		// If this resource is map
 		else if ( IsSupportedMapExtension( extension ) )
 		{
-			mapsMap[ filename ]								= FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+			mapsMap[ filename ]	= resourceInfo;
 		}
 	}
 }
@@ -915,10 +937,15 @@ bool LCookPackagesCommandlet::Main( const std::wstring& InCommand )
 		std::vector< FConfigValue >			configVarAlwaysCookDirs = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "AlwaysCookDirs" ) ).GetArray();
 		for ( uint32 index = 0, count = configVarAlwaysCookDirs.size(); index < count; ++index )
 		{
-			std::wstring		path = configVarAlwaysCookDirs[ index ].GetString();
+			const FConfigValue&		configAlwaysCookDirItem = configVarAlwaysCookDirs[ index ];
+			check( configAlwaysCookDirItem.GetType() == FConfigValue::T_Object );
+			FConfigObject			objectAlwaysCookDir = configAlwaysCookDirItem.GetObject();
+
+			std::wstring		packageSufix	= objectAlwaysCookDir.GetValue( TEXT( "PackageSufix" ) ).GetString();
+			std::wstring		path			= objectAlwaysCookDir.GetValue( TEXT( "Path" ) ).GetString();
 			if ( !path.empty() )
 			{
-				IndexingResources( appBaseDir() + PATH_SEPARATOR + path, true, true );
+				IndexingResources( appBaseDir() + PATH_SEPARATOR + path, true, true, packageSufix );
 			}
 		}
 
@@ -926,10 +953,15 @@ bool LCookPackagesCommandlet::Main( const std::wstring& InCommand )
 		std::vector< FConfigValue >			configVarCookDirs = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "CookDirs" ) ).GetArray();
 		for ( uint32 index = 0, count = configVarCookDirs.size(); index < count; ++index )
 		{
-			std::wstring		path = configVarCookDirs[ index ].GetString();
+			const FConfigValue&		configCookDirItem = configVarCookDirs[ index ];
+			check( configCookDirItem.GetType() == FConfigValue::T_Object );
+			FConfigObject			objectCookDir = configCookDirItem.GetObject();
+
+			std::wstring		packageSufix	= objectCookDir.GetValue( TEXT( "PackageSufix" ) ).GetString();
+			std::wstring		path			= objectCookDir.GetValue( TEXT( "Path" ) ).GetString();
 			if ( !path.empty() )
 			{
-				IndexingResources( appBaseDir() + PATH_SEPARATOR + path, true, false );
+				IndexingResources( appBaseDir() + PATH_SEPARATOR + path, true, false, packageSufix );
 			}
 		}
 	}

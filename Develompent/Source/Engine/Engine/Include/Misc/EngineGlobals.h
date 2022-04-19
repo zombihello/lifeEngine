@@ -10,6 +10,9 @@
 #define ENGINEGLOBALS_H
 
 #include <string>
+#include <vector>
+
+#include "Misc/PhysicsTypes.h"
 
  /**
   * @ingroup Engine
@@ -70,5 +73,13 @@ extern bool                     GAllowRenderThread;
  * @brief Camera manager
  */
 extern class FCameraManager*    GCameraManager;
+
+#if WITH_EDITOR
+/**
+ * @ingroup Engine
+ * @brief Table for convert from text to ESurfaceType
+ */
+extern std::vector< std::pair< std::wstring, ESurfaceType > >		GSurfaceTypeNames;
+#endif // WITH_EDITOR
 
 #endif // !ENGINEGLOBALS_H

@@ -7,7 +7,9 @@ IMPLEMENT_CLASS( LObject )
  * Serialize object
  */
 void LObject::Serialize( FArchive& InArchive )
-{}
+{
+	InArchive << name;
+}
 
 /**
  * Whether the object is of the specified class

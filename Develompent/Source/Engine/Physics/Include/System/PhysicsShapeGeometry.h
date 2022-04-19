@@ -50,7 +50,8 @@ struct FPhysicsShapeGeometry
 		return handle;
 	}
 
-	ECollisionShape					collisionShape;		/**< Collision shape */	
+	ECollisionShape					collisionShape;		/**< Collision shape */
+	FCollisionProfile*				collisionProfile;	/**< Collision profile */
 	FPhysicsMaterialRef				material;			/**< Physics material */
 
 protected:

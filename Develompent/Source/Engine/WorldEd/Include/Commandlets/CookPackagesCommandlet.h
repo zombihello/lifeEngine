@@ -300,7 +300,7 @@ private:
 	 * @param InIsAlwaysCookDir Is always cook dir
 	 * @param InParentDirName Parent directory name
 	 */
-	void IndexingResources( const std::wstring& InRootDir, bool InIsRootDir = false, bool InIsAlwaysCookDir = false, const std::wstring& InParentDirName = TEXT( "" ) );
+	void IndexingResources( const std::wstring& InRootDir, bool InIsRootDir = false, bool InIsAlwaysCookDir = false, const std::wstring& InPackageSufix = GGameName );
 
 	/**
 	 * Cook all resources
@@ -352,6 +352,16 @@ private:
 	 * @return Return true if seccussed cook, else returning false
 	 */
 	bool CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, FPhysicsMaterialRef& OutPhysMaterial );
+
+	/**
+	 * Insert resource to list
+	 * 
+	 * @param InOutResourceMap Resource map
+	 * @param InPackageName Package name
+	 * @param InFilename Filename
+	 * @param InResourceInfo Resource info
+	 */
+	void InsertResourceToList( FResourceMap& InOutResourceMap, const std::wstring& InPackageName, const std::wstring& InFilename, const FResourceInfo& InResourceInfo );
 
 	/**
 	 * Find resource

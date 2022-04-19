@@ -167,11 +167,14 @@ struct FPhysicsShapeHandleBox2D
 	 * @brief Constructor
 	 */
 	FPhysicsShapeHandleBox2D()
-		: bx2Shape( nullptr )
+		: physMaterial( nullptr )
+		, collisionProfile( nullptr )
+		, bx2Shape( nullptr )
 	{}
 
-	class FPhysicsMaterial*			physMaterial;	/**< Physical material */
-	b2Shape*						bx2Shape;		/**< Box2D shape */
+	class FPhysicsMaterial*			physMaterial;		/**< Physical material */
+	FCollisionProfile*				collisionProfile;	/**< Collision profile */
+	b2Shape*						bx2Shape;			/**< Box2D shape */
 };
 
 /**
@@ -242,7 +245,7 @@ struct FPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE bool IsValidShapeGeometry( const FPhysicsShapeHandleBox2D& InShapeHandle )
 	{
-		return InShapeHandle.bx2Shape;
+		return InShapeHandle.physMaterial && InShapeHandle.bx2Shape;
 	}
 
 	/**
@@ -319,6 +322,87 @@ struct FPhysicsInterfaceBox2D
 		}
 
 		return B2LETransform( InActorHandle.bx2Body->GetTransform() );
+	}
+
+	/**
+	 * @brief Set linear velocity
+	 * 
+	 * @param InActorHandle Handle of physics actor
+	 * @param InVelocity New linear velocity to apply to physics
+	 * @param InIsAddToCurrent If true, InVelocity is added to the existing velocity of the body
+	 */
+	static FORCEINLINE void SetLinearVelocity( const FPhysicsActorHandleBox2D& InActorHandle, const FVector& InVelocity, bool InIsAddToCurrent = false )
+	{
+		check( IsValidActor( InActorHandle ) );
+		b2Vec2			bx2NewVelocity = LE2BVector( ( FVector2D )InVelocity );
+		InActorHandle.bx2Body->SetLinearVelocity( !InIsAddToCurrent ? bx2NewVelocity : InActorHandle.bx2Body->GetLinearVelocity() + bx2NewVelocity );
+	}
+
+	/**
+	 * @brief Add angular impulse
+	 *
+	 * @param InActorHandle Handle of physics actor
+	 * @param InAngularImpulse Angular impulse
+	 * @param InIsWake Also wake up the body
+	 */
+	static FORCEINLINE void AddAngularImpulse( const FPhysicsActorHandleBox2D& InActorHandle, const FVector& InAngularImpulse, bool InIsWake )
+	{
+		check( IsValidActor( InActorHandle ) );
+		InActorHandle.bx2Body->ApplyAngularImpulse( InAngularImpulse.z / BOX2D_ANGLES, InIsWake );
+	}
+
+	/**
+	 * @brief Add impulse
+	 * 
+	 * @param InActorHandle Handle of physics actor
+	 * @param InImpulse Impulse
+	 * @param InIsWake Also wake up the body
+	 */
+	static FORCEINLINE void AddImpulse( const FPhysicsActorHandleBox2D& InActorHandle, const FVector& InImpulse, bool InIsWake )
+	{
+		check( IsValidActor( InActorHandle ) );
+		InActorHandle.bx2Body->ApplyLinearImpulse( LE2BVector( ( FVector2D )InImpulse ), b2Vec2( 0.f, 0.f ), InIsWake );
+	}
+
+	/**
+	 * @brief Add impulse at location
+	 *
+	 * @param InActorHandle Handle of physics actor
+	 * @param InImpulse Impulse
+	 * @param InLocation Location
+	 * @param InIsWake Also wake up the body
+	 */
+	static FORCEINLINE void AddImpulseAtLocation( const FPhysicsActorHandleBox2D& InActorHandle, const FVector& InImpulse, const FVector& InLocation, bool InIsWake )
+	{
+		check( IsValidActor( InActorHandle ) );
+		InActorHandle.bx2Body->ApplyLinearImpulse( LE2BVector( ( FVector2D )InImpulse ), LE2BVector( ( FVector2D )InLocation / BOX2D_SCALE ), InIsWake );
+	}
+
+	/**
+	 * @brief Add force
+	 *
+	 * @param InActorHandle Handle of physics actor
+	 * @param InForce Force
+	 * @param InIsWake Also wake up the body
+	 */
+	static FORCEINLINE void AddForce( const FPhysicsActorHandleBox2D& InActorHandle, const FVector& InForce, bool InIsWake )
+	{
+		check( IsValidActor( InActorHandle ) );
+		InActorHandle.bx2Body->ApplyForceToCenter( LE2BVector( ( FVector2D )InForce ), InIsWake );
+	}
+
+	/**
+	 * @brief Add force at location
+	 *
+	 * @param InActorHandle Handle of physics actor
+	 * @param InForce Force
+	 * @param InLocation Location
+	 * @param InIsWake Also wake up the body
+	 */
+	static FORCEINLINE void AddForceAtLocation( const FPhysicsActorHandleBox2D& InActorHandle, const FVector& InForce, const FVector& InLocation, bool InIsWake )
+	{
+		check( IsValidActor( InActorHandle ) );
+		InActorHandle.bx2Body->ApplyForce( LE2BVector( ( FVector2D )InForce ), LE2BVector( ( FVector2D )InLocation / BOX2D_SCALE ), InIsWake );
 	}
 
 	/**

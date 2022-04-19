@@ -1,8 +1,10 @@
 #include "Actors/HEPlayerCharacter.h"
+#include "System/World.h"
 #include "System/CameraManager.h"
 #include "System/Package.h"
 #include "Components/BoxComponent.h"
 #include "Misc/EngineGlobals.h"
+#include "Logger/LoggerMacros.h"
 
 IMPLEMENT_CLASS( AHEPlayerCharacter )
 
@@ -11,6 +13,7 @@ AHEPlayerCharacter::AHEPlayerCharacter()
 	// Create box component
 	LBoxComponent* boxComponent = CreateComponent< LBoxComponent >( TEXT( "BoxComponent0" ) );
 	boxComponent->SetSize( FVector( 32.f, 32.f, 1.f ) );
+	boxComponent->SetCollisionProfile( TEXT( "Character" ) );
 	{
 		FPhysicsBodyInstance*	bodyInstance = &boxComponent->GetBodyInstance();
 		bodyInstance->SetLockFlags( BLF_LockMoveZ | BLF_LockRotateX | BLF_LockRotateY | BLF_LockRotateZ );
@@ -49,4 +52,20 @@ void AHEPlayerCharacter::BeginPlay()
 
 	// Set player camera to active
 	GCameraManager->SetActiveCamera( cameraComponent );
+}
+
+void AHEPlayerCharacter::Tick( float InDeltaTime )
+{
+	Super::Tick( InDeltaTime );
+	
+	// For test
+	FVector		startRay = GetActorLocation();
+	FVector		endRay = GetActorLocation() + GetActorUpVector() * -10.f;
+	FCollisionQueryParams		queryParams;
+	queryParams.bReturnPhysicalMaterial = true;
+	FHitResult	hitResult;
+	bool		result = GWorld->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic, queryParams );
+	if ( result )
+	{
+	}
 }

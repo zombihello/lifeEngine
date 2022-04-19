@@ -2,7 +2,6 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/AudioGlobals.h"
-#include "Misc/PhysicsGlobals.h"
 #include "Misc/Misc.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
@@ -14,7 +13,6 @@
 #include "System/InputSystem.h"
 #include "System/Package.h"
 #include "System/AudioEngine.h"
-#include "System/PhysicsEngine.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Misc/Class.h"
@@ -119,6 +117,22 @@ void FEngineLoop::SerializeConfigs()
 		GEditorConfig.Serialize( *arConfig );
 		delete arConfig;
 	}
+
+	// Fill table for convert from text to ESurfaceType
+	{
+		std::vector< FConfigValue >		configSurfaceNames = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) ).GetArray();
+		for ( uint32 index = 0, count = configSurfaceNames.size(); index < count; ++index )
+		{
+			const FConfigValue&		configSurface = configSurfaceNames[ index ];
+			check( configSurface.GetType() == FConfigValue::T_Object );
+			FConfigObject			objectSurface = configSurface.GetObject();
+
+			std::wstring		name		= objectSurface.GetValue( TEXT( "Name" ) ).GetString();
+			int32				surfaceID	= objectSurface.GetValue( TEXT( "ID" ) ).GetInt();
+			check( surfaceID < ST_Max );
+			GSurfaceTypeNames.push_back( std::make_pair( name, ( ESurfaceType )surfaceID ) );
+		}
+	}
 #endif // WITH_EDITOR
 }
 
@@ -175,6 +189,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 		return -1;
 	}
 
+	GWindow->Create( ANSI_TO_TCHAR( ENGINE_NAME " " ENGINE_VERSION_STRING ), 1, 1, SW_Default );
 	GScriptEngine->Init();
 	GRHI->Init( GIsEditor );
 
@@ -223,9 +238,6 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 
 	appSetSplashText( STT_StartupProgress, TEXT( "Init audio" ) );
 	GAudioEngine.Init();
-
-	appSetSplashText( STT_StartupProgress, TEXT( "Init physics" ) );
-	GPhysicsEngine.Init();
 
 	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
 	GEngine->Init();
@@ -345,8 +357,6 @@ void FEngineLoop::Exit()
 	delete GEngine;
 	GEngine = nullptr;
 
-	//GUIEngine->Shutdown();
-	GPhysicsEngine.Shutdown();
 	GAudioEngine.Shutdown();
 	GShaderManager->Shutdown();
 	GRHI->Destroy();

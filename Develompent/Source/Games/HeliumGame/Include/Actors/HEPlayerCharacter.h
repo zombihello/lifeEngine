@@ -37,6 +37,13 @@ public:
 	 */
 	virtual void BeginPlay() override;
 
+	/**
+	 * Function called every frame on this Actor. Override this function to implement custom logic to be executed every frame.
+	 *
+	 * @param[in] InDeltaTime The time since the last tick.
+	 */
+	virtual void Tick( float InDeltaTime ) override;
+
 private:
 	TRefCountPtr< LCameraComponent >			cameraComponent;		/**< Camera component */
 	TRefCountPtr< LSpriteComponent >			spriteComponent;		/**< Sprite component */

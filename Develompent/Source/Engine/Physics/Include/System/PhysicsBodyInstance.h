@@ -44,6 +44,74 @@ public:
 	void TermBody();
 
 	/**
+	 * @brief Add angular impulse
+	 *
+	 * @param InAngularImpulse Angular impulse
+	 * @param InIsWake Also wake up the body
+	 */
+	FORCEINLINE void AddAngularImpulse( const FVector& InAngularImpulse, bool InIsWake )
+	{
+		FPhysicsInterface::AddAngularImpulse( handle, InAngularImpulse, InIsWake );
+	}
+
+	/**
+	 * @brief Add impulse
+	 *
+	 * @param InImpulse Impulse
+	 * @param InIsWake Also wake up the body
+	 */
+	FORCEINLINE void AddImpulse( const FVector& InImpulse, bool InIsWake )
+	{
+		FPhysicsInterface::AddImpulse( handle, InImpulse, InIsWake );
+	}
+
+	/**
+	 * @brief Add impulse at location
+	 *
+	 * @param InImpulse Impulse
+	 * @param InLocation Location
+	 * @param InIsWake Also wake up the body
+	 */
+	FORCEINLINE void AddImpulseAtLocation( const FVector& InImpulse, const FVector& InLocation, bool InIsWake )
+	{
+		FPhysicsInterface::AddImpulseAtLocation( handle, InImpulse, InLocation, InIsWake );
+	}
+
+	/**
+	 * @brief Add force
+	 *
+	 * @param InForce Force
+	 * @param InIsWake Also wake up the body
+	 */
+	FORCEINLINE void AddForce( const FVector& InForce, bool InIsWake )
+	{
+		FPhysicsInterface::AddForce( handle, InForce, InIsWake );
+	}
+
+	/**
+	 * @brief Add force at location
+	 *
+	 * @param InForce Force
+	 * @param InLocation Location
+	 * @param InIsWake Also wake up the body
+	 */
+	FORCEINLINE void AddForceAtLocation( const FVector& InForce, const FVector& InLocation, bool InIsWake )
+	{
+		FPhysicsInterface::AddForceAtLocation( handle, InForce, InLocation, InIsWake );
+	}
+
+	/**
+	 * @brief Set linear velocity
+	 *
+	 * @param InVelocity New linear velocity to apply to physics
+	 * @param InIsAddToCurrent If true, InVelocity is added to the existing velocity of the body
+	 */
+	FORCEINLINE void SetLinearVelocity( const FVector& InVelocity, bool InIsAddToCurrent = false )
+	{
+		FPhysicsInterface::SetLinearVelocity( handle, InVelocity, InIsAddToCurrent );
+	}
+
+	/**
 	 * @brief Set dynamic body
 	 * 
 	 * @param InIsDynamic Is dynamic body
@@ -163,6 +231,15 @@ public:
 	FORCEINLINE FPhysicsActorHandle GetActorHandle() const
 	{
 		return handle;
+	}
+
+	/**
+	 * @brief Get owner primitive component
+	 * @return Return pointer to owner primitive component, if not exist return NULL
+	 */
+	FORCEINLINE TRefCountPtr< class LPrimitiveComponent > GetOwnerComponent() const
+	{
+		return ownerComponent;
 	}
 
 	/**

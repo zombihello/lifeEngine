@@ -10,6 +10,8 @@
 #define SHAPECOMPONENT_H
 
 #include "Math/Transform.h"
+#include "Misc/PhysicsGlobals.h"
+#include "System/PhysicsEngine.h"
 #include "Components/PrimitiveComponent.h"
 
  /**
@@ -38,9 +40,41 @@ public:
 	virtual void BeginPlay() override;
 
 	/**
+	 * @brief Serialize component
+	 * @param[in] InArchive Archive for serialize
+	 */
+	virtual void Serialize( class FArchive& InArchive ) override;
+
+	/**
 	 * @brief Update the body setup parameters based on shape information
 	 */
 	virtual void UpdateBodySetup() PURE_VIRTUAL( LShapeComponent::UpdateBodySetup, );
+
+	/**
+	 * @brief Set collision profile
+	 * @param InName Name of collision profile
+	 */
+	FORCEINLINE void SetCollisionProfile( const std::wstring& InName )
+	{
+		FCollisionProfile*		newCollisionProfile;
+		newCollisionProfile = GPhysicsEngine.FindCollisionProfile( InName );
+		if ( newCollisionProfile )
+		{
+			collisionProfile = newCollisionProfile;
+		}
+	}
+
+	/**
+	 * @brief Get collision profile
+	 * @return Return collision profile
+	 */
+	FORCEINLINE FCollisionProfile* GetCollisionProfile() const
+	{
+		return collisionProfile;
+	}
+
+protected:
+	FCollisionProfile*			collisionProfile;		/**< Collision profile */
 };
 
 #endif // !SHAPECOMPONENT_H
