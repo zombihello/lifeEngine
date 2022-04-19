@@ -105,12 +105,10 @@ if ( PLATFORM_WINDOWS )
 endif()
 
 if ( WITH_EDITOR )
-	set( QT5_PATH ${EXTERNAL_DIR}/Qt-5.15.2/msvc2019_64 )
-	set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_PATH} )
+	set( WXWIDGETS_PATH ${EXTERNAL_DIR}/wxwidgets-3.1.5 )
 	set( STB_PATH ${EXTERNAL_DIR}/stb )
 	set( ASSIMP_PATH ${EXTERNAL_DIR}/assimp-5.0.1 )
 	set( TMXLITE_PATH ${EXTERNAL_DIR}/tmxlite/tmxlite )
-	set( QT_PLUGIN_DIR ${INSTALL_BINARIES_DIR}/Plugins )
 endif()
 
 #
@@ -140,7 +138,6 @@ if ( WITH_EDITOR )
 	add_definitions( -DWITH_EDITOR=1 )
 else()
 	add_definitions( -DWITH_EDITOR=0 )
-	set( QT_PLUGIN_DIR )
 endif()
 
 # Enable/Disable ImGUI
@@ -193,8 +190,7 @@ endif()
 add_definitions( -DGAMENAME="${GAME_NAME}" )
 
 add_executable( ${GAME_NAME} WIN32 ${ALL_SOURCE_FILES} )
-set_target_properties( ${GAME_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${INSTALL_BINARIES_DIR}
-											   VS_DEBUGGER_ENVIRONMENT 		 "QT_PLUGIN_PATH=${QT_PLUGIN_DIR}" )
+set_target_properties( ${GAME_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${INSTALL_BINARIES_DIR} )
 set_target_properties( ${GAME_NAME} PROPERTIES 
 									DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
 									RELEASE_POSTFIX ${CMAKE_RELEASE_POSTFIX}

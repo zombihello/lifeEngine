@@ -116,7 +116,6 @@ public:
 private:
 	std::vector< class FViewport* >			viewports;		/**< Array of viewports for render */
 	FWorldGridRef							worldGrid;		/**< World grid */
-	class WeMainWindow*						mainWindow;		/**< Main editor window */
 };
 
 #endif // !EDITORENGINE_H

@@ -11,6 +11,7 @@
 
 #include "System/ButtonCode.h"
 
+#if 0
 /**
  * @ingroup WorldEd
  * @brief Convert Qt virtual key to engine keycode
@@ -29,5 +30,6 @@ EButtonCode appQtKeyToButtonCode( Qt::Key InQtKey, uint32 InModifiers );
  * @return Return engine keycode
  */
 EButtonCode appQtMouseButtonToButtonCode( Qt::MouseButton InButton );
+#endif // 0
 
 #endif // !INPUTKEYCONV_H

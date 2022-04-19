@@ -1,9 +1,8 @@
-#include <qnamespace.h>
-
 #include "Core.h"
 #include "System/InputKeyConv.h"
 #include "System/ButtonCode.h"
 
+#if 0
 /**
  * @ingroup WorldEd
  * Qt key info
@@ -158,3 +157,4 @@ EButtonCode appQtMouseButtonToButtonCode( Qt::MouseButton InButton )
 	default:					return BC_None;
 	}
 }
+#endif // 0

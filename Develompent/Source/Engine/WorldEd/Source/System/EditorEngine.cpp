@@ -1,5 +1,3 @@
-#include "Windows/MainWindow.h"
-
 #include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
@@ -11,12 +9,10 @@
 #include "Render/Viewport.h"
 #include "System/EditorEngine.h"
 #include "Actors/PlayerStart.h"
-#include "Widgets/LogWidget.h"
 
 IMPLEMENT_CLASS( LEditorEngine )
 
-LEditorEngine::LEditorEngine() :
-	mainWindow( nullptr )
+LEditorEngine::LEditorEngine()
 {}
 
 LEditorEngine::~LEditorEngine()
@@ -29,10 +25,6 @@ void LEditorEngine::Init()
 	// Init world grid
 	worldGrid = new FWorldGrid();
 	worldGrid->Update( -10000.f, 10000.f, 256.f );
-
-	// Create main window of editor
-	mainWindow = new WeMainWindow();
-	mainWindow->showMaximized();
 }
 
 void LEditorEngine::Tick( float InDeltaSeconds )
@@ -51,27 +43,10 @@ void LEditorEngine::Shutdown()
 {
 	Super::Shutdown();
 	worldGrid.SafeRelease();
-
-	if ( mainWindow )
-	{
-		delete mainWindow;
-		mainWindow = nullptr;
-	}
 }
 
 void LEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage )
-{
-	if ( !mainWindow )
-	{
-		return;
-	}
-
-	WeLogWidget*		logWidget = mainWindow->GetLogWidget();
-	if ( logWidget )
-	{
-		logWidget->Print( InLogType, InMessage );
-	}
-}
+{}
 
 bool LEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {

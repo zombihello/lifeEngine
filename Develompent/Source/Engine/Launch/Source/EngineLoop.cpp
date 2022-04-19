@@ -294,7 +294,10 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 
 	// Start render thread and show window
 	StartRenderingThread();
-	GWindow->Show();
+	if ( !GIsEditor )
+	{
+		GWindow->Show();
+	}
 	return result;
 }
 
