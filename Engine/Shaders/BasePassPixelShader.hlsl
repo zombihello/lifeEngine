@@ -13,5 +13,11 @@ SamplerState	samplerLine		: register( s0 );
 
 float4 MainPS( VS_OUT In ) : SV_Target
 {
-    return diffuse.Sample( samplerLine, In.texCoord0 );
+	float4		outColor = diffuse.Sample( samplerLine, In.texCoord0 );
+	if ( outColor.a < 0.5f )
+	{
+		discard;
+	}
+	
+    return outColor;
 }

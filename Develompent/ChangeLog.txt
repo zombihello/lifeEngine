@@ -29,6 +29,7 @@
 	- Implemented commandlet for cook content
 	- Implemented audio system
 	- Fixed working with scale (while multipy, add, substract, etc) in FTransform
+	- Implemented character movement component
 
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

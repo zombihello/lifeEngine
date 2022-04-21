@@ -38,10 +38,14 @@ private:
 	void MoveRight( float InValue );
 
 	/**
-	 * @brief Move up
-	 * @param InValue Scale of axis
+	 * @brief Jump
 	 */
-	void MoveUp( float InValue );
+	void Jump();
+
+	/**
+	 * @brief Stop jump
+	 */
+	void StopJump();
 };
 
 #endif // !HEPLAYERCONTROLLER_H

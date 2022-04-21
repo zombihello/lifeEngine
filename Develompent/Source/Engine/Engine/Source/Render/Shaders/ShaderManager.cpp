@@ -16,7 +16,7 @@ void FShaderParameter::Bind( const FShaderParameterMap& InParameterMap, const tc
 	uint32 			unusedSamplerIndex = 0;
 	if ( !InParameterMap.FindParameterAllocation( InParameterName, bufferIndex, baseIndex, numBytes, unusedSamplerIndex ) && !InIsOptional )
 	{
-		appErrorf( TEXT( "Failure to bind non-optional shader parameter %s! The parameter is either not present in the shader, or the shader compiler optimized it out" ), InParameterName );
+		checkMsg( false, TEXT( "Failure to bind non-optional shader parameter %s! The parameter is either not present in the shader, or the shader compiler optimized it out" ), InParameterName );
 	}
 }
 

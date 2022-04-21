@@ -5,11 +5,12 @@ IMPLEMENT_CLASS( AHEPlayerController )
 void AHEPlayerController::SetupInputComponent()
 {
 	// Bind actions
-	inputComponent->BindAction( TEXT( "Exit" ), IE_Released, this, &AHEPlayerController::ExitFromGame );
+	inputComponent->BindAction( TEXT( "Exit" ), IE_Released,	this, &AHEPlayerController::ExitFromGame );
+	inputComponent->BindAction( TEXT( "Jump" ), IE_Pressed,		this, &AHEPlayerController::Jump );
+	inputComponent->BindAction( TEXT( "Jump" ), IE_Released,	this, &AHEPlayerController::StopJump );
 
 	// Bind axis
 	inputComponent->BindAxis( TEXT( "MoveRight" ), this, &AHEPlayerController::MoveRight );
-	inputComponent->BindAxis( TEXT( "MoveUp" ), this, &AHEPlayerController::MoveUp );
 }
 
 void AHEPlayerController::ExitFromGame()
@@ -19,10 +20,15 @@ void AHEPlayerController::ExitFromGame()
 
 void AHEPlayerController::MoveRight( float InValue )
 {
-	character->AddActorLocation( character->GetActorRightVector() * InValue );
+	character->Walk( character->GetActorRightVector(), InValue );
 }
 
-void AHEPlayerController::MoveUp( float InValue )
+void AHEPlayerController::Jump()
 {
-	character->AddActorLocation( character->GetActorUpVector() * InValue );
+	character->Jump();
+}
+
+void AHEPlayerController::StopJump()
+{
+	character->StopJump();
 }

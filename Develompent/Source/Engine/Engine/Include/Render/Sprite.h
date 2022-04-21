@@ -200,6 +200,26 @@ public:
 	}
 
 	/**
+	 * @brief Set flip by vertical
+	 * @param InFlipVertical Is need flip sprite by vertical
+	 */
+	FORCEINLINE void SetFlipVertical( bool InFlipVertical )
+	{
+		check( vertexFactory );
+		vertexFactory->SetFlipVertical( InFlipVertical );
+	}
+
+	/**
+	 * @brief Set flip by horizontal
+	 * @param InFlipHorizontal Is need flip sprite by horizontal
+	 */
+	FORCEINLINE void SetFlipHorizontal( bool InFlipHorizontal )
+	{
+		check( vertexFactory );
+		vertexFactory->SetFlipHorizontal( InFlipHorizontal );
+	}
+
+	/**
 	 * @brief Get sprite size
 	 * @return Return sprite size
 	 */
@@ -207,6 +227,26 @@ public:
 	{
 		check( vertexFactory );
 		return vertexFactory->GetSpriteSize();
+	}
+
+	/**
+	 * @brief Is fliped by vertical
+	 * @return Return TRUE if sprite fliped by vertical
+	 */
+	FORCEINLINE bool IsFlipedVertical() const
+	{
+		check( vertexFactory );
+		return vertexFactory->IsFlipedVertical();
+	}
+
+	/**
+	 * @brief Is fliped by horizontal
+	 * @return Return TRUE if sprite fliped by horizontal
+	 */
+	FORCEINLINE bool IsFlipedHorizontal() const
+	{
+		check( vertexFactory );
+		return vertexFactory->IsFlipedHorizontal();
 	}
 
 private:

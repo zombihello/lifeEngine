@@ -65,6 +65,15 @@ public:
 	}
 
 	/**
+	 * @brief Set physics material
+	 * @param InPhysMaterial Physics material
+	 */
+	FORCEINLINE void SetPhysMaterial( FPhysicsMaterial* InPhysMaterial )
+	{
+		physicsMaterial = InPhysMaterial ? InPhysMaterial : GPhysicsEngine.GetDefaultPhysMaterial();
+	}
+
+	/**
 	 * @brief Get collision profile
 	 * @return Return collision profile
 	 */
@@ -73,8 +82,18 @@ public:
 		return collisionProfile;
 	}
 
+	/**
+	 * @brief Get physics material
+	 * @return Return physics material
+	 */
+	FORCEINLINE FPhysicsMaterialRef GetPhysMaterial() const
+	{
+		return physicsMaterial;
+	}
+
 protected:
 	FCollisionProfile*			collisionProfile;		/**< Collision profile */
+	FPhysicsMaterialRef			physicsMaterial;		/**< Physics material */
 };
 
 #endif // !SHAPECOMPONENT_H

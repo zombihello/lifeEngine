@@ -99,6 +99,11 @@ void WxEditorFrame::Create()
 	const bool			success = wxFrame::Create( nullptr, -1, appGetWorldEdName(), framePos, frameSize );
 	check( success );
 	
+	// Set icon for window
+#if PLATFORM_WINDOWS
+	SetIcon( wxICON( IDI_ICON1 ) );
+#endif // PLATFORM_WINDOWS
+
 	if ( frameMaximized )
 	{
 		Maximize( true );

@@ -228,11 +228,11 @@ void LCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 					bool			result = FindTileset( InTilesets, tile.ID, tileset, textureRect );
 					checkMsg( result, TEXT( "Not founded tileset for tile with ID %i" ), tile.ID );
 
-					ASprite*			sprite				= GWorld->SpawnActor< ASprite >( FVector( x * mapTileSize.x / tileset.tileOffset.x, y * mapTileSize.y / tileset.tileOffset.y, indexLayer ) );					
+					ASprite*			sprite				= GWorld->SpawnActor< ASprite >( FVector( x * mapTileSize.x, y * mapTileSize.y, indexLayer ) );					
 					LSpriteComponent*	spriteComponent		= sprite->GetSpriteComponent();
 					spriteComponent->SetType( ST_Static );
 					spriteComponent->SetMaterial( tileset.material );
-					spriteComponent->SetSpriteSize( FVector2D( mapTileSize.x, mapTileSize.y ) );
+					spriteComponent->SetSpriteSize( FVector2D( tileset.tileSize.x, tileset.tileSize.y ) );
 					spriteComponent->SetTextureRect( textureRect );
 					sprite->SetName( TEXT( "ASprite_Tile" ) );
 					sprite->SetStatic( true );

@@ -3,7 +3,8 @@
 #include "System/AudioSource.h"
 
 FAudioSource::FAudioSource()
-	: alHandle( 0 )
+	: bMuted( false )
+	, alHandle( 0 )
 	, volume( 100.f )
 {
 	alGenSources( 1, &alHandle );
@@ -160,12 +161,14 @@ FVector FAudioSource::GetLocation() const
 
 void FAudioSource::OnAudioDeviceMuted( bool InIsAudioDeviceMuted )
 {
-	if ( InIsAudioDeviceMuted )
+	if ( InIsAudioDeviceMuted && GetStatus() == ASS_Playing )
 	{
 		Pause();
+		bMuted = true;
 	}
-	else
+	else if ( !InIsAudioDeviceMuted && bMuted )
 	{
 		Play();
+		bMuted = false;
 	}
 }

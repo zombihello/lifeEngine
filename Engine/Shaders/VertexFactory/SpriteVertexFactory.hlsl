@@ -15,6 +15,8 @@ struct FVertexFactoryInput
 #endif // USE_INSTANCING
 };
 
+bool		bFlipVertical;
+bool		bFlipHorizontal;
 float4		textureRect;
 float2		spriteSize;
 
@@ -29,7 +31,17 @@ float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 
 float2 VertexFactory_GetTexCoord( FVertexFactoryInput InInput, uint InTexCoordIndex )
 {
-	return textureRect.xy + ( InInput.texCoord0 * textureRect.zw );
+	float2	outTexCoord = textureRect.xy + ( InInput.texCoord0 * textureRect.zw );	
+	if ( bFlipVertical )
+	{
+		outTexCoord.y *= -1.f;
+	}
+	
+	if ( bFlipHorizontal )
+	{
+		outTexCoord.x *= -1.f;
+	}
+	return outTexCoord;
 }
 
 #endif // !VERTEXFACTORY_H

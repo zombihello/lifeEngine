@@ -169,6 +169,7 @@ private:
 	 */
 	void OnAudioDeviceMuted( bool InIsAudioDeviceMuted );
 
+	bool				bMuted;			/**< Is audio source muted */
 	uint32				alHandle;		/**< OpenAL of sound source */
 };
 

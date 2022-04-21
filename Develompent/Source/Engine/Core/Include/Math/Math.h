@@ -251,6 +251,39 @@ struct FMath
 	}
 
 	/**
+	 * @brie Length vector
+	 * 
+	 * @param InVector Vector
+	 * @return Return length vector
+	 */
+	static FORCEINLINE float LengthVector( const FVector2D& InVector )
+	{
+		return glm::length( InVector );
+	}
+
+	/**
+	 * @brie Length vector
+	 *
+	 * @param InVector Vector
+	 * @return Return length vector
+	 */
+	static FORCEINLINE float LengthVector( const FVector& InVector )
+	{
+		return glm::length( InVector );
+	}
+
+	/**
+	 * @brie Length vector
+	 *
+	 * @param InVector Vector
+	 * @return Return length vector
+	 */
+	static FORCEINLINE float LengthVector( const FVector4D& InVector )
+	{
+		return glm::length( InVector );
+	}
+
+	/**
 	 * @brief Pow
 	 * 
 	 * @param InA Value A

@@ -541,6 +541,14 @@ public:
 	FAssetRef FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType = AT_Unknown );
 
 	/**
+	 * Find default asset
+	 * 
+	 * @param InType Default asset for type
+	 * @return Return finded asset. If not found returning nullptr
+	 */
+	FAssetRef FindDefaultAsset( EAssetType InType );
+
+	/**
 	 * Load package
 	 * 
 	 * @param InPath Package path
@@ -804,6 +812,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetRef& InValue )
 		if ( assetReference.IsValid() )
 		{
 			InValue = GPackageManager->FindAsset( assetReference.guidPackage, assetReference.guidAsset, assetReference.type );
+		}
+		else
+		{
+			InValue = GPackageManager->FindDefaultAsset( assetReference.type );
 		}
 	}
 

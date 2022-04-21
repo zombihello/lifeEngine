@@ -1,5 +1,6 @@
 #include "System/Config.h"
 #include "Misc/CoreGlobals.h"
+#include "Misc/PhysicsGlobals.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
 #include "System/Archive.h"
@@ -11,14 +12,16 @@
 #include "Scripts/Script.h"
 #include "System/AudioBank.h"
 #include "System/PhysicsMaterial.h"
+#include "System/PhysicsEngine.h"
 
 FORCEINLINE FAssetRef GetDefaultAsset( EAssetType InType )
 {
 	switch ( InType )
 	{
-	case AT_Texture2D:		return GEngine->GetDefaultTexture();
-	case AT_Material:		return GEngine->GetDefaultMaterial();
-	default:				return nullptr;
+	case AT_Texture2D:			return GEngine->GetDefaultTexture();
+	case AT_Material:			return GEngine->GetDefaultMaterial();
+	case AT_PhysicsMaterial:	return GPhysicsEngine.GetDefaultPhysMaterial();
+	default:					return nullptr;
 	}
 }
 
@@ -591,6 +594,11 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, const std::wst
 	}
 
 	return asset;
+}
+
+FAssetRef FPackageManager::FindDefaultAsset( EAssetType InType )
+{
+	return GetDefaultAsset( InType );
 }
 
 FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath, bool InCreateIfNotExist /*= false */ )

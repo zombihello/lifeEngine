@@ -334,8 +334,20 @@ struct FPhysicsInterfaceBox2D
 	static FORCEINLINE void SetLinearVelocity( const FPhysicsActorHandleBox2D& InActorHandle, const FVector& InVelocity, bool InIsAddToCurrent = false )
 	{
 		check( IsValidActor( InActorHandle ) );
-		b2Vec2			bx2NewVelocity = LE2BVector( ( FVector2D )InVelocity );
+		b2Vec2			bx2NewVelocity = LE2BVector( ( FVector2D )InVelocity / BOX2D_SCALE );
 		InActorHandle.bx2Body->SetLinearVelocity( !InIsAddToCurrent ? bx2NewVelocity : InActorHandle.bx2Body->GetLinearVelocity() + bx2NewVelocity );
+	}
+
+	/**
+	 * @brief Get linear velocity
+	 * 
+	 * @param InActorHandle Handle of physics actor
+	 * @return Return actor linear velocity
+	 */
+	static FORCEINLINE FVector GetLinearVelocity( const FPhysicsActorHandleBox2D& InActorHandle )
+	{
+		check( IsValidActor( InActorHandle ) );
+		return FVector( B2LEVector( InActorHandle.bx2Body->GetLinearVelocity() ) * BOX2D_SCALE, 0.f );
 	}
 
 	/**

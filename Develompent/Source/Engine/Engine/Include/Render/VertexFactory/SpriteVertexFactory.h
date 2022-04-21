@@ -63,6 +63,8 @@ public:
 	virtual void Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory ) const override;
 
 private:
+	FShaderParameter		flipVerticalParameter;		/**< Flag is need flip by vertical parameter */
+	FShaderParameter		flipHorizontalParameter;	/**< Flag is need flip by horizontal parameter */
 	FShaderParameter		textureRectParameter;		/**< Texture rect parameter */
 	FShaderParameter		spriteSizeParameter;		/**< Sprite size parameter */
 };
@@ -147,6 +149,24 @@ public:
 	}
 
 	/**
+	 * @brief Set flip by vertical
+	 * @param InFlipVertical Is need flip sprite by vertical
+	 */
+	FORCEINLINE void SetFlipVertical( bool InFlipVertical )
+	{
+		bFlipVertical = InFlipVertical;
+	}
+
+	/**
+	 * @brief Set flip by horizontal
+	 * @param InFlipHorizontal Is need flip sprite by horizontal
+	 */
+	FORCEINLINE void SetFlipHorizontal( bool InFlipHorizontal )
+	{
+		bFlipHorizontal = InFlipHorizontal;
+	}
+
+	/**
 	 * @brief Get sprite size
 	 * @return Return sprite size
 	 */
@@ -155,7 +175,27 @@ public:
 		return spriteSize;
 	}
 
+	/**
+	 * @brief Is fliped by vertical
+	 * @return Return TRUE if sprite fliped by vertical
+	 */
+	FORCEINLINE bool IsFlipedVertical() const
+	{
+		return bFlipVertical;
+	}
+
+	/**
+	 * @brief Is fliped by horizontal
+	 * @return Return TRUE if sprite fliped by horizontal
+	 */
+	FORCEINLINE bool IsFlipedHorizontal() const
+	{
+		return bFlipHorizontal;
+	}
+
 private:
+	bool				bFlipVertical;		/**< Is need flip sprite by vertical */
+	bool				bFlipHorizontal;	/**< Is need flip sprite by horizontal */
 	FRectFloat			textureRect;		/**< Texture rect */
 	FVector2D			spriteSize;			/**< Sprite size */
 };

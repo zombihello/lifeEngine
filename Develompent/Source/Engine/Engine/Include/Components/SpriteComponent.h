@@ -127,12 +127,50 @@ public:
 	}
 
 	/**
+	 * @brief Set flip by vertical
+	 * @param InFlipVertical Is need flip sprite by vertical
+	 */
+	FORCEINLINE void SetFlipVertical( bool InFlipVertical )
+	{
+		sprite->SetFlipVertical( InFlipVertical );
+		bFlipVertical = InFlipVertical;
+	}
+
+	/**
+	 * @brief Set flip by horizontal
+	 * @param InFlipHorizontal Is need flip sprite by horizontal
+	 */
+	FORCEINLINE void SetFlipHorizontal( bool InFlipHorizontal )
+	{
+		sprite->SetFlipHorizontal( InFlipHorizontal );
+		bFlipHorizontal = InFlipHorizontal;
+	}
+
+	/**
 	 * @brief Get material
 	 * @return Return pointer to material. If not setted returning nullptr
 	 */
 	FORCEINLINE FMaterialRef GetMaterial() const
 	{
 		return sprite->GetMaterial();
+	}
+
+	/**
+	 * @brief Is fliped by vertical
+	 * @return Return TRUE if sprite fliped by vertical
+	 */
+	FORCEINLINE bool IsFlipedVertical() const
+	{
+		return bFlipVertical;
+	}
+
+	/**
+	 * @brief Is fliped by horizontal
+	 * @return Return TRUE if sprite fliped by horizontal
+	 */
+	FORCEINLINE bool IsFlipedHorizontal() const
+	{
+		return bFlipHorizontal;
 	}
 
 private:
@@ -165,6 +203,8 @@ private:
 	void RemoveDrawingPolicyLink();
 
 	bool						bIsDirtyDrawingPolicyLink;		/**< Is dirty drawing policy link. If flag equal true - need update drawing policy link */
+	bool						bFlipVertical;					/**< Is need flip sprite by vertical */
+	bool						bFlipHorizontal;				/**< Is need flip sprite by horizontal */
 	class FScene*				scene;							/**< The current scene where the primitive is located  */
     ESpriteType					type;							/**< Sprite type */
 	FSpriteRef					sprite;							/**< Sprite mesh */

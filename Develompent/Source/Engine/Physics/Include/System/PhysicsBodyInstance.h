@@ -198,6 +198,15 @@ public:
 	}
 
 	/**
+	 * @brief Get linear velocity
+	 * @return Return actor linear velocity
+	 */
+	FORCEINLINE FVector GetLinearVelocity()
+	{
+		return FPhysicsInterface::GetLinearVelocity( handle );
+	}
+
+	/**
 	 * @brief Is valid body instance
 	 * @return Return true if body instance is valid, else return false
 	 */

@@ -12,6 +12,7 @@
 #include "Actors/Character.h"
 #include "Components/CameraComponent.h"
 #include "Components/SpriteComponent.h"
+#include "Components/AudioComponent.h"
 
  /**
   * @ingroup HeliumGame
@@ -44,9 +45,25 @@ public:
 	 */
 	virtual void Tick( float InDeltaTime ) override;
 
+	/**
+	 * @brief Walk
+	 *
+	 * @param InWorldDirection Direction of move in world space
+	 * @param InScale Scale of move
+	 */
+	virtual void Walk( const FVector& InWorldDirection, float InScale ) override;
+
+	/**
+	 * @brief Landed
+	 */
+	virtual void Landed();
+
 private:
-	TRefCountPtr< LCameraComponent >			cameraComponent;		/**< Camera component */
-	TRefCountPtr< LSpriteComponent >			spriteComponent;		/**< Sprite component */
+	FAudioBankRef								walkAudioBanks[ ST_Max ];		/**< Audio banks of walking on each surface type */
+	FAudioBankRef								jumpAudioBanks[ ST_Max ];		/**< Audio banks of jump on each surface type */
+	TRefCountPtr< LCameraComponent >			cameraComponent;				/**< Camera component */
+	TRefCountPtr< LSpriteComponent >			spriteComponent;				/**< Sprite component */
+	TRefCountPtr< LAudioComponent >				audioComponent;					/**< Audio component */
 };
 
 #endif // !HEPLAYERCHARACTER_H

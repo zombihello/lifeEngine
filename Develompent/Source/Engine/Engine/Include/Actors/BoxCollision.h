@@ -38,6 +38,15 @@ public:
 	virtual bool InitProperties( const std::vector< FActorVar >& InActorVars, class LCookPackagesCommandlet* InCooker ) override;
 #endif // WITH_EDITOR
 
+	/**
+	 * Get box component
+	 * @return Return box component
+	 */
+	FORCEINLINE TRefCountPtr< LBoxComponent > GetBoxComponent() const
+	{
+		return boxComponent;
+	}
+
 private:
 	TRefCountPtr< LBoxComponent >			boxComponent;		/**< Box component */
 };

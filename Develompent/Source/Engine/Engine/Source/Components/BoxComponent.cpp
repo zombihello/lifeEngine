@@ -12,8 +12,9 @@ void LBoxComponent::UpdateBodySetup()
 {
 	bodySetup = new FPhysicsBodySetup();
 
-	FPhysicsBoxGeometry		boxGeometry( size.x, size.y, size.z );
-	boxGeometry.collisionProfile = collisionProfile;
+	FPhysicsBoxGeometry				boxGeometry( size.x, size.y, size.z );
+	boxGeometry.collisionProfile	= collisionProfile;
+	boxGeometry.material			= physicsMaterial;
 	bodySetup->AddBoxGeometry( boxGeometry );
 }
 

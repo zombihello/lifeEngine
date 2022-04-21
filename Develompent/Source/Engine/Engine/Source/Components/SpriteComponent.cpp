@@ -11,6 +11,8 @@ IMPLEMENT_CLASS( LSpriteComponent )
 
 LSpriteComponent::LSpriteComponent()
     : bIsDirtyDrawingPolicyLink( false )
+	, bFlipVertical( false )
+	, bFlipHorizontal( false )
     , scene( nullptr )
     , type( ST_Rotating )
 	, sprite( new FSprite() )
@@ -31,12 +33,16 @@ void LSpriteComponent::Serialize( class FArchive& InArchive )
     InArchive << textureRect;
     InArchive << spriteSize;
     InArchive << material;
+	InArchive << bFlipVertical;
+	InArchive << bFlipHorizontal;
 
     if ( InArchive.IsLoading() )
     {
         SetTextureRect( textureRect );
         SetSpriteSize( spriteSize );
         SetMaterial( material );
+		SetFlipVertical( bFlipVertical );
+		SetFlipHorizontal( bFlipHorizontal );
     }
 }
 

@@ -137,11 +137,24 @@ void FAudioBank::Serialize( class FArchive& InArchive )
 	{	
 		offsetToRawData		= InArchive.Tell();
 		pathToArchive		= InArchive.GetPath();
-		InArchive.Seek( offsetToRawData + rawDataSize );
+
+		// If we in commandlet or cooker - serialize all raw data to memory, else skeep this section
+#if WITH_EDITOR
+		if ( GIsCommandlet || GIsCooker )
+		{
+			rawData.resize( rawDataSize );
+			InArchive.Serialize( rawData.data(), rawDataSize );
+		}
+		else
+#endif // WITH_EDITOR
+		{
+			InArchive.Seek( offsetToRawData + rawDataSize );
+		}
 	}
 #if WITH_EDITOR
 	else if ( rawDataSize > 0 )
 	{
+		check( rawData.size() == rawDataSize );
 		InArchive.Serialize( rawData.data(), rawDataSize );
 	}
 #endif // WITH_EDITOR

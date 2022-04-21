@@ -20,6 +20,8 @@ FSpriteVertexShaderParameters::FSpriteVertexShaderParameters()
 void FSpriteVertexShaderParameters::Bind( const class FShaderParameterMap& InParameterMap )
 {
 	FGeneralVertexShaderParameters::Bind( InParameterMap );
+	flipVerticalParameter.Bind( InParameterMap, TEXT( "bFlipVertical" ) );
+	flipHorizontalParameter.Bind( InParameterMap, TEXT( "bFlipHorizontal" ) );
 	textureRectParameter.Bind( InParameterMap, TEXT( "textureRect" ) );
 	spriteSizeParameter.Bind( InParameterMap, TEXT( "spriteSize" ) );
 }
@@ -30,18 +32,24 @@ void FSpriteVertexShaderParameters::Set( class FBaseDeviceContextRHI* InDeviceCo
 	FSpriteVertexFactory*		vertexFactory = ( FSpriteVertexFactory* )InVertexFactory;
 	check( InVertexFactory );
 
+	SetVertexShaderValue( InDeviceContextRHI, flipVerticalParameter, vertexFactory->IsFlipedVertical() );
+	SetVertexShaderValue( InDeviceContextRHI, flipHorizontalParameter, vertexFactory->IsFlipedHorizontal() );
 	SetVertexShaderValue( InDeviceContextRHI, textureRectParameter, vertexFactory->GetTextureRect() );
 	SetVertexShaderValue( InDeviceContextRHI, spriteSizeParameter, vertexFactory->GetSpriteSize() );
 }
 
 FSpriteVertexFactory::FSpriteVertexFactory()
-	: textureRect( 0.f, 0.f, 1.f, 1.f )
+	: bFlipVertical( false )
+	, bFlipHorizontal( false )
+	, textureRect( 0.f, 0.f, 1.f, 1.f )
 	, spriteSize( 1.f, 1.f )
 {}
 
 uint64 FSpriteVertexFactory::GetTypeHash() const
 {
-	uint64		hash = appMemFastHash( textureRect, staticType.GetHash() );
+	uint64		hash = appMemFastHash( bFlipVertical, staticType.GetHash() );
+	hash = appMemFastHash( bFlipHorizontal, hash );
+	hash = appMemFastHash( textureRect, hash );
 	return appMemFastHash( spriteSize, hash );
 }
 

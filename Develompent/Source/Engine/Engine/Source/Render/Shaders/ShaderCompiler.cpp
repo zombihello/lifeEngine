@@ -87,6 +87,12 @@ bool FShaderCompiler::CompileShader( class FShaderMetaType* InShaderMetaType, ES
 		shaderCacheItem.numInstructions = output.numInstructions;
 		shaderCacheItem.parameterMap = output.parameterMap;
 
+		// Validate compiled shader
+		FShader*		shader = InShaderMetaType->CreateCompiledInstance();
+		shader->Init( shaderCacheItem );
+		delete shader;
+
+		// Add shader to cache
 		InOutShaderCache.Add( shaderCacheItem );
 		LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s compiled" ), InShaderMetaType->GetName().c_str(), InVertexFactoryType->GetName().c_str() );
 	}

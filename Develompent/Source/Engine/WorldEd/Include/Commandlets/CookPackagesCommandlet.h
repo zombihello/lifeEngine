@@ -90,6 +90,36 @@ public:
 	}
 
 	/**
+	 * Cook physics material
+	 *
+	 * @param InAssetRef Reference to asset in format <PackageName>:<AssetName>
+	 * @param OutPhysMaterial Output cooked physics material
+	 * @return Return true if seccussed cook, else returning false
+	 */
+	FORCEINLINE bool CookPhysMaterial( const std::wstring& InAssetRef, FPhysicsMaterialRef& OutPhysMaterial )
+	{
+		std::wstring		packageName;
+		std::wstring		assetName;
+		FResourceInfo		resourceInfo;
+
+		ParseReferenceToAsset( InAssetRef, packageName, assetName );
+		if ( !FindResource( physMaterialsMap, packageName, assetName, resourceInfo ) )
+		{
+			appErrorf( TEXT( "Physics material '%s' not founded" ), InAssetRef.c_str() );
+			return false;
+		}
+
+		bool	result = CookPhysMaterial( resourceInfo, OutPhysMaterial );
+		if ( !result )
+		{
+			appErrorf( TEXT( "Failed cooking physics material '%s'" ), InAssetRef.c_str() );
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get supported map extensions
 	 * @retun Return array of supported extensions (e.g "png", "jpg", etc)
 	 */
@@ -146,7 +176,14 @@ public:
 		static std::vector< std::wstring >		supportedExtensions =
 		{
 			TEXT( "png" ),
-			TEXT( "jpg" )
+			TEXT( "jpg" ),
+			TEXT( "tga" ),
+			TEXT( "bmp" ),
+			TEXT( "psd" ),
+			TEXT( "gif" ),
+			TEXT( "hdr" ),
+			TEXT( "pic" ),
+			TEXT( "pnm" )
 		};
 		return supportedExtensions;
 	}
