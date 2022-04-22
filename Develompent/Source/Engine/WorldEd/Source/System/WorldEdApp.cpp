@@ -5,6 +5,7 @@
 #include "Logger/LoggerMacros.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "RHI/BaseRHI.h"
 #include "System/WorldEdApp.h"
 
@@ -14,6 +15,7 @@ WxWorldEdApp::WxWorldEdApp()
 
 bool WxWorldEdApp::OnInit()
 {
+	GApp = this;
 	WxLaunchApp::OnInit();
 
 	// Get the editor
@@ -21,6 +23,7 @@ bool WxWorldEdApp::OnInit()
 	check( editorFrame );
 
 	editorFrame->Show();
+	editorFrame->SetUp();
 	return true;
 }
 

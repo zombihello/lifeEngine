@@ -28,6 +28,15 @@ public:
 	 */
 	virtual bool OnInit();
 
+	/**
+	 * @brief Get editor frame
+	 * @return Return pointer to editor frame
+	 */
+	FORCEINLINE class WxEditorFrame* GetEditorFrame() const
+	{
+		return editorFrame;
+	}
+
 private:
 	/**
 	 * Uses file configuration to determine which class to use to create
