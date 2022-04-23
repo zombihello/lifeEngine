@@ -1,41 +1,12 @@
 #include "Render/Scene.h"
 
-FSceneView::FSceneView() :
-	viewMatrix( FMath::matrixIdentity ),
-	projectionMatrix( FMath::matrixIdentity ),
-	viewProjectionMatrix( FMath::matrixIdentity )
+FSceneView::FSceneView( const FMatrix& InProjectionMatrix, const FMatrix& InViewMatrix, const FColor& InBackgroundColor, EShowFlags InShowFlags )
+	: viewMatrix( InViewMatrix )
+	, projectionMatrix( InProjectionMatrix )
+	, viewProjectionMatrix( InProjectionMatrix * InViewMatrix )
+	, backgroundColor( InBackgroundColor )
+	, showFlags( InShowFlags )
 {
-	appMemzero( &cameraView, sizeof( FCameraView ) );
-}
-
-void FSceneView::SetCameraView( const FCameraView& InCameraView )
-{
-    // Update projection and view matrix
-    if ( InCameraView.projectionMode == CPM_Perspective )
-    {
-        projectionMatrix = glm::perspective( FMath::DegreesToRadians( InCameraView.fov ), InCameraView.aspectRatio, InCameraView.nearClipPlane, InCameraView.farClipPlane );
-	}
-	else
-	{
-		float		halfWidth = InCameraView.orthoWidth / 2.f;
-		float		halfHeight = InCameraView.orthoHeight / 2.f;
-        projectionMatrix = glm::ortho( -halfWidth, halfWidth, -halfHeight, halfHeight, InCameraView.nearClipPlane, InCameraView.farClipPlane );
-	}
-
-    // Update view matrix
-    {
-        FVector		targetDirection		= InCameraView.rotation.RotateVector( FMath::vectorForward );
-        FVector		axisUp				= InCameraView.rotation.RotateVector( FMath::vectorUp );
-        viewMatrix = glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
-    }
-
-	// Update view*projection matrix
-    viewProjectionMatrix = projectionMatrix * viewMatrix;
-
-	// Copy view info
-	cameraView = InCameraView;
-
-	// Update frustum
 	frustum.Update( viewProjectionMatrix );
 }
 

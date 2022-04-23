@@ -37,11 +37,11 @@ WxMainMenu::WxMainMenu()
 
 	// File menu
 	{
-		fileMenu->Append( RID_New, TEXT( "New level" ), nullptr, TEXT( "Create new level" ) );
+		fileMenu->Append( RID_New, TEXT( "New Level" ), nullptr, TEXT( "Create new level" ) );
 		fileMenu->Append( RID_Open, TEXT( "Open" ), nullptr, TEXT( "Open level" ) );
 		fileMenu->AppendSeparator();
 		fileMenu->Append( RID_Save, TEXT( "Save" ), nullptr, TEXT( "Save level" ) );
-		fileMenu->Append( RID_SaveAs, TEXT( "Save as" ), nullptr, TEXT( "Save as level" ) );
+		fileMenu->Append( RID_SaveAs, TEXT( "Save As" ), nullptr, TEXT( "Save as level" ) );
 		fileMenu->AppendSeparator();
 		fileMenu->Append( RID_Exit, TEXT( "Exit" ), nullptr, TEXT( "Exit from editor" ) );
 
@@ -56,13 +56,13 @@ WxMainMenu::WxMainMenu()
 			for ( uint32 index = 0, count = viewportConfigTemplates.size(); index < count; ++index )
 			{
 				FViewportConfig_Template*		viewportConfigTemplate = viewportConfigTemplates[ index ];
-				viewportConfigMenu->AppendCheckItem( RID_ViewportConfig_Start + index, viewportConfigTemplate->description.c_str(), TEXT( "" ) );
+				viewportConfigMenu->AppendCheckItem( RID_ViewportConfig_Start + index, viewportConfigTemplate->description.c_str(), FString::Format( TEXT( "Switch to the '%s' viewport configuration" ), viewportConfigTemplate->description.c_str() ).c_str() );
 			}
 		}
 
 		viewMenu->AppendSeparator();
 		viewMenu->Append( RID_ViewportConfig, TEXT( "Viewport configuration" ), viewportConfigMenu );
-		viewMenu->AppendCheckItem( RID_ViewportResizeTogether, TEXT( "Viewport resize together" ), TEXT( "" ) );
+		viewMenu->AppendCheckItem( RID_ViewportResizeTogether, TEXT( "Resize Top And Bottom Viewports Together" ), TEXT( "Locks the vertical sash so that the top and bottom viewports share the same width" ) )->Check( GApp->GetEditorFrame()->IsViewportsResizeTogether() );
 		
 		Append( viewMenu, TEXT( "View" ) );
 	}
@@ -117,15 +117,19 @@ WxEditorFrame::WxEditorFrame()
 	, buttonBar( nullptr )
 	, statusBar( nullptr )
 	, viewportContainer( nullptr )
+	, viewportConfigData( nullptr )
 	, framePos( 0, 0 )
 	, frameSize( 1280, 720 )
 	, frameMaximized( true )
-	, viewport( nullptr )
 {}
 
 WxEditorFrame::~WxEditorFrame()
 {
-	delete viewport;
+	for ( uint32 index = 0, count = viewportConfigTemplates.size(); index < count; ++index )
+	{
+		delete viewportConfigTemplates[ index ];
+	}
+	delete viewportConfigData;
 }
 
 void WxEditorFrame::Create()
@@ -208,11 +212,14 @@ void WxEditorFrame::SetUp()
 	statusBar->Create( this, -1 );
 	statusBar->SetUp();
 	SetStatusBar( statusBar );
-
+	
 	// Create viewport for render
-	viewport = new FViewport();
-	viewport->Update( false, frameSize.x, frameSize.y, GetHWND() );
-	GEditorEngine->AddViewport( viewport );
+	viewportConfigData = new FViewportConfig_Data();
+	if ( !viewportConfigData->LoadFromConfig() )
+	{
+		viewportConfigData->SetTemplate( VC_2_2_Split );
+	}
+	viewportConfigData->Apply( viewportContainer );
 
 	// Clean up
 	wxSizeEvent		dummyEvent;
@@ -221,6 +228,16 @@ void WxEditorFrame::SetUp()
 
 void WxEditorFrame::UpdateUI()
 {}
+
+void WxEditorFrame::SetViewportConfig( EViewportConfig InViewportConfig )
+{
+	FViewportConfig_Data*		saveConfig = viewportConfigData;
+	viewportConfigData			= new FViewportConfig_Data();
+
+	viewportContainer->DestroyChildren();
+	viewportConfigData->SetTemplate( InViewportConfig );
+	viewportConfigData->Apply( viewportContainer );
+}
 
 void WxEditorFrame::UI_MenuFileNewMap( wxCommandEvent& InCommandEvent )
 {}
@@ -232,16 +249,6 @@ void WxEditorFrame::UI_MenuFileExit( wxCommandEvent& InCommandEvent )
 
 void WxEditorFrame::OnClose( wxCloseEvent& InEvent )
 {
-	// Destroy viewport
-	viewport->Update( true, 0, 0, nullptr );
-	GEditorEngine->RemoveViewport( viewport );
-
-	// Wait while viewport RHI is not deleted
-	while ( viewport->IsValid() )
-	{
-		appSleep( 0.1f );
-	}
-
 	Destroy();
 }
 
@@ -259,12 +266,56 @@ void WxEditorFrame::OnSize( wxSizeEvent& InEvent )
 	// Figure out the client area remaining for viewports once the docked windows are taken into account
 	wxSize		oldSize = viewportContainer->GetSize();
 	wxSize		newSize( clientRect.GetWidth() - 72, clientRect.GetHeight() );
+	if ( viewportConfigData )
+	{
+		viewportConfigData->ResizeProportionally( ( float )newSize.x / oldSize.x, ( float )newSize.y / oldSize.y, false );
+	}
 	viewportContainer->SetSize( 72, 0, newSize.x, newSize.y );
 }
 
 void WxEditorFrame::UI_MenuHelpAbout( wxCommandEvent& InCommandEvent )
 {
 	WxWindowAbout::Create( this );
+}
+
+void WxEditorFrame::UI_MenuViewportConfig( wxCommandEvent& InCommandEvent )
+{
+	EViewportConfig			viewportConfig = VC_2_2_Split;
+	switch ( InCommandEvent.GetId() )
+	{
+	case RID_ViewportConfig_2_2_Split:		viewportConfig = VC_2_2_Split;		break;
+	case RID_ViewportConfig_1_2_Split:		viewportConfig = VC_1_2_Split;		break;
+	case RID_ViewportConfig_1_1_Split_H:	viewportConfig = VC_1_1_SplitH;		break;
+	case RID_ViewportConfig_1_1_Split_V:	viewportConfig = VC_1_1_SplitV;		break;
+	}
+
+	SetViewportConfig( viewportConfig );
+}
+
+void WxEditorFrame::UI_MenuViewportResizeTogether( wxCommandEvent& InCommandEvent )
+{
+	if ( InCommandEvent.IsChecked() )
+	{
+		bViewportResizeTogether = true;
+
+		// Make the splitter sashes match up
+		viewportContainer->MatchSplitterPositions();
+	}
+	else
+	{
+		bViewportResizeTogether = false;
+	}
+}
+
+void WxEditorFrame::MenuViewportConfig( wxUpdateUIEvent& InCommandEvent )
+{
+	switch ( InCommandEvent.GetId() )
+	{
+	case RID_ViewportConfig_2_2_Split:			InCommandEvent.Check( viewportConfigData->GetTemplate() == VC_2_2_Split );			break;
+	case RID_ViewportConfig_1_2_Split:			InCommandEvent.Check( viewportConfigData->GetTemplate() == VC_1_2_Split );			break;
+	case RID_ViewportConfig_1_1_Split_H:		InCommandEvent.Check( viewportConfigData->GetTemplate() == VC_1_1_SplitH );			break;
+	case RID_ViewportConfig_1_1_Split_V:		InCommandEvent.Check( viewportConfigData->GetTemplate() == VC_1_1_SplitV );			break;
+	}
 }
 
 //----------------------------------------------------
@@ -278,4 +329,9 @@ BEGIN_EVENT_TABLE( WxEditorFrame, wxFrame )
 	EVT_MENU( RID_New, WxEditorFrame::UI_MenuFileNewMap )
 	EVT_MENU( RID_Exit, WxEditorFrame::UI_MenuFileExit )
 	EVT_MENU( RID_HelpAboutBox, WxEditorFrame::UI_MenuHelpAbout )
+	EVT_MENU_RANGE( RID_ViewportConfig_Start, RID_ViewportConfig_End, WxEditorFrame::UI_MenuViewportConfig )
+	EVT_MENU( RID_ViewportResizeTogether, WxEditorFrame::UI_MenuViewportResizeTogether )
+
+	EVT_UPDATE_UI_RANGE( RID_ViewportConfig_Start, RID_ViewportConfig_End, WxEditorFrame::MenuViewportConfig )
+
 END_EVENT_TABLE()

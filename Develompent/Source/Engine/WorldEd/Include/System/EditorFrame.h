@@ -10,9 +10,11 @@
 #define EDITORFRAME_H
 
 #include <wx/wx.h>
+#include <wx/splitter.h>
 #include <vector>
 
 #include "System/Bitmaps.h"
+#include "System/Viewports.h"
 
 /**
  * @ingroup WorldEd
@@ -51,6 +53,12 @@ public:
 	virtual void UpdateUI();
 
 	/**
+	 * @brief Set viewport config
+	 * @param InViewportConfig		New viewport config
+	 */
+	void SetViewportConfig( EViewportConfig InViewportConfig );
+
+	/**
 	 * @brief Is viewports resize together
 	 * @return Returns whether or not we should link the vertical splitters for the top and bottom viewports
 	 */
@@ -81,6 +89,9 @@ private:
 	void UI_MenuFileNewMap( wxCommandEvent& InCommandEvent );
 	void UI_MenuFileExit( wxCommandEvent& InCommandEvent );
 	void UI_MenuHelpAbout( wxCommandEvent& InCommandEvent );
+	void UI_MenuViewportResizeTogether( wxCommandEvent& InCommandEvent );
+	void UI_MenuViewportConfig( wxCommandEvent& InCommandEvent );
+	void MenuViewportConfig( wxUpdateUIEvent& InCommandEvent );
 
 	bool												bViewportResizeTogether;	/**< Locks the vertical splitter for the top and bottom viewports together */
 	class WxMainMenu*									mainMenuBar;				/**< Main menu bar */
@@ -89,10 +100,10 @@ private:
 	class WxStatusBar*									statusBar;					/**< Status bar */	
 	class WxViewportsContainer*							viewportContainer;			/**< Holds all open level editing viewports */
 	std::vector< struct FViewportConfig_Template* >		viewportConfigTemplates;	/**< Viewport config templates */
+	class FViewportConfig_Data*							viewportConfigData;			/**< Viewport config data */
 	wxPoint												framePos;					/**< Window position */
 	wxSize												frameSize;					/**< Window size */
 	bool												frameMaximized;				/**< Window maximized state */
-	class FViewport*									viewport;					/**< Viewport of render */
 
 	DECLARE_EVENT_TABLE();
 };

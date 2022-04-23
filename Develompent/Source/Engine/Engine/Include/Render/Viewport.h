@@ -69,6 +69,16 @@ public:
 	void Draw( bool InIsShouldPresent = true );
 
 	/**
+	 * Set viewport client
+	 * 
+	 * @param InViewportClient		Viewport client
+	 */
+	FORCEINLINE void SetViewportClient( class FViewportClient* InViewportClient )
+	{
+		viewportClient = InViewportClient;
+	}
+
+	/**
 	 * Is initialized viewport RHI
 	 * @return Return true if viewport RHI is allocated, else return false
 	 */
@@ -113,11 +123,42 @@ public:
 		return windowHandle;
 	}
 
+	/**
+	 * Get viewport client
+	 * @return Return viewport client. If not exist return NULL
+	 */
+	FORCEINLINE class FViewportClient* GetViewportClient() const
+	{
+		return viewportClient;
+	}
+
 private:
 	void*						windowHandle;		/**< Handle to window for render */
+	class FViewportClient*		viewportClient;		/**< Viewport client */
 	uint32						sizeX;				/**< Width of viewport */
 	uint32						sizeY;				/**< Height of viewport */
 	FViewportRHIRef				viewportRHI;		/**< Pointer to viewport of RHI */
+};
+
+/**
+ * @ingroup Engine
+ * An abstract interface to a viewport's client
+ * The viewport's client processes input received by the viewport, and draws the viewport
+ */
+class FViewportClient
+{
+public:
+	/**
+	 * Destructor
+	 */
+	virtual ~FViewportClient() {}
+
+	/**
+	 * Draw viewport
+	 * 
+	 * @param InViewport	Viewport
+	 */
+	virtual void Draw( FViewport* InViewport ) {}
 };
 
 #endif // !VIEWPORT_H

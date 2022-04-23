@@ -34,6 +34,7 @@ void LGameEngine::Init()
 	
 	GWindow->SetTitle( gameName.c_str() );
 	GWindow->SetSize( windowWidth, windowHeight );
+	viewport.SetViewportClient( &viewportClient );
 	viewport.Update( false, windowWidth, windowHeight, GWindow->GetHandle() );
 }
 
@@ -41,6 +42,11 @@ void LGameEngine::Tick( float InDeltaSeconds )
 {
 	Super::Tick( InDeltaSeconds );
 	GWorld->Tick( InDeltaSeconds );
+
+	// Wait while render thread is rendering of the frame
+	FlushRenderingCommands();
+
+	// Draw frame
 	viewport.Draw();
 }
 
@@ -50,6 +56,7 @@ void LGameEngine::Shutdown()
 
 	// Destroy viewport
 	viewport.Update( true, 0, 0, nullptr );
+	viewport.SetViewportClient( nullptr );
 
 	// Wait while viewport RHI is not deleted
 	while ( viewport.IsValid() )

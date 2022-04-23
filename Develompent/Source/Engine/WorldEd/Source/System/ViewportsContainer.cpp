@@ -29,8 +29,8 @@ void WxViewportsContainer::ConnectSplitterEvents( wxSplitterWindow* InTopSplitte
 
 void WxViewportsContainer::DisconnectSplitterEvents()
 {
-	topSplitter = NULL;
-	bottomSplitter = NULL;
+	topSplitter = nullptr;
+	bottomSplitter = nullptr;
 
 	Disconnect( RID_SplitterWindow + 1 );
 	Disconnect( RID_SplitterWindow + 2 );

@@ -80,11 +80,12 @@ void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 {
 	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 	GRHI->SetRenderTarget( immediateContext, InViewportRHI->GetSurface(), GSceneRenderTargets.GetSceneDepthZSurface() );
-	immediateContext->ClearSurface( InViewportRHI->GetSurface(), FColor::black );
+	immediateContext->ClearSurface( InViewportRHI->GetSurface(), sceneView->GetBackgroundColor() );
 	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
 	GRHI->SetViewParameters( immediateContext, *sceneView );
 
-	FScene*			scene = ( FScene* )GWorld->GetScene();
+	EShowFlags		showFlags	= sceneView->GetShowFlags();
+	FScene*			scene		= ( FScene* )GWorld->GetScene();
     scene->BuildSDGs( *sceneView );
 
 	// Render scene layers
@@ -96,44 +97,18 @@ void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 			FSceneDepthGroup&		SDG = scene->GetSDG( ( ESceneDepthGroup ) SDGIndex );
 
 			// Draw static meshes
-			if ( SDG.staticMeshDrawList.GetNum() > 0 )
+			if ( showFlags & SHOW_StaticMesh && SDG.staticMeshDrawList.GetNum() > 0 )
 			{
 				SCOPED_DRAW_EVENT( EventStaticMeshes, DEC_STATIC_MESH, TEXT( "Static meshes" ) );
 				SDG.staticMeshDrawList.Draw( immediateContext, *sceneView );
 			}
 
 			// Draw sprites
-			if ( SDG.spriteDrawList.GetNum() > 0 )
+			if ( showFlags & SHOW_Sprite && SDG.spriteDrawList.GetNum() > 0 )
 			{
 				SCOPED_DRAW_EVENT( EventSprites, DEC_SPRITE, TEXT( "Sprites" ) );
 				SDG.spriteDrawList.Draw( immediateContext, *sceneView );
 			}
 		}
 	}
-
-	// Render world grid for editor
-#if WITH_EDITOR
-    if ( GIsEditor )
-	{
-		SCOPED_DRAW_EVENT( EventWorldGrid, DEC_SCENE_ITEMS, TEXT( "WorldGrid" ) );
-        FWorldGridRef		worldGrid = GEditorEngine->GetWorldGrid();
-
-		if ( worldGrid )
-		{
-			FVertexBufferRHIRef							vertexBuffer = worldGrid->GetVertexBufferRHI();
-			TRefCountPtr< FWorldGridVertexFactory >		vertexFactory = worldGrid->GetVertexFactory();
-			
-			if ( vertexBuffer && vertexFactory )
-			{
-				FShaderRef					vertexShader = GShaderManager->FindInstance< FWorldGridVertexShader, FWorldGridVertexFactory >();
-				FShaderRef					pixelShader = GShaderManager->FindInstance< FWorldGridPixelShader, FWorldGridVertexFactory >();
-				FBoundShaderStateRHIRef		boundShaderState = GRHI->CreateBoundShaderState( TEXT( "WorldGridBSS" ), vertexFactory->GetDeclaration(), vertexShader->GetVertexShader(), pixelShader->GetPixelShader() );
-
-				vertexFactory->Set( immediateContext );
-				GRHI->SetBoundShaderState( immediateContext, boundShaderState );
-				GRHI->DrawPrimitive( immediateContext, PT_LineList, 0, worldGrid->GetNumVerteces() / 2 );
-			}
-		}
-	}
-#endif // WITH_EDITOR
 }

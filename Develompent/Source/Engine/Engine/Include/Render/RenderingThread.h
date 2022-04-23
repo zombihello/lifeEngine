@@ -457,12 +457,18 @@ extern void StopRenderingThread();
 
 /**
  * @ingroup Engine
- * Wait while frame is rendering
+ * Flush rendering commands
  */
-FORCEINLINE void WaitWhileRenderingFrame()
+FORCEINLINE void FlushRenderingCommands()
 {
 	if ( GRenderFrameFinished )
 	{
+		// Mark of flushed rendering commands
+		UNIQUE_RENDER_COMMAND( FFlushedRenderCommands,
+							   {
+								   GRenderFrameFinished->Trigger();
+							   } );
+
 		GRenderFrameFinished->Wait();
 	}
 }

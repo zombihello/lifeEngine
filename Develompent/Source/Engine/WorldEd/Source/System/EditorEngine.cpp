@@ -7,6 +7,7 @@
 #include "Misc/EngineGlobals.h"
 #include "System/World.h"
 #include "Render/Viewport.h"
+#include "Render/RenderingThread.h"
 #include "System/EditorEngine.h"
 #include "Actors/PlayerStart.h"
 
@@ -29,10 +30,13 @@ void LEditorEngine::Init()
 
 void LEditorEngine::Tick( float InDeltaSeconds )
 {
-	// Update world
+	Super::Tick( InDeltaSeconds );
 	GWorld->Tick( InDeltaSeconds );
 
-	// Draw to viewports
+	// Wait while render thread is rendering of the frame
+	FlushRenderingCommands();
+
+	// Draw frame to viewports
 	for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
 	{
 		viewports[ index ]->Draw();

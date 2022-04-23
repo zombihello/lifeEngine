@@ -13,6 +13,7 @@
 #include <set>
 
 #include "Math/Math.h"
+#include "Math/Color.h"
 #include "Render/CameraTypes.h"
 #include "Render/Material.h"
 #include "Render/SceneRendering.h"
@@ -25,6 +26,27 @@
 
 /**
  * @ingroup Engine
+ * Typedef of show flags
+ */
+typedef uint64		EShowFlags;
+
+/**
+ * @ingroup Engine
+ * Enumeration of show flag
+ */
+enum EShowFlag
+{
+	SHOW_None			= 0,								/**< Nothig show */
+	SHOW_Sprite			= 1 << 0,							/**< Sprite show */
+	SHOW_StaticMesh		= 1 << 1,							/**< Static mesh show */
+	SHOW_Wireframe		= 1 << 2,							/**< Show all geometry in wireframe mode */
+
+	SHOW_DefaultGame	= SHOW_Sprite | SHOW_StaticMesh,	/**< Default show flags for game */
+	SHOW_DefaultEditor	= SHOW_Sprite | SHOW_StaticMesh		/**< Default show flags for editor */
+};
+
+/**
+ * @ingroup Engine
  * A projection from scene space into a 2D screen region
  */
 class FSceneView
@@ -32,38 +54,13 @@ class FSceneView
 public:
 	/**
 	 * Constructor
-	 */
-	FSceneView();
-
-	/**
-	 * Set camera view
 	 * 
-	 * @param[in] InCameraView View info of camera
+	 * @param InProjectionMatrix		Projection matrix
+	 * @param InViewMatrix				View matrix
+	 * @param InBackgroundColor			Background color
+	 * @param InShowFlags				Show flags
 	 */
-	void SetCameraView( const FCameraView& InCameraView );
-
-	/**
-	 * Set camera view by camera component
-	 * 
-	 * @param[in] InCameraComponent Camera component
-	 */
-	FORCEINLINE void SetCameraView( class LCameraComponent* InCameraComponent )
-	{
-		check( InCameraComponent );
-
-		FCameraView		cameraView;
-		InCameraComponent->GetCameraView( cameraView );
-		SetCameraView( cameraView );
-	}
-
-	/**
-	 * Get camera view
-	 * @return Return camera view info
-	 */
-	FORCEINLINE const FCameraView& GetCameraView() const
-	{
-		return cameraView;
-	}
+	FSceneView( const FMatrix& InProjectionMatrix, const FMatrix& InViewMatrix, const FColor& InBackgroundColor, EShowFlags InShowFlags );
 
 	/**
 	 * Get view matrix
@@ -101,12 +98,31 @@ public:
 		return frustum;
 	}
 
+	/**
+	 * Get background color
+	 * @return Return background color
+	 */
+	FORCEINLINE const FColor& GetBackgroundColor() const
+	{
+		return backgroundColor;
+	}
+
+	/**
+	 * Get show flags
+	 * @return Return show flags
+	 */
+	FORCEINLINE EShowFlags GetShowFlags() const
+	{
+		return showFlags;
+	}
+
 private:
 	FMatrix			viewMatrix;				/**< View matrix */
 	FMatrix			projectionMatrix;		/**< Projection matrix */
 	FMatrix			viewProjectionMatrix;	/**< View * Projection matrix */
-	FCameraView		cameraView;				/**< View info of camera */
 	FFrustum		frustum;				/**< Frustum */
+	FColor			backgroundColor;		/**< Background color */
+	EShowFlags		showFlags;				/**< Show flags for the view */
 };
 
 /**

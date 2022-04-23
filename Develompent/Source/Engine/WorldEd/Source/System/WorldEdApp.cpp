@@ -22,6 +22,7 @@ bool WxWorldEdApp::OnInit()
 	editorFrame = CreateEditorFrame();
 	check( editorFrame );
 
+	// Init UI and show editor frame
 	editorFrame->Show();
 	editorFrame->SetUp();
 	return true;

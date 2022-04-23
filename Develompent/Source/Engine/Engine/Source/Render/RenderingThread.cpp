@@ -81,12 +81,6 @@ uint32 FRenderingThread::Run()
 				}
 			}
 		}
-
-		// Trigger event of end rendering frame
-		if ( GRenderFrameFinished )
-		{
-			GRenderFrameFinished->Trigger();
-		}
 	}
 
 	return 0;

@@ -29,7 +29,7 @@ void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceCo
 	const FRasterizerStateInitializerRHI		initializer =
 	{
 		material->IsWireframe() ? FM_Wireframe : FM_Solid,
-		CM_None,
+		material->IsTwoSided() ? CM_None : CM_CW,
 		depthBias,
 		0.f,
 		true

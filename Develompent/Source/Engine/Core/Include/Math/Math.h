@@ -295,6 +295,28 @@ struct FMath
 		return powf( InA, InB );
 	}
 
+	/**
+	 * @brief Converts number with truncation towards zero
+	 * 
+	 * @param InA		Value
+	 * @return Rounds InA toward zero, returning the nearest integral value that is not larger in magnitude than InA
+	 */
+	static FORCEINLINE float Trunc( float InA )
+	{
+		return truncf( InA );
+	}
+
+	/**
+	 * @brief Round to nearest a floating point number
+	 * 
+	 * @param InA		Value
+	 * @return Returns the integral value that is nearest to InA, with halfway cases rounded away from zero
+	 */
+	static FORCEINLINE float Round( float InA )
+	{
+		return roundf( InA );
+	}
+
 	static const FVector				vectorZero;			/**< Zero 3D vector */
 	static const FVector				vectorOne;			/**< One 3D vector */
 	static const FQuaternion			quaternionZero;		/**< Quaternion zero */

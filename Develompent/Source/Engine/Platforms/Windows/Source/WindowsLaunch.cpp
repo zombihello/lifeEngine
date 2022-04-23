@@ -30,7 +30,10 @@
  */
 int32 appPlatformPreInit( const tchar* InCmdLine )
 {
-	static_cast< FWindowsLogger* >( GLog )->Show( true );
+	if ( !GIsCommandlet && appParseParam( InCmdLine, TEXT( "-console" ) ) )
+	{
+		static_cast< FWindowsLogger* >( GLog )->Show( true );
+	}
 
 	// Print version SDL to logs
 	{

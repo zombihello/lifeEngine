@@ -11,6 +11,7 @@
 
 #include "System/BaseEngine.h"
 #include "Render/Viewport.h"
+#include "Render/GameViewportClient.h"
 
 /**
  * @ingroup Engine
@@ -56,7 +57,8 @@ public:
 	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
 
 private:
-	FViewport			viewport;		/**< Viewport */
+	FViewport				viewport;			/**< Viewport */
+	FGameViewportClient		viewportClient;		/**< Viewport client */
 };
 
 #endif // !GAMEENGINE_H

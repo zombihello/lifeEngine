@@ -1,22 +1,17 @@
 #include "Misc/EngineGlobals.h"
-#include "Misc/AudioGlobals.h"
-#include "Misc/UIGlobals.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
 #include "RHI/BaseViewportRHI.h"
 #include "Render/RenderingThread.h"
 #include "Render/Viewport.h"
 #include "Render/SceneRenderTargets.h"
-#include "Render/SceneRendering.h"
 #include "Render/Scene.h"
-#include "System/CameraManager.h"
-#include "System/AudioDevice.h"
-#include "UIEngine.h"
 
-FViewport::FViewport() :
-	windowHandle( nullptr ),
-	sizeX( 0 ),
-	sizeY( 0 )
+FViewport::FViewport() 
+	: windowHandle( nullptr )
+	, viewportClient( nullptr )
+	, sizeX( 0 )
+	, sizeY( 0 )
 {}
 
 FViewport::~FViewport()
@@ -86,7 +81,7 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 		BeginUpdateResource( this );
 	}
 }
-#include "Logger/LoggerMacros.h"
+
 void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
 	if ( !IsInitialized() )
@@ -94,55 +89,26 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 		return;
 	}
 
-	TRefCountPtr< LCameraComponent >        cameraComponent = GCameraManager->GetActiveCamera();
-	FSceneView*                             sceneView = new FSceneView();
-	if ( cameraComponent )
+	// Begin drawing viewport
+	UNIQUE_RENDER_COMMAND_ONEPARAMETER( FBeginRenderCommand,
+										FViewportRHIRef, viewportRHI, viewportRHI,
+										{
+											FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+											GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
+										} );
+
+	// Draw viewport
+	if ( viewportClient )
 	{
-		sceneView->SetCameraView( cameraComponent );
+		viewportClient->Draw( this );
 	}
 
-	// Update audio listener spatial
-	{
-		const FCameraView&		cameraView = sceneView->GetCameraView();
-		GAudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation.RotateVector( FMath::vectorForward ), cameraView.rotation.RotateVector( FMath::vectorUp ) );
-	}
-
-	struct Helper
-	{
-		static void Execute( FViewportRHIRef viewportRHI, FSceneView* sceneView, bool isShouldPresent )
-		{
-			FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-			FSceneRenderer				sceneRenderer( sceneView );
-			GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
-			
-			// Scene render
-			sceneRenderer.Render( viewportRHI );
-			
-			// UI render
-			GUIEngine->BeginDraw();
-			GUIEngine->EndDraw();
-
-			GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
-			
-			// Trigger event of end rendering frame
-			if ( GRenderFrameFinished )
-			{
-				GRenderFrameFinished->Trigger();
-			}
-
-			// Delete scene view
-			delete sceneView;
-		}
-	};
-
-	// Wait while render thread is rendering of the frame
-	WaitWhileRenderingFrame();
-
-	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FRenderFrameCommand,
-										  FViewportRHIRef, viewportRHI, viewportRHI,
-										  FSceneView*, sceneView, sceneView,
-										  bool, isShouldPresent, InIsShouldPresent,
-										  {
-											  Helper::Execute( viewportRHI, sceneView, isShouldPresent );
-										  } );
+	// End drawing viewport
+	UNIQUE_RENDER_COMMAND_TWOPARAMETER( FEndRenderCommand,
+										FViewportRHIRef, viewportRHI, viewportRHI,
+										bool, isShouldPresent, InIsShouldPresent,
+										{
+											FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+											GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
+										} );
 }
