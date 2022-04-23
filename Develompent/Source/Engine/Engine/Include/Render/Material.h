@@ -98,6 +98,17 @@ public:
 	}
 
 	/**
+	 * Set vector parameter value
+	 *
+	 * @param InParameterName	Parameter name
+	 * @param InValue			Value
+	 */
+	FORCEINLINE void SetVectorParameterValue( const std::wstring& InParameterName, const FVector4D& InValue )
+	{
+		vectorParameters[ InParameterName ] = InValue;
+	}
+
+	/**
 	 * Set two sided mode
 	 * 
 	 * @param[in] InIsTwoSided Enable two sided mode
@@ -203,6 +214,15 @@ public:
 	bool GetTextureParameterValue( const std::wstring& InParameterName, FTexture2DRef& OutValue ) const;
 
 	/**
+	 * Get vector parameter value
+	 *
+	 * @param InParameterName	Parameter name
+	 * @param OutValue			Return value
+	 * @return Return true if finded, else return false
+	 */
+	bool GetVectorParameterValue( const std::wstring& InParameterName, FVector4D& OutValue ) const;
+
+	/**
 	 * Is enabled two sided mode
 	 * @return Return true if two sided mode enabled, else return false
 	 */
@@ -246,6 +266,7 @@ private:
 	class FShaderMetaType*								shadersType[ SF_NumDrawFrequencies ];	/**< Array shader types for material */
 	FMeshShaderMap										shaderMap;								/**< Shader map for material */
 	std::unordered_map< std::wstring, float >			scalarParameters;						/**< Array scalar parameters */
+	std::unordered_map< std::wstring, FVector4D >		vectorParameters;						/**< Vector parameters */
 	std::unordered_map< std::wstring, FTexture2DRef >	textureParameters;						/**< Array texture parameters */
 };
 

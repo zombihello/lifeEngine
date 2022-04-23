@@ -2,6 +2,7 @@
 #include "Misc/CoreGlobals.h"
 #include "System/Package.h"
 #include "Render/Scene.h"
+#include "Render/SceneUtils.h"
 #include "Math/Math.h"
 #include "Math/Rect.h"
 #include "Render/Shaders/BasePassShader.h"
@@ -133,7 +134,7 @@ void LSpriteComponent::AddDrawingPolicyLink()
 	{
 		FSceneDepthGroup&               SDGWorld = scene->GetSDG( SDG_World );
 		FSpriteSurface					surface = sprite->GetSurface();
-		FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( FStaticMeshDrawPolicy( sprite->GetVertexFactory(), sprite->GetMaterial() ) );
+		FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( FStaticMeshDrawPolicy( sprite->GetVertexFactory(), sprite->GetMaterial() ), DEC_SPRITE );
 
 		// Generate mesh batch of sprite
 		FMeshBatch			            meshBatch;

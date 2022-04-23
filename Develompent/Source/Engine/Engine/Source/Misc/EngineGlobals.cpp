@@ -21,4 +21,5 @@ FCameraManager*												GCameraManager = new FCameraManager();
 
 #if WITH_EDITOR
 std::vector< std::pair< std::wstring, ESurfaceType > >		GSurfaceTypeNames( 1, std::make_pair( TEXT( "Default" ), ST_Default ) );
+bool														GIsCookEditorContent = false;
 #endif // WITH_EDITOR

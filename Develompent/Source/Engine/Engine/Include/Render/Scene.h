@@ -36,13 +36,19 @@ typedef uint64		EShowFlags;
  */
 enum EShowFlag
 {
+	// General and game flags
 	SHOW_None			= 0,								/**< Nothig show */
 	SHOW_Sprite			= 1 << 0,							/**< Sprite show */
 	SHOW_StaticMesh		= 1 << 1,							/**< Static mesh show */
+
+	SHOW_DefaultGame	= SHOW_Sprite | SHOW_StaticMesh,	/**< Default show flags for game */	
+
+	// WorldEd flags
+#if WITH_EDITOR
 	SHOW_Wireframe		= 1 << 2,							/**< Show all geometry in wireframe mode */
 
-	SHOW_DefaultGame	= SHOW_Sprite | SHOW_StaticMesh,	/**< Default show flags for game */
 	SHOW_DefaultEditor	= SHOW_Sprite | SHOW_StaticMesh		/**< Default show flags for editor */
+#endif // WITH_EDITOR
 };
 
 /**
@@ -231,8 +237,11 @@ public:
 		/**
 		 * @brief Constructor
 		 */
-		FDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy )
+		FDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const FColor& InWireframeColor = FColor::red )
 			: drawingPolicy( InDrawingPolicy )
+#if WITH_EDITOR
+			, wireframeColor( InWireframeColor )
+#endif // WITH_EDITOR
 		{}
 
 		/**
@@ -262,6 +271,10 @@ public:
 
 		mutable FMeshBatchList					meshBatchList;			/**< Mesh batch list */
 		mutable TDrawingPolicyType				drawingPolicy;			/**< Drawing policy */
+
+#if WITH_EDITOR
+		FColor									wireframeColor;			/**< Wireframe color */
+#endif // WITH_EDITOR
 	};
 
 	/**
@@ -392,10 +405,35 @@ public:
 	FORCEINLINE void Draw( class FBaseDeviceContextRHI* InDeviceContext, const FSceneView& InSceneView )
 	{
 		check( IsInRenderingThread() );
+
+		// Wireframe drawing available only with editor
+#if WITH_EDITOR
+		bool		bWireframe = InSceneView.GetShowFlags() & SHOW_Wireframe;
+#endif // WITH_EDITOR
+
 		for ( FMapDrawData::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
 		{
-			bool						bIsInitedRenderState = false;
-			FDrawingPolicyLinkRef		drawingPolicyLink = *it;
+			bool						bIsInitedRenderState	= false;
+			FDrawingPolicyLinkRef		drawingPolicyLink		= *it;
+			FMeshDrawingPolicy*			drawingPolicy			= nullptr;
+
+#if WITH_EDITOR
+			drawingPolicy				= !bWireframe ? &drawingPolicyLink->drawingPolicy : &wireframeDrawingPolicy;
+
+			// If we use wireframe drawing policy - init him
+			if ( bWireframe )
+			{
+				wireframeDrawingPolicy.Init( drawingPolicyLink->drawingPolicy.GetVertexFactory(), drawingPolicyLink->wireframeColor, drawingPolicyLink->drawingPolicy.GetDepthBias() );
+			}
+#else
+			drawingPolicy				= &drawingPolicyLink->drawingPolicy;
+#endif // WITH_EDITOR
+
+			// If drawing policy is not valid - skip meshes
+			if ( !drawingPolicy->IsValid() )
+			{
+				continue;
+			}
 
 			// Draw all mesh batches
 			for ( FMeshBatchList::const_iterator itMeshBatch = drawingPolicyLink->meshBatchList.begin(), itMeshBatchEnd = drawingPolicyLink->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
@@ -408,20 +446,24 @@ public:
 
 				// If we not initialized render state - do it!
 				if ( !bIsInitedRenderState )
-				{
-					drawingPolicyLink->drawingPolicy.SetRenderState( InDeviceContext );
-					drawingPolicyLink->drawingPolicy.SetShaderParameters( InDeviceContext );
+				{					
+					drawingPolicy->SetRenderState( InDeviceContext );
+					drawingPolicy->SetShaderParameters( InDeviceContext );
 					bIsInitedRenderState = true;
 				}
 
 				// Draw mesh batch
-				drawingPolicyLink->drawingPolicy.Draw( InDeviceContext, *itMeshBatch, InSceneView );
+				drawingPolicy->Draw( InDeviceContext, *itMeshBatch, InSceneView );
 			}
 		}
 	}
 
 private:
-	FMapDrawData		meshes;		/**< Map of meshes sorted by materials for draw */
+	FMapDrawData											meshes;						/**< Map of meshes sorted by materials for draw */
+
+#if WITH_EDITOR
+	TWireframeMeshDrawingPolicy< TDrawingPolicyType >		wireframeDrawingPolicy;		/**< Drawing policy for wireframe mode */
+#endif // WITH_EDITOR
 };
 
 /**

@@ -13,6 +13,7 @@
 #include "Misc/UIGlobals.h"
 #include "UIEngine.h"
 #include "Render/Shaders/BasePassShader.h"
+#include "Render/Shaders/WireframeShader.h"
 #include "System/CameraManager.h"
 
 IMPLEMENT_CLASS( LBaseEngine )
@@ -78,6 +79,39 @@ void LBaseEngine::Init()
 			}
 		}
 	}
+
+	// Load default wireframe material (only for build with editor)
+#if WITH_EDITOR
+	{
+		defaultWireframeMaterial = new FMaterial();
+		defaultWireframeMaterial->SetShader( FWireframeVertexShader::staticType );
+		defaultWireframeMaterial->SetShader( FWireframePixelShader::staticType );
+		defaultWireframeMaterial->SetWireframe( true );
+
+		// Loading default wireframe material from packages only when we in game
+		if ( !GIsCooker && !GIsCommandlet )
+		{
+			FConfigValue		configDefaultWireframeMaterial = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
+			if ( configDefaultWireframeMaterial.IsValid() )
+			{
+				std::wstring	pathAsset	= configDefaultWireframeMaterial.GetString();
+				FAssetRef		asset		= GPackageManager->FindAsset( pathAsset );
+				if ( asset )
+				{
+					defaultWireframeMaterial = asset;
+				}
+				else
+				{
+					LE_LOG( LT_Warning, LC_Init, TEXT( "Default wireframe material '%s' not loaded" ), pathAsset.c_str() );
+				}
+			}
+			else
+			{
+				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Editor' default wireframe material in section 'Editor.Editor:DefaultWireframeMaterial'" ) );
+			}
+		}
+	}
+#endif // WITH_EDITOR
 
 	GInputSystem->Init();
 	GUIEngine->Init();

@@ -43,6 +43,7 @@ void FMaterial::Serialize( class FArchive& InArchive )
 	}
 
 	InArchive << scalarParameters;
+	InArchive << vectorParameters;
 	InArchive << textureParameters;
 }
 
@@ -134,6 +135,18 @@ bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, F
 {
 	auto		itFind = textureParameters.find( InParameterName );
 	if ( itFind == textureParameters.end() )
+	{
+		return false;
+	}
+
+	OutValue = itFind->second;
+	return true;
+}
+
+bool FMaterial::GetVectorParameterValue( const std::wstring& InParameterName, FVector4D& OutValue ) const
+{
+	auto		itFind = vectorParameters.find( InParameterName );
+	if ( itFind == vectorParameters.end() )
 	{
 		return false;
 	}

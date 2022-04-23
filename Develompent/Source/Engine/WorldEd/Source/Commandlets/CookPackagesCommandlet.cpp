@@ -422,8 +422,19 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	}
 
 	// Getting general data
-	bool				bIsTwoSided		= lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "IsTwoSided" ) ).GetBool();
-	bool				bIsWireframe	= lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "IsWireframe" ) ).GetBool();
+	bool				bIsEditorContent		= lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "IsEditorContent" ) ).GetBool();
+	if ( bIsEditorContent && !GIsCookEditorContent )
+	{
+		LE_LOG( LT_Log, LC_Commandlet, TEXT( "... Skiped editor content" ) );
+		return true;
+	}
+	else if ( bIsEditorContent )
+	{
+		LE_LOG( LT_Log, LC_Commandlet, TEXT( "... Editor content" ) );
+	}
+
+	bool				bIsTwoSided				= lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "IsTwoSided" ) ).GetBool();
+	bool				bIsWireframe			= lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "IsWireframe" ) ).GetBool();
 
 	// Getting usage flags
 	uint32						usageFlags = MU_AllMeshes;

@@ -133,6 +133,9 @@ void FEngineLoop::SerializeConfigs()
 			GSurfaceTypeNames.push_back( std::make_pair( name, ( ESurfaceType )surfaceID ) );
 		}
 	}
+
+	// Is need cook editor content (include dev content)
+	GIsCookEditorContent			= GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) ).GetBool();
 #endif // WITH_EDITOR
 }
 
@@ -183,7 +186,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 		}
 	}
 
-	if ( !GIsCooker && !GFileSystem->IsExistFile( GCookedDir, true ) )
+	if ( !GIsCooker && !GIsEditor && !GFileSystem->IsExistFile( GCookedDir, true ) )
 	{
 		appErrorf( TEXT( "Cooked directory '%s' not exist. For work need cook packages" ), GCookedDir.c_str() );
 		return -1;

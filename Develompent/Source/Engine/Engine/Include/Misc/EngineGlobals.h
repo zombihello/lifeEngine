@@ -80,6 +80,12 @@ extern class FCameraManager*    GCameraManager;
  * @brief Table for convert from text to ESurfaceType
  */
 extern std::vector< std::pair< std::wstring, ESurfaceType > >		GSurfaceTypeNames;
+
+/**
+ * @ingroup Engine
+ * @brief Is need cook editor content
+ */
+extern bool						GIsCookEditorContent;
 #endif // WITH_EDITOR
 
 #endif // !ENGINEGLOBALS_H

@@ -12,6 +12,7 @@
 #include "Core.h"
 #include "Misc/Types.h"
 #include "System/Archive.h"
+#include "Math/Math.h"
 
 /**
  * @ingroup Core
@@ -134,8 +135,27 @@ public:
 		return a;
 	}
 
+	/**
+	 * @brief Convert FColor to FVector4D
+	 * @return Return converted FColor to FVector4D
+	 */
+	FORCEINLINE FVector4D ToVector4D() const
+	{
+		return FVector4D( r, g, b, a );
+	}
+
+	/**
+	 * @brief Convert FColor to normalized FVector4D (in range 0 -> 1)
+	 * @return Return converted FColor to normalized FVector4D (in range 0 -> 1)
+	 */
+	FORCEINLINE FVector4D ToNormalizedVector4D() const
+	{
+		return FVector4D( r / 255.f, g / 255.f, b / 255.f, a / 255.f );
+	}
+
 	static FColor			black;			/**< Black color */
 	static FColor			white;			/**< White color */
+	static FColor			red;			/**< Red color */
 
 private:
 	uint8			r;			/**< Red component of color */

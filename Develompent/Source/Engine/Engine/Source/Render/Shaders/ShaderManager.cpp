@@ -158,7 +158,7 @@ void FShaderManager::Init()
 	{
 #if WITH_EDITOR
 		// Compile shaders only in cooker or commandlets
-		if ( GIsCooker || GIsCommandlet )
+		if ( GIsCooker || GIsCommandlet || GIsEditor )
 		{
 			FShaderCompiler			shaderCompiler;
 			bool					result = shaderCompiler.CompileAll( pathShaderCache.c_str(), GRHI->GetShaderPlatform() );

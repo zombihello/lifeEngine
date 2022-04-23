@@ -25,6 +25,11 @@ class FMeshDrawingPolicy
 public:
 	/**
 	 * Constructor
+	 */
+	FMeshDrawingPolicy();
+
+	/**
+	 * Constructor
 	 * 
 	 * @param[in] InVertexFactory Vertex factory
 	 * @param[in] InMaterial Material
@@ -36,6 +41,18 @@ public:
 	 * Destructor
 	 */
 	virtual ~FMeshDrawingPolicy();
+
+	/**
+	 * Initialize mesh drawing policy
+	 *
+	 * @param InVertexFactory	Vertex factory
+	 * @param InMaterial		Material
+	 * @param InDepthBias		Depth bias
+	 */
+	FORCEINLINE void Init( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias = 0.f )
+	{
+		InitInternal( InVertexFactory, InMaterial, InDepthBias );
+	}
 
 	/**
 	 * Set render state for drawing
@@ -88,7 +105,41 @@ public:
 		return Matches( InOther );
 	}
 
+	/**
+	 * @brief Get vertex factory
+	 * @return Return vertex factory
+	 */
+	FORCEINLINE FVertexFactoryRef GetVertexFactory() const
+	{
+		return vertexFactory;
+	}
+
+	/**
+	 * @brief Get depth bias
+	 * @return Return depth bias
+	 */
+	FORCEINLINE float GetDepthBias() const
+	{
+		return depthBias;
+	}
+
+	/**
+	 * @brief Is valid drawing policy
+	 * @return Return TRUE if drawing policy is valid, else return FALSE
+	 */
+	virtual bool IsValid() const;
+
 protected:
+	/**
+	 * Initialize mesh drawing policy (internal implementation for override by child classes)
+	 *
+	 * @param InVertexFactory	Vertex factory
+	 * @param InMaterial		Material
+	 * @param InDepthBias		Depth bias
+	 */
+	virtual void InitInternal( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias = 0.f );
+
+	bool								bInit;				/**< Is inited drawing policy */
 	FMaterialRef						material;			/**< Material */
 	FVertexFactoryRef					vertexFactory;		/**< Vertex factory */
 	FShaderRef							vertexShader;		/**< Vertex shader */

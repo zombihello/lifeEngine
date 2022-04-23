@@ -22,6 +22,9 @@
 #include "Render/VertexFactory/WorldGridVertexFactory.h"
 #endif // WITH_EDITOR
 
+FStaticMeshDrawPolicy::FStaticMeshDrawPolicy()
+{}
+
 FStaticMeshDrawPolicy::FStaticMeshDrawPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) :
 	FMeshDrawingPolicy( InVertexFactory, InMaterial, InDepthBias )
 {}

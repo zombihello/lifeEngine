@@ -87,9 +87,24 @@ public:
 		return defaultMaterial;
 	}
 
+#if WITH_EDITOR
+	/**
+	 * Get default wireframe material
+	 * @return Return default wireframe material
+	 */
+	FORCEINLINE FMaterialRef GetDefaultWireframeMaterial() const
+	{
+		return defaultWireframeMaterial;
+	}
+#endif // WITH_EDITOR
+
 protected:
-	FTexture2DRef			defaultTexture;			/**< Default texture */
-	FMaterialRef			defaultMaterial;		/**< Default material */
+	FTexture2DRef			defaultTexture;					/**< Default texture */
+	FMaterialRef			defaultMaterial;				/**< Default material */
+
+#if WITH_EDITOR
+	FMaterialRef			defaultWireframeMaterial;		/**< Default wireframe material */
+#endif // WITH_EDITOR
 };
 
 #endif // !BASEENGINE_H

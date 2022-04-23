@@ -30,7 +30,7 @@
  */
 int32 appPlatformPreInit( const tchar* InCmdLine )
 {
-	if ( !GIsCommandlet && appParseParam( InCmdLine, TEXT( "-console" ) ) )
+	if ( GIsCommandlet || GIsCooker || appParseParam( InCmdLine, TEXT( "-console" ) ) )
 	{
 		static_cast< FWindowsLogger* >( GLog )->Show( true );
 	}

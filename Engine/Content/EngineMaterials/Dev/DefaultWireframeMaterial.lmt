@@ -1,0 +1,14 @@
+{
+	"Material": {
+		"IsEditorContent":	true,
+		"IsTwoSided":		false,
+		"IsWireframe":		true,
+		
+		"Usage": {
+			"StaticMesh":	true,
+			"Sprite":		true
+		},
+		
+		"ShadersType" : [ "FWireframeVertexShader", "FWireframePixelShader" ]
+	}
+}

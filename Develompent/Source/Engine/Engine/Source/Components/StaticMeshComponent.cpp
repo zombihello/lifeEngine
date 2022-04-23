@@ -1,5 +1,6 @@
 #include "Components/StaticMeshComponent.h"
 #include "Render/Scene.h"
+#include "Render/SceneUtils.h"
 
 IMPLEMENT_CLASS( LStaticMeshComponent )
 
@@ -67,7 +68,7 @@ void LStaticMeshComponent::AddDrawingPolicyLink()
 		for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )surfaces.size(); indexSurface < numSurfaces; ++indexSurface )
 		{
 			const FStaticMeshSurface& surface = surfaces[ indexSurface ];
-			FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( FStaticMeshDrawPolicy( vertexFactory, materials[ surface.materialID ] ) );
+			FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( FStaticMeshDrawPolicy( vertexFactory, materials[ surface.materialID ] ), DEC_STATIC_MESH );
 
 			// Generate mesh batch of surface
 			FMeshBatch					meshBatch;

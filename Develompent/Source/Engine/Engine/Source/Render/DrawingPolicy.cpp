@@ -6,26 +6,43 @@
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/DrawingPolicy.h"
 
+FMeshDrawingPolicy::FMeshDrawingPolicy()
+	: bInit( false )
+	, depthBias( 0.f )
+	, hash( INVALID_HASH )
+{}
+
 FMeshDrawingPolicy::FMeshDrawingPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) 
-	: material( InMaterial )
+	: bInit( false )
+	, material( InMaterial )
 	, vertexFactory( InVertexFactory )
 	, depthBias( InDepthBias )
-	, hash( appMemFastHash( material, vertexFactory ? vertexFactory->GetTypeHash() : 0 ) )
+	, hash( INVALID_HASH )
 {
-	check( InVertexFactory && InMaterial );
-
-	uint64			vertexFactoryHash = vertexFactory->GetType()->GetHash();
-	vertexShader	= material->GetShader( vertexFactoryHash, SF_Vertex );
-	pixelShader		= material->GetShader( vertexFactoryHash, SF_Pixel );
-	check( vertexShader && pixelShader );
+	InitInternal( InVertexFactory, InMaterial, InDepthBias );
 }
 
 FMeshDrawingPolicy::~FMeshDrawingPolicy()
 {}
 
+void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ )
+{
+	checkMsg( InVertexFactory && InMaterial, TEXT( "Vertex factory and material must be valid for init drawing policy" ) );
+
+	uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
+	vertexShader	= InMaterial->GetShader( vertexFactoryHash, SF_Vertex );
+	pixelShader		= InMaterial->GetShader( vertexFactoryHash, SF_Pixel );
+
+	hash			= appMemFastHash( material, InVertexFactory->GetTypeHash() );
+	vertexFactory	= InVertexFactory;
+	material		= InMaterial;
+	depthBias		= InDepthBias;
+	bInit			= true;
+}
+
 void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceContextRHI )
 {
-	check( material && vertexFactory );
+	check( bInit );
 	const FRasterizerStateInitializerRHI		initializer =
 	{
 		material->IsWireframe() ? FM_Wireframe : FM_Solid,
@@ -42,7 +59,7 @@ void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceCo
 
 void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
 {
-	check( vertexFactory );
+	check( bInit );
 	vertexShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, material );
 	pixelShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, material );
 }
@@ -74,4 +91,9 @@ bool FMeshDrawingPolicy::Matches( const FMeshDrawingPolicy& InOtherDrawer ) cons
 		vertexFactory == InOtherDrawer.vertexFactory &&
 		vertexShader == InOtherDrawer.vertexShader &&
 		pixelShader == InOtherDrawer.pixelShader;
+}
+
+bool FMeshDrawingPolicy::IsValid() const
+{
+	return material && vertexFactory && vertexShader && pixelShader;
 }
