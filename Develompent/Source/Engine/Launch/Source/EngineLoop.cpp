@@ -136,6 +136,10 @@ void FEngineLoop::SerializeConfigs()
 
 	// Is need cook editor content (include dev content)
 	GIsCookEditorContent			= GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) ).GetBool();
+	if ( GIsCookEditorContent )
+	{
+		LE_LOG( LT_Warning, LC_Editor, TEXT( "Enabled cook editor content" ) );
+	}
 #endif // WITH_EDITOR
 }
 

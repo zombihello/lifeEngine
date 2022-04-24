@@ -40,6 +40,8 @@ void FWorldGrid::ReleaseRHI()
 void FWorldGrid::Update( float InMinSizeZ, float InMaxSizeZ, float InStepSize )
 {
 	// Generate world grid mesh
+	verteces.RemoveAllElements();
+	
 	for ( float index = InMinSizeZ; index <= InMaxSizeZ; index += InStepSize )
 	{
 		verteces.AddElement( FWorldGridVertexType{ FVector4D( index, 0, InMaxSizeZ, 1.f ) } );

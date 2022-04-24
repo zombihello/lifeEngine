@@ -68,7 +68,8 @@ void LStaticMeshComponent::AddDrawingPolicyLink()
 		for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )surfaces.size(); indexSurface < numSurfaces; ++indexSurface )
 		{
 			const FStaticMeshSurface& surface = surfaces[ indexSurface ];
-			FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( FStaticMeshDrawPolicy( vertexFactory, materials[ surface.materialID ] ), DEC_STATIC_MESH );
+			FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( DEC_STATIC_MESH );
+			tmpDrawPolicyLink->drawingPolicy.Init( vertexFactory, materials[ surface.materialID ] );
 
 			// Generate mesh batch of surface
 			FMeshBatch					meshBatch;

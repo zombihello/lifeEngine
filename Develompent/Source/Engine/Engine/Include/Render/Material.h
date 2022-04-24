@@ -196,6 +196,18 @@ public:
 	FShaderRef GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency );
 
 	/**
+	 * Get shader type
+	 * 
+	 * @param InShaderFrequency		Shader frequency
+	 * @return Return shader meta type, if not exist return NULL
+	 */
+	FORCEINLINE class FShaderMetaType* GetShaderType( EShaderFrequency InShaderFrequency )
+	{
+		check( InShaderFrequency < SF_NumDrawFrequencies );
+		return shadersType[ InShaderFrequency ];
+	}
+
+	/**
 	 * Get scalar parameter value
 	 *
 	 * @param[in] InParameterName Parameter name

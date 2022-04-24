@@ -150,6 +150,7 @@ FORCEINLINE void SetVertexShaderValue( class FBaseDeviceContextRHI* InDeviceCont
 {
     const uint32       alignedTypeSize = Align( sizeof( TParameterType ), ShaderArrayElementAlignBytes );
     const int32        numBytesToSet = Min<int32>( sizeof( TParameterType ), InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
+    check( numBytesToSet >= InParameter.GetNumBytes() );
 
     if ( numBytesToSet > 0 )
     {
@@ -160,6 +161,21 @@ FORCEINLINE void SetVertexShaderValue( class FBaseDeviceContextRHI* InDeviceCont
                     ( uint32 )numBytesToSet,
                     &InValue );
     }
+}
+
+/**
+ * @brief Sets the value of a vertex shader parameter with bool type (in shaders bool type is 4 byte)
+ *
+ * @param InDeviceContextRHI    Device context
+ * @param InParameter           Shader parameter
+ * @param InValue               Value
+ * @param InElementIndex        Element index
+ */
+template<>
+FORCEINLINE void SetVertexShaderValue( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderParameter& InParameter, const bool& InValue, uint32 InElementIndex )
+{
+    int32       value = InValue;
+    SetVertexShaderValue( InDeviceContextRHI, InParameter, value, InElementIndex );
 }
 
 /**
@@ -175,6 +191,7 @@ FORCEINLINE void SetPixelShaderValue( class FBaseDeviceContextRHI* InDeviceConte
 {
     const uint32       alignedTypeSize = Align( sizeof( TParameterType ), ShaderArrayElementAlignBytes );
     const int32        numBytesToSet = Min<int32>( sizeof( TParameterType ), InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
+    check( numBytesToSet >= InParameter.GetNumBytes() );
 
     if ( numBytesToSet > 0 )
     {
@@ -185,6 +202,21 @@ FORCEINLINE void SetPixelShaderValue( class FBaseDeviceContextRHI* InDeviceConte
                     ( uint32 )numBytesToSet,
                     &InValue );
     }
+}
+
+/**
+ * @brief Sets the value of a pixel shader parameter with bool type (in shaders bool type is 4 byte)
+ *
+ * @param InDeviceContextRHI    Device context
+ * @param InParameter           Shader parameter
+ * @param InValue               Value
+ * @param InElementIndex        Element index
+ */
+template<>
+FORCEINLINE void SetPixelShaderValue( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderParameter& InParameter, const bool& InValue, uint32 InElementIndex )
+{
+    int32       value = InValue;
+    SetPixelShaderValue( InDeviceContextRHI, InParameter, value, InElementIndex );
 }
 
 /**

@@ -1,9 +1,14 @@
 #include "Misc/AudioGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "Render/EditorLevelViewportClient.h"
 #include "Render/Scene.h"
 #include "Render/SceneRendering.h"
 #include "Render/RenderingThread.h"
+#include "Render/WorldGrid.h"
+#include "Render/WorldGridDrawingPolicy.h"
+#include "Render/SceneUtils.h"
 #include "System/AudioDevice.h"
+#include "System/EditorEngine.h"
 #include "EngineDefines.h"
 
 FEditorLevelViewportClient::FEditorLevelViewportClient()
@@ -43,6 +48,22 @@ void FEditorLevelViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRH
 
 	// Scene render
 	sceneRenderer.Render( InViewportRHI );
+
+	// Render world grid
+	{
+		SCOPED_DRAW_EVENT( EventWorldGrid, DEC_SCENE_ITEMS, TEXT( "World grid" ) );
+		FWorldGrid*													worldGrid = GEditorEngine->GetWorldGrid();
+		worldGrid->Update( -(float)InViewportRHI->GetWidth(), InViewportRHI->GetWidth(), 16.f );
+		FMeshBatch													worldGridMeshBatch = worldGrid->GetMeshBatch();
+		worldGridMeshBatch.numInstances = 1;
+		worldGridMeshBatch.transformationMatrices.push_back( FMath::matrixIdentity );
+
+		TWireframeMeshDrawingPolicy< FWorldGridDrawingPolicy >		worldGridDrawingPolicy;
+		worldGridDrawingPolicy.Init( worldGrid->GetVertexFactory(), FColor( 130, 130, 130 ) );
+		worldGridDrawingPolicy.SetRenderState( immediateContext );
+		worldGridDrawingPolicy.SetShaderParameters( immediateContext );
+		worldGridDrawingPolicy.Draw( immediateContext, worldGridMeshBatch, *InSceneView );
+	}
 
 	// Delete scene view
 	delete InSceneView;

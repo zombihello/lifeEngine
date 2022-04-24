@@ -4,6 +4,8 @@
 #include "RHI/BaseStateRHI.h"
 #include "RHI/TypesRHI.h"
 #include "Render/VertexFactory/VertexFactory.h"
+#include "Render/SceneUtils.h"
+#include "Render/Scene.h"
 #include "Render/DrawingPolicy.h"
 
 FMeshDrawingPolicy::FMeshDrawingPolicy()
@@ -11,16 +13,6 @@ FMeshDrawingPolicy::FMeshDrawingPolicy()
 	, depthBias( 0.f )
 	, hash( INVALID_HASH )
 {}
-
-FMeshDrawingPolicy::FMeshDrawingPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ ) 
-	: bInit( false )
-	, material( InMaterial )
-	, vertexFactory( InVertexFactory )
-	, depthBias( InDepthBias )
-	, hash( INVALID_HASH )
-{
-	InitInternal( InVertexFactory, InMaterial, InDepthBias );
-}
 
 FMeshDrawingPolicy::~FMeshDrawingPolicy()
 {}
@@ -62,6 +54,49 @@ void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDev
 	check( bInit );
 	vertexShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, material );
 	pixelShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, material );
+}
+
+void FMeshDrawingPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView )
+{
+	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, FString::Format( TEXT( "Material %s" ), material->GetAssetName().c_str() ).c_str() );
+
+	// If vertex factory not support instancig - draw without it
+	if ( !vertexFactory->SupportsInstancing() )
+	{
+		if ( InMeshBatch.indexBufferRHI )
+		{
+			for ( uint32 instanceId = 0; instanceId < InMeshBatch.numInstances; ++instanceId )
+			{
+				vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, vertexFactory, &InSceneView, 1, instanceId );
+				GRHI->CommitConstants( InDeviceContextRHI );
+				GRHI->DrawIndexedPrimitive( InDeviceContextRHI, InMeshBatch.indexBufferRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.firstIndex, InMeshBatch.numPrimitives );
+			}
+		}
+		else
+		{
+			for ( uint32 instanceId = 0; instanceId < InMeshBatch.numInstances; ++instanceId )
+			{
+				vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, vertexFactory, &InSceneView, 1, instanceId );
+				GRHI->CommitConstants( InDeviceContextRHI );
+				GRHI->DrawPrimitive( InDeviceContextRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.numPrimitives );
+			}
+		}
+	}
+	// Else we draw geometry with help instancing
+	else
+	{
+		vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, vertexFactory, &InSceneView, InMeshBatch.numInstances );
+		GRHI->CommitConstants( InDeviceContextRHI );
+
+		if ( InMeshBatch.indexBufferRHI )
+		{
+			GRHI->DrawIndexedPrimitive( InDeviceContextRHI, InMeshBatch.indexBufferRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.firstIndex, InMeshBatch.numPrimitives, InMeshBatch.numInstances );
+		}
+		else
+		{
+			GRHI->DrawPrimitive( InDeviceContextRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.numPrimitives, InMeshBatch.numInstances );
+		}
+	}
 }
 
 uint64 FMeshDrawingPolicy::GetTypeHash() const

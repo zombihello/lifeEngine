@@ -14,6 +14,7 @@
 
 #include "Render/RenderResource.h"
 #include "Containers/BulkData.h"
+#include "Render/Scene.h"
 #include "Render/VertexFactory/WorldGridVertexFactory.h"
 #include "RHI/BaseBufferRHI.h"
 #include "RHI/TypesRHI.h"
@@ -63,6 +64,20 @@ public:
 	 * @param[in] InStepSize Step size
 	 */
 	void Update( float InMinSizeZ, float InMaxSizeZ, float InStepSize );
+
+	/**
+	 * Get base mesh batch info
+	 * @return Return base mesh batch info without instances
+	 */
+	FORCEINLINE FMeshBatch GetMeshBatch() const
+	{
+		FMeshBatch		meshBatch;
+		meshBatch.primitiveType		= PT_LineList;
+		meshBatch.baseVertexIndex	= 0;
+		meshBatch.firstIndex		= 0;
+		meshBatch.numPrimitives		= numVerteces / 2;
+		return meshBatch;
+	}
 
 	/**
 	 * Get vertex factory

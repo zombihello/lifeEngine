@@ -29,15 +29,6 @@ public:
 	FMeshDrawingPolicy();
 
 	/**
-	 * Constructor
-	 * 
-	 * @param[in] InVertexFactory Vertex factory
-	 * @param[in] InMaterial Material
-	 * @param[in] InDepthBias Depth bias
-	 */
-	FMeshDrawingPolicy( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias = 0.f );
-
-	/**
 	 * Destructor
 	 */
 	virtual ~FMeshDrawingPolicy();
@@ -81,7 +72,7 @@ public:
 	 * @param[in] InMeshBatch Mesh batch to draw
 	 * @param[in] InSceneView Scene view
 	 */
-	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView ) PURE_VIRTUAL( FMeshDrawingPolicy::Draw, );
+	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView );
 
 	/**
 	 * @brief Get type hash

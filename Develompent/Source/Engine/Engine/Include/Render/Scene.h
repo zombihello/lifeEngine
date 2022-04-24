@@ -236,6 +236,20 @@ public:
 	{
 		/**
 		 * @brief Constructor
+		 * 
+		 * @param InWireframeColor		Wireframe color
+		 */
+		FDrawingPolicyLink( const FColor& InWireframeColor = FColor::red )
+#if WITH_EDITOR
+			: wireframeColor( InWireframeColor )
+#endif // WITH_EDITOR
+		{}
+
+		/**
+		 * @brief Constructor
+		 * 
+		 * @param InDrawingPolicy		Drawing policy
+		 * @param InWireframeColor		Wireframe color
 		 */
 		FDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const FColor& InWireframeColor = FColor::red )
 			: drawingPolicy( InDrawingPolicy )

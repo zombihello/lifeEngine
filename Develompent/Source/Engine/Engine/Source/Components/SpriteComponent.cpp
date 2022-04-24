@@ -134,7 +134,8 @@ void LSpriteComponent::AddDrawingPolicyLink()
 	{
 		FSceneDepthGroup&               SDGWorld = scene->GetSDG( SDG_World );
 		FSpriteSurface					surface = sprite->GetSurface();
-		FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( FStaticMeshDrawPolicy( sprite->GetVertexFactory(), sprite->GetMaterial() ), DEC_SPRITE );
+		FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( DEC_SPRITE );
+		tmpDrawPolicyLink->drawingPolicy.Init( sprite->GetVertexFactory(), sprite->GetMaterial() );
 
 		// Generate mesh batch of sprite
 		FMeshBatch			            meshBatch;
