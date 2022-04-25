@@ -343,9 +343,9 @@ public:
 
 #if WITH_EDITOR
     /**
-     * @brief Pointer to static method for check is need compile shader
+     * @brief Pointer to static method for check is need compile shader for vertex factory. If vertex factory is nullptr - checking general
      */
-    typedef bool                  ( *FShouldCacheFunc )( EShaderPlatform InShaderPlatform );
+    typedef bool                  ( *FShouldCacheFunc )( EShaderPlatform InShaderPlatform, FVertexFactoryMetaType* InVFMetaType );
 
     /**
      * @brief Pointer to static method for modify compilation environment of shader
@@ -439,12 +439,13 @@ public:
      * @brief Is need compile shader for platform
      * 
      * @param InShaderPlatform Shader platform
+     * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
      * @return Return true if need compile shader, else returning false
      */
-    FORCEINLINE bool ShouldCache( EShaderPlatform InShaderPlatform ) const
+    FORCEINLINE bool ShouldCache( EShaderPlatform InShaderPlatform, FVertexFactoryMetaType* InVFMetaType = nullptr ) const
     {
         check( ShouldCacheFunc );
-        return ShouldCacheFunc( InShaderPlatform );
+        return ShouldCacheFunc( InShaderPlatform, InVFMetaType );
     }
 
     /**

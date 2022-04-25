@@ -58,7 +58,7 @@ void FShader::SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const st
 {}
 
 #if WITH_EDITOR
-bool FShader::ShouldCache( EShaderPlatform InShaderPlatform )
+bool FShader::ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
 	return true;
 }

@@ -18,7 +18,12 @@ FWireframeVertexShader::~FWireframeVertexShader()
 }
 
 #if WITH_EDITOR
-bool FWireframeVertexShader::ShouldCache( EShaderPlatform InShaderPlatform )
+bool FWireframeVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
+{
+	return GIsEditor || GIsCookEditorContent;
+}
+
+bool FWireframePixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
 	return GIsEditor || GIsCookEditorContent;
 }
@@ -64,10 +69,3 @@ void FWireframePixelShader::SetConstantParameters( class FBaseDeviceContextRHI* 
 
 	SetPixelShaderValue( InDeviceContextRHI, wireframeColorParameter, wireframeColor );
 }
-
-#if WITH_EDITOR
-bool FWireframePixelShader::ShouldCache( EShaderPlatform InShaderPlatform )
-{
-	return GIsEditor || GIsCookEditorContent;
-}
-#endif // WITH_EDITOR

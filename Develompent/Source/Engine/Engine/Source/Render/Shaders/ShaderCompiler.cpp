@@ -57,7 +57,7 @@ bool FShaderCompiler::CompileAll( FShaderCache& InOutShaderCache, EShaderPlatfor
 		for ( auto itVFType = vertexFactoryTypes.begin(), itVFTypeEnd = vertexFactoryTypes.end(); itVFType != itVFTypeEnd; ++itVFType )
 		{
 			FVertexFactoryMetaType*			vertexFactoryType = itVFType->second;
-			if ( !vertexFactoryType->ShouldCache( InShaderPlatform ) )
+			if ( !vertexFactoryType->ShouldCache( InShaderPlatform ) || !metaType->ShouldCache( InShaderPlatform, vertexFactoryType ) )
 			{
 				continue;
 			}

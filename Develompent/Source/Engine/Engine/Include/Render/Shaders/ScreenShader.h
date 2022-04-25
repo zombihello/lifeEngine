@@ -19,6 +19,18 @@
 class FScreenVertexShader : public FShader
 {
 	DECLARE_SHADER_TYPE( FScreenVertexShader )
+
+public:
+#if WITH_EDITOR
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType = nullptr );
+#endif // WITH_EDITOR
 };
 
 /**
@@ -35,6 +47,17 @@ public:
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
 	virtual void Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem ) override;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType = nullptr );
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Set texture parameter

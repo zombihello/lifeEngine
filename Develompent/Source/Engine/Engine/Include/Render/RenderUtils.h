@@ -38,6 +38,12 @@ extern FPixelFormatInfo			GPixelFormats[ PF_Max ];
 
 /**
  * @ingroup Engine
+ * @brief Offset to center of the pixel
+ */
+extern float					GPixelCenterOffset;
+
+/**
+ * @ingroup Engine
  * Handles initialization/release for a global resource
  */
 template< class ResourceType >
@@ -80,5 +86,25 @@ public:
 		( ( ResourceType* )this )->ReleaseResource();
 	}
 };
+
+/**
+ * @ingroup Engine
+ * Draws a quad with the given vertex positions and UVs in denormalized pixel/texel coordinates.
+ * Note that the positions are affected by the current viewport
+ *
+ * @param InDeviceContextRHI		RHI Device context
+ * @param InX						Position by X in screen pixels of the top left corner of the quad
+ * @param InY						Position by Y in screen pixels of the top left corner of the quad
+ * @param InSizeX					Size by X in pixels of the quad
+ * @param InSizeY					Size by Y in pixels of the quad
+ * @param InU						Position by U in texels of the top left corner of the quad's UV's
+ * @param InV						Position by V in texels of the top left corner of the quad's UV's
+ * @param InTargetSizeX				Size by X in screen pixels of the target surface
+ * @param InTargetSizeY				Size by Y in screen pixels of the target surface
+ * @param InTextureSizeX			Size by X in texels of the source texture
+ * @param InTextureSyzeY			Size by Y in texels of the source texture
+ * @param InClipSpaceQuadZ			Clip space quad by Z
+ */
+void DrawDenormalizedQuad( class FBaseDeviceContextRHI* InDeviceContextRHI, float InX, float InY, float InSizeX, float InSizeY, float InU, float InV, float InSizeU, float InSizeV, uint32 InTargetSizeX, uint32 InTargetSizeY, uint32 InTextureSizeX, uint32 InTextureSizeY, float InClipSpaceQuadZ );
 
 #endif // !RENDERUTILS_H
