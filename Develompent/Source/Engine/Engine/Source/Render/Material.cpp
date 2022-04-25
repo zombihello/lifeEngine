@@ -47,7 +47,7 @@ void FMaterial::Serialize( class FArchive& InArchive )
 	InArchive << textureParameters;
 }
 
-FShaderRef FMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
+FShader* FMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
 {
 	check( InShaderFrequency < SF_NumDrawFrequencies );
 	if ( isNeedUpdateShaderMap )
@@ -99,9 +99,9 @@ void FMaterial::CacheShaderMap()
 	isNeedUpdateShaderMap = false;
 }
 
-std::vector< FShaderRef > FMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) const
+std::vector< FShader* > FMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) const
 {
-	std::vector< FShaderRef >		result;
+	std::vector< FShader* >		result;
 	result.resize( SF_NumDrawFrequencies );
 
 	for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )

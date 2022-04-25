@@ -74,6 +74,12 @@ extern bool                     GAllowRenderThread;
  */
 extern class FCameraManager*    GCameraManager;
 
+/**
+ * @ingroup Engine
+ * @brief Offset to center of the pixel
+ */
+extern float					GPixelCenterOffset;
+
 #if WITH_EDITOR
 /**
  * @ingroup Engine

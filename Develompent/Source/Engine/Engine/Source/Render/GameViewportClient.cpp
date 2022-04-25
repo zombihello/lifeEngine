@@ -40,11 +40,13 @@ void FGameViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, FSce
 	FSceneRenderer				sceneRenderer( InSceneView );
 
 	// Scene render
+	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	sceneRenderer.Render( InViewportRHI );
 
 	// UI render
 	GUIEngine->BeginDraw();
 	GUIEngine->EndDraw();
+	sceneRenderer.FinishRenderViewTarget( InViewportRHI );
 
 	// Delete scene view
 	delete InSceneView;

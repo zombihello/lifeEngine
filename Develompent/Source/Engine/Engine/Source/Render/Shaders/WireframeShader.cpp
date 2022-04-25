@@ -2,8 +2,8 @@
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/Material.h"
 
-IMPLEMENT_SHADER_TYPE( FWireframeVertexShader, TEXT( "WireframeShaders.hlsl" ), TEXT( "MainVS" ), SF_Vertex );
-IMPLEMENT_SHADER_TYPE( FWireframePixelShader, TEXT( "WireframeShaders.hlsl" ), TEXT( "MainPS" ), SF_Pixel );
+IMPLEMENT_SHADER_TYPE( FWireframeVertexShader, TEXT( "WireframeShaders.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
+IMPLEMENT_SHADER_TYPE( FWireframePixelShader, TEXT( "WireframeShaders.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 
 FWireframeVertexShader::FWireframeVertexShader()
 	: vertexFactoryParameters( nullptr )

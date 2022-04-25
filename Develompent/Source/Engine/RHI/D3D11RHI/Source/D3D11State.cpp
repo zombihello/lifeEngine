@@ -54,6 +54,33 @@ static FORCEINLINE D3D11_COMPARISON_FUNC TranslateSamplerCompareFunction( ESampl
 	};
 }
 
+/**
+ * Translate compare function from engine to DirectX 11
+ */
+static FORCEINLINE D3D11_COMPARISON_FUNC TranslateCompareFunction( ECompareFunction InCompareFunction )
+{
+	switch ( InCompareFunction )
+	{
+	case CF_Less:			return D3D11_COMPARISON_LESS;
+	case CF_LessEqual:		return D3D11_COMPARISON_LESS_EQUAL;
+	case CF_Greater:		return D3D11_COMPARISON_GREATER;
+	case CF_GreaterEqual:	return D3D11_COMPARISON_GREATER_EQUAL;
+	case CF_Equal:			return D3D11_COMPARISON_EQUAL;
+	case CF_NotEqual:		return D3D11_COMPARISON_NOT_EQUAL;
+	case CF_Never:			return D3D11_COMPARISON_NEVER;
+	default:				return D3D11_COMPARISON_ALWAYS;
+	};
+}
+
+static FORCEINLINE float TranslateMipBias( ESamplerMipMapLODBias InMipBias )
+{
+	switch ( InMipBias )
+	{
+	case SMMLODBias_Get4:				return 0.f;
+	default:							return ( float )InMipBias;
+	};
+}
+
 FD3D11StateCache::FD3D11StateCache()
 	: inputLayout( nullptr )
 	, vertexShader( nullptr )
@@ -64,6 +91,7 @@ FD3D11StateCache::FD3D11StateCache()
 	, rasterizerState( nullptr )
 	, primitiveTopology( D3D_PRIMITIVE_TOPOLOGY_UNDEFINED )
 	, depthStencilView( nullptr )
+	, depthStencilState( nullptr )
 {
 	appMemzero( &vertexBuffers, sizeof( vertexBuffers ) );
 	appMemzero( &psSamplerStates, sizeof( psSamplerStates ) );
@@ -124,7 +152,7 @@ FD3D11SamplerStateRHI::FD3D11SamplerStateRHI( const FSamplerStateInitializerRHI&
 	d3d11SamplerDesc.AddressU		= TranslateAddressMode( InInitializer.addressU );
 	d3d11SamplerDesc.AddressV		= TranslateAddressMode( InInitializer.addressV );
 	d3d11SamplerDesc.AddressW		= TranslateAddressMode( InInitializer.addressW );
-	d3d11SamplerDesc.MipLODBias		= InInitializer.mipBias;
+	d3d11SamplerDesc.MipLODBias		= TranslateMipBias( InInitializer.mipBias );
 	d3d11SamplerDesc.MaxAnisotropy	= Clamp( InInitializer.maxAnisotropy, ( uint32 )1, ( uint32 )16 );
 	d3d11SamplerDesc.MaxLOD			= D3D11_FLOAT32_MAX;
 
@@ -151,10 +179,11 @@ FD3D11SamplerStateRHI::FD3D11SamplerStateRHI( const FSamplerStateInitializerRHI&
 		break;
 	}
 
-	d3d11SamplerDesc.BorderColor[ 0 ] = InInitializer.borderColor.GetR();
-	d3d11SamplerDesc.BorderColor[ 1 ] = InInitializer.borderColor.GetG();
-	d3d11SamplerDesc.BorderColor[ 2 ] = InInitializer.borderColor.GetB();
-	d3d11SamplerDesc.BorderColor[ 3 ] = InInitializer.borderColor.GetA();
+	FColor		borderColor( InInitializer.borderColor );
+	d3d11SamplerDesc.BorderColor[ 0 ] = borderColor.GetR();
+	d3d11SamplerDesc.BorderColor[ 1 ] = borderColor.GetG();
+	d3d11SamplerDesc.BorderColor[ 2 ] = borderColor.GetB();
+	d3d11SamplerDesc.BorderColor[ 3 ] = borderColor.GetA();
 	d3d11SamplerDesc.ComparisonFunc = TranslateSamplerCompareFunction( InInitializer.comparisonFunction );
 
 	ID3D11Device*		d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
@@ -170,4 +199,29 @@ FD3D11SamplerStateRHI::FD3D11SamplerStateRHI( const FSamplerStateInitializerRHI&
 FD3D11SamplerStateRHI::~FD3D11SamplerStateRHI()
 {
 	d3d11SamplerState->Release();
+}
+
+FD3D11DepthStateRHI::FD3D11DepthStateRHI( const FDepthStateInitializerRHI& InInitializer )
+{
+	// Init descriptor
+	D3D11_DEPTH_STENCIL_DESC		d3d11DepthStencilDesc;
+	appMemzero( &d3d11DepthStencilDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	d3d11DepthStencilDesc.DepthEnable		= InInitializer.depthTest != CF_Always || InInitializer.bEnableDepthWrite;
+	d3d11DepthStencilDesc.DepthWriteMask	= InInitializer.bEnableDepthWrite ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+	d3d11DepthStencilDesc.DepthFunc			= TranslateCompareFunction( InInitializer.depthTest );
+
+	// Create DirectX resource
+	ID3D11Device*		d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
+
+#if DO_CHECK
+	HRESULT				result = d3d11Device->CreateDepthStencilState( &d3d11DepthStencilDesc, &d3d11DepthState );
+	check( result == S_OK );
+#else
+	d3d11Device->CreateDepthStencilState( &d3d11DepthStencilDesc, &d3d11DepthState );
+#endif // DO_CHECK
+}
+
+FD3D11DepthStateRHI::~FD3D11DepthStateRHI()
+{
+	d3d11DepthState->Release();
 }

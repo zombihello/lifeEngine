@@ -18,6 +18,7 @@ FWorld*														GWorld = new FWorld();
 bool														GUseMaxTickRate = true;
 bool														GAllowRenderThread = true;
 FCameraManager*												GCameraManager = new FCameraManager();
+float														GPixelCenterOffset = 0.5f;
 
 #if WITH_EDITOR
 std::vector< std::pair< std::wstring, ESurfaceType > >		GSurfaceTypeNames( 1, std::make_pair( TEXT( "Default" ), ST_Default ) );

@@ -165,14 +165,14 @@ void FD3D11RHI::Init( bool InIsEditor )
 	GPixelFormats[ PF_FilteredShadowDepth ].platformFormat		= DXGI_FORMAT_D32_FLOAT;
 	GPixelFormats[ PF_D32 ].platformFormat						= DXGI_FORMAT_R32_TYPELESS;
 
+	isInitialize = true;
+
 	// Initialize all global render resources
 	std::set< FRenderResource* >&			globalResourceList = FRenderResource::GetResourceList();
 	for ( auto it = globalResourceList.begin(), itEnd = globalResourceList.end(); it != itEnd; ++it )
 	{
 		( *it )->InitRHI();
 	}
-
-	isInitialize = true;
 }
 
 /**
@@ -202,6 +202,13 @@ bool FD3D11RHI::IsInitialize() const
 void FD3D11RHI::Destroy()
 {
 	if ( !isInitialize )		return;
+
+	// Release all global render resources
+	std::set< FRenderResource* >&		globalResourceList = FRenderResource::GetResourceList();
+	for ( auto it = globalResourceList.begin(), itEnd = globalResourceList.end(); it != itEnd; ++it )
+	{
+		( *it )->ReleaseRHI();
+	}
 
 	for ( uint32 index = 0, num = ARRAY_COUNT( vsConstantBuffers ); index < num; ++index )
 	{
@@ -330,6 +337,11 @@ FRasterizerStateRHIRef FD3D11RHI::CreateRasterizerState( const FRasterizerStateI
 FSamplerStateRHIRef FD3D11RHI::CreateSamplerState( const FSamplerStateInitializerRHI& InInitializer )
 {
 	return new FD3D11SamplerStateRHI( InInitializer );
+}
+
+FDepthStateRHIRef FD3D11RHI::CreateDepthState( const FDepthStateInitializerRHI& InInitializer )
+{
+	return new FD3D11DepthStateRHI( InInitializer );
 }
 
 FTexture2DRHIRef FD3D11RHI::CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData /*= nullptr*/ )
@@ -530,6 +542,22 @@ void FD3D11RHI::SetPixelShaderParameter( class FBaseDeviceContextRHI* InDeviceCo
 	psConstantBuffer->Update( ( const byte* )InNewValue, InBaseIndex, InNumBytes );
 }
 
+void FD3D11RHI::SetDepthTest( class FBaseDeviceContextRHI* InDeviceContext, FDepthStateRHIParamRef InNewState )
+{
+	ID3D11DeviceContext*			d3d11DeviceContext	= ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	ID3D11DepthStencilState*		d3d11DepthState		= InNewState ? ( ( FD3D11DepthStateRHI* )InNewState )->GetResource() : nullptr;
+
+	if ( d3d11DepthState != stateCache.depthStencilState )
+	{
+		uint32						oldStencilRef = 0;
+		ID3D11DepthStencilState*	oldStencilState = nullptr;
+		
+		d3d11DeviceContext->OMGetDepthStencilState( &oldStencilState, &oldStencilRef );
+		d3d11DeviceContext->OMSetDepthStencilState( d3d11DepthState, oldStencilRef );
+		stateCache.depthStencilState = d3d11DepthState;
+	}
+}
+
 void FD3D11RHI::CommitConstants( class FBaseDeviceContextRHI* InDeviceContext )
 {
 	// Commit vertex shader constants
@@ -680,6 +708,25 @@ void FD3D11RHI::DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceConte
 	}
 }
 
+void FD3D11RHI::DrawPrimitiveUP( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexInde, uint32 InNumPrimitives, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances /* = 1 */ )
+{
+	uint32										vertexCount		= GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
+	TRefCountPtr< FD3D11VertexBufferRHI >		vertexBuffer	= CreateVertexBuffer( TEXT( "DrawPrimitiveUP" ), InVertexDataStride * vertexCount, ( const byte* )InVertexData, RUF_Static );
+	
+	SetStreamSource( InDeviceContext, 0, vertexBuffer, InVertexDataStride, 0 );
+	DrawPrimitive( InDeviceContext, InPrimitiveType, InBaseVertexInde, InNumPrimitives, InNumInstances );
+}
+
+void FD3D11RHI::DrawIndexedPrimitiveUP( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumVertices, const void* InIndexData, uint32 InIndexDataStride, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances /* = 1 */ )
+{
+	uint32										indexCount		= GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
+	TRefCountPtr< FD3D11VertexBufferRHI >		vertexBuffer	= CreateVertexBuffer( TEXT( "DrawIndexedPrimitiveUP" ), InVertexDataStride * InNumVertices, ( const byte* )InVertexData, RUF_Static );
+	TRefCountPtr< FD3D11IndexBufferRHI >		indexBuffer		= CreateIndexBuffer( TEXT( "DrawIndexedPrimitiveUP" ), InIndexDataStride, InIndexDataStride * indexCount, ( const byte* )InIndexData, RUF_Static );
+
+	SetStreamSource( InDeviceContext, 0, vertexBuffer, InVertexDataStride, 0 );
+	DrawIndexedPrimitive( InDeviceContext, indexBuffer, InPrimitiveType, InBaseVertexIndex, 0, InNumPrimitives, InNumInstances );
+}
+
 /**
  * Begin drawing viewport
  */
@@ -693,6 +740,9 @@ void FD3D11RHI::BeginDrawingViewport( class FBaseDeviceContextRHI* InDeviceConte
 #if FRAME_CAPTURE_MARKERS
 	BeginDrawEvent( InDeviceContext, DEC_SCENE_ITEMS, TEXT( "Viewport" ) );
 #endif // FRAME_CAPTURE_MARKERS
+
+	// Clear state cache
+	appMemzero( &stateCache, sizeof( FD3D11StateCache ) );
 
 	SetRenderTarget( InDeviceContext, viewport->GetSurface(), nullptr );
 	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );
@@ -953,7 +1003,7 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 	D3D11_SHADER_DESC					shaderDesc;
 	reflector->GetDesc( &shaderDesc );
 
-	// Add parameters for shader resources (constant buffers, textures, samplers, etc) */
+	// Add parameters for shader resources (constant buffers, textures, samplers, etc)
 	for ( uint32 resourceIndex = 0; resourceIndex < shaderDesc.BoundResources; ++resourceIndex )
 	{
 		D3D11_SHADER_INPUT_BIND_DESC 		bindDesc;
@@ -994,6 +1044,105 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 				}
 			}
 		}
+		else if ( bindDesc.Type == D3D10_SIT_TEXTURE )
+		{
+			std::wstring		officialName = ANSI_TO_TCHAR( bindDesc.Name );
+			uint32				bindCount = 1;
+
+			// Assign the name and optionally strip any "[#]" suffixes
+			std::size_t			bracketLocation = officialName.find( TEXT( '[' ) );
+			if ( bracketLocation != std::wstring::npos )
+			{
+				officialName.erase( bracketLocation, officialName.size() );
+				const uint32 numCharactersBeforeArray	= officialName.size();
+
+				// In SM5, for some reason, array suffixes are included in Name, i.e. "LightMapTextures[0]", rather than "LightMapTextures"
+				// Additionally elements in an array are listed as SEPERATE bound resources.
+				// However, they are always contiguous in resource index, so iterate over the samplers and textures of the initial association
+				// and count them, identifying the bindpoint and bindcounts
+				while ( resourceIndex + 1 < shaderDesc.BoundResources )
+				{
+					D3D11_SHADER_INPUT_BIND_DESC		bindDesc2;
+					reflector->GetResourceBindingDesc( resourceIndex + 1, &bindDesc2 );
+
+					if ( bindDesc2.Type == D3D10_SIT_TEXTURE && strncmp( bindDesc2.Name, bindDesc.Name, numCharactersBeforeArray ) == 0 )
+					{
+						// Skip over this resource since it is part of an array
+						bindCount++;						
+						resourceIndex++;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+
+			// Add a parameter for the texture only, the sampler index will be invalid
+			OutOutput.parameterMap.AddParameterAllocation(
+				officialName.c_str(),
+				0,
+				bindDesc.BindPoint,
+				bindCount,
+				-1
+			);
+		}
+		else if ( bindDesc.Type == D3D11_SIT_UAV_RWTYPED || bindDesc.Type >= D3D11_SIT_STRUCTURED )
+		{
+			// TODO BS yehor.pohuliaka: Arrays are not yet supported
+			uint32		bindCount = 1;
+
+			OutOutput.parameterMap.AddParameterAllocation(
+				ANSI_TO_TCHAR( bindDesc.Name ),
+				0,
+				bindDesc.BindPoint,
+				bindCount,
+				-1
+			);
+		}
+		else if ( bindDesc.Type == D3D10_SIT_SAMPLER )
+		{ 
+			std::wstring		officialName = ANSI_TO_TCHAR( bindDesc.Name );
+			uint32				bindCount = 1;
+
+			// Assign the name and optionally strip any "[#]" suffixes
+			std::size_t			bracketLocation = officialName.find( TEXT( '[' ) );
+			if ( bracketLocation != std::wstring::npos )
+			{
+				officialName.erase( bracketLocation, officialName.size() );
+				const uint32	numCharactersBeforeArray = officialName.size();
+
+				// In SM5, for some reason, array suffixes are included in Name, i.e. "LightMapTextures[0]", rather than "LightMapTextures"
+				// Additionally elements in an array are listed as SEPERATE bound resources.
+				// However, they are always contiguous in resource index, so iterate over the samplers and textures of the initial association
+				// and count them, identifying the bindpoint and bindcounts
+				while ( resourceIndex + 1 < shaderDesc.BoundResources )
+				{
+					D3D11_SHADER_INPUT_BIND_DESC	bindDesc2;
+					reflector->GetResourceBindingDesc( resourceIndex + 1, &bindDesc2 );
+
+					if ( bindDesc2.Type == D3D10_SIT_SAMPLER && strncmp( bindDesc2.Name, bindDesc.Name, numCharactersBeforeArray ) == 0 )
+					{
+						// Skip over this resource since it is part of an array
+						bindCount++;
+						resourceIndex++;
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+
+			// Add a parameter for the sampler only, the texture index will be invalid
+			OutOutput.parameterMap.AddParameterAllocation(
+				officialName.c_str(),
+				0,
+				-1,
+				bindCount,
+				bindDesc.BindPoint
+			);
+		}
 	}
 
 	// Set the number of instructions
@@ -1001,6 +1150,18 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 
 	// Reflector is a com interface, so it needs to be released.
 	reflector->Release();
+
+	// We don't need the reflection data anymore, and it just takes up space
+	ID3DBlob*		strippedShader = nullptr;
+	result			= D3DStripShader( OutOutput.code.data(), OutOutput.code.size(), D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO | D3DCOMPILER_STRIP_TEST_BLOBS, &strippedShader );
+	if ( result == S_OK )
+	{
+		uint32		numShaderBytes = strippedShader->GetBufferSize();
+
+		OutOutput.code.resize( numShaderBytes );
+		memcpy( OutOutput.code.data(), strippedShader->GetBufferPointer(), numShaderBytes );
+		strippedShader->Release();
+	}
 
 	// Free temporary strings allocated for the macros
 	for ( uint32 indexMacro = 0, countMacros = ( uint32 ) macros.size(); indexMacro < countMacros; ++indexMacro )

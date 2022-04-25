@@ -5,8 +5,12 @@
 #include "Misc/EngineGlobals.h"
 #include "RHI/BaseRHI.h"
 
-static std::set< FRenderResource* >				GGlobalResources;		/**< Global render resources */
-FCriticalSection								GGlobalResourcesCS;		/**< Critical section of add/remove in GGlobalResources*/
+/** Critical section of add/remove in FRenderResource::GetResourceList */
+FORCEINLINE FCriticalSection& GetGlobalResourcesCS()
+{
+	static FCriticalSection		globalResourcesCS;
+	return globalResourcesCS;
+}
 
 /**
  * Constructor
@@ -31,7 +35,8 @@ FRenderResource::~FRenderResource()
 
 std::set< FRenderResource* >& FRenderResource::GetResourceList()
 {
-	return GGlobalResources;
+	static std::set< FRenderResource* >		globalResources;
+	return globalResources;
 }
 
 /**
@@ -56,9 +61,10 @@ void FRenderResource::InitResource()
 	// If resource is global - add he to global list of resource
 	if ( IsGlobal() )
 	{
-		GGlobalResourcesCS.Lock();
-		GGlobalResources.insert( this );
-		GGlobalResourcesCS.Unlock();
+		FCriticalSection&		criticalSection = GetGlobalResourcesCS();
+		criticalSection.Lock();
+		GetResourceList().insert( this );
+		criticalSection.Unlock();
 	}
 
 	// Init resource if RHI is initialized
@@ -83,9 +89,10 @@ void FRenderResource::ReleaseResource()
 	// If resource is global - remove he from global list of resource
 	if ( IsGlobal() )
 	{
-		GGlobalResourcesCS.Lock();
-		GGlobalResources.erase( this );
-		GGlobalResourcesCS.Unlock();
+		FCriticalSection&		criticalSection = GetGlobalResourcesCS();
+		criticalSection.Lock();
+		GetResourceList().erase( this );
+		criticalSection.Unlock();
 	}
 
 	// Release resource if RHI is initialized

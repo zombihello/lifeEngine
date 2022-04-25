@@ -122,8 +122,9 @@ public:
 	struct ID3D11ShaderResourceView*	psShaderResourceViews[ D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT ];	/**< Shader resource view for pixel shader */
 	D3D11_PRIMITIVE_TOPOLOGY			primitiveTopology;														/**< Primitive topology */
 	FD3D11StateIndexBuffer				indexBuffer;															/**< Index buffer */
-	struct ID3D11RenderTargetView*		renderTargetViews[ D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT ];				/**< Render target view */
+	struct ID3D11RenderTargetView*		renderTargetViews[ D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT ];			/**< Render target view */
 	struct ID3D11DepthStencilView*		depthStencilView;														/**< Depth stencil view */
+	struct ID3D11DepthStencilState*		depthStencilState;														/**< Depth stencil state */
 };
 
 /**
@@ -156,6 +157,34 @@ public:
 
 private:
 	struct ID3D11SamplerState*				d3d11SamplerState;			/**< Pointer to DirectX 11 sampler state */	
+};
+
+class FD3D11DepthStateRHI : public FBaseDepthStateRHI
+{
+public:
+	/**
+	 * Constructor
+	 * 
+	 * @param InInitializer		Initializer of depth state
+	 */
+	FD3D11DepthStateRHI( const FDepthStateInitializerRHI& InInitializer );
+
+	/**
+	 * Destructor
+	 */
+	~FD3D11DepthStateRHI();
+
+	/**
+	 * @brief Get DirectX resource
+	 * @return Pointer to DirectX resource
+	 */
+	FORCEINLINE struct ID3D11DepthStencilState* GetResource()
+	{
+		return d3d11DepthState;
+	}
+
+private:
+	struct ID3D11DepthStencilState*		d3d11DepthState;		/**< Pointer to DirectX 11 depth state */
 };
 
 #endif // !D3D11STATE_H

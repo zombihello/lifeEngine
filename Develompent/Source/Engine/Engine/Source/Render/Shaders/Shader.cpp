@@ -67,7 +67,7 @@ void FShader::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FS
 {}
 #endif // WITH_EDITOR
 
-FArchive& operator<<( FArchive& InArchive, FShaderRef& InValue )
+FArchive& operator<<( FArchive& InArchive, FShader*& InValue )
 {
 	if ( InArchive.IsSaving() )
 	{

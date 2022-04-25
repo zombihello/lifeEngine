@@ -8,7 +8,8 @@ void FWorldGridVertexFactory::InitRHI()
 {
 	FVertexDeclarationElementList		vertexDeclElementList =
 	{
-        FVertexElement( SSS_Main, sizeof( FWorldGridVertexType ), STRUCT_OFFSET( FWorldGridVertexType, position ), VET_Float4, VEU_Position, 0 ),
+		FVertexElement( SSS_Main, sizeof( FWorldGridVertexType ), STRUCT_OFFSET( FWorldGridVertexType, position ), VET_Float4, VEU_Position, 0 ),
+		FVertexElement( SSS_Main, sizeof( FWorldGridVertexType ), STRUCT_OFFSET( FWorldGridVertexType, color ), VET_Color, VET_Color, 0 ),
 	};
 
 	InitDeclaration( vertexDeclElementList );

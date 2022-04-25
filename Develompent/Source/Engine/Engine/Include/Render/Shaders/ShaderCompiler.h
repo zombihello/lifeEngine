@@ -128,9 +128,20 @@ public:
 	 * 
 	 * @param[in] InOutputCache	Path to output file with cache (example: ../../Content/GlobalShaderCache.bin)
 	 * @param[in] InShaderPlatform Shader platform enum
+	 * @param[in] InOnlyGlobals Compile only global shaders
 	 * @return Return true if all shader compile successed, else return false
 	 */
-	bool CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform );
+	bool CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals = false );
+
+	/**
+	 * @brief Compile all shaders
+	 * 
+	 * @param InOutShaderCache		Shader cache
+	 * @param InShaderPlatform		Shader platform enum
+	 * @param InOnlyGlobals			Compile only global shaders
+	 * @return Return TRUE if all shader compile successed, else return FALSE
+	 */
+	bool CompileAll( FShaderCache& InOutShaderCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals = false );
 
 	/**
 	 * Compile shader

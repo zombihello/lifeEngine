@@ -4,7 +4,8 @@
 	- Fix link count for DirectX 11 objects 
 	- Implement console system
 	- Implement physics system
-	- Implement global and material shaders
+	- Implement material shaders
+	- Need refactor of contain shaders without solid link with vertex factory
 	- Add FName for optimization use memory
 
 ----------------------------------------------------------------

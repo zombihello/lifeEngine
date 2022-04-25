@@ -25,7 +25,7 @@ void LEditorEngine::Init()
 
 	// Init world grid
 	worldGrid = new FWorldGrid();
-	worldGrid->Update( -10000.f, 10000.f, 256.f );
+	worldGrid->Update( -HALF_WORLD_MAX, HALF_WORLD_MAX, 16.f );
 }
 
 void LEditorEngine::Tick( float InDeltaSeconds )

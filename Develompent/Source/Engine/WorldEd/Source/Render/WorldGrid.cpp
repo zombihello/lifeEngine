@@ -41,13 +41,13 @@ void FWorldGrid::Update( float InMinSizeZ, float InMaxSizeZ, float InStepSize )
 {
 	// Generate world grid mesh
 	verteces.RemoveAllElements();
-	
+
 	for ( float index = InMinSizeZ; index <= InMaxSizeZ; index += InStepSize )
 	{
-		verteces.AddElement( FWorldGridVertexType{ FVector4D( index, 0, InMaxSizeZ, 1.f ) } );
-		verteces.AddElement( FWorldGridVertexType{ FVector4D( index, 0, InMinSizeZ, 1.f ) } );
-		verteces.AddElement( FWorldGridVertexType{ FVector4D( InMaxSizeZ, 0, index, 1.f ) } );
-		verteces.AddElement( FWorldGridVertexType{ FVector4D( InMinSizeZ, 0, index, 1.f ) } );
+		verteces.AddElement( FWorldGridVertexType{ FVector4D( index, 0, InMaxSizeZ, 1.f ), FColor( 255, 255, 255 ) } );
+		verteces.AddElement( FWorldGridVertexType{ FVector4D( index, 0, InMinSizeZ, 1.f ), FColor( 255, 255, 255 ) } );
+		verteces.AddElement( FWorldGridVertexType{ FVector4D( InMaxSizeZ, 0, index, 1.f ), FColor( 255, 255, 255 ) } );
+		verteces.AddElement( FWorldGridVertexType{ FVector4D( InMinSizeZ, 0, index, 1.f ), FColor( 255, 255, 255 ) } );
 	}
 	numVerteces = verteces.Num();
 

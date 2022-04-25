@@ -61,6 +61,12 @@ void FVertexFactory::InitDeclaration( const FVertexDeclarationElementList& InEle
 	declaration = GRHI->CreateVertexDeclaration( InElements );
 }
 
+void FVertexFactory::InitDeclaration( const FVertexDeclarationRHIParamRef InDeclaration )
+{
+	check( InDeclaration );
+	declaration = InDeclaration;
+}
+
 void FVertexFactory::Init()
 {
 	BeginInitResource( this );

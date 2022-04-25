@@ -6,8 +6,8 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#ifndef STATICMESHVERTEXFACTORY_H
-#define STATICMESHVERTEXFACTORY_H
+#ifndef LOCALVERTEXFACTORY_H
+#define LOCALVERTEXFACTORY_H
 
 #include "Math/Math.h"
 #include "Render/VertexFactory/VertexFactory.h"
@@ -15,34 +15,27 @@
 
  /**
   * @ingroup Engine
-  * Vertex type for static mesh
+  * Vertex type for render in screen space
   */
-struct FStaticMeshVertexType
+struct FLocalVertexType
 {
 	FVector4D		position;		/**< Position vertex */
 	FVector2D		texCoord;		/**< Texture coords */
-	FVector4D		normal;			/**< Normal */
-	FVector4D		tangent;		/**< Tangent */
-	FVector4D		binormal;		/**< Binormal */
 
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const FStaticMeshVertexType& InOther ) const
+	bool FORCEINLINE operator==( const FLocalVertexType& InOther ) const
 	{
-		return position == InOther.position &&
-			texCoord == InOther.texCoord &&
-			normal == InOther.normal &&
-			tangent == InOther.tangent &&
-			binormal == InOther.binormal;
+		return position == InOther.position && texCoord == InOther.texCoord;
 	}
 };
 
 /**
  * @ingroup Engine
- * The static mesh vertex declaration resource type
+ * The local vertex declaration resource type
  */
-class FStaticMeshVertexDeclaration : public FRenderResource
+class FLocalVertexDeclaration : public FRenderResource
 {
 public:
 	/**
@@ -74,22 +67,22 @@ private:
 
 /**
  * @ingroup Engine
- * Global resource of static mesh vertex declaration
+ * Global resource of local vertex declaration
  */
-extern TGlobalResource< FStaticMeshVertexDeclaration >			GStaticMeshVertexDeclaration;
+extern TGlobalResource< FLocalVertexDeclaration >			GLocalVertexDeclaration;
 
 /**
  * @ingroup Engine
- * Vertex factory for render static meshes
+ * Vertex factory for render in screen space
  */
-class FStaticMeshVertexFactory : public FVertexFactory
+class FLocalVertexFactory : public FVertexFactory
 {
-	DECLARE_VERTEX_FACTORY_TYPE( FStaticMeshVertexFactory )
+	DECLARE_VERTEX_FACTORY_TYPE( FLocalVertexFactory )
 
 public:
 	enum EStreamSourceSlot
 	{
-		SSS_Main = 0		/**< Main vertex buffer */
+		SSS_Main			= 0		/**< Main vertex buffer */
 	};
 
 	/**
@@ -107,35 +100,11 @@ public:
 
 	/**
 	 * @brief Construct vertex factory shader parameters
-	 * 
+	 *
 	 * @param InShaderFrequency Shader frequency
 	 * @return Return instance of vertex factory shader parameters
 	 */
 	static FVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
 };
 
-//
-// Serialization
-//
-
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshVertexType& InValue )
-{
-	InArchive << InValue.position;
-	InArchive << InValue.texCoord;
-	InArchive << InValue.normal;
-	InArchive << InValue.tangent;
-	InArchive << InValue.binormal;
-	return InArchive;
-}
-
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshVertexType& InValue )
-{
-	InArchive << InValue.position;
-	InArchive << InValue.texCoord;
-	InArchive << InValue.normal;
-	InArchive << InValue.tangent;
-	InArchive << InValue.binormal;
-	return InArchive;
-}
-
-#endif // !STATICMESHVERTEXFACTORY_H
+#endif // !LOCALVERTEXFACTORY_H

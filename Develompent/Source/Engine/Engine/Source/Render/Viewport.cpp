@@ -29,8 +29,6 @@ void FViewport::InitRHI()
 	{
 		viewportRHI = GRHI->CreateViewport( windowHandle, sizeX, sizeY );
 	}
-
-	GSceneRenderTargets.Allocate( sizeX, sizeY );
 }
 
 void FViewport::UpdateRHI()

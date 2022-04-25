@@ -38,7 +38,10 @@ void FSceneRenderTargets::ReleaseRHI()
 
 void FSceneRenderTargets::Allocate( uint32 InNewSizeX, uint32 InNewSizeY )
 {
-	bufferSizeX = InNewSizeX;
-	bufferSizeY = InNewSizeY;
-	UpdateRHI();
+	if ( bufferSizeX < InNewSizeX || bufferSizeY < InNewSizeY )
+	{
+		bufferSizeX = InNewSizeX;
+		bufferSizeY = InNewSizeY;
+		UpdateRHI();
+	}
 }

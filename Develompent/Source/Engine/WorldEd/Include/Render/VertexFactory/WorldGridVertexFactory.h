@@ -10,6 +10,7 @@
 #define WORLDGRIDVERTEXFACTORY_H
 
 #include "Math/Math.h"
+#include "Math/Color.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
  /**
@@ -19,13 +20,14 @@
 struct FWorldGridVertexType
 {
 	FVector4D		position;		/**< Position vertex */
+	FColor			color;			/**< Color vertex */
 
 	/**
 	 * Overload operator ==
 	 */
 	bool FORCEINLINE operator==( const FWorldGridVertexType& InOther ) const
 	{
-		return position == InOther.position;
+		return position == InOther.position && color == InOther.color;
 	}
 };
 
@@ -72,12 +74,14 @@ public:
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, FWorldGridVertexType& InValue )
 {
 	InArchive << InValue.position;
+	InArchive << InValue.color;
 	return InArchive;
 }
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FWorldGridVertexType& InValue )
 {
 	InArchive << InValue.position;
+	InArchive << InValue.color;
 	return InArchive;
 }
 

@@ -133,8 +133,8 @@ protected:
 	bool								bInit;				/**< Is inited drawing policy */
 	FMaterialRef						material;			/**< Material */
 	FVertexFactoryRef					vertexFactory;		/**< Vertex factory */
-	FShaderRef							vertexShader;		/**< Vertex shader */
-	FShaderRef							pixelShader;		/**< Pixel shader */
+	FShader*							vertexShader;		/**< Vertex shader */
+	FShader*							pixelShader;		/**< Pixel shader */
 	float								depthBias;			/**< Depth bias */
 	uint64								hash;				/**< Hash */
 

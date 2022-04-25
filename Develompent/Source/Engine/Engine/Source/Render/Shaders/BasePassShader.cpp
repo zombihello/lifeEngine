@@ -1,8 +1,8 @@
 #include "Render/Shaders/BasePassShader.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
-IMPLEMENT_SHADER_TYPE( FBasePassVertexShader, TEXT( "BasePassVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex );
-IMPLEMENT_SHADER_TYPE( FBasePassPixelShader, TEXT( "BasePassPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel );
+IMPLEMENT_SHADER_TYPE( FBasePassVertexShader, TEXT( "BasePassVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, false );
+IMPLEMENT_SHADER_TYPE( FBasePassPixelShader, TEXT( "BasePassPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, false );
 
 FBasePassVertexShader::FBasePassVertexShader()
     : vertexFactoryParameters( nullptr )

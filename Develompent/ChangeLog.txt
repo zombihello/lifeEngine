@@ -30,6 +30,12 @@
 	- Implemented audio system
 	- Fixed working with scale (while multipy, add, substract, etc) in FTransform
 	- Implemented character movement component
+	- Implemented global shaders
+	- Implemented static RHI states
+	- Implemented shader resource parameters
+	- Added in RHI possibility draw from array
+	- Removed reference count in FShader as unnecessary
+	- Added in RHI possibility change depth test state
 
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

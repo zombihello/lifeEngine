@@ -89,11 +89,23 @@ public:
 	FSceneRenderer( FSceneView* InSceneView );
 
 	/**
+	 * Begin render view target
+	 * @param InViewportRHI		Viewport RHI
+	 */
+	void BeginRenderViewTarget( FViewportRHIParamRef InViewportRHI );
+
+	/**
 	 * Render scene
 	 * 
-	 * @param InViewportRHI Viewport
+	 * @param InViewportRHI		Viewport RHI
 	 */
 	void Render( FViewportRHIParamRef InViewportRHI );
+
+	/**
+	 * Finish rendering a view, writing the contents to backbuffer of InViewportRHI
+	 * @param InViewportRHI		Viewport RHI
+	 */
+	void FinishRenderViewTarget( FViewportRHIParamRef InViewportRHI );
 
 private:
 	FSceneView*			sceneView;		/**< Scene view */

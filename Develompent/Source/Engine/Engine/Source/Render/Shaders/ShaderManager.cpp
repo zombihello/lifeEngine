@@ -11,6 +11,12 @@
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/Shaders/ShaderCompiler.h"
 
+FShaderParameter::FShaderParameter()
+	: bufferIndex( 0 )
+	, baseIndex( 0 )
+	, numBytes( 0 )
+{}
+
 void FShaderParameter::Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional /*= false*/ )
 {
 	uint32 			unusedSamplerIndex = 0;
@@ -20,15 +26,31 @@ void FShaderParameter::Bind( const FShaderParameterMap& InParameterMap, const tc
 	}
 }
 
+FShaderResourceParameter::FShaderResourceParameter()
+	: baseIndex( 0 )
+	, numResources( 0 )
+	, samplerIndex( 0 )
+{}
+
+void FShaderResourceParameter::Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional /* = false */ )
+{
+	uint32		unusedBufferIndex = 0;
+	if ( !InParameterMap.FindParameterAllocation( InParameterName, unusedBufferIndex, baseIndex, numResources, samplerIndex ) && !InIsOptional )
+	{
+		checkMsg( false, TEXT( "Failure to bind non-optional shader resource parameter %s! The parameter is either not present in the shader, or the shader compiler optimized it out" ), InParameterName );
+	}
+}
+
 /**
  * Constructor of FShaderMetaType
  */
-FShaderMetaType::FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance
+FShaderMetaType::FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, bool InIsGlobal, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance
 #if WITH_EDITOR
 								  , FShouldCacheFunc InShouldCacheFunc, FModifyCompilationEnvironmentFunc InModifyCompilationEnvironmentFunc
 #endif // WITH_EDITOR
 )
-	: name( InName )
+	: bGlobal( InIsGlobal )
+	, name( InName )
 	, fileName( appShaderDir() + InFileName.c_str() )
 	, functionName( InFunctionName )
 	, frequency( InFrequency )
@@ -47,6 +69,7 @@ FShaderMetaType::FShaderMetaType( const std::wstring& InName, const std::wstring
  */
 FShaderMetaType::FShaderMetaType( const FShaderMetaType& InCopy )
 {
+	bGlobal = InCopy.bGlobal;
 	name = InCopy.name;
 	fileName = InCopy.fileName;
 	functionName = InCopy.functionName;
@@ -58,7 +81,7 @@ FShaderMetaType::FShaderMetaType( const FShaderMetaType& InCopy )
 /**
  * Create instance of shader
  */
-FShaderRef FShaderManager::FContainerShaderTypes::CreateShaderInstance( const tchar* InShaderName )
+FShader* FShaderManager::FContainerShaderTypes::CreateShaderInstance( const tchar* InShaderName )
 {
 	FContainerShaderTypes*		container = FContainerShaderTypes::Get();
 	auto		itShaderMetaType = container->shaderMetaTypes.find( InShaderName );
@@ -90,7 +113,7 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 	for ( uint32 indexItem = 0, countItems = ( uint32 )shaderCacheItems.size(); indexItem < countItems; ++indexItem )
 	{
 		const FShaderCache::FShaderCacheItem&		item = shaderCacheItems[ indexItem ];
-		FShaderRef									shader = FContainerShaderTypes::CreateShaderInstance( item.name.c_str() );
+		FShader*									shader = FContainerShaderTypes::CreateShaderInstance( item.name.c_str() );
 		if ( !shader )
 		{
 			LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s not loaded, because not found meta type" ), item.name.c_str() );
@@ -113,7 +136,7 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 	return true;
 }
 
-FShaderRef FShaderManager::FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash )
+FShader* FShaderManager::FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash )
 {
 	FMeshShaderMap::const_iterator		itMeshShaderMap = shaders.find( InVertexFactoryHash );
 	if ( itMeshShaderMap == shaders.end() )

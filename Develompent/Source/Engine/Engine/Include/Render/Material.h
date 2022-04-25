@@ -193,7 +193,7 @@ public:
 	 * @param[in] InShaderFrequency Shader frequency
 	 * @return Return pointer to pixel shader
 	 */
-	FShaderRef GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency );
+	FShader* GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency );
 
 	/**
 	 * Get shader type
@@ -264,12 +264,12 @@ private:
 	 * @param[in] InVertexFactoryHash Vertex factory hash
 	 * @return Return array shader instances for mesh type
 	 */
-	std::vector< FShaderRef > GetMeshShaders( uint64 InVertexFactoryHash ) const;
+	std::vector< FShader* > GetMeshShaders( uint64 InVertexFactoryHash ) const;
 
 	/**
 	 * Typedef mesh shader map
 	 */
-	typedef std::unordered_map< uint64, std::vector< FShaderRef > >				FMeshShaderMap;
+	typedef std::unordered_map< uint64, std::vector< FShader* > >				FMeshShaderMap;
 
 	bool												isNeedUpdateShaderMap;					/**< Is need update shader map */
 	bool												isTwoSided;								/**< Is two sided material */

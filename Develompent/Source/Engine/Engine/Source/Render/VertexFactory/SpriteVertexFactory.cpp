@@ -5,6 +5,11 @@
 
 IMPLEMENT_VERTEX_FACTORY_TYPE( FSpriteVertexFactory, TEXT( "SpriteVertexFactory.hlsl" ), true, FSpriteVertexFactory::SSS_Instance )
 
+// 
+// GLOBALS
+//
+TGlobalResource< FSpriteVertexDeclaration >			GSpriteVertexDeclaration;
+
 /**
  * Struct of instance buffer for sprite
  */
@@ -12,6 +17,29 @@ struct FSpriteInstanceBuffer
 {
 	FMatrix		instanceLocalToWorld;		/**< Local to World matrix for each instance */
 };
+
+void FSpriteVertexDeclaration::InitRHI()
+{
+	FVertexDeclarationElementList		vertexDeclElementList =
+	{
+		FVertexElement( FSpriteVertexFactory::SSS_Main,		sizeof( FSpriteVertexType ),		STRUCT_OFFSET( FSpriteVertexType, position ),							VET_Float4, VEU_Position,			0 ),
+		FVertexElement( FSpriteVertexFactory::SSS_Main,		sizeof( FSpriteVertexType ),		STRUCT_OFFSET( FSpriteVertexType, texCoord ),							VET_Float2, VEU_TextureCoordinate,	0 ),
+		FVertexElement( FSpriteVertexFactory::SSS_Main,		sizeof( FSpriteVertexType ),		STRUCT_OFFSET( FSpriteVertexType, normal ),								VET_Float4, VEU_Normal,				0 ),
+
+#if USE_INSTANCING
+		FVertexElement( FSpriteVertexFactory::SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ),			VET_Float4, VEU_Position,			1, true ),
+		FVertexElement( FSpriteVertexFactory::SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ) + 16,		VET_Float4, VEU_Position,			2, true ),
+		FVertexElement( FSpriteVertexFactory::SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ) + 32,		VET_Float4, VEU_Position,			3, true ),
+		FVertexElement( FSpriteVertexFactory::SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ) + 48,		VET_Float4, VEU_Position,			4, true ),
+#endif // USE_INSTANCING
+	};
+	vertexDeclarationRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
+}
+
+void FSpriteVertexDeclaration::ReleaseRHI()
+{
+	vertexDeclarationRHI.SafeRelease();
+}
 
 FSpriteVertexShaderParameters::FSpriteVertexShaderParameters()
 	: FGeneralVertexShaderParameters( FSpriteVertexFactory::staticType.SupportsInstancing() )
@@ -61,21 +89,7 @@ void FSpriteVertexFactory::SetupInstancing( class FBaseDeviceContextRHI* InDevic
 
 void FSpriteVertexFactory::InitRHI()
 {
-	FVertexDeclarationElementList		vertexDeclElementList =
-	{
-		FVertexElement( SSS_Main,		sizeof( FSpriteVertexType ),		STRUCT_OFFSET( FSpriteVertexType, position ),							VET_Float4, VEU_Position,			0 ),
-		FVertexElement( SSS_Main,		sizeof( FSpriteVertexType ),		STRUCT_OFFSET( FSpriteVertexType, texCoord ),							VET_Float2, VEU_TextureCoordinate,	0 ),
-		FVertexElement( SSS_Main,		sizeof( FSpriteVertexType ),		STRUCT_OFFSET( FSpriteVertexType, normal ),								VET_Float4, VEU_Normal,				0 ),
-
-#if USE_INSTANCING
-		FVertexElement( SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ),			VET_Float4, VEU_Position,			1, true ),
-		FVertexElement( SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ) + 16,		VET_Float4, VEU_Position,			2, true ),
-		FVertexElement( SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ) + 32,		VET_Float4, VEU_Position,			3, true ),
-		FVertexElement( SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ) + 48,		VET_Float4, VEU_Position,			4, true ),
-#endif // USE_INSTANCING
-	};
-
-	InitDeclaration( vertexDeclElementList );
+	InitDeclaration( GSpriteVertexDeclaration.GetVertexDeclarationRHI() );
 }
 
 FVertexFactoryShaderParameters* FSpriteVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )

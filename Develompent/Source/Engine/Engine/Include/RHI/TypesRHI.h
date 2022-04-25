@@ -203,4 +203,16 @@ typedef TRefCountPtr< class FBaseSamplerStateRHI >		FSamplerStateRHIRef;
  */
 typedef class FBaseSamplerStateRHI*						FSamplerStateRHIParamRef;
 
+/**
+ * @ingroup Engine Engine
+ * Reference to depth state
+ */
+typedef TRefCountPtr< class FBaseDepthStateRHI >		FDepthStateRHIRef;
+
+/**
+ * @ingroup Engine Engine
+ * Pointer to depth state
+ */
+typedef class FBaseDepthStateRHI*						FDepthStateRHIParamRef;
+
 #endif // !TYPESRHI_H

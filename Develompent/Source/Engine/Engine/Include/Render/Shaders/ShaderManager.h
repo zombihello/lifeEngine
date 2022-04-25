@@ -56,25 +56,28 @@
  * @param[in] SourceFilename Source file name of shader
  * @param[in] FunctionName Main function name in shader
  * @param[in] Frequency Frequency of shader
+ * @param[in] Global Is global shader
  */
 #if WITH_EDITOR
-#define IMPLEMENT_SHADER_TYPE( ShaderClass, SourceFilename, FunctionName, Frequency ) \
+#define IMPLEMENT_SHADER_TYPE( ShaderClass, SourceFilename, FunctionName, Frequency, Global ) \
 	FShaderMetaType       ShaderClass::staticType( \
 		TEXT( #ShaderClass ), \
 		SourceFilename, \
 		FunctionName, \
 		Frequency, \
+        Global, \
 		ShaderClass::ConstructSerializedInstance, \
 		ShaderClass::ConstructCompiledInstance, \
         ShaderClass::ShouldCache, \
         ShaderClass::ModifyCompilationEnvironment );
 #else
-#define IMPLEMENT_SHADER_TYPE( ShaderClass, SourceFilename, FunctionName, Frequency ) \
+#define IMPLEMENT_SHADER_TYPE( ShaderClass, SourceFilename, FunctionName, Frequency, Global ) \
 	FShaderMetaType       ShaderClass::staticType( \
 		TEXT( #ShaderClass ), \
 		SourceFilename, \
 		FunctionName, \
 		Frequency, \
+        Global, \
 		ShaderClass::ConstructSerializedInstance, \
 		ShaderClass::ConstructCompiledInstance );
 #endif // WITH_EDITOR
@@ -86,6 +89,11 @@
 class FShaderParameter
 {
 public:
+    /**
+     * @brief Constructor
+     */
+    FShaderParameter();
+
     /**
      * @brief Bind shader parameter
      * 
@@ -135,6 +143,69 @@ private:
     uint32      bufferIndex;     /**< Buffer index */
     uint32      baseIndex;       /**< Base index */
     uint32      numBytes;        /**< Num bytes of parameter. 0 if the parameter wasn't bound */
+};
+
+/**
+ * @ingroup Engine
+ * @brief A shader resource binding
+ */
+class FShaderResourceParameter
+{
+public:
+    /**
+     * @brief Constructor
+     */
+    FShaderResourceParameter();
+
+    /**
+     * @brief Bind shader parameter
+     *
+     * @param InParameterMap Shader prarameter map
+     * @param InParameterName Parameter name
+     * @param InIsOptional Is optional parameter
+     */
+	void Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional = false );
+
+    /**
+     * @brief Shader parameter is bounded
+     * @return Return true if shader parameter is bounded, else returning false
+     */
+    FORCEINLINE bool IsBound() const 
+    { 
+        return numResources > 0;
+    }
+
+    /**
+     * @brief Get the base index
+     * @return Return base index
+     */
+    FORCEINLINE uint32 GetBaseIndex() const 
+    { 
+        return baseIndex;
+    }
+
+    /**
+     * @brief Get number resources
+     * @return Return number resources
+     */
+    FORCEINLINE uint32 GetNumResources() const 
+    { 
+        return numResources;
+    }
+
+    /**
+     * @brief Get sampler index
+     * @return Return sampler index
+     */
+    FORCEINLINE uint32 GetSamplerIndex() const 
+    { 
+        return samplerIndex;
+    }
+
+private:
+	uint32 baseIndex;
+	uint32 numResources;
+	uint32 samplerIndex;
 };
 
 /**
@@ -205,6 +276,40 @@ FORCEINLINE void SetPixelShaderValue( class FBaseDeviceContextRHI* InDeviceConte
 }
 
 /**
+ * @brief Set texture parameter
+ *
+ * @param InDeviceContextRHI    Device context
+ * @param InParameter           Shader resource parameter
+ * @param InTextureRHI          Texture 2D RHI
+ * @param InElementIndex        Element index
+ */
+FORCEINLINE void SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderResourceParameter& InParameter, const FTexture2DRHIParamRef InTextureRHI, uint32 InElementIndex = 0 )
+{
+	if ( InParameter.IsBound() )
+	{
+		check( InElementIndex < InParameter.GetNumResources() );
+        GRHI->SetTextureParameter( InDeviceContextRHI, nullptr, InTextureRHI, InParameter.GetBaseIndex() + InElementIndex );
+	}
+}
+
+/**
+ * @brief Set sampler state parameter
+ *
+ * @param InDeviceContextRHI    Device context
+ * @param InParameter           Shader resource parameter
+ * @param InSamplerStateRHI     Sampler state RHI
+ * @param InElementIndex        Element index
+ */
+FORCEINLINE void SetSamplerStateParameter( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderResourceParameter& InParameter, const FSamplerStateRHIParamRef InSamplerStateRHI, uint32 InElementIndex = 0 )
+{
+	if ( InParameter.IsBound() )
+	{
+        check( InElementIndex < InParameter.GetNumResources() );
+        GRHI->SetSamplerState( InDeviceContextRHI, nullptr, InSamplerStateRHI, InParameter.GetSamplerIndex() + InElementIndex );
+	}
+}
+
+/**
  * @brief Sets the value of a pixel shader parameter with bool type (in shaders bool type is 4 byte)
  *
  * @param InDeviceContextRHI    Device context
@@ -255,12 +360,13 @@ public:
      * @param[in] InFileName File name of source
      * @param[in] InFunctionName Main function in shader
      * @param[in] InFrequency Frequency of shader
+     * @param[in] IsIsGlobal Shader is global?
      * @param[in] InConstructSerializedInstance Pointer to static method for create object of shader for serialize
      * @param[in] InConstructCompiledInstance Pointer to static method for create object of shader for compiling
      * @param[in] InShouldCacheFunc Pointer to static method for check is need compile shader. WARNING! Only with enabled define WITH_EDITOR
      * @param[in] InModifyCompilationEnvironmentFunc Pointer to static method for modify compilation environment of shader. WARNING! Only with enabled define WITH_EDITOR
      */
-    FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance
+    FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, bool InIsGlobal, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance
 #if WITH_EDITOR
                      , FShouldCacheFunc InShouldCacheFunc, FModifyCompilationEnvironmentFunc InModifyCompilationEnvironmentFunc
 #endif // WITH_EDITOR
@@ -354,7 +460,17 @@ public:
     }
 #endif // WITH_EDITOR
 
+    /**
+     * @brief Is global shader
+     * @return Return TRUE if shader is global, else return FALSE
+     */
+    FORCEINLINE bool IsGlobal() const
+    {
+        return bGlobal;
+    }
+
 private:
+    bool                                bGlobal;                                /**< Is this shader is global */
     std::wstring                        name;                                   /**< Name of shader */
     std::wstring                        fileName;                               /**< Source file name */
     std::wstring                        functionName;                           /**< Main function in shader */
@@ -395,7 +511,7 @@ public:
      * @param[in] InVertexFactoryHash Vertex factory hash
      * @return Return reference to shader
      */
-    FShaderRef FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash );
+    FShader* FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash );
 
     /**
      * @brief Find instance of shader
@@ -404,9 +520,9 @@ public:
      * @return Return reference to shader
      */
     template< typename TShaderClass >
-    FORCEINLINE FShaderRef                  FindInstance( uint64 InVertexFactoryHash )
+    FORCEINLINE TShaderClass*     FindInstance( uint64 InVertexFactoryHash )
     {
-        return FindInstance( TShaderClass::staticType.GetName(), InVertexFactoryHash );
+        return ( TShaderClass* )FindInstance( TShaderClass::staticType.GetName(), InVertexFactoryHash );
     }
 
     /**
@@ -414,9 +530,9 @@ public:
      * @return Return reference to shader
      */
     template< typename TShaderClass, typename TVertexFactoryClass >
-    FORCEINLINE FShaderRef                  FindInstance()
+    FORCEINLINE TShaderClass*    FindInstance()
     {
-        return FindInstance( TShaderClass::staticType.GetName(), TVertexFactoryClass::staticType.GetHash() );
+        return ( TShaderClass* )FindInstance( TShaderClass::staticType.GetName(), TVertexFactoryClass::staticType.GetHash() );
     }
 
     /**
@@ -452,7 +568,7 @@ private:
      * @ingroup Engine
      * Typedef shader map
      */
-    typedef std::unordered_map< std::wstring, FShaderRef >     FShaderMap;
+    typedef std::unordered_map< std::wstring, FShader* >        FShaderMap;
 
     /**
      * @ingroup Engine
@@ -486,7 +602,7 @@ private:
 		 * @param[in] InShaderName Name of shader class
 		 * @return Return pointer to new object of shader class
 		 */
-        static FShaderRef                                   CreateShaderInstance( const tchar* InShaderName );
+        static FShader*                                   CreateShaderInstance( const tchar* InShaderName );
 
         std::unordered_map< std::wstring, FShaderMetaType* >        shaderMetaTypes;
     };

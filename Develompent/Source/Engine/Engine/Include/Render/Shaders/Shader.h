@@ -20,16 +20,10 @@
 #endif // WITH_EDITOR
 
 /**
- * @ingroup Engine Engine
- * @brief Reference to FShader
-*/
-typedef TRefCountPtr< class FShader >				FShaderRef;
-
-/**
  * @ingroup Engine
  * @brief Base class of shader
  */
-class FShader : public FRefCounted
+class FShader
 {
 public:
 	/**
@@ -183,12 +177,12 @@ private:
 /**
  * Overload operator << for serialize bool
  */
-FArchive& operator<<( FArchive& InArchive, FShaderRef& InValue );
+FArchive& operator<<( FArchive& InArchive, FShader*& InValue );
 
 /**
  * Overload operator << for serialize bool
  */
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FShaderRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FShader*& InValue )
 {
 	check( InArchive.IsSaving() );
 	if ( InValue )

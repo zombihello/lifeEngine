@@ -178,6 +178,14 @@ public:
 	virtual FSamplerStateRHIRef						CreateSamplerState( const FSamplerStateInitializerRHI& InInitializer ) override;
 
 	/**
+	 * @brief Create depth state
+	 *
+	 * @param InInitializer		Initializer of depth state
+	 * @return Pointer to depth state
+	 */
+	virtual FDepthStateRHIRef						CreateDepthState( const FDepthStateInitializerRHI& InInitializer ) override;
+
+	/**
 	 * @brief Create texture 2D
 	 *
 	 * @param[in] InDebugName Debug name
@@ -397,6 +405,14 @@ public:
 	virtual void									SetPixelShaderParameter( class FBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) override;
 
 	/**
+	 * Set depth test
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InNewState			New depth test
+	 */
+	virtual void									SetDepthTest( class FBaseDeviceContextRHI* InDeviceContext, FDepthStateRHIParamRef InNewState ) override;
+
+	/**
 	 * Commit constants
 	 * 
 	 * @param[in] InDeviceContext Device context
@@ -488,6 +504,34 @@ public:
 	 * @param[in] InNumInstances Number instances to draw
 	 */
 	virtual void								DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceContext, class FBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) override;
+
+	/**
+	 * @brief Draw primitive
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InPrimitiveType Primitive type
+	 * @param[in] InBaseVertexIndex Base vertex index
+	 * @param[in] InNumPrimitives Number primitives for render
+	 * @param[in] InVertexData Reference to vertex data
+	 * @param[in] InVertexDataStride The size of one vertex
+	 * @param[in] InNumInstances Number instances to draw
+	 */
+	virtual void DrawPrimitiveUP( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexInde, uint32 InNumPrimitives, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances = 1 ) override;
+
+	/**
+	 * @brief Draw primitive
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InPrimitiveType Primitive type
+	 * @param[in] InBaseVertexIndex The lowest vertex index used by the index buffer
+	 * @param[in] InNumPrimitives The number of primitives described by the index buffer
+	 * @param[in] InIndexData Reference to index data
+	 * @param[in] InIndexDataStride The size of one index
+	 * @param[in] InVertexData Reference to vertex data
+	 * @param[in] InVertexDataStride The size of one vertex
+	 * @param[in] InNumInstances Number instances to draw
+	 */
+	virtual void DrawIndexedPrimitiveUP( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumVertices, const void* InIndexData, uint32 InIndexDataStride, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances = 1 ) override;
 
 	/**
 	 * @brief Is initialized RHI

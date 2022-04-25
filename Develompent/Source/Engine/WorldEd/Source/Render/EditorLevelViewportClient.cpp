@@ -47,23 +47,47 @@ void FEditorLevelViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRH
 	FSceneRenderer				sceneRenderer( InSceneView );
 
 	// Scene render
+	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	sceneRenderer.Render( InViewportRHI );
 
 	// Render world grid
 	{
 		SCOPED_DRAW_EVENT( EventWorldGrid, DEC_SCENE_ITEMS, TEXT( "World grid" ) );
 		FWorldGrid*													worldGrid = GEditorEngine->GetWorldGrid();
-		worldGrid->Update( -(float)InViewportRHI->GetWidth(), InViewportRHI->GetWidth(), 16.f );
 		FMeshBatch													worldGridMeshBatch = worldGrid->GetMeshBatch();
+		FColor														colorGrid( 130, 130, 130 );
 		worldGridMeshBatch.numInstances = 1;
-		worldGridMeshBatch.transformationMatrices.push_back( FMath::matrixIdentity );
+
+		switch ( viewportType )
+		{
+		case LVT_Perspective:
+			colorGrid = FColor( 0, 0, 100 );
+
+		case LVT_OrthoXZ:
+			worldGridMeshBatch.transformationMatrices.push_back( FMath::matrixIdentity );
+			break;
+
+		case  LVT_OrthoXY:
+			worldGridMeshBatch.transformationMatrices.push_back( FRotator( 90.f, 0.f, 0.f ).ToMatrix() );
+			break;
+
+		case LVT_OrthoYZ:
+			worldGridMeshBatch.transformationMatrices.push_back( FRotator( 90.f, 0.f, 90.f ).ToMatrix() );
+			break;
+
+		default:
+			check( false );			// Unknown viewport type
+			break;
+		}
+		
 
 		TWireframeMeshDrawingPolicy< FWorldGridDrawingPolicy >		worldGridDrawingPolicy;
-		worldGridDrawingPolicy.Init( worldGrid->GetVertexFactory(), FColor( 130, 130, 130 ) );
+		worldGridDrawingPolicy.Init( worldGrid->GetVertexFactory(), colorGrid );
 		worldGridDrawingPolicy.SetRenderState( immediateContext );
 		worldGridDrawingPolicy.SetShaderParameters( immediateContext );
 		worldGridDrawingPolicy.Draw( immediateContext, worldGridMeshBatch, *InSceneView );
 	}
+	sceneRenderer.FinishRenderViewTarget( InViewportRHI );
 
 	// Delete scene view
 	delete InSceneView;

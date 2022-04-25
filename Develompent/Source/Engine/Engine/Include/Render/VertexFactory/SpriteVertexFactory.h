@@ -13,6 +13,7 @@
 #include "Math/Rect.h"
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/VertexFactory/GeneralVertexFactoryParams.h"
+#include "Render/RenderUtils.h"
 
  /**
   * @ingroup Engine
@@ -34,6 +35,46 @@ struct FSpriteVertexType
 			normal == InOther.normal;
 	}
 };
+
+/**
+ * @ingroup Engine
+ * The sprite vertex declaration resource type
+ */
+class FSpriteVertexDeclaration : public FRenderResource
+{
+public:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
+
+	/**
+	 * @brief Get vertex declaration RHI
+	 * @return Return vertex declaration RHI
+	 */
+	FORCEINLINE FVertexDeclarationRHIRef GetVertexDeclarationRHI()
+	{
+		return vertexDeclarationRHI;
+	}
+
+private:
+	FVertexDeclarationRHIRef		vertexDeclarationRHI;		/**< Vertex declaration RHI */
+};
+
+/**
+ * @ingroup Engine
+ * Global resource of sprite vertex declaration
+ */
+extern TGlobalResource< FSpriteVertexDeclaration >			GSpriteVertexDeclaration;
 
 /**
  * @ingroup Engine

@@ -48,6 +48,15 @@ public:
 	}
 
 	/**
+	 * @brief Constructor
+	 * @param InColor		Color in uint32 type
+	 */
+	FORCEINLINE FColor( uint32 InColor )
+	{
+		GetUInt32Color() = InColor;
+	}
+
+	/**
 	 * @brief Set components of color
 	 * 
 	 * @param[in] InRed Red component of color
@@ -136,6 +145,24 @@ public:
 	}
 
 	/**
+	 * @brief Color in uint32 type
+	 * @return Return color in uint32 type
+	 */
+	FORCEINLINE uint32&	GetUInt32Color() 
+	{ 
+		return *( uint32* )this;
+	}
+
+	/**
+	 * @brief Color in uint32 type
+	 * @return Return color in uint32 type
+	 */
+	FORCEINLINE const uint32& GetUInt32Color( void ) const
+	{ 
+		return *( uint32* )this;
+	}
+
+	/**
 	 * @brief Convert FColor to FVector4D
 	 * @return Return converted FColor to FVector4D
 	 */
@@ -151,6 +178,14 @@ public:
 	FORCEINLINE FVector4D ToNormalizedVector4D() const
 	{
 		return FVector4D( r / 255.f, g / 255.f, b / 255.f, a / 255.f );
+	}
+
+	/**
+	 * @brief Override operator ==
+	 */
+	FORCEINLINE bool operator==( const FColor& InRight ) const
+	{
+		return r == InRight.r && g == InRight.g && b == InRight.b && a == InRight.a;
 	}
 
 	static FColor			black;			/**< Black color */

@@ -451,6 +451,14 @@ public:
 	 */
 	void InitDeclaration( const FVertexDeclarationElementList& InElements );
 
+	/**
+	 * Initializes the vertex declaration
+	 *
+	 * @warning Need call in InitRHI() method
+	 * @param InDeclaration		Vertex declaration RHI	
+	 */
+	void InitDeclaration( const FVertexDeclarationRHIParamRef InDeclaration );
+
 private:
 	std::vector< FVertexStream >	streams;					/**< Array vertex streams */
 	FVertexDeclarationRHIRef		declaration;				/**< Vertex declaration */

@@ -15,17 +15,39 @@
 /**
  * Compile all shaders
  */
-bool FShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform )
+bool FShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
+{
+	FShaderCache	shaderCache;
+	bool			result = CompileAll( shaderCache, InShaderPlatform, InOnlyGlobals );
+	if ( !result )
+	{
+		return false;
+	}
+
+	// Save shader cache
+	FArchive*			archive = GFileSystem->CreateFileWriter( InOutputCache, AW_NoFail );
+	if ( archive )
+	{
+		archive->SetType( AT_ShaderCache );
+
+		archive->SerializeHeader();
+		shaderCache.Serialize( *archive );
+		delete archive;
+	}
+	
+	return true;
+}
+
+bool FShaderCompiler::CompileAll( FShaderCache& InOutShaderCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
 {
 	const std::unordered_map< std::wstring, FShaderMetaType* >&								shaderTypes = FShaderManager::FContainerShaderTypes::Get()->shaderMetaTypes;
 	const FVertexFactoryMetaType::FContainerVertexFactoryMetaType::FVertexFactoryMap&		vertexFactoryTypes = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->GetRegisteredTypes();
-	FShaderCache																			shaderCache;
 	checkMsg( !vertexFactoryTypes.empty(), TEXT( "In engine not a single vertex factory registered" ) );
 	
 	for ( auto itShader = shaderTypes.begin(), itShaderEnd = shaderTypes.end(); itShader != itShaderEnd; ++itShader )
 	{
 		FShaderMetaType*					metaType = itShader->second;
-		if ( !metaType->ShouldCache( InShaderPlatform ) )
+		if ( !metaType->ShouldCache( InShaderPlatform ) || ( !metaType->IsGlobal() && InOnlyGlobals ) )
 		{
 			continue;
 		}
@@ -41,22 +63,11 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform In
 			}
 
 			appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
-			bool		result = CompileShader( metaType, InShaderPlatform, shaderCache, vertexFactoryType );
+			bool		result = CompileShader( metaType, InShaderPlatform, InOutShaderCache, vertexFactoryType );
 			check( result );
 		}
 	}
 
-	// Save shader cache
-	FArchive*			archive = GFileSystem->CreateFileWriter( InOutputCache, AW_NoFail );
-	if ( archive )
-	{
-		archive->SetType( AT_ShaderCache );
-
-		archive->SerializeHeader();
-		shaderCache.Serialize( *archive );
-		delete archive;
-	}
-	
 	return true;
 }
 

@@ -641,6 +641,19 @@ bool LCookPackagesCommandlet::CookTexture2D( const FResourceInfo& InTexture2DInf
 
 void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = false */ )
 {
+	// Compile all global shaders
+	{
+		LE_LOG( LT_Log, LC_Commandlet, TEXT( "Compiling global shaders" ) );
+		
+		FShaderCompiler		shaderCompiler;
+		bool		result = shaderCompiler.CompileAll( shaderCache, cookedShaderPlatform, true );
+		if ( !result )
+		{
+			appErrorf( TEXT( "Failed compiling global shaders" ) );
+			return;
+		}
+	}
+
 	// Cook textures
 	for ( auto itPackage = texturesMap.begin(), itPackageEnd = texturesMap.end(); itPackage != itPackageEnd; ++itPackage )
 	{

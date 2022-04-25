@@ -11,17 +11,20 @@
 struct VS_OUT
 {
 	float2 texCoord0	: TEXCOORD0;
+	float4 color		: TEXCOORD1;
 };
 
 float4		wireframeColor;
 
 void MainVS( in FVertexFactoryInput In, out VS_OUT Out, out float4 OutPosition : SV_POSITION )
 {
-	OutPosition		= MulMatrix( viewProjectionMatrix, VertexFactory_GetWorldPosition( In ) );
 	Out.texCoord0	= VertexFactory_GetTexCoord( In, 0 );
+	Out.color		= VertexFactory_GetColor( In, 0 );
+
+	OutPosition		= MulMatrix( viewProjectionMatrix, VertexFactory_GetWorldPosition( In ) );
 }
 
 float4 MainPS( VS_OUT In ) : SV_Target
 {
-	return wireframeColor;
+	return wireframeColor * In.color;
 }
