@@ -35,18 +35,6 @@ public:
     LSpriteComponent();
 
 	/**
-	 * @brief Adds a draw policy link in SDGs
-	 *
-	 * @param InScene Scene
-	 */
-	virtual void LinkDrawList( class FScene* InScene ) override;
-
-	/**
-	 * @brief Removes a draw policy link from SDGs
-	 */
-	virtual void UnlinkDrawList() override;
-
-	/**
 	 * @brief Adds mesh batches for draw in scene
 	 *
 	 * @param InSceneView Current view of scene
@@ -193,19 +181,17 @@ private:
 	void CalcTransformationMatrix( const class FSceneView& InSceneView, FMatrix& OutResult ) const;
 
 	/**
-	 * @brief Add to scene drawing policy link
+	 * @brief Adds a draw policy link in SDGs
 	 */
-	void AddDrawingPolicyLink();
+	virtual void LinkDrawList() override;
 
 	/**
-	 * @brief Remove from scene drawing policy link
+	 * @brief Removes a draw policy link from SDGs
 	 */
-	void RemoveDrawingPolicyLink();
+	virtual void UnlinkDrawList() override;
 
-	bool						bIsDirtyDrawingPolicyLink;		/**< Is dirty drawing policy link. If flag equal true - need update drawing policy link */
 	bool						bFlipVertical;					/**< Is need flip sprite by vertical */
 	bool						bFlipHorizontal;				/**< Is need flip sprite by horizontal */
-	class FScene*				scene;							/**< The current scene where the primitive is located  */
     ESpriteType					type;							/**< Sprite type */
 	FSpriteRef					sprite;							/**< Sprite mesh */
 	FDrawingPolicyLinkRef		drawingPolicyLink;				/**< Reference to drawing policy link in scene */

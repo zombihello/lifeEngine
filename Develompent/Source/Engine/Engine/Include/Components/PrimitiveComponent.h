@@ -29,10 +29,17 @@ class LPrimitiveComponent : public LSceneComponent
 	DECLARE_CLASS( LPrimitiveComponent, LSceneComponent )
 
 public:
+	friend class FScene;			// For add and remove primitive in scene
+
 	/**
 	 * @brief Constructor
 	 */
 	LPrimitiveComponent();
+
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~LPrimitiveComponent();
 
 	/**
 	 * Begins Play for the component.
@@ -54,23 +61,11 @@ public:
 	virtual void Serialize( class FArchive& InArchive ) override;
 
 	/**
-	 * @brief Adds a draw policy link in SDGs
-	 * 
-	 * @param InScene Scene
-	 */
-	virtual void LinkDrawList( class FScene* InScene ) PURE_VIRTUAL( LPrimitiveComponent::LinkDrawList, );
-
-	/**
-	 * @brief Removes a draw policy link from SDGs
-	 */
-	virtual void UnlinkDrawList() PURE_VIRTUAL( LPrimitiveComponent::UnlinkDrawList, );
-
-	/**
 	 * @brief Adds mesh batches for draw in scene
 	 * 
      * @param InSceneView Current view of scene
 	 */
-	virtual void AddToDrawList( const class FSceneView& InSceneView ) PURE_VIRTUAL( LPrimitiveComponent::AddToDrawList, );
+	virtual void AddToDrawList( const class FSceneView& InSceneView );
 
 	/**
 	 * @brief Init physics component
@@ -92,7 +87,10 @@ public:
 	 * 
 	 * @param InNewVisibility New visibility
 	 */
-	virtual void SetVisibility( bool InNewVisibility );
+	FORCEINLINE void SetVisibility( bool InNewVisibility )
+	{
+		bVisibility = InNewVisibility;
+	}
 
 	/**
 	 * @brief Set body setup
@@ -148,13 +146,32 @@ public:
 		return bodyInstance;
 	}
 
-protected:
-	FBox						boundbox;		/**< Bound box */
-	FPhysicsBodySetupRef		bodySetup;		/**< Physics body setup */
-	FPhysicsBodyInstance		bodyInstance;		/**< Physics body instance */
+	/**
+	 * @brief Get scene
+	 * @return Return scene. If primitive not added to scene return NULL
+	 */
+	FORCEINLINE class FScene* GetScene() const
+	{
+		return scene;
+	}
 
-private:
-	bool						bVisibility;		/**< Is primitive visibility */	
+protected:
+	/**
+	 * @brief Adds a draw policy link in SDGs
+	 */
+	virtual void LinkDrawList();
+
+	/**
+	 * @brief Removes a draw policy link from SDGs
+	 */
+	virtual void UnlinkDrawList();
+
+	bool						bVisibility;					/**< Is primitive visibility */
+	bool						bIsDirtyDrawingPolicyLink;		/**< Is dirty drawing policy link. If flag equal true - need update drawing policy link */
+	FBox						boundbox;						/**< Bound box */
+	FPhysicsBodySetupRef		bodySetup;						/**< Physics body setup */
+	FPhysicsBodyInstance		bodyInstance;					/**< Physics body instance */	
+	class FScene*				scene;							/**< The current scene where the primitive is located  */
 };
 
 #endif // !PRIMITIVECOMPONENT_H

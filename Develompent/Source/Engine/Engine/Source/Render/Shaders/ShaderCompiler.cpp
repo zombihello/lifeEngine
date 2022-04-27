@@ -87,7 +87,7 @@ bool FShaderCompiler::CompileShader( class FShaderMetaType* InShaderMetaType, ES
 		InVertexFactoryType->ModifyCompilationEnvironment( InShaderPlatform, environment );
 	}
 
-	bool		result = GRHI->CompileShader( InShaderMetaType->GetFileName().c_str(), InShaderMetaType->GetFunctionName().c_str(), shaderFrequency, environment, output );
+	bool		result = GRHI->CompileShader( InShaderMetaType->GetFileName().c_str(), InShaderMetaType->GetFunctionName().c_str(), shaderFrequency, environment, output, GAllowDebugShaderDump );
 	if ( result )
 	{
 		FShaderCache::FShaderCacheItem			shaderCacheItem;

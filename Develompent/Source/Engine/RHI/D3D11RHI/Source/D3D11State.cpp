@@ -180,10 +180,10 @@ FD3D11SamplerStateRHI::FD3D11SamplerStateRHI( const FSamplerStateInitializerRHI&
 	}
 
 	FColor		borderColor( InInitializer.borderColor );
-	d3d11SamplerDesc.BorderColor[ 0 ] = borderColor.GetR();
-	d3d11SamplerDesc.BorderColor[ 1 ] = borderColor.GetG();
-	d3d11SamplerDesc.BorderColor[ 2 ] = borderColor.GetB();
-	d3d11SamplerDesc.BorderColor[ 3 ] = borderColor.GetA();
+	d3d11SamplerDesc.BorderColor[ 0 ] = borderColor.r;
+	d3d11SamplerDesc.BorderColor[ 1 ] = borderColor.g;
+	d3d11SamplerDesc.BorderColor[ 2 ] = borderColor.b;
+	d3d11SamplerDesc.BorderColor[ 3 ] = borderColor.a;
 	d3d11SamplerDesc.ComparisonFunc = TranslateSamplerCompareFunction( InInitializer.comparisonFunction );
 
 	ID3D11Device*		d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();

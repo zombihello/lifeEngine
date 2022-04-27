@@ -7,13 +7,23 @@
 IMPLEMENT_CLASS( LPrimitiveComponent )
 
 LPrimitiveComponent::LPrimitiveComponent()
-	: bVisibility( true )
+	: bIsDirtyDrawingPolicyLink( false )
+	, bVisibility( true )
+	, scene( nullptr )
 {}
+
+LPrimitiveComponent::~LPrimitiveComponent()
+{
+	if ( scene )
+	{
+		scene->RemovePrimitive( this );
+	}
+}
 
 void LPrimitiveComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	SetVisibility( bVisibility );
+	GWorld->GetScene()->AddPrimitive( this );
 }
 
 void LPrimitiveComponent::TickComponent( float InDeltaTime )
@@ -34,21 +44,14 @@ void LPrimitiveComponent::Serialize( class FArchive& InArchive )
 	InArchive << bVisibility;
 }
 
-void LPrimitiveComponent::SetVisibility( bool InNewVisibility )
-{
-	bVisibility = InNewVisibility;
-	FBaseScene*		scene = GWorld->GetScene();
-	check( scene );
+void LPrimitiveComponent::LinkDrawList()
+{}
 
-	if ( bVisibility )
-	{
-		scene->AddPrimitive( this );
-	}
-	else
-	{
-		scene->RemovePrimitive( this );
-	}
-}
+void LPrimitiveComponent::UnlinkDrawList()
+{}
+
+void LPrimitiveComponent::AddToDrawList( const class FSceneView& InSceneView )
+{}
 
 void LPrimitiveComponent::InitPrimitivePhysics()
 {

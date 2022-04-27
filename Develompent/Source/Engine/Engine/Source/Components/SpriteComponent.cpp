@@ -11,10 +11,8 @@
 IMPLEMENT_CLASS( LSpriteComponent )
 
 LSpriteComponent::LSpriteComponent()
-    : bIsDirtyDrawingPolicyLink( false )
-	, bFlipVertical( false )
+    : bFlipVertical( false )
 	, bFlipHorizontal( false )
-    , scene( nullptr )
     , type( ST_Rotating )
 	, sprite( new FSprite() )
     , meshBatchLink( nullptr )
@@ -85,48 +83,14 @@ void LSpriteComponent::CalcTransformationMatrix( const class FSceneView& InScene
 	OutResult *= transform.GetRotation().ToMatrix();
 }
 
-void LSpriteComponent::LinkDrawList( class FScene* InScene )
-{
-    check( InScene );
-
-	// If the primitive is already connected to another scene - remove the link 
-	if ( scene && scene != InScene )
-	{
-		UnlinkDrawList();
-	}
-
-	// Memorize a new scene 
-	scene = InScene;
-
-    // If sprite is valid - add to scene draw policy link
-    AddDrawingPolicyLink();
-    bIsDirtyDrawingPolicyLink = false;
-}
-
-void LSpriteComponent::UnlinkDrawList()
-{
-	// If the primitive not connected to scene - exit from method
-	if ( !scene )
-	{
-		return;
-	}
-
-	// If the primitive already added to scene - remove all draw policy links
-	RemoveDrawingPolicyLink();
-	bIsDirtyDrawingPolicyLink = false;
-
-	// Forget the scene 
-	scene = nullptr;
-}
-
-void LSpriteComponent::AddDrawingPolicyLink()
+void LSpriteComponent::LinkDrawList()
 {
     check( scene );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( drawingPolicyLink )
 	{
-		RemoveDrawingPolicyLink();
+		UnlinkDrawList();
 	}
 
 	// If sprite is valid - add to scene draw policy link
@@ -163,7 +127,7 @@ void LSpriteComponent::AddDrawingPolicyLink()
 	}
 }
 
-void LSpriteComponent::RemoveDrawingPolicyLink()
+void LSpriteComponent::UnlinkDrawList()
 {
     check( scene );
 
@@ -193,11 +157,11 @@ void LSpriteComponent::AddToDrawList( const class FSceneView& InSceneView )
 
 		if ( sprite )
 		{
-			AddDrawingPolicyLink();
+			LinkDrawList();
 		}
 		else
 		{
-			RemoveDrawingPolicyLink();
+			UnlinkDrawList();
 			return;
 		}	
 	}

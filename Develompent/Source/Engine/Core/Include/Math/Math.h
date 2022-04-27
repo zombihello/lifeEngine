@@ -218,6 +218,56 @@ struct FMath
     }
 
 	/**
+	 * @brief Inverse matrix
+	 * 
+	 * @param InMatrix		Input matrix
+	 * @param OutMatrix		Output matrix
+	 */
+	static FORCEINLINE void InverseMatrix( const FMatrix& InMatrix, FMatrix& OutMatrix )
+	{
+		OutMatrix = glm::inverse( InMatrix );
+	}
+
+	/**
+	 * @brief Inverse matrix
+	 *
+	 * @param InMatrix		Input matrix
+	 * @return Return inverted matrix
+	 */
+	static FORCEINLINE FMatrix InverseMatrix( const FMatrix& InMatrix )
+	{
+		FMatrix		result;
+		InverseMatrix( InMatrix, result );
+		return result;
+	}
+
+	/**
+	 * @brief Get origin from matrix
+	 * 
+	 * @param InMatric		Input matrix
+	 * @param OutOrigin		Output origin
+	 */
+	static FORCEINLINE void GetOriginMatrix( const FMatrix& InMatrix, FVector& OutOrigin )
+	{
+		OutOrigin.x = InMatrix[ 3 ].x;
+		OutOrigin.y = InMatrix[ 3 ].y;
+		OutOrigin.z = InMatrix[ 3 ].z;
+	}
+
+	/**
+	 * @brief Get origin from matrix
+	 *
+	 * @param InMatric		Input matrix
+	 * @return Return origin from matrix
+	 */
+	static FORCEINLINE FVector GetOriginMatrix( const FMatrix& InMatrix )
+	{
+		FVector		result;
+		GetOriginMatrix( InMatrix, result );
+		return result;
+	}
+
+	/**
 	 * @brief Normalize vector
 	 * 
 	 * @param InVector Vector

@@ -12,19 +12,7 @@
 #include "Math/Rotator.h"
 #include "Render/Viewport.h"
 #include "Render/Scene.h"
-
-/**
- * @ingroup WorldEd
- * @brief Enumeration of viewport type
- */
-enum ELevelViewportType
-{
-	LVT_None = -1,			/**< None */
-	LVT_OrthoXY,			/**< Ortho XY */
-	LVT_OrthoXZ,			/**< Ortho XZ */
-	LVT_OrthoYZ,			/**< Ortho YZ */
-	LVT_Perspective			/**< Perspective */
-};
+#include "Render/EditorCommonDrawHelper.h"
 
 /**
  * @ingroup WorldEd
@@ -87,12 +75,14 @@ protected:
 	 */
 	FColor GetBackgroundColor() const;
 
-	bool					bSetListenerPosition;		/**< Is need sets the listener position */
-	ELevelViewportType		viewportType;				/**< Viewport type */	
-	FVector					viewLocation;				/**< Viewport location */	
-	FRotator				viewRotation;				/**< Viewport orientation. Valid only for perspective projections */
-	float					viewFOV;					/**< Viewport horizontal field of view */
-	EShowFlags				showFlags;					/**< Show flags */
+	bool						bSetListenerPosition;	/**< Is need sets the listener position */
+	ELevelViewportType			viewportType;			/**< Viewport type */	
+	FVector						viewLocation;			/**< Viewport location */	
+	FRotator					viewRotation;			/**< Viewport orientation. Valid only for perspective projections */
+	float						viewFOV;				/**< Viewport horizontal field of view */
+	float						orthoZoom;				/**< Zoom in ortho viewport type */
+	EShowFlags					showFlags;				/**< Show flags */
+	FEditorCommonDrawHelper		drawHelper;				/**< Draw helper */
 };
 
 #endif // !EDITORLEVELVIEWPORTCLIENT_H

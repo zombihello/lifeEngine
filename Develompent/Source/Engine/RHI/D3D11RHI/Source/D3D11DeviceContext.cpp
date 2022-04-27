@@ -27,7 +27,7 @@ void FD3D11DeviceContext::ClearSurface( FSurfaceRHIParamRef InSurface, const cla
 	check( d3d11DeviceContext && InSurface );
 	FD3D11Surface*			d3d11Surface = ( FD3D11Surface* )InSurface;
 
-	float		clearColor[ 4 ] = { InColor.GetR() / 255.f, InColor.GetG() / 255.f, InColor.GetB() / 255.f, InColor.GetA() / 255.f };
+	float		clearColor[ 4 ] = { InColor.r / 255.f, InColor.g / 255.f, InColor.b / 255.f, InColor.a / 255.f };
 	d3d11DeviceContext->ClearRenderTargetView( d3d11Surface->GetRenderTargetView(), clearColor );
 }
 

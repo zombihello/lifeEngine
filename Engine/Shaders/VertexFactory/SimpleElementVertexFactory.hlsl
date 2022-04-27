@@ -8,6 +8,7 @@ struct FVertexFactoryInput
 {
 	float4 		position		: POSITION;
 	float2 		texCoord0		: TEXCOORD0;
+	float4		color			: COLOR;
 };
 
 float4 VertexFactory_GetLocalPosition( FVertexFactoryInput InInput )
@@ -27,7 +28,7 @@ float2 VertexFactory_GetTexCoord( FVertexFactoryInput InInput, uint InTexCoordIn
 
 float4 VertexFactory_GetColor( FVertexFactoryInput InInput, uint InColorIndex )
 {
-	return float4( 1.f, 1.f, 1.f, 1.f );
+	return InInput.color;
 }
 
 #endif // !VERTEXFACTORY_H

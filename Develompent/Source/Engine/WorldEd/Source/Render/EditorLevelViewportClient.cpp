@@ -4,8 +4,6 @@
 #include "Render/Scene.h"
 #include "Render/SceneRendering.h"
 #include "Render/RenderingThread.h"
-#include "Render/WorldGrid.h"
-#include "Render/WorldGridDrawingPolicy.h"
 #include "Render/SceneUtils.h"
 #include "System/AudioDevice.h"
 #include "System/EditorEngine.h"
@@ -17,6 +15,7 @@ FEditorLevelViewportClient::FEditorLevelViewportClient()
 	, viewLocation( FMath::vectorZero )
 	, viewRotation( FMath::rotatorZero )
 	, viewFOV( 90.f )
+	, orthoZoom( 10000.f )
 	, showFlags( SHOW_DefaultEditor )
 {}
 
@@ -45,51 +44,16 @@ void FEditorLevelViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRH
 	check( IsInRenderingThread() );
 	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 	FSceneRenderer				sceneRenderer( InSceneView );
-
-	// Scene render
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
+	
+	// Draw grid
+	drawHelper.DrawGrid( InSceneView, viewportType );
+	
+	// Draw scene
 	sceneRenderer.Render( InViewportRHI );
-
-	// Render world grid
-	{
-		SCOPED_DRAW_EVENT( EventWorldGrid, DEC_SCENE_ITEMS, TEXT( "World grid" ) );
-		FWorldGrid*													worldGrid = GEditorEngine->GetWorldGrid();
-		FMeshBatch													worldGridMeshBatch = worldGrid->GetMeshBatch();
-		FColor														colorGrid( 130, 130, 130 );
-		worldGridMeshBatch.numInstances = 1;
-
-		switch ( viewportType )
-		{
-		case LVT_Perspective:
-			colorGrid = FColor( 0, 0, 100 );
-
-		case LVT_OrthoXZ:
-			worldGridMeshBatch.transformationMatrices.push_back( FMath::matrixIdentity );
-			break;
-
-		case  LVT_OrthoXY:
-			worldGridMeshBatch.transformationMatrices.push_back( FRotator( 90.f, 0.f, 0.f ).ToMatrix() );
-			break;
-
-		case LVT_OrthoYZ:
-			worldGridMeshBatch.transformationMatrices.push_back( FRotator( 90.f, 0.f, 90.f ).ToMatrix() );
-			break;
-
-		default:
-			check( false );			// Unknown viewport type
-			break;
-		}
-		
-
-		TWireframeMeshDrawingPolicy< FWorldGridDrawingPolicy >		worldGridDrawingPolicy;
-		worldGridDrawingPolicy.Init( worldGrid->GetVertexFactory(), colorGrid );
-		worldGridDrawingPolicy.SetRenderState( immediateContext );
-		worldGridDrawingPolicy.SetShaderParameters( immediateContext );
-		worldGridDrawingPolicy.Draw( immediateContext, worldGridMeshBatch, *InSceneView );
-	}
+	
+	// Finishing render and delete scene view
 	sceneRenderer.FinishRenderViewTarget( InViewportRHI );
-
-	// Delete scene view
 	delete InSceneView;
 }
 
@@ -105,8 +69,9 @@ FSceneView* FEditorLevelViewportClient::CalcSceneView( FViewport* InViewport )
 	}
 	else
 	{
-		float		halfWidth	= viewportSizeX / 2.f;
-		float		halfHeight	= viewportSizeY / 2.f;
+		const float		zoom		= orthoZoom / ( viewportSizeX * 15.0f );
+		float			halfWidth	= zoom * viewportSizeX / 2.f;
+		float			halfHeight	= zoom * viewportSizeY / 2.f;
 		projectionMatrix = glm::ortho( -halfWidth, halfWidth, -halfHeight, halfHeight, ( float )-HALF_WORLD_MAX, ( float )HALF_WORLD_MAX );
 	}
 
@@ -139,7 +104,7 @@ FSceneView* FEditorLevelViewportClient::CalcSceneView( FViewport* InViewport )
 
 	viewMatrix = glm::lookAt( viewLocation, viewLocation + targetDirection, axisUp );
 
-	FSceneView*		sceneView = new FSceneView( projectionMatrix, viewMatrix, GetBackgroundColor(), showFlags );
+	FSceneView*		sceneView = new FSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), GetBackgroundColor(), showFlags );
 	return sceneView;
 }
 

@@ -16,6 +16,19 @@
 
 /**
  * @ingroup Engine
+ * @brief Enumeration of viewport type
+ */
+enum ELevelViewportType
+{
+	LVT_None = -1,			/**< None */
+	LVT_OrthoXY,			/**< Ortho XY */
+	LVT_OrthoXZ,			/**< Ortho XZ */
+	LVT_OrthoYZ,			/**< Ortho YZ */
+	LVT_Perspective			/**< Perspective */
+};
+
+/**
+ * @ingroup Engine
  * Implementation for work with viewport
  */
 class FViewport : public FRenderResource, public FRefCounted

@@ -36,6 +36,8 @@
 	- Added in RHI possibility draw from array
 	- Removed reference count in FShader as unnecessary
 	- Added in RHI possibility change depth test state
+	- Added possibility render simple elements (line, points, etc)
+	- Implemented rendering grid in WorldEd viewports
 
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

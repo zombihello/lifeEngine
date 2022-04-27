@@ -27,7 +27,7 @@ public:
 	/**
 	 * @brief Default constructor
 	 */
-	FORCEINLINE					FColor() :
+	FORCEINLINE	FColor() :
 		r( 0 ),
 		g( 0 ),
 		b( 0 ),
@@ -42,9 +42,20 @@ public:
 	 * @param[in] InBlue Blue component of color
 	 * @param[in] InAlpha Alpha component of color
 	 */
-	FORCEINLINE					FColor( uint8 InRed, uint8 InGreen, uint8 InBlue, uint8 InAlpha = 255 )
+	FORCEINLINE	FColor( uint8 InRed, uint8 InGreen, uint8 InBlue, uint8 InAlpha = 255 )
 	{
 		Set( InRed, InGreen, InBlue, InAlpha );
+	}
+
+	/**
+	 * @brief Constructor
+	 * @warning Values must be in range [0:1]
+	 *
+	 * @param InLinearColor	Linear color
+	 */
+	FORCEINLINE FColor( const FVector4D& InLinearColor )
+	{
+		Set( InLinearColor );
 	}
 
 	/**
@@ -66,82 +77,38 @@ public:
 	 */
 	FORCEINLINE void			Set( uint8 InRed, uint8 InGreen, uint8 InBlue, uint8 InAlpha = 255 )
 	{
-		SetR( InRed );
-		SetG( InGreen );
-		SetB( InBlue );
-		SetA( InAlpha );
-	}
-	
-	/**
-	 * @brief Set red component
-	 * @param[in] InRed Red component of color
-	 */
-	FORCEINLINE void			SetR( uint8 InRed )
-	{
 		r = InRed;
-	}
-
-	/**
-	 * @brief Set green component
-	 * @param[in] InGreen Green component of color
-	 */
-	FORCEINLINE void			SetG( uint8 InGreen )
-	{
 		g = InGreen;
-	}
-
-	/**
-	 * @brief Set blue component
-	 * @param[in] InBlue Blue component of color
-	 */
-	FORCEINLINE void			SetB( uint8 InBlue )
-	{
 		b = InBlue;
-	}
-
-	/**
-	 * @brief Set alpha component
-	 * @param[in] InAlpha Alpha component of color
-	 */
-	FORCEINLINE void			SetA( uint8 InAlpha )
-	{
 		a = InAlpha;
 	}
 
 	/**
-	 * @brief Get red component
-	 * @return Red component
+	 * @brief Set components of color
+	 * @warning Values must be in range [0:1]
+	 *
+	 * @param InRed			Red component of color
+	 * @param InGreen		Green component of color
+	 * @param InBlue		Blue component of color
+	 * @param InAlpha		Alpha component of color
 	 */
-	FORCEINLINE uint8			GetR() const
+	FORCEINLINE void			Set( float InRed, float InGreen, float InBlue, float InAlpha = 255 )
 	{
-		return r;
+		r = InRed * 255.f;
+		g = InGreen * 255.f;
+		b = InBlue * 255.f;
+		a = InAlpha * 255.f;
 	}
 
 	/**
-	 * @brief Get green component
-	 * @return Green component
+	 * @brief Set components of color
+	 * @warning Values must be in range [0:1]
+	 *
+	 * @param InLinearColor	Linear color
 	 */
-	FORCEINLINE uint8			GetG() const
+	FORCEINLINE void			Set( const FVector4D& InLinearColor )
 	{
-		return g;
-	}
-
-	/**
-	 * @brief Get blue component
-	 * @return blue component
-	 */
-	FORCEINLINE uint8			GetB() const
-	{
-		return b;
-	}
-
-	/**
-	 * @brief Get alpha component
-	 * @return Alpha component
-	 */
-	FORCEINLINE uint8			GetA() const
-	{
-		return a;
+		Set( InLinearColor.x, InLinearColor.y, InLinearColor.z, InLinearColor.a );
 	}
 
 	/**
@@ -192,7 +159,6 @@ public:
 	static FColor			white;			/**< White color */
 	static FColor			red;			/**< Red color */
 
-private:
 	uint8			r;			/**< Red component of color */
 	uint8			g;			/**< Green component of color */
 	uint8			b;			/**< Blue component of color */

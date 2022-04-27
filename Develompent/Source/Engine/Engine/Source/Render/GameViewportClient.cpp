@@ -72,6 +72,6 @@ FSceneView* FGameViewportClient::CalcSceneView( FViewport* InViewport, const FCa
 	FVector		axisUp				= InCameraView.rotation.RotateVector( FMath::vectorUp );
 	FMatrix		viewMatrix			= glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
 
-	FSceneView*		sceneView = new FSceneView( projectionMatrix, viewMatrix, FColor::black, SHOW_DefaultGame );
+	FSceneView*		sceneView = new FSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), FColor::black, SHOW_DefaultGame );
 	return sceneView;
 }

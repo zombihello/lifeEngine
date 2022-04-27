@@ -120,6 +120,7 @@ void LBaseEngine::Init()
 
 void LBaseEngine::Shutdown()
 {
+	GWorld->CleanupWorld();
 	GUIEngine->Shutdown();
 	GPhysicsEngine.Shutdown();
 }

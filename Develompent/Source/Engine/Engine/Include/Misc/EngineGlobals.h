@@ -86,6 +86,12 @@ extern std::vector< std::pair< std::wstring, ESurfaceType > >		GSurfaceTypeNames
  * @brief Is need cook editor content
  */
 extern bool						GIsCookEditorContent;
+
+/**
+ * @ingroup Engine
+ * @brief Allow debug shader dump
+ */
+extern bool						GAllowDebugShaderDump;
 #endif // WITH_EDITOR
 
 #endif // !ENGINEGLOBALS_H

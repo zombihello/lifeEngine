@@ -109,6 +109,8 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 	shaderCache.Serialize( *archive );
 	delete archive;
 
+	uint32														numLoadedShaders = 0;
+	uint32														numLegacyShaders = 0;
 	const std::vector< FShaderCache::FShaderCacheItem >			shaderCacheItems = shaderCache.GetItems();
 	for ( uint32 indexItem = 0, countItems = ( uint32 )shaderCacheItems.size(); indexItem < countItems; ++indexItem )
 	{
@@ -117,9 +119,12 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 		if ( !shader )
 		{
 			LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s not loaded, because not found meta type" ), item.name.c_str() );
+			++numLegacyShaders;
 			continue;
-		}	
+		}
+
 		shader->Init( item );
+		++numLoadedShaders;
 
 		FVertexFactoryMetaType*			vertexFactoryType = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
 		if ( vertexFactoryType )
@@ -133,6 +138,7 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 		}	
 	}
 
+	LE_LOG( LT_Log, LC_Shader, TEXT( "Loaded %i shaders, %i legacy" ), numLoadedShaders, numLegacyShaders );
 	return true;
 }
 

@@ -1,5 +1,5 @@
 #include "Render/Shaders/ScreenShader.h"
-#include "Render/VertexFactory/LocalVertexFactory.h"
+#include "Render/VertexFactory/SimpleElementVertexFactory.h"
 
 IMPLEMENT_SHADER_TYPE( FScreenVertexShader, TEXT( "ScreenVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
 IMPLEMENT_SHADER_TYPE( FScreenPixelShader, TEXT( "ScreenPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
@@ -12,7 +12,7 @@ bool FScreenVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, class F
 		return true;
 	}
 
-	return InVFMetaType->GetHash() == FLocalVertexFactory::staticType.GetHash();
+	return InVFMetaType->GetHash() == FSimpleElementVertexFactory::staticType.GetHash();
 }
 
 bool FScreenPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
@@ -22,7 +22,7 @@ bool FScreenPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class FV
 		return true;
 	}
 
-	return InVFMetaType->GetHash() == FLocalVertexFactory::staticType.GetHash();
+	return InVFMetaType->GetHash() == FSimpleElementVertexFactory::staticType.GetHash();
 }
 #endif // WITH_EDITOR
 

@@ -84,4 +84,19 @@ FORCEINLINE TType Clamp( const TType InX, const TType InMin, const TType InMax )
 	return InX < InMin ? InMin : InX < InMax ? InX : InMax;
 }
 
+/**
+ * @ingroup Core
+ * Swap InOutA and InOutB
+ * 
+ * @param InOutA	Value A
+ * @param InOutB	Value B
+ */
+template< typename TType >
+FORCEINLINE void Swap( TType& InOutA, TType& InOutB )
+{
+	const TType		temp = InOutA;
+	InOutA = InOutB;
+	InOutB = temp;
+}
+
 #endif // !TEMPLATE_H

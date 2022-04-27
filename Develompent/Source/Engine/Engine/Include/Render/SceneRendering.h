@@ -69,6 +69,15 @@ public:
 		InitInternal( InVertexFactory, wireframeMaterial, InDepthBias );
 	}
 
+	/**
+	 * @brief Get type hash
+	 * @return Return hash of drawing policy
+	 */
+	virtual uint64 GetTypeHash() const override
+	{
+		return appMemFastHash( wireframeColor, TBaseMeshDrawingPolicy::GetTypeHash() );
+	}
+
 private:
 	FColor			wireframeColor;		/**< Wireframe color */
 };

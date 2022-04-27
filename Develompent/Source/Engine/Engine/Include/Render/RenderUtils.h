@@ -107,4 +107,14 @@ public:
  */
 void DrawDenormalizedQuad( class FBaseDeviceContextRHI* InDeviceContextRHI, float InX, float InY, float InSizeX, float InSizeY, float InU, float InV, float InSizeU, float InSizeV, uint32 InTargetSizeX, uint32 InTargetSizeY, uint32 InTextureSizeX, uint32 InTextureSizeY, float InClipSpaceQuadZ );
 
+/**
+ * @ingroup Engine
+ * Draws a wireframe box
+ *
+ * @param	InSDG			Scene depth group
+ * @param	InBox			The FBox to use for drawing
+ * @param	InColor			Color of the box
+ */
+void DrawWireframeBox( struct FSceneDepthGroup& InSDG, const class FBox& InBox, const class FColor& InColor );
+
 #endif // !RENDERUTILS_H

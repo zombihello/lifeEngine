@@ -48,9 +48,9 @@ FSpriteVertexShaderParameters::FSpriteVertexShaderParameters()
 void FSpriteVertexShaderParameters::Bind( const class FShaderParameterMap& InParameterMap )
 {
 	FGeneralVertexShaderParameters::Bind( InParameterMap );
-	flipVerticalParameter.Bind( InParameterMap, TEXT( "bFlipVertical" ) );
-	flipHorizontalParameter.Bind( InParameterMap, TEXT( "bFlipHorizontal" ) );
-	textureRectParameter.Bind( InParameterMap, TEXT( "textureRect" ) );
+	flipVerticalParameter.Bind( InParameterMap, TEXT( "bFlipVertical" ), true );
+	flipHorizontalParameter.Bind( InParameterMap, TEXT( "bFlipHorizontal" ), true );
+	textureRectParameter.Bind( InParameterMap, TEXT( "textureRect" ), true );
 	spriteSizeParameter.Bind( InParameterMap, TEXT( "spriteSize" ) );
 }
 

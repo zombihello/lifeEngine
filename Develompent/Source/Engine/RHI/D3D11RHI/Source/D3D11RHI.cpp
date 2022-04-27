@@ -1152,15 +1152,18 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 	reflector->Release();
 
 	// We don't need the reflection data anymore, and it just takes up space
-	ID3DBlob*		strippedShader = nullptr;
-	result			= D3DStripShader( OutOutput.code.data(), OutOutput.code.size(), D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO | D3DCOMPILER_STRIP_TEST_BLOBS, &strippedShader );
-	if ( result == S_OK )
+	if ( !InDebugDump )
 	{
-		uint32		numShaderBytes = strippedShader->GetBufferSize();
+		ID3DBlob*		strippedShader = nullptr;
+		result = D3DStripShader( OutOutput.code.data(), OutOutput.code.size(), D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO | D3DCOMPILER_STRIP_TEST_BLOBS, &strippedShader );
+		if ( result == S_OK )
+		{
+			uint32		numShaderBytes = strippedShader->GetBufferSize();
 
-		OutOutput.code.resize( numShaderBytes );
-		memcpy( OutOutput.code.data(), strippedShader->GetBufferPointer(), numShaderBytes );
-		strippedShader->Release();
+			OutOutput.code.resize( numShaderBytes );
+			memcpy( OutOutput.code.data(), strippedShader->GetBufferPointer(), numShaderBytes );
+			strippedShader->Release();
+		}
 	}
 
 	// Free temporary strings allocated for the macros
@@ -1217,7 +1220,7 @@ void FD3D11RHI::DrawImGUI( class FBaseDeviceContextRHI* InDeviceContext, ImDrawD
 #if FRAME_CAPTURE_MARKERS
 void FD3D11RHI::BeginDrawEvent( class FBaseDeviceContextRHI* InDeviceContext, const FColor& InColor, const tchar* InName )
 {
-	D3DPERF_BeginEvent( D3DCOLOR_RGBA( InColor.GetR(), InColor.GetG(), InColor.GetB(), InColor.GetA() ), InName );
+	D3DPERF_BeginEvent( D3DCOLOR_RGBA( InColor.r, InColor.g, InColor.b, InColor.a ), InName );
 }
 
 void FD3D11RHI::EndDrawEvent( class FBaseDeviceContextRHI* InDeviceContext )

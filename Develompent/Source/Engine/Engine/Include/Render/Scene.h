@@ -18,6 +18,7 @@
 #include "Render/Material.h"
 #include "Render/SceneRendering.h"
 #include "Render/Frustum.h"
+#include "Render/BatchedSimpleElements.h"
 #include "Components/CameraComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "RHI/BaseRHI.h"
@@ -37,18 +38,14 @@ typedef uint64		EShowFlags;
 enum EShowFlag
 {
 	// General and game flags
-	SHOW_None			= 0,								/**< Nothig show */
-	SHOW_Sprite			= 1 << 0,							/**< Sprite show */
-	SHOW_StaticMesh		= 1 << 1,							/**< Static mesh show */
+	SHOW_None				= 0,													/**< Nothig show */
+	SHOW_Sprite				= 1 << 0,												/**< Sprite show */
+	SHOW_StaticMesh			= 1 << 1,												/**< Static mesh show */
+	SHOW_Wireframe			= 1 << 2,												/**< Show all geometry in wireframe mode */
+	SHOW_SimpleElements		= 1 << 3,												/**< Show simple elements (only for debug and WorldEd) */
 
-	SHOW_DefaultGame	= SHOW_Sprite | SHOW_StaticMesh,	/**< Default show flags for game */	
-
-	// WorldEd flags
-#if WITH_EDITOR
-	SHOW_Wireframe		= 1 << 2,							/**< Show all geometry in wireframe mode */
-
-	SHOW_DefaultEditor	= SHOW_Sprite | SHOW_StaticMesh		/**< Default show flags for editor */
-#endif // WITH_EDITOR
+	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements,	/**< Default show flags for game */
+	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements	/**< Default show flags for editor */
 };
 
 /**
@@ -63,10 +60,12 @@ public:
 	 * 
 	 * @param InProjectionMatrix		Projection matrix
 	 * @param InViewMatrix				View matrix
+	 * @param InSizeX					Size of viewport by X
+	 * @param InSizeY					Size of viewport by Y
 	 * @param InBackgroundColor			Background color
 	 * @param InShowFlags				Show flags
 	 */
-	FSceneView( const FMatrix& InProjectionMatrix, const FMatrix& InViewMatrix, const FColor& InBackgroundColor, EShowFlags InShowFlags );
+	FSceneView( const FMatrix& InProjectionMatrix, const FMatrix& InViewMatrix, float InSizeX, float InSizeY, const FColor& InBackgroundColor, EShowFlags InShowFlags );
 
 	/**
 	 * Get view matrix
@@ -122,6 +121,24 @@ public:
 		return showFlags;
 	}
 
+	/**
+	 * Get size of viewport by X
+	 * @return Return size of viewport by X
+	 */
+	FORCEINLINE float GetSizeX() const
+	{
+		return sizeX;
+	}
+
+	/**
+	 * Get size of viewport by Y
+	 * @return Return size of viewport by Y
+	 */
+	FORCEINLINE float GetSizeY() const
+	{
+		return sizeY;
+	}
+
 private:
 	FMatrix			viewMatrix;				/**< View matrix */
 	FMatrix			projectionMatrix;		/**< Projection matrix */
@@ -129,6 +146,8 @@ private:
 	FFrustum		frustum;				/**< Frustum */
 	FColor			backgroundColor;		/**< Background color */
 	EShowFlags		showFlags;				/**< Show flags for the view */
+	float			sizeX;					/**< Size X of viewport */
+	float			sizeY;					/**< Size Y of viewport */
 };
 
 /**
@@ -225,7 +244,7 @@ typedef std::unordered_set< FMeshBatch, FMeshBatch::FMeshBatchKeyFunc >		FMeshBa
  * @ingroup Engine
  * @brief Draw list of scene for mesh type
  */
-template< typename TDrawingPolicyType >
+template< typename TDrawingPolicyType, bool InAllowWireframe = true >
 class FMeshDrawList
 {
 public:
@@ -422,7 +441,8 @@ public:
 
 		// Wireframe drawing available only with editor
 #if WITH_EDITOR
-		bool		bWireframe = InSceneView.GetShowFlags() & SHOW_Wireframe;
+		TWireframeMeshDrawingPolicy< TDrawingPolicyType >		wireframeDrawingPolicy;		// Drawing policy for wireframe mode
+		bool													bWireframe = InAllowWireframe && ( InSceneView.GetShowFlags() & SHOW_Wireframe );
 #endif // WITH_EDITOR
 
 		for ( FMapDrawData::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
@@ -473,11 +493,7 @@ public:
 	}
 
 private:
-	FMapDrawData											meshes;						/**< Map of meshes sorted by materials for draw */
-
-#if WITH_EDITOR
-	TWireframeMeshDrawingPolicy< TDrawingPolicyType >		wireframeDrawingPolicy;		/**< Drawing policy for wireframe mode */
-#endif // WITH_EDITOR
+	FMapDrawData		meshes;						/**< Map of meshes sorted by materials for draw */
 };
 
 /**
@@ -486,8 +502,10 @@ private:
  */
 enum ESceneDepthGroup
 {
-	SDG_World,		/**< World */
-	SDG_Max			/**< Num depth groups */
+	SDG_WorldEdBackground,	/**< Background of viewport in WorldEd */
+	SDG_World,				/**< World */
+	SDG_WorldEdForeground,	/**< Foreground of viewport in WorldEd */
+	SDG_Max					/**< Num depth groups */
 };
 
 /**
@@ -501,12 +519,34 @@ struct FSceneDepthGroup
 	 */
 	FORCEINLINE void Clear()
 	{
+#if !SHIPPING_BUILD
+		simpleElements.Clear();
+#endif // !SHIPPING_BUILD
+
 		staticMeshDrawList.Clear();
 		spriteDrawList.Clear();
 	}
 
-	FMeshDrawList< FStaticMeshDrawPolicy >		staticMeshDrawList;		/**< Draw list of static meshes */
-	FMeshDrawList< FStaticMeshDrawPolicy >		spriteDrawList;			/**< Draw list of sprites */
+	/**
+	 * @brief Is empty
+	 * @return Return TRUE if SDG is empty, else return FALSE
+	 */
+	FORCEINLINE bool IsEmpty() const
+	{
+		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0
+#if !SHIPPING_BUILD
+			&& simpleElements.IsEmpty()
+#endif // !SHIPPING_BUILD
+			;
+	}
+
+	// Simple elements use only for debug and WorldEd
+#if !SHIPPING_BUILD
+	FBatchedSimpleElements														simpleElements;			/**< Batched simple elements (lines, points, etc) */
+#endif // !SHIPPING_BUILD
+
+	FMeshDrawList< FStaticMeshDrawPolicy >										staticMeshDrawList;		/**< Draw list of static meshes */
+	FMeshDrawList< FStaticMeshDrawPolicy >										spriteDrawList;			/**< Draw list of sprites */
 };
 
 /**
@@ -531,16 +571,26 @@ public:
 	virtual void RemovePrimitive( class LPrimitiveComponent* InPrimitive ) {}
 
 	/**
+	 * @brief Clear scene
+	 */
+	virtual void Clear() {}
+
+	/**
 	 * @brief Build SDGs for render scene from current view
 	 * 
 	 * @param InSceneView Current view of scene
 	 */
 	virtual void BuildSDGs( const FSceneView& InSceneView ) {}
+
+	/**
+	 * @brief Clear all instances in SDGs
+	 */
+	virtual void ClearSDGs() {}
 };
 
 /**
  * @ingroup Engine
- * @brief Main of scene manager
+ * @brief Main of scene manager containing all primitive components
  */
 class FScene : public FBaseScene
 {
@@ -560,11 +610,21 @@ public:
 	virtual void RemovePrimitive( class LPrimitiveComponent* InPrimitive ) override;
 
 	/**
+	 * @brief Clear scene
+	 */
+	virtual void Clear() override;
+
+	/**
 	 * @brief Build SDGs for render scene from current view
 	 *
 	 * @param InSceneView Current view of scene
 	 */
 	virtual void BuildSDGs( const FSceneView& InSceneView ) override;
+
+	/**
+	 * @brief Clear all instances in SDGs
+	 */
+	virtual void ClearSDGs() override;
 
 	/**
 	 * @brief Get depth group

@@ -122,8 +122,6 @@ FD3D11IndexBufferRHI::FD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uin
 	device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
 #endif // DO_CHECK
 
-	d3d11Buffer->AddRef();
-
 #if !SHIPPING_BUILD
 	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( FString::Format( TEXT( "%s[INDEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
@@ -180,8 +178,6 @@ FD3D11ConstantBuffer::FD3D11ConstantBuffer( uint32 InSize, const tchar* InBuffer
 #else
 	device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
 #endif // DO_CHECK
-
-	d3d11Buffer->AddRef();
 
 #if !SHIPPING_BUILD
 	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( FString::Format( TEXT( "%s[CONSTANT_BUFFER]" ), InBufferName ).c_str() ) );

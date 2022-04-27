@@ -34,18 +34,6 @@ public:
     virtual ~LStaticMeshComponent();
 
 	/**
-	 * @brief Adds a draw policy link in SDGs
-	 *
-	 * @param InScene Scene
-	 */
-	virtual void LinkDrawList( class FScene* InScene ) override;
-
-	/**
-	 * @brief Removes a draw policy link from SDGs
-	 */
-	virtual void UnlinkDrawList() override;
-
-	/**
 	 * @brief Adds mesh batches for draw in scene
 	 *
 	 * @param InSceneView Current view of scene
@@ -109,17 +97,15 @@ private:
 	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLinkRef		FDrawingPolicyLinkRef;
 
 	/**
-	 * @brief Add to scene drawing policy link
+	 * @brief Adds a draw policy link in SDGs
 	 */
-	void AddDrawingPolicyLink();
+	virtual void LinkDrawList() override;
 
 	/**
-	 * @brief Remove from scene drawing policy link
+	 * @brief Removes a draw policy link from SDGs
 	 */
-	void RemoveDrawingPolicyLink();
+	virtual void UnlinkDrawList() override;
 
-	bool										bIsDirtyDrawingPolicyLink;		/**< Is dirty drawing policy link. If flag equal true - need update drawing policy link */
-	class FScene*								scene;							/**< The current scene where the primitive is located  */
 	FStaticMeshRef								staticMesh;						/**< Static mesh */
 	std::vector< FMaterialRef >					materials;						/**< Override materials */
 	std::vector< FDrawingPolicyLinkRef >		drawingPolicyLinks;				/**< Array of reference to drawing policy link in scene */

@@ -140,6 +140,9 @@ void FEngineLoop::SerializeConfigs()
 	{
 		LE_LOG( LT_Warning, LC_Editor, TEXT( "Enabled cook editor content" ) );
 	}
+
+	// Is allow shader debug dump
+	GAllowDebugShaderDump			= GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) ).GetBool();
 #endif // WITH_EDITOR
 }
 

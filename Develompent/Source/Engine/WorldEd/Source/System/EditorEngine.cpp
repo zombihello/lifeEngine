@@ -22,10 +22,6 @@ LEditorEngine::~LEditorEngine()
 void LEditorEngine::Init()
 {
 	Super::Init();
-
-	// Init world grid
-	worldGrid = new FWorldGrid();
-	worldGrid->Update( -HALF_WORLD_MAX, HALF_WORLD_MAX, 16.f );
 }
 
 void LEditorEngine::Tick( float InDeltaSeconds )
@@ -45,8 +41,8 @@ void LEditorEngine::Tick( float InDeltaSeconds )
 
 void LEditorEngine::Shutdown()
 {
+	viewports.clear();
 	Super::Shutdown();
-	worldGrid.SafeRelease();
 }
 
 void LEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage )

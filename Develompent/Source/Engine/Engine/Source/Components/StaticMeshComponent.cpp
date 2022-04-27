@@ -5,55 +5,19 @@
 IMPLEMENT_CLASS( LStaticMeshComponent )
 
 LStaticMeshComponent::LStaticMeshComponent()
-	: bIsDirtyDrawingPolicyLink( false )
-	, scene( nullptr )
 {}
 
 LStaticMeshComponent::~LStaticMeshComponent()
 {}
 
-void LStaticMeshComponent::LinkDrawList( class FScene* InScene )
-{
-	check( InScene );
-
-	// If the primitive is already connected to another scene - remove the link 
-	if ( scene && scene != InScene )
-	{
-		UnlinkDrawList();
-	}
-
-	// Memorize a new scene 
-	scene = InScene;
-
-	// Add to scene draw policy link
-	AddDrawingPolicyLink();
-	bIsDirtyDrawingPolicyLink = false;
-}
-
-void LStaticMeshComponent::UnlinkDrawList()
-{
-	// If the primitive not connected to scene - exit from method
-	if ( !scene )
-	{
-		return;
-	}
-
-	// Remove all draw policy links
-	RemoveDrawingPolicyLink();
-	bIsDirtyDrawingPolicyLink = false;
-
-	// Forget the scene 
-	scene = nullptr;
-}
-
-void LStaticMeshComponent::AddDrawingPolicyLink()
+void LStaticMeshComponent::LinkDrawList()
 {
 	check( scene );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( !drawingPolicyLinks.empty() )
 	{
-		RemoveDrawingPolicyLink();
+		UnlinkDrawList();
 	}
 
 	// If static mesh is valid - add to scene draw policy link
@@ -100,7 +64,7 @@ void LStaticMeshComponent::AddDrawingPolicyLink()
 	}
 }
 
-void LStaticMeshComponent::RemoveDrawingPolicyLink()
+void LStaticMeshComponent::UnlinkDrawList()
 {
 	check( scene );
 
@@ -133,11 +97,11 @@ void LStaticMeshComponent::AddToDrawList( const class FSceneView& InSceneView )
 
 		if ( staticMesh )
 		{
-			AddDrawingPolicyLink();
+			LinkDrawList();
 		}
 		else
 		{
-			RemoveDrawingPolicyLink();
+			UnlinkDrawList();
 			return;
 		}
 	}

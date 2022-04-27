@@ -13,7 +13,7 @@
 
 #include "Logger/LoggerMacros.h"
 #include "System/BaseEngine.h"
-#include "Render/WorldGrid.h"
+#include "System/EditorConstraints.h"
 
 /**
  * @ingroup WorldEd
@@ -104,18 +104,26 @@ public:
 	virtual std::wstring GetEditorName() const;
 
 	/**
-	 * Get world grid
-	 * 
-	 * @return Return world grid
+	 * Get editor constraints
+	 * @return Return editor constraints
 	 */
-	FORCEINLINE FWorldGridRef GetWorldGrid() const
+	FORCEINLINE FEditorConstraints& GetConstraints()
 	{
-		return worldGrid;
+		return constraints;
+	}
+
+	/**
+	 * Get editor constraints
+	 * @return Return editor constraints
+	 */
+	FORCEINLINE const FEditorConstraints& GetConstraints() const
+	{
+		return constraints;
 	}
 
 private:
-	std::vector< class FViewport* >			viewports;		/**< Array of viewports for render */
-	FWorldGridRef							worldGrid;		/**< World grid */
+	std::vector< class FViewport* >			viewports;				/**< Array of viewports for render */
+	FEditorConstraints						constraints;			/**< Editor constraints */
 };
 
 #endif // !EDITORENGINE_H

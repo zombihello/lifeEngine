@@ -6,36 +6,38 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#ifndef LOCALVERTEXFACTORY_H
-#define LOCALVERTEXFACTORY_H
+#ifndef SIMPLEELEMENTVERTEXFACTORY_H
+#define SIMPLEELEMENTVERTEXFACTORY_H
 
 #include "Math/Math.h"
+#include "Math/Color.h"
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/RenderUtils.h"
 
  /**
   * @ingroup Engine
-  * Vertex type for render in screen space
+  * Simple element vertex type
   */
-struct FLocalVertexType
+struct FSimpleElementVertexType
 {
 	FVector4D		position;		/**< Position vertex */
 	FVector2D		texCoord;		/**< Texture coords */
+	FColor			color;			/**< Color */
 
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const FLocalVertexType& InOther ) const
+	bool FORCEINLINE operator==( const FSimpleElementVertexType& InOther ) const
 	{
-		return position == InOther.position && texCoord == InOther.texCoord;
+		return position == InOther.position && texCoord == InOther.texCoord && color == InOther.color;
 	}
 };
 
 /**
  * @ingroup Engine
- * The local vertex declaration resource type
+ * The simple element vertex declaration resource type
  */
-class FLocalVertexDeclaration : public FRenderResource
+class FSimpleElementVertexDeclaration : public FRenderResource
 {
 public:
 	/**
@@ -67,17 +69,17 @@ private:
 
 /**
  * @ingroup Engine
- * Global resource of local vertex declaration
+ * Global resource of simple element vertex declaration
  */
-extern TGlobalResource< FLocalVertexDeclaration >			GLocalVertexDeclaration;
+extern TGlobalResource< FSimpleElementVertexDeclaration >			GSimpleElementVertexDeclaration;
 
 /**
  * @ingroup Engine
- * Vertex factory for render in screen space
+ * Simple element vertex factory
  */
-class FLocalVertexFactory : public FVertexFactory
+class FSimpleElementVertexFactory : public FVertexFactory
 {
-	DECLARE_VERTEX_FACTORY_TYPE( FLocalVertexFactory )
+	DECLARE_VERTEX_FACTORY_TYPE( FSimpleElementVertexFactory )
 
 public:
 	enum EStreamSourceSlot
@@ -107,4 +109,4 @@ public:
 	static FVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
 };
 
-#endif // !LOCALVERTEXFACTORY_H
+#endif // !SIMPLEELEMENTVERTEXFACTORY_H

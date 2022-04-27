@@ -24,13 +24,13 @@ bool WxBitmap::Load( const std::wstring& InFilename, bool InIsUseMask /* = false
 	if ( !bIsWxPNGHandleInited )
 	{
 		wxImage::AddHandler( new wxPNGHandler );
-		bIsWxPNGHandleInited = false;
+		bIsWxPNGHandleInited = true;
 	}
 
 	const bool		bResult = LoadFile( FString::Format( TEXT( "%s/Engine/Editor/%s.png" ), appBaseDir().c_str(), InFilename.c_str() ), wxBITMAP_TYPE_PNG );
 	if ( InIsUseMask )
 	{
-		SetMask( new wxMask( *this, wxColor( InColorMask.GetR(), InColorMask.GetG(), InColorMask.GetB() ) ) );
+		SetMask( new wxMask( *this, wxColor( InColorMask.r, InColorMask.g, InColorMask.b ) ) );
 	}
 
 	return bResult;
