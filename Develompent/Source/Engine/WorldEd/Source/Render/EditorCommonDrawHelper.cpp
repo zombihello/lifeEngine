@@ -26,8 +26,8 @@ void FEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 
 	const FMatrix&				projectionMatrix = InSceneView->GetProjectionMatrix();
 	FMatrix	invViewProjMatrix	= FMath::InverseMatrix( projectionMatrix ) * FMath::InverseMatrix( InSceneView->GetViewMatrix() );
-	int32	start				= FMath::Trunc( ( invViewProjMatrix * FVector4D( -1.f, -1.f, 0.5f, 1.f ) )[ InAxis ] / InViewportGridY );
-	int32	end					= FMath::Trunc( ( invViewProjMatrix * FVector4D( +1.f, +1.f, 0.5f, 1.f ) )[ InAxis ] / InViewportGridY );
+	int32	start				= FMath::Trunc( ( FVector4D( -1.f, -1.f, -1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY );
+	int32	end					= FMath::Trunc( ( FVector4D( +1.f, +1.f, +1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY );
 	if ( start > end )
 	{
 		Swap( start, end );
@@ -158,16 +158,16 @@ void FEditorCommonDrawHelper::DrawGrid( const class FSceneView* InSceneView, ELe
 	if ( bDrawColoredOrigin )
 	{
 		a = FVector( 0.f, 0.f, ( float )HALF_WORLD_MAX1 );			b = FVector( 0.f, 0.f, 0.f );
-		SDG.simpleElements.AddLine( a, b, FColor( 64, 64, 255 ) );
-
-		a = FVector( 0.f, 0.f, 0.f );								b = FVector( 0.f, 0.f, ( float )-HALF_WORLD_MAX1 );
-		SDG.simpleElements.AddLine( a, b, FColor( 32, 32, 128 ) );
-
-		a = FVector( 0.f, ( float )HALF_WORLD_MAX1, 0.f );			b = FVector( 0.f, 0.f, 0.f );
 		SDG.simpleElements.AddLine( a, b, FColor( 64, 255, 64 ) );
 
-		a = FVector( 0.f, 0.f, 0.f );								b = FVector( 0.f, ( float )-HALF_WORLD_MAX1, 0.f );
+		a = FVector( 0.f, 0.f, 0.f );								b = FVector( 0.f, 0.f, ( float )-HALF_WORLD_MAX1 );
 		SDG.simpleElements.AddLine( a, b, FColor( 32, 128, 32 ) );
+
+		a = FVector( 0.f, ( float )HALF_WORLD_MAX1, 0.f );			b = FVector( 0.f, 0.f, 0.f );
+		SDG.simpleElements.AddLine( a, b, FColor( 64, 64, 255 ) );
+
+		a = FVector( 0.f, 0.f, 0.f );								b = FVector( 0.f, ( float )-HALF_WORLD_MAX1, 0.f );
+		SDG.simpleElements.AddLine( a, b, FColor( 32, 32, 128 ) );
 
 		a = FVector( ( float )HALF_WORLD_MAX1, 0.f, 0.f );			b = FVector( 0.f, 0.f, 0.f );
 		SDG.simpleElements.AddLine( a, b, FColor( 255, 64, 64 ) );
