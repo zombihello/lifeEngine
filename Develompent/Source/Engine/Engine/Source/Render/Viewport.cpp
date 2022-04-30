@@ -80,6 +80,14 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 	}
 }
 
+void FViewport::Tick( float InDeltaSeconds )
+{
+	if ( viewportClient )
+	{
+		viewportClient->Tick( InDeltaSeconds );
+	}
+}
+
 void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
 	if ( !IsInitialized() )

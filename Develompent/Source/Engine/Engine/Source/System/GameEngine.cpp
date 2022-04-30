@@ -42,6 +42,7 @@ void LGameEngine::Tick( float InDeltaSeconds )
 {
 	Super::Tick( InDeltaSeconds );
 	GWorld->Tick( InDeltaSeconds );
+	viewport.Tick( InDeltaSeconds );
 
 	// Wait while render thread is rendering of the frame
 	FlushRenderingCommands();

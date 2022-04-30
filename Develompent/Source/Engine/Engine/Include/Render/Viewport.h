@@ -83,6 +83,11 @@ public:
 	void Draw( bool InIsShouldPresent = true );
 
 	/**
+	 * Update logic of viewport
+	 */
+	void Tick( float InDeltaSeconds );
+
+	/**
 	 * Set viewport client
 	 * 
 	 * @param InViewportClient		Viewport client
@@ -166,6 +171,11 @@ public:
 	 * Destructor
 	 */
 	virtual ~FViewportClient() {}
+
+	/**
+	 * Update logic of viewport client
+	 */
+	virtual void Tick( float InDeltaSeconds ) {}
 
 	/**
 	 * Draw viewport

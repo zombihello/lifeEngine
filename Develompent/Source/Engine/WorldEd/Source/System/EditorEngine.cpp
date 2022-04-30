@@ -37,6 +37,12 @@ void LEditorEngine::Tick( float InDeltaSeconds )
 	Super::Tick( InDeltaSeconds );
 	GWorld->Tick( InDeltaSeconds );
 
+	// Update viewports
+	for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
+	{
+		viewports[ index ]->Tick( InDeltaSeconds );
+	}
+
 	// Wait while render thread is rendering of the frame
 	FlushRenderingCommands();
 

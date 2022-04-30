@@ -30,7 +30,7 @@
  * @ingroup WorldEd
  * Macro of min camera speed
  */
-#define MIN_CAMERA_SPEED			1.f
+#define MIN_CAMERA_SPEED			0.5f
 
 /**
  * @ingroup WorldEd
@@ -46,9 +46,26 @@ FEditorLevelViewportClient::FEditorLevelViewportClient()
 	, viewRotation( FMath::rotatorZero )
 	, viewFOV( 90.f )
 	, orthoZoom( 10000.f )
-	, cameraSpeed( 3.f )
+	, cameraSpeed( MIN_CAMERA_SPEED )
 	, showFlags( SHOW_DefaultEditor )
+	, cameraMoveFlags( 0x0 )
 {}
+
+void FEditorLevelViewportClient::Tick( float InDeltaSeconds )
+{
+	// If we tracking mouse and this is perspective viewport - change view location
+	if ( bIsTracking && viewportType == LVT_Perspective )
+	{
+		FVector		targetDirection = viewRotation.RotateVector( FMath::vectorForward );
+		FVector		axisUp			= viewRotation.RotateVector( FMath::vectorUp );
+		FVector		axisRight		= FMath::CrossVector( targetDirection, axisUp );
+
+		if ( cameraMoveFlags & CMV_MoveForward )		viewLocation +=	targetDirection	* cameraSpeed;
+		if ( cameraMoveFlags & CMV_MoveBackward )		viewLocation +=	targetDirection	* -cameraSpeed;
+		if ( cameraMoveFlags & CMV_MoveLeft )			viewLocation +=	axisRight		* -cameraSpeed;
+		if ( cameraMoveFlags & CMV_MoveRight )			viewLocation +=	axisRight		* cameraSpeed;
+	}
+}
 
 void FEditorLevelViewportClient::Draw( FViewport* InViewport )
 {
@@ -97,7 +114,7 @@ void FEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
 			QApplication::setOverrideCursor( QCursor( Qt::BlankCursor ) );
-			bIsTracking = true;
+			bIsTracking			= true;
 		}
 		break;
 
@@ -106,7 +123,8 @@ void FEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
 			QApplication::restoreOverrideCursor();
-			bIsTracking = false;
+			bIsTracking			= false;
+			cameraMoveFlags		= 0x0;
 		}
 		break;
 
@@ -176,12 +194,10 @@ void FEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			// For perspective viewports its rotate camera
 			else
 			{
-				float			sensitivity = GInputSystem->GetMouseSensitivity();
-
 				// Update Yaw axis
 				if ( InWindowEvent.events.mouseMove.xDirection != 0.f )
 				{
-					viewRotation.yaw += InWindowEvent.events.mouseMove.xDirection * sensitivity;
+					viewRotation.yaw += InWindowEvent.events.mouseMove.xDirection * GInputSystem->GetMouseSensitivity();
 					if ( viewRotation.yaw < -360.f || viewRotation.yaw > 360.f )
 					{
 						viewRotation.yaw = 0.f;
@@ -191,7 +207,7 @@ void FEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 				// Update Pitch axis
 				if ( InWindowEvent.events.mouseMove.yDirection != 0.f )
 				{
-					viewRotation.pitch -= InWindowEvent.events.mouseMove.yDirection * sensitivity;
+					viewRotation.pitch -= InWindowEvent.events.mouseMove.yDirection * GInputSystem->GetMouseSensitivity();
 					if ( viewRotation.pitch > 90.f )
 					{
 						viewRotation.pitch = 90.f;
@@ -205,18 +221,30 @@ void FEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		}		
 		break;
 
+		// Event of key press
 	case SWindowEvent::T_KeyPressed:
 		if ( bIsTracking && viewportType == LVT_Perspective )
 		{
-			FVector		targetDirection		= viewRotation.RotateVector( FMath::vectorForward );
-			FVector		axisUp				= viewRotation.RotateVector( FMath::vectorUp );
-			FVector		axisRight			= FMath::CrossVector( targetDirection, axisUp );
 			switch ( InWindowEvent.events.key.code )
 			{
-			case BC_KeyW:		viewLocation += targetDirection * cameraSpeed;		break;
-			case BC_KeyS:		viewLocation += targetDirection * -cameraSpeed;		break;
-			case BC_KeyA:		viewLocation += axisRight * -cameraSpeed;			break;
-			case BC_KeyD:		viewLocation += axisRight * cameraSpeed;			break;
+			case BC_KeyW:		cameraMoveFlags |= CMV_MoveForward;			break;
+			case BC_KeyS:		cameraMoveFlags |= CMV_MoveBackward;		break;
+			case BC_KeyA:		cameraMoveFlags |= CMV_MoveLeft;			break;
+			case BC_KeyD:		cameraMoveFlags |= CMV_MoveRight;			break;
+			}
+		}
+		break;
+
+		// Event of release key
+	case SWindowEvent::T_KeyReleased:
+		if ( bIsTracking && viewportType == LVT_Perspective )
+		{
+			switch ( InWindowEvent.events.key.code )
+			{
+			case BC_KeyW:		cameraMoveFlags &= ~CMV_MoveForward;		break;
+			case BC_KeyS:		cameraMoveFlags &= ~CMV_MoveBackward;		break;
+			case BC_KeyA:		cameraMoveFlags &= ~CMV_MoveLeft;			break;
+			case BC_KeyD:		cameraMoveFlags &= ~CMV_MoveRight;			break;
 			}
 		}
 		break;

@@ -28,6 +28,11 @@ public:
 	FEditorLevelViewportClient();
 
 	/**
+	 * Update logic of viewport client
+	 */
+	virtual void Tick( float InDeltaSeconds ) override;
+
+	/**
 	 * @brief Draw viewport
 	 *
 	 * @param InViewport	Viewport
@@ -69,6 +74,17 @@ public:
 
 protected:
 	/**
+	 * @brief Enumeration of move camera flags
+	 */
+	enum ECameraMoveVector
+	{
+		CMV_MoveForward		= 1 << 0,		/**< Move forward */
+		CMV_MoveBackward	= 1 << 1,		/**< Move backward */
+		CMV_MoveLeft		= 1 << 2,		/**< Move left */
+		CMV_MoveRight		= 1 << 3		/**< Move right */
+	};
+
+	/**
 	 * @brief Calculate scene view
 	 * 
 	 * @warning Need delete allocated pointer
@@ -93,6 +109,7 @@ protected:
 	float						cameraSpeed;			/**< Camera speed (only for perspective projections) */
 	EShowFlags					showFlags;				/**< Show flags */
 	FEditorCommonDrawHelper		drawHelper;				/**< Draw helper */
+	byte						cameraMoveFlags;		/**< Camera move flags */
 };
 
 #endif // !EDITORLEVELVIEWPORTCLIENT_H
