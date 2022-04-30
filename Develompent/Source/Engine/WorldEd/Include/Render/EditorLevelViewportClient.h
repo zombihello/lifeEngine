@@ -13,6 +13,7 @@
 #include "Render/Viewport.h"
 #include "Render/Scene.h"
 #include "Render/EditorCommonDrawHelper.h"
+#include "System/WindowEvent.h"
 
 /**
  * @ingroup WorldEd
@@ -40,6 +41,13 @@ public:
 	 * @param InSceneView		Scene view
 	 */
 	void Draw_RenderThread( FViewportRHIRef InViewportRHI, class FSceneView* InSceneView );
+
+	/**
+	 * @brief Process event
+	 *
+	 * @param InWindowEvent			Window event
+	 */
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
 
 	/**
 	 * @brief Set viewport type
@@ -76,11 +84,13 @@ protected:
 	FColor GetBackgroundColor() const;
 
 	bool						bSetListenerPosition;	/**< Is need sets the listener position */
+	bool						bIsTracking;			/**< Is mouse tracking */
 	ELevelViewportType			viewportType;			/**< Viewport type */	
 	FVector						viewLocation;			/**< Viewport location */	
 	FRotator					viewRotation;			/**< Viewport orientation. Valid only for perspective projections */
 	float						viewFOV;				/**< Viewport horizontal field of view */
 	float						orthoZoom;				/**< Zoom in ortho viewport type */
+	float						cameraSpeed;			/**< Camera speed (only for perspective projections) */
 	EShowFlags					showFlags;				/**< Show flags */
 	FEditorCommonDrawHelper		drawHelper;				/**< Draw helper */
 };

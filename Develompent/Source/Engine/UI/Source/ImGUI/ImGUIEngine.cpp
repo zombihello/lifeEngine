@@ -176,7 +176,10 @@ void FImGUIEngine::Init()
  */
 void FImGUIEngine::Shutdown()
 {
-	check( imguiContext );
+	if ( !imguiContext )
+	{
+		return;
+	}
 
 	UNIQUE_RENDER_COMMAND( FShutdownImGUICommand,
 		{

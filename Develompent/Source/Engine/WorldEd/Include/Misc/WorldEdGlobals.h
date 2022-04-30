@@ -15,10 +15,4 @@
  */
 extern class LEditorEngine*			GEditorEngine;
 
-/**
- * @ingroup Engine
- * WorldEd application
- */
-extern class WxWorldEdApp*			GApp;
-
 #endif // !WORLDEDGLOBALS_H

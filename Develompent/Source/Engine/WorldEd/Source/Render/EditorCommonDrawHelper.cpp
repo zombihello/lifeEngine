@@ -26,8 +26,8 @@ void FEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 
 	const FMatrix&				projectionMatrix = InSceneView->GetProjectionMatrix();
 	FMatrix	invViewProjMatrix	= FMath::InverseMatrix( projectionMatrix ) * FMath::InverseMatrix( InSceneView->GetViewMatrix() );
-	int32	start				= FMath::Trunc( ( FVector4D( -1.f, -1.f, -1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY );
-	int32	end					= FMath::Trunc( ( FVector4D( +1.f, +1.f, +1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY );
+	int32	start				= FMath::Trunc( ( FVector4D( -1.f, -1.f, -1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) + InViewportLocX;
+	int32	end					= FMath::Trunc( ( FVector4D( +1.f, +1.f, +1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) - InViewportLocX;
 	if ( start > end )
 	{
 		Swap( start, end );

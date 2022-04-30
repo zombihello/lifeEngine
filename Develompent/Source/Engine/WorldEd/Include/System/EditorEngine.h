@@ -122,8 +122,9 @@ public:
 	}
 
 private:
-	std::vector< class FViewport* >			viewports;				/**< Array of viewports for render */
-	FEditorConstraints						constraints;			/**< Editor constraints */
+	std::vector< class FViewport* >			viewports;		/**< Array of viewports for render */
+	FEditorConstraints						constraints;	/**< Editor constraints */
+	class WeMainWindow*						mainWindow;		/**< Main editor window */
 };
 
 #endif // !EDITORENGINE_H

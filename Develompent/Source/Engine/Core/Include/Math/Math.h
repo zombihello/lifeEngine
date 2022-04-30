@@ -334,6 +334,32 @@ struct FMath
 	}
 
 	/**
+	 * @brief Cross vector
+	 *
+	 * @param InVectorA		Vector A
+	 * @param InVectorB		Vector B
+	 * @param OutVector		Output vector
+	 */
+	static FORCEINLINE void CrossVector( const FVector& InVectorA, const FVector& InVectorB, FVector& OutVector )
+	{
+		OutVector = glm::cross( InVectorA, InVectorB );
+	}
+
+	/**
+	 * @brief Cross vector
+	 *
+	 * @param InVectorA		Vector A
+	 * @param InVectorB		Vector B
+	 * @return Return cross vector
+	 */
+	static FORCEINLINE FVector CrossVector( const FVector& InVectorA, const FVector& InVectorB )
+	{
+		FVector		result;
+		CrossVector( InVectorA, InVectorB, result );
+		return result;
+	}
+
+	/**
 	 * @brief Pow
 	 * 
 	 * @param InA Value A

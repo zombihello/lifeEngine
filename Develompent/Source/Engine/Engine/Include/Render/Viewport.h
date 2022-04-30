@@ -24,7 +24,8 @@ enum ELevelViewportType
 	LVT_OrthoXY,			/**< Ortho XY */
 	LVT_OrthoXZ,			/**< Ortho XZ */
 	LVT_OrthoYZ,			/**< Ortho YZ */
-	LVT_Perspective			/**< Perspective */
+	LVT_Perspective,		/**< Perspective */
+	LVT_Max					/**< Count viewport types */
 };
 
 /**
