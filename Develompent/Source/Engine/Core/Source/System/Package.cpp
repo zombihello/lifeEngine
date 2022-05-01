@@ -74,6 +74,15 @@ void FAsset::Serialize( class FArchive& InArchive )
 	}
 }
 
+void FAsset::SetAssetName( const std::wstring& InName )
+{
+	name = InName;
+	if ( package )
+	{
+		package->UpdateAssetNameInTable( guid );
+	}
+}
+
 FAssetReference FAsset::GetAssetReference() const
 {
 	return FAssetReference( type, guid, package ? package->GetGUID() : FGuid() );
@@ -102,6 +111,7 @@ bool FPackage::Load( const std::wstring& InPath )
 		return false;
 	}
 
+	bIsLoaded		= true;
 	filename		= InPath;
 
 	// Serialize header of archive
@@ -171,7 +181,7 @@ bool FPackage::Save( const std::wstring& InPath )
 void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 {
 	// If we not load package from HDD - exit from function
-	if ( !bIsLoaded && filename.empty() )
+	if ( !bIsLoaded || filename.empty() )
 	{
 		return;
 	}
@@ -411,6 +421,27 @@ void FPackage::MarkAssetUnlnoad( const FGuid& InGUID )
 	}
 }
 
+void FPackage::UpdateAssetNameInTable( const FGuid& InGUID )
+{
+	// Find asset in package
+	auto		itAsset = assetsTable.find( InGUID );
+	if ( itAsset == assetsTable.end() )
+	{
+		return;
+	}
+
+	FAssetInfo&		assetInfo = itAsset->second;
+	check( assetInfo.data );
+	FAsset*			asset = ( FAsset* )assetInfo.data;
+
+	// Remove from GUID table old name
+	assetGUIDTable.erase( assetInfo.name );
+
+	// Add to GUID table new name and update asset info
+	assetGUIDTable[ asset->GetAssetName() ] = InGUID;
+	assetInfo.name = asset->GetAssetName();
+}
+
 void FPackage::Remove( const FGuid& InGUID )
 {
 	auto		itAsset = assetsTable.find( InGUID );
@@ -424,6 +455,12 @@ void FPackage::Remove( const FGuid& InGUID )
 	{
 		assetInfo.data->package = nullptr;
 		--numUsageAssets;
+	}
+
+	auto		itAssetGUID = assetGUIDTable.find( assetInfo.name );
+	if ( itAssetGUID != assetGUIDTable.end() )
+	{
+		assetGUIDTable.erase( itAssetGUID );
 	}
 
 	assetsTable.erase( itAsset );
@@ -441,6 +478,7 @@ void FPackage::RemoveAll()
 		}
 	}
 
+	assetGUIDTable.clear();
 	assetsTable.clear();
 	numUsageAssets = 0;
 	bIsDirty = true;

@@ -94,17 +94,19 @@ protected:
 	void dropEvent( QDropEvent* Event );
 
 private slots:
-	/**
-	 * Event of double click on item
-	 */
 	void on_treeView_contentBrowser_clicked( const QModelIndex& InIndex );
 
 signals:
 	/**
-	 * Event on open package
-	 * @param InPackage Package
+	 * Event of clicked in empty space
 	 */
-	void OnOpenPackage( FPackage* InPackage );
+	void OnClickedInEmptySpace();
+
+	/**
+	 * Event of selection package
+	 * @param InPackage			Package
+	 */
+	void OnSelectedPackage( FPackage* InPackage );
 
 private:
 	QDir					rootDir;			/**< Root dir for content browser */

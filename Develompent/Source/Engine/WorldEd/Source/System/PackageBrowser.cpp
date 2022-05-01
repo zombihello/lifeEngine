@@ -57,3 +57,14 @@ WePackageBrowser::~WePackageBrowser()
 {
 	delete style;
 }
+
+void WePackageBrowser::mousePressEvent( QMouseEvent* InEvent )
+{
+	// If we clicked in empty space - clear all selections
+	if ( !indexAt( InEvent->pos() ).isValid() )
+	{
+		selectionModel()->clear();
+	}
+
+	QListView::mousePressEvent( InEvent );
+}

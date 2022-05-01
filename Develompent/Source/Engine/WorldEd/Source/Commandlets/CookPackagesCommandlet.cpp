@@ -604,33 +604,57 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
  * ----------------------
  */
 
-bool LCookPackagesCommandlet::CookTexture2D( const FResourceInfo& InTexture2DInfo, FTexture2DRef& OutTexture2D )
+FTexture2DRef LCookPackagesCommandlet::ConvertTexture2D( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
 {
-	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking texture 2D '%s:%s'" ), InTexture2DInfo.packageName.c_str(), InTexture2DInfo.filename.c_str() );
-
 	// Loading data from image
 	int				numComponents = 0;
 	uint32			sizeX = 0;
 	uint32			sizeY = 0;
-	void* data = stbi_load( TCHAR_TO_ANSI( InTexture2DInfo.path.c_str() ), ( int* ) &sizeX, ( int* ) &sizeY, &numComponents, 4 );
+	void*			data = stbi_load( TCHAR_TO_ANSI( InPath.c_str() ), ( int* ) &sizeX, ( int* ) &sizeY, &numComponents, 4 );
 	if ( !data )
 	{
 		return nullptr;
 	}
 
+	// Getting file name from path if InName is empty
+	std::wstring		filename = InName;
+	if ( filename.empty() )
+	{
+		filename = InPath;
+
+		appNormalizePathSeparators( filename );
+		std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
+		if ( pathSeparatorPos != std::string::npos )
+		{
+			filename.erase( 0, pathSeparatorPos + 1 );
+		}
+
+		std::size_t dotPos = filename.find_last_of( TEXT( "." ) );
+		if ( dotPos != std::string::npos )
+		{
+			filename.erase( dotPos, filename.size() + 1 );
+		}
+	}
+
 	// Create texture 2D and init him
-	OutTexture2D = new FTexture2D();
-	OutTexture2D->SetAssetName( InTexture2DInfo.filename );
+	FTexture2DRef		texture2D = new FTexture2D();
+	texture2D->SetAssetName( filename );
 	{
 		std::vector< byte >		tempData;
 		tempData.resize( sizeX * sizeY * GPixelFormats[ PF_A8R8G8B8 ].blockBytes );
 		memcpy( tempData.data(), data, tempData.size() );
-		OutTexture2D->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
+		texture2D->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 	}
 
 	// Clean up all data
 	stbi_image_free( data );
-	return SaveToPackage( InTexture2DInfo, OutTexture2D );
+	return texture2D;
+}
+
+bool LCookPackagesCommandlet::CookTexture2D( const FResourceInfo& InTexture2DInfo, FTexture2DRef& OutTexture2D )
+{
+	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking texture 2D '%s:%s'" ), InTexture2DInfo.packageName.c_str(), InTexture2DInfo.filename.c_str() );
+	return SaveToPackage( InTexture2DInfo, ConvertTexture2D( InTexture2DInfo.path, InTexture2DInfo.filename ) );
 }
 
 /**
@@ -741,15 +765,40 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
  * ----------------------
  */
 
+FAudioBankRef LCookPackagesCommandlet::ConvertAudioBank( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
+{
+	// Create audio bank and init him
+	FAudioBankRef		audioBank = new FAudioBank();
+
+	// Getting file name from path if InName is empty
+	std::wstring		filename = InName;
+	if ( filename.empty() )
+	{
+		filename = InPath;
+
+		appNormalizePathSeparators( filename );
+		std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
+		if ( pathSeparatorPos != std::string::npos )
+		{
+			filename.erase( 0, pathSeparatorPos + 1 );
+		}
+
+		std::size_t dotPos = filename.find_last_of( TEXT( "." ) );
+		if ( dotPos != std::string::npos )
+		{
+			filename.erase( dotPos, filename.size() + 1 );
+		}
+	}
+
+	audioBank->SetAssetName( filename );
+	audioBank->SetSourceOGGFile( InPath );
+	return audioBank;
+}
+
 bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInfo, FAudioBankRef& OutAudioBank )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking audio bank '%s:%s'" ), InAudioBankInfo.packageName.c_str(), InAudioBankInfo.filename.c_str() );
-
-	// Create audio bank and init him
-	OutAudioBank = new FAudioBank();
-	OutAudioBank->SetAssetName( InAudioBankInfo.filename );
-	OutAudioBank->SetSourceOGGFile( InAudioBankInfo.path );
-	return SaveToPackage( InAudioBankInfo, OutAudioBank );
+	return SaveToPackage( InAudioBankInfo, ConvertAudioBank( InAudioBankInfo.path, InAudioBankInfo.filename ) );
 }
 
 /**

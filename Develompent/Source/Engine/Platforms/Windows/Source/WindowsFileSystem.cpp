@@ -31,7 +31,7 @@ class FArchive* FWindowsFileSystem::CreateFileReader( const std::wstring& InFile
 	{
 		if ( InFlags & AR_NoFail )
 		{
-			appErrorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName.c_str(), InFlags );
+			appErrorf( TEXT( "Failed to create file: %s, InFlags = 0x%X" ), InFileName.c_str(), InFlags );
 		}
 
 		delete inputFile;

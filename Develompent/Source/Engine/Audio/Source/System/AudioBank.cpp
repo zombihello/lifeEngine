@@ -140,7 +140,7 @@ void FAudioBank::Serialize( class FArchive& InArchive )
 
 		// If we in commandlet or cooker - serialize all raw data to memory, else skeep this section
 #if WITH_EDITOR
-		if ( GIsCommandlet || GIsCooker )
+		if ( GIsEditor || GIsCommandlet || GIsCooker )
 		{
 			rawData.resize( rawDataSize );
 			InArchive.Serialize( rawData.data(), rawDataSize );

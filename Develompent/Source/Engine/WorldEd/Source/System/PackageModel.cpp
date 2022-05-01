@@ -23,7 +23,7 @@ QModelIndex WePackageModel::parent( const QModelIndex& InIndex ) const
 
 int WePackageModel::rowCount( const QModelIndex& InParent /* = QModelIndex() */ ) const
 {
-	return package ? package->GetNumAssets() : 0;
+	return numItems;
 }
 
 int WePackageModel::columnCount( const QModelIndex& InParent /* = QModelIndex() */ ) const
@@ -88,7 +88,8 @@ void WePackageModel::Refresh()
 		return;
 	}
 
-	insertRows( 0, package->GetNumAssets(), QModelIndex() );
+	numItems = package ? package->GetNumAssets() : 0;
+	insertRows( 0, numItems, QModelIndex() );
 }
 
 void WePackageModel::SetPackage( FPackage* InPackage )

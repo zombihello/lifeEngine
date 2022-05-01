@@ -75,6 +75,13 @@ public:
 	}
 
 private:
+	/**
+	 * Event of press mouse
+	 *
+	 * @param InEvent		Mouse event of press button
+	 */
+	void mousePressEvent( QMouseEvent* InEvent );
+
 	WeStyle*				style;				/**< Style of content browser */
 	WePackageModel*			packageModel;		/**< Package model */
 };

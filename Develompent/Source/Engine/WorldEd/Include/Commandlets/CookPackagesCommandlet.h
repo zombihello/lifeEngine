@@ -60,6 +60,24 @@ public:
 	virtual bool Main( const std::wstring& InCommand ) override;
 
 	/**
+	 * Convert texture
+	 * 
+	 * @param InPath		Path to source texture
+	 * @param InName		Name of texture. If is empty string, name getting from path
+	 * @return Return pointer to converted texture
+	 */
+	FTexture2DRef ConvertTexture2D( const std::wstring& InPath, const std::wstring& InName = TEXT( "" ) );
+
+	/**
+	 * Convert audio bank
+	 *
+	 * @param InPath		Path to source audio bank
+	 * @param InName		Name of audio bank. If is empty string, name getting from path
+	 * @return Return pointer to converted audio bank
+	 */
+	FAudioBankRef ConvertAudioBank( const std::wstring& InPath, const std::wstring& InName = TEXT( "" ) );
+
+	/**
 	 * Cook audio bank
 	 *
 	 * @param InAssetRef Reference to asset in format <PackageName>:<AssetName>

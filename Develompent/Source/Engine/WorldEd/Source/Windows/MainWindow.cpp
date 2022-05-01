@@ -81,15 +81,18 @@ void WeMainWindow::InitUI()
 	}
 
 	// Explorer level
-	ads::CDockAreaWidget*		explorerLevelAreaWidget = CreateDockWidget( ads::RightDockWidgetArea, "Explorer Level", new WeExploerLevelWidget( this ), nullptr, &dockWidget );
+	WeExploerLevelWidget*		exploerLevelWidget = new WeExploerLevelWidget( this );
+	ads::CDockAreaWidget*		explorerLevelAreaWidget = CreateDockWidget( ads::RightDockWidgetArea, "Explorer Level", exploerLevelWidget, nullptr, &dockWidget );
 	ui->menuWindows->insertAction( firstActionMenuView, dockWidget->toggleViewAction() );
 
 	// Actor properties
-	ads::CDockAreaWidget*		actorPropertiesAreaWidget = CreateDockWidget( ads::BottomDockWidgetArea, "Actor Properties", new WeActorPropertiesWidget( this ), explorerLevelAreaWidget, &dockWidget );
+	WeActorPropertiesWidget*	actorPropertiesWidget = new WeActorPropertiesWidget( this );
+	ads::CDockAreaWidget*		actorPropertiesAreaWidget = CreateDockWidget( ads::BottomDockWidgetArea, "Actor Properties", actorPropertiesWidget, explorerLevelAreaWidget, &dockWidget );
 	ui->menuWindows->insertAction( firstActionMenuView, dockWidget->toggleViewAction() );
 
 	// Content browser
-	ads::CDockAreaWidget*		contentBrowserAreaWidget = CreateDockWidget( ads::CenterDockWidgetArea, "Content Browser", new WeContentBrowserWidget( FString::Format( TEXT( "%s/Content/" ), appGameDir().c_str() ).c_str(), this ), actorPropertiesAreaWidget, &dockWidget );
+	WeContentBrowserWidget*		contentBrowserWidget = new WeContentBrowserWidget( WeContentBrowserWidget::RD_Game, this );
+	ads::CDockAreaWidget*		contentBrowserAreaWidget = CreateDockWidget( ads::CenterDockWidgetArea, "Content Browser", contentBrowserWidget, actorPropertiesAreaWidget, &dockWidget );
 	ui->menuWindows->insertAction( firstActionMenuView, dockWidget->toggleViewAction() );
 
 	// Logger

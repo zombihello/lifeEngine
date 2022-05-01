@@ -112,10 +112,7 @@ public:
 	 * 
 	 * @param[in] InName Asset name
 	 */
-	FORCEINLINE void SetAssetName( const std::wstring& InName )
-	{
-		name = InName;
-	}
+	void SetAssetName( const std::wstring& InName );
 
 	/**
 	 * Get asset type
@@ -265,6 +262,40 @@ public:
 	void RemoveAll();
 	
 	/**
+	 * Is exist asset with name in package
+	 * 
+	 * @param InName		Asset name
+	 * @return Return TRUE if asset with name InName exist in package, else return FALSE
+	 */
+	FORCEINLINE bool IsExist( const std::wstring& InName ) const
+	{
+		auto		itAssetGUID = assetGUIDTable.find( InName );
+		if ( itAssetGUID == assetGUIDTable.end() )
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Is exist asset with GUID in package
+	 * 
+	 * @param InGUID		Asset guid
+	 * @return Return TRUE if asset with guid InGUID exist in package, else return FALSE
+	 */
+	FORCEINLINE bool IsExist( const FGuid& InGUID ) const
+	{
+		auto		itAsset = assetsTable.find( InGUID );
+		if ( itAsset == assetsTable.end() )
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Find asset
 	 * 
 	 * @param[in] InGUID GUID of asset
@@ -378,8 +409,8 @@ public:
 	 */
 	FORCEINLINE void GetAssetInfo( uint32 InIndex, FAssetInfo& OutAssetInfo ) const
 	{
-		check( !assetsTable.empty() );
-
+		check( !assetsTable.empty() && InIndex >= 0 && InIndex < assetsTable.size() );
+		
 		uint32		index = 0;
 		for ( auto itAsset = assetsTable.cbegin(), itAssetEnd = assetsTable.cend(); itAsset != itAssetEnd; ++itAsset, ++index )
 		{
@@ -449,10 +480,19 @@ private:
 
 	/**
 	 * Mark that the asset is unloaded
+	 * @warning Must called from FAsset
 	 * 
 	 * @param[in] InGUID GUID of asset
 	 */
 	void MarkAssetUnlnoad( const FGuid& InGUID );
+
+	/**
+	 * Update asset name in table
+	 * @warning Must called from FAsset
+	 * 
+	 * @param InGUID		GUID of asset
+	 */
+	void UpdateAssetNameInTable( const FGuid& InGUID );
 
 	bool				bIsLoaded;			/**< Is package loaded from HDD */
 	bool				bIsDirty;			/**< Is dirty package */
