@@ -14,6 +14,7 @@
 #include "UIEngine.h"
 #include "Render/Shaders/BasePassShader.h"
 #include "Render/Shaders/WireframeShader.h"
+#include "Render/RenderingThread.h"
 #include "System/CameraManager.h"
 
 IMPLEMENT_CLASS( LBaseEngine )
@@ -120,6 +121,9 @@ void LBaseEngine::Init()
 
 void LBaseEngine::Shutdown()
 {
+	// Wait while render thread is rendering of the frame
+	FlushRenderingCommands();
+
 	GWorld->CleanupWorld();
 	GUIEngine->Shutdown();
 	GPhysicsEngine.Shutdown();

@@ -24,8 +24,10 @@ class FEditorLevelViewportClient : public FViewportClient
 public:
 	/**
 	 * @brief Constructor
+	 * 
+	 * @param InViewportType		Viewport type
 	 */
-	FEditorLevelViewportClient();
+	FEditorLevelViewportClient( ELevelViewportType InViewportType = LVT_Perspective );
 
 	/**
 	 * Update logic of viewport client
@@ -52,16 +54,13 @@ public:
 	 *
 	 * @param InWindowEvent			Window event
 	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
 
 	/**
 	 * @brief Set viewport type
 	 * @param InViewportType		Viewport type
 	 */
-	FORCEINLINE void SetViewportType( ELevelViewportType InViewportType )
-	{
-		viewportType = InViewportType;
-	}
+	void SetViewportType( ELevelViewportType InViewportType );
 
 	/**
 	 * @brief Get viewport type

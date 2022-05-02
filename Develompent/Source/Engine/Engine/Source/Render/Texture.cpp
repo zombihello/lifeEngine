@@ -10,13 +10,14 @@
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
 
-FTexture2D::FTexture2D() :
-	FAsset( AT_Texture2D ),
-	sizeX( 0 ),
-	sizeY( 0 ),
-	pixelFormat( PF_Unknown ),
-	addressU( SAM_Wrap ),
-	addressV( SAM_Wrap )
+FTexture2D::FTexture2D()
+	: FAsset( AT_Texture2D )
+	, sizeX( 0 )
+	, sizeY( 0 )
+	, pixelFormat( PF_Unknown )
+	, addressU( SAM_Wrap )
+	, addressV( SAM_Wrap )
+	, samplerFilter( SF_Point )
 {}
 
 FTexture2D::~FTexture2D()
@@ -77,6 +78,7 @@ void FTexture2D::Serialize( class FArchive& InArchive )
 	InArchive << pixelFormat;
 	InArchive << addressU;
 	InArchive << addressV;
+	InArchive << samplerFilter;
 
 	// If we loading Texture2D - update render resource
 	if ( InArchive.IsLoading() )

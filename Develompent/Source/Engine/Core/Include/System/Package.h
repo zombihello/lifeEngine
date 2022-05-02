@@ -494,7 +494,6 @@ private:
 	 */
 	void UpdateAssetNameInTable( const FGuid& InGUID );
 
-	bool				bIsLoaded;			/**< Is package loaded from HDD */
 	bool				bIsDirty;			/**< Is dirty package */
 	FGuid				guid;				/**< GUID of package */
 	std::wstring		filename;			/**< Path to the package from which data was last loaded */

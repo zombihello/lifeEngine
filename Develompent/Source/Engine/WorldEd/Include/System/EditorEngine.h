@@ -121,6 +121,15 @@ public:
 		return constraints;
 	}
 
+	/**
+	 * Get main editor window
+	 * @return Return main editor window
+	 */
+	FORCEINLINE class WeMainWindow* GetMainWindow() const
+	{
+		return mainWindow;
+	}
+
 private:
 	std::vector< class FViewport* >			viewports;		/**< Array of viewports for render */
 	FEditorConstraints						constraints;	/**< Editor constraints */

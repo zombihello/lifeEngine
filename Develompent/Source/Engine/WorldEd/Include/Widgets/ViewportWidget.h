@@ -12,24 +12,23 @@
 #include <QWidget>
 
 #include "Render/Viewport.h"
-#include "Render/EditorLevelViewportClient.h"
 
 /**
  * @ingroup WorldEd
  * Widget viewport for render scene and tick engine
  */
-class WeViewportWidget : public QWidget, public FEditorLevelViewportClient
+class WeViewportWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
 	/**
 	 * Constructor
-	 *
-	 * @param InViewportType			Viewport type
 	 * @param InParent					Parent widget
+	 * @param InViewportClient			Viewport client
+	 * @param InDeleteViewportClient	Is need delete viewport client in destroy this widget
 	 */
-	WeViewportWidget( ELevelViewportType InViewportType, QWidget* InParent = nullptr );
+	WeViewportWidget( QWidget* InParent = nullptr, FViewportClient* InViewportClient = nullptr, bool InDeleteViewportClient = false );
 
 	/**
 	 * Destructor
@@ -41,6 +40,19 @@ public:
 	 * @param InIsEnabled		Is enabled viewport
 	 */
 	void SetEnabled( bool InIsEnabled );
+
+	/**
+	 * Set viewport type
+	 * 
+	 * @param InViewportClient			Viewport client
+	 * @param InDeleteViewportClient	Is need delete viewport client in destroy this widget
+	 */
+	FORCEINLINE void SetViewportClient( FViewportClient* InViewportClient, bool InDeleteViewportClient )
+	{
+		viewportClient = InViewportClient;
+		bDeleteViewportClient = InDeleteViewportClient;
+		viewport.SetViewportClient( viewportClient );
+	}
 
 	/**
 	 * Get engine viewport
@@ -61,6 +73,11 @@ public:
 	}
 
 private:
+	/**
+	 * Init viewport
+	 */
+	void InitViewport();
+
 	/**
 	 * Event called when widget showed
 	 * 
@@ -128,10 +145,12 @@ private:
 	 */
 	virtual void keyReleaseEvent( QKeyEvent* InEvent ) override;
 
-	bool			bEnabled;			/**< Is enabled viewport */
-	bool			bInTick;			/**< Is added viewport to editor engine */
-	QPoint			mousePosition;		/**< Last mouse position */
-	FViewport		viewport;			/**< Viewport of render */
+	bool					bEnabled;					/**< Is enabled viewport */
+	bool					bInTick;					/**< Is added viewport to editor engine */
+	bool					bDeleteViewportClient;		/**< Is need delete viewport client in destroy time */
+	QPoint					mousePosition;				/**< Last mouse position */
+	FViewport				viewport;					/**< Viewport of render */
+	FViewportClient*		viewportClient;				/**< Viewport client */
 };
 
 #endif // !VIEWPORTWIDGET_H

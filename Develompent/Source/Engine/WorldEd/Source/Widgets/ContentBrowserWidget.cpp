@@ -7,12 +7,16 @@
 #include <qfiledialog.h>
 #include <qdesktopservices.h>
 
+#include "Misc/WorldEdGlobals.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Commandlets/CookPackagesCommandlet.h"
 #include "Commandlets/ImportMeshCommandlet.h"
 #include "Widgets/ContentBrowserWidget.h"
+#include "Windows/MainWindow.h"
+#include "Windows/TextureEditorWindow.h"
 #include "System/ContentBrowser.h"
+#include "System/EditorEngine.h"
 #include "Render/Material.h"
 #include "WorldEd.h"
 #include "ui_ContentBrowserWidget.h"
@@ -801,4 +805,30 @@ void WeContentBrowserWidget::OnContentBrowserContextMenuShowInExplorer()
 void WeContentBrowserWidget::on_comboBox_rootDir_currentIndexChanged( int InIndex )
 {
 	SetRootDir( ( ERootDir )InIndex );
+}
+
+void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelIndex InModelIndex )
+{
+	// If selected item is not valid - exit from method
+	if ( !InModelIndex.isValid() )
+	{
+		return;
+	}
+
+	// Get info about asset
+	FPackageRef			package = ui->listView_packageBrowser->GetPackage();
+	FAssetInfo			assetInfo;
+	package->GetAssetInfo( InModelIndex.row(), assetInfo );
+	FAssetRef			asset = package->Find( assetInfo.name );
+
+	// Open editor for each asset type
+	switch ( assetInfo.type )
+	{
+	case AT_Texture2D:
+	{
+		WeTextureEditorWindow*		textureEditorWindow = new WeTextureEditorWindow( ( FTexture2DRef )asset, this );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), textureEditorWindow->windowTitle().toStdWString().c_str(), asset->GetAssetName().c_str() ) ), textureEditorWindow, true );
+		break;
+	}
+	}
 }

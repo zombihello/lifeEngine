@@ -117,14 +117,14 @@ void FSceneRenderer::FinishRenderViewTarget( FViewportRHIParamRef InViewportRHI 
 	// Clear all SDGs on finish of the scene render
 	GWorld->GetScene()->ClearSDGs();
 
-	FBaseDeviceContextRHI*		immediateContext	= GRHI->GetImmediateContext();
-	FTexture2DRHIRef			sceneColorTexture	= GSceneRenderTargets.GetSceneColorTexture();
-	const uint32				sceneColorSizeX		= sceneColorTexture->GetSizeX();
-	const uint32				sceneColorSizeY		= sceneColorTexture->GetSizeY();
-	const uint32				viewportSizeX		= InViewportRHI->GetWidth();
-	const uint32				viewportSizeY		= InViewportRHI->GetHeight();
-	FScreenVertexShader*		screenVertexShader	= GShaderManager->FindInstance< FScreenVertexShader, FSimpleElementVertexFactory >();
-	FScreenPixelShader*			screenPixelShader	= GShaderManager->FindInstance< FScreenPixelShader, FSimpleElementVertexFactory >();
+	FBaseDeviceContextRHI*					immediateContext	= GRHI->GetImmediateContext();
+	FTexture2DRHIRef						sceneColorTexture	= GSceneRenderTargets.GetSceneColorTexture();
+	const uint32							sceneColorSizeX		= sceneColorTexture->GetSizeX();
+	const uint32							sceneColorSizeY		= sceneColorTexture->GetSizeY();
+	const uint32							viewportSizeX		= InViewportRHI->GetWidth();
+	const uint32							viewportSizeY		= InViewportRHI->GetHeight();
+	FScreenVertexShader<SVST_Default>*		screenVertexShader	= GShaderManager->FindInstance< FScreenVertexShader<SVST_Default>, FSimpleElementVertexFactory >();
+	FScreenPixelShader*						screenPixelShader	= GShaderManager->FindInstance< FScreenPixelShader, FSimpleElementVertexFactory >();
 	check( screenVertexShader && screenPixelShader );
 
 	GRHI->SetRenderTarget( immediateContext, InViewportRHI->GetSurface(), nullptr );

@@ -221,4 +221,17 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ESamplerAddressMode
 	return InArchive;
 }
 
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, ESamplerFilter& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ESamplerFilter& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
 #endif // !BASESTATERHI_H

@@ -183,6 +183,13 @@ public:
 	 * @param InViewport	Viewport
 	 */
 	virtual void Draw( FViewport* InViewport ) {}
+
+	/**
+	 * @brief Process event
+	 *
+	 * @param InWindowEvent			Window event
+	 */
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) {}
 };
 
 #endif // !VIEWPORT_H

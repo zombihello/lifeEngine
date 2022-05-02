@@ -11,25 +11,39 @@
 #include "Widgets/ViewportWidget.h"
 #include "EngineDefines.h"
 
-/** Default camera position for level editor perspective viewports */
-static const FVector		GDefaultPerspectiveViewLocation( 495.166962, 167.584518, -400.f );
-
-/** Default camera orientation for level editor perspective viewports */
-static const FRotator		GDefaultPerspectiveViewRotation( 0, 0, 0 );
-
-/** Show flags for each viewport type */
-static const EShowFlags		GShowFlags[ LVT_Max ] =
-{
-	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXY
-	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXZ
-	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoYZ
-	SHOW_DefaultEditor							// LVT_Perspective
-};
-
-WeViewportWidget::WeViewportWidget( ELevelViewportType InViewportType, QWidget* InParent /* = nullptr */ )
+WeViewportWidget::WeViewportWidget( QWidget* InParent /* = nullptr */, FViewportClient* InViewportClient /* = nullptr */, bool InDeleteViewportClient /* = false */ )
 	: QWidget( InParent )
 	, bEnabled( false )
 	, bInTick( false )
+{
+	SetViewportClient( InViewportClient, InDeleteViewportClient );
+	InitViewport();
+}
+
+WeViewportWidget::~WeViewportWidget()
+{
+	if ( bInTick )
+	{
+		viewport.Update( true, 0, 0, nullptr );
+		SetEnabled( false );
+
+		if ( bDeleteViewportClient )
+		{
+			delete viewportClient;
+			viewportClient = nullptr;
+		}
+
+		// Wait while viewport RHI is not deleted
+		while ( viewport.IsValid() )
+		{
+			appSleep( 0.1f );
+		}
+
+		bInTick = false;
+	}
+}
+
+void WeViewportWidget::InitViewport()
 {
 	QPalette		Palette = palette();
 	Palette.setColor( QPalette::Base, Qt::black );
@@ -44,38 +58,9 @@ WeViewportWidget::WeViewportWidget( ELevelViewportType InViewportType, QWidget* 
 	setAttribute( Qt::WA_PaintOnScreen );
 	setAttribute( Qt::WA_NoSystemBackground );
 
-	// Set viewport client variables
-	bSetListenerPosition	= false;
-	viewportType			= InViewportType;
-	showFlags				= GShowFlags[ InViewportType ];
-	
-	if ( viewportType == LVT_Perspective )
-	{
-		bSetListenerPosition	= true;
-		viewLocation			= GDefaultPerspectiveViewLocation;
-		viewRotation			= GDefaultPerspectiveViewRotation;
-	}
-
 	QSize		Size = size();
-	viewport.SetViewportClient( this );
+	viewport.SetViewportClient( viewportClient );
 	viewport.Update( false, Size.width(), Size.height(), reinterpret_cast< HWND >( winId() ) );
-}
-
-WeViewportWidget::~WeViewportWidget()
-{
-	if ( bInTick )
-	{
-		viewport.Update( true, 0, 0, nullptr );
-		SetEnabled( false );
-
-		// Wait while viewport RHI is not deleted
-		while ( viewport.IsValid() )
-		{
-			appSleep( 0.1f );
-		}
-
-		bInTick = false;
-	}
 }
 
 void WeViewportWidget::showEvent( QShowEvent* InEvent )
@@ -122,16 +107,26 @@ void WeViewportWidget::resizeEvent( QResizeEvent* InEvent )
 
 void WeViewportWidget::wheelEvent( QWheelEvent* InEvent )
 {
+	if ( !viewportClient )
+	{
+		return;
+	}
+
 	QPoint				angleDelta = InEvent->angleDelta();
 	SWindowEvent		windowEvent;
 	windowEvent.type					= SWindowEvent::T_MouseWheel;
 	windowEvent.events.mouseWheel.x		= angleDelta.x();
 	windowEvent.events.mouseWheel.y		= angleDelta.y();
-	ProcessEvent( windowEvent );
+	viewportClient->ProcessEvent( windowEvent );
 }
 
 void WeViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 {
+	if ( !viewportClient )
+	{
+		return;
+	}
+
 	SWindowEvent		windowEvent;
 	windowEvent.type						= SWindowEvent::T_MousePressed;
 	windowEvent.events.mouseButton.x		= InEvent->x();
@@ -139,11 +134,16 @@ void WeViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 	windowEvent.events.mouseButton.code		= appQtMouseButtonToButtonCode( InEvent->button() );
 
 	mousePosition = mapFromGlobal( cursor().pos() );
-	ProcessEvent( windowEvent );
+	viewportClient->ProcessEvent( windowEvent );
 }
 
 void WeViewportWidget::mouseReleaseEvent( QMouseEvent* InEvent )
 {
+	if ( !viewportClient )
+	{
+		return;
+	}
+
 	SWindowEvent		windowEvent;
 	windowEvent.type						= SWindowEvent::T_MouseReleased;
 	windowEvent.events.mouseButton.x		= InEvent->x();
@@ -152,11 +152,16 @@ void WeViewportWidget::mouseReleaseEvent( QMouseEvent* InEvent )
 
 	mousePosition.setX( 0 );
 	mousePosition.setY( 0 );
-	ProcessEvent( windowEvent );
+	viewportClient->ProcessEvent( windowEvent );
 }
 
 void WeViewportWidget::mouseMoveEvent( QMouseEvent* InEvent )
 {
+	if ( !viewportClient )
+	{
+		return;
+	}
+
 	SWindowEvent		windowEvent;
 	windowEvent.type							= SWindowEvent::T_MouseMove;
 	windowEvent.events.mouseMove.x				= InEvent->x();
@@ -166,11 +171,16 @@ void WeViewportWidget::mouseMoveEvent( QMouseEvent* InEvent )
 
 	mousePosition.setX( InEvent->x() );
 	mousePosition.setY( InEvent->y() );
-	ProcessEvent( windowEvent );
+	viewportClient->ProcessEvent( windowEvent );
 }
 
 void WeViewportWidget::keyPressEvent( QKeyEvent* InEvent )
 {
+	if ( !viewportClient )
+	{
+		return;
+	}
+
 	SWindowEvent		windowEvent;
 	uint32				modifiers		= InEvent->modifiers();
 	windowEvent.type					= SWindowEvent::T_KeyPressed;
@@ -181,11 +191,16 @@ void WeViewportWidget::keyPressEvent( QKeyEvent* InEvent )
 	windowEvent.events.key.isShift		= modifiers & Qt::ShiftModifier;
 	windowEvent.events.key.isSuper		= modifiers & Qt::MetaModifier;
 	windowEvent.events.key.code			= appQtKeyToButtonCode( ( Qt::Key ) InEvent->key(), modifiers );
-	ProcessEvent( windowEvent );
+	viewportClient->ProcessEvent( windowEvent );
 }
 
 void WeViewportWidget::keyReleaseEvent( QKeyEvent* InEvent )
 {
+	if ( !viewportClient )
+	{
+		return;
+	}
+
 	SWindowEvent		windowEvent;
 	uint32				modifiers		= InEvent->modifiers();
 	windowEvent.type					= SWindowEvent::T_KeyReleased;
@@ -196,5 +211,5 @@ void WeViewportWidget::keyReleaseEvent( QKeyEvent* InEvent )
 	windowEvent.events.key.isShift		= modifiers & Qt::ShiftModifier;
 	windowEvent.events.key.isSuper		= modifiers & Qt::MetaModifier;
 	windowEvent.events.key.code			= appQtKeyToButtonCode( ( Qt::Key ) InEvent->key(), modifiers );
-	ProcessEvent( windowEvent );
+	viewportClient->ProcessEvent( windowEvent );
 }

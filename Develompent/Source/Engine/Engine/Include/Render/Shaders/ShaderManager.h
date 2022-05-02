@@ -52,6 +52,7 @@
  * @ingroup Engine
  * @brief A macro to implement a shader type
  * 
+ * @param[in] TemplatePrefix Template prefix
  * @param[in] ShaderClass The name of the class representing an instance of the shader type
  * @param[in] SourceFilename Source file name of shader
  * @param[in] FunctionName Main function name in shader
@@ -59,8 +60,9 @@
  * @param[in] Global Is global shader
  */
 #if WITH_EDITOR
-#define IMPLEMENT_SHADER_TYPE( ShaderClass, SourceFilename, FunctionName, Frequency, Global ) \
-	FShaderMetaType       ShaderClass::staticType( \
+#define IMPLEMENT_SHADER_TYPE( TemplatePrefix, ShaderClass, SourceFilename, FunctionName, Frequency, Global ) \
+	TemplatePrefix \
+    FShaderMetaType       ShaderClass::staticType( \
 		TEXT( #ShaderClass ), \
 		SourceFilename, \
 		FunctionName, \
@@ -71,8 +73,9 @@
         ShaderClass::ShouldCache, \
         ShaderClass::ModifyCompilationEnvironment );
 #else
-#define IMPLEMENT_SHADER_TYPE( ShaderClass, SourceFilename, FunctionName, Frequency, Global ) \
-	FShaderMetaType       ShaderClass::staticType( \
+#define IMPLEMENT_SHADER_TYPE( TemplatePrefix, ShaderClass, SourceFilename, FunctionName, Frequency, Global ) \
+	TemplatePrefix \
+    FShaderMetaType       ShaderClass::staticType( \
 		TEXT( #ShaderClass ), \
 		SourceFilename, \
 		FunctionName, \

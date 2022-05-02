@@ -21,7 +21,9 @@ FORCEINLINE FAssetRef GetDefaultAsset( EAssetType InType )
 	case AT_Texture2D:			return GEngine->GetDefaultTexture();
 	case AT_Material:			return GEngine->GetDefaultMaterial();
 	case AT_PhysicsMaterial:	return GPhysicsEngine.GetDefaultPhysMaterial();
-	default:					return nullptr;
+	default:					
+		/*appErrorf( TEXT( "Unknown asset type 0x%X" ), InType );*/		// TODO BS yehor.pohuliaka - Unknoment this error when fixed getting default asset in serialization
+		return nullptr;
 	}
 }
 
@@ -89,8 +91,7 @@ FAssetReference FAsset::GetAssetReference() const
 }
 
 FPackage::FPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
-	: bIsLoaded( false )
-	, bIsDirty( false )
+	: bIsDirty( false )
 	, guid( appCreateGuid() )
 	, name( InName )
 	, numUsageAssets( 0 )
@@ -111,7 +112,6 @@ bool FPackage::Load( const std::wstring& InPath )
 		return false;
 	}
 
-	bIsLoaded		= true;
 	filename		= InPath;
 
 	// Serialize header of archive
@@ -181,7 +181,7 @@ bool FPackage::Save( const std::wstring& InPath )
 void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 {
 	// If we not load package from HDD - exit from function
-	if ( !bIsLoaded || filename.empty() )
+	if ( filename.empty() )
 	{
 		return;
 	}

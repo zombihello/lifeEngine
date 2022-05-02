@@ -76,6 +76,7 @@ private slots:
 	void OnContentBrowserSelectedPackage( FPackage* InPackage );
 	void OnContentBrowserContextMenuShowInExplorer();
 	void on_comboBox_rootDir_currentIndexChanged( int InIndex );
+	void on_listView_packageBrowser_doubleClicked( QModelIndex InModelIndex );
 
 private:
 	Ui::WeContentBrowserWidget*				ui;			/**< Qt UI */

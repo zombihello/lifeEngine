@@ -516,7 +516,7 @@ public:
 	 * @param[in] InVertexDataStride The size of one vertex
 	 * @param[in] InNumInstances Number instances to draw
 	 */
-	virtual void DrawPrimitiveUP( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexInde, uint32 InNumPrimitives, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances = 1 ) override;
+	virtual void DrawPrimitiveUP( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances = 1 ) override;
 
 	/**
 	 * @brief Draw primitive

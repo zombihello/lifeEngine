@@ -708,13 +708,13 @@ void FD3D11RHI::DrawIndexedPrimitive( class FBaseDeviceContextRHI* InDeviceConte
 	}
 }
 
-void FD3D11RHI::DrawPrimitiveUP( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexInde, uint32 InNumPrimitives, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances /* = 1 */ )
+void FD3D11RHI::DrawPrimitiveUP( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances /* = 1 */ )
 {
 	uint32										vertexCount		= GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
 	TRefCountPtr< FD3D11VertexBufferRHI >		vertexBuffer	= CreateVertexBuffer( TEXT( "DrawPrimitiveUP" ), InVertexDataStride * vertexCount, ( const byte* )InVertexData, RUF_Static );
 	
 	SetStreamSource( InDeviceContext, 0, vertexBuffer, InVertexDataStride, 0 );
-	DrawPrimitive( InDeviceContext, InPrimitiveType, InBaseVertexInde, InNumPrimitives, InNumInstances );
+	DrawPrimitive( InDeviceContext, InPrimitiveType, InBaseVertexIndex, InNumPrimitives, InNumInstances );
 }
 
 void FD3D11RHI::DrawIndexedPrimitiveUP( class FBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumVertices, const void* InIndexData, uint32 InIndexDataStride, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances /* = 1 */ )

@@ -94,6 +94,16 @@ public:
 	}
 
 	/**
+	 * Set sampler filter
+	 *
+	 * @param InSamplerFilter		Sampler filter
+	 */
+	FORCEINLINE void SetSamplerFilter( ESamplerFilter InSamplerFilter )
+	{
+		samplerFilter = InSamplerFilter;
+	}
+
+	/**
 	 * Get RHI texture 2D
 	 * @return Return pointer to RHI texture 2D
 	 */
@@ -112,6 +122,51 @@ public:
 	}
 
 	/**
+	 * Get texture size by X
+	 * @return Return texture size by X
+	 */
+	FORCEINLINE uint32 GetSizeX() const
+	{
+		return sizeX;
+	}
+
+	/**
+	 * Get texture size by Y
+	 * @return Return texture size by Y
+	 */
+	FORCEINLINE uint32 GetSizeY() const
+	{
+		return sizeY;
+	}
+
+	/**
+	 * Get address mod for U coord
+	 * @return Return address mode for U coord
+	 */
+	FORCEINLINE ESamplerAddressMode GetAddressU() const
+	{
+		return addressU;
+	}
+
+	/**
+	 * Get address mod for V coord
+	 * @return Return address mode for V coord
+	 */
+	FORCEINLINE ESamplerAddressMode GetAddressV() const
+	{
+		return addressV;
+	}
+
+	/**
+	 * Get sampler filter
+	 * @return Return sampler filter
+	 */
+	FORCEINLINE ESamplerFilter GetSamplerFilter() const
+	{
+		return samplerFilter;
+	}
+
+	/**
 	 * Get sampler state initializer for RHI
 	 * @return Return sampler state initializer
 	 */
@@ -120,7 +175,7 @@ public:
 		FSamplerStateInitializerRHI		samplerStateInitializer;
 		appMemzero( &samplerStateInitializer, sizeof( FSamplerStateInitializerRHI ) );
 
-		samplerStateInitializer.filter = SF_Bilinear;
+		samplerStateInitializer.filter = samplerFilter;
 		samplerStateInitializer.addressU = addressU;
 		samplerStateInitializer.addressV = addressV;
 		return samplerStateInitializer;
@@ -134,6 +189,7 @@ private:
 	FTexture2DRHIRef			texture;			/**< Reference to RHI texture */
 	ESamplerAddressMode			addressU;			/**< Address mode for U coord */
 	ESamplerAddressMode			addressV;			/**< Address mode for V coord */
+	ESamplerFilter				samplerFilter;		/**< Sampler filter */
 };
 
 //

@@ -38,10 +38,26 @@
  */
 #define MAX_CAMERA_SPEED			1000.f
 
-FEditorLevelViewportClient::FEditorLevelViewportClient()
+/** Default camera position for level editor perspective viewports */
+static const FVector		GDefaultPerspectiveViewLocation( 495.166962, 167.584518, -400.f );
+
+/** Default camera orientation for level editor perspective viewports */
+static const FRotator		GDefaultPerspectiveViewRotation( 0, 0, 0 );
+
+/** Show flags for each viewport type */
+static const EShowFlags		GShowFlags[ LVT_Max ] =
+{
+	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXY
+	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXZ
+	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoYZ
+	SHOW_DefaultEditor							// LVT_Perspective
+};
+
+
+FEditorLevelViewportClient::FEditorLevelViewportClient( ELevelViewportType InViewportType /* = LVT_Perspective */ )
 	: bSetListenerPosition( true )
 	, bIsTracking( false )
-	, viewportType( LVT_Perspective )
+	, viewportType( InViewportType )
 	, viewLocation( FMath::vectorZero )
 	, viewRotation( FMath::rotatorZero )
 	, viewFOV( 90.f )
@@ -49,7 +65,9 @@ FEditorLevelViewportClient::FEditorLevelViewportClient()
 	, cameraSpeed( MIN_CAMERA_SPEED )
 	, showFlags( SHOW_DefaultEditor )
 	, cameraMoveFlags( 0x0 )
-{}
+{
+	SetViewportType( InViewportType );
+}
 
 void FEditorLevelViewportClient::Tick( float InDeltaSeconds )
 {
@@ -103,6 +121,20 @@ void FEditorLevelViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRH
 	// Finishing render and delete scene view
 	sceneRenderer.FinishRenderViewTarget( InViewportRHI );
 	delete InSceneView;
+}
+
+void FEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportType )
+{
+	bSetListenerPosition	= false;
+	viewportType			= InViewportType;
+	showFlags				= GShowFlags[ InViewportType ];
+
+	if ( viewportType == LVT_Perspective )
+	{
+		bSetListenerPosition = true;
+		viewLocation = GDefaultPerspectiveViewLocation;
+		viewRotation = GDefaultPerspectiveViewRotation;
+	}
 }
 
 void FEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEvent )

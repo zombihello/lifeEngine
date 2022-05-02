@@ -78,12 +78,78 @@ public:
 	virtual void mouseMoveEvent( QMouseEvent* InEvent ) override;
 
 	/**
+	 * Event of close window
+	 * 
+	 * @param InEvent Event of close event
+	 */
+	virtual void closeEvent( QCloseEvent* InEvent ) override;
+
+	/**
+	 * Create dock widget
+	 *
+	 * @param InArea					Area to dock new widget
+	 * @param InTitle					Title
+	 * @param InContent					Widget in dock window
+	 * @param InParent					Parent of dock widget
+	 * @param InIsDeleteAfterClose		Is need delete widget after close
+	 * @param OutDockWidget				If not NULL return pointer to created dock widget
+	 * @return Return pointer to dock area widget
+	 */
+	FORCEINLINE ads::CDockAreaWidget* CreateDockWidget( ads::DockWidgetArea InArea, const QString& InTitle, QWidget* InContent, ads::CDockAreaWidget* InParent = nullptr, bool InIsDeleteAfterClose = false, ads::CDockWidget** OutDockWidget = nullptr )
+	{
+		check( InContent && dockManager );
+
+		ads::CDockWidget* dockWidget = new ads::CDockWidget( InTitle );
+		dockWidget->setWidget( InContent );
+		if ( OutDockWidget )
+		{
+			*OutDockWidget = dockWidget;
+		}
+
+		dockWidget->setFeature( ads::CDockWidget::DockWidgetDeleteOnClose, InIsDeleteAfterClose );
+		return dockManager->addDockWidget( InArea, dockWidget, InParent );
+	}
+
+	/**
+	 * Create floating dock widget
+	 * 
+	 * @param InTitle					Title
+	 * @param InContent					Widget in dock window
+	 * @param InIsDeleteAfterClose		Is need delete widget after close
+	 * @param OutDockWidget				If not NULL return pointer to created dock widget
+	 * @return Return floating dock container
+	 */
+	FORCEINLINE ads::CFloatingDockContainer* CreateFloatingDockWidget( const QString& InTitle, QWidget* InContent, bool InIsDeleteAfterClose = false, ads::CDockWidget** OutDockWidget = nullptr )
+	{
+		check( InContent && dockManager );
+
+		ads::CDockWidget* dockWidget = new ads::CDockWidget( InTitle );
+		dockWidget->setWidget( InContent );
+		if ( OutDockWidget )
+		{
+			*OutDockWidget = dockWidget;
+		}
+
+		dockWidget->setFeature( ads::CDockWidget::DockWidgetDeleteOnClose, InIsDeleteAfterClose );
+		return dockManager->addDockWidgetFloating( dockWidget );
+	}
+
+	/**
 	 * Get log widget
 	 * @return Return log widget. If not created returning nullptr
 	 */
 	FORCEINLINE class WeLogWidget* GetLogWidget() const
 	{
 		return logWidget;
+	}
+
+	/**
+	 * Get dock manager
+	 * @return Return dock manager
+	 */
+	FORCEINLINE ads::CDockManager* GetDockManager() const
+	{
+		return dockManager;
 	}
 
 private slots:
@@ -107,29 +173,6 @@ private:
 	 * Init UI
 	 */
 	void InitUI();
-
-	/**
-	 * Create dock widget
-	 * 
-	 * @param InArea		Area to dock new widget
-	 * @param InTitle		Title
-	 * @param InContent		Widget in dock window
-	 * @param InParent		Parent of dock widget
-	 * @param OutDockWidget	If not NULL return pointer to created dock widget
-	 */
-	FORCEINLINE ads::CDockAreaWidget* CreateDockWidget( ads::DockWidgetArea InArea, const QString& InTitle, QWidget* InContent, ads::CDockAreaWidget* InParent = nullptr, ads::CDockWidget** OutDockWidget = nullptr )
-	{
-		check( InContent && dockManager );
-
-		ads::CDockWidget*		dockWidget = new ads::CDockWidget( InTitle );
-		dockWidget->setWidget( InContent );
-		if ( OutDockWidget )
-		{
-			*OutDockWidget = dockWidget;
-		}
-
-		return dockManager->addDockWidget( InArea, dockWidget, InParent );
-	}
 
 	Ui::MainWindow*					ui;								/**< Qt UI */
 	QTimer							timerTick;						/**< Timer for tick engine */

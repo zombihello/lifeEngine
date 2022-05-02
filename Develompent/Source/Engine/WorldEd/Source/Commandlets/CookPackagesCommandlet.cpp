@@ -654,7 +654,9 @@ FTexture2DRef LCookPackagesCommandlet::ConvertTexture2D( const std::wstring& InP
 bool LCookPackagesCommandlet::CookTexture2D( const FResourceInfo& InTexture2DInfo, FTexture2DRef& OutTexture2D )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking texture 2D '%s:%s'" ), InTexture2DInfo.packageName.c_str(), InTexture2DInfo.filename.c_str() );
-	return SaveToPackage( InTexture2DInfo, ConvertTexture2D( InTexture2DInfo.path, InTexture2DInfo.filename ) );
+	
+	OutTexture2D = ConvertTexture2D( InTexture2DInfo.path, InTexture2DInfo.filename );
+	return OutTexture2D && SaveToPackage( InTexture2DInfo, OutTexture2D );
 }
 
 /**
@@ -798,7 +800,9 @@ FAudioBankRef LCookPackagesCommandlet::ConvertAudioBank( const std::wstring& InP
 bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInfo, FAudioBankRef& OutAudioBank )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking audio bank '%s:%s'" ), InAudioBankInfo.packageName.c_str(), InAudioBankInfo.filename.c_str() );
-	return SaveToPackage( InAudioBankInfo, ConvertAudioBank( InAudioBankInfo.path, InAudioBankInfo.filename ) );
+	
+	OutAudioBank = ConvertAudioBank( InAudioBankInfo.path, InAudioBankInfo.filename );
+	return OutAudioBank && SaveToPackage( InAudioBankInfo, OutAudioBank );
 }
 
 /**
