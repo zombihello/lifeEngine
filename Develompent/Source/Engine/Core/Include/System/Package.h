@@ -114,6 +114,17 @@ public:
 	 */
 	void SetAssetName( const std::wstring& InName );
 
+#if WITH_EDITOR
+	/**
+	 * Set path to asset source file
+	 * @param InPath		Path to asset source file
+	 */
+	FORCEINLINE void SetAssetSourceFile( const std::wstring& InPath )
+	{
+		sourceFile = InPath;
+	}
+#endif // WITH_EDITOR
+
 	/**
 	 * Get asset type
 	 * @return Return asset type
@@ -156,11 +167,26 @@ public:
 	 */
 	FAssetReference GetAssetReference() const;
 
+#if WITH_EDITOR
+	/**
+	 * Get path to asset source file
+	 * @return Return path to asset source file
+	 */
+	FORCEINLINE std::wstring GetAssetSourceFile() const
+	{
+		return sourceFile;
+	}
+#endif // WITH_EDITOR
+
 private:
 	class FPackage*		package;		/**< The package where the asset is located */
 	std::wstring		name;			/**< Name asset */
 	FGuid				guid;			/**< GUID of asset */
 	EAssetType			type;			/**< Asset type */
+
+#if WITH_EDITOR
+	std::wstring		sourceFile;			/**< Path to source file */
+#endif // WITH_EDITOR
 };
 
 /**

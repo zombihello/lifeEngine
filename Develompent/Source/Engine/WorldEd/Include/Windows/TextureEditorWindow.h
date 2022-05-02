@@ -39,11 +39,28 @@ public:
 	 */
 	virtual ~WeTextureEditorWindow();
 
+private slots:
+	//
+	// Events
+	//
+	void on_comboBox_addressU_currentIndexChanged( int InIndex );
+	void on_comboBox_addressV_currentIndexChanged( int InIndex );
+	void on_comboBox_filter_currentIndexChanged( int InIndex );
+	void on_toolButton_sourceFile_clicked();
+	void on_toolButton_sourceFileRemove_clicked();
+
 private:
 	/**
 	 * Init UI
 	 */
 	void InitUI();
+
+	/**
+	 * Event called when resize widget
+	 *
+	 * @param[in] InEvent Event of resize widget
+	 */
+	virtual void resizeEvent( QResizeEvent* InEvent ) override;
 
 	Ui::WeTextureEditorWindow*		ui;			/**< Qt UI */
 	FTexture2DRef					texture2D;	/**< Editable asset */

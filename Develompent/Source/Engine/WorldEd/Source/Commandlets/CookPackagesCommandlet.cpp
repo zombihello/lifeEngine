@@ -639,6 +639,7 @@ FTexture2DRef LCookPackagesCommandlet::ConvertTexture2D( const std::wstring& InP
 	// Create texture 2D and init him
 	FTexture2DRef		texture2D = new FTexture2D();
 	texture2D->SetAssetName( filename );
+	texture2D->SetAssetSourceFile( InPath );
 	{
 		std::vector< byte >		tempData;
 		tempData.resize( sizeX * sizeY * GPixelFormats[ PF_A8R8G8B8 ].blockBytes );
@@ -793,6 +794,7 @@ FAudioBankRef LCookPackagesCommandlet::ConvertAudioBank( const std::wstring& InP
 	}
 
 	audioBank->SetAssetName( filename );
+	audioBank->SetAssetSourceFile( InPath );
 	audioBank->SetSourceOGGFile( InPath );
 	return audioBank;
 }

@@ -292,10 +292,14 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 
 	// Main menu
 	QMenu			contextMenu( this );
-	QAction			actionImportAsset( "Import Asset", this );
+	QAction			actionImport( "Import", this );
+	QAction			actionReimport( "Reimport", this );
+	QAction			actionReimportWithNewFile( "Reimport With New File", this );
 	QAction			actionDeleteFile( "Delete", this );
 	QAction			actionRenameFile( "Rename", this );
-	contextMenu.addAction( &actionImportAsset );
+	contextMenu.addAction( &actionImport );
+	contextMenu.addAction( &actionReimport );
+	contextMenu.addAction( &actionReimportWithNewFile );
 	contextMenu.addSeparator();
 	contextMenu.addMenu( &menuCreate );
 	contextMenu.addSeparator();
@@ -306,7 +310,9 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	if ( !currentPackage )
 	{
 		menuCreate.setEnabled( false );
-		actionImportAsset.setEnabled( false );
+		actionImport.setEnabled( false );
+		actionReimport.setEnabled( false );
+		actionReimportWithNewFile.setEnabled( false );
 		actionDeleteFile.setEnabled( false );
 		actionRenameFile.setEnabled( false );
 	}
@@ -317,17 +323,30 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 		{
 			actionDeleteFile.setEnabled( false );
 			actionRenameFile.setEnabled( false );
+			actionReimport.setEnabled( false );
+			actionReimportWithNewFile.setEnabled( false );
 		}
-
-		// Disable actions if selected more of one item
-		if ( numSelecteItems > 1 )
+		else
 		{
-			actionRenameFile.setEnabled( false );
+			// Disable actions if selected more of one item
+			if ( numSelecteItems > 1 )
+			{
+				actionRenameFile.setEnabled( false );
+				actionReimportWithNewFile.setEnabled( false );
+			}
+
+			// Not all assets can be imported
+			FAssetInfo		assetInfo;
+			currentPackage->GetAssetInfo( modelIndex.row(), assetInfo );
+			actionReimport.setEnabled( assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank );
+			actionReimportWithNewFile.setEnabled( assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank );
 		}
 	}
 
 	// Connect to signal of a actions
-	connect( &actionImportAsset, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_ImportAsset() ) );
+	connect( &actionImport, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_Import() ) );
+	connect( &actionReimport, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_Reimport() ) );
+	connect( &actionReimportWithNewFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_ReimportWithNewFile() ) );
 	connect( &actionCreateMaterial, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_CreateMaterial() ) );
 	connect( &actionDeleteFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_DeleteAsset() ) );
 	connect( &actionRenameFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_RenameAsset() ) );
@@ -335,7 +354,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	contextMenu.exec( QCursor::pos() );
 }
 
-void WeContentBrowserWidget::on_listView_packageBrowser_ImportAsset()
+void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 {
 	FPackageRef		package = ui->listView_packageBrowser->GetPackage();
 	check( package );
@@ -415,6 +434,12 @@ void WeContentBrowserWidget::on_listView_packageBrowser_ImportAsset()
 		ui->listView_packageBrowser->Refresh();
 	}
 }
+
+void WeContentBrowserWidget::on_listView_packageBrowser_Reimport()
+{}
+
+void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
+{}
 
 void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
 {}

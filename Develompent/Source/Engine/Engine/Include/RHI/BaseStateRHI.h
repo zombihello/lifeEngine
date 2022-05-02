@@ -9,6 +9,8 @@
 #ifndef BASESTATERHI_H
 #define BASESTATERHI_H
 
+#include <string>
+
 #include "Math/Color.h"
 #include "RHI/BaseResourceRHI.h"
 #include "System/Archive.h"
@@ -99,7 +101,8 @@ enum ESamplerFilter
 	SF_Bilinear,
 	SF_Trilinear,
 	SF_AnisotropicPoint,
-	SF_AnisotropicLinear
+	SF_AnisotropicLinear,
+	SF_Max
 };
 
 /**
@@ -111,8 +114,46 @@ enum ESamplerAddressMode
 	SAM_Wrap,
 	SAM_Clamp,
 	SAM_Mirror,
-	SAM_Border
+	SAM_Border,
+	SAM_Max
 };
+
+/**
+ * @ingroup Engine
+ * Convert sampler filter to text
+ * 
+ * @param InSamplerFilter		Sampler filter
+ */
+FORCEINLINE std::wstring SamplerFilterToText( ESamplerFilter InSamplerFilter )
+{
+	switch ( InSamplerFilter )
+	{
+	case SF_Point:					return TEXT( "Point" );
+	case SF_Bilinear:				return TEXT( "Bilinear" );
+	case SF_Trilinear:				return TEXT( "Trilinear" );
+	case SF_AnisotropicPoint:		return TEXT( "Anisotropic Point" );
+	case SF_AnisotropicLinear:		return TEXT( "Anisotropic Linear" );
+	default:						return TEXT( "Unknown" );
+	}
+}
+
+/**
+ * @ingroup Engine
+ * Convert address mode for sampler to text
+ *
+ * @param InAddressMode		Address mode
+ */
+FORCEINLINE std::wstring SamplerAddressModeToText( ESamplerAddressMode InAddressMode )
+{
+	switch ( InAddressMode )
+	{
+	case SAM_Wrap:			return TEXT( "Wrap" );
+	case SAM_Clamp:			return TEXT( "Clamp" );
+	case SAM_Mirror:		return TEXT( "Mirror" );
+	case SAM_Border:		return TEXT( "Border" );
+	default:				return TEXT( "Unknown" );
+	}
+}
 
 /**
  * @ingroup Engine

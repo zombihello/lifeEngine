@@ -74,6 +74,13 @@ void FAsset::Serialize( class FArchive& InArchive )
 	{
 		InArchive << guid;
 	}
+
+#if WITH_EDITOR
+	if ( !GIsCooker && InArchive.Ver() >= VER_AssetSourceFiles )
+	{
+		InArchive << sourceFile;
+	}
+#endif // WITH_EDITOR
 }
 
 void FAsset::SetAssetName( const std::wstring& InName )

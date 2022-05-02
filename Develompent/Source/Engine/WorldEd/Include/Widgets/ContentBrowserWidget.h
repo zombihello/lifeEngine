@@ -60,7 +60,9 @@ private slots:
 	// Events
 	//
 	void on_treeView_contentBrowser_customContextMenuRequested( QPoint InPoint );
-	void on_listView_packageBrowser_ImportAsset();
+	void on_listView_packageBrowser_Import();
+	void on_listView_packageBrowser_Reimport();
+	void on_listView_packageBrowser_ReimportWithNewFile();
 	void on_listView_packageBrowser_CreateMaterial();
 	void on_listView_packageBrowser_DeleteAsset();
 	void on_listView_packageBrowser_RenameAsset();
