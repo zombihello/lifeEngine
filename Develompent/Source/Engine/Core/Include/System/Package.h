@@ -45,7 +45,7 @@ enum EAssetType
 	AT_Script,				/**< Script */
 	AT_StaticMesh,			/**< Static mesh */
 	AT_AudioBank,			/**< Audio bank */
-	AT_PhysicsMaterial		/**< Physics material */
+	AT_PhysicsMaterial,		/**< Physics material */
 };
 
 /**

@@ -10,13 +10,14 @@
 #include "Misc/WorldEdGlobals.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
-#include "Commandlets/CookPackagesCommandlet.h"
 #include "Commandlets/ImportMeshCommandlet.h"
 #include "Widgets/ContentBrowserWidget.h"
 #include "Windows/MainWindow.h"
 #include "Windows/TextureEditorWindow.h"
 #include "System/ContentBrowser.h"
 #include "System/EditorEngine.h"
+#include "System/AssetManager.h"
+#include "System/AssetsImport.h"
 #include "Render/Material.h"
 #include "WorldEd.h"
 #include "ui_ContentBrowserWidget.h"
@@ -41,57 +42,6 @@ static FORCEINLINE void DeleteDir( const QString& InRouteDir )
 	}
 
 	dir.rmdir( InRouteDir );
-}
-
-static FORCEINLINE QString GetFilterOfSupportedFormats()
-{
-	static QString		result;
-	if ( !result.isEmpty() )
-	{
-		return result;
-	}
-
-	std::wstring		allSupportedFormats;
-
-	// Texture formats
-	{
-		const std::vector< std::wstring >&		textureExtension = LCookPackagesCommandlet::GetSupportedTextureExtensins();
-		if ( !textureExtension.empty() )
-		{
-			result += "Texture formats (";
-			for ( uint32 index = 0, count = textureExtension.size(); index < count; ++index )
-			{
-				std::wstring		format = FString::Format( TEXT( "*.%s%s" ), textureExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
-				result += format;
-				allSupportedFormats += format;
-			}
-			result += ");;";
-		}
-	}
-
-	// Audio formats
-	{
-		const std::vector< std::wstring >&		audioExtnesion = LCookPackagesCommandlet::GetSupportedAudioExtensins();
-		if ( !audioExtnesion.empty() )
-		{
-			allSupportedFormats += !allSupportedFormats.empty() ? TEXT( ";" ) : TEXT( "" );
-			result += "Audio formats (";
-			for ( uint32 index = 0, count = audioExtnesion.size(); index < count; ++index )
-			{
-				std::wstring		format = FString::Format( TEXT( "*.%s%s" ), audioExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
-				result				+= format;
-				allSupportedFormats += format;
-			}
-			result += ");;";
-		}
-	}
-
-	// All supported formats
-	{
-		result += FString::Format( TEXT( "All supported formats (%s)" ), allSupportedFormats.c_str() );
-	}
-
-	return result;
 }
 
 static FORCEINLINE QMessageBox::StandardButton ShowDeleteFileMessageBox( QWidget* InParent, const QString& InTitle, const QString& InText, const QModelIndexList& InModelIndexList, QFileSystemModel* InFileSystemModel )
@@ -359,7 +309,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 	FPackageRef		package = ui->listView_packageBrowser->GetPackage();
 	check( package );
 
-	QStringList			selectedAssets = QFileDialog::getOpenFileNames( this, "Select Asset To Import", QString(), GetFilterOfSupportedFormats() );
+	QStringList			selectedAssets = QFileDialog::getOpenFileNames( this, "Select Asset To Import", QString(), FHelperAssetImporter::MakeFilterOfSupportedExtensions() );
 	if ( selectedAssets.isEmpty() )
 	{
 		return;
@@ -368,61 +318,37 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 	// Import selected assets
 	bool							bReplaceAll		= false;		//
 	bool							bSkipAll		= false;		// } Replace or skip all assets with exist names in package
-	LCookPackagesCommandlet			cookPackages;
 	std::vector< FAssetRef >		loadedAssets;
 	for ( uint32 index = 0, count = selectedAssets.size(); index < count; ++index )
 	{
-		QString			pathToAsset = selectedAssets[ index ];
-		FAssetRef		asset;
-		QFileInfo		fileInfo( pathToAsset );
-		QString			assetName = fileInfo.baseName();
-		std::wstring	fileExtension = fileInfo.suffix().toStdWString();
+		QString								path = selectedAssets[ index ];
+		FAssetRef							asset;
+		FAssetManager::EImportResult		importResult = GAssetManager.Import( path, package, asset, bReplaceAll && !bSkipAll );
 
-		// Check on already exist asset with name in package
-		if ( package->IsExist( assetName.toStdWString() ) )
+		// Show message if not setted flags bReplaceAll and bSkipAll
+		if ( !bReplaceAll && !bSkipAll && importResult == FAssetManager::IR_AlreadyExist )
 		{
-			if ( bSkipAll )
+			QMessageBox::StandardButton		resultButton = QMessageBox::question( this, "Question", QString::fromStdWString( FString::Format( TEXT( "Asset with name '<b>%s</b>' already exist in package. Replace it?" ), QFileInfo( path ).baseName().toStdWString().c_str() ) ), QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll );
+			switch ( resultButton )
 			{
+			case QMessageBox::YesToAll:
+				bReplaceAll = true;
+				importResult = GAssetManager.Import( selectedAssets[ index ], package, asset, true );
+
+			case QMessageBox::Yes:
+				break;
+
+			case QMessageBox::NoToAll:
+				bSkipAll = true;
+
+			case QMessageBox::No:
 				continue;
 			}
-
-			// Show message if not setted flags bReplaceAll and bSkipAll
-			if ( !bReplaceAll && !bSkipAll )
-			{
-				QMessageBox::StandardButton		resultButton = QMessageBox::question( this, "Question", QString::fromStdWString( FString::Format( TEXT( "Asset with name '<b>%s</b>' already exist in package. Replace it?" ), assetName.toStdWString().c_str() ) ), QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll );
-				switch ( resultButton )
-				{
-				case QMessageBox::YesToAll:
-					bReplaceAll = true;
-
-				case QMessageBox::Yes:
-					break;
-
-				case QMessageBox::NoToAll:
-					bSkipAll = true;
-
-				case QMessageBox::No:
-					continue;
-				}
-			}
-		}
-
-		// We import texture
-		if ( LCookPackagesCommandlet::IsSupportedTextureExtension( fileExtension ) )
-		{
-			asset = cookPackages.ConvertTexture2D( appQtAbsolutePathToEngine( pathToAsset ) );
-		}
-
-		// We import audio bank
-		if ( LCookPackagesCommandlet::IsSupportedAudioExtension( fileExtension ) )
-		{	
-			asset = cookPackages.ConvertAudioBank( appQtAbsolutePathToEngine( pathToAsset ) );
 		}
 
 		// Add asset to package
-		if ( asset )
+		if ( importResult == FAssetManager::IR_Seccussed )
 		{
-			package->Add( asset );
 			loadedAssets.push_back( asset );
 		}
 	}

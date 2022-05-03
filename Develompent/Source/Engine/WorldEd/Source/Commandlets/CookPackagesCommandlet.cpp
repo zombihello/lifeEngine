@@ -1,4 +1,3 @@
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <tmxlite/Map.hpp>
 #include <tmxlite/TileLayer.hpp>

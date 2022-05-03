@@ -10,9 +10,15 @@
 #define WORLDEDGLOBALS_H
 
 /**
- * @ingroup Engine
+ * @ingroup WorldEd
  * Editor engine
  */
 extern class LEditorEngine*			GEditorEngine;
+
+/**
+ * @ingroup WorldEd
+ * Asset manager
+ */
+extern class FAssetManager			GAssetManager;
 
 #endif // !WORLDEDGLOBALS_H

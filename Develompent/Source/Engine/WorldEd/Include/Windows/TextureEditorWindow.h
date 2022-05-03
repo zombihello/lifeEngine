@@ -48,12 +48,25 @@ private slots:
 	void on_comboBox_filter_currentIndexChanged( int InIndex );
 	void on_toolButton_sourceFile_clicked();
 	void on_toolButton_sourceFileRemove_clicked();
+	void on_actionReimport_triggered();
 
 private:
 	/**
 	 * Init UI
 	 */
 	void InitUI();
+
+	/**
+	 * Called when source file changed
+	 * 
+	 * @param InNewSourceFile		New path to source file
+	 */
+	void OnSourceFileChanged( QString InNewSourceFile );
+
+	/**
+	 * Crop source file text in UI
+	 */
+	void UICropSourceFileText();
 
 	/**
 	 * Event called when resize widget
