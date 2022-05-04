@@ -16,7 +16,7 @@
 #include "Windows/TextureEditorWindow.h"
 #include "System/ContentBrowser.h"
 #include "System/EditorEngine.h"
-#include "System/AssetManager.h"
+#include "System/AssetDataBase.h"
 #include "System/AssetsImport.h"
 #include "Render/Material.h"
 #include "WorldEd.h"
@@ -97,6 +97,36 @@ static FORCEINLINE QMessageBox::StandardButton ShowDeleteAssetMessageBox( QWidge
 
 	QString		finalText = QString::fromStdWString( FString::Format( TEXT( "%s<br><br><b>Assets:</b><br>%s" ), InText.toStdWString().c_str(), assetsToDelete.toStdWString().c_str() ) );
 	return QMessageBox::warning( InParent, InTitle, finalText, QMessageBox::Cancel | QMessageBox::Ok );
+}
+
+static FORCEINLINE QMessageBox::StandardButton ShowMessageBoxWithList( QWidget* InParent, const QString& InTitle, const QString& InText, const QString& InListName, const std::vector< QString >& InList, bool InIsError = false, uint32 InMaxSizeList = 3 )
+{
+	QString		resultList;
+
+	// Forming a list
+	for ( uint32 index = 0, count = InList.size(); index < count; ++index )
+	{
+		resultList += InList[ index ];
+		if ( count > InMaxSizeList && index + 1 == InMaxSizeList )
+		{
+			resultList += "<br>...<br>";
+			break;
+		}
+		else
+		{
+			resultList += "<br>";
+		}
+	}
+
+	QString		finalText = QString::fromStdWString( FString::Format( TEXT( "%s<br><br><b>%s:</b><br>%s" ), InText.toStdWString().c_str(), InListName.toStdWString().c_str(), resultList.toStdWString().c_str() ) );
+	if ( InIsError )
+	{
+		return QMessageBox::critical( InParent, InTitle, finalText, QMessageBox::Ok );
+	}
+	else
+	{
+		return QMessageBox::warning( InParent, InTitle, finalText, QMessageBox::Ok );
+	}
 }
 
 WeContentBrowserWidget::WeContentBrowserWidget( ERootDir InRootDir /* = RD_Game */, QWidget* InParent /* = nullptr */ )
@@ -289,7 +319,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 			FAssetInfo		assetInfo;
 			currentPackage->GetAssetInfo( modelIndex.row(), assetInfo );
 			actionReimport.setEnabled( assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank );
-			actionReimportWithNewFile.setEnabled( assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank );
+			actionReimportWithNewFile.setEnabled( numSelecteItems == 1 && ( assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank ) );
 		}
 	}
 
@@ -316,24 +346,25 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 	}
 
 	// Import selected assets
-	bool							bReplaceAll		= false;		//
-	bool							bSkipAll		= false;		// } Replace or skip all assets with exist names in package
-	std::vector< FAssetRef >		loadedAssets;
+	bool							bReplaceAll		= false;	//
+	bool							bSkipAll		= false;	// } Replace or skip all assets with exist names in package
+	std::vector< QString >			errorAssets;				// Array with errors of assets
 	for ( uint32 index = 0, count = selectedAssets.size(); index < count; ++index )
 	{
-		QString								path = selectedAssets[ index ];
-		FAssetRef							asset;
-		FAssetManager::EImportResult		importResult = GAssetManager.Import( path, package, asset, bReplaceAll && !bSkipAll );
+		std::wstring							errorMessage;
+		QString									path = selectedAssets[ index ];
+		FAssetRef								asset;
+		FHelperAssetImporter::EImportResult		importResult = FHelperAssetImporter::Import( path, package, asset, errorMessage, bReplaceAll && !bSkipAll );
 
 		// Show message if not setted flags bReplaceAll and bSkipAll
-		if ( !bReplaceAll && !bSkipAll && importResult == FAssetManager::IR_AlreadyExist )
+		if ( !bReplaceAll && !bSkipAll && importResult == FHelperAssetImporter::IR_AlreadyExist )
 		{
 			QMessageBox::StandardButton		resultButton = QMessageBox::question( this, "Question", QString::fromStdWString( FString::Format( TEXT( "Asset with name '<b>%s</b>' already exist in package. Replace it?" ), QFileInfo( path ).baseName().toStdWString().c_str() ) ), QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll );
 			switch ( resultButton )
 			{
 			case QMessageBox::YesToAll:
 				bReplaceAll = true;
-				importResult = GAssetManager.Import( selectedAssets[ index ], package, asset, true );
+				importResult = FHelperAssetImporter::Import( selectedAssets[ index ], package, asset, errorMessage, true );
 
 			case QMessageBox::Yes:
 				break;
@@ -346,26 +377,111 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 			}
 		}
 
-		// Add asset to package
-		if ( importResult == FAssetManager::IR_Seccussed )
+		// If failed import asset - add error message to array
+		if ( importResult == FHelperAssetImporter::IR_Error )
 		{
-			loadedAssets.push_back( asset );
+			errorAssets.push_back( path + " : " + QString::fromStdWString( errorMessage ) );
 		}
 	}
 
-	// If we added to package new assets - need refresh package browser and save package
+	// If we added to package new assets - need refresh package browser
 	if ( package->IsDirty() )
 	{
-		package->Save( package->GetFileName() );
 		ui->listView_packageBrowser->Refresh();
+	}
+
+	// If we have error assets - show message box
+	if ( !errorAssets.empty() )
+	{
+		ShowMessageBoxWithList( this, "Error", "Failed import next assets", "Assets", errorAssets, true );
 	}
 }
 
 void WeContentBrowserWidget::on_listView_packageBrowser_Reimport()
-{}
+{
+	// Getting selected items and current package
+	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
+	if ( !package )
+	{
+		return;
+	}
+
+	// Reimport selected assets
+	std::vector< QString >			errorAssets;				// Array with errors of assets
+	for ( uint32 index = 0, count = modelIndexList.length(); index < count; ++index )
+	{
+		uint32			idAsset = modelIndexList[ index ].row();
+		FAssetInfo		assetInfo;
+		package->GetAssetInfo( idAsset, assetInfo );
+
+		std::wstring	errorMessage;
+		FAssetRef		asset = package->Find( assetInfo.name );
+		bool			bResult = FHelperAssetImporter::Reimport( asset, errorMessage );
+
+		// If failed reimport asset - add error message to array
+		if ( !bResult )
+		{
+			errorAssets.push_back( QString::fromStdWString( asset->GetAssetName() ) + " : " + QString::fromStdWString( errorMessage ) );
+		}
+	}
+
+	// If we have error assets - show message box
+	if ( !errorAssets.empty() )
+	{
+		ShowMessageBoxWithList( this, "Error", "Failed reimport next assets", "Assets", errorAssets, true );
+	}
+}
 
 void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
-{}
+{
+	// Getting selected items and current package
+	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
+	if ( !package )
+	{
+		return;
+	}
+
+	// Getting asset info
+	check( modelIndexList.length() == 1 );		// Support rename only first asset
+	FAssetInfo		assetInfo;
+	package->GetAssetInfo( modelIndexList[ 0 ].row(), assetInfo );
+
+	// Make flags for getting supported extensions
+	uint32		filterFlags = 0;
+	switch ( assetInfo.type )
+	{
+	case AT_Texture2D:
+		filterFlags = FHelperAssetImporter::ET_Texture2D;
+		break;
+
+	case AT_AudioBank:
+		filterFlags = FHelperAssetImporter::ET_AudioBank;
+		break;
+
+	default:		return;
+	}
+
+	// Select new source file
+	QString			newSourceFile	= QFileDialog::getOpenFileName( this, "Select New Source File", QString(), FHelperAssetImporter::MakeFilterOfSupportedExtensions( filterFlags ) );
+	if ( newSourceFile.isEmpty() )
+	{
+		return;
+	}
+
+	// Reimport asset
+	std::wstring	errorMessage;
+	FAssetRef		asset = package->Find( assetInfo.name );
+	asset->SetAssetSourceFile( appQtAbsolutePathToEngine( newSourceFile ) );
+	bool			bResult = FHelperAssetImporter::Reimport( asset, errorMessage );
+	
+	// If reimport asset is failed - show error message box
+	if ( !bResult )
+	{
+		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Failed reimport asset '<b>%s</b>' from new source file '<b>%s</b>'.<br><br>Error: %s" ), asset->GetAssetName().c_str(), newSourceFile.toStdWString().c_str(), errorMessage.c_str() ) ) );
+	}
+}
 
 void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
 {}
@@ -402,14 +518,13 @@ void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 		package->Remove( assetInfosToDelete[ index ].name );
 	}
 
-	// If package is dirty - resave
+	// If package is dirty - refresh package browser
 	if ( package->IsDirty() )
 	{
-		package->Save( package->GetFileName() );
 		ui->listView_packageBrowser->Refresh();
 	}
 }
-
+#include "Render/RenderingThread.h"
 void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 {
 	// Getting selected items and current package
@@ -451,11 +566,8 @@ void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 		return;
 	}
 
-	// Change asset name
+	// Add change asset name
 	asset->SetAssetName( newAssetName.toStdWString() );
-
-	// Resave package
-	package->Save( package->GetFileName() );
 }
 
 void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_SavePackage()
@@ -528,11 +640,27 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_UnloadPackag
 	bool		bIsNeedRepaint = false;
 	ui->listView_packageBrowser->SetPackage( nullptr );
 	
+	std::vector< QString >		dirtyPackages;
 	for ( int index = 0, count = modelIndexList.length(); index < count; ++index )
 	{
 		QFileInfo		fileInfo	= fileSystemModel->fileInfo( modelIndexList[ index ] );
 		std::wstring	pathPackage = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
-		bool			bSeccussed	= GPackageManager->UnloadPackage( pathPackage );
+		
+		// If package already not loaded - skip him
+		if ( !GPackageManager->IsPackageLoaded( pathPackage ) )
+		{
+			continue;
+		}
+
+		// If package is dirty - we not unload him
+		FPackageRef		package = GPackageManager->LoadPackage( pathPackage );
+		if ( package->IsDirty() )
+		{
+			dirtyPackages.push_back( fileInfo.baseName() );
+			continue;
+		}
+
+		bool	bSeccussed = GPackageManager->UnloadPackage( pathPackage );
 
 		// If successed close package, we mark about need repaint content browser
 		if ( bSeccussed && !bIsNeedRepaint )
@@ -557,6 +685,12 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_UnloadPackag
 	if ( bIsNeedRepaint )
 	{
 		ui->treeView_contentBrowser->repaint();
+	}
+
+	// If we have dirty package - print message
+	if ( !dirtyPackages.empty() )
+	{
+		ShowMessageBoxWithList( this, "Warning", "The following packages have been modified and cannot be unloaded. Saving these packages will allow them to be unloaded", "Packages", dirtyPackages );
 	}
 }
 
@@ -779,7 +913,14 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 	{
 		WeTextureEditorWindow*		textureEditorWindow = new WeTextureEditorWindow( ( FTexture2DRef )asset, this );
 		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), textureEditorWindow->windowTitle().toStdWString().c_str(), asset->GetAssetName().c_str() ) ), textureEditorWindow, true );
+		connect( textureEditorWindow, SIGNAL( OnChangedAsset( FAsset* ) ), this, SLOT( OnPackageBrowserChangedAsset( FAsset* ) ) );
 		break;
 	}
 	}
+}
+
+void WeContentBrowserWidget::OnPackageBrowserChangedAsset( FAsset* InAsset )
+{
+	ui->treeView_contentBrowser->repaint();
+	ui->listView_packageBrowser->repaint();
 }

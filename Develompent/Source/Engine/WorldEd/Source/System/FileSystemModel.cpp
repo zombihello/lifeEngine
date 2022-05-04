@@ -377,15 +377,17 @@ int WeFileSystemModel::CountFilesInDir( const QString& InDir, int& OutCountFiles
 
 QVariant WeFileSystemModel::data( const QModelIndex& InIndex, int InRole /* = Qt::DisplayRole */ ) const
 {
+	QFileInfo		fileInfo = WeFileSystemModel::fileInfo( InIndex );
+	std::wstring	path	 = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
+
 	if ( InRole == Qt::DecorationRole )
 	{
-		QFileInfo		fileInfo = WeFileSystemModel::fileInfo( InIndex );
 		if ( fileInfo.isFile() )
 		{
 			// Icon for packages
 			if ( fileInfo.suffix() == FILE_PACKAGE_EXTENSION )
 			{
-				if ( GPackageManager->IsPackageLoaded( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) ) )
+				if ( GPackageManager->IsPackageLoaded( path ) )
 				{
 					return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/CB_PackageOpen.png" ) ).c_str() ) );
 				}
@@ -404,6 +406,19 @@ QVariant WeFileSystemModel::data( const QModelIndex& InIndex, int InRole /* = Qt
 		else if ( fileInfo.isDir() )
 		{
 			return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/CB_FolderClosed.png" ) ).c_str() ) );
+		}
+	}
+	else if ( InRole == Qt::DisplayRole || InRole == Qt::EditRole )
+	{
+		if ( fileInfo.isFile() && fileInfo.suffix() == FILE_PACKAGE_EXTENSION && GPackageManager->IsPackageLoaded( path ) )		// If package loaded we check is changed in memory. In successed case mark this package by star
+		{
+			FPackageRef		package = GPackageManager->LoadPackage( path );
+			QString			result = fileInfo.baseName() + ( package->IsDirty() ? "[MODIFIED]" : "" );
+			return result;
+		}
+		else
+		{
+			return fileInfo.baseName();		// Show all files without extensions
 		}
 	}
 

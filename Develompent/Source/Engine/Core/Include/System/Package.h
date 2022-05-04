@@ -50,6 +50,19 @@ enum EAssetType
 
 /**
  * @ingroup Core
+ * Asset info in package
+ */
+struct FAssetInfo
+{
+	uint32			offset;		/**< Offset in archive to asset */
+	uint32			size;		/**< Size data in archive */
+	EAssetType		type;		/**< Asset type */
+	std::wstring	name;		/**< Name of asset */
+	class FAsset*	data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
+};
+
+/**
+ * @ingroup Core
  * Struct reference to asset
  */
 struct FAssetReference
@@ -126,6 +139,15 @@ public:
 #endif // WITH_EDITOR
 
 	/**
+	 * Is dirty asset
+	 * @return Return TRUE if asset is dirty, else return FALSE
+	 */
+	FORCEINLINE bool IsDirty() const
+	{
+		return bDirty;
+	}
+
+	/**
 	 * Get asset type
 	 * @return Return asset type
 	 */
@@ -178,28 +200,23 @@ public:
 	}
 #endif // WITH_EDITOR
 
+protected:
+	/**
+	 * Mark dirty asset
+	 * @note When changing serializable fields, child classes should mark themselves as dirty
+	 */
+	void MarkDirty();
+
 private:
+	bool				bDirty;			/**< Is asset is dirty */
 	class FPackage*		package;		/**< The package where the asset is located */
 	std::wstring		name;			/**< Name asset */
 	FGuid				guid;			/**< GUID of asset */
 	EAssetType			type;			/**< Asset type */
 
 #if WITH_EDITOR
-	std::wstring		sourceFile;			/**< Path to source file */
+	std::wstring		sourceFile;		/**< Path to source file */
 #endif // WITH_EDITOR
-};
-
-/**
- * @ingroup Core
- * Asset info in package
- */
-struct FAssetInfo
-{
-	uint32			offset;		/**< Offset in archive to asset */
-	uint32			size;		/**< Size data in archive */
-	EAssetType		type;		/**< Asset type */
-	std::wstring	name;		/**< Name of asset */
-	FAsset*			data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
 };
 
 /**
@@ -230,24 +247,7 @@ public:
 	 * 
 	 * @param[in] InAsset Asset
 	 */
-	FORCEINLINE void Add( FAsset* InAsset )
-	{
-		check( InAsset );
-		checkMsg( InAsset->guid.IsValid(), TEXT( "For add asset to package need GUID is valid" ) );
-
-		// If asset in package already containing, remove from table old GUID
-		auto		it = assetGUIDTable.find( InAsset->name );
-		if ( it != assetGUIDTable.end() && it->second != InAsset->guid )
-		{
-			assetsTable.erase( it->second );
-		}
-
-		InAsset->package = this;
-		assetGUIDTable[ InAsset->name ] = InAsset->guid;
-		assetsTable[ InAsset->guid ] = FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset->name, InAsset };
-		++numUsageAssets;
-		bIsDirty = true;
-	}
+	void Add( FAsset* InAsset );
 
 	/**
 	 * Remove asset from package
@@ -355,6 +355,7 @@ public:
 	{
 		name = InName;
 		bIsDirty = true;
+		numUsageAssets = -1;
 	}
 
 	/**
@@ -497,12 +498,13 @@ private:
 	/**
 	 * Load asset from package
 	 * 
-	 * @param InArchive Archive
-	 * @param InAssetGUID Asset GUID
-	 * @param InAssetInfo Asset info
+	 * @param InArchive					Archive
+	 * @param InAssetGUID				Asset GUID
+	 * @param InAssetInfo				Asset info
+	 * @param InAddToAssetDataBase		Is need add loaded asset to data base. Only for editor
 	 * @return Return loaded asset from package, if failed returning nullptr
 	 */
-	FAssetRef LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo );
+	FAssetRef LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo, bool InAddToAssetDataBase );
 
 	/**
 	 * Mark that the asset is unloaded
@@ -520,11 +522,20 @@ private:
 	 */
 	void UpdateAssetNameInTable( const FGuid& InGUID );
 
+	/**
+	 * Mark dirty asset in package
+	 * @warning Must called from FAsset
+	 * 
+	 * @param InGUID		GUID of asset
+	 */
+	void MarkAssetDirty( const FGuid& InGUID );
+
 	bool				bIsDirty;			/**< Is dirty package */
 	FGuid				guid;				/**< GUID of package */
 	std::wstring		filename;			/**< Path to the package from which data was last loaded */
 	std::wstring		name;				/**< Package name */
 	uint32				numUsageAssets;		/**< Number assets in usage */
+	uint32				numDirtyAssets;		/**< Number dirty assets in package */
 	FAssetNameToGUID	assetGUIDTable;		/**< Table for converting asset GUID to name */
 	FAssetTable			assetsTable;		/**< Table of assets in package */
 };

@@ -45,6 +45,8 @@ void FTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InS
 	sizeX			= InSizeX;
 	sizeY			= InSizeY;
 	data			= InData;
+
+	MarkDirty();
 	BeginUpdateResource( this );
 }
 

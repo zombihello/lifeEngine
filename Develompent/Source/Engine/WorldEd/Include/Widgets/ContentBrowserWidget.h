@@ -79,6 +79,7 @@ private slots:
 	void OnContentBrowserContextMenuShowInExplorer();
 	void on_comboBox_rootDir_currentIndexChanged( int InIndex );
 	void on_listView_packageBrowser_doubleClicked( QModelIndex InModelIndex );
+	void OnPackageBrowserChangedAsset( FAsset* InAsset );
 
 private:
 	Ui::WeContentBrowserWidget*				ui;			/**< Qt UI */

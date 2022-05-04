@@ -2,9 +2,7 @@
 #include <qfiledialog.h>
 
 #include "ui_TextureEditorWindow.h"
-#include "Misc/WorldEdGlobals.h"
 #include "Containers/StringConv.h"
-#include "System/AssetManager.h"
 #include "System/AssetsImport.h"
 #include "Render/TexturePreviewViewportClient.h"
 #include "Render/RenderUtils.h"
@@ -13,6 +11,7 @@
 
 WeTextureEditorWindow::WeTextureEditorWindow( FTexture2D* InTexture2D, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
+	, bInit( false )
 	, ui( new Ui::WeTextureEditorWindow() )
 	, texture2D( InTexture2D )
 {
@@ -25,6 +24,7 @@ WeTextureEditorWindow::WeTextureEditorWindow( FTexture2D* InTexture2D, QWidget* 
 	// Init preview viewport
 	ui->viewportPreview->SetViewportClient( new FTexturePreviewViewportClient( InTexture2D ), true );
 	ui->viewportPreview->SetEnabled( true );
+	bInit = true;
 }
 
 void WeTextureEditorWindow::InitUI()
@@ -56,8 +56,6 @@ void WeTextureEditorWindow::InitUI()
 	OnSourceFileChanged( QString::fromStdWString( texture2D->GetAssetSourceFile() ) );
 
 	// Set icons for actions
-	ui->actionSave->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Save.png" ) ).c_str() ) ) );
-	ui->actionBrowse->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Browse.png" ) ).c_str() ) ) );
 	ui->actionReimport->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Import.png" ) ).c_str() ) ) );
 	ui->actionR->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_R.png" ) ).c_str() ) ) );
 	ui->actionG->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_G.png" ) ).c_str() ) ) );
@@ -94,43 +92,74 @@ void WeTextureEditorWindow::resizeEvent( QResizeEvent* InEvent )
 void WeTextureEditorWindow::on_comboBox_addressU_currentIndexChanged( int InIndex )
 { 
 	check( texture2D );
+	if ( !bInit || texture2D->GetAddressU() == ( ESamplerAddressMode )InIndex )
+	{
+		return;
+	}
+
 	texture2D->SetAddressU( ( ESamplerAddressMode )InIndex );
+	emit OnChangedAsset( texture2D );
 }
 
 void WeTextureEditorWindow::on_comboBox_addressV_currentIndexChanged( int InIndex )
 {
 	check( texture2D );
+	if ( !bInit || texture2D->GetAddressV() == ( ESamplerAddressMode )InIndex )
+	{
+		return;
+	}
+
 	texture2D->SetAddressV( ( ESamplerAddressMode )InIndex );
+	emit OnChangedAsset( texture2D );
 }
 
 void WeTextureEditorWindow::on_comboBox_filter_currentIndexChanged( int InIndex )
 {
 	check( texture2D );
+	if ( !bInit || texture2D->GetSamplerFilter() == ( ESamplerFilter )InIndex )
+	{
+		return;
+	}
+
 	texture2D->SetSamplerFilter( ( ESamplerFilter )InIndex );
+	emit OnChangedAsset( texture2D );
 }
 
 void WeTextureEditorWindow::on_toolButton_sourceFile_clicked()
 {
 	check( texture2D );
-	QString		newSourceFile = QFileDialog::getOpenFileName( this, "Select New Source File", QString(), FHelperAssetImporter::MakeFilterOfSupportedExtensions( FHelperAssetImporter::ET_Texture2D ) );
-	if ( newSourceFile.isEmpty() )
+	QString			newSourceFile = QFileDialog::getOpenFileName( this, "Select New Source File", QString(), FHelperAssetImporter::MakeFilterOfSupportedExtensions( FHelperAssetImporter::ET_Texture2D ) );
+	std::wstring	path = appQtAbsolutePathToEngine( newSourceFile );
+	if ( newSourceFile.isEmpty() || texture2D->GetAssetSourceFile() == path )
 	{
 		return;
 	}
 
-	texture2D->SetAssetSourceFile( appQtAbsolutePathToEngine( newSourceFile ) );
+	texture2D->SetAssetSourceFile( path );
 	OnSourceFileChanged( newSourceFile );
+	emit OnChangedAsset( texture2D );
 }
 
 void WeTextureEditorWindow::on_toolButton_sourceFileRemove_clicked()
 {
 	check( texture2D );
+
 	texture2D->SetAssetSourceFile( TEXT( "" ) );
 	OnSourceFileChanged( "" );
+	emit OnChangedAsset( texture2D );
 }
 
 void WeTextureEditorWindow::on_actionReimport_triggered()
 {
 	check( texture2D );
-	GAssetManager.Reimport( texture2D );
+
+	std::wstring		errorMessage;
+	if ( FHelperAssetImporter::Reimport( texture2D, errorMessage ) )
+	{
+		emit OnChangedAsset( texture2D );
+	}
+	else
+	{
+		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), texture2D->GetAssetName().c_str(), errorMessage.c_str() ) ) );
+	}
 }

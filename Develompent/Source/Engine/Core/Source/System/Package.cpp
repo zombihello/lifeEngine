@@ -14,6 +14,11 @@
 #include "System/PhysicsMaterial.h"
 #include "System/PhysicsEngine.h"
 
+#if WITH_EDITOR
+#include "Misc/WorldEdGlobals.h"
+#include "System/AssetDataBase.h"
+#endif // WITH_EDITOR
+
 FORCEINLINE FAssetRef GetDefaultAsset( EAssetType InType )
 {
 	switch ( InType )
@@ -49,7 +54,8 @@ FORCEINLINE FAsset* AssetFactory( EAssetType InType )
 }
 
 FAsset::FAsset( EAssetType InType ) 
-	: package( nullptr )
+	: bDirty( true )		// by default package is dirty because not serialized package from HDD
+	, package( nullptr )
 	, guid( appCreateGuid() )
 	, type( InType )
 {}
@@ -81,14 +87,30 @@ void FAsset::Serialize( class FArchive& InArchive )
 		InArchive << sourceFile;
 	}
 #endif // WITH_EDITOR
+
+	bDirty = false;
 }
 
 void FAsset::SetAssetName( const std::wstring& InName )
 {
+	if ( name != InName )
+	{
+		MarkDirty();
+	}
+
 	name = InName;
 	if ( package )
 	{
 		package->UpdateAssetNameInTable( guid );
+	}
+}
+
+void FAsset::MarkDirty()
+{
+	bDirty = true;
+	if ( package )
+	{
+		package->MarkAssetDirty( guid );
 	}
 }
 
@@ -98,10 +120,11 @@ FAssetReference FAsset::GetAssetReference() const
 }
 
 FPackage::FPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
-	: bIsDirty( false )
+	: bIsDirty( true )			// by default package is dirty because not serialized package from HDD
 	, guid( appCreateGuid() )
 	, name( InName )
 	, numUsageAssets( 0 )
+	, numDirtyAssets( 0 )
 {}
 
 FPackage::~FPackage()
@@ -209,7 +232,7 @@ void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 		}
 
 		// Load asset
-		FAssetRef		asset = LoadAsset( *archive, itAsset->first, assetInfo );
+		FAssetRef		asset = LoadAsset( *archive, itAsset->first, assetInfo, false );
 		if ( asset )
 		{
 			OutAssetArray.push_back( asset );
@@ -253,7 +276,7 @@ FAssetRef FPackage::Find( const FGuid& InGUID )
 
 	archive->SerializeHeader();
 	SerializeHeader( *archive );
-	FAssetRef		asset = LoadAsset( *archive, itAsset->first, itAsset->second );
+	FAssetRef		asset = LoadAsset( *archive, itAsset->first, itAsset->second, true );
 
 	delete archive;
 	return asset;
@@ -337,7 +360,8 @@ void FPackage::Serialize( FArchive& InArchive )
 		}
 	}
 
-	bIsDirty = false;
+	bIsDirty		= false;
+	numDirtyAssets	= 0;
 }
 
 void FPackage::SerializeHeader( FArchive& InArchive )
@@ -358,7 +382,7 @@ void FPackage::SerializeHeader( FArchive& InArchive )
 	InArchive << name;
 }
 
-FAssetRef FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo )
+FAssetRef FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo, bool InAddToAssetDataBase )
 {
 	uint32		oldOffset = InArchive.Tell();
 
@@ -399,6 +423,14 @@ FAssetRef FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FA
 	// Seek to old offset and exit
 	InArchive.Seek( oldOffset );
 
+	// If we in editor, add loaded asset to data base
+#if WITH_EDITOR
+	if ( GIsEditor && InAddToAssetDataBase )
+	{
+		GAssetDataBase.AddAsset( InAssetInfo.data );
+	}
+#endif // WITH_EDITOR
+
 	if ( ++numUsageAssets == 1 )
 	{
 		GPackageManager->CheckUsagePackage( filename );		// TODO BS yehor.pohuliaka - AHTUNG! Need change 'filename' to GUID of the package
@@ -415,6 +447,11 @@ void FPackage::MarkAssetUnlnoad( const FGuid& InGUID )
 	}
 
 	FAssetInfo&		assetInfo = itAsset->second;
+	if ( numDirtyAssets != -1 && ( FAsset* )assetInfo.data->IsDirty() && --numDirtyAssets <= 0 )
+	{
+		bIsDirty = false;
+	}
+
 	assetInfo.data = nullptr;
 	if ( --numUsageAssets <= 0 )
 	{
@@ -425,6 +462,15 @@ void FPackage::MarkAssetUnlnoad( const FGuid& InGUID )
 	{
 		LE_LOG( LT_Warning, LC_Package, TEXT( "An asset was uploaded that was not recorded on the HDD. This asset has been removed from the package and will not be written" ) );
 		assetsTable.erase( itAsset );
+	}
+}
+
+void FPackage::MarkAssetDirty( const FGuid& InGUID )
+{
+	bIsDirty = true;
+	if ( numDirtyAssets != -1 )
+	{
+		++numDirtyAssets;
 	}
 }
 
@@ -449,6 +495,34 @@ void FPackage::UpdateAssetNameInTable( const FGuid& InGUID )
 	assetInfo.name = asset->GetAssetName();
 }
 
+void FPackage::Add( FAsset* InAsset )
+{
+	check( InAsset );
+	checkMsg( InAsset->guid.IsValid(), TEXT( "For add asset to package need GUID is valid" ) );
+
+	// If asset in package already containing, remove from table old GUID
+	auto		it = assetGUIDTable.find( InAsset->name );
+	if ( it != assetGUIDTable.end() && it->second != InAsset->guid )
+	{
+		assetsTable.erase( it->second );
+	}
+
+	bIsDirty						= true;
+	InAsset->package				= this;
+	InAsset->bDirty					= true;
+	assetGUIDTable[ InAsset->name ] = InAsset->guid;
+	assetsTable[ InAsset->guid ]	= FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset->name, InAsset };
+	++numUsageAssets;
+
+	// If we in editor, add asset to data base
+#if WITH_EDITOR
+	if ( GIsEditor )
+	{
+		GAssetDataBase.AddAsset( InAsset );
+	}
+#endif // WITH_EDITOR
+}
+
 void FPackage::Remove( const FGuid& InGUID )
 {
 	auto		itAsset = assetsTable.find( InGUID );
@@ -460,8 +534,20 @@ void FPackage::Remove( const FGuid& InGUID )
 	FAssetInfo&		assetInfo = itAsset->second;
 	if ( assetInfo.data )
 	{
+		// If we in editor, remove asset from data base
+#if WITH_EDITOR
+		FAssetRef		dataRef = assetInfo.data;		// Let's keep the asset so that it is not deleted ahead of time if it has no more links
+		if ( GIsEditor )
+		{
+			GAssetDataBase.RemoveAsset( assetInfo.data );
+		}
+#endif // WITH_EDITOR
+
 		assetInfo.data->package = nullptr;
-		--numUsageAssets;
+		if ( numUsageAssets > 0 )
+		{
+			--numUsageAssets;
+		}
 	}
 
 	auto		itAssetGUID = assetGUIDTable.find( assetInfo.name );
@@ -471,11 +557,21 @@ void FPackage::Remove( const FGuid& InGUID )
 	}
 
 	assetsTable.erase( itAsset );
-	bIsDirty = true;
+
+	bIsDirty		= true;
+	numDirtyAssets	= -1;
 }
 
 void FPackage::RemoveAll()
 {
+	// If we in editor, remove all loaded asset from data base
+#if WITH_EDITOR
+	if ( GIsEditor )
+	{
+		GAssetDataBase.RemoveAssets( this );
+	}
+#endif // WITH_EDITOR
+
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
 		FAssetInfo&		assetInfo = itAsset->second;
@@ -487,8 +583,9 @@ void FPackage::RemoveAll()
 
 	assetGUIDTable.clear();
 	assetsTable.clear();
-	numUsageAssets = 0;
-	bIsDirty = true;
+	numUsageAssets	= 0;
+	bIsDirty		= true;
+	numDirtyAssets	= -1;
 }
 
 FPackageManager::FPackageManager() :
@@ -687,6 +784,21 @@ FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath, bool InCre
 bool FPackageManager::UnloadPackage( const std::wstring& InPath )
 {
 	auto		itPackage = packages.find( InPath );
+
+	// If we in editor, remove all assets from asset data base
+#if WITH_EDITOR
+	if ( GIsEditor )
+	{
+		// If package is dirty we shouldn't upload it
+		if ( itPackage->second.package->IsDirty() )
+		{
+			return false;
+		}
+
+		GAssetDataBase.RemoveAssets( itPackage->second.package );
+	}
+#endif // WITH_EDITOR
+
 	if ( itPackage == packages.end() || itPackage->second.package->GetNumUsageAssets() > 0 )
 	{
 		return false;

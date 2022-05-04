@@ -50,6 +50,14 @@ private slots:
 	void on_toolButton_sourceFileRemove_clicked();
 	void on_actionReimport_triggered();
 
+signals:
+	/**
+	 * Event when texture is changed
+	 * 
+	 * @param InAsset		Changed asset
+	 */
+	void OnChangedAsset( FAsset* InAsset );
+
 private:
 	/**
 	 * Init UI
@@ -75,6 +83,7 @@ private:
 	 */
 	virtual void resizeEvent( QResizeEvent* InEvent ) override;
 
+	bool							bInit;		/**< Is inited window */
 	Ui::WeTextureEditorWindow*		ui;			/**< Qt UI */
 	FTexture2DRef					texture2D;	/**< Editable asset */
 };

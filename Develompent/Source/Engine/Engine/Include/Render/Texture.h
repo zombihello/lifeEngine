@@ -80,6 +80,10 @@ public:
 	 */
 	FORCEINLINE void SetAddressU( ESamplerAddressMode InAdressU )
 	{
+		if ( addressU != InAdressU )
+		{
+			MarkDirty();
+		}
 		addressU = InAdressU;
 	}
 
@@ -90,6 +94,10 @@ public:
 	 */
 	FORCEINLINE void SetAddressV( ESamplerAddressMode InAdressV )
 	{
+		if ( addressV != InAdressV )
+		{
+			MarkDirty();
+		}
 		addressV = InAdressV;
 	}
 
@@ -100,6 +108,10 @@ public:
 	 */
 	FORCEINLINE void SetSamplerFilter( ESamplerFilter InSamplerFilter )
 	{
+		if ( samplerFilter != InSamplerFilter )
+		{
+			MarkDirty();
+		}
 		samplerFilter = InSamplerFilter;
 	}
 

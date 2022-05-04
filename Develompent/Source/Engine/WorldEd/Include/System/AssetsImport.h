@@ -35,6 +35,16 @@ public:
 	};
 
 	/**
+	 * Enumeration of import result
+	 */
+	enum EImportResult
+	{
+		IR_Seccussed,		/**< Asset is imported seccussed */
+		IR_Error,			/**< Asset not imported due to error */
+		IR_AlreadyExist		/**< Asset not imported because in package already exist asset with name */
+	};
+
+	/**
 	 * Is supported extension
 	 *
 	 * @param InExtension				Check extensions ("png", "jpg", etc)
@@ -61,6 +71,27 @@ public:
 	 * @return Return generated string for using in file dialogs
 	 */
 	static QString MakeFilterOfSupportedExtensions( uint32 InFlags = ET_All );
+
+	/**
+	 * Import asset to package
+	 *
+	 * @param InPath				Path to source file
+	 * @param InPackage				Package of place for import
+	 * @param OutAsset				Output imported asset, in case of fail return NULL
+	 * @param OutError				Output error message
+	 * @param InIsForceImport		Is need replace already exist asset with name
+	 * @return Return imported asset, in case of fail return NULL
+	 */
+	static EImportResult Import( const QString& InPath, FPackage* InPackage, FAssetRef& OutAsset, std::wstring& OutError, bool InIsForceImport = false );
+
+	/**
+	 * Reimport asset
+	 *
+	 * @param InAsset		Asset for reimport
+	 * @param OutError		Output error message
+	 * @return Return TRUE if seccussed reimported, else FALSE
+	 */
+	static bool Reimport( FAsset* InAsset, std::wstring& OutError );
 };
 
 /**
@@ -70,7 +101,23 @@ public:
 class FTexture2DImporter
 {
 public:
-	friend class FAssetManager;
+	/**
+	 * Import texture 2D
+	 *
+	 * @param InPath		Path to source file
+	 * @param OutError		Output error message
+	 * @return Return imported texture 2D, if failed return NULL
+	 */
+	static FTexture2DRef Import( const std::wstring& InPath, std::wstring& OutError );
+
+	/**
+	 * Reimport texture 2D
+	 *
+	 * @param InTexture2D	Texture 2D
+	 * @param OutError		Output error message
+	 * @return Return TRUE if seccussed reimported, else return FALSE
+	 */
+	static bool Reimport( FTexture2D* InTexture2D, std::wstring& OutError );
 
 	/**
 	 * Get supported texture extensions
@@ -92,24 +139,6 @@ public:
 		};
 		return supportedExtensions;
 	}
-
-private:
-	/**
-	 * Import texture 2D
-	 *
-	 * @param InPath		Path to source file
-	 * @return Return imported texture 2D, if failed return NULL
-	 */
-	static FTexture2DRef Import( const std::wstring& InPath );
-
-	/**
-	 * Reimport texture 2D
-	 *
-	 * @param InPath		Path to source file
-	 * @param InTexture2D	Texture 2D
-	 * @return Return TRUE if seccussed reimported, else return FALSE
-	 */
-	static bool Reimport( FTexture2D* InTexture2D );
 };
 
 /**
@@ -119,7 +148,23 @@ private:
 class FAudioBankImporter
 {
 public:
-	friend class FAssetManager;
+	/**
+	 * Import audio bank
+	 *
+	 * @param InPath		Path to source file
+	 * @param OutError		Output error message
+	 * @return Return imported audio bank, if failed return NULL
+	 */
+	static FAudioBankRef Import( const std::wstring& InPath, std::wstring& OutError );
+
+	/**
+	 * Reimport audio bank
+	 *
+	 * @param InAudioBank	Audio bank
+	 * @param OutError		Output error message
+	 * @return Return TRUE if seccussed reimported, else return FALSE
+	 */
+	static bool Reimport( FAudioBank* InAudioBank, std::wstring& OutError );
 
 	/**
 	 * Get supported audio extensions
@@ -133,24 +178,6 @@ public:
 		};
 		return supportedExtensions;
 	}
-
-private:
-	/**
-	 * Import audio bank
-	 *
-	 * @param InPath		Path to source file
-	 * @return Return imported audio bank, if failed return NULL
-	 */
-	static FAudioBankRef Import( const std::wstring& InPath );
-
-	/**
-	 * Reimport audio bank
-	 *
-	 * @param InPath		Path to source file
-	 * @param InAudioBank	Audio bank
-	 * @return Return TRUE if seccussed reimported, else return FALSE
-	 */
-	static bool Reimport( FAudioBank* InAudioBank );
 };
 
 #endif // !ASSETSIMPORT_H

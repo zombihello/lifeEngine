@@ -32,9 +32,6 @@
       <bool>true</bool>
      </property>
      <addaction name="separator"/>
-     <addaction name="actionSave"/>
-     <addaction name="actionBrowse"/>
-     <addaction name="separator"/>
      <addaction name="actionReimport"/>
      <addaction name="actionR"/>
      <addaction name="actionG"/>
@@ -330,16 +327,6 @@
     </layout>
    </item>
   </layout>
-  <action name="actionSave">
-   <property name="text">
-    <string>Save</string>
-   </property>
-  </action>
-  <action name="actionBrowse">
-   <property name="text">
-    <string>Browse</string>
-   </property>
-  </action>
   <action name="actionReimport">
    <property name="enabled">
     <bool>true</bool>

@@ -7,10 +7,12 @@
 #include "Misc/Class.h"
 #include "Misc/Misc.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "System/World.h"
 #include "Render/Viewport.h"
 #include "Render/RenderingThread.h"
 #include "System/EditorEngine.h"
+#include "System/AssetDataBase.h"
 #include "Actors/PlayerStart.h"
 #include "Widgets/LogWidget.h"
 
@@ -26,6 +28,7 @@ LEditorEngine::~LEditorEngine()
 void LEditorEngine::Init()
 {
 	Super::Init();
+	GAssetDataBase.Init();
 
 	// Create main window of editor
 	mainWindow = new WeMainWindow();
@@ -56,6 +59,7 @@ void LEditorEngine::Tick( float InDeltaSeconds )
 void LEditorEngine::Shutdown()
 {
 	Super::Shutdown();
+	GAssetDataBase.Shutdown();
 
 	viewports.clear();
 	if ( mainWindow )

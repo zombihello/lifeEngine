@@ -45,7 +45,14 @@ QVariant WePackageModel::data( const QModelIndex& InIndex, int InRole ) const
 	{
 	case Qt::DisplayRole:
 	case Qt::EditRole:
-		return TCHAR_TO_ANSI( assetInfo.name.c_str() );
+		if ( assetInfo.data && ( FAsset* )assetInfo.data->IsDirty() )		// If asset loaded we check is changed in memory. In successed case mark this asset by star
+		{
+			return TCHAR_TO_ANSI( ( assetInfo.name + TEXT( "*" ) ).c_str() );
+		}
+		else
+		{
+			return TCHAR_TO_ANSI( assetInfo.name.c_str() );
+		}
 
 	case Qt::DecorationRole:
 		switch ( assetInfo.type )
@@ -83,12 +90,13 @@ bool WePackageModel::removeRows( int InRow, int InCount, const QModelIndex& InPa
 void WePackageModel::Refresh()
 {
 	removeRows( 0, numItems, QModelIndex() );
-	if ( !package )
+	numItems = package ? package->GetNumAssets() : 0;
+	
+	if ( !package || numItems <= 0 )
 	{
 		return;
 	}
 
-	numItems = package ? package->GetNumAssets() : 0;
 	insertRows( 0, numItems, QModelIndex() );
 }
 

@@ -17,8 +17,8 @@ extern class LEditorEngine*			GEditorEngine;
 
 /**
  * @ingroup WorldEd
- * Asset manager
+ * Asset data base
  */
-extern class FAssetManager			GAssetManager;
+extern class FAssetDataBase			GAssetDataBase;
 
 #endif // !WORLDEDGLOBALS_H
