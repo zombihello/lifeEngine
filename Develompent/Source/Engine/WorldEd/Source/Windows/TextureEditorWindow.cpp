@@ -14,6 +14,7 @@ WeTextureEditorWindow::WeTextureEditorWindow( FTexture2D* InTexture2D, QWidget* 
 	, bInit( false )
 	, ui( new Ui::WeTextureEditorWindow() )
 	, texture2D( InTexture2D )
+	, viewportClient( new FTexturePreviewViewportClient( InTexture2D ) )
 {
 	check( InTexture2D );
 
@@ -22,7 +23,7 @@ WeTextureEditorWindow::WeTextureEditorWindow( FTexture2D* InTexture2D, QWidget* 
 	InitUI();
 
 	// Init preview viewport
-	ui->viewportPreview->SetViewportClient( new FTexturePreviewViewportClient( InTexture2D ), true );
+	ui->viewportPreview->SetViewportClient( viewportClient, false );
 	ui->viewportPreview->SetEnabled( true );
 	bInit = true;
 }
@@ -44,6 +45,10 @@ void WeTextureEditorWindow::InitUI()
 	ui->comboBox_addressU->setCurrentIndex( texture2D->GetAddressU() );
 	ui->comboBox_addressV->setCurrentIndex( texture2D->GetAddressV() );
 	ui->comboBox_filter->setCurrentIndex( texture2D->GetSamplerFilter() );
+	ui->actionR->setChecked( viewportClient->IsShowRedChannel() );
+	ui->actionG->setChecked( viewportClient->IsShowGreenChannel() );
+	ui->actionB->setChecked( viewportClient->IsShowBlueChannel() );
+	ui->actionA->setChecked( viewportClient->IsShowAlphaChannel() );
 
 	// Set info about asset
 	uint32						sizeX = texture2D->GetSizeX();
@@ -65,6 +70,8 @@ void WeTextureEditorWindow::InitUI()
 
 WeTextureEditorWindow::~WeTextureEditorWindow()
 {
+	ui->viewportPreview->SetViewportClient( nullptr, false );
+	delete viewportClient;
 	delete ui;
 }
 
@@ -162,4 +169,28 @@ void WeTextureEditorWindow::on_actionReimport_triggered()
 	{
 		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), texture2D->GetAssetName().c_str(), errorMessage.c_str() ) ) );
 	}
+}
+
+void WeTextureEditorWindow::on_actionR_toggled( bool InValue )
+{
+	check( viewportClient );
+	viewportClient->ShowRedChannel( InValue );
+}
+
+void WeTextureEditorWindow::on_actionG_toggled( bool InValue )
+{
+	check( viewportClient );
+	viewportClient->ShowGreenChannel( InValue );
+}
+
+void WeTextureEditorWindow::on_actionB_toggled( bool InValue )
+{
+	check( viewportClient );
+	viewportClient->ShowBlueChannel( InValue );
+}
+
+void WeTextureEditorWindow::on_actionA_toggled( bool InValue )
+{
+	check( viewportClient );
+	viewportClient->ShowAlphaChannel( InValue );
 }

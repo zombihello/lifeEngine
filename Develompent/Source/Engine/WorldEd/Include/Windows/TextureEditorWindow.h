@@ -49,6 +49,10 @@ private slots:
 	void on_toolButton_sourceFile_clicked();
 	void on_toolButton_sourceFileRemove_clicked();
 	void on_actionReimport_triggered();
+	void on_actionR_toggled( bool InValue );
+	void on_actionG_toggled( bool InValue );
+	void on_actionB_toggled( bool InValue );
+	void on_actionA_toggled( bool InValue );
 
 signals:
 	/**
@@ -83,9 +87,10 @@ private:
 	 */
 	virtual void resizeEvent( QResizeEvent* InEvent ) override;
 
-	bool							bInit;		/**< Is inited window */
-	Ui::WeTextureEditorWindow*		ui;			/**< Qt UI */
-	FTexture2DRef					texture2D;	/**< Editable asset */
+	bool									bInit;			/**< Is inited window */
+	Ui::WeTextureEditorWindow*				ui;				/**< Qt UI */
+	FTexture2DRef							texture2D;		/**< Editable asset */
+	class FTexturePreviewViewportClient*	viewportClient;	/**< Viewport client */
 };
 
 #endif // MAINWINDOW_H

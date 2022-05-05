@@ -5,12 +5,14 @@
 #include "Render/RenderingThread.h"
 #include "Render/SceneUtils.h"
 #include "Render/Shaders/ScreenShader.h"
+#include "Render/Shaders/TexturePreviewShader.h"
 #include "RHI/StaticStatesRHI.h"
 #include "EngineDefines.h"
 
 FTexturePreviewViewportClient::FTexturePreviewViewportClient( FTexture2D* InTexture2D )
 	: showFlags( SHOW_DefaultEditor )
 	, texture2D( InTexture2D )
+	, colorChannelMask( FColor::white )
 {}
 
 void FTexturePreviewViewportClient::Draw( FViewport* InViewport )
@@ -40,17 +42,18 @@ void FTexturePreviewViewportClient::Draw_RenderThread( FViewportRHIRef InViewpor
 	{
 		SCOPED_DRAW_EVENT( EventDrawPreviewTexture, DEC_SCENE_ITEMS, FString::Format( TEXT( "Preview %s" ), InTexture2D->GetAssetName().c_str() ).c_str() );
 
-		FTexture2DRHIRef							texture2DRHI		= InTexture2D->GetTexture2DRHI();
-		FScreenVertexShader<SVST_Fullscreen>*		screenVertexShader	= GShaderManager->FindInstance< FScreenVertexShader<SVST_Fullscreen>, FSimpleElementVertexFactory >();
-		FScreenPixelShader*							screenPixelShader	= GShaderManager->FindInstance< FScreenPixelShader, FSimpleElementVertexFactory >();
-		check( screenVertexShader && screenPixelShader );
+		FTexture2DRHIRef							texture2DRHI				= InTexture2D->GetTexture2DRHI();
+		FScreenVertexShader<SVST_Fullscreen>*		screenVertexShader			= GShaderManager->FindInstance< FScreenVertexShader<SVST_Fullscreen>, FSimpleElementVertexFactory >();
+		FTexturePreviewPixelShader*					texturePreviewPixelShader	= GShaderManager->FindInstance< FTexturePreviewPixelShader, FSimpleElementVertexFactory >();
+		check( screenVertexShader && texturePreviewPixelShader );
 
 		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
 		GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
-		GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "PreviewTexture" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), screenPixelShader->GetPixelShader() ) );
+		GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "PreviewTexture" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), texturePreviewPixelShader->GetPixelShader() ) );
 
-		screenPixelShader->SetTexture( immediateContext, texture2DRHI );
-		screenPixelShader->SetSamplerState( immediateContext, GRHI->CreateSamplerState( InTexture2D->GetSamplerStateInitialiser() ) );
+		texturePreviewPixelShader->SetTexture( immediateContext, texture2DRHI );
+		texturePreviewPixelShader->SetSamplerState( immediateContext, GRHI->CreateSamplerState( InTexture2D->GetSamplerStateInitialiser() ) );
+		texturePreviewPixelShader->SetColorChannelMask( immediateContext, colorChannelMask );
 		GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
 	}
 	

@@ -1,0 +1,58 @@
+/**
+ * @file
+ * @addtogroup WorldEd WorldEd
+ *
+ * Copyright Broken Singularity, All Rights Reserved.
+ * Authors: Yehor Pohuliaka (zombiHello)
+ */
+
+#ifndef TEXTUREPREVIEWSHADER_H
+#define TEXTUREPREVIEWSHADER_H
+
+#include "Math/Color.h"
+#include "Render/Shaders/ScreenShader.h"
+#include "Render/Shaders/ShaderManager.h"
+
+/**
+ * @ingroup WorldEd
+ * @brief Class of pixel shader for render preview texture
+ */
+class FTexturePreviewPixelShader : public FScreenPixelShader
+{
+	DECLARE_SHADER_TYPE( FTexturePreviewPixelShader )
+
+public:
+	/**
+	 * @brief Initialize shader
+	 * @param InShaderCacheItem			Cache of shader
+	 */
+	virtual void Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem ) override;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType = nullptr );
+#endif // WITH_EDITOR
+
+	/**
+	 * @brief Set color channel mask
+	 * 
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InColorMask			Color mask
+	 */
+	FORCEINLINE void SetColorChannelMask( class FBaseDeviceContextRHI* InDeviceContextRHI, const FColor& InColorMask )
+	{
+		SetPixelShaderValue( InDeviceContextRHI, colorChannelMask, InColorMask.ToNormalizedVector4D() );
+	}
+
+private:
+	FShaderParameter		colorChannelMask;		/**< Color channel mask */
+};
+
+#endif // !TEXTUREPREVIEWSHADER_H
+

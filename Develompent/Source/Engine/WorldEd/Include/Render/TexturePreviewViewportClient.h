@@ -9,6 +9,7 @@
 #ifndef TEXTUREPREVIEWVIEWPORTCLIENT_H
 #define TEXTUREPREVIEWVIEWPORTCLIENT_H
 
+#include "Math/Color.h"
 #include "Math/Rotator.h"
 #include "Render/Viewport.h"
 #include "Render/Scene.h"
@@ -55,6 +56,78 @@ public:
 		texture2D = InTexture2D;
 	}
 
+	/**
+	 * @brief Show red channel
+	 * @param InShowRedChannel		Is need show red channel
+	 */
+	FORCEINLINE void ShowRedChannel( bool InShowRedChannel )
+	{
+		colorChannelMask.r = InShowRedChannel ? 255 : 0;
+	}
+
+	/**
+	 * @brief Show green channel
+	 * @param InShowGreenChannel		Is need show green channel
+	 */
+	FORCEINLINE void ShowGreenChannel( bool InShowGreenChannel )
+	{
+		colorChannelMask.g = InShowGreenChannel ? 255 : 0;
+	}
+
+	/**
+	 * @brief Show blue channel
+	 * @param InShowBlueChannel		Is need show blue channel
+	 */
+	FORCEINLINE void ShowBlueChannel( bool InShowBlueChannel )
+	{
+		colorChannelMask.b = InShowBlueChannel ? 255 : 0;
+	}
+
+	/**
+	 * @brief Show alpha channel
+	 * @param InShowAlphaChannel		Is need show alpha channel
+	 */
+	FORCEINLINE void ShowAlphaChannel( bool InShowAlphaChannel )
+	{
+		colorChannelMask.a = InShowAlphaChannel ? 255 : 0;
+	}
+
+	/**
+	 * @brief Is showed red channel
+	 * @return Return TRUE if showed red channel, else return FALSE
+	 */
+	FORCEINLINE bool IsShowRedChannel() const
+	{
+		return colorChannelMask.r > 0;
+	}
+
+	/**
+	 * @brief Is showed green channel
+	 * @return Return TRUE if showed green channel, else return FALSE
+	 */
+	FORCEINLINE bool IsShowGreenChannel() const
+	{
+		return colorChannelMask.g > 0;
+	}
+
+	/**
+	 * @brief Is showed blue channel
+	 * @return Return TRUE if showed blue channel, else return FALSE
+	 */
+	FORCEINLINE bool IsShowBlueChannel() const
+	{
+		return colorChannelMask.b > 0;
+	}
+
+	/**
+	 * @brief Is showed alpha channel
+	 * @return Return TRUE if showed alpha channel, else return FALSE
+	 */
+	FORCEINLINE bool IsShowAlphaChannel() const
+	{
+		return colorChannelMask.a > 0;
+	}
+
 protected:
 	/**
 	 * @brief Calculate scene view
@@ -71,8 +144,9 @@ protected:
 	 */
 	FColor GetBackgroundColor() const;
 
-	EShowFlags			showFlags;		/**< Show flags */
-	FTexture2DRef		texture2D;		/**< Texture 2D to preview */
+	EShowFlags			showFlags;			/**< Show flags */
+	FTexture2DRef		texture2D;			/**< Texture 2D to preview */
+	FColor				colorChannelMask;	/**< Color channel mask */
 };
 
 #endif // !TEXTUREPREVIEWVIEWPORTCLIENT_H
