@@ -560,6 +560,15 @@ public:
     }
 
     /**
+     * Get registered shader types
+     * @return Return array of registered shader types
+     */
+    static FORCEINLINE const std::unordered_map< std::wstring, FShaderMetaType* >& GetShaderTypes()
+    {
+        return FContainerShaderTypes::Get()->shaderMetaTypes;
+    }
+
+    /**
      * Get shader cache filename
      * 
      * @param InShaderPlatform Shader platform

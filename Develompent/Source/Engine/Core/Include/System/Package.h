@@ -134,6 +134,10 @@ public:
 	 */
 	FORCEINLINE void SetAssetSourceFile( const std::wstring& InPath )
 	{
+		if ( sourceFile != InPath )
+		{
+			MarkDirty();
+		}
 		sourceFile = InPath;
 	}
 #endif // WITH_EDITOR

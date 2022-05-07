@@ -87,10 +87,16 @@ private:
 	 */
 	virtual void resizeEvent( QResizeEvent* InEvent ) override;
 
-	bool									bInit;			/**< Is inited window */
-	Ui::WeTextureEditorWindow*				ui;				/**< Qt UI */
-	FTexture2DRef							texture2D;		/**< Editable asset */
-	class FTexturePreviewViewportClient*	viewportClient;	/**< Viewport client */
+	bool									bInit;								/**< Is inited window */
+	Ui::WeTextureEditorWindow*				ui;									/**< Qt UI */
+	FTexture2DRef							texture2D;							/**< Editable asset */
+	class FTexturePreviewViewportClient*	viewportClient;						/**< Viewport client */
+	class QComboBox*						comboBox_addressU;					/**< Combobox for select address mode by U */
+	class QComboBox*						comboBox_addressV;					/**< Combobox for select address mode by V */
+	class QComboBox*						comboBox_filter;					/**< Combobox for select sampler filter */
+	class QLabel*							label_sourceFileValue;				/**< Label for show path to source file */
+	class QToolButton*						toolButton_sourceFile;				/**< Tool button for select new path to source file */
+	class QToolButton*						toolButton_sourceFileRemove;		/**< Tool button for remove path to source file */
 };
 
 #endif // MAINWINDOW_H

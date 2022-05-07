@@ -1,5 +1,8 @@
 #include <qmessagebox.h>
 #include <qfiledialog.h>
+#include <qformlayout.h>
+#include <qlabel.h>
+#include <qcombobox.h>
 
 #include "ui_TextureEditorWindow.h"
 #include "Containers/StringConv.h"
@@ -7,6 +10,7 @@
 #include "Render/TexturePreviewViewportClient.h"
 #include "Render/RenderUtils.h"
 #include "Windows/TextureEditorWindow.h"
+#include "Widgets/SectionWidget.h"
 #include "WorldEd.h"
 
 WeTextureEditorWindow::WeTextureEditorWindow( FTexture2D* InTexture2D, QWidget* InParent /* = nullptr */ )
@@ -15,6 +19,12 @@ WeTextureEditorWindow::WeTextureEditorWindow( FTexture2D* InTexture2D, QWidget* 
 	, ui( new Ui::WeTextureEditorWindow() )
 	, texture2D( InTexture2D )
 	, viewportClient( new FTexturePreviewViewportClient( InTexture2D ) )
+	, comboBox_addressU( nullptr )
+	, comboBox_addressV( nullptr )
+	, comboBox_filter( nullptr )
+	, label_sourceFileValue( nullptr )
+	, toolButton_sourceFile( nullptr )
+	, toolButton_sourceFileRemove( nullptr )
 {
 	check( InTexture2D );
 
@@ -30,21 +40,83 @@ WeTextureEditorWindow::WeTextureEditorWindow( FTexture2D* InTexture2D, QWidget* 
 
 void WeTextureEditorWindow::InitUI()
 {
-	// Fill comboboxes and init him
-	for ( uint32 index = 0; index < SAM_Max; ++index )
+	// Create UI
+	// Section of sampler settings
 	{
-		ui->comboBox_addressU->addItem( QString::fromStdWString( SamplerAddressModeToText( ( ESamplerAddressMode )index ) ) );
-		ui->comboBox_addressV->addItem( QString::fromStdWString( SamplerAddressModeToText( ( ESamplerAddressMode )index ) ) );
+		WeSectionWidget*	samplerSettingsSection	= new WeSectionWidget( "Sampler Settings", 300, this );
+		QFormLayout*		formLayout				= new QFormLayout( samplerSettingsSection );
+		comboBox_addressU	= new QComboBox( samplerSettingsSection );
+		comboBox_addressV	= new QComboBox( samplerSettingsSection );
+		comboBox_filter		= new QComboBox( samplerSettingsSection );
+
+		// Fill comboBoxes
+		for ( uint32 index = 0; index < SAM_Max; ++index )
+		{
+			comboBox_addressU->addItem( QString::fromStdWString( SamplerAddressModeToText( ( ESamplerAddressMode )index ) ) );
+			comboBox_addressV->addItem( QString::fromStdWString( SamplerAddressModeToText( ( ESamplerAddressMode )index ) ) );
+		}
+
+		for ( uint32 index = 0; index < SF_Max; ++index )
+		{
+			comboBox_filter->addItem( QString::fromStdWString( SamplerFilterToText( ( ESamplerFilter )index ) ) );
+		}
+
+		formLayout->setContentsMargins( 3, 3, 3, 3 );
+		formLayout->setWidget( 0, QFormLayout::LabelRole, new QLabel( "Address U:", samplerSettingsSection ) );
+		formLayout->setWidget( 0, QFormLayout::FieldRole, comboBox_addressU );
+		formLayout->setWidget( 1, QFormLayout::LabelRole, new QLabel( "Address V:", samplerSettingsSection ) );
+		formLayout->setWidget( 1, QFormLayout::FieldRole, comboBox_addressV );
+		formLayout->setWidget( 2, QFormLayout::LabelRole, new QLabel( "Filter:", samplerSettingsSection ) );
+		formLayout->setWidget( 2, QFormLayout::FieldRole, comboBox_filter );
+
+		connect( comboBox_addressU, SIGNAL( currentIndexChanged( int ) ), this, SLOT( on_comboBox_addressU_currentIndexChanged( int ) ) );
+		connect( comboBox_addressV, SIGNAL( currentIndexChanged( int ) ), this, SLOT( on_comboBox_addressV_currentIndexChanged( int ) ) );
+		connect( comboBox_filter, SIGNAL( currentIndexChanged( int ) ), this, SLOT( on_comboBox_filter_currentIndexChanged( int ) ) );
+
+		samplerSettingsSection->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
+		samplerSettingsSection->setContentLayout( *formLayout );		
+		samplerSettingsSection->expand( true );
+		ui->frame->layout()->addWidget( samplerSettingsSection );
 	}
 
-	for ( uint32 index = 0; index < SF_Max; ++index )
+	// Section of file path
 	{
-		ui->comboBox_filter->addItem( QString::fromStdWString( SamplerFilterToText( ( ESamplerFilter )index ) ) );
+		WeSectionWidget*	filePathSection		= new WeSectionWidget( "File Path", 300, this );
+		QGridLayout*		gridLayout			= new QGridLayout( filePathSection );
+		QLabel*				label_sourceFile	= new QLabel( "Source File:", filePathSection );
+
+		label_sourceFileValue		= new QLabel( "%Value%", filePathSection );
+		toolButton_sourceFile		= new QToolButton( filePathSection );
+		toolButton_sourceFileRemove = new QToolButton( filePathSection );
+
+		toolButton_sourceFile->setText( "..." );
+		toolButton_sourceFileRemove->setText( "X" );
+		gridLayout->setContentsMargins( 3, 3, 3, 3 );
+
+		gridLayout->addWidget( label_sourceFile, 0, 0 );
+		gridLayout->addWidget( label_sourceFileValue, 0, 1 );
+		gridLayout->addWidget( toolButton_sourceFile, 0, 2 );
+		gridLayout->addWidget( toolButton_sourceFileRemove, 0, 3 );
+
+		connect( toolButton_sourceFile, SIGNAL( clicked() ), this, SLOT( on_toolButton_sourceFile_clicked() ) );
+		connect( toolButton_sourceFileRemove, SIGNAL( clicked() ), this, SLOT( on_toolButton_sourceFileRemove_clicked() ) );
+
+		filePathSection->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
+		filePathSection->setContentLayout( *gridLayout );
+		filePathSection->expand( true );
+		ui->frame->layout()->addWidget( filePathSection );
 	}
 
-	ui->comboBox_addressU->setCurrentIndex( texture2D->GetAddressU() );
-	ui->comboBox_addressV->setCurrentIndex( texture2D->GetAddressV() );
-	ui->comboBox_filter->setCurrentIndex( texture2D->GetSamplerFilter() );
+	// Spacer
+	{
+		QSpacerItem*		verticalSpacer = new QSpacerItem( 20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding );
+		ui->frame->layout()->addItem( verticalSpacer );
+	}
+
+	// Init widgets
+	comboBox_addressU->setCurrentIndex( texture2D->GetAddressU() );
+	comboBox_addressV->setCurrentIndex( texture2D->GetAddressV() );
+	comboBox_filter->setCurrentIndex( texture2D->GetSamplerFilter() );
 	ui->actionR->setChecked( viewportClient->IsShowRedChannel() );
 	ui->actionG->setChecked( viewportClient->IsShowGreenChannel() );
 	ui->actionB->setChecked( viewportClient->IsShowBlueChannel() );
@@ -78,17 +150,17 @@ WeTextureEditorWindow::~WeTextureEditorWindow()
 
 void WeTextureEditorWindow::OnSourceFileChanged( QString InNewSourceFile )
 {
-	ui->label_sourceFileValue->setText( InNewSourceFile );
-	ui->label_sourceFileValue->setToolTip( InNewSourceFile );
+	label_sourceFileValue->setText( InNewSourceFile );
+	label_sourceFileValue->setToolTip( InNewSourceFile );
 	ui->actionReimport->setEnabled( !InNewSourceFile.isEmpty() );
 	UICropSourceFileText();
 }
 
 void WeTextureEditorWindow::UICropSourceFileText()
 {
-	QFontMetrics		fontMetrices = ui->label_sourceFileValue->fontMetrics();
-	uint32				maxTextWidth = Max( ui->label_sourceFileValue->size().width() - 2, 100 );
-	ui->label_sourceFileValue->setText( fontMetrices.elidedText( QString::fromStdWString( texture2D->GetAssetSourceFile() ), Qt::TextElideMode::ElideRight, maxTextWidth ) );
+	QFontMetrics		fontMetrices = label_sourceFileValue->fontMetrics();
+	uint32				maxTextWidth = Max( label_sourceFileValue->size().width() - 2, 100 );
+	label_sourceFileValue->setText( fontMetrices.elidedText( QString::fromStdWString( texture2D->GetAssetSourceFile() ), Qt::TextElideMode::ElideRight, maxTextWidth ) );
 }
 
 void WeTextureEditorWindow::resizeEvent( QResizeEvent* InEvent )

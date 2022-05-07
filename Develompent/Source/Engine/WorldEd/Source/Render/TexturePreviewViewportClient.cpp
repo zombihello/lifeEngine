@@ -54,6 +54,7 @@ void FTexturePreviewViewportClient::Draw_RenderThread( FViewportRHIRef InViewpor
 		texturePreviewPixelShader->SetTexture( immediateContext, texture2DRHI );
 		texturePreviewPixelShader->SetSamplerState( immediateContext, GRHI->CreateSamplerState( InTexture2D->GetSamplerStateInitialiser() ) );
 		texturePreviewPixelShader->SetColorChannelMask( immediateContext, colorChannelMask );
+		GRHI->CommitConstants( immediateContext );
 		GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
 	}
 	

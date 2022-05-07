@@ -95,6 +95,7 @@ protected:
 
 private slots:
 	void on_treeView_contentBrowser_clicked( const QModelIndex& InIndex );
+	void on_treeView_contentBrowser_doubleClicked( const QModelIndex& InIndex );
 
 signals:
 	/**

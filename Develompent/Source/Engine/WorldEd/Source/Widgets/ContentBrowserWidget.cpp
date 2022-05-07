@@ -14,6 +14,7 @@
 #include "Widgets/ContentBrowserWidget.h"
 #include "Windows/MainWindow.h"
 #include "Windows/TextureEditorWindow.h"
+#include "Windows/MaterialEditorWindow.h"
 #include "System/ContentBrowser.h"
 #include "System/EditorEngine.h"
 #include "System/AssetDataBase.h"
@@ -199,52 +200,37 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 	contextMenu.addAction( &actionDeleteFile );
 	contextMenu.addAction( &actionRenameFile );
 
-	// Disable actions with package if current file is not package
-	if ( fileInfo.suffix() != FILE_PACKAGE_EXTENSION )
-	{
-		actionSavePackage.setEnabled( false );
-		actionOpenPackage.setEnabled( false );
-		actionUnloadPackage.setEnabled( false );
-	}
-	else
-	{
-		bool		bIsPackageOpened = GPackageManager->IsPackageLoaded( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) );
-		actionOpenPackage.setEnabled( !bIsPackageOpened );
-		actionUnloadPackage.setEnabled( bIsPackageOpened );
-	}
+	const bool		bPackage				= fileInfo.suffix() == FILE_PACKAGE_EXTENSION;
+	bool			bExistLoadedPackage		= false;
+	bool			bExistUnloadedPackage	= false;
+	const bool		bMap					= fileInfo.suffix() == FILE_MAP_EXTENSION;
+	const bool		bValidItem				= modelIndex.isValid();
+	const bool		bSelectedMoreOneItems	= numSelecteItems > 1;
 
-	// Disable actions with map if current file is not map
-	if ( fileInfo.suffix() != FILE_MAP_EXTENSION )
+	if ( bPackage )
 	{
-		actionOpenLevel.setEnabled( false );
-		actionSaveLevel.setEnabled( false );
-	}
-
-	// Disable actions if current file is not valid
-	if ( !modelIndex.isValid() )
-	{
-		actionDeleteFile.setEnabled( false );
-		actionRenameFile.setEnabled( false );
-		actionShowInExplorer.setEnabled( false );
-	}
-
-	// If in selection list exist not loaded package - disable rename action
-	for ( uint32 index = 0, count = modelIndexList.length(); index < count; ++index )
-	{
-		QFileInfo		fileInfo = fileSystemModel->fileInfo( modelIndexList[ index ] );
-		if ( !GPackageManager->IsPackageLoaded( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) ) )
+		for ( uint32 index = 0, count = modelIndexList.length(); index < count && ( !bExistLoadedPackage || !bExistUnloadedPackage ); ++index )
 		{
-			actionSavePackage.setEnabled( false );
-			break;
+			QFileInfo		fileInfo = fileSystemModel->fileInfo( modelIndexList[ index ] );
+			if ( !GPackageManager->IsPackageLoaded( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) ) )
+			{
+				bExistUnloadedPackage = true;
+			}
+			else
+			{
+				bExistLoadedPackage = true;
+			}
 		}
 	}
 
-	// Disable actions if selected more of one item
-	if ( numSelecteItems > 1 )
-	{
-		actionRenameFile.setEnabled( false );
-		actionShowInExplorer.setEnabled( false );
-	}
+	actionSavePackage.setEnabled( bPackage && bExistLoadedPackage );				//
+	actionOpenPackage.setEnabled( bPackage && bExistUnloadedPackage );				// } Disable actions with package if current file is not package
+	actionUnloadPackage.setEnabled( bPackage && bExistLoadedPackage );				//
+	actionOpenLevel.setEnabled( bMap );												//
+	actionSaveLevel.setEnabled( bMap );												// } Disable actions with map if current file is not map
+	actionDeleteFile.setEnabled( bValidItem );										//   Disable actions if current file is not valid
+	actionRenameFile.setEnabled( bValidItem && !bSelectedMoreOneItems );			// 
+	actionShowInExplorer.setEnabled( bValidItem && !bSelectedMoreOneItems );		// } Disable actions if selected more of one item
 
 	// Connect to signal of actions
 	connect( &actionDeleteFile, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_delete() ) );
@@ -255,7 +241,6 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 	connect( &actionOpenPackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_OpenPackage() ) );
 	connect( &actionUnloadPackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_UnloadPackage() ) );
 	connect( &actionShowInExplorer, SIGNAL( triggered() ), this, SLOT( OnContentBrowserContextMenuShowInExplorer() ) );
-
 	contextMenu.exec( QCursor::pos() );
 }
 
@@ -264,6 +249,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	QModelIndex				modelIndex		= ui->listView_packageBrowser->indexAt( InPoint );
 	FPackageRef				currentPackage	= ui->listView_packageBrowser->GetPackage();
 	uint32					numSelecteItems = ui->listView_packageBrowser->selectionModel()->selectedRows().length();
+	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 
 	// Menu 'Create'
 	QMenu			menuCreate( "Create", this );
@@ -277,51 +263,36 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	QAction			actionReimportWithNewFile( "Reimport With New File", this );
 	QAction			actionDeleteFile( "Delete", this );
 	QAction			actionRenameFile( "Rename", this );
+	contextMenu.addMenu( &menuCreate );
+	contextMenu.addSeparator();
 	contextMenu.addAction( &actionImport );
 	contextMenu.addAction( &actionReimport );
 	contextMenu.addAction( &actionReimportWithNewFile );
 	contextMenu.addSeparator();
-	contextMenu.addMenu( &menuCreate );
-	contextMenu.addSeparator();
 	contextMenu.addAction( &actionDeleteFile );
 	contextMenu.addAction( &actionRenameFile );
 
-	// If current package is not valid - disable all actions
-	if ( !currentPackage )
-	{
-		menuCreate.setEnabled( false );
-		actionImport.setEnabled( false );
-		actionReimport.setEnabled( false );
-		actionReimportWithNewFile.setEnabled( false );
-		actionDeleteFile.setEnabled( false );
-		actionRenameFile.setEnabled( false );
-	}
-	else
-	{
-		// Disable actions if item is not valid
-		if ( !modelIndex.isValid() )
-		{
-			actionDeleteFile.setEnabled( false );
-			actionRenameFile.setEnabled( false );
-			actionReimport.setEnabled( false );
-			actionReimportWithNewFile.setEnabled( false );
-		}
-		else
-		{
-			// Disable actions if selected more of one item
-			if ( numSelecteItems > 1 )
-			{
-				actionRenameFile.setEnabled( false );
-				actionReimportWithNewFile.setEnabled( false );
-			}
+	const bool		bExistCurrentPackage				= currentPackage;
+	const bool		bValidItem							= modelIndex.isValid();
+	const bool		bSelectedMoreOneItems				= numSelecteItems > 1;
+	bool			bExistSupportedReimportAssetType	= false;
 
-			// Not all assets can be imported
+	if ( bExistCurrentPackage )
+	{
+		for ( uint32 index = 0, count = modelIndexList.length(); index < count && !bExistSupportedReimportAssetType; ++index )
+		{
 			FAssetInfo		assetInfo;
-			currentPackage->GetAssetInfo( modelIndex.row(), assetInfo );
-			actionReimport.setEnabled( assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank );
-			actionReimportWithNewFile.setEnabled( numSelecteItems == 1 && ( assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank ) );
+			currentPackage->GetAssetInfo( modelIndexList[ index ].row(), assetInfo );
+			bExistSupportedReimportAssetType = assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank;
 		}
 	}
+
+	menuCreate.setEnabled( bExistCurrentPackage );																								//
+	actionImport.setEnabled( bExistCurrentPackage );																							// } If current package is not valid - disable all actions
+	actionReimport.setEnabled( bExistCurrentPackage && bValidItem && bExistSupportedReimportAssetType );										//
+	actionReimportWithNewFile.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems && bExistSupportedReimportAssetType );	//   Not all assets can be imported
+	actionDeleteFile.setEnabled( bExistCurrentPackage && bValidItem );																			// } Disable actions if item is not valid
+	actionRenameFile.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems );												//   Disable actions if selected more of one item
 
 	// Connect to signal of a actions
 	connect( &actionImport, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_Import() ) );
@@ -330,7 +301,6 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	connect( &actionCreateMaterial, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_CreateMaterial() ) );
 	connect( &actionDeleteFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_DeleteAsset() ) );
 	connect( &actionRenameFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_RenameAsset() ) );
-
 	contextMenu.exec( QCursor::pos() );
 }
 
@@ -359,14 +329,14 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 		// Show message if not setted flags bReplaceAll and bSkipAll
 		if ( !bReplaceAll && !bSkipAll && importResult == FHelperAssetImporter::IR_AlreadyExist )
 		{
-			QMessageBox::StandardButton		resultButton = QMessageBox::question( this, "Question", QString::fromStdWString( FString::Format( TEXT( "Asset with name '<b>%s</b>' already exist in package. Replace it?" ), QFileInfo( path ).baseName().toStdWString().c_str() ) ), QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll );
+			QMessageBox::StandardButton		resultButton = QMessageBox::question( this, "Question", QString::fromStdWString( FString::Format( TEXT( "Asset with name <b>'%s'</b> already exist in package. Replace it?" ), QFileInfo( path ).baseName().toStdWString().c_str() ) ), QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll );
 			switch ( resultButton )
 			{
 			case QMessageBox::YesToAll:
 				bReplaceAll = true;
-				importResult = FHelperAssetImporter::Import( selectedAssets[ index ], package, asset, errorMessage, true );
 
 			case QMessageBox::Yes:
+				importResult = FHelperAssetImporter::Import( selectedAssets[ index ], package, asset, errorMessage, true );
 				break;
 
 			case QMessageBox::NoToAll:
@@ -479,12 +449,45 @@ void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
 	// If reimport asset is failed - show error message box
 	if ( !bResult )
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Failed reimport asset '<b>%s</b>' from new source file '<b>%s</b>'.<br><br>Error: %s" ), asset->GetAssetName().c_str(), newSourceFile.toStdWString().c_str(), errorMessage.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Failed reimport asset <b>'%s'</b> from new source file <b>'%s'</b>.<br><br>Error: %s" ), asset->GetAssetName().c_str(), newSourceFile.toStdWString().c_str(), errorMessage.c_str() ) ) );
 	}
 }
 
 void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
-{}
+{
+	// Getting current package
+	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	if ( !package )
+	{
+		return;
+	}
+
+	// Get asset name and check on exist other asset with this name
+	bool			bIsOk = false;
+	QString			assetName;
+	while ( !bIsOk )
+	{
+		// Get asset name. If we not press 'ok' nothing apply and exit from method
+		assetName = QInputDialog::getText( this, "Enter", "Asset Name", QLineEdit::Normal, "NewAsset", &bIsOk );
+		if ( !bIsOk )
+		{
+			return;
+		}
+
+		// If asset with name already exist - try enter other name 
+		if ( package->IsExist( assetName.toStdWString() ) )
+		{
+			QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), assetName.toStdWString().c_str() ) ), QMessageBox::Ok );
+			bIsOk = false;
+		}
+	}
+
+	// Create material with asset name and add to package
+	FMaterialRef		material = new FMaterial();
+	material->SetAssetName( assetName.toStdWString() );
+	package->Add( material );
+	ui->listView_packageBrowser->Refresh();
+}
 
 void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 {
@@ -524,7 +527,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 		ui->listView_packageBrowser->Refresh();
 	}
 }
-#include "Render/RenderingThread.h"
+
 void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 {
 	// Getting selected items and current package
@@ -554,7 +557,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 		// If asset with new name already exist - try enter other name 
 		if ( package->IsExist( newAssetName.toStdWString() ) )
 		{
-			QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Name '%s' already exist in package" ), newAssetName.toStdWString().c_str() ) ), QMessageBox::Ok );
+			QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), newAssetName.toStdWString().c_str() ) ), QMessageBox::Ok );
 			bIsOk = false;
 		}
 	}
@@ -777,6 +780,13 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 				return;
 			}
 
+			// And if package is dirty - we not change him name
+			if ( package->IsDirty() )
+			{
+				QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "File <b>'%s'</b> not renamed because this package is modified. Saving this package will allow to be rename him" ), pathPackage.c_str() ) ) );
+				return;
+			}
+
 			// Else we change name and resave package
 			package->SetName( newFileName.toStdWString() );
 			package->Save( package->GetFileName() );
@@ -855,7 +865,6 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createPackag
 	std::wstring	fullPath	= appQtAbsolutePathToEngine( dir.absolutePath() + "/" + packageName + "." FILE_PACKAGE_EXTENSION );
 	FPackageRef		package		= GPackageManager->LoadPackage( fullPath, true );
 	package->Save( fullPath );
-	GPackageManager->UnloadPackage( fullPath );
 }
 
 void WeContentBrowserWidget::OnContentBrowserClickedInEmptySpace()
@@ -916,6 +925,12 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		connect( textureEditorWindow, SIGNAL( OnChangedAsset( FAsset* ) ), this, SLOT( OnPackageBrowserChangedAsset( FAsset* ) ) );
 		break;
 	}
+	
+	case AT_Material:
+		WeMaterialEditorWindow*		materialEditorWindow = new WeMaterialEditorWindow( ( FMaterialRef )asset, this );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), materialEditorWindow->windowTitle().toStdWString().c_str(), asset->GetAssetName().c_str() ) ), materialEditorWindow, true );
+		connect( materialEditorWindow, SIGNAL( OnChangedAsset( FAsset* ) ), this, SLOT( OnPackageBrowserChangedAsset( FAsset* ) ) );
+		break;
 	}
 }
 

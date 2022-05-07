@@ -89,7 +89,7 @@ FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString&
 	// Else this is unknown asset
 	else
 	{
-		OutError = FString::Format( TEXT( "Unknown asset type '%s'" ), InPath.toStdWString().c_str() );
+		OutError = FString::Format( TEXT( "Unknown asset type '%s' for import" ), InPath.toStdWString().c_str() );
 		LE_LOG( LT_Warning, LC_Editor, OutError.c_str() );
 		return IR_Error;
 	}
@@ -117,7 +117,15 @@ bool FHelperAssetImporter::Reimport( FAsset* InAsset, std::wstring& OutError )
 	{
 	case AT_Texture2D:		bResult = FTexture2DImporter::Reimport( ( FTexture2D* )InAsset, OutError ); break;
 	case AT_AudioBank:		bResult = FAudioBankImporter::Reimport( ( FAudioBank* )InAsset, OutError ); break;
-	default:				return false;
+	
+	//
+	// Insert your asset type in this place
+	//
+
+	default:				
+		OutError	= TEXT( "Unsupported asset type for reimport" ); 
+		bResult		= false;
+		break;
 	}
 
 	if ( bResult )

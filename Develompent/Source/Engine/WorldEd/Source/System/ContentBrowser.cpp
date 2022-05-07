@@ -74,6 +74,7 @@ WeContentBrowser::WeContentBrowser( QWidget* InParent /* = nullptr */ )
 
 	// Connection to slots
 	connect( this, SIGNAL( clicked( QModelIndex ) ), this, SLOT( on_treeView_contentBrowser_clicked( QModelIndex ) ) );
+	connect( this, SIGNAL( doubleClicked( QModelIndex ) ), this, SLOT( on_treeView_contentBrowser_doubleClicked( QModelIndex ) ) );
 }
 
 WeContentBrowser::~WeContentBrowser()
@@ -182,6 +183,20 @@ void WeContentBrowser::on_treeView_contentBrowser_clicked( const QModelIndex& In
 			emit OnSelectedPackage( GPackageManager->LoadPackage( packagePath ) );
 		}
 
+		repaint();
+	}
+}
+
+void WeContentBrowser::on_treeView_contentBrowser_doubleClicked( const QModelIndex& InIndex )
+{
+	QFileInfo		fileInfo = fileSystemModel->fileInfo( InIndex );
+	if ( fileInfo.isFile() && fileInfo.suffix() == FILE_PACKAGE_EXTENSION )
+	{
+		std::wstring		packagePath = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
+
+		// Load package and if seccussed emit signal
+		FPackageRef			package = GPackageManager->LoadPackage( packagePath );
+		emit OnSelectedPackage( package );
 		repaint();
 	}
 }
