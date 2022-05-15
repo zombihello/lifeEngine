@@ -91,6 +91,12 @@
  */
 #define DEC_SIMPLEELEMENTS		FColor( 238,	153,	26,		255 )
 
+/**
+ * @ingroup Engine
+ * @brief Macro of color draw event for dynamic elements
+ */
+#define DEC_DYNAMICELEMENTS		FColor( 238,	153,	26,		255 )
+
 #if FRAME_CAPTURE_MARKERS
 /**
  * @ingroup Engine

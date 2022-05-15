@@ -1,8 +1,10 @@
 #include <sstream>
 
+#include "Misc/CoreGlobals.h"
 #include "Misc/TableOfContents.h"
 #include "Logger/LoggerMacros.h"
 #include "Containers/StringConv.h"
+#include "System/Package.h"
 
 void FTableOfContets::Serialize( FArchive& InArchive )
 {
@@ -46,5 +48,25 @@ void FTableOfContets::Serialize( FArchive& InArchive )
 			//						GUID													Name										Path to content
 			InArchive << TCHAR_TO_ANSI( itEntry->first.String().c_str() ) << " " << TCHAR_TO_ANSI( tocEntry.name.c_str() ) << " " << TCHAR_TO_ANSI( tocEntry.path.c_str() ) << "\n";
 		}
+	}
+}
+
+void FTableOfContets::AddEntry( const std::wstring& InPath )
+{
+	FPackageRef		package = GPackageManager->LoadPackage( InPath );
+	if ( package )
+	{
+		AddEntry( package->GetGUID(), package->GetName(), InPath );
+		GPackageManager->UnloadPackage( InPath );
+	}
+}
+
+void FTableOfContets::RemoveEntry( const std::wstring& InPath )
+{
+	FPackageRef		package = GPackageManager->LoadPackage( InPath );
+	if ( package )
+	{
+		RemoveEntry( package->GetGUID() );
+		GPackageManager->UnloadPackage( InPath );
 	}
 }

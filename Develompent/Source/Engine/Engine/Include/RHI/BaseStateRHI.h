@@ -65,6 +65,26 @@ struct FRasterizerStateInitializerRHI
 	float						depthBias;				/**< Depth bias */
 	float						slopeScaleDepthBias;	/**< Slope scale depth bias */
 	bool						isAllowMSAA;			/**< Is allow MSAA */
+
+	/**
+	 * Overload operator ==
+	 */
+	FORCEINLINE bool operator==( CONST FRasterizerStateInitializerRHI& InRight ) const
+	{
+		return	fillMode == InRight.fillMode && 
+				cullMode == InRight.cullMode &&
+				depthBias == InRight.depthBias &&
+				slopeScaleDepthBias == InRight.slopeScaleDepthBias &&
+				isAllowMSAA == InRight.isAllowMSAA;
+	}
+
+	/**
+	 * Overload operator !=
+	 */
+	FORCEINLINE bool operator!=( CONST FRasterizerStateInitializerRHI& InRight ) const
+	{
+		return !( *this == InRight );
+	}
 };
 
 /**
@@ -85,10 +105,30 @@ class FBaseRasterizerStateRHI : public FBaseResourceRHI
 {
 public:
 	/**
+	 * @brief Constructor
+	 * @param InInitializer		Initializer of rasterizer state
+	 */
+	FORCEINLINE FBaseRasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer )
+		: initializer( InInitializer )
+	{}
+
+	/**
 	 * @brief Destructor
 	 */
 	virtual ~FBaseRasterizerStateRHI()
 	{}
+
+	/**
+	 * @brief Get initializer of rasterizer state
+	 * @return Return initializer of rasterizer state
+	 */
+	FORCEINLINE FRasterizerStateInitializerRHI GetInitializer() const
+	{
+		return initializer;
+	}
+
+protected:
+	FRasterizerStateInitializerRHI		initializer;		/**< nitializer of rasterizer state */
 };
 
 /**

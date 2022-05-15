@@ -66,6 +66,12 @@ public:
 	virtual FBoundShaderStateRHIRef GetBoundShaderState() const;
 
 	/**
+	 * @brief Get rasterizer state
+	 * @return Return rasterizer state of current drawing policy 
+	 */
+	virtual FRasterizerStateRHIRef GetRasterizerState() const;
+
+	/**
 	 * Draw mesh
 	 * 
 	 * @param[in] InDeviceContextRHI RHI device context
@@ -138,8 +144,8 @@ protected:
 	float								depthBias;			/**< Depth bias */
 	uint64								hash;				/**< Hash */
 
-private:
 	mutable FBoundShaderStateRHIRef		boundShaderState;	/**< Bound shader state */
+	mutable FRasterizerStateRHIRef		rasterizerState;	/**< Rasterizer state */
 };
 
 #endif // !DRAWINGPOLICY_H

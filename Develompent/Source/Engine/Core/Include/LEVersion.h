@@ -46,6 +46,7 @@ enum ELifeEnginePackageVersion
 	VER_ShaderParameterMap 					= 14,					/**< Added shader parameter map in shader cache */
 	VER_HashUInt64							= 15,					/**< Changed type of hashes from uint32 to uint64 */
 	VER_AssetSourceFiles					= 16,					/**< Added in assets path to source file for reimport */
+	VER_RemovedShadersTypeFromMaterial		= 17,					/**< Removed shaders type from material asset */
 
 	//
 	// New versions can be added here

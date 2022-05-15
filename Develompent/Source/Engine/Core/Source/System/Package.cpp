@@ -81,12 +81,16 @@ void FAsset::Serialize( class FArchive& InArchive )
 		InArchive << guid;
 	}
 
-#if WITH_EDITOR
-	if ( !GIsCooker && InArchive.Ver() >= VER_AssetSourceFiles )
+
+	if ( InArchive.Ver() >= VER_AssetSourceFiles )
 	{
+#if !WITH_EDITOR
+		std::wstring	sourceFile;
+#endif // !WITH_EDITOR
+
 		InArchive << sourceFile;
 	}
-#endif // WITH_EDITOR
+
 
 	bDirty = false;
 }
@@ -219,7 +223,7 @@ void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 	// Serialize all assets to memory
 	FArchive*		archive = GFileSystem->CreateFileReader( filename, AR_NoFail );
 	archive->SerializeHeader();
-	SerializeHeader( *archive );
+	SerializeHeader( *archive, true );
 
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
@@ -364,7 +368,7 @@ void FPackage::Serialize( FArchive& InArchive )
 	numDirtyAssets	= 0;
 }
 
-void FPackage::SerializeHeader( FArchive& InArchive )
+void FPackage::SerializeHeader( FArchive& InArchive, bool InIsNeedSkip /* = false */ )
 {
 	check( InArchive.Ver() >= VER_NamePackage );
 	uint32		packageFileTag = PACKAGE_FILE_TAG;
@@ -378,8 +382,18 @@ void FPackage::SerializeHeader( FArchive& InArchive )
 	}
 #endif // DO_CHECK
 
-	InArchive << guid;
-	InArchive << name;
+	if ( !InIsNeedSkip )
+	{
+		InArchive << guid;
+		InArchive << name;
+	}
+	else
+	{
+		FGuid			tmpGuid;
+		std::wstring	tmpName;
+		InArchive << tmpGuid;
+		InArchive << tmpName;
+	}
 }
 
 FAssetRef FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo, bool InAddToAssetDataBase )
@@ -638,20 +652,42 @@ void FPackageManager::CleanupUnusedPackages()
 	unusedPackages.clear();
 }
 
-bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPackageName, std::wstring& OutAssetName )
+bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPackageName, std::wstring& OutAssetName, EAssetType& OutAssetType )
 {
-	// Divide the string into two parts: package name and asset name
-	std::size_t			posSpliter = InString.find( TEXT( ":" ) );
-	if ( posSpliter == std::wstring::npos )
+	// If string is empty, we nothing do
+	if ( InString.empty() )
 	{
-		LE_LOG( LT_Warning, LC_Package, TEXT( "Not correct input string '%s', reference to asset must be splitted by '<Package name>:<Asset name>'" ), InString.c_str() );
 		return false;
 	}
 
-	OutPackageName = InString;
-	OutAssetName = InString;
-	OutPackageName.erase( posSpliter, OutPackageName.size() );
-	OutAssetName.erase( 0, posSpliter + 1 );
+	// Divide the string into three parts: asset type, package name and asset name
+	uint32				offset						= 0;
+	std::size_t			posSpliterType				= InString.find( TEXT( "'" ) );
+	std::size_t			posSpliterPackageAndAsset	= InString.find( TEXT( ":" ) );
+	uint32				packageNameSize				= posSpliterPackageAndAsset - posSpliterType - 1;
+	uint32				assetNameSize				= InString.size() - posSpliterPackageAndAsset - 1;
+	if ( posSpliterType == std::wstring::npos || posSpliterPackageAndAsset == std::wstring::npos || packageNameSize <= 0 || assetNameSize <= 0 )
+	{
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Not correct input string '%s', reference to asset must be splitted by '<Asset type>'<Package name>:<Asset name>'" ), InString.c_str() );
+		return false;
+	}
+
+	// Getting asset type
+	std::wstring		assetType;
+	assetType.resize( posSpliterType );
+	memcpy( assetType.data(), &InString[ 0 ], sizeof( std::wstring::value_type ) * assetType.size() );
+	offset = assetType.size() + 1;				// +1 for skip splitter of type asset
+	OutAssetType = ConvertTextToAssetType( assetType );
+
+	// Getting package name
+	OutPackageName.resize( packageNameSize );
+	memcpy( OutPackageName.data(), &InString[ offset ], sizeof( std::wstring::value_type ) * packageNameSize );
+	offset += packageNameSize + 1;				// +1 for skip splitter of asset and package
+
+	// Getting asset name
+	OutAssetName.resize( assetNameSize );
+	memcpy( OutAssetName.data(), &InString[ offset ], sizeof( std::wstring::value_type ) * assetNameSize );
+
 	return true;
 }
 
@@ -659,9 +695,10 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InString, EAssetType I
 {
 	std::wstring		packageName;
 	std::wstring		assetName;
-	if ( !ParseReferenceToAsset( InString, packageName, assetName ) )
+	EAssetType			assetType;
+	if ( !ParseReferenceToAsset( InString, packageName, assetName, assetType ) || ( InType != AT_Unknown && assetType != InType ) )
 	{
-		return nullptr;
+		return GetDefaultAsset( InType );
 	}
 
 	// Find in TOC path to the package and calculate hash of asset from him name
@@ -672,7 +709,7 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InString, EAssetType I
 		{
 			LE_LOG( LT_Warning, LC_Package, TEXT( "Package with name '%s' not found in TOC file" ), packageName.c_str() );
 		}
-		return nullptr;
+		return GetDefaultAsset( InType );
 	}
 
 	return FindAsset( packagePath, assetName, InType );
@@ -738,7 +775,7 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, const std::wst
 	return asset;
 }
 
-FAssetRef FPackageManager::FindDefaultAsset( EAssetType InType )
+FAssetRef FPackageManager::FindDefaultAsset( EAssetType InType ) const
 {
 	return GetDefaultAsset( InType );
 }
@@ -784,6 +821,10 @@ FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath, bool InCre
 bool FPackageManager::UnloadPackage( const std::wstring& InPath )
 {
 	auto		itPackage = packages.find( InPath );
+	if ( itPackage == packages.end() )
+	{
+		return false;
+	}
 
 	// If we in editor, remove all assets from asset data base
 #if WITH_EDITOR
@@ -799,7 +840,7 @@ bool FPackageManager::UnloadPackage( const std::wstring& InPath )
 	}
 #endif // WITH_EDITOR
 
-	if ( itPackage == packages.end() || itPackage->second.package->GetNumUsageAssets() > 0 )
+	if ( itPackage->second.package->GetNumUsageAssets() > 0 )
 	{
 		return false;
 	}

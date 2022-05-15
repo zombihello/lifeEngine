@@ -7,6 +7,7 @@
 #include "Render/RenderingThread.h"
 #include "System/AudioDevice.h"
 #include "System/CameraManager.h"
+#include "System/World.h"
 #include "UIEngine.h"
 
 void FGameViewportClient::Draw( FViewport* InViewport )
@@ -37,7 +38,7 @@ void FGameViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, FSce
 {
 	check( IsInRenderingThread() );
 	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	FSceneRenderer				sceneRenderer( InSceneView );
+	FSceneRenderer				sceneRenderer( InSceneView, ( FScene* )GWorld->GetScene() );
 
 	// Scene render
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );

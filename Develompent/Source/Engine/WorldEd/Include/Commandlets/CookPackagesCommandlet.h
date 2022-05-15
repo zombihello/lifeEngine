@@ -88,9 +88,16 @@ public:
 	{
 		std::wstring		packageName;
 		std::wstring		assetName;
+		EAssetType			assetType;
 		FResourceInfo		resourceInfo;
 
-		ParseReferenceToAsset( InAssetRef, packageName, assetName );
+		ParseReferenceToAsset( InAssetRef, packageName, assetName, assetType );
+		if ( assetType != AT_AudioBank )
+		{
+			appErrorf( TEXT( "Asset '%s' is not audio bank" ), InAssetRef.c_str() );
+			return false;
+		}
+
 		if ( !FindResource( audiosMap, packageName, assetName, resourceInfo ) )
 		{
 			appErrorf( TEXT( "Audio bank '%s' not founded" ), InAssetRef.c_str() );
@@ -118,9 +125,16 @@ public:
 	{
 		std::wstring		packageName;
 		std::wstring		assetName;
+		EAssetType			assetType;
 		FResourceInfo		resourceInfo;
 
-		ParseReferenceToAsset( InAssetRef, packageName, assetName );
+		ParseReferenceToAsset( InAssetRef, packageName, assetName, assetType );
+		if ( assetType != AT_PhysicsMaterial )
+		{
+			appErrorf( TEXT( "Asset '%s' is not physics material" ), InAssetRef.c_str() );
+			return false;
+		}
+
 		if ( !FindResource( physMaterialsMap, packageName, assetName, resourceInfo ) )
 		{
 			appErrorf( TEXT( "Physics material '%s' not founded" ), InAssetRef.c_str() );

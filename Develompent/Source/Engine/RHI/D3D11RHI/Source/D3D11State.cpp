@@ -103,8 +103,9 @@ FD3D11StateCache::FD3D11StateCache()
 /**
  * Constructor FD3D11RasterizerStateRHI
  */
-FD3D11RasterizerStateRHI::FD3D11RasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer ) :
-	d3d11RasterizerState( nullptr )
+FD3D11RasterizerStateRHI::FD3D11RasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer ) 
+	: FBaseRasterizerStateRHI( InInitializer )
+	, d3d11RasterizerState( nullptr )
 {
 	D3D11_RASTERIZER_DESC			d3d11RasterizerDesc;
 	appMemzero( &d3d11RasterizerDesc, sizeof( D3D11_RASTERIZER_DESC ) );

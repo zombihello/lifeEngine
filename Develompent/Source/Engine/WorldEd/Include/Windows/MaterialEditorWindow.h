@@ -47,26 +47,31 @@ signals:
 	 */
 	void OnChangedAsset( FAsset* InAsset );
 
+private slots:
+	//
+	// Events
+	//
+	void OnCheckBoxIsTwoSidedToggled( bool InValue );
+	void OnCheckBoxIsWireframeToggled( bool InValue );
+	void OnCheckBoxStaticMeshToggled( bool InValue );
+	void OnCheckBoxSpriteToggled( bool InValue );
+	void OnSelectedAssetDiffuse( const std::wstring& InNewAssetReference );
+
 private:
 	/**
 	 * Init UI
 	 */
 	void InitUI();
 
-	bool						bInit;						/**< Is inited window */
-	Ui::WeMaterialEditorWindow*	ui;							/**< Qt UI */
-	FMaterialRef				material;					/**< Editable asset */
-	class QCheckBox*			checkBox_isTwoSided;		/**< Check box of is two sided */
-	class QCheckBox*			checkBox_isWireframe;		/**< Check box of is wireframe */
-	class QCheckBox*			checkBox_staticMesh;		/**< Check box of static mesh */
-	class QCheckBox*			checkBox_sprite;			/**< Check box of sprite */
-	class QComboBox*			comboBox_vertexShader;		/**< Combo box of vertex shader */
-	class QComboBox*			comboBox_hullShader;		/**< Combo box of hull shader */
-	class QComboBox*			comboBox_domainShader;		/**< Combo box of domain shader */
-	class QComboBox*			comboBox_pixelShader;		/**< Combo box of pixel shader */
-	class QComboBox*			comboBox_geometryShader;	/**< Combo box of geometry shader */
-	class QComboBox*			comboBox_diffuseTexture;	/**< Combo box for select diffuse texture */
-	class QToolButton*			toolButton_removeDiffuse;	/**< Tool button for remove diffuse texture */
+	bool										bInit;						/**< Is inited window */
+	Ui::WeMaterialEditorWindow*					ui;							/**< Qt UI */
+	FMaterialRef								material;					/**< Editable asset */
+	class QCheckBox*							checkBox_isTwoSided;		/**< Check box of is two sided */
+	class QCheckBox*							checkBox_isWireframe;		/**< Check box of is wireframe */
+	class QCheckBox*							checkBox_staticMesh;		/**< Check box of static mesh */
+	class QCheckBox*							checkBox_sprite;			/**< Check box of sprite */
+	class WeSelectAssetWidget*					selectAsset_diffuse;		/**< Widget for select asset (diffuse texture) */
+	class FMaterialPreviewViewportClient*		viewportClient;				/**< Viewport client */
 };
 
 #endif // MATERIALEDITORWINDOW_H

@@ -10,7 +10,7 @@
 #include "EngineDefines.h"
 
 FTexturePreviewViewportClient::FTexturePreviewViewportClient( FTexture2D* InTexture2D )
-	: showFlags( SHOW_DefaultEditor )
+	: FEditorLevelViewportClient( LVT_OrthoXY )
 	, texture2D( InTexture2D )
 	, colorChannelMask( FColor::white )
 {}
@@ -71,7 +71,7 @@ FSceneView* FTexturePreviewViewportClient::CalcSceneView( FViewport* InViewport 
 	FMatrix				projectionMatrix	= glm::ortho( -halfWidth, halfWidth, -halfHeight, halfHeight, ( float )-HALF_WORLD_MAX, ( float )HALF_WORLD_MAX );
 
 	// Result
-	FSceneView*			sceneView = new FSceneView( projectionMatrix, FMath::matrixIdentity, InViewport->GetSizeX(), InViewport->GetSizeY(), GetBackgroundColor(), showFlags );
+	FSceneView*			sceneView = new FSceneView( projectionMatrix, FMath::matrixIdentity, InViewport->GetSizeX(), InViewport->GetSizeY(), GetBackgroundColor(), SHOW_DefaultEditor );
 	return sceneView;
 }
 

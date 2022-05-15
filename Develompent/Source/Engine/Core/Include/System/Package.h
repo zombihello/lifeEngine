@@ -50,6 +50,66 @@ enum EAssetType
 
 /**
  * @ingroup Core
+ * Convert text to asset type
+ * 
+ * @param InText	Asset type in text format
+ * @return Return converted asset type to enumeration
+ */
+FORCEINLINE EAssetType ConvertTextToAssetType( const std::wstring& InText )
+{
+	if ( InText == TEXT( "Texture2D" ) )
+	{
+		return AT_Texture2D;
+	}
+	else if ( InText == TEXT( "Material" ) )
+	{
+		return AT_Material;
+	}
+	else if ( InText == TEXT( "Script" ) )
+	{
+		return AT_Script;
+	}
+	else if ( InText == TEXT( "StaticMesh" ) )
+	{
+		return AT_StaticMesh;
+	}
+	else if ( InText == TEXT( "AudioBank" ) )
+	{
+		return AT_AudioBank;
+	}
+	else if ( InText == TEXT( "PhysicsMaterial" ) )
+	{
+		return AT_PhysicsMaterial;
+	}
+	return AT_Unknown;
+}
+
+/**
+ * @ingroup Core
+ * Convert asset type to text
+ * 
+ * @param InAssetType	Asset type
+ * @return Return converted asset type to text
+ */
+FORCEINLINE std::wstring ConvertAssetTypeToText( EAssetType InAssetType )
+{
+	switch ( InAssetType )
+	{
+	case AT_Texture2D:			return TEXT( "Texture2D" );
+	case AT_Material:			return TEXT( "Material" );
+	case AT_Script:				return TEXT( "Script" );
+	case AT_StaticMesh:			return TEXT( "StaticMesh" );
+	case AT_AudioBank:			return TEXT( "AudioBank" );
+	case AT_PhysicsMaterial:	return TEXT( "PhysicsMaterial" );
+
+	case AT_Unknown:
+	default:
+		return TEXT( "" );
+	}
+}
+
+/**
+ * @ingroup Core
  * Asset info in package
  */
 struct FAssetInfo
@@ -359,7 +419,7 @@ public:
 	{
 		name = InName;
 		bIsDirty = true;
-		numUsageAssets = -1;
+		numDirtyAssets = -1;
 	}
 
 	/**
@@ -437,8 +497,9 @@ public:
 	 * 
 	 * @param InIndex Index of asset in package
 	 * @param OutAssetInfo Output reference to asset info
+	 * @param OutGuidAsset Optional output of guid asset
 	 */
-	FORCEINLINE void GetAssetInfo( uint32 InIndex, FAssetInfo& OutAssetInfo ) const
+	FORCEINLINE void GetAssetInfo( uint32 InIndex, FAssetInfo& OutAssetInfo, FGuid* OutGuidAsset = nullptr ) const
 	{
 		check( !assetsTable.empty() && InIndex >= 0 && InIndex < assetsTable.size() );
 		
@@ -448,6 +509,10 @@ public:
 			if ( InIndex == index )
 			{
 				OutAssetInfo = itAsset->second;
+				if ( OutGuidAsset )
+				{
+					*OutGuidAsset = itAsset->first;
+				}
 				break;
 			}
 		}
@@ -495,9 +560,10 @@ private:
 	/**
 	 * Serialize header of the package
 	 * 
-	 * @param InArchive Archive
+	 * @param InArchive		Archive
+	 * @param InIsNeedSkip	Is need skip header
 	 */
-	void SerializeHeader( FArchive& InArchive );
+	void SerializeHeader( FArchive& InArchive, bool InIsNeedSkip = false );
 
 	/**
 	 * Load asset from package
@@ -626,7 +692,22 @@ public:
 	 * @param InType Default asset for type
 	 * @return Return finded asset. If not found returning nullptr
 	 */
-	FAssetRef FindDefaultAsset( EAssetType InType );
+	FAssetRef FindDefaultAsset( EAssetType InType ) const;
+
+	/**
+	 * Is default asset
+	 * 
+	 * @param InAsset	Asset
+	 * @return Return TRUE if InAsset is default asset, else return FALSE
+	 */
+	FORCEINLINE bool IsDefaultAsset( FAsset* InAsset ) const
+	{
+		if ( !InAsset )
+		{
+			return false;
+		}
+		return InAsset == FindDefaultAsset( InAsset->GetType() );
+	}
 
 	/**
 	 * Load package
@@ -648,13 +729,29 @@ public:
 	/**
 	 * Is package loaded
 	 * 
-	 * @param InPath package path
+	 * @param InPath Package path
 	 * @return Return true if package is loaded, else return false
 	 */
 	FORCEINLINE bool IsPackageLoaded( const std::wstring& InPath ) const
 	{
 		auto		itPackage = packages.find( InPath );
 		return itPackage != packages.end();
+	}
+
+	/**
+	 * Is package in used
+	 * 
+	 * @param InPath Package path
+	 * @return Return TRUE if package is in used, else return FALSE
+	 */
+	FORCEINLINE bool IsPackageUsed( const std::wstring& InPath ) const
+	{
+		auto		itPackage = packages.find( InPath );
+		if ( itPackage == packages.end() )
+		{
+			return false;
+		}
+		return !itPackage->second.isUnused;
 	}
 
 	/**
@@ -816,14 +913,53 @@ private:
 
 /**
  * @ingroup Core
- * @brief Parse reference to asset in format <PackageName>:<AssetName>
+ * @brief Parse reference to asset in format <AssetType>'<PackageName>:<AssetName>
  *
  * @param InString Reference to asset
  * @param OutPackageName Package name
  * @param OutAssetName Asset name
+ * @param OutAssetType Asset type
  * @return Return true if InString parsed is seccussed, else returning false
  */
-bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPackageName, std::wstring& OutAssetName );
+bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPackageName, std::wstring& OutAssetName, EAssetType& OutAssetType );
+
+/**
+ * @ingroup Core
+ * @brief Make reference to asset in format <AssetType>'<PackageName>:<AssetName>
+ * 
+ * @param InPackageName		Package name
+ * @param InAssetName		Asset name
+ * @param InAssetType		Asset type
+ * @param OutString			Output string with reference
+ * @return Return TRUE if reference created is seccussed, else returning FALSE
+ */
+FORCEINLINE bool MakeReferenceToAsset( const std::wstring& InPackageName, const std::wstring& InAssetName, EAssetType InAssetType, std::wstring& OutString )
+{
+	if ( InPackageName.empty() || InAssetName.empty() )
+	{
+		return false;
+	}
+
+	OutString = ConvertAssetTypeToText( InAssetType ) + TEXT( "'" ) + InPackageName + TEXT(":") + InAssetName;
+	return true;
+}
+
+/**
+ * @ingroup Core
+ * @brief Make reference to asset in format <AssetType>'<PackageName>:<AssetName>
+ * 
+ * @param InAsset	Asset
+ * @param OutString			Output string with reference
+ * @return Return TRUE if reference created is seccussed, else returning FALSE
+ */
+FORCEINLINE bool MakeReferenceToAsset( FAsset* InAsset, std::wstring& OutString )
+{
+	if ( !InAsset || !InAsset->GetPackage() || InAsset->GetAssetName().empty() )
+	{
+		return false;
+	}
+	return MakeReferenceToAsset( InAsset->GetPackage()->GetName(), InAsset->GetAssetName(), InAsset->GetType(), OutString );
+}
 
 //
 // Serialization

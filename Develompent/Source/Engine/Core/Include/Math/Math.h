@@ -17,6 +17,15 @@
 #include "System/Archive.h"
 #include "Core.h"
 
+// Constants
+#undef  PI
+
+/**
+ * @ingroup Core
+ * Macro of PI value
+ */
+#define PI 					(3.1415926535897932)
+
 /**
  * @ingroup Core
  * Typedef glm::vec2
@@ -391,6 +400,46 @@ struct FMath
 	static FORCEINLINE float Round( float InA )
 	{
 		return roundf( InA );
+	}
+
+	/**
+	 * @brief Sin
+	 * @param InA	Value representing an angle expressed in radians
+	 * @return Returns the sine of an angle of InA radians
+	 */
+	static FORCEINLINE float Sin( float InA )
+	{
+		return sin( InA );
+	}
+
+	/**
+	 * @brief Cos
+	 * @param InA	Value representing an angle expressed in radians
+	 * @return Returns the cosine of an angle of x radians
+	 */
+	static FORCEINLINE float Cos( float InA )
+	{
+		return cos( InA );
+	}
+
+	/**
+	 * @brief ATan
+	 * @param InA		Value whose arc tangent is computed
+	 * @return Principal arc tangent of InA, in the interval [-pi/2,+pi/2] radians
+	 */
+	static FORCEINLINE float ATan( float InA )
+	{
+		return atanf( InA );
+	}
+
+	/**
+	 * @brief Sqrt
+	 * @param InA		Value whose square root is computed
+	 * @return Square root of InA
+	 */
+	static FORCEINLINE float Sqrt( float InA )
+	{
+		return sqrtf( InA );
 	}
 
 	static const FVector				vectorZero;			/**< Zero 3D vector */

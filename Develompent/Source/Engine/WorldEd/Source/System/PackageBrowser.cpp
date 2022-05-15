@@ -51,6 +51,9 @@ WePackageBrowser::WePackageBrowser( QWidget* InParent /* = nullptr */ )
 
 	style = new WeStyle();
 	setStyle( style );
+
+	// Connection to slots
+	connect( this, SIGNAL( clicked( QModelIndex ) ), this, SLOT( OnClicked( QModelIndex ) ) );
 }
 
 WePackageBrowser::~WePackageBrowser()
@@ -64,7 +67,28 @@ void WePackageBrowser::mousePressEvent( QMouseEvent* InEvent )
 	if ( !indexAt( InEvent->pos() ).isValid() )
 	{
 		selectionModel()->clear();
+		emit OnSelectedAsset( TEXT( "" ) );
 	}
 
 	QListView::mousePressEvent( InEvent );
+}
+
+void WePackageBrowser::OnClicked( QModelIndex InIndex )
+{
+	// Getting current package
+	FPackageRef			package			= GetPackage();
+	std::wstring		assetReference	= TEXT( "" );
+	if ( package && InIndex.isValid() )
+	{
+		FAssetInfo		assetInfo;
+		package->GetAssetInfo( InIndex.row(), assetInfo );
+		
+		// Make reference to asset
+		if ( !MakeReferenceToAsset( package->GetName(), assetInfo.name, assetInfo.type, assetReference ) )
+		{
+			assetReference = TEXT( "" );
+		}
+	}
+
+	emit OnSelectedAsset( assetReference );
 }

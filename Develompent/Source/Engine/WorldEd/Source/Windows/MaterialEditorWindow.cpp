@@ -2,12 +2,15 @@
 #include <qformlayout.h>
 #include <qcombobox.h>
 #include <qlabel.h>
-#include <qlineedit.h>
 
 #include "ui_MaterialEditorWindow.h"
+#include "Misc/WorldEdGlobals.h"
+#include "System/AssetDataBase.h"
 #include "Windows/MaterialEditorWindow.h"
 #include "Widgets/SectionWidget.h"
-#include "Render/Shaders/ShaderManager.h"
+#include "Render/MaterialPreviewViewportClient.h"
+#include "Render/RenderingThread.h"
+#include "Widgets/SelectAssetWidget.h"
 
 WeMaterialEditorWindow::WeMaterialEditorWindow( FMaterial* InMaterial, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
@@ -18,19 +21,19 @@ WeMaterialEditorWindow::WeMaterialEditorWindow( FMaterial* InMaterial, QWidget* 
 	, checkBox_isWireframe( nullptr )
 	, checkBox_staticMesh( nullptr )
 	, checkBox_sprite( nullptr )
-	, comboBox_vertexShader( nullptr )
-	, comboBox_hullShader( nullptr )
-	, comboBox_domainShader( nullptr )
-	, comboBox_pixelShader( nullptr )
-	, comboBox_geometryShader( nullptr )
-	, comboBox_diffuseTexture( nullptr )
-	, toolButton_removeDiffuse( nullptr )
+	, selectAsset_diffuse( nullptr )
+	, viewportClient( nullptr )
 {
 	check( InMaterial );
 
 	// Init Qt UI
 	ui->setupUi( this );
 	InitUI();
+
+	// Init preview viewport
+	viewportClient = new FMaterialPreviewViewportClient( InMaterial );
+	ui->viewportPreview->SetViewportClient( viewportClient, false );
+	ui->viewportPreview->SetEnabled( true );
 	bInit = true;
 }
 
@@ -51,6 +54,14 @@ void WeMaterialEditorWindow::InitUI()
 		generalSection->setContentLayout( *verticalLayout );
 		generalSection->expand( true );
 		ui->frame->layout()->addWidget( generalSection );
+
+		// Init states
+		checkBox_isTwoSided->setChecked( material->IsTwoSided() );
+		checkBox_isWireframe->setChecked( material->IsWireframe() );
+
+		// Connect to slots
+		connect( checkBox_isTwoSided, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxIsTwoSidedToggled( bool ) ) );
+		connect( checkBox_isWireframe, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxIsWireframeToggled( bool ) ) );
 	}
 
 	// Create usage section
@@ -69,64 +80,14 @@ void WeMaterialEditorWindow::InitUI()
 		usageSection->setContentLayout( *verticalLayout );
 		usageSection->expand( true );
 		ui->frame->layout()->addWidget( usageSection );
-	}
 
-	// Create shaders section
-	{
-		WeSectionWidget*	shadersSection			= new WeSectionWidget( "Shaders", 300, this );
-		QFormLayout*		formLayout				= new QFormLayout();
-		formLayout->setContentsMargins( 0, 3, 0, 3 );
+		// Init states
+		checkBox_staticMesh->setChecked( material->GetUsageFlags() & MU_StaticMesh );
+		checkBox_sprite->setChecked( material->GetUsageFlags() & MU_Sprite );
 
-		// Vertex shader
-		comboBox_vertexShader = new QComboBox( shadersSection );
-		formLayout->setWidget( 0, QFormLayout::LabelRole, new QLabel( "Vertex:", shadersSection ) );
-		formLayout->setWidget( 0, QFormLayout::FieldRole, comboBox_vertexShader );
-		
-		// Hull shader
-		comboBox_hullShader = new QComboBox( shadersSection );
-		formLayout->setWidget( 1, QFormLayout::LabelRole, new QLabel( "Hull:", shadersSection ) );
-		formLayout->setWidget( 1, QFormLayout::FieldRole, comboBox_hullShader );
-
-		// Domain shader
-		comboBox_domainShader = new QComboBox( shadersSection );
-		formLayout->setWidget( 2, QFormLayout::LabelRole, new QLabel( "Domain:", shadersSection ) );
-		formLayout->setWidget( 2, QFormLayout::FieldRole, comboBox_domainShader );
-
-		// Pixel shader
-		comboBox_pixelShader = new QComboBox( shadersSection );
-		formLayout->setWidget( 3, QFormLayout::LabelRole, new QLabel( "Pixel:", shadersSection ) );
-		formLayout->setWidget( 3, QFormLayout::FieldRole, comboBox_pixelShader );
-
-		// Geometry shader
-		comboBox_geometryShader = new QComboBox( shadersSection );
-		formLayout->setWidget( 4, QFormLayout::LabelRole, new QLabel( "Geometry:", shadersSection ) );
-		formLayout->setWidget( 4, QFormLayout::FieldRole, comboBox_geometryShader );
-
-		// Fill comboboxes shader
-		comboBox_vertexShader->addItem( "None" );
-		comboBox_hullShader->addItem( "None" );
-		comboBox_domainShader->addItem( "None" );
-		comboBox_pixelShader->addItem( "None" );
-		comboBox_geometryShader->addItem( "None" );
-
-		const std::unordered_map< std::wstring, FShaderMetaType* >&			shaderTypes = FShaderManager::GetShaderTypes();
-		for ( auto itShaderType = shaderTypes.begin(), itShaderTypeEnd = shaderTypes.end(); itShaderType != itShaderTypeEnd; ++itShaderType )
-		{
-			FShaderMetaType*		shaderType = itShaderType->second;
-			switch ( shaderType->GetFrequency() )
-			{
-			case SF_Vertex:			comboBox_vertexShader->addItem( QString::fromStdWString( shaderType->GetName() ) );		break;
-			case SF_Hull:			comboBox_hullShader->addItem( QString::fromStdWString( shaderType->GetName() ) );		break;
-			case SF_Domain:			comboBox_domainShader->addItem( QString::fromStdWString( shaderType->GetName() ) );		break;
-			case SF_Pixel:			comboBox_pixelShader->addItem( QString::fromStdWString( shaderType->GetName() ) );		break;
-			case SF_Geometry:		comboBox_geometryShader->addItem( QString::fromStdWString( shaderType->GetName() ) );	break;
-			}
-		}
-
-		shadersSection->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
-		shadersSection->setContentLayout( *formLayout );
-		shadersSection->expand( true );
-		ui->frame->layout()->addWidget( shadersSection );
+		// Connect to slots
+		connect( checkBox_staticMesh, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxStaticMeshToggled( bool ) ) );
+		connect( checkBox_sprite, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxSpriteToggled( bool ) ) );
 	}
 
 	// Create parameters section
@@ -135,20 +96,28 @@ void WeMaterialEditorWindow::InitUI()
 		QGridLayout*			gridLayout			= new QGridLayout();
 		gridLayout->setContentsMargins( 0, 3, 0, 3 );
 
-		comboBox_diffuseTexture		= new QComboBox( parametersSection );
-		toolButton_removeDiffuse	= new QToolButton( parametersSection );
-
-		comboBox_diffuseTexture->addItem( "None" );
-		toolButton_removeDiffuse->setText( "X" );
+		selectAsset_diffuse		= new WeSelectAssetWidget( parametersSection );
+		{
+			FTexture2DRef		diffuseTexture;
+			material->GetTextureParameterValue( TEXT( "diffuse" ), diffuseTexture );
+			if ( diffuseTexture && !GPackageManager->IsDefaultAsset( diffuseTexture ) )
+			{
+				std::wstring		assetReference;
+				MakeReferenceToAsset( diffuseTexture, assetReference );
+				selectAsset_diffuse->SetAssetReference( assetReference );
+			}
+		}
 
 		gridLayout->addWidget( new QLabel( "Diffuse:", parametersSection ), 0, 0 );
-		gridLayout->addWidget( comboBox_diffuseTexture, 0, 1 );
-		gridLayout->addWidget( toolButton_removeDiffuse, 0, 2 );
+		gridLayout->addWidget( selectAsset_diffuse, 0, 1 );
 
 		parametersSection->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
 		parametersSection->setContentLayout( *gridLayout );
 		parametersSection->expand( true );
 		ui->frame->layout()->addWidget( parametersSection );
+
+		// Connect to slots
+		connect( selectAsset_diffuse, SIGNAL( OnAssetReferenceChanged( const std::wstring& ) ), this, SLOT( OnSelectedAssetDiffuse( const std::wstring& ) ) );
 	}
 
 	// Create spacer
@@ -160,5 +129,68 @@ void WeMaterialEditorWindow::InitUI()
 
 WeMaterialEditorWindow::~WeMaterialEditorWindow()
 {
+	FlushRenderingCommands();
+	ui->viewportPreview->SetViewportClient( nullptr, false );
+	delete viewportClient;
 	delete ui;
+}
+
+void WeMaterialEditorWindow::OnCheckBoxIsTwoSidedToggled( bool InValue )
+{
+	if ( !material )
+	{
+		return;
+	}
+	material->SetTwoSided( InValue );
+}
+
+void WeMaterialEditorWindow::OnCheckBoxIsWireframeToggled( bool InValue )
+{
+	if ( !material )
+	{
+		return;
+	}
+	material->SetWireframe( InValue );
+}
+
+void WeMaterialEditorWindow::OnCheckBoxStaticMeshToggled( bool InValue )
+{
+	if ( !material )
+	{
+		return;
+	}
+	material->UsageOnStaticMesh( InValue );
+}
+
+void WeMaterialEditorWindow::OnCheckBoxSpriteToggled( bool InValue )
+{
+	if ( !material )
+	{
+		return;
+	}
+	material->UsageOnSpriteMesh( InValue );
+}
+
+void WeMaterialEditorWindow::OnSelectedAssetDiffuse( const std::wstring& InNewAssetReference )
+{
+	if ( !material )
+	{
+		return;
+	}
+
+	// If asset reference is valid, we find asset
+	FTexture2DRef		newTexture2D;
+	if ( !InNewAssetReference.empty() )
+	{
+		newTexture2D = GPackageManager->FindAsset( InNewAssetReference, AT_Texture2D );
+	}
+
+	// If asset is not valid we clear asset reference
+	if ( !newTexture2D || GPackageManager->IsDefaultAsset( newTexture2D ) )
+	{
+		newTexture2D = nullptr;
+		selectAsset_diffuse->ClearAssetReference( false );
+	}
+
+	material->SetTextureParameterValue( TEXT( "diffuse" ), newTexture2D );	
 }

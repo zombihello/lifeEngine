@@ -68,12 +68,12 @@ private:
 	/**
 	 * Move Directory
 	 */
-	void MoveDir( const QString& InOldDir, const QString& InNewDir, QProgressDialog* InProgressDialog, int& OutValueProgress );
+	void MoveDir( const QString& InOldDir, const QString& InNewDir, QProgressDialog* InProgressDialog, int& OutValueProgress, bool& OutIsDirtyTOC, std::vector< QString >& OutUsedPackage );
 
 	/**
 	 * Copy Directory
 	 */
-	void CopyDir( const QString& InOldDir, const QString& InNewDir, QProgressDialog* InProgressDialog, int& OutValueProgress );
+	void CopyDir( const QString& InOldDir, const QString& InNewDir, QProgressDialog* InProgressDialog, int& OutValueProgress, bool& OutIsDirtyTOC, std::vector< QString >& OutUsedPackage );
 
 	/**
 	 * Count the number of files in a directory

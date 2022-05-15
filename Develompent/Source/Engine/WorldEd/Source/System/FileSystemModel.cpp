@@ -4,9 +4,14 @@
 #include <qdebug.h>
 #include <qapplication.h>
 
+#include "Logger/LoggerMacros.h"
 #include "Misc/Misc.h"
 #include "Misc/CoreGlobals.h"
+#include "Misc/WorldEdGlobals.h"
+#include "Misc/TableOfContents.h"
 #include "System/Package.h"
+#include "System/BaseFileSystem.h"
+#include "System/AssetDataBase.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "System/FileSystemModel.h"
@@ -87,6 +92,7 @@ void WeFileSystemModel::dropMimeData_moveFiles( const QMimeData* InData, Qt::Dro
 	QString				oldFile;
 	QString				newFile;
 	int					compliteFiles = 0;
+	bool				bDirtyTOC = false;
 
 	QProgressDialog				progressDialog( "Moving files", "Cancel", 0, InCountFiles, ( QWidget* )this->parent() );
 	progressDialog.setWindowTitle( "Progress moving files" );
@@ -94,6 +100,7 @@ void WeFileSystemModel::dropMimeData_moveFiles( const QMimeData* InData, Qt::Dro
 	progressDialog.show();
 	applayMode = QMessageBox::No;
 
+	std::vector< QString >		usedPackages;
 	for ( auto it = urls.begin(), itEnd = urls.end(); it != itEnd; ++it, ++compliteFiles )
 	{
 		dropFileInfo.setFile( it->toLocalFile() );
@@ -123,10 +130,11 @@ void WeFileSystemModel::dropMimeData_moveFiles( const QMimeData* InData, Qt::Dro
 				continue;
 			}
 
-			MoveDir( oldFile, newFile, &progressDialog, compliteFiles );
+			MoveDir( oldFile, newFile, &progressDialog, compliteFiles, bDirtyTOC, usedPackages );
 		}
 		else
 		{
+			bool		bPackage = dropFileInfo.suffix() == FILE_PACKAGE_EXTENSION;
 			if ( QFile::exists( newFile ) )
 			{
 				if ( applayMode == QMessageBox::NoToAll ||
@@ -138,11 +146,71 @@ void WeFileSystemModel::dropMimeData_moveFiles( const QMimeData* InData, Qt::Dro
 					continue;
 				}
 
+				// If this file is package, we remove him from TOC
+				if ( bPackage )
+				{
+					std::wstring		enginePath = appQtAbsolutePathToEngine( newFile );
+					
+					// We try unload package for remove unused assets
+					GPackageManager->UnloadPackage( enginePath );
+
+					// If package still used, we skip him
+					if ( GPackageManager->IsPackageUsed( enginePath ) )
+					{
+						usedPackages.push_back( fileInfo( InParent ).baseName() + "/" + dropFileInfo.baseName() );
+						continue;
+					}
+
+					// Else we remove entry from TOC file
+					GTableOfContents.RemoveEntry( enginePath );
+					bDirtyTOC		= true;
+				}
+
 				QFile::remove( newFile );
 			}
 
+			// If this is package, we update TOC file
+			if ( bPackage )
+			{
+				std::wstring		enginePath = appQtAbsolutePathToEngine( oldFile );
+				
+				// We try unload package for remove unused assets
+				GPackageManager->UnloadPackage( enginePath );
+
+				// If package still used, we skip him
+				if ( GPackageManager->IsPackageUsed( enginePath ) )
+				{
+					usedPackages.push_back( dropFileInfo.baseName() );
+					continue;
+				}
+
+				// Else we remove entry from TOC file
+				GTableOfContents.RemoveEntry( enginePath );
+				bDirtyTOC		= true;
+			}	
+
 			QFile::rename( oldFile, newFile );
+
+			if ( bPackage )
+			{
+				GTableOfContents.AddEntry( appQtAbsolutePathToEngine( newFile ) );
+				bDirtyTOC		= true;
+			}
+
+			
 		}
+	}
+
+	// If TOC file is dirty, we serialize him
+	if ( bDirtyTOC )
+	{
+		GAssetDataBase.SerializeTOC( true );
+	}
+
+	// If we have used package - print message
+	if ( !usedPackages.empty() )
+	{
+		ShowMessageBoxWithList( ( QWidget* )parent(), "Warning", "The following packages in using and cannot be delete. Close all assets from this package will allow them to be moved or deleted", "Packages", usedPackages );
 	}
 }
 
@@ -154,6 +222,7 @@ void WeFileSystemModel::dropMimeData_copyFiles( const QMimeData* InData, Qt::Dro
 	QString				oldFile;
 	QString				newFile;
 	int					compliteFiles = 0;
+	bool				bDirtyTOC = false;
 
 	QProgressDialog				progressDialog( "Progress copy files", "Cancel", 0, InCountFiles, ( QWidget* )this->parent() );
 	progressDialog.setWindowTitle( "Progress copy files" );
@@ -161,6 +230,7 @@ void WeFileSystemModel::dropMimeData_copyFiles( const QMimeData* InData, Qt::Dro
 	progressDialog.show();
 	applayMode = QMessageBox::No;
 
+	std::vector< QString >		usedPackages;
 	for ( auto it = urls.begin(), itEnd = urls.end(); it != itEnd; ++it, ++compliteFiles )
 	{
 		dropFileInfo.setFile( it->toLocalFile() );
@@ -190,10 +260,12 @@ void WeFileSystemModel::dropMimeData_copyFiles( const QMimeData* InData, Qt::Dro
 				continue;
 			}
 
-			CopyDir( oldFile, newFile, &progressDialog, compliteFiles );
+			CopyDir( oldFile, newFile, &progressDialog, compliteFiles, bDirtyTOC, usedPackages );
 		}
 		else
 		{
+			bool		bPackage = dropFileInfo.suffix() == FILE_PACKAGE_EXTENSION;
+
 			if ( QFile::exists( newFile ) )
 			{
 				if ( applayMode == QMessageBox::NoToAll ||
@@ -205,15 +277,54 @@ void WeFileSystemModel::dropMimeData_copyFiles( const QMimeData* InData, Qt::Dro
 					continue;
 				}
 
+				// If this file is package, we remove him from TOC
+				if ( bPackage )
+				{
+					std::wstring		enginePath = appQtAbsolutePathToEngine( newFile );
+					
+					// We try unload package for remove unused assets
+					GPackageManager->UnloadPackage( enginePath );
+
+					// If package still used, we skip him
+					if ( GPackageManager->IsPackageUsed( enginePath ) )
+					{
+						usedPackages.push_back( fileInfo( InParent ).baseName() + "/" + dropFileInfo.baseName() );
+						continue;
+					}
+
+					// Else remove entry from TOC file
+					GTableOfContents.RemoveEntry( enginePath );
+					bDirtyTOC = true;
+				}
+
 				QFile::remove( newFile );
 			}
 
 			QFile::copy( oldFile, newFile );
+
+			// If this is package, we update TOC file
+			if ( bPackage )
+			{
+				GTableOfContents.AddEntry( appQtAbsolutePathToEngine( newFile ) );
+				bDirtyTOC = true;
+			}
 		}
+	}
+
+	// If TOC file is dirty, we serialize him
+	if ( bDirtyTOC )
+	{
+		GAssetDataBase.SerializeTOC( true );
+	}
+
+	// If we have used package - print message
+	if ( !usedPackages.empty() )
+	{
+		ShowMessageBoxWithList( ( QWidget* )parent(), "Warning", "The following packages in using and cannot be delete. Close all assets from this package will allow them to be deleted", "Packages", usedPackages );
 	}
 }
 
-void WeFileSystemModel::MoveDir( const QString& InOldDir, const QString& InNewDir, QProgressDialog* InProgressDialog, int& OutValueProgress )
+void WeFileSystemModel::MoveDir( const QString& InOldDir, const QString& InNewDir, QProgressDialog* InProgressDialog, int& OutValueProgress, bool& OutIsDirtyTOC, std::vector< QString >& OutUsedPackage )
 {
 	QDir				oldDir( InOldDir );
 	
@@ -226,7 +337,7 @@ void WeFileSystemModel::MoveDir( const QString& InOldDir, const QString& InNewDi
 	{
 		if ( it->isDir() )
 		{
-			MoveDir( it->absoluteFilePath(), InNewDir + "/" + it->fileName(), InProgressDialog, OutValueProgress );
+			MoveDir( it->absoluteFilePath(), InNewDir + "/" + it->fileName(), InProgressDialog, OutValueProgress, OutIsDirtyTOC, OutUsedPackage );
 		}
 		else
 		{
@@ -240,6 +351,8 @@ void WeFileSystemModel::MoveDir( const QString& InOldDir, const QString& InNewDi
 			{
 				break;
 			}
+
+			bool		bPackage = it->suffix() == FILE_PACKAGE_EXTENSION;
 
 			if ( QFile::exists( newFile ) )
 			{
@@ -266,10 +379,56 @@ void WeFileSystemModel::MoveDir( const QString& InOldDir, const QString& InNewDi
 					}
 				}
 
+				// If this file is package, we remove him from TOC
+				if ( bPackage )
+				{
+					std::wstring		enginePath = appQtAbsolutePathToEngine( newFile );
+					
+					// We try unload package for remove unused assets
+					GPackageManager->UnloadPackage( enginePath );
+
+					// If package still used, we skip him
+					if ( GPackageManager->IsPackageUsed( enginePath ) )
+					{
+						OutUsedPackage.push_back( InNewDir + "/" + it->baseName() );
+						continue;
+					}
+
+					// Else remove entry from TOC file
+					GTableOfContents.RemoveEntry( enginePath );
+					OutIsDirtyTOC	= true;
+				}
+
 				QFile::remove( newFile );
 			}
 
+			// If this is package, we update TOC file
+			if ( bPackage )
+			{
+				std::wstring		enginePath = appQtAbsolutePathToEngine( it->absoluteFilePath() );
+				
+				// We try unload package for remove unused assets
+				GPackageManager->UnloadPackage( enginePath );
+
+				// If package still used, we skip him
+				if ( GPackageManager->IsPackageUsed( enginePath ) )
+				{
+					OutUsedPackage.push_back( it->baseName() );
+					continue;
+				}
+
+				// Else remove entry from TOC file
+				GTableOfContents.RemoveEntry( enginePath );
+				OutIsDirtyTOC = true;
+			}
+
 			QFile::rename( it->absoluteFilePath(), newFile );
+
+			if ( bPackage )
+			{
+				GTableOfContents.AddEntry( appQtAbsolutePathToEngine( newFile ) );
+				OutIsDirtyTOC = true;
+			}
 		}
 	}
 
@@ -279,7 +438,7 @@ void WeFileSystemModel::MoveDir( const QString& InOldDir, const QString& InNewDi
 	}
 }
 
-void WeFileSystemModel::CopyDir( const QString& InOldDir, const QString& InNewDir, QProgressDialog* InProgressDialog, int& OutValueProgress )
+void WeFileSystemModel::CopyDir( const QString& InOldDir, const QString& InNewDir, QProgressDialog* InProgressDialog, int& OutValueProgress, bool& OutIsDirtyTOC, std::vector< QString >& OutUsedPackage )
 {
 	QDir				oldDir( InOldDir );
 
@@ -292,7 +451,7 @@ void WeFileSystemModel::CopyDir( const QString& InOldDir, const QString& InNewDi
 	{
 		if ( it->isDir() )
 		{
-			CopyDir( it->absoluteFilePath(), InNewDir + "/" + it->fileName(), InProgressDialog, OutValueProgress );
+			CopyDir( it->absoluteFilePath(), InNewDir + "/" + it->fileName(), InProgressDialog, OutValueProgress, OutIsDirtyTOC, OutUsedPackage );
 		}
 		else
 		{
@@ -306,6 +465,8 @@ void WeFileSystemModel::CopyDir( const QString& InOldDir, const QString& InNewDi
 			{
 				break;
 			}
+
+			bool		bPackage = it->suffix() == FILE_PACKAGE_EXTENSION;
 
 			if ( QFile::exists( newFile ) )
 			{
@@ -332,10 +493,37 @@ void WeFileSystemModel::CopyDir( const QString& InOldDir, const QString& InNewDi
 					}
 				}
 
+				// If this file is package, we remove him from TOC
+				if ( bPackage )
+				{
+					std::wstring		enginePath = appQtAbsolutePathToEngine( newFile );
+					
+					// We try unload package for remove unused assets
+					GPackageManager->UnloadPackage( enginePath );
+
+					// If package still used, we skip him
+					if ( GPackageManager->IsPackageUsed( enginePath ) )
+					{
+						OutUsedPackage.push_back( InNewDir + "/" + it->baseName() );
+						continue;
+					}
+
+					// Else remove entry from TOC file
+					GTableOfContents.RemoveEntry( enginePath );
+					OutIsDirtyTOC = true;
+				}
+
 				QFile::remove( newFile );
 			}
 
 			QFile::copy( it->absoluteFilePath(), newFile );
+
+			// If this is package, we update TOC file
+			if ( bPackage )
+			{
+				GTableOfContents.AddEntry( appQtAbsolutePathToEngine( newFile ) );
+				OutIsDirtyTOC = true;
+			}
 		}
 	}
 

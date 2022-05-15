@@ -2,6 +2,7 @@
 #include "Misc/EngineGlobals.h"
 #include "Render/VertexFactory/SimpleElementVertexFactory.h"
 #include "Render/RenderUtils.h"
+#include "Render/DynamicMeshBuilder.h"
 #include "Render/Scene.h"
 #include "RHI/BaseRHI.h"
 
@@ -80,5 +81,82 @@ void DrawWireframeBox( struct FSceneDepthGroup& InSDG, const class FBox& InBox, 
 			start.y = bbox[ 0 ].y;		end.y = bbox[ 1 ].y;
 			InSDG.simpleElements.AddLine( start, end, InColor );
 		}
+	}
+}
+
+void DrawSphere( struct FSceneDepthGroup& InSDG, const FVector& InCenter, const FVector& InRadius, uint32 InNumSides, uint32 InNumRings, class FMaterial* InMaterial )
+{
+	FDynamicMeshBuilder		dynamicMeshBuilder;
+	FMatrix					transofmrationMatrix = FMath::ScaleMatrix( InRadius ) * FMath::TranslateMatrix( InCenter );
+
+	// Use a mesh builder to draw the sphere
+	{
+		// The first/last arc are on top of each other
+		uint32		numVerts = ( InNumSides + 1 ) * ( InNumRings + 1 );
+		FDynamicMeshVertexType*		verts = ( FDynamicMeshVertexType* )malloc( numVerts * sizeof( FDynamicMeshVertexType ) );
+
+		// Calculate verts for one arc
+		FDynamicMeshVertexType*		arcVerts = ( FDynamicMeshVertexType* )malloc( ( InNumRings + 1 ) * sizeof( FDynamicMeshVertexType ) );
+
+		for ( uint32 index = 0; index < InNumRings + 1; index++ )
+		{
+			FDynamicMeshVertexType*	arcVert = &arcVerts[ index ];
+			float					angle	= ( ( float )index / InNumRings ) * PI;
+
+			// Note: unit sphere, so position always has mag of one. We can just use it for normal!			
+			arcVert->position		= FVector4D( 0.f, FMath::Cos( angle ), FMath::Sin( angle ), 1.f );
+			arcVert->tangent		= FVector4D( 1.f, 0.f, 0.f, 0.f );
+			arcVert->normal			= arcVert->position;
+			arcVert->binormal		= FVector4D( 0.f, -arcVert->position.y, arcVert->position.z, 0.f );
+
+			arcVert->texCoord.x		= 0.f;
+			arcVert->texCoord.t		= ( float )index / InNumRings;
+		}
+
+		// Then rotate this arc InNumSides+1 times
+		for ( uint32 indexSide = 0; indexSide < InNumSides + 1; indexSide++ )
+		{
+			FRotator	arcRotator( 0.f, FMath::Trunc( 65536.f * ( ( float )indexSide / InNumSides ) ), 0.f );
+			FMatrix		arcRot = arcRotator.ToMatrix();
+			float		xTexCoord = ( float )indexSide / InNumSides;
+
+			for ( uint32 indexRing = 0; indexRing < InNumRings + 1; indexRing++ )
+			{
+				uint32		VIx = ( InNumRings + 1 ) * indexSide + indexRing;
+
+				verts[ VIx ].position	= arcRot * arcVerts[ indexRing ].position;
+				verts[ VIx ].tangent	= arcRot * arcVerts[ indexRing ].tangent;
+				verts[ VIx ].normal		= arcRot * arcVerts[ indexRing ].normal;
+				verts[ VIx ].binormal	= arcRot * arcVerts[ indexRing ].binormal;
+
+				verts[ VIx ].texCoord.x = xTexCoord;
+				verts[ VIx ].texCoord.y = arcVerts[ indexRing ].texCoord.y;
+			}
+		}
+
+		// Add all of the vertices we generated to the mesh builder
+		for ( uint32 vertIdx = 0; vertIdx < numVerts; vertIdx++ )
+		{
+			dynamicMeshBuilder.AddVertex( verts[ vertIdx ] );
+		}
+
+		// Add all of the triangles we generated to the mesh builder
+		for ( uint32 indexSide = 0; indexSide < InNumSides; indexSide++ )
+		{
+			uint32	a0start = ( indexSide + 0 ) * ( InNumRings + 1 );
+			uint32	a1start = ( indexSide + 1 ) * ( InNumRings + 1 );
+			for ( uint32 indexRing = 0; indexRing < InNumRings; indexRing++ )
+			{
+				dynamicMeshBuilder.AddTriangle( a0start + indexRing + 0, a1start + indexRing + 0, a0start + indexRing + 1 );
+				dynamicMeshBuilder.AddTriangle( a1start + indexRing + 0, a1start + indexRing + 1, a0start + indexRing + 1 );
+			}
+		}
+
+		// Free our local copy of verts and arc verts
+		free( verts );
+		free( arcVerts );
+
+		// Build mesh for drawing
+		dynamicMeshBuilder.Build();
 	}
 }

@@ -54,8 +54,6 @@ void LBaseEngine::Init()
 	// Load default material
 	{
 		defaultMaterial = new FMaterial();
-		defaultMaterial->SetShader( FBasePassVertexShader::staticType );
-		defaultMaterial->SetShader( FBasePassPixelShader::staticType );
 
 		// Loading default material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
@@ -85,8 +83,6 @@ void LBaseEngine::Init()
 #if WITH_EDITOR
 	{
 		defaultWireframeMaterial = new FMaterial();
-		defaultWireframeMaterial->SetShader( FWireframeVertexShader::staticType );
-		defaultWireframeMaterial->SetShader( FWireframePixelShader::staticType );
 		defaultWireframeMaterial->SetWireframe( true );
 
 		// Loading default wireframe material from packages only when we in game

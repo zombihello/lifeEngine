@@ -41,6 +41,12 @@ public:
 
 	/**
 	 * Add a package to the TOC at runtime
+	 * @param InPath	Path to the package
+	 */
+	void AddEntry( const std::wstring& InPath );
+
+	/**
+	 * Add a package to the TOC at runtime
 	 *
 	 * @param InGUID GUID of the package
 	 * @param InName Name of the package
@@ -50,6 +56,28 @@ public:
 	{
 		nameEntries.insert( std::make_pair( InName, FTOCEntry{ InName, InPath } ) );
 		guidEntries.insert( std::make_pair( InGUID, FTOCEntry{ InName, InPath } ) );
+	}
+
+	/**
+	 * Remove a package from the TOC at runtime
+	 * @param InPath	Path to the package
+	 */
+	void RemoveEntry( const std::wstring& InPath );
+
+	/**
+	 * Remove a package from the TOC at runtime
+	 * @param InGUID	GUID of the package
+	 */
+	FORCEINLINE void RemoveEntry( const FGuid& InGUID )
+	{
+		auto	it = guidEntries.find( InGUID );
+		if ( it == guidEntries.end() )
+		{
+			return;
+		}
+
+		nameEntries.erase( it->second.name );
+		guidEntries.erase( it );
 	}
 
 	/**

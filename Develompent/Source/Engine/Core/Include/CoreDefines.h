@@ -41,4 +41,7 @@
  */
 #define LE_DEPRECATED( Version, Message )			        [ [ deprecated( Message " Please update your code to the new API before upgrading to the next release, otherwise your project will no longer compile." ) ] ]
 
+/** Enable warning C4996 on 1 level (for deprecated messages) */
+#pragma warning( 1: 4996 )
+
 #endif // !COREDEFINES_H

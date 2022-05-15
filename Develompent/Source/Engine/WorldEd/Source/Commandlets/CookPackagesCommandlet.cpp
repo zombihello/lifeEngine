@@ -132,9 +132,16 @@ bool LCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 		{
 			std::wstring		packageName;
 			std::wstring		assetName;
+			EAssetType			assetType;
 			FResourceInfo		resourceInfo;
 
-			ParseReferenceToAsset( tmxTilesetName, packageName, assetName );
+			ParseReferenceToAsset( tmxTilesetName, packageName, assetName, assetType );
+			if ( assetType != AT_Material )
+			{
+				appErrorf( TEXT( "Asset '%s' is not material" ), tmxTilesetName.c_str() );
+				return false;
+			}
+
 			if ( !FindResource( materialsMap, packageName, assetName, resourceInfo ) )
 			{
 				appErrorf( TEXT( "Material '%s' not founded" ), tmxTilesetName.c_str() );
@@ -546,9 +553,16 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 				{
 					std::wstring		packageName;
 					std::wstring		assetName;
+					EAssetType			assetType;
 					FResourceInfo		resourceInfo;
 
-					ParseReferenceToAsset( assetReference, packageName, assetName );
+					ParseReferenceToAsset( assetReference, packageName, assetName, assetType );
+					if ( assetType != AT_Texture2D )
+					{
+						appErrorf( TEXT( "Asset '%s' is not texture" ), assetReference.c_str() );
+						return false;
+					}
+
 					if ( !FindResource( texturesMap, packageName, assetName, resourceInfo ) )
 					{
 						appErrorf( TEXT( "Texture '%s' not founded" ), assetReference.c_str() );
@@ -574,12 +588,6 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	OutMaterial->SetTwoSided( bIsTwoSided );
 	OutMaterial->SetWireframe( bIsWireframe );
 	OutMaterial->SetUsageFlags( usageFlags );
-
-	// Set shaders
-	for ( uint32 index = 0, count = shaderMetaTypes.size(); index < count; ++index )
-	{
-		OutMaterial->SetShader( *shaderMetaTypes[ index ] );
-	}
 
 	// Set scalar parameters
 	for ( auto it = scalarParameters.begin(), itEnd = scalarParameters.end(); it != itEnd; ++it )

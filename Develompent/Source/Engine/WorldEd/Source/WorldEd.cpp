@@ -117,3 +117,33 @@ std::wstring appGetWorldEdName()
 
 	return FString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
 }
+
+QMessageBox::StandardButton ShowMessageBoxWithList( class QWidget* InParent, const QString& InTitle, const QString& InText, const QString& InListName, const std::vector<QString>& InList, bool InIsError /* = false */, uint32 InMaxSizeList /* = 3 */ )
+{
+	QString		resultList;
+
+	// Forming a list
+	for ( uint32 index = 0, count = InList.size(); index < count; ++index )
+	{
+		resultList += InList[ index ];
+		if ( count > InMaxSizeList && index + 1 == InMaxSizeList )
+		{
+			resultList += "<br>...<br>";
+			break;
+		}
+		else
+		{
+			resultList += "<br>";
+		}
+	}
+
+	QString		finalText = QString::fromStdWString( FString::Format( TEXT( "%s<br><br><b>%s:</b><br>%s" ), InText.toStdWString().c_str(), InListName.toStdWString().c_str(), resultList.toStdWString().c_str() ) );
+	if ( InIsError )
+	{
+		return QMessageBox::critical( InParent, InTitle, finalText, QMessageBox::Ok );
+	}
+	else
+	{
+		return QMessageBox::warning( InParent, InTitle, finalText, QMessageBox::Ok );
+	}
+}

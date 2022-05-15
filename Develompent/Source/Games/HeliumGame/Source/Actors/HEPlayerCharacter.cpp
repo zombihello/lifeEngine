@@ -35,19 +35,19 @@ AHEPlayerCharacter::AHEPlayerCharacter()
 	spriteComponent = CreateComponent< LSpriteComponent >( TEXT( "SpriteComponent0" ) );
 	spriteComponent->SetSpriteSize( FVector2D( 32.f, 32.f ) );
 	spriteComponent->SetType( ST_Static );
-	spriteComponent->SetMaterial( ( FMaterialRef )GPackageManager->FindAsset( TEXT( "Characters_Player:Player_Mat" ), AT_Material ) );
+	spriteComponent->SetMaterial( ( FMaterialRef )GPackageManager->FindAsset( TEXT( "Material'Characters_Player:Player_Mat" ), AT_Material ) );
 
 	// Create audio component
 	audioComponent = CreateComponent< LAudioComponent >( TEXT( "AudioComponent0" ) );
 
 	// Load audio bank for walking and jumping
-	walkAudioBanks[ ST_Default ]	= GPackageManager->FindAsset( TEXT( "Characters_Player_Audio:Footsteps_Concrete_Walk_01" ), AT_AudioBank );
-	walkAudioBanks[ ST_Surface1 ]	= GPackageManager->FindAsset( TEXT( "Characters_Player_Audio:Footstep_Grass_Walk_01" ), AT_AudioBank );
-	walkAudioBanks[ ST_Surface2 ]	= GPackageManager->FindAsset( TEXT( "Characters_Player_Audio:Footsteps_Concrete_Walk_01" ), AT_AudioBank );
+	walkAudioBanks[ ST_Default ]	= GPackageManager->FindAsset( TEXT( "AudioBank'Characters_Player_Audio:Footsteps_Concrete_Walk_01" ), AT_AudioBank );
+	walkAudioBanks[ ST_Surface1 ]	= GPackageManager->FindAsset( TEXT( "AudioBank'Characters_Player_Audio:Footstep_Grass_Walk_01" ), AT_AudioBank );
+	walkAudioBanks[ ST_Surface2 ]	= GPackageManager->FindAsset( TEXT( "AudioBank'Characters_Player_Audio:Footsteps_Concrete_Walk_01" ), AT_AudioBank );
 
-	jumpAudioBanks[ ST_Default ]	= GPackageManager->FindAsset( TEXT( "Characters_Player_Audio:Footsteps_Concrete_Land_01" ), AT_AudioBank );
-	jumpAudioBanks[ ST_Surface1 ]	= GPackageManager->FindAsset( TEXT( "Characters_Player_Audio:Footstep_Grass_Land_01" ), AT_AudioBank );
-	jumpAudioBanks[ ST_Surface2 ]	= GPackageManager->FindAsset( TEXT( "Characters_Player_Audio:Footsteps_Concrete_Land_01" ), AT_AudioBank );
+	jumpAudioBanks[ ST_Default ]	= GPackageManager->FindAsset( TEXT( "AudioBank'Characters_Player_Audio:Footsteps_Concrete_Land_01" ), AT_AudioBank );
+	jumpAudioBanks[ ST_Surface1 ]	= GPackageManager->FindAsset( TEXT( "AudioBank'Characters_Player_Audio:Footstep_Grass_Land_01" ), AT_AudioBank );
+	jumpAudioBanks[ ST_Surface2 ]	= GPackageManager->FindAsset( TEXT( "AudioBank'Characters_Player_Audio:Footsteps_Concrete_Land_01" ), AT_AudioBank );
 }
 
 AHEPlayerCharacter::~AHEPlayerCharacter()

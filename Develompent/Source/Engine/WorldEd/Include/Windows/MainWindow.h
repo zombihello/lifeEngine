@@ -152,6 +152,15 @@ public:
 		return dockManager;
 	}
 
+	/**
+	 * Get content browser widget
+	 * @return Return content browser widget
+	 */
+	FORCEINLINE class WeContentBrowserWidget* GetContentBrowserWidget() const
+	{
+		return contentBrowserWidget;
+	}
+
 private slots:
 	/**
 	 * Slot on tick LE
@@ -180,6 +189,7 @@ private:
 	ads::CDockManager*				dockManager;					/**< Dock manager */
 	class WeLogWidget*				logWidget;						/**< Log widget */
 	class WeViewportWidget*			viewportWidgets[ LVT_Max ];		/**< Array of widget viewports */
+	class WeContentBrowserWidget*	contentBrowserWidget;			/**< Content browser widget */
 };
 
 #endif // MAINWINDOW_H

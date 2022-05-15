@@ -38,14 +38,15 @@ typedef uint64		EShowFlags;
 enum EShowFlag
 {
 	// General and game flags
-	SHOW_None				= 0,													/**< Nothig show */
-	SHOW_Sprite				= 1 << 0,												/**< Sprite show */
-	SHOW_StaticMesh			= 1 << 1,												/**< Static mesh show */
-	SHOW_Wireframe			= 1 << 2,												/**< Show all geometry in wireframe mode */
-	SHOW_SimpleElements		= 1 << 3,												/**< Show simple elements (only for debug and WorldEd) */
+	SHOW_None				= 0,			/**< Nothig show */
+	SHOW_Sprite				= 1 << 0,		/**< Sprite show */
+	SHOW_StaticMesh			= 1 << 1,		/**< Static mesh show */
+	SHOW_Wireframe			= 1 << 2,		/**< Show all geometry in wireframe mode */
+	SHOW_SimpleElements		= 1 << 3,		/**< Show simple elements (only for debug and WorldEd) */
+	SHOW_DynamicElements	= 1 << 4,		/**< Show dynamic elements */
 
-	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements,	/**< Default show flags for game */
-	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements	/**< Default show flags for editor */
+	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements,	/**< Default show flags for game */
+	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements	/**< Default show flags for editor */
 };
 
 /**
@@ -259,9 +260,9 @@ public:
 		 * @param InWireframeColor		Wireframe color
 		 */
 		FDrawingPolicyLink( const FColor& InWireframeColor = FColor::red )
-#if WITH_EDITOR
+#if !SHIPPING_BUILD
 			: wireframeColor( InWireframeColor )
-#endif // WITH_EDITOR
+#endif // !SHIPPING_BUILD
 		{}
 
 		/**
@@ -272,9 +273,9 @@ public:
 		 */
 		FDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const FColor& InWireframeColor = FColor::red )
 			: drawingPolicy( InDrawingPolicy )
-#if WITH_EDITOR
+#if !SHIPPING_BUILD
 			, wireframeColor( InWireframeColor )
-#endif // WITH_EDITOR
+#endif // !SHIPPING_BUILD
 		{}
 
 		/**
@@ -305,9 +306,9 @@ public:
 		mutable FMeshBatchList					meshBatchList;			/**< Mesh batch list */
 		mutable TDrawingPolicyType				drawingPolicy;			/**< Drawing policy */
 
-#if WITH_EDITOR
+#if !SHIPPING_BUILD
 		FColor									wireframeColor;			/**< Wireframe color */
-#endif // WITH_EDITOR
+#endif // !SHIPPING_BUILD
 	};
 
 	/**
@@ -440,10 +441,10 @@ public:
 		check( IsInRenderingThread() );
 
 		// Wireframe drawing available only with editor
-#if WITH_EDITOR
+#if !SHIPPING_BUILD
 		TWireframeMeshDrawingPolicy< TDrawingPolicyType >		wireframeDrawingPolicy;		// Drawing policy for wireframe mode
 		bool													bWireframe = InAllowWireframe && ( InSceneView.GetShowFlags() & SHOW_Wireframe );
-#endif // WITH_EDITOR
+#endif // !SHIPPING_BUILD
 
 		for ( FMapDrawData::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
 		{
@@ -451,7 +452,7 @@ public:
 			FDrawingPolicyLinkRef		drawingPolicyLink		= *it;
 			FMeshDrawingPolicy*			drawingPolicy			= nullptr;
 
-#if WITH_EDITOR
+#if !SHIPPING_BUILD
 			drawingPolicy				= !bWireframe ? &drawingPolicyLink->drawingPolicy : &wireframeDrawingPolicy;
 
 			// If we use wireframe drawing policy - init him
@@ -461,7 +462,7 @@ public:
 			}
 #else
 			drawingPolicy				= &drawingPolicyLink->drawingPolicy;
-#endif // WITH_EDITOR
+#endif // !SHIPPING_BUILD
 
 			// If drawing policy is not valid - skip meshes
 			if ( !drawingPolicy->IsValid() )
@@ -523,6 +524,7 @@ struct FSceneDepthGroup
 		simpleElements.Clear();
 #endif // !SHIPPING_BUILD
 
+		dynamicMeshElements.Clear();
 		staticMeshDrawList.Clear();
 		spriteDrawList.Clear();
 	}
@@ -533,7 +535,7 @@ struct FSceneDepthGroup
 	 */
 	FORCEINLINE bool IsEmpty() const
 	{
-		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0
+		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0 && dynamicMeshElements.GetNum() <= 0
 #if !SHIPPING_BUILD
 			&& simpleElements.IsEmpty()
 #endif // !SHIPPING_BUILD
@@ -542,11 +544,12 @@ struct FSceneDepthGroup
 
 	// Simple elements use only for debug and WorldEd
 #if !SHIPPING_BUILD
-	FBatchedSimpleElements														simpleElements;			/**< Batched simple elements (lines, points, etc) */
+	FBatchedSimpleElements								simpleElements;			/**< Batched simple elements (lines, points, etc) */
 #endif // !SHIPPING_BUILD
 
-	FMeshDrawList< FStaticMeshDrawPolicy >										staticMeshDrawList;		/**< Draw list of static meshes */
-	FMeshDrawList< FStaticMeshDrawPolicy >										spriteDrawList;			/**< Draw list of sprites */
+	FMeshDrawList< FStaticMeshDrawPolicy >				dynamicMeshElements;	/**< Draw list of dynamic meshes */
+	FMeshDrawList< FStaticMeshDrawPolicy >				staticMeshDrawList;		/**< Draw list of static meshes */
+	FMeshDrawList< FStaticMeshDrawPolicy >				spriteDrawList;			/**< Draw list of sprites */
 };
 
 /**
@@ -556,6 +559,11 @@ struct FSceneDepthGroup
 class FBaseScene
 {
 public:
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~FBaseScene() {}
+
 	/**
 	 * @brief Add new primitive component to scene
 	 *
@@ -595,6 +603,11 @@ public:
 class FScene : public FBaseScene
 {
 public:
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~FScene();
+
 	/**
 	 * @brief Add new primitive component to scene
 	 *
@@ -654,5 +667,22 @@ private:
 	FSceneDepthGroup							SDGs[ SDG_Max ];			/**< Scene depth groups */
 	std::list< LPrimitiveComponentRef >			primitives;					/**< List of primitives on scene */
 };
+
+//
+// Serialization
+//
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, ESceneDepthGroup& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ESceneDepthGroup& InValue )
+{
+	check( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* )&InValue, sizeof( InValue ) );
+	return InArchive;
+}
 
 #endif // !SCENE_H

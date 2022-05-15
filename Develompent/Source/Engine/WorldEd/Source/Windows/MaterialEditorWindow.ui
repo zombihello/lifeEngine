@@ -40,16 +40,23 @@
      <property name="midLineWidth">
       <number>0</number>
      </property>
-     <widget class="WeViewportWidget" name="viewportPreview" native="true">
-      <property name="geometry">
-       <rect>
-        <x>2</x>
-        <y>2</y>
-        <width>436</width>
-        <height>437</height>
-       </rect>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
       </property>
-     </widget>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="WeViewportWidget" name="viewportPreview" native="true"/>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

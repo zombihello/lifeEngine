@@ -74,6 +74,19 @@ public:
 		return packageModel->GetPackage();
 	}
 
+private slots:
+	//
+	// Events
+	//
+	void OnClicked( QModelIndex InIndex );
+
+signals:
+	/**
+	 * Event of selection asset
+	 * @param InAssetReference	Asset reference
+	 */
+	void OnSelectedAsset( const std::wstring& InAssetReference );
+
 private:
 	/**
 	 * Event of press mouse

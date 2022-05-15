@@ -89,6 +89,11 @@ void WeContentBrowser::SetRootDir( const QDir& InRootDir )
 	setRootIndex( fileSystemModel->index( rootDir.path() ) );
 }
 
+void WeContentBrowser::SetCurrentFile( const QString& InPath )
+{
+	setCurrentIndex( fileSystemModel->index( InPath ) );
+}
+
 QFileSystemModel* WeContentBrowser::GetFileSystemModel() const
 {
 	return fileSystemModel;

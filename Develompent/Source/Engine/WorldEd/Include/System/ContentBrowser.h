@@ -53,6 +53,12 @@ public:
     virtual void SetRootDir( const QDir& InRootDir );
 
 	/**
+	 * Set current selected file
+	 * @param InPath	Path to file
+	 */
+	virtual void SetCurrentFile( const QString& InPath );
+
+	/**
 	 * Get file system model
 	 * @return Return pointer to file system model
 	 */

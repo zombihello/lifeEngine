@@ -9,6 +9,7 @@
 #ifndef RENDERUTILS_H
 #define RENDERUTILS_H
 
+#include "Math/Math.h"
 #include "Misc/Types.h"
 #include "RHI/BaseSurfaceRHI.h"
 
@@ -111,10 +112,24 @@ void DrawDenormalizedQuad( class FBaseDeviceContextRHI* InDeviceContextRHI, floa
  * @ingroup Engine
  * Draws a wireframe box
  *
- * @param	InSDG			Scene depth group
- * @param	InBox			The FBox to use for drawing
- * @param	InColor			Color of the box
+ * @param InSDG			Scene depth group
+ * @param InBox			The FBox to use for drawing
+ * @param InColor		Color of the box
  */
 void DrawWireframeBox( struct FSceneDepthGroup& InSDG, const class FBox& InBox, const class FColor& InColor );
+
+/**
+ * @ingroup Engine
+ * Draws a sphere
+ * 
+ * @param InSDG			Scene depth group
+ * @param InCenter		Center
+ * @param InRadius		Radius
+ * @param InNumSides	Number sides in sphere
+ * @param InNumRings	Number rings in sphere
+ * @param InMaterial	Material
+ */
+LE_DEPRECATED( 0.4.0, "Use LSphereComponent for draw sphere" )
+void DrawSphere( struct FSceneDepthGroup& InSDG, const FVector& InCenter, const FVector& InRadius, uint32 InNumSides, uint32 InNumRings, class FMaterial* InMaterial );
 
 #endif // !RENDERUTILS_H

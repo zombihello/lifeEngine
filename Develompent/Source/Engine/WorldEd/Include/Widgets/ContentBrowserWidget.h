@@ -10,6 +10,8 @@
 #define CONTENTBROWSERWIDGET_H
 
 #include <QWidget>
+#include <string>
+
 #include "Core.h"
 
 namespace Ui
@@ -55,6 +57,21 @@ public:
 	 */
 	void SetRootDir( ERootDir InRootDir );
 
+	/**
+	 * Show asset in content browser
+	 * @param InAssetReference		Asset reference
+	 */
+	void ShowAsset( const std::wstring& InAssetReference );
+
+	/**
+	 * Get selected asset reference
+	 * @return Return selected asset reference
+	 */
+	FORCEINLINE const std::wstring& GetSelectedAssetReference() const
+	{
+		return selectedAssetReference;
+	}
+
 private slots:
 	//
 	// Events
@@ -80,10 +97,12 @@ private slots:
 	void on_comboBox_rootDir_currentIndexChanged( int InIndex );
 	void on_listView_packageBrowser_doubleClicked( QModelIndex InModelIndex );
 	void OnPackageBrowserChangedAsset( FAsset* InAsset );
+	void on_listView_packageBrowser_CopyReferenceToAsset();
+	void OnListViewPackageBrowserSelectedAsset( const std::wstring& InAssetReference );
 
 private:
-	Ui::WeContentBrowserWidget*				ui;			/**< Qt UI */
-
+	Ui::WeContentBrowserWidget*	ui;							/**< Qt UI */
+	std::wstring				selectedAssetReference;		/**< Selected asset */
 };
 
 #endif // !CONTENTBROWSERWIDGET_H

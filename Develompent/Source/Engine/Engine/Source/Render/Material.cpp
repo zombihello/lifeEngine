@@ -1,17 +1,21 @@
+#include "Misc/CoreGlobals.h"
 #include "Logger/LoggerMacros.h"
+#include "System/Package.h"
 #include "Render/Material.h"
 #include "Render/VertexFactory/StaticMeshVertexFactory.h"
 #include "Render/VertexFactory/SpriteVertexFactory.h"
 
+#if !SHIPPING_BUILD
+#include "Render/VertexFactory/DynamicMeshVertexFactory.h"
+#endif // !SHIPPING_BUILD
+
 FMaterial::FMaterial() :
 	FAsset( AT_Material ),
-	isNeedUpdateShaderMap( false ),
+	isNeedUpdateShaderMap( true ),
 	isTwoSided( false ),
 	isWireframe( false ),
 	usage( MU_AllMeshes )
-{
-	appMemzero( &shadersType, sizeof( shadersType ) );
-}
+{}
 
 FMaterial::~FMaterial()
 {}
@@ -23,11 +27,7 @@ void FMaterial::Serialize( class FArchive& InArchive )
 		return;
 	}
 
-	if ( InArchive.IsSaving() && isNeedUpdateShaderMap )
-	{
-		CacheShaderMap();
-	}
-	else if ( InArchive.IsLoading() )
+	if ( InArchive.IsLoading() )
 	{
 		isNeedUpdateShaderMap = true;
 	}
@@ -37,9 +37,15 @@ void FMaterial::Serialize( class FArchive& InArchive )
 	InArchive << isWireframe;
 	InArchive << usage;
 
-	for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )
+	if ( InArchive.Ver() < VER_RemovedShadersTypeFromMaterial )
 	{
-		InArchive << shadersType[ index ];
+		class FShaderMetaType*		shadersType[ SF_NumDrawFrequencies ];
+		appMemzero( shadersType, sizeof( shadersType ) );
+
+		for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )
+		{
+			InArchive << shadersType[ index ];
+		}
 	}
 
 	InArchive << scalarParameters;
@@ -96,6 +102,15 @@ void FMaterial::CacheShaderMap()
 		}
 	}
 
+	// Only for debug and WorldEd
+#if !SHIPPING_BUILD
+	// Dynamic mesh
+	{
+		const uint64			vertexFactoryHash = FDynamicMeshVertexFactory::staticType.GetHash();
+		shaderMap[ vertexFactoryHash ] = GetMeshShaders( vertexFactoryHash );
+	}
+#endif // !SHIPPING_BUILD
+
 	isNeedUpdateShaderMap = false;
 }
 
@@ -106,7 +121,7 @@ std::vector< FShader* > FMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) 
 
 	for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )
 	{
-		const FShaderMetaType*		shaderType = shadersType[ index ];
+		const FShaderMetaType*		shaderType = GetShaderType( ( EShaderFrequency )index );
 		if ( !shaderType || InVertexFactoryHash == ( uint32 )INVALID_HASH )
 		{
 			continue;
@@ -136,11 +151,12 @@ bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, F
 	auto		itFind = textureParameters.find( InParameterName );
 	if ( itFind == textureParameters.end() )
 	{
+		OutValue = GPackageManager->FindDefaultAsset( AT_Texture2D );
 		return false;
 	}
 
-	OutValue = itFind->second;
-	return true;
+	OutValue = itFind->second ? itFind->second : GPackageManager->FindDefaultAsset( AT_Texture2D );
+	return itFind->second.IsValid();
 }
 
 bool FMaterial::GetVectorParameterValue( const std::wstring& InParameterName, FVector4D& OutValue ) const
@@ -148,6 +164,7 @@ bool FMaterial::GetVectorParameterValue( const std::wstring& InParameterName, FV
 	auto		itFind = vectorParameters.find( InParameterName );
 	if ( itFind == vectorParameters.end() )
 	{
+		OutValue = FVector4D( 0.f, 0.f, 0.f, 0.f );
 		return false;
 	}
 

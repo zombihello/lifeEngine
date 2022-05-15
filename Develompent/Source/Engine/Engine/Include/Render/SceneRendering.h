@@ -17,6 +17,10 @@
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/TypesRHI.h"
 
+#if !SHIPPING_BUILD
+#include "Render/Shaders/WireframeShader.h"
+#endif // !SHIPPING_BUILD
+
 /**
  * @ingroup Engine
  * Draw policy of static mesh
@@ -37,7 +41,7 @@ public:
 	virtual void SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI ) override;
 };
 
-#if WITH_EDITOR
+#if !SHIPPING_BUILD
 /**
  * @ingroup Engine
  * Drawing policy of wireframe meshes
@@ -67,6 +71,33 @@ public:
 		wireframeMaterial->SetVectorParameterValue( TEXT( "wireframeColor" ), InWireframeColor.ToNormalizedVector4D() );		// TODO: For correct work need implement material instances
 		
 		InitInternal( InVertexFactory, wireframeMaterial, InDepthBias );
+
+		// Override shaders for wireframe rendering
+		uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
+		vertexShader	= GShaderManager->FindInstance<FWireframeVertexShader>( vertexFactoryHash );
+		pixelShader		= GShaderManager->FindInstance<FWireframePixelShader>( vertexFactoryHash );
+	}
+
+	/**
+	 * @brief Get rasterizer state
+	 * @return Return rasterizer state of current drawing policy
+	 */
+	virtual FRasterizerStateRHIRef GetRasterizerState() const
+	{
+		if ( !rasterizerState )
+		{
+			const FRasterizerStateInitializerRHI		initializer =
+			{
+				FM_Wireframe,
+				CM_None,
+				depthBias,
+				0.f,
+				true
+			};
+			rasterizerState = GRHI->CreateRasterizerState( initializer );
+		}
+
+		return rasterizerState;
 	}
 
 	/**
@@ -81,7 +112,7 @@ public:
 private:
 	FColor			wireframeColor;		/**< Wireframe color */
 };
-#endif // WITH_EDITOR
+#endif // !SHIPPING_BUILD
 
 /**
  * @ingroup Engine
@@ -93,9 +124,10 @@ public:
 	/**
 	 * Constructor
 	 * 
-	 * @param InSceneView Scene view
+	 * @param InSceneView	Scene view
+	 * @param InScene		Scene
 	 */
-	FSceneRenderer( FSceneView* InSceneView );
+	FSceneRenderer( FSceneView* InSceneView, class FScene* InScene = nullptr );
 
 	/**
 	 * Begin render view target
@@ -117,7 +149,8 @@ public:
 	void FinishRenderViewTarget( FViewportRHIParamRef InViewportRHI );
 
 private:
-	FSceneView*			sceneView;		/**< Scene view */
+	class FScene*	scene;			/**< Scene */
+	FSceneView*		sceneView;		/**< Scene view */
 };
 
 #endif // !SCENERENDERING_H

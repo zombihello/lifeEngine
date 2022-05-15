@@ -35,17 +35,9 @@ void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, cl
 void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceContextRHI )
 {
 	check( bInit );
-	const FRasterizerStateInitializerRHI		initializer =
-	{
-		material->IsWireframe() ? FM_Wireframe : FM_Solid,
-		material->IsTwoSided() ? CM_None : CM_CW,
-		depthBias,
-		0.f,
-		true
-	};
-	
+
 	vertexFactory->Set( InDeviceContextRHI );
-	GRHI->SetRasterizerState( InDeviceContextRHI, GRHI->CreateRasterizerState( initializer ) );
+	GRHI->SetRasterizerState( InDeviceContextRHI, GetRasterizerState() );
 	GRHI->SetBoundShaderState( InDeviceContextRHI, GetBoundShaderState() );
 }
 
@@ -117,6 +109,25 @@ FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const
 	}
 
 	return boundShaderState;
+}
+
+FRasterizerStateRHIRef FMeshDrawingPolicy::GetRasterizerState() const
+{
+	const FRasterizerStateInitializerRHI		initializer =
+	{
+		material->IsWireframe() ? FM_Wireframe : FM_Solid,
+		material->IsTwoSided() ? CM_None : CM_CW,
+		depthBias,
+		0.f,
+		true
+	};
+
+	if ( !rasterizerState || rasterizerState->GetInitializer() != initializer )
+	{
+		rasterizerState = GRHI->CreateRasterizerState( initializer );
+	}
+
+	return rasterizerState;
 }
 
 bool FMeshDrawingPolicy::Matches( const FMeshDrawingPolicy& InOtherDrawer ) const

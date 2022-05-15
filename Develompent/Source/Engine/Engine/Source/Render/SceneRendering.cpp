@@ -26,7 +26,8 @@ void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* In
 	FMeshDrawingPolicy::SetShaderParameters( InDeviceContextRHI );
 
 	FTexture2DRef		texture2d;
-	if ( material->GetTextureParameterValue( TEXT( "diffuse" ), texture2d ) )
+	material->GetTextureParameterValue( TEXT( "diffuse" ), texture2d );
+	if ( texture2d )
 	{
 		GRHI->SetTextureParameter( InDeviceContextRHI, pixelShader->GetPixelShader(), texture2d->GetTexture2DRHI(), 0 );
 		GRHI->SetSamplerState( InDeviceContextRHI, pixelShader->GetPixelShader(), GRHI->CreateSamplerState( texture2d->GetSamplerStateInitialiser() ), 0 );
@@ -44,8 +45,9 @@ FORCEINLINE const tchar* GetSceneSDGName( ESceneDepthGroup SDG )
 	}
 }
 
-FSceneRenderer::FSceneRenderer( FSceneView* InSceneView )
-	: sceneView( InSceneView )
+FSceneRenderer::FSceneRenderer( FSceneView* InSceneView, class FScene* InScene /* = nullptr */ )
+	: scene( InScene )
+	, sceneView( InSceneView )
 {}
 
 void FSceneRenderer::BeginRenderViewTarget( FViewportRHIParamRef InViewportRHI )
@@ -62,14 +64,21 @@ void FSceneRenderer::BeginRenderViewTarget( FViewportRHIParamRef InViewportRHI )
 	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
 
 	// Build visible primitives on all SDGs
-	GWorld->GetScene()->BuildSDGs( *sceneView );
+	if ( scene )
+	{
+		scene->BuildSDGs( *sceneView );
+	}
 }
 
 void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 {
+	if ( !scene )
+	{
+		return;
+	}
+
 	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 	EShowFlags					showFlags	= sceneView->GetShowFlags();
-	FScene*						scene		= ( FScene* )GWorld->GetScene();
 
 	// Render scene layers
 	{
@@ -106,6 +115,13 @@ void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 				SCOPED_DRAW_EVENT( EventSprites, DEC_SPRITE, TEXT( "Sprites" ) );
 				SDG.spriteDrawList.Draw( immediateContext, *sceneView );
 			}
+
+			// Draw dynamic meshes
+			if ( showFlags & SHOW_DynamicElements && SDG.dynamicMeshElements.GetNum() > 0 )
+			{
+				SCOPED_DRAW_EVENT( EventDynamicElements, DEC_SIMPLEELEMENTS, TEXT( "Dynamic elements" ) );
+				SDG.dynamicMeshElements.Draw( immediateContext, *sceneView );
+			}
 		}
 	}
 }
@@ -115,7 +131,10 @@ void FSceneRenderer::FinishRenderViewTarget( FViewportRHIParamRef InViewportRHI 
 	SCOPED_DRAW_EVENT( EventFinishRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Finish Render View Target" ) );
 
 	// Clear all SDGs on finish of the scene render
-	GWorld->GetScene()->ClearSDGs();
+	if ( scene )
+	{
+		scene->ClearSDGs();
+	}
 
 	FBaseDeviceContextRHI*					immediateContext	= GRHI->GetImmediateContext();
 	FTexture2DRHIRef						sceneColorTexture	= GSceneRenderTargets.GetSceneColorTexture();

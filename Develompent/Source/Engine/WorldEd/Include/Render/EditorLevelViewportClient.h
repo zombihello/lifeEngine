@@ -60,7 +60,7 @@ public:
 	 * @brief Set viewport type
 	 * @param InViewportType		Viewport type
 	 */
-	void SetViewportType( ELevelViewportType InViewportType );
+	virtual void SetViewportType( ELevelViewportType InViewportType );
 
 	/**
 	 * @brief Get viewport type
@@ -90,16 +90,17 @@ protected:
 	 * @param InViewport		Viewport
 	 * @return Return scene view
 	 */
-	class FSceneView* CalcSceneView( FViewport* InViewport );
+	virtual class FSceneView* CalcSceneView( FViewport* InViewport );
 
 	/**
 	 * @brief Get background color
 	 * @return Return background color
 	 */
-	FColor GetBackgroundColor() const;
+	virtual FColor GetBackgroundColor() const;
 
 	bool						bSetListenerPosition;	/**< Is need sets the listener position */
 	bool						bIsTracking;			/**< Is mouse tracking */
+	bool						bIgnoreInput;			/**< Is need ignore input events */
 	ELevelViewportType			viewportType;			/**< Viewport type */	
 	FVector						viewLocation;			/**< Viewport location */	
 	FRotator					viewRotation;			/**< Viewport orientation. Valid only for perspective projections */

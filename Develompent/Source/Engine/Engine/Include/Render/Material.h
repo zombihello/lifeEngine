@@ -19,6 +19,7 @@
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/Shaders/Shader.h"
 #include "Render/Texture.h"
+#include "Render/Shaders/BasePassShader.h"
 #include "Core.h"
 
 /**
@@ -64,18 +65,6 @@ public:
 	virtual void Serialize( class FArchive& InArchive ) override;
 
 	/**
-	 * Set pixel shader
-	 *
-	 * @param[in] InShaderMetaType Meta info about shader
-	 */
-	FORCEINLINE void SetShader( const class FShaderMetaType& InShaderMetaType )
-	{
-		check( InShaderMetaType.GetFrequency() < SF_NumDrawFrequencies );
-		shadersType[ InShaderMetaType.GetFrequency() ] = ( class FShaderMetaType* ) &InShaderMetaType;
-		isNeedUpdateShaderMap = true;
-	}
-
-	/**
 	 * Set scalar parameter value
 	 *
 	 * @param[in] InParameterName Parameter name
@@ -84,6 +73,7 @@ public:
 	FORCEINLINE void SetScalarParameterValue( const std::wstring& InParameterName, float InValue )
 	{
 		scalarParameters[ InParameterName ] = InValue;
+		MarkDirty();
 	}
 
 	/**
@@ -95,6 +85,7 @@ public:
 	FORCEINLINE void SetTextureParameterValue( const std::wstring& InParameterName, class FTexture2D* InValue )
 	{
 		textureParameters[ InParameterName ] = InValue;
+		MarkDirty();
 	}
 
 	/**
@@ -106,6 +97,7 @@ public:
 	FORCEINLINE void SetVectorParameterValue( const std::wstring& InParameterName, const FVector4D& InValue )
 	{
 		vectorParameters[ InParameterName ] = InValue;
+		MarkDirty();
 	}
 
 	/**
@@ -115,6 +107,10 @@ public:
 	 */
 	FORCEINLINE void SetTwoSided( bool InIsTwoSided )
 	{
+		if ( isTwoSided != InIsTwoSided )
+		{
+			MarkDirty();
+		}
 		isTwoSided = InIsTwoSided;
 	}
 
@@ -125,6 +121,11 @@ public:
 	 */
 	FORCEINLINE void SetWireframe( bool InIsWireframe )
 	{
+		if ( isWireframe != InIsWireframe )
+		{
+			MarkDirty();
+		}
+
 		isWireframe = InIsWireframe;
 	}
 
@@ -144,6 +145,7 @@ public:
 			usage &= ~MU_StaticMesh;
 		}
 
+		MarkDirty();
 		isNeedUpdateShaderMap = true;
 	}
 
@@ -163,6 +165,7 @@ public:
 			usage &= ~MU_Sprite;
 		}
 
+		MarkDirty();
 		isNeedUpdateShaderMap = true;
 	}
 
@@ -173,6 +176,11 @@ public:
 	 */
 	FORCEINLINE void SetUsageFlags( uint32 InUsageFlags )
 	{
+		if ( usage != InUsageFlags )
+		{
+			MarkDirty();
+		}
+
 		usage = InUsageFlags;
 		isNeedUpdateShaderMap = true;
 	}
@@ -187,11 +195,11 @@ public:
 	}
 
 	/**
-	 * Get pixel shader
+	 * Get shader
 	 *
 	 * @param[in] InVertexFactoryHash Vertex factory hash
 	 * @param[in] InShaderFrequency Shader frequency
-	 * @return Return pointer to pixel shader
+	 * @return Return pointer to shader
 	 */
 	FShader* GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency );
 
@@ -201,9 +209,18 @@ public:
 	 * @param InShaderFrequency		Shader frequency
 	 * @return Return shader meta type, if not exist return NULL
 	 */
-	FORCEINLINE class FShaderMetaType* GetShaderType( EShaderFrequency InShaderFrequency )
+	FORCEINLINE class FShaderMetaType* GetShaderType( EShaderFrequency InShaderFrequency ) const
 	{
 		check( InShaderFrequency < SF_NumDrawFrequencies );
+		static class FShaderMetaType*		shadersType[ SF_NumDrawFrequencies ] =
+		{			
+			&FBasePassVertexShader::staticType,		// SF_Vertex
+			nullptr,								// SF_Hull
+			nullptr,								// SF_Domain
+			&FBasePassPixelShader::staticType,		// SF_Pixel
+			nullptr									// SF_Geometry
+		};
+
 		return shadersType[ InShaderFrequency ];
 	}
 
@@ -271,15 +288,14 @@ private:
 	 */
 	typedef std::unordered_map< uint64, std::vector< FShader* > >				FMeshShaderMap;
 
-	bool												isNeedUpdateShaderMap;					/**< Is need update shader map */
-	bool												isTwoSided;								/**< Is two sided material */
-	bool												isWireframe;							/**< Is wireframe material */
-	uint32												usage;									/**< Usage flags (see EMaterialUsage) */
-	class FShaderMetaType*								shadersType[ SF_NumDrawFrequencies ];	/**< Array shader types for material */
-	FMeshShaderMap										shaderMap;								/**< Shader map for material */
-	std::unordered_map< std::wstring, float >			scalarParameters;						/**< Array scalar parameters */
-	std::unordered_map< std::wstring, FVector4D >		vectorParameters;						/**< Vector parameters */
-	std::unordered_map< std::wstring, FTexture2DRef >	textureParameters;						/**< Array texture parameters */
+	bool												isNeedUpdateShaderMap;	/**< Is need update shader map */
+	bool												isTwoSided;				/**< Is two sided material */
+	bool												isWireframe;			/**< Is wireframe material */
+	uint32												usage;					/**< Usage flags (see EMaterialUsage) */
+	FMeshShaderMap										shaderMap;				/**< Shader map for material */
+	std::unordered_map< std::wstring, float >			scalarParameters;		/**< Array scalar parameters */
+	std::unordered_map< std::wstring, FVector4D >		vectorParameters;		/**< Vector parameters */
+	std::unordered_map< std::wstring, FTexture2DRef >	textureParameters;		/**< Array texture parameters */
 };
 
 //

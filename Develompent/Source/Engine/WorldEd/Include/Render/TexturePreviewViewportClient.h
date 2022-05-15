@@ -9,19 +9,14 @@
 #ifndef TEXTUREPREVIEWVIEWPORTCLIENT_H
 #define TEXTUREPREVIEWVIEWPORTCLIENT_H
 
-#include "Math/Color.h"
-#include "Math/Rotator.h"
-#include "Render/Viewport.h"
-#include "Render/Scene.h"
-#include "Render/EditorCommonDrawHelper.h"
-#include "System/WindowEvent.h"
+#include "Render/EditorLevelViewportClient.h"
 #include "Render/Texture.h"
 
 /**
  * @ingroup WorldEd
  * @brief Preview texture viewport client
  */
-class FTexturePreviewViewportClient : public FViewportClient
+class FTexturePreviewViewportClient : public FEditorLevelViewportClient
 {
 public:
 	/**
@@ -136,15 +131,14 @@ protected:
 	 * @param InViewport		Viewport
 	 * @return Return scene view
 	 */
-	class FSceneView* CalcSceneView( FViewport* InViewport );
+	virtual class FSceneView* CalcSceneView( FViewport* InViewport ) override;
 
 	/**
 	 * @brief Get background color
 	 * @return Return background color
 	 */
-	FColor GetBackgroundColor() const;
+	virtual FColor GetBackgroundColor() const override;
 
-	EShowFlags			showFlags;			/**< Show flags */
 	FTexture2DRef		texture2D;			/**< Texture 2D to preview */
 	FColor				colorChannelMask;	/**< Color channel mask */
 };

@@ -6,7 +6,9 @@
 #include <qinputdialog.h>
 #include <qfiledialog.h>
 #include <qdesktopservices.h>
+#include <qclipboard.h>
 
+#include "Misc/CoreGlobals.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
@@ -19,11 +21,13 @@
 #include "System/EditorEngine.h"
 #include "System/AssetDataBase.h"
 #include "System/AssetsImport.h"
+#include "System/BaseFileSystem.h"
+#include "Misc/TableOfContents.h"
 #include "Render/Material.h"
 #include "WorldEd.h"
 #include "ui_ContentBrowserWidget.h"
 
-static FORCEINLINE void DeleteDir( const QString& InRouteDir )
+static FORCEINLINE void DeleteDir( const QString& InRouteDir, bool& OutIsDirtyTOC, std::vector< QString >& OutUsedPackage )
 {
 	QDir				dir( InRouteDir );
 	QFile				file;
@@ -33,10 +37,30 @@ static FORCEINLINE void DeleteDir( const QString& InRouteDir )
 	{
 		if ( it->isDir() )
 		{
-			DeleteDir( it->absoluteFilePath() );
+			DeleteDir( it->absoluteFilePath(), OutIsDirtyTOC, OutUsedPackage );
 		}
 		else
 		{
+			// If this package, we remove entry from TOC file
+			if ( it->suffix() == FILE_PACKAGE_EXTENSION )
+			{
+				std::wstring		enginePath = appQtAbsolutePathToEngine( it->absoluteFilePath() );
+				
+				// We try unload package for remove unused assets
+				GPackageManager->UnloadPackage( enginePath );
+
+				// If package still used, we skip him
+				if ( GPackageManager->IsPackageUsed( enginePath ) )
+				{
+					OutUsedPackage.push_back( it->baseName() );
+					continue;
+				}
+
+				// Else we remove entry from TOC file
+				GTableOfContents.RemoveEntry( enginePath );
+				OutIsDirtyTOC = true;
+			}
+
 			QFile::setPermissions( it->absoluteFilePath(), QFile::ReadOwner | QFile::WriteOwner );
 			QFile::remove( it->absoluteFilePath() );
 		}
@@ -100,36 +124,6 @@ static FORCEINLINE QMessageBox::StandardButton ShowDeleteAssetMessageBox( QWidge
 	return QMessageBox::warning( InParent, InTitle, finalText, QMessageBox::Cancel | QMessageBox::Ok );
 }
 
-static FORCEINLINE QMessageBox::StandardButton ShowMessageBoxWithList( QWidget* InParent, const QString& InTitle, const QString& InText, const QString& InListName, const std::vector< QString >& InList, bool InIsError = false, uint32 InMaxSizeList = 3 )
-{
-	QString		resultList;
-
-	// Forming a list
-	for ( uint32 index = 0, count = InList.size(); index < count; ++index )
-	{
-		resultList += InList[ index ];
-		if ( count > InMaxSizeList && index + 1 == InMaxSizeList )
-		{
-			resultList += "<br>...<br>";
-			break;
-		}
-		else
-		{
-			resultList += "<br>";
-		}
-	}
-
-	QString		finalText = QString::fromStdWString( FString::Format( TEXT( "%s<br><br><b>%s:</b><br>%s" ), InText.toStdWString().c_str(), InListName.toStdWString().c_str(), resultList.toStdWString().c_str() ) );
-	if ( InIsError )
-	{
-		return QMessageBox::critical( InParent, InTitle, finalText, QMessageBox::Ok );
-	}
-	else
-	{
-		return QMessageBox::warning( InParent, InTitle, finalText, QMessageBox::Ok );
-	}
-}
-
 WeContentBrowserWidget::WeContentBrowserWidget( ERootDir InRootDir /* = RD_Game */, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
 	, ui( new Ui::WeContentBrowserWidget() )
@@ -141,6 +135,7 @@ WeContentBrowserWidget::WeContentBrowserWidget( ERootDir InRootDir /* = RD_Game 
 	// Connect to slots
 	connect( ui->treeView_contentBrowser, SIGNAL( OnClickedInEmptySpace() ), this, SLOT( OnContentBrowserClickedInEmptySpace() ) );
 	connect( ui->treeView_contentBrowser, SIGNAL( OnSelectedPackage( FPackage* ) ), this, SLOT( OnContentBrowserSelectedPackage( FPackage* ) ) );
+	connect( ui->listView_packageBrowser, SIGNAL( OnSelectedAsset( const std::wstring& ) ), this, SLOT( OnListViewPackageBrowserSelectedAsset( const std::wstring& ) ) );
 }
 
 WeContentBrowserWidget::~WeContentBrowserWidget()
@@ -150,15 +145,80 @@ WeContentBrowserWidget::~WeContentBrowserWidget()
 
 void WeContentBrowserWidget::SetRootDir( ERootDir InRootDir )
 {
-	/** List of root directories */
-	static std::wstring		GRootDirs[] =
-	{
-		FString::Format( TEXT( "%s/Content/" ), appGameDir().c_str() ),				// RD_Game
-		FString::Format( TEXT( "%s/Engine/Content/" ), appBaseDir().c_str() )		// RD_Engine
-	};
-
 	check( InRootDir >= 0 && InRootDir < RD_Max );
-	ui->treeView_contentBrowser->SetRootDir( QFileInfo( QString::fromStdWString( GRootDirs[ InRootDir ] ) ).dir() );
+	
+	std::wstring		rootDirectory;
+	switch ( InRootDir )
+	{
+	case RD_Engine:		rootDirectory = GAssetDataBase.GetEngineContentDir();	break;
+	case RD_Game:		rootDirectory = GAssetDataBase.GetGameContentDir();		break;
+
+	default:
+		appErrorf( TEXT( "Unsupported type root directory '0x%X'" ), InRootDir );
+		rootDirectory = TEXT( "Unknown" );
+	}
+
+	ui->treeView_contentBrowser->SetRootDir( QFileInfo( QString::fromStdWString( rootDirectory ) ).dir() );
+}
+
+void WeContentBrowserWidget::ShowAsset( const std::wstring& InAssetReference )
+{
+	// If asset reference is not valid, we nothing do
+	if ( InAssetReference.empty() )
+	{
+		return;
+	}
+
+	// Parse asset reference
+	EAssetType		assetType;
+	std::wstring	packageName;
+	std::wstring	assetName;
+	bool			bResult = ParseReferenceToAsset( InAssetReference, packageName, assetName, assetType );
+	if ( !bResult )
+	{
+		return;
+	}
+
+	// Find path to package from TOC table and load him
+	FPackageRef		package;
+	std::wstring	packagePath;
+	{
+		packagePath = GTableOfContents.GetPackagePath( packageName );
+		if ( !packagePath.empty() )
+		{
+			package = GPackageManager->LoadPackage( packagePath );
+		}
+	}
+
+	// If package not loaded, we exit from method
+	if ( !package )
+	{
+		return;
+	}
+
+	// Find index of asset in package
+	bool	bFinded		= false;
+	uint32	indexAsset	= 0;
+	uint32	numAssets	= package->GetNumAssets();
+	for ( indexAsset = 0; indexAsset < numAssets; ++indexAsset )
+	{
+		FAssetInfo		assetInfo;
+		package->GetAssetInfo( indexAsset, assetInfo );
+
+		if ( assetInfo.type == assetType && assetInfo.name == assetName )
+		{
+			bFinded = true;
+			break;
+		}
+	}
+
+	// If we finded asset - show in content browser
+	if ( bFinded )
+	{
+		ui->treeView_contentBrowser->SetCurrentFile( QString::fromStdWString( packagePath ) );
+		ui->listView_packageBrowser->SetPackage( package );
+		ui->listView_packageBrowser->setCurrentIndex( ui->listView_packageBrowser->model()->index( indexAsset, 0 ) );
+	}
 }
 
 void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequested( QPoint InPoint )
@@ -263,6 +323,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	QAction			actionReimportWithNewFile( "Reimport With New File", this );
 	QAction			actionDeleteFile( "Delete", this );
 	QAction			actionRenameFile( "Rename", this );
+	QAction			actionCopyReference( "Copy Reference", this );
 	contextMenu.addMenu( &menuCreate );
 	contextMenu.addSeparator();
 	contextMenu.addAction( &actionImport );
@@ -271,6 +332,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	contextMenu.addSeparator();
 	contextMenu.addAction( &actionDeleteFile );
 	contextMenu.addAction( &actionRenameFile );
+	contextMenu.addAction( &actionCopyReference );
 
 	const bool		bExistCurrentPackage				= currentPackage;
 	const bool		bValidItem							= modelIndex.isValid();
@@ -293,6 +355,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	actionReimportWithNewFile.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems && bExistSupportedReimportAssetType );	//   Not all assets can be imported
 	actionDeleteFile.setEnabled( bExistCurrentPackage && bValidItem );																			// } Disable actions if item is not valid
 	actionRenameFile.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems );												//   Disable actions if selected more of one item
+	actionCopyReference.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems );												//
 
 	// Connect to signal of a actions
 	connect( &actionImport, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_Import() ) );
@@ -301,6 +364,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	connect( &actionCreateMaterial, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_CreateMaterial() ) );
 	connect( &actionDeleteFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_DeleteAsset() ) );
 	connect( &actionRenameFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_RenameAsset() ) );
+	connect( &actionCopyReference, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_CopyReferenceToAsset() ) );
 	contextMenu.exec( QCursor::pos() );
 }
 
@@ -703,6 +767,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_delete()
 	QFileSystemModel*				fileSystemModel		= ui->treeView_contentBrowser->GetFileSystemModel();
 	FPackageRef						currentPackage		= ui->listView_packageBrowser->GetPackage();
 	QString							filesForDelete;
+	bool							bDirtyTOC			= false;
 
 	// If we not press 'ok' in message box - exit from method
 	if ( ShowDeleteFileMessageBox( this, "Warning", "Is need delete selected files?", modelIndexList, fileSystemModel ) != QMessageBox::Ok )
@@ -711,23 +776,56 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_delete()
 	}
 
 	// Delete all selected files
+	std::vector< QString >		usedPackages;
 	for ( uint32 index = 0, count = modelIndexList.length(); index < count; ++index )
 	{
 		QFileInfo		fileInfo = fileSystemModel->fileInfo( modelIndexList[ index ] );
 		if ( fileInfo.isDir() )
 		{
-			DeleteDir( fileInfo.absoluteFilePath() );
+			DeleteDir( fileInfo.absoluteFilePath(), bDirtyTOC, usedPackages );
 		}
 		else
 		{
+			// If this package, we remove entry from TOC file
+			if ( fileInfo.suffix() == FILE_PACKAGE_EXTENSION )
+			{
+				std::wstring	enginePath = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
+				
+				// We try unload package for remove unused assets
+				GPackageManager->UnloadPackage( enginePath );
+
+				// If package still used, we skip him
+				if ( GPackageManager->IsPackageUsed( enginePath ) )
+				{
+					usedPackages.push_back( fileInfo.baseName() );
+					continue;
+				}
+				
+				// Else we remove entry from TOC file
+				GTableOfContents.RemoveEntry( enginePath );
+				bDirtyTOC = true;
+
+				// If this is  package and him opened in package browser, we close it
+				if ( currentPackage && enginePath == currentPackage->GetFileName() )
+				{
+					ui->listView_packageBrowser->SetPackage( nullptr );
+				}
+			}
+
 			QFile( fileInfo.absoluteFilePath() ).remove();
 		}
+	}
 
-		// If this is  package and him opened in package browser, we close it
-		if ( currentPackage && fileInfo.suffix() == FILE_PACKAGE_EXTENSION && appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) == currentPackage->GetFileName() )
-		{
-			ui->listView_packageBrowser->SetPackage( nullptr );
-		}
+	// If TOC file is dirty, we serialize him to cache
+	if ( bDirtyTOC )
+	{
+		GAssetDataBase.SerializeTOC( true );
+	}
+
+	// If we have used package - print message
+	if ( !usedPackages.empty() )
+	{
+		ShowMessageBoxWithList( this, "Warning", "The following packages in using and cannot be delete. Close all assets from this package will allow them to be deleted", "Packages", usedPackages );
 	}
 }
 
@@ -737,6 +835,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 	QFileSystemModel*	fileSystemModel		= ui->treeView_contentBrowser->GetFileSystemModel();
 	QFileInfo			fileInfo			= fileSystemModel->fileInfo( ui->treeView_contentBrowser->currentIndex() );
 	QString				newFileName;
+	bool				bDirtyTOC			= false;
 
 	// Get new file name
 	if ( fileInfo.isDir() )
@@ -765,11 +864,23 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 	else
 	{
 		QFile			file;
+		QString			newAbsolutePath = fileInfo.absolutePath() + "/" + newFileName + "." + fileInfo.suffix();
 
 		// If this is package need call SetName in him
 		if ( fileInfo.suffix() == FILE_PACKAGE_EXTENSION )
 		{
 			std::wstring	pathPackage				= appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
+			
+			// We try unload package for remove unused assets
+			GPackageManager->UnloadPackage( pathPackage );
+
+			// If package still used, we skip him
+			if ( GPackageManager->IsPackageUsed( pathPackage ) )
+			{
+				QMessageBox::warning( this, "Warning", QString::fromStdWString( FString::Format( TEXT( "The package <b>'%s'</b> in using and cannot be delete. Close all assets from this package will allow them to be deleted" ), fileInfo.baseName().toStdWString().c_str() ) ), QMessageBox::Ok );
+				return;
+			}
+
 			bool			bIsNeedUnloadPackage	= !GPackageManager->IsPackageLoaded( pathPackage );
 			FPackageRef		package					= GPackageManager->LoadPackage( pathPackage );
 
@@ -791,6 +902,11 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 			package->SetName( newFileName.toStdWString() );
 			package->Save( package->GetFileName() );
 
+			// Update TOC file
+			GTableOfContents.RemoveEntry( package->GetGUID() );
+			GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), appQtAbsolutePathToEngine( newAbsolutePath ) );
+			bDirtyTOC = true;
+
 			// If need unload package - do it
 			if ( bIsNeedUnloadPackage )
 			{
@@ -798,7 +914,13 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 			}
 		}
 
-		file.rename( fileInfo.absoluteFilePath(), fileInfo.absolutePath() + "/" + newFileName + "." + fileInfo.suffix() );
+		file.rename( fileInfo.absoluteFilePath(), newAbsolutePath );
+	}
+
+	// If TOC file is dirty, we serialize him to cache
+	if ( bDirtyTOC )
+	{
+		GAssetDataBase.SerializeTOC( true );
 	}
 }
 
@@ -865,6 +987,10 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createPackag
 	std::wstring	fullPath	= appQtAbsolutePathToEngine( dir.absolutePath() + "/" + packageName + "." FILE_PACKAGE_EXTENSION );
 	FPackageRef		package		= GPackageManager->LoadPackage( fullPath, true );
 	package->Save( fullPath );
+
+	// Update TOC file and serialize him
+	GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), package->GetFileName() );
+	GAssetDataBase.SerializeTOC( true );
 }
 
 void WeContentBrowserWidget::OnContentBrowserClickedInEmptySpace()
@@ -938,4 +1064,34 @@ void WeContentBrowserWidget::OnPackageBrowserChangedAsset( FAsset* InAsset )
 {
 	ui->treeView_contentBrowser->repaint();
 	ui->listView_packageBrowser->repaint();
+}
+
+void WeContentBrowserWidget::on_listView_packageBrowser_CopyReferenceToAsset()
+{
+	// Getting selected items and current package
+	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
+	if ( !package )
+	{
+		return;
+	}
+
+	check( modelIndexList.length() == 1 );		// Support rename only first asset
+	FAssetInfo		assetInfo;
+	package->GetAssetInfo( modelIndexList[ 0 ].row(), assetInfo );
+
+	// Make reference to asset
+	std::wstring		assetReference;
+	bool	bResult = MakeReferenceToAsset( package->GetName(), assetInfo.name, assetInfo.type, assetReference );
+	if ( !bResult )
+	{
+		return;
+	}
+
+	QApplication::clipboard()->setText( QString::fromStdWString( assetReference ) );
+}
+
+void WeContentBrowserWidget::OnListViewPackageBrowserSelectedAsset( const std::wstring& InAssetReference )
+{
+	selectedAssetReference = InAssetReference;
 }

@@ -28,6 +28,7 @@ WeMainWindow::WeMainWindow( QWidget* InParent /* = nullptr */ )
 	, ui( new Ui::MainWindow() )
 	, dockManager( nullptr )
 	, logWidget( nullptr )
+	, contentBrowserWidget( nullptr )
 {
 	// Init Qt UI
 	ui->setupUi( this );
@@ -90,7 +91,7 @@ void WeMainWindow::InitUI()
 	ui->menuWindows->insertAction( firstActionMenuView, dockWidget->toggleViewAction() );
 
 	// Content browser
-	WeContentBrowserWidget*		contentBrowserWidget = new WeContentBrowserWidget( WeContentBrowserWidget::RD_Game, this );
+	contentBrowserWidget		= new WeContentBrowserWidget( WeContentBrowserWidget::RD_Game, this );
 	ads::CDockAreaWidget*		contentBrowserAreaWidget = CreateDockWidget( ads::CenterDockWidgetArea, "Content Browser", contentBrowserWidget, actorPropertiesAreaWidget, true, &dockWidget );
 	ui->menuWindows->insertAction( firstActionMenuView, dockWidget->toggleViewAction() );
 

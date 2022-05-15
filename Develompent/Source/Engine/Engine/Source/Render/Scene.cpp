@@ -12,6 +12,10 @@ FSceneView::FSceneView( const FMatrix& InProjectionMatrix, const FMatrix& InView
 	frustum.Update( viewProjectionMatrix );
 }
 
+FScene::~FScene()
+{
+	Clear();
+}
 
 void FScene::AddPrimitive( class LPrimitiveComponent* InPrimitive )
 {

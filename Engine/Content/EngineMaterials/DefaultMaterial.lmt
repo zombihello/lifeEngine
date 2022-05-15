@@ -12,7 +12,7 @@
 		"TextureParameters": [
 			{
 				"Name": 			"diffuse",
-				"AssetReference":	"EngineTextures:DefaultTexture_C"
+				"AssetReference":	"Texture2D'EngineTextures:DefaultTexture_C"
 			}
 		]
 	}

@@ -12,6 +12,7 @@
 #include "System/AudioDevice.h"
 #include "System/EditorEngine.h"
 #include "System/InputSystem.h"
+#include "System/World.h"
 #include "EngineDefines.h"
 
 /**
@@ -57,6 +58,7 @@ static const EShowFlags		GShowFlags[ LVT_Max ] =
 FEditorLevelViewportClient::FEditorLevelViewportClient( ELevelViewportType InViewportType /* = LVT_Perspective */ )
 	: bSetListenerPosition( true )
 	, bIsTracking( false )
+	, bIgnoreInput( false )
 	, viewportType( InViewportType )
 	, viewLocation( FMath::vectorZero )
 	, viewRotation( FMath::rotatorZero )
@@ -109,7 +111,7 @@ void FEditorLevelViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRH
 {
 	check( IsInRenderingThread() );
 	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	FSceneRenderer				sceneRenderer( InSceneView );
+	FSceneRenderer				sceneRenderer( InSceneView, ( FScene* )GWorld->GetScene() );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	
 	// Draw grid
@@ -139,6 +141,11 @@ void FEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportT
 
 void FEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
+	if ( bIgnoreInput )
+	{
+		return;
+	}
+
 	switch ( InWindowEvent.type )
 	{
 		// Event of mouse pressed
