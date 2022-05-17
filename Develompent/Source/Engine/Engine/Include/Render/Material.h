@@ -251,6 +251,15 @@ public:
 	 */
 	bool GetVectorParameterValue( const std::wstring& InParameterName, FVector4D& OutValue ) const;
 
+#if WITH_EDITOR
+	/**
+	 * Get dependent assets
+	 * @param OutDependentAssets	Output set of dependent assets
+	 * @param InFilter				Filter of getting assets by type. If setted AT_Unknown return all types
+	 */
+	virtual void GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter = AT_Unknown ) const override;
+#endif // WITH_EDITOR
+
 	/**
 	 * Is enabled two sided mode
 	 * @return Return true if two sided mode enabled, else return false

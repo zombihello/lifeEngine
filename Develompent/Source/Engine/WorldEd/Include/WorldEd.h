@@ -16,6 +16,7 @@
 #include <qmessagebox.h>
 
 #include "Misc/Types.h"
+#include "System/Delegate.h"
 
 /**
  * @ingroup WorldEd
@@ -60,5 +61,19 @@ FORCEINLINE std::wstring appQtAbsolutePathToEngine( const QString& InPath )
  * @param InMaxSizeList	Max show items in list
  */
 QMessageBox::StandardButton ShowMessageBoxWithList( class QWidget* InParent, const QString& InTitle, const QString& InText, const QString& InListName, const std::vector< QString >& InList, bool InIsError = false, uint32 InMaxSizeList = 3 );
+
+/**
+ * @ingroup WorldEd
+ * Delegates used by the editor
+ */
+struct FEditorDelegates
+{
+	/**
+	 * @brief Delegate for called event when asset deleted
+	 */
+	DECLARE_MULTICAST_DELEGATE( FOnAssetsDeleted, std::vector< class FAsset* >& );
+
+	static FOnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
+};
 
 #endif // !WORLDED_H

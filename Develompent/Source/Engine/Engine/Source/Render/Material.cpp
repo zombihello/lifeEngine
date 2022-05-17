@@ -171,3 +171,22 @@ bool FMaterial::GetVectorParameterValue( const std::wstring& InParameterName, FV
 	OutValue = itFind->second;
 	return true;
 }
+
+#if WITH_EDITOR
+void FMaterial::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
+{
+	// Fill set of dependent assets
+	if ( InFilter == AT_Unknown || InFilter == AT_Texture2D )
+	{
+		for ( auto itTexture = textureParameters.begin(), itTextureEnd = textureParameters.end(); itTexture != itTextureEnd; ++itTexture )
+		{
+			if ( !itTexture->second )
+			{
+				continue;
+			}
+
+			OutDependentAssets.insert( itTexture->second );
+		}
+	}
+}
+#endif // WITH_EDITOR

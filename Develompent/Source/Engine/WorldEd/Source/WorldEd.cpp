@@ -20,6 +20,11 @@
 #include "EngineLoop.h"
 #include "WorldEd.h"
 
+/**
+ * Globals
+ */
+FEditorDelegates::FOnAssetsDeleted		FEditorDelegates::onAssetsDeleted;
+
 void QtMessageOutput( QtMsgType InType, const QMessageLogContext& InContext, const QString& InMessage )
 {
 	std::wstring		message = InMessage.toStdWString();

@@ -161,6 +161,13 @@ class FAsset : public FRefCounted
 public:
 	friend class FPackage;
 
+#if WITH_EDITOR
+	/**
+	 * @brief Typedef of dependent assets
+	 */
+	typedef std::unordered_set< FAssetRef, FAssetRef::FHashFunction >		FSetDependentAssets;
+#endif // WITH_EDITOR
+
 	/**
 	 * Constructor
 	 * 
@@ -262,6 +269,13 @@ public:
 	{
 		return sourceFile;
 	}
+
+	/**
+	 * Get dependent assets
+	 * @param OutDependentAssets	Output set of dependent assets
+	 * @param InFilter				Filter of getting assets by type. If setted AT_Unknown return all types
+	 */
+	virtual void GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter = AT_Unknown ) const;
 #endif // WITH_EDITOR
 
 protected:
@@ -272,14 +286,14 @@ protected:
 	void MarkDirty();
 
 private:
-	bool				bDirty;			/**< Is asset is dirty */
-	class FPackage*		package;		/**< The package where the asset is located */
-	std::wstring		name;			/**< Name asset */
-	FGuid				guid;			/**< GUID of asset */
-	EAssetType			type;			/**< Asset type */
+	bool						bDirty;				/**< Is asset is dirty */
+	class FPackage*				package;			/**< The package where the asset is located */
+	std::wstring				name;				/**< Name asset */
+	FGuid						guid;				/**< GUID of asset */
+	EAssetType					type;				/**< Asset type */
 
 #if WITH_EDITOR
-	std::wstring		sourceFile;		/**< Path to source file */
+	std::wstring				sourceFile;			/**< Path to source file */
 #endif // WITH_EDITOR
 };
 

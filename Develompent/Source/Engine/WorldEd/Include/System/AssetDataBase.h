@@ -69,11 +69,7 @@ private:
 	 * Add asset to data base
 	 * @param InAsset		Asset
 	 */
-	FORCEINLINE void AddAsset( FAsset* InAsset )
-	{
-		checkMsg( InAsset && InAsset->GetPackage(), TEXT( "For add asset to data base must be valid InAsset and containing in package" ) );
-		loadedAssetsMap[ InAsset->GetPackage() ].push_back( InAsset );
-	}
+	void AddAsset( FAsset* InAsset );
 
 	/**
 	 * Remove asset from data base

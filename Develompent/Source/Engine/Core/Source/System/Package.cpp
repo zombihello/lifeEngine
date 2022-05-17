@@ -118,6 +118,11 @@ void FAsset::MarkDirty()
 	}
 }
 
+#if WITH_EDITOR
+void FAsset::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
+{}
+#endif // WITH_EDITOR
+
 FAssetReference FAsset::GetAssetReference() const
 {
 	return FAssetReference( type, guid, package ? package->GetGUID() : FGuid() );

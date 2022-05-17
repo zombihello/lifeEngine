@@ -3,6 +3,7 @@
 #include "System/BaseFileSystem.h"
 #include "System/AssetDataBase.h"
 #include "System/SplashScreen.h"
+#include "WorldEd.h"
 
 void FAssetDataBase::Init()
 {
@@ -19,6 +20,12 @@ void FAssetDataBase::Init()
 	}
 }
 
+void FAssetDataBase::AddAsset( FAsset* InAsset )
+{
+	checkMsg( InAsset && InAsset->GetPackage(), TEXT( "For add asset to data base must be valid InAsset and containing in package" ) );
+	loadedAssetsMap[ InAsset->GetPackage() ].push_back( InAsset );
+}
+
 void FAssetDataBase::RemoveAsset( FAsset* InAsset )
 {
 	check( InAsset && InAsset->GetPackage() );
@@ -27,6 +34,9 @@ void FAssetDataBase::RemoveAsset( FAsset* InAsset )
 	{
 		return;
 	}
+
+	// Broadcast event of deleting asset
+	FEditorDelegates::onAssetsDeleted.Broadcast( std::vector< FAsset* >{ InAsset } );
 
 	// Remove asset from data base
 	for ( auto itAsset = itPackage->second.begin(), itAssetEnd = itPackage->second.end(); itAsset != itAssetEnd; ++itAsset )
@@ -46,6 +56,20 @@ void FAssetDataBase::RemoveAssets( FPackage* InPackage )
 	if ( itPackage == loadedAssetsMap.end() )
 	{
 		return;
+	}
+
+	// Broadcast event of deleting asset
+	{
+		uint32					index = 0;
+		std::vector< FAsset* >	assetsToDelete;
+		assetsToDelete.resize( itPackage->second.size() );
+		
+		for ( auto itAsset = itPackage->second.begin(), itAssetEnd = itPackage->second.end(); itAsset != itAssetEnd; ++itAsset, ++index )
+		{
+			assetsToDelete[ index ] = *itAsset;
+		}
+
+		FEditorDelegates::onAssetsDeleted.Broadcast( assetsToDelete );
 	}
 
 	// Remove all package assets

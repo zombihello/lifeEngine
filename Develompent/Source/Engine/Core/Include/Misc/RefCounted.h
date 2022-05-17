@@ -17,7 +17,7 @@
  * @ingroup Core
  * @brief Object reference counting class
  */
-class FRefCounted
+class LE_DEPRECATED( 0.4.0, "FRefCounted is deprecated, use TSharedPtr and TWeakPtr." ) FRefCounted
 {
 public:
 	/**
