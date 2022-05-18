@@ -17,7 +17,7 @@
  * @brief Reference-counting pointer class
  */
 template< typename PtrType >
-class LE_DEPRECATED( 0.4.0, "TRefCountPtr is deprecated, use TSharedPtr and TWeakPtr." ) TRefCountPtr
+class TRefCountPtr
 {
 public:
 	/**

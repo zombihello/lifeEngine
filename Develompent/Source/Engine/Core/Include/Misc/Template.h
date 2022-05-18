@@ -31,6 +31,14 @@
 
 /**
  * @ingroup Core
+ * @brief TRemoveReference<type> will remove any references from a type.
+ */
+template <typename T> struct TRemoveReference		{ typedef T Type; };
+template <typename T> struct TRemoveReference<T& >	{ typedef T Type; };
+template <typename T> struct TRemoveReference<T&&>	{ typedef T Type; };
+
+/**
+ * @ingroup Core
  * @brief Find the maximum between two numbers
  * 
  * @param[in] InA First value
@@ -97,6 +105,26 @@ FORCEINLINE void Swap( TType& InOutA, TType& InOutB )
 	const TType		temp = InOutA;
 	InOutA = InOutB;
 	InOutB = temp;
+}
+
+/**
+ * @ingroup Core
+ * @brief MoveTemp will cast a reference to an rvalue reference.
+ * This is lifeEngine equivalent of std::move except that it will not compile when passed an rvalue or
+ * const object, because we would prefer to be informed when MoveTemp will have no effect
+ * 
+ * @param InObj		Object
+ */
+template <typename T>
+FORCEINLINE typename TRemoveReference<T>::Type&& MoveTemp( T&& InObj )
+{
+	typedef typename TRemoveReference<T>::Type CastType;
+
+	// Validate that we're not being passed an rvalue or a const object - the former is redundant, the latter is almost certainly a mistake
+	//static_assert( TIsLValueReferenceType<T>::Value, "MoveTemp called on an rvalue" );
+	//static_assert( !TAreTypesEqual<CastType&, const CastType&>::Value, "MoveTemp called on a const object" );
+
+	return ( CastType&& )InObj;
 }
 
 #endif // !TEMPLATE_H

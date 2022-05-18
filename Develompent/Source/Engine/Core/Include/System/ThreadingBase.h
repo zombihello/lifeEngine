@@ -9,6 +9,7 @@
 #ifndef THREADINGBASE_H
 #define THREADINGBASE_H
 
+#include "Core.h"
 #include "CoreDefines.h"
 #include "Misc/Types.h"
 
@@ -60,6 +61,86 @@ extern FORCEINLINE int32 appInterlockedIncrement( volatile int32* InValue );
  * @return Returns the minified value
  */
 extern FORCEINLINE int32 appInterlockedDecrement( volatile int32* InValue );
+
+/**
+ * @ingroup Core
+ * Atomically adds the amount to the value pointed to and returns the old
+ * value to the caller
+ * 
+ * @param InValue	Value
+ * @param InAmount	Amount
+ * @return Return the old value to the caller
+ */
+extern FORCEINLINE int32 appInterlockedAdd( volatile int32* InValue, int32 InAmount );
+
+/**
+ * @ingroup Core
+ * Atomically swaps two values returning the original value to the caller
+ * 
+ * @param InValue		Value
+ * @param InExchange	Exchange
+ * @return Returning the original value to the caller
+ */
+extern FORCEINLINE int32 appInterlockedExchange( volatile int32* InValue, int32 InExchange );
+
+/**
+ * @ingroup Core
+ * Atomically swaps two values returning the original value to the caller
+ *
+ * @param InValue		Value
+ * @param InExchange	Exchange
+ * @return Returning the original value to the caller
+ */
+extern FORCEINLINE int64 appInterlockedExchange64( volatile int64* InValue, int64 InExchange );
+
+/**
+ * @ingroup Core
+ * Atomically compares the value to comperand and replaces with the exchange
+ * value if they are equal and returns the original value
+ * 
+ * @param InDest		Distention
+ * @param InExchange	Exchange
+ * @param InComperand	Comperand
+ * @return Returns the original value
+ */
+extern FORCEINLINE int32 appInterlockedCompareExchange( volatile int32* InDest, int32 InExchange, int32 InComperand );
+
+/**
+ * @ingroup Core
+ * Atomically compares the value to comperand and replaces with the exchange
+ * value if they are equal and returns the original value
+ *
+ * @param InDest		Distention
+ * @param InExchange	Exchange
+ * @param InComperand	Comperand
+ * @return Returns the original value
+ */
+extern FORCEINLINE int64 appInterlockedCompareExchange64( volatile int64* InDest, int64 InExchange, int64 InComperand );
+
+/**
+ * @ingroup Core
+ * Atomically compares the pointer to comperand and replaces with the exchange
+ * pointer if they are equal and returns the original value
+ * 
+ * @param InDest		Distention
+ * @param InExchange	Exchange
+ * @param InComperand	Comperand
+ * @return Returns the original value
+ */
+extern FORCEINLINE void* appInterlockedCompareExchangePointer( void** InDest, void* InExchange, void* InComperand );
+
+/**
+ * Atomically or's the value pointed to with the value and returns that to the caller
+ */
+/**
+ * @ingroup Core
+ * Atomically or's the value pointed to with the value and returns that to the caller
+ * 
+ * @param InDest	Distention
+ * @param InValue	Value
+ * @return Return that to the caller
+ */
+extern FORCEINLINE int32 appInterlockedOr( volatile int32* InDest, int32 InValue );
 
 /**
  * @ingroup Core

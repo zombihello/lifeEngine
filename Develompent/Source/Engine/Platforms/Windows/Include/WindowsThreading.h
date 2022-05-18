@@ -21,6 +21,41 @@ FORCEINLINE int32 appInterlockedDecrement( volatile int32* InValue )
 	return ( int32 )InterlockedDecrement( ( LPLONG )InValue );
 }
 
+FORCEINLINE int32 appInterlockedAdd( volatile int32* InValue, int32 InAmount )
+{
+	return ( int32 )InterlockedExchangeAdd( ( LPLONG )InValue, ( LONG )InAmount );
+}
+
+FORCEINLINE int32 appInterlockedExchange( volatile int32* InValue, int32 InExchange )
+{
+	return ( int32 )InterlockedExchange( ( LPLONG )InValue, ( LONG )InExchange );
+}
+
+FORCEINLINE int64 appInterlockedExchange64( volatile int64* InValue, int64 InExchange )
+{
+	return ( int64 )InterlockedExchange64( InValue, InExchange );
+}
+
+FORCEINLINE int32 appInterlockedCompareExchange( volatile int32* InDest, int32 InExchange, int32 InComperand )
+{
+	return ( int32 )InterlockedCompareExchange( ( LPLONG )InDest, ( LONG )InExchange, ( LONG )InComperand );
+}
+
+FORCEINLINE int64 appInterlockedCompareExchange64( volatile int64* InDest, int64 InExchange, int64 InComperand )
+{
+	return ( int64 )InterlockedCompareExchange64( InDest, InExchange, InComperand );
+}
+
+FORCEINLINE void* appInterlockedCompareExchangePointer( void** InDest, void* InExchange, void* InComperand )
+{
+	return InterlockedCompareExchangePointer( InDest, InExchange, InComperand );
+}
+
+FORCEINLINE int32 appInterlockedOr( volatile int32* InDest, int32 InValue )
+{
+	return ( int32 )InterlockedOr( ( LPLONG )InDest, ( LONG )InValue );
+}
+
 FORCEINLINE uint32 appGetCurrentThreadId()
 {
 	return GetCurrentThreadId();
