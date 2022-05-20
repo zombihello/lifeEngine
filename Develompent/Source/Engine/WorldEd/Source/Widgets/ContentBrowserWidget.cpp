@@ -324,6 +324,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	QAction			actionDeleteFile( "Delete", this );
 	QAction			actionRenameFile( "Rename", this );
 	QAction			actionCopyReference( "Copy Reference", this );
+	QAction			actionShowReferences( "Show References", this );
 	contextMenu.addMenu( &menuCreate );
 	contextMenu.addSeparator();
 	contextMenu.addAction( &actionImport );
@@ -333,6 +334,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	contextMenu.addAction( &actionDeleteFile );
 	contextMenu.addAction( &actionRenameFile );
 	contextMenu.addAction( &actionCopyReference );
+	contextMenu.addAction( &actionShowReferences );
 
 	const bool		bExistCurrentPackage				= currentPackage;
 	const bool		bValidItem							= modelIndex.isValid();
@@ -356,6 +358,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	actionDeleteFile.setEnabled( bExistCurrentPackage && bValidItem );																			// } Disable actions if item is not valid
 	actionRenameFile.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems );												//   Disable actions if selected more of one item
 	actionCopyReference.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems );												//
+	actionShowReferences.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems );											//
 
 	// Connect to signal of a actions
 	connect( &actionImport, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_Import() ) );
@@ -365,6 +368,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	connect( &actionDeleteFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_DeleteAsset() ) );
 	connect( &actionRenameFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_RenameAsset() ) );
 	connect( &actionCopyReference, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_CopyReferenceToAsset() ) );
+	connect( &actionShowReferences, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_ShowReferencesAssets() ) );
 	contextMenu.exec( QCursor::pos() );
 }
 
@@ -387,8 +391,8 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 	{
 		std::wstring							errorMessage;
 		QString									path = selectedAssets[ index ];
-		FAssetRef								asset;
-		FHelperAssetImporter::EImportResult		importResult = FHelperAssetImporter::Import( path, package, asset, errorMessage, bReplaceAll && !bSkipAll );
+		TWeakPtr<FAsset>						assetPtr;
+		FHelperAssetImporter::EImportResult		importResult = FHelperAssetImporter::Import( path, package, assetPtr, errorMessage, bReplaceAll && !bSkipAll );
 
 		// Show message if not setted flags bReplaceAll and bSkipAll
 		if ( !bReplaceAll && !bSkipAll && importResult == FHelperAssetImporter::IR_AlreadyExist )
@@ -400,7 +404,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 				bReplaceAll = true;
 
 			case QMessageBox::Yes:
-				importResult = FHelperAssetImporter::Import( selectedAssets[ index ], package, asset, errorMessage, true );
+				importResult = FHelperAssetImporter::Import( selectedAssets[ index ], package, assetPtr, errorMessage, true );
 				break;
 
 			case QMessageBox::NoToAll:
@@ -449,14 +453,14 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Reimport()
 		FAssetInfo		assetInfo;
 		package->GetAssetInfo( idAsset, assetInfo );
 
-		std::wstring	errorMessage;
-		FAssetRef		asset = package->Find( assetInfo.name );
-		bool			bResult = FHelperAssetImporter::Reimport( asset, errorMessage );
+		std::wstring		errorMessage;
+		TSharedPtr<FAsset>	assetRef = package->Find( assetInfo.name );
+		bool				bResult = FHelperAssetImporter::Reimport( assetRef, errorMessage );
 
 		// If failed reimport asset - add error message to array
 		if ( !bResult )
 		{
-			errorAssets.push_back( QString::fromStdWString( asset->GetAssetName() ) + " : " + QString::fromStdWString( errorMessage ) );
+			errorAssets.push_back( QString::fromStdWString( assetRef->GetAssetName() ) + " : " + QString::fromStdWString( errorMessage ) );
 		}
 	}
 
@@ -505,15 +509,15 @@ void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
 	}
 
 	// Reimport asset
-	std::wstring	errorMessage;
-	FAssetRef		asset = package->Find( assetInfo.name );
-	asset->SetAssetSourceFile( appQtAbsolutePathToEngine( newSourceFile ) );
-	bool			bResult = FHelperAssetImporter::Reimport( asset, errorMessage );
+	std::wstring			errorMessage;
+	TSharedPtr<FAsset>		assetRef = package->Find( assetInfo.name );
+	assetRef->SetAssetSourceFile( appQtAbsolutePathToEngine( newSourceFile ) );
+	bool			bResult = FHelperAssetImporter::Reimport( assetRef, errorMessage );
 	
 	// If reimport asset is failed - show error message box
 	if ( !bResult )
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Failed reimport asset <b>'%s'</b> from new source file <b>'%s'</b>.<br><br>Error: %s" ), asset->GetAssetName().c_str(), newSourceFile.toStdWString().c_str(), errorMessage.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Failed reimport asset <b>'%s'</b> from new source file <b>'%s'</b>.<br><br>Error: %s" ), assetRef->GetAssetName().c_str(), newSourceFile.toStdWString().c_str(), errorMessage.c_str() ) ) );
 	}
 }
 
@@ -547,9 +551,9 @@ void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
 	}
 
 	// Create material with asset name and add to package
-	FMaterialRef		material = new FMaterial();
-	material->SetAssetName( assetName.toStdWString() );
-	package->Add( material );
+	TSharedPtr<FMaterial>		materialRef = MakeSharedPtr<FMaterial>();
+	materialRef->SetAssetName( assetName.toStdWString() );
+	package->Add( materialRef );
 	ui->listView_packageBrowser->Refresh();
 }
 
@@ -627,14 +631,14 @@ void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 	}
 
 	// Find asset in package
-	FAssetRef		asset = package->Find( assetInfo.name );
-	if ( !asset )
+	TSharedPtr<FAsset>		assetRef = package->Find( assetInfo.name );
+	if ( !assetRef )
 	{
 		return;
 	}
 
 	// Add change asset name
-	asset->SetAssetName( newAssetName.toStdWString() );
+	assetRef->SetAssetName( newAssetName.toStdWString() );
 }
 
 void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_SavePackage()
@@ -1039,28 +1043,28 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 	FPackageRef			package = ui->listView_packageBrowser->GetPackage();
 	FAssetInfo			assetInfo;
 	package->GetAssetInfo( InModelIndex.row(), assetInfo );
-	FAssetRef			asset = package->Find( assetInfo.name );
+	TSharedPtr<FAsset>	assetRef = package->Find( assetInfo.name );
 
 	// Open editor for each asset type
 	switch ( assetInfo.type )
 	{
 	case AT_Texture2D:
 	{
-		WeTextureEditorWindow*		textureEditorWindow = new WeTextureEditorWindow( ( FTexture2DRef )asset, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), textureEditorWindow->windowTitle().toStdWString().c_str(), asset->GetAssetName().c_str() ) ), textureEditorWindow, true );
-		connect( textureEditorWindow, SIGNAL( OnChangedAsset( FAsset* ) ), this, SLOT( OnPackageBrowserChangedAsset( FAsset* ) ) );
+		WeTextureEditorWindow*		textureEditorWindow = new WeTextureEditorWindow( assetRef, this );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), textureEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), textureEditorWindow, true );
+		connect( textureEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<FAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& ) ) );
 		break;
 	}
 	
 	case AT_Material:
-		WeMaterialEditorWindow*		materialEditorWindow = new WeMaterialEditorWindow( ( FMaterialRef )asset, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), materialEditorWindow->windowTitle().toStdWString().c_str(), asset->GetAssetName().c_str() ) ), materialEditorWindow, true );
-		connect( materialEditorWindow, SIGNAL( OnChangedAsset( FAsset* ) ), this, SLOT( OnPackageBrowserChangedAsset( FAsset* ) ) );
+		WeMaterialEditorWindow*		materialEditorWindow = new WeMaterialEditorWindow( assetRef, this );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), materialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), materialEditorWindow, true );
+		connect( materialEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<FAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& ) ) );
 		break;
 	}
 }
 
-void WeContentBrowserWidget::OnPackageBrowserChangedAsset( FAsset* InAsset )
+void WeContentBrowserWidget::OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& InAsset )
 {
 	ui->treeView_contentBrowser->repaint();
 	ui->listView_packageBrowser->repaint();
@@ -1076,7 +1080,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_CopyReferenceToAsset()
 		return;
 	}
 
-	check( modelIndexList.length() == 1 );		// Support rename only first asset
+	check( modelIndexList.length() == 1 );		// Support copy reference only first asset
 	FAssetInfo		assetInfo;
 	package->GetAssetInfo( modelIndexList[ 0 ].row(), assetInfo );
 
@@ -1094,4 +1098,42 @@ void WeContentBrowserWidget::on_listView_packageBrowser_CopyReferenceToAsset()
 void WeContentBrowserWidget::OnListViewPackageBrowserSelectedAsset( const std::wstring& InAssetReference )
 {
 	selectedAssetReference = InAssetReference;
+}
+
+void WeContentBrowserWidget::on_listView_packageBrowser_ShowReferencesAssets()
+{
+	// Getting selected items and current package
+	/*FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
+	if ( !package )
+	{
+		return;
+	}
+
+	check( modelIndexList.length() == 1 );		// Support rename only first asset
+	FAssetInfo		assetInfo;
+	package->GetAssetInfo( modelIndexList[ 0 ].row(), assetInfo );
+
+	// If asset is not loaded, we not possible show references to this asset
+	// TODO BS yehor.pohulika - Maybe in future need add caching references assets for showing without loading him
+	if ( !assetInfo.data )
+	{
+		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Not possible show references to asset <b>'%s'</b>, because him not loaded" ), assetInfo.name.c_str() ) ) );
+		return;
+	}
+
+	// Getting all references
+	const FAsset::FSetReferencesAssets&		referencesAssets = assetInfo.data->GetReferencesAssets();
+
+	// Convert to human readable text for showing
+	std::vector< QString >					textReferencesAssets;
+	for ( auto itRef = referencesAssets.begin(), itRefEnd = referencesAssets.end(); itRef != itRefEnd; ++itRef )
+	{
+		std::wstring		result;
+		MakeReferenceToAsset( *itRef, result );
+		textReferencesAssets.push_back( QString::fromStdWString( result ) );
+	}
+
+	// Show list
+	ShowMessageBoxWithList( this, "References To Asset", QString::fromStdWString( FString::Format( TEXT( "List of references to asset <b>'%s'</b>" ), assetInfo.name.c_str() ) ), "Assets", textReferencesAssets, false, -1);*/
 }

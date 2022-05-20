@@ -160,7 +160,7 @@ public:
 	 * Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	virtual void SetAudioBank( FAudioBank* InAudioBank ) override;
+	virtual void SetAudioBank( const FAudioBankPtr& InAudioBank ) override;
 
 	/**
 	 * Is looped
@@ -179,7 +179,7 @@ private:
 	 * Open bank for stream
 	 * @param InAudioBank Audio bank
 	 */
-	void OpenBank( FAudioBank* InAudioBank );
+	void OpenBank( const FAudioBankPtr& InAudioBank );
 
 	/**
 	 * Close bank

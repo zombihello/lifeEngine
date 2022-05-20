@@ -32,7 +32,7 @@ public:
 	 * @param InTexture2D	Texture 2D to edit
 	 * @param InParent		Parent widget
 	 */
-	WeTextureEditorWindow( FTexture2D* InTexture2D, QWidget* InParent = nullptr );
+	WeTextureEditorWindow( const TSharedPtr<FTexture2D>& InTexture2D, QWidget* InParent = nullptr );
 
 	/**
 	 * Destructor
@@ -60,7 +60,7 @@ signals:
 	 * 
 	 * @param InAsset		Changed asset
 	 */
-	void OnChangedAsset( FAsset* InAsset );
+	void OnChangedAsset( const TSharedPtr<FAsset>& InAsset );
 
 private:
 	/**
@@ -89,7 +89,7 @@ private:
 
 	bool									bInit;								/**< Is inited window */
 	Ui::WeTextureEditorWindow*				ui;									/**< Qt UI */
-	FTexture2DRef							texture2D;							/**< Editable asset */
+	TSharedPtr<FTexture2D>					texture2D;							/**< Editable asset */
 	class FTexturePreviewViewportClient*	viewportClient;						/**< Viewport client */
 	class QComboBox*						comboBox_addressU;					/**< Combobox for select address mode by U */
 	class QComboBox*						comboBox_addressV;					/**< Combobox for select address mode by V */

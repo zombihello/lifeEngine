@@ -108,7 +108,7 @@ public:
 	 * @brief Set material
 	 * @param InMaterial Material
 	 */
-	FORCEINLINE void SetMaterial( FMaterial* InMaterial )
+	FORCEINLINE void SetMaterial( const TWeakPtr<FMaterial> InMaterial )
 	{
 		sprite->SetMaterial( InMaterial );
 		bIsDirtyDrawingPolicyLink = true;
@@ -138,7 +138,7 @@ public:
 	 * @brief Get material
 	 * @return Return pointer to material. If not setted returning nullptr
 	 */
-	FORCEINLINE FMaterialRef GetMaterial() const
+	FORCEINLINE TWeakPtr<FMaterial> GetMaterial() const
 	{
 		return sprite->GetMaterial();
 	}

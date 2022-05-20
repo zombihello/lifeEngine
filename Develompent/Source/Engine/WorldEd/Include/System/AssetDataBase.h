@@ -66,35 +66,10 @@ public:
 
 private:
 	/**
-	 * Add asset to data base
-	 * @param InAsset		Asset
-	 */
-	void AddAsset( FAsset* InAsset );
-
-	/**
-	 * Remove asset from data base
-	 * @param InAsset		Asset
-	 */
-	void RemoveAsset( FAsset* InAsset );
-
-	/**
-	 * Remove all assets of package
-	 * @param InPackage		Package
-	 */
-	void RemoveAssets( FPackage* InPackage );
-
-	/**
 	 * Add TOC entries
 	 * @param InRootDir		Root directory
 	 */
 	void AddTOCEntries( const std::wstring& InRootDir );
-
-	/**
-	 * Typedef of map loaded assets
-	 */
-	typedef std::unordered_map< FPackage*, std::list< FAssetRef > >		FLoadedAssetsMap;
-
-	FLoadedAssetsMap		loadedAssetsMap;		/**< Map of loaded assets */
 };
 
 #endif // !ASSETDATABASE_H

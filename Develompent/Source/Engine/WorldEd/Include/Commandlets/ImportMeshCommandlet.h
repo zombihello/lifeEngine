@@ -78,7 +78,7 @@ public:
 	 * @param InAssetName Asset name for new mesh
 	 * @return Return converted static mesh, if failed returning false
 	 */
-	FStaticMeshRef ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName );
+	TSharedPtr<FStaticMesh> ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName );
 
 	/**
 	 * Get supported meshes extensions

@@ -33,7 +33,7 @@ struct FTMXTileset
 	uint32							lastGID;		/**< Last ID of tile in set */
 	FVector2D						tileSize;		/**< Size of tile */
 	FVector2D						tileOffset;		/**< Offset of tile */
-	FMaterialRef					material;		/**< Material of tileset */
+	FMaterialPtr					material;		/**< Material of tileset */
 	std::vector< FRectFloat >		textureRects;	/**< Array of rects with tiles */
 };
 
@@ -66,7 +66,7 @@ public:
 	 * @param InName		Name of texture. If is empty string, name getting from path
 	 * @return Return pointer to converted texture
 	 */
-	FTexture2DRef ConvertTexture2D( const std::wstring& InPath, const std::wstring& InName = TEXT( "" ) );
+	TSharedPtr<FTexture2D> ConvertTexture2D( const std::wstring& InPath, const std::wstring& InName = TEXT( "" ) );
 
 	/**
 	 * Convert audio bank
@@ -75,7 +75,7 @@ public:
 	 * @param InName		Name of audio bank. If is empty string, name getting from path
 	 * @return Return pointer to converted audio bank
 	 */
-	FAudioBankRef ConvertAudioBank( const std::wstring& InPath, const std::wstring& InName = TEXT( "" ) );
+	TSharedPtr<FAudioBank> ConvertAudioBank( const std::wstring& InPath, const std::wstring& InName = TEXT( "" ) );
 
 	/**
 	 * Cook audio bank
@@ -84,7 +84,7 @@ public:
 	 * @param OutAudioBank Output cooked audio bank
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	FORCEINLINE bool CookAudioBank( const std::wstring& InAssetRef, FAudioBankRef& OutAudioBank )
+	FORCEINLINE bool CookAudioBank( const std::wstring& InAssetRef, TSharedPtr<FAudioBank>& OutAudioBank )
 	{
 		std::wstring		packageName;
 		std::wstring		assetName;
@@ -121,7 +121,7 @@ public:
 	 * @param OutPhysMaterial Output cooked physics material
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	FORCEINLINE bool CookPhysMaterial( const std::wstring& InAssetRef, FPhysicsMaterialRef& OutPhysMaterial )
+	FORCEINLINE bool CookPhysMaterial( const std::wstring& InAssetRef, TSharedPtr<FPhysicsMaterial>& OutPhysMaterial )
 	{
 		std::wstring		packageName;
 		std::wstring		assetName;
@@ -393,7 +393,7 @@ private:
 	 * @param OutMaterial Output cooked material
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookMaterial( const FResourceInfo& InMaterialInfo, FMaterialRef& OutMaterial );
+	bool CookMaterial( const FResourceInfo& InMaterialInfo, TSharedPtr<FMaterial>& OutMaterial );
 
 	/**
 	 * Cook texture 2D
@@ -402,7 +402,7 @@ private:
 	 * @param OutTexture2D Output cooked texture
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookTexture2D( const FResourceInfo& InTexture2DInfo, FTexture2DRef& OutTexture2D );
+	bool CookTexture2D( const FResourceInfo& InTexture2DInfo, TSharedPtr<FTexture2D>& OutTexture2D );
 
 	/**
 	 * Cook audio bank
@@ -411,7 +411,7 @@ private:
 	 * @param OutAudioBank Output cooked audio bank
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookAudioBank( const FResourceInfo& InAudioBankInfo, FAudioBankRef& OutAudioBank );
+	bool CookAudioBank( const FResourceInfo& InAudioBankInfo, TSharedPtr<FAudioBank>& OutAudioBank );
 
 	/**
 	 * Cook physics material
@@ -420,7 +420,7 @@ private:
 	 * @param OutPhysMaterial Output cooked physics material
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, FPhysicsMaterialRef& OutPhysMaterial );
+	bool CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, TSharedPtr<FPhysicsMaterial>& OutPhysMaterial );
 
 	/**
 	 * Insert resource to list
@@ -466,7 +466,7 @@ private:
 	 * @param InAsset Asset for save
 	 * @return Return true if package saved seccussed, else return false
 	 */
-	bool SaveToPackage( const FResourceInfo& InResourceInfo, FAssetRef InAsset );
+	bool SaveToPackage( const FResourceInfo& InResourceInfo, const TSharedPtr<FAsset>& InAsset );
 
 	FExtensionInfo											extensionInfo;			/**< Info about extensions of output formats */
 	FResourceMap											texturesMap;			/**< All textures */

@@ -66,11 +66,16 @@ public:
 	 */
 	FORCEINLINE void Init( class FVertexFactory* InVertexFactory, const FColor& InWireframeColor = FColor::red, float InDepthBias = 0.f )
 	{
-		FMaterialRef		wireframeMaterial = GEngine->GetDefaultWireframeMaterial();
+		TSharedPtr<FMaterial>		wireframeMaterialRef = GEngine->GetDefaultWireframeMaterial().Pin();
+		if ( !wireframeMaterialRef )
+		{
+			return;
+		}
+
 		wireframeColor		= InWireframeColor;	
-		wireframeMaterial->SetVectorParameterValue( TEXT( "wireframeColor" ), InWireframeColor.ToNormalizedVector4D() );		// TODO: For correct work need implement material instances
+		wireframeMaterialRef->SetVectorParameterValue( TEXT( "wireframeColor" ), InWireframeColor.ToNormalizedVector4D() );		// TODO: For correct work need implement material instances
 		
-		InitInternal( InVertexFactory, wireframeMaterial, InDepthBias );
+		InitInternal( InVertexFactory, wireframeMaterialRef, InDepthBias );
 
 		// Override shaders for wireframe rendering
 		uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();

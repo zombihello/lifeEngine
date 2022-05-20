@@ -140,7 +140,7 @@ public:
 	 * @brief Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	FORCEINLINE void SetAudioBank( FAudioBank* InAudioBank )
+	FORCEINLINE void SetAudioBank( const FAudioBankPtr& InAudioBank )
 	{
 		bank = InAudioBank;
 		source->SetAudioBank( bank );
@@ -173,7 +173,7 @@ public:
 	 * @brief Get audio bank
 	 * @return Return audio bank. If not setted return nullptr
 	 */
-	FORCEINLINE FAudioBankRef GetAudioBank() const
+	FORCEINLINE FAudioBankPtr GetAudioBank() const
 	{
 		return bank;
 	}
@@ -273,7 +273,7 @@ private:
 	float					pitch;						/**< Pitch */
 	float					minDistance;				/**< Min distance */
 	float					attenuation;				/**< Attenuation */
-	FAudioBankRef			bank;						/**< Audio bank */
+	FAudioBankPtr			bank;						/**< Audio bank */
 	FAudioSource*			source;						/**< Audio source */
 	FVector					oldSourceLocation;			/**< Old source location */
 };

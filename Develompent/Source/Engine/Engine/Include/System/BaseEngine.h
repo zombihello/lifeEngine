@@ -73,7 +73,7 @@ public:
 	 * Get default texture
 	 * @return Return default texture
 	 */
-	FORCEINLINE FTexture2DRef GetDefaultTexture() const
+	FORCEINLINE FTexture2DPtr GetDefaultTexture() const
 	{
 		return defaultTexture;
 	}
@@ -82,7 +82,7 @@ public:
 	 * Get default material
 	 * @return Return default material
 	 */
-	FORCEINLINE FMaterialRef GetDefaultMaterial() const
+	FORCEINLINE FMaterialPtr GetDefaultMaterial() const
 	{
 		return defaultMaterial;
 	}
@@ -92,18 +92,18 @@ public:
 	 * Get default wireframe material
 	 * @return Return default wireframe material
 	 */
-	FORCEINLINE FMaterialRef GetDefaultWireframeMaterial() const
+	FORCEINLINE FMaterialPtr GetDefaultWireframeMaterial() const
 	{
 		return defaultWireframeMaterial;
 	}
 #endif // WITH_EDITOR
 
 protected:
-	FTexture2DRef			defaultTexture;					/**< Default texture */
-	FMaterialRef			defaultMaterial;				/**< Default material */
+	FTexture2DPtr			defaultTexture;					/**< Default texture */
+	FMaterialPtr			defaultMaterial;				/**< Default material */
 
 #if WITH_EDITOR
-	FMaterialRef			defaultWireframeMaterial;		/**< Default wireframe material */
+	FMaterialPtr			defaultWireframeMaterial;		/**< Default wireframe material */
 #endif // WITH_EDITOR
 };
 

@@ -39,7 +39,7 @@ public:
 	}
 
 private:
-	std::unordered_map< FAudioBankRef, FAudioBufferRef, FAudioBankRef::FHashFunction >			buffers;		/**< Map of fully loaded banks to buffer */
+	std::unordered_map< FAudioBank*, FAudioBufferRef >		buffers;		/**< Map of fully loaded banks to buffer */
 };
 
 #endif // !AUDIOBUFFERMANAGER_H

@@ -61,8 +61,6 @@ void FPhysicsEngine::Init()
 
 	// Load default physics material
 	{
-		defaultPhysMaterial = new FPhysicsMaterial();
-
 		// Loading default material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
@@ -70,7 +68,7 @@ void FPhysicsEngine::Init()
 			if ( configDefaultPhysMaterial.IsValid() )
 			{
 				std::wstring	pathAsset = configDefaultPhysMaterial.GetString();
-				FAssetRef		asset = GPackageManager->FindAsset( pathAsset );
+				FAssetPtr		asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultPhysMaterial = asset;
@@ -84,6 +82,16 @@ void FPhysicsEngine::Init()
 			{
 				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default physics material in section 'Physics.Physics:DefaultPhysMaterial'" ) );
 			}
+		}
+
+		// If default physics material not loaded we create in virtual package
+		if ( !defaultPhysMaterial.Pin() )
+		{
+			FPackageRef						package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			TSharedPtr<FPhysicsMaterial>	physMaterial = MakeSharedPtr<FPhysicsMaterial>();
+
+			package->Add( physMaterial );
+			defaultPhysMaterial = physMaterial;
 		}
 	}
 
@@ -138,6 +146,6 @@ void FPhysicsEngine::Shutdown()
 {
 	// Free allocated memory
 	GPhysicsScene.Shutdown();
-	defaultPhysMaterial.SafeRelease();
+	defaultPhysMaterial.Reset();
 	FPhysicsInterface::Shutdown();
 }

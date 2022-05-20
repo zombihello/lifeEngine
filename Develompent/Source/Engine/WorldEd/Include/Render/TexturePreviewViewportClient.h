@@ -24,7 +24,7 @@ public:
 	 * 
 	 * @param InTexture2D		Texture 2D to preview
 	 */
-	FTexturePreviewViewportClient( FTexture2D* InTexture2D );
+	FTexturePreviewViewportClient( const TSharedPtr<FTexture2D>& InTexture2D );
 
 	/**
 	 * @brief Draw viewport
@@ -40,13 +40,13 @@ public:
 	 * @param InTexture2D		Texture 2D to preview
 	 * @param InSceneView		Scene view
 	 */
-	void Draw_RenderThread( FViewportRHIRef InViewportRHI, FTexture2D* InTexture2D, class FSceneView* InSceneView );
+	void Draw_RenderThread( FViewportRHIRef InViewportRHI, const TSharedPtr<FTexture2D>& InTexture2D, class FSceneView* InSceneView );
 
 	/**
 	 * @brief Set texture 2D to preview
 	 * @param InTexture2D		Texture 2D to preview
 	 */
-	FORCEINLINE void SetTexture2D( FTexture2D* InTexture2D )
+	FORCEINLINE void SetTexture2D( const TSharedPtr<FTexture2D>& InTexture2D )
 	{
 		texture2D = InTexture2D;
 	}
@@ -139,8 +139,8 @@ protected:
 	 */
 	virtual FColor GetBackgroundColor() const override;
 
-	FTexture2DRef		texture2D;			/**< Texture 2D to preview */
-	FColor				colorChannelMask;	/**< Color channel mask */
+	TSharedPtr<FTexture2D>		texture2D;			/**< Texture 2D to preview */
+	FColor						colorChannelMask;	/**< Color channel mask */
 };
 
 #endif // !TEXTUREPREVIEWVIEWPORTCLIENT_H

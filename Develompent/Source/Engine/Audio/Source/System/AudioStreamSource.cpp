@@ -48,9 +48,10 @@ uint32 FAudioStreamRunnable::Run()
 
 	while ( true )
 	{
+		TSharedPtr<FAudioBank>		audioBankRef = streamSource->audioBank.Pin();		// Lock audio bank for him not unloaded ahead of time
 		{
 			FScopeLock		scopeLock( &streamSource->csStreamData );
-			if ( !streamSource->bIsStreaming )
+			if ( !streamSource->bIsStreaming || !streamSource->audioBank )
 			{
 				break;
 			}
@@ -172,7 +173,7 @@ bool FAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 		}
 
 		//  If we looped - move to start file
-		streamSource->audioBank->SeekBankPCM( streamSource->audioBankHandle, 0 );
+		streamSource->audioBank.Pin()->SeekBankPCM( streamSource->audioBankHandle, 0 );
 	}
 
 	// Fill the buffer if some data was returned
@@ -196,9 +197,10 @@ bool FAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 bool FAudioStreamRunnable::GetData( FChunk& OutData )
 {
 	FScopeLock	scopeLock( &streamSource->csStreamData );
-	uint32		toFill			= samples.size();
-	uint64		currentOffset	= streamSource->audioBank->GetOffsetBankPCM( streamSource->audioBankHandle );
-	uint64		numSamples		= streamSource->audioBankInfo.numSamples;
+	TSharedPtr<FAudioBank>		audioBankRef	= streamSource->audioBank.Pin();
+	uint32						toFill			= samples.size();
+	uint64						currentOffset	= audioBankRef->GetOffsetBankPCM( streamSource->audioBankHandle );
+	uint64						numSamples		= streamSource->audioBankInfo.numSamples;
 
 	// If there are less samples left than the buffer size, we count how many samples need to be read
 	if ( currentOffset + toFill > numSamples )
@@ -208,7 +210,7 @@ bool FAudioStreamRunnable::GetData( FChunk& OutData )
 
 	// Fill the chunk parameters
 	OutData.samples		= &samples[ 0 ];
-	OutData.numSamples	= streamSource->audioBank->ReadBankPCM( streamSource->audioBankHandle, &samples[ 0 ], toFill );
+	OutData.numSamples	= audioBankRef->ReadBankPCM( streamSource->audioBankHandle, &samples[ 0 ], toFill );
 	currentOffset		+= OutData.numSamples;
 
 	// Check if we have stopped obtaining samples or reached either the EOF or the loop end point
@@ -297,9 +299,10 @@ void FAudioStreamSource::Stop()
 	}
 
 	// Move to the beginning
-	if ( audioBankHandle )
+	TSharedPtr<FAudioBank>		audioBankRef = audioBank.Pin();
+	if ( audioBankHandle && audioBankRef )
 	{
-		audioBank->SeekBankPCM( audioBankHandle, 0 );
+		audioBankRef->SeekBankPCM( audioBankHandle, 0 );
 	}
 }
 
@@ -308,7 +311,7 @@ void FAudioStreamSource::SetLoop( bool InIsLoop )
 	bIsLoop = InIsLoop;
 }
 
-void FAudioStreamSource::OpenBank( FAudioBank* InAudioBank )
+void FAudioStreamSource::OpenBank( const FAudioBankPtr& InAudioBank )
 {
 	// If already opened bank - close
 	if ( audioBankHandle )
@@ -317,20 +320,21 @@ void FAudioStreamSource::OpenBank( FAudioBank* InAudioBank )
 	}
 
 	// If new bank is nullptr - exit from method
-	if ( !InAudioBank )
+	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.Pin();
+	if ( !audioBankRef )
 	{
 		return;
 	}
 
 	// Open bank
-	audioBankHandle = InAudioBank->OpenBank( audioBankInfo );
+	audioBankHandle = audioBankRef->OpenBank( audioBankInfo );
 	bIsStreaming = false;
 
 	// Check if the format is valid
 	if ( audioBankInfo.format == SF_Unknown )
 	{
 		CloseBank();
-		LE_LOG( LT_Warning, LC_Audio, TEXT( "Unsupported sample format in audio bank '%s'" ), audioBank->GetAssetName().c_str() );
+		LE_LOG( LT_Warning, LC_Audio, TEXT( "Unsupported sample format in audio bank '%s'" ), audioBankRef->GetAssetName().c_str() );
 		return;
 	}
 }
@@ -343,11 +347,17 @@ void FAudioStreamSource::CloseBank()
 	}
 
 	Stop();
-	audioBank->CloseBank( audioBankHandle );
+	{
+		TSharedPtr<FAudioBank>		audioBankRef = audioBank.Pin();
+		if ( audioBankRef )
+		{
+			audioBankRef->CloseBank( audioBankHandle );
+		}
+	}
 	audioBankHandle = nullptr;
 }
 
-void FAudioStreamSource::SetAudioBank( FAudioBank* InAudioBank )
+void FAudioStreamSource::SetAudioBank( const FAudioBankPtr& InAudioBank )
 {
 	// If bank opened - close
 	if ( audioBankHandle )

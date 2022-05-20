@@ -41,7 +41,7 @@ void FWireframeVertexShader::Init( const FShaderCache::FShaderCacheItem& InShade
 	vertexFactoryParameters->Bind( InShaderCacheItem.parameterMap );
 }
 
-void FWireframeVertexShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FMaterial* InMaterialResource ) const
+void FWireframeVertexShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const
 {
 	check( vertexFactoryParameters );
 	vertexFactoryParameters->Set( InDeviceContextRHI, InVertexFactory );
@@ -61,7 +61,7 @@ void FWireframePixelShader::Init( const FShaderCache::FShaderCacheItem& InShader
 	wireframeColorParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "wireframeColor" ) );
 }
 
-void FWireframePixelShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FMaterial* InMaterialResource ) const
+void FWireframePixelShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const
 {
 	check( InMaterialResource );
 	FVector4D		wireframeColor = FColor::black.ToNormalizedVector4D();

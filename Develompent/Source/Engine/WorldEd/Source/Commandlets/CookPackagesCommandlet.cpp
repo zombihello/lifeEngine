@@ -127,7 +127,7 @@ bool LCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 		tmx::Vector2u			tmxTileSize		= tmxTileset.getTileSize();
 		int32					countCulumns	= tmxTilesetSize.x / tmxTileSize.x;
 		int32					countRows		= tmxTilesetSize.y / tmxTileSize.y;
-		FMaterialRef			tilesetMaterial = ( FMaterialRef )GPackageManager->FindAsset( tmxTilesetName, AT_Unknown );
+		TSharedPtr<FMaterial>	tilesetMaterial = GPackageManager->FindAsset( tmxTilesetName, AT_Unknown );
 		if ( !tilesetMaterial )
 		{
 			std::wstring		packageName;
@@ -415,7 +415,7 @@ void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
  * --------------------
  */
 
-bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo, FMaterialRef& OutMaterial )
+bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo, TSharedPtr<FMaterial>& OutMaterial )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking material '%s:%s'" ), InMaterialInfo.packageName.c_str(), InMaterialInfo.filename.c_str() );
 
@@ -535,7 +535,7 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	}
 
 	// Getting texture parameters
-	std::unordered_map< std::wstring, FTexture2DRef >		textureParameters;
+	std::unordered_map< std::wstring, FTexture2DPtr >		textureParameters;
 	{
 		FConfigValue	configVarTextureParameters = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "TextureParameters" ) );
 		if ( configVarTextureParameters.IsValid() )
@@ -545,10 +545,10 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 			std::vector< FConfigValue >		configObjects = configVarTextureParameters.GetArray();
 			for ( uint32 index = 0, count = configObjects.size(); index < count; ++index )
 			{
-				FConfigObject		configObject	= configObjects[ index ].GetObject();
-				std::wstring		name			= configObject.GetValue( TEXT( "Name" ) ).GetString();
-				std::wstring		assetReference	= configObject.GetValue( TEXT( "AssetReference" ) ).GetString();
-				FTexture2DRef		texture			= GPackageManager->FindAsset( assetReference, AT_Unknown );
+				FConfigObject				configObject	= configObjects[ index ].GetObject();
+				std::wstring				name			= configObject.GetValue( TEXT( "Name" ) ).GetString();
+				std::wstring				assetReference	= configObject.GetValue( TEXT( "AssetReference" ) ).GetString();
+				TSharedPtr<FTexture2D>		texture			= GPackageManager->FindAsset( assetReference, AT_Unknown );
 				if ( !texture )
 				{
 					std::wstring		packageName;
@@ -583,7 +583,7 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	}
 
 	// Create material and saving to package
-	OutMaterial = new FMaterial();
+	OutMaterial = MakeSharedPtr<FMaterial>();
 	OutMaterial->SetAssetName( InMaterialInfo.filename );
 	OutMaterial->SetTwoSided( bIsTwoSided );
 	OutMaterial->SetWireframe( bIsWireframe );
@@ -611,7 +611,7 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
  * ----------------------
  */
 
-FTexture2DRef LCookPackagesCommandlet::ConvertTexture2D( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
+TSharedPtr<FTexture2D> LCookPackagesCommandlet::ConvertTexture2D( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
 {
 	// Loading data from image
 	int				numComponents = 0;
@@ -644,22 +644,22 @@ FTexture2DRef LCookPackagesCommandlet::ConvertTexture2D( const std::wstring& InP
 	}
 
 	// Create texture 2D and init him
-	FTexture2DRef		texture2D = new FTexture2D();
-	texture2D->SetAssetName( filename );
-	texture2D->SetAssetSourceFile( InPath );
+	TSharedPtr<FTexture2D>		texture2DRef = MakeSharedPtr<FTexture2D>();
+	texture2DRef->SetAssetName( filename );
+	texture2DRef->SetAssetSourceFile( InPath );
 	{
 		std::vector< byte >		tempData;
 		tempData.resize( sizeX * sizeY * GPixelFormats[ PF_A8R8G8B8 ].blockBytes );
 		memcpy( tempData.data(), data, tempData.size() );
-		texture2D->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
+		texture2DRef->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 	}
 
 	// Clean up all data
 	stbi_image_free( data );
-	return texture2D;
+	return texture2DRef;
 }
 
-bool LCookPackagesCommandlet::CookTexture2D( const FResourceInfo& InTexture2DInfo, FTexture2DRef& OutTexture2D )
+bool LCookPackagesCommandlet::CookTexture2D( const FResourceInfo& InTexture2DInfo, TSharedPtr<FTexture2D>& OutTexture2D )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking texture 2D '%s:%s'" ), InTexture2DInfo.packageName.c_str(), InTexture2DInfo.filename.c_str() );
 	
@@ -698,7 +698,7 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 				continue;
 			}
 
-			FTexture2DRef		texture2D;
+			TSharedPtr<FTexture2D>		texture2D;
 			bool	result = CookTexture2D( itAsset->second, texture2D );
 			if ( !result )
 			{
@@ -718,7 +718,7 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 				continue;
 			}
 
-			FMaterialRef		material;
+			TSharedPtr<FMaterial>		material;
 			bool	result = CookMaterial( itAsset->second, material );
 			if ( !result )
 			{
@@ -738,7 +738,7 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 				continue;
 			}
 
-			FAudioBankRef	audioBank;
+			TSharedPtr<FAudioBank>	audioBank;
 			bool	result = CookAudioBank( itAsset->second, audioBank );
 			if ( !result )
 			{
@@ -758,7 +758,7 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 				continue;
 			}
 
-			FPhysicsMaterialRef		physMaterial;
+			TSharedPtr<FPhysicsMaterial>		physMaterial;
 			bool					result = CookPhysMaterial( itAsset->second, physMaterial );
 			if ( !result )
 			{
@@ -775,10 +775,10 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
  * ----------------------
  */
 
-FAudioBankRef LCookPackagesCommandlet::ConvertAudioBank( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
+TSharedPtr<FAudioBank> LCookPackagesCommandlet::ConvertAudioBank( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
 {
 	// Create audio bank and init him
-	FAudioBankRef		audioBank = new FAudioBank();
+	TSharedPtr<FAudioBank>		audioBankRef = MakeSharedPtr<FAudioBank>();
 
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InName;
@@ -800,13 +800,13 @@ FAudioBankRef LCookPackagesCommandlet::ConvertAudioBank( const std::wstring& InP
 		}
 	}
 
-	audioBank->SetAssetName( filename );
-	audioBank->SetAssetSourceFile( InPath );
-	audioBank->SetSourceOGGFile( InPath );
-	return audioBank;
+	audioBankRef->SetAssetName( filename );
+	audioBankRef->SetAssetSourceFile( InPath );
+	audioBankRef->SetSourceOGGFile( InPath );
+	return audioBankRef;
 }
 
-bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInfo, FAudioBankRef& OutAudioBank )
+bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInfo, TSharedPtr<FAudioBank>& OutAudioBank )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking audio bank '%s:%s'" ), InAudioBankInfo.packageName.c_str(), InAudioBankInfo.filename.c_str() );
 	
@@ -820,7 +820,7 @@ bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInf
  * --------------------
  */
 
-bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, FPhysicsMaterialRef& OutPhysMaterial )
+bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, TSharedPtr<FPhysicsMaterial>& OutPhysMaterial )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking physics material '%s:%s'" ), InPhysMaterialInfo.packageName.c_str(), InPhysMaterialInfo.filename.c_str() );
 	
@@ -840,7 +840,7 @@ bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMater
 	std::wstring	surfaceTypeName = pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Surface" ) ).GetString();
 
 	// Create physics material and saving to package
-	OutPhysMaterial = new FPhysicsMaterial();
+	OutPhysMaterial = MakeSharedPtr<FPhysicsMaterial>();
 	OutPhysMaterial->SetAssetName( InPhysMaterialInfo.filename );
 	OutPhysMaterial->SetStaticFriction( staticFriction );
 	OutPhysMaterial->SetDynamicFriction( dynamicFriction );
@@ -858,7 +858,7 @@ bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMater
  * --------------------
  */
 
-bool LCookPackagesCommandlet::SaveToPackage( const FResourceInfo& InResourceInfo, FAssetRef InAsset )
+bool LCookPackagesCommandlet::SaveToPackage( const FResourceInfo& InResourceInfo, const TSharedPtr<FAsset>& InAsset )
 {
 	std::wstring		outputPackage = FString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
 	FPackageRef			package = GPackageManager->LoadPackage( outputPackage, true );

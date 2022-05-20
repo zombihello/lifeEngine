@@ -146,7 +146,7 @@ bool FMaterial::GetScalarParameterValue( const std::wstring& InParameterName, fl
 	return true;
 }
 
-bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, FTexture2DRef& OutValue ) const
+bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, TSharedPtr<FTexture2D>& OutValue ) const
 {
 	auto		itFind = textureParameters.find( InParameterName );
 	if ( itFind == textureParameters.end() )
@@ -155,7 +155,8 @@ bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, F
 		return false;
 	}
 
-	OutValue = itFind->second ? itFind->second : GPackageManager->FindDefaultAsset( AT_Texture2D );
+	TSharedPtr<FTexture2D>		valueRef = itFind->second.Pin();
+	OutValue = valueRef ? valueRef : GPackageManager->FindDefaultAsset( AT_Texture2D );
 	return itFind->second.IsValid();
 }
 

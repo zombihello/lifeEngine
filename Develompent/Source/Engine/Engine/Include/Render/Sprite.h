@@ -119,7 +119,7 @@ public:
 	 * @brief Set material
 	 * @param InMaterial Material
 	 */
-	FORCEINLINE void SetMaterial( FMaterial* InMaterial )
+	FORCEINLINE void SetMaterial( const TWeakPtr<FMaterial>& InMaterial )
 	{
 		material = InMaterial;
 	}
@@ -137,7 +137,7 @@ public:
 	 * @brief Get material
 	 * @return Return pointer to material. If not setted returning nullptr
 	 */
-	FORCEINLINE FMaterialRef GetMaterial() const
+	FORCEINLINE TWeakPtr<FMaterial> GetMaterial() const
 	{
 		return material;
 	}
@@ -251,7 +251,7 @@ public:
 
 private:
 	TRefCountPtr< FSpriteVertexFactory >	vertexFactory;			/**< Vertex factory */
-	FMaterialRef							material;				/**< Material */
+	TWeakPtr<FMaterial>						material;				/**< Material */
 };
 
 #endif // !SPRITE_H

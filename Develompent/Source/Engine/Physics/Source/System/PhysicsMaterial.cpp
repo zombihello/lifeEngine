@@ -9,12 +9,11 @@ FPhysicsMaterial::FPhysicsMaterial()
 	, restitution( 0.f )
 	, density( 0.f )
 	, surfaceType( ST_Default )
-{
-	handle = FPhysicsInterface::CreateMaterial( this );
-}
+{}
 
 FPhysicsMaterial::~FPhysicsMaterial()
 {
+	onPhysicsMaterialDestroyed.Broadcast( SharedThis( this ) );
 	FPhysicsInterface::ReleaseMaterial( handle );
 }
 
@@ -29,6 +28,6 @@ void FPhysicsMaterial::Serialize( class FArchive& InArchive )
 
 	if ( InArchive.IsLoading() )
 	{
-		FPhysicsInterface::UpdateMaterial( handle, this );
+		FPhysicsInterface::UpdateMaterial( handle, SharedThis( this ) );
 	}
 }

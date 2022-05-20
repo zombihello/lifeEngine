@@ -28,7 +28,7 @@ void FBasePassVertexShader::Init( const FShaderCache::FShaderCacheItem& InShader
     vertexFactoryParameters->Bind( InShaderCacheItem.parameterMap );
 }
 
-void FBasePassVertexShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FMaterial* InMaterialResource ) const
+void FBasePassVertexShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const
 {
     check( vertexFactoryParameters );
     vertexFactoryParameters->Set( InDeviceContextRHI, InVertexFactory );

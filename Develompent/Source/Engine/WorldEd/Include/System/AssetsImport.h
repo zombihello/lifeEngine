@@ -82,7 +82,7 @@ public:
 	 * @param InIsForceImport		Is need replace already exist asset with name
 	 * @return Return imported asset, in case of fail return NULL
 	 */
-	static EImportResult Import( const QString& InPath, FPackage* InPackage, FAssetRef& OutAsset, std::wstring& OutError, bool InIsForceImport = false );
+	static EImportResult Import( const QString& InPath, FPackage* InPackage, TWeakPtr<FAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport = false );
 
 	/**
 	 * Reimport asset
@@ -91,7 +91,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if seccussed reimported, else FALSE
 	 */
-	static bool Reimport( FAsset* InAsset, std::wstring& OutError );
+	static bool Reimport( const TWeakPtr<FAsset>& InAsset, std::wstring& OutError );
 };
 
 /**
@@ -108,7 +108,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return imported texture 2D, if failed return NULL
 	 */
-	static FTexture2DRef Import( const std::wstring& InPath, std::wstring& OutError );
+	static TSharedPtr<FTexture2D> Import( const std::wstring& InPath, std::wstring& OutError );
 
 	/**
 	 * Reimport texture 2D
@@ -117,7 +117,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if seccussed reimported, else return FALSE
 	 */
-	static bool Reimport( FTexture2D* InTexture2D, std::wstring& OutError );
+	static bool Reimport( const TSharedPtr<FTexture2D>& InTexture2D, std::wstring& OutError );
 
 	/**
 	 * Get supported texture extensions
@@ -155,7 +155,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return imported audio bank, if failed return NULL
 	 */
-	static FAudioBankRef Import( const std::wstring& InPath, std::wstring& OutError );
+	static TSharedPtr<FAudioBank> Import( const std::wstring& InPath, std::wstring& OutError );
 
 	/**
 	 * Reimport audio bank
@@ -164,7 +164,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if seccussed reimported, else return FALSE
 	 */
-	static bool Reimport( FAudioBank* InAudioBank, std::wstring& OutError );
+	static bool Reimport( const TSharedPtr<FAudioBank>& InAudioBank, std::wstring& OutError );
 
 	/**
 	 * Get supported audio extensions

@@ -3,6 +3,7 @@
 #include "System/PhysicsEngine.h"
 #include "System/PhysicsBodyInstance.h"
 #include "System/Box2DScene.h"
+#include "System/PhysicsMaterial.h"
 #include "Components/PrimitiveComponent.h"
 
 FBox2DScene::FBox2DScene()
@@ -95,7 +96,7 @@ bool FBox2DScene::LineTraceSingleByChannel( FHitResult& OutHitResult, const FVec
 				{
 					FPhysicsShapeHandleBox2D*		shapeHandle = ( FPhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
 					check( shapeHandle );
-					OutHitResult.physMaterial = shapeHandle->physMaterial;
+					OutHitResult.physMaterial = shapeHandle->physMaterial.Pin();
 				}
 
 				return true;

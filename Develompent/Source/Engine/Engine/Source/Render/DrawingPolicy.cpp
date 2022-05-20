@@ -17,13 +17,14 @@ FMeshDrawingPolicy::FMeshDrawingPolicy()
 FMeshDrawingPolicy::~FMeshDrawingPolicy()
 {}
 
-void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias /* = 0.f */ )
+void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, const FMaterialPtr& InMaterial, float InDepthBias /* = 0.f */ )
 {
-	checkMsg( InVertexFactory && InMaterial, TEXT( "Vertex factory and material must be valid for init drawing policy" ) );
+	TSharedPtr<FMaterial>		materialRef = InMaterial.Pin();
+	checkMsg( InVertexFactory && materialRef, TEXT( "Vertex factory and material must be valid for init drawing policy" ) );
 
 	uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
-	vertexShader	= InMaterial->GetShader( vertexFactoryHash, SF_Vertex );
-	pixelShader		= InMaterial->GetShader( vertexFactoryHash, SF_Pixel );
+	vertexShader	= materialRef->GetShader( vertexFactoryHash, SF_Vertex );
+	pixelShader		= materialRef->GetShader( vertexFactoryHash, SF_Pixel );
 
 	hash			= appMemFastHash( material, InVertexFactory->GetTypeHash() );
 	vertexFactory	= InVertexFactory;
@@ -44,13 +45,21 @@ void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceCo
 void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
 {
 	check( bInit );
-	vertexShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, material );
-	pixelShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, material );
+
+	TSharedPtr<FMaterial>		materialRef = material.Pin();
+	if ( !materialRef )
+	{
+		return;
+	}
+
+	vertexShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, materialRef );
+	pixelShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, materialRef );
 }
 
 void FMeshDrawingPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView )
 {
-	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, FString::Format( TEXT( "Material %s" ), material->GetAssetName().c_str() ).c_str() );
+	TSharedPtr<FMaterial>		materialRef = material.Pin();
+	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, FString::Format( TEXT( "Material %s" ), materialRef ? materialRef->GetAssetName().c_str() : TEXT( "Unloaded" ) ).c_str());
 
 	// If vertex factory not support instancig - draw without it
 	if ( !vertexFactory->SupportsInstancing() )
@@ -100,9 +109,11 @@ FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const
 {
 	if ( !boundShaderState )
 	{
-		check( material && vertexFactory && vertexShader && pixelShader );
+		TSharedPtr<FMaterial>		materialRef = material.Pin();
+		check( materialRef && vertexFactory && vertexShader && pixelShader );
+		
 		boundShaderState = GRHI->CreateBoundShaderState(
-			material->GetAssetName().c_str(),
+			materialRef->GetAssetName().c_str(),
 			vertexFactory->GetDeclaration(),
 			vertexShader->GetVertexShader(),
 			pixelShader->GetPixelShader() );
@@ -113,10 +124,11 @@ FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const
 
 FRasterizerStateRHIRef FMeshDrawingPolicy::GetRasterizerState() const
 {
+	TSharedPtr<FMaterial>		materialRef = material.Pin();
 	const FRasterizerStateInitializerRHI		initializer =
 	{
-		material->IsWireframe() ? FM_Wireframe : FM_Solid,
-		material->IsTwoSided() ? CM_None : CM_CW,
+		materialRef->IsWireframe() ? FM_Wireframe : FM_Solid,
+		materialRef->IsTwoSided() ? CM_None : CM_CW,
 		depthBias,
 		0.f,
 		true

@@ -65,7 +65,7 @@ bool LImportMeshCommandlet::Main( const std::wstring& InCommand )
 	}
 
 	// Convert static mesh
-	FStaticMeshRef		staticMesh = ConvertStaticMesh( srcFilename, nameMesh );
+	TSharedPtr<FStaticMesh>		staticMesh = ConvertStaticMesh( srcFilename, nameMesh );
 	if ( !staticMesh )
 	{
 		return false;
@@ -76,7 +76,7 @@ bool LImportMeshCommandlet::Main( const std::wstring& InCommand )
 	return package->Save( dstFilename );
 }
 
-FStaticMeshRef LImportMeshCommandlet::ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName )
+TSharedPtr<FStaticMesh> LImportMeshCommandlet::ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName )
 {
 	// Loading mesh with help Assimp
 	Assimp::Importer		aiImport;
@@ -104,7 +104,7 @@ FStaticMeshRef LImportMeshCommandlet::ConvertStaticMesh( const std::wstring& InP
 	std::vector< FStaticMeshVertexType >		verteces;
 	std::vector< uint32 >						indeces;
 	std::vector< FStaticMeshSurface >			surfaces;
-	std::vector< FMaterialRef >					materials;
+	std::vector< TWeakPtr<FMaterial> >			materials;
 	for ( auto itRoot = meshes.begin(), itRootEnd = meshes.end(); itRoot != itRootEnd; ++itRoot )
 	{
 		FStaticMeshSurface							surface;
@@ -212,13 +212,13 @@ FStaticMeshRef LImportMeshCommandlet::ConvertStaticMesh( const std::wstring& InP
 	}
 
 	// Serialize static mesh in archive
-	FStaticMeshRef		staticMesh = new FStaticMesh();
-	staticMesh->SetAssetName( InAssetName );
-	staticMesh->SetData( verteces, indeces, surfaces, materials );
+	TSharedPtr<FStaticMesh>		staticMeshRef = MakeSharedPtr<FStaticMesh>();
+	staticMeshRef->SetAssetName( InAssetName );
+	staticMeshRef->SetData( verteces, indeces, surfaces, materials );
 
 	// Clean up all data
 	aiImport.FreeScene();
-	return staticMesh;
+	return staticMeshRef;
 }
 
 void LImportMeshCommandlet::ProcessNode( aiNode* InNode, const aiScene* InScene, FAiMeshesMap& OutMeshes )

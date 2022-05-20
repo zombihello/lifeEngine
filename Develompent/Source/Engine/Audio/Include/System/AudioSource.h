@@ -87,7 +87,7 @@ public:
 	 * Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	virtual void SetAudioBank( FAudioBank* InAudioBank );
+	virtual void SetAudioBank( const FAudioBankPtr& InAudioBank );
 
 	/**
 	 * Set location
@@ -141,7 +141,7 @@ public:
 	 * Get audio bank
 	 * @return Return audio bank. If not setted return nullptr
 	 */
-	virtual FAudioBankRef GetAudioBank() const;
+	virtual FAudioBankPtr GetAudioBank() const;
 
 	/**
 	 * Get location
@@ -159,7 +159,7 @@ public:
 	}
 
 protected:
-	FAudioBankRef		audioBank;		/**< Audio bank */
+	FAudioBankPtr		audioBank;		/**< Audio bank */
 	float				volume;			/**< Volume */
 
 private:
@@ -168,6 +168,18 @@ private:
 	 * @param InIsAudioDeviceMuted Is audio device muted
 	 */
 	void OnAudioDeviceMuted( bool InIsAudioDeviceMuted );
+
+	/**
+	 * On audio buffer is destroyed
+	 * @param InAudioBuffer		Audio buffer
+	 */
+	void OnAudioBufferDestroyed( class FAudioBuffer* InAudioBuffer );
+
+	/**
+	 * On audio buffer is updated
+	 * @param InAudioBuffer		Audio buffer
+	 */
+	void OnAudioBufferUpdated( class FAudioBuffer* InAudioBuffer );
 
 	bool				bMuted;			/**< Is audio source muted */
 	uint32				alHandle;		/**< OpenAL of sound source */

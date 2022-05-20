@@ -60,13 +60,14 @@ QString FHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 	return result;
 }
 
-FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString& InPath, FPackage* InPackage, FAssetRef& OutAsset, std::wstring& OutError, bool InIsForceImport /* = false */ )
+FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString& InPath, FPackage* InPackage, TWeakPtr<FAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport /* = false */ )
 {
 	checkMsg( InPackage, TEXT( "For import package must be valid" ) );
 
-	QFileInfo		fileInfo( InPath );
-	QString			assetName = fileInfo.baseName();
-	std::wstring	fileExtension = fileInfo.suffix().toStdWString();
+	TSharedPtr<FAsset>	assetRef;
+	QFileInfo			fileInfo( InPath );
+	QString				assetName = fileInfo.baseName();
+	std::wstring		fileExtension = fileInfo.suffix().toStdWString();
 
 	// Check on already exist asset with name in package
 	if ( !InIsForceImport && InPackage->IsExist( assetName.toStdWString() ) )
@@ -77,13 +78,13 @@ FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString&
 	// We import texture
 	if ( FHelperAssetImporter::IsSupportedExtension( fileExtension, FTexture2DImporter::GetSupportedExtensions() ) )
 	{
-		OutAsset = FTexture2DImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
+		assetRef = FTexture2DImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
 	}
 
 	// We import audio bank
 	else if ( FHelperAssetImporter::IsSupportedExtension( fileExtension, FAudioBankImporter::GetSupportedExtensions() ) )
 	{
-		OutAsset = FAudioBankImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
+		assetRef = FAudioBankImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
 	}
 
 	// Else this is unknown asset
@@ -95,28 +96,37 @@ FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString&
 	}
 
 	// Add asset to package
-	if ( OutAsset )
+	if ( assetRef )
 	{
-		LE_LOG( LT_Log, LC_Editor, TEXT( "Imported asset '%s' from '%s' to package '%s'" ), OutAsset->GetAssetName().c_str(), InPath.toStdWString().c_str(), InPackage->GetName().c_str() );
-		InPackage->Add( OutAsset );
+		LE_LOG( LT_Log, LC_Editor, TEXT( "Imported asset '%s' from '%s' to package '%s'" ), assetRef->GetAssetName().c_str(), InPath.toStdWString().c_str(), InPackage->GetName().c_str() );
+		InPackage->Add( assetRef );
+		OutAsset = assetRef;
 	}
 	else
 	{
-		LE_LOG( LT_Warning, LC_Editor, TEXT( "Failed import asset '%s' from '%s' to package '%s'. Error: %s" ), OutAsset->GetAssetName().c_str(), InPath.toStdWString().c_str(), InPackage->GetName().c_str(), OutError.c_str() );
+		LE_LOG( LT_Warning, LC_Editor, TEXT( "Failed import asset from '%s' to package '%s'. Error: %s" ), InPath.toStdWString().c_str(), InPackage->GetName().c_str(), OutError.c_str() );
 	}
 
-	return OutAsset ? IR_Seccussed : IR_Error;
+	return assetRef ? IR_Seccussed : IR_Error;
 }
 
-bool FHelperAssetImporter::Reimport( FAsset* InAsset, std::wstring& OutError )
+bool FHelperAssetImporter::Reimport( const TWeakPtr<FAsset>& InAsset, std::wstring& OutError )
 {
 	check( InAsset );
 	bool		bResult = false;
 
-	switch ( InAsset->GetType() )
+	// If asset already is unloaded, we must exit from method
+	TSharedPtr<FAsset>		assetRef = InAsset.Pin();
+	if ( !assetRef )
 	{
-	case AT_Texture2D:		bResult = FTexture2DImporter::Reimport( ( FTexture2D* )InAsset, OutError ); break;
-	case AT_AudioBank:		bResult = FAudioBankImporter::Reimport( ( FAudioBank* )InAsset, OutError ); break;
+		OutError = TEXT( "Asset already is unloaded" );
+		return false;
+	}
+
+	switch ( assetRef->GetType() )
+	{
+	case AT_Texture2D:		bResult = FTexture2DImporter::Reimport( assetRef, OutError ); break;
+	case AT_AudioBank:		bResult = FAudioBankImporter::Reimport( assetRef, OutError ); break;
 	
 	//
 	// Insert your asset type in this place
@@ -130,11 +140,11 @@ bool FHelperAssetImporter::Reimport( FAsset* InAsset, std::wstring& OutError )
 
 	if ( bResult )
 	{
-		LE_LOG( LT_Log, LC_Editor, TEXT( "Reimported asset '%s' from '%s'" ), InAsset->GetAssetName().c_str(), InAsset->GetAssetSourceFile().c_str() );
+		LE_LOG( LT_Log, LC_Editor, TEXT( "Reimported asset '%s' from '%s'" ), assetRef->GetAssetName().c_str(), assetRef->GetAssetSourceFile().c_str() );
 	}
 	else
 	{
-		LE_LOG( LT_Warning, LC_Editor, TEXT( "Failed reimport asset '%s' from '%s'. Error %s" ), InAsset->GetAssetName().c_str(), InAsset->GetAssetSourceFile().c_str(), OutError.c_str() );
+		LE_LOG( LT_Warning, LC_Editor, TEXT( "Failed reimport asset '%s' from '%s'. Error %s" ), assetRef->GetAssetName().c_str(), assetRef->GetAssetSourceFile().c_str(), OutError.c_str() );
 	}
 
 	return bResult;
@@ -144,7 +154,7 @@ bool FHelperAssetImporter::Reimport( FAsset* InAsset, std::wstring& OutError )
 // TEXTURE 2D
 //
 
-FTexture2DRef FTexture2DImporter::Import( const std::wstring& InPath, std::wstring& OutError )
+TSharedPtr<FTexture2D> FTexture2DImporter::Import( const std::wstring& InPath, std::wstring& OutError )
 {
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
@@ -163,13 +173,13 @@ FTexture2DRef FTexture2DImporter::Import( const std::wstring& InPath, std::wstri
 	}
 
 	// Import new texture 2D
-	FTexture2DRef		texture2D = new FTexture2D();
-	texture2D->SetAssetName( filename );
-	texture2D->SetAssetSourceFile( InPath );
-	return Reimport( texture2D, OutError ) ? texture2D : nullptr;
+	TSharedPtr<FTexture2D>		texture2DRef = MakeSharedPtr<FTexture2D>();
+	texture2DRef->SetAssetName( filename );
+	texture2DRef->SetAssetSourceFile( InPath );
+	return Reimport( texture2DRef, OutError ) ? texture2DRef : nullptr;
 }
 
-bool FTexture2DImporter::Reimport( FTexture2D* InTexture2D, std::wstring& OutError )
+bool FTexture2DImporter::Reimport( const TSharedPtr<FTexture2D>& InTexture2D, std::wstring& OutError )
 {
 	check( InTexture2D );
 
@@ -206,7 +216,7 @@ bool FTexture2DImporter::Reimport( FTexture2D* InTexture2D, std::wstring& OutErr
 // AUDIO BANK
 //
 
-FAudioBankRef FAudioBankImporter::Import( const std::wstring& InPath, std::wstring& OutError )
+TSharedPtr<FAudioBank> FAudioBankImporter::Import( const std::wstring& InPath, std::wstring& OutError )
 {
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
@@ -225,13 +235,13 @@ FAudioBankRef FAudioBankImporter::Import( const std::wstring& InPath, std::wstri
 	}
 
 	// Import new texture 2D
-	FAudioBankRef		audioBank = new FAudioBank();
-	audioBank->SetAssetName( filename );
-	audioBank->SetAssetSourceFile( InPath );
-	return Reimport( audioBank, OutError ) ? audioBank : nullptr;
+	TSharedPtr<FAudioBank>		audioBankRef = MakeSharedPtr<FAudioBank>();
+	audioBankRef->SetAssetName( filename );
+	audioBankRef->SetAssetSourceFile( InPath );
+	return Reimport( audioBankRef, OutError ) ? audioBankRef : nullptr;
 }
 
-bool FAudioBankImporter::Reimport( FAudioBank* InAudioBank, std::wstring& OutError )
+bool FAudioBankImporter::Reimport( const TSharedPtr<FAudioBank>& InAudioBank, std::wstring& OutError )
 {
 	check( InAudioBank );
 	InAudioBank->SetSourceOGGFile( InAudioBank->GetAssetSourceFile() );

@@ -72,13 +72,13 @@ public:
 	 * @brief Get default physics material
 	 * @return Return default physics material
 	 */
-	FORCEINLINE FPhysicsMaterialRef GetDefaultPhysMaterial() const
+	FORCEINLINE FPhysicsMaterialPtr GetDefaultPhysMaterial() const
 	{
 		return defaultPhysMaterial;
 	}
 
 private:
-	FPhysicsMaterialRef													defaultPhysMaterial;			/**< Default physics material */
+	FPhysicsMaterialPtr													defaultPhysMaterial;			/**< Default physics material */
 	mutable std::unordered_map< std::wstring,  FCollisionProfile >		collisionProfiles;				/**< Collision profiles map */
 };
 

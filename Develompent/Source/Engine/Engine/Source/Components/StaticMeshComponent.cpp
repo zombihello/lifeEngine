@@ -21,12 +21,13 @@ void LStaticMeshComponent::LinkDrawList()
 	}
 
 	// If static mesh is valid - add to scene draw policy link
-	if ( staticMesh )
+	TSharedPtr<FStaticMesh>		staticMeshRef = staticMesh.Pin();
+	if ( staticMeshRef )
 	{
 		FSceneDepthGroup&							SDGWorld = scene->GetSDG( SDG_World );
-		FVertexFactoryRef							vertexFactory = staticMesh->GetVertexFactory();
-		FIndexBufferRHIRef							indexBuffer = staticMesh->GetIndexBufferRHI();
-		const std::vector< FStaticMeshSurface >&	surfaces = staticMesh->GetSurfaces();
+		FVertexFactoryRef							vertexFactory = staticMeshRef->GetVertexFactory();
+		FIndexBufferRHIRef							indexBuffer = staticMeshRef->GetIndexBufferRHI();
+		const std::vector< FStaticMeshSurface >&	surfaces = staticMeshRef->GetSurfaces();
 
 		// Generate mesh batch for surface and add to new scene draw policy link
 		for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )surfaces.size(); indexSurface < numSurfaces; ++indexSurface )

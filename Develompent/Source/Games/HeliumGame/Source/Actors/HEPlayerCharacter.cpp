@@ -35,7 +35,7 @@ AHEPlayerCharacter::AHEPlayerCharacter()
 	spriteComponent = CreateComponent< LSpriteComponent >( TEXT( "SpriteComponent0" ) );
 	spriteComponent->SetSpriteSize( FVector2D( 32.f, 32.f ) );
 	spriteComponent->SetType( ST_Static );
-	spriteComponent->SetMaterial( ( FMaterialRef )GPackageManager->FindAsset( TEXT( "Material'Characters_Player:Player_Mat" ), AT_Material ) );
+	spriteComponent->SetMaterial( GPackageManager->FindAsset( TEXT( "Material'Characters_Player:Player_Mat" ), AT_Material ) );
 
 	// Create audio component
 	audioComponent = CreateComponent< LAudioComponent >( TEXT( "AudioComponent0" ) );
@@ -87,10 +87,10 @@ void AHEPlayerCharacter::Tick( float InDeltaTime )
 			bool		bResult = GWorld->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic, queryParams );
 			if ( bResult )
 			{
-				FAudioBankRef		audioBank = walkAudioBanks[ hitResult.physMaterial->GetSurfaceType() ];
-				if ( audioBank )
+				TSharedPtr<FAudioBank>		audioBankRef = walkAudioBanks[ hitResult.physMaterial->GetSurfaceType() ].Pin();
+				if ( audioBankRef )
 				{
-					audioComponent->SetAudioBank( audioBank );
+					audioComponent->SetAudioBank( audioBankRef );
 					audioComponent->Play();
 				}
 			}
@@ -111,10 +111,10 @@ void AHEPlayerCharacter::Landed()
 	bool			bResult		= GWorld->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic, queryParams );
 	if ( bResult )
 	{
-		FAudioBankRef		audioBank = jumpAudioBanks[ hitResult.physMaterial->GetSurfaceType() ];
-		if ( audioBank )
+		TSharedPtr<FAudioBank>	audioBankRef = jumpAudioBanks[ hitResult.physMaterial->GetSurfaceType() ].Pin();
+		if ( audioBankRef )
 		{
-			audioComponent->SetAudioBank( audioBank );
+			audioComponent->SetAudioBank( audioBankRef );
 			audioComponent->Play();
 		}
 	}

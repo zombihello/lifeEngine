@@ -16,6 +16,7 @@
 #include "Math/Math.h"
 #include "Math/Transform.h"
 #include "Math/Rotator.h"
+#include "Misc/SharedPointer.h"
 #include "Misc/Box2DGlobals.h"
 #include "System/Box2DScene.h"
 
@@ -147,14 +148,7 @@ FORCEINLINE bool LE2BLockFlags( uint32 InLockFlags )
  */
 struct FPhysicsMaterialHandleBox2D
 {
-	/**
-	 * @brief Constructor
-	 */
-	FPhysicsMaterialHandleBox2D()
-		: physMaterial( nullptr )
-	{}
-
-	class FPhysicsMaterial*			physMaterial;				/**< Physical material */
+	TWeakPtr<class FPhysicsMaterial>		physMaterial;				/**< Physical material */
 };
 
 /**
@@ -167,14 +161,13 @@ struct FPhysicsShapeHandleBox2D
 	 * @brief Constructor
 	 */
 	FPhysicsShapeHandleBox2D()
-		: physMaterial( nullptr )
-		, collisionProfile( nullptr )
+		: collisionProfile( nullptr )
 		, bx2Shape( nullptr )
 	{}
 
-	class FPhysicsMaterial*			physMaterial;		/**< Physical material */
-	FCollisionProfile*				collisionProfile;	/**< Collision profile */
-	b2Shape*						bx2Shape;			/**< Box2D shape */
+	TWeakPtr<class FPhysicsMaterial>	physMaterial;		/**< Physical material */
+	FCollisionProfile*			collisionProfile;	/**< Collision profile */
+	b2Shape*					bx2Shape;			/**< Box2D shape */
 };
 
 /**
@@ -193,7 +186,12 @@ struct FPhysicsActorHandleBox2D
 	/**
 	 * @brief On material updated
 	 */
-	void OnMaterialUpdated( class FPhysicsMaterial* InPhysMaterial );
+	void OnMaterialUpdated( const TSharedPtr<class FPhysicsMaterial>& InPhysMaterial );
+
+	/**
+	 * @brief On material destroyed
+	 */
+	void OnMaterialDestroyed( const TSharedPtr<class FPhysicsMaterial>& InPhysMaterial );
 
 	b2Body*											bx2Body;		/**< Box2D rigid body */
 	std::unordered_map< b2Shape*, b2Fixture* >		fixtureMap;		/**< Fixture map */
@@ -254,7 +252,7 @@ struct FPhysicsInterfaceBox2D
 	 * @param InPhysMaterial Physics material
 	 * @return Return material handle
 	 */
-	static FORCEINLINE FPhysicsMaterialHandleBox2D CreateMaterial( class FPhysicsMaterial* InPhysMaterial )
+	static FORCEINLINE FPhysicsMaterialHandleBox2D CreateMaterial( const TSharedPtr<class FPhysicsMaterial>& InPhysMaterial )
 	{
 		FPhysicsMaterialHandleBox2D		materialHandle;
 		materialHandle.physMaterial = InPhysMaterial;
@@ -267,7 +265,7 @@ struct FPhysicsInterfaceBox2D
 	 * @param InMaterialHandle Handle of phys material
 	 * @param InPhysMaterial Physics material
 	 */
-	static FORCEINLINE void UpdateMaterial( const FPhysicsMaterialHandleBox2D& InMaterialHandle, class FPhysicsMaterial* InPhysMaterial )
+	static FORCEINLINE void UpdateMaterial( const FPhysicsMaterialHandleBox2D& InMaterialHandle, const TSharedPtr<class FPhysicsMaterial>& InPhysMaterial )
 	{}
 
 	/**

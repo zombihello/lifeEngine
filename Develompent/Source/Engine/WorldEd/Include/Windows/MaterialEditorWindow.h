@@ -32,7 +32,7 @@ public:
 	 * @param InMaterial	Material to edit
 	 * @param InParent		Parent widget
 	 */
-	WeMaterialEditorWindow( FMaterial* InMaterial, QWidget* InParent = nullptr );
+	WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InMaterial, QWidget* InParent = nullptr );
 
 	/**
 	 * Destructor
@@ -45,7 +45,7 @@ signals:
 	 * 
 	 * @param InAsset		Changed asset
 	 */
-	void OnChangedAsset( FAsset* InAsset );
+	void OnChangedAsset( const TSharedPtr<FAsset>& InAsset );
 
 private slots:
 	//
@@ -65,7 +65,7 @@ private:
 
 	bool										bInit;						/**< Is inited window */
 	Ui::WeMaterialEditorWindow*					ui;							/**< Qt UI */
-	FMaterialRef								material;					/**< Editable asset */
+	TSharedPtr<FMaterial>						material;					/**< Editable asset */
 	class QCheckBox*							checkBox_isTwoSided;		/**< Check box of is two sided */
 	class QCheckBox*							checkBox_isWireframe;		/**< Check box of is wireframe */
 	class QCheckBox*							checkBox_staticMesh;		/**< Check box of static mesh */

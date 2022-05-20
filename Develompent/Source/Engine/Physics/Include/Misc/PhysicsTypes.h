@@ -12,6 +12,7 @@
 #include <string>
 
 #include "Math/Math.h"
+#include "Misc/SharedPointer.h"
 #include "System/Archive.h"
 
 /**
@@ -118,11 +119,11 @@ struct FHitResult
 		, physMaterial( nullptr )
 	{ }
 
-	class AActor*					actor;			/**< Actor hit by the trace */
-	class LPrimitiveComponent*		component;		/**< PrimitiveComponent hit by the trace */
-	FVector							impactNormal;	/**< Normal of the hit in world space, for the object that was hit by the sweep, if any */
-	FVector							impactPoint;	/**< Location in world space of the actual contact of the trace shape (box, sphere, ray, etc) with the impacted object */
-	class FPhysicsMaterial*			physMaterial;	/**< Physical material that was hit */
+	class AActor*						actor;			/**< Actor hit by the trace */
+	class LPrimitiveComponent*			component;		/**< PrimitiveComponent hit by the trace */
+	FVector								impactNormal;	/**< Normal of the hit in world space, for the object that was hit by the sweep, if any */
+	FVector								impactPoint;	/**< Location in world space of the actual contact of the trace shape (box, sphere, ray, etc) with the impacted object */
+	TSharedPtr<class FPhysicsMaterial>	physMaterial;	/**< Physical material that was hit */
 };
 
 /**

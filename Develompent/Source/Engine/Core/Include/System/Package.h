@@ -15,6 +15,8 @@
 #include "Misc/Types.h"
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
+#include "Misc/SharedPointer.h"
+#include "Misc/SharedPointerInternals.h"
 #include "Misc/Misc.h"
 #include "Misc/Guid.h"
 #include "Misc/TableOfContents.h"
@@ -23,9 +25,9 @@
 
 /**
  * @ingroup Core
- * Reference to FAsset
+ * Weak smart pointer to base asset type
  */
-typedef TRefCountPtr< class FAsset >			FAssetRef;
+typedef TWeakPtr<class FAsset>					FAssetPtr;
 
 /**
  * @ingroup Core
@@ -114,11 +116,11 @@ FORCEINLINE std::wstring ConvertAssetTypeToText( EAssetType InAssetType )
  */
 struct FAssetInfo
 {
-	uint32			offset;		/**< Offset in archive to asset */
-	uint32			size;		/**< Size data in archive */
-	EAssetType		type;		/**< Asset type */
-	std::wstring	name;		/**< Name of asset */
-	class FAsset*	data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
+	uint32					offset;		/**< Offset in archive to asset */
+	uint32					size;		/**< Size data in archive */
+	EAssetType				type;		/**< Asset type */
+	std::wstring			name;		/**< Name of asset */
+	TSharedPtr<FAsset>		data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
 };
 
 /**
@@ -156,7 +158,7 @@ struct FAssetReference
  * @ingroup Core
  * Base class for serialize assets in package
  */
-class FAsset : public FRefCounted
+class FAsset
 {
 public:
 	friend class FPackage;
@@ -165,7 +167,7 @@ public:
 	/**
 	 * @brief Typedef of dependent assets
 	 */
-	typedef std::unordered_set< FAssetRef, FAssetRef::FHashFunction >		FSetDependentAssets;
+	typedef std::unordered_set< FAssetPtr, FAssetPtr::FHashFunction >		FSetDependentAssets;
 #endif // WITH_EDITOR
 
 	/**
@@ -325,16 +327,20 @@ public:
 	 * 
 	 * @param[in] InAsset Asset
 	 */
-	void Add( FAsset* InAsset );
+	void Add( const TSharedPtr<FAsset>& InAsset );
 
 	/**
 	 * Remove asset from package
 	 * 
 	 * @param[in] InAsset Asset to remove
 	 */
-	FORCEINLINE void Remove( const FAsset& InAsset )
+	FORCEINLINE void Remove( const TSharedPtr<FAsset>& InAsset )
 	{
-		Remove( InAsset.GetGUID() );
+		if ( !InAsset.IsValid() )
+		{
+			return;
+		}
+		Remove( InAsset->GetGUID() );
 	}
 
 	/**
@@ -405,7 +411,7 @@ public:
 	 * @param[in] InGUID GUID of asset
 	 * @return Return pointer to asset in package, if not found return nullptr
 	 */
-	FAssetRef Find( const FGuid& InGUID );
+	TSharedPtr<FAsset> Find( const FGuid& InGUID );
 
 	/**
 	 * Find asset by name
@@ -413,7 +419,7 @@ public:
 	 * @param InName Name asset
 	 * @return Return pointer to asset in package, if not found return nullptr
 	 */
-	FORCEINLINE FAssetRef Find( const std::wstring& InName )
+	FORCEINLINE TSharedPtr<FAsset> Find( const std::wstring& InName )
 	{
 		auto		itAssetGUID = assetGUIDTable.find( InName );
 		if ( itAssetGUID == assetGUIDTable.end() )
@@ -562,7 +568,7 @@ private:
 	 * Fully load
 	 * @param OutAssetArray Array of loaded asset from package
 	 */
-	void FullyLoad( std::vector< FAssetRef >& OutAssetArray );
+	void FullyLoad( std::vector< TSharedPtr<FAsset> >& OutAssetArray );
 
 	/**
 	 * Serialize package
@@ -585,10 +591,9 @@ private:
 	 * @param InArchive					Archive
 	 * @param InAssetGUID				Asset GUID
 	 * @param InAssetInfo				Asset info
-	 * @param InAddToAssetDataBase		Is need add loaded asset to data base. Only for editor
 	 * @return Return loaded asset from package, if failed returning nullptr
 	 */
-	FAssetRef LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo, bool InAddToAssetDataBase );
+	TSharedPtr<FAsset> LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo );
 
 	/**
 	 * Mark that the asset is unloaded
@@ -661,7 +666,7 @@ public:
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 * @return Return finded asset. If not found returning nullptr
 	 */
-	FAssetRef FindAsset( const std::wstring& InString, EAssetType InType = AT_Unknown );
+	TSharedPtr<FAsset> FindAsset( const std::wstring& InString, EAssetType InType = AT_Unknown );
 
 	/**
 	 * Find asset in package
@@ -671,7 +676,7 @@ public:
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 * @return Return finded asset. If not found returning nullptr
 	 */
-	FORCEINLINE FAssetRef FindAsset( const FGuid& InGUIDPackage, const FGuid& InGUIDAsset, EAssetType InType = AT_Unknown )
+	FORCEINLINE TSharedPtr<FAsset> FindAsset( const FGuid& InGUIDPackage, const FGuid& InGUIDAsset, EAssetType InType = AT_Unknown )
 	{
 		std::wstring		path = GTableOfContents.GetPackagePath( InGUIDPackage );
 		if ( path.empty() )
@@ -689,7 +694,7 @@ public:
 	 * @param InGUIDAsset GUID of asset
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 */
-	FAssetRef FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType = AT_Unknown );
+	TSharedPtr<FAsset> FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType = AT_Unknown );
 
 	/**
 	 * Find asset in package
@@ -698,7 +703,7 @@ public:
 	 * @param InAsset Asset name in the package
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 */
-	FAssetRef FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType = AT_Unknown );
+	TSharedPtr<FAsset> FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType = AT_Unknown );
 
 	/**
 	 * Find default asset
@@ -706,7 +711,7 @@ public:
 	 * @param InType Default asset for type
 	 * @return Return finded asset. If not found returning nullptr
 	 */
-	FAssetRef FindDefaultAsset( EAssetType InType ) const;
+	TSharedPtr<FAsset> FindDefaultAsset( EAssetType InType ) const;
 
 	/**
 	 * Is default asset
@@ -714,7 +719,7 @@ public:
 	 * @param InAsset	Asset
 	 * @return Return TRUE if InAsset is default asset, else return FALSE
 	 */
-	FORCEINLINE bool IsDefaultAsset( FAsset* InAsset ) const
+	FORCEINLINE bool IsDefaultAsset( const TSharedPtr<FAsset>& InAsset ) const
 	{
 		if ( !InAsset )
 		{
@@ -966,7 +971,7 @@ FORCEINLINE bool MakeReferenceToAsset( const std::wstring& InPackageName, const 
  * @param OutString			Output string with reference
  * @return Return TRUE if reference created is seccussed, else returning FALSE
  */
-FORCEINLINE bool MakeReferenceToAsset( FAsset* InAsset, std::wstring& OutString )
+FORCEINLINE bool MakeReferenceToAsset( const TSharedPtr<FAsset>& InAsset, std::wstring& OutString )
 {
 	if ( !InAsset || !InAsset->GetPackage() || InAsset->GetAssetName().empty() )
 	{
@@ -1021,16 +1026,17 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetReference& In
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetPtr& InValue )
 {
 	if ( InArchive.IsSaving() )
 	{
-		InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
+		TSharedPtr<FAsset>		asset = InValue.Pin();
+		InArchive << ( asset ? asset->GetAssetReference() : FAssetReference() );
 
 #if DO_CHECK
-		if ( InValue )
+		if ( asset )
 		{
-			FAssetReference		assetRef = InValue->GetAssetReference();
+			FAssetReference		assetRef = asset->GetAssetReference();
 			check( assetRef.guidAsset.IsValid() && assetRef.guidPackage.IsValid() );
 		}
 #endif // DO_CHECK
@@ -1052,10 +1058,12 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetRef& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetPtr& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( InValue ? InValue->GetAssetReference() : FAssetReference() );
+	
+	TSharedPtr<FAsset>		asset = InValue.Pin();
+	InArchive << ( asset ? asset->GetAssetReference() : FAssetReference() );
 	return InArchive;
 }
 

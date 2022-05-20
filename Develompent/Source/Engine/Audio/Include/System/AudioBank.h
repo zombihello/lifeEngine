@@ -10,6 +10,7 @@
 #define AUDIOBANK_H
 
 #include <vector>
+#include <list>
 
 #include "System/Package.h"
 #include "System/AudioDevice.h"
@@ -17,9 +18,9 @@
 
  /**
   * @ingroup Audio
-  * @brief Reference to FAudioBank
+  * @brief Weak smart pointer to FAudioBank
   */
-typedef TRefCountPtr< class FAudioBank >				FAudioBankRef;
+typedef TWeakPtr<class FAudioBank>						FAudioBankPtr;
 
 /**
  * @ingroup Audio
@@ -76,7 +77,10 @@ public:
 	 * 
 	 * @param InBankHandle Handle to opened bank
 	 */
-	void CloseBank( FAudioBankHandle InBankHandle );
+	FORCEINLINE void CloseBank( FAudioBankHandle InBankHandle )
+	{
+		CloseBankInternal( InBankHandle );
+	} 
 
 	/**
 	 * Read PCM from bank
@@ -130,10 +134,19 @@ public:
 	FAudioBufferRef GetAudioBuffer();
 
 private:
-	uint64				offsetToRawData;	/**< Offset in archive to raw data */
-	uint64				rawDataSize;		/**< Size in bytes of raw data */
-	std::wstring		pathToArchive;		/**< Path to archive */
-	FAudioBufferRef		audioBuffer;		/**< Audio buffer with fully loaded bank. Used only by FAudioSource */
+	/**
+	 * Close bank. Internal implementation
+	 *
+	 * @param InBankHandle			Handle to opened bank
+	 * @param InNeedFreeFromList	If setted TRUE method remove item of opened handle from 'openedHandles'
+	 */
+	void CloseBankInternal( FAudioBankHandle InBankHandle, bool InNeedFreeFromList = true );
+
+	uint64							offsetToRawData;	/**< Offset in archive to raw data */
+	uint64							rawDataSize;		/**< Size in bytes of raw data */
+	std::wstring					pathToArchive;		/**< Path to archive */
+	FAudioBufferRef					audioBuffer;		/**< Audio buffer with fully loaded bank. Used only by FAudioSource */
+	std::list<FAudioBankHandle>		openedHandles;		/**< List opened handles of this audio bank */
 
 #if WITH_EDITOR
 	std::vector<byte>	rawData;			/**< Raw data of Ogg/Vorbis file */
@@ -144,9 +157,9 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAudioBankRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAudioBankPtr& InValue )
 {
-	FAssetRef			asset = InValue;
+	FAssetPtr			asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -156,10 +169,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAudioBankRef& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAudioBankRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAudioBankPtr& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( FAssetRef )InValue;
+	InArchive << ( FAssetPtr )InValue;
 	return InArchive;
 }
 

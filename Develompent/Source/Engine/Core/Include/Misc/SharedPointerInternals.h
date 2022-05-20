@@ -13,6 +13,11 @@
 #include "System/ThreadingBase.h"
 #include "Core.h"
 
+// Forward declarations
+template< class ObjectType > class TSharedPtr;
+template< class ObjectType > class TWeakPtr;
+template< class ObjectType > class TSharedFromThis;
+
 /**
  * @ingroup Core
  * @brief SharedPointerInternals contains internal workings of shared and weak pointers. You should
@@ -760,7 +765,7 @@ namespace SharedPointerInternals
 		FORCEINLINE void AssignReferenceController( TReferenceController<OtherType>* InNewReferenceController )
 		{
 			// Only proceed if the new reference counter is different than our current
-			if ( InNewReferenceController != referenceController )
+			if ( ( TReferenceController<ObjectType>* )InNewReferenceController != referenceController )
 			{
 				// First, add a weak reference to the new object
 				if ( InNewReferenceController != nullptr )
@@ -791,6 +796,41 @@ namespace SharedPointerInternals
 	{
 		return new TReferenceController<ObjectType>( InObject );
 	}
+
+	/**
+	 * @brief Templated helper function (const) that creates a shared pointer from an object instance
+	 * 
+	 * @param InSharedPtr		Pointer to shared ptr
+	 * @param InShareable		Shareable object
+	 */
+	template< class SharedPtrType, class OtherType >
+	FORCEINLINE void EnableSharedFromThis( const TSharedPtr<SharedPtrType>* InSharedPtr, const TSharedFromThis<OtherType>* InShareable )
+	{
+		if ( InShareable != nullptr )
+		{
+			InShareable->UpdateWeakReferenceInternal( InSharedPtr );
+		}
+	}
+
+	/**
+	 * @brief Templated helper function that creates a shared pointer from an object instance
+	 * 
+	 * @param InSharedPtr		Pointer to shared ptr
+	 * @param InShareable		Shareable object
+	 */
+	template< class SharedPtrType, class OtherType >
+	FORCEINLINE void EnableSharedFromThis( TSharedPtr<SharedPtrType>* InSharedPtr, const TSharedFromThis<OtherType>* InShareable )
+	{
+		if ( InShareable != nullptr )
+		{
+			InShareable->UpdateWeakReferenceInternal( InSharedPtr );
+		}
+	}
+
+	/**
+	 * @brief Templated helper catch-all function, accomplice to the above helper functions
+	 */
+	FORCEINLINE void EnableSharedFromThis( ... ) {}
 }
 
 #endif // !SHAREDPOINTERINTERNALS_H

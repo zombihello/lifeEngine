@@ -12,7 +12,7 @@
 #include "Render/RenderingThread.h"
 #include "Widgets/SelectAssetWidget.h"
 
-WeMaterialEditorWindow::WeMaterialEditorWindow( FMaterial* InMaterial, QWidget* InParent /* = nullptr */ )
+WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InMaterial, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
 	, bInit( false )
 	, ui( new Ui::WeMaterialEditorWindow() )
@@ -98,12 +98,12 @@ void WeMaterialEditorWindow::InitUI()
 
 		selectAsset_diffuse		= new WeSelectAssetWidget( parametersSection );
 		{
-			FTexture2DRef		diffuseTexture;
-			material->GetTextureParameterValue( TEXT( "diffuse" ), diffuseTexture );
-			if ( diffuseTexture && !GPackageManager->IsDefaultAsset( diffuseTexture ) )
+			TSharedPtr<FTexture2D>		diffuseTextureRef;
+			material->GetTextureParameterValue( TEXT( "diffuse" ), diffuseTextureRef );
+			if ( diffuseTextureRef && !GPackageManager->IsDefaultAsset( diffuseTextureRef ) )
 			{
 				std::wstring		assetReference;
-				MakeReferenceToAsset( diffuseTexture, assetReference );
+				MakeReferenceToAsset( diffuseTextureRef, assetReference );
 				selectAsset_diffuse->SetAssetReference( assetReference );
 			}
 		}
@@ -179,18 +179,18 @@ void WeMaterialEditorWindow::OnSelectedAssetDiffuse( const std::wstring& InNewAs
 	}
 
 	// If asset reference is valid, we find asset
-	FTexture2DRef		newTexture2D;
+	TSharedPtr<FTexture2D>		newTexture2DRef;
 	if ( !InNewAssetReference.empty() )
 	{
-		newTexture2D = GPackageManager->FindAsset( InNewAssetReference, AT_Texture2D );
+		newTexture2DRef = GPackageManager->FindAsset( InNewAssetReference, AT_Texture2D );
 	}
 
 	// If asset is not valid we clear asset reference
-	if ( !newTexture2D || GPackageManager->IsDefaultAsset( newTexture2D ) )
+	if ( !newTexture2DRef || GPackageManager->IsDefaultAsset( newTexture2DRef ) )
 	{
-		newTexture2D = nullptr;
+		newTexture2DRef = nullptr;
 		selectAsset_diffuse->ClearAssetReference( false );
 	}
 
-	material->SetTextureParameterValue( TEXT( "diffuse" ), newTexture2D );	
+	material->SetTextureParameterValue( TEXT( "diffuse" ), newTexture2DRef );
 }

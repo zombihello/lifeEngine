@@ -25,7 +25,7 @@ public:
 	 * @brief Constructor
 	 * @param InMaterial	Material
 	 */
-	FMaterialPreviewViewportClient( FMaterial* InMaterial );
+	FMaterialPreviewViewportClient( const TSharedPtr<FMaterial>& InMaterial );
 
 	/**
 	 * @brief Destructor
@@ -62,7 +62,7 @@ public:
 	 * @brief Set preview material
 	 * @param InMaterial	Material
 	 */
-	FORCEINLINE void SetMaterial( FMaterial* InMaterial )
+	FORCEINLINE void SetMaterial( const TSharedPtr<FMaterial>& InMaterial )
 	{
 		material = InMaterial;
 		sphereComponent->SetMaterial( InMaterial );
@@ -70,7 +70,7 @@ public:
 
 private:
 	FScene*								scene;				/**< Scene for preview material */
-	FMaterialRef						material;			/**< Material */
+	TSharedPtr<FMaterial>				material;			/**< Material */
 	TRefCountPtr< LSphereComponent >	sphereComponent;	/**< Sphere component */
 };
 

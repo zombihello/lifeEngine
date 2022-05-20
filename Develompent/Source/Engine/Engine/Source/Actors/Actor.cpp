@@ -33,7 +33,7 @@ void FActorVar::Clear()
 	case AVT_RectFloat:	delete static_cast< FRectFloat* >( value );		break;
 	case AVT_Color:		delete static_cast< FColor* >( value );			break;
 	case AVT_String:	delete static_cast< std::wstring* >( value );	break;
-	case AVT_Material:	delete static_cast< FMaterialRef* >( value );	break;
+	case AVT_Material:	delete static_cast< FMaterialPtr* >( value );	break;
 	}
 
 	value = nullptr;

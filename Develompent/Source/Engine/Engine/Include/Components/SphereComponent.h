@@ -69,7 +69,7 @@ public:
 	 * @brief Set material
 	 * @param InMaterial	Material
 	 */
-	FORCEINLINE void SetMaterial( FMaterial* InMaterial )
+	FORCEINLINE void SetMaterial( const FMaterialPtr& InMaterial )
 	{
 		material = InMaterial;
 		bIsDirtyDrawingPolicyLink = true;
@@ -97,7 +97,7 @@ public:
 	 * @brief Get material
 	 * @return Return material, if not exist return NULL
 	 */
-	FORCEINLINE FMaterialRef GetMaterial() const
+	FORCEINLINE FMaterialPtr GetMaterial() const
 	{
 		return material;
 	}
@@ -126,7 +126,7 @@ private:
 	float						radius;					/**< Radius of sphere */
 	ESceneDepthGroup			SDGLevel;				/**< Mesh on SDG level */
 	ESceneDepthGroup			pendingSDGLevel;		/**< Pending SDG level */
-	FMaterialRef				material;				/**< Material */
+	FMaterialPtr				material;				/**< Material */
 	FDrawingPolicyLinkRef		drawingPolicyLink;		/**< Drawing policy link in scene */
 	const FMeshBatch*			meshBatchLink;			/**< Mesh batch in drawing policy link */
 };

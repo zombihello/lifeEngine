@@ -5,7 +5,7 @@
 #include "Render/MaterialPreviewViewportClient.h"
 #include "Render/RenderUtils.h"
 
-FMaterialPreviewViewportClient::FMaterialPreviewViewportClient( FMaterial* InMaterial )
+FMaterialPreviewViewportClient::FMaterialPreviewViewportClient( const TSharedPtr<FMaterial>& InMaterial )
 	: FEditorLevelViewportClient( LVT_Perspective )
 	, scene( new FScene() )
 	, material( InMaterial )

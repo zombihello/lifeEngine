@@ -21,9 +21,9 @@
 
 /**
  * @ingroup Engine Engine
- * @brief Reference to FTexture2D
+ * @brief Weak smart pointer to FTexture2D asset
  */
-typedef TRefCountPtr< class FTexture2D >				FTexture2DRef;
+typedef TWeakPtr<class FTexture2D>				FTexture2DPtr;
 
 /**
  * @ingroup Engine
@@ -208,9 +208,9 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTexture2DRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTexture2DPtr& InValue )
 {
-	FAssetRef			asset = InValue;
+	FAssetPtr			asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -220,10 +220,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTexture2DRef& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FTexture2DRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FTexture2DPtr& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( FAssetRef )InValue;
+	InArchive << ( FAssetPtr )InValue;
 	return InArchive;
 }
 

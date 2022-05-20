@@ -21,19 +21,25 @@
  * @ingroup Physics
  * @brief Delegate for called event when physics materials is updated
  */
-DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialUpdate, class FPhysicsMaterial* )
+DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialUpdate, const TSharedPtr<class FPhysicsMaterial>& )
 
 /**
  * @ingroup Physics
- * @brief Reference to FPhysicsMaterial
+ * @brief Delegate for called event when physics materials is destroyed
  */
-typedef TRefCountPtr< class FPhysicsMaterial >				FPhysicsMaterialRef;
+DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialDestroyed, const TSharedPtr<class FPhysicsMaterial>& )
+
+/**
+ * @ingroup Physics
+ * @brief Weak smart pointer to FPhysicsMaterial
+ */
+typedef TWeakPtr<class FPhysicsMaterial>				FPhysicsMaterialPtr;
 
 /**
  * @ingroup Physics
  * @brief Class of physics material
  */
-class FPhysicsMaterial : public FAsset
+class FPhysicsMaterial : public FAsset, public TSharedFromThis<FPhysicsMaterial>
 {
 public:
 	/**
@@ -137,13 +143,17 @@ public:
 	{
 		return density;
 	}
-
+	
 	/**
 	 * @brief Get physics material handle
 	 * @return Return physics material handle
 	 */
 	FORCEINLINE FPhysicsMaterialHandle GetMaterialHandle() const
 	{
+		if ( !FPhysicsInterface::IsValidMaterial( handle ) )
+		{
+			handle = FPhysicsInterface::CreateMaterial( SharedThis( this ) );
+		}
 		return handle;
 	}
 
@@ -165,14 +175,24 @@ public:
 		return onPhysicsMaterialUpdate;
 	}
 
+	/**
+	 * @brief Get delegate of physics material is destroyed
+	 * @return Return delegate of physics material destroyed
+	 */
+	FORCEINLINE FOnPhysicsMaterialDestroyed& OnPhysicsMaterialDestroyed() const
+	{
+		return onPhysicsMaterialDestroyed;
+	}
+
 private:
 	/**
 	 * @brief Update material
 	 */
 	FORCEINLINE void UpdateMaterial()
 	{
-		FPhysicsInterface::UpdateMaterial( handle, this );
-		onPhysicsMaterialUpdate.Broadcast( this );
+		TSharedPtr<FPhysicsMaterial>		sharedThis = SharedThis( this );
+		FPhysicsInterface::UpdateMaterial( handle, sharedThis );
+		onPhysicsMaterialUpdate.Broadcast( sharedThis );
 	}
 
 	float									staticFriction;					/**< The coefficient of static friction */
@@ -180,17 +200,18 @@ private:
 	float									restitution;					/**< The coefficient of restitution */
 	float									density;						/**< Density */
 	ESurfaceType							surfaceType;					/**< Surface type */
-	FPhysicsMaterialHandle					handle;							/**< Physics material handle */
+	mutable FPhysicsMaterialHandle			handle;							/**< Physics material handle */
 	mutable FOnPhysicsMaterialUpdate		onPhysicsMaterialUpdate;		/**< Event called when physics material is updated */
+	mutable FOnPhysicsMaterialDestroyed		onPhysicsMaterialDestroyed;		/**< Event called when physics material is destroyed */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FPhysicsMaterialRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FPhysicsMaterialPtr& InValue )
 {
-	FAssetRef			asset = InValue;
+	FAssetPtr			asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -200,10 +221,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FPhysicsMaterialRef& InVa
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FPhysicsMaterialRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FPhysicsMaterialPtr& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( FAssetRef )InValue;
+	InArchive << ( FAssetPtr )InValue;
 	return InArchive;
 }
 

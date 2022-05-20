@@ -9,7 +9,7 @@
 #include "RHI/StaticStatesRHI.h"
 #include "EngineDefines.h"
 
-FTexturePreviewViewportClient::FTexturePreviewViewportClient( FTexture2D* InTexture2D )
+FTexturePreviewViewportClient::FTexturePreviewViewportClient( const TSharedPtr<FTexture2D>& InTexture2D )
 	: FEditorLevelViewportClient( LVT_OrthoXY )
 	, texture2D( InTexture2D )
 	, colorChannelMask( FColor::white )
@@ -23,14 +23,14 @@ void FTexturePreviewViewportClient::Draw( FViewport* InViewport )
 	UNIQUE_RENDER_COMMAND_FOURPARAMETER(  FViewportRenderCommand,
 										  FTexturePreviewViewportClient*, viewportClient, this,
 										  FViewportRHIRef, viewportRHI, InViewport->GetViewportRHI(),
-										  FTexture2DRef, texture2D, texture2D,
+										  TSharedPtr<FTexture2D>, texture2D, texture2D,
 										  FSceneView*, sceneView, sceneView,
 										  {
 											  viewportClient->Draw_RenderThread( viewportRHI, texture2D, sceneView );
 										  } );
 }
 
-void FTexturePreviewViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, FTexture2D* InTexture2D, class FSceneView* InSceneView )
+void FTexturePreviewViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, const TSharedPtr<FTexture2D>& InTexture2D, class FSceneView* InSceneView )
 {
 	check( IsInRenderingThread() );
 	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();

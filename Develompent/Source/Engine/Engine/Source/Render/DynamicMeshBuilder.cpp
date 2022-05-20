@@ -46,7 +46,7 @@ void FDynamicMeshBuilder::ReleaseRHI()
 	vertexFactory.SafeRelease();
 }
 
-void FDynamicMeshBuilder::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const FMatrix& InLocalToWorld, FMaterial* InMaterial, const class FSceneView& InSceneView ) const
+void FDynamicMeshBuilder::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const FMatrix& InLocalToWorld, const TWeakPtr<FMaterial>& InMaterial, const class FSceneView& InSceneView ) const
 {
 	checkMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call FDynamicMeshBuilder::Build" ) );
 	

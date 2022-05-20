@@ -22,11 +22,7 @@ IMPLEMENT_CLASS( LBaseEngine )
 void LBaseEngine::Init()
 {
 	// Load default texture
-	{
-		std::vector< byte >		data = { 0, 0, 0, 0 };
-		defaultTexture = new FTexture2D();						// } Default texture without packages
-		defaultTexture->SetData( PF_A8R8G8B8, 1, 1, data );
-		
+	{	
 		// Loading default texture from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
@@ -34,7 +30,7 @@ void LBaseEngine::Init()
 			if ( configDefaultTexture.IsValid() )
 			{
 				std::wstring	pathAsset = configDefaultTexture.GetString();
-				FAssetRef		asset = GPackageManager->FindAsset( pathAsset );
+				FAssetPtr		asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultTexture = asset;
@@ -49,12 +45,22 @@ void LBaseEngine::Init()
 				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default texture in section 'Engine.Engine:DefaultTexture'" ) );
 			}
 		}
+
+		// If default texture not loaded we create in virtual package
+		if ( !defaultTexture.Pin() )
+		{
+			std::vector< byte >		data		= { 0, 0, 0, 0 };
+			FPackageRef				package		= GPackageManager->LoadPackage( TEXT( "" ), true );
+			TSharedPtr<FTexture2D>	texture2D	= MakeSharedPtr<FTexture2D>();
+			texture2D->SetData( PF_A8R8G8B8, 1, 1, data );
+			
+			package->Add( texture2D );
+			defaultTexture = texture2D;
+		}
 	}
 
 	// Load default material
 	{
-		defaultMaterial = new FMaterial();
-
 		// Loading default material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
@@ -62,7 +68,7 @@ void LBaseEngine::Init()
 			if ( configDefaultMaterial.IsValid() )
 			{
 				std::wstring	pathAsset = configDefaultMaterial.GetString();
-				FAssetRef		asset = GPackageManager->FindAsset( pathAsset );
+				FAssetPtr		asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultMaterial = asset;
@@ -77,14 +83,21 @@ void LBaseEngine::Init()
 				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default material in section 'Engine.Engine:DefaultMaterial'" ) );
 			}
 		}
+
+		// If default material not loaded we create in virtual package
+		if ( !defaultMaterial.Pin() )
+		{
+			FPackageRef				package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			TSharedPtr<FMaterial>	material = MakeSharedPtr<FMaterial>();
+
+			package->Add( material );
+			defaultMaterial = material;
+		}
 	}
 
 	// Load default wireframe material (only for build with editor)
 #if WITH_EDITOR
 	{
-		defaultWireframeMaterial = new FMaterial();
-		defaultWireframeMaterial->SetWireframe( true );
-
 		// Loading default wireframe material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
@@ -92,7 +105,7 @@ void LBaseEngine::Init()
 			if ( configDefaultWireframeMaterial.IsValid() )
 			{
 				std::wstring	pathAsset	= configDefaultWireframeMaterial.GetString();
-				FAssetRef		asset		= GPackageManager->FindAsset( pathAsset );
+				FAssetPtr		asset		= GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultWireframeMaterial = asset;
@@ -106,6 +119,17 @@ void LBaseEngine::Init()
 			{
 				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Editor' default wireframe material in section 'Editor.Editor:DefaultWireframeMaterial'" ) );
 			}
+		}
+
+		// If default wireframe material not loaded we create in virtual package
+		if ( !defaultWireframeMaterial.Pin() )
+		{
+			FPackageRef				package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			TSharedPtr<FMaterial>	material = MakeSharedPtr<FMaterial>();
+			material->SetWireframe( true );
+
+			package->Add( material );
+			defaultWireframeMaterial = material;
 		}
 	}
 #endif // WITH_EDITOR

@@ -40,7 +40,7 @@ public:
 	 * @param InMaterial		Material
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias = 0.f )
+	FORCEINLINE void Init( class FVertexFactory* InVertexFactory, const FMaterialPtr& InMaterial, float InDepthBias = 0.f )
 	{
 		InitInternal( InVertexFactory, InMaterial, InDepthBias );
 	}
@@ -134,10 +134,10 @@ protected:
 	 * @param InMaterial		Material
 	 * @param InDepthBias		Depth bias
 	 */
-	virtual void InitInternal( class FVertexFactory* InVertexFactory, class FMaterial* InMaterial, float InDepthBias = 0.f );
+	virtual void InitInternal( class FVertexFactory* InVertexFactory, const FMaterialPtr& InMaterial, float InDepthBias = 0.f );
 
 	bool								bInit;				/**< Is inited drawing policy */
-	FMaterialRef						material;			/**< Material */
+	FMaterialPtr						material;			/**< Material */
 	FVertexFactoryRef					vertexFactory;		/**< Vertex factory */
 	FShader*							vertexShader;		/**< Vertex shader */
 	FShader*							pixelShader;		/**< Pixel shader */

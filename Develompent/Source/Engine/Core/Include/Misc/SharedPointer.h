@@ -48,6 +48,12 @@ public:
 
 	/**
 	 * @brief Constructor
+	 */
+	FORCEINLINE TSharedPtr( std::nullptr_t )
+	{}
+
+	/**
+	 * @brief Constructor
 	 * @param InSharedPtr	Shared ptr
 	 */
 	template< typename OtherType >
@@ -307,7 +313,7 @@ public:
 	 */
 	FORCEINLINE bool IsUnique() const
 	{
-		return sharedReferenceCount->IsUnique();
+		return sharedReferenceCount.IsUnique();
 	}
 
 	// Friend function for make shared ptr
@@ -325,8 +331,12 @@ protected:
 	 */
 	template< typename OtherType >
 	FORCEINLINE TSharedPtr( OtherType* InObject )
-		: sharedReferenceCount( MoveTemp( SharedPointerInternals::NewReferenceController( ( ObjectType* ) InObject ) ) )
-	{}
+		: sharedReferenceCount( MoveTemp( SharedPointerInternals::NewReferenceController( ( ObjectType* )InObject ) ) )
+	{
+		// If the object happens to be derived from TSharedFromThis, the following method
+		// will prime the object with a weak pointer to itself
+		SharedPointerInternals::EnableSharedFromThis( this, InObject );
+	}
 
 	SharedPointerInternals::TSharedReferencer<ObjectType>		sharedReferenceCount;		/**< Shared reference count */
 };
@@ -336,7 +346,7 @@ protected:
  * @brief Make shared pointer
  *
  * @param InArgs	Arguments for construct object
- * @return Return created shared pointer from InObject
+ * @return Return created shared pointer with allocated object
  */
 template< typename ObjectType, typename... ArgTypes >
 FORCEINLINE TSharedPtr<ObjectType> MakeSharedPtr( ArgTypes&&... InArgs )
@@ -518,12 +528,69 @@ public:
 	}
 
 	/**
+	 * @brief Overloaded operator ==
+	 *
+	 * @param InWeakPtr		Weak ptr
+	 * @return Returning TRUE if pointers is equal, else returning FALSE
+	 */
+	template< typename OtherType >
+	FORCEINLINE bool operator==( const TWeakPtr<OtherType>& InWeakPtr ) const
+	{
+		return Pin().Get() == InWeakPtr.Pin().Get();
+	}
+
+	/**
+	 * @brief Overloaded operator ==
+	 *
+	 * @param InSharedPtr	Shared ptr
+	 * @return Returning TRUE if pointers is equal, else returning FALSE
+	 */
+	template< typename OtherType >
+	FORCEINLINE bool operator==( const TSharedPtr<OtherType>& InSharedPtr ) const
+	{
+		return Pin().Get() == InSharedPtr.Get();
+	}
+
+	/**
+	 * @brief Overloaded operator !=
+	 *
+	 * @param InWeakPtr		Weak ptr
+	 * @return Returning TRUE if pointers is not equal, else returning FALSE
+	 */
+	template< typename OtherType >
+	FORCEINLINE bool operator!=( const TWeakPtr<OtherType>& InWeakPtr ) const
+	{
+		return Pin().Get() != InWeakPtr.Pin().Get();
+	}
+
+	/**
+	 * @brief Overloaded operator !=
+	 *
+	 * @param InSharedPtr	Shared ptr
+	 * @return Returning TRUE if pointers is equal, else returning FALSE
+	 */
+	template< typename OtherType >
+	FORCEINLINE bool operator!=( const TSharedPtr<OtherType>& InSharedPtr ) const
+	{
+		return Pin().Get() != InSharedPtr.Get();
+	}
+
+	/**
+	 * @brief Overloaded operator bool
+	 * @return Returning TRUE if pointer not null, else returning FALSE
+	 */
+	FORCEINLINE	operator bool() const
+	{
+		return IsValid();
+	}
+
+	/**
 	 * @brief Converts this weak pointer to a shared pointer
 	 * @return Return shared pointer for this object (will only be valid if still referenced!)
 	 */
 	FORCEINLINE TSharedPtr<ObjectType> Pin() const
 	{
-		return TSharedPtr<ObjectType>( *this );
+		return IsValid() ? TSharedPtr<ObjectType>( *this ) : TSharedPtr<ObjectType>();
 	}
 
 	/**
@@ -559,6 +626,210 @@ public:
 
 protected:
 	SharedPointerInternals::TWeakReferencer<ObjectType>		weakReferenceCount;		/**< Weak reference count */
+};
+
+/**
+ * @ingroup Core
+ * @brief Derive your class from TSharedFromThis to enable access to a TSharedPtr directly from an object
+ * instance that's already been allocated
+ */
+template< class ObjectType >
+class TSharedFromThis
+{
+public:
+	/**
+	 * @brief Provides access to a shared reference to this object. Note that is only valid to call
+	 * this after a shared pointer to the object has already been created.
+	 * Also note that it is illegal to call this in the object's destructor.
+	 *
+	 * @return Returns this object as a shared pointer
+	 */
+	TSharedPtr<ObjectType> AsShared()
+	{
+		TSharedPtr<ObjectType>	sharedThis = weakThis.Pin();
+
+		//
+		// If the following assert goes off, it means one of the following:
+		//
+		//     - You tried to request a shared pointer before the object was ever assigned to one. (e.g. constructor)
+		//     - You tried to request a shared pointer while the object is being destroyed (destructor chain)
+		//
+		// To fix this, make sure you create at least one shared reference to your object instance before requested,
+		// and also avoid calling this function from your object's destructor.
+		//
+		check( sharedThis.Get() == this );
+
+		// Now that we've verified the shared pointer is valid, we return it!
+		return sharedThis;
+	}
+
+	/**
+	 * @brief Provides access to a shared reference to this object (const.)  Note that is only valid to call
+	 * this after a shared pointer to the object has already been created.
+	 * Also note that it is illegal to call this in the object's destructor.
+	 *
+	 * @return Returns this object as a shared pointer (const)
+	 */
+	TSharedPtr<const ObjectType> AsShared() const
+	{
+		TSharedPtr<const ObjectType>	sharedThis = weakThis.Pin();
+
+		//
+		// If the following assert goes off, it means one of the following:
+		//
+		//     - You tried to request a shared pointer before the object was ever assigned to one. (e.g. constructor)
+		//     - You tried to request a shared pointer while the object is being destroyed (destructor chain)
+		//
+		// To fix this, make sure you create at least one shared reference to your object instance before requested,
+		// and also avoid calling this function from your object's destructor.
+		//
+		check( sharedThis.Get() == this );
+
+		// Now that we've verified the shared pointer is valid, we return it!
+		return sharedThis;
+	}
+
+	/**
+	 * @brief Provides a weak reference to this object. Note that is only valid to call
+	 * this after a shared pointer to the object has already been created.
+	 * Also note that it is illegal to call this in the object's destructor.
+	 *
+	 * @return Returns this object as a shared pointer
+	 */
+	TWeakPtr<ObjectType> AsWeak()
+	{
+		TWeakPtr<ObjectType>	result = weakThis;
+
+		//
+		// If the following assert goes off, it means one of the following:
+		//
+		//     - You tried to request a weak pointer before the object was ever assigned to a shared pointer. (e.g. constructor)
+		//     - You tried to request a weak pointer while the object is being destroyed (destructor chain)
+		//
+		// To fix this, make sure you create at least one shared reference to your object instance before requested,
+		// and also avoid calling this function from your object's destructor.
+		//
+		check( result.Pin().Get() == this );
+
+		// Now that we've verified the pointer is valid, we'll return it!
+		return result;
+	}
+
+	/**
+	 * @brief Provides a weak reference to this object (const.). Note that is only valid to call
+	 * this after a shared pointer to the object has already been created.
+	 * Also note that it is illegal to call this in the object's destructor.
+	 *
+	 * @return Returns this object as a shared pointer (const.)
+	 */
+	TWeakPtr<const ObjectType> AsWeak() const
+	{
+		TWeakPtr<const ObjectType>		result = weakThis;
+
+		//
+		// If the following assert goes off, it means one of the following:
+		//
+		//     - You tried to request a weak pointer before the object was ever assigned to a shared pointer. (e.g. constructor)
+		//     - You tried to request a weak pointer while the object is being destroyed (destructor chain)
+		//
+		// To fix this, make sure you create at least one shared reference to your object instance before requested,
+		// and also avoid calling this function from your object's destructor.
+		//
+		check( result.Pin().Get() == this );
+
+		// Now that we've verified the pointer is valid, we'll return it!
+		return result;
+	}
+
+protected:
+	/**
+	 * @brief Provides access to a shared reference to an object, given the object's 'this' pointer. Uses
+	 * the 'this' pointer to derive the object's actual type, then casts and returns an appropriately
+	 * typed shared reference.  Intentionally declared 'protected', as should only be called when the
+	 * 'this' pointer can be passed.
+	 *
+	 * @param InThisPtr		Pointer to this ptr
+	 * @return Returns this object as a shared pointer
+	 */
+	template< class OtherType >
+	FORCEINLINE static TSharedPtr<OtherType> SharedThis( OtherType* InThisPtr )
+	{
+		return ( TSharedPtr<OtherType> )InThisPtr->AsShared();
+	}
+
+	/**
+	 * @brief Provides access to a shared reference to an object, given the object's 'this' pointer. Uses
+	 * the 'this' pointer to derive the object's actual type, then casts and returns an appropriately
+	 * typed shared reference.  Intentionally declared 'protected', as should only be called when the
+	 * 'this' pointer can be passed.
+	 *
+	 * @param InThisPtr		Pointer to this ptr
+	 * @return Returns this object as a shared pointer (const)
+	 */
+	template< class OtherType >
+	FORCEINLINE static TSharedPtr<const OtherType> SharedThis( const OtherType* InThisPtr )
+	{
+		return ( TSharedPtr<const OtherType> )InThisPtr->AsShared();
+	}
+
+public:		// Ideally this would be private, but template sharing problems prevent it
+	/**
+	 * @brief Freshens the internal weak pointer object using
+	 * the supplied object pointer along with the authoritative shared reference to the object.
+	 * Note that until this function is called, calls to AsShared() will result in an empty pointer
+	 * 
+	 * @warning Internal use only, do not call this method
+	 * 
+	 * @param InSharedPtr	Pointer to shared ptr
+	 */
+	template< class SharedPtrType >
+	FORCEINLINE void UpdateWeakReferenceInternal( const TSharedPtr<SharedPtrType>* InSharedPtr ) const
+	{
+		if ( !weakThis.IsValid() )
+		{
+			weakThis = TSharedPtr<ObjectType>( *InSharedPtr );
+		}
+	}
+
+	/**
+	 * @brief Checks whether our referenced instance is valid (ie, whether it's safe to call AsShared)
+	 * @return If this returns false, it means that your instance has either:
+	 *  - Not yet been assigned to a shared pointer (via MakeShared or MakeShareable).
+	 *  - Is currently within its constructor (so the shared instance isn't yet available).
+	 *  - Is currently within its destructor (so the shared instance is no longer available).
+	 */
+	FORCEINLINE bool DoesSharedInstanceExist() const
+	{
+		return weakThis.IsValid();
+	}
+
+protected:
+	/**
+	 * @brief Hidden stub constructor
+	 */
+	TSharedFromThis() 
+	{}
+
+	/**
+	 * @brief Hidden stub copy constructor
+	 */
+	TSharedFromThis( TSharedFromThis const& ) {}
+
+	/**
+	 * @brief Hidden stub assignment operator
+	 */
+	FORCEINLINE TSharedFromThis& operator=( TSharedFromThis const& )
+	{
+		return *this;
+	}
+
+	/**
+	 * @brief Hidden destructor
+	 */
+	~TSharedFromThis() {}
+
+private:
+	mutable TWeakPtr<ObjectType>		weakThis;	/**< Weak reference to ourselves */
 };
 
 #endif // SHAREDPOINTER_H

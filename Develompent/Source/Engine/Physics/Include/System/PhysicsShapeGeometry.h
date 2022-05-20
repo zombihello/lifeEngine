@@ -52,7 +52,7 @@ struct FPhysicsShapeGeometry
 
 	ECollisionShape					collisionShape;		/**< Collision shape */
 	FCollisionProfile*				collisionProfile;	/**< Collision profile */
-	FPhysicsMaterialRef				material;			/**< Physics material */
+	FPhysicsMaterialPtr				material;			/**< Physics material */
 
 protected:
 	/**

@@ -15,12 +15,25 @@
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
 #include "System/AudioDevice.h"
+#include "System/Delegate.h"
 
 /**
  * @ingroup Audio
  * @brief Reference to FAudioBuffer
  */
 typedef TRefCountPtr< class FAudioBuffer >				FAudioBufferRef;
+
+/**
+ * @ingroup Audio
+ * @brief Delegate for called event when OpenAL audio buffer is destroyed
+ */
+DECLARE_MULTICAST_DELEGATE( FOnAudioBufferDestroyed, class FAudioBuffer* );
+
+/**
+ * @ingroup Audio
+ * @brief Delegate for called event when OpenAL audio buffer is updated
+ */
+DECLARE_MULTICAST_DELEGATE( FOnAudioBufferUpdated, class FAudioBuffer* );
 
 /**
  * @ingroup Audio
@@ -61,6 +74,9 @@ public:
 
 		alGenBuffers( 1, &alHandle );
 		alBufferData( alHandle, appSampleFormatToEngine( InSampleFormat ), InSampleData, InSamplesSize, InSampleRate );
+
+		// Tell to all users this buffer what we is updated him
+		onAudioBufferUpdated.Broadcast( this );
 	}
 
 	/**
@@ -72,6 +88,9 @@ public:
 		{
 			return;
 		}
+
+		// Tell to all users this buffer what we destroy OpenAL buffer
+		onAudioBufferDestroyed.Broadcast( this );
 
 		alDeleteBuffers( 1, &alHandle );
 		alHandle = 0;
@@ -86,8 +105,28 @@ public:
 		return alHandle;
 	}
 
+	/**
+	 * Get delegate of event when OpenAL audio buffer destroyed
+	 * @return Return delegate of event when OpenAL audio buffer destroyed
+	 */
+	FORCEINLINE FOnAudioBufferDestroyed& OnAudioBufferDestroyed() const
+	{
+		return onAudioBufferDestroyed;
+	}
+
+	/**
+	 * Get delegate of event when OpenAL audio buffer is updated
+	 * @return Return delegate of event when OpenAL audio buffer is updated
+	 */
+	FORCEINLINE FOnAudioBufferUpdated& OnAudioBufferUpdated() const
+	{
+		return onAudioBufferUpdated;
+	}
+
 private:
-	uint32		alHandle;			/**< Handle to OpenAL buffer */
+	uint32								alHandle;					/**< Handle to OpenAL buffer */
+	mutable FOnAudioBufferDestroyed		onAudioBufferDestroyed;		/**< Delegate of event when OpenAL audio buffer destroyed */
+	mutable FOnAudioBufferUpdated		onAudioBufferUpdated;		/**< Delegate of event when OpenAL audio buffer is updated */
 };
 
 #endif // !AUDIOBUFFER_H

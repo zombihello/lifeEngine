@@ -13,7 +13,7 @@
 #include "Widgets/SectionWidget.h"
 #include "WorldEd.h"
 
-WeTextureEditorWindow::WeTextureEditorWindow( FTexture2D* InTexture2D, QWidget* InParent /* = nullptr */ )
+WeTextureEditorWindow::WeTextureEditorWindow( const TSharedPtr<FTexture2D>& InTexture2D, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
 	, bInit( false )
 	, ui( new Ui::WeTextureEditorWindow() )

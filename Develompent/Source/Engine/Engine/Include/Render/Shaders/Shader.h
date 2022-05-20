@@ -14,6 +14,7 @@
 #include "Misc/RefCounted.h"
 #include "RHI/TypesRHI.h"
 #include "ShaderCache.h"
+#include "Misc/SharedPointer.h"
 
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
@@ -39,7 +40,7 @@ public:
 	 * @param InVertexFactory Vertex factory
 	 * @param InMaterialResource Material
 	 */
-	virtual void SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const class FMaterial* InMaterialResource ) const;
+	virtual void SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const;
 
 	/**
 	 * @brief Set the l2w transform shader

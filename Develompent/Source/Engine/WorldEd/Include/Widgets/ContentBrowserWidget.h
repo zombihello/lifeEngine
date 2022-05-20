@@ -96,9 +96,10 @@ private slots:
 	void OnContentBrowserContextMenuShowInExplorer();
 	void on_comboBox_rootDir_currentIndexChanged( int InIndex );
 	void on_listView_packageBrowser_doubleClicked( QModelIndex InModelIndex );
-	void OnPackageBrowserChangedAsset( FAsset* InAsset );
+	void OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& InAsset );
 	void on_listView_packageBrowser_CopyReferenceToAsset();
 	void OnListViewPackageBrowserSelectedAsset( const std::wstring& InAssetReference );
+	void on_listView_packageBrowser_ShowReferencesAssets();
 
 private:
 	Ui::WeContentBrowserWidget*	ui;							/**< Qt UI */

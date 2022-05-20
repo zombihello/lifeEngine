@@ -14,12 +14,7 @@
 #include "System/PhysicsMaterial.h"
 #include "System/PhysicsEngine.h"
 
-#if WITH_EDITOR
-#include "Misc/WorldEdGlobals.h"
-#include "System/AssetDataBase.h"
-#endif // WITH_EDITOR
-
-FORCEINLINE FAssetRef GetDefaultAsset( EAssetType InType )
+FORCEINLINE FAssetPtr GetDefaultAsset( EAssetType InType )
 {
 	switch ( InType )
 	{
@@ -32,16 +27,16 @@ FORCEINLINE FAssetRef GetDefaultAsset( EAssetType InType )
 	}
 }
 
-FORCEINLINE FAsset* AssetFactory( EAssetType InType )
+FORCEINLINE TSharedPtr<FAsset> AssetFactory( EAssetType InType )
 {
 	switch ( InType )
 	{
-	case AT_Texture2D:			return new FTexture2D();
-	case AT_Material:			return new FMaterial();
-	case AT_Script:				return new FScript();
-	case AT_StaticMesh:			return new FStaticMesh();
-	case AT_AudioBank:			return new FAudioBank();
-	case AT_PhysicsMaterial:	return new FPhysicsMaterial();
+	case AT_Texture2D:			return MakeSharedPtr<FTexture2D>();
+	case AT_Material:			return MakeSharedPtr<FMaterial>();
+	case AT_Script:				return MakeSharedPtr<FScript>();
+	case AT_StaticMesh:			return MakeSharedPtr<FStaticMesh>();
+	case AT_AudioBank:			return MakeSharedPtr<FAudioBank>();
+	case AT_PhysicsMaterial:	return MakeSharedPtr<FPhysicsMaterial>();
 
 	//
 	// Instert new asset type her
@@ -192,7 +187,7 @@ void FPackage::SetNameFromPath( const std::wstring& InPath )
 bool FPackage::Save( const std::wstring& InPath )
 {
 	// Before saving package it needs to be fully loaded into memory
-	std::vector< FAssetRef >		loadedAsset;
+	std::vector< TSharedPtr<FAsset> >		loadedAsset;
 	FullyLoad( loadedAsset );
 
 	// If package name not setted - take from path name of file
@@ -217,7 +212,7 @@ bool FPackage::Save( const std::wstring& InPath )
 	return true;
 }
 
-void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
+void FPackage::FullyLoad( std::vector< TSharedPtr<FAsset> >& OutAssetArray )
 {
 	// If we not load package from HDD - exit from function
 	if ( filename.empty() )
@@ -241,7 +236,7 @@ void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 		}
 
 		// Load asset
-		FAssetRef		asset = LoadAsset( *archive, itAsset->first, assetInfo, false );
+		TSharedPtr<FAsset>		asset = LoadAsset( *archive, itAsset->first, assetInfo );
 		if ( asset )
 		{
 			OutAssetArray.push_back( asset );
@@ -255,7 +250,7 @@ void FPackage::FullyLoad( std::vector<FAssetRef>& OutAssetArray )
 	delete archive;
 }
 
-FAssetRef FPackage::Find( const FGuid& InGUID )
+TSharedPtr<FAsset> FPackage::Find( const FGuid& InGUID )
 {
 	// Find asset in table
 	auto		itAsset = assetsTable.find( InGUID );
@@ -285,7 +280,7 @@ FAssetRef FPackage::Find( const FGuid& InGUID )
 
 	archive->SerializeHeader();
 	SerializeHeader( *archive );
-	FAssetRef		asset = LoadAsset( *archive, itAsset->first, itAsset->second, true );
+	TSharedPtr<FAsset>		asset = LoadAsset( *archive, itAsset->first, itAsset->second );
 
 	delete archive;
 	return asset;
@@ -401,7 +396,7 @@ void FPackage::SerializeHeader( FArchive& InArchive, bool InIsNeedSkip /* = fals
 	}
 }
 
-FAssetRef FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo, bool InAddToAssetDataBase )
+TSharedPtr<FAsset> FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo )
 {
 	uint32		oldOffset = InArchive.Tell();
 
@@ -441,14 +436,6 @@ FAssetRef FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FA
 
 	// Seek to old offset and exit
 	InArchive.Seek( oldOffset );
-
-	// If we in editor, add loaded asset to data base
-#if WITH_EDITOR
-	if ( GIsEditor && InAddToAssetDataBase )
-	{
-		GAssetDataBase.AddAsset( InAssetInfo.data );
-	}
-#endif // WITH_EDITOR
 
 	if ( ++numUsageAssets == 1 )
 	{
@@ -504,17 +491,16 @@ void FPackage::UpdateAssetNameInTable( const FGuid& InGUID )
 
 	FAssetInfo&		assetInfo = itAsset->second;
 	check( assetInfo.data );
-	FAsset*			asset = ( FAsset* )assetInfo.data;
 
 	// Remove from GUID table old name
 	assetGUIDTable.erase( assetInfo.name );
 
 	// Add to GUID table new name and update asset info
-	assetGUIDTable[ asset->GetAssetName() ] = InGUID;
-	assetInfo.name = asset->GetAssetName();
+	assetGUIDTable[ assetInfo.data->GetAssetName() ] = InGUID;
+	assetInfo.name = assetInfo.data->GetAssetName();
 }
 
-void FPackage::Add( FAsset* InAsset )
+void FPackage::Add( const TSharedPtr<FAsset>& InAsset )
 {
 	check( InAsset );
 	checkMsg( InAsset->guid.IsValid(), TEXT( "For add asset to package need GUID is valid" ) );
@@ -532,14 +518,6 @@ void FPackage::Add( FAsset* InAsset )
 	assetGUIDTable[ InAsset->name ] = InAsset->guid;
 	assetsTable[ InAsset->guid ]	= FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset->name, InAsset };
 	++numUsageAssets;
-
-	// If we in editor, add asset to data base
-#if WITH_EDITOR
-	if ( GIsEditor )
-	{
-		GAssetDataBase.AddAsset( InAsset );
-	}
-#endif // WITH_EDITOR
 }
 
 void FPackage::Remove( const FGuid& InGUID )
@@ -553,15 +531,6 @@ void FPackage::Remove( const FGuid& InGUID )
 	FAssetInfo&		assetInfo = itAsset->second;
 	if ( assetInfo.data )
 	{
-		// If we in editor, remove asset from data base
-#if WITH_EDITOR
-		FAssetRef		dataRef = assetInfo.data;		// Let's keep the asset so that it is not deleted ahead of time if it has no more links
-		if ( GIsEditor )
-		{
-			GAssetDataBase.RemoveAsset( assetInfo.data );
-		}
-#endif // WITH_EDITOR
-
 		assetInfo.data->package = nullptr;
 		if ( numUsageAssets > 0 )
 		{
@@ -583,14 +552,6 @@ void FPackage::Remove( const FGuid& InGUID )
 
 void FPackage::RemoveAll()
 {
-	// If we in editor, remove all loaded asset from data base
-#if WITH_EDITOR
-	if ( GIsEditor )
-	{
-		GAssetDataBase.RemoveAssets( this );
-	}
-#endif // WITH_EDITOR
-
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
 		FAssetInfo&		assetInfo = itAsset->second;
@@ -696,7 +657,7 @@ bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPacka
 	return true;
 }
 
-FAssetRef FPackageManager::FindAsset( const std::wstring& InString, EAssetType InType /* = AT_Unknown */ )
+TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InString, EAssetType InType /* = AT_Unknown */ )
 {
 	std::wstring		packageName;
 	std::wstring		assetName;
@@ -720,12 +681,12 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InString, EAssetType I
 	return FindAsset( packagePath, assetName, InType );
 }
 
-FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType /* = AT_Unknown */ )
+TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType /* = AT_Unknown */ )
 {
 	check( InGUIDAsset.IsValid() );
 
 	// Find package and open he
-	FAssetRef			asset;
+	FAssetPtr			asset;
 	FPackageRef			package = LoadPackage( InPath );
 	if ( !package )
 	{
@@ -750,12 +711,12 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, const FGuid& I
 	return asset;
 }
 
-FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType /* = AT_Unknown */ )
+TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType /* = AT_Unknown */ )
 {
 	check( !InAsset.empty() );
 
 	// Find package and open he
-	FAssetRef			asset;
+	FAssetPtr			asset;
 	FPackageRef			package = LoadPackage( InPath );
 	if ( !package )
 	{
@@ -780,7 +741,7 @@ FAssetRef FPackageManager::FindAsset( const std::wstring& InPath, const std::wst
 	return asset;
 }
 
-FAssetRef FPackageManager::FindDefaultAsset( EAssetType InType ) const
+TSharedPtr<FAsset> FPackageManager::FindDefaultAsset( EAssetType InType ) const
 {
 	return GetDefaultAsset( InType );
 }
@@ -840,12 +801,11 @@ bool FPackageManager::UnloadPackage( const std::wstring& InPath )
 		{
 			return false;
 		}
-
-		GAssetDataBase.RemoveAssets( itPackage->second.package );
 	}
 #endif // WITH_EDITOR
 
-	if ( itPackage->second.package->GetNumUsageAssets() > 0 )
+	// If package in using, we not unload him
+	if ( itPackage->second.package.GetRefCount() > 1 )
 	{
 		return false;
 	}

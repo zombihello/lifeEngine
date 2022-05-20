@@ -28,6 +28,18 @@ FAudioSource::~FAudioSource()
 
 	// Unsubscribe from event of muted/unmuted audio device
 	GAudioDevice.OnAudioDeviceMuted().Remove( this, &FAudioSource::OnAudioDeviceMuted );
+
+	// Unsubscribe from event of audio buffer if him is exist
+	TSharedPtr<FAudioBank>		audioBankRef = audioBank.Pin();
+	if ( audioBankRef )
+	{
+		FAudioBufferRef		audioBuffer = audioBankRef->GetAudioBuffer();
+		if ( audioBuffer )
+		{
+			audioBuffer->OnAudioBufferDestroyed().Remove( this, &FAudioSource::OnAudioBufferDestroyed );
+			audioBuffer->OnAudioBufferUpdated().Remove( this, &FAudioSource::OnAudioBufferUpdated );
+		}
+	}
 }
 
 void FAudioSource::Play()
@@ -76,15 +88,39 @@ void FAudioSource::SetAttenuation( float InAttenuation )
 	alSourcef( alHandle, AL_ROLLOFF_FACTOR, InAttenuation );
 }
 
-void FAudioSource::SetAudioBank( FAudioBank* InAudioBank )
+void FAudioSource::SetAudioBank( const FAudioBankPtr& InAudioBank )
 {
 	FAudioBufferRef		audioBuffer;
+
+	// Unsubscribe from events of audio buffer if him is exist
+	{
+		TSharedPtr<FAudioBank>		oldAudioBankRef = audioBank.Pin();
+		if ( oldAudioBankRef )
+		{
+			audioBuffer = oldAudioBankRef->GetAudioBuffer();
+			if ( audioBuffer )
+			{
+				audioBuffer->OnAudioBufferDestroyed().Remove( this, &FAudioSource::OnAudioBufferDestroyed );
+				audioBuffer->OnAudioBufferUpdated().Remove( this, &FAudioSource::OnAudioBufferUpdated );
+				audioBuffer = nullptr;
+			}
+		}
+	}
+
 	audioBank = InAudioBank;
 
-	if ( audioBank )
+	// Getting audio buffer if bank is valid and subscribe to events of audio buffer
+	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.Pin();
+	if ( audioBankRef )
 	{
-		audioBuffer = audioBank->GetAudioBuffer();
+		audioBuffer = audioBankRef->GetAudioBuffer();
+		if ( audioBuffer )
+		{
+			audioBuffer->OnAudioBufferDestroyed().Add( this, &FAudioSource::OnAudioBufferDestroyed );
+			audioBuffer->OnAudioBufferUpdated().Add( this, &FAudioSource::OnAudioBufferUpdated );
+		}
 	}
+
 	alSourcei( alHandle, AL_BUFFER, audioBuffer ? audioBuffer->GetALHandle() : 0 );
 }
 
@@ -147,7 +183,7 @@ EAudioSourceStatus FAudioSource::GetStatus() const
 	}
 }
 
-FAudioBankRef FAudioSource::GetAudioBank() const
+FAudioBankPtr FAudioSource::GetAudioBank() const
 {
 	return audioBank;
 }
@@ -171,4 +207,16 @@ void FAudioSource::OnAudioDeviceMuted( bool InIsAudioDeviceMuted )
 		Play();
 		bMuted = false;
 	}
+}
+
+void FAudioSource::OnAudioBufferDestroyed( class FAudioBuffer* InAudioBuffer )
+{
+	// Reset OpenAL buffer for audio source
+	alSourcei( alHandle, AL_BUFFER, 0 );
+}
+
+void FAudioSource::OnAudioBufferUpdated( class FAudioBuffer* InAudioBuffer )
+{
+	// When audio buffer is updated we recreating OpenAL buffer
+	alSourcei( alHandle, AL_BUFFER, InAudioBuffer->GetALHandle() );
 }

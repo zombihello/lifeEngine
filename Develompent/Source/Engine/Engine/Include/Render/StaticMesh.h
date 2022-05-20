@@ -22,9 +22,9 @@
 
  /**
   * @ingroup Engine Engine
-  * @brief Reference to FTexture2D
+  * @brief Weak smart pointer to FTexture2D
   */
-typedef TRefCountPtr< class FStaticMesh >				FStaticMeshRef;
+typedef TWeakPtr<class FStaticMesh>				FStaticMeshPtr;
 
 /**
  * @ingroup Engine
@@ -84,7 +84,7 @@ public:
 	 * @param[in] InSurfaces Array surfaces in mesh
 	 * @param[in] InMaterials Array materials in mesh
 	 */
-	void SetData( const std::vector< FStaticMeshVertexType >& InVerteces, const std::vector< uint32 >& InIndeces, const std::vector< FStaticMeshSurface >& InSurfaces, std::vector< FMaterialRef >& InMaterials );
+	void SetData( const std::vector< FStaticMeshVertexType >& InVerteces, const std::vector< uint32 >& InIndeces, const std::vector< FStaticMeshSurface >& InSurfaces, std::vector< TWeakPtr<FMaterial> >& InMaterials );
 
 	/**
 	 * Set material
@@ -92,7 +92,7 @@ public:
 	 * @param[in] InMaterialIndex Index material
 	 * @param[in] InNewMaterial New material
 	 */
-	void SetMaterial( uint32 InMaterialIndex, FMaterialRef InNewMaterial );
+	void SetMaterial( uint32 InMaterialIndex, const TWeakPtr<FMaterial>& InNewMaterial );
 
 	/**
 	 * Get vertex factory
@@ -116,7 +116,7 @@ public:
 	 * Get materials
 	 * @return Return array materials
 	 */
-	FORCEINLINE const std::vector< FMaterialRef > GetMaterials() const
+	FORCEINLINE const std::vector<FMaterialPtr> GetMaterials() const
 	{
 		return materials;
 	}
@@ -127,7 +127,7 @@ public:
 	 * @param[in] InMaterialIndex Material index
 	 * @return Return material, if index not valid return nullptr
 	 */
-	FORCEINLINE FMaterialRef GetMaterial( uint32 InMaterialIndex ) const
+	FORCEINLINE FMaterialPtr GetMaterial( uint32 InMaterialIndex ) const
 	{
 		if ( InMaterialIndex >= materials.size() )
 		{
@@ -166,7 +166,7 @@ public:
 
 private:
 	TRefCountPtr< FStaticMeshVertexFactory >	vertexFactory;			/**< Vertex factory */
-	std::vector< FMaterialRef >					materials;				/**< Array materials in mesh */
+	std::vector< FMaterialPtr >					materials;				/**< Array materials in mesh */
 	std::vector< FStaticMeshSurface >			surfaces;				/**< Array surfaces in mesh */
 	FBulkData< FStaticMeshVertexType >			verteces;				/**< Array verteces to create RHI vertex buffer */	
 	FBulkData< uint32 >							indeces;				/**< Array indeces to create RHI index buffer */
@@ -196,9 +196,9 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshSurface&
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshPtr& InValue )
 {
-	FAssetRef			asset = InValue;
+	FAssetPtr			asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -208,10 +208,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshRef& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshRef& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshPtr& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( FAssetRef )InValue;
+	InArchive << ( FAssetPtr )InValue;
 	return InArchive;
 }
 

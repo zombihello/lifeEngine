@@ -3,6 +3,7 @@
 #include "Render/Scene.h"
 #include "Misc/EngineGlobals.h"
 #include "System/World.h"
+#include "System/BaseEngine.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseBufferRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
@@ -25,12 +26,22 @@ void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* In
 {
 	FMeshDrawingPolicy::SetShaderParameters( InDeviceContextRHI );
 
-	FTexture2DRef		texture2d;
-	material->GetTextureParameterValue( TEXT( "diffuse" ), texture2d );
-	if ( texture2d )
+	TSharedPtr<FMaterial>		materialRef = material.Pin();
+	if ( !materialRef )
 	{
-		GRHI->SetTextureParameter( InDeviceContextRHI, pixelShader->GetPixelShader(), texture2d->GetTexture2DRHI(), 0 );
-		GRHI->SetSamplerState( InDeviceContextRHI, pixelShader->GetPixelShader(), GRHI->CreateSamplerState( texture2d->GetSamplerStateInitialiser() ), 0 );
+		materialRef = GEngine->GetDefaultMaterial().Pin();
+		if ( !materialRef )
+		{
+			return;
+		}
+	}
+
+	TSharedPtr<FTexture2D>		texture2dRef;
+	materialRef->GetTextureParameterValue( TEXT( "diffuse" ), texture2dRef );
+	if ( texture2dRef )
+	{
+		GRHI->SetTextureParameter( InDeviceContextRHI, pixelShader->GetPixelShader(), texture2dRef->GetTexture2DRHI(), 0 );
+		GRHI->SetSamplerState( InDeviceContextRHI, pixelShader->GetPixelShader(), GRHI->CreateSamplerState( texture2dRef->GetSamplerStateInitialiser() ), 0 );
 	}
 }
 

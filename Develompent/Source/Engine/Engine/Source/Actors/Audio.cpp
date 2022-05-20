@@ -27,8 +27,8 @@ bool AAudio::InitProperties( const std::vector<FActorVar>& InActorVars, class LC
 		if ( actorVar.GetName() == TEXT( "Source" ) )
 		{
 			check( actorVar.GetType() == AVT_String );
-			std::wstring			audioBankName = actorVar.GetValueString();
-			FAudioBankRef			audioBank = ( FAudioBankRef )GPackageManager->FindAsset( audioBankName, AT_Unknown );
+			std::wstring					audioBankName = actorVar.GetValueString();
+			TSharedPtr<FAudioBank>			audioBank = GPackageManager->FindAsset( audioBankName, AT_Unknown );
 			if ( !audioBank && !InCooker->CookAudioBank( audioBankName, audioBank ) )
 			{
 				return false;

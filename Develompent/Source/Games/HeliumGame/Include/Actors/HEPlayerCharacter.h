@@ -59,8 +59,8 @@ public:
 	virtual void Landed();
 
 private:
-	FAudioBankRef								walkAudioBanks[ ST_Max ];		/**< Audio banks of walking on each surface type */
-	FAudioBankRef								jumpAudioBanks[ ST_Max ];		/**< Audio banks of jump on each surface type */
+	TWeakPtr<FAudioBank>						walkAudioBanks[ ST_Max ];		/**< Audio banks of walking on each surface type */
+	TWeakPtr<FAudioBank>						jumpAudioBanks[ ST_Max ];		/**< Audio banks of jump on each surface type */
 	TRefCountPtr< LCameraComponent >			cameraComponent;				/**< Camera component */
 	TRefCountPtr< LSpriteComponent >			spriteComponent;				/**< Sprite component */
 	TRefCountPtr< LAudioComponent >				audioComponent;					/**< Audio component */

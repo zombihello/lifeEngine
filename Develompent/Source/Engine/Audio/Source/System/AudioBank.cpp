@@ -126,6 +126,12 @@ FAudioBank::~FAudioBank()
 	{
 		GAudioBufferManager.Remove( this );
 	}
+
+	// Close all opened handles
+	for ( auto itHandle = openedHandles.begin(), itHandleEnd = openedHandles.end(); itHandle != itHandleEnd; ++itHandle )
+	{
+		CloseBankInternal( *itHandle, false );
+	}
 }
 
 void FAudioBank::Serialize( class FArchive& InArchive )
@@ -228,10 +234,12 @@ FAudioBankHandle FAudioBank::OpenBank( FAudioBankInfo& OutBankInfo )
 	OutBankInfo.rate		= audioBankOgg->vorbisInfo->rate;
 	OutBankInfo.numSamples	= ov_pcm_total( &audioBankOgg->oggVorbisFile, -1 ) * audioBankOgg->vorbisInfo->channels * 2;
 	audioBankOgg->info		= OutBankInfo;
+	
+	openedHandles.push_back( audioBankOgg );
 	return audioBankOgg;
 }
 
-void FAudioBank::CloseBank( FAudioBankHandle InBankHandle )
+void FAudioBank::CloseBankInternal( FAudioBankHandle InBankHandle, bool InNeedFreeFromList /* = true */ )
 {
 	if ( !InBankHandle )
 	{
@@ -242,6 +250,19 @@ void FAudioBank::CloseBank( FAudioBankHandle InBankHandle )
 	vorbis_info_clear( audioBankOgg->vorbisInfo );
 	ov_clear( &audioBankOgg->oggVorbisFile );
 	delete audioBankOgg;
+
+	// Remove from list opened handle
+	if ( InNeedFreeFromList )
+	{
+		for ( auto itHandle = openedHandles.begin(), itHandleEnd = openedHandles.end(); itHandle != itHandleEnd; ++itHandle )
+		{
+			if ( *itHandle == InBankHandle )
+			{
+				openedHandles.erase( itHandle );
+				return;
+			}
+		}
+	}
 }
 
 uint64 FAudioBank::ReadBankPCM( FAudioBankHandle InBankHandle, byte* InSamples, uint64 InMaxSize )
