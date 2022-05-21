@@ -33,7 +33,7 @@ struct FTMXTileset
 	uint32							lastGID;		/**< Last ID of tile in set */
 	FVector2D						tileSize;		/**< Size of tile */
 	FVector2D						tileOffset;		/**< Offset of tile */
-	FMaterialPtr					material;		/**< Material of tileset */
+	TSharedPtr<FMaterial>			material;		/**< Material of tileset */
 	std::vector< FRectFloat >		textureRects;	/**< Array of rects with tiles */
 };
 

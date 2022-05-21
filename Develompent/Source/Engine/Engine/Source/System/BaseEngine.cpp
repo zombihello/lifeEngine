@@ -29,8 +29,8 @@ void LBaseEngine::Init()
 			FConfigValue		configDefaultTexture = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
 			if ( configDefaultTexture.IsValid() )
 			{
-				std::wstring	pathAsset = configDefaultTexture.GetString();
-				FAssetPtr		asset = GPackageManager->FindAsset( pathAsset );
+				std::wstring		pathAsset = configDefaultTexture.GetString();
+				TWeakPtr<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultTexture = asset;
@@ -67,8 +67,8 @@ void LBaseEngine::Init()
 			FConfigValue		configDefaultMaterial = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
 			if ( configDefaultMaterial.IsValid() )
 			{
-				std::wstring	pathAsset = configDefaultMaterial.GetString();
-				FAssetPtr		asset = GPackageManager->FindAsset( pathAsset );
+				std::wstring		pathAsset = configDefaultMaterial.GetString();
+				TWeakPtr<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultMaterial = asset;
@@ -104,8 +104,8 @@ void LBaseEngine::Init()
 			FConfigValue		configDefaultWireframeMaterial = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
 			if ( configDefaultWireframeMaterial.IsValid() )
 			{
-				std::wstring	pathAsset	= configDefaultWireframeMaterial.GetString();
-				FAssetPtr		asset		= GPackageManager->FindAsset( pathAsset );
+				std::wstring		pathAsset	= configDefaultWireframeMaterial.GetString();
+				TWeakPtr<FAsset>	asset		= GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultWireframeMaterial = asset;
@@ -183,8 +183,14 @@ bool LBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 		return false;
 	}
 
+	// Serialize world
 	archive->SerializeHeader();
 	GWorld->Serialize( *archive );
+	
+	// Call garbage collector of unused packages and assets
+	GPackageManager->GarbageCollector();
+
+	// Begin play of game
 	GWorld->BeginPlay();
 	return true;
 }

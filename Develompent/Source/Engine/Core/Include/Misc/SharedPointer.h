@@ -290,6 +290,15 @@ public:
 	}
 
 	/**
+	 * @brief Returns the number of weak references to this object
+	 * @return Number of weak references to the object
+	 */
+	FORCEINLINE uint32 GetWeakReferenceCount() const
+	{
+		return sharedReferenceCount.GetWeakReferenceCount();
+	}
+
+	/**
 	 * @brief Resets this shared pointer, removing a reference to the object. If there are no other shared
 	 * references to the object then it will be destroyed.
 	 */

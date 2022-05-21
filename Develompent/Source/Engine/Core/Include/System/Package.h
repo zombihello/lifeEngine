@@ -11,6 +11,7 @@
 
 #include <unordered_set>
 #include <unordered_map>
+#include <vector>
 
 #include "Misc/Types.h"
 #include "Misc/RefCounted.h"
@@ -21,13 +22,8 @@
 #include "Misc/Guid.h"
 #include "Misc/TableOfContents.h"
 #include "Misc/CoreGlobals.h"
+#include "System/Delegate.h"
 #include "System/Archive.h"
-
-/**
- * @ingroup Core
- * Weak smart pointer to base asset type
- */
-typedef TWeakPtr<class FAsset>					FAssetPtr;
 
 /**
  * @ingroup Core
@@ -116,11 +112,11 @@ FORCEINLINE std::wstring ConvertAssetTypeToText( EAssetType InAssetType )
  */
 struct FAssetInfo
 {
-	uint32					offset;		/**< Offset in archive to asset */
-	uint32					size;		/**< Size data in archive */
-	EAssetType				type;		/**< Asset type */
-	std::wstring			name;		/**< Name of asset */
-	TSharedPtr<FAsset>		data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
+	uint32						offset;		/**< Offset in archive to asset */
+	uint32						size;		/**< Size data in archive */
+	EAssetType					type;		/**< Asset type */
+	std::wstring				name;		/**< Name of asset */
+	TSharedPtr<class FAsset>	data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
 };
 
 /**
@@ -163,12 +159,10 @@ class FAsset
 public:
 	friend class FPackage;
 
-#if WITH_EDITOR
 	/**
 	 * @brief Typedef of dependent assets
 	 */
-	typedef std::unordered_set< FAssetPtr, FAssetPtr::FHashFunction >		FSetDependentAssets;
-#endif // WITH_EDITOR
+	typedef std::unordered_set< TWeakPtr<FAsset>, TWeakPtr<FAsset>::FHashFunction >		FSetDependentAssets;
 
 	/**
 	 * Constructor
@@ -271,6 +265,7 @@ public:
 	{
 		return sourceFile;
 	}
+#endif // WITH_EDITOR
 
 	/**
 	 * Get dependent assets
@@ -278,7 +273,6 @@ public:
 	 * @param InFilter				Filter of getting assets by type. If setted AT_Unknown return all types
 	 */
 	virtual void GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter = AT_Unknown ) const;
-#endif // WITH_EDITOR
 
 protected:
 	/**
@@ -332,45 +326,103 @@ public:
 	/**
 	 * Remove asset from package
 	 * 
-	 * @param[in] InAsset Asset to remove
+	 * @param InAsset			Asset to remove
+	 * @param InForceUnload		Is need force unload asset if him loaded
+	 * @return Return TRUE if asset seccussed removed from package
 	 */
-	FORCEINLINE void Remove( const TSharedPtr<FAsset>& InAsset )
+	FORCEINLINE bool Remove( const TSharedPtr<FAsset>& InAsset, bool InForceUnload = false )
 	{
 		if ( !InAsset.IsValid() )
 		{
-			return;
+			return true;
 		}
-		Remove( InAsset->GetGUID() );
+		return Remove( InAsset->GetGUID(), InForceUnload );
 	}
 
 	/**
 	 * Remove asset from package by GUID
 	 * 
-	 * @param[in] InGUID Asset guid
+	 * @param InGUID			Asset guid
+	 * @param InForceUnload		Is need force unload asset if him loaded
+	 * @return Return TRUE if asset seccussed removed from package
 	 */
-	void Remove( const FGuid& InGUID );
+	bool Remove( const FGuid& InGUID, bool InForceUnload = false );
 
 	/**
 	 * Remove asset from package by name
 	 * 
-	 * @param InName Name asset
+	 * @param InName			Name asset
+	 * @param InForceUnload		Is need force unload asset if him loaded
+	 * @return Return TRUE if asset seccussed removed from package
 	 */
-	FORCEINLINE void Remove( const std::wstring& InName )
+	FORCEINLINE bool Remove( const std::wstring& InName, bool InForceUnload = false )
 	{
 		auto		itAssetGUID = assetGUIDTable.find( InName );
 		if ( itAssetGUID == assetGUIDTable.end() )
 		{
-			return;
+			return true;
 		}
 
-		Remove( itAssetGUID->second );
+		return Remove( itAssetGUID->second, InForceUnload );
 	}
 
 	/**
 	 * Remove all from package
+	 * 
+	 * @param InForceUnload		Is need force unload assets if him loaded
+	 * @return Return TRUE if all assets seccussed removed from package
 	 */
-	void RemoveAll();
+	bool RemoveAll( bool InForceUnload = false );
 	
+	/**
+	 * Unload asset
+	 * 
+	 * @param InAssetPtr			AssetPtr
+	 * @param InForceUnload			Is need force unload (ignored shared references)
+	 * @return Return TRUE if asset is unloaded
+	 */
+	FORCEINLINE bool UnloadAsset( const TWeakPtr<FAsset>& InAssetPtr, bool InForceUnload = false )
+	{
+		FGuid				assetGuid;
+		{
+			TSharedPtr<FAsset>	assetRef = InAssetPtr.Pin();
+			if ( !assetRef )
+			{
+				return true;
+			}
+			assetGuid = assetRef->guid;
+		}
+
+		return UnloadAsset( assetGuid, InForceUnload );
+	}
+
+	/**
+	 * Unload asset
+	 * 
+	 * @param InGuid				Asset guid
+	 * @param InForceUnload			Is need force unload (ignored shared references)
+	 * @return Return TRUE if asset is unloaded
+	 */
+	FORCEINLINE bool UnloadAsset( const FGuid& InGuid, bool InForceUnload = false )
+	{
+		auto		itAsset = assetsTable.find( InGuid );
+		if ( itAsset == assetsTable.end() )
+		{
+			return true;
+		}
+
+		FAssetInfo&		assetInfo = itAsset->second;
+		return UnloadAsset( assetInfo, InForceUnload );
+	}
+
+	/**
+	 * Unload all assets
+	 * 
+	 * @param InForceUnload		Is need force unload (ignored shared references)
+	 * @return Return TRUE if assets is unloaded
+	 */
+	bool UnloadAllAssets( bool InForceUnload = false );
+
 	/**
 	 * Is exist asset with name in package
 	 * 
@@ -459,12 +511,12 @@ public:
 	}
 
 	/**
-	 * Get number usage assets from package
-	 * @retun Return number assets in usage
+	 * Get number loaded assets in package
+	 * @retun Return number loaded assets
 	 */
-	FORCEINLINE uint32 GetNumUsageAssets() const
+	FORCEINLINE uint32 GetNumLoadedAssets() const
 	{
-		return numUsageAssets;
+		return numLoadedAssets;
 	}
 
 	/**
@@ -571,6 +623,16 @@ private:
 	void FullyLoad( std::vector< TSharedPtr<FAsset> >& OutAssetArray );
 
 	/**
+	 * Unload asset by asset info
+	 *
+	 * @param InAssetInfo		Asset info
+	 * @param InForceUnload		Is need force unload (ignored shared references)
+	 * @param InBroadcastEvent	Is need broadcast event OnAssetsCanDelete and OnAssetsDeleted. @note Only for editor
+	 * @return Return TRUE if asset is unloaded
+	 */
+	bool UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload = false, bool InBroadcastEvent = true );
+
+	/**
 	 * Serialize package
 	 * 
 	 * @param InArchive Archive
@@ -596,14 +658,6 @@ private:
 	TSharedPtr<FAsset> LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo );
 
 	/**
-	 * Mark that the asset is unloaded
-	 * @warning Must called from FAsset
-	 * 
-	 * @param[in] InGUID GUID of asset
-	 */
-	void MarkAssetUnlnoad( const FGuid& InGUID );
-
-	/**
 	 * Update asset name in table
 	 * @warning Must called from FAsset
 	 * 
@@ -623,7 +677,7 @@ private:
 	FGuid				guid;				/**< GUID of package */
 	std::wstring		filename;			/**< Path to the package from which data was last loaded */
 	std::wstring		name;				/**< Package name */
-	uint32				numUsageAssets;		/**< Number assets in usage */
+	uint32				numLoadedAssets;	/**< Number loaded assets */
 	uint32				numDirtyAssets;		/**< Number dirty assets in package */
 	FAssetNameToGUID	assetGUIDTable;		/**< Table for converting asset GUID to name */
 	FAssetTable			assetsTable;		/**< Table of assets in package */
@@ -660,7 +714,7 @@ public:
 	void Shutdown();
 
 	/**
-	 * Find asset in package by <PackageName>:<AssetName>
+	 * Find asset in package by <AssetType>'<PackageName>:<AssetName>
 	 * 
 	 * @param InString Reference to asset
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
@@ -740,10 +794,33 @@ public:
 	/**
 	 * Unload package
 	 * 
-	 * @param InPath Package path
-	 * @return Return true if package is unloaded. If in package used asset(s) or package not found return false
+	 * @param InPath			Package path
+	 * @param InForceUnload		Is need force unload (ignored shared references)
+	 * @return Return true if package is unloaded. If in package exist dirty asset(s) or package not found return false
 	 */
-	bool UnloadPackage( const std::wstring& InPath );
+	bool UnloadPackage( const std::wstring& InPath, bool InForceUnload = false );
+
+	/**
+	 * Unload all packages
+	 * 
+	 * @param InForceUnload		Is need force unload (ignored shared references)
+	 * @return Return TRUE if all packages is unloaded. If in package exist dirty asset(s) or package not found return FALSE
+	 */
+	bool UnloadAllPackages( bool InForceUnload = false );
+
+	/**
+	 * Unload asset
+	 *
+	 * @param InAssetPtr		Asset ptr
+	 * @param InForceUnload		Is need force unload (ignored shared references)
+	 * @return Return TRUE if asset is unloaded
+	 */
+	bool UnloadAsset( const TWeakPtr<FAsset>& InAssetPtr, bool InForceUnload = false );
+
+	/**
+	 * Garbage collector of unused packages and assets
+	 */
+	void GarbageCollector();
 
 	/**
 	 * Is package loaded
@@ -757,37 +834,7 @@ public:
 		return itPackage != packages.end();
 	}
 
-	/**
-	 * Is package in used
-	 * 
-	 * @param InPath Package path
-	 * @return Return TRUE if package is in used, else return FALSE
-	 */
-	FORCEINLINE bool IsPackageUsed( const std::wstring& InPath ) const
-	{
-		auto		itPackage = packages.find( InPath );
-		if ( itPackage == packages.end() )
-		{
-			return false;
-		}
-		return !itPackage->second.isUnused;
-	}
-
-	/**
-	 * Forcibly cleanup unused packages
-	 */
-	void CleanupUnusedPackages();
-
-private:
-	/**
-	 * Struct package info
-	 */
-	struct FPackageInfo
-	{
-		bool				isUnused;				/**< Is package not used */
-		FPackageRef			package;				/**< Package */
-	};
-
+private:	
 	/**
 	 * Struct of normalized path in file system
 	 */
@@ -894,39 +941,8 @@ private:
 	/**
 	 * Typedef of list loaded packages
 	 */
-	typedef std::unordered_map< FNormalizedPath, FPackageInfo, FNormalizedPath::FNormalizedPathKeyFunc >			FPackageList;
+	typedef std::unordered_map< FNormalizedPath, FPackageRef, FNormalizedPath::FNormalizedPathKeyFunc >			FPackageList;
 
-	/**
-	 * Typedef of unused list packages
-	 */
-	typedef std::unordered_set< FNormalizedPath, FNormalizedPath::FNormalizedPathKeyFunc >							FUnusedPackageList;
-
-	/**
-	 * Check usage package
-	 * 
-	 * @param InPath Path to the package
-	 */
-	FORCEINLINE void CheckUsagePackage( const std::wstring& InPath )
-	{
-		auto		itPackage = packages.find( InPath );
-		if ( itPackage == packages.end() )
-		{
-			return;
-		}
-
-		CheckUsagePackage( itPackage->second );
-	}
-
-	/**
-	 * Check usage package
-	 * 
-	 * @param[in/out] InOutPackageInfo Info package
-	 */
-	void CheckUsagePackage( FPackageInfo& InOutPackageInfo );
-
-	float					cleaningFrequency;		/**< Rate of removes unused packages */
-	double					lastCleaningTime;		/**< Last time removes unused packages */
-	FUnusedPackageList		unusedPackages;			/**< List unused packages. After a specified time will be unloaded */
 	FPackageList			packages;				/**< Opened packages */
 };
 
@@ -1026,7 +1042,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetReference& In
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FAsset>& InValue )
 {
 	if ( InArchive.IsSaving() )
 	{
@@ -1058,7 +1074,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAssetPtr& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FAsset>& InValue )
 {
 	check( InArchive.IsSaving() );
 	

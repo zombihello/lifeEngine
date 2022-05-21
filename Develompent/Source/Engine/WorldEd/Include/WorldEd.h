@@ -64,15 +64,60 @@ QMessageBox::StandardButton ShowMessageBoxWithList( class QWidget* InParent, con
 
 /**
  * @ingroup WorldEd
+ * Helper struct for the FOnAssetsCanDelete delegate
+ */
+struct FCanDeleteAssetResult
+{
+public:
+	FCanDeleteAssetResult( const FCanDeleteAssetResult& )	= delete;
+	FCanDeleteAssetResult( FCanDeleteAssetResult&& )		= delete;
+
+	/**
+	 * Constructor
+	 */
+	FCanDeleteAssetResult() : 
+		bResult( true ) 
+	{}
+
+	/**
+	 * Set value
+	 * @param InValue	Value
+	 */
+	FORCEINLINE void Set( bool InValue )
+	{ 
+		bResult &= InValue; 
+	}
+
+	/**
+	 * Get value
+	 * @return Return result
+	 */
+	FORCEINLINE bool Get() const 
+	{ 
+		return bResult; 
+	}
+
+private:
+	bool	bResult;	/**< Is can delete assets */
+};
+
+/**
+ * @ingroup WorldEd
  * Delegates used by the editor
  */
 struct FEditorDelegates
 {
 	/**
+	 * @brief Delegate for called event when asset try delete
+	 */
+	DECLARE_MULTICAST_DELEGATE( FOnAssetsCanDelete, const std::vector< TSharedPtr<class FAsset> >& /*InAssets*/, FCanDeleteAssetResult& /*OutResult*/ );
+
+	/**
 	 * @brief Delegate for called event when asset deleted
 	 */
-	DECLARE_MULTICAST_DELEGATE( FOnAssetsDeleted, std::vector< class FAsset* >& );
+	DECLARE_MULTICAST_DELEGATE( FOnAssetsDeleted, const std::vector< TSharedPtr<class FAsset> >& /*InAssets*/);
 
+	static FOnAssetsCanDelete		onAssetsCanDelete;		/**< Called when one or more assets try delete */
 	static FOnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
 };
 

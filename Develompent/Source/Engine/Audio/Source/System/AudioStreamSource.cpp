@@ -311,7 +311,7 @@ void FAudioStreamSource::SetLoop( bool InIsLoop )
 	bIsLoop = InIsLoop;
 }
 
-void FAudioStreamSource::OpenBank( const FAudioBankPtr& InAudioBank )
+void FAudioStreamSource::OpenBank( const TWeakPtr<FAudioBank>& InAudioBank )
 {
 	// If already opened bank - close
 	if ( audioBankHandle )
@@ -357,7 +357,7 @@ void FAudioStreamSource::CloseBank()
 	audioBankHandle = nullptr;
 }
 
-void FAudioStreamSource::SetAudioBank( const FAudioBankPtr& InAudioBank )
+void FAudioStreamSource::SetAudioBank( const TWeakPtr<FAudioBank>& InAudioBank )
 {
 	// If bank opened - close
 	if ( audioBankHandle )

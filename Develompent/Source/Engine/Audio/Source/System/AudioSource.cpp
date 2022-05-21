@@ -88,7 +88,7 @@ void FAudioSource::SetAttenuation( float InAttenuation )
 	alSourcef( alHandle, AL_ROLLOFF_FACTOR, InAttenuation );
 }
 
-void FAudioSource::SetAudioBank( const FAudioBankPtr& InAudioBank )
+void FAudioSource::SetAudioBank( const TWeakPtr<FAudioBank>& InAudioBank )
 {
 	FAudioBufferRef		audioBuffer;
 
@@ -183,7 +183,7 @@ EAudioSourceStatus FAudioSource::GetStatus() const
 	}
 }
 
-FAudioBankPtr FAudioSource::GetAudioBank() const
+TWeakPtr<FAudioBank> FAudioSource::GetAudioBank() const
 {
 	return audioBank;
 }

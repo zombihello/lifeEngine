@@ -1,6 +1,6 @@
 #include "System/AudioBufferManager.h"
 
-FAudioBufferRef FAudioBufferManager::Find( FAudioBank* InAudioBank )
+FAudioBufferRef FAudioBufferManager::Find( const TSharedPtr<FAudioBank>& InAudioBank )
 {
 	// If already loaded buffer - return it
 	{

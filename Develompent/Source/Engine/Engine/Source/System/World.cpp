@@ -87,7 +87,6 @@ void FWorld::CleanupWorld()
 	GPhysicsScene.RemoveAllBodies();
 	scene->Clear();
 	actors.clear();
-	GPackageManager->CleanupUnusedPackages();
 	isBeginPlay = false;
 }
 

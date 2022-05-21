@@ -14,7 +14,11 @@
 #include "System/PhysicsMaterial.h"
 #include "System/PhysicsEngine.h"
 
-FORCEINLINE FAssetPtr GetDefaultAsset( EAssetType InType )
+#if WITH_EDITOR
+#include "WorldEd.h"
+#endif // WITH_EDITOR
+
+FORCEINLINE TWeakPtr<FAsset> GetDefaultAsset( EAssetType InType )
 {
 	switch ( InType )
 	{
@@ -56,13 +60,7 @@ FAsset::FAsset( EAssetType InType )
 {}
 
 FAsset::~FAsset()
-{
-	// If asset in package, mark unload state
-	if ( package )
-	{
-		package->MarkAssetUnlnoad( guid );
-	}
-}
+{}
 
 void FAsset::Serialize( class FArchive& InArchive )
 {
@@ -113,10 +111,8 @@ void FAsset::MarkDirty()
 	}
 }
 
-#if WITH_EDITOR
 void FAsset::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
 {}
-#endif // WITH_EDITOR
 
 FAssetReference FAsset::GetAssetReference() const
 {
@@ -127,18 +123,18 @@ FPackage::FPackage( const std::wstring& InName /* = TEXT( "" ) */ )
 	: bIsDirty( true )			// by default package is dirty because not serialized package from HDD
 	, guid( appCreateGuid() )
 	, name( InName )
-	, numUsageAssets( 0 )
+	, numLoadedAssets( 0 )
 	, numDirtyAssets( 0 )
 {}
 
 FPackage::~FPackage()
 {
-	RemoveAll();
+	RemoveAll( true );
 }
 
 bool FPackage::Load( const std::wstring& InPath )
 {
-	RemoveAll();
+	RemoveAll( true );
 
 	FArchive*		archive = GFileSystem->CreateFileReader( InPath );
 	if ( !archive )
@@ -416,9 +412,9 @@ TSharedPtr<FAsset> FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAsse
 	InAssetInfo.data = AssetFactory( InAssetInfo.type );
 
 	// Init asset
-	InAssetInfo.data->guid = InAssetGUID;
-	InAssetInfo.data->package = this;
-	InAssetInfo.data->name = InAssetInfo.name;
+	InAssetInfo.data->guid		= InAssetGUID;
+	InAssetInfo.data->package	= this;
+	InAssetInfo.data->name		= InAssetInfo.name;
 
 	// Seek to asset data
 	InArchive.Seek( InAssetInfo.offset );
@@ -436,39 +432,8 @@ TSharedPtr<FAsset> FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAsse
 
 	// Seek to old offset and exit
 	InArchive.Seek( oldOffset );
-
-	if ( ++numUsageAssets == 1 )
-	{
-		GPackageManager->CheckUsagePackage( filename );		// TODO BS yehor.pohuliaka - AHTUNG! Need change 'filename' to GUID of the package
-	}
+	++numLoadedAssets;
 	return InAssetInfo.data;
-}
-
-void FPackage::MarkAssetUnlnoad( const FGuid& InGUID )
-{
-	auto		itAsset = assetsTable.find( InGUID );
-	if ( itAsset == assetsTable.end() )
-	{
-		return;
-	}
-
-	FAssetInfo&		assetInfo = itAsset->second;
-	if ( numDirtyAssets != -1 && ( FAsset* )assetInfo.data->IsDirty() && --numDirtyAssets <= 0 )
-	{
-		bIsDirty = false;
-	}
-
-	assetInfo.data = nullptr;
-	if ( --numUsageAssets <= 0 )
-	{
-		GPackageManager->CheckUsagePackage( filename );		// TODO BS yehor.pohuliaka - AHTUNG! Need change 'filename' to GUID of the package
-	}
-
-	if ( assetInfo.offset == INVALID_HASH && assetInfo.size == INVALID_HASH )
-	{
-		LE_LOG( LT_Warning, LC_Package, TEXT( "An asset was uploaded that was not recorded on the HDD. This asset has been removed from the package and will not be written" ) );
-		assetsTable.erase( itAsset );
-	}
 }
 
 void FPackage::MarkAssetDirty( const FGuid& InGUID )
@@ -517,27 +482,35 @@ void FPackage::Add( const TSharedPtr<FAsset>& InAsset )
 	InAsset->bDirty					= true;
 	assetGUIDTable[ InAsset->name ] = InAsset->guid;
 	assetsTable[ InAsset->guid ]	= FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset->name, InAsset };
-	++numUsageAssets;
+	++numLoadedAssets;
 }
 
-void FPackage::Remove( const FGuid& InGUID )
+bool FPackage::Remove( const FGuid& InGUID, bool InForceUnload /* = false */ )
 {
 	auto		itAsset = assetsTable.find( InGUID );
 	if ( itAsset == assetsTable.end() )
 	{
-		return;
+		return true;
 	}
 
-	FAssetInfo&		assetInfo = itAsset->second;
-	if ( assetInfo.data )
+	// Unload asset, if failed we exit from method
+	FAssetInfo&				assetInfo = itAsset->second;
+	TWeakPtr<FAsset>		assetPtr = assetInfo.data;
+	if ( assetInfo.data && !UnloadAsset( assetInfo, InForceUnload ) )
 	{
-		assetInfo.data->package = nullptr;
-		if ( numUsageAssets > 0 )
+		return false;
+	}
+
+	// If the asset remains in memory, then in this case we reset its link to this package
+	{
+		TSharedPtr<FAsset>		assetRef = assetPtr.Pin();
+		if ( assetRef )
 		{
-			--numUsageAssets;
+			assetRef->package = nullptr;
 		}
 	}
 
+	// Remove from package
 	auto		itAssetGUID = assetGUIDTable.find( assetInfo.name );
 	if ( itAssetGUID != assetGUIDTable.end() )
 	{
@@ -548,75 +521,182 @@ void FPackage::Remove( const FGuid& InGUID )
 
 	bIsDirty		= true;
 	numDirtyAssets	= -1;
+	return true;
 }
 
-void FPackage::RemoveAll()
+bool FPackage::RemoveAll( bool InForceUnload /* = false */ )
 {
+	// Fill array of assets to unload. Need it for remove reference to this package if him remained in memory
+	std::vector< TWeakPtr<FAsset> >		assetsToUnload;
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
 		FAssetInfo&		assetInfo = itAsset->second;
 		if ( assetInfo.data )
 		{
-			assetInfo.data->package = nullptr;
+			assetsToUnload.push_back( assetInfo.data );
+		}
+	}
+
+	// If we were unable to unload all the assets, we exit the method
+	if ( !UnloadAllAssets( InForceUnload ) )
+	{
+		return false;
+	}
+
+	// If it is still used, unbind the package
+	for ( uint32 index = 0, count = assetsToUnload.size(); index < count; ++index )
+	{
+		TSharedPtr<FAsset>		assetRef = assetsToUnload[ index ].Pin();
+		if ( assetRef )
+		{
+			assetRef->package = nullptr;
 		}
 	}
 
 	assetGUIDTable.clear();
 	assetsTable.clear();
-	numUsageAssets	= 0;
+	numLoadedAssets	= 0;
 	bIsDirty		= true;
 	numDirtyAssets	= -1;
+	return true;
 }
 
-FPackageManager::FPackageManager() :
-	cleaningFrequency( 60.f ),
-	lastCleaningTime( GStartTime )
-{}
-
-void FPackageManager::Init()
+bool FPackage::UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload /* = false */, bool InBroadcastEvent /* = true */ )
 {
-	FConfigValue		configCleaningFrequency = GEngineConfig.GetValue( TEXT( "Engine.PackageManager" ), TEXT( "CleaningFrequency" ) );
-	if ( configCleaningFrequency.IsValid() )
+	// We must unload only not dirty assets and with unique shared reference
+	if ( InAssetInfo.data && !InAssetInfo.data->bDirty )
 	{
-		cleaningFrequency = configCleaningFrequency.GetNumber();
+		// If we not must force unload and is not unique - exit from method
+		if ( !InForceUnload && !InAssetInfo.data.IsUnique() )
+		{
+			return false;
+		}
+
+		// Is can delete this asset
+#if WITH_EDITOR
+		if ( GIsEditor && InBroadcastEvent )
+		{
+			FCanDeleteAssetResult					result;
+			std::vector< TSharedPtr<FAsset>	>		assets = { InAssetInfo.data };
+			FEditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
+
+			// If this asset is blocked, we exit from method
+			if ( !result.Get() )
+			{
+				return false;
+			}
+
+			// Else we tell all what asset is deleted
+			FEditorDelegates::onAssetsDeleted.Broadcast( assets );
+		}
+#endif // WITH_EDITOR
+
+		// If the asset is dirty, then we reduce the number of dirty assets in the package, 
+		// if the package itself has not been changed (name change, etc)
+		if ( numDirtyAssets != -1 && InAssetInfo.data->IsDirty() && --numDirtyAssets <= 0 )
+		{
+			bIsDirty = false;
+		}
+
+		// If the asset was added to the package only in memory, then we remove its mention 
+		// from the package itself, since data is needed to write to the HDD, which is now unloading
+		if ( InAssetInfo.offset == INVALID_ID && InAssetInfo.size == INVALID_ID )
+		{
+			LE_LOG( LT_Warning, LC_Package, TEXT( "An asset was uploaded that was not recorded on the HDD. This asset has been removed from the package and will not be written" ) );
+			InAssetInfo.data->package = nullptr;
+			assetsTable.erase( InAssetInfo.data->GetGUID() );
+		}
+		// Else we only destroy asset
+		else
+		{
+			InAssetInfo.data.Reset();
+		}
+
+		// Decrement number of loaded assets
+		if ( numLoadedAssets > 0 )
+		{
+			--numLoadedAssets;
+		}
+	
+		return true;
 	}
+
+	return false;
 }
 
-void FPackageManager::Tick()
+bool FPackage::UnloadAllAssets( bool InForceUnload /* = false */ )
 {
-	// We clean the packages every 'cleaningFrequency' seconds and only for build game (in editor not execute)
-	if ( !GIsEditor && GCurrentTime - lastCleaningTime >= cleaningFrequency )
-	{	
-		CleanupUnusedPackages();
-		lastCleaningTime = GCurrentTime;
-	}
-}
+	bool		bExistDirtyAssets = false;
+	std::vector<FAssetInfo*>		assetsToUnload;
 
-void FPackageManager::Shutdown()
-{}
-
-void FPackageManager::CleanupUnusedPackages()
-{
-	if ( unusedPackages.empty() )
+	// Fill array assets to unload
+	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
-		return;
-	}
+		FAssetInfo&		assetInfo = itAsset->second;
 
-	for ( auto itUnusedPackage = unusedPackages.begin(), itUnusedPackageEnd = unusedPackages.end(); itUnusedPackage != itUnusedPackageEnd; ++itUnusedPackage )
-	{
-		const std::wstring&		packagePath = *itUnusedPackage;
-		auto					itPackage = packages.find( packagePath );
-		if ( itPackage == packages.end() )
+		// If asset is not loaded - skip it
+		if ( !assetInfo.data )
 		{
 			continue;
 		}
 
-		LE_LOG( LT_Log, LC_Package, TEXT( "Unloaded package '%s'" ), packagePath.c_str() );
-		packages.erase( packagePath );
+		// We must unload only not dirty assets
+		if ( !assetInfo.data->bDirty )
+		{
+			assetsToUnload.push_back( &assetInfo );
+		}
+		else
+		{
+			bExistDirtyAssets = true;
+		}
 	}
 
-	unusedPackages.clear();
+	// If we in editor, fill array for checking is available unload this assets
+#if WITH_EDITOR
+	if ( GIsEditor )
+	{
+		// Convert array of FAssetInfo to TSharedPtr<FAsset> for events
+		std::vector< TSharedPtr<FAsset>	>		assets;
+		for ( uint32 index = 0, count = assetsToUnload.size(); index < count; ++index )
+		{
+			assets.push_back( assetsToUnload[ index ]->data );
+		}
+
+		// Tell all user of we want delete this assets 
+		FCanDeleteAssetResult		result;
+		FEditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
+
+		// If this assets is blocked, we exit from method
+		if ( !result.Get() )
+		{
+			return false;
+		}
+
+		// Else we tell all what asset is deleted
+		FEditorDelegates::onAssetsDeleted.Broadcast( assets );
+	}
+#endif // WITH_EDITOR
+
+	// Unload all assets
+	for ( uint32 index = 0, count = assetsToUnload.size(); index < count; ++index )
+	{
+		bExistDirtyAssets |= !UnloadAsset( *assetsToUnload[ index ], InForceUnload, false );
+	}
+
+	return !bExistDirtyAssets;
 }
+
+FPackageManager::FPackageManager()
+{}
+
+void FPackageManager::Init()
+{}
+
+void FPackageManager::Tick()
+{}
+
+void FPackageManager::Shutdown()
+{}
 
 bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPackageName, std::wstring& OutAssetName, EAssetType& OutAssetType )
 {
@@ -686,26 +766,19 @@ TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const
 	check( InGUIDAsset.IsValid() );
 
 	// Find package and open he
-	FAssetPtr			asset;
+	TWeakPtr<FAsset>	asset;
 	FPackageRef			package = LoadPackage( InPath );
-	if ( !package )
-	{
-		asset = GetDefaultAsset( InType );
-	}
 
 	// Find asset in package
 	if ( package )
 	{
-		FPackageInfo* packageInfo = &packages[ InPath ];
 		asset = package->Find( InGUIDAsset );
-		if ( !asset )
-		{
-			asset = GetDefaultAsset( InType );
-		}
-		else
-		{
-			CheckUsagePackage( *packageInfo );
-		}
+	}
+
+	// If asset is not valid, we return default
+	if ( !asset )
+	{
+		asset = GetDefaultAsset( InType );
 	}
 
 	return asset;
@@ -716,26 +789,23 @@ TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const
 	check( !InAsset.empty() );
 
 	// Find package and open he
-	FAssetPtr			asset;
+	TWeakPtr<FAsset>	asset;
 	FPackageRef			package = LoadPackage( InPath );
-	if ( !package )
-	{
-		asset = GetDefaultAsset( InType );
-	}
-
+	
 	// Find asset in package
 	if ( package )
 	{
-		FPackageInfo* packageInfo = &packages[ InPath ];
 		asset = package->Find( InAsset );
 		if ( !asset )
 		{
 			asset = GetDefaultAsset( InType );
 		}
-		else
-		{
-			CheckUsagePackage( *packageInfo );
-		}
+	}
+
+	// If asset is not valid, we return default
+	if ( !asset )
+	{
+		asset = GetDefaultAsset( InType );
 	}
 
 	return asset;
@@ -760,7 +830,7 @@ FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath, bool InCre
 		}
 		else
 		{
-			packages[ InPath ] = FPackageInfo{ false, package };
+			packages[ InPath ] = package;
 			LE_LOG( LT_Log, LC_Package, TEXT( "Package '%s' opened" ), InPath.c_str() );
 			
 			package->SetNameFromPath( InPath );
@@ -769,22 +839,17 @@ FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath, bool InCre
 	}
 	else
 	{
-		package = itPackage->second.package;
+		package = itPackage->second;
 	}
 
 	if ( !package )
 	{
 		LE_LOG( LT_Warning, LC_Package, TEXT( "Package '%s' not found" ), InPath.c_str() );
 	}
-	else
-	{
-		CheckUsagePackage( packages[ InPath ] );
-	}
-
 	return package;
 }
 
-bool FPackageManager::UnloadPackage( const std::wstring& InPath )
+bool FPackageManager::UnloadPackage( const std::wstring& InPath, bool InForceUnload /* = false */ )
 {
 	auto		itPackage = packages.find( InPath );
 	if ( itPackage == packages.end() )
@@ -792,45 +857,171 @@ bool FPackageManager::UnloadPackage( const std::wstring& InPath )
 		return false;
 	}
 
-	// If we in editor, remove all assets from asset data base
-#if WITH_EDITOR
-	if ( GIsEditor )
-	{
-		// If package is dirty we shouldn't upload it
-		if ( itPackage->second.package->IsDirty() )
-		{
-			return false;
-		}
-	}
-#endif // WITH_EDITOR
-
-	// If package in using, we not unload him
-	if ( itPackage->second.package.GetRefCount() > 1 )
+	// Unload all assets, if any of them was not unloaded or is dirty package, exit from the function
+	if ( itPackage->second->IsDirty() || !itPackage->second->UnloadAllAssets( InForceUnload ) )
 	{
 		return false;
 	}
 
-	unusedPackages.erase( InPath );
+	// If package in using, we not unload him
+	if ( itPackage->second->GetNumLoadedAssets() > 0 )
+	{
+		return false;
+	}
+
 	packages.erase( itPackage );
 
 	LE_LOG( LT_Log, LC_Package, TEXT( "Unloaded package '%s'" ), InPath.c_str() );
 	return true;
 }
 
-void FPackageManager::CheckUsagePackage( FPackageInfo& InOutPackageInfo )
+bool FPackageManager::UnloadAllPackages( bool InForceUnload /* = false */ )
 {
-	// If package in current time not used, we add he to unused list for remove in future
-	check( InOutPackageInfo.package );
-	bool					oldIsUnused = InOutPackageInfo.isUnused;
-	const std::wstring&		packagePath = InOutPackageInfo.package->GetFileName();
+	bool	bUnloadedNotAll = false;
+	for ( auto itPackage = packages.begin(); itPackage != packages.end(); )
+	{
+		// Unload all assets, if any of them was not unloaded or is dirty package - we not remove current package
+		if ( itPackage->second->IsDirty() || !itPackage->second->UnloadAllAssets( InForceUnload ) )
+		{
+			bUnloadedNotAll = true;
+			++itPackage;
+			continue;
+		}
 
-	InOutPackageInfo.isUnused = InOutPackageInfo.package->GetNumUsageAssets() <= 0;
-	if ( InOutPackageInfo.isUnused && !oldIsUnused )
-	{
-		unusedPackages.insert( packagePath );
+		// If package in using, we not unload him
+		if ( itPackage->second->GetNumLoadedAssets() > 0 )
+		{
+			bUnloadedNotAll = true;
+			++itPackage;
+			continue;
+		}
+
+		LE_LOG( LT_Log, LC_Package, TEXT( "Unloaded package '%s'" ), itPackage->first.ToString().c_str() );
+		itPackage = packages.erase( itPackage );
 	}
-	else if ( !InOutPackageInfo.isUnused && oldIsUnused )
+
+	return !bUnloadedNotAll;
+}
+
+bool FPackageManager::UnloadAsset( const TWeakPtr<FAsset>& InAssetPtr, bool InForceUnload /* = false */ )
+{
+	FPackageRef		package;
+	FGuid			guidAsset;
 	{
-		unusedPackages.erase( packagePath );
+		// If asset already unload, we exit from function
+		TSharedPtr<FAsset>		assetRef = InAssetPtr.Pin();
+		if ( !assetRef )
+		{
+			return true;
+		}
+
+		// Getting from asset him package and guid
+		package		= assetRef->GetPackage();
+		guidAsset	= assetRef->GetGUID();
+		check( package );
 	}
+
+	// Try unload asset in package
+	return package->UnloadAsset( guidAsset, InForceUnload );
+}
+
+void FPackageManager::GarbageCollector()
+{
+	double		startGCTime = appSeconds();
+	LE_LOG( LT_Log, LC_Package, TEXT( "Collecting garbage of packages" ) );
+
+	uint32															numUnloadedAssets	= 0;
+	uint32															numUnloadedPackages = 0;
+	std::unordered_set< FPackageRef, FPackageRef::FHashFunction >	packagesToUnload;
+
+	// We go through all the packages and unload unused assets
+	LE_LOG( LT_Log, LC_Package, TEXT( " Assets:" ) );
+	for ( auto itPackage = packages.begin(), itPackageEnd = packages.end(); itPackage != itPackageEnd; ++itPackage )
+	{
+		FPackageRef		package		= itPackage->second;
+		uint32			numAssets	= package->GetNumAssets();		
+		for ( uint32 index = 0; index < numAssets; ++index )
+		{
+			FAssetInfo		assetInfo;
+			package->GetAssetInfo( index, assetInfo );
+
+			// Skip asset if him is not loaded
+			if ( !assetInfo.data )
+			{
+				continue;
+			}
+
+			// Unload asset only if weak references is not exist
+			bool		bCanUnloadAsset = assetInfo.data.GetSharedReferenceCount() <= 2 && assetInfo.data.GetWeakReferenceCount() <= 1;		// 2 shared reference this is two FAssetInfo, one in current section, other in package
+			if ( bCanUnloadAsset && package->UnloadAsset( assetInfo.data->GetGUID(), true ) )
+			{
+				// Try unload dependent assets
+				FAsset::FSetDependentAssets		dependentAssets;
+				assetInfo.data->GetDependentAssets( dependentAssets );
+
+				for ( auto itDependentAsset = dependentAssets.begin(), itDependentAssetEnd = dependentAssets.end(); itDependentAsset != itDependentAssetEnd; ++itDependentAsset )
+				{
+					// If depended asset already unloaded - skip it
+					TSharedPtr<FAsset>		dependetAsset = itDependentAsset->Pin();
+					if ( !dependetAsset )
+					{
+						continue;
+					}
+
+					// Is we can unload this asset?
+					bool	bCanUnloadDependentAsset = dependetAsset.GetSharedReferenceCount() <= 2 && dependetAsset.GetWeakReferenceCount() <= 3;		// Shared reference: 2 because one in current section, other in package
+																																						// Weak reference: 3 because one in current section (FSetDependentAssets), second in parent asset and other self this resource
+					if ( !bCanUnloadDependentAsset )
+					{
+						continue;
+					}
+
+					// If in asset package is not exist - skip it
+					FPackageRef		dependetPackage = dependetAsset->GetPackage();
+					if ( !dependetPackage )
+					{
+						continue;
+					}
+
+					// If we succeed unload this asset then increment counter
+					if ( dependetPackage->UnloadAsset( dependetAsset->GetGUID(), true ) )
+					{
+						LE_LOG( LT_Log, LC_Package, TEXT( "  Asset '%s:%s' unloaded" ), dependetPackage->GetName().c_str(), dependetAsset->GetAssetName().c_str() );
+						++numUnloadedAssets;
+					}
+
+					// If unloaded all assets we must remove this package
+					if ( dependetPackage->GetNumLoadedAssets() <= 0 )
+					{
+						packagesToUnload.insert( dependetPackage );
+					}
+				}
+
+				LE_LOG( LT_Log, LC_Package, TEXT( "  Asset '%s:%s' unloaded" ), package->GetName().c_str(), assetInfo.name.c_str() );
+				++numUnloadedAssets;
+			}
+		}
+
+		// If unloaded all assets we must remove this package
+		if ( package->GetNumLoadedAssets() <= 0 )
+		{
+			packagesToUnload.insert( itPackage->second );
+		}
+	}
+
+	// Unload all not used packages
+	numUnloadedPackages		= packagesToUnload.size();
+	LE_LOG( LT_Log, LC_Package, TEXT( " Packages:" ) );
+	
+	for ( auto itPackage = packagesToUnload.begin(), itPackageEnd = packagesToUnload.end(); itPackage != itPackageEnd; ++itPackage )
+	{
+		FPackageRef		package = *itPackage;
+		
+		LE_LOG( LT_Log, LC_Package, TEXT( "  Package '%s' unloaded" ), package->GetName().c_str() );
+		packages.erase( package->GetFileName() );
+	}
+
+	double		endGCTime = appSeconds();
+	LE_LOG( LT_Log, LC_Package, TEXT( "Unloaded %i assets and %i packages" ), numUnloadedAssets, numUnloadedPackages );
+	LE_LOG( LT_Log, LC_Package, TEXT( "%f ms for realtime GC" ), ( endGCTime - startGCTime ) / 1000.f );
 }

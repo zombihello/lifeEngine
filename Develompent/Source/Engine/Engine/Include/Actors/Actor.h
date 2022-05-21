@@ -296,7 +296,7 @@ public:
 	 *
 	 * @param InValue Value
 	 */
-	FORCEINLINE void SetValueMaterial( const FMaterialPtr& InValue )
+	FORCEINLINE void SetValueMaterial( const TWeakPtr<FMaterial>& InValue )
 	{
 		if ( value && type != AVT_Material )
 		{
@@ -305,10 +305,10 @@ public:
 
 		if ( !value )
 		{
-			value = new FMaterialPtr();
+			value = new TWeakPtr<FMaterial>();
 		}
 
-		*static_cast< FMaterialPtr* >( value ) = InValue;
+		*static_cast< TWeakPtr<FMaterial>* >( value ) = InValue;
 		type = AVT_Material;
 	}
 
@@ -486,13 +486,13 @@ public:
 	 * Get value material
 	 * @return Return value material
 	 */
-	FORCEINLINE FMaterialPtr GetValueMaterial() const
+	FORCEINLINE TWeakPtr<FMaterial> GetValueMaterial() const
 	{
 		if ( type != AVT_Material )
 		{
 			return nullptr;
 		}
-		return *static_cast< FMaterialPtr* >( value );
+		return *static_cast< TWeakPtr<FMaterial>* >( value );
 	}
 
 	/**

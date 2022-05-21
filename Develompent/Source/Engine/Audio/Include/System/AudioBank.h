@@ -15,12 +15,7 @@
 #include "System/Package.h"
 #include "System/AudioDevice.h"
 #include "System/AudioBuffer.h"
-
- /**
-  * @ingroup Audio
-  * @brief Weak smart pointer to FAudioBank
-  */
-typedef TWeakPtr<class FAudioBank>						FAudioBankPtr;
+#include "Misc/SharedPointer.h"
 
 /**
  * @ingroup Audio
@@ -44,7 +39,7 @@ struct FAudioBankInfo
  * @ingroup Audio
  * @brief Audio bank
  */
-class FAudioBank : public FAsset
+class FAudioBank : public FAsset, public TSharedFromThis<FAudioBank>
 {
 public:
 	/**
@@ -157,9 +152,9 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAudioBankPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FAudioBank>& InValue )
 {
-	FAssetPtr			asset = InValue;
+	TWeakPtr<FAsset>	asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -169,10 +164,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FAudioBankPtr& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAudioBankPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FAudioBank>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( FAssetPtr )InValue;
+	InArchive << ( TWeakPtr<FAsset> )InValue;
 	return InArchive;
 }
 

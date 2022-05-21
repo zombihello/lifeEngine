@@ -23,12 +23,6 @@
 #include "Core.h"
 
 /**
- * @ingroup Engine Engine
- * @brief Weak smart pointer to FMaterial
- */
-typedef TWeakPtr<class FMaterial>				FMaterialPtr;
-
-/**
  * @ingroup Engine
  * Flags usage material
  */
@@ -297,23 +291,23 @@ private:
 	 */
 	typedef std::unordered_map< uint64, std::vector< FShader* > >				FMeshShaderMap;
 
-	bool												isNeedUpdateShaderMap;	/**< Is need update shader map */
-	bool												isTwoSided;				/**< Is two sided material */
-	bool												isWireframe;			/**< Is wireframe material */
-	uint32												usage;					/**< Usage flags (see EMaterialUsage) */
-	FMeshShaderMap										shaderMap;				/**< Shader map for material */
-	std::unordered_map< std::wstring, float >			scalarParameters;		/**< Array scalar parameters */
-	std::unordered_map< std::wstring, FVector4D >		vectorParameters;		/**< Vector parameters */
-	std::unordered_map< std::wstring, FTexture2DPtr >	textureParameters;		/**< Array texture parameters */
+	bool														isNeedUpdateShaderMap;	/**< Is need update shader map */
+	bool														isTwoSided;				/**< Is two sided material */
+	bool														isWireframe;			/**< Is wireframe material */
+	uint32														usage;					/**< Usage flags (see EMaterialUsage) */
+	FMeshShaderMap												shaderMap;				/**< Shader map for material */
+	std::unordered_map< std::wstring, float >					scalarParameters;		/**< Array scalar parameters */
+	std::unordered_map< std::wstring, FVector4D >				vectorParameters;		/**< Vector parameters */
+	std::unordered_map< std::wstring, TWeakPtr<FTexture2D> >	textureParameters;		/**< Array texture parameters */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FMaterialPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FMaterial>& InValue )
 {
-	FAssetPtr			asset = InValue;
+	TWeakPtr<FAsset>		asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -323,10 +317,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FMaterialPtr& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FMaterialPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FMaterial>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( FAssetPtr )InValue;
+	InArchive << ( TWeakPtr<FAsset> )InValue;
 	return InArchive;
 }
 

@@ -64,6 +64,15 @@ namespace SharedPointerInternals
 		}
 
 		/**
+		 * @brief Get count of weak references
+		 * @return Return count of weak references
+		 */
+		FORCEINLINE uint32 GetWeakReferenceCount() const
+		{
+			return weakReferenceCount;
+		}
+
+		/**
 		 * @brief Adds a shared reference to this counter
 		 */
 		FORCEINLINE void AddSharedReference()
@@ -76,14 +85,27 @@ namespace SharedPointerInternals
 		 */
 		FORCEINLINE void ReleaseSharedReference()
 		{
-			if ( !appInterlockedDecrement( ( int32* ) &sharedReferenceCount ) )
+			// If we already release shared reference, we nothing do
+			if ( sharedReferenceCount <= 0 )
+			{
+				return;
+			}
+
+			if ( sharedReferenceCount == 1 )
 			{
 				// Last shared reference was released!  Destroy the referenced object.
 				DestroyObject();
 
+				// Clear shared reference count
+				appInterlockedDecrement( ( int32* )&sharedReferenceCount );
+
 				// No more shared referencers, so decrement the weak reference count by one.  When the weak
 				// reference count reaches zero, this object will be deleted.
 				ReleaseWeakReference();
+			}
+			else
+			{
+				appInterlockedDecrement( ( int32* )&sharedReferenceCount );
 			}
 		}
 
@@ -476,17 +498,6 @@ namespace SharedPointerInternals
 		}
 
 		/**
-		 * @brief Force destroy object
-		 */
-		FORCEINLINE void ForceDestroyObject()
-		{
-			if ( referenceController )
-			{
-				referenceController->DestroyObject();
-			}
-		}
-
-		/**
 		 * @brief Get type hash
 		 * @return Return hash of type
 		 */
@@ -514,12 +525,21 @@ namespace SharedPointerInternals
 		}
 
 		/**
+		 * @brief Returns the number of weak references to this object
+		 * @return Number of weak references to the object
+		 */
+		FORCEINLINE uint32 GetWeakReferenceCount() const
+		{
+			return referenceController != nullptr ? referenceController->GetWeakReferenceCount() : 0;
+		}
+
+		/**
 		 * @brief Is unique shared reference
 		 * @return Return TRUE if there is only one shared reference to the object, and this is it!
 		 */
 		FORCEINLINE bool IsUnique() const
 		{
-			return GetSharedReferenceCount() == 0;
+			return GetSharedReferenceCount() == 1;
 		}
 
 		/**

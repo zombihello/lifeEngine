@@ -46,11 +46,9 @@ static FORCEINLINE void DeleteDir( const QString& InRouteDir, bool& OutIsDirtyTO
 			{
 				std::wstring		enginePath = appQtAbsolutePathToEngine( it->absoluteFilePath() );
 				
-				// We try unload package for remove unused assets
-				GPackageManager->UnloadPackage( enginePath );
-
+				// We try unload package for remove unused assets.
 				// If package still used, we skip him
-				if ( GPackageManager->IsPackageUsed( enginePath ) )
+				if ( !GPackageManager->UnloadPackage( enginePath ) )
 				{
 					OutUsedPackage.push_back( it->baseName() );
 					continue;
@@ -574,25 +572,35 @@ void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 	}
 
 	// Remove all selected assets from package
-	std::vector< FAssetInfo >		assetInfosToDelete;
+	std::vector< std::wstring >		assetInfosToDelete;
+	std::vector< QString >			usedAssets;
 	for ( uint32 index = 0, count = modelIndexList.length(); index < count; ++index )
 	{
 		uint32			idAsset = modelIndexList[ index ].row();
 		FAssetInfo		assetInfo;
 		
 		package->GetAssetInfo( idAsset, assetInfo );
-		assetInfosToDelete.push_back( assetInfo );
+		assetInfosToDelete.push_back( assetInfo.name );
 	}
 
 	for ( uint32 index = 0, count = assetInfosToDelete.size(); index < count; ++index )
 	{
-		package->Remove( assetInfosToDelete[ index ].name );
+		if ( !package->Remove( assetInfosToDelete[ index ] ) )
+		{
+			usedAssets.push_back( QString::fromStdWString( assetInfosToDelete[ index ] ) );
+		}
 	}
 
 	// If package is dirty - refresh package browser
 	if ( package->IsDirty() )
 	{
 		ui->listView_packageBrowser->Refresh();
+	}
+
+	// If we have used assets - print message
+	if ( !usedAssets.empty() )
+	{
+		ShowMessageBoxWithList( this, "Warning", "The following assets in using and cannot be delete. Close all assets from this package will allow them to be moved or deleted", "Assets", usedAssets );
 	}
 }
 
@@ -795,11 +803,9 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_delete()
 			{
 				std::wstring	enginePath = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
 				
-				// We try unload package for remove unused assets
-				GPackageManager->UnloadPackage( enginePath );
-
+				// We try unload package for remove unused assets.
 				// If package still used, we skip him
-				if ( GPackageManager->IsPackageUsed( enginePath ) )
+				if ( !GPackageManager->UnloadPackage( enginePath ) )
 				{
 					usedPackages.push_back( fileInfo.baseName() );
 					continue;
@@ -875,11 +881,9 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 		{
 			std::wstring	pathPackage				= appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
 			
-			// We try unload package for remove unused assets
-			GPackageManager->UnloadPackage( pathPackage );
-
+			// We try unload package for remove unused assets.
 			// If package still used, we skip him
-			if ( GPackageManager->IsPackageUsed( pathPackage ) )
+			if ( !GPackageManager->UnloadPackage( pathPackage ) )
 			{
 				QMessageBox::warning( this, "Warning", QString::fromStdWString( FString::Format( TEXT( "The package <b>'%s'</b> in using and cannot be delete. Close all assets from this package will allow them to be deleted" ), fileInfo.baseName().toStdWString().c_str() ) ), QMessageBox::Ok );
 				return;

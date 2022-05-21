@@ -173,7 +173,6 @@ bool FMaterial::GetVectorParameterValue( const std::wstring& InParameterName, FV
 	return true;
 }
 
-#if WITH_EDITOR
 void FMaterial::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
 {
 	// Fill set of dependent assets
@@ -190,4 +189,3 @@ void FMaterial::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAs
 		}
 	}
 }
-#endif // WITH_EDITOR

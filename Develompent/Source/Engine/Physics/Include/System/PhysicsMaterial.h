@@ -31,12 +31,6 @@ DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialDestroyed, const TSharedPtr<class 
 
 /**
  * @ingroup Physics
- * @brief Weak smart pointer to FPhysicsMaterial
- */
-typedef TWeakPtr<class FPhysicsMaterial>				FPhysicsMaterialPtr;
-
-/**
- * @ingroup Physics
  * @brief Class of physics material
  */
 class FPhysicsMaterial : public FAsset, public TSharedFromThis<FPhysicsMaterial>
@@ -209,9 +203,9 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FPhysicsMaterialPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FPhysicsMaterial>& InValue )
 {
-	FAssetPtr			asset = InValue;
+	TWeakPtr<FAsset>	asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -221,10 +215,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FPhysicsMaterialPtr& InVa
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FPhysicsMaterialPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FPhysicsMaterial>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( FAssetPtr )InValue;
+	InArchive << ( TWeakPtr<FAsset> )InValue;
 	return InArchive;
 }
 

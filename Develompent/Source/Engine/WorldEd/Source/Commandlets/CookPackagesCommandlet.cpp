@@ -535,7 +535,7 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	}
 
 	// Getting texture parameters
-	std::unordered_map< std::wstring, FTexture2DPtr >		textureParameters;
+	std::unordered_map< std::wstring, TWeakPtr<FTexture2D> >		textureParameters;
 	{
 		FConfigValue	configVarTextureParameters = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "TextureParameters" ) );
 		if ( configVarTextureParameters.IsValid() )

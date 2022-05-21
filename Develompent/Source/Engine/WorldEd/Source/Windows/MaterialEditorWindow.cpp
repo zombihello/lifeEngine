@@ -11,6 +11,7 @@
 #include "Render/MaterialPreviewViewportClient.h"
 #include "Render/RenderingThread.h"
 #include "Widgets/SelectAssetWidget.h"
+#include "WorldEd.h"
 
 WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InMaterial, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
@@ -35,6 +36,9 @@ WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InM
 	ui->viewportPreview->SetViewportClient( viewportClient, false );
 	ui->viewportPreview->SetEnabled( true );
 	bInit = true;
+
+	// Subscribe to event when assets try destroy of editing material. It need is block
+	//FEditorDelegates::onAssetsCanDelete.Add( this, &WeMaterialEditorWindow::OnAssetsCanDelete );
 }
 
 void WeMaterialEditorWindow::InitUI()
@@ -133,6 +137,9 @@ WeMaterialEditorWindow::~WeMaterialEditorWindow()
 	ui->viewportPreview->SetViewportClient( nullptr, false );
 	delete viewportClient;
 	delete ui;
+
+	// Unsubscribe from event when assets try destroy
+	//FEditorDelegates::onAssetsCanDelete.Remove( this, &WeMaterialEditorWindow::OnAssetsCanDelete );
 }
 
 void WeMaterialEditorWindow::OnCheckBoxIsTwoSidedToggled( bool InValue )
@@ -193,4 +200,17 @@ void WeMaterialEditorWindow::OnSelectedAssetDiffuse( const std::wstring& InNewAs
 	}
 
 	material->SetTextureParameterValue( TEXT( "diffuse" ), newTexture2DRef );
+}
+
+void WeMaterialEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, FCanDeleteAssetResult& OutResult )
+{
+	// If in InAssets exist material who is editing now - need is block
+	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
+	{
+		if ( InAssets[ index ] == material )
+		{
+			OutResult.Set( false );
+			return;
+		}
+	}
 }

@@ -63,6 +63,14 @@ private:
 	 */
 	void InitUI();
 
+	/**
+	 * Called event when asset try delete
+	 * 
+	 * @param InAssets	Array of assets to delete
+	 * @param OutResult Result, we can is delete this assets?
+	 */
+	void OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, struct FCanDeleteAssetResult& OutResult );
+
 	bool										bInit;						/**< Is inited window */
 	Ui::WeMaterialEditorWindow*					ui;							/**< Qt UI */
 	TSharedPtr<FMaterial>						material;					/**< Editable asset */

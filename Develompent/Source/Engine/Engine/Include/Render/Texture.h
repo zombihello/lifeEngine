@@ -20,12 +20,6 @@
 #include "RHI/TypesRHI.h"
 
 /**
- * @ingroup Engine Engine
- * @brief Weak smart pointer to FTexture2D asset
- */
-typedef TWeakPtr<class FTexture2D>				FTexture2DPtr;
-
-/**
  * @ingroup Engine
  * @brief Implementation for 2D textures
  */
@@ -208,9 +202,9 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTexture2DPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FTexture2D>& InValue )
 {
-	FAssetPtr			asset = InValue;
+	TWeakPtr<FAsset>	asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -220,10 +214,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FTexture2DPtr& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FTexture2DPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FTexture2D>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( FAssetPtr )InValue;
+	InArchive << ( TWeakPtr<FAsset> )InValue;
 	return InArchive;
 }
 

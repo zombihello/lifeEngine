@@ -20,12 +20,6 @@
 #include "RHI/BaseBufferRHI.h"
 #include "RHI/TypesRHI.h"
 
- /**
-  * @ingroup Engine Engine
-  * @brief Weak smart pointer to FTexture2D
-  */
-typedef TWeakPtr<class FStaticMesh>				FStaticMeshPtr;
-
 /**
  * @ingroup Engine
  * Surface in static mesh
@@ -116,7 +110,7 @@ public:
 	 * Get materials
 	 * @return Return array materials
 	 */
-	FORCEINLINE const std::vector<FMaterialPtr> GetMaterials() const
+	FORCEINLINE const std::vector< TWeakPtr<FMaterial> > GetMaterials() const
 	{
 		return materials;
 	}
@@ -127,7 +121,7 @@ public:
 	 * @param[in] InMaterialIndex Material index
 	 * @return Return material, if index not valid return nullptr
 	 */
-	FORCEINLINE FMaterialPtr GetMaterial( uint32 InMaterialIndex ) const
+	FORCEINLINE TWeakPtr<FMaterial> GetMaterial( uint32 InMaterialIndex ) const
 	{
 		if ( InMaterialIndex >= materials.size() )
 		{
@@ -166,7 +160,7 @@ public:
 
 private:
 	TRefCountPtr< FStaticMeshVertexFactory >	vertexFactory;			/**< Vertex factory */
-	std::vector< FMaterialPtr >					materials;				/**< Array materials in mesh */
+	std::vector< TWeakPtr<FMaterial> >			materials;				/**< Array materials in mesh */
 	std::vector< FStaticMeshSurface >			surfaces;				/**< Array surfaces in mesh */
 	FBulkData< FStaticMeshVertexType >			verteces;				/**< Array verteces to create RHI vertex buffer */	
 	FBulkData< uint32 >							indeces;				/**< Array indeces to create RHI index buffer */
@@ -196,9 +190,9 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshSurface&
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FStaticMesh>& InValue )
 {
-	FAssetPtr			asset = InValue;
+	TWeakPtr<FAsset>	asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -208,10 +202,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshPtr& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshPtr& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FStaticMesh>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( FAssetPtr )InValue;
+	InArchive << ( TWeakPtr<FAsset> )InValue;
 	return InArchive;
 }
 

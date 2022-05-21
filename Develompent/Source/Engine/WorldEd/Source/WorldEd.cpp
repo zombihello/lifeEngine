@@ -23,6 +23,7 @@
 /**
  * Globals
  */
+FEditorDelegates::FOnAssetsCanDelete	FEditorDelegates::onAssetsCanDelete;
 FEditorDelegates::FOnAssetsDeleted		FEditorDelegates::onAssetsDeleted;
 
 void QtMessageOutput( QtMsgType InType, const QMessageLogContext& InContext, const QString& InMessage )

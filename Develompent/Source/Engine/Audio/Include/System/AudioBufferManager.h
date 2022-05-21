@@ -27,19 +27,19 @@ public:
 	 * @param InAudioBank Audio bank
 	 * @return Return finded bank. If failed return nullptr
 	 */
-	FAudioBufferRef Find( FAudioBank* InAudioBank );
+	FAudioBufferRef Find( const TSharedPtr<FAudioBank>& InAudioBank );
 
 	/**
 	 * Remove loaded buffer
 	 * @param InAudioBank Audio bank
 	 */
-	FORCEINLINE void Remove( FAudioBank* InAudioBank )
+	FORCEINLINE void Remove( const TSharedPtr<FAudioBank>& InAudioBank )
 	{
 		buffers.erase( InAudioBank );
 	}
 
 private:
-	std::unordered_map< FAudioBank*, FAudioBufferRef >		buffers;		/**< Map of fully loaded banks to buffer */
+	std::unordered_map< TWeakPtr<FAudioBank>, FAudioBufferRef, TWeakPtr<FAudioBank>::FHashFunction >		buffers;		/**< Map of fully loaded banks to buffer */
 };
 
 #endif // !AUDIOBUFFERMANAGER_H

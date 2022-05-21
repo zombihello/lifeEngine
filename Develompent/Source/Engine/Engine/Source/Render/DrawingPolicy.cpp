@@ -17,7 +17,7 @@ FMeshDrawingPolicy::FMeshDrawingPolicy()
 FMeshDrawingPolicy::~FMeshDrawingPolicy()
 {}
 
-void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, const FMaterialPtr& InMaterial, float InDepthBias /* = 0.f */ )
+void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, const TWeakPtr<FMaterial>& InMaterial, float InDepthBias /* = 0.f */ )
 {
 	TSharedPtr<FMaterial>		materialRef = InMaterial.Pin();
 	checkMsg( InVertexFactory && materialRef, TEXT( "Vertex factory and material must be valid for init drawing policy" ) );

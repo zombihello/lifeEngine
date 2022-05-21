@@ -151,11 +151,9 @@ void WeFileSystemModel::dropMimeData_moveFiles( const QMimeData* InData, Qt::Dro
 				{
 					std::wstring		enginePath = appQtAbsolutePathToEngine( newFile );
 					
-					// We try unload package for remove unused assets
-					GPackageManager->UnloadPackage( enginePath );
-
+					// We try unload package for remove unused assets.
 					// If package still used, we skip him
-					if ( GPackageManager->IsPackageUsed( enginePath ) )
+					if ( !GPackageManager->UnloadPackage( enginePath ) )
 					{
 						usedPackages.push_back( fileInfo( InParent ).baseName() + "/" + dropFileInfo.baseName() );
 						continue;
@@ -174,11 +172,9 @@ void WeFileSystemModel::dropMimeData_moveFiles( const QMimeData* InData, Qt::Dro
 			{
 				std::wstring		enginePath = appQtAbsolutePathToEngine( oldFile );
 				
-				// We try unload package for remove unused assets
-				GPackageManager->UnloadPackage( enginePath );
-
+				// We try unload package for remove unused assets.
 				// If package still used, we skip him
-				if ( GPackageManager->IsPackageUsed( enginePath ) )
+				if ( !GPackageManager->UnloadPackage( enginePath ) )
 				{
 					usedPackages.push_back( dropFileInfo.baseName() );
 					continue;
@@ -282,11 +278,9 @@ void WeFileSystemModel::dropMimeData_copyFiles( const QMimeData* InData, Qt::Dro
 				{
 					std::wstring		enginePath = appQtAbsolutePathToEngine( newFile );
 					
-					// We try unload package for remove unused assets
-					GPackageManager->UnloadPackage( enginePath );
-
+					// We try unload package for remove unused assets.
 					// If package still used, we skip him
-					if ( GPackageManager->IsPackageUsed( enginePath ) )
+					if ( !GPackageManager->UnloadPackage( enginePath ) )
 					{
 						usedPackages.push_back( fileInfo( InParent ).baseName() + "/" + dropFileInfo.baseName() );
 						continue;
@@ -384,11 +378,9 @@ void WeFileSystemModel::MoveDir( const QString& InOldDir, const QString& InNewDi
 				{
 					std::wstring		enginePath = appQtAbsolutePathToEngine( newFile );
 					
-					// We try unload package for remove unused assets
-					GPackageManager->UnloadPackage( enginePath );
-
+					// We try unload package for remove unused assets.
 					// If package still used, we skip him
-					if ( GPackageManager->IsPackageUsed( enginePath ) )
+					if ( !GPackageManager->UnloadPackage( enginePath ) )
 					{
 						OutUsedPackage.push_back( InNewDir + "/" + it->baseName() );
 						continue;
@@ -407,11 +399,9 @@ void WeFileSystemModel::MoveDir( const QString& InOldDir, const QString& InNewDi
 			{
 				std::wstring		enginePath = appQtAbsolutePathToEngine( it->absoluteFilePath() );
 				
-				// We try unload package for remove unused assets
-				GPackageManager->UnloadPackage( enginePath );
-
+				// We try unload package for remove unused assets.
 				// If package still used, we skip him
-				if ( GPackageManager->IsPackageUsed( enginePath ) )
+				if ( !GPackageManager->UnloadPackage( enginePath ) )
 				{
 					OutUsedPackage.push_back( it->baseName() );
 					continue;
@@ -498,11 +488,9 @@ void WeFileSystemModel::CopyDir( const QString& InOldDir, const QString& InNewDi
 				{
 					std::wstring		enginePath = appQtAbsolutePathToEngine( newFile );
 					
-					// We try unload package for remove unused assets
-					GPackageManager->UnloadPackage( enginePath );
-
+					// We try unload package for remove unused assets.
 					// If package still used, we skip him
-					if ( GPackageManager->IsPackageUsed( enginePath ) )
+					if ( !GPackageManager->UnloadPackage( enginePath ) )
 					{
 						OutUsedPackage.push_back( InNewDir + "/" + it->baseName() );
 						continue;

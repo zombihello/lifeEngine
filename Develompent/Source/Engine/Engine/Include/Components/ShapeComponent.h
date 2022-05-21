@@ -68,7 +68,7 @@ public:
 	 * @brief Set physics material
 	 * @param InPhysMaterial Physics material
 	 */
-	FORCEINLINE void SetPhysMaterial( const FPhysicsMaterialPtr& InPhysMaterial )
+	FORCEINLINE void SetPhysMaterial( const TWeakPtr<FPhysicsMaterial>& InPhysMaterial )
 	{
 		physicsMaterial = InPhysMaterial ? InPhysMaterial : GPhysicsEngine.GetDefaultPhysMaterial();
 	}
@@ -86,14 +86,14 @@ public:
 	 * @brief Get physics material
 	 * @return Return physics material
 	 */
-	FORCEINLINE FPhysicsMaterialPtr GetPhysMaterial() const
+	FORCEINLINE TWeakPtr<FPhysicsMaterial> GetPhysMaterial() const
 	{
 		return physicsMaterial;
 	}
 
 protected:
 	FCollisionProfile*			collisionProfile;		/**< Collision profile */
-	FPhysicsMaterialPtr			physicsMaterial;		/**< Physics material */
+	TWeakPtr<FPhysicsMaterial>	physicsMaterial;		/**< Physics material */
 };
 
 #endif // !SHAPECOMPONENT_H

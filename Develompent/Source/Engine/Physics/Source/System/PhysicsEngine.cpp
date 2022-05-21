@@ -67,8 +67,8 @@ void FPhysicsEngine::Init()
 			FConfigValue		configDefaultPhysMaterial = GEngineConfig.GetValue( TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
 			if ( configDefaultPhysMaterial.IsValid() )
 			{
-				std::wstring	pathAsset = configDefaultPhysMaterial.GetString();
-				FAssetPtr		asset = GPackageManager->FindAsset( pathAsset );
+				std::wstring		pathAsset = configDefaultPhysMaterial.GetString();
+				TWeakPtr<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultPhysMaterial = asset;
