@@ -6,6 +6,9 @@ FAudioSource::FAudioSource()
 	: bMuted( false )
 	, alHandle( 0 )
 	, volume( 100.f )
+	, audioDeviceMutedHandle( nullptr )
+	, audioBufferDestroyedHandle( nullptr )
+	, audioBufferUpdatedHandle( nullptr )
 {
 	alGenSources( 1, &alHandle );
 
@@ -19,7 +22,7 @@ FAudioSource::FAudioSource()
 	SetLocation( FMath::vectorZero );
 
 	// Subscribe to event of muted/unmuted audio device
-	GAudioDevice.OnAudioDeviceMuted().Add( this, &FAudioSource::OnAudioDeviceMuted );
+	audioDeviceMutedHandle = GAudioDevice.OnAudioDeviceMuted().Add( std::bind( &FAudioSource::OnAudioDeviceMuted, this, std::placeholders::_1 ) );
 }
 
 FAudioSource::~FAudioSource()
@@ -27,7 +30,7 @@ FAudioSource::~FAudioSource()
 	alDeleteSources( 1, &alHandle );
 
 	// Unsubscribe from event of muted/unmuted audio device
-	GAudioDevice.OnAudioDeviceMuted().Remove( this, &FAudioSource::OnAudioDeviceMuted );
+	GAudioDevice.OnAudioDeviceMuted().Remove( audioDeviceMutedHandle );
 
 	// Unsubscribe from event of audio buffer if him is exist
 	TSharedPtr<FAudioBank>		audioBankRef = audioBank.ToSharedPtr();
@@ -36,8 +39,8 @@ FAudioSource::~FAudioSource()
 		FAudioBufferRef		audioBuffer = audioBankRef->GetAudioBuffer();
 		if ( audioBuffer )
 		{
-			audioBuffer->OnAudioBufferDestroyed().Remove( this, &FAudioSource::OnAudioBufferDestroyed );
-			audioBuffer->OnAudioBufferUpdated().Remove( this, &FAudioSource::OnAudioBufferUpdated );
+			audioBuffer->OnAudioBufferDestroyed().Remove( audioBufferDestroyedHandle );
+			audioBuffer->OnAudioBufferUpdated().Remove( audioBufferUpdatedHandle );
 		}
 	}
 }
@@ -100,8 +103,8 @@ void FAudioSource::SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank )
 			audioBuffer = oldAudioBankRef->GetAudioBuffer();
 			if ( audioBuffer )
 			{
-				audioBuffer->OnAudioBufferDestroyed().Remove( this, &FAudioSource::OnAudioBufferDestroyed );
-				audioBuffer->OnAudioBufferUpdated().Remove( this, &FAudioSource::OnAudioBufferUpdated );
+				audioBuffer->OnAudioBufferDestroyed().Remove( audioBufferDestroyedHandle );
+				audioBuffer->OnAudioBufferUpdated().Remove( audioBufferUpdatedHandle );
 				audioBuffer = nullptr;
 			}
 		}
@@ -116,8 +119,8 @@ void FAudioSource::SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank )
 		audioBuffer = audioBankRef->GetAudioBuffer();
 		if ( audioBuffer )
 		{
-			audioBuffer->OnAudioBufferDestroyed().Add( this, &FAudioSource::OnAudioBufferDestroyed );
-			audioBuffer->OnAudioBufferUpdated().Add( this, &FAudioSource::OnAudioBufferUpdated );
+			audioBufferDestroyedHandle	= audioBuffer->OnAudioBufferDestroyed().Add( std::bind( &FAudioSource::OnAudioBufferDestroyed, this, std::placeholders::_1 ) );
+			audioBufferUpdatedHandle	= audioBuffer->OnAudioBufferUpdated().Add( std::bind( &FAudioSource::OnAudioBufferUpdated, this, std::placeholders::_1 ) );
 		}
 	}
 

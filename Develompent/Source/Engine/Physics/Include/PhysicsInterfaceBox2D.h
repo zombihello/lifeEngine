@@ -18,6 +18,7 @@
 #include "Math/Rotator.h"
 #include "Misc/SharedPointer.h"
 #include "Misc/Box2DGlobals.h"
+#include "System/PhysicsMaterialDelegates.h"
 #include "System/Box2DScene.h"
 
 /**
@@ -181,6 +182,8 @@ struct FPhysicsActorHandleBox2D
 	 */
 	FPhysicsActorHandleBox2D()
 		: bx2Body( nullptr )
+		, physicsMaterialUpdateHandle( nullptr )
+		, physicsMaterialDestroyedHandle( nullptr )
 	{}
 
 	/**
@@ -193,8 +196,10 @@ struct FPhysicsActorHandleBox2D
 	 */
 	void OnMaterialDestroyed( const TSharedPtr<class FPhysicsMaterial>& InPhysMaterial );
 
-	b2Body*											bx2Body;		/**< Box2D rigid body */
-	std::unordered_map< b2Shape*, b2Fixture* >		fixtureMap;		/**< Fixture map */
+	b2Body*											bx2Body;						/**< Box2D rigid body */
+	std::unordered_map< b2Shape*, b2Fixture* >		fixtureMap;						/**< Fixture map */
+	FOnPhysicsMaterialUpdate::FDelegateType*		physicsMaterialUpdateHandle;	/**< Handle delegate of physics material is updated */
+	FOnPhysicsMaterialDestroyed::FDelegateType*		physicsMaterialDestroyedHandle;	/**< Handle delegate of physics material is destroyed */
 };
 
 /**

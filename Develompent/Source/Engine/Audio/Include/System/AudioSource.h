@@ -181,8 +181,11 @@ private:
 	 */
 	void OnAudioBufferUpdated( class FAudioBuffer* InAudioBuffer );
 
-	bool				bMuted;			/**< Is audio source muted */
-	uint32				alHandle;		/**< OpenAL of sound source */
+	bool										bMuted;						/**< Is audio source muted */
+	uint32										alHandle;					/**< OpenAL of sound source */
+	FOnAudioDeviceMuted::FDelegateType*			audioDeviceMutedHandle;		/**< Handle of delegate of muted device */
+	FOnAudioBufferDestroyed::FDelegateType*		audioBufferDestroyedHandle;	/**< Handle of delegate of destroyed audio buffer */
+	FOnAudioBufferUpdated::FDelegateType*		audioBufferUpdatedHandle;	/**< Handle of delegate of updated audio buffer */
 };
 
 #endif // !AUDIOSOURCE_H

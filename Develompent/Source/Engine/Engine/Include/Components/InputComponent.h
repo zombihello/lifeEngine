@@ -86,7 +86,7 @@ public:
 	 * @param InTriggerEvent Button event when triggered this action
 	 * @param InDelegate Delegate
 	 */
-	FORCEINLINE void BindAction( const std::wstring& InName, EInputEvent InTriggerEvent, const FOnInputActionDelegate::FDelegateFunction& InDelegate )
+	FORCEINLINE void BindAction( const std::wstring& InName, EInputEvent InTriggerEvent, const FOnInputActionDelegate::FDelegateType& InDelegate )
 	{
 		FInputActionMap::iterator		it = inputActionMap.find( InName );
 		if ( it == inputActionMap.end() )
@@ -95,41 +95,7 @@ public:
 		}
 
 		check( InTriggerEvent != IE_Num );
-		it->second.inputActionDelegate[ InTriggerEvent ].BindFunction( InDelegate );
-	}
-
-	/**
-	 * Bind to action
-	 *
-	 * @param InName Name action
-	 * @param InTriggerEvent Button event when triggered this action
-	 * @param InObject Object
-	 * @param InDelegate Delegate
-	 */
-	FORCEINLINE void BindAction( const std::wstring& InName, EInputEvent InTriggerEvent, LObject* InObject, const FOnInputActionDelegate::FDelegateMethod& InDelegate )
-	{
-		FInputActionMap::iterator		it = inputActionMap.find( InName );
-		if ( it == inputActionMap.end() )
-		{
-			return;
-		}
-
-		check( InTriggerEvent != IE_Num );
-		it->second.inputActionDelegate[ InTriggerEvent ].BindMethod( InObject, InDelegate );
-	}
-
-	/**
-	 * Bind to action
-	 *
-	 * @param InName Name action
-	 * @param InTriggerEvent Button event when triggered this action
-	 * @param InObject Object
-	 * @param InDelegate Delegate
-	 */
-	template< class TClass, typename TMethod >
-	FORCEINLINE void BindAction( const std::wstring& InName, EInputEvent InTriggerEvent, TClass* InObject, const TMethod& InDelegate )
-	{
-		BindAction( InName, InTriggerEvent, ( LObject* )InObject, ( FOnInputActionDelegate::FDelegateMethod )InDelegate );
+		it->second.inputActionDelegate[ InTriggerEvent ].Bind( InDelegate );
 	}
 
 	/**
@@ -138,44 +104,14 @@ public:
 	 * @param InName Name axis
 	 * @param InDelegate Delegate
 	 */
-	FORCEINLINE void BindAxis( const std::wstring& InName, const FOnInputAxisDelegate::FDelegateFunction& InDelegate )
+	FORCEINLINE void BindAxis( const std::wstring& InName, const FOnInputAxisDelegate::FDelegateType& InDelegate )
 	{
 		FInputAxisMap::iterator		it = inputAxisMap.find( InName );
 		if ( it == inputAxisMap.end() )
 		{
 			return;
 		}
-		it->second.inputAxisDelegate.BindFunction( InDelegate );
-	}
-
-	/**
-	 * Bind to axis
-	 *
-	 * @param InName Name axis
-	 * @param InObject Object
-	 * @param InDelegate Delegate
-	 */
-	FORCEINLINE void BindAxis( const std::wstring& InName, LObject* InObject, const FOnInputAxisDelegate::FDelegateMethod& InDelegate )
-	{
-		FInputAxisMap::iterator		it = inputAxisMap.find( InName );
-		if ( it == inputAxisMap.end() )
-		{
-			return;
-		}
-		it->second.inputAxisDelegate.BindMethod( InObject, InDelegate );
-	}
-
-	/**
-	 * Bind to axis
-	 *
-	 * @param InName Name axis
-	 * @param InObject Object
-	 * @param InDelegate Delegate
-	 */
-	template< class TClass, typename TMethod >
-	FORCEINLINE void BindAxis( const std::wstring& InName, TClass* InObject, const TMethod& InDelegate )
-	{
-		BindAxis( InName, ( LObject* )InObject, ( FOnInputAxisDelegate::FDelegateMethod )InDelegate );
+		it->second.inputAxisDelegate.Bind( InDelegate );
 	}
 
 private:

@@ -181,8 +181,8 @@ void FPhysicsInterfaceBox2D::AttachShape( FPhysicsActorHandleBox2D& InActorHandl
 
 	b2Fixture*		bx2Fixture = InActorHandle.bx2Body->CreateFixture( &bx2FixtureDef );
 	InActorHandle.fixtureMap[ InShapeHandle.bx2Shape ]		= bx2Fixture;
-	physMaterialRef->OnPhysicsMaterialUpdate().Add( &InActorHandle, &FPhysicsActorHandleBox2D::OnMaterialUpdated );
-	physMaterialRef->OnPhysicsMaterialDestroyed().Add( &InActorHandle, &FPhysicsActorHandleBox2D::OnMaterialDestroyed );
+	InActorHandle.physicsMaterialUpdateHandle		= physMaterialRef->OnPhysicsMaterialUpdate().Add(		std::bind( &FPhysicsActorHandleBox2D::OnMaterialUpdated, &InActorHandle, std::placeholders::_1 )	);
+	InActorHandle.physicsMaterialDestroyedHandle	= physMaterialRef->OnPhysicsMaterialDestroyed().Add(	std::bind( &FPhysicsActorHandleBox2D::OnMaterialDestroyed, &InActorHandle, std::placeholders::_1 )	);
 }
 
 void FPhysicsInterfaceBox2D::DetachShape( FPhysicsActorHandleBox2D& InActorHandle, const FPhysicsShapeHandleBox2D& InShapeHandle )
@@ -202,8 +202,8 @@ void FPhysicsInterfaceBox2D::DetachShape( FPhysicsActorHandleBox2D& InActorHandl
 	TSharedPtr<FPhysicsMaterial>	physMaterialRef = InShapeHandle.physMaterial.ToSharedPtr();
 	if ( physMaterialRef )
 	{
-		physMaterialRef->OnPhysicsMaterialUpdate().Remove( &InActorHandle, &FPhysicsActorHandleBox2D::OnMaterialUpdated );
-		physMaterialRef->OnPhysicsMaterialDestroyed().Remove( &InActorHandle, &FPhysicsActorHandleBox2D::OnMaterialDestroyed );
+		physMaterialRef->OnPhysicsMaterialUpdate().Remove( InActorHandle.physicsMaterialUpdateHandle );
+		physMaterialRef->OnPhysicsMaterialDestroyed().Remove( InActorHandle.physicsMaterialDestroyedHandle );
 	}
 }
 #endif // WITH_BOX2D

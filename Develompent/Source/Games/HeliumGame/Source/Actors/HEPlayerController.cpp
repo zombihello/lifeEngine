@@ -5,12 +5,12 @@ IMPLEMENT_CLASS( AHEPlayerController )
 void AHEPlayerController::SetupInputComponent()
 {
 	// Bind actions
-	inputComponent->BindAction( TEXT( "Exit" ), IE_Released,	this, &AHEPlayerController::ExitFromGame );
-	inputComponent->BindAction( TEXT( "Jump" ), IE_Pressed,		this, &AHEPlayerController::Jump );
-	inputComponent->BindAction( TEXT( "Jump" ), IE_Released,	this, &AHEPlayerController::StopJump );
+	inputComponent->BindAction( TEXT( "Exit" ), IE_Released,	std::bind( &AHEPlayerController::ExitFromGame, this ) );
+	inputComponent->BindAction( TEXT( "Jump" ), IE_Pressed,		std::bind( &AHEPlayerController::Jump, this ) );
+	inputComponent->BindAction( TEXT( "Jump" ), IE_Released,	std::bind( &AHEPlayerController::StopJump, this ) );
 
 	// Bind axis
-	inputComponent->BindAxis( TEXT( "MoveRight" ), this, &AHEPlayerController::MoveRight );
+	inputComponent->BindAxis( TEXT( "MoveRight" ),				std::bind( &AHEPlayerController::MoveRight, this, std::placeholders::_1 ) );
 }
 
 void AHEPlayerController::ExitFromGame()

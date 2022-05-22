@@ -11,6 +11,7 @@
 
 #include <QWidget>
 #include "Render/Material.h"
+#include "WorldEd.h"
 
 namespace Ui
 {
@@ -39,6 +40,14 @@ public:
 	 */
 	virtual ~WeMaterialEditorWindow();
 
+	/**
+	 * Called event when asset try delete
+	 *
+	 * @param InAssets	Array of assets to delete
+	 * @param OutResult Result, we can is delete this assets?
+	 */
+	void OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, struct FCanDeleteAssetResult& OutResult );
+
 signals:
 	/**
 	 * Event when material is changed
@@ -63,23 +72,16 @@ private:
 	 */
 	void InitUI();
 
-	/**
-	 * Called event when asset try delete
-	 * 
-	 * @param InAssets	Array of assets to delete
-	 * @param OutResult Result, we can is delete this assets?
-	 */
-	void OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, struct FCanDeleteAssetResult& OutResult );
-
-	bool										bInit;						/**< Is inited window */
-	Ui::WeMaterialEditorWindow*					ui;							/**< Qt UI */
-	TSharedPtr<FMaterial>						material;					/**< Editable asset */
-	class QCheckBox*							checkBox_isTwoSided;		/**< Check box of is two sided */
-	class QCheckBox*							checkBox_isWireframe;		/**< Check box of is wireframe */
-	class QCheckBox*							checkBox_staticMesh;		/**< Check box of static mesh */
-	class QCheckBox*							checkBox_sprite;			/**< Check box of sprite */
-	class WeSelectAssetWidget*					selectAsset_diffuse;		/**< Widget for select asset (diffuse texture) */
-	class FMaterialPreviewViewportClient*		viewportClient;				/**< Viewport client */
+	bool													bInit;						/**< Is inited window */
+	Ui::WeMaterialEditorWindow*								ui;							/**< Qt UI */
+	TSharedPtr<FMaterial>									material;					/**< Editable asset */
+	class QCheckBox*										checkBox_isTwoSided;		/**< Check box of is two sided */
+	class QCheckBox*										checkBox_isWireframe;		/**< Check box of is wireframe */
+	class QCheckBox*										checkBox_staticMesh;		/**< Check box of static mesh */
+	class QCheckBox*										checkBox_sprite;			/**< Check box of sprite */
+	class WeSelectAssetWidget*								selectAsset_diffuse;		/**< Widget for select asset (diffuse texture) */
+	class FMaterialPreviewViewportClient*					viewportClient;				/**< Viewport client */
+	FEditorDelegates::FOnAssetsCanDelete::FDelegateType*	assetsCanDeleteHandle;		/**< Handle delegate of assets can delete */
 };
 
 #endif // MATERIALEDITORWINDOW_H

@@ -13,6 +13,10 @@
 #include "Widgets/SelectAssetWidget.h"
 #include "WorldEd.h"
 
+#include <vector>
+#include "Misc/SharedPointer.h"
+#include "System/Package.h"
+
 WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InMaterial, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
 	, bInit( false )
@@ -24,6 +28,7 @@ WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InM
 	, checkBox_sprite( nullptr )
 	, selectAsset_diffuse( nullptr )
 	, viewportClient( nullptr )
+	, assetsCanDeleteHandle( nullptr )
 {
 	check( InMaterial );
 
@@ -38,7 +43,7 @@ WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InM
 	bInit = true;
 
 	// Subscribe to event when assets try destroy of editing material. It need is block
-	//FEditorDelegates::onAssetsCanDelete.Add( this, &WeMaterialEditorWindow::OnAssetsCanDelete );
+	assetsCanDeleteHandle = FEditorDelegates::onAssetsCanDelete.Add( std::bind( &WeMaterialEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2 ) );
 }
 
 void WeMaterialEditorWindow::InitUI()
@@ -139,7 +144,7 @@ WeMaterialEditorWindow::~WeMaterialEditorWindow()
 	delete ui;
 
 	// Unsubscribe from event when assets try destroy
-	//FEditorDelegates::onAssetsCanDelete.Remove( this, &WeMaterialEditorWindow::OnAssetsCanDelete );
+	FEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
 }
 
 void WeMaterialEditorWindow::OnCheckBoxIsTwoSidedToggled( bool InValue )
@@ -204,13 +209,27 @@ void WeMaterialEditorWindow::OnSelectedAssetDiffuse( const std::wstring& InNewAs
 
 void WeMaterialEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, FCanDeleteAssetResult& OutResult )
 {
-	// If in InAssets exist material who is editing now - need is block
+	FAsset::FSetDependentAssets		dependentAssets;
+	material->GetDependentAssets( dependentAssets );
+
+	// If in InAssets exist material who is editing now or him dependent assets - need is block
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
 	{
-		if ( InAssets[ index ] == material )
+		TSharedPtr<FAsset>		assetRef = InAssets[ index ];
+		if ( assetRef == material )
 		{
 			OutResult.Set( false );
 			return;
+		}
+
+		// Look in dependent assets
+		for ( auto itDependentAsset = dependentAssets.begin(), itDependentAssetEnd = dependentAssets.end(); itDependentAsset != itDependentAssetEnd; ++itDependentAsset )
+		{
+			if ( *itDependentAsset == assetRef )
+			{
+				OutResult.Set( false );
+				return;
+			}
 		}
 	}
 }

@@ -13,21 +13,9 @@
 #include "Misc/RefCountPtr.h"
 #include "Misc/PhysicsTypes.h"
 #include "System/Package.h"
-#include "System/Delegate.h"
+#include "System/PhysicsMaterialDelegates.h"
 #include "PhysicsInterface.h"
 #include "Core.h"
-
-/**
- * @ingroup Physics
- * @brief Delegate for called event when physics materials is updated
- */
-DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialUpdate, const TSharedPtr<class FPhysicsMaterial>& )
-
-/**
- * @ingroup Physics
- * @brief Delegate for called event when physics materials is destroyed
- */
-DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialDestroyed, const TSharedPtr<class FPhysicsMaterial>& )
 
 /**
  * @ingroup Physics
