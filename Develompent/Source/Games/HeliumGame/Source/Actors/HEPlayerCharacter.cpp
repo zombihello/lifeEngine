@@ -88,7 +88,7 @@ void AHEPlayerCharacter::Tick( float InDeltaTime )
 			if ( bResult )
 			{
 				TAssetHandle<FAudioBank>		audioBank = walkAudioBanks[ hitResult.physMaterial->GetSurfaceType() ];
-				if ( audioBank )
+				if ( audioBank.IsAssetValid() )
 				{
 					audioComponent->SetAudioBank( audioBank );
 					audioComponent->Play();
@@ -112,7 +112,7 @@ void AHEPlayerCharacter::Landed()
 	if ( bResult )
 	{
 		TAssetHandle<FAudioBank>	audioBank = jumpAudioBanks[ hitResult.physMaterial->GetSurfaceType() ];
-		if ( audioBank )
+		if ( audioBank.IsAssetValid() )
 		{
 			audioComponent->SetAudioBank( audioBank );
 			audioComponent->Play();

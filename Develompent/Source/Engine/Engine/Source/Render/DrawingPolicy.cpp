@@ -153,5 +153,5 @@ bool FMeshDrawingPolicy::Matches( const FMeshDrawingPolicy& InOtherDrawer ) cons
 
 bool FMeshDrawingPolicy::IsValid() const
 {
-	return material && vertexFactory && vertexShader && pixelShader;
+	return material.IsAssetValid() && vertexFactory && vertexShader && pixelShader;
 }

@@ -12,7 +12,7 @@ FAudioBufferRef FAudioBufferManager::Find( const TAssetHandle<FAudioBank>& InAud
 	}
 
 	// Load samples and create buffer
-	check( InAudioBank );
+	check( InAudioBank.IsAssetValid() );
 
 	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
 	FAudioBankInfo				audioBankInfo;

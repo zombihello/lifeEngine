@@ -128,7 +128,7 @@ bool LCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 		int32					countCulumns	= tmxTilesetSize.x / tmxTileSize.x;
 		int32					countRows		= tmxTilesetSize.y / tmxTileSize.y;
 		TAssetHandle<FMaterial>	tilesetMaterial = GPackageManager->FindAsset( tmxTilesetName, AT_Unknown );
-		if ( !tilesetMaterial )
+		if ( !tilesetMaterial.IsAssetValid() )
 		{
 			std::wstring		packageName;
 			std::wstring		assetName;
@@ -549,7 +549,7 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 				std::wstring				name			= configObject.GetValue( TEXT( "Name" ) ).GetString();
 				std::wstring				assetReference	= configObject.GetValue( TEXT( "AssetReference" ) ).GetString();
 				TAssetHandle<FTexture2D>	texture			= GPackageManager->FindAsset( assetReference, AT_Unknown );
-				if ( !texture )
+				if ( !texture.IsAssetValid() )
 				{
 					std::wstring		packageName;
 					std::wstring		assetName;
@@ -666,8 +666,8 @@ bool LCookPackagesCommandlet::CookTexture2D( const FResourceInfo& InTexture2DInf
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking texture 2D '%s:%s'" ), InTexture2DInfo.packageName.c_str(), InTexture2DInfo.filename.c_str() );
 	
 	TSharedPtr<FTexture2D>		texture2DRef = ConvertTexture2D( InTexture2DInfo.path, InTexture2DInfo.filename );
-	OutTexture2D = TAssetHandle<FTexture2D>( texture2DRef, MakeSharedPtr<FAssetReference>( AT_Texture2D, texture2DRef->GetGUID() ) );
-	return OutTexture2D && SaveToPackage( InTexture2DInfo, OutTexture2D );
+	OutTexture2D				= TAssetHandle<FTexture2D>( texture2DRef, MakeSharedPtr<FAssetReference>( AT_Texture2D, texture2DRef->GetGUID() ) );
+	return OutTexture2D.IsAssetValid() && SaveToPackage( InTexture2DInfo, OutTexture2D );
 }
 
 /**
@@ -814,8 +814,8 @@ bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInf
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking audio bank '%s:%s'" ), InAudioBankInfo.packageName.c_str(), InAudioBankInfo.filename.c_str() );
 	
 	TSharedPtr<FAudioBank>		audioBankRef = ConvertAudioBank( InAudioBankInfo.path, InAudioBankInfo.filename );
-	OutAudioBank = TAssetHandle<FAudioBank>( audioBankRef, MakeSharedPtr<FAssetReference>( AT_AudioBank, audioBankRef->GetGUID() ) );
-	return OutAudioBank && SaveToPackage( InAudioBankInfo, OutAudioBank );
+	OutAudioBank				= TAssetHandle<FAudioBank>( audioBankRef, MakeSharedPtr<FAssetReference>( AT_AudioBank, audioBankRef->GetGUID() ) );
+	return OutAudioBank.IsAssetValid() && SaveToPackage( InAudioBankInfo, OutAudioBank );
 }
 
 /**

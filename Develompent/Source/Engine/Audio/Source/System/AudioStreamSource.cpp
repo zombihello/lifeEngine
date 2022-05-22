@@ -51,7 +51,7 @@ uint32 FAudioStreamRunnable::Run()
 		TSharedPtr<FAudioBank>		audioBankRef = streamSource->audioBank.ToSharedPtr();		// Lock audio bank for him not unloaded ahead of time
 		{
 			FScopeLock		scopeLock( &streamSource->csStreamData );
-			if ( !streamSource->bIsStreaming || !streamSource->audioBank )
+			if ( !streamSource->bIsStreaming || !audioBankRef )
 			{
 				break;
 			}
@@ -366,7 +366,7 @@ void FAudioStreamSource::SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBa
 	}
 
 	// Open new bank
-	if ( InAudioBank )
+	if ( InAudioBank.IsAssetValid() )
 	{
 		OpenBank( InAudioBank );
 	}

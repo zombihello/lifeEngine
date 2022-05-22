@@ -109,7 +109,7 @@ void WeMaterialEditorWindow::InitUI()
 		{
 			TAssetHandle<FTexture2D>		diffuseTextureRef;
 			material->GetTextureParameterValue( TEXT( "diffuse" ), diffuseTextureRef );
-			if ( diffuseTextureRef && !GPackageManager->IsDefaultAsset( diffuseTextureRef ) )
+			if ( diffuseTextureRef.IsAssetValid() && !GPackageManager->IsDefaultAsset( diffuseTextureRef ) )
 			{
 				std::wstring		assetReference;
 				MakeReferenceToAsset( diffuseTextureRef, assetReference );
@@ -198,7 +198,7 @@ void WeMaterialEditorWindow::OnSelectedAssetDiffuse( const std::wstring& InNewAs
 	}
 
 	// If asset is not valid we clear asset reference
-	if ( !newTexture2DRef || GPackageManager->IsDefaultAsset( newTexture2DRef ) )
+	if ( !newTexture2DRef.IsAssetValid() || GPackageManager->IsDefaultAsset( newTexture2DRef ) )
 	{
 		newTexture2DRef = nullptr;
 		selectAsset_diffuse->ClearAssetReference( false );

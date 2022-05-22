@@ -343,12 +343,27 @@ public:
 	}
 
 	/**
-	 * @brief Overloaded operator bool
-	 * @return Returning TRUE if handle is valid, else returning FALSE
+	 * @brief Overloaded operator ==
+	 *
+	 * @param InSharedPtr	Shared ptr
+	 * @return Returning TRUE if pointers is equal, else returning FALSE
 	 */
-	FORCEINLINE	operator bool() const
+	template< typename OtherType >
+	FORCEINLINE bool operator==( const TSharedPtr<OtherType>& InSharedPtr ) const
 	{
-		return IsValid();
+		return asset == InSharedPtr;
+	}
+
+	/**
+	 * @brief Overloaded operator !=
+	 *
+	 * @param InSharedPtr	Shared ptr
+	 * @return Returning TRUE if pointers is not equal, else returning FALSE
+	 */
+	template< typename OtherType >
+	FORCEINLINE bool operator!=( const TSharedPtr<OtherType>& InSharedPtr ) const
+	{
+		return asset != InSharedPtr;
 	}
 
 	/**
@@ -366,7 +381,16 @@ public:
 	 */
 	FORCEINLINE bool IsValid() const
 	{
-		return asset.IsValid() && reference.IsValid();
+		return reference.IsValid();
+	}
+
+	/**
+	 * @brief Is valid asset
+	 * @return Return TRUE if asset is loaded, else return FALSE
+	 */
+	FORCEINLINE bool IsAssetValid() const
+	{
+		return asset.IsValid();
 	}
 
 	/**
@@ -1034,7 +1058,7 @@ public:
 	 */
 	FORCEINLINE bool IsDefaultAsset( const TAssetHandle<FAsset>& InAsset ) const
 	{
-		if ( !InAsset )
+		if ( !InAsset.IsAssetValid() )
 		{
 			return false;
 		}
@@ -1248,7 +1272,7 @@ FORCEINLINE bool MakeReferenceToAsset( const std::wstring& InPackageName, const 
  */
 FORCEINLINE bool MakeReferenceToAsset( const TAssetHandle<FAsset>& InAsset, std::wstring& OutString )
 {
-	if ( !InAsset )
+	if ( !InAsset.IsAssetValid() )
 	{
 		return false;
 	}

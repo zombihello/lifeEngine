@@ -29,7 +29,7 @@ bool AAudio::InitProperties( const std::vector<FActorVar>& InActorVars, class LC
 			check( actorVar.GetType() == AVT_String );
 			std::wstring					audioBankName = actorVar.GetValueString();
 			TAssetHandle<FAudioBank>		audioBank = GPackageManager->FindAsset( audioBankName, AT_Unknown );
-			if ( !audioBank && !InCooker->CookAudioBank( audioBankName, audioBank ) )
+			if ( !audioBank.IsAssetValid() && !InCooker->CookAudioBank( audioBankName, audioBank ) )
 			{
 				return false;
 			}

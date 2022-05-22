@@ -9,7 +9,7 @@ void FPhysicsBoxGeometry::InitPhysicsShape() const
 		return;
 	}
 
-	check( material );
+	check( material.IsAssetValid() );
 	handle = FPhysicsInterface::CreateShapeGeometry( *this );
 }
 

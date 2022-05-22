@@ -112,7 +112,7 @@ FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString&
 
 bool FHelperAssetImporter::Reimport( const TAssetHandle<FAsset>& InAsset, std::wstring& OutError )
 {
-	check( InAsset );
+	check( InAsset.IsAssetValid() );
 	bool		bResult = false;
 
 	// If asset already is unloaded, we must exit from method

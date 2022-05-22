@@ -155,8 +155,8 @@ bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, T
 		return false;
 	}
 
-	OutValue = itFind->second ? itFind->second : GPackageManager->FindDefaultAsset( AT_Texture2D );
-	return itFind->second.IsValid();
+	OutValue = itFind->second.IsAssetValid() ? itFind->second : GPackageManager->FindDefaultAsset( AT_Texture2D );
+	return itFind->second.IsAssetValid();
 }
 
 bool FMaterial::GetVectorParameterValue( const std::wstring& InParameterName, FVector4D& OutValue ) const
@@ -179,7 +179,7 @@ void FMaterial::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAs
 	{
 		for ( auto itTexture = textureParameters.begin(), itTextureEnd = textureParameters.end(); itTexture != itTextureEnd; ++itTexture )
 		{
-			if ( !itTexture->second )
+			if ( !itTexture->second.IsAssetValid() )
 			{
 				continue;
 			}
@@ -193,7 +193,8 @@ void FMaterial::ReloadDependentAssets( bool InForce /* = false */ )
 {
 	for ( auto itTexture = textureParameters.begin(), itTextureEnd = textureParameters.end(); itTexture != itTextureEnd; ++itTexture )
 	{
-		if ( itTexture->second )
+		TAssetHandle<FAsset>		assetHandle = itTexture->second;
+		if ( !assetHandle.IsValid() || assetHandle.IsAssetValid() )
 		{
 			continue;
 		}

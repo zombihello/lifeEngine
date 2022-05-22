@@ -38,7 +38,7 @@ void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* In
 
 	TAssetHandle<FTexture2D>		texture2d;
 	materialRef->GetTextureParameterValue( TEXT( "diffuse" ), texture2d );
-	if ( texture2d )
+	if ( texture2d.IsAssetValid() )
 	{
 		TSharedPtr<FTexture2D>		texture2DRef = texture2d.ToSharedPtr();
 		GRHI->SetTextureParameter( InDeviceContextRHI, pixelShader->GetPixelShader(), texture2DRef->GetTexture2DRHI(), 0 );

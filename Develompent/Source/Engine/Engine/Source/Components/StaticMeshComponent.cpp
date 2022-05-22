@@ -96,7 +96,7 @@ void LStaticMeshComponent::AddToDrawList( const class FSceneView& InSceneView )
 	{
 		bIsDirtyDrawingPolicyLink = false;
 
-		if ( staticMesh )
+		if ( staticMesh.IsAssetValid() )
 		{
 			LinkDrawList();
 		}

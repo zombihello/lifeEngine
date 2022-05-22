@@ -248,7 +248,7 @@ struct FPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE bool IsValidShapeGeometry( const FPhysicsShapeHandleBox2D& InShapeHandle )
 	{
-		return InShapeHandle.physMaterial && InShapeHandle.bx2Shape;
+		return InShapeHandle.physMaterial.IsAssetValid() && InShapeHandle.bx2Shape;
 	}
 
 	/**
@@ -285,7 +285,7 @@ struct FPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE bool IsValidMaterial( const FPhysicsMaterialHandleBox2D& InMaterialHandle )
 	{
-		return InMaterialHandle.physMaterial;
+		return InMaterialHandle.physMaterial.IsAssetValid();
 	}
 
 	/**

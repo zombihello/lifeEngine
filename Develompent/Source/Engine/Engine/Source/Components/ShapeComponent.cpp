@@ -15,7 +15,7 @@ LShapeComponent::~LShapeComponent()
 void LShapeComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if ( !physicsMaterial )
+	if ( !physicsMaterial.IsAssetValid() )
 	{
 		physicsMaterial = GPhysicsEngine.GetDefaultPhysMaterial();
 	}

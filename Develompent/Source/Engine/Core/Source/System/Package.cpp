@@ -124,7 +124,7 @@ FAssetReference FAsset::GetAssetReference() const
 
 TAssetHandle<FAsset> FAsset::GetAssetHandle() const
 {
-	if ( !handle )
+	if ( !handle.IsValid() )
 	{
 		handle = TAssetHandle<FAsset>( SharedThis( this ), MakeSharedPtr<FAssetReference>( type, guid, package ? package->GetGUID() : FGuid() ) );
 	}
@@ -245,7 +245,7 @@ void FPackage::FullyLoad( std::vector< TAssetHandle<FAsset> >& OutAssetArray )
 
 		// Load asset
 		TAssetHandle<FAsset>		asset = LoadAsset( *archive, itAsset->first, assetInfo );
-		if ( asset )
+		if ( asset.IsAssetValid() )
 		{
 			OutAssetArray.push_back( asset );
 		}
@@ -479,7 +479,7 @@ void FPackage::UpdateAssetNameInTable( const FGuid& InGUID )
 
 void FPackage::Add( const TAssetHandle<FAsset>& InAsset )
 {
-	check( InAsset );
+	check( InAsset.IsAssetValid() );
 
 	TSharedPtr<FAsset>		assetRef = InAsset.ToSharedPtr();
 	checkMsg( assetRef->guid.IsValid(), TEXT( "For add asset to package need GUID is valid" ) );
@@ -796,7 +796,7 @@ TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, con
 	}
 
 	// If asset is not valid, we return default
-	if ( !asset )
+	if ( !asset.IsAssetValid() )
 	{
 		asset = GetDefaultAsset( InType );
 	}
@@ -816,14 +816,14 @@ TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, con
 	if ( package )
 	{
 		asset = package->Find( InAsset );
-		if ( !asset )
+		if ( !asset.IsAssetValid() )
 		{
 			asset = GetDefaultAsset( InType );
 		}
 	}
 
 	// If asset is not valid, we return default
-	if ( !asset )
+	if ( !asset.IsAssetValid() )
 	{
 		asset = GetDefaultAsset( InType );
 	}

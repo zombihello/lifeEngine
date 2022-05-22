@@ -70,7 +70,7 @@ public:
 	 */
 	FORCEINLINE void SetPhysMaterial( const TAssetHandle<FPhysicsMaterial>& InPhysMaterial )
 	{
-		physicsMaterial = InPhysMaterial ? InPhysMaterial : GPhysicsEngine.GetDefaultPhysMaterial();
+		physicsMaterial = InPhysMaterial.IsAssetValid() ? InPhysMaterial : GPhysicsEngine.GetDefaultPhysMaterial();
 	}
 
 	/**

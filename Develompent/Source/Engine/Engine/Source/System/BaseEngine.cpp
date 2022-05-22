@@ -31,7 +31,7 @@ void LBaseEngine::Init()
 			{
 				std::wstring			pathAsset = configDefaultTexture.GetString();
 				TAssetHandle<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
-				if ( asset )
+				if ( asset.IsAssetValid() )
 				{
 					defaultTexture = asset;
 				}
@@ -47,7 +47,7 @@ void LBaseEngine::Init()
 		}
 
 		// If default texture not loaded we create in virtual package
-		if ( !defaultTexture )
+		if ( !defaultTexture.IsAssetValid() )
 		{
 			std::vector< byte >		data		= { 0, 0, 0, 0 };
 			FPackageRef				package		= GPackageManager->LoadPackage( TEXT( "" ), true );
@@ -69,7 +69,7 @@ void LBaseEngine::Init()
 			{
 				std::wstring			pathAsset = configDefaultMaterial.GetString();
 				TAssetHandle<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
-				if ( asset )
+				if ( asset.IsAssetValid() )
 				{
 					defaultMaterial = asset;
 				}
@@ -85,7 +85,7 @@ void LBaseEngine::Init()
 		}
 
 		// If default material not loaded we create in virtual package
-		if ( !defaultMaterial )
+		if ( !defaultMaterial.IsAssetValid() )
 		{
 			FPackageRef				package = GPackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<FMaterial>	material = MakeSharedPtr<FMaterial>();
@@ -106,7 +106,7 @@ void LBaseEngine::Init()
 			{
 				std::wstring			pathAsset	= configDefaultWireframeMaterial.GetString();
 				TAssetHandle<FAsset>	asset		= GPackageManager->FindAsset( pathAsset );
-				if ( asset )
+				if ( asset.IsAssetValid() )
 				{
 					defaultWireframeMaterial = asset;
 				}
@@ -122,7 +122,7 @@ void LBaseEngine::Init()
 		}
 
 		// If default wireframe material not loaded we create in virtual package
-		if ( !defaultWireframeMaterial )
+		if ( !defaultWireframeMaterial.IsAssetValid() )
 		{
 			FPackageRef				package = GPackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<FMaterial>	material = MakeSharedPtr<FMaterial>();
