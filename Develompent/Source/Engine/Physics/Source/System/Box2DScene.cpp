@@ -96,7 +96,7 @@ bool FBox2DScene::LineTraceSingleByChannel( FHitResult& OutHitResult, const FVec
 				{
 					FPhysicsShapeHandleBox2D*		shapeHandle = ( FPhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
 					check( shapeHandle );
-					OutHitResult.physMaterial = shapeHandle->physMaterial.Pin();
+					OutHitResult.physMaterial	= shapeHandle->physMaterial.ToSharedPtr();
 				}
 
 				return true;

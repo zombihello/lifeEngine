@@ -389,7 +389,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 	{
 		std::wstring							errorMessage;
 		QString									path = selectedAssets[ index ];
-		TWeakPtr<FAsset>						assetPtr;
+		TAssetHandle<FAsset>					assetPtr;
 		FHelperAssetImporter::EImportResult		importResult = FHelperAssetImporter::Import( path, package, assetPtr, errorMessage, bReplaceAll && !bSkipAll );
 
 		// Show message if not setted flags bReplaceAll and bSkipAll
@@ -451,9 +451,10 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Reimport()
 		FAssetInfo		assetInfo;
 		package->GetAssetInfo( idAsset, assetInfo );
 
-		std::wstring		errorMessage;
-		TSharedPtr<FAsset>	assetRef = package->Find( assetInfo.name );
-		bool				bResult = FHelperAssetImporter::Reimport( assetRef, errorMessage );
+		std::wstring			errorMessage;
+		TAssetHandle<FAsset>	assetHandle = package->Find( assetInfo.name );
+		TSharedPtr<FAsset>		assetRef = assetHandle.ToSharedPtr();
+		bool					bResult = FHelperAssetImporter::Reimport( assetHandle, errorMessage );
 
 		// If failed reimport asset - add error message to array
 		if ( !bResult )
@@ -508,9 +509,10 @@ void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
 
 	// Reimport asset
 	std::wstring			errorMessage;
-	TSharedPtr<FAsset>		assetRef = package->Find( assetInfo.name );
+	TAssetHandle<FAsset>	assetHandle = package->Find( assetInfo.name );
+	TSharedPtr<FAsset>		assetRef = assetHandle.ToSharedPtr();
 	assetRef->SetAssetSourceFile( appQtAbsolutePathToEngine( newSourceFile ) );
-	bool			bResult = FHelperAssetImporter::Reimport( assetRef, errorMessage );
+	bool			bResult = FHelperAssetImporter::Reimport( assetHandle, errorMessage );
 	
 	// If reimport asset is failed - show error message box
 	if ( !bResult )
@@ -551,7 +553,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
 	// Create material with asset name and add to package
 	TSharedPtr<FMaterial>		materialRef = MakeSharedPtr<FMaterial>();
 	materialRef->SetAssetName( assetName.toStdWString() );
-	package->Add( materialRef );
+	package->Add( TAssetHandle<FMaterial>( materialRef, MakeSharedPtr<FAssetReference>( AT_Material, materialRef->GetGUID() ) ) );
 	ui->listView_packageBrowser->Refresh();
 }
 
@@ -639,7 +641,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 	}
 
 	// Find asset in package
-	TSharedPtr<FAsset>		assetRef = package->Find( assetInfo.name );
+	TSharedPtr<FAsset>		assetRef = package->Find( assetInfo.name ).ToSharedPtr();
 	if ( !assetRef )
 	{
 		return;
@@ -1047,24 +1049,30 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 	FPackageRef			package = ui->listView_packageBrowser->GetPackage();
 	FAssetInfo			assetInfo;
 	package->GetAssetInfo( InModelIndex.row(), assetInfo );
-	TSharedPtr<FAsset>	assetRef = package->Find( assetInfo.name );
+	TSharedPtr<FAsset>	assetRef = package->Find( assetInfo.name ).ToSharedPtr();
 
 	// Open editor for each asset type
 	switch ( assetInfo.type )
 	{
 	case AT_Texture2D:
 	{
+		assetRef->ReloadDependentAssets();
+
 		WeTextureEditorWindow*		textureEditorWindow = new WeTextureEditorWindow( assetRef, this );
 		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), textureEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), textureEditorWindow, true );
 		connect( textureEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<FAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& ) ) );
 		break;
 	}
-	
+
 	case AT_Material:
+	{
+		assetRef->ReloadDependentAssets();
+
 		WeMaterialEditorWindow*		materialEditorWindow = new WeMaterialEditorWindow( assetRef, this );
 		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), materialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), materialEditorWindow, true );
 		connect( materialEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<FAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& ) ) );
 		break;
+	}
 	}
 }
 
@@ -1106,6 +1114,7 @@ void WeContentBrowserWidget::OnListViewPackageBrowserSelectedAsset( const std::w
 
 void WeContentBrowserWidget::on_listView_packageBrowser_ShowReferencesAssets()
 {
+	GPackageManager->GarbageCollector();
 	// Getting selected items and current package
 	/*FPackageRef				package = ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();

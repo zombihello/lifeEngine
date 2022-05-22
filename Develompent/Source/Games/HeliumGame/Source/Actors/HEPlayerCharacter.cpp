@@ -87,10 +87,10 @@ void AHEPlayerCharacter::Tick( float InDeltaTime )
 			bool		bResult = GWorld->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic, queryParams );
 			if ( bResult )
 			{
-				TSharedPtr<FAudioBank>		audioBankRef = walkAudioBanks[ hitResult.physMaterial->GetSurfaceType() ].Pin();
-				if ( audioBankRef )
+				TAssetHandle<FAudioBank>		audioBank = walkAudioBanks[ hitResult.physMaterial->GetSurfaceType() ];
+				if ( audioBank )
 				{
-					audioComponent->SetAudioBank( audioBankRef );
+					audioComponent->SetAudioBank( audioBank );
 					audioComponent->Play();
 				}
 			}
@@ -111,10 +111,10 @@ void AHEPlayerCharacter::Landed()
 	bool			bResult		= GWorld->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic, queryParams );
 	if ( bResult )
 	{
-		TSharedPtr<FAudioBank>	audioBankRef = jumpAudioBanks[ hitResult.physMaterial->GetSurfaceType() ].Pin();
-		if ( audioBankRef )
+		TAssetHandle<FAudioBank>	audioBank = jumpAudioBanks[ hitResult.physMaterial->GetSurfaceType() ];
+		if ( audioBank )
 		{
-			audioComponent->SetAudioBank( audioBankRef );
+			audioComponent->SetAudioBank( audioBank );
 			audioComponent->Play();
 		}
 	}

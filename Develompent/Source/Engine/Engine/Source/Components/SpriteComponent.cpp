@@ -26,7 +26,7 @@ void LSpriteComponent::Serialize( class FArchive& InArchive )
 
     FRectFloat				textureRect     = GetTextureRect();
     FVector2D				spriteSize      = GetSpriteSize();
-    TWeakPtr<FMaterial>		material        = GetMaterial();
+	TAssetHandle<FMaterial>	material        = GetMaterial();
 
     InArchive << type;
     InArchive << textureRect;

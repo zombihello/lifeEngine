@@ -98,7 +98,7 @@ public:
 	 * @param InMaterial			Material
 	 * @param InSceneView			Scene view
 	 */
-	void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const FMatrix& InLocalToWorld, const TWeakPtr<FMaterial>& InMaterial, const class FSceneView& InSceneView ) const;
+	void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const FMatrix& InLocalToWorld, const TAssetHandle<FMaterial>& InMaterial, const class FSceneView& InSceneView ) const;
 
 	/**
 	 * @brief Get array of verteces

@@ -29,8 +29,8 @@ void LBaseEngine::Init()
 			FConfigValue		configDefaultTexture = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
 			if ( configDefaultTexture.IsValid() )
 			{
-				std::wstring		pathAsset = configDefaultTexture.GetString();
-				TWeakPtr<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
+				std::wstring			pathAsset = configDefaultTexture.GetString();
+				TAssetHandle<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultTexture = asset;
@@ -47,15 +47,15 @@ void LBaseEngine::Init()
 		}
 
 		// If default texture not loaded we create in virtual package
-		if ( !defaultTexture.Pin() )
+		if ( !defaultTexture )
 		{
 			std::vector< byte >		data		= { 0, 0, 0, 0 };
 			FPackageRef				package		= GPackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<FTexture2D>	texture2D	= MakeSharedPtr<FTexture2D>();
 			texture2D->SetData( PF_A8R8G8B8, 1, 1, data );
 			
-			package->Add( texture2D );
-			defaultTexture = texture2D;
+			defaultTexture		= texture2D->GetAssetHandle();
+			package->Add( defaultTexture );
 		}
 	}
 
@@ -67,8 +67,8 @@ void LBaseEngine::Init()
 			FConfigValue		configDefaultMaterial = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
 			if ( configDefaultMaterial.IsValid() )
 			{
-				std::wstring		pathAsset = configDefaultMaterial.GetString();
-				TWeakPtr<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
+				std::wstring			pathAsset = configDefaultMaterial.GetString();
+				TAssetHandle<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultMaterial = asset;
@@ -85,13 +85,13 @@ void LBaseEngine::Init()
 		}
 
 		// If default material not loaded we create in virtual package
-		if ( !defaultMaterial.Pin() )
+		if ( !defaultMaterial )
 		{
 			FPackageRef				package = GPackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<FMaterial>	material = MakeSharedPtr<FMaterial>();
 
-			package->Add( material );
-			defaultMaterial = material;
+			defaultMaterial		= material->GetAssetHandle();
+			package->Add( defaultMaterial );
 		}
 	}
 
@@ -104,8 +104,8 @@ void LBaseEngine::Init()
 			FConfigValue		configDefaultWireframeMaterial = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
 			if ( configDefaultWireframeMaterial.IsValid() )
 			{
-				std::wstring		pathAsset	= configDefaultWireframeMaterial.GetString();
-				TWeakPtr<FAsset>	asset		= GPackageManager->FindAsset( pathAsset );
+				std::wstring			pathAsset	= configDefaultWireframeMaterial.GetString();
+				TAssetHandle<FAsset>	asset		= GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultWireframeMaterial = asset;
@@ -122,14 +122,14 @@ void LBaseEngine::Init()
 		}
 
 		// If default wireframe material not loaded we create in virtual package
-		if ( !defaultWireframeMaterial.Pin() )
+		if ( !defaultWireframeMaterial )
 		{
 			FPackageRef				package = GPackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<FMaterial>	material = MakeSharedPtr<FMaterial>();
 			material->SetWireframe( true );
 
-			package->Add( material );
-			defaultWireframeMaterial = material;
+			defaultWireframeMaterial	= material->GetAssetHandle();
+			package->Add( defaultWireframeMaterial );
 		}
 	}
 #endif // WITH_EDITOR

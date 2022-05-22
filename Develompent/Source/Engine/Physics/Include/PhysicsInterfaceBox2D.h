@@ -148,7 +148,7 @@ FORCEINLINE bool LE2BLockFlags( uint32 InLockFlags )
  */
 struct FPhysicsMaterialHandleBox2D
 {
-	TWeakPtr<class FPhysicsMaterial>		physMaterial;				/**< Physical material */
+	TAssetHandle<class FPhysicsMaterial>	physMaterial;				/**< Physical material */
 };
 
 /**
@@ -165,9 +165,9 @@ struct FPhysicsShapeHandleBox2D
 		, bx2Shape( nullptr )
 	{}
 
-	TWeakPtr<class FPhysicsMaterial>	physMaterial;		/**< Physical material */
-	FCollisionProfile*			collisionProfile;	/**< Collision profile */
-	b2Shape*					bx2Shape;			/**< Box2D shape */
+	TAssetHandle<class FPhysicsMaterial>	physMaterial;		/**< Physical material */
+	FCollisionProfile*						collisionProfile;	/**< Collision profile */
+	b2Shape*								bx2Shape;			/**< Box2D shape */
 };
 
 /**
@@ -252,12 +252,7 @@ struct FPhysicsInterfaceBox2D
 	 * @param InPhysMaterial Physics material
 	 * @return Return material handle
 	 */
-	static FORCEINLINE FPhysicsMaterialHandleBox2D CreateMaterial( const TSharedPtr<class FPhysicsMaterial>& InPhysMaterial )
-	{
-		FPhysicsMaterialHandleBox2D		materialHandle;
-		materialHandle.physMaterial = InPhysMaterial;
-		return materialHandle;
-	}
+	static FPhysicsMaterialHandleBox2D CreateMaterial( const TSharedPtr<class FPhysicsMaterial>& InPhysMaterial );
 
 	/**
 	 * @brief Update material

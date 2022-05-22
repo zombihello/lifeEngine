@@ -82,7 +82,7 @@ public:
 	 * @param InIsForceImport		Is need replace already exist asset with name
 	 * @return Return imported asset, in case of fail return NULL
 	 */
-	static EImportResult Import( const QString& InPath, FPackage* InPackage, TWeakPtr<FAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport = false );
+	static EImportResult Import( const QString& InPath, FPackage* InPackage, TAssetHandle<FAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport = false );
 
 	/**
 	 * Reimport asset
@@ -91,7 +91,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if seccussed reimported, else FALSE
 	 */
-	static bool Reimport( const TWeakPtr<FAsset>& InAsset, std::wstring& OutError );
+	static bool Reimport( const TAssetHandle<FAsset>& InAsset, std::wstring& OutError );
 };
 
 /**

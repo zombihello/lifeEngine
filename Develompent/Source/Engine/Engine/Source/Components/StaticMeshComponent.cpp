@@ -21,7 +21,7 @@ void LStaticMeshComponent::LinkDrawList()
 	}
 
 	// If static mesh is valid - add to scene draw policy link
-	TSharedPtr<FStaticMesh>		staticMeshRef = staticMesh.Pin();
+	TSharedPtr<FStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
 	if ( staticMeshRef )
 	{
 		FSceneDepthGroup&							SDGWorld = scene->GetSDG( SDG_World );

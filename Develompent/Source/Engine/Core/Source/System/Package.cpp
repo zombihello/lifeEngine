@@ -18,7 +18,7 @@
 #include "WorldEd.h"
 #endif // WITH_EDITOR
 
-FORCEINLINE TWeakPtr<FAsset> GetDefaultAsset( EAssetType InType )
+FORCEINLINE TAssetHandle<FAsset> GetDefaultAsset( EAssetType InType )
 {
 	switch ( InType )
 	{
@@ -114,9 +114,21 @@ void FAsset::MarkDirty()
 void FAsset::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
 {}
 
+void FAsset::ReloadDependentAssets( bool InForce /* = false */ )
+{}
+
 FAssetReference FAsset::GetAssetReference() const
 {
 	return FAssetReference( type, guid, package ? package->GetGUID() : FGuid() );
+}
+
+TAssetHandle<FAsset> FAsset::GetAssetHandle() const
+{
+	if ( !handle )
+	{
+		handle = TAssetHandle<FAsset>( SharedThis( this ), MakeSharedPtr<FAssetReference>( type, guid, package ? package->GetGUID() : FGuid() ) );
+	}
+	return handle;
 }
 
 FPackage::FPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
@@ -183,7 +195,7 @@ void FPackage::SetNameFromPath( const std::wstring& InPath )
 bool FPackage::Save( const std::wstring& InPath )
 {
 	// Before saving package it needs to be fully loaded into memory
-	std::vector< TSharedPtr<FAsset> >		loadedAsset;
+	std::vector< TAssetHandle<FAsset> >		loadedAsset;
 	FullyLoad( loadedAsset );
 
 	// If package name not setted - take from path name of file
@@ -208,7 +220,7 @@ bool FPackage::Save( const std::wstring& InPath )
 	return true;
 }
 
-void FPackage::FullyLoad( std::vector< TSharedPtr<FAsset> >& OutAssetArray )
+void FPackage::FullyLoad( std::vector< TAssetHandle<FAsset> >& OutAssetArray )
 {
 	// If we not load package from HDD - exit from function
 	if ( filename.empty() )
@@ -232,7 +244,7 @@ void FPackage::FullyLoad( std::vector< TSharedPtr<FAsset> >& OutAssetArray )
 		}
 
 		// Load asset
-		TSharedPtr<FAsset>		asset = LoadAsset( *archive, itAsset->first, assetInfo );
+		TAssetHandle<FAsset>		asset = LoadAsset( *archive, itAsset->first, assetInfo );
 		if ( asset )
 		{
 			OutAssetArray.push_back( asset );
@@ -246,7 +258,7 @@ void FPackage::FullyLoad( std::vector< TSharedPtr<FAsset> >& OutAssetArray )
 	delete archive;
 }
 
-TSharedPtr<FAsset> FPackage::Find( const FGuid& InGUID )
+TAssetHandle<FAsset> FPackage::Find( const FGuid& InGUID )
 {
 	// Find asset in table
 	auto		itAsset = assetsTable.find( InGUID );
@@ -258,7 +270,7 @@ TSharedPtr<FAsset> FPackage::Find( const FGuid& InGUID )
 	// If asset already in memory - return it
 	if ( itAsset->second.data )
 	{
-		return itAsset->second.data;
+		return itAsset->second.data->GetAssetHandle();
 	}
 
 	// If we not load package from HDD - exit from function
@@ -276,7 +288,7 @@ TSharedPtr<FAsset> FPackage::Find( const FGuid& InGUID )
 
 	archive->SerializeHeader();
 	SerializeHeader( *archive );
-	TSharedPtr<FAsset>		asset = LoadAsset( *archive, itAsset->first, itAsset->second );
+	TAssetHandle<FAsset>		asset = LoadAsset( *archive, itAsset->first, itAsset->second );
 
 	delete archive;
 	return asset;
@@ -392,7 +404,7 @@ void FPackage::SerializeHeader( FArchive& InArchive, bool InIsNeedSkip /* = fals
 	}
 }
 
-TSharedPtr<FAsset> FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo )
+TAssetHandle<FAsset> FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo )
 {
 	uint32		oldOffset = InArchive.Tell();
 
@@ -405,7 +417,7 @@ TSharedPtr<FAsset> FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAsse
 	// If asset already created - return it
 	if ( InAssetInfo.data )
 	{
-		return InAssetInfo.data;
+		return InAssetInfo.data->GetAssetHandle();
 	}
 
 	// Else we create asset from package	
@@ -433,7 +445,7 @@ TSharedPtr<FAsset> FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAsse
 	// Seek to old offset and exit
 	InArchive.Seek( oldOffset );
 	++numLoadedAssets;
-	return InAssetInfo.data;
+	return InAssetInfo.data->GetAssetHandle();
 }
 
 void FPackage::MarkAssetDirty( const FGuid& InGUID )
@@ -465,23 +477,28 @@ void FPackage::UpdateAssetNameInTable( const FGuid& InGUID )
 	assetInfo.name = assetInfo.data->GetAssetName();
 }
 
-void FPackage::Add( const TSharedPtr<FAsset>& InAsset )
+void FPackage::Add( const TAssetHandle<FAsset>& InAsset )
 {
 	check( InAsset );
-	checkMsg( InAsset->guid.IsValid(), TEXT( "For add asset to package need GUID is valid" ) );
+
+	TSharedPtr<FAsset>		assetRef = InAsset.ToSharedPtr();
+	checkMsg( assetRef->guid.IsValid(), TEXT( "For add asset to package need GUID is valid" ) );
 
 	// If asset in package already containing, remove from table old GUID
-	auto		it = assetGUIDTable.find( InAsset->name );
-	if ( it != assetGUIDTable.end() && it->second != InAsset->guid )
+	auto		it = assetGUIDTable.find( assetRef->name );
+	if ( it != assetGUIDTable.end() && it->second != assetRef->guid )
 	{
 		assetsTable.erase( it->second );
 	}
 
-	bIsDirty						= true;
-	InAsset->package				= this;
-	InAsset->bDirty					= true;
-	assetGUIDTable[ InAsset->name ] = InAsset->guid;
-	assetsTable[ InAsset->guid ]	= FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, InAsset->type, InAsset->name, InAsset };
+	// Update guid package in asset reference
+	InAsset.reference->guidPackage		= guid;
+
+	bIsDirty							= true;
+	assetRef->package					= this;
+	assetRef->bDirty					= true;
+	assetGUIDTable[ assetRef->name ]	= assetRef->guid;
+	assetsTable[ assetRef->guid ]		= FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, assetRef->type, assetRef->name, assetRef };
 	++numLoadedAssets;
 }
 
@@ -507,6 +524,7 @@ bool FPackage::Remove( const FGuid& InGUID, bool InForceUnload /* = false */ )
 		if ( assetRef )
 		{
 			assetRef->package = nullptr;
+			assetRef->GetAssetHandle().GetReference()->guidPackage.Invalidate();
 		}
 	}
 
@@ -550,6 +568,7 @@ bool FPackage::RemoveAll( bool InForceUnload /* = false */ )
 		if ( assetRef )
 		{
 			assetRef->package = nullptr;
+			assetRef->GetAssetHandle().GetReference()->guidPackage.Invalidate();
 		}
 	}
 
@@ -604,6 +623,7 @@ bool FPackage::UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload /* = fal
 		{
 			LE_LOG( LT_Warning, LC_Package, TEXT( "An asset was uploaded that was not recorded on the HDD. This asset has been removed from the package and will not be written" ) );
 			InAssetInfo.data->package = nullptr;
+			InAssetInfo.data->GetAssetHandle().GetReference()->guidPackage.Invalidate();
 			assetsTable.erase( InAssetInfo.data->GetGUID() );
 		}
 		// Else we only destroy asset
@@ -656,7 +676,7 @@ bool FPackage::UnloadAllAssets( bool InForceUnload /* = false */ )
 	if ( GIsEditor )
 	{
 		// Convert array of FAssetInfo to TSharedPtr<FAsset> for events
-		std::vector< TSharedPtr<FAsset>	>		assets;
+		std::vector< TSharedPtr<FAsset> >		assets;
 		for ( uint32 index = 0, count = assetsToUnload.size(); index < count; ++index )
 		{
 			assets.push_back( assetsToUnload[ index ]->data );
@@ -737,7 +757,7 @@ bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPacka
 	return true;
 }
 
-TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InString, EAssetType InType /* = AT_Unknown */ )
+TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InString, EAssetType InType /* = AT_Unknown */ )
 {
 	std::wstring		packageName;
 	std::wstring		assetName;
@@ -761,13 +781,13 @@ TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InString, EAs
 	return FindAsset( packagePath, assetName, InType );
 }
 
-TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType /* = AT_Unknown */ )
+TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType /* = AT_Unknown */ )
 {
 	check( InGUIDAsset.IsValid() );
 
 	// Find package and open he
-	TWeakPtr<FAsset>	asset;
-	FPackageRef			package = LoadPackage( InPath );
+	TAssetHandle<FAsset>	asset;
+	FPackageRef				package = LoadPackage( InPath );
 
 	// Find asset in package
 	if ( package )
@@ -784,13 +804,13 @@ TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const
 	return asset;
 }
 
-TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType /* = AT_Unknown */ )
+TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType /* = AT_Unknown */ )
 {
 	check( !InAsset.empty() );
 
 	// Find package and open he
-	TWeakPtr<FAsset>	asset;
-	FPackageRef			package = LoadPackage( InPath );
+	TAssetHandle<FAsset>	asset;
+	FPackageRef				package = LoadPackage( InPath );
 	
 	// Find asset in package
 	if ( package )
@@ -811,7 +831,7 @@ TSharedPtr<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const
 	return asset;
 }
 
-TSharedPtr<FAsset> FPackageManager::FindDefaultAsset( EAssetType InType ) const
+TAssetHandle<FAsset> FPackageManager::FindDefaultAsset( EAssetType InType ) const
 {
 	return GetDefaultAsset( InType );
 }
@@ -903,13 +923,13 @@ bool FPackageManager::UnloadAllPackages( bool InForceUnload /* = false */ )
 	return !bUnloadedNotAll;
 }
 
-bool FPackageManager::UnloadAsset( const TWeakPtr<FAsset>& InAssetPtr, bool InForceUnload /* = false */ )
+bool FPackageManager::UnloadAsset( const TAssetHandle<FAsset>& InAssetPtr, bool InForceUnload /* = false */ )
 {
 	FPackageRef		package;
 	FGuid			guidAsset;
 	{
 		// If asset already unload, we exit from function
-		TSharedPtr<FAsset>		assetRef = InAssetPtr.Pin();
+		TSharedPtr<FAsset>		assetRef = InAssetPtr.ToSharedPtr();
 		if ( !assetRef )
 		{
 			return true;
@@ -952,7 +972,8 @@ void FPackageManager::GarbageCollector()
 			}
 
 			// Unload asset only if weak references is not exist
-			bool		bCanUnloadAsset = assetInfo.data.GetSharedReferenceCount() <= 2 && assetInfo.data.GetWeakReferenceCount() <= 1;		// 2 shared reference this is two FAssetInfo, one in current section, other in package
+			bool		bCanUnloadAsset = assetInfo.data.GetSharedReferenceCount() <= 2 && assetInfo.data.GetWeakReferenceCount() <= 3;		// 2 shared reference this is two FAssetInfo, one in current section, other in package
+																																			// 3 weak references containing in SharedThis, GetAssetHandle and self this resource
 			if ( bCanUnloadAsset && package->UnloadAsset( assetInfo.data->GetGUID(), true ) )
 			{
 				// Try unload dependent assets
@@ -962,15 +983,15 @@ void FPackageManager::GarbageCollector()
 				for ( auto itDependentAsset = dependentAssets.begin(), itDependentAssetEnd = dependentAssets.end(); itDependentAsset != itDependentAssetEnd; ++itDependentAsset )
 				{
 					// If depended asset already unloaded - skip it
-					TSharedPtr<FAsset>		dependetAsset = itDependentAsset->Pin();
+					TSharedPtr<FAsset>		dependetAsset = itDependentAsset->ToSharedPtr();
 					if ( !dependetAsset )
 					{
 						continue;
 					}
 
 					// Is we can unload this asset?
-					bool	bCanUnloadDependentAsset = dependetAsset.GetSharedReferenceCount() <= 2 && dependetAsset.GetWeakReferenceCount() <= 3;		// Shared reference: 2 because one in current section, other in package
-																																						// Weak reference: 3 because one in current section (FSetDependentAssets), second in parent asset and other self this resource
+					bool	bCanUnloadDependentAsset = dependetAsset.GetSharedReferenceCount() <= 2 && dependetAsset.GetWeakReferenceCount() <= 5;		// Shared reference: 2 because one in current section, other in package
+																																						// Weak reference: 5 because one in current section (FSetDependentAssets), second in parent asset and other self this resource, SharedThis and GetAssetHandle
 					if ( !bCanUnloadDependentAsset )
 					{
 						continue;

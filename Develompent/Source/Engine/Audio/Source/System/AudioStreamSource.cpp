@@ -48,7 +48,7 @@ uint32 FAudioStreamRunnable::Run()
 
 	while ( true )
 	{
-		TSharedPtr<FAudioBank>		audioBankRef = streamSource->audioBank.Pin();		// Lock audio bank for him not unloaded ahead of time
+		TSharedPtr<FAudioBank>		audioBankRef = streamSource->audioBank.ToSharedPtr();		// Lock audio bank for him not unloaded ahead of time
 		{
 			FScopeLock		scopeLock( &streamSource->csStreamData );
 			if ( !streamSource->bIsStreaming || !streamSource->audioBank )
@@ -173,7 +173,7 @@ bool FAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 		}
 
 		//  If we looped - move to start file
-		streamSource->audioBank.Pin()->SeekBankPCM( streamSource->audioBankHandle, 0 );
+		streamSource->audioBank.ToSharedPtr()->SeekBankPCM( streamSource->audioBankHandle, 0 );
 	}
 
 	// Fill the buffer if some data was returned
@@ -197,7 +197,7 @@ bool FAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 bool FAudioStreamRunnable::GetData( FChunk& OutData )
 {
 	FScopeLock	scopeLock( &streamSource->csStreamData );
-	TSharedPtr<FAudioBank>		audioBankRef	= streamSource->audioBank.Pin();
+	TSharedPtr<FAudioBank>		audioBankRef	= streamSource->audioBank.ToSharedPtr();
 	uint32						toFill			= samples.size();
 	uint64						currentOffset	= audioBankRef->GetOffsetBankPCM( streamSource->audioBankHandle );
 	uint64						numSamples		= streamSource->audioBankInfo.numSamples;
@@ -299,7 +299,7 @@ void FAudioStreamSource::Stop()
 	}
 
 	// Move to the beginning
-	TSharedPtr<FAudioBank>		audioBankRef = audioBank.Pin();
+	TSharedPtr<FAudioBank>		audioBankRef = audioBank.ToSharedPtr();
 	if ( audioBankHandle && audioBankRef )
 	{
 		audioBankRef->SeekBankPCM( audioBankHandle, 0 );
@@ -311,7 +311,7 @@ void FAudioStreamSource::SetLoop( bool InIsLoop )
 	bIsLoop = InIsLoop;
 }
 
-void FAudioStreamSource::OpenBank( const TWeakPtr<FAudioBank>& InAudioBank )
+void FAudioStreamSource::OpenBank( const TAssetHandle<FAudioBank>& InAudioBank )
 {
 	// If already opened bank - close
 	if ( audioBankHandle )
@@ -320,7 +320,7 @@ void FAudioStreamSource::OpenBank( const TWeakPtr<FAudioBank>& InAudioBank )
 	}
 
 	// If new bank is nullptr - exit from method
-	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.Pin();
+	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
 	if ( !audioBankRef )
 	{
 		return;
@@ -348,7 +348,7 @@ void FAudioStreamSource::CloseBank()
 
 	Stop();
 	{
-		TSharedPtr<FAudioBank>		audioBankRef = audioBank.Pin();
+		TSharedPtr<FAudioBank>		audioBankRef = audioBank.ToSharedPtr();
 		if ( audioBankRef )
 		{
 			audioBankRef->CloseBank( audioBankHandle );
@@ -357,7 +357,7 @@ void FAudioStreamSource::CloseBank()
 	audioBankHandle = nullptr;
 }
 
-void FAudioStreamSource::SetAudioBank( const TWeakPtr<FAudioBank>& InAudioBank )
+void FAudioStreamSource::SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank )
 {
 	// If bank opened - close
 	if ( audioBankHandle )

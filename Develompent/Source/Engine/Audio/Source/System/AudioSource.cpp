@@ -30,7 +30,7 @@ FAudioSource::~FAudioSource()
 	GAudioDevice.OnAudioDeviceMuted().Remove( this, &FAudioSource::OnAudioDeviceMuted );
 
 	// Unsubscribe from event of audio buffer if him is exist
-	TSharedPtr<FAudioBank>		audioBankRef = audioBank.Pin();
+	TSharedPtr<FAudioBank>		audioBankRef = audioBank.ToSharedPtr();
 	if ( audioBankRef )
 	{
 		FAudioBufferRef		audioBuffer = audioBankRef->GetAudioBuffer();
@@ -88,13 +88,13 @@ void FAudioSource::SetAttenuation( float InAttenuation )
 	alSourcef( alHandle, AL_ROLLOFF_FACTOR, InAttenuation );
 }
 
-void FAudioSource::SetAudioBank( const TWeakPtr<FAudioBank>& InAudioBank )
+void FAudioSource::SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank )
 {
 	FAudioBufferRef		audioBuffer;
 
 	// Unsubscribe from events of audio buffer if him is exist
 	{
-		TSharedPtr<FAudioBank>		oldAudioBankRef = audioBank.Pin();
+		TSharedPtr<FAudioBank>		oldAudioBankRef = audioBank.ToSharedPtr();
 		if ( oldAudioBankRef )
 		{
 			audioBuffer = oldAudioBankRef->GetAudioBuffer();
@@ -110,7 +110,7 @@ void FAudioSource::SetAudioBank( const TWeakPtr<FAudioBank>& InAudioBank )
 	audioBank = InAudioBank;
 
 	// Getting audio buffer if bank is valid and subscribe to events of audio buffer
-	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.Pin();
+	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
 	if ( audioBankRef )
 	{
 		audioBuffer = audioBankRef->GetAudioBuffer();
@@ -183,7 +183,7 @@ EAudioSourceStatus FAudioSource::GetStatus() const
 	}
 }
 
-TWeakPtr<FAudioBank> FAudioSource::GetAudioBank() const
+TAssetHandle<FAudioBank> FAudioSource::GetAudioBank() const
 {
 	return audioBank;
 }

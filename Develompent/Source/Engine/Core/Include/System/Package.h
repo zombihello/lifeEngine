@@ -108,33 +108,21 @@ FORCEINLINE std::wstring ConvertAssetTypeToText( EAssetType InAssetType )
 
 /**
  * @ingroup Core
- * Asset info in package
- */
-struct FAssetInfo
-{
-	uint32						offset;		/**< Offset in archive to asset */
-	uint32						size;		/**< Size data in archive */
-	EAssetType					type;		/**< Asset type */
-	std::wstring				name;		/**< Name of asset */
-	TSharedPtr<class FAsset>	data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc)*/
-};
-
-/**
- * @ingroup Core
  * Struct reference to asset
  */
 struct FAssetReference
 {
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param[in] InType Asset type
 	 * @param[in] InGUIDAsset GUID of asset
 	 * @param[in] InGUIDPackage GUID of the package
 	 */
 	FORCEINLINE FAssetReference( EAssetType InType = AT_Unknown, const FGuid& InGUIDAsset = FGuid(), const FGuid& InGUIDPackage = FGuid() )
 		: type( InType ), guidAsset( InGUIDAsset ), guidPackage( InGUIDPackage )
-	{}
+	{
+	}
 
 	/**
 	 * Is valid
@@ -152,9 +140,266 @@ struct FAssetReference
 
 /**
  * @ingroup Core
+ * Asset info in package
+ */
+struct FAssetInfo
+{
+	uint32						offset;		/**< Offset in archive to asset */
+	uint32						size;		/**< Size data in archive */
+	EAssetType					type;		/**< Asset type */
+	std::wstring				name;		/**< Name of asset */
+	TSharedPtr<class FAsset>	data;		/**< Pointer to asset (FMaterialRef, FTexture2DRef, etc) */
+};
+
+/**
+ * @ingroup Core
+ * Asset handle for containing in TSharedPtr and TWeakPtr reference to asset and him pointer
+ */
+template< class ObjectType >
+struct TAssetHandle
+{
+public:
+	friend class FPackage;
+	friend class FPackageManager;
+
+	/**
+	 * @brief Hash function for STL containers
+	 */
+	struct FHashFunction
+	{
+		/**
+		 * @brief Calculate hash of TAssetHandle
+		 * @param InAssetPtr	Asset ptr
+		 */
+		FORCEINLINE std::size_t operator()( const TAssetHandle& InAssetPtr ) const
+		{
+			return appMemFastHash( InAssetPtr.reference.Get(), InAssetPtr.asset.GetTypeHash() );
+		}
+	};
+
+	/**
+	 * @brief Constructor
+	 */
+	FORCEINLINE TAssetHandle()
+	{}
+
+	/**
+	 * @brief Constructor
+	 */
+	FORCEINLINE TAssetHandle( std::nullptr_t )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InAssetPtr		Asset ptr
+	 * @param InReferencePtr	Reference ptr
+	 */
+	FORCEINLINE TAssetHandle( const TWeakPtr<ObjectType>& InAssetPtr, const TSharedPtr<FAssetReference>& InReferencePtr )
+		: asset( InAssetPtr )
+		, reference( InReferencePtr )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InAssetInfo		Asset info
+	 */
+	FORCEINLINE TAssetHandle( const FAssetInfo& InAssetInfo )
+		: asset( InAssetInfo.data )
+		, reference( InAssetInfo.reference )
+	{}
+
+	/**
+	 * @brief Constructor
+	 * @param InAssetPtr	Asset ptr
+	 */
+	template< typename OtherType >
+	FORCEINLINE TAssetHandle( const TAssetHandle<OtherType>& InAssetPtr )
+		: asset( ( TWeakPtr<ObjectType> )InAssetPtr.asset )
+		, reference( InAssetPtr.reference )
+	{}
+
+	/**
+	 * @brief Constructor
+	 * @param InAssetPtr	Asset ptr
+	 */
+	FORCEINLINE TAssetHandle( const TAssetHandle& InAssetPtr )
+		: asset( InAssetPtr.asset )
+		, reference( InAssetPtr.reference )
+	{}
+
+	/**
+	 * @brief Constructor
+	 * @param InAssetPtr	Asset ptr
+	 */
+	template< typename OtherType >
+	FORCEINLINE TAssetHandle( TAssetHandle<OtherType>&& InAssetPtr )
+		: asset( MoveTemp( ( TWeakPtr<ObjectType> )InAssetPtr.asset ) )
+		, reference( MoveTemp( InAssetPtr.reference ) )
+	{}
+
+	/**
+	 * @brief Constructor
+	 * @param InAssetPtr	Asset ptr
+	 */
+	FORCEINLINE TAssetHandle( TAssetHandle&& InAssetPtr )
+		: asset( MoveTemp( InAssetPtr.asset ) )
+		, reference( MoveTemp( InAssetPtr.reference ) )
+	{}
+
+	/**
+	 * @brief Overloaded operator =
+	 *
+	 * @param InAssetPtr	Asset ptr
+	 * @return Return reference to current object
+	 */
+	FORCEINLINE TAssetHandle& operator=( const TAssetHandle& InAssetPtr )
+	{
+		asset		= InAssetPtr.asset;
+		reference	= InAssetPtr.reference;
+		return *this;
+	}
+
+	/**
+	 * @brief Overloaded operator =
+	 *
+	 * @param InAssetPtr	Asset ptr
+	 * @return Return reference to current object
+	 */
+	template< typename OtherType >
+	FORCEINLINE TAssetHandle& operator=( const TAssetHandle<OtherType>& InAssetPtr )
+	{
+		asset		= InAssetPtr.asset;
+		reference	= InAssetPtr.reference;
+		return *this;
+	}
+
+	/**
+	 * @brief Overloaded operator
+	 *
+	 * @param InAssetPtr	Asset ptr
+	 * @return Return reference to current object
+	 */
+	template< typename OtherType >
+	FORCEINLINE TAssetHandle& operator=( TAssetHandle<OtherType>&& InAssetPtr )
+	{
+		if ( this != ( TAssetHandle<ObjectType>* ) &InAssetPtr )
+		{
+			asset		= MoveTemp( InAssetPtr.asset );
+			reference	= MoveTemp( InAssetPtr.reference );
+		}
+		return *this;
+	}
+
+	/**
+	 * @brief Overloaded operator
+	 *
+	 * @param InAssetPtr	Asset ptr
+	 * @return Return reference to current object
+	 */
+	FORCEINLINE TAssetHandle& operator=( TAssetHandle&& InAssetPtr )
+	{
+		if ( this != &InAssetPtr )
+		{
+			asset		= MoveTemp( InAssetPtr.asset );
+			reference	= MoveTemp( InAssetPtr.reference );
+		}
+		return *this;
+	}
+
+	/**
+	 * @brief Overloaded operator =
+	 * @return Return reference to current object
+	 */
+	FORCEINLINE TAssetHandle& operator=( std::nullptr_t )
+	{
+		Reset();
+		return *this;
+	}
+
+	/**
+	 * @brief Overloaded operator ==
+	 *
+	 * @param InAssetPtr	Asset ptr
+	 * @return Returning TRUE if pointers is equal, else returning FALSE
+	 */
+	template< typename OtherType >
+	FORCEINLINE bool operator==( const TAssetHandle<OtherType>& InAssetPtr ) const
+	{
+		return asset == InAssetPtr.asset && reference == InAssetPtr.reference;
+	}
+
+	/**
+	 * @brief Overloaded operator !=
+	 *
+	 * @param InAssetPtr	Asset ptr
+	 * @return Returning TRUE if pointers is not equal, else returning FALSE
+	 */
+	template< typename OtherType >
+	FORCEINLINE bool operator!=( const TAssetHandle<OtherType>& InAssetPtr ) const
+	{
+		return asset != InAssetPtr.asset && reference != InAssetPtr.reference;
+	}
+
+	/**
+	 * @brief Overloaded operator bool
+	 * @return Returning TRUE if handle is valid, else returning FALSE
+	 */
+	FORCEINLINE	operator bool() const
+	{
+		return IsValid();
+	}
+
+	/**
+	 * @brief Resets this asset handle, removing a reference to the asset. If there are no other
+	 * references to the asset then it will be destroyed
+	 */
+	FORCEINLINE void Reset()
+	{
+		*this = TAssetHandle<ObjectType>();
+	}
+
+	/**
+	 * @brief Is valid asset handle
+	 * @return Return TRUE if handle is valid
+	 */
+	FORCEINLINE bool IsValid() const
+	{
+		return asset.IsValid() && reference.IsValid();
+	}
+
+	/**
+	 * @brief Get shared ptr to asset
+	 * @return Return shared ptr to asset. If him is unloaded return invalid TSharedPtr
+	 */
+	FORCEINLINE TSharedPtr<ObjectType> ToSharedPtr() const
+	{
+		return asset.Pin();
+	}
+
+	/**
+	 * @brief Get asset reference
+	 * @return Return pointer to asset reference
+	 */
+	FORCEINLINE TSharedPtr<FAssetReference> GetReference() const
+	{
+		return reference;
+	}
+
+	// Declare other actor handle types as friends as needed
+	template< class OtherType > friend class TAssetHandle;
+
+private:
+	TWeakPtr<ObjectType>					asset;		/**< Pointer to asset */
+	mutable TSharedPtr<FAssetReference>		reference;	/**< Reference to asset for reload */
+};
+
+/**
+ * @ingroup Core
  * Base class for serialize assets in package
  */
-class FAsset
+class FAsset : public TSharedFromThis<FAsset>
 {
 public:
 	friend class FPackage;
@@ -162,7 +407,7 @@ public:
 	/**
 	 * @brief Typedef of dependent assets
 	 */
-	typedef std::unordered_set< TWeakPtr<FAsset>, TWeakPtr<FAsset>::FHashFunction >		FSetDependentAssets;
+	typedef std::unordered_set< TAssetHandle<FAsset>, TAssetHandle<FAsset>::FHashFunction >		FSetDependentAssets;
 
 	/**
 	 * Constructor
@@ -256,6 +501,12 @@ public:
 	 */
 	FAssetReference GetAssetReference() const;
 
+	/**
+	 * Get asset handle
+	 * @return Return asset handle
+	 */
+	TAssetHandle<FAsset> GetAssetHandle() const;
+
 #if WITH_EDITOR
 	/**
 	 * Get path to asset source file
@@ -274,6 +525,12 @@ public:
 	 */
 	virtual void GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter = AT_Unknown ) const;
 
+	/**
+	 * Reload dependent assets
+	 * @param InForce	Is need force reload assets
+	 */
+	virtual void ReloadDependentAssets( bool InForce = false );
+
 protected:
 	/**
 	 * Mark dirty asset
@@ -282,14 +539,15 @@ protected:
 	void MarkDirty();
 
 private:
-	bool						bDirty;				/**< Is asset is dirty */
-	class FPackage*				package;			/**< The package where the asset is located */
-	std::wstring				name;				/**< Name asset */
-	FGuid						guid;				/**< GUID of asset */
-	EAssetType					type;				/**< Asset type */
+	bool							bDirty;		/**< Is asset is dirty */
+	class FPackage*					package;	/**< The package where the asset is located */
+	std::wstring					name;		/**< Name asset */
+	FGuid							guid;		/**< GUID of asset */
+	EAssetType						type;		/**< Asset type */
+	mutable TAssetHandle<FAsset>	handle;		/**< Handle to this asset */
 
 #if WITH_EDITOR
-	std::wstring				sourceFile;			/**< Path to source file */
+	std::wstring					sourceFile;	/**< Path to source file */
 #endif // WITH_EDITOR
 };
 
@@ -321,7 +579,7 @@ public:
 	 * 
 	 * @param[in] InAsset Asset
 	 */
-	void Add( const TSharedPtr<FAsset>& InAsset );
+	void Add( const TAssetHandle<FAsset>& InAsset );
 
 	/**
 	 * Remove asset from package
@@ -330,13 +588,14 @@ public:
 	 * @param InForceUnload		Is need force unload asset if him loaded
 	 * @return Return TRUE if asset seccussed removed from package
 	 */
-	FORCEINLINE bool Remove( const TSharedPtr<FAsset>& InAsset, bool InForceUnload = false )
+	FORCEINLINE bool Remove( const TAssetHandle<FAsset>& InAsset, bool InForceUnload = false )
 	{
 		if ( !InAsset.IsValid() )
 		{
 			return true;
 		}
-		return Remove( InAsset->GetGUID(), InForceUnload );
+
+		return Remove( InAsset.ToSharedPtr()->GetGUID(), InForceUnload );
 	}
 
 	/**
@@ -381,11 +640,11 @@ public:
 	 * @param InForceUnload			Is need force unload (ignored shared references)
 	 * @return Return TRUE if asset is unloaded
 	 */
-	FORCEINLINE bool UnloadAsset( const TWeakPtr<FAsset>& InAssetPtr, bool InForceUnload = false )
+	FORCEINLINE bool UnloadAsset( const TAssetHandle<FAsset>& InAssetPtr, bool InForceUnload = false )
 	{
 		FGuid				assetGuid;
 		{
-			TSharedPtr<FAsset>	assetRef = InAssetPtr.Pin();
+			TSharedPtr<FAsset>	assetRef = InAssetPtr.ToSharedPtr();
 			if ( !assetRef )
 			{
 				return true;
@@ -463,7 +722,7 @@ public:
 	 * @param[in] InGUID GUID of asset
 	 * @return Return pointer to asset in package, if not found return nullptr
 	 */
-	TSharedPtr<FAsset> Find( const FGuid& InGUID );
+	TAssetHandle<FAsset> Find( const FGuid& InGUID );
 
 	/**
 	 * Find asset by name
@@ -471,7 +730,7 @@ public:
 	 * @param InName Name asset
 	 * @return Return pointer to asset in package, if not found return nullptr
 	 */
-	FORCEINLINE TSharedPtr<FAsset> Find( const std::wstring& InName )
+	FORCEINLINE TAssetHandle<FAsset> Find( const std::wstring& InName )
 	{
 		auto		itAssetGUID = assetGUIDTable.find( InName );
 		if ( itAssetGUID == assetGUIDTable.end() )
@@ -620,7 +879,7 @@ private:
 	 * Fully load
 	 * @param OutAssetArray Array of loaded asset from package
 	 */
-	void FullyLoad( std::vector< TSharedPtr<FAsset> >& OutAssetArray );
+	void FullyLoad( std::vector< TAssetHandle<FAsset> >& OutAssetArray );
 
 	/**
 	 * Unload asset by asset info
@@ -655,7 +914,7 @@ private:
 	 * @param InAssetInfo				Asset info
 	 * @return Return loaded asset from package, if failed returning nullptr
 	 */
-	TSharedPtr<FAsset> LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo );
+	TAssetHandle<FAsset> LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo );
 
 	/**
 	 * Update asset name in table
@@ -720,7 +979,7 @@ public:
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 * @return Return finded asset. If not found returning nullptr
 	 */
-	TSharedPtr<FAsset> FindAsset( const std::wstring& InString, EAssetType InType = AT_Unknown );
+	TAssetHandle<FAsset> FindAsset( const std::wstring& InString, EAssetType InType = AT_Unknown );
 
 	/**
 	 * Find asset in package
@@ -730,7 +989,7 @@ public:
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 * @return Return finded asset. If not found returning nullptr
 	 */
-	FORCEINLINE TSharedPtr<FAsset> FindAsset( const FGuid& InGUIDPackage, const FGuid& InGUIDAsset, EAssetType InType = AT_Unknown )
+	FORCEINLINE TAssetHandle<FAsset> FindAsset( const FGuid& InGUIDPackage, const FGuid& InGUIDAsset, EAssetType InType = AT_Unknown )
 	{
 		std::wstring		path = GTableOfContents.GetPackagePath( InGUIDPackage );
 		if ( path.empty() )
@@ -748,7 +1007,7 @@ public:
 	 * @param InGUIDAsset GUID of asset
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 */
-	TSharedPtr<FAsset> FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType = AT_Unknown );
+	TAssetHandle<FAsset> FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType = AT_Unknown );
 
 	/**
 	 * Find asset in package
@@ -757,7 +1016,7 @@ public:
 	 * @param InAsset Asset name in the package
 	 * @param InType Asset type. Optional parameter, if setted return default asset in case fail
 	 */
-	TSharedPtr<FAsset> FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType = AT_Unknown );
+	TAssetHandle<FAsset> FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType = AT_Unknown );
 
 	/**
 	 * Find default asset
@@ -765,7 +1024,7 @@ public:
 	 * @param InType Default asset for type
 	 * @return Return finded asset. If not found returning nullptr
 	 */
-	TSharedPtr<FAsset> FindDefaultAsset( EAssetType InType ) const;
+	TAssetHandle<FAsset> FindDefaultAsset( EAssetType InType ) const;
 
 	/**
 	 * Is default asset
@@ -773,13 +1032,13 @@ public:
 	 * @param InAsset	Asset
 	 * @return Return TRUE if InAsset is default asset, else return FALSE
 	 */
-	FORCEINLINE bool IsDefaultAsset( const TSharedPtr<FAsset>& InAsset ) const
+	FORCEINLINE bool IsDefaultAsset( const TAssetHandle<FAsset>& InAsset ) const
 	{
 		if ( !InAsset )
 		{
 			return false;
 		}
-		return InAsset == FindDefaultAsset( InAsset->GetType() );
+		return InAsset == FindDefaultAsset( InAsset.ToSharedPtr()->GetType() );
 	}
 
 	/**
@@ -815,7 +1074,7 @@ public:
 	 * @param InForceUnload		Is need force unload (ignored shared references)
 	 * @return Return TRUE if asset is unloaded
 	 */
-	bool UnloadAsset( const TWeakPtr<FAsset>& InAssetPtr, bool InForceUnload = false );
+	bool UnloadAsset( const TAssetHandle<FAsset>& InAssetPtr, bool InForceUnload = false );
 
 	/**
 	 * Garbage collector of unused packages and assets
@@ -987,13 +1246,19 @@ FORCEINLINE bool MakeReferenceToAsset( const std::wstring& InPackageName, const 
  * @param OutString			Output string with reference
  * @return Return TRUE if reference created is seccussed, else returning FALSE
  */
-FORCEINLINE bool MakeReferenceToAsset( const TSharedPtr<FAsset>& InAsset, std::wstring& OutString )
+FORCEINLINE bool MakeReferenceToAsset( const TAssetHandle<FAsset>& InAsset, std::wstring& OutString )
 {
-	if ( !InAsset || !InAsset->GetPackage() || InAsset->GetAssetName().empty() )
+	if ( !InAsset )
 	{
 		return false;
 	}
-	return MakeReferenceToAsset( InAsset->GetPackage()->GetName(), InAsset->GetAssetName(), InAsset->GetType(), OutString );
+
+	TSharedPtr<FAsset>		asset = InAsset.ToSharedPtr();
+	if ( !asset->GetPackage() || asset->GetAssetName().empty() )
+	{
+		return false;
+	}
+	return MakeReferenceToAsset( asset->GetPackage()->GetName(), asset->GetAssetName(), asset->GetType(), OutString );
 }
 
 //
@@ -1042,11 +1307,11 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FAssetReference& In
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FAsset>& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FAsset>& InValue )
 {
 	if ( InArchive.IsSaving() )
 	{
-		TSharedPtr<FAsset>		asset = InValue.Pin();
+		TSharedPtr<FAsset>		asset = InValue.ToSharedPtr();
 		InArchive << ( asset ? asset->GetAssetReference() : FAssetReference() );
 
 #if DO_CHECK
@@ -1074,11 +1339,11 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FAsset>& InValue
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FAsset>& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TAssetHandle<FAsset>& InValue )
 {
 	check( InArchive.IsSaving() );
 	
-	TSharedPtr<FAsset>		asset = InValue.Pin();
+	TSharedPtr<FAsset>		asset = InValue.ToSharedPtr();
 	InArchive << ( asset ? asset->GetAssetReference() : FAssetReference() );
 	return InArchive;
 }

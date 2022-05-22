@@ -575,7 +575,7 @@ namespace SharedPointerInternals
 		 */
 		FORCEINLINE uint64 GetTypeHash() const
 		{
-			return ( uint64 ) referenceController;
+			return ( uint64 )referenceController;
 		}
 
 		/**

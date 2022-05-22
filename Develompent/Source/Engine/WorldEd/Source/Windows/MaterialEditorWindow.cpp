@@ -102,7 +102,7 @@ void WeMaterialEditorWindow::InitUI()
 
 		selectAsset_diffuse		= new WeSelectAssetWidget( parametersSection );
 		{
-			TSharedPtr<FTexture2D>		diffuseTextureRef;
+			TAssetHandle<FTexture2D>		diffuseTextureRef;
 			material->GetTextureParameterValue( TEXT( "diffuse" ), diffuseTextureRef );
 			if ( diffuseTextureRef && !GPackageManager->IsDefaultAsset( diffuseTextureRef ) )
 			{
@@ -186,7 +186,7 @@ void WeMaterialEditorWindow::OnSelectedAssetDiffuse( const std::wstring& InNewAs
 	}
 
 	// If asset reference is valid, we find asset
-	TSharedPtr<FTexture2D>		newTexture2DRef;
+	TAssetHandle<FTexture2D>		newTexture2DRef;
 	if ( !InNewAssetReference.empty() )
 	{
 		newTexture2DRef = GPackageManager->FindAsset( InNewAssetReference, AT_Texture2D );

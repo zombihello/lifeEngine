@@ -60,7 +60,7 @@ QString FHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 	return result;
 }
 
-FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString& InPath, FPackage* InPackage, TWeakPtr<FAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport /* = false */ )
+FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString& InPath, FPackage* InPackage, TAssetHandle<FAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport /* = false */ )
 {
 	checkMsg( InPackage, TEXT( "For import package must be valid" ) );
 
@@ -98,9 +98,9 @@ FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString&
 	// Add asset to package
 	if ( assetRef )
 	{
-		LE_LOG( LT_Log, LC_Editor, TEXT( "Imported asset '%s' from '%s' to package '%s'" ), assetRef->GetAssetName().c_str(), InPath.toStdWString().c_str(), InPackage->GetName().c_str() );
-		InPackage->Add( assetRef );
-		OutAsset = assetRef;
+		LE_LOG( LT_Log, LC_Editor, TEXT( "Imported asset '%s' from '%s' to package '%s'" ), assetRef->GetAssetName().c_str(), InPath.toStdWString().c_str(), InPackage->GetName().c_str() );		
+		OutAsset	= TAssetHandle<FAsset>( assetRef, MakeSharedPtr<FAssetReference>( assetRef->GetType(), assetRef->GetGUID() ) );
+		InPackage->Add( OutAsset );
 	}
 	else
 	{
@@ -110,13 +110,13 @@ FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString&
 	return assetRef ? IR_Seccussed : IR_Error;
 }
 
-bool FHelperAssetImporter::Reimport( const TWeakPtr<FAsset>& InAsset, std::wstring& OutError )
+bool FHelperAssetImporter::Reimport( const TAssetHandle<FAsset>& InAsset, std::wstring& OutError )
 {
 	check( InAsset );
 	bool		bResult = false;
 
 	// If asset already is unloaded, we must exit from method
-	TSharedPtr<FAsset>		assetRef = InAsset.Pin();
+	TSharedPtr<FAsset>		assetRef = InAsset.ToSharedPtr();
 	if ( !assetRef )
 	{
 		OutError = TEXT( "Asset already is unloaded" );

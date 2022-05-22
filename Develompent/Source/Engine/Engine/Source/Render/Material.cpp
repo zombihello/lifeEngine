@@ -146,7 +146,7 @@ bool FMaterial::GetScalarParameterValue( const std::wstring& InParameterName, fl
 	return true;
 }
 
-bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, TSharedPtr<FTexture2D>& OutValue ) const
+bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, TAssetHandle<FTexture2D>& OutValue ) const
 {
 	auto		itFind = textureParameters.find( InParameterName );
 	if ( itFind == textureParameters.end() )
@@ -155,8 +155,7 @@ bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, T
 		return false;
 	}
 
-	TSharedPtr<FTexture2D>		valueRef = itFind->second.Pin();
-	OutValue = valueRef ? valueRef : GPackageManager->FindDefaultAsset( AT_Texture2D );
+	OutValue = itFind->second ? itFind->second : GPackageManager->FindDefaultAsset( AT_Texture2D );
 	return itFind->second.IsValid();
 }
 
@@ -187,5 +186,19 @@ void FMaterial::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAs
 
 			OutDependentAssets.insert( itTexture->second );
 		}
+	}
+}
+
+void FMaterial::ReloadDependentAssets( bool InForce /* = false */ )
+{
+	for ( auto itTexture = textureParameters.begin(), itTextureEnd = textureParameters.end(); itTexture != itTextureEnd; ++itTexture )
+	{
+		if ( itTexture->second )
+		{
+			continue;
+		}
+
+		TSharedPtr<FAssetReference>	assetReference = itTexture->second.GetReference();
+		itTexture->second			= GPackageManager->FindAsset( assetReference->guidPackage, assetReference->guidAsset, assetReference->type );
 	}
 }

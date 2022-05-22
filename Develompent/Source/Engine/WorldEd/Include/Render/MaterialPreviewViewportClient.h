@@ -65,7 +65,7 @@ public:
 	FORCEINLINE void SetMaterial( const TSharedPtr<FMaterial>& InMaterial )
 	{
 		material = InMaterial;
-		sphereComponent->SetMaterial( InMaterial );
+		sphereComponent->SetMaterial( InMaterial->GetAssetHandle() );
 	}
 
 private:

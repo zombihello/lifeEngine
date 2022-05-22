@@ -17,9 +17,9 @@ FMeshDrawingPolicy::FMeshDrawingPolicy()
 FMeshDrawingPolicy::~FMeshDrawingPolicy()
 {}
 
-void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, const TWeakPtr<FMaterial>& InMaterial, float InDepthBias /* = 0.f */ )
+void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, const TAssetHandle<FMaterial>& InMaterial, float InDepthBias /* = 0.f */ )
 {
-	TSharedPtr<FMaterial>		materialRef = InMaterial.Pin();
+	TSharedPtr<FMaterial>		materialRef = InMaterial.ToSharedPtr();
 	checkMsg( InVertexFactory && materialRef, TEXT( "Vertex factory and material must be valid for init drawing policy" ) );
 
 	uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
@@ -46,7 +46,7 @@ void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDev
 {
 	check( bInit );
 
-	TSharedPtr<FMaterial>		materialRef = material.Pin();
+	TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
 	if ( !materialRef )
 	{
 		return;
@@ -58,7 +58,7 @@ void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDev
 
 void FMeshDrawingPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView )
 {
-	TSharedPtr<FMaterial>		materialRef = material.Pin();
+	TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
 	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, FString::Format( TEXT( "Material %s" ), materialRef ? materialRef->GetAssetName().c_str() : TEXT( "Unloaded" ) ).c_str());
 
 	// If vertex factory not support instancig - draw without it
@@ -109,7 +109,7 @@ FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const
 {
 	if ( !boundShaderState )
 	{
-		TSharedPtr<FMaterial>		materialRef = material.Pin();
+		TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
 		check( materialRef && vertexFactory && vertexShader && pixelShader );
 		
 		boundShaderState = GRHI->CreateBoundShaderState(
@@ -124,7 +124,7 @@ FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const
 
 FRasterizerStateRHIRef FMeshDrawingPolicy::GetRasterizerState() const
 {
-	TSharedPtr<FMaterial>		materialRef = material.Pin();
+	TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
 	const FRasterizerStateInitializerRHI		initializer =
 	{
 		materialRef->IsWireframe() ? FM_Wireframe : FM_Solid,

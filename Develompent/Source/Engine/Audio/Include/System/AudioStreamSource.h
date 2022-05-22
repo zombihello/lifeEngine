@@ -160,7 +160,7 @@ public:
 	 * Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	virtual void SetAudioBank( const TWeakPtr<FAudioBank>& InAudioBank ) override;
+	virtual void SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank ) override;
 
 	/**
 	 * Is looped
@@ -179,7 +179,7 @@ private:
 	 * Open bank for stream
 	 * @param InAudioBank Audio bank
 	 */
-	void OpenBank( const TWeakPtr<FAudioBank>& InAudioBank );
+	void OpenBank( const TAssetHandle<FAudioBank>& InAudioBank );
 
 	/**
 	 * Close bank

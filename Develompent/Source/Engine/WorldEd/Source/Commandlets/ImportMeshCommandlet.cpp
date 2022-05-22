@@ -72,7 +72,7 @@ bool LImportMeshCommandlet::Main( const std::wstring& InCommand )
 	}
 
 	FPackageRef		package = GPackageManager->LoadPackage( dstFilename, true );
-	package->Add( staticMesh );
+	package->Add( TAssetHandle<FStaticMesh>( staticMesh, MakeSharedPtr<FAssetReference>( AT_StaticMesh, staticMesh->GetGUID() ) ) );
 	return package->Save( dstFilename );
 }
 
@@ -104,7 +104,7 @@ TSharedPtr<FStaticMesh> LImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	std::vector< FStaticMeshVertexType >		verteces;
 	std::vector< uint32 >						indeces;
 	std::vector< FStaticMeshSurface >			surfaces;
-	std::vector< TWeakPtr<FMaterial> >			materials;
+	std::vector< TAssetHandle<FMaterial> >		materials;
 	for ( auto itRoot = meshes.begin(), itRootEnd = meshes.end(); itRoot != itRootEnd; ++itRoot )
 	{
 		FStaticMeshSurface							surface;

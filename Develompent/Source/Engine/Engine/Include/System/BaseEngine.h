@@ -73,7 +73,7 @@ public:
 	 * Get default texture
 	 * @return Return default texture
 	 */
-	FORCEINLINE TWeakPtr<FTexture2D> GetDefaultTexture() const
+	FORCEINLINE TAssetHandle<FTexture2D> GetDefaultTexture() const
 	{
 		return defaultTexture;
 	}
@@ -82,7 +82,7 @@ public:
 	 * Get default material
 	 * @return Return default material
 	 */
-	FORCEINLINE TWeakPtr<FMaterial> GetDefaultMaterial() const
+	FORCEINLINE TAssetHandle<FMaterial> GetDefaultMaterial() const
 	{
 		return defaultMaterial;
 	}
@@ -92,18 +92,18 @@ public:
 	 * Get default wireframe material
 	 * @return Return default wireframe material
 	 */
-	FORCEINLINE TWeakPtr<FMaterial> GetDefaultWireframeMaterial() const
+	FORCEINLINE TAssetHandle<FMaterial> GetDefaultWireframeMaterial() const
 	{
 		return defaultWireframeMaterial;
 	}
 #endif // WITH_EDITOR
 
 protected:
-	TWeakPtr<FTexture2D>		defaultTexture;					/**< Default texture */
-	TWeakPtr<FMaterial>			defaultMaterial;				/**< Default material */
+	TAssetHandle<FTexture2D>		defaultTexture;					/**< Default texture */
+	TAssetHandle<FMaterial>			defaultMaterial;				/**< Default material */
 
 #if WITH_EDITOR
-	TWeakPtr<FMaterial>			defaultWireframeMaterial;		/**< Default wireframe material */
+	TAssetHandle<FMaterial>			defaultWireframeMaterial;		/**< Default wireframe material */
 #endif // WITH_EDITOR
 };
 

@@ -50,9 +50,9 @@ struct FPhysicsShapeGeometry
 		return handle;
 	}
 
-	ECollisionShape					collisionShape;		/**< Collision shape */
-	FCollisionProfile*				collisionProfile;	/**< Collision profile */
-	TWeakPtr<FPhysicsMaterial>		material;			/**< Physics material */
+	ECollisionShape						collisionShape;		/**< Collision shape */
+	FCollisionProfile*					collisionProfile;	/**< Collision profile */
+	TAssetHandle<FPhysicsMaterial>		material;			/**< Physics material */
 
 protected:
 	/**

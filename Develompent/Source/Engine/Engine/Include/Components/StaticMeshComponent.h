@@ -46,7 +46,7 @@ public:
      * @param InIndex Index of material layer in mesh
      * @param InMaterial Material
      */
-    FORCEINLINE void SetMaterial( uint32 InIndex, const TWeakPtr<FMaterial>& InMaterial )
+    FORCEINLINE void SetMaterial( uint32 InIndex, const TAssetHandle<FMaterial>& InMaterial )
     {
         check( InIndex < materials.size() );
         materials[ InIndex ] = InMaterial;
@@ -57,11 +57,11 @@ public:
 	 * @brief Set static mesh
 	 * @param InNewStaticMesh New static mesh
 	 */
-	FORCEINLINE void SetStaticMesh( const TWeakPtr<FStaticMesh>& InNewStaticMesh )
+	FORCEINLINE void SetStaticMesh( const TAssetHandle<FStaticMesh>& InNewStaticMesh )
 	{
 		staticMesh = InNewStaticMesh;
 		{
-			TSharedPtr<FStaticMesh>		staticMeshRef = InNewStaticMesh.Pin();
+			TSharedPtr<FStaticMesh>		staticMeshRef = InNewStaticMesh.ToSharedPtr();
 			if ( staticMeshRef )
 			{
 				materials = staticMeshRef->GetMaterials();
@@ -74,7 +74,7 @@ public:
 	 * @brief Get static mesh
 	 * @return Return pointer to static mesh. If not valid returning nullptr
 	 */
-	FORCEINLINE TWeakPtr<FStaticMesh> GetStaticMesh() const
+	FORCEINLINE TAssetHandle<FStaticMesh> GetStaticMesh() const
 	{
 		return staticMesh;
 	}
@@ -85,7 +85,7 @@ public:
      * @param InIndex Index of material layer in mesh
      * @return Return pointer to material. If material not exist returning nullptr
      */
-    FORCEINLINE TWeakPtr<FMaterial> GetMaterial( uint32 InIndex ) const
+    FORCEINLINE TAssetHandle<FMaterial> GetMaterial( uint32 InIndex ) const
     {
         check( InIndex < materials.size() );
         return materials[ InIndex ];
@@ -112,8 +112,8 @@ private:
 	 */
 	virtual void UnlinkDrawList() override;
 
-	TWeakPtr<FStaticMesh>						staticMesh;						/**< Static mesh */
-	std::vector< TWeakPtr<FMaterial> >			materials;						/**< Override materials */
+	TAssetHandle<FStaticMesh>					staticMesh;						/**< Static mesh */
+	std::vector< TAssetHandle<FMaterial> >		materials;						/**< Override materials */
 	std::vector< FDrawingPolicyLinkRef >		drawingPolicyLinks;				/**< Array of reference to drawing policy link in scene */
 	std::vector< const FMeshBatch* >			meshBatchLinks;					/**< Array of references to mesh batch in drawing policy link */
 };

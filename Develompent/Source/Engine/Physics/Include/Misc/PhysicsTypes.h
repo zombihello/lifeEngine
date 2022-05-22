@@ -12,7 +12,7 @@
 #include <string>
 
 #include "Math/Math.h"
-#include "Misc/SharedPointer.h"
+#include "System/Package.h"
 #include "System/Archive.h"
 
 /**

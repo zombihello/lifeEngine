@@ -72,13 +72,13 @@ public:
 	 * @brief Get default physics material
 	 * @return Return default physics material
 	 */
-	FORCEINLINE TWeakPtr<FPhysicsMaterial> GetDefaultPhysMaterial() const
+	FORCEINLINE TAssetHandle<FPhysicsMaterial> GetDefaultPhysMaterial() const
 	{
 		return defaultPhysMaterial;
 	}
 
 private:
-	TWeakPtr<FPhysicsMaterial>											defaultPhysMaterial;			/**< Default physics material */
+	TAssetHandle<FPhysicsMaterial>										defaultPhysMaterial;			/**< Default physics material */
 	mutable std::unordered_map< std::wstring,  FCollisionProfile >		collisionProfiles;				/**< Collision profiles map */
 };
 

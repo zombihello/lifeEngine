@@ -202,9 +202,9 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FTexture2D>& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FTexture2D>& InValue )
 {
-	TWeakPtr<FAsset>	asset = InValue;
+	TAssetHandle<FAsset>	asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -214,10 +214,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FTexture2D>& InV
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FTexture2D>& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TAssetHandle<FTexture2D>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( TWeakPtr<FAsset> )InValue;
+	InArchive << ( TAssetHandle<FAsset> )InValue;
 	return InArchive;
 }
 

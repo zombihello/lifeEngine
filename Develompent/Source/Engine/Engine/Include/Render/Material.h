@@ -76,7 +76,7 @@ public:
 	 * @param[in] InParameterName Parameter name
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void SetTextureParameterValue( const std::wstring& InParameterName, const TWeakPtr<class FTexture2D>& InValue )
+	FORCEINLINE void SetTextureParameterValue( const std::wstring& InParameterName, const TAssetHandle<class FTexture2D>& InValue )
 	{
 		textureParameters[ InParameterName ] = InValue;
 		MarkDirty();
@@ -234,7 +234,7 @@ public:
 	 * @param[out] OutValue Return value
 	 * @return Return true if finded, else return false
 	 */
-	bool GetTextureParameterValue( const std::wstring& InParameterName, TSharedPtr<FTexture2D>& OutValue ) const;
+	bool GetTextureParameterValue( const std::wstring& InParameterName, TAssetHandle<FTexture2D>& OutValue ) const;
 
 	/**
 	 * Get vector parameter value
@@ -245,14 +245,18 @@ public:
 	 */
 	bool GetVectorParameterValue( const std::wstring& InParameterName, FVector4D& OutValue ) const;
 
-#if WITH_EDITOR
 	/**
 	 * Get dependent assets
 	 * @param OutDependentAssets	Output set of dependent assets
 	 * @param InFilter				Filter of getting assets by type. If setted AT_Unknown return all types
 	 */
 	virtual void GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter = AT_Unknown ) const override;
-#endif // WITH_EDITOR
+
+	/**
+	 * Reload dependent assets
+	 * @param InForce	Is need force reload assets
+	 */
+	virtual void ReloadDependentAssets( bool InForce = false );
 
 	/**
 	 * Is enabled two sided mode
@@ -291,23 +295,23 @@ private:
 	 */
 	typedef std::unordered_map< uint64, std::vector< FShader* > >				FMeshShaderMap;
 
-	bool														isNeedUpdateShaderMap;	/**< Is need update shader map */
-	bool														isTwoSided;				/**< Is two sided material */
-	bool														isWireframe;			/**< Is wireframe material */
-	uint32														usage;					/**< Usage flags (see EMaterialUsage) */
-	FMeshShaderMap												shaderMap;				/**< Shader map for material */
-	std::unordered_map< std::wstring, float >					scalarParameters;		/**< Array scalar parameters */
-	std::unordered_map< std::wstring, FVector4D >				vectorParameters;		/**< Vector parameters */
-	std::unordered_map< std::wstring, TWeakPtr<FTexture2D> >	textureParameters;		/**< Array texture parameters */
+	bool															isNeedUpdateShaderMap;	/**< Is need update shader map */
+	bool															isTwoSided;				/**< Is two sided material */
+	bool															isWireframe;			/**< Is wireframe material */
+	uint32															usage;					/**< Usage flags (see EMaterialUsage) */
+	FMeshShaderMap													shaderMap;				/**< Shader map for material */
+	std::unordered_map< std::wstring, float >						scalarParameters;		/**< Array scalar parameters */
+	std::unordered_map< std::wstring, FVector4D >					vectorParameters;		/**< Vector parameters */
+	std::unordered_map< std::wstring, TAssetHandle<FTexture2D> >	textureParameters;		/**< Array texture parameters */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FMaterial>& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FMaterial>& InValue )
 {
-	TWeakPtr<FAsset>		asset = InValue;
+	TAssetHandle<FAsset>		asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -317,10 +321,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FMaterial>& InVa
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FMaterial>& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TAssetHandle<FMaterial>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( TWeakPtr<FAsset> )InValue;
+	InArchive << ( TAssetHandle<FAsset> )InValue;
 	return InArchive;
 }
 

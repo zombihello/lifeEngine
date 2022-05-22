@@ -124,7 +124,7 @@ FAudioBank::~FAudioBank()
 {
 	if ( audioBuffer )
 	{
-		GAudioBufferManager.Remove( SharedThis( this ) );
+		GAudioBufferManager.Remove( GetAssetHandle() );
 	}
 
 	// Close all opened handles
@@ -354,6 +354,6 @@ FAudioBufferRef FAudioBank::GetAudioBuffer()
 		return audioBuffer;
 	}
 
-	audioBuffer = GAudioBufferManager.Find( SharedThis( this ) );
+	audioBuffer = GAudioBufferManager.Find( GetAssetHandle() );
 	return audioBuffer;
 }

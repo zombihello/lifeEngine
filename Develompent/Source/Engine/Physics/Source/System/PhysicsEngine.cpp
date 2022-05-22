@@ -67,8 +67,8 @@ void FPhysicsEngine::Init()
 			FConfigValue		configDefaultPhysMaterial = GEngineConfig.GetValue( TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
 			if ( configDefaultPhysMaterial.IsValid() )
 			{
-				std::wstring		pathAsset = configDefaultPhysMaterial.GetString();
-				TWeakPtr<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
+				std::wstring			pathAsset = configDefaultPhysMaterial.GetString();
+				TAssetHandle<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset )
 				{
 					defaultPhysMaterial = asset;
@@ -85,13 +85,13 @@ void FPhysicsEngine::Init()
 		}
 
 		// If default physics material not loaded we create in virtual package
-		if ( !defaultPhysMaterial.Pin() )
+		if ( !defaultPhysMaterial )
 		{
 			FPackageRef						package = GPackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<FPhysicsMaterial>	physMaterial = MakeSharedPtr<FPhysicsMaterial>();
 
-			package->Add( physMaterial );
-			defaultPhysMaterial = physMaterial;
+			defaultPhysMaterial		= physMaterial->GetAssetHandle();
+			package->Add( defaultPhysMaterial );
 		}
 	}
 

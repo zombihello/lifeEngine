@@ -33,7 +33,7 @@ DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialDestroyed, const TSharedPtr<class 
  * @ingroup Physics
  * @brief Class of physics material
  */
-class FPhysicsMaterial : public FAsset, public TSharedFromThis<FPhysicsMaterial>
+class FPhysicsMaterial : public FAsset
 {
 public:
 	/**
@@ -203,9 +203,9 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FPhysicsMaterial>& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FPhysicsMaterial>& InValue )
 {
-	TWeakPtr<FAsset>	asset = InValue;
+	TAssetHandle<FAsset>	asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -215,10 +215,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, TWeakPtr<FPhysicsMaterial
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TWeakPtr<FPhysicsMaterial>& InValue )
+FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TAssetHandle<FPhysicsMaterial>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( TWeakPtr<FAsset> )InValue;
+	InArchive << ( TAssetHandle<FAsset> )InValue;
 	return InArchive;
 }
 

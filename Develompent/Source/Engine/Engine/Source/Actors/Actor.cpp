@@ -23,17 +23,17 @@ void FActorVar::Clear()
 
 	switch ( type )
 	{
-	case AVT_Int:		delete static_cast< int32* >( value );			break;
-	case AVT_Float:		delete static_cast< float* >( value );			break;
-	case AVT_Bool:		delete static_cast< bool* >( value );			break;
-	case AVT_Vector2D:	delete static_cast< FVector2D* >( value );		break;
-	case AVT_Vector3D:	delete static_cast< FVector* >( value );		break;
-	case AVT_Vector4D:	delete static_cast< FVector4D* >( value );		break;
-	case AVT_RectInt:	delete static_cast< FRectInt32* >( value );		break;
-	case AVT_RectFloat:	delete static_cast< FRectFloat* >( value );		break;
-	case AVT_Color:		delete static_cast< FColor* >( value );			break;
-	case AVT_String:	delete static_cast< std::wstring* >( value );	break;
-	case AVT_Material:	delete static_cast< TWeakPtr<FMaterial>* >( value );	break;
+	case AVT_Int:		delete static_cast< int32* >( value );						break;
+	case AVT_Float:		delete static_cast< float* >( value );						break;
+	case AVT_Bool:		delete static_cast< bool* >( value );						break;
+	case AVT_Vector2D:	delete static_cast< FVector2D* >( value );					break;
+	case AVT_Vector3D:	delete static_cast< FVector* >( value );					break;
+	case AVT_Vector4D:	delete static_cast< FVector4D* >( value );					break;
+	case AVT_RectInt:	delete static_cast< FRectInt32* >( value );					break;
+	case AVT_RectFloat:	delete static_cast< FRectFloat* >( value );					break;
+	case AVT_Color:		delete static_cast< FColor* >( value );						break;
+	case AVT_String:	delete static_cast< std::wstring* >( value );				break;
+	case AVT_Material:	delete static_cast< TAssetHandle<FMaterial>* >( value );	break;
 	}
 
 	value = nullptr;

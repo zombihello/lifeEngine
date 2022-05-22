@@ -1,6 +1,6 @@
 #include "System/AudioBufferManager.h"
 
-FAudioBufferRef FAudioBufferManager::Find( const TSharedPtr<FAudioBank>& InAudioBank )
+FAudioBufferRef FAudioBufferManager::Find( const TAssetHandle<FAudioBank>& InAudioBank )
 {
 	// If already loaded buffer - return it
 	{
@@ -13,19 +13,21 @@ FAudioBufferRef FAudioBufferManager::Find( const TSharedPtr<FAudioBank>& InAudio
 
 	// Load samples and create buffer
 	check( InAudioBank );
-	FAudioBankInfo		audioBankInfo;
-	FAudioBankHandle	audioBankHandle = InAudioBank->OpenBank( audioBankInfo );
+
+	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
+	FAudioBankInfo				audioBankInfo;
+	FAudioBankHandle			audioBankHandle = audioBankRef->OpenBank( audioBankInfo );
 	check( audioBankHandle );
 
 	byte*				sampleData = ( byte* )malloc( audioBankInfo.numSamples );
-	InAudioBank->ReadBankPCM( audioBankHandle, sampleData, audioBankInfo.numSamples );
+	audioBankRef->ReadBankPCM( audioBankHandle, sampleData, audioBankInfo.numSamples );
 
 	FAudioBufferRef		audioBuffer = new FAudioBuffer();
 	audioBuffer->Append( audioBankInfo.format, sampleData, audioBankInfo.numSamples, audioBankInfo.rate );
 
 	// Free all allocated temporary data and return audio buffer
 	free( sampleData );
-	InAudioBank->CloseBank( audioBankHandle );
+	audioBankRef->CloseBank( audioBankHandle );
 
 	buffers.insert( std::make_pair( InAudioBank, audioBuffer ) );
 	return audioBuffer;

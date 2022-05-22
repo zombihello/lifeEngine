@@ -140,7 +140,7 @@ public:
 	 * @brief Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	FORCEINLINE void SetAudioBank( const TWeakPtr<FAudioBank>& InAudioBank )
+	FORCEINLINE void SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank )
 	{
 		bank = InAudioBank;
 		source->SetAudioBank( bank );
@@ -173,7 +173,7 @@ public:
 	 * @brief Get audio bank
 	 * @return Return audio bank. If not setted return nullptr
 	 */
-	FORCEINLINE TWeakPtr<FAudioBank> GetAudioBank() const
+	FORCEINLINE TAssetHandle<FAudioBank> GetAudioBank() const
 	{
 		return bank;
 	}
@@ -265,17 +265,17 @@ private:
 	 */
 	void UpdateAudioSourceType();
 
-	bool					bIsLoop;					/**< Is looped */
-	bool					bIsUISound;					/**< Is UI sound */
-	bool					bIsAutoPlay;				/**< Is need auto play on begin play */
-	bool					bIsStreamable;				/**< Is streamable */
-	float					volume;						/**< Volume of sound */
-	float					pitch;						/**< Pitch */
-	float					minDistance;				/**< Min distance */
-	float					attenuation;				/**< Attenuation */
-	TWeakPtr<FAudioBank>	bank;						/**< Audio bank */
-	FAudioSource*			source;						/**< Audio source */
-	FVector					oldSourceLocation;			/**< Old source location */
+	bool						bIsLoop;					/**< Is looped */
+	bool						bIsUISound;					/**< Is UI sound */
+	bool						bIsAutoPlay;				/**< Is need auto play on begin play */
+	bool						bIsStreamable;				/**< Is streamable */
+	float						volume;						/**< Volume of sound */
+	float						pitch;						/**< Pitch */
+	float						minDistance;				/**< Min distance */
+	float						attenuation;				/**< Attenuation */
+	TAssetHandle<FAudioBank>	bank;						/**< Audio bank */
+	FAudioSource*				source;						/**< Audio source */
+	FVector						oldSourceLocation;			/**< Old source location */
 };
 
 #endif // !AUDIOCOMPONENT_H

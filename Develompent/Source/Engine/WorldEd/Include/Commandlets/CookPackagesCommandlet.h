@@ -33,7 +33,7 @@ struct FTMXTileset
 	uint32							lastGID;		/**< Last ID of tile in set */
 	FVector2D						tileSize;		/**< Size of tile */
 	FVector2D						tileOffset;		/**< Offset of tile */
-	TSharedPtr<FMaterial>			material;		/**< Material of tileset */
+	TAssetHandle<FMaterial>			material;		/**< Material of tileset */
 	std::vector< FRectFloat >		textureRects;	/**< Array of rects with tiles */
 };
 
@@ -84,7 +84,7 @@ public:
 	 * @param OutAudioBank Output cooked audio bank
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	FORCEINLINE bool CookAudioBank( const std::wstring& InAssetRef, TSharedPtr<FAudioBank>& OutAudioBank )
+	FORCEINLINE bool CookAudioBank( const std::wstring& InAssetRef, TAssetHandle<FAudioBank>& OutAudioBank )
 	{
 		std::wstring		packageName;
 		std::wstring		assetName;
@@ -121,7 +121,7 @@ public:
 	 * @param OutPhysMaterial Output cooked physics material
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	FORCEINLINE bool CookPhysMaterial( const std::wstring& InAssetRef, TSharedPtr<FPhysicsMaterial>& OutPhysMaterial )
+	FORCEINLINE bool CookPhysMaterial( const std::wstring& InAssetRef, TAssetHandle<FPhysicsMaterial>& OutPhysMaterial )
 	{
 		std::wstring		packageName;
 		std::wstring		assetName;
@@ -393,7 +393,7 @@ private:
 	 * @param OutMaterial Output cooked material
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookMaterial( const FResourceInfo& InMaterialInfo, TSharedPtr<FMaterial>& OutMaterial );
+	bool CookMaterial( const FResourceInfo& InMaterialInfo, TAssetHandle<FMaterial>& OutMaterial );
 
 	/**
 	 * Cook texture 2D
@@ -402,7 +402,7 @@ private:
 	 * @param OutTexture2D Output cooked texture
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookTexture2D( const FResourceInfo& InTexture2DInfo, TSharedPtr<FTexture2D>& OutTexture2D );
+	bool CookTexture2D( const FResourceInfo& InTexture2DInfo, TAssetHandle<FTexture2D>& OutTexture2D );
 
 	/**
 	 * Cook audio bank
@@ -411,7 +411,7 @@ private:
 	 * @param OutAudioBank Output cooked audio bank
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookAudioBank( const FResourceInfo& InAudioBankInfo, TSharedPtr<FAudioBank>& OutAudioBank );
+	bool CookAudioBank( const FResourceInfo& InAudioBankInfo, TAssetHandle<FAudioBank>& OutAudioBank );
 
 	/**
 	 * Cook physics material
@@ -420,7 +420,7 @@ private:
 	 * @param OutPhysMaterial Output cooked physics material
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, TSharedPtr<FPhysicsMaterial>& OutPhysMaterial );
+	bool CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, TAssetHandle<FPhysicsMaterial>& OutPhysMaterial );
 
 	/**
 	 * Insert resource to list
@@ -466,7 +466,7 @@ private:
 	 * @param InAsset Asset for save
 	 * @return Return true if package saved seccussed, else return false
 	 */
-	bool SaveToPackage( const FResourceInfo& InResourceInfo, const TSharedPtr<FAsset>& InAsset );
+	bool SaveToPackage( const FResourceInfo& InResourceInfo, const TAssetHandle<FAsset>& InAsset );
 
 	FExtensionInfo											extensionInfo;			/**< Info about extensions of output formats */
 	FResourceMap											texturesMap;			/**< All textures */

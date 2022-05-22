@@ -26,22 +26,23 @@ void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* In
 {
 	FMeshDrawingPolicy::SetShaderParameters( InDeviceContextRHI );
 
-	TSharedPtr<FMaterial>		materialRef = material.Pin();
+	TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
 	if ( !materialRef )
 	{
-		materialRef = GEngine->GetDefaultMaterial().Pin();
+		materialRef = GEngine->GetDefaultMaterial().ToSharedPtr();
 		if ( !materialRef )
 		{
 			return;
 		}
 	}
 
-	TSharedPtr<FTexture2D>		texture2dRef;
-	materialRef->GetTextureParameterValue( TEXT( "diffuse" ), texture2dRef );
-	if ( texture2dRef )
+	TAssetHandle<FTexture2D>		texture2d;
+	materialRef->GetTextureParameterValue( TEXT( "diffuse" ), texture2d );
+	if ( texture2d )
 	{
-		GRHI->SetTextureParameter( InDeviceContextRHI, pixelShader->GetPixelShader(), texture2dRef->GetTexture2DRHI(), 0 );
-		GRHI->SetSamplerState( InDeviceContextRHI, pixelShader->GetPixelShader(), GRHI->CreateSamplerState( texture2dRef->GetSamplerStateInitialiser() ), 0 );
+		TSharedPtr<FTexture2D>		texture2DRef = texture2d.ToSharedPtr();
+		GRHI->SetTextureParameter( InDeviceContextRHI, pixelShader->GetPixelShader(), texture2DRef->GetTexture2DRHI(), 0 );
+		GRHI->SetSamplerState( InDeviceContextRHI, pixelShader->GetPixelShader(), GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ), 0 );
 	}
 }
 

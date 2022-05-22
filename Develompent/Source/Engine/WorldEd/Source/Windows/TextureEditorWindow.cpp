@@ -233,7 +233,7 @@ void WeTextureEditorWindow::on_actionReimport_triggered()
 	check( texture2D );
 
 	std::wstring		errorMessage;
-	if ( FHelperAssetImporter::Reimport( texture2D, errorMessage ) )
+	if ( FHelperAssetImporter::Reimport( texture2D->GetAssetHandle(), errorMessage ) )
 	{
 		emit OnChangedAsset( texture2D );
 	}

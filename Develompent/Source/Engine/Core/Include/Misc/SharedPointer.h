@@ -272,6 +272,15 @@ public:
 	}
 
 	/**
+	 * @brief Get type hash
+	 * @return Return hash of type
+	 */
+	FORCEINLINE uint64 GetTypeHash() const
+	{
+		return sharedReferenceCount.GetTypeHash();
+	}
+
+	/**
 	 * @brief Is valid pointer
 	 * @return Returning TRUE if pointer is valid, else returning FALSE
 	 */
@@ -600,6 +609,15 @@ public:
 	FORCEINLINE TSharedPtr<ObjectType> Pin() const
 	{
 		return IsValid() ? TSharedPtr<ObjectType>( *this ) : TSharedPtr<ObjectType>();
+	}
+
+	/**
+	 * @brief Get type hash
+	 * @return Return hash of type
+	 */
+	FORCEINLINE uint64 GetTypeHash() const
+	{
+		return weakReferenceCount.GetTypeHash();
 	}
 
 	/**

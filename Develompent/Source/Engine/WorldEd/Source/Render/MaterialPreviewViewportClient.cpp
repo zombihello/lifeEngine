@@ -21,7 +21,7 @@ FMaterialPreviewViewportClient::FMaterialPreviewViewportClient( const TSharedPtr
 
 	// Init scene
 	sphereComponent->SetRadius( 40.f );
-	sphereComponent->SetMaterial( InMaterial );
+	sphereComponent->SetMaterial( InMaterial->GetAssetHandle() );
 	sphereComponent->SetVisibility( true );
 	sphereComponent->SetRelativeRotation( FRotator( 90.f, 0.f, 0.f ) );
 	scene->AddPrimitive( sphereComponent );

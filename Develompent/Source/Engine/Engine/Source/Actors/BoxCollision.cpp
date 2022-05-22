@@ -35,7 +35,7 @@ bool ABoxCollision::InitProperties( const std::vector<FActorVar>& InActorVars, c
 		{
 			check( actorVar.GetType() == AVT_String );
 			std::wstring						physMaterialName = actorVar.GetValueString();
-			TSharedPtr<FPhysicsMaterial>		physMaterial = GPackageManager->FindAsset( physMaterialName, AT_Unknown );
+			TAssetHandle<FPhysicsMaterial>		physMaterial = GPackageManager->FindAsset( physMaterialName, AT_Unknown );
 			if ( !physMaterial && !InCooker->CookPhysMaterial( physMaterialName, physMaterial ) )
 			{
 				return false;

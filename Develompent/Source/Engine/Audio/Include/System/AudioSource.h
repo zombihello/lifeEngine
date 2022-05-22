@@ -87,7 +87,7 @@ public:
 	 * Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	virtual void SetAudioBank( const TWeakPtr<FAudioBank>& InAudioBank );
+	virtual void SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank );
 
 	/**
 	 * Set location
@@ -141,7 +141,7 @@ public:
 	 * Get audio bank
 	 * @return Return audio bank. If not setted return nullptr
 	 */
-	virtual TWeakPtr<FAudioBank> GetAudioBank() const;
+	virtual TAssetHandle<FAudioBank> GetAudioBank() const;
 
 	/**
 	 * Get location
@@ -159,8 +159,8 @@ public:
 	}
 
 protected:
-	TWeakPtr<FAudioBank>	audioBank;		/**< Audio bank */
-	float					volume;			/**< Volume */
+	TAssetHandle<FAudioBank>	audioBank;		/**< Audio bank */
+	float						volume;			/**< Volume */
 
 private:
 	/**

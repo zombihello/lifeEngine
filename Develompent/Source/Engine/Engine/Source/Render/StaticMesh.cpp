@@ -80,7 +80,7 @@ void FStaticMesh::Serialize( class FArchive& InArchive )
 	}
 }
 
-void FStaticMesh::SetData( const std::vector<FStaticMeshVertexType>& InVerteces, const std::vector<uint32>& InIndeces, const std::vector<FStaticMeshSurface>& InSurfaces, std::vector< TWeakPtr<FMaterial> >& InMaterials )
+void FStaticMesh::SetData( const std::vector<FStaticMeshVertexType>& InVerteces, const std::vector<uint32>& InIndeces, const std::vector<FStaticMeshSurface>& InSurfaces, std::vector< TAssetHandle<FMaterial> >& InMaterials )
 {
 	// Copy new parameters of static mesh
 	verteces		= InVerteces;
@@ -91,7 +91,7 @@ void FStaticMesh::SetData( const std::vector<FStaticMeshVertexType>& InVerteces,
 	BeginUpdateResource( this );
 }
 
-void FStaticMesh::SetMaterial( uint32 InMaterialIndex, const TWeakPtr<FMaterial>& InNewMaterial )
+void FStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<FMaterial>& InNewMaterial )
 {
 	if ( InMaterialIndex > materials.size() )
 	{
