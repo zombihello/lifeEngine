@@ -589,16 +589,20 @@ void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 		assetInfosToDelete.push_back( assetInfo.name );
 	}
 
+	bool	bNeedRefreshPackageBrowser = false;
 	for ( uint32 index = 0, count = assetInfosToDelete.size(); index < count; ++index )
 	{
-		if ( !package->Remove( assetInfosToDelete[ index ], false, true ) )
+		bool	bLocalResult = package->Remove( assetInfosToDelete[ index ], false, true );
+		if ( !bLocalResult )
 		{
 			usedAssets.push_back( QString::fromStdWString( assetInfosToDelete[ index ] ) );
 		}
+
+		bNeedRefreshPackageBrowser |= bLocalResult;
 	}
 
 	// If package is dirty - refresh package browser
-	if ( package->IsDirty() )
+	if ( bNeedRefreshPackageBrowser )
 	{
 		ui->listView_packageBrowser->Refresh();
 	}
@@ -920,6 +924,12 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 			GTableOfContents.RemoveEntry( package->GetGUID() );
 			GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), appQtAbsolutePathToEngine( newAbsolutePath ) );
 			bDirtyTOC = true;
+
+			// If this is package and him opened in package browser, we close it 
+			if ( ui->listView_packageBrowser->GetPackage() == package )
+			{
+				ui->listView_packageBrowser->SetPackage( nullptr );
+			}
 
 			// If need unload package - do it
 			if ( bIsNeedUnloadPackage )

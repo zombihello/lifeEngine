@@ -71,7 +71,6 @@ void FAsset::Serialize( class FArchive& InArchive )
 		InArchive << guid;
 	}
 
-
 	if ( InArchive.Ver() >= VER_AssetSourceFiles )
 	{
 #if !WITH_EDITOR
@@ -369,11 +368,17 @@ void FPackage::Serialize( FArchive& InArchive )
 				InArchive.Seek( InArchive.Tell() + localAssetInfo.size );
 			}
 
-			// Update asset info in table
-			assetGUIDTable[ localAssetInfo.name ] = assetGUID;
+			// Update asset info in table			
+			FAssetInfo&			assetInfo			= assetsTable[ assetGUID ];
+			localAssetInfo.data						= assetInfo.data;
+			assetGUIDTable[ localAssetInfo.name ]	= assetGUID;
 			
-			FAssetInfo&			assetInfo = assetsTable[ assetGUID ];
-			localAssetInfo.data = assetInfo.data;
+			// If the name of the asset in the table cache is different, you need to update the table GUID
+			if ( localAssetInfo.name != assetInfo.name )
+			{
+				assetGUIDTable.erase( assetInfo.name );
+			}
+
 			assetInfo			= localAssetInfo;
 		}
 	}
@@ -517,7 +522,9 @@ void FPackage::Add( const TAssetHandle<FAsset>& InAsset )
 	assetRef->bDirty					= true;
 	assetGUIDTable[ assetRef->name ]	= assetRef->guid;
 	assetsTable[ assetRef->guid ]		= FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, assetRef->type, assetRef->name, assetRef };
+	
 	++numLoadedAssets;
+	++numDirtyAssets;
 }
 
 bool FPackage::Remove( const FGuid& InGUID, bool InForceUnload /* = false */, bool InIgnoreDirty /* = false */ )
@@ -529,8 +536,9 @@ bool FPackage::Remove( const FGuid& InGUID, bool InForceUnload /* = false */, bo
 	}
 
 	// Unload asset, if failed we exit from method
-	FAssetInfo&				assetInfo = itAsset->second;
-	TWeakPtr<FAsset>		assetPtr = assetInfo.data;
+	FAssetInfo&				assetInfo		= itAsset->second;
+	TWeakPtr<FAsset>		assetPtr		= assetInfo.data;
+	bool					bIsExistOnHDD	= assetInfo.offset != INVALID_ID && assetInfo.size != INVALID_ID;		// Is asset containing in package on HDD?
 	if ( assetInfo.data && !UnloadAsset( assetInfo, InForceUnload, true, InIgnoreDirty ) )
 	{
 		return false;
@@ -546,17 +554,20 @@ bool FPackage::Remove( const FGuid& InGUID, bool InForceUnload /* = false */, bo
 		}
 	}
 
-	// Remove from package
-	auto		itAssetGUID = assetGUIDTable.find( assetInfo.name );
-	if ( itAssetGUID != assetGUIDTable.end() )
+	// We remove her asset only if him exist on HDD. Otherwise, deletion from these tables occurs in UnloadAsset
+	if ( bIsExistOnHDD )
 	{
-		assetGUIDTable.erase( itAssetGUID );
+		auto		itAssetGUID = assetGUIDTable.find( assetInfo.name );
+		if ( itAssetGUID != assetGUIDTable.end() )
+		{
+			assetGUIDTable.erase( itAssetGUID );
+		}
+
+		assetsTable.erase( itAsset );
+		bIsDirty		= true;
+		numDirtyAssets	= -1;
 	}
 
-	assetsTable.erase( itAsset );
-
-	bIsDirty		= true;
-	numDirtyAssets	= -1;
 	return true;
 }
 
@@ -639,10 +650,16 @@ bool FPackage::UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload /* = fal
 		// from the package itself, since data is needed to write to the HDD, which is now unloading
 		if ( InAssetInfo.offset == INVALID_ID && InAssetInfo.size == INVALID_ID )
 		{
-			LE_LOG( LT_Warning, LC_Package, TEXT( "An asset was uploaded that was not recorded on the HDD. This asset has been removed from the package and will not be written" ) );
+			LE_LOG( LT_Warning, LC_Package, TEXT( "An asset '%s' was uploaded that was not recorded on the HDD. This asset has been removed from the package and will not be written" ), InAssetInfo.name.c_str() );
 			InAssetInfo.data->package = nullptr;
 			InAssetInfo.data->GetAssetHandle().GetReference()->guidPackage.Invalidate();
-			assetsTable.erase( InAssetInfo.data->GetGUID() );
+			
+			auto		itAssetGUID = assetGUIDTable.find( InAssetInfo.name );
+			assetsTable.erase( InAssetInfo.data->guid );
+			if ( itAssetGUID != assetGUIDTable.end() )
+			{
+				assetGUIDTable.erase( itAssetGUID );
+			}
 		}
 		// Else we only destroy asset
 		else
@@ -1028,7 +1045,7 @@ bool FPackageManager::UnloadPackage( const std::wstring& InPath, bool InForceUnl
 	auto		itPackage = packages.find( InPath );
 	if ( itPackage == packages.end() )
 	{
-		return false;
+		return true;
 	}
 
 	// Unload all assets, if any of them was not unloaded or is dirty package, exit from the function

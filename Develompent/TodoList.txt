@@ -7,6 +7,7 @@
 	- Implement material shaders
 	- Need refactor of contain shaders without solid link with vertex factory
 	- Add FName for optimization use memory
+	- Remove packages and implement containing assets in *.asset
 
 ----------------------------------------------------------------
  Postponed for later 

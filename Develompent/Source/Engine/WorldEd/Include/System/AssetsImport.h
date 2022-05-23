@@ -11,11 +11,19 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 #include <qstring.h>
+#include <assimp/scene.h>
 
 #include "Render/Texture.h"
 #include "System/AudioBank.h"
+#include "Render/StaticMesh.h"
 #include "Core.h"
+
+// Forward declarations
+struct aiNode;
+struct aiMesh;
+struct aiScene;
 
 /**
  * @ingroup WorldEd
@@ -29,9 +37,10 @@ public:
 	 */
 	enum EExtensionType
 	{
-		ET_Texture2D	= 1 << 0,							/**< Add in filter extensions for texture 2D */
-		ET_AudioBank	= 1 << 1,							/**< Add in filter extensions for audio bank */
-		ET_All			= ET_Texture2D | ET_AudioBank		/**< Add in filter all assets type */
+		ET_Texture2D	= 1 << 0,										/**< Add in filter extensions for texture 2D */
+		ET_AudioBank	= 1 << 1,										/**< Add in filter extensions for audio bank */
+		ET_StaticMesh	= 1 << 2,										/**< Add in filter extensions for static mesh */
+		ET_All			= ET_Texture2D | ET_AudioBank | ET_StaticMesh	/**< Add in filter all assets type */
 	};
 
 	/**
@@ -178,6 +187,79 @@ public:
 		};
 		return supportedExtensions;
 	}
+};
+
+/**
+ * @ingroup WorldEd
+ * Class for importer static mesh
+ */
+class FStaticMeshImporter
+{
+public:
+	/**
+	 * Import static mesh
+	 *
+	 * @param InPath		Path to source file
+	 * @param OutError		Output error message
+	 * @return Return imported static mesh, if failed return NULL
+	 */
+	static TSharedPtr<FStaticMesh> Import( const std::wstring& InPath, std::wstring& OutError );
+
+	/**
+	 * Reimport static mesh
+	 *
+	 * @param InStaticMesh	Static mesh
+	 * @param OutError		Output error message
+	 * @return Return TRUE if seccussed reimported, else return FALSE
+	 */
+	static bool Reimport( const TSharedPtr<FStaticMesh>& InStaticMesh, std::wstring& OutError );
+
+	/**
+	 * Get supported static mesh extensions
+	 * @return Return list of supported static mesh extensions
+	 */
+	static const std::vector< std::wstring >& GetSupportedExtensions();
+
+private:
+	/**
+	 * Container for Assimp mesh
+	 */
+	struct FAiMesh
+	{
+		/**
+		 * Constructor
+		 */
+		FORCEINLINE FAiMesh()
+		{}
+
+		/**
+		 * Constructor
+		 *
+		 * @param InTransformation	Transform matrix
+		 * @param InMesh			Pointer to Assimp mesh
+		 */
+		FORCEINLINE FAiMesh( const aiMatrix4x4& InTransformation, struct aiMesh* InMesh )
+			: transformation( InTransformation )
+			, mesh( InMesh )
+		{}
+
+		aiMatrix4x4		transformation;		/**< Transformation matrix */
+		aiMesh*			mesh;				/**< Pointer to Assimp mesh */
+	};
+
+	/**
+	 * Typedef container AiMeshes
+	 */
+	typedef std::unordered_map< uint32, std::vector<FAiMesh> >			FAiMeshesMap;
+
+	/**
+	 * Fill array meshes from Assimp root scene
+	 *
+	 * @param[in] InNode Pointer to Assimp node
+	 * @param[in] InScene Pointer to Assimp scene
+	 * @param[out] OutMeshes Array filled from Assimp scene
+	 */
+	static void ProcessNode( aiNode* InNode, const aiScene* InScene, FAiMeshesMap& OutMeshes );
 };
 
 #endif // !ASSETSIMPORT_H
