@@ -47,6 +47,7 @@ enum ELifeEnginePackageVersion
 	VER_HashUInt64							= 15,					/**< Changed type of hashes from uint32 to uint64 */
 	VER_AssetSourceFiles					= 16,					/**< Added in assets path to source file for reimport */
 	VER_RemovedShadersTypeFromMaterial		= 17,					/**< Removed shaders type from material asset */
+	VER_AssetName_V3						= 18,					/**< Moved asset name to FAsset */
 
 	//
 	// New versions can be added here

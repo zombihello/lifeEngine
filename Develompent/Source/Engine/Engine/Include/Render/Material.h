@@ -66,8 +66,21 @@ public:
 	 */
 	FORCEINLINE void SetScalarParameterValue( const std::wstring& InParameterName, float InValue )
 	{
-		scalarParameters[ InParameterName ] = InValue;
-		MarkDirty();
+		auto	itScalarParameter	= scalarParameters.find( InParameterName );
+		bool	bNotFound			= itScalarParameter == scalarParameters.end();
+		if ( bNotFound || itScalarParameter->second != InValue )
+		{
+			MarkDirty();
+		}
+
+		if ( !bNotFound )
+		{
+			itScalarParameter->second			= InValue;
+		}
+		else
+		{
+			scalarParameters[ InParameterName ] = InValue;
+		}
 	}
 
 	/**
@@ -78,8 +91,21 @@ public:
 	 */
 	FORCEINLINE void SetTextureParameterValue( const std::wstring& InParameterName, const TAssetHandle<class FTexture2D>& InValue )
 	{
-		textureParameters[ InParameterName ] = InValue;
-		MarkDirty();
+		auto	itTextureParameter	= textureParameters.find( InParameterName );
+		bool	bNotFound			= itTextureParameter == textureParameters.end();
+		if ( bNotFound || itTextureParameter->second != InValue )
+		{
+			MarkDirty();
+		}
+
+		if ( !bNotFound )
+		{
+			itTextureParameter->second			= InValue;
+		}
+		else
+		{
+			textureParameters[ InParameterName ] = InValue;
+		}
 	}
 
 	/**
@@ -90,8 +116,21 @@ public:
 	 */
 	FORCEINLINE void SetVectorParameterValue( const std::wstring& InParameterName, const FVector4D& InValue )
 	{
-		vectorParameters[ InParameterName ] = InValue;
-		MarkDirty();
+		auto	itVectorParameter	= vectorParameters.find( InParameterName );
+		bool	bNotFound			= itVectorParameter == vectorParameters.end();
+		if ( bNotFound || itVectorParameter->second != InValue )
+		{
+			MarkDirty();
+		}
+
+		if ( !bNotFound )
+		{
+			itVectorParameter->second			= InValue;
+		}
+		else
+		{
+			vectorParameters[ InParameterName ] = InValue;
+		}
 	}
 
 	/**
@@ -130,6 +169,12 @@ public:
 	 */
 	FORCEINLINE void UsageOnStaticMesh( bool InIsUseOnStaticMeshes )
 	{
+		bool	bUseOnStaticMesh = usage & MU_StaticMesh;
+		if ( bUseOnStaticMesh != InIsUseOnStaticMeshes )
+		{
+			MarkDirty();
+		}
+
 		if ( InIsUseOnStaticMeshes )
 		{
 			usage |= MU_StaticMesh;
@@ -138,8 +183,6 @@ public:
 		{
 			usage &= ~MU_StaticMesh;
 		}
-
-		MarkDirty();
 		isNeedUpdateShaderMap = true;
 	}
 
@@ -150,6 +193,12 @@ public:
 	 */
 	FORCEINLINE void UsageOnSpriteMesh( bool InIsUseOnSpriteMeshes )
 	{
+		bool	bUseOnSpriteMesh = usage & MU_Sprite;
+		if ( bUseOnSpriteMesh != InIsUseOnSpriteMeshes )
+		{
+			MarkDirty();
+		}
+
 		if ( InIsUseOnSpriteMeshes )
 		{
 			usage |= MU_Sprite;
@@ -158,8 +207,6 @@ public:
 		{
 			usage &= ~MU_Sprite;
 		}
-
-		MarkDirty();
 		isNeedUpdateShaderMap = true;
 	}
 

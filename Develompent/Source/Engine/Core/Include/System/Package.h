@@ -610,16 +610,17 @@ public:
 	 * 
 	 * @param InAsset			Asset to remove
 	 * @param InForceUnload		Is need force unload asset if him loaded
+	 * @param InIgnoreDirty		Is need ignore dirty flag in asset
 	 * @return Return TRUE if asset seccussed removed from package
 	 */
-	FORCEINLINE bool Remove( const TAssetHandle<FAsset>& InAsset, bool InForceUnload = false )
+	FORCEINLINE bool Remove( const TAssetHandle<FAsset>& InAsset, bool InForceUnload = false, bool InIgnoreDirty = false )
 	{
 		if ( !InAsset.IsValid() )
 		{
 			return true;
 		}
 
-		return Remove( InAsset.ToSharedPtr()->GetGUID(), InForceUnload );
+		return Remove( InAsset.ToSharedPtr()->GetGUID(), InForceUnload, InIgnoreDirty );
 	}
 
 	/**
@@ -627,18 +628,20 @@ public:
 	 * 
 	 * @param InGUID			Asset guid
 	 * @param InForceUnload		Is need force unload asset if him loaded
+	 * @param InIgnoreDirty		Is need ignore dirty flag in asset
 	 * @return Return TRUE if asset seccussed removed from package
 	 */
-	bool Remove( const FGuid& InGUID, bool InForceUnload = false );
+	bool Remove( const FGuid& InGUID, bool InForceUnload = false, bool InIgnoreDirty = false );
 
 	/**
 	 * Remove asset from package by name
 	 * 
 	 * @param InName			Name asset
 	 * @param InForceUnload		Is need force unload asset if him loaded
+	 * @param InIgnoreDirty		Is need ignore dirty flag in asset
 	 * @return Return TRUE if asset seccussed removed from package
 	 */
-	FORCEINLINE bool Remove( const std::wstring& InName, bool InForceUnload = false )
+	FORCEINLINE bool Remove( const std::wstring& InName, bool InForceUnload = false, bool InIgnoreDirty = false )
 	{
 		auto		itAssetGUID = assetGUIDTable.find( InName );
 		if ( itAssetGUID == assetGUIDTable.end() )
@@ -646,16 +649,17 @@ public:
 			return true;
 		}
 
-		return Remove( itAssetGUID->second, InForceUnload );
+		return Remove( itAssetGUID->second, InForceUnload, InIgnoreDirty );
 	}
 
 	/**
 	 * Remove all from package
 	 * 
 	 * @param InForceUnload		Is need force unload assets if him loaded
+	 * @param InIgnoreDirty		Is need ignore dirty flag in asset
 	 * @return Return TRUE if all assets seccussed removed from package
 	 */
-	bool RemoveAll( bool InForceUnload = false );
+	bool RemoveAll( bool InForceUnload = false, bool InIgnoreDirty = false );
 	
 	/**
 	 * Unload asset
@@ -704,7 +708,55 @@ public:
 	 * @param InForceUnload		Is need force unload (ignored shared references)
 	 * @return Return TRUE if assets is unloaded
 	 */
-	bool UnloadAllAssets( bool InForceUnload = false );
+	FORCEINLINE bool UnloadAllAssets( bool InForceUnload = false )
+	{
+		return UnloadAllAssetsInternal( InForceUnload );
+	}
+
+	/**
+	 * Reload asset
+	 * @warning Reloaded only already loaded assets
+	 * 
+	 * @param InAssetPtr			AssetPtr
+	 * @return Return TRUE if asset is reloaded
+	 */
+	FORCEINLINE bool ReloadAsset( const TAssetHandle<FAsset>& InAssetPtr )
+	{
+		if ( !InAssetPtr.IsValid() )
+		{
+			return false;
+		}
+
+		return ReloadAsset( InAssetPtr.GetReference()->guidAsset );
+	}
+
+	/**
+	 * Reload asset
+	 * @warning Reloaded only already loaded assets
+	 *
+	 * @param InGuid				Asset guid
+	 * @return Return TRUE if asset is reloaded
+	 */
+	FORCEINLINE bool ReloadAsset( const FGuid& InGuid )
+	{
+		auto		itAsset = assetsTable.find( InGuid );
+		if ( itAsset == assetsTable.end() )
+		{
+			return false;
+		}
+
+		FAssetInfo&		assetInfo = itAsset->second;
+		return ReloadAsset( assetInfo );
+	}
+
+	/**
+	 * Reload package
+	 * @warning Reloaded only package data and already loaded assets. New assets that have not been written to HDD are not deleted
+	 * 
+	 * @param InOnlyAsset	Is need reload only assets
+	 * @return Return TRUE if asset(s) or package data is reloaded
+	 */
+	bool ReloadPackage( bool InOnlyAsset = false );
 
 	/**
 	 * Is exist asset with name in package
@@ -911,9 +963,27 @@ private:
 	 * @param InAssetInfo		Asset info
 	 * @param InForceUnload		Is need force unload (ignored shared references)
 	 * @param InBroadcastEvent	Is need broadcast event OnAssetsCanDelete and OnAssetsDeleted. @note Only for editor
+	 * @param InIgnoreDirty		Is need ignore dirty flag in asset
 	 * @return Return TRUE if asset is unloaded
 	 */
-	bool UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload = false, bool InBroadcastEvent = true );
+	bool UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload = false, bool InBroadcastEvent = true, bool InIgnoreDirty = false );
+
+	/**
+	 * Internal unload all assets
+	 *
+	 * @param InForceUnload		Is need force unload (ignored shared references)
+	 * @param InIgnoreDirty		Is need ignore dirty flag in asset
+	 * @return Return TRUE if assets is unloaded
+	 */
+	bool UnloadAllAssetsInternal( bool InForceUnload = false, bool InIgnoreDirty = false );
+
+	/**
+	 * Reload asset by asset info
+	 *
+	 * @param InAssetInfo		Asset info
+	 * @return Return TRUE if asset is reloaded
+	 */
+	bool ReloadAsset( FAssetInfo& InAssetInfo );
 
 	/**
 	 * Serialize package
@@ -936,9 +1006,10 @@ private:
 	 * @param InArchive					Archive
 	 * @param InAssetGUID				Asset GUID
 	 * @param InAssetInfo				Asset info
+	 * @param InNeedReload				Is need reload asset if it already loaded
 	 * @return Return loaded asset from package, if failed returning nullptr
 	 */
-	TAssetHandle<FAsset> LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo );
+	TAssetHandle<FAsset> LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo, bool InNeedReload = false );
 
 	/**
 	 * Update asset name in table
@@ -1099,6 +1170,32 @@ public:
 	 * @return Return TRUE if asset is unloaded
 	 */
 	bool UnloadAsset( const TAssetHandle<FAsset>& InAssetPtr, bool InForceUnload = false );
+
+	/**
+	 * Reload asset
+	 * @warning Reloaded only already loaded assets
+	 * 
+	 * @param InAssetPtr		Asset ptr
+	 * @return Return TRUE if asset is reloaded
+	 */
+	bool ReloadAsset( const TAssetHandle<FAsset>& InAssetPtr );
+
+	/**
+	 * Reload all assets in package
+	 * @warning Reloaded only package data and already loaded assets. New assets that have not been written to HDD are not deleted
+	 * 
+	 * @param InPath			Package path
+	 * @return Return TRUE if asset(s) is reloaded
+	 */
+	bool ReloadPackage( const std::wstring& InPath );
+
+	/**
+	 * Reload all assets in all packages
+	 * @warning Reloaded only package data and already loaded assets. New assets that have not been written to HDD are not deleted
+	 * 
+	 * @return Return TRUE if asset(s) is reloaded
+	 */
+	bool ReloadAllPackages();
 
 	/**
 	 * Garbage collector of unused packages and assets

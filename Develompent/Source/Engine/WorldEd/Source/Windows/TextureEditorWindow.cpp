@@ -25,6 +25,7 @@ WeTextureEditorWindow::WeTextureEditorWindow( const TSharedPtr<FTexture2D>& InTe
 	, label_sourceFileValue( nullptr )
 	, toolButton_sourceFile( nullptr )
 	, toolButton_sourceFileRemove( nullptr )
+	, assetsReloadedHandle( nullptr )
 {
 	check( InTexture2D );
 
@@ -36,6 +37,9 @@ WeTextureEditorWindow::WeTextureEditorWindow( const TSharedPtr<FTexture2D>& InTe
 	ui->viewportPreview->SetViewportClient( viewportClient, false );
 	ui->viewportPreview->SetEnabled( true );
 	bInit = true;
+
+	// Subscribe to event when assets reload
+	assetsReloadedHandle = FEditorDelegates::onAssetsReloaded.Add( std::bind( &WeTextureEditorWindow::OnAssetsReloaded, this, std::placeholders::_1 ) );
 }
 
 void WeTextureEditorWindow::InitUI()
@@ -113,7 +117,18 @@ void WeTextureEditorWindow::InitUI()
 		ui->frame->layout()->addItem( verticalSpacer );
 	}
 
-	// Init widgets
+	// Set icons for actions
+	ui->actionReimport->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Import.png" ) ).c_str() ) ) );
+	ui->actionR->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_R.png" ) ).c_str() ) ) );
+	ui->actionG->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_G.png" ) ).c_str() ) ) );
+	ui->actionB->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_B.png" ) ).c_str() ) ) );
+	ui->actionA->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_A.png" ) ).c_str() ) ) );
+
+	UpdateUI();
+}
+
+void WeTextureEditorWindow::UpdateUI()
+{
 	comboBox_addressU->setCurrentIndex( texture2D->GetAddressU() );
 	comboBox_addressV->setCurrentIndex( texture2D->GetAddressV() );
 	comboBox_filter->setCurrentIndex( texture2D->GetSamplerFilter() );
@@ -125,19 +140,12 @@ void WeTextureEditorWindow::InitUI()
 	// Set info about asset
 	uint32						sizeX = texture2D->GetSizeX();
 	uint32						sizeY = texture2D->GetSizeY();
-	const FPixelFormatInfo&		pixelFormatInfo = GPixelFormats[ texture2D->GetPixelFormat() ];
+	const FPixelFormatInfo& 	pixelFormatInfo = GPixelFormats[ texture2D->GetPixelFormat() ];
 
 	ui->label_importedValue->setText( QString::fromStdWString( FString::Format( TEXT( "%ix%i" ), sizeX, sizeY ) ) );
 	ui->label_formatValue->setText( QString::fromWCharArray( pixelFormatInfo.name ) );
 	ui->label_resourceSizeValue->setText( QString::fromStdWString( FString::Format( TEXT( "%.2f Kb" ), ( pixelFormatInfo.blockBytes * sizeX * sizeY ) / 1024.f ) ) );
 	OnSourceFileChanged( QString::fromStdWString( texture2D->GetAssetSourceFile() ) );
-
-	// Set icons for actions
-	ui->actionReimport->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Import.png" ) ).c_str() ) ) );
-	ui->actionR->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_R.png" ) ).c_str() ) ) );
-	ui->actionG->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_G.png" ) ).c_str() ) ) );
-	ui->actionB->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_B.png" ) ).c_str() ) ) );
-	ui->actionA->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Color_A.png" ) ).c_str() ) ) );
 }
 
 WeTextureEditorWindow::~WeTextureEditorWindow()
@@ -145,6 +153,9 @@ WeTextureEditorWindow::~WeTextureEditorWindow()
 	ui->viewportPreview->SetViewportClient( nullptr, false );
 	delete viewportClient;
 	delete ui;
+
+	// Unsubscribe from event when assetsreload
+	FEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 }
 
 
@@ -265,4 +276,17 @@ void WeTextureEditorWindow::on_actionA_toggled( bool InValue )
 {
 	check( viewportClient );
 	viewportClient->ShowAlphaChannel( InValue );
+}
+
+void WeTextureEditorWindow::OnAssetsReloaded( const std::vector<TSharedPtr<class FAsset>>& InAssets )
+{
+	// If texture who is edition reloaded, we update UI
+	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
+	{
+		if ( InAssets[ index ] == texture2D )
+		{
+			UpdateUI();
+			return;
+		}
+	}
 }

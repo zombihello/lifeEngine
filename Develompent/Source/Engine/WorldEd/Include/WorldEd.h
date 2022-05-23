@@ -108,17 +108,23 @@ private:
 struct FEditorDelegates
 {
 	/**
-	 * @brief Delegate for called event when asset try delete
+	 * @brief Delegate for called event when assets try delete
 	 */
 	DECLARE_MULTICAST_DELEGATE( FOnAssetsCanDelete, const std::vector< TSharedPtr<class FAsset> >& /*InAssets*/, FCanDeleteAssetResult& /*OutResult*/ );
 
 	/**
-	 * @brief Delegate for called event when asset deleted
+	 * @brief Delegate for called event when assets deleted
 	 */
-	DECLARE_MULTICAST_DELEGATE( FOnAssetsDeleted, const std::vector< TSharedPtr<class FAsset> >& /*InAssets*/);
+	DECLARE_MULTICAST_DELEGATE( FOnAssetsDeleted, const std::vector< TSharedPtr<class FAsset> >& /*InAssets*/ );
+
+	/**
+	 * @brief Delegate for called event when assets is reloaded
+	 */
+	DECLARE_MULTICAST_DELEGATE( FOnAssetsReloaded, const std::vector< TSharedPtr<class FAsset> >& /*InAssets*/ );
 
 	static FOnAssetsCanDelete		onAssetsCanDelete;		/**< Called when one or more assets try delete */
 	static FOnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
+	static FOnAssetsReloaded		onAssetsReloaded;		/**< Called when one or more assets is reloaded */
 };
 
 #endif // !WORLDED_H

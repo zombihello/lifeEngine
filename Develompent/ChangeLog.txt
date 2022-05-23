@@ -38,7 +38,14 @@
 	- Added in RHI possibility change depth test state
 	- Added possibility render simple elements (line, points, etc)
 	- Implemented rendering grid in WorldEd viewports
-
+	- Implemented TSharedPtr and TWeakPtr
+	- Added new interlocked functions (appInterlockedAdd, appInterlockedExchange and other)
+	- Implemented TAssetHandle for store assets and unload/reload hims
+	- Implemented garbage collector for packages and assets
+	- Refactored delegates
+	- Implemented in WorldEd texture and material editor
+	- Added possibility of reload packages
+	
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021
 ----------------------------------------------------------------

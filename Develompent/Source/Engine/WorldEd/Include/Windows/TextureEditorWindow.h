@@ -11,6 +11,7 @@
 
 #include <QWidget>
 #include "Render/Texture.h"
+#include "WorldEd.h"
 
 namespace Ui
 {
@@ -69,6 +70,11 @@ private:
 	void InitUI();
 
 	/**
+	 * Update UI
+	 */
+	void UpdateUI();
+
+	/**
 	 * Called when source file changed
 	 * 
 	 * @param InNewSourceFile		New path to source file
@@ -87,16 +93,23 @@ private:
 	 */
 	virtual void resizeEvent( QResizeEvent* InEvent ) override;
 
-	bool									bInit;								/**< Is inited window */
-	Ui::WeTextureEditorWindow*				ui;									/**< Qt UI */
-	TSharedPtr<FTexture2D>					texture2D;							/**< Editable asset */
-	class FTexturePreviewViewportClient*	viewportClient;						/**< Viewport client */
-	class QComboBox*						comboBox_addressU;					/**< Combobox for select address mode by U */
-	class QComboBox*						comboBox_addressV;					/**< Combobox for select address mode by V */
-	class QComboBox*						comboBox_filter;					/**< Combobox for select sampler filter */
-	class QLabel*							label_sourceFileValue;				/**< Label for show path to source file */
-	class QToolButton*						toolButton_sourceFile;				/**< Tool button for select new path to source file */
-	class QToolButton*						toolButton_sourceFileRemove;		/**< Tool button for remove path to source file */
+	/**
+	 * Called event when asset is reloaded
+	 * @param InAssets	Array of reloaded assets
+	 */
+	void OnAssetsReloaded( const std::vector< TSharedPtr<class FAsset> >& InAssets );
+
+	bool												bInit;								/**< Is inited window */
+	Ui::WeTextureEditorWindow*							ui;									/**< Qt UI */
+	TSharedPtr<FTexture2D>								texture2D;							/**< Editable asset */
+	class FTexturePreviewViewportClient*				viewportClient;						/**< Viewport client */
+	class QComboBox*									comboBox_addressU;					/**< Combobox for select address mode by U */
+	class QComboBox*									comboBox_addressV;					/**< Combobox for select address mode by V */
+	class QComboBox*									comboBox_filter;					/**< Combobox for select sampler filter */
+	class QLabel*										label_sourceFileValue;				/**< Label for show path to source file */
+	class QToolButton*									toolButton_sourceFile;				/**< Tool button for select new path to source file */
+	class QToolButton*									toolButton_sourceFileRemove;		/**< Tool button for remove path to source file */
+	FEditorDelegates::FOnAssetsReloaded::FDelegateType* assetsReloadedHandle;				/**< Handle delegate of reloaded assets */
 };
 
 #endif // MAINWINDOW_H

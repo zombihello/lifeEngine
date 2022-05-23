@@ -25,6 +25,7 @@
  */
 FEditorDelegates::FOnAssetsCanDelete	FEditorDelegates::onAssetsCanDelete;
 FEditorDelegates::FOnAssetsDeleted		FEditorDelegates::onAssetsDeleted;
+FEditorDelegates::FOnAssetsReloaded		FEditorDelegates::onAssetsReloaded;
 
 void QtMessageOutput( QtMsgType InType, const QMessageLogContext& InContext, const QString& InMessage )
 {

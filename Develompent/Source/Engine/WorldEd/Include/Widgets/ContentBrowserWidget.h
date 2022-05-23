@@ -99,7 +99,8 @@ private slots:
 	void OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& InAsset );
 	void on_listView_packageBrowser_CopyReferenceToAsset();
 	void OnListViewPackageBrowserSelectedAsset( const std::wstring& InAssetReference );
-	void on_listView_packageBrowser_ShowReferencesAssets();
+	void on_listView_packageBrowser_ReloadAsset();
+	void on_treeView_contentBrowser_contextMenu_ReloadPackage();
 
 private:
 	Ui::WeContentBrowserWidget*	ui;							/**< Qt UI */

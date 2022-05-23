@@ -29,6 +29,7 @@ WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InM
 	, selectAsset_diffuse( nullptr )
 	, viewportClient( nullptr )
 	, assetsCanDeleteHandle( nullptr )
+	, assetsReloadedHandle( nullptr )
 {
 	check( InMaterial );
 
@@ -42,8 +43,9 @@ WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InM
 	ui->viewportPreview->SetEnabled( true );
 	bInit = true;
 
-	// Subscribe to event when assets try destroy of editing material. It need is block
-	assetsCanDeleteHandle = FEditorDelegates::onAssetsCanDelete.Add( std::bind( &WeMaterialEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2 ) );
+	// Subscribe to event when assets try destroy of editing material and reload. It need is block
+	assetsCanDeleteHandle	= FEditorDelegates::onAssetsCanDelete.Add(	std::bind( &WeMaterialEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2 ) );
+	assetsReloadedHandle	= FEditorDelegates::onAssetsReloaded.Add(	std::bind( &WeMaterialEditorWindow::OnAssetsReloaded, this, std::placeholders::_1 )							);
 }
 
 void WeMaterialEditorWindow::InitUI()
@@ -63,10 +65,6 @@ void WeMaterialEditorWindow::InitUI()
 		generalSection->setContentLayout( *verticalLayout );
 		generalSection->expand( true );
 		ui->frame->layout()->addWidget( generalSection );
-
-		// Init states
-		checkBox_isTwoSided->setChecked( material->IsTwoSided() );
-		checkBox_isWireframe->setChecked( material->IsWireframe() );
 
 		// Connect to slots
 		connect( checkBox_isTwoSided, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxIsTwoSidedToggled( bool ) ) );
@@ -90,10 +88,6 @@ void WeMaterialEditorWindow::InitUI()
 		usageSection->expand( true );
 		ui->frame->layout()->addWidget( usageSection );
 
-		// Init states
-		checkBox_staticMesh->setChecked( material->GetUsageFlags() & MU_StaticMesh );
-		checkBox_sprite->setChecked( material->GetUsageFlags() & MU_Sprite );
-
 		// Connect to slots
 		connect( checkBox_staticMesh, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxStaticMeshToggled( bool ) ) );
 		connect( checkBox_sprite, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxSpriteToggled( bool ) ) );
@@ -106,17 +100,7 @@ void WeMaterialEditorWindow::InitUI()
 		gridLayout->setContentsMargins( 0, 3, 0, 3 );
 
 		selectAsset_diffuse		= new WeSelectAssetWidget( parametersSection );
-		{
-			TAssetHandle<FTexture2D>		diffuseTextureRef;
-			material->GetTextureParameterValue( TEXT( "diffuse" ), diffuseTextureRef );
-			if ( diffuseTextureRef.IsAssetValid() && !GPackageManager->IsDefaultAsset( diffuseTextureRef ) )
-			{
-				std::wstring		assetReference;
-				MakeReferenceToAsset( diffuseTextureRef, assetReference );
-				selectAsset_diffuse->SetAssetReference( assetReference );
-			}
-		}
-
+		
 		gridLayout->addWidget( new QLabel( "Diffuse:", parametersSection ), 0, 0 );
 		gridLayout->addWidget( selectAsset_diffuse, 0, 1 );
 
@@ -134,6 +118,35 @@ void WeMaterialEditorWindow::InitUI()
 		QSpacerItem*		verticalSpacer = new QSpacerItem( 20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding );
 		ui->frame->layout()->addItem( verticalSpacer );
 	}
+
+	// Update data in UI
+	UpdateUI();
+}
+
+void WeMaterialEditorWindow::UpdateUI()
+{
+	check( material );
+
+	// General section
+	checkBox_isTwoSided->setChecked( material->IsTwoSided() );
+	checkBox_isWireframe->setChecked( material->IsWireframe() );
+
+	// Usage section
+	checkBox_staticMesh->setChecked( material->GetUsageFlags() & MU_StaticMesh );
+	checkBox_sprite->setChecked( material->GetUsageFlags() & MU_Sprite );
+
+	// Parameters section
+	// Diffuse
+	{
+		TAssetHandle<FTexture2D>		diffuseTextureRef;
+		material->GetTextureParameterValue( TEXT( "diffuse" ), diffuseTextureRef );
+		if ( diffuseTextureRef.IsAssetValid() && !GPackageManager->IsDefaultAsset( diffuseTextureRef ) )
+		{
+			std::wstring		assetReference;
+			MakeReferenceToAsset( diffuseTextureRef, assetReference );
+			selectAsset_diffuse->SetAssetReference( assetReference );
+		}
+	}
 }
 
 WeMaterialEditorWindow::~WeMaterialEditorWindow()
@@ -143,8 +156,9 @@ WeMaterialEditorWindow::~WeMaterialEditorWindow()
 	delete viewportClient;
 	delete ui;
 
-	// Unsubscribe from event when assets try destroy
+	// Unsubscribe from event when assets try destroy and reload
 	FEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
+	FEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 }
 
 void WeMaterialEditorWindow::OnCheckBoxIsTwoSidedToggled( bool InValue )
@@ -230,6 +244,19 @@ void WeMaterialEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<cl
 				OutResult.Set( false );
 				return;
 			}
+		}
+	}
+}
+
+void WeMaterialEditorWindow::OnAssetsReloaded( const std::vector< TSharedPtr<class FAsset> >& InAssets )
+{
+	// If material who is edition reloaded, we update UI
+	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
+	{
+		if ( InAssets[ index ] == material )
+		{
+			UpdateUI();
+			return;
 		}
 	}
 }

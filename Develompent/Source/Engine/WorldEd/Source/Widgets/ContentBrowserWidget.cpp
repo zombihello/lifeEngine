@@ -240,6 +240,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 	QAction			actionSavePackage( "Save", this );					//
 	QAction			actionOpenPackage( "Open", this );					// } Actions with package
 	QAction			actionUnloadPackage( "Unload", this );				//
+	QAction			actionReloadPackage( "Reload", this );				//
 	QAction			actionShowInExplorer( "Show In Explorer", this );	//
 	QAction			actionOpenLevel( "Open Level", this );				//
 	QAction			actionSaveLevel( "Save Level", this );				// } Actions with map
@@ -248,6 +249,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 	contextMenu.addAction( &actionSavePackage );
 	contextMenu.addAction( &actionOpenPackage );
 	contextMenu.addAction( &actionUnloadPackage );
+	contextMenu.addAction( &actionReloadPackage );
 	contextMenu.addSeparator();
 	contextMenu.addAction( &actionShowInExplorer );
 	contextMenu.addSeparator();
@@ -284,6 +286,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 	actionSavePackage.setEnabled( bPackage && bExistLoadedPackage );				//
 	actionOpenPackage.setEnabled( bPackage && bExistUnloadedPackage );				// } Disable actions with package if current file is not package
 	actionUnloadPackage.setEnabled( bPackage && bExistLoadedPackage );				//
+	actionReloadPackage.setEnabled( bPackage && bExistLoadedPackage );				//
 	actionOpenLevel.setEnabled( bMap );												//
 	actionSaveLevel.setEnabled( bMap );												// } Disable actions with map if current file is not map
 	actionDeleteFile.setEnabled( bValidItem );										//   Disable actions if current file is not valid
@@ -298,6 +301,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 	connect( &actionSavePackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_SavePackage() ) );
 	connect( &actionOpenPackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_OpenPackage() ) );
 	connect( &actionUnloadPackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_UnloadPackage() ) );
+	connect( &actionReloadPackage, SIGNAL( triggered() ), this, SLOT( on_treeView_contentBrowser_contextMenu_ReloadPackage() ) );
 	connect( &actionShowInExplorer, SIGNAL( triggered() ), this, SLOT( OnContentBrowserContextMenuShowInExplorer() ) );
 	contextMenu.exec( QCursor::pos() );
 }
@@ -316,15 +320,16 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 
 	// Main menu
 	QMenu			contextMenu( this );
+	QAction			actionReload( "Reload", this );
 	QAction			actionImport( "Import", this );
 	QAction			actionReimport( "Reimport", this );
 	QAction			actionReimportWithNewFile( "Reimport With New File", this );
 	QAction			actionDeleteFile( "Delete", this );
 	QAction			actionRenameFile( "Rename", this );
 	QAction			actionCopyReference( "Copy Reference", this );
-	QAction			actionShowReferences( "Show References", this );
 	contextMenu.addMenu( &menuCreate );
 	contextMenu.addSeparator();
+	contextMenu.addAction( &actionReload );
 	contextMenu.addAction( &actionImport );
 	contextMenu.addAction( &actionReimport );
 	contextMenu.addAction( &actionReimportWithNewFile );
@@ -332,7 +337,6 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	contextMenu.addAction( &actionDeleteFile );
 	contextMenu.addAction( &actionRenameFile );
 	contextMenu.addAction( &actionCopyReference );
-	contextMenu.addAction( &actionShowReferences );
 
 	const bool		bExistCurrentPackage				= currentPackage;
 	const bool		bValidItem							= modelIndex.isValid();
@@ -356,7 +360,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	actionDeleteFile.setEnabled( bExistCurrentPackage && bValidItem );																			// } Disable actions if item is not valid
 	actionRenameFile.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems );												//   Disable actions if selected more of one item
 	actionCopyReference.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems );												//
-	actionShowReferences.setEnabled( bExistCurrentPackage && bValidItem && !bSelectedMoreOneItems );											//
+	actionReload.setEnabled( bExistCurrentPackage && bValidItem );																				//
 
 	// Connect to signal of a actions
 	connect( &actionImport, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_Import() ) );
@@ -366,7 +370,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	connect( &actionDeleteFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_DeleteAsset() ) );
 	connect( &actionRenameFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_RenameAsset() ) );
 	connect( &actionCopyReference, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_CopyReferenceToAsset() ) );
-	connect( &actionShowReferences, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_ShowReferencesAssets() ) );
+	connect( &actionReload, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_ReloadAsset() ) );
 	contextMenu.exec( QCursor::pos() );
 }
 
@@ -587,7 +591,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 
 	for ( uint32 index = 0, count = assetInfosToDelete.size(); index < count; ++index )
 	{
-		if ( !package->Remove( assetInfosToDelete[ index ] ) )
+		if ( !package->Remove( assetInfosToDelete[ index ], false, true ) )
 		{
 			usedAssets.push_back( QString::fromStdWString( assetInfosToDelete[ index ] ) );
 		}
@@ -1112,41 +1116,46 @@ void WeContentBrowserWidget::OnListViewPackageBrowserSelectedAsset( const std::w
 	selectedAssetReference = InAssetReference;
 }
 
-void WeContentBrowserWidget::on_listView_packageBrowser_ShowReferencesAssets()
+void WeContentBrowserWidget::on_listView_packageBrowser_ReloadAsset()
 {
-	GPackageManager->GarbageCollector();
 	// Getting selected items and current package
-	/*FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 	if ( !package )
 	{
 		return;
 	}
 
-	check( modelIndexList.length() == 1 );		// Support rename only first asset
-	FAssetInfo		assetInfo;
-	package->GetAssetInfo( modelIndexList[ 0 ].row(), assetInfo );
-
-	// If asset is not loaded, we not possible show references to this asset
-	// TODO BS yehor.pohulika - Maybe in future need add caching references assets for showing without loading him
-	if ( !assetInfo.data )
+	// Reload selected assets
+	for ( uint32 index = 0, count = modelIndexList.length(); index < count; ++index )
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Not possible show references to asset <b>'%s'</b>, because him not loaded" ), assetInfo.name.c_str() ) ) );
-		return;
+		uint32			idAsset = modelIndexList[ index ].row();
+		FAssetInfo		assetInfo;
+		FGuid			guidAsset;
+		package->GetAssetInfo( idAsset, assetInfo, &guidAsset );
+		package->ReloadAsset( guidAsset );
+	}
+}
+
+void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_ReloadPackage()
+{
+	// Getting selected items, file system model and current package in package browser
+	QModelIndexList			modelIndexList = ui->treeView_contentBrowser->selectionModel()->selectedRows();
+	QFileSystemModel*		fileSystemModel = ui->treeView_contentBrowser->GetFileSystemModel();
+	FPackageRef				currentPackage = ui->listView_packageBrowser->GetPackage();
+
+	// Reload packages
+	bool		bIsNeedRepaint = false;
+	for ( int index = 0, count = modelIndexList.length(); index < count; ++index )
+	{
+		QFileInfo		fileInfo = fileSystemModel->fileInfo( modelIndexList[ index ] );
+		bIsNeedRepaint |= GPackageManager->ReloadPackage( appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() ) );
 	}
 
-	// Getting all references
-	const FAsset::FSetReferencesAssets&		referencesAssets = assetInfo.data->GetReferencesAssets();
-
-	// Convert to human readable text for showing
-	std::vector< QString >					textReferencesAssets;
-	for ( auto itRef = referencesAssets.begin(), itRefEnd = referencesAssets.end(); itRef != itRefEnd; ++itRef )
+	// Repaint content browser is need
+	if ( bIsNeedRepaint )
 	{
-		std::wstring		result;
-		MakeReferenceToAsset( *itRef, result );
-		textReferencesAssets.push_back( QString::fromStdWString( result ) );
+		ui->treeView_contentBrowser->repaint();
+		ui->listView_packageBrowser->Refresh();
 	}
-
-	// Show list
-	ShowMessageBoxWithList( this, "References To Asset", QString::fromStdWString( FString::Format( TEXT( "List of references to asset <b>'%s'</b>" ), assetInfo.name.c_str() ) ), "Assets", textReferencesAssets, false, -1);*/
 }

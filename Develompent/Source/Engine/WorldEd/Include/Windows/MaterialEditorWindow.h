@@ -40,14 +40,6 @@ public:
 	 */
 	virtual ~WeMaterialEditorWindow();
 
-	/**
-	 * Called event when asset try delete
-	 *
-	 * @param InAssets	Array of assets to delete
-	 * @param OutResult Result, we can is delete this assets?
-	 */
-	void OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, struct FCanDeleteAssetResult& OutResult );
-
 signals:
 	/**
 	 * Event when material is changed
@@ -72,6 +64,25 @@ private:
 	 */
 	void InitUI();
 
+	/**
+	 * Update UI
+	 */
+	void UpdateUI();
+
+	/**
+	 * Called event when asset try delete
+	 *
+	 * @param InAssets	Array of assets to delete
+	 * @param OutResult Result, we can is delete this assets?
+	 */
+	void OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, struct FCanDeleteAssetResult& OutResult );
+
+	/**
+	 * Called event when asset is reloaded
+	 * @param InAssets	Array of reloaded assets
+	 */
+	void OnAssetsReloaded( const std::vector< TSharedPtr<class FAsset> >& InAssets );
+
 	bool													bInit;						/**< Is inited window */
 	Ui::WeMaterialEditorWindow*								ui;							/**< Qt UI */
 	TSharedPtr<FMaterial>									material;					/**< Editable asset */
@@ -82,6 +93,7 @@ private:
 	class WeSelectAssetWidget*								selectAsset_diffuse;		/**< Widget for select asset (diffuse texture) */
 	class FMaterialPreviewViewportClient*					viewportClient;				/**< Viewport client */
 	FEditorDelegates::FOnAssetsCanDelete::FDelegateType*	assetsCanDeleteHandle;		/**< Handle delegate of assets can delete */
+	FEditorDelegates::FOnAssetsReloaded::FDelegateType*		assetsReloadedHandle;		/**< Handle delegate of reloaded assets */
 };
 
 #endif // MATERIALEDITORWINDOW_H
