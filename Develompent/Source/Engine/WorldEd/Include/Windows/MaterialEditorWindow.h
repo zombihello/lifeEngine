@@ -56,7 +56,7 @@ private slots:
 	void OnCheckBoxIsWireframeToggled( bool InValue );
 	void OnCheckBoxStaticMeshToggled( bool InValue );
 	void OnCheckBoxSpriteToggled( bool InValue );
-	void OnSelectedAssetDiffuse( const std::wstring& InNewAssetReference );
+	void OnSelectedAssetDiffuse( uint32 InAssetSlot, const std::wstring& InNewAssetReference );
 
 private:
 	/**

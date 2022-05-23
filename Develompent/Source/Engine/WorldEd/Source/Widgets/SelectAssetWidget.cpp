@@ -11,8 +11,9 @@
 #include "Widgets/ContentBrowserWidget.h"
 #include "Windows/MainWindow.h"
 
-WeSelectAssetWidget::WeSelectAssetWidget( QWidget* InParent /* = nullptr */ )
+WeSelectAssetWidget::WeSelectAssetWidget( uint32 InAssetSlot, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
+	, assetSlot( InAssetSlot )
 	, horizontalLayout( nullptr )
 	, lineEdit_assetReference( nullptr )
 	, toolButton_pasteAsset( nullptr )
@@ -60,7 +61,7 @@ void WeSelectAssetWidget::ClearAssetReference( bool InIsEmitEvent /* = true */ )
 	lineEdit_assetReference->setText( "None" );
 	if ( InIsEmitEvent )
 	{
-		emit OnAssetReferenceChanged( TEXT( "" ) );
+		emit OnAssetReferenceChanged( assetSlot, TEXT( "" ) );
 	}
 }
 
@@ -76,13 +77,13 @@ void WeSelectAssetWidget::SetAssetReference( const std::wstring& InAssetReferenc
 
 	if ( InIsEmitEvent )
 	{
-		emit OnAssetReferenceChanged( InAssetReference );
+		emit OnAssetReferenceChanged( assetSlot, InAssetReference );
 	}
 }
 
 void WeSelectAssetWidget::OnLineEditAssetReferenceReturnPressed()
 {
-	emit OnAssetReferenceChanged( lineEdit_assetReference->text().toStdWString() );
+	emit OnAssetReferenceChanged( assetSlot, lineEdit_assetReference->text().toStdWString() );
 }
 
 void WeSelectAssetWidget::OnRemoveAsset()

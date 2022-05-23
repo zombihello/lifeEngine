@@ -22,9 +22,10 @@ class WeSelectAssetWidget : public QWidget
 public:
 	/**
 	 * Constructor
+	 * @param InAssetSlot	Asset slot
 	 * @param InParent		Parent
 	 */
-	WeSelectAssetWidget( QWidget* InParent = nullptr );
+	WeSelectAssetWidget( uint32 InAssetSlot, QWidget* InParent = nullptr );
 
 	/**
 	 * Destructor
@@ -58,7 +59,7 @@ signals:
 	/**
 	 * Event of changed asset reference
 	 */
-	void OnAssetReferenceChanged( const std::wstring& InNewAssetReference );
+	void OnAssetReferenceChanged( uint32 InAssetSlot, const std::wstring& InNewAssetReference );
 
 private:
 	/**
@@ -66,6 +67,7 @@ private:
 	 */
 	void InitUI();
 
+	uint32					assetSlot;					/**< Index of slot */
 	class QHBoxLayout*		horizontalLayout;			/**< Horizontal layout */
 	class QLineEdit*		lineEdit_assetReference;	/**< Reference to asset */
 	class QToolButton*		toolButton_pasteAsset;		/**< Paste selected asset in content browser */

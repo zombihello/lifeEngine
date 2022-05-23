@@ -29,8 +29,9 @@ public:
 	 * 
 	 * @param InSceneView			Scene view
 	 * @param InViewportType		Viewport type
+	 * @param InScene				Scene
 	 */
-	void DrawGrid( const class FSceneView* InSceneView, ELevelViewportType InViewportType );
+	void DrawGrid( const class FSceneView* InSceneView, ELevelViewportType InViewportType, class FScene* InScene );
 
 private:
 	/**

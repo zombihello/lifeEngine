@@ -17,6 +17,7 @@
 #include "Windows/MainWindow.h"
 #include "Windows/TextureEditorWindow.h"
 #include "Windows/MaterialEditorWindow.h"
+#include "Windows/StaticMeshEditorWindow.h"
 #include "System/ContentBrowser.h"
 #include "System/EditorEngine.h"
 #include "System/AssetDataBase.h"
@@ -1068,6 +1069,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 	// Open editor for each asset type
 	switch ( assetInfo.type )
 	{
+	// Texture 2D
 	case AT_Texture2D:
 	{
 		assetRef->ReloadDependentAssets();
@@ -1078,6 +1080,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		break;
 	}
 
+	// Material
 	case AT_Material:
 	{
 		assetRef->ReloadDependentAssets();
@@ -1085,6 +1088,17 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		WeMaterialEditorWindow*		materialEditorWindow = new WeMaterialEditorWindow( assetRef, this );
 		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), materialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), materialEditorWindow, true );
 		connect( materialEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<FAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& ) ) );
+		break;
+	}
+
+	// Static mesh
+	case AT_StaticMesh:
+	{
+		assetRef->ReloadDependentAssets();
+
+		WeStaticMeshEditorWindow*		staticMeshEditorWindow = new WeStaticMeshEditorWindow( assetRef, this );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), staticMeshEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), staticMeshEditorWindow, true );
+		connect( staticMeshEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<FAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& ) ) );
 		break;
 	}
 	}

@@ -98,5 +98,10 @@ void FStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<FMater
 		return;
 	}
 
+	if ( materials[ InMaterialIndex ] != InNewMaterial )
+	{
+		MarkDirty();
+	}
+
 	materials[ InMaterialIndex ] = InNewMaterial;
 }

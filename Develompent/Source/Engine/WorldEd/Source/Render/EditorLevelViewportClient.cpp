@@ -115,7 +115,7 @@ void FEditorLevelViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRH
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	
 	// Draw grid
-	drawHelper.DrawGrid( InSceneView, viewportType );
+	drawHelper.DrawGrid( InSceneView, viewportType, ( FScene* )GWorld->GetScene() );
 	
 	// Draw scene
 	sceneRenderer.Render( InViewportRHI );

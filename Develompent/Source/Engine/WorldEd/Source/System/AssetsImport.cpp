@@ -440,6 +440,9 @@ bool FStaticMeshImporter::Reimport( const TSharedPtr<FStaticMesh>& InStaticMesh,
 		surfaces.push_back( surface );
 	}
 
+	// Update data in static mesh
+	InStaticMesh->SetData( verteces, indeces, surfaces, materials );
+
 	// Clean up all data
 	aiImport.FreeScene();
 	return true;

@@ -99,7 +99,7 @@ void WeMaterialEditorWindow::InitUI()
 		QGridLayout*			gridLayout			= new QGridLayout();
 		gridLayout->setContentsMargins( 0, 3, 0, 3 );
 
-		selectAsset_diffuse		= new WeSelectAssetWidget( parametersSection );
+		selectAsset_diffuse		= new WeSelectAssetWidget( 0, parametersSection );
 		
 		gridLayout->addWidget( new QLabel( "Diffuse:", parametersSection ), 0, 0 );
 		gridLayout->addWidget( selectAsset_diffuse, 0, 1 );
@@ -110,7 +110,7 @@ void WeMaterialEditorWindow::InitUI()
 		ui->frame->layout()->addWidget( parametersSection );
 
 		// Connect to slots
-		connect( selectAsset_diffuse, SIGNAL( OnAssetReferenceChanged( const std::wstring& ) ), this, SLOT( OnSelectedAssetDiffuse( const std::wstring& ) ) );
+		connect( selectAsset_diffuse, SIGNAL( OnAssetReferenceChanged( uint32, const std::wstring& ) ), this, SLOT( OnSelectedAssetDiffuse( uint32, const std::wstring& ) ) );
 	}
 
 	// Create spacer
@@ -197,7 +197,7 @@ void WeMaterialEditorWindow::OnCheckBoxSpriteToggled( bool InValue )
 	material->UsageOnSpriteMesh( InValue );
 }
 
-void WeMaterialEditorWindow::OnSelectedAssetDiffuse( const std::wstring& InNewAssetReference )
+void WeMaterialEditorWindow::OnSelectedAssetDiffuse( uint32 InAssetSlot, const std::wstring& InNewAssetReference )
 {
 	if ( !material )
 	{

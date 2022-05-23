@@ -74,10 +74,10 @@ void FEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 	}
 }
 
-void FEditorCommonDrawHelper::DrawGrid( const class FSceneView* InSceneView, ELevelViewportType InViewportType )
+void FEditorCommonDrawHelper::DrawGrid( const class FSceneView* InSceneView, ELevelViewportType InViewportType, class FScene* InScene )
 {
-	FScene*					scene = ( FScene* )GWorld->GetScene();
-	FSceneDepthGroup&		SDG = scene->GetSDG( SDG_WorldEdBackground );
+	check( InScene );
+	FSceneDepthGroup&		SDG = InScene->GetSDG( SDG_WorldEdBackground );
 	FVector					origin;
 	FVector					a( 0.f, 0.f, 0.f );			// Start line
 	FVector					b( 0.f, 0.f, 0.f );			// End line

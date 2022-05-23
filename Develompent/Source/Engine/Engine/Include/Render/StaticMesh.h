@@ -110,7 +110,7 @@ public:
 	 * Get materials
 	 * @return Return array materials
 	 */
-	FORCEINLINE const std::vector< TAssetHandle<FMaterial> > GetMaterials() const
+	FORCEINLINE const std::vector< TAssetHandle<FMaterial> >& GetMaterials() const
 	{
 		return materials;
 	}
@@ -156,6 +156,24 @@ public:
 	FORCEINLINE uint32 GetNumMaterials() const
 	{
 		return materials.size();
+	}
+
+	/**
+	 * @brief Get array of verteces
+	 * @return Return array of verteces
+	 */
+	FORCEINLINE const FBulkData<FStaticMeshVertexType>& GetVerteces() const
+	{
+		return verteces;
+	}
+
+	/**
+	 * @brief Get array of indeces
+	 * @return Return array of indeces
+	 */
+	FORCEINLINE const FBulkData<uint32>& GetIndeces() const
+	{
+		return indeces;
 	}
 
 private:
