@@ -337,16 +337,16 @@ void FPackage::Serialize( FArchive& InArchive )
 		while ( !InArchive.IsEndOfFile() )
 		{
 			// Serialize asset header and add to table
-			FAssetInfo			assetInfo;
+			FAssetInfo			localAssetInfo;
 			FGuid				assetGUID;
-			appMemzero( &assetInfo, sizeof( FAssetInfo ) );
+			appMemzero( &localAssetInfo, sizeof( FAssetInfo ) );
 
 			// Serialize hash with size data
-			InArchive << assetInfo.type;
+			InArchive << localAssetInfo.type;
 
 			if ( InArchive.Ver() >= VER_AssetName_V2 )
 			{
-				InArchive << assetInfo.name;
+				InArchive << localAssetInfo.name;
 			}
 
 			if ( InArchive.Ver() < VER_GUIDAssets )
@@ -360,18 +360,21 @@ void FPackage::Serialize( FArchive& InArchive )
 				InArchive << assetGUID;
 			}
 
-			InArchive << assetInfo.size;
-			assetInfo.offset = InArchive.Tell();
+			InArchive << localAssetInfo.size;
+			localAssetInfo.offset = InArchive.Tell();
 
 			// Skip asset data	
-			if ( assetInfo.size > 0 )
+			if ( localAssetInfo.size > 0 )
 			{
-				InArchive.Seek( InArchive.Tell() + assetInfo.size );
+				InArchive.Seek( InArchive.Tell() + localAssetInfo.size );
 			}
 
-			// Add asset info in table
-			assetGUIDTable[ assetInfo.name ] = assetGUID;
-			assetsTable[ assetGUID ] = assetInfo;
+			// Update asset info in table
+			assetGUIDTable[ localAssetInfo.name ] = assetGUID;
+			
+			FAssetInfo&			assetInfo = assetsTable[ assetGUID ];
+			localAssetInfo.data = assetInfo.data;
+			assetInfo			= localAssetInfo;
 		}
 	}
 
