@@ -243,13 +243,13 @@ public:
 	 * @return Return true if compilation is succeed, else returning false
 	 */
 	virtual bool									CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const FShaderCompilerEnvironment& InEnvironment, FShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) ) override;
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Get shader platform
 	 * @return Return shader platform
 	 */
 	virtual EShaderPlatform						GetShaderPlatform() const override;
-#endif // WITH_EDITOR
 
 #if WITH_IMGUI
 	/**

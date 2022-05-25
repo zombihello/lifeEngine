@@ -59,6 +59,7 @@ void DrawDenormalizedQuad( class FBaseDeviceContextRHI* InDeviceContextRHI, floa
 
 void DrawWireframeBox( struct FSceneDepthGroup& InSDG, const class FBox& InBox, const class FColor& InColor )
 {
+#if WITH_EDITOR
 	FVector		bbox[ 2 ] = { InBox.GetMin(), InBox.GetMax() };
 	FVector		start, end;
 
@@ -82,6 +83,7 @@ void DrawWireframeBox( struct FSceneDepthGroup& InSDG, const class FBox& InBox, 
 			InSDG.simpleElements.AddLine( start, end, InColor );
 		}
 	}
+#endif // WITH_EDITOR
 }
 
 void DrawSphere( struct FSceneDepthGroup& InSDG, const FVector& InCenter, const FVector& InRadius, uint32 InNumSides, uint32 InNumRings, class FMaterial* InMaterial )

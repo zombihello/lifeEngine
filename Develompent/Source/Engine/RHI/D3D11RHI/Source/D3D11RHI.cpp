@@ -1179,12 +1179,12 @@ bool FD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 	delete shaderArchive;
 	return true;
 }
+#endif // WITH_EDITOR
 
 EShaderPlatform FD3D11RHI::GetShaderPlatform() const
 {
 	return SP_PCD3D_SM5;
 }
-#endif // WITH_EDITOR
 
 #if WITH_IMGUI
 /**

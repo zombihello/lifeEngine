@@ -306,7 +306,7 @@ private:
 	FVertexFactoryShaderParameters* Construct##FactoryClass##ShaderParameters( EShaderFrequency InShaderFrequency ) { return FactoryClass::ConstructShaderParameters( InShaderFrequency ); } \
 	FVertexFactoryMetaType			FactoryClass::staticType( TEXT( #FactoryClass ), FileName, SupportsInstancing, InstanceStreamIndex, Construct##FactoryClass##ShaderParameters, FactoryClass::ShouldCache, FactoryClass::ModifyCompilationEnvironment );
 #else
-#define IMPLEMENT_VERTEX_FACTORY_TYPE( FactoryClass, FileName, SupportsInstancing ) \
+#define IMPLEMENT_VERTEX_FACTORY_TYPE( FactoryClass, FileName, SupportsInstancing, InstanceStreamIndex ) \
 	FVertexFactoryShaderParameters* Construct##FactoryClass##ShaderParameters( EShaderFrequency InShaderFrequency ) { return FactoryClass::ConstructShaderParameters( InShaderFrequency ); } \
 	FVertexFactoryMetaType			FactoryClass::staticType( TEXT( #FactoryClass ), FileName, SupportsInstancing, InstanceStreamIndex, Construct##FactoryClass##ShaderParameters );
 #endif // WITH_EDITOR

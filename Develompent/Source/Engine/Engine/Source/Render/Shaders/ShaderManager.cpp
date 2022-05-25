@@ -177,8 +177,8 @@ void FShaderManager::Init()
 	{
 		pathShaderCache = appGameDir() + PATH_SEPARATOR + TEXT( "Content" ) + PATH_SEPARATOR + GetShaderCacheFilename( GRHI->GetShaderPlatform() );
 	}
-#endif // WITH_EDITOR
 	else
+#endif // WITH_EDITOR
 	{
 		pathShaderCache = GCookedDir + PATH_SEPARATOR + GetShaderCacheFilename( GRHI->GetShaderPlatform() );
 	}
