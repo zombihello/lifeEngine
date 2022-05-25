@@ -48,8 +48,8 @@ public:
      */
     FORCEINLINE void SetMaterial( uint32 InIndex, const TAssetHandle<FMaterial>& InMaterial )
     {
-        check( InIndex < materials.size() );
-        materials[ InIndex ] = InMaterial;
+        check( InIndex < overrideMaterials.size() );
+		overrideMaterials[ InIndex ] = InMaterial;
 		bIsDirtyDrawingPolicyLink = true;
     }
 
@@ -64,7 +64,7 @@ public:
 			TSharedPtr<FStaticMesh>		staticMeshRef = InNewStaticMesh.ToSharedPtr();
 			if ( staticMeshRef )
 			{
-				materials = staticMeshRef->GetMaterials();
+				overrideMaterials.resize( staticMeshRef->GetNumMaterials() );
 			}
 		}
 		bIsDirtyDrawingPolicyLink = true;
@@ -83,25 +83,23 @@ public:
      * @brief Get material in mesh
      *
      * @param InIndex Index of material layer in mesh
-     * @return Return pointer to material. If material not exist returning nullptr
+     * @return Return pointer to material. If material not exist or static mesh is not valid returning nullptr
      */
     FORCEINLINE TAssetHandle<FMaterial> GetMaterial( uint32 InIndex ) const
     {
-        check( InIndex < materials.size() );
-        return materials[ InIndex ];
+		// If mesh is not valid, we return NULL
+		TSharedPtr<FStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
+		if ( !staticMeshRef )
+		{
+			return nullptr;
+		}
+        check( InIndex < overrideMaterials.size() );
+		
+		TAssetHandle<FMaterial>		material = overrideMaterials[ InIndex ];
+        return material.IsValid() ? material : staticMeshRef->GetMaterial( InIndex );
     }
 
 private:
-	/**
-	 * @brief Typedef of drawing policy link
-	 */
-	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLink			FDrawingPolicyLink;
-
-	/**
-	 * @brief Typedef of reference on drawing policy link in scene
-	 */
-	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLinkRef		FDrawingPolicyLinkRef;
-
 	/**
 	 * @brief Adds a draw policy link in SDGs
 	 */
@@ -112,10 +110,9 @@ private:
 	 */
 	virtual void UnlinkDrawList() override;
 
-	TAssetHandle<FStaticMesh>					staticMesh;						/**< Static mesh */
-	std::vector< TAssetHandle<FMaterial> >		materials;						/**< Override materials */
-	std::vector< FDrawingPolicyLinkRef >		drawingPolicyLinks;				/**< Array of reference to drawing policy link in scene */
-	std::vector< const FMeshBatch* >			meshBatchLinks;					/**< Array of references to mesh batch in drawing policy link */
+	TAssetHandle<FStaticMesh>								staticMesh;						/**< Static mesh */
+	std::vector< TAssetHandle<FMaterial> >					overrideMaterials;				/**< Override materials */
+	TSharedPtr<FStaticMesh::FElementDrawingPolicyLink>		elementDrawingPolicyLink;		/**< Element drawing policy link of current static mesh */
 };
 
 #endif // !STATICMESHCOMPONENT_H

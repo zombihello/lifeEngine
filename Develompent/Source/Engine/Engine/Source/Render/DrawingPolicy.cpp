@@ -19,16 +19,21 @@ FMeshDrawingPolicy::~FMeshDrawingPolicy()
 
 void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, const TAssetHandle<FMaterial>& InMaterial, float InDepthBias /* = 0.f */ )
 {
+	// If material is not valid, we use default material
 	TSharedPtr<FMaterial>		materialRef = InMaterial.ToSharedPtr();
+	if ( !materialRef )
+	{
+		materialRef = GEngine->GetDefaultMaterial().ToSharedPtr();
+	}
 	checkMsg( InVertexFactory && materialRef, TEXT( "Vertex factory and material must be valid for init drawing policy" ) );
 
 	uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
 	vertexShader	= materialRef->GetShader( vertexFactoryHash, SF_Vertex );
 	pixelShader		= materialRef->GetShader( vertexFactoryHash, SF_Pixel );
 
-	hash			= appMemFastHash( material, InVertexFactory->GetTypeHash() );
+	hash			= appMemFastHash( materialRef, InVertexFactory->GetTypeHash() );
 	vertexFactory	= InVertexFactory;
-	material		= InMaterial;
+	material		= materialRef->GetAssetHandle();
 	depthBias		= InDepthBias;
 	bInit			= true;
 }

@@ -396,13 +396,15 @@ public:
 	 *
 	 * @param InDrawingPolicyLink Drawing policy link
 	 */
-	void RemoveItem( const FDrawingPolicyLinkRef& InDrawingPolicyLink )
+	void RemoveItem( FDrawingPolicyLinkRef& InDrawingPolicyLink )
 	{
 		check( InDrawingPolicyLink );
 		if ( InDrawingPolicyLink->GetRefCount() <= 2 )
 		{
 			meshes.erase( InDrawingPolicyLink );
 		}
+
+		InDrawingPolicyLink = nullptr;
 	}
 
 	/**

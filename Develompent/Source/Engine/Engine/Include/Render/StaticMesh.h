@@ -11,12 +11,15 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "RenderResource.h"
 #include "Containers/BulkData.h"
+#include "Misc/SharedPointer.h"
 #include "System/Package.h"
 #include "Render/Material.h"
 #include "Render/VertexFactory/StaticMeshVertexFactory.h"
+#include "Render/Scene.h"
 #include "RHI/BaseBufferRHI.h"
 #include "RHI/TypesRHI.h"
 
@@ -39,6 +42,26 @@ struct FStaticMeshSurface
 class FStaticMesh : public FAsset, public FRenderResource
 {
 public:
+	/**
+	 * @brief Typedef of drawing policy link
+	 */
+	typedef FMeshDrawList<FStaticMeshDrawPolicy>::FDrawingPolicyLink		FDrawingPolicyLink;
+
+	/**
+	 * @brief Typedef of reference on drawing policy link in scene
+	 */
+	typedef FMeshDrawList<FStaticMeshDrawPolicy>::FDrawingPolicyLinkRef		FDrawingPolicyLinkRef;
+
+	/**
+	 * @brief Elements of drawing policy link to SDG
+	 */
+	struct FElementDrawingPolicyLink
+	{
+		bool									bDirty;					/**< Is dirty this element */
+		std::vector<FDrawingPolicyLinkRef>		drawingPolicyLinks;		/**< Array of reference to drawing policy link in scene */
+		std::vector<const FMeshBatch*>			meshBatchLinks;			/**< Array of references to mesh batch in drawing policy link */
+	};
+
 	/**
 	 * Constructor
 	 */
@@ -95,6 +118,15 @@ public:
 	FORCEINLINE TRefCountPtr< FStaticMeshVertexFactory > GetVertexFactory() const
 	{
 		return vertexFactory;
+	}
+
+	/**
+	 * Get number of surfaces
+	 * @return Return number of surfaces in array
+	 */
+	FORCEINLINE uint32 GetNumSurfaces() const
+	{
+		return surfaces.size();
 	}
 
 	/**
@@ -176,14 +208,107 @@ public:
 		return indeces;
 	}
 
+	/**
+	 * @brief Adds a drawing policy link in SDGs
+	 * @note When FStaticMesh is deleting, all this drawing policy links unlinks from scenes
+	 * 
+	 * @param InSDG		Scene depth group
+	 * @return Return pointer to drawing policy link for SDG
+	 */
+	FORCEINLINE TSharedPtr<FElementDrawingPolicyLink> LinkDrawList( FSceneDepthGroup& InSDG )
+	{
+		// If already added drawing policy link for this scene depth group - return exist element
+		{
+			auto	itElement = elementDrawingPolicyMap.find( &InSDG );
+			if ( itElement != elementDrawingPolicyMap.end() )
+			{
+				return itElement->second;
+			}
+		}
+
+		// Allocate new element
+		TSharedPtr<FElementDrawingPolicyLink>		element = MakeCustomDrawingPolicyLink( InSDG );
+
+		// Add to cache and return created element
+		elementDrawingPolicyMap[ &InSDG ] = element;
+		return element;
+	}
+
+	/**
+	 * @brief Adds a drawing policy link with override materials in SDGs
+	 * @note When FStaticMesh is deleting, all this drawing policy links unlinks from scenes
+	 * 
+	 * @param InSDG					Scene depth group
+	 * @param InOverrideMaterials	Array of override materials
+	 * @return Return pointer to drawing policy link for SDG
+	 */
+	FORCEINLINE TSharedPtr<FElementDrawingPolicyLink> LinkDrawList( FSceneDepthGroup& InSDG, const std::vector< TAssetHandle<FMaterial> >& InOverrideMaterials )
+	{
+		// TODO BS yehor.pohuliaka - AHTUNG! Need change key in 'elementDrawingPolicyMap' for correct caching custom drawing policy link
+		// If already added drawing policy link for this scene depth group - return exist element
+		{
+			auto	itElement = elementDrawingPolicyMap.find( &InSDG );
+			if ( itElement != elementDrawingPolicyMap.end() )
+			{
+				return itElement->second;
+			}
+		}
+
+		// Allocate new element
+		TSharedPtr<FElementDrawingPolicyLink>		element = MakeCustomDrawingPolicyLink( InSDG, ( std::vector< TAssetHandle<FMaterial> >* ) &InOverrideMaterials );
+
+		// Add to cache and return created element
+		elementDrawingPolicyMap[ &InSDG ] = element;
+		return element;
+	}
+
+	/**
+	 * @brief Removes a drawing policy link from SDGs
+	 * @warning After work of this method pointer InDrawingPolicyLink will is not valid 
+	 * @note When FStaticMesh is deleting, all this drawing policy links unlinks from scenes
+	 * 
+	 * @param InSDG					Scene depth group
+	 * @param InDrawingPolicyLink	Drawing policy link to delete
+	 */
+	void UnlinkDrawList( FSceneDepthGroup& InSDG, TSharedPtr<FElementDrawingPolicyLink>& InDrawingPolicyLink );
+
+	/**
+	 * @brief Get drawing policy link for SDG
+	 * 
+	 * @param InSDG		Scene depth group
+	 * @return Return pointer to drawing policy link for SDG. If not exist return NULL
+	 */
+	FORCEINLINE TSharedPtr<FElementDrawingPolicyLink> GetDrawingPolicyLink( const FSceneDepthGroup& InSDG ) const
+	{
+		// Find element in cache drawing policy map
+		auto		itElement = elementDrawingPolicyMap.find( ( FSceneDepthGroup* ) &InSDG );
+		if ( itElement == elementDrawingPolicyMap.end() )
+		{
+			return nullptr;
+		}
+
+		return itElement->second;
+	}
+
 private:
-	TRefCountPtr< FStaticMeshVertexFactory >	vertexFactory;			/**< Vertex factory */
-	std::vector< TAssetHandle<FMaterial> >		materials;				/**< Array materials in mesh */
-	std::vector< FStaticMeshSurface >			surfaces;				/**< Array surfaces in mesh */
-	FBulkData< FStaticMeshVertexType >			verteces;				/**< Array verteces to create RHI vertex buffer */	
-	FBulkData< uint32 >							indeces;				/**< Array indeces to create RHI index buffer */
-	FVertexBufferRHIRef							vertexBufferRHI;		/**< RHI vertex buffer */
-	FIndexBufferRHIRef							indexBufferRHI;			/**< RHI index buffer */
+	/**
+	 * @brief Create element drawing policy link
+	 * @note For cache this drawing policy link need call LinkDrawList for add him on cache
+	 *
+	 * @param InSDG					Scene depth group
+	 * @param InOverrideMaterials	Optional. Pointer to array of override materials
+	 * @return Return pointer to drawing policy link for SDG
+	 */
+	TSharedPtr<FElementDrawingPolicyLink> MakeCustomDrawingPolicyLink( FSceneDepthGroup& InSDG, std::vector< TAssetHandle<FMaterial> >* InOverrideMaterials = nullptr );
+
+	TRefCountPtr< FStaticMeshVertexFactory >										vertexFactory;				/**< Vertex factory */
+	std::vector< TAssetHandle<FMaterial> >											materials;					/**< Array materials in mesh */
+	std::vector< FStaticMeshSurface >												surfaces;					/**< Array surfaces in mesh */
+	FBulkData< FStaticMeshVertexType >												verteces;					/**< Array verteces to create RHI vertex buffer */
+	FBulkData< uint32 >																indeces;					/**< Array indeces to create RHI index buffer */
+	FVertexBufferRHIRef																vertexBufferRHI;			/**< RHI vertex buffer */
+	FIndexBufferRHIRef																indexBufferRHI;				/**< RHI index buffer */
+	std::unordered_map<FSceneDepthGroup*, TSharedPtr<FElementDrawingPolicyLink>>	elementDrawingPolicyMap;	/**< Map of adds a drawing policy link to SDGs */
 };
 
 //
@@ -192,19 +317,13 @@ private:
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshSurface& InValue )
 {
-	InArchive << InValue.materialID;
-	InArchive << InValue.baseVertexIndex;
-	InArchive << InValue.firstIndex;
-	InArchive << InValue.numPrimitives;
+	InArchive.Serialize( &InValue, sizeof( FStaticMeshSurface ) );
 	return InArchive;
 }
 
 FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshSurface& InValue )
 {
-	InArchive << InValue.materialID;
-	InArchive << InValue.baseVertexIndex;
-	InArchive << InValue.firstIndex;
-	InArchive << InValue.numPrimitives;
+	InArchive.Serialize( ( FStaticMeshSurface* ) &InValue, sizeof( FStaticMeshSurface ) );
 	return InArchive;
 }
 
