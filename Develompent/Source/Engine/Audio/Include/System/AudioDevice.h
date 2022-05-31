@@ -19,7 +19,7 @@
 #include "System/Delegate.h"
 
 /** Delegate called when audio device muted/unmuted */
-DECLARE_MULTICAST_DELEGATE( FOnAudioDeviceMuted, bool )
+DECLARE_MULTICAST_DELEGATE( COnAudioDeviceMuted, bool )
 
 /**
  * @ingroup Audio
@@ -58,38 +58,38 @@ uint32 appSampleFormatToEngine( ESampleFormat InSampleFormat );
  * @ingroup Audio
  * @brief Struct of descriptrion listener spatial
  */
-struct FListenerSpatial
+struct SListenerSpatial
 {
 	/**
 	 * @brief Constructor
 	 */
-	FListenerSpatial()
-		: location( FMath::vectorZero )
-		, forward( FMath::vectorForward )
-		, up( FMath::vectorUp )
+	SListenerSpatial()
+		: location( SMath::vectorZero )
+		, forward( SMath::vectorForward )
+		, up( SMath::vectorUp )
 	{}
 
-	FVector		location;	/**< Location in world */
-	FVector		forward;	/**< Forward vector */
-	FVector		up;			/**< Up vector */
+	Vector		location;	/**< Location in world */
+	Vector		forward;	/**< Forward vector */
+	Vector		up;			/**< Up vector */
 };
 
 /**
  * @ingroup Audio
  * @brief Class of audio device
  */
-class FAudioDevice
+class ÑAudioDevice
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FAudioDevice();
+	ÑAudioDevice();
 
 	/**
 	 * @brief Destructor
 	 */
-	~FAudioDevice();
+	~ÑAudioDevice();
 
 	/**
 	 * @brief Initialize engine
@@ -108,7 +108,7 @@ public:
 	 * @param InForward Forward vector
 	 * @param InUp Up vector
 	 */
-	FORCEINLINE void SetListenerSpatial( const FVector& InLocation, const FVector& InForward, const FVector& InUp )
+	FORCEINLINE void SetListenerSpatial( const Vector& InLocation, const Vector& InForward, const Vector& InUp )
 	{
 		listener.location = InLocation;
 		listener.forward = InForward;
@@ -144,7 +144,7 @@ public:
 	 * @brief Get listener spatial
 	 * @return Return listener spatial
 	 */
-	FORCEINLINE const FListenerSpatial& GetListenerSpatial() const
+	FORCEINLINE const SListenerSpatial& GetListenerSpatial() const
 	{
 		return listener;
 	}
@@ -188,7 +188,7 @@ public:
 	 * @brief Get delegate of audio device muted/unmute
 	 * @return Return delegate of audio device muted/unmute
 	 */
-	FORCEINLINE FOnAudioDeviceMuted& OnAudioDeviceMuted() const
+	FORCEINLINE COnAudioDeviceMuted& OnAudioDeviceMuted() const
 	{
 		return onAudioDeviceMuted;
 	}
@@ -197,23 +197,23 @@ private:
 	bool							bIsMuted;				/**< Is muted device */
 	class ALCdevice*				alDevice;				/**< OpenAL device */
 	class ALCcontext*				alContext;				/**< OpenAL context */
-	FListenerSpatial				listener;				/**< Listener */
+	SListenerSpatial				listener;				/**< Listener */
 	float							globalVolume;			/**< Global volume */
 	float							platformAudioHeadroom;	/**< Defines a platform-specific volume headroom (in dB) for audio to provide better platform consistency with respect to volume levels */
-	mutable FOnAudioDeviceMuted		onAudioDeviceMuted;		/**< Delegate called when audio device muted/unmuted */
+	mutable COnAudioDeviceMuted		onAudioDeviceMuted;		/**< Delegate called when audio device muted/unmuted */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, ESampleFormat& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESampleFormat& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( ESampleFormat ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ESampleFormat& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESampleFormat& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( byte* ) &InValue, sizeof( ESampleFormat ) );

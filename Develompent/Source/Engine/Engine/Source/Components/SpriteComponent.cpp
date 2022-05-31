@@ -8,25 +8,25 @@
 #include "Render/Shaders/BasePassShader.h"
 #include "Render/Texture.h"
 
-IMPLEMENT_CLASS( LSpriteComponent )
+IMPLEMENT_CLASS( CSpriteComponent )
 
-LSpriteComponent::LSpriteComponent()
+CSpriteComponent::CSpriteComponent()
     : bFlipVertical( false )
 	, bFlipHorizontal( false )
     , type( ST_Rotating )
-	, sprite( new FSprite() )
+	, sprite( new CSprite() )
     , meshBatchLink( nullptr )
 {
 	BeginInitResource( sprite );
 }
 
-void LSpriteComponent::Serialize( class FArchive& InArchive )
+void CSpriteComponent::Serialize( class CArchive& InArchive )
 {
     Super::Serialize( InArchive );
 
-    FRectFloat				textureRect     = GetTextureRect();
-    FVector2D				spriteSize      = GetSpriteSize();
-	TAssetHandle<FMaterial>	material        = GetMaterial();
+    RectFloat_t				textureRect     = GetTextureRect();
+    Vector2D				spriteSize      = GetSpriteSize();
+	TAssetHandle<CMaterial>	material        = GetMaterial();
 
     InArchive << type;
     InArchive << textureRect;
@@ -45,19 +45,19 @@ void LSpriteComponent::Serialize( class FArchive& InArchive )
     }
 }
 
-void LSpriteComponent::CalcTransformationMatrix( const class FSceneView& InSceneView, FMatrix& OutResult ) const
+void CSpriteComponent::CalcTransformationMatrix( const class CSceneView& InSceneView, Matrix& OutResult ) const
 {
-    FTransform      transform = GetComponentTransform();
+    CTransform      transform = GetComponentTransform();
     if ( type == ST_Static )
     {
         transform.ToMatrix( OutResult );
 		return;
     }
 
-	FMath::IdentityMatrix( OutResult );
-	FMath::TranslateMatrix( transform.GetLocation(), OutResult );
+	SMath::IdentityMatrix( OutResult );
+	SMath::TranslateMatrix( transform.GetLocation(), OutResult );
     
-	const FMatrix&      viewMatrix = InSceneView.GetViewMatrix();
+	const Matrix&      viewMatrix = InSceneView.GetViewMatrix();
 	OutResult[ 0 ].x = viewMatrix[ 0 ].x;
 	OutResult[ 0 ].y = viewMatrix[ 1 ].x;
 	OutResult[ 0 ].z = viewMatrix[ 2 ].x;
@@ -79,11 +79,11 @@ void LSpriteComponent::CalcTransformationMatrix( const class FSceneView& InScene
 	OutResult[ 2 ].y = viewMatrix[ 1 ].z;
 	OutResult[ 2 ].z = viewMatrix[ 2 ].z;
 
-	OutResult *= FMath::ScaleMatrix( transform.GetScale() );
+	OutResult *= SMath::ScaleMatrix( transform.GetScale() );
 	OutResult *= transform.GetRotation().ToMatrix();
 }
 
-void LSpriteComponent::LinkDrawList()
+void CSpriteComponent::LinkDrawList()
 {
     check( scene );
 
@@ -96,13 +96,13 @@ void LSpriteComponent::LinkDrawList()
 	// If sprite is valid - add to scene draw policy link
 	if ( sprite )
 	{
-		FSceneDepthGroup&               SDGWorld = scene->GetSDG( SDG_World );
-		FSpriteSurface					surface = sprite->GetSurface();
-		FDrawingPolicyLinkRef           tmpDrawPolicyLink = new FDrawingPolicyLink( DEC_SPRITE );
+		SSceneDepthGroup&               SDGWorld = scene->GetSDG( SDG_World );
+		SSpriteSurface					surface = sprite->GetSurface();
+		DrawingPolicyLinkRef_t           tmpDrawPolicyLink = new DrawingPolicyLink_t( DEC_SPRITE );
 		tmpDrawPolicyLink->drawingPolicy.Init( sprite->GetVertexFactory(), sprite->GetMaterial() );
 
 		// Generate mesh batch of sprite
-		FMeshBatch			            meshBatch;
+		SMeshBatch			            meshBatch;
 		meshBatch.baseVertexIndex       = surface.baseVertexIndex;
 		meshBatch.firstIndex            = surface.firstIndex;
 		meshBatch.numPrimitives         = surface.numPrimitives;
@@ -115,7 +115,7 @@ void LSpriteComponent::LinkDrawList()
 		check( drawingPolicyLink );
 
 		// Get link to mesh batch. If not founded insert new
-		FMeshBatchList::iterator        itMeshBatchLink = drawingPolicyLink->meshBatchList.find( meshBatch );
+		MeshBatchList_t::iterator        itMeshBatchLink = drawingPolicyLink->meshBatchList.find( meshBatch );
 		if ( itMeshBatchLink != drawingPolicyLink->meshBatchList.end() )
 		{
 			meshBatchLink = &( *itMeshBatchLink );
@@ -127,14 +127,14 @@ void LSpriteComponent::LinkDrawList()
 	}
 }
 
-void LSpriteComponent::UnlinkDrawList()
+void CSpriteComponent::UnlinkDrawList()
 {
     check( scene );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( drawingPolicyLink )
 	{
-		FSceneDepthGroup&		SDGWorld = scene->GetSDG( SDG_World );
+		SSceneDepthGroup&		SDGWorld = scene->GetSDG( SDG_World );
 		SDGWorld.spriteDrawList.RemoveItem( drawingPolicyLink );
 
 		drawingPolicyLink = nullptr;
@@ -142,7 +142,7 @@ void LSpriteComponent::UnlinkDrawList()
 	}
 }
 
-void LSpriteComponent::AddToDrawList( const class FSceneView& InSceneView )
+void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 {
 	// If primitive is empty - exit from method
 	if ( !bIsDirtyDrawingPolicyLink && !meshBatchLink )
@@ -172,5 +172,5 @@ void LSpriteComponent::AddToDrawList( const class FSceneView& InSceneView )
 	CalcTransformationMatrix( InSceneView, meshBatchLink->transformationMatrices[ meshBatchLink->numInstances-1 ] );
 
     // Update AABB
-    boundbox = FBox::BuildAABB( GetComponentLocation(), FVector( GetSpriteSize(), 1.f ) );
+    boundbox = ÑBox::BuildAABB( GetComponentLocation(), Vector( GetSpriteSize(), 1.f ) );
 }

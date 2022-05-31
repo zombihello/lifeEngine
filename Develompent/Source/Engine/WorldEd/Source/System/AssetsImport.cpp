@@ -18,7 +18,7 @@
 // GENERIC
 //
 
-QString FHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /* = ET_All */ )
+QString CHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /* = ET_All */ )
 {
 	QString				result;
 	std::wstring		allSupportedFormats;
@@ -26,13 +26,13 @@ QString FHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 	// Texture formats
 	if ( InFlags & ET_Texture2D )
 	{
-		const std::vector< std::wstring >&		textureExtension = FTexture2DImporter::GetSupportedExtensions();
+		const std::vector< std::wstring >&		textureExtension = CTexture2DImporter::GetSupportedExtensions();
 		if ( !textureExtension.empty() )
 		{
 			result += "Texture Formats (";
 			for ( uint32 index = 0, count = textureExtension.size(); index < count; ++index )
 			{
-				std::wstring		format = FString::Format( TEXT( "*.%s%s" ), textureExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+				std::wstring		format = ÑString::Format( TEXT( "*.%s%s" ), textureExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
 				result += format;
 				allSupportedFormats += format;
 			}
@@ -43,14 +43,14 @@ QString FHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 	// Audio formats
 	if ( InFlags & ET_AudioBank )
 	{
-		const std::vector< std::wstring >&		audioExtnesion = FAudioBankImporter::GetSupportedExtensions();
+		const std::vector< std::wstring >&		audioExtnesion = CAudioBankImporter::GetSupportedExtensions();
 		if ( !audioExtnesion.empty() )
 		{
 			allSupportedFormats += !allSupportedFormats.empty() ? TEXT( ";" ) : TEXT( "" );
 			result += "Audio Formats (";
 			for ( uint32 index = 0, count = audioExtnesion.size(); index < count; ++index )
 			{
-				std::wstring		format = FString::Format( TEXT( "*.%s%s" ), audioExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+				std::wstring		format = ÑString::Format( TEXT( "*.%s%s" ), audioExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
 				result += format;
 				allSupportedFormats += format;
 			}
@@ -61,14 +61,14 @@ QString FHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 	// Static mesh formats
 	if ( InFlags & ET_StaticMesh )
 	{
-		const std::vector< std::wstring >&		staticMeshExtnesion = FStaticMeshImporter::GetSupportedExtensions();
+		const std::vector< std::wstring >&		staticMeshExtnesion = CStaticMeshImporter::GetSupportedExtensions();
 		if ( !staticMeshExtnesion.empty() )
 		{
 			allSupportedFormats += !allSupportedFormats.empty() ? TEXT( ";" ) : TEXT( "" );
 			result += "Static Mesh Formats (";
 			for ( uint32 index = 0, count = staticMeshExtnesion.size(); index < count; ++index )
 			{
-				std::wstring		format = FString::Format( TEXT( "*.%s%s" ), staticMeshExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+				std::wstring		format = ÑString::Format( TEXT( "*.%s%s" ), staticMeshExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
 				result += format;
 				allSupportedFormats += format;
 			}
@@ -78,17 +78,17 @@ QString FHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 
 	// All supported formats
 	{
-		result += FString::Format( TEXT( "All supported formats (%s)" ), allSupportedFormats.c_str() );
+		result += ÑString::Format( TEXT( "All supported formats (%s)" ), allSupportedFormats.c_str() );
 	}
 
 	return result;
 }
 
-FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString& InPath, FPackage* InPackage, TAssetHandle<FAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport /* = false */ )
+CHelperAssetImporter::EImportResult CHelperAssetImporter::Import( const QString& InPath, CPackage* InPackage, TAssetHandle<CAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport /* = false */ )
 {
 	checkMsg( InPackage, TEXT( "For import package must be valid" ) );
 
-	TSharedPtr<FAsset>	assetRef;
+	TSharedPtr<CAsset>	assetRef;
 	QFileInfo			fileInfo( InPath );
 	QString				assetName = fileInfo.baseName();
 	std::wstring		fileExtension = fileInfo.suffix().toStdWString();
@@ -100,27 +100,27 @@ FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString&
 	}
 
 	// We import texture
-	if ( FHelperAssetImporter::IsSupportedExtension( fileExtension, FTexture2DImporter::GetSupportedExtensions() ) )
+	if ( CHelperAssetImporter::IsSupportedExtension( fileExtension, CTexture2DImporter::GetSupportedExtensions() ) )
 	{
-		assetRef = FTexture2DImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
+		assetRef = CTexture2DImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
 	}
 
 	// We import audio bank
-	else if ( FHelperAssetImporter::IsSupportedExtension( fileExtension, FAudioBankImporter::GetSupportedExtensions() ) )
+	else if ( CHelperAssetImporter::IsSupportedExtension( fileExtension, CAudioBankImporter::GetSupportedExtensions() ) )
 	{
-		assetRef = FAudioBankImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
+		assetRef = CAudioBankImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
 	}
 
 	// We import static mesh
-	else if ( FHelperAssetImporter::IsSupportedExtension( fileExtension, FStaticMeshImporter::GetSupportedExtensions() ) )
+	else if ( CHelperAssetImporter::IsSupportedExtension( fileExtension, CStaticMeshImporter::GetSupportedExtensions() ) )
 	{
-		assetRef = FStaticMeshImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
+		assetRef = CStaticMeshImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
 	}
 
 	// Else this is unknown asset
 	else
 	{
-		OutError = FString::Format( TEXT( "Unknown asset type '%s' for import" ), InPath.toStdWString().c_str() );
+		OutError = ÑString::Format( TEXT( "Unknown asset type '%s' for import" ), InPath.toStdWString().c_str() );
 		LE_LOG( LT_Warning, LC_Editor, OutError.c_str() );
 		return IR_Error;
 	}
@@ -129,7 +129,7 @@ FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString&
 	if ( assetRef )
 	{
 		LE_LOG( LT_Log, LC_Editor, TEXT( "Imported asset '%s' from '%s' to package '%s'" ), assetRef->GetAssetName().c_str(), InPath.toStdWString().c_str(), InPackage->GetName().c_str() );		
-		OutAsset	= TAssetHandle<FAsset>( assetRef, MakeSharedPtr<FAssetReference>( assetRef->GetType(), assetRef->GetGUID() ) );
+		OutAsset	= TAssetHandle<CAsset>( assetRef, MakeSharedPtr<SAssetReference>( assetRef->GetType(), assetRef->GetGUID() ) );
 		InPackage->Add( OutAsset );
 	}
 	else
@@ -140,13 +140,13 @@ FHelperAssetImporter::EImportResult FHelperAssetImporter::Import( const QString&
 	return assetRef ? IR_Seccussed : IR_Error;
 }
 
-bool FHelperAssetImporter::Reimport( const TAssetHandle<FAsset>& InAsset, std::wstring& OutError )
+bool CHelperAssetImporter::Reimport( const TAssetHandle<CAsset>& InAsset, std::wstring& OutError )
 {
 	check( InAsset.IsAssetValid() );
 	bool		bResult = false;
 
 	// If asset already is unloaded, we must exit from method
-	TSharedPtr<FAsset>		assetRef = InAsset.ToSharedPtr();
+	TSharedPtr<CAsset>		assetRef = InAsset.ToSharedPtr();
 	if ( !assetRef )
 	{
 		OutError = TEXT( "Asset already is unloaded" );
@@ -155,8 +155,8 @@ bool FHelperAssetImporter::Reimport( const TAssetHandle<FAsset>& InAsset, std::w
 
 	switch ( assetRef->GetType() )
 	{
-	case AT_Texture2D:		bResult = FTexture2DImporter::Reimport( assetRef, OutError ); break;
-	case AT_AudioBank:		bResult = FAudioBankImporter::Reimport( assetRef, OutError ); break;
+	case AT_Texture2D:		bResult = CTexture2DImporter::Reimport( assetRef, OutError ); break;
+	case AT_AudioBank:		bResult = CAudioBankImporter::Reimport( assetRef, OutError ); break;
 	
 	//
 	// Insert your asset type in this place
@@ -184,7 +184,7 @@ bool FHelperAssetImporter::Reimport( const TAssetHandle<FAsset>& InAsset, std::w
 // TEXTURE 2D
 //
 
-TSharedPtr<FTexture2D> FTexture2DImporter::Import( const std::wstring& InPath, std::wstring& OutError )
+TSharedPtr<CTexture2D> CTexture2DImporter::Import( const std::wstring& InPath, std::wstring& OutError )
 {
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
@@ -203,13 +203,13 @@ TSharedPtr<FTexture2D> FTexture2DImporter::Import( const std::wstring& InPath, s
 	}
 
 	// Import new texture 2D
-	TSharedPtr<FTexture2D>		texture2DRef = MakeSharedPtr<FTexture2D>();
+	TSharedPtr<CTexture2D>		texture2DRef = MakeSharedPtr<CTexture2D>();
 	texture2DRef->SetAssetName( filename );
 	texture2DRef->SetAssetSourceFile( InPath );
 	return Reimport( texture2DRef, OutError ) ? texture2DRef : nullptr;
 }
 
-bool FTexture2DImporter::Reimport( const TSharedPtr<FTexture2D>& InTexture2D, std::wstring& OutError )
+bool CTexture2DImporter::Reimport( const TSharedPtr<CTexture2D>& InTexture2D, std::wstring& OutError )
 {
 	check( InTexture2D );
 
@@ -227,7 +227,7 @@ bool FTexture2DImporter::Reimport( const TSharedPtr<FTexture2D>& InTexture2D, st
 	void*			data = stbi_load( TCHAR_TO_ANSI( sourceFile.c_str() ), ( int* ) &sizeX, ( int* ) &sizeY, &numComponents, 4 );
 	if ( !data )
 	{
-		OutError = FString::Format( TEXT( "Failed open file '%s'" ), sourceFile.c_str() );
+		OutError = ÑString::Format( TEXT( "Failed open file '%s'" ), sourceFile.c_str() );
 		return false;
 	}
 
@@ -246,7 +246,7 @@ bool FTexture2DImporter::Reimport( const TSharedPtr<FTexture2D>& InTexture2D, st
 // AUDIO BANK
 //
 
-TSharedPtr<FAudioBank> FAudioBankImporter::Import( const std::wstring& InPath, std::wstring& OutError )
+TSharedPtr<CAudioBank> CAudioBankImporter::Import( const std::wstring& InPath, std::wstring& OutError )
 {
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
@@ -265,20 +265,20 @@ TSharedPtr<FAudioBank> FAudioBankImporter::Import( const std::wstring& InPath, s
 	}
 
 	// Import new audio bank
-	TSharedPtr<FAudioBank>		audioBankRef = MakeSharedPtr<FAudioBank>();
+	TSharedPtr<CAudioBank>		audioBankRef = MakeSharedPtr<CAudioBank>();
 	audioBankRef->SetAssetName( filename );
 	audioBankRef->SetAssetSourceFile( InPath );
 	return Reimport( audioBankRef, OutError ) ? audioBankRef : nullptr;
 }
 
-bool FAudioBankImporter::Reimport( const TSharedPtr<FAudioBank>& InAudioBank, std::wstring& OutError )
+bool CAudioBankImporter::Reimport( const TSharedPtr<CAudioBank>& InAudioBank, std::wstring& OutError )
 {
 	check( InAudioBank );
 	InAudioBank->SetSourceOGGFile( InAudioBank->GetAssetSourceFile() );
 	return true;
 }
 
-TSharedPtr<FStaticMesh> FStaticMeshImporter::Import( const std::wstring& InPath, std::wstring& OutError )
+TSharedPtr<CStaticMesh> CStaticMeshImporter::Import( const std::wstring& InPath, std::wstring& OutError )
 {
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
@@ -297,13 +297,13 @@ TSharedPtr<FStaticMesh> FStaticMeshImporter::Import( const std::wstring& InPath,
 	}
 
 	// Import new static mesh
-	TSharedPtr<FStaticMesh>		staticMeshRef = MakeSharedPtr<FStaticMesh>();
+	TSharedPtr<CStaticMesh>		staticMeshRef = MakeSharedPtr<CStaticMesh>();
 	staticMeshRef->SetAssetName( filename );
 	staticMeshRef->SetAssetSourceFile( InPath );
 	return Reimport( staticMeshRef, OutError ) ? staticMeshRef : nullptr;
 }
 
-bool FStaticMeshImporter::Reimport( const TSharedPtr<FStaticMesh>& InStaticMesh, std::wstring& OutError )
+bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh, std::wstring& OutError )
 {
 	// Loading mesh with help Assimp
 	check( InStaticMesh );
@@ -313,16 +313,16 @@ bool FStaticMeshImporter::Reimport( const TSharedPtr<FStaticMesh>& InStaticMesh,
 		aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals | aiProcess_LimitBoneWeights | aiProcess_Triangulate );
 	if ( !aiScene )
 	{
-		OutError = FString::Format( TEXT( "Failed open static mesh file. Error: %s" ), ANSI_TO_TCHAR( aiImport.GetErrorString() ) );
+		OutError = ÑString::Format( TEXT( "Failed open static mesh file. Error: %s" ), ANSI_TO_TCHAR( aiImport.GetErrorString() ) );
 		return false;
 	}
 
 	// Fill array meshes from Assimp scene
-	FAiMeshesMap			meshes;
+	AiMeshesMap_t			meshes;
 	ProcessNode( aiScene->mRootNode, aiScene, meshes );
 	if ( meshes.empty() )
 	{
-		OutError = FString::Format( TEXT( "In file '%s' not found meshes" ), InStaticMesh->GetAssetSourceFile().c_str() );
+		OutError = ÑString::Format( TEXT( "In file '%s' not found meshes" ), InStaticMesh->GetAssetSourceFile().c_str() );
 		aiImport.FreeScene();
 		return false;
 	}
@@ -330,24 +330,24 @@ bool FStaticMeshImporter::Reimport( const TSharedPtr<FStaticMesh>& InStaticMesh,
 	// TODO BS yehor.pohuliaka - I'm not sure how correct this code is, it may need to be rewritten
 	// Go through the material ID, take the mesh and write its vertices, and indices
 	// to the shared buffer
-	std::vector< FStaticMeshVertexType >		verteces;
+	std::vector< SStaticMeshVertexType >		verteces;
 	std::vector< uint32 >						indeces;
-	std::vector< FStaticMeshSurface >			surfaces;
-	std::vector< TAssetHandle<FMaterial> >		materials;
+	std::vector< SStaticMeshSurface >			surfaces;
+	std::vector< TAssetHandle<CMaterial> >		materials;
 	for ( auto itRoot = meshes.begin(), itRootEnd = meshes.end(); itRoot != itRootEnd; ++itRoot )
 	{
-		FStaticMeshSurface							surface;
-		appMemzero( &surface, sizeof( FStaticMeshSurface ) );
+		SStaticMeshSurface							surface;
+		appMemzero( &surface, sizeof( SStaticMeshSurface ) );
 
 		surface.firstIndex = indeces.size();
 		surface.materialID = materials.size();
 
 		for ( auto itMesh = itRoot->second.begin(), itMeshEnd = itRoot->second.end(); itMesh != itMeshEnd; ++itMesh )
 		{
-			std::vector< FStaticMeshVertexType >	vertexBuffer;
-			FStaticMeshVertexType					vertex;
+			std::vector< SStaticMeshVertexType >	vertexBuffer;
+			SStaticMeshVertexType					vertex;
 			aiMesh* mesh = ( *itMesh ).mesh;
-			appMemzero( &vertex, sizeof( FStaticMeshVertexType ) );
+			appMemzero( &vertex, sizeof( SStaticMeshVertexType ) );
 
 			// Prepare the vertex buffer.
 			// If the vertices of the mesh do not fit into the buffer, then
@@ -448,12 +448,12 @@ bool FStaticMeshImporter::Reimport( const TSharedPtr<FStaticMesh>& InStaticMesh,
 	return true;
 }
 
-void FStaticMeshImporter::ProcessNode( aiNode* InNode, const aiScene* InScene, FAiMeshesMap& OutMeshes )
+void CStaticMeshImporter::ProcessNode( aiNode* InNode, const aiScene* InScene, AiMeshesMap_t& OutMeshes )
 {
 	for ( uint32 index = 0; index < InNode->mNumMeshes; ++index )
 	{
 		aiMesh* mesh = InScene->mMeshes[ InNode->mMeshes[ index ] ];
-		OutMeshes[ mesh->mMaterialIndex ].push_back( FAiMesh( InNode->mTransformation, mesh ) );
+		OutMeshes[ mesh->mMaterialIndex ].push_back( SAiMesh( InNode->mTransformation, mesh ) );
 	}
 
 	for ( uint32 index = 0; index < InNode->mNumChildren; ++index )
@@ -462,7 +462,7 @@ void FStaticMeshImporter::ProcessNode( aiNode* InNode, const aiScene* InScene, F
 	}
 }
 
-const std::vector<std::wstring>& FStaticMeshImporter::GetSupportedExtensions()
+const std::vector<std::wstring>& CStaticMeshImporter::GetSupportedExtensions()
 {
 	// If supported extension not cached - get extensions from aiImport
 	static bool								bCached = false;

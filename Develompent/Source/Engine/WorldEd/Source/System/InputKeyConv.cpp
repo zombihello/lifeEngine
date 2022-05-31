@@ -8,7 +8,7 @@
  * @ingroup WorldEd
  * Qt key info
  */
-struct FQtKeyInfo
+struct SQtKeyInfo
 {
 	Qt::Key		key;			/**< Qt key*/
 	uint32		modifiers;		/**< Modifiers of key */
@@ -16,13 +16,13 @@ struct FQtKeyInfo
 	/**
 	 * Overload operator '=='
 	 */
-	FORCEINLINE bool operator==( const FQtKeyInfo& InOther ) const
+	FORCEINLINE bool operator==( const SQtKeyInfo& InOther ) const
 	{
 		return key == InOther.key && modifiers == InOther.modifiers;
 	}
 };
 
-static FQtKeyInfo		GQtKeysToButtonCode[] =
+static SQtKeyInfo		GQtKeysToButtonCode[] =
 {
 	{ Qt::Key_unknown,			0						},			// BC_None
 	{ Qt::Key_0,				0						},			// BC_Key0
@@ -138,7 +138,7 @@ EButtonCode appQtKeyToButtonCode( Qt::Key InQtKey, uint32 InModifiers )
 {
 	for ( uint32 index = 0; index < BC_KeyCount; ++index )
 	{
-		if ( GQtKeysToButtonCode[ index ] == FQtKeyInfo{ InQtKey, InModifiers } )
+		if ( GQtKeysToButtonCode[ index ] == SQtKeyInfo{ InQtKey, InModifiers } )
 		{
 			return ( EButtonCode )index;
 		}

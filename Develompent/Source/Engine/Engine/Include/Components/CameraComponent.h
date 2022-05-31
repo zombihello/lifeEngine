@@ -16,17 +16,17 @@
   * @ingroup Engine
   * Represents a camera viewpoint and settings, such as projection type, field of view, and post-process overrides
   */
-class LCameraComponent : public LSceneComponent
+class CCameraComponent : public CSceneComponent
 {
-	DECLARE_CLASS( LCameraComponent, LSceneComponent )
+	DECLARE_CLASS( CCameraComponent, CSceneComponent )
 
 public:
-    friend class FCameraManager;
+    friend class CCameraManager;
 
 	/**
 	 * Constructor
 	 */
-	LCameraComponent();
+	CCameraComponent();
 
 	/**
 	 * Rotate camera by mouse
@@ -39,7 +39,7 @@ public:
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * Set projection mode
@@ -188,7 +188,7 @@ public:
 	 * Get camera view
 	 * @param[out] OutDesiredView Desired view info
 	 */
-	void GetCameraView( FCameraView& OutDesiredView );
+	void GetCameraView( SCameraView& OutDesiredView );
 
     /**
      * @brief Is active camera
@@ -209,8 +209,8 @@ public:
 	}
 
 private:
-    bool                            bIsActive;					/**< Is active camera. This field setted from FCameraManager::SetActiveCamera */
-	bool							bAutoViewData;				/**< Auto view data. If this flag is true, FCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic) */
+    bool                            bIsActive;					/**< Is active camera. This field setted from CCameraManager::SetActiveCamera */
+	bool							bAutoViewData;				/**< Auto view data. If this flag is true, CCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic) */
 	ECameraProjectionMode			projectionMode;				/**< Projection mode */
 	float							fieldOfView;				/**< The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode) */
 	float							orthoWidth;					/**< The desired width (in world units) of the orthographic view (ignored in Perspective mode) */
@@ -224,13 +224,13 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive operator<<( FArchive& InArchive, ECameraProjectionMode& InValue )
+FORCEINLINE CArchive operator<<( CArchive& InArchive, ECameraProjectionMode& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive operator<<( FArchive& InArchive, const ECameraProjectionMode& InValue )
+FORCEINLINE CArchive operator<<( CArchive& InArchive, const ECameraProjectionMode& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );

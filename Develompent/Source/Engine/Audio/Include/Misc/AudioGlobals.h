@@ -13,18 +13,18 @@
  * @ingroup Audio
  * Audio engine
  */
-extern class FAudioEngine			GAudioEngine;
+extern class ÑAudioEngine			GAudioEngine;
 
 /**
  * @ingroup Audio
  * Audio device
  */
-extern class FAudioDevice			GAudioDevice;
+extern class ÑAudioDevice			GAudioDevice;
 
 /**
  * @ingroup Audio
  * Audio buffer manager
  */
-extern class FAudioBufferManager	GAudioBufferManager;
+extern class ÑAudioBufferManager	GAudioBufferManager;
 
 #endif // !AUDIOGLOBALS_H

@@ -15,7 +15,7 @@
  * @ingroup WorldEd
  * @brief Editor constraints
  */
-class FEditorConstraints
+class CEditorConstraints
 {
 public:
 	enum
@@ -26,7 +26,7 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	FEditorConstraints();
+	CEditorConstraints();
 
 	/**
 	 * @brief Get current grid size

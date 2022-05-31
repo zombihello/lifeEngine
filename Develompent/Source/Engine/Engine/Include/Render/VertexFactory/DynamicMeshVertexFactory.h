@@ -17,19 +17,19 @@
   * @ingroup Engine
   * Vertex type for dynamic mesh
   */
-struct FDynamicMeshVertexType
+struct SDynamicMeshVertexType
 {
-	FVector4D		position;		/**< Position vertex */
-	FVector2D		texCoord;		/**< Texture coords */
-	FVector4D		normal;			/**< Normal */
-	FVector4D		tangent;		/**< Tangent */
-	FVector4D		binormal;		/**< Binormal */
-	FVector4D		color;			/**< Color */
+	Vector4D		position;		/**< Position vertex */
+	Vector2D		texCoord;		/**< Texture coords */
+	Vector4D		normal;			/**< Normal */
+	Vector4D		tangent;		/**< Tangent */
+	Vector4D		binormal;		/**< Binormal */
+	Vector4D		color;			/**< Color */
 
 	/**
 	 * Constructor
 	 */
-	FDynamicMeshVertexType()
+	SDynamicMeshVertexType()
 	{}
 
 	/**
@@ -42,7 +42,7 @@ struct FDynamicMeshVertexType
 	 * @param InBinormal	Binormal
 	 * @param InColor		Color
 	 */
-	FDynamicMeshVertexType( const FVector4D& InPosition, const FVector2D& InTexCoord, const FVector4D& InNormal, const FVector4D& InTangent, const FVector4D& InBinormal, const FVector4D& InColor = FVector4D( 1.f, 1.f, 1.f, 1.f ) )
+	SDynamicMeshVertexType( const Vector4D& InPosition, const Vector2D& InTexCoord, const Vector4D& InNormal, const Vector4D& InTangent, const Vector4D& InBinormal, const Vector4D& InColor = Vector4D( 1.f, 1.f, 1.f, 1.f ) )
 		: position( InPosition )
 		, texCoord( InTexCoord )
 		, normal( InNormal )
@@ -59,7 +59,7 @@ struct FDynamicMeshVertexType
 	 * @param InNormal		Normal
 	 * @param InColor		Color
 	 */
-	FDynamicMeshVertexType( const FVector4D& InPosition, const FVector2D& InTexCoord, const FVector4D& InNormal, const FVector4D& InColor = FVector4D( 1.f, 1.f, 1.f, 1.f ) )
+	SDynamicMeshVertexType( const Vector4D& InPosition, const Vector2D& InTexCoord, const Vector4D& InNormal, const Vector4D& InColor = Vector4D( 1.f, 1.f, 1.f, 1.f ) )
 		: position( InPosition )
 		, texCoord( InTexCoord )
 		, normal( InNormal )
@@ -71,7 +71,7 @@ struct FDynamicMeshVertexType
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const FDynamicMeshVertexType& InOther ) const
+	bool FORCEINLINE operator==( const SDynamicMeshVertexType& InOther ) const
 	{
 		return position == InOther.position &&
 			texCoord == InOther.texCoord &&
@@ -86,7 +86,7 @@ struct FDynamicMeshVertexType
  * @ingroup Engine
  * The dynamic mesh vertex declaration resource type
  */
-class FDynamicMeshVertexDeclaration : public FRenderResource
+class CDynamicMeshVertexDeclaration : public CRenderResource
 {
 public:
 	/**
@@ -107,28 +107,28 @@ public:
 	 * @brief Get vertex declaration RHI
 	 * @return Return vertex declaration RHI
 	 */
-	FORCEINLINE FVertexDeclarationRHIRef GetVertexDeclarationRHI()
+	FORCEINLINE VertexDeclarationRHIRef_t GetVertexDeclarationRHI()
 	{
 		return vertexDeclarationRHI;
 	}
 
 private:
-	FVertexDeclarationRHIRef		vertexDeclarationRHI;		/**< Vertex declaration RHI */
+	VertexDeclarationRHIRef_t		vertexDeclarationRHI;		/**< Vertex declaration RHI */
 };
 
 /**
  * @ingroup Engine
  * Global resource of dynamic mesh vertex declaration
  */
-extern TGlobalResource< FDynamicMeshVertexDeclaration >			GDynamicMeshVertexDeclaration;
+extern TGlobalResource< CDynamicMeshVertexDeclaration >			GDynamicMeshVertexDeclaration;
 
 /**
  * @ingroup Engine
  * Vertex factory for render dynamic meshes
  */
-class FDynamicMeshVertexFactory : public FVertexFactory
+class CDynamicMeshVertexFactory : public CVertexFactory
 {
-	DECLARE_VERTEX_FACTORY_TYPE( FDynamicMeshVertexFactory )
+	DECLARE_VERTEX_FACTORY_TYPE( CDynamicMeshVertexFactory )
 
 public:
 	enum EStreamSourceSlot
@@ -155,7 +155,7 @@ public:
 	 * @param InShaderFrequency Shader frequency
 	 * @return Return instance of vertex factory shader parameters
 	 */
-	static FVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
+	static CVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
 };
 
 #endif // !DYNAMICMESHVERTEXFACTORY_H

@@ -15,13 +15,13 @@
  * @ingroup Core
  * @brief A rectangular minimum bounding volume
  */
-class FBox
+class ÑBox
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FORCEINLINE FBox()
+	FORCEINLINE ÑBox()
 		: bIsValid( false )
 	{}
 
@@ -31,7 +31,7 @@ public:
 	 * @param InMin Min position
 	 * @param InMax Max position
 	 */
-	FORCEINLINE FBox( const FVector& InMin, const FVector& InMax )
+	FORCEINLINE ÑBox( const Vector& InMin, const Vector& InMax )
 		: minLocation( InMin ), maxLocation( InMax ), bIsValid( true )
 	{}
 
@@ -42,16 +42,16 @@ public:
 	 * @param InSize Size of AABB
 	 * @return Return created AABB
 	 */
-	static FORCEINLINE FBox BuildAABB( const FVector& InLocation, const FVector& InSize )
+	static FORCEINLINE ÑBox BuildAABB( const Vector& InLocation, const Vector& InSize )
 	{
-		return FBox( InLocation - InSize, InLocation + InSize );
+		return ÑBox( InLocation - InSize, InLocation + InSize );
 	}
 
 	/**
 	 * Get min
 	 * @return Return min
 	 */
-	FORCEINLINE const FVector& GetMin() const
+	FORCEINLINE const Vector& GetMin() const
 	{
 		return minLocation;
 	}
@@ -60,7 +60,7 @@ public:
 	 * Get max
 	 * @return Return max
 	 */
-	FORCEINLINE const FVector& GetMax() const
+	FORCEINLINE const Vector& GetMax() const
 	{
 		return maxLocation;
 	}
@@ -75,8 +75,8 @@ public:
 	}
 
 private:
-	FVector			minLocation;		/**< Min position */
-	FVector			maxLocation;		/**< Max position */
+	Vector			minLocation;		/**< Min position */
+	Vector			maxLocation;		/**< Max position */
 	bool			bIsValid;			/**< Is valid box */
 };
 

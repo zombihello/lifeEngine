@@ -73,20 +73,20 @@ public:
 	 * Set selected package
 	 * @param InPackage Package
 	 */
-	void SetPackage( FPackage* InPackage );
+	void SetPackage( CPackage* InPackage );
 
 	/**
 	 * Get selected package
 	 * @return Return selected package. If not selected returning nullptr
 	 */
-	FORCEINLINE FPackageRef GetPackage() const
+	FORCEINLINE PackageRef_t GetPackage() const
 	{
 		return package;
 	}
 
 private:
 	uint32				numItems;		/**< Number created items */
-	FPackageRef			package;		/**< Current package */
+	PackageRef_t			package;		/**< Current package */
 };
 
 #endif // !PACKAGEMODEL_H

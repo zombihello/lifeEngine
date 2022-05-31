@@ -15,7 +15,7 @@
  * @ingroup Audio
  * @brief Main class of audio engine
  */
-class FAudioEngine
+class ÑAudioEngine
 {
 public:
 	/**

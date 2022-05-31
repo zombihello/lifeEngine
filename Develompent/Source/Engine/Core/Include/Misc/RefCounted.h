@@ -17,18 +17,18 @@
  * @ingroup Core
  * @brief Object reference counting class
  */
-class FRefCounted
+class CRefCounted
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-							FRefCounted();
+							CRefCounted();
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual					~FRefCounted();
+	virtual					~CRefCounted();
 
 	/**
 	 * @brief Increment reference count

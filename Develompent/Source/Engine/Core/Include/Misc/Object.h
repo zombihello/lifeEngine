@@ -19,17 +19,17 @@
  * @param[in] TClass Class
  * @param[in] TSuperClass Super class
  * 
- * Example usage: @code DECLARE_CLASS( LClass, LObject ) @endcode
+ * Example usage: @code DECLARE_CLASS( CClass, CObject ) @endcode
  */
 #define DECLARE_CLASS( TClass, TSuperClass ) \
     private: \
-        static class LClass*        staticClass; \
+        static class CClass*        staticClass; \
     public: \
 	    typedef TClass		        ThisClass; \
 	    typedef TSuperClass	        Super; \
-        static LObject*             StaticConstructor(); \
-        static class LClass*        StaticClass(); \
-        virtual class LClass*       GetClass() const;
+        static CObject*             StaticConstructor(); \
+        static class CClass*        StaticClass(); \
+        virtual class CClass*       GetClass() const;
 
 /**
  * @ingroup Core
@@ -37,27 +37,27 @@
  * 
  * @param[in] TClass Class
  * 
- * Example usage: @code IMPLEMENT_CLASS( LObject ) @endcode
+ * Example usage: @code IMPLEMENT_CLASS( CObject ) @endcode
  */
 #define IMPLEMENT_CLASS( TClass ) \
-    LClass*     TClass::staticClass = nullptr; \
-    LObject*    TClass::StaticConstructor() \
+    CClass*     TClass::staticClass = nullptr; \
+    CObject*    TClass::StaticConstructor() \
     { \
         return new ThisClass(); \
     } \
     \
-    LClass*     TClass::StaticClass() \
+    CClass*     TClass::StaticClass() \
     { \
         if ( !staticClass ) \
         { \
             bool        isBaseClass = &ThisClass::StaticClass == &Super::StaticClass; \
-            staticClass = new LClass( TEXT( #TClass ), &ThisClass::StaticConstructor, !isBaseClass ? Super::StaticClass() : nullptr ); \
+            staticClass = new CClass( TEXT( #TClass ), &ThisClass::StaticConstructor, !isBaseClass ? Super::StaticClass() : nullptr ); \
         } \
         \
         return staticClass; \
     } \
     \
-    LClass*     TClass::GetClass() const \
+    CClass*     TClass::GetClass() const \
     { \
         return StaticClass(); \
     } \
@@ -66,7 +66,7 @@
     { \
         SRegister##TClass() \
         { \
-            LClass::StaticRegisterClass( TClass::StaticClass() ); \
+            CClass::StaticRegisterClass( TClass::StaticClass() ); \
         } \
     } GRegister##TClass;
 
@@ -74,21 +74,21 @@
  * @ingroup Core
  * @brief The base class of all objects
  */
-class LObject
+class CObject
 {
-    DECLARE_CLASS( LObject, LObject )
+    DECLARE_CLASS( CObject, CObject )
 
 public:
     /**
      * @brief Destructor
      */
-    virtual                         ~LObject() {}
+    virtual                         ~CObject() {}
 
     /**
      * @brief Serialize object
      * @param[in] InArchive Archive for serialize
      */
-    virtual void                    Serialize( class FArchive& InArchive );
+    virtual void                    Serialize( class CArchive& InArchive );
 
     /**
      * @brief Set name object
@@ -155,7 +155,7 @@ public:
      * @return Return pointer to new object
      */
     template< typename TClass >
-    static FORCEINLINE LObject*      StaticNewObject( const LClass* InClass )
+    static FORCEINLINE CObject*      StaticNewObject( const CClass* InClass )
     {
         check( InClass );
         return InClass->CreateObject< TClass >();
@@ -164,7 +164,7 @@ public:
     /**
      * Overload operator of serialization in archive
      */
-    friend FArchive& operator<<( FArchive& InArchive, LObject& InObject );
+    friend CArchive& operator<<( CArchive& InArchive, CObject& InObject );
 
 private:
     /**
@@ -173,7 +173,7 @@ private:
      * 
      * @return Return true if object is a class InClass, else returning false
      */
-    bool                            InternalIsA( const LClass* InClass ) const;
+    bool                            InternalIsA( const CClass* InClass ) const;
 
     std::wstring            name;               /**< Name object */
 };

@@ -18,61 +18,61 @@
   * @ingroup Engine
   * @brief RHI
   */
-extern class FBaseRHI*				GRHI;
+extern class CBaseRHI*					GRHI;
 
 /**
  * @ingroup Engine
  * @brief Script engine
  */
-extern class FScriptEngine*			GScriptEngine;
+extern class CScriptEngine*				GScriptEngine;
 
 /**
  * @ingroup Engine
  * @brief Shader manager
  */
-extern class FShaderManager*		GShaderManager;
+extern class CShaderManager*			GShaderManager;
 
 /**
  * @ingroup Engine
  * Cooked directory
  */
-extern std::wstring					GCookedDir;
+extern std::wstring						GCookedDir;
 
 /**
  * @ingroup Engine
  * Engine
  */
-extern class LBaseEngine*			GEngine;
+extern class CBaseEngine*				GEngine;
 
 /**
  * @ingroup Engine
  * Input system
  */
-extern class FInputSystem*			GInputSystem;
+extern class CInputSystem*				GInputSystem;
 
 /**
  * @ingroup Engine
  * World
  */
-extern class FWorld*				  GWorld;
+extern class CWorld*					GWorld;
 
 /**
  * @ingroup Engine
  * Is need use max tick rate
  */
-extern bool                     GUseMaxTickRate;
+extern bool								GUseMaxTickRate;
 
 /**
  * @ingroup Engine
  * Is allow render thread
  */
-extern bool                     GAllowRenderThread;
+extern bool								GAllowRenderThread;
 
 /**
  * @ingroup Engine
  * @brief Camera manager
  */
-extern class FCameraManager*    GCameraManager;
+extern class CCameraManager*			GCameraManager;
 
 #if WITH_EDITOR
 /**

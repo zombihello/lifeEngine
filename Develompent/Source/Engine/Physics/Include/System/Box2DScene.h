@@ -21,18 +21,18 @@
  * @ingroup Physics
  * @brief Class of PhysX scene
  */
-class FBox2DScene
+class CBox2DScene
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FBox2DScene();
+	CBox2DScene();
 
 	/**
 	 * @brief Destructor
 	 */
-	~FBox2DScene();
+	~CBox2DScene();
 
 	/**
 	 * @brief Initialize scene
@@ -55,13 +55,13 @@ public:
 	 * @brief Add body on scene
 	 * @param InBodyInstance Pointer to body instance
 	 */
-	void AddBody( class FPhysicsBodyInstance* InBodyInstance );
+	void AddBody( class CPhysicsBodyInstance* InBodyInstance );
 
 	/**
 	 * @brief Remove body from scene
 	 * @param InBodyInstance Pointer to body instance
 	 */
-	void RemoveBody( class FPhysicsBodyInstance* InBodyInstance );
+	void RemoveBody( class CPhysicsBodyInstance* InBodyInstance );
 
 	/**
 	 * @brief Remove all bodies from scene
@@ -85,7 +85,7 @@ public:
 	 * @param InCollisionQueryParams Collision query params
 	 * @return Return TRUE if a blocking hit is found, else false
 	 */
-	bool LineTraceSingleByChannel( FHitResult& OutHitResult, const FVector& InStart, const FVector& InEnd, ECollisionChannel InTraceChannel, const FCollisionQueryParams& InCollisionQueryParams = FCollisionQueryParams::defaultQueryParam );
+	bool LineTraceSingleByChannel( SHitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const SCollisionQueryParams& InCollisionQueryParams = SCollisionQueryParams::defaultQueryParam );
 
 	/**
 	 * @brief Get Box2D world
@@ -98,8 +98,8 @@ public:
 
 private:
 	b2World*																		bx2World;						/**< Box2D world */
-	std::vector< class FPhysicsBodyInstance* >										bodies;							/**< Array of bodies on scene */
-	std::unordered_map< class FPhysicsBodyInstance*, std::vector< b2Fixture* > >	fixturesMap[ CC_Max ];			/**< Map of fixtures each collision channel */
+	std::vector< class CPhysicsBodyInstance* >										bodies;							/**< Array of bodies on scene */
+	std::unordered_map< class CPhysicsBodyInstance*, std::vector< b2Fixture* > >	fixturesMap[ CC_Max ];			/**< Map of fixtures each collision channel */
 };
 #endif // WITH_BOX2D
 

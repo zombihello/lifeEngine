@@ -9,7 +9,7 @@
 /**
  * Initialize shader
  */
-void FShader::Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem )
+void CShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
 {
 	name = InShaderCacheItem.name;
 	frequency = InShaderCacheItem.frequency;
@@ -49,23 +49,23 @@ void FShader::Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem )
 	}
 }
 
-void FShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const
+void CShader::SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const
 {}
 
-void FShader::SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+void CShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {}
 
 #if WITH_EDITOR
-bool FShader::ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
+bool CShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
 	return true;
 }
 
-void FShader::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment )
+void CShader::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
 {}
 #endif // WITH_EDITOR
 
-FArchive& operator<<( FArchive& InArchive, FShader*& InValue )
+CArchive& operator<<( CArchive& InArchive, CShader*& InValue )
 {
 	if ( InArchive.IsSaving() )
 	{

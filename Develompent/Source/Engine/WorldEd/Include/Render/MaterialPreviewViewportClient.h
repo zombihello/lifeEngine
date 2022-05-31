@@ -18,19 +18,19 @@
  * @ingroup WorldEd
  * @brief Material preview viewport client
  */
-class FMaterialPreviewViewportClient : public FEditorLevelViewportClient
+class CMaterialPreviewViewportClient : public CEditorLevelViewportClient
 {
 public:
 	/**
 	 * @brief Constructor
 	 * @param InMaterial	Material
 	 */
-	FMaterialPreviewViewportClient( const TSharedPtr<FMaterial>& InMaterial );
+	CMaterialPreviewViewportClient( const TSharedPtr<CMaterial>& InMaterial );
 
 	/**
 	 * @brief Destructor
 	 */
-	~FMaterialPreviewViewportClient();
+	~CMaterialPreviewViewportClient();
 
 	/**
 	 * Update logic of viewport client
@@ -42,7 +42,7 @@ public:
 	 *
 	 * @param InViewport	Viewport
 	 */
-	virtual void Draw( FViewport* InViewport ) override;
+	virtual void Draw( CViewport* InViewport ) override;
 
 	/**
 	 * @brief Draw viewport. Must be call in render thread
@@ -50,7 +50,7 @@ public:
 	 * @param InViewportRHI		Viewport RHI
 	 * @param InSceneView		Scene view
 	 */
-	void Draw_RenderThread( FViewportRHIRef InViewportRHI, class FSceneView* InSceneView );
+	void Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView );
 
 	/**
 	 * @brief Set viewport type
@@ -62,16 +62,16 @@ public:
 	 * @brief Set preview material
 	 * @param InMaterial	Material
 	 */
-	FORCEINLINE void SetMaterial( const TSharedPtr<FMaterial>& InMaterial )
+	FORCEINLINE void SetMaterial( const TSharedPtr<CMaterial>& InMaterial )
 	{
 		material = InMaterial;
 		sphereComponent->SetMaterial( InMaterial->GetAssetHandle() );
 	}
 
 private:
-	FScene*								scene;				/**< Scene for preview material */
-	TSharedPtr<FMaterial>				material;			/**< Material */
-	TRefCountPtr< LSphereComponent >	sphereComponent;	/**< Sphere component */
+	CScene*								scene;				/**< Scene for preview material */
+	TSharedPtr<CMaterial>				material;			/**< Material */
+	TRefCountPtr< CSphereComponent >	sphereComponent;	/**< Sphere component */
 };
 
 #endif // !MATERIALPREVIEWVIEWPORTCLIENT_H

@@ -19,15 +19,15 @@
 
 /**
  * @ingroup Engine
- * @brief Reference to FSprite
+ * @brief Reference to CSprite
  */
-typedef TRefCountPtr< class FSprite >				FSpriteRef;
+typedef TRefCountPtr< class CSprite >				SpriteRef_t;
 
 /**
  * @ingroup Engine
  * Surface in sprite mesh
  */
-struct FSpriteSurface
+struct SSpriteSurface
 {
 	uint32		baseVertexIndex;		/**< First index vertex in vertex buffer */
 	uint32		firstIndex;				/**< First index */
@@ -38,7 +38,7 @@ struct FSpriteSurface
  * @ingroup Engine
  * @brief Sprite mesh data for rendering sprites
  */
-class FSpriteMesh : public FRenderResource
+class CSpriteMesh : public CRenderResource
 {
 public:
 	/**
@@ -59,16 +59,16 @@ public:
 	 * Get surface
 	 * @return Return surface info
 	 */
-	FORCEINLINE FSpriteSurface GetSurface() const
+	FORCEINLINE SSpriteSurface GetSurface() const
 	{
-		return FSpriteSurface{ 0, 0, 2 };
+		return SSpriteSurface{ 0, 0, 2 };
 	}
 
 	/**
 	 * Get RHI vertex buffer
 	 * @return Return RHI vertex buffer, if not created return nullptr
 	 */
-	FORCEINLINE FVertexBufferRHIRef GetVertexBufferRHI() const
+	FORCEINLINE VertexBufferRHIRef_t GetVertexBufferRHI() const
 	{
 		return vertexBufferRHI;
 	}
@@ -77,29 +77,29 @@ public:
 	 * Get RHI index buffer
 	 * @return Return RHI index buffer, if not created return nullptr
 	 */
-	FORCEINLINE FIndexBufferRHIRef GetIndexBufferRHI() const
+	FORCEINLINE IndexBufferRHIRef_t GetIndexBufferRHI() const
 	{
 		return indexBufferRHI;
 	}
 
 private:
-	FVertexBufferRHIRef			vertexBufferRHI;		/**< Vertex buffer RHI */
-	FIndexBufferRHIRef			indexBufferRHI;			/**< Index buffer RHI */
+	VertexBufferRHIRef_t		vertexBufferRHI;		/**< Vertex buffer RHI */
+	IndexBufferRHIRef_t			indexBufferRHI;			/**< Index buffer RHI */
 };
 
-extern TGlobalResource< FSpriteMesh >		GSpriteMesh;			/**< The global sprite mesh data for rendering sprites */
+extern TGlobalResource< CSpriteMesh >		GSpriteMesh;			/**< The global sprite mesh data for rendering sprites */
 
 /**
  * @ingroup Engine
  * @brief Implementation for sprite mesh
  */
-class FSprite : public FRenderResource, public FRefCounted
+class CSprite : public CRenderResource, public CRefCounted
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FSprite();
+	CSprite();
 
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -119,7 +119,7 @@ public:
 	 * @brief Set material
 	 * @param InMaterial Material
 	 */
-	FORCEINLINE void SetMaterial( const TAssetHandle<FMaterial>& InMaterial )
+	FORCEINLINE void SetMaterial( const TAssetHandle<CMaterial>& InMaterial )
 	{
 		material = InMaterial;
 	}
@@ -128,7 +128,7 @@ public:
 	 * Get surface
 	 * @return Return surface info
 	 */
-	FORCEINLINE FSpriteSurface GetSurface() const
+	FORCEINLINE SSpriteSurface GetSurface() const
 	{
 		return GSpriteMesh.GetSurface();
 	}
@@ -137,7 +137,7 @@ public:
 	 * @brief Get material
 	 * @return Return pointer to material. If not setted returning nullptr
 	 */
-	FORCEINLINE TAssetHandle<FMaterial> GetMaterial() const
+	FORCEINLINE TAssetHandle<CMaterial> GetMaterial() const
 	{
 		return material;
 	}
@@ -146,7 +146,7 @@ public:
 	 * Get vertex factory
 	 * @return Return vertex factory
 	 */
-	FORCEINLINE TRefCountPtr< FSpriteVertexFactory > GetVertexFactory() const
+	FORCEINLINE TRefCountPtr< CSpriteVertexFactory > GetVertexFactory() const
 	{
 		return vertexFactory;
 	}
@@ -155,7 +155,7 @@ public:
 	 * Get RHI vertex buffer
 	 * @return Return RHI vertex buffer, if not created return nullptr
 	 */
-	FORCEINLINE FVertexBufferRHIRef GetVertexBufferRHI() const
+	FORCEINLINE VertexBufferRHIRef_t GetVertexBufferRHI() const
 	{
 		return GSpriteMesh.GetVertexBufferRHI();
 	}
@@ -164,7 +164,7 @@ public:
 	 * Get RHI index buffer
 	 * @return Return RHI index buffer, if not created return nullptr
 	 */
-	FORCEINLINE FIndexBufferRHIRef GetIndexBufferRHI() const
+	FORCEINLINE IndexBufferRHIRef_t GetIndexBufferRHI() const
 	{
 		return GSpriteMesh.GetIndexBufferRHI();
 	}
@@ -173,7 +173,7 @@ public:
 	 * @brief Set texture rect
 	 * @param InTextureRect Texture rect
 	 */
-	FORCEINLINE void SetTextureRect( const FRectFloat& InTextureRect )
+	FORCEINLINE void SetTextureRect( const RectFloat_t& InTextureRect )
 	{
 		check( vertexFactory );
 		vertexFactory->SetTextureRect( InTextureRect );
@@ -183,7 +183,7 @@ public:
 	 * @brief Get texture rect
 	 * @return Return texture rect
 	 */
-	FORCEINLINE const FRectFloat& GetTextureRect() const
+	FORCEINLINE const RectFloat_t& GetTextureRect() const
 	{
 		check( vertexFactory );
 		return vertexFactory->GetTextureRect();
@@ -193,7 +193,7 @@ public:
 	 * @brief Set sprite size
 	 * @param InSpriteSize Sprite size
 	 */
-	FORCEINLINE void SetSpriteSize( const FVector2D& InSpriteSize )
+	FORCEINLINE void SetSpriteSize( const Vector2D& InSpriteSize )
 	{
 		check( vertexFactory );
 		vertexFactory->SetSpriteSize( InSpriteSize );
@@ -223,7 +223,7 @@ public:
 	 * @brief Get sprite size
 	 * @return Return sprite size
 	 */
-	FORCEINLINE const FVector2D& GetSpriteSize() const
+	FORCEINLINE const Vector2D& GetSpriteSize() const
 	{
 		check( vertexFactory );
 		return vertexFactory->GetSpriteSize();
@@ -250,8 +250,8 @@ public:
 	}
 
 private:
-	TRefCountPtr< FSpriteVertexFactory >	vertexFactory;			/**< Vertex factory */
-	TAssetHandle<FMaterial>					material;				/**< Material */
+	TRefCountPtr< CSpriteVertexFactory >	vertexFactory;			/**< Vertex factory */
+	TAssetHandle<CMaterial>					material;				/**< Material */
 };
 
 #endif // !SPRITE_H

@@ -18,17 +18,17 @@
  * @ingroup Audio
  * Runnable thread for audio stream
  */
-class FAudioStreamRunnable : public FRunnable
+class CAudioStreamRunnable : public CRunnable
 {
 public:
-	friend class FAudioStreamSource;
+	friend class CAudioStreamSource;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param InStreamSource Owner stream source
 	 */
-	FAudioStreamRunnable( FAudioStreamSource* InStreamSource );
+	CAudioStreamRunnable( CAudioStreamSource* InStreamSource );
 
 	/**
 	 * @brief Initialize
@@ -78,7 +78,7 @@ private:
 	/**
 	 * Struct of streamed chunk
 	 */
-	struct FChunk
+	struct SChunk
 	{
 		const byte*		samples;	/**< Pointer to array of samples */
 		uint32			numSamples;	/**< Number samples in array */
@@ -109,9 +109,9 @@ private:
 	 * @param OutData Output loaded data
 	 * @return Return true if seccussed loaded, else return false
 	 */
-	bool GetData( FChunk& OutData );
+	bool GetData( SChunk& OutData );
 	
-	class FAudioStreamSource*		streamSource;				/**< Stream source */
+	class CAudioStreamSource*		streamSource;				/**< Stream source */
 	uint32							alBuffers[ BufferCount ];	/**< OpenAL buffers */
 	std::vector<byte>				samples;					/**< Buffer of samples for streamed to buffers */
 };
@@ -120,20 +120,20 @@ private:
  * @ingroup Audio
  * @brief Audio stream source
  */
-class FAudioStreamSource : public FAudioSource
+class CAudioStreamSource : public CAudioSource
 {
 public:
-	friend class FAudioStreamRunnable;
+	friend class CAudioStreamRunnable;
 
 	/**
 	 * Constructor
 	 */
-	FAudioStreamSource();
+	CAudioStreamSource();
 
 	/**
 	 * Destructor
 	 */
-	~FAudioStreamSource();
+	~CAudioStreamSource();
 
 	/**
 	 * Play
@@ -160,7 +160,7 @@ public:
 	 * Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	virtual void SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank ) override;
+	virtual void SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank ) override;
 
 	/**
 	 * Is looped
@@ -179,7 +179,7 @@ private:
 	 * Open bank for stream
 	 * @param InAudioBank Audio bank
 	 */
-	void OpenBank( const TAssetHandle<FAudioBank>& InAudioBank );
+	void OpenBank( const TAssetHandle<CAudioBank>& InAudioBank );
 
 	/**
 	 * Close bank
@@ -189,11 +189,11 @@ private:
 	bool						bIsStreaming;			/**< Is streamed in this time audio */
 	bool						bIsLoop;				/**< Is need loop audio */
 	EAudioSourceStatus			status;					/**< Source audio status */
-	FAudioBankHandle			audioBankHandle;		/**< Handle to opened bank for streamed audio */
-	FAudioBankInfo				audioBankInfo;			/**< Info about opened bank */
-	mutable FCriticalSection	csStreamData;			/**< Critical section of stream data */
-	FAudioStreamRunnable*		audioStreamRunnable;	/**< Audio stream runnable */
-	FRunnableThread*			threadStreamData;		/**< Thread for streaming audio */
+	AudioBankHandle_t			audioBankHandle;		/**< Handle to opened bank for streamed audio */
+	SAudioBankInfo				audioBankInfo;			/**< Info about opened bank */
+	mutable ÑCriticalSection	csStreamData;			/**< Critical section of stream data */
+	CAudioStreamRunnable*		audioStreamRunnable;	/**< Audio stream runnable */
+	CRunnableThread*			threadStreamData;		/**< Thread for streaming audio */
 };
 
 #endif // !AUDIOSTREAMSOURCE_H

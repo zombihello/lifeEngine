@@ -13,15 +13,15 @@
 /**
  * Constructor
  */
-FWindowsArchiveReading::FWindowsArchiveReading( std::ifstream* InFile, const std::wstring& InPath )
-	: FArchive( InPath )
+CWindowsArchiveReading::CWindowsArchiveReading( std::ifstream* InFile, const std::wstring& InPath )
+	: CArchive( InPath )
 	, file( InFile )
 {}
 
 /**
  * Destructor
  */
-FWindowsArchiveReading::~FWindowsArchiveReading()
+CWindowsArchiveReading::~CWindowsArchiveReading()
 {
 	delete file;
 }
@@ -29,7 +29,7 @@ FWindowsArchiveReading::~FWindowsArchiveReading()
 /**
  * Get size of archive
  */
-uint32 FWindowsArchiveReading::GetSize()
+uint32 CWindowsArchiveReading::GetSize()
 {
 	uint32			currentPosition = ( uint32 )Tell();
 	uint32			sizeFile = 0;
@@ -44,7 +44,7 @@ uint32 FWindowsArchiveReading::GetSize()
 /**
  * Set current position in archive
  */
-void FWindowsArchiveReading::Seek( uint32 InPosition )
+void CWindowsArchiveReading::Seek( uint32 InPosition )
 {
 	file->seekg( InPosition, std::ios::beg );
 }
@@ -52,13 +52,13 @@ void FWindowsArchiveReading::Seek( uint32 InPosition )
 /**
  * Flush data
  */
-void FWindowsArchiveReading::Flush()
+void CWindowsArchiveReading::Flush()
 {}
 
 /**
  * Get current position in archive
  */
-uint32 FWindowsArchiveReading::Tell()
+uint32 CWindowsArchiveReading::Tell()
 {
 	return ( uint32 )file->tellg();
 }
@@ -66,12 +66,12 @@ uint32 FWindowsArchiveReading::Tell()
 /**
  * Serialize data
  */
-void FWindowsArchiveReading::Serialize( void* InBuffer, uint32 InSize )
+void CWindowsArchiveReading::Serialize( void* InBuffer, uint32 InSize )
 {
 	file->read( ( achar* )InBuffer, InSize );
 }
 
-bool FWindowsArchiveReading::IsEndOfFile()
+bool CWindowsArchiveReading::IsEndOfFile()
 {
 	uint32		sizeFile = GetSize();
 	return Tell() == sizeFile;
@@ -80,7 +80,7 @@ bool FWindowsArchiveReading::IsEndOfFile()
 /**
  * Is loading archive
  */
-bool FWindowsArchiveReading::IsLoading() const
+bool CWindowsArchiveReading::IsLoading() const
 {
 	return true;
 }
@@ -92,15 +92,15 @@ bool FWindowsArchiveReading::IsLoading() const
 /**
  * Constructor
  */
-FWindowsArchiveWriter::FWindowsArchiveWriter( std::ofstream* InFile, const std::wstring& InPath )
-	: FArchive( InPath )
+CWindowsArchiveWriter::CWindowsArchiveWriter( std::ofstream* InFile, const std::wstring& InPath )
+	: CArchive( InPath )
 	, file( InFile )
 {}
 
 /**
  * Destructor
  */
-FWindowsArchiveWriter::~FWindowsArchiveWriter()
+CWindowsArchiveWriter::~CWindowsArchiveWriter()
 {
 	Flush();
 	delete file;
@@ -109,7 +109,7 @@ FWindowsArchiveWriter::~FWindowsArchiveWriter()
 /**
  * Get size of archive
  */
-uint32 FWindowsArchiveWriter::GetSize()
+uint32 CWindowsArchiveWriter::GetSize()
 {
 	// Make sure that all data is written before looking at file size.
 	Flush();
@@ -127,7 +127,7 @@ uint32 FWindowsArchiveWriter::GetSize()
 /**
  * Set current position in archive
  */
-void FWindowsArchiveWriter::Seek( uint32 InPosition )
+void CWindowsArchiveWriter::Seek( uint32 InPosition )
 {
 	Flush();
 	file->seekp( InPosition, std::ios::beg );
@@ -136,7 +136,7 @@ void FWindowsArchiveWriter::Seek( uint32 InPosition )
 /**
  * Flush data
  */
-void FWindowsArchiveWriter::Flush()
+void CWindowsArchiveWriter::Flush()
 {
 	file->flush();
 }
@@ -144,7 +144,7 @@ void FWindowsArchiveWriter::Flush()
 /**
  * Get current position in archive
  */
-uint32 FWindowsArchiveWriter::Tell()
+uint32 CWindowsArchiveWriter::Tell()
 {
 	Flush();
 	return ( uint32 )file->tellp();
@@ -153,13 +153,13 @@ uint32 FWindowsArchiveWriter::Tell()
 /**
  * Serialize data
  */
-void FWindowsArchiveWriter::Serialize( void* InBuffer, uint32 InSize )
+void CWindowsArchiveWriter::Serialize( void* InBuffer, uint32 InSize )
 {
 	file->write( ( achar* )InBuffer, InSize );
 	Flush();
 }
 
-bool FWindowsArchiveWriter::IsEndOfFile()
+bool CWindowsArchiveWriter::IsEndOfFile()
 {
 	uint32		sizeFile = GetSize();
 	return Tell() == sizeFile;
@@ -168,7 +168,7 @@ bool FWindowsArchiveWriter::IsEndOfFile()
 /**
  * Is saving archive
  */
-bool FWindowsArchiveWriter::IsSaving() const
+bool CWindowsArchiveWriter::IsSaving() const
 {
 	return true;
 }

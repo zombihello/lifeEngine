@@ -8,19 +8,19 @@
 #include "Render/Scene.h"
 #include "Render/DrawingPolicy.h"
 
-FMeshDrawingPolicy::FMeshDrawingPolicy()
+CMeshDrawingPolicy::CMeshDrawingPolicy()
 	: bInit( false )
 	, depthBias( 0.f )
 	, hash( INVALID_HASH )
 {}
 
-FMeshDrawingPolicy::~FMeshDrawingPolicy()
+CMeshDrawingPolicy::~CMeshDrawingPolicy()
 {}
 
-void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, const TAssetHandle<FMaterial>& InMaterial, float InDepthBias /* = 0.f */ )
+void CMeshDrawingPolicy::InitInternal( class CVertexFactory* InVertexFactory, const TAssetHandle<CMaterial>& InMaterial, float InDepthBias /* = 0.f */ )
 {
 	// If material is not valid, we use default material
-	TSharedPtr<FMaterial>		materialRef = InMaterial.ToSharedPtr();
+	TSharedPtr<CMaterial>		materialRef = InMaterial.ToSharedPtr();
 	if ( !materialRef )
 	{
 		materialRef = GEngine->GetDefaultMaterial().ToSharedPtr();
@@ -38,7 +38,7 @@ void FMeshDrawingPolicy::InitInternal( class FVertexFactory* InVertexFactory, co
 	bInit			= true;
 }
 
-void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceContextRHI )
+void CMeshDrawingPolicy::SetRenderState( class CBaseDeviceContextRHI* InDeviceContextRHI )
 {
 	check( bInit );
 
@@ -47,11 +47,11 @@ void FMeshDrawingPolicy::SetRenderState( class FBaseDeviceContextRHI* InDeviceCo
 	GRHI->SetBoundShaderState( InDeviceContextRHI, GetBoundShaderState() );
 }
 
-void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
+void CMeshDrawingPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI )
 {
 	check( bInit );
 
-	TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
+	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
 	if ( !materialRef )
 	{
 		return;
@@ -61,10 +61,10 @@ void FMeshDrawingPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDev
 	pixelShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, materialRef );
 }
 
-void FMeshDrawingPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView )
+void CMeshDrawingPolicy::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMeshBatch, const class CSceneView& InSceneView )
 {
-	TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
-	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, FString::Format( TEXT( "Material %s" ), materialRef ? materialRef->GetAssetName().c_str() : TEXT( "Unloaded" ) ).c_str());
+	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
+	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, ÑString::Format( TEXT( "Material %s" ), materialRef ? materialRef->GetAssetName().c_str() : TEXT( "Unloaded" ) ).c_str());
 
 	// If vertex factory not support instancig - draw without it
 	if ( !vertexFactory->SupportsInstancing() )
@@ -105,16 +105,16 @@ void FMeshDrawingPolicy::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, 
 	}
 }
 
-uint64 FMeshDrawingPolicy::GetTypeHash() const
+uint64 CMeshDrawingPolicy::GetTypeHash() const
 {
 	return hash;
 }
 
-FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const
+BoundShaderStateRHIRef_t CMeshDrawingPolicy::GetBoundShaderState() const
 {
 	if ( !boundShaderState )
 	{
-		TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
+		TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
 		check( materialRef && vertexFactory && vertexShader && pixelShader );
 		
 		boundShaderState = GRHI->CreateBoundShaderState(
@@ -127,10 +127,10 @@ FBoundShaderStateRHIRef FMeshDrawingPolicy::GetBoundShaderState() const
 	return boundShaderState;
 }
 
-FRasterizerStateRHIRef FMeshDrawingPolicy::GetRasterizerState() const
+RasterizerStateRHIRef_t CMeshDrawingPolicy::GetRasterizerState() const
 {
-	TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
-	const FRasterizerStateInitializerRHI		initializer =
+	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
+	const SRasterizerStateInitializerRHI		initializer =
 	{
 		materialRef->IsWireframe() ? FM_Wireframe : FM_Solid,
 		materialRef->IsTwoSided() ? CM_None : CM_CW,
@@ -147,7 +147,7 @@ FRasterizerStateRHIRef FMeshDrawingPolicy::GetRasterizerState() const
 	return rasterizerState;
 }
 
-bool FMeshDrawingPolicy::Matches( const FMeshDrawingPolicy& InOtherDrawer ) const
+bool CMeshDrawingPolicy::Matches( const CMeshDrawingPolicy& InOtherDrawer ) const
 {
 	return
 		material == InOtherDrawer.material &&
@@ -156,7 +156,7 @@ bool FMeshDrawingPolicy::Matches( const FMeshDrawingPolicy& InOtherDrawer ) cons
 		pixelShader == InOtherDrawer.pixelShader;
 }
 
-bool FMeshDrawingPolicy::IsValid() const
+bool CMeshDrawingPolicy::IsValid() const
 {
 	return material.IsAssetValid() && vertexFactory && vertexShader && pixelShader;
 }

@@ -21,13 +21,13 @@
  * @ingroup Engine
  * @brief Class for build and draw dynamic mesh
  */
-class FDynamicMeshBuilder : public FRenderResource
+class CDynamicMeshBuilder : public CRenderResource
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FDynamicMeshBuilder();
+	CDynamicMeshBuilder();
 
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -49,9 +49,9 @@ public:
 	 * @param InVertex		Vertex
 	 * @return Return index of vertex
 	 */
-	FORCEINLINE uint32 AddVertex( const FDynamicMeshVertexType& InVertex )
+	FORCEINLINE uint32 AddVertex( const SDynamicMeshVertexType& InVertex )
 	{
-		FScopeLock	scopeLock( &readWriteCS );
+		CScopeLock	scopeLock( &readWriteCS );
 		uint32		idVertex = verteces.size();
 		verteces.push_back( InVertex );
 		return idVertex;
@@ -65,7 +65,7 @@ public:
 	 */
 	FORCEINLINE void AddTriangle( uint32 InVerId0, uint32 InVerId1, uint32 InVerId2 )
 	{
-		FScopeLock	scopeLock( &readWriteCS );
+		CScopeLock	scopeLock( &readWriteCS );
 		indeces.push_back( InVerId0 );
 		indeces.push_back( InVerId1 );
 		indeces.push_back( InVerId2 );
@@ -98,13 +98,13 @@ public:
 	 * @param InMaterial			Material
 	 * @param InSceneView			Scene view
 	 */
-	void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const FMatrix& InLocalToWorld, const TAssetHandle<FMaterial>& InMaterial, const class FSceneView& InSceneView ) const;
+	void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, const class CSceneView& InSceneView ) const;
 
 	/**
 	 * @brief Get array of verteces
 	 * @return Return array of verteces
 	 */
-	FORCEINLINE const std::vector< FDynamicMeshVertexType >& GetVerteces() const
+	FORCEINLINE const std::vector< SDynamicMeshVertexType >& GetVerteces() const
 	{
 		return verteces;
 	}
@@ -120,12 +120,12 @@ public:
 
 private:
 	uint32										numPrimitives;		/**< Number primitives in builded mesh */
-	FCriticalSection							readWriteCS;		/**< Read and write critical section */
-	std::vector< FDynamicMeshVertexType >		verteces;			/**< Array of verteces */
+	ÑCriticalSection							readWriteCS;		/**< Read and write critical section */
+	std::vector< SDynamicMeshVertexType >		verteces;			/**< Array of verteces */
 	std::vector< uint32 >						indeces;			/**< Array of indeces */
-	FVertexBufferRHIRef							vertexBufferRHI;	/**< Vertex buffer RHI */
-	FIndexBufferRHIRef							indexBufferRHI;		/**< Index buffer RHI */
-	TRefCountPtr< FDynamicMeshVertexFactory >	vertexFactory;		/**< Vertex factory */
+	VertexBufferRHIRef_t						vertexBufferRHI;	/**< Vertex buffer RHI */
+	IndexBufferRHIRef_t							indexBufferRHI;		/**< Index buffer RHI */
+	TRefCountPtr< CDynamicMeshVertexFactory >	vertexFactory;		/**< Vertex factory */
 };
 
 #endif // !DYNAMICMESHBUILDER_H

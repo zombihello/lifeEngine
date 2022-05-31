@@ -16,16 +16,16 @@
 #include "Actors/PlayerStart.h"
 #include "Widgets/LogWidget.h"
 
-IMPLEMENT_CLASS( LEditorEngine )
+IMPLEMENT_CLASS( CEditorEngine )
 
-LEditorEngine::LEditorEngine()
+CEditorEngine::CEditorEngine()
 	: mainWindow( nullptr )
 {}
 
-LEditorEngine::~LEditorEngine()
+CEditorEngine::~CEditorEngine()
 {}
 
-void LEditorEngine::Init()
+void CEditorEngine::Init()
 {
 	Super::Init();
 	GAssetDataBase.Init();
@@ -35,7 +35,7 @@ void LEditorEngine::Init()
 	mainWindow->showMaximized();
 }
 
-void LEditorEngine::Tick( float InDeltaSeconds )
+void CEditorEngine::Tick( float InDeltaSeconds )
 {
 	Super::Tick( InDeltaSeconds );
 	GWorld->Tick( InDeltaSeconds );
@@ -56,7 +56,7 @@ void LEditorEngine::Tick( float InDeltaSeconds )
 	}
 }
 
-void LEditorEngine::Shutdown()
+void CEditorEngine::Shutdown()
 {
 	Super::Shutdown();
 	GAssetDataBase.Shutdown();
@@ -69,7 +69,7 @@ void LEditorEngine::Shutdown()
 	}
 }
 
-void LEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage )
+void CEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage )
 {
 	if ( !mainWindow )
 	{
@@ -83,18 +83,18 @@ void LEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage
 	}
 }
 
-bool LEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
+bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	if ( !Super::LoadMap( InMap, OutError ) )
 	{
 		LE_LOG( LT_Warning, LC_General, TEXT( "Failed loading map '%s'. Error: %s" ), InMap.c_str(), OutError.c_str() );
-		GWorld->SpawnActor< APlayerStart >( FVector( 0.f, 0.f, 0.f ) );
+		GWorld->SpawnActor< APlayerStart >( Vector( 0.f, 0.f, 0.f ) );
 	}
 
 	return true;
 }
 
-std::wstring LEditorEngine::GetEditorName() const
+std::wstring CEditorEngine::GetEditorName() const
 {
 #if PLATFORM_WINDOWS
 #if _WIN64
@@ -106,5 +106,5 @@ std::wstring LEditorEngine::GetEditorName() const
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
 	
-	return FString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
+	return ÑString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
 }

@@ -28,7 +28,7 @@ public:
 	/**
 	 * @brief Hash function for STL containers
 	 */
-	struct FHashFunction
+	struct SHashFunction
 	{
 		/**
 		 * @brief Calculate hash of TSharedPtr
@@ -385,7 +385,7 @@ public:
 	/**
 	 * @brief Hash function for STL containers
 	 */
-	struct FHashFunction
+	struct SHashFunction
 	{
 		/**
 		 * @brief Calculate hash of TWeakPtr

@@ -58,7 +58,7 @@ enum ECompareFunction
  * @ingroup Engine
  * @brief Struct for create resterize state in RHI
  */
-struct FRasterizerStateInitializerRHI
+struct SRasterizerStateInitializerRHI
 {
 	ERasterizerFillMode			fillMode;				/**< Fill mode */
 	ERasterizerCullMode			cullMode;				/**< Cull mode */
@@ -69,7 +69,7 @@ struct FRasterizerStateInitializerRHI
 	/**
 	 * Overload operator ==
 	 */
-	FORCEINLINE bool operator==( CONST FRasterizerStateInitializerRHI& InRight ) const
+	FORCEINLINE bool operator==( const SRasterizerStateInitializerRHI& InRight ) const
 	{
 		return	fillMode == InRight.fillMode && 
 				cullMode == InRight.cullMode &&
@@ -81,7 +81,7 @@ struct FRasterizerStateInitializerRHI
 	/**
 	 * Overload operator !=
 	 */
-	FORCEINLINE bool operator!=( CONST FRasterizerStateInitializerRHI& InRight ) const
+	FORCEINLINE bool operator!=( const SRasterizerStateInitializerRHI& InRight ) const
 	{
 		return !( *this == InRight );
 	}
@@ -91,7 +91,7 @@ struct FRasterizerStateInitializerRHI
  * @ingroup Engine
  * @brief Struct for create depth state in RHI
  */
-struct FDepthStateInitializerRHI
+struct SDepthStateInitializerRHI
 {
 	bool						bEnableDepthWrite;		/**< Is eneable depth write */
 	ECompareFunction			depthTest;				/**< Depth test compare function */
@@ -101,34 +101,34 @@ struct FDepthStateInitializerRHI
  * @ingroup Engine
  * @brief Base class of resterize state
  */
-class FBaseRasterizerStateRHI : public FBaseResourceRHI
+class CBaseRasterizerStateRHI : public CBaseResourceRHI
 {
 public:
 	/**
 	 * @brief Constructor
 	 * @param InInitializer		Initializer of rasterizer state
 	 */
-	FORCEINLINE FBaseRasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer )
+	FORCEINLINE CBaseRasterizerStateRHI( const SRasterizerStateInitializerRHI& InInitializer )
 		: initializer( InInitializer )
 	{}
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FBaseRasterizerStateRHI()
+	virtual ~CBaseRasterizerStateRHI()
 	{}
 
 	/**
 	 * @brief Get initializer of rasterizer state
 	 * @return Return initializer of rasterizer state
 	 */
-	FORCEINLINE FRasterizerStateInitializerRHI GetInitializer() const
+	FORCEINLINE SRasterizerStateInitializerRHI GetInitializer() const
 	{
 		return initializer;
 	}
 
 protected:
-	FRasterizerStateInitializerRHI		initializer;		/**< nitializer of rasterizer state */
+	SRasterizerStateInitializerRHI		initializer;		/**< Initializer of rasterizer state */
 };
 
 /**
@@ -245,7 +245,7 @@ enum ESamplerMipMapLODBias
  * @ingroup Engine
  * Structc for create sampler state in RHI
  */
-struct FSamplerStateInitializerRHI
+struct SSamplerStateInitializerRHI
 {
 	ESamplerFilter			filter;						/**< Filter of sampler */
 	ESamplerAddressMode		addressU;					/**< Address mode for U coord */
@@ -261,13 +261,13 @@ struct FSamplerStateInitializerRHI
  * @ingroup Engine
  * Base class of sampler state
  */
-class FBaseSamplerStateRHI : public FBaseResourceRHI
+class CBaseSamplerStateRHI : public CBaseResourceRHI
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FBaseSamplerStateRHI()
+	virtual ~CBaseSamplerStateRHI()
 	{}
 };
 
@@ -275,13 +275,13 @@ public:
  * @ingroup Engine
  * Base class of depth state
  */
-class FBaseDepthStateRHI : public FBaseResourceRHI
+class CBaseDepthStateRHI : public CBaseResourceRHI
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FBaseDepthStateRHI()
+	virtual ~CBaseDepthStateRHI()
 	{}
 };
 
@@ -289,26 +289,26 @@ public:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, ESamplerAddressMode& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESamplerAddressMode& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ESamplerAddressMode& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESamplerAddressMode& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, ESamplerFilter& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESamplerFilter& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ESamplerFilter& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESamplerFilter& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );

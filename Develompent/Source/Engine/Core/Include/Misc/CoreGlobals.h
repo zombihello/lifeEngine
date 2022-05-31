@@ -15,44 +15,44 @@
  * @ingroup Core
  * @brief Logger
  */
-extern class FBaseLogger*			GLog;
+extern class ÑBaseLogger*			GLog;
 
 /**
  * @ingroup Core
  * @brief File system
  */
-extern class FBaseFileSystem*		GFileSystem;
+extern class CBaseFileSystem*		GFileSystem;
 
 /**
  * @ingroup Core
  * @brief Window
  */
-extern class FBaseWindow*			GWindow;
+extern class CBaseWindow*			GWindow;
 
 /**
  * @ingroup Core
  * @brief Config of engine
  */
-extern class FConfig				GEngineConfig;
+extern class CConfig				GEngineConfig;
 
 /**
  * @ingroup Core
  * @brief Config of game
  */
-extern class FConfig				GGameConfig;
+extern class CConfig				GGameConfig;
 
 /**
  * @ingroup Core
  * @brief Config of input system
  */
-extern class FConfig				GInputConfig;
+extern class CConfig				GInputConfig;
 
 #if WITH_EDITOR
 /**
  * @ingroup Core
  * @brief Config of editor
  */
-extern class FConfig				GEditorConfig;
+extern class CConfig				GEditorConfig;
 #endif // WITH_EDITOR
 
 /**
@@ -125,13 +125,13 @@ extern double						GLastTime;
  * @ingroup Core
  * Package manager
  */
-extern class FPackageManager*		GPackageManager;
+extern class CPackageManager*		GPackageManager;
 
 /**
  * @ingroup Core
  * Table of contents
  */
-extern class FTableOfContets		GTableOfContents;
+extern class CTableOfContets		GTableOfContents;
 
 /**
  * @ingroup Core

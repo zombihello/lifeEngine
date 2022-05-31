@@ -29,11 +29,11 @@ struct aiScene;
  * @ingroup WorldEd
  * Generic helper for importer assets
  */
-class FHelperAssetImporter
+class CHelperAssetImporter
 {
 public:
 	/**
-	 * Enumeration of flags for making filter supported extensions (see FHelperAssetImporter::MakeFilterOfSupportedExtensions)
+	 * Enumeration of flags for making filter supported extensions (see CHelperAssetImporter::MakeFilterOfSupportedExtensions)
 	 */
 	enum EExtensionType
 	{
@@ -76,7 +76,7 @@ public:
 	/**
 	 * Make filter for file dialog with supported extensions
 	 * 
-	 * @param InFlags		Flags for making filter (see FHelperAssetImporter::EExtensionType)
+	 * @param InFlags		Flags for making filter (see CHelperAssetImporter::EExtensionType)
 	 * @return Return generated string for using in file dialogs
 	 */
 	static QString MakeFilterOfSupportedExtensions( uint32 InFlags = ET_All );
@@ -91,7 +91,7 @@ public:
 	 * @param InIsForceImport		Is need replace already exist asset with name
 	 * @return Return imported asset, in case of fail return NULL
 	 */
-	static EImportResult Import( const QString& InPath, FPackage* InPackage, TAssetHandle<FAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport = false );
+	static EImportResult Import( const QString& InPath, CPackage* InPackage, TAssetHandle<CAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport = false );
 
 	/**
 	 * Reimport asset
@@ -100,14 +100,14 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if seccussed reimported, else FALSE
 	 */
-	static bool Reimport( const TAssetHandle<FAsset>& InAsset, std::wstring& OutError );
+	static bool Reimport( const TAssetHandle<CAsset>& InAsset, std::wstring& OutError );
 };
 
 /**
  * @ingroup WorldEd
  * Class for importer textures 2D
  */
-class FTexture2DImporter
+class CTexture2DImporter
 {
 public:
 	/**
@@ -117,7 +117,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return imported texture 2D, if failed return NULL
 	 */
-	static TSharedPtr<FTexture2D> Import( const std::wstring& InPath, std::wstring& OutError );
+	static TSharedPtr<CTexture2D> Import( const std::wstring& InPath, std::wstring& OutError );
 
 	/**
 	 * Reimport texture 2D
@@ -126,7 +126,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if seccussed reimported, else return FALSE
 	 */
-	static bool Reimport( const TSharedPtr<FTexture2D>& InTexture2D, std::wstring& OutError );
+	static bool Reimport( const TSharedPtr<CTexture2D>& InTexture2D, std::wstring& OutError );
 
 	/**
 	 * Get supported texture extensions
@@ -154,7 +154,7 @@ public:
  * @ingroup WorldEd
  * Class for importer audio banks
  */
-class FAudioBankImporter
+class CAudioBankImporter
 {
 public:
 	/**
@@ -164,7 +164,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return imported audio bank, if failed return NULL
 	 */
-	static TSharedPtr<FAudioBank> Import( const std::wstring& InPath, std::wstring& OutError );
+	static TSharedPtr<CAudioBank> Import( const std::wstring& InPath, std::wstring& OutError );
 
 	/**
 	 * Reimport audio bank
@@ -173,7 +173,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if seccussed reimported, else return FALSE
 	 */
-	static bool Reimport( const TSharedPtr<FAudioBank>& InAudioBank, std::wstring& OutError );
+	static bool Reimport( const TSharedPtr<CAudioBank>& InAudioBank, std::wstring& OutError );
 
 	/**
 	 * Get supported audio extensions
@@ -193,7 +193,7 @@ public:
  * @ingroup WorldEd
  * Class for importer static mesh
  */
-class FStaticMeshImporter
+class CStaticMeshImporter
 {
 public:
 	/**
@@ -203,7 +203,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return imported static mesh, if failed return NULL
 	 */
-	static TSharedPtr<FStaticMesh> Import( const std::wstring& InPath, std::wstring& OutError );
+	static TSharedPtr<CStaticMesh> Import( const std::wstring& InPath, std::wstring& OutError );
 
 	/**
 	 * Reimport static mesh
@@ -212,7 +212,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if seccussed reimported, else return FALSE
 	 */
-	static bool Reimport( const TSharedPtr<FStaticMesh>& InStaticMesh, std::wstring& OutError );
+	static bool Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh, std::wstring& OutError );
 
 	/**
 	 * Get supported static mesh extensions
@@ -224,12 +224,12 @@ private:
 	/**
 	 * Container for Assimp mesh
 	 */
-	struct FAiMesh
+	struct SAiMesh
 	{
 		/**
 		 * Constructor
 		 */
-		FORCEINLINE FAiMesh()
+		FORCEINLINE SAiMesh()
 		{}
 
 		/**
@@ -238,7 +238,7 @@ private:
 		 * @param InTransformation	Transform matrix
 		 * @param InMesh			Pointer to Assimp mesh
 		 */
-		FORCEINLINE FAiMesh( const aiMatrix4x4& InTransformation, struct aiMesh* InMesh )
+		FORCEINLINE SAiMesh( const aiMatrix4x4& InTransformation, struct aiMesh* InMesh )
 			: transformation( InTransformation )
 			, mesh( InMesh )
 		{}
@@ -250,7 +250,7 @@ private:
 	/**
 	 * Typedef container AiMeshes
 	 */
-	typedef std::unordered_map< uint32, std::vector<FAiMesh> >			FAiMeshesMap;
+	typedef std::unordered_map< uint32, std::vector<SAiMesh> >			AiMeshesMap_t;
 
 	/**
 	 * Fill array meshes from Assimp root scene
@@ -259,7 +259,7 @@ private:
 	 * @param[in] InScene Pointer to Assimp scene
 	 * @param[out] OutMeshes Array filled from Assimp scene
 	 */
-	static void ProcessNode( aiNode* InNode, const aiScene* InScene, FAiMeshesMap& OutMeshes );
+	static void ProcessNode( aiNode* InNode, const aiScene* InScene, AiMeshesMap_t& OutMeshes );
 };
 
 #endif // !ASSETSIMPORT_H

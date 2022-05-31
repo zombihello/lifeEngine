@@ -66,7 +66,7 @@ void appUpdateTimeAndHandleMaxTickRate()
 /**
  * Constructor
  */
-FEngineLoop::FEngineLoop() 
+CEngineLoop::CEngineLoop() 
 	: isInitialize( false )
 	, bIsFocus( true )
 {}
@@ -74,16 +74,16 @@ FEngineLoop::FEngineLoop()
 /**
  * Destructor
  */
-FEngineLoop::~FEngineLoop()
+CEngineLoop::~CEngineLoop()
 {}
 
 /**
  * Serialize configs
  */
-void FEngineLoop::SerializeConfigs()
+void CEngineLoop::SerializeConfigs()
 {
 	// Loading engine config
-	FArchive*		arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Engine.json" ) );
+	CArchive*		arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Engine.json" ) );
 	if ( arConfig )
 	{
 		GEngineConfig.Serialize( *arConfig );
@@ -120,12 +120,12 @@ void FEngineLoop::SerializeConfigs()
 
 	// Fill table for convert from text to ESurfaceType
 	{
-		std::vector< FConfigValue >		configSurfaceNames = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) ).GetArray();
+		std::vector< CConfigValue >		configSurfaceNames = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) ).GetArray();
 		for ( uint32 index = 0, count = configSurfaceNames.size(); index < count; ++index )
 		{
-			const FConfigValue&		configSurface = configSurfaceNames[ index ];
-			check( configSurface.GetType() == FConfigValue::T_Object );
-			FConfigObject			objectSurface = configSurface.GetObject();
+			const CConfigValue&		configSurface = configSurfaceNames[ index ];
+			check( configSurface.GetType() == CConfigValue::T_Object );
+			CConfigObject			objectSurface = configSurface.GetObject();
 
 			std::wstring		name		= objectSurface.GetValue( TEXT( "Name" ) ).GetString();
 			int32				surfaceID	= objectSurface.GetValue( TEXT( "ID" ) ).GetInt();
@@ -149,7 +149,7 @@ void FEngineLoop::SerializeConfigs()
 /**
  * Pre-Initialize the main loop
  */
-int32 FEngineLoop::PreInit( const tchar* InCmdLine )
+int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 {
 	GGameThreadId = appGetCurrentThreadId();
 	GGameName = ANSI_TO_TCHAR( GAMENAME );
@@ -158,7 +158,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 
 #if WITH_EDITOR
 	GIsEditor = appParseParam( InCmdLine, TEXT( "editor" ) );
-	GIsCooker = appParseParam( InCmdLine, TEXT( "CookPackages" ) ) || appParseParam( InCmdLine, TEXT( "LCookPackagesCommandlet" ) );
+	GIsCooker = appParseParam( InCmdLine, TEXT( "CookPackages" ) ) || appParseParam( InCmdLine, TEXT( "CCookPackagesCommandlet" ) );
 
 	// Are we launching a commandlet
 	{
@@ -180,8 +180,8 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 	// Loading table of contents
 	if ( !GIsCooker )
 	{
-		std::wstring	tocPath		= GCookedDir + PATH_SEPARATOR + FTableOfContets::GetNameTOC();
-		FArchive*		archiveTOC	= GFileSystem->CreateFileReader( tocPath );
+		std::wstring	tocPath		= GCookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC();
+		CArchive*		archiveTOC	= GFileSystem->CreateFileReader( tocPath );
 		if ( archiveTOC )
 		{
 			GTableOfContents.Serialize( *archiveTOC );
@@ -207,7 +207,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 
 	// Creating engine from config
 	{
-		std::wstring		classEngineName = TEXT( "LBaseEngine" );
+		std::wstring		classEngineName = TEXT( "CBaseEngine" );
 		if ( !GIsEditor )
 		{
 			classEngineName = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "Class" ) ).GetString().c_str();
@@ -219,10 +219,10 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 		}
 #endif // WITH_EDITOR
 
-		const LClass*		lclass = LClass::StaticFindClass( classEngineName.c_str() );
+		const CClass*		lclass = CClass::StaticFindClass( classEngineName.c_str() );
 		checkMsg( lclass, TEXT( "Class engine %s not found" ), classEngineName.c_str() );
 		
-		GEngine = lclass->CreateObject< LBaseEngine >();
+		GEngine = lclass->CreateObject< CBaseEngine >();
 		check( GEngine );
 	}
 
@@ -232,7 +232,7 @@ int32 FEngineLoop::PreInit( const tchar* InCmdLine )
 /**
  * Initialize the main loop
  */
-int32 FEngineLoop::Init( const tchar* InCmdLine )
+int32 CEngineLoop::Init( const tchar* InCmdLine )
 {
 	LE_LOG( LT_Log, LC_Init, TEXT( "Engine version: " ENGINE_VERSION_STRING ) );
 
@@ -254,7 +254,7 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 
 	// Parse cmd line for start commandlets
 #if WITH_EDITOR
-	if ( LBaseCommandlet::ExecCommandlet( InCmdLine, 1 ) )
+	if ( ÑBaseCommandlet::ExecCommandlet( InCmdLine, 1 ) )
 	{
 		return result;
 	}
@@ -267,8 +267,8 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 	if ( GIsEditor )
 	{
 		// Get map for loading in editor
-		FConfigValue		configEditorStartupMap = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
-		if ( configEditorStartupMap.IsA( FConfigValue::T_String ) )
+		CConfigValue		configEditorStartupMap = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
+		if ( configEditorStartupMap.IsA( CConfigValue::T_String ) )
 		{
 			map = configEditorStartupMap.GetString();
 		}
@@ -277,8 +277,8 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 #endif // WITH_EDITOR
 	{
 		// Get map for loading in game
-		FConfigValue		configGameDefaultMap = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
-		if ( configGameDefaultMap.IsA( FConfigValue::T_String ) )
+		CConfigValue		configGameDefaultMap = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
+		if ( configGameDefaultMap.IsA( CConfigValue::T_String ) )
 		{
 			map = configGameDefaultMap.GetString();
 		}
@@ -286,7 +286,7 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 
 	if ( !map.empty() )
 	{
-		appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
+		appSetSplashText( STT_StartupProgress, ÑString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
 
 		std::wstring		error;
 		bool				successed = GEngine->LoadMap( map, error );
@@ -314,7 +314,7 @@ int32 FEngineLoop::Init( const tchar* InCmdLine )
 /**
  * Process event
  */
-void FEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// Handling system events
 	GEngine->ProcessEvent( InWindowEvent );
@@ -337,7 +337,7 @@ void FEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
 /**
  * Advances main loop
  */
-void FEngineLoop::Tick()
+void CEngineLoop::Tick()
 {
 	// If we lost focus - not update engine tick
 	if ( !bIsFocus )
@@ -360,7 +360,7 @@ void FEngineLoop::Tick()
 /**
  * Performs shut down
  */
-void FEngineLoop::Exit()
+void CEngineLoop::Exit()
 {
 	StopRenderingThread();
 

@@ -17,21 +17,21 @@
   * @ingroup Engine
   * Sphere component
   */
-class LSphereComponent : public LShapeComponent
+class CSphereComponent : public CShapeComponent
 {
-	DECLARE_CLASS( LSphereComponent, LShapeComponent )
+	DECLARE_CLASS( CSphereComponent, CShapeComponent )
 
 public:
 	/**
 	 * Constructor
 	 */
-	LSphereComponent();
+	CSphereComponent();
 
 	/**
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Update the body setup parameters based on shape information
@@ -43,7 +43,7 @@ public:
 	 *
 	 * @param InSceneView Current view of scene
 	 */
-	virtual void AddToDrawList( const class FSceneView& InSceneView ) override;
+	virtual void AddToDrawList( const class CSceneView& InSceneView ) override;
 
 	/**
 	 * @brief Set SDG level
@@ -69,7 +69,7 @@ public:
 	 * @brief Set material
 	 * @param InMaterial	Material
 	 */
-	FORCEINLINE void SetMaterial( const TAssetHandle<FMaterial>& InMaterial )
+	FORCEINLINE void SetMaterial( const TAssetHandle<CMaterial>& InMaterial )
 	{
 		material = InMaterial;
 		bIsDirtyDrawingPolicyLink = true;
@@ -97,7 +97,7 @@ public:
 	 * @brief Get material
 	 * @return Return material, if not exist return NULL
 	 */
-	FORCEINLINE TAssetHandle<FMaterial> GetMaterial() const
+	FORCEINLINE TAssetHandle<CMaterial> GetMaterial() const
 	{
 		return material;
 	}
@@ -106,12 +106,12 @@ private:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLink			FDrawingPolicyLink;
+	typedef CMeshDrawList< CStaticMeshDrawPolicy >::SDrawingPolicyLink			DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
-	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLinkRef		FDrawingPolicyLinkRef;
+	typedef CMeshDrawList< CStaticMeshDrawPolicy >::DrawingPolicyLinkRef_t		DrawingPolicyLinkRef_t;
 
 	/**
 	 * @brief Adds a draw policy link in SDGs
@@ -126,9 +126,9 @@ private:
 	float						radius;					/**< Radius of sphere */
 	ESceneDepthGroup			SDGLevel;				/**< Mesh on SDG level */
 	ESceneDepthGroup			pendingSDGLevel;		/**< Pending SDG level */
-	TAssetHandle<FMaterial>		material;				/**< Material */
-	FDrawingPolicyLinkRef		drawingPolicyLink;		/**< Drawing policy link in scene */
-	const FMeshBatch*			meshBatchLink;			/**< Mesh batch in drawing policy link */
+	TAssetHandle<CMaterial>		material;				/**< Material */
+	DrawingPolicyLinkRef_t		drawingPolicyLink;		/**< Drawing policy link in scene */
+	const SMeshBatch*			meshBatchLink;			/**< Mesh batch in drawing policy link */
 };
 
 #endif // !SPHERECOMPONENT_H

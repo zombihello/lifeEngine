@@ -17,7 +17,7 @@
  * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 device context
 */
-class FD3D11DeviceContext : public FBaseDeviceContextRHI
+class CD3D11DeviceContext : public CBaseDeviceContextRHI
 {
 public:
 	/**
@@ -25,12 +25,12 @@ public:
 	 * 
 	 * @param[in] InD3D11DeviceContext Pointer to D3D11 device context
 	 */
-											FD3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext );
+											CD3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext );
 
 	/**
 	 * @brief Destructor
 	 */
-											~FD3D11DeviceContext();
+											~CD3D11DeviceContext();
 
 	/**
 	 * @brief Clear surface
@@ -38,7 +38,7 @@ public:
 	 * @param[in] InSurface Surface for rendering
 	 * @param[in] InColor Color for clearing render target
 	 */
-	virtual void							ClearSurface( FSurfaceRHIParamRef InSurface, const class FColor& InColor ) override;
+	virtual void							ClearSurface( SurfaceRHIParamRef_t InSurface, const class ÑColor& InColor ) override;
 
 	/**
 	 * Clear depth stencil
@@ -49,7 +49,7 @@ public:
 	 * @param[in] InDepthValue Clear the depth buffer with this value
 	 * @param[in] InStencilValue Clear the stencil buffer with this value
 	 */
-	virtual void							ClearDepthStencil( FSurfaceRHIParamRef InSurface, bool InIsClearDepth = true, bool InIsClearStencil = true, float InDepthValue = 1.f, uint8 InStencilValue = 0 ) override;
+	virtual void							ClearDepthStencil( SurfaceRHIParamRef_t InSurface, bool InIsClearDepth = true, bool InIsClearStencil = true, float InDepthValue = 1.f, uint8 InStencilValue = 0 ) override;
 
 	/**
 	 * @brief Get D3D11 device context

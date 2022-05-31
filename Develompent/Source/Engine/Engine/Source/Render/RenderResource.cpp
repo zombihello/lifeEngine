@@ -5,44 +5,44 @@
 #include "Misc/EngineGlobals.h"
 #include "RHI/BaseRHI.h"
 
-/** Critical section of add/remove in FRenderResource::GetResourceList */
-FORCEINLINE FCriticalSection& GetGlobalResourcesCS()
+/** Critical section of add/remove in CRenderResource::GetResourceList */
+FORCEINLINE ÑCriticalSection& GetGlobalResourcesCS()
 {
-	static FCriticalSection		globalResourcesCS;
+	static ÑCriticalSection		globalResourcesCS;
 	return globalResourcesCS;
 }
 
 /**
  * Constructor
  */
-FRenderResource::FRenderResource() :
+CRenderResource::CRenderResource() :
 	isInitialized( false )
 {}
 
 /**
  * Destructor
  */
-FRenderResource::~FRenderResource()
+CRenderResource::~CRenderResource()
 {
 	if ( !isInitialized )
 	{
 		return;
 	}
 
-	// Deleting an initialized FRenderResource will result in a crash later since it is still linked
-	//appErrorf( TEXT( "An FRenderResource was deleted without being released first!" ) );
+	// Deleting an initialized CRenderResource will result in a crash later since it is still linked
+	//appErrorf( TEXT( "An CRenderResource was deleted without being released first!" ) );
 }
 
-std::set< FRenderResource* >& FRenderResource::GetResourceList()
+std::set< CRenderResource* >& CRenderResource::GetResourceList()
 {
-	static std::set< FRenderResource* >		globalResources;
+	static std::set< CRenderResource* >		globalResources;
 	return globalResources;
 }
 
 /**
  * Update RHI resource
  */
-void FRenderResource::UpdateRHI()
+void CRenderResource::UpdateRHI()
 {
 	ReleaseRHI();
 	InitRHI();
@@ -51,7 +51,7 @@ void FRenderResource::UpdateRHI()
 /**
  * Initializes the resource
  */
-void FRenderResource::InitResource()
+void CRenderResource::InitResource()
 {
 	if ( isInitialized )
 	{
@@ -61,7 +61,7 @@ void FRenderResource::InitResource()
 	// If resource is global - add he to global list of resource
 	if ( IsGlobal() )
 	{
-		FCriticalSection&		criticalSection = GetGlobalResourcesCS();
+		ÑCriticalSection&		criticalSection = GetGlobalResourcesCS();
 		criticalSection.Lock();
 		GetResourceList().insert( this );
 		criticalSection.Unlock();
@@ -79,7 +79,7 @@ void FRenderResource::InitResource()
 /**
  * Prepares the resource for deletion
  */
-void FRenderResource::ReleaseResource()
+void CRenderResource::ReleaseResource()
 {
 	if ( !isInitialized )
 	{
@@ -89,7 +89,7 @@ void FRenderResource::ReleaseResource()
 	// If resource is global - remove he from global list of resource
 	if ( IsGlobal() )
 	{
-		FCriticalSection&		criticalSection = GetGlobalResourcesCS();
+		ÑCriticalSection&		criticalSection = GetGlobalResourcesCS();
 		criticalSection.Lock();
 		GetResourceList().erase( this );
 		criticalSection.Unlock();
@@ -107,7 +107,7 @@ void FRenderResource::ReleaseResource()
 /**
  * If the resource's RHI has been initialized, then release and reinitialize it.  Otherwise, do nothing
  */
-void FRenderResource::UpdateResource()
+void CRenderResource::UpdateResource()
 {
 	if ( !isInitialized )
 	{
@@ -119,30 +119,30 @@ void FRenderResource::UpdateResource()
 	}
 }
 
-bool FRenderResource::IsGlobal() const
+bool CRenderResource::IsGlobal() const
 {
 	return false;
 }
 
-void BeginInitResource( FRenderResource* InResource )
+void BeginInitResource( CRenderResource* InResource )
 {
-	UNIQUE_RENDER_COMMAND_ONEPARAMETER( FInitResourceCommand, FRenderResource*, resource, InResource,
+	UNIQUE_RENDER_COMMAND_ONEPARAMETER( CInitResourceCommand, CRenderResource*, resource, InResource,
 		{
 			resource->InitResource();
 		} );
 }
 
-void BeginUpdateResource( FRenderResource* InResource )
+void BeginUpdateResource( CRenderResource* InResource )
 {
-	UNIQUE_RENDER_COMMAND_ONEPARAMETER( FUpdateResourceCommand, FRenderResource*, resource, InResource,
+	UNIQUE_RENDER_COMMAND_ONEPARAMETER( CUpdateResourceCommand, CRenderResource*, resource, InResource,
 		{
 			resource->UpdateResource();
 		} );
 }
 
-void BeginReleaseResource( FRenderResource* InResource )
+void BeginReleaseResource( CRenderResource* InResource )
 {
-	UNIQUE_RENDER_COMMAND_ONEPARAMETER( FReleaseResourceCommand, FRenderResource*, resource, InResource,
+	UNIQUE_RENDER_COMMAND_ONEPARAMETER( CReleaseResourceCommand, CRenderResource*, resource, InResource,
 		{
 			resource->ReleaseResource();
 		} );

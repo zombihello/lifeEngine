@@ -9,19 +9,19 @@
 /**
  * Constructor
  */
-FWindowsFileSystem::FWindowsFileSystem()
+CWindowsFileSystem::CWindowsFileSystem()
 {}
 
 /**
  * Destructor
  */
-FWindowsFileSystem::~FWindowsFileSystem()
+CWindowsFileSystem::~CWindowsFileSystem()
 {}
 
 /**
  * Create file reader
  */
-class FArchive* FWindowsFileSystem::CreateFileReader( const std::wstring& InFileName, uint32 InFlags )
+class CArchive* CWindowsFileSystem::CreateFileReader( const std::wstring& InFileName, uint32 InFlags )
 {
 	std::ifstream*			inputFile = new std::ifstream();
 
@@ -38,13 +38,13 @@ class FArchive* FWindowsFileSystem::CreateFileReader( const std::wstring& InFile
 		return nullptr;
 	}
 
-	return new FWindowsArchiveReading( inputFile, InFileName );
+	return new CWindowsArchiveReading( inputFile, InFileName );
 }
 
 /**
  * Create file writer
  */
-class FArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& InFileName, uint32 InFlags )
+class CArchive* CWindowsFileSystem::CreateFileWriter( const std::wstring& InFileName, uint32 InFlags )
 {
 	std::ofstream*			outputFile = new std::ofstream();
 	int						flags = 0;
@@ -80,19 +80,19 @@ class FArchive* FWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 		return nullptr;
 	}
 
-	return new FWindowsArchiveWriter( outputFile, InFileName );
+	return new CWindowsArchiveWriter( outputFile, InFileName );
 }
 
 /**
  * Find files in directory
  */
-std::vector< std::wstring > FWindowsFileSystem::FindFiles( const std::wstring& InDirectory, bool InIsFiles, bool InIsDirectories )
+std::vector< std::wstring > CWindowsFileSystem::FindFiles( const std::wstring& InDirectory, bool InIsFiles, bool InIsDirectories )
 {
 	HANDLE								handle = nullptr;
 	WIN32_FIND_DATAW					data;
 	std::vector< std::wstring >			result;
 
-	handle = FindFirstFileW( FString::Format( TEXT( "%s/*" ), InDirectory.c_str() ).c_str(), &data );
+	handle = FindFirstFileW( ÑString::Format( TEXT( "%s/*" ), InDirectory.c_str() ).c_str(), &data );
 	if ( handle != INVALID_HANDLE_VALUE )
 	{
 		do
@@ -113,7 +113,7 @@ std::vector< std::wstring > FWindowsFileSystem::FindFiles( const std::wstring& I
 	return result;
 }
 
-bool FWindowsFileSystem::Delete( const std::wstring& InPath, bool InIsEvenReadOnly /* = false */ )
+bool CWindowsFileSystem::Delete( const std::wstring& InPath, bool InIsEvenReadOnly /* = false */ )
 {
 	if ( InIsEvenReadOnly )
 	{
@@ -139,11 +139,11 @@ bool FWindowsFileSystem::Delete( const std::wstring& InPath, bool InIsEvenReadOn
 	return result != 0;
 }
 
-bool FWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree )
+bool CWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree )
 {
 	if ( InIsTree )
 	{
-		return FBaseFileSystem::DeleteDirectory( InPath, InIsTree );
+		return CBaseFileSystem::DeleteDirectory( InPath, InIsTree );
 	}
 
 	bool		result = RemoveDirectoryW( InPath.c_str() );
@@ -154,7 +154,7 @@ bool FWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsT
 	return result;
 }
 
-bool FWindowsFileSystem::IsExistFile( const std::wstring& InPath, bool InIsDirectory /* = false */ )
+bool CWindowsFileSystem::IsExistFile( const std::wstring& InPath, bool InIsDirectory /* = false */ )
 {
 	DWORD		fileAttributes = GetFileAttributesW( InPath.c_str() );
 	if ( fileAttributes == INVALID_FILE_ATTRIBUTES )
@@ -173,7 +173,7 @@ bool FWindowsFileSystem::IsExistFile( const std::wstring& InPath, bool InIsDirec
 /**
  * Convert to absolute path
  */
-std::wstring FWindowsFileSystem::ConvertToAbsolutePath( const std::wstring& InPath ) const
+std::wstring CWindowsFileSystem::ConvertToAbsolutePath( const std::wstring& InPath ) const
 {
 	std::wstring		path = InPath;
 	if ( path.find( TEXT( ".." ) ) != std::wstring::npos )
@@ -187,7 +187,7 @@ std::wstring FWindowsFileSystem::ConvertToAbsolutePath( const std::wstring& InPa
 /**
  * Set current directory
  */
-void FWindowsFileSystem::SetCurrentDirectory( const std::wstring& InDirectory )
+void CWindowsFileSystem::SetCurrentDirectory( const std::wstring& InDirectory )
 {
 	SetCurrentDirectoryW( InDirectory.c_str() );
 }
@@ -195,7 +195,7 @@ void FWindowsFileSystem::SetCurrentDirectory( const std::wstring& InDirectory )
 /**
  * Get current directory
  */
-std::wstring FWindowsFileSystem::GetCurrentDirectory() const
+std::wstring CWindowsFileSystem::GetCurrentDirectory() const
 {
 	tchar		path[ MAX_PATH ];
 	::GetCurrentDirectoryW( MAX_PATH, path );

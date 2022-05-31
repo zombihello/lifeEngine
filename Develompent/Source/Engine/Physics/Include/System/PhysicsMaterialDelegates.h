@@ -16,12 +16,12 @@
  * @ingroup Physics
  * @brief Delegate for called event when physics materials is updated
  */
-DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialUpdate, const TSharedPtr<class FPhysicsMaterial>& )
+DECLARE_MULTICAST_DELEGATE( COnPhysicsMaterialUpdate, const TSharedPtr<class CPhysicsMaterial>& )
 
 /**
  * @ingroup Physics
  * @brief Delegate for called event when physics materials is destroyed
  */
-DECLARE_MULTICAST_DELEGATE( FOnPhysicsMaterialDestroyed, const TSharedPtr<class FPhysicsMaterial>& )
+DECLARE_MULTICAST_DELEGATE( COnPhysicsMaterialDestroyed, const TSharedPtr<class CPhysicsMaterial>& )
 
 #endif // !PHYSICSMATERIALDELEGATES_H

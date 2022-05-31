@@ -28,7 +28,7 @@ public:
 	 * @param InViewportClient			Viewport client
 	 * @param InDeleteViewportClient	Is need delete viewport client in destroy this widget
 	 */
-	WeViewportWidget( QWidget* InParent = nullptr, FViewportClient* InViewportClient = nullptr, bool InDeleteViewportClient = false );
+	WeViewportWidget( QWidget* InParent = nullptr, CViewportClient* InViewportClient = nullptr, bool InDeleteViewportClient = false );
 
 	/**
 	 * Destructor
@@ -47,7 +47,7 @@ public:
 	 * @param InViewportClient			Viewport client
 	 * @param InDeleteViewportClient	Is need delete viewport client in destroy this widget
 	 */
-	FORCEINLINE void SetViewportClient( FViewportClient* InViewportClient, bool InDeleteViewportClient )
+	FORCEINLINE void SetViewportClient( CViewportClient* InViewportClient, bool InDeleteViewportClient )
 	{
 		viewportClient = InViewportClient;
 		bDeleteViewportClient = InDeleteViewportClient;
@@ -58,7 +58,7 @@ public:
 	 * Get engine viewport
 	 * @return Return engine viewport
 	 */
-	FORCEINLINE const FViewport& GetViewport() const
+	FORCEINLINE const CViewport& GetViewport() const
 	{
 		return viewport;
 	}
@@ -149,8 +149,8 @@ private:
 	bool					bInTick;					/**< Is added viewport to editor engine */
 	bool					bDeleteViewportClient;		/**< Is need delete viewport client in destroy time */
 	QPoint					mousePosition;				/**< Last mouse position */
-	FViewport				viewport;					/**< Viewport of render */
-	FViewportClient*		viewportClient;				/**< Viewport client */
+	CViewport				viewport;					/**< Viewport of render */
+	CViewportClient*		viewportClient;				/**< Viewport client */
 };
 
 #endif // !VIEWPORTWIDGET_H

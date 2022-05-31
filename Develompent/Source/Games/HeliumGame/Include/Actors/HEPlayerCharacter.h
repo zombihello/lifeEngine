@@ -51,7 +51,7 @@ public:
 	 * @param InWorldDirection Direction of move in world space
 	 * @param InScale Scale of move
 	 */
-	virtual void Walk( const FVector& InWorldDirection, float InScale ) override;
+	virtual void Walk( const Vector& InWorldDirection, float InScale ) override;
 
 	/**
 	 * @brief Landed
@@ -59,11 +59,11 @@ public:
 	virtual void Landed();
 
 private:
-	TAssetHandle<FAudioBank>					walkAudioBanks[ ST_Max ];		/**< Audio banks of walking on each surface type */
-	TAssetHandle<FAudioBank>					jumpAudioBanks[ ST_Max ];		/**< Audio banks of jump on each surface type */
-	TRefCountPtr< LCameraComponent >			cameraComponent;				/**< Camera component */
-	TRefCountPtr< LSpriteComponent >			spriteComponent;				/**< Sprite component */
-	TRefCountPtr< LAudioComponent >				audioComponent;					/**< Audio component */
+	TAssetHandle<CAudioBank>					walkAudioBanks[ ST_Max ];		/**< Audio banks of walking on each surface type */
+	TAssetHandle<CAudioBank>					jumpAudioBanks[ ST_Max ];		/**< Audio banks of jump on each surface type */
+	TRefCountPtr< CCameraComponent >			cameraComponent;				/**< Camera component */
+	TRefCountPtr< CSpriteComponent >			spriteComponent;				/**< Sprite component */
+	TRefCountPtr< CAudioComponent >				audioComponent;					/**< Audio component */
 };
 
 #endif // !HEPLAYERCHARACTER_H

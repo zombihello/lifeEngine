@@ -81,7 +81,7 @@ static FORCEINLINE float TranslateMipBias( ESamplerMipMapLODBias InMipBias )
 	};
 }
 
-FD3D11StateCache::FD3D11StateCache()
+SD3D11StateCache::SD3D11StateCache()
 	: inputLayout( nullptr )
 	, vertexShader( nullptr )
 	, pixelShader( nullptr )
@@ -96,15 +96,15 @@ FD3D11StateCache::FD3D11StateCache()
 	appMemzero( &vertexBuffers, sizeof( vertexBuffers ) );
 	appMemzero( &psSamplerStates, sizeof( psSamplerStates ) );
 	appMemzero( &psShaderResourceViews, sizeof( psShaderResourceViews ) );
-	appMemzero( &indexBuffer, sizeof( FD3D11StateIndexBuffer ) );
+	appMemzero( &indexBuffer, sizeof( CD3D11StateIndexBuffer ) );
 	appMemzero( &renderTargetViews, sizeof( renderTargetViews ) );
 }
 
 /**
- * Constructor FD3D11RasterizerStateRHI
+ * Constructor CD3D11RasterizerStateRHI
  */
-FD3D11RasterizerStateRHI::FD3D11RasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer ) 
-	: FBaseRasterizerStateRHI( InInitializer )
+CD3D11RasterizerStateRHI::CD3D11RasterizerStateRHI( const SRasterizerStateInitializerRHI& InInitializer ) 
+	: CBaseRasterizerStateRHI( InInitializer )
 	, d3d11RasterizerState( nullptr )
 {
 	D3D11_RASTERIZER_DESC			d3d11RasterizerDesc;
@@ -126,7 +126,7 @@ FD3D11RasterizerStateRHI::FD3D11RasterizerStateRHI( const FRasterizerStateInitia
 		d3d11RasterizerDesc.FrontCounterClockwise	= true;
 	}
 
-	ID3D11Device*		d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
+	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
 
 #if DO_CHECK
 	HRESULT				result = d3d11Device->CreateRasterizerState( &d3d11RasterizerDesc, &d3d11RasterizerState );
@@ -137,14 +137,14 @@ FD3D11RasterizerStateRHI::FD3D11RasterizerStateRHI( const FRasterizerStateInitia
 }
 
 /**
- * Destructor FD3D11RasterizerStateRHI
+ * Destructor CD3D11RasterizerStateRHI
  */
-FD3D11RasterizerStateRHI::~FD3D11RasterizerStateRHI()
+CD3D11RasterizerStateRHI::~CD3D11RasterizerStateRHI()
 {
 	d3d11RasterizerState->Release();
 }
 
-FD3D11SamplerStateRHI::FD3D11SamplerStateRHI( const FSamplerStateInitializerRHI& InInitializer ) :
+CD3D11SamplerStateRHI::CD3D11SamplerStateRHI( const SSamplerStateInitializerRHI& InInitializer ) :
 	d3d11SamplerState( nullptr )
 {
 	D3D11_SAMPLER_DESC			d3d11SamplerDesc;
@@ -180,14 +180,14 @@ FD3D11SamplerStateRHI::FD3D11SamplerStateRHI( const FSamplerStateInitializerRHI&
 		break;
 	}
 
-	FColor		borderColor( InInitializer.borderColor );
+	ÑColor		borderColor( InInitializer.borderColor );
 	d3d11SamplerDesc.BorderColor[ 0 ] = borderColor.r;
 	d3d11SamplerDesc.BorderColor[ 1 ] = borderColor.g;
 	d3d11SamplerDesc.BorderColor[ 2 ] = borderColor.b;
 	d3d11SamplerDesc.BorderColor[ 3 ] = borderColor.a;
 	d3d11SamplerDesc.ComparisonFunc = TranslateSamplerCompareFunction( InInitializer.comparisonFunction );
 
-	ID3D11Device*		d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
+	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
 
 #if DO_CHECK
 	HRESULT				result = d3d11Device->CreateSamplerState( &d3d11SamplerDesc, &d3d11SamplerState );
@@ -197,12 +197,12 @@ FD3D11SamplerStateRHI::FD3D11SamplerStateRHI( const FSamplerStateInitializerRHI&
 #endif // DO_CHECK
 }
 
-FD3D11SamplerStateRHI::~FD3D11SamplerStateRHI()
+CD3D11SamplerStateRHI::~CD3D11SamplerStateRHI()
 {
 	d3d11SamplerState->Release();
 }
 
-FD3D11DepthStateRHI::FD3D11DepthStateRHI( const FDepthStateInitializerRHI& InInitializer )
+CD3D11DepthStateRHI::CD3D11DepthStateRHI( const SDepthStateInitializerRHI& InInitializer )
 {
 	// Init descriptor
 	D3D11_DEPTH_STENCIL_DESC		d3d11DepthStencilDesc;
@@ -212,7 +212,7 @@ FD3D11DepthStateRHI::FD3D11DepthStateRHI( const FDepthStateInitializerRHI& InIni
 	d3d11DepthStencilDesc.DepthFunc			= TranslateCompareFunction( InInitializer.depthTest );
 
 	// Create DirectX resource
-	ID3D11Device*		d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
+	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
 
 #if DO_CHECK
 	HRESULT				result = d3d11Device->CreateDepthStencilState( &d3d11DepthStencilDesc, &d3d11DepthState );
@@ -222,7 +222,7 @@ FD3D11DepthStateRHI::FD3D11DepthStateRHI( const FDepthStateInitializerRHI& InIni
 #endif // DO_CHECK
 }
 
-FD3D11DepthStateRHI::~FD3D11DepthStateRHI()
+CD3D11DepthStateRHI::~CD3D11DepthStateRHI()
 {
 	d3d11DepthState->Release();
 }

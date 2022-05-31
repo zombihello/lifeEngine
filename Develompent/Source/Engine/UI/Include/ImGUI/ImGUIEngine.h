@@ -63,18 +63,18 @@ extern void				appImGUIProcessEvent( struct SWindowEvent& InWindowEvent );
  * @ingroup UI
  * @brief Class for draw data of ImGUI
  */
-class FImGUIDrawData : public FRefCounted
+class CImGUIDrawData : public CRefCounted
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FImGUIDrawData();
+	CImGUIDrawData();
 
 	/**
 	 * Destructor
 	 */
-	~FImGUIDrawData();
+	~CImGUIDrawData();
 
 	/**
 	 * Mark buffer is free
@@ -133,14 +133,14 @@ private:
  * @ingroup UI
  * Class of update window ImGUI
  */
-class FImGUIWindow
+class ÑImGUIWindow
 {
 public:
 	/**
 	 * Constructor
 	 * @param[in] InViewport Pointer to viewport of ImGUI
 	 */
-	FImGUIWindow( ImGuiViewport* InViewport );
+	ÑImGUIWindow( ImGuiViewport* InViewport );
 
 	/**
 	 * Update ImGUI windows
@@ -158,7 +158,7 @@ public:
 
 private:
 	ImGuiViewport*						imguiViewport;									/**< Pointer to ImGUI viewport */
-	TRefCountPtr< FImGUIDrawData >		drawDataBuffers[ IMGUI_DRAWBUFFERS_COUNT ];		/**< Buffers of ImDrawData for draw. In one buffer write, from one read */
+	TRefCountPtr< CImGUIDrawData >		drawDataBuffers[ IMGUI_DRAWBUFFERS_COUNT ];		/**< Buffers of ImDrawData for draw. In one buffer write, from one read */
 	uint32								indexCurrentBuffer;								/**< Index of current buffer */
 };
 
@@ -166,18 +166,18 @@ private:
  * @ingroup UI
  * @brief Class for work with ImGUI and initialize her on platforms
  */
-class FImGUIEngine
+class ÑImGUIEngine
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-							FImGUIEngine();
+							ÑImGUIEngine();
 
 	/**
 	 * @brief Destructor
 	 */
-							~FImGUIEngine();
+							~ÑImGUIEngine();
 
 	/**
 	 * @brief Initialize ImGUI
@@ -220,7 +220,7 @@ public:
 
 private:
 	struct ImGuiContext*				imguiContext;	/**< Pointer to ImGUI context */
-	std::vector< FImGUIWindow* >		windows;		/**< Array of windows ImGUI */
+	std::vector< ÑImGUIWindow* >		windows;		/**< Array of windows ImGUI */
 };
 
 #endif // WITH_IMGUI

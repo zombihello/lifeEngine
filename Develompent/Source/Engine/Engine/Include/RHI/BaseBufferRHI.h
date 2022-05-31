@@ -30,12 +30,12 @@ enum EResourceUsageFlags
  * @ingroup Engine
  * @brief Information about a resource that is currently locked
  */
-struct FLockedData
+struct SLockedData
 {
 	/**
 	 * Constructor
 	 */
-	FLockedData() :
+	SLockedData() :
 		data( nullptr ),
 		isNeedFree( false ),
 		size( 0 ),
@@ -45,7 +45,7 @@ struct FLockedData
 	/**
 	 * Destructor
 	 */
-	~FLockedData()
+	~SLockedData()
 	{
 		if ( isNeedFree )
 		{
@@ -60,14 +60,14 @@ struct FLockedData
 	bool					isNeedFree;			/**< Need free data? */
 	uint32					size;				/**< Size of data */
 	uint32					pitch;				/**< Pitch of data */
-	FResourceRHIRef			stagingResource;	/**< Staging resource for read/write operations */
+	ResourceRHIRef_t		stagingResource;	/**< Staging resource for read/write operations */
 };
 
 /**
  * @ingroup Engine
  * @brief Base class for work with vertex buffer
  */
-class FBaseVertexBufferRHI : public FBaseResourceRHI
+class CBaseVertexBufferRHI : public CBaseResourceRHI
 {
 public:
 	/**
@@ -75,7 +75,7 @@ public:
 	 * @param[in] InUsage Usage flags
 	 * @param[in] InSize Size of buffer
 	 */
-	FBaseVertexBufferRHI( uint32 InUsage, uint32 InSize ) :
+	CBaseVertexBufferRHI( uint32 InUsage, uint32 InSize ) :
 		usage( InUsage ),
 		size( InSize )
 	{}
@@ -83,7 +83,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FBaseVertexBufferRHI()												{}
+	virtual ~CBaseVertexBufferRHI()												{}
 
 	/**
 	 * @brief Get usage flags
@@ -106,7 +106,7 @@ private:
  * @ingroup Engine
  * @brief Base class for work with index buffer
  */
-class FBaseIndexBufferRHI : public FBaseResourceRHI
+class CBaseIndexBufferRHI : public CBaseResourceRHI
 {
 public:
 	/**
@@ -115,13 +115,13 @@ public:
 	 * @param[in] InStride Stride of struct
 	 * @param[in] InSize Size of buffer
 	 */
-	FBaseIndexBufferRHI( uint32 InUsage, uint32 InStride, uint32 InSize )
+	CBaseIndexBufferRHI( uint32 InUsage, uint32 InStride, uint32 InSize )
 	{}
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FBaseIndexBufferRHI()							{}
+	virtual ~CBaseIndexBufferRHI()							{}
 
 	/**
 	 * @brief Get usage flags

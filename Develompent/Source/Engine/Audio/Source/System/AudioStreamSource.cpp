@@ -1,23 +1,23 @@
 #include "System/AudioStreamSource.h"
 #include "Logger/LoggerMacros.h"
 
-FAudioStreamRunnable::FAudioStreamRunnable( FAudioStreamSource* InStreamSource )
+CAudioStreamRunnable::CAudioStreamRunnable( CAudioStreamSource* InStreamSource )
 	: streamSource( InStreamSource )
 {}
 
-bool FAudioStreamRunnable::Init()
+bool CAudioStreamRunnable::Init()
 {
 	return true;
 }
 
-uint32 FAudioStreamRunnable::Run()
+uint32 CAudioStreamRunnable::Run()
 {
 	bool			bRequestStop = false;
 	check( streamSource );
 
 	{
 		// Check if the thread was launched is stopped
-		FScopeLock		scopeLock( &streamSource->csStreamData );
+		CScopeLock		scopeLock( &streamSource->csStreamData );
 		if ( streamSource->status == ASS_Stoped )
 		{
 			streamSource->bIsStreaming = false;
@@ -39,7 +39,7 @@ uint32 FAudioStreamRunnable::Run()
 
 	{
 		// Check if the thread was launched is paused
-		FScopeLock		scopeLock( &streamSource->csStreamData );	
+		CScopeLock		scopeLock( &streamSource->csStreamData );	
 		if ( streamSource->status == ASS_Paused )
 		{
 			alSourcePause( streamSource->GetALHandle() );
@@ -48,9 +48,9 @@ uint32 FAudioStreamRunnable::Run()
 
 	while ( true )
 	{
-		TSharedPtr<FAudioBank>		audioBankRef = streamSource->audioBank.ToSharedPtr();		// Lock audio bank for him not unloaded ahead of time
+		TSharedPtr<CAudioBank>		audioBankRef = streamSource->audioBank.ToSharedPtr();		// Lock audio bank for him not unloaded ahead of time
 		{
-			FScopeLock		scopeLock( &streamSource->csStreamData );
+			CScopeLock		scopeLock( &streamSource->csStreamData );
 			if ( !streamSource->bIsStreaming || !audioBankRef )
 			{
 				break;
@@ -68,7 +68,7 @@ uint32 FAudioStreamRunnable::Run()
 			else
 			{
 				// End streaming
-				FScopeLock		scopeLock( &streamSource->csStreamData );
+				CScopeLock		scopeLock( &streamSource->csStreamData );
 				streamSource->bIsStreaming = false;
 			}
 		}
@@ -120,13 +120,13 @@ uint32 FAudioStreamRunnable::Run()
 	return 0;
 }
 
-void FAudioStreamRunnable::Stop()
+void CAudioStreamRunnable::Stop()
 {}
 
-void FAudioStreamRunnable::Exit()
+void CAudioStreamRunnable::Exit()
 {}
 
-bool FAudioStreamRunnable::FillQueue()
+bool CAudioStreamRunnable::FillQueue()
 {	
 	// Fill and enqueue all the available buffers
 	bool			requestStop = false;
@@ -143,7 +143,7 @@ bool FAudioStreamRunnable::FillQueue()
 	return requestStop;
 }
 
-void FAudioStreamRunnable::ClearQueue()
+void CAudioStreamRunnable::ClearQueue()
 {
 	// Get the number of buffers still in the queue
 	ALint			queued;
@@ -157,12 +157,12 @@ void FAudioStreamRunnable::ClearQueue()
 	}
 }
 
-bool FAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
+bool CAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 {
 	bool		requestStop = false;
 
 	// Acquire audio data, also address EOF and error cases if they occur
-	FChunk		data = { nullptr, 0 };
+	SChunk		data = { nullptr, 0 };
 	for ( uint32 retryCount = 0; !GetData( data ) && retryCount < BufferRetries; ++retryCount )
 	{
 		// Check if the stream must loop or stop
@@ -194,10 +194,10 @@ bool FAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 	return requestStop;
 }
 
-bool FAudioStreamRunnable::GetData( FChunk& OutData )
+bool CAudioStreamRunnable::GetData( SChunk& OutData )
 {
-	FScopeLock	scopeLock( &streamSource->csStreamData );
-	TSharedPtr<FAudioBank>		audioBankRef	= streamSource->audioBank.ToSharedPtr();
+	CScopeLock	scopeLock( &streamSource->csStreamData );
+	TSharedPtr<CAudioBank>		audioBankRef	= streamSource->audioBank.ToSharedPtr();
 	uint32						toFill			= samples.size();
 	uint64						currentOffset	= audioBankRef->GetOffsetBankPCM( streamSource->audioBankHandle );
 	uint64						numSamples		= streamSource->audioBankInfo.numSamples;
@@ -217,7 +217,7 @@ bool FAudioStreamRunnable::GetData( FChunk& OutData )
 	return OutData.numSamples != 0 && currentOffset != numSamples;
 }
 
-FAudioStreamSource::FAudioStreamSource()
+CAudioStreamSource::CAudioStreamSource()
 	: bIsStreaming( false )
 	, bIsLoop( false )
 	, status( ASS_Stoped )
@@ -226,7 +226,7 @@ FAudioStreamSource::FAudioStreamSource()
 	, threadStreamData( nullptr )
 {}
 
-FAudioStreamSource::~FAudioStreamSource()
+CAudioStreamSource::~CAudioStreamSource()
 {
 	if ( audioBankHandle )
 	{
@@ -234,14 +234,14 @@ FAudioStreamSource::~FAudioStreamSource()
 	}
 }
 
-void FAudioStreamSource::Play()
+void CAudioStreamSource::Play()
 {
 	bool					isStreaming = false;
 	EAudioSourceStatus		status = ASS_Stoped;
 
 	// Getting values state
 	{
-		FScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &csStreamData );
 		isStreaming		= bIsStreaming;
 		status			= this->status;
 	}
@@ -250,7 +250,7 @@ void FAudioStreamSource::Play()
 	// If sound is streaming and thread state is ASS_Playing - restart play sound
 	if ( isStreaming && status == ASS_Paused )
 	{
-		FScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &csStreamData );
 		this->status = ASS_Playing;
 		alSourcePlay( GetALHandle() );
 		return;
@@ -263,15 +263,15 @@ void FAudioStreamSource::Play()
 	// Start thread for streaming data
 	bIsStreaming		= true;
 	this->status		= ASS_Playing;
-	audioStreamRunnable = new FAudioStreamRunnable( this );
+	audioStreamRunnable = new CAudioStreamRunnable( this );
 	threadStreamData	= GThreadFactory->CreateThread( audioStreamRunnable, TEXT( "AudioStream" ), true, true, 0, TP_Normal );
 }
 
-void FAudioStreamSource::Pause()
+void CAudioStreamSource::Pause()
 {
 	// Set state to ASS_Paused
 	{
-		FScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &csStreamData );
 		if ( !bIsStreaming )
 		{
 			return;
@@ -282,11 +282,11 @@ void FAudioStreamSource::Pause()
 	alSourcePause( GetALHandle() );
 }
 
-void FAudioStreamSource::Stop()
+void CAudioStreamSource::Stop()
 {
 	// Request the thread to terminate
 	{
-		FScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &csStreamData );
 		bIsStreaming	= false;
 	}
 
@@ -299,19 +299,19 @@ void FAudioStreamSource::Stop()
 	}
 
 	// Move to the beginning
-	TSharedPtr<FAudioBank>		audioBankRef = audioBank.ToSharedPtr();
+	TSharedPtr<CAudioBank>		audioBankRef = audioBank.ToSharedPtr();
 	if ( audioBankHandle && audioBankRef )
 	{
 		audioBankRef->SeekBankPCM( audioBankHandle, 0 );
 	}
 }
 
-void FAudioStreamSource::SetLoop( bool InIsLoop )
+void CAudioStreamSource::SetLoop( bool InIsLoop )
 {
 	bIsLoop = InIsLoop;
 }
 
-void FAudioStreamSource::OpenBank( const TAssetHandle<FAudioBank>& InAudioBank )
+void CAudioStreamSource::OpenBank( const TAssetHandle<CAudioBank>& InAudioBank )
 {
 	// If already opened bank - close
 	if ( audioBankHandle )
@@ -320,7 +320,7 @@ void FAudioStreamSource::OpenBank( const TAssetHandle<FAudioBank>& InAudioBank )
 	}
 
 	// If new bank is nullptr - exit from method
-	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
+	TSharedPtr<CAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
 	if ( !audioBankRef )
 	{
 		return;
@@ -339,7 +339,7 @@ void FAudioStreamSource::OpenBank( const TAssetHandle<FAudioBank>& InAudioBank )
 	}
 }
 
-void FAudioStreamSource::CloseBank()
+void CAudioStreamSource::CloseBank()
 {
 	if ( !audioBankHandle )
 	{
@@ -348,7 +348,7 @@ void FAudioStreamSource::CloseBank()
 
 	Stop();
 	{
-		TSharedPtr<FAudioBank>		audioBankRef = audioBank.ToSharedPtr();
+		TSharedPtr<CAudioBank>		audioBankRef = audioBank.ToSharedPtr();
 		if ( audioBankRef )
 		{
 			audioBankRef->CloseBank( audioBankHandle );
@@ -357,7 +357,7 @@ void FAudioStreamSource::CloseBank()
 	audioBankHandle = nullptr;
 }
 
-void FAudioStreamSource::SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank )
+void CAudioStreamSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 {
 	// If bank opened - close
 	if ( audioBankHandle )
@@ -374,12 +374,12 @@ void FAudioStreamSource::SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBa
 	audioBank = InAudioBank;
 }
 
-bool FAudioStreamSource::IsLooped() const
+bool CAudioStreamSource::IsLooped() const
 {
 	return bIsLoop;
 }
 
-EAudioSourceStatus FAudioStreamSource::GetStatus() const
+EAudioSourceStatus CAudioStreamSource::GetStatus() const
 {
 	ALint			alStatus = 0;
 	alGetSourcei( GetALHandle(), AL_SOURCE_STATE, &alStatus );
@@ -391,7 +391,7 @@ EAudioSourceStatus FAudioStreamSource::GetStatus() const
 	case AL_STOPPED:
 	default:
 	{
-		FScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &csStreamData );
 		if ( bIsStreaming )
 		{
 			return status;

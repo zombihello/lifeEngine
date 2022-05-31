@@ -21,13 +21,13 @@
  * @ingroup Audio
  * @brief Typedef of handle opened audio bank
  */
-typedef void*											FAudioBankHandle;
+typedef void*											AudioBankHandle_t;
 
 /**
  * @ingroup Audio
  * @brief Audio bank info
  */
-struct FAudioBankInfo
+struct SAudioBankInfo
 {
 	ESampleFormat		format;			/**< Sample format */
 	uint32				rate;			/**< Rate */
@@ -39,25 +39,25 @@ struct FAudioBankInfo
  * @ingroup Audio
  * @brief Audio bank
  */
-class FAudioBank : public FAsset, public TSharedFromThis<FAudioBank>
+class CAudioBank : public CAsset, public TSharedFromThis<CAudioBank>
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FAudioBank();
+	CAudioBank();
 
 	/**
 	 * Destructor
 	 */
-	~FAudioBank();
+	~CAudioBank();
 
 	/**
 	 * Serialize
 	 *
 	 * @param[in] InArchive Archive
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * Open bank
@@ -65,14 +65,14 @@ public:
 	 * @param OutBankInfo Output parameter, return info about bank
 	 * @return Return handle of opened bank. If failed return nullptr
 	 */
-	FAudioBankHandle OpenBank( FAudioBankInfo& OutBankInfo );
+	AudioBankHandle_t OpenBank( SAudioBankInfo& OutBankInfo );
 
 	/**
 	 * Close bank
 	 * 
 	 * @param InBankHandle Handle to opened bank
 	 */
-	FORCEINLINE void CloseBank( FAudioBankHandle InBankHandle )
+	FORCEINLINE void CloseBank( AudioBankHandle_t InBankHandle )
 	{
 		CloseBankInternal( InBankHandle );
 	} 
@@ -85,7 +85,7 @@ public:
 	 * @param InMaxSize Max size (in bytes) of destination buffer
 	 * @return Return number readed bytes
 	 */
-	uint64 ReadBankPCM( FAudioBankHandle InBankHandle, byte* InSamples, uint64 InMaxSize );
+	uint64 ReadBankPCM( AudioBankHandle_t InBankHandle, byte* InSamples, uint64 InMaxSize );
 
 	/**
 	 * Seek PCM in bank
@@ -93,7 +93,7 @@ public:
 	 * @param InBankHandle Handle to opened bank
 	 * @param InSampleOffset Offset in PCM of bank
 	 */
-	void SeekBankPCM( FAudioBankHandle InBankHandle, uint64 InSampleOffset );
+	void SeekBankPCM( AudioBankHandle_t InBankHandle, uint64 InSampleOffset );
 
 	/**
 	 * Get PCM offset in bank
@@ -101,7 +101,7 @@ public:
 	 * @param InBankHandle Handle to opened bank
 	 * @return Return current offset PCM in bank
 	 */
-	uint64 GetOffsetBankPCM( FAudioBankHandle InBankHandle ) const;
+	uint64 GetOffsetBankPCM( AudioBankHandle_t InBankHandle ) const;
 
 #if WITH_EDITOR
 	/**
@@ -126,7 +126,7 @@ public:
 	 * Get audio buffer
 	 * @return Return audio buffer, if failed return nullptr
 	 */
-	FAudioBufferRef GetAudioBuffer();
+	AudioBufferRef_t GetAudioBuffer();
 
 private:
 	/**
@@ -135,13 +135,13 @@ private:
 	 * @param InBankHandle			Handle to opened bank
 	 * @param InNeedFreeFromList	If setted TRUE method remove item of opened handle from 'openedHandles'
 	 */
-	void CloseBankInternal( FAudioBankHandle InBankHandle, bool InNeedFreeFromList = true );
+	void CloseBankInternal( AudioBankHandle_t InBankHandle, bool InNeedFreeFromList = true );
 
 	uint64							offsetToRawData;	/**< Offset in archive to raw data */
 	uint64							rawDataSize;		/**< Size in bytes of raw data */
 	std::wstring					pathToArchive;		/**< Path to archive */
-	FAudioBufferRef					audioBuffer;		/**< Audio buffer with fully loaded bank. Used only by FAudioSource */
-	std::list<FAudioBankHandle>		openedHandles;		/**< List opened handles of this audio bank */
+	AudioBufferRef_t					audioBuffer;		/**< Audio buffer with fully loaded bank. Used only by CAudioSource */
+	std::list<AudioBankHandle_t>		openedHandles;		/**< List opened handles of this audio bank */
 
 #if WITH_EDITOR
 	std::vector<byte>	rawData;			/**< Raw data of Ogg/Vorbis file */
@@ -152,9 +152,9 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FAudioBank>& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CAudioBank>& InValue )
 {
-	TAssetHandle<FAsset>	asset = InValue;
+	TAssetHandle<CAsset>	asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -164,10 +164,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FAudioBank>&
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TAssetHandle<FAudioBank>& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CAudioBank>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( TAssetHandle<FAsset> )InValue;
+	InArchive << ( TAssetHandle<CAsset> )InValue;
 	return InArchive;
 }
 

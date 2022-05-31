@@ -16,7 +16,7 @@
   * @ingroup Core
   * @brief Class for work with string
   */
-class FString
+class ÑString
 {
 public:
 	/**

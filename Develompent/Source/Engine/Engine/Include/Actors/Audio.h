@@ -35,20 +35,20 @@ public:
 	 * @param InCooker Pointer to cooker for cook any resources if need
 	 * @return Return if properties inited succeed and all resources cooked is succeed, else return false
 	 */
-	virtual bool InitProperties( const std::vector< FActorVar >& InActorVars, class LCookPackagesCommandlet* InCooker ) override;
+	virtual bool InitProperties( const std::vector< CActorVar >& InActorVars, class CCookPackagesCommandlet* InCooker ) override;
 #endif // WITH_EDITOR
 
 	/**
 	 * Get audio component
 	 * @return Return audio component
 	 */
-	FORCEINLINE TRefCountPtr< LAudioComponent > GetAudioComponent() const
+	FORCEINLINE TRefCountPtr< CAudioComponent > GetAudioComponent() const
 	{
 		return audioComponent;
 	}
 
 private:
-	TRefCountPtr< LAudioComponent >			audioComponent;		/**< Audio component */
+	TRefCountPtr< CAudioComponent >			audioComponent;		/**< Audio component */
 };
 
 #endif // !AAUDIO_H

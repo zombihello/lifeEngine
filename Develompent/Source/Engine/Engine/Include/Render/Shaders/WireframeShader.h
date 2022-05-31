@@ -16,20 +16,20 @@
  * @ingroup Engine
  * @brief Class of wireframe vertex shader
  */
-class FWireframeVertexShader : public FShader
+class CWireframeVertexShader : public CShader
 {
-	DECLARE_SHADER_TYPE( FWireframeVertexShader )
+	DECLARE_SHADER_TYPE( CWireframeVertexShader )
 
 public:
 	/**
-	 * @brief Construct a new FWireframeVertexShader object
+	 * @brief Construct a new CWireframeVertexShader object
 	 */
-	FWireframeVertexShader();
+	CWireframeVertexShader();
 
     /**
-     * @brief Destructor of a FWireframeVertexShader object
+     * @brief Destructor of a CWireframeVertexShader object
      */
-    virtual ~FWireframeVertexShader();
+    virtual ~CWireframeVertexShader();
 
 #if WITH_EDITOR
 	/**
@@ -39,14 +39,14 @@ public:
 	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
 	 * @return Return true if need compile shader, else returning false
 	 */
-	static bool ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType = nullptr );
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );
 #endif // WITH_EDITOR
 
 	/**
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem ) override;
+	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
 
 	/**
 	 * @brief Set the constant shader parameters
@@ -55,7 +55,7 @@ public:
 	 * @param InVertexFactory Vertex factory
 	 * @param InMaterialResource Material
 	 */
-	virtual void SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const;
+	virtual void SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const;
 
 	/**
 	 * @brief Set the l2w transform shader
@@ -67,19 +67,19 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 private:
-	class FVertexFactoryShaderParameters*		vertexFactoryParameters;		/**< Vertex factory shader parameters */
+	class CVertexFactoryShaderParameters*		vertexFactoryParameters;		/**< Vertex factory shader parameters */
 };
 
 /**
  * @ingroup Engine
  * @brief Class of wireframe pixel shader
  */
-class FWireframePixelShader : public FShader
+class CWireframePixelShader : public CShader
 {
-	DECLARE_SHADER_TYPE( FWireframePixelShader )
+	DECLARE_SHADER_TYPE( CWireframePixelShader )
 
 public:
 #if WITH_EDITOR
@@ -90,14 +90,14 @@ public:
 	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
 	 * @return Return true if need compile shader, else returning false
 	 */
-	static bool ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType = nullptr );
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );
 #endif // WITH_EDITOR
 
 	/**
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem ) override;
+	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
 
 	/**
 	 * @brief Set the constant shader parameters
@@ -106,10 +106,10 @@ public:
 	 * @param InVertexFactory Vertex factory
 	 * @param InMaterialResource Material
 	 */
-	virtual void SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const;
+	virtual void SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const;
 
 private:
-	FShaderParameter			wireframeColorParameter;		/**< Wireframe color parameter */
+	CShaderParameter			wireframeColorParameter;		/**< Wireframe color parameter */
 };
 
 #endif // !WIREFRAMESHADER_H

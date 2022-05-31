@@ -33,7 +33,7 @@ public:
 	 * @param InMaterial	Material to edit
 	 * @param InParent		Parent widget
 	 */
-	WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InMaterial, QWidget* InParent = nullptr );
+	WeMaterialEditorWindow( const TSharedPtr<CMaterial>& InMaterial, QWidget* InParent = nullptr );
 
 	/**
 	 * Destructor
@@ -46,7 +46,7 @@ signals:
 	 * 
 	 * @param InAsset		Changed asset
 	 */
-	void OnChangedAsset( const TSharedPtr<FAsset>& InAsset );
+	void OnChangedAsset( const TSharedPtr<CAsset>& InAsset );
 
 private slots:
 	//
@@ -75,25 +75,25 @@ private:
 	 * @param InAssets	Array of assets to delete
 	 * @param OutResult Result, we can is delete this assets?
 	 */
-	void OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, struct FCanDeleteAssetResult& OutResult );
+	void OnAssetsCanDelete( const std::vector< TSharedPtr<class CAsset> >& InAssets, struct SCanDeleteAssetResult& OutResult );
 
 	/**
 	 * Called event when asset is reloaded
 	 * @param InAssets	Array of reloaded assets
 	 */
-	void OnAssetsReloaded( const std::vector< TSharedPtr<class FAsset> >& InAssets );
+	void OnAssetsReloaded( const std::vector< TSharedPtr<class CAsset> >& InAssets );
 
 	bool													bInit;						/**< Is inited window */
 	Ui::WeMaterialEditorWindow*								ui;							/**< Qt UI */
-	TSharedPtr<FMaterial>									material;					/**< Editable asset */
+	TSharedPtr<CMaterial>									material;					/**< Editable asset */
 	class QCheckBox*										checkBox_isTwoSided;		/**< Check box of is two sided */
 	class QCheckBox*										checkBox_isWireframe;		/**< Check box of is wireframe */
 	class QCheckBox*										checkBox_staticMesh;		/**< Check box of static mesh */
 	class QCheckBox*										checkBox_sprite;			/**< Check box of sprite */
 	class WeSelectAssetWidget*								selectAsset_diffuse;		/**< Widget for select asset (diffuse texture) */
-	class FMaterialPreviewViewportClient*					viewportClient;				/**< Viewport client */
-	FEditorDelegates::FOnAssetsCanDelete::FDelegateType*	assetsCanDeleteHandle;		/**< Handle delegate of assets can delete */
-	FEditorDelegates::FOnAssetsReloaded::FDelegateType*		assetsReloadedHandle;		/**< Handle delegate of reloaded assets */
+	class CMaterialPreviewViewportClient*					viewportClient;				/**< Viewport client */
+	SEditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;		/**< Handle delegate of assets can delete */
+	SEditorDelegates::COnAssetsReloaded::DelegateType_t*		assetsReloadedHandle;		/**< Handle delegate of reloaded assets */
 };
 
 #endif // MATERIALEDITORWINDOW_H

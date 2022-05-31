@@ -39,7 +39,7 @@ public:
 	virtual void BeginPlay() override;
 
 private:
-	TRefCountPtr< LStaticMeshComponent >			staticMeshComponent;		/**< Static mesh component */
+	TRefCountPtr< CStaticMeshComponent >			staticMeshComponent;		/**< Static mesh component */
 };
 
 #endif // !ASTATICMESH_H

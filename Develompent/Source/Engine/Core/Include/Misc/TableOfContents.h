@@ -20,7 +20,7 @@
  * @ingroup Core
  * Class for working with table of contents
  */
-class FTableOfContets
+class CTableOfContets
 {
 public:
 	/**
@@ -28,7 +28,7 @@ public:
 	 * 
 	 * @param InArchive Archive
 	 */
-	void Serialize( FArchive& InArchive );
+	void Serialize( CArchive& InArchive );
 
 	/**
 	 * Clear table
@@ -52,10 +52,10 @@ public:
 	 * @param InName Name of the package
 	 * @param InPath Path to the package
 	 */
-	FORCEINLINE void AddEntry( const FGuid& InGUID, const std::wstring& InName, const std::wstring& InPath )
+	FORCEINLINE void AddEntry( const CGuid& InGUID, const std::wstring& InName, const std::wstring& InPath )
 	{
-		nameEntries.insert( std::make_pair( InName, FTOCEntry{ InName, InPath } ) );
-		guidEntries.insert( std::make_pair( InGUID, FTOCEntry{ InName, InPath } ) );
+		nameEntries.insert( std::make_pair( InName, STOCEntry{ InName, InPath } ) );
+		guidEntries.insert( std::make_pair( InGUID, STOCEntry{ InName, InPath } ) );
 	}
 
 	/**
@@ -68,7 +68,7 @@ public:
 	 * Remove a package from the TOC at runtime
 	 * @param InGUID	GUID of the package
 	 */
-	FORCEINLINE void RemoveEntry( const FGuid& InGUID )
+	FORCEINLINE void RemoveEntry( const CGuid& InGUID )
 	{
 		auto	it = guidEntries.find( InGUID );
 		if ( it == guidEntries.end() )
@@ -95,7 +95,7 @@ public:
 	 * @param InGUID GUID of the package
 	 * @return Return path to the package by GUID, if not found returning empty string
 	 */
-	FORCEINLINE std::wstring GetPackagePath( const FGuid& InGUID ) const
+	FORCEINLINE std::wstring GetPackagePath( const CGuid& InGUID ) const
 	{
 		auto	itEntry = guidEntries.find( InGUID );
 		if ( itEntry != guidEntries.end() )
@@ -145,14 +145,14 @@ private:
 	/**
 	 * TOC entry
 	 */
-	struct FTOCEntry
+	struct STOCEntry
 	{
 		std::wstring		name;		/**< Name of entry */
 		std::wstring		path;		/**< Path to entry */
 	};
 
-	std::unordered_map< std::wstring, FTOCEntry >					nameEntries;			/**< Entries of table content. Key - Name of the package, Item - Path to package */
-	std::unordered_map< FGuid, FTOCEntry, FGuid::FGuidKeyFunc >		guidEntries;			/**< Entries of table content. Key - GUID of the package, Item - Path to package */
+	std::unordered_map< std::wstring, STOCEntry >					nameEntries;			/**< Entries of table content. Key - Name of the package, Item - Path to package */
+	std::unordered_map< CGuid, STOCEntry, CGuid::SGuidKeyFunc >		guidEntries;			/**< Entries of table content. Key - GUID of the package, Item - Path to package */
 };
 
 #endif // !TABLEOFCONTENTS_H

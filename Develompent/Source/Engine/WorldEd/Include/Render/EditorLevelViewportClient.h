@@ -19,7 +19,7 @@
  * @ingroup WorldEd
  * @brief Editor level viewport client
  */
-class FEditorLevelViewportClient : public FViewportClient
+class CEditorLevelViewportClient : public CViewportClient
 {
 public:
 	/**
@@ -27,7 +27,7 @@ public:
 	 * 
 	 * @param InViewportType		Viewport type
 	 */
-	FEditorLevelViewportClient( ELevelViewportType InViewportType = LVT_Perspective );
+	CEditorLevelViewportClient( ELevelViewportType InViewportType = LVT_Perspective );
 
 	/**
 	 * Update logic of viewport client
@@ -39,7 +39,7 @@ public:
 	 *
 	 * @param InViewport	Viewport
 	 */
-	virtual void Draw( FViewport* InViewport ) override;
+	virtual void Draw( CViewport* InViewport ) override;
 
 	/**
 	 * @brief Draw viewport. Must be call in render thread
@@ -47,7 +47,7 @@ public:
 	 * @param InViewportRHI		Viewport RHI
 	 * @param InSceneView		Scene view
 	 */
-	void Draw_RenderThread( FViewportRHIRef InViewportRHI, class FSceneView* InSceneView );
+	void Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView );
 
 	/**
 	 * @brief Process event
@@ -90,25 +90,25 @@ protected:
 	 * @param InViewport		Viewport
 	 * @return Return scene view
 	 */
-	virtual class FSceneView* CalcSceneView( FViewport* InViewport );
+	virtual class CSceneView* CalcSceneView( CViewport* InViewport );
 
 	/**
 	 * @brief Get background color
 	 * @return Return background color
 	 */
-	virtual FColor GetBackgroundColor() const;
+	virtual ÑColor GetBackgroundColor() const;
 
 	bool						bSetListenerPosition;	/**< Is need sets the listener position */
 	bool						bIsTracking;			/**< Is mouse tracking */
 	bool						bIgnoreInput;			/**< Is need ignore input events */
 	ELevelViewportType			viewportType;			/**< Viewport type */	
-	FVector						viewLocation;			/**< Viewport location */	
-	FRotator					viewRotation;			/**< Viewport orientation. Valid only for perspective projections */
+	Vector						viewLocation;			/**< Viewport location */	
+	CRotator					viewRotation;			/**< Viewport orientation. Valid only for perspective projections */
 	float						viewFOV;				/**< Viewport horizontal field of view */
 	float						orthoZoom;				/**< Zoom in ortho viewport type */
 	float						cameraSpeed;			/**< Camera speed (only for perspective projections) */
-	EShowFlags					showFlags;				/**< Show flags */
-	FEditorCommonDrawHelper		drawHelper;				/**< Draw helper */
+	ShowFlags_t					showFlags;				/**< Show flags */
+	CEditorCommonDrawHelper		drawHelper;				/**< Draw helper */
 	byte						cameraMoveFlags;		/**< Camera move flags */
 };
 

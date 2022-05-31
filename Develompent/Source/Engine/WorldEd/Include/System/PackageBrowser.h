@@ -58,7 +58,7 @@ public:
 	 * Set selected package
 	 * @param InPackage Package
 	 */
-	FORCEINLINE void SetPackage( FPackage* InPackage )
+	FORCEINLINE void SetPackage( CPackage* InPackage )
 	{
 		check( packageModel );
 		packageModel->SetPackage( InPackage );
@@ -68,7 +68,7 @@ public:
 	 * Get selected package
 	 * @return Return selected package. If not selected returning nullptr
 	 */
-	FORCEINLINE FPackageRef GetPackage() const
+	FORCEINLINE PackageRef_t GetPackage() const
 	{
 		check( packageModel );
 		return packageModel->GetPackage();

@@ -22,11 +22,11 @@
  * @ingroup WorldEd
  * Asset data base
  */
-class FAssetDataBase
+class CAssetDataBase
 {
 public:
-	friend class FPackage;
-	friend class FPackageManager;
+	friend class CPackage;
+	friend class CPackageManager;
 
 	/**
 	 * Init data base
@@ -52,7 +52,7 @@ public:
 	 */
 	FORCEINLINE std::wstring GetGameContentDir() const
 	{
-		return FString::Format( TEXT( "%s/Content/" ), appGameDir().c_str() );
+		return ÑString::Format( TEXT( "%s/Content/" ), appGameDir().c_str() );
 	}
 
 	/**
@@ -61,7 +61,7 @@ public:
 	 */
 	FORCEINLINE std::wstring GetEngineContentDir() const
 	{
-		return FString::Format( TEXT( "%s/Engine/Content/" ), appBaseDir().c_str() );
+		return ÑString::Format( TEXT( "%s/Engine/Content/" ), appBaseDir().c_str() );
 	}
 
 private:

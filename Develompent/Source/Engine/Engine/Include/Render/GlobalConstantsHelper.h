@@ -19,6 +19,6 @@
  * @param[out] OutGlobalContents Output global constant buffer
  * @param[in] InSceneView Scene view info
  */
-void SetGlobalConstants( FGlobalConstantBufferContents& OutGlobalContents, const FSceneView& InSceneView );
+void SetGlobalConstants( SGlobalConstantBufferContents& OutGlobalContents, const CSceneView& InSceneView );
 
 #endif // !GLOBALCONSTANTSHELPER_H

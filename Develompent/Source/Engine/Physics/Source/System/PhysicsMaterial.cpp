@@ -2,8 +2,8 @@
 #include "System/PhysicsEngine.h"
 #include "System/PhysicsMaterial.h"
 
-FPhysicsMaterial::FPhysicsMaterial()
-	: FAsset( AT_PhysicsMaterial )
+CPhysicsMaterial::CPhysicsMaterial()
+	: CAsset( AT_PhysicsMaterial )
 	, staticFriction( 0.f )
 	, dynamicFriction( 0.f )
 	, restitution( 0.f )
@@ -11,15 +11,15 @@ FPhysicsMaterial::FPhysicsMaterial()
 	, surfaceType( ST_Default )
 {}
 
-FPhysicsMaterial::~FPhysicsMaterial()
+CPhysicsMaterial::~CPhysicsMaterial()
 {
 	onPhysicsMaterialDestroyed.Broadcast( SharedThis( this ) );
-	FPhysicsInterface::ReleaseMaterial( handle );
+	CPhysicsInterface::ReleaseMaterial( handle );
 }
 
-void FPhysicsMaterial::Serialize( class FArchive& InArchive )
+void CPhysicsMaterial::Serialize( class CArchive& InArchive )
 {
-	FAsset::Serialize( InArchive );
+	CAsset::Serialize( InArchive );
 	InArchive << staticFriction;
 	InArchive << dynamicFriction;
 	InArchive << restitution;
@@ -28,6 +28,6 @@ void FPhysicsMaterial::Serialize( class FArchive& InArchive )
 
 	if ( InArchive.IsLoading() )
 	{
-		FPhysicsInterface::UpdateMaterial( handle, SharedThis( this ) );
+		CPhysicsInterface::UpdateMaterial( handle, SharedThis( this ) );
 	}
 }

@@ -49,7 +49,7 @@ extern physx::PxPvd*					GPhysXVisualDebugger;
  * @ingroup Physics
  * Physics scene
  */
-extern class FPhysXScene				GPhysicsScene;
+extern class CPhysXScene				GPhysicsScene;
 #endif // WITH_PHYSX
 
 #endif // !PHYSXGLOBALS_H

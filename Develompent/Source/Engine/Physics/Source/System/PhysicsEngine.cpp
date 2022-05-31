@@ -43,18 +43,18 @@ FORCEINLINE ECollisionResponse TextToECollisionResponse( const std::wstring& InS
 	return CR_Max;
 }
 
-FPhysicsEngine::FPhysicsEngine()
+CPhysicsEngine::CPhysicsEngine()
 {}
 
-FPhysicsEngine::~FPhysicsEngine()
+CPhysicsEngine::~CPhysicsEngine()
 {
 	Shutdown();
 }
 
-void FPhysicsEngine::Init()
+void CPhysicsEngine::Init()
 {
 	// Init physics interface
-	FPhysicsInterface::Init();
+	CPhysicsInterface::Init();
 
 	// Init physics scene
 	GPhysicsScene.Init();
@@ -64,11 +64,11 @@ void FPhysicsEngine::Init()
 		// Loading default material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
-			FConfigValue		configDefaultPhysMaterial = GEngineConfig.GetValue( TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
+			CConfigValue		configDefaultPhysMaterial = GEngineConfig.GetValue( TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
 			if ( configDefaultPhysMaterial.IsValid() )
 			{
 				std::wstring			pathAsset = configDefaultPhysMaterial.GetString();
-				TAssetHandle<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
+				TAssetHandle<CAsset>	asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
 					defaultPhysMaterial = asset;
@@ -87,8 +87,8 @@ void FPhysicsEngine::Init()
 		// If default physics material not loaded we create in virtual package
 		if ( !defaultPhysMaterial.IsAssetValid() )
 		{
-			FPackageRef						package = GPackageManager->LoadPackage( TEXT( "" ), true );
-			TSharedPtr<FPhysicsMaterial>	physMaterial = MakeSharedPtr<FPhysicsMaterial>();
+			PackageRef_t					package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			TSharedPtr<CPhysicsMaterial>	physMaterial = MakeSharedPtr<CPhysicsMaterial>();
 
 			defaultPhysMaterial		= physMaterial->GetAssetHandle();
 			package->Add( defaultPhysMaterial );
@@ -97,30 +97,30 @@ void FPhysicsEngine::Init()
 
 	// Load collision profiles
 	{
-		FConfigValue		configCollisionProfiles = GEngineConfig.GetValue( TEXT( "Physics.Physics" ), TEXT( "CollisionProfiles" ) );
+		CConfigValue		configCollisionProfiles = GEngineConfig.GetValue( TEXT( "Physics.Physics" ), TEXT( "CollisionProfiles" ) );
 		if ( configCollisionProfiles.IsValid() )
 		{
-			check( configCollisionProfiles.GetType() == FConfigValue::T_Array );
-			std::vector< FConfigValue >		arrayCollisionProfiles = configCollisionProfiles.GetArray();
+			check( configCollisionProfiles.GetType() == CConfigValue::T_Array );
+			std::vector< CConfigValue >		arrayCollisionProfiles = configCollisionProfiles.GetArray();
 
 			for ( uint32 index = 0, count = arrayCollisionProfiles.size(); index < count; ++index )
 			{
-				const FConfigValue&		configCollisionProfile = arrayCollisionProfiles[ index ];
-				check( configCollisionProfile.GetType() == FConfigValue::T_Object );
-				FConfigObject			objectCollisionProfile = configCollisionProfile.GetObject();
+				const CConfigValue&		configCollisionProfile = arrayCollisionProfiles[ index ];
+				check( configCollisionProfile.GetType() == CConfigValue::T_Object );
+				CConfigObject			objectCollisionProfile = configCollisionProfile.GetObject();
 
-				FCollisionProfile		collisionProfile;
+				SCollisionProfile		collisionProfile;
 				collisionProfile.name = objectCollisionProfile.GetValue( TEXT( "Name" ) ).GetString();
 
 				std::wstring		objectType = objectCollisionProfile.GetValue( TEXT( "ObjectType" ) ).GetString();
 				collisionProfile.objectType = TextToECollisionChannel( objectType );
 
-				std::vector< FConfigValue >		arrayCollisionResponses = objectCollisionProfile.GetValue( TEXT( "CollisionResponses" ) ).GetArray();
+				std::vector< CConfigValue >		arrayCollisionResponses = objectCollisionProfile.GetValue( TEXT( "CollisionResponses" ) ).GetArray();
 				for ( uint32 indexResponse = 0, countResponse = arrayCollisionResponses.size(); indexResponse < countResponse; ++indexResponse )
 				{
-					const FConfigValue&		configCollisionResponse = arrayCollisionResponses[ indexResponse ];
-					check( configCollisionResponse.GetType() == FConfigValue::T_Object );
-					FConfigObject			objectCollisionResponse = configCollisionResponse.GetObject();
+					const CConfigValue&		configCollisionResponse = arrayCollisionResponses[ indexResponse ];
+					check( configCollisionResponse.GetType() == CConfigValue::T_Object );
+					CConfigObject			objectCollisionResponse = configCollisionResponse.GetObject();
 
 					std::wstring			name = objectCollisionResponse.GetValue( TEXT( "Name" ) ).GetString();
 					std::wstring			value = objectCollisionResponse.GetValue( TEXT( "Value" ) ).GetString();
@@ -137,15 +137,15 @@ void FPhysicsEngine::Init()
 	}
 }
 
-void FPhysicsEngine::Tick( float InDeltaTime )
+void CPhysicsEngine::Tick( float InDeltaTime )
 {
 	GPhysicsScene.Tick( InDeltaTime );
 }
 
-void FPhysicsEngine::Shutdown()
+void CPhysicsEngine::Shutdown()
 {
 	// Free allocated memory
 	GPhysicsScene.Shutdown();
 	defaultPhysMaterial.Reset();
-	FPhysicsInterface::Shutdown();
+	CPhysicsInterface::Shutdown();
 }

@@ -1,8 +1,8 @@
 #include "Components/AudioComponent.h"
 
-IMPLEMENT_CLASS( LAudioComponent )
+IMPLEMENT_CLASS( CAudioComponent )
 
-LAudioComponent::LAudioComponent()
+CAudioComponent::CAudioComponent()
 	: bIsLoop( false )
 	, bIsUISound( false )
 	, bIsAutoPlay( false )
@@ -12,12 +12,12 @@ LAudioComponent::LAudioComponent()
 	, minDistance( 1.f )
 	, attenuation( 1.f )
 	, source( nullptr )
-	, oldSourceLocation( FMath::vectorZero )
+	, oldSourceLocation( SMath::vectorZero )
 {
 	UpdateAudioSourceType();
 }
 
-LAudioComponent::~LAudioComponent()
+CAudioComponent::~CAudioComponent()
 {
 	if ( source )
 	{
@@ -25,7 +25,7 @@ LAudioComponent::~LAudioComponent()
 	}
 }
 
-void LAudioComponent::Serialize( class FArchive& InArchive )
+void CAudioComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );	
 	InArchive << bIsLoop;
@@ -45,7 +45,7 @@ void LAudioComponent::Serialize( class FArchive& InArchive )
 	}
 }
 
-void LAudioComponent::BeginPlay()
+void CAudioComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -62,19 +62,19 @@ void LAudioComponent::BeginPlay()
 	}
 	else
 	{
-		oldSourceLocation = FMath::vectorZero;
+		oldSourceLocation = SMath::vectorZero;
 	}
 	source->SetLocation( oldSourceLocation );
 }
 
-void LAudioComponent::TickComponent( float InDeltaTime )
+void CAudioComponent::TickComponent( float InDeltaTime )
 {
 	Super::TickComponent( InDeltaTime );
 
 	// If audio component is moved - update audio source location if this not UI sound
 	if ( !bIsUISound )
 	{
-		FVector		location = GetComponentLocation();
+		Vector		location = GetComponentLocation();
 		if ( location != oldSourceLocation )
 		{
 			oldSourceLocation = location;
@@ -83,7 +83,7 @@ void LAudioComponent::TickComponent( float InDeltaTime )
 	}
 }
 
-void LAudioComponent::UpdateAudioSourceType()
+void CAudioComponent::UpdateAudioSourceType()
 {
 	// If source is valid - we getting current status and free allocated memory
 	EAudioSourceStatus		status = ASS_Stoped;
@@ -96,12 +96,12 @@ void LAudioComponent::UpdateAudioSourceType()
 	// If bIsStreamable is true - this audio is stream source
 	if ( bIsStreamable )
 	{
-		source = new FAudioStreamSource();
+		source = new CAudioStreamSource();
 	}
 	// Else this simple audio source
 	else
 	{
-		source = new FAudioSource();
+		source = new CAudioSource();
 	}
 
 	// Reset set all values to source

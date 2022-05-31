@@ -20,15 +20,15 @@
  * @ingroup Engine
  * Class of base engine
  */
-class LBaseEngine : public LObject
+class CBaseEngine : public CObject
 {
-	DECLARE_CLASS( LBaseEngine, LObject )
+	DECLARE_CLASS( CBaseEngine, CObject )
 
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~LBaseEngine() {}
+	virtual ~CBaseEngine() {}
 
 	/**
 	 * Initialize engine
@@ -73,7 +73,7 @@ public:
 	 * Get default texture
 	 * @return Return default texture
 	 */
-	FORCEINLINE TAssetHandle<FTexture2D> GetDefaultTexture() const
+	FORCEINLINE TAssetHandle<CTexture2D> GetDefaultTexture() const
 	{
 		return defaultTexture;
 	}
@@ -82,7 +82,7 @@ public:
 	 * Get default material
 	 * @return Return default material
 	 */
-	FORCEINLINE TAssetHandle<FMaterial> GetDefaultMaterial() const
+	FORCEINLINE TAssetHandle<CMaterial> GetDefaultMaterial() const
 	{
 		return defaultMaterial;
 	}
@@ -92,18 +92,18 @@ public:
 	 * Get default wireframe material
 	 * @return Return default wireframe material
 	 */
-	FORCEINLINE TAssetHandle<FMaterial> GetDefaultWireframeMaterial() const
+	FORCEINLINE TAssetHandle<CMaterial> GetDefaultWireframeMaterial() const
 	{
 		return defaultWireframeMaterial;
 	}
 #endif // WITH_EDITOR
 
 protected:
-	TAssetHandle<FTexture2D>		defaultTexture;					/**< Default texture */
-	TAssetHandle<FMaterial>			defaultMaterial;				/**< Default material */
+	TAssetHandle<CTexture2D>		defaultTexture;					/**< Default texture */
+	TAssetHandle<CMaterial>			defaultMaterial;				/**< Default material */
 
 #if WITH_EDITOR
-	TAssetHandle<FMaterial>			defaultWireframeMaterial;		/**< Default wireframe material */
+	TAssetHandle<CMaterial>			defaultWireframeMaterial;		/**< Default wireframe material */
 #endif // WITH_EDITOR
 };
 

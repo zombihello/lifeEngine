@@ -6,8 +6,8 @@
 #include "Render/Scene.h"
 #include "RHI/BaseRHI.h"
 
-/* Maps members of EPixelFormat to a FPixelFormatInfo describing the format */
-FPixelFormatInfo		GPixelFormats[ PF_Max ] =
+/* Maps members of EPixelFormat to a SPixelFormatInfo describing the format */
+SPixelFormatInfo		GPixelFormats[ PF_Max ] =
 {
 	// Name						BlockSizeX	BlockSizeY	BlockSizeZ	BlockBytes	NumComponents	PlatformFormat	Flags			Supported		EngineFormat
 
@@ -22,25 +22,25 @@ FPixelFormatInfo		GPixelFormats[ PF_Max ] =
 /** Offset to center of the pixel */
 float			GPixelCenterOffset		= 0.5f;
 
-void DrawDenormalizedQuad( class FBaseDeviceContextRHI* InDeviceContextRHI, float InX, float InY, float InSizeX, float InSizeY, float InU, float InV, float InSizeU, float InSizeV, uint32 InTargetSizeX, uint32 InTargetSizeY, uint32 InTextureSizeX, uint32 InTextureSizeY, float InClipSpaceQuadZ )
+void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, float InX, float InY, float InSizeX, float InSizeY, float InU, float InV, float InSizeU, float InSizeV, uint32 InTargetSizeX, uint32 InTargetSizeY, uint32 InTextureSizeX, uint32 InTextureSizeY, float InClipSpaceQuadZ )
 {
 	// Set up the vertices
-	FSimpleElementVertexType		vertices[ 4 ];
+	SSimpleElementVertexType		vertices[ 4 ];
 
-	vertices[ 0 ].position		= FVector4D( InX,			InY,			InClipSpaceQuadZ, 1.f );
-	vertices[ 1 ].position		= FVector4D( InX + InSizeX,	InY,			InClipSpaceQuadZ, 1.f );
-	vertices[ 2 ].position		= FVector4D( InX,			InY + InSizeY,	InClipSpaceQuadZ, 1.f );
-	vertices[ 3 ].position		= FVector4D( InX + InSizeX,	InY + InSizeY,	InClipSpaceQuadZ, 1.f );
+	vertices[ 0 ].position		= Vector4D( InX,			InY,			InClipSpaceQuadZ, 1.f );
+	vertices[ 1 ].position		= Vector4D( InX + InSizeX,	InY,			InClipSpaceQuadZ, 1.f );
+	vertices[ 2 ].position		= Vector4D( InX,			InY + InSizeY,	InClipSpaceQuadZ, 1.f );
+	vertices[ 3 ].position		= Vector4D( InX + InSizeX,	InY + InSizeY,	InClipSpaceQuadZ, 1.f );
 
-	vertices[ 0 ].texCoord		= FVector2D( InU,			InV );
-	vertices[ 1 ].texCoord		= FVector2D( InU + InSizeU,	InV );
-	vertices[ 2 ].texCoord		= FVector2D( InU,			InV + InSizeV );
-	vertices[ 3 ].texCoord		= FVector2D( InU + InSizeU,	InV + InSizeV );
+	vertices[ 0 ].texCoord		= Vector2D( InU,			InV );
+	vertices[ 1 ].texCoord		= Vector2D( InU + InSizeU,	InV );
+	vertices[ 2 ].texCoord		= Vector2D( InU,			InV + InSizeV );
+	vertices[ 3 ].texCoord		= Vector2D( InU + InSizeU,	InV + InSizeV );
 
-	vertices[ 0 ].color			= FColor( 255, 255, 255 );
-	vertices[ 1 ].color			= FColor( 255, 255, 255 );
-	vertices[ 2 ].color			= FColor( 255, 255, 255 );
-	vertices[ 3 ].color			= FColor( 255, 255, 255 );
+	vertices[ 0 ].color			= ÑColor( 255, 255, 255 );
+	vertices[ 1 ].color			= ÑColor( 255, 255, 255 );
+	vertices[ 2 ].color			= ÑColor( 255, 255, 255 );
+	vertices[ 3 ].color			= ÑColor( 255, 255, 255 );
 
 	for ( uint32 vertexIndex = 0; vertexIndex < 4; ++vertexIndex )
 	{
@@ -57,11 +57,11 @@ void DrawDenormalizedQuad( class FBaseDeviceContextRHI* InDeviceContextRHI, floa
 	GRHI->DrawIndexedPrimitiveUP( InDeviceContextRHI, PT_TriangleList, 0, 2, 4, indices, sizeof( indices[ 0 ] ), vertices, sizeof( vertices[ 0 ] ) );
 }
 
-void DrawWireframeBox( struct FSceneDepthGroup& InSDG, const class FBox& InBox, const class FColor& InColor )
+void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class ÑBox& InBox, const class ÑColor& InColor )
 {
 #if WITH_EDITOR
-	FVector		bbox[ 2 ] = { InBox.GetMin(), InBox.GetMax() };
-	FVector		start, end;
+	Vector		bbox[ 2 ] = { InBox.GetMin(), InBox.GetMax() };
+	Vector		start, end;
 
 	for ( uint32 i = 0; i < 2; i++ )
 	{
@@ -86,30 +86,30 @@ void DrawWireframeBox( struct FSceneDepthGroup& InSDG, const class FBox& InBox, 
 #endif // WITH_EDITOR
 }
 
-void DrawSphere( struct FSceneDepthGroup& InSDG, const FVector& InCenter, const FVector& InRadius, uint32 InNumSides, uint32 InNumRings, class FMaterial* InMaterial )
+void DrawSphere( struct SSceneDepthGroup& InSDG, const Vector& InCenter, const Vector& InRadius, uint32 InNumSides, uint32 InNumRings, class CMaterial* InMaterial )
 {
-	FDynamicMeshBuilder		dynamicMeshBuilder;
-	FMatrix					transofmrationMatrix = FMath::ScaleMatrix( InRadius ) * FMath::TranslateMatrix( InCenter );
+	CDynamicMeshBuilder		dynamicMeshBuilder;
+	Matrix					transofmrationMatrix = SMath::ScaleMatrix( InRadius ) * SMath::TranslateMatrix( InCenter );
 
 	// Use a mesh builder to draw the sphere
 	{
 		// The first/last arc are on top of each other
 		uint32		numVerts = ( InNumSides + 1 ) * ( InNumRings + 1 );
-		FDynamicMeshVertexType*		verts = ( FDynamicMeshVertexType* )malloc( numVerts * sizeof( FDynamicMeshVertexType ) );
+		SDynamicMeshVertexType*		verts = ( SDynamicMeshVertexType* )malloc( numVerts * sizeof( SDynamicMeshVertexType ) );
 
 		// Calculate verts for one arc
-		FDynamicMeshVertexType*		arcVerts = ( FDynamicMeshVertexType* )malloc( ( InNumRings + 1 ) * sizeof( FDynamicMeshVertexType ) );
+		SDynamicMeshVertexType*		arcVerts = ( SDynamicMeshVertexType* )malloc( ( InNumRings + 1 ) * sizeof( SDynamicMeshVertexType ) );
 
 		for ( uint32 index = 0; index < InNumRings + 1; index++ )
 		{
-			FDynamicMeshVertexType*	arcVert = &arcVerts[ index ];
+			SDynamicMeshVertexType*	arcVert = &arcVerts[ index ];
 			float					angle	= ( ( float )index / InNumRings ) * PI;
 
 			// Note: unit sphere, so position always has mag of one. We can just use it for normal!			
-			arcVert->position		= FVector4D( 0.f, FMath::Cos( angle ), FMath::Sin( angle ), 1.f );
-			arcVert->tangent		= FVector4D( 1.f, 0.f, 0.f, 0.f );
+			arcVert->position		= Vector4D( 0.f, SMath::Cos( angle ), SMath::Sin( angle ), 1.f );
+			arcVert->tangent		= Vector4D( 1.f, 0.f, 0.f, 0.f );
 			arcVert->normal			= arcVert->position;
-			arcVert->binormal		= FVector4D( 0.f, -arcVert->position.y, arcVert->position.z, 0.f );
+			arcVert->binormal		= Vector4D( 0.f, -arcVert->position.y, arcVert->position.z, 0.f );
 
 			arcVert->texCoord.x		= 0.f;
 			arcVert->texCoord.t		= ( float )index / InNumRings;
@@ -118,8 +118,8 @@ void DrawSphere( struct FSceneDepthGroup& InSDG, const FVector& InCenter, const 
 		// Then rotate this arc InNumSides+1 times
 		for ( uint32 indexSide = 0; indexSide < InNumSides + 1; indexSide++ )
 		{
-			FRotator	arcRotator( 0.f, FMath::Trunc( 65536.f * ( ( float )indexSide / InNumSides ) ), 0.f );
-			FMatrix		arcRot = arcRotator.ToMatrix();
+			CRotator	arcRotator( 0.f, SMath::Trunc( 65536.f * ( ( float )indexSide / InNumSides ) ), 0.f );
+			Matrix		arcRot = arcRotator.ToMatrix();
 			float		xTexCoord = ( float )indexSide / InNumSides;
 
 			for ( uint32 indexRing = 0; indexRing < InNumRings + 1; indexRing++ )

@@ -17,16 +17,16 @@
  * @ingroup WorldEd
  * @brief Class of pixel shader for render preview texture
  */
-class FTexturePreviewPixelShader : public FScreenPixelShader
+class CTexturePreviewPixelShader : public CScreenPixelShader
 {
-	DECLARE_SHADER_TYPE( FTexturePreviewPixelShader )
+	DECLARE_SHADER_TYPE( CTexturePreviewPixelShader )
 
 public:
 	/**
 	 * @brief Initialize shader
 	 * @param InShaderCacheItem			Cache of shader
 	 */
-	virtual void Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem ) override;
+	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
 
 #if WITH_EDITOR
 	/**
@@ -36,7 +36,7 @@ public:
 	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
 	 * @return Return true if need compile shader, else returning false
 	 */
-	static bool ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType = nullptr );
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );
 #endif // WITH_EDITOR
 
 	/**
@@ -45,13 +45,13 @@ public:
 	 * @param InDeviceContextRHI	RHI device context
 	 * @param InColorMask			Color mask
 	 */
-	FORCEINLINE void SetColorChannelMask( class FBaseDeviceContextRHI* InDeviceContextRHI, const FColor& InColorMask )
+	FORCEINLINE void SetColorChannelMask( class CBaseDeviceContextRHI* InDeviceContextRHI, const ÑColor& InColorMask )
 	{
 		SetPixelShaderValue( InDeviceContextRHI, colorChannelMask, InColorMask.ToNormalizedVector4D() );
 	}
 
 private:
-	FShaderParameter		colorChannelMask;		/**< Color channel mask */
+	CShaderParameter		colorChannelMask;		/**< Color channel mask */
 };
 
 #endif // !TEXTUREPREVIEWSHADER_H

@@ -21,27 +21,27 @@
   * @ingroup Core
   * @brief Class object of config
   */
-class FConfigObject
+class CConfigObject
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE						FConfigObject()
+	FORCEINLINE						CConfigObject()
 	{}
 
 	/**
 	 * @brief Constructor of copy
 	 * @param[in] InCopy Copy of object
 	 */
-	FORCEINLINE						FConfigObject( const FConfigObject& InCopy ) :
+	FORCEINLINE						CConfigObject( const CConfigObject& InCopy ) :
 		values( InCopy.values )
 	{}
 
 	/**
 	 * @brief Destructor
 	 */
-	FORCEINLINE						~FConfigObject()
+	FORCEINLINE						~CConfigObject()
 	{
 		Clear();
 	}
@@ -58,7 +58,7 @@ public:
 	 * @brief Copy
 	 * @param[in] InCopy Copy of object
 	 */
-	FORCEINLINE void				Copy( const FConfigObject& InCopy )
+	FORCEINLINE void				Copy( const CConfigObject& InCopy )
 	{
 		values = InCopy.values;
 	}
@@ -84,7 +84,7 @@ public:
 	 * @param[in] InName Name of value
 	 * @param[in] InValue Value
 	 */
-	void							SetValue( const tchar* InName, const class FConfigValue& InValue );
+	void							SetValue( const tchar* InName, const class CConfigValue& InValue );
 
 	/**
 	 * @brief Get value
@@ -92,27 +92,27 @@ public:
 	 * @param[in] InName Name of value
 	 * @return Return value from object. If not exist value in object - return empty
 	 */
-	class FConfigValue				GetValue( const tchar* InName ) const;
+	class CConfigValue				GetValue( const tchar* InName ) const;
 
 	/**
 	 * @brief Operator = for copy value
 	 * @param[in] InCopy Copy of value
 	 */
-	FORCEINLINE FConfigObject& operator=( const FConfigObject& InCopy )
+	FORCEINLINE CConfigObject& operator=( const CConfigObject& InCopy )
 	{
 		Copy( InCopy );
 		return *this;
 	}
 
 private:
-	std::unordered_map< std::wstring, class FConfigValue >			values;		/**< Values in object */
+	std::unordered_map< std::wstring, class CConfigValue >			values;		/**< Values in object */
 };
 
 /**
  * @ingroup Core
  * @brief Class value of config
  */
-class FConfigValue
+class CConfigValue
 {
 public:
 	/**
@@ -132,7 +132,7 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE										FConfigValue() :
+	FORCEINLINE										CConfigValue() :
 		type( T_None ),
 		value( nullptr )
 	{}
@@ -141,7 +141,7 @@ public:
 	 * @brief Constructor of copy
 	 * @param[in] InCopy Copy of value
 	 */
-	FORCEINLINE										FConfigValue( const FConfigValue& InCopy ) :
+	FORCEINLINE										CConfigValue( const CConfigValue& InCopy ) :
 		type( T_None ),
 		value( nullptr )
 	{
@@ -151,7 +151,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	FORCEINLINE										~FConfigValue()
+	FORCEINLINE										~CConfigValue()
 	{
 		Clear();
 	}
@@ -165,7 +165,7 @@ public:
 	 * @brief Copy value
 	 * @param[in] InCopy Copy
 	 */
-	void											Copy( const FConfigValue& InCopy );
+	void											Copy( const CConfigValue& InCopy );
 
 	/**
 	 * @brief Convert value to JSON string
@@ -286,7 +286,7 @@ public:
 	 * @brief Set object
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void								SetObject( const FConfigObject& InValue )
+	FORCEINLINE void								SetObject( const CConfigObject& InValue )
 	{
 		if ( type != T_Object )
 		{
@@ -295,10 +295,10 @@ public:
 
 		if ( !value )
 		{
-			value = new FConfigObject();
+			value = new CConfigObject();
 		}
 
-		*static_cast< FConfigObject* >( value ) = InValue;
+		*static_cast< CConfigObject* >( value ) = InValue;
 		type = T_Object;
 	}
 
@@ -306,7 +306,7 @@ public:
 	 * @brief Set array
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void								SetArray( const std::vector< FConfigValue >& InValue )
+	FORCEINLINE void								SetArray( const std::vector< CConfigValue >& InValue )
 	{
 		if ( type != T_Array )
 		{
@@ -315,10 +315,10 @@ public:
 
 		if ( !value )
 		{
-			value = new std::vector< FConfigValue >();
+			value = new std::vector< CConfigValue >();
 		}
 
-		*static_cast< std::vector< FConfigValue >* >( value ) = InValue;
+		*static_cast< std::vector< CConfigValue >* >( value ) = InValue;
 		type = T_Array;
 	}
 
@@ -412,35 +412,35 @@ public:
 	 * @brief Get object
 	 * @return Value with type object, if type not correct return empty object
 	 */
-	FORCEINLINE FConfigObject						GetObject() const
+	FORCEINLINE CConfigObject						GetObject() const
 	{
 		if ( type != T_Object || !value )
 		{
-			return FConfigObject();
+			return CConfigObject();
 		}
 
-		return *static_cast< FConfigObject* >( value );
+		return *static_cast< CConfigObject* >( value );
 	}
 
 	/**
 	 * @brief Get array
 	 * @return Value with type array, if type not correct return empty array
 	 */
-	FORCEINLINE std::vector< FConfigValue >			GetArray() const
+	FORCEINLINE std::vector< CConfigValue >			GetArray() const
 	{
 		if ( type != T_Array || !value )
 		{
-			return std::vector< FConfigValue >();
+			return std::vector< CConfigValue >();
 		}
 
-		return *static_cast< std::vector< FConfigValue >* >( value );
+		return *static_cast< std::vector< CConfigValue >* >( value );
 	}
 
 	/**
 	 * @brief Operator = for copy value
 	 * @param[in] InCopy Copy of value
 	 */
-	FORCEINLINE FConfigValue&						operator=( const FConfigValue& InCopy )
+	FORCEINLINE CConfigValue&						operator=( const CConfigValue& InCopy )
 	{
 		Copy( InCopy );
 		return *this;
@@ -455,7 +455,7 @@ private:
  * @ingroup Core
  * @brief Class for work with config files
  */
-class FConfig
+class CConfig
 {
 public:
 	/**
@@ -463,7 +463,7 @@ public:
 	 * 
 	 * @param[in] InArchive Archive for serialization
 	 */
-	void						Serialize( class FArchive& InArchive );
+	void						Serialize( class CArchive& InArchive );
 
 	/**
 	 * @brief Set value
@@ -472,7 +472,7 @@ public:
 	 * @param[in] InName Name of value in config group
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void			SetValue( const tchar* InGroup, const tchar* InName, const FConfigValue& InValue )
+	FORCEINLINE void			SetValue( const tchar* InGroup, const tchar* InName, const CConfigValue& InValue )
 	{
 		groups[ InGroup ].SetValue( InName, InValue );
 	}
@@ -484,21 +484,21 @@ public:
 	 * @param[in] InName Name of value in config group
 	 * @return Return value from config, if not founded return empty value
 	 */
-	FORCEINLINE FConfigValue		GetValue( const tchar* InGroup, const tchar* InName ) const
+	FORCEINLINE CConfigValue		GetValue( const tchar* InGroup, const tchar* InName ) const
 	{
-		MapGroups::const_iterator		itGroup = groups.find( InGroup );
+		MapGroups_t::const_iterator		itGroup = groups.find( InGroup );
 		if ( itGroup == groups.end() )
 		{
-			return FConfigValue();
+			return CConfigValue();
 		}
 
 		return itGroup->second.GetValue( InName );
 	}
 
 private:
-	typedef std::unordered_map< std::wstring, FConfigObject >		MapGroups;
+	typedef std::unordered_map< std::wstring, CConfigObject >		MapGroups_t;
 
-	MapGroups			groups;			/**< Config values */
+	MapGroups_t			groups;			/**< Config values */
 };
 
 #endif // !CONFIG_H

@@ -31,8 +31,8 @@
 enum ELifeEnginePackageVersion
 {
 	VER_PackageBase							= 1,					/**< Min version for serialize content*/
-	VER_Assets								= 2,					/**< Added in archive assets (FTexture2D, FMaterial, etc) */
-	VER_LeftOnlyPixelShaderInMaterial		= 3,					/**< Removed all shaders except pixel shader from FMaterial */
+	VER_Assets								= 2,					/**< Added in archive assets (CTexture2D, CMaterial, etc) */
+	VER_LeftOnlyPixelShaderInMaterial		= 3,					/**< Removed all shaders except pixel shader from CMaterial */
 	VER_VertexFactory						= 4,					/**< Implemented vertex factory */
 	VER_StaticMesh							= 5,					/**< Implemented static mesh */
 	VER_ShaderMap							= 6,					/**< Added in material shader map */
@@ -47,7 +47,7 @@ enum ELifeEnginePackageVersion
 	VER_HashUInt64							= 15,					/**< Changed type of hashes from uint32 to uint64 */
 	VER_AssetSourceFiles					= 16,					/**< Added in assets path to source file for reimport */
 	VER_RemovedShadersTypeFromMaterial		= 17,					/**< Removed shaders type from material asset */
-	VER_AssetName_V3						= 18,					/**< Moved asset name to FAsset */
+	VER_AssetName_V3						= 18,					/**< Moved asset name to CAsset */
 
 	//
 	// New versions can be added here

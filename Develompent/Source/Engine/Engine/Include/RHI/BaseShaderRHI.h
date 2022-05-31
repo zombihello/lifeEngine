@@ -72,7 +72,7 @@ enum EVertexElementUsage
  * @ingroup Engine
  * @brief Struct of vertex element
  */
-struct FVertexElement
+struct SVertexElement
 {
 	uint32			stride;						/**< Stride element */
 	byte			streamIndex;				/**< Index of buffer */
@@ -86,7 +86,7 @@ struct FVertexElement
 	/**
 	 * @brief Constructor
 	 */
-	FVertexElement() :
+	SVertexElement() :
 		streamIndex( 0 ),
 		stride( 0 ),
 		offset( 0 ),
@@ -109,7 +109,7 @@ struct FVertexElement
 	 * @param[in] InIsUseInstanceIndex Is use instance index
 	 * @param[in] InNumVerticesPerInstance Number vertices per one instance
 	 */
-	FVertexElement( byte InStreamIndex, uint32 InStride, byte InOffset, byte InType, byte InUsage, byte InUsageIndex, bool InIsUseInstanceIndex = false, uint32 InNumVerticesPerInstance = 0 ) :
+	SVertexElement( byte InStreamIndex, uint32 InStride, byte InOffset, byte InType, byte InUsage, byte InUsageIndex, bool InIsUseInstanceIndex = false, uint32 InNumVerticesPerInstance = 0 ) :
 		streamIndex( InStreamIndex ),
 		stride( InStride ),
 		offset( InOffset ),
@@ -125,7 +125,7 @@ struct FVertexElement
  * @ingroup Engine
  * @brief Base class for work with shader
  */
-class FBaseShaderRHI : public FBaseResourceRHI
+class CBaseShaderRHI : public CBaseResourceRHI
 {
 public:
 	/**
@@ -133,7 +133,7 @@ public:
 	 * @param[in] InFrequency Frequency of shader
 	 * @param[in] InShaderName Shader name
 	 */
-	explicit									FBaseShaderRHI( EShaderFrequency InFrequency, const tchar* InShaderName ) :
+	explicit									CBaseShaderRHI( EShaderFrequency InFrequency, const tchar* InShaderName ) :
 		frequency( InFrequency )
 #if !SHIPPING_BUILD
 		, shaderName( InShaderName )
@@ -174,25 +174,25 @@ private:
  * @ingroup Engine Engine
  * @brief Element list for vertex declaration
  */
-typedef std::vector< FVertexElement >		FVertexDeclarationElementList;
+typedef std::vector< SVertexElement >		VertexDeclarationElementList_t;
 
 /**
  * @ingroup Engine
  * @breif Base class of vertex declaration
  */
-class FBaseVertexDeclarationRHI : public FBaseResourceRHI
+class CBaseVertexDeclarationRHI : public CBaseResourceRHI
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FBaseVertexDeclarationRHI( const FVertexDeclarationElementList& InElementList )					
+	CBaseVertexDeclarationRHI( const VertexDeclarationElementList_t& InElementList )					
 	{}
 
 	/**
 	 * @brief Destructor 
 	 */
-	virtual ~FBaseVertexDeclarationRHI()
+	virtual ~CBaseVertexDeclarationRHI()
 	{}
 
 	/**
@@ -208,7 +208,7 @@ public:
  * @ingroup Engine
  * @brief Base class of bound shader state
  */
-class FBaseBoundShaderStateRHI : public FBaseResourceRHI
+class CBaseBoundShaderStateRHI : public CBaseResourceRHI
 {
 public:
 	/**
@@ -222,7 +222,7 @@ public:
 	 * @param[in] InDomainShader Domain shader
 	 * @param[in] InGeometryShader Geometry shader
 	 */
-	FBaseBoundShaderStateRHI( const FBoundShaderStateKey& InKey, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader = nullptr, FDomainShaderRHIRef InDomainShader = nullptr, FGeometryShaderRHIRef InGeometryShader = nullptr ) :
+	CBaseBoundShaderStateRHI( const CBoundShaderStateKey& InKey, VertexDeclarationRHIRef_t InVertexDeclaration, VertexShaderRHIRef_t InVertexShader, PixelShaderRHIRef_t InPixelShader, HullShaderRHIRef_t InHullShader = nullptr, DomainShaderRHIRef_t InDomainShader = nullptr, GeometryShaderRHIRef_t InGeometryShader = nullptr ) :
 		key( InKey ),
 		vertexDeclaration( InVertexDeclaration ),
 		vertexShader( InVertexShader ),
@@ -235,14 +235,14 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FBaseBoundShaderStateRHI()
+	virtual ~CBaseBoundShaderStateRHI()
 	{}
 
 	/**
 	 * @brief Get vertex declaration
 	 * @return Pointer to vertex declaration
 	 */
-	FORCEINLINE FVertexDeclarationRHIRef GetVertexDeclaration() const
+	FORCEINLINE VertexDeclarationRHIRef_t GetVertexDeclaration() const
 	{
 		return vertexDeclaration;
 	}
@@ -251,7 +251,7 @@ public:
 	 * @brief Get vertex shader
 	 * @return Pointer to vertex shader
 	 */
-	FORCEINLINE FVertexShaderRHIRef GetVertexShader() const
+	FORCEINLINE VertexShaderRHIRef_t GetVertexShader() const
 	{
 		return vertexShader;
 	}
@@ -260,7 +260,7 @@ public:
 	 * @brief Get pixel shader
 	 * @return Pointer to pixel shader
 	 */
-	FORCEINLINE FPixelShaderRHIRef GetPixelShader() const
+	FORCEINLINE PixelShaderRHIRef_t GetPixelShader() const
 	{
 		return pixelShader;
 	}
@@ -269,7 +269,7 @@ public:
 	 * @brief Get hull shader
 	 * @return Pointer to hull shader
 	 */
-	FORCEINLINE FHullShaderRHIRef GetHullShader() const
+	FORCEINLINE HullShaderRHIRef_t GetHullShader() const
 	{
 		return hullShader;
 	}
@@ -278,7 +278,7 @@ public:
 	 * @brief Get domain shader
 	 * @return Pointer to domain shader
 	 */
-	FORCEINLINE FDomainShaderRHIRef GetDomainShader() const
+	FORCEINLINE DomainShaderRHIRef_t GetDomainShader() const
 	{
 		return domainShader;
 	}
@@ -287,7 +287,7 @@ public:
 	 * @brief Get geometry shader
 	 * @return Pointer to geometry shader
 	 */
-	FORCEINLINE FGeometryShaderRHIRef GetGeometryShader() const
+	FORCEINLINE GeometryShaderRHIRef_t GetGeometryShader() const
 	{
 		return geometryShader;
 	}
@@ -302,26 +302,26 @@ public:
 	}
 
 protected:
-	FBoundShaderStateKey			key;					/**< Bound shader state key */
-	FVertexDeclarationRHIRef		vertexDeclaration;		/**< Vertex declaration */
-	FVertexShaderRHIRef				vertexShader;			/**< Vertex shader */
-	FPixelShaderRHIRef				pixelShader;			/**< Pixel shader */
-	FHullShaderRHIRef				hullShader;				/**< Hull shader */
-	FDomainShaderRHIRef				domainShader;			/**< Domain shader */
-	FGeometryShaderRHIRef			geometryShader;			/**< Geometry shader */
+	CBoundShaderStateKey			key;					/**< Bound shader state key */
+	VertexDeclarationRHIRef_t		vertexDeclaration;		/**< Vertex declaration */
+	VertexShaderRHIRef_t			vertexShader;			/**< Vertex shader */
+	PixelShaderRHIRef_t				pixelShader;			/**< Pixel shader */
+	HullShaderRHIRef_t				hullShader;				/**< Hull shader */
+	DomainShaderRHIRef_t			domainShader;			/**< Domain shader */
+	GeometryShaderRHIRef_t			geometryShader;			/**< Geometry shader */
 };
 
 //
 // Overloaded operators for serialize in archive
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, EShaderFrequency& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, EShaderFrequency& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EShaderFrequency& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const EShaderFrequency& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );

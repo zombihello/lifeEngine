@@ -23,86 +23,86 @@
  * @ingroup Engine
  * @brief Macro of color draw event for lights
  */
-#define DEC_LIGHT				FColor( 255,	0,		0,		255 )
+#define DEC_LIGHT				ÑColor( 255,	0,		0,		255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for skeletal meshes
  */
-#define DEC_SKEL_MESH			FColor( 255,	0,		255,	255 )
+#define DEC_SKEL_MESH			ÑColor( 255,	0,		255,	255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for static meshes
  */
-#define DEC_STATIC_MESH			FColor( 0,		128,	255,	255 )
+#define DEC_STATIC_MESH			ÑColor( 0,		128,	255,	255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for render canvas
  */
-#define DEC_CANVAS				FColor( 128,	255,	255,	255 )
+#define DEC_CANVAS				ÑColor( 128,	255,	255,	255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for terrain
  */
-#define DEC_TERRAIN				FColor( 0,		128,	0,		255 )
+#define DEC_TERRAIN				ÑColor( 0,		128,	0,		255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for shadows
  */
-#define DEC_SHADOW				FColor( 128,	128,	128,	255 )
+#define DEC_SHADOW				ÑColor( 128,	128,	128,	255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for BSP
  */
-#define DEC_BSP					FColor( 255,	128,	0,		255 )
+#define DEC_BSP					ÑColor( 255,	128,	0,		255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for particles
  */
-#define DEC_PARTICLE			FColor( 128,	0,		128,	255 )
+#define DEC_PARTICLE			ÑColor( 128,	0,		128,	255 )
 
  /**
   * @ingroup Engine
   * @brief Macro of color draw event for sprites
   */
-#define DEC_SPRITE				FColor( 128,	255,	255,	255 )
+#define DEC_SPRITE				ÑColor( 128,	255,	255,	255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color general scene draw events
  */
-#define DEC_SCENE_ITEMS			FColor( 128,	128,	128,	255 )
+#define DEC_SCENE_ITEMS			ÑColor( 128,	128,	128,	255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for materials
  */
-#define DEC_MATERIAL			FColor( 0,		128,	255,	255 )
+#define DEC_MATERIAL			ÑColor( 0,		128,	255,	255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for simple elements
  */
-#define DEC_SIMPLEELEMENTS		FColor( 238,	153,	26,		255 )
+#define DEC_SIMPLEELEMENTS		ÑColor( 238,	153,	26,		255 )
 
 /**
  * @ingroup Engine
  * @brief Macro of color draw event for dynamic elements
  */
-#define DEC_DYNAMICELEMENTS		FColor( 238,	153,	26,		255 )
+#define DEC_DYNAMICELEMENTS		ÑColor( 238,	153,	26,		255 )
 
 #if FRAME_CAPTURE_MARKERS
 /**
  * @ingroup Engine
  * @brief Class for scoped draw event
  */
-class FScopedDrawEvent
+class CScopedDrawEvent
 {
 public:
 	/**
@@ -111,7 +111,7 @@ public:
 	 * @param InColor Color of event
 	 * @param InStatId Name event
 	 */
-	FORCEINLINE FScopedDrawEvent( const FColor& InColor, const tchar* InStatId )
+	FORCEINLINE CScopedDrawEvent( const ÑColor& InColor, const tchar* InStatId )
 	{
 		GRHI->BeginDrawEvent( GRHI->GetImmediateContext(), InColor, InStatId );
 	}
@@ -119,7 +119,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	FORCEINLINE ~FScopedDrawEvent()
+	FORCEINLINE ~CScopedDrawEvent()
 	{
 		GRHI->EndDrawEvent( GRHI->GetImmediateContext() );
 	}
@@ -128,7 +128,7 @@ protected:
 	/**
 	 * @brief Constructor
 	 */
-	FScopedDrawEvent() {}
+	CScopedDrawEvent() {}
 };
 
 /**
@@ -139,7 +139,7 @@ protected:
  * @param InColor Color of event
  * @param InStatID Stat id
  */
-#define SCOPED_DRAW_EVENT( InEventName, InColor, InStatID )		FScopedDrawEvent event_##InEventName( InColor, InStatID )
+#define SCOPED_DRAW_EVENT( InEventName, InColor, InStatID )		CScopedDrawEvent event_##InEventName( InColor, InStatID )
 #else
 #define SCOPED_DRAW_EVENT( InEventName, InColor, InStatID )
 #endif // FRAME_CAPTURE_MARKERS

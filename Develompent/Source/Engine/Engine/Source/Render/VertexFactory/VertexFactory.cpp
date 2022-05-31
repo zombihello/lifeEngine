@@ -5,9 +5,9 @@
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
-FVertexFactoryMetaType::FVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName, bool InSupportsInstancing, uint32 InInstanceStreamIndex, ConstructParametersType InConstructParameters
+CVertexFactoryMetaType::CVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName, bool InSupportsInstancing, uint32 InInstanceStreamIndex, ConstructParametersType InConstructParameters
 #if WITH_EDITOR
-												, FShouldCacheFunc InShouldCacheFunc, FModifyCompilationEnvironmentFunc InModifyCompilationEnvironmentFunc
+												, ShouldCacheFn_t InShouldCacheFunc, ModifyCompilationEnvironmentFn_t InModifyCompilationEnvironmentFunc
 #endif // WITH_EDITOR
 )
 	: factoryName( InFactoryName )
@@ -25,59 +25,59 @@ FVertexFactoryMetaType::FVertexFactoryMetaType( const std::wstring& InFactoryNam
 	, ModifyCompilationEnvironmentFunc( InModifyCompilationEnvironmentFunc )
 #endif // WITH_EDITOR
 {
-	FContainerVertexFactoryMetaType::Get()->RegisterType( this );
+	SContainerVertexFactoryMetaType::Get()->RegisterType( this );
 }
 
-FVertexFactory::~FVertexFactory()
+CVertexFactory::~CVertexFactory()
 {}
 
-void FVertexFactory::ReleaseRHI()
+void CVertexFactory::ReleaseRHI()
 {
 	declaration.SafeRelease();
 	streams.clear();
 }
 
-void FVertexFactory::Set( class FBaseDeviceContextRHI* InDeviceContextRHI ) const
+void CVertexFactory::Set( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( IsInitialized() );
 	for ( uint32 streamIndex = 0, streamNum = ( uint32 )streams.size(); streamIndex < streamNum; ++streamIndex )
 	{
-		const FVertexStream&		stream = streams[ streamIndex ];
+		const SVertexStream&		stream = streams[ streamIndex ];
 		check( stream.vertexBuffer );
 		GRHI->SetStreamSource( InDeviceContextRHI, streamIndex, stream.vertexBuffer, stream.stride, 0 );
 	}
 }
 
-void FVertexFactory::SetupInstancing( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+void CVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	appErrorf( TEXT( "FVertexFactory::SetupInstancing :: Not implemented" ) );
+	appErrorf( TEXT( "CVertexFactory::SetupInstancing :: Not implemented" ) );
 }
 
-void FVertexFactory::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
+void CVertexFactory::SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI )
 {}
 
-void FVertexFactory::InitDeclaration( const FVertexDeclarationElementList& InElements )
+void CVertexFactory::InitDeclaration( const VertexDeclarationElementList_t& InElements )
 {
 	declaration = GRHI->CreateVertexDeclaration( InElements );
 }
 
-void FVertexFactory::InitDeclaration( const FVertexDeclarationRHIParamRef InDeclaration )
+void CVertexFactory::InitDeclaration( const VertexDeclarationRHIParamRef_t InDeclaration )
 {
 	check( InDeclaration );
 	declaration = InDeclaration;
 }
 
-void FVertexFactory::Init()
+void CVertexFactory::Init()
 {
 	BeginInitResource( this );
 }
 
 #if WITH_EDITOR
-bool FVertexFactory::ShouldCache( EShaderPlatform InShaderPlatform )
+bool CVertexFactory::ShouldCache( EShaderPlatform InShaderPlatform )
 {
 	return true;
 }
 
-void FVertexFactory::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment )
+void CVertexFactory::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
 {}
 #endif // WITH_EDITOR

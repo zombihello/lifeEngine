@@ -32,7 +32,7 @@ int32 appPlatformPreInit( const tchar* InCmdLine )
 {
 	if ( GIsCommandlet || GIsCooker || appParseParam( InCmdLine, TEXT( "-console" ) ) )
 	{
-		static_cast< FWindowsLogger* >( GLog )->Show( true );
+		static_cast< CWindowsLogger* >( GLog )->Show( true );
 	}
 
 	// Print version SDL to logs

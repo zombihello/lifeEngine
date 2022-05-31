@@ -16,7 +16,7 @@
  * @ingroup Engine
  * @brief Vertex factory shader parameters for each meshes
  */
-class FGeneralVertexShaderParameters : public FVertexFactoryShaderParameters
+class CGeneralVertexShaderParameters : public CVertexFactoryShaderParameters
 {
 public:
     /**
@@ -24,14 +24,14 @@ public:
      * 
      * @param InSupportsInstancing Is supported instancing
      */
-    FGeneralVertexShaderParameters( bool InSupportsInstancing );
+    CGeneralVertexShaderParameters( bool InSupportsInstancing );
 
     /**
      * @brief Bind shader parameters
      *
      * @param InParameterMap Shader parameter map
      */
-    virtual void Bind( const class FShaderParameterMap& InParameterMap ) override;
+    virtual void Bind( const class CShaderParameterMap& InParameterMap ) override;
 
 	/**
 	 * @brief Set any shader data specific to this vertex factory
@@ -39,7 +39,7 @@ public:
 	 * @param InDeviceContextRHI RHI device context
 	 * @param InVertexFactory Vertex factory
 	 */
-	virtual void Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory ) const override;
+	virtual void Set( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory ) const override;
 
 	/**
 	 * @brief Set the l2w transform shader
@@ -51,10 +51,10 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 private:
-    FShaderParameter		localToWorldMatrixParameter;		/**< Local to world parameter */
+    CShaderParameter		localToWorldMatrixParameter;		/**< Local to world parameter */
     bool					bSupportsInstancing;				/**< Is supported instancing */
 };
 

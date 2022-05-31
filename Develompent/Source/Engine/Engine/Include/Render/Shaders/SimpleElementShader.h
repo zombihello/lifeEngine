@@ -16,9 +16,9 @@
  * @ingroup Engine
  * @brief Class of simple element vertex shader
  */
-class FSimpleElementVertexShader : public FShader
+class CSimpleElementVertexShader : public CShader
 {
-	DECLARE_SHADER_TYPE( FSimpleElementVertexShader )
+	DECLARE_SHADER_TYPE( CSimpleElementVertexShader )
 
 public:
 #if WITH_EDITOR
@@ -29,7 +29,7 @@ public:
 	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
 	 * @return Return true if need compile shader, else returning false
 	 */
-	static bool ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType = nullptr );
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );
 #endif // WITH_EDITOR
 };
 
@@ -37,9 +37,9 @@ public:
  * @ingroup Engine
  * @brief Class of simple element pixel shader
  */
-class FSimpleElementPixelShader : public FShader
+class CSimpleElementPixelShader : public CShader
 {
-	DECLARE_SHADER_TYPE( FSimpleElementPixelShader )
+	DECLARE_SHADER_TYPE( CSimpleElementPixelShader )
 
 public:
 #if WITH_EDITOR
@@ -50,7 +50,7 @@ public:
 	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
 	 * @return Return true if need compile shader, else returning false
 	 */
-	static bool ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType = nullptr );
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );
 #endif // WITH_EDITOR
 };
 

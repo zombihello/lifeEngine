@@ -2,12 +2,12 @@
 #include "Math/Rotator.h"
 #include "Math/Transform.h"
 
-const FVector		FMath::vectorZero( 0.f, 0.f, 0.f );
-const FVector		FMath::vectorOne( 1.f, 1.f, 1.f );
-const FQuaternion	FMath::quaternionZero( FMath::AnglesToQuaternion( 0.f, 0.f, 0.f ) );
-const FMatrix		FMath::matrixIdentity( 1.f );
-const FRotator		FMath::rotatorZero( 0.f );
-const FTransform	FMath::transformZero( FMath::rotatorZero, FMath::vectorOne, FMath::vectorOne );
-const FVector		FMath::vectorForward( 0.f, 0.f, 1.f );
-const FVector		FMath::vectorRight( 1.f, 0.f, 0.f );
-const FVector		FMath::vectorUp( 0.f, 1.f, 0.f );
+const Vector		SMath::vectorZero( 0.f, 0.f, 0.f );
+const Vector		SMath::vectorOne( 1.f, 1.f, 1.f );
+const Quaternion	SMath::quaternionZero( SMath::AnglesToQuaternion( 0.f, 0.f, 0.f ) );
+const Matrix		SMath::matrixIdentity( 1.f );
+const CRotator		SMath::rotatorZero( 0.f );
+const CTransform	SMath::transformZero( SMath::rotatorZero, SMath::vectorOne, SMath::vectorOne );
+const Vector		SMath::vectorForward( 0.f, 0.f, 1.f );
+const Vector		SMath::vectorRight( 1.f, 0.f, 0.f );
+const Vector		SMath::vectorUp( 0.f, 1.f, 0.f );

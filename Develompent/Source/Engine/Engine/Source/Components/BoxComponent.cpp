@@ -1,24 +1,24 @@
 #include "Components/BoxComponent.h"
 
-IMPLEMENT_CLASS( LBoxComponent )
+IMPLEMENT_CLASS( CBoxComponent )
 
-LBoxComponent::LBoxComponent()
+CBoxComponent::CBoxComponent()
 	: size( 1.f, 1.f, 1.f )
 {
 	bodyInstance.SetSimulatePhysics( true );
 }
 
-void LBoxComponent::UpdateBodySetup()
+void CBoxComponent::UpdateBodySetup()
 {
-	bodySetup = new FPhysicsBodySetup();
+	bodySetup = new CPhysicsBodySetup();
 
-	FPhysicsBoxGeometry				boxGeometry( size.x, size.y, size.z );
+	SPhysicsBoxGeometry				boxGeometry( size.x, size.y, size.z );
 	boxGeometry.collisionProfile	= collisionProfile;
 	boxGeometry.material			= physicsMaterial;
 	bodySetup->AddBoxGeometry( boxGeometry );
 }
 
-void LBoxComponent::Serialize( class FArchive& InArchive )
+void CBoxComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << size;

@@ -5,35 +5,35 @@
 #include "ImGUI/ImGUIEngine.h"
 #endif // WITH_IMGUI
 
-void FUIEngine::Init()
+void ÑUIEngine::Init()
 {
 #if WITH_IMGUI
 	GImGUIEngine->Init();
 #endif // WITH_IMGUI
 }
 
-void FUIEngine::Shutdown()
+void ÑUIEngine::Shutdown()
 {
 #if WITH_IMGUI
 	GImGUIEngine->Shutdown();
 #endif // WITH_IMGUI
 }
 
-void FUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void ÑUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 #if WITH_IMGUI
 	GImGUIEngine->ProcessEvent( InWindowEvent );
 #endif // WITH_IMGUI
 }
 
-void FUIEngine::BeginDraw()
+void ÑUIEngine::BeginDraw()
 {
 #if WITH_IMGUI
 	GImGUIEngine->BeginDraw();
 #endif // WITH_IMGUI
 }
 
-void FUIEngine::EndDraw()
+void ÑUIEngine::EndDraw()
 {
 #if WITH_IMGUI
 	GImGUIEngine->EndDraw();

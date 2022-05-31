@@ -15,9 +15,9 @@
  * @ingroup WorldEd
  * Commandlet for generate table of contents
  */
-class LCookerSyncCommandlet : public LBaseCommandlet
+class ÑCookerSyncCommandlet : public ÑBaseCommandlet
 {
-	DECLARE_CLASS( LCookerSyncCommandlet, LBaseCommandlet )
+	DECLARE_CLASS( ÑCookerSyncCommandlet, ÑBaseCommandlet )
 
 public:
 	/**

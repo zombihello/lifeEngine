@@ -31,22 +31,22 @@
  */
 #define DECLARE_SHADER_TYPE( ShaderClass ) \
 	public: \
-        static FShaderMetaType          staticType;             /**< Static meta type of shader */ \
+        static CShaderMetaType          staticType;             /**< Static meta type of shader */ \
         /** */\
         /** Get meta type of this shader */\
         /** @return Return meta type shader */\
         /** */\
-        virtual FShaderMetaType*        GetType() const override                { return &staticType; }\
+        virtual CShaderMetaType*        GetType() const override                { return &staticType; }\
         /** */\
         /** @brief Static method for create object of this shader for serialize */ \
         /** @return Return new object of this class */ \
         /** */\
-		static FShader*			        ConstructSerializedInstance()           { return new ShaderClass(); } \
+		static CShader*			        ConstructSerializedInstance()           { return new ShaderClass(); } \
         /** */\
         /** @brief Static method for create object of this shader for compiling */ \
         /** @return Return new object of this class */ \
         /** */\
-        static FShader*			        ConstructCompiledInstance()             { return new ShaderClass(); }
+        static CShader*			        ConstructCompiledInstance()             { return new ShaderClass(); }
 
 /**
  * @ingroup Engine
@@ -62,7 +62,7 @@
 #if WITH_EDITOR
 #define IMPLEMENT_SHADER_TYPE( TemplatePrefix, ShaderClass, SourceFilename, FunctionName, Frequency, Global ) \
 	TemplatePrefix \
-    FShaderMetaType       ShaderClass::staticType( \
+    CShaderMetaType       ShaderClass::staticType( \
 		TEXT( #ShaderClass ), \
 		SourceFilename, \
 		FunctionName, \
@@ -75,7 +75,7 @@
 #else
 #define IMPLEMENT_SHADER_TYPE( TemplatePrefix, ShaderClass, SourceFilename, FunctionName, Frequency, Global ) \
 	TemplatePrefix \
-    FShaderMetaType       ShaderClass::staticType( \
+    CShaderMetaType       ShaderClass::staticType( \
 		TEXT( #ShaderClass ), \
 		SourceFilename, \
 		FunctionName, \
@@ -89,13 +89,13 @@
  * @ingroup Engine
  * @brief A shader parameter's register binding
  */
-class FShaderParameter
+class CShaderParameter
 {
 public:
     /**
      * @brief Constructor
      */
-    FShaderParameter();
+    CShaderParameter();
 
     /**
      * @brief Bind shader parameter
@@ -104,7 +104,7 @@ public:
      * @param InParameterName Parameter name
      * @param InIsOptional Is optional parameter
      */
-    void Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional = false );
+    void Bind( const CShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional = false );
 
     /**
      * @brief Shader parameter is bounded
@@ -152,13 +152,13 @@ private:
  * @ingroup Engine
  * @brief A shader resource binding
  */
-class FShaderResourceParameter
+class CShaderResourceParameter
 {
 public:
     /**
      * @brief Constructor
      */
-    FShaderResourceParameter();
+    CShaderResourceParameter();
 
     /**
      * @brief Bind shader parameter
@@ -167,7 +167,7 @@ public:
      * @param InParameterName Parameter name
      * @param InIsOptional Is optional parameter
      */
-	void Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional = false );
+	void Bind( const CShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional = false );
 
     /**
      * @brief Shader parameter is bounded
@@ -220,7 +220,7 @@ private:
  * @param InElementIndex Eelement index
  */
 template< class TParameterType >
-FORCEINLINE void SetVertexShaderValue( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderParameter& InParameter, const TParameterType& InValue, uint32 InElementIndex = 0 )
+FORCEINLINE void SetVertexShaderValue( class CBaseDeviceContextRHI* InDeviceContextRHI, const CShaderParameter& InParameter, const TParameterType& InValue, uint32 InElementIndex = 0 )
 {
     const uint32       alignedTypeSize = Align( sizeof( TParameterType ), ShaderArrayElementAlignBytes );
     const int32        numBytesToSet = Min<int32>( sizeof( TParameterType ), InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
@@ -246,7 +246,7 @@ FORCEINLINE void SetVertexShaderValue( class FBaseDeviceContextRHI* InDeviceCont
  * @param InElementIndex        Element index
  */
 template<>
-FORCEINLINE void SetVertexShaderValue( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderParameter& InParameter, const bool& InValue, uint32 InElementIndex )
+FORCEINLINE void SetVertexShaderValue( class CBaseDeviceContextRHI* InDeviceContextRHI, const CShaderParameter& InParameter, const bool& InValue, uint32 InElementIndex )
 {
     int32       value = InValue;
     SetVertexShaderValue( InDeviceContextRHI, InParameter, value, InElementIndex );
@@ -261,7 +261,7 @@ FORCEINLINE void SetVertexShaderValue( class FBaseDeviceContextRHI* InDeviceCont
  * @param InElementIndex Eelement index
  */
 template< class TParameterType >
-FORCEINLINE void SetPixelShaderValue( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderParameter& InParameter, const TParameterType& InValue, uint32 InElementIndex = 0 )
+FORCEINLINE void SetPixelShaderValue( class CBaseDeviceContextRHI* InDeviceContextRHI, const CShaderParameter& InParameter, const TParameterType& InValue, uint32 InElementIndex = 0 )
 {
     const uint32       alignedTypeSize = Align( sizeof( TParameterType ), ShaderArrayElementAlignBytes );
     const int32        numBytesToSet = Min<int32>( sizeof( TParameterType ), InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
@@ -286,7 +286,7 @@ FORCEINLINE void SetPixelShaderValue( class FBaseDeviceContextRHI* InDeviceConte
  * @param InTextureRHI          Texture 2D RHI
  * @param InElementIndex        Element index
  */
-FORCEINLINE void SetTextureParameter( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderResourceParameter& InParameter, const FTexture2DRHIParamRef InTextureRHI, uint32 InElementIndex = 0 )
+FORCEINLINE void SetTextureParameter( class CBaseDeviceContextRHI* InDeviceContextRHI, const CShaderResourceParameter& InParameter, const Texture2DRHIParamRef_t InTextureRHI, uint32 InElementIndex = 0 )
 {
 	if ( InParameter.IsBound() )
 	{
@@ -303,7 +303,7 @@ FORCEINLINE void SetTextureParameter( class FBaseDeviceContextRHI* InDeviceConte
  * @param InSamplerStateRHI     Sampler state RHI
  * @param InElementIndex        Element index
  */
-FORCEINLINE void SetSamplerStateParameter( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderResourceParameter& InParameter, const FSamplerStateRHIParamRef InSamplerStateRHI, uint32 InElementIndex = 0 )
+FORCEINLINE void SetSamplerStateParameter( class CBaseDeviceContextRHI* InDeviceContextRHI, const CShaderResourceParameter& InParameter, const SamplerStateRHIParamRef_t InSamplerStateRHI, uint32 InElementIndex = 0 )
 {
 	if ( InParameter.IsBound() )
 	{
@@ -321,7 +321,7 @@ FORCEINLINE void SetSamplerStateParameter( class FBaseDeviceContextRHI* InDevice
  * @param InElementIndex        Element index
  */
 template<>
-FORCEINLINE void SetPixelShaderValue( class FBaseDeviceContextRHI* InDeviceContextRHI, const FShaderParameter& InParameter, const bool& InValue, uint32 InElementIndex )
+FORCEINLINE void SetPixelShaderValue( class CBaseDeviceContextRHI* InDeviceContextRHI, const CShaderParameter& InParameter, const bool& InValue, uint32 InElementIndex )
 {
     int32       value = InValue;
     SetPixelShaderValue( InDeviceContextRHI, InParameter, value, InElementIndex );
@@ -331,29 +331,29 @@ FORCEINLINE void SetPixelShaderValue( class FBaseDeviceContextRHI* InDeviceConte
  * @ingroup Engine
  * @brief Class of meta information by shader
  */
-class FShaderMetaType
+class CShaderMetaType
 {
 public:
     /**
      * @brief Pointer to static method for create object of shader for serialize
      */
-    typedef class FShader*        ( *FConstructSerializedInstance )();
+    typedef class CShader*        ( *ConstructSerializedInstanceFn_t )();
 
     /**
      * @brief Pointer to static method for create object of shader for compiling
      */
-    typedef class FShader*        ( *FConstructCompiledInstance )();
+    typedef class CShader*        ( *ConstructCompiledInstanceFn_t )();
 
 #if WITH_EDITOR
     /**
      * @brief Pointer to static method for check is need compile shader for vertex factory. If vertex factory is nullptr - checking general
      */
-    typedef bool                  ( *FShouldCacheFunc )( EShaderPlatform InShaderPlatform, FVertexFactoryMetaType* InVFMetaType );
+    typedef bool                  ( *ShouldCacheFn_t )( EShaderPlatform InShaderPlatform, CVertexFactoryMetaType* InVFMetaType );
 
     /**
      * @brief Pointer to static method for modify compilation environment of shader
      */
-    typedef void                  ( *FModifyCompilationEnvironmentFunc )( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment );
+    typedef void                  ( *ModifyCompilationEnvironmentFn_t )( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment );
 #endif // WITH_EDITOR
 
     /**
@@ -369,9 +369,9 @@ public:
      * @param[in] InShouldCacheFunc Pointer to static method for check is need compile shader. WARNING! Only with enabled define WITH_EDITOR
      * @param[in] InModifyCompilationEnvironmentFunc Pointer to static method for modify compilation environment of shader. WARNING! Only with enabled define WITH_EDITOR
      */
-    FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, bool InIsGlobal, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance
+    CShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, bool InIsGlobal, ConstructSerializedInstanceFn_t InConstructSerializedInstance, ConstructCompiledInstanceFn_t InConstructCompiledInstance
 #if WITH_EDITOR
-                     , FShouldCacheFunc InShouldCacheFunc, FModifyCompilationEnvironmentFunc InModifyCompilationEnvironmentFunc
+                     , ShouldCacheFn_t InShouldCacheFunc, ModifyCompilationEnvironmentFn_t InModifyCompilationEnvironmentFunc
 #endif // WITH_EDITOR
     );
 
@@ -379,7 +379,7 @@ public:
      * @brief Constructor of copy
      * @param[in] InCopy Copy
      */
-    FShaderMetaType( const FShaderMetaType& InCopy );
+    CShaderMetaType( const CShaderMetaType& InCopy );
 
     /**
      * @brief Get name
@@ -421,7 +421,7 @@ public:
      * @brief Create instance shader for serialize
      * @return Return new instance of shader
      */
-    FORCEINLINE FShader*                    CreateSerializedInstace() const
+    FORCEINLINE CShader*                    CreateSerializedInstace() const
     {
         check( ConstructSerializedInstance );
         return ConstructSerializedInstance();
@@ -431,7 +431,7 @@ public:
 	 * @brief Create instance shader for compile
 	 * @return Return new instance of shader
      */
-    FORCEINLINE FShader*                    CreateCompiledInstance() const
+    FORCEINLINE CShader*                    CreateCompiledInstance() const
     {
         check( ConstructCompiledInstance );
         return ConstructCompiledInstance();
@@ -445,7 +445,7 @@ public:
      * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
      * @return Return true if need compile shader, else returning false
      */
-    FORCEINLINE bool ShouldCache( EShaderPlatform InShaderPlatform, FVertexFactoryMetaType* InVFMetaType = nullptr ) const
+    FORCEINLINE bool ShouldCache( EShaderPlatform InShaderPlatform, CVertexFactoryMetaType* InVFMetaType = nullptr ) const
     {
         check( ShouldCacheFunc );
         return ShouldCacheFunc( InShaderPlatform, InVFMetaType );
@@ -457,7 +457,7 @@ public:
      * @param InShaderPlatform Shader platform
      * @param InEnvironment Shader compiler environment
      */
-    FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment ) const
+    FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment ) const
     {
         check( ModifyCompilationEnvironmentFunc );
         ModifyCompilationEnvironmentFunc( InShaderPlatform, InEnvironment );
@@ -479,12 +479,12 @@ private:
     std::wstring                        fileName;                               /**< Source file name */
     std::wstring                        functionName;                           /**< Main function in shader */
     EShaderFrequency                    frequency;                              /**< Frequency of shader */
-    FConstructSerializedInstance        ConstructSerializedInstance;            /**< Pointer to static method for create object of shader for serialize */
-    FConstructCompiledInstance          ConstructCompiledInstance;              /**< Pointer to static method for create object of shader for compiling */
+    ConstructSerializedInstanceFn_t        ConstructSerializedInstance;            /**< Pointer to static method for create object of shader for serialize */
+    ConstructCompiledInstanceFn_t          ConstructCompiledInstance;              /**< Pointer to static method for create object of shader for compiling */
 
 #if WITH_EDITOR
-    FShouldCacheFunc                     ShouldCacheFunc;                        /**< Pointer to static method for check if need compile shader for platform */
-    FModifyCompilationEnvironmentFunc    ModifyCompilationEnvironmentFunc;       /**< Pointer to static method for modify compilation environment */
+    ShouldCacheFn_t                     ShouldCacheFunc;                        /**< Pointer to static method for check if need compile shader for platform */
+    ModifyCompilationEnvironmentFn_t    ModifyCompilationEnvironmentFunc;       /**< Pointer to static method for modify compilation environment */
 #endif // WITH_EDITOR
 };
 
@@ -492,11 +492,11 @@ private:
  * @ingroup Engine
  * @brief Class of management shaders
  */
-class FShaderManager
+class CShaderManager
 {
 public:
-    friend FShaderMetaType;
-    friend class FShaderCompiler;
+    friend CShaderMetaType;
+    friend class CShaderCompiler;
 
     /**
      * @brief Initialize shader manager
@@ -515,7 +515,7 @@ public:
      * @param[in] InVertexFactoryHash Vertex factory hash
      * @return Return reference to shader
      */
-    FShader* FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash );
+    CShader* FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash );
 
     /**
      * @brief Find instance of shader
@@ -545,9 +545,9 @@ public:
      * @param[in] InShaderName Shader name
      * @return Return pointer to shader type, if not found return nullptr
      */
-    static FORCEINLINE FShaderMetaType* FindShaderType( const std::wstring& InShaderName )
+    static FORCEINLINE CShaderMetaType* FindShaderType( const std::wstring& InShaderName )
     {
-        FContainerShaderTypes* container = FContainerShaderTypes::Get();
+        SContainerShaderTypes* container = SContainerShaderTypes::Get();
         check( container );
 
         auto        itShaderType = container->shaderMetaTypes.find( InShaderName );
@@ -563,9 +563,9 @@ public:
      * Get registered shader types
      * @return Return array of registered shader types
      */
-    static FORCEINLINE const std::unordered_map< std::wstring, FShaderMetaType* >& GetShaderTypes()
+    static FORCEINLINE const std::unordered_map< std::wstring, CShaderMetaType* >& GetShaderTypes()
     {
-        return FContainerShaderTypes::Get()->shaderMetaTypes;
+        return SContainerShaderTypes::Get()->shaderMetaTypes;
     }
 
     /**
@@ -581,29 +581,29 @@ private:
      * @ingroup Engine
      * Typedef shader map
      */
-    typedef std::unordered_map< std::wstring, FShader* >        FShaderMap;
+    typedef std::unordered_map< std::wstring, CShader* >        ShaderMap_t;
 
     /**
      * @ingroup Engine
      * Typedef mesh shader map
      */
-    typedef std::unordered_map< uint64, FShaderMap >            FMeshShaderMap;
+    typedef std::unordered_map< uint64, ShaderMap_t >            MeshShaderMap_t;
 
     /**
      * @brief Class container for storage global shader types
      */
-    struct FContainerShaderTypes
+    struct SContainerShaderTypes
     {
         /**
          * @brief Get instance of container
          * @return Return instance of container
          */
-        static FORCEINLINE FContainerShaderTypes*           Get()
+        static FORCEINLINE SContainerShaderTypes*           Get()
         {
-            static FContainerShaderTypes*       container = nullptr;
+            static SContainerShaderTypes*       container = nullptr;
             if ( !container )
             {
-                container = new FContainerShaderTypes();
+                container = new SContainerShaderTypes();
             }
 
             return container;
@@ -615,18 +615,18 @@ private:
 		 * @param[in] InShaderName Name of shader class
 		 * @return Return pointer to new object of shader class
 		 */
-        static FShader*                                   CreateShaderInstance( const tchar* InShaderName );
+        static CShader*                                   CreateShaderInstance( const tchar* InShaderName );
 
-        std::unordered_map< std::wstring, FShaderMetaType* >        shaderMetaTypes;
+        std::unordered_map< std::wstring, CShaderMetaType* >        shaderMetaTypes;
     };
 
     /**
      * @brief Register shader type
      * @param[in] InShaderMetaType Pointer to static meta type by shader
      */
-    static FORCEINLINE void                                 RegisterShaderType( FShaderMetaType* InShaderMetaType )
+    static FORCEINLINE void                                 RegisterShaderType( CShaderMetaType* InShaderMetaType )
     {
-        FContainerShaderTypes*          container = FContainerShaderTypes::Get();
+        SContainerShaderTypes*          container = SContainerShaderTypes::Get();
         check( container && InShaderMetaType );
 
         container->shaderMetaTypes.insert( std::make_pair( InShaderMetaType->GetName(), InShaderMetaType ) );
@@ -640,14 +640,14 @@ private:
      */
     bool                                                    LoadShaders( const tchar* InPathShaderCache );
 
-    FMeshShaderMap            shaders;            /**< Map of loaded shaders */
+    MeshShaderMap_t            shaders;            /**< Map of loaded shaders */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FShaderMetaType*& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, CShaderMetaType*& InValue )
 {
 	if ( InArchive.IsLoading() )
 	{
@@ -656,7 +656,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FShaderMetaType*& InValue
 
 		if ( !shaderTypeName.empty() )
 		{
-            InValue = FShaderManager::FindShaderType( shaderTypeName );
+            InValue = CShaderManager::FindShaderType( shaderTypeName );
 		}
 	}
 	else
@@ -667,7 +667,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FShaderMetaType*& InValue
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FShaderMetaType*& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CShaderMetaType*& InValue )
 {
 	check( InArchive.IsSaving() );
     InArchive << ( InValue ? InValue->GetName() : std::wstring() );

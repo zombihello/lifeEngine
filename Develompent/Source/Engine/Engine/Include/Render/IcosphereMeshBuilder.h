@@ -18,13 +18,13 @@
   * @ingroup Engine
   * @brief Class for build icosphere
   */
-class FIcosphereMeshBuilder
+class CIcosphereMeshBuilder
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FIcosphereMeshBuilder();
+	CIcosphereMeshBuilder();
 
 	/**
 	 * @brief Build mesh
@@ -62,7 +62,7 @@ public:
 	 * @brief Get array of verteces
 	 * @return Return array of verteces
 	 */
-	FORCEINLINE const std::vector< FDynamicMeshVertexType >& GetVerteces() const
+	FORCEINLINE const std::vector< SDynamicMeshVertexType >& GetVerteces() const
 	{
 		return verteces;
 	}
@@ -107,7 +107,7 @@ private:
 	/**
 	 * @brief Functions to extract the texture coord as a key for std::unordered_map and std::unordered_set
 	 */
-	struct FTexCoordKeyFunc
+	struct STexCoordKeyFunc
 	{
 		/**
 		 * @brief Calculate hash of the texture coord
@@ -115,7 +115,7 @@ private:
 		 * @param InTexCoord	Texture coord
 		 * @return Return hash of this texture coord
 		 */
-		FORCEINLINE std::size_t operator()( const FVector2D& InTexCoord ) const
+		FORCEINLINE std::size_t operator()( const Vector2D& InTexCoord ) const
 		{
 			return appMemFastHash( InTexCoord );
 		}
@@ -127,7 +127,7 @@ private:
 		 * @param InB	Second texture coord
 		 * @return Return true if InA and InB equal, else returning false
 		 */
-		FORCEINLINE bool operator()( const FVector2D& InA, const FVector2D& InB ) const
+		FORCEINLINE bool operator()( const Vector2D& InA, const Vector2D& InB ) const
 		{
 			return InA.x < InB.x && InA.y < InB.y;
 		}
@@ -144,7 +144,7 @@ private:
 	 * @brief Compute icosahedron verteces
 	 * @return Return array verteces of icosahedron
 	 */
-	std::vector<FVector4D> ComputeIcosahedronVerteces();
+	std::vector<Vector4D> ComputeIcosahedronVerteces();
 
 	/**
 	 * @brief Add sub vertex
@@ -154,7 +154,7 @@ private:
 	 * @param InNormal		Normal
 	 * @return Return index of vertex
 	 */
-	uint32 AddSubVertex( const FVector4D& InVertex, const FVector2D& InTexCoord, const FVector4D& InNormal );
+	uint32 AddSubVertex( const Vector4D& InVertex, const Vector2D& InTexCoord, const Vector4D& InNormal );
 
 	/**
 	 * @brief Compute face normal
@@ -164,7 +164,7 @@ private:
 	 * @param InVert2	Vertex 2
 	 * @param OutNormal	Computed normal
 	 */
-	void ComputeFaceNormal( const FVector4D& InVert0, const FVector4D& InVert1, const FVector4D& InVert2, FVector4D& OutNormal );
+	void ComputeFaceNormal( const Vector4D& InVert0, const Vector4D& InVert1, const Vector4D& InVert2, Vector4D& OutNormal );
 
 	/**
 	 * @brief Find middle point of 2 vertices
@@ -175,7 +175,7 @@ private:
 	 * @param InLength	Length
 	 * @param OutVert	Computed vertex
 	 */
-	FORCEINLINE void ComputeHalfVertex( const FVector4D& InVert0, const FVector4D& InVert1, float InLength, FVector4D& OutVert )
+	FORCEINLINE void ComputeHalfVertex( const Vector4D& InVert0, const Vector4D& InVert1, float InLength, Vector4D& OutVert )
 	{
 		OutVert = InVert0 + InVert1;
 		OutVert *= ComputeScaleForLength( OutVert, InLength );
@@ -188,7 +188,7 @@ private:
 	 * @param InVertex	Vertex
 	 * @param OutNormal	Computed normal
 	 */
-	FORCEINLINE void ComputeVertexNormal( const FVector4D& InVertex, FVector4D& OutNormal )
+	FORCEINLINE void ComputeVertexNormal( const Vector4D& InVertex, Vector4D& OutNormal )
 	{
 		OutNormal = InVertex * ComputeScaleForLength( InVertex, 1.f );
 	}
@@ -200,9 +200,9 @@ private:
 	 * @param InVertex		Vertex
 	 * @param InLength		Length
 	 */
-	FORCEINLINE float ComputeScaleForLength( const FVector4D& InVertex, float InLength ) const
+	FORCEINLINE float ComputeScaleForLength( const Vector4D& InVertex, float InLength ) const
 	{
-		return InLength / FMath::Sqrt( InVertex.x * InVertex.x + InVertex.y * InVertex.y + InVertex.z * InVertex.z );
+		return InLength / SMath::Sqrt( InVertex.x * InVertex.x + InVertex.y * InVertex.y + InVertex.z * InVertex.z );
 	}
 
 	/**
@@ -213,7 +213,7 @@ private:
 	 * @param InTexCoord1	Texture coord 1
 	 * @param OutTexCoord	Computed new texture coord
 	 */
-	FORCEINLINE void ComputeHalfTexCoord( const FVector2D& InTexCoord0, const FVector2D& InTexCoord1, FVector2D& OutTexCoord )
+	FORCEINLINE void ComputeHalfTexCoord( const Vector2D& InTexCoord0, const Vector2D& InTexCoord1, Vector2D& OutTexCoord )
 	{
 		OutTexCoord = ( InTexCoord0 + InTexCoord1 ) * 0.5f;
 	}
@@ -223,31 +223,31 @@ private:
 	 * @param InTexCoord	Texture coord
 	 * @return Return TRUE if texture coord is shared
 	 */
-	FORCEINLINE bool IsSharedTexCoord( const FVector2D& InTexCoord ) const
+	FORCEINLINE bool IsSharedTexCoord( const Vector2D& InTexCoord ) const
 	{
 		// 20 non-shared line segments
 		const float			s = 0.5;  // Texture steps
 		const float			t = 0.5;
-		static FVector2D	segments[] = {	FVector2D( s,		0		),			FVector2D( 0,		t		),		// 00 - 05
-											FVector2D( s,		0		),			FVector2D( s * 2,	t		),		// 00 - 06
-											FVector2D( s * 3,	0		),			FVector2D( s * 2,	t		),		// 01 - 06
-											FVector2D( s * 3,	0		),			FVector2D( s * 4,	t		),		// 01 - 07
-											FVector2D( s * 5,	0		),			FVector2D( s * 4,	t		),		// 02 - 07
-											FVector2D( s * 5,	0		),			FVector2D( s * 6,	t		),		// 02 - 08
-											FVector2D( s * 7,	0		),			FVector2D( s * 6,	t		),		// 03 - 08
-											FVector2D( s * 7,	0		),			FVector2D( s * 8,	t		),		// 03 - 09
-											FVector2D( s * 9,	0		),			FVector2D( s * 8,	t		),		// 04 - 09
-											FVector2D( s * 9,	0		),			FVector2D( 1,		t * 2	),		// 04 - 14
-											FVector2D( 0,		t		),			FVector2D( s * 2,	1		),		// 05 - 15
-											FVector2D( s * 3,	t * 2	),			FVector2D( s * 2,	1		),		// 10 - 15
-											FVector2D( s * 3,	t * 2	),			FVector2D( s * 4,	1		),		// 10 - 16
-											FVector2D( s * 5,	t * 2	),			FVector2D( s * 4,	1		),		// 11 - 16
-											FVector2D( s * 5,	t * 2	),			FVector2D( s * 6,	1		),		// 11 - 17
-											FVector2D( s * 7,	t * 2	),			FVector2D( s * 6,	1		),		// 12 - 17
-											FVector2D( s * 7,	t * 2	),			FVector2D( s * 8,	1		),		// 12 - 18
-											FVector2D( s * 9,	t * 2	),			FVector2D( s * 8,	1		),		// 13 - 18
-											FVector2D( s * 9,	t * 2	),			FVector2D( s * 10,	1		),		// 13 - 19
-											FVector2D( 1,		t * 2	),			FVector2D( s * 10,	1		) };	// 14 - 19
+		static Vector2D	segments[] = {	Vector2D( s,		0		),			Vector2D( 0,		t		),		// 00 - 05
+										Vector2D( s,		0		),			Vector2D( s * 2,	t		),		// 00 - 06
+										Vector2D( s * 3,	0		),			Vector2D( s * 2,	t		),		// 01 - 06
+										Vector2D( s * 3,	0		),			Vector2D( s * 4,	t		),		// 01 - 07
+										Vector2D( s * 5,	0		),			Vector2D( s * 4,	t		),		// 02 - 07
+										Vector2D( s * 5,	0		),			Vector2D( s * 6,	t		),		// 02 - 08
+										Vector2D( s * 7,	0		),			Vector2D( s * 6,	t		),		// 03 - 08
+										Vector2D( s * 7,	0		),			Vector2D( s * 8,	t		),		// 03 - 09
+										Vector2D( s * 9,	0		),			Vector2D( s * 8,	t		),		// 04 - 09
+										Vector2D( s * 9,	0		),			Vector2D( 1,		t * 2	),		// 04 - 14
+										Vector2D( 0,		t		),			Vector2D( s * 2,	1		),		// 05 - 15
+										Vector2D( s * 3,	t * 2	),			Vector2D( s * 2,	1		),		// 10 - 15
+										Vector2D( s * 3,	t * 2	),			Vector2D( s * 4,	1		),		// 10 - 16
+										Vector2D( s * 5,	t * 2	),			Vector2D( s * 4,	1		),		// 11 - 16
+										Vector2D( s * 5,	t * 2	),			Vector2D( s * 6,	1		),		// 11 - 17
+										Vector2D( s * 7,	t * 2	),			Vector2D( s * 6,	1		),		// 12 - 17
+										Vector2D( s * 7,	t * 2	),			Vector2D( s * 8,	1		),		// 12 - 18
+										Vector2D( s * 9,	t * 2	),			Vector2D( s * 8,	1		),		// 13 - 18
+										Vector2D( s * 9,	t * 2	),			Vector2D( s * 10,	1		),		// 13 - 19
+										Vector2D( 1,		t * 2	),			Vector2D( s * 10,	1		) };	// 14 - 19
 
 		// Check the point with all 20 line segments
 		// if it is on the line segment, it is non-shared
@@ -270,7 +270,7 @@ private:
 	 * @param InB	Texture coord B
 	 * @param InC	Texture coord C
 	 */
-	FORCEINLINE bool IsOnLineSegment( const FVector2D& InA, const FVector2D& InB, const FVector2D& InC ) const
+	FORCEINLINE bool IsOnLineSegment( const Vector2D& InA, const Vector2D& InB, const Vector2D& InC ) const
 	{
 		const float			epsilon = 0.0001f;
 
@@ -297,9 +297,9 @@ private:
 	uint32															subdivision;		/**< Subdivision */
 	float															radius;				/**< Radius */
 	uint32															numPrimitives;		/**< Number primitives in builded mesh */
-	std::vector< FDynamicMeshVertexType >							verteces;			/**< Array of verteces */
+	std::vector< SDynamicMeshVertexType >							verteces;			/**< Array of verteces */
 	std::vector< uint32 >											indeces;			/**< Array of indeces */
-	std::unordered_map< FVector2D, uint32, FTexCoordKeyFunc >		sharedIndeces;		/**< Shared indeces */
+	std::unordered_map< Vector2D, uint32, STexCoordKeyFunc >		sharedIndeces;		/**< Shared indeces */
 };
 
 #endif // !ICOSPHEREMESHBUILDER_H

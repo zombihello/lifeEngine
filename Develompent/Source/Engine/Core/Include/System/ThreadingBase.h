@@ -184,13 +184,13 @@ extern FORCEINLINE void appSleep( float InSeconds );
  * If it succeeds, Run() is called where the real threaded work is done. Upon
  * completion, Exit() is called to allow correct clean up.
  */
-class FRunnable
+class CRunnable
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FRunnable() {}
+	virtual ~CRunnable() {}
 
 	/**
 	 * @brief Initialize
@@ -235,13 +235,13 @@ public:
  * This is the base interface for all runnable thread classes. It specifies the
  * methods used in managing its life cycle.
  */
-class FRunnableThread
+class CRunnableThread
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FRunnableThread() {}
+	virtual ~CRunnableThread() {}
 
 	/**
 	 * Tells the OS the preferred CPU to run the thread on. NOTE: Don't use
@@ -299,13 +299,13 @@ public:
  * This is the factory interface for creating threads. Each platform must
  * implement this with all the correct platform semantics
  */
-class FThreadFactory
+class CThreadFactory
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FThreadFactory() {}
+	virtual ~CThreadFactory() {}
 
 	/**
 	 * Creates the thread with the specified stack size and thread priority.
@@ -319,39 +319,39 @@ public:
 	 *
 	 * @return The newly created thread or nullptr if it failed
 	 */
-	virtual FRunnableThread* CreateThread( FRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf = false, bool InIsAutoDeleteRunnable = false, uint32 InStackSize = 0, EThreadPriority InThreadPriority = TP_Normal ) = 0;
+	virtual CRunnableThread* CreateThread( CRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf = false, bool InIsAutoDeleteRunnable = false, uint32 InStackSize = 0, EThreadPriority InThreadPriority = TP_Normal ) = 0;
 
 	/**
 	 * Cleans up the specified thread object using the correct heap
 	 *
 	 * @param[in] InThread The thread object to destroy
 	 */
-	virtual void Destroy( FRunnableThread* InThread ) = 0;
+	virtual void Destroy( CRunnableThread* InThread ) = 0;
 };
 
 /*
  * @ingroup Core
  * Global factory for creating threads
  */
-extern FThreadFactory*			GThreadFactory;
+extern CThreadFactory*			GThreadFactory;
 
 /**
  * @ingroup Core
  * Simple base class for polymorphic cleanup
  */
-class FSynchronize
+class CSynchronize
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FSynchronize() {}
+	virtual ~CSynchronize() {}
 };
 
 /**
  * Forward declaration for a platform specific implementation
  */
-class FCriticalSection;
+class ÑCriticalSection;
 
 /**
  * @ingroup Core
@@ -360,13 +360,13 @@ class FCriticalSection;
  * to wait for another thread to signal that it is ready for the waiting thread
  * to do some work. Very useful for telling groups of threads to exit.
  */
-class FEvent : public FSynchronize
+class CEvent : public CSynchronize
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FEvent() {}
+	virtual ~CEvent() {}
 
 	/**
 	 * Creates the event. Manually reset events stay triggered until reset.
@@ -407,13 +407,13 @@ public:
  * 
  * This class is the abstract representation of a semaphore object
  */
-class FSemaphore : public FSynchronize
+class CSemaphore : public CSynchronize
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FSemaphore() {}
+	virtual ~CSemaphore() {}
 
 	/**
 	 * Create semaphore
@@ -469,20 +469,20 @@ public:
  * the various synchronization objects. NOTE: The malloc used by it must be
  * thread safe
  */
-class FSynchronizeFactory
+class CSynchronizeFactory
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FSynchronizeFactory() {}
+	virtual ~CSynchronizeFactory() {}
 
 	/**
 	 * Creates a new critical section
 	 *
 	 * @return The new critical section object or nullptr otherwise
 	 */
-	virtual FCriticalSection* CreateCriticalSection() = 0;
+	virtual ÑCriticalSection* CreateCriticalSection() = 0;
 
 	/**
 	 * Creates a new event
@@ -491,7 +491,7 @@ public:
 	 * @param[in] InName Whether to use a commonly shared event or not. If so this is the name of the event to share.
 	 * @return Returns the new event object if successful, NULL otherwise
 	 */
-	virtual FEvent* CreateSynchEvent( bool InIsManualReset = false, const tchar* InName = nullptr ) = 0;
+	virtual CEvent* CreateSynchEvent( bool InIsManualReset = false, const tchar* InName = nullptr ) = 0;
 
 	/**
 	 * Creates a new semaphore object
@@ -500,7 +500,7 @@ public:
 	 * @param[in] InInitialCount
 	 * @return Returns the new semaphore object if successful, nullptr otherwise
 	 */
-	virtual FSemaphore* CreateSemaphore( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName = nullptr ) = 0;
+	virtual CSemaphore* CreateSemaphore( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName = nullptr ) = 0;
 
 
 	/**
@@ -508,14 +508,14 @@ public:
 	 *
 	 * @param[in] InSynchObj The synchronization object to destroy
 	 */
-	virtual void Destroy( FSynchronize* InSynchObj ) = 0;
+	virtual void Destroy( CSynchronize* InSynchObj ) = 0;
 };
 
 /*
  * @ingroup Core
  * Global factory for creating synchronization objects
  */
-extern FSynchronizeFactory*				GSynchronizeFactory;
+extern CSynchronizeFactory*				GSynchronizeFactory;
 
 // Include platform specific implementation
 #if PLATFORM_WINDOWS
@@ -533,14 +533,14 @@ extern FSynchronizeFactory*				GSynchronizeFactory;
  * <code>
  *	{
  *		// Syncronize thread access to the following data
- *		FScopeLock		scopeLock( criticalSection );
+ *		CScopeLock		scopeLock( criticalSection );
  *		// Access data that is shared among multiple threads
  *		...
  *		// When ScopeLock goes out of scope, other threads can access data
  *	}
  * </code>
  */
-class FScopeLock
+class CScopeLock
 {
 public:
 	/**
@@ -548,7 +548,7 @@ public:
 	 *
 	 * @param[in] InSynchObject The synchronization object to manage
 	 */
-	FScopeLock( FCriticalSection* InSynchObject ) :
+	CScopeLock( ÑCriticalSection* InSynchObject ) :
 		synchObject( InSynchObject )
 	{
 		check( synchObject );
@@ -560,7 +560,7 @@ public:
 	 *
 	 * @param[in] InSynchObject The synchronization object to manage
 	 */
-	FScopeLock( FCriticalSection& InSynchObject ) :
+	CScopeLock( ÑCriticalSection& InSynchObject ) :
 		synchObject( &InSynchObject )
 	{
 		check( synchObject );
@@ -570,7 +570,7 @@ public:
 	/**
 	 * Destructor that performs a release on the synchronization object
 	 */
-	~FScopeLock()
+	~CScopeLock()
 	{
 		check( synchObject );
 		synchObject->Unlock();
@@ -580,7 +580,7 @@ private:
 	/**
 	 * Default constructor hidden on purpose
 	 */
-	FScopeLock() : synchObject( nullptr ) 
+	CScopeLock() : synchObject( nullptr ) 
 	{}
 
 	/**
@@ -588,7 +588,7 @@ private:
 	 *
 	 * @param[in] InScopeLock Ignored
 	 */
-	FScopeLock( FScopeLock* InScopeLock ) : synchObject( nullptr )
+	CScopeLock( CScopeLock* InScopeLock ) : synchObject( nullptr )
 	{}
 
 	/**
@@ -596,11 +596,11 @@ private:
 	 *
 	 * @param[in] InScopeLock Ignored
 	 */
-	FORCEINLINE FScopeLock& operator=( FScopeLock& InScopeLock ) 
+	FORCEINLINE CScopeLock& operator=( CScopeLock& InScopeLock ) 
 	{ 
 		return *this; 
 	}
 
-	FCriticalSection*		synchObject;		/**< The synchronization object to aggregate and scope manage */
+	ÑCriticalSection*		synchObject;		/**< The synchronization object to aggregate and scope manage */
 };
 #endif // !THREADINGBASE_H

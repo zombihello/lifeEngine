@@ -22,13 +22,13 @@
  * @ingroup Engine
  * Declare delegate of process input action
  */
-DECLARE_DELEGATE( FOnInputActionDelegate );
+DECLARE_DELEGATE( COnInputActionDelegate );
 
 /**
  * @ingroup Engine
  * Declare delegate of process input axis
  */
-DECLARE_DELEGATE( FOnInputAxisDelegate, float );
+DECLARE_DELEGATE( COnInputAxisDelegate, float );
 
 /**
  * @ingroup Engine
@@ -45,9 +45,9 @@ enum EInputEvent
  * @ingroup Engine
  * Component for work inputs in actors
  */
-class LInputComponent : public LActorComponent
+class CInputComponent : public CActorComponent
 {
-	DECLARE_CLASS( LInputComponent, LActorComponent )
+	DECLARE_CLASS( CInputComponent, CActorComponent )
 
 public:
 	/**
@@ -86,9 +86,9 @@ public:
 	 * @param InTriggerEvent Button event when triggered this action
 	 * @param InDelegate Delegate
 	 */
-	FORCEINLINE void BindAction( const std::wstring& InName, EInputEvent InTriggerEvent, const FOnInputActionDelegate::FDelegateType& InDelegate )
+	FORCEINLINE void BindAction( const std::wstring& InName, EInputEvent InTriggerEvent, const COnInputActionDelegate::DelegateType_t& InDelegate )
 	{
-		FInputActionMap::iterator		it = inputActionMap.find( InName );
+		InputActionMap_t::iterator		it = inputActionMap.find( InName );
 		if ( it == inputActionMap.end() )
 		{
 			return;
@@ -104,9 +104,9 @@ public:
 	 * @param InName Name axis
 	 * @param InDelegate Delegate
 	 */
-	FORCEINLINE void BindAxis( const std::wstring& InName, const FOnInputAxisDelegate::FDelegateType& InDelegate )
+	FORCEINLINE void BindAxis( const std::wstring& InName, const COnInputAxisDelegate::DelegateType_t& InDelegate )
 	{
-		FInputAxisMap::iterator		it = inputAxisMap.find( InName );
+		InputAxisMap_t::iterator		it = inputAxisMap.find( InName );
 		if ( it == inputAxisMap.end() )
 		{
 			return;
@@ -118,40 +118,40 @@ private:
 	/**
 	 * Struct description of input action
 	 */
-	struct FInputAction
+	struct SInputAction
 	{
 		std::wstring					name;								/**< Name of action */
 		std::vector< EButtonCode >		buttons;							/**< Buttons for trigger action */
-		FOnInputActionDelegate			inputActionDelegate[ IE_Num ];		/**< Array of delegates per input event */
+		COnInputActionDelegate			inputActionDelegate[ IE_Num ];		/**< Array of delegates per input event */
 	};
 
 	/**
 	 * Struct description of input axis
 	 */
-	struct FInputAxis
+	struct SInputAxis
 	{
 		/**
 		 * Typedef of pair EButtonCode and float (scale)
 		 */
-		typedef std::pair< EButtonCode, float >			FPairAxisButton;
+		typedef std::pair< EButtonCode, float >			PairAxisButton_t;
 
 		std::wstring							name;				/**< Name of action */
-		std::vector< FPairAxisButton >			buttons;			/**< Buttons for trigger action */
-		FOnInputAxisDelegate					inputAxisDelegate;	/**< Array of delegates per input event */
+		std::vector< PairAxisButton_t >			buttons;			/**< Buttons for trigger action */
+		COnInputAxisDelegate					inputAxisDelegate;	/**< Array of delegates per input event */
 	};
 
 	/**
 	 * Typedef of input action map
 	 */
-	typedef std::unordered_map< std::wstring, FInputAction >		FInputActionMap;
+	typedef std::unordered_map< std::wstring, SInputAction >		InputActionMap_t;
 
 	/**
 	 * Typedef of input axis map
 	 */
-	typedef std::unordered_map< std::wstring, FInputAxis >			FInputAxisMap;
+	typedef std::unordered_map< std::wstring, SInputAxis >			InputAxisMap_t;
 
-	FInputActionMap				inputActionMap;		/**< Input action map */
-	FInputAxisMap				inputAxisMap;		/**< Input axis map */
+	InputActionMap_t			inputActionMap;		/**< Input action map */
+	InputAxisMap_t				inputAxisMap;		/**< Input axis map */
 };
 
 #endif // !INPUTCOMPONENT_H

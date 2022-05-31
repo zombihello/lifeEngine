@@ -7,17 +7,17 @@
 #include "Render/SceneRenderTargets.h"
 #include "Render/Scene.h"
 
-FViewport::FViewport() 
+CViewport::CViewport() 
 	: windowHandle( nullptr )
 	, viewportClient( nullptr )
 	, sizeX( 0 )
 	, sizeY( 0 )
 {}
 
-FViewport::~FViewport()
+CViewport::~CViewport()
 {}
 
-void FViewport::InitRHI()
+void CViewport::InitRHI()
 {
 	// If viewport already created - we need resize
 	if ( viewportRHI )
@@ -31,17 +31,17 @@ void FViewport::InitRHI()
 	}
 }
 
-void FViewport::UpdateRHI()
+void CViewport::UpdateRHI()
 {
 	InitRHI();
 }
 
-void FViewport::ReleaseRHI()
+void CViewport::ReleaseRHI()
 {
 	viewportRHI.SafeRelease();
 }
 
-void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, void* InNewWindowHandle )
+void CViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, void* InNewWindowHandle )
 {
 	bool	isNewWindowHandle = windowHandle != InNewWindowHandle;
 
@@ -80,7 +80,7 @@ void FViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 	}
 }
 
-void FViewport::Tick( float InDeltaSeconds )
+void CViewport::Tick( float InDeltaSeconds )
 {
 	if ( viewportClient )
 	{
@@ -88,7 +88,7 @@ void FViewport::Tick( float InDeltaSeconds )
 	}
 }
 
-void FViewport::Draw( bool InIsShouldPresent /* = true */ )
+void CViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
 	if ( !IsInitialized() )
 	{
@@ -96,10 +96,10 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 	}
 
 	// Begin drawing viewport
-	UNIQUE_RENDER_COMMAND_ONEPARAMETER( FBeginRenderCommand,
-										FViewportRHIRef, viewportRHI, viewportRHI,
+	UNIQUE_RENDER_COMMAND_ONEPARAMETER( CBeginRenderCommand,
+										ViewportRHIRef_t, viewportRHI, viewportRHI,
 										{
-											FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+											CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 											GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
 										} );
 
@@ -110,11 +110,11 @@ void FViewport::Draw( bool InIsShouldPresent /* = true */ )
 	}
 
 	// End drawing viewport
-	UNIQUE_RENDER_COMMAND_TWOPARAMETER( FEndRenderCommand,
-										FViewportRHIRef, viewportRHI, viewportRHI,
+	UNIQUE_RENDER_COMMAND_TWOPARAMETER( CEndRenderCommand,
+										ViewportRHIRef_t, viewportRHI, viewportRHI,
 										bool, isShouldPresent, InIsShouldPresent,
 										{
-											FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+											CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 											GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
 										} );
 }

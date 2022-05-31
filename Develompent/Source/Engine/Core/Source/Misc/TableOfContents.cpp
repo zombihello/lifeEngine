@@ -6,7 +6,7 @@
 #include "Containers/StringConv.h"
 #include "System/Package.h"
 
-void FTableOfContets::Serialize( FArchive& InArchive )
+void CTableOfContets::Serialize( CArchive& InArchive )
 {
 	if ( InArchive.IsLoading() )
 	{
@@ -27,7 +27,7 @@ void FTableOfContets::Serialize( FArchive& InArchive )
 		while ( strStream >> strGuid >> strName >> strPath )
 		{
 			// Add content to table
-			FGuid			guid;
+			CGuid			guid;
 			if ( !guid.InitFromString( ANSI_TO_TCHAR( strGuid.c_str() ) ) )
 			{ 
 				LE_LOG( LT_Warning, LC_Package, TEXT( "Failed init GUID for content '%s'" ), ANSI_TO_TCHAR( strPath.c_str() ) );
@@ -43,7 +43,7 @@ void FTableOfContets::Serialize( FArchive& InArchive )
 	{
 		for ( auto itEntry = guidEntries.begin(), itEntryEnd = guidEntries.end(); itEntry != itEntryEnd; ++itEntry )
 		{
-			const FTOCEntry&		tocEntry = itEntry->second;
+			const STOCEntry&		tocEntry = itEntry->second;
 
 			//						GUID													Name										Path to content
 			InArchive << TCHAR_TO_ANSI( itEntry->first.String().c_str() ) << " " << TCHAR_TO_ANSI( tocEntry.name.c_str() ) << " " << TCHAR_TO_ANSI( tocEntry.path.c_str() ) << "\n";
@@ -51,9 +51,9 @@ void FTableOfContets::Serialize( FArchive& InArchive )
 	}
 }
 
-void FTableOfContets::AddEntry( const std::wstring& InPath )
+void CTableOfContets::AddEntry( const std::wstring& InPath )
 {
-	FPackageRef		package = GPackageManager->LoadPackage( InPath );
+	PackageRef_t		package = GPackageManager->LoadPackage( InPath );
 	if ( package )
 	{
 		AddEntry( package->GetGUID(), package->GetName(), InPath );
@@ -61,9 +61,9 @@ void FTableOfContets::AddEntry( const std::wstring& InPath )
 	}
 }
 
-void FTableOfContets::RemoveEntry( const std::wstring& InPath )
+void CTableOfContets::RemoveEntry( const std::wstring& InPath )
 {
-	FPackageRef		package = GPackageManager->LoadPackage( InPath );
+	PackageRef_t		package = GPackageManager->LoadPackage( InPath );
 	if ( package )
 	{
 		RemoveEntry( package->GetGUID() );

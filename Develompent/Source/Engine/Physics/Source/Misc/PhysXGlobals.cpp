@@ -15,5 +15,5 @@ physx::PxErrorCallback*			GPhysXError				= nullptr;
 physx::PxPvd*					GPhysXVisualDebugger	= nullptr;
 #endif // !SHIPPING_BUILD
 
-FPhysXScene						GPhysicsScene;
+CPhysXScene						GPhysicsScene;
 #endif // WITH_PHYSX

@@ -23,7 +23,7 @@ uint32 appSampleFormatToEngine( ESampleFormat InSampleFormat )
 	}
 }
 
-FAudioDevice::FAudioDevice()
+ÑAudioDevice::ÑAudioDevice()
 	: bIsMuted( false )
 	, alDevice( nullptr )
 	, alContext( nullptr )
@@ -31,12 +31,12 @@ FAudioDevice::FAudioDevice()
 	, platformAudioHeadroom( 1.f )
 {}
 
-FAudioDevice::~FAudioDevice()
+ÑAudioDevice::~ÑAudioDevice()
 {
 	Shutdown();
 }
 
-void FAudioDevice::Init()
+void ÑAudioDevice::Init()
 {
 	// Open audio device
 	alDevice = alcOpenDevice( nullptr );
@@ -81,7 +81,7 @@ void FAudioDevice::Init()
 	if ( headroom != 0.f )
 	{
 		// Convert dB to linear volume
-		platformAudioHeadroom = FMath::Pow( 10.f, headroom / 20.f );
+		platformAudioHeadroom = SMath::Pow( 10.f, headroom / 20.f );
 	}
 	else
 	{
@@ -91,19 +91,19 @@ void FAudioDevice::Init()
 	// Getting global volume from config
 	float		globalVolume = 1.f;
 	{
-		FConfigValue		configGlobalVolume = GEngineConfig.GetValue( TEXT( "Audio.Audio" ), TEXT( "GlobalVolume" ) );
-		if ( configGlobalVolume.IsValid() && ( configGlobalVolume.GetType() == FConfigValue::T_Int || configGlobalVolume.GetType() == FConfigValue::T_Float ) )
+		CConfigValue		configGlobalVolume = GEngineConfig.GetValue( TEXT( "Audio.Audio" ), TEXT( "GlobalVolume" ) );
+		if ( configGlobalVolume.IsValid() && ( configGlobalVolume.GetType() == CConfigValue::T_Int || configGlobalVolume.GetType() == CConfigValue::T_Float ) )
 		{
 			globalVolume = configGlobalVolume.GetNumber();
 		}
 	}
 
 	// Initialize listener spatial
-	SetListenerSpatial( FMath::vectorZero, FMath::vectorForward, FMath::vectorUp );
+	SetListenerSpatial( SMath::vectorZero, SMath::vectorForward, SMath::vectorUp );
 	SetGlobalVolume( globalVolume );
 }
 
-void FAudioDevice::Shutdown()
+void ÑAudioDevice::Shutdown()
 {
 	alcMakeContextCurrent( nullptr );
 	if ( alContext )
@@ -120,7 +120,7 @@ void FAudioDevice::Shutdown()
 	alDevice = nullptr;
 }
 
-bool FAudioDevice::IsExtensionSupported( const std::string& InExtension ) const
+bool ÑAudioDevice::IsExtensionSupported( const std::string& InExtension ) const
 {
 	if ( InExtension.size() > 2 && InExtension.substr( 0, 3 ) == "ALC" )
 	{

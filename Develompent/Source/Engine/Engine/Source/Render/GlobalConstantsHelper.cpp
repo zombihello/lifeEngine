@@ -1,6 +1,6 @@
 #include "Render/GlobalConstantsHelper.h"
 
-void SetGlobalConstants( FGlobalConstantBufferContents& OutGlobalContents, const FSceneView& InSceneView )
+void SetGlobalConstants( SGlobalConstantBufferContents& OutGlobalContents, const CSceneView& InSceneView )
 {
 	OutGlobalContents.viewMatrix				= InSceneView.GetViewMatrix();
 	OutGlobalContents.projectionMatrix			= InSceneView.GetProjectionMatrix();

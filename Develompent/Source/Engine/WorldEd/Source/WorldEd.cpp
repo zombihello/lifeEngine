@@ -23,9 +23,9 @@
 /**
  * Globals
  */
-FEditorDelegates::FOnAssetsCanDelete	FEditorDelegates::onAssetsCanDelete;
-FEditorDelegates::FOnAssetsDeleted		FEditorDelegates::onAssetsDeleted;
-FEditorDelegates::FOnAssetsReloaded		FEditorDelegates::onAssetsReloaded;
+SEditorDelegates::COnAssetsCanDelete	SEditorDelegates::onAssetsCanDelete;
+SEditorDelegates::COnAssetsDeleted		SEditorDelegates::onAssetsDeleted;
+SEditorDelegates::COnAssetsReloaded		SEditorDelegates::onAssetsReloaded;
 
 void QtMessageOutput( QtMsgType InType, const QMessageLogContext& InContext, const QString& InMessage )
 {
@@ -89,8 +89,8 @@ int32 appWorldEdEntry( const tchar* InCmdLine )
 		}
 	}
 
-	GEditorEngine = GEngine->Cast< LEditorEngine >();
-	checkMsg( GEditorEngine, TEXT( "Class of engine for editor must be inherited from LEditorEngine" ) );
+	GEditorEngine = GEngine->Cast< CEditorEngine >();
+	checkMsg( GEditorEngine, TEXT( "Class of engine for editor must be inherited from CEditorEngine" ) );
 
 	int32		result = GEngineLoop->Init( InCmdLine );
 	check( result == 0 );
@@ -122,7 +122,7 @@ std::wstring appGetWorldEdName()
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
 
-	return FString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
+	return ÑString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
 }
 
 QMessageBox::StandardButton ShowMessageBoxWithList( class QWidget* InParent, const QString& InTitle, const QString& InText, const QString& InListName, const std::vector<QString>& InList, bool InIsError /* = false */, uint32 InMaxSizeList /* = 3 */ )
@@ -144,7 +144,7 @@ QMessageBox::StandardButton ShowMessageBoxWithList( class QWidget* InParent, con
 		}
 	}
 
-	QString		finalText = QString::fromStdWString( FString::Format( TEXT( "%s<br><br><b>%s:</b><br>%s" ), InText.toStdWString().c_str(), InListName.toStdWString().c_str(), resultList.toStdWString().c_str() ) );
+	QString		finalText = QString::fromStdWString( ÑString::Format( TEXT( "%s<br><br><b>%s:</b><br>%s" ), InText.toStdWString().c_str(), InListName.toStdWString().c_str(), resultList.toStdWString().c_str() ) );
 	if ( InIsError )
 	{
 		return QMessageBox::critical( InParent, InTitle, finalText, QMessageBox::Ok );

@@ -37,18 +37,18 @@ uint32 appButtonCodeToScanCode( EButtonCode InButtonCode );
  * @ingroup WindowsPlatform
  * @brief The class for work with window on Windows
  */
-class FWindowsWindow : public FBaseWindow
+class CWindowsWindow : public CBaseWindow
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-									FWindowsWindow();
+									CWindowsWindow();
 
 	/**
 	 * @brief Destructor
 	 */
-									~FWindowsWindow();
+									~CWindowsWindow();
 
 	/**
 	 * @brief Create window

@@ -41,7 +41,7 @@ extern const uint32 GConstantBufferSizes[ SOB_Max ];
  * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 vertex buffer
  */
-class FD3D11VertexBufferRHI : public FBaseVertexBufferRHI
+class CD3D11VertexBufferRHI : public CBaseVertexBufferRHI
 {
 public:
 	/**
@@ -51,12 +51,12 @@ public:
 	 * @param[in] InData Pointer to data for buffer
 	 * @param[in] InBufferName Buffer name
 	 */
-	FD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, const byte* InData, const tchar* InBufferName );
+	CD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, const byte* InData, const tchar* InBufferName );
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FD3D11VertexBufferRHI();
+	virtual ~CD3D11VertexBufferRHI();
 
 	/**
 	 * @brief Get pointer to DirectX 11 buffer
@@ -75,7 +75,7 @@ private:
  * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 index buffer
  */
-class FD3D11IndexBufferRHI : public FBaseIndexBufferRHI
+class CD3D11IndexBufferRHI : public CBaseIndexBufferRHI
 {
 public:
 	/**
@@ -86,12 +86,12 @@ public:
 	 * @param[in] InData Pointer to data for buffer
 	 * @param[in] InBufferName Buffer name
 	 */
-	FD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uint32 InSize, const byte* InData, const tchar* InBufferName );
+	CD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uint32 InSize, const byte* InData, const tchar* InBufferName );
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FD3D11IndexBufferRHI();
+	virtual ~CD3D11IndexBufferRHI();
 
 	/**
 	 * @brief Get pointer to DirectX 11 buffer
@@ -110,7 +110,7 @@ private:
  * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 constant buffer
  */
-class FD3D11ConstantBuffer : public FBaseResourceRHI
+class CD3D11ConstantBuffer : public CBaseResourceRHI
 {
 public:
 	/**
@@ -119,12 +119,12 @@ public:
 	 * @param[in] InSize Size buffer
 	 * @param[in] InBufferName Buffer name
 	 */
-	FD3D11ConstantBuffer( uint32 InSize, const tchar* InBufferName );
+	CD3D11ConstantBuffer( uint32 InSize, const tchar* InBufferName );
 
 	/**
 	 * Destructor
 	 */
-	virtual ~FD3D11ConstantBuffer();
+	virtual ~CD3D11ConstantBuffer();
 
 	/**
 	 * Update data in buffer
@@ -140,7 +140,7 @@ public:
 	 * 
 	 * @param[in] InDeviceContext Device context
 	 */
-	void CommitConstantsToDevice( class FD3D11DeviceContext* InDeviceContext );
+	void CommitConstantsToDevice( class CD3D11DeviceContext* InDeviceContext );
 
 	/**
 	 * Clear data

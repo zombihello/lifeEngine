@@ -18,7 +18,7 @@
  * @ingroup D3D11RHI
  * Class of base texture for DirectX 11
  */
-class FD3D11TextureRHI : public FBaseTextureRHI
+class CD3D11TextureRHI : public CBaseTextureRHI
 {
 public:
 	/**
@@ -30,12 +30,12 @@ public:
 	 * @param[in] InFormat Pixel format in texture
 	 * @param[in] InFlags Texture create flags (use ETextureCreateFlags)
 	 */
-	FD3D11TextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags );
+	CD3D11TextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags );
 
 	/**
 	 * Destructor
 	 */
-	virtual ~FD3D11TextureRHI();
+	virtual ~CD3D11TextureRHI();
 
 	/**
 	 * Get shader resource view
@@ -74,7 +74,7 @@ protected:
  * @ingroup D3D11RHI
  * Class for work with texture 2D in DirectX 11
  */
-class FD3D11Texture2DRHI : public FD3D11TextureRHI
+class CD3D11Texture2DRHI : public CD3D11TextureRHI
 {
 public:
 	/**
@@ -88,12 +88,12 @@ public:
 	 * @param[in] InFlags Texture create flags (use ETextureCreateFlags)
 	 * @param[in] InData Pointer to data texture
 	 */
-	FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags, void* InData = nullptr );
+	CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags, void* InData = nullptr );
 
 	/**
 	 * Destructor
 	 */
-	~FD3D11Texture2DRHI();
+	~CD3D11Texture2DRHI();
 
 	/**
 	 * Lock texture for read/write
@@ -104,7 +104,7 @@ public:
 	 * @param[in] InIsUseCPUShadow Is use CPU shadow
 	 * @param[out] OutLockedData Locked data in texture
 	 */
-	void Lock( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, struct FLockedData& OutLockedData );
+	void Lock( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, struct SLockedData& OutLockedData );
 
 	/**
 	 * Unlock texture for apply changes to texture
@@ -114,7 +114,7 @@ public:
 	 * @param[in] InLockedData Locked data
 	 * @param[in] InDiscardUpdate Disczrd update
 	 */
-	void Unlock( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, struct FLockedData& InLockedData, bool InDiscardUpdate = false );
+	void Unlock( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, struct SLockedData& InLockedData, bool InDiscardUpdate = false );
 
 	/**
 	 * Get DirectX resource
@@ -136,7 +136,7 @@ private:
 	 * @param[in] InFormat Pixel format in texture
 	 * @param[in] InFlags Texture create flags (use ETextureCreateFlags)
 	 */
-	FD3D11Texture2DRHI( ID3D11Texture2D* InD3D11Texture2D, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags );
+	CD3D11Texture2DRHI( ID3D11Texture2D* InD3D11Texture2D, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags );
 
 	/**
 	 * Create staging resource for lock
@@ -149,7 +149,7 @@ private:
 	 * @param[in] InIsUseCPUShadow Is use CPU shadow
 	 * @return Pointer to created staging texture 2D
 	 */
-	FD3D11Texture2DRHI* CreateStagingResource( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipSizeX, uint32 InMipSizeY, uint32 InSubresource, bool InIsDataWrite, bool InIsUseCPUShadow );
+	CD3D11Texture2DRHI* CreateStagingResource( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMipSizeX, uint32 InMipSizeY, uint32 InSubresource, bool InIsDataWrite, bool InIsUseCPUShadow );
 
 	ID3D11Texture2D*			d3d11Texture2D;			/**< Pointer to DirectX texture 2D */
 };
@@ -158,7 +158,7 @@ private:
  * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 surface
  */
-class FD3D11Surface : public FBaseSurfaceRHI
+class CD3D11Surface : public CBaseSurfaceRHI
 {
 public:
 	/**
@@ -166,19 +166,19 @@ public:
 	 * 
 	 * @param[in] InRenderTargetView Render target view
 	 */
-	FD3D11Surface( ID3D11RenderTargetView* InRenderTargetView );
+	CD3D11Surface( ID3D11RenderTargetView* InRenderTargetView );
 
 	/**
 	 * Constructor
 	 * 
 	 * @param[in] InResolveTargetTexture The 2d texture which the surface will be resolved to.  It must have been allocated with bResolveTargetable=TRUE
 	 */
-	FD3D11Surface( FTexture2DRHIParamRef InResolveTargetTexture );
+	CD3D11Surface( Texture2DRHIParamRef_t InResolveTargetTexture );
 
 	/**
 	 * @brief Destructor
 	 */
-	~FD3D11Surface();
+	~CD3D11Surface();
 
 	/**
 	 * @brief Get render target view
@@ -211,7 +211,7 @@ private:
 	ID3D11ShaderResourceView*				d3d11ShaderResourceView;		/**< The view that is used to access the texture from a shader */
 	ID3D11RenderTargetView*					d3d11RenderTargetView;			/**< The view that is used to render to the texture for shader-based resolve */
 	ID3D11DepthStencilView*					d3d11DepthStencilView;			/**< The view that is used to render to the texture for shader-based resolve of depth format textures */
-	TRefCountPtr< FD3D11Texture2DRHI >		resolveTarget2D;				/**< 2D texture to resolve surface to */
+	TRefCountPtr< CD3D11Texture2DRHI >		resolveTarget2D;				/**< 2D texture to resolve surface to */
 };
 
 #endif // D3D11SURFACE_H

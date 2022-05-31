@@ -16,7 +16,7 @@
  * @ingroup Engine
  * Frustum for culling in scene
  */
-class FFrustum
+class CFrustum
 {
 public:
 	/**
@@ -24,7 +24,7 @@ public:
 	 * 
 	 * @param InProjectionView Projection * View matrix
 	 */
-	FORCEINLINE void Update( const FMatrix& InProjectionView )
+	FORCEINLINE void Update( const Matrix& InProjectionView )
 	{
 		// Right side
 		planes[ FS_Right ].x = InProjectionView[ 0 ].w - InProjectionView[ 0 ].x;
@@ -72,7 +72,7 @@ public:
 	 * @param InMaxPosition Max position of box
 	 * @return Return true if box in frustum, else returning false
 	 */
-	FORCEINLINE bool IsIn( const FVector& InMinPosition, const FVector& InMaxPosition ) const
+	FORCEINLINE bool IsIn( const Vector& InMinPosition, const Vector& InMaxPosition ) const
 	{
 		for ( uint32 index = 0; index < 6; ++index )
 		{
@@ -97,7 +97,7 @@ public:
 	 * @param InBox Box
 	 * @return Return true if box in frustum, else returning false
 	 */
-	FORCEINLINE bool IsIn( const FBox& InBox ) const
+	FORCEINLINE bool IsIn( const ÑBox& InBox ) const
 	{
 		if ( !InBox.IsValid() )
 		{
@@ -114,7 +114,7 @@ public:
 	 * @param InRadius Radius of sphere
 	 * @return Return true if sphere in frustum, else returning false
 	 */
-	FORCEINLINE bool IsIn( const FVector& InPosition, float InRadius ) const
+	FORCEINLINE bool IsIn( const Vector& InPosition, float InRadius ) const
 	{
 		for ( uint32 index = 0; index < 6; ++index )
 		{
@@ -149,11 +149,11 @@ private:
 	{
 		for ( uint32 side = 0; side < 6; ++side )
 		{
-			planes[ side ] = FMath::NormalizeVector( planes[ side ] );
+			planes[ side ] = SMath::NormalizeVector( planes[ side ] );
 		}
 	}
 
-	FVector4D		planes[ 6 ];		/**< Planes of frustum */
+	Vector4D		planes[ 6 ];		/**< Planes of frustum */
 };
 
 #endif // !FRUSTUM_H

@@ -2,9 +2,9 @@
 #include "Commandlets/BaseCommandlet.h"
 #include "Logger/LoggerMacros.h"
 
-IMPLEMENT_CLASS( LBaseCommandlet )
+IMPLEMENT_CLASS( ÑBaseCommandlet )
 
-bool LBaseCommandlet::ExecCommandlet( const std::wstring& InCommands, uint32 InBaseCommandIndex /*= 0*/, bool* OutResultCommand /*= nullptr*/ )
+bool ÑBaseCommandlet::ExecCommandlet( const std::wstring& InCommands, uint32 InBaseCommandIndex /*= 0*/, bool* OutResultCommand /*= nullptr*/ )
 {
 	std::vector< std::wstring >		tokens;
 	std::vector< std::wstring >		switches;
@@ -17,18 +17,18 @@ bool LBaseCommandlet::ExecCommandlet( const std::wstring& InCommands, uint32 InB
 	}
 
 	const std::wstring&			nameCommandlet = tokens[ InBaseCommandIndex ];
-	LClass*						lclassCommandlet = LClass::StaticFindClass( nameCommandlet.c_str() );
+	CClass*						lclassCommandlet = CClass::StaticFindClass( nameCommandlet.c_str() );
 
-	// If class not found try to search by added 'L' in prefix and 'Commandlet' in sufix
+	// If class not found try to search by added 'C' in prefix and 'Commandlet' in sufix
 	if ( !lclassCommandlet )
 	{
-		lclassCommandlet = LClass::StaticFindClass( ( std::wstring( TEXT( "L" ) ) + nameCommandlet + TEXT( "Commandlet" ) ).c_str() );
+		lclassCommandlet = CClass::StaticFindClass( ( std::wstring( TEXT( "C" ) ) + nameCommandlet + TEXT( "Commandlet" ) ).c_str() );
 	}
 
 	// Create and execute commandlet
 	if ( lclassCommandlet )
 	{
-		LBaseCommandlet*		commandlet = lclassCommandlet->CreateObject< LBaseCommandlet >();
+		ÑBaseCommandlet*		commandlet = lclassCommandlet->CreateObject< ÑBaseCommandlet >();
 		check( commandlet );
 
 		bool		oldIsCommandlet = GIsCommandlet;

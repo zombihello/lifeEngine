@@ -15,9 +15,9 @@
 /**
  * Compile all shaders
  */
-bool FShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
+bool CShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
 {
-	FShaderCache	shaderCache;
+	CShaderCache	shaderCache;
 	bool			result = CompileAll( shaderCache, InShaderPlatform, InOnlyGlobals );
 	if ( !result )
 	{
@@ -25,7 +25,7 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform In
 	}
 
 	// Save shader cache
-	FArchive*			archive = GFileSystem->CreateFileWriter( InOutputCache, AW_NoFail );
+	CArchive*			archive = GFileSystem->CreateFileWriter( InOutputCache, AW_NoFail );
 	if ( archive )
 	{
 		archive->SetType( AT_ShaderCache );
@@ -38,15 +38,15 @@ bool FShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform In
 	return true;
 }
 
-bool FShaderCompiler::CompileAll( FShaderCache& InOutShaderCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
+bool CShaderCompiler::CompileAll( CShaderCache& InOutShaderCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
 {
-	const std::unordered_map< std::wstring, FShaderMetaType* >&								shaderTypes = FShaderManager::FContainerShaderTypes::Get()->shaderMetaTypes;
-	const FVertexFactoryMetaType::FContainerVertexFactoryMetaType::FVertexFactoryMap&		vertexFactoryTypes = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->GetRegisteredTypes();
+	const std::unordered_map< std::wstring, CShaderMetaType* >&								shaderTypes = CShaderManager::SContainerShaderTypes::Get()->shaderMetaTypes;
+	const CVertexFactoryMetaType::SContainerVertexFactoryMetaType::VertexFactoryMap_t&		vertexFactoryTypes = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->GetRegisteredTypes();
 	checkMsg( !vertexFactoryTypes.empty(), TEXT( "In engine not a single vertex factory registered" ) );
 	
 	for ( auto itShader = shaderTypes.begin(), itShaderEnd = shaderTypes.end(); itShader != itShaderEnd; ++itShader )
 	{
-		FShaderMetaType*					metaType = itShader->second;
+		CShaderMetaType*					metaType = itShader->second;
 		if ( !metaType->ShouldCache( InShaderPlatform ) || ( !metaType->IsGlobal() && InOnlyGlobals ) )
 		{
 			continue;
@@ -56,13 +56,13 @@ bool FShaderCompiler::CompileAll( FShaderCache& InOutShaderCache, EShaderPlatfor
 		// Compile shader for each vertex factory
 		for ( auto itVFType = vertexFactoryTypes.begin(), itVFTypeEnd = vertexFactoryTypes.end(); itVFType != itVFTypeEnd; ++itVFType )
 		{
-			FVertexFactoryMetaType*			vertexFactoryType = itVFType->second;
+			CVertexFactoryMetaType*			vertexFactoryType = itVFType->second;
 			if ( !vertexFactoryType->ShouldCache( InShaderPlatform ) || !metaType->ShouldCache( InShaderPlatform, vertexFactoryType ) )
 			{
 				continue;
 			}
 
-			appSetSplashText( STT_StartupProgress, FString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
+			appSetSplashText( STT_StartupProgress, ÑString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
 			bool		result = CompileShader( metaType, InShaderPlatform, InOutShaderCache, vertexFactoryType );
 			check( result );
 		}
@@ -71,13 +71,13 @@ bool FShaderCompiler::CompileAll( FShaderCache& InOutShaderCache, EShaderPlatfor
 	return true;
 }
 
-bool FShaderCompiler::CompileShader( class FShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class FShaderCache& InOutShaderCache, class FVertexFactoryMetaType* InVertexFactoryType /* = nullptr */ )
+bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class CShaderCache& InOutShaderCache, class CVertexFactoryMetaType* InVertexFactoryType /* = nullptr */ )
 {
-	FShaderCompilerOutput			output;
+	SShaderCompilerOutput			output;
 	uint64							vertexFactoryHash = ( uint64 )INVALID_HASH;
 	EShaderFrequency				shaderFrequency = InShaderMetaType->GetFrequency();
 	
-	FShaderCompilerEnvironment		environment( shaderFrequency );
+	SShaderCompilerEnvironment		environment( shaderFrequency );
 	InShaderMetaType->ModifyCompilationEnvironment( InShaderPlatform, environment );
 
 	if ( InVertexFactoryType )
@@ -90,7 +90,7 @@ bool FShaderCompiler::CompileShader( class FShaderMetaType* InShaderMetaType, ES
 	bool		result = GRHI->CompileShader( InShaderMetaType->GetFileName().c_str(), InShaderMetaType->GetFunctionName().c_str(), shaderFrequency, environment, output, GAllowDebugShaderDump );
 	if ( result )
 	{
-		FShaderCache::FShaderCacheItem			shaderCacheItem;
+		CShaderCache::SShaderCacheItem			shaderCacheItem;
 		shaderCacheItem.name = InShaderMetaType->GetName();
 		shaderCacheItem.frequency = shaderFrequency;
 		shaderCacheItem.vertexFactoryHash = vertexFactoryHash;
@@ -99,7 +99,7 @@ bool FShaderCompiler::CompileShader( class FShaderMetaType* InShaderMetaType, ES
 		shaderCacheItem.parameterMap = output.parameterMap;
 
 		// Validate compiled shader
-		FShader*		shader = InShaderMetaType->CreateCompiledInstance();
+		CShader*		shader = InShaderMetaType->CreateCompiledInstance();
 		shader->Init( shaderCacheItem );
 		delete shader;
 

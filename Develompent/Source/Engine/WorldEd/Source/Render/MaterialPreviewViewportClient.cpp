@@ -5,59 +5,59 @@
 #include "Render/MaterialPreviewViewportClient.h"
 #include "Render/RenderUtils.h"
 
-FMaterialPreviewViewportClient::FMaterialPreviewViewportClient( const TSharedPtr<FMaterial>& InMaterial )
-	: FEditorLevelViewportClient( LVT_Perspective )
-	, scene( new FScene() )
+CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr<CMaterial>& InMaterial )
+	: CEditorLevelViewportClient( LVT_Perspective )
+	, scene( new CScene() )
 	, material( InMaterial )
-	, sphereComponent( new LSphereComponent() )
+	, sphereComponent( new CSphereComponent() )
 {
 	// Init view
 	bIgnoreInput			= true;
 	bSetListenerPosition	= false;
 	viewportType			= LVT_Perspective;
 	showFlags				= SHOW_DefaultEditor;
-	viewLocation			= FVector( 0.f, 0.f, -80.f );
-	viewRotation			= FRotator( 0.f, 0.f, 0.f );
+	viewLocation			= Vector( 0.f, 0.f, -80.f );
+	viewRotation			= CRotator( 0.f, 0.f, 0.f );
 
 	// Init scene
 	sphereComponent->SetRadius( 40.f );
 	sphereComponent->SetMaterial( InMaterial->GetAssetHandle() );
 	sphereComponent->SetVisibility( true );
-	sphereComponent->SetRelativeRotation( FRotator( 90.f, 0.f, 0.f ) );
+	sphereComponent->SetRelativeRotation( CRotator( 90.f, 0.f, 0.f ) );
 	scene->AddPrimitive( sphereComponent );
 }
 
-FMaterialPreviewViewportClient::~FMaterialPreviewViewportClient()
+CMaterialPreviewViewportClient::~CMaterialPreviewViewportClient()
 {
 	FlushRenderingCommands();
 	delete scene;
 }
 
-void FMaterialPreviewViewportClient::Tick( float InDeltaSeconds )
+void CMaterialPreviewViewportClient::Tick( float InDeltaSeconds )
 {
-	FEditorLevelViewportClient::Tick( InDeltaSeconds );
-	sphereComponent->AddRelativeRotate( FRotator( 0.f, 0.f, 10.f * InDeltaSeconds ) );
+	CEditorLevelViewportClient::Tick( InDeltaSeconds );
+	sphereComponent->AddRelativeRotate( CRotator( 0.f, 0.f, 10.f * InDeltaSeconds ) );
 }
 
-void FMaterialPreviewViewportClient::Draw( FViewport* InViewport )
+void CMaterialPreviewViewportClient::Draw( CViewport* InViewport )
 {
-	FSceneView*		sceneView = CalcSceneView( InViewport );
+	CSceneView*		sceneView = CalcSceneView( InViewport );
 
 	// Draw viewport
-	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FViewportRenderCommand,
-										  FMaterialPreviewViewportClient*, viewportClient, this,
-										  FViewportRHIRef, viewportRHI, InViewport->GetViewportRHI(),
-										  FSceneView*, sceneView, sceneView,
+	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,
+										  CMaterialPreviewViewportClient*, viewportClient, this,
+										  ViewportRHIRef_t, viewportRHI, InViewport->GetViewportRHI(),
+										  CSceneView*, sceneView, sceneView,
 										  {
 											  viewportClient->Draw_RenderThread( viewportRHI, sceneView );
 										  } );
 }
 
-void FMaterialPreviewViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, class FSceneView* InSceneView )
+void CMaterialPreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView )
 {
 	check( IsInRenderingThread() );
-	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	FSceneRenderer				sceneRenderer( InSceneView, scene );
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	CSceneRenderer				sceneRenderer( InSceneView, scene );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 
 	// Draw scene
@@ -68,5 +68,5 @@ void FMaterialPreviewViewportClient::Draw_RenderThread( FViewportRHIRef InViewpo
 	delete InSceneView;
 }
 
-void FMaterialPreviewViewportClient::SetViewportType( ELevelViewportType InViewportType )
+void CMaterialPreviewViewportClient::SetViewportType( ELevelViewportType InViewportType )
 {}

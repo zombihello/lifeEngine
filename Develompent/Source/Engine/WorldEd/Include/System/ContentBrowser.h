@@ -113,7 +113,7 @@ signals:
 	 * Event of selection package
 	 * @param InPackage			Package
 	 */
-	void OnSelectedPackage( FPackage* InPackage );
+	void OnSelectedPackage( CPackage* InPackage );
 
 private:
 	QDir					rootDir;			/**< Root dir for content browser */

@@ -17,18 +17,18 @@
   * @ingroup Engine
   * Vertex type for static mesh
   */
-struct FStaticMeshVertexType
+struct SStaticMeshVertexType
 {
-	FVector4D		position;		/**< Position vertex */
-	FVector2D		texCoord;		/**< Texture coords */
-	FVector4D		normal;			/**< Normal */
-	FVector4D		tangent;		/**< Tangent */
-	FVector4D		binormal;		/**< Binormal */
+	Vector4D		position;		/**< Position vertex */
+	Vector2D		texCoord;		/**< Texture coords */
+	Vector4D		normal;			/**< Normal */
+	Vector4D		tangent;		/**< Tangent */
+	Vector4D		binormal;		/**< Binormal */
 
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const FStaticMeshVertexType& InOther ) const
+	bool FORCEINLINE operator==( const SStaticMeshVertexType& InOther ) const
 	{
 		return position == InOther.position &&
 			texCoord == InOther.texCoord &&
@@ -42,7 +42,7 @@ struct FStaticMeshVertexType
  * @ingroup Engine
  * The static mesh vertex declaration resource type
  */
-class FStaticMeshVertexDeclaration : public FRenderResource
+class CStaticMeshVertexDeclaration : public CRenderResource
 {
 public:
 	/**
@@ -63,28 +63,28 @@ public:
 	 * @brief Get vertex declaration RHI
 	 * @return Return vertex declaration RHI
 	 */
-	FORCEINLINE FVertexDeclarationRHIRef GetVertexDeclarationRHI()
+	FORCEINLINE VertexDeclarationRHIRef_t GetVertexDeclarationRHI()
 	{
 		return vertexDeclarationRHI;
 	}
 
 private:
-	FVertexDeclarationRHIRef		vertexDeclarationRHI;		/**< Vertex declaration RHI */
+	VertexDeclarationRHIRef_t		vertexDeclarationRHI;		/**< Vertex declaration RHI */
 };
 
 /**
  * @ingroup Engine
  * Global resource of static mesh vertex declaration
  */
-extern TGlobalResource< FStaticMeshVertexDeclaration >			GStaticMeshVertexDeclaration;
+extern TGlobalResource< CStaticMeshVertexDeclaration >			GStaticMeshVertexDeclaration;
 
 /**
  * @ingroup Engine
  * Vertex factory for render static meshes
  */
-class FStaticMeshVertexFactory : public FVertexFactory
+class CStaticMeshVertexFactory : public CVertexFactory
 {
-	DECLARE_VERTEX_FACTORY_TYPE( FStaticMeshVertexFactory )
+	DECLARE_VERTEX_FACTORY_TYPE( CStaticMeshVertexFactory )
 
 public:
 	enum EStreamSourceSlot
@@ -111,14 +111,14 @@ public:
 	 * @param InShaderFrequency Shader frequency
 	 * @return Return instance of vertex factory shader parameters
 	 */
-	static FVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
+	static CVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshVertexType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, SStaticMeshVertexType& InValue )
 {
 	InArchive << InValue.position;
 	InArchive << InValue.texCoord;
@@ -128,7 +128,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FStaticMeshVertexType& In
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FStaticMeshVertexType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SStaticMeshVertexType& InValue )
 {
 	InArchive << InValue.position;
 	InArchive << InValue.texCoord;

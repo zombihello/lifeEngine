@@ -4,25 +4,25 @@
 #include "System/InputSystem.h"
 #include "System/WindowEvent.h"
 
-FInputSystem::FInputSystem() :
-	mouseLocation( FMath::vectorZero ),
-	mouseOffset( FMath::vectorZero ),
+CInputSystem::CInputSystem() :
+	mouseLocation( SMath::vectorZero ),
+	mouseOffset( SMath::vectorZero ),
 	mouseSensitivity( 0.5f )
 {
 	memset( &buttonEvents, BE_None, BC_Count * sizeof( EButtonEvent ) );
 }
 
-void FInputSystem::Init()
+void CInputSystem::Init()
 {
 	// Get mouse sensitivity
-	FConfigValue		configSensitivity = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Sensitivity" ) );
+	CConfigValue		configSensitivity = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Sensitivity" ) );
 	if ( configSensitivity.IsValid() )
 	{
 		mouseSensitivity = configSensitivity.GetNumber();
 	}
 }
 
-void FInputSystem::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CInputSystem::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	switch ( InWindowEvent.type )
 	{
@@ -48,7 +48,7 @@ void FInputSystem::ProcessEvent( struct SWindowEvent& InWindowEvent )
 	}
 }
 
-void FInputSystem::ResetEvents()
+void CInputSystem::ResetEvents()
 {
 	for ( uint32 index = 0; index < BC_Count; ++index )
 	{
@@ -58,5 +58,5 @@ void FInputSystem::ResetEvents()
 		}
 	}
 
-	mouseOffset = FMath::vectorZero;
+	mouseOffset = SMath::vectorZero;
 }

@@ -7,20 +7,20 @@
 // -------------
 // GLOBALS
 // -------------
-TGlobalResource< FSphereMesh >				GSphereMesh;
+TGlobalResource< CSphereMesh >				GSphereMesh;
 
-FSphereMesh::FSphereMesh()
+CSphereMesh::CSphereMesh()
 	: numPrimitives( 0 )
 {}
 
-void FSphereMesh::InitRHI()
+void CSphereMesh::InitRHI()
 {
-	std::vector< FDynamicMeshVertexType >		verteces;
+	std::vector< SDynamicMeshVertexType >		verteces;
 	std::vector< uint32 >						indeces;
 
 	// Generate sphere from icosphere
 	{
-		FIcosphereMeshBuilder		icosphereMeshBuilder;
+		CIcosphereMeshBuilder		icosphereMeshBuilder;
 		icosphereMeshBuilder.SetRadius( 1.f );
 		icosphereMeshBuilder.SetSubdivision( 3 );
 		icosphereMeshBuilder.Build();
@@ -34,11 +34,11 @@ void FSphereMesh::InitRHI()
 	uint32			numVerteces = verteces.size();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "Sphere" ), sizeof( FDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "Sphere" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
-		vertexFactory = new FDynamicMeshVertexFactory();
-		vertexFactory->AddVertexStream( FVertexStream{ vertexBufferRHI, sizeof( FDynamicMeshVertexType ) } );		// 0 stream slot
+		vertexFactory = new CDynamicMeshVertexFactory();
+		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SDynamicMeshVertexType ) } );		// 0 stream slot
 		vertexFactory->Init();
 	}
 
@@ -50,7 +50,7 @@ void FSphereMesh::InitRHI()
 	}
 }
 
-void FSphereMesh::ReleaseRHI()
+void CSphereMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
 	indexBufferRHI.SafeRelease();

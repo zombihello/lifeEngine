@@ -15,12 +15,12 @@
  * @ingroup Engine Engine
  * @brief Reference to actor component
  */
-typedef TRefCountPtr< class LActorComponent >			LActorComponentRef;
+typedef TRefCountPtr< class CActorComponent >			ActorComponentRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Reference to actor
  */
-typedef TRefCountPtr< class AActor >					AActorRef;
+typedef TRefCountPtr< class AActor >					ActorRef_t;
 
 #endif // !ENGINETYPES_H

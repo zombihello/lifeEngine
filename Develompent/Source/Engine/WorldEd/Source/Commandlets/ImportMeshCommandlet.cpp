@@ -15,9 +15,9 @@
 #include "Render/StaticMesh.h"
 #include "Commandlets/ImportMeshCommandlet.h"
 
-IMPLEMENT_CLASS( LImportMeshCommandlet )
+IMPLEMENT_CLASS( CImportMeshCommandlet )
 
-bool LImportMeshCommandlet::Main( const std::wstring& InCommand )
+bool CImportMeshCommandlet::Main( const std::wstring& InCommand )
 {
 	std::wstring			srcFilename;
 	std::wstring			dstFilename;
@@ -65,18 +65,18 @@ bool LImportMeshCommandlet::Main( const std::wstring& InCommand )
 	}
 
 	// Convert static mesh
-	TSharedPtr<FStaticMesh>		staticMesh = ConvertStaticMesh( srcFilename, nameMesh );
+	TSharedPtr<CStaticMesh>		staticMesh = ConvertStaticMesh( srcFilename, nameMesh );
 	if ( !staticMesh )
 	{
 		return false;
 	}
 
-	FPackageRef		package = GPackageManager->LoadPackage( dstFilename, true );
-	package->Add( TAssetHandle<FStaticMesh>( staticMesh, MakeSharedPtr<FAssetReference>( AT_StaticMesh, staticMesh->GetGUID() ) ) );
+	PackageRef_t		package = GPackageManager->LoadPackage( dstFilename, true );
+	package->Add( TAssetHandle<CStaticMesh>( staticMesh, MakeSharedPtr<SAssetReference>( AT_StaticMesh, staticMesh->GetGUID() ) ) );
 	return package->Save( dstFilename );
 }
 
-TSharedPtr<FStaticMesh> LImportMeshCommandlet::ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName )
+TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName )
 {
 	// Loading mesh with help Assimp
 	Assimp::Importer		aiImport;
@@ -89,7 +89,7 @@ TSharedPtr<FStaticMesh> LImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	}
 
 	// Fill array meshes from Assimp scene
-	FAiMeshesMap			meshes;
+	AiMeshesMap_t			meshes;
 	ProcessNode( aiScene->mRootNode, aiScene, meshes );
 	if ( meshes.empty() )
 	{
@@ -101,24 +101,24 @@ TSharedPtr<FStaticMesh> LImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	// TODO BS yehor.pohuliaka - I'm not sure how correct this code is, it may need to be rewritten
 	// Go through the material ID, take the mesh and write its vertices, and indices
 	// to the shared buffer
-	std::vector< FStaticMeshVertexType >		verteces;
+	std::vector< SStaticMeshVertexType >		verteces;
 	std::vector< uint32 >						indeces;
-	std::vector< FStaticMeshSurface >			surfaces;
-	std::vector< TAssetHandle<FMaterial> >		materials;
+	std::vector< SStaticMeshSurface >			surfaces;
+	std::vector< TAssetHandle<CMaterial> >		materials;
 	for ( auto itRoot = meshes.begin(), itRootEnd = meshes.end(); itRoot != itRootEnd; ++itRoot )
 	{
-		FStaticMeshSurface							surface;
-		appMemzero( &surface, sizeof( FStaticMeshSurface ) );
+		SStaticMeshSurface							surface;
+		appMemzero( &surface, sizeof( SStaticMeshSurface ) );
 
 		surface.firstIndex = indeces.size();
 		surface.materialID = materials.size();
 
 		for ( auto itMesh = itRoot->second.begin(), itMeshEnd = itRoot->second.end(); itMesh != itMeshEnd; ++itMesh )
 		{
-			std::vector< FStaticMeshVertexType >	vertexBuffer;
-			FStaticMeshVertexType					vertex;
+			std::vector< SStaticMeshVertexType >	vertexBuffer;
+			SStaticMeshVertexType					vertex;
 			aiMesh*									mesh = ( *itMesh ).mesh;
-			appMemzero( &vertex, sizeof( FStaticMeshVertexType ) );
+			appMemzero( &vertex, sizeof( SStaticMeshVertexType ) );
 
 			// Prepare the vertex buffer.
 			// If the vertices of the mesh do not fit into the buffer, then
@@ -212,7 +212,7 @@ TSharedPtr<FStaticMesh> LImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	}
 
 	// Serialize static mesh in archive
-	TSharedPtr<FStaticMesh>		staticMeshRef = MakeSharedPtr<FStaticMesh>();
+	TSharedPtr<CStaticMesh>		staticMeshRef = MakeSharedPtr<CStaticMesh>();
 	staticMeshRef->SetAssetName( InAssetName );
 	staticMeshRef->SetData( verteces, indeces, surfaces, materials );
 
@@ -221,12 +221,12 @@ TSharedPtr<FStaticMesh> LImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	return staticMeshRef;
 }
 
-void LImportMeshCommandlet::ProcessNode( aiNode* InNode, const aiScene* InScene, FAiMeshesMap& OutMeshes )
+void CImportMeshCommandlet::ProcessNode( aiNode* InNode, const aiScene* InScene, AiMeshesMap_t& OutMeshes )
 {
 	for ( uint32 index = 0; index < InNode->mNumMeshes; ++index )
 	{
 		aiMesh*			mesh = InScene->mMeshes[ InNode->mMeshes[ index ] ];
-		OutMeshes[ mesh->mMaterialIndex ].push_back( FAiMesh( InNode->mTransformation, mesh ) );
+		OutMeshes[ mesh->mMaterialIndex ].push_back( SAiMesh( InNode->mTransformation, mesh ) );
 	}
 
 	for ( uint32 index = 0; index < InNode->mNumChildren; ++index )

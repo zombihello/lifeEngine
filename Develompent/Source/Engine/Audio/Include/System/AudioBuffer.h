@@ -19,40 +19,40 @@
 
 /**
  * @ingroup Audio
- * @brief Reference to FAudioBuffer
+ * @brief Reference to CAudioBuffer
  */
-typedef TRefCountPtr< class FAudioBuffer >				FAudioBufferRef;
+typedef TRefCountPtr< class CAudioBuffer >				AudioBufferRef_t;
 
 /**
  * @ingroup Audio
  * @brief Delegate for called event when OpenAL audio buffer is destroyed
  */
-DECLARE_MULTICAST_DELEGATE( FOnAudioBufferDestroyed, class FAudioBuffer* );
+DECLARE_MULTICAST_DELEGATE( COnAudioBufferDestroyed, class CAudioBuffer* );
 
 /**
  * @ingroup Audio
  * @brief Delegate for called event when OpenAL audio buffer is updated
  */
-DECLARE_MULTICAST_DELEGATE( FOnAudioBufferUpdated, class FAudioBuffer* );
+DECLARE_MULTICAST_DELEGATE( COnAudioBufferUpdated, class CAudioBuffer* );
 
 /**
  * @ingroup Audio
  * @brief Audio buffer
  */
-class FAudioBuffer : public FRefCounted
+class CAudioBuffer : public CRefCounted
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FORCEINLINE FAudioBuffer()
+	FORCEINLINE CAudioBuffer()
 		: alHandle( 0 )
 	{}
 
 	/**
 	 * Destructor
 	 */
-	FORCEINLINE ~FAudioBuffer()
+	FORCEINLINE ~CAudioBuffer()
 	{
 		Clear();
 	}
@@ -109,7 +109,7 @@ public:
 	 * Get delegate of event when OpenAL audio buffer destroyed
 	 * @return Return delegate of event when OpenAL audio buffer destroyed
 	 */
-	FORCEINLINE FOnAudioBufferDestroyed& OnAudioBufferDestroyed() const
+	FORCEINLINE COnAudioBufferDestroyed& OnAudioBufferDestroyed() const
 	{
 		return onAudioBufferDestroyed;
 	}
@@ -118,15 +118,15 @@ public:
 	 * Get delegate of event when OpenAL audio buffer is updated
 	 * @return Return delegate of event when OpenAL audio buffer is updated
 	 */
-	FORCEINLINE FOnAudioBufferUpdated& OnAudioBufferUpdated() const
+	FORCEINLINE COnAudioBufferUpdated& OnAudioBufferUpdated() const
 	{
 		return onAudioBufferUpdated;
 	}
 
 private:
 	uint32								alHandle;					/**< Handle to OpenAL buffer */
-	mutable FOnAudioBufferDestroyed		onAudioBufferDestroyed;		/**< Delegate of event when OpenAL audio buffer destroyed */
-	mutable FOnAudioBufferUpdated		onAudioBufferUpdated;		/**< Delegate of event when OpenAL audio buffer is updated */
+	mutable COnAudioBufferDestroyed		onAudioBufferDestroyed;		/**< Delegate of event when OpenAL audio buffer destroyed */
+	mutable COnAudioBufferUpdated		onAudioBufferUpdated;		/**< Delegate of event when OpenAL audio buffer is updated */
 };
 
 #endif // !AUDIOBUFFER_H

@@ -4,13 +4,13 @@ IMPLEMENT_CLASS( ACharacter )
 
 ACharacter::ACharacter()
 {
-	characterMovement = CreateComponent< LCharacterMovementComponent >( TEXT( "CharacterMovementComponent0" ) );
+	characterMovement = CreateComponent< CCharacterMovementComponent >( TEXT( "CharacterMovementComponent0" ) );
 }
 
 ACharacter::~ACharacter()
 {}
 
-void ACharacter::Walk( const FVector& InWorldDirection, float InScale )
+void ACharacter::Walk( const Vector& InWorldDirection, float InScale )
 {
 	characterMovement->Walk( InWorldDirection, InScale );
 }

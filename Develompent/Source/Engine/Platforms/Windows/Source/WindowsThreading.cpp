@@ -4,10 +4,10 @@
 #include "Containers/StringConv.h"
 
 /* Global factory for creating threads */
-FThreadFactory*			GThreadFactory = new FThreadFactoryWindows();
+CThreadFactory*			GThreadFactory = new CThreadFactoryWindows();
 
 /* Global factory for creating synchronization objects */
-FSynchronizeFactory*	GSynchronizeFactory = new FSynchronizeFactoryWindows();
+CSynchronizeFactory*	GSynchronizeFactory = new CSynchronizeFactoryWindows();
 
 /**
  * Code setting the thread name for use in the debugger.
@@ -43,7 +43,7 @@ void SetThreadName( HANDLE InThreadHandle, const achar* InThreadName )
 	}
 }
 
-FRunnableThreadWindows::FRunnableThreadWindows() :
+CRunnableThreadWindows::CRunnableThreadWindows() :
 	threadId( 0 ),
 	thread( nullptr ),
 	runnable( nullptr ),
@@ -53,7 +53,7 @@ FRunnableThreadWindows::FRunnableThreadWindows() :
 	isAutoDeleteRunnable( false )
 {}
 
-FRunnableThreadWindows::~FRunnableThreadWindows()
+CRunnableThreadWindows::~CRunnableThreadWindows()
 {
 	if ( thread != nullptr )
 	{
@@ -61,13 +61,13 @@ FRunnableThreadWindows::~FRunnableThreadWindows()
 	}
 }
 
-void FRunnableThreadWindows::SetProcessorAffinity( uint32 InProcessorNum )
+void CRunnableThreadWindows::SetProcessorAffinity( uint32 InProcessorNum )
 {}
 
-void FRunnableThreadWindows::SetProcessorAffinityMask( uint32 InProcessorMask )
+void CRunnableThreadWindows::SetProcessorAffinityMask( uint32 InProcessorMask )
 {}
 
-void FRunnableThreadWindows::Suspend( bool InIsShouldPause /*= true*/ )
+void CRunnableThreadWindows::Suspend( bool InIsShouldPause /*= true*/ )
 {
 	check( thread );
 	if ( InIsShouldPause )
@@ -80,7 +80,7 @@ void FRunnableThreadWindows::Suspend( bool InIsShouldPause /*= true*/ )
 	}
 }
 
-bool FRunnableThreadWindows::Kill( bool InIsShouldWait /*= false*/ )
+bool CRunnableThreadWindows::Kill( bool InIsShouldWait /*= false*/ )
 {
 	check( thread );
 	bool		didExitOK = true;
@@ -124,18 +124,18 @@ bool FRunnableThreadWindows::Kill( bool InIsShouldWait /*= false*/ )
 	return didExitOK;
 }
 
-void FRunnableThreadWindows::WaitForCompletion()
+void CRunnableThreadWindows::WaitForCompletion()
 {
 	// Block until this thread exits
 	WaitForSingleObject( thread, INFINITE );
 }
 
-uint32 FRunnableThreadWindows::GetThreadID() const
+uint32 CRunnableThreadWindows::GetThreadID() const
 {
 	return threadId;
 }
 
-bool FRunnableThreadWindows::Create( FRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf /*= false*/, bool InIsAutoDeleteRunnable /*= false*/, uint32 InStackSize /*= 0*/, EThreadPriority InThreadPriority /*= TP_Normal*/ )
+bool CRunnableThreadWindows::Create( CRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf /*= false*/, bool InIsAutoDeleteRunnable /*= false*/, uint32 InStackSize /*= 0*/, EThreadPriority InThreadPriority /*= TP_Normal*/ )
 {
 	// Remember our inputs
 	runnable = InRunnable;
@@ -147,7 +147,7 @@ bool FRunnableThreadWindows::Create( FRunnable* InRunnable, const tchar* InThrea
 	threadInitSyncEvent = GSynchronizeFactory->CreateSynchEvent( true );
 
 	// Create the new thread
-	thread = CreateThread( nullptr, InStackSize, &FRunnableThreadWindows::StaticMainProc, this, 0, ( LPDWORD ) &threadId );
+	thread = CreateThread( nullptr, InStackSize, &CRunnableThreadWindows::StaticMainProc, this, 0, ( LPDWORD ) &threadId );
 	
 	// If it fails, clear all the vars
 	if ( !thread )
@@ -172,13 +172,13 @@ bool FRunnableThreadWindows::Create( FRunnable* InRunnable, const tchar* InThrea
 	return thread != nullptr;
 }
 
-DWORD FRunnableThreadWindows::StaticMainProc( LPVOID InThis )
+DWORD CRunnableThreadWindows::StaticMainProc( LPVOID InThis )
 {
-	FRunnableThreadWindows*		thisThread = ( FRunnableThreadWindows* )InThis;
+	CRunnableThreadWindows*		thisThread = ( CRunnableThreadWindows* )InThis;
 	return thisThread->Run();
 }
 
-uint32 FRunnableThreadWindows::Run()
+uint32 CRunnableThreadWindows::Run()
 {
 	check( runnable );
 	appSetThreadPriority( thread, threadPriority );
@@ -217,9 +217,9 @@ uint32 FRunnableThreadWindows::Run()
 	return exitCode;
 }
 
-FRunnableThread* FThreadFactoryWindows::CreateThread( FRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf /*= false*/, bool InIsAutoDeleteRunnable /*= false*/, uint32 InStackSize /*= 0*/, EThreadPriority InThreadPriority /*= TP_Normal*/ )
+CRunnableThread* CThreadFactoryWindows::CreateThread( CRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf /*= false*/, bool InIsAutoDeleteRunnable /*= false*/, uint32 InStackSize /*= 0*/, EThreadPriority InThreadPriority /*= TP_Normal*/ )
 {
-	FRunnableThreadWindows*		newThread = new FRunnableThreadWindows();
+	CRunnableThreadWindows*		newThread = new CRunnableThreadWindows();
 	
 #if DO_CHECK
 	check( newThread->Create( InRunnable, InThreadName, InIsAutoDeleteSelf, InIsAutoDeleteRunnable, InStackSize, InThreadPriority ) );
@@ -230,16 +230,16 @@ FRunnableThread* FThreadFactoryWindows::CreateThread( FRunnable* InRunnable, con
 	return newThread;
 }
 
-void FThreadFactoryWindows::Destroy( FRunnableThread* InThread )
+void CThreadFactoryWindows::Destroy( CRunnableThread* InThread )
 {
-	delete ( FRunnableThreadWindows* )InThread;
+	delete ( CRunnableThreadWindows* )InThread;
 }
 
-FEventWindows::FEventWindows() :
+CEventWindows::CEventWindows() :
 	event( nullptr )
 {}
 
-FEventWindows::~FEventWindows()
+CEventWindows::~CEventWindows()
 {
 	if ( event )
 	{
@@ -247,41 +247,41 @@ FEventWindows::~FEventWindows()
 	}
 }
 
-bool FEventWindows::Create( bool InIsManualReset /*= false*/, const tchar* InName /*= nullptr*/ )
+bool CEventWindows::Create( bool InIsManualReset /*= false*/, const tchar* InName /*= nullptr*/ )
 {
 	event = CreateEventW( nullptr, InIsManualReset, 0, InName );
 	return event != nullptr;
 }
 
-void FEventWindows::Trigger()
+void CEventWindows::Trigger()
 {
 	check( event );
 	SetEvent( event );
 }
 
-void FEventWindows::Reset()
+void CEventWindows::Reset()
 {
 	check( event );
 	ResetEvent( event );
 }
 
-void FEventWindows::Pulse()
+void CEventWindows::Pulse()
 {
 	check( event );
 	PulseEvent( event );
 }
 
-bool FEventWindows::Wait( uint32 InWaitTime /*= (uint32)-1*/ )
+bool CEventWindows::Wait( uint32 InWaitTime /*= (uint32)-1*/ )
 {
 	check( event );
 	return WaitForSingleObject( event, InWaitTime) == WAIT_OBJECT_0;
 }
 
-FSemaphoreWindows::FSemaphoreWindows() :
+CSemaphoreWindows::CSemaphoreWindows() :
 	semaphore( nullptr )
 {}
 
-FSemaphoreWindows::~FSemaphoreWindows()
+CSemaphoreWindows::~CSemaphoreWindows()
 {
 	if ( semaphore )
 	{
@@ -289,7 +289,7 @@ FSemaphoreWindows::~FSemaphoreWindows()
 	}
 }
 
-bool FSemaphoreWindows::Create( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName /*= nullptr*/ )
+bool CSemaphoreWindows::Create( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName /*= nullptr*/ )
 {
 	semaphore = CreateSemaphoreW(
 		nullptr,						// default security attributes
@@ -303,19 +303,19 @@ bool FSemaphoreWindows::Create( uint32 InMaxCount, uint32 InInitialCount, const 
 	if ( !success )
 	{
 		uint32			error = GetLastError();
-		appErrorf( TEXT( "Failed in FSemaphoreWindows::Create() with ERROR CODE: %u" ), error );
+		appErrorf( TEXT( "Failed in CSemaphoreWindows::Create() with ERROR CODE: %u" ), error );
 	}
 #endif
 
 	return success;
 }
 
-bool FSemaphoreWindows::Signal()
+bool CSemaphoreWindows::Signal()
 {
 	return Post( 1 );
 }
 
-bool FSemaphoreWindows::Post( uint32 InCount )
+bool CSemaphoreWindows::Post( uint32 InCount )
 {
 	check( semaphore );
 	bool success = ReleaseSemaphore( semaphore, InCount, nullptr );
@@ -324,14 +324,14 @@ bool FSemaphoreWindows::Post( uint32 InCount )
 	if ( !success )
 	{
 		uint32				error = GetLastError();
-		appErrorf( TEXT( "Failed in FSemaphoreWindows::Post() with ERROR CODE: %u" ), error );
+		appErrorf( TEXT( "Failed in CSemaphoreWindows::Post() with ERROR CODE: %u" ), error );
 	}
 #endif
 
 	return success;
 }
 
-bool FSemaphoreWindows::TryWait()
+bool CSemaphoreWindows::TryWait()
 {
 	check( semaphore );
 	uint32		ret = ( uint32 )WaitForSingleObject( semaphore, 0 );
@@ -340,7 +340,7 @@ bool FSemaphoreWindows::TryWait()
 	return ret != WAIT_TIMEOUT;
 }
 
-void FSemaphoreWindows::Wait()
+void CSemaphoreWindows::Wait()
 {
 	check( semaphore );
 	
@@ -349,7 +349,7 @@ void FSemaphoreWindows::Wait()
 	UNUSED_VAR( ret );
 }
 
-bool FSemaphoreWindows::WaitTimeoutMs( uint32 InMilliseconds )
+bool CSemaphoreWindows::WaitTimeoutMs( uint32 InMilliseconds )
 {
 	check( semaphore );
 	uint32		ret = ( uint32 )WaitForSingleObject( semaphore, InMilliseconds );
@@ -358,15 +358,15 @@ bool FSemaphoreWindows::WaitTimeoutMs( uint32 InMilliseconds )
 	return ret != WAIT_TIMEOUT;
 }
 
-FCriticalSection* FSynchronizeFactoryWindows::CreateCriticalSection()
+ÑCriticalSection* CSynchronizeFactoryWindows::CreateCriticalSection()
 {
-	return new FCriticalSection();
+	return new ÑCriticalSection();
 }
 
-FEvent* FSynchronizeFactoryWindows::CreateSynchEvent( bool InIsManualReset /*= false*/, const tchar* InName /*= nullptr*/ )
+CEvent* CSynchronizeFactoryWindows::CreateSynchEvent( bool InIsManualReset /*= false*/, const tchar* InName /*= nullptr*/ )
 {
 	// Allocate the new object
-	FEvent*			newEvent = new FEventWindows();
+	CEvent*			newEvent = new CEventWindows();
 
 	// If the internal create fails, delete the instance and return nullptr
 	if ( !newEvent->Create( InIsManualReset, InName ) )
@@ -378,10 +378,10 @@ FEvent* FSynchronizeFactoryWindows::CreateSynchEvent( bool InIsManualReset /*= f
 	return newEvent;
 }
 
-FSemaphore* FSynchronizeFactoryWindows::CreateSemaphore( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName /*= nullptr*/ )
+CSemaphore* CSynchronizeFactoryWindows::CreateSemaphore( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName /*= nullptr*/ )
 {
 	// Allocate the new object
-	FSemaphore*			newSemaphore = new FSemaphoreWindows();
+	CSemaphore*			newSemaphore = new CSemaphoreWindows();
 
 	// If the internal create fails, delete the instance and return NULL
 	if ( !newSemaphore->Create( InMaxCount, InInitialCount, InName ) )
@@ -393,7 +393,7 @@ FSemaphore* FSynchronizeFactoryWindows::CreateSemaphore( uint32 InMaxCount, uint
 	return newSemaphore;
 }
 
-void FSynchronizeFactoryWindows::Destroy( FSynchronize* InSynchObj )
+void CSynchronizeFactoryWindows::Destroy( CSynchronize* InSynchObj )
 {
 	delete InSynchObj;
 }

@@ -4,17 +4,17 @@
 #include "System/PhysicsBodyInstance.h"
 #include "System/PhysXScene.h"
 
-FPhysXScene::FPhysXScene()
+CPhysXScene::CPhysXScene()
 	: pxScene( nullptr )
 	, pxDefaultCpuDispatcher( nullptr )
 {}
 
-FPhysXScene::~FPhysXScene()
+CPhysXScene::~CPhysXScene()
 {
 	Shutdown();
 }
 
-void FPhysXScene::Init()
+void CPhysXScene::Init()
 {
 	// Create CPU dispatcher
 	pxDefaultCpuDispatcher = physx::PxDefaultCpuDispatcherCreate( 2 );
@@ -28,13 +28,13 @@ void FPhysXScene::Init()
 	check( pxScene );
 }
 
-void FPhysXScene::Tick( float InDeltaTime )
+void CPhysXScene::Tick( float InDeltaTime )
 {
 	pxScene->simulate( InDeltaTime );
 	pxScene->fetchResults( true );
 }
 
-void FPhysXScene::Shutdown()
+void CPhysXScene::Shutdown()
 {
 	// Free allocated memory
 	if ( pxScene )
@@ -50,7 +50,7 @@ void FPhysXScene::Shutdown()
 	}
 }
 
-void FPhysXScene::AddBody( class FPhysicsBodyInstance* InBodyInstance )
+void CPhysXScene::AddBody( class CPhysicsBodyInstance* InBodyInstance )
 {
 	physx::PxRigidActor*		pxRigidBody = InBodyInstance->GetActorHandle().pxRigidActor;
 	check( pxRigidBody );
@@ -59,11 +59,11 @@ void FPhysXScene::AddBody( class FPhysicsBodyInstance* InBodyInstance )
 	bodies.push_back( InBodyInstance );
 }
 
-void FPhysXScene::RemoveBody( FPhysicsBodyInstance* InBodyInstance )
+void CPhysXScene::RemoveBody( CPhysicsBodyInstance* InBodyInstance )
 {
 	for ( uint32 index = 0, count = bodies.size(); index < count; ++index )
 	{
-		FPhysicsBodyInstance*		bodyInstance = bodies[ index ];
+		CPhysicsBodyInstance*		bodyInstance = bodies[ index ];
 		if ( bodyInstance == InBodyInstance )
 		{
 			physx::PxRigidActor*		pxRigidBody = bodyInstance->GetActorHandle().pxRigidActor;
@@ -76,11 +76,11 @@ void FPhysXScene::RemoveBody( FPhysicsBodyInstance* InBodyInstance )
 	}
 }
 
-void FPhysXScene::RemoveAllBodies()
+void CPhysXScene::RemoveAllBodies()
 {
 	for ( uint32 index = 0, count = bodies.size(); index < count; ++index )
 	{
-		FPhysicsBodyInstance*		bodyInstance = bodies[ index ];
+		CPhysicsBodyInstance*		bodyInstance = bodies[ index ];
 		physx::PxRigidActor*		pxRigidBody = bodyInstance->GetActorHandle().pxRigidActor;
 		check( pxRigidBody );
 

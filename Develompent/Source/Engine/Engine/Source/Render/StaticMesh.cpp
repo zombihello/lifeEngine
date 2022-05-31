@@ -4,11 +4,11 @@
 #include "Render/StaticMesh.h"
 #include "Render/SceneUtils.h"
 
-FStaticMesh::FStaticMesh()
-	: FAsset( AT_StaticMesh )
+CStaticMesh::CStaticMesh()
+	: CAsset( AT_StaticMesh )
 {}
 
-FStaticMesh::~FStaticMesh()
+CStaticMesh::~CStaticMesh()
 {
 	// Remove all drawing policy links from scenes
 	for ( auto itElement = elementDrawingPolicyMap.begin(), itElementEnd = elementDrawingPolicyMap.end(); itElement != itElementEnd; ++itElement )
@@ -20,17 +20,17 @@ FStaticMesh::~FStaticMesh()
 	}
 }
 
-void FStaticMesh::InitRHI()
+void CStaticMesh::InitRHI()
 {
 	// Create vertex buffer
 	uint32			numVerteces = ( uint32 )verteces.Num();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = GRHI->CreateVertexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( FStaticMeshVertexType ) * numVerteces, ( byte* )verteces.GetData(), RUF_Static );
+		vertexBufferRHI = GRHI->CreateVertexBuffer( ÑString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( SStaticMeshVertexType ) * numVerteces, ( byte* )verteces.GetData(), RUF_Static );
 
 		// Initialize vertex factory
-		vertexFactory = new FStaticMeshVertexFactory();
-		vertexFactory->AddVertexStream( FVertexStream{ vertexBufferRHI, sizeof( FStaticMeshVertexType ) } );		// 0 stream slot
+		vertexFactory = new CStaticMeshVertexFactory();
+		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SStaticMeshVertexType ) } );		// 0 stream slot
 		vertexFactory->Init();
 	}
 
@@ -38,7 +38,7 @@ void FStaticMesh::InitRHI()
 	uint32			numIndeces = ( uint32 )indeces.Num();
 	if ( numIndeces > 0 )
 	{
-		indexBufferRHI = GRHI->CreateIndexBuffer( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.GetData(), RUF_Static );
+		indexBufferRHI = GRHI->CreateIndexBuffer( ÑString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.GetData(), RUF_Static );
 	}
 
 	if ( !GIsEditor && !GIsCommandlet )
@@ -48,25 +48,25 @@ void FStaticMesh::InitRHI()
 	}
 }
 
-void FStaticMesh::ReleaseRHI()
+void CStaticMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
 	indexBufferRHI.SafeRelease();
 	vertexFactory.SafeRelease();
 }
 
-void FStaticMesh::Serialize( class FArchive& InArchive )
+void CStaticMesh::Serialize( class CArchive& InArchive )
 {
 	if ( InArchive.Ver() < VER_StaticMesh )
 	{
 		return;
 	}
 
-	FAsset::Serialize( InArchive );
+	CAsset::Serialize( InArchive );
 
 	if ( InArchive.Ver() < VER_CompressedZlib )
 	{
-		std::vector<FStaticMeshVertexType>		tmpVerteces;
+		std::vector<SStaticMeshVertexType>		tmpVerteces;
 		std::vector<uint32>						tmpIndeces;
 		InArchive << tmpVerteces;
 		InArchive << tmpIndeces;
@@ -90,7 +90,7 @@ void FStaticMesh::Serialize( class FArchive& InArchive )
 	}
 }
 
-void FStaticMesh::SetData( const std::vector<FStaticMeshVertexType>& InVerteces, const std::vector<uint32>& InIndeces, const std::vector<FStaticMeshSurface>& InSurfaces, std::vector< TAssetHandle<FMaterial> >& InMaterials )
+void CStaticMesh::SetData( const std::vector<SStaticMeshVertexType>& InVerteces, const std::vector<uint32>& InIndeces, const std::vector<SStaticMeshSurface>& InSurfaces, std::vector< TAssetHandle<CMaterial> >& InMaterials )
 {
 	// Copy new parameters of static mesh
 	verteces		= InVerteces;
@@ -107,7 +107,7 @@ void FStaticMesh::SetData( const std::vector<FStaticMeshVertexType>& InVerteces,
 	BeginUpdateResource( this );
 }
 
-void FStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<FMaterial>& InNewMaterial )
+void CStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<CMaterial>& InNewMaterial )
 {
 	if ( InMaterialIndex > materials.size() )
 	{
@@ -128,10 +128,10 @@ void FStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<FMater
 	materials[ InMaterialIndex ] = InNewMaterial;
 }
 
-TSharedPtr<FStaticMesh::FElementDrawingPolicyLink> FStaticMesh::LinkDrawList( FSceneDepthGroup& InSDG )
+TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::LinkDrawList( SSceneDepthGroup& InSDG )
 {
 	// Make key for element drawing policy link
-	FElementKeyDrawingPolicyLink	elementKey{ &InSDG, 0 };
+	SElementKeyDrawingPolicyLink	elementKey{ &InSDG, 0 };
 
 	// If already added drawing policy link for this scene depth group - return exist element
 	{
@@ -143,17 +143,17 @@ TSharedPtr<FStaticMesh::FElementDrawingPolicyLink> FStaticMesh::LinkDrawList( FS
 	}
 
 	// Allocate new element
-	TSharedPtr<FElementDrawingPolicyLink>		element = MakeDrawingPolicyLink( InSDG, 0 );
+	TSharedPtr<SElementDrawingPolicyLink>		element = MakeDrawingPolicyLink( InSDG, 0 );
 
 	// Add to cache and return created element
 	elementDrawingPolicyMap[ elementKey ] = element;
 	return element;
 }
 
-TSharedPtr<FStaticMesh::FElementDrawingPolicyLink> FStaticMesh::LinkDrawList( FSceneDepthGroup& InSDG, const std::vector< TAssetHandle<FMaterial> >& InOverrideMaterials )
+TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::LinkDrawList( SSceneDepthGroup& InSDG, const std::vector< TAssetHandle<CMaterial> >& InOverrideMaterials )
 {
 	// Make key for element drawing policy link
-	FElementKeyDrawingPolicyLink	elementKey{ &InSDG, 0 };
+	SElementKeyDrawingPolicyLink	elementKey{ &InSDG, 0 };
 
 	// Calculate override hash
 	for ( uint32 index = 0, count = InOverrideMaterials.size(); index < count; ++index )
@@ -172,31 +172,31 @@ TSharedPtr<FStaticMesh::FElementDrawingPolicyLink> FStaticMesh::LinkDrawList( FS
 	}
 
 	// Allocate new element
-	TSharedPtr<FElementDrawingPolicyLink>		element = MakeDrawingPolicyLink( InSDG, elementKey.overrideHash, ( std::vector< TAssetHandle<FMaterial> >* ) & InOverrideMaterials );
+	TSharedPtr<SElementDrawingPolicyLink>		element = MakeDrawingPolicyLink( InSDG, elementKey.overrideHash, ( std::vector< TAssetHandle<CMaterial> >* ) & InOverrideMaterials );
 
 	// Add to cache and return created element
 	elementDrawingPolicyMap[ elementKey ] = element;
 	return element;
 }
 
-TSharedPtr<FStaticMesh::FElementDrawingPolicyLink> FStaticMesh::MakeDrawingPolicyLink( FSceneDepthGroup& InSDG, uint64 InOverrideHash /* = 0 */, std::vector<TAssetHandle<FMaterial>>* InOverrideMaterials /* = nullptr */ )
+TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolicyLink( SSceneDepthGroup& InSDG, uint64 InOverrideHash /* = 0 */, std::vector<TAssetHandle<CMaterial>>* InOverrideMaterials /* = nullptr */ )
 {
 	// Allocate new element
-	TSharedPtr<FElementDrawingPolicyLink>	element					= MakeSharedPtr<FElementDrawingPolicyLink>();
+	TSharedPtr<SElementDrawingPolicyLink>	element					= MakeSharedPtr<SElementDrawingPolicyLink>();
 	uint32									numOverrideMaterials	= InOverrideMaterials ? InOverrideMaterials->size() : 0;
 	element->overrideHash = InOverrideHash;
 
 	// Generate mesh batch for surface and add to new scene draw policy link
 	for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )surfaces.size(); indexSurface < numSurfaces; ++indexSurface )
 	{
-		const FStaticMeshSurface&		surface				= surfaces[ indexSurface ];
-		FDrawingPolicyLinkRef           tmpDrawPolicyLink	= new FDrawingPolicyLink( DEC_STATIC_MESH );
-		TAssetHandle<FMaterial>			material			= materials[ surface.materialID ];
+		const SStaticMeshSurface&		surface				= surfaces[ indexSurface ];
+		DrawingPolicyLinkRef_t           tmpDrawPolicyLink	= new DrawingPolicyLink_t( DEC_STATIC_MESH );
+		TAssetHandle<CMaterial>			material			= materials[ surface.materialID ];
 
 		// If current material is override - use custom material
 		if ( indexSurface < numOverrideMaterials )
 		{
-			TAssetHandle<FMaterial>			overrideMaterial = InOverrideMaterials->at( surface.materialID );
+			TAssetHandle<CMaterial>			overrideMaterial = InOverrideMaterials->at( surface.materialID );
 			if ( overrideMaterial.IsValid() )
 			{
 				material = overrideMaterial;
@@ -206,7 +206,7 @@ TSharedPtr<FStaticMesh::FElementDrawingPolicyLink> FStaticMesh::MakeDrawingPolic
 		tmpDrawPolicyLink->drawingPolicy.Init( vertexFactory, material );
 
 		// Generate mesh batch of surface
-		FMeshBatch					meshBatch;
+		SMeshBatch					meshBatch;
 		meshBatch.baseVertexIndex	= surface.baseVertexIndex;
 		meshBatch.firstIndex		= surface.firstIndex;
 		meshBatch.numPrimitives		= surface.numPrimitives;
@@ -215,19 +215,19 @@ TSharedPtr<FStaticMesh::FElementDrawingPolicyLink> FStaticMesh::MakeDrawingPolic
 		tmpDrawPolicyLink->meshBatchList.insert( meshBatch );
 
 		// Add to new scene draw policy link
-		FDrawingPolicyLinkRef		drawingPolicyLink = InSDG.staticMeshDrawList.AddItem( tmpDrawPolicyLink );
+		DrawingPolicyLinkRef_t		drawingPolicyLink = InSDG.staticMeshDrawList.AddItem( tmpDrawPolicyLink );
 		check( drawingPolicyLink );
 		element->drawingPolicyLinks.push_back( drawingPolicyLink );
 
 		// Get link to mesh batch. If not founded insert new
-		FMeshBatchList::iterator        itMeshBatchLink = drawingPolicyLink->meshBatchList.find( meshBatch );
+		MeshBatchList_t::iterator        itMeshBatchLink = drawingPolicyLink->meshBatchList.find( meshBatch );
 		if ( itMeshBatchLink != drawingPolicyLink->meshBatchList.end() )
 		{
 			element->meshBatchLinks.push_back( &( *itMeshBatchLink ) );
 		}
 		else
 		{
-			const FMeshBatch*		meshBatchLink = &( *drawingPolicyLink->meshBatchList.insert( meshBatch ).first );
+			const SMeshBatch*		meshBatchLink = &( *drawingPolicyLink->meshBatchList.insert( meshBatch ).first );
 			element->meshBatchLinks.push_back( meshBatchLink );
 		}
 	}
@@ -235,7 +235,7 @@ TSharedPtr<FStaticMesh::FElementDrawingPolicyLink> FStaticMesh::MakeDrawingPolic
 	return element;
 }
 
-void FStaticMesh::UnlinkDrawList( FSceneDepthGroup& InSDG, TSharedPtr<FElementDrawingPolicyLink>& InDrawingPolicyLink )
+void CStaticMesh::UnlinkDrawList( SSceneDepthGroup& InSDG, TSharedPtr<SElementDrawingPolicyLink>& InDrawingPolicyLink )
 {
 	// If pointer is not valid, we exist
 	if ( !InDrawingPolicyLink )
@@ -244,7 +244,7 @@ void FStaticMesh::UnlinkDrawList( FSceneDepthGroup& InSDG, TSharedPtr<FElementDr
 	}
 
 	// Find element in cache, if not found - exist
-	auto	itElement = elementDrawingPolicyMap.find( FElementKeyDrawingPolicyLink{ &InSDG, InDrawingPolicyLink->overrideHash } );
+	auto	itElement = elementDrawingPolicyMap.find( SElementKeyDrawingPolicyLink{ &InSDG, InDrawingPolicyLink->overrideHash } );
 	if ( itElement == elementDrawingPolicyMap.end() )
 	{
 		return;

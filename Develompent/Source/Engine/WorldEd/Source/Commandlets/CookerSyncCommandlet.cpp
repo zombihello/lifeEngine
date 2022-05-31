@@ -11,9 +11,9 @@
 #include "Render/StaticMesh.h"
 #include "Commandlets/CookerSyncCommandlet.h"
 
-IMPLEMENT_CLASS( LCookerSyncCommandlet )
+IMPLEMENT_CLASS( ÑCookerSyncCommandlet )
 
-void LCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
+void ÑCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 {
 	std::vector< std::wstring >		files = GFileSystem->FindFiles( InRootDir, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
@@ -32,7 +32,7 @@ void LCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 		extension.erase( 0, dotPos + 1 );
 		if ( extension == TEXT( "lpak" ) )
 		{
-			FPackageRef		package = GPackageManager->LoadPackage( fullPath );
+			PackageRef_t		package = GPackageManager->LoadPackage( fullPath );
 			check( package );
 
 			LE_LOG( LT_Log, LC_Commandlet, TEXT( "Added package '%s'" ), fullPath.c_str() );
@@ -42,13 +42,13 @@ void LCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 	}
 }
 
-bool LCookerSyncCommandlet::Main( const std::wstring& InCommand )
+bool ÑCookerSyncCommandlet::Main( const std::wstring& InCommand )
 {
 	GTableOfContents.Clear();
 	AddContentEntries( appBaseDir() );
 
 	// Serialize table of contents
-	FArchive*		archiveTOC = GFileSystem->CreateFileWriter( appBaseDir() + PATH_SEPARATOR + GCookedDir + PATH_SEPARATOR + FTableOfContets::GetNameTOC(), AW_NoFail );
+	CArchive*		archiveTOC = GFileSystem->CreateFileWriter( appBaseDir() + PATH_SEPARATOR + GCookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC(), AW_NoFail );
 	GTableOfContents.Serialize( *archiveTOC );
 	delete archiveTOC;
 

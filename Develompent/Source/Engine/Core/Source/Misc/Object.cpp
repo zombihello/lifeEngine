@@ -1,12 +1,12 @@
 #include "Misc/Class.h"
 #include "Misc/Object.h"
 
-IMPLEMENT_CLASS( LObject )
+IMPLEMENT_CLASS( CObject )
 
 /**
  * Serialize object
  */
-void LObject::Serialize( FArchive& InArchive )
+void CObject::Serialize( CArchive& InArchive )
 {
 	InArchive << name;
 }
@@ -14,14 +14,14 @@ void LObject::Serialize( FArchive& InArchive )
 /**
  * Whether the object is of the specified class
  */
-bool LObject::InternalIsA( const LClass* InClass ) const
+bool CObject::InternalIsA( const CClass* InClass ) const
 {
 	if ( !InClass )
 	{
 		return false;
 	}
 
-	for ( const LClass* tempClass = GetClass(); tempClass; tempClass = tempClass->GetSuperClass() )
+	for ( const CClass* tempClass = GetClass(); tempClass; tempClass = tempClass->GetSuperClass() )
 	{
 		if ( tempClass == InClass )
 		{

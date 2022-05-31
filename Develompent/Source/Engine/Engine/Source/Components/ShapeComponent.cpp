@@ -1,18 +1,18 @@
 #include "Components/ShapeComponent.h"
 
-IMPLEMENT_CLASS( LShapeComponent )
+IMPLEMENT_CLASS( CShapeComponent )
 
-LShapeComponent::LShapeComponent()
-	: collisionProfile( GPhysicsEngine.FindCollisionProfile( FCollisionProfile::blockAll_ProfileName ) )
+CShapeComponent::CShapeComponent()
+	: collisionProfile( GPhysicsEngine.FindCollisionProfile( SCollisionProfile::blockAll_ProfileName ) )
 	, physicsMaterial( nullptr )
 {
 	SetVisibility( false );
 }
 
-LShapeComponent::~LShapeComponent()
+CShapeComponent::~CShapeComponent()
 {}
 
-void LShapeComponent::BeginPlay()
+void CShapeComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	if ( !physicsMaterial.IsAssetValid() )
@@ -23,7 +23,7 @@ void LShapeComponent::BeginPlay()
 	UpdateBodySetup();
 }
 
-void LShapeComponent::Serialize( class FArchive& InArchive )
+void CShapeComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << collisionProfile;

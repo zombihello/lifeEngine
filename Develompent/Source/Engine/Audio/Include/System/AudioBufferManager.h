@@ -18,7 +18,7 @@
  * @ingroup Audio
  * @brief Class for manager loaded fully banks to memory
  */
-class FAudioBufferManager
+class ÑAudioBufferManager
 {
 public:
 	/**
@@ -27,19 +27,19 @@ public:
 	 * @param InAudioBank Audio bank
 	 * @return Return finded bank. If failed return nullptr
 	 */
-	FAudioBufferRef Find( const TAssetHandle<FAudioBank>& InAudioBank );
+	AudioBufferRef_t Find( const TAssetHandle<CAudioBank>& InAudioBank );
 
 	/**
 	 * Remove loaded buffer
 	 * @param InAudioBank Audio bank
 	 */
-	FORCEINLINE void Remove( const TAssetHandle<FAudioBank>& InAudioBank )
+	FORCEINLINE void Remove( const TAssetHandle<CAudioBank>& InAudioBank )
 	{
 		buffers.erase( InAudioBank );
 	}
 
 private:
-	std::unordered_map< TAssetHandle<FAudioBank>, FAudioBufferRef, TAssetHandle<FAudioBank>::FHashFunction >		buffers;		/**< Map of fully loaded banks to buffer */
+	std::unordered_map< TAssetHandle<CAudioBank>, AudioBufferRef_t, TAssetHandle<CAudioBank>::SHashFunction >		buffers;		/**< Map of fully loaded banks to buffer */
 };
 
 #endif // !AUDIOBUFFERMANAGER_H

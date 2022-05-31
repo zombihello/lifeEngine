@@ -18,20 +18,20 @@
   * @ingroup Engine
   * ShapeComponent is a PrimitiveComponent that is represented by a simple geometrical shape (sphere, capsule, box, etc).
   */
-class LShapeComponent : public LPrimitiveComponent
+class CShapeComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( LShapeComponent, LPrimitiveComponent )
+	DECLARE_CLASS( CShapeComponent, CPrimitiveComponent )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
-	LShapeComponent();
+	CShapeComponent();
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~LShapeComponent();
+	virtual ~CShapeComponent();
 
 	/**
 	 * Begins Play for the component.
@@ -43,12 +43,12 @@ public:
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Update the body setup parameters based on shape information
 	 */
-	virtual void UpdateBodySetup() PURE_VIRTUAL( LShapeComponent::UpdateBodySetup, );
+	virtual void UpdateBodySetup() PURE_VIRTUAL( CShapeComponent::UpdateBodySetup, );
 
 	/**
 	 * @brief Set collision profile
@@ -56,7 +56,7 @@ public:
 	 */
 	FORCEINLINE void SetCollisionProfile( const std::wstring& InName )
 	{
-		FCollisionProfile*		newCollisionProfile;
+		SCollisionProfile*		newCollisionProfile;
 		newCollisionProfile = GPhysicsEngine.FindCollisionProfile( InName );
 		if ( newCollisionProfile )
 		{
@@ -68,7 +68,7 @@ public:
 	 * @brief Set physics material
 	 * @param InPhysMaterial Physics material
 	 */
-	FORCEINLINE void SetPhysMaterial( const TAssetHandle<FPhysicsMaterial>& InPhysMaterial )
+	FORCEINLINE void SetPhysMaterial( const TAssetHandle<CPhysicsMaterial>& InPhysMaterial )
 	{
 		physicsMaterial = InPhysMaterial.IsAssetValid() ? InPhysMaterial : GPhysicsEngine.GetDefaultPhysMaterial();
 	}
@@ -77,7 +77,7 @@ public:
 	 * @brief Get collision profile
 	 * @return Return collision profile
 	 */
-	FORCEINLINE FCollisionProfile* GetCollisionProfile() const
+	FORCEINLINE SCollisionProfile* GetCollisionProfile() const
 	{
 		return collisionProfile;
 	}
@@ -86,14 +86,14 @@ public:
 	 * @brief Get physics material
 	 * @return Return physics material
 	 */
-	FORCEINLINE TAssetHandle<FPhysicsMaterial> GetPhysMaterial() const
+	FORCEINLINE TAssetHandle<CPhysicsMaterial> GetPhysMaterial() const
 	{
 		return physicsMaterial;
 	}
 
 protected:
-	FCollisionProfile*				collisionProfile;		/**< Collision profile */
-	TAssetHandle<FPhysicsMaterial>	physicsMaterial;		/**< Physics material */
+	SCollisionProfile*				collisionProfile;		/**< Collision profile */
+	TAssetHandle<CPhysicsMaterial>	physicsMaterial;		/**< Physics material */
 };
 
 #endif // !SHAPECOMPONENT_H

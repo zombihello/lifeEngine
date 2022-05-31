@@ -4,17 +4,17 @@
 IMPLEMENT_CLASS( AActor )
 
 #if WITH_EDITOR
-FActorVar::FActorVar()
+CActorVar::CActorVar()
 	: type( AVT_Unknown )
 	, value( nullptr )
 {}
 
-FActorVar::FActorVar( const FActorVar& InCopy )
+CActorVar::CActorVar( const CActorVar& InCopy )
 {
 	*this = InCopy;
 }
 
-void FActorVar::Clear()
+void CActorVar::Clear()
 {
 	if ( !value )
 	{
@@ -26,14 +26,14 @@ void FActorVar::Clear()
 	case AVT_Int:		delete static_cast< int32* >( value );						break;
 	case AVT_Float:		delete static_cast< float* >( value );						break;
 	case AVT_Bool:		delete static_cast< bool* >( value );						break;
-	case AVT_Vector2D:	delete static_cast< FVector2D* >( value );					break;
-	case AVT_Vector3D:	delete static_cast< FVector* >( value );					break;
-	case AVT_Vector4D:	delete static_cast< FVector4D* >( value );					break;
-	case AVT_RectInt:	delete static_cast< FRectInt32* >( value );					break;
-	case AVT_RectFloat:	delete static_cast< FRectFloat* >( value );					break;
-	case AVT_Color:		delete static_cast< FColor* >( value );						break;
+	case AVT_Vector2D:	delete static_cast< Vector2D* >( value );					break;
+	case AVT_Vector3D:	delete static_cast< Vector* >( value );					break;
+	case AVT_Vector4D:	delete static_cast< Vector4D* >( value );					break;
+	case AVT_RectInt:	delete static_cast< RectInt32_t* >( value );					break;
+	case AVT_RectFloat:	delete static_cast< RectFloat_t* >( value );					break;
+	case AVT_Color:		delete static_cast< ÑColor* >( value );						break;
 	case AVT_String:	delete static_cast< std::wstring* >( value );				break;
-	case AVT_Material:	delete static_cast< TAssetHandle<FMaterial>* >( value );	break;
+	case AVT_Material:	delete static_cast< TAssetHandle<CMaterial>* >( value );	break;
 	}
 
 	value = nullptr;
@@ -75,7 +75,7 @@ void AActor::Tick( float InDeltaTime )
 	}
 }
 
-void AActor::Serialize( class FArchive& InArchive )
+void AActor::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << bIsStatic;
@@ -111,32 +111,32 @@ void AActor::SyncPhysics()
 }
 
 #if WITH_EDITOR
-bool AActor::InitProperties( const std::vector<FActorVar>& InActorVars, class LCookPackagesCommandlet* InCooker )
+bool AActor::InitProperties( const std::vector<CActorVar>& InActorVars, class CCookPackagesCommandlet* InCooker )
 {
 	return true;
 }
 #endif // WITH_EDITOR
 
-LActorComponentRef AActor::CreateComponent( LClass* InClass, const tchar* InName )
+ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InName )
 {
 	check( InClass );
 
-	LObject*				newObject = InClass->CreateObject();
-	check( newObject->IsA< LActorComponent >() );
+	CObject*				newObject = InClass->CreateObject();
+	check( newObject->IsA< CActorComponent >() );
 
-	LActorComponent*		component = newObject->Cast< LActorComponent >();
+	CActorComponent*		component = newObject->Cast< CActorComponent >();
 	check( component );
 
-	bool		bIsASceneComponent		= component->IsA< LSceneComponent >();
+	bool		bIsASceneComponent		= component->IsA< CSceneComponent >();
 
-	// If created component is a LSceneComponent and RootComponent not setted - set it!
+	// If created component is a CSceneComponent and RootComponent not setted - set it!
 	if ( !rootComponent && bIsASceneComponent )
 	{
-		rootComponent = component->Cast< LSceneComponent >();
+		rootComponent = component->Cast< CSceneComponent >();
 	}
 	else if ( rootComponent && bIsASceneComponent )
 	{
-		( ( LSceneComponent* )component )->SetupAttachment( rootComponent );
+		( ( CSceneComponent* )component )->SetupAttachment( rootComponent );
 	}
 
 	component->SetName( InName );
@@ -144,7 +144,7 @@ LActorComponentRef AActor::CreateComponent( LClass* InClass, const tchar* InName
 	return component;
 }
 
-void AActor::AddOwnedComponent( class LActorComponent* InComponent )
+void AActor::AddOwnedComponent( class CActorComponent* InComponent )
 {
 	check( InComponent && InComponent->GetOwner() != this );
 
@@ -162,12 +162,12 @@ void AActor::AddOwnedComponent( class LActorComponent* InComponent )
 	ownedComponents.push_back( InComponent );
 }
 
-void AActor::RemoveOwnedComponent( class LActorComponent* InComponent )
+void AActor::RemoveOwnedComponent( class CActorComponent* InComponent )
 {
 	check( InComponent && InComponent->GetOwner() == this );
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
 	{
-		LActorComponent*		component = ownedComponents[ index ];
+		CActorComponent*		component = ownedComponents[ index ];
 		if ( component == InComponent )
 		{
 			if ( component == collisionComponent )

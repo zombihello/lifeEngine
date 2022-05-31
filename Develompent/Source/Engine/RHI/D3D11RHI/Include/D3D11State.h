@@ -15,7 +15,7 @@
  * @ingroup D3D11RHI
  * @brief Class of resterize state DirectX 11
  */
-class FD3D11RasterizerStateRHI : public FBaseRasterizerStateRHI
+class CD3D11RasterizerStateRHI : public CBaseRasterizerStateRHI
 {
 public:
 	/**
@@ -23,12 +23,12 @@ public:
 	 *
 	 * @param[in] InInitializer Initializer of rasterizer state
 	 */
-	FD3D11RasterizerStateRHI( const FRasterizerStateInitializerRHI& InInitializer );
+	CD3D11RasterizerStateRHI( const SRasterizerStateInitializerRHI& InInitializer );
 
 	/**
 	 * @brief Destructor
 	 */
-	~FD3D11RasterizerStateRHI();
+	~CD3D11RasterizerStateRHI();
 
 	/**
 	 * @brief Get DirectX resource
@@ -47,12 +47,12 @@ private:
  * @ingroup D3D11RHI
  * Class for caching binded vertex buffer
  */
-struct FD3D11StateVertexBuffer
+struct CD3D11StateVertexBuffer
 {
 	/**
 	 * Overload operator ==
 	 */
-	FORCEINLINE bool operator==( const FD3D11StateVertexBuffer& InOther ) const
+	FORCEINLINE bool operator==( const CD3D11StateVertexBuffer& InOther ) const
 	{
 		return vertexBuffer == InOther.vertexBuffer && stride == InOther.stride && offset == InOther.offset;
 	}
@@ -60,7 +60,7 @@ struct FD3D11StateVertexBuffer
 	/**
 	 * Overload operator !=
 	 */
-	FORCEINLINE bool operator!=( const FD3D11StateVertexBuffer& InOther ) const
+	FORCEINLINE bool operator!=( const CD3D11StateVertexBuffer& InOther ) const
 	{
 		return !( *this == InOther );
 	}
@@ -74,12 +74,12 @@ struct FD3D11StateVertexBuffer
  * @ingroup D3D11RHI
  * Class for caching binded index buffer
  */
-struct FD3D11StateIndexBuffer
+struct CD3D11StateIndexBuffer
 {
 	/**
 	 * Overload operator ==
 	 */
-	FORCEINLINE bool operator==( const FD3D11StateIndexBuffer& InOther ) const
+	FORCEINLINE bool operator==( const CD3D11StateIndexBuffer& InOther ) const
 	{
 		return indexBuffer == InOther.indexBuffer && format == InOther.format && offset == InOther.offset;
 	}
@@ -87,7 +87,7 @@ struct FD3D11StateIndexBuffer
 	/**
 	 * Overload operator !=
 	 */
-	FORCEINLINE bool operator!=( const FD3D11StateIndexBuffer& InOther ) const
+	FORCEINLINE bool operator!=( const CD3D11StateIndexBuffer& InOther ) const
 	{
 		return !( *this == InOther );
 	}
@@ -101,13 +101,13 @@ struct FD3D11StateIndexBuffer
  * @ingroup D3D11RHI
  * Class for caching DirectX 11 states
  */
-struct FD3D11StateCache
+struct SD3D11StateCache
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FD3D11StateCache();
+	SD3D11StateCache();
 
 	struct D3D11_VIEWPORT				viewport;																/**< Viewport */
 	struct ID3D11InputLayout*			inputLayout;															/**< Input layout */
@@ -116,12 +116,12 @@ public:
 	struct ID3D11GeometryShader*		geometryShader;															/**< Geometry shader */
 	struct ID3D11HullShader*			hullShader;																/**< Hull shader */
 	struct ID3D11DomainShader*			domainShader;															/**< Domain shader */
-	FD3D11StateVertexBuffer				vertexBuffers[ D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT ];				/**< Vertex buffers */
+	CD3D11StateVertexBuffer				vertexBuffers[ D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT ];				/**< Vertex buffers */
 	struct ID3D11RasterizerState*		rasterizerState;														/**< Rasterizer state */
 	struct ID3D11SamplerState*			psSamplerStates[ D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT ];				/**< Sampler state for pixel shader */
 	struct ID3D11ShaderResourceView*	psShaderResourceViews[ D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT ];	/**< Shader resource view for pixel shader */
 	D3D11_PRIMITIVE_TOPOLOGY			primitiveTopology;														/**< Primitive topology */
-	FD3D11StateIndexBuffer				indexBuffer;															/**< Index buffer */
+	CD3D11StateIndexBuffer				indexBuffer;															/**< Index buffer */
 	struct ID3D11RenderTargetView*		renderTargetViews[ D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT ];			/**< Render target view */
 	struct ID3D11DepthStencilView*		depthStencilView;														/**< Depth stencil view */
 	struct ID3D11DepthStencilState*		depthStencilState;														/**< Depth stencil state */
@@ -131,7 +131,7 @@ public:
  * @ingroup D3D11RHI
  * Class of sampler state DirectX 11
  */
-class FD3D11SamplerStateRHI : public FBaseSamplerStateRHI
+class CD3D11SamplerStateRHI : public CBaseSamplerStateRHI
 {
 public:
 	/**
@@ -139,12 +139,12 @@ public:
 	 * 
 	 * @param[in] InInitializer Initializer of sampler state
 	 */
-	FD3D11SamplerStateRHI( const FSamplerStateInitializerRHI& InInitializer );
+	CD3D11SamplerStateRHI( const SSamplerStateInitializerRHI& InInitializer );
 
 	/**
 	 * Destructor
 	 */
-	~FD3D11SamplerStateRHI();
+	~CD3D11SamplerStateRHI();
 
 	/**
 	 * @brief Get DirectX resource
@@ -159,7 +159,7 @@ private:
 	struct ID3D11SamplerState*				d3d11SamplerState;			/**< Pointer to DirectX 11 sampler state */	
 };
 
-class FD3D11DepthStateRHI : public FBaseDepthStateRHI
+class CD3D11DepthStateRHI : public CBaseDepthStateRHI
 {
 public:
 	/**
@@ -167,12 +167,12 @@ public:
 	 * 
 	 * @param InInitializer		Initializer of depth state
 	 */
-	FD3D11DepthStateRHI( const FDepthStateInitializerRHI& InInitializer );
+	CD3D11DepthStateRHI( const SDepthStateInitializerRHI& InInitializer );
 
 	/**
 	 * Destructor
 	 */
-	~FD3D11DepthStateRHI();
+	~CD3D11DepthStateRHI();
 
 	/**
 	 * @brief Get DirectX resource

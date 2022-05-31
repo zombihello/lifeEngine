@@ -72,12 +72,12 @@ enum ESurfaceType
  * @ingroup Physics
  * @brief Struct of collision profile
  */
-struct FCollisionProfile
+struct SCollisionProfile
 {
 	/**
 	 * @brief Constructor
 	 */
-	FCollisionProfile()
+	SCollisionProfile()
 		: name( TEXT( "Unknown" ) )
 		, objectType( CC_WorldStatic )
 	{
@@ -87,12 +87,12 @@ struct FCollisionProfile
 	/**
 	 * Overload operator << for serialize
 	 */
-	friend FArchive& operator<<( FArchive& InAr, FCollisionProfile*& InCollisionProfile );
+	friend CArchive& operator<<( CArchive& InAr, SCollisionProfile*& InCollisionProfile );
 
 	/**
 	 * Overload operator << for serialize
 	 */
-	friend FArchive& operator<<( FArchive& InAr, const FCollisionProfile*& InCollisionProfile );
+	friend CArchive& operator<<( CArchive& InAr, const SCollisionProfile*& InCollisionProfile );
 
 	std::wstring				name;					/**< Profile name */
 	ECollisionChannel			objectType;				/**< Object type */
@@ -106,54 +106,54 @@ struct FCollisionProfile
  * @ingroup Physics
  * @brief Struct of result ray cast
  */
-struct FHitResult
+struct SHitResult
 {
 	/**
 	 * @brief Constructor
 	 */
-	FHitResult()
+	SHitResult()
 		: actor( nullptr )
 		, component( nullptr )
-		, impactNormal( FMath::vectorZero )
-		, impactPoint( FMath::vectorZero )
+		, impactNormal( SMath::vectorZero )
+		, impactPoint( SMath::vectorZero )
 		, physMaterial( nullptr )
 	{ }
 
 	class AActor*						actor;			/**< Actor hit by the trace */
-	class LPrimitiveComponent*			component;		/**< PrimitiveComponent hit by the trace */
-	FVector								impactNormal;	/**< Normal of the hit in world space, for the object that was hit by the sweep, if any */
-	FVector								impactPoint;	/**< Location in world space of the actual contact of the trace shape (box, sphere, ray, etc) with the impacted object */
-	TSharedPtr<class FPhysicsMaterial>	physMaterial;	/**< Physical material that was hit */
+	class CPrimitiveComponent*			component;		/**< PrimitiveComponent hit by the trace */
+	Vector								impactNormal;	/**< Normal of the hit in world space, for the object that was hit by the sweep, if any */
+	Vector								impactPoint;	/**< Location in world space of the actual contact of the trace shape (box, sphere, ray, etc) with the impacted object */
+	TSharedPtr<class CPhysicsMaterial>	physMaterial;	/**< Physical material that was hit */
 };
 
 /**
  * @ingroup Physics
  * @brief Structure that defines parameters passed into collision function 
  */
-struct FCollisionQueryParams
+struct SCollisionQueryParams
 {
 	/**
 	 * @brief Constructor
 	 */
-	FCollisionQueryParams()
+	SCollisionQueryParams()
 		: bReturnPhysicalMaterial( false )
 	{}
 
 	bool							bReturnPhysicalMaterial;		/**< Whether we want to include the physical material in the results */
-	static FCollisionQueryParams	defaultQueryParam;				/**< Static variable for default data to be used without reconstructing everytime */
+	static SCollisionQueryParams	defaultQueryParam;				/**< Static variable for default data to be used without reconstructing everytime */
 };
 
 //
 // Serialize
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InAr, ESurfaceType& InSurfaceType )
+FORCEINLINE CArchive& operator<<( CArchive& InAr, ESurfaceType& InSurfaceType )
 {
 	InAr.Serialize( &InSurfaceType, sizeof( ESurfaceType ) );
 	return InAr;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InAr, const ESurfaceType& InSurfaceType )
+FORCEINLINE CArchive& operator<<( CArchive& InAr, const ESurfaceType& InSurfaceType )
 {
 	check( InAr.IsSaving() );
 	InAr.Serialize( ( void* ) &InSurfaceType, sizeof( ESurfaceType ) );

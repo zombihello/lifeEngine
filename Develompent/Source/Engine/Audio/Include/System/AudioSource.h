@@ -19,18 +19,18 @@
  * @ingroup Audio
  * @brief Audio source
  */
-class FAudioSource
+class CAudioSource
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FAudioSource();
+	CAudioSource();
 
 	/**
 	 * Destructor
 	 */
-	virtual ~FAudioSource();
+	virtual ~CAudioSource();
 
 	/**
 	 * Play
@@ -87,13 +87,13 @@ public:
 	 * Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	virtual void SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank );
+	virtual void SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank );
 
 	/**
 	 * Set location
 	 * @param InLocation Location
 	 */
-	virtual void SetLocation( const FVector& InLocation );
+	virtual void SetLocation( const Vector& InLocation );
 
 	/**
 	 * Is looped
@@ -141,13 +141,13 @@ public:
 	 * Get audio bank
 	 * @return Return audio bank. If not setted return nullptr
 	 */
-	virtual TAssetHandle<FAudioBank> GetAudioBank() const;
+	virtual TAssetHandle<CAudioBank> GetAudioBank() const;
 
 	/**
 	 * Get location
 	 * @return Return location of source audio
 	 */
-	virtual FVector GetLocation() const;
+	virtual Vector GetLocation() const;
 
 	/**
 	 * Get OpenAL handle to source
@@ -159,7 +159,7 @@ public:
 	}
 
 protected:
-	TAssetHandle<FAudioBank>	audioBank;		/**< Audio bank */
+	TAssetHandle<CAudioBank>	audioBank;		/**< Audio bank */
 	float						volume;			/**< Volume */
 
 private:
@@ -173,19 +173,19 @@ private:
 	 * On audio buffer is destroyed
 	 * @param InAudioBuffer		Audio buffer
 	 */
-	void OnAudioBufferDestroyed( class FAudioBuffer* InAudioBuffer );
+	void OnAudioBufferDestroyed( class CAudioBuffer* InAudioBuffer );
 
 	/**
 	 * On audio buffer is updated
 	 * @param InAudioBuffer		Audio buffer
 	 */
-	void OnAudioBufferUpdated( class FAudioBuffer* InAudioBuffer );
+	void OnAudioBufferUpdated( class CAudioBuffer* InAudioBuffer );
 
 	bool										bMuted;						/**< Is audio source muted */
 	uint32										alHandle;					/**< OpenAL of sound source */
-	FOnAudioDeviceMuted::FDelegateType*			audioDeviceMutedHandle;		/**< Handle of delegate of muted device */
-	FOnAudioBufferDestroyed::FDelegateType*		audioBufferDestroyedHandle;	/**< Handle of delegate of destroyed audio buffer */
-	FOnAudioBufferUpdated::FDelegateType*		audioBufferUpdatedHandle;	/**< Handle of delegate of updated audio buffer */
+	COnAudioDeviceMuted::DelegateType_t*			audioDeviceMutedHandle;		/**< Handle of delegate of muted device */
+	COnAudioBufferDestroyed::DelegateType_t*		audioBufferDestroyedHandle;	/**< Handle of delegate of destroyed audio buffer */
+	COnAudioBufferUpdated::DelegateType_t*		audioBufferUpdatedHandle;	/**< Handle of delegate of updated audio buffer */
 };
 
 #endif // !AUDIOSOURCE_H

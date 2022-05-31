@@ -17,7 +17,7 @@
 #include "Misc/SharedPointer.h"
 #include "System/Package.h"
 
-WeStaticMeshEditorWindow::WeStaticMeshEditorWindow( const TSharedPtr<FStaticMesh>& InStaticMesh, QWidget* InParent /* = nullptr */ )
+WeStaticMeshEditorWindow::WeStaticMeshEditorWindow( const TSharedPtr<CStaticMesh>& InStaticMesh, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
 	, bInit( false )
 	, ui( new Ui::WeStaticMeshEditorWindow() )
@@ -36,14 +36,14 @@ WeStaticMeshEditorWindow::WeStaticMeshEditorWindow( const TSharedPtr<FStaticMesh
 	InitUI();
 
 	// Init preview viewport
-	viewportClient = new FStaticMeshPreviewViewportClient( InStaticMesh );
+	viewportClient = new CStaticMeshPreviewViewportClient( InStaticMesh );
 	ui->viewportPreview->SetViewportClient( viewportClient, false );
 	ui->viewportPreview->SetEnabled( true );
 	bInit = true;
 
 	// Subscribe to event when assets try destroy of editing static mesh and reload. It need is block
-	assetsCanDeleteHandle	= FEditorDelegates::onAssetsCanDelete.Add(	std::bind( &WeStaticMeshEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2 )	);
-	assetsReloadedHandle	= FEditorDelegates::onAssetsReloaded.Add(	std::bind( &WeStaticMeshEditorWindow::OnAssetsReloaded, this, std::placeholders::_1 )							);
+	assetsCanDeleteHandle	= SEditorDelegates::onAssetsCanDelete.Add(	std::bind( &WeStaticMeshEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2 )	);
+	assetsReloadedHandle	= SEditorDelegates::onAssetsReloaded.Add(	std::bind( &WeStaticMeshEditorWindow::OnAssetsReloaded, this, std::placeholders::_1 )							);
 }
 
 void WeStaticMeshEditorWindow::InitUI()
@@ -113,13 +113,13 @@ void WeStaticMeshEditorWindow::InitUI()
 void WeStaticMeshEditorWindow::UpdateUI()
 {
 	// Update info about materials
-	const std::vector< TAssetHandle<FMaterial> >&		materials = staticMesh->GetMaterials();
+	const std::vector< TAssetHandle<CMaterial> >&		materials = staticMesh->GetMaterials();
 	for ( uint32 index = 0, count = materials.size(); index < count; ++index )
 	{
 		WeSelectAssetWidget*		selectAssetWidget = selectAsset_materials[ index ];
 		check( selectAssetWidget );
 
-		TAssetHandle<FMaterial>		material = materials[ index ];
+		TAssetHandle<CMaterial>		material = materials[ index ];
 		if ( material.IsAssetValid() && !GPackageManager->IsDefaultAsset( material ) )
 		{
 			std::wstring		assetReference;
@@ -129,12 +129,12 @@ void WeStaticMeshEditorWindow::UpdateUI()
 	}
 
 	// Set info about asset
-	const FBulkData<FStaticMeshVertexType>&		verteces	= staticMesh->GetVerteces();
-	const FBulkData<uint32>&					indeces		= staticMesh->GetIndeces();
+	const ÑBulkData<SStaticMeshVertexType>&		verteces	= staticMesh->GetVerteces();
+	const ÑBulkData<uint32>&					indeces		= staticMesh->GetIndeces();
 	
 	ui->label_numVertecesValue->setText( QString::number( verteces.Num() ) );
 	ui->label_numTrianglesValue->setText( QString::number( indeces.Num() / 3 ) );
-	ui->label_resourceSizeValue->setText( QString::fromStdWString( FString::Format( TEXT( "%.2f Kb" ), ( verteces.Num() * sizeof( FStaticMeshVertexType ) + indeces.Num() * sizeof( uint32 ) ) / 1024.f ) ) );
+	ui->label_resourceSizeValue->setText( QString::fromStdWString( ÑString::Format( TEXT( "%.2f Kb" ), ( verteces.Num() * sizeof( SStaticMeshVertexType ) + indeces.Num() * sizeof( uint32 ) ) / 1024.f ) ) );
 	OnSourceFileChanged( QString::fromStdWString( staticMesh->GetAssetSourceFile() ) );
 }
 
@@ -146,8 +146,8 @@ WeStaticMeshEditorWindow::~WeStaticMeshEditorWindow()
 	delete ui;
 
 	// Unsubscribe from event when assets try destroy and reload
-	FEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
-	FEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
+	SEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
+	SEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 }
 
 void WeStaticMeshEditorWindow::OnSourceFileChanged( QString InNewSourceFile )
@@ -178,7 +178,7 @@ void WeStaticMeshEditorWindow::OnSelectedAssetMaterial( uint32 InAssetSlot, cons
 	}
 
 	// If asset reference is valid, we find asset
-	TAssetHandle<FMaterial>		newMaterialRef;
+	TAssetHandle<CMaterial>		newMaterialRef;
 	if ( !InNewAssetReference.empty() )
 	{
 		newMaterialRef		= GPackageManager->FindAsset( InNewAssetReference, AT_Material );
@@ -194,15 +194,15 @@ void WeStaticMeshEditorWindow::OnSelectedAssetMaterial( uint32 InAssetSlot, cons
 	staticMesh->SetMaterial( InAssetSlot, newMaterialRef );
 }
 
-void WeStaticMeshEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, FCanDeleteAssetResult& OutResult )
+void WeStaticMeshEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<class CAsset> >& InAssets, SCanDeleteAssetResult& OutResult )
 {
-	FAsset::FSetDependentAssets		dependentAssets;
+	CAsset::SetDependentAssets_t		dependentAssets;
 	staticMesh->GetDependentAssets( dependentAssets );
 
 	// If in InAssets exist static mesh who is editing now or him dependent assets - need is block
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
 	{
-		TSharedPtr<FAsset>		assetRef = InAssets[ index ];
+		TSharedPtr<CAsset>		assetRef = InAssets[ index ];
 		if ( assetRef == staticMesh )
 		{
 			OutResult.Set( false );
@@ -221,7 +221,7 @@ void WeStaticMeshEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<
 	}
 }
 
-void WeStaticMeshEditorWindow::OnAssetsReloaded( const std::vector< TSharedPtr<class FAsset> >& InAssets )
+void WeStaticMeshEditorWindow::OnAssetsReloaded( const std::vector< TSharedPtr<class CAsset> >& InAssets )
 {
 	// If static mesh who is edition reloaded, we update UI
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )

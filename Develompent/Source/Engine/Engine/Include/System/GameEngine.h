@@ -17,20 +17,20 @@
  * @ingroup Engine
  * Class of game engine
  */
-class LGameEngine : public LBaseEngine
+class CGameEngine : public CBaseEngine
 {
-	DECLARE_CLASS( LGameEngine, LBaseEngine )
+	DECLARE_CLASS( CGameEngine, CBaseEngine )
 
 public:
 	/**
 	 * Constructor
 	 */
-	LGameEngine();
+	CGameEngine();
 
 	/**
 	 * Destructor
 	 */
-	virtual ~LGameEngine();
+	virtual ~CGameEngine();
 
 	/**
 	 * Initialize engine
@@ -57,8 +57,8 @@ public:
 	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
 
 private:
-	FViewport				viewport;			/**< Viewport */
-	FGameViewportClient		viewportClient;		/**< Viewport client */
+	CViewport				viewport;			/**< Viewport */
+	CGameViewportClient		viewportClient;		/**< Viewport client */
 };
 
 #endif // !GAMEENGINE_H

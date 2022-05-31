@@ -3,12 +3,12 @@
 
 #define SHADER_CACHE_VERSION			4
 
-bool FShaderParameterMap::FindParameterAllocation( const tchar* InParameterName, uint32& OutBufferIndex, uint32& OutBaseIndex, uint32& OutSize, uint32& OutSamplerIndex ) const
+bool CShaderParameterMap::FindParameterAllocation( const tchar* InParameterName, uint32& OutBufferIndex, uint32& OutBaseIndex, uint32& OutSize, uint32& OutSamplerIndex ) const
 {
 	auto		itParamAllocation = parameterMap.find( InParameterName );
 	if ( itParamAllocation != parameterMap.end() )
 	{
-		const FParameterAllocation&		allocation = itParamAllocation->second;
+		const SParameterAllocation&		allocation = itParamAllocation->second;
 		OutBufferIndex = allocation.bufferIndex;
 		OutBaseIndex = allocation.baseIndex;
 		OutSize = allocation.size;
@@ -22,9 +22,9 @@ bool FShaderParameterMap::FindParameterAllocation( const tchar* InParameterName,
 	}
 }
 
-void FShaderParameterMap::AddParameterAllocation( const tchar* InParameterName, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InSize, uint32 InSamplerIndex )
+void CShaderParameterMap::AddParameterAllocation( const tchar* InParameterName, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InSize, uint32 InSamplerIndex )
 {
-	FParameterAllocation 		allocation;
+	SParameterAllocation 		allocation;
 	allocation.bufferIndex = InBufferIndex;
 	allocation.baseIndex = InBaseIndex;
 	allocation.size = InSize;
@@ -33,9 +33,9 @@ void FShaderParameterMap::AddParameterAllocation( const tchar* InParameterName, 
 }
 
 /**
- * Serialize of FShaderCacheItem
+ * Serialize of SShaderCacheItem
  */
-void FShaderCache::FShaderCacheItem::Serialize( FArchive& InArchive )
+void CShaderCache::SShaderCacheItem::Serialize( CArchive& InArchive )
 {
 	InArchive << frequency;
 
@@ -73,7 +73,7 @@ void FShaderCache::FShaderCacheItem::Serialize( FArchive& InArchive )
 /**
  * Serialize
  */
-void FShaderCache::Serialize( FArchive& InArchive )
+void CShaderCache::Serialize( CArchive& InArchive )
 {
 	check( InArchive.Type() == AT_ShaderCache );
 
@@ -95,7 +95,7 @@ void FShaderCache::Serialize( FArchive& InArchive )
 		// Loading all items from archive
 		for ( uint32 indexItem = 0; indexItem < countItems; ++indexItem )
 		{
-			FShaderCacheItem&		item = items[ indexItem ];
+			SShaderCacheItem&		item = items[ indexItem ];
 			item.Serialize( InArchive );
 			itemsMap[ item.vertexFactoryHash ].insert( item.name );
 		}

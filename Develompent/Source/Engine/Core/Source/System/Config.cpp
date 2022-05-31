@@ -9,7 +9,7 @@
 /**
  * Serialize
  */
-void FConfig::Serialize( FArchive& InArchive )
+void CConfig::Serialize( CArchive& InArchive )
 {
 	if ( InArchive.IsLoading() )
 	{
@@ -38,7 +38,7 @@ void FConfig::Serialize( FArchive& InArchive )
 
 			if ( itGroup->value.IsObject() )
 			{
-				FConfigObject		object;
+				CConfigObject		object;
 				object.Set( itGroup->value, groupName.c_str() );
 				groups[ groupName ] = object;
 			}
@@ -51,7 +51,7 @@ void FConfig::Serialize( FArchive& InArchive )
 	else
 	{
 		InArchive << "{\n";
-		for ( MapGroups::const_iterator itGroup = groups.begin(), itGroupEnd = groups.end(); itGroup != itGroupEnd; ++itGroup )
+		for ( MapGroups_t::const_iterator itGroup = groups.begin(), itGroupEnd = groups.end(); itGroup != itGroupEnd; ++itGroup )
 		{
 			InArchive << "\t\"" << TCHAR_TO_ANSI( itGroup->first.c_str() ) << "\": " << ( achar* )itGroup->second.ToJSON( 1 ).c_str();
 			if ( std::next( itGroup ) != itGroupEnd )
@@ -70,7 +70,7 @@ void FConfig::Serialize( FArchive& InArchive )
 /**
  * Convert value to JSON string
  */
-std::string FConfigValue::ToJSON( uint32 InCountTabs /* = 0 */ ) const
+std::string CConfigValue::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 {
 	std::stringstream	strStream;
 	
@@ -90,7 +90,7 @@ std::string FConfigValue::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 /**
  * Convert object to JSON string
  */
-std::string FConfigObject::ToJSON( uint32 InCountTabs /* = 0 */ ) const
+std::string CConfigObject::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 {
 	std::stringstream	strStream;
 	std::string			tabs;
@@ -121,7 +121,7 @@ std::string FConfigObject::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 /**
  * Set value from RapidJSON value
  */
-void FConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
+void CConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
 {
 	if ( InValue.IsNull() )
 	{
@@ -145,19 +145,19 @@ void FConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* 
 	}
 	else if ( InValue.IsObject() )
 	{
-		FConfigObject		object;
+		CConfigObject		object;
 		object.Set( InValue, InName );
 		SetObject( object );
 	}
 	else if ( InValue.IsArray() )
 	{
 		auto							array = InValue.GetArray();
-		std::vector< FConfigValue >		configValues;
+		std::vector< CConfigValue >		configValues;
 
 		for ( uint32 index = 0, count = array.Size(); index < count; ++index )
 		{
-			FConfigValue		configValue;
-			configValue.Set( array[ index ], FString::Format( TEXT( "%s[%i]" ), InName, index ).c_str() );
+			CConfigValue		configValue;
+			configValue.Set( array[ index ], ÑString::Format( TEXT( "%s[%i]" ), InName, index ).c_str() );
 			configValues.push_back( configValue );
 		}
 
@@ -172,14 +172,14 @@ void FConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* 
 /**
  * Set object from RapidJSON value
  */
-void FConfigObject::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
+void CConfigObject::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
 {
 	std::wstring			objectName = InName;
 
 	for ( auto itValue = InValue.MemberBegin(), itValueEnd = InValue.MemberEnd(); itValue != itValueEnd; ++itValue )
 	{
 		std::wstring		valueName = ANSI_TO_TCHAR( itValue->name.GetString() );
-		FConfigValue		value;
+		CConfigValue		value;
 
 		value.Set( itValue->value, ( objectName + TEXT( "::" ) + valueName ).c_str() );
 		values[ valueName ] = value;
@@ -189,7 +189,7 @@ void FConfigObject::Set( const rapidjson::Value& InValue, const tchar* InName /*
 /**
  * Set value
  */
-void FConfigObject::SetValue( const tchar* InName, const FConfigValue& InValue )
+void CConfigObject::SetValue( const tchar* InName, const CConfigValue& InValue )
 {
 	values[ InName ] = InValue;
 }
@@ -197,12 +197,12 @@ void FConfigObject::SetValue( const tchar* InName, const FConfigValue& InValue )
 /**
  * Get value
  */
-FConfigValue FConfigObject::GetValue( const tchar* InName ) const
+CConfigValue CConfigObject::GetValue( const tchar* InName ) const
 {
 	auto		itValue = values.find( InName );
 	if ( itValue == values.end() )
 	{
-		return FConfigValue();
+		return CConfigValue();
 	}
 
 	return itValue->second;
@@ -211,7 +211,7 @@ FConfigValue FConfigObject::GetValue( const tchar* InName ) const
 /**
  * Copy value
  */
-void FConfigValue::Copy( const FConfigValue& InCopy )
+void CConfigValue::Copy( const CConfigValue& InCopy )
 {
 	type = InCopy.type;
 
@@ -230,7 +230,7 @@ void FConfigValue::Copy( const FConfigValue& InCopy )
 /**
  * Clear value
  */
-void FConfigValue::Clear()
+void CConfigValue::Clear()
 {
 	if ( !value ) return;
 
@@ -240,8 +240,8 @@ void FConfigValue::Clear()
 	case T_Int:				delete static_cast< int32* >( value );							break;
 	case T_Float:			delete static_cast< float* >( value );							break;
 	case T_String:			delete static_cast< std::wstring* >( value );					break;
-	case T_Object:			delete static_cast< FConfigObject* >( value );					break;
-	case T_Array:			delete static_cast< std::vector< FConfigValue >* >( value );	break;
+	case T_Object:			delete static_cast< CConfigObject* >( value );					break;
+	case T_Array:			delete static_cast< std::vector< CConfigValue >* >( value );	break;
 	}
 
 	value = nullptr;

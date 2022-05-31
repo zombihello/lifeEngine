@@ -4,4 +4,4 @@
 // STATIC VALUES
 // ----------------
 
-std::unordered_map< std::wstring, const LClass* >			LClass::classesTable;
+std::unordered_map< std::wstring, const CClass* >			CClass::classesTable;

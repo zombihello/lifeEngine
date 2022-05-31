@@ -21,18 +21,18 @@
  * @ingroup Engine
  * The World is the top level object representing a map or a sandbox in which Actors and Components will exist and be rendered.
  */
-class FWorld
+class CWorld
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FWorld();
+	CWorld();
 
 	/**
 	 * Destructor
 	 */
-	~FWorld();
+	~CWorld();
 
 	/**
 	 * Start gameplay. This will cause the game mode to transition to the correct state and call BeginPlay on all actors
@@ -51,7 +51,7 @@ public:
 	 * 
 	 * @param[in] InArchive Archive
 	 */
-	void Serialize( FArchive& InArchive );
+	void Serialize( CArchive& InArchive );
 
 	/**
 	 * Clean up all world
@@ -65,7 +65,7 @@ public:
 	 * @param[in] InLocation Location actor on spawn
 	 * @param[in] InRotation Rotation actor on spawn
 	 */
-	AActorRef SpawnActor( class LClass* InClass, const FVector& InLocation, const FRotator& InRotation = FMath::rotatorZero );
+	ActorRef_t SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation = SMath::rotatorZero );
 
 	/**
 	 * Spawn actor in world
@@ -74,7 +74,7 @@ public:
 	 * @param[in] InRotation Rotation actor on spawn
 	 */
 	template< typename TClass >
-	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const FVector& InLocation, const FRotator& InRotation = FMath::rotatorZero )
+	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const Vector& InLocation, const CRotator& InRotation = SMath::rotatorZero )
 	{
 		return SpawnActor( TClass::StaticClass(), InLocation, InRotation );
 	}
@@ -89,7 +89,7 @@ public:
 	 * @param InCollisionQueryParams Collision query params
 	 * @return Return TRUE if a blocking hit is found, else false
 	 */
-	FORCEINLINE bool LineTraceSingleByChannel( FHitResult& OutHitResult, const FVector& InStart, const FVector& InEnd, ECollisionChannel InTraceChannel, const FCollisionQueryParams& InCollisionQueryParams = FCollisionQueryParams::defaultQueryParam )
+	FORCEINLINE bool LineTraceSingleByChannel( SHitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const SCollisionQueryParams& InCollisionQueryParams = SCollisionQueryParams::defaultQueryParam )
 	{
 		return GPhysicsScene.LineTraceSingleByChannel( OutHitResult, InStart, InEnd, InTraceChannel, InCollisionQueryParams );
 	}
@@ -98,15 +98,15 @@ public:
 	 * @brief Get scene manager
 	 * @return Return pointer to scene manager
 	 */
-	FORCEINLINE class FBaseScene* GetScene() const
+	FORCEINLINE class CBaseScene* GetScene() const
 	{
 		return scene;
 	}
 
 private:
 	bool							isBeginPlay;	/**< Is started gameplay */
-	class FBaseScene*				scene;			/**< Scene manager */
-	std::vector< AActorRef >		actors;			/**< Array actors in world */
+	class CBaseScene*				scene;			/**< Scene manager */
+	std::vector< ActorRef_t >		actors;			/**< Array actors in world */
 };
 
 #endif // !WORLD_H

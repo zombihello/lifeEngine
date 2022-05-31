@@ -10,7 +10,7 @@ IMPLEMENT_CLASS( AStaticMesh )
 
 AStaticMesh::AStaticMesh()
 {
-	staticMeshComponent = CreateComponent< LStaticMeshComponent >( TEXT( "StaticMeshComponent0" ) );
+	staticMeshComponent = CreateComponent< CStaticMeshComponent >( TEXT( "StaticMeshComponent0" ) );
 }
 
 AStaticMesh::~AStaticMesh()

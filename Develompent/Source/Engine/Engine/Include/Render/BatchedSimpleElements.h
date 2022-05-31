@@ -19,7 +19,7 @@
  * @ingroup Engine
  * @brief Batched simple elements for later rendering
  */
-class FBatchedSimpleElements
+class CBatchedSimpleElements
 {
 public:
 	/**
@@ -29,15 +29,15 @@ public:
 	 * @param InEnd			End
 	 * @param InColor		Color
 	 */
-	FORCEINLINE void AddLine( const FVector& InStart, const FVector& InEnd, const FColor& InColor )
+	FORCEINLINE void AddLine( const Vector& InStart, const Vector& InEnd, const ÑColor& InColor )
 	{
 		// Reserve space for new verteces of line
 		uint32		oldSize = lineVerteces.size();
 		lineVerteces.resize( oldSize + 2 );
 
 		// Fill data
-		lineVerteces[ oldSize ]		= FSimpleElementVertexType{ FVector4D( InStart, 1.f ),	FVector2D( 0.f, 0.f ), InColor };
-		lineVerteces[ oldSize + 1 ] = FSimpleElementVertexType{ FVector4D( InEnd, 1.f ),	FVector2D( 0.f, 0.f ), InColor };
+		lineVerteces[ oldSize ]		= SSimpleElementVertexType{ Vector4D( InStart, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
+		lineVerteces[ oldSize + 1 ] = SSimpleElementVertexType{ Vector4D( InEnd, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
 	}
 
 	/**
@@ -63,10 +63,10 @@ public:
 	 * @param InDeviceContext		RHI device context
 	 * @param InSceneView			Scene view
 	 */
-	void Draw( class FBaseDeviceContextRHI* InDeviceContext, const class FSceneView& InSceneView ) const;
+	void Draw( class CBaseDeviceContextRHI* InDeviceContext, const class CSceneView& InSceneView ) const;
 
 private:
-	std::vector< FSimpleElementVertexType >		lineVerteces;		/**< Array of line verteces */
+	std::vector< SSimpleElementVertexType >		lineVerteces;		/**< Array of line verteces */
 };
 
 #endif // !BATCHEDSIMPLEELEMENTS_H

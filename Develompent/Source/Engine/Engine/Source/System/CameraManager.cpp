@@ -3,7 +3,7 @@
 #include "System/BaseWindow.h"
 #include "System/WindowEvent.h"
 
-void FCameraManager::BeginPlay()
+void CCameraManager::BeginPlay()
 {
 	// If camera is active - we update aspect ratio and width/height
 	if ( activeCamera && activeCamera->IsAutoViewData() )
@@ -18,7 +18,7 @@ void FCameraManager::BeginPlay()
 	}
 }
 
-void FCameraManager::ProcessEvent( struct SWindowEvent &InWindowEvent )
+void CCameraManager::ProcessEvent( struct SWindowEvent &InWindowEvent )
 {
 	if ( !activeCamera )
 	{

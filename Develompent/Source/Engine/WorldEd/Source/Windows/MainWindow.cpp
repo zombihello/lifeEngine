@@ -56,25 +56,25 @@ void WeMainWindow::InitUI()
 	// Create viewports
 	{
 		// 3D perspective
-		viewportWidgets[ LVT_Perspective ]		= new WeViewportWidget( this, new FEditorLevelViewportClient( LVT_Perspective ), true );
+		viewportWidgets[ LVT_Perspective ]		= new WeViewportWidget( this, new CEditorLevelViewportClient( LVT_Perspective ), true );
 		ads::CDockAreaWidget*					perspectiveDockAreaWidget = CreateDockWidget( ads::CenterDockWidgetArea, "3D Perspective", viewportWidgets[ LVT_Perspective ], nullptr, true, &dockWidget );
 		ui->menuViewports->addAction( dockWidget->toggleViewAction() );
 		connect( dockWidget, &ads::CDockWidget::visibilityChanged, this, &WeMainWindow::On_PerspectiveDockWidget_VisibilityChanged );
 
 		// 2D XY
-		viewportWidgets[ LVT_OrthoXY ]			= new WeViewportWidget( this, new FEditorLevelViewportClient( LVT_OrthoXY ), true );
+		viewportWidgets[ LVT_OrthoXY ]			= new WeViewportWidget( this, new CEditorLevelViewportClient( LVT_OrthoXY ), true );
 		ads::CDockAreaWidget*					xyDockAreaWidget = CreateDockWidget( ads::TopDockWidgetArea, "2D X/Y", viewportWidgets[ LVT_OrthoXY ], perspectiveDockAreaWidget, true, &dockWidget );
 		ui->menuViewports->addAction( dockWidget->toggleViewAction() );
 		connect( dockWidget, &ads::CDockWidget::visibilityChanged, this, &WeMainWindow::On_OrthoXYDockWidget_VisibilityChanged );
 
 		// 2D XZ
-		viewportWidgets[ LVT_OrthoXZ ]			= new WeViewportWidget( this, new FEditorLevelViewportClient( LVT_OrthoXZ ), true );
+		viewportWidgets[ LVT_OrthoXZ ]			= new WeViewportWidget( this, new CEditorLevelViewportClient( LVT_OrthoXZ ), true );
 		ads::CDockAreaWidget*					xzDockAreaWidget = CreateDockWidget( ads::RightDockWidgetArea, "2D X/Z", viewportWidgets[ LVT_OrthoXZ ], xyDockAreaWidget, true, &dockWidget );
 		ui->menuViewports->addAction( dockWidget->toggleViewAction() );
 		connect( dockWidget, &ads::CDockWidget::visibilityChanged, this, &WeMainWindow::On_OrthoXZDockWidget_VisibilityChanged );
 
 		// 2D YZ
-		viewportWidgets[ LVT_OrthoYZ ]			= new WeViewportWidget( this, new FEditorLevelViewportClient( LVT_OrthoYZ ), true );
+		viewportWidgets[ LVT_OrthoYZ ]			= new WeViewportWidget( this, new CEditorLevelViewportClient( LVT_OrthoYZ ), true );
 		ads::CDockAreaWidget*					yzDockAreaWidget = CreateDockWidget( ads::RightDockWidgetArea, "2D Y/Z", viewportWidgets[ LVT_OrthoYZ ], perspectiveDockAreaWidget, true, &dockWidget );
 		ui->menuViewports->addAction( dockWidget->toggleViewAction() );
 		connect( dockWidget, &ads::CDockWidget::visibilityChanged, this, &WeMainWindow::On_OrthoYZDockWidget_VisibilityChanged );
@@ -101,7 +101,7 @@ void WeMainWindow::InitUI()
 	ui->menuWindows->insertAction( firstActionMenuView, dockWidget->toggleViewAction() );
 
 	// Update text in menu action 'About'
-	ui->actionAbout->setText( QString::fromStdWString( FString::Format( TEXT( "About %s" ), GEditorEngine->GetEditorName().c_str() ) ) );
+	ui->actionAbout->setText( QString::fromStdWString( ÑString::Format( TEXT( "About %s" ), GEditorEngine->GetEditorName().c_str() ) ) );
 
 	// Set icons for actions
 	ui->actionNewLevel->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/New.png" ) ).c_str() ) ) );
@@ -110,7 +110,7 @@ void WeMainWindow::InitUI()
 	ui->actionSaveAll->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/SaveAll.png" ) ).c_str() ) ) );
 
 	// Restore state of dock widgets from cache
-	QFile           file( QString::fromStdWString( FString::Format( TEXT( "%s/EditorCache/UICache.dat" ), appGameDir().c_str() ) ) );
+	QFile           file( QString::fromStdWString( ÑString::Format( TEXT( "%s/EditorCache/UICache.dat" ), appGameDir().c_str() ) ) );
 	QByteArray		cachedState;
 	if ( file.open( QFile::ReadOnly ) )
 	{

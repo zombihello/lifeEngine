@@ -22,36 +22,36 @@ bool			GIsThreadedRendering = false;
 uint32			GRenderingThreadId = 0;
 
 /* The rendering command queue */
-FRingBuffer		GRenderCommandBuffer( RENDERING_COMMAND_BUFFER_SIZE, 16 );
+ÑRingBuffer		GRenderCommandBuffer( RENDERING_COMMAND_BUFFER_SIZE, 16 );
 
 /* Event of finished rendering frame */
-FEvent*			GRenderFrameFinished = nullptr;
+CEvent*			GRenderFrameFinished = nullptr;
 
-FSkipRenderCommand::FSkipRenderCommand( uint32 InNumSkipBytes ) :
+CSkipRenderCommand::CSkipRenderCommand( uint32 InNumSkipBytes ) :
 	numSkipBytes( InNumSkipBytes )
 {}
 
-uint32 FSkipRenderCommand::Execute()
+uint32 CSkipRenderCommand::Execute()
 {
 	return numSkipBytes;
 }
 
-uint32 FSkipRenderCommand::GetSize() const
+uint32 CSkipRenderCommand::GetSize() const
 {
 	return numSkipBytes;
 }
 
-const tchar* FSkipRenderCommand::DescribeCommand() const
+const tchar* CSkipRenderCommand::DescribeCommand() const
 {
-	return TEXT( "FSkipRenderCommand" );
+	return TEXT( "CSkipRenderCommand" );
 }
 
-const char* FSkipRenderCommand::DescribeCommandChar() const
+const char* CSkipRenderCommand::DescribeCommandChar() const
 {
-	return "FSkipRenderCommand";
+	return "CSkipRenderCommand";
 }
 
-bool FRenderingThread::Init()
+bool CRenderingThread::Init()
 {
 	// Acquire rendering context ownership on the current thread
 	GRHI->AcquireThreadOwnership();
@@ -60,7 +60,7 @@ bool FRenderingThread::Init()
 	return true;
 }
 
-uint32 FRenderingThread::Run()
+uint32 CRenderingThread::Run()
 {
 	void*		readPointer = nullptr;
 	uint32		numReadBytes = 0;
@@ -73,10 +73,10 @@ uint32 FRenderingThread::Run()
 			// Process one render command
 			{
 				// Execute the Render Command
-				FRenderCommand*		command = ( FRenderCommand* )readPointer;
+				CRenderCommand*		command = ( CRenderCommand* )readPointer;
 				{			
 					uint32		commandSize = command->Execute();
-					command->~FRenderCommand();
+					command->~CRenderCommand();
 					GRenderCommandBuffer.FinishRead( commandSize );
 				}
 			}
@@ -86,10 +86,10 @@ uint32 FRenderingThread::Run()
 	return 0;
 }
 
-void FRenderingThread::Stop()
+void CRenderingThread::Stop()
 {}
 
-void FRenderingThread::Exit()
+void CRenderingThread::Exit()
 {
 	// Release rendering context ownership on the current thread
 	GRHI->ReleaseThreadOwnership();
@@ -97,8 +97,8 @@ void FRenderingThread::Exit()
 }
 
 /** Thread used for rendering */
-FRunnableThread*	GRenderingThread = nullptr;
-FRunnable*			GRenderingThreadRunnable = nullptr;
+CRunnableThread*	GRenderingThread = nullptr;
+CRunnable*			GRenderingThreadRunnable = nullptr;
 
 void StartRenderingThread()
 {
@@ -108,7 +108,7 @@ void StartRenderingThread()
 		GIsThreadedRendering = true;
 
 		// Create the rendering thread.
-		GRenderingThreadRunnable = new FRenderingThread();
+		GRenderingThreadRunnable = new CRenderingThread();
 
 		// Release rendering context ownership on the current thread
 		GRHI->ReleaseThreadOwnership();

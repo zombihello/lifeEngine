@@ -5,7 +5,7 @@
 #include "System/SplashScreen.h"
 #include "WorldEd.h"
 
-void FAssetDataBase::Init()
+void CAssetDataBase::Init()
 {
 	// If failed serialize TOC file, we generate new TOC file and serialize data to archive
 	if ( !SerializeTOC() )
@@ -20,7 +20,7 @@ void FAssetDataBase::Init()
 	}
 }
 
-void FAssetDataBase::AddTOCEntries( const std::wstring& InRootDir )
+void CAssetDataBase::AddTOCEntries( const std::wstring& InRootDir )
 {
 	std::vector< std::wstring >		files = GFileSystem->FindFiles( InRootDir, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
@@ -44,10 +44,10 @@ void FAssetDataBase::AddTOCEntries( const std::wstring& InRootDir )
 	}
 }
 
-bool FAssetDataBase::SerializeTOC( bool InIsSave /* = false */ )
+bool CAssetDataBase::SerializeTOC( bool InIsSave /* = false */ )
 {
 	std::wstring	pathTOC		= appGameDir() + ( PATH_SEPARATOR TEXT( "EditorCache" ) ) + PATH_SEPARATOR + GTableOfContents.GetNameTOC();
-	FArchive*		archiveTOC	= !InIsSave ? GFileSystem->CreateFileReader( pathTOC ) : GFileSystem->CreateFileWriter( pathTOC ) ;
+	CArchive*		archiveTOC	= !InIsSave ? GFileSystem->CreateFileReader( pathTOC ) : GFileSystem->CreateFileWriter( pathTOC ) ;
 	if ( archiveTOC )
 	{
 		GTableOfContents.Serialize( *archiveTOC );
@@ -61,5 +61,5 @@ bool FAssetDataBase::SerializeTOC( bool InIsSave /* = false */ )
 	}
 }
 
-void FAssetDataBase::Shutdown()
+void CAssetDataBase::Shutdown()
 {}

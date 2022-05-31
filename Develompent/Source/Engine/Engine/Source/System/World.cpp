@@ -9,18 +9,18 @@
 #include "Logger/LoggerMacros.h"
 #include "Render/Scene.h"
 
-FWorld::FWorld() 
+CWorld::CWorld() 
 	: isBeginPlay( false )
-	, scene( new FScene() )
+	, scene( new CScene() )
 {}
 
-FWorld::~FWorld()
+CWorld::~CWorld()
 {
 	CleanupWorld();
 	delete scene;
 }
 
-void FWorld::BeginPlay()
+void CWorld::BeginPlay()
 {
 	// Init all actors
 	for ( uint32 index = 0; index < ( uint32 )actors.size(); ++index )
@@ -38,7 +38,7 @@ void FWorld::BeginPlay()
 	isBeginPlay = true;
 }
 
-void FWorld::Tick( float InDeltaTime )
+void CWorld::Tick( float InDeltaTime )
 {
 	for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
 	{
@@ -48,7 +48,7 @@ void FWorld::Tick( float InDeltaTime )
 	}
 }
 
-void FWorld::Serialize( FArchive& InArchive )
+void CWorld::Serialize( CArchive& InArchive )
 {
 	if ( InArchive.IsSaving() )
 	{
@@ -76,13 +76,13 @@ void FWorld::Serialize( FArchive& InArchive )
 			InArchive << className;
 
 			// Spawn actor, serialize and add to array
-			AActor*			actor = SpawnActor( LClass::StaticFindClass( className.c_str() ), FMath::vectorZero, FMath::rotatorZero );
+			AActor*			actor = SpawnActor( CClass::StaticFindClass( className.c_str() ), SMath::vectorZero, SMath::rotatorZero );
 			actor->Serialize( InArchive );
 		}
 	}
 }
 
-void FWorld::CleanupWorld()
+void CWorld::CleanupWorld()
 {
 	GPhysicsScene.RemoveAllBodies();
 	scene->Clear();
@@ -90,7 +90,7 @@ void FWorld::CleanupWorld()
 	isBeginPlay = false;
 }
 
-AActorRef FWorld::SpawnActor( class LClass* InClass, const FVector& InLocation, const FRotator& InRotation /* = FMath::rotatorZero */ )
+ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /* = SMath::rotatorZero */ )
 {
 	check( InClass );
 

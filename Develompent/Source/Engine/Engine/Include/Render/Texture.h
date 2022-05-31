@@ -23,18 +23,18 @@
  * @ingroup Engine
  * @brief Implementation for 2D textures
  */
-class FTexture2D : public FAsset, public FRenderResource
+class CTexture2D : public CAsset, public CRenderResource
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FTexture2D();
+	CTexture2D();
 
 	/**
 	 * Destructor
 	 */
-	~FTexture2D();
+	~CTexture2D();
 
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -55,7 +55,7 @@ public:
 	 *
 	 * @param[in] InArchive Archive
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * Set texture data
@@ -113,7 +113,7 @@ public:
 	 * Get RHI texture 2D
 	 * @return Return pointer to RHI texture 2D
 	 */
-	FORCEINLINE FTexture2DRHIRef GetTexture2DRHI()
+	FORCEINLINE Texture2DRHIRef_t GetTexture2DRHI()
 	{
 		return texture;
 	}
@@ -176,10 +176,10 @@ public:
 	 * Get sampler state initializer for RHI
 	 * @return Return sampler state initializer
 	 */
-	FORCEINLINE FSamplerStateInitializerRHI GetSamplerStateInitialiser() const
+	FORCEINLINE SSamplerStateInitializerRHI GetSamplerStateInitialiser() const
 	{
-		FSamplerStateInitializerRHI		samplerStateInitializer;
-		appMemzero( &samplerStateInitializer, sizeof( FSamplerStateInitializerRHI ) );
+		SSamplerStateInitializerRHI		samplerStateInitializer;
+		appMemzero( &samplerStateInitializer, sizeof( SSamplerStateInitializerRHI ) );
 
 		samplerStateInitializer.filter = samplerFilter;
 		samplerStateInitializer.addressU = addressU;
@@ -190,9 +190,9 @@ public:
 private:
 	uint32						sizeX;				/**< Width of texture */
 	uint32						sizeY;				/**< Height of texture */
-	FBulkData<byte>				data;				/**< Data used when loading texture */
+	ÑBulkData<byte>				data;				/**< Data used when loading texture */
 	EPixelFormat				pixelFormat;		/**< Pixel format of texture */
-	FTexture2DRHIRef			texture;			/**< Reference to RHI texture */
+	Texture2DRHIRef_t			texture;			/**< Reference to RHI texture */
 	ESamplerAddressMode			addressU;			/**< Address mode for U coord */
 	ESamplerAddressMode			addressV;			/**< Address mode for V coord */
 	ESamplerFilter				samplerFilter;		/**< Sampler filter */
@@ -202,9 +202,9 @@ private:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FTexture2D>& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CTexture2D>& InValue )
 {
-	TAssetHandle<FAsset>	asset = InValue;
+	TAssetHandle<CAsset>	asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -214,10 +214,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FTexture2D>&
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TAssetHandle<FTexture2D>& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CTexture2D>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( TAssetHandle<FAsset> )InValue;
+	InArchive << ( TAssetHandle<CAsset> )InValue;
 	return InArchive;
 }
 

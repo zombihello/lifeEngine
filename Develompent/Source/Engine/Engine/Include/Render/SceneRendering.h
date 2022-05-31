@@ -25,20 +25,20 @@
  * @ingroup Engine
  * Draw policy of static mesh
  */
-class FStaticMeshDrawPolicy : public FMeshDrawingPolicy
+class CStaticMeshDrawPolicy : public CMeshDrawingPolicy
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FStaticMeshDrawPolicy();
+	CStaticMeshDrawPolicy();
 
 	/**
 	 * Set shader parameters
 	 *
 	 * @param[in] InDeviceContextRHI RHI device context
 	 */
-	virtual void SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI ) override;
+	virtual void SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI ) override;
 };
 
 #if !SHIPPING_BUILD
@@ -54,7 +54,7 @@ public:
 	 * Constructor
 	 */
 	TWireframeMeshDrawingPolicy()
-		: wireframeColor( FColor::red )
+		: wireframeColor( ÑColor::red )
 	{}
 
 	/**
@@ -64,10 +64,10 @@ public:
 	 * @param InWireframeColor	Wireframe color
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( class FVertexFactory* InVertexFactory, const FColor& InWireframeColor = FColor::red, float InDepthBias = 0.f )
+	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, const ÑColor& InWireframeColor = ÑColor::red, float InDepthBias = 0.f )
 	{
-		TAssetHandle<FMaterial>		wireframeMaterial = GEngine->GetDefaultWireframeMaterial();
-		TSharedPtr<FMaterial>		wireframeMaterialRef = wireframeMaterial.ToSharedPtr();
+		TAssetHandle<CMaterial>		wireframeMaterial = GEngine->GetDefaultWireframeMaterial();
+		TSharedPtr<CMaterial>		wireframeMaterialRef = wireframeMaterial.ToSharedPtr();
 		if ( !wireframeMaterialRef )
 		{
 			return;
@@ -80,19 +80,19 @@ public:
 
 		// Override shaders for wireframe rendering
 		uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
-		vertexShader	= GShaderManager->FindInstance<FWireframeVertexShader>( vertexFactoryHash );
-		pixelShader		= GShaderManager->FindInstance<FWireframePixelShader>( vertexFactoryHash );
+		vertexShader	= GShaderManager->FindInstance<CWireframeVertexShader>( vertexFactoryHash );
+		pixelShader		= GShaderManager->FindInstance<CWireframePixelShader>( vertexFactoryHash );
 	}
 
 	/**
 	 * @brief Get rasterizer state
 	 * @return Return rasterizer state of current drawing policy
 	 */
-	virtual FRasterizerStateRHIRef GetRasterizerState() const
+	virtual RasterizerStateRHIRef_t GetRasterizerState() const
 	{
 		if ( !rasterizerState )
 		{
-			const FRasterizerStateInitializerRHI		initializer =
+			const SRasterizerStateInitializerRHI		initializer =
 			{
 				FM_Wireframe,
 				CM_None,
@@ -116,7 +116,7 @@ public:
 	}
 
 private:
-	FColor			wireframeColor;		/**< Wireframe color */
+	ÑColor			wireframeColor;		/**< Wireframe color */
 };
 #endif // !SHIPPING_BUILD
 
@@ -124,7 +124,7 @@ private:
  * @ingroup Engine
  * Class for render scene
  */
-class FSceneRenderer
+class CSceneRenderer
 {
 public:
 	/**
@@ -133,30 +133,30 @@ public:
 	 * @param InSceneView	Scene view
 	 * @param InScene		Scene
 	 */
-	FSceneRenderer( FSceneView* InSceneView, class FScene* InScene = nullptr );
+	CSceneRenderer( CSceneView* InSceneView, class CScene* InScene = nullptr );
 
 	/**
 	 * Begin render view target
 	 * @param InViewportRHI		Viewport RHI
 	 */
-	void BeginRenderViewTarget( FViewportRHIParamRef InViewportRHI );
+	void BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI );
 
 	/**
 	 * Render scene
 	 * 
 	 * @param InViewportRHI		Viewport RHI
 	 */
-	void Render( FViewportRHIParamRef InViewportRHI );
+	void Render( ViewportRHIParamRef_t InViewportRHI );
 
 	/**
 	 * Finish rendering a view, writing the contents to backbuffer of InViewportRHI
 	 * @param InViewportRHI		Viewport RHI
 	 */
-	void FinishRenderViewTarget( FViewportRHIParamRef InViewportRHI );
+	void FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI );
 
 private:
-	class FScene*	scene;			/**< Scene */
-	FSceneView*		sceneView;		/**< Scene view */
+	class CScene*	scene;			/**< Scene */
+	CSceneView*		sceneView;		/**< Scene view */
 };
 
 #endif // !SCENERENDERING_H

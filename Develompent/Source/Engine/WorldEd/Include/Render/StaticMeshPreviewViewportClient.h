@@ -18,19 +18,19 @@
  * @ingroup WorldEd
  * @brief Static mesh preview viewport client
  */
-class FStaticMeshPreviewViewportClient : public FEditorLevelViewportClient
+class CStaticMeshPreviewViewportClient : public CEditorLevelViewportClient
 {
 public:
 	/**
 	 * @brief Constructor
 	 * @param InStaticMesh	Static mesh
 	 */
-	FStaticMeshPreviewViewportClient( const TSharedPtr<FStaticMesh>& InStaticMesh );
+	CStaticMeshPreviewViewportClient( const TSharedPtr<CStaticMesh>& InStaticMesh );
 
 	/**
 	 * @brief Destructor
 	 */
-	~FStaticMeshPreviewViewportClient();
+	~CStaticMeshPreviewViewportClient();
 
 	/**
 	 * Update logic of viewport client
@@ -42,7 +42,7 @@ public:
 	 *
 	 * @param InViewport	Viewport
 	 */
-	virtual void Draw( FViewport* InViewport ) override;
+	virtual void Draw( CViewport* InViewport ) override;
 
 	/**
 	 * @brief Draw viewport. Must be call in render thread
@@ -50,7 +50,7 @@ public:
 	 * @param InViewportRHI		Viewport RHI
 	 * @param InSceneView		Scene view
 	 */
-	void Draw_RenderThread( FViewportRHIRef InViewportRHI, class FSceneView* InSceneView );
+	void Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView );
 
 	/**
 	 * @brief Set viewport type
@@ -62,16 +62,16 @@ public:
 	 * @brief Set preview static mesh
 	 * @param InStaticMesh	Static mesh
 	 */
-	FORCEINLINE void SetStaticMesh( const TSharedPtr<FStaticMesh>& InStaticMesh )
+	FORCEINLINE void SetStaticMesh( const TSharedPtr<CStaticMesh>& InStaticMesh )
 	{
 		staticMesh = InStaticMesh;
 		staticMeshComponent->SetStaticMesh( InStaticMesh->GetAssetHandle() );
 	}
 
 private:
-	FScene*								scene;					/**< Scene for preview material */
-	TSharedPtr<FStaticMesh>				staticMesh;				/**< Static mesh */
-	TRefCountPtr<LStaticMeshComponent>	staticMeshComponent;	/**< Static mesh component */
+	CScene*								scene;					/**< Scene for preview material */
+	TSharedPtr<CStaticMesh>				staticMesh;				/**< Static mesh */
+	TRefCountPtr<CStaticMeshComponent>	staticMeshComponent;	/**< Static mesh component */
 };
 
 #endif // !STATICMESHPREVIEWVIEWPORTCLIENT_H

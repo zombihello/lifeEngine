@@ -18,15 +18,15 @@
  * @ingroup WorldEd
  * Class of base commandlet
  */
-class LBaseCommandlet : public LObject
+class ÑBaseCommandlet : public CObject
 {
-	DECLARE_CLASS( LBaseCommandlet, LObject )
+	DECLARE_CLASS( ÑBaseCommandlet, CObject )
 
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~LBaseCommandlet() {}
+	virtual ~ÑBaseCommandlet() {}
 
 	/**
 	 * Main method of execute commandlet
@@ -34,7 +34,7 @@ public:
 	 * @param[in] InCommands Arguments of start commandlet
 	 * @return Return true if commandlet executed is seccussed, else returning false
 	 */
-	virtual bool Main( const std::wstring& InCommands ) PURE_VIRTUAL( LBaseCommandlet::Main, return false; );
+	virtual bool Main( const std::wstring& InCommands ) PURE_VIRTUAL( ÑBaseCommandlet::Main, return false; );
 
 	/**
 	 * @brief Execute commandlet

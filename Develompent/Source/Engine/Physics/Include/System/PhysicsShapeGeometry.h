@@ -17,33 +17,33 @@
  * @ingroup Physics
  * @brief Base shape used for collision
  */
-struct FPhysicsShapeGeometry
+struct SPhysicsShapeGeometry
 {
 	/**
 	 * @brief Constructor
 	 * @param InCollisionShape Collision shape type
 	 */
-	FPhysicsShapeGeometry( ECollisionShape InCollisionShape );
+	SPhysicsShapeGeometry( ECollisionShape InCollisionShape );
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FPhysicsShapeGeometry(); 
+	virtual ~SPhysicsShapeGeometry(); 
 
 	/**
 	 * Serialize
 	 *
 	 * @param[in] InArchive Archive
 	 */
-	virtual void Serialize( class FArchive& InArchive );
+	virtual void Serialize( class CArchive& InArchive );
 
 	/**
 	 * @brief Get physics shape handle
 	 * @return Return physics shape handle
 	 */
-	FORCEINLINE const FPhysicsShapeHandle& GetShapeHandle() const
+	FORCEINLINE const PhysicsShapeHandle_t& GetShapeHandle() const
 	{
-		if ( !FPhysicsInterface::IsValidShapeGeometry( handle ) )
+		if ( !CPhysicsInterface::IsValidShapeGeometry( handle ) )
 		{
 			InitPhysicsShape();
 		}
@@ -51,8 +51,8 @@ struct FPhysicsShapeGeometry
 	}
 
 	ECollisionShape						collisionShape;		/**< Collision shape */
-	FCollisionProfile*					collisionProfile;	/**< Collision profile */
-	TAssetHandle<FPhysicsMaterial>		material;			/**< Physics material */
+	SCollisionProfile*					collisionProfile;	/**< Collision profile */
+	TAssetHandle<CPhysicsMaterial>		material;			/**< Physics material */
 
 protected:
 	/**
@@ -60,20 +60,20 @@ protected:
 	 */
 	virtual void InitPhysicsShape() const = 0;
 
-	mutable FPhysicsShapeHandle		handle;				/**< Physics shape */
+	mutable PhysicsShapeHandle_t		handle;				/**< Physics shape */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, ECollisionShape& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, ECollisionShape& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( ECollisionShape ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ECollisionShape& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ECollisionShape& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( ECollisionShape ) );

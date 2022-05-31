@@ -45,25 +45,25 @@ enum EActorVarType
  * @ingroup Engine
  * Class for contain actor variable for initialize him when cooked map. Available only when WITH_EDITOR is 1
  */
-class FActorVar
+class CActorVar
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FActorVar();
+	CActorVar();
 
 	/**
 	 * Constructor of copy
 	 *
 	 * @param InCopy Copy
 	 */
-	FActorVar( const FActorVar& InCopy );
+	CActorVar( const CActorVar& InCopy );
 
 	/**
 	 * Destructor
 	 */
-	FORCEINLINE ~FActorVar()
+	FORCEINLINE ~CActorVar()
 	{
 		Clear();
 	}
@@ -151,7 +151,7 @@ public:
 	 *
 	 * @param InValue Value
 	 */
-	FORCEINLINE void SetValueVector2D( const FVector2D& InValue )
+	FORCEINLINE void SetValueVector2D( const Vector2D& InValue )
 	{
 		if ( value && type != AVT_Vector2D )
 		{
@@ -160,10 +160,10 @@ public:
 
 		if ( !value )
 		{
-			value = new FVector2D();
+			value = new Vector2D();
 		}
 
-		*static_cast< FVector2D* >( value ) = InValue;
+		*static_cast< Vector2D* >( value ) = InValue;
 		type = AVT_Vector2D;
 	}
 
@@ -172,7 +172,7 @@ public:
 	 *
 	 * @param InValue Value
 	 */
-	FORCEINLINE void SetValueVector3D( const FVector& InValue )
+	FORCEINLINE void SetValueVector3D( const Vector& InValue )
 	{
 		if ( value && type != AVT_Vector3D )
 		{
@@ -181,17 +181,17 @@ public:
 
 		if ( !value )
 		{
-			value = new FVector();
+			value = new Vector();
 		}
 
-		*static_cast< FVector* >( value ) = InValue;
+		*static_cast< Vector* >( value ) = InValue;
 		type = AVT_Vector3D;
 	}
 
 	/**
 	 * Set value vector 4D
 	 */
-	FORCEINLINE void SetValueVector4D( const FVector4D& InValue )
+	FORCEINLINE void SetValueVector4D( const Vector4D& InValue )
 	{
 		if ( value && type != AVT_Vector4D )
 		{
@@ -200,10 +200,10 @@ public:
 
 		if ( !value )
 		{
-			value = new FVector4D();
+			value = new Vector4D();
 		}
 
-		*static_cast< FVector4D* >( value ) = InValue;
+		*static_cast< Vector4D* >( value ) = InValue;
 		type = AVT_Vector4D;
 	}
 
@@ -212,7 +212,7 @@ public:
 	 *
 	 * @param InValue Value
 	 */
-	FORCEINLINE void SetValueRectInt( const FRectInt32& InValue )
+	FORCEINLINE void SetValueRectInt( const RectInt32_t& InValue )
 	{
 		if ( value && type != AVT_RectInt )
 		{
@@ -221,10 +221,10 @@ public:
 
 		if ( !value )
 		{
-			value = new FRectInt32();
+			value = new RectInt32_t();
 		}
 
-		*static_cast< FRectInt32* >( value ) = InValue;
+		*static_cast< RectInt32_t* >( value ) = InValue;
 		type = AVT_RectInt;
 	}
 
@@ -233,7 +233,7 @@ public:
 	 *
 	 * @param InValue Value
 	 */
-	FORCEINLINE void SetValueRectFloat( const FRectFloat& InValue )
+	FORCEINLINE void SetValueRectFloat( const RectFloat_t& InValue )
 	{
 		if ( value && type != AVT_RectFloat )
 		{
@@ -242,10 +242,10 @@ public:
 
 		if ( !value )
 		{
-			value = new FRectFloat();
+			value = new RectFloat_t();
 		}
 
-		*static_cast< FRectFloat* >( value ) = InValue;
+		*static_cast< RectFloat_t* >( value ) = InValue;
 		type = AVT_RectFloat;
 	}
 
@@ -254,7 +254,7 @@ public:
 	 *
 	 * @param InValue Value
 	 */
-	FORCEINLINE void SetValueColor( const FColor& InValue )
+	FORCEINLINE void SetValueColor( const ÑColor& InValue )
 	{
 		if ( value && type != AVT_Color )
 		{
@@ -263,10 +263,10 @@ public:
 
 		if ( !value )
 		{
-			value = new FColor();
+			value = new ÑColor();
 		}
 
-		*static_cast< FColor* >( value ) = InValue;
+		*static_cast< ÑColor* >( value ) = InValue;
 		type = AVT_Color;
 	}
 
@@ -296,7 +296,7 @@ public:
 	 *
 	 * @param InValue Value
 	 */
-	FORCEINLINE void SetValueMaterial( const TAssetHandle<FMaterial>& InValue )
+	FORCEINLINE void SetValueMaterial( const TAssetHandle<CMaterial>& InValue )
 	{
 		if ( value && type != AVT_Material )
 		{
@@ -305,10 +305,10 @@ public:
 
 		if ( !value )
 		{
-			value = new TAssetHandle<FMaterial>();
+			value = new TAssetHandle<CMaterial>();
 		}
 
-		*static_cast< TAssetHandle<FMaterial>* >( value ) = InValue;
+		*static_cast< TAssetHandle<CMaterial>* >( value ) = InValue;
 		type = AVT_Material;
 	}
 
@@ -395,78 +395,78 @@ public:
 	 * Get value vector 2D
 	 * @return Return value vector 2D
 	 */
-	FORCEINLINE FVector2D GetValueVector2D() const
+	FORCEINLINE Vector2D GetValueVector2D() const
 	{
 		if ( type != AVT_Vector2D )
 		{
-			return FVector2D();
+			return Vector2D();
 		}
-		return *static_cast< FVector2D* >( value );
+		return *static_cast< Vector2D* >( value );
 	}
 
 	/**
 	 * Get value vector 3D
 	 * @return Return value vector 3D
 	 */
-	FORCEINLINE FVector GetValueVector3D() const
+	FORCEINLINE Vector GetValueVector3D() const
 	{
 		if ( type != AVT_Vector3D )
 		{
-			return FVector();
+			return Vector();
 		}
-		return *static_cast< FVector* >( value );
+		return *static_cast< Vector* >( value );
 	}
 
 	/**
 	 * Get value vector 4D
 	 * @return Return value vector 4D
 	 */
-	FORCEINLINE FVector4D GetValueVector4D() const
+	FORCEINLINE Vector4D GetValueVector4D() const
 	{
 		if ( type != AVT_Vector4D )
 		{
-			return FVector4D();
+			return Vector4D();
 		}
-		return *static_cast< FVector4D* >( value );
+		return *static_cast< Vector4D* >( value );
 	}
 
 	/**
 	 * Get value rect int
 	 * @return Return value rect int
 	 */
-	FORCEINLINE FRectInt32 GetValueRectInt() const
+	FORCEINLINE RectInt32_t GetValueRectInt() const
 	{
 		if ( type != AVT_RectInt )
 		{
-			return FRectInt32();
+			return RectInt32_t();
 		}
-		return *static_cast< FRectInt32* >( value );
+		return *static_cast< RectInt32_t* >( value );
 	}
 
 	/**
 	 * Get value rect float
 	 * @return Return value rect float
 	 */
-	FORCEINLINE FRectFloat GetValueRectFloat() const
+	FORCEINLINE RectFloat_t GetValueRectFloat() const
 	{
 		if ( type != AVT_RectFloat )
 		{
-			return FRectFloat();
+			return RectFloat_t();
 		}
-		return *static_cast< FRectFloat* >( value );
+		return *static_cast< RectFloat_t* >( value );
 	}
 
 	/**
 	 * Get value color
 	 * @return Return value color
 	 */
-	FORCEINLINE FColor GetValueColor() const
+	FORCEINLINE ÑColor GetValueColor() const
 	{
 		if ( type != AVT_Color )
 		{
-			return FColor();
+			return ÑColor();
 		}
-		return *static_cast< FColor* >( value );
+		return *static_cast< ÑColor* >( value );
 	}
 
 	/**
@@ -486,19 +486,19 @@ public:
 	 * Get value material
 	 * @return Return value material
 	 */
-	FORCEINLINE TAssetHandle<FMaterial> GetValueMaterial() const
+	FORCEINLINE TAssetHandle<CMaterial> GetValueMaterial() const
 	{
 		if ( type != AVT_Material )
 		{
 			return nullptr;
 		}
-		return *static_cast< TAssetHandle<FMaterial>* >( value );
+		return *static_cast< TAssetHandle<CMaterial>* >( value );
 	}
 
 	/**
 	 * Overload operator =
 	 */
-	FORCEINLINE FActorVar& operator=( const FActorVar& InRight )
+	FORCEINLINE CActorVar& operator=( const CActorVar& InRight )
 	{
 		name = InRight.name;
 		switch ( InRight.type )
@@ -535,9 +535,9 @@ private:
  * @ingroup Engine
  * Base class of all actors in world
  */
-class AActor : public LObject, public FRefCounted
+class AActor : public CObject, public CRefCounted
 {
-	DECLARE_CLASS( AActor, LObject )
+	DECLARE_CLASS( AActor, CObject )
 
 public:
 	/**
@@ -566,7 +566,7 @@ public:
 	 * @brief Serialize actor
 	 * @param[in] InArchive Archive for serialize
 	 */
-	virtual void Serialize( class FArchive& InArchive );
+	virtual void Serialize( class CArchive& InArchive );
 
 	/**
 	 * @brief Init physics body
@@ -592,14 +592,14 @@ public:
 	 * @param InCooker Pointer to cooker for cook any resources if need
 	 * @return Return if properties inited succeed and all resources cooked is succeed, else return false
 	 */
-	virtual bool InitProperties( const std::vector< FActorVar >& InActorVars, class LCookPackagesCommandlet* InCooker );
+	virtual bool InitProperties( const std::vector< CActorVar >& InActorVars, class CCookPackagesCommandlet* InCooker );
 #endif // WITH_EDITOR
 
 	/**
 	 * Get array of owned components
 	 * @return Return array owned components
 	 */
-	FORCEINLINE const std::vector< LActorComponentRef >& GetComponents() const
+	FORCEINLINE const std::vector< ActorComponentRef_t >& GetComponents() const
 	{
 		return ownedComponents;
 	}
@@ -609,7 +609,7 @@ public:
 	 * 
 	 * @param[in] InDeltaLocation Delta location
 	 */
-	FORCEINLINE void AddActorLocation( const FVector& InDeltaLocation )
+	FORCEINLINE void AddActorLocation( const Vector& InDeltaLocation )
 	{
 		if ( !rootComponent )	return;
 		rootComponent->AddRelativeLocation( InDeltaLocation );
@@ -620,7 +620,7 @@ public:
 	 * 
 	 * @param[in] InDeltaRotation Delta rotation
 	 */
-	FORCEINLINE void AddActorRotation( const FRotator& InDeltaRotation )
+	FORCEINLINE void AddActorRotation( const CRotator& InDeltaRotation )
 	{
 		if ( !rootComponent )	return;
 		rootComponent->AddRelativeRotate( InDeltaRotation );
@@ -631,7 +631,7 @@ public:
 	 * 
 	 * @param[in] InDeltaScale Delta scale
 	 */
-	FORCEINLINE void AddActorScale( const FVector& InDeltaScale )
+	FORCEINLINE void AddActorScale( const Vector& InDeltaScale )
 	{
 		if ( !rootComponent )	return;
 		rootComponent->AddRelativeScale( InDeltaScale );
@@ -642,7 +642,7 @@ public:
 	 * 
 	 * @param[in] InNewLocation New actor location
 	 */
-	FORCEINLINE void SetActorLocation( const FVector& InNewLocation )
+	FORCEINLINE void SetActorLocation( const Vector& InNewLocation )
 	{
 		if ( !rootComponent )	return;
 		rootComponent->SetRelativeLocation( InNewLocation );
@@ -653,7 +653,7 @@ public:
 	 * 
 	 * @param[in] InNewRotation New actor rotation
 	 */
-	FORCEINLINE void SetActorRotation( const FRotator& InNewRotation )
+	FORCEINLINE void SetActorRotation( const CRotator& InNewRotation )
 	{
 		if ( !rootComponent )	return;
 		rootComponent->SetRelativeRotation( InNewRotation );
@@ -664,7 +664,7 @@ public:
 	 * 
 	 * @param[in] InNewScale New actor scale
 	 */
-	FORCEINLINE void SetActorScale( const FVector& InNewScale )
+	FORCEINLINE void SetActorScale( const Vector& InNewScale )
 	{
 		if ( !rootComponent )	return;
 		rootComponent->SetRelativeScale( InNewScale );
@@ -684,70 +684,70 @@ public:
 	 * Get actor location in world space
 	 * @return Return actor location, if root component is not valid return zero vector
 	 */
-	FORCEINLINE FVector GetActorLocation() const
+	FORCEINLINE Vector GetActorLocation() const
 	{
-		return rootComponent ? rootComponent->GetComponentLocation() : FMath::vectorZero;
+		return rootComponent ? rootComponent->GetComponentLocation() : SMath::vectorZero;
 	}
 
 	/**
 	 * Get actor rotation in world space
 	 * @return Return actor rotation, if root component is not valid return zero rotator
 	 */
-	FORCEINLINE FRotator GetActorRotation() const
+	FORCEINLINE CRotator GetActorRotation() const
 	{
-		return rootComponent ? rootComponent->GetComponentRotation() : FMath::rotatorZero;
+		return rootComponent ? rootComponent->GetComponentRotation() : SMath::rotatorZero;
 	}
 
 	/**
 	 * Get actor scale in world space
 	 * @return Return actor scale, if root component is not valid return one vector
 	 */
-	FORCEINLINE FVector GetActorScale() const
+	FORCEINLINE Vector GetActorScale() const
 	{
-		return rootComponent ? rootComponent->GetComponentScale() : FMath::vectorOne;
+		return rootComponent ? rootComponent->GetComponentScale() : SMath::vectorOne;
 	}
 
 	/**
 	 * Get actor transform in world space
 	 * @return Return actor transform, if root component is not valid return zero transform
 	 */
-	FORCEINLINE FTransform GetActorTransform() const
+	FORCEINLINE CTransform GetActorTransform() const
 	{
-		return rootComponent ? rootComponent->GetComponentTransform() : FMath::transformZero;
+		return rootComponent ? rootComponent->GetComponentTransform() : SMath::transformZero;
 	}
 
 	/**
 	 * Get actor forward vector
 	 * @return Return actor forward vector
 	 */
-	FORCEINLINE FVector GetActorForwardVector() const
+	FORCEINLINE Vector GetActorForwardVector() const
 	{
-		return rootComponent ? rootComponent->GetForwardVector() : FMath::vectorForward;
+		return rootComponent ? rootComponent->GetForwardVector() : SMath::vectorForward;
 	}
 
 	/**
 	 * Get actor right vector
 	 * @return Return actor right vector
 	 */
-	FORCEINLINE FVector GetActorRightVector() const
+	FORCEINLINE Vector GetActorRightVector() const
 	{
-		return rootComponent ? rootComponent->GetRightVector() : FMath::vectorRight;
+		return rootComponent ? rootComponent->GetRightVector() : SMath::vectorRight;
 	}
 
 	/**
 	 * Get actor up vector
 	 * @return Return actor up vector
 	 */
-	FORCEINLINE FVector GetActorUpVector() const
+	FORCEINLINE Vector GetActorUpVector() const
 	{
-		return rootComponent ? rootComponent->GetUpVector() : FMath::vectorUp;
+		return rootComponent ? rootComponent->GetUpVector() : SMath::vectorUp;
 	}
 
 	/**
 	 * Get collision component
 	 * @return Return collision component. If not exist return nullptr
 	 */
-	FORCEINLINE TRefCountPtr< LPrimitiveComponent > GetCollisionComponent() const
+	FORCEINLINE TRefCountPtr< CPrimitiveComponent > GetCollisionComponent() const
 	{
 		return collisionComponent;
 	}
@@ -764,13 +764,13 @@ public:
 protected:
 	/**
 	 * Create component and add to array of owned components
-	 * If creating LSceneComponent, if RootComponent is nullptr, automatic new component setted to root
+	 * If creating CSceneComponent, if RootComponent is nullptr, automatic new component setted to root
 	 *
 	 * @param[in] InClass Class component
 	 * @param[in] InName Name component
 	 * @return Return pointer to component
 	 */
-	LActorComponentRef CreateComponent( LClass* InClass, const tchar* InName );
+	ActorComponentRef_t CreateComponent( CClass* InClass, const tchar* InName );
 
 	/**
 	 * Create component and add to array of owned components
@@ -781,7 +781,7 @@ protected:
 	template< typename TClass >
 	FORCEINLINE TRefCountPtr< TClass > CreateComponent( const tchar* InName )
 	{
-		LActorComponent*		newComponent = CreateComponent( TClass::StaticClass(), InName );
+		CActorComponent*		newComponent = CreateComponent( TClass::StaticClass(), InName );
 		return ( TClass* )newComponent;
 	}
 
@@ -789,26 +789,26 @@ protected:
 	 * Puts a component in to the OwnedComponents array of the Actor
 	 * @param[in] InComponent Component
 	 */
-	void AddOwnedComponent( class LActorComponent* InComponent );
+	void AddOwnedComponent( class CActorComponent* InComponent );
 
 	/**
 	 * Removes a component from the OwnedComponents array of the Actor
 	 * @param[in] InComponent Component
 	 */
-	void RemoveOwnedComponent( class LActorComponent* InComponent );
+	void RemoveOwnedComponent( class CActorComponent* InComponent );
 
 	/**
 	 * Clear array owned components
 	 */
 	void ResetOwnedComponents();
 
-	TRefCountPtr< LSceneComponent >				rootComponent;			/**< Root component, default is null */
-	TRefCountPtr< LPrimitiveComponent >			collisionComponent;		/**< Collision component */
+	TRefCountPtr< CSceneComponent >				rootComponent;			/**< Root component, default is null */
+	TRefCountPtr< CPrimitiveComponent >			collisionComponent;		/**< Collision component */
 
 private:
 	bool										bIsStatic;				/**< Is static actor */
 	bool										bNeedReinitCollision;	/**< Is need reinit collision component */
-	std::vector< LActorComponentRef >			ownedComponents;		/**< Owned components */
+	std::vector< ActorComponentRef_t >			ownedComponents;		/**< Owned components */
 };
 
 #endif // !ACTOR_H

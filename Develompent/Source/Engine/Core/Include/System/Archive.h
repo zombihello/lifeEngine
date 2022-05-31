@@ -34,7 +34,7 @@ enum EArchiveType
  * @ingroup Core
  * @brief The base class for work with archive
  */
-class FArchive
+class CArchive
 {
 public:
 	/**
@@ -42,12 +42,12 @@ public:
 	 * 
 	 * @param InPath Path to archive
 	 */
-	FArchive( const std::wstring& InPath );
+	CArchive( const std::wstring& InPath );
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual					~FArchive() {}
+	virtual					~CArchive() {}
 
 	/**
 	 * @brief Serialize data
@@ -161,7 +161,7 @@ protected:
  * Helper structure for compression support, containing information on compressed
  * and uncompressed size of a chunk of data.
  */
-struct FCompressedChunkInfo
+struct SCompressedChunkInfo
 {
 	uint32		compressedSize;			/**< Compressed size of data */
 	uint32		uncompressedSize;		/**< Uncompresses size of data */
@@ -171,203 +171,203 @@ struct FCompressedChunkInfo
 // Overloaded operators for serialize in archive
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, int8& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, int8& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const int8& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const int8& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, uint8& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, uint8& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const uint8& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const uint8& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, int16& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, int16& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const int16& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const int16& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, uint16& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, uint16& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const uint16& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const uint16& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, int32& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, int32& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const int32& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const int32& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, uint32& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, uint32& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const uint32& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const uint32& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, int64& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, int64& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const int64& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const int64& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, uint64& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, uint64& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const uint64& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const uint64& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, bool& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, bool& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const bool& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const bool& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, float& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, float& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const float& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const float& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, EArchiveType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, EArchiveType& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EArchiveType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const EArchiveType& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FCompressedChunkInfo& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, SCompressedChunkInfo& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FCompressedChunkInfo& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SCompressedChunkInfo& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, achar& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, achar& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const achar& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const achar& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, tchar& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, tchar& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const tchar& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const tchar& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const tchar* InStringC )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const tchar* InStringC )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* )InStringC, ( uint32 )wcslen( InStringC ) * 2 );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const achar* InStringC )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const achar* InStringC )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* )InStringC, ( uint32 )strlen( InStringC ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::string& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::string& InValue )
 {
 	// If we serialize text file
 	if ( InArchive.Type() == AT_TextFile )
@@ -394,7 +394,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::string& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::string& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::string& InValue )
 {
 	check( InArchive.IsSaving() );
 
@@ -418,7 +418,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::string& InValu
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::wstring& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::wstring& InValue )
 {	
 	// If we serialize text file
 	if ( InArchive.Type() == AT_TextFile )
@@ -445,7 +445,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::wstring& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::wstring& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::wstring& InValue )
 {
 	check( InArchive.IsSaving() );
 
@@ -470,7 +470,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::wstring& InVal
 }
 
 template< typename TType >
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::vector< TType >& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::vector< TType >& InValue )
 {
 	if ( InArchive.IsLoading() && InArchive.Ver() < VER_StaticMesh )
 	{
@@ -497,7 +497,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::vector< TType >& InV
 }
 
 template< typename TType >
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::vector< TType >& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::vector< TType >& InValue )
 {
 	check( InArchive.IsSaving() );
 
@@ -516,7 +516,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::vector< TType 
 }
 
 template< typename TKey, typename TValue >
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::unordered_map< TKey, TValue >& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::unordered_map< TKey, TValue >& InValue )
 {
 	if ( InArchive.IsLoading() && InArchive.Ver() < VER_ShaderMap )
 	{
@@ -554,7 +554,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, std::unordered_map< TKey,
 }
 
 template< typename TKey, typename TValue >
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const std::unordered_map< TKey, TValue >& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::unordered_map< TKey, TValue >& InValue )
 {
 	check( InArchive.IsSaving() );
 

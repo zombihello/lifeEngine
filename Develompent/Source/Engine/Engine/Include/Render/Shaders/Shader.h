@@ -24,14 +24,14 @@
  * @ingroup Engine
  * @brief Base class of shader
  */
-class FShader
+class CShader
 {
 public:
 	/**
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem );
+	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem );
 
 	/**
 	 * @brief Set the constant shader parameters
@@ -40,7 +40,7 @@ public:
 	 * @param InVertexFactory Vertex factory
 	 * @param InMaterialResource Material
 	 */
-	virtual void SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const;
+	virtual void SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const;
 
 	/**
 	 * @brief Set the l2w transform shader
@@ -52,7 +52,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
 
 #if WITH_EDITOR
 	/**
@@ -62,7 +62,7 @@ public:
 	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
 	 * @return Return true if need compile shader, else returning false
 	 */
-	static bool ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType = nullptr );
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );
 
 	/**
 	 * @brief Modify compilation environment
@@ -70,7 +70,7 @@ public:
 	 * @param InShaderPlatform Shader platform
 	 * @param InEnvironment Shader compiler environment
 	 */
-	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, FShaderCompilerEnvironment& InEnvironment );
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment );
 #endif // WITH_EDITOR
 
 	/**
@@ -113,7 +113,7 @@ public:
 	 * @brief Get vertex shader
 	 * @return Return pointer to RHI vertex shader. If this shader not SF_Vertex return nullptr
 	 */
-	FORCEINLINE FVertexShaderRHIRef				GetVertexShader() const
+	FORCEINLINE VertexShaderRHIRef_t				GetVertexShader() const
 	{
 		return vertexShader;
 	}
@@ -122,7 +122,7 @@ public:
 	 * @brief Get hull shader
 	 * @return Return pointer to RHI hull shader. If this shader not SF_Hull return nullptr
 	 */
-	FORCEINLINE FHullShaderRHIRef				GetHullShader() const
+	FORCEINLINE HullShaderRHIRef_t				GetHullShader() const
 	{
 		return hullShader;
 	}
@@ -131,7 +131,7 @@ public:
 	 * @brief Get domain shader
 	 * @return Return pointer to RHI domain shader. If this shader not SF_Domain return nullptr
 	 */
-	FORCEINLINE FDomainShaderRHIRef				GetDomainShader() const
+	FORCEINLINE DomainShaderRHIRef_t				GetDomainShader() const
 	{
 		return domainShader;
 	}
@@ -140,7 +140,7 @@ public:
 	 * @brief Get geometry shader
 	 * @return Return pointer to RHI geometry shader. If this shader not SF_Geometry return nullptr
 	 */
-	FORCEINLINE FGeometryShaderRHIRef			GetGeometryShader() const
+	FORCEINLINE GeometryShaderRHIRef_t			GetGeometryShader() const
 	{
 		return geometryShader;
 	}
@@ -149,7 +149,7 @@ public:
 	 * @brief Get pixel shader
 	 * @return Return pointer to RHI pixel shader. If this shader not SF_Pixel return nullptr
 	 */
-	FORCEINLINE FPixelShaderRHIRef				GetPixelShader() const
+	FORCEINLINE PixelShaderRHIRef_t				GetPixelShader() const
 	{
 		return pixelShader;
 	}
@@ -158,18 +158,18 @@ public:
 	 * Get meta type of this shader
 	 * @return Return meta type shader
 	 */
-	virtual class FShaderMetaType* GetType() const = 0;
+	virtual class CShaderMetaType* GetType() const = 0;
 
 private:
 	std::wstring				name;				/**< Name of class shader */
 	EShaderFrequency			frequency;			/**< Frequency of shader */
 	uint64						vertexFactoryHash;	/**< Vertex factory hash */
 	uint32						numInstructions;	/**< Number instructions in shader */
-	FVertexShaderRHIRef			vertexShader;		/**< Pointer to RHI vertex shader */
-	FHullShaderRHIRef			hullShader;			/**< Pointer to RHI hull shader */
-	FDomainShaderRHIRef			domainShader;		/**< Pointer to RHI domain shader */
-	FGeometryShaderRHIRef		geometryShader;		/**< Pointer to RHI geometry shader */
-	FPixelShaderRHIRef			pixelShader;		/**< Pointer to RHI pixel shader */
+	VertexShaderRHIRef_t		vertexShader;		/**< Pointer to RHI vertex shader */
+	HullShaderRHIRef_t			hullShader;			/**< Pointer to RHI hull shader */
+	DomainShaderRHIRef_t		domainShader;		/**< Pointer to RHI domain shader */
+	GeometryShaderRHIRef_t		geometryShader;		/**< Pointer to RHI geometry shader */
+	PixelShaderRHIRef_t			pixelShader;		/**< Pointer to RHI pixel shader */
 };
 
 //
@@ -179,12 +179,12 @@ private:
 /**
  * Overload operator << for serialize bool
  */
-FArchive& operator<<( FArchive& InArchive, FShader*& InValue );
+CArchive& operator<<( CArchive& InArchive, CShader*& InValue );
 
 /**
  * Overload operator << for serialize bool
  */
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FShader*& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CShader*& InValue )
 {
 	check( InArchive.IsSaving() );
 	if ( InValue )

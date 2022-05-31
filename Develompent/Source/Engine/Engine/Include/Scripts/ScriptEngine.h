@@ -41,7 +41,7 @@ extern "C"
  * @param[in] TClass Class
  * @param[in] TRegisterClassAPICode Code of register class API for script
  *
- * Example usage: @code IMPLEMENT_SCRIPT_API( LObject, <Code of register class API for scripts with help LuaBridge> ) @endcode
+ * Example usage: @code IMPLEMENT_SCRIPT_API( CObject, <Code of register class API for scripts with help LuaBridge> ) @endcode
 */
 #define IMPLEMENT_SCRIPT_API( TClass, TRegisterClassAPICode ) \
 	/** Register API class for scripts */ \
@@ -54,7 +54,7 @@ extern "C"
     { \
         SRegisterClassAPI##TClass() \
         { \
-            FScriptEngine::StaticAddRegisterClassAPI( &TClass::StaticRegisterClassAPI ); \
+            CScriptEngine::StaticAddRegisterClassAPI( &TClass::StaticRegisterClassAPI ); \
         } \
     } GRegisterClassAPI##TClass;
 
@@ -62,7 +62,7 @@ extern "C"
  * @ingroup Engine
  * @brief Class for work with script engine
  */
-class FScriptEngine
+class CScriptEngine
 {
 public:
 	/**

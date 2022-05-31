@@ -10,7 +10,7 @@ IMPLEMENT_CLASS( APlayerStart )
 
 APlayerStart::APlayerStart()
 {
-	rootComponent = CreateComponent< LSceneComponent >( TEXT( "RootComponent0" ) );
+	rootComponent = CreateComponent< CSceneComponent >( TEXT( "RootComponent0" ) );
 }
 
 APlayerStart::~APlayerStart()
@@ -19,11 +19,11 @@ APlayerStart::~APlayerStart()
 void APlayerStart::BeginPlay()
 {
 	// Find class of default player controller
-	FConfigValue			configPlayerController = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerController" ) );
-	LClass*					classPlayerController = nullptr;
-	if ( configPlayerController.IsA( FConfigValue::T_String ) )
+	CConfigValue			configPlayerController = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerController" ) );
+	CClass*					classPlayerController = nullptr;
+	if ( configPlayerController.IsA( CConfigValue::T_String ) )
 	{
-		classPlayerController = LClass::StaticFindClass( configPlayerController.GetString().c_str() );
+		classPlayerController = CClass::StaticFindClass( configPlayerController.GetString().c_str() );
 	}
 
 	// If not found - use APlayerController
@@ -41,11 +41,11 @@ void APlayerStart::BeginPlay()
 	}
 
 	// Find class of default player character
-	FConfigValue		configPlayerCharacter = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerCharacter" ) );
-	LClass*				classPlayerCharacter = nullptr;
-	if ( configPlayerCharacter.IsA( FConfigValue::T_String ) )
+	CConfigValue		configPlayerCharacter = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerCharacter" ) );
+	CClass*				classPlayerCharacter = nullptr;
+	if ( configPlayerCharacter.IsA( CConfigValue::T_String ) )
 	{
-		classPlayerCharacter = LClass::StaticFindClass( configPlayerCharacter.GetString().c_str() );
+		classPlayerCharacter = CClass::StaticFindClass( configPlayerCharacter.GetString().c_str() );
 	}
 
 	// If not found - use ACharacter
@@ -63,7 +63,7 @@ void APlayerStart::BeginPlay()
 	}
 
 	// Spawn player controller and character
-	TRefCountPtr< APlayerController >		playerController = GWorld->SpawnActor( classPlayerController, FVector( 0.f, 0.f, 0.f ) );
+	TRefCountPtr< APlayerController >		playerController = GWorld->SpawnActor( classPlayerController, Vector( 0.f, 0.f, 0.f ) );
 	TRefCountPtr< ACharacter >				playerCharacter = GWorld->SpawnActor( classPlayerCharacter, GetActorLocation(), GetActorRotation() );
 	playerController->SetCharacter( playerCharacter );
 }

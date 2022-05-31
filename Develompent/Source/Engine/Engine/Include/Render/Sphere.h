@@ -16,13 +16,13 @@
 #include "RHI/BaseBufferRHI.h"
 #include "RHI/TypesRHI.h"
 
-class FSphereMesh : public FRenderResource
+class CSphereMesh : public CRenderResource
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FSphereMesh();
+	CSphereMesh();
 
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -51,7 +51,7 @@ public:
 	 * @brief Get RHI vertex buffer
 	 * @return Return RHI vertex buffer, if not created return nullptr
 	 */
-	FORCEINLINE FVertexBufferRHIRef GetVertexBufferRHI() const
+	FORCEINLINE VertexBufferRHIRef_t GetVertexBufferRHI() const
 	{
 		return vertexBufferRHI;
 	}
@@ -60,7 +60,7 @@ public:
 	 * @brief Get RHI index buffer
 	 * @return Return RHI index buffer, if not created return nullptr
 	 */
-	FORCEINLINE FIndexBufferRHIRef GetIndexBufferRHI() const
+	FORCEINLINE IndexBufferRHIRef_t GetIndexBufferRHI() const
 	{
 		return indexBufferRHI;
 	}
@@ -69,18 +69,18 @@ public:
 	 * @brief Get vertex factory
 	 * @return Return vertex factory, if not created return NULL
 	 */
-	FORCEINLINE TRefCountPtr< FDynamicMeshVertexFactory > GetVertexFactory() const
+	FORCEINLINE TRefCountPtr< CDynamicMeshVertexFactory > GetVertexFactory() const
 	{
 		return vertexFactory;
 	}
 
 private:
 	uint32											numPrimitives;		/**< Number primitives */
-	FVertexBufferRHIRef								vertexBufferRHI;	/**< Vertex buffer RHI */
-	FIndexBufferRHIRef								indexBufferRHI;		/**< Index buffer RHI */
-	TRefCountPtr< FDynamicMeshVertexFactory >		vertexFactory;		/**< Vertex factory */
+	VertexBufferRHIRef_t							vertexBufferRHI;	/**< Vertex buffer RHI */
+	IndexBufferRHIRef_t								indexBufferRHI;		/**< Index buffer RHI */
+	TRefCountPtr< CDynamicMeshVertexFactory >		vertexFactory;		/**< Vertex factory */
 };
 
-extern TGlobalResource< FSphereMesh >		GSphereMesh;			/**< The global sphere mesh data */
+extern TGlobalResource< CSphereMesh >		GSphereMesh;			/**< The global sphere mesh data */
 
 #endif // !SPHERE_H

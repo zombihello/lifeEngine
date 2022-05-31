@@ -16,16 +16,16 @@
  * Implements a container for rotation information.
  * All rotation values are stored in degrees
  */
-class FRotator
+class CRotator
 {
 public:
-	friend FArchive& operator<<( FArchive& InArchive, FRotator& InValue );
-	friend FArchive& operator<<( FArchive& InArchive, const FRotator& InValue );
+	friend CArchive& operator<<( CArchive& InArchive, CRotator& InValue );
+	friend CArchive& operator<<( CArchive& InArchive, const CRotator& InValue );
 
 	/**
 	 * Constructor
 	 */
-	FORCEINLINE FRotator() :
+	FORCEINLINE CRotator() :
 		pitch( 0.f ),
 		yaw( 0.f ),
 		roll( 0.f )
@@ -36,7 +36,7 @@ public:
 	 * 
 	 * @param[in] InValue Value to set all components to
 	 */
-	FORCEINLINE FRotator( float InValue ) :
+	FORCEINLINE CRotator( float InValue ) :
 		pitch( InValue ),
 		yaw( InValue ),
 		roll( InValue )
@@ -49,7 +49,7 @@ public:
 	 * @param[in] InYaw Yaw in degrees
 	 * @param[in] InRoll Roll in degrees
 	 */
-	FORCEINLINE FRotator( float InPitch, float InYaw, float InRoll ) :
+	FORCEINLINE CRotator( float InPitch, float InYaw, float InRoll ) :
 		pitch( InPitch ),
 		yaw( InYaw ),
 		roll( InRoll )
@@ -60,9 +60,9 @@ public:
 	 * 
 	 * @param[in] InQuaternion Quaternion
 	 */
-	FORCEINLINE FRotator( const FQuaternion& InQuaternion )
+	FORCEINLINE CRotator( const Quaternion& InQuaternion )
 	{
-		FVector		eulerAngles = FMath::QuaternionToAngles( InQuaternion );
+		Vector		eulerAngles = SMath::QuaternionToAngles( InQuaternion );
 		pitch	= eulerAngles.x;
 		yaw		= eulerAngles.y;
 		roll	= eulerAngles.z;
@@ -71,7 +71,7 @@ public:
 	/**
 	 * Constructor with leaving uninitialized memory
 	 */
-	FORCEINLINE explicit FRotator( ENoInit )
+	FORCEINLINE explicit CRotator( ENoInit )
 	{}
 
 	/**
@@ -79,7 +79,7 @@ public:
 	 * 
 	 * @param[in] InRotator Rotator
 	 */
-	FORCEINLINE void Add( const FRotator& InRotator )
+	FORCEINLINE void Add( const CRotator& InRotator )
 	{
 		Add( InRotator.pitch, InRotator.yaw, InRotator.roll );
 	}
@@ -89,7 +89,7 @@ public:
 	 * 
 	 * @param[in] InRotator Rotator
 	 */
-	FORCEINLINE void Subtract( const FRotator& InRotator )
+	FORCEINLINE void Subtract( const CRotator& InRotator )
 	{
 		Subtract( InRotator.pitch, InRotator.yaw, InRotator.roll );
 	}
@@ -128,7 +128,7 @@ public:
 	 * @param[in] InVector Vector
 	 * @return Return rotated vector
 	 */
-	FORCEINLINE FVector RotateVector( const FVector& InVector ) const
+	FORCEINLINE Vector RotateVector( const Vector& InVector ) const
 	{
 		return InVector * ToQuaternion();
 	}
@@ -137,27 +137,27 @@ public:
 	 * Convert to quaternion
 	 * @return Return quaternion
 	 */
-	FORCEINLINE FQuaternion ToQuaternion() const
+	FORCEINLINE Quaternion ToQuaternion() const
 	{
-		return FMath::AnglesToQuaternion( FMath::DegreesToRadians( pitch ), FMath::DegreesToRadians( yaw ), FMath::DegreesToRadians( roll ) );
+		return SMath::AnglesToQuaternion( SMath::DegreesToRadians( pitch ), SMath::DegreesToRadians( yaw ), SMath::DegreesToRadians( roll ) );
 	}
 
 	/**
 	 * Convert to Euler angles (in degrees)
 	 * @return Return rotation as a Euler angle vector
 	 */
-	FORCEINLINE FVector ToEuler() const
+	FORCEINLINE Vector ToEuler() const
 	{
-		return FVector( pitch, yaw, roll );
+		return Vector( pitch, yaw, roll );
 	}
 
 	/**
 	 * Convert to matrix
 	 * @return Return rotation as a matrix
 	 */
-	FORCEINLINE FMatrix ToMatrix() const
+	FORCEINLINE Matrix ToMatrix() const
 	{
-        return FMath::QuaternionToMatrix( ToQuaternion() );
+        return SMath::QuaternionToMatrix( ToQuaternion() );
 	}
 
 	/**
@@ -166,9 +166,9 @@ public:
 	 * @param[in] InOther The other rotator
 	 * @return The result of adding a rotator to this
 	 */
-	FORCEINLINE FRotator operator+( const FRotator& InOther ) const
+	FORCEINLINE CRotator operator+( const CRotator& InOther ) const
 	{
-		return FRotator( pitch + InOther.pitch, yaw + InOther.yaw, roll + InOther.roll );
+		return CRotator( pitch + InOther.pitch, yaw + InOther.yaw, roll + InOther.roll );
 	}
 
 	/**
@@ -177,9 +177,9 @@ public:
 	 * @param[in] InOther The other rotator
 	 * @return The result of subtracting a rotator from this
 	 */
-	FORCEINLINE FRotator operator-( const FRotator& InOther ) const
+	FORCEINLINE CRotator operator-( const CRotator& InOther ) const
 	{
-		return FRotator( pitch - InOther.pitch, yaw - InOther.yaw, roll - InOther.roll );
+		return CRotator( pitch - InOther.pitch, yaw - InOther.yaw, roll - InOther.roll );
 	}
 
 	/**
@@ -188,7 +188,7 @@ public:
 	 * @param[in] InOther The other rotator
 	 * @return Return self
 	 */
-	FORCEINLINE FRotator& operator+=( const FRotator& InOther )
+	FORCEINLINE CRotator& operator+=( const CRotator& InOther )
 	{
 		Add( InOther );
 		return *this;
@@ -200,19 +200,19 @@ public:
 	 * @param[in] InOther The other rotator
 	 * @return Return self
 	 */
-	FORCEINLINE FRotator& operator-=( const FRotator& InOther )
+	FORCEINLINE CRotator& operator-=( const CRotator& InOther )
 	{
 		Subtract( InOther );
 		return *this;
 	}
 
 	/**
-	 * Compare two FRotator
+	 * Compare two CRotator
 	 * 
 	 * @param InRight Right rotator
 	 * @return Return if two rotators is equal, else return false
 	 */
-	FORCEINLINE bool operator==( const FRotator& InRight ) const
+	FORCEINLINE bool operator==( const CRotator& InRight ) const
 	{
 		return pitch == InRight.pitch &&
 			yaw == InRight.yaw &&
@@ -228,7 +228,7 @@ public:
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FRotator& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, CRotator& InValue )
 {
 	InArchive << InValue.pitch;
 	InArchive << InValue.yaw;
@@ -236,7 +236,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FRotator& InValue )
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FRotator& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CRotator& InValue )
 {
 	InArchive << InValue.pitch;
 	InArchive << InValue.yaw;

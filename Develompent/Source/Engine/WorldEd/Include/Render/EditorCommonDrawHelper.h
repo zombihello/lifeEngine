@@ -16,13 +16,13 @@
  * @ingroup WorldEd
  * @brief Implements some basic functionality used by all editor viewports
  */
-class FEditorCommonDrawHelper
+class CEditorCommonDrawHelper
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FEditorCommonDrawHelper();
+	CEditorCommonDrawHelper();
 
 	/**
 	 * @brief Draws the viewport grid
@@ -31,7 +31,7 @@ public:
 	 * @param InViewportType		Viewport type
 	 * @param InScene				Scene
 	 */
-	void DrawGrid( const class FSceneView* InSceneView, ELevelViewportType InViewportType, class FScene* InScene );
+	void DrawGrid( const class CSceneView* InSceneView, ELevelViewportType InViewportType, class CScene* InScene );
 
 private:
 	/**
@@ -48,14 +48,14 @@ private:
 	 * @param InSceneView			Scene view
 	 * @param InSDG					Scene depth group
 	 */
-	void DrawGridSection( int32 InViewportLocX, int32 InViewportGridY, FVector& InStart, FVector& InEnd, float& InStartX, float& InEndX, int32 InAxis, bool InIsAlphaCase, const class FSceneView* InSceneView, struct FSceneDepthGroup& InSDG );
+	void DrawGridSection( int32 InViewportLocX, int32 InViewportGridY, Vector& InStart, Vector& InEnd, float& InStartX, float& InEndX, int32 InAxis, bool InIsAlphaCase, const class CSceneView* InSceneView, struct SSceneDepthGroup& InSDG );
 
 	bool		bDrawColoredOrigin;			/**< Is need draw colored origins */
 	bool		bDrawWorldBox;				/**< Is need draw world box */
 	float		perspectiveGridSize;		/**< Perspective grid size */
-	FColor		gridColorHi;				/**< Grid color height */
-	FColor		gridColorLo;				/**< Grid color low */
-	FColor		worldBoxColor;				/**< World box color */
+	ÑColor		gridColorHi;				/**< Grid color height */
+	ÑColor		gridColorLo;				/**< Grid color low */
+	ÑColor		worldBoxColor;				/**< World box color */
 };
 
 #endif // !EDITORCOMMONDRAWHELPER_H

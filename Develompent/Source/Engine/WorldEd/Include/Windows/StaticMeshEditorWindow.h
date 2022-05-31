@@ -35,7 +35,7 @@ public:
 	 * @param InStaticMesh	Static mesh to edit
 	 * @param InParent		Parent widget
 	 */
-	WeStaticMeshEditorWindow( const TSharedPtr<FStaticMesh>& InStaticMesh, QWidget* InParent = nullptr );
+	WeStaticMeshEditorWindow( const TSharedPtr<CStaticMesh>& InStaticMesh, QWidget* InParent = nullptr );
 
 	/**
 	 * Destructor
@@ -48,7 +48,7 @@ signals:
 	 * 
 	 * @param InAsset		Changed asset
 	 */
-	void OnChangedAsset( const TSharedPtr<FAsset>& InAsset );
+	void OnChangedAsset( const TSharedPtr<CAsset>& InAsset );
 
 private slots:
 	//
@@ -92,20 +92,20 @@ private:
 	 * @param InAssets	Array of assets to delete
 	 * @param OutResult Result, we can is delete this assets?
 	 */
-	void OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, struct FCanDeleteAssetResult& OutResult );
+	void OnAssetsCanDelete( const std::vector< TSharedPtr<class CAsset> >& InAssets, struct SCanDeleteAssetResult& OutResult );
 
 	/**
 	 * Called event when asset is reloaded
 	 * @param InAssets	Array of reloaded assets
 	 */
-	void OnAssetsReloaded( const std::vector< TSharedPtr<class FAsset> >& InAssets );
+	void OnAssetsReloaded( const std::vector< TSharedPtr<class CAsset> >& InAssets );
 
 	bool													bInit;							/**< Is inited window */
 	Ui::WeStaticMeshEditorWindow*							ui;								/**< Qt UI */
-	TSharedPtr<FStaticMesh>									staticMesh;						/**< Editable asset */
-	class FStaticMeshPreviewViewportClient*					viewportClient;					/**< Viewport client */
-	FEditorDelegates::FOnAssetsCanDelete::FDelegateType*	assetsCanDeleteHandle;			/**< Handle delegate of assets can delete */
-	FEditorDelegates::FOnAssetsReloaded::FDelegateType*		assetsReloadedHandle;			/**< Handle delegate of reloaded assets */
+	TSharedPtr<CStaticMesh>									staticMesh;						/**< Editable asset */
+	class CStaticMeshPreviewViewportClient*					viewportClient;					/**< Viewport client */
+	SEditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;			/**< Handle delegate of assets can delete */
+	SEditorDelegates::COnAssetsReloaded::DelegateType_t*	assetsReloadedHandle;			/**< Handle delegate of reloaded assets */
 	class QLabel*											label_sourceFileValue;			/**< Label for show path to source file */
 	class QToolButton*										toolButton_sourceFile;			/**< Tool button for select new path to source file */
 	class QToolButton*										toolButton_sourceFileRemove;	/**< Tool button for remove path to source file */

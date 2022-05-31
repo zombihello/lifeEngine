@@ -40,13 +40,13 @@ enum EArchiveWrite
  * @ingroup Core
  * @brief The base class for work with file system
  */
-class FBaseFileSystem
+class CBaseFileSystem
 {
 public:
     /**
      * @brief Destructor
      */
-    virtual                                         ~FBaseFileSystem() {}
+    virtual                                         ~CBaseFileSystem() {}
 
     /**
      * @brief Create file reader
@@ -58,7 +58,7 @@ public:
      * 
      * @warning After use need delete file reader
      */
-    virtual class FArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None )            { return nullptr; }
+    virtual class CArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None )            { return nullptr; }
 
     /**
 	 * @brief Create file writer
@@ -70,7 +70,7 @@ public:
 	 *
 	 * @warning After use need delete file writer
 	 */
-    virtual class FArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None )            { return nullptr; }
+    virtual class CArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None )            { return nullptr; }
 
     /**
      * @brief Find files in directory

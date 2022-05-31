@@ -8,7 +8,7 @@
 #include "Render/RenderUtils.h"
 #include "EngineDefines.h"
 
-FEditorCommonDrawHelper::FEditorCommonDrawHelper()
+CEditorCommonDrawHelper::CEditorCommonDrawHelper()
 	: bDrawColoredOrigin( true )
 	, bDrawWorldBox( true )
 	, perspectiveGridSize( HALF_WORLD_MAX1 )
@@ -17,17 +17,17 @@ FEditorCommonDrawHelper::FEditorCommonDrawHelper()
 	, worldBoxColor( 40, 40, 40 )
 {}
 
-void FEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InViewportGridY, FVector& InStart, FVector& InEnd, float& InStartX, float& InEndX, int32 InAxis, bool InIsAlphaCase, const class FSceneView* InSceneView, struct FSceneDepthGroup& InSDG )
+void CEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InViewportGridY, Vector& InStart, Vector& InEnd, float& InStartX, float& InEndX, int32 InAxis, bool InIsAlphaCase, const class CSceneView* InSceneView, struct SSceneDepthGroup& InSDG )
 {
 	if ( !InViewportGridY )
 	{
 		return;
 	}
 
-	const FMatrix&				projectionMatrix = InSceneView->GetProjectionMatrix();
-	FMatrix	invViewProjMatrix	= FMath::InverseMatrix( projectionMatrix ) * FMath::InverseMatrix( InSceneView->GetViewMatrix() );
-	int32	start				= FMath::Trunc( ( FVector4D( -1.f, -1.f, -1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) + InViewportLocX;
-	int32	end					= FMath::Trunc( ( FVector4D( +1.f, +1.f, +1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) - InViewportLocX;
+	const Matrix&				projectionMatrix = InSceneView->GetProjectionMatrix();
+	Matrix	invViewProjMatrix	= SMath::InverseMatrix( projectionMatrix ) * SMath::InverseMatrix( InSceneView->GetViewMatrix() );
+	int32	start				= SMath::Trunc( ( Vector4D( -1.f, -1.f, -1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) + InViewportLocX;
+	int32	end					= SMath::Trunc( ( Vector4D( +1.f, +1.f, +1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) - InViewportLocX;
 	if ( start > end )
 	{
 		Swap( start, end );
@@ -35,7 +35,7 @@ void FEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 
 	float	sizeX		= InSceneView->GetSizeX();
 	float	zoom		= ( 1.0f / projectionMatrix[ 0 ].x ) * 2.0f / sizeX;
-	int32   dist		= FMath::Trunc( sizeX * zoom / InViewportGridY );
+	int32   dist		= SMath::Trunc( sizeX * zoom / InViewportGridY );
 
 	// Figure out alpha interpolator for fading in the grid lines.
 	float	alpha		= 0.f;
@@ -61,27 +61,27 @@ void FEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 		InEndX			= ( index * InViewportGridY ) << incBits;
 		if ( ( index & 1 ) != InIsAlphaCase )
 		{
-			FVector4D		background( InSceneView->GetBackgroundColor().ToNormalizedVector4D() );
-			FVector4D		grid( 0.5f, 0.5f, 0.5f, 0.f );
-			FVector4D		color = background + ( grid - background ) * ( float )( ( ( index << incBits ) & 7 ) ? 0.5f : 1.f );
+			Vector4D		background( InSceneView->GetBackgroundColor().ToNormalizedVector4D() );
+			Vector4D		grid( 0.5f, 0.5f, 0.5f, 0.f );
+			Vector4D		color = background + ( grid - background ) * ( float )( ( ( index << incBits ) & 7 ) ? 0.5f : 1.f );
 			if ( index & 1 )
 			{
 				color		= background + ( color - background ) * alpha;
 			}
 
-			InSDG.simpleElements.AddLine( InStart, InEnd, FColor( color ) );
+			InSDG.simpleElements.AddLine( InStart, InEnd, ÑColor( color ) );
 		}
 	}
 }
 
-void FEditorCommonDrawHelper::DrawGrid( const class FSceneView* InSceneView, ELevelViewportType InViewportType, class FScene* InScene )
+void CEditorCommonDrawHelper::DrawGrid( const class CSceneView* InSceneView, ELevelViewportType InViewportType, class CScene* InScene )
 {
 	check( InScene );
-	FSceneDepthGroup&		SDG = InScene->GetSDG( SDG_WorldEdBackground );
-	FVector					origin;
-	FVector					a( 0.f, 0.f, 0.f );			// Start line
-	FVector					b( 0.f, 0.f, 0.f );			// End line
-	FMath::GetOriginMatrix( FMath::InverseMatrix( InSceneView->GetViewMatrix() ), origin );
+	SSceneDepthGroup&		SDG = InScene->GetSDG( SDG_WorldEdBackground );
+	Vector					origin;
+	Vector					a( 0.f, 0.f, 0.f );			// Start line
+	Vector					b( 0.f, 0.f, 0.f );			// End line
+	SMath::GetOriginMatrix( SMath::InverseMatrix( InSceneView->GetViewMatrix() ), origin );
 
 	// Draw 3D perspective grid
 	if ( InViewportType == LVT_Perspective )
@@ -157,28 +157,28 @@ void FEditorCommonDrawHelper::DrawGrid( const class FSceneView* InSceneView, ELe
 	// Draw axis lines
 	if ( bDrawColoredOrigin )
 	{
-		a = FVector( 0.f, 0.f, ( float )HALF_WORLD_MAX1 );			b = FVector( 0.f, 0.f, 0.f );
-		SDG.simpleElements.AddLine( a, b, FColor( 64, 255, 64 ) );
+		a = Vector( 0.f, 0.f, ( float )HALF_WORLD_MAX1 );			b = Vector( 0.f, 0.f, 0.f );
+		SDG.simpleElements.AddLine( a, b, ÑColor( 64, 255, 64 ) );
 
-		a = FVector( 0.f, 0.f, 0.f );								b = FVector( 0.f, 0.f, ( float )-HALF_WORLD_MAX1 );
-		SDG.simpleElements.AddLine( a, b, FColor( 32, 128, 32 ) );
+		a = Vector( 0.f, 0.f, 0.f );								b = Vector( 0.f, 0.f, ( float )-HALF_WORLD_MAX1 );
+		SDG.simpleElements.AddLine( a, b, ÑColor( 32, 128, 32 ) );
 
-		a = FVector( 0.f, ( float )HALF_WORLD_MAX1, 0.f );			b = FVector( 0.f, 0.f, 0.f );
-		SDG.simpleElements.AddLine( a, b, FColor( 64, 64, 255 ) );
+		a = Vector( 0.f, ( float )HALF_WORLD_MAX1, 0.f );			b = Vector( 0.f, 0.f, 0.f );
+		SDG.simpleElements.AddLine( a, b, ÑColor( 64, 64, 255 ) );
 
-		a = FVector( 0.f, 0.f, 0.f );								b = FVector( 0.f, ( float )-HALF_WORLD_MAX1, 0.f );
-		SDG.simpleElements.AddLine( a, b, FColor( 32, 32, 128 ) );
+		a = Vector( 0.f, 0.f, 0.f );								b = Vector( 0.f, ( float )-HALF_WORLD_MAX1, 0.f );
+		SDG.simpleElements.AddLine( a, b, ÑColor( 32, 32, 128 ) );
 
-		a = FVector( ( float )HALF_WORLD_MAX1, 0.f, 0.f );			b = FVector( 0.f, 0.f, 0.f );
-		SDG.simpleElements.AddLine( a, b, FColor( 255, 64, 64 ) );
+		a = Vector( ( float )HALF_WORLD_MAX1, 0.f, 0.f );			b = Vector( 0.f, 0.f, 0.f );
+		SDG.simpleElements.AddLine( a, b, ÑColor( 255, 64, 64 ) );
 
-		a = FVector( 0.f, 0.f, 0.f );								b = FVector( ( float )-HALF_WORLD_MAX1, 0.f, 0.f );
-		SDG.simpleElements.AddLine( a, b, FColor( 128, 32, 32 ) );
+		a = Vector( 0.f, 0.f, 0.f );								b = Vector( ( float )-HALF_WORLD_MAX1, 0.f, 0.f );
+		SDG.simpleElements.AddLine( a, b, ÑColor( 128, 32, 32 ) );
 	}
 
 	// Draw orthogonal worldframe
 	if ( bDrawWorldBox )
 	{
-		DrawWireframeBox( SDG, FBox( FVector( -HALF_WORLD_MAX1, -HALF_WORLD_MAX1, -HALF_WORLD_MAX1 ), FVector( HALF_WORLD_MAX1, HALF_WORLD_MAX1, HALF_WORLD_MAX1 ) ), worldBoxColor );
+		DrawWireframeBox( SDG, ÑBox( Vector( -HALF_WORLD_MAX1, -HALF_WORLD_MAX1, -HALF_WORLD_MAX1 ), Vector( HALF_WORLD_MAX1, HALF_WORLD_MAX1, HALF_WORLD_MAX1 ) ), worldBoxColor );
 	}
 }

@@ -17,20 +17,20 @@
 #include "Render/RenderingThread.h"
 #include "System/CameraManager.h"
 
-IMPLEMENT_CLASS( LBaseEngine )
+IMPLEMENT_CLASS( CBaseEngine )
 
-void LBaseEngine::Init()
+void CBaseEngine::Init()
 {
 	// Load default texture
 	{	
 		// Loading default texture from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
-			FConfigValue		configDefaultTexture = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
+			CConfigValue		configDefaultTexture = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
 			if ( configDefaultTexture.IsValid() )
 			{
 				std::wstring			pathAsset = configDefaultTexture.GetString();
-				TAssetHandle<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
+				TAssetHandle<CAsset>	asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
 					defaultTexture = asset;
@@ -49,9 +49,9 @@ void LBaseEngine::Init()
 		// If default texture not loaded we create in virtual package
 		if ( !defaultTexture.IsAssetValid() )
 		{
-			std::vector< byte >		data		= { 0, 0, 0, 0 };
-			FPackageRef				package		= GPackageManager->LoadPackage( TEXT( "" ), true );
-			TSharedPtr<FTexture2D>	texture2D	= MakeSharedPtr<FTexture2D>();
+			std::vector< byte >			data		= { 0, 0, 0, 0 };
+			PackageRef_t				package		= GPackageManager->LoadPackage( TEXT( "" ), true );
+			TSharedPtr<CTexture2D>		texture2D	= MakeSharedPtr<CTexture2D>();
 			texture2D->SetData( PF_A8R8G8B8, 1, 1, data );
 			
 			defaultTexture		= texture2D->GetAssetHandle();
@@ -64,11 +64,11 @@ void LBaseEngine::Init()
 		// Loading default material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
-			FConfigValue		configDefaultMaterial = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
+			CConfigValue		configDefaultMaterial = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
 			if ( configDefaultMaterial.IsValid() )
 			{
 				std::wstring			pathAsset = configDefaultMaterial.GetString();
-				TAssetHandle<FAsset>	asset = GPackageManager->FindAsset( pathAsset );
+				TAssetHandle<CAsset>	asset = GPackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
 					defaultMaterial = asset;
@@ -87,8 +87,8 @@ void LBaseEngine::Init()
 		// If default material not loaded we create in virtual package
 		if ( !defaultMaterial.IsAssetValid() )
 		{
-			FPackageRef				package = GPackageManager->LoadPackage( TEXT( "" ), true );
-			TSharedPtr<FMaterial>	material = MakeSharedPtr<FMaterial>();
+			PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			TSharedPtr<CMaterial>	material = MakeSharedPtr<CMaterial>();
 
 			defaultMaterial		= material->GetAssetHandle();
 			package->Add( defaultMaterial );
@@ -101,11 +101,11 @@ void LBaseEngine::Init()
 		// Loading default wireframe material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
-			FConfigValue		configDefaultWireframeMaterial = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
+			CConfigValue		configDefaultWireframeMaterial = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
 			if ( configDefaultWireframeMaterial.IsValid() )
 			{
 				std::wstring			pathAsset	= configDefaultWireframeMaterial.GetString();
-				TAssetHandle<FAsset>	asset		= GPackageManager->FindAsset( pathAsset );
+				TAssetHandle<CAsset>	asset		= GPackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
 					defaultWireframeMaterial = asset;
@@ -124,8 +124,8 @@ void LBaseEngine::Init()
 		// If default wireframe material not loaded we create in virtual package
 		if ( !defaultWireframeMaterial.IsAssetValid() )
 		{
-			FPackageRef				package = GPackageManager->LoadPackage( TEXT( "" ), true );
-			TSharedPtr<FMaterial>	material = MakeSharedPtr<FMaterial>();
+			PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			TSharedPtr<CMaterial>	material = MakeSharedPtr<CMaterial>();
 			material->SetWireframe( true );
 
 			defaultWireframeMaterial	= material->GetAssetHandle();
@@ -139,7 +139,7 @@ void LBaseEngine::Init()
 	GPhysicsEngine.Init();
 }
 
-void LBaseEngine::Shutdown()
+void CBaseEngine::Shutdown()
 {
 	// Wait while render thread is rendering of the frame
 	FlushRenderingCommands();
@@ -149,21 +149,21 @@ void LBaseEngine::Shutdown()
 	GPhysicsEngine.Shutdown();
 }
 
-void LBaseEngine::Tick( float InDeltaSeconds )
+void CBaseEngine::Tick( float InDeltaSeconds )
 {
 	GPhysicsEngine.Tick( InDeltaSeconds );
 }
 
-void LBaseEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CBaseEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	GInputSystem->ProcessEvent( InWindowEvent );
 	GUIEngine->ProcessEvent( InWindowEvent );
 	GCameraManager->ProcessEvent( InWindowEvent );
 }
 
-float LBaseEngine::GetMaxTickRate() const
+float CBaseEngine::GetMaxTickRate() const
 {
-	FConfigValue		configMaxTickRate = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
+	CConfigValue		configMaxTickRate = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
 	if ( configMaxTickRate.IsValid() )
 	{
 		return configMaxTickRate.GetNumber();
@@ -172,11 +172,11 @@ float LBaseEngine::GetMaxTickRate() const
 	return 0.f;
 }
 
-bool LBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
+bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
 
-	FArchive*		archive = GFileSystem->CreateFileReader( FString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), GCookedDir.c_str(), InMap.c_str() ) );
+	CArchive*		archive = GFileSystem->CreateFileReader( ÑString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), GCookedDir.c_str(), InMap.c_str() ) );
 	if ( !archive )
 	{
 		OutError = TEXT( "Map not found" );

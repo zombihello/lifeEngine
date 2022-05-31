@@ -17,7 +17,7 @@
  * @ingroup Engine
  * Information about pixel format
  */
-struct FPixelFormatInfo
+struct SPixelFormatInfo
 {
 	const tchar*			name;			/**< Pixel format name */
 	uint32					blockSizeX;		/**< Size of block by X */
@@ -33,9 +33,9 @@ struct FPixelFormatInfo
 
 /**
  * @ingroup Engine
- * Maps members of EPixelFormat to a FPixelFormatInfo describing the format
+ * Maps members of EPixelFormat to a SPixelFormatInfo describing the format
  */
-extern FPixelFormatInfo			GPixelFormats[ PF_Max ];
+extern SPixelFormatInfo			GPixelFormats[ PF_Max ];
 
 /**
  * @ingroup Engine
@@ -106,17 +106,17 @@ public:
  * @param InTextureSyzeY			Size by Y in texels of the source texture
  * @param InClipSpaceQuadZ			Clip space quad by Z
  */
-void DrawDenormalizedQuad( class FBaseDeviceContextRHI* InDeviceContextRHI, float InX, float InY, float InSizeX, float InSizeY, float InU, float InV, float InSizeU, float InSizeV, uint32 InTargetSizeX, uint32 InTargetSizeY, uint32 InTextureSizeX, uint32 InTextureSizeY, float InClipSpaceQuadZ );
+void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, float InX, float InY, float InSizeX, float InSizeY, float InU, float InV, float InSizeU, float InSizeV, uint32 InTargetSizeX, uint32 InTargetSizeY, uint32 InTextureSizeX, uint32 InTextureSizeY, float InClipSpaceQuadZ );
 
 /**
  * @ingroup Engine
  * Draws a wireframe box
  *
  * @param InSDG			Scene depth group
- * @param InBox			The FBox to use for drawing
+ * @param InBox			The ÑBox to use for drawing
  * @param InColor		Color of the box
  */
-void DrawWireframeBox( struct FSceneDepthGroup& InSDG, const class FBox& InBox, const class FColor& InColor );
+void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class ÑBox& InBox, const class ÑColor& InColor );
 
 /**
  * @ingroup Engine
@@ -129,7 +129,7 @@ void DrawWireframeBox( struct FSceneDepthGroup& InSDG, const class FBox& InBox, 
  * @param InNumRings	Number rings in sphere
  * @param InMaterial	Material
  */
-LE_DEPRECATED( 0.4.0, "Use LSphereComponent for draw sphere" )
-void DrawSphere( struct FSceneDepthGroup& InSDG, const FVector& InCenter, const FVector& InRadius, uint32 InNumSides, uint32 InNumRings, class FMaterial* InMaterial );
+LE_DEPRECATED( 0.4.0, "Use CSphereComponent for draw sphere" )
+void DrawSphere( struct SSceneDepthGroup& InSDG, const Vector& InCenter, const Vector& InRadius, uint32 InNumSides, uint32 InNumRings, class CMaterial* InMaterial );
 
 #endif // !RENDERUTILS_H

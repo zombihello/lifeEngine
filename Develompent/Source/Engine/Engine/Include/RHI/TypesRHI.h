@@ -15,204 +15,204 @@
  * @ingroup Engine Engine
  * @brief Reference to viewport
  */
-typedef TRefCountPtr< class FBaseViewportRHI >			FViewportRHIRef;
+typedef TRefCountPtr< class CBaseViewportRHI >			ViewportRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Pointer to viewport
  */
-typedef class FBaseViewportRHI*							FViewportRHIParamRef;
+typedef class CBaseViewportRHI*							ViewportRHIParamRef_t;
 
  /**
   * @ingroup Engine Engine
   * @brief Reference to vertex shader
   */
-typedef TRefCountPtr< class FBaseShaderRHI >			FVertexShaderRHIRef;
+typedef TRefCountPtr< class CBaseShaderRHI >			VertexShaderRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Pointer to vertex shader
  */
-typedef class FBaseShaderRHI*							FVertexShaderRHIParamRef;
+typedef class CBaseShaderRHI*							VertexShaderRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Reference to hull shader
  */
-typedef TRefCountPtr< class FBaseShaderRHI >			FHullShaderRHIRef;
+typedef TRefCountPtr< class CBaseShaderRHI >			HullShaderRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Pointer to hull shader
  */
-typedef class FBaseShaderRHI*							FHullShaderRHIParamRef;
+typedef class CBaseShaderRHI*							HullShaderRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Reference to domain shader
  */
-typedef TRefCountPtr< class FBaseShaderRHI >			FDomainShaderRHIRef;
+typedef TRefCountPtr< class CBaseShaderRHI >			DomainShaderRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Pointer to domain shader
  */
-typedef class FBaseShaderRHI*							FDomainShaderRHIParamRef;
+typedef class CBaseShaderRHI*							DomainShaderRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Reference to pixel shader
  */
-typedef TRefCountPtr< class FBaseShaderRHI >			FPixelShaderRHIRef;
+typedef TRefCountPtr< class CBaseShaderRHI >			PixelShaderRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Pointer to pixel shader
  */
-typedef class FBaseShaderRHI*							FPixelShaderRHIParamRef;
+typedef class CBaseShaderRHI*							PixelShaderRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Reference to geometry shader
  */
-typedef TRefCountPtr< class FBaseShaderRHI >			FGeometryShaderRHIRef;
+typedef TRefCountPtr< class CBaseShaderRHI >			GeometryShaderRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Pointer to geometry shader
  */
-typedef class FBaseShaderRHI*							FGeometryShaderRHIParamRef;
+typedef class CBaseShaderRHI*							GeometryShaderRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Reference to FBoundShaderStateRHI
  */
-typedef TRefCountPtr< class FBaseBoundShaderStateRHI >	FBoundShaderStateRHIRef;
+typedef TRefCountPtr< class CBaseBoundShaderStateRHI >	BoundShaderStateRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * @brief Pointer to FBoundShaderStateRHI
  */
-typedef class FBaseBoundShaderStateRHI*					FBoundShaderStateRHIParamRef;
+typedef class CBaseBoundShaderStateRHI*					BoundShaderStateRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
- * @brief Reference to FBaseVertexBufferRHI
+ * @brief Reference to CBaseVertexBufferRHI
  */
-typedef TRefCountPtr< class FBaseVertexBufferRHI >		FVertexBufferRHIRef;
+typedef TRefCountPtr< class CBaseVertexBufferRHI >		VertexBufferRHIRef_t;
 
 /**
  * @ingroup Engine Engine
- * @brief Pointer to FBaseVertexBufferRHI
+ * @brief Pointer to CBaseVertexBufferRHI
  */
-typedef class FBaseVertexBufferRHI*						FVertexBufferRHIParamRef;
+typedef class CBaseVertexBufferRHI*						VertexBufferRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
- * @brief Reference to FBaseIndexBufferRHI
+ * @brief Reference to CBaseIndexBufferRHI
  */
-typedef TRefCountPtr< class FBaseIndexBufferRHI >		FIndexBufferRHIRef;
+typedef TRefCountPtr< class CBaseIndexBufferRHI >		IndexBufferRHIRef_t;
 
 /**
  * @ingroup Engine Engine
- * @brief Pointer to FBaseIndexBufferRHI
+ * @brief Pointer to CBaseIndexBufferRHI
  */
-typedef class FBaseIndexBufferRHI*						FIndexBufferRHIParamRef;
+typedef class CBaseIndexBufferRHI*						IndexBufferRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
- * @brief Reference to FBaseVertexDeclarationRHI
+ * @brief Reference to CBaseVertexDeclarationRHI
  */
-typedef TRefCountPtr< class FBaseVertexDeclarationRHI >	FVertexDeclarationRHIRef;
+typedef TRefCountPtr< class CBaseVertexDeclarationRHI >	VertexDeclarationRHIRef_t;
 
 /**
  * @ingroup Engine Engine
- * @brief Pointer to FBaseVertexDeclarationRHI
+ * @brief Pointer to CBaseVertexDeclarationRHI
  */
-typedef class FBaseVertexDeclarationRHI*				FVertexDeclarationRHIParamRef;
+typedef class CBaseVertexDeclarationRHI*				VertexDeclarationRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
- * @brief Reference to FBaseRasterizerStateRHI
+ * @brief Reference to CBaseRasterizerStateRHI
  */
-typedef TRefCountPtr< class FBaseRasterizerStateRHI >	FRasterizerStateRHIRef;
+typedef TRefCountPtr< class CBaseRasterizerStateRHI >	RasterizerStateRHIRef_t;
 
 /**
  * @ingroup Engine Engine
- * @brief Pointer to FBaseRasterizerStateRHI
+ * @brief Pointer to CBaseRasterizerStateRHI
  */
-typedef class FBaseRasterizerStateRHI*					FRasterizerStateRHIParamRef;
+typedef class CBaseRasterizerStateRHI*					RasterizerStateRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
- * Reference to FBaseSurfaceRHI
+ * Reference to CBaseSurfaceRHI
  */
-typedef TRefCountPtr< class FBaseSurfaceRHI >			FSurfaceRHIRef;
+typedef TRefCountPtr< class CBaseSurfaceRHI >			SurfaceRHIRef_t;
 
 /**
  * @ingroup Engine Engine
- * Pointer to FBaseSurfaceRHI
+ * Pointer to CBaseSurfaceRHI
  */
-typedef class FBaseSurfaceRHI*							FSurfaceRHIParamRef;
+typedef class CBaseSurfaceRHI*							SurfaceRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * Reference to base texture
  */
-typedef TRefCountPtr< class FBaseTextureRHI >			FTextureRHIRef;
+typedef TRefCountPtr< class CBaseTextureRHI >			TextureRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * Pointer to base texture
  */
-typedef class FBaseTextureRHI*							FTextureRHIParamRef;
+typedef class CBaseTextureRHI*							TextureRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * Reference to texture 2D
  */
-typedef TRefCountPtr< class FBaseTextureRHI >			FTexture2DRHIRef;
+typedef TRefCountPtr< class CBaseTextureRHI >			Texture2DRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * Pointer to texture 2D
  */
-typedef class FBaseTextureRHI*							FTexture2DRHIParamRef;
+typedef class CBaseTextureRHI*							Texture2DRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * Reference to RHI resource
  */
-typedef TRefCountPtr< class FBaseResourceRHI >			FResourceRHIRef;
+typedef TRefCountPtr< class CBaseResourceRHI >			ResourceRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * Pointer to RHI resource
  */
-typedef class FBaseResourceRHI*							FResourceRHIParamRef;
+typedef class CBaseResourceRHI*							ResourceRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * Reference to sampler state
  */
-typedef TRefCountPtr< class FBaseSamplerStateRHI >		FSamplerStateRHIRef;
+typedef TRefCountPtr< class CBaseSamplerStateRHI >		SamplerStateRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * Pointer to sampler state
  */
-typedef class FBaseSamplerStateRHI*						FSamplerStateRHIParamRef;
+typedef class CBaseSamplerStateRHI*						SamplerStateRHIParamRef_t;
 
 /**
  * @ingroup Engine Engine
  * Reference to depth state
  */
-typedef TRefCountPtr< class FBaseDepthStateRHI >		FDepthStateRHIRef;
+typedef TRefCountPtr< class CBaseDepthStateRHI >		DepthStateRHIRef_t;
 
 /**
  * @ingroup Engine Engine
  * Pointer to depth state
  */
-typedef class FBaseDepthStateRHI*						FDepthStateRHIParamRef;
+typedef class CBaseDepthStateRHI*						DepthStateRHIParamRef_t;
 
 #endif // !TYPESRHI_H

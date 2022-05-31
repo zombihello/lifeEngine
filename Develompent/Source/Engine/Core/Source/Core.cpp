@@ -14,9 +14,9 @@
 // GLOBALS
 // ----------------
 
-FConfig                 GEngineConfig;
-FConfig                 GGameConfig;
-FConfig                 GInputConfig;
+CConfig                 GEngineConfig;
+CConfig                 GGameConfig;
+CConfig                 GInputConfig;
 bool	                GIsRequestingExit           = false;
 uint32			        GGameThreadId               = 0;
 double                  GSecondsPerCycle            = 0.0;
@@ -24,12 +24,12 @@ double                  GStartTime                  = appInitTiming();
 double                  GCurrentTime                = GStartTime;
 double                  GLastTime                   = 0.0;
 double                  GDeltaTime                  = 0.0;
-FPackageManager*        GPackageManager             = new FPackageManager();
-FTableOfContets		    GTableOfContents;
+CPackageManager*        GPackageManager             = new CPackageManager();
+CTableOfContets		    GTableOfContents;
 std::wstring            GGameName                   = TEXT( "ExampleGame" );
 
 #if WITH_EDITOR
-FConfig                 GEditorConfig;
+CConfig                 GEditorConfig;
 bool			        GIsEditor                   = false;
 bool                    GIsCommandlet               = false;
 bool					GIsCooker                   = false;
@@ -43,7 +43,7 @@ void VARARGS appFailAssertFunc( const achar* InExpr, const achar* InFile, int In
 {
     va_list     arguments;
     va_start( arguments, InFormat );
-    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, FString::Format( InFormat, arguments ).c_str() );
+    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, ÑString::Format( InFormat, arguments ).c_str() );
     va_end( arguments );
 }
 
@@ -54,7 +54,7 @@ void VARARGS appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, i
 {
 	va_list     arguments;
 	va_start( arguments, InFormat );
-    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, FString::Format( InFormat, arguments ).c_str() );
+    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, ÑString::Format( InFormat, arguments ).c_str() );
 	va_end( arguments );
 }
 

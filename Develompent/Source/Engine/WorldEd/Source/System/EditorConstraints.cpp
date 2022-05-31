@@ -1,6 +1,6 @@
 #include "System/EditorConstraints.h"
 
-FEditorConstraints::FEditorConstraints()
+CEditorConstraints::CEditorConstraints()
 	: currentGridSize( 4 )
 {
 	// Set default grid sizes, powers of two

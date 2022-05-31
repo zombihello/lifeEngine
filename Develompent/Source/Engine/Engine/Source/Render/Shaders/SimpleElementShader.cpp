@@ -1,11 +1,11 @@
 #include "Render/Shaders/SimpleElementShader.h"
 #include "Render/VertexFactory/SimpleElementVertexFactory.h"
 
-IMPLEMENT_SHADER_TYPE(, FSimpleElementVertexShader, TEXT( "SimpleElementVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
-IMPLEMENT_SHADER_TYPE(, FSimpleElementPixelShader, TEXT( "SimpleElementPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
+IMPLEMENT_SHADER_TYPE(, CSimpleElementVertexShader, TEXT( "SimpleElementVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
+IMPLEMENT_SHADER_TYPE(, CSimpleElementPixelShader, TEXT( "SimpleElementPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 
 #if WITH_EDITOR
-bool FSimpleElementVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
+bool CSimpleElementVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
 	if ( !InVFMetaType )
 	{
@@ -13,10 +13,10 @@ bool FSimpleElementVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, 
 	}
 
 	// Shader supported only simple element vertex factory
-	return InVFMetaType->GetHash() == FSimpleElementVertexFactory::staticType.GetHash();
+	return InVFMetaType->GetHash() == CSimpleElementVertexFactory::staticType.GetHash();
 }
 
-bool FSimpleElementPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class FVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
+bool CSimpleElementPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
 	if ( !InVFMetaType )
 	{
@@ -24,6 +24,6 @@ bool FSimpleElementPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, c
 	}
 
 	// Shader supported only simple element vertex factory
-	return InVFMetaType->GetHash() == FSimpleElementVertexFactory::staticType.GetHash();
+	return InVFMetaType->GetHash() == CSimpleElementVertexFactory::staticType.GetHash();
 }
 #endif // WITH_EDITOR

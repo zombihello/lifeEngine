@@ -25,12 +25,12 @@ struct aiScene;
  * @ingroup WorldEd
  * Container for Assimp mesh
  */
-struct FAiMesh
+struct SAiMesh
 {
 	/**
 	 * Constructor
 	 */
-	FAiMesh()
+	SAiMesh()
 	{}
 
 	/**
@@ -39,7 +39,7 @@ struct FAiMesh
 	 * @param[in] InTransformation Transform matrix
 	 * @param[in] InMesh Pointer to Assimp mesh
 	 */
-	FAiMesh( const aiMatrix4x4& InTransformation, struct aiMesh* InMesh )
+	SAiMesh( const aiMatrix4x4& InTransformation, struct aiMesh* InMesh )
 		: transformation( InTransformation )
 		, mesh( InMesh )
 	{}
@@ -52,15 +52,15 @@ struct FAiMesh
  * @ingroup WorldEd
  * Typedef container AiMeshes
  */
-typedef std::unordered_map< uint32, std::vector< FAiMesh > >			FAiMeshesMap;
+typedef std::unordered_map< uint32, std::vector< SAiMesh > >			AiMeshesMap_t;
 
  /**
   * @ingroup WorldEd
   * Commandlet for import mesh to engine
   */
-class LImportMeshCommandlet : public LBaseCommandlet
+class CImportMeshCommandlet : public ÑBaseCommandlet
 {
-	DECLARE_CLASS( LImportMeshCommandlet, LBaseCommandlet )
+	DECLARE_CLASS( CImportMeshCommandlet, ÑBaseCommandlet )
 
 public:
 	/**
@@ -78,7 +78,7 @@ public:
 	 * @param InAssetName Asset name for new mesh
 	 * @return Return converted static mesh, if failed returning false
 	 */
-	TSharedPtr<FStaticMesh> ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName );
+	TSharedPtr<CStaticMesh> ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName );
 
 	/**
 	 * Get supported meshes extensions
@@ -122,7 +122,7 @@ private:
 	 * @param[in] InScene Pointer to Assimp scene
 	 * @param[out] OutMeshes Array filled from Assimp scene
 	 */
-	void ProcessNode( aiNode* InNode, const aiScene* InScene, FAiMeshesMap& OutMeshes );
+	void ProcessNode( aiNode* InNode, const aiScene* InScene, AiMeshesMap_t& OutMeshes );
 };
 
 #endif // !IMPORTMESHCOMMANDLET_H

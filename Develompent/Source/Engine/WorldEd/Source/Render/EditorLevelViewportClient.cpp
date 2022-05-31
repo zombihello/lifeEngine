@@ -40,13 +40,13 @@
 #define MAX_CAMERA_SPEED			1000.f
 
 /** Default camera position for level editor perspective viewports */
-static const FVector		GDefaultPerspectiveViewLocation( 495.166962, 167.584518, -400.f );
+static const Vector		GDefaultPerspectiveViewLocation( 495.166962, 167.584518, -400.f );
 
 /** Default camera orientation for level editor perspective viewports */
-static const FRotator		GDefaultPerspectiveViewRotation( 0, 0, 0 );
+static const CRotator		GDefaultPerspectiveViewRotation( 0, 0, 0 );
 
 /** Show flags for each viewport type */
-static const EShowFlags		GShowFlags[ LVT_Max ] =
+static const ShowFlags_t		GShowFlags[ LVT_Max ] =
 {
 	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXY
 	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXZ
@@ -55,13 +55,13 @@ static const EShowFlags		GShowFlags[ LVT_Max ] =
 };
 
 
-FEditorLevelViewportClient::FEditorLevelViewportClient( ELevelViewportType InViewportType /* = LVT_Perspective */ )
+CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InViewportType /* = LVT_Perspective */ )
 	: bSetListenerPosition( true )
 	, bIsTracking( false )
 	, bIgnoreInput( false )
 	, viewportType( InViewportType )
-	, viewLocation( FMath::vectorZero )
-	, viewRotation( FMath::rotatorZero )
+	, viewLocation( SMath::vectorZero )
+	, viewRotation( SMath::rotatorZero )
 	, viewFOV( 90.f )
 	, orthoZoom( 10000.f )
 	, cameraSpeed( MIN_CAMERA_SPEED )
@@ -71,14 +71,14 @@ FEditorLevelViewportClient::FEditorLevelViewportClient( ELevelViewportType InVie
 	SetViewportType( InViewportType );
 }
 
-void FEditorLevelViewportClient::Tick( float InDeltaSeconds )
+void CEditorLevelViewportClient::Tick( float InDeltaSeconds )
 {
 	// If we tracking mouse and this is perspective viewport - change view location
 	if ( bIsTracking && viewportType == LVT_Perspective )
 	{
-		FVector		targetDirection = viewRotation.RotateVector( FMath::vectorForward );
-		FVector		axisUp			= viewRotation.RotateVector( FMath::vectorUp );
-		FVector		axisRight		= FMath::CrossVector( targetDirection, axisUp );
+		Vector		targetDirection = viewRotation.RotateVector( SMath::vectorForward );
+		Vector		axisUp			= viewRotation.RotateVector( SMath::vectorUp );
+		Vector		axisRight		= SMath::CrossVector( targetDirection, axisUp );
 
 		if ( cameraMoveFlags & CMV_MoveForward )		viewLocation +=	targetDirection	* cameraSpeed;
 		if ( cameraMoveFlags & CMV_MoveBackward )		viewLocation +=	targetDirection	* -cameraSpeed;
@@ -87,35 +87,35 @@ void FEditorLevelViewportClient::Tick( float InDeltaSeconds )
 	}
 }
 
-void FEditorLevelViewportClient::Draw( FViewport* InViewport )
+void CEditorLevelViewportClient::Draw( CViewport* InViewport )
 {
-	FSceneView*		sceneView = CalcSceneView( InViewport );
+	CSceneView*		sceneView = CalcSceneView( InViewport );
 
 	// Update audio listener spatial if allowed
 	if ( viewportType == LVT_Perspective && bSetListenerPosition )
 	{
-		GAudioDevice.SetListenerSpatial( viewLocation, viewRotation.RotateVector( FMath::vectorForward ), viewRotation.RotateVector( FMath::vectorUp ) );
+		GAudioDevice.SetListenerSpatial( viewLocation, viewRotation.RotateVector( SMath::vectorForward ), viewRotation.RotateVector( SMath::vectorUp ) );
 	}
 
 	// Draw viewport
-	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FViewportRenderCommand,
-										  FEditorLevelViewportClient*, viewportClient, this,
-										  FViewportRHIRef, viewportRHI, InViewport->GetViewportRHI(),
-										  FSceneView*, sceneView, sceneView,
+	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,
+										  CEditorLevelViewportClient*, viewportClient, this,
+										  ViewportRHIRef_t, viewportRHI, InViewport->GetViewportRHI(),
+										  CSceneView*, sceneView, sceneView,
 										  {
 											  viewportClient->Draw_RenderThread( viewportRHI, sceneView );
 										  } );
 }
 
-void FEditorLevelViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, class FSceneView* InSceneView )
+void CEditorLevelViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView )
 {
 	check( IsInRenderingThread() );
-	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	FSceneRenderer				sceneRenderer( InSceneView, ( FScene* )GWorld->GetScene() );
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	CSceneRenderer				sceneRenderer( InSceneView, ( CScene* )GWorld->GetScene() );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	
 	// Draw grid
-	drawHelper.DrawGrid( InSceneView, viewportType, ( FScene* )GWorld->GetScene() );
+	drawHelper.DrawGrid( InSceneView, viewportType, ( CScene* )GWorld->GetScene() );
 	
 	// Draw scene
 	sceneRenderer.Render( InViewportRHI );
@@ -125,7 +125,7 @@ void FEditorLevelViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRH
 	delete InSceneView;
 }
 
-void FEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportType )
+void CEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportType )
 {
 	bSetListenerPosition	= false;
 	viewportType			= InViewportType;
@@ -139,7 +139,7 @@ void FEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportT
 	}
 }
 
-void FEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	if ( bIgnoreInput )
 	{
@@ -290,15 +290,15 @@ void FEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	}
 }
 
-FSceneView* FEditorLevelViewportClient::CalcSceneView( FViewport* InViewport )
+CSceneView* CEditorLevelViewportClient::CalcSceneView( CViewport* InViewport )
 {
 	// Calculate projection matrix
-	FMatrix		projectionMatrix;
+	Matrix		projectionMatrix;
 	float		viewportSizeX	= InViewport->GetSizeX();
 	float		viewportSizeY	= InViewport->GetSizeY();
 	if ( viewportType == LVT_Perspective )
 	{
-		projectionMatrix = glm::perspective( FMath::DegreesToRadians( viewFOV ), viewportSizeX / viewportSizeY, 0.01f, ( float )WORLD_MAX );
+		projectionMatrix = glm::perspective( SMath::DegreesToRadians( viewFOV ), viewportSizeX / viewportSizeY, 0.01f, ( float )WORLD_MAX );
 	}
 	else
 	{
@@ -309,25 +309,25 @@ FSceneView* FEditorLevelViewportClient::CalcSceneView( FViewport* InViewport )
 	}
 
 	// Calculate view matrix
-	FMatrix		viewMatrix;
-	FVector		targetDirection;
-	FVector		axisUp;
+	Matrix		viewMatrix;
+	Vector		targetDirection;
+	Vector		axisUp;
 	switch ( viewportType )
 	{
 	case LVT_Perspective:
 	case LVT_OrthoXY:
-		targetDirection		= viewRotation.RotateVector( FMath::vectorForward );
-		axisUp				= viewRotation.RotateVector( FMath::vectorUp );
+		targetDirection		= viewRotation.RotateVector( SMath::vectorForward );
+		axisUp				= viewRotation.RotateVector( SMath::vectorUp );
 		break;
 
 	case LVT_OrthoXZ:
-		targetDirection		= viewRotation.RotateVector( -FMath::vectorUp );
-		axisUp				= viewRotation.RotateVector( FMath::vectorForward );
+		targetDirection		= viewRotation.RotateVector( -SMath::vectorUp );
+		axisUp				= viewRotation.RotateVector( SMath::vectorForward );
 		break;
 
 	case LVT_OrthoYZ:
-		targetDirection		= viewRotation.RotateVector( FMath::vectorRight );
-		axisUp				= viewRotation.RotateVector( FMath::vectorUp );
+		targetDirection		= viewRotation.RotateVector( SMath::vectorRight );
+		axisUp				= viewRotation.RotateVector( SMath::vectorUp );
 		break;
 
 	default:
@@ -337,18 +337,18 @@ FSceneView* FEditorLevelViewportClient::CalcSceneView( FViewport* InViewport )
 
 	viewMatrix = glm::lookAt( viewLocation, viewLocation + targetDirection, axisUp );
 
-	FSceneView*		sceneView = new FSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), GetBackgroundColor(), showFlags );
+	CSceneView*		sceneView = new CSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), GetBackgroundColor(), showFlags );
 	return sceneView;
 }
 
-FColor FEditorLevelViewportClient::GetBackgroundColor() const
+ÑColor CEditorLevelViewportClient::GetBackgroundColor() const
 {
 	if ( viewportType == LVT_Perspective )
 	{
-		return FColor::black;
+		return ÑColor::black;
 	}
 	else
 	{
-		return FColor( 163, 163, 163 );
+		return ÑColor( 163, 163, 163 );
 	}
 }

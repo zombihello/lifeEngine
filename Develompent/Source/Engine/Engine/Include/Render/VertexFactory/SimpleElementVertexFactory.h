@@ -18,16 +18,16 @@
   * @ingroup Engine
   * Simple element vertex type
   */
-struct FSimpleElementVertexType
+struct SSimpleElementVertexType
 {
-	FVector4D		position;		/**< Position vertex */
-	FVector2D		texCoord;		/**< Texture coords */
-	FColor			color;			/**< Color */
+	Vector4D		position;		/**< Position vertex */
+	Vector2D		texCoord;		/**< Texture coords */
+	ÑColor			color;			/**< Color */
 
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const FSimpleElementVertexType& InOther ) const
+	bool FORCEINLINE operator==( const SSimpleElementVertexType& InOther ) const
 	{
 		return position == InOther.position && texCoord == InOther.texCoord && color == InOther.color;
 	}
@@ -37,7 +37,7 @@ struct FSimpleElementVertexType
  * @ingroup Engine
  * The simple element vertex declaration resource type
  */
-class FSimpleElementVertexDeclaration : public FRenderResource
+class CSimpleElementVertexDeclaration : public CRenderResource
 {
 public:
 	/**
@@ -58,28 +58,28 @@ public:
 	 * @brief Get vertex declaration RHI
 	 * @return Return vertex declaration RHI
 	 */
-	FORCEINLINE FVertexDeclarationRHIRef GetVertexDeclarationRHI()
+	FORCEINLINE VertexDeclarationRHIRef_t GetVertexDeclarationRHI()
 	{
 		return vertexDeclarationRHI;
 	}
 
 private:
-	FVertexDeclarationRHIRef		vertexDeclarationRHI;		/**< Vertex declaration RHI */
+	VertexDeclarationRHIRef_t		vertexDeclarationRHI;		/**< Vertex declaration RHI */
 };
 
 /**
  * @ingroup Engine
  * Global resource of simple element vertex declaration
  */
-extern TGlobalResource< FSimpleElementVertexDeclaration >			GSimpleElementVertexDeclaration;
+extern TGlobalResource< CSimpleElementVertexDeclaration >			GSimpleElementVertexDeclaration;
 
 /**
  * @ingroup Engine
  * Simple element vertex factory
  */
-class FSimpleElementVertexFactory : public FVertexFactory
+class CSimpleElementVertexFactory : public CVertexFactory
 {
-	DECLARE_VERTEX_FACTORY_TYPE( FSimpleElementVertexFactory )
+	DECLARE_VERTEX_FACTORY_TYPE( CSimpleElementVertexFactory )
 
 public:
 	enum EStreamSourceSlot
@@ -106,7 +106,7 @@ public:
 	 * @param InShaderFrequency Shader frequency
 	 * @return Return instance of vertex factory shader parameters
 	 */
-	static FVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
+	static CVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
 };
 
 #endif // !SIMPLEELEMENTVERTEXFACTORY_H

@@ -2,7 +2,7 @@
 #include "System/AudioDevice.h"
 #include "System/AudioSource.h"
 
-FAudioSource::FAudioSource()
+CAudioSource::CAudioSource()
 	: bMuted( false )
 	, alHandle( 0 )
 	, volume( 100.f )
@@ -19,13 +19,13 @@ FAudioSource::FAudioSource()
 	SetPitch( 1.f );
 	SetMinDistance( 1.f );
 	SetAttenuation( 1.f );
-	SetLocation( FMath::vectorZero );
+	SetLocation( SMath::vectorZero );
 
 	// Subscribe to event of muted/unmuted audio device
-	audioDeviceMutedHandle = GAudioDevice.OnAudioDeviceMuted().Add( std::bind( &FAudioSource::OnAudioDeviceMuted, this, std::placeholders::_1 ) );
+	audioDeviceMutedHandle = GAudioDevice.OnAudioDeviceMuted().Add( std::bind( &CAudioSource::OnAudioDeviceMuted, this, std::placeholders::_1 ) );
 }
 
-FAudioSource::~FAudioSource()
+CAudioSource::~CAudioSource()
 {
 	alDeleteSources( 1, &alHandle );
 
@@ -33,10 +33,10 @@ FAudioSource::~FAudioSource()
 	GAudioDevice.OnAudioDeviceMuted().Remove( audioDeviceMutedHandle );
 
 	// Unsubscribe from event of audio buffer if him is exist
-	TSharedPtr<FAudioBank>		audioBankRef = audioBank.ToSharedPtr();
+	TSharedPtr<CAudioBank>		audioBankRef = audioBank.ToSharedPtr();
 	if ( audioBankRef )
 	{
-		FAudioBufferRef		audioBuffer = audioBankRef->GetAudioBuffer();
+		AudioBufferRef_t		audioBuffer = audioBankRef->GetAudioBuffer();
 		if ( audioBuffer )
 		{
 			audioBuffer->OnAudioBufferDestroyed().Remove( audioBufferDestroyedHandle );
@@ -45,59 +45,59 @@ FAudioSource::~FAudioSource()
 	}
 }
 
-void FAudioSource::Play()
+void CAudioSource::Play()
 {
 	alSourcePlay( alHandle );
 }
 
-void FAudioSource::Pause()
+void CAudioSource::Pause()
 {
 	alSourcePause( alHandle );
 }
 
-void FAudioSource::Stop()
+void CAudioSource::Stop()
 {
 	alSourceStop( alHandle );
 }
 
-void FAudioSource::SetLoop( bool InIsLoop )
+void CAudioSource::SetLoop( bool InIsLoop )
 {
 	alSourcei( alHandle, AL_LOOPING, InIsLoop );
 }
 
-void FAudioSource::SetRelativeToListener( bool InIsRelativeToListener )
+void CAudioSource::SetRelativeToListener( bool InIsRelativeToListener )
 {
 	alSourcei( alHandle, AL_SOURCE_RELATIVE, InIsRelativeToListener );
 }
 
-void FAudioSource::SetVolume( float InVolume )
+void CAudioSource::SetVolume( float InVolume )
 {
 	alSourcef( alHandle, AL_GAIN, InVolume * GAudioDevice.GetPlatformAudioHeadroom() );
 	volume = InVolume;
 }
 
-void FAudioSource::SetPitch( float InPitch )
+void CAudioSource::SetPitch( float InPitch )
 {
 	alSourcef( alHandle, AL_PITCH, InPitch );
 }
 
-void FAudioSource::SetMinDistance( float InMinDistance )
+void CAudioSource::SetMinDistance( float InMinDistance )
 {
 	alSourcef( alHandle, AL_REFERENCE_DISTANCE, InMinDistance );
 }
 
-void FAudioSource::SetAttenuation( float InAttenuation )
+void CAudioSource::SetAttenuation( float InAttenuation )
 {
 	alSourcef( alHandle, AL_ROLLOFF_FACTOR, InAttenuation );
 }
 
-void FAudioSource::SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank )
+void CAudioSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 {
-	FAudioBufferRef		audioBuffer;
+	AudioBufferRef_t		audioBuffer;
 
 	// Unsubscribe from events of audio buffer if him is exist
 	{
-		TSharedPtr<FAudioBank>		oldAudioBankRef = audioBank.ToSharedPtr();
+		TSharedPtr<CAudioBank>		oldAudioBankRef = audioBank.ToSharedPtr();
 		if ( oldAudioBankRef )
 		{
 			audioBuffer = oldAudioBankRef->GetAudioBuffer();
@@ -113,66 +113,66 @@ void FAudioSource::SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank )
 	audioBank = InAudioBank;
 
 	// Getting audio buffer if bank is valid and subscribe to events of audio buffer
-	TSharedPtr<FAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
+	TSharedPtr<CAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
 	if ( audioBankRef )
 	{
 		audioBuffer = audioBankRef->GetAudioBuffer();
 		if ( audioBuffer )
 		{
-			audioBufferDestroyedHandle	= audioBuffer->OnAudioBufferDestroyed().Add( std::bind( &FAudioSource::OnAudioBufferDestroyed, this, std::placeholders::_1 ) );
-			audioBufferUpdatedHandle	= audioBuffer->OnAudioBufferUpdated().Add( std::bind( &FAudioSource::OnAudioBufferUpdated, this, std::placeholders::_1 ) );
+			audioBufferDestroyedHandle	= audioBuffer->OnAudioBufferDestroyed().Add( std::bind( &CAudioSource::OnAudioBufferDestroyed, this, std::placeholders::_1 ) );
+			audioBufferUpdatedHandle	= audioBuffer->OnAudioBufferUpdated().Add( std::bind( &CAudioSource::OnAudioBufferUpdated, this, std::placeholders::_1 ) );
 		}
 	}
 
 	alSourcei( alHandle, AL_BUFFER, audioBuffer ? audioBuffer->GetALHandle() : 0 );
 }
 
-void FAudioSource::SetLocation( const FVector& InLocation )
+void CAudioSource::SetLocation( const Vector& InLocation )
 {
 	alSource3f( alHandle, AL_POSITION, InLocation.x, InLocation.y, InLocation.z );
 }
 
-bool FAudioSource::IsLooped() const
+bool CAudioSource::IsLooped() const
 {
 	ALint			isLoop = 0;
 	alGetSourcei( alHandle, AL_LOOPING, &isLoop );
 	return isLoop != 0;
 }
 
-bool FAudioSource::IsRelativeToListener() const
+bool CAudioSource::IsRelativeToListener() const
 {
 	ALint			isRelativeToListener = 0;
 	alGetSourcei( alHandle, AL_SOURCE_RELATIVE, &isRelativeToListener );
 	return isRelativeToListener != 0;
 }
 
-float FAudioSource::GetVolume() const
+float CAudioSource::GetVolume() const
 {
 	return volume;
 }
 
-float FAudioSource::GetPitch() const
+float CAudioSource::GetPitch() const
 {
 	ALfloat			pitch = 0.f;
 	alGetSourcef( alHandle, AL_PITCH, &pitch );
 	return pitch;
 }
 
-float FAudioSource::GetMinDistance() const
+float CAudioSource::GetMinDistance() const
 {
 	ALfloat			distance = 0.f;
 	alGetSourcef( alHandle, AL_REFERENCE_DISTANCE, &distance );
 	return distance;
 }
 
-float FAudioSource::GetAttenuation() const
+float CAudioSource::GetAttenuation() const
 {
 	ALfloat			attenuation = 0.f;
 	alGetSourcef( alHandle, AL_ROLLOFF_FACTOR, &attenuation );
 	return attenuation;
 }
 
-EAudioSourceStatus FAudioSource::GetStatus() const
+EAudioSourceStatus CAudioSource::GetStatus() const
 {
 	ALint			alStatus = 0;
 	alGetSourcei( alHandle, AL_SOURCE_STATE, &alStatus );
@@ -186,19 +186,19 @@ EAudioSourceStatus FAudioSource::GetStatus() const
 	}
 }
 
-TAssetHandle<FAudioBank> FAudioSource::GetAudioBank() const
+TAssetHandle<CAudioBank> CAudioSource::GetAudioBank() const
 {
 	return audioBank;
 }
 
-FVector FAudioSource::GetLocation() const
+Vector CAudioSource::GetLocation() const
 {
-	FVector			location;
+	Vector			location;
 	alGetSource3f( alHandle, AL_POSITION, &location.x, &location.y, &location.z );
 	return location;
 }
 
-void FAudioSource::OnAudioDeviceMuted( bool InIsAudioDeviceMuted )
+void CAudioSource::OnAudioDeviceMuted( bool InIsAudioDeviceMuted )
 {
 	if ( InIsAudioDeviceMuted && GetStatus() == ASS_Playing )
 	{
@@ -212,13 +212,13 @@ void FAudioSource::OnAudioDeviceMuted( bool InIsAudioDeviceMuted )
 	}
 }
 
-void FAudioSource::OnAudioBufferDestroyed( class FAudioBuffer* InAudioBuffer )
+void CAudioSource::OnAudioBufferDestroyed( class CAudioBuffer* InAudioBuffer )
 {
 	// Reset OpenAL buffer for audio source
 	alSourcei( alHandle, AL_BUFFER, 0 );
 }
 
-void FAudioSource::OnAudioBufferUpdated( class FAudioBuffer* InAudioBuffer )
+void CAudioSource::OnAudioBufferUpdated( class CAudioBuffer* InAudioBuffer )
 {
 	// When audio buffer is updated we recreating OpenAL buffer
 	alSourcei( alHandle, AL_BUFFER, InAudioBuffer->GetALHandle() );

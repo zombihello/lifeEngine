@@ -6,13 +6,13 @@ IMPLEMENT_CLASS( AAudio )
 
 AAudio::AAudio()
 {
-	audioComponent = CreateComponent< LAudioComponent >( TEXT( "AudioComponent0" ) );
+	audioComponent = CreateComponent< CAudioComponent >( TEXT( "AudioComponent0" ) );
 }
 
 #if WITH_EDITOR
 #include "Commandlets/CookPackagesCommandlet.h"
 
-bool AAudio::InitProperties( const std::vector<FActorVar>& InActorVars, class LCookPackagesCommandlet* InCooker )
+bool AAudio::InitProperties( const std::vector<CActorVar>& InActorVars, class CCookPackagesCommandlet* InCooker )
 {
 	if ( !Super::InitProperties( InActorVars, InCooker ) )
 	{
@@ -21,14 +21,14 @@ bool AAudio::InitProperties( const std::vector<FActorVar>& InActorVars, class LC
 
 	for ( uint32 index = 0, count = InActorVars.size(); index < count; ++index )
 	{
-		const FActorVar&		actorVar = InActorVars[ index ];
+		const CActorVar&		actorVar = InActorVars[ index ];
 
 		// If property is path to sound
 		if ( actorVar.GetName() == TEXT( "Source" ) )
 		{
 			check( actorVar.GetType() == AVT_String );
 			std::wstring					audioBankName = actorVar.GetValueString();
-			TAssetHandle<FAudioBank>		audioBank = GPackageManager->FindAsset( audioBankName, AT_Unknown );
+			TAssetHandle<CAudioBank>		audioBank = GPackageManager->FindAsset( audioBankName, AT_Unknown );
 			if ( !audioBank.IsAssetValid() && !InCooker->CookAudioBank( audioBankName, audioBank ) )
 			{
 				return false;

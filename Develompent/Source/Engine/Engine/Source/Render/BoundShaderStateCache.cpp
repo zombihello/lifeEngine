@@ -4,7 +4,7 @@
 /**
  * Constructor
  */
-FBoundShaderStateKey::FBoundShaderStateKey( FVertexDeclarationRHIParamRef InVertexDeclaration, FVertexShaderRHIParamRef InVertexShader, FPixelShaderRHIParamRef InPixelShader, FHullShaderRHIParamRef InHullShader /*= nullptr*/, FDomainShaderRHIParamRef InDomainShader /*= nullptr*/, FGeometryShaderRHIParamRef InGeometryShader /*= nullptr*/ ) :
+CBoundShaderStateKey::CBoundShaderStateKey( VertexDeclarationRHIParamRef_t InVertexDeclaration, VertexShaderRHIParamRef_t InVertexShader, PixelShaderRHIParamRef_t InPixelShader, HullShaderRHIParamRef_t InHullShader /*= nullptr*/, DomainShaderRHIParamRef_t InDomainShader /*= nullptr*/, GeometryShaderRHIParamRef_t InGeometryShader /*= nullptr*/ ) :
 	hash( 94875494 ),
 	vertexDeclaration( InVertexDeclaration ),
 	vertexShader( InVertexShader ),

@@ -28,7 +28,7 @@ public:
 	 */
 	static RHIParamRefType GetRHI()
 	{
-		static FStaticStateResource		staticStateResource;
+		static CStaticStateResource		staticStateResource;
 		return staticStateResource.GetRHI();
 	};
 
@@ -36,13 +36,13 @@ private:
 	/**
 	 * @brief A resource which manages the RHI resource
 	 */
-	class FStaticStateResource : public FRenderResource
+	class CStaticStateResource : public CRenderResource
 	{
 	public:
 		/**
 		 * @brief Constructor
 		 */
-		FStaticStateResource()
+		CStaticStateResource()
 		{
 			InitResource();
 		}
@@ -50,7 +50,7 @@ private:
 		/**
 		 * @brief Destructor
 		 */
-		~FStaticStateResource()
+		~CStaticStateResource()
 		{
 			ReleaseResource();
 		}
@@ -94,7 +94,7 @@ private:
  * @brief A static RHI sampler state resource
  * @warning Should only be used from the rendering thread
  * 
- * TStaticSamplerStateRHI<...>::GetRHI() will return a FSamplerStateRHIRef to a sampler state with the desired settings
+ * TStaticSamplerStateRHI<...>::GetRHI() will return a SamplerStateRHIRef_t to a sampler state with the desired settings
  */
 template<	ESamplerFilter			InFilter						= SF_Point, 
 			ESamplerAddressMode		InAddressU						= SAM_Clamp, 
@@ -104,16 +104,16 @@ template<	ESamplerFilter			InFilter						= SF_Point,
 			uint32					InMaxAnisotropy					= 0,
 			uint32					InBorderColor					= 0,
 			ESamplerCompareFunction InSamplerComparisonFunction		= SCF_Never >
-class TStaticSamplerStateRHI : public TStaticStateRHI< TStaticSamplerStateRHI< InFilter, InAddressU, InAddressV, InAddressW, InMipBias, InMaxAnisotropy, InBorderColor, InSamplerComparisonFunction >, FSamplerStateRHIRef, FSamplerStateRHIParamRef >
+class TStaticSamplerStateRHI : public TStaticStateRHI< TStaticSamplerStateRHI< InFilter, InAddressU, InAddressV, InAddressW, InMipBias, InMaxAnisotropy, InBorderColor, InSamplerComparisonFunction >, SamplerStateRHIRef_t, SamplerStateRHIParamRef_t >
 {
 public:
 	/**
 	 * @brief Create RHI object
 	 * @return Return created RHI object
 	 */
-	static FSamplerStateRHIRef CreateRHI()
+	static SamplerStateRHIRef_t CreateRHI()
 	{
-		FSamplerStateInitializerRHI		initializerRHI = 
+		SSamplerStateInitializerRHI		initializerRHI = 
 		{
 			InFilter, 
 			InAddressU, 
@@ -132,27 +132,27 @@ public:
  * @ingroup Engine
  * @brief Typedef of linear sampler state RHI
  */
-typedef TStaticSamplerStateRHI< SF_Bilinear, SAM_Wrap, SAM_Wrap, SAM_Wrap>		FLinearSamplerStateRHI;
+typedef TStaticSamplerStateRHI< SF_Bilinear, SAM_Wrap, SAM_Wrap, SAM_Wrap>		LinearSamplerStateRHI_t;
 
 /**
  * @ingroup Engine
  * @brief A static RHI rasterizer state resource
  * @warning Should only be used from the rendering thread
  * 
- * TStaticRasterizerStateRHI<...>::GetRHI() will return a FRasterizerStateRHIRef to a rasterizer state with the desired settings
+ * TStaticRasterizerStateRHI<...>::GetRHI() will return a RasterizerStateRHIRef_t to a rasterizer state with the desired settings
  */
 template<	ERasterizerFillMode		InFillMode		= FM_Solid,
 			ERasterizerCullMode		InCullMode		= CM_None >
-class TStaticRasterizerStateRHI : public TStaticStateRHI< TStaticRasterizerStateRHI< InFillMode, InCullMode >, FRasterizerStateRHIRef, FRasterizerStateRHIParamRef >
+class TStaticRasterizerStateRHI : public TStaticStateRHI< TStaticRasterizerStateRHI< InFillMode, InCullMode >, RasterizerStateRHIRef_t, RasterizerStateRHIParamRef_t >
 {
 public:
 	/**
 	 * @brief Create RHI object
 	 * @return Return created RHI object
 	 */
-	static FRasterizerStateRHIRef CreateRHI()
+	static RasterizerStateRHIRef_t CreateRHI()
 	{
-		FRasterizerStateInitializerRHI initializerRHI = { InFillMode, InCullMode, 0.f, 0.f, true };
+		SRasterizerStateInitializerRHI initializerRHI = { InFillMode, InCullMode, 0.f, 0.f, true };
 		return GRHI->CreateRasterizerState( initializerRHI );
 	}
 };
@@ -162,20 +162,20 @@ public:
  * @brief A static RHI depth state resource
  * @warning Should only be used from the rendering thread
  * 
- * TStaticDepthStateRHI<...>::GetRHI() will return a FDepthStateRHIRef to a depth state with the desired settings
+ * TStaticDepthStateRHI<...>::GetRHI() will return a DepthStateRHIRef_t to a depth state with the desired settings
  */
 template<	bool				InEnableDepthWrite	= true,
 			ECompareFunction	InDepthTest			= CF_LessEqual >
-class TStaticDepthStateRHI : public TStaticStateRHI< TStaticDepthStateRHI< InEnableDepthWrite, InDepthTest >, FDepthStateRHIRef, FDepthStateRHIParamRef >
+class TStaticDepthStateRHI : public TStaticStateRHI< TStaticDepthStateRHI< InEnableDepthWrite, InDepthTest >, DepthStateRHIRef_t, DepthStateRHIParamRef_t >
 {
 public:
 	/**
 	 * @brief Create RHI object
 	 * @return Return created RHI object
 	 */
-	static FDepthStateRHIRef CreateRHI()
+	static DepthStateRHIRef_t CreateRHI()
 	{
-		FDepthStateInitializerRHI		initializerRHI = { InEnableDepthWrite, InDepthTest };
+		SDepthStateInitializerRHI		initializerRHI = { InEnableDepthWrite, InDepthTest };
 		return GRHI->CreateDepthState( initializerRHI );
 	}
 };

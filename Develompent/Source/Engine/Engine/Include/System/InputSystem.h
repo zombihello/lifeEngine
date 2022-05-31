@@ -28,13 +28,13 @@ enum EButtonEvent
  * @ingroup Engine
  * Class for work with input system
  */
-class FInputSystem
+class CInputSystem
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FInputSystem();
+	CInputSystem();
 
 	/**
 	 * Init input system
@@ -132,7 +132,7 @@ public:
 	 * Get mouse location on screen
 	 * @return Return mouse location on screen
 	 */
-	FORCEINLINE FVector2D GetMouseLocation() const
+	FORCEINLINE Vector2D GetMouseLocation() const
 	{
 		return mouseLocation;
 	}
@@ -141,7 +141,7 @@ public:
 	 * Get mouse offset on current frame
 	 * @return Return mouse offset on current frame
 	 */
-	FORCEINLINE FVector2D GetMouseOffset() const
+	FORCEINLINE Vector2D GetMouseOffset() const
 	{
 		return mouseOffset;
 	}
@@ -168,8 +168,8 @@ public:
 
 private:
 	EButtonEvent						buttonEvents[ BC_Count ];		/**< Events button */
-	FVector2D							mouseLocation;					/**< Location mouse on screen */
-	FVector2D							mouseOffset;					/**< Offset mouse on current frame */
+	Vector2D							mouseLocation;					/**< Location mouse on screen */
+	Vector2D							mouseOffset;					/**< Offset mouse on current frame */
 	float								mouseSensitivity;				/**< Mouse sensitivity */
 };
 

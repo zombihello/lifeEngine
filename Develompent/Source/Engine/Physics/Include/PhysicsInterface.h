@@ -25,10 +25,10 @@
 #include "Misc/PhysXGlobals.h"
 #include "System/PhysXScene.h"
 
-typedef FPhysicsInterfacePhysX					FPhysicsInterface;
-typedef FPhysicsMaterialHandlePhysX				FPhysicsMaterialHandle;
-typedef FPhysicsShapeHandlePhysX				FPhysicsShapeHandle;
-typedef FPhysicsActorHandlePhysX				FPhysicsActorHandle;
+typedef SPhysicsInterfacePhysX					CPhysicsInterface;
+typedef SPhysicsMaterialHandlePhysX				PhysicsMaterialHandle_t;
+typedef SPhysicsShapeHandlePhysX				PhysicsShapeHandle_t;
+typedef SPhysicsActorHandlePhysX				PhysicsActorHandle_t;
 
 // Box 2D implementation
 #elif WITH_BOX2D
@@ -36,10 +36,10 @@ typedef FPhysicsActorHandlePhysX				FPhysicsActorHandle;
 #include "Misc/Box2DGlobals.h"
 #include "System/Box2DScene.h"
 
-typedef FPhysicsInterfaceBox2D					FPhysicsInterface;
-typedef FPhysicsMaterialHandleBox2D				FPhysicsMaterialHandle;
-typedef FPhysicsShapeHandleBox2D				FPhysicsShapeHandle;
-typedef FPhysicsActorHandleBox2D				FPhysicsActorHandle;
+typedef SPhysicsInterfaceBox2D					CPhysicsInterface;
+typedef SPhysicsMaterialHandleBox2D				PhysicsMaterialHandle_t;
+typedef SPhysicsShapeHandleBox2D				PhysicsShapeHandle_t;
+typedef SPhysicsActorHandleBox2D				PhysicsActorHandle_t;
 
 #else
 	static_assert( false, "A physics engine interface must be defined to build" );

@@ -7,7 +7,7 @@
 /**
  * Creates a D3D11Surface to represent a swap chain's back buffer
  */
-static class FD3D11Surface* GetSwapChainSurface( IDXGISwapChain* InSwapChain )
+static class CD3D11Surface* GetSwapChainSurface( IDXGISwapChain* InSwapChain )
 {
 	check( InSwapChain );
 
@@ -24,27 +24,27 @@ static class FD3D11Surface* GetSwapChainSurface( IDXGISwapChain* InSwapChain )
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
 
-	result = static_cast< FD3D11RHI* >( GRHI )->GetD3D11Device()->CreateRenderTargetView( backBuffer, &rtvDesc, &backBufferRenderTargetView );
+	result = static_cast< CD3D11RHI* >( GRHI )->GetD3D11Device()->CreateRenderTargetView( backBuffer, &rtvDesc, &backBufferRenderTargetView );
 	check( result == S_OK );
 	
 	D3D11SetDebugName( backBuffer, "SwapChainBackBuffer" );
 	D3D11SetDebugName( backBufferRenderTargetView, "BackBuffer" );
 	
 	backBuffer->Release();
-	return new FD3D11Surface( backBufferRenderTargetView );
+	return new CD3D11Surface( backBufferRenderTargetView );
 }
 
 /**
  * Constructor
  */
-FD3D11Viewport::FD3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight ) :
+CD3D11Viewport::CD3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight ) :
 	backBuffer( nullptr ),
 	dxgiSwapChain( nullptr ),
 	width( InWidth ),
 	height( InHeight )
 {
 	check( GRHI );
-	FD3D11RHI*				rhi = ( FD3D11RHI* )GRHI;
+	CD3D11RHI*				rhi = ( CD3D11RHI* )GRHI;
 	IDXGIFactory*			dxgiFactory = rhi->GetDXGIFactory();
 
 	// Create the swapchain
@@ -77,7 +77,7 @@ FD3D11Viewport::FD3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InH
 /**
  * Destructor
  */
-FD3D11Viewport::~FD3D11Viewport()
+CD3D11Viewport::~CD3D11Viewport()
 {
 	backBuffer.SafeRelease();
 	dxgiSwapChain->Release();
@@ -87,13 +87,13 @@ FD3D11Viewport::~FD3D11Viewport()
 /**
  * Presents the swap chain
  */
-void FD3D11Viewport::Present( bool InLockToVsync )
+void CD3D11Viewport::Present( bool InLockToVsync )
 {
 	check( dxgiSwapChain );
 	dxgiSwapChain->Present( InLockToVsync ? 1 : 0, 0 );
 }
 
-void FD3D11Viewport::Resize( uint32 InWidth, uint32 InHeight )
+void CD3D11Viewport::Resize( uint32 InWidth, uint32 InHeight )
 {
 	if ( width == InWidth && height == InHeight )
 	{
@@ -119,7 +119,7 @@ void FD3D11Viewport::Resize( uint32 InWidth, uint32 InHeight )
 /**
  * Get width
  */
-uint32 FD3D11Viewport::GetWidth() const
+uint32 CD3D11Viewport::GetWidth() const
 {
 	return width;
 }
@@ -127,7 +127,7 @@ uint32 FD3D11Viewport::GetWidth() const
 /**
  * Get height
  */
-uint32 FD3D11Viewport::GetHeight() const
+uint32 CD3D11Viewport::GetHeight() const
 {
 	return height;
 }
@@ -135,7 +135,7 @@ uint32 FD3D11Viewport::GetHeight() const
 /**
  * Get surface of viewport
  */
-FSurfaceRHIRef FD3D11Viewport::GetSurface() const
+SurfaceRHIRef_t CD3D11Viewport::GetSurface() const
 {
 	return backBuffer;
 }

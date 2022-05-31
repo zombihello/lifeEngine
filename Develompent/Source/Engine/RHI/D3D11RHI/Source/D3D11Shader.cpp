@@ -13,10 +13,10 @@
 /**
  * Constructor
  */
-FD3D11ShaderRHI::FD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InData, uint32 InSize, const tchar* InShaderName ) :
-	FBaseShaderRHI( InFrequency, InShaderName )
+CD3D11ShaderRHI::CD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+	CBaseShaderRHI( InFrequency, InShaderName )
 {
-	ID3D11Device*		device = static_cast< FD3D11RHI* >( GRHI )->GetD3D11Device();
+	ID3D11Device*		device = static_cast< CD3D11RHI* >( GRHI )->GetD3D11Device();
 	HRESULT				result = 0;
 
 	// Creating DirectX shader
@@ -55,7 +55,7 @@ FD3D11ShaderRHI::FD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InDa
 	check( result == S_OK );
 }
 
-FD3D11ShaderRHI::~FD3D11ShaderRHI()
+CD3D11ShaderRHI::~CD3D11ShaderRHI()
 {
 	shader.object->Release();
 }
@@ -63,13 +63,13 @@ FD3D11ShaderRHI::~FD3D11ShaderRHI()
 /**
  * Constructor
  */
-FD3D11VertexDeclarationRHI::FD3D11VertexDeclarationRHI( const FVertexDeclarationElementList& InElementList ) :
-	FBaseVertexDeclarationRHI( InElementList ),
+CD3D11VertexDeclarationRHI::CD3D11VertexDeclarationRHI( const VertexDeclarationElementList_t& InElementList ) :
+	CBaseVertexDeclarationRHI( InElementList ),
 	streamCount( 0 )
 {
 	for ( uint32 elementIndex = 0, elementCount = ( uint32 )InElementList.size(); elementIndex < elementCount; ++elementIndex )
 	{
-		const FVertexElement&		element = InElementList[ elementIndex ];
+		const SVertexElement&		element = InElementList[ elementIndex ];
 		D3D11_INPUT_ELEMENT_DESC	d3dElement;
 		d3dElement.InputSlot = element.streamIndex;
 		d3dElement.AlignedByteOffset = element.offset;
@@ -113,26 +113,26 @@ FD3D11VertexDeclarationRHI::FD3D11VertexDeclarationRHI( const FVertexDeclaration
 /**
  * Get hash of vertex declaration
  */
-uint64 FD3D11VertexDeclarationRHI::GetHash( uint64 InHash /*= 0*/ ) const
+uint64 CD3D11VertexDeclarationRHI::GetHash( uint64 InHash /*= 0*/ ) const
 {
 	return appMemFastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint64 )vertexElements.size(), InHash );
 }
 
 /**
- * Constructor of FD3D11BoundShaderStateRHI
+ * Constructor of CD3D11BoundShaderStateRHI
  */
-FD3D11BoundShaderStateRHI::FD3D11BoundShaderStateRHI( const tchar* InDebugName, const FBoundShaderStateKey& InKey, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader /*= nullptr*/, FDomainShaderRHIRef InDomainShader /*= nullptr*/, FGeometryShaderRHIRef InGeometryShader /*= nullptr*/ ) :
-	FBaseBoundShaderStateRHI( InKey, InVertexDeclaration, InVertexShader, InPixelShader, InHullShader, InDomainShader, InGeometryShader ),
+CD3D11BoundShaderStateRHI::CD3D11BoundShaderStateRHI( const tchar* InDebugName, const CBoundShaderStateKey& InKey, VertexDeclarationRHIRef_t InVertexDeclaration, VertexShaderRHIRef_t InVertexShader, PixelShaderRHIRef_t InPixelShader, HullShaderRHIRef_t InHullShader /*= nullptr*/, DomainShaderRHIRef_t InDomainShader /*= nullptr*/, GeometryShaderRHIRef_t InGeometryShader /*= nullptr*/ ) :
+	CBaseBoundShaderStateRHI( InKey, InVertexDeclaration, InVertexShader, InPixelShader, InHullShader, InDomainShader, InGeometryShader ),
 	d3d11InputLayout( nullptr )
 {
-	FD3D11RHI*		rhi = ( FD3D11RHI* )GRHI;
+	CD3D11RHI*		rhi = ( CD3D11RHI* )GRHI;
 	check( rhi );
 
 	ID3D11Device*	d3d11Device = rhi->GetD3D11Device();
 	check( d3d11Device );
 
-	const std::vector< D3D11_INPUT_ELEMENT_DESC >&		d3d11VertexElements = ( ( FD3D11VertexDeclarationRHI* )InVertexDeclaration.GetPtr() )->GetVertexElements();
-	const std::vector< byte >&							vertexShaderBytecode = ( ( FD3D11VertexShaderRHI* )InVertexShader.GetPtr() )->GetCode();
+	const std::vector< D3D11_INPUT_ELEMENT_DESC >&		d3d11VertexElements = ( ( CD3D11VertexDeclarationRHI* )InVertexDeclaration.GetPtr() )->GetVertexElements();
+	const std::vector< byte >&							vertexShaderBytecode = ( ( CD3D11VertexShaderRHI* )InVertexShader.GetPtr() )->GetCode();
 	
 #if DO_CHECK
 	HRESULT			result = d3d11Device->CreateInputLayout( d3d11VertexElements.data(), ( uint32 )d3d11VertexElements.size(), vertexShaderBytecode.data(), vertexShaderBytecode.size(), &d3d11InputLayout );
@@ -167,16 +167,16 @@ FD3D11BoundShaderStateRHI::FD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 #endif // DO_CHECK
 	
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( FString::Format( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
+	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( ÑString::Format( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
 /**
- * Destructor of FD3D11BoundShaderStateRHI
+ * Destructor of CD3D11BoundShaderStateRHI
  */
-FD3D11BoundShaderStateRHI::~FD3D11BoundShaderStateRHI()
+CD3D11BoundShaderStateRHI::~CD3D11BoundShaderStateRHI()
 {
-	FD3D11RHI*		rhi = ( FD3D11RHI* )GRHI;
+	CD3D11RHI*		rhi = ( CD3D11RHI* )GRHI;
 	check( rhi );
 
 	d3d11InputLayout->Release();

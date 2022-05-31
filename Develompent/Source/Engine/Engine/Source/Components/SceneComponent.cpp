@@ -1,12 +1,12 @@
 #include "Components/SceneComponent.h"
 
-IMPLEMENT_CLASS( LSceneComponent )
+IMPLEMENT_CLASS( CSceneComponent )
 
-bool LSceneComponent::IsAttachedTo( LSceneComponent* InTestComp ) const
+bool CSceneComponent::IsAttachedTo( CSceneComponent* InTestComp ) const
 {
 	if ( InTestComp != nullptr )
 	{
-		for ( const LSceneComponent* Comp = this->GetAttachParent(); Comp != nullptr; Comp = Comp->GetAttachParent() )
+		for ( const CSceneComponent* Comp = this->GetAttachParent(); Comp != nullptr; Comp = Comp->GetAttachParent() )
 		{
 			if ( InTestComp == Comp )
 			{
@@ -17,13 +17,13 @@ bool LSceneComponent::IsAttachedTo( LSceneComponent* InTestComp ) const
 	return false;
 }
 
-void LSceneComponent::Serialize( class FArchive& InArchive )
+void CSceneComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << transform;
 }
 
-void LSceneComponent::SetupAttachment( LSceneComponent* InParent )
+void CSceneComponent::SetupAttachment( CSceneComponent* InParent )
 {
 	checkMsg( InParent != this, TEXT( "Cannot attach a component to itself" ) );
 	checkMsg( InParent && !InParent->IsAttachedTo( this ), TEXT( "Setting up attachment would create a cycle" ) );

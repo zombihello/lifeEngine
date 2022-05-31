@@ -15,21 +15,21 @@
   * @ingroup Engine
   * Box collision shape
   */
-class LBoxComponent : public LShapeComponent
+class CBoxComponent : public CShapeComponent
 {
-	DECLARE_CLASS( LBoxComponent, LShapeComponent )
+	DECLARE_CLASS( CBoxComponent, CShapeComponent )
 
 public:
 	/**
 	 * Constructor
 	 */
-	LBoxComponent();
+	CBoxComponent();
 
 	/**
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Update the body setup parameters based on shape information
@@ -40,7 +40,7 @@ public:
 	 * @brief Set size of box
 	 * @param InSize Size
 	 */
-	FORCEINLINE void SetSize( const FVector& InSize )
+	FORCEINLINE void SetSize( const Vector& InSize )
 	{
 		size = InSize;
 	}
@@ -49,13 +49,13 @@ public:
 	 * @brief Get size of box
 	 * @return Return size of box
 	 */
-	FORCEINLINE const FVector& GetSize() const
+	FORCEINLINE const Vector& GetSize() const
 	{
 		return size;
 	}
 
 private:
-	FVector		size;		/**< Set size of box */
+	Vector		size;		/**< Set size of box */
 };
 
 #endif // !SHAPECOMPONENT_H

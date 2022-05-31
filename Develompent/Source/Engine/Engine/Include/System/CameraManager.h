@@ -16,7 +16,7 @@
  * @ingroup Engine
  * @brief Manager cameras in engine
  */
-class FCameraManager
+class CCameraManager
 {
 public:
     /**
@@ -35,7 +35,7 @@ public:
      * @brief Set active camera for render frame
      * @param InCameraComponent Camera component
      */
-    FORCEINLINE void SetActiveCamera( LCameraComponent* InCameraComponent )
+    FORCEINLINE void SetActiveCamera( CCameraComponent* InCameraComponent )
     {
         if ( activeCamera )
         {
@@ -54,13 +54,13 @@ public:
      * @brief Get active camera
      * @return Return active camera. If not seted returing nullptr
      */
-    FORCEINLINE TRefCountPtr< LCameraComponent > GetActiveCamera() const
+    FORCEINLINE TRefCountPtr< CCameraComponent > GetActiveCamera() const
     {
         return activeCamera;
     }
 
 private:
-    TRefCountPtr< LCameraComponent >        activeCamera;       /**< Current active camera */
+    TRefCountPtr< CCameraComponent >        activeCamera;       /**< Current active camera */
 };
 
 #endif // !CAMERAMANAGER_H

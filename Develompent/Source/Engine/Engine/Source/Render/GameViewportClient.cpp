@@ -10,35 +10,35 @@
 #include "System/World.h"
 #include "UIEngine.h"
 
-void FGameViewportClient::Draw( FViewport* InViewport )
+void CGameViewportClient::Draw( CViewport* InViewport )
 {
 	// Create scene view for draw scene
-	FCameraView			cameraView;
-	LCameraComponent*	cameraComponent = GCameraManager->GetActiveCamera();
+	SCameraView			cameraView;
+	CCameraComponent*	cameraComponent = GCameraManager->GetActiveCamera();
 	if ( cameraComponent )
 	{
 		cameraComponent->GetCameraView( cameraView );
 	}
 
 	// Calculate scene view and update audio listener spatial
-	FSceneView*		sceneView = CalcSceneView( InViewport, cameraView );
-	GAudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation.RotateVector( FMath::vectorForward ), cameraView.rotation.RotateVector( FMath::vectorUp ) );
+	CSceneView*		sceneView = CalcSceneView( InViewport, cameraView );
+	GAudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation.RotateVector( SMath::vectorForward ), cameraView.rotation.RotateVector( SMath::vectorUp ) );
 
 	// Draw viewport
-	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FViewportRenderCommand,
-										  FGameViewportClient*, viewportClient, this,
-										  FViewportRHIRef, viewportRHI, InViewport->GetViewportRHI(),
-										  FSceneView*, sceneView, sceneView,
+	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,
+										  CGameViewportClient*, viewportClient, this,
+										  ViewportRHIRef_t, viewportRHI, InViewport->GetViewportRHI(),
+										  CSceneView*, sceneView, sceneView,
 										  {
 											  viewportClient->Draw_RenderThread( viewportRHI, sceneView );
 										  } );
 }
 
-void FGameViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, FSceneView* InSceneView )
+void CGameViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, CSceneView* InSceneView )
 {
 	check( IsInRenderingThread() );
-	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	FSceneRenderer				sceneRenderer( InSceneView, ( FScene* )GWorld->GetScene() );
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	CSceneRenderer				sceneRenderer( InSceneView, ( CScene* )GWorld->GetScene() );
 
 	// Scene render
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
@@ -53,13 +53,13 @@ void FGameViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, FSce
 	delete InSceneView;
 }
 
-FSceneView* FGameViewportClient::CalcSceneView( FViewport* InViewport, const FCameraView& InCameraView )
+CSceneView* CGameViewportClient::CalcSceneView( CViewport* InViewport, const SCameraView& InCameraView )
 {
 	// Calculate projection matrix
-	FMatrix		projectionMatrix;
+	Matrix		projectionMatrix;
 	if ( InCameraView.projectionMode == CPM_Perspective )
 	{
-		projectionMatrix		= glm::perspective( FMath::DegreesToRadians( InCameraView.fov ), InCameraView.aspectRatio, InCameraView.nearClipPlane, InCameraView.farClipPlane );
+		projectionMatrix		= glm::perspective( SMath::DegreesToRadians( InCameraView.fov ), InCameraView.aspectRatio, InCameraView.nearClipPlane, InCameraView.farClipPlane );
 	}
 	else
 	{
@@ -69,10 +69,10 @@ FSceneView* FGameViewportClient::CalcSceneView( FViewport* InViewport, const FCa
 	}
 
 	// Update view matrix
-	FVector		targetDirection		= InCameraView.rotation.RotateVector( FMath::vectorForward );
-	FVector		axisUp				= InCameraView.rotation.RotateVector( FMath::vectorUp );
-	FMatrix		viewMatrix			= glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
+	Vector		targetDirection		= InCameraView.rotation.RotateVector( SMath::vectorForward );
+	Vector		axisUp				= InCameraView.rotation.RotateVector( SMath::vectorUp );
+	Matrix		viewMatrix			= glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
 
-	FSceneView*		sceneView = new FSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), FColor::black, SHOW_DefaultGame );
+	CSceneView*		sceneView = new CSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), ÑColor::black, SHOW_DefaultGame );
 	return sceneView;
 }

@@ -16,9 +16,9 @@
 	  * @ingroup UI
 	  * @brief ImGUI engine
 	  */
-	extern class FImGUIEngine*				GImGUIEngine;
+	extern class ÑImGUIEngine*				GImGUIEngine;
 #endif // WITH_IMGUI
 
-extern class FUIEngine*						GUIEngine;
+extern class ÑUIEngine*						GUIEngine;
 
 #endif // !UIGLOBALS_H

@@ -15,18 +15,18 @@
  * @ingroup WindowsPlatform
  * @brief Class for work with file system in Windows
  */
-class FWindowsFileSystem : public FBaseFileSystem
+class CWindowsFileSystem : public CBaseFileSystem
 {
 public:
     /**
      * @brief Constructor
      */
-                                                    FWindowsFileSystem();
+                                                    CWindowsFileSystem();
 
     /**
      * @brief Destructor
      */
-                                                    ~FWindowsFileSystem();
+                                                    ~CWindowsFileSystem();
 
     /**
      * @brief Create file reader
@@ -37,7 +37,7 @@ public:
      *
      * @warning After use need delete file reader
      */
-    virtual class FArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None ) override;
+    virtual class CArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None ) override;
 
     /**
      * @brief Create file writer
@@ -48,7 +48,7 @@ public:
      *
      * @warning After use need delete file writer
      */
-    virtual class FArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None ) override;
+    virtual class CArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None ) override;
 
     /**
      * @brief Find files in directory

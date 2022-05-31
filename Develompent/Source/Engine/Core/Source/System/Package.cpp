@@ -18,7 +18,7 @@
 #include "WorldEd.h"
 #endif // WITH_EDITOR
 
-FORCEINLINE TAssetHandle<FAsset> GetDefaultAsset( EAssetType InType )
+FORCEINLINE TAssetHandle<CAsset> GetDefaultAsset( EAssetType InType )
 {
 	switch ( InType )
 	{
@@ -31,16 +31,16 @@ FORCEINLINE TAssetHandle<FAsset> GetDefaultAsset( EAssetType InType )
 	}
 }
 
-FORCEINLINE TSharedPtr<FAsset> AssetFactory( EAssetType InType )
+FORCEINLINE TSharedPtr<CAsset> AssetFactory( EAssetType InType )
 {
 	switch ( InType )
 	{
-	case AT_Texture2D:			return MakeSharedPtr<FTexture2D>();
-	case AT_Material:			return MakeSharedPtr<FMaterial>();
-	case AT_Script:				return MakeSharedPtr<FScript>();
-	case AT_StaticMesh:			return MakeSharedPtr<FStaticMesh>();
-	case AT_AudioBank:			return MakeSharedPtr<FAudioBank>();
-	case AT_PhysicsMaterial:	return MakeSharedPtr<FPhysicsMaterial>();
+	case AT_Texture2D:			return MakeSharedPtr<CTexture2D>();
+	case AT_Material:			return MakeSharedPtr<CMaterial>();
+	case AT_Script:				return MakeSharedPtr<CScript>();
+	case AT_StaticMesh:			return MakeSharedPtr<CStaticMesh>();
+	case AT_AudioBank:			return MakeSharedPtr<CAudioBank>();
+	case AT_PhysicsMaterial:	return MakeSharedPtr<CPhysicsMaterial>();
 
 	//
 	// Instert new asset type her
@@ -52,17 +52,17 @@ FORCEINLINE TSharedPtr<FAsset> AssetFactory( EAssetType InType )
 	}
 }
 
-FAsset::FAsset( EAssetType InType ) 
+CAsset::CAsset( EAssetType InType ) 
 	: bDirty( true )		// by default package is dirty because not serialized package from HDD
 	, package( nullptr )
 	, guid( appCreateGuid() )
 	, type( InType )
 {}
 
-FAsset::~FAsset()
+CAsset::~CAsset()
 {}
 
-void FAsset::Serialize( class FArchive& InArchive )
+void CAsset::Serialize( class CArchive& InArchive )
 {
 	InArchive << name;
 
@@ -83,7 +83,7 @@ void FAsset::Serialize( class FArchive& InArchive )
 	bDirty = false;
 }
 
-void FAsset::SetAssetName( const std::wstring& InName )
+void CAsset::SetAssetName( const std::wstring& InName )
 {
 	if ( name != InName )
 	{
@@ -97,7 +97,7 @@ void FAsset::SetAssetName( const std::wstring& InName )
 	}
 }
 
-void FAsset::MarkDirty()
+void CAsset::MarkDirty()
 {
 	// If asset already is dirty, we nothing do
 	if ( bDirty )
@@ -113,27 +113,27 @@ void FAsset::MarkDirty()
 	}
 }
 
-void FAsset::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
+void CAsset::GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
 {}
 
-void FAsset::ReloadDependentAssets( bool InForce /* = false */ )
+void CAsset::ReloadDependentAssets( bool InForce /* = false */ )
 {}
 
-FAssetReference FAsset::GetAssetReference() const
+SAssetReference CAsset::GetAssetReference() const
 {
-	return FAssetReference( type, guid, package ? package->GetGUID() : FGuid() );
+	return SAssetReference( type, guid, package ? package->GetGUID() : CGuid() );
 }
 
-TAssetHandle<FAsset> FAsset::GetAssetHandle() const
+TAssetHandle<CAsset> CAsset::GetAssetHandle() const
 {
 	if ( !handle.IsValid() )
 	{
-		handle = TAssetHandle<FAsset>( SharedThis( this ), MakeSharedPtr<FAssetReference>( type, guid, package ? package->GetGUID() : FGuid() ) );
+		handle = TAssetHandle<CAsset>( SharedThis( this ), MakeSharedPtr<SAssetReference>( type, guid, package ? package->GetGUID() : CGuid() ) );
 	}
 	return handle;
 }
 
-FPackage::FPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
+CPackage::CPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
 	: bIsDirty( true )			// by default package is dirty because not serialized package from HDD
 	, guid( appCreateGuid() )
 	, name( InName )
@@ -141,16 +141,16 @@ FPackage::FPackage( const std::wstring& InName /* = TEXT( "" ) */ )
 	, numDirtyAssets( 0 )
 {}
 
-FPackage::~FPackage()
+CPackage::~CPackage()
 {
 	RemoveAll( true );
 }
 
-bool FPackage::Load( const std::wstring& InPath )
+bool CPackage::Load( const std::wstring& InPath )
 {
 	RemoveAll( true );
 
-	FArchive*		archive = GFileSystem->CreateFileReader( InPath );
+	CArchive*		archive = GFileSystem->CreateFileReader( InPath );
 	if ( !archive )
 	{
 		return false;
@@ -166,7 +166,7 @@ bool FPackage::Load( const std::wstring& InPath )
 	return true;
 }
 
-void FPackage::SetNameFromPath( const std::wstring& InPath )
+void CPackage::SetNameFromPath( const std::wstring& InPath )
 {
 	name = InPath;
 
@@ -194,10 +194,10 @@ void FPackage::SetNameFromPath( const std::wstring& InPath )
 	}
 }
 
-bool FPackage::Save( const std::wstring& InPath )
+bool CPackage::Save( const std::wstring& InPath )
 {
 	// Before saving package it needs to be fully loaded into memory
-	std::vector< TAssetHandle<FAsset> >		loadedAsset;
+	std::vector< TAssetHandle<CAsset> >		loadedAsset;
 	FullyLoad( loadedAsset );
 
 	// If package name not setted - take from path name of file
@@ -206,7 +206,7 @@ bool FPackage::Save( const std::wstring& InPath )
 		SetNameFromPath( InPath );
 	}
 
-	FArchive*		archive = GFileSystem->CreateFileWriter( InPath );
+	CArchive*		archive = GFileSystem->CreateFileWriter( InPath );
 	if ( !archive )
 	{
 		return false;
@@ -222,7 +222,7 @@ bool FPackage::Save( const std::wstring& InPath )
 	return true;
 }
 
-void FPackage::FullyLoad( std::vector< TAssetHandle<FAsset> >& OutAssetArray )
+void CPackage::FullyLoad( std::vector< TAssetHandle<CAsset> >& OutAssetArray )
 {
 	// If we not load package from HDD - exit from function
 	if ( filename.empty() )
@@ -231,13 +231,13 @@ void FPackage::FullyLoad( std::vector< TAssetHandle<FAsset> >& OutAssetArray )
 	}
 
 	// Serialize all assets to memory
-	FArchive*		archive = GFileSystem->CreateFileReader( filename, AR_NoFail );
+	CArchive*		archive = GFileSystem->CreateFileReader( filename, AR_NoFail );
 	archive->SerializeHeader();
 	SerializeHeader( *archive, true );
 
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
-		FAssetInfo&		assetInfo = itAsset->second;
+		SAssetInfo&		assetInfo = itAsset->second;
 
 		// If asset info is not valid - return nullptr
 		if ( assetInfo.offset == ( uint32 )INVALID_ID || assetInfo.size == ( uint32 )INVALID_ID )
@@ -246,7 +246,7 @@ void FPackage::FullyLoad( std::vector< TAssetHandle<FAsset> >& OutAssetArray )
 		}
 
 		// Load asset
-		TAssetHandle<FAsset>		asset = LoadAsset( *archive, itAsset->first, assetInfo );
+		TAssetHandle<CAsset>		asset = LoadAsset( *archive, itAsset->first, assetInfo );
 		if ( asset.IsAssetValid() )
 		{
 			OutAssetArray.push_back( asset );
@@ -260,7 +260,7 @@ void FPackage::FullyLoad( std::vector< TAssetHandle<FAsset> >& OutAssetArray )
 	delete archive;
 }
 
-TAssetHandle<FAsset> FPackage::Find( const FGuid& InGUID )
+TAssetHandle<CAsset> CPackage::Find( const CGuid& InGUID )
 {
 	// Find asset in table
 	auto		itAsset = assetsTable.find( InGUID );
@@ -282,7 +282,7 @@ TAssetHandle<FAsset> FPackage::Find( const FGuid& InGUID )
 	}
 
 	// Serialize asset from package
-	FArchive*	archive = GFileSystem->CreateFileReader( filename );
+	CArchive*	archive = GFileSystem->CreateFileReader( filename );
 	if ( !archive )
 	{
 		return nullptr;
@@ -290,13 +290,13 @@ TAssetHandle<FAsset> FPackage::Find( const FGuid& InGUID )
 
 	archive->SerializeHeader();
 	SerializeHeader( *archive );
-	TAssetHandle<FAsset>		asset = LoadAsset( *archive, itAsset->first, itAsset->second );
+	TAssetHandle<CAsset>		asset = LoadAsset( *archive, itAsset->first, itAsset->second );
 
 	delete archive;
 	return asset;
 }
 
-void FPackage::Serialize( FArchive& InArchive )
+void CPackage::Serialize( CArchive& InArchive )
 {
 	SerializeHeader( InArchive );
 	check( InArchive.Ver() >= VER_Assets );
@@ -305,7 +305,7 @@ void FPackage::Serialize( FArchive& InArchive )
 	{
 		for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 		{
-			FAssetInfo&			assetInfo = itAsset->second;
+			SAssetInfo&			assetInfo = itAsset->second;
 			if ( !assetInfo.data )
 			{
 				LE_LOG( LT_Warning, LC_Package, TEXT( "Asset '%s' is not valid, skiped saving to package" ), assetInfo.name.c_str() );
@@ -336,9 +336,9 @@ void FPackage::Serialize( FArchive& InArchive )
 		while ( !InArchive.IsEndOfFile() )
 		{
 			// Serialize asset header and add to table
-			FAssetInfo			localAssetInfo;
-			FGuid				assetGUID;
-			appMemzero( &localAssetInfo, sizeof( FAssetInfo ) );
+			SAssetInfo			localAssetInfo;
+			CGuid				assetGUID;
+			appMemzero( &localAssetInfo, sizeof( SAssetInfo ) );
 
 			// Serialize hash with size data
 			InArchive << localAssetInfo.type;
@@ -369,7 +369,7 @@ void FPackage::Serialize( FArchive& InArchive )
 			}
 
 			// Update asset info in table			
-			FAssetInfo&			assetInfo			= assetsTable[ assetGUID ];
+			SAssetInfo&			assetInfo			= assetsTable[ assetGUID ];
 			localAssetInfo.data						= assetInfo.data;
 			assetGUIDTable[ localAssetInfo.name ]	= assetGUID;
 			
@@ -387,7 +387,7 @@ void FPackage::Serialize( FArchive& InArchive )
 	numDirtyAssets	= 0;
 }
 
-void FPackage::SerializeHeader( FArchive& InArchive, bool InIsNeedSkip /* = false */ )
+void CPackage::SerializeHeader( CArchive& InArchive, bool InIsNeedSkip /* = false */ )
 {
 	check( InArchive.Ver() >= VER_NamePackage );
 	uint32		packageFileTag = PACKAGE_FILE_TAG;
@@ -408,14 +408,14 @@ void FPackage::SerializeHeader( FArchive& InArchive, bool InIsNeedSkip /* = fals
 	}
 	else
 	{
-		FGuid			tmpGuid;
+		CGuid			tmpGuid;
 		std::wstring	tmpName;
 		InArchive << tmpGuid;
 		InArchive << tmpName;
 	}
 }
 
-TAssetHandle<FAsset> FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAssetGUID, FAssetInfo& InAssetInfo, bool InNeedReload /* = false */ )
+TAssetHandle<CAsset> CPackage::LoadAsset( CArchive& InArchive, const CGuid& InAssetGUID, SAssetInfo& InAssetInfo, bool InNeedReload /* = false */ )
 {
 	uint32		oldOffset = InArchive.Tell();
 
@@ -471,7 +471,7 @@ TAssetHandle<FAsset> FPackage::LoadAsset( FArchive& InArchive, const FGuid& InAs
 	return InAssetInfo.data->GetAssetHandle();
 }
 
-void FPackage::MarkAssetDirty( const FGuid& InGUID )
+void CPackage::MarkAssetDirty( const CGuid& InGUID )
 {
 	bIsDirty = true;
 	if ( numDirtyAssets != -1 )
@@ -480,7 +480,7 @@ void FPackage::MarkAssetDirty( const FGuid& InGUID )
 	}
 }
 
-void FPackage::UpdateAssetNameInTable( const FGuid& InGUID )
+void CPackage::UpdateAssetNameInTable( const CGuid& InGUID )
 {
 	// Find asset in package
 	auto		itAsset = assetsTable.find( InGUID );
@@ -489,7 +489,7 @@ void FPackage::UpdateAssetNameInTable( const FGuid& InGUID )
 		return;
 	}
 
-	FAssetInfo&		assetInfo = itAsset->second;
+	SAssetInfo&		assetInfo = itAsset->second;
 	check( assetInfo.data );
 
 	// Remove from GUID table old name
@@ -500,11 +500,11 @@ void FPackage::UpdateAssetNameInTable( const FGuid& InGUID )
 	assetInfo.name = assetInfo.data->name;
 }
 
-void FPackage::Add( const TAssetHandle<FAsset>& InAsset )
+void CPackage::Add( const TAssetHandle<CAsset>& InAsset )
 {
 	check( InAsset.IsAssetValid() );
 
-	TSharedPtr<FAsset>		assetRef = InAsset.ToSharedPtr();
+	TSharedPtr<CAsset>		assetRef = InAsset.ToSharedPtr();
 	checkMsg( assetRef->guid.IsValid(), TEXT( "For add asset to package need GUID is valid" ) );
 
 	// If asset in package already containing, remove from table old GUID
@@ -521,13 +521,13 @@ void FPackage::Add( const TAssetHandle<FAsset>& InAsset )
 	assetRef->package					= this;
 	assetRef->bDirty					= true;
 	assetGUIDTable[ assetRef->name ]	= assetRef->guid;
-	assetsTable[ assetRef->guid ]		= FAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, assetRef->type, assetRef->name, assetRef };
+	assetsTable[ assetRef->guid ]		= SAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, assetRef->type, assetRef->name, assetRef };
 	
 	++numLoadedAssets;
 	++numDirtyAssets;
 }
 
-bool FPackage::Remove( const FGuid& InGUID, bool InForceUnload /* = false */, bool InIgnoreDirty /* = false */ )
+bool CPackage::Remove( const CGuid& InGUID, bool InForceUnload /* = false */, bool InIgnoreDirty /* = false */ )
 {
 	auto		itAsset = assetsTable.find( InGUID );
 	if ( itAsset == assetsTable.end() )
@@ -536,8 +536,8 @@ bool FPackage::Remove( const FGuid& InGUID, bool InForceUnload /* = false */, bo
 	}
 
 	// Unload asset, if failed we exit from method
-	FAssetInfo&				assetInfo		= itAsset->second;
-	TWeakPtr<FAsset>		assetPtr		= assetInfo.data;
+	SAssetInfo&				assetInfo		= itAsset->second;
+	TWeakPtr<CAsset>		assetPtr		= assetInfo.data;
 	bool					bIsExistOnHDD	= assetInfo.offset != INVALID_ID && assetInfo.size != INVALID_ID;		// Is asset containing in package on HDD?
 	if ( assetInfo.data && !UnloadAsset( assetInfo, InForceUnload, true, InIgnoreDirty ) )
 	{
@@ -546,7 +546,7 @@ bool FPackage::Remove( const FGuid& InGUID, bool InForceUnload /* = false */, bo
 
 	// If the asset remains in memory, then in this case we reset its link to this package
 	{
-		TSharedPtr<FAsset>		assetRef = assetPtr.Pin();
+		TSharedPtr<CAsset>		assetRef = assetPtr.Pin();
 		if ( assetRef )
 		{
 			assetRef->package = nullptr;
@@ -571,13 +571,13 @@ bool FPackage::Remove( const FGuid& InGUID, bool InForceUnload /* = false */, bo
 	return true;
 }
 
-bool FPackage::RemoveAll( bool InForceUnload /* = false */, bool InIgnoreDirty /* = false */ )
+bool CPackage::RemoveAll( bool InForceUnload /* = false */, bool InIgnoreDirty /* = false */ )
 {
 	// Fill array of assets to unload. Need it for remove reference to this package if him remained in memory
-	std::vector< TWeakPtr<FAsset> >		assetsToUnload;
+	std::vector< TWeakPtr<CAsset> >		assetsToUnload;
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
-		FAssetInfo&		assetInfo = itAsset->second;
+		SAssetInfo&		assetInfo = itAsset->second;
 		if ( assetInfo.data )
 		{
 			assetsToUnload.push_back( assetInfo.data );
@@ -593,7 +593,7 @@ bool FPackage::RemoveAll( bool InForceUnload /* = false */, bool InIgnoreDirty /
 	// If it is still used, unbind the package
 	for ( uint32 index = 0, count = assetsToUnload.size(); index < count; ++index )
 	{
-		TSharedPtr<FAsset>		assetRef = assetsToUnload[ index ].Pin();
+		TSharedPtr<CAsset>		assetRef = assetsToUnload[ index ].Pin();
 		if ( assetRef )
 		{
 			assetRef->package = nullptr;
@@ -609,7 +609,7 @@ bool FPackage::RemoveAll( bool InForceUnload /* = false */, bool InIgnoreDirty /
 	return true;
 }
 
-bool FPackage::UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload /* = false */, bool InBroadcastEvent /* = true */, bool InIgnoreDirty /* = false */ )
+bool CPackage::UnloadAsset( SAssetInfo& InAssetInfo, bool InForceUnload /* = false */, bool InBroadcastEvent /* = true */, bool InIgnoreDirty /* = false */ )
 {
 	// We must unload only not dirty assets and with unique shared reference
 	if ( InAssetInfo.data && ( !InIgnoreDirty ? !InAssetInfo.data->bDirty : true ) )
@@ -624,9 +624,9 @@ bool FPackage::UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload /* = fal
 #if WITH_EDITOR
 		if ( GIsEditor && InBroadcastEvent )
 		{
-			FCanDeleteAssetResult					result;
-			std::vector< TSharedPtr<FAsset>	>		assets = { InAssetInfo.data };
-			FEditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
+			SCanDeleteAssetResult					result;
+			std::vector< TSharedPtr<CAsset>	>		assets = { InAssetInfo.data };
+			SEditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
 
 			// If this asset is blocked, we exit from method
 			if ( !result.Get() )
@@ -635,7 +635,7 @@ bool FPackage::UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload /* = fal
 			}
 
 			// Else we tell all what asset is deleted
-			FEditorDelegates::onAssetsDeleted.Broadcast( assets );
+			SEditorDelegates::onAssetsDeleted.Broadcast( assets );
 		}
 #endif // WITH_EDITOR
 
@@ -679,15 +679,15 @@ bool FPackage::UnloadAsset( FAssetInfo& InAssetInfo, bool InForceUnload /* = fal
 	return false;
 }
 
-bool FPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool InIgnoreDirty /* = false */ )
+bool CPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool InIgnoreDirty /* = false */ )
 {
 	bool		bExistDirtyAssets = false;
-	std::vector<FAssetInfo*>		assetsToUnload;
+	std::vector<SAssetInfo*>		assetsToUnload;
 
 	// Fill array assets to unload
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
-		FAssetInfo&		assetInfo = itAsset->second;
+		SAssetInfo&		assetInfo = itAsset->second;
 
 		// If asset is not loaded - skip it
 		if ( !assetInfo.data )
@@ -710,16 +710,16 @@ bool FPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool I
 #if WITH_EDITOR
 	if ( GIsEditor )
 	{
-		// Convert array of FAssetInfo to TSharedPtr<FAsset> for events
-		std::vector< TSharedPtr<FAsset> >		assets;
+		// Convert array of SAssetInfo to TSharedPtr<CAsset> for events
+		std::vector< TSharedPtr<CAsset> >		assets;
 		for ( uint32 index = 0, count = assetsToUnload.size(); index < count; ++index )
 		{
 			assets.push_back( assetsToUnload[ index ]->data );
 		}
 
 		// Tell all user of we want delete this assets 
-		FCanDeleteAssetResult		result;
-		FEditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
+		SCanDeleteAssetResult		result;
+		SEditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
 
 		// If this assets is blocked, we exit from method
 		if ( !result.Get() )
@@ -728,7 +728,7 @@ bool FPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool I
 		}
 
 		// Else we tell all what asset is deleted
-		FEditorDelegates::onAssetsDeleted.Broadcast( assets );
+		SEditorDelegates::onAssetsDeleted.Broadcast( assets );
 	}
 #endif // WITH_EDITOR
 
@@ -741,7 +741,7 @@ bool FPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool I
 	return !bExistDirtyAssets;
 }
 
-bool FPackage::ReloadAsset( FAssetInfo& InAssetInfo )
+bool CPackage::ReloadAsset( SAssetInfo& InAssetInfo )
 {
 	// If we not load package from HDD - exit from function
 	if ( filename.empty() )
@@ -756,7 +756,7 @@ bool FPackage::ReloadAsset( FAssetInfo& InAssetInfo )
 	}
 
 	// Open package for reload asset
-	FArchive*		archive = GFileSystem->CreateFileReader( filename );
+	CArchive*		archive = GFileSystem->CreateFileReader( filename );
 	if ( !archive )
 	{
 		return false;
@@ -782,15 +782,15 @@ bool FPackage::ReloadAsset( FAssetInfo& InAssetInfo )
 #if WITH_EDITOR
 	if ( GIsEditor )
 	{
-		std::vector< TSharedPtr<FAsset>	>		assets = { InAssetInfo.data };
-		FEditorDelegates::onAssetsReloaded.Broadcast( assets );
+		std::vector< TSharedPtr<CAsset>	>		assets = { InAssetInfo.data };
+		SEditorDelegates::onAssetsReloaded.Broadcast( assets );
 	}
 #endif // WITH_EDITOR
 
 	return bResult;
 }
 
-bool FPackage::ReloadPackage( bool InOnlyAsset /* = false */ )
+bool CPackage::ReloadPackage( bool InOnlyAsset /* = false */ )
 {
 	// If we not load package from HDD - exit from function
 	if ( filename.empty() )
@@ -799,7 +799,7 @@ bool FPackage::ReloadPackage( bool InOnlyAsset /* = false */ )
 	}
 
 	// Open package for reload asset
-	FArchive*		archive = GFileSystem->CreateFileReader( filename );
+	CArchive*		archive = GFileSystem->CreateFileReader( filename );
 	if ( !archive )
 	{
 		return false;
@@ -822,14 +822,14 @@ bool FPackage::ReloadPackage( bool InOnlyAsset /* = false */ )
 
 	// Reload all assets
 #if WITH_EDITOR
-	std::vector< TSharedPtr<FAsset> >	reloadedAssets;
+	std::vector< TSharedPtr<CAsset> >	reloadedAssets;
 #endif // WITH_EDITOR
 
 	bool		bNotAllAssetLoaded = false;
 	uint32		numNewDirtyAssets = 0;
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
-		FAssetInfo&		assetInfo = itAsset->second;
+		SAssetInfo&		assetInfo = itAsset->second;
 
 		// If asset is not loaded - skip it
 		if ( !assetInfo.data )
@@ -868,7 +868,7 @@ bool FPackage::ReloadPackage( bool InOnlyAsset /* = false */ )
 #if WITH_EDITOR
 	if ( GIsEditor )
 	{
-		FEditorDelegates::onAssetsReloaded.Broadcast( reloadedAssets );
+		SEditorDelegates::onAssetsReloaded.Broadcast( reloadedAssets );
 	}
 #endif // WITH_EDITOR
 
@@ -877,16 +877,16 @@ bool FPackage::ReloadPackage( bool InOnlyAsset /* = false */ )
 	return !bNotAllAssetLoaded;
 }
 
-FPackageManager::FPackageManager()
+CPackageManager::CPackageManager()
 {}
 
-void FPackageManager::Init()
+void CPackageManager::Init()
 {}
 
-void FPackageManager::Tick()
+void CPackageManager::Tick()
 {}
 
-void FPackageManager::Shutdown()
+void CPackageManager::Shutdown()
 {}
 
 bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPackageName, std::wstring& OutAssetName, EAssetType& OutAssetType )
@@ -928,7 +928,7 @@ bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPacka
 	return true;
 }
 
-TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InString, EAssetType InType /* = AT_Unknown */ )
+TAssetHandle<CAsset> CPackageManager::FindAsset( const std::wstring& InString, EAssetType InType /* = AT_Unknown */ )
 {
 	std::wstring		packageName;
 	std::wstring		assetName;
@@ -952,13 +952,13 @@ TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InString, E
 	return FindAsset( packagePath, assetName, InType );
 }
 
-TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const FGuid& InGUIDAsset, EAssetType InType /* = AT_Unknown */ )
+TAssetHandle<CAsset> CPackageManager::FindAsset( const std::wstring& InPath, const CGuid& InGUIDAsset, EAssetType InType /* = AT_Unknown */ )
 {
 	check( InGUIDAsset.IsValid() );
 
 	// Find package and open he
-	TAssetHandle<FAsset>	asset;
-	FPackageRef				package = LoadPackage( InPath );
+	TAssetHandle<CAsset>	asset;
+	PackageRef_t				package = LoadPackage( InPath );
 
 	// Find asset in package
 	if ( package )
@@ -975,13 +975,13 @@ TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, con
 	return asset;
 }
 
-TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType /* = AT_Unknown */ )
+TAssetHandle<CAsset> CPackageManager::FindAsset( const std::wstring& InPath, const std::wstring& InAsset, EAssetType InType /* = AT_Unknown */ )
 {
 	check( !InAsset.empty() );
 
 	// Find package and open he
-	TAssetHandle<FAsset>	asset;
-	FPackageRef				package = LoadPackage( InPath );
+	TAssetHandle<CAsset>	asset;
+	PackageRef_t				package = LoadPackage( InPath );
 	
 	// Find asset in package
 	if ( package )
@@ -1002,19 +1002,19 @@ TAssetHandle<FAsset> FPackageManager::FindAsset( const std::wstring& InPath, con
 	return asset;
 }
 
-TAssetHandle<FAsset> FPackageManager::FindDefaultAsset( EAssetType InType ) const
+TAssetHandle<CAsset> CPackageManager::FindDefaultAsset( EAssetType InType ) const
 {
 	return GetDefaultAsset( InType );
 }
 
-FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath, bool InCreateIfNotExist /*= false */ )
+PackageRef_t CPackageManager::LoadPackage( const std::wstring& InPath, bool InCreateIfNotExist /*= false */ )
 {
-	FPackageRef			package;
+	PackageRef_t			package;
 	auto				itPackage = packages.find( InPath );
 	
 	if ( itPackage == packages.end() )
 	{
-		package = new FPackage();
+		package = new CPackage();
 		if ( !package->Load( InPath ) && !InCreateIfNotExist )
 		{
 			package = nullptr;
@@ -1040,7 +1040,7 @@ FPackageRef FPackageManager::LoadPackage( const std::wstring& InPath, bool InCre
 	return package;
 }
 
-bool FPackageManager::UnloadPackage( const std::wstring& InPath, bool InForceUnload /* = false */ )
+bool CPackageManager::UnloadPackage( const std::wstring& InPath, bool InForceUnload /* = false */ )
 {
 	auto		itPackage = packages.find( InPath );
 	if ( itPackage == packages.end() )
@@ -1066,7 +1066,7 @@ bool FPackageManager::UnloadPackage( const std::wstring& InPath, bool InForceUnl
 	return true;
 }
 
-bool FPackageManager::UnloadAllPackages( bool InForceUnload /* = false */ )
+bool CPackageManager::UnloadAllPackages( bool InForceUnload /* = false */ )
 {
 	bool	bUnloadedNotAll = false;
 	for ( auto itPackage = packages.begin(); itPackage != packages.end(); )
@@ -1094,13 +1094,13 @@ bool FPackageManager::UnloadAllPackages( bool InForceUnload /* = false */ )
 	return !bUnloadedNotAll;
 }
 
-bool FPackageManager::UnloadAsset( const TAssetHandle<FAsset>& InAssetPtr, bool InForceUnload /* = false */ )
+bool CPackageManager::UnloadAsset( const TAssetHandle<CAsset>& InAssetPtr, bool InForceUnload /* = false */ )
 {
-	FPackageRef		package;
-	FGuid			guidAsset;
+	PackageRef_t		package;
+	CGuid			guidAsset;
 	{
 		// If asset already unload, we exit from function
-		TSharedPtr<FAsset>		assetRef = InAssetPtr.ToSharedPtr();
+		TSharedPtr<CAsset>		assetRef = InAssetPtr.ToSharedPtr();
 		if ( !assetRef )
 		{
 			return true;
@@ -1116,7 +1116,7 @@ bool FPackageManager::UnloadAsset( const TAssetHandle<FAsset>& InAssetPtr, bool 
 	return package->UnloadAsset( guidAsset, InForceUnload );
 }
 
-bool FPackageManager::ReloadAsset( const TAssetHandle<FAsset>& InAssetPtr )
+bool CPackageManager::ReloadAsset( const TAssetHandle<CAsset>& InAssetPtr )
 {
 	// If asset handle is not valid, we exit from function
 	if ( !InAssetPtr.IsValid() )
@@ -1124,11 +1124,11 @@ bool FPackageManager::ReloadAsset( const TAssetHandle<FAsset>& InAssetPtr )
 		return false;
 	}
 
-	FPackageRef		package;
-	FGuid			guidAsset;
+	PackageRef_t		package;
+	CGuid			guidAsset;
 	{
 		// If asset is not loaded, we exit
-		TSharedPtr<FAsset>		assetRef = InAssetPtr.ToSharedPtr();
+		TSharedPtr<CAsset>		assetRef = InAssetPtr.ToSharedPtr();
 		if ( !assetRef )
 		{
 			return false;
@@ -1144,7 +1144,7 @@ bool FPackageManager::ReloadAsset( const TAssetHandle<FAsset>& InAssetPtr )
 	return package->ReloadAsset( guidAsset );
 }
 
-bool FPackageManager::ReloadPackage( const std::wstring& InPath )
+bool CPackageManager::ReloadPackage( const std::wstring& InPath )
 {
 	auto		itPackage = packages.find( InPath );
 	if ( itPackage == packages.end() )
@@ -1162,7 +1162,7 @@ bool FPackageManager::ReloadPackage( const std::wstring& InPath )
 	return bResult;
 }
 
-bool FPackageManager::ReloadAllPackages()
+bool CPackageManager::ReloadAllPackages()
 {
 	bool	bResult = false;
 	for ( auto itPackage = packages.begin(); itPackage != packages.end(); )
@@ -1180,24 +1180,24 @@ bool FPackageManager::ReloadAllPackages()
 	return bResult;
 }
 
-void FPackageManager::GarbageCollector()
+void CPackageManager::GarbageCollector()
 {
 	double		startGCTime = appSeconds();
 	LE_LOG( LT_Log, LC_Package, TEXT( "Collecting garbage of packages" ) );
 
 	uint32															numUnloadedAssets	= 0;
 	uint32															numUnloadedPackages = 0;
-	std::unordered_set< FPackageRef, FPackageRef::FHashFunction >	packagesToUnload;
+	std::unordered_set< PackageRef_t, PackageRef_t::SHashFunction >	packagesToUnload;
 
 	// We go through all the packages and unload unused assets
 	LE_LOG( LT_Log, LC_Package, TEXT( " Assets:" ) );
 	for ( auto itPackage = packages.begin(), itPackageEnd = packages.end(); itPackage != itPackageEnd; ++itPackage )
 	{
-		FPackageRef		package		= itPackage->second;
+		PackageRef_t		package		= itPackage->second;
 		uint32			numAssets	= package->GetNumAssets();		
 		for ( uint32 index = 0; index < numAssets; ++index )
 		{
-			FAssetInfo		assetInfo;
+			SAssetInfo		assetInfo;
 			package->GetAssetInfo( index, assetInfo );
 
 			// Skip asset if him is not loaded
@@ -1207,18 +1207,18 @@ void FPackageManager::GarbageCollector()
 			}
 
 			// Unload asset only if weak references is not exist
-			bool		bCanUnloadAsset = assetInfo.data.GetSharedReferenceCount() <= 2 && assetInfo.data.GetWeakReferenceCount() <= 3;		// 2 shared reference this is two FAssetInfo, one in current section, other in package
+			bool		bCanUnloadAsset = assetInfo.data.GetSharedReferenceCount() <= 2 && assetInfo.data.GetWeakReferenceCount() <= 3;		// 2 shared reference this is two SAssetInfo, one in current section, other in package
 																																			// 3 weak references containing in SharedThis, GetAssetHandle and self this resource
 			if ( bCanUnloadAsset && package->UnloadAsset( assetInfo.data->GetGUID(), true ) )
 			{
 				// Try unload dependent assets
-				FAsset::FSetDependentAssets		dependentAssets;
+				CAsset::SetDependentAssets_t		dependentAssets;
 				assetInfo.data->GetDependentAssets( dependentAssets );
 
 				for ( auto itDependentAsset = dependentAssets.begin(), itDependentAssetEnd = dependentAssets.end(); itDependentAsset != itDependentAssetEnd; ++itDependentAsset )
 				{
 					// If depended asset already unloaded - skip it
-					TSharedPtr<FAsset>		dependetAsset = itDependentAsset->ToSharedPtr();
+					TSharedPtr<CAsset>		dependetAsset = itDependentAsset->ToSharedPtr();
 					if ( !dependetAsset )
 					{
 						continue;
@@ -1226,14 +1226,14 @@ void FPackageManager::GarbageCollector()
 
 					// Is we can unload this asset?
 					bool	bCanUnloadDependentAsset = dependetAsset.GetSharedReferenceCount() <= 2 && dependetAsset.GetWeakReferenceCount() <= 5;		// Shared reference: 2 because one in current section, other in package
-																																						// Weak reference: 5 because one in current section (FSetDependentAssets), second in parent asset and other self this resource, SharedThis and GetAssetHandle
+																																						// Weak reference: 5 because one in current section (SetDependentAssets_t), second in parent asset and other self this resource, SharedThis and GetAssetHandle
 					if ( !bCanUnloadDependentAsset )
 					{
 						continue;
 					}
 
 					// If in asset package is not exist - skip it
-					FPackageRef		dependetPackage = dependetAsset->GetPackage();
+					PackageRef_t		dependetPackage = dependetAsset->GetPackage();
 					if ( !dependetPackage )
 					{
 						continue;
@@ -1271,7 +1271,7 @@ void FPackageManager::GarbageCollector()
 	
 	for ( auto itPackage = packagesToUnload.begin(), itPackageEnd = packagesToUnload.end(); itPackage != itPackageEnd; ++itPackage )
 	{
-		FPackageRef		package = *itPackage;
+		PackageRef_t		package = *itPackage;
 		
 		LE_LOG( LT_Log, LC_Package, TEXT( "  Package '%s' unloaded" ), package->GetName().c_str() );
 		packages.erase( package->GetFileName() );

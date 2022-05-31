@@ -11,13 +11,13 @@
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/Shaders/ShaderCompiler.h"
 
-FShaderParameter::FShaderParameter()
+CShaderParameter::CShaderParameter()
 	: bufferIndex( 0 )
 	, baseIndex( 0 )
 	, numBytes( 0 )
 {}
 
-void FShaderParameter::Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional /*= false*/ )
+void CShaderParameter::Bind( const CShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional /*= false*/ )
 {
 	uint32 			unusedSamplerIndex = 0;
 	if ( !InParameterMap.FindParameterAllocation( InParameterName, bufferIndex, baseIndex, numBytes, unusedSamplerIndex ) && !InIsOptional )
@@ -26,13 +26,13 @@ void FShaderParameter::Bind( const FShaderParameterMap& InParameterMap, const tc
 	}
 }
 
-FShaderResourceParameter::FShaderResourceParameter()
+CShaderResourceParameter::CShaderResourceParameter()
 	: baseIndex( 0 )
 	, numResources( 0 )
 	, samplerIndex( 0 )
 {}
 
-void FShaderResourceParameter::Bind( const FShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional /* = false */ )
+void CShaderResourceParameter::Bind( const CShaderParameterMap& InParameterMap, const tchar* InParameterName, bool InIsOptional /* = false */ )
 {
 	uint32		unusedBufferIndex = 0;
 	if ( !InParameterMap.FindParameterAllocation( InParameterName, unusedBufferIndex, baseIndex, numResources, samplerIndex ) && !InIsOptional )
@@ -42,11 +42,11 @@ void FShaderResourceParameter::Bind( const FShaderParameterMap& InParameterMap, 
 }
 
 /**
- * Constructor of FShaderMetaType
+ * Constructor of CShaderMetaType
  */
-FShaderMetaType::FShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, bool InIsGlobal, FConstructSerializedInstance InConstructSerializedInstance, FConstructCompiledInstance InConstructCompiledInstance
+CShaderMetaType::CShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, bool InIsGlobal, ConstructSerializedInstanceFn_t InConstructSerializedInstance, ConstructCompiledInstanceFn_t InConstructCompiledInstance
 #if WITH_EDITOR
-								  , FShouldCacheFunc InShouldCacheFunc, FModifyCompilationEnvironmentFunc InModifyCompilationEnvironmentFunc
+								  , ShouldCacheFn_t InShouldCacheFunc, ModifyCompilationEnvironmentFn_t InModifyCompilationEnvironmentFunc
 #endif // WITH_EDITOR
 )
 	: bGlobal( InIsGlobal )
@@ -61,13 +61,13 @@ FShaderMetaType::FShaderMetaType( const std::wstring& InName, const std::wstring
 	, ModifyCompilationEnvironmentFunc( InModifyCompilationEnvironmentFunc )
 #endif // WITH_EDITOR
 {
-	FShaderManager::RegisterShaderType( this );
+	CShaderManager::RegisterShaderType( this );
 }
 
 /**
- * Constructor of copy FShaderMetaType
+ * Constructor of copy CShaderMetaType
  */
-FShaderMetaType::FShaderMetaType( const FShaderMetaType& InCopy )
+CShaderMetaType::CShaderMetaType( const CShaderMetaType& InCopy )
 {
 	bGlobal = InCopy.bGlobal;
 	name = InCopy.name;
@@ -81,9 +81,9 @@ FShaderMetaType::FShaderMetaType( const FShaderMetaType& InCopy )
 /**
  * Create instance of shader
  */
-FShader* FShaderManager::FContainerShaderTypes::CreateShaderInstance( const tchar* InShaderName )
+CShader* CShaderManager::SContainerShaderTypes::CreateShaderInstance( const tchar* InShaderName )
 {
-	FContainerShaderTypes*		container = FContainerShaderTypes::Get();
+	SContainerShaderTypes*		container = SContainerShaderTypes::Get();
 	auto		itShaderMetaType = container->shaderMetaTypes.find( InShaderName );
 	if ( itShaderMetaType == container->shaderMetaTypes.end() )
 	{
@@ -96,26 +96,26 @@ FShader* FShaderManager::FContainerShaderTypes::CreateShaderInstance( const tcha
 /**
  * Loading shader from cache
  */
-bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
+bool CShaderManager::LoadShaders( const tchar* InPathShaderCache )
 {
-	FArchive*		archive = GFileSystem->CreateFileReader( InPathShaderCache );
+	CArchive*		archive = GFileSystem->CreateFileReader( InPathShaderCache );
 	if ( !archive )
 	{
 		return false;
 	}
 
-	FShaderCache		shaderCache;
+	CShaderCache		shaderCache;
 	archive->SerializeHeader();
 	shaderCache.Serialize( *archive );
 	delete archive;
 
 	uint32														numLoadedShaders = 0;
 	uint32														numLegacyShaders = 0;
-	const std::vector< FShaderCache::FShaderCacheItem >			shaderCacheItems = shaderCache.GetItems();
+	const std::vector< CShaderCache::SShaderCacheItem >			shaderCacheItems = shaderCache.GetItems();
 	for ( uint32 indexItem = 0, countItems = ( uint32 )shaderCacheItems.size(); indexItem < countItems; ++indexItem )
 	{
-		const FShaderCache::FShaderCacheItem&		item = shaderCacheItems[ indexItem ];
-		FShader*									shader = FContainerShaderTypes::CreateShaderInstance( item.name.c_str() );
+		const CShaderCache::SShaderCacheItem&		item = shaderCacheItems[ indexItem ];
+		CShader*									shader = SContainerShaderTypes::CreateShaderInstance( item.name.c_str() );
 		if ( !shader )
 		{
 			LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s not loaded, because not found meta type" ), item.name.c_str() );
@@ -126,7 +126,7 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 		shader->Init( item );
 		++numLoadedShaders;
 
-		FVertexFactoryMetaType*			vertexFactoryType = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
+		CVertexFactoryMetaType*			vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
 		if ( vertexFactoryType )
 		{
 			LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s loaded" ), item.name.c_str(), vertexFactoryType->GetName().c_str() );
@@ -142,16 +142,16 @@ bool FShaderManager::LoadShaders( const tchar* InPathShaderCache )
 	return true;
 }
 
-FShader* FShaderManager::FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash )
+CShader* CShaderManager::FindInstance( const std::wstring& InShaderName, uint64 InVertexFactoryHash )
 {
-	FMeshShaderMap::const_iterator		itMeshShaderMap = shaders.find( InVertexFactoryHash );
+	MeshShaderMap_t::const_iterator		itMeshShaderMap = shaders.find( InVertexFactoryHash );
 	if ( itMeshShaderMap == shaders.end() )
 	{
 		LE_LOG( LT_Warning, LC_Shader, TEXT( "For vertex factory hash 0x%X does not exist in the shaders cache" ), InVertexFactoryHash );
 		return nullptr;
 	}
 
-	FShaderMap::const_iterator			itShaderMap = itMeshShaderMap->second.find( InShaderName );
+	ShaderMap_t::const_iterator			itShaderMap = itMeshShaderMap->second.find( InShaderName );
 	if ( itShaderMap == itMeshShaderMap->second.end() )
 	{
 		LE_LOG( LT_Warning, LC_Shader, TEXT( "Shader %s with vertex factory hash 0x%X not found in cache" ), InShaderName.c_str(), InVertexFactoryHash );
@@ -161,15 +161,15 @@ FShader* FShaderManager::FindInstance( const std::wstring& InShaderName, uint64 
 	return itShaderMap->second;
 }
 
-std::wstring FShaderManager::GetShaderCacheFilename( EShaderPlatform InShaderPlatform )
+std::wstring CShaderManager::GetShaderCacheFilename( EShaderPlatform InShaderPlatform )
 {
-	return FString::Format( TEXT( "GlobalShaderCache-%s.bin" ), ShaderPlatformToText( InShaderPlatform ) );
+	return ÑString::Format( TEXT( "GlobalShaderCache-%s.bin" ), ShaderPlatformToText( InShaderPlatform ) );
 }
 
 /**
  * Initialize shader manager
  */
-void FShaderManager::Init()
+void CShaderManager::Init()
 {
 	std::wstring		pathShaderCache;
 #if WITH_EDITOR
@@ -189,7 +189,7 @@ void FShaderManager::Init()
 		// Compile shaders only in cooker or commandlets
 		if ( GIsCooker || GIsCommandlet || GIsEditor )
 		{
-			FShaderCompiler			shaderCompiler;
+			CShaderCompiler			shaderCompiler;
 			bool					result = shaderCompiler.CompileAll( pathShaderCache.c_str(), GRHI->GetShaderPlatform() );
 			check( result );
 
@@ -209,7 +209,7 @@ void FShaderManager::Init()
 	}
 }
 
-void FShaderManager::Shutdown()
+void CShaderManager::Shutdown()
 {
 	shaders.clear();
 	LE_LOG( LT_Log, LC_Shader, TEXT( "All shaders unloaded" ) );

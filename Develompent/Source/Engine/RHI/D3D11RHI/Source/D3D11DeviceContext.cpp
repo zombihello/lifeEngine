@@ -6,14 +6,14 @@
 /**
  * Constructor
  */
-FD3D11DeviceContext::FD3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext ) :
+CD3D11DeviceContext::CD3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext ) :
 	d3d11DeviceContext( InD3D11DeviceContext )
 {}
 
 /**
  * Destructor
  */
-FD3D11DeviceContext::~FD3D11DeviceContext()
+CD3D11DeviceContext::~CD3D11DeviceContext()
 {
 	d3d11DeviceContext->Release();
 	d3d11DeviceContext = nullptr;
@@ -22,19 +22,19 @@ FD3D11DeviceContext::~FD3D11DeviceContext()
 /**
  * Clear surface
  */
-void FD3D11DeviceContext::ClearSurface( FSurfaceRHIParamRef InSurface, const class FColor& InColor )
+void CD3D11DeviceContext::ClearSurface( SurfaceRHIParamRef_t InSurface, const class ÑColor& InColor )
 {
 	check( d3d11DeviceContext && InSurface );
-	FD3D11Surface*			d3d11Surface = ( FD3D11Surface* )InSurface;
+	CD3D11Surface*			d3d11Surface = ( CD3D11Surface* )InSurface;
 
 	float		clearColor[ 4 ] = { InColor.r / 255.f, InColor.g / 255.f, InColor.b / 255.f, InColor.a / 255.f };
 	d3d11DeviceContext->ClearRenderTargetView( d3d11Surface->GetRenderTargetView(), clearColor );
 }
 
-void FD3D11DeviceContext::ClearDepthStencil( FSurfaceRHIParamRef InSurface, bool InIsClearDepth /* = true */, bool InIsClearStencil /* = true */, float InDepthValue /* = 1.f */, uint8 InStencilValue /* = 0 */ )
+void CD3D11DeviceContext::ClearDepthStencil( SurfaceRHIParamRef_t InSurface, bool InIsClearDepth /* = true */, bool InIsClearStencil /* = true */, float InDepthValue /* = 1.f */, uint8 InStencilValue /* = 0 */ )
 {
 	check( d3d11DeviceContext && InSurface );
-	ID3D11DepthStencilView*			d3d11DepthStencilView = ( ( FD3D11Surface* )InSurface )->GetDepthStencilView();
+	ID3D11DepthStencilView*			d3d11DepthStencilView = ( ( CD3D11Surface* )InSurface )->GetDepthStencilView();
 	check( d3d11DepthStencilView );
 
 	uint32			clearFlags = 0;

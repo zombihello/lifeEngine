@@ -3,14 +3,14 @@
 /**
  * Constructor
  */
-FRefCounted::FRefCounted() :
+CRefCounted::CRefCounted() :
 	countReferences( 0 )
 {}
 
 /**
  * Destructor
  */
-FRefCounted::~FRefCounted()
+CRefCounted::~CRefCounted()
 {
 	check( !countReferences );
 }
@@ -18,7 +18,7 @@ FRefCounted::~FRefCounted()
 /**
  * Decrement reference count and delete self if no more references
  */
-void FRefCounted::ReleaseRef()
+void CRefCounted::ReleaseRef()
 {	 
 	if ( !countReferences || !appInterlockedDecrement( ( int32* )&countReferences ) )
 	{

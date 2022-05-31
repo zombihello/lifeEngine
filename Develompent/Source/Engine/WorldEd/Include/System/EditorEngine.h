@@ -19,20 +19,20 @@
  * @ingroup WorldEd
  * Class of editor engine
  */
-class LEditorEngine : public LBaseEngine
+class CEditorEngine : public CBaseEngine
 {
-	DECLARE_CLASS( LEditorEngine, LBaseEngine )
+	DECLARE_CLASS( CEditorEngine, CBaseEngine )
 
 public:
 	/**
 	 * Constructor
 	 */
-	LEditorEngine();
+	CEditorEngine();
 
 	/**
 	 * Destructor
 	 */
-	virtual ~LEditorEngine();
+	virtual ~CEditorEngine();
 
 	/**
 	 * Initialize engine
@@ -64,7 +64,7 @@ public:
 	 * 
 	 * @param[in] InViewport Viewport
 	 */
-	FORCEINLINE void AddViewport( class FViewport* InViewport )
+	FORCEINLINE void AddViewport( class CViewport* InViewport )
 	{
 		viewports.push_back( InViewport );
 	}
@@ -74,11 +74,11 @@ public:
 	 * 
 	 * @param[in] InViewport Viewport
 	 */
-	FORCEINLINE void RemoveViewport( class FViewport* InViewport )
+	FORCEINLINE void RemoveViewport( class CViewport* InViewport )
 	{
 		for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
 		{
-			class FViewport*&		viewport = viewports[ index ];
+			class CViewport*&		viewport = viewports[ index ];
 			if ( viewport == InViewport )
 			{
 				viewports.erase( viewports.begin() + index );
@@ -107,7 +107,7 @@ public:
 	 * Get editor constraints
 	 * @return Return editor constraints
 	 */
-	FORCEINLINE FEditorConstraints& GetConstraints()
+	FORCEINLINE CEditorConstraints& GetConstraints()
 	{
 		return constraints;
 	}
@@ -116,7 +116,7 @@ public:
 	 * Get editor constraints
 	 * @return Return editor constraints
 	 */
-	FORCEINLINE const FEditorConstraints& GetConstraints() const
+	FORCEINLINE const CEditorConstraints& GetConstraints() const
 	{
 		return constraints;
 	}
@@ -131,8 +131,8 @@ public:
 	}
 
 private:
-	std::vector< class FViewport* >			viewports;		/**< Array of viewports for render */
-	FEditorConstraints						constraints;	/**< Editor constraints */
+	std::vector< class CViewport* >			viewports;		/**< Array of viewports for render */
+	CEditorConstraints						constraints;	/**< Editor constraints */
 	class WeMainWindow*						mainWindow;		/**< Main editor window */
 };
 

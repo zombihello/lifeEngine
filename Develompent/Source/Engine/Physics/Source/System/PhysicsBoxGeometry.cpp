@@ -2,20 +2,20 @@
 #include "System/PhysicsEngine.h"
 #include "System/PhysicsBoxGeometry.h"
 
-void FPhysicsBoxGeometry::InitPhysicsShape() const
+void SPhysicsBoxGeometry::InitPhysicsShape() const
 {
-	if ( FPhysicsInterface::IsValidShapeGeometry( handle ) )
+	if ( CPhysicsInterface::IsValidShapeGeometry( handle ) )
 	{
 		return;
 	}
 
 	check( material.IsAssetValid() );
-	handle = FPhysicsInterface::CreateShapeGeometry( *this );
+	handle = CPhysicsInterface::CreateShapeGeometry( *this );
 }
 
-void FPhysicsBoxGeometry::Serialize( class FArchive& InArchive )
+void SPhysicsBoxGeometry::Serialize( class CArchive& InArchive )
 {
-	FPhysicsShapeGeometry::Serialize( InArchive );
+	SPhysicsShapeGeometry::Serialize( InArchive );
 	InArchive << location;
 	InArchive << rotation;
 	InArchive << extent;

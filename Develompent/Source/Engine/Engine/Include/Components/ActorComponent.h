@@ -18,20 +18,20 @@
  * ActorComponent is the base class for components that define reusable behavior that can be added to different types of Actors.
  * ActorComponents that have a transform are known as SceneComponents and those that can be rendered are PrimitiveComponents.
  */
-class LActorComponent : public LObject, public FRefCounted
+class CActorComponent : public CObject, public CRefCounted
 {
-	DECLARE_CLASS( LActorComponent, LObject )
+	DECLARE_CLASS( CActorComponent, CObject )
 
 public:
 	/**
 	 * Constructor
 	 */
-	LActorComponent();
+	CActorComponent();
 
 	/**
 	 * Destructor
 	 */
-	virtual ~LActorComponent();
+	virtual ~CActorComponent();
 
 	/**
 	 * Begins Play for the component.

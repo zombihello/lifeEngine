@@ -60,7 +60,7 @@ public:
 	 * @brief Get input component
 	 * @return Return input component
 	 */
-	FORCEINLINE TRefCountPtr< LInputComponent > GetInputComponent() const
+	FORCEINLINE TRefCountPtr< CInputComponent > GetInputComponent() const
 	{
 		return inputComponent;
 	}
@@ -81,7 +81,7 @@ protected:
 	virtual void SetupInputComponent();
 
 	TRefCountPtr< ACharacter >					character;				/**< Character controlled by this controller */
-	TRefCountPtr< LInputComponent >				inputComponent;			/**< Input component */
+	TRefCountPtr< CInputComponent >				inputComponent;			/**< Input component */
 };
 
 

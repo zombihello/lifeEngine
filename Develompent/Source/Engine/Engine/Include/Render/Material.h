@@ -38,25 +38,25 @@ enum EMaterialUsage
  * @ingroup Engine
  * Material
  */
-class FMaterial : public FAsset
+class CMaterial : public CAsset
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FMaterial();
+	CMaterial();
 
 	/**
 	 * Destructor
 	 */
-	~FMaterial();
+	~CMaterial();
 
 	/**
 	 * Serialize to archive
 	 *
 	 * @param[in] InArchive Archive
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * Set scalar parameter value
@@ -89,7 +89,7 @@ public:
 	 * @param[in] InParameterName Parameter name
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void SetTextureParameterValue( const std::wstring& InParameterName, const TAssetHandle<class FTexture2D>& InValue )
+	FORCEINLINE void SetTextureParameterValue( const std::wstring& InParameterName, const TAssetHandle<class CTexture2D>& InValue )
 	{
 		auto	itTextureParameter	= textureParameters.find( InParameterName );
 		bool	bNotFound			= itTextureParameter == textureParameters.end();
@@ -114,7 +114,7 @@ public:
 	 * @param InParameterName	Parameter name
 	 * @param InValue			Value
 	 */
-	FORCEINLINE void SetVectorParameterValue( const std::wstring& InParameterName, const FVector4D& InValue )
+	FORCEINLINE void SetVectorParameterValue( const std::wstring& InParameterName, const Vector4D& InValue )
 	{
 		auto	itVectorParameter	= vectorParameters.find( InParameterName );
 		bool	bNotFound			= itVectorParameter == vectorParameters.end();
@@ -242,7 +242,7 @@ public:
 	 * @param[in] InShaderFrequency Shader frequency
 	 * @return Return pointer to shader
 	 */
-	FShader* GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency );
+	CShader* GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency );
 
 	/**
 	 * Get shader type
@@ -250,15 +250,15 @@ public:
 	 * @param InShaderFrequency		Shader frequency
 	 * @return Return shader meta type, if not exist return NULL
 	 */
-	FORCEINLINE class FShaderMetaType* GetShaderType( EShaderFrequency InShaderFrequency ) const
+	FORCEINLINE class CShaderMetaType* GetShaderType( EShaderFrequency InShaderFrequency ) const
 	{
 		check( InShaderFrequency < SF_NumDrawFrequencies );
-		static class FShaderMetaType*		shadersType[ SF_NumDrawFrequencies ] =
+		static class CShaderMetaType*		shadersType[ SF_NumDrawFrequencies ] =
 		{			
-			&FBasePassVertexShader::staticType,		// SF_Vertex
+			&CBasePassVertexShader::staticType,		// SF_Vertex
 			nullptr,								// SF_Hull
 			nullptr,								// SF_Domain
-			&FBasePassPixelShader::staticType,		// SF_Pixel
+			&CBasePassPixelShader::staticType,		// SF_Pixel
 			nullptr									// SF_Geometry
 		};
 
@@ -281,7 +281,7 @@ public:
 	 * @param[out] OutValue Return value
 	 * @return Return true if finded, else return false
 	 */
-	bool GetTextureParameterValue( const std::wstring& InParameterName, TAssetHandle<FTexture2D>& OutValue ) const;
+	bool GetTextureParameterValue( const std::wstring& InParameterName, TAssetHandle<CTexture2D>& OutValue ) const;
 
 	/**
 	 * Get vector parameter value
@@ -290,14 +290,14 @@ public:
 	 * @param OutValue			Return value
 	 * @return Return true if finded, else return false
 	 */
-	bool GetVectorParameterValue( const std::wstring& InParameterName, FVector4D& OutValue ) const;
+	bool GetVectorParameterValue( const std::wstring& InParameterName, Vector4D& OutValue ) const;
 
 	/**
 	 * Get dependent assets
 	 * @param OutDependentAssets	Output set of dependent assets
 	 * @param InFilter				Filter of getting assets by type. If setted AT_Unknown return all types
 	 */
-	virtual void GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter = AT_Unknown ) const override;
+	virtual void GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EAssetType InFilter = AT_Unknown ) const override;
 
 	/**
 	 * Reload dependent assets
@@ -335,30 +335,30 @@ private:
 	 * @param[in] InVertexFactoryHash Vertex factory hash
 	 * @return Return array shader instances for mesh type
 	 */
-	std::vector< FShader* > GetMeshShaders( uint64 InVertexFactoryHash ) const;
+	std::vector< CShader* > GetMeshShaders( uint64 InVertexFactoryHash ) const;
 
 	/**
 	 * Typedef mesh shader map
 	 */
-	typedef std::unordered_map< uint64, std::vector< FShader* > >				FMeshShaderMap;
+	typedef std::unordered_map< uint64, std::vector< CShader* > >				MeshShaderMap_t;
 
 	bool															isNeedUpdateShaderMap;	/**< Is need update shader map */
 	bool															isTwoSided;				/**< Is two sided material */
 	bool															isWireframe;			/**< Is wireframe material */
 	uint32															usage;					/**< Usage flags (see EMaterialUsage) */
-	FMeshShaderMap													shaderMap;				/**< Shader map for material */
+	MeshShaderMap_t													shaderMap;				/**< Shader map for material */
 	std::unordered_map< std::wstring, float >						scalarParameters;		/**< Array scalar parameters */
-	std::unordered_map< std::wstring, FVector4D >					vectorParameters;		/**< Vector parameters */
-	std::unordered_map< std::wstring, TAssetHandle<FTexture2D> >	textureParameters;		/**< Array texture parameters */
+	std::unordered_map< std::wstring, Vector4D >					vectorParameters;		/**< Vector parameters */
+	std::unordered_map< std::wstring, TAssetHandle<CTexture2D> >	textureParameters;		/**< Array texture parameters */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FMaterial>& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CMaterial>& InValue )
 {
-	TAssetHandle<FAsset>		asset = InValue;
+	TAssetHandle<CAsset>		asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -368,10 +368,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FMaterial>& 
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TAssetHandle<FMaterial>& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CMaterial>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( TAssetHandle<FAsset> )InValue;
+	InArchive << ( TAssetHandle<CAsset> )InValue;
 	return InArchive;
 }
 

@@ -6,15 +6,15 @@
 #include "CPP_HLSL_Glue.hlsl"
 
 #ifdef __cplusplus
-struct FGlobalConstantBufferContents
+struct SGlobalConstantBufferContents
 #else
 #include "Common.hlsl"
 cbuffer GlobalConstants : register( SOB_GlobalConstants )
 #endif // __cplusplus
 {
-	FMatrix			viewMatrix;
-	FMatrix			projectionMatrix;
-	FMatrix			viewProjectionMatrix;
+	Matrix			viewMatrix;
+	Matrix			projectionMatrix;
+	Matrix			viewProjectionMatrix;
 };
 
 #endif // !CPP_GLOBALCONSTANTBUFFERS_HLSL

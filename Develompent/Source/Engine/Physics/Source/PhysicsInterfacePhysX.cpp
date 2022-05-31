@@ -3,7 +3,7 @@
 #include "System/PhysicsMaterial.h"
 #include "PhysicsInterfacePhysX.h"
 
-void FPhysicsInterfacePhysX::Init()
+void SPhysicsInterfacePhysX::Init()
 {
 	LE_LOG( LT_Log, LC_Init, TEXT( "PhysX version: %i.%i.%i" ), PX_PHYSICS_VERSION_MAJOR, PX_PHYSICS_VERSION_MINOR, PX_PHYSICS_VERSION_BUGFIX );
 
@@ -31,7 +31,7 @@ void FPhysicsInterfacePhysX::Init()
 	check( GPhysXSDK );
 }
 
-void FPhysicsInterfacePhysX::Shutdown()
+void SPhysicsInterfacePhysX::Shutdown()
 {
 	if ( GPhysXSDK )
 	{
@@ -64,26 +64,26 @@ void FPhysicsInterfacePhysX::Shutdown()
 	}
 }
 
-FPhysicsMaterialHandlePhysX FPhysicsInterfacePhysX::CreateMaterial( class FPhysicsMaterial* InPhysMaterial )
+SPhysicsMaterialHandlePhysX SPhysicsInterfacePhysX::CreateMaterial( class CPhysicsMaterial* InPhysMaterial )
 {
 	check( InPhysMaterial );
 
-	FPhysicsMaterialHandlePhysX		materialHandle;
+	SPhysicsMaterialHandlePhysX		materialHandle;
 	materialHandle.pxMaterial = GPhysXSDK->createMaterial( InPhysMaterial->GetStaticFriction(), InPhysMaterial->GetDynamicFriction(), InPhysMaterial->GetRestitution() );
 	return materialHandle;
 }
 
-void FPhysicsInterfacePhysX::UpdateMaterial( const FPhysicsMaterialHandlePhysX& InMaterialHandle, class FPhysicsMaterial* InPhysMaterial )
+void SPhysicsInterfacePhysX::UpdateMaterial( const SPhysicsMaterialHandlePhysX& InMaterialHandle, class CPhysicsMaterial* InPhysMaterial )
 {
-	check( FPhysicsInterfacePhysX::IsValidMaterial( InMaterialHandle ) && InPhysMaterial );
+	check( SPhysicsInterfacePhysX::IsValidMaterial( InMaterialHandle ) && InPhysMaterial );
 	InMaterialHandle.pxMaterial->setStaticFriction( InPhysMaterial->GetStaticFriction() );
 	InMaterialHandle.pxMaterial->setDynamicFriction( InPhysMaterial->GetDynamicFriction() );
 	InMaterialHandle.pxMaterial->setRestitution( InPhysMaterial->GetRestitution() );
 }
 
-FPhysicsActorHandlePhysX FPhysicsInterfacePhysX::CreateActor( const FActorCreationParams& InParams )
+SPhysicsActorHandlePhysX SPhysicsInterfacePhysX::CreateActor( const SActorCreationParams& InParams )
 {
-	FPhysicsActorHandle		actorHandle;
+	PhysicsActorHandle_t		actorHandle;
 	physx::PxTransform		pxTransform = LE2PTransform( InParams.initialTM );
 	actorHandle.bStatic		= InParams.bStatic;
 

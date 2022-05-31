@@ -5,7 +5,7 @@ IMPLEMENT_CLASS( APlayerController )
 
 APlayerController::APlayerController()
 {
-	inputComponent = CreateComponent< LInputComponent >( TEXT( "InputComponent0" ) );
+	inputComponent = CreateComponent< CInputComponent >( TEXT( "InputComponent0" ) );
 }
 
 APlayerController::~APlayerController()

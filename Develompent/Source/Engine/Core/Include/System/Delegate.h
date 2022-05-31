@@ -27,15 +27,15 @@ public:
 	/**
 	 * Typedef of delegate type
 	 */
-	typedef std::function<void( TParamTypes... )>		FDelegateType;
+	typedef std::function<void( TParamTypes... )>		DelegateType_t;
 
 	/**
 	 * Add delegate
 	 * @param InDelegate	Delegate
 	 */
-	FORCEINLINE FDelegateType* Add( const FDelegateType& InDelegate )
+	FORCEINLINE DelegateType_t* Add( const DelegateType_t& InDelegate )
 	{
-		FScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( criticalSection );
 		delegates.push_back( InDelegate );
 		return &delegates.back();
 	}
@@ -44,14 +44,14 @@ public:
 	 * Remove delegate
 	 * @param InDelegate		Delegate
 	 */
-	FORCEINLINE void Remove( FDelegateType*& InDelegate )
+	FORCEINLINE void Remove( DelegateType_t*& InDelegate )
 	{
 		if ( !InDelegate )
 		{
 			return;
 		}
 
-		FScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( criticalSection );
 		for ( auto itDelegate = delegates.begin(), itDelegateEnd = delegates.end(); itDelegate != itDelegateEnd; ++itDelegate )
 		{
 			if ( &( *itDelegate ) == InDelegate )
@@ -70,7 +70,7 @@ public:
 	FORCEINLINE void Broadcast( TParamTypes... InParams ) const
 	{
 		// Call delegates
-		FScopeLock		scopeLock( criticalSection );	
+		CScopeLock		scopeLock( criticalSection );	
 		for ( auto itDelegate = delegates.begin(), itDelegateEnd = delegates.end(); itDelegate != itDelegateEnd; ++itDelegate )
 		{
 			( *itDelegate )( InParams... );
@@ -78,8 +78,8 @@ public:
 	}
 
 private:
-	std::list< FDelegateType >		delegates;				/**< List of delegates */
-	mutable FCriticalSection		criticalSection;		/**< Critical section for thread safe broadcast */
+	std::list< DelegateType_t >		delegates;				/**< List of delegates */
+	mutable ÑCriticalSection		criticalSection;		/**< Critical section for thread safe broadcast */
 };
 
 /**
@@ -93,16 +93,16 @@ public:
 	/**
 	 * Typedef of delegate type
 	 */
-	typedef std::function<void( TParamTypes... )>		FDelegateType;
+	typedef std::function<void( TParamTypes... )>		DelegateType_t;
 	
 	/**
 	 * Bind delegate
 	 * 
 	 * @param InDelegate	Delegate
 	 */
-	FORCEINLINE void Bind( const FDelegateType& InDelegate )
+	FORCEINLINE void Bind( const DelegateType_t& InDelegate )
 	{
-		FScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( criticalSection );
 		delegate = InDelegate;
 	}
 
@@ -111,7 +111,7 @@ public:
 	 */
 	FORCEINLINE void Unbind()
 	{
-		FScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( criticalSection );
 		delegate = nullptr;
 	}
 
@@ -127,13 +127,13 @@ public:
 			return;
 		}
 
-		FScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( criticalSection );
 		delegate( InParams... );
 	}
 
 private:
-	FDelegateType				delegate;				/**< Delegate */
-	mutable FCriticalSection	criticalSection;		/**< Critical section for thread safe execute */
+	DelegateType_t				delegate;				/**< Delegate */
+	mutable ÑCriticalSection	criticalSection;		/**< Critical section for thread safe execute */
 };
 
 /**

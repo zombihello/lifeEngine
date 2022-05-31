@@ -30,37 +30,37 @@
  * @ingroup Core
  * Typedef glm::vec2
  */
-typedef glm::vec2		FVector2D;
+typedef glm::vec2		Vector2D;
 
 /**
  * @ingroup Core
  * Typedef glm::vec3
  */
-typedef glm::vec3		FVector;
+typedef glm::vec3		Vector;
 
 /**
  * @ingroup Core
  * Typedef glm::vec4
  */
-typedef glm::vec4		FVector4D;
+typedef glm::vec4		Vector4D;
 
 /**
  * @ingroup Core
  * Typedef glm::mat4
  */
-typedef glm::mat4		FMatrix;
+typedef glm::mat4		Matrix;
 
 /**
  * @ingroup Core
  * Typedef glm::quat
  */
-typedef glm::quat		FQuaternion;
+typedef glm::quat		Quaternion;
 
 /**
  * @ingroup Core
  * Structure for all math helper functions
  */
-struct FMath
+struct SMath
 {
 	/**
 	 * @ingroup Core
@@ -70,12 +70,12 @@ struct FMath
 	 * @param[in] InEulerAngleY Euler angle by Y
 	 * @param[in] InEulerAngleZ Euler angle by Z
 	 */
-	static FORCEINLINE FQuaternion AnglesToQuaternion( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
+	static FORCEINLINE Quaternion AnglesToQuaternion( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
 	{
 		return 
-			glm::angleAxis( InEulerAngleX, FVector( 1.f, 0.f, 0.f ) ) *
-			glm::angleAxis( InEulerAngleY, FVector( 0.f, 1.f, 0.f ) ) *
-			glm::angleAxis( InEulerAngleZ, FVector( 0.f, 0.f, 1.f ) );
+			glm::angleAxis( InEulerAngleX, Vector( 1.f, 0.f, 0.f ) ) *
+			glm::angleAxis( InEulerAngleY, Vector( 0.f, 1.f, 0.f ) ) *
+			glm::angleAxis( InEulerAngleZ, Vector( 0.f, 0.f, 1.f ) );
 	}
 
 	/**
@@ -84,7 +84,7 @@ struct FMath
 	 * 
 	 * @param[in] InEulerAngles Euler angles
 	 */
-	static FORCEINLINE FQuaternion AnglesToQuaternion( const FVector& InEulerAngles )
+	static FORCEINLINE Quaternion AnglesToQuaternion( const Vector& InEulerAngles )
 	{
 		return AnglesToQuaternion( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
 	}
@@ -96,7 +96,7 @@ struct FMath
 	 * @param[in] InQuaternion Quaternion
 	 * @return Return euler angles in radians
 	 */
-	static FORCEINLINE FVector QuaternionToAngles( const FQuaternion& InQuaternion )
+	static FORCEINLINE Vector QuaternionToAngles( const Quaternion& InQuaternion )
 	{
 		return glm::eulerAngles( InQuaternion );
 	}
@@ -107,7 +107,7 @@ struct FMath
      * @param InQuaternion Quaternion
      * @return Return matrix of ratation
      */
-    static FORCEINLINE FMatrix QuaternionToMatrix( const FQuaternion& InQuaternion )
+    static FORCEINLINE Matrix QuaternionToMatrix( const Quaternion& InQuaternion )
     {
         return glm::mat4_cast( InQuaternion );
     }
@@ -138,18 +138,18 @@ struct FMath
 	 * @brief Create identity matrix
 	 * @param OutResult Output created identity matrix
 	 */
-	static FORCEINLINE void IdentityMatrix( FMatrix& OutResult )
+	static FORCEINLINE void IdentityMatrix( Matrix& OutResult )
 	{
-		OutResult = glm::identity< FMatrix >();
+		OutResult = glm::identity< Matrix >();
 	}
 
 	/**
 	 * @brief Create identity matrix
 	 * @return Return created identity matrix
 	 */
-	static FORCEINLINE FMatrix IdentityMatrix()
+	static FORCEINLINE Matrix IdentityMatrix()
 	{
-		return glm::identity< FMatrix >();
+		return glm::identity< Matrix >();
 	}
 
 	/**
@@ -158,7 +158,7 @@ struct FMath
 	 * @param InLocation Location
 	 * @param OutResult Output created translate matrix
 	 */
-	static FORCEINLINE void TranslateMatrix( const FVector& InLocation, FMatrix& OutResult )
+	static FORCEINLINE void TranslateMatrix( const Vector& InLocation, Matrix& OutResult )
 	{
 		OutResult[ 3 ].x = InLocation.x;
 		OutResult[ 3 ].y = InLocation.y;
@@ -172,7 +172,7 @@ struct FMath
 	 * @param InInitMatrix Initial matrix
 	 * @param OutResult Output result translated matrix
 	 */
-	static FORCEINLINE void TranslateMatrix( const FVector& InLocation, const FMatrix& InInitMatrix, FMatrix& OutResult )
+	static FORCEINLINE void TranslateMatrix( const Vector& InLocation, const Matrix& InInitMatrix, Matrix& OutResult )
 	{
 		OutResult = glm::translate( InInitMatrix, InLocation );
 	}
@@ -184,7 +184,7 @@ struct FMath
 	 * @param InInitMatrix Initial matrix
      * @return Return translated matrix
      */
-    static FORCEINLINE FMatrix TranslateMatrix( const FVector& InLocation, const FMatrix& InInitMatrix = FMatrix( 1.f ) )
+    static FORCEINLINE Matrix TranslateMatrix( const Vector& InLocation, const Matrix& InInitMatrix = Matrix( 1.f ) )
     {
 		return glm::translate( InInitMatrix, InLocation );
     }
@@ -195,7 +195,7 @@ struct FMath
 	 * @param InScale Scale
 	 * @param OutResult Output created scale matrix
 	 */
-	static FORCEINLINE void ScaleMatrix( const FVector& InScale, FMatrix& OutResult )
+	static FORCEINLINE void ScaleMatrix( const Vector& InScale, Matrix& OutResult )
 	{
 		OutResult[ 0 ].x = InScale.x;
 		OutResult[ 1 ].y = InScale.y;
@@ -209,7 +209,7 @@ struct FMath
 	 * @param InInitMatrix Initial matrix
 	 * @param OutResult Output result scaled matrix
 	 */
-	static FORCEINLINE void ScaleMatrix( const FVector& InScale, const FMatrix& InInitMatrix, FMatrix& OutResult )
+	static FORCEINLINE void ScaleMatrix( const Vector& InScale, const Matrix& InInitMatrix, Matrix& OutResult )
 	{
 		OutResult = glm::scale( InInitMatrix, InScale );
 	}
@@ -221,7 +221,7 @@ struct FMath
 	 * @param InInitMatrix Initial matrix
      * @return Return scaled matrix
      */
-    static FORCEINLINE FMatrix ScaleMatrix( const FVector& InScale, const FMatrix& InInitMatrix = FMatrix( 1.f ) )
+    static FORCEINLINE Matrix ScaleMatrix( const Vector& InScale, const Matrix& InInitMatrix = Matrix( 1.f ) )
     {
         return glm::scale( InInitMatrix, InScale );
     }
@@ -232,7 +232,7 @@ struct FMath
 	 * @param InMatrix		Input matrix
 	 * @param OutMatrix		Output matrix
 	 */
-	static FORCEINLINE void InverseMatrix( const FMatrix& InMatrix, FMatrix& OutMatrix )
+	static FORCEINLINE void InverseMatrix( const Matrix& InMatrix, Matrix& OutMatrix )
 	{
 		OutMatrix = glm::inverse( InMatrix );
 	}
@@ -243,9 +243,9 @@ struct FMath
 	 * @param InMatrix		Input matrix
 	 * @return Return inverted matrix
 	 */
-	static FORCEINLINE FMatrix InverseMatrix( const FMatrix& InMatrix )
+	static FORCEINLINE Matrix InverseMatrix( const Matrix& InMatrix )
 	{
-		FMatrix		result;
+		Matrix		result;
 		InverseMatrix( InMatrix, result );
 		return result;
 	}
@@ -256,7 +256,7 @@ struct FMath
 	 * @param InMatric		Input matrix
 	 * @param OutOrigin		Output origin
 	 */
-	static FORCEINLINE void GetOriginMatrix( const FMatrix& InMatrix, FVector& OutOrigin )
+	static FORCEINLINE void GetOriginMatrix( const Matrix& InMatrix, Vector& OutOrigin )
 	{
 		OutOrigin.x = InMatrix[ 3 ].x;
 		OutOrigin.y = InMatrix[ 3 ].y;
@@ -269,9 +269,9 @@ struct FMath
 	 * @param InMatric		Input matrix
 	 * @return Return origin from matrix
 	 */
-	static FORCEINLINE FVector GetOriginMatrix( const FMatrix& InMatrix )
+	static FORCEINLINE Vector GetOriginMatrix( const Matrix& InMatrix )
 	{
-		FVector		result;
+		Vector		result;
 		GetOriginMatrix( InMatrix, result );
 		return result;
 	}
@@ -282,7 +282,7 @@ struct FMath
 	 * @param InVector Vector
 	 * @return Return normalized vector
 	 */
-	static FORCEINLINE FVector2D NormalizeVector( const FVector2D& InVector )
+	static FORCEINLINE Vector2D NormalizeVector( const Vector2D& InVector )
 	{
 		return glm::normalize( InVector );
 	}
@@ -293,7 +293,7 @@ struct FMath
 	 * @param InVector Vector
 	 * @return Return normalized vector
 	 */
-	static FORCEINLINE FVector NormalizeVector( const FVector& InVector )
+	static FORCEINLINE Vector NormalizeVector( const Vector& InVector )
 	{
 		return glm::normalize( InVector );
 	}
@@ -304,7 +304,7 @@ struct FMath
 	 * @param InVector Vector
 	 * @return Return normalized vector
 	 */
-	static FORCEINLINE FVector4D NormalizeVector( const FVector4D& InVector )
+	static FORCEINLINE Vector4D NormalizeVector( const Vector4D& InVector )
 	{
 		return glm::normalize( InVector );
 	}
@@ -315,7 +315,7 @@ struct FMath
 	 * @param InVector Vector
 	 * @return Return length vector
 	 */
-	static FORCEINLINE float LengthVector( const FVector2D& InVector )
+	static FORCEINLINE float LengthVector( const Vector2D& InVector )
 	{
 		return glm::length( InVector );
 	}
@@ -326,7 +326,7 @@ struct FMath
 	 * @param InVector Vector
 	 * @return Return length vector
 	 */
-	static FORCEINLINE float LengthVector( const FVector& InVector )
+	static FORCEINLINE float LengthVector( const Vector& InVector )
 	{
 		return glm::length( InVector );
 	}
@@ -337,7 +337,7 @@ struct FMath
 	 * @param InVector Vector
 	 * @return Return length vector
 	 */
-	static FORCEINLINE float LengthVector( const FVector4D& InVector )
+	static FORCEINLINE float LengthVector( const Vector4D& InVector )
 	{
 		return glm::length( InVector );
 	}
@@ -349,7 +349,7 @@ struct FMath
 	 * @param InVectorB		Vector B
 	 * @param OutVector		Output vector
 	 */
-	static FORCEINLINE void CrossVector( const FVector& InVectorA, const FVector& InVectorB, FVector& OutVector )
+	static FORCEINLINE void CrossVector( const Vector& InVectorA, const Vector& InVectorB, Vector& OutVector )
 	{
 		OutVector = glm::cross( InVectorA, InVectorB );
 	}
@@ -361,9 +361,9 @@ struct FMath
 	 * @param InVectorB		Vector B
 	 * @return Return cross vector
 	 */
-	static FORCEINLINE FVector CrossVector( const FVector& InVectorA, const FVector& InVectorB )
+	static FORCEINLINE Vector CrossVector( const Vector& InVectorA, const Vector& InVectorB )
 	{
-		FVector		result;
+		Vector		result;
 		CrossVector( InVectorA, InVectorB, result );
 		return result;
 	}
@@ -442,80 +442,80 @@ struct FMath
 		return sqrtf( InA );
 	}
 
-	static const FVector				vectorZero;			/**< Zero 3D vector */
-	static const FVector				vectorOne;			/**< One 3D vector */
-	static const FQuaternion			quaternionZero;		/**< Quaternion zero */
-	static const FMatrix				matrixIdentity;		/**< Identity matrix */
-	static const class FRotator			rotatorZero;		/**< A rotator of zero degrees on each axis */
-	static const struct FTransform		transformZero;		/**< Transform zero */
-	static const FVector				vectorForward;		/**< Forward vector */
-	static const FVector				vectorRight;		/**< Right vector */
-	static const FVector				vectorUp;			/**< Up vector */
+	static const Vector				vectorZero;			/**< Zero 3D vector */
+	static const Vector				vectorOne;			/**< One 3D vector */
+	static const Quaternion			quaternionZero;		/**< Quaternion zero */
+	static const Matrix				matrixIdentity;		/**< Identity matrix */
+	static const class CRotator		rotatorZero;		/**< A rotator of zero degrees on each axis */
+	static const struct CTransform	transformZero;		/**< Transform zero */
+	static const Vector				vectorForward;		/**< Forward vector */
+	static const Vector				vectorRight;		/**< Right vector */
+	static const Vector				vectorUp;			/**< Up vector */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FVector2D& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, Vector2D& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FVector2D& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Vector2D& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FVector& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, Vector& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FVector& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Vector& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FVector4D& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, Vector4D& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FVector4D& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Vector4D& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FMatrix& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, Matrix& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FMatrix& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Matrix& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FQuaternion& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, Quaternion& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FQuaternion& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Quaternion& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );

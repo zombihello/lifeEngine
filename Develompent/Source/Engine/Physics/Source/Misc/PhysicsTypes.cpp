@@ -2,11 +2,11 @@
 #include "Misc/PhysicsGlobals.h"
 #include "System/PhysicsEngine.h"
 
-const std::wstring		FCollisionProfile::noCollision_ProfileName		= TEXT( "NoCollision" );
-const std::wstring		FCollisionProfile::blockAll_ProfileName			= TEXT( "BlockAll" );
-FCollisionQueryParams	FCollisionQueryParams::defaultQueryParam;
+const std::wstring		SCollisionProfile::noCollision_ProfileName		= TEXT( "NoCollision" );
+const std::wstring		SCollisionProfile::blockAll_ProfileName			= TEXT( "BlockAll" );
+SCollisionQueryParams	SCollisionQueryParams::defaultQueryParam;
 
-FArchive& operator<<( FArchive& InAr, FCollisionProfile*& InCollisionProfile )
+CArchive& operator<<( CArchive& InAr, SCollisionProfile*& InCollisionProfile )
 {
 	if ( InAr.IsSaving() )
 	{
@@ -20,7 +20,7 @@ FArchive& operator<<( FArchive& InAr, FCollisionProfile*& InCollisionProfile )
 		InCollisionProfile = GPhysicsEngine.FindCollisionProfile( profileName );
 		if ( !InCollisionProfile )
 		{
-			InCollisionProfile = GPhysicsEngine.FindCollisionProfile( FCollisionProfile::noCollision_ProfileName );
+			InCollisionProfile = GPhysicsEngine.FindCollisionProfile( SCollisionProfile::noCollision_ProfileName );
 			check( InCollisionProfile );
 		}
 	}
@@ -28,7 +28,7 @@ FArchive& operator<<( FArchive& InAr, FCollisionProfile*& InCollisionProfile )
 	return InAr;
 }
 
-FArchive& operator<<( FArchive& InAr, const FCollisionProfile*& InCollisionProfile )
+CArchive& operator<<( CArchive& InAr, const SCollisionProfile*& InCollisionProfile )
 {
 	check( InAr.IsSaving() && InCollisionProfile );
 	InAr << InCollisionProfile->name;

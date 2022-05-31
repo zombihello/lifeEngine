@@ -16,7 +16,7 @@
  * @ingroup Core
  * A ring buffer for use with two threads: a reading thread and a writing thread
  */
-class FRingBuffer
+class ÑRingBuffer
 {
 public:
 	/**
@@ -25,18 +25,18 @@ public:
 	 * @param[in] InBufferSize The size of the data buffer to allocate
 	 * @param[in] InAlignment Alignment of each allocation unit (in bytes)
 	 */
-	FRingBuffer( uint32 InBufferSize, uint32 InAlignment = 1 );
+	ÑRingBuffer( uint32 InBufferSize, uint32 InAlignment = 1 );
 
 	/**
 	 * Destructor
 	 */
-	~FRingBuffer();
+	~ÑRingBuffer();
 
 	/**
 	 * A reference to an allocated chunk of the ring buffer.
 	 * Upon destruction of the context, the chunk is committed as written.
 	 */
-	class AllocationContext
+	class ÑAllocationContext
 	{
 	public:
 		/**
@@ -45,12 +45,12 @@ public:
 		 * @param[in] InRingBuffer The ring buffer to allocate from.
 		 * @param[in] InAllocationSize The size of the allocation to make.
 		 */
-		AllocationContext( FRingBuffer& InRingBuffer, uint32 InAllocationSize );
+		ÑAllocationContext( ÑRingBuffer& InRingBuffer, uint32 InAllocationSize );
 
 		/**
 		 * Upon destruction, the allocation is committed, if Commit hasn't been called manually
 		 */
-		~AllocationContext();
+		~ÑAllocationContext();
 
 		/**
 		 * Commits the allocated chunk of memory to the ring buffer
@@ -78,7 +78,7 @@ public:
 		}
 
 	private:
-		FRingBuffer&		ringBuffer;			/**< Reference to ring buffer */
+		ÑRingBuffer&		ringBuffer;			/**< Reference to ring buffer */
 		byte*				allocationStart;	/**< Pointer to start allocation data */
 		byte*				allocationEnd;		/**< Pointer to end allocation data */
 	};
@@ -120,7 +120,7 @@ private:
 	bool				isWriting;				/**< TRUE if there is an AllocationContext outstanding for this ring buffer */
 	byte* volatile		readPointer;			/**< The next byte to be read from */
 	uint32				alignment;				/**< Alignment of each allocation unit (in bytes) */
-	class FEvent*		dataWrittenEvent;		/**< The event used to signal the reader thread when the ring buffer has data to read */
+	class CEvent*		dataWrittenEvent;		/**< The event used to signal the reader thread when the ring buffer has data to read */
 };
 
 #endif // !RINGBUFFER_H

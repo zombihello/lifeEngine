@@ -35,20 +35,20 @@ public:
 	 * @param InCooker Pointer to cooker for cook any resources if need
 	 * @return Return if properties inited succeed and all resources cooked is succeed, else return false
 	 */
-	virtual bool InitProperties( const std::vector< FActorVar >& InActorVars, class LCookPackagesCommandlet* InCooker ) override;
+	virtual bool InitProperties( const std::vector< CActorVar >& InActorVars, class CCookPackagesCommandlet* InCooker ) override;
 #endif // WITH_EDITOR
 
 	/**
 	 * Get box component
 	 * @return Return box component
 	 */
-	FORCEINLINE TRefCountPtr< LBoxComponent > GetBoxComponent() const
+	FORCEINLINE TRefCountPtr< CBoxComponent > GetBoxComponent() const
 	{
 		return boxComponent;
 	}
 
 private:
-	TRefCountPtr< LBoxComponent >			boxComponent;		/**< Box component */
+	TRefCountPtr< CBoxComponent >			boxComponent;		/**< Box component */
 };
 
 #endif // !ABOXCOLLISION_H

@@ -15,7 +15,7 @@
  * @ingroup Engine
  * Game viewport client
  */
-class FGameViewportClient : public FViewportClient
+class CGameViewportClient : public CViewportClient
 {
 public:
 	/**
@@ -23,7 +23,7 @@ public:
 	 *
 	 * @param InViewport	Viewport
 	 */
-	virtual void Draw( FViewport* InViewport ) override;
+	virtual void Draw( CViewport* InViewport ) override;
 
 	/**
 	 * Draw viewport. Must be call in render thread
@@ -31,7 +31,7 @@ public:
 	 * @param InViewportRHI		Viewport RHI
 	 * @param InSceneView		Scene view
 	 */
-	void Draw_RenderThread( FViewportRHIRef InViewportRHI, class FSceneView* InSceneView );
+	void Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView );
 
 private:
 	/**
@@ -42,7 +42,7 @@ private:
 	 * @param InCameraView		Camera view
 	 * @return Return scene view
 	 */
-	class FSceneView* CalcSceneView( FViewport* InViewport, const struct FCameraView& InCameraView );
+	class CSceneView* CalcSceneView( CViewport* InViewport, const struct SCameraView& InCameraView );
 };
 
 #endif // !GAMEVIEWPORTCLIENT_H

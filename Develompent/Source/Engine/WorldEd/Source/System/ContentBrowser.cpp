@@ -200,7 +200,7 @@ void WeContentBrowser::on_treeView_contentBrowser_doubleClicked( const QModelInd
 		std::wstring		packagePath = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
 
 		// Load package and if seccussed emit signal
-		FPackageRef			package = GPackageManager->LoadPackage( packagePath );
+		PackageRef_t			package = GPackageManager->LoadPackage( packagePath );
 		emit OnSelectedPackage( package );
 		repaint();
 	}

@@ -18,7 +18,7 @@
   * @ingroup WindowsPlatform
   * @brief The class for reading archive on Windows
   */
-class FWindowsArchiveReading : public FArchive
+class CWindowsArchiveReading : public CArchive
 {
 public:
 	/**
@@ -27,12 +27,12 @@ public:
 	 * @param InFile Link to file
 	 * @param InPath Path to archive
 	 */
-									FWindowsArchiveReading( std::ifstream* InFile, const std::wstring& InPath );
+									CWindowsArchiveReading( std::ifstream* InFile, const std::wstring& InPath );
 
 	/**
 	 * @brief Destructor
 	 */
-									~FWindowsArchiveReading();
+									~CWindowsArchiveReading();
 
 	/**
 	 * @brief Serialize data
@@ -95,7 +95,7 @@ private:
  * @ingroup WindowsPlatform
  * @brief The class for writing archive on Windows
  */
-class FWindowsArchiveWriter : public FArchive
+class CWindowsArchiveWriter : public CArchive
 {
 public:
 	/**
@@ -104,12 +104,12 @@ public:
 	 * @param InFile Link to file
 	 * @param InPath Path to archive
 	 */
-							FWindowsArchiveWriter( std::ofstream* InFile, const std::wstring& InPath );
+							CWindowsArchiveWriter( std::ofstream* InFile, const std::wstring& InPath );
 
 	/**
 	 * @brief Destructor
 	 */
-							~FWindowsArchiveWriter();
+							~CWindowsArchiveWriter();
 
 	/**
 	 * @brief Serialize data

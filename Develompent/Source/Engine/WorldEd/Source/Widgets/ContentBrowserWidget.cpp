@@ -92,11 +92,11 @@ static FORCEINLINE QMessageBox::StandardButton ShowDeleteFileMessageBox( QWidget
 		}
 	}
 
-	QString		finalText = QString::fromStdWString( FString::Format( TEXT( "%s<br><br><b>Files:</b><br>%s" ), InText.toStdWString().c_str(), filesToDelete.toStdWString().c_str() ) );
+	QString		finalText = QString::fromStdWString( ÑString::Format( TEXT( "%s<br><br><b>Files:</b><br>%s" ), InText.toStdWString().c_str(), filesToDelete.toStdWString().c_str() ) );
 	return QMessageBox::warning( InParent, InTitle, finalText, QMessageBox::Cancel | QMessageBox::Ok );
 }
 
-static FORCEINLINE QMessageBox::StandardButton ShowDeleteAssetMessageBox( QWidget* InParent, const QString& InTitle, const QString& InText, const QModelIndexList& InModelIndexList, FPackage* InPackage )
+static FORCEINLINE QMessageBox::StandardButton ShowDeleteAssetMessageBox( QWidget* InParent, const QString& InTitle, const QString& InText, const QModelIndexList& InModelIndexList, CPackage* InPackage )
 {
 	QString							assetsToDelete;
 	check( InPackage );
@@ -104,7 +104,7 @@ static FORCEINLINE QMessageBox::StandardButton ShowDeleteAssetMessageBox( QWidge
 	// Forming a list of deleted files
 	for ( uint32 index = 0, count = InModelIndexList.length(); index < count; ++index )
 	{
-		FAssetInfo		assetInfo;
+		SAssetInfo		assetInfo;
 		InPackage->GetAssetInfo( InModelIndexList[ index ].row(), assetInfo );
 
 		assetsToDelete += QString::fromStdWString( assetInfo.name );
@@ -119,7 +119,7 @@ static FORCEINLINE QMessageBox::StandardButton ShowDeleteAssetMessageBox( QWidge
 		}
 	}
 
-	QString		finalText = QString::fromStdWString( FString::Format( TEXT( "%s<br><br><b>Assets:</b><br>%s" ), InText.toStdWString().c_str(), assetsToDelete.toStdWString().c_str() ) );
+	QString		finalText = QString::fromStdWString( ÑString::Format( TEXT( "%s<br><br><b>Assets:</b><br>%s" ), InText.toStdWString().c_str(), assetsToDelete.toStdWString().c_str() ) );
 	return QMessageBox::warning( InParent, InTitle, finalText, QMessageBox::Cancel | QMessageBox::Ok );
 }
 
@@ -133,7 +133,7 @@ WeContentBrowserWidget::WeContentBrowserWidget( ERootDir InRootDir /* = RD_Game 
 
 	// Connect to slots
 	connect( ui->treeView_contentBrowser, SIGNAL( OnClickedInEmptySpace() ), this, SLOT( OnContentBrowserClickedInEmptySpace() ) );
-	connect( ui->treeView_contentBrowser, SIGNAL( OnSelectedPackage( FPackage* ) ), this, SLOT( OnContentBrowserSelectedPackage( FPackage* ) ) );
+	connect( ui->treeView_contentBrowser, SIGNAL( OnSelectedPackage( CPackage* ) ), this, SLOT( OnContentBrowserSelectedPackage( CPackage* ) ) );
 	connect( ui->listView_packageBrowser, SIGNAL( OnSelectedAsset( const std::wstring& ) ), this, SLOT( OnListViewPackageBrowserSelectedAsset( const std::wstring& ) ) );
 }
 
@@ -179,7 +179,7 @@ void WeContentBrowserWidget::ShowAsset( const std::wstring& InAssetReference )
 	}
 
 	// Find path to package from TOC table and load him
-	FPackageRef		package;
+	PackageRef_t		package;
 	std::wstring	packagePath;
 	{
 		packagePath = GTableOfContents.GetPackagePath( packageName );
@@ -201,7 +201,7 @@ void WeContentBrowserWidget::ShowAsset( const std::wstring& InAssetReference )
 	uint32	numAssets	= package->GetNumAssets();
 	for ( indexAsset = 0; indexAsset < numAssets; ++indexAsset )
 	{
-		FAssetInfo		assetInfo;
+		SAssetInfo		assetInfo;
 		package->GetAssetInfo( indexAsset, assetInfo );
 
 		if ( assetInfo.type == assetType && assetInfo.name == assetName )
@@ -310,7 +310,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequested( QPoint InPoint )
 {
 	QModelIndex				modelIndex		= ui->listView_packageBrowser->indexAt( InPoint );
-	FPackageRef				currentPackage	= ui->listView_packageBrowser->GetPackage();
+	PackageRef_t				currentPackage	= ui->listView_packageBrowser->GetPackage();
 	uint32					numSelecteItems = ui->listView_packageBrowser->selectionModel()->selectedRows().length();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 
@@ -348,7 +348,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	{
 		for ( uint32 index = 0, count = modelIndexList.length(); index < count && !bExistSupportedReimportAssetType; ++index )
 		{
-			FAssetInfo		assetInfo;
+			SAssetInfo		assetInfo;
 			currentPackage->GetAssetInfo( modelIndexList[ index ].row(), assetInfo );
 			bExistSupportedReimportAssetType = assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank;
 		}
@@ -377,10 +377,10 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 
 void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 {
-	FPackageRef		package = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t		package = ui->listView_packageBrowser->GetPackage();
 	check( package );
 
-	QStringList			selectedAssets = QFileDialog::getOpenFileNames( this, "Select Asset To Import", QString(), FHelperAssetImporter::MakeFilterOfSupportedExtensions() );
+	QStringList			selectedAssets = QFileDialog::getOpenFileNames( this, "Select Asset To Import", QString(), CHelperAssetImporter::MakeFilterOfSupportedExtensions() );
 	if ( selectedAssets.isEmpty() )
 	{
 		return;
@@ -394,20 +394,20 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 	{
 		std::wstring							errorMessage;
 		QString									path = selectedAssets[ index ];
-		TAssetHandle<FAsset>					assetPtr;
-		FHelperAssetImporter::EImportResult		importResult = FHelperAssetImporter::Import( path, package, assetPtr, errorMessage, bReplaceAll && !bSkipAll );
+		TAssetHandle<CAsset>					assetPtr;
+		CHelperAssetImporter::EImportResult		importResult = CHelperAssetImporter::Import( path, package, assetPtr, errorMessage, bReplaceAll && !bSkipAll );
 
 		// Show message if not setted flags bReplaceAll and bSkipAll
-		if ( !bReplaceAll && !bSkipAll && importResult == FHelperAssetImporter::IR_AlreadyExist )
+		if ( !bReplaceAll && !bSkipAll && importResult == CHelperAssetImporter::IR_AlreadyExist )
 		{
-			QMessageBox::StandardButton		resultButton = QMessageBox::question( this, "Question", QString::fromStdWString( FString::Format( TEXT( "Asset with name <b>'%s'</b> already exist in package. Replace it?" ), QFileInfo( path ).baseName().toStdWString().c_str() ) ), QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll );
+			QMessageBox::StandardButton		resultButton = QMessageBox::question( this, "Question", QString::fromStdWString( ÑString::Format( TEXT( "Asset with name <b>'%s'</b> already exist in package. Replace it?" ), QFileInfo( path ).baseName().toStdWString().c_str() ) ), QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll );
 			switch ( resultButton )
 			{
 			case QMessageBox::YesToAll:
 				bReplaceAll = true;
 
 			case QMessageBox::Yes:
-				importResult = FHelperAssetImporter::Import( selectedAssets[ index ], package, assetPtr, errorMessage, true );
+				importResult = CHelperAssetImporter::Import( selectedAssets[ index ], package, assetPtr, errorMessage, true );
 				break;
 
 			case QMessageBox::NoToAll:
@@ -419,7 +419,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 		}
 
 		// If failed import asset - add error message to array
-		if ( importResult == FHelperAssetImporter::IR_Error )
+		if ( importResult == CHelperAssetImporter::IR_Error )
 		{
 			errorAssets.push_back( path + " : " + QString::fromStdWString( errorMessage ) );
 		}
@@ -441,7 +441,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 void WeContentBrowserWidget::on_listView_packageBrowser_Reimport()
 {
 	// Getting selected items and current package
-	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t				package = ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 	if ( !package )
 	{
@@ -453,13 +453,13 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Reimport()
 	for ( uint32 index = 0, count = modelIndexList.length(); index < count; ++index )
 	{
 		uint32			idAsset = modelIndexList[ index ].row();
-		FAssetInfo		assetInfo;
+		SAssetInfo		assetInfo;
 		package->GetAssetInfo( idAsset, assetInfo );
 
 		std::wstring			errorMessage;
-		TAssetHandle<FAsset>	assetHandle = package->Find( assetInfo.name );
-		TSharedPtr<FAsset>		assetRef = assetHandle.ToSharedPtr();
-		bool					bResult = FHelperAssetImporter::Reimport( assetHandle, errorMessage );
+		TAssetHandle<CAsset>	assetHandle = package->Find( assetInfo.name );
+		TSharedPtr<CAsset>		assetRef = assetHandle.ToSharedPtr();
+		bool					bResult = CHelperAssetImporter::Reimport( assetHandle, errorMessage );
 
 		// If failed reimport asset - add error message to array
 		if ( !bResult )
@@ -478,7 +478,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Reimport()
 void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
 {
 	// Getting selected items and current package
-	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t				package = ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 	if ( !package )
 	{
@@ -487,7 +487,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
 
 	// Getting asset info
 	check( modelIndexList.length() == 1 );		// Support rename only first asset
-	FAssetInfo		assetInfo;
+	SAssetInfo		assetInfo;
 	package->GetAssetInfo( modelIndexList[ 0 ].row(), assetInfo );
 
 	// Make flags for getting supported extensions
@@ -495,18 +495,18 @@ void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
 	switch ( assetInfo.type )
 	{
 	case AT_Texture2D:
-		filterFlags = FHelperAssetImporter::ET_Texture2D;
+		filterFlags = CHelperAssetImporter::ET_Texture2D;
 		break;
 
 	case AT_AudioBank:
-		filterFlags = FHelperAssetImporter::ET_AudioBank;
+		filterFlags = CHelperAssetImporter::ET_AudioBank;
 		break;
 
 	default:		return;
 	}
 
 	// Select new source file
-	QString			newSourceFile	= QFileDialog::getOpenFileName( this, "Select New Source File", QString(), FHelperAssetImporter::MakeFilterOfSupportedExtensions( filterFlags ) );
+	QString			newSourceFile	= QFileDialog::getOpenFileName( this, "Select New Source File", QString(), CHelperAssetImporter::MakeFilterOfSupportedExtensions( filterFlags ) );
 	if ( newSourceFile.isEmpty() )
 	{
 		return;
@@ -514,22 +514,22 @@ void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
 
 	// Reimport asset
 	std::wstring			errorMessage;
-	TAssetHandle<FAsset>	assetHandle = package->Find( assetInfo.name );
-	TSharedPtr<FAsset>		assetRef = assetHandle.ToSharedPtr();
+	TAssetHandle<CAsset>	assetHandle = package->Find( assetInfo.name );
+	TSharedPtr<CAsset>		assetRef = assetHandle.ToSharedPtr();
 	assetRef->SetAssetSourceFile( appQtAbsolutePathToEngine( newSourceFile ) );
-	bool			bResult = FHelperAssetImporter::Reimport( assetHandle, errorMessage );
+	bool			bResult = CHelperAssetImporter::Reimport( assetHandle, errorMessage );
 	
 	// If reimport asset is failed - show error message box
 	if ( !bResult )
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Failed reimport asset <b>'%s'</b> from new source file <b>'%s'</b>.<br><br>Error: %s" ), assetRef->GetAssetName().c_str(), newSourceFile.toStdWString().c_str(), errorMessage.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed reimport asset <b>'%s'</b> from new source file <b>'%s'</b>.<br><br>Error: %s" ), assetRef->GetAssetName().c_str(), newSourceFile.toStdWString().c_str(), errorMessage.c_str() ) ) );
 	}
 }
 
 void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
 {
 	// Getting current package
-	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t				package = ui->listView_packageBrowser->GetPackage();
 	if ( !package )
 	{
 		return;
@@ -550,22 +550,22 @@ void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
 		// If asset with name already exist - try enter other name 
 		if ( package->IsExist( assetName.toStdWString() ) )
 		{
-			QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), assetName.toStdWString().c_str() ) ), QMessageBox::Ok );
+			QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), assetName.toStdWString().c_str() ) ), QMessageBox::Ok );
 			bIsOk = false;
 		}
 	}
 
 	// Create material with asset name and add to package
-	TSharedPtr<FMaterial>		materialRef = MakeSharedPtr<FMaterial>();
+	TSharedPtr<CMaterial>		materialRef = MakeSharedPtr<CMaterial>();
 	materialRef->SetAssetName( assetName.toStdWString() );
-	package->Add( TAssetHandle<FMaterial>( materialRef, MakeSharedPtr<FAssetReference>( AT_Material, materialRef->GetGUID() ) ) );
+	package->Add( TAssetHandle<CMaterial>( materialRef, MakeSharedPtr<SAssetReference>( AT_Material, materialRef->GetGUID() ) ) );
 	ui->listView_packageBrowser->Refresh();
 }
 
 void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 {
 	// Getting selected items and current package
-	FPackageRef				package			= ui->listView_packageBrowser->GetPackage();
+	PackageRef_t				package			= ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList	= ui->listView_packageBrowser->selectionModel()->selectedRows();
 	if ( !package )
 	{
@@ -584,7 +584,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 	for ( uint32 index = 0, count = modelIndexList.length(); index < count; ++index )
 	{
 		uint32			idAsset = modelIndexList[ index ].row();
-		FAssetInfo		assetInfo;
+		SAssetInfo		assetInfo;
 		
 		package->GetAssetInfo( idAsset, assetInfo );
 		assetInfosToDelete.push_back( assetInfo.name );
@@ -618,7 +618,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 {
 	// Getting selected items and current package
-	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t				package = ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 	if ( !package )
 	{
@@ -626,7 +626,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 	}
 
 	check( modelIndexList.length() == 1 );		// Support rename only first asset
-	FAssetInfo		assetInfo;
+	SAssetInfo		assetInfo;
 	package->GetAssetInfo( modelIndexList[ 0 ].row(), assetInfo );		
 
 	// Get new asset name and check on exist other asset with this name
@@ -644,13 +644,13 @@ void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 		// If asset with new name already exist - try enter other name 
 		if ( package->IsExist( newAssetName.toStdWString() ) )
 		{
-			QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), newAssetName.toStdWString().c_str() ) ), QMessageBox::Ok );
+			QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), newAssetName.toStdWString().c_str() ) ), QMessageBox::Ok );
 			bIsOk = false;
 		}
 	}
 
 	// Find asset in package
-	TSharedPtr<FAsset>		assetRef = package->Find( assetInfo.name ).ToSharedPtr();
+	TSharedPtr<CAsset>		assetRef = package->Find( assetInfo.name ).ToSharedPtr();
 	if ( !assetRef )
 	{
 		return;
@@ -675,7 +675,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_SavePackage(
 		// If package is loaded - we resave him
 		if ( GPackageManager->IsPackageLoaded( pathPackage ) )
 		{
-			FPackageRef		package = GPackageManager->LoadPackage( pathPackage );
+			PackageRef_t		package = GPackageManager->LoadPackage( pathPackage );
 			if ( package && package->IsDirty() )
 			{
 				package->Save( pathPackage );
@@ -690,14 +690,14 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_OpenPackage(
 	QModelIndexList			modelIndexList		= ui->treeView_contentBrowser->selectionModel()->selectedRows();
 	QFileSystemModel*		fileSystemModel		= ui->treeView_contentBrowser->GetFileSystemModel();
 	bool					bIsNeedRepaint		= false;
-	FPackageRef				lastLoadedPackage;
+	PackageRef_t				lastLoadedPackage;
 
 	// Load packages
 	for ( uint32 index = 0, count = modelIndexList.length(); index < count; ++index )
 	{
 		QFileInfo		fileInfo	= fileSystemModel->fileInfo( modelIndexList[ index ] );
 		std::wstring	pathPackage = appQtAbsolutePathToEngine( fileInfo.absoluteFilePath() );
-		FPackageRef		package		= GPackageManager->LoadPackage( pathPackage );
+		PackageRef_t		package		= GPackageManager->LoadPackage( pathPackage );
 		
 		if ( package )
 		{
@@ -724,7 +724,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_UnloadPackag
 	// Getting selected items, file system model and current package in package browser
 	QModelIndexList			modelIndexList		= ui->treeView_contentBrowser->selectionModel()->selectedRows();
 	QFileSystemModel*		fileSystemModel		= ui->treeView_contentBrowser->GetFileSystemModel();
-	FPackageRef				currentPackage		= ui->listView_packageBrowser->GetPackage();
+	PackageRef_t			currentPackage		= ui->listView_packageBrowser->GetPackage();
 
 	// Unload packages
 	bool		bIsNeedRepaint = false;
@@ -743,7 +743,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_UnloadPackag
 		}
 
 		// If package is dirty - we not unload him
-		FPackageRef		package = GPackageManager->LoadPackage( pathPackage );
+		PackageRef_t		package = GPackageManager->LoadPackage( pathPackage );
 		if ( package->IsDirty() )
 		{
 			dirtyPackages.push_back( fileInfo.baseName() );
@@ -788,7 +788,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_delete()
 {
 	QModelIndexList					modelIndexList		= ui->treeView_contentBrowser->selectionModel()->selectedRows();
 	QFileSystemModel*				fileSystemModel		= ui->treeView_contentBrowser->GetFileSystemModel();
-	FPackageRef						currentPackage		= ui->listView_packageBrowser->GetPackage();
+	PackageRef_t						currentPackage		= ui->listView_packageBrowser->GetPackage();
 	QString							filesForDelete;
 	bool							bDirtyTOC			= false;
 
@@ -896,24 +896,24 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 			// If package still used, we skip him
 			if ( !GPackageManager->UnloadPackage( pathPackage ) )
 			{
-				QMessageBox::warning( this, "Warning", QString::fromStdWString( FString::Format( TEXT( "The package <b>'%s'</b> in using and cannot be delete. Close all assets from this package will allow them to be deleted" ), fileInfo.baseName().toStdWString().c_str() ) ), QMessageBox::Ok );
+				QMessageBox::warning( this, "Warning", QString::fromStdWString( ÑString::Format( TEXT( "The package <b>'%s'</b> in using and cannot be delete. Close all assets from this package will allow them to be deleted" ), fileInfo.baseName().toStdWString().c_str() ) ), QMessageBox::Ok );
 				return;
 			}
 
 			bool			bIsNeedUnloadPackage	= !GPackageManager->IsPackageLoaded( pathPackage );
-			FPackageRef		package					= GPackageManager->LoadPackage( pathPackage );
+			PackageRef_t		package					= GPackageManager->LoadPackage( pathPackage );
 
 			// If package failed loaded - we not change him name
 			if ( !package )
 			{
-				QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "File <b>'%s'</b> not renamed because failed loading package for change him name" ), pathPackage.c_str() ) ), QMessageBox::Ok );
+				QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "File <b>'%s'</b> not renamed because failed loading package for change him name" ), pathPackage.c_str() ) ), QMessageBox::Ok );
 				return;
 			}
 
 			// And if package is dirty - we not change him name
 			if ( package->IsDirty() )
 			{
-				QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "File <b>'%s'</b> not renamed because this package is modified. Saving this package will allow to be rename him" ), pathPackage.c_str() ) ) );
+				QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "File <b>'%s'</b> not renamed because this package is modified. Saving this package will allow to be rename him" ), pathPackage.c_str() ) ) );
 				return;
 			}
 
@@ -1010,7 +1010,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createPackag
 
 	// Create package
 	std::wstring	fullPath	= appQtAbsolutePathToEngine( dir.absolutePath() + "/" + packageName + "." FILE_PACKAGE_EXTENSION );
-	FPackageRef		package		= GPackageManager->LoadPackage( fullPath, true );
+	PackageRef_t		package		= GPackageManager->LoadPackage( fullPath, true );
 	package->Save( fullPath );
 
 	// Update TOC file and serialize him
@@ -1023,7 +1023,7 @@ void WeContentBrowserWidget::OnContentBrowserClickedInEmptySpace()
 	ui->listView_packageBrowser->SetPackage( nullptr );
 }
 
-void WeContentBrowserWidget::OnContentBrowserSelectedPackage( FPackage* InPackage )
+void WeContentBrowserWidget::OnContentBrowserSelectedPackage( CPackage* InPackage )
 {
 	ui->listView_packageBrowser->SetPackage( InPackage );
 }
@@ -1061,10 +1061,10 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 	}
 
 	// Get info about asset
-	FPackageRef			package = ui->listView_packageBrowser->GetPackage();
-	FAssetInfo			assetInfo;
+	PackageRef_t			package = ui->listView_packageBrowser->GetPackage();
+	SAssetInfo			assetInfo;
 	package->GetAssetInfo( InModelIndex.row(), assetInfo );
-	TSharedPtr<FAsset>	assetRef = package->Find( assetInfo.name ).ToSharedPtr();
+	TSharedPtr<CAsset>	assetRef = package->Find( assetInfo.name ).ToSharedPtr();
 
 	// Open editor for each asset type
 	switch ( assetInfo.type )
@@ -1075,8 +1075,8 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		assetRef->ReloadDependentAssets();
 
 		WeTextureEditorWindow*		textureEditorWindow = new WeTextureEditorWindow( assetRef, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), textureEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), textureEditorWindow, true );
-		connect( textureEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<FAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& ) ) );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), textureEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), textureEditorWindow, true );
+		connect( textureEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
 	}
 
@@ -1086,8 +1086,8 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		assetRef->ReloadDependentAssets();
 
 		WeMaterialEditorWindow*		materialEditorWindow = new WeMaterialEditorWindow( assetRef, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), materialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), materialEditorWindow, true );
-		connect( materialEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<FAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& ) ) );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), materialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), materialEditorWindow, true );
+		connect( materialEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
 	}
 
@@ -1097,14 +1097,14 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		assetRef->ReloadDependentAssets();
 
 		WeStaticMeshEditorWindow*		staticMeshEditorWindow = new WeStaticMeshEditorWindow( assetRef, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( FString::Format( TEXT( "%s - %s" ), staticMeshEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), staticMeshEditorWindow, true );
-		connect( staticMeshEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<FAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& ) ) );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), staticMeshEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), staticMeshEditorWindow, true );
+		connect( staticMeshEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
 	}
 	}
 }
 
-void WeContentBrowserWidget::OnPackageBrowserChangedAsset( const TSharedPtr<FAsset>& InAsset )
+void WeContentBrowserWidget::OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& InAsset )
 {
 	ui->treeView_contentBrowser->repaint();
 	ui->listView_packageBrowser->repaint();
@@ -1113,7 +1113,7 @@ void WeContentBrowserWidget::OnPackageBrowserChangedAsset( const TSharedPtr<FAss
 void WeContentBrowserWidget::on_listView_packageBrowser_CopyReferenceToAsset()
 {
 	// Getting selected items and current package
-	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t				package = ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 	if ( !package )
 	{
@@ -1121,7 +1121,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_CopyReferenceToAsset()
 	}
 
 	check( modelIndexList.length() == 1 );		// Support copy reference only first asset
-	FAssetInfo		assetInfo;
+	SAssetInfo		assetInfo;
 	package->GetAssetInfo( modelIndexList[ 0 ].row(), assetInfo );
 
 	// Make reference to asset
@@ -1143,7 +1143,7 @@ void WeContentBrowserWidget::OnListViewPackageBrowserSelectedAsset( const std::w
 void WeContentBrowserWidget::on_listView_packageBrowser_ReloadAsset()
 {
 	// Getting selected items and current package
-	FPackageRef				package = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t				package = ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 	if ( !package )
 	{
@@ -1154,8 +1154,8 @@ void WeContentBrowserWidget::on_listView_packageBrowser_ReloadAsset()
 	for ( uint32 index = 0, count = modelIndexList.length(); index < count; ++index )
 	{
 		uint32			idAsset = modelIndexList[ index ].row();
-		FAssetInfo		assetInfo;
-		FGuid			guidAsset;
+		SAssetInfo		assetInfo;
+		CGuid			guidAsset;
 		package->GetAssetInfo( idAsset, assetInfo, &guidAsset );
 		package->ReloadAsset( guidAsset );
 	}
@@ -1166,7 +1166,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_ReloadPackag
 	// Getting selected items, file system model and current package in package browser
 	QModelIndexList			modelIndexList = ui->treeView_contentBrowser->selectionModel()->selectedRows();
 	QFileSystemModel*		fileSystemModel = ui->treeView_contentBrowser->GetFileSystemModel();
-	FPackageRef				currentPackage = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t			currentPackage = ui->listView_packageBrowser->GetPackage();
 
 	// Reload packages
 	bool		bIsNeedRepaint = false;

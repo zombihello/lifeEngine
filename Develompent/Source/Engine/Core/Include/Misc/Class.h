@@ -20,13 +20,13 @@
  * @ingroup Core
  * @brief Class description for reflection
  */
-class LClass
+class CClass
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE										LClass() :
+	FORCEINLINE										CClass() :
 		ClassConstructor( nullptr ),
 		superClass( nullptr )
 	{}
@@ -38,7 +38,7 @@ public:
 	 * @param[in] InClassConstructor Pointer to class constructor
 	 * @param[in] InSuperClass Pointer to super class
 	 */
-	FORCEINLINE										LClass( const std::wstring& InClassName, class LObject*( *InClassConstructor )(), LClass* InSuperClass = nullptr ) :
+	FORCEINLINE										CClass( const std::wstring& InClassName, class CObject*( *InClassConstructor )(), CClass* InSuperClass = nullptr ) :
 		ClassConstructor( InClassConstructor ),
 		superClass( InSuperClass ),
 		name( InClassName )
@@ -57,7 +57,7 @@ public:
 	 * @brief Get super class
 	 * @return Return pointer to super class. If it is not, it will return nullptr
 	 */
-	FORCEINLINE LClass*								GetSuperClass() const
+	FORCEINLINE CClass*								GetSuperClass() const
 	{
 		return superClass;
 	}
@@ -66,7 +66,7 @@ public:
 	 * @brief Create instance of class object
 	 * @return Return pointer to instance of class object
 	 */
-	FORCEINLINE class LObject*						CreateObject() const
+	FORCEINLINE class CObject*						CreateObject() const
 	{
 		check( ClassConstructor );
 		return ClassConstructor();
@@ -86,7 +86,7 @@ public:
 	 * @brief Register class in table
 	 * @param[in] InClass Class
 	 */
-	static FORCEINLINE void							StaticRegisterClass( const LClass* InClass )
+	static FORCEINLINE void							StaticRegisterClass( const CClass* InClass )
 	{
 		check( InClass );
 		classesTable.insert( std::make_pair( InClass->GetName(), InClass ) );
@@ -98,7 +98,7 @@ public:
 	 * 
 	 * @return Return pointer to class. If not found returning nullptr
 	 */
-	static FORCEINLINE LClass*					StaticFindClass( const tchar* InClassName )
+	static FORCEINLINE CClass*					StaticFindClass( const tchar* InClassName )
 	{
 		auto		itClass = classesTable.find( InClassName );
 		if ( itClass == classesTable.end() )
@@ -106,15 +106,15 @@ public:
 			return nullptr;
 		}
 
-		return ( LClass* )itClass->second;
+		return ( CClass* )itClass->second;
 	}
 
 private:
-	class LObject*( *ClassConstructor )();											/**< Pointer to constructor of class */
+	class CObject*( *ClassConstructor )();											/**< Pointer to constructor of class */
 
-	LClass*														superClass;			/**< Pointer to super class */
+	CClass*														superClass;			/**< Pointer to super class */
 	std::wstring												name;				/**< Class name */	
-	static std::unordered_map< std::wstring, const LClass* >	classesTable;		/**< Table of all classes in system */
+	static std::unordered_map< std::wstring, const CClass* >	classesTable;		/**< Table of all classes in system */
 };
 
 #endif // !CLASS_H

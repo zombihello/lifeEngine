@@ -18,11 +18,11 @@
 // Platform specific globals variables
 // ----
 
-FBaseLogger*         GLog			= new FWindowsLogger();
-FBaseFileSystem*     GFileSystem	= new FWindowsFileSystem();
-FBaseWindow*         GWindow		= new FWindowsWindow();
-FBaseRHI*            GRHI			= new FD3D11RHI();
-FEngineLoop*         GEngineLoop	= new FEngineLoop();
+ÑBaseLogger*         GLog			= new CWindowsLogger();
+CBaseFileSystem*     GFileSystem	= new CWindowsFileSystem();
+CBaseWindow*         GWindow		= new CWindowsWindow();
+CBaseRHI*            GRHI			= new CD3D11RHI();
+CEngineLoop*         GEngineLoop	= new CEngineLoop();
 EPlatformType        GPlatform		= PLATFORM_Windows;
 
 // ----
@@ -52,7 +52,7 @@ void* appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool I
 {
     LE_LOG( LT_Log, LC_Dev, TEXT( "CreateProc %s %s" ), InPathToProcess, InParams );
 
-	std::wstring				commandLine = FString::Format( TEXT( "%s %s" ), InPathToProcess, InParams );
+	std::wstring				commandLine = ÑString::Format( TEXT( "%s %s" ), InPathToProcess, InParams );
 
 	PROCESS_INFORMATION			procInfo;
 	SECURITY_ATTRIBUTES			attributes;
@@ -141,9 +141,9 @@ bool appGetProcReturnCode( void* InProcHandle, int32* OutReturnCode )
     return GetExitCodeProcess( ( HANDLE )InProcHandle, ( DWORD* )OutReturnCode ) && *( ( DWORD* )OutReturnCode ) != STILL_ACTIVE;
 }
 
-FGuid appCreateGuid()
+CGuid appCreateGuid()
 {
-	FGuid	guid;
+	CGuid	guid;
 	HRESULT result = CoCreateGuid( ( GUID* ) &guid );
 	check( result == S_OK );
 	return guid;

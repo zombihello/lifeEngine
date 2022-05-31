@@ -2,18 +2,18 @@
 #include "System/PhysicsEngine.h"
 #include "System/PhysicsShapeGeometry.h"
 
-FPhysicsShapeGeometry::FPhysicsShapeGeometry( ECollisionShape InCollisionShape )
+SPhysicsShapeGeometry::SPhysicsShapeGeometry( ECollisionShape InCollisionShape )
 	: collisionShape( InCollisionShape )
-	, collisionProfile( GPhysicsEngine.FindCollisionProfile( FCollisionProfile::blockAll_ProfileName ) )
+	, collisionProfile( GPhysicsEngine.FindCollisionProfile( SCollisionProfile::blockAll_ProfileName ) )
 	, material( GPhysicsEngine.GetDefaultPhysMaterial() )
 {}
 
-FPhysicsShapeGeometry::~FPhysicsShapeGeometry()
+SPhysicsShapeGeometry::~SPhysicsShapeGeometry()
 {
-	FPhysicsInterface::ReleaseShapeGeometry( handle );
+	CPhysicsInterface::ReleaseShapeGeometry( handle );
 }
 
-void FPhysicsShapeGeometry::Serialize( class FArchive& InArchive )
+void SPhysicsShapeGeometry::Serialize( class CArchive& InArchive )
 {
 	InArchive << collisionShape;
 	InArchive << collisionProfile;

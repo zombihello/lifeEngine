@@ -5,8 +5,8 @@
 /**
  * Constructor
  */
-FScript::FScript() : 
-	FAsset( AT_Script ),
+CScript::CScript() : 
+	CAsset( AT_Script ),
 	luaVM( luaL_newstate() )
 {
 	check( luaVM );
@@ -17,13 +17,13 @@ FScript::FScript() :
 	luaL_openlibs( luaVM );
 
 	// Register of classes API in Lua
-	FScriptEngine::StaticRegisterClassAPI( luaVM );
+	CScriptEngine::StaticRegisterClassAPI( luaVM );
 }
 
 /**
  * Destructor
  */
-FScript::~FScript()
+CScript::~CScript()
 {
 	if ( luaVM )
 	{
@@ -35,11 +35,11 @@ FScript::~FScript()
 /**
  * Serialize script
  */
-void FScript::Serialize( FArchive& InArchive )
+void CScript::Serialize( CArchive& InArchive )
 {
 	if ( InArchive.Type() != AT_TextFile )
 	{
-		FAsset::Serialize( InArchive );
+		CAsset::Serialize( InArchive );
 	}
 
 	if ( InArchive.IsLoading() )
@@ -96,7 +96,7 @@ void FScript::Serialize( FArchive& InArchive )
 /**
  * Set byte code
  */
-void FScript::SetByteCode( const byte* InByteCode, uint32 InSize )
+void CScript::SetByteCode( const byte* InByteCode, uint32 InSize )
 {
 	check( InByteCode && InSize > 0 );
 	

@@ -32,18 +32,18 @@ enum ELevelViewportType
  * @ingroup Engine
  * Implementation for work with viewport
  */
-class FViewport : public FRenderResource, public FRefCounted
+class CViewport : public CRenderResource, public CRefCounted
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FViewport();
+	CViewport();
 
 	/**
 	 * Destructor
 	 */
-	~FViewport();
+	~CViewport();
 
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -92,7 +92,7 @@ public:
 	 * 
 	 * @param InViewportClient		Viewport client
 	 */
-	FORCEINLINE void SetViewportClient( class FViewportClient* InViewportClient )
+	FORCEINLINE void SetViewportClient( class CViewportClient* InViewportClient )
 	{
 		viewportClient = InViewportClient;
 	}
@@ -110,7 +110,7 @@ public:
 	 * Get viewport RHI
 	 * @return Return pointer to RHI viewport
 	 */
-	FViewportRHIRef GetViewportRHI() const
+	ViewportRHIRef_t GetViewportRHI() const
 	{
 		return viewportRHI;
 	}
@@ -146,17 +146,17 @@ public:
 	 * Get viewport client
 	 * @return Return viewport client. If not exist return NULL
 	 */
-	FORCEINLINE class FViewportClient* GetViewportClient() const
+	FORCEINLINE class CViewportClient* GetViewportClient() const
 	{
 		return viewportClient;
 	}
 
 private:
 	void*						windowHandle;		/**< Handle to window for render */
-	class FViewportClient*		viewportClient;		/**< Viewport client */
+	class CViewportClient*		viewportClient;		/**< Viewport client */
 	uint32						sizeX;				/**< Width of viewport */
 	uint32						sizeY;				/**< Height of viewport */
-	FViewportRHIRef				viewportRHI;		/**< Pointer to viewport of RHI */
+	ViewportRHIRef_t			viewportRHI;		/**< Pointer to viewport of RHI */
 };
 
 /**
@@ -164,13 +164,13 @@ private:
  * An abstract interface to a viewport's client
  * The viewport's client processes input received by the viewport, and draws the viewport
  */
-class FViewportClient
+class CViewportClient
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FViewportClient() {}
+	virtual ~CViewportClient() {}
 
 	/**
 	 * Update logic of viewport client
@@ -182,7 +182,7 @@ public:
 	 * 
 	 * @param InViewport	Viewport
 	 */
-	virtual void Draw( FViewport* InViewport ) {}
+	virtual void Draw( CViewport* InViewport ) {}
 
 	/**
 	 * @brief Process event

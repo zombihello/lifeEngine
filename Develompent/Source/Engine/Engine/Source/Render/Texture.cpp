@@ -10,8 +10,8 @@
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
 
-FTexture2D::FTexture2D()
-	: FAsset( AT_Texture2D )
+CTexture2D::CTexture2D()
+	: CAsset( AT_Texture2D )
 	, sizeX( 0 )
 	, sizeY( 0 )
 	, pixelFormat( PF_Unknown )
@@ -20,13 +20,13 @@ FTexture2D::FTexture2D()
 	, samplerFilter( SF_Point )
 {}
 
-FTexture2D::~FTexture2D()
+CTexture2D::~CTexture2D()
 {}
 
-void FTexture2D::InitRHI()
+void CTexture2D::InitRHI()
 {
 	check( data.Num() > 0 );
-	texture = GRHI->CreateTexture2D( FString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeX, sizeY, pixelFormat, 1, 0, data.GetData() );
+	texture = GRHI->CreateTexture2D( ÑString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeX, sizeY, pixelFormat, 1, 0, data.GetData() );
 
 	if ( !GIsEditor && !GIsCommandlet )
 	{
@@ -34,12 +34,12 @@ void FTexture2D::InitRHI()
 	}
 }
 
-void FTexture2D::ReleaseRHI()
+void CTexture2D::ReleaseRHI()
 {
 	texture.SafeRelease();
 }
 
-void FTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector<byte>& InData )
+void CTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector<byte>& InData )
 {
 	pixelFormat		= InPixelFormat;
 	sizeX			= InSizeX;
@@ -50,9 +50,9 @@ void FTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InS
 	BeginUpdateResource( this );
 }
 
-void FTexture2D::Serialize( class FArchive& InArchive )
+void CTexture2D::Serialize( class CArchive& InArchive )
 {
-	FAsset::Serialize( InArchive );
+	CAsset::Serialize( InArchive );
 
 	if ( InArchive.Ver() < VER_RemovedTFC )
 	{
@@ -61,7 +61,7 @@ void FTexture2D::Serialize( class FArchive& InArchive )
 
 		InArchive << textureCachePath;
 		InArchive << textureCacheHash;
-		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated version FTexture2D in package. Texture not loaded correctly" ) );
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated version CTexture2D in package. Texture not loaded correctly" ) );
 	}
 	else if ( InArchive.Ver() < VER_CompressedZlib )
 	{

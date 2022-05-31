@@ -18,18 +18,18 @@
  * @ingroup Physics
  * @brief Class of PhysX scene
  */
-class FPhysXScene
+class CPhysXScene
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FPhysXScene();
+	CPhysXScene();
 
 	/**
 	 * @brief Destructor
 	 */
-	~FPhysXScene();
+	~CPhysXScene();
 
 	/**
 	 * @brief Initialize scene
@@ -52,13 +52,13 @@ public:
 	 * @brief Add body on scene
 	 * @param InBodyInstance Pointer to body instance
 	 */
-	void AddBody( class FPhysicsBodyInstance* InBodyInstance );
+	void AddBody( class CPhysicsBodyInstance* InBodyInstance );
 
 	/**
 	 * @brief Remove body from scene
 	 * @param InBodyInstance Pointer to body instance
 	 */
-	void RemoveBody( class FPhysicsBodyInstance* InBodyInstance );
+	void RemoveBody( class CPhysicsBodyInstance* InBodyInstance );
 
 	/**
 	 * @brief Remove all bodies from scene
@@ -68,7 +68,7 @@ public:
 private:
 	physx::PxScene*									pxScene;						/**< PhysX scene */
 	physx::PxDefaultCpuDispatcher*					pxDefaultCpuDispatcher;			/**< Default CPU dispatcher */
-	std::vector< class FPhysicsBodyInstance* >		bodies;							/**< Array of bodies on scene */
+	std::vector< class CPhysicsBodyInstance* >		bodies;							/**< Array of bodies on scene */
 };
 #endif // WITH_PHYSX
 

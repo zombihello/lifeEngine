@@ -7,23 +7,23 @@
 #include "Render/SceneRendering.h"
 #include "Render/Scene.h"
 
-FDynamicMeshBuilder::FDynamicMeshBuilder()
+CDynamicMeshBuilder::CDynamicMeshBuilder()
 	: numPrimitives( 0 )
 {}
 
-void FDynamicMeshBuilder::InitRHI()
+void CDynamicMeshBuilder::InitRHI()
 {
-	FScopeLock		scopeLock( &readWriteCS );
+	CScopeLock		scopeLock( &readWriteCS );
 
 	// Create vertex buffer
 	uint32			numVerteces = verteces.size();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "DynamicMesh" ), sizeof( FDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "DynamicMesh" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
-		vertexFactory = new FDynamicMeshVertexFactory();
-		vertexFactory->AddVertexStream( FVertexStream{ vertexBufferRHI, sizeof( FDynamicMeshVertexType ) } );		// 0 stream slot
+		vertexFactory = new CDynamicMeshVertexFactory();
+		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SDynamicMeshVertexType ) } );		// 0 stream slot
 		vertexFactory->Init();
 	}
 
@@ -39,19 +39,19 @@ void FDynamicMeshBuilder::InitRHI()
 	indeces.clear();
 }
 
-void FDynamicMeshBuilder::ReleaseRHI()
+void CDynamicMeshBuilder::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
 	indexBufferRHI.SafeRelease();
 	vertexFactory.SafeRelease();
 }
 
-void FDynamicMeshBuilder::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const FMatrix& InLocalToWorld, const TAssetHandle<FMaterial>& InMaterial, const class FSceneView& InSceneView ) const
+void CDynamicMeshBuilder::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, const class CSceneView& InSceneView ) const
 {
-	checkMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call FDynamicMeshBuilder::Build" ) );
+	checkMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call CDynamicMeshBuilder::Build" ) );
 	
 	// Init mesh batch
-	FMeshBatch		meshBatch;
+	SMeshBatch		meshBatch;
 	meshBatch.indexBufferRHI	= indexBufferRHI;
 	meshBatch.baseVertexIndex	= 0;
 	meshBatch.firstIndex		= 0;
@@ -61,7 +61,7 @@ void FDynamicMeshBuilder::Draw( class FBaseDeviceContextRHI* InDeviceContextRHI,
 	meshBatch.transformationMatrices.push_back( InLocalToWorld );
 
 	// Draw mesh
-	FStaticMeshDrawPolicy		drawPolicy;
+	CStaticMeshDrawPolicy		drawPolicy;
 	drawPolicy.Init( vertexFactory, InMaterial );
 	if ( drawPolicy.IsValid() )
 	{

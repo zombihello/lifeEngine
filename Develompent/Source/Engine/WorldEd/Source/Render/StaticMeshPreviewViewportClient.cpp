@@ -5,18 +5,18 @@
 #include "Render/StaticMeshPreviewViewportClient.h"
 #include "Render/RenderUtils.h"
 
-FStaticMeshPreviewViewportClient::FStaticMeshPreviewViewportClient( const TSharedPtr<FStaticMesh>& InStaticMesh )
-	: FEditorLevelViewportClient( LVT_Perspective )
-	, scene( new FScene() )
+CStaticMeshPreviewViewportClient::CStaticMeshPreviewViewportClient( const TSharedPtr<CStaticMesh>& InStaticMesh )
+	: CEditorLevelViewportClient( LVT_Perspective )
+	, scene( new CScene() )
 	, staticMesh( InStaticMesh )
-	, staticMeshComponent( new LStaticMeshComponent() )
+	, staticMeshComponent( new CStaticMeshComponent() )
 {
 	// Init view
 	bSetListenerPosition	= false;
 	viewportType			= LVT_Perspective;
 	showFlags				= SHOW_DefaultEditor;
-	viewLocation			= FVector( 0.f, 0.f, -80.f );
-	viewRotation			= FRotator( 0.f, 0.f, 0.f );
+	viewLocation			= Vector( 0.f, 0.f, -80.f );
+	viewRotation			= CRotator( 0.f, 0.f, 0.f );
 
 	// Init scene
 	staticMeshComponent->SetStaticMesh( InStaticMesh->GetAssetHandle() );
@@ -24,36 +24,36 @@ FStaticMeshPreviewViewportClient::FStaticMeshPreviewViewportClient( const TShare
 	scene->AddPrimitive( staticMeshComponent );
 }
 
-FStaticMeshPreviewViewportClient::~FStaticMeshPreviewViewportClient()
+CStaticMeshPreviewViewportClient::~CStaticMeshPreviewViewportClient()
 {
 	FlushRenderingCommands();
 	delete scene;
 }
 
-void FStaticMeshPreviewViewportClient::Tick( float InDeltaSeconds )
+void CStaticMeshPreviewViewportClient::Tick( float InDeltaSeconds )
 {
-	FEditorLevelViewportClient::Tick( InDeltaSeconds );
+	CEditorLevelViewportClient::Tick( InDeltaSeconds );
 }
 
-void FStaticMeshPreviewViewportClient::Draw( FViewport* InViewport )
+void CStaticMeshPreviewViewportClient::Draw( CViewport* InViewport )
 {
-	FSceneView*		sceneView = CalcSceneView( InViewport );
+	CSceneView*		sceneView = CalcSceneView( InViewport );
 
 	// Draw viewport
-	UNIQUE_RENDER_COMMAND_THREEPARAMETER( FViewportRenderCommand,
-										  FStaticMeshPreviewViewportClient*, viewportClient, this,
-										  FViewportRHIRef, viewportRHI, InViewport->GetViewportRHI(),
-										  FSceneView*, sceneView, sceneView,
+	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,
+										  CStaticMeshPreviewViewportClient*, viewportClient, this,
+										  ViewportRHIRef_t, viewportRHI, InViewport->GetViewportRHI(),
+										  CSceneView*, sceneView, sceneView,
 										  {
 											  viewportClient->Draw_RenderThread( viewportRHI, sceneView );
 										  } );
 }
 
-void FStaticMeshPreviewViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, class FSceneView* InSceneView )
+void CStaticMeshPreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView )
 {
 	check( IsInRenderingThread() );
-	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	FSceneRenderer				sceneRenderer( InSceneView, scene );
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	CSceneRenderer				sceneRenderer( InSceneView, scene );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 
 	// Draw grid
@@ -67,5 +67,5 @@ void FStaticMeshPreviewViewportClient::Draw_RenderThread( FViewportRHIRef InView
 	delete InSceneView;
 }
 
-void FStaticMeshPreviewViewportClient::SetViewportType( ELevelViewportType InViewportType )
+void CStaticMeshPreviewViewportClient::SetViewportType( ELevelViewportType InViewportType )
 {}

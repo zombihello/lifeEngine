@@ -15,15 +15,15 @@
 #include "RHI/BaseDeviceContextRHI.h"
 #include "Actors/PlayerStart.h"
 
-IMPLEMENT_CLASS( LGameEngine )
+IMPLEMENT_CLASS( CGameEngine )
 
-LGameEngine::LGameEngine()
+CGameEngine::CGameEngine()
 {}
 
-LGameEngine::~LGameEngine()
+CGameEngine::~CGameEngine()
 {}
 
-void LGameEngine::Init()
+void CGameEngine::Init()
 {
 	Super::Init();
 
@@ -38,7 +38,7 @@ void LGameEngine::Init()
 	viewport.Update( false, windowWidth, windowHeight, GWindow->GetHandle() );
 }
 
-void LGameEngine::Tick( float InDeltaSeconds )
+void CGameEngine::Tick( float InDeltaSeconds )
 {
 	Super::Tick( InDeltaSeconds );
 	GWorld->Tick( InDeltaSeconds );
@@ -51,7 +51,7 @@ void LGameEngine::Tick( float InDeltaSeconds )
 	viewport.Draw();
 }
 
-void LGameEngine::Shutdown()
+void CGameEngine::Shutdown()
 {
 	Super::Shutdown();
 
@@ -66,7 +66,7 @@ void LGameEngine::Shutdown()
 	}
 }
 
-void LGameEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CGameEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	Super::ProcessEvent( InWindowEvent );
 

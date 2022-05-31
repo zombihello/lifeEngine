@@ -29,7 +29,7 @@
  * @ingroup Engine
  * Typedef of show flags
  */
-typedef uint64		EShowFlags;
+typedef uint64		ShowFlags_t;
 
 /**
  * @ingroup Engine
@@ -53,7 +53,7 @@ enum EShowFlag
  * @ingroup Engine
  * A projection from scene space into a 2D screen region
  */
-class FSceneView
+class CSceneView
 {
 public:
 	/**
@@ -66,13 +66,13 @@ public:
 	 * @param InBackgroundColor			Background color
 	 * @param InShowFlags				Show flags
 	 */
-	FSceneView( const FMatrix& InProjectionMatrix, const FMatrix& InViewMatrix, float InSizeX, float InSizeY, const FColor& InBackgroundColor, EShowFlags InShowFlags );
+	CSceneView( const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const ÑColor& InBackgroundColor, ShowFlags_t InShowFlags );
 
 	/**
 	 * Get view matrix
 	 * @return Return view matrix
 	 */
-	FORCEINLINE const FMatrix& GetViewMatrix() const
+	FORCEINLINE const Matrix& GetViewMatrix() const
 	{
 		return viewMatrix;
 	}
@@ -81,7 +81,7 @@ public:
 	 * Get projection matrix
 	 * @return Return projection matrix
 	 */
-	FORCEINLINE const FMatrix& GetProjectionMatrix() const
+	FORCEINLINE const Matrix& GetProjectionMatrix() const
 	{
 		return projectionMatrix;
 	}
@@ -90,7 +90,7 @@ public:
 	 * Get View * Projection matrix
 	 * @return Return View * Projection matrix
 	 */
-	FORCEINLINE const FMatrix& GetViewProjectionMatrix() const
+	FORCEINLINE const Matrix& GetViewProjectionMatrix() const
 	{
 		return viewProjectionMatrix;
 	}
@@ -99,7 +99,7 @@ public:
 	 * Get frustum
 	 * @return Return frustum
 	 */
-	FORCEINLINE const FFrustum& GetFrustum() const
+	FORCEINLINE const CFrustum& GetFrustum() const
 	{
 		return frustum;
 	}
@@ -108,7 +108,7 @@ public:
 	 * Get background color
 	 * @return Return background color
 	 */
-	FORCEINLINE const FColor& GetBackgroundColor() const
+	FORCEINLINE const ÑColor& GetBackgroundColor() const
 	{
 		return backgroundColor;
 	}
@@ -117,7 +117,7 @@ public:
 	 * Get show flags
 	 * @return Return show flags
 	 */
-	FORCEINLINE EShowFlags GetShowFlags() const
+	FORCEINLINE ShowFlags_t GetShowFlags() const
 	{
 		return showFlags;
 	}
@@ -141,12 +141,12 @@ public:
 	}
 
 private:
-	FMatrix			viewMatrix;				/**< View matrix */
-	FMatrix			projectionMatrix;		/**< Projection matrix */
-	FMatrix			viewProjectionMatrix;	/**< View * Projection matrix */
-	FFrustum		frustum;				/**< Frustum */
-	FColor			backgroundColor;		/**< Background color */
-	EShowFlags		showFlags;				/**< Show flags for the view */
+	Matrix			viewMatrix;				/**< View matrix */
+	Matrix			projectionMatrix;		/**< Projection matrix */
+	Matrix			viewProjectionMatrix;	/**< View * Projection matrix */
+	CFrustum		frustum;				/**< Frustum */
+	ÑColor			backgroundColor;		/**< Background color */
+	ShowFlags_t		showFlags;				/**< Show flags for the view */
 	float			sizeX;					/**< Size X of viewport */
 	float			sizeY;					/**< Size Y of viewport */
 };
@@ -155,32 +155,32 @@ private:
  * @ingroup Engine
  * A batch of mesh elements, all with the same material and vertex buffer
  */
-struct FMeshBatch
+struct SMeshBatch
 {
 	/**
-	 * @brief Functions to extract the mesh batch from FMeshBatch as a key for std::set
+	 * @brief Functions to extract the mesh batch from SMeshBatch as a key for std::set
 	 */
-	struct FMeshBatchKeyFunc
+	struct SMeshBatchKeyFunc
 	{
 		/**
-		 * @brief Compare FMeshBatch
+		 * @brief Compare SMeshBatch
 		 *
 		 * @param InA First mesh batch
 		 * @param InB Second mesh batch
 		 * @return Return true if InA and InB equal, else returning false
 		 */
-		FORCEINLINE bool operator()( const FMeshBatch& InA, const FMeshBatch& InB ) const
+		FORCEINLINE bool operator()( const SMeshBatch& InA, const SMeshBatch& InB ) const
 		{
 			return InA.GetTypeHash() < InB.GetTypeHash();
 		}
 
 		/**
-		 * @brief Calculate hash of the FMeshBatch
+		 * @brief Calculate hash of the SMeshBatch
 		 *
 		 * @param InMeshBatch Mesh batch
-		 * @return Return hash of this FMeshBatch
+		 * @return Return hash of this SMeshBatch
 		 */
-		FORCEINLINE std::size_t operator()( const FMeshBatch& InMeshBatch ) const
+		FORCEINLINE std::size_t operator()( const SMeshBatch& InMeshBatch ) const
 		{
 			return InMeshBatch.GetTypeHash();
 		}
@@ -189,14 +189,14 @@ struct FMeshBatch
 	/**
 	 * Constructor
 	 */
-	FORCEINLINE FMeshBatch()
+	FORCEINLINE SMeshBatch()
 		: baseVertexIndex( 0 ), firstIndex( 0 ), numPrimitives( 0 ), numInstances( 0 )
 	{}
 
 	/**
 	 * Overrload operator ==
 	 */
-	FORCEINLINE friend bool operator==( const FMeshBatch& InA, const FMeshBatch& InB )
+	FORCEINLINE friend bool operator==( const SMeshBatch& InA, const SMeshBatch& InB )
 	{
 		return	InA.indexBufferRHI == InB.indexBufferRHI		&& 
 				InA.primitiveType == InB.primitiveType			&& 
@@ -208,7 +208,7 @@ struct FMeshBatch
 	/**
 	 * Overrload operator !=
 	 */
-	FORCEINLINE friend bool operator!=( const FMeshBatch& InA, const FMeshBatch& InB )
+	FORCEINLINE friend bool operator!=( const SMeshBatch& InA, const SMeshBatch& InB )
 	{
 		return !( InA == InB );
 	}
@@ -227,39 +227,39 @@ struct FMeshBatch
 		return hash;
 	}
 
-	FIndexBufferRHIRef					indexBufferRHI;				/**< Index buffer */
+	IndexBufferRHIRef_t					indexBufferRHI;				/**< Index buffer */
 	EPrimitiveType						primitiveType;				/**< Primitive type */
 	uint32								baseVertexIndex;			/**< First index vertex in vertex buffer */
 	uint32								firstIndex;					/**< First index */
 	uint32								numPrimitives;				/**< Number primitives to render */
 	mutable uint32						numInstances;				/**< Number instances of mesh */
-	mutable std::vector< FMatrix >		transformationMatrices;		/**< Array of transformation matrix for instances */
+	mutable std::vector< Matrix >		transformationMatrices;		/**< Array of transformation matrix for instances */
 };
 
 /**
  * @brief Typedef set of mesh batches
  */
-typedef std::unordered_set< FMeshBatch, FMeshBatch::FMeshBatchKeyFunc >		FMeshBatchList;
+typedef std::unordered_set< SMeshBatch, SMeshBatch::SMeshBatchKeyFunc >		MeshBatchList_t;
 
 /**
  * @ingroup Engine
  * @brief Draw list of scene for mesh type
  */
 template< typename TDrawingPolicyType, bool InAllowWireframe = true >
-class FMeshDrawList
+class CMeshDrawList
 {
 public:
 	/**
 	 * @brief A set of draw list elements with the same drawing policy
 	 */
-	struct FDrawingPolicyLink : public FRefCounted
+	struct SDrawingPolicyLink : public CRefCounted
 	{
 		/**
 		 * @brief Constructor
 		 * 
 		 * @param InWireframeColor		Wireframe color
 		 */
-		FDrawingPolicyLink( const FColor& InWireframeColor = FColor::red )
+		SDrawingPolicyLink( const ÑColor& InWireframeColor = ÑColor::red )
 #if !SHIPPING_BUILD
 			: wireframeColor( InWireframeColor )
 #endif // !SHIPPING_BUILD
@@ -271,7 +271,7 @@ public:
 		 * @param InDrawingPolicy		Drawing policy
 		 * @param InWireframeColor		Wireframe color
 		 */
-		FDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const FColor& InWireframeColor = FColor::red )
+		SDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const ÑColor& InWireframeColor = ÑColor::red )
 			: drawingPolicy( InDrawingPolicy )
 #if !SHIPPING_BUILD
 			, wireframeColor( InWireframeColor )
@@ -281,7 +281,7 @@ public:
 		/**
 		 * Overrload operator ==
 		 */
-		FORCEINLINE friend bool operator==( const FDrawingPolicyLink& InA, const FDrawingPolicyLink& InB )
+		FORCEINLINE friend bool operator==( const SDrawingPolicyLink& InA, const SDrawingPolicyLink& InB )
 		{
 			return InA.drawingPolicy.GetTypeHash() == InB.drawingPolicy.GetTypeHash();
 		}
@@ -289,7 +289,7 @@ public:
 		/**
 		 * Overrload operator !=
 		 */
-		FORCEINLINE friend bool operator!=( const FDrawingPolicyLink& InA, const FDrawingPolicyLink& InB )
+		FORCEINLINE friend bool operator!=( const SDrawingPolicyLink& InA, const SDrawingPolicyLink& InB )
 		{
 			return !( InA == InB );
 		}
@@ -303,43 +303,43 @@ public:
 			return drawingPolicy.GetTypeHash();
 		}
 
-		mutable FMeshBatchList					meshBatchList;			/**< Mesh batch list */
+		mutable MeshBatchList_t					meshBatchList;			/**< Mesh batch list */
 		mutable TDrawingPolicyType				drawingPolicy;			/**< Drawing policy */
 
 #if !SHIPPING_BUILD
-		FColor									wireframeColor;			/**< Wireframe color */
+		ÑColor									wireframeColor;			/**< Wireframe color */
 #endif // !SHIPPING_BUILD
 	};
 
 	/**
 	 * @brief Typedef of reference to drawing policy link
 	 */
-	typedef TRefCountPtr< FDrawingPolicyLink >		FDrawingPolicyLinkRef;
+	typedef TRefCountPtr< SDrawingPolicyLink >		DrawingPolicyLinkRef_t;
 
 	/**
-	 * @brief Functions to extract the drawing policy from FDrawingPolicyLink as a key for std::set
+	 * @brief Functions to extract the drawing policy from DrawingPolicyLink_t as a key for std::set
 	 */
-	struct FDrawingPolicyKeyFunc
+	struct SDrawingPolicyKeyFunc
 	{
 		/**
-		 * @brief Compare FDrawingPolicyLink
+		 * @brief Compare DrawingPolicyLink_t
 		 * 
 		 * @param InA First drawing policy
 		 * @param InB Second drawing policy
 		 * @return Return true if InA and InB equal, else returning false
 		 */
-		FORCEINLINE bool operator()( const FDrawingPolicyLinkRef& InA, const FDrawingPolicyLinkRef& InB ) const
+		FORCEINLINE bool operator()( const DrawingPolicyLinkRef_t& InA, const DrawingPolicyLinkRef_t& InB ) const
 		{
 			return InA->GetTypeHash() < InB->GetTypeHash();
 		}
 
 		/**
-		 * @brief Calculate hash of the FDrawingPolicyLink
+		 * @brief Calculate hash of the DrawingPolicyLink_t
 		 *
 		 * @param InDrawingPolicyLink Drawing policy link
-		 * @return Return hash of this FDrawingPolicyLink
+		 * @return Return hash of this DrawingPolicyLink_t
 		 */
-		FORCEINLINE std::size_t operator()( const FDrawingPolicyLinkRef& InDrawingPolicyLink ) const
+		FORCEINLINE std::size_t operator()( const DrawingPolicyLinkRef_t& InDrawingPolicyLink ) const
 		{
 			return InDrawingPolicyLink->GetTypeHash();
 		}
@@ -348,16 +348,16 @@ public:
 	/**
 	 * @brief Functions for custom equal the drawing policy in std::set 
 	 */
-	struct FDrawingPolicyEqualFunc
+	struct SDrawingPolicyEqualFunc
 	{
 		/**
-		  * @brief Compare FDrawingPolicyLinkRef
+		  * @brief Compare DrawingPolicyLinkRef_t
 		  *
 		  * @param InA First drawing policy
 		  * @param InB Second drawing policy
 		  * @return Return true if InA and InB equal, else returning false
 		  */
-		FORCEINLINE bool operator()( const FDrawingPolicyLinkRef& InA, const FDrawingPolicyLinkRef& InB ) const
+		FORCEINLINE bool operator()( const DrawingPolicyLinkRef_t& InA, const DrawingPolicyLinkRef_t& InB ) const
 		{
 			return ( *InA ) == ( *InB );
 		}
@@ -366,7 +366,7 @@ public:
 	/**
 	 * @brief Typedef map of draw data
 	 */
-	typedef std::unordered_set< FDrawingPolicyLinkRef, FDrawingPolicyKeyFunc, FDrawingPolicyEqualFunc >		FMapDrawData;
+	typedef std::unordered_set< DrawingPolicyLinkRef_t, SDrawingPolicyKeyFunc, SDrawingPolicyEqualFunc >		MapDrawData_t;
 
 	/**
 	 * @brief Add item
@@ -374,12 +374,12 @@ public:
 	 * @param InDrawingPolicyLink Drawing policy link
 	 * @return Return reference to drawing policy link in SDG
 	 */
-	FDrawingPolicyLinkRef AddItem( const FDrawingPolicyLinkRef& InDrawingPolicyLink )
+	DrawingPolicyLinkRef_t AddItem( const DrawingPolicyLinkRef_t& InDrawingPolicyLink )
 	{
 		check( InDrawingPolicyLink );
 
 		// Get drawing policy link in std::set
-		FMapDrawData::iterator		it = meshes.find( InDrawingPolicyLink );
+		MapDrawData_t::iterator		it = meshes.find( InDrawingPolicyLink );
 
 		// If drawing policy link is not exist - we insert
 		if ( it == meshes.end() )
@@ -396,7 +396,7 @@ public:
 	 *
 	 * @param InDrawingPolicyLink Drawing policy link
 	 */
-	void RemoveItem( FDrawingPolicyLinkRef& InDrawingPolicyLink )
+	void RemoveItem( DrawingPolicyLinkRef_t& InDrawingPolicyLink )
 	{
 		check( InDrawingPolicyLink );
 		if ( InDrawingPolicyLink->GetRefCount() <= 2 )
@@ -412,10 +412,10 @@ public:
 	 */
 	FORCEINLINE void Clear()
 	{
-		for ( FMapDrawData::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
+		for ( MapDrawData_t::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
 		{
-			FDrawingPolicyLinkRef		drawingPolicyLink = *it;
-			for ( FMeshBatchList::const_iterator itMeshBatch = drawingPolicyLink->meshBatchList.begin(), itMeshBatchEnd = drawingPolicyLink->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
+			DrawingPolicyLinkRef_t		drawingPolicyLink = *it;
+			for ( MeshBatchList_t::const_iterator itMeshBatch = drawingPolicyLink->meshBatchList.begin(), itMeshBatchEnd = drawingPolicyLink->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
 			{
 				itMeshBatch->numInstances = 0;
 				itMeshBatch->transformationMatrices.clear();
@@ -438,7 +438,7 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param InSceneView Current view of scene
 	 */
-	FORCEINLINE void Draw( class FBaseDeviceContextRHI* InDeviceContext, const FSceneView& InSceneView )
+	FORCEINLINE void Draw( class CBaseDeviceContextRHI* InDeviceContext, const CSceneView& InSceneView )
 	{
 		check( IsInRenderingThread() );
 
@@ -448,11 +448,11 @@ public:
 		bool													bWireframe = InAllowWireframe && ( InSceneView.GetShowFlags() & SHOW_Wireframe );
 #endif // !SHIPPING_BUILD
 
-		for ( FMapDrawData::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
+		for ( MapDrawData_t::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
 		{
 			bool						bIsInitedRenderState	= false;
-			FDrawingPolicyLinkRef		drawingPolicyLink		= *it;
-			FMeshDrawingPolicy*			drawingPolicy			= nullptr;
+			DrawingPolicyLinkRef_t		drawingPolicyLink		= *it;
+			CMeshDrawingPolicy*			drawingPolicy			= nullptr;
 
 #if !SHIPPING_BUILD
 			drawingPolicy				= !bWireframe ? &drawingPolicyLink->drawingPolicy : &wireframeDrawingPolicy;
@@ -473,7 +473,7 @@ public:
 			}
 
 			// Draw all mesh batches
-			for ( FMeshBatchList::const_iterator itMeshBatch = drawingPolicyLink->meshBatchList.begin(), itMeshBatchEnd = drawingPolicyLink->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
+			for ( MeshBatchList_t::const_iterator itMeshBatch = drawingPolicyLink->meshBatchList.begin(), itMeshBatchEnd = drawingPolicyLink->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
 			{
 				// If in mesh batch not exist instance - continue to next step
 				if ( itMeshBatch->numInstances <= 0 )
@@ -496,7 +496,7 @@ public:
 	}
 
 private:
-	FMapDrawData		meshes;						/**< Map of meshes sorted by materials for draw */
+	MapDrawData_t		meshes;						/**< Map of meshes sorted by materials for draw */
 };
 
 /**
@@ -515,7 +515,7 @@ enum ESceneDepthGroup
  * @ingroup Engine
  * @brief Scene depth group
  */
-struct FSceneDepthGroup
+struct SSceneDepthGroup
 {
 	/**
 	 * @brief Clear
@@ -546,39 +546,39 @@ struct FSceneDepthGroup
 
 	// Simple elements use only for debug and WorldEd
 #if !SHIPPING_BUILD
-	FBatchedSimpleElements								simpleElements;			/**< Batched simple elements (lines, points, etc) */
+	CBatchedSimpleElements								simpleElements;			/**< Batched simple elements (lines, points, etc) */
 #endif // !SHIPPING_BUILD
 
-	FMeshDrawList< FStaticMeshDrawPolicy >				dynamicMeshElements;	/**< Draw list of dynamic meshes */
-	FMeshDrawList< FStaticMeshDrawPolicy >				staticMeshDrawList;		/**< Draw list of static meshes */
-	FMeshDrawList< FStaticMeshDrawPolicy >				spriteDrawList;			/**< Draw list of sprites */
+	CMeshDrawList< CStaticMeshDrawPolicy >				dynamicMeshElements;	/**< Draw list of dynamic meshes */
+	CMeshDrawList< CStaticMeshDrawPolicy >				staticMeshDrawList;		/**< Draw list of static meshes */
+	CMeshDrawList< CStaticMeshDrawPolicy >				spriteDrawList;			/**< Draw list of sprites */
 };
 
 /**
  * @ingroup Engine
  * @brief Base implementation of the scene manager
  */
-class FBaseScene
+class CBaseScene
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FBaseScene() {}
+	virtual ~CBaseScene() {}
 
 	/**
 	 * @brief Add new primitive component to scene
 	 *
 	 * @param InPrimitive Primitive component to add
 	 */
-	virtual void AddPrimitive( class LPrimitiveComponent* InPrimitive ) {}
+	virtual void AddPrimitive( class CPrimitiveComponent* InPrimitive ) {}
 
 	/**
 	 * @brief Remove primitive component from scene
 	 *
 	 * @param InPrimitive Primitive component to remove
 	 */
-	virtual void RemovePrimitive( class LPrimitiveComponent* InPrimitive ) {}
+	virtual void RemovePrimitive( class CPrimitiveComponent* InPrimitive ) {}
 
 	/**
 	 * @brief Clear scene
@@ -590,7 +590,7 @@ public:
 	 * 
 	 * @param InSceneView Current view of scene
 	 */
-	virtual void BuildSDGs( const FSceneView& InSceneView ) {}
+	virtual void BuildSDGs( const CSceneView& InSceneView ) {}
 
 	/**
 	 * @brief Clear all instances in SDGs
@@ -602,27 +602,27 @@ public:
  * @ingroup Engine
  * @brief Main of scene manager containing all primitive components
  */
-class FScene : public FBaseScene
+class CScene : public CBaseScene
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FScene();
+	virtual ~CScene();
 
 	/**
 	 * @brief Add new primitive component to scene
 	 *
 	 * @param InPrimitive Primitive component to add
 	 */
-	virtual void AddPrimitive( class LPrimitiveComponent* InPrimitive ) override;
+	virtual void AddPrimitive( class CPrimitiveComponent* InPrimitive ) override;
 
 	/**
 	 * @brief Remove primitive component from scene
 	 *
 	 * @param InPrimitive Primitive component to remove
 	 */
-	virtual void RemovePrimitive( class LPrimitiveComponent* InPrimitive ) override;
+	virtual void RemovePrimitive( class CPrimitiveComponent* InPrimitive ) override;
 
 	/**
 	 * @brief Clear scene
@@ -634,7 +634,7 @@ public:
 	 *
 	 * @param InSceneView Current view of scene
 	 */
-	virtual void BuildSDGs( const FSceneView& InSceneView ) override;
+	virtual void BuildSDGs( const CSceneView& InSceneView ) override;
 
 	/**
 	 * @brief Clear all instances in SDGs
@@ -647,7 +647,7 @@ public:
 	 * @param InSDGType SDG type
 	 * @return Return reference to depth group
 	 */
-	FORCEINLINE FSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType )
+	FORCEINLINE SSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType )
 	{
 		check( InSDGType < SDG_Max );
 		return SDGs[ InSDGType ];
@@ -659,28 +659,28 @@ public:
 	 * @param InSDGType SDG type
 	 * @return Return reference to depth group
 	 */
-	FORCEINLINE const FSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType ) const
+	FORCEINLINE const SSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType ) const
 	{
 		check( InSDGType < SDG_Max );
 		return SDGs[ InSDGType ];
 	}
 
 private:
-	FSceneDepthGroup							SDGs[ SDG_Max ];			/**< Scene depth groups */
-	std::list< LPrimitiveComponentRef >			primitives;					/**< List of primitives on scene */
+	SSceneDepthGroup							SDGs[ SDG_Max ];			/**< Scene depth groups */
+	std::list< PrimitiveComponentRef_t >		primitives;					/**< List of primitives on scene */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, ESceneDepthGroup& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESceneDepthGroup& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ESceneDepthGroup& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESceneDepthGroup& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* )&InValue, sizeof( InValue ) );

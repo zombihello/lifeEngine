@@ -20,7 +20,7 @@
  * Container for store bulk data in archive
  */
 template< typename TType >
-class FBulkData
+class ÑBulkData
 {
 public:
 	/**
@@ -28,7 +28,7 @@ public:
 	 * 
 	 * @param[in] InFlags Compression flags (see ECompressionFlags)
 	 */
-	FORCEINLINE FBulkData( ECompressionFlags InFlags = CF_ZLIB ) : compressionFlags( InFlags )
+	FORCEINLINE ÑBulkData( ECompressionFlags InFlags = CF_ZLIB ) : compressionFlags( InFlags )
 	{}
 
 	/**
@@ -64,7 +64,7 @@ public:
 	 * 
 	 * @param[in] InArchive Archive
 	 */
-	void Serialize( FArchive& InArchive )
+	void Serialize( CArchive& InArchive )
 	{
 		if ( InArchive.Ver() < VER_CompressedZlib )
 		{
@@ -176,7 +176,7 @@ public:
 	/**
 	 * Operator of copy
 	 */
-	FORCEINLINE FBulkData<TType>& operator=( const std::vector<TType>& InOther )
+	FORCEINLINE ÑBulkData<TType>& operator=( const std::vector<TType>& InOther )
 	{
 		data = InOther;
 		return *this;
@@ -192,14 +192,14 @@ private:
 //
 
 template< typename TType >
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FBulkData< TType >& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, ÑBulkData< TType >& InValue )
 {
 	InValue.Serialize( InArchive );
 	return InArchive;
 }
 
 template< typename TType >
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FBulkData< TType >& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ÑBulkData< TType >& InValue )
 {
 	check( InArchive.IsSaving() );
 	InValue.Serialize( InArchive );

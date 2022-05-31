@@ -18,7 +18,7 @@
  * @ingroup D3D11RHI
  * @brief Class for work with DirectX 11 viewport
  */
-class FD3D11Viewport : public FBaseViewportRHI
+class CD3D11Viewport : public CBaseViewportRHI
 {
 public:
 	/**
@@ -28,12 +28,12 @@ public:
 	 * @param[in] InWidth Width of viewport
 	 * @param[in] InHeight Height of viewport
 	 */
-											FD3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight );
+											CD3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight );
 
 	/**
 	 * @brief Destructor
 	 */
-											~FD3D11Viewport();
+											~CD3D11Viewport();
 
 	/**
 	 * @brief Presents the swap chain
@@ -67,10 +67,10 @@ public:
 	 * @breif Get surface of viewport
 	 * @return Pointer to surface of viewport
 	 */
-	virtual FSurfaceRHIRef					GetSurface() const override;
+	virtual SurfaceRHIRef_t					GetSurface() const override;
 
 private:
-	FSurfaceRHIRef				backBuffer;					/**< Pointer to back buffer */
+	SurfaceRHIRef_t				backBuffer;					/**< Pointer to back buffer */
 	IDXGISwapChain*				dxgiSwapChain;				/**< DXGI swap chain */
 	uint32						width;						/**< Width of viewport */
 	uint32						height;						/**< Height of viewport */

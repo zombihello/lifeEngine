@@ -9,18 +9,18 @@
 #include "Render/VertexFactory/DynamicMeshVertexFactory.h"
 #endif // !SHIPPING_BUILD
 
-FMaterial::FMaterial() :
-	FAsset( AT_Material ),
+CMaterial::CMaterial() :
+	CAsset( AT_Material ),
 	isNeedUpdateShaderMap( true ),
 	isTwoSided( false ),
 	isWireframe( false ),
 	usage( MU_AllMeshes )
 {}
 
-FMaterial::~FMaterial()
+CMaterial::~CMaterial()
 {}
 
-void FMaterial::Serialize( class FArchive& InArchive )
+void CMaterial::Serialize( class CArchive& InArchive )
 {
 	if ( InArchive.Ver() < VER_ShaderMap )
 	{
@@ -32,14 +32,14 @@ void FMaterial::Serialize( class FArchive& InArchive )
 		isNeedUpdateShaderMap = true;
 	}
 
-	FAsset::Serialize( InArchive );
+	CAsset::Serialize( InArchive );
 	InArchive << isTwoSided;
 	InArchive << isWireframe;
 	InArchive << usage;
 
 	if ( InArchive.Ver() < VER_RemovedShadersTypeFromMaterial )
 	{
-		class FShaderMetaType*		shadersType[ SF_NumDrawFrequencies ];
+		class CShaderMetaType*		shadersType[ SF_NumDrawFrequencies ];
 		appMemzero( shadersType, sizeof( shadersType ) );
 
 		for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )
@@ -53,7 +53,7 @@ void FMaterial::Serialize( class FArchive& InArchive )
 	InArchive << textureParameters;
 }
 
-FShader* FMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
+CShader* CMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
 {
 	check( InShaderFrequency < SF_NumDrawFrequencies );
 	if ( isNeedUpdateShaderMap )
@@ -61,7 +61,7 @@ FShader* FMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InSh
 		CacheShaderMap();
 	}
 
-	FMeshShaderMap::const_iterator		itVT = shaderMap.find( InVertexFactoryHash );
+	MeshShaderMap_t::const_iterator		itVT = shaderMap.find( InVertexFactoryHash );
 	if ( itVT == shaderMap.end() )
 	{
 		return nullptr;
@@ -69,7 +69,7 @@ FShader* FMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InSh
 	return itVT->second[ InShaderFrequency ];
 }
 
-void FMaterial::CacheShaderMap()
+void CMaterial::CacheShaderMap()
 {
 	if ( !isNeedUpdateShaderMap )
 	{
@@ -78,7 +78,7 @@ void FMaterial::CacheShaderMap()
 
 	// If material usage for render static mesh
 	{
-		const uint64			vertexFactoryHash = FStaticMeshVertexFactory::staticType.GetHash();
+		const uint64			vertexFactoryHash = CStaticMeshVertexFactory::staticType.GetHash();
 		if ( usage & MU_StaticMesh )
 		{	
 			shaderMap[ vertexFactoryHash ] = GetMeshShaders( vertexFactoryHash );
@@ -91,7 +91,7 @@ void FMaterial::CacheShaderMap()
 
 	// If material usage for render sprite mesh
 	{
-		const uint64			vertexFactoryHash = FSpriteVertexFactory::staticType.GetHash();
+		const uint64			vertexFactoryHash = CSpriteVertexFactory::staticType.GetHash();
 		if ( usage & MU_Sprite )
 		{
 			shaderMap[ vertexFactoryHash ] = GetMeshShaders( vertexFactoryHash );
@@ -106,7 +106,7 @@ void FMaterial::CacheShaderMap()
 #if !SHIPPING_BUILD
 	// Dynamic mesh
 	{
-		const uint64			vertexFactoryHash = FDynamicMeshVertexFactory::staticType.GetHash();
+		const uint64			vertexFactoryHash = CDynamicMeshVertexFactory::staticType.GetHash();
 		shaderMap[ vertexFactoryHash ] = GetMeshShaders( vertexFactoryHash );
 	}
 #endif // !SHIPPING_BUILD
@@ -114,14 +114,14 @@ void FMaterial::CacheShaderMap()
 	isNeedUpdateShaderMap = false;
 }
 
-std::vector< FShader* > FMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) const
+std::vector< CShader* > CMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) const
 {
-	std::vector< FShader* >		result;
+	std::vector< CShader* >		result;
 	result.resize( SF_NumDrawFrequencies );
 
 	for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )
 	{
-		const FShaderMetaType*		shaderType = GetShaderType( ( EShaderFrequency )index );
+		const CShaderMetaType*		shaderType = GetShaderType( ( EShaderFrequency )index );
 		if ( !shaderType || InVertexFactoryHash == ( uint32 )INVALID_HASH )
 		{
 			continue;
@@ -133,7 +133,7 @@ std::vector< FShader* > FMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) 
 	return result;
 }
 
-bool FMaterial::GetScalarParameterValue( const std::wstring& InParameterName, float& OutValue ) const
+bool CMaterial::GetScalarParameterValue( const std::wstring& InParameterName, float& OutValue ) const
 {
 	auto		itFind = scalarParameters.find( InParameterName );
 	if ( itFind == scalarParameters.end() )
@@ -146,7 +146,7 @@ bool FMaterial::GetScalarParameterValue( const std::wstring& InParameterName, fl
 	return true;
 }
 
-bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, TAssetHandle<FTexture2D>& OutValue ) const
+bool CMaterial::GetTextureParameterValue( const std::wstring& InParameterName, TAssetHandle<CTexture2D>& OutValue ) const
 {
 	auto		itFind = textureParameters.find( InParameterName );
 	if ( itFind == textureParameters.end() )
@@ -159,12 +159,12 @@ bool FMaterial::GetTextureParameterValue( const std::wstring& InParameterName, T
 	return itFind->second.IsAssetValid();
 }
 
-bool FMaterial::GetVectorParameterValue( const std::wstring& InParameterName, FVector4D& OutValue ) const
+bool CMaterial::GetVectorParameterValue( const std::wstring& InParameterName, Vector4D& OutValue ) const
 {
 	auto		itFind = vectorParameters.find( InParameterName );
 	if ( itFind == vectorParameters.end() )
 	{
-		OutValue = FVector4D( 0.f, 0.f, 0.f, 0.f );
+		OutValue = Vector4D( 0.f, 0.f, 0.f, 0.f );
 		return false;
 	}
 
@@ -172,7 +172,7 @@ bool FMaterial::GetVectorParameterValue( const std::wstring& InParameterName, FV
 	return true;
 }
 
-void FMaterial::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
+void CMaterial::GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
 {
 	// Fill set of dependent assets
 	if ( InFilter == AT_Unknown || InFilter == AT_Texture2D )
@@ -189,17 +189,17 @@ void FMaterial::GetDependentAssets( FSetDependentAssets& OutDependentAssets, EAs
 	}
 }
 
-void FMaterial::ReloadDependentAssets( bool InForce /* = false */ )
+void CMaterial::ReloadDependentAssets( bool InForce /* = false */ )
 {
 	for ( auto itTexture = textureParameters.begin(), itTextureEnd = textureParameters.end(); itTexture != itTextureEnd; ++itTexture )
 	{
-		TAssetHandle<FAsset>		assetHandle = itTexture->second;
+		TAssetHandle<CAsset>		assetHandle = itTexture->second;
 		if ( !assetHandle.IsValid() || assetHandle.IsAssetValid() )
 		{
 			continue;
 		}
 
-		TSharedPtr<FAssetReference>	assetReference = itTexture->second.GetReference();
+		TSharedPtr<SAssetReference>	assetReference = itTexture->second.GetReference();
 		itTexture->second			= GPackageManager->FindAsset( assetReference->guidPackage, assetReference->guidAsset, assetReference->type );
 	}
 }

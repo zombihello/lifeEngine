@@ -22,22 +22,22 @@
  * @ingroup Engine
  * @brief A map of shader parameter names to registers allocated to that parameter
  */
-class FShaderParameterMap
+class CShaderParameterMap
 {
 public:
-	struct FParameterAllocation
+	struct SParameterAllocation
 	{
 		/**
-		 * @brief Construct a new FParameterAllocation object
+		 * @brief Construct a new SParameterAllocation object
 		 */
-		FParameterAllocation() :
+		SParameterAllocation() :
 			isBound( false )
 		{}
 
 		/**
 		 * Overload operator << for serialize
 		 */
-		FORCEINLINE friend FArchive& operator<<( FArchive& InAr, FParameterAllocation& InParameterAllocation )
+		FORCEINLINE friend CArchive& operator<<( CArchive& InAr, SParameterAllocation& InParameterAllocation )
 		{
 			return InAr << InParameterAllocation.bufferIndex << InParameterAllocation.baseIndex << InParameterAllocation.size << InParameterAllocation.samplerIndex << InParameterAllocation.isBound;
 		}
@@ -45,7 +45,7 @@ public:
 		/**
 		 * Overload operator << for serialize
 		 */
-		FORCEINLINE friend FArchive& operator<<( FArchive& InAr, const FParameterAllocation& InParameterAllocation )
+		FORCEINLINE friend CArchive& operator<<( CArchive& InAr, const SParameterAllocation& InParameterAllocation )
 		{
 			return InAr << InParameterAllocation.bufferIndex << InParameterAllocation.baseIndex << InParameterAllocation.size << InParameterAllocation.samplerIndex << InParameterAllocation.isBound;
 		}
@@ -83,7 +83,7 @@ public:
 	/**
 	 * Overload operator << for serialize
 	 */
-	FORCEINLINE friend FArchive& operator<<( FArchive& InAr, FShaderParameterMap& InShaderParameterMap )
+	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, CShaderParameterMap& InShaderParameterMap )
 	{
 		return InAr << InShaderParameterMap.parameterMap;
 	}
@@ -91,52 +91,52 @@ public:
 	/**
 	 * Overload operator << for serialize
 	 */
-	FORCEINLINE friend FArchive& operator<<( FArchive& InAr, const FShaderParameterMap& InShaderParameterMap )
+	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, const CShaderParameterMap& InShaderParameterMap )
 	{
 		return InAr << InShaderParameterMap.parameterMap;
 	}
 
 private:
-	std::unordered_map< std::wstring, FParameterAllocation >		parameterMap;		/**< Parameter map */
+	std::unordered_map< std::wstring, SParameterAllocation >		parameterMap;		/**< Parameter map */
 };
 
 /**
  * @ingroup Engine 
  * @brief Class of serialize shader cache
  */
-class FShaderCache
+class CShaderCache
 {
 public:
 	/**
 	 * @brief Struct of shader cache item
 	 */
-	struct FShaderCacheItem
+	struct SShaderCacheItem
 	{
 		/**
 		 * @brief Serialize
 		 * @param[in] InArchive Archive
 		 */
-		void						Serialize( FArchive& InArchive );
+		void						Serialize( CArchive& InArchive );
 
 		std::wstring				name;				/**< Name of class shader */
 		EShaderFrequency			frequency;			/**< Frequency of shader */
 		uint64						vertexFactoryHash;	/**< Vertex factory hash */
-		FBulkData< byte >			code;				/**< Byte code of shader */
+		ÑBulkData< byte >			code;				/**< Byte code of shader */
 		uint32						numInstructions;	/**< Number instructions in shader */
-		FShaderParameterMap			parameterMap;		/**< Parameter map */
+		CShaderParameterMap			parameterMap;		/**< Parameter map */
 	};
 
 	/**
 	 * @brief Serialize
 	 * @param[in] InArchive Archive
 	 */
-	void													Serialize( FArchive& InArchive );
+	void													Serialize( CArchive& InArchive );
 
 	/**
 	 * @brief Add to cache compiled shader
 	 * @param[in] InShaderCacheItem Shader cache item
 	 */
-	FORCEINLINE void										Add( const FShaderCacheItem& InShaderCacheItem )
+	FORCEINLINE void										Add( const SShaderCacheItem& InShaderCacheItem )
 	{
 		items.push_back( InShaderCacheItem );
 		itemsMap[ InShaderCacheItem.vertexFactoryHash ].insert( InShaderCacheItem.name );
@@ -146,7 +146,7 @@ public:
 	 * @brief Get array of items shader cache
 	 * @return Return const reference to array of items shader cache
 	 */
-	FORCEINLINE const std::vector< FShaderCacheItem >&		GetItems() const
+	FORCEINLINE const std::vector< SShaderCacheItem >&		GetItems() const
 	{
 		return items;
 	}
@@ -176,7 +176,7 @@ public:
 	}
 
 private:
-	std::vector< FShaderCacheItem >											items;		/**< Array of items shader cache */
+	std::vector< SShaderCacheItem >											items;		/**< Array of items shader cache */
 	std::unordered_map< uint64, std::unordered_set< std::wstring > >		itemsMap;	/**< Map of items separated by vertex factory. Need for check on exist in cache */
 };
 

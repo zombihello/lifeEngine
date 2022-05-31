@@ -871,7 +871,7 @@ bool appImGUIInit()
 {
 	check( GWindow );
 
-    SDL_Window*         sdlWindow = static_cast< FWindowsWindow* >( GWindow )->GetSDLWindow();
+    SDL_Window*         sdlWindow = static_cast< CWindowsWindow* >( GWindow )->GetSDLWindow();
     bool                result = ImGui_ImplSDL2_Init( sdlWindow, nullptr );
     check( result );
 
@@ -893,7 +893,7 @@ void appImGUIShutdown()
 void appImGUIBeginDrawing()
 {
 	check( GWindow );
-	ImGui_ImplSDL2_NewFrame( static_cast< FWindowsWindow* >( GWindow )->GetSDLWindow() );
+	ImGui_ImplSDL2_NewFrame( static_cast< CWindowsWindow* >( GWindow )->GetSDLWindow() );
 }
 
 /**

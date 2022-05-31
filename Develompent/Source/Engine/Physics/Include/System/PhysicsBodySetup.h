@@ -14,39 +14,39 @@
 
 /**
  * @ingroup Audio
- * @brief Reference to FPhysicsBodySetup
+ * @brief Reference to CPhysicsBodySetup
  */
-typedef TRefCountPtr< class FPhysicsBodySetup >				FPhysicsBodySetupRef;
+typedef TRefCountPtr< class CPhysicsBodySetup >				PhysicsBodySetupRef_t;
 
 /**
  * @ingroup Physics
  * @brief BodySetup contains all collision information that is associated with a single asset
  */
-class FPhysicsBodySetup : public FRefCounted
+class CPhysicsBodySetup : public CRefCounted
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FPhysicsBodySetup();
+	CPhysicsBodySetup();
 
 	/**
 	 * @brief Destructor
 	 */
-	~FPhysicsBodySetup();
+	~CPhysicsBodySetup();
 
 	/**
 	 * Serialize
 	 *
 	 * @param[in] InArchive Archive
 	 */
-	void Serialize( class FArchive& InArchive );
+	void Serialize( class CArchive& InArchive );
 
 	/**
 	 * @brief Add box geometry
 	 * @param InBoxGeometry Box geometry
 	 */
-	FORCEINLINE void AddBoxGeometry( const FPhysicsBoxGeometry& InBoxGeometry )
+	FORCEINLINE void AddBoxGeometry( const SPhysicsBoxGeometry& InBoxGeometry )
 	{
 		boxGeometries.push_back( InBoxGeometry );
 	}
@@ -55,7 +55,7 @@ public:
 	 * @brief Remove box geometry
 	 * @param InBoxGeometry Box geometry to remove
 	 */
-	void RemoveBoxGeometry( const FPhysicsBoxGeometry& InBoxGeometry );
+	void RemoveBoxGeometry( const SPhysicsBoxGeometry& InBoxGeometry );
 
 	/**
 	 * @brief Remove box geometry by index
@@ -82,7 +82,7 @@ public:
 	 * @brief Get array of box geometries
 	 * @return Return array of box geometries
 	 */
-	FORCEINLINE const std::vector< FPhysicsBoxGeometry >& GetBoxGeometries() const
+	FORCEINLINE const std::vector< SPhysicsBoxGeometry >& GetBoxGeometries() const
 	{
 		return boxGeometries;
 	}
@@ -91,13 +91,13 @@ public:
 	 * @brief Get array of box geometries
 	 * @return Return array of box geometries
 	 */
-	FORCEINLINE std::vector< FPhysicsBoxGeometry >& GetBoxGeometries()
+	FORCEINLINE std::vector< SPhysicsBoxGeometry >& GetBoxGeometries()
 	{
 		return boxGeometries;
 	}
 
 private:
-	std::vector< FPhysicsBoxGeometry >		boxGeometries;		/**< Array of box collisions */
+	std::vector< SPhysicsBoxGeometry >		boxGeometries;		/**< Array of box collisions */
 };
 
 #endif // !PHYSICSBODYSETUP_H

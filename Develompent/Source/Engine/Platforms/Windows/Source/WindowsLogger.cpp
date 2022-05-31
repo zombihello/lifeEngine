@@ -51,7 +51,7 @@ const uint16 GLogColors[] =
 /**
  * Constructor
  */
-FWindowsLogger::FWindowsLogger()
+CWindowsLogger::CWindowsLogger()
 	: consoleHandle( nullptr )
 	, archiveLogs( nullptr )
 	, textColor( LC_Default )
@@ -60,13 +60,13 @@ FWindowsLogger::FWindowsLogger()
 /**
  * Destructor
  */
-FWindowsLogger::~FWindowsLogger()
+CWindowsLogger::~CWindowsLogger()
 {}
 
 /**
  * Shows or hides the console window
  */
-void FWindowsLogger::Show( bool InShowWindow )
+void CWindowsLogger::Show( bool InShowWindow )
 {
 #if !NO_LOGGING
 	if ( InShowWindow )
@@ -91,13 +91,13 @@ void FWindowsLogger::Show( bool InShowWindow )
 /**
  * Initialize logger
  */
-void FWindowsLogger::Init()
+void CWindowsLogger::Init()
 {
 #if !NO_LOGGING
 	time_t		timeNow = time( nullptr );
 	tm*			tmTimeNow = localtime( &timeNow );
 
-	std::wstring		logFile = FString::Format( TEXT( "%s/Logs/%s-%i.%02i.%02i-%02i.%02i.%02i.log" ), appGameDir().c_str(), !GIsEditor ? GGameName.c_str() : TEXT( "WorldEd" ), 1900 + tmTimeNow->tm_year, 1 + tmTimeNow->tm_mon, tmTimeNow->tm_mday, tmTimeNow->tm_hour, tmTimeNow->tm_min, tmTimeNow->tm_sec );
+	std::wstring		logFile = ÑString::Format( TEXT( "%s/Logs/%s-%i.%02i.%02i-%02i.%02i.%02i.log" ), appGameDir().c_str(), !GIsEditor ? GGameName.c_str() : TEXT( "WorldEd" ), 1900 + tmTimeNow->tm_year, 1 + tmTimeNow->tm_mon, tmTimeNow->tm_mday, tmTimeNow->tm_hour, tmTimeNow->tm_min, tmTimeNow->tm_sec );
 	archiveLogs = GFileSystem->CreateFileWriter( logFile.c_str(), AW_None );
 	if ( archiveLogs )
 	{
@@ -110,7 +110,7 @@ void FWindowsLogger::Init()
 /**
  * Closes output device and cleans up
  */
-void FWindowsLogger::TearDown()
+void CWindowsLogger::TearDown()
 {
 	Show( false );
 
@@ -121,7 +121,7 @@ void FWindowsLogger::TearDown()
 	}
 }
 
-void FWindowsLogger::SetTextColor( ELogColor InLogColor )
+void CWindowsLogger::SetTextColor( ELogColor InLogColor )
 {
 #if !NO_LOGGING
 	textColor = InLogColor;
@@ -132,7 +132,7 @@ void FWindowsLogger::SetTextColor( ELogColor InLogColor )
 #endif // !NO_LOGGING
 }
 
-void FWindowsLogger::ResetTextColor()
+void CWindowsLogger::ResetTextColor()
 {
 #if !NO_LOGGING
 	textColor = LC_Default;
@@ -146,7 +146,7 @@ void FWindowsLogger::ResetTextColor()
 /**
  * Serialize message
  */
-void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELogCategory InLogCategory )
+void CWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELogCategory InLogCategory )
 {
 	// If console is opened - get current text color
 	// and change to color by event type
@@ -172,7 +172,7 @@ void FWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 		}
 	}
 	
-	std::wstring			message = FString::Format( TEXT( "[%07.2f][%s][%s] %s" ), appSeconds() - GStartTime, GLogTypeNames[ ( uint32 ) InLogType ], GLogCategoryNames[ ( uint32 ) InLogCategory ], InMessage );
+	std::wstring			message = ÑString::Format( TEXT( "[%07.2f][%s][%s] %s" ), appSeconds() - GStartTime, GLogTypeNames[ ( uint32 ) InLogType ], GLogCategoryNames[ ( uint32 ) InLogCategory ], InMessage );
 	std::wstring			finalMessage = message + TEXT( "\n" );
 	wprintf( finalMessage.c_str() );
 

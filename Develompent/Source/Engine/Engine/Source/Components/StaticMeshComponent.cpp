@@ -2,15 +2,15 @@
 #include "Render/Scene.h"
 #include "Render/SceneUtils.h"
 
-IMPLEMENT_CLASS( LStaticMeshComponent )
+IMPLEMENT_CLASS( CStaticMeshComponent )
 
-LStaticMeshComponent::LStaticMeshComponent()
+CStaticMeshComponent::CStaticMeshComponent()
 {}
 
-LStaticMeshComponent::~LStaticMeshComponent()
+CStaticMeshComponent::~CStaticMeshComponent()
 {}
 
-void LStaticMeshComponent::LinkDrawList()
+void CStaticMeshComponent::LinkDrawList()
 {
 	check( scene );
 
@@ -21,21 +21,21 @@ void LStaticMeshComponent::LinkDrawList()
 	}
 
 	// If static mesh is valid - add to scene draw policy link
-	TSharedPtr<FStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
+	TSharedPtr<CStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
 	if ( staticMeshRef )
 	{
 		elementDrawingPolicyLink = staticMeshRef->LinkDrawList( scene->GetSDG( SDG_World ), overrideMaterials );
 	}
 }
 
-void LStaticMeshComponent::UnlinkDrawList()
+void CStaticMeshComponent::UnlinkDrawList()
 {
 	check( scene );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( elementDrawingPolicyLink )
 	{
-		TSharedPtr<FStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
+		TSharedPtr<CStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
 		if ( staticMeshRef )
 		{
 			staticMeshRef->UnlinkDrawList( scene->GetSDG( SDG_World ), elementDrawingPolicyLink );
@@ -47,7 +47,7 @@ void LStaticMeshComponent::UnlinkDrawList()
 	}
 }
 
-void LStaticMeshComponent::AddToDrawList( const class FSceneView& InSceneView )
+void CStaticMeshComponent::AddToDrawList( const class CSceneView& InSceneView )
 {
 	// If primitive is empty - exit from method
 	if ( !bIsDirtyDrawingPolicyLink && !elementDrawingPolicyLink )
@@ -68,10 +68,10 @@ void LStaticMeshComponent::AddToDrawList( const class FSceneView& InSceneView )
 	}
 
 	// Add to mesh batch new instance
-	const FMatrix				transformationMatrix = GetComponentTransform().ToMatrix();
+	const Matrix				transformationMatrix = GetComponentTransform().ToMatrix();
 	for ( uint32 index = 0, count = elementDrawingPolicyLink->meshBatchLinks.size(); index < count; ++index )
 	{
-		const FMeshBatch*		meshBatch = elementDrawingPolicyLink->meshBatchLinks[ index ];
+		const SMeshBatch*		meshBatch = elementDrawingPolicyLink->meshBatchLinks[ index ];
 		++meshBatch->numInstances;
 		meshBatch->transformationMatrices.push_back( transformationMatrix );
 	}

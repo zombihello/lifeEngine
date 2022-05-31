@@ -11,7 +11,7 @@
 #include "Widgets/ViewportWidget.h"
 #include "EngineDefines.h"
 
-WeViewportWidget::WeViewportWidget( QWidget* InParent /* = nullptr */, FViewportClient* InViewportClient /* = nullptr */, bool InDeleteViewportClient /* = false */ )
+WeViewportWidget::WeViewportWidget( QWidget* InParent /* = nullptr */, CViewportClient* InViewportClient /* = nullptr */, bool InDeleteViewportClient /* = false */ )
 	: QWidget( InParent )
 	, bEnabled( false )
 	, bInTick( false )

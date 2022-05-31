@@ -17,15 +17,15 @@
  * @ingroup Engine
  * @brief Component for moving character
  */
-class LCharacterMovementComponent : public LActorComponent
+class CCharacterMovementComponent : public CActorComponent
 {
-	DECLARE_CLASS( LCharacterMovementComponent, LActorComponent )
+	DECLARE_CLASS( CCharacterMovementComponent, CActorComponent )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
-	LCharacterMovementComponent();
+	CCharacterMovementComponent();
 
 	/**
 	 * Begins Play for the component.
@@ -44,7 +44,7 @@ public:
 	 * @brief Serialize object
 	 * @param[in] InArchive Archive for serialize
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Walk
@@ -52,7 +52,7 @@ public:
 	 * @param InWorldDirection Direction of move in world space
 	 * @param InScale Scale of move
 	 */
-	void Walk( const FVector& InWorldDirection, float InScale );
+	void Walk( const Vector& InWorldDirection, float InScale );
 
 	/**
 	 * @brief Jump
@@ -153,7 +153,7 @@ private:
 	 * @param InScale Scale of move
 	 * @return Return TRUE if character can walk, else return FALSE
 	 */
-	bool IsCanWalk( const FVector& InWorldDirection, float InScale ) const;
+	bool IsCanWalk( const Vector& InWorldDirection, float InScale ) const;
 
 	bool							bOnGround;			/**< Is character on ground */
 	bool							bJump;				/**< Is character is jump */
@@ -161,7 +161,7 @@ private:
 	float							walkSpeed;			/**< Walk speed */
 	float							walkSpeedInFly;		/**< Walk speed in fly */
 	float							jumpSpeed;			/**< Jump speed */
-	FPhysicsBodyInstance*			bodyInstance;		/**< Pointer to body instance */
+	CPhysicsBodyInstance*			bodyInstance;		/**< Pointer to body instance */
 	class ACharacter*				ownerCharacter;		/**< Owner character */
 };
 

@@ -1,14 +1,14 @@
 #include "Render/Shaders/BasePassShader.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
-IMPLEMENT_SHADER_TYPE(, FBasePassVertexShader, TEXT( "BasePassVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, false );
-IMPLEMENT_SHADER_TYPE(, FBasePassPixelShader, TEXT( "BasePassPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, false );
+IMPLEMENT_SHADER_TYPE(, CBasePassVertexShader, TEXT( "BasePassVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, false );
+IMPLEMENT_SHADER_TYPE(, CBasePassPixelShader, TEXT( "BasePassPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, false );
 
-FBasePassVertexShader::FBasePassVertexShader()
+CBasePassVertexShader::CBasePassVertexShader()
     : vertexFactoryParameters( nullptr )
 {}
 
-FBasePassVertexShader::~FBasePassVertexShader()
+CBasePassVertexShader::~CBasePassVertexShader()
 {
     if ( vertexFactoryParameters )
     {
@@ -16,25 +16,25 @@ FBasePassVertexShader::~FBasePassVertexShader()
     }
 }
 
-void FBasePassVertexShader::Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem )
+void CBasePassVertexShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
 {
-    FShader::Init( InShaderCacheItem );
+    CShader::Init( InShaderCacheItem );
 
     // Bind shader parameters
-    FVertexFactoryMetaType*			vertexFactoryType = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
+    CVertexFactoryMetaType*			vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
     check( vertexFactoryType );
 
     vertexFactoryParameters = vertexFactoryType->CreateShaderParameters( SF_Vertex );
     vertexFactoryParameters->Bind( InShaderCacheItem.parameterMap );
 }
 
-void FBasePassVertexShader::SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const
+void CBasePassVertexShader::SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const
 {
     check( vertexFactoryParameters );
     vertexFactoryParameters->Set( InDeviceContextRHI, InVertexFactory );
 }
 
-void FBasePassVertexShader::SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+void CBasePassVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
     check( vertexFactoryParameters );
     vertexFactoryParameters->SetMesh( InDeviceContextRHI, InMesh, InVertexFactory, InView, InNumInstances, InStartInstanceID );

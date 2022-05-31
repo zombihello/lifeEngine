@@ -3,9 +3,9 @@
 #include "Misc/Template.h"
 
 /* Critical section of ring buffer */
-static FCriticalSection			GCriticalSection;
+static ÑCriticalSection			GCriticalSection;
 
-FRingBuffer::FRingBuffer( uint32 InBufferSize, uint32 InAlignment /*= 1*/ ) :
+ÑRingBuffer::ÑRingBuffer( uint32 InBufferSize, uint32 InAlignment /*= 1*/ ) :
 	dataWrittenEvent( nullptr ),
 	alignment( InAlignment )
 {
@@ -14,13 +14,13 @@ FRingBuffer::FRingBuffer( uint32 InBufferSize, uint32 InAlignment /*= 1*/ ) :
 	readPointer = writePointer = data;
 }
 
-FRingBuffer::~FRingBuffer()
+ÑRingBuffer::~ÑRingBuffer()
 {
 	GSynchronizeFactory->Destroy( dataWrittenEvent );
 	delete[] data;	
 }
 
-FRingBuffer::AllocationContext::AllocationContext( FRingBuffer& InRingBuffer, uint32 InAllocationSize ) :
+ÑRingBuffer::ÑAllocationContext::ÑAllocationContext( ÑRingBuffer& InRingBuffer, uint32 InAllocationSize ) :
 	ringBuffer( InRingBuffer )
 {
 	GCriticalSection.Lock();
@@ -68,12 +68,12 @@ FRingBuffer::AllocationContext::AllocationContext( FRingBuffer& InRingBuffer, ui
 	}
 }
 
-FRingBuffer::AllocationContext::~AllocationContext()
+ÑRingBuffer::ÑAllocationContext::~ÑAllocationContext()
 {
 	Commit();
 }
 
-void FRingBuffer::AllocationContext::Commit()
+void ÑRingBuffer::ÑAllocationContext::Commit()
 {
 	if ( allocationStart )
 	{
@@ -87,12 +87,12 @@ void FRingBuffer::AllocationContext::Commit()
 		// Clear the allocation pointer, to signal that it has been committed.
 		allocationStart = nullptr;
 
-		// Lazily create the data-written event. It can't be done in the FRingBuffer constructor because GSynchronizeFactory may not
+		// Lazily create the data-written event. It can't be done in the ÑRingBuffer constructor because GSynchronizeFactory may not
 		// be initialized at that point.
 		if ( !ringBuffer.dataWrittenEvent )
 		{
 			ringBuffer.dataWrittenEvent = GSynchronizeFactory->CreateSynchEvent();
-			checkMsg( ringBuffer.dataWrittenEvent, TEXT( "Failed to create data-write event for FRingBuffer" ) );
+			checkMsg( ringBuffer.dataWrittenEvent, TEXT( "Failed to create data-write event for ÑRingBuffer" ) );
 		}
 
 		// Trigger the data-written event to wake the reader thread.
@@ -100,7 +100,7 @@ void FRingBuffer::AllocationContext::Commit()
 	}
 }
 
-bool FRingBuffer::BeginRead( void*& OutReadPointer, uint32& OutReadSize )
+bool ÑRingBuffer::BeginRead( void*& OutReadPointer, uint32& OutReadSize )
 {
 	// Make a snapshot of a recent value of WritePointer, and use a memory barrier to ensure that reads from the data buffer
 	// will see writes no older than this snapshot of the WritePointer.
@@ -137,12 +137,12 @@ bool FRingBuffer::BeginRead( void*& OutReadPointer, uint32& OutReadSize )
 	return false;
 }
 
-void FRingBuffer::FinishRead( uint32 InReadSize )
+void ÑRingBuffer::FinishRead( uint32 InReadSize )
 {
 	readPointer += Align( InReadSize, alignment );
 }
 
-void FRingBuffer::WaitForRead( uint32 InWaitTime /*= (uint32)-1*/ )
+void ÑRingBuffer::WaitForRead( uint32 InWaitTime /*= (uint32)-1*/ )
 {
 	// If the buffer is empty, wait for the data-written event to be triggered.
 	if ( readPointer == writePointer )

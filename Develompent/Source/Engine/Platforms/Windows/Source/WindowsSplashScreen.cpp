@@ -18,8 +18,8 @@ static std::wstring			GSplashScreenText[ STT_NumTextTypes ];
 static RECT					GSplashScreenTextRects[ STT_NumTextTypes ];
 static HFONT				GSplashScreenSmallTextFontHandle = nullptr;
 static HFONT				GSplashScreenNormalTextFontHandle = nullptr;
-static FCriticalSection		GSplashScreenSynchronizationObject;
-static FEvent*				GThreadInitSyncEvent = nullptr;
+static ÑCriticalSection		GSplashScreenSynchronizationObject;
+static CEvent*				GThreadInitSyncEvent = nullptr;
 
 /**
  * Window's proc for splash screen
@@ -40,7 +40,7 @@ LRESULT CALLBACK SplashScreenWindowProc( HWND InHWND, UINT InMessage, WPARAM InW
 
 		{
 			// Take a critical section since another thread may be trying to set the splash text
-			FScopeLock		scopeLock( GSplashScreenSynchronizationObject );
+			CScopeLock		scopeLock( GSplashScreenSynchronizationObject );
 
 			// Draw splash text
 			for ( int32 curTypeIndex = 0; curTypeIndex < STT_NumTextTypes; ++curTypeIndex )
@@ -294,7 +294,7 @@ void appShowSplash( const tchar* InSplashName )
 {
 	if ( !GIsCommandlet )
 	{
-		GSplashScreenFileName = appGameDir() + FString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
+		GSplashScreenFileName = appGameDir() + ÑString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
 		GThreadInitSyncEvent = GSynchronizeFactory->CreateSynchEvent( true );
 		GSplashScreenThread = CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
 
@@ -337,7 +337,7 @@ void appSetSplashText( const ESplashTextType InType, const tchar* InText )
 		{
 			{
 				// Take a critical section since the splash thread may already be repainting using this text
-				FScopeLock			scopeLock( GSplashScreenSynchronizationObject );
+				CScopeLock			scopeLock( GSplashScreenSynchronizationObject );
 				
 				// Update splash text
 				GSplashScreenText[ InType ] = InText;

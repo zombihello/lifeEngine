@@ -26,10 +26,10 @@ enum ECameraProjectionMode
  * @ingroup Engine
  * Struct of camera view info
  */
-struct FCameraView
+struct SCameraView
 {
-	FVector						location;		/**< Location */
-	FRotator					rotation;		/**< Rotation */
+	Vector						location;		/**< Location */
+	CRotator					rotation;		/**< Rotation */
 	ECameraProjectionMode		projectionMode;	/**< Projection mode */
 	float						fov;			/**< The horizontal field of view (in degrees) in perspective mode (ignored in orthographic mode) */
 	float						orthoWidth;		/**< The desired width (in world units) of the orthographic view (ignored in Perspective mode) */

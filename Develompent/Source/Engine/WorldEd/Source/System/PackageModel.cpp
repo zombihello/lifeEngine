@@ -38,14 +38,14 @@ QVariant WePackageModel::data( const QModelIndex& InIndex, int InRole ) const
 		return QVariant();
 	}
 
-	FAssetInfo		assetInfo;
+	SAssetInfo		assetInfo;
 	package->GetAssetInfo( InIndex.row(), assetInfo );
 
 	switch ( InRole )
 	{
 	case Qt::DisplayRole:
 	case Qt::EditRole:
-		if ( assetInfo.data && ( FAsset* )assetInfo.data->IsDirty() )		// If asset loaded we check is changed in memory. In successed case mark this asset by star
+		if ( assetInfo.data && ( CAsset* )assetInfo.data->IsDirty() )		// If asset loaded we check is changed in memory. In successed case mark this asset by star
 		{
 			return TCHAR_TO_ANSI( ( assetInfo.name + TEXT( "*" ) ).c_str() );
 		}
@@ -100,7 +100,7 @@ void WePackageModel::Refresh()
 	insertRows( 0, numItems, QModelIndex() );
 }
 
-void WePackageModel::SetPackage( FPackage* InPackage )
+void WePackageModel::SetPackage( CPackage* InPackage )
 {
 	if ( package && !package->IsEmpty() )
 	{

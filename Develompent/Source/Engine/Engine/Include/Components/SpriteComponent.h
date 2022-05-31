@@ -24,28 +24,28 @@ enum ESpriteType
   * @ingroup Engine
   * @brief Component for work with sprite
   */
-class LSpriteComponent : public LPrimitiveComponent
+class CSpriteComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( LSpriteComponent, LPrimitiveComponent )
+	DECLARE_CLASS( CSpriteComponent, CPrimitiveComponent )
 
 public:
     /**
      * @brief Constructor
      */
-    LSpriteComponent();
+    CSpriteComponent();
 
 	/**
 	 * @brief Adds mesh batches for draw in scene
 	 *
 	 * @param InSceneView Current view of scene
 	 */
-	virtual void AddToDrawList( const class FSceneView& InSceneView ) override;
+	virtual void AddToDrawList( const class CSceneView& InSceneView ) override;
 
 	/**
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
     /**
      * @brief Set sprite type
@@ -70,7 +70,7 @@ public:
 	 * @brief Set texture rect
 	 * @param InTextureRect Texture rect
 	 */
-	FORCEINLINE void SetTextureRect( const FRectFloat& InTextureRect )
+	FORCEINLINE void SetTextureRect( const RectFloat_t& InTextureRect )
 	{
 		sprite->SetTextureRect( InTextureRect );
 		bIsDirtyDrawingPolicyLink = true;
@@ -80,7 +80,7 @@ public:
 	 * @brief Get texture rect
 	 * @return Return texture rect
 	 */
-	FORCEINLINE const FRectFloat& GetTextureRect() const
+	FORCEINLINE const RectFloat_t& GetTextureRect() const
 	{
 		return sprite->GetTextureRect();
 	}
@@ -89,7 +89,7 @@ public:
 	 * @brief Set sprite size
 	 * @param InSpriteSize Sprite size
 	 */
-	FORCEINLINE void SetSpriteSize( const FVector2D& InSpriteSize )
+	FORCEINLINE void SetSpriteSize( const Vector2D& InSpriteSize )
 	{
 		sprite->SetSpriteSize( InSpriteSize );
 		bIsDirtyDrawingPolicyLink = true;
@@ -99,7 +99,7 @@ public:
 	 * @brief Get sprite size
 	 * @return Return sprite size
 	 */
-	FORCEINLINE const FVector2D& GetSpriteSize() const
+	FORCEINLINE const Vector2D& GetSpriteSize() const
 	{
 		return sprite->GetSpriteSize();
 	}
@@ -108,7 +108,7 @@ public:
 	 * @brief Set material
 	 * @param InMaterial Material
 	 */
-	FORCEINLINE void SetMaterial( const TAssetHandle<FMaterial> InMaterial )
+	FORCEINLINE void SetMaterial( const TAssetHandle<CMaterial> InMaterial )
 	{
 		sprite->SetMaterial( InMaterial );
 		bIsDirtyDrawingPolicyLink = true;
@@ -138,7 +138,7 @@ public:
 	 * @brief Get material
 	 * @return Return pointer to material. If not setted returning nullptr
 	 */
-	FORCEINLINE TAssetHandle<FMaterial> GetMaterial() const
+	FORCEINLINE TAssetHandle<CMaterial> GetMaterial() const
 	{
 		return sprite->GetMaterial();
 	}
@@ -165,12 +165,12 @@ private:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLink			FDrawingPolicyLink;
+	typedef CMeshDrawList< CStaticMeshDrawPolicy >::SDrawingPolicyLink			DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
-	typedef FMeshDrawList< FStaticMeshDrawPolicy >::FDrawingPolicyLinkRef		FDrawingPolicyLinkRef;
+	typedef CMeshDrawList< CStaticMeshDrawPolicy >::DrawingPolicyLinkRef_t		DrawingPolicyLinkRef_t;
 
 	/**
 	 * @brief Calculate transformation matrix
@@ -178,7 +178,7 @@ private:
 	 * @param InSceneView Current view of scene
 	 * @param OutResult Output calculated transformation matrix
 	 */
-	void CalcTransformationMatrix( const class FSceneView& InSceneView, FMatrix& OutResult ) const;
+	void CalcTransformationMatrix( const class CSceneView& InSceneView, Matrix& OutResult ) const;
 
 	/**
 	 * @brief Adds a draw policy link in SDGs
@@ -193,9 +193,9 @@ private:
 	bool						bFlipVertical;					/**< Is need flip sprite by vertical */
 	bool						bFlipHorizontal;				/**< Is need flip sprite by horizontal */
     ESpriteType					type;							/**< Sprite type */
-	FSpriteRef					sprite;							/**< Sprite mesh */
-	FDrawingPolicyLinkRef		drawingPolicyLink;				/**< Reference to drawing policy link in scene */
-	const FMeshBatch*			meshBatchLink;					/**< Reference to mesh batch in drawing policy link */
+	SpriteRef_t					sprite;							/**< Sprite mesh */
+	DrawingPolicyLinkRef_t		drawingPolicyLink;				/**< Reference to drawing policy link in scene */
+	const SMeshBatch*			meshBatchLink;					/**< Reference to mesh batch in drawing policy link */
 };
 
 //
@@ -205,7 +205,7 @@ private:
 /**
  * Overload operator << for serialize ESpriteType
  */
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, ESpriteType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESpriteType& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( ESpriteType ) );
 	return InArchive;
@@ -214,7 +214,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, ESpriteType& InValue )
 /**
  * Overload operator << for serialize ESpriteType
  */
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const ESpriteType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESpriteType& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( ESpriteType ) );

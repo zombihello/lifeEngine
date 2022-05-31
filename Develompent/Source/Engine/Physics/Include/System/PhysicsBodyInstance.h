@@ -16,18 +16,18 @@
  * @ingroup Physics
  * @brief Container for a physics representation of an object
  */
-class FPhysicsBodyInstance
+class CPhysicsBodyInstance
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FPhysicsBodyInstance();
+	CPhysicsBodyInstance();
 
 	/**
 	 * @brief Destructor
 	 */
-	~FPhysicsBodyInstance();
+	~CPhysicsBodyInstance();
 
 	/**
 	 * @brief Initialize rigid body
@@ -36,7 +36,7 @@ public:
 	 * @param InTransform Initial transform of body
 	 * @param InPrimComp PrimitiveComponent containing this body
 	 */
-	void InitBody( FPhysicsBodySetup* InBodySetup, const FTransform& InTransform, class LPrimitiveComponent* InPrimComp );
+	void InitBody( CPhysicsBodySetup* InBodySetup, const CTransform& InTransform, class CPrimitiveComponent* InPrimComp );
 
 	/**
 	 * @brief Terminates the body, releasing resources
@@ -49,9 +49,9 @@ public:
 	 * @param InAngularImpulse Angular impulse
 	 * @param InIsWake Also wake up the body
 	 */
-	FORCEINLINE void AddAngularImpulse( const FVector& InAngularImpulse, bool InIsWake )
+	FORCEINLINE void AddAngularImpulse( const Vector& InAngularImpulse, bool InIsWake )
 	{
-		FPhysicsInterface::AddAngularImpulse( handle, InAngularImpulse, InIsWake );
+		CPhysicsInterface::AddAngularImpulse( handle, InAngularImpulse, InIsWake );
 	}
 
 	/**
@@ -60,9 +60,9 @@ public:
 	 * @param InImpulse Impulse
 	 * @param InIsWake Also wake up the body
 	 */
-	FORCEINLINE void AddImpulse( const FVector& InImpulse, bool InIsWake )
+	FORCEINLINE void AddImpulse( const Vector& InImpulse, bool InIsWake )
 	{
-		FPhysicsInterface::AddImpulse( handle, InImpulse, InIsWake );
+		CPhysicsInterface::AddImpulse( handle, InImpulse, InIsWake );
 	}
 
 	/**
@@ -72,9 +72,9 @@ public:
 	 * @param InLocation Location
 	 * @param InIsWake Also wake up the body
 	 */
-	FORCEINLINE void AddImpulseAtLocation( const FVector& InImpulse, const FVector& InLocation, bool InIsWake )
+	FORCEINLINE void AddImpulseAtLocation( const Vector& InImpulse, const Vector& InLocation, bool InIsWake )
 	{
-		FPhysicsInterface::AddImpulseAtLocation( handle, InImpulse, InLocation, InIsWake );
+		CPhysicsInterface::AddImpulseAtLocation( handle, InImpulse, InLocation, InIsWake );
 	}
 
 	/**
@@ -83,9 +83,9 @@ public:
 	 * @param InForce Force
 	 * @param InIsWake Also wake up the body
 	 */
-	FORCEINLINE void AddForce( const FVector& InForce, bool InIsWake )
+	FORCEINLINE void AddForce( const Vector& InForce, bool InIsWake )
 	{
-		FPhysicsInterface::AddForce( handle, InForce, InIsWake );
+		CPhysicsInterface::AddForce( handle, InForce, InIsWake );
 	}
 
 	/**
@@ -95,9 +95,9 @@ public:
 	 * @param InLocation Location
 	 * @param InIsWake Also wake up the body
 	 */
-	FORCEINLINE void AddForceAtLocation( const FVector& InForce, const FVector& InLocation, bool InIsWake )
+	FORCEINLINE void AddForceAtLocation( const Vector& InForce, const Vector& InLocation, bool InIsWake )
 	{
-		FPhysicsInterface::AddForceAtLocation( handle, InForce, InLocation, InIsWake );
+		CPhysicsInterface::AddForceAtLocation( handle, InForce, InLocation, InIsWake );
 	}
 
 	/**
@@ -106,9 +106,9 @@ public:
 	 * @param InVelocity New linear velocity to apply to physics
 	 * @param InIsAddToCurrent If true, InVelocity is added to the existing velocity of the body
 	 */
-	FORCEINLINE void SetLinearVelocity( const FVector& InVelocity, bool InIsAddToCurrent = false )
+	FORCEINLINE void SetLinearVelocity( const Vector& InVelocity, bool InIsAddToCurrent = false )
 	{
-		FPhysicsInterface::SetLinearVelocity( handle, InVelocity, InIsAddToCurrent );
+		CPhysicsInterface::SetLinearVelocity( handle, InVelocity, InIsAddToCurrent );
 	}
 
 	/**
@@ -183,16 +183,16 @@ public:
 	 * @brief Get LE world transform
 	 * @return Return LE world transform
 	 */
-	FORCEINLINE FTransform GetLEWorldTransform() const
+	FORCEINLINE CTransform GetLEWorldTransform() const
 	{
-		return FPhysicsInterface::GetTransform( handle );
+		return CPhysicsInterface::GetTransform( handle );
 	}
 
 	/**
 	 * @brief Get body setup
 	 * @return Return body setup
 	 */
-	FORCEINLINE FPhysicsBodySetupRef GetBodySetup() const
+	FORCEINLINE PhysicsBodySetupRef_t GetBodySetup() const
 	{
 		return bodySetup;
 	}
@@ -201,9 +201,9 @@ public:
 	 * @brief Get linear velocity
 	 * @return Return actor linear velocity
 	 */
-	FORCEINLINE FVector GetLinearVelocity()
+	FORCEINLINE Vector GetLinearVelocity()
 	{
-		return FPhysicsInterface::GetLinearVelocity( handle );
+		return CPhysicsInterface::GetLinearVelocity( handle );
 	}
 
 	/**
@@ -212,7 +212,7 @@ public:
 	 */
 	FORCEINLINE bool IsValid() const
 	{
-		return FPhysicsInterface::IsValidActor( handle );
+		return CPhysicsInterface::IsValidActor( handle );
 	}
 
 	/**
@@ -237,7 +237,7 @@ public:
 	 * @brief Get handle to physics actor
 	 * @return Return physics actor handle
 	 */
-	FORCEINLINE FPhysicsActorHandle GetActorHandle() const
+	FORCEINLINE PhysicsActorHandle_t GetActorHandle() const
 	{
 		return handle;
 	}
@@ -246,7 +246,7 @@ public:
 	 * @brief Get owner primitive component
 	 * @return Return pointer to owner primitive component, if not exist return NULL
 	 */
-	FORCEINLINE TRefCountPtr< class LPrimitiveComponent > GetOwnerComponent() const
+	FORCEINLINE TRefCountPtr< class CPrimitiveComponent > GetOwnerComponent() const
 	{
 		return ownerComponent;
 	}
@@ -295,9 +295,9 @@ private:
 	bool											bDirty;				/**< Is body is dirty and need reinit hem */
 	uint32											lockFlags;			/**< Lock flags */
 	float											mass;				/**< Mass of body */
-	TRefCountPtr< class LPrimitiveComponent >		ownerComponent;		/**< PrimitiveComponent containing this body */	
-	FPhysicsBodySetupRef							bodySetup;			/**< Body setup */
-	FPhysicsActorHandle								handle;				/**< Handle to physics actor */
+	TRefCountPtr< class CPrimitiveComponent >		ownerComponent;		/**< PrimitiveComponent containing this body */	
+	PhysicsBodySetupRef_t							bodySetup;			/**< Body setup */
+	PhysicsActorHandle_t							handle;				/**< Handle to physics actor */
 };
 
 #endif // !PHYSICSBODYINSTANCE_H

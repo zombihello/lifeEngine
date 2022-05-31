@@ -45,20 +45,20 @@ enum ETextureCreateFlags
  * @ingroup Engine
  * @brief Base class of surface for RHI
  */
-class FBaseSurfaceRHI : public FBaseResourceRHI
+class CBaseSurfaceRHI : public CBaseResourceRHI
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual					~FBaseSurfaceRHI() {}
+	virtual					~CBaseSurfaceRHI() {}
 };
 
 /**
  * @ingroup Engine
  * Base class of texture for RHI
  */
-class FBaseTextureRHI : public FBaseResourceRHI
+class CBaseTextureRHI : public CBaseResourceRHI
 {
 public:
 	/**
@@ -70,7 +70,7 @@ public:
 	 * @param[in] InFormat Pixel format in texture
 	 * @param[in] InFlags Texture create flags (use ETextureCreateFlags)
 	 */
-	FBaseTextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) :
+	CBaseTextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) :
 		sizeX( InSizeX ),
 		sizeY( InSizeY ),
 		numMips( InNumMips ),
@@ -81,7 +81,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FBaseTextureRHI() {}
+	virtual ~CBaseTextureRHI() {}
 
 	/**
 	 * Get width of texture
@@ -140,13 +140,13 @@ protected:
 // Overloaded operators for serialize in archive
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, EPixelFormat& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, EPixelFormat& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const EPixelFormat& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const EPixelFormat& InValue )
 {
 	check( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );

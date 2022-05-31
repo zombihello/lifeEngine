@@ -1,6 +1,6 @@
 #include "System/BaseFileSystem.h"
 
-bool FBaseFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree )
+bool CBaseFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree )
 {
 	// Support code for removing a directory tree.
 	check( InIsTree );

@@ -62,14 +62,14 @@ enum ECompilerFlags
  * @ingroup Engine
  * @brief The environment used to compile a shader
  */
-struct FShaderCompilerEnvironment
+struct SShaderCompilerEnvironment
 {
 	/**
 	 * @brief Constructor
 	 * @param[in] InFrequency Shader frequency
 	 * @param[in] InVertexFactoryFileName Vertex factory file name
 	 */
-	FShaderCompilerEnvironment( EShaderFrequency InFrequency, const std::wstring InVertexFactoryFileName = TEXT( "" ) ) :
+	SShaderCompilerEnvironment( EShaderFrequency InFrequency, const std::wstring InVertexFactoryFileName = TEXT( "" ) ) :
 		vertexFactoryFileName( InVertexFactoryFileName )
 	{
 		difinitions.insert( std::make_pair( TEXT( "VERTEXSHADER" ), InFrequency == SF_Vertex ? TEXT( "1" ) : TEXT( "0" ) ) );
@@ -84,7 +84,7 @@ struct FShaderCompilerEnvironment
 	 * @brief Constructor of copy
 	 * @param[in] InCopy Copy
 	 */
-	FShaderCompilerEnvironment( const FShaderCompilerEnvironment& InCopy )
+	SShaderCompilerEnvironment( const SShaderCompilerEnvironment& InCopy )
 	{
 		vertexFactoryFileName = InCopy.vertexFactoryFileName;
 		includeFiles = InCopy.includeFiles;
@@ -102,17 +102,17 @@ struct FShaderCompilerEnvironment
  * @ingroup Engine
  * @brief The output of the shader compiler
  */
-struct FShaderCompilerOutput
+struct SShaderCompilerOutput
 {
 	/**
 	 * @brief Constructor
 	 */
-	FShaderCompilerOutput() :
+	SShaderCompilerOutput() :
 		numInstructions( 0 )
 	{}
 
 	std::vector< byte >			code;				/**< Output compiled code of shader */
-	FShaderParameterMap			parameterMap;		/**< Shader parameter map */
+	CShaderParameterMap			parameterMap;		/**< Shader parameter map */
 	uint32						numInstructions;	/**< Number instructions in shader */
 };
 
@@ -120,7 +120,7 @@ struct FShaderCompilerOutput
  * @ingroup Engine
  * @brief Class-manager for compiler shaders
  */
-class FShaderCompiler
+class CShaderCompiler
 {
 public:
 	/**
@@ -141,7 +141,7 @@ public:
 	 * @param InOnlyGlobals			Compile only global shaders
 	 * @return Return TRUE if all shader compile successed, else return FALSE
 	 */
-	bool CompileAll( FShaderCache& InOutShaderCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals = false );
+	bool CompileAll( CShaderCache& InOutShaderCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals = false );
 
 	/**
 	 * Compile shader
@@ -152,7 +152,7 @@ public:
 	 * @param[in] InVertexFactoryType Vertex factory type
 	 * @return Return true if shader compile successed, else return false
 	 */
-	bool CompileShader( class FShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class FShaderCache& InOutShaderCache, class FVertexFactoryMetaType* InVertexFactoryType = nullptr );
+	bool CompileShader( class CShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class CShaderCache& InOutShaderCache, class CVertexFactoryMetaType* InVertexFactoryType = nullptr );
 };
 
 #endif // !WITH_EDITOR

@@ -19,16 +19,16 @@
   * @ingroup Engine
   * Vertex type for sprite
   */
-struct FSpriteVertexType
+struct SSpriteVertexType
 {
-	FVector4D		position;		/**< Position vertex */
-	FVector2D		texCoord;		/**< Texture coords */
-	FVector4D		normal;			/**< Normal */
+	Vector4D		position;		/**< Position vertex */
+	Vector2D		texCoord;		/**< Texture coords */
+	Vector4D		normal;			/**< Normal */
 
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const FSpriteVertexType& InOther ) const
+	bool FORCEINLINE operator==( const SSpriteVertexType& InOther ) const
 	{
 		return position == InOther.position &&
 			texCoord == InOther.texCoord &&
@@ -40,7 +40,7 @@ struct FSpriteVertexType
  * @ingroup Engine
  * The sprite vertex declaration resource type
  */
-class FSpriteVertexDeclaration : public FRenderResource
+class CSpriteVertexDeclaration : public CRenderResource
 {
 public:
 	/**
@@ -61,39 +61,39 @@ public:
 	 * @brief Get vertex declaration RHI
 	 * @return Return vertex declaration RHI
 	 */
-	FORCEINLINE FVertexDeclarationRHIRef GetVertexDeclarationRHI()
+	FORCEINLINE VertexDeclarationRHIRef_t GetVertexDeclarationRHI()
 	{
 		return vertexDeclarationRHI;
 	}
 
 private:
-	FVertexDeclarationRHIRef		vertexDeclarationRHI;		/**< Vertex declaration RHI */
+	VertexDeclarationRHIRef_t		vertexDeclarationRHI;		/**< Vertex declaration RHI */
 };
 
 /**
  * @ingroup Engine
  * Global resource of sprite vertex declaration
  */
-extern TGlobalResource< FSpriteVertexDeclaration >			GSpriteVertexDeclaration;
+extern TGlobalResource< CSpriteVertexDeclaration >			GSpriteVertexDeclaration;
 
 /**
  * @ingroup Engine
  * @brief Vertex factory shader parameters for sprites
  */
-class FSpriteVertexShaderParameters : public FGeneralVertexShaderParameters
+class CSpriteVertexShaderParameters : public CGeneralVertexShaderParameters
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FSpriteVertexShaderParameters();
+	CSpriteVertexShaderParameters();
 
 	/**
 	 * @brief Bind shader parameters
 	 *
 	 * @param InParameterMap Shader parameter map
 	 */
-	virtual void Bind( const class FShaderParameterMap& InParameterMap ) override;
+	virtual void Bind( const class CShaderParameterMap& InParameterMap ) override;
 
 	/**
 	 * @brief Set any shader data specific to this vertex factory
@@ -101,22 +101,22 @@ public:
 	 * @param InDeviceContextRHI RHI device context
 	 * @param InVertexFactory Vertex factory
 	 */
-	virtual void Set( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory ) const override;
+	virtual void Set( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory ) const override;
 
 private:
-	FShaderParameter		flipVerticalParameter;		/**< Flag is need flip by vertical parameter */
-	FShaderParameter		flipHorizontalParameter;	/**< Flag is need flip by horizontal parameter */
-	FShaderParameter		textureRectParameter;		/**< Texture rect parameter */
-	FShaderParameter		spriteSizeParameter;		/**< Sprite size parameter */
+	CShaderParameter		flipVerticalParameter;		/**< Flag is need flip by vertical parameter */
+	CShaderParameter		flipHorizontalParameter;	/**< Flag is need flip by horizontal parameter */
+	CShaderParameter		textureRectParameter;		/**< Texture rect parameter */
+	CShaderParameter		spriteSizeParameter;		/**< Sprite size parameter */
 };
 
 /**
  * @ingroup Engine
  * Vertex factory for render sprites
  */
-class FSpriteVertexFactory : public FVertexFactory
+class CSpriteVertexFactory : public CVertexFactory
 {
-	DECLARE_VERTEX_FACTORY_TYPE( FSpriteVertexFactory )
+	DECLARE_VERTEX_FACTORY_TYPE( CSpriteVertexFactory )
 
 public:
 	enum EStreamSourceSlot
@@ -128,7 +128,7 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	FSpriteVertexFactory();
+	CSpriteVertexFactory();
 
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -146,7 +146,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetupInstancing( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 	/**
 	 * @brief Get type hash
@@ -160,13 +160,13 @@ public:
 	 * @param InShaderFrequency Shader frequency
 	 * @return Return instance of vertex factory shader parameters
 	 */
-	static FVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
+	static CVertexFactoryShaderParameters* ConstructShaderParameters( EShaderFrequency InShaderFrequency );
 
 	/**
 	 * @brief Set texture rect
 	 * @param InTextureRect Texture rect
 	 */
-	FORCEINLINE void SetTextureRect( const FRectFloat& InTextureRect )
+	FORCEINLINE void SetTextureRect( const RectFloat_t& InTextureRect )
 	{
 		textureRect = InTextureRect;
 	}
@@ -175,7 +175,7 @@ public:
 	 * @brief Get texture rect
 	 * @return Return texture rect
 	 */
-	FORCEINLINE const FRectFloat& GetTextureRect() const
+	FORCEINLINE const RectFloat_t& GetTextureRect() const
 	{
 		return textureRect;
 	}
@@ -184,7 +184,7 @@ public:
 	 * @brief Set sprite size
 	 * @param InSpriteSize Sprite size
 	 */
-	FORCEINLINE void SetSpriteSize( const FVector2D& InSpriteSize )
+	FORCEINLINE void SetSpriteSize( const Vector2D& InSpriteSize )
 	{
 		spriteSize = InSpriteSize;
 	}
@@ -211,7 +211,7 @@ public:
 	 * @brief Get sprite size
 	 * @return Return sprite size
 	 */
-	FORCEINLINE const FVector2D& GetSpriteSize() const
+	FORCEINLINE const Vector2D& GetSpriteSize() const
 	{
 		return spriteSize;
 	}
@@ -237,15 +237,15 @@ public:
 private:
 	bool				bFlipVertical;		/**< Is need flip sprite by vertical */
 	bool				bFlipHorizontal;	/**< Is need flip sprite by horizontal */
-	FRectFloat			textureRect;		/**< Texture rect */
-	FVector2D			spriteSize;			/**< Sprite size */
+	RectFloat_t			textureRect;		/**< Texture rect */
+	Vector2D			spriteSize;			/**< Sprite size */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, FSpriteVertexType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, SSpriteVertexType& InValue )
 {
 	InArchive << InValue.position;
 	InArchive << InValue.texCoord;
@@ -253,7 +253,7 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, FSpriteVertexType& InValu
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const FSpriteVertexType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SSpriteVertexType& InValue )
 {
 	InArchive << InValue.position;
 	InArchive << InValue.texCoord;

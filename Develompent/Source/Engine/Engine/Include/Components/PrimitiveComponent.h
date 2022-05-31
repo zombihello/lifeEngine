@@ -18,28 +18,28 @@
  * @ingroup Engine
  * Typedef of pointer to primitive component
  */
-typedef TRefCountPtr< class LPrimitiveComponent >		LPrimitiveComponentRef;
+typedef TRefCountPtr< class CPrimitiveComponent >		PrimitiveComponentRef_t;
 
 /**
  * @ingroup Engine
  * PrimitiveComponents are SceneComponents that contain or generate some sort of geometry, generally to be rendered or used as collision data.
  */
-class LPrimitiveComponent : public LSceneComponent
+class CPrimitiveComponent : public CSceneComponent
 {
-	DECLARE_CLASS( LPrimitiveComponent, LSceneComponent )
+	DECLARE_CLASS( CPrimitiveComponent, CSceneComponent )
 
 public:
-	friend class FScene;			// For add and remove primitive in scene
+	friend class CScene;			// For add and remove primitive in scene
 
 	/**
 	 * @brief Constructor
 	 */
-	LPrimitiveComponent();
+	CPrimitiveComponent();
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~LPrimitiveComponent();
+	virtual ~CPrimitiveComponent();
 
 	/**
 	 * Begins Play for the component.
@@ -58,14 +58,14 @@ public:
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Adds mesh batches for draw in scene
 	 * 
      * @param InSceneView Current view of scene
 	 */
-	virtual void AddToDrawList( const class FSceneView& InSceneView );
+	virtual void AddToDrawList( const class CSceneView& InSceneView );
 
 	/**
 	 * @brief Init physics component
@@ -96,7 +96,7 @@ public:
 	 * @brief Set body setup
 	 * @param InBodySetup Body setup
 	 */
-	FORCEINLINE void SetBodySetup( FPhysicsBodySetup* InBodySetup )
+	FORCEINLINE void SetBodySetup( CPhysicsBodySetup* InBodySetup )
 	{
 		bodySetup = InBodySetup;
 	}
@@ -114,7 +114,7 @@ public:
 	 * @brief Get bound box
 	 * @return Return bound box
 	 */
-	FORCEINLINE const FBox& GetBoundBox() const
+	FORCEINLINE const ÑBox& GetBoundBox() const
 	{
 		return boundbox;
 	}
@@ -123,7 +123,7 @@ public:
 	 * @brief Get body setup
 	 * @return Return body setup
 	 */
-	FORCEINLINE FPhysicsBodySetupRef GetBodySetup() const
+	FORCEINLINE PhysicsBodySetupRef_t GetBodySetup() const
 	{
 		return bodySetup;
 	}
@@ -132,7 +132,7 @@ public:
 	 * @brief Get body instance
 	 * @return Return body instance
 	 */
-	FORCEINLINE const FPhysicsBodyInstance& GetBodyInstance() const
+	FORCEINLINE const CPhysicsBodyInstance& GetBodyInstance() const
 	{
 		return bodyInstance;
 	}
@@ -141,7 +141,7 @@ public:
 	 * @brief Get body instance
 	 * @return Return body instance
 	 */
-	FORCEINLINE FPhysicsBodyInstance& GetBodyInstance()
+	FORCEINLINE CPhysicsBodyInstance& GetBodyInstance()
 	{
 		return bodyInstance;
 	}
@@ -150,7 +150,7 @@ public:
 	 * @brief Get scene
 	 * @return Return scene. If primitive not added to scene return NULL
 	 */
-	FORCEINLINE class FScene* GetScene() const
+	FORCEINLINE class CScene* GetScene() const
 	{
 		return scene;
 	}
@@ -168,10 +168,10 @@ protected:
 
 	bool						bVisibility;					/**< Is primitive visibility */
 	bool						bIsDirtyDrawingPolicyLink;		/**< Is dirty drawing policy link. If flag equal true - need update drawing policy link */
-	FBox						boundbox;						/**< Bound box */
-	FPhysicsBodySetupRef		bodySetup;						/**< Physics body setup */
-	FPhysicsBodyInstance		bodyInstance;					/**< Physics body instance */	
-	class FScene*				scene;							/**< The current scene where the primitive is located  */
+	ÑBox						boundbox;						/**< Bound box */
+	PhysicsBodySetupRef_t		bodySetup;						/**< Physics body setup */
+	CPhysicsBodyInstance		bodyInstance;					/**< Physics body instance */	
+	class CScene*				scene;							/**< The current scene where the primitive is located  */
 };
 
 #endif // !PRIMITIVECOMPONENT_H

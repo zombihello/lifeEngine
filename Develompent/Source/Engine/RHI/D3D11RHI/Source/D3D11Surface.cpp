@@ -59,17 +59,17 @@ FORCEINLINE DXGI_FORMAT FindDXGIFormat( DXGI_FORMAT InFormat, bool InIsSRGB )
 	return InFormat;
 }
 
-FD3D11Surface::FD3D11Surface( ID3D11RenderTargetView* InRenderTargetView ) 
+CD3D11Surface::CD3D11Surface( ID3D11RenderTargetView* InRenderTargetView ) 
 	: d3d11ShaderResourceView( nullptr )
 	, d3d11RenderTargetView( InRenderTargetView )
 	, d3d11DepthStencilView( nullptr )
 {}
 
-FD3D11Surface::FD3D11Surface( FTexture2DRHIParamRef InResolveTargetTexture ) 
+CD3D11Surface::CD3D11Surface( Texture2DRHIParamRef_t InResolveTargetTexture ) 
 	: d3d11ShaderResourceView( nullptr )
 	, d3d11RenderTargetView( nullptr )
 	, d3d11DepthStencilView( nullptr )
-	, resolveTarget2D( ( FD3D11Texture2DRHI* )InResolveTargetTexture )
+	, resolveTarget2D( ( CD3D11Texture2DRHI* )InResolveTargetTexture )
 {
 	check( resolveTarget2D );
 	d3d11ShaderResourceView = resolveTarget2D->GetShaderResourceView();
@@ -92,7 +92,7 @@ FD3D11Surface::FD3D11Surface( FTexture2DRHIParamRef InResolveTargetTexture )
 	}
 }
 
-FD3D11Surface::~FD3D11Surface()
+CD3D11Surface::~CD3D11Surface()
 {
 	if ( d3d11ShaderResourceView )
 	{
@@ -112,14 +112,14 @@ FD3D11Surface::~FD3D11Surface()
 	resolveTarget2D.SafeRelease();
 }
 
-FD3D11TextureRHI::FD3D11TextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) :
-	FBaseTextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags ),
+CD3D11TextureRHI::CD3D11TextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) :
+	CBaseTextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags ),
 	d3d11ShaderResourceView( nullptr ),
 	d3d11RenderTargetView( nullptr ),
 	d3d11DepthStencilView( nullptr )
 {}
 
-FD3D11TextureRHI::~FD3D11TextureRHI()
+CD3D11TextureRHI::~CD3D11TextureRHI()
 {
 	if ( d3d11ShaderResourceView )
 	{
@@ -137,8 +137,8 @@ FD3D11TextureRHI::~FD3D11TextureRHI()
 	}
 }
 
-FD3D11Texture2DRHI::FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags, void* InData /*= nullptr*/ ) :
-	FD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags ),
+CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags, void* InData /*= nullptr*/ ) :
+	CD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags ),
 	d3d11Texture2D( nullptr )
 {
 	DXGI_FORMAT					platformFormat = FindDXGIFormat( ( DXGI_FORMAT )GPixelFormats[ InFormat ].platformFormat, InFlags & TCF_sRGB );
@@ -171,7 +171,7 @@ FD3D11Texture2DRHI::FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 		}
 	}
 
-	ID3D11Device*	d3d11Device = ( ( FD3D11RHI* )GRHI )->GetD3D11Device();
+	ID3D11Device*	d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
 	check( d3d11Device );
 
 	std::vector< D3D11_SUBRESOURCE_DATA >	subResourceData;
@@ -276,20 +276,20 @@ FD3D11Texture2DRHI::FD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 	}
 }
 
-FD3D11Texture2DRHI::FD3D11Texture2DRHI( ID3D11Texture2D* InD3D11Texture2D, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) 
-	: FD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags )
+CD3D11Texture2DRHI::CD3D11Texture2DRHI( ID3D11Texture2D* InD3D11Texture2D, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) 
+	: CD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags )
 	, d3d11Texture2D( InD3D11Texture2D )
 {
 	check( d3d11Texture2D );
 	d3d11Texture2D->AddRef();
 }
 
-FD3D11Texture2DRHI::~FD3D11Texture2DRHI()
+CD3D11Texture2DRHI::~CD3D11Texture2DRHI()
 {
 	d3d11Texture2D->Release();
 }
 
-void FD3D11Texture2DRHI::Lock( FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, FLockedData& OutLockedData )
+void CD3D11Texture2DRHI::Lock( CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, SLockedData& OutLockedData )
 {
 	check( OutLockedData.data == nullptr );
 
@@ -315,17 +315,17 @@ void FD3D11Texture2DRHI::Lock( FBaseDeviceContextRHI* InDeviceContext, uint32 In
 	{
 		// Calculate the subresource index corresponding to the specified mip-map
 		const uint32			subresource = D3D11CalcSubresource( InMipIndex, 0, numMips );
-		checkMsg( subresource < numMips, TEXT( "FD3D11Texture2DRHI::Lock; ERROR! Subresource is out of range" ) );
+		checkMsg( subresource < numMips, TEXT( "CD3D11Texture2DRHI::Lock; ERROR! Subresource is out of range" ) );
 
 		// If we're reading from the texture, or writing to a dynamic texture, we create a staging resource, 
 		// copy the texture contents to it, and map it.
 		
 		// Create the staging texture
-		FD3D11Texture2DRHI*				stagingResource = CreateStagingResource( InDeviceContext, mipSizeX, mipSizeY, subresource, InIsDataWrite, InIsUseCPUShadow );
+		CD3D11Texture2DRHI*				stagingResource = CreateStagingResource( InDeviceContext, mipSizeX, mipSizeY, subresource, InIsDataWrite, InIsUseCPUShadow );
 		OutLockedData.stagingResource = stagingResource;
 
 		// Map the staging resource, and return the mapped address
-		ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+		ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 		D3D11_MAPPED_SUBRESOURCE		d3d11MappedTexture2D;
 
 #if DO_CHECK
@@ -342,17 +342,17 @@ void FD3D11Texture2DRHI::Lock( FBaseDeviceContextRHI* InDeviceContext, uint32 In
 	}
 }
 
-void FD3D11Texture2DRHI::Unlock( FBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, FLockedData& InLockedData, bool InDiscardUpdate /*= false*/ )
+void CD3D11Texture2DRHI::Unlock( CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, SLockedData& InLockedData, bool InDiscardUpdate /*= false*/ )
 {
 	bool			isNeedUpdate = ( !InLockedData.stagingResource.IsValid() || flags & TCF_Dynamic ) && !InDiscardUpdate;
 	if ( isNeedUpdate )
 	{
 		// Calculate the subresource index corresponding to the specified mip-map
 		const uint32			subresource = D3D11CalcSubresource( InMipIndex, 0, numMips );
-		checkMsg( subresource < numMips, TEXT( "FD3D11Texture2DRHI::Unlock; ERROR! Subresource is out of range" ) );
+		checkMsg( subresource < numMips, TEXT( "CD3D11Texture2DRHI::Unlock; ERROR! Subresource is out of range" ) );
 
 		// If we're writing, we need to update the subresource
-		ID3D11DeviceContext*			d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+		ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 		d3d11DeviceContext->UpdateSubresource( d3d11Texture2D, subresource, nullptr, InLockedData.data, InLockedData.pitch, 0 );
 	}
 
@@ -365,7 +365,7 @@ void FD3D11Texture2DRHI::Unlock( FBaseDeviceContextRHI* InDeviceContext, uint32 
 	InLockedData.data = nullptr;
 }
 
-FD3D11Texture2DRHI* FD3D11Texture2DRHI::CreateStagingResource( class FBaseDeviceContextRHI* InDeviceContext, uint32 InMipSizeX, uint32 InMipSizeY, uint32 InSubresource, bool InIsDataWrite, bool InIsUseCPUShadow )
+CD3D11Texture2DRHI* CD3D11Texture2DRHI::CreateStagingResource( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMipSizeX, uint32 InMipSizeY, uint32 InSubresource, bool InIsDataWrite, bool InIsUseCPUShadow )
 {
 	check( d3d11Texture2D );
 	D3D11_TEXTURE2D_DESC			d3d11StagingTextureDesc;
@@ -381,10 +381,10 @@ FD3D11Texture2DRHI* FD3D11Texture2DRHI::CreateStagingResource( class FBaseDevice
 	ID3D11Texture2D*		d3d11StagingTexture2D = nullptr;
 
 #if DO_CHECK
-	HRESULT					result = ( ( FD3D11RHI* )GRHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
+	HRESULT					result = ( ( CD3D11RHI* )GRHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
 	check( result == S_OK );
 #else
-	( ( FD3D11RHI* )GRHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
+	( ( CD3D11RHI* )GRHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
 #endif // DO_CHECK
 
 #if !SHIPPING_BUILD
@@ -394,9 +394,9 @@ FD3D11Texture2DRHI* FD3D11Texture2DRHI::CreateStagingResource( class FBaseDevice
 	// Copy the mip-map data from the real resource into the staging resource
 	if ( !InIsDataWrite || InIsUseCPUShadow )
 	{
-		ID3D11DeviceContext*		d3d11DeviceContext = ( ( FD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+		ID3D11DeviceContext*		d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 		d3d11DeviceContext->CopySubresourceRegion( d3d11StagingTexture2D, 0, 0, 0, 0, d3d11Texture2D, InSubresource, nullptr );
 	}
 
-	return new FD3D11Texture2DRHI( d3d11StagingTexture2D, InMipSizeX, InMipSizeY, 1, format, TCF_None );
+	return new CD3D11Texture2DRHI( d3d11StagingTexture2D, InMipSizeX, InMipSizeY, 1, format, TCF_None );
 }

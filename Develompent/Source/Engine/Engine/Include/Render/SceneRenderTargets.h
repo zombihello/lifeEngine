@@ -29,13 +29,13 @@ enum ESceneRenderTargetTypes
  * @ingroup Engine
  * Render targets for scene rendering
  */
-class FSceneRenderTargets : public FRenderResource
+class CSceneRenderTargets : public CRenderResource
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FSceneRenderTargets();
+	CSceneRenderTargets();
 
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -63,7 +63,7 @@ public:
 	 * @brief Get texture of scene color
 	 * @return Return texture of scene color
 	 */
-	FORCEINLINE FTexture2DRHIRef GetSceneColorTexture() const
+	FORCEINLINE Texture2DRHIRef_t GetSceneColorTexture() const
 	{
 		return renderTargets[ SRTT_SceneColor ].texture;
 	}
@@ -72,7 +72,7 @@ public:
 	 * @brief Get surface of scene color
 	 * @return Return surface of scene color
 	 */
-	FORCEINLINE FSurfaceRHIRef GetSceneColorSurface() const
+	FORCEINLINE SurfaceRHIRef_t GetSceneColorSurface() const
 	{
 		return renderTargets[ SRTT_SceneColor ].surface;
 	}
@@ -81,7 +81,7 @@ public:
 	 * @brief Get texture of scene depth Z
 	 * @return Return texture of scene depth Z
 	 */
-	FORCEINLINE FTexture2DRHIRef GetSceneDepthZTexture() const
+	FORCEINLINE Texture2DRHIRef_t GetSceneDepthZTexture() const
 	{
 		return renderTargets[ SRTT_SceneDepthZ ].texture;
 	}
@@ -90,7 +90,7 @@ public:
 	 * @brief Get surface of scene depth Z
 	 * @return Return surface of scene depth Z
 	 */
-	FORCEINLINE FSurfaceRHIRef GetSceneDepthZSurface() const
+	FORCEINLINE SurfaceRHIRef_t GetSceneDepthZSurface() const
 	{
 		return renderTargets[ SRTT_SceneDepthZ ].surface;
 	}
@@ -99,17 +99,17 @@ private:
 	/**
 	 * Element of scene render target
 	 */
-	struct FSceneRenderTargetItem
+	struct SSceneRenderTargetItem
 	{
-		FTexture2DRHIRef		texture;											/**< Texture for resolving to */
-		FSurfaceRHIRef			surface;											/**< Surface to render to */
+		Texture2DRHIRef_t		texture;											/**< Texture for resolving to */
+		SurfaceRHIRef_t			surface;											/**< Surface to render to */
 	};
 
 	uint32						bufferSizeX;										/**< Size of buffer by X */
 	uint32						bufferSizeY;										/**< Size of buffer by Y */
-	FSceneRenderTargetItem		renderTargets[ SRTT_MaxSceneRenderTargets ];		/**< Static array of all the scene render targets */
+	SSceneRenderTargetItem		renderTargets[ SRTT_MaxSceneRenderTargets ];		/**< Static array of all the scene render targets */
 };
 
-extern TGlobalResource< FSceneRenderTargets >		GSceneRenderTargets;			/**< The global render targets used for scene rendering */
+extern TGlobalResource< CSceneRenderTargets >		GSceneRenderTargets;			/**< The global render targets used for scene rendering */
 
 #endif // !SCENERENDERTARGETS_H

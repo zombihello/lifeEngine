@@ -17,18 +17,18 @@
 // IMGUI DRAW DATA
 //
 
-FImGUIDrawData::FImGUIDrawData() :
+CImGUIDrawData::CImGUIDrawData() :
 	isFree( true )
 {
 	appMemzero( &drawData, sizeof( ImDrawData ) );
 }
 
-FImGUIDrawData::~FImGUIDrawData()
+CImGUIDrawData::~CImGUIDrawData()
 {
 	Clear();
 }
 
-void FImGUIDrawData::Clear()
+void CImGUIDrawData::Clear()
 {
 	check( isFree );
 	if ( drawData.CmdLists )
@@ -45,7 +45,7 @@ void FImGUIDrawData::Clear()
 	drawData.Clear();
 }
 
-void FImGUIDrawData::SetDrawData( ImDrawData* InDrawData )
+void CImGUIDrawData::SetDrawData( ImDrawData* InDrawData )
 {
 	check( isFree && InDrawData && InDrawData->Valid );
 	Clear();
@@ -64,19 +64,19 @@ void FImGUIDrawData::SetDrawData( ImDrawData* InDrawData )
 // IMGUI WINDOW
 //
 
-FImGUIWindow::FImGUIWindow( ImGuiViewport* InViewport ) :
+ÑImGUIWindow::ÑImGUIWindow( ImGuiViewport* InViewport ) :
 	imguiViewport( InViewport ),
 	indexCurrentBuffer( 0 )
 {
 	for ( uint32 index = 0; index < IMGUI_DRAWBUFFERS_COUNT; ++index )
 	{
-		drawDataBuffers[ index ] = new FImGUIDrawData();
+		drawDataBuffers[ index ] = new CImGUIDrawData();
 	}
 }
 
-void FImGUIWindow::Tick()
+void ÑImGUIWindow::Tick()
 {
-	FImGUIDrawData*				currentBuffer = drawDataBuffers[ indexCurrentBuffer ];
+	CImGUIDrawData*				currentBuffer = drawDataBuffers[ indexCurrentBuffer ];
 	while ( !currentBuffer->IsFree() )
 	{
 		for ( uint32 index = 0; index < IMGUI_DRAWBUFFERS_COUNT; ++index, indexCurrentBuffer = ++indexCurrentBuffer % IMGUI_DRAWBUFFERS_COUNT )
@@ -95,8 +95,8 @@ void FImGUIWindow::Tick()
 	// If main window - ViewportRHI is nullptr; If child window - ViewportRHI is valid
 	if ( !imguiViewport->ViewportRHI )
 	{
-		UNIQUE_RENDER_COMMAND_ONEPARAMETER( FMainWindow_DrawImGUICommand,
-											TRefCountPtr< FImGUIDrawData >, imGuiDrawData, currentBuffer,
+		UNIQUE_RENDER_COMMAND_ONEPARAMETER( ÑMainWindow_DrawImGUICommand,
+											TRefCountPtr< CImGUIDrawData >, imGuiDrawData, currentBuffer,
 											{
 												GRHI->DrawImGUI( GRHI->GetImmediateContext(), ( ImDrawData* )imGuiDrawData->GetDrawData() );
 												imGuiDrawData->MarkFree();
@@ -104,17 +104,17 @@ void FImGUIWindow::Tick()
 	}
 	else
 	{
-		UNIQUE_RENDER_COMMAND_THREEPARAMETER( FChildWindow_DrawImGUICommand,
-											  TRefCountPtr< FImGUIDrawData >, imGuiDrawData, currentBuffer,
-											  FViewportRHIRef, viewportRHI, imguiViewport->ViewportRHI,
+		UNIQUE_RENDER_COMMAND_THREEPARAMETER( ÑChildWindow_DrawImGUICommand,
+											  TRefCountPtr< CImGUIDrawData >, imGuiDrawData, currentBuffer,
+											  ViewportRHIRef_t, viewportRHI, imguiViewport->ViewportRHI,
 											  bool, isNeedClear, !( imguiViewport->Flags & ImGuiViewportFlags_NoRendererClear ),
 											  {
-													FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+													CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 													GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
 													
 													if ( isNeedClear )
 													{
-														immediateContext->ClearSurface( viewportRHI->GetSurface(), FColor::black );
+														immediateContext->ClearSurface( viewportRHI->GetSurface(), ÑColor::black );
 													}
 													GRHI->DrawImGUI( immediateContext, ( ImDrawData* )imGuiDrawData->GetDrawData() );
 													
@@ -131,20 +131,20 @@ void FImGUIWindow::Tick()
 /**
  * Constructor
  */
-FImGUIEngine::FImGUIEngine() :
+ÑImGUIEngine::ÑImGUIEngine() :
 	imguiContext( nullptr )
 {}
 
 /**
  * Destructor
  */
-FImGUIEngine::~FImGUIEngine()
+ÑImGUIEngine::~ÑImGUIEngine()
 {}
 
 /**
  * Initialize ImGUI
  */
-void FImGUIEngine::Init()
+void ÑImGUIEngine::Init()
 {
 	// Create ImGUI context
 	imguiContext = ImGui::CreateContext();
@@ -159,7 +159,7 @@ void FImGUIEngine::Init()
 	check( result );
 
 	// Initialize RHI for ImGUI
-	UNIQUE_RENDER_COMMAND( FInitImGUICommand,
+	UNIQUE_RENDER_COMMAND( ÑInitImGUICommand,
 		{
 			GRHI->InitImGUI( GRHI->GetImmediateContext() );
 		} );
@@ -174,14 +174,14 @@ void FImGUIEngine::Init()
 /**
  * Shutdown ImGUI on platform
  */
-void FImGUIEngine::Shutdown()
+void ÑImGUIEngine::Shutdown()
 {
 	if ( !imguiContext )
 	{
 		return;
 	}
 
-	UNIQUE_RENDER_COMMAND( FShutdownImGUICommand,
+	UNIQUE_RENDER_COMMAND( ÑShutdownImGUICommand,
 		{
 			GRHI->ShutdownImGUI( GRHI->GetImmediateContext() );
 		} );
@@ -195,7 +195,7 @@ void FImGUIEngine::Shutdown()
 /**
  * Process event for ImGUI
  */
-void FImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void ÑImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	appImGUIProcessEvent( InWindowEvent );
 }
@@ -203,22 +203,22 @@ void FImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 /**
  * Begin draw commands for render ImGUI
  */
-void FImGUIEngine::BeginDraw()
+void ÑImGUIEngine::BeginDraw()
 {
 	appImGUIBeginDrawing();
 	ImGui::NewFrame();
 }
 
-void FImGUIEngine::OpenWindow( ImGuiViewport* InViewport )
+void ÑImGUIEngine::OpenWindow( ImGuiViewport* InViewport )
 {
-	windows.push_back( new FImGUIWindow( InViewport ) );
+	windows.push_back( new ÑImGUIWindow( InViewport ) );
 }
 
-void FImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
+void ÑImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
 {
 	for ( uint32 index = 0, count = ( uint32 )windows.size(); index < count; ++index )
 	{
-		FImGUIWindow*		window = windows[ index ];
+		ÑImGUIWindow*		window = windows[ index ];
 		if ( window->GetViewport() == InViewport )
 		{			
 			delete window;
@@ -231,7 +231,7 @@ void FImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
 /**
  * End draw commands for render ImGUI
  */
-void FImGUIEngine::EndDraw()
+void ÑImGUIEngine::EndDraw()
 {
 	ImGui::Render();
 	appImGUIEndDrawing();

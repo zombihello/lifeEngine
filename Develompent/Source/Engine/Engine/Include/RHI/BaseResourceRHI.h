@@ -15,13 +15,13 @@
  * @ingroup Engine
  * Base class for all RHI resources
  */
-class FBaseResourceRHI : public FRefCounted
+class CBaseResourceRHI : public CRefCounted
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FBaseResourceRHI()
+	virtual ~CBaseResourceRHI()
 	{}
 };
 

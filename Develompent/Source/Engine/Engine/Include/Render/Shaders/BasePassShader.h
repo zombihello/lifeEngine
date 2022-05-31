@@ -16,26 +16,26 @@
  * @ingroup Engine
  * @brief Class of base pass vertex shader
  */
-class FBasePassVertexShader : public FShader
+class CBasePassVertexShader : public CShader
 {
-	DECLARE_SHADER_TYPE( FBasePassVertexShader )
+	DECLARE_SHADER_TYPE( CBasePassVertexShader )
 
 public:
 	/**
-	 * @brief Construct a new FBasePassVertexShader object
+	 * @brief Construct a new CBasePassVertexShader object
 	 */
-	FBasePassVertexShader();
+	CBasePassVertexShader();
 
     /**
-     * @brief Destructor of a FBasePassVertexShader object
+     * @brief Destructor of a CBasePassVertexShader object
      */
-    virtual ~FBasePassVertexShader();
+    virtual ~CBasePassVertexShader();
 
 	/**
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const FShaderCache::FShaderCacheItem& InShaderCacheItem ) override;
+	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
 
 	/**
 	 * @brief Set the constant shader parameters
@@ -44,7 +44,7 @@ public:
 	 * @param InVertexFactory Vertex factory
 	 * @param InMaterialResource Material
 	 */
-	virtual void SetConstantParameters( class FBaseDeviceContextRHI* InDeviceContextRHI, const class FVertexFactory* InVertexFactory, const TSharedPtr<class FMaterial>& InMaterialResource ) const;
+	virtual void SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const;
 
 	/**
 	 * @brief Set the l2w transform shader
@@ -56,19 +56,19 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMesh, const class FVertexFactory* InVertexFactory, const class FSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 private:
-	class FVertexFactoryShaderParameters*		vertexFactoryParameters;		/**< Vertex factory shader parameters */
+	class CVertexFactoryShaderParameters*		vertexFactoryParameters;		/**< Vertex factory shader parameters */
 };
 
 /**
  * @ingroup Engine
  * @brief Class of base pass pixel shader
  */
-class FBasePassPixelShader : public FShader
+class CBasePassPixelShader : public CShader
 {
-	DECLARE_SHADER_TYPE( FBasePassPixelShader )
+	DECLARE_SHADER_TYPE( CBasePassPixelShader )
 
 public:
 };

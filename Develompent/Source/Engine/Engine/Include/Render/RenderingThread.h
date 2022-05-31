@@ -29,13 +29,13 @@ extern uint32			GRenderingThreadId;
  * @ingroup Engine
  * The rendering command queue
  */
-extern FRingBuffer		GRenderCommandBuffer;
+extern ÑRingBuffer		GRenderCommandBuffer;
 
 /**
  * @ingroup Engine
  * @brief Event of finished rendering frame
  */
-extern FEvent*			GRenderFrameFinished;
+extern CEvent*			GRenderFrameFinished;
 
 /**
  * @ingroup Engine
@@ -52,13 +52,13 @@ FORCEINLINE bool IsInRenderingThread()
  * @ingroup Engine
  * The parent class of commands stored in the rendering command queue
  */
-class FRenderCommand
+class CRenderCommand
 {
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~FRenderCommand() {}
+	virtual ~CRenderCommand() {}
 
 	/**
 	 * Execute render command
@@ -90,7 +90,7 @@ public:
 	 * @param[in] InSize Size
 	 * @param[in] InAllocation Allocation context in ring buffer
 	 */
-	FORCEINLINE void* operator new( size_t InSize, const FRingBuffer::AllocationContext& InAllocation )
+	FORCEINLINE void* operator new( size_t InSize, const ÑRingBuffer::ÑAllocationContext& InAllocation )
 	{
 		return InAllocation.GetAllocation();
 	}
@@ -101,7 +101,7 @@ public:
 	 * @param[in] InPtr Pointer to data
 	 * @param[in] InAllocation Allocation context in ring buffer
 	 */
-	FORCEINLINE void operator delete( void* InPtr, const FRingBuffer::AllocationContext& InAllocation )
+	FORCEINLINE void operator delete( void* InPtr, const ÑRingBuffer::ÑAllocationContext& InAllocation )
 	{}
 };
 
@@ -109,7 +109,7 @@ public:
  * @ingroup Engine
  * A rendering command that simply consumes space in the rendering command queue
  */
-class FSkipRenderCommand : public FRenderCommand
+class CSkipRenderCommand : public CRenderCommand
 {
 public:
 	/**
@@ -117,7 +117,7 @@ public:
 	 * 
 	 * @param[in] InNumSkipBytes Number skip bytes
 	 */
-	FSkipRenderCommand( uint32 InNumSkipBytes );
+	CSkipRenderCommand( uint32 InNumSkipBytes );
 
 	/**
 	 * Execute render command
@@ -163,13 +163,13 @@ private:
 		if ( GIsThreadedRendering && !IsInRenderingThread() ) \
 		{ \
 			check( IsInGameThread() ); \
-			FRingBuffer::AllocationContext			allocationContext( GRenderCommandBuffer, sizeof( InTypeName ) ); \
+			ÑRingBuffer::ÑAllocationContext			allocationContext( GRenderCommandBuffer, sizeof( InTypeName ) ); \
 			if ( allocationContext.GetAllocatedSize() < sizeof( InTypeName ) ) \
 			{ \
-				check( allocationContext.GetAllocatedSize() >= sizeof( FSkipRenderCommand ) ); \
-				new( allocationContext ) FSkipRenderCommand( allocationContext.GetAllocatedSize() ); \
+				check( allocationContext.GetAllocatedSize() >= sizeof( CSkipRenderCommand ) ); \
+				new( allocationContext ) CSkipRenderCommand( allocationContext.GetAllocatedSize() ); \
 				allocationContext.Commit(); \
-				new( FRingBuffer::AllocationContext( GRenderCommandBuffer, sizeof(InTypeName) ) ) InTypeName InParam; \
+				new( ÑRingBuffer::ÑAllocationContext( GRenderCommandBuffer, sizeof(InTypeName) ) ) InTypeName InParam; \
 			} \
 			else \
 			{ \
@@ -191,7 +191,7 @@ private:
  * @param[in] InCode Executable code in render thread
  */
 #define UNIQUE_RENDER_COMMAND( InTypeName, InCode ) \
-	class InTypeName : public FRenderCommand \
+	class InTypeName : public CRenderCommand \
 	{ \
 	public: \
 		virtual uint32 Execute() override \
@@ -225,7 +225,7 @@ private:
  * @param[in] InCode Executable code in render thread
  */
 #define UNIQUE_RENDER_COMMAND_ONEPARAMETER( InTypeName, InParamType1, InParamName1, InParamValue1, InCode ) \
-	class InTypeName : public FRenderCommand \
+	class InTypeName : public CRenderCommand \
 	{ \
 	public: \
 		InTypeName( InParamType1 In##InParamName1 ) : \
@@ -267,7 +267,7 @@ private:
   * @param[in] InCode Executable code in render thread
   */
 #define UNIQUE_RENDER_COMMAND_TWOPARAMETER( InTypeName, InParamType1, InParamName1, InParamValue1, InParamType2, InParamName2, InParamValue2, InCode ) \
-	class InTypeName : public FRenderCommand \
+	class InTypeName : public CRenderCommand \
 	{ \
 	public: \
 		InTypeName( InParamType1 In##InParamName1, InParamType2 In##InParamName2 ) : \
@@ -314,7 +314,7 @@ private:
  * @param[in] InCode Executable code in render thread
  */
 #define UNIQUE_RENDER_COMMAND_THREEPARAMETER( InTypeName, InParamType1, InParamName1, InParamValue1, InParamType2, InParamName2, InParamValue2, InParamType3, InParamName3, InParamValue3, InCode ) \
-	class InTypeName : public FRenderCommand \
+	class InTypeName : public CRenderCommand \
 	{ \
 	public: \
 		InTypeName( InParamType1 In##InParamName1, InParamType2 In##InParamName2, InParamType3 In##InParamName3 ) : \
@@ -366,7 +366,7 @@ private:
  * @param[in] InCode Executable code in render thread
  */
 #define UNIQUE_RENDER_COMMAND_FOURPARAMETER( InTypeName, InParamType1, InParamName1, InParamValue1, InParamType2, InParamName2, InParamValue2, InParamType3, InParamName3, InParamValue3, InParamType4, InParamName4, InParamValue4, InCode ) \
-	class InTypeName : public FRenderCommand \
+	class InTypeName : public CRenderCommand \
 	{ \
 	public: \
 		InTypeName( InParamType1 In##InParamName1, InParamType2 In##InParamName2, InParamType3 In##InParamName3, InParamType4 In##InParamName4 ) : \
@@ -404,7 +404,7 @@ private:
  * @ingroup Engine
  * @brief The rendering thread runnable object
  */
-class FRenderingThread : public FRunnable
+class CRenderingThread : public CRunnable
 {
 public:
 	/**
@@ -464,7 +464,7 @@ FORCEINLINE void FlushRenderingCommands()
 	if ( GRenderFrameFinished )
 	{
 		// Mark of flushed rendering commands
-		UNIQUE_RENDER_COMMAND( FFlushedRenderCommands,
+		UNIQUE_RENDER_COMMAND( CFlushedRenderCommands,
 							   {
 								   GRenderFrameFinished->Trigger();
 							   } );

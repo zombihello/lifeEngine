@@ -20,13 +20,13 @@
  * @ingroup Core
  * Implementation of GUID
  */
-class FGuid
+class CGuid
 {
 public:
 	/**
 	 * @brief Functions to extract the GUID as a key for std::unordered_map and std::unordered_set
 	 */
-	struct FGuidKeyFunc
+	struct SGuidKeyFunc
 	{
 		/**
 		 * @brief Calculate hash of the GUID
@@ -34,19 +34,19 @@ public:
 		 * @param InGUID GUID
 		 * @return Return hash of this GUID
 		 */
-		FORCEINLINE std::size_t operator()( const FGuid& InGUID ) const
+		FORCEINLINE std::size_t operator()( const CGuid& InGUID ) const
 		{
 			return InGUID.GetTypeHash();
 		}
 
 		/**
-		 * @brief Compare FGuid
+		 * @brief Compare CGuid
 		 *
 		 * @param InA First GUID
 		 * @param InB Second GUID
 		 * @return Return true if InA and InB equal, else returning false
 		 */
-		FORCEINLINE bool operator()( const FGuid& InA, const FGuid& InB ) const
+		FORCEINLINE bool operator()( const CGuid& InA, const CGuid& InB ) const
 		{
 			return InA < InB;
 		}
@@ -55,7 +55,7 @@ public:
 	/**
 	 * Constructor
 	 */
-	FGuid()
+	CGuid()
 		: a( 0 ), b( 0 ), c( 0 ), d( 0 )
 	{}
 
@@ -67,7 +67,7 @@ public:
 	 * @param InC C section in GUID
 	 * @param InD D section in GUID
 	 */
-	FGuid( uint32 InA, uint32 InB, uint32 InC, uint32 InD )
+	CGuid( uint32 InA, uint32 InB, uint32 InC, uint32 InD )
 		: a( InA ), b( InB ), c( InC ), d( InD )
 	{}
 
@@ -76,7 +76,7 @@ public:
 	 * 
 	 * @param InGUID Other GUID
 	 */
-	FGuid( const FGuid& InGUID )
+	CGuid( const CGuid& InGUID )
 		: a( InGUID.a ), b( InGUID.b ), c( InGUID.c ), d( InGUID.d )
 	{}
 
@@ -101,7 +101,7 @@ public:
 	/**
 	 * Overrload operator ==
 	 */
-	FORCEINLINE friend bool operator==( const FGuid& InX, const FGuid& InY )
+	FORCEINLINE friend bool operator==( const CGuid& InX, const CGuid& InY )
 	{
 		return ( ( InX.a ^ InY.a ) | ( InX.b ^ InY.b ) | ( InX.c ^ InY.c ) | ( InX.d ^ InY.d ) ) == 0;
 	}
@@ -109,7 +109,7 @@ public:
 	/**
 	 * Overrload operator !=
 	 */
-	FORCEINLINE friend bool operator!=( const FGuid& InX, const FGuid& InY )
+	FORCEINLINE friend bool operator!=( const CGuid& InX, const CGuid& InY )
 	{
 		return ( ( InX.a ^ InY.a ) | ( InX.b ^ InY.b ) | ( InX.c ^ InY.c ) | ( InX.d ^ InY.d ) ) != 0;
 	}
@@ -117,7 +117,7 @@ public:
 	/**
 	 * Operator <
 	 */
-	FORCEINLINE bool operator<( const FGuid& InOther ) const
+	FORCEINLINE bool operator<( const CGuid& InOther ) const
 	{
 		if ( a < InOther.a )
 		{
@@ -157,7 +157,7 @@ public:
 	/**
 	 * Overload operator << for serialize
 	 */
-	FORCEINLINE friend FArchive& operator<<( FArchive& InAr, FGuid& InGuid )
+	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, CGuid& InGuid )
 	{
 		return InAr << InGuid.a << InGuid.b << InGuid.c << InGuid.d;
 	}
@@ -165,7 +165,7 @@ public:
 	/**
 	 * Overload operator << for serialize
 	 */
-	FORCEINLINE friend FArchive& operator<<( FArchive& InAr, const FGuid& InGuid )
+	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, const CGuid& InGuid )
 	{
 		return InAr << InGuid.a << InGuid.b << InGuid.c << InGuid.d;
 	}
@@ -176,7 +176,7 @@ public:
 	 */
 	FORCEINLINE std::wstring String() const
 	{
-		return FString::Format( TEXT( "%08X%08X%08X%08X" ), a, b, c, d );
+		return ÑString::Format( TEXT( "%08X%08X%08X%08X" ), a, b, c, d );
 	}
 
 	/**
@@ -223,6 +223,6 @@ private:
  * @ingroup Core
  * @return Return created GUID
  */
-FGuid appCreateGuid();
+CGuid appCreateGuid();
 
 #endif // !GUID_H

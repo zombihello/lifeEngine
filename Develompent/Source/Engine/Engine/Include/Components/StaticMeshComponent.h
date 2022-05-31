@@ -18,27 +18,27 @@
   * @ingroup Engine
   * @brief Component for work with static mesh
   */
-class LStaticMeshComponent : public LPrimitiveComponent
+class CStaticMeshComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( LStaticMeshComponent, LPrimitiveComponent )
+	DECLARE_CLASS( CStaticMeshComponent, CPrimitiveComponent )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
-	LStaticMeshComponent();
+	CStaticMeshComponent();
 
     /**
      * @brief Destructor
      */
-    virtual ~LStaticMeshComponent();
+    virtual ~CStaticMeshComponent();
 
 	/**
 	 * @brief Adds mesh batches for draw in scene
 	 *
 	 * @param InSceneView Current view of scene
 	 */
-	virtual void AddToDrawList( const class FSceneView& InSceneView ) override;
+	virtual void AddToDrawList( const class CSceneView& InSceneView ) override;
 
     /**
      * @brief Set material
@@ -46,7 +46,7 @@ public:
      * @param InIndex Index of material layer in mesh
      * @param InMaterial Material
      */
-    FORCEINLINE void SetMaterial( uint32 InIndex, const TAssetHandle<FMaterial>& InMaterial )
+    FORCEINLINE void SetMaterial( uint32 InIndex, const TAssetHandle<CMaterial>& InMaterial )
     {
         check( InIndex < overrideMaterials.size() );
 		overrideMaterials[ InIndex ] = InMaterial;
@@ -57,11 +57,11 @@ public:
 	 * @brief Set static mesh
 	 * @param InNewStaticMesh New static mesh
 	 */
-	FORCEINLINE void SetStaticMesh( const TAssetHandle<FStaticMesh>& InNewStaticMesh )
+	FORCEINLINE void SetStaticMesh( const TAssetHandle<CStaticMesh>& InNewStaticMesh )
 	{
 		staticMesh = InNewStaticMesh;
 		{
-			TSharedPtr<FStaticMesh>		staticMeshRef = InNewStaticMesh.ToSharedPtr();
+			TSharedPtr<CStaticMesh>		staticMeshRef = InNewStaticMesh.ToSharedPtr();
 			if ( staticMeshRef )
 			{
 				overrideMaterials.resize( staticMeshRef->GetNumMaterials() );
@@ -74,7 +74,7 @@ public:
 	 * @brief Get static mesh
 	 * @return Return pointer to static mesh. If not valid returning nullptr
 	 */
-	FORCEINLINE TAssetHandle<FStaticMesh> GetStaticMesh() const
+	FORCEINLINE TAssetHandle<CStaticMesh> GetStaticMesh() const
 	{
 		return staticMesh;
 	}
@@ -85,17 +85,17 @@ public:
      * @param InIndex Index of material layer in mesh
      * @return Return pointer to material. If material not exist or static mesh is not valid returning nullptr
      */
-    FORCEINLINE TAssetHandle<FMaterial> GetMaterial( uint32 InIndex ) const
+    FORCEINLINE TAssetHandle<CMaterial> GetMaterial( uint32 InIndex ) const
     {
 		// If mesh is not valid, we return NULL
-		TSharedPtr<FStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
+		TSharedPtr<CStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
 		if ( !staticMeshRef )
 		{
 			return nullptr;
 		}
         check( InIndex < overrideMaterials.size() );
 		
-		TAssetHandle<FMaterial>		material = overrideMaterials[ InIndex ];
+		TAssetHandle<CMaterial>		material = overrideMaterials[ InIndex ];
         return material.IsValid() ? material : staticMeshRef->GetMaterial( InIndex );
     }
 
@@ -110,9 +110,9 @@ private:
 	 */
 	virtual void UnlinkDrawList() override;
 
-	TAssetHandle<FStaticMesh>								staticMesh;						/**< Static mesh */
-	std::vector< TAssetHandle<FMaterial> >					overrideMaterials;				/**< Override materials */
-	TSharedPtr<FStaticMesh::FElementDrawingPolicyLink>		elementDrawingPolicyLink;		/**< Element drawing policy link of current static mesh */
+	TAssetHandle<CStaticMesh>								staticMesh;						/**< Static mesh */
+	std::vector< TAssetHandle<CMaterial> >					overrideMaterials;				/**< Override materials */
+	TSharedPtr<CStaticMesh::SElementDrawingPolicyLink>		elementDrawingPolicyLink;		/**< Element drawing policy link of current static mesh */
 };
 
 #endif // !STATICMESHCOMPONENT_H

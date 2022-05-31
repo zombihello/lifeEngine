@@ -82,18 +82,18 @@ FORCEINLINE void appSleep( float InSeconds )
   * @ingroup WindowsPlatform
   * @brief Runnable thread for Windows
   */
-class FRunnableThreadWindows : public FRunnableThread
+class CRunnableThreadWindows : public CRunnableThread
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FRunnableThreadWindows();
+	CRunnableThreadWindows();
 
 	/**
 	 * Destructor
 	 */
-	virtual ~FRunnableThreadWindows();
+	virtual ~CRunnableThreadWindows();
 
 	/**
 	 * Tells the OS the preferred CPU to run the thread on. NOTE: Don't use
@@ -156,7 +156,7 @@ public:
 	 *
 	 * @return Return true if successfully create thread, else return false
 	 */
-	bool Create( FRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf = false, bool InIsAutoDeleteRunnable = false, uint32 InStackSize = 0, EThreadPriority InThreadPriority = TP_Normal );
+	bool Create( CRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf = false, bool InIsAutoDeleteRunnable = false, uint32 InStackSize = 0, EThreadPriority InThreadPriority = TP_Normal );
 
 private:
 	/**
@@ -173,8 +173,8 @@ private:
 
 	uint32					threadId;				/**< ID of thread */
 	HANDLE					thread;					/**< Windows handle of thread */
-	FRunnable*				runnable;				/**< Runnable object */
-	FEvent*					threadInitSyncEvent;	/**< Sync event to make sure that Init() has been completed before allowing the main thread to continue */
+	CRunnable*				runnable;				/**< Runnable object */
+	CEvent*					threadInitSyncEvent;	/**< Sync event to make sure that Init() has been completed before allowing the main thread to continue */
 	EThreadPriority			threadPriority;			/**< The priority to run the thread at */
 	bool					isAutoDeleteSelf;		/**< Is need delete self*/
 	bool					isAutoDeleteRunnable;	/**< Is need delete runnable object */
@@ -184,7 +184,7 @@ private:
  * @ingroup WindowsPlatform
  * @brief Thread factory Windows
  */
-class FThreadFactoryWindows : public FThreadFactory
+class CThreadFactoryWindows : public CThreadFactory
 {
 public:
 	/**
@@ -199,21 +199,21 @@ public:
 	 *
 	 * @return The newly created thread or nullptr if it failed
 	 */
-	virtual FRunnableThread* CreateThread( FRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf = false, bool InIsAutoDeleteRunnable = false, uint32 InStackSize = 0, EThreadPriority InThreadPriority = TP_Normal ) override;
+	virtual CRunnableThread* CreateThread( CRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf = false, bool InIsAutoDeleteRunnable = false, uint32 InStackSize = 0, EThreadPriority InThreadPriority = TP_Normal ) override;
 
 	/**
 	 * @brief Cleans up the specified thread object using the correct heap
 	 *
 	 * @param[in] InThread The thread object to destroy
 	 */
-	virtual void Destroy( FRunnableThread* InThread ) override;
+	virtual void Destroy( CRunnableThread* InThread ) override;
 };
 
 /**
  * @ingroup WindowsPlatform
  * This is the Windows version of a critical section
  */
-class FCriticalSection : public FSynchronize
+class ÑCriticalSection : public CSynchronize
 {
 public:
 	/**
@@ -230,7 +230,7 @@ public:
 	 * @param[in] InDebugName Debug name
 	 * @param[in] InSpinCount Spin count
 	 */
-	FORCEINLINE FCriticalSection( const tchar* InDebugName = nullptr, uint32 InSpinCount = DEFAULT_SPIN_COUNT )
+	FORCEINLINE ÑCriticalSection( const tchar* InDebugName = nullptr, uint32 InSpinCount = DEFAULT_SPIN_COUNT )
 	{
 		InitializeCriticalSection(&criticalSection);
 		SetCriticalSectionSpinCount(&criticalSection, InSpinCount);
@@ -239,7 +239,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	FORCEINLINE ~FCriticalSection()
+	FORCEINLINE ~ÑCriticalSection()
 	{
 		DeleteCriticalSection(&criticalSection);
 	}
@@ -273,18 +273,18 @@ private:
  *
  * This is the Windows version of an event
  */
-class FEventWindows : public FEvent
+class CEventWindows : public CEvent
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FEventWindows();
+	CEventWindows();
 
 	/**
 	 * Destructor
 	 */
-	~FEventWindows();
+	~CEventWindows();
 
 	/**
 	 * Creates the event. Manually reset events stay triggered until reset.
@@ -328,18 +328,18 @@ private:
  *
  * This is the Windows version of a semaphore object
  */
-class FSemaphoreWindows : public FSemaphore
+class CSemaphoreWindows : public CSemaphore
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FSemaphoreWindows();
+	CSemaphoreWindows();
 
 	/**
 	 * Destructor
 	 */
-	~FSemaphoreWindows();
+	~CSemaphoreWindows();
 
 	/**
 	 * Create semaphore
@@ -395,7 +395,7 @@ private:
  *
  * This is the Windows factory for creating various synchronization objects.
  */
-class FSynchronizeFactoryWindows : public FSynchronizeFactory
+class CSynchronizeFactoryWindows : public CSynchronizeFactory
 {
 public:
 	/**
@@ -403,7 +403,7 @@ public:
 	 *
 	 * @return The new critical section object or nullptr otherwise
 	 */
-	virtual FCriticalSection* CreateCriticalSection() override;
+	virtual ÑCriticalSection* CreateCriticalSection() override;
 
 	/**
 	 * Creates a new event
@@ -412,7 +412,7 @@ public:
 	 * @param[in] InName Whether to use a commonly shared event or not. If so this is the name of the event to share.
 	 * @return Returns the new event object if successful, NULL otherwise
 	 */
-	virtual FEvent* CreateSynchEvent( bool InIsManualReset = false, const tchar* InName = nullptr ) override;
+	virtual CEvent* CreateSynchEvent( bool InIsManualReset = false, const tchar* InName = nullptr ) override;
 
 	/**
 	 * Creates a new semaphore object
@@ -421,14 +421,14 @@ public:
 	 * @param[in] InInitialCount
 	 * @return Returns the new semaphore object if successful, nullptr otherwise
 	 */
-	virtual FSemaphore* CreateSemaphore( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName = nullptr ) override;
+	virtual CSemaphore* CreateSemaphore( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName = nullptr ) override;
 
 	/**
 	 * Cleans up the specified synchronization object using the correct heap
 	 *
 	 * @param[in] InSynchObj The synchronization object to destroy
 	 */
-	virtual void Destroy( FSynchronize* InSynchObj ) override;
+	virtual void Destroy( CSynchronize* InSynchObj ) override;
 };
 
 #endif // !WINDOWSTHREADING_H

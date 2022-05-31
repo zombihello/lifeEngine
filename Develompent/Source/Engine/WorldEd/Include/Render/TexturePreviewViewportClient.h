@@ -16,7 +16,7 @@
  * @ingroup WorldEd
  * @brief Preview texture viewport client
  */
-class FTexturePreviewViewportClient : public FEditorLevelViewportClient
+class CTexturePreviewViewportClient : public CEditorLevelViewportClient
 {
 public:
 	/**
@@ -24,14 +24,14 @@ public:
 	 * 
 	 * @param InTexture2D		Texture 2D to preview
 	 */
-	FTexturePreviewViewportClient( const TSharedPtr<FTexture2D>& InTexture2D );
+	CTexturePreviewViewportClient( const TSharedPtr<CTexture2D>& InTexture2D );
 
 	/**
 	 * @brief Draw viewport
 	 *
 	 * @param InViewport	Viewport
 	 */
-	virtual void Draw( FViewport* InViewport ) override;
+	virtual void Draw( CViewport* InViewport ) override;
 
 	/**
 	 * @brief Draw viewport. Must be call in render thread
@@ -40,13 +40,13 @@ public:
 	 * @param InTexture2D		Texture 2D to preview
 	 * @param InSceneView		Scene view
 	 */
-	void Draw_RenderThread( FViewportRHIRef InViewportRHI, const TSharedPtr<FTexture2D>& InTexture2D, class FSceneView* InSceneView );
+	void Draw_RenderThread( ViewportRHIRef_t InViewportRHI, const TSharedPtr<CTexture2D>& InTexture2D, class CSceneView* InSceneView );
 
 	/**
 	 * @brief Set texture 2D to preview
 	 * @param InTexture2D		Texture 2D to preview
 	 */
-	FORCEINLINE void SetTexture2D( const TSharedPtr<FTexture2D>& InTexture2D )
+	FORCEINLINE void SetTexture2D( const TSharedPtr<CTexture2D>& InTexture2D )
 	{
 		texture2D = InTexture2D;
 	}
@@ -131,16 +131,16 @@ protected:
 	 * @param InViewport		Viewport
 	 * @return Return scene view
 	 */
-	virtual class FSceneView* CalcSceneView( FViewport* InViewport ) override;
+	virtual class CSceneView* CalcSceneView( CViewport* InViewport ) override;
 
 	/**
 	 * @brief Get background color
 	 * @return Return background color
 	 */
-	virtual FColor GetBackgroundColor() const override;
+	virtual ÑColor GetBackgroundColor() const override;
 
-	TSharedPtr<FTexture2D>		texture2D;			/**< Texture 2D to preview */
-	FColor						colorChannelMask;	/**< Color channel mask */
+	TSharedPtr<CTexture2D>		texture2D;			/**< Texture 2D to preview */
+	ÑColor						colorChannelMask;	/**< Color channel mask */
 };
 
 #endif // !TEXTUREPREVIEWVIEWPORTCLIENT_H

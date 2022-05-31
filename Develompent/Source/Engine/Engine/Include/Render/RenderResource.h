@@ -16,24 +16,24 @@
  * @ingroup Engine
  * @brief A rendering resource which is owned by the rendering thread
  */
-class FRenderResource
+class CRenderResource
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FRenderResource();
+	CRenderResource();
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FRenderResource();
+	virtual ~CRenderResource();
 
 	/**
 	 * @brief Get global resource list
 	 * @return Return reference to list of global resources
 	 */
-	static std::set< FRenderResource* >& GetResourceList();
+	static std::set< CRenderResource* >& GetResourceList();
 
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -98,7 +98,7 @@ private:
  * 
  * @param[in] InResource Pointer to resource
  */
-extern void BeginInitResource( FRenderResource* InResource );
+extern void BeginInitResource( CRenderResource* InResource );
 
 /**
  * @ingroup Engine
@@ -106,7 +106,7 @@ extern void BeginInitResource( FRenderResource* InResource );
  * 
  * @param[in] InResource Pointer to resource
  */
-extern void BeginUpdateResource( FRenderResource* InResource );
+extern void BeginUpdateResource( CRenderResource* InResource );
 
 /**
  * @ingroup Engine
@@ -114,6 +114,6 @@ extern void BeginUpdateResource( FRenderResource* InResource );
  * 
  * @param[in] InResource Pointer to resource
  */
-extern void BeginReleaseResource( FRenderResource* InResource );
+extern void BeginReleaseResource( CRenderResource* InResource );
 
 #endif // !RENDERRESOURCE_H

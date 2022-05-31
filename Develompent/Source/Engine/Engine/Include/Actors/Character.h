@@ -39,7 +39,7 @@ public:
 	 * @param InWorldDirection Direction of move in world space
 	 * @param InScale Scale of move
 	 */
-	virtual void Walk( const FVector& InWorldDirection, float InScale );
+	virtual void Walk( const Vector& InWorldDirection, float InScale );
 
 	/**
 	 * @brief Jump
@@ -78,14 +78,14 @@ public:
 	 * @brief Get character movement component
 	 * @return Return character movement component
 	 */
-	FORCEINLINE TRefCountPtr< LCharacterMovementComponent > GetCharacterMovement() const
+	FORCEINLINE TRefCountPtr< CCharacterMovementComponent > GetCharacterMovement() const
 	{
 		return characterMovement;
 	}
 
 private:
 	TRefCountPtr< ABaseController >						controller;				/**< Controller of this character */
-	TRefCountPtr< LCharacterMovementComponent >			characterMovement;		/**< Character movement component */
+	TRefCountPtr< CCharacterMovementComponent >			characterMovement;		/**< Character movement component */
 };
 
 #endif // !CHARACTER_H

@@ -64,18 +64,18 @@ QMessageBox::StandardButton ShowMessageBoxWithList( class QWidget* InParent, con
 
 /**
  * @ingroup WorldEd
- * Helper struct for the FOnAssetsCanDelete delegate
+ * Helper struct for the COnAssetsCanDelete delegate
  */
-struct FCanDeleteAssetResult
+struct SCanDeleteAssetResult
 {
 public:
-	FCanDeleteAssetResult( const FCanDeleteAssetResult& )	= delete;
-	FCanDeleteAssetResult( FCanDeleteAssetResult&& )		= delete;
+	SCanDeleteAssetResult( const SCanDeleteAssetResult& )	= delete;
+	SCanDeleteAssetResult( SCanDeleteAssetResult&& )		= delete;
 
 	/**
 	 * Constructor
 	 */
-	FCanDeleteAssetResult() : 
+	SCanDeleteAssetResult() : 
 		bResult( true ) 
 	{}
 
@@ -105,26 +105,26 @@ private:
  * @ingroup WorldEd
  * Delegates used by the editor
  */
-struct FEditorDelegates
+struct SEditorDelegates
 {
 	/**
 	 * @brief Delegate for called event when assets try delete
 	 */
-	DECLARE_MULTICAST_DELEGATE( FOnAssetsCanDelete, const std::vector< TSharedPtr<class FAsset> >& /*InAssets*/, FCanDeleteAssetResult& /*OutResult*/ );
+	DECLARE_MULTICAST_DELEGATE( COnAssetsCanDelete, const std::vector< TSharedPtr<class CAsset> >& /*InAssets*/, SCanDeleteAssetResult& /*OutResult*/ );
 
 	/**
 	 * @brief Delegate for called event when assets deleted
 	 */
-	DECLARE_MULTICAST_DELEGATE( FOnAssetsDeleted, const std::vector< TSharedPtr<class FAsset> >& /*InAssets*/ );
+	DECLARE_MULTICAST_DELEGATE( COnAssetsDeleted, const std::vector< TSharedPtr<class CAsset> >& /*InAssets*/ );
 
 	/**
 	 * @brief Delegate for called event when assets is reloaded
 	 */
-	DECLARE_MULTICAST_DELEGATE( FOnAssetsReloaded, const std::vector< TSharedPtr<class FAsset> >& /*InAssets*/ );
+	DECLARE_MULTICAST_DELEGATE( COnAssetsReloaded, const std::vector< TSharedPtr<class CAsset> >& /*InAssets*/ );
 
-	static FOnAssetsCanDelete		onAssetsCanDelete;		/**< Called when one or more assets try delete */
-	static FOnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
-	static FOnAssetsReloaded		onAssetsReloaded;		/**< Called when one or more assets is reloaded */
+	static COnAssetsCanDelete		onAssetsCanDelete;		/**< Called when one or more assets try delete */
+	static COnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
+	static COnAssetsReloaded		onAssetsReloaded;		/**< Called when one or more assets is reloaded */
 };
 
 #endif // !WORLDED_H

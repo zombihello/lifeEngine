@@ -17,7 +17,7 @@
 #include "Misc/SharedPointer.h"
 #include "System/Package.h"
 
-WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InMaterial, QWidget* InParent /* = nullptr */ )
+WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<CMaterial>& InMaterial, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
 	, bInit( false )
 	, ui( new Ui::WeMaterialEditorWindow() )
@@ -38,14 +38,14 @@ WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<FMaterial>& InM
 	InitUI();
 
 	// Init preview viewport
-	viewportClient = new FMaterialPreviewViewportClient( InMaterial );
+	viewportClient = new CMaterialPreviewViewportClient( InMaterial );
 	ui->viewportPreview->SetViewportClient( viewportClient, false );
 	ui->viewportPreview->SetEnabled( true );
 	bInit = true;
 
 	// Subscribe to event when assets try destroy of editing material and reload. It need is block
-	assetsCanDeleteHandle	= FEditorDelegates::onAssetsCanDelete.Add(	std::bind( &WeMaterialEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2 ) );
-	assetsReloadedHandle	= FEditorDelegates::onAssetsReloaded.Add(	std::bind( &WeMaterialEditorWindow::OnAssetsReloaded, this, std::placeholders::_1 )							);
+	assetsCanDeleteHandle	= SEditorDelegates::onAssetsCanDelete.Add(	std::bind( &WeMaterialEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2 ) );
+	assetsReloadedHandle	= SEditorDelegates::onAssetsReloaded.Add(	std::bind( &WeMaterialEditorWindow::OnAssetsReloaded, this, std::placeholders::_1 )							);
 }
 
 void WeMaterialEditorWindow::InitUI()
@@ -138,7 +138,7 @@ void WeMaterialEditorWindow::UpdateUI()
 	// Parameters section
 	// Diffuse
 	{
-		TAssetHandle<FTexture2D>		diffuseTextureRef;
+		TAssetHandle<CTexture2D>		diffuseTextureRef;
 		material->GetTextureParameterValue( TEXT( "diffuse" ), diffuseTextureRef );
 		if ( diffuseTextureRef.IsAssetValid() && !GPackageManager->IsDefaultAsset( diffuseTextureRef ) )
 		{
@@ -157,8 +157,8 @@ WeMaterialEditorWindow::~WeMaterialEditorWindow()
 	delete ui;
 
 	// Unsubscribe from event when assets try destroy and reload
-	FEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
-	FEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
+	SEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
+	SEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 }
 
 void WeMaterialEditorWindow::OnCheckBoxIsTwoSidedToggled( bool InValue )
@@ -205,7 +205,7 @@ void WeMaterialEditorWindow::OnSelectedAssetDiffuse( uint32 InAssetSlot, const s
 	}
 
 	// If asset reference is valid, we find asset
-	TAssetHandle<FTexture2D>		newTexture2DRef;
+	TAssetHandle<CTexture2D>		newTexture2DRef;
 	if ( !InNewAssetReference.empty() )
 	{
 		newTexture2DRef = GPackageManager->FindAsset( InNewAssetReference, AT_Texture2D );
@@ -221,15 +221,15 @@ void WeMaterialEditorWindow::OnSelectedAssetDiffuse( uint32 InAssetSlot, const s
 	material->SetTextureParameterValue( TEXT( "diffuse" ), newTexture2DRef );
 }
 
-void WeMaterialEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<class FAsset> >& InAssets, FCanDeleteAssetResult& OutResult )
+void WeMaterialEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<class CAsset> >& InAssets, SCanDeleteAssetResult& OutResult )
 {
-	FAsset::FSetDependentAssets		dependentAssets;
+	CAsset::SetDependentAssets_t		dependentAssets;
 	material->GetDependentAssets( dependentAssets );
 
 	// If in InAssets exist material who is editing now or him dependent assets - need is block
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
 	{
-		TSharedPtr<FAsset>		assetRef = InAssets[ index ];
+		TSharedPtr<CAsset>		assetRef = InAssets[ index ];
 		if ( assetRef == material )
 		{
 			OutResult.Set( false );
@@ -248,7 +248,7 @@ void WeMaterialEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<cl
 	}
 }
 
-void WeMaterialEditorWindow::OnAssetsReloaded( const std::vector< TSharedPtr<class FAsset> >& InAssets )
+void WeMaterialEditorWindow::OnAssetsReloaded( const std::vector< TSharedPtr<class CAsset> >& InAssets )
 {
 	// If material who is edition reloaded, we update UI
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )

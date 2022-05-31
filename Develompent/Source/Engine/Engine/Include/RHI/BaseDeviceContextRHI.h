@@ -15,13 +15,13 @@
  * @ingroup Engine
  * @brief Base class for work with device context RHI
  */
-class FBaseDeviceContextRHI : public FBaseResourceRHI
+class CBaseDeviceContextRHI : public CBaseResourceRHI
 {
 public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual						~FBaseDeviceContextRHI() {}
+	virtual						~CBaseDeviceContextRHI() {}
 
 	/**
 	 * @brief Clear surface
@@ -29,7 +29,7 @@ public:
 	 * @param[in] InSurface Surface for rendering
 	 * @param[in] InColor Color for clearing render target
 	 */
-	virtual void				ClearSurface( FSurfaceRHIParamRef InSurface, const class FColor& InColor ) {}
+	virtual void				ClearSurface( SurfaceRHIParamRef_t InSurface, const class ÑColor& InColor ) {}
 
 	/**
 	 * Clear depth stencil
@@ -40,7 +40,7 @@ public:
 	 * @param[in] InDepthValue Clear the depth buffer with this value
 	 * @param[in] InStencilValue Clear the stencil buffer with this value
 	 */
-	virtual void				ClearDepthStencil( FSurfaceRHIParamRef InSurface, bool InIsClearDepth = true, bool InIsClearStencil = true, float InDepthValue = 1.f, uint8 InStencilValue = 0 ) {}
+	virtual void				ClearDepthStencil( SurfaceRHIParamRef_t InSurface, bool InIsClearDepth = true, bool InIsClearStencil = true, float InDepthValue = 1.f, uint8 InStencilValue = 0 ) {}
 };
 
 #endif // !BASEDEVICECONTEXTRHI_H

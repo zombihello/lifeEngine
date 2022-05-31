@@ -9,42 +9,42 @@
 #include "RHI/StaticStatesRHI.h"
 #include "EngineDefines.h"
 
-FTexturePreviewViewportClient::FTexturePreviewViewportClient( const TSharedPtr<FTexture2D>& InTexture2D )
-	: FEditorLevelViewportClient( LVT_OrthoXY )
+CTexturePreviewViewportClient::CTexturePreviewViewportClient( const TSharedPtr<CTexture2D>& InTexture2D )
+	: CEditorLevelViewportClient( LVT_OrthoXY )
 	, texture2D( InTexture2D )
-	, colorChannelMask( FColor::white )
+	, colorChannelMask( ÑColor::white )
 {}
 
-void FTexturePreviewViewportClient::Draw( FViewport* InViewport )
+void CTexturePreviewViewportClient::Draw( CViewport* InViewport )
 {
-	FSceneView*		sceneView = CalcSceneView( InViewport );
+	CSceneView*		sceneView = CalcSceneView( InViewport );
 
 	// Draw preview texture viewport
-	UNIQUE_RENDER_COMMAND_FOURPARAMETER(  FViewportRenderCommand,
-										  FTexturePreviewViewportClient*, viewportClient, this,
-										  FViewportRHIRef, viewportRHI, InViewport->GetViewportRHI(),
-										  TSharedPtr<FTexture2D>, texture2D, texture2D,
-										  FSceneView*, sceneView, sceneView,
+	UNIQUE_RENDER_COMMAND_FOURPARAMETER(  CViewportRenderCommand,
+										  CTexturePreviewViewportClient*, viewportClient, this,
+										  ViewportRHIRef_t, viewportRHI, InViewport->GetViewportRHI(),
+										  TSharedPtr<CTexture2D>, texture2D, texture2D,
+										  CSceneView*, sceneView, sceneView,
 										  {
 											  viewportClient->Draw_RenderThread( viewportRHI, texture2D, sceneView );
 										  } );
 }
 
-void FTexturePreviewViewportClient::Draw_RenderThread( FViewportRHIRef InViewportRHI, const TSharedPtr<FTexture2D>& InTexture2D, class FSceneView* InSceneView )
+void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, const TSharedPtr<CTexture2D>& InTexture2D, class CSceneView* InSceneView )
 {
 	check( IsInRenderingThread() );
-	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	FSceneRenderer				sceneRenderer( InSceneView );
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	CSceneRenderer				sceneRenderer( InSceneView );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	
 	// Draw quad with texture
 	if ( InTexture2D )
 	{
-		SCOPED_DRAW_EVENT( EventDrawPreviewTexture, DEC_SCENE_ITEMS, FString::Format( TEXT( "Preview %s" ), InTexture2D->GetAssetName().c_str() ).c_str() );
+		SCOPED_DRAW_EVENT( EventDrawPreviewTexture, DEC_SCENE_ITEMS, ÑString::Format( TEXT( "Preview %s" ), InTexture2D->GetAssetName().c_str() ).c_str() );
 
-		FTexture2DRHIRef							texture2DRHI				= InTexture2D->GetTexture2DRHI();
-		FScreenVertexShader<SVST_Fullscreen>*		screenVertexShader			= GShaderManager->FindInstance< FScreenVertexShader<SVST_Fullscreen>, FSimpleElementVertexFactory >();
-		FTexturePreviewPixelShader*					texturePreviewPixelShader	= GShaderManager->FindInstance< FTexturePreviewPixelShader, FSimpleElementVertexFactory >();
+		Texture2DRHIRef_t							texture2DRHI				= InTexture2D->GetTexture2DRHI();
+		CScreenVertexShader<SVST_Fullscreen>*		screenVertexShader			= GShaderManager->FindInstance< CScreenVertexShader<SVST_Fullscreen>, CSimpleElementVertexFactory >();
+		CTexturePreviewPixelShader*					texturePreviewPixelShader	= GShaderManager->FindInstance< CTexturePreviewPixelShader, CSimpleElementVertexFactory >();
 		check( screenVertexShader && texturePreviewPixelShader );
 
 		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
@@ -63,19 +63,19 @@ void FTexturePreviewViewportClient::Draw_RenderThread( FViewportRHIRef InViewpor
 	delete InSceneView;
 }
 
-FSceneView* FTexturePreviewViewportClient::CalcSceneView( FViewport* InViewport )
+CSceneView* CTexturePreviewViewportClient::CalcSceneView( CViewport* InViewport )
 {
 	// Calculate projection matrix
 	const float			halfWidth			= InViewport->GetSizeX() / 2.f;
 	const float			halfHeight			= InViewport->GetSizeY() / 2.f;
-	FMatrix				projectionMatrix	= glm::ortho( -halfWidth, halfWidth, -halfHeight, halfHeight, ( float )-HALF_WORLD_MAX, ( float )HALF_WORLD_MAX );
+	Matrix				projectionMatrix	= glm::ortho( -halfWidth, halfWidth, -halfHeight, halfHeight, ( float )-HALF_WORLD_MAX, ( float )HALF_WORLD_MAX );
 
 	// Result
-	FSceneView*			sceneView = new FSceneView( projectionMatrix, FMath::matrixIdentity, InViewport->GetSizeX(), InViewport->GetSizeY(), GetBackgroundColor(), SHOW_DefaultEditor );
+	CSceneView*			sceneView = new CSceneView( projectionMatrix, SMath::matrixIdentity, InViewport->GetSizeX(), InViewport->GetSizeY(), GetBackgroundColor(), SHOW_DefaultEditor );
 	return sceneView;
 }
 
-FColor FTexturePreviewViewportClient::GetBackgroundColor() const
+ÑColor CTexturePreviewViewportClient::GetBackgroundColor() const
 {
-	return FColor::black;
+	return ÑColor::black;
 }

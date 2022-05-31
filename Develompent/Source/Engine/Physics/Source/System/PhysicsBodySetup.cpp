@@ -1,23 +1,23 @@
 #include "System/PhysicsBodySetup.h"
 
-FPhysicsBodySetup::FPhysicsBodySetup()
+CPhysicsBodySetup::CPhysicsBodySetup()
 {}
 
-FPhysicsBodySetup::~FPhysicsBodySetup()
+CPhysicsBodySetup::~CPhysicsBodySetup()
 {
 	RemoveAllBoxGeometries();
 }
 
-void FPhysicsBodySetup::Serialize( class FArchive& InArchive )
+void CPhysicsBodySetup::Serialize( class CArchive& InArchive )
 {
 	InArchive << boxGeometries;
 }
 
-void FPhysicsBodySetup::RemoveBoxGeometry( const FPhysicsBoxGeometry& InBoxGeometry )
+void CPhysicsBodySetup::RemoveBoxGeometry( const SPhysicsBoxGeometry& InBoxGeometry )
 {
 	for ( uint32 index = 0, count = boxGeometries.size(); index < count; ++index )
 	{
-		const FPhysicsBoxGeometry&		boxGeometry = boxGeometries[ index ];
+		const SPhysicsBoxGeometry&		boxGeometry = boxGeometries[ index ];
 		if ( boxGeometry == InBoxGeometry )
 		{
 			RemoveBoxGeometry( index );

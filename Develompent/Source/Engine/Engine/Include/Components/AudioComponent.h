@@ -18,26 +18,26 @@
  * @ingroup Engine
  * Component of work audio in engine
  */
-class LAudioComponent : public LSceneComponent
+class CAudioComponent : public CSceneComponent
 {
-	DECLARE_CLASS( LAudioComponent, LSceneComponent )
+	DECLARE_CLASS( CAudioComponent, CSceneComponent )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
-	LAudioComponent();
+	CAudioComponent();
 
 	/**
 	 * @brief Destructor
 	 */
-	~LAudioComponent();
+	~CAudioComponent();
 
 	/**
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * Begins Play for the component.
@@ -140,7 +140,7 @@ public:
 	 * @brief Set audio bank
 	 * @param InAudioBank Audio bank
 	 */
-	FORCEINLINE void SetAudioBank( const TAssetHandle<FAudioBank>& InAudioBank )
+	FORCEINLINE void SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 	{
 		bank = InAudioBank;
 		source->SetAudioBank( bank );
@@ -173,7 +173,7 @@ public:
 	 * @brief Get audio bank
 	 * @return Return audio bank. If not setted return nullptr
 	 */
-	FORCEINLINE TAssetHandle<FAudioBank> GetAudioBank() const
+	FORCEINLINE TAssetHandle<CAudioBank> GetAudioBank() const
 	{
 		return bank;
 	}
@@ -273,9 +273,9 @@ private:
 	float						pitch;						/**< Pitch */
 	float						minDistance;				/**< Min distance */
 	float						attenuation;				/**< Attenuation */
-	TAssetHandle<FAudioBank>	bank;						/**< Audio bank */
-	FAudioSource*				source;						/**< Audio source */
-	FVector						oldSourceLocation;			/**< Old source location */
+	TAssetHandle<CAudioBank>	bank;						/**< Audio bank */
+	CAudioSource*				source;						/**< Audio source */
+	Vector						oldSourceLocation;			/**< Old source location */
 };
 
 #endif // !AUDIOCOMPONENT_H

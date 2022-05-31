@@ -13,12 +13,12 @@
 #include "Widgets/SectionWidget.h"
 #include "WorldEd.h"
 
-WeTextureEditorWindow::WeTextureEditorWindow( const TSharedPtr<FTexture2D>& InTexture2D, QWidget* InParent /* = nullptr */ )
+WeTextureEditorWindow::WeTextureEditorWindow( const TSharedPtr<CTexture2D>& InTexture2D, QWidget* InParent /* = nullptr */ )
 	: QWidget( InParent )
 	, bInit( false )
 	, ui( new Ui::WeTextureEditorWindow() )
 	, texture2D( InTexture2D )
-	, viewportClient( new FTexturePreviewViewportClient( InTexture2D ) )
+	, viewportClient( new CTexturePreviewViewportClient( InTexture2D ) )
 	, comboBox_addressU( nullptr )
 	, comboBox_addressV( nullptr )
 	, comboBox_filter( nullptr )
@@ -39,7 +39,7 @@ WeTextureEditorWindow::WeTextureEditorWindow( const TSharedPtr<FTexture2D>& InTe
 	bInit = true;
 
 	// Subscribe to event when assets reload
-	assetsReloadedHandle = FEditorDelegates::onAssetsReloaded.Add( std::bind( &WeTextureEditorWindow::OnAssetsReloaded, this, std::placeholders::_1 ) );
+	assetsReloadedHandle = SEditorDelegates::onAssetsReloaded.Add( std::bind( &WeTextureEditorWindow::OnAssetsReloaded, this, std::placeholders::_1 ) );
 }
 
 void WeTextureEditorWindow::InitUI()
@@ -140,11 +140,11 @@ void WeTextureEditorWindow::UpdateUI()
 	// Set info about asset
 	uint32						sizeX = texture2D->GetSizeX();
 	uint32						sizeY = texture2D->GetSizeY();
-	const FPixelFormatInfo& 	pixelFormatInfo = GPixelFormats[ texture2D->GetPixelFormat() ];
+	const SPixelFormatInfo& 	pixelFormatInfo = GPixelFormats[ texture2D->GetPixelFormat() ];
 
-	ui->label_importedValue->setText( QString::fromStdWString( FString::Format( TEXT( "%ix%i" ), sizeX, sizeY ) ) );
+	ui->label_importedValue->setText( QString::fromStdWString( ÑString::Format( TEXT( "%ix%i" ), sizeX, sizeY ) ) );
 	ui->label_formatValue->setText( QString::fromWCharArray( pixelFormatInfo.name ) );
-	ui->label_resourceSizeValue->setText( QString::fromStdWString( FString::Format( TEXT( "%.2f Kb" ), ( pixelFormatInfo.blockBytes * sizeX * sizeY ) / 1024.f ) ) );
+	ui->label_resourceSizeValue->setText( QString::fromStdWString( ÑString::Format( TEXT( "%.2f Kb" ), ( pixelFormatInfo.blockBytes * sizeX * sizeY ) / 1024.f ) ) );
 	OnSourceFileChanged( QString::fromStdWString( texture2D->GetAssetSourceFile() ) );
 }
 
@@ -155,7 +155,7 @@ WeTextureEditorWindow::~WeTextureEditorWindow()
 	delete ui;
 
 	// Unsubscribe from event when assetsreload
-	FEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
+	SEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 }
 
 
@@ -218,7 +218,7 @@ void WeTextureEditorWindow::on_comboBox_filter_currentIndexChanged( int InIndex 
 void WeTextureEditorWindow::on_toolButton_sourceFile_clicked()
 {
 	check( texture2D );
-	QString			newSourceFile = QFileDialog::getOpenFileName( this, "Select New Source File", QString(), FHelperAssetImporter::MakeFilterOfSupportedExtensions( FHelperAssetImporter::ET_Texture2D ) );
+	QString			newSourceFile = QFileDialog::getOpenFileName( this, "Select New Source File", QString(), CHelperAssetImporter::MakeFilterOfSupportedExtensions( CHelperAssetImporter::ET_Texture2D ) );
 	std::wstring	path = appQtAbsolutePathToEngine( newSourceFile );
 	if ( newSourceFile.isEmpty() || texture2D->GetAssetSourceFile() == path )
 	{
@@ -244,13 +244,13 @@ void WeTextureEditorWindow::on_actionReimport_triggered()
 	check( texture2D );
 
 	std::wstring		errorMessage;
-	if ( FHelperAssetImporter::Reimport( texture2D->GetAssetHandle(), errorMessage ) )
+	if ( CHelperAssetImporter::Reimport( texture2D->GetAssetHandle(), errorMessage ) )
 	{
 		emit OnChangedAsset( texture2D );
 	}
 	else
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( FString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), texture2D->GetAssetName().c_str(), errorMessage.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), texture2D->GetAssetName().c_str(), errorMessage.c_str() ) ) );
 	}
 }
 
@@ -278,7 +278,7 @@ void WeTextureEditorWindow::on_actionA_toggled( bool InValue )
 	viewportClient->ShowAlphaChannel( InValue );
 }
 
-void WeTextureEditorWindow::OnAssetsReloaded( const std::vector<TSharedPtr<class FAsset>>& InAssets )
+void WeTextureEditorWindow::OnAssetsReloaded( const std::vector<TSharedPtr<class CAsset>>& InAssets )
 {
 	// If texture who is edition reloaded, we update UI
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )

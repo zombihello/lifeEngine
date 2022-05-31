@@ -4,15 +4,15 @@
 #include "Actors/Actor.h"
 #include "Render/Scene.h"
 
-IMPLEMENT_CLASS( LPrimitiveComponent )
+IMPLEMENT_CLASS( CPrimitiveComponent )
 
-LPrimitiveComponent::LPrimitiveComponent()
+CPrimitiveComponent::CPrimitiveComponent()
 	: bIsDirtyDrawingPolicyLink( false )
 	, bVisibility( true )
 	, scene( nullptr )
 {}
 
-LPrimitiveComponent::~LPrimitiveComponent()
+CPrimitiveComponent::~CPrimitiveComponent()
 {
 	if ( scene )
 	{
@@ -20,13 +20,13 @@ LPrimitiveComponent::~LPrimitiveComponent()
 	}
 }
 
-void LPrimitiveComponent::BeginPlay()
+void CPrimitiveComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	GWorld->GetScene()->AddPrimitive( this );
 }
 
-void LPrimitiveComponent::TickComponent( float InDeltaTime )
+void CPrimitiveComponent::TickComponent( float InDeltaTime )
 {
 	Super::TickComponent( InDeltaTime );
 
@@ -38,22 +38,22 @@ void LPrimitiveComponent::TickComponent( float InDeltaTime )
 	}
 }
 
-void LPrimitiveComponent::Serialize( class FArchive& InArchive )
+void CPrimitiveComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << bVisibility;
 }
 
-void LPrimitiveComponent::LinkDrawList()
+void CPrimitiveComponent::LinkDrawList()
 {}
 
-void LPrimitiveComponent::UnlinkDrawList()
+void CPrimitiveComponent::UnlinkDrawList()
 {}
 
-void LPrimitiveComponent::AddToDrawList( const class FSceneView& InSceneView )
+void CPrimitiveComponent::AddToDrawList( const class CSceneView& InSceneView )
 {}
 
-void LPrimitiveComponent::InitPrimitivePhysics()
+void CPrimitiveComponent::InitPrimitivePhysics()
 {
 	if ( bodySetup )
 	{
@@ -63,19 +63,19 @@ void LPrimitiveComponent::InitPrimitivePhysics()
 	}
 }
 
-void LPrimitiveComponent::SyncComponentToPhysics()
+void CPrimitiveComponent::SyncComponentToPhysics()
 {
 	if ( bodyInstance.IsValid() )
 	{
 		AActor*		actorOwner = GetOwner();
 		check( actorOwner );
 
-		FTransform		oldTransform = actorOwner->GetActorTransform();
-		FTransform		newTransform = bodyInstance.GetLEWorldTransform();
+		CTransform		oldTransform = actorOwner->GetActorTransform();
+		CTransform		newTransform = bodyInstance.GetLEWorldTransform();
 
 #if ENGINE_2D
 		// For 2D game we copy to new transform Z coord (in 2D this is layer)
-		newTransform.AddToTranslation( FVector( 0.f, 0.f, oldTransform.GetLocation().z ) );
+		newTransform.AddToTranslation( Vector( 0.f, 0.f, oldTransform.GetLocation().z ) );
 #endif // ENGINE_2D
 
 		if ( !oldTransform.MatchesNoScale( newTransform ) )
@@ -86,7 +86,7 @@ void LPrimitiveComponent::SyncComponentToPhysics()
 	}
 }
 
-void LPrimitiveComponent::TermPrimitivePhysics()
+void CPrimitiveComponent::TermPrimitivePhysics()
 {
 	if ( bodyInstance.IsValid() )
 	{

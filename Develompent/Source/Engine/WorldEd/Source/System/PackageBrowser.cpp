@@ -76,11 +76,11 @@ void WePackageBrowser::mousePressEvent( QMouseEvent* InEvent )
 void WePackageBrowser::OnClicked( QModelIndex InIndex )
 {
 	// Getting current package
-	FPackageRef			package			= GetPackage();
+	PackageRef_t			package			= GetPackage();
 	std::wstring		assetReference	= TEXT( "" );
 	if ( package && InIndex.isValid() )
 	{
-		FAssetInfo		assetInfo;
+		SAssetInfo		assetInfo;
 		package->GetAssetInfo( InIndex.row(), assetInfo );
 		
 		// Make reference to asset

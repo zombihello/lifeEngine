@@ -20,18 +20,18 @@
  * May be used either simply as a helper to render a dynamic mesh, or as a static instance shared between
  * similar meshs
  */
-class FMeshDrawingPolicy
+class CMeshDrawingPolicy
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FMeshDrawingPolicy();
+	CMeshDrawingPolicy();
 
 	/**
 	 * Destructor
 	 */
-	virtual ~FMeshDrawingPolicy();
+	virtual ~CMeshDrawingPolicy();
 
 	/**
 	 * Initialize mesh drawing policy
@@ -40,7 +40,7 @@ public:
 	 * @param InMaterial		Material
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( class FVertexFactory* InVertexFactory, const TAssetHandle<FMaterial>& InMaterial, float InDepthBias = 0.f )
+	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, const TAssetHandle<CMaterial>& InMaterial, float InDepthBias = 0.f )
 	{
 		InitInternal( InVertexFactory, InMaterial, InDepthBias );
 	}
@@ -50,26 +50,26 @@ public:
 	 * 
 	 * @param[in] InDeviceContextRHI RHI device context
 	 */
-	virtual void SetRenderState( class FBaseDeviceContextRHI* InDeviceContextRHI );
+	virtual void SetRenderState( class CBaseDeviceContextRHI* InDeviceContextRHI );
 
 	/**
 	 * Set shader parameters
 	 * 
 	 * @param[in] InDeviceContextRHI RHI device context
 	 */
-	virtual void SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI );
+	virtual void SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI );
 
 	/**
 	 * @brief Get bound shader state
 	 * @return Return bound shader state of current drawing policy
 	 */
-	virtual FBoundShaderStateRHIRef GetBoundShaderState() const;
+	virtual BoundShaderStateRHIRef_t GetBoundShaderState() const;
 
 	/**
 	 * @brief Get rasterizer state
 	 * @return Return rasterizer state of current drawing policy 
 	 */
-	virtual FRasterizerStateRHIRef GetRasterizerState() const;
+	virtual RasterizerStateRHIRef_t GetRasterizerState() const;
 
 	/**
 	 * Draw mesh
@@ -78,7 +78,7 @@ public:
 	 * @param[in] InMeshBatch Mesh batch to draw
 	 * @param[in] InSceneView Scene view
 	 */
-	virtual void Draw( class FBaseDeviceContextRHI* InDeviceContextRHI, const struct FMeshBatch& InMeshBatch, const class FSceneView& InSceneView );
+	virtual void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMeshBatch, const class CSceneView& InSceneView );
 
 	/**
 	 * @brief Get type hash
@@ -92,12 +92,12 @@ public:
 	 * @param InOtherDrawer Other drawer
 	 * @return Return true if equal with InOtherDrawer, else returning false
 	 */
-	virtual bool Matches( const FMeshDrawingPolicy& InOtherDrawer ) const;
+	virtual bool Matches( const CMeshDrawingPolicy& InOtherDrawer ) const;
 
 	/**
 	 * @brief Overload operator '=='
 	 */
-	FORCEINLINE bool operator==( const FMeshDrawingPolicy& InOther ) const
+	FORCEINLINE bool operator==( const CMeshDrawingPolicy& InOther ) const
 	{
 		return Matches( InOther );
 	}
@@ -106,7 +106,7 @@ public:
 	 * @brief Get vertex factory
 	 * @return Return vertex factory
 	 */
-	FORCEINLINE FVertexFactoryRef GetVertexFactory() const
+	FORCEINLINE VertexFactoryRef_t GetVertexFactory() const
 	{
 		return vertexFactory;
 	}
@@ -134,18 +134,18 @@ protected:
 	 * @param InMaterial		Material
 	 * @param InDepthBias		Depth bias
 	 */
-	virtual void InitInternal( class FVertexFactory* InVertexFactory, const TAssetHandle<FMaterial>& InMaterial, float InDepthBias = 0.f );
+	virtual void InitInternal( class CVertexFactory* InVertexFactory, const TAssetHandle<CMaterial>& InMaterial, float InDepthBias = 0.f );
 
 	bool								bInit;				/**< Is inited drawing policy */
-	TAssetHandle<FMaterial>				material;			/**< Material */
-	FVertexFactoryRef					vertexFactory;		/**< Vertex factory */
-	FShader*							vertexShader;		/**< Vertex shader */
-	FShader*							pixelShader;		/**< Pixel shader */
+	TAssetHandle<CMaterial>				material;			/**< Material */
+	VertexFactoryRef_t					vertexFactory;		/**< Vertex factory */
+	CShader*							vertexShader;		/**< Vertex shader */
+	CShader*							pixelShader;		/**< Pixel shader */
 	float								depthBias;			/**< Depth bias */
 	uint64								hash;				/**< Hash */
 
-	mutable FBoundShaderStateRHIRef		boundShaderState;	/**< Bound shader state */
-	mutable FRasterizerStateRHIRef		rasterizerState;	/**< Rasterizer state */
+	mutable BoundShaderStateRHIRef_t	boundShaderState;	/**< Bound shader state */
+	mutable RasterizerStateRHIRef_t		rasterizerState;	/**< Rasterizer state */
 };
 
 #endif // !DRAWINGPOLICY_H

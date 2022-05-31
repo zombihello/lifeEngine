@@ -15,7 +15,7 @@
   * @ingroup D3D11RHI
   * @brief Class for work with DirectX shader
   */
-class FD3D11ShaderRHI : public FBaseShaderRHI
+class CD3D11ShaderRHI : public CBaseShaderRHI
 {
 public:
 	/**
@@ -26,12 +26,12 @@ public:
 	 * @param[in] InSize Size of data
 	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InData, uint32 InSize, const tchar* InShaderName );
+	CD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InData, uint32 InSize, const tchar* InShaderName );
 
 	/**
 	 * Destructor
 	 */
-	virtual ~FD3D11ShaderRHI();
+	virtual ~CD3D11ShaderRHI();
 
 protected:
 	/**
@@ -54,7 +54,7 @@ protected:
  * @ingroup D3D11RHI
  * @brief Class of DirectX vertex shader
  */
-class FD3D11VertexShaderRHI : public FD3D11ShaderRHI
+class CD3D11VertexShaderRHI : public CD3D11ShaderRHI
 {
 public:
 	/**
@@ -64,8 +64,8 @@ public:
 	 * @param[in] InSize Size of data
 	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11VertexShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
-		FD3D11ShaderRHI( SF_Vertex, InData, InSize, InShaderName )
+	CD3D11VertexShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		CD3D11ShaderRHI( SF_Vertex, InData, InSize, InShaderName )
 	{
 		code.resize( InSize );
 		memcpy( code.data(), InData, InSize );
@@ -97,7 +97,7 @@ private:
  * @ingroup D3D11RHI
  * @brief Class of DirectX hull shader
  */
-class FD3D11HullShaderRHI : public FD3D11ShaderRHI
+class CD3D11HullShaderRHI : public CD3D11ShaderRHI
 {
 public:
 	/**
@@ -107,8 +107,8 @@ public:
 	 * @param[in] InSize Size of data
 	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11HullShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
-		FD3D11ShaderRHI( SF_Hull, InData, InSize, InShaderName )
+	CD3D11HullShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		CD3D11ShaderRHI( SF_Hull, InData, InSize, InShaderName )
 	{}
 
 	/**
@@ -125,7 +125,7 @@ public:
  * @ingroup D3D11RHI
  * @brief Class of DirectX domain shader
  */
-class FD3D11DomainShaderRHI : public FD3D11ShaderRHI
+class CD3D11DomainShaderRHI : public CD3D11ShaderRHI
 {
 public:
 	/**
@@ -135,8 +135,8 @@ public:
 	 * @param[in] InSize Size of data
 	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11DomainShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
-		FD3D11ShaderRHI( SF_Domain, InData, InSize, InShaderName )
+	CD3D11DomainShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		CD3D11ShaderRHI( SF_Domain, InData, InSize, InShaderName )
 	{}
 
 	/**
@@ -153,7 +153,7 @@ public:
  * @ingroup D3D11RHI
  * @brief Class of DirectX pixel shader
  */
-class FD3D11PixelShaderRHI : public FD3D11ShaderRHI
+class CD3D11PixelShaderRHI : public CD3D11ShaderRHI
 {
 public:
 	/**
@@ -163,8 +163,8 @@ public:
 	 * @param[in] InSize Size of data
 	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11PixelShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
-		FD3D11ShaderRHI( SF_Pixel, InData, InSize, InShaderName )
+	CD3D11PixelShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		CD3D11ShaderRHI( SF_Pixel, InData, InSize, InShaderName )
 	{}
 
 	/**
@@ -181,7 +181,7 @@ public:
  * @ingroup D3D11RHI
  * @brief Class of DirectX geometry shader
  */
-class FD3D11GeometryShaderRHI : public FD3D11ShaderRHI
+class CD3D11GeometryShaderRHI : public CD3D11ShaderRHI
 {
 public:
 	/**
@@ -191,8 +191,8 @@ public:
 	 * @param[in] InSize Size of data
 	 * @param[in] InShaderName Shader name
 	 */
-	FD3D11GeometryShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
-		FD3D11ShaderRHI( SF_Geometry, InData, InSize, InShaderName )
+	CD3D11GeometryShaderRHI( const byte* InData, uint32 InSize, const tchar* InShaderName ) :
+		CD3D11ShaderRHI( SF_Geometry, InData, InSize, InShaderName )
 	{}
 
 	/**
@@ -209,13 +209,13 @@ public:
  * @ingroup D3D11RHI
  * @breif Class of vertex declaration
  */
-class FD3D11VertexDeclarationRHI : public FBaseVertexDeclarationRHI
+class CD3D11VertexDeclarationRHI : public CBaseVertexDeclarationRHI
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FD3D11VertexDeclarationRHI( const FVertexDeclarationElementList& InElementList );
+	CD3D11VertexDeclarationRHI( const VertexDeclarationElementList_t& InElementList );
 
 	/**
 	 * @brief Get hash
@@ -252,7 +252,7 @@ private:
  * @ingroup D3D11RHI
  * @brief Class of bound shader state
  */
-class FD3D11BoundShaderStateRHI : public FBaseBoundShaderStateRHI
+class CD3D11BoundShaderStateRHI : public CBaseBoundShaderStateRHI
 {
 public:
 	/**
@@ -267,12 +267,12 @@ public:
 	 * @param[in] InDomainShader Domain shader
 	 * @param[in] InGeometryShader Geometry shader
 	 */
-	FD3D11BoundShaderStateRHI( const tchar* InDebugName, const FBoundShaderStateKey& InKey, FVertexDeclarationRHIRef InVertexDeclaration, FVertexShaderRHIRef InVertexShader, FPixelShaderRHIRef InPixelShader, FHullShaderRHIRef InHullShader = nullptr, FDomainShaderRHIRef InDomainShader = nullptr, FGeometryShaderRHIRef InGeometryShader = nullptr );
+	CD3D11BoundShaderStateRHI( const tchar* InDebugName, const CBoundShaderStateKey& InKey, VertexDeclarationRHIRef_t InVertexDeclaration, VertexShaderRHIRef_t InVertexShader, PixelShaderRHIRef_t InPixelShader, HullShaderRHIRef_t InHullShader = nullptr, DomainShaderRHIRef_t InDomainShader = nullptr, GeometryShaderRHIRef_t InGeometryShader = nullptr );
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~FD3D11BoundShaderStateRHI();
+	virtual ~CD3D11BoundShaderStateRHI();
 
 	/**
 	 * @brief Get D3D11 input layout

@@ -1,12 +1,12 @@
 #include "Misc/AudioGlobals.h"
 #include "System/AudioEngine.h"
 
-void FAudioEngine::Init()
+void ÑAudioEngine::Init()
 {
 	GAudioDevice.Init();
 }
 
-void FAudioEngine::Shutdown()
+void ÑAudioEngine::Shutdown()
 {
 	GAudioDevice.Shutdown();
 }

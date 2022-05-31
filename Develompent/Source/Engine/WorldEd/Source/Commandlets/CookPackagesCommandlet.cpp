@@ -28,7 +28,7 @@
 #include "Render/VertexFactory/StaticMeshVertexFactory.h"
 #include "Render/VertexFactory/SpriteVertexFactory.h"
 
-IMPLEMENT_CLASS( LCookPackagesCommandlet )
+IMPLEMENT_CLASS( CCookPackagesCommandlet )
 
 /** Default package extension */
 #define DEFAULT_PACKAGE_EXTENSION		TEXT( "lpak" )
@@ -39,12 +39,12 @@ IMPLEMENT_CLASS( LCookPackagesCommandlet )
 /**
  * Struct of TMX object for spawn actor in world
  */
-struct FTMXObject
+struct STMXObject
 {
 	std::wstring					name;		/**< Actor name */
 	std::wstring					className;	/**< Class actor */
-	FTransform						transform;	/**< Transform */
-	std::vector< FActorVar >		actorVars;	/**< Actor properties */
+	CTransform						transform;	/**< Transform */
+	std::vector< CActorVar >		actorVars;	/**< Actor properties */
 };
 
 /**
@@ -66,7 +66,7 @@ FORCEINLINE std::wstring TMXPropertyTypeToText( tmx::Property::Type InTmxPropert
 	}
 }
 
-LCookPackagesCommandlet::LCookPackagesCommandlet()
+CCookPackagesCommandlet::CCookPackagesCommandlet()
 	: cookedShaderPlatform( SP_Unknown )
 	, cookedPlatform( PLATFORM_Unknown )
 {}
@@ -77,7 +77,7 @@ LCookPackagesCommandlet::LCookPackagesCommandlet()
  * --------------------
  */
 
-bool LCookPackagesCommandlet::CookMap( const FResourceInfo& InMapInfo )
+bool CCookPackagesCommandlet::CookMap( const SResourceInfo& InMapInfo )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking map '%s'" ), InMapInfo.filename.c_str() );
 
@@ -90,7 +90,7 @@ bool LCookPackagesCommandlet::CookMap( const FResourceInfo& InMapInfo )
 	}
 
 	// Loading tilesets from TMX
-	std::vector< FTMXTileset >			tilesets;
+	std::vector< STMXTileset >			tilesets;
 	if ( !LoadTMXTilests( tmxMap, tilesets ) )
 	{
 		appErrorf( TEXT( "Failed loading TMX tilesets" ) );
@@ -107,7 +107,7 @@ bool LCookPackagesCommandlet::CookMap( const FResourceInfo& InMapInfo )
 	SpawnActorsInWorld( tmxMap, tilesets );
 
 	// Serialize world to HDD
-	FArchive*		archive = GFileSystem->CreateFileWriter( FString::Format( TEXT( "%s") PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InMapInfo.filename.c_str(), extensionInfo.map.c_str() ), AW_NoFail );
+	CArchive*		archive = GFileSystem->CreateFileWriter( ÑString::Format( TEXT( "%s") PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InMapInfo.filename.c_str(), extensionInfo.map.c_str() ), AW_NoFail );
 	archive->SetType( AT_World );
 	archive->SerializeHeader();
 	GWorld->Serialize( *archive );
@@ -115,7 +115,7 @@ bool LCookPackagesCommandlet::CookMap( const FResourceInfo& InMapInfo )
 	return true;
 }
 
-bool LCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vector<FTMXTileset>& OutTilesets )
+bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vector<STMXTileset>& OutTilesets )
 {
 	const std::vector< tmx::Tileset >&		tmxTilesets		= InTMXMap.getTilesets();
 	const tmx::Vector2u&					mapTileSize		= InTMXMap.getTileSize();
@@ -127,13 +127,13 @@ bool LCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 		tmx::Vector2u			tmxTileSize		= tmxTileset.getTileSize();
 		int32					countCulumns	= tmxTilesetSize.x / tmxTileSize.x;
 		int32					countRows		= tmxTilesetSize.y / tmxTileSize.y;
-		TAssetHandle<FMaterial>	tilesetMaterial = GPackageManager->FindAsset( tmxTilesetName, AT_Unknown );
+		TAssetHandle<CMaterial>	tilesetMaterial = GPackageManager->FindAsset( tmxTilesetName, AT_Unknown );
 		if ( !tilesetMaterial.IsAssetValid() )
 		{
 			std::wstring		packageName;
 			std::wstring		assetName;
 			EAssetType			assetType;
-			FResourceInfo		resourceInfo;
+			SResourceInfo		resourceInfo;
 
 			ParseReferenceToAsset( tmxTilesetName, packageName, assetName, assetType );
 			if ( assetType != AT_Material )
@@ -157,19 +157,19 @@ bool LCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 		}
 
 		// Save info about tileset
-		FTMXTileset			tileset;
+		STMXTileset			tileset;
 		tileset.firstGID	= tmxTileset.getFirstGID();
 		tileset.lastGID		= tmxTileset.getLastGID();
 		tileset.material	= tilesetMaterial;
-		tileset.tileSize	= FVector2D( tmxTileSize.x, tmxTileSize.y );
-		tileset.tileOffset	= FVector2D( ( float )tmxTileSize.x / mapTileSize.x, ( float )tmxTileSize.y / mapTileSize.y );
+		tileset.tileSize	= Vector2D( tmxTileSize.x, tmxTileSize.y );
+		tileset.tileOffset	= Vector2D( ( float )tmxTileSize.x / mapTileSize.x, ( float )tmxTileSize.y / mapTileSize.y );
 
 		// Precalculates rectangles in tileset
 		for ( uint32 y = 0; y < countRows; ++y )
 		{
 			for ( uint32 x = 0; x < countCulumns; ++x )
 			{
-				FRectFloat		rect;
+				RectFloat_t		rect;
 				rect.width		= tmxTileSize.x;
 				rect.height		= tmxTileSize.y;
 				rect.top		= y * tmxTileSize.y;
@@ -191,11 +191,11 @@ bool LCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 	return true;
 }
 
-bool LCookPackagesCommandlet::FindTileset( const std::vector<FTMXTileset>& InTilesets, uint32 InIDTile, FTMXTileset& OutTileset, FRectFloat& OutTextureRect ) const
+bool CCookPackagesCommandlet::FindTileset( const std::vector<STMXTileset>& InTilesets, uint32 InIDTile, STMXTileset& OutTileset, RectFloat_t& OutTextureRect ) const
 {
 	for ( uint32 indexTileset = 0, countTilesets = InTilesets.size(); indexTileset < countTilesets; ++indexTileset )
 	{
-		const FTMXTileset&		tileset = InTilesets[ indexTileset ];
+		const STMXTileset&		tileset = InTilesets[ indexTileset ];
 		if ( InIDTile < tileset.firstGID || InIDTile > tileset.lastGID )
 		{
 			continue;
@@ -209,7 +209,7 @@ bool LCookPackagesCommandlet::FindTileset( const std::vector<FTMXTileset>& InTil
 	return false;
 }
 
-void LCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const std::vector<FTMXTileset>& InTilesets )
+void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const std::vector<STMXTileset>& InTilesets )
 {
 	const std::vector< tmx::Layer::Ptr >&		tmxLayers	= InTMXMap.getLayers();
 	const tmx::Vector2u&						mapSize		= InTMXMap.getTileCount();
@@ -229,16 +229,16 @@ void LCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 				if ( tile.ID != 0 )
 				{
 					// Find material for tile
-					FTMXTileset		tileset;
-					FRectFloat		textureRect;
+					STMXTileset		tileset;
+					RectFloat_t		textureRect;
 					bool			result = FindTileset( InTilesets, tile.ID, tileset, textureRect );
 					checkMsg( result, TEXT( "Not founded tileset for tile with ID %i" ), tile.ID );
 
-					ASprite*			sprite				= GWorld->SpawnActor< ASprite >( FVector( x * mapTileSize.x, y * mapTileSize.y, indexLayer ) );					
-					LSpriteComponent*	spriteComponent		= sprite->GetSpriteComponent();
+					ASprite*			sprite				= GWorld->SpawnActor< ASprite >( Vector( x * mapTileSize.x, y * mapTileSize.y, indexLayer ) );					
+					CSpriteComponent*	spriteComponent		= sprite->GetSpriteComponent();
 					spriteComponent->SetType( ST_Static );
 					spriteComponent->SetMaterial( tileset.material );
-					spriteComponent->SetSpriteSize( FVector2D( tileset.tileSize.x, tileset.tileSize.y ) );
+					spriteComponent->SetSpriteSize( Vector2D( tileset.tileSize.x, tileset.tileSize.y ) );
 					spriteComponent->SetTextureRect( textureRect );
 					sprite->SetName( TEXT( "ASprite_Tile" ) );
 					sprite->SetStatic( true );
@@ -255,12 +255,12 @@ void LCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 	}
 }
 
-void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, const std::vector<FTMXTileset>& InTileset )
+void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, const std::vector<STMXTileset>& InTileset )
 {
 	const std::vector< tmx::Layer::Ptr >&		tmxLayers = InTMXMap.getLayers();
 
 	// Getting max coord XY in coords system of Tiled Map Editor
-	FVector2D		tmxMaxXY;
+	Vector2D		tmxMaxXY;
 	{
 		const tmx::Vector2u&	mapSize			= InTMXMap.getTileCount();
 		const tmx::Vector2u&	mapTileSize		= InTMXMap.getTileSize();
@@ -279,7 +279,7 @@ void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 			{			
 				// Getting all parameters from object
 				const tmx::Object&		object = tmxObjects[ indexObject ];							
-				FTMXObject				tmxObject;
+				STMXObject				tmxObject;
 				tmxObject.name = ANSI_TO_TCHAR( object.getName().c_str() );
 
 				// Getting transformation and settings from object
@@ -289,19 +289,19 @@ void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					// Getting position
 					{
 						const tmx::Vector2f&		location = object.getPosition();
-						tmxObject.transform.SetLocation( FVector( objectAABB.left, tmxMaxXY.y - objectAABB.top - objectAABB.height, indexLayer ) );
+						tmxObject.transform.SetLocation( Vector( objectAABB.left, tmxMaxXY.y - objectAABB.top - objectAABB.height, indexLayer ) );
 					}
 
 					// Getting rotation
 					{
-						tmxObject.transform.SetRotation( FRotator( 0.f, 0.f, object.getRotation() ) );
+						tmxObject.transform.SetRotation( CRotator( 0.f, 0.f, object.getRotation() ) );
 					}
 
 					// Getting size
 					{
-						FActorVar		actorVar;
+						CActorVar		actorVar;
 						actorVar.SetName( TEXT( "Size" ) );
-						actorVar.SetValueVector3D( FVector( objectAABB.width, objectAABB.height, 1.f ) );
+						actorVar.SetValueVector3D( Vector( objectAABB.width, objectAABB.height, 1.f ) );
 						tmxObject.actorVars.push_back( actorVar );
 					}
 
@@ -310,15 +310,15 @@ void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					if ( tileID > 0 )
 					{
 						// Find material for tile
-						FTMXTileset			tileset;
-						FRectFloat			textureRect;
+						STMXTileset			tileset;
+						RectFloat_t			textureRect;
 						if ( FindTileset( InTileset, tileID, tileset, textureRect ) )
 						{
-							FActorVar		varMaterial;
+							CActorVar		varMaterial;
 							varMaterial.SetName( TEXT( "Material" ) );
 							varMaterial.SetValueMaterial( tileset.material );
 
-							FActorVar		varTextureRect;
+							CActorVar		varTextureRect;
 							varTextureRect.SetName( TEXT( "TextureRect" ) );
 							varTextureRect.SetValueRectFloat( textureRect );
 
@@ -338,7 +338,7 @@ void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 				{
 					const tmx::Property&		objectProperty = objectProperties[ indexPropery ];
 					bool						bIsClassName = false;
-					FActorVar					actorVar;
+					CActorVar					actorVar;
 
 					actorVar.SetName( ANSI_TO_TCHAR( objectProperty.getName().c_str() ) );
 					if ( actorVar.GetName() == TEXT( "Class" ) )
@@ -358,7 +358,7 @@ void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					case tmx::Property::Type::Colour:
 					{
 						const tmx::Colour&		tmxColor = objectProperty.getColourValue();
-						actorVar.SetValueColor( FColor( tmxColor.r, tmxColor.g, tmxColor.b, tmxColor.a ) );
+						actorVar.SetValueColor( ÑColor( tmxColor.r, tmxColor.g, tmxColor.b, tmxColor.a ) );
 						break;
 					}
 
@@ -385,14 +385,14 @@ void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 				// Spawn actor and init properties if class name is valid
 				if ( !tmxObject.className.empty() )
 				{
-					LClass*		classActor = LClass::StaticFindClass( tmxObject.className.c_str() );
+					CClass*		classActor = CClass::StaticFindClass( tmxObject.className.c_str() );
 					if ( !classActor )
 					{
 						LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Actor '%s' not spanwed because class '%s' not founded" ), tmxObject.className.c_str() );
 						continue;
 					}
 
-					AActorRef		actor = GWorld->SpawnActor( classActor, tmxObject.transform.GetLocation(), tmxObject.transform.GetRotation() );
+					ActorRef_t		actor = GWorld->SpawnActor( classActor, tmxObject.transform.GetLocation(), tmxObject.transform.GetRotation() );
 					actor->SetName( tmxObject.name.c_str() );
 					if ( !actor->InitProperties( tmxObject.actorVars, this ) )
 					{
@@ -415,14 +415,14 @@ void LCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
  * --------------------
  */
 
-bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo, TAssetHandle<FMaterial>& OutMaterial )
+bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo, TAssetHandle<CMaterial>& OutMaterial )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking material '%s:%s'" ), InMaterialInfo.packageName.c_str(), InMaterialInfo.filename.c_str() );
 
 	// Parse material in JSON format
-	FConfig		lmtMaterial;
+	CConfig		lmtMaterial;
 	{
-		FArchive*		arMaterial = GFileSystem->CreateFileReader( InMaterialInfo.path, AR_NoFail );
+		CArchive*		arMaterial = GFileSystem->CreateFileReader( InMaterialInfo.path, AR_NoFail );
 		lmtMaterial.Serialize( *arMaterial );
 		delete arMaterial;
 	}
@@ -446,14 +446,14 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	uint32						usageFlags = MU_AllMeshes;
 	std::vector< uint64 >		usedVertexFectories;
 	{
-		FConfigValue	configVarUsageFlags = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "Usage" ) );
-		if ( configVarUsageFlags.GetType() == FConfigValue::T_Object )
+		CConfigValue	configVarUsageFlags = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "Usage" ) );
+		if ( configVarUsageFlags.GetType() == CConfigValue::T_Object )
 		{
 			// If exist Usage object, we reset usage flags to MU_None
 			usageFlags = MU_None;
 
 			// Get usage flags
-			FConfigObject		configObjUsageFlags		= configVarUsageFlags.GetObject();
+			CConfigObject		configObjUsageFlags		= configVarUsageFlags.GetObject();
 			bool				bStaticMesh				= configObjUsageFlags.GetValue( TEXT( "StaticMesh" ) ).GetBool();
 			bool				bSprite					= configObjUsageFlags.GetValue( TEXT( "Sprite" ) ).GetBool();
 
@@ -461,13 +461,13 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 			if ( bStaticMesh )
 			{
 				usageFlags |= MU_StaticMesh;
-				usedVertexFectories.push_back( FStaticMeshVertexFactory::staticType.GetHash() );
+				usedVertexFectories.push_back( CStaticMeshVertexFactory::staticType.GetHash() );
 			}
 
 			if ( bSprite )
 			{
 				usageFlags |= MU_Sprite;
-				usedVertexFectories.push_back( FSpriteVertexFactory::staticType.GetHash() );
+				usedVertexFectories.push_back( CSpriteVertexFactory::staticType.GetHash() );
 			}
 		}
 		else
@@ -477,16 +477,16 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	}
 
 	// Getting shader types
-	std::vector< FShaderMetaType* >		shaderMetaTypes;
+	std::vector< CShaderMetaType* >		shaderMetaTypes;
 	{
-		FConfigValue	configVarShadersType = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "ShadersType" ) );
-		check( configVarShadersType.GetType() == FConfigValue::T_Array );
+		CConfigValue	configVarShadersType = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "ShadersType" ) );
+		check( configVarShadersType.GetType() == CConfigValue::T_Array );
 
-		std::vector< FConfigValue >		configValues = configVarShadersType.GetArray();
+		std::vector< CConfigValue >		configValues = configVarShadersType.GetArray();
 		for ( uint32 index = 0, count = configValues.size(); index < count; ++index )
 		{
 			std::wstring		shaderMetaTypeName	= configValues[ index ].GetString();
-			FShaderMetaType*	shaderMetaType		= GShaderManager->FindShaderType( shaderMetaTypeName );
+			CShaderMetaType*	shaderMetaType		= GShaderManager->FindShaderType( shaderMetaTypeName );
 			if ( !shaderMetaType )
 			{
 				appErrorf( TEXT( "Shader '%s' not found in engine" ), shaderMetaTypeName.c_str() );
@@ -501,8 +501,8 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 					continue;
 				}
 
-				FShaderCompiler				shaderCompiler;
-				FVertexFactoryMetaType*		vfType = FVertexFactoryMetaType::FContainerVertexFactoryMetaType::Get()->FindRegisteredType( usedVertexFectories[ index ] );
+				CShaderCompiler				shaderCompiler;
+				CVertexFactoryMetaType*		vfType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( usedVertexFectories[ index ] );
 				bool						result = shaderCompiler.CompileShader( shaderMetaType, cookedShaderPlatform, shaderCache, vfType );
 				if ( !result )
 				{
@@ -518,15 +518,15 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	// Getting scalar parameters
 	std::unordered_map< std::wstring, float >		scalarParameters;
 	{
-		FConfigValue	configVarScalarParameters = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "ScalarParameters" ) );
+		CConfigValue	configVarScalarParameters = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "ScalarParameters" ) );
 		if ( configVarScalarParameters.IsValid() )
 		{
-			check( configVarScalarParameters.GetType() == FConfigValue::T_Array );
+			check( configVarScalarParameters.GetType() == CConfigValue::T_Array );
 
-			std::vector< FConfigValue >		configObjects = configVarScalarParameters.GetArray();
+			std::vector< CConfigValue >		configObjects = configVarScalarParameters.GetArray();
 			for ( uint32 index = 0, count = configObjects.size(); index < count; ++index )
 			{
-				FConfigObject	configObject	= configObjects[ index ].GetObject();
+				CConfigObject	configObject	= configObjects[ index ].GetObject();
 				std::wstring	name			= configObject.GetValue( TEXT( "Name" ) ).GetString();
 				float			value			= configObject.GetValue( TEXT( "Value" ) ).GetNumber();
 				scalarParameters.insert( std::make_pair( name, value ) );
@@ -535,26 +535,26 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	}
 
 	// Getting texture parameters
-	std::unordered_map< std::wstring, TAssetHandle<FTexture2D> >		textureParameters;
+	std::unordered_map< std::wstring, TAssetHandle<CTexture2D> >		textureParameters;
 	{
-		FConfigValue	configVarTextureParameters = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "TextureParameters" ) );
+		CConfigValue	configVarTextureParameters = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "TextureParameters" ) );
 		if ( configVarTextureParameters.IsValid() )
 		{
-			check( configVarTextureParameters.GetType() == FConfigValue::T_Array );
+			check( configVarTextureParameters.GetType() == CConfigValue::T_Array );
 
-			std::vector< FConfigValue >		configObjects = configVarTextureParameters.GetArray();
+			std::vector< CConfigValue >		configObjects = configVarTextureParameters.GetArray();
 			for ( uint32 index = 0, count = configObjects.size(); index < count; ++index )
 			{
-				FConfigObject				configObject	= configObjects[ index ].GetObject();
+				CConfigObject				configObject	= configObjects[ index ].GetObject();
 				std::wstring				name			= configObject.GetValue( TEXT( "Name" ) ).GetString();
 				std::wstring				assetReference	= configObject.GetValue( TEXT( "AssetReference" ) ).GetString();
-				TAssetHandle<FTexture2D>	texture			= GPackageManager->FindAsset( assetReference, AT_Unknown );
+				TAssetHandle<CTexture2D>	texture			= GPackageManager->FindAsset( assetReference, AT_Unknown );
 				if ( !texture.IsAssetValid() )
 				{
 					std::wstring		packageName;
 					std::wstring		assetName;
 					EAssetType			assetType;
-					FResourceInfo		resourceInfo;
+					SResourceInfo		resourceInfo;
 
 					ParseReferenceToAsset( assetReference, packageName, assetName, assetType );
 					if ( assetType != AT_Texture2D )
@@ -583,7 +583,7 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 	}
 
 	// Create material and saving to package
-	TSharedPtr<FMaterial>		materialRef = MakeSharedPtr<FMaterial>();
+	TSharedPtr<CMaterial>		materialRef = MakeSharedPtr<CMaterial>();
 	materialRef->SetAssetName( InMaterialInfo.filename );
 	materialRef->SetTwoSided( bIsTwoSided );
 	materialRef->SetWireframe( bIsWireframe );
@@ -601,7 +601,7 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
 		materialRef->SetTextureParameterValue( it->first, it->second );
 	}
 
-	OutMaterial = TAssetHandle<FMaterial>( materialRef, MakeSharedPtr<FAssetReference>( AT_Material, materialRef->GetGUID() ) );
+	OutMaterial = TAssetHandle<CMaterial>( materialRef, MakeSharedPtr<SAssetReference>( AT_Material, materialRef->GetGUID() ) );
 
 	// Save to package
 	return SaveToPackage( InMaterialInfo, OutMaterial );
@@ -613,7 +613,7 @@ bool LCookPackagesCommandlet::CookMaterial( const FResourceInfo& InMaterialInfo,
  * ----------------------
  */
 
-TSharedPtr<FTexture2D> LCookPackagesCommandlet::ConvertTexture2D( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
+TSharedPtr<CTexture2D> CCookPackagesCommandlet::ConvertTexture2D( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
 {
 	// Loading data from image
 	int				numComponents = 0;
@@ -646,7 +646,7 @@ TSharedPtr<FTexture2D> LCookPackagesCommandlet::ConvertTexture2D( const std::wst
 	}
 
 	// Create texture 2D and init him
-	TSharedPtr<FTexture2D>		texture2DRef = MakeSharedPtr<FTexture2D>();
+	TSharedPtr<CTexture2D>		texture2DRef = MakeSharedPtr<CTexture2D>();
 	texture2DRef->SetAssetName( filename );
 	texture2DRef->SetAssetSourceFile( InPath );
 	{
@@ -661,12 +661,12 @@ TSharedPtr<FTexture2D> LCookPackagesCommandlet::ConvertTexture2D( const std::wst
 	return texture2DRef;
 }
 
-bool LCookPackagesCommandlet::CookTexture2D( const FResourceInfo& InTexture2DInfo, TAssetHandle<FTexture2D>& OutTexture2D )
+bool CCookPackagesCommandlet::CookTexture2D( const SResourceInfo& InTexture2DInfo, TAssetHandle<CTexture2D>& OutTexture2D )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking texture 2D '%s:%s'" ), InTexture2DInfo.packageName.c_str(), InTexture2DInfo.filename.c_str() );
 	
-	TSharedPtr<FTexture2D>		texture2DRef = ConvertTexture2D( InTexture2DInfo.path, InTexture2DInfo.filename );
-	OutTexture2D				= TAssetHandle<FTexture2D>( texture2DRef, MakeSharedPtr<FAssetReference>( AT_Texture2D, texture2DRef->GetGUID() ) );
+	TSharedPtr<CTexture2D>		texture2DRef = ConvertTexture2D( InTexture2DInfo.path, InTexture2DInfo.filename );
+	OutTexture2D				= TAssetHandle<CTexture2D>( texture2DRef, MakeSharedPtr<SAssetReference>( AT_Texture2D, texture2DRef->GetGUID() ) );
 	return OutTexture2D.IsAssetValid() && SaveToPackage( InTexture2DInfo, OutTexture2D );
 }
 
@@ -676,13 +676,13 @@ bool LCookPackagesCommandlet::CookTexture2D( const FResourceInfo& InTexture2DInf
  * ---------------------
  */
 
-void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = false */ )
+void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = false */ )
 {
 	// Compile all global shaders
 	{
 		LE_LOG( LT_Log, LC_Commandlet, TEXT( "Compiling global shaders" ) );
 		
-		FShaderCompiler		shaderCompiler;
+		CShaderCompiler		shaderCompiler;
 		bool		result = shaderCompiler.CompileAll( shaderCache, cookedShaderPlatform, true );
 		if ( !result )
 		{
@@ -701,7 +701,7 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 				continue;
 			}
 
-			TAssetHandle<FTexture2D>		texture2D;
+			TAssetHandle<CTexture2D>		texture2D;
 			bool	result = CookTexture2D( itAsset->second, texture2D );
 			if ( !result )
 			{
@@ -721,7 +721,7 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 				continue;
 			}
 
-			TAssetHandle<FMaterial>		material;
+			TAssetHandle<CMaterial>		material;
 			bool	result = CookMaterial( itAsset->second, material );
 			if ( !result )
 			{
@@ -741,7 +741,7 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 				continue;
 			}
 
-			TAssetHandle<FAudioBank>	audioBank;
+			TAssetHandle<CAudioBank>	audioBank;
 			bool	result = CookAudioBank( itAsset->second, audioBank );
 			if ( !result )
 			{
@@ -761,7 +761,7 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 				continue;
 			}
 
-			TAssetHandle<FPhysicsMaterial>		physMaterial;
+			TAssetHandle<CPhysicsMaterial>		physMaterial;
 			bool					result = CookPhysMaterial( itAsset->second, physMaterial );
 			if ( !result )
 			{
@@ -778,10 +778,10 @@ void LCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
  * ----------------------
  */
 
-TSharedPtr<FAudioBank> LCookPackagesCommandlet::ConvertAudioBank( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
+TSharedPtr<CAudioBank> CCookPackagesCommandlet::ConvertAudioBank( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
 {
 	// Create audio bank and init him
-	TSharedPtr<FAudioBank>		audioBankRef = MakeSharedPtr<FAudioBank>();
+	TSharedPtr<CAudioBank>		audioBankRef = MakeSharedPtr<CAudioBank>();
 
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InName;
@@ -809,12 +809,12 @@ TSharedPtr<FAudioBank> LCookPackagesCommandlet::ConvertAudioBank( const std::wst
 	return audioBankRef;
 }
 
-bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInfo, TAssetHandle<FAudioBank>& OutAudioBank )
+bool CCookPackagesCommandlet::CookAudioBank( const SResourceInfo& InAudioBankInfo, TAssetHandle<CAudioBank>& OutAudioBank )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking audio bank '%s:%s'" ), InAudioBankInfo.packageName.c_str(), InAudioBankInfo.filename.c_str() );
 	
-	TSharedPtr<FAudioBank>		audioBankRef = ConvertAudioBank( InAudioBankInfo.path, InAudioBankInfo.filename );
-	OutAudioBank				= TAssetHandle<FAudioBank>( audioBankRef, MakeSharedPtr<FAssetReference>( AT_AudioBank, audioBankRef->GetGUID() ) );
+	TSharedPtr<CAudioBank>		audioBankRef = ConvertAudioBank( InAudioBankInfo.path, InAudioBankInfo.filename );
+	OutAudioBank				= TAssetHandle<CAudioBank>( audioBankRef, MakeSharedPtr<SAssetReference>( AT_AudioBank, audioBankRef->GetGUID() ) );
 	return OutAudioBank.IsAssetValid() && SaveToPackage( InAudioBankInfo, OutAudioBank );
 }
 
@@ -824,14 +824,14 @@ bool LCookPackagesCommandlet::CookAudioBank( const FResourceInfo& InAudioBankInf
  * --------------------
  */
 
-bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMaterialInfo, TAssetHandle<FPhysicsMaterial>& OutPhysMaterial )
+bool CCookPackagesCommandlet::CookPhysMaterial( const SResourceInfo& InPhysMaterialInfo, TAssetHandle<CPhysicsMaterial>& OutPhysMaterial )
 {
 	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking physics material '%s:%s'" ), InPhysMaterialInfo.packageName.c_str(), InPhysMaterialInfo.filename.c_str() );
 	
 	// Parse physics material in JSON format
-	FConfig		pmtMaterial;
+	CConfig		pmtMaterial;
 	{
-		FArchive*	arMaterial = GFileSystem->CreateFileReader( InPhysMaterialInfo.path, AR_NoFail );
+		CArchive*	arMaterial = GFileSystem->CreateFileReader( InPhysMaterialInfo.path, AR_NoFail );
 		pmtMaterial.Serialize( *arMaterial );
 		delete arMaterial;
 	}
@@ -844,7 +844,7 @@ bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMater
 	std::wstring	surfaceTypeName = pmtMaterial.GetValue( TEXT( "PhysicsMaterial" ), TEXT( "Surface" ) ).GetString();
 
 	// Create physics material and saving to package
-	TSharedPtr<FPhysicsMaterial>		physMaterialRef = MakeSharedPtr<FPhysicsMaterial>();
+	TSharedPtr<CPhysicsMaterial>		physMaterialRef = MakeSharedPtr<CPhysicsMaterial>();
 	physMaterialRef->SetAssetName( InPhysMaterialInfo.filename );
 	physMaterialRef->SetStaticFriction( staticFriction );
 	physMaterialRef->SetDynamicFriction( dynamicFriction );
@@ -853,7 +853,7 @@ bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMater
 	physMaterialRef->SetSurfaceType( appTextToESurfaceType( surfaceTypeName ) );
 
 	// Save to package
-	OutPhysMaterial = TAssetHandle<FPhysicsMaterial>( physMaterialRef, MakeSharedPtr<FAssetReference>( AT_PhysicsMaterial, physMaterialRef->GetGUID() ) );
+	OutPhysMaterial = TAssetHandle<CPhysicsMaterial>( physMaterialRef, MakeSharedPtr<SAssetReference>( AT_PhysicsMaterial, physMaterialRef->GetGUID() ) );
 	return SaveToPackage( InPhysMaterialInfo, OutPhysMaterial );
 }
 
@@ -863,10 +863,10 @@ bool LCookPackagesCommandlet::CookPhysMaterial( const FResourceInfo& InPhysMater
  * --------------------
  */
 
-bool LCookPackagesCommandlet::SaveToPackage( const FResourceInfo& InResourceInfo, const TAssetHandle<FAsset>& InAsset )
+bool CCookPackagesCommandlet::SaveToPackage( const SResourceInfo& InResourceInfo, const TAssetHandle<CAsset>& InAsset )
 {
-	std::wstring		outputPackage = FString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
-	FPackageRef			package = GPackageManager->LoadPackage( outputPackage, true );
+	std::wstring		outputPackage = ÑString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
+	PackageRef_t			package = GPackageManager->LoadPackage( outputPackage, true );
 	package->Add( InAsset );
 
 	bool	result = package->Save( outputPackage );
@@ -879,7 +879,7 @@ bool LCookPackagesCommandlet::SaveToPackage( const FResourceInfo& InResourceInfo
 	return true;
 }
 
-void LCookPackagesCommandlet::InsertResourceToList( FResourceMap& InOutResourceMap, const std::wstring& InPackageName, const std::wstring& InFilename, const FResourceInfo& InResourceInfo )
+void CCookPackagesCommandlet::InsertResourceToList( ResourceMap_t& InOutResourceMap, const std::wstring& InPackageName, const std::wstring& InFilename, const SResourceInfo& InResourceInfo )
 {
 	auto		itPackage = InOutResourceMap.find( InPackageName );
 	if ( itPackage == InOutResourceMap.end() )
@@ -896,7 +896,7 @@ void LCookPackagesCommandlet::InsertResourceToList( FResourceMap& InOutResourceM
 	}
 }
 
-void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, bool InIsRootDir /* = false */, bool InIsAlwaysCookDir /* = false */, const std::wstring& InParentDirName /* = TEXT( "" ) */ )
+void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, bool InIsRootDir /* = false */, bool InIsAlwaysCookDir /* = false */, const std::wstring& InParentDirName /* = TEXT( "" ) */ )
 {
 	// Getting package name from dir name
 	std::wstring		packageName = InParentDirName;
@@ -952,7 +952,7 @@ void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 		}
 
 		// If this resource is texture
-		FResourceInfo			resourceInfo = FResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+		SResourceInfo			resourceInfo = SResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
 		if ( IsSupportedTextureExtension( extension ) )
 		{
 			InsertResourceToList( texturesMap, packageName, filename, resourceInfo );
@@ -980,7 +980,7 @@ void LCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 	}
 }
 
-bool LCookPackagesCommandlet::Main( const std::wstring& InCommand )
+bool CCookPackagesCommandlet::Main( const std::wstring& InCommand )
 {
 	GIsCooker = true;
 	std::vector< std::wstring >			mapsToCook;
@@ -1025,12 +1025,12 @@ bool LCookPackagesCommandlet::Main( const std::wstring& InCommand )
 	// Indexing resources in content dirs
 	{
 		// Always cook dirs
-		std::vector< FConfigValue >			configVarAlwaysCookDirs = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "AlwaysCookDirs" ) ).GetArray();
+		std::vector< CConfigValue >			configVarAlwaysCookDirs = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "AlwaysCookDirs" ) ).GetArray();
 		for ( uint32 index = 0, count = configVarAlwaysCookDirs.size(); index < count; ++index )
 		{
-			const FConfigValue&		configAlwaysCookDirItem = configVarAlwaysCookDirs[ index ];
-			check( configAlwaysCookDirItem.GetType() == FConfigValue::T_Object );
-			FConfigObject			objectAlwaysCookDir = configAlwaysCookDirItem.GetObject();
+			const CConfigValue&		configAlwaysCookDirItem = configVarAlwaysCookDirs[ index ];
+			check( configAlwaysCookDirItem.GetType() == CConfigValue::T_Object );
+			CConfigObject			objectAlwaysCookDir = configAlwaysCookDirItem.GetObject();
 
 			std::wstring		packageSufix	= objectAlwaysCookDir.GetValue( TEXT( "PackageSufix" ) ).GetString();
 			std::wstring		path			= objectAlwaysCookDir.GetValue( TEXT( "Path" ) ).GetString();
@@ -1041,12 +1041,12 @@ bool LCookPackagesCommandlet::Main( const std::wstring& InCommand )
 		}
 
 		// Cooked dirs
-		std::vector< FConfigValue >			configVarCookDirs = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "CookDirs" ) ).GetArray();
+		std::vector< CConfigValue >			configVarCookDirs = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "CookDirs" ) ).GetArray();
 		for ( uint32 index = 0, count = configVarCookDirs.size(); index < count; ++index )
 		{
-			const FConfigValue&		configCookDirItem = configVarCookDirs[ index ];
-			check( configCookDirItem.GetType() == FConfigValue::T_Object );
-			FConfigObject			objectCookDir = configCookDirItem.GetObject();
+			const CConfigValue&		configCookDirItem = configVarCookDirs[ index ];
+			check( configCookDirItem.GetType() == CConfigValue::T_Object );
+			CConfigObject			objectCookDir = configCookDirItem.GetObject();
 
 			std::wstring		packageSufix	= objectCookDir.GetValue( TEXT( "PackageSufix" ) ).GetString();
 			std::wstring		path			= objectCookDir.GetValue( TEXT( "Path" ) ).GetString();
@@ -1059,7 +1059,7 @@ bool LCookPackagesCommandlet::Main( const std::wstring& InCommand )
 
 	// Getting output cooked directory and extensions for saving
 	{
-		FConfigObject		configObjExtensions = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "Extensions" ) ).GetObject();
+		CConfigObject		configObjExtensions = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "Extensions" ) ).GetObject();
 		extensionInfo.package	= configObjExtensions.GetValue( TEXT( "Package" ) ).GetString();
 		if ( extensionInfo.package.empty() )
 		{
@@ -1104,7 +1104,7 @@ bool LCookPackagesCommandlet::Main( const std::wstring& InCommand )
 
 	// Serialize shader cache
 	{
-		FArchive*		archive = GFileSystem->CreateFileWriter( GCookedDir + PATH_SEPARATOR + GShaderManager->GetShaderCacheFilename( cookedShaderPlatform ), AW_NoFail );
+		CArchive*		archive = GFileSystem->CreateFileWriter( GCookedDir + PATH_SEPARATOR + GShaderManager->GetShaderCacheFilename( cookedShaderPlatform ), AW_NoFail );
 		archive->SetType( AT_ShaderCache );
 		archive->SerializeHeader();
 		shaderCache.Serialize( *archive );
@@ -1113,7 +1113,7 @@ bool LCookPackagesCommandlet::Main( const std::wstring& InCommand )
 
 	// Serialize table of contents
 	{
-		FArchive*		archive = GFileSystem->CreateFileWriter( GCookedDir + PATH_SEPARATOR + FTableOfContets::GetNameTOC(), AW_NoFail );
+		CArchive*		archive = GFileSystem->CreateFileWriter( GCookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC(), AW_NoFail );
 		GTableOfContents.Serialize( *archive );
 		delete archive;
 	}

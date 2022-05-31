@@ -5,14 +5,14 @@
 // -------------
 // GLOBALS
 // -------------
-TGlobalResource< FSceneRenderTargets >				GSceneRenderTargets;
+TGlobalResource< CSceneRenderTargets >				GSceneRenderTargets;
 
-FSceneRenderTargets::FSceneRenderTargets()
+CSceneRenderTargets::CSceneRenderTargets()
 	: bufferSizeX( 0 )
 	, bufferSizeY( 0 )
 {}
 
-void FSceneRenderTargets::InitRHI()
+void CSceneRenderTargets::InitRHI()
 {
 	if ( bufferSizeX > 0 && bufferSizeY > 0 )
 	{
@@ -26,17 +26,17 @@ void FSceneRenderTargets::InitRHI()
 	}
 }
 
-void FSceneRenderTargets::ReleaseRHI()
+void CSceneRenderTargets::ReleaseRHI()
 {
 	for ( uint32 index = 0; index < SRTT_MaxSceneRenderTargets; ++index )
 	{
-		FSceneRenderTargetItem&		rtItem = renderTargets[ index ];
+		SSceneRenderTargetItem&		rtItem = renderTargets[ index ];
 		rtItem.surface.SafeRelease();
 		rtItem.texture.SafeRelease();
 	}
 }
 
-void FSceneRenderTargets::Allocate( uint32 InNewSizeX, uint32 InNewSizeY )
+void CSceneRenderTargets::Allocate( uint32 InNewSizeX, uint32 InNewSizeY )
 {
 	if ( bufferSizeX < InNewSizeX || bufferSizeY < InNewSizeY )
 	{

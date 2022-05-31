@@ -19,23 +19,23 @@
  * @ingroup Engine
  * @brief Class for work with scripts
  */
-class FScript : public FAsset
+class CScript : public CAsset
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-										FScript();
+										CScript();
 
 	/**
 	 * @brief Destructor
 	 */
-										~FScript();
+										~CScript();
 
 	/**
 	 * @brief Serialize script
 	 */
-	virtual void						Serialize( class FArchive& InArchive ) override;
+	virtual void						Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Execute function

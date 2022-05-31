@@ -33,7 +33,7 @@ public:
 	 * @param InTexture2D	Texture 2D to edit
 	 * @param InParent		Parent widget
 	 */
-	WeTextureEditorWindow( const TSharedPtr<FTexture2D>& InTexture2D, QWidget* InParent = nullptr );
+	WeTextureEditorWindow( const TSharedPtr<CTexture2D>& InTexture2D, QWidget* InParent = nullptr );
 
 	/**
 	 * Destructor
@@ -61,7 +61,7 @@ signals:
 	 * 
 	 * @param InAsset		Changed asset
 	 */
-	void OnChangedAsset( const TSharedPtr<FAsset>& InAsset );
+	void OnChangedAsset( const TSharedPtr<CAsset>& InAsset );
 
 private:
 	/**
@@ -97,19 +97,19 @@ private:
 	 * Called event when asset is reloaded
 	 * @param InAssets	Array of reloaded assets
 	 */
-	void OnAssetsReloaded( const std::vector< TSharedPtr<class FAsset> >& InAssets );
+	void OnAssetsReloaded( const std::vector< TSharedPtr<class CAsset> >& InAssets );
 
 	bool												bInit;								/**< Is inited window */
 	Ui::WeTextureEditorWindow*							ui;									/**< Qt UI */
-	TSharedPtr<FTexture2D>								texture2D;							/**< Editable asset */
-	class FTexturePreviewViewportClient*				viewportClient;						/**< Viewport client */
+	TSharedPtr<CTexture2D>								texture2D;							/**< Editable asset */
+	class CTexturePreviewViewportClient*				viewportClient;						/**< Viewport client */
 	class QComboBox*									comboBox_addressU;					/**< Combobox for select address mode by U */
 	class QComboBox*									comboBox_addressV;					/**< Combobox for select address mode by V */
 	class QComboBox*									comboBox_filter;					/**< Combobox for select sampler filter */
 	class QLabel*										label_sourceFileValue;				/**< Label for show path to source file */
 	class QToolButton*									toolButton_sourceFile;				/**< Tool button for select new path to source file */
 	class QToolButton*									toolButton_sourceFileRemove;		/**< Tool button for remove path to source file */
-	FEditorDelegates::FOnAssetsReloaded::FDelegateType* assetsReloadedHandle;				/**< Handle delegate of reloaded assets */
+	SEditorDelegates::COnAssetsReloaded::DelegateType_t* assetsReloadedHandle;				/**< Handle delegate of reloaded assets */
 };
 
 #endif // MAINWINDOW_H

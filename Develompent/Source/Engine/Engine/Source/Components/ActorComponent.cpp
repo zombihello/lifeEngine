@@ -1,17 +1,17 @@
 #include "Actors/Actor.h"
 #include "Components/ActorComponent.h"
 
-IMPLEMENT_CLASS( LActorComponent )
+IMPLEMENT_CLASS( CActorComponent )
 
-LActorComponent::LActorComponent() :
+CActorComponent::CActorComponent() :
 	owner( nullptr )
 {}
 
-LActorComponent::~LActorComponent()
+CActorComponent::~CActorComponent()
 {}
 
-void LActorComponent::BeginPlay()
+void CActorComponent::BeginPlay()
 {}
 
-void LActorComponent::TickComponent( float InDeltaTime )
+void CActorComponent::TickComponent( float InDeltaTime )
 {}

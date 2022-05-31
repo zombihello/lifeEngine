@@ -19,14 +19,14 @@
 #include "Render/VertexFactory/SimpleElementVertexFactory.h"
 #include "Render/SceneRenderTargets.h"
 
-FStaticMeshDrawPolicy::FStaticMeshDrawPolicy()
+CStaticMeshDrawPolicy::CStaticMeshDrawPolicy()
 {}
 
-void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* InDeviceContextRHI )
+void CStaticMeshDrawPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI )
 {
-	FMeshDrawingPolicy::SetShaderParameters( InDeviceContextRHI );
+	CMeshDrawingPolicy::SetShaderParameters( InDeviceContextRHI );
 
-	TSharedPtr<FMaterial>		materialRef = material.ToSharedPtr();
+	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
 	if ( !materialRef )
 	{
 		materialRef = GEngine->GetDefaultMaterial().ToSharedPtr();
@@ -36,11 +36,11 @@ void FStaticMeshDrawPolicy::SetShaderParameters( class FBaseDeviceContextRHI* In
 		}
 	}
 
-	TAssetHandle<FTexture2D>		texture2d;
+	TAssetHandle<CTexture2D>		texture2d;
 	materialRef->GetTextureParameterValue( TEXT( "diffuse" ), texture2d );
 	if ( texture2d.IsAssetValid() )
 	{
-		TSharedPtr<FTexture2D>		texture2DRef = texture2d.ToSharedPtr();
+		TSharedPtr<CTexture2D>		texture2DRef = texture2d.ToSharedPtr();
 		GRHI->SetTextureParameter( InDeviceContextRHI, pixelShader->GetPixelShader(), texture2DRef->GetTexture2DRHI(), 0 );
 		GRHI->SetSamplerState( InDeviceContextRHI, pixelShader->GetPixelShader(), GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ), 0 );
 	}
@@ -57,16 +57,16 @@ FORCEINLINE const tchar* GetSceneSDGName( ESceneDepthGroup SDG )
 	}
 }
 
-FSceneRenderer::FSceneRenderer( FSceneView* InSceneView, class FScene* InScene /* = nullptr */ )
+CSceneRenderer::CSceneRenderer( CSceneView* InSceneView, class CScene* InScene /* = nullptr */ )
 	: scene( InScene )
 	, sceneView( InSceneView )
 {}
 
-void FSceneRenderer::BeginRenderViewTarget( FViewportRHIParamRef InViewportRHI )
+void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
 	SCOPED_DRAW_EVENT( EventBeginRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Begin Render View Target" ) );
 	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
-	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 
 	GRHI->SetRenderTarget( immediateContext, GSceneRenderTargets.GetSceneColorSurface(), GSceneRenderTargets.GetSceneDepthZSurface() );
 	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
@@ -82,28 +82,28 @@ void FSceneRenderer::BeginRenderViewTarget( FViewportRHIParamRef InViewportRHI )
 	}
 }
 
-void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
+void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 {
 	if ( !scene )
 	{
 		return;
 	}
 
-	FBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	EShowFlags					showFlags	= sceneView->GetShowFlags();
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	ShowFlags_t					showFlags	= sceneView->GetShowFlags();
 
 	// Render scene layers
 	{
 		SCOPED_DRAW_EVENT( EventSDGs, DEC_SCENE_ITEMS, TEXT( "SDGs" ) );
 		for ( uint32 SDGIndex = 0; SDGIndex < SDG_Max; ++SDGIndex )
 		{
-			FSceneDepthGroup&		SDG = scene->GetSDG( ( ESceneDepthGroup )SDGIndex );
+			SSceneDepthGroup&		SDG = scene->GetSDG( ( ESceneDepthGroup )SDGIndex );
 			if ( SDG.IsEmpty() )
 			{
 				continue;
 			}
 
-			SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, FString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str() );
+			SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, ÑString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str() );
 
 #if !SHIPPING_BUILD
 			// Draw simple elements
@@ -138,7 +138,7 @@ void FSceneRenderer::Render( FViewportRHIParamRef InViewportRHI )
 	}
 }
 
-void FSceneRenderer::FinishRenderViewTarget( FViewportRHIParamRef InViewportRHI )
+void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
 	SCOPED_DRAW_EVENT( EventFinishRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Finish Render View Target" ) );
 
@@ -148,14 +148,14 @@ void FSceneRenderer::FinishRenderViewTarget( FViewportRHIParamRef InViewportRHI 
 		scene->ClearSDGs();
 	}
 
-	FBaseDeviceContextRHI*					immediateContext	= GRHI->GetImmediateContext();
-	FTexture2DRHIRef						sceneColorTexture	= GSceneRenderTargets.GetSceneColorTexture();
+	CBaseDeviceContextRHI*					immediateContext	= GRHI->GetImmediateContext();
+	Texture2DRHIRef_t						sceneColorTexture	= GSceneRenderTargets.GetSceneColorTexture();
 	const uint32							sceneColorSizeX		= sceneColorTexture->GetSizeX();
 	const uint32							sceneColorSizeY		= sceneColorTexture->GetSizeY();
 	const uint32							viewportSizeX		= InViewportRHI->GetWidth();
 	const uint32							viewportSizeY		= InViewportRHI->GetHeight();
-	FScreenVertexShader<SVST_Default>*		screenVertexShader	= GShaderManager->FindInstance< FScreenVertexShader<SVST_Default>, FSimpleElementVertexFactory >();
-	FScreenPixelShader*						screenPixelShader	= GShaderManager->FindInstance< FScreenPixelShader, FSimpleElementVertexFactory >();
+	CScreenVertexShader<SVST_Default>*		screenVertexShader	= GShaderManager->FindInstance< CScreenVertexShader<SVST_Default>, CSimpleElementVertexFactory >();
+	CScreenPixelShader*						screenPixelShader	= GShaderManager->FindInstance< CScreenPixelShader, CSimpleElementVertexFactory >();
 	check( screenVertexShader && screenPixelShader );
 
 	GRHI->SetRenderTarget( immediateContext, InViewportRHI->GetSurface(), nullptr );

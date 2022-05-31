@@ -5,5 +5,5 @@
 // GLOBALS
 // -------------
 
-class LEditorEngine*			GEditorEngine = nullptr;
-FAssetDataBase					GAssetDataBase;
+class CEditorEngine*			GEditorEngine = nullptr;
+CAssetDataBase					GAssetDataBase;

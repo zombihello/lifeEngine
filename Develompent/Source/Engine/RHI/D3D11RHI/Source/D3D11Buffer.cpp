@@ -17,7 +17,7 @@ const uint32 GConstantBufferSizes[ SOB_Max ] =
 {
 	// CBs must be a multiple of 16
 	Align( ( uint32 )MAX_GLOBAL_CONSTANT_BUFFER_SIZE, 16 ),
-	Align( ( uint32 )sizeof( FGlobalConstantBufferContents ), 16 ),
+	Align( ( uint32 )sizeof( SGlobalConstantBufferContents ), 16 ),
 };
 
 // ------------------------------------
@@ -27,8 +27,8 @@ const uint32 GConstantBufferSizes[ SOB_Max ] =
 /**
  * Constructor
  */
-FD3D11VertexBufferRHI::FD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, const byte* InData, const tchar* InBufferName ) :
-	FBaseVertexBufferRHI( InUsage, InSize ),
+CD3D11VertexBufferRHI::CD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, const byte* InData, const tchar* InBufferName ) :
+	CBaseVertexBufferRHI( InUsage, InSize ),
 	d3d11Buffer( nullptr )
 {
 	// Explicitly check that the size is nonzero before allowing create vertex buffer to opaquely fail
@@ -54,7 +54,7 @@ FD3D11VertexBufferRHI::FD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, con
 	}
 
 	// Creating DirectX 11 vertex buffer
-	ID3D11Device*		device = static_cast< FD3D11RHI* >( GRHI )->GetD3D11Device();
+	ID3D11Device*		device = static_cast< CD3D11RHI* >( GRHI )->GetD3D11Device();
 
 #if DO_CHECK
 	HRESULT				result = device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
@@ -64,14 +64,14 @@ FD3D11VertexBufferRHI::FD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, con
 #endif // DO_CHECK
 
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( FString::Format( TEXT( "%s[VERTEX_BUFFER]" ), InBufferName ).c_str() ) );
+	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( ÑString::Format( TEXT( "%s[VERTEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
 /**
  * Destructor
  */
-FD3D11VertexBufferRHI::~FD3D11VertexBufferRHI()
+CD3D11VertexBufferRHI::~CD3D11VertexBufferRHI()
 {
 	if ( d3d11Buffer )
 	{
@@ -86,8 +86,8 @@ FD3D11VertexBufferRHI::~FD3D11VertexBufferRHI()
 /**
  * Constructor
  */
-FD3D11IndexBufferRHI::FD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uint32 InSize, const byte* InData, const tchar* InBufferName ) :
-	FBaseIndexBufferRHI( InUsage, InStride, InSize ),
+CD3D11IndexBufferRHI::CD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uint32 InSize, const byte* InData, const tchar* InBufferName ) :
+	CBaseIndexBufferRHI( InUsage, InStride, InSize ),
 	d3d11Buffer( nullptr )
 {	
 	// Explicitly check that the size is nonzero before allowing create index buffer to opaquely fail
@@ -113,7 +113,7 @@ FD3D11IndexBufferRHI::FD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uin
 	}
 
 	// Creating DirectX 11 index buffer
-	ID3D11Device*		device = static_cast< FD3D11RHI* >( GRHI )->GetD3D11Device();
+	ID3D11Device*		device = static_cast< CD3D11RHI* >( GRHI )->GetD3D11Device();
 
 #if DO_CHECK
 	HRESULT				result = device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
@@ -123,14 +123,14 @@ FD3D11IndexBufferRHI::FD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uin
 #endif // DO_CHECK
 
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( FString::Format( TEXT( "%s[INDEX_BUFFER]" ), InBufferName ).c_str() ) );
+	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( ÑString::Format( TEXT( "%s[INDEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
 /**
  * Destructor
  */
-FD3D11IndexBufferRHI::~FD3D11IndexBufferRHI()
+CD3D11IndexBufferRHI::~CD3D11IndexBufferRHI()
 {
 	if ( d3d11Buffer )
 	{
@@ -142,7 +142,7 @@ FD3D11IndexBufferRHI::~FD3D11IndexBufferRHI()
 // CONSTANT BUFFER
 // ------------------------------------
 
-FD3D11ConstantBuffer::FD3D11ConstantBuffer( uint32 InSize, const tchar* InBufferName ) :
+CD3D11ConstantBuffer::CD3D11ConstantBuffer( uint32 InSize, const tchar* InBufferName ) :
 	isNeedCommit( false ),
 	d3d11Buffer( nullptr ),
 	size( InSize ),
@@ -170,7 +170,7 @@ FD3D11ConstantBuffer::FD3D11ConstantBuffer( uint32 InSize, const tchar* InBuffer
 	pInitData					= &initData;
 
 	// Creating DirectX 11 constant buffer
-	ID3D11Device*		device = static_cast< FD3D11RHI* >( GRHI )->GetD3D11Device();
+	ID3D11Device*		device = static_cast< CD3D11RHI* >( GRHI )->GetD3D11Device();
 
 #if DO_CHECK
 	HRESULT				result = device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
@@ -180,11 +180,11 @@ FD3D11ConstantBuffer::FD3D11ConstantBuffer( uint32 InSize, const tchar* InBuffer
 #endif // DO_CHECK
 
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( FString::Format( TEXT( "%s[CONSTANT_BUFFER]" ), InBufferName ).c_str() ) );
+	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( ÑString::Format( TEXT( "%s[CONSTANT_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
-FD3D11ConstantBuffer::~FD3D11ConstantBuffer()
+CD3D11ConstantBuffer::~CD3D11ConstantBuffer()
 {
 	// Delete shadow data
 	if ( shadowData )
@@ -199,14 +199,14 @@ FD3D11ConstantBuffer::~FD3D11ConstantBuffer()
 	}
 }
 
-void FD3D11ConstantBuffer::Update( const byte* InData, uint32 InOffset, uint32 InSize )
+void CD3D11ConstantBuffer::Update( const byte* InData, uint32 InOffset, uint32 InSize )
 {
 	memcpy( shadowData + InOffset, InData, InSize );
 	currentUpdateSize = Max( currentUpdateSize, ( uint32 )InOffset + InSize );
 	isNeedCommit = true;
 }
 
-void FD3D11ConstantBuffer::CommitConstantsToDevice( class FD3D11DeviceContext* InDeviceContext )
+void CD3D11ConstantBuffer::CommitConstantsToDevice( class CD3D11DeviceContext* InDeviceContext )
 {
 	if ( !isNeedCommit )
 	{
@@ -231,7 +231,7 @@ void FD3D11ConstantBuffer::CommitConstantsToDevice( class FD3D11DeviceContext* I
 	currentUpdateSize = 0;
 }
 
-void FD3D11ConstantBuffer::Clear()
+void CD3D11ConstantBuffer::Clear()
 {
 	if ( !shadowData )		return;
 

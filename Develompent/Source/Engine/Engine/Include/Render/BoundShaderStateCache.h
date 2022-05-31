@@ -16,7 +16,7 @@
  * @ingroup Engine
  * @brief Key used to map a set of unique decl/vs/ps combinations to a vertex shader resource
  */
-class FBoundShaderStateKey
+class CBoundShaderStateKey
 {
 public:
 	/**
@@ -29,7 +29,7 @@ public:
 	 * @param[in] InDomainShader Domain shader
 	 * @param[in] InGeometryShader Geometry shader
 	 */
-	FBoundShaderStateKey( FVertexDeclarationRHIParamRef InVertexDeclaration, FVertexShaderRHIParamRef InVertexShader, FPixelShaderRHIParamRef InPixelShader, FHullShaderRHIParamRef InHullShader = nullptr, FDomainShaderRHIParamRef InDomainShader = nullptr, FGeometryShaderRHIParamRef InGeometryShader = nullptr );
+	CBoundShaderStateKey( VertexDeclarationRHIParamRef_t InVertexDeclaration, VertexShaderRHIParamRef_t InVertexShader, PixelShaderRHIParamRef_t InPixelShader, HullShaderRHIParamRef_t InHullShader = nullptr, DomainShaderRHIParamRef_t InDomainShader = nullptr, GeometryShaderRHIParamRef_t InGeometryShader = nullptr );
 
 	/**
 	 * @brief Get hash of key
@@ -44,7 +44,7 @@ public:
 	 * @brief Overrload operator '<'
 	 * @return Return true if key less second key
 	 */
-	FORCEINLINE bool operator<( const FBoundShaderStateKey& InRight ) const
+	FORCEINLINE bool operator<( const CBoundShaderStateKey& InRight ) const
 	{
 		return hash < InRight.hash;
 	}
@@ -53,26 +53,26 @@ public:
 	 * @brief Overrload operator '=='
 	 * @return Return true if key equal second key
 	 */
-	FORCEINLINE bool operator==( const FBoundShaderStateKey& InRight ) const
+	FORCEINLINE bool operator==( const CBoundShaderStateKey& InRight ) const
 	{
 		return hash == InRight.hash && vertexDeclaration == InRight.vertexDeclaration && vertexShader == InRight.vertexShader && pixelShader == InRight.pixelShader && hullShader == InRight.hullShader && domainShader == InRight.domainShader && geometryShader == InRight.geometryShader;
 	}
 
 private:
 	uint64								hash;					/**< Hash of key */
-	FVertexDeclarationRHIParamRef		vertexDeclaration;		/**< Vertex decl for this combination */
-	FVertexShaderRHIParamRef			vertexShader;			/**< VS for this combination */
-	FPixelShaderRHIParamRef				pixelShader;			/**< PS for this combination */
-	FHullShaderRHIParamRef				hullShader;				/**< HS for this combination */
-	FDomainShaderRHIParamRef			domainShader;			/**< DS for this combination */
-	FGeometryShaderRHIParamRef			geometryShader;			/**< GS for this combination */
+	VertexDeclarationRHIParamRef_t		vertexDeclaration;		/**< Vertex decl for this combination */
+	VertexShaderRHIParamRef_t			vertexShader;			/**< VS for this combination */
+	PixelShaderRHIParamRef_t			pixelShader;			/**< PS for this combination */
+	HullShaderRHIParamRef_t				hullShader;				/**< HS for this combination */
+	DomainShaderRHIParamRef_t			domainShader;			/**< DS for this combination */
+	GeometryShaderRHIParamRef_t			geometryShader;			/**< GS for this combination */
 };
 
 /**
  * @ingroup Engine
  * @brief A list of the most recently used bound shader states.
  */
-class FBoundShaderStateHistory
+class CBoundShaderStateHistory
 {
 public:
 	/**
@@ -81,7 +81,7 @@ public:
 	 * @param[in] InKey Key of bound shader state
 	 * @param[in] InBoundShaderState Bound shader state
 	 */
-	FORCEINLINE void Add( const FBoundShaderStateKey& InKey, FBoundShaderStateRHIParamRef InBoundShaderState )
+	FORCEINLINE void Add( const CBoundShaderStateKey& InKey, BoundShaderStateRHIParamRef_t InBoundShaderState )
 	{
 		boundShaderStateMap[ InKey ] = InBoundShaderState;
 	}
@@ -92,7 +92,7 @@ public:
 	 * @param[in] InKey Key of bound shader state
 	 * @return Return pointer to bound shader state. If not found return nullptr
 	 */
-	FORCEINLINE FBoundShaderStateRHIRef Find( const FBoundShaderStateKey& InKey ) const
+	FORCEINLINE BoundShaderStateRHIRef_t Find( const CBoundShaderStateKey& InKey ) const
 	{
 		auto		itBoundShaderState = boundShaderStateMap.find( InKey );
 		if ( itBoundShaderState == boundShaderStateMap.end() )
@@ -108,7 +108,7 @@ public:
 	 * 
 	 * @param[in] InKey Key of bound shader state
 	 */
-	FORCEINLINE void Remove( const FBoundShaderStateKey& InKey )
+	FORCEINLINE void Remove( const CBoundShaderStateKey& InKey )
 	{
 		boundShaderStateMap.erase( InKey );
 	}
@@ -123,20 +123,20 @@ public:
 
 private:
 	/**
-	 * @brief key hasher for using FBoundShaderStateKey in std::unordered_map
+	 * @brief key hasher for using CBoundShaderStateKey in std::unordered_map
 	 */
-	struct FBoundShaderStateKeyHasher
+	struct SBoundShaderStateKeyHasher
 	{
 		/**
-		 * @brief Get hash from FBoundShaderStateKey
+		 * @brief Get hash from CBoundShaderStateKey
 		 */
-		FORCEINLINE std::size_t operator()( const FBoundShaderStateKey& InKey ) const
+		FORCEINLINE std::size_t operator()( const CBoundShaderStateKey& InKey ) const
 		{
 			return InKey.GetHash();
 		}
 	};
 
-	std::unordered_map< FBoundShaderStateKey, FBoundShaderStateRHIParamRef, FBoundShaderStateKeyHasher >			boundShaderStateMap;
+	std::unordered_map< CBoundShaderStateKey, BoundShaderStateRHIParamRef_t, SBoundShaderStateKeyHasher >			boundShaderStateMap;
 };
 
 #endif // !BOUNDSHADERSTATECACHE_H

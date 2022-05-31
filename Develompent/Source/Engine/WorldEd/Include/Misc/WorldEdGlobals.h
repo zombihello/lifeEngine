@@ -13,12 +13,12 @@
  * @ingroup WorldEd
  * Editor engine
  */
-extern class LEditorEngine*			GEditorEngine;
+extern class CEditorEngine*			GEditorEngine;
 
 /**
  * @ingroup WorldEd
  * Asset data base
  */
-extern class FAssetDataBase			GAssetDataBase;
+extern class CAssetDataBase			GAssetDataBase;
 
 #endif // !WORLDEDGLOBALS_H

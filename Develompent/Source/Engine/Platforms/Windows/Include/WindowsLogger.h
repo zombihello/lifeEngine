@@ -18,20 +18,20 @@
  * @ingroup WindowsPlatform
  * @brief Class for logging on Windows
  */
-class FWindowsLogger : public FBaseLogger
+class CWindowsLogger : public ÑBaseLogger
 {
 public:
     /**
      * @ingroup WindowsPlatform
      * @brief Constructor
      */
-                            FWindowsLogger();
+                            CWindowsLogger();
 
     /**
      * @ingroup WindowsPlatform
      * @brief Destructor
      */
-                            ~FWindowsLogger();
+                            ~CWindowsLogger();
 
     /**
      * @brief Initialize logger
@@ -85,7 +85,7 @@ public:
 
 private:
     HANDLE              consoleHandle;      /**< OS handle on console*/
-    FArchive*           archiveLogs;        /**< Archive of logs */
+    CArchive*           archiveLogs;        /**< Archive of logs */
     ELogColor           textColor;          /**< Current text color */
 };
 

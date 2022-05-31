@@ -30,12 +30,12 @@ enum EBodyLockFlag
  * @ingroup Physics
  * @brief Parameters to create physics actor
  */
-struct FActorCreationParams
+struct SActorCreationParams
 {
 	/**
 	 * @brief Constructor
 	 */
-	FActorCreationParams()
+	SActorCreationParams()
 		: bStatic( false )
 		, bQueryOnly( false )
 		, bEnableGravity( false )
@@ -46,7 +46,7 @@ struct FActorCreationParams
 		, debugName( nullptr )
 	{}
 
-	FTransform		initialTM;			/**< Initial transform */
+	CTransform		initialTM;			/**< Initial transform */
 	bool			bStatic;			/**< Is static actor */
 	bool			bQueryOnly;			/**< Query only */
 	bool			bEnableGravity;		/**< Enable gravity */

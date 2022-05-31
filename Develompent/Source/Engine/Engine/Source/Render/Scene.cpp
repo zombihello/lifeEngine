@@ -1,6 +1,6 @@
 #include "Render/Scene.h"
 
-FSceneView::FSceneView( const FMatrix& InProjectionMatrix, const FMatrix& InViewMatrix, float InSizeX, float InSizeY, const FColor& InBackgroundColor, EShowFlags InShowFlags )
+CSceneView::CSceneView( const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const ÑColor& InBackgroundColor, ShowFlags_t InShowFlags )
 	: viewMatrix( InViewMatrix )
 	, projectionMatrix( InProjectionMatrix )
 	, viewProjectionMatrix( InProjectionMatrix * InViewMatrix )
@@ -12,12 +12,12 @@ FSceneView::FSceneView( const FMatrix& InProjectionMatrix, const FMatrix& InView
 	frustum.Update( viewProjectionMatrix );
 }
 
-FScene::~FScene()
+CScene::~CScene()
 {
 	Clear();
 }
 
-void FScene::AddPrimitive( class LPrimitiveComponent* InPrimitive )
+void CScene::AddPrimitive( class CPrimitiveComponent* InPrimitive )
 {
 	check( InPrimitive );
 
@@ -37,7 +37,7 @@ void FScene::AddPrimitive( class LPrimitiveComponent* InPrimitive )
 	primitives.push_back( InPrimitive );
 }
 
-void FScene::RemovePrimitive( class LPrimitiveComponent* InPrimitive )
+void CScene::RemovePrimitive( class CPrimitiveComponent* InPrimitive )
 {
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
 	{
@@ -51,23 +51,23 @@ void FScene::RemovePrimitive( class LPrimitiveComponent* InPrimitive )
 	}
 }
 
-void FScene::Clear()
+void CScene::Clear()
 {
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
 	{
-		LPrimitiveComponent*		primitiveComponent = *it;
+		CPrimitiveComponent*		primitiveComponent = *it;
 		primitiveComponent->UnlinkDrawList();
 		primitiveComponent->scene = nullptr;
 	}
 	primitives.clear();
 }
 
-void FScene::BuildSDGs( const FSceneView& InSceneView )
+void CScene::BuildSDGs( const CSceneView& InSceneView )
 {
 	// Add to SDGs visible primitives
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
 	{
-		LPrimitiveComponent*		primitiveComponent = *it;
+		CPrimitiveComponent*		primitiveComponent = *it;
 		if ( primitiveComponent->IsVisibility() && InSceneView.GetFrustum().IsIn( primitiveComponent->GetBoundBox() ) )
 		{
 			primitiveComponent->AddToDrawList( InSceneView );
@@ -75,7 +75,7 @@ void FScene::BuildSDGs( const FSceneView& InSceneView )
 	}
 }
 
-void FScene::ClearSDGs()
+void CScene::ClearSDGs()
 {
 	// Clear all instances in scene depth groups
 	for ( uint32 index = 0; index < SDG_Max; ++index )

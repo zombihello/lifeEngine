@@ -21,25 +21,25 @@
  * @ingroup Physics
  * @brief Class of physics material
  */
-class FPhysicsMaterial : public FAsset
+class CPhysicsMaterial : public CAsset
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FPhysicsMaterial();
+	CPhysicsMaterial();
 
 	/**
 	 * @brief Destructor
 	 */
-	~FPhysicsMaterial();
+	~CPhysicsMaterial();
 
 	/**
 	 * Serialize
 	 *
 	 * @param[in] InArchive Archive
 	 */
-	virtual void Serialize( class FArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Set static friction
@@ -130,11 +130,11 @@ public:
 	 * @brief Get physics material handle
 	 * @return Return physics material handle
 	 */
-	FORCEINLINE FPhysicsMaterialHandle GetMaterialHandle() const
+	FORCEINLINE PhysicsMaterialHandle_t GetMaterialHandle() const
 	{
-		if ( !FPhysicsInterface::IsValidMaterial( handle ) )
+		if ( !CPhysicsInterface::IsValidMaterial( handle ) )
 		{
-			handle = FPhysicsInterface::CreateMaterial( SharedThis( this ) );
+			handle = CPhysicsInterface::CreateMaterial( SharedThis( this ) );
 		}
 		return handle;
 	}
@@ -152,7 +152,7 @@ public:
 	 * @brief Get delegate of physics material is update
 	 * @return Return delegate of physics material update
 	 */
-	FORCEINLINE FOnPhysicsMaterialUpdate& OnPhysicsMaterialUpdate() const
+	FORCEINLINE COnPhysicsMaterialUpdate& OnPhysicsMaterialUpdate() const
 	{
 		return onPhysicsMaterialUpdate;
 	}
@@ -161,7 +161,7 @@ public:
 	 * @brief Get delegate of physics material is destroyed
 	 * @return Return delegate of physics material destroyed
 	 */
-	FORCEINLINE FOnPhysicsMaterialDestroyed& OnPhysicsMaterialDestroyed() const
+	FORCEINLINE COnPhysicsMaterialDestroyed& OnPhysicsMaterialDestroyed() const
 	{
 		return onPhysicsMaterialDestroyed;
 	}
@@ -172,8 +172,8 @@ private:
 	 */
 	FORCEINLINE void UpdateMaterial()
 	{
-		TSharedPtr<FPhysicsMaterial>		sharedThis = SharedThis( this );
-		FPhysicsInterface::UpdateMaterial( handle, sharedThis );
+		TSharedPtr<CPhysicsMaterial>		sharedThis = SharedThis( this );
+		CPhysicsInterface::UpdateMaterial( handle, sharedThis );
 		onPhysicsMaterialUpdate.Broadcast( sharedThis );
 	}
 
@@ -182,18 +182,18 @@ private:
 	float									restitution;					/**< The coefficient of restitution */
 	float									density;						/**< Density */
 	ESurfaceType							surfaceType;					/**< Surface type */
-	mutable FPhysicsMaterialHandle			handle;							/**< Physics material handle */
-	mutable FOnPhysicsMaterialUpdate		onPhysicsMaterialUpdate;		/**< Event called when physics material is updated */
-	mutable FOnPhysicsMaterialDestroyed		onPhysicsMaterialDestroyed;		/**< Event called when physics material is destroyed */
+	mutable PhysicsMaterialHandle_t			handle;							/**< Physics material handle */
+	mutable COnPhysicsMaterialUpdate		onPhysicsMaterialUpdate;		/**< Event called when physics material is updated */
+	mutable COnPhysicsMaterialDestroyed		onPhysicsMaterialDestroyed;		/**< Event called when physics material is destroyed */
 };
 
 //
 // Serialization
 //
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FPhysicsMaterial>& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CPhysicsMaterial>& InValue )
 {
-	TAssetHandle<FAsset>	asset = InValue;
+	TAssetHandle<CAsset>	asset = InValue;
 	InArchive << asset;
 
 	if ( InArchive.IsLoading() )
@@ -203,10 +203,10 @@ FORCEINLINE FArchive& operator<<( FArchive& InArchive, TAssetHandle<FPhysicsMate
 	return InArchive;
 }
 
-FORCEINLINE FArchive& operator<<( FArchive& InArchive, const TAssetHandle<FPhysicsMaterial>& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CPhysicsMaterial>& InValue )
 {
 	check( InArchive.IsSaving() );
-	InArchive << ( TAssetHandle<FAsset> )InValue;
+	InArchive << ( TAssetHandle<CAsset> )InValue;
 	return InArchive;
 }
 

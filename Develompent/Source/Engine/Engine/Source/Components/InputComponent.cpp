@@ -6,24 +6,24 @@
 #include "Components/InputComponent.h"
 #include "System/InputSystem.h"
 
-IMPLEMENT_CLASS( LInputComponent )
+IMPLEMENT_CLASS( CInputComponent )
 
-void LInputComponent::BeginPlay()
+void CInputComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// Get mapping of buttons
 	// Actions
-	std::vector< FConfigValue >		configActions = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Actions" ) ).GetArray();
+	std::vector< CConfigValue >		configActions = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Actions" ) ).GetArray();
 	for ( uint32 indexAction = 0, countActions = configActions.size(); indexAction < countActions; ++indexAction )
 	{
 		// Get JSON object of action item
-		const FConfigValue&		configAction = configActions[ indexAction ];
-		check( configAction.GetType() == FConfigValue::T_Object );
-		FConfigObject			configObject = configAction.GetObject();
+		const CConfigValue&		configAction = configActions[ indexAction ];
+		check( configAction.GetType() == CConfigValue::T_Object );
+		CConfigObject			configObject = configAction.GetObject();
 
 		// Get name of action
-		FInputAction			inputAction;
+		SInputAction			inputAction;
 		inputAction.name = configObject.GetValue( TEXT( "Name" ) ).GetString();
 		if ( inputAction.name.empty() )
 		{
@@ -31,12 +31,12 @@ void LInputComponent::BeginPlay()
 		}
 
 		// Get buttons
-		std::vector< FConfigValue >		configButtons = configObject.GetValue( TEXT( "Buttons" ) ).GetArray();
+		std::vector< CConfigValue >		configButtons = configObject.GetValue( TEXT( "Buttons" ) ).GetArray();
 		for ( uint32 indexButton = 0, countButtons = configButtons.size(); indexButton < countButtons; ++indexButton )
 		{
 			// Get JSON item
-			const FConfigValue& configButton = configButtons[ indexButton ];
-			check( configButton.GetType() == FConfigValue::T_String );
+			const CConfigValue& configButton = configButtons[ indexButton ];
+			check( configButton.GetType() == CConfigValue::T_String );
 			std::wstring		buttonName = configButton.GetString();
 
 			// Get button code from name of button
@@ -57,16 +57,16 @@ void LInputComponent::BeginPlay()
 	}
 
 	// Axis
-	std::vector< FConfigValue >		configArrayAxis = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Axis" ) ).GetArray();
+	std::vector< CConfigValue >		configArrayAxis = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Axis" ) ).GetArray();
 	for ( uint32 indexAxis = 0, countAxis = configArrayAxis.size(); indexAxis < countAxis; ++indexAxis )
 	{
 		// Get JSON object of action item
-		const FConfigValue&		configAxis = configArrayAxis[ indexAxis ];
-		check( configAxis.GetType() == FConfigValue::T_Object );
-		FConfigObject			configObject = configAxis.GetObject();
+		const CConfigValue&		configAxis = configArrayAxis[ indexAxis ];
+		check( configAxis.GetType() == CConfigValue::T_Object );
+		CConfigObject			configObject = configAxis.GetObject();
 
 		// Get name of axis
-		FInputAxis			inputAxis;
+		SInputAxis			inputAxis;
 		inputAxis.name = configObject.GetValue( TEXT( "Name" ) ).GetString();
 		if ( inputAxis.name.empty() )
 		{
@@ -74,13 +74,13 @@ void LInputComponent::BeginPlay()
 		}
 
 		// Get buttons
-		std::vector< FConfigValue >		configButtons = configObject.GetValue( TEXT( "Buttons" ) ).GetArray();
+		std::vector< CConfigValue >		configButtons = configObject.GetValue( TEXT( "Buttons" ) ).GetArray();
 		for ( uint32 indexButton = 0, countButtons = configButtons.size(); indexButton < countButtons; ++indexButton )
 		{
 			// Get JSON item
-			const FConfigValue&		configButton = configButtons[ indexButton ];
-			check( configAxis.GetType() == FConfigValue::T_Object );
-			FConfigObject			configButtonObject = configButton.GetObject();
+			const CConfigValue&		configButton = configButtons[ indexButton ];
+			check( configAxis.GetType() == CConfigValue::T_Object );
+			CConfigObject			configButtonObject = configButton.GetObject();
 			
 			std::wstring			buttonName = configButtonObject.GetValue( TEXT( "Name" ) ).GetString();
 			float					scale = configButtonObject.GetValue( TEXT( "Scale" ) ).GetNumber();
@@ -114,12 +114,12 @@ enum EInputActionFlags
 	IAF_All			= IAF_Pressed | IAF_Released		/**< Need call press and release events */
 };
 
-void LInputComponent::TickComponent( float InDeltaTime )
+void CInputComponent::TickComponent( float InDeltaTime )
 {
 	Super::TickComponent( InDeltaTime );
 	
 	// Find triggered actions and execute it
-	for ( FInputActionMap::iterator it = inputActionMap.begin(), itEnd = inputActionMap.end(); it != itEnd; ++it )
+	for ( InputActionMap_t::iterator it = inputActionMap.begin(), itEnd = inputActionMap.end(); it != itEnd; ++it )
 	{
 		uint32		executeFlags = IAF_None;
 		for ( uint32 indexButton = 0, countButtons = it->second.buttons.size(); indexButton < countButtons; ++indexButton )
@@ -156,12 +156,12 @@ void LInputComponent::TickComponent( float InDeltaTime )
 	}
 
 	// Find triggered axis and execute it
-	for ( FInputAxisMap::iterator it = inputAxisMap.begin(), itEnd = inputAxisMap.end(); it != itEnd; ++it )
+	for ( InputAxisMap_t::iterator it = inputAxisMap.begin(), itEnd = inputAxisMap.end(); it != itEnd; ++it )
 	{
 		std::unordered_set< float >		triggeredScales;
 		for ( uint32 indexButton = 0, countButtons = it->second.buttons.size(); indexButton < countButtons; ++indexButton )
 		{
-			const FInputAxis::FPairAxisButton&		pairAxisButton = it->second.buttons[ indexButton ];
+			const SInputAxis::PairAxisButton_t&		pairAxisButton = it->second.buttons[ indexButton ];
 			switch ( GInputSystem->GetButtonEvent( pairAxisButton.first ) )
 			{
 			case BE_Pressed:

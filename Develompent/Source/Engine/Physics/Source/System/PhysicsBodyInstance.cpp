@@ -3,7 +3,7 @@
 #include "System/PhysicsBodyInstance.h"
 #include "Components/PrimitiveComponent.h"
 
-FPhysicsBodyInstance::FPhysicsBodyInstance()
+CPhysicsBodyInstance::CPhysicsBodyInstance()
 	: bStatic( true )
 	, bEnableGravity( false )
 	, bSimulatePhysics( false )
@@ -13,17 +13,17 @@ FPhysicsBodyInstance::FPhysicsBodyInstance()
 	, mass( 1.f )
 {}
 
-FPhysicsBodyInstance::~FPhysicsBodyInstance()
+CPhysicsBodyInstance::~CPhysicsBodyInstance()
 {
 	TermBody();
 }
 
-void FPhysicsBodyInstance::InitBody( FPhysicsBodySetup* InBodySetup, const FTransform& InTransform, LPrimitiveComponent* InPrimComp )
+void CPhysicsBodyInstance::InitBody( CPhysicsBodySetup* InBodySetup, const CTransform& InTransform, CPrimitiveComponent* InPrimComp )
 {
 	bDirty = false;
 
 	// If body is inited - terminate body for reinit
-	if ( FPhysicsInterface::IsValidActor( handle ) )
+	if ( CPhysicsInterface::IsValidActor( handle ) )
 	{
 		TermBody();
 	}
@@ -32,7 +32,7 @@ void FPhysicsBodyInstance::InitBody( FPhysicsBodySetup* InBodySetup, const FTran
 	ownerComponent	= InPrimComp;
 	bodySetup		= InBodySetup;
 
-	FActorCreationParams	params;
+	SActorCreationParams	params;
 	params.bStatic			= bStatic;
 	params.lockFlags		= lockFlags;
 	params.initialTM		= InTransform;
@@ -40,32 +40,32 @@ void FPhysicsBodyInstance::InitBody( FPhysicsBodySetup* InBodySetup, const FTran
 	params.bSimulatePhysics = bSimulatePhysics;
 	params.bEnableGravity	= bEnableGravity;
 	params.bStartAwake		= bStartAwake;
-	handle = FPhysicsInterface::CreateActor( params );
-	check( FPhysicsInterface::IsValidActor( handle ) );
+	handle = CPhysicsInterface::CreateActor( params );
+	check( CPhysicsInterface::IsValidActor( handle ) );
 
 	// Attach all shapes in body setup to physics actor
 	// Box shapes
 	{
-		std::vector< FPhysicsBoxGeometry >&		boxGeometries = bodySetup->GetBoxGeometries();
+		std::vector< SPhysicsBoxGeometry >&		boxGeometries = bodySetup->GetBoxGeometries();
 		for ( uint32 index = 0, count = boxGeometries.size(); index < count; ++index )
 		{
-			FPhysicsInterface::AttachShape( handle, boxGeometries[ index ].GetShapeHandle() );
+			CPhysicsInterface::AttachShape( handle, boxGeometries[ index ].GetShapeHandle() );
 		}
 	}
 
 	// Update mass and inertia if rigid body is not static
 	if ( !bStatic )
 	{
-		FPhysicsInterface::UpdateMassAndInertia( handle, 10.f );
+		CPhysicsInterface::UpdateMassAndInertia( handle, 10.f );
 	}
 
 	// Add rigid body to physics scene
 	GPhysicsScene.AddBody( this );
 }
 
-void FPhysicsBodyInstance::TermBody()
+void CPhysicsBodyInstance::TermBody()
 {
-	if ( !FPhysicsInterface::IsValidActor( handle ) )
+	if ( !CPhysicsInterface::IsValidActor( handle ) )
 	{
 		return;
 	}
@@ -74,7 +74,7 @@ void FPhysicsBodyInstance::TermBody()
 	GPhysicsScene.RemoveBody( this );
 
 	// Release resource
-	FPhysicsInterface::ReleaseActor( handle );
+	CPhysicsInterface::ReleaseActor( handle );
 	ownerComponent = nullptr;
 	bodySetup = nullptr;
 	bDirty = false;

@@ -1,13 +1,13 @@
 #include "Math/Math.h"
 #include "Render/IcosphereMeshBuilder.h"
 
-FIcosphereMeshBuilder::FIcosphereMeshBuilder()
+CIcosphereMeshBuilder::CIcosphereMeshBuilder()
 	: subdivision( 3 )
 	, radius( 1.f )
 	, numPrimitives( 0 )
 {}
 
-void FIcosphereMeshBuilder::Build()
+void CIcosphereMeshBuilder::Build()
 {
 	const float sStep	= 0.5;         // Horizontal texture step
 	const float tStep	= 0.5;         // Vertical texture step
@@ -17,10 +17,10 @@ void FIcosphereMeshBuilder::Build()
 	// Compute 12 vertices of icosahedron
 	// NOTE: v0 (top), v11(bottom), v1, v6(first vert on each row) cannot be
 	// shared for smooth shading (they have different texcoords)
-	std::vector<FVector4D>		tmpVertices = ComputeIcosahedronVerteces();
+	std::vector<Vector4D>		tmpVertices = ComputeIcosahedronVerteces();
 
-	FVector4D	v;       // Vertex
-	FVector4D	n;       // Normal
+	Vector4D	v;       // Vertex
+	Vector4D	n;       // Normal
 	float		scale;   // Scale factor for normalization
 
 	// Smooth icosahedron has 14 non-shared (0 to 13) and
@@ -38,68 +38,68 @@ void FIcosphereMeshBuilder::Build()
 	//////////////////////////////////
 	
 	// Add 14 non-shared vertices first (index from 0 to 13)
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 0 ], FVector2D( sStep, 0.f ), FVector4D( 0.f, 0.f, 1.f, 0.f ) ) );						// v0 (top)
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 0 ], FVector2D( sStep * 3.f, 0.f ), FVector4D( 0.f, 0.f, 1.f, 0.f ) ) );				// v1
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 0 ], FVector2D( sStep * 5.f, 0.f ), FVector4D( 0.f, 0.f, 1.f, 0.f ) ) );				// v2
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 0 ], FVector2D( sStep * 7.f, 0.f ), FVector4D( 0.f, 0.f, 1.f, 0.f ) ) );				// v3
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 0 ], FVector2D( sStep * 9.f, 0.f ), FVector4D( 0.f, 0.f, 1.f, 0.f ) ) );				// v4
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 0 ], Vector2D( sStep, 0.f ), Vector4D( 0.f, 0.f, 1.f, 0.f ) ) );						// v0 (top)
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 0 ], Vector2D( sStep * 3.f, 0.f ), Vector4D( 0.f, 0.f, 1.f, 0.f ) ) );				// v1
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 0 ], Vector2D( sStep * 5.f, 0.f ), Vector4D( 0.f, 0.f, 1.f, 0.f ) ) );				// v2
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 0 ], Vector2D( sStep * 7.f, 0.f ), Vector4D( 0.f, 0.f, 1.f, 0.f ) ) );				// v3
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 0 ], Vector2D( sStep * 9.f, 0.f ), Vector4D( 0.f, 0.f, 1.f, 0.f ) ) );				// v4
 
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 11 ], FVector2D( sStep * 2.f, tStep * 3.f ), FVector4D( 0.f, 0.f, -1.f, 0.f ) ) );		// v5 (bottom)
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 11 ], FVector2D( sStep * 4.f, tStep * 3.f ), FVector4D( 0.f, 0.f, -1.f, 0.f ) ) );		// v6
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 11 ], FVector2D( sStep * 6.f, tStep * 3.f ), FVector4D( 0.f, 0.f, -1.f, 0.f ) ) );		// v7
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 11 ], FVector2D( sStep * 8.f, tStep * 3.f ), FVector4D( 0.f, 0.f, -1.f, 0.f ) ) );		// v8
-	verteces.push_back( FDynamicMeshVertexType( tmpVertices[ 11 ], FVector2D( sStep * 10.f, tStep * 3.f ), FVector4D( 0.f, 0.f, -1.f, 0.f ) ) );	// v9
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 11 ], Vector2D( sStep * 2.f, tStep * 3.f ), Vector4D( 0.f, 0.f, -1.f, 0.f ) ) );		// v5 (bottom)
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 11 ], Vector2D( sStep * 4.f, tStep * 3.f ), Vector4D( 0.f, 0.f, -1.f, 0.f ) ) );		// v6
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 11 ], Vector2D( sStep * 6.f, tStep * 3.f ), Vector4D( 0.f, 0.f, -1.f, 0.f ) ) );		// v7
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 11 ], Vector2D( sStep * 8.f, tStep * 3.f ), Vector4D( 0.f, 0.f, -1.f, 0.f ) ) );		// v8
+	verteces.push_back( SDynamicMeshVertexType( tmpVertices[ 11 ], Vector2D( sStep * 10.f, tStep * 3.f ), Vector4D( 0.f, 0.f, -1.f, 0.f ) ) );	// v9
 
 	v = tmpVertices[ 1 ];		// v10 (left)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( 0.f, tStep ), n ) );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 10.f, tStep ), n ) );		// v11 (right)
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( 0.f, tStep ), n ) );
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 10.f, tStep ), n ) );		// v11 (right)
 
 	v = tmpVertices[ 6 ];		// v12 (left)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep, tStep * 2.f ), n ) );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 11.f, tStep * 2.f ), n ) );	// v13 (right)
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep, tStep * 2.f ), n ) );
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 11.f, tStep * 2.f ), n ) );	// v13 (right)
 
 	// Add 8 shared vertices to array (index from 14 to 21)
 	v = tmpVertices[ 2 ];		// v14 (shared)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 2.f, tStep ), n ) );
-	sharedIndeces[ FVector2D( sStep * 2.f, tStep ) ] = verteces.size() - 1;
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 2.f, tStep ), n ) );
+	sharedIndeces[ Vector2D( sStep * 2.f, tStep ) ] = verteces.size() - 1;
 
 	v = tmpVertices[ 3 ];		// v15 (shared)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 4.f, tStep ), n ) );
-	sharedIndeces[ FVector2D( sStep * 4.f, tStep ) ] = verteces.size() - 1;
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 4.f, tStep ), n ) );
+	sharedIndeces[ Vector2D( sStep * 4.f, tStep ) ] = verteces.size() - 1;
 
 	v = tmpVertices[ 4 ];		// v16 (shared)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 6.f, tStep ), n ) );
-	sharedIndeces[ FVector2D( sStep * 6.f, tStep ) ] = verteces.size() - 1;
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 6.f, tStep ), n ) );
+	sharedIndeces[ Vector2D( sStep * 6.f, tStep ) ] = verteces.size() - 1;
 
 	v = tmpVertices[ 5 ];		// v17 (shared)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 8.f, tStep ), n ) );
-	sharedIndeces[ FVector2D( sStep * 8.f, tStep ) ] = verteces.size() - 1;
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 8.f, tStep ), n ) );
+	sharedIndeces[ Vector2D( sStep * 8.f, tStep ) ] = verteces.size() - 1;
 
 	v = tmpVertices[ 7 ];		// v18 (shared)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 3.f, tStep * 2.f ), n ) );
-	sharedIndeces[ FVector2D( sStep * 3.f, tStep * 2.f ) ] = verteces.size() - 1;
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 3.f, tStep * 2.f ), n ) );
+	sharedIndeces[ Vector2D( sStep * 3.f, tStep * 2.f ) ] = verteces.size() - 1;
 
 	v = tmpVertices[ 8 ];		// v19 (shared)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 5.f, tStep * 2.f ), n ) );
-	sharedIndeces[ FVector2D( sStep * 5.f, tStep * 2.f ) ] = verteces.size() - 1;
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 5.f, tStep * 2.f ), n ) );
+	sharedIndeces[ Vector2D( sStep * 5.f, tStep * 2.f ) ] = verteces.size() - 1;
 
 	v = tmpVertices[ 9 ];		// v20 (shared)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 7.f, tStep * 2.f ), n ) );
-	sharedIndeces[ FVector2D( sStep * 7.f, tStep * 2.f ) ] = verteces.size() - 1;
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 7.f, tStep * 2.f ), n ) );
+	sharedIndeces[ Vector2D( sStep * 7.f, tStep * 2.f ) ] = verteces.size() - 1;
 
 	v = tmpVertices[ 10 ];		// v21 (shared)
 	ComputeVertexNormal( v, n );
-	verteces.push_back( FDynamicMeshVertexType( v, FVector2D( sStep * 9.f, tStep * 2.f ), n ) );
-	sharedIndeces[ FVector2D( sStep * 9.f, tStep * 2.f ) ] = verteces.size() - 1;
+	verteces.push_back( SDynamicMeshVertexType( v, Vector2D( sStep * 9.f, tStep * 2.f ), n ) );
+	sharedIndeces[ Vector2D( sStep * 9.f, tStep * 2.f ) ] = verteces.size() - 1;
 
 	// Build index list for icosahedron (20 triangles)
 	indeces.push_back( 0 );
@@ -189,15 +189,15 @@ void FIcosphereMeshBuilder::Build()
 	numPrimitives = indeces.size() / 3;
 }
 
-void FIcosphereMeshBuilder::SubdivideVertices()
+void CIcosphereMeshBuilder::SubdivideVertices()
 {
 	std::vector<uint32>				tmpIndices;
 	uint32							indexCount = 0;
 	uint32							i1, i2, i3;				// Indices from original triangle
-	const FDynamicMeshVertexType	*v1, *v2, *v3;			// Ptr to original vertices of a triangle
-	FVector4D						newV1, newV2, newV3;	// New subdivided vertex positions
-	FVector4D						newN1, newN2, newN3;	// New subdivided normals
-	FVector2D						newT1, newT2, newT3;	// New subdivided texture coords
+	const SDynamicMeshVertexType	*v1, *v2, *v3;			// Ptr to original vertices of a triangle
+	Vector4D						newV1, newV2, newV3;	// New subdivided vertex positions
+	Vector4D						newN1, newN2, newN3;	// New subdivided normals
+	Vector2D						newT1, newT2, newT3;	// New subdivided texture coords
 	uint32							newI1, newI2, newI3;	// New subdivided indices
 	uint32							i = 0, j = 0;
 
@@ -260,7 +260,7 @@ void FIcosphereMeshBuilder::SubdivideVertices()
 	}
 }
 
-uint32 FIcosphereMeshBuilder::AddSubVertex( const FVector4D& InVertex, const FVector2D& InTexCoord, const FVector4D& InNormal )
+uint32 CIcosphereMeshBuilder::AddSubVertex( const Vector4D& InVertex, const Vector2D& InTexCoord, const Vector4D& InNormal )
 {
 	uint32		index = 0;     // Return value;
 
@@ -273,7 +273,7 @@ uint32 FIcosphereMeshBuilder::AddSubVertex( const FVector4D& InVertex, const FVe
 		auto		it = sharedIndeces.find( InTexCoord );
 		if ( it == sharedIndeces.end() )
 		{
-			verteces.push_back( FDynamicMeshVertexType( InVertex, InTexCoord, InNormal ) );
+			verteces.push_back( SDynamicMeshVertexType( InVertex, InTexCoord, InNormal ) );
 			index						= verteces.size() - 1;
 			sharedIndeces[ InTexCoord ] = index;
 		}
@@ -285,34 +285,34 @@ uint32 FIcosphereMeshBuilder::AddSubVertex( const FVector4D& InVertex, const FVe
 	// Not shared
 	else
 	{
-		verteces.push_back( FDynamicMeshVertexType( InVertex, InTexCoord, InNormal ) );
+		verteces.push_back( SDynamicMeshVertexType( InVertex, InTexCoord, InNormal ) );
 		index		= verteces.size() - 1;
 	}
 
 	return index;
 }
 
-std::vector<FVector4D> FIcosphereMeshBuilder::ComputeIcosahedronVerteces()
+std::vector<Vector4D> CIcosphereMeshBuilder::ComputeIcosahedronVerteces()
 {
 	const float		hAngle = PI / 180.f * 72.f;				// 72 degree = 360 / 5
-	const float		vAngle = FMath::ATan( 1.0f / 2.f );		// Elevation = 26.565 degree
+	const float		vAngle = SMath::ATan( 1.0f / 2.f );		// Elevation = 26.565 degree
 
-	std::vector<FVector4D>		vertices( 12 );		// 12 vertices
+	std::vector<Vector4D>		vertices( 12 );		// 12 vertices
 	float z, xy;									// Coords
 	float hAngle1 = -PI / 2.f - hAngle / 2.f;		// Start from -126 deg at 2nd row
 	float hAngle2 = -PI / 2.f;						// Start from -90 deg at 3rd row
 
 	// The first top vertex (0, 0, radius)
-	vertices[ 0 ] = FVector4D( 0.f, 0.f, radius, 1.f );
+	vertices[ 0 ] = Vector4D( 0.f, 0.f, radius, 1.f );
 
 	// 10 vertices at 2nd and 3rd rows
 	for ( uint32 i = 1; i <= 5; ++i )
 	{
-		z	= radius * FMath::Sin( vAngle );	// Elevaton
-		xy	= radius * FMath::Cos( vAngle );
+		z	= radius * SMath::Sin( vAngle );	// Elevaton
+		xy	= radius * SMath::Cos( vAngle );
 
-		vertices[ i ]		= FVector4D( xy * FMath::Cos( hAngle1 ), xy * FMath::Sin( hAngle1 ), z, 1.f );
-		vertices[ i + 5 ]	= FVector4D( xy * FMath::Cos( hAngle2 ), xy * FMath::Sin( hAngle2 ), -z, 1.f );
+		vertices[ i ]		= Vector4D( xy * SMath::Cos( hAngle1 ), xy * SMath::Sin( hAngle1 ), z, 1.f );
+		vertices[ i + 5 ]	= Vector4D( xy * SMath::Cos( hAngle2 ), xy * SMath::Sin( hAngle2 ), -z, 1.f );
 
 		// Next horizontal angles
 		hAngle1 += hAngle;
@@ -320,22 +320,22 @@ std::vector<FVector4D> FIcosphereMeshBuilder::ComputeIcosahedronVerteces()
 	}
 
 	// The last bottom vertex (0, 0, -radius )
-	vertices[ 11 ] = FVector4D( 0.f, 0.f, -radius, 1.f );
+	vertices[ 11 ] = Vector4D( 0.f, 0.f, -radius, 1.f );
 	return vertices;
 }
 
-void FIcosphereMeshBuilder::ComputeFaceNormal( const FVector4D& InVert0, const FVector4D& InVert1, const FVector4D& InVert2, FVector4D& OutNormal )
+void CIcosphereMeshBuilder::ComputeFaceNormal( const Vector4D& InVert0, const Vector4D& InVert1, const Vector4D& InVert2, Vector4D& OutNormal )
 {
 	// Default return value (0, 0, 0)
-	OutNormal = FVector4D( FMath::vectorZero, 0.f );
+	OutNormal = Vector4D( SMath::vectorZero, 0.f );
 
 	// Find 2 edge vectors: InVert0-InVert1, InVert0-InVert2
-	FVector4D		edge0 = InVert1 - InVert0;
-	FVector4D		edge1 = InVert2 - InVert0;
+	Vector4D		edge0 = InVert1 - InVert0;
+	Vector4D		edge1 = InVert2 - InVert0;
 
 	// Cross product: edge0 x edge1
-	OutNormal = FVector4D( FMath::CrossVector( edge0, edge1 ), 0.f );
+	OutNormal = Vector4D( SMath::CrossVector( edge0, edge1 ), 0.f );
 
 	// Normalize normal
-	FMath::NormalizeVector( OutNormal );
+	SMath::NormalizeVector( OutNormal );
 }

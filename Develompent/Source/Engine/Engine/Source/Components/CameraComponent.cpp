@@ -3,9 +3,9 @@
 #include "Components/CameraComponent.h"
 #include "EngineDefines.h"
 
-IMPLEMENT_CLASS( LCameraComponent )
+IMPLEMENT_CLASS( CCameraComponent )
 
-LCameraComponent::LCameraComponent()
+CCameraComponent::CCameraComponent()
     : bIsActive( false )
 	, bAutoViewData( false )
     , projectionMode( CPM_Perspective )
@@ -17,16 +17,16 @@ LCameraComponent::LCameraComponent()
     , aspectRatio( 1.777778f )
 {}
 
-void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ )
+void CCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ )
 {	
-	FVector2D		mouseOffset = GInputSystem->GetMouseOffset();
+	Vector2D		mouseOffset = GInputSystem->GetMouseOffset();
 	if ( mouseOffset.x == 0.f && mouseOffset.y == 0.f )
 	{
 		return;
 	}
 
 	float			sensitivity = GInputSystem->GetMouseSensitivity();
-	FRotator		rotator = GetRelativeRotation();
+	CRotator		rotator = GetRelativeRotation();
 	
 	// Update Yaw axis
 	if ( mouseOffset.x != 0.f )
@@ -62,7 +62,7 @@ void LCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ 
 	SetRelativeRotation( rotator );
 }
 
-void LCameraComponent::Serialize( class FArchive& InArchive )
+void CCameraComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 
@@ -82,7 +82,7 @@ void LCameraComponent::Serialize( class FArchive& InArchive )
 	}
 }
 
-void LCameraComponent::GetCameraView( FCameraView& OutDesiredView )
+void CCameraComponent::GetCameraView( SCameraView& OutDesiredView )
 {
 	OutDesiredView.location			= GetComponentLocation();
 	OutDesiredView.rotation			= GetComponentRotation();
