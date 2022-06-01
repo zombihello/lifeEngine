@@ -86,6 +86,8 @@ void CStaticMesh::Serialize( class CArchive& InArchive )
 
 	if ( InArchive.IsLoading() )
 	{
+		// Mark dirty all drawing policy links
+		MarkDirtyAllElementDrawingPolices();
 		BeginUpdateResource( this );
 	}
 }
@@ -99,11 +101,7 @@ void CStaticMesh::SetData( const std::vector<SStaticMeshVertexType>& InVerteces,
 	materials		= InMaterials;
 
 	// Mark dirty all drawing policy links
-	for ( auto itElement = elementDrawingPolicyMap.begin(), itElementEnd = elementDrawingPolicyMap.end(); itElement != itElementEnd; ++itElement )
-	{
-		itElement->second->bDirty = true;
-	}
-
+	MarkDirtyAllElementDrawingPolices();
 	BeginUpdateResource( this );
 }
 
@@ -119,13 +117,38 @@ void CStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<CMater
 		MarkDirty();
 
 		// Mark dirty all drawing policy links
-		for ( auto itElement = elementDrawingPolicyMap.begin(), itElementEnd = elementDrawingPolicyMap.end(); itElement != itElementEnd; ++itElement )
-		{
-			itElement->second->bDirty = true;
-		}
+		MarkDirtyAllElementDrawingPolices();
 	}
 
 	materials[ InMaterialIndex ] = InNewMaterial;
+}
+
+void CStaticMesh::GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
+{
+	// TODO BS yehor.pohuliaka - Need implement
+}
+
+void CStaticMesh::ReloadDependentAssets( bool InForce /* = false */ )
+{
+	bool		bDirtyElementDrawingPolices = false;
+	for ( uint32 index = 0, count = materials.size(); index < count; ++index )
+	{
+		TAssetHandle<CAsset>&			assetHandle = ( TAssetHandle<CAsset>& )materials[ index ];
+		if ( !assetHandle.IsValid() || assetHandle.IsAssetValid() )
+		{
+			continue;
+		}
+
+		TSharedPtr<SAssetReference>		assetReference = assetHandle.GetReference();
+		assetHandle					= GPackageManager->FindAsset( assetReference->guidPackage, assetReference->guidAsset, assetReference->type );
+		bDirtyElementDrawingPolices = true;
+	}
+
+	// Mark dirty all drawing policy links if need
+	if ( bDirtyElementDrawingPolices )
+	{
+		MarkDirtyAllElementDrawingPolices();
+	}
 }
 
 TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::LinkDrawList( SSceneDepthGroup& InSDG )
@@ -158,7 +181,7 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::LinkDrawList( SS
 	// Calculate override hash
 	for ( uint32 index = 0, count = InOverrideMaterials.size(); index < count; ++index )
 	{
-		elementKey.overrideHash = appMemFastHash( index, 0 );
+		elementKey.overrideHash = appMemFastHash( index, elementKey.overrideHash );
 		elementKey.overrideHash = appMemFastHash( InOverrideMaterials[ index ].ToSharedPtr(), elementKey.overrideHash );
 	}
 
@@ -190,7 +213,7 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolic
 	for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )surfaces.size(); indexSurface < numSurfaces; ++indexSurface )
 	{
 		const SStaticMeshSurface&		surface				= surfaces[ indexSurface ];
-		DrawingPolicyLinkRef_t           tmpDrawPolicyLink	= new DrawingPolicyLink_t( DEC_STATIC_MESH );
+		DrawingPolicyLinkRef_t          tmpDrawPolicyLink	= new DrawingPolicyLink_t( DEC_STATIC_MESH );
 		TAssetHandle<CMaterial>			material			= materials[ surface.materialID ];
 
 		// If current material is override - use custom material

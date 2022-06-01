@@ -218,6 +218,19 @@ public:
 	}
 
 	/**
+	 * @brief Get dependent assets
+	 * @param OutDependentAssets	Output set of dependent assets
+	 * @param InFilter				Filter of getting assets by type. If setted AT_Unknown return all types
+	 */
+	virtual void GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EAssetType InFilter = AT_Unknown ) const override;
+
+	/**
+	 * @brief Reload dependent assets
+	 * @param InForce	Is need force reload assets
+	 */
+	virtual void ReloadDependentAssets( bool InForce = false );
+
+	/**
 	 * @brief Adds a drawing policy link in SDGs
 	 * @note When CStaticMesh is deleting, all this drawing policy links unlinks from scenes
 	 * 
@@ -263,7 +276,7 @@ private:
 			 */
 			FORCEINLINE std::size_t operator()( const SElementKeyDrawingPolicyLink& InElementKey ) const
 			{
-				return appMemFastHash( &InElementKey.SDG, InElementKey.overrideHash );
+				return appMemFastHash( &( *InElementKey.SDG ), InElementKey.overrideHash );
 			}
 		};
 
@@ -295,6 +308,18 @@ private:
 	 * @return Return pointer to drawing policy link for SDG
 	 */
 	TSharedPtr<SElementDrawingPolicyLink> MakeDrawingPolicyLink( SSceneDepthGroup& InSDG, uint64 InOverrideHash = 0, std::vector< TAssetHandle<CMaterial> >* InOverrideMaterials = nullptr );
+
+	/**
+	 * @brief Mark dirty all element drawing polices
+	 */
+	FORCEINLINE void MarkDirtyAllElementDrawingPolices()
+	{
+		// Mark dirty all drawing policy links
+		for ( auto itElement = elementDrawingPolicyMap.begin(), itElementEnd = elementDrawingPolicyMap.end(); itElement != itElementEnd; ++itElement )
+		{
+			itElement->second->bDirty = true;
+		}
+	}
 
 	TRefCountPtr< CStaticMeshVertexFactory >	vertexFactory;				/**< Vertex factory */
 	std::vector< TAssetHandle<CMaterial> >		materials;					/**< Array materials in mesh */
