@@ -125,7 +125,35 @@ void CStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<CMater
 
 void CStaticMesh::GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
 {
-	// TODO BS yehor.pohuliaka - Need implement
+	// TODO BS yehor.pohuliaka - Need optimize it
+	bool		bAllDependents	= InFilter == AT_Unknown;
+	bool		bTextures		= InFilter == AT_Texture2D	|| bAllDependents;
+	bool		bMaterials		= InFilter == AT_Material	|| bAllDependents;
+
+	if ( !bAllDependents && !bTextures && !bMaterials )
+	{
+		return;
+	}
+
+	for ( uint32 index = 0, count = materials.size(); index < count; ++index )
+	{
+		TAssetHandle<CMaterial>		material = materials[ index ];
+		if ( !material.IsAssetValid() )
+		{
+			continue;
+		}
+
+		if ( bMaterials )
+		{
+			OutDependentAssets.insert( material );
+		}
+
+		if ( bTextures )
+		{
+			TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
+			materialRef->GetDependentAssets( OutDependentAssets, AT_Texture2D );
+		}
+	}
 }
 
 void CStaticMesh::ReloadDependentAssets( bool InForce /* = false */ )

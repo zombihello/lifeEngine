@@ -1,11 +1,14 @@
 #include <qcheckbox.h>
 #include <qformlayout.h>
+#include <qfiledialog.h>
 #include <qcombobox.h>
 #include <qlabel.h>
 
 #include "ui_StaticMeshEditorWindow.h"
+#include "Containers/StringConv.h"
 #include "Misc/WorldEdGlobals.h"
 #include "System/AssetDataBase.h"
+#include "System/AssetsImport.h"
 #include "Windows/StaticMeshEditorWindow.h"
 #include "Widgets/SectionWidget.h"
 #include "Render/StaticMeshPreviewViewportClient.h"
@@ -106,6 +109,9 @@ void WeStaticMeshEditorWindow::InitUI()
 		ui->frame->layout()->addItem( verticalSpacer );
 	}
 
+	// Set icons for actions
+	ui->actionReimport->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Import.png" ) ).c_str() ) ) );
+
 	// Update data in UI
 	UpdateUI();
 }
@@ -125,6 +131,10 @@ void WeStaticMeshEditorWindow::UpdateUI()
 			std::wstring		assetReference;
 			MakeReferenceToAsset( material, assetReference );
 			selectAssetWidget->SetAssetReference( assetReference );
+		}
+		else
+		{
+			selectAssetWidget->ClearAssetReference();
 		}
 	}
 
@@ -231,5 +241,44 @@ void WeStaticMeshEditorWindow::OnAssetsReloaded( const std::vector< TSharedPtr<c
 			UpdateUI();
 			return;
 		}
+	}
+}
+
+void WeStaticMeshEditorWindow::on_toolButton_sourceFile_clicked()
+{
+	check( staticMesh );
+	QString			newSourceFile = QFileDialog::getOpenFileName( this, "Select New Source File", QString(), CHelperAssetImporter::MakeFilterOfSupportedExtensions( CHelperAssetImporter::ET_StaticMesh ) );
+	std::wstring	path = appQtAbsolutePathToEngine( newSourceFile );
+	if ( newSourceFile.isEmpty() || staticMesh->GetAssetSourceFile() == path )
+	{
+		return;
+	}
+
+	staticMesh->SetAssetSourceFile( path );
+	OnSourceFileChanged( newSourceFile );
+	emit OnChangedAsset( staticMesh );
+}
+
+void WeStaticMeshEditorWindow::on_toolButton_sourceFileRemove_clicked()
+{
+	check( staticMesh );
+
+	staticMesh->SetAssetSourceFile( TEXT( "" ) );
+	OnSourceFileChanged( "" );
+	emit OnChangedAsset( staticMesh );
+}
+
+void WeStaticMeshEditorWindow::on_actionReimport_triggered()
+{
+	check( staticMesh );
+
+	std::wstring		errorMessage;
+	if ( CHelperAssetImporter::Reimport( staticMesh->GetAssetHandle(), errorMessage ) )
+	{
+		emit OnChangedAsset( staticMesh );
+	}
+	else
+	{
+		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), staticMesh->GetAssetName().c_str(), errorMessage.c_str() ) ) );
 	}
 }

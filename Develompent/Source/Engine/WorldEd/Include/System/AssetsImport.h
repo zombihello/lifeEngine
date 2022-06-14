@@ -18,6 +18,7 @@
 #include "Render/Texture.h"
 #include "System/AudioBank.h"
 #include "Render/StaticMesh.h"
+#include "Dialogs/ImportSettingsMeshDialog.h"
 #include "Core.h"
 
 // Forward declarations
@@ -50,7 +51,8 @@ public:
 	{
 		IR_Seccussed,		/**< Asset is imported seccussed */
 		IR_Error,			/**< Asset not imported due to error */
-		IR_AlreadyExist		/**< Asset not imported because in package already exist asset with name */
+		IR_AlreadyExist,	/**< Asset not imported because in package already exist asset with name */
+		IR_Cancel			/**< Import asset canceled by user */
 	};
 
 	/**
@@ -89,7 +91,7 @@ public:
 	 * @param OutAsset				Output imported asset, in case of fail return NULL
 	 * @param OutError				Output error message
 	 * @param InIsForceImport		Is need replace already exist asset with name
-	 * @return Return imported asset, in case of fail return NULL
+	 * @return Return import result
 	 */
 	static EImportResult Import( const QString& InPath, CPackage* InPackage, TAssetHandle<CAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport = false );
 
@@ -101,6 +103,68 @@ public:
 	 * @return Return TRUE if seccussed reimported, else FALSE
 	 */
 	static bool Reimport( const TAssetHandle<CAsset>& InAsset, std::wstring& OutError );
+
+	/**
+	 * Clear cached settings of import/reimport
+	 */
+	static void ClearCachedSettings();
+
+private:
+	/**
+	 * Struct for containing cache of import settings
+	 */
+	template<typename TImportSettings>
+	struct SCacheImportSettings
+	{
+		/**
+		 * Constructor
+		 */
+		SCacheImportSettings()
+			: bIsCached( false )
+		{}
+
+		/**
+		 * Reset cached import settings
+		 */
+		FORCEINLINE void Reset()
+		{
+			bIsCached = false;
+		}
+
+		/**
+		 * Set import settings
+		 * 
+		 * @param InImportSettings	Import settings
+		 */
+		FORCEINLINE void Set( const TImportSettings& InImportSettings )
+		{
+			importSettings = InImportSettings;
+		}
+
+		/**
+		 * Get import settings
+		 * @return Return import settings
+		 */
+		FORCEINLINE const TImportSettings& Get() const
+		{
+			return importSettings;
+		}
+
+		/**
+		 * Is cached
+		 * @return Return TRUE if import settings is cached, else return FALSE
+		 */
+		FORCEINLINE bool IsCached() const
+		{
+			return bIsCached;
+		}
+
+	private:
+		TImportSettings		importSettings;		/**< Import settings */
+		bool				bIsCached;			/**< Is cached */
+	};
+
+	static SCacheImportSettings<WeImportSettingsMeshDialog::SImportSettings>		meshImportSettings;		/**< Mesh import settings */
 };
 
 /**
@@ -199,20 +263,22 @@ public:
 	/**
 	 * Import static mesh
 	 *
-	 * @param InPath		Path to source file
-	 * @param OutError		Output error message
+	 * @param InPath			Path to source file
+	 * @param InImportSettings	Import settings
+	 * @param OutError			Output error message
 	 * @return Return imported static mesh, if failed return NULL
 	 */
-	static TSharedPtr<CStaticMesh> Import( const std::wstring& InPath, std::wstring& OutError );
+	static TSharedPtr<CStaticMesh> Import( const std::wstring& InPath, const WeImportSettingsMeshDialog::SImportSettings& InImportSettings, std::wstring& OutError );
 
 	/**
 	 * Reimport static mesh
 	 *
-	 * @param InStaticMesh	Static mesh
-	 * @param OutError		Output error message
+	 * @param InStaticMesh		Static mesh
+	 * @param InImportSettings	Import settings
+	 * @param OutError			Output error message
 	 * @return Return TRUE if seccussed reimported, else return FALSE
 	 */
-	static bool Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh, std::wstring& OutError );
+	static bool Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh, const WeImportSettingsMeshDialog::SImportSettings& InImportSettings, std::wstring& OutError );
 
 	/**
 	 * Get supported static mesh extensions
@@ -260,6 +326,38 @@ private:
 	 * @param[out] OutMeshes Array filled from Assimp scene
 	 */
 	static void ProcessNode( aiNode* InNode, const aiScene* InScene, AiMeshesMap_t& OutMeshes );
+
+	/**
+	 * Change axis up in vector
+	 * 
+	 * @param InOutVector	Input and output vector
+	 * @param InAxisUp		Axis up
+	 */
+	FORCEINLINE static void ChangeAxisUpInVector( aiVector3D& InOutVector, WeImportSettingsMeshDialog::EAxis InAxisUp )
+	{
+		switch ( InAxisUp )
+		{
+		case WeImportSettingsMeshDialog::A_MinusX:
+			InOutVector.y	= -InOutVector.y;
+
+		case WeImportSettingsMeshDialog::A_PlusX:
+			Swap( InOutVector.y, InOutVector.x );
+			break;
+
+		case WeImportSettingsMeshDialog::A_MinusY:
+			InOutVector.y	= -InOutVector.y;
+
+		case WeImportSettingsMeshDialog::A_PlusY:
+			break;
+
+		case WeImportSettingsMeshDialog::A_MinusZ:
+			InOutVector.y	= -InOutVector.y;
+
+		case WeImportSettingsMeshDialog::A_PlusZ:
+			Swap( InOutVector.y, InOutVector.z );
+			break;
+		}
+	}
 };
 
 #endif // !ASSETSIMPORT_H

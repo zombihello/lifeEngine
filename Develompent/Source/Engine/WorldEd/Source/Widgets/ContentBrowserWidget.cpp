@@ -350,7 +350,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 		{
 			SAssetInfo		assetInfo;
 			currentPackage->GetAssetInfo( modelIndexList[ index ].row(), assetInfo );
-			bExistSupportedReimportAssetType = assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank;
+			bExistSupportedReimportAssetType = assetInfo.type == AT_Texture2D || assetInfo.type == AT_AudioBank || assetInfo.type == AT_StaticMesh;
 		}
 	}
 
@@ -386,6 +386,9 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 		return;
 	}
 
+	// Clear cached settings of import
+	CHelperAssetImporter::ClearCachedSettings();
+
 	// Import selected assets
 	bool							bReplaceAll		= false;	//
 	bool							bSkipAll		= false;	// } Replace or skip all assets with exist names in package
@@ -396,6 +399,12 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 		QString									path = selectedAssets[ index ];
 		TAssetHandle<CAsset>					assetPtr;
 		CHelperAssetImporter::EImportResult		importResult = CHelperAssetImporter::Import( path, package, assetPtr, errorMessage, bReplaceAll && !bSkipAll );
+
+		// If import canceled by user, we stop cycle
+		if ( importResult == CHelperAssetImporter::IR_Cancel )
+		{
+			break;
+		}
 
 		// Show message if not setted flags bReplaceAll and bSkipAll
 		if ( !bReplaceAll && !bSkipAll && importResult == CHelperAssetImporter::IR_AlreadyExist )
@@ -447,6 +456,9 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Reimport()
 	{
 		return;
 	}
+
+	// Clear cached settings of reimport
+	CHelperAssetImporter::ClearCachedSettings();
 
 	// Reimport selected assets
 	std::vector< QString >			errorAssets;				// Array with errors of assets

@@ -15,6 +15,11 @@
 #include "WorldEd.h"
 
 //
+// GLOBAL
+//
+CHelperAssetImporter::SCacheImportSettings<WeImportSettingsMeshDialog::SImportSettings>		CHelperAssetImporter::meshImportSettings;
+
+//
 // GENERIC
 //
 
@@ -65,7 +70,7 @@ QString CHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 		if ( !staticMeshExtnesion.empty() )
 		{
 			allSupportedFormats += !allSupportedFormats.empty() ? TEXT( ";" ) : TEXT( "" );
-			result += "Static Mesh Formats (";
+			result += "Mesh Formats (";
 			for ( uint32 index = 0, count = staticMeshExtnesion.size(); index < count; ++index )
 			{
 				std::wstring		format = ÑString::Format( TEXT( "*.%s%s" ), staticMeshExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
@@ -82,6 +87,11 @@ QString CHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 	}
 
 	return result;
+}
+
+void CHelperAssetImporter::ClearCachedSettings()
+{
+	meshImportSettings.Reset();
 }
 
 CHelperAssetImporter::EImportResult CHelperAssetImporter::Import( const QString& InPath, CPackage* InPackage, TAssetHandle<CAsset>& OutAsset, std::wstring& OutError, bool InIsForceImport /* = false */ )
@@ -114,7 +124,28 @@ CHelperAssetImporter::EImportResult CHelperAssetImporter::Import( const QString&
 	// We import static mesh
 	else if ( CHelperAssetImporter::IsSupportedExtension( fileExtension, CStaticMeshImporter::GetSupportedExtensions() ) )
 	{
-		assetRef = CStaticMeshImporter::Import( appQtAbsolutePathToEngine( InPath ), OutError );
+		// If mesh import settings not cached, we open dialog for getting him
+		bool		bNeedResetCache = false;
+		if ( !meshImportSettings.IsCached() )
+		{
+			WeImportSettingsMeshDialog::SImportSettings		importSettings;
+			WeImportSettingsMeshDialog::EDialogResult		dialogResult = WeImportSettingsMeshDialog::GetImportSettings( importSettings );
+			if ( dialogResult == WeImportSettingsMeshDialog::DR_Cancel )
+			{
+				return IR_Cancel;
+			}
+
+			bNeedResetCache		= dialogResult != WeImportSettingsMeshDialog::DR_ImportAll;
+			meshImportSettings.Set( importSettings );
+		}
+
+		assetRef = CStaticMeshImporter::Import( appQtAbsolutePathToEngine( InPath ), meshImportSettings.Get(), OutError );
+
+		// Reset cache if need
+		if ( bNeedResetCache )
+		{
+			meshImportSettings.Reset();
+		}
 	}
 
 	// Else this is unknown asset
@@ -157,7 +188,36 @@ bool CHelperAssetImporter::Reimport( const TAssetHandle<CAsset>& InAsset, std::w
 	{
 	case AT_Texture2D:		bResult = CTexture2DImporter::Reimport( assetRef, OutError ); break;
 	case AT_AudioBank:		bResult = CAudioBankImporter::Reimport( assetRef, OutError ); break;
-	
+	case AT_StaticMesh:
+	{
+		// If mesh import settings not cached, we open dialog for getting him
+		bool		bNeedResetCache = false;
+		if ( !meshImportSettings.IsCached() )
+		{
+			WeImportSettingsMeshDialog::SImportSettings		importSettings;
+			WeImportSettingsMeshDialog::EDialogResult		dialogResult = WeImportSettingsMeshDialog::GetImportSettings( importSettings );
+			if ( dialogResult == WeImportSettingsMeshDialog::DR_Cancel )
+			{
+				bResult		= false;
+				OutError	= TEXT( "Cancel by user" );
+				break;
+			}
+
+			bNeedResetCache = dialogResult != WeImportSettingsMeshDialog::DR_ImportAll;
+			meshImportSettings.Set( importSettings );
+		}
+
+		bResult = CStaticMeshImporter::Reimport( assetRef, meshImportSettings.Get(), OutError );
+
+		// Reset cache if need
+		if ( bNeedResetCache )
+		{
+			meshImportSettings.Reset();
+		}
+
+		break;
+	}
+
 	//
 	// Insert your asset type in this place
 	//
@@ -239,6 +299,11 @@ bool CTexture2DImporter::Reimport( const TSharedPtr<CTexture2D>& InTexture2D, st
 
 	// Clean up all data
 	stbi_image_free( data );
+
+	// Broadcast event of reimport/reloaded asset
+	std::vector< TSharedPtr<CAsset> >		reimportedAssets{ InTexture2D };
+	SEditorDelegates::onAssetsReloaded.Broadcast( reimportedAssets );
+
 	return true;
 }
 
@@ -275,10 +340,15 @@ bool CAudioBankImporter::Reimport( const TSharedPtr<CAudioBank>& InAudioBank, st
 {
 	check( InAudioBank );
 	InAudioBank->SetSourceOGGFile( InAudioBank->GetAssetSourceFile() );
+	
+	// Broadcast event of reimport/reloaded asset
+	std::vector< TSharedPtr<CAsset> >		reimportedAssets{ InAudioBank };
+	SEditorDelegates::onAssetsReloaded.Broadcast( reimportedAssets );
+
 	return true;
 }
 
-TSharedPtr<CStaticMesh> CStaticMeshImporter::Import( const std::wstring& InPath, std::wstring& OutError )
+TSharedPtr<CStaticMesh> CStaticMeshImporter::Import( const std::wstring& InPath, const WeImportSettingsMeshDialog::SImportSettings& InImportSettings, std::wstring& OutError )
 {
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
@@ -300,10 +370,10 @@ TSharedPtr<CStaticMesh> CStaticMeshImporter::Import( const std::wstring& InPath,
 	TSharedPtr<CStaticMesh>		staticMeshRef = MakeSharedPtr<CStaticMesh>();
 	staticMeshRef->SetAssetName( filename );
 	staticMeshRef->SetAssetSourceFile( InPath );
-	return Reimport( staticMeshRef, OutError ) ? staticMeshRef : nullptr;
+	return Reimport( staticMeshRef, InImportSettings, OutError ) ? staticMeshRef : nullptr;
 }
 
-bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh, std::wstring& OutError )
+bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh, const WeImportSettingsMeshDialog::SImportSettings& InImportSettings, std::wstring& OutError )
 {
 	// Loading mesh with help Assimp
 	check( InStaticMesh );
@@ -346,7 +416,7 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh,
 		{
 			std::vector< SStaticMeshVertexType >	vertexBuffer;
 			SStaticMeshVertexType					vertex;
-			aiMesh* mesh = ( *itMesh ).mesh;
+			aiMesh*									mesh = ( *itMesh ).mesh;
 			appMemzero( &vertex, sizeof( SStaticMeshVertexType ) );
 
 			// Prepare the vertex buffer.
@@ -361,12 +431,16 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh,
 			for ( uint32 index = 0; index < mesh->mNumVertices; ++index )
 			{
 				aiVector3D		tempVector = ( *itMesh ).transformation * mesh->mVertices[ index ];
+				ChangeAxisUpInVector( tempVector, InImportSettings.axisUp );
+
 				vertex.position.x = tempVector.x;
 				vertex.position.y = tempVector.y;
 				vertex.position.z = tempVector.z;
 				vertex.position.w = 1.f;
 
-				tempVector = ( aiMatrix3x3 ) ( *itMesh ).transformation * mesh->mNormals[ index ];
+				tempVector			= ( aiMatrix3x3 ) ( *itMesh ).transformation * mesh->mNormals[ index ];
+				ChangeAxisUpInVector( tempVector, InImportSettings.axisUp );
+
 				vertex.normal.x = tempVector.x;
 				vertex.normal.y = tempVector.y;
 				vertex.normal.z = tempVector.z;
@@ -374,7 +448,9 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh,
 
 				if ( mesh->mTangents )
 				{
-					tempVector = ( aiMatrix3x3 ) ( *itMesh ).transformation * mesh->mTangents[ index ];
+					tempVector		= ( aiMatrix3x3 ) ( *itMesh ).transformation * mesh->mTangents[ index ];
+					ChangeAxisUpInVector( tempVector, InImportSettings.axisUp );
+
 					vertex.tangent.x = tempVector.x;
 					vertex.tangent.y = tempVector.y;
 					vertex.tangent.z = tempVector.z;
@@ -383,7 +459,9 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh,
 
 				if ( mesh->mBitangents )
 				{
-					tempVector = ( aiMatrix3x3 ) ( *itMesh ).transformation * mesh->mBitangents[ index ];
+					tempVector		= ( aiMatrix3x3 ) ( *itMesh ).transformation * mesh->mBitangents[ index ];
+					ChangeAxisUpInVector( tempVector, InImportSettings.axisUp );
+
 					vertex.binormal.x = tempVector.x;
 					vertex.binormal.y = tempVector.y;
 					vertex.binormal.z = tempVector.z;
@@ -445,6 +523,11 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh,
 
 	// Clean up all data
 	aiImport.FreeScene();
+
+	// Broadcast event of reimport/reloaded asset
+	std::vector< TSharedPtr<CAsset> >		reimportedAssets{ InStaticMesh };
+	SEditorDelegates::onAssetsReloaded.Broadcast( reimportedAssets );
+
 	return true;
 }
 

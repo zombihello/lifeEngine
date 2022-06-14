@@ -55,6 +55,9 @@ private slots:
 	// Events
 	//
 	void OnSelectedAssetMaterial( uint32 InAssetSlot, const std::wstring& InNewAssetReference );
+	void on_toolButton_sourceFile_clicked();
+	void on_toolButton_sourceFileRemove_clicked();
+	void on_actionReimport_triggered();
 
 private:
 	/**
