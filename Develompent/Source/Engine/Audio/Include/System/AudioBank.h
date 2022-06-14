@@ -15,6 +15,7 @@
 #include "System/Package.h"
 #include "System/AudioDevice.h"
 #include "System/AudioBuffer.h"
+#include "System/Delegate.h"
 #include "Misc/SharedPointer.h"
 
 /**
@@ -22,6 +23,14 @@
  * @brief Typedef of handle opened audio bank
  */
 typedef void*											AudioBankHandle_t;
+
+#if WITH_EDITOR
+/**
+ * @ingroup Audio
+ * @brief Delegate for called event when audio bank is updated
+ */
+DECLARE_MULTICAST_DELEGATE( COnAudioBankUpdated, class CAudioBank* );
+#endif // WITH_EDITOR
 
 /**
  * @ingroup Audio
@@ -128,6 +137,17 @@ public:
 	 */
 	AudioBufferRef_t GetAudioBuffer();
 
+#if WITH_EDITOR
+	/**
+	 * Get delegate of event when audio bank is updated
+	 * @return Return delegate of event when audio bank is updated
+	 */
+	FORCEINLINE COnAudioBankUpdated& OnAudioBankUpdated() const
+	{
+		return onAudioBankUpdated;
+	}
+#endif // WITH_EDITOR
+
 private:
 	/**
 	 * Close bank. Internal implementation
@@ -140,11 +160,12 @@ private:
 	uint64							offsetToRawData;	/**< Offset in archive to raw data */
 	uint64							rawDataSize;		/**< Size in bytes of raw data */
 	std::wstring					pathToArchive;		/**< Path to archive */
-	AudioBufferRef_t					audioBuffer;		/**< Audio buffer with fully loaded bank. Used only by CAudioSource */
-	std::list<AudioBankHandle_t>		openedHandles;		/**< List opened handles of this audio bank */
+	AudioBufferRef_t				audioBuffer;		/**< Audio buffer with fully loaded bank. Used only by CAudioSource */
+	std::list<AudioBankHandle_t>	openedHandles;		/**< List opened handles of this audio bank */
 
 #if WITH_EDITOR
-	std::vector<byte>	rawData;			/**< Raw data of Ogg/Vorbis file */
+	std::vector<byte>				rawData;			/**< Raw data of Ogg/Vorbis file */
+	mutable COnAudioBankUpdated		onAudioBankUpdated;	/**< Event when audio bank is updated */
 #endif // WITH_EDITOR
 };
 

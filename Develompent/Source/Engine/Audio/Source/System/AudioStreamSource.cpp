@@ -354,6 +354,7 @@ void CAudioStreamSource::CloseBank()
 			audioBankRef->CloseBank( audioBankHandle );
 		}
 	}
+
 	audioBankHandle = nullptr;
 }
 
@@ -370,6 +371,30 @@ void CAudioStreamSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBa
 	{
 		OpenBank( InAudioBank );
 	}
+
+	// If current audio bank is not equal with InAudioBank, we unsubscribe from old event delegate
+#if WITH_EDITOR
+	if ( audioBank != InAudioBank )
+	{
+		// Unsubscribe from old event delegate
+		TSharedPtr<CAudioBank>		audioBankRef = audioBank.ToSharedPtr();
+		if ( audioBankRef )
+		{
+			audioBankRef->OnAudioBankUpdated().Remove( audioBankUpdatedHandle );
+		}
+		else
+		{
+			audioBankUpdatedHandle = nullptr;
+		}
+
+		// Subscribe to new event delegate
+		audioBankRef		= InAudioBank.ToSharedPtr();
+		if ( audioBankRef )
+		{
+			audioBankUpdatedHandle	= audioBankRef->OnAudioBankUpdated().Add( std::bind( &CAudioStreamSource::OnAudioBankUpdated, this, std::placeholders::_1 ) );
+		}
+	}
+#endif // WITH_EDITOR
 
 	audioBank = InAudioBank;
 }
@@ -400,3 +425,19 @@ EAudioSourceStatus CAudioStreamSource::GetStatus() const
 	}
 	}
 }
+
+#if WITH_EDITOR
+void CAudioStreamSource::OnAudioBankUpdated( class CAudioBank* InAudioBank )
+{
+	// Update data from audio bank
+	check( InAudioBank );
+	EAudioSourceStatus		currentStatus = GetStatus();
+	SetAudioBank( InAudioBank->GetAssetHandle() );
+
+	// Keep playing the sound if need
+	if ( currentStatus == ASS_Playing )
+	{
+		Play();
+	}
+}
+#endif // WITH_EDITOR

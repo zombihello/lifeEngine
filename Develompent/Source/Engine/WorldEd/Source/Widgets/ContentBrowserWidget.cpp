@@ -18,6 +18,7 @@
 #include "Windows/TextureEditorWindow.h"
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/StaticMeshEditorWindow.h"
+#include "Windows/AudioBankEditorWindow.h"
 #include "System/ContentBrowser.h"
 #include "System/EditorEngine.h"
 #include "System/AssetDataBase.h"
@@ -1113,6 +1114,15 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		connect( staticMeshEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
 	}
+
+	// Audio bank
+	case AT_AudioBank:
+		assetRef->ReloadDependentAssets();
+
+		WeAudioBankEditorWindow*		audioBankEditorWindow = new WeAudioBankEditorWindow( assetRef, this );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), audioBankEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), audioBankEditorWindow, true );
+		connect( audioBankEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
+		break;
 	}
 }
 

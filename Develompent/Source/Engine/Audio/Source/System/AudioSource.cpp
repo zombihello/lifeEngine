@@ -6,6 +6,9 @@ CAudioSource::CAudioSource()
 	: bMuted( false )
 	, alHandle( 0 )
 	, volume( 100.f )
+#if WITH_EDITOR
+	, audioBankUpdatedHandle( nullptr )
+#endif // WITH_EDITOR
 	, audioDeviceMutedHandle( nullptr )
 	, audioBufferDestroyedHandle( nullptr )
 	, audioBufferUpdatedHandle( nullptr )
@@ -42,6 +45,10 @@ CAudioSource::~CAudioSource()
 			audioBuffer->OnAudioBufferDestroyed().Remove( audioBufferDestroyedHandle );
 			audioBuffer->OnAudioBufferUpdated().Remove( audioBufferUpdatedHandle );
 		}
+
+#if WITH_EDITOR
+		audioBankRef->OnAudioBankUpdated().Remove( audioBankUpdatedHandle );
+#endif // WITH_EDITOR
 	}
 }
 
@@ -107,10 +114,15 @@ void CAudioSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 				audioBuffer->OnAudioBufferUpdated().Remove( audioBufferUpdatedHandle );
 				audioBuffer = nullptr;
 			}
+
+#if WITH_EDITOR
+			if ( audioBank != InAudioBank )
+			{
+				oldAudioBankRef->OnAudioBankUpdated().Remove( audioBankUpdatedHandle );
+			}
+#endif // WITH_EDITOR
 		}
 	}
-
-	audioBank = InAudioBank;
 
 	// Getting audio buffer if bank is valid and subscribe to events of audio buffer
 	TSharedPtr<CAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
@@ -122,8 +134,16 @@ void CAudioSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 			audioBufferDestroyedHandle	= audioBuffer->OnAudioBufferDestroyed().Add( std::bind( &CAudioSource::OnAudioBufferDestroyed, this, std::placeholders::_1 ) );
 			audioBufferUpdatedHandle	= audioBuffer->OnAudioBufferUpdated().Add( std::bind( &CAudioSource::OnAudioBufferUpdated, this, std::placeholders::_1 ) );
 		}
+
+#if WITH_EDITOR
+		if ( audioBank != InAudioBank )
+		{
+			audioBankUpdatedHandle		= audioBankRef->OnAudioBankUpdated().Add( std::bind( &CAudioSource::OnAudioBankUpdated, this, std::placeholders::_1 ) );
+		}
+#endif // WITH_EDITOR
 	}
 
+	audioBank		= InAudioBank;
 	alSourcei( alHandle, AL_BUFFER, audioBuffer ? audioBuffer->GetALHandle() : 0 );
 }
 
@@ -223,3 +243,12 @@ void CAudioSource::OnAudioBufferUpdated( class CAudioBuffer* InAudioBuffer )
 	// When audio buffer is updated we recreating OpenAL buffer
 	alSourcei( alHandle, AL_BUFFER, InAudioBuffer->GetALHandle() );
 }
+
+#if WITH_EDITOR
+void CAudioSource::OnAudioBankUpdated( class CAudioBank* InAudioBank )
+{
+	// Update data from audio bank
+	check( InAudioBank );
+	SetAudioBank( InAudioBank->GetAssetHandle() );
+}
+#endif // WITH_EDITOR

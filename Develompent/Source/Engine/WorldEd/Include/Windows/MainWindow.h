@@ -107,6 +107,9 @@ public:
 		}
 
 		dockWidget->setFeature( ads::CDockWidget::DockWidgetDeleteOnClose, InIsDeleteAfterClose );
+		dockWidget->setMinimumSize( InContent->minimumSize() );
+		dockWidget->setMaximumSize( InContent->maximumSize() );
+
 		return dockManager->addDockWidget( InArea, dockWidget, InParent );
 	}
 
@@ -131,7 +134,11 @@ public:
 		}
 
 		dockWidget->setFeature( ads::CDockWidget::DockWidgetDeleteOnClose, InIsDeleteAfterClose );
-		return dockManager->addDockWidgetFloating( dockWidget );
+
+		ads::CFloatingDockContainer*	floatingDockContainer = dockManager->addDockWidgetFloating( dockWidget );
+		floatingDockContainer->setMinimumSize( InContent->minimumSize() );
+		floatingDockContainer->setMaximumSize( InContent->maximumSize() );
+		return floatingDockContainer;
 	}
 
 	/**

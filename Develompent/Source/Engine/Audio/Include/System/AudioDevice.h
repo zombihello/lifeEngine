@@ -56,6 +56,24 @@ uint32 appSampleFormatToEngine( ESampleFormat InSampleFormat );
 
 /**
  * @ingroup Audio
+ * @brief Convert sample format from ESampleFormat to text
+ * 
+ * @param InSampleFormat	Sample format
+ * @return Return text sampler format
+ */
+std::wstring appSampleFormatToText( ESampleFormat InSampleFormat );
+
+/**
+ * @ingroup Audio
+ * @brief Get number bytes for one sample
+ * 
+ * @param InSampleFormat	Sample format
+ * @return Return number bytes for one sample
+ */
+uint32 appGetNumSampleBytes( ESampleFormat InSampleFormat );
+
+/**
+ * @ingroup Audio
  * @brief Struct of descriptrion listener spatial
  */
 struct SListenerSpatial

@@ -320,6 +320,11 @@ uint64 CAudioBank::GetOffsetBankPCM( AudioBankHandle_t InBankHandle ) const
 #if WITH_EDITOR
 void CAudioBank::SetSourceOGGFile( const std::wstring& InPath )
 {
+	if ( pathToArchive == InPath )
+	{
+		return;
+	}
+
 	// Read raw data of Ogg/Vorbis file
 	CArchive*		archive = GFileSystem->CreateFileReader( InPath.c_str() );
 	if ( !archive )
@@ -344,6 +349,17 @@ void CAudioBank::SetSourceOGGFile( const std::wstring& InPath )
 	}
 
 	delete archive;
+	MarkDirty();
+
+	// Remove loaded old audio buffer
+	if ( audioBuffer )
+	{
+		GAudioBufferManager.Remove( GetAssetHandle() );
+		audioBuffer.SafeRelease();
+	}
+
+	// Broadcast event of updated audio bank
+	onAudioBankUpdated.Broadcast( this );
 }
 #endif // WITH_EDITOR
 

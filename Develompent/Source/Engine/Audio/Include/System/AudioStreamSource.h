@@ -186,6 +186,14 @@ private:
 	 */
 	void CloseBank();
 
+#if WITH_EDITOR
+	/**
+	 * On audio bank is updated
+	 * @param InAudioBank		Audio bank
+	 */
+	void OnAudioBankUpdated( class CAudioBank* InAudioBank );
+#endif // WITH_EDITOR
+
 	bool						bIsStreaming;			/**< Is streamed in this time audio */
 	bool						bIsLoop;				/**< Is need loop audio */
 	EAudioSourceStatus			status;					/**< Source audio status */

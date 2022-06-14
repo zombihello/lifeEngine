@@ -23,6 +23,36 @@ uint32 appSampleFormatToEngine( ESampleFormat InSampleFormat )
 	}
 }
 
+std::wstring appSampleFormatToText( ESampleFormat InSampleFormat )
+{
+	switch ( InSampleFormat )
+	{
+	case SF_Mono8:		return TEXT( "8 bit (Mono)" );
+	case SF_Mono16:		return TEXT( "16 bit (Mono)" );
+	case SF_Stereo8:	return TEXT( "8 bit (Stereo)" );
+	case SF_Stereo16:	return TEXT( "16 bit (Stereo)" );
+	case SF_Unknown:
+	default:
+		appErrorf( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
+		return TEXT( "Unknown");
+	}
+}
+
+uint32 appGetNumSampleBytes( ESampleFormat InSampleFormat )
+{
+	switch ( InSampleFormat )
+	{
+	case SF_Mono8:		return 8;
+	case SF_Mono16:		return 16;
+	case SF_Stereo8:	return 16;
+	case SF_Stereo16:	return 32;
+	case SF_Unknown:
+	default:
+		appErrorf( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
+		return 0;
+	}
+}
+
 ÑAudioDevice::ÑAudioDevice()
 	: bIsMuted( false )
 	, alDevice( nullptr )

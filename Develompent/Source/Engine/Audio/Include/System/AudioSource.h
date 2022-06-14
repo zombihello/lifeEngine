@@ -159,8 +159,12 @@ public:
 	}
 
 protected:
-	TAssetHandle<CAudioBank>	audioBank;		/**< Audio bank */
-	float						volume;			/**< Volume */
+	TAssetHandle<CAudioBank>					audioBank;				/**< Audio bank */
+	float										volume;					/**< Volume */
+
+#if WITH_EDITOR
+	COnAudioBankUpdated::DelegateType_t*		audioBankUpdatedHandle;	/**< Handle of delegate of updated audio bank */
+#endif // WITH_EDITOR
 
 private:
 	/**
@@ -181,10 +185,18 @@ private:
 	 */
 	void OnAudioBufferUpdated( class CAudioBuffer* InAudioBuffer );
 
+#if WITH_EDITOR
+	/**
+	 * On audio bank is updated
+	 * @param InAudioBank		Audio bank
+	 */
+	void OnAudioBankUpdated( class CAudioBank* InAudioBank );
+#endif // WITH_EDITOR
+
 	bool										bMuted;						/**< Is audio source muted */
 	uint32										alHandle;					/**< OpenAL of sound source */
-	COnAudioDeviceMuted::DelegateType_t*			audioDeviceMutedHandle;		/**< Handle of delegate of muted device */
-	COnAudioBufferDestroyed::DelegateType_t*		audioBufferDestroyedHandle;	/**< Handle of delegate of destroyed audio buffer */
+	COnAudioDeviceMuted::DelegateType_t*		audioDeviceMutedHandle;		/**< Handle of delegate of muted device */
+	COnAudioBufferDestroyed::DelegateType_t*	audioBufferDestroyedHandle;	/**< Handle of delegate of destroyed audio buffer */
 	COnAudioBufferUpdated::DelegateType_t*		audioBufferUpdatedHandle;	/**< Handle of delegate of updated audio buffer */
 };
 
