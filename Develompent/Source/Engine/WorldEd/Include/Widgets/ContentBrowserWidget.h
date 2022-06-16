@@ -81,6 +81,7 @@ private slots:
 	void on_listView_packageBrowser_Reimport();
 	void on_listView_packageBrowser_ReimportWithNewFile();
 	void on_listView_packageBrowser_CreateMaterial();
+	void on_listView_packageBrowser_CreatePhysMaterial();
 	void on_listView_packageBrowser_DeleteAsset();
 	void on_listView_packageBrowser_RenameAsset();
 	void on_listView_packageBrowser_customContextMenuRequested( QPoint InPoint );

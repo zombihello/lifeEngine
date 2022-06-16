@@ -21,7 +21,7 @@ namespace Ui
 
 /**
  * @ingroup WorldEd
- * Class window of audio bank preview
+ * Class window of audio bank editor
  */
 class WeAudioBankEditorWindow : public QWidget
 {

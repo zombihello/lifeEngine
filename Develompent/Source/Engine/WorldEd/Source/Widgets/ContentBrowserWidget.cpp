@@ -19,11 +19,13 @@
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/StaticMeshEditorWindow.h"
 #include "Windows/AudioBankEditorWindow.h"
+#include "Windows/PhysicsMaterialEditorWindow.h"
 #include "System/ContentBrowser.h"
 #include "System/EditorEngine.h"
 #include "System/AssetDataBase.h"
 #include "System/AssetsImport.h"
 #include "System/BaseFileSystem.h"
+#include "System/PhysicsMaterial.h"
 #include "Misc/TableOfContents.h"
 #include "Render/Material.h"
 #include "WorldEd.h"
@@ -317,8 +319,14 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 
 	// Menu 'Create'
 	QMenu			menuCreate( "Create", this );
+	QMenu			menuCreatePhysics( "Physics", this );
 	QAction			actionCreateMaterial( "Material", this );
 	menuCreate.addAction( &actionCreateMaterial );
+	menuCreate.addMenu( &menuCreatePhysics );
+
+	// Menu 'Create->Physics'
+	QAction			actionCreatePhysMaterial( "Physics Material", this );
+	menuCreatePhysics.addAction( &actionCreatePhysMaterial );
 
 	// Main menu
 	QMenu			contextMenu( this );
@@ -373,6 +381,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequest
 	connect( &actionRenameFile, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_RenameAsset() ) );
 	connect( &actionCopyReference, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_CopyReferenceToAsset() ) );
 	connect( &actionReload, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_ReloadAsset() ) );
+	connect( &actionCreatePhysMaterial, SIGNAL( triggered() ), this, SLOT( on_listView_packageBrowser_CreatePhysMaterial() ) );
 	contextMenu.exec( QCursor::pos() );
 }
 
@@ -572,6 +581,42 @@ void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
 	TSharedPtr<CMaterial>		materialRef = MakeSharedPtr<CMaterial>();
 	materialRef->SetAssetName( assetName.toStdWString() );
 	package->Add( TAssetHandle<CMaterial>( materialRef, MakeSharedPtr<SAssetReference>( AT_Material, materialRef->GetGUID() ) ) );
+	ui->listView_packageBrowser->Refresh();
+}
+
+void WeContentBrowserWidget::on_listView_packageBrowser_CreatePhysMaterial()
+{
+	// Getting current package
+	PackageRef_t				package = ui->listView_packageBrowser->GetPackage();
+	if ( !package )
+	{
+		return;
+	}
+
+	// Get asset name and check on exist other asset with this name
+	bool			bIsOk = false;
+	QString			assetName;
+	while ( !bIsOk )
+	{
+		// Get asset name. If we not press 'ok' nothing apply and exit from method
+		assetName = QInputDialog::getText( this, "Enter", "Asset Name", QLineEdit::Normal, "NewAsset", &bIsOk );
+		if ( !bIsOk )
+		{
+			return;
+		}
+
+		// If asset with name already exist - try enter other name 
+		if ( package->IsExist( assetName.toStdWString() ) )
+		{
+			QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), assetName.toStdWString().c_str() ) ), QMessageBox::Ok );
+			bIsOk = false;
+		}
+	}
+
+	// Create physics material with asset name and add to package
+	TSharedPtr<CPhysicsMaterial>		physMaterialRef = MakeSharedPtr<CPhysicsMaterial>();
+	physMaterialRef->SetAssetName( assetName.toStdWString() );
+	package->Add( TAssetHandle<CPhysicsMaterial>( physMaterialRef, MakeSharedPtr<SAssetReference>( AT_PhysicsMaterial, physMaterialRef->GetGUID() ) ) );
 	ui->listView_packageBrowser->Refresh();
 }
 
@@ -1117,12 +1162,25 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 
 	// Audio bank
 	case AT_AudioBank:
+	{
 		assetRef->ReloadDependentAssets();
 
 		WeAudioBankEditorWindow*		audioBankEditorWindow = new WeAudioBankEditorWindow( assetRef, this );
 		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), audioBankEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), audioBankEditorWindow, true );
 		connect( audioBankEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
+	}
+
+	// Physics material
+	case AT_PhysicsMaterial:
+	{
+		assetRef->ReloadDependentAssets();
+
+		WePhysicsMaterialEditorWindow*	physMaterialEditorWindow = new WePhysicsMaterialEditorWindow( assetRef, this );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), physMaterialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), physMaterialEditorWindow, true );
+		connect( physMaterialEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
+		break;
+	}
 	}
 }
 
@@ -1135,7 +1193,7 @@ void WeContentBrowserWidget::OnPackageBrowserChangedAsset( const TSharedPtr<CAss
 void WeContentBrowserWidget::on_listView_packageBrowser_CopyReferenceToAsset()
 {
 	// Getting selected items and current package
-	PackageRef_t				package = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t			package = ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 	if ( !package )
 	{

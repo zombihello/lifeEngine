@@ -47,7 +47,14 @@ public:
 	 */
 	FORCEINLINE void SetStaticFriction( float InStaticFriction )
 	{
+		if ( staticFriction == InStaticFriction )
+		{
+			return;
+		}
+
 		staticFriction = InStaticFriction;
+
+		MarkDirty();
 		UpdateMaterial();
 	}
 
@@ -57,7 +64,14 @@ public:
 	 */
 	FORCEINLINE void SetDynamicFriction( float InDynamicFriction )
 	{
+		if ( dynamicFriction == InDynamicFriction )
+		{
+			return;
+		}
+
 		dynamicFriction = InDynamicFriction;
+
+		MarkDirty();
 		UpdateMaterial();
 	}
 
@@ -67,7 +81,14 @@ public:
 	 */
 	FORCEINLINE void SetRestitution( float InRestitution )
 	{
+		if ( restitution == InRestitution )
+		{
+			return;
+		}
+
 		restitution = InRestitution;
+		
+		MarkDirty();
 		UpdateMaterial();
 	}
 
@@ -77,7 +98,14 @@ public:
 	 */
 	FORCEINLINE void SetDensity( float InDensity )
 	{
+		if ( density == InDensity )
+		{
+			return;
+		}
+
 		density = InDensity;
+
+		MarkDirty();
 		UpdateMaterial();
 	}
 
@@ -87,7 +115,13 @@ public:
 	 */
 	FORCEINLINE void SetSurfaceType( ESurfaceType InNewSurfaceType )
 	{
+		if ( surfaceType == InNewSurfaceType )
+		{
+			return;
+		}
+
 		surfaceType = InNewSurfaceType;
+		MarkDirty();
 	}
 
 	/**

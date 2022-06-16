@@ -57,11 +57,13 @@ QVariant WePackageModel::data( const QModelIndex& InIndex, int InRole ) const
 	case Qt::DecorationRole:
 		switch ( assetInfo.type )
 		{
-		case AT_Texture2D:		return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_Texture.png" ) ).c_str() ) );			
-		case AT_StaticMesh:		return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_StaticMesh.png" ) ).c_str() ) );
-		case AT_Material:		return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_Material.png" ) ).c_str() ) );
-		case AT_Script:			return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_Script.png" ) ).c_str() ) );
-		default:				return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_Unknown.png" ) ).c_str() ) );
+		case AT_Texture2D:				return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_Texture.png" ) ).c_str() ) );			
+		case AT_StaticMesh:				return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_StaticMesh.png" ) ).c_str() ) );
+		case AT_Material:				return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_Material.png" ) ).c_str() ) );
+		case AT_Script:					return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_Script.png" ) ).c_str() ) );
+		case AT_AudioBank:				return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_Audio.png" ) ).c_str() ) );
+		case AT_PhysicsMaterial:		return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_PhysMaterial.png" ) ).c_str() ) );
+		default:						return QPixmap( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Asset_Unknown.png" ) ).c_str() ) );
 		}
 	}
 
