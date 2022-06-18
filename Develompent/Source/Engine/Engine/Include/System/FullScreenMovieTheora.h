@@ -20,8 +20,18 @@
 #include "System/ThreadingBase.h"
 #include "System/FullScreenMovie.h"
 #include "Render/Viewport.h"
+#include "Render/Shaders/ScreenShader.h"
 #include "RHI/BaseSurfaceRHI.h"
 #include "RHI/TypesRHI.h"
+
+/**
+ * @ingroup Engine
+ * @brief Class of pixel shader for render Theora movie
+ */
+class CTheoraMoviePixelShader : public CScreenPixelShader
+{
+	DECLARE_SHADER_TYPE( CTheoraMoviePixelShader )
+};
 
 /**
  * @ingroup Engine
@@ -174,6 +184,11 @@ private:
 	bool OpenStreamedMovie( const std::wstring& InMovieFilename );
 
 	/**
+	 * @brief Close streamed movie
+	 */
+	void CloseStreamedMovie();
+
+	/**
 	 * @brief Grab buffer some data from file into Ogg stream
 	 * @return Return count readed bytes
 	 */
@@ -181,17 +196,31 @@ private:
 
 	/**
 	 * @brief Perform per-frame processing, including rendering to the screen
+	 * 
 	 * @param InDeltaTime		Delta time
+	 * @return Return TRUE if movie is not ended, else returning FALSE
 	 */
-	void PumpMovie( float InDeltaTime );
+	bool PumpMovie( float InDeltaTime );
 
 	/**
 	 * @brief Decodes current frame from Theora to YUV 
 	 */
 	void DecodeVideoFrame();
 
+	/**
+	 * @brief Stop current movie and proceed to the next startup movie (cleaning up any memory it can)
+	 * @param InIsPlayNext	Whether we should proceed to the next startup movie
+	 */
+	void StopCurrentAndPlayNext( bool InIsPlayNext = true );
+
+	/**
+	 * @brief Process the next step in the startup sequence
+	 * @return TRUE if a new movie was kicked off, FALSE otherwise
+	 */
+	bool ProcessNextStartupSequence();
+
 	bool							bStopped;				/**< Is stopped movie */
-	std::wstring					gameThreadMovieName;	/**< Game thread's copy of the movie name */
+	std::wstring					currentMovieName;		/**< Current of the movie name */
 	ogg_sync_state					oggSyncState;			/**< Ogg sync state */
 	ogg_page						oggPage;				/**< Ogg page */
 	ogg_packet						oggPacket;				/**< Ogg packet */
@@ -205,6 +234,7 @@ private:
 	float							framesPerSecond;		/**< Frames per second */
 	float							videoTimer;				/**< Video timer */
 	uint32							lastVideoFrame;			/**< Last video frame */
+	uint32							startupSequenceStep;	/**< Index of current startup movie */
 	class CArchive*					arMovie;				/**< File of movie */
 	CEvent*							movieFinishEvent;		/**< Synchronization object for game to wait for movie to finish */
 	CTheoraMovieRenderClient*		theoraRender;			/**< Theora rendering */

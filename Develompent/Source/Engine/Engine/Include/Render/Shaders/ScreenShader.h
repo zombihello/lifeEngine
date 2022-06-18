@@ -11,6 +11,7 @@
 
 #include "Shader.h"
 #include "ShaderManager.h"
+#include "Render/VertexFactory/SimpleElementVertexFactory.h"
 
 /**
  * @ingroup Engine

@@ -13,21 +13,9 @@
 #include "System/BaseWindow.h"
 #include "System/SplashScreen.h"
 #include "Render/RenderingThread.h"
-#include "Render/Shaders/ScreenShader.h"
-#include "Render/Shaders/ShaderManager.h"
-#include "Render/VertexFactory/SimpleElementVertexFactory.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/StaticStatesRHI.h"
 #include "Core.h"
-
-/**
- * @ingroup Engine
- * @brief Class of pixel shader for render Theora movie
- */
-class CTheoraMoviePixelShader : public CScreenPixelShader
-{
-	DECLARE_SHADER_TYPE( CTheoraMoviePixelShader )
-};
 
 IMPLEMENT_SHADER_TYPE(, CTheoraMoviePixelShader, TEXT( "TheoraPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 
@@ -72,7 +60,7 @@ void CTheoraMovieRenderClient::DestroyViewport()
 
 void CTheoraMovieRenderClient::MovieInitRendering( uint32 InWidth, uint32 InHeight )
 {
-	textureFrame = GRHI->CreateTexture2D( TEXT( "TheoraFrame" ), InWidth, InHeight, PF_A8R8G8B8, 1, TCF_None );
+	textureFrame = GRHI->CreateTexture2D( TEXT( "TheoraYUVFrame" ), InWidth, InHeight, PF_A8R8G8B8, 1, TCF_None );
 }
 
 void CTheoraMovieRenderClient::MovieCleanupRendering()
@@ -92,14 +80,14 @@ void CTheoraMovieRenderClient::CopyFrameToTexture( yuv_buffer* InYUVBuffer )
 	{
 		for ( uint32 x = 0; x < textureFrame->GetSizeX(); ++x )
 		{
-			const int off = x + y * textureFrame->GetSizeX();
-			const int xx = x >> 1;
-			const int yy = y >> 1;
+			const uint32	offset	= x + y * textureFrame->GetSizeX();
+			const uint32	xx		= x >> 1;
+			const uint32	yy		= y >> 1;
 
-			lockedData.data[ off * 4 + 0 ] = InYUVBuffer->y[ x + y * InYUVBuffer->y_stride ];
-			lockedData.data[ off * 4 + 1 ] = InYUVBuffer->u[ xx + yy * InYUVBuffer->uv_stride ];
-			lockedData.data[ off * 4 + 2 ] = InYUVBuffer->v[ xx + yy * InYUVBuffer->uv_stride ];
-			lockedData.data[ off * 4 + 3 ] = 255;
+			lockedData.data[ offset * GPixelFormats[ PF_A8R8G8B8 ].blockBytes + 0 ]		= InYUVBuffer->y[ x + y * InYUVBuffer->y_stride ];
+			lockedData.data[ offset * GPixelFormats[ PF_A8R8G8B8 ].blockBytes + 1 ]		= InYUVBuffer->u[ xx + yy * InYUVBuffer->uv_stride ];
+			lockedData.data[ offset * GPixelFormats[ PF_A8R8G8B8 ].blockBytes + 2 ]		= InYUVBuffer->v[ xx + yy * InYUVBuffer->uv_stride ];
+			lockedData.data[ offset * GPixelFormats[ PF_A8R8G8B8 ].blockBytes + 3 ]		= 255;
 		}
 	}
 
@@ -117,10 +105,10 @@ void CTheoraMovieRenderClient::Draw( CViewport* InViewport )
 	GRHI->SetRenderTarget( immediateContext, viewportRHI->GetSurface(), nullptr );
 	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
 	GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
-	GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "TheoraDrawBBS" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), theoraMoviePixelShader->GetPixelShader() ) );
+	GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "TheoraMovieDrawBBS" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), theoraMoviePixelShader->GetPixelShader() ) );
 
 	theoraMoviePixelShader->SetTexture( immediateContext, textureFrame );
-	theoraMoviePixelShader->SetSamplerState( immediateContext, TStaticSamplerStateRHI<>::GetRHI() );
+	theoraMoviePixelShader->SetSamplerState( immediateContext, TStaticSamplerStateRHI<SF_Bilinear>::GetRHI() );
 	GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
 }
 
@@ -132,6 +120,7 @@ CFullScreenMovieTheora::CFullScreenMovieTheora()
 	, framesPerSecond( 0.f )
 	, videoTimer( 0.f )
 	, lastVideoFrame( 0 )
+	, startupSequenceStep( -1 )
 	, arMovie( nullptr )
 	, movieFinishEvent( nullptr )
 	, theoraRender( nullptr )
@@ -158,19 +147,25 @@ CFullScreenMovieTheora::CFullScreenMovieTheora()
 
 CFullScreenMovieTheora::~CFullScreenMovieTheora()
 {
+	// Stop movie
 	GameThreadStopMovie( 0, false, true );
+
+	// Free allocated memory
+	GSynchronizeFactory->Destroy( movieFinishEvent );
 }
 
 void CFullScreenMovieTheora::Tick( float InDeltaTime )
 {
 	// We are only tickable if we are playing a movie
-	if ( arMovie )
+	if ( !arMovie )
 	{
-		PumpMovie( InDeltaTime );
-		if ( bStopped )
-		{
-			StopMovie( true );
-		}
+		return;
+	}
+
+	// Pump movie, if end we play next
+	if ( !PumpMovie( InDeltaTime ) )
+	{
+		StopCurrentAndPlayNext();
 	}
 }
 
@@ -179,7 +174,7 @@ bool CFullScreenMovieTheora::IsTickable() const
 	return arMovie && theoraRender;
 }
 
-void CFullScreenMovieTheora::PumpMovie( float InDeltaTime )
+bool CFullScreenMovieTheora::PumpMovie( float InDeltaTime )
 {
 	if ( !bStopped )
 	{
@@ -201,6 +196,51 @@ void CFullScreenMovieTheora::PumpMovie( float InDeltaTime )
 	{
 		viewport->Draw( true );
 	}
+
+	return !bStopped;
+}
+
+void CFullScreenMovieTheora::StopCurrentAndPlayNext( bool InIsPlayNext /*= true*/ )
+{
+	// Close file of movie
+	if ( arMovie )
+	{
+		// Clear allocated memory for Theora structures
+		CloseStreamedMovie();
+	}
+
+	// Cleanup rendering structures
+	theoraRender->MovieCleanupRendering();
+
+	// See if there are more startup movies to process
+	if ( !InIsPlayNext || !ProcessNextStartupSequence() )
+	{
+		// Trigger of finished movie playing
+		movieFinishEvent->Trigger();
+	}
+}
+
+bool CFullScreenMovieTheora::ProcessNextStartupSequence()
+{
+	// If not exist startup movies or not valid index - exit from method
+	if ( startupMovies.empty() || startupSequenceStep == -1 )
+	{
+		return false;
+	}
+
+	// Set next index of startup movie
+	++startupSequenceStep;
+	
+	// If not exist next startup movies - exit from method
+	if ( startupSequenceStep >= startupMovies.size() )
+	{
+		startupSequenceStep = -1;
+		return false;
+	}
+
+	// Play next movie
+	LE_LOG( LT_Log, LC_Movie, TEXT( "Next movie %i/%i" ), startupSequenceStep+1, startupMovies.size() );
+	return PlayMovie( startupMovies[ startupSequenceStep ] );
 }
 
 void CFullScreenMovieTheora::DecodeVideoFrame()
@@ -242,7 +282,7 @@ void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFil
 	// Check for movie already playing and exit out if so
 	if ( !movieFinishEvent->Wait( 0 ) )
 	{
-		LE_LOG( LT_Log, LC_Movie, TEXT( "Attempting to start already playing movie \"%s\"; aborting" ), gameThreadMovieName.c_str() );
+		LE_LOG( LT_Log, LC_Movie, TEXT( "Attempting to start already playing movie '%s', aborting" ), currentMovieName.c_str() );
 		return;
 	}
 
@@ -253,9 +293,6 @@ void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFil
 		appHideSplash();
 		GWindow->Show();
 	}
-
-	// Remember the name of the movie we're playing
-	gameThreadMovieName = InMovieFilename;
 
 	// Deferred init for Theora renderer the first time we try playing a movie
 	if ( !theoraRender )
@@ -273,16 +310,17 @@ void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFil
 	movieFinishEvent->Reset();
 
 	// Play movie
-	UNIQUE_RENDER_COMMAND_ONEPARAMETER( CPlayMovieCommand,
+	UNIQUE_RENDER_COMMAND_TWOPARAMETER( CPlayMovieCommand,
 										CFullScreenMovieTheora*, moviePlayer, this,
+										std::wstring, movieFilename, InMovieFilename,
 										{
-											moviePlayer->PlayMovie( moviePlayer->gameThreadMovieName );
+											moviePlayer->PlayMovie( movieFilename );
 										} )
 }
 
 void CFullScreenMovieTheora::GameThreadStopMovie( float InDelayInSeconds /*= 0.f*/, bool InIsWaitForMovie /*= true*/, bool InIsForceStop /*= false*/ )
 {
-	LE_LOG( LT_Log, LC_Movie, TEXT( "Stopping movie %s" ), gameThreadMovieName.c_str() );
+	LE_LOG( LT_Log, LC_Movie, TEXT( "Stopping movie" ) );
 
 	if ( !InIsForceStop )
 	{
@@ -335,14 +373,18 @@ void CFullScreenMovieTheora::GameThreadInitiateStartupSequence()
 {
 	if ( !startupMovies.empty() )
 	{
-		GameThreadPlayMovie( startupMovies[ 0 ] );
+		startupSequenceStep	= 0;
+		GameThreadPlayMovie( startupMovies[ startupSequenceStep ] );
 	}
 }
 
 bool CFullScreenMovieTheora::PlayMovie( const std::wstring& InMovieFilename )
 {
 	check( theoraRender );
-	LE_LOG( LT_Log, LC_Movie, TEXT( "Playing movie [%s]" ), !InMovieFilename.empty() ? InMovieFilename.c_str() : TEXT( "None" ) );
+	LE_LOG( LT_Log, LC_Movie, TEXT( "Playing movie '%s'" ), !InMovieFilename.empty() ? InMovieFilename.c_str() : TEXT( "None" ) );
+
+	// Remember the name of the movie we're playing
+	currentMovieName = InMovieFilename;
 
 	// Use the region name from the startup movies if available
 	std::wstring		fullPath	= appGameDir() + TEXT( "Movies" ) PATH_SEPARATOR + InMovieFilename + TEXT( ".ogv" );
@@ -353,7 +395,13 @@ bool CFullScreenMovieTheora::PlayMovie( const std::wstring& InMovieFilename )
 	{
 		theoraRender->MovieInitRendering( frameWidth, frameHeight );
 	}
+	else
+	{
+		LE_LOG( LT_Warning, LC_Movie, TEXT( "Failed to open/prepare movie '%s' for playback!" ), InMovieFilename.c_str() );
 
+		// Reset any settings that we may have set
+		StopCurrentAndPlayNext();
+	}
 	return result;
 }
 
@@ -490,20 +538,39 @@ bool CFullScreenMovieTheora::OpenStreamedMovie( const std::wstring& InMovieFilen
 	return false;
 }
 
-bool CFullScreenMovieTheora::StopMovie( bool InIsForce /*= false*/ )
+void CFullScreenMovieTheora::CloseStreamedMovie()
 {
-	// Close file of movie
-	if ( arMovie )
+	// If file of move not oppend - we not need clear memory
+	if ( !arMovie )
 	{
-		delete arMovie;
-		arMovie = nullptr;
+		return;
 	}
 
-	// Cleanup rendering structures
-	theoraRender->MovieCleanupRendering();
+	// Clear video stream
+	ogg_stream_clear( &videoStream );
+	theora_clear( &theoraState );
+	theora_comment_clear( &theoraComment );
+	theora_info_clear( &theoraInfo );
 
-	// Trigger of finished movie playing
-	movieFinishEvent->Trigger();
+	// Clear Ogg sync
+	ogg_sync_clear( &oggSyncState );
+
+	// Delete opened file of movie
+	delete arMovie;
+	arMovie = nullptr;
+}
+
+bool CFullScreenMovieTheora::StopMovie( bool InIsForce /*= false*/ )
+{
+	// Stop current movie and play next if need
+	if ( !InIsForce )
+	{
+		return false;
+	}
+	else
+	{
+		StopCurrentAndPlayNext( !InIsForce );
+	}
 
 	return true;
 }
