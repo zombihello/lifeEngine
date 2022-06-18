@@ -12,6 +12,7 @@
 #include "System/GameEngine.h"
 #include "System/BaseWindow.h"
 #include "System/SplashScreen.h"
+#include "System/InputSystem.h"
 #include "Render/RenderingThread.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/StaticStatesRHI.h"
@@ -19,8 +20,9 @@
 
 IMPLEMENT_SHADER_TYPE(, CTheoraMoviePixelShader, TEXT( "TheoraPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 
-CTheoraMovieRenderClient::CTheoraMovieRenderClient()
-	: viewport( nullptr )
+CTheoraMovieRenderClient::CTheoraMovieRenderClient( CFullScreenMovieTheora* InMoviePlayer )
+	: moviePlayer( InMoviePlayer )
+	, viewport( nullptr )
 	, originalViewportClient( nullptr )
 {
 	CreateViewport();
@@ -112,9 +114,43 @@ void CTheoraMovieRenderClient::Draw( CViewport* InViewport )
 	GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
 }
 
+void CTheoraMovieRenderClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
+{
+	// Check if we skipping current movie	
+	bool		bIsNeedSkip = false;
+	switch ( InWindowEvent.type )
+	{
+	case SWindowEvent::T_KeyReleased:
+		switch ( InWindowEvent.events.key.code )
+		{
+		case BC_KeySpace:
+		case BC_KeyEscape:
+			bIsNeedSkip = true;
+			break;
+		}
+		break;
+
+	case SWindowEvent::T_MouseReleased:
+		if ( InWindowEvent.events.mouseButton.code == BC_MouseLeft )
+		{
+			bIsNeedSkip = true;
+		}
+		break;
+	}
+
+	// Skip movie is need
+	if ( bIsNeedSkip )
+	{
+		check( moviePlayer );
+		moviePlayer->SkipMovie();
+	}
+}
+
 
 CFullScreenMovieTheora::CFullScreenMovieTheora()
 	: bStopped( true )
+	, bIsMovieSkippable( false )
+	, bWasSkipped( false )
 	, frameWidth( 0 )
 	, frameHeight( 0 )
 	, framesPerSecond( 0.f )
@@ -148,7 +184,7 @@ CFullScreenMovieTheora::CFullScreenMovieTheora()
 CFullScreenMovieTheora::~CFullScreenMovieTheora()
 {
 	// Stop movie
-	GameThreadStopMovie( 0, false, true );
+	GameThreadStopMovie( false, true );
 
 	// Free allocated memory
 	GSynchronizeFactory->Destroy( movieFinishEvent );
@@ -163,7 +199,7 @@ void CFullScreenMovieTheora::Tick( float InDeltaTime )
 	}
 
 	// Pump movie, if end we play next
-	if ( !PumpMovie( InDeltaTime ) )
+	if ( bWasSkipped || !PumpMovie( InDeltaTime ) )
 	{
 		StopCurrentAndPlayNext();
 	}
@@ -277,7 +313,7 @@ void CFullScreenMovieTheora::DecodeVideoFrame()
 	}
 }
 
-void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFilename, uint32 InStartFrame /*= 0*/ )
+void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFilename, bool InIsSkippable /*= false */, uint32 InStartFrame /*= 0*/ )
 {
 	// Check for movie already playing and exit out if so
 	if ( !movieFinishEvent->Wait( 0 ) )
@@ -285,6 +321,9 @@ void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFil
 		LE_LOG( LT_Log, LC_Movie, TEXT( "Attempting to start already playing movie '%s', aborting" ), currentMovieName.c_str() );
 		return;
 	}
+
+	// Remember allow skip movie
+	bIsMovieSkippable		= InIsSkippable;
 
 	// If we're going to play startup movies, hide the splashscreen and show the game window.
 	// Both of these functions do nothing if called a second time
@@ -297,7 +336,7 @@ void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFil
 	// Deferred init for Theora renderer the first time we try playing a movie
 	if ( !theoraRender )
 	{
-		CTheoraMovieRenderClient*		newTheoraRender = new CTheoraMovieRenderClient();
+		CTheoraMovieRenderClient*		newTheoraRender = new CTheoraMovieRenderClient( this );
 		UNIQUE_RENDER_COMMAND_TWOPARAMETER( CInitTheoraRenderCommand,
 											CTheoraMovieRenderClient*, newTheoraRender, newTheoraRender,
 											CFullScreenMovieTheora*, moviePlayer, this,
@@ -318,11 +357,12 @@ void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFil
 										} )
 }
 
-void CFullScreenMovieTheora::GameThreadStopMovie( float InDelayInSeconds /*= 0.f*/, bool InIsWaitForMovie /*= true*/, bool InIsForceStop /*= false*/ )
+void CFullScreenMovieTheora::GameThreadStopMovie( bool InIsWaitForMovie /*= true*/, bool InIsForceStop /*= false*/ )
 {
 	LE_LOG( LT_Log, LC_Movie, TEXT( "Stopping movie" ) );
 
-	if ( !InIsForceStop )
+	// Wait for the movie to finish (to make sure required movies are played before continuing)
+	if ( InIsWaitForMovie )
 	{
 		GameThreadWaitForMovie();
 	}
@@ -378,6 +418,16 @@ void CFullScreenMovieTheora::GameThreadInitiateStartupSequence()
 	}
 }
 
+void CFullScreenMovieTheora::GameThreadSetSkippable( bool InIsSkippable )
+{
+	bIsMovieSkippable = InIsSkippable;
+}
+
+bool CFullScreenMovieTheora::GameThreadWasSkipped() const
+{
+	return bWasSkipped;
+}
+
 bool CFullScreenMovieTheora::PlayMovie( const std::wstring& InMovieFilename )
 {
 	check( theoraRender );
@@ -385,6 +435,9 @@ bool CFullScreenMovieTheora::PlayMovie( const std::wstring& InMovieFilename )
 
 	// Remember the name of the movie we're playing
 	currentMovieName = InMovieFilename;
+
+	// Current movie is not skipped
+	bWasSkipped			= false;
 
 	// Use the region name from the startup movies if available
 	std::wstring		fullPath	= appGameDir() + TEXT( "Movies" ) PATH_SEPARATOR + InMovieFilename + TEXT( ".ogv" );
@@ -403,6 +456,15 @@ bool CFullScreenMovieTheora::PlayMovie( const std::wstring& InMovieFilename )
 		StopCurrentAndPlayNext();
 	}
 	return result;
+}
+
+void CFullScreenMovieTheora::SkipMovie()
+{
+	if ( bIsMovieSkippable )
+	{
+		LE_LOG( LT_Log, LC_Movie, TEXT( "Skipped movie" ) );
+		bWasSkipped = true;
+	}
 }
 
 bool CFullScreenMovieTheora::OpenStreamedMovie( const std::wstring& InMovieFilename )
@@ -562,16 +624,15 @@ void CFullScreenMovieTheora::CloseStreamedMovie()
 
 bool CFullScreenMovieTheora::StopMovie( bool InIsForce /*= false*/ )
 {
-	// Stop current movie and play next if need
+	// If we stopping movie not force, need set to -1 startupSequenceStep for case stopping startup sequence
 	if ( !InIsForce )
 	{
-		return false;
+		startupSequenceStep = -1;
+		return bStopped;
 	}
-	else
-	{
-		StopCurrentAndPlayNext( !InIsForce );
-	}
-
+	
+	// Force stop playing movie
+	StopCurrentAndPlayNext( !InIsForce );
 	return true;
 }
 

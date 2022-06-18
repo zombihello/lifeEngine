@@ -39,18 +39,18 @@ public:
 	* @brief Kick off a movie play from the game thread
 	*
 	* @param InMovieFilename	Path of the movie to play in its entirety
+	* @param InIsSkippable		Is skippable movie
 	* @param InStartFrame		Optional frame number to start on
 	*/
-	virtual void GameThreadPlayMovie( const std::wstring& InMovieFilename, uint32 InStartFrame = 0 ) override;
+	virtual void GameThreadPlayMovie( const std::wstring& InMovieFilename, bool InIsSkippable = false, uint32 InStartFrame = 0 ) override;
 
 	/**
 	* @brief Stops the currently playing movie
 	*
-	* @param InDelayInSeconds		Will delay the stopping of the movie for this many seconds. If zero, this function will wait until the movie stops before returning.
 	* @param InIsWaitForMovie		If TRUE then wait until the movie finish event triggers
 	* @param InIsForceStop			If TRUE then non-skippable movies and startup movies are forced to stop
 	*/
-	virtual void GameThreadStopMovie( float InDelayInSeconds = 0.f, bool InIsWaitForMovie = true, bool InIsForceStop = false ) override;
+	virtual void GameThreadStopMovie( bool InIsWaitForMovie = true, bool InIsForceStop = false ) override;
 
 	/**
 	* @brief Block game thread until movie is complete
@@ -61,6 +61,18 @@ public:
 	* @brief Kicks off a thread to control the startup movie sequence
 	*/
 	virtual void GameThreadInitiateStartupSequence() override;
+
+	/**
+	 * @brief Set skippable current movie
+	 * @param InIsSkippable		Is skippable movie
+	 */
+	virtual void GameThreadSetSkippable( bool InIsSkippable ) override;
+
+	/**
+	 * @brief Is current movie is was skipped
+	 * @return Return TRUE if current movie is was skipped, else return FALSE
+	 */
+	virtual bool GameThreadWasSkipped() const override;
 };
 
 #endif // !FULLSCREENMOVIEFALLBACK_H

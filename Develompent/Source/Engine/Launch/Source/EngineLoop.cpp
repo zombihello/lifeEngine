@@ -341,8 +341,8 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 	// Stop playing startup movies (only for game)
 	if ( GIsGame )
 	{
+		GFullScreenMovie->GameThreadSetSkippable( true );		// After loading map we allow skip startup movies sequence
 		GFullScreenMovie->GameThreadStopMovie();
-		GWindow->Show();
 	}
 	return result;
 }

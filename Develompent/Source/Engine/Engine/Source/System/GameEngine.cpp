@@ -86,4 +86,11 @@ void CGameEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 		}
 		break;
 	}
+
+	// Process event in viewport client
+	CViewportClient*		viewportClient = viewport.GetViewportClient();
+	if ( viewportClient )
+	{
+		viewportClient->ProcessEvent( InWindowEvent );
+	}
 }

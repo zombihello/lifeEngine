@@ -42,13 +42,21 @@ class CTheoraMovieRenderClient : public CViewportClient
 public:
 	/**
 	 * @brief Constructor
+	 * 
+	 * @param InMoviePlayer		Movie player
 	 */
-	CTheoraMovieRenderClient();
+	CTheoraMovieRenderClient( class CFullScreenMovieTheora* InMoviePlayer );
 
 	/**
 	 * @brief Destructor
 	 */
 	virtual ~CTheoraMovieRenderClient();
+
+	/**
+	 * @brief Process event
+	 * @param InWindowEvent			Window event
+	 */
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
 
 	/**
 	 * @brief Initialize internal rendering structures for a particular movie
@@ -97,9 +105,10 @@ private:
 	 */
 	virtual void Draw( CViewport* InViewport ) override;
 
-	CViewport*			viewport;					/**< Viewport */
-	CViewportClient*	originalViewportClient;		/**< Original viewport client */
-	Texture2DRHIRef_t	textureFrame;				/**< Texture of the frame */
+	class CFullScreenMovieTheora*		moviePlayer;				/**< Movie player */
+	CViewport*							viewport;					/**< Viewport */
+	CViewportClient*					originalViewportClient;		/**< Original viewport client */
+	Texture2DRHIRef_t					textureFrame;				/**< Texture of the frame */
 };
 
  /**
@@ -109,6 +118,8 @@ private:
 class CFullScreenMovieTheora : public CFullScreenMovieSupport
 {
 public:
+	friend CTheoraMovieRenderClient;
+
 	/**
 	 * @brief Constructor
 	 */
@@ -135,18 +146,18 @@ public:
 	* @brief Kick off a movie play from the game thread
 	*
 	* @param InMovieFilename	Path of the movie to play in its entirety
+	* @param InIsSkippable		Is skippable movie
 	* @param InStartFrame		Optional frame number to start on
 	*/
-	virtual void GameThreadPlayMovie( const std::wstring& InMovieFilename, uint32 InStartFrame = 0 ) override;
+	virtual void GameThreadPlayMovie( const std::wstring& InMovieFilename, bool InIsSkippable = false, uint32 InStartFrame = 0 ) override;
 
 	/**
 	* @brief Stops the currently playing movie
 	*
-	* @param InDelayInSeconds		Will delay the stopping of the movie for this many seconds. If zero, this function will wait until the movie stops before returning.
 	* @param InIsWaitForMovie		If TRUE then wait until the movie finish event triggers
 	* @param InIsForceStop			If TRUE then non-skippable movies and startup movies are forced to stop
 	*/
-	virtual void GameThreadStopMovie( float InDelayInSeconds = 0.f, bool InIsWaitForMovie = true, bool InIsForceStop = false ) override;
+	virtual void GameThreadStopMovie( bool InIsWaitForMovie = true, bool InIsForceStop = false ) override;
 
 	/**
 	* @brief Block game thread until movie is complete
@@ -158,11 +169,23 @@ public:
 	*/
 	virtual void GameThreadInitiateStartupSequence() override;
 
+	/**
+	 * @brief Set skippable current movie
+	 * @param InIsSkippable		Is skippable movie
+	 */
+	virtual void GameThreadSetSkippable( bool InIsSkippable ) override;
+
+	/**
+	 * @brief Is current movie is was skipped
+	 * @return Return TRUE if current movie is was skipped, else return FALSE
+	 */
+	virtual bool GameThreadWasSkipped() const override;
+
 private:
 	/**
 	 * @brief Kicks off the playback of a movie (must be called in rendering thread)
 	 *
-	 * @param InMovieFilename			Path to the movie file that will be played
+	 * @param InMovieFilename	Path to the movie file that will be played
 	 * @return Return TRUE if successful
 	 */
 	bool PlayMovie( const std::wstring& InMovieFilename );
@@ -174,6 +197,11 @@ private:
 	 * @return Return TRUE if successful
 	 */
 	bool StopMovie( bool InIsForce = false );
+
+	/**
+	 * @brief Stops the movie if it is skippable
+	 */
+	void SkipMovie();
 
 	/**
 	 * @brief Opens a Theora movie with streaming from disk
@@ -220,6 +248,8 @@ private:
 	bool ProcessNextStartupSequence();
 
 	bool							bStopped;				/**< Is stopped movie */
+	bool							bIsMovieSkippable;		/**< Is current movie skippable */
+	bool							bWasSkipped;			/**< Was skipped current movie */
 	std::wstring					currentMovieName;		/**< Current of the movie name */
 	ogg_sync_state					oggSyncState;			/**< Ogg sync state */
 	ogg_page						oggPage;				/**< Ogg page */

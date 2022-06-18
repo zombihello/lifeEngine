@@ -11,10 +11,10 @@ bool CFullScreenMovieFallback::IsTickable() const
 	return false;
 }
 
-void CFullScreenMovieFallback::GameThreadPlayMovie( const std::wstring& InMovieFilename, uint32 InStartFrame /*= 0*/ )
+void CFullScreenMovieFallback::GameThreadPlayMovie( const std::wstring& InMovieFilename, bool InIsSkippable /*= false*/, uint32 InStartFrame /*= 0*/ )
 {}
 
-void CFullScreenMovieFallback::GameThreadStopMovie( float InDelayInSeconds /*= 0.f*/, bool InIsWaitForMovie /*= true*/, bool InIsForceStop /*= false*/ )
+void CFullScreenMovieFallback::GameThreadStopMovie( bool InIsWaitForMovie /*= true*/, bool InIsForceStop /*= false*/ )
 {}
 
 void CFullScreenMovieFallback::GameThreadWaitForMovie()
@@ -22,3 +22,11 @@ void CFullScreenMovieFallback::GameThreadWaitForMovie()
 
 void CFullScreenMovieFallback::GameThreadInitiateStartupSequence()
 {}
+
+void CFullScreenMovieFallback::GameThreadSetSkippable( bool InIsSkippable )
+{}
+
+bool CFullScreenMovieFallback::GameThreadWasSkipped() const
+{
+	return true;
+}
