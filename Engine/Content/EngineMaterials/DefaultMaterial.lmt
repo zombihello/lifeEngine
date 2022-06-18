@@ -8,7 +8,7 @@
 			"Sprite":		true
 		},
 		
-		"ShadersType" : [ "FBasePassVertexShader", "FBasePassPixelShader" ],	
+		"ShadersType" : [ "CBasePassVertexShader", "CBasePassPixelShader" ],	
 		"TextureParameters": [
 			{
 				"Name": 			"diffuse",

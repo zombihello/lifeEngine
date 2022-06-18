@@ -146,7 +146,7 @@ public:
 	 * Get vertex factory
 	 * @return Return vertex factory
 	 */
-	FORCEINLINE TRefCountPtr< CSpriteVertexFactory > GetVertexFactory() const
+	FORCEINLINE TRefCountPtr<CSpriteVertexFactory> GetVertexFactory() const
 	{
 		return vertexFactory;
 	}
@@ -175,8 +175,11 @@ public:
 	 */
 	FORCEINLINE void SetTextureRect( const RectFloat_t& InTextureRect )
 	{
-		check( vertexFactory );
-		vertexFactory->SetTextureRect( InTextureRect );
+		textureRect = InTextureRect;
+		if ( vertexFactory )
+		{
+			vertexFactory->SetTextureRect( InTextureRect );
+		}
 	}
 
 	/**
@@ -185,8 +188,7 @@ public:
 	 */
 	FORCEINLINE const RectFloat_t& GetTextureRect() const
 	{
-		check( vertexFactory );
-		return vertexFactory->GetTextureRect();
+		return textureRect;
 	}
 
 	/**
@@ -195,8 +197,11 @@ public:
 	 */
 	FORCEINLINE void SetSpriteSize( const Vector2D& InSpriteSize )
 	{
-		check( vertexFactory );
-		vertexFactory->SetSpriteSize( InSpriteSize );
+		spriteSize = InSpriteSize;
+		if ( vertexFactory )
+		{
+			vertexFactory->SetSpriteSize( InSpriteSize );
+		}
 	}
 
 	/**
@@ -205,8 +210,11 @@ public:
 	 */
 	FORCEINLINE void SetFlipVertical( bool InFlipVertical )
 	{
-		check( vertexFactory );
-		vertexFactory->SetFlipVertical( InFlipVertical );
+		bFlipVertical = InFlipVertical;
+		if ( vertexFactory )
+		{
+			vertexFactory->SetFlipVertical( InFlipVertical );
+		}
 	}
 
 	/**
@@ -215,8 +223,11 @@ public:
 	 */
 	FORCEINLINE void SetFlipHorizontal( bool InFlipHorizontal )
 	{
-		check( vertexFactory );
-		vertexFactory->SetFlipHorizontal( InFlipHorizontal );
+		bFlipHorizontal = InFlipHorizontal;
+		if ( vertexFactory )
+		{
+			vertexFactory->SetFlipHorizontal( InFlipHorizontal );
+		}
 	}
 
 	/**
@@ -225,8 +236,7 @@ public:
 	 */
 	FORCEINLINE const Vector2D& GetSpriteSize() const
 	{
-		check( vertexFactory );
-		return vertexFactory->GetSpriteSize();
+		return spriteSize;
 	}
 
 	/**
@@ -235,8 +245,7 @@ public:
 	 */
 	FORCEINLINE bool IsFlipedVertical() const
 	{
-		check( vertexFactory );
-		return vertexFactory->IsFlipedVertical();
+		return bFlipVertical;
 	}
 
 	/**
@@ -245,13 +254,16 @@ public:
 	 */
 	FORCEINLINE bool IsFlipedHorizontal() const
 	{
-		check( vertexFactory );
-		return vertexFactory->IsFlipedHorizontal();
+		return bFlipHorizontal;
 	}
 
 private:
-	TRefCountPtr< CSpriteVertexFactory >	vertexFactory;			/**< Vertex factory */
-	TAssetHandle<CMaterial>					material;				/**< Material */
+	bool									bFlipVertical;		/**< Is need flip sprite by vertical */
+	bool									bFlipHorizontal;	/**< Is need flip sprite by horizontal */
+	RectFloat_t								textureRect;		/**< Texture rect */
+	Vector2D								spriteSize;			/**< Sprite size */
+	TRefCountPtr<CSpriteVertexFactory>		vertexFactory;		/**< Vertex factory */
+	TAssetHandle<CMaterial>					material;			/**< Material */
 };
 
 #endif // !SPRITE_H

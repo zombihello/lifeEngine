@@ -99,6 +99,7 @@ set( OGG_PATH ${EXTERNAL_DIR}/libogg-1.3.5 )
 set( VORBIS_PATH ${EXTERNAL_DIR}/libvorbis-1.3.7 )
 set( PHYSX_PATH ${EXTERNAL_DIR}/PhysX-4.1/physx/install )
 set( BOX2D_PATH ${EXTERNAL_DIR}/box2d-2.4.1/install )
+set( THEORA_PATH ${EXTERNAL_DIR}/theora-1.2 )
 
 if ( PLATFORM_WINDOWS )
 	set( PHYSX_PATH ${PHYSX_PATH}/vc15win64 )
@@ -165,6 +166,14 @@ if ( ENGINE_2D )
 	add_definitions( -DENGINE_2D=1 )
 else()
 	add_definitions( -DENGINE_2D=0 )
+endif()
+
+# Enable/Disable use Theora codec for movies
+option( USE_THEORA_CODEC "Is need use Theora codec for movies" ON )
+if ( USE_THEORA_CODEC )
+	add_definitions( -DUSE_THEORA_CODEC=1 )
+else()
+	add_definitions( -DUSE_THEORA_CODEC=0 )
 endif()
 
 #

@@ -30,7 +30,14 @@
 #include "Render/RenderingThread.h"
 #include "System/SplashScreen.h"
 #include "System/BaseEngine.h"
+#include "System/FullScreenMovie.h"
 #include "LEBuild.h"
+
+#if USE_THEORA_CODEC
+#include "System/FullScreenMovieTheora.h"
+#else
+#include "System/FullScreenMovieFallback.h"
+#endif // USE_THEORA_CODEC
 
 #if WITH_EDITOR
 #include "Commandlets/BaseCommandlet.h"
@@ -61,6 +68,22 @@ void appUpdateTimeAndHandleMaxTickRate()
 		float		maxTickRate = Max( GEngine->GetMaxTickRate(), 1.f );
 		appSleep( Max( 1.f / maxTickRate - GDeltaTime, 0.0 ) );		// BS yehor.pohuliaka - It is possible that you need to somehow fix the stalling of the render thread another way
 	}
+}
+
+/**
+ * Initialize the global full screen movie player
+ */
+void appInitFullScreenMoviePlayer()
+{
+	check( !GFullScreenMovie );
+
+#if USE_THEORA_CODEC
+	GFullScreenMovie = new CFullScreenMovieTheora();
+#else
+	GFullScreenMovie = new CFullScreenMovieFallback();
+#endif // USE_THEORA_CODEC
+
+	check( GFullScreenMovie );
 }
 
 /**
@@ -172,6 +195,8 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 			GIsCommandlet = true;
 		}
 	}
+
+	GIsGame = !GIsEditor && !GIsCooker && !GIsCommandlet;
 #endif // WITH_EDITOR
 
 	GLog->Init();
@@ -234,6 +259,9 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
  */
 int32 CEngineLoop::Init( const tchar* InCmdLine )
 {
+	// Init full screen movie player and start startup movies (only if this game)
+	appInitFullScreenMoviePlayer();
+
 	LE_LOG( LT_Log, LC_Init, TEXT( "Engine version: " ENGINE_VERSION_STRING ) );
 
 	appSetSplashText( STT_StartupProgress, TEXT( "Init platform" ) );
@@ -251,6 +279,15 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 
 	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
 	GEngine->Init();
+
+	// Start render thread
+	StartRenderingThread();
+
+	// Playing startup movies (only for game)
+	if ( GIsGame )
+	{
+		GFullScreenMovie->GameThreadInitiateStartupSequence();
+	}
 
 	// Parse cmd line for start commandlets
 #if WITH_EDITOR
@@ -302,11 +339,10 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 		result = 1;
 	}
 
-	// Start render thread and show window
-	StartRenderingThread();
-	if ( !GIsEditor )
+	// Stop playing startup movies ((only for game)
+	if ( GIsGame )
 	{
-		GWindow->Show();
+		GFullScreenMovie->GameThreadStopMovie();
 	}
 	return result;
 }
@@ -369,6 +405,9 @@ void CEngineLoop::Exit()
 	GEngine->Shutdown();
 	delete GEngine;
 	GEngine = nullptr;
+
+	delete GFullScreenMovie;
+	GFullScreenMovie = nullptr;
 
 	GAudioEngine.Shutdown();
 	GShaderManager->Shutdown();

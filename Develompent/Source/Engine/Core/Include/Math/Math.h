@@ -442,6 +442,17 @@ struct SMath
 		return sqrtf( InA );
 	}
 
+	/**
+	 * @brief Floor
+	 * 
+	 * @param InA	Value to round down
+	 * @return Return the value of InA rounded downward (as a floating-point value)
+	 */
+	static FORCEINLINE float Floor( float InA )
+	{
+		return floorf( InA );
+	}
+
 	static const Vector				vectorZero;			/**< Zero 3D vector */
 	static const Vector				vectorOne;			/**< One 3D vector */
 	static const Quaternion			quaternionZero;		/**< Quaternion zero */

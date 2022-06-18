@@ -165,6 +165,12 @@ extern int32           appPlatformInit();
 
 /**
  * @ingroup Core
+ * @brief Process window events
+ */
+extern void appProcessWindowEvents();
+
+/**
+ * @ingroup Core
  * @brief Create process
  * 
  * @param[in] InPathToProcess Executable name

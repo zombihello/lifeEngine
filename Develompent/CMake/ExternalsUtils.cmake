@@ -85,6 +85,17 @@ function( IncludeExternals MODULE_NAME )
 		message( SEND_ERROR "Failed to find Vorbis" )
 	endif()
 	
+	# Theora
+	if ( USE_THEORA_CODEC )
+		find_package( Theora REQUIRED )
+		if ( THEORA_FOUND )
+			include_directories( ${THEORA_INCLUDE} )
+			target_link_libraries( ${MODULE_NAME} optimized ${THEORA_LIB} debug ${THEORA_DEBUG_LIB} )
+		else()
+			message( SEND_ERROR "Failed to find Theora" )
+		endif()
+	endif()
+	
 	# For physics in 2D engine we use Box2D, else using PhysX
 	if ( ENGINE_2D )
 		# Box2D

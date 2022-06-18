@@ -39,6 +39,7 @@ enum ELogCategory
     LC_Package,             /**< Package category */
     LC_Audio,               /**< Audio category */
     LC_Physics,             /**< Physics category */
+    LC_Movie,               /**< Movie category */
 
 #if WITH_EDITOR
     LC_Editor,              /**< Editor category */

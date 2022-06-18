@@ -3,6 +3,7 @@
 #include "Logger/BaseLogger.h"
 #include "Logger/LoggerMacros.h"
 #include "Render/RenderingThread.h"
+#include "System/TickableObject.h"
 
 //
 // Definitions
@@ -26,6 +27,30 @@ uint32			GRenderingThreadId = 0;
 
 /* Event of finished rendering frame */
 CEvent*			GRenderFrameFinished = nullptr;
+
+void TickRenderingTickables()
+{
+	static double		lastTickTime = appSeconds();
+
+	// Calc how long has passed since last tick
+	double		currentTime		= appSeconds();
+	float		deltaTime		= currentTime - lastTickTime;
+
+	// Tick any rendering thread tickables
+	for ( uint32 index = 0, count = CTickableObject::renderingThreadTickableObjects.size(); index < count; ++index )
+	{
+		CTickableObject*		tickableObject = CTickableObject::renderingThreadTickableObjects[ index ];
+
+		// Make sure it wants to be ticked and the rendering thread isn't suspended
+		if ( tickableObject->IsTickable() )
+		{
+			tickableObject->Tick( deltaTime );
+		}
+	}
+
+	// Update the last time we ticked
+	lastTickTime = currentTime;
+}
 
 CSkipRenderCommand::CSkipRenderCommand( uint32 InNumSkipBytes ) :
 	numSkipBytes( InNumSkipBytes )
@@ -81,6 +106,9 @@ uint32 CRenderingThread::Run()
 				}
 			}
 		}
+
+		// Tick tickable objects
+		TickRenderingTickables();
 	}
 
 	return 0;

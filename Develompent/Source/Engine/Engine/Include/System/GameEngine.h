@@ -56,6 +56,24 @@ public:
 	 */
 	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
 
+	/**
+	 * @brief Get viewport
+	 * @return Viewport
+	 */
+	FORCEINLINE const CViewport& GetViewport() const
+	{
+		return viewport;
+	}
+
+	/**
+	 * @brief Get viewport client
+	 * @return Return viewport client
+	 */
+	FORCEINLINE const CGameViewportClient& GetViewportClient() const
+	{
+		return viewportClient;
+	}
+
 private:
 	CViewport				viewport;			/**< Viewport */
 	CGameViewportClient		viewportClient;		/**< Viewport client */

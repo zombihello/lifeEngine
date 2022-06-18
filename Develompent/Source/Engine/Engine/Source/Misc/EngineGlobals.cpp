@@ -24,3 +24,5 @@ std::vector< std::pair< std::wstring, ESurfaceType > >		GSurfaceTypeNames( 1, st
 bool														GIsCookEditorContent = false;
 bool														GAllowDebugShaderDump = false;
 #endif // WITH_EDITOR
+
+class CFullScreenMovieSupport*								GFullScreenMovie = nullptr;

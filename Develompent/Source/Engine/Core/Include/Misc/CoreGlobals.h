@@ -64,6 +64,12 @@ extern bool							GIsRequestingExit;
 #if WITH_EDITOR
 /**
  * @ingroup Core
+ * @brief Whether engine was launched for game
+ */
+extern bool							GIsGame;
+
+/**
+ * @ingroup Core
  * Whether engine was launched for editing
  */
 extern bool							GIsEditor;
@@ -86,6 +92,7 @@ extern bool							GIsCooker;
  */
 extern bool							GShouldPauseBeforeExit;
 #else
+#define								GIsGame 1
 #define								GIsEditor 0
 #define								GIsCommandlet 0
 #define								GIsCooker 0

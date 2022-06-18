@@ -30,6 +30,7 @@ std::wstring            GGameName                   = TEXT( "ExampleGame" );
 
 #if WITH_EDITOR
 CConfig                 GEditorConfig;
+bool					GIsGame                     = true;
 bool			        GIsEditor                   = false;
 bool                    GIsCommandlet               = false;
 bool					GIsCooker                   = false;

@@ -94,4 +94,10 @@ extern bool						GIsCookEditorContent;
 extern bool						GAllowDebugShaderDump;
 #endif // WITH_EDITOR
 
+/**
+ * @ingroup Engine
+ * @brief Full screen movie player
+ */
+extern class CFullScreenMovieSupport*		GFullScreenMovie;
+
 #endif // !ENGINEGLOBALS_H

@@ -70,6 +70,11 @@
 	#define ENGINE_2D				0
 #endif // !ENGINE_2D
 
+// Is need use Theora codec for movies
+#ifndef USE_THEORA_CODEC
+	#define USE_THEORA_CODEC		0
+#endif // !USE_THEORA_CODEC
+
 /**
  * @ingroup Core
  * Checks to see if pure virtual has actually been implemented

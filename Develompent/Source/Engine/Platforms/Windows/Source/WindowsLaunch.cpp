@@ -74,6 +74,19 @@ std::wstring appGetCommandLine()
 }
 
 /**
+ * Process window events
+ */
+void appProcessWindowEvents()
+{
+	// Handling system events
+	SWindowEvent		windowEvent;
+	while ( GWindow->PollEvent( windowEvent ) )
+	{
+		GEngineLoop->ProcessEvent( windowEvent );
+	}
+}
+
+/**
  * Main function
  */
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nCmdShow )
@@ -109,12 +122,9 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 			while ( !GIsRequestingExit )
 			{
 				// Handling system events
-				SWindowEvent		windowEvent;
-				while ( GWindow->PollEvent( windowEvent ) )
-				{
-					GEngineLoop->ProcessEvent( windowEvent );
-				}
+				appProcessWindowEvents();
 
+				// Tick engine
 				GEngineLoop->Tick();
 			}
 		}

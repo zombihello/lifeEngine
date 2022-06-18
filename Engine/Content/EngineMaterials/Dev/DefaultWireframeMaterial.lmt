@@ -9,6 +9,6 @@
 			"Sprite":		true
 		},
 		
-		"ShadersType" : [ "FWireframeVertexShader", "FWireframePixelShader" ]
+		"ShadersType" : [ "CWireframeVertexShader", "CWireframePixelShader" ]
 	}
 }
