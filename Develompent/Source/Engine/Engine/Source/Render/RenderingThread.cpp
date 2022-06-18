@@ -130,7 +130,7 @@ CRunnable*			GRenderingThreadRunnable = nullptr;
 
 void StartRenderingThread()
 {
-	if ( GAllowRenderThread && !GIsThreadedRendering )
+	if ( !GIsThreadedRendering )
 	{
 		// Turn on the threaded rendering flag.
 		GIsThreadedRendering = true;

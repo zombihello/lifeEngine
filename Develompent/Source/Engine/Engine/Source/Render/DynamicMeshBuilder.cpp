@@ -9,6 +9,7 @@
 
 CDynamicMeshBuilder::CDynamicMeshBuilder()
 	: numPrimitives( 0 )
+	, vertexFactory( new CDynamicMeshVertexFactory() )
 {}
 
 void CDynamicMeshBuilder::InitRHI()
@@ -22,7 +23,6 @@ void CDynamicMeshBuilder::InitRHI()
 		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "DynamicMesh" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
-		vertexFactory = new CDynamicMeshVertexFactory();
 		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SDynamicMeshVertexType ) } );		// 0 stream slot
 		vertexFactory->Init();
 	}
@@ -43,7 +43,7 @@ void CDynamicMeshBuilder::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
 	indexBufferRHI.SafeRelease();
-	vertexFactory.SafeRelease();
+	vertexFactory->ReleaseResource();
 }
 
 void CDynamicMeshBuilder::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, const class CSceneView& InSceneView ) const

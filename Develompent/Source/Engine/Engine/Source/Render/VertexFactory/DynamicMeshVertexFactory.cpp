@@ -30,10 +30,6 @@ void CDynamicMeshVertexDeclaration::ReleaseRHI()
 
 void CDynamicMeshVertexFactory::InitRHI()
 {
-	if ( !GDynamicMeshVertexDeclaration.GetVertexDeclarationRHI() )
-	{
-		GDynamicMeshVertexDeclaration.InitRHI();
-	}
 	InitDeclaration( GDynamicMeshVertexDeclaration.GetVertexDeclarationRHI() );
 }
 

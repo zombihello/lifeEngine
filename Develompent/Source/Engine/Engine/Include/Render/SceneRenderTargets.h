@@ -38,20 +38,6 @@ public:
 	CSceneRenderTargets();
 
 	/**
-	 * @brief Initializes the RHI resources used by this resource.
-	 * Called when the resource is initialized.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void InitRHI() override;
-
-	/**
-	 * @brief Releases the RHI resources used by this resource.
-	 * Called when the resource is released.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void ReleaseRHI() override;
-
-	/**
 	 * @brief Allocate render targets for new size
 	 * 
 	 * @param InNewSizeX New size by X
@@ -94,6 +80,21 @@ public:
 	{
 		return renderTargets[ SRTT_SceneDepthZ ].surface;
 	}
+
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
 
 private:
 	/**

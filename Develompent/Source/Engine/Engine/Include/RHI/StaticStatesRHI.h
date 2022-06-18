@@ -56,6 +56,16 @@ private:
 		}
 
 		/**
+		 * @brief Get RHI object
+		 * @return Return RHI object
+		 */
+		FORCEINLINE TRHIRefType GetRHI() const
+		{
+			return stateRHI;
+		}
+
+	protected:
+		/**
 		 * @brief Initializes the RHI resources used by this resource.
 		 * Called when the resource is initialized.
 		 * This is only called by the rendering thread.
@@ -73,15 +83,6 @@ private:
 		virtual void ReleaseRHI()
 		{
 			stateRHI.SafeRelease();
-		}
-
-		/**
-		 * @brief Get RHI object
-		 * @return Return RHI object
-		 */
-		FORCEINLINE TRHIRefType GetRHI() const
-		{
-			return stateRHI;
 		}
 
 	private:

@@ -41,6 +41,20 @@ class CSimpleElementVertexDeclaration : public CRenderResource
 {
 public:
 	/**
+	 * @brief Get vertex declaration RHI
+	 * @return Return vertex declaration RHI
+	 */
+	FORCEINLINE VertexDeclarationRHIRef_t GetVertexDeclarationRHI()
+	{
+		if ( !vertexDeclarationRHI )
+		{
+			InitRHI();
+		}
+		return vertexDeclarationRHI;
+	}
+
+protected:
+	/**
 	 * @brief Initializes the RHI resources used by this resource.
 	 * Called when the resource is initialized.
 	 * This is only called by the rendering thread.
@@ -53,15 +67,6 @@ public:
 	 * This is only called by the rendering thread.
 	 */
 	virtual void ReleaseRHI() override;
-
-	/**
-	 * @brief Get vertex declaration RHI
-	 * @return Return vertex declaration RHI
-	 */
-	FORCEINLINE VertexDeclarationRHIRef_t GetVertexDeclarationRHI()
-	{
-		return vertexDeclarationRHI;
-	}
 
 private:
 	VertexDeclarationRHIRef_t		vertexDeclarationRHI;		/**< Vertex declaration RHI */

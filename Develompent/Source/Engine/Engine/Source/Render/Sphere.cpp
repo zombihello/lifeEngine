@@ -11,6 +11,7 @@ TGlobalResource< CSphereMesh >				GSphereMesh;
 
 CSphereMesh::CSphereMesh()
 	: numPrimitives( 0 )
+	, vertexFactory( new CDynamicMeshVertexFactory() )
 {}
 
 void CSphereMesh::InitRHI()
@@ -37,7 +38,6 @@ void CSphereMesh::InitRHI()
 		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "Sphere" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
-		vertexFactory = new CDynamicMeshVertexFactory();
 		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SDynamicMeshVertexType ) } );		// 0 stream slot
 		vertexFactory->Init();
 	}
@@ -54,5 +54,5 @@ void CSphereMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
 	indexBufferRHI.SafeRelease();
-	vertexFactory.SafeRelease();
+	vertexFactory->ReleaseResource();
 }

@@ -33,28 +33,18 @@ void CSpriteMesh::ReleaseRHI()
 }
 
 CSprite::CSprite()
-	: bFlipVertical( false )
-	, bFlipHorizontal( false )
-	, textureRect( 0.f, 0.f, 1.f, 1.f )
-	, spriteSize( 1.f, 1.f )
+	: vertexFactory( new CSpriteVertexFactory() )
 	, material( GEngine->GetDefaultMaterial() )
 {}
 
 void CSprite::InitRHI()
 {
 	// Initialize vertex factory
-	vertexFactory = new CSpriteVertexFactory();
 	vertexFactory->AddVertexStream( SVertexStream{ GetVertexBufferRHI(), sizeof( SSpriteVertexType ) } );		// 0 stream slot
 	vertexFactory->Init();
-
-	// Init values of vertex factory
-	vertexFactory->SetFlipVertical( bFlipVertical );
-	vertexFactory->SetFlipHorizontal( bFlipHorizontal );
-	vertexFactory->SetTextureRect( textureRect );
-	vertexFactory->SetSpriteSize( spriteSize );
 }
 
 void CSprite::ReleaseRHI()
 {
-	vertexFactory.SafeRelease();
+	vertexFactory->ReleaseResource();
 }

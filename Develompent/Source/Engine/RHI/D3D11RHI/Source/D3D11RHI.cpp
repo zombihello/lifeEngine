@@ -171,7 +171,7 @@ void CD3D11RHI::Init( bool InIsEditor )
 	std::set< CRenderResource* >&			globalResourceList = CRenderResource::GetResourceList();
 	for ( auto it = globalResourceList.begin(), itEnd = globalResourceList.end(); it != itEnd; ++it )
 	{
-		( *it )->InitRHI();
+		( *it )->InitResource();
 	}
 }
 
@@ -207,7 +207,7 @@ void CD3D11RHI::Destroy()
 	std::set< CRenderResource* >&		globalResourceList = CRenderResource::GetResourceList();
 	for ( auto it = globalResourceList.begin(), itEnd = globalResourceList.end(); it != itEnd; ++it )
 	{
-		( *it )->ReleaseRHI();
+		( *it )->ReleaseResource();
 	}
 
 	for ( uint32 index = 0, num = ARRAY_COUNT( vsConstantBuffers ); index < num; ++index )

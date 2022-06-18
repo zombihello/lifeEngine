@@ -42,20 +42,6 @@ class CSpriteMesh : public CRenderResource
 {
 public:
 	/**
-	 * @brief Initializes the RHI resources used by this resource.
-	 * Called when the resource is initialized.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void InitRHI() override;
-
-	/**
-	 * @brief Releases the RHI resources used by this resource.
-	 * Called when the resource is released.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void ReleaseRHI() override;
-
-	/**
 	 * Get surface
 	 * @return Return surface info
 	 */
@@ -82,6 +68,21 @@ public:
 		return indexBufferRHI;
 	}
 
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
+
 private:
 	VertexBufferRHIRef_t		vertexBufferRHI;		/**< Vertex buffer RHI */
 	IndexBufferRHIRef_t			indexBufferRHI;			/**< Index buffer RHI */
@@ -100,20 +101,6 @@ public:
 	 * @brief Constructor
 	 */
 	CSprite();
-
-	/**
-	 * @brief Initializes the RHI resources used by this resource.
-	 * Called when the resource is initialized.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void InitRHI() override;
-
-	/**
-	 * @brief Releases the RHI resources used by this resource.
-	 * Called when the resource is released.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void ReleaseRHI() override;
 
 	/**
 	 * @brief Set material
@@ -175,11 +162,7 @@ public:
 	 */
 	FORCEINLINE void SetTextureRect( const RectFloat_t& InTextureRect )
 	{
-		textureRect = InTextureRect;
-		if ( vertexFactory )
-		{
-			vertexFactory->SetTextureRect( InTextureRect );
-		}
+		vertexFactory->SetTextureRect( InTextureRect );
 	}
 
 	/**
@@ -188,7 +171,7 @@ public:
 	 */
 	FORCEINLINE const RectFloat_t& GetTextureRect() const
 	{
-		return textureRect;
+		return vertexFactory->GetTextureRect();
 	}
 
 	/**
@@ -197,11 +180,7 @@ public:
 	 */
 	FORCEINLINE void SetSpriteSize( const Vector2D& InSpriteSize )
 	{
-		spriteSize = InSpriteSize;
-		if ( vertexFactory )
-		{
-			vertexFactory->SetSpriteSize( InSpriteSize );
-		}
+		vertexFactory->SetSpriteSize( InSpriteSize );
 	}
 
 	/**
@@ -210,11 +189,7 @@ public:
 	 */
 	FORCEINLINE void SetFlipVertical( bool InFlipVertical )
 	{
-		bFlipVertical = InFlipVertical;
-		if ( vertexFactory )
-		{
-			vertexFactory->SetFlipVertical( InFlipVertical );
-		}
+		vertexFactory->SetFlipVertical( InFlipVertical );
 	}
 
 	/**
@@ -223,11 +198,7 @@ public:
 	 */
 	FORCEINLINE void SetFlipHorizontal( bool InFlipHorizontal )
 	{
-		bFlipHorizontal = InFlipHorizontal;
-		if ( vertexFactory )
-		{
-			vertexFactory->SetFlipHorizontal( InFlipHorizontal );
-		}
+		vertexFactory->SetFlipHorizontal( InFlipHorizontal );
 	}
 
 	/**
@@ -236,7 +207,7 @@ public:
 	 */
 	FORCEINLINE const Vector2D& GetSpriteSize() const
 	{
-		return spriteSize;
+		return vertexFactory->GetSpriteSize();
 	}
 
 	/**
@@ -245,7 +216,7 @@ public:
 	 */
 	FORCEINLINE bool IsFlipedVertical() const
 	{
-		return bFlipVertical;
+		return vertexFactory->IsFlipedVertical();
 	}
 
 	/**
@@ -254,14 +225,25 @@ public:
 	 */
 	FORCEINLINE bool IsFlipedHorizontal() const
 	{
-		return bFlipHorizontal;
+		return vertexFactory->IsFlipedHorizontal();
 	}
 
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
+
 private:
-	bool									bFlipVertical;		/**< Is need flip sprite by vertical */
-	bool									bFlipHorizontal;	/**< Is need flip sprite by horizontal */
-	RectFloat_t								textureRect;		/**< Texture rect */
-	Vector2D								spriteSize;			/**< Sprite size */
 	TRefCountPtr<CSpriteVertexFactory>		vertexFactory;		/**< Vertex factory */
 	TAssetHandle<CMaterial>					material;			/**< Material */
 };

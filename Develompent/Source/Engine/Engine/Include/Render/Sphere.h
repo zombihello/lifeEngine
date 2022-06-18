@@ -25,20 +25,6 @@ public:
 	CSphereMesh();
 
 	/**
-	 * @brief Initializes the RHI resources used by this resource.
-	 * Called when the resource is initialized.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void InitRHI() override;
-
-	/**
-	 * @brief Releases the RHI resources used by this resource.
-	 * Called when the resource is released.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void ReleaseRHI() override;
-
-	/**
 	 * @brief Get number primitives
 	 * @return Return number primitives
 	 */
@@ -73,6 +59,21 @@ public:
 	{
 		return vertexFactory;
 	}
+
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
 
 private:
 	uint32											numPrimitives;		/**< Number primitives */

@@ -46,26 +46,6 @@ public:
 	~CViewport();
 
 	/**
-	 * @brief Initializes the RHI resources used by this resource.
-	 * Called when the resource is initialized.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void InitRHI() override;
-
-	/**
-	 * @brief Releases the RHI resources used by this resource.
-	 * Called when the resource is released.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void ReleaseRHI() override;
-
-	/**
-	 * @brief If the resource's RHI has been initialized, then release and reinitialize it.  Otherwise, do nothing.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void UpdateRHI() override;
-
-	/**
 	 * Update RHI viewport
 	 * 
 	 * @param[in] InIsDestroyed Is need destroy viewport
@@ -150,6 +130,27 @@ public:
 	{
 		return viewportClient;
 	}
+
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
+
+	/**
+	 * @brief If the resource's RHI has been initialized, then release and reinitialize it.  Otherwise, do nothing.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void UpdateRHI() override;
 
 private:
 	void*						windowHandle;		/**< Handle to window for render */

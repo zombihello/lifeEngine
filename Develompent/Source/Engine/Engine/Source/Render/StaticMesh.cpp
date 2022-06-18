@@ -6,6 +6,7 @@
 
 CStaticMesh::CStaticMesh()
 	: CAsset( AT_StaticMesh )
+	, vertexFactory( new CStaticMeshVertexFactory() )
 {}
 
 CStaticMesh::~CStaticMesh()
@@ -29,7 +30,6 @@ void CStaticMesh::InitRHI()
 		vertexBufferRHI = GRHI->CreateVertexBuffer( ÑString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( SStaticMeshVertexType ) * numVerteces, ( byte* )verteces.GetData(), RUF_Static );
 
 		// Initialize vertex factory
-		vertexFactory = new CStaticMeshVertexFactory();
 		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SStaticMeshVertexType ) } );		// 0 stream slot
 		vertexFactory->Init();
 	}
@@ -52,7 +52,7 @@ void CStaticMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
 	indexBufferRHI.SafeRelease();
-	vertexFactory.SafeRelease();
+	vertexFactory->ReleaseResource();
 }
 
 void CStaticMesh::Serialize( class CArchive& InArchive )

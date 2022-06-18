@@ -16,7 +16,6 @@ class CBaseEngine*											GEngine = nullptr;
 CInputSystem*												GInputSystem = new CInputSystem();
 CWorld*														GWorld = new CWorld();
 bool														GUseMaxTickRate = true;
-bool														GAllowRenderThread = true;
 CCameraManager*												GCameraManager = new CCameraManager();
 
 #if WITH_EDITOR

@@ -2,6 +2,7 @@
 #include "Misc/EngineGlobals.h"
 #include "Misc/Misc.h"
 #include "RHI/BaseRHI.h"
+#include "Render/RenderingThread.h"
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
@@ -29,7 +30,9 @@ CVertexFactoryMetaType::CVertexFactoryMetaType( const std::wstring& InFactoryNam
 }
 
 CVertexFactory::~CVertexFactory()
-{}
+{
+	BeginInitResource( this );
+}
 
 void CVertexFactory::ReleaseRHI()
 {

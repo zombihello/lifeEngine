@@ -114,7 +114,6 @@ void CEngineLoop::SerializeConfigs()
 	}
 
 	GUseMaxTickRate			= GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
-	GAllowRenderThread		= GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "AllowRenderThread" ) ).GetBool();
 
 	// Loading input config
 	arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Input.json" ) );
@@ -339,10 +338,11 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 		result = 1;
 	}
 
-	// Stop playing startup movies ((only for game)
+	// Stop playing startup movies (only for game)
 	if ( GIsGame )
 	{
 		GFullScreenMovie->GameThreadStopMovie();
+		GWindow->Show();
 	}
 	return result;
 }

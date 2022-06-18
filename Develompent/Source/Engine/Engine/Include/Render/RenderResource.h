@@ -36,6 +36,40 @@ public:
 	static std::set< CRenderResource* >& GetResourceList();
 
 	/**
+	 * @brief Initializes the resource.
+	 * @warning This is only called by the rendering thread.
+	 */
+	void InitResource();
+
+	/**
+	 * @brief Prepares the resource for deletion.
+	 * @warning This is only called by the rendering thread.
+	 */
+	void ReleaseResource();
+
+	/**
+	 * @brief Prepares the resource for update.
+	 * @warning This is only called by the rendering thread.
+	 */
+	void UpdateResource();
+
+	/**
+	 * @brief Is resource initialized
+	 * @return Return true if resource is initialized, else false
+	 */
+	FORCEINLINE bool IsInitialized() const
+	{
+		return isInitialized;
+	}
+
+	/**
+	 * @brief Is global resource
+	 * @return Return true if this resource is global, else return false
+	 */
+	virtual bool IsGlobal() const;
+
+protected:
+	/**
 	 * @brief Initializes the RHI resources used by this resource.
 	 * Called when the resource is initialized.
 	 * This is only called by the rendering thread.
@@ -55,41 +89,9 @@ public:
 	 */
 	virtual void UpdateRHI();
 
-	/**
-	 * @brief Initializes the resource.
-	 * This is only called by the rendering thread.
-	 */
-	void InitResource();
-
-	/**
-	 * @brief Prepares the resource for deletion.
-	 * This is only called by the rendering thread.
-	 */
-	void ReleaseResource();
-
-	/**
-	 * @brief Prepares the resource for update.
-	 * This is only called by the rendering thread.
-	 */
-	void UpdateResource();
-
-	/**
-	 * @brief Is resource initialized
-	 * @return Return true if resource is initialized, else false
-	 */
-	FORCEINLINE bool IsInitialized() const
-	{
-		return isInitialized;
-	}
-
-	/**
-	 * @brief Is global resource
-	 * @return Return true if this resource is global, else return false
-	 */
-	virtual bool IsGlobal() const;
-
 private:
 	volatile bool				isInitialized;		/**< Is resource initialized */
+	bool						bInGlobalList;		/**< Is resource already containing in global list */
 };
 
 /**

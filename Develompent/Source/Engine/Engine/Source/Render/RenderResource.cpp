@@ -15,8 +15,9 @@ FORCEINLINE ÑCriticalSection& GetGlobalResourcesCS()
 /**
  * Constructor
  */
-CRenderResource::CRenderResource() :
-	isInitialized( false )
+CRenderResource::CRenderResource() 
+	: isInitialized( false )
+	, bInGlobalList( false )
 {}
 
 /**
@@ -30,7 +31,7 @@ CRenderResource::~CRenderResource()
 	}
 
 	// Deleting an initialized CRenderResource will result in a crash later since it is still linked
-	//appErrorf( TEXT( "An CRenderResource was deleted without being released first!" ) );
+	appErrorf( TEXT( "An CRenderResource was deleted without being released first!" ) );
 }
 
 std::set< CRenderResource* >& CRenderResource::GetResourceList()
@@ -59,21 +60,22 @@ void CRenderResource::InitResource()
 	}
 
 	// If resource is global - add he to global list of resource
-	if ( IsGlobal() )
+	if ( IsGlobal() && !bInGlobalList )
 	{
 		ÑCriticalSection&		criticalSection = GetGlobalResourcesCS();
 		criticalSection.Lock();
 		GetResourceList().insert( this );
 		criticalSection.Unlock();
+
+		bInGlobalList = true;
 	}
 
 	// Init resource if RHI is initialized
 	if ( GRHI && GRHI->IsInitialize() )
 	{
 		InitRHI();
+		isInitialized = true;
 	}
-
-	isInitialized = true;
 }
 
 /**
@@ -87,21 +89,22 @@ void CRenderResource::ReleaseResource()
 	}
 
 	// If resource is global - remove he from global list of resource
-	if ( IsGlobal() )
+	if ( IsGlobal() && bInGlobalList )
 	{
 		ÑCriticalSection&		criticalSection = GetGlobalResourcesCS();
 		criticalSection.Lock();
 		GetResourceList().erase( this );
 		criticalSection.Unlock();
+
+		bInGlobalList = false;
 	}
 
 	// Release resource if RHI is initialized
 	if ( GRHI && GRHI->IsInitialize() )
 	{
 		ReleaseRHI();
+		isInitialized = false;
 	}
-
-	isInitialized = false;
 }
 
 /**

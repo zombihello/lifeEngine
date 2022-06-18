@@ -345,13 +345,6 @@ public:
 	void Init();
 
 	/**
-	 * @brief Releases the RHI resources used by this resource.
-	 * Called when the resource is released.
-	 * This is only called by the rendering thread.
-	 */
-	virtual void ReleaseRHI() override;
-
-	/**
 	 * Add vertex stream
 	 *
 	 * @param[in] InVertexStream Vertex stream info
@@ -458,6 +451,14 @@ public:
 	 * @param InDeclaration		Vertex declaration RHI	
 	 */
 	void InitDeclaration( const VertexDeclarationRHIParamRef_t InDeclaration );
+
+protected:
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
 
 private:
 	std::vector< SVertexStream >	streams;					/**< Array vertex streams */

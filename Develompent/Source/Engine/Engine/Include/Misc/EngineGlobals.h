@@ -64,12 +64,6 @@ extern bool								GUseMaxTickRate;
 
 /**
  * @ingroup Engine
- * Is allow render thread
- */
-extern bool								GAllowRenderThread;
-
-/**
- * @ingroup Engine
  * @brief Camera manager
  */
 extern class CCameraManager*			GCameraManager;
