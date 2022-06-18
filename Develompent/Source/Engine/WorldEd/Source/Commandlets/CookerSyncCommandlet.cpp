@@ -30,7 +30,7 @@ void ÑCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 
 		std::wstring		extension = file;
 		extension.erase( 0, dotPos + 1 );
-		if ( extension == TEXT( "lpak" ) )
+		if ( extension == TEXT( "pak" ) )
 		{
 			PackageRef_t		package = GPackageManager->LoadPackage( fullPath );
 			check( package );

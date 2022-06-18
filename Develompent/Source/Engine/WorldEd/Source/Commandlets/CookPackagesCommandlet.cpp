@@ -31,10 +31,10 @@
 IMPLEMENT_CLASS( CCookPackagesCommandlet )
 
 /** Default package extension */
-#define DEFAULT_PACKAGE_EXTENSION		TEXT( "lpak" )
+#define DEFAULT_PACKAGE_EXTENSION		TEXT( "pak" )
 
 /** Default map extension */
-#define DEFAULT_MAP_EXTENSION			TEXT( "lmap" )
+#define DEFAULT_MAP_EXTENSION			TEXT( "map" )
 
 /**
  * Struct of TMX object for spawn actor in world

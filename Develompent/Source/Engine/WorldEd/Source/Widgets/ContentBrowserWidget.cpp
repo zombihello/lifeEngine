@@ -1065,9 +1065,9 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createPackag
 	{
 		dir.cd( !fileInfo.isDir() ? fileInfo.absolutePath() : fileInfo.absoluteFilePath() );
 	}
-
+	
 	// Create package
-	std::wstring	fullPath	= appQtAbsolutePathToEngine( dir.absolutePath() + "/" + packageName + "." FILE_PACKAGE_EXTENSION );
+	std::wstring		fullPath	= appQtAbsolutePathToEngine( dir.absolutePath() + "/" + packageName + "." FILE_PACKAGE_EXTENSION );
 	PackageRef_t		package		= GPackageManager->LoadPackage( fullPath, true );
 	package->Save( fullPath );
 

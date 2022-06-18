@@ -17,13 +17,13 @@
  * @ingroup WorldEd
  * Package extension
  */
-#define FILE_PACKAGE_EXTENSION		"lpak"
+#define FILE_PACKAGE_EXTENSION		"pak"
 
 /**
  * @ingroup WorldEd
  * Map extension
  */
-#define  FILE_MAP_EXTENSION			"lmap"
+#define  FILE_MAP_EXTENSION			"map"
 
 /**
  * @ingroup WorldEd
