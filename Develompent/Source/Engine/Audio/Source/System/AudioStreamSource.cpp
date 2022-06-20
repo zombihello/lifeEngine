@@ -236,8 +236,8 @@ CAudioStreamSource::~CAudioStreamSource()
 
 void CAudioStreamSource::Play()
 {
-	// If audio source is muted, do nothing
-	if ( IsMuted() )
+	// If audio bank handle is not valid or source is muted, do nothing
+	if ( !audioBankHandle || IsMuted() )
 	{
 		return;
 	}

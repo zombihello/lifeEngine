@@ -45,6 +45,7 @@
 	- Refactored delegates
 	- Implemented in WorldEd texture and material editor
 	- Added possibility of reload packages
+	- Implemented full screen movie player with using codec Theora
 	
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

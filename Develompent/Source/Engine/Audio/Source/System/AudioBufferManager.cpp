@@ -17,18 +17,21 @@ AudioBufferRef_t ÑAudioBufferManager::Find( const TAssetHandle<CAudioBank>& InAu
 	TSharedPtr<CAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
 	SAudioBankInfo				audioBankInfo;
 	AudioBankHandle_t			audioBankHandle = audioBankRef->OpenBank( audioBankInfo );
-	check( audioBankHandle );
+	if ( audioBankHandle )
+	{
+		byte* sampleData = ( byte* ) malloc( audioBankInfo.numSamples );
+		audioBankRef->ReadBankPCM( audioBankHandle, sampleData, audioBankInfo.numSamples );
 
-	byte*				sampleData = ( byte* )malloc( audioBankInfo.numSamples );
-	audioBankRef->ReadBankPCM( audioBankHandle, sampleData, audioBankInfo.numSamples );
+		AudioBufferRef_t		audioBuffer = new CAudioBuffer();
+		audioBuffer->Append( audioBankInfo.format, sampleData, audioBankInfo.numSamples, audioBankInfo.rate );
 
-	AudioBufferRef_t		audioBuffer = new CAudioBuffer();
-	audioBuffer->Append( audioBankInfo.format, sampleData, audioBankInfo.numSamples, audioBankInfo.rate );
+		// Free all allocated temporary data and return audio buffer
+		free( sampleData );
+		audioBankRef->CloseBank( audioBankHandle );
 
-	// Free all allocated temporary data and return audio buffer
-	free( sampleData );
-	audioBankRef->CloseBank( audioBankHandle );
+		buffers.insert( std::make_pair( InAudioBank, audioBuffer ) );
+		return audioBuffer;
+	}
 
-	buffers.insert( std::make_pair( InAudioBank, audioBuffer ) );
-	return audioBuffer;
+	return nullptr;
 }
