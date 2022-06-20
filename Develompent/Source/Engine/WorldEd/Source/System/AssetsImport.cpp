@@ -339,7 +339,7 @@ TSharedPtr<CAudioBank> CAudioBankImporter::Import( const std::wstring& InPath, s
 bool CAudioBankImporter::Reimport( const TSharedPtr<CAudioBank>& InAudioBank, std::wstring& OutError )
 {
 	check( InAudioBank );
-	InAudioBank->SetSourceOGGFile( InAudioBank->GetAssetSourceFile() );
+	InAudioBank->SetOGGFile( InAudioBank->GetAssetSourceFile() );
 	
 	// Broadcast event of reimport/reloaded asset
 	std::vector< TSharedPtr<CAsset> >		reimportedAssets{ InAudioBank };

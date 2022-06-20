@@ -112,15 +112,13 @@ public:
 	 */
 	uint64 GetOffsetBankPCM( AudioBankHandle_t InBankHandle ) const;
 
-#if WITH_EDITOR
 	/**
-	 * Set source OGG file
+	 * Set OGG file for this bank
 	 * This method takes an Ogg/Vorbis file, which it decodes and applies in the audio engine
 	 *
 	 * @param InPath Path to Ogg/Vorbis file
 	 */
-	void SetSourceOGGFile( const std::wstring& InPath );
-#endif // WITH_EDITOR
+	void SetOGGFile( const std::wstring& InPath );
 
 	/**
 	 * Is empty bank
@@ -164,7 +162,6 @@ private:
 	std::list<AudioBankHandle_t>	openedHandles;		/**< List opened handles of this audio bank */
 
 #if WITH_EDITOR
-	std::vector<byte>				rawData;			/**< Raw data of Ogg/Vorbis file */
 	mutable COnAudioBankUpdated		onAudioBankUpdated;	/**< Event when audio bank is updated */
 #endif // WITH_EDITOR
 };

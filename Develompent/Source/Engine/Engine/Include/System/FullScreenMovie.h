@@ -52,6 +52,18 @@ public:
 	virtual void GameThreadStopMovie( bool InIsWaitForMovie = true, bool InIsForceStop = false ) = 0;
 
 	/**
+	* @brief Pause or resume the movie
+	* @param InPause		TRUE to pause, FALSE to resume playback
+	*/
+	virtual void GameThreadPauseMovie( bool InPause ) = 0;
+
+	/**
+	* @brief Is movie paused
+	* @return Return TRUE if movie is paused, else returning FALSE
+	*/
+	virtual bool GameThreadIsMoviePaused() const = 0;
+
+	/**
 	* @brief Block game thread until movie is complete
 	*/
 	virtual void GameThreadWaitForMovie() = 0;

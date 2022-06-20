@@ -53,6 +53,18 @@ public:
 	virtual void GameThreadStopMovie( bool InIsWaitForMovie = true, bool InIsForceStop = false ) override;
 
 	/**
+	* @brief Pause or resume the movie
+	* @param InPause		TRUE to pause, FALSE to resume playback
+	*/
+	virtual void GameThreadPauseMovie( bool InPause ) override;
+
+	/**
+	* @brief Is movie paused
+	* @return Return TRUE if movie is paused, else returning FALSE
+	*/
+	virtual bool GameThreadIsMoviePaused() const override;
+
+	/**
 	* @brief Block game thread until movie is complete
 	*/
 	virtual void GameThreadWaitForMovie() override;

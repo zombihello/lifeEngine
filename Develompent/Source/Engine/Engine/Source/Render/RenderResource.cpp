@@ -31,7 +31,7 @@ CRenderResource::~CRenderResource()
 	}
 
 	// Deleting an initialized CRenderResource will result in a crash later since it is still linked
-	appErrorf( TEXT( "An CRenderResource was deleted without being released first!" ) );
+	//appErrorf( TEXT( "An CRenderResource was deleted without being released first!" ) );
 }
 
 std::set< CRenderResource* >& CRenderResource::GetResourceList()

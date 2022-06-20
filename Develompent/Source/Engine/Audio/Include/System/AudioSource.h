@@ -158,6 +158,15 @@ public:
 		return alHandle;
 	}
 
+	/**
+	 * Is muted audio source
+	 * @return Return TRUE if audio source is muted, else return FALSE
+	 */
+	FORCEINLINE bool IsMuted() const
+	{
+		return bMuted;
+	}
+
 protected:
 	TAssetHandle<CAudioBank>					audioBank;				/**< Audio bank */
 	float										volume;					/**< Volume */

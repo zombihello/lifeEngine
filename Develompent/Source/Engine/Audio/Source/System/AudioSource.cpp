@@ -54,17 +54,26 @@ CAudioSource::~CAudioSource()
 
 void CAudioSource::Play()
 {
-	alSourcePlay( alHandle );
+	if ( !bMuted )
+	{
+		alSourcePlay( alHandle );
+	}
 }
 
 void CAudioSource::Pause()
 {
-	alSourcePause( alHandle );
+	if ( !bMuted )
+	{
+		alSourcePause( alHandle );
+	}
 }
 
 void CAudioSource::Stop()
 {
-	alSourceStop( alHandle );
+	if ( !bMuted )
+	{
+		alSourceStop( alHandle );
+	}
 }
 
 void CAudioSource::SetLoop( bool InIsLoop )

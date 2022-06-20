@@ -139,31 +139,32 @@ void CAudioBank::Serialize( class CArchive& InArchive )
 	CAsset::Serialize( InArchive );
 	InArchive << rawDataSize;
 
+	// If archive loaded, we remembre offset to raw data and seek it
 	if ( InArchive.IsLoading() && rawDataSize > 0 )
-	{	
+	{
 		offsetToRawData		= InArchive.Tell();
 		pathToArchive		= InArchive.GetPath();
+		InArchive.Seek( offsetToRawData + rawDataSize );
 
-		// If we in commandlet or cooker - serialize all raw data to memory, else skeep this section
+		// Broadcast event of updated audio bank (only with editor build)
 #if WITH_EDITOR
-		if ( GIsEditor || GIsCommandlet || GIsCooker )
-		{
-			rawData.resize( rawDataSize );
-			InArchive.Serialize( rawData.data(), rawDataSize );
-		}
-		else
+		onAudioBankUpdated.Broadcast( this );
 #endif // WITH_EDITOR
-		{
-			InArchive.Seek( offsetToRawData + rawDataSize );
-		}
 	}
-#if WITH_EDITOR
+
+	// Save OGG file to archive if rawDataSize more then 0
 	else if ( rawDataSize > 0 )
 	{
-		check( rawData.size() == rawDataSize );
+		std::vector<byte>		rawData;
+		rawData.resize( rawDataSize );
+
+		CArchive*				archive = GFileSystem->CreateFileReader( pathToArchive, AR_NoFail );	
+		archive->Seek( offsetToRawData );
+		archive->Serialize( rawData.data(), rawDataSize );
+		delete archive;
+
 		InArchive.Serialize( rawData.data(), rawDataSize );
 	}
-#endif // WITH_EDITOR
 }
 
 AudioBankHandle_t CAudioBank::OpenBank( SAudioBankInfo& OutBankInfo )
@@ -317,8 +318,7 @@ uint64 CAudioBank::GetOffsetBankPCM( AudioBankHandle_t InBankHandle ) const
 	return audioBankOgg->sampleOffset;
 }
 
-#if WITH_EDITOR
-void CAudioBank::SetSourceOGGFile( const std::wstring& InPath )
+void CAudioBank::SetOGGFile( const std::wstring& InPath )
 {
 	if ( pathToArchive == InPath )
 	{
@@ -333,23 +333,14 @@ void CAudioBank::SetSourceOGGFile( const std::wstring& InPath )
 		return;
 	}
 
-	// Serialize audio bank to memory
+	// Update info about raw data
 	offsetToRawData		= 0;
 	pathToArchive		= InPath;
 	rawDataSize			= archive->GetSize();
 
-	rawData.resize( rawDataSize );
-	if ( rawDataSize > 0 )
-	{
-		archive->Serialize( rawData.data(), rawDataSize );
-	}
-	else
-	{
-		LE_LOG( LT_Warning, LC_Audio, TEXT( "Archive '%s' is empty" ), InPath.c_str() );
-	}
-
-	delete archive;
+	// Mark dirty asset and close archive
 	MarkDirty();
+	delete archive;
 
 	// Remove loaded old audio buffer
 	if ( audioBuffer )
@@ -358,10 +349,11 @@ void CAudioBank::SetSourceOGGFile( const std::wstring& InPath )
 		audioBuffer.SafeRelease();
 	}
 
-	// Broadcast event of updated audio bank
+	// Broadcast event of updated audio bank (only with editor build)
+#if WITH_EDITOR
 	onAudioBankUpdated.Broadcast( this );
-}
 #endif // WITH_EDITOR
+}
 
 AudioBufferRef_t CAudioBank::GetAudioBuffer()
 {

@@ -805,7 +805,7 @@ TSharedPtr<CAudioBank> CCookPackagesCommandlet::ConvertAudioBank( const std::wst
 
 	audioBankRef->SetAssetName( filename );
 	audioBankRef->SetAssetSourceFile( InPath );
-	audioBankRef->SetSourceOGGFile( InPath );
+	audioBankRef->SetOGGFile( InPath );
 	return audioBankRef;
 }
 

@@ -236,6 +236,12 @@ CAudioStreamSource::~CAudioStreamSource()
 
 void CAudioStreamSource::Play()
 {
+	// If audio source is muted, do nothing
+	if ( IsMuted() )
+	{
+		return;
+	}
+
 	bool					isStreaming = false;
 	EAudioSourceStatus		status = ASS_Stoped;
 
@@ -269,6 +275,12 @@ void CAudioStreamSource::Play()
 
 void CAudioStreamSource::Pause()
 {
+	// If audio source is muted, do nothing
+	if ( IsMuted() )
+	{
+		return;
+	}
+
 	// Set state to ASS_Paused
 	{
 		CScopeLock		scopeLock( &csStreamData );
@@ -284,6 +296,12 @@ void CAudioStreamSource::Pause()
 
 void CAudioStreamSource::Stop()
 {
+	// If audio source is muted, do nothing
+	if ( IsMuted() )
+	{
+		return;
+	}
+
 	// Request the thread to terminate
 	{
 		CScopeLock		scopeLock( &csStreamData );

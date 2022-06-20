@@ -19,6 +19,8 @@
 
 #include "System/ThreadingBase.h"
 #include "System/FullScreenMovie.h"
+#include "System/AudioBank.h"
+#include "System/AudioStreamSource.h"
 #include "Render/Viewport.h"
 #include "Render/Shaders/ScreenShader.h"
 #include "RHI/BaseSurfaceRHI.h"
@@ -160,6 +162,18 @@ public:
 	virtual void GameThreadStopMovie( bool InIsWaitForMovie = true, bool InIsForceStop = false ) override;
 
 	/**
+	* @brief Pause or resume the movie
+	* @param InPause		TRUE to pause, FALSE to resume playback
+	*/
+	virtual void GameThreadPauseMovie( bool InPause ) override;
+
+	/**
+	* @brief Is movie paused
+	* @return Return TRUE if movie is paused, else returning FALSE
+	*/
+	virtual bool GameThreadIsMoviePaused() const override;
+
+	/**
 	* @brief Block game thread until movie is complete
 	*/
 	virtual void GameThreadWaitForMovie() override;
@@ -199,6 +213,12 @@ private:
 	bool StopMovie( bool InIsForce = false );
 
 	/**
+	* @brief Pause or resume the movie
+	* @param InPause	TRUE to pause, FALSE to resume playback
+	*/
+	void PauseMovie( bool InPause );
+
+	/**
 	 * @brief Stops the movie if it is skippable
 	 */
 	void SkipMovie();
@@ -224,11 +244,9 @@ private:
 
 	/**
 	 * @brief Perform per-frame processing, including rendering to the screen
-	 * 
-	 * @param InDeltaTime		Delta time
 	 * @return Return TRUE if movie is not ended, else returning FALSE
 	 */
-	bool PumpMovie( float InDeltaTime );
+	bool PumpMovie();
 
 	/**
 	 * @brief Decodes current frame from Theora to YUV 
@@ -250,6 +268,7 @@ private:
 	bool							bStopped;				/**< Is stopped movie */
 	bool							bIsMovieSkippable;		/**< Is current movie skippable */
 	bool							bWasSkipped;			/**< Was skipped current movie */
+	bool							bPaused;				/**< Is current movie is paused */
 	std::wstring					currentMovieName;		/**< Current of the movie name */
 	ogg_sync_state					oggSyncState;			/**< Ogg sync state */
 	ogg_page						oggPage;				/**< Ogg page */
@@ -261,10 +280,12 @@ private:
 	yuv_buffer						yuvFrame;				/**< YUV frame */
 	uint32							frameWidth;				/**< Frame width */
 	uint32							frameHeight;			/**< Frame height */
-	float							framesPerSecond;		/**< Frames per second */
-	float							videoTimer;				/**< Video timer */
-	uint32							lastVideoFrame;			/**< Last video frame */
+	float							frameRate;				/**< Frame rate */
+	double							beginPlaybackTime;		/**< Time in seconds of begin playback */
+	double							lastFrameTime;			/**< Last time of frame */
 	uint32							startupSequenceStep;	/**< Index of current startup movie */
+	TSharedPtr<CAudioBank>			audioBank;				/**< Audio bank for streamed source */
+	CAudioStreamSource*				audioStreamSource;		/**< Audio stream source */
 	class CArchive*					arMovie;				/**< File of movie */
 	CEvent*							movieFinishEvent;		/**< Synchronization object for game to wait for movie to finish */
 	CTheoraMovieRenderClient*		theoraRender;			/**< Theora rendering */

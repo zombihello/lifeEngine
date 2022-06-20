@@ -453,6 +453,19 @@ struct SMath
 		return floorf( InA );
 	}
 
+	/**
+	 * @brief Clamp value in range InMin and InMax
+	 *
+	 * @param InX Value
+	 * @param InMin Min range
+	 * @param InMax Max range
+	 * @return Return clamped value
+	 */
+	static FORCEINLINE float Clamp( float InX, float InMin, float InMax )
+	{
+		return ::Clamp( InX, InMin, InMax );
+	}
+
 	static const Vector				vectorZero;			/**< Zero 3D vector */
 	static const Vector				vectorOne;			/**< One 3D vector */
 	static const Quaternion			quaternionZero;		/**< Quaternion zero */

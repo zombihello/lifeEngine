@@ -17,6 +17,14 @@ void CFullScreenMovieFallback::GameThreadPlayMovie( const std::wstring& InMovieF
 void CFullScreenMovieFallback::GameThreadStopMovie( bool InIsWaitForMovie /*= true*/, bool InIsForceStop /*= false*/ )
 {}
 
+void CFullScreenMovieFallback::GameThreadPauseMovie( bool InPause )
+{}
+
+bool CFullScreenMovieFallback::GameThreadIsMoviePaused() const
+{
+	return false;
+}
+
 void CFullScreenMovieFallback::GameThreadWaitForMovie()
 {}
 

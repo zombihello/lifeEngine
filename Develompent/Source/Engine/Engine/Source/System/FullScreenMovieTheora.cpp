@@ -120,6 +120,7 @@ void CTheoraMovieRenderClient::ProcessEvent( struct SWindowEvent& InWindowEvent 
 	bool		bIsNeedSkip = false;
 	switch ( InWindowEvent.type )
 	{
+		// If released Space, Escape or Left Mouse Button, we skip current movie 
 	case SWindowEvent::T_KeyReleased:
 		switch ( InWindowEvent.events.key.code )
 		{
@@ -136,6 +137,18 @@ void CTheoraMovieRenderClient::ProcessEvent( struct SWindowEvent& InWindowEvent 
 			bIsNeedSkip = true;
 		}
 		break;
+
+		// Pause movie if focus lost
+	case SWindowEvent::T_WindowFocusLost:
+		check( moviePlayer );
+		moviePlayer->PauseMovie( true );
+		break;
+
+		// Resume movie if focus gained
+	case SWindowEvent::T_WindowFocusGained:
+		check( moviePlayer );
+		moviePlayer->PauseMovie( false );
+		break;
 	}
 
 	// Skip movie is need
@@ -151,12 +164,14 @@ CFullScreenMovieTheora::CFullScreenMovieTheora()
 	: bStopped( true )
 	, bIsMovieSkippable( false )
 	, bWasSkipped( false )
+	, bPaused( false )
 	, frameWidth( 0 )
 	, frameHeight( 0 )
-	, framesPerSecond( 0.f )
-	, videoTimer( 0.f )
-	, lastVideoFrame( 0 )
+	, frameRate( 0.f )
+	, beginPlaybackTime( 0.f )
+	, lastFrameTime( 0.f )
 	, startupSequenceStep( -1 )
+	, audioStreamSource( nullptr )
 	, arMovie( nullptr )
 	, movieFinishEvent( nullptr )
 	, theoraRender( nullptr )
@@ -199,7 +214,7 @@ void CFullScreenMovieTheora::Tick( float InDeltaTime )
 	}
 
 	// Pump movie, if end we play next
-	if ( bWasSkipped || !PumpMovie( InDeltaTime ) )
+	if ( bWasSkipped || !PumpMovie() )
 	{
 		StopCurrentAndPlayNext();
 	}
@@ -210,20 +225,12 @@ bool CFullScreenMovieTheora::IsTickable() const
 	return arMovie && theoraRender;
 }
 
-bool CFullScreenMovieTheora::PumpMovie( float InDeltaTime )
+bool CFullScreenMovieTheora::PumpMovie()
 {
-	if ( !bStopped )
-	{
-		// Advance video timer by delta time
-		videoTimer += InDeltaTime;
-
-		// Calculate current frame and decode him if need
-		uint32		currentFrame = videoTimer * framesPerSecond;
-		if ( currentFrame != lastVideoFrame )
-		{
-			lastVideoFrame = currentFrame;
-			DecodeVideoFrame();
-		}
+	// Decode video frame
+	if ( !bStopped && !bPaused )
+	{	
+		DecodeVideoFrame();
 	}
 
 	// Draw frame
@@ -281,16 +288,22 @@ bool CFullScreenMovieTheora::ProcessNextStartupSequence()
 
 void CFullScreenMovieTheora::DecodeVideoFrame()
 {
+	// If the interval between the previous frame is less than the frame rate, then we do not decode the new one
+	double		currentTime = appSeconds();
+	if ( currentTime - lastFrameTime <= frameRate )
+	{
+		return;
+	}
+
 	// First of all - grab some data into ogg packet
 	while ( ogg_stream_packetout( &videoStream, &oggPacket ) <= 0 )
 	{
 		// If no data in video stream, grab some data
 		if ( !GrabBufferData() )
 		{
-			bStopped = true;
-			return;
+			break;
 		}
-
+	
 		// Grab all decoded ogg pages into our video stream
 		while ( ogg_sync_pageout( &oggSyncState, &oggPage ) > 0 )
 		{
@@ -298,16 +311,21 @@ void CFullScreenMovieTheora::DecodeVideoFrame()
 		}
 	}
 
-	// Load packet into theora decoder
-	if ( !theora_decode_packetin( &theoraState, &oggPacket ) )
+	// Load packet into Theora decoder if need
+	if ( !theora_decode_packetin( &theoraState, &oggPacket ) && currentTime - beginPlaybackTime <= theora_granule_time( &theoraState, theoraState.granulepos ) )
 	{
 		// If decoded ok - get YUV frame
 		theora_decode_YUVout( &theoraState, &yuvFrame );
-
+	
 		// Copy YUV frame to texture
 		theoraRender->CopyFrameToTexture( &yuvFrame );
+
+		// Remember time of last frame
+		lastFrameTime = currentTime;
 	}
-	else
+
+	// If end of file, we stop playing movie
+	if ( arMovie->IsEndOfFile() )
 	{
 		bStopped = true;
 	}
@@ -381,6 +399,22 @@ void CFullScreenMovieTheora::GameThreadStopMovie( bool InIsWaitForMovie /*= true
 	theoraRender = nullptr;
 }
 
+void CFullScreenMovieTheora::GameThreadPauseMovie( bool InPause )
+{
+	// Pause movie
+	UNIQUE_RENDER_COMMAND_TWOPARAMETER( CPauseMovieCommand,
+										bool, bPaused, InPause,
+										CFullScreenMovieTheora*, moviePlayer, this,
+										{
+											moviePlayer->PauseMovie( bPaused );
+										} )
+}
+
+bool CFullScreenMovieTheora::GameThreadIsMoviePaused() const
+{
+	return bPaused;
+}
+
 void CFullScreenMovieTheora::GameThreadWaitForMovie()
 {
 	// Wait for the event
@@ -446,7 +480,16 @@ bool CFullScreenMovieTheora::PlayMovie( const std::wstring& InMovieFilename )
 	bool				result		= OpenStreamedMovie( fullPath );
 	if ( result )
 	{
+		// Init movie rendering structures
 		theoraRender->MovieInitRendering( frameWidth, frameHeight );
+
+		// Init audio bank and streamed source
+		audioBank = MakeSharedPtr<CAudioBank>();
+		audioBank->SetOGGFile( fullPath );
+
+		audioStreamSource = new CAudioStreamSource();
+		audioStreamSource->SetAudioBank( audioBank->GetAssetHandle() );
+		audioStreamSource->Play();
 	}
 	else
 	{
@@ -464,6 +507,30 @@ void CFullScreenMovieTheora::SkipMovie()
 	{
 		LE_LOG( LT_Log, LC_Movie, TEXT( "Skipped movie" ) );
 		bWasSkipped = true;
+	}
+}
+
+void CFullScreenMovieTheora::PauseMovie( bool InPause )
+{
+	bPaused = InPause;
+
+	// If movie is unpaused, we shift the beginning of the video playback by the duration of the pause
+	if ( !InPause )
+	{
+		beginPlaybackTime += appSeconds() - lastFrameTime;
+	}
+
+	// Pause/Resume audio stream if him is exist
+	if ( audioStreamSource )
+	{
+		if ( InPause )
+		{
+			audioStreamSource->Pause();
+		}
+		else
+		{
+			audioStreamSource->Play();
+		}
 	}
 }
 
@@ -543,7 +610,7 @@ bool CFullScreenMovieTheora::OpenStreamedMovie( const std::wstring& InMovieFilen
 			error = ogg_stream_packetout( &videoStream, &oggPacket );
 			if ( error < 0 )
 			{
-				// Some stream errors (maybe stream corrupted?)
+				LE_LOG( LT_Warning, LC_Movie, TEXT( "Error parsing Theora stream headers. Corrupt stream?" ) );
 				break;
 			}
 
@@ -555,7 +622,7 @@ bool CFullScreenMovieTheora::OpenStreamedMovie( const std::wstring& InMovieFilen
 				}
 				else
 				{
-					// Another stream corruption?
+					LE_LOG( LT_Warning, LC_Movie, TEXT( "Error parsing Theora stream headers. Corrupt stream?" ) );
 					break;
 				}
 			}
@@ -574,6 +641,7 @@ bool CFullScreenMovieTheora::OpenStreamedMovie( const std::wstring& InMovieFilen
 					if ( !GrabBufferData() )
 					{
 						// End of file :(
+						LE_LOG( LT_Warning, LC_Movie, TEXT( "End of file while searching for codec headers" ) );
 						break;
 					}
 				}
@@ -581,21 +649,21 @@ bool CFullScreenMovieTheora::OpenStreamedMovie( const std::wstring& InMovieFilen
 		}
 	}
 
-	// If we have theora ok
-	if ( theoraPacketsFound )
+	// If we have Theora it's okkay and init decoder
+	if ( theoraPacketsFound && !theora_decode_init( &theoraState, &theoraInfo ) )
 	{
-		// Init decoder
-		if ( !theora_decode_init( &theoraState, &theoraInfo ) )
-		{
-			// Decoder intialization succeed
-			frameWidth			= theoraInfo.frame_width;
-			frameHeight			= theoraInfo.frame_height;
-			framesPerSecond		= ( float )theoraInfo.fps_numerator / theoraInfo.fps_denominator;
-			videoTimer			= 0.f;
-			bStopped			= false;
-			return true;
-		}
+		// Decoder intialization succeed
+		frameWidth			= theoraInfo.frame_width;
+		frameHeight			= theoraInfo.frame_height;
+		frameRate			= 1.f / ( ( float )theoraInfo.fps_numerator / theoraInfo.fps_denominator );
+		beginPlaybackTime	= appSeconds();
+		lastFrameTime		= 0;
+		bStopped			= false;
+		return true;
 	}
+
+	// Failed, we close archive and free allocated memory
+	CloseStreamedMovie();
 
 	return false;
 }
@@ -607,6 +675,11 @@ void CFullScreenMovieTheora::CloseStreamedMovie()
 	{
 		return;
 	}
+
+	// Clear audio bank and streamed source
+	delete audioStreamSource;
+	audioBank			= nullptr;
+	audioStreamSource	= nullptr;
 
 	// Clear video stream
 	ogg_stream_clear( &videoStream );
