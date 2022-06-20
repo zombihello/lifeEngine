@@ -30,7 +30,17 @@
     <number>1</number>
    </property>
    <item>
-    <widget class="WeExploerLevel" name="treeView_level"/>
+    <widget class="WeExploerLevel" name="listView_level">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -38,7 +48,7 @@
  <customwidgets>
   <customwidget>
    <class>WeExploerLevel</class>
-   <extends>QTreeView</extends>
+   <extends>QListView</extends>
    <header>System/ExploerLevel.h</header>
   </customwidget>
  </customwidgets>

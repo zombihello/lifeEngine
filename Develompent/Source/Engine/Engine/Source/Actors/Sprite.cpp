@@ -15,3 +15,10 @@ ASprite::ASprite()
 
 ASprite::~ASprite()
 {}
+
+#if WITH_EDITOR
+std::wstring ASprite::GetActorIcon() const
+{
+    return TEXT( "Engine/Editor/Icons/CB_Map.png" );
+}
+#endif // WITH_EDITOR

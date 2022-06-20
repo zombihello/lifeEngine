@@ -96,4 +96,9 @@ bool AAudio::InitProperties( const std::vector<CActorVar>& InActorVars, class CC
 
 	return true;
 }
+
+std::wstring AAudio::GetActorIcon() const
+{
+	return TEXT( "Engine/Editor/Icons/Asset_Audio.png" );
+}
 #endif // WITH_EDITOR

@@ -16,6 +16,7 @@
 #include <qmessagebox.h>
 
 #include "Misc/Types.h"
+#include "Misc/SharedPointer.h"
 #include "System/Delegate.h"
 
 /**
@@ -103,7 +104,7 @@ private:
 
 /**
  * @ingroup WorldEd
- * Delegates used by the editor
+ * @brief Delegates used by the editor
  */
 struct SEditorDelegates
 {
@@ -122,9 +123,15 @@ struct SEditorDelegates
 	 */
 	DECLARE_MULTICAST_DELEGATE( COnAssetsReloaded, const std::vector< TSharedPtr<class CAsset> >& /*InAssets*/ );
 
+	/**
+	 * @brief Delegate for called event when world is loaded
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnWorldLoaded );
+
 	static COnAssetsCanDelete		onAssetsCanDelete;		/**< Called when one or more assets try delete */
 	static COnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
 	static COnAssetsReloaded		onAssetsReloaded;		/**< Called when one or more assets is reloaded */
+	static COnWorldLoaded			onWorldLoaded;			/**< Called when world is loaded */
 };
 
 #endif // !WORLDED_H

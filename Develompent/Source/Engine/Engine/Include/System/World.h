@@ -15,6 +15,7 @@
 #include "Misc/EngineTypes.h"
 #include "Misc/PhysicsGlobals.h"
 #include "System/Archive.h"
+#include "Actors/Actor.h"
 #include "PhysicsInterface.h"
 
 /**
@@ -101,6 +102,27 @@ public:
 	FORCEINLINE class CBaseScene* GetScene() const
 	{
 		return scene;
+	}
+
+	/**
+	 * @brief Get number of actors
+	 * @return Return number of actors
+	 */
+	FORCEINLINE uint32 GetNumActors() const
+	{
+		return actors.size();
+	}
+
+	/**
+	 * @brief Get actor by index
+	 * 
+	 * @param InIndex	Index
+	 * @return Return actor
+	 */
+	FORCEINLINE ActorRef_t GetActor( uint32 InIndex ) const
+	{
+		check( InIndex >= 0 && InIndex < actors.size() );
+		return actors[ InIndex ];
 	}
 
 private:

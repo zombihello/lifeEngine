@@ -9,14 +9,8 @@
 #include <qdrag.h>
 #include <qscrollbar.h>
 
+#include "Misc/SharedPointer.h"
 #include "System/ExploerLevel.h"
-
-//-------------------------------------------------------------------------//
-
-/*
- * Событие отрисовки примитива
- * ----------------------------------------
- */
 
 void WeExploerLevel::WeStyle::drawPrimitive( PrimitiveElement Element, const QStyleOption* Option, QPainter* Painter, const QWidget* Widget ) const
 {
@@ -42,68 +36,47 @@ void WeExploerLevel::WeStyle::drawPrimitive( PrimitiveElement Element, const QSt
 			Painter->drawLine( QPoint( Option->rect.topLeft().x() + 3, Option->rect.topLeft().y() ), Option->rect.topRight() );
 		}
 		else
+		{
 			Painter->drawRoundedRect( Option->rect, 5, 5 );
+		}
 	}
 	else
+	{
 		QProxyStyle::drawPrimitive( Element, Option, Painter, Widget );
+	}
 }
 
-//-------------------------------------------------------------------------//
-
-/*
- * Конструктор
- * ----------------------------------------
- */
-
-WeExploerLevel::WeExploerLevel( QWidget* parent ) :
-	QTreeView( parent )
+WeExploerLevel::WeExploerLevel( QWidget* parent ) 
+	: QListView( parent )
 {
 	//setModel( Scene::GetSingleton() );
 	//header()->setSectionResizeMode( 0, QHeaderView::ResizeMode::ResizeToContents );
 
+	exploerLevelModel = new WeExploerLevelModel( this );
+	setModel( exploerLevelModel );
+
 	style = new WeStyle();
 	setStyle( style );
 }
-
-//-------------------------------------------------------------------------//
-
-/*
- * Деструктор
- * ----------------------------------------
- */
 
 WeExploerLevel::~WeExploerLevel()
 {
 	delete style;
 }
 
-//-------------------------------------------------------------------------//
-
-/*
- * Событие нажатий кнопки мыши
- * ------------------------------
- */
-
 void WeExploerLevel::mousePressEvent( QMouseEvent* Event )
 {
 	if ( !indexAt( Event->pos() ).isValid() )
 		setCurrentIndex( QModelIndex() );
-	else
-		resizeColumnToContents( 0 );
+	//else
+	//	resizeColumnToContents( 0 );
 
-	QTreeView::mousePressEvent( Event );
+	QListView::mousePressEvent( Event );
 }
-
-//-------------------------------------------------------------------------//
-
-/*
- * Собатие "броска" элемента в виджет
- * ------------------------------
- */
 
 void WeExploerLevel::dropEvent( QDropEvent * Event )
 {
-	QTreeView::dropEvent( Event );
+	QListView::dropEvent( Event );
 
 	/*const QMimeData* mimeData = Event->mimeData();
 
@@ -141,5 +114,3 @@ void WeExploerLevel::dropEvent( QDropEvent * Event )
 
 	viewport()->update();*/
 }
-
-//-------------------------------------------------------------------------//

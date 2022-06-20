@@ -47,4 +47,9 @@ bool ABoxCollision::InitProperties( const std::vector<CActorVar>& InActorVars, c
 
 	return true;
 }
+
+std::wstring ABoxCollision::GetActorIcon() const
+{
+	return TEXT( "Engine/Editor/Icons/Actor_BoxCollision.png" );
+}
 #endif // WITH_EDITOR

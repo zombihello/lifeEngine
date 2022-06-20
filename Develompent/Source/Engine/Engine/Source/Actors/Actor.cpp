@@ -115,6 +115,11 @@ bool AActor::InitProperties( const std::vector<CActorVar>& InActorVars, class CC
 {
 	return true;
 }
+
+std::wstring AActor::GetActorIcon() const
+{
+	return TEXT( "Engine/Editor/Icons/Actor_Default.png" );
+}
 #endif // WITH_EDITOR
 
 ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InName )

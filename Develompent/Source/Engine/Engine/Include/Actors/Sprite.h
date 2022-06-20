@@ -43,6 +43,14 @@ public:
         return spriteComponent;
     }
 
+#if WITH_EDITOR
+    /**
+     * @brief Get path to icon of actor for exploer level in WorldEd
+     * @return Return path to actor icon from appBaseDir()
+     */
+    virtual std::wstring GetActorIcon() const override;
+#endif // WITH_EDITOR
+
 private:
     TRefCountPtr< CSpriteComponent >			spriteComponent;		/**< Sprite component */
 };

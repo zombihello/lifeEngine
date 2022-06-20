@@ -86,7 +86,7 @@ public:
 
 private:
 	uint32				numItems;		/**< Number created items */
-	PackageRef_t			package;		/**< Current package */
+	PackageRef_t		package;		/**< Current package */
 };
 
 #endif // !PACKAGEMODEL_H

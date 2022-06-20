@@ -67,3 +67,10 @@ void APlayerStart::BeginPlay()
 	TRefCountPtr< ACharacter >				playerCharacter = GWorld->SpawnActor( classPlayerCharacter, GetActorLocation(), GetActorRotation() );
 	playerController->SetCharacter( playerCharacter );
 }
+
+#if WITH_EDITOR
+std::wstring APlayerStart::GetActorIcon() const
+{
+	return TEXT( "Engine/Editor/Icons/Actor_PlayerStart.png" );
+}
+#endif // WITH_EDITOR

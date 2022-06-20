@@ -9,6 +9,10 @@
 #include "Logger/LoggerMacros.h"
 #include "Render/Scene.h"
 
+#if WITH_EDITOR
+#include "WorldEd.h"
+#endif // WITH_EDITOR
+
 CWorld::CWorld() 
 	: isBeginPlay( false )
 	, scene( new CScene() )
@@ -79,6 +83,10 @@ void CWorld::Serialize( CArchive& InArchive )
 			AActor*			actor = SpawnActor( CClass::StaticFindClass( className.c_str() ), SMath::vectorZero, SMath::rotatorZero );
 			actor->Serialize( InArchive );
 		}
+
+#if WITH_EDITOR
+		SEditorDelegates::onWorldLoaded.Broadcast();
+#endif // WITH_EDITOR
 	}
 }
 

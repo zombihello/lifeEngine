@@ -36,6 +36,12 @@ public:
 	 * @return Return if properties inited succeed and all resources cooked is succeed, else return false
 	 */
 	virtual bool InitProperties( const std::vector< CActorVar >& InActorVars, class CCookPackagesCommandlet* InCooker ) override;
+
+	/**
+	 * @brief Get path to icon of actor for exploer level in WorldEd
+	 * @return Return path to actor icon from appBaseDir()
+	 */
+	virtual std::wstring GetActorIcon() const override;
 #endif // WITH_EDITOR
 
 	/**

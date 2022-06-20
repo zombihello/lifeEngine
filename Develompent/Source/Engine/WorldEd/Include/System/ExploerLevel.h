@@ -9,15 +9,17 @@
 #ifndef EXPLOERLEVEL_H
 #define EXPLOERLEVEL_H
 
-#include <qtreeview.h>
+#include <qlistview.h>
 #include <qproxystyle.h>
 #include <qbasictimer.h>
+
+#include "System/ExploerLevelModel.h"
 
 /**
  * @ingroup WorldEd
  * Class of exploer level
  */
-class WeExploerLevel : public QTreeView
+class WeExploerLevel : public QListView
 {
 	Q_OBJECT
 
@@ -60,6 +62,7 @@ protected:
 	virtual void dropEvent( QDropEvent* InEvent ) override;
 
 private:
+	WeExploerLevelModel*		exploerLevelModel;		/**< Exploer level model */
 	WeStyle*					style;					/**< Custom style */
 	QPoint						dragStartPosition;		/** Drag start position */
 };

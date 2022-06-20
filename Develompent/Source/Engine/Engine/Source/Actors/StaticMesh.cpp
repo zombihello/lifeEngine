@@ -21,3 +21,10 @@ void AStaticMesh::BeginPlay()
 	Super::BeginPlay();
 	staticMeshComponent->SetStaticMesh( GPackageManager->FindAsset( TEXT( "StaticMesh'Tiger:Tiger_SM" ), AT_StaticMesh ) );
 }
+
+#if WITH_EDITOR
+std::wstring AStaticMesh::GetActorIcon() const
+{
+	return TEXT( "Engine/Editor/Icons/Asset_StaticMesh.png" );
+}
+#endif // WITH_EDITOR

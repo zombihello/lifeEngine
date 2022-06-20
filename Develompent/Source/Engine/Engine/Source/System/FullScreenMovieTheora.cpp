@@ -377,7 +377,7 @@ void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFil
 
 void CFullScreenMovieTheora::GameThreadStopMovie( bool InIsWaitForMovie /*= true*/, bool InIsForceStop /*= false*/ )
 {
-	LE_LOG( LT_Log, LC_Movie, TEXT( "Stopping movie" ) );
+	LE_LOG( LT_Log, LC_Movie, TEXT( "Stopping movie '%s'" ), currentMovieName.c_str() );
 
 	// Wait for the movie to finish (to make sure required movies are played before continuing)
 	if ( InIsWaitForMovie )
@@ -505,13 +505,14 @@ void CFullScreenMovieTheora::SkipMovie()
 {
 	if ( bIsMovieSkippable )
 	{
-		LE_LOG( LT_Log, LC_Movie, TEXT( "Skipped movie" ) );
+		LE_LOG( LT_Log, LC_Movie, TEXT( "Skipped movie '%s'" ), currentMovieName.c_str() );
 		bWasSkipped = true;
 	}
 }
 
 void CFullScreenMovieTheora::PauseMovie( bool InPause )
 {
+	LE_LOG( LT_Log, LC_Movie, TEXT( "%s movie '%s'" ), InPause ? TEXT( "Paused" ) : TEXT( "Unpaused" ), currentMovieName.c_str() );
 	bPaused = InPause;
 
 	// If movie is unpaused, we shift the beginning of the video playback by the duration of the pause

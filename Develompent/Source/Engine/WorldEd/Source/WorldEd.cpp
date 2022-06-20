@@ -26,6 +26,7 @@
 SEditorDelegates::COnAssetsCanDelete	SEditorDelegates::onAssetsCanDelete;
 SEditorDelegates::COnAssetsDeleted		SEditorDelegates::onAssetsDeleted;
 SEditorDelegates::COnAssetsReloaded		SEditorDelegates::onAssetsReloaded;
+SEditorDelegates::COnWorldLoaded		SEditorDelegates::onWorldLoaded;
 
 void QtMessageOutput( QtMsgType InType, const QMessageLogContext& InContext, const QString& InMessage )
 {
