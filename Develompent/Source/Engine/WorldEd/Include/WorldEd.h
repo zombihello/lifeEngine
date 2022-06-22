@@ -17,6 +17,7 @@
 
 #include "Misc/Types.h"
 #include "Misc/SharedPointer.h"
+#include "Actors/Actor.h"
 #include "System/Delegate.h"
 
 /**
@@ -124,14 +125,20 @@ struct SEditorDelegates
 	DECLARE_MULTICAST_DELEGATE( COnAssetsReloaded, const std::vector< TSharedPtr<class CAsset> >& /*InAssets*/ );
 
 	/**
-	 * @brief Delegate for called event when world is loaded
+	 * @brief Delegate for called event when actor spawned
 	 */
-	DECLARE_MULTICAST_DELEGATE( COnWorldLoaded );
+	DECLARE_MULTICAST_DELEGATE( COnActorsSpawned, const std::vector<ActorRef_t>& /*InActors*/ );
+
+	/**
+	 * @brief Delegate for called event when actor destroyed
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnActorsDestroyed, const std::vector<ActorRef_t>& /*InActors*/ );
 
 	static COnAssetsCanDelete		onAssetsCanDelete;		/**< Called when one or more assets try delete */
 	static COnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
 	static COnAssetsReloaded		onAssetsReloaded;		/**< Called when one or more assets is reloaded */
-	static COnWorldLoaded			onWorldLoaded;			/**< Called when world is loaded */
+	static COnActorsSpawned			onActorsSpawned;		/**< Called when actors spawned */
+	static COnActorsDestroyed		onActorsDestroyed;		/**< Called when actors destroyed */
 };
 
 #endif // !WORLDED_H

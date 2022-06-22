@@ -56,7 +56,7 @@ void CBox2DScene::RemoveBody( CPhysicsBodyInstance* InBodyInstance )
 		if ( bodyInstance == InBodyInstance )
 		{
 			// Remove all fixtures from collision channel map
-			for ( uint32 index = 0; index << CC_Max; ++index )
+			for ( uint32 index = 0; index < CC_Max; ++index )
 			{
 				fixturesMap[ index ].erase( InBodyInstance );
 			}

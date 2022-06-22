@@ -17,6 +17,7 @@
 #include "Math/Rect.h"
 #include "Math/Color.h"
 #include "Render/Material.h"
+#include "System/Delegate.h"
 #include "Components/SceneComponent.h"
 #include "Components/PrimitiveComponent.h"
 
@@ -533,6 +534,12 @@ private:
 
 /**
  * @ingroup Engine
+ * @brief Delegate for called event when actor is destroyed
+ */
+DECLARE_MULTICAST_DELEGATE( COnActorDestroyed, class AActor* );
+
+/**
+ * @ingroup Engine
  * Base class of all actors in world
  */
 class AActor : public CObject, public CRefCounted
@@ -556,6 +563,11 @@ public:
 	virtual void BeginPlay();
 
 	/**
+	 * Overridable native event for when end play for this actor
+	 */
+	virtual void EndPlay();
+
+	/**
 	 * Function called every frame on this Actor. Override this function to implement custom logic to be executed every frame.
 	 * 
 	 * @param[in] InDeltaTime The time since the last tick.
@@ -567,6 +579,18 @@ public:
 	 * @param[in] InArchive Archive for serialize
 	 */
 	virtual void Serialize( class CArchive& InArchive );
+	
+	/**
+	 * @brief Called when this actor is destroyed
+	 */
+	virtual void Destroyed();
+
+	/**
+	 * @brief Destroy this actor. Returns TRUE the actor is destroyed or already marked for destruction, FALSE if indestructible
+	 * Destruction is latent. It occurs at the end of the tick
+	 * @returns	Return TRUE if destroyed or already marked for destruction, FALSE if indestructible
+	 */
+	bool Destroy();
 
 	/**
 	 * @brief Init physics body
@@ -767,6 +791,24 @@ public:
 		return bIsStatic;
 	}
 
+	/**
+	 * Is this actor has begun the destruction process
+	 * @return Return TRUE if this actor has begun destruction, or if this actor has been destroyed already
+	 */
+	FORCEINLINE bool IsPendingKill() const
+	{
+		return bActorIsBeingDestroyed;
+	}
+
+	/**
+	 * Is actor playing
+	 * @return Return TRUE if actor is playing, else returning FALSE
+	 */
+	FORCEINLINE bool IsPlaying() const
+	{
+		return bBeginPlay;
+	}
+
 protected:
 	/**
 	 * Create component and add to array of owned components
@@ -808,13 +850,25 @@ protected:
 	 */
 	void ResetOwnedComponents();
 
+	/**
+	 * Get event when actor is destroyed
+	 * @return Return event when actor is destroyed
+	 */
+	FORCEINLINE COnActorDestroyed& OnActorDestroyed() const
+	{
+		return onActorDestroyed;
+	}
+
 	TRefCountPtr< CSceneComponent >				rootComponent;			/**< Root component, default is null */
 	TRefCountPtr< CPrimitiveComponent >			collisionComponent;		/**< Collision component */
 
 private:
 	bool										bIsStatic;				/**< Is static actor */
 	bool										bNeedReinitCollision;	/**< Is need reinit collision component */
+	bool										bActorIsBeingDestroyed;	/**< Actor is being destroyed */
+	bool										bBeginPlay;				/**< Is begin play for this actor */
 	std::vector< ActorComponentRef_t >			ownedComponents;		/**< Owned components */
+	mutable COnActorDestroyed					onActorDestroyed;		/**< Called event when actor is destroyed */
 };
 
 #endif // !ACTOR_H

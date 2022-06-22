@@ -313,9 +313,9 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_customContextMenuRequest
 void WeContentBrowserWidget::on_listView_packageBrowser_customContextMenuRequested( QPoint InPoint )
 {
 	QModelIndex				modelIndex		= ui->listView_packageBrowser->indexAt( InPoint );
-	PackageRef_t				currentPackage	= ui->listView_packageBrowser->GetPackage();
+	PackageRef_t			currentPackage	= ui->listView_packageBrowser->GetPackage();
 	uint32					numSelecteItems = ui->listView_packageBrowser->selectionModel()->selectedRows().length();
-	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
+	QModelIndexList			modelIndexList	= ui->listView_packageBrowser->selectionModel()->selectedRows();
 
 	// Menu 'Create'
 	QMenu			menuCreate( "Create", this );
@@ -676,7 +676,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_DeleteAsset()
 void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 {
 	// Getting selected items and current package
-	PackageRef_t				package = ui->listView_packageBrowser->GetPackage();
+	PackageRef_t			package = ui->listView_packageBrowser->GetPackage();
 	QModelIndexList			modelIndexList = ui->listView_packageBrowser->selectionModel()->selectedRows();
 	if ( !package )
 	{

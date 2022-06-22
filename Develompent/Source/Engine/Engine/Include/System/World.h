@@ -41,6 +41,11 @@ public:
 	void BeginPlay();
 
 	/**
+	 * End gameplay. This will cause the reset game mode and call EndPlay on all actors
+	 */
+	void EndPlay();
+
+	/**
 	 * Update world
 	 * 
 	 * @param[in] InDeltaTime The time since the last tick
@@ -67,6 +72,15 @@ public:
 	 * @param[in] InRotation Rotation actor on spawn
 	 */
 	ActorRef_t SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation = SMath::rotatorZero );
+
+	/**
+	 * Destroy actor in world
+	 * @param InActor	Actor
+	 */
+	FORCEINLINE void DestroyActor( ActorRef_t InActor )
+	{
+		DestroyActor( InActor, false );
+	}
 
 	/**
 	 * Spawn actor in world
@@ -126,9 +140,18 @@ public:
 	}
 
 private:
-	bool							isBeginPlay;	/**< Is started gameplay */
-	class CBaseScene*				scene;			/**< Scene manager */
-	std::vector< ActorRef_t >		actors;			/**< Array actors in world */
+	/**
+	 * Destroy actor in world
+	 * 
+	 * @param InActor				Actor
+	 * @param InIsIgnorePlaying		Is need ignore playing flag in actor
+	 */
+	void DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying );
+
+	bool						isBeginPlay;		/**< Is started gameplay */
+	class CBaseScene*			scene;				/**< Scene manager */
+	std::vector<ActorRef_t>		actors;				/**< Array actors in world */
+	std::vector<ActorRef_t>		actorsToDestroy;	/**< Array actors which need destroy after tick */
 };
 
 #endif // !WORLD_H

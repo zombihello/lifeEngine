@@ -26,6 +26,12 @@ CWorld::~CWorld()
 
 void CWorld::BeginPlay()
 {
+	// If allready playing started, do nothing
+	if ( isBeginPlay )
+	{
+		return;
+	}
+
 	// Init all actors
 	for ( uint32 index = 0; index < ( uint32 )actors.size(); ++index )
 	{
@@ -42,13 +48,44 @@ void CWorld::BeginPlay()
 	isBeginPlay = true;
 }
 
+void CWorld::EndPlay()
+{
+	// If not playing, do nothing
+	if ( !isBeginPlay )
+	{
+		return;
+	}
+
+	// End play and destroy physics for all actors
+	for ( uint32 index = 0; index < ( uint32 ) actors.size(); ++index )
+	{
+		ActorRef_t		actor = actors[ index ];
+		actor->EndPlay();
+		actor->TermPhysics();
+	}
+
+	GCameraManager->EndPlay();
+	isBeginPlay = false;
+}
+
 void CWorld::Tick( float InDeltaTime )
 {
+	// Tick all actors
 	for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
 	{
 		AActor*		actor = actors[ index ];
 		actor->Tick( InDeltaTime );
 		actor->SyncPhysics();
+	}
+
+	// Destroy actors if need
+	if ( !actorsToDestroy.empty() )
+	{
+		for ( uint32 index = 0, count = actorsToDestroy.size(); index < count; ++index )
+		{
+			DestroyActor( actorsToDestroy[ index ], true );
+		}
+		actorsToDestroy.clear();
 	}
 }
 
@@ -83,19 +120,34 @@ void CWorld::Serialize( CArchive& InArchive )
 			AActor*			actor = SpawnActor( CClass::StaticFindClass( className.c_str() ), SMath::vectorZero, SMath::rotatorZero );
 			actor->Serialize( InArchive );
 		}
-
-#if WITH_EDITOR
-		SEditorDelegates::onWorldLoaded.Broadcast();
-#endif // WITH_EDITOR
 	}
 }
 
 void CWorld::CleanupWorld()
 {
+	// If we playing, end it
+	if ( isBeginPlay )
+	{
+		EndPlay();
+	}
+
+	// Call event of destroyed actor in each object
+	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
+	{
+		actors[ index ]->Destroyed();
+	}
+
+	// Broadcast event of destroyed actors
+#if WITH_EDITOR
+	if ( !actors.empty() )
+	{
+		SEditorDelegates::onActorsSpawned.Broadcast( actors );
+	}
+#endif // WITH_EDITOR
+
 	GPhysicsScene.RemoveAllBodies();
 	scene->Clear();
 	actors.clear();
-	isBeginPlay = false;
 }
 
 ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /* = SMath::rotatorZero */ )
@@ -118,5 +170,51 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
 	}
 
 	actors.push_back( actor );
+	
+	// Broadcast event of spawned actor
+#if WITH_EDITOR
+	std::vector<ActorRef_t>		spawnedActors = { actor };
+	SEditorDelegates::onActorsSpawned.Broadcast( spawnedActors );
+#endif // WITH_EDITOR
+
 	return actor;
+}
+
+void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
+{
+	check( InActor );
+
+	// If actor allready penging kill, exit from method
+	if ( InActor->IsPendingKill() )
+	{
+		return;
+	}
+
+	// If world in play, put this actor to actorsToDestroy for remove after tick
+	if ( !InIsIgnorePlaying && InActor->IsPlaying() )
+	{
+		actorsToDestroy.push_back( InActor );
+		return;
+	}
+
+	// Destroy actor
+
+	// Broadcast event of destroy actor
+#if WITH_EDITOR
+	std::vector<ActorRef_t>		destroyedActors = { InActor };
+	SEditorDelegates::onActorsDestroyed.Broadcast( destroyedActors );
+#endif // WITH_EDITOR
+
+	// Call events of destroyed actor
+	InActor->Destroyed();
+
+	// Remove actor from array of all actors in world
+	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
+	{
+		if ( actors[ index ] == InActor )
+		{
+			actors.erase( actors.begin() + index );
+			return;
+		}
+	}
 }

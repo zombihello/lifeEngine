@@ -25,6 +25,11 @@ public:
     virtual void BeginPlay();
 
     /**
+     * End play of game in world
+     */
+    virtual void EndPlay();
+
+    /**
      * @brief Process event
      *
      * @param InWindowEvent Window event

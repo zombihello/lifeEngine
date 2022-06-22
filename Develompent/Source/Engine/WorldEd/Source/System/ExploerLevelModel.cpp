@@ -6,16 +6,20 @@
 
 WeExploerLevelModel::WeExploerLevelModel( QObject* InParent /*= nullptr*/ )
 	: QAbstractItemModel( InParent )
-	, numItems( 0 )
+	, numRows( 0 )
+	, actorsSpawnedHandle( nullptr )
+	, actorsDestroyedHandle( nullptr )
 {
-	// Subscribe to event when world is loaded for updating exploer level in UI
-	worldLoadedHandle = SEditorDelegates::onWorldLoaded.Add( std::bind( &WeExploerLevelModel::OnWorldLoaded, this ) );
+	// Subscribe to event when actors spawned and destroyed
+	actorsSpawnedHandle		= SEditorDelegates::onActorsSpawned.Add(	std::bind( &WeExploerLevelModel::OnActorsSpawned, this, std::placeholders::_1 )		);
+	actorsDestroyedHandle	= SEditorDelegates::onActorsDestroyed.Add(	std::bind( &WeExploerLevelModel::OnActorsDestroyed, this, std::placeholders::_1 )	);
 }
 
 WeExploerLevelModel::~WeExploerLevelModel()
 {
-	// Unscribe from event when world is loaded
-	SEditorDelegates::onWorldLoaded.Remove( worldLoadedHandle );
+	// Unscribe from event when actors spawned and destroyed
+	SEditorDelegates::onActorsSpawned.Remove( actorsSpawnedHandle );
+	SEditorDelegates::onActorsDestroyed.Remove( actorsDestroyedHandle );
 }
 
 QModelIndex WeExploerLevelModel::index( int InRow, int InColumn, const QModelIndex& InParent /*= QModelIndex()*/ ) const
@@ -30,7 +34,7 @@ QModelIndex WeExploerLevelModel::parent( const QModelIndex& InIndex ) const
 
 int WeExploerLevelModel::rowCount( const QModelIndex& InParent /*= QModelIndex()*/ ) const
 {
-	return numItems;
+	return numRows;
 }
 
 int WeExploerLevelModel::columnCount( const QModelIndex& InParent /*= QModelIndex()*/ ) const
@@ -79,15 +83,22 @@ bool WeExploerLevelModel::removeRows( int InRow, int InCount, const QModelIndex&
 	return true;
 }
 
-void WeExploerLevelModel::OnWorldLoaded()
+void WeExploerLevelModel::OnActorsSpawned( const std::vector<ActorRef_t>& InActors )
 {
-	removeRows( 0, numItems, QModelIndex() );
-	
-	numItems = GWorld->GetNumActors();
-	if ( numItems <= 0 )
+	if ( !InActors.empty() )
 	{
-		return;
+		uint32		numSpawnedActors = InActors.size();
+		insertRows( numRows, numSpawnedActors, QModelIndex() );
+		numRows += numSpawnedActors;
 	}
+}
 
-	insertRows( 0, numItems, QModelIndex() );
+void WeExploerLevelModel::OnActorsDestroyed( const std::vector<ActorRef_t>& InActors )
+{
+	if ( !InActors.empty() )
+	{
+		uint32		numDestroyedActors = InActors.size();
+		removeRows( 0, numDestroyedActors, QModelIndex() );
+		numRows -= numDestroyedActors;
+	}
 }

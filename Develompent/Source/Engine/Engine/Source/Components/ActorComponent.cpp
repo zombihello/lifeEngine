@@ -3,8 +3,8 @@
 
 IMPLEMENT_CLASS( CActorComponent )
 
-CActorComponent::CActorComponent() :
-	owner( nullptr )
+CActorComponent::CActorComponent() 
+	: owner( nullptr )
 {}
 
 CActorComponent::~CActorComponent()
@@ -13,5 +13,11 @@ CActorComponent::~CActorComponent()
 void CActorComponent::BeginPlay()
 {}
 
+void CActorComponent::EndPlay()
+{}
+
 void CActorComponent::TickComponent( float InDeltaTime )
+{}
+
+void CActorComponent::Destroyed()
 {}

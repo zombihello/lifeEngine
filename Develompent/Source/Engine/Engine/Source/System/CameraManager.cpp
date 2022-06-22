@@ -18,6 +18,11 @@ void CCameraManager::BeginPlay()
 	}
 }
 
+void CCameraManager::EndPlay()
+{
+	activeCamera = nullptr;
+}
+
 void CCameraManager::ProcessEvent( struct SWindowEvent &InWindowEvent )
 {
 	if ( !activeCamera )

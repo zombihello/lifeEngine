@@ -18,7 +18,7 @@ namespace Ui
 
 /**
  * @ingroup WorldEd
- * Widget of showing scene graph
+ * @brief Widget of showing scene graph
  */
 class WeExploerLevelWidget : public QWidget
 {
@@ -26,18 +26,29 @@ class WeExploerLevelWidget : public QWidget
 
 public:
 	/**
-	 * Constructor
+	 * @brief Constructor
+	 * @param InParent		Parent
 	 */
 	WeExploerLevelWidget( QWidget* InParent = nullptr );
 
 	/**
-	 * Destructor
+	 * @brief Destructor
 	 */
 	virtual ~WeExploerLevelWidget();
 
-private:
-	Ui::WeExploerLevelWidget*				ui;			/**< Qt UI */
+private slots:
+	//
+	// Events
+	//
+	void on_listView_level_customContextMenuRequested( QPoint InPoint );
+	void OnContextMenuActorSpawn();
+	void OnContextMenuActorRename();
+	void OnContextMenuActorDuplicate();
+	void OnContextMenuActorDelete();
+	void OnContextMenuActorProperties();
 
+private:
+	Ui::WeExploerLevelWidget*		ui;			/**< Qt UI */
 };
 
 #endif // !EXPLOERLEVELWIDGET_H

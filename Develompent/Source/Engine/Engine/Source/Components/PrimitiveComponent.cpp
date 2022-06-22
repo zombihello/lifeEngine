@@ -26,6 +26,12 @@ void CPrimitiveComponent::BeginPlay()
 	GWorld->GetScene()->AddPrimitive( this );
 }
 
+void CPrimitiveComponent::Destroyed()
+{
+	Super::Destroyed();
+	GWorld->GetScene()->RemovePrimitive( this );
+}
+
 void CPrimitiveComponent::TickComponent( float InDeltaTime )
 {
 	Super::TickComponent( InDeltaTime );

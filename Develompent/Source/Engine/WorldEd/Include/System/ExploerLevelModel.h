@@ -69,12 +69,18 @@ public:
 
 private:
 	/**
-	 * @brief Event called when world is loaded
+	 * @brief Event called when actors spawned
 	 */
-	void OnWorldLoaded();
+	void OnActorsSpawned( const std::vector<ActorRef_t>& InActors );
 
-	uint32													numItems;			/**< Number created items */
-	SEditorDelegates::COnWorldLoaded::DelegateType_t*		worldLoadedHandle;	/**< Handle delegate of world loaded */
+	/**
+	 * @brief Event called when actors destroyed
+	 */
+	void OnActorsDestroyed( const std::vector<ActorRef_t>& InActors );
+
+	uint32													numRows;				/**< Number created rows */
+	SEditorDelegates::COnActorsSpawned::DelegateType_t*		actorsSpawnedHandle;	/**< Handle delegate of actors spawned */
+	SEditorDelegates::COnActorsDestroyed::DelegateType_t*	actorsDestroyedHandle;	/**< Handle delegate of actors destroyed */
 };
 
 #endif // !EXPLOERLEVELMODEL_H

@@ -40,11 +40,22 @@ public:
 	virtual void BeginPlay();
 
 	/**
+	 * End play for the component.
+	 * Called when owning actor eng play
+	 */
+	virtual void EndPlay();
+
+	/**
 	 * Function called every frame on this ActorComponent. Override this function to implement custom logic to be executed every frame.
 	 * 
 	 * @param[in] InDeltaTime The time since the last tick.
 	 */
 	virtual void TickComponent( float InDeltaTime );
+
+	/**
+	 * @brief Called when this component is destroyed
+	 */
+	virtual void Destroyed();
 
 	/**
 	 * Set owner

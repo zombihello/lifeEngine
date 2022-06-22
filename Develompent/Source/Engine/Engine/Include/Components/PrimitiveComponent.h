@@ -68,6 +68,11 @@ public:
 	virtual void AddToDrawList( const class CSceneView& InSceneView );
 
 	/**
+	 * @brief Called when this component is destroyed
+	 */
+	virtual void Destroyed() override;
+
+	/**
 	 * @brief Init physics component
 	 */
 	void InitPrimitivePhysics();

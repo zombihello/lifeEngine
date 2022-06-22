@@ -1,3 +1,5 @@
+#include "Misc/EngineGlobals.h"
+#include "System/World.h"
 #include "Actors/Actor.h"
 #include "Components/ActorComponent.h"
 
@@ -44,6 +46,8 @@ void CActorVar::Clear()
 AActor::AActor()
 	: bIsStatic( false )
 	, bNeedReinitCollision( false )
+	, bActorIsBeingDestroyed( false )
+	, bBeginPlay( false )
 {}
 
 AActor::~AActor()
@@ -57,6 +61,18 @@ void AActor::BeginPlay()
 	{
 		ownedComponents[ index ]->BeginPlay();
 	}
+
+	bBeginPlay = true;
+}
+
+void AActor::EndPlay()
+{
+	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
+	{
+		ownedComponents[ index ]->EndPlay();
+	}
+
+	bBeginPlay = false;
 }
 
 void AActor::Tick( float InDeltaTime )
@@ -84,6 +100,37 @@ void AActor::Serialize( class CArchive& InArchive )
 	{
 		ownedComponents[ index ]->Serialize( InArchive );
 	}
+}
+
+bool AActor::Destroy()
+{
+	if ( !bActorIsBeingDestroyed )
+	{
+		GWorld->DestroyActor( this );
+		bActorIsBeingDestroyed = true;
+	}
+	return bActorIsBeingDestroyed;
+}
+
+void AActor::Destroyed()
+{
+	// If for this actor allready started play, call event of end play
+	if ( bBeginPlay )
+	{
+		EndPlay();
+	}
+
+	// Call destroy for each component
+	for ( uint32 index = 0, count = ownedComponents.size(); index < count; ++index )
+	{
+		ownedComponents[ index ]->Destroyed();
+	}
+
+	// Terminate physics
+	TermPhysics();
+
+	// Broadcast event of destroyed this actor
+	onActorDestroyed.Broadcast( this );
 }
 
 void AActor::InitPhysics()
