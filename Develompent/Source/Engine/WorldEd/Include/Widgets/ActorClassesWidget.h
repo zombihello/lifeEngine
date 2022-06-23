@@ -10,6 +10,7 @@
 #define ACTORCLASSESWIDGET_H
 
 #include <QWidget>
+#include "System/ExploerClassesFilterModel.h"
 
 namespace Ui
 {
@@ -36,6 +37,13 @@ public:
 	 */
 	virtual ~WeActorClassesWidget();
 
+private slots:
+	//
+	// Events
+	//
+	void on_lineEdit_search_textEdited( QString InValue );
+	void on_toolButton_clearSearch_clicked();
+
 private:
 	/**
 	 * Init UI
@@ -44,6 +52,7 @@ private:
 	
 	Ui::WeActorClassesWidget*		ui;						/**< Qt UI */
 	class WeExploerClassesModel*	exploerClassesModel;	/**< Exploer classes model */
+	WeExploerClassesFilterModel		filterProxyModel;		/**< Filter proxy model */
 };
 
 #endif // !ACTORCLASSESWIDGET_H

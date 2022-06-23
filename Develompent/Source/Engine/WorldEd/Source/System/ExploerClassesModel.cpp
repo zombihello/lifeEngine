@@ -178,7 +178,7 @@ QModelIndex WeExploerClassesModel::index( int InRow, int InColumn, const QModelI
 {
 	// Get child node by index row from parent
 	WeClassNode*	parentNode	= GetClassNode( InParent );
-	WeClassNode*	childNode	= parentNode->GetChild( InRow );
+	WeClassNode*	childNode	= parentNode->GetNumChilds() > 0 ? parentNode->GetChild( InRow ) : nullptr;
 
 	// If exist child node, we create and return new index
 	if ( childNode )

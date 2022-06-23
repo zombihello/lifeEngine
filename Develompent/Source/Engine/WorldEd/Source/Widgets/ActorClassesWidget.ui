@@ -59,6 +59,13 @@
      <item>
       <widget class="QLineEdit" name="lineEdit_search"/>
      </item>
+     <item>
+      <widget class="QToolButton" name="toolButton_clearSearch">
+       <property name="text">
+        <string>X</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
