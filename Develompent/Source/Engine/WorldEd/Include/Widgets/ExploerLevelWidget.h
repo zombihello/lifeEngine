@@ -41,7 +41,6 @@ private slots:
 	// Events
 	//
 	void on_listView_level_customContextMenuRequested( QPoint InPoint );
-	void OnContextMenuActorSpawn();
 	void OnContextMenuActorRename();
 	void OnContextMenuActorDuplicate();
 	void OnContextMenuActorDelete();

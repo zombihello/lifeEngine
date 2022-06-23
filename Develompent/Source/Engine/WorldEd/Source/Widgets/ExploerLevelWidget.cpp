@@ -26,13 +26,10 @@ void WeExploerLevelWidget::on_listView_level_customContextMenuRequested( QPoint 
 
 	// Main menu
 	QMenu			contextMenu( this );
-	QAction			actionActorSpawn( "Spawn", this );
 	QAction			actionActorRename( "Rename", this );
 	QAction			actionActorDuplicate( "Duplicate", this );
 	QAction			actionActorDelete( "Delete", this );
 	QAction			actionActorProperties( "Properties", this );
-	contextMenu.addAction( &actionActorSpawn );
-	contextMenu.addSeparator();
 	contextMenu.addAction( &actionActorRename );
 	contextMenu.addAction( &actionActorDuplicate );
 	contextMenu.addAction( &actionActorDelete );
@@ -48,7 +45,6 @@ void WeExploerLevelWidget::on_listView_level_customContextMenuRequested( QPoint 
 	actionActorProperties.setEnabled( bValidItem && !bSelectedMoreOneItems );
 
 	// Connect to signal of a actions
-	connect( &actionActorSpawn, SIGNAL( triggered() ), this, SLOT( OnContextMenuActorSpawn() ) );
 	connect( &actionActorRename, SIGNAL( triggered() ), this, SLOT( OnContextMenuActorRename() ) );
 	connect( &actionActorDuplicate, SIGNAL( triggered() ), this, SLOT( OnContextMenuActorDuplicate() ) );
 	connect( &actionActorDelete, SIGNAL( triggered() ), this, SLOT( OnContextMenuActorDelete() ) );
@@ -56,9 +52,6 @@ void WeExploerLevelWidget::on_listView_level_customContextMenuRequested( QPoint 
 
 	contextMenu.exec( QCursor::pos() );
 }
-
-void WeExploerLevelWidget::OnContextMenuActorSpawn()
-{}
 
 void WeExploerLevelWidget::OnContextMenuActorRename()
 {

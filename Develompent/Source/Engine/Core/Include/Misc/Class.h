@@ -109,12 +109,49 @@ public:
 		return ( CClass* )itClass->second;
 	}
 
+	/**
+	 * @brief Get array of all registered classes
+	 * @return Return array of all registered classes
+	 */
+	static FORCEINLINE const std::unordered_map<std::wstring, const CClass*>& StaticGetRegisteredClasses()
+	{
+		return classesTable;
+	}
+
+	/**
+	 * @brief Is a class
+	 * 
+	 * @param InClass	Checking class
+	 * @return Return TRUE if object is a class InClass, else returning FALSE
+	 */
+	FORCEINLINE bool IsA( CClass* InClass ) const
+	{
+		// If class is not valid, we return false
+		if ( !InClass )
+		{
+			return false;
+		}
+
+		// Iterate over each class ancestor
+		for ( const CClass* tempClass = this; tempClass; tempClass = tempClass->superClass )
+		{
+			// Success! This class contains the class being checked
+			if ( tempClass == InClass )
+			{
+				return true;
+			}
+		}
+
+		// Otherwise the class does not contain the class being checked 
+		return false;
+	}
+
 private:
 	class CObject*( *ClassConstructor )();											/**< Pointer to constructor of class */
 
 	CClass*														superClass;			/**< Pointer to super class */
 	std::wstring												name;				/**< Class name */	
-	static std::unordered_map< std::wstring, const CClass* >	classesTable;		/**< Table of all classes in system */
+	static std::unordered_map<std::wstring, const CClass*>		classesTable;		/**< Table of all classes in system */
 };
 
 #endif // !CLASS_H

@@ -197,6 +197,7 @@ private:
 	class WeLogWidget*				logWidget;						/**< Log widget */
 	class WeViewportWidget*			viewportWidgets[ LVT_Max ];		/**< Array of widget viewports */
 	class WeContentBrowserWidget*	contentBrowserWidget;			/**< Content browser widget */
+	class WeActorClassesWidget*		actorClassesWidget;				/**< Actor classes widget */
 };
 
 #endif // MAINWINDOW_H
