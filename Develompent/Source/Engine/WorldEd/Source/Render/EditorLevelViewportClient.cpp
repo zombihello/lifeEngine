@@ -59,6 +59,7 @@ CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InVie
 	: bSetListenerPosition( true )
 	, bIsTracking( false )
 	, bIgnoreInput( false )
+	, bAllowContextMenu( true )
 	, viewportType( InViewportType )
 	, viewLocation( SMath::vectorZero )
 	, viewRotation( SMath::rotatorZero )
@@ -131,11 +132,33 @@ void CEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportT
 	viewportType			= InViewportType;
 	showFlags				= GShowFlags[ InViewportType ];
 
+	// Init for perspective mode default location and rotation
 	if ( viewportType == LVT_Perspective )
 	{
 		bSetListenerPosition = true;
 		viewLocation = GDefaultPerspectiveViewLocation;
 		viewRotation = GDefaultPerspectiveViewRotation;
+	}
+	// Else we init default location of axis up for other viewport types
+	else
+	{
+		switch ( viewportType )
+		{
+			// In XZ case Y is up
+		case LVT_OrthoXZ:
+			viewLocation.y = HALF_WORLD_MAX1/2;
+			break;
+
+			// In XY case Z is up
+		case LVT_OrthoXY:
+			viewLocation.z = -HALF_WORLD_MAX1/2;
+			break;
+
+			// In YZ case X is up
+		case LVT_OrthoYZ:
+			viewLocation.x = -HALF_WORLD_MAX1/2;
+			break;
+		}
 	}
 }
 
@@ -155,6 +178,8 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			QApplication::setOverrideCursor( QCursor( Qt::BlankCursor ) );
 			bIsTracking			= true;
 		}
+
+		bAllowContextMenu		= true;
 		break;
 
 		// Event of mouse released
@@ -197,6 +222,9 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	case SWindowEvent::T_MouseMove:
 		if ( bIsTracking )
 		{
+			// We moved mouse when press right mouse button, in this case we not allow opening context menu after release
+			bAllowContextMenu = false;
+
 			// For ortho viewports its move
 			if ( viewportType != LVT_Perspective )
 			{

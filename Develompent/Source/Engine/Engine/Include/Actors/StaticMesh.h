@@ -38,7 +38,26 @@ public:
 	 */
 	virtual void BeginPlay() override;
 
+	/**
+	 * @brief Set static mesh asset
+	 * @param InStaticMesh		Static mesh asset
+	 */
+	FORCEINLINE void SetStaticMesh( const TAssetHandle<CStaticMesh>& InStaticMesh )
+	{
+		staticMeshComponent->SetStaticMesh( InStaticMesh );
+	}
+
 #if WITH_EDITOR
+	/**
+	 * @brief Spawn asset actor
+	 * 
+	 * @param InAsset       Asset
+	 * @param InLocation    Location actor on spawn
+	 * @param InRotation    Rotation actor on spawn
+	 * @return Return spawned actor. If failed returning NULL
+	 */
+	static ActorRef_t SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const CRotator& InRotation );
+
 	/**
 	 * @brief Get path to icon of actor for exploer level in WorldEd
 	 * @return Return path to actor icon from appBaseDir()

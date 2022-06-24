@@ -37,6 +37,12 @@ public:
 	 */
 	virtual ~WeActorClassesWidget();
 
+	/**
+	 * Get selected class
+	 * @return Return selected class, else returning NULL
+	 */
+	class CClass* GetSelectedClass() const;
+
 private slots:
 	//
 	// Events

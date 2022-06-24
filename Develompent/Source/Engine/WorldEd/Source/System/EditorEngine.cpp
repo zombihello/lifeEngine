@@ -13,8 +13,14 @@
 #include "Render/RenderingThread.h"
 #include "System/EditorEngine.h"
 #include "System/AssetDataBase.h"
-#include "Actors/PlayerStart.h"
+#include "System/ActorFactory.h"
+#include "System/Package.h"
 #include "Widgets/LogWidget.h"
+
+// Actors
+#include "Actors/PlayerStart.h"
+#include "Actors/StaticMesh.h"
+#include "Actors/Audio.h"
 
 IMPLEMENT_CLASS( CEditorEngine )
 
@@ -29,6 +35,10 @@ void CEditorEngine::Init()
 {
 	Super::Init();
 	GAssetDataBase.Init();
+
+	// Register actor factory for assets
+	GActorFactory.Register( AT_StaticMesh,	&AStaticMesh::SpawnActorAsset );
+	GActorFactory.Register( AT_AudioBank,	&AAudio::SpawnActorAsset );
 
 	// Create main window of editor
 	mainWindow = new WeMainWindow();

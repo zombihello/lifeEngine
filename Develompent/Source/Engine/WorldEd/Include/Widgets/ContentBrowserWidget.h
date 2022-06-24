@@ -65,7 +65,7 @@ public:
 
 	/**
 	 * Get selected asset reference
-	 * @return Return selected asset reference
+	 * @return Return selected asset reference. If not selected returning empty string
 	 */
 	FORCEINLINE const std::wstring& GetSelectedAssetReference() const
 	{

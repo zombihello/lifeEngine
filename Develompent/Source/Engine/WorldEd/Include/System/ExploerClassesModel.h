@@ -68,6 +68,25 @@ public:
 	 */
 	virtual bool removeRows( int InRow, int InCount, const QModelIndex& InParent = QModelIndex() ) override;
 
+	/**
+	 * @brief Get class by index
+	 * 
+	 * @param InIndex	Index
+	 * @return Return pointer to class if valid index, else returning NULL
+	 */
+	FORCEINLINE CClass* GetClass( const QModelIndex& InIndex ) const
+	{
+		// If index is not valid, we returning NULL
+		if ( !InIndex.isValid() )
+		{
+			return nullptr;
+		}
+
+		// Else we getting from index class node, and return class from him
+		WeClassNode*	classNode = ( WeClassNode* )InIndex.internalPointer();
+		return classNode ? classNode->GetClass() : nullptr;
+	}
+
 private:
 	/**
 	 * @brief Container of class node

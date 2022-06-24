@@ -26,7 +26,26 @@ public:
 	 */
 	AAudio();
 
+	/**
+	 * @brief Set audio bank
+	 * @param InAudioBank		Audio bank
+	 */
+	FORCEINLINE void SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
+	{
+		audioComponent->SetAudioBank( InAudioBank );
+	}
+
 #if WITH_EDITOR
+	/**
+	 * @brief Spawn asset actor
+	 *
+	 * @param InAsset       Asset
+	 * @param InLocation    Location actor on spawn
+	 * @param InRotation    Rotation actor on spawn
+	 * @return Return spawned actor. If failed returning NULL
+	 */
+	static ActorRef_t SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const CRotator& InRotation );
+
 	/**
 	 * @brief Initialize actor properties
 	 * This method called only when actor spawned on cooking of map. Available only when WITH_EDITOR is 1

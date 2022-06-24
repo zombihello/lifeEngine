@@ -73,7 +73,18 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
 	
 	GRHI->SetViewParameters( immediateContext, *sceneView );
-	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+
+	// If enabled wireframe mode, we disable depth text
+#if WITH_EDITOR
+	if ( sceneView->GetShowFlags() & SHOW_Wireframe )
+	{
+		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
+	}
+	else
+#endif // WITH_EDITOR
+	{
+		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+	}
 
 	// Build visible primitives on all SDGs
 	if ( scene )

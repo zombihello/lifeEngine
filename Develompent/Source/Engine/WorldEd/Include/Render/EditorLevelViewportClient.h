@@ -71,6 +71,15 @@ public:
 		return viewportType;
 	}
 
+	/**
+	 * @brief Is allow open context menu
+	 * @return Return TRUE if allow open context menu, else returning FALSE
+	 */
+	FORCEINLINE bool IsAllowContextMenu() const
+	{
+		return bAllowContextMenu;
+	}
+
 protected:
 	/**
 	 * @brief Enumeration of move camera flags
@@ -101,6 +110,7 @@ protected:
 	bool						bSetListenerPosition;	/**< Is need sets the listener position */
 	bool						bIsTracking;			/**< Is mouse tracking */
 	bool						bIgnoreInput;			/**< Is need ignore input events */
+	bool						bAllowContextMenu;		/**< Is allow open context menu when pressed right mouse button */
 	ELevelViewportType			viewportType;			/**< Viewport type */	
 	Vector						viewLocation;			/**< Viewport location */	
 	CRotator					viewRotation;			/**< Viewport orientation. Valid only for perspective projections */

@@ -1,6 +1,8 @@
+#include "Misc/EngineGlobals.h"
 #include "Actors/Audio.h"
 #include "System/AudioBuffer.h"
 #include "System/Package.h"
+#include "System/World.h"
 
 IMPLEMENT_CLASS( AAudio )
 
@@ -100,5 +102,25 @@ bool AAudio::InitProperties( const std::vector<CActorVar>& InActorVars, class CC
 std::wstring AAudio::GetActorIcon() const
 {
 	return TEXT( "Engine/Editor/Icons/Asset_Audio.png" );
+}
+
+ActorRef_t AAudio::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const CRotator& InRotation )
+{
+	// If asset is not valid or not audio bank asset, we do nothing
+	if ( !InAsset || InAsset->GetType() != AT_AudioBank )
+	{
+		return nullptr;
+	}
+
+	// Spawn new actor
+	TRefCountPtr<AAudio>		audioActor = GWorld->SpawnActor<AAudio>( InLocation, InRotation );
+	if ( !audioActor )
+	{
+		return nullptr;
+	}
+
+	// Init asset in new audio actor
+	audioActor->SetAudioBank( InAsset->GetAssetHandle() );
+	return audioActor;
 }
 #endif // WITH_EDITOR

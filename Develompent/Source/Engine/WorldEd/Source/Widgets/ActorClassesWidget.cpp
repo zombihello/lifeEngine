@@ -29,6 +29,20 @@ void WeActorClassesWidget::InitUI()
 	ui->treeView_classes->header()->setHidden( true );
 }
 
+CClass* WeActorClassesWidget::GetSelectedClass() const
+{
+	// Getting current index in tree view of classes
+	QModelIndex		currentIndex = filterProxyModel.mapToSource( ui->treeView_classes->currentIndex() );
+
+	// If index is not valid, we return base class - AActor
+	if ( !currentIndex.isValid() )
+	{
+		return AActor::StaticClass();
+	}
+
+	return exploerClassesModel->GetClass( currentIndex );
+}
+
 void WeActorClassesWidget::on_lineEdit_search_textEdited( QString InValue )
 {
 	filterProxyModel.SetFilterPattern( InValue + "*" );

@@ -5,6 +5,7 @@
 
 #include "Math/Rotator.h"
 #include "Misc/WorldEdGlobals.h"
+#include "Containers/String.h"
 #include "System/EditorEngine.h"
 #include "System/WindowEvent.h"
 #include "System/InputKeyConv.h"

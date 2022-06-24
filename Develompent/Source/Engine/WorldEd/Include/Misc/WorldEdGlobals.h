@@ -21,4 +21,10 @@ extern class CEditorEngine*			GEditorEngine;
  */
 extern class CAssetDataBase			GAssetDataBase;
 
+/**
+ * @ingroup WorldEd
+ * Factory actors for spawn from assets in content browser
+ */
+extern class CActorFactory			GActorFactory;
+
 #endif // !WORLDEDGLOBALS_H

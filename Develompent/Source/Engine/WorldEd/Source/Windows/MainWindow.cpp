@@ -17,7 +17,7 @@
 #include "WorldEd.h"
 
 // Widgets
-#include "Widgets/ViewportWidget.h"
+#include "Widgets/LevelViewportWidget.h"
 #include "Widgets/LogWidget.h"
 #include "Widgets/ActorPropertiesWidget.h"
 #include "Widgets/ExploerLevelWidget.h"
@@ -58,25 +58,25 @@ void WeMainWindow::InitUI()
 	// Create viewports
 	{
 		// 3D perspective
-		viewportWidgets[ LVT_Perspective ]		= new WeViewportWidget( this, new CEditorLevelViewportClient( LVT_Perspective ), true );
+		viewportWidgets[ LVT_Perspective ]		= new WeLevelViewportWidget( this, new CEditorLevelViewportClient( LVT_Perspective ), true );
 		ads::CDockAreaWidget*					perspectiveDockAreaWidget = CreateDockWidget( ads::CenterDockWidgetArea, "3D Perspective", viewportWidgets[ LVT_Perspective ], nullptr, false, &dockWidget );
 		ui->menuViewports->addAction( dockWidget->toggleViewAction() );
 		connect( dockWidget, &ads::CDockWidget::visibilityChanged, this, &WeMainWindow::On_PerspectiveDockWidget_VisibilityChanged );
 
 		// 2D XY
-		viewportWidgets[ LVT_OrthoXY ]			= new WeViewportWidget( this, new CEditorLevelViewportClient( LVT_OrthoXY ), true );
+		viewportWidgets[ LVT_OrthoXY ]			= new WeLevelViewportWidget( this, new CEditorLevelViewportClient( LVT_OrthoXY ), true );
 		ads::CDockAreaWidget*					xyDockAreaWidget = CreateDockWidget( ads::TopDockWidgetArea, "2D X/Y", viewportWidgets[ LVT_OrthoXY ], perspectiveDockAreaWidget, false, &dockWidget );
 		ui->menuViewports->addAction( dockWidget->toggleViewAction() );
 		connect( dockWidget, &ads::CDockWidget::visibilityChanged, this, &WeMainWindow::On_OrthoXYDockWidget_VisibilityChanged );
 
 		// 2D XZ
-		viewportWidgets[ LVT_OrthoXZ ]			= new WeViewportWidget( this, new CEditorLevelViewportClient( LVT_OrthoXZ ), true );
+		viewportWidgets[ LVT_OrthoXZ ]			= new WeLevelViewportWidget( this, new CEditorLevelViewportClient( LVT_OrthoXZ ), true );
 		ads::CDockAreaWidget*					xzDockAreaWidget = CreateDockWidget( ads::RightDockWidgetArea, "2D X/Z", viewportWidgets[ LVT_OrthoXZ ], xyDockAreaWidget, false, &dockWidget );
 		ui->menuViewports->addAction( dockWidget->toggleViewAction() );
 		connect( dockWidget, &ads::CDockWidget::visibilityChanged, this, &WeMainWindow::On_OrthoXZDockWidget_VisibilityChanged );
 
 		// 2D YZ
-		viewportWidgets[ LVT_OrthoYZ ]			= new WeViewportWidget( this, new CEditorLevelViewportClient( LVT_OrthoYZ ), true );
+		viewportWidgets[ LVT_OrthoYZ ]			= new WeLevelViewportWidget( this, new CEditorLevelViewportClient( LVT_OrthoYZ ), true );
 		ads::CDockAreaWidget*					yzDockAreaWidget = CreateDockWidget( ads::RightDockWidgetArea, "2D Y/Z", viewportWidgets[ LVT_OrthoYZ ], perspectiveDockAreaWidget, false, &dockWidget );
 		ui->menuViewports->addAction( dockWidget->toggleViewAction() );
 		connect( dockWidget, &ads::CDockWidget::visibilityChanged, this, &WeMainWindow::On_OrthoYZDockWidget_VisibilityChanged );
@@ -103,7 +103,7 @@ void WeMainWindow::InitUI()
 	ui->menuWindows->insertAction( firstActionMenuView, dockWidget->toggleViewAction() );
 
 	// Logger
-	logWidget = new WeLogWidget( this );
+	logWidget					= new WeLogWidget( this );
 	ads::CDockAreaWidget*		logAreaWidget = CreateDockWidget( ads::CenterDockWidgetArea, "Logs", logWidget, actorPropertiesAreaWidget, false, &dockWidget );
 	ui->menuWindows->insertAction( firstActionMenuView, dockWidget->toggleViewAction() );
 

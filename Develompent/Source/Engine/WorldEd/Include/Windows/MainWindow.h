@@ -168,6 +168,15 @@ public:
 		return contentBrowserWidget;
 	}
 
+	/**
+	 * Get actor classes widget
+	 * @return Return actor classes widget
+	 */
+	FORCEINLINE class WeActorClassesWidget* GetActorClassesWidget() const
+	{
+		return actorClassesWidget;
+	}
+
 private slots:
 	/**
 	 * Slot on tick LE
@@ -195,7 +204,7 @@ private:
 	QPoint							mousePosition;					/**< Mouse position */
 	ads::CDockManager*				dockManager;					/**< Dock manager */
 	class WeLogWidget*				logWidget;						/**< Log widget */
-	class WeViewportWidget*			viewportWidgets[ LVT_Max ];		/**< Array of widget viewports */
+	class WeLevelViewportWidget*	viewportWidgets[ LVT_Max ];		/**< Array of widget viewports */
 	class WeContentBrowserWidget*	contentBrowserWidget;			/**< Content browser widget */
 	class WeActorClassesWidget*		actorClassesWidget;				/**< Actor classes widget */
 };
