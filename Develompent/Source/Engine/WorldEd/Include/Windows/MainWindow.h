@@ -136,8 +136,6 @@ public:
 		dockWidget->setFeature( ads::CDockWidget::DockWidgetDeleteOnClose, InIsDeleteAfterClose );
 
 		ads::CFloatingDockContainer*	floatingDockContainer = dockManager->addDockWidgetFloating( dockWidget );
-		floatingDockContainer->setMinimumSize( InContent->minimumSize() );
-		floatingDockContainer->setMaximumSize( InContent->maximumSize() );
 		return floatingDockContainer;
 	}
 

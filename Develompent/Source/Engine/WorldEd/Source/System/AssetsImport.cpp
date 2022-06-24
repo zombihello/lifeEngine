@@ -484,8 +484,8 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh,
 				aiFace* face = &mesh->mFaces[ index ];
 				for ( uint32 indexVertex = 0; indexVertex < face->mNumIndices; ++indexVertex )
 				{
-					uint32		index = face->mIndices[ indexVertex ];
-					auto		it = find( verteces.begin(), verteces.end(), vertexBuffer[ index ] );
+					uint32		localIndex = face->mIndices[ indexVertex ];
+					auto		it = find( verteces.begin(), verteces.end(), vertexBuffer[ localIndex ] );
 
 					// Look for the vertex index in the shared vertex buffer,
 					// if not found, add the vertex to the buffer,
@@ -493,7 +493,7 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh,
 					if ( it == verteces.end() )
 					{
 						indeces.push_back( verteces.size() );
-						verteces.push_back( vertexBuffer[ index ] );
+						verteces.push_back( vertexBuffer[ localIndex ] );
 					}
 					else
 					{

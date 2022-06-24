@@ -3,6 +3,7 @@
 #include <qfiledialog.h>
 #include <qcombobox.h>
 #include <qlabel.h>
+#include <qscrollarea.h>
 
 #include "ui_StaticMeshEditorWindow.h"
 #include "Containers/StringConv.h"
@@ -53,28 +54,40 @@ void WeStaticMeshEditorWindow::InitUI()
 {
 	// Section of materials
 	{
-		WeSectionWidget*	materialsSection	= new WeSectionWidget( "Materials", 300, this );
-		QGridLayout*		gridLayout			= new QGridLayout( materialsSection );
+		WeSectionWidget*	materialsSection		= new WeSectionWidget( "Materials", 300, this );
+		QVBoxLayout*		verticalLayout			= new QVBoxLayout( materialsSection );
+		QScrollArea*		scrollArea				= new QScrollArea( materialsSection );
+		QWidget*			scrollWidgetContents	= new QWidget( materialsSection );
+		QGridLayout*		gridLayout				= new QGridLayout( scrollWidgetContents );
+		
+		verticalLayout->setContentsMargins( 0, 0, 0, 0 );
+		verticalLayout->setSpacing( 0 );
 		gridLayout->setContentsMargins( 3, 3, 3, 3 );
 		gridLayout->setVerticalSpacing( 1 );
+		verticalLayout->addWidget( scrollArea );
 
+		scrollArea->setWidget( scrollWidgetContents );
+		scrollArea->setWidgetResizable( true );
+		scrollArea->setFrameShape( QFrame::NoFrame );
+
+		selectAsset_materials.resize( staticMesh->GetNumMaterials() );
 		for ( uint32 index = 0, numMaterials = staticMesh->GetNumMaterials(); index < numMaterials; ++index )
 		{
 			WeSelectAssetWidget*		selectAsset = new WeSelectAssetWidget( index, materialsSection );
 			gridLayout->addWidget( new QLabel( QString::number( index+1 ) + ":", materialsSection ), index, 0 );
 			gridLayout->addWidget( selectAsset, index, 1 );
-
+		
 			// Add to array and connect to slot
 			connect( selectAsset, SIGNAL( OnAssetReferenceChanged( uint32, const std::wstring& ) ), this, SLOT( OnSelectedAssetMaterial( uint32, const std::wstring& ) ) );
-			selectAsset_materials.push_back( selectAsset );
+			selectAsset_materials[ index ] = selectAsset;
 		}
-		
+
 		materialsSection->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
-		materialsSection->setContentLayout( *gridLayout );
+		materialsSection->setContentLayout( *verticalLayout );
 		materialsSection->expand( true );
 		ui->frame->layout()->addWidget( materialsSection );
 	}
-	
+
 	// Section of file path
 	{
 		WeSectionWidget*	filePathSection		= new WeSectionWidget( "File Path", 300, this );
@@ -124,7 +137,7 @@ void WeStaticMeshEditorWindow::UpdateUI()
 	{
 		WeSelectAssetWidget*		selectAssetWidget = selectAsset_materials[ index ];
 		check( selectAssetWidget );
-
+	
 		TAssetHandle<CMaterial>		material = materials[ index ];
 		if ( material.IsAssetValid() && !GPackageManager->IsDefaultAsset( material ) )
 		{
