@@ -128,10 +128,11 @@ protected:
 	 * @brief Calculate scene view
 	 *
 	 * @warning Need delete allocated pointer
-	 * @param InViewport		Viewport
+	 * @param InSizeX	Size X
+	 * @param InSizeY	Size Y
 	 * @return Return scene view
 	 */
-	virtual class CSceneView* CalcSceneView( CViewport* InViewport ) override;
+	virtual class CSceneView* CalcSceneView( uint32 InSizeX, uint32 InSizeY ) override;
 
 	/**
 	 * @brief Get background color

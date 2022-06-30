@@ -63,6 +63,26 @@ public:
 	virtual void SetViewportType( ELevelViewportType InViewportType );
 
 	/**
+	 * Screen to world space
+	 *
+	 * @param InScreenPoint		Screen point
+	 * @param InViewportSizeX	Viewport size by X
+	 * @param InViewportSizeY	Viewport size by Y
+	 * @return Return point in world space
+	 */
+	Vector ScreenToWorld( const Vector2D& InScreenPoint, uint32 InViewportSizeX, uint32 InViewportSizeY );
+
+	/**
+	 * World space to screen
+	 *
+	 * @param InWorldPoint		World point
+	 * @param InViewportSizeX	Viewport size by X
+	 * @param InViewportSizeY	Viewport size by Y
+	 * @return Return point in screen space
+	 */
+	Vector WorldToScreen( const Vector& InWorldPoint, uint32 InViewportSizeX, uint32 InViewportSizeY );
+
+	/**
 	 * @brief Get viewport type
 	 * @return Return viewport type
 	 */
@@ -96,10 +116,11 @@ protected:
 	 * @brief Calculate scene view
 	 * 
 	 * @warning Need delete allocated pointer
-	 * @param InViewport		Viewport
+	 * @param InSizeX	Size X
+	 * @param InSizeY	Size Y
 	 * @return Return scene view
 	 */
-	virtual class CSceneView* CalcSceneView( CViewport* InViewport );
+	virtual class CSceneView* CalcSceneView( uint32 InSizeX, uint32 InSizeY );
 
 	/**
 	 * @brief Get background color

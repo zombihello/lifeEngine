@@ -28,6 +28,9 @@ WeLevelViewportWidget::~WeLevelViewportWidget()
 
 void WeLevelViewportWidget::OnCustomContextMenuRequested( const QPoint& InPoint )
 {
+	// Save cursor position for spawn objects on this place
+	contextMenuCursorPosition = mapFromGlobal( cursor().pos() );
+
 	// Check if we allow open context menu or no
 	CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
 	check( viewportClient );
@@ -76,7 +79,15 @@ void WeLevelViewportWidget::OnCustomContextMenuRequested( const QPoint& InPoint 
 
 void WeLevelViewportWidget::OnActorAdd()
 {
-	GWorld->SpawnActor( GEditorEngine->GetMainWindow()->GetActorClassesWidget()->GetSelectedClass(), SMath::vectorZero );
+	// Getting viewport client
+	CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
+	check( viewportClient );
+
+	// Convert from screen space to world space
+	Vector		location = viewportClient->ScreenToWorld( Vector2D( contextMenuCursorPosition.x(), contextMenuCursorPosition.y() ), width(), height() );
+
+	// Spawn new actor
+	GWorld->SpawnActor( GEditorEngine->GetMainWindow()->GetActorClassesWidget()->GetSelectedClass(), location );
 }
 
 void WeLevelViewportWidget::OnAssetAdd()
@@ -100,6 +111,13 @@ void WeLevelViewportWidget::OnAssetAdd()
 		return;
 	}
 
+	// Getting viewport client
+	CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
+	check( viewportClient );
+
+	// Convert from screen space to world space
+	Vector		location = viewportClient->ScreenToWorld( Vector2D( contextMenuCursorPosition.x(), contextMenuCursorPosition.y() ), width(), height() );
+
 	// Spawn new actor
-	GActorFactory.Spawn( asset, SMath::vectorZero );
+	GActorFactory.Spawn( asset, location );
 }

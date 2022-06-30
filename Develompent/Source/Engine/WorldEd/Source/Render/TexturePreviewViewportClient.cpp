@@ -17,7 +17,8 @@ CTexturePreviewViewportClient::CTexturePreviewViewportClient( const TSharedPtr<C
 
 void CTexturePreviewViewportClient::Draw( CViewport* InViewport )
 {
-	CSceneView*		sceneView = CalcSceneView( InViewport );
+	check( InViewport );
+	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
 
 	// Draw preview texture viewport
 	UNIQUE_RENDER_COMMAND_FOURPARAMETER(  CViewportRenderCommand,
@@ -63,15 +64,15 @@ void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewpo
 	delete InSceneView;
 }
 
-CSceneView* CTexturePreviewViewportClient::CalcSceneView( CViewport* InViewport )
+CSceneView* CTexturePreviewViewportClient::CalcSceneView( uint32 InSizeX, uint32 InSizeY )
 {
 	// Calculate projection matrix
-	const float			halfWidth			= InViewport->GetSizeX() / 2.f;
-	const float			halfHeight			= InViewport->GetSizeY() / 2.f;
+	const float			halfWidth			= InSizeX / 2.f;
+	const float			halfHeight			= InSizeY / 2.f;
 	Matrix				projectionMatrix	= glm::ortho( -halfWidth, halfWidth, -halfHeight, halfHeight, ( float )-HALF_WORLD_MAX, ( float )HALF_WORLD_MAX );
 
 	// Result
-	CSceneView*			sceneView = new CSceneView( projectionMatrix, SMath::matrixIdentity, InViewport->GetSizeX(), InViewport->GetSizeY(), GetBackgroundColor(), SHOW_DefaultEditor );
+	CSceneView*			sceneView = new CSceneView( projectionMatrix, SMath::matrixIdentity, InSizeX, InSizeY, GetBackgroundColor(), SHOW_DefaultEditor );
 	return sceneView;
 }
 

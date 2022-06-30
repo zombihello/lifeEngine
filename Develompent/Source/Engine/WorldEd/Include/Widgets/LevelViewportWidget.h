@@ -41,6 +41,9 @@ private slots:
 	void OnCustomContextMenuRequested( const QPoint& InPoint );
 	void OnActorAdd();
 	void OnAssetAdd();
+
+private:
+	QPoint		contextMenuCursorPosition;		/**< Cursor position when opened context menu */
 };
 
 #endif // !LEVELVIEWPORTWIDGET_H

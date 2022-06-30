@@ -41,7 +41,8 @@ void CMaterialPreviewViewportClient::Tick( float InDeltaSeconds )
 
 void CMaterialPreviewViewportClient::Draw( CViewport* InViewport )
 {
-	CSceneView*		sceneView = CalcSceneView( InViewport );
+	check( InViewport );
+	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
 
 	// Draw viewport
 	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,

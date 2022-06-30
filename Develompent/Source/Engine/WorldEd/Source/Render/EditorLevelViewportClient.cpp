@@ -90,7 +90,8 @@ void CEditorLevelViewportClient::Tick( float InDeltaSeconds )
 
 void CEditorLevelViewportClient::Draw( CViewport* InViewport )
 {
-	CSceneView*		sceneView = CalcSceneView( InViewport );
+	check( InViewport );
+	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
 
 	// Update audio listener spatial if allowed
 	if ( viewportType == LVT_Perspective && bSetListenerPosition )
@@ -160,6 +161,61 @@ void CEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportT
 			break;
 		}
 	}
+}
+
+Vector CEditorLevelViewportClient::ScreenToWorld( const Vector2D& InScreenPoint, uint32 InViewportSizeX, uint32 InViewportSizeY )
+{
+	// Convert screen point to screen space
+	Vector2D		screenSpace = InScreenPoint;
+
+	// For non perspective viewport need apply zoom factor
+	if ( viewportType != LVT_Perspective )
+	{
+		const float		zoom = orthoZoom / ( InViewportSizeX * 15.0f );
+		screenSpace.x	= zoom * ( screenSpace.x - InViewportSizeX / 2.f );
+		screenSpace.y	= zoom * ( screenSpace.y - InViewportSizeY / 2.f );
+	}
+
+	// Convert screen to world space for each viewport type
+	switch ( viewportType )
+	{
+		// For perspective type we use CSceneView::ScreenToWorld (use inverted matrices)
+	case LVT_Perspective:
+	{
+		Vector		worldOrigin;
+		Vector		worldDirection;
+
+		CSceneView*		sceneView = CalcSceneView( InViewportSizeX, InViewportSizeY );
+		sceneView->ScreenToWorld( screenSpace, worldOrigin, worldDirection );
+		delete sceneView;
+
+		float	t		= -worldOrigin.y / worldDirection.y;
+		float	worldX	= worldOrigin.x + worldDirection.x * t;
+		float	worldZ	= worldOrigin.z + worldDirection.z * t;
+		return Vector( worldX, 0.f, worldZ );
+	}
+
+		// In XZ case Y is up
+	case LVT_OrthoXZ:		return Vector( viewLocation.x - screenSpace.x, 0.f, viewLocation.z - screenSpace.y );
+
+		// In XY case Z is up
+	case LVT_OrthoXY:		return Vector( viewLocation.x - screenSpace.x, viewLocation.y - screenSpace.y, 0.f );
+		
+		// In YZ case X is up
+	case LVT_OrthoYZ:		return Vector( 0.f, viewLocation.y - screenSpace.y, viewLocation.z - screenSpace.y );
+
+		// In default case we return empty vector
+	default:
+		return SMath::vectorZero;
+	}
+}
+
+Vector CEditorLevelViewportClient::WorldToScreen( const Vector& InWorldPoint, uint32 InViewportSizeX, uint32 InViewportSizeY )
+{
+	CSceneView*		sceneView = CalcSceneView( InViewportSizeX, InViewportSizeY );
+	Vector			result = sceneView->WorldToScreen( InWorldPoint );
+	delete sceneView;
+	return result;
 }
 
 void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
@@ -318,21 +374,19 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	}
 }
 
-CSceneView* CEditorLevelViewportClient::CalcSceneView( CViewport* InViewport )
+CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 InSizeY )
 {
 	// Calculate projection matrix
 	Matrix		projectionMatrix;
-	float		viewportSizeX	= InViewport->GetSizeX();
-	float		viewportSizeY	= InViewport->GetSizeY();
 	if ( viewportType == LVT_Perspective )
 	{
-		projectionMatrix = glm::perspective( SMath::DegreesToRadians( viewFOV ), viewportSizeX / viewportSizeY, 0.01f, ( float )WORLD_MAX );
+		projectionMatrix = glm::perspective( SMath::DegreesToRadians( viewFOV ), ( float )InSizeX / InSizeY, 0.01f, ( float )WORLD_MAX );
 	}
 	else
 	{
-		const float		zoom		= orthoZoom / ( viewportSizeX * 15.0f );
-		float			halfWidth	= zoom * viewportSizeX / 2.f;
-		float			halfHeight	= zoom * viewportSizeY / 2.f;
+		const float		zoom		= orthoZoom / ( InSizeX * 15.0f );
+		float			halfWidth	= zoom * InSizeX / 2.f;
+		float			halfHeight	= zoom * InSizeY / 2.f;
 		projectionMatrix = glm::ortho( -halfWidth, halfWidth, -halfHeight, halfHeight, ( float )-HALF_WORLD_MAX, ( float )HALF_WORLD_MAX );
 	}
 
@@ -365,7 +419,7 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( CViewport* InViewport )
 
 	viewMatrix = glm::lookAt( viewLocation, viewLocation + targetDirection, axisUp );
 
-	CSceneView*		sceneView = new CSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), GetBackgroundColor(), showFlags );
+	CSceneView*		sceneView = new CSceneView( projectionMatrix, viewMatrix, InSizeX, InSizeY, GetBackgroundColor(), showFlags );
 	return sceneView;
 }
 

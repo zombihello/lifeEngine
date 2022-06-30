@@ -69,6 +69,26 @@ public:
 	CSceneView( const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const ÑColor& InBackgroundColor, ShowFlags_t InShowFlags );
 
 	/**
+	 * Screen to world space
+	 * 
+	 * @param InScreenPoint		Screen point
+	 * @param OutWorldOrigin	Output origin of ray in world space
+	 * @param OutWorldDirection	Output direction of ray in world space
+	 */
+	void ScreenToWorld( const Vector2D& InScreenPoint, Vector& OutWorldOrigin, Vector& OutWorldDirection ) const;
+
+	/**
+	 * World space to screen
+	 * 
+	 * @param InWorldPoint		World point
+	 * @return Return point in screen space
+	 */
+	FORCEINLINE Vector WorldToScreen( const Vector& InWorldPoint ) const
+	{
+		return viewProjectionMatrix * Vector4D( InWorldPoint, 1.f );
+	}
+
+	/**
 	 * Get view matrix
 	 * @return Return view matrix
 	 */
