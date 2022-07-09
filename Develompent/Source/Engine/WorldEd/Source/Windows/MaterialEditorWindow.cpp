@@ -5,7 +5,6 @@
 
 #include "ui_MaterialEditorWindow.h"
 #include "Misc/WorldEdGlobals.h"
-#include "System/AssetDataBase.h"
 #include "Windows/MaterialEditorWindow.h"
 #include "Widgets/SectionWidget.h"
 #include "Render/MaterialPreviewViewportClient.h"

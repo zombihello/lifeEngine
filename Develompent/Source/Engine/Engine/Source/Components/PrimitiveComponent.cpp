@@ -20,9 +20,9 @@ CPrimitiveComponent::~CPrimitiveComponent()
 	}
 }
 
-void CPrimitiveComponent::BeginPlay()
+void CPrimitiveComponent::Spawned()
 {
-	Super::BeginPlay();
+	Super::Spawned();
 	GWorld->GetScene()->AddPrimitive( this );
 }
 

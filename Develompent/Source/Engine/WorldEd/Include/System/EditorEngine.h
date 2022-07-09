@@ -97,6 +97,14 @@ public:
 	virtual bool LoadMap( const std::wstring& InMap, std::wstring& OutError ) override;
 
 	/**
+	 * Serialize TOC
+	 *
+	 * @param InIsSave	Is save TOC file
+	 * @return Return TRUE if TOC file serialized seccussed, else return FALSE
+	 */
+	bool SerializeTOC( bool InIsSave = false );
+
+	/**
 	 * Get editor name
 	 * 
 	 * @return Return editor name
@@ -130,7 +138,31 @@ public:
 		return mainWindow;
 	}
 
+	/**
+	 * Get game content directory
+	 * @return Return game content directory
+	 */
+	FORCEINLINE std::wstring GetGameContentDir() const
+	{
+		return ÑString::Format( TEXT( "%s/Content/" ), appGameDir().c_str() );
+	}
+
+	/**
+	 * Get engine content directory
+	 * @return Return engine content directory
+	 */
+	FORCEINLINE std::wstring GetEngineContentDir() const
+	{
+		return ÑString::Format( TEXT( "%s/Engine/Content/" ), appBaseDir().c_str() );
+	}
+
 private:
+	/**
+	 * Add TOC entries
+	 * @param InRootDir		Root directory
+	 */
+	void AddTOCEntries( const std::wstring& InRootDir );
+
 	std::vector< class CViewport* >			viewports;		/**< Array of viewports for render */
 	CEditorConstraints						constraints;	/**< Editor constraints */
 	class WeMainWindow*						mainWindow;		/**< Main editor window */

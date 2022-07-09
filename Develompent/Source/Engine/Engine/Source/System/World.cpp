@@ -162,6 +162,9 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
     actor->AddActorLocation( InLocation );
     actor->AddActorRotation( InRotation );
 
+	// Call event of spawn actor
+	actor->Spawned();
+
 	// If gameplay is started - call BeginPlay in spawned actor and init physics
 	if ( isBeginPlay )
 	{

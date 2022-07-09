@@ -52,8 +52,9 @@ void CBaseEngine::Init()
 			std::vector< byte >			data		= { 0, 0, 0, 0 };
 			PackageRef_t				package		= GPackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<CTexture2D>		texture2D	= MakeSharedPtr<CTexture2D>();
+			texture2D->SetAssetName( TEXT( "DefaultTexture" ) );
 			texture2D->SetData( PF_A8R8G8B8, 1, 1, data );
-			
+
 			defaultTexture		= texture2D->GetAssetHandle();
 			package->Add( defaultTexture );
 		}
@@ -89,6 +90,7 @@ void CBaseEngine::Init()
 		{
 			PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<CMaterial>	material = MakeSharedPtr<CMaterial>();
+			material->SetAssetName( TEXT( "DefaultMaterial" ) );
 
 			defaultMaterial		= material->GetAssetHandle();
 			package->Add( defaultMaterial );
@@ -126,6 +128,7 @@ void CBaseEngine::Init()
 		{
 			PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<CMaterial>	material = MakeSharedPtr<CMaterial>();
+			material->SetAssetName( TEXT( "DefaultWireframeMaterial" ) );
 			material->SetWireframe( true );
 
 			defaultWireframeMaterial	= material->GetAssetHandle();

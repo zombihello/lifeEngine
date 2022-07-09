@@ -581,6 +581,11 @@ public:
 	virtual void Serialize( class CArchive& InArchive );
 	
 	/**
+	 * @brief Called when this actor is spawned
+	 */
+	virtual void Spawned();
+
+	/**
 	 * @brief Called when this actor is destroyed
 	 */
 	virtual void Destroyed();

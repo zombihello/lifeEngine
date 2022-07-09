@@ -8,7 +8,6 @@
 #include "ui_StaticMeshEditorWindow.h"
 #include "Containers/StringConv.h"
 #include "Misc/WorldEdGlobals.h"
-#include "System/AssetDataBase.h"
 #include "System/AssetsImport.h"
 #include "Windows/StaticMeshEditorWindow.h"
 #include "Widgets/SectionWidget.h"

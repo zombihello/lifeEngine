@@ -102,6 +102,14 @@ void AActor::Serialize( class CArchive& InArchive )
 	}
 }
 
+void AActor::Spawned()
+{
+	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
+	{
+		ownedComponents[ index ]->Spawned();
+	}
+}
+
 bool AActor::Destroy()
 {
 	if ( !bActorIsBeingDestroyed )

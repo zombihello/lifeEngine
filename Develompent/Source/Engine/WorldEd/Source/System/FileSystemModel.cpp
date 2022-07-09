@@ -11,7 +11,7 @@
 #include "Misc/TableOfContents.h"
 #include "System/Package.h"
 #include "System/BaseFileSystem.h"
-#include "System/AssetDataBase.h"
+#include "System/EditorEngine.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "System/FileSystemModel.h"
@@ -200,7 +200,7 @@ void WeFileSystemModel::dropMimeData_moveFiles( const QMimeData* InData, Qt::Dro
 	// If TOC file is dirty, we serialize him
 	if ( bDirtyTOC )
 	{
-		GAssetDataBase.SerializeTOC( true );
+		GEditorEngine->SerializeTOC( true );
 	}
 
 	// If we have used package - print message
@@ -308,7 +308,7 @@ void WeFileSystemModel::dropMimeData_copyFiles( const QMimeData* InData, Qt::Dro
 	// If TOC file is dirty, we serialize him
 	if ( bDirtyTOC )
 	{
-		GAssetDataBase.SerializeTOC( true );
+		GEditorEngine->SerializeTOC( true );
 	}
 
 	// If we have used package - print message

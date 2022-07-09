@@ -22,7 +22,6 @@
 #include "Windows/PhysicsMaterialEditorWindow.h"
 #include "System/ContentBrowser.h"
 #include "System/EditorEngine.h"
-#include "System/AssetDataBase.h"
 #include "System/AssetsImport.h"
 #include "System/BaseFileSystem.h"
 #include "System/PhysicsMaterial.h"
@@ -152,8 +151,8 @@ void WeContentBrowserWidget::SetRootDir( ERootDir InRootDir )
 	std::wstring		rootDirectory;
 	switch ( InRootDir )
 	{
-	case RD_Engine:		rootDirectory = GAssetDataBase.GetEngineContentDir();	break;
-	case RD_Game:		rootDirectory = GAssetDataBase.GetGameContentDir();		break;
+	case RD_Engine:		rootDirectory = GEditorEngine->GetEngineContentDir();	break;
+	case RD_Game:		rootDirectory = GEditorEngine->GetGameContentDir();		break;
 
 	default:
 		appErrorf( TEXT( "Unsupported type root directory '0x%X'" ), InRootDir );
@@ -898,7 +897,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_delete()
 	// If TOC file is dirty, we serialize him to cache
 	if ( bDirtyTOC )
 	{
-		GAssetDataBase.SerializeTOC( true );
+		GEditorEngine->SerializeTOC( true );
 	}
 
 	// If we have used package - print message
@@ -1003,7 +1002,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 	// If TOC file is dirty, we serialize him to cache
 	if ( bDirtyTOC )
 	{
-		GAssetDataBase.SerializeTOC( true );
+		GEditorEngine->SerializeTOC( true );
 	}
 }
 
@@ -1073,7 +1072,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_createPackag
 
 	// Update TOC file and serialize him
 	GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), package->GetFileName() );
-	GAssetDataBase.SerializeTOC( true );
+	GEditorEngine->SerializeTOC( true );
 }
 
 void WeContentBrowserWidget::OnContentBrowserClickedInEmptySpace()

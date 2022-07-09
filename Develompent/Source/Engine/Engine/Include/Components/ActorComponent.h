@@ -53,6 +53,11 @@ public:
 	virtual void TickComponent( float InDeltaTime );
 
 	/**
+	 * @brief Called when the owning Actor is spawned
+	 */
+	virtual void Spawned();
+
+	/**
 	 * @brief Called when this component is destroyed
 	 */
 	virtual void Destroyed();

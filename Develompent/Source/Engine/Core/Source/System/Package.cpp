@@ -1025,7 +1025,12 @@ PackageRef_t CPackageManager::LoadPackage( const std::wstring& InPath, bool InCr
 			LE_LOG( LT_Log, LC_Package, TEXT( "Package '%s' opened" ), InPath.c_str() );
 			
 			package->SetNameFromPath( InPath );
-			GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), InPath );
+
+			// If package is not virtual, we add entry to TOC
+			if ( !InPath.empty() )
+			{
+				GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), InPath );
+			}
 		}
 	}
 	else

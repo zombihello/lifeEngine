@@ -42,12 +42,6 @@ public:
 	virtual ~CPrimitiveComponent();
 
 	/**
-	 * Begins Play for the component.
-	 * Called when the owning Actor begins play or when the component is created if the Actor has already begun play.
-	 */
-	virtual void BeginPlay() override;
-
-	/**
 	 * Function called every frame on this ActorComponent. Override this function to implement custom logic to be executed every frame.
 	 *
 	 * @param[in] InDeltaTime The time since the last tick.
@@ -66,6 +60,11 @@ public:
      * @param InSceneView Current view of scene
 	 */
 	virtual void AddToDrawList( const class CSceneView& InSceneView );
+
+	/**
+	 * @brief Called when the owning Actor is spawned
+	 */
+	virtual void Spawned() override;
 
 	/**
 	 * @brief Called when this component is destroyed

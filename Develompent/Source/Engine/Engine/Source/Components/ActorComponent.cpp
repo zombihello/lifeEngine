@@ -19,5 +19,8 @@ void CActorComponent::EndPlay()
 void CActorComponent::TickComponent( float InDeltaTime )
 {}
 
+void CActorComponent::Spawned()
+{}
+
 void CActorComponent::Destroyed()
 {}
