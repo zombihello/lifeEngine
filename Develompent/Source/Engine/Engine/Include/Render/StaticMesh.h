@@ -45,12 +45,24 @@ public:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef CMeshDrawList<CStaticMeshDrawPolicy>::SDrawingPolicyLink		DrawingPolicyLink_t;
+	typedef CMeshDrawList<CStaticMeshDrawPolicy>::SDrawingPolicyLink			DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
 	typedef CMeshDrawList<CStaticMeshDrawPolicy>::DrawingPolicyLinkRef_t		DrawingPolicyLinkRef_t;
+
+#if ENABLE_HITPROXY
+	/**
+	 * @brief Typedef of hit proxy drawing policy link
+	 */
+	typedef CMeshDrawList<CHitProxyDrawingPolicy>::SDrawingPolicyLink			HitProxyDrawingPolicyLink_t;
+
+	/**
+	 * @brief Typedef of reference on drawing policy link in scene
+	 */
+	typedef CMeshDrawList<CHitProxyDrawingPolicy>::DrawingPolicyLinkRef_t		HitProxyDrawingPolicyLinkRef_t;
+#endif // ENABLE_HITPROXY
 
 	/**
 	 * @brief Elements of drawing policy link to SDG
@@ -65,10 +77,14 @@ public:
 			, overrideHash( 0 )
 		{}
 
-		bool									bDirty;					/**< Is dirty this element */
-		std::vector<DrawingPolicyLinkRef_t>		drawingPolicyLinks;		/**< Array of reference to drawing policy link in scene */
-		std::vector<const SMeshBatch*>			meshBatchLinks;			/**< Array of references to mesh batch in drawing policy link */
-		uint64									overrideHash;			/**< Hash of overrided segments (custom materials) */
+		bool											bDirty;					/**< Is dirty this element */
+		std::vector<DrawingPolicyLinkRef_t>				drawingPolicyLinks;		/**< Array of reference to drawing policy link in scene */
+		std::vector<const SMeshBatch*>					meshBatchLinks;			/**< Array of references to mesh batch in drawing policy link */
+		uint64											overrideHash;			/**< Hash of overrided segments (custom materials) */
+
+#if ENABLE_HITPROXY
+		std::vector<HitProxyDrawingPolicyLinkRef_t>		hitProxyDrawingPolicyLinks;		/**< Array of references to hit proxy drawing policy link in scene */
+#endif // ENABLE_HITPROXY
 	};
 
 	/**

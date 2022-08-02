@@ -16,6 +16,7 @@
 #include "Render/DrawingPolicy.h"
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/TypesRHI.h"
+#include "LEBuild.h"
 
 #if !SHIPPING_BUILD
 #include "Render/Shaders/WireframeShader.h"
@@ -54,7 +55,7 @@ public:
 	 * Constructor
 	 */
 	TWireframeMeshDrawingPolicy()
-		: wireframeColor( ÑColor::red )
+		: wireframeColor( CColor::red )
 	{}
 
 	/**
@@ -64,7 +65,7 @@ public:
 	 * @param InWireframeColor	Wireframe color
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, const ÑColor& InWireframeColor = ÑColor::red, float InDepthBias = 0.f )
+	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, const CColor& InWireframeColor = CColor::red, float InDepthBias = 0.f )
 	{
 		TAssetHandle<CMaterial>		wireframeMaterial = GEngine->GetDefaultWireframeMaterial();
 		TSharedPtr<CMaterial>		wireframeMaterialRef = wireframeMaterial.ToSharedPtr();
@@ -116,7 +117,7 @@ public:
 	}
 
 private:
-	ÑColor			wireframeColor;		/**< Wireframe color */
+	CColor			wireframeColor;		/**< Wireframe color */
 };
 #endif // !SHIPPING_BUILD
 
@@ -147,6 +148,14 @@ public:
 	 * @param InViewportRHI		Viewport RHI
 	 */
 	void Render( ViewportRHIParamRef_t InViewportRHI );
+
+#if ENABLE_HITPROXY
+	/**
+	 * Render hit proxies
+	 * @param InViewportRHI		Viewport RHI
+	 */
+	void RenderHitProxies( ViewportRHIParamRef_t InViewportRHI );
+#endif // ENABLE_HITPROXY
 
 	/**
 	 * Finish rendering a view, writing the contents to backbuffer of InViewportRHI

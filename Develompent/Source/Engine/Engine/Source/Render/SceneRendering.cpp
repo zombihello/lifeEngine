@@ -46,17 +46,6 @@ void CStaticMeshDrawPolicy::SetShaderParameters( class CBaseDeviceContextRHI* In
 	}
 }
 
-FORCEINLINE const tchar* GetSceneSDGName( ESceneDepthGroup SDG )
-{
-	switch ( SDG )
-	{
-	case SDG_WorldEdBackground:		return TEXT( "WorldEd Background" );
-	case SDG_World:					return TEXT( "World" );
-	case SDG_WorldEdForeground:		return TEXT( "WorldEd Foreground" );
-	default:						return TEXT( "Unknown" );
-	}
-}
-
 CSceneRenderer::CSceneRenderer( CSceneView* InSceneView, class CScene* InScene /* = nullptr */ )
 	: scene( InScene )
 	, sceneView( InSceneView )

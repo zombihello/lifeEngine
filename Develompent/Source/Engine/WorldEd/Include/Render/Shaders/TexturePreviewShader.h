@@ -45,7 +45,7 @@ public:
 	 * @param InDeviceContextRHI	RHI device context
 	 * @param InColorMask			Color mask
 	 */
-	FORCEINLINE void SetColorChannelMask( class CBaseDeviceContextRHI* InDeviceContextRHI, const ÑColor& InColorMask )
+	FORCEINLINE void SetColorChannelMask( class CBaseDeviceContextRHI* InDeviceContextRHI, const CColor& InColorMask )
 	{
 		SetPixelShaderValue( InDeviceContextRHI, colorChannelMask, InColorMask.ToNormalizedVector4D() );
 	}

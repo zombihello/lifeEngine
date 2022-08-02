@@ -12,7 +12,7 @@
 CTexturePreviewViewportClient::CTexturePreviewViewportClient( const TSharedPtr<CTexture2D>& InTexture2D )
 	: CEditorLevelViewportClient( LVT_OrthoXY )
 	, texture2D( InTexture2D )
-	, colorChannelMask( ÑColor::white )
+	, colorChannelMask( CColor::white )
 {}
 
 void CTexturePreviewViewportClient::Draw( CViewport* InViewport )
@@ -76,7 +76,7 @@ CSceneView* CTexturePreviewViewportClient::CalcSceneView( uint32 InSizeX, uint32
 	return sceneView;
 }
 
-ÑColor CTexturePreviewViewportClient::GetBackgroundColor() const
+CColor CTexturePreviewViewportClient::GetBackgroundColor() const
 {
-	return ÑColor::black;
+	return CColor::black;
 }

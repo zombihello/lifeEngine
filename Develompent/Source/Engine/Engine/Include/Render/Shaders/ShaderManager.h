@@ -223,7 +223,7 @@ template< class TParameterType >
 FORCEINLINE void SetVertexShaderValue( class CBaseDeviceContextRHI* InDeviceContextRHI, const CShaderParameter& InParameter, const TParameterType& InValue, uint32 InElementIndex = 0 )
 {
     const uint32       alignedTypeSize = Align( sizeof( TParameterType ), ShaderArrayElementAlignBytes );
-    const int32        numBytesToSet = Min<int32>( sizeof( TParameterType ), InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
+    const int32        numBytesToSet = Min<int32>( alignedTypeSize, InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
     check( numBytesToSet >= InParameter.GetNumBytes() );
 
     if ( numBytesToSet > 0 )

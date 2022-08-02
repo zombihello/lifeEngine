@@ -22,7 +22,7 @@ struct SSimpleElementVertexType
 {
 	Vector4D		position;		/**< Position vertex */
 	Vector2D		texCoord;		/**< Texture coords */
-	ÑColor			color;			/**< Color */
+	CColor			color;			/**< Color */
 
 	/**
 	 * Overload operator ==

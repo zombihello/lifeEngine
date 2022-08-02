@@ -243,7 +243,14 @@ public:
 		check( ModifyCompilationEnvironmentFunc );
 		ModifyCompilationEnvironmentFunc( InShaderPlatform, InEnvironment );
 
-		InEnvironment.difinitions.insert( std::make_pair( TEXT( "USE_INSTANCING" ), bSupportsInstancing ? TEXT( "1" ) : TEXT( "0" ) ) );	
+		InEnvironment.difinitions.insert( std::make_pair( TEXT( "USE_INSTANCING" ), bSupportsInstancing ? TEXT( "1" ) : TEXT( "0" ) ) );
+		InEnvironment.difinitions.insert( std::make_pair( TEXT( "ENABLE_HITPROXY" ),
+#if ENABLE_HITPROXY
+										  !GIsCooker ? TEXT( "1" ) : TEXT( "0" )
+#else
+										  TEXT( "0" )
+#endif // ENABLE_HITPROXY
+		) );
 	}
 #endif // WITH_EDITOR
 

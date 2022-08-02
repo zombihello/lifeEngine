@@ -34,6 +34,13 @@ public:
 	 */
 	virtual ~WeLevelViewportWidget();
 
+	/**
+	 * Event of mouse press
+	 *
+	 * @param InEvent Event of mouse press
+	 */
+	virtual void mousePressEvent( QMouseEvent* InEvent ) override;
+
 private slots:
 	//
 	// Events

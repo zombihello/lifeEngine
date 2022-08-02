@@ -283,7 +283,7 @@ public:
 	 * @param InColor Color event
 	 * @param InName Event name
 	 */
-	virtual void								BeginDrawEvent( class CBaseDeviceContextRHI* InDeviceContext, const ÑColor& InColor, const tchar* InName ) override;
+	virtual void								BeginDrawEvent( class CBaseDeviceContextRHI* InDeviceContext, const CColor& InColor, const tchar* InName ) override;
 
 	/**
 	 * @brief End draw event

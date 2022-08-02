@@ -85,4 +85,7 @@
 	#define CHECK_PUREVIRTUALS		0
 #endif
 
+// Is enable hit proxy
+#define ENABLE_HITPROXY		WITH_EDITOR
+
 #endif // !LEBUILD_H

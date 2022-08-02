@@ -42,6 +42,12 @@ enum { INVALID_ID = ( uint32 )-1 };
 
 /**
  * @ingroup Core
+ * Invalid index
+ */
+enum { INDEX_NONE = ( uint32 )-1 };
+
+/**
+ * @ingroup Core
  * Platform type
  */
 enum EPlatformType

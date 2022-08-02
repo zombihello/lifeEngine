@@ -73,6 +73,6 @@ CSceneView* CGameViewportClient::CalcSceneView( CViewport* InViewport, const SCa
 	Vector		axisUp				= InCameraView.rotation.RotateVector( SMath::vectorUp );
 	Matrix		viewMatrix			= glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
 
-	CSceneView*		sceneView = new CSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), ÑColor::black, SHOW_DefaultGame );
+	CSceneView*		sceneView = new CSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), CColor::black, SHOW_DefaultGame );
 	return sceneView;
 }

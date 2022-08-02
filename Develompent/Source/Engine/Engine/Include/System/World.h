@@ -109,6 +109,13 @@ public:
 		return GPhysicsScene.LineTraceSingleByChannel( OutHitResult, InStart, InEnd, InTraceChannel, InCollisionQueryParams );
 	}
 
+#if ENABLE_HITPROXY
+	/**
+	 * Update hit proxies id in all actors
+	 */
+	void UpdateHitProxiesId();
+#endif // ENABLE_HITPROXY
+
 	/**
 	 * @brief Get scene manager
 	 * @return Return pointer to scene manager

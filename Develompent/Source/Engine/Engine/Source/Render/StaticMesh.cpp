@@ -1,8 +1,10 @@
 #include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 #include "System/Archive.h"
+#include "Render/Scene.h"
 #include "Render/StaticMesh.h"
 #include "Render/SceneUtils.h"
+#include "Render/SceneHitProxyRendering.h"
 
 CStaticMesh::CStaticMesh()
 	: CAsset( AT_StaticMesh )
@@ -17,6 +19,10 @@ CStaticMesh::~CStaticMesh()
 		for ( uint32 index = 0, count = itElement->second->drawingPolicyLinks.size(); index < count; ++index )
 		{
 			itElement->first.SDG->staticMeshDrawList.RemoveItem( itElement->second->drawingPolicyLinks[ index ] );
+			
+#if ENABLE_HITPROXY
+			itElement->first.SDG->hitProxyDrawList.RemoveItem( itElement->second->hitProxyDrawingPolicyLinks[ index ] );
+#endif // ENABLE_HITPROXY
 		}
 	}
 }
@@ -241,7 +247,6 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolic
 	for ( uint32 indexSurface = 0, numSurfaces = ( uint32 )surfaces.size(); indexSurface < numSurfaces; ++indexSurface )
 	{
 		const SStaticMeshSurface&		surface				= surfaces[ indexSurface ];
-		DrawingPolicyLinkRef_t          tmpDrawPolicyLink	= new DrawingPolicyLink_t( DEC_STATIC_MESH );
 		TAssetHandle<CMaterial>			material			= materials[ surface.materialID ];
 
 		// If current material is override - use custom material
@@ -254,8 +259,6 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolic
 			}
 		}
 
-		tmpDrawPolicyLink->drawingPolicy.Init( vertexFactory, material );
-
 		// Generate mesh batch of surface
 		SMeshBatch					meshBatch;
 		meshBatch.baseVertexIndex	= surface.baseVertexIndex;
@@ -263,24 +266,19 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolic
 		meshBatch.numPrimitives		= surface.numPrimitives;
 		meshBatch.indexBufferRHI	= indexBufferRHI;
 		meshBatch.primitiveType		= PT_TriangleList;
-		tmpDrawPolicyLink->meshBatchList.insert( meshBatch );
 
-		// Add to new scene draw policy link
-		DrawingPolicyLinkRef_t		drawingPolicyLink = InSDG.staticMeshDrawList.AddItem( tmpDrawPolicyLink );
-		check( drawingPolicyLink );
+		// Make and add to scene new static mesh drawing policy link
+		const SMeshBatch*					meshBatchLink				= nullptr;
+		DrawingPolicyLinkRef_t				drawingPolicyLink			= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( vertexFactory, material, meshBatch, meshBatchLink, InSDG.staticMeshDrawList, DEC_STATIC_MESH );
 		element->drawingPolicyLinks.push_back( drawingPolicyLink );
+		element->meshBatchLinks.push_back( meshBatchLink );
 
-		// Get link to mesh batch. If not founded insert new
-		MeshBatchList_t::iterator        itMeshBatchLink = drawingPolicyLink->meshBatchList.find( meshBatch );
-		if ( itMeshBatchLink != drawingPolicyLink->meshBatchList.end() )
-		{
-			element->meshBatchLinks.push_back( &( *itMeshBatchLink ) );
-		}
-		else
-		{
-			const SMeshBatch*		meshBatchLink = &( *drawingPolicyLink->meshBatchList.insert( meshBatch ).first );
-			element->meshBatchLinks.push_back( meshBatchLink );
-		}
+		// Make and add to scene new hit proxy drawing policy link
+#if ENABLE_HITPROXY
+		HitProxyDrawingPolicyLinkRef_t		hitProxyDrawingPolicyLink	= ::MakeDrawingPolicyLink<HitProxyDrawingPolicyLink_t>( vertexFactory, material, meshBatch, meshBatchLink, InSDG.hitProxyDrawList, DEC_STATIC_MESH );
+		element->hitProxyDrawingPolicyLinks.push_back( hitProxyDrawingPolicyLink );
+		element->meshBatchLinks.push_back( meshBatchLink );
+#endif // ENABLE_HITPROXY
 	}
 
 	return element;
@@ -312,6 +310,10 @@ void CStaticMesh::UnlinkDrawList( SSceneDepthGroup& InSDG, TSharedPtr<SElementDr
 	for ( uint32 index = 0, count = itElement->second->drawingPolicyLinks.size(); index < count; ++index )
 	{
 		InSDG.staticMeshDrawList.RemoveItem( itElement->second->drawingPolicyLinks[ index ] );
+
+#if ENABLE_HITPROXY
+		InSDG.hitProxyDrawList.RemoveItem( itElement->second->hitProxyDrawingPolicyLinks[ index ] );
+#endif // ENABLE_HITPROXY
 	}
 
 	InDrawingPolicyLink.Reset();

@@ -221,3 +221,13 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 		}
 	}
 }
+
+#if ENABLE_HITPROXY
+void CWorld::UpdateHitProxiesId()
+{
+	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
+	{
+		actors[ index ]->SetHitProxyId( index+1 );
+	}
+}
+#endif // ENABLE_HITPROXY

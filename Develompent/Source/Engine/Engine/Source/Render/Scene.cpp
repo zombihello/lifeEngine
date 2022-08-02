@@ -1,7 +1,7 @@
 #include "Math/Math.h"
 #include "Render/Scene.h"
 
-CSceneView::CSceneView( const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const ÑColor& InBackgroundColor, ShowFlags_t InShowFlags )
+CSceneView::CSceneView( const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const CColor& InBackgroundColor, ShowFlags_t InShowFlags )
 	: viewMatrix( InViewMatrix )
 	, projectionMatrix( InProjectionMatrix )
 	, viewProjectionMatrix( InProjectionMatrix * InViewMatrix )

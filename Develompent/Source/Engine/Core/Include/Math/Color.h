@@ -18,16 +18,16 @@
  * @ingroup Core
  * @brief The class for work with color
  */
-class ÑColor
+class CColor
 {
 public:
-	friend CArchive& operator<<( CArchive& InArchive, ÑColor& InValue );
-	friend CArchive& operator<<( CArchive& InArchive, const ÑColor& InValue );
+	friend CArchive& operator<<( CArchive& InArchive, CColor& InValue );
+	friend CArchive& operator<<( CArchive& InArchive, const CColor& InValue );
 
 	/**
 	 * @brief Default constructor
 	 */
-	FORCEINLINE	ÑColor() :
+	FORCEINLINE	CColor() :
 		r( 0 ),
 		g( 0 ),
 		b( 0 ),
@@ -42,7 +42,7 @@ public:
 	 * @param[in] InBlue Blue component of color
 	 * @param[in] InAlpha Alpha component of color
 	 */
-	FORCEINLINE	ÑColor( uint8 InRed, uint8 InGreen, uint8 InBlue, uint8 InAlpha = 255 )
+	FORCEINLINE	CColor( uint8 InRed, uint8 InGreen, uint8 InBlue, uint8 InAlpha = 255 )
 	{
 		Set( InRed, InGreen, InBlue, InAlpha );
 	}
@@ -53,7 +53,7 @@ public:
 	 *
 	 * @param InLinearColor	Linear color
 	 */
-	FORCEINLINE ÑColor( const Vector4D& InLinearColor )
+	FORCEINLINE CColor( const Vector4D& InLinearColor )
 	{
 		Set( InLinearColor );
 	}
@@ -62,7 +62,7 @@ public:
 	 * @brief Constructor
 	 * @param InColor		Color in uint32 type
 	 */
-	FORCEINLINE ÑColor( uint32 InColor )
+	FORCEINLINE CColor( uint32 InColor )
 	{
 		GetUInt32Color() = InColor;
 	}
@@ -130,8 +130,8 @@ public:
 	}
 
 	/**
-	 * @brief Convert ÑColor to Vector4D
-	 * @return Return converted ÑColor to Vector4D
+	 * @brief Convert CColor to Vector4D
+	 * @return Return converted CColor to Vector4D
 	 */
 	FORCEINLINE Vector4D ToVector4D() const
 	{
@@ -139,8 +139,8 @@ public:
 	}
 
 	/**
-	 * @brief Convert ÑColor to normalized Vector4D (in range 0 -> 1)
-	 * @return Return converted ÑColor to normalized Vector4D (in range 0 -> 1)
+	 * @brief Convert CColor to normalized Vector4D (in range 0 -> 1)
+	 * @return Return converted CColor to normalized Vector4D (in range 0 -> 1)
 	 */
 	FORCEINLINE Vector4D ToNormalizedVector4D() const
 	{
@@ -150,14 +150,14 @@ public:
 	/**
 	 * @brief Override operator ==
 	 */
-	FORCEINLINE bool operator==( const ÑColor& InRight ) const
+	FORCEINLINE bool operator==( const CColor& InRight ) const
 	{
 		return r == InRight.r && g == InRight.g && b == InRight.b && a == InRight.a;
 	}
 
-	static ÑColor			black;			/**< Black color */
-	static ÑColor			white;			/**< White color */
-	static ÑColor			red;			/**< Red color */
+	static CColor			black;			/**< Black color */
+	static CColor			white;			/**< White color */
+	static CColor			red;			/**< Red color */
 
 	uint8			r;			/**< Red component of color */
 	uint8			g;			/**< Green component of color */
@@ -169,7 +169,7 @@ public:
 // Serialization
 //
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, ÑColor& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, CColor& InValue )
 {
 	InArchive << InValue.r;
 	InArchive << InValue.g;
@@ -178,7 +178,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, ÑColor& InValue )
 	return InArchive;
 }
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ÑColor& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CColor& InValue )
 {
 	InArchive << InValue.r;
 	InArchive << InValue.g;

@@ -17,8 +17,11 @@
 #include "Render/CameraTypes.h"
 #include "Render/Material.h"
 #include "Render/SceneRendering.h"
+#include "Render/SceneHitProxyRendering.h"
 #include "Render/Frustum.h"
+#include "Render/HitProxies.h"
 #include "Render/BatchedSimpleElements.h"
+#include "Render/RenderingThread.h"
 #include "Components/CameraComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "RHI/BaseRHI.h"
@@ -66,7 +69,7 @@ public:
 	 * @param InBackgroundColor			Background color
 	 * @param InShowFlags				Show flags
 	 */
-	CSceneView( const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const ÑColor& InBackgroundColor, ShowFlags_t InShowFlags );
+	CSceneView( const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const CColor& InBackgroundColor, ShowFlags_t InShowFlags );
 
 	/**
 	 * Screen to world space
@@ -128,7 +131,7 @@ public:
 	 * Get background color
 	 * @return Return background color
 	 */
-	FORCEINLINE const ÑColor& GetBackgroundColor() const
+	FORCEINLINE const CColor& GetBackgroundColor() const
 	{
 		return backgroundColor;
 	}
@@ -165,10 +168,23 @@ private:
 	Matrix			projectionMatrix;		/**< Projection matrix */
 	Matrix			viewProjectionMatrix;	/**< View * Projection matrix */
 	CFrustum		frustum;				/**< Frustum */
-	ÑColor			backgroundColor;		/**< Background color */
+	CColor			backgroundColor;		/**< Background color */
 	ShowFlags_t		showFlags;				/**< Show flags for the view */
 	float			sizeX;					/**< Size X of viewport */
 	float			sizeY;					/**< Size Y of viewport */
+};
+
+/**
+ * @ingroup Engine
+ * Mesh instance of batch
+ */
+struct SMeshInstance
+{
+	Matrix			transformMatrix;	/**< Transform matrix */
+
+#if ENABLE_HITPROXY
+	CHitProxyId		hitProxyId;			/**< Hit proxy id */
+#endif // ENABLE_HITPROXY
 };
 
 /**
@@ -247,13 +263,13 @@ struct SMeshBatch
 		return hash;
 	}
 
-	IndexBufferRHIRef_t					indexBufferRHI;				/**< Index buffer */
-	EPrimitiveType						primitiveType;				/**< Primitive type */
-	uint32								baseVertexIndex;			/**< First index vertex in vertex buffer */
-	uint32								firstIndex;					/**< First index */
-	uint32								numPrimitives;				/**< Number primitives to render */
-	mutable uint32						numInstances;				/**< Number instances of mesh */
-	mutable std::vector< Matrix >		transformationMatrices;		/**< Array of transformation matrix for instances */
+	IndexBufferRHIRef_t							indexBufferRHI;		/**< Index buffer */
+	EPrimitiveType								primitiveType;		/**< Primitive type */
+	uint32										baseVertexIndex;	/**< First index vertex in vertex buffer */
+	uint32										firstIndex;			/**< First index */
+	uint32										numPrimitives;		/**< Number primitives to render */
+	mutable uint32								numInstances;		/**< Number instances of mesh */
+	mutable std::vector< SMeshInstance >		instances;			/**< Array of mesh instances */
 };
 
 /**
@@ -279,7 +295,7 @@ public:
 		 * 
 		 * @param InWireframeColor		Wireframe color
 		 */
-		SDrawingPolicyLink( const ÑColor& InWireframeColor = ÑColor::red )
+		SDrawingPolicyLink( const CColor& InWireframeColor = CColor::red )
 #if !SHIPPING_BUILD
 			: wireframeColor( InWireframeColor )
 #endif // !SHIPPING_BUILD
@@ -291,7 +307,7 @@ public:
 		 * @param InDrawingPolicy		Drawing policy
 		 * @param InWireframeColor		Wireframe color
 		 */
-		SDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const ÑColor& InWireframeColor = ÑColor::red )
+		SDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const CColor& InWireframeColor = CColor::red )
 			: drawingPolicy( InDrawingPolicy )
 #if !SHIPPING_BUILD
 			, wireframeColor( InWireframeColor )
@@ -327,7 +343,7 @@ public:
 		mutable TDrawingPolicyType				drawingPolicy;			/**< Drawing policy */
 
 #if !SHIPPING_BUILD
-		ÑColor									wireframeColor;			/**< Wireframe color */
+		CColor									wireframeColor;			/**< Wireframe color */
 #endif // !SHIPPING_BUILD
 	};
 
@@ -438,7 +454,7 @@ public:
 			for ( MeshBatchList_t::const_iterator itMeshBatch = drawingPolicyLink->meshBatchList.begin(), itMeshBatchEnd = drawingPolicyLink->meshBatchList.end(); itMeshBatch != itMeshBatchEnd; ++itMeshBatch )
 			{
 				itMeshBatch->numInstances = 0;
-				itMeshBatch->transformationMatrices.clear();
+				itMeshBatch->instances.clear();
 			}
 		}
 	}
@@ -521,6 +537,44 @@ private:
 
 /**
  * @ingroup Engine
+ * @brief Make drawing policy link and add him to scene
+ * 
+ * @param InVertexFactory	Vertex factory
+ * @param InMaterial		Material
+ * @param InMeshBatch		Mesh batch
+ * @param OutMeshBatchLink	Output pointer to mesh batch in drawing policy link
+ * @param InMeshDrawList	Mesh draw list
+ * @param InWireframeColor	Wireframe color
+ */
+template<typename TDrawingPolicyLink, typename TMeshDrawList>
+FORCEINLINE TRefCountPtr<TDrawingPolicyLink> MakeDrawingPolicyLink( CVertexFactory* InVertexFactory, const TAssetHandle<CMaterial>& InMaterial, const SMeshBatch& InMeshBatch, const SMeshBatch*& OutMeshBatchLink, TMeshDrawList& InMeshDrawList, const CColor& InWireframeColor = CColor::red )
+{
+	// Init new drawing policy link
+	check( InVertexFactory );
+	TRefCountPtr<TDrawingPolicyLink>		tmpDrawPolicyLink = new TDrawingPolicyLink( InWireframeColor );
+	tmpDrawPolicyLink->drawingPolicy.Init( InVertexFactory, InMaterial );
+	tmpDrawPolicyLink->meshBatchList.insert( InMeshBatch );
+
+	// Add to scene new drawing policy link
+	TRefCountPtr<TDrawingPolicyLink>		drawingPolicyLink = InMeshDrawList.AddItem( tmpDrawPolicyLink );
+	check( drawingPolicyLink );
+
+	// Get link to mesh batch. If not founded insert new
+	MeshBatchList_t::iterator        itMeshBatchLink = drawingPolicyLink->meshBatchList.find( InMeshBatch );
+	if ( itMeshBatchLink != drawingPolicyLink->meshBatchList.end() )
+	{
+		OutMeshBatchLink = &( *itMeshBatchLink );
+	}
+	else
+	{
+		OutMeshBatchLink = &( *drawingPolicyLink->meshBatchList.insert( InMeshBatch ).first );
+	}
+
+	return drawingPolicyLink;
+}
+
+/**
+ * @ingroup Engine
  * @brief Enumeration of scene depth group
  */
 enum ESceneDepthGroup
@@ -530,6 +584,24 @@ enum ESceneDepthGroup
 	SDG_WorldEdForeground,	/**< Foreground of viewport in WorldEd */
 	SDG_Max					/**< Num depth groups */
 };
+
+#if WITH_EDITOR
+/**
+ * @ingroup Engine
+ * @brief Get scene SDG name
+ * @return Return name of scene SDG
+ */
+FORCEINLINE const tchar* GetSceneSDGName( ESceneDepthGroup SDG )
+{
+	switch ( SDG )
+	{
+	case SDG_WorldEdBackground:		return TEXT( "WorldEd Background" );
+	case SDG_World:					return TEXT( "World" );
+	case SDG_WorldEdForeground:		return TEXT( "WorldEd Foreground" );
+	default:						return TEXT( "Unknown" );
+	}
+}
+#endif // WITH_EDITOR
 
 /**
  * @ingroup Engine
@@ -549,6 +621,10 @@ struct SSceneDepthGroup
 		dynamicMeshElements.Clear();
 		staticMeshDrawList.Clear();
 		spriteDrawList.Clear();
+
+#if ENABLE_HITPROXY
+		hitProxyDrawList.Clear();
+#endif // ENABLE_HITPROXY
 	}
 
 	/**
@@ -561,6 +637,10 @@ struct SSceneDepthGroup
 #if !SHIPPING_BUILD
 			&& simpleElements.IsEmpty()
 #endif // !SHIPPING_BUILD
+
+#if ENABLE_HITPROXY
+			&& hitProxyDrawList.GetNum() <= 0
+#endif // ENABLE_HITPROXY
 			;
 	}
 
@@ -572,6 +652,10 @@ struct SSceneDepthGroup
 	CMeshDrawList< CStaticMeshDrawPolicy >				dynamicMeshElements;	/**< Draw list of dynamic meshes */
 	CMeshDrawList< CStaticMeshDrawPolicy >				staticMeshDrawList;		/**< Draw list of static meshes */
 	CMeshDrawList< CStaticMeshDrawPolicy >				spriteDrawList;			/**< Draw list of sprites */
+
+#if ENABLE_HITPROXY
+	CMeshDrawList< CHitProxyDrawingPolicy >				hitProxyDrawList;		/**< Draw list of hit proxy */
+#endif // ENABLE_HITPROXY
 };
 
 /**

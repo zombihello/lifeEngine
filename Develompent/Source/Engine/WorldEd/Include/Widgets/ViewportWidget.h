@@ -72,12 +72,7 @@ public:
 		return bEnabled;
 	}
 
-private:
-	/**
-	 * Init viewport
-	 */
-	void InitViewport();
-
+protected:
 	/**
 	 * Event called when widget showed
 	 * 
@@ -144,6 +139,12 @@ private:
 	 * @param InEvent Event of key release
 	 */
 	virtual void keyReleaseEvent( QKeyEvent* InEvent ) override;
+
+private:
+	/**
+	 * Init viewport
+	 */
+	void InitViewport();
 
 	bool					bEnabled;					/**< Is enabled viewport */
 	bool					bInTick;					/**< Is added viewport to editor engine */

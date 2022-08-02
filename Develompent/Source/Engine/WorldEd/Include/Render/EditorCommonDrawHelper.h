@@ -53,9 +53,9 @@ private:
 	bool		bDrawColoredOrigin;			/**< Is need draw colored origins */
 	bool		bDrawWorldBox;				/**< Is need draw world box */
 	float		perspectiveGridSize;		/**< Perspective grid size */
-	ÑColor		gridColorHi;				/**< Grid color height */
-	ÑColor		gridColorLo;				/**< Grid color low */
-	ÑColor		worldBoxColor;				/**< World box color */
+	CColor		gridColorHi;				/**< Grid color height */
+	CColor		gridColorLo;				/**< Grid color low */
+	CColor		worldBoxColor;				/**< World box color */
 };
 
 #endif // !EDITORCOMMONDRAWHELPER_H

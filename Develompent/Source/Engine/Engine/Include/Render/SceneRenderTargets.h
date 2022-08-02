@@ -13,6 +13,7 @@
 #include "RenderUtils.h"
 #include "RHI/BaseSurfaceRHI.h"
 #include "RHI/TypesRHI.h"
+#include "LEBuild.h"
 
 /**
  * @ingroup Engine
@@ -22,6 +23,11 @@ enum ESceneRenderTargetTypes
 {
 	SRTT_SceneColor,						/**< Render target for scene colors */
 	SRTT_SceneDepthZ,						/**< Render target for scene depths */
+
+#if ENABLE_HITPROXY
+	SRRT_HitProxies,						/**< Render target for hitProxiesy */
+#endif // ENABLE_HITPROXY
+
 	SRTT_MaxSceneRenderTargets				/**< Max scene RTs available */
 };
 
@@ -80,6 +86,26 @@ public:
 	{
 		return renderTargets[ SRTT_SceneDepthZ ].surface;
 	}
+
+#if ENABLE_HITPROXY
+	/**
+	 * @brief Get texture of hit proxy
+	 * @return Return texture of hit proxy
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetHitProxyTexture() const
+	{
+		return renderTargets[ SRRT_HitProxies ].texture;
+	}
+
+	/**
+	 * @brief Get surface of hit proxy
+	 * @return Return surface of hit proxy
+	 */
+	FORCEINLINE SurfaceRHIRef_t GetHitProxySurface() const
+	{
+		return renderTargets[ SRRT_HitProxies ].surface;
+	}
+#endif // ENABLE_HITPROXY
 
 protected:
 	/**

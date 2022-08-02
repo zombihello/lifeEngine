@@ -37,10 +37,10 @@ void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, floa
 	vertices[ 2 ].texCoord		= Vector2D( InU,			InV + InSizeV );
 	vertices[ 3 ].texCoord		= Vector2D( InU + InSizeU,	InV + InSizeV );
 
-	vertices[ 0 ].color			= ÑColor( 255, 255, 255 );
-	vertices[ 1 ].color			= ÑColor( 255, 255, 255 );
-	vertices[ 2 ].color			= ÑColor( 255, 255, 255 );
-	vertices[ 3 ].color			= ÑColor( 255, 255, 255 );
+	vertices[ 0 ].color			= CColor( 255, 255, 255 );
+	vertices[ 1 ].color			= CColor( 255, 255, 255 );
+	vertices[ 2 ].color			= CColor( 255, 255, 255 );
+	vertices[ 3 ].color			= CColor( 255, 255, 255 );
 
 	for ( uint32 vertexIndex = 0; vertexIndex < 4; ++vertexIndex )
 	{
@@ -57,7 +57,7 @@ void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, floa
 	GRHI->DrawIndexedPrimitiveUP( InDeviceContextRHI, PT_TriangleList, 0, 2, 4, indices, sizeof( indices[ 0 ] ), vertices, sizeof( vertices[ 0 ] ) );
 }
 
-void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class ÑBox& InBox, const class ÑColor& InColor )
+void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class ÑBox& InBox, const class CColor& InColor )
 {
 #if WITH_EDITOR
 	Vector		bbox[ 2 ] = { InBox.GetMin(), InBox.GetMax() };

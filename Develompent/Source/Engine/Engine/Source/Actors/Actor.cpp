@@ -33,7 +33,7 @@ void CActorVar::Clear()
 	case AVT_Vector4D:	delete static_cast< Vector4D* >( value );					break;
 	case AVT_RectInt:	delete static_cast< RectInt32_t* >( value );					break;
 	case AVT_RectFloat:	delete static_cast< RectFloat_t* >( value );					break;
-	case AVT_Color:		delete static_cast< ÑColor* >( value );						break;
+	case AVT_Color:		delete static_cast< CColor* >( value );						break;
 	case AVT_String:	delete static_cast< std::wstring* >( value );				break;
 	case AVT_Material:	delete static_cast< TAssetHandle<CMaterial>* >( value );	break;
 	}

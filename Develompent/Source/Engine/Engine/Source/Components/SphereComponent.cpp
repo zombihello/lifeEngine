@@ -42,7 +42,7 @@ void CSphereComponent::AddToDrawList( const class CSceneView& InSceneView )
 	transform.SetScale( Vector( radius, radius, radius ) );
 
 	++meshBatchLink->numInstances;
-	meshBatchLink->transformationMatrices.push_back( transform.ToMatrix() );
+	meshBatchLink->instances.push_back( SMeshInstance{ transform.ToMatrix() } );
 }
 
 void CSphereComponent::LinkDrawList()

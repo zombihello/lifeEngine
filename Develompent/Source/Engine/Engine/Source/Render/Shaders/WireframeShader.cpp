@@ -64,7 +64,7 @@ void CWireframePixelShader::Init( const CShaderCache::SShaderCacheItem& InShader
 void CWireframePixelShader::SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const
 {
 	check( InMaterialResource );
-	Vector4D		wireframeColor = ÑColor::black.ToNormalizedVector4D();
+	Vector4D		wireframeColor = CColor::black.ToNormalizedVector4D();
 	InMaterialResource->GetVectorParameterValue( TEXT( "wireframeColor" ), wireframeColor );
 
 	SetPixelShaderValue( InDeviceContextRHI, wireframeColorParameter, wireframeColor );

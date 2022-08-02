@@ -1218,7 +1218,7 @@ void CD3D11RHI::DrawImGUI( class CBaseDeviceContextRHI* InDeviceContext, ImDrawD
 #endif // WITH_IMGUI
 
 #if FRAME_CAPTURE_MARKERS
-void CD3D11RHI::BeginDrawEvent( class CBaseDeviceContextRHI* InDeviceContext, const ÑColor& InColor, const tchar* InName )
+void CD3D11RHI::BeginDrawEvent( class CBaseDeviceContextRHI* InDeviceContext, const CColor& InColor, const tchar* InName )
 {
 	D3DPERF_BeginEvent( D3DCOLOR_RGBA( InColor.r, InColor.g, InColor.b, InColor.a ), InName );
 }

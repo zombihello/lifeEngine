@@ -29,7 +29,7 @@ public:
 	 * @param[in] InSurface Surface for rendering
 	 * @param[in] InColor Color for clearing render target
 	 */
-	virtual void				ClearSurface( SurfaceRHIParamRef_t InSurface, const class ÑColor& InColor ) {}
+	virtual void				ClearSurface( SurfaceRHIParamRef_t InSurface, const class CColor& InColor ) {}
 
 	/**
 	 * Clear depth stencil

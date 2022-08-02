@@ -299,7 +299,7 @@ public:
 	 * @param InColor Color event
 	 * @param InName Event name
 	 */
-	virtual void								BeginDrawEvent( class CBaseDeviceContextRHI* InDeviceContext, const ÑColor& InColor, const tchar* InName ) {}
+	virtual void								BeginDrawEvent( class CBaseDeviceContextRHI* InDeviceContext, const CColor& InColor, const tchar* InName ) {}
 
 	/**
 	 * @brief End draw event

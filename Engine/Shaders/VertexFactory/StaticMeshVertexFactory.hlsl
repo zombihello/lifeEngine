@@ -33,4 +33,11 @@ float4 VertexFactory_GetColor( FVertexFactoryInput InInput, uint InColorIndex )
 	return float4( 1.f, 1.f, 1.f, 1.f );
 }
 
+#if ENABLE_HITPROXY
+float4 VertexFactory_GetHitProxyId( FVertexFactoryInput InInput )
+{
+	return hitProxyId;
+}
+#endif // ENABLE_HITPROXY
+
 #endif // !VERTEXFACTORY_H

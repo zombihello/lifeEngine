@@ -17,12 +17,18 @@ void CSceneRenderTargets::InitRHI()
 	if ( bufferSizeX > 0 && bufferSizeY > 0 )
 	{
 		// Scene color
-		renderTargets[ SRTT_SceneColor ].texture = GRHI->CreateTexture2D( TEXT( "SceneColor" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );
-		renderTargets[ SRTT_SceneColor ].surface = GRHI->CreateTargetableSurface( TEXT( "SceneColor" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[ SRTT_SceneColor ].texture, TCF_ResolveTargetable );
+		renderTargets[ SRTT_SceneColor ].texture	= GRHI->CreateTexture2D( TEXT( "SceneColor" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );
+		renderTargets[ SRTT_SceneColor ].surface	= GRHI->CreateTargetableSurface( TEXT( "SceneColor" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[ SRTT_SceneColor ].texture, TCF_ResolveTargetable );
 
 		// Scene depth Z
-		renderTargets[ SRTT_SceneDepthZ ].texture = GRHI->CreateTexture2D( TEXT( "SceneDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, 1, TCF_ResolveTargetable | TCF_DepthStencil );
-		renderTargets[ SRTT_SceneDepthZ ].surface = GRHI->CreateTargetableSurface( TEXT( "SceneDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, renderTargets[ SRTT_SceneDepthZ ].texture, TCF_ResolveTargetable | TCF_DepthStencil );
+		renderTargets[ SRTT_SceneDepthZ ].texture	= GRHI->CreateTexture2D( TEXT( "SceneDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, 1, TCF_ResolveTargetable | TCF_DepthStencil );
+		renderTargets[ SRTT_SceneDepthZ ].surface	= GRHI->CreateTargetableSurface( TEXT( "SceneDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, renderTargets[ SRTT_SceneDepthZ ].texture, TCF_ResolveTargetable | TCF_DepthStencil );
+
+#if ENABLE_HITPROXY
+		// Hit proxy
+		renderTargets[ SRRT_HitProxies ].texture	= GRHI->CreateTexture2D( TEXT( "HitProxy" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );
+		renderTargets[ SRRT_HitProxies ].surface	= GRHI->CreateTargetableSurface( TEXT( "HitProxy" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[ SRRT_HitProxies ].texture, TCF_ResolveTargetable );
+#endif // ENABLE_HITPROXY
 	}
 }
 

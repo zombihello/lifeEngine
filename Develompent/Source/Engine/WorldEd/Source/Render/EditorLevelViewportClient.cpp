@@ -9,6 +9,8 @@
 #include "Render/SceneRendering.h"
 #include "Render/RenderingThread.h"
 #include "Render/SceneUtils.h"
+#include "Render/SceneRenderTargets.h"
+#include "Render/RenderUtils.h"
 #include "System/AudioDevice.h"
 #include "System/EditorEngine.h"
 #include "System/InputSystem.h"
@@ -126,6 +128,59 @@ void CEditorLevelViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportR
 	sceneRenderer.FinishRenderViewTarget( InViewportRHI );
 	delete InSceneView;
 }
+
+#if ENABLE_HITPROXY
+void CEditorLevelViewportClient::DrawHitProxies( CViewport* InViewport )
+{ 
+	check( InViewport );
+	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
+
+	// Draw viewport
+	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,
+										  CEditorLevelViewportClient*, viewportClient, this,
+										  ViewportRHIRef_t, viewportRHI, InViewport->GetViewportRHI(),
+										  CSceneView*, sceneView, sceneView,
+										  {
+											  viewportClient->DrawHitProxies_RenderThread( viewportRHI, sceneView );
+										  } );
+}
+
+void CEditorLevelViewportClient::DrawHitProxies_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView )
+{
+	check( IsInRenderingThread() );
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	CSceneRenderer				sceneRenderer( InSceneView, ( CScene* )GWorld->GetScene() );
+
+	// Draw hit proxies
+	sceneRenderer.RenderHitProxies( InViewportRHI );
+	
+	delete InSceneView;
+}
+
+CHitProxyId CEditorLevelViewportClient::GetHitProxyId( uint32 InX, uint32 InY ) const
+{
+	CHitProxyId		result;
+	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CGetHitProxyIdCommand,
+										  CHitProxyId&, hitProxyId, result,
+										  uint32, x, InX,
+										  uint32, y, InY,
+										  {
+											  CBaseDeviceContextRHI*	deviceContext	= GRHI->GetImmediateContext();
+											  Texture2DRHIRef_t			hitProxyTexture = GSceneRenderTargets.GetHitProxyTexture();
+											  SLockedData				lockedData;
+											  GRHI->LockTexture2D( deviceContext, hitProxyTexture, 0, false, lockedData );
+
+											  uint8*	data	= ( uint8* )lockedData.data;
+											  uint32	offset	= x * y;
+
+											  hitProxyId.SetIndex( CColor( data[ offset ], data[ offset + 1 ], data[ offset + 2 ], data[ offset + 3 ] ) );
+											  GRHI->UnlockTexture2D( deviceContext, hitProxyTexture, 0, lockedData );
+										  } );
+
+	FlushRenderingCommands();
+	return result;
+}
+#endif // ENABLE_HITPROXY
 
 void CEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportType )
 {
@@ -423,14 +478,14 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 In
 	return sceneView;
 }
 
-ÑColor CEditorLevelViewportClient::GetBackgroundColor() const
+CColor CEditorLevelViewportClient::GetBackgroundColor() const
 {
 	if ( viewportType == LVT_Perspective )
 	{
-		return ÑColor::black;
+		return CColor::black;
 	}
 	else
 	{
-		return ÑColor( 163, 163, 163 );
+		return CColor( 163, 163, 163 );
 	}
 }

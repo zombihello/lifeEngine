@@ -29,7 +29,7 @@ public:
 	 * @param InEnd			End
 	 * @param InColor		Color
 	 */
-	FORCEINLINE void AddLine( const Vector& InStart, const Vector& InEnd, const ÑColor& InColor )
+	FORCEINLINE void AddLine( const Vector& InStart, const Vector& InEnd, const CColor& InColor )
 	{
 		// Reserve space for new verteces of line
 		uint32		oldSize = lineVerteces.size();

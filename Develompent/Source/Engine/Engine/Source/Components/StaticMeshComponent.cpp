@@ -1,3 +1,4 @@
+#include "Actors/Actor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Render/Scene.h"
 #include "Render/SceneUtils.h"
@@ -73,6 +74,10 @@ void CStaticMeshComponent::AddToDrawList( const class CSceneView& InSceneView )
 	{
 		const SMeshBatch*		meshBatch = elementDrawingPolicyLink->meshBatchLinks[ index ];
 		++meshBatch->numInstances;
-		meshBatch->transformationMatrices.push_back( transformationMatrix );
+		meshBatch->instances.push_back( SMeshInstance{ transformationMatrix 
+#if ENABLE_HITPROXY
+										, GetOwner()->GetHitProxyId() 
+#endif // ENABLE_HITPROXY
+										} );
 	}
 }

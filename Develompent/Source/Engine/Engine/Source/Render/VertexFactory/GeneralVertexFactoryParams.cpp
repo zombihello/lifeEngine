@@ -21,7 +21,7 @@ void CGeneralVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDev
     if ( !bSupportsInstancing )
     {
         check( InNumInstances == 1 );
-        SetVertexShaderValue( InDeviceContextRHI, localToWorldMatrixParameter, InMesh.transformationMatrices[ InStartInstanceID ] );
+        SetVertexShaderValue( InDeviceContextRHI, localToWorldMatrixParameter, InMesh.instances[ InStartInstanceID ].transformMatrix );
     }
     else
     {

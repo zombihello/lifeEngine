@@ -13,9 +13,13 @@ TGlobalResource< CSpriteVertexDeclaration >			GSpriteVertexDeclaration;
 /**
  * Struct of instance buffer for sprite
  */
-struct FSpriteInstanceBuffer
+struct SSpriteInstanceBuffer
 {
 	Matrix		instanceLocalToWorld;		/**< Local to World matrix for each instance */
+
+#if ENABLE_HITPROXY
+	CColor		hitProxyId;					/**< Hit proxy id */
+#endif // ENABLE_HITPROXY
 };
 
 void CSpriteVertexDeclaration::InitRHI()
@@ -27,10 +31,11 @@ void CSpriteVertexDeclaration::InitRHI()
 		SVertexElement( CSpriteVertexFactory::SSS_Main,		sizeof( SSpriteVertexType ),		STRUCT_OFFSET( SSpriteVertexType, normal ),								VET_Float4, VEU_Normal,				0 ),
 
 #if USE_INSTANCING
-		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ),			VET_Float4, VEU_Position,			1, true ),
-		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ) + 16,		VET_Float4, VEU_Position,			2, true ),
-		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ) + 32,		VET_Float4, VEU_Position,			3, true ),
-		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( FSpriteInstanceBuffer ),	STRUCT_OFFSET( FSpriteInstanceBuffer, instanceLocalToWorld ) + 48,		VET_Float4, VEU_Position,			4, true ),
+		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( SSpriteInstanceBuffer ),	STRUCT_OFFSET( SSpriteInstanceBuffer, instanceLocalToWorld ),			VET_Float4, VEU_Position,			1, true ),
+		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( SSpriteInstanceBuffer ),	STRUCT_OFFSET( SSpriteInstanceBuffer, instanceLocalToWorld ) + 16,		VET_Float4, VEU_Position,			2, true ),
+		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( SSpriteInstanceBuffer ),	STRUCT_OFFSET( SSpriteInstanceBuffer, instanceLocalToWorld ) + 32,		VET_Float4, VEU_Position,			3, true ),
+		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( SSpriteInstanceBuffer ),	STRUCT_OFFSET( SSpriteInstanceBuffer, instanceLocalToWorld ) + 48,		VET_Float4, VEU_Position,			4, true ),
+		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( SSpriteInstanceBuffer ),	STRUCT_OFFSET( SSpriteInstanceBuffer, hitProxyId ),						VET_Color,	VEU_Color,				0, true ),
 #endif // USE_INSTANCING
 	};
 	vertexDeclarationRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
@@ -83,8 +88,19 @@ uint64 CSpriteVertexFactory::GetTypeHash() const
 
 void CSpriteVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	check( InStartInstanceID < InMesh.transformationMatrices.size() && InNumInstances <= InMesh.transformationMatrices.size() - InStartInstanceID );
-	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, &InMesh.transformationMatrices[ InStartInstanceID ], sizeof( FSpriteInstanceBuffer ), InNumInstances * sizeof( FSpriteInstanceBuffer ), InNumInstances );
+	check( InStartInstanceID < InMesh.instances.size() && InNumInstances <= InMesh.instances.size() - InStartInstanceID );
+	
+	std::vector<SSpriteInstanceBuffer>		instanceBuffers;
+	instanceBuffers.resize( InNumInstances );
+	for ( uint32 index = 0; index < InNumInstances; ++index )
+	{
+		SSpriteInstanceBuffer&					instanceBuffer = instanceBuffers[ index ];
+		const SMeshInstance&					meshInstance = InMesh.instances[ InStartInstanceID + index ];
+		instanceBuffer.instanceLocalToWorld		= meshInstance.transformMatrix;
+		instanceBuffer.hitProxyId				= meshInstance.hitProxyId.GetColor();
+	}
+
+	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( SSpriteInstanceBuffer ), InNumInstances * sizeof( SSpriteInstanceBuffer ), InNumInstances );
 }
 
 void CSpriteVertexFactory::InitRHI()

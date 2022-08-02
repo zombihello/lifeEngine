@@ -358,7 +358,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					case tmx::Property::Type::Colour:
 					{
 						const tmx::Colour&		tmxColor = objectProperty.getColourValue();
-						actorVar.SetValueColor( ÑColor( tmxColor.r, tmxColor.g, tmxColor.b, tmxColor.a ) );
+						actorVar.SetValueColor( CColor( tmxColor.r, tmxColor.g, tmxColor.b, tmxColor.a ) );
 						break;
 					}
 

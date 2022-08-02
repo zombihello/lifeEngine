@@ -17,6 +17,7 @@
 #include "Math/Rect.h"
 #include "Math/Color.h"
 #include "Render/Material.h"
+#include "Render/HitProxies.h"
 #include "System/Delegate.h"
 #include "Components/SceneComponent.h"
 #include "Components/PrimitiveComponent.h"
@@ -255,7 +256,7 @@ public:
 	 *
 	 * @param InValue Value
 	 */
-	FORCEINLINE void SetValueColor( const ÑColor& InValue )
+	FORCEINLINE void SetValueColor( const CColor& InValue )
 	{
 		if ( value && type != AVT_Color )
 		{
@@ -264,10 +265,10 @@ public:
 
 		if ( !value )
 		{
-			value = new ÑColor();
+			value = new CColor();
 		}
 
-		*static_cast< ÑColor* >( value ) = InValue;
+		*static_cast< CColor* >( value ) = InValue;
 		type = AVT_Color;
 	}
 
@@ -461,13 +462,13 @@ public:
 	 * Get value color
 	 * @return Return value color
 	 */
-	FORCEINLINE ÑColor GetValueColor() const
+	FORCEINLINE CColor GetValueColor() const
 	{
 		if ( type != AVT_Color )
 		{
-			return ÑColor();
+			return CColor();
 		}
-		return *static_cast< ÑColor* >( value );
+		return *static_cast< CColor* >( value );
 	}
 
 	/**
@@ -715,6 +716,26 @@ public:
 		bIsStatic = InIsStatic;
 	}
 
+#if ENABLE_HITPROXY
+	/**
+	 * Set hit proxy id
+	 * @param InIndex	Index
+	 */
+	FORCEINLINE void SetHitProxyId( uint32 InIndex )
+	{
+		hitProxyId.SetIndex( InIndex );
+	}
+
+	/**
+	 * Get hit proxy id
+	 * @return Return hit proxy id
+	 */
+	FORCEINLINE const CHitProxyId& GetHitProxyId() const
+	{
+		return hitProxyId;
+	}
+#endif // ENABLE_HITPROXY
+
 	/**
 	 * Get actor location in world space
 	 * @return Return actor location, if root component is not valid return zero vector
@@ -874,6 +895,10 @@ private:
 	bool										bBeginPlay;				/**< Is begin play for this actor */
 	std::vector< ActorComponentRef_t >			ownedComponents;		/**< Owned components */
 	mutable COnActorDestroyed					onActorDestroyed;		/**< Called event when actor is destroyed */
+
+#if ENABLE_HITPROXY
+	CHitProxyId									hitProxyId;				/**< Hit proxy id */
+#endif // ENABLE_HITPROXY
 };
 
 #endif // !ACTOR_H

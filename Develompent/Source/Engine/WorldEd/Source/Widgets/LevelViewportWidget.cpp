@@ -7,6 +7,7 @@
 #include "System/Package.h"
 #include "System/ActorFactory.h"
 #include "Widgets/LevelViewportWidget.h"
+#include "Render/RenderingThread.h"
 
 #include "Windows/MainWindow.h"
 
@@ -25,6 +26,34 @@ WeLevelViewportWidget::WeLevelViewportWidget( QWidget* InParent /*= nullptr*/, C
 
 WeLevelViewportWidget::~WeLevelViewportWidget()
 {}
+
+void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
+{
+	WeViewportWidget::mousePressEvent( InEvent );
+
+#if ENABLE_HITPROXY
+	if ( InEvent->button() == Qt::MouseButton::LeftButton )
+	{
+		// Update hit proxies id in all actors
+		GWorld->UpdateHitProxiesId();
+
+		// Render hit proxies to render target
+		CEditorLevelViewportClient* viewportClient = ( CEditorLevelViewportClient* ) GetViewport().GetViewportClient();
+		check( viewportClient );
+		viewportClient->DrawHitProxies( const_cast< CViewport* >( &GetViewport() ) );
+
+		// Wait until we rendering scene
+		FlushRenderingCommands();
+
+		QPoint			cursorPosition = mapFromGlobal( cursor().pos() );
+		CHitProxyId		hitProxyId = viewportClient->GetHitProxyId( cursorPosition.x(), cursorPosition.y() );
+		int a = 0;
+		++a;
+
+		LE_LOG( LT_Log, LC_General, TEXT( "Selected actor %s" ), GWorld->GetActor( hitProxyId.GetIndex()-1 )->GetName() );	
+	}
+#endif // ENABLE_HITPROXY
+}
 
 void WeLevelViewportWidget::OnCustomContextMenuRequested( const QPoint& InPoint )
 {

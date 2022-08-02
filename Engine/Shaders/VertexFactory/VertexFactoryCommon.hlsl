@@ -1,9 +1,14 @@
 #ifndef VERTEXFACTORYCOMMON_H
 #define VERTEXFACTORYCOMMON_H 0
 
-/* Matrix for convert from local to world coord system */
 #if !USE_INSTANCING
+	/* Matrix for convert from local to world coord system */
 	float4x4        localToWorldMatrix;
+	
+	/* Hit proxy Id */
+	#if ENABLE_HITPROXY
+		float4			hitProxyId;
+	#endif // ENABLE_HITPROXY
 #endif // !USE_INSTANCING
 
 #endif // !VERTEXFACTORYCOMMON_H

@@ -58,7 +58,7 @@ void CDynamicMeshBuilder::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI,
 	meshBatch.numInstances		= 1;
 	meshBatch.numPrimitives		= numPrimitives;
 	meshBatch.primitiveType		= PT_TriangleList;
-	meshBatch.transformationMatrices.push_back( InLocalToWorld );
+	meshBatch.instances.push_back( SMeshInstance{ InLocalToWorld }  );
 
 	// Draw mesh
 	CStaticMeshDrawPolicy		drawPolicy;

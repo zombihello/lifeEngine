@@ -1,3 +1,4 @@
+#include "Actors/Actor.h"
 #include "Components/SpriteComponent.h"
 #include "Misc/CoreGlobals.h"
 #include "System/Package.h"
@@ -168,8 +169,14 @@ void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 
     // Add to mesh batch new instance
     ++meshBatchLink->numInstances;
-	meshBatchLink->transformationMatrices.resize( meshBatchLink->numInstances );
-	CalcTransformationMatrix( InSceneView, meshBatchLink->transformationMatrices[ meshBatchLink->numInstances-1 ] );
+	meshBatchLink->instances.resize( meshBatchLink->numInstances );
+	
+	SMeshInstance&		instanceMesh = meshBatchLink->instances[ meshBatchLink->numInstances-1 ];
+	CalcTransformationMatrix( InSceneView, instanceMesh.transformMatrix );
+
+#if ENABLE_HITPROXY
+	instanceMesh.hitProxyId = GetOwner()->GetHitProxyId();
+#endif // ENABLE_HITPROXY
 
     // Update AABB
     boundbox = ÑBox::BuildAABB( GetComponentLocation(), Vector( GetSpriteSize(), 1.f ) );

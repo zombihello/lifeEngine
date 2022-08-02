@@ -12,6 +12,10 @@ struct FVertexFactoryInput
 	
 #if USE_INSTANCING
 	float4x4 	instanceLocalToWorld 	: POSITION1;
+	
+	#if ENABLE_HITPROXY
+		float4		hitProxyId			: COLOR0;
+	#endif // ENABLE_HITPROXY
 #endif // USE_INSTANCING
 };
 
@@ -54,5 +58,16 @@ float4 VertexFactory_GetColor( FVertexFactoryInput InInput, uint InColorIndex )
 {
 	return float4( 1.f, 1.f, 1.f, 1.f );
 }
+
+#if ENABLE_HITPROXY
+float4 VertexFactory_GetHitProxyId( FVertexFactoryInput InInput )
+{
+	#if USE_INSTANCING
+		return InInput.hitProxyId;
+	#else
+		return hitProxyId;
+	#endif // USE_INSTANCING
+}
+#endif // ENABLE_HITPROXY
 
 #endif // !VERTEXFACTORY_H

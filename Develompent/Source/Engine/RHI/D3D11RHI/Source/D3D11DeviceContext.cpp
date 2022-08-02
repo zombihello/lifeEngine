@@ -22,7 +22,7 @@ CD3D11DeviceContext::~CD3D11DeviceContext()
 /**
  * Clear surface
  */
-void CD3D11DeviceContext::ClearSurface( SurfaceRHIParamRef_t InSurface, const class ÑColor& InColor )
+void CD3D11DeviceContext::ClearSurface( SurfaceRHIParamRef_t InSurface, const class CColor& InColor )
 {
 	check( d3d11DeviceContext && InSurface );
 	CD3D11Surface*			d3d11Surface = ( CD3D11Surface* )InSurface;

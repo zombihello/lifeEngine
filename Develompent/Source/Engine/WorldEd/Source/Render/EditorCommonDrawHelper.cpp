@@ -69,7 +69,7 @@ void CEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 				color		= background + ( color - background ) * alpha;
 			}
 
-			InSDG.simpleElements.AddLine( InStart, InEnd, ÑColor( color ) );
+			InSDG.simpleElements.AddLine( InStart, InEnd, CColor( color ) );
 		}
 	}
 }
@@ -158,22 +158,22 @@ void CEditorCommonDrawHelper::DrawGrid( const class CSceneView* InSceneView, ELe
 	if ( bDrawColoredOrigin )
 	{
 		a = Vector( 0.f, 0.f, ( float )HALF_WORLD_MAX1 );			b = Vector( 0.f, 0.f, 0.f );
-		SDG.simpleElements.AddLine( a, b, ÑColor( 64, 255, 64 ) );
+		SDG.simpleElements.AddLine( a, b, CColor( 64, 255, 64 ) );
 
 		a = Vector( 0.f, 0.f, 0.f );								b = Vector( 0.f, 0.f, ( float )-HALF_WORLD_MAX1 );
-		SDG.simpleElements.AddLine( a, b, ÑColor( 32, 128, 32 ) );
+		SDG.simpleElements.AddLine( a, b, CColor( 32, 128, 32 ) );
 
 		a = Vector( 0.f, ( float )HALF_WORLD_MAX1, 0.f );			b = Vector( 0.f, 0.f, 0.f );
-		SDG.simpleElements.AddLine( a, b, ÑColor( 64, 64, 255 ) );
+		SDG.simpleElements.AddLine( a, b, CColor( 64, 64, 255 ) );
 
 		a = Vector( 0.f, 0.f, 0.f );								b = Vector( 0.f, ( float )-HALF_WORLD_MAX1, 0.f );
-		SDG.simpleElements.AddLine( a, b, ÑColor( 32, 32, 128 ) );
+		SDG.simpleElements.AddLine( a, b, CColor( 32, 32, 128 ) );
 
 		a = Vector( ( float )HALF_WORLD_MAX1, 0.f, 0.f );			b = Vector( 0.f, 0.f, 0.f );
-		SDG.simpleElements.AddLine( a, b, ÑColor( 255, 64, 64 ) );
+		SDG.simpleElements.AddLine( a, b, CColor( 255, 64, 64 ) );
 
 		a = Vector( 0.f, 0.f, 0.f );								b = Vector( ( float )-HALF_WORLD_MAX1, 0.f, 0.f );
-		SDG.simpleElements.AddLine( a, b, ÑColor( 128, 32, 32 ) );
+		SDG.simpleElements.AddLine( a, b, CColor( 128, 32, 32 ) );
 	}
 
 	// Draw orthogonal worldframe

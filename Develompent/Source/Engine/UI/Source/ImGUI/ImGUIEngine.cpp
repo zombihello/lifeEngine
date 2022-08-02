@@ -114,7 +114,7 @@ void ÑImGUIWindow::Tick()
 													
 													if ( isNeedClear )
 													{
-														immediateContext->ClearSurface( viewportRHI->GetSurface(), ÑColor::black );
+														immediateContext->ClearSurface( viewportRHI->GetSurface(), CColor::black );
 													}
 													GRHI->DrawImGUI( immediateContext, ( ImDrawData* )imGuiDrawData->GetDrawData() );
 													

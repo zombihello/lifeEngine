@@ -138,10 +138,10 @@ protected:
 	 * @brief Get background color
 	 * @return Return background color
 	 */
-	virtual ÑColor GetBackgroundColor() const override;
+	virtual CColor GetBackgroundColor() const override;
 
 	TSharedPtr<CTexture2D>		texture2D;			/**< Texture 2D to preview */
-	ÑColor						colorChannelMask;	/**< Color channel mask */
+	CColor						colorChannelMask;	/**< Color channel mask */
 };
 
 #endif // !TEXTUREPREVIEWVIEWPORTCLIENT_H

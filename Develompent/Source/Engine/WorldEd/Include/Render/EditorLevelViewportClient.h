@@ -13,6 +13,7 @@
 #include "Render/Viewport.h"
 #include "Render/Scene.h"
 #include "Render/EditorCommonDrawHelper.h"
+#include "Render/HitProxies.h"
 #include "System/WindowEvent.h"
 
 /**
@@ -48,6 +49,32 @@ public:
 	 * @param InSceneView		Scene view
 	 */
 	void Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView );
+
+#if ENABLE_HITPROXY
+	/**
+	 * @brief Draw hit proxies
+	 *
+	 * @param InViewport	Viewport
+	 */
+	virtual void DrawHitProxies( CViewport* InViewport );
+
+	/**
+	 * @brief Draw hit proxies. Must be call in render thread
+	 *
+	 * @param InViewportRHI		Viewport RHI
+	 * @param InSceneView		Scene view
+	 */
+	void DrawHitProxies_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView );
+
+	/**
+	 * @brief Get hit proxy id by screen coord
+	 * 
+	 * @param InX	X
+	 * @param InY	Y
+	 * @return Return hit proxy id
+	 */
+	CHitProxyId GetHitProxyId( uint32 InX, uint32 InY ) const;
+#endif // ENABLE_HITPROXY
 
 	/**
 	 * @brief Process event
@@ -126,7 +153,7 @@ protected:
 	 * @brief Get background color
 	 * @return Return background color
 	 */
-	virtual ÑColor GetBackgroundColor() const;
+	virtual CColor GetBackgroundColor() const;
 
 	bool						bSetListenerPosition;	/**< Is need sets the listener position */
 	bool						bIsTracking;			/**< Is mouse tracking */

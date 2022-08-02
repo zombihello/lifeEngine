@@ -180,7 +180,7 @@ CD3D11SamplerStateRHI::CD3D11SamplerStateRHI( const SSamplerStateInitializerRHI&
 		break;
 	}
 
-	ÑColor		borderColor( InInitializer.borderColor );
+	CColor		borderColor( InInitializer.borderColor );
 	d3d11SamplerDesc.BorderColor[ 0 ] = borderColor.r;
 	d3d11SamplerDesc.BorderColor[ 1 ] = borderColor.g;
 	d3d11SamplerDesc.BorderColor[ 2 ] = borderColor.b;
