@@ -69,7 +69,7 @@ public:
 	 */
 	FORCEINLINE void SetIndex( const CColor& InColor )
 	{
-		index = ( ( uint32 )InColor.r << 16 ) | ( ( uint32 )InColor.g << 8 ) | ( ( uint32 )InColor.b << 0 );
+		index = ( ( int32 )InColor.r << 16 ) | ( ( int32 )InColor.g << 8 ) | ( ( int32 )InColor.b << 0 );
 	}
 
 	/**

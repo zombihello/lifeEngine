@@ -170,10 +170,9 @@ CHitProxyId CEditorLevelViewportClient::GetHitProxyId( uint32 InX, uint32 InY ) 
 											  SLockedData				lockedData;
 											  GRHI->LockTexture2D( deviceContext, hitProxyTexture, 0, false, lockedData );
 
-											  uint8*	data	= ( uint8* )lockedData.data;
-											  uint32	offset	= x * y;
+											  uint8*		data = &( ( uint8* )lockedData.data )[ ( x + y * hitProxyTexture->GetSizeX() ) * GPixelFormats[ hitProxyTexture->GetFormat() ].blockBytes ];
 
-											  hitProxyId.SetIndex( CColor( data[ offset ], data[ offset + 1 ], data[ offset + 2 ], data[ offset + 3 ] ) );
+											  hitProxyId.SetIndex( CColor( data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ] ) );
 											  GRHI->UnlockTexture2D( deviceContext, hitProxyTexture, 0, lockedData );
 										  } );
 

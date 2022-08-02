@@ -50,7 +50,8 @@ void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 		int a = 0;
 		++a;
 
-		LE_LOG( LT_Log, LC_General, TEXT( "Selected actor %s" ), GWorld->GetActor( hitProxyId.GetIndex()-1 )->GetName() );	
+		uint32			index = hitProxyId.GetIndex();
+		LE_LOG( LT_Log, LC_General, TEXT( "(%i;%i) Selected actor %s" ), cursorPosition.x(), cursorPosition.y(), GWorld->GetActor( index > 0 ? index-1 : index )->GetName() );
 	}
 #endif // ENABLE_HITPROXY
 }
