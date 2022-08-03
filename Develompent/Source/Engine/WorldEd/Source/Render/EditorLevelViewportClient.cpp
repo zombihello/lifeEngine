@@ -152,6 +152,7 @@ void CEditorLevelViewportClient::DrawHitProxies_RenderThread( ViewportRHIRef_t I
 	CSceneRenderer				sceneRenderer( InSceneView, ( CScene* )GWorld->GetScene() );
 
 	// Draw hit proxies
+	GRHI->SetViewport( immediateContext, 0, 0, 0.f, InViewportRHI->GetWidth(), InViewportRHI->GetHeight(), 1.f );
 	sceneRenderer.RenderHitProxies( InViewportRHI );
 	
 	delete InSceneView;

@@ -52,6 +52,15 @@ public:
 	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
 
 	/**
+	 * @brief Set the constant shader parameters
+	 *
+	 * @param InDeviceContextRHI Device context
+	 * @param InVertexFactory Vertex factory
+	 * @param InMaterialResource Material
+	 */
+	virtual void SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const override;
+
+	/**
 	 * @brief Set the l2w transform shader
 	 *
 	 * @param InDeviceContextRHI RHI device context

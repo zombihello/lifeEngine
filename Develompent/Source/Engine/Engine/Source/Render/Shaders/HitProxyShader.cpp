@@ -50,6 +50,12 @@ void CHitProxyVertexShader::Init( const CShaderCache::SShaderCacheItem& InShader
 	vertexFactoryParameters->Bind( InShaderCacheItem.parameterMap );
 }
 
+void CHitProxyVertexShader::SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const
+{
+	check( vertexFactoryParameters );
+	vertexFactoryParameters->Set( InDeviceContextRHI, InVertexFactory );
+}
+
 void CHitProxyVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
 	check( vertexFactoryParameters );
