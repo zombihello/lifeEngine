@@ -1,5 +1,6 @@
 #include "Render/Shaders/BasePassShader.h"
 #include "Render/VertexFactory/VertexFactory.h"
+#include "Render/Scene.h"
 
 IMPLEMENT_SHADER_TYPE(, CBasePassVertexShader, TEXT( "BasePassVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, false );
 IMPLEMENT_SHADER_TYPE(, CBasePassPixelShader, TEXT( "BasePassPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, false );

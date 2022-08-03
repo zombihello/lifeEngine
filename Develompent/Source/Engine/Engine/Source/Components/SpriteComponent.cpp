@@ -16,7 +16,6 @@ CSpriteComponent::CSpriteComponent()
 	, bFlipHorizontal( false )
     , type( ST_Rotating )
 	, sprite( new CSprite() )
-    , meshBatchLink( nullptr )
 {
 	BeginInitResource( sprite );
 }
@@ -99,8 +98,6 @@ void CSpriteComponent::LinkDrawList()
 	{
 		SSceneDepthGroup&               SDGWorld = scene->GetSDG( SDG_World );
 		SSpriteSurface					surface = sprite->GetSurface();
-		DrawingPolicyLinkRef_t           tmpDrawPolicyLink = new DrawingPolicyLink_t( DEC_SPRITE );
-		tmpDrawPolicyLink->drawingPolicy.Init( sprite->GetVertexFactory(), sprite->GetMaterial() );
 
 		// Generate mesh batch of sprite
 		SMeshBatch			            meshBatch;
@@ -109,22 +106,17 @@ void CSpriteComponent::LinkDrawList()
 		meshBatch.numPrimitives         = surface.numPrimitives;
 		meshBatch.indexBufferRHI        = sprite->GetIndexBufferRHI();
 		meshBatch.primitiveType         = PT_TriangleList;
-		tmpDrawPolicyLink->meshBatchList.insert( meshBatch );
 
-		// Add to new scene draw policy link
-		drawingPolicyLink = SDGWorld.spriteDrawList.AddItem( tmpDrawPolicyLink );
-		check( drawingPolicyLink );
+		// Make and add to scene new draw policy link
+		const SMeshBatch*				meshBatchLink = nullptr;
+		drawingPolicyLink				= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.spriteDrawList, DEC_SPRITE );
+		meshBatchLinks.push_back( meshBatchLink );
 
-		// Get link to mesh batch. If not founded insert new
-		MeshBatchList_t::iterator        itMeshBatchLink = drawingPolicyLink->meshBatchList.find( meshBatch );
-		if ( itMeshBatchLink != drawingPolicyLink->meshBatchList.end() )
-		{
-			meshBatchLink = &( *itMeshBatchLink );
-		}
-		else
-		{
-			meshBatchLink = &( *drawingPolicyLink->meshBatchList.insert( meshBatch ).first );
-		}
+		// Make and add to scene new hit proxy draw policy link
+#if ENABLE_HITPROXY
+		hitProxyDrawingPolicyLink		= ::MakeDrawingPolicyLink<HitProxyDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.hitProxyDrawList, DEC_SPRITE );
+		meshBatchLinks.push_back( meshBatchLink );
+#endif // ENABLE_HITPROXY
 	}
 }
 
@@ -138,15 +130,19 @@ void CSpriteComponent::UnlinkDrawList()
 		SSceneDepthGroup&		SDGWorld = scene->GetSDG( SDG_World );
 		SDGWorld.spriteDrawList.RemoveItem( drawingPolicyLink );
 
+#if ENABLE_HITPROXY
+		SDGWorld.hitProxyDrawList.RemoveItem( hitProxyDrawingPolicyLink );
+#endif // ENABLE_HITPROXY
+
 		drawingPolicyLink = nullptr;
-		meshBatchLink = nullptr;
+		meshBatchLinks.clear();
 	}
 }
 
 void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 {
 	// If primitive is empty - exit from method
-	if ( !bIsDirtyDrawingPolicyLink && !meshBatchLink )
+	if ( !bIsDirtyDrawingPolicyLink && meshBatchLinks.empty() )
 	{
 		return;
 	}
@@ -167,16 +163,29 @@ void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 		}	
 	}
 
+	// Calculate transform matrix
+	ActorRef_t	owner = GetOwner();
+	Matrix		transformMatrix;
+	CalcTransformationMatrix( InSceneView, transformMatrix );
+
     // Add to mesh batch new instance
-    ++meshBatchLink->numInstances;
-	meshBatchLink->instances.resize( meshBatchLink->numInstances );
-	
-	SMeshInstance&		instanceMesh = meshBatchLink->instances[ meshBatchLink->numInstances-1 ];
-	CalcTransformationMatrix( InSceneView, instanceMesh.transformMatrix );
+	for ( uint32 index = 0, count = meshBatchLinks.size(); index < count; ++index )
+	{
+		const SMeshBatch*	meshBatchLink = meshBatchLinks[ index ];	
+		++meshBatchLink->numInstances;
+		meshBatchLink->instances.resize( meshBatchLink->numInstances );
+
+		SMeshInstance&		instanceMesh = meshBatchLink->instances[ meshBatchLink->numInstances - 1 ];
+		instanceMesh.transformMatrix	 = transformMatrix;
 
 #if ENABLE_HITPROXY
-	instanceMesh.hitProxyId = GetOwner()->GetHitProxyId();
+		instanceMesh.hitProxyId		= owner ? owner->GetHitProxyId() : CHitProxyId();
 #endif // ENABLE_HITPROXY
+
+#if WITH_EDITOR
+		instanceMesh.bSelected		= owner ? owner->IsSelected() : false;
+#endif // WITH_EDITOR
+	}
 
     // Update AABB
     boundbox = ÑBox::BuildAABB( GetComponentLocation(), Vector( GetSpriteSize(), 1.f ) );

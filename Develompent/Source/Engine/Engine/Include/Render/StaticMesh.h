@@ -45,23 +45,23 @@ public:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef CMeshDrawList<CStaticMeshDrawPolicy>::SDrawingPolicyLink			DrawingPolicyLink_t;
+	typedef CMeshDrawList<CStaticMeshDrawPolicy>::SDrawingPolicyLink					DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
-	typedef CMeshDrawList<CStaticMeshDrawPolicy>::DrawingPolicyLinkRef_t		DrawingPolicyLinkRef_t;
+	typedef CMeshDrawList<CStaticMeshDrawPolicy>::DrawingPolicyLinkRef_t				DrawingPolicyLinkRef_t;
 
 #if ENABLE_HITPROXY
 	/**
 	 * @brief Typedef of hit proxy drawing policy link
 	 */
-	typedef CMeshDrawList<CHitProxyDrawingPolicy>::SDrawingPolicyLink			HitProxyDrawingPolicyLink_t;
+	typedef CMeshDrawList<CHitProxyDrawingPolicy, false>::SDrawingPolicyLink			HitProxyDrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
-	typedef CMeshDrawList<CHitProxyDrawingPolicy>::DrawingPolicyLinkRef_t		HitProxyDrawingPolicyLinkRef_t;
+	typedef CMeshDrawList<CHitProxyDrawingPolicy, false>::DrawingPolicyLinkRef_t		HitProxyDrawingPolicyLinkRef_t;
 #endif // ENABLE_HITPROXY
 
 	/**

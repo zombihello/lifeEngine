@@ -202,6 +202,7 @@ public:
 		{
 			TEXT( "png" ),
 			TEXT( "jpg" ),
+			TEXT( "jpeg" ),
 			TEXT( "tga" ),
 			TEXT( "bmp" ),
 			TEXT( "psd" ),

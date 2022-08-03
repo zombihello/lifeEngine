@@ -18,6 +18,10 @@ float4 MainPS( VS_OUT In ) : SV_Target
 	{
 		discard;
 	}
-	
-    return outColor;
+
+    return outColor
+#if WITH_EDITOR
+		+ In.colorOverlay
+#endif // WITH_EDITOR
+		;
 }

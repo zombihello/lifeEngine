@@ -148,6 +148,11 @@ void CWorld::CleanupWorld()
 	GPhysicsScene.RemoveAllBodies();
 	scene->Clear();
 	actors.clear();
+	actorsToDestroy.clear();
+
+#if WITH_EDITOR
+	selectedActors.clear();
+#endif // WITH_EDITOR
 }
 
 ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /* = SMath::rotatorZero */ )
@@ -231,3 +236,45 @@ void CWorld::UpdateHitProxiesId()
 	}
 }
 #endif // ENABLE_HITPROXY
+
+#if WITH_EDITOR
+void CWorld::SelectActor( ActorRef_t InActor )
+{
+	check( InActor );
+	if ( InActor->IsSelected() )
+	{
+		return;
+	}
+
+	InActor->SetSelected( true );
+	selectedActors.push_back( InActor );
+}
+
+void CWorld::UnselectActor( ActorRef_t InActor )
+{
+	check( InActor );
+	if ( !InActor->IsSelected() )
+	{
+		return;
+	}
+
+	InActor->SetSelected( false );
+	for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
+	{
+		if ( selectedActors[ index ] == InActor )
+		{
+			selectedActors.erase( selectedActors.begin() + index );
+			break;
+		}
+	}
+}
+
+void CWorld::UnselectAllActors()
+{
+	for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
+	{
+		selectedActors[ index ]->SetSelected( false );
+	}
+	selectedActors.clear();
+}
+#endif // WITH_EDITOR

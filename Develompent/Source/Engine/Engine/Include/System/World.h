@@ -116,6 +116,25 @@ public:
 	void UpdateHitProxiesId();
 #endif // ENABLE_HITPROXY
 
+#if WITH_EDITOR
+	/**
+	 * Select actor
+	 * @param InActor	Actor
+	 */
+	void SelectActor( ActorRef_t InActor );
+
+	/**
+	 * Unselect actor
+	 * @param InActor	Actor
+	 */
+	void UnselectActor( ActorRef_t InActor );
+
+	/**
+	 * Unselect all actors
+	 */
+	void UnselectAllActors();
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Get scene manager
 	 * @return Return pointer to scene manager
@@ -159,6 +178,10 @@ private:
 	class CBaseScene*			scene;				/**< Scene manager */
 	std::vector<ActorRef_t>		actors;				/**< Array actors in world */
 	std::vector<ActorRef_t>		actorsToDestroy;	/**< Array actors which need destroy after tick */
+
+#if WITH_EDITOR
+	std::vector<ActorRef_t>		selectedActors;		/**< Array of selected actors */
+#endif // WITH_EDITOR
 };
 
 #endif // !WORLD_H

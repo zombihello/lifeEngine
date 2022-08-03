@@ -185,6 +185,10 @@ struct SMeshInstance
 #if ENABLE_HITPROXY
 	CHitProxyId		hitProxyId;			/**< Hit proxy id */
 #endif // ENABLE_HITPROXY
+
+#if WITH_EDITOR
+	bool			bSelected;			/**< Is selected instance */
+#endif // WITH_EDITOR
 };
 
 /**
@@ -654,7 +658,7 @@ struct SSceneDepthGroup
 	CMeshDrawList< CStaticMeshDrawPolicy >				spriteDrawList;			/**< Draw list of sprites */
 
 #if ENABLE_HITPROXY
-	CMeshDrawList< CHitProxyDrawingPolicy >				hitProxyDrawList;		/**< Draw list of hit proxy */
+	CMeshDrawList< CHitProxyDrawingPolicy, false >		hitProxyDrawList;		/**< Draw list of hit proxy */
 #endif // ENABLE_HITPROXY
 };
 

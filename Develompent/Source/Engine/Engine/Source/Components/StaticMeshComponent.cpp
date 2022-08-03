@@ -68,6 +68,8 @@ void CStaticMeshComponent::AddToDrawList( const class CSceneView& InSceneView )
 		}
 	}
 
+	AActor*		owner = GetOwner();
+
 	// Add to mesh batch new instance
 	const Matrix				transformationMatrix = GetComponentTransform().ToMatrix();
 	for ( uint32 index = 0, count = elementDrawingPolicyLink->meshBatchLinks.size(); index < count; ++index )
@@ -76,8 +78,12 @@ void CStaticMeshComponent::AddToDrawList( const class CSceneView& InSceneView )
 		++meshBatch->numInstances;
 		meshBatch->instances.push_back( SMeshInstance{ transformationMatrix 
 #if ENABLE_HITPROXY
-										, GetOwner()->GetHitProxyId() 
+										, owner ? owner->GetHitProxyId() : CHitProxyId()
 #endif // ENABLE_HITPROXY
+
+#if WITH_EDITOR
+										, owner? owner->IsSelected() : false
+#endif // WITH_EDITOR
 										} );
 	}
 }

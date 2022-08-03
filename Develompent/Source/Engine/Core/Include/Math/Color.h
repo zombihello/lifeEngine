@@ -155,6 +155,14 @@ public:
 		return r == InRight.r && g == InRight.g && b == InRight.b && a == InRight.a;
 	}
 
+	/**
+	 * @brief Override operator !=
+	 */
+	FORCEINLINE bool operator!=( const CColor& InRight ) const
+	{
+		return !( *this == InRight );
+	}
+
 	static CColor			black;			/**< Black color */
 	static CColor			white;			/**< White color */
 	static CColor			red;			/**< Red color */

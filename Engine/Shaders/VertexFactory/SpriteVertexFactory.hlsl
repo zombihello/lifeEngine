@@ -16,6 +16,10 @@ struct FVertexFactoryInput
 	#if ENABLE_HITPROXY
 		float4		hitProxyId			: COLOR0;
 	#endif // ENABLE_HITPROXY
+	
+	#if WITH_EDITOR
+		float4		colorOverlay		: COLOR1;
+	#endif // WITH_EDITOR
 #endif // USE_INSTANCING
 };
 
@@ -69,5 +73,16 @@ float4 VertexFactory_GetHitProxyId( FVertexFactoryInput InInput )
 	#endif // USE_INSTANCING
 }
 #endif // ENABLE_HITPROXY
+
+#if WITH_EDITOR
+float4 VertexFactory_GetColorOverlay( FVertexFactoryInput InInput )
+{
+	#if USE_INSTANCING
+		return InInput.colorOverlay;
+	#else
+		return colorOverlay;
+	#endif // USE_INSTANCING
+}
+#endif // WITH_EDITOR
 
 #endif // !VERTEXFACTORY_H

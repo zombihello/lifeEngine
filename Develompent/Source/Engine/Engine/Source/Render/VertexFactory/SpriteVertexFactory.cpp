@@ -3,6 +3,11 @@
 #include "Render/VertexFactory/SpriteVertexFactory.h"
 #include "Render/Scene.h"
 
+#if WITH_EDITOR
+#include "Misc/WorldEdGlobals.h"
+#include "System/EditorEngine.h"
+#endif // WITH_EDITOR
+
 IMPLEMENT_VERTEX_FACTORY_TYPE( CSpriteVertexFactory, TEXT( "SpriteVertexFactory.hlsl" ), true, CSpriteVertexFactory::SSS_Instance )
 
 // 
@@ -20,6 +25,10 @@ struct SSpriteInstanceBuffer
 #if ENABLE_HITPROXY
 	CColor		hitProxyId;					/**< Hit proxy id */
 #endif // ENABLE_HITPROXY
+
+#if WITH_EDITOR
+	CColor		colorOverlay;				/**< Color overlay */
+#endif // WITH_EDITOR
 };
 
 void CSpriteVertexDeclaration::InitRHI()
@@ -36,6 +45,7 @@ void CSpriteVertexDeclaration::InitRHI()
 		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( SSpriteInstanceBuffer ),	STRUCT_OFFSET( SSpriteInstanceBuffer, instanceLocalToWorld ) + 32,		VET_Float4, VEU_Position,			3, true ),
 		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( SSpriteInstanceBuffer ),	STRUCT_OFFSET( SSpriteInstanceBuffer, instanceLocalToWorld ) + 48,		VET_Float4, VEU_Position,			4, true ),
 		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( SSpriteInstanceBuffer ),	STRUCT_OFFSET( SSpriteInstanceBuffer, hitProxyId ),						VET_Color,	VEU_Color,				0, true ),
+		SVertexElement( CSpriteVertexFactory::SSS_Instance,	sizeof( SSpriteInstanceBuffer ),	STRUCT_OFFSET( SSpriteInstanceBuffer, colorOverlay ),					VET_Color,	VEU_Color,				1, true ),
 #endif // USE_INSTANCING
 	};
 	vertexDeclarationRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
@@ -97,7 +107,14 @@ void CSpriteVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDevic
 		SSpriteInstanceBuffer&					instanceBuffer = instanceBuffers[ index ];
 		const SMeshInstance&					meshInstance = InMesh.instances[ InStartInstanceID + index ];
 		instanceBuffer.instanceLocalToWorld		= meshInstance.transformMatrix;
-		instanceBuffer.hitProxyId				= meshInstance.hitProxyId.GetColor();
+
+#if ENABLE_HITPROXY
+		instanceBuffer.hitProxyId				= meshInstance.hitProxyId.GetColor().ToNormalizedVector4D();
+#endif // ENABLE_HITPROXY
+
+#if WITH_EDITOR
+		instanceBuffer.colorOverlay				= meshInstance.bSelected ? GEditorEngine->GetSelectionColor().ToNormalizedVector4D() : Vector4D( 0.f, 0.f, 0.f, 0.f );
+#endif // WITH_EDITOR
 	}
 
 	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( SSpriteInstanceBuffer ), InNumInstances * sizeof( SSpriteInstanceBuffer ), InNumInstances );

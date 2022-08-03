@@ -13,6 +13,10 @@
 #include "Render/Scene.h"
 #include "Render/Sprite.h"
 
+#if ENABLE_HITPROXY
+#include "Render/SceneHitProxyRendering.h"
+#endif // ENABLE_HITPROXY
+
 enum ESpriteType
 {
     ST_Static,                  /**< Static sprite */
@@ -165,12 +169,24 @@ private:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef CMeshDrawList< CStaticMeshDrawPolicy >::SDrawingPolicyLink			DrawingPolicyLink_t;
+	typedef CMeshDrawList< CStaticMeshDrawPolicy >::SDrawingPolicyLink					DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
-	typedef CMeshDrawList< CStaticMeshDrawPolicy >::DrawingPolicyLinkRef_t		DrawingPolicyLinkRef_t;
+	typedef CMeshDrawList< CStaticMeshDrawPolicy >::DrawingPolicyLinkRef_t				DrawingPolicyLinkRef_t;
+
+#if ENABLE_HITPROXY
+	/**
+	 * @brief Typedef of hit proxy drawing policy link
+	 */
+	typedef CMeshDrawList< CHitProxyDrawingPolicy, false >::SDrawingPolicyLink			HitProxyDrawingPolicyLink_t;
+
+	/**
+	 * @brief Typedef of reference on hit proxy drawing policy link in scene
+	 */
+	typedef CMeshDrawList< CHitProxyDrawingPolicy, false >::DrawingPolicyLinkRef_t		HitProxyDrawingPolicyLinkRef_t;
+#endif // ENABLE_HITPROXY
 
 	/**
 	 * @brief Calculate transformation matrix
@@ -190,12 +206,16 @@ private:
 	 */
 	virtual void UnlinkDrawList() override;
 
-	bool						bFlipVertical;					/**< Is need flip sprite by vertical */
-	bool						bFlipHorizontal;				/**< Is need flip sprite by horizontal */
-    ESpriteType					type;							/**< Sprite type */
-	SpriteRef_t					sprite;							/**< Sprite mesh */
-	DrawingPolicyLinkRef_t		drawingPolicyLink;				/**< Reference to drawing policy link in scene */
-	const SMeshBatch*			meshBatchLink;					/**< Reference to mesh batch in drawing policy link */
+	bool								bFlipVertical;					/**< Is need flip sprite by vertical */
+	bool								bFlipHorizontal;				/**< Is need flip sprite by horizontal */
+    ESpriteType							type;							/**< Sprite type */
+	SpriteRef_t							sprite;							/**< Sprite mesh */
+	DrawingPolicyLinkRef_t				drawingPolicyLink;				/**< Reference to drawing policy link in scene */
+	std::vector<const SMeshBatch*>		meshBatchLinks;					/**< Reference to mesh batch in drawing policy link */
+
+#if ENABLE_HITPROXY
+	HitProxyDrawingPolicyLinkRef_t		hitProxyDrawingPolicyLink;		/**< Reference to hit proxy drawing policy link in scene */
+#endif // ENABLE_HITPROXY
 };
 
 //

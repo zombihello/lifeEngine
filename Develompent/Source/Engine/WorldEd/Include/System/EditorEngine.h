@@ -11,6 +11,7 @@
 
 #include <vector>
 
+#include "Math/Color.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseEngine.h"
 #include "System/EditorConstraints.h"
@@ -154,6 +155,15 @@ public:
 	FORCEINLINE std::wstring GetEngineContentDir() const
 	{
 		return ÑString::Format( TEXT( "%s/Engine/Content/" ), appBaseDir().c_str() );
+	}
+
+	/**
+	 * Get selection color
+	 * @return Return selection color
+	 */
+	FORCEINLINE CColor GetSelectionColor() const
+	{
+		return CColor( 32, 0, 128, 255 );
 	}
 
 private:

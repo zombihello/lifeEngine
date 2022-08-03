@@ -6,6 +6,7 @@
 #include "System/EditorEngine.h"
 #include "System/Package.h"
 #include "System/ActorFactory.h"
+#include "System/InputSystem.h"
 #include "Widgets/LevelViewportWidget.h"
 #include "Render/RenderingThread.h"
 
@@ -47,11 +48,16 @@ void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 
 		QPoint			cursorPosition = mapFromGlobal( cursor().pos() );
 		CHitProxyId		hitProxyId = viewportClient->GetHitProxyId( cursorPosition.x(), cursorPosition.y() );
-		int a = 0;
-		++a;
 
-		uint32			index = hitProxyId.GetIndex();
-		LE_LOG( LT_Log, LC_General, TEXT( "(%i;%i) Selected actor %s" ), cursorPosition.x(), cursorPosition.y(), GWorld->GetActor( index > 0 ? index-1 : index )->GetName() );
+		GWorld->UnselectAllActors();
+		if ( hitProxyId.IsValid() )
+		{
+			uint32			index = hitProxyId.GetIndex();
+			ActorRef_t		actor = GWorld->GetActor( index > 0 ? index - 1 : index );
+			
+			GWorld->SelectActor( actor );
+			LE_LOG( LT_Log, LC_Editor, TEXT( "(%i;%i) Selected actor '%s'" ), cursorPosition.x(), cursorPosition.y(), actor->GetName() );
+		}
 	}
 #endif // ENABLE_HITPROXY
 }

@@ -736,6 +736,26 @@ public:
 	}
 #endif // ENABLE_HITPROXY
 
+#if WITH_EDITOR
+	/**
+	 * Set selected actor
+	 * @param InIsSelected	Is selected this actor
+	 */
+	FORCEINLINE void SetSelected( bool InIsSelected )
+	{
+		bSelected = InIsSelected;
+	}
+
+	/**
+	 * Is selected actor
+	 * @return Return TRUE if actor is selected, else returning FALSE
+	 */
+	FORCEINLINE bool IsSelected() const
+	{
+		return bSelected;
+	}
+#endif // WITH_EDITOR
+
 	/**
 	 * Get actor location in world space
 	 * @return Return actor location, if root component is not valid return zero vector
@@ -893,6 +913,11 @@ private:
 	bool										bNeedReinitCollision;	/**< Is need reinit collision component */
 	bool										bActorIsBeingDestroyed;	/**< Actor is being destroyed */
 	bool										bBeginPlay;				/**< Is begin play for this actor */
+	
+#if WITH_EDITOR
+	bool										bSelected;				/**< Is selected this actor */
+#endif // WITH_EDITOR
+
 	std::vector< ActorComponentRef_t >			ownedComponents;		/**< Owned components */
 	mutable COnActorDestroyed					onActorDestroyed;		/**< Called event when actor is destroyed */
 

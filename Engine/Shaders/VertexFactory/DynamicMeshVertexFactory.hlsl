@@ -41,4 +41,11 @@ float4 VertexFactory_GetHitProxyId( FVertexFactoryInput InInput )
 }
 #endif // ENABLE_HITPROXY
 
+#if WITH_EDITOR
+float4 VertexFactory_GetColorOverlay( FVertexFactoryInput InInput )
+{
+	return colorOverlay;
+}
+#endif // WITH_EDITOR
+
 #endif // !VERTEXFACTORY_H

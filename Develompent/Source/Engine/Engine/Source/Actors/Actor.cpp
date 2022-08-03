@@ -48,6 +48,10 @@ AActor::AActor()
 	, bNeedReinitCollision( false )
 	, bActorIsBeingDestroyed( false )
 	, bBeginPlay( false )
+
+#if WITH_EDITOR
+	, bSelected( false )
+#endif // WITH_EDITOR
 {}
 
 AActor::~AActor()

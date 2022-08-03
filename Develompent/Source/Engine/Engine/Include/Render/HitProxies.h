@@ -51,7 +51,7 @@ public:
 	 */
 	FORCEINLINE CColor GetColor() const
 	{
-		return CColor( ( index >> 16 ) & 0xFF, ( index >> 8 ) & 0xFF, ( index >> 0 ) & 0xFF, 0 );
+		return CColor( ( index >> 0 ) & 0xFF, ( index >> 8 ) & 0xFF, ( index >> 16 ) & 0xFF, 0 );
 	}
 
 	/**
@@ -69,7 +69,7 @@ public:
 	 */
 	FORCEINLINE void SetIndex( const CColor& InColor )
 	{
-		index = ( ( int32 )InColor.r << 16 ) | ( ( int32 )InColor.g << 8 ) | ( ( int32 )InColor.b << 0 );
+		index = ( ( int32 )InColor.r << 0 ) | ( ( int32 )InColor.g << 8 ) | ( ( int32 )InColor.b << 16 );
 	}
 
 	/**

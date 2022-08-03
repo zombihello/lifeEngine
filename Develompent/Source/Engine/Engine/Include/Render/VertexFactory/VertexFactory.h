@@ -251,6 +251,7 @@ public:
 										  TEXT( "0" )
 #endif // ENABLE_HITPROXY
 		) );
+		InEnvironment.difinitions.insert( std::make_pair( TEXT( "WITH_EDITOR" ), !GIsCooker ? TEXT( "1" ) : TEXT( "0" ) ) );
 	}
 #endif // WITH_EDITOR
 

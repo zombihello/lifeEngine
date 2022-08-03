@@ -165,14 +165,22 @@ CHitProxyId CEditorLevelViewportClient::GetHitProxyId( uint32 InX, uint32 InY ) 
 										  uint32, x, InX,
 										  uint32, y, InY,
 										  {
+											  // Getting hit proxy texture and lock him for read
 											  CBaseDeviceContextRHI*	deviceContext	= GRHI->GetImmediateContext();
 											  Texture2DRHIRef_t			hitProxyTexture = GSceneRenderTargets.GetHitProxyTexture();
 											  SLockedData				lockedData;
 											  GRHI->LockTexture2D( deviceContext, hitProxyTexture, 0, false, lockedData );
 
-											  uint8*		data = &( ( uint8* )lockedData.data )[ ( x + y * hitProxyTexture->GetSizeX() ) * GPixelFormats[ hitProxyTexture->GetFormat() ].blockBytes ];
+											  // Getting pointer to we interested data in texture
+											  CColor*		data = ( CColor* )lockedData.data + x + y * ( lockedData.pitch / GPixelFormats[ hitProxyTexture->GetFormat() ].blockBytes );
 
-											  hitProxyId.SetIndex( CColor( data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ] ) );
+											  // If color is not black (black is color of clear texture), then hit proxy is valid
+											  if ( *data != CColor::black )
+											  {
+												  hitProxyId.SetIndex( *data );
+											  }
+
+											  // Unlock texture
 											  GRHI->UnlockTexture2D( deviceContext, hitProxyTexture, 0, lockedData );
 										  } );
 
