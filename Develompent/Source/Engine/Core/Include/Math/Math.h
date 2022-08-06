@@ -467,6 +467,16 @@ struct SMath
 		return ::Clamp( InX, InMin, InMax );
 	}
 
+	/**
+	 * @brief Computes the absolute value of an number
+	 * @param InX	Value
+	 * @return Return The absolute value of n (i.e. |n|), if it is representable.
+	 */
+	static FORCEINLINE float Abs( float InX )
+	{
+		return abs( InX );
+	}
+
 	static const Vector				vectorZero;			/**< Zero 3D vector */
 	static const Vector				vectorOne;			/**< One 3D vector */
 	static const Quaternion			quaternionZero;		/**< Quaternion zero */

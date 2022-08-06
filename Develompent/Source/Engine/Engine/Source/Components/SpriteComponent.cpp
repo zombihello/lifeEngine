@@ -114,7 +114,7 @@ void CSpriteComponent::LinkDrawList()
 
 		// Make and add to scene new hit proxy draw policy link
 #if ENABLE_HITPROXY
-		hitProxyDrawingPolicyLink		= ::MakeDrawingPolicyLink<HitProxyDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.hitProxyDrawList, DEC_SPRITE );
+		hitProxyDrawingPolicyLink		= ::MakeDrawingPolicyLink<HitProxyDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.hitProxyLayers[ HPL_World ].hitProxyDrawList, DEC_SPRITE );
 		meshBatchLinks.push_back( meshBatchLink );
 #endif // ENABLE_HITPROXY
 	}
@@ -131,7 +131,7 @@ void CSpriteComponent::UnlinkDrawList()
 		SDGWorld.spriteDrawList.RemoveItem( drawingPolicyLink );
 
 #if ENABLE_HITPROXY
-		SDGWorld.hitProxyDrawList.RemoveItem( hitProxyDrawingPolicyLink );
+		SDGWorld.hitProxyLayers[ HPL_World ].hitProxyDrawList.RemoveItem( hitProxyDrawingPolicyLink );
 #endif // ENABLE_HITPROXY
 
 		drawingPolicyLink = nullptr;

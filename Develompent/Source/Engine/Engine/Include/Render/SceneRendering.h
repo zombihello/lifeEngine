@@ -18,6 +18,10 @@
 #include "RHI/TypesRHI.h"
 #include "LEBuild.h"
 
+#if ENABLE_HITPROXY
+#include "Render/HitProxies.h"
+#endif // ENABLE_HITPROXY
+
 #if !SHIPPING_BUILD
 #include "Render/Shaders/WireframeShader.h"
 #endif // !SHIPPING_BUILD
@@ -151,10 +155,23 @@ public:
 
 #if ENABLE_HITPROXY
 	/**
-	 * Render hit proxies
+	 * Begin render view target for hit proxies
 	 * @param InViewportRHI		Viewport RHI
 	 */
-	void RenderHitProxies( ViewportRHIParamRef_t InViewportRHI );
+	void BeginRenderHitProxiesViewTarget( ViewportRHIParamRef_t InViewportRHI );
+
+	/**
+	 * Render hit proxies
+	 * @param InViewportRHI		Viewport RHI
+	 * @param InHitProxyLayer	Hit proxy layer to render
+	 */
+	void RenderHitProxies( ViewportRHIParamRef_t InViewportRHI, EHitProxyLayer InHitProxyLayer = HPL_World );
+
+	/**
+	 * Finish rendering a view for hit proxies
+	 * @param InViewportRHI		Viewport RHI
+	 */
+	void FinishRenderHitProxiesViewTarget( ViewportRHIParamRef_t InViewportRHI );
 #endif // ENABLE_HITPROXY
 
 	/**

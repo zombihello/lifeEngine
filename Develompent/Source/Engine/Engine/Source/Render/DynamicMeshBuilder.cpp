@@ -46,7 +46,7 @@ void CDynamicMeshBuilder::ReleaseRHI()
 	vertexFactory->ReleaseResource();
 }
 
-void CDynamicMeshBuilder::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, const class CSceneView& InSceneView ) const
+void CDynamicMeshBuilder::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, CMeshDrawingPolicy& InDrawingPolicy, const class CSceneView& InSceneView ) const
 {
 	checkMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call CDynamicMeshBuilder::Build" ) );
 	
@@ -58,15 +58,21 @@ void CDynamicMeshBuilder::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI,
 	meshBatch.numInstances		= 1;
 	meshBatch.numPrimitives		= numPrimitives;
 	meshBatch.primitiveType		= PT_TriangleList;
-	meshBatch.instances.push_back( SMeshInstance{ InLocalToWorld }  );
+	meshBatch.instances.push_back( SMeshInstance{ InLocalToWorld, 
+#if ENABLE_HITPROXY
+								   hitProxyId 
+#endif // ENABLE_HITPROXY
+								   }  );
 
 	// Draw mesh
-	CStaticMeshDrawPolicy		drawPolicy;
-	drawPolicy.Init( vertexFactory, InMaterial );
-	if ( drawPolicy.IsValid() )
+	if ( InDrawingPolicy.IsValid() )
 	{
-		drawPolicy.SetRenderState( InDeviceContextRHI );
-		drawPolicy.SetShaderParameters( InDeviceContextRHI );
-		drawPolicy.Draw( InDeviceContextRHI, meshBatch, InSceneView );
+		InDrawingPolicy.SetRenderState( InDeviceContextRHI );
+		InDrawingPolicy.SetShaderParameters( InDeviceContextRHI );
+		InDrawingPolicy.Draw( InDeviceContextRHI, meshBatch, InSceneView );
+	}
+	else
+	{
+		checkMsg( false, TEXT( "Need init drawing policy before drawing" ) );
 	}
 }

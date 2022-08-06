@@ -39,7 +39,7 @@ public:
 	 * Set enabled
 	 * @param InIsEnabled		Is enabled viewport
 	 */
-	void SetEnabled( bool InIsEnabled );
+	virtual void SetEnabled( bool InIsEnabled );
 
 	/**
 	 * Set viewport type

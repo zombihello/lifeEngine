@@ -16,6 +16,7 @@
 #include "System/InputSystem.h"
 #include "System/World.h"
 #include "System/Gizmo.h"
+#include "Actors/Actor.h"
 #include "EngineDefines.h"
 
 /**
@@ -60,7 +61,7 @@ static const ShowFlags_t		GShowFlags[ LVT_Max ] =
 
 CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InViewportType /* = LVT_Perspective */ )
 	: bSetListenerPosition( true )
-	, bIsTracking( false )
+	, trackingType( CEditorLevelViewportClient::MT_None )
 	, bIgnoreInput( false )
 	, bAllowContextMenu( true )
 	, viewportType( InViewportType )
@@ -78,7 +79,7 @@ CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InVie
 void CEditorLevelViewportClient::Tick( float InDeltaSeconds )
 {
 	// If we tracking mouse and this is perspective viewport - change view location
-	if ( bIsTracking && viewportType == LVT_Perspective )
+	if ( trackingType == MT_View && viewportType == LVT_Perspective )
 	{
 		Vector		targetDirection = viewRotation.RotateVector( SMath::vectorForward );
 		Vector		axisUp			= viewRotation.RotateVector( SMath::vectorUp );
@@ -132,38 +133,51 @@ void CEditorLevelViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportR
 
 	// Draw scene
 	sceneRenderer.Render( InViewportRHI );
-	
+
 	// Finishing render and delete scene view
 	sceneRenderer.FinishRenderViewTarget( InViewportRHI );
 	delete InSceneView;
 }
 
 #if ENABLE_HITPROXY
-void CEditorLevelViewportClient::DrawHitProxies( CViewport* InViewport )
+void CEditorLevelViewportClient::DrawHitProxies( CViewport* InViewport, EHitProxyLayer InHitProxyLayer /* = HPL_World */ )
 { 
 	check( InViewport );
 	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
 
 	// Draw viewport
-	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,
-										  CEditorLevelViewportClient*, viewportClient, this,
-										  ViewportRHIRef_t, viewportRHI, InViewport->GetViewportRHI(),
-										  CSceneView*, sceneView, sceneView,
-										  {
-											  viewportClient->DrawHitProxies_RenderThread( viewportRHI, sceneView );
-										  } );
+	UNIQUE_RENDER_COMMAND_FOURPARAMETER( CViewportRenderCommand,
+										 CEditorLevelViewportClient*, viewportClient, this,
+										 ViewportRHIRef_t, viewportRHI, InViewport->GetViewportRHI(),
+										 CSceneView*, sceneView, sceneView,
+										 EHitProxyLayer, hitProxyLayer, InHitProxyLayer,
+										 {
+											 viewportClient->DrawHitProxies_RenderThread( viewportRHI, sceneView, hitProxyLayer );
+										 } );
 }
 
-void CEditorLevelViewportClient::DrawHitProxies_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView )
+void CEditorLevelViewportClient::DrawHitProxies_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, EHitProxyLayer InHitProxyLayer /* = HPL_World */ )
 {
 	check( IsInRenderingThread() );
 	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	CSceneRenderer				sceneRenderer( InSceneView, ( CScene* )GWorld->GetScene() );
+	CScene*						scene = ( CScene* )GWorld->GetScene();
+	CSceneRenderer				sceneRenderer( InSceneView, scene );
 
 	// Draw hit proxies
 	GRHI->SetViewport( immediateContext, 0, 0, 0.f, InViewportRHI->GetWidth(), InViewportRHI->GetHeight(), 1.f );
-	sceneRenderer.RenderHitProxies( InViewportRHI );
+	sceneRenderer.BeginRenderHitProxiesViewTarget( InViewportRHI );
+
+	// Draw gizmo
+	CGizmo&			gizmo = GEditorEngine->GetGizmo();
+	if ( gizmo.IsEnabled() )
+	{
+		gizmo.Draw_RenderThread( InViewportRHI, InSceneView, scene );
+	}
+
+	// Draw scene
+	sceneRenderer.RenderHitProxies( InViewportRHI, InHitProxyLayer );
 	
+	sceneRenderer.FinishRenderHitProxiesViewTarget( InViewportRHI );
 	delete InSceneView;
 }
 
@@ -301,24 +315,39 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	{
 		// Event of mouse pressed
 	case SWindowEvent::T_MousePressed:
+	{
+		CGizmo&				gizmo = GEditorEngine->GetGizmo();
+		bAllowContextMenu	= true;
+
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
 			QApplication::setOverrideCursor( QCursor( Qt::BlankCursor ) );
-			bIsTracking			= true;
+			trackingType = MT_View;
+		}	
+		else if ( InWindowEvent.events.mouseButton.code == BC_MouseLeft && gizmo.IsEnabled() && gizmo.GetCurrentAxis() > A_None )
+		{
+			trackingType = MT_Gizmo;
 		}
-
-		bAllowContextMenu		= true;
 		break;
+	}
 
 		// Event of mouse released
 	case SWindowEvent::T_MouseReleased:
-		if ( InWindowEvent.events.mouseButton.code == BC_MouseRight )
+	{
+		CGizmo&				gizmo = GEditorEngine->GetGizmo();
+		
+		if ( trackingType == MT_View && InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
 			QApplication::restoreOverrideCursor();
-			bIsTracking			= false;
+			trackingType		= MT_None;
 			cameraMoveFlags		= 0x0;
 		}
+		else if ( trackingType == MT_Gizmo && InWindowEvent.events.mouseButton.code == BC_MouseLeft )
+		{
+			trackingType = MT_None;
+		}
 		break;
+	}
 
 		// Event of mouse wheel moved
 	case SWindowEvent::T_MouseWheel:
@@ -348,7 +377,21 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 		// Event of mouse move
 	case SWindowEvent::T_MouseMove:
-		if ( bIsTracking )
+	{
+		Vector2D		moveDelta = Vector2D( 0.f, 0.f );
+		if ( viewportType != LVT_Perspective )
+		{
+			moveDelta.x		= InWindowEvent.events.mouseMove.xDirection * ( orthoZoom / CAMERA_ZOOM_DIV );
+			moveDelta.y		= InWindowEvent.events.mouseMove.yDirection * ( orthoZoom / CAMERA_ZOOM_DIV );
+		}
+		else
+		{
+			moveDelta.x		= InWindowEvent.events.mouseMove.xDirection * GInputSystem->GetMouseSensitivity();
+			moveDelta.y		= InWindowEvent.events.mouseMove.yDirection * GInputSystem->GetMouseSensitivity();
+		}
+
+		// Update view if we tracking mouse for MT_View
+		if ( trackingType == MT_View )
 		{
 			// We moved mouse when press right mouse button, in this case we not allow opening context menu after release
 			bAllowContextMenu = false;
@@ -380,19 +423,17 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 					break;
 				}
 
-				*dX			+= InWindowEvent.events.mouseMove.xDirection * ( orthoZoom / CAMERA_ZOOM_DIV );
-				*dY			+= InWindowEvent.events.mouseMove.yDirection * ( orthoZoom / CAMERA_ZOOM_DIV );
-				*dX			= Clamp<float>( *dX, -HALF_WORLD_MAX1, HALF_WORLD_MAX1 );
-				*dY			= Clamp<float>( *dY, -HALF_WORLD_MAX1, HALF_WORLD_MAX1 );
+				*dX	= Clamp<float>( *dX + moveDelta.x, -HALF_WORLD_MAX1, HALF_WORLD_MAX1 );
+				*dY	= Clamp<float>( *dY + moveDelta.y, -HALF_WORLD_MAX1, HALF_WORLD_MAX1 );
 			}
 
 			// For perspective viewports its rotate camera
 			else
 			{
 				// Update Yaw axis
-				if ( InWindowEvent.events.mouseMove.xDirection != 0.f )
+				if ( moveDelta.x != 0.f )
 				{
-					viewRotation.yaw += InWindowEvent.events.mouseMove.xDirection * GInputSystem->GetMouseSensitivity();
+					viewRotation.yaw += moveDelta.x;
 					if ( viewRotation.yaw < -360.f || viewRotation.yaw > 360.f )
 					{
 						viewRotation.yaw = 0.f;
@@ -400,9 +441,9 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 				}
 
 				// Update Pitch axis
-				if ( InWindowEvent.events.mouseMove.yDirection != 0.f )
+				if ( moveDelta.y != 0.f )
 				{
-					viewRotation.pitch -= InWindowEvent.events.mouseMove.yDirection * GInputSystem->GetMouseSensitivity();
+					viewRotation.pitch -= moveDelta.y;
 					if ( viewRotation.pitch > 90.f )
 					{
 						viewRotation.pitch = 90.f;
@@ -413,12 +454,57 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 					}
 				}
 			}
-		}		
+		}
+		// Apply transformation for object if we traking mouse for MT_Gizmo
+		else if ( trackingType == MT_Gizmo )
+		{
+			CGizmo&		gizmo = GEditorEngine->GetGizmo();
+			Vector		drag;
+			CRotator	rotator;
+			Vector		scale;
+
+			for ( uint32 axis = 0; axis < 2; ++axis )
+			{
+				Vector2D	delta( 0.f, 0.f );
+				delta[ axis ] = moveDelta[ axis ];
+				if ( delta.x != 0.f || delta.y != 0.f )
+				{
+					// Convert movement mouse to drag/rotate/scale
+					ConvertMovementDeltaToDragRot( delta, drag, rotator, scale );
+
+					// Apply transform to actors
+					const std::vector<ActorRef_t>&	selectedActors = GWorld->GetSelectedActors();
+					switch ( gizmo.GetType() )
+					{
+					// Translate gizmo
+					case GT_Translate:
+						for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
+						{
+							ActorRef_t		actor = selectedActors[ index ];
+							actor->AddActorLocation( drag );
+						}
+
+						gizmo.SetLocation( gizmo.GetLocation() + drag );
+						break;
+
+					// Scale gizmo
+					case GT_Scale:
+						for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
+						{
+							ActorRef_t		actor = selectedActors[ index ];
+							actor->AddActorScale( scale );
+						}
+						break;
+					}
+				}
+			}
+		}
 		break;
+	}
 
 		// Event of key press
 	case SWindowEvent::T_KeyPressed:
-		if ( bIsTracking && viewportType == LVT_Perspective )
+		if ( trackingType == MT_View && viewportType == LVT_Perspective )
 		{
 			switch ( InWindowEvent.events.key.code )
 			{
@@ -432,7 +518,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 		// Event of release key
 	case SWindowEvent::T_KeyReleased:
-		if ( bIsTracking && viewportType == LVT_Perspective )
+		if ( trackingType == MT_View && viewportType == LVT_Perspective )
 		{
 			switch ( InWindowEvent.events.key.code )
 			{
@@ -443,6 +529,86 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			}
 		}
 		break;
+	}
+}
+
+void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, CRotator& OutRotation, Vector& OutScale )
+{
+	CGizmo&		gizmo		=	GEditorEngine->GetGizmo();
+	Vector2D	axisEnd;
+	uint32		currentAxis = gizmo.GetCurrentAxis();
+	Vector2D	dragDelta	= InDragDelta;
+
+	OutDrag		= SMath::vectorZero;
+	OutRotation = SMath::rotatorZero;
+	OutScale	= SMath::vectorOne;
+
+	// Get the end of the axis (in screen space) based on which axis is being pulled
+	switch ( currentAxis )
+	{
+	case A_X:					axisEnd = gizmo.GetAxisXEnd();												break;
+	case A_Y:					axisEnd = gizmo.GetAxisYEnd();												break;
+	case A_Z:					axisEnd = gizmo.GetAxisZEnd();												break;
+	case A_X | A_Y:				axisEnd = dragDelta.x != 0 ? gizmo.GetAxisXEnd() : gizmo.GetAxisYEnd();		break;
+	case A_X | A_Z:				axisEnd = dragDelta.x != 0 ? gizmo.GetAxisXEnd() : gizmo.GetAxisZEnd();		break;
+	case A_Y | A_Z:				axisEnd = dragDelta.x != 0 ? gizmo.GetAxisYEnd() : gizmo.GetAxisZEnd();		break;
+	case A_X | A_Y | A_Z:		axisEnd = dragDelta.x != 0 ? gizmo.GetAxisYEnd() : gizmo.GetAxisZEnd();		break;
+	default:																								break;
+	}
+
+	// Screen space Y axis is inverted
+	dragDelta.y *= -1.f;
+
+	// Get the directions of the axis (on the screen)
+	Vector2D	axisDir = axisEnd - gizmo.GetScreenLocation();
+
+	// Use the most dominant axis the mouse is being dragged along
+	int32		idx = 0;
+	if ( SMath::Abs( dragDelta.x ) < SMath::Abs( dragDelta.y ) )
+	{
+		idx = 1;
+	}
+	float		value = dragDelta[ idx ];
+
+	// If the axis dir is negative, it is pointing in the negative screen direction.  In this situation, the mouse
+	// drag must be inverted so that you are still dragging in the right logical direction
+	if ( axisDir[ idx ] < 0.f && ( currentAxis == A_X || currentAxis == A_Y || currentAxis == A_Z ) )
+	{
+		value *= -1.f;
+	}
+
+	switch ( gizmo.GetType() )
+	{
+	// Translate gizmo
+	case GT_Translate:
+		switch ( currentAxis )
+		{
+		case A_X:			OutDrag = Vector( value, 0.f, 0.f );													break;
+		case A_Y:			OutDrag = Vector( 0.f, value, 0.f );													break;
+		case A_Z:			OutDrag = Vector( 0.f, 0.f, value );													break;
+		case A_X | A_Y:		OutDrag = dragDelta.x != 0 ? Vector( -value, 0.f, 0.f ) : Vector( 0.f, value, 0.f );	break;
+		case A_X | A_Z:		OutDrag = dragDelta.x != 0 ? Vector( -value, 0.f, 0.f ) : Vector( 0.f, 0.f, value );	break;
+		case A_Y | A_Z:		OutDrag = dragDelta.x != 0 ? Vector( 0.f, 0.f, value ) : Vector( 0.f, value, 0.f );		break;
+		}
+		break;
+
+	// Scale gizmo
+	case GT_Scale:
+	{
+		Vector		axis;
+		switch ( currentAxis )
+		{
+		case A_X:				axis = Vector( 1.f, 0.f, 0.f );													break;
+		case A_Y:				axis = Vector( 0.f, 1.f, 0.f );													break;
+		case A_Z:				axis = Vector( 0.f, 0.f, 1.f );													break;
+		case A_X | A_Y:			axis = dragDelta.x != 0 ? Vector( 1.f, 0.f, 0.f ) : Vector( 0.f, 1.f, 0.f );	break;
+		case A_X | A_Z:			axis = dragDelta.x != 0 ? Vector( 1.f, 0.f, 0.f ) : Vector( 0.f, 0.f, 1.f );	break;
+		case A_Y | A_Z:			axis = dragDelta.x != 0 ? Vector( 0.f, 1.f, 0.f ) : Vector( 0.f, 0.f, 1.f );	break;
+		case  A_X | A_Y | A_Z:	axis = Vector( 1.f, 1.f, 1.f );													break;
+		}
+
+		OutScale = axis * value;
+	}
 	}
 }
 

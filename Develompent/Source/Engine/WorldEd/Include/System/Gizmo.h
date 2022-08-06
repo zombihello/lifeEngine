@@ -20,6 +20,7 @@
  */
 enum EGizmoType
 {
+	GT_None,			/**< None */
 	GT_Translate,		/**< Gizmo translate */
 	GT_Rotate,			/**< Gizmo rotate */
 	GT_Scale,			/**< Gizmo scale */
@@ -98,7 +99,8 @@ public:
 	 */
 	FORCEINLINE void SetEnable( bool InEnable )
 	{
-		bEnabled = InEnable;
+		bEnabled	= InEnable;
+		currentAxis = A_None;
 	}
 
 	/**
@@ -110,6 +112,60 @@ public:
 		return bEnabled;
 	}
 
+	/**
+	 * @brief Set current axis
+	 * @param InNewCurrentAxis		New current axis
+	 */
+	FORCEINLINE void SetCurrentAxis( uint32 InNewCurrentAxis )
+	{
+		currentAxis = InNewCurrentAxis;
+	}
+
+	/**
+	 * @brief Get current axis
+	 * @return Return current axis (see EAxis)
+	 */
+	FORCEINLINE uint32 GetCurrentAxis() const
+	{
+		return currentAxis;
+	}
+
+	/**
+	 * @brief Get axis X end in screen space
+	 * @return Return axis X end in screen space
+	 */
+	FORCEINLINE const Vector2D& GetAxisXEnd() const
+	{
+		return axisXEnd;
+	}
+
+	/**
+	 * @brief Get axis Y end in screen space
+	 * @return Return axis Y end in screen space
+	 */
+	FORCEINLINE const Vector2D& GetAxisYEnd() const
+	{
+		return axisYEnd;
+	}
+
+	/**
+	 * @brief Get axis Z end in screen space
+	 * @return Return axis Z end in screen space
+	 */
+	FORCEINLINE const Vector2D& GetAxisZEnd() const
+	{
+		return axisZEnd;
+	}
+
+	/**
+	 * @brief Get location gizmo in screen space
+	 * @return Return location gizmo in screen space
+	 */
+	FORCEINLINE const Vector2D& GetScreenLocation() const
+	{
+		return screenLocation;
+	}
+
 private:
 	/**
 	 * @brief Render translate gizmo. Must be call in render thread
@@ -119,6 +175,15 @@ private:
 	 * @param InScene			Scene
 	 */
 	void Render_Translate( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene );
+
+	/**
+	 * @brief Render rotate gizmo. Must be call in render thread
+	 *
+	 * @param InViewportRHI		Viewport RHI
+	 * @param InSceneView		Scene view
+	 * @param InScene			Scene
+	 */
+	void Render_Rotate( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene );
 
 	/**
 	 * @brief Render scale gizmo. Must be call in render thread
@@ -138,20 +203,27 @@ private:
 	 * @param InMatrix			Matrix
 	 * @param InMaterial		Material
 	 * @param InColor			Color of axis
+	 * @param OutAxisEnd		Output axis end in screen coords
 	 * @param InScale			Scale of axis
 	 * @param InIsCubeHead		Is need cube head in axis
 	 */
-	void Render_Axis( const class CSceneView* InSceneView, struct SSceneDepthGroup& InSDG, EAxis InAxis, const Matrix& InMatrix, const TAssetHandle<CMaterial>& InMaterial, const CColor& InColor, float InScale, bool InIsCubeHead = false );
+	void Render_Axis( const class CSceneView* InSceneView, struct SSceneDepthGroup& InSDG, EAxis InAxis, const Matrix& InMatrix, const TAssetHandle<CMaterial>& InMaterial, const CColor& InColor, Vector2D& OutAxisEnd, float InScale, bool InIsCubeHead = false );
 
-	bool						bEnabled;		/**< Is enabled gizmo */
-	EGizmoType					type;			/**< Gizmo type */
-	Vector						location;		/**< Gizmo location */
-	CColor						axisColorX;		/**< Axis color X */
-	CColor						axisColorY;		/**< Axis color Y */
-	CColor						axisColorZ;		/**< Axis color Z */
-	TAssetHandle<CMaterial>		axisMaterialX;	/**< Axis material X */
-	TAssetHandle<CMaterial>		axisMaterialY;	/**< Axis material Y */
-	TAssetHandle<CMaterial>		axisMaterialZ;	/**< Axis material Z */
+	bool						bEnabled;			/**< Is enabled gizmo */
+	EGizmoType					type;				/**< Gizmo type */
+	Vector						location;			/**< Gizmo location */
+	Vector2D					screenLocation;		/**< Screen location */
+	CColor						axisColorX;			/**< Axis color X */
+	CColor						axisColorY;			/**< Axis color Y */
+	CColor						axisColorZ;			/**< Axis color Z */
+	CColor						currentAxisColor;	/**< Current axis color */
+	uint32						currentAxis;		/**< Current axies (see EAxis) */
+	TAssetHandle<CMaterial>		axisMaterialX;		/**< Axis material X */
+	TAssetHandle<CMaterial>		axisMaterialY;		/**< Axis material Y */
+	TAssetHandle<CMaterial>		axisMaterialZ;		/**< Axis material Z */
+	Vector2D					axisXEnd;			/**< Axis X end in screen coord */
+	Vector2D					axisYEnd;			/**< Axis Y end in screen coord */
+	Vector2D					axisZEnd;			/**< Axis Z end in screen coord */
 };
 
 #endif // !GIZMO_H

@@ -24,6 +24,16 @@ class CEditorLevelViewportClient : public CViewportClient
 {
 public:
 	/**
+	 * @brief Enumeration of type mouse tracking
+	 */
+	enum EMouseTracking
+	{
+		MT_None,		/**< No mouse tracking */
+		MT_View,		/**< Tacking mouse for view */
+		MT_Gizmo		/**< Tacking mouse for gizmo */
+	};
+
+	/**
 	 * @brief Constructor
 	 * 
 	 * @param InViewportType		Viewport type
@@ -54,17 +64,19 @@ public:
 	/**
 	 * @brief Draw hit proxies
 	 *
-	 * @param InViewport	Viewport
+	 * @param InViewport		Viewport
+	 * @param InHitProxyLayer	Hit proxy layer
 	 */
-	virtual void DrawHitProxies( CViewport* InViewport );
+	virtual void DrawHitProxies( CViewport* InViewport, EHitProxyLayer InHitProxyLayer = HPL_World );
 
 	/**
 	 * @brief Draw hit proxies. Must be call in render thread
 	 *
 	 * @param InViewportRHI		Viewport RHI
 	 * @param InSceneView		Scene view
+	 * @param InHitProxyLayer	Hit proxy layer
 	 */
-	void DrawHitProxies_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView );
+	void DrawHitProxies_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, EHitProxyLayer InHitProxyLayer = HPL_World );
 
 	/**
 	 * @brief Get hit proxy id by screen coord
@@ -119,6 +131,15 @@ public:
 	}
 
 	/**
+	 * @brief Get mouse tracking type
+	 * @return Return mouse tracking type
+	 */
+	FORCEINLINE EMouseTracking GetMouseTrackingType() const
+	{
+		return trackingType;
+	}
+
+	/**
 	 * @brief Is allow open context menu
 	 * @return Return TRUE if allow open context menu, else returning FALSE
 	 */
@@ -155,8 +176,18 @@ protected:
 	 */
 	virtual CColor GetBackgroundColor() const;
 
+	/**
+	 * Converts the delta movement to drag/rotation/scale based on gizmo axis
+	 * 
+	 * @param InDragDelta		Muse move delta
+	 * @param OutDrag			Output delta of move
+	 * @param OutRotation		Output delta of rotation
+	 * @param OutScale			Output delta of scale
+	 */
+	void ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, CRotator& OutRotation, Vector& OutScale );
+
 	bool						bSetListenerPosition;	/**< Is need sets the listener position */
-	bool						bIsTracking;			/**< Is mouse tracking */
+	EMouseTracking				trackingType;			/**< Mouse tacking type */
 	bool						bIgnoreInput;			/**< Is need ignore input events */
 	bool						bAllowContextMenu;		/**< Is allow open context menu when pressed right mouse button */
 	ELevelViewportType			viewportType;			/**< Viewport type */	

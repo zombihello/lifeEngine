@@ -17,6 +17,8 @@
 #include "Render/Material.h"
 #include "Render/VertexFactory/DynamicMeshVertexFactory.h"
 #include "Render/RenderResource.h"
+#include "Render/DrawingPolicy.h"
+#include "Render/HitProxies.h"
 #include "RHI/BaseBufferRHI.h"
 
 /**
@@ -90,9 +92,52 @@ public:
 	 * @param InDeviceContextRHI	RHI device context
 	 * @param InLocalToWorld		Local to world matrix
 	 * @param InMaterial			Material
+	 * @param InDrawingPolicy		Drawing policy
 	 * @param InSceneView			Scene view
 	 */
-	void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, const class CSceneView& InSceneView ) const;
+	template<typename TDrawingPolicyType>
+	FORCEINLINE void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, const class CSceneView& InSceneView ) const
+	{
+		checkMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call CDynamicMeshBuilder::Build" ) );
+
+		TDrawingPolicyType		drawingPolicy;
+		drawingPolicy.Init( vertexFactory, InMaterial );
+		if ( drawingPolicy.IsValid() )
+		{
+			Draw( InDeviceContextRHI, InLocalToWorld, InMaterial, drawingPolicy, InSceneView );
+		}
+	}
+
+	/**
+	 * @brief Draw dynamic mesh
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InLocalToWorld		Local to world matrix
+	 * @param InMaterial			Material
+	 * @param InDrawingPolicy		Drawing policy
+	 * @param InSceneView			Scene view
+	 */
+	void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, CMeshDrawingPolicy& InDrawingPolicy, const class CSceneView& InSceneView ) const;
+
+#if ENABLE_HITPROXY
+	/**
+	 * @brief Set hit proxy id
+	 * @param InNewHitProxyId	New hit proxy id
+	 */
+	FORCEINLINE void SetHitProxyId( const CHitProxyId& InNewHitProxyId )
+	{
+		hitProxyId = InNewHitProxyId;
+	}
+
+	/**
+	 * @brief Get hit proxy id
+	 * @return Return hit proxy id
+	 */
+	FORCEINLINE CHitProxyId GetHitProxyId() const
+	{
+		return hitProxyId;
+	}
+#endif // ENABLE_HITPROXY
 
 	/**
 	 * @brief Get array of verteces
@@ -134,6 +179,7 @@ private:
 	VertexBufferRHIRef_t						vertexBufferRHI;	/**< Vertex buffer RHI */
 	IndexBufferRHIRef_t							indexBufferRHI;		/**< Index buffer RHI */
 	TRefCountPtr< CDynamicMeshVertexFactory >	vertexFactory;		/**< Vertex factory */
+	CHitProxyId									hitProxyId;			/**< Hit proxy Id */
 };
 
 #endif // !DYNAMICMESHBUILDER_H

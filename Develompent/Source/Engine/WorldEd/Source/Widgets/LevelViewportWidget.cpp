@@ -24,51 +24,132 @@ WeLevelViewportWidget::WeLevelViewportWidget( QWidget* InParent /*= nullptr*/, C
 
 	// Connect to slots
 	connect( this, SIGNAL( customContextMenuRequested( const QPoint& ) ), this, SLOT( OnCustomContextMenuRequested( const QPoint& ) ) );
+
+#if ENABLE_HITPROXY
+	connect( &timerRenderHitProxyGizmo, &QTimer::timeout, this, &WeLevelViewportWidget::OnRenderHitProxyGizmo );
+#endif // ENABLE_HITPROXY
 }
 
 WeLevelViewportWidget::~WeLevelViewportWidget()
 {}
 
+#if ENABLE_HITPROXY
 void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 {
 	WeViewportWidget::mousePressEvent( InEvent );
 
-#if ENABLE_HITPROXY
 	if ( InEvent->button() == Qt::MouseButton::LeftButton )
 	{
-		// Update hit proxies id in all actors
-		GWorld->UpdateHitProxiesId();
-
-		// Render hit proxies to render target
-		CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
-		check( viewportClient );
-		viewportClient->DrawHitProxies( const_cast< CViewport* >( &GetViewport() ) );
-
-		// Wait until we rendering scene
-		FlushRenderingCommands();
-
-		QPoint		cursorPosition	= mapFromGlobal( cursor().pos() );
-		CHitProxyId	hitProxyId		= viewportClient->GetHitProxyId( cursorPosition.x(), cursorPosition.y() );
-		CGizmo&		gizmo			= GEditorEngine->GetGizmo();
-
-		GWorld->UnselectAllActors();
-		gizmo.SetEnable( false );
-
-		if ( hitProxyId.IsValid() )
+		CGizmo&		gizmo = GEditorEngine->GetGizmo();
+		
+		// If gizmo is disabled or not exist current axis, we try select actor
+		if ( !gizmo.IsEnabled() || gizmo.GetCurrentAxis() == A_None )
 		{
-			uint32			index = hitProxyId.GetIndex();
-			ActorRef_t		actor = GWorld->GetActor( index > 0 ? index - 1 : index );
-			
-			GWorld->SelectActor( actor );
-			gizmo.SetEnable( true );
-			gizmo.SetType( GT_Translate );
-			gizmo.SetLocation( actor->GetActorLocation() );
+			// Update hit proxies id in all actors
+			GWorld->UpdateHitProxiesId();
 
-			LE_LOG( LT_Log, LC_Editor, TEXT( "(%i;%i) Selected actor '%s'" ), cursorPosition.x(), cursorPosition.y(), actor->GetName() );
+			// Render hit proxies to render target
+			CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* ) GetViewport().GetViewportClient();
+			check( viewportClient );
+			viewportClient->DrawHitProxies( const_cast< CViewport* >( &GetViewport() ) );
+
+			// Wait until we rendering scene
+			FlushRenderingCommands();
+
+			QPoint		cursorPosition	= mapFromGlobal( cursor().pos() );
+			CHitProxyId	hitProxyId		= viewportClient->GetHitProxyId( cursorPosition.x(), cursorPosition.y() );
+
+			GWorld->UnselectAllActors();
+			gizmo.SetEnable( false );
+			UpdateTimerRenderHitProxyGizmo( false );
+
+			if ( hitProxyId.IsValid() )
+			{
+				uint32			index = hitProxyId.GetIndex();
+				ActorRef_t		actor = GWorld->GetActor( index > 0 ? index - 1 : index );
+
+				GWorld->SelectActor( actor );
+				gizmo.SetEnable( true );
+				gizmo.SetLocation( actor->GetActorLocation() );
+				UpdateTimerRenderHitProxyGizmo( true );
+
+				LE_LOG( LT_Log, LC_Editor, TEXT( "(%i;%i) Selected actor '%s'" ), cursorPosition.x(), cursorPosition.y(), actor->GetName() );
+			}
 		}
 	}
-#endif // ENABLE_HITPROXY
 }
+
+void WeLevelViewportWidget::enterEvent( QEvent* InEvent )
+{
+	WeViewportWidget::enterEvent( InEvent );
+	UpdateTimerRenderHitProxyGizmo( true );
+}
+
+void WeLevelViewportWidget::leaveEvent( QEvent* InEvent )
+{
+	WeViewportWidget::leaveEvent( InEvent );
+	UpdateTimerRenderHitProxyGizmo( false );
+}
+
+void WeLevelViewportWidget::SetEnabled( bool InIsEnabled )
+{
+	WeViewportWidget::SetEnabled( InIsEnabled );
+	UpdateTimerRenderHitProxyGizmo( InIsEnabled );
+}
+
+void WeLevelViewportWidget::UpdateTimerRenderHitProxyGizmo( bool InNeedStart )
+{
+	CGizmo&		gizmo = GEditorEngine->GetGizmo();
+	if ( gizmo.IsEnabled() && InNeedStart )
+	{
+		timerRenderHitProxyGizmo.start( 1.f );
+	}
+	else
+	{
+		timerRenderHitProxyGizmo.stop();
+	}
+}
+
+void WeLevelViewportWidget::OnRenderHitProxyGizmo()
+{
+	CGizmo&		gizmo = GEditorEngine->GetGizmo();
+	if ( !gizmo.IsEnabled() || gizmo.GetType() == GT_None )
+	{
+		return;
+	}
+
+	// Getting current cursor position and check on condition cursor on widget
+	QPoint		cursorPosition = mapFromGlobal( cursor().pos() );
+	if ( cursorPosition.x() < 0 || cursorPosition.y() < 0 || cursorPosition.x() >= width() || cursorPosition.y() >= height() )
+	{
+		return;
+	}
+
+	// Getting hit proxy id from last hit proxy rendering
+	CEditorLevelViewportClient*		viewportClient	= ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
+	check( viewportClient );
+	if ( viewportClient->GetMouseTrackingType() == CEditorLevelViewportClient::MT_Gizmo )
+	{
+		return;
+	}
+
+	// Render hit proxies to render target
+	viewportClient->DrawHitProxies( const_cast< CViewport* >( &GetViewport() ), HPL_UI );
+
+	// Wait until we rendering scene
+	FlushRenderingCommands();
+
+	CHitProxyId		hitProxyId = viewportClient->GetHitProxyId( cursorPosition.x(), cursorPosition.y() );
+	if ( hitProxyId.IsValid() )
+	{
+		gizmo.SetCurrentAxis( hitProxyId.GetIndex() );
+	}
+	else
+	{
+		gizmo.SetCurrentAxis( A_None );
+	}
+}
+#endif // ENABLE_HITPROXY
 
 void WeLevelViewportWidget::OnCustomContextMenuRequested( const QPoint& InPoint )
 {

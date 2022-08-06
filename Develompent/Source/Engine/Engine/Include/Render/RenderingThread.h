@@ -461,7 +461,7 @@ extern void StopRenderingThread();
  */
 FORCEINLINE void FlushRenderingCommands()
 {
-	if ( GRenderFrameFinished )
+	if ( !IsInRenderingThread() && GRenderFrameFinished )
 	{
 		// Mark of flushed rendering commands
 		UNIQUE_RENDER_COMMAND( CFlushedRenderCommands,

@@ -258,6 +258,7 @@ void WeMainWindow::on_actionToolSelect_triggered()
 	ui->actionToolTranslate->setChecked( false );
 	ui->actionToolRotate->setChecked( false );
 	ui->actionToolScale->setChecked( false );
+	GEditorEngine->GetGizmo().SetType( GT_None );
 }
 
 void WeMainWindow::on_actionToolTranslate_triggered()
@@ -266,6 +267,8 @@ void WeMainWindow::on_actionToolTranslate_triggered()
 	ui->actionToolTranslate->setChecked( true );
 	ui->actionToolRotate->setChecked( false );
 	ui->actionToolScale->setChecked( false );
+	GEditorEngine->GetGizmo().SetType( GT_Translate );
+
 }
 
 void WeMainWindow::on_actionToolRotate_triggered()
@@ -274,6 +277,8 @@ void WeMainWindow::on_actionToolRotate_triggered()
 	ui->actionToolTranslate->setChecked( false );
 	ui->actionToolRotate->setChecked( true );
 	ui->actionToolScale->setChecked( false );
+	GEditorEngine->GetGizmo().SetType( GT_Rotate );
+
 }
 
 void WeMainWindow::on_actionToolScale_triggered()
@@ -282,6 +287,8 @@ void WeMainWindow::on_actionToolScale_triggered()
 	ui->actionToolTranslate->setChecked( false );
 	ui->actionToolRotate->setChecked( false );
 	ui->actionToolScale->setChecked( true );
+	GEditorEngine->GetGizmo().SetType( GT_Scale );
+
 }
 
 void WeMainWindow::On_PerspectiveDockWidget_VisibilityChanged( bool InVisible )

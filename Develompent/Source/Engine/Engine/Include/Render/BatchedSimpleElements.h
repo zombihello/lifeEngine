@@ -14,6 +14,8 @@
 #include "Math/Math.h"
 #include "Math/Color.h"
 #include "Render/VertexFactory/SimpleElementVertexFactory.h"
+#include "Render/HitProxies.h"
+#include "LEBuild.h"
 
 /**
  * @ingroup Engine
@@ -22,6 +24,20 @@
 class CBatchedSimpleElements
 {
 public:
+#if ENABLE_HITPROXY
+	/**
+	 * @brief Adds a line to the batch
+	 *
+	 * @param InStart		Start
+	 * @param InEnd			End
+	 * @param InHitProxyId	Hit proxy id
+	 */
+	FORCEINLINE void AddLine( const Vector& InStart, const Vector& InEnd, const CHitProxyId& InHitProxyId )
+	{
+		AddLine( InStart, InEnd, InHitProxyId.GetColor().ToNormalizedVector4D() );
+	}
+#endif // ENABLE_HITPROXY
+
 	/**
 	 * @brief Adds a line to the batch
 	 * 
@@ -65,7 +81,7 @@ public:
 	 */
 	void Draw( class CBaseDeviceContextRHI* InDeviceContext, const class CSceneView& InSceneView ) const;
 
-private:
+protected:
 	std::vector< SSimpleElementVertexType >		lineVerteces;		/**< Array of line verteces */
 };
 

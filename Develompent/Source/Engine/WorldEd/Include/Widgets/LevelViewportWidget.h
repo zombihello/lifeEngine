@@ -9,8 +9,11 @@
 #ifndef LEVELVIEWPORTWIDGET_H
 #define LEVELVIEWPORTWIDGET_H
 
+#include <QTimer>
+
 #include "Render/EditorLevelViewportClient.h"
 #include "Widgets/ViewportWidget.h"
+#include "LEBuild.h"
 
 /**
  * @ingroup WorldEd
@@ -34,6 +37,7 @@ public:
 	 */
 	virtual ~WeLevelViewportWidget();
 
+#if ENABLE_HITPROXY
 	/**
 	 * Event of mouse press
 	 *
@@ -41,7 +45,35 @@ public:
 	 */
 	virtual void mousePressEvent( QMouseEvent* InEvent ) override;
 
+	/**
+	 * Set enabled
+	 * @param InIsEnabled		Is enabled viewport
+	 */
+	virtual void SetEnabled( bool InIsEnabled ) override;
+
+	/**
+	 * Event of mouse enter on widget
+	 * 
+	 * @param InEvent Event of mouse enter on widget
+	 */
+	virtual void enterEvent( QEvent* InEvent ) override;
+
+	/**
+	 * Event of mouse leave from widget
+	 * 
+	 * @param InEvent Event of mouse leave from widget
+	 */
+	virtual void leaveEvent( QEvent* InEvent ) override;
+#endif // ENABLE_HITPROXY
+
 private slots:
+#if ENABLE_HITPROXY
+	/**
+	 * Slot on rendering hit proxy of gizmo
+	 */
+	void OnRenderHitProxyGizmo();
+#endif // ENABLE_HITPROXY
+
 	//
 	// Events
 	//
@@ -51,6 +83,18 @@ private slots:
 
 private:
 	QPoint		contextMenuCursorPosition;		/**< Cursor position when opened context menu */
+
+#if ENABLE_HITPROXY
+	/**
+	 * Update timer for render hit proxy gizmo
+	 * This function start and stop timer 'timerRenderHitProxyGizmo' in depending on the gizmo status
+	 * 
+	 * @param InNeedStart	Is need start timer. If gizmo is disabled ignored parameter and stop timer
+	 */
+	void UpdateTimerRenderHitProxyGizmo( bool InNeedStart );
+
+	QTimer		timerRenderHitProxyGizmo;		/**< Timer for rendering hit proxy of gizmo */
+#endif // ENABLE_HITPROXY
 };
 
 #endif // !LEVELVIEWPORTWIDGET_H

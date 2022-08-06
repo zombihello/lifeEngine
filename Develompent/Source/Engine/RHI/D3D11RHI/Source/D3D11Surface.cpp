@@ -279,10 +279,7 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 CD3D11Texture2DRHI::CD3D11Texture2DRHI( ID3D11Texture2D* InD3D11Texture2D, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) 
 	: CD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags )
 	, d3d11Texture2D( InD3D11Texture2D )
-{
-	check( d3d11Texture2D );
-	d3d11Texture2D->AddRef();
-}
+{}
 
 CD3D11Texture2DRHI::~CD3D11Texture2DRHI()
 {

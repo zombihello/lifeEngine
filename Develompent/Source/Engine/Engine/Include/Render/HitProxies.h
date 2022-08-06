@@ -16,6 +16,17 @@
 
 /**
  * @ingroup Engine
+ * Enumeration of hit proxy layer
+ */
+enum EHitProxyLayer
+{
+	HPL_World,		/**< World layer */
+	HPL_UI,			/**< UI layer */
+	HPL_Num			/**< Number of layers */
+};
+
+/**
+ * @ingroup Engine
  * Encapsulates a hit proxy ID
  */
 class CHitProxyId

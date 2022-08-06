@@ -165,7 +165,7 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 						const SDynamicMeshBuilderElement&		element = *it;
 						if ( element.dynamicMeshBuilder )
 						{
-							element.dynamicMeshBuilder->Draw( immediateContext, element.localToWorldMatrix, element.material, *sceneView );
+							element.dynamicMeshBuilder->Draw<CStaticMeshDrawPolicy>( immediateContext, element.localToWorldMatrix, element.material, *sceneView );
 						}
 					}
 				}

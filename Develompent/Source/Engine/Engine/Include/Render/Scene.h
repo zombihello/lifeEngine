@@ -49,9 +49,10 @@ enum EShowFlag
 	SHOW_Wireframe			= 1 << 2,		/**< Show all geometry in wireframe mode */
 	SHOW_SimpleElements		= 1 << 3,		/**< Show simple elements (only for debug and WorldEd) */
 	SHOW_DynamicElements	= 1 << 4,		/**< Show dynamic elements */
+	SHOW_HitProxy			= 1 << 5,		/**< Show hit proxy elements */
 
-	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements,	/**< Default show flags for game */
-	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements	/**< Default show flags for editor */
+	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements,					/**< Default show flags for game */
+	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_HitProxy	/**< Default show flags for editor */
 };
 
 /**
@@ -592,6 +593,48 @@ struct SDynamicMeshBuilderElement
 };
 #endif // WITH_EDITOR
 
+#if ENABLE_HITPROXY
+/**
+ * @ingroup Engine
+ * @brief Struct of hit proxy layer on scene
+ */
+struct SHitProxyLayer
+{
+	/**
+	 * @brief Clear
+	 */
+	FORCEINLINE void Clear()
+	{
+#if WITH_EDITOR
+		simpleHitProxyElements.Clear();
+		dynamicHitProxyMeshBuilders.clear();
+#endif // WITH_EDITOR
+
+		hitProxyDrawList.Clear();
+	}
+
+	/**
+	 * @brief Is empty
+	 * @return Return TRUE if layer is empty, else return FALSE
+	 */
+	FORCEINLINE bool IsEmpty() const
+	{
+		return hitProxyDrawList.GetNum() <= 0
+#if WITH_EDITOR
+			&& simpleHitProxyElements.IsEmpty() && dynamicHitProxyMeshBuilders.empty()
+#endif // WITH_EDITOR
+			;
+	}
+
+#if WITH_EDITOR
+	CBatchedSimpleElements							simpleHitProxyElements;			/**< Batched simple hit proxy elements (lines, points, etc) */
+	std::list<SDynamicMeshBuilderElement>			dynamicHitProxyMeshBuilders;	/**< List of dynamic hit proxy mesh builders */
+#endif // WITH_EDITOR
+
+	CMeshDrawList<CHitProxyDrawingPolicy, false>	hitProxyDrawList;				/**< Draw list of hit proxy */
+};
+#endif // ENABLE_HITPROXY
+
 /**
  * @ingroup Engine
  * @brief Enumeration of scene depth group
@@ -625,6 +668,7 @@ FORCEINLINE const tchar* GetSceneSDGName( ESceneDepthGroup SDG )
 	case SDG_WorldEdBackground:		return TEXT( "WorldEd Background" );
 	case SDG_World:					return TEXT( "World" );
 	case SDG_WorldEdForeground:		return TEXT( "WorldEd Foreground" );
+	case SDG_Foreground:			return TEXT( "Foreground" );
 	default:						return TEXT( "Unknown" );
 	}
 }
@@ -651,7 +695,10 @@ struct SSceneDepthGroup
 		spriteDrawList.Clear();
 
 #if ENABLE_HITPROXY
-		hitProxyDrawList.Clear();
+		for ( uint32 index = 0; index < HPL_Num; ++index )
+		{
+			hitProxyLayers[ index ].Clear();
+		}
 #endif // ENABLE_HITPROXY
 	}
 
@@ -661,29 +708,37 @@ struct SSceneDepthGroup
 	 */
 	FORCEINLINE bool IsEmpty() const
 	{
+#if ENABLE_HITPROXY
+		bool		bEmptyHitProxyLayers = true;
+		for ( uint32 index = 0; index < HPL_Num && bEmptyHitProxyLayers; ++index )
+		{
+			bEmptyHitProxyLayers = hitProxyLayers[ index ].IsEmpty();
+		}
+#endif // ENABLE_HITPROXY
+
 		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0 && dynamicMeshElements.GetNum() <= 0
 #if WITH_EDITOR
 			&& simpleElements.IsEmpty() && dynamicMeshBuilders.empty()
 #endif // WITH_EDITOR
 
 #if ENABLE_HITPROXY
-			&& hitProxyDrawList.GetNum() <= 0
+			&& bEmptyHitProxyLayers
 #endif // ENABLE_HITPROXY
 			;
 	}
 
 	// Simple elements use only for debug and WorldEd
 #if WITH_EDITOR
-	CBatchedSimpleElements								simpleElements;			/**< Batched simple elements (lines, points, etc) */
-	std::list<SDynamicMeshBuilderElement>				dynamicMeshBuilders;	/**< List of dynamic mesh builders */
+	CBatchedSimpleElements								simpleElements;				/**< Batched simple elements (lines, points, etc) */
+	std::list<SDynamicMeshBuilderElement>				dynamicMeshBuilders;		/**< List of dynamic mesh builders */
 #endif // WITH_EDITOR
 
-	CMeshDrawList< CStaticMeshDrawPolicy >				dynamicMeshElements;	/**< Draw list of dynamic meshes */
-	CMeshDrawList< CStaticMeshDrawPolicy >				staticMeshDrawList;		/**< Draw list of static meshes */
-	CMeshDrawList< CStaticMeshDrawPolicy >				spriteDrawList;			/**< Draw list of sprites */
+	CMeshDrawList< CStaticMeshDrawPolicy >				dynamicMeshElements;		/**< Draw list of dynamic meshes */
+	CMeshDrawList< CStaticMeshDrawPolicy >				staticMeshDrawList;			/**< Draw list of static meshes */
+	CMeshDrawList< CStaticMeshDrawPolicy >				spriteDrawList;				/**< Draw list of sprites */
 
 #if ENABLE_HITPROXY
-	CMeshDrawList< CHitProxyDrawingPolicy, false >		hitProxyDrawList;		/**< Draw list of hit proxy */
+	SHitProxyLayer										hitProxyLayers[ HPL_Num ];	/**< Hit proxy layers */
 #endif // ENABLE_HITPROXY
 };
 
