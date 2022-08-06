@@ -57,6 +57,10 @@ CAsset::CAsset( EAssetType InType )
 	, package( nullptr )
 	, guid( appCreateGuid() )
 	, type( InType )
+
+#if WITH_EDITOR
+	, bOnlyEditor( false )
+#endif // WITH_EDITOR
 {}
 
 CAsset::~CAsset()
@@ -76,8 +80,15 @@ void CAsset::Serialize( class CArchive& InArchive )
 #if !WITH_EDITOR
 		std::wstring	sourceFile;
 #endif // !WITH_EDITOR
-
 		InArchive << sourceFile;
+	}
+
+	if ( InArchive.Ver() >= VER_AssetOnlyEditor )
+	{
+#if !WITH_EDITOR
+		bool		bOnlyEditor;
+#endif // !WITH_EDITOR
+		InArchive << bOnlyEditor;
 	}
 
 	bDirty = false;

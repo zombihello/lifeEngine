@@ -186,6 +186,10 @@ private slots:
 	//
 	void on_actionAbout_Qt_triggered();
 	void on_actionAbout_triggered();
+	void on_actionToolSelect_triggered();
+	void on_actionToolTranslate_triggered();
+	void on_actionToolRotate_triggered();
+	void on_actionToolScale_triggered();
 	void On_PerspectiveDockWidget_VisibilityChanged( bool InVisible );
 	void On_OrthoXYDockWidget_VisibilityChanged( bool InVisible );
 	void On_OrthoXZDockWidget_VisibilityChanged( bool InVisible );

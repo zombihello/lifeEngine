@@ -33,8 +33,6 @@ CEditorEngine::~CEditorEngine()
 
 void CEditorEngine::Init()
 {
-	Super::Init();
-
 	// If failed serialize TOC file, we generate new TOC file and serialize data to archive
 	if ( !SerializeTOC() )
 	{
@@ -47,9 +45,14 @@ void CEditorEngine::Init()
 		SerializeTOC( true );
 	}
 
+	Super::Init();
+
 	// Register actor factory for assets
 	GActorFactory.Register( AT_StaticMesh,	&AStaticMesh::SpawnActorAsset );
 	GActorFactory.Register( AT_AudioBank,	&AAudio::SpawnActorAsset );
+
+	// Init gizmo
+	gizmo.Init();
 
 	// Create main window of editor
 	mainWindow = new WeMainWindow();
@@ -108,7 +111,6 @@ bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 	if ( !Super::LoadMap( InMap, OutError ) )
 	{
 		LE_LOG( LT_Warning, LC_General, TEXT( "Failed loading map '%s'. Error: %s" ), InMap.c_str(), OutError.c_str() );
-		GWorld->SpawnActor< APlayerStart >( Vector( 0.f, 0.f, 0.f ) );
 	}
 
 	return true;

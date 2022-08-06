@@ -11,6 +11,8 @@
 
 #include <vector>
 
+#include "Misc/RefCounted.h"
+#include "Misc/RefCountPtr.h"
 #include "System/ThreadingBase.h"
 #include "Render/Material.h"
 #include "Render/VertexFactory/DynamicMeshVertexFactory.h"
@@ -19,9 +21,15 @@
 
 /**
  * @ingroup Engine
+ * Reference to CDynamicMeshBuilder
+ */
+typedef TRefCountPtr< class CDynamicMeshBuilder >			DynamicMeshBuilderRef_t;
+
+/**
+ * @ingroup Engine
  * @brief Class for build and draw dynamic mesh
  */
-class CDynamicMeshBuilder : public CRenderResource
+class CDynamicMeshBuilder : public CRenderResource, public CRefCounted
 {
 public:
 	/**

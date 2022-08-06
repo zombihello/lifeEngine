@@ -15,6 +15,7 @@
 #include "Logger/LoggerMacros.h"
 #include "System/BaseEngine.h"
 #include "System/EditorConstraints.h"
+#include "System/Gizmo.h"
 
 /**
  * @ingroup WorldEd
@@ -166,6 +167,15 @@ public:
 		return CColor( 32, 0, 128, 255 );
 	}
 
+	/**
+	 * Get gizmo
+	 * @return Return gizmo
+	 */
+	FORCEINLINE CGizmo& GetGizmo()
+	{
+		return gizmo;
+	}
+
 private:
 	/**
 	 * Add TOC entries
@@ -176,6 +186,7 @@ private:
 	std::vector< class CViewport* >			viewports;		/**< Array of viewports for render */
 	CEditorConstraints						constraints;	/**< Editor constraints */
 	class WeMainWindow*						mainWindow;		/**< Main editor window */
+	CGizmo									gizmo;			/**< Gizmo */
 };
 
 #endif // !EDITORENGINE_H

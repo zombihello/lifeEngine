@@ -54,10 +54,12 @@ void WeMaterialEditorWindow::InitUI()
 		WeSectionWidget*	generalSection		= new WeSectionWidget( "General", 300, this );
 		QVBoxLayout*		verticalLayout		= new QVBoxLayout();
 		
+		checkBox_onlyEditor		= new QCheckBox( "Only For Editor", generalSection );
 		checkBox_isTwoSided		= new QCheckBox( "Is Two Sided", generalSection );
 		checkBox_isWireframe	= new QCheckBox( "Is Wireframe", generalSection );
 
 		verticalLayout->setContentsMargins( 0, 3, 0, 3 );
+		verticalLayout->addWidget( checkBox_onlyEditor );
 		verticalLayout->addWidget( checkBox_isTwoSided );
 		verticalLayout->addWidget( checkBox_isWireframe );
 		
@@ -66,6 +68,7 @@ void WeMaterialEditorWindow::InitUI()
 		ui->frame->layout()->addWidget( generalSection );
 
 		// Connect to slots
+		connect( checkBox_onlyEditor, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxOnlyEditorToggled( bool ) ) );
 		connect( checkBox_isTwoSided, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxIsTwoSidedToggled( bool ) ) );
 		connect( checkBox_isWireframe, SIGNAL( toggled( bool ) ), this, SLOT( OnCheckBoxIsWireframeToggled( bool ) ) );
 	}
@@ -127,6 +130,7 @@ void WeMaterialEditorWindow::UpdateUI()
 	check( material );
 
 	// General section
+	checkBox_onlyEditor->setChecked( material->IsOnlyEditor() );
 	checkBox_isTwoSided->setChecked( material->IsTwoSided() );
 	checkBox_isWireframe->setChecked( material->IsWireframe() );
 
@@ -158,6 +162,15 @@ WeMaterialEditorWindow::~WeMaterialEditorWindow()
 	// Unsubscribe from event when assets try destroy and reload
 	SEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
 	SEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
+}
+
+void WeMaterialEditorWindow::OnCheckBoxOnlyEditorToggled( bool InValue )
+{
+	if ( !material )
+	{
+		return;
+	}
+	material->SetOnlyEditor( InValue );
 }
 
 void WeMaterialEditorWindow::OnCheckBoxIsTwoSidedToggled( bool InValue )

@@ -105,14 +105,25 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 
 			SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, ÑString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str() );
 
-#if !SHIPPING_BUILD
+
+			// Clear depth buffer for foreground layer
+			if ( SDGIndex == SDG_Foreground 
+#if WITH_EDITOR
+				 || SDGIndex == SDG_WorldEdForeground 
+#endif // WITH_EDITOR
+				 )
+			{
+				immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+			}
+
+#if WITH_EDITOR
 			// Draw simple elements
 			if ( showFlags & SHOW_SimpleElements && !SDG.simpleElements.IsEmpty() )
 			{
 				SCOPED_DRAW_EVENT( EventSimpleElements, DEC_SIMPLEELEMENTS, TEXT( "Simple elements" ) );
 				SDG.simpleElements.Draw( immediateContext, *sceneView );
 			}
-#endif // !SHIPPING_BUILD
+#endif // WITH_EDITOR
 
 			// Draw static meshes
 			if ( showFlags & SHOW_StaticMesh && SDG.staticMeshDrawList.GetNum() > 0 )
@@ -129,10 +140,36 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 			}
 
 			// Draw dynamic meshes
-			if ( showFlags & SHOW_DynamicElements && SDG.dynamicMeshElements.GetNum() > 0 )
+			if ( showFlags & SHOW_DynamicElements && ( SDG.dynamicMeshElements.GetNum() > 0 ||
+#if WITH_EDITOR
+				!SDG.dynamicMeshBuilders.empty()
+#else
+				 false
+#endif // WITH_EDITOR
+				 ) )
 			{
-				SCOPED_DRAW_EVENT( EventDynamicElements, DEC_SIMPLEELEMENTS, TEXT( "Dynamic elements" ) );
-				SDG.dynamicMeshElements.Draw( immediateContext, *sceneView );
+				SCOPED_DRAW_EVENT( EventDynamicElements, DEC_DYNAMICELEMENTS, TEXT( "Dynamic elements" ) );
+				
+				// Draw dynamic mesh elements
+				if ( SDG.dynamicMeshElements.GetNum() > 0 )
+				{
+					SDG.dynamicMeshElements.Draw( immediateContext, *sceneView );
+				}
+
+				// Draw dynamic mesh builders
+#if WITH_EDITOR
+				if ( !SDG.dynamicMeshBuilders.empty() )
+				{
+					for ( auto it = SDG.dynamicMeshBuilders.begin(), itEnd = SDG.dynamicMeshBuilders.end(); it != itEnd; ++it )
+					{
+						const SDynamicMeshBuilderElement&		element = *it;
+						if ( element.dynamicMeshBuilder )
+						{
+							element.dynamicMeshBuilder->Draw( immediateContext, element.localToWorldMatrix, element.material, *sceneView );
+						}
+					}
+				}
+#endif // WITH_EDITOR
 			}
 		}
 	}

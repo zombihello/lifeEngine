@@ -165,6 +165,17 @@ public:
 		return actors[ InIndex ];
 	}
 
+#if WITH_EDITOR
+	/**
+	 * @brief Get selected actors
+	 * @return Return selected actors
+	 */
+	FORCEINLINE const std::vector<ActorRef_t>& GetSelectedActors() const
+	{
+		return selectedActors;
+	}
+#endif // WITH_EDITOR
+
 private:
 	/**
 	 * Destroy actor in world

@@ -472,6 +472,19 @@ public:
 		}
 		sourceFile = InPath;
 	}
+
+	/**
+	 * Set this asset only for editor
+	 * @param InIsOnlyEditor	Is asset only for editor
+	 */
+	FORCEINLINE void SetOnlyEditor( bool InIsOnlyEditor )
+	{
+		if ( bOnlyEditor != InIsOnlyEditor )
+		{
+			MarkDirty();
+		}
+		bOnlyEditor = InIsOnlyEditor;
+	}
 #endif // WITH_EDITOR
 
 	/**
@@ -540,6 +553,15 @@ public:
 	{
 		return sourceFile;
 	}
+
+	/**
+	 * Is asset only for editor
+	 * @return Return TRUE if this asset only for editor
+	 */
+	FORCEINLINE bool IsOnlyEditor() const
+	{
+		return bOnlyEditor;
+	}
 #endif // WITH_EDITOR
 
 	/**
@@ -563,15 +585,16 @@ protected:
 	void MarkDirty();
 
 private:
-	bool							bDirty;		/**< Is asset is dirty */
-	class CPackage*					package;	/**< The package where the asset is located */
-	std::wstring					name;		/**< Name asset */
-	CGuid							guid;		/**< GUID of asset */
-	EAssetType						type;		/**< Asset type */
-	mutable TAssetHandle<CAsset>	handle;		/**< Handle to this asset */
+	bool							bDirty;				/**< Is asset is dirty */
+	class CPackage*					package;			/**< The package where the asset is located */
+	std::wstring					name;				/**< Name asset */
+	CGuid							guid;				/**< GUID of asset */
+	EAssetType						type;				/**< Asset type */
+	mutable TAssetHandle<CAsset>	handle;				/**< Handle to this asset */
 
 #if WITH_EDITOR
-	std::wstring					sourceFile;	/**< Path to source file */
+	std::wstring					sourceFile;			/**< Path to source file */
+	bool							bOnlyEditor;		/**< Is asset only for editor */
 #endif // WITH_EDITOR
 };
 

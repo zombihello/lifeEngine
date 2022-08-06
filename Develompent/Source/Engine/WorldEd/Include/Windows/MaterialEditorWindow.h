@@ -52,6 +52,7 @@ private slots:
 	//
 	// Events
 	//
+	void OnCheckBoxOnlyEditorToggled( bool InValue );
 	void OnCheckBoxIsTwoSidedToggled( bool InValue );
 	void OnCheckBoxIsWireframeToggled( bool InValue );
 	void OnCheckBoxStaticMeshToggled( bool InValue );
@@ -86,6 +87,7 @@ private:
 	bool													bInit;						/**< Is inited window */
 	Ui::WeMaterialEditorWindow*								ui;							/**< Qt UI */
 	TSharedPtr<CMaterial>									material;					/**< Editable asset */
+	class QCheckBox*										checkBox_onlyEditor;		/**< Check box of only editor */
 	class QCheckBox*										checkBox_isTwoSided;		/**< Check box of is two sided */
 	class QCheckBox*										checkBox_isWireframe;		/**< Check box of is wireframe */
 	class QCheckBox*										checkBox_staticMesh;		/**< Check box of static mesh */

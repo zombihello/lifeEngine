@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <set>
+#include <list>
 
 #include "Math/Math.h"
 #include "Math/Color.h"
@@ -22,6 +23,7 @@
 #include "Render/HitProxies.h"
 #include "Render/BatchedSimpleElements.h"
 #include "Render/RenderingThread.h"
+#include "Render/DynamicMeshBuilder.h"
 #include "Components/CameraComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "RHI/BaseRHI.h"
@@ -86,7 +88,7 @@ public:
 	 * @param InWorldPoint		World point
 	 * @return Return point in screen space
 	 */
-	FORCEINLINE Vector WorldToScreen( const Vector& InWorldPoint ) const
+	FORCEINLINE Vector4D WorldToScreen( const Vector& InWorldPoint ) const
 	{
 		return viewProjectionMatrix * Vector4D( InWorldPoint, 1.f );
 	}
@@ -300,9 +302,9 @@ public:
 		 * @param InWireframeColor		Wireframe color
 		 */
 		SDrawingPolicyLink( const CColor& InWireframeColor = CColor::red )
-#if !SHIPPING_BUILD
+#if WITH_EDITOR
 			: wireframeColor( InWireframeColor )
-#endif // !SHIPPING_BUILD
+#endif // WITH_EDITOR
 		{}
 
 		/**
@@ -313,9 +315,9 @@ public:
 		 */
 		SDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const CColor& InWireframeColor = CColor::red )
 			: drawingPolicy( InDrawingPolicy )
-#if !SHIPPING_BUILD
+#if WITH_EDITOR
 			, wireframeColor( InWireframeColor )
-#endif // !SHIPPING_BUILD
+#endif // WITH_EDITOR
 		{}
 
 		/**
@@ -346,9 +348,9 @@ public:
 		mutable MeshBatchList_t					meshBatchList;			/**< Mesh batch list */
 		mutable TDrawingPolicyType				drawingPolicy;			/**< Drawing policy */
 
-#if !SHIPPING_BUILD
+#if WITH_EDITOR
 		CColor									wireframeColor;			/**< Wireframe color */
-#endif // !SHIPPING_BUILD
+#endif // WITH_EDITOR
 	};
 
 	/**
@@ -483,10 +485,10 @@ public:
 		check( IsInRenderingThread() );
 
 		// Wireframe drawing available only with editor
-#if !SHIPPING_BUILD
+#if WITH_EDITOR
 		TWireframeMeshDrawingPolicy< TDrawingPolicyType >		wireframeDrawingPolicy;		// Drawing policy for wireframe mode
 		bool													bWireframe = InAllowWireframe && ( InSceneView.GetShowFlags() & SHOW_Wireframe );
-#endif // !SHIPPING_BUILD
+#endif // WITH_EDITOR
 
 		for ( MapDrawData_t::const_iterator it = meshes.begin(), itEnd = meshes.end(); it != itEnd; ++it )
 		{
@@ -494,7 +496,7 @@ public:
 			DrawingPolicyLinkRef_t		drawingPolicyLink		= *it;
 			CMeshDrawingPolicy*			drawingPolicy			= nullptr;
 
-#if !SHIPPING_BUILD
+#if WITH_EDITOR
 			drawingPolicy				= !bWireframe ? &drawingPolicyLink->drawingPolicy : &wireframeDrawingPolicy;
 
 			// If we use wireframe drawing policy - init him
@@ -504,7 +506,7 @@ public:
 			}
 #else
 			drawingPolicy				= &drawingPolicyLink->drawingPolicy;
-#endif // !SHIPPING_BUILD
+#endif // WITH_EDITOR
 
 			// If drawing policy is not valid - skip meshes
 			if ( !drawingPolicy->IsValid() )
@@ -577,15 +579,36 @@ FORCEINLINE TRefCountPtr<TDrawingPolicyLink> MakeDrawingPolicyLink( CVertexFacto
 	return drawingPolicyLink;
 }
 
+#if WITH_EDITOR
+/**
+ * @ingroup Engine
+ * @brief Struct of dynamic mesh builder element
+ */
+struct SDynamicMeshBuilderElement
+{
+	DynamicMeshBuilderRef_t			dynamicMeshBuilder;		/**< Dynamic mesh builder */
+	Matrix							localToWorldMatrix;		/**< Matrix local to world */
+	TAssetHandle<CMaterial>			material;				/**< Material */
+};
+#endif // WITH_EDITOR
+
 /**
  * @ingroup Engine
  * @brief Enumeration of scene depth group
  */
 enum ESceneDepthGroup
 {
+#if WITH_EDITOR
 	SDG_WorldEdBackground,	/**< Background of viewport in WorldEd */
+#endif // WITH_EDITOR
+	
 	SDG_World,				/**< World */
+	
+#if WITH_EDITOR
 	SDG_WorldEdForeground,	/**< Foreground of viewport in WorldEd */
+#endif // WITH_EDITOR
+
+	SDG_Foreground,			/**< Foreground of viewport for rendering UI */
 	SDG_Max					/**< Num depth groups */
 };
 
@@ -618,9 +641,10 @@ struct SSceneDepthGroup
 	 */
 	FORCEINLINE void Clear()
 	{
-#if !SHIPPING_BUILD
+#if WITH_EDITOR
 		simpleElements.Clear();
-#endif // !SHIPPING_BUILD
+		dynamicMeshBuilders.clear();
+#endif // WITH_EDITOR
 
 		dynamicMeshElements.Clear();
 		staticMeshDrawList.Clear();
@@ -638,9 +662,9 @@ struct SSceneDepthGroup
 	FORCEINLINE bool IsEmpty() const
 	{
 		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0 && dynamicMeshElements.GetNum() <= 0
-#if !SHIPPING_BUILD
-			&& simpleElements.IsEmpty()
-#endif // !SHIPPING_BUILD
+#if WITH_EDITOR
+			&& simpleElements.IsEmpty() && dynamicMeshBuilders.empty()
+#endif // WITH_EDITOR
 
 #if ENABLE_HITPROXY
 			&& hitProxyDrawList.GetNum() <= 0
@@ -649,9 +673,10 @@ struct SSceneDepthGroup
 	}
 
 	// Simple elements use only for debug and WorldEd
-#if !SHIPPING_BUILD
+#if WITH_EDITOR
 	CBatchedSimpleElements								simpleElements;			/**< Batched simple elements (lines, points, etc) */
-#endif // !SHIPPING_BUILD
+	std::list<SDynamicMeshBuilderElement>				dynamicMeshBuilders;	/**< List of dynamic mesh builders */
+#endif // WITH_EDITOR
 
 	CMeshDrawList< CStaticMeshDrawPolicy >				dynamicMeshElements;	/**< Draw list of dynamic meshes */
 	CMeshDrawList< CStaticMeshDrawPolicy >				staticMeshDrawList;		/**< Draw list of static meshes */

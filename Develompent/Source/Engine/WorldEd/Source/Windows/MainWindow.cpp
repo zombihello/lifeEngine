@@ -115,6 +115,10 @@ void WeMainWindow::InitUI()
 	ui->actionOpen->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Open.png" ) ).c_str() ) ) );
 	ui->actionSave->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Save.png" ) ).c_str() ) ) );
 	ui->actionSaveAll->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/SaveAll.png" ) ).c_str() ) ) );
+	ui->actionToolSelect->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_Select.png" ) ).c_str() ) ) );
+	ui->actionToolTranslate->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_Translate.png" ) ).c_str() ) ) );
+	ui->actionToolRotate->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_Rotate.png" ) ).c_str() ) ) );
+	ui->actionToolScale->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_Scale.png" ) ).c_str() ) ) );
 
 	// Restore state of dock widgets from cache
 	QFile           file( QString::fromStdWString( ÑString::Format( TEXT( "%s/EditorCache/UICache.dat" ), appGameDir().c_str() ) ) );
@@ -246,6 +250,38 @@ void WeMainWindow::on_actionAbout_Qt_triggered()
 void WeMainWindow::on_actionAbout_triggered()
 {
 	QMessageBox::about( this, ui->actionAbout->text(), "Place about text" );
+}
+
+void WeMainWindow::on_actionToolSelect_triggered()
+{
+	ui->actionToolSelect->setChecked( true );
+	ui->actionToolTranslate->setChecked( false );
+	ui->actionToolRotate->setChecked( false );
+	ui->actionToolScale->setChecked( false );
+}
+
+void WeMainWindow::on_actionToolTranslate_triggered()
+{
+	ui->actionToolSelect->setChecked( false );
+	ui->actionToolTranslate->setChecked( true );
+	ui->actionToolRotate->setChecked( false );
+	ui->actionToolScale->setChecked( false );
+}
+
+void WeMainWindow::on_actionToolRotate_triggered()
+{
+	ui->actionToolSelect->setChecked( false );
+	ui->actionToolTranslate->setChecked( false );
+	ui->actionToolRotate->setChecked( true );
+	ui->actionToolScale->setChecked( false );
+}
+
+void WeMainWindow::on_actionToolScale_triggered()
+{
+	ui->actionToolSelect->setChecked( false );
+	ui->actionToolTranslate->setChecked( false );
+	ui->actionToolRotate->setChecked( false );
+	ui->actionToolScale->setChecked( true );
 }
 
 void WeMainWindow::On_PerspectiveDockWidget_VisibilityChanged( bool InVisible )

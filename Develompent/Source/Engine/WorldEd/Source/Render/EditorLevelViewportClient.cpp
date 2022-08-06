@@ -15,6 +15,7 @@
 #include "System/EditorEngine.h"
 #include "System/InputSystem.h"
 #include "System/World.h"
+#include "System/Gizmo.h"
 #include "EngineDefines.h"
 
 /**
@@ -115,12 +116,20 @@ void CEditorLevelViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportR
 {
 	check( IsInRenderingThread() );
 	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	CSceneRenderer				sceneRenderer( InSceneView, ( CScene* )GWorld->GetScene() );
+	CScene*						scene = ( CScene* )GWorld->GetScene();
+	CSceneRenderer				sceneRenderer( InSceneView, scene );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	
 	// Draw grid
-	drawHelper.DrawGrid( InSceneView, viewportType, ( CScene* )GWorld->GetScene() );
+	drawHelper.DrawGrid( InSceneView, viewportType, scene );
 	
+	// Draw gizmo
+	CGizmo&		gizmo = GEditorEngine->GetGizmo();
+	if ( gizmo.IsEnabled() )
+	{
+		gizmo.Draw_RenderThread( InViewportRHI, InSceneView, scene );
+	}
+
 	// Draw scene
 	sceneRenderer.Render( InViewportRHI );
 	

@@ -7,6 +7,7 @@
 #include "System/Package.h"
 #include "System/ActorFactory.h"
 #include "System/InputSystem.h"
+#include "System/Gizmo.h"
 #include "Widgets/LevelViewportWidget.h"
 #include "Render/RenderingThread.h"
 
@@ -39,23 +40,30 @@ void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 		GWorld->UpdateHitProxiesId();
 
 		// Render hit proxies to render target
-		CEditorLevelViewportClient* viewportClient = ( CEditorLevelViewportClient* ) GetViewport().GetViewportClient();
+		CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
 		check( viewportClient );
 		viewportClient->DrawHitProxies( const_cast< CViewport* >( &GetViewport() ) );
 
 		// Wait until we rendering scene
 		FlushRenderingCommands();
 
-		QPoint			cursorPosition = mapFromGlobal( cursor().pos() );
-		CHitProxyId		hitProxyId = viewportClient->GetHitProxyId( cursorPosition.x(), cursorPosition.y() );
+		QPoint		cursorPosition	= mapFromGlobal( cursor().pos() );
+		CHitProxyId	hitProxyId		= viewportClient->GetHitProxyId( cursorPosition.x(), cursorPosition.y() );
+		CGizmo&		gizmo			= GEditorEngine->GetGizmo();
 
 		GWorld->UnselectAllActors();
+		gizmo.SetEnable( false );
+
 		if ( hitProxyId.IsValid() )
 		{
 			uint32			index = hitProxyId.GetIndex();
 			ActorRef_t		actor = GWorld->GetActor( index > 0 ? index - 1 : index );
 			
 			GWorld->SelectActor( actor );
+			gizmo.SetEnable( true );
+			gizmo.SetType( GT_Translate );
+			gizmo.SetLocation( actor->GetActorLocation() );
+
 			LE_LOG( LT_Log, LC_Editor, TEXT( "(%i;%i) Selected actor '%s'" ), cursorPosition.x(), cursorPosition.y(), actor->GetName() );
 		}
 	}
