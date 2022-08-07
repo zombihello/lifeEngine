@@ -21,6 +21,14 @@ WeLevelViewportWidget::WeLevelViewportWidget( QWidget* InParent /*= nullptr*/, C
 	: WeViewportWidget( InParent, InViewportClient, InDeleteViewportClient )
 {
 	setContextMenuPolicy( Qt::CustomContextMenu );
+	gizmo.Init();
+
+	// Set gizmo if viewport client is CEditorLevelViewportClient
+	CEditorLevelViewportClient*		viewportClient = dynamic_cast<CEditorLevelViewportClient*>( GetViewport().GetViewportClient() );
+	if ( viewportClient )
+	{
+		viewportClient->SetGizmo( &gizmo );
+	}
 
 	// Connect to slots
 	connect( this, SIGNAL( customContextMenuRequested( const QPoint& ) ), this, SLOT( OnCustomContextMenuRequested( const QPoint& ) ) );
@@ -31,7 +39,14 @@ WeLevelViewportWidget::WeLevelViewportWidget( QWidget* InParent /*= nullptr*/, C
 }
 
 WeLevelViewportWidget::~WeLevelViewportWidget()
-{}
+{
+	// Remove gizmo from viewport client
+	CEditorLevelViewportClient*			viewportClient = dynamic_cast<CEditorLevelViewportClient*>( GetViewport().GetViewportClient() );
+	if ( viewportClient )
+	{
+		viewportClient->SetGizmo( nullptr );
+	}
+}
 
 #if ENABLE_HITPROXY
 void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
@@ -40,8 +55,6 @@ void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 
 	if ( InEvent->button() == Qt::MouseButton::LeftButton )
 	{
-		CGizmo&		gizmo = GEditorEngine->GetGizmo();
-		
 		// If gizmo is disabled or not exist current axis, we try select actor
 		if ( !gizmo.IsEnabled() || gizmo.GetCurrentAxis() == A_None )
 		{
@@ -49,32 +62,33 @@ void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 			GWorld->UpdateHitProxiesId();
 
 			// Render hit proxies to render target
-			CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* ) GetViewport().GetViewportClient();
+			CEditorLevelViewportClient*		viewportClient = dynamic_cast<CEditorLevelViewportClient*>( GetViewport().GetViewportClient() );
 			check( viewportClient );
-			viewportClient->DrawHitProxies( const_cast< CViewport* >( &GetViewport() ) );
+			viewportClient->DrawHitProxies( const_cast<CViewport*>( &GetViewport() ) );
 
 			// Wait until we rendering scene
 			FlushRenderingCommands();
 
 			QPoint		cursorPosition	= mapFromGlobal( cursor().pos() );
 			CHitProxyId	hitProxyId		= viewportClient->GetHitProxyId( cursorPosition.x(), cursorPosition.y() );
+			bool		bGizmoEnable	= false;
+			Vector		gizmoLocation	= SMath::vectorZero;
 
 			GWorld->UnselectAllActors();
-			gizmo.SetEnable( false );
-			UpdateTimerRenderHitProxyGizmo( false );
-
 			if ( hitProxyId.IsValid() )
 			{
 				uint32			index = hitProxyId.GetIndex();
 				ActorRef_t		actor = GWorld->GetActor( index > 0 ? index - 1 : index );
-
+				bGizmoEnable	= true;
+				gizmoLocation	= actor->GetActorLocation();
+				
 				GWorld->SelectActor( actor );
-				gizmo.SetEnable( true );
-				gizmo.SetLocation( actor->GetActorLocation() );
-				UpdateTimerRenderHitProxyGizmo( true );
-
 				LE_LOG( LT_Log, LC_Editor, TEXT( "(%i;%i) Selected actor '%s'" ), cursorPosition.x(), cursorPosition.y(), actor->GetName() );
 			}
+
+			// Update all gizmos
+			CGizmo::OnUpdateAllGizmo().Broadcast( bGizmoEnable, gizmoLocation );
+			UpdateTimerRenderHitProxyGizmo( bGizmoEnable );
 		}
 	}
 }
@@ -82,24 +96,29 @@ void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 void WeLevelViewportWidget::enterEvent( QEvent* InEvent )
 {
 	WeViewportWidget::enterEvent( InEvent );
+	
+	// Update timer for render hit proxy gizmo
 	UpdateTimerRenderHitProxyGizmo( true );
 }
 
 void WeLevelViewportWidget::leaveEvent( QEvent* InEvent )
 {
 	WeViewportWidget::leaveEvent( InEvent );
+
+	// Update timer for render hit proxy gizmo
 	UpdateTimerRenderHitProxyGizmo( false );
 }
 
 void WeLevelViewportWidget::SetEnabled( bool InIsEnabled )
 {
 	WeViewportWidget::SetEnabled( InIsEnabled );
+
+	// Update timer for render hit proxy gizmo
 	UpdateTimerRenderHitProxyGizmo( InIsEnabled );
 }
 
 void WeLevelViewportWidget::UpdateTimerRenderHitProxyGizmo( bool InNeedStart )
 {
-	CGizmo&		gizmo = GEditorEngine->GetGizmo();
 	if ( gizmo.IsEnabled() && InNeedStart )
 	{
 		timerRenderHitProxyGizmo.start( 1.f );
@@ -112,7 +131,6 @@ void WeLevelViewportWidget::UpdateTimerRenderHitProxyGizmo( bool InNeedStart )
 
 void WeLevelViewportWidget::OnRenderHitProxyGizmo()
 {
-	CGizmo&		gizmo = GEditorEngine->GetGizmo();
 	if ( !gizmo.IsEnabled() || gizmo.GetType() == GT_None )
 	{
 		return;
@@ -124,9 +142,9 @@ void WeLevelViewportWidget::OnRenderHitProxyGizmo()
 	{
 		return;
 	}
-
+	
 	// Getting hit proxy id from last hit proxy rendering
-	CEditorLevelViewportClient*		viewportClient	= ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
+	CEditorLevelViewportClient*		viewportClient	= dynamic_cast<CEditorLevelViewportClient*>( GetViewport().GetViewportClient() );
 	check( viewportClient );
 	if ( viewportClient->GetMouseTrackingType() == CEditorLevelViewportClient::MT_Gizmo )
 	{
@@ -157,7 +175,7 @@ void WeLevelViewportWidget::OnCustomContextMenuRequested( const QPoint& InPoint 
 	contextMenuCursorPosition = mapFromGlobal( cursor().pos() );
 
 	// Check if we allow open context menu or no
-	CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
+	CEditorLevelViewportClient*		viewportClient = dynamic_cast<CEditorLevelViewportClient*>( GetViewport().GetViewportClient() );
 	check( viewportClient );
 	if ( !viewportClient->IsAllowContextMenu() )
 	{
@@ -205,7 +223,7 @@ void WeLevelViewportWidget::OnCustomContextMenuRequested( const QPoint& InPoint 
 void WeLevelViewportWidget::OnActorAdd()
 {
 	// Getting viewport client
-	CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
+	CEditorLevelViewportClient*		viewportClient = dynamic_cast<CEditorLevelViewportClient*>( GetViewport().GetViewportClient() );
 	check( viewportClient );
 
 	// Convert from screen space to world space
@@ -237,7 +255,7 @@ void WeLevelViewportWidget::OnAssetAdd()
 	}
 
 	// Getting viewport client
-	CEditorLevelViewportClient*		viewportClient = ( CEditorLevelViewportClient* )GetViewport().GetViewportClient();
+	CEditorLevelViewportClient*		viewportClient = dynamic_cast<CEditorLevelViewportClient*>( GetViewport().GetViewportClient() );
 	check( viewportClient );
 
 	// Convert from screen space to world space

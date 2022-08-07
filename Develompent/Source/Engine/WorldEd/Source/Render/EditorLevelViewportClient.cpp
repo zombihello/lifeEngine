@@ -72,6 +72,7 @@ CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InVie
 	, cameraSpeed( MIN_CAMERA_SPEED )
 	, showFlags( SHOW_DefaultEditor )
 	, cameraMoveFlags( 0x0 )
+	, gizmo( nullptr )
 {
 	SetViewportType( InViewportType );
 }
@@ -125,10 +126,9 @@ void CEditorLevelViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportR
 	drawHelper.DrawGrid( InSceneView, viewportType, scene );
 	
 	// Draw gizmo
-	CGizmo&		gizmo = GEditorEngine->GetGizmo();
-	if ( gizmo.IsEnabled() )
+	if ( gizmo && gizmo->IsEnabled() )
 	{
-		gizmo.Draw_RenderThread( InViewportRHI, InSceneView, scene );
+		gizmo->Draw_RenderThread( InViewportRHI, InSceneView, scene );
 	}
 
 	// Draw scene
@@ -168,10 +168,9 @@ void CEditorLevelViewportClient::DrawHitProxies_RenderThread( ViewportRHIRef_t I
 	sceneRenderer.BeginRenderHitProxiesViewTarget( InViewportRHI );
 
 	// Draw gizmo
-	CGizmo&			gizmo = GEditorEngine->GetGizmo();
-	if ( gizmo.IsEnabled() )
+	if ( gizmo && gizmo->IsEnabled() )
 	{
-		gizmo.Draw_RenderThread( InViewportRHI, InSceneView, scene );
+		gizmo->Draw_RenderThread( InViewportRHI, InSceneView, scene );
 	}
 
 	// Draw scene
@@ -315,8 +314,6 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	{
 		// Event of mouse pressed
 	case SWindowEvent::T_MousePressed:
-	{
-		CGizmo&				gizmo = GEditorEngine->GetGizmo();
 		bAllowContextMenu	= true;
 
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseRight )
@@ -324,18 +321,14 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			QApplication::setOverrideCursor( QCursor( Qt::BlankCursor ) );
 			trackingType = MT_View;
 		}	
-		else if ( InWindowEvent.events.mouseButton.code == BC_MouseLeft && gizmo.IsEnabled() && gizmo.GetCurrentAxis() > A_None )
+		else if ( gizmo && InWindowEvent.events.mouseButton.code == BC_MouseLeft && gizmo->IsEnabled() && gizmo->GetCurrentAxis() > A_None )
 		{
 			trackingType = MT_Gizmo;
 		}
 		break;
-	}
 
 		// Event of mouse released
 	case SWindowEvent::T_MouseReleased:
-	{
-		CGizmo&				gizmo = GEditorEngine->GetGizmo();
-		
 		if ( trackingType == MT_View && InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
 			QApplication::restoreOverrideCursor();
@@ -347,7 +340,6 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			trackingType = MT_None;
 		}
 		break;
-	}
 
 		// Event of mouse wheel moved
 	case SWindowEvent::T_MouseWheel:
@@ -456,9 +448,8 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			}
 		}
 		// Apply transformation for object if we traking mouse for MT_Gizmo
-		else if ( trackingType == MT_Gizmo )
+		else if ( gizmo && trackingType == MT_Gizmo )
 		{
-			CGizmo&		gizmo = GEditorEngine->GetGizmo();
 			Vector		drag;
 			CRotator	rotator;
 			Vector		scale;
@@ -474,7 +465,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 					// Apply transform to actors
 					const std::vector<ActorRef_t>&	selectedActors = GWorld->GetSelectedActors();
-					switch ( gizmo.GetType() )
+					switch ( gizmo->GetType() )
 					{
 					// Translate gizmo
 					case GT_Translate:
@@ -484,7 +475,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 							actor->AddActorLocation( drag );
 						}
 
-						gizmo.SetLocation( gizmo.GetLocation() + drag );
+						CGizmo::OnUpdateAllGizmo().Broadcast( gizmo->IsEnabled(), gizmo->GetLocation() + drag );
 						break;
 
 					// Scale gizmo
@@ -534,9 +525,13 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, CRotator& OutRotation, Vector& OutScale )
 {
-	CGizmo&		gizmo		=	GEditorEngine->GetGizmo();
+	if ( !gizmo )
+	{
+		return;
+	}
+
 	Vector2D	axisEnd;
-	uint32		currentAxis = gizmo.GetCurrentAxis();
+	uint32		currentAxis = gizmo->GetCurrentAxis();
 	Vector2D	dragDelta	= InDragDelta;
 
 	OutDrag		= SMath::vectorZero;
@@ -546,13 +541,13 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 	// Get the end of the axis (in screen space) based on which axis is being pulled
 	switch ( currentAxis )
 	{
-	case A_X:					axisEnd = gizmo.GetAxisXEnd();												break;
-	case A_Y:					axisEnd = gizmo.GetAxisYEnd();												break;
-	case A_Z:					axisEnd = gizmo.GetAxisZEnd();												break;
-	case A_X | A_Y:				axisEnd = dragDelta.x != 0 ? gizmo.GetAxisXEnd() : gizmo.GetAxisYEnd();		break;
-	case A_X | A_Z:				axisEnd = dragDelta.x != 0 ? gizmo.GetAxisXEnd() : gizmo.GetAxisZEnd();		break;
-	case A_Y | A_Z:				axisEnd = dragDelta.x != 0 ? gizmo.GetAxisYEnd() : gizmo.GetAxisZEnd();		break;
-	case A_X | A_Y | A_Z:		axisEnd = dragDelta.x != 0 ? gizmo.GetAxisYEnd() : gizmo.GetAxisZEnd();		break;
+	case A_X:					axisEnd = gizmo->GetAxisXEnd();												break;
+	case A_Y:					axisEnd = gizmo->GetAxisYEnd();												break;
+	case A_Z:					axisEnd = gizmo->GetAxisZEnd();												break;
+	case A_X | A_Y:				axisEnd = dragDelta.x != 0 ? gizmo->GetAxisXEnd() : gizmo->GetAxisYEnd();	break;
+	case A_X | A_Z:				axisEnd = dragDelta.x != 0 ? gizmo->GetAxisXEnd() : gizmo->GetAxisZEnd();	break;
+	case A_Y | A_Z:				axisEnd = dragDelta.x != 0 ? gizmo->GetAxisYEnd() : gizmo->GetAxisZEnd();	break;
+	case A_X | A_Y | A_Z:		axisEnd = dragDelta.x != 0 ? gizmo->GetAxisYEnd() : gizmo->GetAxisZEnd();	break;
 	default:																								break;
 	}
 
@@ -560,7 +555,7 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 	dragDelta.y *= -1.f;
 
 	// Get the directions of the axis (on the screen)
-	Vector2D	axisDir = axisEnd - gizmo.GetScreenLocation();
+	Vector2D	axisDir = axisEnd - gizmo->GetScreenLocation();
 
 	// Use the most dominant axis the mouse is being dragged along
 	int32		idx = 0;
@@ -577,7 +572,7 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 		value *= -1.f;
 	}
 
-	switch ( gizmo.GetType() )
+	switch ( gizmo->GetType() )
 	{
 	// Translate gizmo
 	case GT_Translate:

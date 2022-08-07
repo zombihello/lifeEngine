@@ -13,6 +13,8 @@
 #include "Math/Color.h"
 #include "Render/Material.h"
 #include "System/Package.h"
+#include "System/Delegate.h"
+#include "WorldEd.h"
 
 /**
  * @ingroup WorldEd
@@ -33,6 +35,11 @@ enum EGizmoType
 class CGizmo
 {
 public:
+	/**
+	 * @brief Delegate for called event when update all gizmo
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnUpdateAllGizmo, bool /*InEnable*/, const Vector& /*InLocation*/ );
+
 	/**
 	 * @brief Constructor
 	 */
@@ -99,6 +106,11 @@ public:
 	 */
 	FORCEINLINE void SetEnable( bool InEnable )
 	{
+		if ( bEnabled == InEnable )
+		{
+			return;
+		}
+
 		bEnabled	= InEnable;
 		currentAxis = A_None;
 	}
@@ -166,6 +178,15 @@ public:
 		return screenLocation;
 	}
 
+	/**
+	 * @brief Get event of update all gizmo
+	 * @return Return event of update all gizmo
+	 */
+	FORCEINLINE static COnUpdateAllGizmo& OnUpdateAllGizmo()
+	{
+		return onUpdateAllGizmo;
+	}
+
 private:
 	/**
 	 * @brief Render translate gizmo. Must be call in render thread
@@ -209,21 +230,38 @@ private:
 	 */
 	void Render_Axis( const class CSceneView* InSceneView, struct SSceneDepthGroup& InSDG, EAxis InAxis, const Matrix& InMatrix, const TAssetHandle<CMaterial>& InMaterial, const CColor& InColor, Vector2D& OutAxisEnd, float InScale, bool InIsCubeHead = false );
 
-	bool						bEnabled;			/**< Is enabled gizmo */
-	EGizmoType					type;				/**< Gizmo type */
-	Vector						location;			/**< Gizmo location */
-	Vector2D					screenLocation;		/**< Screen location */
-	CColor						axisColorX;			/**< Axis color X */
-	CColor						axisColorY;			/**< Axis color Y */
-	CColor						axisColorZ;			/**< Axis color Z */
-	CColor						currentAxisColor;	/**< Current axis color */
-	uint32						currentAxis;		/**< Current axies (see EAxis) */
-	TAssetHandle<CMaterial>		axisMaterialX;		/**< Axis material X */
-	TAssetHandle<CMaterial>		axisMaterialY;		/**< Axis material Y */
-	TAssetHandle<CMaterial>		axisMaterialZ;		/**< Axis material Z */
-	Vector2D					axisXEnd;			/**< Axis X end in screen coord */
-	Vector2D					axisYEnd;			/**< Axis Y end in screen coord */
-	Vector2D					axisZEnd;			/**< Axis Z end in screen coord */
+	/**
+	 * Event when editor mode is changed
+	 * @param InEditorMode	New editor mode
+	 */
+	void OnEditorModeChanged( EEditorMode InEditorMode );
+
+	/**
+	 * Event when need update all gizmo
+	 * 
+	 * @param InEnable		Is need enable gizmo
+	 * @param InLocation	New location
+	 */
+	void OnUpdateGizmo( bool InEnable, const Vector& InLocation );
+
+	bool														bEnabled;						/**< Is enabled gizmo */
+	EGizmoType													type;							/**< Gizmo type */
+	Vector														location;						/**< Gizmo location */
+	Vector2D													screenLocation;					/**< Screen location */
+	CColor														axisColorX;						/**< Axis color X */
+	CColor														axisColorY;						/**< Axis color Y */
+	CColor														axisColorZ;						/**< Axis color Z */
+	CColor														currentAxisColor;				/**< Current axis color */
+	uint32														currentAxis;					/**< Current axies (see EAxis) */
+	TAssetHandle<CMaterial>										axisMaterialX;					/**< Axis material X */
+	TAssetHandle<CMaterial>										axisMaterialY;					/**< Axis material Y */
+	TAssetHandle<CMaterial>										axisMaterialZ;					/**< Axis material Z */
+	Vector2D													axisXEnd;						/**< Axis X end in screen coord */
+	Vector2D													axisYEnd;						/**< Axis Y end in screen coord */
+	Vector2D													axisZEnd;						/**< Axis Z end in screen coord */
+	SEditorDelegates::COnEditorModeChanged::DelegateType_t*		editorModeChangedDelegate;		/**< Editor mode changed delegate */
+	COnUpdateAllGizmo::DelegateType_t*							updateAllGizmoDelegate;			/**< Update all gizmo delegate */
+	static COnUpdateAllGizmo									onUpdateAllGizmo;				/**< Event when update all gizmo */
 };
 
 #endif // !GIZMO_H

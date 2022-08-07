@@ -13,6 +13,7 @@
 
 #include "Render/EditorLevelViewportClient.h"
 #include "Widgets/ViewportWidget.h"
+#include "System/Gizmo.h"
 #include "LEBuild.h"
 
 /**
@@ -83,6 +84,7 @@ private slots:
 
 private:
 	QPoint		contextMenuCursorPosition;		/**< Cursor position when opened context menu */
+	CGizmo		gizmo;							/**< Gizmo for rendering pivot */
 
 #if ENABLE_HITPROXY
 	/**

@@ -15,7 +15,7 @@
 #include "Logger/LoggerMacros.h"
 #include "System/BaseEngine.h"
 #include "System/EditorConstraints.h"
-#include "System/Gizmo.h"
+#include "WorldEd.h"
 
 /**
  * @ingroup WorldEd
@@ -168,12 +168,22 @@ public:
 	}
 
 	/**
-	 * Get gizmo
-	 * @return Return gizmo
+	 * Set current editor mode
+	 * @param InNewEditorMode	New editor mode
 	 */
-	FORCEINLINE CGizmo& GetGizmo()
+	FORCEINLINE void SetEditorMode( EEditorMode InNewEditorMode )
 	{
-		return gizmo;
+		currentEditorMode = InNewEditorMode;
+		SEditorDelegates::onEditorModeChanged.Broadcast( InNewEditorMode );
+	}
+
+	/**
+	 * Get current editor mode
+	 * @return Return current editor mode
+	 */
+	FORCEINLINE EEditorMode GetEditorMode() const
+	{
+		return currentEditorMode;
 	}
 
 private:
@@ -183,10 +193,10 @@ private:
 	 */
 	void AddTOCEntries( const std::wstring& InRootDir );
 
-	std::vector< class CViewport* >			viewports;		/**< Array of viewports for render */
-	CEditorConstraints						constraints;	/**< Editor constraints */
-	class WeMainWindow*						mainWindow;		/**< Main editor window */
-	CGizmo									gizmo;			/**< Gizmo */
+	EEditorMode								currentEditorMode;		/**< Current editor mode */
+	std::vector< class CViewport* >			viewports;				/**< Array of viewports for render */
+	CEditorConstraints						constraints;			/**< Editor constraints */
+	class WeMainWindow*						mainWindow;				/**< Main editor window */
 };
 
 #endif // !EDITORENGINE_H

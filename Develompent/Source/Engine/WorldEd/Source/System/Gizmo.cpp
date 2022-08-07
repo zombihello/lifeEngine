@@ -1,10 +1,12 @@
 #include "Misc/EngineGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseViewportRHI.h"
 #include "Render/Scene.h"
 #include "Render/DynamicMeshBuilder.h"
 #include "System/BaseEngine.h"
 #include "System/Gizmo.h"
+#include "System/EditorEngine.h"
 
 /**
  * @ingroup WorldEd
@@ -24,6 +26,8 @@
  */
 #define CUBE_SCALE				4.0f
 
+CGizmo::COnUpdateAllGizmo		CGizmo::onUpdateAllGizmo;
+
 CGizmo::CGizmo()
 	: bEnabled( false )
 	, type( GT_None )
@@ -37,16 +41,35 @@ CGizmo::CGizmo()
 	, axisXEnd( 0.f, 0.f )
 	, axisYEnd( 0.f, 0.f )
 	, axisZEnd( 0.f, 0.f )
+	, editorModeChangedDelegate( nullptr )
+	, updateAllGizmoDelegate( nullptr )
 {}
 
 CGizmo::~CGizmo()
-{}
+{
+	if ( editorModeChangedDelegate )
+	{
+		SEditorDelegates::onEditorModeChanged.Remove( editorModeChangedDelegate );
+	}
+
+	if ( updateAllGizmoDelegate )
+	{
+		onUpdateAllGizmo.Remove( updateAllGizmoDelegate );
+	}
+}
 
 void CGizmo::Init()
 {
+	// Find materials for axis
 	axisMaterialX	= ( TAssetHandle<CMaterial> )GPackageManager->FindAsset( TEXT( "Material'EditorMaterials:AxisX_Mat" ), AT_Material );
 	axisMaterialY	= ( TAssetHandle<CMaterial> )GPackageManager->FindAsset( TEXT( "Material'EditorMaterials:AxisY_Mat" ), AT_Material );
 	axisMaterialZ	= ( TAssetHandle<CMaterial> )GPackageManager->FindAsset( TEXT( "Material'EditorMaterials:AxisZ_Mat" ), AT_Material );
+
+	// Init gizmo type
+	OnEditorModeChanged( GEditorEngine->GetEditorMode() );
+
+	editorModeChangedDelegate	= SEditorDelegates::onEditorModeChanged.Add(	std::bind( &CGizmo::OnEditorModeChanged, this, std::placeholders::_1 )						);
+	updateAllGizmoDelegate		= onUpdateAllGizmo.Add(							std::bind( &CGizmo::OnUpdateGizmo, this, std::placeholders::_1, std::placeholders::_2 )		);
 }
 
 void CGizmo::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene )
@@ -237,4 +260,21 @@ void CGizmo::Render_Scale( ViewportRHIRef_t InViewportRHI, class CSceneView* InS
 	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ) );
 	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ) );
 #endif // ENABLE_HITPROXY
+}
+
+void CGizmo::OnEditorModeChanged( EEditorMode InEditorMode )
+{
+	switch ( InEditorMode )
+	{
+	case EM_Translate:		type = GT_Translate;	break;
+	case EM_Rotate:			type = GT_Rotate;		break;
+	case EM_Scale:			type = GT_Scale;		break;
+	default:				type = GT_None;			break;
+	}
+}
+
+void CGizmo::OnUpdateGizmo( bool InEnable, const Vector& InLocation )
+{
+	SetEnable( InEnable );
+	SetLocation( InLocation );
 }

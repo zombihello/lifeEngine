@@ -15,6 +15,7 @@
 #include "Render/EditorCommonDrawHelper.h"
 #include "Render/HitProxies.h"
 #include "System/WindowEvent.h"
+#include "System/Gizmo.h"
 
 /**
  * @ingroup WorldEd
@@ -140,12 +141,39 @@ public:
 	}
 
 	/**
+	 * @brief Set ignore input
+	 * @param InIsIgnoreInput		Is need ignore input
+	 */
+	FORCEINLINE void SetIgnoreInput( bool InIsIgnoreInput )
+	{
+		bIgnoreInput = InIsIgnoreInput;
+	}
+
+	/**
 	 * @brief Is allow open context menu
 	 * @return Return TRUE if allow open context menu, else returning FALSE
 	 */
 	FORCEINLINE bool IsAllowContextMenu() const
 	{
 		return bAllowContextMenu;
+	}
+
+	/**
+	 * @brief Set gizmo
+	 * @param InNewGizmo	New gizmo
+	 */
+	FORCEINLINE void SetGizmo( CGizmo* InNewGizmo )
+	{
+		gizmo = InNewGizmo;
+	}
+
+	/**
+	 * @brief Get gizmo
+	 * @return Return pointer to gizmo, if not exist returning NULL
+	 */
+	FORCEINLINE CGizmo* GetGizmo() const
+	{
+		return gizmo;
 	}
 
 protected:
@@ -199,6 +227,7 @@ protected:
 	ShowFlags_t					showFlags;				/**< Show flags */
 	CEditorCommonDrawHelper		drawHelper;				/**< Draw helper */
 	byte						cameraMoveFlags;		/**< Camera move flags */
+	CGizmo*						gizmo;					/**< Gizmo for rendering pivot */
 };
 
 #endif // !EDITORLEVELVIEWPORTCLIENT_H

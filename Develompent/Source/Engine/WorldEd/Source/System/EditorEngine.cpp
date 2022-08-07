@@ -25,7 +25,8 @@
 IMPLEMENT_CLASS( CEditorEngine )
 
 CEditorEngine::CEditorEngine()
-	: mainWindow( nullptr )
+	: currentEditorMode( EM_Default )
+	, mainWindow( nullptr )
 {}
 
 CEditorEngine::~CEditorEngine()
@@ -50,9 +51,6 @@ void CEditorEngine::Init()
 	// Register actor factory for assets
 	GActorFactory.Register( AT_StaticMesh,	&AStaticMesh::SpawnActorAsset );
 	GActorFactory.Register( AT_AudioBank,	&AAudio::SpawnActorAsset );
-
-	// Init gizmo
-	gizmo.Init();
 
 	// Create main window of editor
 	mainWindow = new WeMainWindow();
