@@ -13,6 +13,10 @@
 #include "Misc/Types.h"
 #include "RHI/BaseSurfaceRHI.h"
 
+#if ENABLE_HITPROXY
+#include "Render/HitProxies.h"
+#endif // ENABLE_HITPROXY
+
 /**
  * @ingroup Engine
  * Information about pixel format
@@ -120,16 +124,35 @@ void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class ÑBox& InBox, 
 
 /**
  * @ingroup Engine
- * Draws a sphere
+ * Draw circle using lines
  * 
- * @param InSDG			Scene depth group
- * @param InCenter		Center
- * @param InRadius		Radius
- * @param InNumSides	Number sides in sphere
- * @param InNumRings	Number rings in sphere
- * @param InMaterial	Material
+ * @param	InSDG			Scene depth group
+ * @param	InLocation		Center of the circle
+ * @param	InX				X alignment axis to draw along
+ * @param	InY				Y alignment axis to draw along
+ * @param	InColor			Color of the circle
+ * @param	InRadius		Radius of the circle
+ * @param	InNumSides		Numbers of sides that the circle has
+ * @param	Thickness		Optional. Thickness for lines
  */
-LE_DEPRECATED( 0.4.0, "Use CSphereComponent for draw sphere" )
-void DrawSphere( struct SSceneDepthGroup& InSDG, const Vector& InCenter, const Vector& InRadius, uint32 InNumSides, uint32 InNumRings, class CMaterial* InMaterial );
+void DrawCircle( struct SSceneDepthGroup& InSDG, const Vector& InLocation, const Vector& InX, const Vector& InY, const class CColor& InColor, float InRadius, uint32 InNumSides, float InThickness = 0.f );
+
+#if ENABLE_HITPROXY
+/**
+ * @ingroup Engine
+ * Draw circle using lines to hit proxy
+ * 
+ * @param	InSDG			Scene depth group
+ * @param	InHitProxyLayer	Hit proxy layer
+ * @param	InLocation		Center of the circle
+ * @param	InX				X alignment axis to draw along
+ * @param	InY				Y alignment axis to draw along
+ * @param	InHitProxyId	Hit proxy id
+ * @param	InRadius		Radius of the circle
+ * @param	InNumSides		Numbers of sides that the circle has
+ * @param	Thickness		Optional. Thickness for lines
+ */
+void DrawHitProxyCircle( struct SSceneDepthGroup& InSDG, EHitProxyLayer InHitProxyLayer, const Vector& InLocation, const Vector& InX, const Vector& InY, const CHitProxyId& InHitProxyId, float InRadius, uint32 InNumSides, float InThickness = 0.f );
+#endif // ENABLE_HITPROXY
 
 #endif // !RENDERUTILS_H

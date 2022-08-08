@@ -58,7 +58,6 @@ static const ShowFlags_t		GShowFlags[ LVT_Max ] =
 	SHOW_DefaultEditor							// LVT_Perspective
 };
 
-
 CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InViewportType /* = LVT_Perspective */ )
 	: bSetListenerPosition( true )
 	, trackingType( CEditorLevelViewportClient::MT_None )
@@ -447,6 +446,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 				}
 			}
 		}
+		
 		// Apply transformation for object if we traking mouse for MT_Gizmo
 		else if ( gizmo && trackingType == MT_Gizmo )
 		{
@@ -476,6 +476,15 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 						}
 
 						CGizmo::OnUpdateAllGizmo().Broadcast( gizmo->IsEnabled(), gizmo->GetLocation() + drag );
+						break;
+
+					// Rotate gizmo
+					case GT_Rotate:
+						for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
+						{
+							ActorRef_t		actor = selectedActors[ index ];
+							actor->AddActorRotation( rotator );
+						}
 						break;
 
 					// Scale gizmo
@@ -523,7 +532,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	}
 }
 
-void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, CRotator& OutRotation, Vector& OutScale )
+void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, CRotator& OutRotation, Vector& OutScale, class CSceneView* InSceneView /* = nullptr */ )
 {
 	if ( !gizmo )
 	{
@@ -538,6 +547,45 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 	OutRotation = SMath::rotatorZero;
 	OutScale	= SMath::vectorOne;
 
+	// We apply an increase in offset depending on the distance of the camera to gizmo point (for viewport type LVT_Perspective) 
+	if ( viewportType == LVT_Perspective && gizmo->GetType() == GT_Translate )
+	{
+		dragDelta *= SMath::DistanceVector( viewLocation, gizmo->GetLocation() ) / viewFOV / 4.f;
+	}
+
+	// Screen space Y axis is inverted
+	dragDelta.y *= -1.f;
+
+	// To move objects in perspective on a plane, we consider offsets relative to the camera
+	if ( viewportType == LVT_Perspective && gizmo->GetType() == GT_Translate )
+	{
+		switch ( currentAxis )
+		{
+		case A_X | A_Y:
+		case A_X | A_Z:
+		case A_Y | A_Z:
+		{
+			CViewport*		viewport = GetViewport();
+			if ( viewport )
+			{
+				CSceneView*	sceneView		= CalcSceneView( viewport->GetSizeX(), viewport->GetSizeY() );
+				Matrix		cameraToWorld	= SMath::InverseMatrix( sceneView->GetViewMatrix() );
+				OutDrag		= cameraToWorld * Vector4D( dragDelta.x, dragDelta.y, 0.f, 0.f );
+				
+				switch ( currentAxis )
+				{
+				case A_X | A_Y:		OutDrag.z = 0.f;	break;
+				case A_X | A_Z:		OutDrag.y = 0.f;	break;
+				case A_Y | A_Z:		OutDrag.x = 0.f;	break;
+				}
+
+				delete sceneView;
+			}
+			return;
+		}
+		}
+	}
+
 	// Get the end of the axis (in screen space) based on which axis is being pulled
 	switch ( currentAxis )
 	{
@@ -551,9 +599,6 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 	default:																								break;
 	}
 
-	// Screen space Y axis is inverted
-	dragDelta.y *= -1.f;
-
 	// Get the directions of the axis (on the screen)
 	Vector2D	axisDir = axisEnd - gizmo->GetScreenLocation();
 
@@ -566,7 +611,10 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 	float		value = dragDelta[ idx ];
 
 	// If the axis dir is negative, it is pointing in the negative screen direction.  In this situation, the mouse
-	// drag must be inverted so that you are still dragging in the right logical direction
+	// drag must be inverted so that you are still dragging in the right logical direction.
+	//
+	// For example, if the X axis is pointing left and you drag left, this will ensure that the widget moves left.
+	// Only valid for single axis movement.  For planar movement, this widget gets caught up at the origin and oscillates
 	if ( axisDir[ idx ] < 0.f && ( currentAxis == A_X || currentAxis == A_Y || currentAxis == A_Z ) )
 	{
 		value *= -1.f;
@@ -586,6 +634,19 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 		case A_Y | A_Z:		OutDrag = dragDelta.x != 0 ? Vector( 0.f, 0.f, value ) : Vector( 0.f, value, 0.f );		break;
 		}
 		break;
+
+	// Rotate gizmo
+	case GT_Rotate:
+	{
+		switch ( currentAxis )
+		{
+		case A_X:		OutRotation = CRotator( -value, 0.f, 0.f );								break;
+		case A_Y:		OutRotation = CRotator( 0.f, -value, 0.f );								break;
+		case A_Z:		OutRotation = CRotator( 0.f, 0.f, -value );								break;
+		default:		checkMsg( false, TEXT( "Axis not correctly set while rotating!" ) );	break;
+		}
+		break;
+	}
 
 	// Scale gizmo
 	case GT_Scale:

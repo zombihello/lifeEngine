@@ -4,6 +4,7 @@
 #include "RHI/BaseViewportRHI.h"
 #include "Render/Scene.h"
 #include "Render/DynamicMeshBuilder.h"
+#include "Render/RenderUtils.h"
 #include "System/BaseEngine.h"
 #include "System/Gizmo.h"
 #include "System/EditorEngine.h"
@@ -25,6 +26,24 @@
  * @brief Macro of axis cube scale
  */
 #define CUBE_SCALE				4.0f
+
+/**
+ * @ingroup WorldEd
+ * @brief Macro of circle radius
+ */
+#define CIRCLE_RADIUS			64.f
+
+/**
+ * @ingroup WorldEd
+ * @brief Macro of circle segments
+ */
+#define CIRCLE_SEGMENTS			32
+
+/**
+ * @ingroup WorldEd
+ * @brief Macro of thickness lines
+ */
+#define THICKNESS_LINE			1.5f
 
 CGizmo::COnUpdateAllGizmo		CGizmo::onUpdateAllGizmo;
 
@@ -93,10 +112,10 @@ void CGizmo::Render_Axis( const class CSceneView* InSceneView, struct SSceneDept
 	DynamicMeshBuilderRef_t		meshBuilder		= new CDynamicMeshBuilder();
 
 	// Draw axis line
-	InSDG.simpleElements.AddLine( InMatrix * Vector4D( 8.f * InScale, 0.f, 0.f, 1.f ), InMatrix * Vector4D( 48.f * InScale, 0.f, 0.f, 1.f ), InColor );
+	InSDG.simpleElements.AddLine( InMatrix * Vector4D( 8.f * InScale, 0.f, 0.f, 1.f ), InMatrix * Vector4D( 48.f * InScale, 0.f, 0.f, 1.f ), InColor, THICKNESS_LINE * InScale );
 
 #if ENABLE_HITPROXY
-	InSDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( InMatrix * Vector4D( 8.f * InScale, 0.f, 0.f, 1.f ), InMatrix * Vector4D( 48.f * InScale, 0.f, 0.f, 1.f ), CHitProxyId( InAxis ) );
+	InSDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( InMatrix * Vector4D( 8.f * InScale, 0.f, 0.f, 1.f ), InMatrix * Vector4D( 48.f * InScale, 0.f, 0.f, 1.f ), CHitProxyId( InAxis ), THICKNESS_LINE * InScale );
 #endif // ENABLE_HITPROXY
 
 	// Draw cube on head if need
@@ -184,37 +203,56 @@ void CGizmo::Render_Translate( ViewportRHIRef_t InViewportRHI, class CSceneView*
 
 	// Draw axis X
 	Render_Axis( InSceneView, SDG, A_X, xMatrix, axisMaterialX, *xColor, axisXEnd, scale );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 16.f, 16.f, 0.f ) * scale, 1.f ), *xColor );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 16.f, 0.f ) * scale, 1.f ), *yColor );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 16.f, 16.f, 0.f ) * scale, 1.f ), *xColor, THICKNESS_LINE * scale );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 16.f, 0.f ) * scale, 1.f ), *yColor, THICKNESS_LINE * scale );
 
 #if ENABLE_HITPROXY
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 16.f, 16.f, 0.f ) * scale, 1.f ), CHitProxyId( A_X | A_Y ) );
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 16.f, 0.f ) * scale, 1.f ), CHitProxyId( A_X | A_Y ) );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 16.f, 16.f, 0.f ) * scale, 1.f ), CHitProxyId( A_X | A_Y ), THICKNESS_LINE * scale );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 16.f, 0.f ) * scale, 1.f ), CHitProxyId( A_X | A_Y ) ), THICKNESS_LINE* scale;
 #endif // ENABLE_HITPROXY
 
 	// Draw axis Y
 	Render_Axis( InSceneView, SDG, A_Y, yMatrix, axisMaterialY, *yColor, axisYEnd, scale );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 16.f, 0.f, 16.f ) * scale, 1.f ), *xColor );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 16.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), *zColor );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 16.f, 0.f, 16.f ) * scale, 1.f ), *xColor, THICKNESS_LINE * scale );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 16.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), *zColor, THICKNESS_LINE * scale );
 
 #if ENABLE_HITPROXY
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 16.f, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_X | A_Z ) );
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 16.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_X | A_Z ) );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 16.f, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_X | A_Z ), THICKNESS_LINE * scale );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 16.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_X | A_Z ), THICKNESS_LINE * scale );
 #endif // ENABLE_HITPROXY
 
 	// Draw axis Z
 	Render_Axis( InSceneView, SDG, A_Z, zMatrix, axisMaterialZ, *zColor, axisZEnd, scale );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0.f, 16.f, 16.f ) * scale, 1.f ), *yColor );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 16.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), *zColor );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0.f, 16.f, 16.f ) * scale, 1.f ), *yColor, THICKNESS_LINE * scale );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 16.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), *zColor, THICKNESS_LINE * scale );
 
 #if ENABLE_HITPROXY
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0.f, 16.f, 16.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ) );
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 16.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ) );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0.f, 16.f, 16.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ), THICKNESS_LINE * scale );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 16.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ), THICKNESS_LINE * scale );
 #endif // ENABLE_HITPROXY
 }
 
 void CGizmo::Render_Rotate( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene )
-{}
+{
+	SSceneDepthGroup&	SDG		= InScene->GetSDG( SDG_WorldEdForeground );
+	float				scale	= InSceneView->WorldToScreen( location ).w * ( 4.f / InSceneView->GetSizeX() / InSceneView->GetProjectionMatrix()[ 0 ][ 0 ] );
+
+	// Figure out axis colors
+	CColor*				xColor = &( currentAxis & A_X ? currentAxisColor : axisColorX );
+	CColor*				yColor = &( currentAxis & A_Y ? currentAxisColor : axisColorY );
+	CColor*				zColor = &( currentAxis & A_Z ? currentAxisColor : axisColorZ );
+
+	// Draw circle for axis
+	DrawCircle( SDG, location, Vector( 1, 0, 0 ), Vector( 0, 1, 0 ), *zColor, CIRCLE_RADIUS * scale, CIRCLE_SEGMENTS, THICKNESS_LINE * scale );
+	DrawCircle( SDG, location, Vector( 1, 0, 0 ), Vector( 0, 0, 1 ), *yColor, CIRCLE_RADIUS * scale, CIRCLE_SEGMENTS, THICKNESS_LINE * scale );
+	DrawCircle( SDG, location, Vector( 0, 1, 0 ), Vector( 0, 0, 1 ), *xColor, CIRCLE_RADIUS * scale, CIRCLE_SEGMENTS, THICKNESS_LINE * scale );
+
+#if ENABLE_HITPROXY
+	DrawHitProxyCircle( SDG, HPL_UI, location, Vector( 1, 0, 0 ), Vector( 0, 1, 0 ), CHitProxyId( A_Z ), CIRCLE_RADIUS * scale, CIRCLE_SEGMENTS, THICKNESS_LINE * scale );
+	DrawHitProxyCircle( SDG, HPL_UI, location, Vector( 1, 0, 0 ), Vector( 0, 0, 1 ), CHitProxyId( A_Y ), CIRCLE_RADIUS * scale, CIRCLE_SEGMENTS, THICKNESS_LINE * scale );
+	DrawHitProxyCircle( SDG, HPL_UI, location, Vector( 0, 1, 0 ), Vector( 0, 0, 1 ), CHitProxyId( A_X ), CIRCLE_RADIUS * scale, CIRCLE_SEGMENTS, THICKNESS_LINE * scale );
+#endif // ENABLE_HITPROXY
+}
 
 void CGizmo::Render_Scale( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene )
 {
@@ -233,32 +271,32 @@ void CGizmo::Render_Scale( ViewportRHIRef_t InViewportRHI, class CSceneView* InS
 
 	// Draw axis X
 	Render_Axis( InSceneView, SDG, A_X, xMatrix, axisMaterialX, *xColor, axisXEnd, scale, true );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 8.f, 8.f, 0.f ) * scale, 1.f ), *xColor );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 8.f, 8.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 16.f, 0.f ) * scale, 1.f ), *yColor );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 8.f, 8.f, 0.f ) * scale, 1.f ), *xColor, THICKNESS_LINE * scale );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 8.f, 8.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 16.f, 0.f ) * scale, 1.f ), *yColor, THICKNESS_LINE * scale );
 
 #if ENABLE_HITPROXY
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 8.f, 8.f, 0.f ) * scale, 1.f ), CHitProxyId( A_X | A_Y ) );
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 8.f, 8.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 16.f, 0.f ) * scale, 1.f ), CHitProxyId( A_X | A_Y ) );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 8.f, 8.f, 0.f ) * scale, 1.f ), CHitProxyId( A_X | A_Y ), THICKNESS_LINE * scale );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 8.f, 8.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 16.f, 0.f ) * scale, 1.f ), CHitProxyId( A_X | A_Y ), THICKNESS_LINE * scale );
 #endif // ENABLE_HITPROXY
 
 	// Draw axis Y
 	Render_Axis( InSceneView, SDG, A_Y, yMatrix, axisMaterialY, *yColor, axisYEnd, scale, true );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 8.f, 0.f, 8.f ) * scale, 1.f ), *xColor );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 8.f, 0.f, 8.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), *zColor );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 8.f, 0.f, 8.f ) * scale, 1.f ), *xColor, THICKNESS_LINE * scale );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 8.f, 0.f, 8.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), *zColor, THICKNESS_LINE * scale );
 
 #if ENABLE_HITPROXY
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 8.f, 0.f, 8.f ) * scale, 1.f ), CHitProxyId( A_X | A_Z ) );
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 8.f, 0.f, 8.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_X | A_Z ) );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 16.f, 0.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 8.f, 0.f, 8.f ) * scale, 1.f ), CHitProxyId( A_X | A_Z ), THICKNESS_LINE * scale );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 8.f, 0.f, 8.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_X | A_Z ), THICKNESS_LINE * scale );
 #endif // ENABLE_HITPROXY
 
 	// Draw axis Z
 	Render_Axis( InSceneView, SDG, A_Z, zMatrix, axisMaterialZ, *zColor, axisZEnd, scale, true );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), *yColor );
-	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), *zColor );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), *yColor, THICKNESS_LINE * scale );
+	SDG.simpleElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), *zColor, THICKNESS_LINE * scale );
 
 #if ENABLE_HITPROXY
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ) );
-	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ) );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 16.f, 0.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ), THICKNESS_LINE * scale );
+	SDG.hitProxyLayers[ HPL_UI ].simpleHitProxyElements.AddLine( xMatrix * Vector4D( Vector( 0.f, 8.f, 8.f ) * scale, 1.f ), xMatrix * Vector4D( Vector( 0, 0.f, 16.f ) * scale, 1.f ), CHitProxyId( A_Y | A_Z ), THICKNESS_LINE * scale );
 #endif // ENABLE_HITPROXY
 }
 

@@ -30,6 +30,60 @@ enum ELevelViewportType
 
 /**
  * @ingroup Engine
+ * An abstract interface to a viewport's client
+ * The viewport's client processes input received by the viewport, and draws the viewport
+ */
+class CViewportClient
+{
+public:
+	friend class CViewport;
+
+	/**
+	 * Constructor
+	 */
+	CViewportClient()
+		: viewport( nullptr )
+	{}
+
+	/**
+	 * Destructor
+	 */
+	virtual ~CViewportClient() {}
+
+	/**
+	 * Update logic of viewport client
+	 */
+	virtual void Tick( float InDeltaSeconds ) {}
+
+	/**
+	 * Draw viewport
+	 *
+	 * @param InViewport	Viewport
+	 */
+	virtual void Draw( class CViewport* InViewport ) {}
+
+	/**
+	 * @brief Process event
+	 *
+	 * @param InWindowEvent			Window event
+	 */
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) {}
+
+	/**
+	 * @brief Get viewport
+	 * @return Return owner viewport, if not exist returning NULL
+	 */
+	FORCEINLINE class CViewport* GetViewport() const
+	{
+		return viewport;
+	}
+
+private:
+	class CViewport* viewport;		/**< Owner viewport */
+};
+
+/**
+ * @ingroup Engine
  * Implementation for work with viewport
  */
 class CViewport : public CRenderResource, public CRefCounted
@@ -74,7 +128,16 @@ public:
 	 */
 	FORCEINLINE void SetViewportClient( class CViewportClient* InViewportClient )
 	{
+		if ( viewportClient && viewportClient->viewport && viewportClient->viewport != this )
+		{
+			viewportClient->viewport->SetViewportClient( nullptr );
+		}
+
 		viewportClient = InViewportClient;
+		if ( viewportClient )
+		{
+			viewportClient->viewport = this;
+		}
 	}
 
 	/**
@@ -158,39 +221,6 @@ private:
 	uint32						sizeX;				/**< Width of viewport */
 	uint32						sizeY;				/**< Height of viewport */
 	ViewportRHIRef_t			viewportRHI;		/**< Pointer to viewport of RHI */
-};
-
-/**
- * @ingroup Engine
- * An abstract interface to a viewport's client
- * The viewport's client processes input received by the viewport, and draws the viewport
- */
-class CViewportClient
-{
-public:
-	/**
-	 * Destructor
-	 */
-	virtual ~CViewportClient() {}
-
-	/**
-	 * Update logic of viewport client
-	 */
-	virtual void Tick( float InDeltaSeconds ) {}
-
-	/**
-	 * Draw viewport
-	 * 
-	 * @param InViewport	Viewport
-	 */
-	virtual void Draw( CViewport* InViewport ) {}
-
-	/**
-	 * @brief Process event
-	 *
-	 * @param InWindowEvent			Window event
-	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) {}
 };
 
 #endif // !VIEWPORT_H

@@ -211,8 +211,9 @@ protected:
 	 * @param OutDrag			Output delta of move
 	 * @param OutRotation		Output delta of rotation
 	 * @param OutScale			Output delta of scale
+	 * @param InSceneView		Scene view. This parameter using only for perspective viewport type
 	 */
-	void ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, CRotator& OutRotation, Vector& OutScale );
+	void ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, CRotator& OutRotation, Vector& OutScale, class CSceneView* InSceneView = nullptr );
 
 	bool						bSetListenerPosition;	/**< Is need sets the listener position */
 	EMouseTracking				trackingType;			/**< Mouse tacking type */

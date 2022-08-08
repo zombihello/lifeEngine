@@ -477,6 +477,18 @@ struct SMath
 		return abs( InX );
 	}
 
+	/**
+	 * @brief Distance between vectors
+	 * 
+	 * @param InVectorA	Vector A
+	 * @param InVeftorB	Vector B
+	 * @return Return distance between vectors
+	 */
+	static FORCEINLINE float DistanceVector( const Vector& InVectorA, const Vector& InVectorB )
+	{
+		return glm::distance( InVectorA, InVectorB );
+	}
+
 	static const Vector				vectorZero;			/**< Zero 3D vector */
 	static const Vector				vectorOne;			/**< One 3D vector */
 	static const Quaternion			quaternionZero;		/**< Quaternion zero */

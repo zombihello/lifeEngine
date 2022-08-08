@@ -146,7 +146,7 @@ void WeLevelViewportWidget::OnRenderHitProxyGizmo()
 	// Getting hit proxy id from last hit proxy rendering
 	CEditorLevelViewportClient*		viewportClient	= dynamic_cast<CEditorLevelViewportClient*>( GetViewport().GetViewportClient() );
 	check( viewportClient );
-	if ( viewportClient->GetMouseTrackingType() == CEditorLevelViewportClient::MT_Gizmo )
+	if ( viewportClient->GetMouseTrackingType() != CEditorLevelViewportClient::MT_None )
 	{
 		return;
 	}

@@ -31,10 +31,11 @@ public:
 	 * @param InStart		Start
 	 * @param InEnd			End
 	 * @param InHitProxyId	Hit proxy id
+	 * @param InThickness	Thickness
 	 */
-	FORCEINLINE void AddLine( const Vector& InStart, const Vector& InEnd, const CHitProxyId& InHitProxyId )
+	FORCEINLINE void AddLine( const Vector& InStart, const Vector& InEnd, const CHitProxyId& InHitProxyId, float InThickness = 0.f )
 	{
-		AddLine( InStart, InEnd, InHitProxyId.GetColor().ToNormalizedVector4D() );
+		AddLine( InStart, InEnd, InHitProxyId.GetColor().ToNormalizedVector4D(), InThickness );
 	}
 #endif // ENABLE_HITPROXY
 
@@ -44,16 +45,31 @@ public:
 	 * @param InStart		Start
 	 * @param InEnd			End
 	 * @param InColor		Color
+	 * @param InThickness	Thickness
 	 */
-	FORCEINLINE void AddLine( const Vector& InStart, const Vector& InEnd, const CColor& InColor )
+	FORCEINLINE void AddLine( const Vector& InStart, const Vector& InEnd, const CColor& InColor, float InThickness = 0.f )
 	{
-		// Reserve space for new verteces of line
-		uint32		oldSize = lineVerteces.size();
-		lineVerteces.resize( oldSize + 2 );
+		// Reserve space for new verteces of line without thickness
+		if ( InThickness == 0.f )
+		{
+			uint32		oldSize = lineVerteces.size();
+			lineVerteces.resize( oldSize + 2 );
 
-		// Fill data
-		lineVerteces[ oldSize ]		= SSimpleElementVertexType{ Vector4D( InStart, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
-		lineVerteces[ oldSize + 1 ] = SSimpleElementVertexType{ Vector4D( InEnd, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
+			// Fill data
+			lineVerteces[ oldSize ]		= SSimpleElementVertexType{ Vector4D( InStart, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
+			lineVerteces[ oldSize + 1 ] = SSimpleElementVertexType{ Vector4D( InEnd, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
+		}
+		else
+		{
+			uint32		oldSize = thickLines.size();
+			thickLines.resize( oldSize + 1 );
+
+			SBatchedThickLines&		thickLine = thickLines[ oldSize ];
+			thickLine.start			= InStart;
+			thickLine.end			= InEnd;
+			thickLine.thickness		= InThickness;
+			thickLine.color			= InColor;
+		}
 	}
 
 	/**
@@ -62,7 +78,7 @@ public:
 	 */
 	FORCEINLINE bool IsEmpty() const
 	{
-		return lineVerteces.empty();
+		return lineVerteces.empty() && thickLines.empty();
 	}
 
 	/**
@@ -71,6 +87,7 @@ public:
 	FORCEINLINE void Clear()
 	{
 		lineVerteces.clear();
+		thickLines.clear();
 	}
 
 	/**
@@ -82,7 +99,19 @@ public:
 	void Draw( class CBaseDeviceContextRHI* InDeviceContext, const class CSceneView& InSceneView ) const;
 
 protected:
-	std::vector< SSimpleElementVertexType >		lineVerteces;		/**< Array of line verteces */
+	/**
+	 * @brief Struct of batched thick lines
+	 */
+	struct SBatchedThickLines
+	{
+		Vector		start;		/**< Start line */
+		Vector		end;		/**< End line */
+		float		thickness;	/**< Thickness */
+		CColor		color;		/**< Color */
+	};
+
+	std::vector<SSimpleElementVertexType>		lineVerteces;		/**< Array of line verteces */
+	std::vector<SBatchedThickLines>				thickLines;			/**< Array of thick lines */
 };
 
 #endif // !BATCHEDSIMPLEELEMENTS_H

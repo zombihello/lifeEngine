@@ -86,79 +86,34 @@ void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class ÑBox& InBox, 
 #endif // WITH_EDITOR
 }
 
-void DrawSphere( struct SSceneDepthGroup& InSDG, const Vector& InCenter, const Vector& InRadius, uint32 InNumSides, uint32 InNumRings, class CMaterial* InMaterial )
+void DrawCircle( struct SSceneDepthGroup& InSDG, const Vector& InLocation, const Vector& InX, const Vector& InY, const class CColor& InColor, float InRadius, uint32 InNumSides, float InThickness /*= 0.f*/ )
 {
-	CDynamicMeshBuilder		dynamicMeshBuilder;
-	Matrix					transofmrationMatrix = SMath::ScaleMatrix( InRadius ) * SMath::TranslateMatrix( InCenter );
+#if WITH_EDITOR
+	const float		angleDelta = 2.f * PI / InNumSides;
+	Vector			lastVertex = InLocation + InX * InRadius;
 
-	// Use a mesh builder to draw the sphere
+	for ( uint32 sideIndex = 0; sideIndex < InNumSides; ++sideIndex )
 	{
-		// The first/last arc are on top of each other
-		uint32		numVerts = ( InNumSides + 1 ) * ( InNumRings + 1 );
-		SDynamicMeshVertexType*		verts = ( SDynamicMeshVertexType* )malloc( numVerts * sizeof( SDynamicMeshVertexType ) );
-
-		// Calculate verts for one arc
-		SDynamicMeshVertexType*		arcVerts = ( SDynamicMeshVertexType* )malloc( ( InNumRings + 1 ) * sizeof( SDynamicMeshVertexType ) );
-
-		for ( uint32 index = 0; index < InNumRings + 1; index++ )
-		{
-			SDynamicMeshVertexType*	arcVert = &arcVerts[ index ];
-			float					angle	= ( ( float )index / InNumRings ) * PI;
-
-			// Note: unit sphere, so position always has mag of one. We can just use it for normal!			
-			arcVert->position		= Vector4D( 0.f, SMath::Cos( angle ), SMath::Sin( angle ), 1.f );
-			arcVert->tangent		= Vector4D( 1.f, 0.f, 0.f, 0.f );
-			arcVert->normal			= arcVert->position;
-			arcVert->binormal		= Vector4D( 0.f, -arcVert->position.y, arcVert->position.z, 0.f );
-
-			arcVert->texCoord.x		= 0.f;
-			arcVert->texCoord.t		= ( float )index / InNumRings;
-		}
-
-		// Then rotate this arc InNumSides+1 times
-		for ( uint32 indexSide = 0; indexSide < InNumSides + 1; indexSide++ )
-		{
-			CRotator	arcRotator( 0.f, SMath::Trunc( 65536.f * ( ( float )indexSide / InNumSides ) ), 0.f );
-			Matrix		arcRot = arcRotator.ToMatrix();
-			float		xTexCoord = ( float )indexSide / InNumSides;
-
-			for ( uint32 indexRing = 0; indexRing < InNumRings + 1; indexRing++ )
-			{
-				uint32		VIx = ( InNumRings + 1 ) * indexSide + indexRing;
-
-				verts[ VIx ].position	= arcRot * arcVerts[ indexRing ].position;
-				verts[ VIx ].tangent	= arcRot * arcVerts[ indexRing ].tangent;
-				verts[ VIx ].normal		= arcRot * arcVerts[ indexRing ].normal;
-				verts[ VIx ].binormal	= arcRot * arcVerts[ indexRing ].binormal;
-
-				verts[ VIx ].texCoord.x = xTexCoord;
-				verts[ VIx ].texCoord.y = arcVerts[ indexRing ].texCoord.y;
-			}
-		}
-
-		// Add all of the vertices we generated to the mesh builder
-		for ( uint32 vertIdx = 0; vertIdx < numVerts; vertIdx++ )
-		{
-			dynamicMeshBuilder.AddVertex( verts[ vertIdx ] );
-		}
-
-		// Add all of the triangles we generated to the mesh builder
-		for ( uint32 indexSide = 0; indexSide < InNumSides; indexSide++ )
-		{
-			uint32	a0start = ( indexSide + 0 ) * ( InNumRings + 1 );
-			uint32	a1start = ( indexSide + 1 ) * ( InNumRings + 1 );
-			for ( uint32 indexRing = 0; indexRing < InNumRings; indexRing++ )
-			{
-				dynamicMeshBuilder.AddTriangle( a0start + indexRing + 0, a1start + indexRing + 0, a0start + indexRing + 1 );
-				dynamicMeshBuilder.AddTriangle( a1start + indexRing + 0, a1start + indexRing + 1, a0start + indexRing + 1 );
-			}
-		}
-
-		// Free our local copy of verts and arc verts
-		free( verts );
-		free( arcVerts );
-
-		// Build mesh for drawing
-		dynamicMeshBuilder.Build();
+		const Vector	vertex = InLocation + ( InX * SMath::Cos( angleDelta * ( sideIndex + 1 ) ) + InY * SMath::Sin( angleDelta * ( sideIndex + 1 ) ) ) * InRadius;
+		InSDG.simpleElements.AddLine( lastVertex, vertex, InColor, InThickness );
+		lastVertex = vertex;
 	}
+#endif // WITH_EDITOR
 }
+
+#if ENABLE_HITPROXY
+void DrawHitProxyCircle( struct SSceneDepthGroup& InSDG, EHitProxyLayer InHitProxyLayer, const Vector& InLocation, const Vector& InX, const Vector& InY, const CHitProxyId& InHitProxyId, float InRadius, uint32 InNumSides, float InThickness /*= 0.f*/ )
+{
+#if WITH_EDITOR
+	const float		angleDelta = 2.f * PI / InNumSides;
+	Vector			lastVertex = InLocation + InX * InRadius;
+
+	for ( uint32 sideIndex = 0; sideIndex < InNumSides; ++sideIndex )
+	{
+		const Vector	vertex = InLocation + ( InX * SMath::Cos( angleDelta * ( sideIndex + 1 ) ) + InY * SMath::Sin( angleDelta * ( sideIndex + 1 ) ) ) * InRadius;
+		InSDG.hitProxyLayers[ InHitProxyLayer ].simpleHitProxyElements.AddLine( lastVertex, vertex, InHitProxyId.GetColor(), InThickness );
+		lastVertex = vertex;
+	}
+#endif // WITH_EDITOR
+}
+#endif // ENABLE_HITPROXY
