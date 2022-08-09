@@ -44,10 +44,11 @@
 #define MAX_CAMERA_SPEED			1000.f
 
 /** Default camera position for level editor perspective viewports */
-static const Vector		GDefaultPerspectiveViewLocation( 495.166962, 167.584518, -400.f );
+static const Vector			GDefaultPerspectiveViewLocation( 495.166962, 167.584518, -400.f );
 
 /** Default camera orientation for level editor perspective viewports */
-static const CRotator		GDefaultPerspectiveViewRotation( 0, 0, 0 );
+static const Quaternion		GDefaultPerspectiveViewRotationQuat( SMath::quaternionZero );
+static const Vector			GDefaultPerspectiveViewRotationEuler( SMath::vectorZero );
 
 /** Show flags for each viewport type */
 static const ShowFlags_t		GShowFlags[ LVT_Max ] =
@@ -65,7 +66,8 @@ CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InVie
 	, bAllowContextMenu( true )
 	, viewportType( InViewportType )
 	, viewLocation( SMath::vectorZero )
-	, viewRotation( SMath::rotatorZero )
+	, viewRotationEuler( SMath::vectorZero )
+	, viewRotationQuat( SMath::quaternionZero )
 	, viewFOV( 90.f )
 	, orthoZoom( 10000.f )
 	, cameraSpeed( MIN_CAMERA_SPEED )
@@ -81,8 +83,8 @@ void CEditorLevelViewportClient::Tick( float InDeltaSeconds )
 	// If we tracking mouse and this is perspective viewport - change view location
 	if ( trackingType == MT_View && viewportType == LVT_Perspective )
 	{
-		Vector		targetDirection = viewRotation.RotateVector( SMath::vectorForward );
-		Vector		axisUp			= viewRotation.RotateVector( SMath::vectorUp );
+		Vector		targetDirection = SMath::vectorForward	* viewRotationQuat;
+		Vector		axisUp			= SMath::vectorUp		* viewRotationQuat;
 		Vector		axisRight		= SMath::CrossVector( targetDirection, axisUp );
 
 		if ( cameraMoveFlags & CMV_MoveForward )		viewLocation +=	targetDirection	* cameraSpeed;
@@ -100,7 +102,7 @@ void CEditorLevelViewportClient::Draw( CViewport* InViewport )
 	// Update audio listener spatial if allowed
 	if ( viewportType == LVT_Perspective && bSetListenerPosition )
 	{
-		GAudioDevice.SetListenerSpatial( viewLocation, viewRotation.RotateVector( SMath::vectorForward ), viewRotation.RotateVector( SMath::vectorUp ) );
+		GAudioDevice.SetListenerSpatial( viewLocation, SMath::vectorForward * viewRotationQuat, SMath::vectorUp * viewRotationQuat );
 	}
 
 	// Draw viewport
@@ -127,7 +129,7 @@ void CEditorLevelViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportR
 	// Draw gizmo
 	if ( gizmo && gizmo->IsEnabled() )
 	{
-		gizmo->Draw_RenderThread( InViewportRHI, InSceneView, scene );
+		gizmo->Draw_RenderThread( InViewportRHI, InSceneView, scene, viewportType );
 	}
 
 	// Draw scene
@@ -169,7 +171,7 @@ void CEditorLevelViewportClient::DrawHitProxies_RenderThread( ViewportRHIRef_t I
 	// Draw gizmo
 	if ( gizmo && gizmo->IsEnabled() )
 	{
-		gizmo->Draw_RenderThread( InViewportRHI, InSceneView, scene );
+		gizmo->Draw_RenderThread( InViewportRHI, InSceneView, scene, viewportType );
 	}
 
 	// Draw scene
@@ -221,8 +223,9 @@ void CEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportT
 	if ( viewportType == LVT_Perspective )
 	{
 		bSetListenerPosition = true;
-		viewLocation = GDefaultPerspectiveViewLocation;
-		viewRotation = GDefaultPerspectiveViewRotation;
+		viewLocation		= GDefaultPerspectiveViewLocation;
+		viewRotationEuler	= GDefaultPerspectiveViewRotationEuler;
+		viewRotationQuat	= GDefaultPerspectiveViewRotationQuat;
 	}
 	// Else we init default location of axis up for other viewport types
 	else
@@ -369,21 +372,22 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		// Event of mouse move
 	case SWindowEvent::T_MouseMove:
 	{
-		Vector2D		moveDelta = Vector2D( 0.f, 0.f );
-		if ( viewportType != LVT_Perspective )
-		{
-			moveDelta.x		= InWindowEvent.events.mouseMove.xDirection * ( orthoZoom / CAMERA_ZOOM_DIV );
-			moveDelta.y		= InWindowEvent.events.mouseMove.yDirection * ( orthoZoom / CAMERA_ZOOM_DIV );
-		}
-		else
-		{
-			moveDelta.x		= InWindowEvent.events.mouseMove.xDirection * GInputSystem->GetMouseSensitivity();
-			moveDelta.y		= InWindowEvent.events.mouseMove.yDirection * GInputSystem->GetMouseSensitivity();
-		}
+		Vector2D		moveDelta = Vector2D( InWindowEvent.events.mouseMove.xDirection, InWindowEvent.events.mouseMove.yDirection );
 
 		// Update view if we tracking mouse for MT_View
 		if ( trackingType == MT_View )
 		{
+			if ( viewportType != LVT_Perspective )
+			{
+				moveDelta.x		= InWindowEvent.events.mouseMove.xDirection * ( orthoZoom / CAMERA_ZOOM_DIV );
+				moveDelta.y		= InWindowEvent.events.mouseMove.yDirection * ( orthoZoom / CAMERA_ZOOM_DIV );
+			}
+			else
+			{
+				moveDelta.x		= InWindowEvent.events.mouseMove.xDirection * GInputSystem->GetMouseSensitivity();
+				moveDelta.y		= InWindowEvent.events.mouseMove.yDirection * GInputSystem->GetMouseSensitivity();
+			}
+
 			// We moved mouse when press right mouse button, in this case we not allow opening context menu after release
 			bAllowContextMenu = false;
 
@@ -424,26 +428,29 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 				// Update Yaw axis
 				if ( moveDelta.x != 0.f )
 				{
-					viewRotation.yaw += moveDelta.x;
-					if ( viewRotation.yaw < -360.f || viewRotation.yaw > 360.f )
+					viewRotationEuler.y += moveDelta.x;
+					if ( viewRotationEuler.y < -360.f || viewRotationEuler.y > 360.f )
 					{
-						viewRotation.yaw = 0.f;
+						viewRotationEuler.y = 0.f;
 					}
 				}
 
 				// Update Pitch axis
 				if ( moveDelta.y != 0.f )
 				{
-					viewRotation.pitch -= moveDelta.y;
-					if ( viewRotation.pitch > 90.f )
+					viewRotationEuler.x -= moveDelta.y;
+					if ( viewRotationEuler.x > 90.f )
 					{
-						viewRotation.pitch = 90.f;
-					}
-					else if ( viewRotation.pitch < -90.f )
+						viewRotationEuler.x = 90.f;
+					} 
+					else if ( viewRotationEuler.x < -90.f )
 					{
-						viewRotation.pitch = -90.f;
+						viewRotationEuler.x = -90.f;
 					}
+
 				}
+
+				viewRotationQuat = SMath::AnglesToQuaternionZXY( viewRotationEuler );
 			}
 		}
 		
@@ -451,7 +458,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		else if ( gizmo && trackingType == MT_Gizmo )
 		{
 			Vector		drag;
-			CRotator	rotator;
+			Quaternion	rotator;
 			Vector		scale;
 
 			for ( uint32 axis = 0; axis < 2; ++axis )
@@ -532,7 +539,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	}
 }
 
-void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, CRotator& OutRotation, Vector& OutScale, class CSceneView* InSceneView /* = nullptr */ )
+void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, Quaternion& OutRotation, Vector& OutScale, class CSceneView* InSceneView /* = nullptr */ )
 {
 	if ( !gizmo )
 	{
@@ -544,13 +551,20 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 	Vector2D	dragDelta	= InDragDelta;
 
 	OutDrag		= SMath::vectorZero;
-	OutRotation = SMath::rotatorZero;
+	OutRotation = SMath::quaternionZero;
 	OutScale	= SMath::vectorOne;
 
 	// We apply an increase in offset depending on the distance of the camera to gizmo point (for viewport type LVT_Perspective) 
-	if ( viewportType == LVT_Perspective && gizmo->GetType() == GT_Translate )
+	if ( gizmo->GetType() == GT_Translate )
 	{
-		dragDelta *= SMath::DistanceVector( viewLocation, gizmo->GetLocation() ) / viewFOV / 4.f;
+		if ( viewportType == LVT_Perspective )
+		{
+			dragDelta *= SMath::DistanceVector( viewLocation, gizmo->GetLocation() ) / viewFOV / 4.f;
+		}
+		else
+		{
+			dragDelta *= orthoZoom / CAMERA_ZOOM_DIV;
+		}
 	}
 
 	// Screen space Y axis is inverted
@@ -637,34 +651,27 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 
 	// Rotate gizmo
 	case GT_Rotate:
-	{
 		switch ( currentAxis )
 		{
-		case A_X:		OutRotation = CRotator( -value, 0.f, 0.f );								break;
-		case A_Y:		OutRotation = CRotator( 0.f, -value, 0.f );								break;
-		case A_Z:		OutRotation = CRotator( 0.f, 0.f, -value );								break;
+		case A_X:		OutRotation = SMath::AnglesToQuaternion( Vector( value, 0.f, 0.f ) );	break;
+		case A_Y:		OutRotation = SMath::AnglesToQuaternion( Vector( 0.f, value, 0.f ) );	break;
+		case A_Z:		OutRotation = SMath::AnglesToQuaternion( Vector( 0.f, 0.f, value ) );	break;
 		default:		checkMsg( false, TEXT( "Axis not correctly set while rotating!" ) );	break;
 		}
 		break;
-	}
 
 	// Scale gizmo
 	case GT_Scale:
-	{
-		Vector		axis;
 		switch ( currentAxis )
 		{
-		case A_X:				axis = Vector( 1.f, 0.f, 0.f );													break;
-		case A_Y:				axis = Vector( 0.f, 1.f, 0.f );													break;
-		case A_Z:				axis = Vector( 0.f, 0.f, 1.f );													break;
-		case A_X | A_Y:			axis = dragDelta.x != 0 ? Vector( 1.f, 0.f, 0.f ) : Vector( 0.f, 1.f, 0.f );	break;
-		case A_X | A_Z:			axis = dragDelta.x != 0 ? Vector( 1.f, 0.f, 0.f ) : Vector( 0.f, 0.f, 1.f );	break;
-		case A_Y | A_Z:			axis = dragDelta.x != 0 ? Vector( 0.f, 1.f, 0.f ) : Vector( 0.f, 0.f, 1.f );	break;
-		case  A_X | A_Y | A_Z:	axis = Vector( 1.f, 1.f, 1.f );													break;
+		case A_X:				OutScale = Vector( 0.005f * value, 0.f, 0.f );																break;
+		case A_Y:				OutScale = Vector( 0.f, 0.005f * value, 0.f );																break;
+		case A_Z:				OutScale = Vector( 0.f, 0.f, 0.005f * value );																break;
+		case A_X | A_Y:			OutScale = dragDelta.x != 0 ? Vector( 0.005f * value, 0.f, 0.f )	: Vector( 0.f, 0.005f * value, 0.f );	break;
+		case A_X | A_Z:			OutScale = dragDelta.x != 0 ? Vector( 0.005f * value, 0.f, 0.f )	: Vector( 0.f, 0.f, -0.005f * value );	break;
+		case A_Y | A_Z:			OutScale = dragDelta.x != 0 ? Vector( 0.f, 0.f, -0.005f * value )	: Vector( 0.f, 0.005f * value, 0.f );	break;
+		case  A_X | A_Y | A_Z:	OutScale = Vector( 0.005f, 0.005f, 0.005f ) * value;														break;
 		}
-
-		OutScale = axis * value;
-	}
 	}
 }
 
@@ -692,18 +699,18 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 In
 	{
 	case LVT_Perspective:
 	case LVT_OrthoXY:
-		targetDirection		= viewRotation.RotateVector( SMath::vectorForward );
-		axisUp				= viewRotation.RotateVector( SMath::vectorUp );
+		targetDirection		= SMath::vectorForward	* viewRotationQuat ;
+		axisUp				= SMath::vectorUp		* viewRotationQuat;
 		break;
 
 	case LVT_OrthoXZ:
-		targetDirection		= viewRotation.RotateVector( -SMath::vectorUp );
-		axisUp				= viewRotation.RotateVector( SMath::vectorForward );
+		targetDirection		= -SMath::vectorUp		* viewRotationQuat;
+		axisUp				= SMath::vectorForward	* viewRotationQuat;
 		break;
 
 	case LVT_OrthoYZ:
-		targetDirection		= viewRotation.RotateVector( SMath::vectorRight );
-		axisUp				= viewRotation.RotateVector( SMath::vectorUp );
+		targetDirection		= SMath::vectorRight	* viewRotationQuat;
+		axisUp				= SMath::vectorUp		* viewRotationQuat;
 		break;
 
 	default:

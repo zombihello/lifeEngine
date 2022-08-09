@@ -34,6 +34,12 @@ public:
     virtual ~CStaticMeshComponent();
 
 	/**
+	 * @brief Serialize component
+	 * @param[in] InArchive Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
+
+	/**
 	 * @brief Adds mesh batches for draw in scene
 	 *
 	 * @param InSceneView Current view of scene

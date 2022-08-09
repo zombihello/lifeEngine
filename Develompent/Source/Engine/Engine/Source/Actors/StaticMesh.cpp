@@ -22,7 +22,7 @@ void AStaticMesh::BeginPlay()
 }
 
 #if WITH_EDITOR
-ActorRef_t AStaticMesh::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const CRotator& InRotation )
+ActorRef_t AStaticMesh::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation )
 {
 	// If asset is not valid or not static mesh asset, we do nothing
 	if ( !InAsset || InAsset->GetType() != AT_StaticMesh )

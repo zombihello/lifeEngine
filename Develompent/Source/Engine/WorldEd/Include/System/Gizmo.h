@@ -12,6 +12,7 @@
 #include "Math/Math.h"
 #include "Math/Color.h"
 #include "Render/Material.h"
+#include "Render/Viewport.h"
 #include "System/Package.h"
 #include "System/Delegate.h"
 #include "WorldEd.h"
@@ -61,8 +62,9 @@ public:
 	 * @param InViewportRHI		Viewport RHI
 	 * @param InSceneView		Scene view
 	 * @param InScene			Scene
+	 * @param InViewportType	Viewport type
 	 */
-	void Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene );
+	void Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene, ELevelViewportType InViewportType );
 
 	/**
 	 * @brief Set type
@@ -194,8 +196,9 @@ private:
 	 * @param InViewportRHI		Viewport RHI
 	 * @param InSceneView		Scene view
 	 * @param InScene			Scene
+	 * @param InViewportType	Viewport type
 	 */
-	void Render_Translate( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene );
+	void Render_Translate( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene, ELevelViewportType InViewportType );
 
 	/**
 	 * @brief Render rotate gizmo. Must be call in render thread
@@ -203,8 +206,9 @@ private:
 	 * @param InViewportRHI		Viewport RHI
 	 * @param InSceneView		Scene view
 	 * @param InScene			Scene
+	 * @param InViewportType	Viewport type
 	 */
-	void Render_Rotate( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene );
+	void Render_Rotate( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene, ELevelViewportType InViewportType );
 
 	/**
 	 * @brief Render scale gizmo. Must be call in render thread
@@ -212,8 +216,9 @@ private:
 	 * @param InViewportRHI		Viewport RHI
 	 * @param InSceneView		Scene view
 	 * @param InScene			Scene
+	 * @param InViewportType	Viewport type
 	 */
-	void Render_Scale( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene );
+	void Render_Scale( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene, ELevelViewportType InViewportType );
 
 	/**
 	 * @brief Render axis for translate gizmo
@@ -227,8 +232,9 @@ private:
 	 * @param OutAxisEnd		Output axis end in screen coords
 	 * @param InScale			Scale of axis
 	 * @param InIsCubeHead		Is need cube head in axis
+	 * @param InDrawAxisLine	Is need draw axis line
 	 */
-	void Render_Axis( const class CSceneView* InSceneView, struct SSceneDepthGroup& InSDG, EAxis InAxis, const Matrix& InMatrix, const TAssetHandle<CMaterial>& InMaterial, const CColor& InColor, Vector2D& OutAxisEnd, float InScale, bool InIsCubeHead = false );
+	void Render_Axis( const class CSceneView* InSceneView, struct SSceneDepthGroup& InSDG, uint8 InAxis, const Matrix& InMatrix, const TAssetHandle<CMaterial>& InMaterial, const CColor& InColor, Vector2D* OutAxisEnd, float InScale, bool InIsCubeHead = false, bool InDrawAxisLine = true );
 
 	/**
 	 * Event when editor mode is changed
@@ -251,11 +257,13 @@ private:
 	CColor														axisColorX;						/**< Axis color X */
 	CColor														axisColorY;						/**< Axis color Y */
 	CColor														axisColorZ;						/**< Axis color Z */
+	CColor														axisColorCenter;				/**< Axis color Center */
 	CColor														currentAxisColor;				/**< Current axis color */
 	uint32														currentAxis;					/**< Current axies (see EAxis) */
 	TAssetHandle<CMaterial>										axisMaterialX;					/**< Axis material X */
 	TAssetHandle<CMaterial>										axisMaterialY;					/**< Axis material Y */
 	TAssetHandle<CMaterial>										axisMaterialZ;					/**< Axis material Z */
+	TAssetHandle<CMaterial>										axisMaterialCenter;				/**< Axis material Center */
 	Vector2D													axisXEnd;						/**< Axis X end in screen coord */
 	Vector2D													axisYEnd;						/**< Axis Y end in screen coord */
 	Vector2D													axisZEnd;						/**< Axis Z end in screen coord */

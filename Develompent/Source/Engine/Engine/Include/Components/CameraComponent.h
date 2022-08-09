@@ -218,6 +218,7 @@ private:
 	float							nearClipPlane;				/**< The near plane distance (in world units) */
 	float							farClipPlane;				/**< The far plane distance (in world units) */
 	float							aspectRatio;				/**< Aspect Ratio (Width/Height) (ignored in Orthographic mode) */
+	Vector							rotateEuler;				/**< Rotate of camera in euler angles */
 };
 
 //

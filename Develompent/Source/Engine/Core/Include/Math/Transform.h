@@ -10,7 +10,6 @@
 #define TRANSFORM_H
 
 #include "Math/Math.h"
-#include "Math/Rotator.h"
 #include "Math/Axis.h"
 #include "System/Archive.h"
 
@@ -27,10 +26,12 @@ public:
 	/**
 	 * Constructor with initialization to the identity transform
 	 */
-	FORCEINLINE CTransform() :
-		translation( SMath::vectorZero ),
-		rotation( SMath::rotatorZero ),
-		scale( SMath::vectorOne )
+	FORCEINLINE CTransform() 
+		: bDirtyMatrix( false )
+		, translation( SMath::vectorZero )
+		, rotation( SMath::quaternionZero )
+		, scale( SMath::vectorOne )
+		, matrix( SMath::matrixIdentity )
 	{}
 
 	/**
@@ -38,10 +39,12 @@ public:
 	 * 
 	 * @param[in] InTranslation The value to use for the translation component
 	 */
-	FORCEINLINE explicit CTransform( const Vector& InTranslation ) :
-		translation( InTranslation ),
-		rotation( SMath::rotatorZero ),
-		scale( SMath::vectorOne )
+	FORCEINLINE explicit CTransform( const Vector& InTranslation ) 
+		: bDirtyMatrix( false )
+		, translation( InTranslation )
+		, rotation( SMath::quaternionZero )
+		, scale( SMath::vectorOne )
+		, matrix( SMath::matrixIdentity )
 	{}
 
 	/**
@@ -49,10 +52,12 @@ public:
 	 * 
 	 * @param[in] InRotation The value to use for rotation component
 	 */
-	FORCEINLINE explicit CTransform( const CRotator& InRotation ) :
-		translation( SMath::vectorZero ),
-		rotation( InRotation ),
-		scale( SMath::vectorOne )
+	FORCEINLINE explicit CTransform( const Quaternion& InRotation ) 
+		: bDirtyMatrix( false )
+		, translation( SMath::vectorZero )
+		, rotation( InRotation )
+		, scale( SMath::vectorOne )
+		, matrix( SMath::matrixIdentity )
 	{}
 
 	/**
@@ -62,10 +67,12 @@ public:
 	 * @param[in] InTranslation The value to use for the translation component
 	 * @param[in] InScale The value to use for the scale component
 	 */
-	FORCEINLINE CTransform( const CRotator& InRotation, const Vector& InTranslation, const Vector& InScale = SMath::vectorOne ) :
-		translation( InTranslation ),
-		rotation( InRotation ),
-		scale( InScale )
+	FORCEINLINE CTransform( const Quaternion& InRotation, const Vector& InTranslation, const Vector& InScale = SMath::vectorOne ) 
+		: bDirtyMatrix( false )
+		, translation( InTranslation )
+		, rotation( InRotation )
+		, scale( InScale )
+		, matrix( SMath::matrixIdentity )
 	{}
 
 	/**
@@ -81,7 +88,8 @@ public:
 	 */
 	FORCEINLINE void CopyTranslation( const CTransform& InOther )
 	{
-		translation = InOther.translation;
+		translation		= InOther.translation;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -91,7 +99,8 @@ public:
 	 */
 	FORCEINLINE void AddToTranslation( const Vector& InDeltaTranslation )
 	{
-		translation += InDeltaTranslation;
+		translation		+= InDeltaTranslation;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -101,7 +110,8 @@ public:
 	 */
 	FORCEINLINE void SubtractFromTranslation( const Vector& InDeltaTranslation )
 	{
-		translation -= InDeltaTranslation;
+		translation		-= InDeltaTranslation;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -109,9 +119,10 @@ public:
 	 * 
 	 * @param[in] InDeltaRotation The rotation to add in the following fashion: Rotation = Rotation * DeltaRotation
 	 */
-	FORCEINLINE void AddToRotation( const CRotator& InDeltaRotation )
+	FORCEINLINE void AddToRotation( const Quaternion& InDeltaRotation )
 	{
-		rotation += InDeltaRotation;
+		rotation		= InDeltaRotation * rotation;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -119,9 +130,10 @@ public:
 	 *
 	 * @param[in] InDeltaRotation Delta rotation
 	 */
-	FORCEINLINE void SubtractFromRotation( const CRotator& InDeltaRotation )
+	FORCEINLINE void SubtractFromRotation( const Quaternion& InDeltaRotation )
 	{
-		rotation -= InDeltaRotation;
+		rotation		= SMath::InverseQuaternion( InDeltaRotation ) * rotation;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -131,7 +143,8 @@ public:
 	 */
 	FORCEINLINE void AddToScale( const Vector& InDeltaScale )
 	{
-		scale += InDeltaScale;
+		scale			+= InDeltaScale;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -141,7 +154,8 @@ public:
 	 */
 	FORCEINLINE void SubtractFromScale( const Vector& InDeltaScale )
 	{
-		scale -= InDeltaScale;
+		scale			-= InDeltaScale;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -151,7 +165,8 @@ public:
 	 */
 	FORCEINLINE void CopyRotation( const CTransform& InOther )
 	{
-		rotation = InOther.rotation;
+		rotation		= InOther.rotation;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -161,7 +176,8 @@ public:
 	 */
 	FORCEINLINE void CopyScale( const CTransform& InOther )
 	{
-		scale = InOther.scale;
+		scale			= InOther.scale;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -171,9 +187,10 @@ public:
 	 */
 	FORCEINLINE void Add( const CTransform& InOther )
 	{
-		translation += InOther.translation;
-		rotation += InOther.rotation;
-		scale *= InOther.scale;
+		translation	+= InOther.translation;
+		rotation	=  InOther.rotation * rotation;
+		scale		*= InOther.scale;
+		bDirtyMatrix = true;
 	}
 
 	/**
@@ -183,9 +200,10 @@ public:
 	 */
 	FORCEINLINE void Subtract( const CTransform& InOther )
 	{
-		translation -= InOther.translation;
-		rotation -= InOther.rotation;
-		scale /= InOther.scale;
+		translation		-= InOther.translation;
+		rotation		= SMath::InverseQuaternion( InOther.rotation ) * rotation;
+		scale			/= InOther.scale;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -196,7 +214,7 @@ public:
 	 */
 	FORCEINLINE Vector RotateVector( const Vector& InVector ) const
 	{
-		return InVector * rotation.ToQuaternion();
+		return InVector * rotation;
 	}
 
 	/**
@@ -228,7 +246,8 @@ public:
 	 */
 	FORCEINLINE void SetLocation( const Vector& InLocation )
 	{
-		translation = InLocation;
+		translation		= InLocation;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -236,9 +255,10 @@ public:
 	 * 
 	 * @param[in] InRotation New rotation
 	 */
-	FORCEINLINE void SetRotation( const CRotator& InRotation )
+	FORCEINLINE void SetRotation( const Quaternion& InRotation )
 	{
-		rotation = InRotation;
+		rotation		= InRotation;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -248,7 +268,8 @@ public:
 	 */
 	FORCEINLINE void SetScale( const Vector& InScale )
 	{
-		scale = InScale;
+		scale			= InScale;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -256,9 +277,10 @@ public:
 	 */
 	FORCEINLINE void SetIdentity()
 	{
-		translation = SMath::vectorZero;
-		rotation = SMath::rotatorZero;
-		scale = SMath::vectorOne;
+		translation		= SMath::vectorZero;
+		rotation		= SMath::quaternionZero;
+		scale			= SMath::vectorOne;
+		bDirtyMatrix	= true;
 	}
 
 	/**
@@ -292,7 +314,7 @@ public:
 	 * Get rotation
 	 * @return Return rotation of transform
 	 */
-	FORCEINLINE CRotator GetRotation() const
+	FORCEINLINE Quaternion GetRotation() const
 	{
 		return rotation;
 	}
@@ -310,11 +332,14 @@ public:
 	 * Convert transform to matrix
 	 * @return Return matrix with location, scale and rotation
 	 */
-	FORCEINLINE Matrix ToMatrix() const
+	FORCEINLINE const Matrix& ToMatrix() const
 	{
-		Matrix		result;
-		ToMatrix( result );
-		return result;
+		if ( bDirtyMatrix )
+		{
+			ToMatrix( matrix );
+			bDirtyMatrix	= false;
+		}
+		return matrix;
 	}
 
 	/**
@@ -323,49 +348,12 @@ public:
 	 */
 	FORCEINLINE void ToMatrix( Matrix& OutMatrix ) const
 	{
-		const Quaternion		quaternion = rotation.ToQuaternion();
-		OutMatrix[ 3 ].x = translation.x;
-		OutMatrix[ 3 ].y = translation.y;
-		OutMatrix[ 3 ].z = translation.z;
-
-		const float				x2 = quaternion.x + quaternion.x;
-		const float				y2 = quaternion.y + quaternion.y;
-		const float				z2 = quaternion.z + quaternion.z;
+		if ( bDirtyMatrix )
 		{
-			const float			xx2 = quaternion.x * x2;
-			const float			yy2 = quaternion.y * y2;
-			const float			zz2 = quaternion.z * z2;
-
-			OutMatrix[ 0 ].x = ( 1.0f - ( yy2 + zz2 ) ) * scale.x;
-			OutMatrix[ 1 ].y = ( 1.0f - ( xx2 + zz2 ) ) * scale.y;
-			OutMatrix[ 2 ].z = ( 1.0f - ( xx2 + yy2 ) ) * scale.z;
+			matrix			= SMath::TranslateMatrix( translation ) * SMath::ScaleMatrix( scale ) * SMath::QuaternionToMatrix( rotation );
+			bDirtyMatrix	= false;
 		}
-		{
-			const float			yz2 = quaternion.y * z2;
-			const float			wx2 = quaternion.w * x2;
-
-			OutMatrix[ 2 ].y = ( yz2 - wx2 ) * scale.z;
-			OutMatrix[ 1 ].z = ( yz2 + wx2 ) * scale.y;
-		}
-		{
-			const float			xy2 = quaternion.x * y2;
-			const float			wz2 = quaternion.w * z2;
-
-			OutMatrix[ 1 ].x = ( xy2 - wz2 ) * scale.y;
-			OutMatrix[ 0 ].y = ( xy2 + wz2 ) * scale.x;
-		}
-		{
-			const float			xz2 = quaternion.x * z2;
-			const float			wy2 = quaternion.w * y2;
-
-			OutMatrix[ 2 ].x = ( xz2 + wy2 ) * scale.z;
-			OutMatrix[ 0 ].z = ( xz2 - wy2 ) * scale.x;
-		}
-
-		OutMatrix[ 0 ].w = 0.0f;
-		OutMatrix[ 1 ].w = 0.0f;
-		OutMatrix[ 2 ].w = 0.0f;
-		OutMatrix[ 3 ].w = 1.0f;
+		OutMatrix			= matrix;
 	}
 
 	/**
@@ -373,7 +361,7 @@ public:
 	 */
 	FORCEINLINE CTransform operator+( const CTransform& InOther ) const
 	{
-		return CTransform( rotation + InOther.rotation, translation + InOther.translation, scale * InOther.scale );
+		return CTransform( InOther.rotation * rotation, translation + InOther.translation, scale * InOther.scale );
 	}
 
 	/**
@@ -381,13 +369,15 @@ public:
 	 */
 	FORCEINLINE CTransform operator-( const CTransform& InOther ) const
 	{
-		return CTransform( rotation - InOther.rotation, translation - InOther.translation, scale / InOther.scale );
+		return CTransform( SMath::InverseQuaternion( InOther.rotation ) * rotation, translation - InOther.translation, scale / InOther.scale );
 	}
 
 protected:
-	Vector			translation;			/**< Translation of this transformation */
-	CRotator		rotation;				/**< Rotation of this transformation */
-	Vector			scale;					/**< 3D scale */
+	mutable bool	bDirtyMatrix;	/**< Is dirty matrix */
+	Vector			translation;	/**< Translation of this transformation */
+	Quaternion		rotation;		/**< Rotation of this transformation */
+	Vector			scale;			/**< 3D scale */
+	mutable Matrix	matrix;			/**< Transformation in matrix */
 };
 
 //
@@ -402,6 +392,11 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, CTransform& InValue )
 	InArchive << InValue.translation;
 	InArchive << InValue.rotation;
 	InArchive << InValue.scale;
+
+	if ( InArchive.IsLoading() )
+	{
+		InValue.bDirtyMatrix = true;
+	}
 	return InArchive;
 }
 
@@ -410,6 +405,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, CTransform& InValue )
  */
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CTransform& InValue )
 {
+	check( InArchive.IsSaving() );
 	InArchive << InValue.translation;
 	InArchive << InValue.rotation;
 	InArchive << InValue.scale;

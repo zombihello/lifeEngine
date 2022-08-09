@@ -30,7 +30,7 @@ public:
 	 * @param InRotation    Rotation actor on spawn
      * @return Return spawned actor. If failed returning NULL
      */
-    typedef ActorRef_t ( *SpawnActorFn_t )( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const CRotator& InRotation );
+    typedef ActorRef_t ( *SpawnActorFn_t )( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
 
     /**
      * @brief Register actor for asset type
@@ -51,7 +51,7 @@ public:
      * @param InRotation    Rotation actor on spawn
      * @return Return spawned actor. If failed returning NULL
      */
-    FORCEINLINE ActorRef_t Spawn( const TAssetHandle<CAsset>& InAsset, const Vector& InLocation, const CRotator& InRotation = SMath::rotatorZero )
+    FORCEINLINE ActorRef_t Spawn( const TAssetHandle<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation = SMath::quaternionZero )
     {
         // If asset is not valid, we exit from method
         if ( !InAsset.IsAssetValid() )

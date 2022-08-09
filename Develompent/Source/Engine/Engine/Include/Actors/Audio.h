@@ -44,7 +44,7 @@ public:
 	 * @param InRotation    Rotation actor on spawn
 	 * @return Return spawned actor. If failed returning NULL
 	 */
-	static ActorRef_t SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const CRotator& InRotation );
+	static ActorRef_t SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
 
 	/**
 	 * @brief Initialize actor properties

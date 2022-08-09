@@ -99,6 +99,15 @@ public:
 	virtual bool LoadMap( const std::wstring& InMap, std::wstring& OutError ) override;
 
 	/**
+	 * Save map
+	 * 
+	 * @param[in] InMap Path to map
+	 * @param[out] OutError Error of saving map
+	 * @return Return true if map saved successed, else return false
+	 */
+	virtual bool SaveMap( const std::wstring& InMap, std::wstring& OutError );
+
+	/**
 	 * Serialize TOC
 	 *
 	 * @param InIsSave	Is save TOC file

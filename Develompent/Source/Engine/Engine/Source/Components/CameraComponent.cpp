@@ -15,6 +15,7 @@ CCameraComponent::CCameraComponent()
     , nearClipPlane( 0.01f )
     , farClipPlane( WORLD_MAX )
     , aspectRatio( 1.777778f )
+	, rotateEuler( SMath::vectorZero ) 
 {}
 
 void CCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ )
@@ -26,40 +27,40 @@ void CCameraComponent::RotateComponentByMouse( bool InConstrainYaw /* = true */ 
 	}
 
 	float			sensitivity = GInputSystem->GetMouseSensitivity();
-	CRotator		rotator = GetRelativeRotation();
 	
 	// Update Yaw axis
 	if ( mouseOffset.x != 0.f )
 	{
-		rotator.yaw += mouseOffset.x * sensitivity;
-		if ( rotator.yaw < -360.f || rotator.yaw > 360.f )
+		rotateEuler.y += mouseOffset.x * sensitivity;
+		if ( rotateEuler.y < -360.f || rotateEuler.y > 360.f )
 		{
-			rotator.yaw = 0.f;
+			rotateEuler.y = 0.f;
 		}
 	}
 
 	// Update Pitch axis
 	if ( mouseOffset.y != 0.f )
 	{
-		rotator.pitch -= mouseOffset.y * sensitivity;
+		rotateEuler.x -= mouseOffset.y * sensitivity;
 		if ( InConstrainYaw )
 		{
-			if ( rotator.pitch > 90.f )
+			if ( rotateEuler.x > 90.f )
 			{
-				rotator.pitch = 90.f;
+				rotateEuler.x = 90.f;
 			}
-			else if ( rotator.pitch < -90.f )
+			else if ( rotateEuler.x < -90.f )
 			{
-				rotator.pitch = -90.f;
+				rotateEuler.x = -90.f;
 			}
 		}
-		else if ( rotator.pitch < -360.f || rotator.pitch > 360.f )
+		else if ( rotateEuler.x < -360.f || rotateEuler.x > 360.f )
 		{
-			rotator.pitch = 0.f;
+			rotateEuler.x = 0.f;
 		}
+
 	}
 
-	SetRelativeRotation( rotator );
+	SetRelativeRotation( SMath::AnglesToQuaternionZXY( rotateEuler ) );
 }
 
 void CCameraComponent::Serialize( class CArchive& InArchive )

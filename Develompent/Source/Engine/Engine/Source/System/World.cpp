@@ -16,6 +16,9 @@
 CWorld::CWorld() 
 	: isBeginPlay( false )
 	, scene( new CScene() )
+#if WITH_EDITOR
+	, name( TEXT( "Unknown" ) )
+#endif // WITH_EDITOR
 {}
 
 CWorld::~CWorld()
@@ -117,10 +120,32 @@ void CWorld::Serialize( CArchive& InArchive )
 			InArchive << className;
 
 			// Spawn actor, serialize and add to array
-			AActor*			actor = SpawnActor( CClass::StaticFindClass( className.c_str() ), SMath::vectorZero, SMath::rotatorZero );
+			AActor*			actor = SpawnActor( CClass::StaticFindClass( className.c_str() ), SMath::vectorZero, SMath::quaternionZero );
 			actor->Serialize( InArchive );
 		}
 	}
+
+#if WITH_EDITOR
+	// Getting path and file name
+	filePath	= InArchive.GetPath();
+	name		= filePath;
+	{
+		appNormalizePathSeparators( name );
+		std::size_t			pathSeparatorPos = name.find_last_of( PATH_SEPARATOR );
+		if ( pathSeparatorPos != std::string::npos )
+		{
+			name.erase( 0, pathSeparatorPos + 1 );
+		}
+
+		uint32 dotPos = name.find_last_of( TEXT( "." ) );
+		if ( dotPos != std::string::npos )
+		{
+			name.erase( dotPos, name.size() + 1 );
+		}
+	}
+
+	bDirty = false;
+#endif // WITH_EDITOR
 }
 
 void CWorld::CleanupWorld()
@@ -141,7 +166,7 @@ void CWorld::CleanupWorld()
 #if WITH_EDITOR
 	if ( !actors.empty() )
 	{
-		SEditorDelegates::onActorsSpawned.Broadcast( actors );
+		SEditorDelegates::onActorsDestroyed.Broadcast( actors );
 	}
 #endif // WITH_EDITOR
 
@@ -151,11 +176,14 @@ void CWorld::CleanupWorld()
 	actorsToDestroy.clear();
 
 #if WITH_EDITOR
+	bDirty		= true;
 	selectedActors.clear();
+	filePath	= TEXT( "" );
+	name		= TEXT( "" );
 #endif // WITH_EDITOR
 }
 
-ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /* = SMath::rotatorZero */ )
+ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const Quaternion& InRotation /* = SMath::quaternionZero */ )
 {
 	check( InClass );
 
@@ -183,6 +211,7 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
 #if WITH_EDITOR
 	std::vector<ActorRef_t>		spawnedActors = { actor };
 	SEditorDelegates::onActorsSpawned.Broadcast( spawnedActors );
+	bDirty = true;
 #endif // WITH_EDITOR
 
 	return actor;
@@ -211,6 +240,7 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 #if WITH_EDITOR
 	std::vector<ActorRef_t>		destroyedActors = { InActor };
 	SEditorDelegates::onActorsDestroyed.Broadcast( destroyedActors );
+	bDirty = true;
 #endif // WITH_EDITOR
 
 	// Call events of destroyed actor

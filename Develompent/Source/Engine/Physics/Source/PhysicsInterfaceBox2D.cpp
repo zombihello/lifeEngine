@@ -89,7 +89,7 @@ SPhysicsShapeHandleBox2D SPhysicsInterfaceBox2D::CreateShapeGeometry( const stru
 	b2PolygonShape*					bx2BoxGeometry		= new b2PolygonShape();
 	const b2Vec2					sizeInMeters		= b2Vec2( InBoxGeometry.extent.x / BOX2D_SCALE, InBoxGeometry.extent.y / BOX2D_SCALE );
 	const b2Vec2					locationInMeters	= b2Vec2( InBoxGeometry.location.x / BOX2D_SCALE, InBoxGeometry.location.y / BOX2D_SCALE );
-	const float						rotationInRadians	= InBoxGeometry.rotation.roll / BOX2D_ANGLES;
+	const float						rotationInRadians	= SMath::QuaternionToAngles( InBoxGeometry.rotation ).y / BOX2D_ANGLES;
 	
 	b2Vec2							boxVerteces[] =
 	{

@@ -10,7 +10,6 @@
 #define CAMERATYPES_H
 
 #include "Math/Math.h"
-#include "Math/Rotator.h"
 
 /**
  * @ingroup Engine
@@ -29,7 +28,7 @@ enum ECameraProjectionMode
 struct SCameraView
 {
 	Vector						location;		/**< Location */
-	CRotator					rotation;		/**< Rotation */
+	Quaternion					rotation;		/**< Rotation */
 	ECameraProjectionMode		projectionMode;	/**< Projection mode */
 	float						fov;			/**< The horizontal field of view (in degrees) in perspective mode (ignored in orthographic mode) */
 	float						orthoWidth;		/**< The desired width (in world units) of the orthographic view (ignored in Perspective mode) */

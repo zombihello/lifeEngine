@@ -15,7 +15,6 @@
 
 #include "Math/Math.h"
 #include "Math/Transform.h"
-#include "Math/Rotator.h"
 #include "Misc/SharedPointer.h"
 #include "Misc/Box2DGlobals.h"
 #include "System/PhysicsMaterialDelegates.h"
@@ -39,9 +38,9 @@
  *
  * @param InRot LE rotator
  */
-FORCEINLINE b2Rot LE2BRot( const CRotator& InRot )
+FORCEINLINE b2Rot LE2BRot( const Quaternion& InRot )
 {
-	return b2Rot( InRot.roll / BOX2D_ANGLES );
+	return b2Rot( SMath::QuaternionToAngles( InRot ).y / BOX2D_ANGLES );
 }
 
 /**
@@ -86,9 +85,9 @@ FORCEINLINE b2Transform LE2BTransform( const CTransform& InTransform )
  *
  * @param InRot Box2D rotator
  */
-FORCEINLINE CRotator B2LERot( const b2Rot& InRot )
+FORCEINLINE Quaternion B2LERot( const b2Rot& InRot )
 {
-	return CRotator( 0.f, 0.f, InRot.GetAngle() * BOX2D_ANGLES );
+	return SMath::AnglesToQuaternion( Vector( 0.f, 0.f, InRot.GetAngle() * BOX2D_ANGLES ) );
 }
 
 /**
@@ -121,7 +120,7 @@ FORCEINLINE Vector2D B2LEVector( const b2Vec2& InVec )
  */
 FORCEINLINE CTransform B2LETransform( const b2Transform& InTransform )
 {
-	CRotator		leRot = B2LERot( InTransform.q );
+	Quaternion		leRot = B2LERot( InTransform.q );
 	Vector2D		lePos = B2LEVector( InTransform.p ) * BOX2D_SCALE;
 
 	CTransform		result( leRot, Vector( lePos, 0.f ) );

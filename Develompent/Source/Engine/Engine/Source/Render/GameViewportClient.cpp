@@ -22,7 +22,7 @@ void CGameViewportClient::Draw( CViewport* InViewport )
 
 	// Calculate scene view and update audio listener spatial
 	CSceneView*		sceneView = CalcSceneView( InViewport, cameraView );
-	GAudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation.RotateVector( SMath::vectorForward ), cameraView.rotation.RotateVector( SMath::vectorUp ) );
+	GAudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation * SMath::vectorForward, cameraView.rotation * SMath::vectorUp );
 
 	// Draw viewport
 	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,
@@ -69,8 +69,8 @@ CSceneView* CGameViewportClient::CalcSceneView( CViewport* InViewport, const SCa
 	}
 
 	// Update view matrix
-	Vector		targetDirection		= InCameraView.rotation.RotateVector( SMath::vectorForward );
-	Vector		axisUp				= InCameraView.rotation.RotateVector( SMath::vectorUp );
+	Vector		targetDirection		= InCameraView.rotation * SMath::vectorForward;
+	Vector		axisUp				= InCameraView.rotation * SMath::vectorUp;
 	Matrix		viewMatrix			= glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
 
 	CSceneView*		sceneView = new CSceneView( projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), CColor::black, SHOW_DefaultGame );

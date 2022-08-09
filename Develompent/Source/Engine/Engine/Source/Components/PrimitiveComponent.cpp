@@ -7,7 +7,7 @@
 IMPLEMENT_CLASS( CPrimitiveComponent )
 
 CPrimitiveComponent::CPrimitiveComponent()
-	: bIsDirtyDrawingPolicyLink( false )
+	: bIsDirtyDrawingPolicyLink( true )
 	, bVisibility( true )
 	, scene( nullptr )
 {}

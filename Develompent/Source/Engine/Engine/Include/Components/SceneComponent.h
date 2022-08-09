@@ -50,7 +50,7 @@ public:
 	 * 
 	 * @param[in] InRotationDelta Relative rotation delta
 	 */
-	FORCEINLINE void AddRelativeRotate( const CRotator& InRotationDelta )
+	FORCEINLINE void AddRelativeRotate( const Quaternion& InRotationDelta )
 	{
 		transform.AddToRotation( InRotationDelta );
 	}
@@ -80,7 +80,7 @@ public:
 	 * 
 	 * @param[in] InRotation New relative rotation of component
 	 */
-	FORCEINLINE void SetRelativeRotation( const CRotator& InRotation )
+	FORCEINLINE void SetRelativeRotation( const Quaternion& InRotation )
 	{
 		transform.SetRotation( InRotation );
 	}
@@ -153,7 +153,7 @@ public:
 	 * Get relative rotation
 	 * @return Return relative rotation
 	 */
-	FORCEINLINE CRotator GetRelativeRotation() const
+	FORCEINLINE Quaternion GetRelativeRotation() const
 	{
 		return transform.GetRotation();
 	}
@@ -180,7 +180,7 @@ public:
 	 * Get rotation of the component in world space
 	 * @return Return rotation of the component in world space
 	 */
-	FORCEINLINE CRotator GetComponentRotation() const
+	FORCEINLINE Quaternion GetComponentRotation() const
 	{
 		return attachParent ? attachParent->GetComponentRotation() + GetRelativeRotation() : GetRelativeRotation();
 	}

@@ -656,7 +656,7 @@ public:
 	 * 
 	 * @param[in] InDeltaRotation Delta rotation
 	 */
-	FORCEINLINE void AddActorRotation( const CRotator& InDeltaRotation )
+	FORCEINLINE void AddActorRotation( const Quaternion& InDeltaRotation )
 	{
 		if ( !rootComponent )	return;
 		rootComponent->AddRelativeRotate( InDeltaRotation );
@@ -689,7 +689,7 @@ public:
 	 * 
 	 * @param[in] InNewRotation New actor rotation
 	 */
-	FORCEINLINE void SetActorRotation( const CRotator& InNewRotation )
+	FORCEINLINE void SetActorRotation( const Quaternion& InNewRotation )
 	{
 		if ( !rootComponent )	return;
 		rootComponent->SetRelativeRotation( InNewRotation );
@@ -769,9 +769,9 @@ public:
 	 * Get actor rotation in world space
 	 * @return Return actor rotation, if root component is not valid return zero rotator
 	 */
-	FORCEINLINE CRotator GetActorRotation() const
+	FORCEINLINE Quaternion GetActorRotation() const
 	{
-		return rootComponent ? rootComponent->GetComponentRotation() : SMath::rotatorZero;
+		return rootComponent ? rootComponent->GetComponentRotation() : SMath::quaternionZero;
 	}
 
 	/**

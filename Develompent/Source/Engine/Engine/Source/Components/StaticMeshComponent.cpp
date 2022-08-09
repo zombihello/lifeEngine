@@ -11,6 +11,13 @@ CStaticMeshComponent::CStaticMeshComponent()
 CStaticMeshComponent::~CStaticMeshComponent()
 {}
 
+void CStaticMeshComponent::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << staticMesh;
+	InArchive << overrideMaterials;
+}
+
 void CStaticMeshComponent::LinkDrawList()
 {
 	check( scene );

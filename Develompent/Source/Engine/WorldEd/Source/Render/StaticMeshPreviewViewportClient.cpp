@@ -16,7 +16,8 @@ CStaticMeshPreviewViewportClient::CStaticMeshPreviewViewportClient( const TShare
 	viewportType			= LVT_Perspective;
 	showFlags				= SHOW_DefaultEditor;
 	viewLocation			= Vector( 0.f, 0.f, -80.f );
-	viewRotation			= CRotator( 0.f, 0.f, 0.f );
+	viewRotationEuler		= SMath::vectorZero;
+	viewRotationQuat		= SMath::quaternionZero;
 
 	// Init scene
 	staticMeshComponent->SetStaticMesh( InStaticMesh->GetAssetHandle() );

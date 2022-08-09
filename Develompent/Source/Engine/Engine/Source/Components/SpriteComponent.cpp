@@ -80,7 +80,7 @@ void CSpriteComponent::CalcTransformationMatrix( const class CSceneView& InScene
 	OutResult[ 2 ].z = viewMatrix[ 2 ].z;
 
 	OutResult *= SMath::ScaleMatrix( transform.GetScale() );
-	OutResult *= transform.GetRotation().ToMatrix();
+	OutResult *= SMath::QuaternionToMatrix( transform.GetRotation() );
 }
 
 void CSpriteComponent::LinkDrawList()

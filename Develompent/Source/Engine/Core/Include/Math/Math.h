@@ -74,9 +74,25 @@ struct SMath
 	static FORCEINLINE Quaternion AnglesToQuaternion( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
 	{
 		return 
-			glm::angleAxis( InEulerAngleX, Vector( 1.f, 0.f, 0.f ) ) *
-			glm::angleAxis( InEulerAngleY, Vector( 0.f, 1.f, 0.f ) ) *
-			glm::angleAxis( InEulerAngleZ, Vector( 0.f, 0.f, 1.f ) );
+			glm::angleAxis( DegreesToRadians( InEulerAngleX ), Vector( 1.f, 0.f, 0.f ) )*
+			glm::angleAxis( DegreesToRadians( InEulerAngleY ), Vector( 0.f, 1.f, 0.f ) )*
+			glm::angleAxis( DegreesToRadians( InEulerAngleZ ), Vector( 0.f, 0.f, 1.f ) );
+	}
+
+	/**
+	 * @ingroup Core
+	 * Convert from euler angles to quaternion ZXY
+	 *
+	 * @param[in] InEulerAngleX Euler angle by X
+	 * @param[in] InEulerAngleY Euler angle by Y
+	 * @param[in] InEulerAngleZ Euler angle by Z
+	 */
+	static FORCEINLINE Quaternion AnglesToQuaternionZXY( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
+	{
+		return
+			glm::angleAxis( DegreesToRadians( InEulerAngleZ ), Vector( 0.f, 0.f, 1.f ) ) *
+			glm::angleAxis( DegreesToRadians( InEulerAngleX ), Vector( 1.f, 0.f, 0.f ) ) *
+			glm::angleAxis( DegreesToRadians( InEulerAngleY ), Vector( 0.f, 1.f, 0.f ) );
 	}
 
 	/**
@@ -92,6 +108,17 @@ struct SMath
 
 	/**
 	 * @ingroup Core
+	 * Convert from euler angles to quaternion ZXY
+	 *
+	 * @param[in] InEulerAngles Euler angles
+	 */
+	static FORCEINLINE Quaternion AnglesToQuaternionZXY( const Vector& InEulerAngles )
+	{
+		return AnglesToQuaternionZXY( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
+	}
+
+	/**
+	 * @ingroup Core
 	 * Convert from quaternion to euler angles
 	 * 
 	 * @param[in] InQuaternion Quaternion
@@ -99,7 +126,11 @@ struct SMath
 	 */
 	static FORCEINLINE Vector QuaternionToAngles( const Quaternion& InQuaternion )
 	{
-		return glm::eulerAngles( InQuaternion );
+		Vector		result = glm::eulerAngles( InQuaternion );
+		result.x = RadiansToDegrees( result.x );
+		result.y = RadiansToDegrees( result.y );
+		result.z = RadiansToDegrees( result.z );
+		return result;
 	}
 
     /**
@@ -248,6 +279,30 @@ struct SMath
 	{
 		Matrix		result;
 		InverseMatrix( InMatrix, result );
+		return result;
+	}
+
+	/**
+	 * @brief Inverse quaternion
+	 *
+	 * @param InQuaternion		Input quaternion
+	 * @param OutQuaternion		Output quaternion
+	 */
+	static FORCEINLINE void InverseQuaternion( const Quaternion& InQuaternion, Quaternion& OutQuaternion )
+	{
+		OutQuaternion = glm::inverse( InQuaternion );
+	}
+
+	/**
+	 * @brief Inverse quaternion
+	 *
+	 * @param InQuaternion		Input quaternion
+	 * @return Return inverted quaternion
+	 */
+	static FORCEINLINE Quaternion InverseQuaternion( const Quaternion& InQuaternion )
+	{
+		Quaternion		result;
+		InverseQuaternion( InQuaternion, result );
 		return result;
 	}
 
@@ -493,7 +548,6 @@ struct SMath
 	static const Vector				vectorOne;			/**< One 3D vector */
 	static const Quaternion			quaternionZero;		/**< Quaternion zero */
 	static const Matrix				matrixIdentity;		/**< Identity matrix */
-	static const class CRotator		rotatorZero;		/**< A rotator of zero degrees on each axis */
 	static const struct CTransform	transformZero;		/**< Transform zero */
 	static const Vector				vectorForward;		/**< Forward vector */
 	static const Vector				vectorRight;		/**< Right vector */

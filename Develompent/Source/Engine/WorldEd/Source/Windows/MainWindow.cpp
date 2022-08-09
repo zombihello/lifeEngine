@@ -2,6 +2,7 @@
 #include <QKeyEvent>
 #include <qlabel.h>
 #include <qdebug.h>
+#include <qfiledialog.h>
 
 #include "ui_MainWindow.h"
 #include "Windows/MainWindow.h"
@@ -12,6 +13,7 @@
 #include "System/EditorEngine.h"
 #include "System/InputKeyConv.h"
 #include "System/WindowEvent.h"
+#include "System/World.h"
 #include "Render/EditorLevelViewportClient.h"
 #include "EngineLoop.h"
 #include "WorldEd.h"
@@ -31,10 +33,14 @@ WeMainWindow::WeMainWindow( QWidget* InParent /* = nullptr */ )
 	, logWidget( nullptr )
 	, contentBrowserWidget( nullptr )
 	, actorClassesWidget( nullptr )
+	, editorLoadedMapDelegate( nullptr )
 {
 	// Init Qt UI
 	ui->setupUi( this );
 	InitUI();
+
+	// Bind to event when editor map loaded
+	editorLoadedMapDelegate = SEditorDelegates::onEditorLoadedMap.Add( std::bind( &WeMainWindow::OnEditorMapLoaded, this ) );
 
 	// Start timer for tick engine
 	connect( &timerTick, &QTimer::timeout, this, &WeMainWindow::OnTickLE );
@@ -43,9 +49,6 @@ WeMainWindow::WeMainWindow( QWidget* InParent /* = nullptr */ )
 
 void WeMainWindow::InitUI()
 {
-	// Update window title
-	setWindowTitle( QString::fromStdWString( GEditorEngine->GetEditorName() ) );
-
 	// Create the dock manager. Because the parent parameter is a QMainWindow
 	// the dock manager registers itself as the central widget
 	dockManager = new ads::CDockManager( this );
@@ -133,10 +136,21 @@ void WeMainWindow::InitUI()
 	{
 		dockManager->restoreState( cachedState );
 	}
+
+	OnEditorMapLoaded();
+}
+
+void WeMainWindow::OnEditorMapLoaded()
+{
+	// Update window title
+	std::wstring		worldName = GWorld->GetName();
+	setWindowTitle( QString::fromStdWString( worldName + TEXT( " - " ) + GEditorEngine->GetEditorName() ) );
 }
 
 WeMainWindow::~WeMainWindow()
 {
+	SEditorDelegates::onEditorLoadedMap.Remove( editorLoadedMapDelegate );
+
 	delete ui;
 	delete logWidget;
 	delete dockManager;
@@ -289,6 +303,65 @@ void WeMainWindow::on_actionToolScale_triggered()
 	ui->actionToolScale->setChecked( true );
 	GEditorEngine->SetEditorMode( EM_Scale );
 
+}
+
+void WeMainWindow::on_actionNewLevel_triggered()
+{
+	if ( GWorld->IsDirty() )
+	{
+		int		resultButton = QMessageBox::warning( this, "Warning",  "Map not saved, all changes will be lost.<br>Are you sure you want to close the level?", QMessageBox::Cancel, QMessageBox::Ok );
+		if ( resultButton != QMessageBox::Ok )
+		{
+			return;
+		}
+	}
+
+	GWorld->CleanupWorld();
+}
+
+void WeMainWindow::on_actionOpen_triggered()
+{
+	QString		path = QFileDialog::getOpenFileName( this, "Open Map", QString::fromStdWString( appGameDir() ) );
+	if ( path.isEmpty() )
+	{
+		return;
+	}
+
+	std::wstring		errorMsg;
+	if ( !GEditorEngine->LoadMap( appQtAbsolutePathToEngine( path ), errorMsg ) )
+	{
+		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed open map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
+	}
+}
+
+void WeMainWindow::on_actionSave_triggered()
+{
+	if ( GWorld->GetFilePath().empty() )
+	{
+		on_actionSave_as_triggered();
+		return;
+	}
+
+	std::wstring		errorMsg;
+	if ( !GEditorEngine->SaveMap( GWorld->GetFilePath(), errorMsg ) )
+	{
+		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed saving map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
+	}
+}
+
+void WeMainWindow::on_actionSave_as_triggered()
+{
+	QString		path = QFileDialog::getSaveFileName( this, "Save As Map", QString::fromStdWString( appGameDir() ) );
+	if ( path.isEmpty() )
+	{
+		return;
+	}
+
+	std::wstring		errorMsg;
+	if ( !GEditorEngine->SaveMap( appQtAbsolutePathToEngine( path ), errorMsg) )
+	{
+		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed saving map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
+	}
 }
 
 void WeMainWindow::On_PerspectiveDockWidget_VisibilityChanged( bool InVisible )

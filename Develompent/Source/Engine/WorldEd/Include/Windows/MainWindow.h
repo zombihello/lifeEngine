@@ -15,6 +15,7 @@
 
 #include "Render/Viewport.h"
 #include "Core.h"
+#include "WorldEd.h"
 
 namespace Ui
 {
@@ -190,6 +191,10 @@ private slots:
 	void on_actionToolTranslate_triggered();
 	void on_actionToolRotate_triggered();
 	void on_actionToolScale_triggered();
+	void on_actionNewLevel_triggered();
+	void on_actionOpen_triggered();
+	void on_actionSave_triggered();
+	void on_actionSave_as_triggered();
 	void On_PerspectiveDockWidget_VisibilityChanged( bool InVisible );
 	void On_OrthoXYDockWidget_VisibilityChanged( bool InVisible );
 	void On_OrthoXZDockWidget_VisibilityChanged( bool InVisible );
@@ -201,14 +206,20 @@ private:
 	 */
 	void InitUI();
 
-	Ui::MainWindow*					ui;								/**< Qt UI */
-	QTimer							timerTick;						/**< Timer for tick engine */
-	QPoint							mousePosition;					/**< Mouse position */
-	ads::CDockManager*				dockManager;					/**< Dock manager */
-	class WeLogWidget*				logWidget;						/**< Log widget */
-	class WeLevelViewportWidget*	viewportWidgets[ LVT_Max ];		/**< Array of widget viewports */
-	class WeContentBrowserWidget*	contentBrowserWidget;			/**< Content browser widget */
-	class WeActorClassesWidget*		actorClassesWidget;				/**< Actor classes widget */
+	/**
+	 * Event called when editor map loaded
+	 */
+	void OnEditorMapLoaded();
+
+	Ui::MainWindow*											ui;								/**< Qt UI */
+	QTimer													timerTick;						/**< Timer for tick engine */
+	QPoint													mousePosition;					/**< Mouse position */
+	ads::CDockManager*										dockManager;					/**< Dock manager */
+	class WeLogWidget*										logWidget;						/**< Log widget */
+	class WeLevelViewportWidget*							viewportWidgets[ LVT_Max ];		/**< Array of widget viewports */
+	class WeContentBrowserWidget*							contentBrowserWidget;			/**< Content browser widget */
+	class WeActorClassesWidget*								actorClassesWidget;				/**< Actor classes widget */
+	SEditorDelegates::COnEditorLoadedMap::DelegateType_t*	editorLoadedMapDelegate;		/**< Delegate of editor loaded map */
 };
 
 #endif // MAINWINDOW_H

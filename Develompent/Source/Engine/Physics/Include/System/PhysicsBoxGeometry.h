@@ -10,7 +10,6 @@
 #define PHYSICSSBOXGEOMETRY_H
 
 #include "Math/Math.h"
-#include "Math/Rotator.h"
 #include "System/PhysicsShapeGeometry.h"
 
 /**
@@ -26,7 +25,7 @@ public:
 	FORCEINLINE SPhysicsBoxGeometry()
 		: SPhysicsShapeGeometry( CS_Box )
 		, location( SMath::vectorZero )
-		, rotation( SMath::rotatorZero )
+		, rotation( SMath::quaternionZero )
 		, extent( SMath::vectorZero )
 	{}
 
@@ -37,7 +36,7 @@ public:
 	FORCEINLINE SPhysicsBoxGeometry( float InSize )
 		: SPhysicsShapeGeometry( CS_Box )
 		, location( SMath::vectorZero )
-		, rotation( SMath::rotatorZero )
+		, rotation( SMath::quaternionZero )
 		, extent( InSize, InSize, InSize )
 	{}
 
@@ -51,7 +50,7 @@ public:
 	FORCEINLINE SPhysicsBoxGeometry( float InSizeX, float InSizeY, float InSizeZ )
 		: SPhysicsShapeGeometry( CS_Box )
 		, location( SMath::vectorZero )
-		, rotation( SMath::rotatorZero )
+		, rotation( SMath::quaternionZero )
 		, extent( InSizeX, InSizeY, InSizeZ )
 	{}
 
@@ -95,7 +94,7 @@ public:
 	}
 
 	Vector			location;	/**< Position of the box's origin */
-	CRotator		rotation;	/**< Rotation of the box */
+	Quaternion		rotation;	/**< Rotation of the box */
 	Vector			extent;		/**< Extent of the box */
 
 protected:

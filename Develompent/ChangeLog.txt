@@ -46,6 +46,10 @@
 	- Implemented in WorldEd texture and material editor
 	- Added possibility of reload packages
 	- Implemented full screen movie player with using codec Theora
+	- Implemented in WorldEd adding actor on scene
+	- Implemented in WorldEd base tools: move, rotate and scale actors
+	- Implemented content browser and package browser in WorldEd
+	- Implemented save map in WorldEd and load in game
 	
 ----------------------------------------------------------------
  Version 0.2.0 :: 13.11.2021

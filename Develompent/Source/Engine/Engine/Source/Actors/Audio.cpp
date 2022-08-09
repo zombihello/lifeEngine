@@ -104,7 +104,7 @@ std::wstring AAudio::GetActorIcon() const
 	return TEXT( "Engine/Editor/Icons/Asset_Audio.png" );
 }
 
-ActorRef_t AAudio::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const CRotator& InRotation )
+ActorRef_t AAudio::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation )
 {
 	// If asset is not valid or not audio bank asset, we do nothing
 	if ( !InAsset || InAsset->GetType() != AT_AudioBank )

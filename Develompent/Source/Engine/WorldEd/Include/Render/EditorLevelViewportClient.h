@@ -9,7 +9,6 @@
 #ifndef EDITORLEVELVIEWPORTCLIENT_H
 #define EDITORLEVELVIEWPORTCLIENT_H
 
-#include "Math/Rotator.h"
 #include "Render/Viewport.h"
 #include "Render/Scene.h"
 #include "Render/EditorCommonDrawHelper.h"
@@ -213,7 +212,7 @@ protected:
 	 * @param OutScale			Output delta of scale
 	 * @param InSceneView		Scene view. This parameter using only for perspective viewport type
 	 */
-	void ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, CRotator& OutRotation, Vector& OutScale, class CSceneView* InSceneView = nullptr );
+	void ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, Quaternion& OutRotation, Vector& OutScale, class CSceneView* InSceneView = nullptr );
 
 	bool						bSetListenerPosition;	/**< Is need sets the listener position */
 	EMouseTracking				trackingType;			/**< Mouse tacking type */
@@ -221,7 +220,8 @@ protected:
 	bool						bAllowContextMenu;		/**< Is allow open context menu when pressed right mouse button */
 	ELevelViewportType			viewportType;			/**< Viewport type */	
 	Vector						viewLocation;			/**< Viewport location */	
-	CRotator					viewRotation;			/**< Viewport orientation. Valid only for perspective projections */
+	Vector						viewRotationEuler;		/**< Viewport orientation in euler angles. Valid only for perspective projections */
+	Quaternion					viewRotationQuat;		/**< Viewport orientation in quaternion. Valid only for perspective projections */
 	float						viewFOV;				/**< Viewport horizontal field of view */
 	float						orthoZoom;				/**< Zoom in ortho viewport type */
 	float						cameraSpeed;			/**< Camera speed (only for perspective projections) */

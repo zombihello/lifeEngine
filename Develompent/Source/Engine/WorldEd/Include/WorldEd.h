@@ -140,12 +140,18 @@ struct SEditorDelegates
 	 */
 	DECLARE_MULTICAST_DELEGATE( COnEditorModeChanged, EEditorMode /*InEditorMode*/ );
 
+	/**
+	 * @brief Delegate for called event when loaded map
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnEditorLoadedMap );
+
 	static COnAssetsCanDelete		onAssetsCanDelete;		/**< Called when one or more assets try delete */
 	static COnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
 	static COnAssetsReloaded		onAssetsReloaded;		/**< Called when one or more assets is reloaded */
 	static COnActorsSpawned			onActorsSpawned;		/**< Called when actors spawned */
 	static COnActorsDestroyed		onActorsDestroyed;		/**< Called when actors destroyed */
 	static COnEditorModeChanged		onEditorModeChanged;	/**< Called when editor mode is changed */
+	static COnEditorLoadedMap		onEditorLoadedMap;		/**< Called when editor loaded map */
 };
 
 #endif // !WORLDED_H

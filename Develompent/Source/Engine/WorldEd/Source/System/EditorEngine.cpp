@@ -6,6 +6,7 @@
 #include "EngineDefines.h"
 #include "Misc/Class.h"
 #include "Misc/Misc.h"
+#include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/WorldEdGlobals.h"
 #include "System/World.h"
@@ -15,6 +16,7 @@
 #include "System/ActorFactory.h"
 #include "System/Package.h"
 #include "System/SplashScreen.h"
+#include "System/Archive.h"
 #include "Widgets/LogWidget.h"
 
 // Actors
@@ -110,6 +112,24 @@ bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 	{
 		LE_LOG( LT_Warning, LC_General, TEXT( "Failed loading map '%s'. Error: %s" ), InMap.c_str(), OutError.c_str() );
 	}
+
+	SEditorDelegates::onEditorLoadedMap.Broadcast();
+	return true;
+}
+
+bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
+{
+	CArchive*	arWorld = GFileSystem->CreateFileWriter( InMap );
+	if ( !arWorld )
+	{
+		OutError = TEXT( "Failed open archive" );
+		return false;
+	}
+
+	arWorld->SetType( AT_World );
+	arWorld->SerializeHeader();
+	GWorld->Serialize( *arWorld );
+	delete arWorld;
 
 	return true;
 }

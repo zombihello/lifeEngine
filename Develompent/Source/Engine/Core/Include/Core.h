@@ -247,6 +247,18 @@ extern bool            appGetProcReturnCode( void* InProcHandle, int32* OutRetur
     * @param[in] Expr Checkable condition
     * @param[in] Msg Message
     *
+    * Example usage: @code checkf( Value == 0, TEXT( "Value = %i" ), Value ) @endcode
+    */
+    #define checkf( Expr, Msg, ... )		{ if ( !( Expr ) ) { appFailAssert( #Expr, __FILE__, __LINE__, Msg, __VA_ARGS__ ); } }
+
+    /**
+    * @ingroup Core
+    * @brief Macro for checking the condition and in case of failure, display your message
+    * @warning With enabled define DO_CHECK this macro is empty
+    *
+    * @param[in] Expr Checkable condition
+    * @param[in] Msg Message
+    *
     * Example usage: @code checkMsg( Value == 0, TEXT( "Value = %i" ), Value ) @endcode
     */
     #define checkMsg( Expr, Msg, ... )		{ if ( !( Expr ) ) { appFailAssert( #Expr, __FILE__, __LINE__, Msg, __VA_ARGS__ ); } }
@@ -318,6 +330,7 @@ extern bool            appGetProcReturnCode( void* InProcHandle, int32* OutRetur
                                                 s_beenHere##__LINE__ = true; }
 #else
     #define checkCode( Code )		        {}
+    #define checkf( Expr, Msg, ... )        {}
     #define checkMsg( Expr, Msg, ... )		{}
     #define checkFunc( Expr, Func )	        {}
     #define verify( Expr )			        {}

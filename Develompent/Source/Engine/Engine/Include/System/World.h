@@ -9,6 +9,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include <string>
 #include <vector>
 
 #include "Math/Math.h"
@@ -71,7 +72,7 @@ public:
 	 * @param[in] InLocation Location actor on spawn
 	 * @param[in] InRotation Rotation actor on spawn
 	 */
-	ActorRef_t SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation = SMath::rotatorZero );
+	ActorRef_t SpawnActor( class CClass* InClass, const Vector& InLocation, const Quaternion& InRotation = SMath::quaternionZero );
 
 	/**
 	 * Destroy actor in world
@@ -89,7 +90,7 @@ public:
 	 * @param[in] InRotation Rotation actor on spawn
 	 */
 	template< typename TClass >
-	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const Vector& InLocation, const CRotator& InRotation = SMath::rotatorZero )
+	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const Vector& InLocation, const Quaternion& InRotation = SMath::quaternionZero )
 	{
 		return SpawnActor( TClass::StaticClass(), InLocation, InRotation );
 	}
@@ -174,6 +175,41 @@ public:
 	{
 		return selectedActors;
 	}
+
+	/**
+	 * @brief Get name
+	 * @return Return name of world
+	 */
+	FORCEINLINE const std::wstring& GetName() const
+	{
+		return name;
+	}
+
+	/**
+	 * @brief Get path to file
+	 * @return Return path to file with world. If not serialized returning empty string
+	 */
+	FORCEINLINE const std::wstring& GetFilePath() const
+	{
+		return filePath;
+	}
+
+	/**
+	 * @brief Mark dirty world
+	 */
+	FORCEINLINE void MarkDirty()
+	{
+		bDirty = true;
+	}
+
+	/**
+	 * @brief Is dirty world
+	 * @return Return TRUE if world is dirty, else returning FALSE
+	 */
+	FORCEINLINE bool IsDirty() const
+	{
+		return bDirty;
+	}
 #endif // WITH_EDITOR
 
 private:
@@ -191,7 +227,10 @@ private:
 	std::vector<ActorRef_t>		actorsToDestroy;	/**< Array actors which need destroy after tick */
 
 #if WITH_EDITOR
+	bool						bDirty;				/**< Is world dirty and need save */
 	std::vector<ActorRef_t>		selectedActors;		/**< Array of selected actors */
+	std::wstring				name;				/**< World name */
+	std::wstring				filePath;			/**< Path to serialized world on HDD */
 #endif // WITH_EDITOR
 };
 
