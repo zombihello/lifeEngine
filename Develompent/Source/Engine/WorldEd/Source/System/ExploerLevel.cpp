@@ -9,8 +9,10 @@
 #include <qdrag.h>
 #include <qscrollbar.h>
 
+#include "Misc/EngineGlobals.h"
 #include "Misc/SharedPointer.h"
 #include "System/ExploerLevel.h"
+#include "System/World.h"
 
 void WeExploerLevel::WeStyle::drawPrimitive( PrimitiveElement Element, const QStyleOption* Option, QPainter* Painter, const QWidget* Widget ) const
 {
@@ -57,6 +59,9 @@ WeExploerLevel::WeExploerLevel( QWidget* parent )
 
 	style = new WeStyle();
 	setStyle( style );
+
+	// Connection to slots
+	connect( this, SIGNAL( clicked( QModelIndex ) ), this, SLOT( OnClicked( QModelIndex ) ) );
 }
 
 WeExploerLevel::~WeExploerLevel()
@@ -67,7 +72,10 @@ WeExploerLevel::~WeExploerLevel()
 void WeExploerLevel::mousePressEvent( QMouseEvent* Event )
 {
 	if ( !indexAt( Event->pos() ).isValid() )
+	{
 		setCurrentIndex( QModelIndex() );
+		GWorld->UnselectAllActors();
+	}
 	//else
 	//	resizeColumnToContents( 0 );
 
@@ -113,4 +121,19 @@ void WeExploerLevel::dropEvent( QDropEvent * Event )
 	}
 
 	viewport()->update();*/
+}
+
+void WeExploerLevel::OnClicked( QModelIndex InIndex )
+{
+	if ( !InIndex.isValid() )
+	{
+		return;
+	}
+
+	if ( selectionModel()->selectedRows().size() <= 1 )
+	{
+		GWorld->UnselectAllActors();
+	}
+
+	GWorld->SelectActor( GWorld->GetActor( InIndex.row() ) );
 }

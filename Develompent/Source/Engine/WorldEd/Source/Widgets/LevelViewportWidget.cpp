@@ -19,6 +19,8 @@
 
 WeLevelViewportWidget::WeLevelViewportWidget( QWidget* InParent /*= nullptr*/, CEditorLevelViewportClient* InViewportClient /*= nullptr*/, bool InDeleteViewportClient /*= false*/ )
 	: WeViewportWidget( InParent, InViewportClient, InDeleteViewportClient )
+	, actorsSelectedDelegate( nullptr )
+	, actorsUnselectedDelegate( nullptr )
 {
 	setContextMenuPolicy( Qt::CustomContextMenu );
 	gizmo.Init();
@@ -36,6 +38,9 @@ WeLevelViewportWidget::WeLevelViewportWidget( QWidget* InParent /*= nullptr*/, C
 #if ENABLE_HITPROXY
 	connect( &timerRenderHitProxyGizmo, &QTimer::timeout, this, &WeLevelViewportWidget::OnRenderHitProxyGizmo );
 #endif // ENABLE_HITPROXY
+
+	actorsSelectedDelegate		= SEditorDelegates::onActorsSelected.Add(	std::bind( &WeLevelViewportWidget::OnActorsSelected, this, std::placeholders::_1	) );
+	actorsUnselectedDelegate	= SEditorDelegates::onActorsUnselected.Add( std::bind( &WeLevelViewportWidget::OnActorsUnselected, this, std::placeholders::_1	) );
 }
 
 WeLevelViewportWidget::~WeLevelViewportWidget()
@@ -45,6 +50,16 @@ WeLevelViewportWidget::~WeLevelViewportWidget()
 	if ( viewportClient )
 	{
 		viewportClient->SetGizmo( nullptr );
+	}
+
+	if ( actorsSelectedDelegate )
+	{
+		SEditorDelegates::onActorsSelected.Remove( actorsSelectedDelegate );
+	}
+
+	if ( actorsUnselectedDelegate )
+	{
+		SEditorDelegates::onActorsUnselected.Remove( actorsUnselectedDelegate );
 	}
 }
 
@@ -264,3 +279,9 @@ void WeLevelViewportWidget::OnAssetAdd()
 	// Spawn new actor
 	GActorFactory.Spawn( asset, location );
 }
+
+void WeLevelViewportWidget::OnActorsSelected( const std::vector<ActorRef_t>& InActors )
+{}
+
+void WeLevelViewportWidget::OnActorsUnselected( const std::vector<ActorRef_t>& InActors )
+{}

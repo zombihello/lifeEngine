@@ -15,11 +15,12 @@
  */
 enum EEditorMode
 {
-	EM_None,		/**< Gameplay, editor disabled */
-	EM_Default,		/**< Camera movement, actor placement */
-	EM_Translate,	/**< Translate actors */
-	EM_Rotate,		/**< Rotate actors */
-	EM_Scale,		/**< Scale actors */
+	EM_None,				/**< Gameplay, editor disabled */
+	EM_Default,				/**< Camera movement, actor placement */
+	EM_Translate,			/**< Translate actors */
+	EM_Rotate,				/**< Rotate actors */
+	EM_Scale,				/**< Scale actors */
+	EM_ScaleNonUniform		/**< Non uniform scale actors */
 };
 
 #endif // !EDITORMODES_H

@@ -27,6 +27,7 @@ enum EGizmoType
 	GT_Translate,		/**< Gizmo translate */
 	GT_Rotate,			/**< Gizmo rotate */
 	GT_Scale,			/**< Gizmo scale */
+	GT_ScaleNonUniform,	/**< Gizmo non uniform scale */
 };
 
 /**
@@ -221,6 +222,16 @@ private:
 	void Render_Scale( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene, ELevelViewportType InViewportType );
 
 	/**
+	 * @brief Render scale non uniform gizmo. Must be call in render thread
+	 *
+	 * @param InViewportRHI		Viewport RHI
+	 * @param InSceneView		Scene view
+	 * @param InScene			Scene
+	 * @param InViewportType	Viewport type
+	 */
+	void Render_ScaleNonUniform( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, class CScene* InScene, ELevelViewportType InViewportType );
+
+	/**
 	 * @brief Render axis for translate gizmo
 	 * 
 	 * @param InSceneView		Scene view
@@ -257,13 +268,11 @@ private:
 	CColor														axisColorX;						/**< Axis color X */
 	CColor														axisColorY;						/**< Axis color Y */
 	CColor														axisColorZ;						/**< Axis color Z */
-	CColor														axisColorCenter;				/**< Axis color Center */
 	CColor														currentAxisColor;				/**< Current axis color */
 	uint32														currentAxis;					/**< Current axies (see EAxis) */
 	TAssetHandle<CMaterial>										axisMaterialX;					/**< Axis material X */
 	TAssetHandle<CMaterial>										axisMaterialY;					/**< Axis material Y */
 	TAssetHandle<CMaterial>										axisMaterialZ;					/**< Axis material Z */
-	TAssetHandle<CMaterial>										axisMaterialCenter;				/**< Axis material Center */
 	Vector2D													axisXEnd;						/**< Axis X end in screen coord */
 	Vector2D													axisYEnd;						/**< Axis Y end in screen coord */
 	Vector2D													axisZEnd;						/**< Axis Z end in screen coord */

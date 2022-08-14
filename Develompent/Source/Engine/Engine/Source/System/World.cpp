@@ -278,6 +278,10 @@ void CWorld::SelectActor( ActorRef_t InActor )
 
 	InActor->SetSelected( true );
 	selectedActors.push_back( InActor );
+
+#if WITH_EDITOR
+	SEditorDelegates::onActorsSelected.Broadcast( std::vector<ActorRef_t>{ InActor } );
+#endif // WITH_EDITOR
 }
 
 void CWorld::UnselectActor( ActorRef_t InActor )
@@ -297,6 +301,10 @@ void CWorld::UnselectActor( ActorRef_t InActor )
 			break;
 		}
 	}
+
+#if WITH_EDITOR
+	SEditorDelegates::onActorsUnselected.Broadcast( std::vector<ActorRef_t>{ InActor } );
+#endif // WITH_EDITOR
 }
 
 void CWorld::UnselectAllActors()
@@ -305,6 +313,11 @@ void CWorld::UnselectAllActors()
 	{
 		selectedActors[ index ]->SetSelected( false );
 	}
+
+#if WITH_EDITOR
+	SEditorDelegates::onActorsUnselected.Broadcast( selectedActors );
+#endif // WITH_EDITOR
+
 	selectedActors.clear();
 }
 #endif // WITH_EDITOR

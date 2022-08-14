@@ -14,6 +14,7 @@
 #include "Render/EditorLevelViewportClient.h"
 #include "Widgets/ViewportWidget.h"
 #include "System/Gizmo.h"
+#include "WorldEd.h"
 #include "LEBuild.h"
 
 /**
@@ -97,6 +98,19 @@ private:
 
 	QTimer		timerRenderHitProxyGizmo;		/**< Timer for rendering hit proxy of gizmo */
 #endif // ENABLE_HITPROXY
+
+	/**
+	 * Event called when actors selected
+	 */
+	void OnActorsSelected( const std::vector<ActorRef_t>& InActors );
+
+	/**
+	 * Event called when actors unselected
+	 */
+	void OnActorsUnselected( const std::vector<ActorRef_t>& InActors );
+
+	SEditorDelegates::COnActorsSelected::DelegateType_t*		actorsSelectedDelegate;		/**< Delegate of actors selected */
+	SEditorDelegates::COnActorsUnselected::DelegateType_t*		actorsUnselectedDelegate;	/**< Delegate of actors unselected */
 };
 
 #endif // !LEVELVIEWPORTWIDGET_H

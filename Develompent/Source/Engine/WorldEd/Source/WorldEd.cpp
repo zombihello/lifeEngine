@@ -30,6 +30,8 @@ SEditorDelegates::COnActorsSpawned		SEditorDelegates::onActorsSpawned;
 SEditorDelegates::COnActorsDestroyed	SEditorDelegates::onActorsDestroyed;
 SEditorDelegates::COnEditorModeChanged	SEditorDelegates::onEditorModeChanged;
 SEditorDelegates::COnEditorLoadedMap	SEditorDelegates::onEditorLoadedMap;
+SEditorDelegates::COnActorsSelected		SEditorDelegates::onActorsSelected;
+SEditorDelegates::COnActorsUnselected	SEditorDelegates::onActorsUnselected;
 
 void QtMessageOutput( QtMsgType InType, const QMessageLogContext& InContext, const QString& InMessage )
 {

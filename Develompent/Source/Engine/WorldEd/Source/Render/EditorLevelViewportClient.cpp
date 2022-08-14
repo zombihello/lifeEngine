@@ -496,6 +496,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 					// Scale gizmo
 					case GT_Scale:
+					case GT_ScaleNonUniform:
 						for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
 						{
 							ActorRef_t		actor = selectedActors[ index ];
@@ -662,6 +663,10 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 
 	// Scale gizmo
 	case GT_Scale:
+		OutScale = Vector( 0.005f, 0.005f, 0.005f ) * value;
+		break;
+
+	case GT_ScaleNonUniform:
 		switch ( currentAxis )
 		{
 		case A_X:				OutScale = Vector( 0.005f * value, 0.f, 0.f );																break;
@@ -669,8 +674,7 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 		case A_Z:				OutScale = Vector( 0.f, 0.f, 0.005f * value );																break;
 		case A_X | A_Y:			OutScale = dragDelta.x != 0 ? Vector( 0.005f * value, 0.f, 0.f )	: Vector( 0.f, 0.005f * value, 0.f );	break;
 		case A_X | A_Z:			OutScale = dragDelta.x != 0 ? Vector( 0.005f * value, 0.f, 0.f )	: Vector( 0.f, 0.f, -0.005f * value );	break;
-		case A_Y | A_Z:			OutScale = dragDelta.x != 0 ? Vector( 0.f, 0.f, -0.005f * value )	: Vector( 0.f, 0.005f * value, 0.f );	break;
-		case  A_X | A_Y | A_Z:	OutScale = Vector( 0.005f, 0.005f, 0.005f ) * value;														break;
+		case A_Y | A_Z:			OutScale = dragDelta.x != 0 ? Vector( 0.f, 0.f, -0.005f * value )	: Vector( 0.f, 0.005f * value, 0.f );	break;														break;
 		}
 	}
 }

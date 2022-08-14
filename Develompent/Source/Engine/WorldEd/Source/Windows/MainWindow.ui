@@ -110,6 +110,7 @@
    <addaction name="actionToolTranslate"/>
    <addaction name="actionToolRotate"/>
    <addaction name="actionToolScale"/>
+   <addaction name="actionToolScaleNonUniform"/>
   </widget>
   <action name="actionNewLevel">
    <property name="text">
@@ -231,6 +232,14 @@
    </property>
    <property name="toolTip">
     <string>Scale Mode</string>
+   </property>
+  </action>
+  <action name="actionToolScaleNonUniform">
+   <property name="text">
+    <string>ToolScaleNonUniform</string>
+   </property>
+   <property name="toolTip">
+    <string>Non Uniform Scale Mode</string>
    </property>
   </action>
  </widget>

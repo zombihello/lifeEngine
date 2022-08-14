@@ -191,6 +191,7 @@ private slots:
 	void on_actionToolTranslate_triggered();
 	void on_actionToolRotate_triggered();
 	void on_actionToolScale_triggered();
+	void on_actionToolScaleNonUniform_triggered();
 	void on_actionNewLevel_triggered();
 	void on_actionOpen_triggered();
 	void on_actionSave_triggered();

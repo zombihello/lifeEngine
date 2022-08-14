@@ -122,6 +122,7 @@ void WeMainWindow::InitUI()
 	ui->actionToolTranslate->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_Translate.png" ) ).c_str() ) ) );
 	ui->actionToolRotate->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_Rotate.png" ) ).c_str() ) ) );
 	ui->actionToolScale->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_Scale.png" ) ).c_str() ) ) );
+	ui->actionToolScaleNonUniform->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_ScaleNoUniform.png" ) ).c_str() ) ) );
 
 	// Restore state of dock widgets from cache
 	QFile           file( QString::fromStdWString( ÑString::Format( TEXT( "%s/EditorCache/UICache.dat" ), appGameDir().c_str() ) ) );
@@ -272,6 +273,7 @@ void WeMainWindow::on_actionToolSelect_triggered()
 	ui->actionToolTranslate->setChecked( false );
 	ui->actionToolRotate->setChecked( false );
 	ui->actionToolScale->setChecked( false );
+	ui->actionToolScaleNonUniform->setChecked( false );
 	GEditorEngine->SetEditorMode( EM_Default );
 }
 
@@ -281,6 +283,7 @@ void WeMainWindow::on_actionToolTranslate_triggered()
 	ui->actionToolTranslate->setChecked( true );
 	ui->actionToolRotate->setChecked( false );
 	ui->actionToolScale->setChecked( false );
+	ui->actionToolScaleNonUniform->setChecked( false );
 	GEditorEngine->SetEditorMode( EM_Translate );
 
 }
@@ -291,6 +294,7 @@ void WeMainWindow::on_actionToolRotate_triggered()
 	ui->actionToolTranslate->setChecked( false );
 	ui->actionToolRotate->setChecked( true );
 	ui->actionToolScale->setChecked( false );
+	ui->actionToolScaleNonUniform->setChecked( false );
 	GEditorEngine->SetEditorMode( EM_Rotate );
 
 }
@@ -301,8 +305,19 @@ void WeMainWindow::on_actionToolScale_triggered()
 	ui->actionToolTranslate->setChecked( false );
 	ui->actionToolRotate->setChecked( false );
 	ui->actionToolScale->setChecked( true );
+	ui->actionToolScaleNonUniform->setChecked( false );
 	GEditorEngine->SetEditorMode( EM_Scale );
 
+}
+
+void WeMainWindow::on_actionToolScaleNonUniform_triggered()
+{
+	ui->actionToolSelect->setChecked( false );
+	ui->actionToolTranslate->setChecked( false );
+	ui->actionToolRotate->setChecked( false );
+	ui->actionToolScale->setChecked( false );
+	ui->actionToolScaleNonUniform->setChecked( true );
+	GEditorEngine->SetEditorMode( EM_ScaleNonUniform );
 }
 
 void WeMainWindow::on_actionNewLevel_triggered()
@@ -321,7 +336,7 @@ void WeMainWindow::on_actionNewLevel_triggered()
 
 void WeMainWindow::on_actionOpen_triggered()
 {
-	QString		path = QFileDialog::getOpenFileName( this, "Open Map", QString::fromStdWString( appGameDir() ) );
+	QString		path = QFileDialog::getOpenFileName( this, "Open Map", QString::fromStdWString( appGameDir() ), "lifeEngine Map (*.map)" );
 	if ( path.isEmpty() )
 	{
 		return;
@@ -351,7 +366,7 @@ void WeMainWindow::on_actionSave_triggered()
 
 void WeMainWindow::on_actionSave_as_triggered()
 {
-	QString		path = QFileDialog::getSaveFileName( this, "Save As Map", QString::fromStdWString( appGameDir() ) );
+	QString		path = QFileDialog::getSaveFileName( this, "Save As Map", QString::fromStdWString( appGameDir() ), "lifeEngine Map (*.map)" );
 	if ( path.isEmpty() )
 	{
 		return;

@@ -46,6 +46,12 @@ public:
 	 */
 	virtual ~WeExploerLevel();
 
+private slots:
+	//
+	// Events
+	//
+	void OnClicked( QModelIndex InIndex );
+
 protected:
 	/**
 	 * Event of press mouse

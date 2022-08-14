@@ -145,6 +145,16 @@ struct SEditorDelegates
 	 */
 	DECLARE_MULTICAST_DELEGATE( COnEditorLoadedMap );
 
+	/**
+	 * @brief Delegate for called event when actors selected
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnActorsSelected, const std::vector<ActorRef_t>& /*InActors*/ );
+
+	/**
+	 * @brief Delegate for called event when actors unselected
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnActorsUnselected, const std::vector<ActorRef_t>& /*InActors*/ );
+
 	static COnAssetsCanDelete		onAssetsCanDelete;		/**< Called when one or more assets try delete */
 	static COnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
 	static COnAssetsReloaded		onAssetsReloaded;		/**< Called when one or more assets is reloaded */
@@ -152,6 +162,8 @@ struct SEditorDelegates
 	static COnActorsDestroyed		onActorsDestroyed;		/**< Called when actors destroyed */
 	static COnEditorModeChanged		onEditorModeChanged;	/**< Called when editor mode is changed */
 	static COnEditorLoadedMap		onEditorLoadedMap;		/**< Called when editor loaded map */
+	static COnActorsSelected		onActorsSelected;		/**< Called when actors slected */
+	static COnActorsUnselected		onActorsUnselected;		/**< Called when actors unselected */
 };
 
 #endif // !WORLDED_H
