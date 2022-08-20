@@ -280,7 +280,7 @@ void CWorld::SelectActor( ActorRef_t InActor )
 	selectedActors.push_back( InActor );
 
 #if WITH_EDITOR
-	SEditorDelegates::onActorsSelected.Broadcast( std::vector<ActorRef_t>{ InActor } );
+	SEditorDelegates::onActorsSelected.Broadcast( selectedActors );
 #endif // WITH_EDITOR
 }
 

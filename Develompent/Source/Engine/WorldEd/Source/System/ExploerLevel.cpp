@@ -61,7 +61,7 @@ WeExploerLevel::WeExploerLevel( QWidget* parent )
 	setStyle( style );
 
 	// Connection to slots
-	connect( this, SIGNAL( clicked( QModelIndex ) ), this, SLOT( OnClicked( QModelIndex ) ) );
+	connect( selectionModel(), SIGNAL( selectionChanged( const QItemSelection&, const QItemSelection& ) ), this, SLOT( OnSelectionChanged( const QItemSelection&, const QItemSelection& ) ) );
 }
 
 WeExploerLevel::~WeExploerLevel()
@@ -123,17 +123,13 @@ void WeExploerLevel::dropEvent( QDropEvent * Event )
 	viewport()->update();*/
 }
 
-void WeExploerLevel::OnClicked( QModelIndex InIndex )
+void WeExploerLevel::OnSelectionChanged( const QItemSelection& InSelected, const QItemSelection& InDeselected )
 {
-	if ( !InIndex.isValid() )
+	QModelIndexList		selectedIndexes = selectionModel()->selectedIndexes();
+	GWorld->UnselectAllActors();
+	
+	for ( uint32 index = 0, count = selectedIndexes.size(); index < count; ++index )
 	{
-		return;
+		GWorld->SelectActor( GWorld->GetActor( selectedIndexes.at( index ).row() ) );
 	}
-
-	if ( selectionModel()->selectedRows().size() <= 1 )
-	{
-		GWorld->UnselectAllActors();
-	}
-
-	GWorld->SelectActor( GWorld->GetActor( InIndex.row() ) );
 }

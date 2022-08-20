@@ -50,7 +50,7 @@ private slots:
 	//
 	// Events
 	//
-	void OnClicked( QModelIndex InIndex );
+	void OnSelectionChanged( const QItemSelection& InSelected, const QItemSelection& InDeselected );
 
 protected:
 	/**

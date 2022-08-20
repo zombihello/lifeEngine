@@ -281,7 +281,18 @@ void WeLevelViewportWidget::OnAssetAdd()
 }
 
 void WeLevelViewportWidget::OnActorsSelected( const std::vector<ActorRef_t>& InActors )
-{}
+{
+	Vector		gizmoLocation		= SMath::vectorZero;
+	uint32		numSelectedActors	= InActors.size();
+	for ( uint32 index = 0; index < numSelectedActors; ++index )
+	{
+		gizmoLocation += InActors[index]->GetActorLocation();
+	}
+
+	CGizmo::OnUpdateAllGizmo().Broadcast( numSelectedActors > 0, gizmoLocation / ( float )numSelectedActors );
+}
 
 void WeLevelViewportWidget::OnActorsUnselected( const std::vector<ActorRef_t>& InActors )
-{}
+{
+	CGizmo::OnUpdateAllGizmo().Broadcast( false, SMath::vectorZero );
+}
