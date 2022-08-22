@@ -6,6 +6,7 @@
 
 WeExploerLevelModel::WeExploerLevelModel( QObject* InParent /*= nullptr*/ )
 	: QAbstractItemModel( InParent )
+	, bDirtyMapActorsIndex( true )
 	, numRows( 0 )
 	, actorsSpawnedHandle( nullptr )
 	, actorsDestroyedHandle( nullptr )
@@ -83,11 +84,35 @@ bool WeExploerLevelModel::removeRows( int InRow, int InCount, const QModelIndex&
 	return true;
 }
 
+QModelIndex WeExploerLevelModel::ActorToModelIndex( ActorRef_t InActor ) const
+{
+	// Update map for convert actor to index if need
+	if ( bDirtyMapActorsIndex )
+	{
+		bDirtyMapActorsIndex = false;
+		mapActorsIndex.clear();
+		
+		for ( uint32 index = 0, count = GWorld->GetNumActors(); index < count; ++index )
+		{
+			mapActorsIndex.insert( std::make_pair( GWorld->GetActor( index ), index ) );
+		}
+	}
+
+	auto	itFind = mapActorsIndex.find( InActor );
+	if ( itFind != mapActorsIndex.end() )
+	{
+		return index( itFind->second, 0, QModelIndex() );
+	}
+
+	return QModelIndex();
+}
+
 void WeExploerLevelModel::OnActorsSpawned( const std::vector<ActorRef_t>& InActors )
 {
 	if ( !InActors.empty() )
 	{
-		uint32		numSpawnedActors = InActors.size();
+		bDirtyMapActorsIndex			= true;
+		uint32		numSpawnedActors	= InActors.size();
 		insertRows( numRows, numSpawnedActors, QModelIndex() );
 		numRows += numSpawnedActors;
 	}
@@ -97,7 +122,8 @@ void WeExploerLevelModel::OnActorsDestroyed( const std::vector<ActorRef_t>& InAc
 {
 	if ( !InActors.empty() )
 	{
-		uint32		numDestroyedActors = InActors.size();
+		bDirtyMapActorsIndex				= true;
+		uint32		numDestroyedActors		= InActors.size();
 		removeRows( 0, numDestroyedActors, QModelIndex() );
 		numRows -= numDestroyedActors;
 	}

@@ -17,6 +17,7 @@
 #include "System/Package.h"
 #include "System/SplashScreen.h"
 #include "System/Archive.h"
+#include "System/InputSystem.h"
 #include "Widgets/LogWidget.h"
 
 // Actors
@@ -69,6 +70,9 @@ void CEditorEngine::Tick( float InDeltaSeconds )
 	{
 		viewports[ index ]->Tick( InDeltaSeconds );
 	}
+
+	// Reset input events after engine tick
+	GInputSystem->ResetEvents();
 
 	// Wait while render thread is rendering of the frame
 	FlushRenderingCommands();

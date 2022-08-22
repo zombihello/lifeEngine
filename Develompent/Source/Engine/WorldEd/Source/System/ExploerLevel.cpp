@@ -50,6 +50,9 @@ void WeExploerLevel::WeStyle::drawPrimitive( PrimitiveElement Element, const QSt
 
 WeExploerLevel::WeExploerLevel( QWidget* parent ) 
 	: QListView( parent )
+	, bIgnoreEventSelectionChanged( false )
+	, actorsSelectedDelegate( nullptr )
+	, actorsUnselectedDelegate( nullptr )
 {
 	//setModel( Scene::GetSingleton() );
 	//header()->setSectionResizeMode( 0, QHeaderView::ResizeMode::ResizeToContents );
@@ -62,11 +65,24 @@ WeExploerLevel::WeExploerLevel( QWidget* parent )
 
 	// Connection to slots
 	connect( selectionModel(), SIGNAL( selectionChanged( const QItemSelection&, const QItemSelection& ) ), this, SLOT( OnSelectionChanged( const QItemSelection&, const QItemSelection& ) ) );
+
+	actorsSelectedDelegate		= SEditorDelegates::onActorsSelected.Add(		std::bind( &WeExploerLevel::OnSelectedActors, this, std::placeholders::_1	) );
+	actorsUnselectedDelegate	= SEditorDelegates::onActorsUnselected.Add(		std::bind( &WeExploerLevel::OnUnselectedActors, this, std::placeholders::_1 ) );
 }
 
 WeExploerLevel::~WeExploerLevel()
 {
 	delete style;
+
+	if ( actorsSelectedDelegate )
+	{
+		SEditorDelegates::onActorsSelected.Remove( actorsSelectedDelegate );
+	}
+
+	if ( actorsUnselectedDelegate )
+	{
+		SEditorDelegates::onActorsUnselected.Remove( actorsUnselectedDelegate );
+	}
 }
 
 void WeExploerLevel::mousePressEvent( QMouseEvent* Event )
@@ -82,54 +98,58 @@ void WeExploerLevel::mousePressEvent( QMouseEvent* Event )
 	QListView::mousePressEvent( Event );
 }
 
-void WeExploerLevel::dropEvent( QDropEvent * Event )
+void WeExploerLevel::OnSelectionChanged( const QItemSelection& InSelected, const QItemSelection& InDeselected )
 {
-	QListView::dropEvent( Event );
-
-	/*const QMimeData* mimeData = Event->mimeData();
-
-	if ( !mimeData->hasFormat( "expploerlevel/gameobject" ) )
+	if ( bIgnoreEventSelectionChanged )
 	{
-		Event->ignore();
 		return;
 	}
 
-	QByteArray					data = mimeData->data( "expploerlevel/gameobject" );
-	QDataStream					dataStream( &data, QIODevice::ReadOnly );
-	QModelIndex					targetModelIndex = indexAt( Event->pos() );
-	int							countItems = 0;
-	
-	dataStream.readRawData( ( char* ) &countItems, sizeof( int ) );
-
-	for ( int index = 0; index < countItems; ++index )
-	{
-		QModelIndex				modelIndex;
-		QStandardItem*			item;
-		dataStream.readRawData( ( char* ) &modelIndex, sizeof( QModelIndex ) );
-	
-		if ( !modelIndex.isValid() ) continue;
-		item = gameObjectModel.itemFromIndex( modelIndex );
-
-		if ( targetModelIndex.isValid() )
-		{
-			gameObjectModel.itemFromIndex( targetModelIndex )->appendRow( new QStandardItem( item->icon(), item->text() ) );
-		}
-		else
-		{
-			gameObjectModel.insertRow( gameObjectModel.rowCount(), new QStandardItem( item->icon(), item->text() ) );
-		}
-	}
-
-	viewport()->update();*/
-}
-
-void WeExploerLevel::OnSelectionChanged( const QItemSelection& InSelected, const QItemSelection& InDeselected )
-{
 	QModelIndexList		selectedIndexes = selectionModel()->selectedIndexes();
 	GWorld->UnselectAllActors();
 	
+	std::vector<ActorRef_t>		selectedActors;
 	for ( uint32 index = 0, count = selectedIndexes.size(); index < count; ++index )
 	{
-		GWorld->SelectActor( GWorld->GetActor( selectedIndexes.at( index ).row() ) );
+		selectedActors.push_back( GWorld->GetActor( selectedIndexes.at( index ).row() ) );
+	}
+
+	if ( !selectedActors.empty() )
+	{
+		GWorld->SelectActors( selectedActors );
+	}
+}
+
+void WeExploerLevel::OnSelectedActors( const std::vector<ActorRef_t>& InActors )
+{
+	QItemSelectionModel*		itemSelectionModel = selectionModel();
+	for ( uint32 index = 0, count = InActors.size(); index < count; ++index )
+	{
+		QModelIndex		modelIndex = exploerLevelModel->ActorToModelIndex( InActors[index] );
+		if ( !modelIndex.isValid() )
+		{
+			continue;
+		}
+
+		bIgnoreEventSelectionChanged = true;
+		itemSelectionModel->select( modelIndex, QItemSelectionModel::SelectionFlag::Select );
+		bIgnoreEventSelectionChanged = false;
+	}
+}
+
+void WeExploerLevel::OnUnselectedActors( const std::vector<ActorRef_t>& InActors )
+{
+	QItemSelectionModel*	itemSelectionModel = selectionModel();
+	for ( uint32 index = 0, count = InActors.size(); index < count; ++index )
+	{
+		QModelIndex		modelIndex = exploerLevelModel->ActorToModelIndex( InActors[index] );
+		if ( !modelIndex.isValid() )
+		{
+			continue;
+		}
+
+		bIgnoreEventSelectionChanged = true;
+		itemSelectionModel->select( modelIndex, QItemSelectionModel::SelectionFlag::Deselect );
+		bIgnoreEventSelectionChanged = false;
 	}
 }

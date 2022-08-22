@@ -131,6 +131,18 @@ public:
 	void UnselectActor( ActorRef_t InActor );
 
 	/**
+	 * Select actors
+	 * @param InActors	Array of actors
+	 */
+	void SelectActors( const std::vector<ActorRef_t>& InActors );
+
+	/**
+	 * Unselect actors
+	 * @param InActors	Array of actors
+	 */
+	void UnselectActors( const std::vector<ActorRef_t>& InActors );
+
+	/**
 	 * Unselect all actors
 	 */
 	void UnselectAllActors();

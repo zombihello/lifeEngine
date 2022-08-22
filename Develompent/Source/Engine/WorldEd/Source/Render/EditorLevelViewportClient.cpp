@@ -4,6 +4,7 @@
 #include "Misc/EngineGlobals.h"
 #include "Misc/AudioGlobals.h"
 #include "Misc/WorldEdGlobals.h"
+#include "Misc/LaunchGlobals.h"
 #include "Render/EditorLevelViewportClient.h"
 #include "Render/Scene.h"
 #include "Render/SceneRendering.h"
@@ -17,6 +18,7 @@
 #include "System/World.h"
 #include "System/Gizmo.h"
 #include "Actors/Actor.h"
+#include "EngineLoop.h"
 #include "EngineDefines.h"
 
 /**
@@ -538,6 +540,8 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		}
 		break;
 	}
+
+	GEngineLoop->ProcessEvent( InWindowEvent );
 }
 
 void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, Quaternion& OutRotation, Vector& OutScale, class CSceneView* InSceneView /* = nullptr */ )

@@ -34,13 +34,16 @@ WeLevelViewportWidget::WeLevelViewportWidget( QWidget* InParent /*= nullptr*/, C
 
 	// Connect to slots
 	connect( this, SIGNAL( customContextMenuRequested( const QPoint& ) ), this, SLOT( OnCustomContextMenuRequested( const QPoint& ) ) );
+	connect( &timerTick, &QTimer::timeout, this, &WeLevelViewportWidget::OnTick );
 
 #if ENABLE_HITPROXY
 	connect( &timerRenderHitProxyGizmo, &QTimer::timeout, this, &WeLevelViewportWidget::OnRenderHitProxyGizmo );
 #endif // ENABLE_HITPROXY
 
-	actorsSelectedDelegate		= SEditorDelegates::onActorsSelected.Add(	std::bind( &WeLevelViewportWidget::OnActorsSelected, this, std::placeholders::_1	) );
-	actorsUnselectedDelegate	= SEditorDelegates::onActorsUnselected.Add( std::bind( &WeLevelViewportWidget::OnActorsUnselected, this, std::placeholders::_1	) );
+	actorsSelectedDelegate		= SEditorDelegates::onActorsSelected.Add(	std::bind( &WeLevelViewportWidget::OnUpdateActorSelections, this, std::placeholders::_1	) );
+	actorsUnselectedDelegate	= SEditorDelegates::onActorsUnselected.Add( std::bind( &WeLevelViewportWidget::OnUpdateActorSelections, this, std::placeholders::_1	) );
+
+	timerTick.start( 1.f );
 }
 
 WeLevelViewportWidget::~WeLevelViewportWidget()
@@ -87,9 +90,14 @@ void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 			QPoint		cursorPosition	= mapFromGlobal( cursor().pos() );
 			CHitProxyId	hitProxyId		= viewportClient->GetHitProxyId( cursorPosition.x(), cursorPosition.y() );
 			bool		bGizmoEnable	= false;
+			bool		bControlDown	= GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
 			Vector		gizmoLocation	= SMath::vectorZero;
 
-			GWorld->UnselectAllActors();
+			if ( !bControlDown )
+			{
+				GWorld->UnselectAllActors();
+			}
+
 			if ( hitProxyId.IsValid() )
 			{
 				uint32			index = hitProxyId.GetIndex();
@@ -97,12 +105,18 @@ void WeLevelViewportWidget::mousePressEvent( QMouseEvent* InEvent )
 				bGizmoEnable	= true;
 				gizmoLocation	= actor->GetActorLocation();
 				
-				GWorld->SelectActor( actor );
-				LE_LOG( LT_Log, LC_Editor, TEXT( "(%i;%i) Selected actor '%s'" ), cursorPosition.x(), cursorPosition.y(), actor->GetName() );
+				if ( bControlDown && actor->IsSelected() )
+				{
+					GWorld->UnselectActor( actor );
+					LE_LOG( LT_Log, LC_Editor, TEXT( "(%i;%i) Unselected actor '%s'" ), cursorPosition.x(), cursorPosition.y(), actor->GetName() );
+				}
+				else
+				{
+					GWorld->SelectActor( actor );
+					LE_LOG( LT_Log, LC_Editor, TEXT( "(%i;%i) Selected actor '%s'" ), cursorPosition.x(), cursorPosition.y(), actor->GetName() );
+				}
 			}
 
-			// Update all gizmos
-			CGizmo::OnUpdateAllGizmo().Broadcast( bGizmoEnable, gizmoLocation );
 			UpdateTimerRenderHitProxyGizmo( bGizmoEnable );
 		}
 	}
@@ -280,19 +294,23 @@ void WeLevelViewportWidget::OnAssetAdd()
 	GActorFactory.Spawn( asset, location );
 }
 
-void WeLevelViewportWidget::OnActorsSelected( const std::vector<ActorRef_t>& InActors )
+void WeLevelViewportWidget::OnUpdateActorSelections( const std::vector<ActorRef_t>& InActors )
 {
-	Vector		gizmoLocation		= SMath::vectorZero;
-	uint32		numSelectedActors	= InActors.size();
+	const std::vector<ActorRef_t>&		selectedActors = GWorld->GetSelectedActors();
+	Vector		gizmoLocation			= SMath::vectorZero;
+	uint32		numSelectedActors		= selectedActors.size();
 	for ( uint32 index = 0; index < numSelectedActors; ++index )
 	{
-		gizmoLocation += InActors[index]->GetActorLocation();
+		gizmoLocation += selectedActors[index]->GetActorLocation();
 	}
 
 	CGizmo::OnUpdateAllGizmo().Broadcast( numSelectedActors > 0, gizmoLocation / ( float )numSelectedActors );
 }
 
-void WeLevelViewportWidget::OnActorsUnselected( const std::vector<ActorRef_t>& InActors )
+void WeLevelViewportWidget::OnTick()
 {
-	CGizmo::OnUpdateAllGizmo().Broadcast( false, SMath::vectorZero );
+	if ( GInputSystem->IsKeyUp( BC_KeyEscape ) )
+	{
+		GWorld->UnselectAllActors();
+	}
 }

@@ -9,6 +9,7 @@
 #ifndef EXPLOERLEVELMODEL_H
 #define EXPLOERLEVELMODEL_H
 
+#include <unordered_map>
 #include <qabstractitemmodel.h>
 
 #include "Misc/Types.h"
@@ -67,6 +68,14 @@ public:
 	 */
 	virtual bool removeRows( int InRow, int InCount, const QModelIndex& InParent = QModelIndex() ) override;
 
+	/**
+	 * Convert actor to model index
+	 * 
+	 * @param InActor	Actor
+	 * @return Return model index
+	 */
+	QModelIndex ActorToModelIndex( ActorRef_t InActor ) const;
+
 private:
 	/**
 	 * @brief Event called when actors spawned
@@ -78,9 +87,11 @@ private:
 	 */
 	void OnActorsDestroyed( const std::vector<ActorRef_t>& InActors );
 
-	uint32													numRows;				/**< Number created rows */
-	SEditorDelegates::COnActorsSpawned::DelegateType_t*		actorsSpawnedHandle;	/**< Handle delegate of actors spawned */
-	SEditorDelegates::COnActorsDestroyed::DelegateType_t*	actorsDestroyedHandle;	/**< Handle delegate of actors destroyed */
+	mutable bool																bDirtyMapActorsIndex;	/**< Is need update map for convert actor to index */
+	uint32																		numRows;				/**< Number created rows */
+	SEditorDelegates::COnActorsSpawned::DelegateType_t*							actorsSpawnedHandle;	/**< Handle delegate of actors spawned */
+	SEditorDelegates::COnActorsDestroyed::DelegateType_t*						actorsDestroyedHandle;	/**< Handle delegate of actors destroyed */
+	mutable std::unordered_map<ActorRef_t, uint32, ActorRef_t::SHashFunction>	mapActorsIndex;			/**< Map for convert actors to index */
 };
 
 #endif // !EXPLOERLEVELMODEL_H

@@ -279,9 +279,7 @@ void CWorld::SelectActor( ActorRef_t InActor )
 	InActor->SetSelected( true );
 	selectedActors.push_back( InActor );
 
-#if WITH_EDITOR
-	SEditorDelegates::onActorsSelected.Broadcast( selectedActors );
-#endif // WITH_EDITOR
+	SEditorDelegates::onActorsSelected.Broadcast( std::vector<ActorRef_t>{ InActor } );
 }
 
 void CWorld::UnselectActor( ActorRef_t InActor )
@@ -302,9 +300,57 @@ void CWorld::UnselectActor( ActorRef_t InActor )
 		}
 	}
 
-#if WITH_EDITOR
 	SEditorDelegates::onActorsUnselected.Broadcast( std::vector<ActorRef_t>{ InActor } );
-#endif // WITH_EDITOR
+}
+
+void CWorld::SelectActors( const std::vector<ActorRef_t>& InActors )
+{
+	bool		bNeedBroadcast = false;
+	for ( uint32 index = 0, count = InActors.size(); index < count; ++index )
+	{
+		ActorRef_t		actor = InActors[index];
+		if ( !actor->IsSelected() )
+		{
+			bNeedBroadcast = true;
+			actor->SetSelected( true );
+			selectedActors.push_back( actor );
+		}
+	}
+
+	if ( bNeedBroadcast )
+	{
+		SEditorDelegates::onActorsSelected.Broadcast( InActors );
+	}
+}
+
+void CWorld::UnselectActors( const std::vector<ActorRef_t>& InActors )
+{
+	std::vector<ActorRef_t>		unselectedActors;
+	for ( uint32 index = 0, count = InActors.size(); index < count; ++index )
+	{
+		ActorRef_t		actor = InActors[index];
+		if ( actor->IsSelected() )
+		{
+			actor->SetSelected( false );
+			unselectedActors.push_back( actor );
+
+			// Remove actor from selected array
+			// FIXME: Maybe need optimize it
+			for ( uint32 indexSelected = 0, countSelected = selectedActors.size(); indexSelected < countSelected; ++indexSelected )
+			{
+				if ( selectedActors[indexSelected] == actor )
+				{
+					selectedActors.erase( selectedActors.begin() + index );
+					break;
+				}
+			}
+		}
+	}
+
+	if ( !unselectedActors.empty() )
+	{
+		SEditorDelegates::onActorsUnselected.Broadcast( unselectedActors );
+	}
 }
 
 void CWorld::UnselectAllActors()
@@ -314,10 +360,8 @@ void CWorld::UnselectAllActors()
 		selectedActors[ index ]->SetSelected( false );
 	}
 
-#if WITH_EDITOR
-	SEditorDelegates::onActorsUnselected.Broadcast( selectedActors );
-#endif // WITH_EDITOR
-
-	selectedActors.clear();
+	std::vector<ActorRef_t>		unselectedActors;
+	std::swap( selectedActors, unselectedActors );
+	SEditorDelegates::onActorsUnselected.Broadcast( unselectedActors );
 }
 #endif // WITH_EDITOR

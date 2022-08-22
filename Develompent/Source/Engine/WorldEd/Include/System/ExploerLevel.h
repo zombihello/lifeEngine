@@ -61,16 +61,24 @@ protected:
 	virtual void mousePressEvent( QMouseEvent* InEvent ) override;
 
 	/**
-	 * Event of drop
-	 * 
-	 * @param InEvent Drop event
+	 * Event called when actors is selected
+	 * @param InActors		Array of actors
 	 */
-	virtual void dropEvent( QDropEvent* InEvent ) override;
+	void OnSelectedActors( const std::vector<ActorRef_t>& InActors );
+
+	/**
+	 * Event called when actors is unselected
+	 * @param InActors		Array of actors
+	 */
+	void OnUnselectedActors( const std::vector<ActorRef_t>& InActors );
 
 private:
-	WeExploerLevelModel*		exploerLevelModel;		/**< Exploer level model */
-	WeStyle*					style;					/**< Custom style */
-	QPoint						dragStartPosition;		/** Drag start position */
+	bool														bIgnoreEventSelectionChanged;	/**< Is need ignore event of selection changed */
+	WeExploerLevelModel*										exploerLevelModel;				/**< Exploer level model */
+	WeStyle*													style;							/**< Custom style */
+	QPoint														dragStartPosition;				/**< Drag start position */
+	SEditorDelegates::COnActorsSelected::DelegateType_t*		actorsSelectedDelegate;			/**< Delegate of actors selected */
+	SEditorDelegates::COnActorsUnselected::DelegateType_t*		actorsUnselectedDelegate;		/**< Delegate of actors unselected */
 };
 
 #endif // !EXPLOERLEVEL_H

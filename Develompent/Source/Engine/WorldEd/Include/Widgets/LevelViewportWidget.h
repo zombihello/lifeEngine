@@ -82,6 +82,7 @@ private slots:
 	void OnCustomContextMenuRequested( const QPoint& InPoint );
 	void OnActorAdd();
 	void OnAssetAdd();
+	void OnTick();
 
 private:
 	QPoint		contextMenuCursorPosition;		/**< Cursor position when opened context menu */
@@ -100,17 +101,13 @@ private:
 #endif // ENABLE_HITPROXY
 
 	/**
-	 * Event called when actors selected
+	 * Event called when actors selected/unselected
 	 */
-	void OnActorsSelected( const std::vector<ActorRef_t>& InActors );
+	void OnUpdateActorSelections( const std::vector<ActorRef_t>& InActors );
 
-	/**
-	 * Event called when actors unselected
-	 */
-	void OnActorsUnselected( const std::vector<ActorRef_t>& InActors );
-
-	SEditorDelegates::COnActorsSelected::DelegateType_t*		actorsSelectedDelegate;		/**< Delegate of actors selected */
-	SEditorDelegates::COnActorsUnselected::DelegateType_t*		actorsUnselectedDelegate;	/**< Delegate of actors unselected */
+	QTimer														timerTick;						/**< Timer for tick logic */
+	SEditorDelegates::COnActorsSelected::DelegateType_t*		actorsSelectedDelegate;			/**< Delegate of actors selected */
+	SEditorDelegates::COnActorsUnselected::DelegateType_t*		actorsUnselectedDelegate;		/**< Delegate of actors unselected */
 };
 
 #endif // !LEVELVIEWPORTWIDGET_H
