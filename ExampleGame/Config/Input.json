@@ -1,0 +1,21 @@
+{
+	"InputSystem.InputSettings": {
+		"Sensitivity": 0.5,
+		"Actions": [
+			{ 
+				"Name": "Exit",
+				"Buttons": [ "ESC" ]
+			},
+			{
+				"Name": "Jump",
+				"Buttons": [ "W" ]
+			}
+		],
+		"Axis": [
+			{
+				"Name": "MoveRight",
+				"Buttons": [ { "Name": "D", "Scale": -1 }, { "Name": "A", "Scale": 1 } ]
+			}
+		]
+	}
+}

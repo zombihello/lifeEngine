@@ -10,14 +10,14 @@ set( ALL_CPP_FILES ${SOURCE_FILES} ${SOURCE_ACTORS_FILES} )
 set( ALL_H_FILES ${INCLUDE_FILES} ${INCLUDE_ACTORS_FILES} )
 
 # Source groups
-source_group( "HeliumGame/Include" FILES ${INCLUDE_FILES} )	
-source_group( "HeliumGame/Include/Actors" FILES ${INCLUDE_ACTORS_FILES} )
-source_group( "HeliumGame/Source" FILES ${SOURCE_FILES} )
-source_group( "HeliumGame/Source/Actors" FILES ${SOURCE_ACTORS_FILES} )
+source_group( "EleotGame/Include" FILES ${INCLUDE_FILES} )	
+source_group( "EleotGame/Include/Actors" FILES ${INCLUDE_ACTORS_FILES} )
+source_group( "EleotGame/Source" FILES ${SOURCE_FILES} )
+source_group( "EleotGame/Source/Actors" FILES ${SOURCE_ACTORS_FILES} )
 
 # Set include dirs and game name
 set( INCLUDE_DIRS ${INCLUDE_DIRS} "${GAME_SOURCE_PATH}/Include" )
-set( GAME_NAME "HeliumGame" )
+set( GAME_NAME "EleotGame" )
 
 # Set all source files
 set( ALL_SOURCE_FILES ${ALL_SOURCE_FILES} ${ALL_CPP_FILES} ${ALL_H_FILES} )

@@ -1,0 +1,14 @@
+{
+	"Game.GameInfo": {
+		"Name": 					"lifeEngine - Example Game",
+		"Splash": 					"Splash.bmp",
+		"EditorStartupMap": 		"ExampleMap.map",
+		"GameDefaultMap": 			"ExampleMap.map",
+		"DefaultPlayerController": 	"AEXPlayerController",
+		"DefaultPlayerCharacter":	"AEXPlayerCharacter"
+	},
+	
+	"Game.FullScreenMovie": {
+		"StartupMovies": [ "BrokenSingularityLogo" ]
+	}
+}

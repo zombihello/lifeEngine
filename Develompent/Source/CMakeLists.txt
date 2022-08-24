@@ -157,7 +157,7 @@ endif()
 set( GAME_SOURCE_PATH "" CACHE PATH "Path to source code of game with <NAME_GAME>.Build.cmake file" )
 if ( NOT GAME_SOURCE_PATH )
 	message( "Value GAME_SOURCE_PATH not setted" )
-	set( GAME_SOURCE_PATH "${PROJECT_SOURCE_DIR}/Games/HeliumGame" )			# Default game
+	set( GAME_SOURCE_PATH "${PROJECT_SOURCE_DIR}/Games/ExampleGame" )			# Default game
 endif()
 
 # Build engine for 2D game

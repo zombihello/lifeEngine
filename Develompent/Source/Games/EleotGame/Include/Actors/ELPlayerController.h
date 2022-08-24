@@ -1,23 +1,23 @@
 /**
  * @file
- * @addtogroup HeliumGame HeliumGame
+ * @addtogroup EleotGame EleotGame
  *
  * Copyright Broken Singularity, All Rights Reserved.
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#ifndef HEPLAYERCONTROLLER_H
-#define HEPLAYERCONTROLLER_H
+#ifndef ELPLAYERCONTROLLER_H
+#define ELPLAYERCONTROLLER_H
 
 #include "Actors/PlayerController.h"
 
  /**
-  * @ingroup HeliumGame
-  * Actor of HeliumGame player controller
+  * @ingroup EleotGame
+  * Actor of EleotGame player controller
   */
-class AHEPlayerController : public APlayerController
+class AELPlayerController : public APlayerController
 {
-	DECLARE_CLASS( AHEPlayerController, APlayerController )
+	DECLARE_CLASS( AELPlayerController, APlayerController )
 
 protected:
 	/**
@@ -48,4 +48,4 @@ private:
 	void StopJump();
 };
 
-#endif // !HEPLAYERCONTROLLER_H
+#endif // !ELPLAYERCONTROLLER_H

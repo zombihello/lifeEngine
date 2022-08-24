@@ -1,0 +1,50 @@
+{
+	"Engine.Engine": {
+		"Class": "CGameEngine",
+		"UseMaxTickRate": false,
+		"MaxTickRate": 900,
+		"DefaultTexture": "Texture2D'EngineTextures:DefaultDiffuse_C",
+		"DefaultMaterial": "Material'EngineMaterials:DefaultMaterial_Mat"
+	},
+	"Engine.SystemSettings": {
+		"WindowWidth": 1280,
+		"WindowHeight": 720
+	},
+	"Audio.Audio": {
+		// Defines a platform-specific volume headroom (in dB) for audio to provide better platform consistency with respect to volume levels.
+		"PlatformHeadroomDB": -6,
+		"GlobalVolume": 1
+	},
+	"Physics.Physics": {
+		"DefaultPhysMaterial": "PhysicsMaterial'EngineMaterials:DefaultPhysMaterial_PM",
+		"CollisionProfiles": [
+			{
+				"Name": "NoCollision",
+				"ObjectType": "WorldStatic",
+				"CollisionResponses": [
+					{ "Name": "WorldStatic", "Value": "Ignore" },
+					{ "Name": "Visibility", "Value": "Ignore" },
+					{ "Name": "Character", "Value": "Ignore" }
+				]
+			},
+			{
+				"Name": "BlockAll",
+				"ObjectType": "WorldStatic",
+				"CollisionResponses": [
+					{ "Name": "WorldStatic", "Value": "Block" },
+					{ "Name": "Visibility", "Value": "Block" },
+					{ "Name": "Character", "Value": "Block" }
+				]
+			},
+			{
+				"Name": "Character",
+				"ObjectType": "Character",
+				"CollisionResponses": [
+					{ "Name": "WorldStatic", "Value": "Block" },
+					{ "Name": "Visibility", "Value": "Block" },
+					{ "Name": "Character", "Value": "Block" }
+				]
+			}
+		]
+	}
+}

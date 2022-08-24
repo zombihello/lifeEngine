@@ -309,8 +309,20 @@ void WeLevelViewportWidget::OnUpdateActorSelections( const std::vector<ActorRef_
 
 void WeLevelViewportWidget::OnTick()
 {
+	// 'Escape' - unselect all actors
 	if ( GInputSystem->IsKeyUp( BC_KeyEscape ) )
 	{
+		GWorld->UnselectAllActors();
+	}
+
+	// 'Delete' - delete selected actors
+	if ( GInputSystem->IsKeyUp( BC_KeyDelete ) )
+	{
+		std::vector<ActorRef_t>		actorsToDelete = GWorld->GetSelectedActors();
+		for ( uint32 index = 0, count = actorsToDelete.size(); index < count; ++index )
+		{
+			GWorld->DestroyActor( actorsToDelete[index] );
+		}
 		GWorld->UnselectAllActors();
 	}
 }

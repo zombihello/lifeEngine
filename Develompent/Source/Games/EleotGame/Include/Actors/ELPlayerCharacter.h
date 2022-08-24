@@ -1,13 +1,13 @@
 /**
  * @file
- * @addtogroup HeliumGame HeliumGame
+ * @addtogroup EleotGame EleotGame
  *
  * Copyright Broken Singularity, All Rights Reserved.
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#ifndef HEPLAYERCHARACTER_H
-#define HEPLAYERCHARACTER_H
+#ifndef ELPLAYERCHARACTER_H
+#define ELPLAYERCHARACTER_H
 
 #include "Actors/Character.h"
 #include "Components/CameraComponent.h"
@@ -15,23 +15,23 @@
 #include "Components/AudioComponent.h"
 
  /**
-  * @ingroup HeliumGame
+  * @ingroup EleotGame
   * Class of player character
   */
-class AHEPlayerCharacter : public ACharacter
+class AELPlayerCharacter : public ACharacter
 {
-	DECLARE_CLASS( AHEPlayerCharacter, ACharacter )
+	DECLARE_CLASS( AELPlayerCharacter, ACharacter )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
-	AHEPlayerCharacter();
+	AELPlayerCharacter();
 
 	/**
 	 * @brief Destructor
 	 */
-	~AHEPlayerCharacter();
+	~AELPlayerCharacter();
 
 	/**
 	 * Overridable native event for when play begins for this actor
@@ -66,4 +66,4 @@ private:
 	TRefCountPtr< CAudioComponent >				audioComponent;					/**< Audio component */
 };
 
-#endif // !HEPLAYERCHARACTER_H
+#endif // !ELPLAYERCHARACTER_H

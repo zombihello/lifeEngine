@@ -1,0 +1,35 @@
+{
+	"Editor.Editor": 
+	{
+		"Splash": 		"EdSplash.bmp",
+		"Class":		"CEditorEngine",
+		"Surfaces": 
+		[
+			{ "Name": "Grass", 		"ID": 1 	},
+			{ "Name": "Concrete",	"ID": 2		}
+		],
+		"DefaultWireframeMaterial": 	"Material'EngineMaterials_Dev:Wireframe_Mat",
+		"AllowShaderDebugDump":			true
+	},
+	
+	"Editor.CookPackages": 
+	{
+		"CookEditorContent":	true,
+		"AlwaysCookDirs":	
+		[ 
+			{ "PackageSufix": "", 					"Path": "Engine/Content" 								},
+			{ "PackageSufix": "Characters", 		"Path": "ExampleGame/Content/Packages/Characters" 		},
+			{ "PackageSufix": "PhysMaterials", 		"Path": "ExampleGame/Content/Packages/PhysMaterials" 	}
+		],
+		"CookDirs": 		
+		[
+			{ "PackageSufix": "", "Path": "ExampleGame/Content/Maps" },
+			{ "PackageSufix": "", "Path": "ExampleGame/Content/Packages" }
+		],
+		"Extensions": 
+		{
+			"Package":		"pak",
+			"Map":			"map"
+		}
+	}
+}

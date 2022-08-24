@@ -238,6 +238,12 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 
 	// Broadcast event of destroy actor
 #if WITH_EDITOR
+	// Unselect actor if him is selected
+	if ( InActor->IsSelected() )
+	{
+		UnselectActor( InActor );
+	}
+
 	std::vector<ActorRef_t>		destroyedActors = { InActor };
 	SEditorDelegates::onActorsDestroyed.Broadcast( destroyedActors );
 	bDirty = true;
@@ -252,7 +258,7 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 		if ( actors[ index ] == InActor )
 		{
 			actors.erase( actors.begin() + index );
-			return;
+			break;
 		}
 	}
 }

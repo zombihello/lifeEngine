@@ -1,4 +1,4 @@
-#include "Actors/HEPlayerCharacter.h"
+#include "Actors/ELPlayerCharacter.h"
 #include "System/World.h"
 #include "System/CameraManager.h"
 #include "System/Package.h"
@@ -6,9 +6,9 @@
 #include "Misc/EngineGlobals.h"
 #include "Logger/LoggerMacros.h"
 
-IMPLEMENT_CLASS( AHEPlayerCharacter )
+IMPLEMENT_CLASS( AELPlayerCharacter )
 
-AHEPlayerCharacter::AHEPlayerCharacter()
+AELPlayerCharacter::AELPlayerCharacter()
 {
 	// Create box component
 	CBoxComponent* boxComponent = CreateComponent< CBoxComponent >( TEXT( "BoxComponent0" ) );
@@ -50,7 +50,7 @@ AHEPlayerCharacter::AHEPlayerCharacter()
 	jumpAudioBanks[ ST_Surface2 ]	= GPackageManager->FindAsset( TEXT( "AudioBank'Characters_Player_Audio:Footsteps_Concrete_Land_01" ), AT_AudioBank );
 }
 
-AHEPlayerCharacter::~AHEPlayerCharacter()
+AELPlayerCharacter::~AELPlayerCharacter()
 {
 	// Deactive player camera if need
 	if ( cameraComponent->IsActive() )
@@ -59,7 +59,7 @@ AHEPlayerCharacter::~AHEPlayerCharacter()
 	}
 }
 
-void AHEPlayerCharacter::BeginPlay()
+void AELPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -67,7 +67,7 @@ void AHEPlayerCharacter::BeginPlay()
 	GCameraManager->SetActiveCamera( cameraComponent );
 }
 
-void AHEPlayerCharacter::Tick( float InDeltaTime )
+void AELPlayerCharacter::Tick( float InDeltaTime )
 {
 	Super::Tick( InDeltaTime );
 
@@ -98,7 +98,7 @@ void AHEPlayerCharacter::Tick( float InDeltaTime )
 	}
 }
 
-void AHEPlayerCharacter::Landed()
+void AELPlayerCharacter::Landed()
 {
 	Super::Landed();
 
@@ -120,7 +120,7 @@ void AHEPlayerCharacter::Landed()
 	}
 }
 
-void AHEPlayerCharacter::Walk( const Vector& InWorldDirection, float InScale )
+void AELPlayerCharacter::Walk( const Vector& InWorldDirection, float InScale )
 {
 	Super::Walk( InWorldDirection, InScale );
 	spriteComponent->SetFlipHorizontal( InScale < 0.f );
