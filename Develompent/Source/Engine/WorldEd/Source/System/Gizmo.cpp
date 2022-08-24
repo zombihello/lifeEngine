@@ -209,8 +209,8 @@ void CGizmo::Render_Translate( ViewportRHIRef_t InViewportRHI, class CSceneView*
 
 	// Figure out axis matrices
 	Matrix		xMatrix = SMath::TranslateMatrix( location );
-	Matrix		yMatrix = SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternion( 0.f, 0.f, 90.f ) );
-	Matrix		zMatrix = SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternion( 0.f, -90.f, 0.f ) );
+	Matrix		yMatrix = SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternionXYZ( 0.f, 0.f, 90.f ) );
+	Matrix		zMatrix = SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternionXYZ( 0.f, -90.f, 0.f ) );
 
 	// Draw axis X
 	if ( bDrawAxisX )
@@ -306,8 +306,8 @@ void CGizmo::Render_Scale( ViewportRHIRef_t InViewportRHI, class CSceneView* InS
 
 	// Figure out axis matrices
 	Matrix		xMatrix = SMath::TranslateMatrix( location );
-	Matrix		yMatrix = SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternion( Vector( 0.f, 0.f, 90.f ) ) );
-	Matrix		zMatrix = SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternion( Vector( 0.f, -90.f, 0.f ) ) );
+	Matrix		yMatrix = SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternionXYZ( Vector( 0.f, 0.f, 90.f ) ) );
+	Matrix		zMatrix = SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternionXYZ( Vector( 0.f, -90.f, 0.f ) ) );
 
 	// Draw axis X
 	if ( bDrawAxisX )
@@ -365,8 +365,8 @@ void CGizmo::Render_ScaleNonUniform( ViewportRHIRef_t InViewportRHI, class CScen
 
 	// Figure out axis matrices
 	Matrix		xMatrix			= SMath::TranslateMatrix( location );
-	Matrix		yMatrix			= SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternion( Vector( 0.f, 0.f, 90.f ) ) );
-	Matrix		zMatrix			= SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternion( Vector( 0.f, -90.f, 0.f ) ) );
+	Matrix		yMatrix			= SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternionXYZ( Vector( 0.f, 0.f, 90.f ) ) );
+	Matrix		zMatrix			= SMath::TranslateMatrix( location ) * SMath::QuaternionToMatrix( SMath::AnglesToQuaternionXYZ( Vector( 0.f, -90.f, 0.f ) ) );
 
 	// Draw axis X
 	if ( bDrawAxisX )

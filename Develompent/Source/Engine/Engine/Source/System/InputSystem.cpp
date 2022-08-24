@@ -37,6 +37,16 @@ void CInputSystem::ProcessEvent( struct SWindowEvent& InWindowEvent )
 		mouseOffset.y += InWindowEvent.events.mouseMove.yDirection;
 		mouseLocation.x = InWindowEvent.events.mouseMove.x;
 		mouseLocation.y = InWindowEvent.events.mouseMove.y;
+
+		if ( mouseOffset.x != 0.f )
+		{
+			buttonEvents[ BC_MouseX ] = BE_Moved;
+		}
+
+		if ( mouseOffset.y != 0.f )
+		{
+			buttonEvents[ BC_MouseY ] = BE_Moved;
+		}
 		break;
 
 	case SWindowEvent::T_MouseWheel:
@@ -52,7 +62,7 @@ void CInputSystem::ResetEvents()
 {
 	for ( uint32 index = 0; index < BC_Count; ++index )
 	{
-		if ( buttonEvents[ index ] == BE_Released || buttonEvents[ index ] == BE_Scrolled )
+		if ( buttonEvents[ index ] == BE_Released || buttonEvents[ index ] == BE_Scrolled || buttonEvents[ index ] == BE_Moved )
 		{
 			buttonEvents[ index ] = BE_None;
 		}

@@ -123,6 +123,13 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 				SCOPED_DRAW_EVENT( EventSimpleElements, DEC_SIMPLEELEMENTS, TEXT( "Simple elements" ) );
 				SDG.simpleElements.Draw( immediateContext, *sceneView );
 			}
+
+			// Draw gizmos
+			if ( showFlags & SHOW_Gizmo && SDG.gizmoDrawList.GetNum() > 0 )
+			{
+				SCOPED_DRAW_EVENT( EventGizmos, DEC_SPRITE, TEXT( "Gizmos" ) );
+				SDG.gizmoDrawList.Draw( immediateContext, *sceneView );
+			}
 #endif // WITH_EDITOR
 
 			// Draw static meshes

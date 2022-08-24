@@ -49,10 +49,11 @@ enum EShowFlag
 	SHOW_Wireframe			= 1 << 2,		/**< Show all geometry in wireframe mode */
 	SHOW_SimpleElements		= 1 << 3,		/**< Show simple elements (only for debug and WorldEd) */
 	SHOW_DynamicElements	= 1 << 4,		/**< Show dynamic elements */
-	SHOW_HitProxy			= 1 << 5,		/**< Show hit proxy elements */
+	SHOW_HitProxy			= 1 << 5,		/**< Show hit proxy elements (only for WorldEd) */
+	SHOW_Gizmo				= 1 << 6,		/**< Show gizmo elements (only for WorldEd) */
 
-	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements,					/**< Default show flags for game */
-	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_HitProxy	/**< Default show flags for editor */
+	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements,								/**< Default show flags for game */
+	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_HitProxy | SHOW_Gizmo	/**< Default show flags for editor */
 };
 
 /**
@@ -688,6 +689,7 @@ struct SSceneDepthGroup
 #if WITH_EDITOR
 		simpleElements.Clear();
 		dynamicMeshBuilders.clear();
+		gizmoDrawList.Clear();
 #endif // WITH_EDITOR
 
 		dynamicMeshElements.Clear();
@@ -718,7 +720,7 @@ struct SSceneDepthGroup
 
 		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0 && dynamicMeshElements.GetNum() <= 0
 #if WITH_EDITOR
-			&& simpleElements.IsEmpty() && dynamicMeshBuilders.empty()
+			&& simpleElements.IsEmpty() && dynamicMeshBuilders.empty() && gizmoDrawList.GetNum() <= 0
 #endif // WITH_EDITOR
 
 #if ENABLE_HITPROXY
@@ -731,6 +733,7 @@ struct SSceneDepthGroup
 #if WITH_EDITOR
 	CBatchedSimpleElements								simpleElements;				/**< Batched simple elements (lines, points, etc) */
 	std::list<SDynamicMeshBuilderElement>				dynamicMeshBuilders;		/**< List of dynamic mesh builders */
+	CMeshDrawList<CStaticMeshDrawPolicy, false>			gizmoDrawList;				/**< Draw list of gizmos */
 #endif // WITH_EDITOR
 
 	CMeshDrawList< CStaticMeshDrawPolicy >				dynamicMeshElements;		/**< Draw list of dynamic meshes */

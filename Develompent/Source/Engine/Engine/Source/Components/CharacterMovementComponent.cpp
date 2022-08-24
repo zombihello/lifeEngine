@@ -82,22 +82,33 @@ bool CCharacterMovementComponent::IsCanWalk( const Vector& InWorldDirection, flo
 
 void CCharacterMovementComponent::Walk( const Vector& InWorldDirection, float InScale )
 {
-	if ( !bodyInstance || !IsCanWalk( InWorldDirection, InScale ) )
+	if ( !bodyInstance )
+	{
+		AActor*		owner = GetOwner();
+		if ( owner )
+		{
+			owner->AddActorLocation( InWorldDirection * InScale );
+		}
+	}
+	else if ( IsCanWalk( InWorldDirection, InScale ) )
+	{
+		float			maxVelocity = !IsFly() ? walkSpeed : walkSpeedInFly;
+		Vector			velocity = bodyInstance->GetLinearVelocity();	
+		velocity.x		= Clamp( velocity.x + InWorldDirection.x * InScale, -maxVelocity, maxVelocity );
+		velocity.z		= Clamp( velocity.z + InWorldDirection.z * InScale, -maxVelocity, maxVelocity );
+	
+		if ( !bJump && bOnGround )
+		{
+			velocity.y	= Clamp( velocity.y + InWorldDirection.y * InScale, -maxVelocity, maxVelocity );
+		}
+
+		bodyInstance->SetLinearVelocity( velocity );	
+	}
+	else
 	{
 		return;
 	}
 
-	float			maxVelocity = !IsFly() ? walkSpeed : walkSpeedInFly;
-	Vector			velocity = bodyInstance->GetLinearVelocity();	
-	velocity.x		= Clamp( velocity.x + InWorldDirection.x * InScale, -maxVelocity, maxVelocity );
-	velocity.z		= Clamp( velocity.z + InWorldDirection.z * InScale, -maxVelocity, maxVelocity );
-	
-	if ( !bJump && bOnGround )
-	{
-		velocity.y	= Clamp( velocity.y + InWorldDirection.y * InScale, -maxVelocity, maxVelocity );
-	}
-
-	bodyInstance->SetLinearVelocity( velocity );
 	bWalk = true;
 }
 

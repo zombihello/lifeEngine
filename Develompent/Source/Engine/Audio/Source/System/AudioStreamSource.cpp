@@ -253,7 +253,7 @@ void CAudioStreamSource::Play()
 	}
 
 	// If sound is streaming and thread state is ASS_Paused - start play sound
-	// If sound is streaming and thread state is ASS_Playing - restart play sound
+	// If sound is streaming and thread state is ASS_Playing - do nothing
 	if ( isStreaming && status == ASS_Paused )
 	{
 		CScopeLock		scopeLock( &csStreamData );
@@ -263,7 +263,7 @@ void CAudioStreamSource::Play()
 	}
 	else if ( isStreaming && status == ASS_Playing )
 	{
-		Stop();
+		return;
 	}
 
 	// Start thread for streaming data

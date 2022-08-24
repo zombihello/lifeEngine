@@ -24,7 +24,7 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	sphereComponent->SetRadius( 40.f );
 	sphereComponent->SetMaterial( InMaterial->GetAssetHandle() );
 	sphereComponent->SetVisibility( true );
-	sphereComponent->SetRelativeRotation( SMath::AnglesToQuaternion( Vector( 90.f, 0.f, 0.f ) ) );
+	sphereComponent->SetRelativeRotation( SMath::AnglesToQuaternionXYZ( Vector( 90.f, 0.f, 0.f ) ) );
 	scene->AddPrimitive( sphereComponent );
 }
 
@@ -37,7 +37,7 @@ CMaterialPreviewViewportClient::~CMaterialPreviewViewportClient()
 void CMaterialPreviewViewportClient::Tick( float InDeltaSeconds )
 {
 	CEditorLevelViewportClient::Tick( InDeltaSeconds );
-	sphereComponent->AddRelativeRotate( SMath::AnglesToQuaternion( Vector( 0.f, 0.f, 10.f * InDeltaSeconds ) ) );
+	sphereComponent->AddRelativeRotate( SMath::AnglesToQuaternionXYZ( Vector( 0.f, 0.f, 10.f * InDeltaSeconds ) ) );
 }
 
 void CMaterialPreviewViewportClient::Draw( CViewport* InViewport )

@@ -294,7 +294,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 
 					// Getting rotation
 					{
-						tmxObject.transform.SetRotation( SMath::AnglesToQuaternion( Vector( 0.f, 0.f, object.getRotation() ) ) );
+						tmxObject.transform.SetRotation( SMath::AnglesToQuaternionXYZ( Vector( 0.f, 0.f, object.getRotation() ) ) );
 					}
 
 					// Getting size

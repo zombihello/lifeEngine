@@ -3,6 +3,9 @@
 ----------------------------------------------------------------	
 	- Added gizmos to WorldEd (icon of audio source, collisions, etc)
 	- Implemented functions of exploer level
+	- Added gizmo render in WorldEd.
+	- Added mouse move event to axis mapping in CInputSystem.
+	- Fixed replay sound on start in startup movies
 
 ----------------------------------------------------------------
  Version 0.3.0 :: 24.08.2022

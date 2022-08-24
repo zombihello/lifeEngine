@@ -8,7 +8,15 @@ IMPLEMENT_CLASS( AAudio )
 
 AAudio::AAudio()
 {
-	audioComponent = CreateComponent< CAudioComponent >( TEXT( "AudioComponent0" ) );
+	audioComponent = CreateComponent<CAudioComponent>( TEXT( "AudioComponent0" ) );
+
+#if WITH_EDITOR
+	gizmoComponent = CreateComponent<CSpriteComponent>( TEXT( "GizmoComponent0" ), true );
+	gizmoComponent->SetGizmo( true );
+	gizmoComponent->SetType( ST_Rotating );
+	gizmoComponent->SetSpriteSize( Vector2D( 64.f, 64.f ) );
+	gizmoComponent->SetMaterial( GPackageManager->FindAsset( TEXT( "Material'EditorMaterials:AAudio_Gizmo_Mat" ), AT_Material ) );
+#endif // WITH_EDITOR
 }
 
 #if WITH_EDITOR

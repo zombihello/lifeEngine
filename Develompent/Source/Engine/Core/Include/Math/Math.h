@@ -65,13 +65,13 @@ struct SMath
 {
 	/**
 	 * @ingroup Core
-	 * Convert from euler angles to quaternion
+	 * Convert from euler angles to quaternion XYZ
 	 * 
 	 * @param[in] InEulerAngleX Euler angle by X
 	 * @param[in] InEulerAngleY Euler angle by Y
 	 * @param[in] InEulerAngleZ Euler angle by Z
 	 */
-	static FORCEINLINE Quaternion AnglesToQuaternion( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
+	static FORCEINLINE Quaternion AnglesToQuaternionXYZ( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
 	{
 		return 
 			glm::angleAxis( DegreesToRadians( InEulerAngleX ), Vector( 1.f, 0.f, 0.f ) )*
@@ -97,13 +97,29 @@ struct SMath
 
 	/**
 	 * @ingroup Core
-	 * Convert from euler angles to quaternion
+	 * Convert from euler angles to quaternion ZYX
+	 *
+	 * @param[in] InEulerAngleX Euler angle by X
+	 * @param[in] InEulerAngleY Euler angle by Y
+	 * @param[in] InEulerAngleZ Euler angle by Z
+	 */
+	static FORCEINLINE Quaternion AnglesToQuaternionZYX( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
+	{
+		return
+			glm::angleAxis( DegreesToRadians( InEulerAngleZ ), Vector( 0.f, 0.f, 1.f ) ) *
+			glm::angleAxis( DegreesToRadians( InEulerAngleY ), Vector( 0.f, 1.f, 0.f ) ) *
+			glm::angleAxis( DegreesToRadians( InEulerAngleX ), Vector( 1.f, 0.f, 0.f ) );
+	}
+
+	/**
+	 * @ingroup Core
+	 * Convert from euler angles to quaternion XYZ
 	 * 
 	 * @param[in] InEulerAngles Euler angles
 	 */
-	static FORCEINLINE Quaternion AnglesToQuaternion( const Vector& InEulerAngles )
+	static FORCEINLINE Quaternion AnglesToQuaternionXYZ( const Vector& InEulerAngles )
 	{
-		return AnglesToQuaternion( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
+		return AnglesToQuaternionXYZ( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
 	}
 
 	/**
@@ -115,6 +131,17 @@ struct SMath
 	static FORCEINLINE Quaternion AnglesToQuaternionZXY( const Vector& InEulerAngles )
 	{
 		return AnglesToQuaternionZXY( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
+	}
+
+	/**
+	 * @ingroup Core
+	 * Convert from euler angles to quaternion ZYX
+	 *
+	 * @param[in] InEulerAngles Euler angles
+	 */
+	static FORCEINLINE Quaternion AnglesToQuaternionZYX( const Vector& InEulerAngles )
+	{
+		return AnglesToQuaternionZYX( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
 	}
 
 	/**

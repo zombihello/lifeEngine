@@ -22,6 +22,7 @@ enum EButtonEvent
 	BE_Pressed,		/**< Pressed button */
 	BE_Released,	/**< Released button */
 	BE_Scrolled,	/**< Button is scrolled */
+	BE_Moved,		/**< Button is moved */
 };
 
 /**
@@ -129,6 +130,22 @@ public:
 	}
 
 	/**
+	 * Is mouse moved
+	 * 
+	 * @param InMouseAxis	Axis of moved mouse
+	 * @return Return TRUE if mouse moved by axis
+	 */
+	FORCEINLINE bool IsMouseMoved( EButtonCode InMouseAxis ) const
+	{
+		if ( InMouseAxis != BC_MouseX || InMouseAxis != BC_MouseY )
+		{
+			return false;
+		}
+
+		return buttonEvents[ InMouseAxis ] == BE_Moved;
+	}
+
+	/**
 	 * Get mouse location on screen
 	 * @return Return mouse location on screen
 	 */
@@ -144,6 +161,38 @@ public:
 	FORCEINLINE Vector2D GetMouseOffset() const
 	{
 		return mouseOffset;
+	}
+
+	/**
+	 * Get mouse offset by axis
+	 * 
+	 * @param InMouseAxis	Axis of moved mouse
+	 * @return Return mouse offset by axis
+	 */
+	FORCEINLINE float GetMouseOffset( EButtonCode InMouseAxis ) const
+	{
+		switch ( InMouseAxis )
+		{
+		case BC_MouseX:		return GetMouseOffset( A_X );
+		case BC_MouseY:		return GetMouseOffset( A_Y );
+		default:			return 0.f;
+		}
+	}
+
+	/**
+	 * Get mouse offset by axis
+	 *
+	 * @param InAxis	Axis
+	 * @return Return mouse offset by axis
+	 */
+	FORCEINLINE float GetMouseOffset( EAxis InAxis ) const
+	{
+		switch ( InAxis )
+		{
+		case A_X:		return mouseOffset.x;
+		case A_Y:		return mouseOffset.y;
+		default:		return 0.f;
+		}
 	}
 
 	/**

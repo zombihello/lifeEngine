@@ -11,6 +11,7 @@
 
 #include "Actors/Actor.h"
 #include "Components/AudioComponent.h"
+#include "Components/SpriteComponent.h"
 
  /**
   * @ingroup Engine
@@ -74,6 +75,10 @@ public:
 
 private:
 	TRefCountPtr< CAudioComponent >			audioComponent;		/**< Audio component */
+
+#if WITH_EDITOR
+	TRefCountPtr<CSpriteComponent>			gizmoComponent;		/**< Gizmo component */
+#endif // WITH_EDITOR
 };
 
 #endif // !AAUDIO_H

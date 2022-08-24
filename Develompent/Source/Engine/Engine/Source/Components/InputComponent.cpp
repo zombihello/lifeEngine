@@ -161,14 +161,24 @@ void CInputComponent::TickComponent( float InDeltaTime )
 		std::unordered_set< float >		triggeredScales;
 		for ( uint32 indexButton = 0, countButtons = it->second.buttons.size(); indexButton < countButtons; ++indexButton )
 		{
-			const SInputAxis::PairAxisButton_t&		pairAxisButton = it->second.buttons[ indexButton ];
-			switch ( GInputSystem->GetButtonEvent( pairAxisButton.first ) )
+			const SInputAxis::PairAxisButton_t&		pairAxisButton	= it->second.buttons[ indexButton ];
+			EButtonEvent							buttonEvent		= GInputSystem->GetButtonEvent( pairAxisButton.first );
+			switch ( buttonEvent )
 			{
 			case BE_Pressed:
 			case BE_Released:
 			case BE_Scrolled:
-				triggeredScales.insert( pairAxisButton.second );
+			case BE_Moved:
+			{
+				float		value = pairAxisButton.second;
+				if ( buttonEvent == BE_Moved )
+				{
+					value *= GInputSystem->GetMouseOffset( pairAxisButton.first ) * GInputSystem->GetMouseSensitivity();
+				}
+
+				triggeredScales.insert( value );
 				break;
+			}
 
 			default:	continue;
 			}

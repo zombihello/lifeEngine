@@ -149,11 +149,13 @@ enum EButtonCode
 	BC_Mouse8,											/**< Mouse button 8 */
 	BC_MouseWheelUp,									/**< Mouse wheel up */
 	BC_MouseWheelDown,									/**< Mouse wheel down */
+	BC_MouseX,											/**< Move mouse by X */
+	BC_MouseY,											/**< Move mouse by Y */
 
 	BC_MouseLeft = BC_Mouse1,							/**< Mouse left button */
 	BC_MouseRight = BC_Mouse2,							/**< Mouse right button */
 	BC_MouseMiddle = BC_Mouse3,							/**< Mouse middle button */
-	BC_MouseLast = BC_MouseWheelDown,					/**< Last mouse button */
+	BC_MouseLast = BC_MouseY,							/**< Last mouse button */
 	BC_MouseCount = BC_MouseLast - BC_MouseFirst + 1,	/**< Count of mouse buttons */
 
 	BC_Last = BC_MouseLast,								/**< Last button code */

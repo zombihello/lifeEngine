@@ -10,7 +10,6 @@
 #define PLAYERCONTROLLER_H
 
 #include "Actors/BaseController.h"
-#include "Actors/Character.h"
 #include "Components/InputComponent.h"
 
 /**
@@ -23,38 +22,26 @@ class APlayerController : public ABaseController
 
 public:
 	/**
-	 * Constructor
+	 * @brief Constructor
 	 */
 	APlayerController();
 
 	/**
-	 * Destructor
+	 * @brief Destructor
 	 */
 	virtual ~APlayerController();
 
 	/**
-	 * Overridable native event for when play begins for this actor
+	 * @brief Overridable native event for when play begins for this actor
 	 */
 	virtual void BeginPlay() override;
 
 	/**
-	 * @brief Set controlled character
-	 * @param InCharacter Character
+	 * @brief Function called every frame on this Actor. Override this function to implement custom logic to be executed every frame.
+	 *
+	 * @param[in] InDeltaTime The time since the last tick.
 	 */
-	FORCEINLINE void SetCharacter( ACharacter* InCharacter )
-	{
-		if ( character )
-		{
-			character->SetController( nullptr );
-		}
-
-		character = InCharacter;
-	
-		if ( character )
-		{
-			character->SetController( this );
-		}
-	}
+	virtual void Tick( float InDeltaTime );
 
 	/**
 	 * @brief Get input component
@@ -66,12 +53,48 @@ public:
 	}
 
 	/**
-	 * @brief Get controlled character
-	 * @return Return controlled character. If not exist return nullptr
+	 * @brief Set show mouse cursor
+	 * @param InShowMouseCursor		Is need show mouse cursor
 	 */
-	FORCEINLINE TRefCountPtr< ACharacter > GetCharacter() const
+	FORCEINLINE void SetShowMouseCursor( bool InShowMouseCursor )
 	{
-		return character;
+		bShowMouseCursor = InShowMouseCursor;
+	}
+
+	/**
+	 * @brief Is show mouse cursor
+	 * @return Return TRUE if mouse cursor need show
+	 */
+	FORCEINLINE bool IsShowMouseCursor() const
+	{
+		return bShowMouseCursor;
+	}
+
+	/**
+	 * @brief Add pitch input
+	 * @param InValue	Value
+	 */
+	FORCEINLINE void AddPitchInput( float InValue )
+	{
+		rotationInput.x += InValue;
+	}
+
+	/**
+	 * @brief Add yaw input
+	 * @param InValue	Value
+	 */
+	FORCEINLINE void AddYawInput( float InValue )
+	{
+		rotationInput.y += InValue;
+	}
+
+	/**
+	 * @brief Add roll input
+	 * @param InValue	Value
+	 */
+	FORCEINLINE void AddRollInput( float InValue )
+	{
+		rotationInput.z += InValue;
 	}
 
 protected:
@@ -80,8 +103,19 @@ protected:
 	 */
 	virtual void SetupInputComponent();
 
-	TRefCountPtr< ACharacter >					character;				/**< Character controlled by this controller */
-	TRefCountPtr< CInputComponent >				inputComponent;			/**< Input component */
+	bool										bShowMouseCursor;		/**< Show mouse cursor */
+	bool										bConstrainYaw;			/**< Is need constrain yaw */
+	Vector										rotationInput;			/**< Rotation input */
+	TRefCountPtr<CInputComponent>				inputComponent;			/**< Input component */
+
+private:
+	/**
+	 * @brief Updates the rotation of player, based on ControlRotation after RotationInput has been applied.
+	 * @param InDeltaTime	The time since the last tick.
+	 */
+	void UpdateRotation( float InDeltaTime );
+
+	Vector										viewRotation;			/**< View rotation in Euler angles */
 };
 
 

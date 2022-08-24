@@ -119,7 +119,9 @@ static const tchar* GButtonName[] =
 	TEXT( "MOUSE7" ),					// BC_Mouse7
 	TEXT( "MOUSE8" ),					// BC_Mouse8
 	TEXT( "MOUSEWHEELUP" ),				// BC_MouseWheelUp
-	TEXT( "MOUSEWHEELDOWN" )			// BC_MouseWheelDown
+	TEXT( "MOUSEWHEELDOWN" ),			// BC_MouseWheelDown
+	TEXT( "MOUSEX" ),					// BC_MouseX
+	TEXT( "MOUSEY" ),					// BC_MouseY				
 };
 
 /**

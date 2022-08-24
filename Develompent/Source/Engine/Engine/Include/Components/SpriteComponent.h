@@ -165,27 +165,59 @@ public:
 		return bFlipHorizontal;
 	}
 
+#if WITH_EDITOR
+	/**
+	 * @brief Set gizmo component
+	 * @param InIsGizmo		Is current component is gizmo?
+	 */
+	FORCEINLINE void SetGizmo( bool InIsGizmo )
+	{
+		bGizmo = InIsGizmo;
+	}
+
+	/**
+	 * @brief Is gizmo component
+	 * @return Return TRUE if component is gizmo
+	 */
+	FORCEINLINE bool IsGizmo() const
+	{
+		return bGizmo;
+	}
+#endif // WITH_EDITOR
+
 private:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef CMeshDrawList< CStaticMeshDrawPolicy >::SDrawingPolicyLink					DrawingPolicyLink_t;
+	typedef CMeshDrawList<CStaticMeshDrawPolicy>::SDrawingPolicyLink					DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
-	typedef CMeshDrawList< CStaticMeshDrawPolicy >::DrawingPolicyLinkRef_t				DrawingPolicyLinkRef_t;
+	typedef CMeshDrawList<CStaticMeshDrawPolicy>::DrawingPolicyLinkRef_t				DrawingPolicyLinkRef_t;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Typedef of gizmo drawing policy link
+	 */
+	typedef CMeshDrawList<CStaticMeshDrawPolicy, false>::SDrawingPolicyLink				GizmoDrawingPolicyLink_t;
+
+	/**
+	 * @brief Typedef of reference on gizmo drawing policy link in scene
+	 */
+	typedef CMeshDrawList<CStaticMeshDrawPolicy, false>::DrawingPolicyLinkRef_t			GizmoDrawingPolicyLinkRef_t;
+#endif // WITH_EDITOR
 
 #if ENABLE_HITPROXY
 	/**
 	 * @brief Typedef of hit proxy drawing policy link
 	 */
-	typedef CMeshDrawList< CHitProxyDrawingPolicy, false >::SDrawingPolicyLink			HitProxyDrawingPolicyLink_t;
+	typedef CMeshDrawList<CHitProxyDrawingPolicy, false>::SDrawingPolicyLink			HitProxyDrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on hit proxy drawing policy link in scene
 	 */
-	typedef CMeshDrawList< CHitProxyDrawingPolicy, false >::DrawingPolicyLinkRef_t		HitProxyDrawingPolicyLinkRef_t;
+	typedef CMeshDrawList<CHitProxyDrawingPolicy, false>::DrawingPolicyLinkRef_t		HitProxyDrawingPolicyLinkRef_t;
 #endif // ENABLE_HITPROXY
 
 	/**
@@ -205,6 +237,11 @@ private:
 	 * @brief Removes a draw policy link from SDGs
 	 */
 	virtual void UnlinkDrawList() override;
+
+#if WITH_EDITOR
+	bool								bGizmo;							/**< This sprite component is gizmo */
+	GizmoDrawingPolicyLinkRef_t			gizmoDrawingPolicyLink;			/**< Reference to gizmo drawing policy link in scene */
+#endif // WITH_EDITOR
 
 	bool								bFlipVertical;					/**< Is need flip sprite by vertical */
 	bool								bFlipHorizontal;				/**< Is need flip sprite by horizontal */

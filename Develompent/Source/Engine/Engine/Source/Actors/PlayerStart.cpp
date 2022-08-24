@@ -10,10 +10,11 @@ IMPLEMENT_CLASS( APlayerStart )
 
 APlayerStart::APlayerStart()
 {
-	rootComponent = CreateComponent< CSceneComponent >( TEXT( "RootComponent0" ) );
+	rootComponent = CreateComponent<CSceneComponent>( TEXT( "RootComponent0" ) );
 
 #if WITH_EDITOR
-	gizmoComponent = CreateComponent< CSpriteComponent >( TEXT( "GizmoComponent0" ), true );
+	gizmoComponent = CreateComponent<CSpriteComponent>( TEXT( "GizmoComponent0" ), true );
+	gizmoComponent->SetGizmo( true );
 	gizmoComponent->SetType( ST_Rotating );
 	gizmoComponent->SetSpriteSize( Vector2D( 64.f, 64.f ) );
 	gizmoComponent->SetMaterial( GPackageManager->FindAsset( TEXT( "Material'EditorMaterials:APlayerStart_Gizmo_Mat" ), AT_Material ) );

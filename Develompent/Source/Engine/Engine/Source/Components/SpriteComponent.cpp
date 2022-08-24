@@ -12,7 +12,12 @@
 IMPLEMENT_CLASS( CSpriteComponent )
 
 CSpriteComponent::CSpriteComponent()
-    : bFlipVertical( false )
+#if WITH_EDITOR
+	: bGizmo( false ),
+#else
+	:
+#endif // WITH_EDITOR
+	  bFlipVertical( false )
 	, bFlipHorizontal( false )
     , type( ST_Rotating )
 	, sprite( new CSprite() )
@@ -88,7 +93,11 @@ void CSpriteComponent::LinkDrawList()
     check( scene );
 
 	// If the primitive already added to scene - remove all draw policy links
-	if ( drawingPolicyLink )
+	if ( drawingPolicyLink
+#if WITH_EDITOR
+		 || gizmoDrawingPolicyLink
+#endif // WITH_EDITOR
+		 )
 	{
 		UnlinkDrawList();
 	}
@@ -109,7 +118,16 @@ void CSpriteComponent::LinkDrawList()
 
 		// Make and add to scene new draw policy link
 		const SMeshBatch*				meshBatchLink = nullptr;
-		drawingPolicyLink				= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.spriteDrawList, DEC_SPRITE );
+#if WITH_EDITOR
+		if ( bGizmo )
+		{
+			gizmoDrawingPolicyLink		= ::MakeDrawingPolicyLink<GizmoDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.gizmoDrawList, DEC_SPRITE );
+		}
+		else
+#endif // WITH_EDITOR
+		{
+			drawingPolicyLink			= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.spriteDrawList, DEC_SPRITE );
+		}
 		meshBatchLinks.push_back( meshBatchLink );
 
 		// Make and add to scene new hit proxy draw policy link
@@ -123,20 +141,28 @@ void CSpriteComponent::LinkDrawList()
 void CSpriteComponent::UnlinkDrawList()
 {
     check( scene );
+	SSceneDepthGroup&		SDGWorld = scene->GetSDG( SDG_World );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( drawingPolicyLink )
-	{
-		SSceneDepthGroup&		SDGWorld = scene->GetSDG( SDG_World );
+	{		
 		SDGWorld.spriteDrawList.RemoveItem( drawingPolicyLink );
+	}
+#if WITH_EDITOR
+	else if ( gizmoDrawingPolicyLink )
+	{
+		SDGWorld.gizmoDrawList.RemoveItem( gizmoDrawingPolicyLink );
+	}
+#endif // WITH_EDITOR
 
 #if ENABLE_HITPROXY
-		SDGWorld.hitProxyLayers[ HPL_World ].hitProxyDrawList.RemoveItem( hitProxyDrawingPolicyLink );
+	if ( hitProxyDrawingPolicyLink )
+	{
+		SDGWorld.hitProxyLayers[HPL_World].hitProxyDrawList.RemoveItem( hitProxyDrawingPolicyLink );
+	}
 #endif // ENABLE_HITPROXY
 
-		drawingPolicyLink = nullptr;
-		meshBatchLinks.clear();
-	}
+	meshBatchLinks.clear();
 }
 
 void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )

@@ -214,7 +214,7 @@ public:
 	 */
 	FORCEINLINE Vector RotateVector( const Vector& InVector ) const
 	{
-		return InVector * rotation;
+		return rotation * InVector;
 	}
 
 	/**

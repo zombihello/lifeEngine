@@ -658,10 +658,10 @@ void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& 
 	case GT_Rotate:
 		switch ( currentAxis )
 		{
-		case A_X:		OutRotation = SMath::AnglesToQuaternion( Vector( value, 0.f, 0.f ) );	break;
-		case A_Y:		OutRotation = SMath::AnglesToQuaternion( Vector( 0.f, value, 0.f ) );	break;
-		case A_Z:		OutRotation = SMath::AnglesToQuaternion( Vector( 0.f, 0.f, value ) );	break;
-		default:		checkMsg( false, TEXT( "Axis not correctly set while rotating!" ) );	break;
+		case A_X:		OutRotation = SMath::AnglesToQuaternionXYZ( Vector( value, 0.f, 0.f ) );	break;
+		case A_Y:		OutRotation = SMath::AnglesToQuaternionXYZ( Vector( 0.f, value, 0.f ) );	break;
+		case A_Z:		OutRotation = SMath::AnglesToQuaternionXYZ( Vector( 0.f, 0.f, value ) );	break;
+		default:		checkMsg( false, TEXT( "Axis not correctly set while rotating!" ) );		break;
 		}
 		break;
 

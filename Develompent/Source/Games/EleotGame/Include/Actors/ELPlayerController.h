@@ -19,6 +19,12 @@ class AELPlayerController : public APlayerController
 {
 	DECLARE_CLASS( AELPlayerController, APlayerController )
 
+public:
+	/**
+	 * @brief Constructor
+	 */
+	AELPlayerController();
+
 protected:
 	/**
 	 * @brief Setup input player
@@ -32,10 +38,28 @@ private:
 	void ExitFromGame();
 
 	/**
+	 * @brief Move forward
+	 * @param InValue Scale of axis
+	 */
+	void MoveForward( float InValue );
+
+	/**
 	 * @brief Move right
 	 * @param InValue Scale of axis
 	 */
 	void MoveRight( float InValue );
+
+	/**
+	 * @brief Turn
+	 * @param InValue Scale of axis
+	 */
+	void Turn( float InValue );
+
+	/**
+	 * @brief Look up
+	 * @param InValue Scale of axis
+	 */
+	void LookUp( float InValue );
 
 	/**
 	 * @brief Jump
