@@ -10,6 +10,7 @@
 #define PLAYERSTART_H
 
 #include "Actors/Actor.h"
+#include "Components/SpriteComponent.h"
 
 /**
  * @ingroup Engine
@@ -41,6 +42,9 @@ public:
 	 * @return Return path to actor icon from appBaseDir()
 	 */
 	virtual std::wstring GetActorIcon() const override;
+
+private:
+	TRefCountPtr<CSpriteComponent>		gizmoComponent;				/**< Gizmo component */
 #endif // WITH_EDITOR
 };
 

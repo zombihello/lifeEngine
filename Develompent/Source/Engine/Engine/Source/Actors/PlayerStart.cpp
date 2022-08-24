@@ -11,6 +11,13 @@ IMPLEMENT_CLASS( APlayerStart )
 APlayerStart::APlayerStart()
 {
 	rootComponent = CreateComponent< CSceneComponent >( TEXT( "RootComponent0" ) );
+
+#if WITH_EDITOR
+	gizmoComponent = CreateComponent< CSpriteComponent >( TEXT( "GizmoComponent0" ), true );
+	gizmoComponent->SetType( ST_Rotating );
+	gizmoComponent->SetSpriteSize( Vector2D( 64.f, 64.f ) );
+	gizmoComponent->SetMaterial( GPackageManager->FindAsset( TEXT( "Material'EditorMaterials:APlayerStart_Gizmo_Mat" ), AT_Material ) );
+#endif // WITH_EDITOR
 }
 
 APlayerStart::~APlayerStart()
@@ -18,6 +25,8 @@ APlayerStart::~APlayerStart()
 
 void APlayerStart::BeginPlay()
 {
+	Super::BeginPlay();
+
 	// Find class of default player controller
 	CConfigValue			configPlayerController = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerController" ) );
 	CClass*					classPlayerController = nullptr;

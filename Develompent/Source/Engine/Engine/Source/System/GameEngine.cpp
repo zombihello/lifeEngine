@@ -66,6 +66,17 @@ void CGameEngine::Shutdown()
 	}
 }
 
+bool CGameEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
+{
+	if ( Super::LoadMap( InMap, OutError ) )
+	{
+		GWorld->BeginPlay();
+		return true;
+	}
+
+	return false;
+}
+
 void CGameEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	Super::ProcessEvent( InWindowEvent );

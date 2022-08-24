@@ -862,9 +862,10 @@ protected:
 	 *
 	 * @param[in] InClass Class component
 	 * @param[in] InName Name component
+	 * @param[in] InEditorOnly Is editor only component
 	 * @return Return pointer to component
 	 */
-	ActorComponentRef_t CreateComponent( CClass* InClass, const tchar* InName );
+	ActorComponentRef_t CreateComponent( CClass* InClass, const tchar* InName, bool InEditorOnly = false );
 
 	/**
 	 * Create component and add to array of owned components
@@ -873,9 +874,9 @@ protected:
 	 * @return Return pointer to component
 	 */
 	template< typename TClass >
-	FORCEINLINE TRefCountPtr< TClass > CreateComponent( const tchar* InName )
+	FORCEINLINE TRefCountPtr< TClass > CreateComponent( const tchar* InName, bool InEditorOnly = false )
 	{
-		CActorComponent*		newComponent = CreateComponent( TClass::StaticClass(), InName );
+		CActorComponent*		newComponent = CreateComponent( TClass::StaticClass(), InName, InEditorOnly );
 		return ( TClass* )newComponent;
 	}
 

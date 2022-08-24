@@ -80,8 +80,32 @@ public:
 		return owner;
 	}
 
+#if WITH_EDITOR
+	/**
+	 * Set editor only
+	 * @param InEditorOnly	Is component only for editor
+	 */
+	FORCEINLINE void SetEditorOnly( bool InEditorOnly )
+	{
+		bEditorOnly = InEditorOnly;
+	}
+
+	/**
+	 * Is editor only
+	 * @return Return TRUE if component only for editor
+	 */
+	FORCEINLINE bool IsEditorOnly() const
+	{
+		return bEditorOnly;
+	}
+#endif // WITH_EDITOR
+
 private:
-	class AActor*			owner;		/**< Actor owner */
+#if WITH_EDITOR
+	bool					bEditorOnly;	/**< Is component only for editor */
+#endif // WITH_EDITOR
+
+	class AActor*			owner;			/**< Actor owner */
 };
 
 #endif // !ACTORCOMPONENT_H

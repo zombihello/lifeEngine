@@ -11,9 +11,9 @@
 #include "Render/StaticMesh.h"
 #include "Commandlets/CookerSyncCommandlet.h"
 
-IMPLEMENT_CLASS( ÑCookerSyncCommandlet )
+IMPLEMENT_CLASS( CCookerSyncCommandlet )
 
-void ÑCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
+void CCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 {
 	std::vector< std::wstring >		files = GFileSystem->FindFiles( InRootDir, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
@@ -42,13 +42,13 @@ void ÑCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 	}
 }
 
-bool ÑCookerSyncCommandlet::Main( const std::wstring& InCommand )
+bool CCookerSyncCommandlet::Main( const std::wstring& InCommand )
 {
 	GTableOfContents.Clear();
 	AddContentEntries( appBaseDir() );
 
 	// Serialize table of contents
-	CArchive*		archiveTOC = GFileSystem->CreateFileWriter( appBaseDir() + PATH_SEPARATOR + GCookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC(), AW_NoFail );
+	CArchive*		archiveTOC = GFileSystem->CreateFileWriter( GCookedDir + CTableOfContets::GetNameTOC(), AW_NoFail );
 	GTableOfContents.Serialize( *archiveTOC );
 	delete archiveTOC;
 

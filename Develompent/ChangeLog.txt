@@ -1,5 +1,11 @@
 ----------------------------------------------------------------
- Version 0.3.0 :: Now
+ Version 0.4.0 :: Now
+----------------------------------------------------------------	
+	- Added gizmos to WorldEd (icon of audio source, collisions, etc)
+	- Implemented functions of exploer level
+
+----------------------------------------------------------------
+ Version 0.3.0 :: 24.08.2022
 ----------------------------------------------------------------
 	- Implemented TOC file (Table Of Content)
 	- Fixed serialize already created FPackage (for rewrite package with adding new assets)

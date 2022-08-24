@@ -111,6 +111,8 @@
    <addaction name="actionToolRotate"/>
    <addaction name="actionToolScale"/>
    <addaction name="actionToolScaleNonUniform"/>
+   <addaction name="separator"/>
+   <addaction name="actionPlay"/>
   </widget>
   <action name="actionNewLevel">
    <property name="text">
@@ -240,6 +242,14 @@
    </property>
    <property name="toolTip">
     <string>Non Uniform Scale Mode</string>
+   </property>
+  </action>
+  <action name="actionPlay">
+   <property name="text">
+    <string>Play</string>
+   </property>
+   <property name="toolTip">
+    <string>Play Game In Standalone</string>
    </property>
   </action>
  </widget>

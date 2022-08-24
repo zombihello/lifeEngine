@@ -4,7 +4,12 @@
 IMPLEMENT_CLASS( CActorComponent )
 
 CActorComponent::CActorComponent() 
-	: owner( nullptr )
+#if WITH_EDITOR
+	: bEditorOnly( false ),
+#else
+	:
+#endif // WITH_EDITOR
+	 owner( nullptr )
 {}
 
 CActorComponent::~CActorComponent()

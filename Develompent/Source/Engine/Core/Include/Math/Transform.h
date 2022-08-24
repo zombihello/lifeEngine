@@ -27,7 +27,7 @@ public:
 	 * Constructor with initialization to the identity transform
 	 */
 	FORCEINLINE CTransform() 
-		: bDirtyMatrix( false )
+		: bDirtyMatrix( true )
 		, translation( SMath::vectorZero )
 		, rotation( SMath::quaternionZero )
 		, scale( SMath::vectorOne )
@@ -40,7 +40,7 @@ public:
 	 * @param[in] InTranslation The value to use for the translation component
 	 */
 	FORCEINLINE explicit CTransform( const Vector& InTranslation ) 
-		: bDirtyMatrix( false )
+		: bDirtyMatrix( true )
 		, translation( InTranslation )
 		, rotation( SMath::quaternionZero )
 		, scale( SMath::vectorOne )
@@ -53,7 +53,7 @@ public:
 	 * @param[in] InRotation The value to use for rotation component
 	 */
 	FORCEINLINE explicit CTransform( const Quaternion& InRotation ) 
-		: bDirtyMatrix( false )
+		: bDirtyMatrix( true )
 		, translation( SMath::vectorZero )
 		, rotation( InRotation )
 		, scale( SMath::vectorOne )
@@ -68,7 +68,7 @@ public:
 	 * @param[in] InScale The value to use for the scale component
 	 */
 	FORCEINLINE CTransform( const Quaternion& InRotation, const Vector& InTranslation, const Vector& InScale = SMath::vectorOne ) 
-		: bDirtyMatrix( false )
+		: bDirtyMatrix( true )
 		, translation( InTranslation )
 		, rotation( InRotation )
 		, scale( InScale )

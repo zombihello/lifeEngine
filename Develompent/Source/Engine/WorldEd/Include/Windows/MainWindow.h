@@ -196,6 +196,7 @@ private slots:
 	void on_actionOpen_triggered();
 	void on_actionSave_triggered();
 	void on_actionSave_as_triggered();
+	void on_actionPlay_triggered();
 	void On_PerspectiveDockWidget_VisibilityChanged( bool InVisible );
 	void On_OrthoXYDockWidget_VisibilityChanged( bool InVisible );
 	void On_OrthoXZDockWidget_VisibilityChanged( bool InVisible );

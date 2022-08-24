@@ -102,7 +102,17 @@ void AActor::Serialize( class CArchive& InArchive )
 
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
 	{
-		ownedComponents[ index ]->Serialize( InArchive );
+		ActorComponentRef_t		ownedComponent = ownedComponents[index];
+
+		// Skip editor only component if we cooking packages
+#if WITH_EDITOR
+		if ( ownedComponent->IsEditorOnly() && GIsCooker )
+		{
+			continue;
+		}
+#endif // WITH_EDITOR
+
+		ownedComponent->Serialize( InArchive );
 	}
 }
 
@@ -181,7 +191,7 @@ std::wstring AActor::GetActorIcon() const
 }
 #endif // WITH_EDITOR
 
-ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InName )
+ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InName, bool InEditorOnly /*= false*/ )
 {
 	check( InClass );
 
@@ -202,6 +212,14 @@ ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InNam
 	{
 		( ( CSceneComponent* )component )->SetupAttachment( rootComponent );
 	}
+
+#if WITH_EDITOR
+	component->SetEditorOnly( InEditorOnly );
+	if ( !GIsEditor && InEditorOnly && component->IsA<CPrimitiveComponent>() )
+	{
+		( ( CPrimitiveComponent* )component )->SetVisibility( false );
+	}
+#endif // WITH_EDITOR
 
 	component->SetName( InName );
 	AddOwnedComponent( component );

@@ -192,8 +192,5 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 	
 	// Call garbage collector of unused packages and assets
 	GPackageManager->GarbageCollector();
-
-	// Begin play of game
-	GWorld->BeginPlay();
 	return true;
 }

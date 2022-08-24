@@ -2,6 +2,7 @@
 #include <QKeyEvent>
 #include <qlabel.h>
 #include <qdebug.h>
+#include <qprocess.h>
 #include <qfiledialog.h>
 
 #include "ui_MainWindow.h"
@@ -123,6 +124,7 @@ void WeMainWindow::InitUI()
 	ui->actionToolRotate->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_Rotate.png" ) ).c_str() ) ) );
 	ui->actionToolScale->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_Scale.png" ) ).c_str() ) ) );
 	ui->actionToolScaleNonUniform->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Tool_ScaleNoUniform.png" ) ).c_str() ) ) );
+	ui->actionPlay->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Play.png" ) ).c_str() ) ) );
 
 	// Restore state of dock widgets from cache
 	QFile           file( QString::fromStdWString( ÑString::Format( TEXT( "%s/EditorCache/UICache.dat" ), appGameDir().c_str() ) ) );
@@ -377,6 +379,12 @@ void WeMainWindow::on_actionSave_as_triggered()
 	{
 		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed saving map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
 	}
+}
+
+void WeMainWindow::on_actionPlay_triggered()
+{
+	QProcess::startDetached( QCoreApplication::applicationFilePath() );
+	LE_LOG( LT_Log, LC_Editor, TEXT( "Started stendalone game" ) );
 }
 
 void WeMainWindow::On_PerspectiveDockWidget_VisibilityChanged( bool InVisible )

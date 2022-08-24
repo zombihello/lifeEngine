@@ -18,24 +18,17 @@ AELPlayerCharacter::AELPlayerCharacter()
 		CPhysicsBodyInstance*	bodyInstance = &boxComponent->GetBodyInstance();
 		bodyInstance->SetLockFlags( BLF_LockMoveZ | BLF_LockRotateX | BLF_LockRotateY | BLF_LockRotateZ );
 		bodyInstance->SetMass( 10.f );
-		bodyInstance->SetEnableGravity( true );
+		bodyInstance->SetEnableGravity( false );
 		bodyInstance->SetSimulatePhysics( true );
 	}
 	collisionComponent = boxComponent;
 
 	// Create camera component
 	cameraComponent = CreateComponent< CCameraComponent >( TEXT( "CameraComponent0" ) );
-	cameraComponent->SetProjectionMode( CPM_Orthographic );
+	cameraComponent->SetProjectionMode( CPM_Perspective );
 	cameraComponent->SetAutoViewData( true );
-	cameraComponent->SetNearClipPlane( -100.f );
-	cameraComponent->SetFarClipPlane( 100.f );
+	cameraComponent->SetFieldOfView( 90.f );
 	cameraComponent->AddRelativeLocation( Vector( 0, 0, -10.f ) );
-
-	// Create sprite component
-	spriteComponent = CreateComponent< CSpriteComponent >( TEXT( "SpriteComponent0" ) );
-	spriteComponent->SetSpriteSize( Vector2D( 32.f, 32.f ) );
-	spriteComponent->SetType( ST_Static );
-	spriteComponent->SetMaterial( GPackageManager->FindAsset( TEXT( "Material'Characters_Player:Player_Mat" ), AT_Material ) );
 
 	// Create audio component
 	audioComponent = CreateComponent< CAudioComponent >( TEXT( "AudioComponent0" ) );
@@ -123,5 +116,4 @@ void AELPlayerCharacter::Landed()
 void AELPlayerCharacter::Walk( const Vector& InWorldDirection, float InScale )
 {
 	Super::Walk( InWorldDirection, InScale );
-	spriteComponent->SetFlipHorizontal( InScale < 0.f );
 }

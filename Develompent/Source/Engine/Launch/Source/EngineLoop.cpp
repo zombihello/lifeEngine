@@ -51,7 +51,11 @@
  */
 void appGetCookedContentPath( EPlatformType InPlatform, std::wstring& OutPath )
 {
+#if !WITH_EDITOR
 	OutPath = appGameDir() + PATH_SEPARATOR + TEXT( "Cooked" ) + appPlatformTypeToString( InPlatform ) + PATH_SEPARATOR;
+#else
+	OutPath = appGameDir() + PATH_SEPARATOR + TEXT( "Content" ) + PATH_SEPARATOR;
+#endif // !WITH_EDITOR
 }
 
 /**
@@ -202,9 +206,17 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	int32		result = appPlatformPreInit( InCmdLine );
 	
 	// Loading table of contents
-	if ( !GIsCooker )
+	if ( !GIsEditor && !GIsCooker )
 	{
-		std::wstring	tocPath		= GCookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC();
+		std::wstring	tocPath = GCookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC();
+
+#if WITH_EDITOR
+		if ( !GFileSystem->IsExistFile( tocPath ) )
+		{
+			ÑBaseCommandlet::ExecCommandlet( TEXT( "CookerSync" ) );
+		}
+#endif // WITH_EDITOR
+		
 		CArchive*		archiveTOC	= GFileSystem->CreateFileReader( tocPath );
 		if ( archiveTOC )
 		{

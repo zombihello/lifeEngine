@@ -62,7 +62,6 @@ private:
 	TAssetHandle<CAudioBank>					walkAudioBanks[ ST_Max ];		/**< Audio banks of walking on each surface type */
 	TAssetHandle<CAudioBank>					jumpAudioBanks[ ST_Max ];		/**< Audio banks of jump on each surface type */
 	TRefCountPtr< CCameraComponent >			cameraComponent;				/**< Camera component */
-	TRefCountPtr< CSpriteComponent >			spriteComponent;				/**< Sprite component */
 	TRefCountPtr< CAudioComponent >				audioComponent;					/**< Audio component */
 };
 

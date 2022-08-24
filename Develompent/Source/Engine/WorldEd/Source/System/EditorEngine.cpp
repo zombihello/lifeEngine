@@ -63,7 +63,6 @@ void CEditorEngine::Init()
 void CEditorEngine::Tick( float InDeltaSeconds )
 {
 	Super::Tick( InDeltaSeconds );
-	GWorld->Tick( InDeltaSeconds );
 
 	// Update viewports
 	for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
