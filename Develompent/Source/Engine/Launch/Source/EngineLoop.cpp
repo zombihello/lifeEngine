@@ -31,6 +31,7 @@
 #include "System/SplashScreen.h"
 #include "System/BaseEngine.h"
 #include "System/FullScreenMovie.h"
+#include "System/Name.h"
 #include "LEBuild.h"
 
 #if USE_THEORA_CODEC
@@ -180,6 +181,8 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	GGameThreadId = appGetCurrentThreadId();
 	GGameName = ANSI_TO_TCHAR( GAMENAME );
 	appGetCookedContentPath( GPlatform, GCookedDir );
+	
+	CName::StaticInit();
 	SerializeConfigs();
 
 #if WITH_EDITOR

@@ -15,6 +15,7 @@
 #include "System/MemoryBase.h"
 #include "Misc/Template.h"
 #include "Misc/Types.h"
+#include "Misc/Names.h"
 #include "Misc/CoreGlobals.h"
 
 #undef TEXT

@@ -15,7 +15,6 @@ AELPlayerCharacter::AELPlayerCharacter()
 	cameraComponent->SetProjectionMode( CPM_Perspective );
 	cameraComponent->SetAutoViewData( true );
 	cameraComponent->SetFieldOfView( 90.f );
-	cameraComponent->AddRelativeLocation( Vector( 0, 0, -10.f ) );
 }
 
 AELPlayerCharacter::~AELPlayerCharacter()

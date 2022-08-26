@@ -1,11 +1,11 @@
 ----------------------------------------------------------------
- Version 0.3.0
+ Version 0.4.0
 ----------------------------------------------------------------
 	- Fix link count for DirectX 11 objects 
 	- Fix depth buffer accuracy
 	- Implement console system
 	- Implement physics system
 	- Implement material shaders
-	- Add FName for optimization use memory
 	- Add supported mip levels in textures
 	- Add possible generate mip levels for textures in WorldEd
+	- Implement rendering light with deferred shading technique
