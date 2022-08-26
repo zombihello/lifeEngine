@@ -189,23 +189,23 @@ private:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef CMeshDrawList<CStaticMeshDrawPolicy>::SDrawingPolicyLink					DrawingPolicyLink_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy>::SDrawingPolicyLink					DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
-	typedef CMeshDrawList<CStaticMeshDrawPolicy>::DrawingPolicyLinkRef_t				DrawingPolicyLinkRef_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy>::DrawingPolicyLinkRef_t				DrawingPolicyLinkRef_t;
 
 #if WITH_EDITOR
 	/**
 	 * @brief Typedef of gizmo drawing policy link
 	 */
-	typedef CMeshDrawList<CStaticMeshDrawPolicy, false>::SDrawingPolicyLink				GizmoDrawingPolicyLink_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy, false>::SDrawingPolicyLink				GizmoDrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on gizmo drawing policy link in scene
 	 */
-	typedef CMeshDrawList<CStaticMeshDrawPolicy, false>::DrawingPolicyLinkRef_t			GizmoDrawingPolicyLinkRef_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy, false>::DrawingPolicyLinkRef_t			GizmoDrawingPolicyLinkRef_t;
 #endif // WITH_EDITOR
 
 #if ENABLE_HITPROXY

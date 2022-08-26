@@ -731,17 +731,17 @@ struct SSceneDepthGroup
 
 	// Simple elements use only for debug and WorldEd
 #if WITH_EDITOR
-	CBatchedSimpleElements								simpleElements;				/**< Batched simple elements (lines, points, etc) */
-	std::list<SDynamicMeshBuilderElement>				dynamicMeshBuilders;		/**< List of dynamic mesh builders */
-	CMeshDrawList<CStaticMeshDrawPolicy, false>			gizmoDrawList;				/**< Draw list of gizmos */
+	CBatchedSimpleElements							simpleElements;				/**< Batched simple elements (lines, points, etc) */
+	std::list<SDynamicMeshBuilderElement>			dynamicMeshBuilders;		/**< List of dynamic mesh builders */
+	CMeshDrawList<CMeshDrawingPolicy, false>		gizmoDrawList;				/**< Draw list of gizmos */
 #endif // WITH_EDITOR
 
-	CMeshDrawList< CStaticMeshDrawPolicy >				dynamicMeshElements;		/**< Draw list of dynamic meshes */
-	CMeshDrawList< CStaticMeshDrawPolicy >				staticMeshDrawList;			/**< Draw list of static meshes */
-	CMeshDrawList< CStaticMeshDrawPolicy >				spriteDrawList;				/**< Draw list of sprites */
+	CMeshDrawList<CMeshDrawingPolicy>				dynamicMeshElements;		/**< Draw list of dynamic meshes */
+	CMeshDrawList<CMeshDrawingPolicy>				staticMeshDrawList;			/**< Draw list of static meshes */
+	CMeshDrawList<CMeshDrawingPolicy>				spriteDrawList;				/**< Draw list of sprites */
 
 #if ENABLE_HITPROXY
-	SHitProxyLayer										hitProxyLayers[ HPL_Num ];	/**< Hit proxy layers */
+	SHitProxyLayer									hitProxyLayers[ HPL_Num ];	/**< Hit proxy layers */
 #endif // ENABLE_HITPROXY
 };
 

@@ -515,8 +515,8 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::vector< TType 
 	return InArchive;
 }
 
-template< typename TKey, typename TValue >
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::unordered_map< TKey, TValue >& InValue )
+template< typename TKey, typename TValue, typename THasher = std::hash<TKey> >
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::unordered_map< TKey, TValue, THasher >& InValue )
 {
 	if ( InArchive.IsLoading() && InArchive.Ver() < VER_ShaderMap )
 	{
@@ -553,8 +553,8 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::unordered_map< TKey,
 	return InArchive;
 }
 
-template< typename TKey, typename TValue >
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::unordered_map< TKey, TValue >& InValue )
+template< typename TKey, typename TValue, typename THasher = std::hash<TKey> >
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::unordered_map< TKey, TValue, THasher >& InValue )
 {
 	check( InArchive.IsSaving() );
 

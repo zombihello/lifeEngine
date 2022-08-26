@@ -49,6 +49,7 @@ enum ELifeEnginePackageVersion
 	VER_RemovedShadersTypeFromMaterial		= 17,					/**< Removed shaders type from material asset */
 	VER_AssetName_V3						= 18,					/**< Moved asset name to CAsset */
 	VER_AssetOnlyEditor						= 19,					/**< Added field 'bOnlyEditor' to asset */
+	VER_CName								= 20,					/**< Added CName for IDs in string view */
 
 	//
 	// New versions can be added here

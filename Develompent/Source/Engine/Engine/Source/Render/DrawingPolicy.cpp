@@ -54,7 +54,11 @@ void CMeshDrawingPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDev
 	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
 	if ( !materialRef )
 	{
-		return;
+		materialRef = GEngine->GetDefaultMaterial().ToSharedPtr();
+		if ( !materialRef )
+		{
+			return;
+		}
 	}
 
 	vertexShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, materialRef );

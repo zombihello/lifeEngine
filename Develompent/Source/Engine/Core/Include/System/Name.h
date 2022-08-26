@@ -50,8 +50,35 @@ public:
 		uint32			hash;		/**< Hash name */
 	};
 
+	/**
+	 * @brief Hash function for STL containers
+	 */
+	struct SHashFunction
+	{
+		/**
+		 * @brief Calculate hash of CName
+		 *
+		 * @param InName Name
+		 */
+		FORCEINLINE std::size_t operator()( const CName& InName ) const
+		{
+			return InName.index;
+		}
+	};
+
 	friend CArchive& operator<<( CArchive& InArchive, CName& InValue );
 	friend CArchive& operator<<( CArchive& InArchive, const CName& InValue );
+
+	/**
+	 * @brief Constructor
+	 * @param InString		String
+	 */
+	FORCEINLINE CName( const tchar* InString )
+		: index( INDEX_NONE )
+	{
+		StaticInit();
+		Init( InString );
+	}
 
 	/**
 	 * @brief Constructor

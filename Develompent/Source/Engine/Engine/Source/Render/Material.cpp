@@ -9,6 +9,11 @@
 #include "Render/VertexFactory/DynamicMeshVertexFactory.h"
 #endif // !SHIPPING_BUILD
 
+const CName		CMaterial::diffuseTextureParamName( TEXT( "Diffuse" ) );
+const CName		CMaterial::normalTextureParamName( TEXT( "Normal" ) );
+const CName		CMaterial::metallicTextureParamName( TEXT( "Metallic" ) );
+const CName		CMaterial::roughnessTextureParamName( TEXT( "Roughness" ) );
+
 CMaterial::CMaterial() :
 	CAsset( AT_Material ),
 	isNeedUpdateShaderMap( true ),
@@ -30,6 +35,9 @@ void CMaterial::Serialize( class CArchive& InArchive )
 	if ( InArchive.IsLoading() )
 	{
 		isNeedUpdateShaderMap = true;
+		scalarParameters.clear();
+		vectorParameters.clear();
+		textureParameters.clear();
 	}
 
 	CAsset::Serialize( InArchive );
@@ -48,9 +56,37 @@ void CMaterial::Serialize( class CArchive& InArchive )
 		}
 	}
 
-	InArchive << scalarParameters;
-	InArchive << vectorParameters;
-	InArchive << textureParameters;
+	if ( InArchive.Ver() < VER_CName )
+	{
+		std::unordered_map<std::wstring, float>							localScalarParameters;
+		std::unordered_map<std::wstring, Vector4D>						localVectorParameters;
+		std::unordered_map<std::wstring, TAssetHandle<CTexture2D>>		localTextureParameters;
+		InArchive << localScalarParameters;
+		InArchive << localVectorParameters;
+		InArchive << localTextureParameters;
+
+		// Copy to original parameters
+		for ( auto it = localScalarParameters.begin(), itEnd = localScalarParameters.end(); it != itEnd; ++it )
+		{
+			scalarParameters[it->first] = it->second;
+		}
+		for ( auto it = localVectorParameters.begin(), itEnd = localVectorParameters.end(); it != itEnd; ++it )
+		{
+			vectorParameters[it->first] = it->second;
+		}
+		for ( auto it = localTextureParameters.begin(), itEnd = localTextureParameters.end(); it != itEnd; ++it )
+		{
+			textureParameters[it->first] = it->second;
+		}
+
+		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package version (0x%X). Need to re-save the package '%s', because in the future it may not open" ), InArchive.Ver(), InArchive.GetPath().c_str() );
+	}
+	else
+	{
+		InArchive << scalarParameters;
+		InArchive << vectorParameters;
+		InArchive << textureParameters;
+	}
 }
 
 CShader* CMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
@@ -133,7 +169,7 @@ std::vector< CShader* > CMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) 
 	return result;
 }
 
-bool CMaterial::GetScalarParameterValue( const std::wstring& InParameterName, float& OutValue ) const
+bool CMaterial::GetScalarParameterValue( const CName& InParameterName, float& OutValue ) const
 {
 	auto		itFind = scalarParameters.find( InParameterName );
 	if ( itFind == scalarParameters.end() )
@@ -146,7 +182,7 @@ bool CMaterial::GetScalarParameterValue( const std::wstring& InParameterName, fl
 	return true;
 }
 
-bool CMaterial::GetTextureParameterValue( const std::wstring& InParameterName, TAssetHandle<CTexture2D>& OutValue ) const
+bool CMaterial::GetTextureParameterValue( const CName& InParameterName, TAssetHandle<CTexture2D>& OutValue ) const
 {
 	auto		itFind = textureParameters.find( InParameterName );
 	if ( itFind == textureParameters.end() )
@@ -159,7 +195,7 @@ bool CMaterial::GetTextureParameterValue( const std::wstring& InParameterName, T
 	return itFind->second.IsAssetValid();
 }
 
-bool CMaterial::GetVectorParameterValue( const std::wstring& InParameterName, Vector4D& OutValue ) const
+bool CMaterial::GetVectorParameterValue( const CName& InParameterName, Vector4D& OutValue ) const
 {
 	auto		itFind = vectorParameters.find( InParameterName );
 	if ( itFind == vectorParameters.end() )

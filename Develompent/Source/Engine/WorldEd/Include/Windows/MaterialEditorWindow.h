@@ -57,7 +57,7 @@ private slots:
 	void OnCheckBoxIsWireframeToggled( bool InValue );
 	void OnCheckBoxStaticMeshToggled( bool InValue );
 	void OnCheckBoxSpriteToggled( bool InValue );
-	void OnSelectedAssetDiffuse( uint32 InAssetSlot, const std::wstring& InNewAssetReference );
+	void OnSelectedAsset( uint32 InAssetSlot, const std::wstring& InNewAssetReference );
 
 private:
 	/**
@@ -84,18 +84,18 @@ private:
 	 */
 	void OnAssetsReloaded( const std::vector< TSharedPtr<class CAsset> >& InAssets );
 
-	bool													bInit;						/**< Is inited window */
-	Ui::WeMaterialEditorWindow*								ui;							/**< Qt UI */
-	TSharedPtr<CMaterial>									material;					/**< Editable asset */
-	class QCheckBox*										checkBox_onlyEditor;		/**< Check box of only editor */
-	class QCheckBox*										checkBox_isTwoSided;		/**< Check box of is two sided */
-	class QCheckBox*										checkBox_isWireframe;		/**< Check box of is wireframe */
-	class QCheckBox*										checkBox_staticMesh;		/**< Check box of static mesh */
-	class QCheckBox*										checkBox_sprite;			/**< Check box of sprite */
-	class WeSelectAssetWidget*								selectAsset_diffuse;		/**< Widget for select asset (diffuse texture) */
-	class CMaterialPreviewViewportClient*					viewportClient;				/**< Viewport client */
-	SEditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;		/**< Handle delegate of assets can delete */
-	SEditorDelegates::COnAssetsReloaded::DelegateType_t*		assetsReloadedHandle;		/**< Handle delegate of reloaded assets */
+	bool														bInit;							/**< Is inited window */
+	Ui::WeMaterialEditorWindow*									ui;								/**< Qt UI */
+	TSharedPtr<CMaterial>										material;						/**< Editable asset */
+	class QCheckBox*											checkBox_onlyEditor;			/**< Check box of only editor */
+	class QCheckBox*											checkBox_isTwoSided;			/**< Check box of is two sided */
+	class QCheckBox*											checkBox_isWireframe;			/**< Check box of is wireframe */
+	class QCheckBox*											checkBox_staticMesh;			/**< Check box of static mesh */
+	class QCheckBox*											checkBox_sprite;				/**< Check box of sprite */
+	std::vector<std::pair<CName,class WeSelectAssetWidget*>>	selectAssetWidgets;				/**< Array of widgets for select asset */
+	class CMaterialPreviewViewportClient*						viewportClient;					/**< Viewport client */
+	SEditorDelegates::COnAssetsCanDelete::DelegateType_t*		assetsCanDeleteHandle;			/**< Handle delegate of assets can delete */
+	SEditorDelegates::COnAssetsReloaded::DelegateType_t*		assetsReloadedHandle;			/**< Handle delegate of reloaded assets */
 };
 
 #endif // MATERIALEDITORWINDOW_H

@@ -106,12 +106,12 @@ private:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef CMeshDrawList< CStaticMeshDrawPolicy >::SDrawingPolicyLink			DrawingPolicyLink_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy>::SDrawingPolicyLink			DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
-	typedef CMeshDrawList< CStaticMeshDrawPolicy >::DrawingPolicyLinkRef_t		DrawingPolicyLinkRef_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy>::DrawingPolicyLinkRef_t		DrawingPolicyLinkRef_t;
 
 	/**
 	 * @brief Adds a draw policy link in SDGs

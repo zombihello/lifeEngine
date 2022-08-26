@@ -15,6 +15,7 @@
 #include "Math/Math.h"
 #include "Misc/EngineGlobals.h"
 #include "System/Package.h"
+#include "System/Name.h"
 #include "RHI/BaseShaderRHI.h"
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/Shaders/Shader.h"
@@ -64,7 +65,7 @@ public:
 	 * @param[in] InParameterName Parameter name
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void SetScalarParameterValue( const std::wstring& InParameterName, float InValue )
+	FORCEINLINE void SetScalarParameterValue( const CName& InParameterName, float InValue )
 	{
 		auto	itScalarParameter	= scalarParameters.find( InParameterName );
 		bool	bNotFound			= itScalarParameter == scalarParameters.end();
@@ -89,7 +90,7 @@ public:
 	 * @param[in] InParameterName Parameter name
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void SetTextureParameterValue( const std::wstring& InParameterName, const TAssetHandle<class CTexture2D>& InValue )
+	FORCEINLINE void SetTextureParameterValue( const CName& InParameterName, const TAssetHandle<class CTexture2D>& InValue )
 	{
 		auto	itTextureParameter	= textureParameters.find( InParameterName );
 		bool	bNotFound			= itTextureParameter == textureParameters.end();
@@ -114,7 +115,7 @@ public:
 	 * @param InParameterName	Parameter name
 	 * @param InValue			Value
 	 */
-	FORCEINLINE void SetVectorParameterValue( const std::wstring& InParameterName, const Vector4D& InValue )
+	FORCEINLINE void SetVectorParameterValue( const CName& InParameterName, const Vector4D& InValue )
 	{
 		auto	itVectorParameter	= vectorParameters.find( InParameterName );
 		bool	bNotFound			= itVectorParameter == vectorParameters.end();
@@ -272,7 +273,7 @@ public:
 	 * @param[out] OutValue Return value
 	 * @return Return true if finded, else return false
 	 */
-	bool GetScalarParameterValue( const std::wstring& InParameterName, float& OutValue ) const;
+	bool GetScalarParameterValue( const CName& InParameterName, float& OutValue ) const;
 
 	/**
 	 * Get texture parameter value
@@ -281,7 +282,7 @@ public:
 	 * @param[out] OutValue Return value
 	 * @return Return true if finded, else return false
 	 */
-	bool GetTextureParameterValue( const std::wstring& InParameterName, TAssetHandle<CTexture2D>& OutValue ) const;
+	bool GetTextureParameterValue( const CName& InParameterName, TAssetHandle<CTexture2D>& OutValue ) const;
 
 	/**
 	 * Get vector parameter value
@@ -290,7 +291,7 @@ public:
 	 * @param OutValue			Return value
 	 * @return Return true if finded, else return false
 	 */
-	bool GetVectorParameterValue( const std::wstring& InParameterName, Vector4D& OutValue ) const;
+	bool GetVectorParameterValue( const CName& InParameterName, Vector4D& OutValue ) const;
 
 	/**
 	 * Get dependent assets
@@ -323,6 +324,11 @@ public:
 		return isWireframe;
 	}
 
+	const static CName		diffuseTextureParamName;		/**< Name of Diffuse texture parameter */
+	const static CName		normalTextureParamName;			/**< Name of Normal texture parameter */
+	const static CName		metallicTextureParamName;		/**< Name of Metallic texture parameter */
+	const static CName		roughnessTextureParamName;		/**< Name of Roughness texture parameter */
+
 private:
 	/**
 	 * Cache of shader map
@@ -342,14 +348,14 @@ private:
 	 */
 	typedef std::unordered_map< uint64, std::vector< CShader* > >				MeshShaderMap_t;
 
-	bool															isNeedUpdateShaderMap;	/**< Is need update shader map */
-	bool															isTwoSided;				/**< Is two sided material */
-	bool															isWireframe;			/**< Is wireframe material */
-	uint32															usage;					/**< Usage flags (see EMaterialUsage) */
-	MeshShaderMap_t													shaderMap;				/**< Shader map for material */
-	std::unordered_map< std::wstring, float >						scalarParameters;		/**< Array scalar parameters */
-	std::unordered_map< std::wstring, Vector4D >					vectorParameters;		/**< Vector parameters */
-	std::unordered_map< std::wstring, TAssetHandle<CTexture2D> >	textureParameters;		/**< Array texture parameters */
+	bool																			isNeedUpdateShaderMap;	/**< Is need update shader map */
+	bool																			isTwoSided;				/**< Is two sided material */
+	bool																			isWireframe;			/**< Is wireframe material */
+	uint32																			usage;					/**< Usage flags (see EMaterialUsage) */
+	MeshShaderMap_t																	shaderMap;				/**< Shader map for material */
+	std::unordered_map<CName, float, CName::SHashFunction>							scalarParameters;		/**< Array scalar parameters */
+	std::unordered_map<CName, Vector4D, CName::SHashFunction>						vectorParameters;		/**< Vector parameters */
+	std::unordered_map<CName, TAssetHandle<CTexture2D>, CName::SHashFunction>		textureParameters;		/**< Array texture parameters */
 };
 
 //

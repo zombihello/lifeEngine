@@ -26,26 +26,6 @@
 #include "Render/Shaders/WireframeShader.h"
 #endif // !SHIPPING_BUILD
 
-/**
- * @ingroup Engine
- * Draw policy of static mesh
- */
-class CStaticMeshDrawPolicy : public CMeshDrawingPolicy
-{
-public:
-	/**
-	 * Constructor
-	 */
-	CStaticMeshDrawPolicy();
-
-	/**
-	 * Set shader parameters
-	 *
-	 * @param[in] InDeviceContextRHI RHI device context
-	 */
-	virtual void SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI ) override;
-};
-
 #if !SHIPPING_BUILD
 /**
  * @ingroup Engine

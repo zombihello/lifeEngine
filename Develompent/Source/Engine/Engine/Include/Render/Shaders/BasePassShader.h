@@ -71,6 +71,30 @@ class CBasePassPixelShader : public CShader
 	DECLARE_SHADER_TYPE( CBasePassPixelShader )
 
 public:
+	/**
+	 * @brief Initialize shader
+	 * @param[in] InShaderCacheItem Cache of shader
+	 */
+	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
+
+	/**
+	 * @brief Set the constant shader parameters
+	 *
+	 * @param InDeviceContextRHI Device context
+	 * @param InVertexFactory Vertex factory
+	 * @param InMaterialResource Material
+	 */
+	virtual void SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const override;
+
+private:
+	CShaderResourceParameter		diffuseParameter;				/**< Diffuse texture parameter */
+	CShaderResourceParameter		diffuseSamplerParameter;		/**< Diffuse sampler parameter */
+	CShaderResourceParameter		normalParameter;				/**< Normal texture parameter */
+	CShaderResourceParameter		normalSamplerParameter;			/**< Normal sampler parameter */
+	CShaderResourceParameter		metallicParameter;				/**< Metallic texture parameter */
+	CShaderResourceParameter		metallicSamplerParameter;		/**< Metallic sampler parameter */
+	CShaderResourceParameter		roughnessParameter;				/**< Roughness texture parameter */
+	CShaderResourceParameter		roughnessSamplerParameter;		/**< Roughness sampler parameter */
 };
 
 #endif // !BASEPASSSHADER_H

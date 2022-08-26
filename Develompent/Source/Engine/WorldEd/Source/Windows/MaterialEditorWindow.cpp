@@ -25,7 +25,6 @@ WeMaterialEditorWindow::WeMaterialEditorWindow( const TSharedPtr<CMaterial>& InM
 	, checkBox_isWireframe( nullptr )
 	, checkBox_staticMesh( nullptr )
 	, checkBox_sprite( nullptr )
-	, selectAsset_diffuse( nullptr )
 	, viewportClient( nullptr )
 	, assetsCanDeleteHandle( nullptr )
 	, assetsReloadedHandle( nullptr )
@@ -99,20 +98,33 @@ void WeMaterialEditorWindow::InitUI()
 	{
 		WeSectionWidget*		parametersSection	= new WeSectionWidget( "Parameters", 300, this );
 		QGridLayout*			gridLayout			= new QGridLayout();
-		gridLayout->setContentsMargins( 0, 3, 0, 3 );
+		gridLayout->setContentsMargins( 3, 3, 3, 3 );
+		gridLayout->setVerticalSpacing( 1 );
 
-		selectAsset_diffuse		= new WeSelectAssetWidget( 0, parametersSection );
-		
-		gridLayout->addWidget( new QLabel( "Diffuse:", parametersSection ), 0, 0 );
-		gridLayout->addWidget( selectAsset_diffuse, 0, 1 );
+		CName		textureParameterNames[] = 
+		{ 
+			CMaterial::diffuseTextureParamName, 
+			CMaterial::normalTextureParamName, 
+			CMaterial::metallicTextureParamName, 
+			CMaterial::roughnessTextureParamName 
+		};
+
+		for ( uint32 index = 0; index < ARRAY_COUNT( textureParameterNames ); ++index )
+		{
+			WeSelectAssetWidget*		selectAssetWidget = new WeSelectAssetWidget( index, parametersSection );
+			selectAssetWidgets.push_back( std::make_pair( textureParameterNames[index], selectAssetWidget ) );
+
+			gridLayout->addWidget( new QLabel( QString::fromStdWString( textureParameterNames[index].ToString() + TEXT( ": " ) ), parametersSection ), index, 0 );
+			gridLayout->addWidget( selectAssetWidget, index, 1 );
+
+			// Connect to slots
+			connect( selectAssetWidget, SIGNAL( OnAssetReferenceChanged( uint32, const std::wstring& ) ), this, SLOT( OnSelectedAsset( uint32, const std::wstring& ) ) );
+		}
 
 		parametersSection->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
 		parametersSection->setContentLayout( *gridLayout );
 		parametersSection->expand( true );
 		ui->frame->layout()->addWidget( parametersSection );
-
-		// Connect to slots
-		connect( selectAsset_diffuse, SIGNAL( OnAssetReferenceChanged( uint32, const std::wstring& ) ), this, SLOT( OnSelectedAssetDiffuse( uint32, const std::wstring& ) ) );
 	}
 
 	// Create spacer
@@ -139,15 +151,23 @@ void WeMaterialEditorWindow::UpdateUI()
 	checkBox_sprite->setChecked( material->GetUsageFlags() & MU_Sprite );
 
 	// Parameters section
-	// Diffuse
 	{
-		TAssetHandle<CTexture2D>		diffuseTextureRef;
-		material->GetTextureParameterValue( TEXT( "diffuse" ), diffuseTextureRef );
-		if ( diffuseTextureRef.IsAssetValid() && !GPackageManager->IsDefaultAsset( diffuseTextureRef ) )
+		for ( uint32 index = 0, count = selectAssetWidgets.size(); index < count; ++index )
 		{
-			std::wstring		assetReference;
-			MakeReferenceToAsset( diffuseTextureRef, assetReference );
-			selectAsset_diffuse->SetAssetReference( assetReference );
+			std::pair<CName, class WeSelectAssetWidget*>&		selectAssetWidgetPair = selectAssetWidgets[index];
+			
+			TAssetHandle<CTexture2D>							textureRef;			
+			material->GetTextureParameterValue( selectAssetWidgetPair.first, textureRef );
+			if ( textureRef.IsAssetValid() && !GPackageManager->IsDefaultAsset( textureRef ) )
+			{
+				std::wstring		assetReference;
+				MakeReferenceToAsset( textureRef, assetReference );
+				selectAssetWidgetPair.second->SetAssetReference( assetReference );
+			}
+			else
+			{
+				selectAssetWidgetPair.second->ClearAssetReference( false );
+			}
 		}
 	}
 }
@@ -209,12 +229,15 @@ void WeMaterialEditorWindow::OnCheckBoxSpriteToggled( bool InValue )
 	material->UsageOnSpriteMesh( InValue );
 }
 
-void WeMaterialEditorWindow::OnSelectedAssetDiffuse( uint32 InAssetSlot, const std::wstring& InNewAssetReference )
+void WeMaterialEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::wstring& InNewAssetReference )
 {
 	if ( !material )
 	{
 		return;
 	}
+
+	check( InAssetSlot < selectAssetWidgets.size() );
+	std::pair<CName, class WeSelectAssetWidget*>&	selectAssetWidgetPair = selectAssetWidgets[InAssetSlot];
 
 	// If asset reference is valid, we find asset
 	TAssetHandle<CTexture2D>		newTexture2DRef;
@@ -227,10 +250,10 @@ void WeMaterialEditorWindow::OnSelectedAssetDiffuse( uint32 InAssetSlot, const s
 	if ( !newTexture2DRef.IsAssetValid() || GPackageManager->IsDefaultAsset( newTexture2DRef ) )
 	{
 		newTexture2DRef = nullptr;
-		selectAsset_diffuse->ClearAssetReference( false );
+		selectAssetWidgetPair.second->ClearAssetReference( false );
 	}
 
-	material->SetTextureParameterValue( TEXT( "diffuse" ), newTexture2DRef );
+	material->SetTextureParameterValue( selectAssetWidgetPair.first, newTexture2DRef );
 }
 
 void WeMaterialEditorWindow::OnAssetsCanDelete( const std::vector< TSharedPtr<class CAsset> >& InAssets, SCanDeleteAssetResult& OutResult )

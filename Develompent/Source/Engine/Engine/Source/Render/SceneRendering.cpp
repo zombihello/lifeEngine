@@ -19,33 +19,6 @@
 #include "Render/VertexFactory/SimpleElementVertexFactory.h"
 #include "Render/SceneRenderTargets.h"
 
-CStaticMeshDrawPolicy::CStaticMeshDrawPolicy()
-{}
-
-void CStaticMeshDrawPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI )
-{
-	CMeshDrawingPolicy::SetShaderParameters( InDeviceContextRHI );
-
-	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
-	if ( !materialRef )
-	{
-		materialRef = GEngine->GetDefaultMaterial().ToSharedPtr();
-		if ( !materialRef )
-		{
-			return;
-		}
-	}
-
-	TAssetHandle<CTexture2D>		texture2d;
-	materialRef->GetTextureParameterValue( TEXT( "diffuse" ), texture2d );
-	if ( texture2d.IsAssetValid() )
-	{
-		TSharedPtr<CTexture2D>		texture2DRef = texture2d.ToSharedPtr();
-		GRHI->SetTextureParameter( InDeviceContextRHI, pixelShader->GetPixelShader(), texture2DRef->GetTexture2DRHI(), 0 );
-		GRHI->SetSamplerState( InDeviceContextRHI, pixelShader->GetPixelShader(), GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ), 0 );
-	}
-}
-
 CSceneRenderer::CSceneRenderer( CSceneView* InSceneView, class CScene* InScene /* = nullptr */ )
 	: scene( InScene )
 	, sceneView( InSceneView )
@@ -172,7 +145,7 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 						const SDynamicMeshBuilderElement&		element = *it;
 						if ( element.dynamicMeshBuilder )
 						{
-							element.dynamicMeshBuilder->Draw<CStaticMeshDrawPolicy>( immediateContext, element.localToWorldMatrix, element.material, *sceneView );
+							element.dynamicMeshBuilder->Draw<CMeshDrawingPolicy>( immediateContext, element.localToWorldMatrix, element.material, *sceneView );
 						}
 					}
 				}
