@@ -157,7 +157,7 @@ void CConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* 
 		for ( uint32 index = 0, count = array.Size(); index < count; ++index )
 		{
 			CConfigValue		configValue;
-			configValue.Set( array[ index ], ÑString::Format( TEXT( "%s[%i]" ), InName, index ).c_str() );
+			configValue.Set( array[ index ], CString::Format( TEXT( "%s[%i]" ), InName, index ).c_str() );
 			configValues.push_back( configValue );
 		}
 

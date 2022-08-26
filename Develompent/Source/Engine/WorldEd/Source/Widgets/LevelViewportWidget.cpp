@@ -231,8 +231,8 @@ void WeLevelViewportWidget::OnCustomContextMenuRequested( const QPoint& InPoint 
 
 	// Main menu
 	QMenu			contextMenu( this );
-	QAction			actionActorAdd( QString::fromStdWString( ÑString::Format( TEXT( "Add %s Here" ), currentActorClass->GetName().c_str() ) ), this );
-	QAction			actionAssetAdd( QString::fromStdWString( ÑString::Format( TEXT( "Add %s Here" ), assetReference.c_str() ) ), this );
+	QAction			actionActorAdd( QString::fromStdWString( CString::Format( TEXT( "Add %s Here" ), currentActorClass->GetName().c_str() ) ), this );
+	QAction			actionAssetAdd( QString::fromStdWString( CString::Format( TEXT( "Add %s Here" ), assetReference.c_str() ) ), this );
 	contextMenu.addAction( &actionActorAdd );
 	
 	// If asset reference not empty, we add action for spawn asset in world

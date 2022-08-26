@@ -176,7 +176,7 @@ public:
 	 */
 	FORCEINLINE std::wstring String() const
 	{
-		return ÑString::Format( TEXT( "%08X%08X%08X%08X" ), a, b, c, d );
+		return CString::Format( TEXT( "%08X%08X%08X%08X" ), a, b, c, d );
 	}
 
 	/**

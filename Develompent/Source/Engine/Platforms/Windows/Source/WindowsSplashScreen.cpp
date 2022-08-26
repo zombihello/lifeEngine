@@ -294,7 +294,7 @@ void appShowSplash( const tchar* InSplashName )
 {
 	if ( !GIsCommandlet )
 	{
-		GSplashScreenFileName = appGameDir() + ÑString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
+		GSplashScreenFileName = appGameDir() + CString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
 		GThreadInitSyncEvent = GSynchronizeFactory->CreateSynchEvent( true );
 		GSplashScreenThread = CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
 

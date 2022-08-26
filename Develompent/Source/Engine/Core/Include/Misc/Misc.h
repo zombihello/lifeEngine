@@ -135,7 +135,7 @@ FORCEINLINE std::wstring appBaseDir()
  */
 FORCEINLINE std::wstring appGameDir()
 {
-	return ÑString::Format( TEXT( ".." ) PATH_SEPARATOR TEXT( ".." ) PATH_SEPARATOR TEXT( "%s" ) PATH_SEPARATOR, GGameName.c_str() );
+	return CString::Format( TEXT( ".." ) PATH_SEPARATOR TEXT( ".." ) PATH_SEPARATOR TEXT( "%s" ) PATH_SEPARATOR, GGameName.c_str() );
 }
 
 /**

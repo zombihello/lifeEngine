@@ -119,7 +119,7 @@ void WeAudioBankEditorWindow::UpdateUI()
 		ui->label_formatValue->setText( QString::fromStdWString( appSampleFormatToText( audioBankInfo.format ) ) );
 		ui->label_channelsValue->setText( QString::number( audioBankInfo.numChannels ) );
 		ui->label_rateValue->setText( QString::number( audioBankInfo.rate ) );
-		ui->label_resourceSizeValue->setText( QString::fromStdWString( ÑString::Format( TEXT( "%.2f Kb" ), ( appGetNumSampleBytes( audioBankInfo.format ) * audioBankInfo.numSamples ) / 1024.f ) ) );
+		ui->label_resourceSizeValue->setText( QString::fromStdWString( CString::Format( TEXT( "%.2f Kb" ), ( appGetNumSampleBytes( audioBankInfo.format ) * audioBankInfo.numSamples ) / 1024.f ) ) );
 		audioBank->CloseBank( audioBankHandle );
 	}
 	else
@@ -199,7 +199,7 @@ void WeAudioBankEditorWindow::on_actionReimport_triggered()
 	}
 	else
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), audioBank->GetAssetName().c_str(), errorMessage.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), audioBank->GetAssetName().c_str(), errorMessage.c_str() ) ) );
 	}
 }
 

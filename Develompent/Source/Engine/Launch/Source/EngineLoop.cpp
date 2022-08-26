@@ -173,6 +173,10 @@ void CEngineLoop::SerializeConfigs()
 #endif // WITH_EDITOR
 }
 
+#include "Misc/CoreGlobals.h"
+#include "System/BaseFileSystem.h"
+#include "System/Archive.h"
+
 /**
  * Pre-Initialize the main loop
  */
@@ -337,7 +341,7 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 
 	if ( !map.empty() )
 	{
-		appSetSplashText( STT_StartupProgress, ÑString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
+		appSetSplashText( STT_StartupProgress, CString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
 
 		std::wstring		error;
 		bool				successed = GEngine->LoadMap( map, error );

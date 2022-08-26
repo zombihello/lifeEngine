@@ -156,7 +156,7 @@ void WeStaticMeshEditorWindow::UpdateUI()
 	
 	ui->label_numVertecesValue->setText( QString::number( verteces.Num() ) );
 	ui->label_numTrianglesValue->setText( QString::number( indeces.Num() / 3 ) );
-	ui->label_resourceSizeValue->setText( QString::fromStdWString( ÑString::Format( TEXT( "%.2f Kb" ), ( verteces.Num() * sizeof( SStaticMeshVertexType ) + indeces.Num() * sizeof( uint32 ) ) / 1024.f ) ) );
+	ui->label_resourceSizeValue->setText( QString::fromStdWString( CString::Format( TEXT( "%.2f Kb" ), ( verteces.Num() * sizeof( SStaticMeshVertexType ) + indeces.Num() * sizeof( uint32 ) ) / 1024.f ) ) );
 	OnSourceFileChanged( QString::fromStdWString( staticMesh->GetAssetSourceFile() ) );
 }
 
@@ -291,6 +291,6 @@ void WeStaticMeshEditorWindow::on_actionReimport_triggered()
 	}
 	else
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), staticMesh->GetAssetName().c_str(), errorMessage.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), staticMesh->GetAssetName().c_str(), errorMessage.c_str() ) ) );
 	}
 }

@@ -140,7 +140,7 @@ void WeFileSystemModel::dropMimeData_moveFiles( const QMimeData* InData, Qt::Dro
 				if ( applayMode == QMessageBox::NoToAll ||
 					 applayMode != QMessageBox::YesToAll && QMessageBox::warning( ( QWidget* ) this->parent(),
 					 "Warning",
-					 TCHAR_TO_ANSI( ÑString::Format( TEXT( "Move file exists %s %s" ), dropFileInfo.fileName().toStdWString().c_str(), this->fileInfo( InParent ).fileName().toStdWString().c_str() ).c_str() ),
+					 TCHAR_TO_ANSI( CString::Format( TEXT( "Move file exists %s %s" ), dropFileInfo.fileName().toStdWString().c_str(), this->fileInfo( InParent ).fileName().toStdWString().c_str() ).c_str() ),
 					 QMessageBox::Ok | QMessageBox::Cancel ) != QMessageBox::Ok )
 				{
 					continue;
@@ -267,7 +267,7 @@ void WeFileSystemModel::dropMimeData_copyFiles( const QMimeData* InData, Qt::Dro
 				if ( applayMode == QMessageBox::NoToAll ||
 					 applayMode != QMessageBox::YesToAll && QMessageBox::warning( ( QWidget* ) this->parent(),
 					 "Warning",
-					 TCHAR_TO_ANSI( ÑString::Format( TEXT( "Copy file exists %s %s" ), dropFileInfo.fileName().toStdWString().c_str(), this->fileInfo( InParent ).fileName().toStdWString().c_str() ).c_str() ),
+					 TCHAR_TO_ANSI( CString::Format( TEXT( "Copy file exists %s %s" ), dropFileInfo.fileName().toStdWString().c_str(), this->fileInfo( InParent ).fileName().toStdWString().c_str() ).c_str() ),
 					 QMessageBox::Ok | QMessageBox::Cancel ) != QMessageBox::Ok )
 				{
 					continue;
@@ -363,7 +363,7 @@ void WeFileSystemModel::MoveDir( const QString& InOldDir, const QString& InNewDi
 					{
 						applayMode = QMessageBox::warning( ( QWidget* ) this->parent(),
 														   "Warning",
-														   TCHAR_TO_ANSI( ÑString::Format( TEXT( "Move file exists %s %s" ), it->fileName().toStdWString().c_str(), InNewDir.toStdWString().c_str() ).c_str() ),
+														   TCHAR_TO_ANSI( CString::Format( TEXT( "Move file exists %s %s" ), it->fileName().toStdWString().c_str(), InNewDir.toStdWString().c_str() ).c_str() ),
 														   QMessageBox::YesAll | QMessageBox::Yes | QMessageBox::NoAll | QMessageBox::No );
 
 						if ( applayMode == QMessageBox::No || applayMode == QMessageBox::NoToAll )
@@ -473,7 +473,7 @@ void WeFileSystemModel::CopyDir( const QString& InOldDir, const QString& InNewDi
 					{
 						applayMode = QMessageBox::warning( ( QWidget* ) this->parent(),
 														   "Warning",
-														   TCHAR_TO_ANSI( ÑString::Format( TEXT( "Copy file exists %s %s" ), it->fileName().toStdWString().c_str(), InNewDir.toStdWString().c_str() ).c_str() ),
+														   TCHAR_TO_ANSI( CString::Format( TEXT( "Copy file exists %s %s" ), it->fileName().toStdWString().c_str(), InNewDir.toStdWString().c_str() ).c_str() ),
 														   QMessageBox::YesAll | QMessageBox::Yes | QMessageBox::NoAll | QMessageBox::No );
 
 						if ( applayMode == QMessageBox::No || applayMode == QMessageBox::NoToAll )

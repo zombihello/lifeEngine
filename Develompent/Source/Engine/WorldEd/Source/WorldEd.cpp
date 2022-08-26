@@ -128,7 +128,7 @@ std::wstring appGetWorldEdName()
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
 
-	return ÑString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
+	return CString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
 }
 
 QMessageBox::StandardButton ShowMessageBoxWithList( class QWidget* InParent, const QString& InTitle, const QString& InText, const QString& InListName, const std::vector<QString>& InList, bool InIsError /* = false */, uint32 InMaxSizeList /* = 3 */ )
@@ -150,7 +150,7 @@ QMessageBox::StandardButton ShowMessageBoxWithList( class QWidget* InParent, con
 		}
 	}
 
-	QString		finalText = QString::fromStdWString( ÑString::Format( TEXT( "%s<br><br><b>%s:</b><br>%s" ), InText.toStdWString().c_str(), InListName.toStdWString().c_str(), resultList.toStdWString().c_str() ) );
+	QString		finalText = QString::fromStdWString( CString::Format( TEXT( "%s<br><br><b>%s:</b><br>%s" ), InText.toStdWString().c_str(), InListName.toStdWString().c_str(), resultList.toStdWString().c_str() ) );
 	if ( InIsError )
 	{
 		return QMessageBox::critical( InParent, InTitle, finalText, QMessageBox::Ok );

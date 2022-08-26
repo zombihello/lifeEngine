@@ -94,7 +94,7 @@ static FORCEINLINE QMessageBox::StandardButton ShowDeleteFileMessageBox( QWidget
 		}
 	}
 
-	QString		finalText = QString::fromStdWString( ÑString::Format( TEXT( "%s<br><br><b>Files:</b><br>%s" ), InText.toStdWString().c_str(), filesToDelete.toStdWString().c_str() ) );
+	QString		finalText = QString::fromStdWString( CString::Format( TEXT( "%s<br><br><b>Files:</b><br>%s" ), InText.toStdWString().c_str(), filesToDelete.toStdWString().c_str() ) );
 	return QMessageBox::warning( InParent, InTitle, finalText, QMessageBox::Cancel | QMessageBox::Ok );
 }
 
@@ -121,7 +121,7 @@ static FORCEINLINE QMessageBox::StandardButton ShowDeleteAssetMessageBox( QWidge
 		}
 	}
 
-	QString		finalText = QString::fromStdWString( ÑString::Format( TEXT( "%s<br><br><b>Assets:</b><br>%s" ), InText.toStdWString().c_str(), assetsToDelete.toStdWString().c_str() ) );
+	QString		finalText = QString::fromStdWString( CString::Format( TEXT( "%s<br><br><b>Assets:</b><br>%s" ), InText.toStdWString().c_str(), assetsToDelete.toStdWString().c_str() ) );
 	return QMessageBox::warning( InParent, InTitle, finalText, QMessageBox::Cancel | QMessageBox::Ok );
 }
 
@@ -418,7 +418,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_Import()
 		// Show message if not setted flags bReplaceAll and bSkipAll
 		if ( !bReplaceAll && !bSkipAll && importResult == CHelperAssetImporter::IR_AlreadyExist )
 		{
-			QMessageBox::StandardButton		resultButton = QMessageBox::question( this, "Question", QString::fromStdWString( ÑString::Format( TEXT( "Asset with name <b>'%s'</b> already exist in package. Replace it?" ), QFileInfo( path ).baseName().toStdWString().c_str() ) ), QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll );
+			QMessageBox::StandardButton		resultButton = QMessageBox::question( this, "Question", QString::fromStdWString( CString::Format( TEXT( "Asset with name <b>'%s'</b> already exist in package. Replace it?" ), QFileInfo( path ).baseName().toStdWString().c_str() ) ), QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll );
 			switch ( resultButton )
 			{
 			case QMessageBox::YesToAll:
@@ -543,7 +543,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_ReimportWithNewFile()
 	// If reimport asset is failed - show error message box
 	if ( !bResult )
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed reimport asset <b>'%s'</b> from new source file <b>'%s'</b>.<br><br>Error: %s" ), assetRef->GetAssetName().c_str(), newSourceFile.toStdWString().c_str(), errorMessage.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Failed reimport asset <b>'%s'</b> from new source file <b>'%s'</b>.<br><br>Error: %s" ), assetRef->GetAssetName().c_str(), newSourceFile.toStdWString().c_str(), errorMessage.c_str() ) ) );
 	}
 }
 
@@ -571,7 +571,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_CreateMaterial()
 		// If asset with name already exist - try enter other name 
 		if ( package->IsExist( assetName.toStdWString() ) )
 		{
-			QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), assetName.toStdWString().c_str() ) ), QMessageBox::Ok );
+			QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), assetName.toStdWString().c_str() ) ), QMessageBox::Ok );
 			bIsOk = false;
 		}
 	}
@@ -607,7 +607,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_CreatePhysMaterial()
 		// If asset with name already exist - try enter other name 
 		if ( package->IsExist( assetName.toStdWString() ) )
 		{
-			QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), assetName.toStdWString().c_str() ) ), QMessageBox::Ok );
+			QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), assetName.toStdWString().c_str() ) ), QMessageBox::Ok );
 			bIsOk = false;
 		}
 	}
@@ -701,7 +701,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_RenameAsset()
 		// If asset with new name already exist - try enter other name 
 		if ( package->IsExist( newAssetName.toStdWString() ) )
 		{
-			QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), newAssetName.toStdWString().c_str() ) ), QMessageBox::Ok );
+			QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Name <b>'%s'</b> already exist in package" ), newAssetName.toStdWString().c_str() ) ), QMessageBox::Ok );
 			bIsOk = false;
 		}
 	}
@@ -953,7 +953,7 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 			// If package still used, we skip him
 			if ( !GPackageManager->UnloadPackage( pathPackage ) )
 			{
-				QMessageBox::warning( this, "Warning", QString::fromStdWString( ÑString::Format( TEXT( "The package <b>'%s'</b> in using and cannot be delete. Close all assets from this package will allow them to be deleted" ), fileInfo.baseName().toStdWString().c_str() ) ), QMessageBox::Ok );
+				QMessageBox::warning( this, "Warning", QString::fromStdWString( CString::Format( TEXT( "The package <b>'%s'</b> in using and cannot be delete. Close all assets from this package will allow them to be deleted" ), fileInfo.baseName().toStdWString().c_str() ) ), QMessageBox::Ok );
 				return;
 			}
 
@@ -963,14 +963,14 @@ void WeContentBrowserWidget::on_treeView_contentBrowser_contextMenu_rename()
 			// If package failed loaded - we not change him name
 			if ( !package )
 			{
-				QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "File <b>'%s'</b> not renamed because failed loading package for change him name" ), pathPackage.c_str() ) ), QMessageBox::Ok );
+				QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "File <b>'%s'</b> not renamed because failed loading package for change him name" ), pathPackage.c_str() ) ), QMessageBox::Ok );
 				return;
 			}
 
 			// And if package is dirty - we not change him name
 			if ( package->IsDirty() )
 			{
-				QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "File <b>'%s'</b> not renamed because this package is modified. Saving this package will allow to be rename him" ), pathPackage.c_str() ) ) );
+				QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "File <b>'%s'</b> not renamed because this package is modified. Saving this package will allow to be rename him" ), pathPackage.c_str() ) ) );
 				return;
 			}
 
@@ -1132,7 +1132,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		assetRef->ReloadDependentAssets();
 
 		WeTextureEditorWindow*		textureEditorWindow = new WeTextureEditorWindow( assetRef, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), textureEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), textureEditorWindow, true );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( CString::Format( TEXT( "%s - %s" ), textureEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), textureEditorWindow, true );
 		connect( textureEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
 	}
@@ -1143,7 +1143,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		assetRef->ReloadDependentAssets();
 
 		WeMaterialEditorWindow*		materialEditorWindow = new WeMaterialEditorWindow( assetRef, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), materialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), materialEditorWindow, true );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( CString::Format( TEXT( "%s - %s" ), materialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), materialEditorWindow, true );
 		connect( materialEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
 	}
@@ -1154,7 +1154,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		assetRef->ReloadDependentAssets();
 
 		WeStaticMeshEditorWindow*		staticMeshEditorWindow = new WeStaticMeshEditorWindow( assetRef, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), staticMeshEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), staticMeshEditorWindow, true );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( CString::Format( TEXT( "%s - %s" ), staticMeshEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), staticMeshEditorWindow, true );
 		connect( staticMeshEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
 	}
@@ -1165,7 +1165,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		assetRef->ReloadDependentAssets();
 
 		WeAudioBankEditorWindow*		audioBankEditorWindow = new WeAudioBankEditorWindow( assetRef, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), audioBankEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), audioBankEditorWindow, true );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( CString::Format( TEXT( "%s - %s" ), audioBankEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), audioBankEditorWindow, true );
 		connect( audioBankEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
 	}
@@ -1176,7 +1176,7 @@ void WeContentBrowserWidget::on_listView_packageBrowser_doubleClicked( QModelInd
 		assetRef->ReloadDependentAssets();
 
 		WePhysicsMaterialEditorWindow*	physMaterialEditorWindow = new WePhysicsMaterialEditorWindow( assetRef, this );
-		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( ÑString::Format( TEXT( "%s - %s" ), physMaterialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), physMaterialEditorWindow, true );
+		GEditorEngine->GetMainWindow()->CreateFloatingDockWidget( QString::fromStdWString( CString::Format( TEXT( "%s - %s" ), physMaterialEditorWindow->windowTitle().toStdWString().c_str(), assetRef->GetAssetName().c_str() ) ), physMaterialEditorWindow, true );
 		connect( physMaterialEditorWindow, SIGNAL( OnChangedAsset( const TSharedPtr<CAsset>& ) ), this, SLOT( OnPackageBrowserChangedAsset( const TSharedPtr<CAsset>& ) ) );
 		break;
 	}

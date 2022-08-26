@@ -64,7 +64,7 @@ void CMeshDrawingPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDev
 void CMeshDrawingPolicy::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMeshBatch, const class CSceneView& InSceneView )
 {
 	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
-	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, ÑString::Format( TEXT( "Material %s" ), materialRef ? materialRef->GetAssetName().c_str() : TEXT( "Unloaded" ) ).c_str());
+	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, CString::Format( TEXT( "Material %s" ), materialRef ? materialRef->GetAssetName().c_str() : TEXT( "Unloaded" ) ).c_str());
 
 	// If vertex factory not support instancig - draw without it
 	if ( !vertexFactory->SupportsInstancing() )

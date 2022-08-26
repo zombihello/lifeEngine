@@ -103,7 +103,7 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 				continue;
 			}
 
-			SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, ÑString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str() );
+			SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, CString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str() );
 
 
 			// Clear depth buffer for foreground layer

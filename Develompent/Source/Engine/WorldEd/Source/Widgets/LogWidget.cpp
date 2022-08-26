@@ -37,5 +37,5 @@ void WeLogWidget::Print( ELogType InLogType, const tchar* InMessage )
 		break;
 	}
 	
-	ui->textBrowser->append( QString::fromStdWString( ÑString::Format( ( beginColorMessage + TEXT( "%s" ) + endColorMessage ).c_str(), InMessage ) ) );
+	ui->textBrowser->append( QString::fromStdWString( CString::Format( ( beginColorMessage + TEXT( "%s" ) + endColorMessage ).c_str(), InMessage ) ) );
 }

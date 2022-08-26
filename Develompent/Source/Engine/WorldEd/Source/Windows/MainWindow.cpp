@@ -112,7 +112,7 @@ void WeMainWindow::InitUI()
 	ui->menuWindows->insertAction( firstActionMenuView, dockWidget->toggleViewAction() );
 
 	// Update text in menu action 'About'
-	ui->actionAbout->setText( QString::fromStdWString( ÑString::Format( TEXT( "About %s" ), GEditorEngine->GetEditorName().c_str() ) ) );
+	ui->actionAbout->setText( QString::fromStdWString( CString::Format( TEXT( "About %s" ), GEditorEngine->GetEditorName().c_str() ) ) );
 
 	// Set icons for actions
 	ui->actionNewLevel->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/New.png" ) ).c_str() ) ) );
@@ -127,7 +127,7 @@ void WeMainWindow::InitUI()
 	ui->actionPlay->setIcon( QIcon( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Icons/Play.png" ) ).c_str() ) ) );
 
 	// Restore state of dock widgets from cache
-	QFile           file( QString::fromStdWString( ÑString::Format( TEXT( "%s/EditorCache/UICache.dat" ), appGameDir().c_str() ) ) );
+	QFile           file( QString::fromStdWString( CString::Format( TEXT( "%s/EditorCache/UICache.dat" ), appGameDir().c_str() ) ) );
 	QByteArray		cachedState;
 	if ( file.open( QFile::ReadOnly ) )
 	{
@@ -347,7 +347,7 @@ void WeMainWindow::on_actionOpen_triggered()
 	std::wstring		errorMsg;
 	if ( !GEditorEngine->LoadMap( appQtAbsolutePathToEngine( path ), errorMsg ) )
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed open map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Failed open map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
 	}
 }
 
@@ -362,7 +362,7 @@ void WeMainWindow::on_actionSave_triggered()
 	std::wstring		errorMsg;
 	if ( !GEditorEngine->SaveMap( GWorld->GetFilePath(), errorMsg ) )
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed saving map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Failed saving map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
 	}
 }
 
@@ -377,7 +377,7 @@ void WeMainWindow::on_actionSave_as_triggered()
 	std::wstring		errorMsg;
 	if ( !GEditorEngine->SaveMap( appQtAbsolutePathToEngine( path ), errorMsg) )
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed saving map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Failed saving map.<br><br><b>Error:<b> %s" ), errorMsg.c_str() ) ) );
 	}
 }
 

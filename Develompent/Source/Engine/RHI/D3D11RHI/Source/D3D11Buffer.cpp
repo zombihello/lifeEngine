@@ -64,7 +64,7 @@ CD3D11VertexBufferRHI::CD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, con
 #endif // DO_CHECK
 
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( ÑString::Format( TEXT( "%s[VERTEX_BUFFER]" ), InBufferName ).c_str() ) );
+	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[VERTEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
@@ -123,7 +123,7 @@ CD3D11IndexBufferRHI::CD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uin
 #endif // DO_CHECK
 
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( ÑString::Format( TEXT( "%s[INDEX_BUFFER]" ), InBufferName ).c_str() ) );
+	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[INDEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
@@ -180,7 +180,7 @@ CD3D11ConstantBuffer::CD3D11ConstantBuffer( uint32 InSize, const tchar* InBuffer
 #endif // DO_CHECK
 
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( ÑString::Format( TEXT( "%s[CONSTANT_BUFFER]" ), InBufferName ).c_str() ) );
+	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[CONSTANT_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 

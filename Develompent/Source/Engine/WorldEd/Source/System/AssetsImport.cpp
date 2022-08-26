@@ -37,7 +37,7 @@ QString CHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 			result += "Texture Formats (";
 			for ( uint32 index = 0, count = textureExtension.size(); index < count; ++index )
 			{
-				std::wstring		format = ÑString::Format( TEXT( "*.%s%s" ), textureExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+				std::wstring		format = CString::Format( TEXT( "*.%s%s" ), textureExtension[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
 				result += format;
 				allSupportedFormats += format;
 			}
@@ -55,7 +55,7 @@ QString CHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 			result += "Audio Formats (";
 			for ( uint32 index = 0, count = audioExtnesion.size(); index < count; ++index )
 			{
-				std::wstring		format = ÑString::Format( TEXT( "*.%s%s" ), audioExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+				std::wstring		format = CString::Format( TEXT( "*.%s%s" ), audioExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
 				result += format;
 				allSupportedFormats += format;
 			}
@@ -73,7 +73,7 @@ QString CHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 			result += "Mesh Formats (";
 			for ( uint32 index = 0, count = staticMeshExtnesion.size(); index < count; ++index )
 			{
-				std::wstring		format = ÑString::Format( TEXT( "*.%s%s" ), staticMeshExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
+				std::wstring		format = CString::Format( TEXT( "*.%s%s" ), staticMeshExtnesion[ index ].c_str(), index + 1 < count ? TEXT( ";" ) : TEXT( "" ) );
 				result += format;
 				allSupportedFormats += format;
 			}
@@ -83,7 +83,7 @@ QString CHelperAssetImporter::MakeFilterOfSupportedExtensions( uint32 InFlags /*
 
 	// All supported formats
 	{
-		result += ÑString::Format( TEXT( "All supported formats (%s)" ), allSupportedFormats.c_str() );
+		result += CString::Format( TEXT( "All supported formats (%s)" ), allSupportedFormats.c_str() );
 	}
 
 	return result;
@@ -151,7 +151,7 @@ CHelperAssetImporter::EImportResult CHelperAssetImporter::Import( const QString&
 	// Else this is unknown asset
 	else
 	{
-		OutError = ÑString::Format( TEXT( "Unknown asset type '%s' for import" ), InPath.toStdWString().c_str() );
+		OutError = CString::Format( TEXT( "Unknown asset type '%s' for import" ), InPath.toStdWString().c_str() );
 		LE_LOG( LT_Warning, LC_Editor, OutError.c_str() );
 		return IR_Error;
 	}
@@ -287,7 +287,7 @@ bool CTexture2DImporter::Reimport( const TSharedPtr<CTexture2D>& InTexture2D, st
 	void*			data = stbi_load( TCHAR_TO_ANSI( sourceFile.c_str() ), ( int* ) &sizeX, ( int* ) &sizeY, &numComponents, 4 );
 	if ( !data )
 	{
-		OutError = ÑString::Format( TEXT( "Failed open file '%s'" ), sourceFile.c_str() );
+		OutError = CString::Format( TEXT( "Failed open file '%s'" ), sourceFile.c_str() );
 		return false;
 	}
 
@@ -383,7 +383,7 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh,
 		aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals | aiProcess_LimitBoneWeights | aiProcess_Triangulate );
 	if ( !aiScene )
 	{
-		OutError = ÑString::Format( TEXT( "Failed open static mesh file. Error: %s" ), ANSI_TO_TCHAR( aiImport.GetErrorString() ) );
+		OutError = CString::Format( TEXT( "Failed open static mesh file. Error: %s" ), ANSI_TO_TCHAR( aiImport.GetErrorString() ) );
 		return false;
 	}
 
@@ -392,7 +392,7 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CStaticMesh>& InStaticMesh,
 	ProcessNode( aiScene->mRootNode, aiScene, meshes );
 	if ( meshes.empty() )
 	{
-		OutError = ÑString::Format( TEXT( "In file '%s' not found meshes" ), InStaticMesh->GetAssetSourceFile().c_str() );
+		OutError = CString::Format( TEXT( "In file '%s' not found meshes" ), InStaticMesh->GetAssetSourceFile().c_str() );
 		aiImport.FreeScene();
 		return false;
 	}

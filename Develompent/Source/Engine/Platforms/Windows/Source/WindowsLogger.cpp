@@ -98,7 +98,7 @@ void CWindowsLogger::Init()
 	time_t		timeNow = time( nullptr );
 	tm*			tmTimeNow = localtime( &timeNow );
 
-	std::wstring		logFile = ÑString::Format( TEXT( "%s/Logs/%s-%i.%02i.%02i-%02i.%02i.%02i.log" ), appGameDir().c_str(), !GIsEditor ? GGameName.c_str() : TEXT( "WorldEd" ), 1900 + tmTimeNow->tm_year, 1 + tmTimeNow->tm_mon, tmTimeNow->tm_mday, tmTimeNow->tm_hour, tmTimeNow->tm_min, tmTimeNow->tm_sec );
+	std::wstring		logFile = CString::Format( TEXT( "%s/Logs/%s-%i.%02i.%02i-%02i.%02i.%02i.log" ), appGameDir().c_str(), !GIsEditor ? GGameName.c_str() : TEXT( "WorldEd" ), 1900 + tmTimeNow->tm_year, 1 + tmTimeNow->tm_mon, tmTimeNow->tm_mday, tmTimeNow->tm_hour, tmTimeNow->tm_min, tmTimeNow->tm_sec );
 	archiveLogs = GFileSystem->CreateFileWriter( logFile.c_str(), AW_None );
 	if ( archiveLogs )
 	{
@@ -173,7 +173,7 @@ void CWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType, ELog
 		}
 	}
 	
-	std::wstring			message = ÑString::Format( TEXT( "[%07.2f][%s][%s] %s" ), appSeconds() - GStartTime, GLogTypeNames[ ( uint32 ) InLogType ], GLogCategoryNames[ ( uint32 ) InLogCategory ], InMessage );
+	std::wstring			message = CString::Format( TEXT( "[%07.2f][%s][%s] %s" ), appSeconds() - GStartTime, GLogTypeNames[ ( uint32 ) InLogType ], GLogCategoryNames[ ( uint32 ) InLogCategory ], InMessage );
 	std::wstring			finalMessage = message + TEXT( "\n" );
 	wprintf( finalMessage.c_str() );
 

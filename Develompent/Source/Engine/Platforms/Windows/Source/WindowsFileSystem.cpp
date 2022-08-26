@@ -63,8 +63,11 @@ class CArchive* CWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 			slashIndex = path.find_last_of( TEXT( "\\" ) );
 		}
 
-		path.erase( slashIndex, path.size() );
-		CreateDirectoryW( path.c_str(), nullptr );
+		if ( slashIndex != std::wstring::npos )
+		{
+			path.erase( slashIndex, path.size() );
+			CreateDirectoryW( path.c_str(), nullptr );
+		}
 	}
 
 	// Create file and create archive writer
@@ -92,7 +95,7 @@ std::vector< std::wstring > CWindowsFileSystem::FindFiles( const std::wstring& I
 	WIN32_FIND_DATAW					data;
 	std::vector< std::wstring >			result;
 
-	handle = FindFirstFileW( ÑString::Format( TEXT( "%s/*" ), InDirectory.c_str() ).c_str(), &data );
+	handle = FindFirstFileW( CString::Format( TEXT( "%s/*" ), InDirectory.c_str() ).c_str(), &data );
 	if ( handle != INVALID_HANDLE_VALUE )
 	{
 		do

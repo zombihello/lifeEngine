@@ -62,7 +62,7 @@ bool CShaderCompiler::CompileAll( CShaderCache& InOutShaderCache, EShaderPlatfor
 				continue;
 			}
 
-			appSetSplashText( STT_StartupProgress, ÑString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
+			appSetSplashText( STT_StartupProgress, CString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
 			bool		result = CompileShader( metaType, InShaderPlatform, InOutShaderCache, vertexFactoryType );
 			check( result );
 		}

@@ -52,7 +52,7 @@ void* appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool I
 {
     LE_LOG( LT_Log, LC_Dev, TEXT( "CreateProc %s %s" ), InPathToProcess, InParams );
 
-	std::wstring				commandLine = ÑString::Format( TEXT( "%s %s" ), InPathToProcess, InParams );
+	std::wstring				commandLine = CString::Format( TEXT( "%s %s" ), InPathToProcess, InParams );
 
 	PROCESS_INFORMATION			procInfo;
 	SECURITY_ATTRIBUTES			attributes;

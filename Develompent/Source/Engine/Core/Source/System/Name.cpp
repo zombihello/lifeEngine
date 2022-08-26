@@ -1,73 +1,74 @@
 #include <list>
 
 #include "Misc/Misc.h"
+#include "Containers/String.h"
 #include "System/Name.h"
 
-static std::list<TSharedPtr<CName::SNameEntry>>& GetGlobalNameTable()
+static std::vector<CName::SNameEntry>& GetGlobalNameTable()
 {
-	static std::list<TSharedPtr<CName::SNameEntry>>		globalNameTable;
+	static std::vector<CName::SNameEntry>		globalNameTable;
 	return globalNameTable;
 }
 
-static FORCEINLINE TSharedPtr<CName::SNameEntry> AllocateNameEntry( const std::wstring& InName, uint32 InIndex )
+static FORCEINLINE void AllocateNameEntry( const std::wstring& InName, uint32 InHash )
 {
-	TSharedPtr<CName::SNameEntry>		newNameEntry = MakeSharedPtr<CName::SNameEntry>( InName, InIndex );
-	GetGlobalNameTable().push_back( newNameEntry );
-	return newNameEntry;
+	GetGlobalNameTable().push_back( CName::SNameEntry( InName, InHash ) );
 }
 
 void CName::StaticInit()
 {
-	check( !GetIsInitialized() );
+	// Initialize engine names if necessary
+	if ( GetIsInitialized() )
+	{
+		return;
+	}
+
+	check( GetGlobalNameTable().empty() );
 	GetIsInitialized() = true;
 
 	// Register all hardcoded names
-	#define REGISTER_NAME( InNum, InName )	AllocateNameEntry( TEXT( #InName ), InNum );
+	#define REGISTER_NAME( InNum, InName )	\
+	{ \
+		check( InNum == GetGlobalNameTable().size() ); \
+		AllocateNameEntry( TEXT( #InName ), appCalcHash( CString::ToUpper( TEXT( #InName ) ) ) ); \
+	}
 	#include "Misc/Names.h"
 }
 
 void CName::Init( const std::wstring& InString )
 {
-	// Initialize engine names if necessary
-	if ( !GetIsInitialized() )
-	{
-		StaticInit();
-	}
-
-	// Transform string to upper case
-	std::wstring		upperString = InString;
-	for ( uint32 index = 0, count = upperString.size(); index < count; ++index )
-	{
-		upperString[index] = std::toupper( upperString[index] );
-	}
-
 	// Calculate hash for string
-	uint32		index = appCalcHash( upperString );
+	uint32				hash = appCalcHash( CString::ToUpper( InString ) );
 
 	// Try find already exist name in global table
-	std::list<TSharedPtr<CName::SNameEntry>>&	globalNameTable = GetGlobalNameTable();
-	for ( auto itBegin = globalNameTable.begin(), itEnd = globalNameTable.end(); itBegin != itEnd; ++itBegin )
+	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+	for ( uint32 nameEntryId = 0, numNameEntries = globalNameTable.size(); nameEntryId < numNameEntries; ++nameEntryId )
 	{
-		if ( ( *itBegin )->index == index )
+		const CName::SNameEntry&		nameEntry = globalNameTable[nameEntryId];
+		if ( nameEntry.hash == hash )
 		{
-			nameEntry = *itBegin;
+			index = nameEntryId;
 			return;
 		}
 	}
 
+	// Getting index of name
+	index = globalNameTable.size();
+
 	// Allocate new name entry
-	AllocateNameEntry( InString, index );
+	AllocateNameEntry( InString, hash );
 }
 
 void CName::ToString( std::wstring& OutString ) const
 {
-	if ( nameEntry )
+	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+	if ( !IsValid() )
 	{
-		OutString = nameEntry->name;
+		OutString = globalNameTable[NAME_None].name;
 	}
 	else
 	{
-		OutString = CName( NAME_None ).ToString();
+		OutString = globalNameTable[index].name;
 	}
 }
 
@@ -80,37 +81,60 @@ std::wstring CName::ToString() const
 
 bool CName::operator==( const std::wstring& InOther ) const
 {
-	if ( !nameEntry )
-	{
-		return false;
-	}
-
-	// Transform string to upper case
-	std::wstring		upperString = InOther;
-	for ( uint32 index = 0, count = upperString.size(); index < count; ++index )
-	{
-		upperString = std::toupper( upperString[index] );
-	}
-
 	// Calculate hash for string
-	uint32		index = appCalcHash( upperString );
+	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+	uint32								hash = appCalcHash( CString::ToUpper( InOther ) );
 
-	return nameEntry->index == index;
+	return globalNameTable[IsValid() ? index : NAME_None].hash == hash;
 }
 
-CName& CName::operator=( EName InOther )
+CArchive& operator<<( CArchive& InArchive, CName& InValue )
 {
-	// Try find engine name in global table
-	std::list<TSharedPtr<CName::SNameEntry>>&	globalNameTable = GetGlobalNameTable();
-	for ( auto itBegin = globalNameTable.begin(), itEnd = globalNameTable.end(); itBegin != itEnd; ++itBegin )
+	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+
+	if ( InArchive.IsSaving() )
 	{
-		if ( ( *itBegin )->index == InOther )
+		const CName::SNameEntry& nameEntry = globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
+		InArchive << nameEntry.name;
+		InArchive << InValue.index;
+	}
+	else
+	{
+		std::wstring	name;
+		uint32			index;
+		InArchive << name;
+		InArchive << index;
+
+		// Is name is not valid, setting to NAME_None
+		if ( name == TEXT( "" ) || index == INDEX_NONE )
 		{
-			nameEntry = *itBegin;
-			return *this;
+			InValue = NAME_None;
+		}
+
+		// Else we init name
+		else
+		{	
+			if ( index < globalNameTable.size() && globalNameTable[index].name == name )
+			{
+				InValue.index = index;
+			}
+			else
+			{
+				InValue.Init( name );
+			}
 		}
 	}
 
-	appErrorf( TEXT( "Engine name 0x%X not founded. Need call CName::StaticInit before using" ), InOther );
-	return *this;
+	return InArchive;
+}
+
+CArchive& operator<<( CArchive& InArchive, const CName& InValue )
+{
+	std::vector<CName::SNameEntry>&	globalNameTable = GetGlobalNameTable();
+	const CName::SNameEntry&		nameEntry		= globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
+
+	check( InArchive.IsSaving() );
+	InArchive << nameEntry.name;
+	InArchive << InValue.index;
+	return InArchive;
 }

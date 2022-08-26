@@ -13,6 +13,7 @@
 
 #include "Misc/Types.h"
 #include "Misc/SharedPointer.h"
+#include "System/Archive.h"
 #include "Core.h"
 
 /**
@@ -32,29 +33,34 @@ public:
 		 * @brief Constructor
 		 */
 		FORCEINLINE SNameEntry()
-			: index( INDEX_NONE )
+			: hash( INVALID_HASH )
 		{}
 
 		/**
 		 * @brief Constructor
 		 * @param InName	Name
-		 * @param InIndex	Index
+		 * @param InHash	Hash
 		 */
-		FORCEINLINE SNameEntry( const std::wstring& InName, uint32 InIndex )
+		FORCEINLINE SNameEntry( const std::wstring& InName, uint32 InHash = INVALID_HASH )
 			: name( InName )
-			, index( InIndex )
+			, hash( InHash )
 		{}
 
 		std::wstring	name;		/**< Name in string */
-		uint32			index;		/**< Index of name */
+		uint32			hash;		/**< Hash name */
 	};
+
+	friend CArchive& operator<<( CArchive& InArchive, CName& InValue );
+	friend CArchive& operator<<( CArchive& InArchive, const CName& InValue );
 
 	/**
 	 * @brief Constructor
 	 * @param InString		String
 	 */
 	FORCEINLINE CName( const std::wstring& InString )
+		: index( INDEX_NONE )
 	{
+		StaticInit();
 		Init( InString );
 	}
 
@@ -63,15 +69,19 @@ public:
 	 * @param InNameEnum	Name enum
 	 */
 	FORCEINLINE CName( EName InNameEnum )
+		: index( InNameEnum )
 	{
-		*this = InNameEnum;
+		StaticInit();
 	}
 
 	/**
 	 * @brief Constructor
 	 */
 	FORCEINLINE CName()
-	{}
+		: index( INDEX_NONE )
+	{
+		StaticInit();
+	}
 
 	/**
 	 * @brief Convert name to string
@@ -91,7 +101,7 @@ public:
 	 */
 	FORCEINLINE uint32 GetIndex() const
 	{
-		return nameEntry ? nameEntry->index : INDEX_NONE;
+		return index;
 	}
 
 	/**
@@ -100,7 +110,7 @@ public:
 	 */
 	FORCEINLINE bool IsValid() const
 	{
-		return nameEntry.IsValid();
+		return index != INDEX_NONE;
 	}
 
 	/**
@@ -148,7 +158,7 @@ public:
 	 */
 	FORCEINLINE bool operator==( const CName& InOther ) const
 	{
-		return nameEntry == InOther.nameEntry;
+		return index == InOther.index;
 	}
 
 	/**
@@ -159,7 +169,7 @@ public:
 	 */
 	FORCEINLINE bool operator==( EName InOther ) const
 	{
-		return nameEntry && nameEntry->index == InOther;
+		return index == InOther;
 	}
 
 	/**
@@ -170,7 +180,7 @@ public:
 	 */
 	FORCEINLINE CName& operator=( const CName& InOther )
 	{
-		nameEntry = InOther.nameEntry;
+		index = InOther.index;
 		return *this;
 	}
 
@@ -180,7 +190,11 @@ public:
 	 * @param InOther	New name
 	 * @return Return reference to self
 	 */
-	CName& operator=( EName InOther );
+	FORCEINLINE CName& operator=( EName InOther )
+	{
+		index = InOther;
+		return *this;
+	}
 
 private:
 	/**
@@ -189,7 +203,7 @@ private:
 	 */
 	void Init( const std::wstring& InString );
 
-	TSharedPtr<SNameEntry>		nameEntry;	/**< Name entry */
+	uint32		index;		/**< Index name */
 };
 
 #endif // !NAME_H

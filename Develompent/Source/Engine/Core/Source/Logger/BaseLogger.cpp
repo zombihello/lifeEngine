@@ -36,7 +36,7 @@ void ÑBaseLogger::Logf( ELogType InLogType, ELogCategory InLogCategory, const tc
 #if !NO_LOGGING
 	va_list			arguments;
 	va_start( arguments, InMessage );
-    Serialize( ÑString::Format( InMessage, arguments ).c_str(), InLogType, InLogCategory );  
+    Serialize( CString::Format( InMessage, arguments ).c_str(), InLogType, InLogCategory );  
 	va_end( arguments );
 #endif // !NO_LOGGING
 }

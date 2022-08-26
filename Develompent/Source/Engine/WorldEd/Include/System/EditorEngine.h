@@ -155,7 +155,7 @@ public:
 	 */
 	FORCEINLINE std::wstring GetGameContentDir() const
 	{
-		return ÑString::Format( TEXT( "%s/Content/" ), appGameDir().c_str() );
+		return CString::Format( TEXT( "%s/Content/" ), appGameDir().c_str() );
 	}
 
 	/**
@@ -164,7 +164,7 @@ public:
 	 */
 	FORCEINLINE std::wstring GetEngineContentDir() const
 	{
-		return ÑString::Format( TEXT( "%s/Engine/Content/" ), appBaseDir().c_str() );
+		return CString::Format( TEXT( "%s/Engine/Content/" ), appBaseDir().c_str() );
 	}
 
 	/**

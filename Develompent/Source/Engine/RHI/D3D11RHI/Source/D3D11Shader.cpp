@@ -167,7 +167,7 @@ CD3D11BoundShaderStateRHI::CD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 #endif // DO_CHECK
 	
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( ÑString::Format( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
+	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 

@@ -107,7 +107,7 @@ bool CCookPackagesCommandlet::CookMap( const SResourceInfo& InMapInfo )
 	SpawnActorsInWorld( tmxMap, tilesets );
 
 	// Serialize world to HDD
-	CArchive*		archive = GFileSystem->CreateFileWriter( ÑString::Format( TEXT( "%s") PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InMapInfo.filename.c_str(), extensionInfo.map.c_str() ), AW_NoFail );
+	CArchive*		archive = GFileSystem->CreateFileWriter( CString::Format( TEXT( "%s") PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InMapInfo.filename.c_str(), extensionInfo.map.c_str() ), AW_NoFail );
 	archive->SetType( AT_World );
 	archive->SerializeHeader();
 	GWorld->Serialize( *archive );
@@ -865,7 +865,7 @@ bool CCookPackagesCommandlet::CookPhysMaterial( const SResourceInfo& InPhysMater
 
 bool CCookPackagesCommandlet::SaveToPackage( const SResourceInfo& InResourceInfo, const TAssetHandle<CAsset>& InAsset )
 {
-	std::wstring		outputPackage = ÑString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
+	std::wstring		outputPackage = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
 	PackageRef_t			package = GPackageManager->LoadPackage( outputPackage, true );
 	package->Add( InAsset );
 

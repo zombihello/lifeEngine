@@ -6,7 +6,7 @@
 /**
  * Getting a formatted string
  */
-std::wstring ÑString::Format( const tchar* InFormat, ... )
+std::wstring CString::Format( const tchar* InFormat, ... )
 {
 	va_list			arguments;
 	va_start( arguments, InFormat );
@@ -20,7 +20,7 @@ std::wstring ÑString::Format( const tchar* InFormat, ... )
 /**
  * Getting a formatted string
  */
-std::wstring ÑString::Format( const tchar* InFormat, va_list InArguments )
+std::wstring CString::Format( const tchar* InFormat, va_list InArguments )
 {
 	int32           bufferSize = 1024;
 	tchar*			buffer = nullptr;

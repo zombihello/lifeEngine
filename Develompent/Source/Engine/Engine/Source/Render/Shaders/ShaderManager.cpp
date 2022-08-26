@@ -163,7 +163,7 @@ CShader* CShaderManager::FindInstance( const std::wstring& InShaderName, uint64 
 
 std::wstring CShaderManager::GetShaderCacheFilename( EShaderPlatform InShaderPlatform )
 {
-	return ÑString::Format( TEXT( "GlobalShaderCache-%s.bin" ), ShaderPlatformToText( InShaderPlatform ) );
+	return CString::Format( TEXT( "GlobalShaderCache-%s.bin" ), ShaderPlatformToText( InShaderPlatform ) );
 }
 
 /**

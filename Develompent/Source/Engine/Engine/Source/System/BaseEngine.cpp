@@ -179,7 +179,7 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
 
-	CArchive*		archive = GFileSystem->CreateFileReader( ÑString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), GCookedDir.c_str(), InMap.c_str() ) );
+	CArchive*		archive = GFileSystem->CreateFileReader( CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), GCookedDir.c_str(), InMap.c_str() ) );
 	if ( !archive )
 	{
 		OutError = TEXT( "Map not found" );

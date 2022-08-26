@@ -41,7 +41,7 @@ void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewpo
 	// Draw quad with texture
 	if ( InTexture2D )
 	{
-		SCOPED_DRAW_EVENT( EventDrawPreviewTexture, DEC_SCENE_ITEMS, ÑString::Format( TEXT( "Preview %s" ), InTexture2D->GetAssetName().c_str() ).c_str() );
+		SCOPED_DRAW_EVENT( EventDrawPreviewTexture, DEC_SCENE_ITEMS, CString::Format( TEXT( "Preview %s" ), InTexture2D->GetAssetName().c_str() ).c_str() );
 
 		Texture2DRHIRef_t							texture2DRHI				= InTexture2D->GetTexture2DRHI();
 		CScreenVertexShader<SVST_Fullscreen>*		screenVertexShader			= GShaderManager->FindInstance< CScreenVertexShader<SVST_Fullscreen>, CSimpleElementVertexFactory >();

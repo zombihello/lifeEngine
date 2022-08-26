@@ -26,7 +26,7 @@ CTexture2D::~CTexture2D()
 void CTexture2D::InitRHI()
 {
 	check( data.Num() > 0 );
-	texture = GRHI->CreateTexture2D( ÑString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeX, sizeY, pixelFormat, 1, 0, data.GetData() );
+	texture = GRHI->CreateTexture2D( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeX, sizeY, pixelFormat, 1, 0, data.GetData() );
 
 	if ( !GIsEditor && !GIsCommandlet )
 	{

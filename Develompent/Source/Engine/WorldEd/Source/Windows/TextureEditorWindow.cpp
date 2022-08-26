@@ -142,9 +142,9 @@ void WeTextureEditorWindow::UpdateUI()
 	uint32						sizeY = texture2D->GetSizeY();
 	const SPixelFormatInfo& 	pixelFormatInfo = GPixelFormats[ texture2D->GetPixelFormat() ];
 
-	ui->label_importedValue->setText( QString::fromStdWString( ÑString::Format( TEXT( "%ix%i" ), sizeX, sizeY ) ) );
+	ui->label_importedValue->setText( QString::fromStdWString( CString::Format( TEXT( "%ix%i" ), sizeX, sizeY ) ) );
 	ui->label_formatValue->setText( QString::fromWCharArray( pixelFormatInfo.name ) );
-	ui->label_resourceSizeValue->setText( QString::fromStdWString( ÑString::Format( TEXT( "%.2f Kb" ), ( pixelFormatInfo.blockBytes * sizeX * sizeY ) / 1024.f ) ) );
+	ui->label_resourceSizeValue->setText( QString::fromStdWString( CString::Format( TEXT( "%.2f Kb" ), ( pixelFormatInfo.blockBytes * sizeX * sizeY ) / 1024.f ) ) );
 	OnSourceFileChanged( QString::fromStdWString( texture2D->GetAssetSourceFile() ) );
 }
 
@@ -250,7 +250,7 @@ void WeTextureEditorWindow::on_actionReimport_triggered()
 	}
 	else
 	{
-		QMessageBox::critical( this, "Error", QString::fromStdWString( ÑString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), texture2D->GetAssetName().c_str(), errorMessage.c_str() ) ) );
+		QMessageBox::critical( this, "Error", QString::fromStdWString( CString::Format( TEXT( "Failed reimport asset '<b>%s</b>'<br><br>Error: %s" ), texture2D->GetAssetName().c_str(), errorMessage.c_str() ) ) );
 	}
 }
 
