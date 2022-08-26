@@ -8,6 +8,13 @@
 #include "CPP_GlobalConstantBuffers.hlsl"
 #include "BasePassCommon.hlsl"
 
+// Output of pixel shader
+struct PS_OUT
+{
+	float4	diffuseRoughness	: SV_TARGET0;
+	float4	normalMetal			: SV_TARGET1;
+};
+
 // Diffuse texture
 Texture2D		diffuseTexture;
 SamplerState	diffuseSampler;
@@ -24,17 +31,21 @@ SamplerState	metallicSampler;
 Texture2D		roughnessTexture;
 SamplerState	roughnessSampler;
 
-float4 MainPS( VS_OUT In ) : SV_Target
+void MainPS( VS_OUT In, out PS_OUT Out )
 {
-	float4		outColor = diffuseTexture.Sample( diffuseSampler, In.texCoord0 );
-	if ( outColor.a < 0.5f )
+	float4 	diffuseColor = diffuseTexture.Sample( diffuseSampler, In.texCoord0 );
+	if ( diffuseColor.a < 0.5f )
 	{
 		discard;
 	}
 
-    return outColor
-#if WITH_EDITOR
+	Out.diffuseRoughness.a		= roughnessTexture.Sample( roughnessSampler, In.texCoord0 ).a;
+	Out.diffuseRoughness.rgb	= diffuseColor.rgb
+	#if WITH_EDITOR
 		+ In.colorOverlay
-#endif // WITH_EDITOR
+	#endif // WITH_EDITOR
 		;
+
+	Out.normalMetal.rgb 		= normalTexture.Sample( normalSampler, In.texCoord0 ).rgb;
+	Out.normalMetal.a			= metallicTexture.Sample( metallicSampler, In.texCoord0 ).a;
 }

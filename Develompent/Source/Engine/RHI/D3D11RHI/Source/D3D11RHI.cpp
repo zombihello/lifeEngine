@@ -751,7 +751,7 @@ void CD3D11RHI::BeginDrawingViewport( class CBaseDeviceContextRHI* InDeviceConte
 void CD3D11RHI::SetRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget, SurfaceRHIParamRef_t InNewDepthStencilTarget )
 {
 	check( InDeviceContext );
-	CD3D11DeviceContext*			deviceContext				= ( CD3D11DeviceContext* ) InDeviceContext;
+	CD3D11DeviceContext*			deviceContext				= ( CD3D11DeviceContext* )InDeviceContext;
 	CD3D11Surface*					renderTarget				= ( CD3D11Surface* )InNewRenderTarget;
 	CD3D11Surface*					depthStencilTarget			= ( CD3D11Surface* )InNewDepthStencilTarget;
 
@@ -765,6 +765,23 @@ void CD3D11RHI::SetRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, S
 			deviceContext->GetD3D11DeviceContext()->OMSetRenderTargets( 1, &d3d11RenderTargetView, d3d11DepthStencilView );
 			stateCache.renderTargetViews[ 0 ] = d3d11RenderTargetView;
 			stateCache.depthStencilView = d3d11DepthStencilView;
+		}
+	}
+}
+
+void CD3D11RHI::SetMRTRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget, uint32 InTargetIndex )
+{
+	check( InDeviceContext && InTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT );
+	CD3D11DeviceContext*	deviceContext	= ( CD3D11DeviceContext* )InDeviceContext;
+	CD3D11Surface*			renderTarget	= ( CD3D11Surface* )InNewRenderTarget;
+
+	// Set render target
+	{
+		ID3D11RenderTargetView*		d3d11RenderTargetView	= renderTarget ? renderTarget->GetRenderTargetView() : nullptr;
+		if ( d3d11RenderTargetView != stateCache.renderTargetViews[InTargetIndex] )
+		{
+			stateCache.renderTargetViews[InTargetIndex] = d3d11RenderTargetView;
+			deviceContext->GetD3D11DeviceContext()->OMSetRenderTargets( D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, &stateCache.renderTargetViews[0], stateCache.depthStencilView );
 		}
 	}
 }

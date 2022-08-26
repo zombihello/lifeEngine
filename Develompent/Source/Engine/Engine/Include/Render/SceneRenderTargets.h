@@ -28,6 +28,9 @@ enum ESceneRenderTargetTypes
 	SRRT_HitProxies,						/**< Render target for hitProxiesy */
 #endif // ENABLE_HITPROXY
 
+	SRRT_Diffuse_Roughness_GBuffer,			/**< Render target for diffuse and roughness GBuffer */
+	SRRT_Normal_Metal_GBuffer,				/**< Render target for normal and metal GBuffer */
+
 	SRTT_MaxSceneRenderTargets				/**< Max scene RTs available */
 };
 
@@ -50,6 +53,36 @@ public:
 	 * @param InNewSizeY New size by Y
 	 */
 	void Allocate( uint32 InNewSizeX, uint32 InNewSizeY );
+
+	/**
+	 * @brief Begin rendering scene color
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void BeginRenderingSceneColor( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Finish rendering scene color
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void FinishRenderingSceneColor( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Begin rendering GBuffer
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void BeginRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Finish rendering GBuffer
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void FinishRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Clear rendering GBuffer
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void ClearGBufferTargets( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
 	 * @brief Get texture of scene color
@@ -106,6 +139,42 @@ public:
 		return renderTargets[ SRRT_HitProxies ].surface;
 	}
 #endif // ENABLE_HITPROXY
+
+	/**
+	 * @brief Get texture of Diffuse/Roughness GBuffer
+	 * @return Return texture of Diffuse/Roughness GBuffer
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetDiffuse_Roughness_GBufferTexture() const
+	{
+		return renderTargets[SRRT_Diffuse_Roughness_GBuffer].texture;
+	}
+
+	/**
+	 * @brief Get surface of Diffuse/Roughness GBuffer
+	 * @return Return surface of Diffuse/Roughness GBuffer
+	 */
+	FORCEINLINE SurfaceRHIRef_t GetDiffuse_Roughness_GBufferSurface() const
+	{
+		return renderTargets[SRRT_Diffuse_Roughness_GBuffer].surface;
+	}
+
+	/**
+	 * @brief Get texture of Normal/Metal GBuffer
+	 * @return Return texture of Normal/Metal GBuffer
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetNormal_Metal_GBufferTexture() const
+	{
+		return renderTargets[SRRT_Normal_Metal_GBuffer].texture;
+	}
+
+	/**
+	 * @brief Get surface of Normal/Metal GBuffer
+	 * @return Return surface of Normal/Metal GBuffer
+	 */
+	FORCEINLINE SurfaceRHIRef_t GetNormal_Metal_GBufferSurface() const
+	{
+		return renderTargets[SRRT_Normal_Metal_GBuffer].surface;
+	}
 
 protected:
 	/**

@@ -399,6 +399,15 @@ public:
 	virtual void								SetRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget , SurfaceRHIParamRef_t InNewDepthStencilTarget ) {}
 
 	/**
+	 * Set MRT render target
+	 *
+	 * @param[in] InDeviceContext Device context
+	 * @param[in] InNewRenderTarget New render target
+	 * @param[in] InTargetIndex Target index
+	 */
+	virtual void								SetMRTRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget, uint32 InTargetIndex ) {}
+
+	/**
 	 * Set vertex shader parameter
 	 * 
 	 * @param[in] InDeviceContext Device context

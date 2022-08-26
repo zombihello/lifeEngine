@@ -30,8 +30,8 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
 	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 
-	GRHI->SetRenderTarget( immediateContext, GSceneRenderTargets.GetSceneColorSurface(), GSceneRenderTargets.GetSceneDepthZSurface() );
-	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
+	GSceneRenderTargets.BeginRenderingGBuffer( immediateContext );
+	GSceneRenderTargets.ClearGBufferTargets( immediateContext );
 	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
 	
 	GRHI->SetViewParameters( immediateContext, *sceneView );
@@ -166,7 +166,7 @@ void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI
 	}
 
 	CBaseDeviceContextRHI*					immediateContext	= GRHI->GetImmediateContext();
-	Texture2DRHIRef_t						sceneColorTexture	= GSceneRenderTargets.GetSceneColorTexture();
+	Texture2DRHIRef_t						sceneColorTexture	= GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture();
 	const uint32							sceneColorSizeX		= sceneColorTexture->GetSizeX();
 	const uint32							sceneColorSizeY		= sceneColorTexture->GetSizeY();
 	const uint32							viewportSizeX		= InViewportRHI->GetWidth();
@@ -175,6 +175,7 @@ void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI
 	CScreenPixelShader*						screenPixelShader	= GShaderManager->FindInstance< CScreenPixelShader, CSimpleElementVertexFactory >();
 	check( screenVertexShader && screenPixelShader );
 
+	GSceneRenderTargets.FinishRenderingGBuffer( immediateContext );
 	GRHI->SetRenderTarget( immediateContext, InViewportRHI->GetSurface(), nullptr );
 	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
 	GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
