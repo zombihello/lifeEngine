@@ -24,10 +24,10 @@ void CSceneRenderer::BeginRenderHitProxiesViewTarget( ViewportRHIParamRef_t InVi
 	GRHI->SetViewParameters( immediateContext, *sceneView );
 	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
 
-	// Build visible primitives on all SDGs
+	// Build visible view on scene
 	if ( scene )
 	{
-		scene->BuildSDGs( *sceneView );
+		scene->BuildView( *sceneView );
 	}
 }
 
@@ -90,10 +90,10 @@ void CSceneRenderer::RenderHitProxies( ViewportRHIParamRef_t InViewportRHI, EHit
 
 void CSceneRenderer::FinishRenderHitProxiesViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
-	// Clear all SDGs on finish of the scene render
+	// Clear visible view on finish of the scene render
 	if ( scene )
 	{
-		scene->ClearSDGs();
+		scene->ClearView();
 	}
 }
 #endif // ENABLE_HITPROXY

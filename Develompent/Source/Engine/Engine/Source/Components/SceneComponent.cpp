@@ -2,6 +2,12 @@
 
 IMPLEMENT_CLASS( CSceneComponent )
 
+CSceneComponent::CSceneComponent()
+{}
+
+CSceneComponent::~CSceneComponent()
+{}
+
 bool CSceneComponent::IsAttachedTo( CSceneComponent* InTestComp ) const
 {
 	if ( InTestComp != nullptr )

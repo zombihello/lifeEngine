@@ -26,32 +26,34 @@ CSceneRenderer::CSceneRenderer( CSceneView* InSceneView, class CScene* InScene /
 
 void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
+	CBaseDeviceContextRHI*	immediateContext	= GRHI->GetImmediateContext();
+
 	SCOPED_DRAW_EVENT( EventBeginRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Begin Render View Target" ) );
 	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
 
-	GSceneRenderTargets.BeginRenderingGBuffer( immediateContext );
-	GSceneRenderTargets.ClearGBufferTargets( immediateContext );
-	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
-	
-	GRHI->SetViewParameters( immediateContext, *sceneView );
-
-	// If enabled wireframe mode, we disable depth text
+	// If enabled wireframe mode, we disable depth text and rendering to scene color
 #if WITH_EDITOR
 	if ( sceneView->GetShowFlags() & SHOW_Wireframe )
 	{
-		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
+		GSceneRenderTargets.BeginRenderingSceneColor( immediateContext );
+		immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
+		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );	
 	}
 	else
 #endif // WITH_EDITOR
 	{
+		GSceneRenderTargets.BeginRenderingGBuffer( immediateContext );
+		GSceneRenderTargets.ClearGBufferTargets( immediateContext );
 		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
 	}
+	
+	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+	GRHI->SetViewParameters( immediateContext, *sceneView );
 
-	// Build visible primitives on all SDGs
+	// Build visible view on scene
 	if ( scene )
 	{
-		scene->BuildSDGs( *sceneView );
+		scene->BuildView( *sceneView );
 	}
 }
 
@@ -62,8 +64,9 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 		return;
 	}
 
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	ShowFlags_t					showFlags	= sceneView->GetShowFlags();
+	CBaseDeviceContextRHI*	immediateContext	= GRHI->GetImmediateContext();
+	ShowFlags_t				showFlags			= sceneView->GetShowFlags();
+	bool					bDirty				= false;
 
 	// Render scene layers
 	{
@@ -76,97 +79,146 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 				continue;
 			}
 
-			SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, CString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str() );
-
-
-			// Clear depth buffer for foreground layer
-			if ( SDGIndex == SDG_Foreground 
-#if WITH_EDITOR
-				 || SDGIndex == SDG_WorldEdForeground 
-#endif // WITH_EDITOR
-				 )
-			{
-				immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
-			}
-
-#if WITH_EDITOR
-			// Draw simple elements
-			if ( showFlags & SHOW_SimpleElements && !SDG.simpleElements.IsEmpty() )
-			{
-				SCOPED_DRAW_EVENT( EventSimpleElements, DEC_SIMPLEELEMENTS, TEXT( "Simple elements" ) );
-				SDG.simpleElements.Draw( immediateContext, *sceneView );
-			}
-
-			// Draw gizmos
-			if ( showFlags & SHOW_Gizmo && SDG.gizmoDrawList.GetNum() > 0 )
-			{
-				SCOPED_DRAW_EVENT( EventGizmos, DEC_SPRITE, TEXT( "Gizmos" ) );
-				SDG.gizmoDrawList.Draw( immediateContext, *sceneView );
-			}
-#endif // WITH_EDITOR
-
-			// Draw static meshes
-			if ( showFlags & SHOW_StaticMesh && SDG.staticMeshDrawList.GetNum() > 0 )
-			{
-				SCOPED_DRAW_EVENT( EventStaticMeshes, DEC_STATIC_MESH, TEXT( "Static meshes" ) );
-				SDG.staticMeshDrawList.Draw( immediateContext, *sceneView );
-			}
-
-			// Draw sprites
-			if ( showFlags & SHOW_Sprite && SDG.spriteDrawList.GetNum() > 0 )
-			{
-				SCOPED_DRAW_EVENT( EventSprites, DEC_SPRITE, TEXT( "Sprites" ) );
-				SDG.spriteDrawList.Draw( immediateContext, *sceneView );
-			}
-
-			// Draw dynamic meshes
-			if ( showFlags & SHOW_DynamicElements && ( SDG.dynamicMeshElements.GetNum() > 0 ||
-#if WITH_EDITOR
-				!SDG.dynamicMeshBuilders.empty()
-#else
-				 false
-#endif // WITH_EDITOR
-				 ) )
-			{
-				SCOPED_DRAW_EVENT( EventDynamicElements, DEC_DYNAMICELEMENTS, TEXT( "Dynamic elements" ) );
-				
-				// Draw dynamic mesh elements
-				if ( SDG.dynamicMeshElements.GetNum() > 0 )
-				{
-					SDG.dynamicMeshElements.Draw( immediateContext, *sceneView );
-				}
-
-				// Draw dynamic mesh builders
-#if WITH_EDITOR
-				if ( !SDG.dynamicMeshBuilders.empty() )
-				{
-					for ( auto it = SDG.dynamicMeshBuilders.begin(), itEnd = SDG.dynamicMeshBuilders.end(); it != itEnd; ++it )
-					{
-						const SDynamicMeshBuilderElement&		element = *it;
-						if ( element.dynamicMeshBuilder )
-						{
-							element.dynamicMeshBuilder->Draw<CMeshDrawingPolicy>( immediateContext, element.localToWorldMatrix, element.material, *sceneView );
-						}
-					}
-				}
-#endif // WITH_EDITOR
-			}
+			// Render SDG
+			bDirty |= RenderSDG( immediateContext, SDGIndex );
 		}
 	}
+
+	// Render lights
+	if ( bDirty && showFlags & SHOW_Lights
+#if WITH_EDITOR
+		 && !( showFlags & SHOW_Wireframe )
+#endif // WITH_EDITOR
+		 )
+	{
+		SCOPED_DRAW_EVENT( EventLights, DEC_LIGHT, TEXT( "Lights" ) );
+		RenderLights( immediateContext );
+	}
+}
+
+bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, uint32 InSDGIndex )
+{
+	ShowFlags_t			showFlags	= sceneView->GetShowFlags();
+	SSceneDepthGroup&	SDG			= scene->GetSDG( ( ESceneDepthGroup )InSDGIndex );
+	
+	bool				bDirty		= false;
+	SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, CString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )InSDGIndex ) ).c_str() );
+
+	// Clear depth buffer for foreground layer
+	if ( InSDGIndex == SDG_Foreground
+#if WITH_EDITOR
+		 || InSDGIndex == SDG_WorldEdForeground
+#endif // WITH_EDITOR
+		 )
+	{
+		InDeviceContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+	}
+
+#if WITH_EDITOR
+	// Draw simple elements
+	if ( showFlags & SHOW_SimpleElements && !SDG.simpleElements.IsEmpty() )
+	{
+		SCOPED_DRAW_EVENT( EventSimpleElements, DEC_SIMPLEELEMENTS, TEXT( "Simple elements" ) );
+		SDG.simpleElements.Draw( InDeviceContext, *sceneView );
+		bDirty = true;
+	}
+
+	// Draw gizmos
+	if ( showFlags & SHOW_Gizmo && SDG.gizmoDrawList.GetNum() > 0 )
+	{
+		SCOPED_DRAW_EVENT( EventGizmos, DEC_SPRITE, TEXT( "Gizmos" ) );
+		SDG.gizmoDrawList.Draw( InDeviceContext, *sceneView );
+		bDirty = true;
+	}
+#endif // WITH_EDITOR
+
+	// Draw static meshes
+	if ( showFlags & SHOW_StaticMesh && SDG.staticMeshDrawList.GetNum() > 0 )
+	{
+		SCOPED_DRAW_EVENT( EventStaticMeshes, DEC_STATIC_MESH, TEXT( "Static meshes" ) );
+		SDG.staticMeshDrawList.Draw( InDeviceContext, *sceneView );
+		bDirty = true;
+	}
+
+	// Draw sprites
+	if ( showFlags & SHOW_Sprite && SDG.spriteDrawList.GetNum() > 0 )
+	{
+		SCOPED_DRAW_EVENT( EventSprites, DEC_SPRITE, TEXT( "Sprites" ) );
+		SDG.spriteDrawList.Draw( InDeviceContext, *sceneView );
+		bDirty = true;
+	}
+
+	// Draw dynamic meshes
+	if ( showFlags & SHOW_DynamicElements && ( SDG.dynamicMeshElements.GetNum() > 0 ||
+#if WITH_EDITOR
+											   !SDG.dynamicMeshBuilders.empty()
+#else
+											   false
+#endif // WITH_EDITOR
+											   ) )
+	{
+		SCOPED_DRAW_EVENT( EventDynamicElements, DEC_DYNAMICELEMENTS, TEXT( "Dynamic elements" ) );
+
+		// Draw dynamic mesh elements
+		if ( SDG.dynamicMeshElements.GetNum() > 0 )
+		{
+			SDG.dynamicMeshElements.Draw( InDeviceContext, *sceneView );
+			bDirty = true;
+		}
+
+		// Draw dynamic mesh builders
+#if WITH_EDITOR
+		if ( !SDG.dynamicMeshBuilders.empty() )
+		{
+			for ( auto it = SDG.dynamicMeshBuilders.begin(), itEnd = SDG.dynamicMeshBuilders.end(); it != itEnd; ++it )
+			{
+				const SDynamicMeshBuilderElement& element = *it;
+				if ( element.dynamicMeshBuilder )
+				{
+					element.dynamicMeshBuilder->Draw<CMeshDrawingPolicy>( InDeviceContext, element.localToWorldMatrix, element.material, *sceneView );
+				}
+			}
+
+			bDirty = true;
+		}
+#endif // WITH_EDITOR
+	}
+
+	return bDirty;
+}
+
+void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext )
+{
+	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
+	GSceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
+	InDeviceContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
 }
 
 void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
 	SCOPED_DRAW_EVENT( EventFinishRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Finish Render View Target" ) );
 
-	// Clear all SDGs on finish of the scene render
+	// Clear visible view on finish of the scene render
 	if ( scene )
 	{
-		scene->ClearSDGs();
+		scene->ClearView();
 	}
 
-	CBaseDeviceContextRHI*					immediateContext	= GRHI->GetImmediateContext();
-	Texture2DRHIRef_t						sceneColorTexture	= GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture();
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	Texture2DRHIRef_t			sceneColorTexture;
+
+#if WITH_EDITOR
+	if ( sceneView->GetShowFlags() & SHOW_Wireframe )
+	{
+		sceneColorTexture = GSceneRenderTargets.GetSceneColorTexture();
+	}
+	else
+#endif // WITH_EDITOR
+	{
+		sceneColorTexture = GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture();
+		GSceneRenderTargets.FinishRenderingGBuffer( immediateContext );
+	}
+
 	const uint32							sceneColorSizeX		= sceneColorTexture->GetSizeX();
 	const uint32							sceneColorSizeY		= sceneColorTexture->GetSizeY();
 	const uint32							viewportSizeX		= InViewportRHI->GetWidth();
@@ -174,8 +226,7 @@ void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI
 	CScreenVertexShader<SVST_Default>*		screenVertexShader	= GShaderManager->FindInstance< CScreenVertexShader<SVST_Default>, CSimpleElementVertexFactory >();
 	CScreenPixelShader*						screenPixelShader	= GShaderManager->FindInstance< CScreenPixelShader, CSimpleElementVertexFactory >();
 	check( screenVertexShader && screenPixelShader );
-
-	GSceneRenderTargets.FinishRenderingGBuffer( immediateContext );
+	
 	GRHI->SetRenderTarget( immediateContext, InViewportRHI->GetSurface(), nullptr );
 	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
 	GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );

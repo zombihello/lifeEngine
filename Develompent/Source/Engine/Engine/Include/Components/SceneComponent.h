@@ -22,6 +22,16 @@ class CSceneComponent : public CActorComponent
 
 public:
 	/**
+	 * @brief Constructor
+	 */
+	CSceneComponent();
+
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~CSceneComponent();
+
+	/**
 	 * Attaches a component to a given parent
 	 * @warning Need use only in constructor or BeginPlay()
 	 * 

@@ -101,6 +101,38 @@ void CScene::RemovePrimitive( class CPrimitiveComponent* InPrimitive )
 	}
 }
 
+void CScene::AddLight( class CLightComponent* InLight )
+{
+	check( InLight );
+
+	// If light already on scene
+	if ( InLight->scene == this )
+	{
+		return;
+	}
+	// Else if light on other scene - remove from old
+	if ( InLight->scene )
+	{
+		InLight->scene->RemoveLight( InLight );
+	}
+
+	InLight->scene = this;
+	lights.push_back( InLight );
+}
+
+void CScene::RemoveLight( class CLightComponent* InLight )
+{
+	for ( auto it = lights.begin(), itEnd = lights.end(); it != itEnd; ++it )
+	{
+		if ( *it == InLight )
+		{
+			InLight->scene = nullptr;
+			lights.erase( it );
+			return;
+		}
+	}
+}
+
 void CScene::Clear()
 {
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
@@ -109,10 +141,18 @@ void CScene::Clear()
 		primitiveComponent->UnlinkDrawList();
 		primitiveComponent->scene = nullptr;
 	}
+
+	for ( auto it = lights.begin(), itEnd = lights.end(); it != itEnd; ++it )
+	{
+		CLightComponent*		lightComponent = *it;
+		lightComponent->scene = nullptr;
+	}
+
 	primitives.clear();
+	lights.clear();
 }
 
-void CScene::BuildSDGs( const CSceneView& InSceneView )
+void CScene::BuildView( const CSceneView& InSceneView )
 {
 	// Add to SDGs visible primitives
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
@@ -123,13 +163,25 @@ void CScene::BuildSDGs( const CSceneView& InSceneView )
 			primitiveComponent->AddToDrawList( InSceneView );
 		}
 	}
+
+	// Add to scene frame visible lights
+	for ( auto it = lights.begin(), itEnd = lights.end(); it != itEnd; ++it )
+	{
+		CLightComponent*		lightComponent = *it;
+		if ( lightComponent->IsEnabled() )
+		{
+			frame.visibleLights.push_back( lightComponent );
+		}
+	}
 }
 
-void CScene::ClearSDGs()
+void CScene::ClearView()
 {
 	// Clear all instances in scene depth groups
 	for ( uint32 index = 0; index < SDG_Max; ++index )
 	{
-		SDGs[ index ].Clear();
+		frame.SDGs[ index ].Clear();
 	}
+
+	frame.visibleLights.clear();
 }

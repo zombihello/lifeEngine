@@ -161,6 +161,22 @@ public:
 	void FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI );
 
 private:
+	/**
+	 * Render SDG
+	 * 
+	 * @param InDeviceContext	RHI device context
+	 * @param InSDGIndex		SDG index
+	 * @return Return TRUE if geometry is drawed
+	 */
+	bool RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, uint32 InSDGIndex );
+
+	/**
+	 * Render lights
+	 * 
+	 * @param InDeviceContext	RHI device context
+	 */
+	void RenderLights( class CBaseDeviceContextRHI* InDeviceContext );
+
 	class CScene*	scene;			/**< Scene */
 	CSceneView*		sceneView;		/**< Scene view */
 };

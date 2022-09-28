@@ -178,4 +178,58 @@ private:
     std::wstring            name;               /**< Name object */
 };
 
+/**
+ * @ingroup Core
+ * @brief Is the object a class TClass
+ * 
+ * @param InObject  Object
+ * @return Return TRUE if InObject is a class TClass, else returning FALSE
+ */
+template<typename TClass>
+FORCEINLINE bool IsA( CObject* InObject )
+{
+    if ( InObject )
+    {
+        return InObject->IsA<TClass>();
+    }
+
+    return false;
+}
+
+/**
+ * @ingroup Core
+ * @brief Cast object to class a TClass
+ * 
+ * @param InObject      Object
+ * @return Return pointer with type TClass. If InObject not is the class TClass returning NULL
+ */
+template<typename TClass>
+FORCEINLINE TClass* Cast( CObject* InObject )
+{
+    if ( IsA<TClass>( InObject ) )
+    {
+        return ( TClass* )InObject;
+    }
+
+    return nullptr;
+}
+
+/**
+ * @ingroup Core
+ * @brief Cast object to class a TClass
+ * 
+ * @param InObject      Object
+ * @return Return const pointer with type TClass. If InObject not is the class TClass returning nullptr
+ */
+template<typename TClass>
+FORCEINLINE const TClass* ConstCast( CObject* InObject )
+{
+    if ( IsA<TClass>( InObject ) )
+    {
+        return ( const TClass* )InObject;
+   }
+
+    return nullptr;
+}
+
 #endif // !OBJECT_H

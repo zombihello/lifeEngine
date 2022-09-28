@@ -26,6 +26,7 @@
 #include "Render/DynamicMeshBuilder.h"
 #include "Components/CameraComponent.h"
 #include "Components/PrimitiveComponent.h"
+#include "Components/LightComponent.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseBufferRHI.h"
 #include "RHI/TypesRHI.h"
@@ -51,9 +52,10 @@ enum EShowFlag
 	SHOW_DynamicElements	= 1 << 4,		/**< Show dynamic elements */
 	SHOW_HitProxy			= 1 << 5,		/**< Show hit proxy elements (only for WorldEd) */
 	SHOW_Gizmo				= 1 << 6,		/**< Show gizmo elements (only for WorldEd) */
+	SHOW_Lights				= 1 << 7,		/**< Show lights */
 
-	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements,								/**< Default show flags for game */
-	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_HitProxy | SHOW_Gizmo	/**< Default show flags for editor */
+	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_Lights,								/**< Default show flags for game */
+	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_HitProxy | SHOW_Gizmo | SHOW_Lights	/**< Default show flags for editor */
 };
 
 /**
@@ -718,7 +720,7 @@ struct SSceneDepthGroup
 		}
 #endif // ENABLE_HITPROXY
 
-		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0 && dynamicMeshElements.GetNum() <= 0
+		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0 && dynamicMeshElements.GetNum() <= 0 
 #if WITH_EDITOR
 			&& simpleElements.IsEmpty() && dynamicMeshBuilders.empty() && gizmoDrawList.GetNum() <= 0
 #endif // WITH_EDITOR
@@ -731,17 +733,17 @@ struct SSceneDepthGroup
 
 	// Simple elements use only for debug and WorldEd
 #if WITH_EDITOR
-	CBatchedSimpleElements							simpleElements;				/**< Batched simple elements (lines, points, etc) */
-	std::list<SDynamicMeshBuilderElement>			dynamicMeshBuilders;		/**< List of dynamic mesh builders */
-	CMeshDrawList<CMeshDrawingPolicy, false>		gizmoDrawList;				/**< Draw list of gizmos */
+	CBatchedSimpleElements									simpleElements;				/**< Batched simple elements (lines, points, etc) */
+	std::list<SDynamicMeshBuilderElement>					dynamicMeshBuilders;		/**< List of dynamic mesh builders */
+	CMeshDrawList<CMeshDrawingPolicy, false>				gizmoDrawList;				/**< Draw list of gizmos */
 #endif // WITH_EDITOR
 
-	CMeshDrawList<CMeshDrawingPolicy>				dynamicMeshElements;		/**< Draw list of dynamic meshes */
-	CMeshDrawList<CMeshDrawingPolicy>				staticMeshDrawList;			/**< Draw list of static meshes */
-	CMeshDrawList<CMeshDrawingPolicy>				spriteDrawList;				/**< Draw list of sprites */
+	CMeshDrawList<CMeshDrawingPolicy>						dynamicMeshElements;		/**< Draw list of dynamic meshes */
+	CMeshDrawList<CMeshDrawingPolicy>						staticMeshDrawList;			/**< Draw list of static meshes */
+	CMeshDrawList<CMeshDrawingPolicy>						spriteDrawList;				/**< Draw list of sprites */
 
 #if ENABLE_HITPROXY
-	SHitProxyLayer									hitProxyLayers[ HPL_Num ];	/**< Hit proxy layers */
+	SHitProxyLayer											hitProxyLayers[ HPL_Num ];	/**< Hit proxy layers */
 #endif // ENABLE_HITPROXY
 };
 
@@ -772,21 +774,35 @@ public:
 	virtual void RemovePrimitive( class CPrimitiveComponent* InPrimitive ) {}
 
 	/**
+	 * @brief Add new light component to scene
+	 *
+	 * @param InLight Light component to add
+	 */
+	virtual void AddLight( class CLightComponent* InLight ) {}
+
+	/**
+	 * @brief Remove light component from scene
+	 *
+	 * @param InLight Light component to remove
+	 */
+	virtual void RemoveLight( class CLightComponent* InLight ) {}
+
+	/**
 	 * @brief Clear scene
 	 */
 	virtual void Clear() {}
 
 	/**
-	 * @brief Build SDGs for render scene from current view
+	 * @brief Build view for render scene from current view
 	 * 
 	 * @param InSceneView Current view of scene
 	 */
-	virtual void BuildSDGs( const CSceneView& InSceneView ) {}
+	virtual void BuildView( const CSceneView& InSceneView ) {}
 
 	/**
-	 * @brief Clear all instances in SDGs
+	 * @brief Clear all instances from scene frame
 	 */
-	virtual void ClearSDGs() {}
+	virtual void ClearView() {}
 };
 
 /**
@@ -816,21 +832,35 @@ public:
 	virtual void RemovePrimitive( class CPrimitiveComponent* InPrimitive ) override;
 
 	/**
+	 * @brief Add new light component to scene
+	 *
+	 * @param InLight Light component to add
+	 */
+	virtual void AddLight( class CLightComponent* InLight ) override;
+
+	/**
+	 * @brief Remove light component from scene
+	 *
+	 * @param InLight Light component to remove
+	 */
+	virtual void RemoveLight( class CLightComponent* InLight ) override;
+
+	/**
 	 * @brief Clear scene
 	 */
 	virtual void Clear() override;
 
 	/**
-	 * @brief Build SDGs for render scene from current view
+	 * @brief Build view for render scene from current view
 	 *
 	 * @param InSceneView Current view of scene
 	 */
-	virtual void BuildSDGs( const CSceneView& InSceneView ) override;
+	virtual void BuildView( const CSceneView& InSceneView ) override;
 
 	/**
-	 * @brief Clear all instances in SDGs
+	 * @brief Clear all instances from scene frame
 	 */
-	virtual void ClearSDGs() override;
+	virtual void ClearView() override;
 
 	/**
 	 * @brief Get depth group
@@ -841,7 +871,7 @@ public:
 	FORCEINLINE SSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType )
 	{
 		check( InSDGType < SDG_Max );
-		return SDGs[ InSDGType ];
+		return frame.SDGs[ InSDGType ];
 	}
 
 	/**
@@ -853,12 +883,22 @@ public:
 	FORCEINLINE const SSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType ) const
 	{
 		check( InSDGType < SDG_Max );
-		return SDGs[ InSDGType ];
+		return frame.SDGs[ InSDGType ];
 	}
 
 private:
-	SSceneDepthGroup							SDGs[ SDG_Max ];			/**< Scene depth groups */
-	std::list< PrimitiveComponentRef_t >		primitives;					/**< List of primitives on scene */
+	/**
+	 * @brief One frame of the scene
+	 */
+	struct SSceneFrame
+	{
+		SSceneDepthGroup					SDGs[SDG_Max];		/**< Scene depth groups */
+		std::list<LightComponentRef_t>		visibleLights;		/**< List of visible lights */
+	};
+	
+	SSceneFrame								frame;				/**< Scene frame */
+	std::list<PrimitiveComponentRef_t>		primitives;			/**< List of primitives on scene */
+	std::list<LightComponentRef_t>			lights;				/**< List of lights on scene */
 };
 
 //
