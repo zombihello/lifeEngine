@@ -107,3 +107,27 @@ void CBasePassPixelShader::SetConstantParameters( class CBaseDeviceContextRHI* I
 		SetSamplerStateParameter( InDeviceContextRHI, roughnessSamplerParameter, GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ) );
     }
 }
+
+#if WITH_EDITOR
+#include "Render/VertexFactory/LightVertexFactory.h"
+
+bool CBasePassVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
+{
+	if ( !InVFMetaType )
+	{
+		return true;
+	}
+
+	return InVFMetaType->GetHash() != CLightVertexFactory::staticType.GetHash();
+}
+
+bool CBasePassPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
+{
+	if ( !InVFMetaType )
+	{
+		return true;
+	}
+
+	return InVFMetaType->GetHash() != CLightVertexFactory::staticType.GetHash();
+}
+#endif // WITH_EDITOR

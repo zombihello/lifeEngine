@@ -16,7 +16,8 @@ IMPLEMENT_VERTEX_FACTORY_TYPE( CSpriteVertexFactory, TEXT( "SpriteVertexFactory.
 TGlobalResource< CSpriteVertexDeclaration >			GSpriteVertexDeclaration;
 
 /**
- * Struct of instance buffer for sprite
+ * @ingroup Engine
+ * @brief Struct of instance buffer for sprite
  */
 struct SSpriteInstanceBuffer
 {

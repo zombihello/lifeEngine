@@ -187,13 +187,6 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 	return bDirty;
 }
 
-void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext )
-{
-	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
-	GSceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
-	InDeviceContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
-}
-
 void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
 	SCOPED_DRAW_EVENT( EventFinishRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Finish Render View Target" ) );
@@ -204,21 +197,8 @@ void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI
 		scene->ClearView();
 	}
 
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	Texture2DRHIRef_t			sceneColorTexture;
-
-#if WITH_EDITOR
-	if ( sceneView->GetShowFlags() & SHOW_Wireframe )
-	{
-		sceneColorTexture = GSceneRenderTargets.GetSceneColorTexture();
-	}
-	else
-#endif // WITH_EDITOR
-	{
-		sceneColorTexture = GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture();
-		GSceneRenderTargets.FinishRenderingGBuffer( immediateContext );
-	}
-
+	CBaseDeviceContextRHI*					immediateContext	= GRHI->GetImmediateContext();
+	Texture2DRHIRef_t						sceneColorTexture	= GSceneRenderTargets.GetSceneColorTexture();
 	const uint32							sceneColorSizeX		= sceneColorTexture->GetSizeX();
 	const uint32							sceneColorSizeY		= sceneColorTexture->GetSizeY();
 	const uint32							viewportSizeX		= InViewportRHI->GetWidth();

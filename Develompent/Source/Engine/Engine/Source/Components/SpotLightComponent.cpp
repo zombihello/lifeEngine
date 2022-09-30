@@ -3,6 +3,9 @@
 IMPLEMENT_CLASS( CSpotLightComponent )
 
 CSpotLightComponent::CSpotLightComponent()
+{}
+
+ELightType CSpotLightComponent::GetLightType() const
 {
-	lightType = LT_Spot;
+	return LT_Spot;
 }

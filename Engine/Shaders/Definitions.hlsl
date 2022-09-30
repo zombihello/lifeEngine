@@ -12,4 +12,16 @@
  #define USE_INSTANCING						0
  #endif // !USE_INSTANCING
  
+#ifndef POINT_LIGHT
+#define POINT_LIGHT                         0
+#endif // !POINT_LIGHT
+
+#ifndef SPOT_LIGHT
+#define SPOT_LIGHT                          0
+#endif // !SPOT_LIGHT
+
+#ifndef DIRECTIONAL_LIGHT
+#define DIRECTIONAL_LIGHT                   0
+#endif // !DIRECTIONAL_LIGHT
+
  #endif // !DEFINITIONS_H

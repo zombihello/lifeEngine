@@ -13,9 +13,14 @@
 #include "RenderUtils.h"
 #include "Misc/RefCounted.h"
 #include "Render/VertexFactory/DynamicMeshVertexFactory.h"
+#include "Render/VertexFactory/LightVertexFactory.h"
 #include "RHI/BaseBufferRHI.h"
 #include "RHI/TypesRHI.h"
 
+/**
+ * @ingroup Engine 
+ * @brief Sphere mesh
+ */
 class CSphereMesh : public CRenderResource
 {
 public:
@@ -82,6 +87,77 @@ private:
 	TRefCountPtr< CDynamicMeshVertexFactory >		vertexFactory;		/**< Vertex factory */
 };
 
-extern TGlobalResource< CSphereMesh >		GSphereMesh;			/**< The global sphere mesh data */
+/**
+ * @ingroup Engine
+ * @brief Light sphere mesh
+ */
+class CLightSphereMesh : public CRenderResource
+{
+public:
+	/**
+	 * @brief Constructor
+	 */
+	CLightSphereMesh();
+
+	/**
+	 * @brief Get number primitives
+	 * @return Return number primitives
+	 */
+	FORCEINLINE uint32 GetNumPrimitives() const
+	{
+		return numPrimitives;
+	}
+
+	/**
+	 * @brief Get RHI vertex buffer
+	 * @return Return RHI vertex buffer, if not created return nullptr
+	 */
+	FORCEINLINE VertexBufferRHIRef_t GetVertexBufferRHI() const
+	{
+		return vertexBufferRHI;
+	}
+
+	/**
+	 * @brief Get RHI index buffer
+	 * @return Return RHI index buffer, if not created return nullptr
+	 */
+	FORCEINLINE IndexBufferRHIRef_t GetIndexBufferRHI() const
+	{
+		return indexBufferRHI;
+	}
+
+	/**
+	 * @brief Get vertex factory
+	 * @return Return vertex factory, if not created return NULL
+	 */
+	FORCEINLINE TRefCountPtr<CLightVertexFactory> GetVertexFactory() const
+	{
+		return vertexFactory;
+	}
+
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
+
+private:
+	uint32									numPrimitives;		/**< Number primitives */
+	VertexBufferRHIRef_t					vertexBufferRHI;	/**< Vertex buffer RHI */
+	IndexBufferRHIRef_t						indexBufferRHI;		/**< Index buffer RHI */
+	TRefCountPtr<CLightVertexFactory>		vertexFactory;		/**< Vertex factory */
+};
+
+extern TGlobalResource<CSphereMesh>				GSphereMesh;			/**< The global sphere mesh data */
+extern TGlobalResource<CLightSphereMesh>		GLightSphereMesh;		/**< The global light sphere mesh data */
 
 #endif // !SPHERE_H

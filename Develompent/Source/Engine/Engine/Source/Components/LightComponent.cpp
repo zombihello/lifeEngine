@@ -8,7 +8,7 @@ IMPLEMENT_CLASS( CLightComponent )
 CLightComponent::CLightComponent()
 	: bEnabled( true )
 	, scene( nullptr )
-	, lightType( LT_Unknown )
+	, color( CColor::white )
 {}
 
 CLightComponent::~CLightComponent()
@@ -35,4 +35,9 @@ void CLightComponent::Destroyed()
 {
 	Super::Destroyed();
 	GWorld->GetScene()->RemoveLight( this );
+}
+
+ELightType CLightComponent::GetLightType() const
+{
+	return LT_Unknown;
 }

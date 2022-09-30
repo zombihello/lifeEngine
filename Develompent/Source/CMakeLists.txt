@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 3.19 )
-project( lifeEngine LANGUAGES CXX )
+project( LE LANGUAGES CXX )
 
 #
 # General settings

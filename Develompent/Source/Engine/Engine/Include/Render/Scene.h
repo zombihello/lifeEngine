@@ -886,6 +886,15 @@ public:
 		return frame.SDGs[ InSDGType ];
 	}
 
+	/**
+	 * @brief Get list of visible lights on the current frame
+	 * @return Return list of visible lights
+	 */
+	FORCEINLINE const std::list<LightComponentRef_t>& GetVisibleLights() const
+	{
+		return frame.visibleLights;
+	}
+
 private:
 	/**
 	 * @brief One frame of the scene

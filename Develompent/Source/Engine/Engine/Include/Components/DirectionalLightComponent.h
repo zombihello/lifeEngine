@@ -24,6 +24,14 @@ public:
 	 * @brief Constructor
 	 */
 	CDirectionalLightComponent();
+
+	/**
+	 * @brief Get light type
+	 * Need override the method by child for setting light type
+	 *
+	 * @return Return light type
+	 */
+	virtual ELightType GetLightType() const override;
 };
 
 #endif // !DIRECTIONALLIGHTCOMPONENT_H

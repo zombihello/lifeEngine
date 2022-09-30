@@ -22,14 +22,16 @@ CHitProxyVertexShader::~CHitProxyVertexShader()
 }
 
 #if WITH_EDITOR
+#include "Render/VertexFactory/LightVertexFactory.h"
+
 bool CHitProxyVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
-	return !GIsCooker;
+	return !GIsCooker && ( !InVFMetaType || InVFMetaType->GetHash() != CLightVertexFactory::staticType.GetHash() );
 }
 
 bool CHitProxyPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
-	return !GIsCooker;
+	return !GIsCooker && ( !InVFMetaType || InVFMetaType->GetHash() != CLightVertexFactory::staticType.GetHash() );
 }
 #endif // WITH_EDITOR
 

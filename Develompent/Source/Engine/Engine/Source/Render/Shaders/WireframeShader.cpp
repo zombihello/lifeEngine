@@ -18,14 +18,16 @@ CWireframeVertexShader::~CWireframeVertexShader()
 }
 
 #if WITH_EDITOR
+#include "Render/VertexFactory/LightVertexFactory.h"
+
 bool CWireframeVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
-	return GIsEditor || GIsCookEditorContent;
+	return GIsEditor || GIsCookEditorContent && ( !InVFMetaType || InVFMetaType->GetHash() != CLightVertexFactory::staticType.GetHash() );
 }
 
 bool CWireframePixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
-	return GIsEditor || GIsCookEditorContent;
+	return GIsEditor || GIsCookEditorContent && ( !InVFMetaType || InVFMetaType->GetHash() != CLightVertexFactory::staticType.GetHash() );
 }
 #endif // WITH_EDITOR
 

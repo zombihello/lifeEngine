@@ -53,7 +53,7 @@ public:
 	 */
 	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
-private:
+protected:
     CShaderParameter		localToWorldMatrixParameter;	/**< Local to world parameter */
     bool					bSupportsInstancing;			/**< Is supported instancing */
 

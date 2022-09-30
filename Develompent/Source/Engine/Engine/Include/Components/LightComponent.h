@@ -10,6 +10,7 @@
 #define LIGHTCOMPONENT_H
 
 #include "Misc/RefCountPtr.h"
+#include "Math/Color.h"
 #include "Components/SceneComponent.h"
 
 /**
@@ -24,10 +25,11 @@ typedef TRefCountPtr<class CLightComponent>		LightComponentRef_t;
  */
 enum ELightType
 {
-	LT_Unknown,		/**< Unknown light */
-	LT_Point,		/**< Point light */
-	LT_Spot,		/**< Spot light */
-	LT_Directional	/**< Directional light */
+	LT_Unknown = -1,	/**< Unknown light */
+	LT_Point,			/**< Point light */
+	LT_Spot,			/**< Spot light */
+	LT_Directional,		/**< Directional light */
+	LT_Num				/**< Number of light types */
 };
 
 /**
@@ -77,6 +79,15 @@ public:
 	}
 
 	/**
+	 * @brief Set light color
+	 * @param InColor	Color
+	 */
+	FORCEINLINE void SetColor( const CColor& InColor )
+	{
+		color = InColor;
+	}
+
+	/**
 	 * @brief Get scene
 	 * @return Return scene. If light not added to scene return NULL
 	 */
@@ -87,12 +98,11 @@ public:
 
 	/**
 	 * @brief Get light type
+	 * Need override the method by child for setting light type
+	 * 
 	 * @return Return light type
 	 */
-	FORCEINLINE ELightType GetLightType() const
-	{
-		return lightType;
-	}
+	virtual ELightType GetLightType() const;
 
 	/**
 	 * @brief Is enabled
@@ -103,10 +113,19 @@ public:
 		return bEnabled;
 	}
 
+	/**
+	 * @brief Get light color
+	 * @return Return light color
+	 */
+	FORCEINLINE const CColor& GetColor() const
+	{
+		return color;
+	}
+
 protected:
 	bool				bEnabled;		/**< Is enabled the light component */
 	class CScene*		scene;			/**< The current scene where the primitive is located  */
-	ELightType			lightType;		/**< Light type */
+	CColor				color;			/**< Light color */
 };
 
 #endif // !LIGHTCOMPONENT_H

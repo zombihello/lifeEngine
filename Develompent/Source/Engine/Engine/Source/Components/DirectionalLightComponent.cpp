@@ -3,6 +3,9 @@
 IMPLEMENT_CLASS( CDirectionalLightComponent )
 
 CDirectionalLightComponent::CDirectionalLightComponent()
+{}
+
+ELightType CDirectionalLightComponent::GetLightType() const
 {
-	lightType = LT_Directional;
+	return LT_Directional;
 }

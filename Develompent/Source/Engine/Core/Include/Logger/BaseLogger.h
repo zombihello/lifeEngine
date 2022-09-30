@@ -40,6 +40,7 @@ enum ELogCategory
     LC_Audio,               /**< Audio category */
     LC_Physics,             /**< Physics category */
     LC_Movie,               /**< Movie category */
+    LC_Render,              /**< Render category */
 
 #if WITH_EDITOR
     LC_Editor,              /**< Editor category */

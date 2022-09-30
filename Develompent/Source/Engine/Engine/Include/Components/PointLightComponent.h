@@ -24,6 +24,35 @@ public:
 	 * @brief Constructor
 	 */
 	CPointLightComponent();
+
+	/**
+	 * @brief Set radius
+	 * @param InRadius		Radius
+	 */
+	FORCEINLINE void SetRadius( float InRadius )
+	{
+		radius = InRadius;
+	}
+
+	/**
+	 * @brief Get light type
+	 * Need override the method by child for setting light type
+	 *
+	 * @return Return light type
+	 */
+	virtual ELightType GetLightType() const override;
+
+	/**
+	 * @brief Get radius
+	 * @return Return radius
+	 */
+	FORCEINLINE float GetRadius() const
+	{
+		return radius;
+	}
+
+private:
+	float		radius;		/**< Radius */
 };
 
 #endif // !POINTLIGHTCOMPONENT_H
