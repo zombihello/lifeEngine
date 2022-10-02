@@ -80,11 +80,29 @@ public:
 
 	/**
 	 * @brief Set light color
-	 * @param InColor	Color
+	 * @param InLightColor	Light color
 	 */
-	FORCEINLINE void SetColor( const CColor& InColor )
+	FORCEINLINE void SetLightColor( const CColor& InLightColor )
 	{
-		color = InColor;
+		lightColor = InLightColor;
+	}
+
+	/**
+	 * @brief Set specular color
+	 * @param InSpecularColor	Specular color
+	 */
+	FORCEINLINE void SetSpecularColor( const CColor& InSpecularColor )
+	{
+		specularColor = InSpecularColor;
+	}
+
+	/**
+	 * @brief Set intensivity
+	 * @param InIntensivity		Intensivity
+	 */
+	FORCEINLINE void SetIntensivity( float InIntensivity )
+	{
+		intensivity = InIntensivity;
 	}
 
 	/**
@@ -117,15 +135,35 @@ public:
 	 * @brief Get light color
 	 * @return Return light color
 	 */
-	FORCEINLINE const CColor& GetColor() const
+	FORCEINLINE const CColor& GetLightColor() const
 	{
-		return color;
+		return lightColor;
+	}
+
+	/**
+	 * @brief Get specular color
+	 * @return Return specular color
+	 */
+	FORCEINLINE const CColor& GetSpecularColor() const
+	{
+		return specularColor;
+	}
+
+	/**
+	 * @brief Get intensivity
+	 * @return Return intensivity
+	 */
+	FORCEINLINE float GetIntensivity() const
+	{
+		return intensivity;
 	}
 
 protected:
 	bool				bEnabled;		/**< Is enabled the light component */
 	class CScene*		scene;			/**< The current scene where the primitive is located  */
-	CColor				color;			/**< Light color */
+	CColor				lightColor;		/**< Light color */
+	CColor				specularColor;	/**< Specular color */
+	float				intensivity;	/**< intensivity */
 };
 
 #endif // !LIGHTCOMPONENT_H

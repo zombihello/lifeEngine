@@ -17,15 +17,20 @@
 // ----------------------------------------------------------------------------------------
 #define SOB_GlobalConstants			b1			// Slot for global constant buffer
 
+#include "CPP_GlobalConstantBuffers.hlsl"
+
 // Struct of light data (color, radius, etc)
 struct SLightData
 {
+    float4      lightColor      : COLOR0;
+    float4      specularColor   : COLOR1;
+    float       intensivity     : BLENDWEIGHT0;
+
 #if POINT_LIGHT
-    float4      color : COLOR;
+    float3      position        : POSITION5;
+    float       radius          : BLENDWEIGHT1;
 #elif SPOT_LIGHT
-    float4      color : COLOR;
 #elif DIRECTIONAL_LIGHT
-    float4      color : COLOR;
 #endif // POINT_LIGHT / SPOT_LIGHT / DIRECTIONAL_LIGHT
 };
 

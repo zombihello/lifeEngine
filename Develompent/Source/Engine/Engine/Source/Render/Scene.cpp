@@ -1,15 +1,21 @@
 #include "Math/Math.h"
+#include "Render/SceneRenderTargets.h"
 #include "Render/Scene.h"
 
-CSceneView::CSceneView( const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const CColor& InBackgroundColor, ShowFlags_t InShowFlags )
+CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const CColor& InBackgroundColor, ShowFlags_t InShowFlags )
 	: viewMatrix( InViewMatrix )
 	, projectionMatrix( InProjectionMatrix )
 	, viewProjectionMatrix( InProjectionMatrix * InViewMatrix )
+	, invViewMatrix( SMath::InverseMatrix( InViewMatrix ) )
+	, invProjectionMatrix( SMath::InverseMatrix( InProjectionMatrix ) )
+	, invViewProjectionMatrix( SMath::matrixIdentity )
+	, position( InPosition )
 	, backgroundColor( InBackgroundColor )
 	, showFlags( InShowFlags )
 	, sizeX( InSizeX )
 	, sizeY( InSizeY )
 {
+	invViewProjectionMatrix = invViewMatrix * invProjectionMatrix;
 	frustum.Update( viewProjectionMatrix );
 }
 

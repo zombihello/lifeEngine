@@ -8,13 +8,16 @@
 #ifdef __cplusplus
 struct SGlobalConstantBufferContents
 #else
-#include "Common.hlsl"
 cbuffer GlobalConstants : register( SOB_GlobalConstants )
 #endif // __cplusplus
 {
 	Matrix			viewMatrix;
 	Matrix			projectionMatrix;
 	Matrix			viewProjectionMatrix;
+	Matrix			invViewMatrix;
+	Matrix			invProjectionMatrix;
+	Matrix			invViewProjectionMatrix;
+	Vector			position;
 };
 
 #endif // !CPP_GLOBALCONSTANTBUFFERS_HLSL

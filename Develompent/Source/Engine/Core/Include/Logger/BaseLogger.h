@@ -41,6 +41,7 @@ enum ELogCategory
     LC_Physics,             /**< Physics category */
     LC_Movie,               /**< Movie category */
     LC_Render,              /**< Render category */
+    LC_RHI,                 /**< RHI category */
 
 #if WITH_EDITOR
     LC_Editor,              /**< Editor category */

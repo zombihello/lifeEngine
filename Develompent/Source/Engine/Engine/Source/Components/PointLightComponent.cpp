@@ -3,7 +3,7 @@
 IMPLEMENT_CLASS( CPointLightComponent )
 
 CPointLightComponent::CPointLightComponent()
-	: radius( 200.f )
+	: radius( 850.f )
 {}
 
 ELightType CPointLightComponent::GetLightType() const

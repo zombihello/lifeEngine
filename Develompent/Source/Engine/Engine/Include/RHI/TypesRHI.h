@@ -215,4 +215,28 @@ typedef TRefCountPtr< class CBaseDepthStateRHI >		DepthStateRHIRef_t;
  */
 typedef class CBaseDepthStateRHI*						DepthStateRHIParamRef_t;
 
+/**
+ * @ingroup Engine Engine
+ * Reference to blend state
+ */
+typedef TRefCountPtr< class CBaseBlendStateRHI >		BlendStateRHIRef_t;
+
+/**
+ * @ingroup Engine Engine
+ * Pointer to blend state
+ */
+typedef class CBaseBlendStateRHI*						BlendStateRHIParamRef_t;
+
+/**
+ * @ingroup Engine Engine
+ * Reference to stencil state
+ */
+typedef TRefCountPtr< class CBaseStencilStateRHI >		StencilStateRHIRef_t;
+
+/**
+ * @ingroup Engine Engine
+ * Pointer to stencil state
+ */
+typedef class CBaseStencilStateRHI*						StencilStateRHIParamRef_t;
+
 #endif // !TYPESRHI_H

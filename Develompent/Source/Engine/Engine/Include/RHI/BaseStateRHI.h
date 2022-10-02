@@ -56,6 +56,60 @@ enum ECompareFunction
 
 /**
  * @ingroup Engine
+ * @brief Enumeration of blend operation
+ */
+enum EBlendOperation
+{
+	BO_Add,					/**< Add */
+	BO_Subtract,			/**< Subtract */
+	BO_Min,					/**< Min */
+	BO_Max,					/**< Max */
+	BO_ReverseSubtract		/**< Reveerse subtract */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Enumeration of blend factor
+ */
+enum EBlendFactor
+{
+	BF_Zero,						/**< Zero */
+	BF_One,							/**< One */
+	BF_SourceColor,					/**< Source color */
+	BF_InverseSourceColor,			/**< Inverse source color */
+	BF_SourceAlpha,					/**< Source alpha */
+	BF_InverseSourceAlpha,			/**< Inverse source alpha */
+	BF_DestAlpha,					/**< Dest alpha */
+	BF_InverseDestAlpha,			/**< Inverse dest alpha */
+	BF_DestColor,					/**< Dest color */
+	BF_InverseDestColor,			/**< Inverse dest color */
+	BF_SourceAlphaSaturate,			/**< Source alpha saturate */
+	BF_ConstantBlendColor,			/**< Constant blend color */
+	BF_InverseConstantBlendColor,	/**< Inverse constant blend color */
+	BF_Source1Color,				/**< Source 1 color */
+	BF_InverseSource1Color,			/**< Inverse source 1 color */
+	BF_Source1Alpha,				/**< Source 1 alpha */
+	BF_InverseSource1Alpha			/**< Inverse source 1 alpha */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Enumeration of stencil operation
+ */
+enum EStencilOp
+{
+	SO_Keep,					/**< Keep */
+	SO_Zero,					/**< Zero */
+	SO_Replace,					/**< Replace */
+	SO_SaturatedIncrement,		/**< Saturated increment */
+	SO_SaturatedDecrement,		/**< Saturated decrement */
+	SO_Invert,					/**< Invert */
+	SO_Increment,				/**< Increment */
+	SO_Decrement				/**< Decrement */
+};
+
+/**
+ * @ingroup Engine
  * @brief Struct for create resterize state in RHI
  */
 struct SRasterizerStateInitializerRHI
@@ -95,6 +149,91 @@ struct SDepthStateInitializerRHI
 {
 	bool						bEnableDepthWrite;		/**< Is eneable depth write */
 	ECompareFunction			depthTest;				/**< Depth test compare function */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Struct for create blend state in RHI
+ */
+struct SBlendStateInitializerRHI
+{
+	/**
+	 * @brief Constructor
+	 */
+	SBlendStateInitializerRHI()
+	{}
+
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InColorBlendOp			Color blend operation
+	 * @param InColorSourceBlendFactor	Color source blend factor
+	 * @param InColorDestBlendFactor	Color dest blend factor
+	 * @param InAlphaBlendOp			Alpha blend operation
+	 * @param InAlphaSourceBlendFactor	Alpha source blend factor
+	 * @param InAlphaDestBlendFactor	Alpha dest blend factor
+	 * @param InAlphaTest				Alpha test
+	 * @param InAlphaRef				Alpha reference
+	 */
+	SBlendStateInitializerRHI( EBlendOperation InColorBlendOp, EBlendFactor InColorSourceBlendFactor, EBlendFactor InColorDestBlendFactor, EBlendOperation InAlphaBlendOp, EBlendFactor InAlphaSourceBlendFactor, EBlendFactor InAlphaDestBlendFactor, ECompareFunction InAlphaTest, byte InAlphaRef )
+		: colorBlendOperation( InColorBlendOp )
+		, colorSourceBlendFactor( InColorSourceBlendFactor )
+		, colorDestBlendFactor( InColorDestBlendFactor )
+		, alphaBlendOperation( InAlphaBlendOp )
+		, alphaSourceBlendFactor( InAlphaSourceBlendFactor )
+		, alphaDestBlendFactor( InAlphaDestBlendFactor )
+		, alphaTest( InAlphaTest )
+		, alphaRef( InAlphaRef )
+	{}
+
+	EBlendOperation		colorBlendOperation;		/**< Color blend operation */
+	EBlendFactor		colorSourceBlendFactor;		/**< Color source blend factor */
+	EBlendFactor		colorDestBlendFactor;		/**< Color dest blend factor */
+	EBlendOperation		alphaBlendOperation;		/**< Alpha blend operation */
+	EBlendFactor		alphaSourceBlendFactor;		/**< Alpha source blend factor */
+	EBlendFactor		alphaDestBlendFactor;		/**< Alpha dest blend factor */
+	ECompareFunction	alphaTest;					/**< Alpha test */
+	byte				alphaRef;					/**< Alpha reference */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Struct for create stencil state in RHI
+ */
+struct SStencilStateInitializerRHI
+{
+	/**
+	 * @brief Constructor
+	 */
+	SStencilStateInitializerRHI( bool InEnableFrontFaceStencil = false, ECompareFunction InFrontFaceStencilTest = CF_Always, EStencilOp InFrontFaceStencilFailStencilOp = SO_Keep, EStencilOp InFrontFaceDepthFailStencilOp = SO_Keep, EStencilOp InFrontFacePassStencilOp  = SO_Keep, bool InEnableBackFaceStencil = false, ECompareFunction InBackFaceStencilTest = CF_Always, EStencilOp InBackFaceStencilFailStencilOp = SO_Keep, EStencilOp InBackFaceDepthFailStencilOp  = SO_Keep, EStencilOp InBackFacePassStencilOp = SO_Keep, uint32 InStencilReadMask = 0xFFFFFFFF, uint32 InStencilWriteMask = 0xFFFFFFFF, uint32 InStencilRef = 0 )
+		: bEnableFrontFaceStencil( InEnableFrontFaceStencil )
+		, frontFaceStencilTest( InFrontFaceStencilTest )
+		, frontFaceStencilFailStencilOp( InFrontFaceStencilFailStencilOp )
+		, frontFaceDepthFailStencilOp( InFrontFaceDepthFailStencilOp )
+		, frontFacePassStencilOp( InFrontFacePassStencilOp )
+		, bEnableBackFaceStencil( InEnableBackFaceStencil )
+		, backFaceStencilTest( InBackFaceStencilTest)
+		, backFaceStencilFailStencilOp( InBackFaceStencilFailStencilOp )
+		, backFaceDepthFailStencilOp( InBackFaceDepthFailStencilOp )
+		, backFacePassStencilOp( InBackFacePassStencilOp )
+		, stencilReadMask( InStencilReadMask )
+		, stencilWriteMask( InStencilWriteMask )
+		, stencilRef( InStencilRef )
+	{}
+
+	bool				bEnableFrontFaceStencil;			/**< Is enable front face stencil */
+	ECompareFunction	frontFaceStencilTest;				/**< Front face stencil test */
+	EStencilOp			frontFaceStencilFailStencilOp;		/**< Front face stencil fail stencil operation */
+	EStencilOp			frontFaceDepthFailStencilOp;		/**< Front face depth fail stencil operation */
+	EStencilOp			frontFacePassStencilOp;				/**< Front face pass stencil operation */
+	bool				bEnableBackFaceStencil;				/**< Is enable back face stencil */
+	ECompareFunction	backFaceStencilTest;				/**< Back face stencil test */
+	EStencilOp			backFaceStencilFailStencilOp;		/**< Back face stencil fail stencil operation */
+	EStencilOp			backFaceDepthFailStencilOp;			/**< Back face depth fail stencil operation */
+	EStencilOp			backFacePassStencilOp;				/**< Back face pass stencil operation */
+	uint32				stencilReadMask;					/**< Stencil read mask */
+	uint32				stencilWriteMask;					/**< Stencil write mask */
+	uint32				stencilRef;							/**< Stencil reference */
 };
 
 /**
@@ -282,6 +421,34 @@ public:
 	 * Destructor
 	 */
 	virtual ~CBaseDepthStateRHI()
+	{}
+};
+
+/**
+ * @ingroup Engine
+ * Base class of blend state
+ */
+class CBaseBlendStateRHI : public CBaseResourceRHI
+{
+public:
+	/**
+	 * Destructor
+	 */
+	virtual ~CBaseBlendStateRHI()
+	{}
+};
+
+/**
+ * @ingroup Engine
+ * Base class of stencil state
+ */
+class CBaseStencilStateRHI : public CBaseResourceRHI
+{
+public:
+	/**
+	 * Destructor
+	 */
+	virtual ~CBaseStencilStateRHI()
 	{}
 };
 

@@ -124,7 +124,7 @@ public:
 	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 protected:
-	class CLightVertexShaderParameters*		vertexFactoryParameters;		/**< Vertex factory shader parameters */
+	class CLightVertexShaderParameters*		vertexFactoryParameters;	/**< Vertex factory shader parameters */
 };
 
 /**
@@ -320,11 +320,35 @@ public:
 		SetSamplerStateParameter( InDeviceContextRHI, normalMetalGBufferSamplerParameter, InSamplerStateRHI );
 	}
 
+	/**
+	 * @brief Set depth buffer texture parameter
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InTextureRHI			RHI Texture
+	 */
+	FORCEINLINE void SetDepthBufferTexture( class CBaseDeviceContextRHI* InDeviceContextRHI, const Texture2DRHIParamRef_t InTextureRHI )
+	{
+		SetTextureParameter( InDeviceContextRHI, depthBufferParameter, InTextureRHI );
+	}
+
+	/**
+	 * @brief Set depth buffer sampler state parameter
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InSamplerStateRHI		RHI sampler state
+	 */
+	FORCEINLINE void SetDepthBufferSamplerState( class CBaseDeviceContextRHI* InDeviceContextRHI, const SamplerStateRHIParamRef_t InSamplerStateRHI )
+	{
+		SetSamplerStateParameter( InDeviceContextRHI, depthBufferSamplerParameter, InSamplerStateRHI );
+	}
+
 private:
 	CShaderResourceParameter		diffuseRoughnessGBufferParameter;			/**< DiffuseRoughnessGBuffer texture parameter */
 	CShaderResourceParameter		diffuseRoughnessGBufferSamplerParameter;	/**< DiffuseRoughnessGBuffer sampler parameter */
 	CShaderResourceParameter		normalMetalGBufferParameter;				/**< NormalMetalGBuffer texture parameter */
 	CShaderResourceParameter		normalMetalGBufferSamplerParameter;			/**< NormalMetalGBuffer sampler parameter */
+	CShaderResourceParameter		depthBufferParameter;						/**< Depth buffer texture parameter */
+	CShaderResourceParameter		depthBufferSamplerParameter;				/**< Depth buffer sampler parameter */
 };
 
 /**

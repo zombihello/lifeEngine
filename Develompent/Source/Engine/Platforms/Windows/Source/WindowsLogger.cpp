@@ -35,6 +35,7 @@ const tchar* GLogCategoryNames[] =
 	TEXT( "Physics" ),
 	TEXT( "Movie" ),
 	TEXT( "Render" ),
+	TEXT( "RHI" ),
 
 #if WITH_EDITOR
 	TEXT( "Editor" ),

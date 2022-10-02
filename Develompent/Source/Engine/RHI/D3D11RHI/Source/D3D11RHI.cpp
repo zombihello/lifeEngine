@@ -344,6 +344,17 @@ DepthStateRHIRef_t CD3D11RHI::CreateDepthState( const SDepthStateInitializerRHI&
 	return new CD3D11DepthStateRHI( InInitializer );
 }
 
+BlendStateRHIRef_t CD3D11RHI::CreateBlendState( const SBlendStateInitializerRHI& InInitializer )
+{
+	return new CD3D11BlendStateRHI( InInitializer );
+}
+
+StencilStateRHIRef_t CD3D11RHI::CreateStencilState( const SStencilStateInitializerRHI& InInitializer )
+{
+	appErrorf( TEXT( "Not implemented!" ) );
+	return nullptr;
+}
+
 Texture2DRHIRef_t CD3D11RHI::CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData /*= nullptr*/ )
 {
 	return new CD3D11Texture2DRHI( InDebugName, InSizeX, InSizeY, InNumMips, InFormat, InFlags, InData );
@@ -360,6 +371,16 @@ SurfaceRHIRef_t CD3D11RHI::CreateTargetableSurface( const tchar* InDebugName, ui
 class CBaseDeviceContextRHI* CD3D11RHI::GetImmediateContext() const
 {
 	return immediateContext;
+}
+
+uint32 CD3D11RHI::GetViewportWidth() const
+{
+	return stateCache.viewport.Width;
+}
+
+uint32 CD3D11RHI::GetViewportHeight() const
+{
+	return stateCache.viewport.Height;
 }
 
 void CD3D11RHI::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, void* InInstanceData, uint32 InInstanceStride, uint32 InInstanceSize, uint32 InNumInstances )
@@ -556,6 +577,24 @@ void CD3D11RHI::SetDepthTest( class CBaseDeviceContextRHI* InDeviceContext, Dept
 		d3d11DeviceContext->OMSetDepthStencilState( d3d11DepthState, oldStencilRef );
 		stateCache.depthStencilState = d3d11DepthState;
 	}
+}
+
+void CD3D11RHI::SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState )
+{
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	ID3D11BlendState*				d3d11BlendState = InNewState ? ( ( CD3D11BlendStateRHI* )InNewState )->GetResource() : nullptr;
+
+	if ( d3d11BlendState != stateCache.blendState )
+	{
+		float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
+		d3d11DeviceContext->OMSetBlendState( d3d11BlendState, blendFactor, 0xFFFFFFFF );
+		stateCache.blendState = d3d11BlendState;
+	}
+}
+
+void CD3D11RHI::SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, StencilStateRHIParamRef_t InNewState )
+{
+	appErrorf( TEXT( "Not implemented" ) );
 }
 
 void CD3D11RHI::CommitConstants( class CBaseDeviceContextRHI* InDeviceContext )

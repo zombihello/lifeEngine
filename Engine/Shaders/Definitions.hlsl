@@ -24,4 +24,8 @@
 #define DIRECTIONAL_LIGHT                   0
 #endif // !DIRECTIONAL_LIGHT
 
+#ifndef ORTHOGRAPHIC_PROJECTION
+#define ORTHOGRAPHIC_PROJECTION             0
+#endif // !ORTHOGRAPHIC_PROJECTION
+
  #endif // !DEFINITIONS_H

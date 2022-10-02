@@ -8,7 +8,9 @@ IMPLEMENT_CLASS( CLightComponent )
 CLightComponent::CLightComponent()
 	: bEnabled( true )
 	, scene( nullptr )
-	, color( CColor::white )
+	, lightColor( CColor::white )
+	, specularColor( CColor::white )
+	, intensivity( 22400.f )
 {}
 
 CLightComponent::~CLightComponent()

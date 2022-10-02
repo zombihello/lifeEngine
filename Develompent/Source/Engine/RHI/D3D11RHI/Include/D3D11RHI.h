@@ -186,6 +186,22 @@ public:
 	virtual DepthStateRHIRef_t						CreateDepthState( const SDepthStateInitializerRHI& InInitializer ) override;
 
 	/**
+	 * @brief Create blend state
+	 *
+	 * @param InInitializer		Initializer of blend state
+	 * @return Pointer to blend state
+	 */
+	virtual BlendStateRHIRef_t						CreateBlendState( const SBlendStateInitializerRHI& InInitializer ) override;
+
+	/**
+	 * @brief Create stencil state
+	 *
+	 * @param InInitializer		Initializer of stencil state
+	 * @return Pointer to stencil state
+	 */
+	virtual StencilStateRHIRef_t					CreateStencilState( const SStencilStateInitializerRHI& InInitializer ) override;
+
+	/**
 	 * @brief Create texture 2D
 	 *
 	 * @param[in] InDebugName Debug name
@@ -422,6 +438,22 @@ public:
 	virtual void									SetDepthTest( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState ) override;
 
 	/**
+	 * Set blend state
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InNewState			New blend state
+	 */
+	virtual void									SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState ) override;
+
+	/**
+	 * Set stencil state
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InNewState			New stencil state
+	 */
+	virtual void									SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, StencilStateRHIParamRef_t InNewState ) override;
+
+	/**
 	 * Commit constants
 	 * 
 	 * @param[in] InDeviceContext Device context
@@ -559,6 +591,18 @@ public:
 	 * @return Pointer to device context
 	 */
 	virtual class CBaseDeviceContextRHI*			GetImmediateContext() const override;
+
+	/**
+	 * @brief Get viewport width
+	 * @return Return viewport width
+	 */
+	virtual uint32									GetViewportWidth() const override;
+
+	/**
+	 * @brief Get viewport height
+	 * @return Return viewport height
+	 */
+	virtual uint32									GetViewportHeight() const override;
 
 	/**
 	 * @brief Get D3D11 device

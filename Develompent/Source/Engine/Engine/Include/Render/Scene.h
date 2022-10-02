@@ -68,6 +68,7 @@ public:
 	/**
 	 * Constructor
 	 * 
+	 * @param InPosition				Camera position
 	 * @param InProjectionMatrix		Projection matrix
 	 * @param InViewMatrix				View matrix
 	 * @param InSizeX					Size of viewport by X
@@ -75,7 +76,7 @@ public:
 	 * @param InBackgroundColor			Background color
 	 * @param InShowFlags				Show flags
 	 */
-	CSceneView( const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const CColor& InBackgroundColor, ShowFlags_t InShowFlags );
+	CSceneView( const Vector& InPosition, const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const CColor& InBackgroundColor, ShowFlags_t InShowFlags );
 
 	/**
 	 * Screen to world space
@@ -125,6 +126,33 @@ public:
 	}
 
 	/**
+	 * Get inverse view matrix
+	 * @return Return inverse view matrix
+	 */
+	FORCEINLINE const Matrix& GetInvViewMatrix() const
+	{
+		return invViewMatrix;
+	}
+
+	/**
+	 * Get inverse projection matrix
+	 * @return Return inverse projection matrix
+	 */
+	FORCEINLINE const Matrix& GetInvProjectionMatrix() const
+	{
+		return invProjectionMatrix;
+	}
+
+	/**
+	 * Get inverse View * Projection matrix
+	 * @return Return inverse View * Projection matrix
+	 */
+	FORCEINLINE const Matrix& GetInvViewProjectionMatrix() const
+	{
+		return invViewProjectionMatrix;
+	}
+
+	/**
 	 * Get frustum
 	 * @return Return frustum
 	 */
@@ -169,15 +197,28 @@ public:
 		return sizeY;
 	}
 
+	/**
+	 * Get camera position
+	 * @return Return camera position
+	 */
+	FORCEINLINE const Vector& GetPosition() const
+	{
+		return position;
+	}
+
 private:
-	Matrix			viewMatrix;				/**< View matrix */
-	Matrix			projectionMatrix;		/**< Projection matrix */
-	Matrix			viewProjectionMatrix;	/**< View * Projection matrix */
-	CFrustum		frustum;				/**< Frustum */
-	CColor			backgroundColor;		/**< Background color */
-	ShowFlags_t		showFlags;				/**< Show flags for the view */
-	float			sizeX;					/**< Size X of viewport */
-	float			sizeY;					/**< Size Y of viewport */
+	Matrix			viewMatrix;							/**< View matrix */
+	Matrix			projectionMatrix;					/**< Projection matrix */
+	Matrix			viewProjectionMatrix;				/**< View * Projection matrix */
+	Matrix			invViewMatrix;						/**< Inverse view matrix */
+	Matrix			invProjectionMatrix;				/**< Inverse projection matrix */
+	Matrix			invViewProjectionMatrix;			/**< Inverse View * Projection matrix */
+	Vector			position;							/**< Camera position */
+	CFrustum		frustum;							/**< Frustum */
+	CColor			backgroundColor;					/**< Background color */
+	ShowFlags_t		showFlags;							/**< Show flags for the view */
+	float			sizeX;								/**< Size X of viewport */
+	float			sizeY;								/**< Size Y of viewport */
 };
 
 /**

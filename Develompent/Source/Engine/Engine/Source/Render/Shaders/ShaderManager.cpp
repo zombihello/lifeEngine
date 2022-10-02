@@ -11,6 +11,10 @@
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/Shaders/ShaderCompiler.h"
 
+#if WITH_EDITOR
+#include "System/SplashScreen.h"
+#endif // WITH_EDITOR
+
 CShaderParameter::CShaderParameter()
 	: bufferIndex( 0 )
 	, baseIndex( 0 )
@@ -123,10 +127,19 @@ bool CShaderManager::LoadShaders( const tchar* InPathShaderCache )
 			continue;
 		}
 
+		CVertexFactoryMetaType*			vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
+
+#if WITH_EDITOR
+		if ( GIsEditor )
+		{
+			appSetSplashText( STT_StartupProgress, CString::Format( TEXT( "Loading shader %s for %s..." ), item.name.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
+			appSleep( 0.01f );
+		}
+#endif // WITH_EDITOR
+
 		shader->Init( item );
 		++numLoadedShaders;
-
-		CVertexFactoryMetaType*			vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
+	
 		if ( vertexFactoryType )
 		{
 			LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s loaded" ), item.name.c_str(), vertexFactoryType->GetName().c_str() );

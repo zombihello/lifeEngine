@@ -5,7 +5,7 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#include "CPP_GlobalConstantBuffers.hlsl"
+#include "Common.hlsl"
 #include "BasePassCommon.hlsl"
 #include "VertexFactory.hlsl"
 
@@ -13,7 +13,8 @@ void MainVS( in FVertexFactoryInput In, out VS_OUT Out, out float4 OutPosition :
 {
 	OutPosition			= MulMatrix( viewProjectionMatrix, VertexFactory_GetWorldPosition( In ) );
 	Out.texCoord0		= VertexFactory_GetTexCoord( In, 0 );
-	
+	Out.normal			= VertexFactory_GetWorldNormal( In );
+
 #if WITH_EDITOR
 	Out.colorOverlay	= VertexFactory_GetColorOverlay( In );
 #endif // WITH_EDITOR

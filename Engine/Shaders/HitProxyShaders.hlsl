@@ -5,7 +5,7 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
  
-#include "CPP_GlobalConstantBuffers.hlsl"
+#include "Common.hlsl"
 #include "VertexFactory.hlsl"
 
 struct VS_OUT

@@ -176,6 +176,33 @@ public:
 		return renderTargets[SRRT_Normal_Metal_GBuffer].surface;
 	}
 
+	/**
+	 * @brief Get buffer size
+	 * @return Return buffer size
+	 */
+	FORCEINLINE Vector2D GetBufferSize() const
+	{
+		return Vector2D( bufferSizeX, bufferSizeY );
+	}
+
+	/**
+	 * @brief Get buffer width
+	 * @return Return buffer width
+	 */
+	FORCEINLINE float GetBufferWidth() const
+	{
+		return bufferSizeX;
+	}
+
+	/**
+	 * @brief Get buffer height
+	 * @return Return buffer height
+	 */
+	FORCEINLINE float GetBufferHeight() const
+	{
+		return bufferSizeY;
+	}
+
 protected:
 	/**
 	 * @brief Initializes the RHI resources used by this resource.

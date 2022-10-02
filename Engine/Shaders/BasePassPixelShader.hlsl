@@ -5,7 +5,7 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#include "CPP_GlobalConstantBuffers.hlsl"
+#include "Common.hlsl"
 #include "BasePassCommon.hlsl"
 
 // Output of pixel shader
@@ -46,6 +46,6 @@ void MainPS( VS_OUT In, out PS_OUT Out )
 	#endif // WITH_EDITOR
 		;
 
-	Out.normalMetal.rgb 		= normalTexture.Sample( normalSampler, In.texCoord0 ).rgb;
+	Out.normalMetal.rgb 		= normalize( In.normal.xyz ); //normalTexture.Sample( normalSampler, In.texCoord0 ).rgb;
 	Out.normalMetal.a			= metallicTexture.Sample( metallicSampler, In.texCoord0 ).a;
 }

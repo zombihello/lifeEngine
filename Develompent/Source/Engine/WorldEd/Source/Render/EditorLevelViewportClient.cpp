@@ -728,7 +728,7 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 In
 
 	viewMatrix = glm::lookAt( viewLocation, viewLocation + targetDirection, axisUp );
 
-	CSceneView*		sceneView = new CSceneView( projectionMatrix, viewMatrix, InSizeX, InSizeY, GetBackgroundColor(), showFlags );
+	CSceneView*		sceneView = new CSceneView( viewLocation, projectionMatrix, viewMatrix, InSizeX, InSizeY, GetBackgroundColor(), showFlags );
 	return sceneView;
 }
 

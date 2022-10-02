@@ -5,7 +5,7 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#include "CPP_GlobalConstantBuffers.hlsl"
+#include "Common.hlsl"
 #include "VertexFactory.hlsl"
 
  void MainVS( in FVertexFactoryInput In, out float2 OutUV : TEXCOORD0, out float4 OutColor : TEXCOORD1, out float4 OutPosition : SV_POSITION )

@@ -33,12 +33,26 @@ float4 VertexFactory_GetLocalPosition( FVertexFactoryInput InInput )
 	return InInput.position * float4( spriteSize, 1.f, 1.f );
 }
 
+float4 VertexFactory_GetLocalNormal( FVertexFactoryInput InInput )
+{
+	return InInput.normal;
+}
+
 float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 {
 #if USE_INSTANCING
 	return MulMatrix( InInput.instanceLocalToWorld, VertexFactory_GetLocalPosition( InInput ) );
 #else
 	return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalPosition( InInput ) );
+#endif // USE_INSTANCING
+}
+
+float4 VertexFactory_GetWorldNormal( FVertexFactoryInput InInput )
+{
+#if USE_INSTANCING
+	return MulMatrix( InInput.instanceLocalToWorld, VertexFactory_GetLocalNormal( InInput ) );
+#else
+	return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalNormal( InInput ) );
 #endif // USE_INSTANCING
 }
 

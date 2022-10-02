@@ -1,3 +1,4 @@
+#include "Logger/LoggerMacros.h"
 #include "Misc/Template.h"
 #include "D3D11RHI.h"
 #include "D3D11State.h"
@@ -81,6 +82,42 @@ static FORCEINLINE float TranslateMipBias( ESamplerMipMapLODBias InMipBias )
 	};
 }
 
+static FORCEINLINE D3D11_BLEND_OP TranslateBlendOp( EBlendOperation InBlendOp )
+{
+	switch ( InBlendOp )
+	{
+	case BO_Subtract:			return D3D11_BLEND_OP_SUBTRACT;
+	case BO_ReverseSubtract:	return D3D11_BLEND_OP_REV_SUBTRACT;
+	case BO_Min:				return D3D11_BLEND_OP_MIN;
+	case BO_Max:				return D3D11_BLEND_OP_MAX;
+	default:					return D3D11_BLEND_OP_ADD;
+	};
+}
+
+static FORCEINLINE D3D11_BLEND TranslateBlendFactor( EBlendFactor InBlendFactor )
+{
+	switch ( InBlendFactor )
+	{
+	case BF_One:						return D3D11_BLEND_ONE;
+	case BF_SourceColor:				return D3D11_BLEND_SRC_COLOR;
+	case BF_InverseSourceColor:			return D3D11_BLEND_INV_SRC_COLOR;
+	case BF_SourceAlpha:				return D3D11_BLEND_SRC_ALPHA;
+	case BF_InverseSourceAlpha:			return D3D11_BLEND_INV_SRC_ALPHA;
+	case BF_DestAlpha:					return D3D11_BLEND_DEST_ALPHA;
+	case BF_InverseDestAlpha:			return D3D11_BLEND_INV_DEST_ALPHA;
+	case BF_DestColor:					return D3D11_BLEND_DEST_COLOR;
+	case BF_InverseDestColor:			return D3D11_BLEND_INV_DEST_COLOR;
+	case BF_SourceAlphaSaturate:		return D3D11_BLEND_SRC_ALPHA_SAT;
+	case BF_ConstantBlendColor:			return D3D11_BLEND_BLEND_FACTOR;
+	case BF_InverseConstantBlendColor:	return D3D11_BLEND_INV_BLEND_FACTOR;
+	case BF_Source1Color:				return D3D11_BLEND_SRC1_COLOR;
+	case BF_InverseSource1Color:		return D3D11_BLEND_INV_SRC1_COLOR;
+	case BF_Source1Alpha:				return D3D11_BLEND_SRC1_ALPHA;
+	case BF_InverseSource1Alpha:		return D3D11_BLEND_INV_SRC1_ALPHA;
+	default:							return D3D11_BLEND_ZERO;
+	};
+}
+
 SD3D11StateCache::SD3D11StateCache()
 	: inputLayout( nullptr )
 	, vertexShader( nullptr )
@@ -92,6 +129,7 @@ SD3D11StateCache::SD3D11StateCache()
 	, primitiveTopology( D3D_PRIMITIVE_TOPOLOGY_UNDEFINED )
 	, depthStencilView( nullptr )
 	, depthStencilState( nullptr )
+	, blendState( nullptr )
 {
 	appMemzero( &vertexBuffers, sizeof( vertexBuffers ) );
 	appMemzero( &psSamplerStates, sizeof( psSamplerStates ) );
@@ -225,4 +263,43 @@ CD3D11DepthStateRHI::CD3D11DepthStateRHI( const SDepthStateInitializerRHI& InIni
 CD3D11DepthStateRHI::~CD3D11DepthStateRHI()
 {
 	d3d11DepthState->Release();
+}
+
+CD3D11BlendStateRHI::CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InInitializer )
+{
+	// Init descriptor
+	D3D11_BLEND_DESC		d3d11BlendDesc;
+	appMemzero( &d3d11BlendDesc, sizeof( D3D11_BLEND_DESC ) );
+	d3d11BlendDesc.AlphaToCoverageEnable					= false;
+	d3d11BlendDesc.IndependentBlendEnable					= true;
+	d3d11BlendDesc.RenderTarget[0].BlendEnable				= InInitializer.colorBlendOperation != BO_Add || InInitializer.colorDestBlendFactor != BF_Zero || InInitializer.colorSourceBlendFactor != BF_One || InInitializer.alphaBlendOperation != BO_Add || InInitializer.alphaDestBlendFactor != BF_Zero || InInitializer.alphaSourceBlendFactor != BF_One;
+	d3d11BlendDesc.RenderTarget[0].BlendOp					= TranslateBlendOp( InInitializer.colorBlendOperation );
+	d3d11BlendDesc.RenderTarget[0].SrcBlend					= TranslateBlendFactor( InInitializer.colorSourceBlendFactor );
+	d3d11BlendDesc.RenderTarget[0].DestBlend				= TranslateBlendFactor( InInitializer.colorDestBlendFactor );
+	d3d11BlendDesc.RenderTarget[0].BlendOpAlpha				= TranslateBlendOp( InInitializer.alphaBlendOperation );
+	d3d11BlendDesc.RenderTarget[0].SrcBlendAlpha			= TranslateBlendFactor( InInitializer.alphaSourceBlendFactor );
+	d3d11BlendDesc.RenderTarget[0].DestBlendAlpha			= TranslateBlendFactor( InInitializer.alphaDestBlendFactor );
+	d3d11BlendDesc.RenderTarget[0].RenderTargetWriteMask	= D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	LE_LOG( LT_Warning, LC_RHI, TEXT( "AHTUNG! CD3D11BlendStateRHI::CD3D11BlendStateRHI :: Need implement color write mask" ) );
+
+	for ( uint32 renderTargetIndex = 1; renderTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT; ++renderTargetIndex )
+	{
+		memcpy( &d3d11BlendDesc.RenderTarget[renderTargetIndex], &d3d11BlendDesc.RenderTarget[0], sizeof( d3d11BlendDesc.RenderTarget[0] ) );		
+	}
+
+	// Create DirectX resource
+	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
+
+#if DO_CHECK
+	HRESULT				result = d3d11Device->CreateBlendState( &d3d11BlendDesc, &d3d11BlendState );
+	check( result == S_OK );
+#else
+	d3d11Device->CreateBlendState( &d3d11BlendDesc, &d3d11BlendState );
+#endif // DO_CHECK
+}
+
+CD3D11BlendStateRHI::~CD3D11BlendStateRHI()
+{
+	d3d11BlendState->Release();
 }

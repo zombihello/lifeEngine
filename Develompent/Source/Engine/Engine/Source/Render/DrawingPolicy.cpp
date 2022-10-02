@@ -3,6 +3,7 @@
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseStateRHI.h"
 #include "RHI/TypesRHI.h"
+#include "RHI/StaticStatesRHI.h"
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/SceneUtils.h"
 #include "Render/Scene.h"
@@ -45,6 +46,7 @@ void CMeshDrawingPolicy::SetRenderState( class CBaseDeviceContextRHI* InDeviceCo
 	vertexFactory->Set( InDeviceContextRHI );
 	GRHI->SetRasterizerState( InDeviceContextRHI, GetRasterizerState() );
 	GRHI->SetBoundShaderState( InDeviceContextRHI, GetBoundShaderState() );
+	GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<>::GetRHI() );
 }
 
 void CMeshDrawingPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI )

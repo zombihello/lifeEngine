@@ -1,3 +1,4 @@
+#include "Math/Math.h"
 #include "Render/Shaders/LightingShader.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
@@ -56,6 +57,10 @@ void CBaseLightingPixelShader::Init( const CShaderCache::SShaderCacheItem& InSha
 	diffuseRoughnessGBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "diffuseRoughnessGBufferSampler" ), true );
 
 	// Normal Metal GBuffer
-	normalMetalGBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "normalMetalGBufferTexture" ), true );              // TODO: Need remove 'true', because Normal, Metallic and Roughness this is non-optional parameters.
+	normalMetalGBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "normalMetalGBufferTexture" ), true );
 	normalMetalGBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "normalMetalGBufferSampler" ), true );
+
+	// Depth buffer
+	depthBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "depthBufferTexture" ), true );
+	depthBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "depthBufferSampler" ), true );
 }

@@ -157,13 +157,13 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 
 	if ( InFlags & TCF_DepthStencil )
 	{
-		d3d11Texture2DDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		d3d11Texture2DDesc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 	}
 	else if ( InFlags & TCF_ResolveTargetable )
 	{
 		if ( InFormat == PF_DepthStencil || InFormat == PF_ShadowDepth || InFormat == PF_FilteredShadowDepth || InFormat == PF_D32 )
 		{
-			d3d11Texture2DDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+			d3d11Texture2DDesc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 		}
 		else
 		{
@@ -252,12 +252,11 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 				// Use the typed depth format corresponding to DXGI_FORMAT_D32_FLOAT
 				d3d11DepthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
 			}
-			//@ROCK - Dustin: Changed Shadow Depth to D32. We're not using the other 8 bits for shadows anyways!
+			// Changed Shadow Depth to D32. We're not using the other 8 bits for shadows anyways!
 			else if ( d3d11Texture2DDesc.Format == DXGI_FORMAT_R16_TYPELESS )
 			{
 				d3d11DepthStencilViewDesc.Format = DXGI_FORMAT_D16_UNORM;
 			}
-			//@Rock Bleees
 			else if ( d3d11Texture2DDesc.Format == DXGI_FORMAT_R32G8X24_TYPELESS )
 			{
 				d3d11DepthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;

@@ -125,6 +125,7 @@ public:
 	struct ID3D11RenderTargetView*		renderTargetViews[ D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT ];			/**< Render target view */
 	struct ID3D11DepthStencilView*		depthStencilView;														/**< Depth stencil view */
 	struct ID3D11DepthStencilState*		depthStencilState;														/**< Depth stencil state */
+	struct ID3D11BlendState*			blendState;																/**< Blend state */
 };
 
 /**
@@ -159,6 +160,10 @@ private:
 	struct ID3D11SamplerState*				d3d11SamplerState;			/**< Pointer to DirectX 11 sampler state */	
 };
 
+/**
+ * @ingroup D3D11RHI
+ * Class of depth state DirectX 11
+ */
 class CD3D11DepthStateRHI : public CBaseDepthStateRHI
 {
 public:
@@ -185,6 +190,38 @@ public:
 
 private:
 	struct ID3D11DepthStencilState*		d3d11DepthState;		/**< Pointer to DirectX 11 depth state */
+};
+
+/**
+ * @ingroup D3D11RHI
+ * Class of blend state DirectX 11
+ */
+class CD3D11BlendStateRHI : public CBaseBlendStateRHI
+{
+public:
+	/**
+	 * Constructor
+	 *
+	 * @param InInitializer		Initializer of blend state
+	 */
+	CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InInitializer );
+
+	/**
+	 * Destructor
+	 */
+	~CD3D11BlendStateRHI();
+
+	/**
+	 * @brief Get DirectX resource
+	 * @return Pointer to DirectX resource
+	 */
+	FORCEINLINE struct ID3D11BlendState* GetResource()
+	{
+		return d3d11BlendState;
+	}
+
+private:
+	struct ID3D11BlendState*			d3d11BlendState;		/**< Point to DirectX 11 blend state */
 };
 
 #endif // !D3D11STATE_H

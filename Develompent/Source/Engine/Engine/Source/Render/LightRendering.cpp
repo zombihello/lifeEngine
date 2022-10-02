@@ -46,22 +46,31 @@ public:
 	/**
 	 * Set shader parameters
 	 *
-	 * @param InDeviceContextRHI		RHI device context
-	 * @param InDiffuseRoughnessGBuffer	Diffuse roughness GBuffer texture
-	 * @param InNormalMetalGBuffer		Normal metal GBuffer texture
+	 * @param InDeviceContextRHI			RHI device context
+	 * @param InDiffuseRoughnessGBufferRHI	RHI diffuse roughness GBuffer texture
+	 * @param InNormalMetalGBufferRHI		RHI normal metal GBuffer texture
+	 * @param InDepthBufferRHI				Rhi depth buffer texture
 	 */
-	void SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, Texture2DRHIParamRef_t InDiffuseRoughnessGBuffer, Texture2DRHIParamRef_t InNormalMetalGBuffer )
+	void SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, Texture2DRHIParamRef_t InDiffuseRoughnessGBufferRHI, Texture2DRHIParamRef_t InNormalMetalGBufferRHI, Texture2DRHIParamRef_t InDepthBufferRHI )
 	{
 		CBaseLightingPixelShader*		baseLightingPixelShader = ( CBaseLightingPixelShader* )pixelShader;
 		check( baseLightingPixelShader );
 
+		// Set constant parameters
+		vertexShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, nullptr );
+		pixelShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, nullptr );
+
 		// Diffuse Roughness GBuffer
-		baseLightingPixelShader->SetDiffuseRoughnessGBufferTexture( InDeviceContextRHI, InDiffuseRoughnessGBuffer );
+		baseLightingPixelShader->SetDiffuseRoughnessGBufferTexture( InDeviceContextRHI, InDiffuseRoughnessGBufferRHI );
 		baseLightingPixelShader->SetDiffuseRoughnessGBufferSamplerState( InDeviceContextRHI, TStaticSamplerStateRHI<>::GetRHI() );
 
 		// Normal Metal GBuffer
-		baseLightingPixelShader->SetNormalMetalGBufferTexture( InDeviceContextRHI, InNormalMetalGBuffer );
+		baseLightingPixelShader->SetNormalMetalGBufferTexture( InDeviceContextRHI, InNormalMetalGBufferRHI );
 		baseLightingPixelShader->SetNormalMetalGBufferSamplerState( InDeviceContextRHI, TStaticSamplerStateRHI<>::GetRHI() );
+
+		// Depth buffer
+		baseLightingPixelShader->SetDepthBufferTexture( InDeviceContextRHI, InDepthBufferRHI );
+		baseLightingPixelShader->SetDepthBufferSamplerState( InDeviceContextRHI, TStaticSamplerStateRHI<>::GetRHI() );
 	}
 
 	/**
@@ -77,12 +86,31 @@ public:
 		switch ( InPassType )
 		{
 		case PT_Base:
+			GRHI->SetDepthTest( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
+			GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<BO_Add, BF_SourceColor>::GetRHI() );
+			break;
+
+		case PT_Stencil:
+			GRHI->SetDepthTest( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_LessEqual>::GetRHI() );
 			break;
 
 		default:
 			appErrorf( TEXT( "Unknown pass type 0x%X" ), InPassType );
 			break;
 		}
+	}
+
+	/**
+	 * @brief Get rasterizer state
+	 * @return Return rasterizer state of current drawing policy
+	 */
+	virtual RasterizerStateRHIRef_t GetRasterizerState() const override
+	{
+		if ( !rasterizerState )
+		{
+			rasterizerState = TStaticRasterizerStateRHI<FM_Solid, CM_CCW>::GetRHI();
+		}
+		return rasterizerState;
 	}
 };
 
@@ -233,16 +261,11 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
 	InDeviceContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
 
-	SMeshBatch								 meshBatchPointLight;
-	meshBatchPointLight.baseVertexIndex		= 0;
-	meshBatchPointLight.firstIndex			= 0;
-	meshBatchPointLight.numPrimitives		= GSphereMesh.GetNumPrimitives();
-	meshBatchPointLight.indexBufferRHI		= GSphereMesh.GetIndexBufferRHI();
-	meshBatchPointLight.primitiveType		= PT_TriangleList;
-
 	std::list<TRefCountPtr<CPointLightComponent>>			pointLightComponents;
 	std::list<TRefCountPtr<CSpotLightComponent>>			spotLightComponents;
 	std::list<TRefCountPtr<CDirectionalLightComponent>>		directionalLightComponents;
+
+	GRHI->SetRenderTarget( InDeviceContext, GSceneRenderTargets.GetSceneColorSurface(), nullptr );
 
 	// Separating light components by type
 	{
@@ -266,7 +289,7 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	{
 		TLightingDrawingPolicy<LT_Point>		lightingDrawingPolicy;
 		lightingDrawingPolicy.Init( pointLightComponents );
-		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture() );
+		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetSceneDepthZTexture() );
 		lightingDrawingPolicy.SetRenderState( InDeviceContext, TLightingDrawingPolicy<LT_Point>::PT_Base );
 		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
 	}

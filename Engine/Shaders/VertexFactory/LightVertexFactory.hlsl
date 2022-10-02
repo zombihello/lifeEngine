@@ -17,7 +17,18 @@ struct FVertexFactoryInput
 
 float4 VertexFactory_GetLocalPosition( FVertexFactoryInput InInput )
 {
+#if POINT_LIGHT
+	return float4( InInput.position.x * InInput.lightData.radius, InInput.position.y * InInput.lightData.radius, InInput.position.z * InInput.lightData.radius, 1.f );
+#elif SPOT_LIGHT
 	return InInput.position;
+#else
+	return InInput.position;
+#endif // POINT_LIGHT / SPOT_LIGHT 
+}
+
+float4 VertexFactory_GetLocalNormal( FVertexFactoryInput InInput )
+{
+	return float4( 0.5f, 0.5f, 1.f, 0.f );
 }
 
 float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
@@ -30,6 +41,19 @@ float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 	#endif // USE_INSTANCING
 #else
 	return VertexFactory_GetLocalPosition( InInput );
+#endif // POINT_LIGHT || SPOT_LIGHT
+}
+
+float4 VertexFactory_GetWorldNormal( FVertexFactoryInput InInput )
+{
+#if POINT_LIGHT || SPOT_LIGHT
+	#if USE_INSTANCING
+		return MulMatrix( InInput.instanceLocalToWorld, VertexFactory_GetLocalNormal( InInput ) );	
+	#else
+		return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalNormal( InInput ) );
+	#endif // USE_INSTANCING
+#else
+	return VertexFactory_GetLocalNormal( InInput );
 #endif // POINT_LIGHT || SPOT_LIGHT
 }
 

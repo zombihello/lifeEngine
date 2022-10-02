@@ -182,7 +182,7 @@ public:
 	 * @param[in] InInitializer Initializer of rasterizer state
 	 * @return Pointer to rasterizer state
 	 */
-	virtual RasterizerStateRHIRef_t				CreateRasterizerState( const SRasterizerStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual RasterizerStateRHIRef_t					CreateRasterizerState( const SRasterizerStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create sampler state
@@ -198,7 +198,23 @@ public:
 	 * @param InInitializer		Initializer of depth state
 	 * @return Pointer to depth state
 	 */
-	virtual DepthStateRHIRef_t					CreateDepthState( const SDepthStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual DepthStateRHIRef_t						CreateDepthState( const SDepthStateInitializerRHI& InInitializer ) { return nullptr; }
+
+	/**
+	 * @brief Create blend state
+	 * 
+	 * @param InInitializer		Initializer of blend state
+	 * @return Pointer to blend state
+	 */
+	virtual BlendStateRHIRef_t						CreateBlendState( const SBlendStateInitializerRHI& InInitializer ) { return nullptr; }
+
+	/**
+	 * @brief Create stencil state
+	 * 
+	 * @param InInitializer		Initializer of stencil state
+	 * @return Pointer to stencil state
+	 */
+	virtual StencilStateRHIRef_t					CreateStencilState( const SStencilStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create texture 2D
@@ -438,6 +454,22 @@ public:
 	virtual void								SetDepthTest( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState ) {}
 
 	/**
+	 * Set blend state
+	 * 
+	 * @param InDeviceContext		Device context
+	 * @param InNewState			New blend state
+	 */
+	virtual void								SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState ) {}
+
+	/**
+	 * Set stencil state
+	 * 
+	 * @param InDeviceContext		Device context
+	 * @param InNewState			New stencil state
+	 */
+	virtual void								SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, StencilStateRHIParamRef_t InNewState ) {}
+
+	/**
 	 * Commit constants
 	 * 
 	 * @param[in] InDeviceContext Device context
@@ -576,6 +608,18 @@ public:
 	 * @return Pointer to device context
 	 */
 	virtual class CBaseDeviceContextRHI*		GetImmediateContext() const		{ return nullptr; }
+
+	/**
+	 * @brief Get viewport width
+	 * @return Return viewport width
+	 */
+	virtual uint32								GetViewportWidth() const		{ return 0; }
+
+	/**
+	 * @brief Get viewport height
+	 * @return Return viewport height
+	 */
+	virtual uint32								GetViewportHeight() const		{ return 0; }
 };
 
 #endif // !BASERHI_H

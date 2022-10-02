@@ -181,4 +181,67 @@ public:
 	}
 };
 
+/**
+ * @ingroup Engine
+ * @brief A static RHI blend state resource
+ * @warning Should only be used from the rendering thread
+ * 
+ * TStaticBlendState<...>::GetRHI() will return a BlendStateRHIRef_t to a blend state with the desired settings
+ */
+template<	EBlendOperation		InColorBlendOp		= BO_Add,
+			EBlendFactor		InColorSrcBlend		= BF_One,
+			EBlendFactor		InColorDestBlend	= BF_Zero,
+			EBlendOperation		InAlphaBlendOp		= BO_Add,
+			EBlendFactor		InAlphaSrcBlend		= BF_One,
+			EBlendFactor		InAlphaDestBlend	= BF_Zero,
+			ECompareFunction	InAlphaTest			= CF_Always,
+			byte				InAlphaRef			= 255 >
+class TStaticBlendState : public TStaticStateRHI<TStaticBlendState<InColorBlendOp, InColorSrcBlend, InColorDestBlend, InAlphaBlendOp, InAlphaSrcBlend, InAlphaDestBlend, InAlphaTest, InAlphaRef>, BlendStateRHIRef_t, BlendStateRHIParamRef_t>
+{
+public:
+	/**
+	 * @brief Create RHI object
+	 * @return Return created RHI object
+	 */
+	static BlendStateRHIRef_t CreateRHI()
+	{
+		SBlendStateInitializerRHI		initializerRHI = { InColorBlendOp, InColorSrcBlend, InColorDestBlend, InAlphaBlendOp, InAlphaSrcBlend, InAlphaDestBlend, InAlphaTest, InAlphaRef };
+		return GRHI->CreateBlendState( initializerRHI );
+	}
+};
+
+/**
+ * @ingroup Engine
+ * @brief A static RHI stencil state resource
+ * @warning Should only be used from the rendering thread
+ *
+ * TStaticStencilState<...>::GetRHI() will return a StencilStateRHIRef_t to a stencil state with the desired settings
+ */
+template<	bool				InEnableFrontFaceStencil		= false,
+			ECompareFunction	InFrontFaceStencilTest			= CF_Always,
+			EStencilOp			InFrontFaceStencilFailStencilOp	= SO_Keep,
+			EStencilOp			InFrontFaceDepthFailStencilOp	= SO_Keep,
+			EStencilOp			InFrontFacePassStencilOp		= SO_Keep,
+			bool				InEnableBackFaceStencil			= false,
+			ECompareFunction	InBackFaceStencilTest			= CF_Always,
+			EStencilOp			InBackFaceStencilFailStencilOp	= SO_Keep,
+			EStencilOp			InBackFaceDepthFailStencilOp	= SO_Keep,
+			EStencilOp			InBackFacePassStencilOp			= SO_Keep,
+			uint32				InStencilReadMask				= 0xFFFFFFFF,
+			uint32				InStencilWriteMask				= 0xFFFFFFFF,
+			uint32				InStencilRef					= 0 >
+class TStaticStencilState : public TStaticStateRHI<TStaticStencilState<InEnableFrontFaceStencil, InFrontFaceStencilTest, InFrontFaceStencilFailStencilOp, InFrontFaceDepthFailStencilOp, InFrontFacePassStencilOp, InEnableBackFaceStencil, InBackFaceStencilTest, InBackFaceStencilFailStencilOp, InBackFaceDepthFailStencilOp, InBackFacePassStencilOp, InStencilReadMask, InStencilWriteMask, InStencilRef>, StencilStateRHIRef_t, StencilStateRHIParamRef_t>
+{
+public:
+	/**
+	 * @brief Create RHI object
+	 * @return Return created RHI object
+	 */
+	static StencilStateRHIRef_t CreateRHI()
+	{
+		SStencilStateInitializerRHI		initializerRHI( InEnableFrontFaceStencil, InFrontFaceStencilTest, InFrontFaceStencilFailStencilOp, InFrontFaceDepthFailStencilOp, InFrontFacePassStencilOp, InEnableBackFaceStencil, InBackFaceStencilTest, InBackFaceStencilFailStencilOp, InBackFaceDepthFailStencilOp, InBackFacePassStencilOp, InStencilReadMask, InStencilWriteMask, InStencilRef );
+		return GRHI->CreateStencilState( initializerRHI );
+	}
+};
+
 #endif // !STATICSTATESRHI_H
