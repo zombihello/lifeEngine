@@ -30,6 +30,7 @@ enum ESceneRenderTargetTypes
 
 	SRRT_Diffuse_Roughness_GBuffer,			/**< Render target for diffuse and roughness GBuffer */
 	SRRT_Normal_Metal_GBuffer,				/**< Render target for normal and metal GBuffer */
+	SRRT_LightAttenuationDepthZ,			/**< Render target for light pass' depths */
 
 	SRTT_MaxSceneRenderTargets				/**< Max scene RTs available */
 };
@@ -83,6 +84,23 @@ public:
 	 * @param InDeviceContextRHI	Device context RHI
 	 */
 	void ClearGBufferTargets( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Resolve light attenuation depth
+	 */
+	void ResolveLightAttenuationDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Begin rendering light attenuation
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void BeginRenderingLightAttenuation( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Finish rendering light attenuation
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void FinishRenderingLightAttenuation( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
 	 * @brief Get texture of scene color
@@ -174,6 +192,24 @@ public:
 	FORCEINLINE SurfaceRHIRef_t GetNormal_Metal_GBufferSurface() const
 	{
 		return renderTargets[SRRT_Normal_Metal_GBuffer].surface;
+	}
+
+	/**
+	 * @brief Get texture of light attenuation depth
+	 * @return Return texture of light attenuation depth
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetLightAttenuationDepthZTexture() const
+	{
+		return renderTargets[SRRT_LightAttenuationDepthZ].texture;
+	}
+
+	/**
+	 * @brief Get surface of light attenuation depth
+	 * @return Return surface of light attenuation depth
+	 */
+	FORCEINLINE SurfaceRHIRef_t GetLightAttenuationDepthZSurface() const
+	{
+		return renderTargets[SRRT_LightAttenuationDepthZ].surface;
 	}
 
 	/**

@@ -575,6 +575,15 @@ public:
 	virtual void DrawIndexedPrimitiveUP( class CBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumVertices, const void* InIndexData, uint32 InIndexDataStride, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances = 1 ) override;
 
 	/**
+	 * @brief Copies the contents of the given surface to its resolve target texture
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InSourceSurface		Surface with a resolve texture to copy to
+	 * @param InResolveParams		Optional resolve params
+	 */
+	virtual void CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InSourceSurface, const SResolveParams& InResolveParams ) override;
+
+	/**
 	 * @brief Is initialized RHI
 	 * @return Return true if RHI is initialized, else false
 	 */
@@ -640,6 +649,15 @@ public:
 		return boundShaderStateHistory;
 	}
 
+	/**
+	 * @brief Get DirectX state cache
+	 * @return Return DirectX state cache
+	 */
+	FORCEINLINE const SD3D11StateCache& GetStateCache() const
+	{
+		return stateCache;
+	}
+
 private:
 	bool										isInitialize;						/**< Is RHI is initialized */
 	class CD3D11ConstantBuffer*					globalConstantBuffer;				/**< Global constant buffer */
@@ -650,6 +668,7 @@ private:
 	SD3D11StateCache							stateCache;							/**< DirectX 11 state cache */
 	TRefCountPtr< CD3D11VertexBufferRHI >		instanceBuffer;						/**< Instance buffer */
 
+	D3D_FEATURE_LEVEL							d3dFeatureLevel;					/**< DirectX feature level */
 	ID3D11Device*								d3d11Device;						/**< D3D11 Device */
 	IDXGIFactory*								dxgiFactory;						/**< DXGI factory */
 	IDXGIAdapter*								dxgiAdapter;						/**< DXGI adapter */

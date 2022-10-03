@@ -11,6 +11,7 @@
 
 #include "Misc/RefCounted.h"
 #include "RHI/BaseResourceRHI.h"
+#include "RHI/TypesRHI.h"
 #include "System/Archive.h"
 
 /**
@@ -39,6 +40,61 @@ enum ETextureCreateFlags
 	TCF_Dynamic					= 1 << 1,	/**< Texture that may be updated every frame */
 	TCF_ResolveTargetable		= 1 << 2,	/**< Texture can be used as a resolve target */
 	TCF_DepthStencil			= 1 << 3	/**< Texture is a depth stencil format that can be sampled */
+};
+
+/**
+ * @ingroup Engine
+ * Rect for resolve targets
+ */
+struct SResolveRect
+{
+	int32	x1;		/**< X1 */
+	int32	y1;		/**< Y1 */
+	int32	x2;		/**< X2 */
+	int32	y2;		/**< Y2 */
+
+	/**
+	 * Constructor
+	 * 
+	 * @param InX1	X1
+	 * @param InY1	Y1
+	 * @param InX2	X2
+	 * @param InY2	Y2
+	 */
+	SResolveRect( int32 InX1 = -1, int32 InY1 = -1, int32 InX2 = -1, int32 InY2 = -1 )
+		: x1( InX1 )
+		, y1( InY1 )
+		, x2( InX2 )
+		, y2( InY2 )
+	{}
+};
+
+/**
+ * @ingroup Engine
+ * Parameters for resolve targets
+ */
+struct SResolveParams
+{
+	SResolveRect			rect;					/**< Resolve rect bounded by [X1,Y1]..[X2,Y2]. Or -1 for fullscreen */
+	SurfaceRHIParamRef_t	resolveTargetSurface;	/**< Surface to resolve to. If NULL attempt to use 'resolveTarget' */
+	Texture2DRHIParamRef_t	resolveTarget;			/**< Texture to resolve to. If NULL it will resolve to the texture associated with the render target */
+
+	/**
+	 * Constructor
+	 */ 
+	SResolveParams( const SResolveRect& InRect = SResolveRect(), Texture2DRHIParamRef_t InResolveTarget = nullptr, SurfaceRHIParamRef_t InResolveTargetSurface = nullptr )
+		: rect( InRect )
+		, resolveTargetSurface( InResolveTargetSurface )
+		, resolveTarget( InResolveTarget )
+	{}
+
+	/**
+	 * Constructor
+	 */
+	SResolveParams( Texture2DRHIParamRef_t InResolveTarget )
+		: resolveTargetSurface( nullptr )
+		, resolveTarget( InResolveTarget )
+	{}
 };
 
 /**

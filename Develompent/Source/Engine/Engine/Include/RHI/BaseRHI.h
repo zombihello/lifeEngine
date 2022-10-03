@@ -563,6 +563,15 @@ public:
 	virtual void								DrawIndexedPrimitive( class CBaseDeviceContextRHI* InDeviceContext, class CBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) {}
 
 	/**
+	 * @brief Copies the contents of the given surface to its resolve target texture
+	 * 
+	 * @param InDeviceContext		Device context
+	 * @param InSourceSurface		Surface with a resolve texture to copy to
+	 * @param InResolveParams		Optional resolve params
+	 */
+	virtual void CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InSourceSurface, const SResolveParams& InResolveParams ) {}
+
+	/**
 	 * @brief Draw primitive
 	 * 
 	 * @param[in] InDeviceContext Device context

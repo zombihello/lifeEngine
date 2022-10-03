@@ -87,7 +87,7 @@ public:
 		{
 		case PT_Base:
 			GRHI->SetDepthTest( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
-			GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<BO_Add, BF_SourceColor>::GetRHI() );
+			GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<BO_Add, BF_One, BF_SourceColor>::GetRHI() );
 			break;
 
 		case PT_Stencil:
@@ -257,15 +257,17 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 		return;
 	}
 
+	// Copy scene depth buffer to light attenuation depth for using him's data in RT and in shaders (reconstruction world position)
+	GSceneRenderTargets.ResolveLightAttenuationDepth( InDeviceContext );
+
+	// Begin rendering light attenuation
 	GSceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
-	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
+	GSceneRenderTargets.BeginRenderingLightAttenuation( InDeviceContext );
 	InDeviceContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
 
 	std::list<TRefCountPtr<CPointLightComponent>>			pointLightComponents;
 	std::list<TRefCountPtr<CSpotLightComponent>>			spotLightComponents;
 	std::list<TRefCountPtr<CDirectionalLightComponent>>		directionalLightComponents;
-
-	GRHI->SetRenderTarget( InDeviceContext, GSceneRenderTargets.GetSceneColorSurface(), nullptr );
 
 	// Separating light components by type
 	{
@@ -289,8 +291,10 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	{
 		TLightingDrawingPolicy<LT_Point>		lightingDrawingPolicy;
 		lightingDrawingPolicy.Init( pointLightComponents );
-		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetSceneDepthZTexture() );
+		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetLightAttenuationDepthZTexture() );
 		lightingDrawingPolicy.SetRenderState( InDeviceContext, TLightingDrawingPolicy<LT_Point>::PT_Base );
 		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
 	}
+
+	GSceneRenderTargets.FinishRenderingLightAttenuation( InDeviceContext );
 }

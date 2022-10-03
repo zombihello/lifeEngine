@@ -6,6 +6,10 @@
 #include "Render/RenderUtils.h"
 #include "Render/GlobalConstantsHelper.h"
 #include "Render/SceneUtils.h"
+#include "Render/Shaders/Shader.h"
+#include "Render/Shaders/ShaderManager.h"
+#include "Render/VertexFactory/SimpleElementVertexFactory.h"
+#include "RHI/StaticStatesRHI.h"
 #include "D3D11RHI.h"
 #include "D3D11Viewport.h"
 #include "D3D11DeviceContext.h"
@@ -55,15 +59,235 @@ static FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrim
 	return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 }
 
+
+/**
+ * @ingroup D3D11RHI
+ * @brief A vertex shader for rendering a textured screen element 
+ */
+class CResolveVertexShader : public CShader
+{
+	DECLARE_SHADER_TYPE( CResolveVertexShader )
+
+public:
+#if WITH_EDITOR
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
+	{
+		if ( InShaderPlatform != SP_PCD3D_SM5 )
+		{
+			return false;
+		}
+
+		return !InVFMetaType || InVFMetaType->GetHash() == CSimpleElementVertexFactory::staticType.GetHash();
+	}
+#endif // WITH_EDITOR
+};
+
+/**
+ * @ingroup D3D11RHI
+ * @brief A pixel shader for resolving depth
+ */
+class CResolveDepthPixelShader : public CShader
+{
+	DECLARE_SHADER_TYPE( CResolveDepthPixelShader )
+
+public:
+	/**
+	 * @brief Initialize shader
+	 * @param[in] InShaderCacheItem Cache of shader
+	 */
+	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override
+	{
+		CShader::Init( InShaderCacheItem );
+		unresolvedSurfaceParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "unresolvedSurface" ) );
+	}
+
+#if WITH_EDITOR
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
+	{
+		if ( InShaderPlatform != SP_PCD3D_SM5 )
+		{
+			return false;
+		}
+
+		return !InVFMetaType || InVFMetaType->GetHash() == CSimpleElementVertexFactory::staticType.GetHash();
+	}
+#endif // WITH_EDITOR
+
+	/**
+	 * @brief Set unresolved surface
+	 *
+	 * @param InDeviceContextRHI	DirectX 11 device context
+	 * @param InSourceSurfaceRHI	DirectX 11 source surface
+	 */
+	FORCEINLINE void SetUnresolvedSurface( class CD3D11DeviceContext* InDeviceContextRHI, const CD3D11Surface* InSourceSurfaceRHI ) const
+	{
+		uint32							textureIndex			= unresolvedSurfaceParameter.GetBaseIndex();
+		ID3D11ShaderResourceView*		d3d11ShaderResourceView = InSourceSurfaceRHI->GetShaderResourceView();
+		InDeviceContextRHI->GetD3D11DeviceContext()->PSSetShaderResources( textureIndex, 1, &d3d11ShaderResourceView );
+	}
+
+private:
+	CShaderResourceParameter		unresolvedSurfaceParameter;			/**< Unresolved surface parameter */
+};
+
+IMPLEMENT_SHADER_TYPE(, CResolveVertexShader, TEXT( "RHI/D3D11RHI/ResolveVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
+IMPLEMENT_SHADER_TYPE(, CResolveDepthPixelShader, TEXT( "RHI/D3D11RHI/ResolvePixelShader.hlsl" ), TEXT( "MainDepth" ), SF_Pixel, true );
+
+void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11Surface* InSourceSurfaceRHI, CD3D11Texture2DRHI* InDestTexture2D, const D3D11_TEXTURE2D_DESC& InD3D11ResolveTargetDesc, const SResolveRect& InSourceRect, const SResolveRect& InDestRect )
+{
+	ID3D11DeviceContext*		d3d11DeviceContext		= InDeviceContextRHI->GetD3D11DeviceContext();
+	ID3D11Texture2D*			d3d11DestTexture2D		= InDestTexture2D->GetResource();
+	ID3D11RenderTargetView*		d3d11RenderTargetView	= InDestTexture2D->GetRenderTargetView();
+	ID3D11DepthStencilView*		d3d11DepthStencilView	= InDestTexture2D->GetDepthStencilView();
+
+	// Save the current viewport so that it can be restored
+	D3D11_VIEWPORT				d3d11SavedViewport;
+	uint32						numSavedViewports = 1;
+	d3d11DeviceContext->RSGetViewports( &numSavedViewports, &d3d11SavedViewport );
+
+	// No alpha blending, no depth tests or writes, no stencil tests or writes, no backface culling.
+	GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<>::GetRHI() );
+	GRHI->SetStencilState( InDeviceContextRHI, TStaticStencilState<>::GetRHI() );
+	GRHI->SetRasterizerState( InDeviceContextRHI, TStaticRasterizerStateRHI<FM_Solid, CM_None>::GetRHI() );
+
+	// Determine if the entire destination surface is being resolved to.
+	// If the entire surface is being resolved to, then it means we can clear it and signal the driver that it can discard
+	// the surface's previous contents, which breaks dependencies between frames when using alternate-frame SLI.
+	const bool					bClearDestSurface = InDestRect.x1 == 0 && InDestRect.y1 == 0 && InDestRect.x2 == InD3D11ResolveTargetDesc.Width && InDestRect.y2 == InD3D11ResolveTargetDesc.Height;
+
+	if ( InD3D11ResolveTargetDesc.BindFlags & D3D11_BIND_DEPTH_STENCIL )
+	{
+		// Clear the dest surface.
+		if ( bClearDestSurface )
+		{
+			d3d11DeviceContext->ClearDepthStencilView( d3d11DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 0, 0 );
+		}
+
+		GRHI->SetDepthTest( InDeviceContextRHI, TStaticDepthStateRHI<true, CF_Always>::GetRHI() );
+
+		// Write to the dest surface as a depth-stencil target
+		ID3D11RenderTargetView*			nullRTV = nullptr;
+		d3d11DeviceContext->OMSetRenderTargets( 1, &nullRTV, d3d11DepthStencilView );
+	}
+	else
+	{
+		// Clear the dest surface.
+		if ( bClearDestSurface )
+		{
+			CColor	clearColor = CColor::black;
+			d3d11DeviceContext->ClearRenderTargetView( d3d11RenderTargetView, ( float* ) &clearColor.ToNormalizedVector4D() );
+		}
+
+		GRHI->SetDepthTest( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
+
+		// Write to the dest surface as a render target.
+		d3d11DeviceContext->OMSetRenderTargets( 1, &d3d11RenderTargetView, nullptr );
+	}
+
+	D3D11_VIEWPORT		d3d11TempViewport;
+	d3d11TempViewport.MinDepth	= 0.0f;
+	d3d11TempViewport.MaxDepth	= 1.0f;
+	d3d11TempViewport.TopLeftX	= 0;
+	d3d11TempViewport.TopLeftY	= 0;
+	d3d11TempViewport.Width		= InD3D11ResolveTargetDesc.Width;
+	d3d11TempViewport.Height	= InD3D11ResolveTargetDesc.Height;
+	d3d11DeviceContext->RSSetViewports( 1, &d3d11TempViewport );
+
+	// Generate the vertices used to copy from the source surface to the destination surface.
+	const float minU				= InSourceRect.x1;
+	const float minV				= InSourceRect.y1;
+	const float maxU				= InSourceRect.x2;
+	const float maxV				= InSourceRect.y2;
+	const float minX				= -1.f + InDestRect.x1 / ( ( float )InD3D11ResolveTargetDesc.Width	* 0.5f );
+	const float minY				= +1.f - InDestRect.y1 / ( ( float )InD3D11ResolveTargetDesc.Height	* 0.5f );
+	const float maxX				= -1.f + InDestRect.x2 / ( ( float )InD3D11ResolveTargetDesc.Width	* 0.5f );
+	const float maxY				= +1.f - InDestRect.y2 / ( ( float )InD3D11ResolveTargetDesc.Height	* 0.5f );
+
+	static BoundShaderStateRHIRef_t	resolveBoundShaderState;
+
+	// Set the vertex and pixel shader
+	CResolveVertexShader*			resolveVertexShader = GShaderManager->FindInstance<CResolveVertexShader, CSimpleElementVertexFactory>();
+	CResolveDepthPixelShader*		resolvePixelShader	= GShaderManager->FindInstance<CResolveDepthPixelShader, CSimpleElementVertexFactory>();
+	resolvePixelShader->SetUnresolvedSurface( InDeviceContextRHI, InSourceSurfaceRHI );
+	
+	if ( !resolveBoundShaderState )
+	{
+		resolveBoundShaderState = GRHI->CreateBoundShaderState( TEXT( "Resolve" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), resolveVertexShader->GetVertexShader(), resolvePixelShader->GetPixelShader() );
+		check( resolveBoundShaderState );
+	}
+	GRHI->SetBoundShaderState( InDeviceContextRHI, resolveBoundShaderState );
+
+	// Generate the vertices used
+	SSimpleElementVertexType	vertices[4];
+	appMemzero( vertices, sizeof( SSimpleElementVertexType ) * 4 );
+
+	vertices[0].position.x = maxX;
+	vertices[0].position.y = minY;
+	vertices[0].texCoord.x = maxU;
+	vertices[0].texCoord.y = minV;
+
+	vertices[1].position.x = maxX;
+	vertices[1].position.y = maxY;
+	vertices[1].texCoord.x = maxU;
+	vertices[1].texCoord.y = maxV;
+
+	vertices[2].position.x = minX;
+	vertices[2].position.y = minY;
+	vertices[2].texCoord.x = minU;
+	vertices[2].texCoord.y = minV;
+
+	vertices[3].position.x = minX;
+	vertices[3].position.y = maxY;
+	vertices[3].texCoord.x = minU;
+	vertices[3].texCoord.y = maxV;
+
+	GRHI->DrawPrimitiveUP( InDeviceContextRHI, PT_TriangleStrip, 0, 2, vertices, sizeof( vertices[0] ) );
+
+	// Reset saved render targets
+	{
+		const SD3D11StateCache&		d3d11StateCache = ( ( CD3D11RHI* )GRHI )->GetStateCache();
+		d3d11DeviceContext->OMSetRenderTargets( D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, d3d11StateCache.renderTargetViews, d3d11StateCache.depthStencilView );
+	}
+
+	// Reset saved viewport
+	d3d11DeviceContext->RSSetViewports( numSavedViewports, &d3d11SavedViewport );
+}
+
+static FORCEINLINE SResolveRect GetDefaultRect( const SResolveRect& InRect, uint32 InDefaultWidth, uint32 InDefaultHeight )
+{
+	if ( InRect.x1 >= 0 && InRect.x2 >= 0 && InRect.y1 >= 0 && InRect.y2 >= 0 )
+	{
+		return InRect;
+	}
+	else
+	{
+		return SResolveRect( 0, 0, InDefaultWidth, InDefaultHeight );
+	}
+}
+
 /**
  * Constructor
  */
-CD3D11RHI::CD3D11RHI() :
-	isInitialize( false ),
-	immediateContext( nullptr ),
-	globalConstantBuffer( nullptr ),
-	psConstantBuffer( nullptr ),
-	d3d11Device( nullptr )
+CD3D11RHI::CD3D11RHI() 
+	: isInitialize( false )
+	, immediateContext( nullptr )
+	, globalConstantBuffer( nullptr )
+	, psConstantBuffer( nullptr )
+	, d3d11Device( nullptr )
 {
 	appMemzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
 }
@@ -106,9 +330,8 @@ void CD3D11RHI::Init( bool InIsEditor )
 	checkMsg( dxgiAdapter, TEXT( "GPU adapter not found" ) );
 
 	D3D_FEATURE_LEVEL				maxFeatureLevel = D3D_FEATURE_LEVEL_11_0;
-	D3D_FEATURE_LEVEL				featureLevel;
 	ID3D11DeviceContext*			d3d11DeviceContext = nullptr;
-	result = D3D11CreateDevice( dxgiAdapter, driverType, nullptr, deviceFlags, &maxFeatureLevel, 1, D3D11_SDK_VERSION, &d3d11Device, &featureLevel, &d3d11DeviceContext );
+	result = D3D11CreateDevice( dxgiAdapter, driverType, nullptr, deviceFlags, &maxFeatureLevel, 1, D3D11_SDK_VERSION, &d3d11Device, &d3dFeatureLevel, &d3d11DeviceContext );
 	check( result == S_OK );
 
 	immediateContext = new CD3D11DeviceContext( d3d11DeviceContext );
@@ -764,6 +987,81 @@ void CD3D11RHI::DrawIndexedPrimitiveUP( class CBaseDeviceContextRHI* InDeviceCon
 
 	SetStreamSource( InDeviceContext, 0, vertexBuffer, InVertexDataStride, 0 );
 	DrawIndexedPrimitive( InDeviceContext, indexBuffer, InPrimitiveType, InBaseVertexIndex, 0, InNumPrimitives, InNumInstances );
+}
+
+void CD3D11RHI::CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InSourceSurface, const SResolveParams& InResolveParams )
+{
+	ID3D11DeviceContext*	d3d11DeviceContext		= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	CD3D11Surface*			resolveTargetSurface	= InResolveParams.resolveTargetSurface ? ( CD3D11Surface* )InResolveParams.resolveTargetSurface : nullptr;
+	CD3D11Texture2DRHI*		resolveTarget2D			= InResolveParams.resolveTarget ? ( CD3D11Texture2DRHI* )InResolveParams.resolveTarget : nullptr;
+	check( resolveTargetSurface || resolveTarget2D );
+
+	ID3D11Texture2D*		d3d11SourceSurface		= ( ( CD3D11Surface* )InSourceSurface )->GetResource();
+	ID3D11Texture2D*		d3d11ResolveTarget		= resolveTargetSurface ? resolveTargetSurface->GetResource() : resolveTarget2D->GetResource();
+	if ( d3d11SourceSurface && d3d11ResolveTarget && d3d11SourceSurface != d3d11ResolveTarget )
+	{
+		D3D11_TEXTURE2D_DESC	d3d11ResolveTargetDesc;
+		d3d11ResolveTarget->GetDesc( &d3d11ResolveTargetDesc );
+
+		if ( d3dFeatureLevel == D3D_FEATURE_LEVEL_11_0 && d3d11ResolveTargetDesc.BindFlags & D3D11_BIND_DEPTH_STENCIL )
+		{
+			// If we're resolving part of the depth buffer, we need to do a copy using a shader. Otherwise we can do a CopySubresourceRegion
+			SResolveRect		resolveRect = InResolveParams.rect;
+			if ( resolveRect.x1 >= 0 && resolveRect.x2 < ( int32 )d3d11ResolveTargetDesc.Width && resolveRect.y1 >= 0 && resolveRect.y2 < ( int32 )d3d11ResolveTargetDesc.Height )
+			{
+				ResolveSurfaceUsingShader( ( CD3D11DeviceContext* )InDeviceContext, ( CD3D11Surface* )InSourceSurface, resolveTarget2D, d3d11ResolveTargetDesc, GetDefaultRect( InResolveParams.rect, d3d11ResolveTargetDesc.Width, d3d11ResolveTargetDesc.Height ), GetDefaultRect( InResolveParams.rect, d3d11ResolveTargetDesc.Width, d3d11ResolveTargetDesc.Height ) );
+			}
+			else
+			{
+				d3d11DeviceContext->CopySubresourceRegion( d3d11ResolveTarget, 0, 0, 0, 0, d3d11SourceSurface, 0, nullptr );
+			}
+		}
+		else
+		{
+			uint32					subresource = 0;
+			D3D11_TEXTURE2D_DESC	d3d11SourceSurfaceDesc;
+			d3d11SourceSurface->GetDesc( &d3d11SourceSurfaceDesc );
+
+			if ( d3d11SourceSurfaceDesc.SampleDesc.Count != 1 )
+			{
+				d3d11DeviceContext->ResolveSubresource( d3d11ResolveTarget, subresource, d3d11SourceSurface, subresource, d3d11ResolveTargetDesc.Format );
+			}
+			else
+			{
+				bool		bZeroArea		= false;
+				D3D11_BOX	d3d11SrcBox;
+				d3d11SrcBox.left			= 0;
+				d3d11SrcBox.top				= 0;
+				d3d11SrcBox.front			= 0;
+				D3D11_BOX*	pD3D11SrcBox	= nullptr;
+				SResolveRect resolveRect	= InResolveParams.rect;
+				
+				if ( resolveRect.x1 >= 0 && resolveRect.x2 >= 0 && resolveRect.y1 >= 0 && resolveRect.y2 >= 0 && ( resolveRect.x1 > 0 || resolveRect.y1 > 0 || resolveRect.x2 < ( int32 )d3d11ResolveTargetDesc.Width || resolveRect.y2 < ( int32 )d3d11ResolveTargetDesc.Height || resolveRect.x2 < ( int32 )d3d11SourceSurfaceDesc.Width || resolveRect.y2 < ( int32 )d3d11SourceSurfaceDesc.Height ) )
+				{
+					if ( resolveRect.x1 == resolveRect.x2 || resolveRect.y1 == resolveRect.y2 )
+					{
+						// Zero area - skip
+						bZeroArea			= true;
+					}
+					else
+					{
+						d3d11SrcBox.left	= resolveRect.x1;
+						d3d11SrcBox.right	= resolveRect.x2;
+						d3d11SrcBox.top		= resolveRect.y1;
+						d3d11SrcBox.bottom	= resolveRect.y2;
+						d3d11SrcBox.front	= 0;
+						d3d11SrcBox.back	= 1;
+						pD3D11SrcBox		= &d3d11SrcBox;
+					}
+				}
+
+				if ( !bZeroArea )
+				{
+					d3d11DeviceContext->CopySubresourceRegion( d3d11ResolveTarget, subresource, d3d11SrcBox.left, d3d11SrcBox.top, d3d11SrcBox.front, d3d11SourceSurface, subresource, pD3D11SrcBox );
+				}
+			}
+		}
+	}
 }
 
 /**

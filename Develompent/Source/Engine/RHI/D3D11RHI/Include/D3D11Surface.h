@@ -207,6 +207,16 @@ public:
 		return d3d11DepthStencilView;
 	}
 
+	/**
+	 * Get DirectX resource
+	 * @return Return pointer to DirectX texture 2D of this surface
+	 */
+	FORCEINLINE ID3D11Texture2D* GetResource()
+	{
+		check( resolveTarget2D );
+		return resolveTarget2D->GetResource();
+	}
+
 private:
 	ID3D11ShaderResourceView*				d3d11ShaderResourceView;		/**< The view that is used to access the texture from a shader */
 	ID3D11RenderTargetView*					d3d11RenderTargetView;			/**< The view that is used to render to the texture for shader-based resolve */
