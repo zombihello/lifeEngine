@@ -25,12 +25,14 @@ enum ESceneRenderTargetTypes
 	SRTT_SceneDepthZ,						/**< Render target for scene depths */
 
 #if ENABLE_HITPROXY
-	SRRT_HitProxies,						/**< Render target for hitProxiesy */
+	SRTT_HitProxies,						/**< Render target for hitProxiesy */
 #endif // ENABLE_HITPROXY
 
-	SRRT_Diffuse_Roughness_GBuffer,			/**< Render target for diffuse and roughness GBuffer */
-	SRRT_Normal_Metal_GBuffer,				/**< Render target for normal and metal GBuffer */
-	SRRT_LightAttenuationDepthZ,			/**< Render target for light pass' depths */
+	SRTT_Diffuse_Roughness_GBuffer,			/**< Render target for diffuse and roughness GBuffer */
+	SRTT_Normal_Metal_GBuffer,				/**< Render target for normal and metal GBuffer */
+	SRTT_Emission_GBuffer,					/**< Render target for emission GBuffer */
+	SRTT_LightAttenuation,					/**< Render target for light pass */
+	SRTT_LightAttenuationDepthZ,			/**< Render target for light pass' depths */
 
 	SRTT_MaxSceneRenderTargets				/**< Max scene RTs available */
 };
@@ -108,7 +110,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetSceneColorTexture() const
 	{
-		return renderTargets[ SRTT_SceneColor ].texture;
+		return renderTargets[SRTT_SceneColor].texture;
 	}
 
 	/**
@@ -117,7 +119,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetSceneColorSurface() const
 	{
-		return renderTargets[ SRTT_SceneColor ].surface;
+		return renderTargets[SRTT_SceneColor].surface;
 	}
 
 	/**
@@ -126,7 +128,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetSceneDepthZTexture() const
 	{
-		return renderTargets[ SRTT_SceneDepthZ ].texture;
+		return renderTargets[SRTT_SceneDepthZ].texture;
 	}
 
 	/**
@@ -135,7 +137,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetSceneDepthZSurface() const
 	{
-		return renderTargets[ SRTT_SceneDepthZ ].surface;
+		return renderTargets[SRTT_SceneDepthZ].surface;
 	}
 
 #if ENABLE_HITPROXY
@@ -145,7 +147,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetHitProxyTexture() const
 	{
-		return renderTargets[ SRRT_HitProxies ].texture;
+		return renderTargets[SRTT_HitProxies].texture;
 	}
 
 	/**
@@ -154,7 +156,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetHitProxySurface() const
 	{
-		return renderTargets[ SRRT_HitProxies ].surface;
+		return renderTargets[SRTT_HitProxies].surface;
 	}
 #endif // ENABLE_HITPROXY
 
@@ -164,7 +166,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetDiffuse_Roughness_GBufferTexture() const
 	{
-		return renderTargets[SRRT_Diffuse_Roughness_GBuffer].texture;
+		return renderTargets[SRTT_Diffuse_Roughness_GBuffer].texture;
 	}
 
 	/**
@@ -173,7 +175,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetDiffuse_Roughness_GBufferSurface() const
 	{
-		return renderTargets[SRRT_Diffuse_Roughness_GBuffer].surface;
+		return renderTargets[SRTT_Diffuse_Roughness_GBuffer].surface;
 	}
 
 	/**
@@ -182,7 +184,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetNormal_Metal_GBufferTexture() const
 	{
-		return renderTargets[SRRT_Normal_Metal_GBuffer].texture;
+		return renderTargets[SRTT_Normal_Metal_GBuffer].texture;
 	}
 
 	/**
@@ -191,7 +193,43 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetNormal_Metal_GBufferSurface() const
 	{
-		return renderTargets[SRRT_Normal_Metal_GBuffer].surface;
+		return renderTargets[SRTT_Normal_Metal_GBuffer].surface;
+	}
+
+	/**
+	 * @brief Get texture of Emission GBuffer
+	 * @return Return texture of Emission GBuffer
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetEmission_GBufferTexture() const
+	{
+		return renderTargets[SRTT_Emission_GBuffer].texture;
+	}
+
+	/**
+	 * @brief Get surface of Emission GBuffer
+	 * @return Return surface of Emission GBuffer
+	 */
+	FORCEINLINE SurfaceRHIRef_t GetEmission_GBufferSurface() const
+	{
+		return renderTargets[SRTT_Emission_GBuffer].surface;
+	}
+
+	/**
+	 * @brief Get texture of light attenuation
+	 * @return Return texture of light attenuation
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetLightAttenuationTexture() const
+	{
+		return renderTargets[SRTT_LightAttenuation].texture;
+	}
+
+	/**
+	 * @brief Get surface of light attenuation
+	 * @return Return surface of light attenuation
+	 */
+	FORCEINLINE SurfaceRHIRef_t GetLightAttenuationSurface() const
+	{
+		return renderTargets[SRTT_LightAttenuation].surface;
 	}
 
 	/**
@@ -200,7 +238,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetLightAttenuationDepthZTexture() const
 	{
-		return renderTargets[SRRT_LightAttenuationDepthZ].texture;
+		return renderTargets[SRTT_LightAttenuationDepthZ].texture;
 	}
 
 	/**
@@ -209,7 +247,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetLightAttenuationDepthZSurface() const
 	{
-		return renderTargets[SRRT_LightAttenuationDepthZ].surface;
+		return renderTargets[SRTT_LightAttenuationDepthZ].surface;
 	}
 
 	/**

@@ -328,6 +328,7 @@ public:
 	const static CName		normalTextureParamName;			/**< Name of Normal texture parameter */
 	const static CName		metallicTextureParamName;		/**< Name of Metallic texture parameter */
 	const static CName		roughnessTextureParamName;		/**< Name of Roughness texture parameter */
+	const static CName		emissionTextureParamName;		/**< Name of Emission texture parameter */
 
 private:
 	/**

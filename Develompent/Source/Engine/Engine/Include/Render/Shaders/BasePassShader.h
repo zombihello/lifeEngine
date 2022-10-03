@@ -117,6 +117,8 @@ private:
 	CShaderResourceParameter		metallicSamplerParameter;		/**< Metallic sampler parameter */
 	CShaderResourceParameter		roughnessParameter;				/**< Roughness texture parameter */
 	CShaderResourceParameter		roughnessSamplerParameter;		/**< Roughness sampler parameter */
+	CShaderResourceParameter		emissionParameter;				/**< Emission texture parameter */
+	CShaderResourceParameter		emissionSamplerParameter;		/**< Emission sampler parameter */
 };
 
 #endif // !BASEPASSSHADER_H

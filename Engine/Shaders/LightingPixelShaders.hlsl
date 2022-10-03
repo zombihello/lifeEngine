@@ -16,9 +16,17 @@ SamplerState	diffuseRoughnessGBufferSampler;
 Texture2D		normalMetalGBufferTexture;
 SamplerState	normalMetalGBufferSampler;
 
+// EmissionGBuffer texture
+Texture2D       emissionGBufferTexture;
+SamplerState    emissionGBufferSampler;
+
 // Depth buffer texture
 Texture2D		depthBufferTexture;
 SamplerState	depthBufferSampler;
+
+// Light attenuation texture (using in MainPS_PostLightPass)
+Texture2D       lightAttenuationTexture;
+SamplerState    lightAttenuationSampler;
 
 float3 ReconstructPosition( float2 InPixelCoord  ) 
 {
@@ -33,6 +41,7 @@ float3 ReconstructPosition( float2 InPixelCoord  )
     return worldPosition.xyz / worldPosition.w;
 }
 
+// Main function for calculate light attenuation
 float4 MainPS( in nointerpolation SLightData InLightData, in float4 InScreenPosition : TEXCOORD0 ) : SV_TARGET0
 {
     // Calculate screen UV
@@ -57,8 +66,20 @@ float4 MainPS( in nointerpolation SLightData InLightData, in float4 InScreenPosi
     float       attenuation         = pow( saturate( 1.f - pow( distance / InLightData.radius, 4.f ) ), 2.f ) / ( pow( distance, 2.f ) + 1.f );
     float	    specularFactor      = max( pow( dot( reflect( -lightDirection, normalMetal.xyz ), viewDirection ), diffuseRoughness.a ) * normalMetal.a, 0.f );
 
-    return  ( float4( diffuseRoughness.xyz, 1.f ) * InLightData.lightColor * InLightData.intensivity + InLightData.lightColor * specularFactor * InLightData.intensivity ) * attenuation * NdotL;
+    return ( InLightData.lightColor * InLightData.intensivity + InLightData.lightColor * specularFactor * InLightData.intensivity ) * attenuation * NdotL;
 #else
     return float4( positionFragment, 1.f );
 #endif // POINT_LIGHT
+}
+
+// Main function for blend the light attenuation with other data from GBuffer and write them to the scene color
+float4 MainPS_PostLightPass( float2 InUV : TEXCOORD0 ) : SV_TARGET0
+{
+    // Getting data from buffers
+    float4      diffuseRoughness    = diffuseRoughnessGBufferTexture.Sample( diffuseRoughnessGBufferSampler, InUV );
+    float4      emission            = emissionGBufferTexture.Sample( emissionGBufferSampler, InUV );
+    float4      lightAttenuation    = lightAttenuationTexture.Sample( lightAttenuationSampler, InUV );
+
+    // Blend them to final color
+    return float4( diffuseRoughness.xyz, 1.f ) * ( emission + lightAttenuation );
 }

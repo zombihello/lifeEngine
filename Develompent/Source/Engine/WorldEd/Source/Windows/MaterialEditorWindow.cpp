@@ -106,7 +106,8 @@ void WeMaterialEditorWindow::InitUI()
 			CMaterial::diffuseTextureParamName, 
 			CMaterial::normalTextureParamName, 
 			CMaterial::metallicTextureParamName, 
-			CMaterial::roughnessTextureParamName 
+			CMaterial::roughnessTextureParamName,
+			CMaterial::emissionTextureParamName
 		};
 
 		for ( uint32 index = 0; index < ARRAY_COUNT( textureParameterNames ); ++index )

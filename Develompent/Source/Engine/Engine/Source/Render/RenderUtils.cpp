@@ -6,6 +6,9 @@
 #include "Render/Scene.h"
 #include "RHI/BaseRHI.h"
 
+TGlobalResource<CWhiteTexture>		GWhiteTexture;
+TGlobalResource<CBlackTexture>		GBlackTexture;
+
 /* Maps members of EPixelFormat to a SPixelFormatInfo describing the format */
 SPixelFormatInfo		GPixelFormats[ PF_Max ] =
 {
@@ -117,3 +120,24 @@ void DrawHitProxyCircle( struct SSceneDepthGroup& InSDG, EHitProxyLayer InHitPro
 #endif // WITH_EDITOR
 }
 #endif // ENABLE_HITPROXY
+
+void CWhiteTexture::InitRHI()
+{
+	uint8		rgba[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
+	texture2DRHI = GRHI->CreateTexture2D( TEXT( "WhiteTexture"), 1, 1, PF_A8R8G8B8, 1, 0, rgba );
+}
+
+void CWhiteTexture::ReleaseRHI()
+{
+	texture2DRHI.SafeRelease();
+}
+
+void CBlackTexture::InitRHI()
+{
+	texture2DRHI = GRHI->CreateTexture2D( TEXT( "BlackTexture" ), 1, 1, PF_A8R8G8B8, 1, 0, nullptr );
+}
+
+void CBlackTexture::ReleaseRHI()
+{
+	texture2DRHI.SafeRelease();
+}

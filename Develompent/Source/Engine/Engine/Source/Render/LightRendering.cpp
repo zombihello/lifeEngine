@@ -12,6 +12,8 @@
 #include "RHI/StaticStatesRHI.h"
 #include "RHI/TypesRHI.h"
 #include "Render/Shaders/LightingShader.h"
+#include "Render/Shaders/ScreenShader.h"
+#include "Render/VertexFactory/SimpleElementVertexFactory.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/DirectionalLightComponent.h"
@@ -257,12 +259,15 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 		return;
 	}
 
+	SCOPED_DRAW_EVENT( EventLights, DEC_LIGHT, TEXT( "Lights" ) );
+
 	// Copy scene depth buffer to light attenuation depth for using him's data in RT and in shaders (reconstruction world position)
 	GSceneRenderTargets.ResolveLightAttenuationDepth( InDeviceContext );
 
 	// Begin rendering light attenuation
 	GSceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
 	GSceneRenderTargets.BeginRenderingLightAttenuation( InDeviceContext );
+	InDeviceContext->ClearSurface( GSceneRenderTargets.GetLightAttenuationSurface(), CColor::black );
 
 	std::list<TRefCountPtr<CPointLightComponent>>			pointLightComponents;
 	std::list<TRefCountPtr<CSpotLightComponent>>			spotLightComponents;
@@ -295,5 +300,33 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
 	}
 
+	// Finish rendering light attenuation and begin draw to the scene color
 	GSceneRenderTargets.FinishRenderingLightAttenuation( InDeviceContext );
+	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
+
+	// Render light attenuation to the scene color
+	{
+		CScreenVertexShader<SVST_Fullscreen>*	screenVertexShader			= GShaderManager->FindInstance<CScreenVertexShader<SVST_Fullscreen>, CSimpleElementVertexFactory>();
+		CPostLightingPassPixelShader*			postLightingPassPixelShader = GShaderManager->FindInstance<CPostLightingPassPixelShader, CSimpleElementVertexFactory>();
+		static BoundShaderStateRHIRef_t			postLightingPassBoundShaderState;	
+		if ( !postLightingPassBoundShaderState )
+		{
+			postLightingPassBoundShaderState = GRHI->CreateBoundShaderState( TEXT( "PostLightingPass" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), postLightingPassPixelShader->GetPixelShader() );
+		}
+		
+		// Set GBuffer and light attenuation
+		postLightingPassPixelShader->SetDiffuseRoughnessGBufferTexture( InDeviceContext, GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture() );
+		postLightingPassPixelShader->SetDiffuseRoughnessGBufferSamplerState( InDeviceContext, TStaticSamplerStateRHI<>::GetRHI() );
+		postLightingPassPixelShader->SetEmissionGBufferTexture( InDeviceContext, GSceneRenderTargets.GetEmission_GBufferTexture() );
+		postLightingPassPixelShader->SetEmissionGBufferSamplerState( InDeviceContext, TStaticSamplerStateRHI<>::GetRHI() );
+		postLightingPassPixelShader->SetLightAttenuationTexture( InDeviceContext, GSceneRenderTargets.GetLightAttenuationTexture() );
+		postLightingPassPixelShader->SetLightAttenuationSamplerState( InDeviceContext, TStaticSamplerStateRHI<>::GetRHI() );
+
+		GRHI->SetDepthTest( InDeviceContext, TStaticDepthStateRHI<false>::GetRHI() );
+		GRHI->SetBlendState( InDeviceContext, TStaticBlendState<>::GetRHI() );
+		GRHI->SetRasterizerState( InDeviceContext, TStaticRasterizerStateRHI<FM_Solid, CM_None>::GetRHI() );
+
+		GRHI->SetBoundShaderState( InDeviceContext, postLightingPassBoundShaderState );
+		GRHI->DrawPrimitive( InDeviceContext, PT_TriangleList, 0, 1 );
+	}
 }

@@ -1,6 +1,10 @@
+#include "Misc/CoreGlobals.h"
+#include "System/Package.h"
 #include "Render/Shaders/BasePassShader.h"
+#include "Render/RenderUtils.h"
 #include "Render/VertexFactory/VertexFactory.h"
 #include "Render/Scene.h"
+#include "RHI/StaticStatesRHI.h"
 
 IMPLEMENT_SHADER_TYPE(, CBasePassVertexShader, TEXT( "BasePassVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, false );
 IMPLEMENT_SHADER_TYPE(, CBasePassPixelShader, TEXT( "BasePassPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, false );
@@ -61,6 +65,10 @@ void CBasePassPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderC
     // Roughness
     roughnessParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "roughnessTexture" ), true );
     roughnessSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "roughnessSampler" ), true );
+
+    // Emission
+	emissionParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "emissionTexture" ), true );
+	emissionSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "emissionSampler" ), true );
 }
 
 void CBasePassPixelShader::SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const
@@ -76,36 +84,72 @@ void CBasePassPixelShader::SetConstantParameters( class CBaseDeviceContextRHI* I
         SetTextureParameter( InDeviceContextRHI, diffuseParameter, texture2DRef->GetTexture2DRHI() );
         SetSamplerStateParameter( InDeviceContextRHI, diffuseSamplerParameter, GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ) );
     }
+	else
+	{
+		SetTextureParameter( InDeviceContextRHI, diffuseParameter, GBlackTexture.GetTexture2DRHI() );
+		SetSamplerStateParameter( InDeviceContextRHI, diffuseSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
+	}
 
     // Getting normal texture
     TAssetHandle<CTexture2D>    normalTexture;
     InMaterialResource->GetTextureParameterValue( CMaterial::normalTextureParamName, normalTexture );
-    if ( normalTexture.IsAssetValid() )
+    if ( normalTexture.IsAssetValid() && !GPackageManager->IsDefaultAsset( normalTexture ) )
     {
 		TSharedPtr<CTexture2D>		texture2DRef = normalTexture.ToSharedPtr();
 		SetTextureParameter( InDeviceContextRHI, normalParameter, texture2DRef->GetTexture2DRHI() );
 		SetSamplerStateParameter( InDeviceContextRHI, normalSamplerParameter, GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ) );
     }
+	else
+	{
+		SetTextureParameter( InDeviceContextRHI, normalParameter, GBlackTexture.GetTexture2DRHI() );
+		SetSamplerStateParameter( InDeviceContextRHI, normalSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
+	}
 
     // Getting metallic texture
     TAssetHandle<CTexture2D>    metallicTexture;
     InMaterialResource->GetTextureParameterValue( CMaterial::metallicTextureParamName, metallicTexture );
-    if ( metallicTexture.IsValid() )
+    if ( metallicTexture.IsValid() && !GPackageManager->IsDefaultAsset( metallicTexture ) )
     {
 		TSharedPtr<CTexture2D>		texture2DRef = metallicTexture.ToSharedPtr();
 		SetTextureParameter( InDeviceContextRHI, metallicParameter, texture2DRef->GetTexture2DRHI() );
 		SetSamplerStateParameter( InDeviceContextRHI, metallicSamplerParameter, GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ) );
     }
+	else
+	{
+		SetTextureParameter( InDeviceContextRHI, metallicParameter, GBlackTexture.GetTexture2DRHI() );
+		SetSamplerStateParameter( InDeviceContextRHI, metallicSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
+	}
 
     // Getting roughness texture
     TAssetHandle<CTexture2D>    roughnessTexture;
     InMaterialResource->GetTextureParameterValue( CMaterial::roughnessTextureParamName, roughnessTexture );
-    if ( roughnessTexture.IsAssetValid() )
+    if ( roughnessTexture.IsAssetValid() && !GPackageManager->IsDefaultAsset( roughnessTexture ) )
     {
 		TSharedPtr<CTexture2D>		texture2DRef = roughnessTexture.ToSharedPtr();
 		SetTextureParameter( InDeviceContextRHI, roughnessParameter, texture2DRef->GetTexture2DRHI() );
 		SetSamplerStateParameter( InDeviceContextRHI, roughnessSamplerParameter, GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ) );
     }
+	else
+	{
+		SetTextureParameter( InDeviceContextRHI, roughnessParameter, GBlackTexture.GetTexture2DRHI() );
+		SetSamplerStateParameter( InDeviceContextRHI, roughnessSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
+	}
+
+    // Getting emission texture
+    TAssetHandle<CTexture2D>    emissionTexture;
+    InMaterialResource->GetTextureParameterValue( CMaterial::emissionTextureParamName, emissionTexture );
+    if ( emissionTexture.IsAssetValid() && !GPackageManager->IsDefaultAsset( emissionTexture ) )
+    {
+        TSharedPtr<CTexture2D>      texture2DRef = emissionTexture.ToSharedPtr();
+		SetTextureParameter( InDeviceContextRHI, emissionParameter, texture2DRef->GetTexture2DRHI() );
+		SetSamplerStateParameter( InDeviceContextRHI, emissionSamplerParameter, GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ) );
+    }
+    else
+    {
+		SetTextureParameter( InDeviceContextRHI, emissionParameter, GBlackTexture.GetTexture2DRHI() );
+		SetSamplerStateParameter( InDeviceContextRHI, emissionSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
+    }
+
 }
 
 #if WITH_EDITOR

@@ -177,6 +177,20 @@ private:
 	 */
 	void RenderLights( class CBaseDeviceContextRHI* InDeviceContext );
 
+	/**
+	 * Render post process
+	 *
+	 * @param InDeviceContext	RHI device context
+	 */
+	void RenderPostProcess( class CBaseDeviceContextRHI* InDeviceContext );
+
+	/**
+	 * Render UI
+	 * 
+	 * @param InDeviceContext	RHI device context
+	 */
+	void RenderUI( class CBaseDeviceContextRHI* InDeviceContext );
+
 	class CScene*	scene;			/**< Scene */
 	CSceneView*		sceneView;		/**< Scene view */
 };

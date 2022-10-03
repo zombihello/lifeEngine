@@ -74,39 +74,20 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	}
 
 	// Render lights
-	if ( bDirty && showFlags & SHOW_Lights
+	if ( bDirty && !scene->GetVisibleLights().empty() && showFlags & SHOW_Lights
 #if WITH_EDITOR
 		 && !( showFlags & SHOW_Wireframe )
 #endif // WITH_EDITOR
 		 )
 	{
-		SCOPED_DRAW_EVENT( EventLights, DEC_LIGHT, TEXT( "Lights" ) );
 		RenderLights( immediateContext );
 	}
 
-	// Render foreground layer
-	{
-		SCOPED_DRAW_EVENT( EventUI, DEC_LIGHT, TEXT( "UI" ) );
-		GSceneRenderTargets.BeginRenderingSceneColor( immediateContext );
-		GRHI->SetBlendState( immediateContext, TStaticBlendState<>::GetRHI() );
-		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
-		
-		// Render WorldEd background and foreground layer (only in editor)
-#if WITH_EDITOR
-		if ( GIsEditor )
-		{
-			RenderSDG( immediateContext, SDG_WorldEdBackground );
-			immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
-			RenderSDG( immediateContext, SDG_WorldEdForeground );
-		}
-		else
-#endif // WITH_EDITOR
-		{
-			immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
-		}
+	// Render post process
+	RenderPostProcess( immediateContext );
 
-		RenderSDG( immediateContext, SDG_Foreground );
-	}
+	// Render UI
+	RenderUI( immediateContext );
 }
 
 bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, uint32 InSDGIndex )

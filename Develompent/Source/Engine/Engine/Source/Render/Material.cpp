@@ -13,6 +13,7 @@ const CName		CMaterial::diffuseTextureParamName( TEXT( "Diffuse" ) );
 const CName		CMaterial::normalTextureParamName( TEXT( "Normal" ) );
 const CName		CMaterial::metallicTextureParamName( TEXT( "Metallic" ) );
 const CName		CMaterial::roughnessTextureParamName( TEXT( "Roughness" ) );
+const CName		CMaterial::emissionTextureParamName( TEXT( "Emission" ) );
 
 CMaterial::CMaterial() :
 	CAsset( AT_Material ),

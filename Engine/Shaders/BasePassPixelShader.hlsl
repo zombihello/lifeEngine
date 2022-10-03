@@ -13,6 +13,7 @@ struct PS_OUT
 {
 	float4	diffuseRoughness	: SV_TARGET0;
 	float4	normalMetal			: SV_TARGET1;
+	float4	emission			: SV_TARGET2;
 };
 
 // Diffuse texture
@@ -31,6 +32,10 @@ SamplerState	metallicSampler;
 Texture2D		roughnessTexture;
 SamplerState	roughnessSampler;
 
+// Emission texture
+Texture2D		emissionTexture;
+SamplerState	emissionSampler;
+
 void MainPS( VS_OUT In, out PS_OUT Out )
 {
 	float4 	diffuseColor = diffuseTexture.Sample( diffuseSampler, In.texCoord0 );
@@ -48,4 +53,6 @@ void MainPS( VS_OUT In, out PS_OUT Out )
 
 	Out.normalMetal.rgb 		= normalize( In.normal.xyz ); //normalTexture.Sample( normalSampler, In.texCoord0 ).rgb;
 	Out.normalMetal.a			= metallicTexture.Sample( metallicSampler, In.texCoord0 ).a;
+
+	Out.emission				= emissionTexture.Sample( emissionSampler, In.texCoord0 );
 }
