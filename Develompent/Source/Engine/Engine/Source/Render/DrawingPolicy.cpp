@@ -46,7 +46,6 @@ void CMeshDrawingPolicy::SetRenderState( class CBaseDeviceContextRHI* InDeviceCo
 	vertexFactory->Set( InDeviceContextRHI );
 	GRHI->SetRasterizerState( InDeviceContextRHI, GetRasterizerState() );
 	GRHI->SetBoundShaderState( InDeviceContextRHI, GetBoundShaderState() );
-	GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<>::GetRHI() );
 }
 
 void CMeshDrawingPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI )

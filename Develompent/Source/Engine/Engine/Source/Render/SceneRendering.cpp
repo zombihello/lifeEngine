@@ -36,18 +36,18 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 	if ( sceneView->GetShowFlags() & SHOW_Wireframe )
 	{
 		GSceneRenderTargets.BeginRenderingSceneColor( immediateContext );
-		immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
-		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );	
 	}
 	else
 #endif // WITH_EDITOR
 	{
 		GSceneRenderTargets.BeginRenderingGBuffer( immediateContext );
-		GSceneRenderTargets.ClearGBufferTargets( immediateContext );
-		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+		GSceneRenderTargets.ClearGBufferTargets( immediateContext );	
 	}
 	
+	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
 	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+	GRHI->SetBlendState( immediateContext, TStaticBlendState<>::GetRHI() );
 	GRHI->SetViewParameters( immediateContext, *sceneView );
 
 	// Build visible view on scene
@@ -68,20 +68,9 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	ShowFlags_t				showFlags			= sceneView->GetShowFlags();
 	bool					bDirty				= false;
 
-	// Render scene layers
+	// Render world layer
 	{
-		SCOPED_DRAW_EVENT( EventSDGs, DEC_SCENE_ITEMS, TEXT( "SDGs" ) );
-		for ( uint32 SDGIndex = 0; SDGIndex < SDG_Max; ++SDGIndex )
-		{
-			SSceneDepthGroup&		SDG = scene->GetSDG( ( ESceneDepthGroup )SDGIndex );
-			if ( SDG.IsEmpty() )
-			{
-				continue;
-			}
-
-			// Render SDG
-			bDirty |= RenderSDG( immediateContext, SDGIndex );
-		}
+		bDirty |= RenderSDG( immediateContext, SDG_World );
 	}
 
 	// Render lights
@@ -94,6 +83,30 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 		SCOPED_DRAW_EVENT( EventLights, DEC_LIGHT, TEXT( "Lights" ) );
 		RenderLights( immediateContext );
 	}
+
+	// Render foreground layer
+	{
+		SCOPED_DRAW_EVENT( EventUI, DEC_LIGHT, TEXT( "UI" ) );
+		GSceneRenderTargets.BeginRenderingSceneColor( immediateContext );
+		GRHI->SetBlendState( immediateContext, TStaticBlendState<>::GetRHI() );
+		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+		
+		// Render WorldEd background and foreground layer (only in editor)
+#if WITH_EDITOR
+		if ( GIsEditor )
+		{
+			RenderSDG( immediateContext, SDG_WorldEdBackground );
+			immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+			RenderSDG( immediateContext, SDG_WorldEdForeground );
+		}
+		else
+#endif // WITH_EDITOR
+		{
+			immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+		}
+
+		RenderSDG( immediateContext, SDG_Foreground );
+	}
 }
 
 bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, uint32 InSDGIndex )
@@ -101,18 +114,13 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 	ShowFlags_t			showFlags	= sceneView->GetShowFlags();
 	SSceneDepthGroup&	SDG			= scene->GetSDG( ( ESceneDepthGroup )InSDGIndex );
 	
+	if ( SDG.IsEmpty() )
+	{
+		return false;
+	}
+
 	bool				bDirty		= false;
 	SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, CString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )InSDGIndex ) ).c_str() );
-
-	// Clear depth buffer for foreground layer
-	if ( InSDGIndex == SDG_Foreground
-#if WITH_EDITOR
-		 || InSDGIndex == SDG_WorldEdForeground
-#endif // WITH_EDITOR
-		 )
-	{
-		InDeviceContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
-	}
 
 #if WITH_EDITOR
 	// Draw simple elements

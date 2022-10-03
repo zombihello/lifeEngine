@@ -87,7 +87,7 @@ public:
 		{
 		case PT_Base:
 			GRHI->SetDepthTest( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
-			GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<BO_Add, BF_One, BF_SourceColor>::GetRHI() );
+			GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<BO_Add, BF_One, BF_One>::GetRHI() );
 			break;
 
 		case PT_Stencil:
@@ -263,7 +263,6 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	// Begin rendering light attenuation
 	GSceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
 	GSceneRenderTargets.BeginRenderingLightAttenuation( InDeviceContext );
-	InDeviceContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
 
 	std::list<TRefCountPtr<CPointLightComponent>>			pointLightComponents;
 	std::list<TRefCountPtr<CSpotLightComponent>>			spotLightComponents;
