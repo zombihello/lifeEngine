@@ -126,24 +126,6 @@ public:
 	}
 
 	/**
-	 * Get inverse view matrix
-	 * @return Return inverse view matrix
-	 */
-	FORCEINLINE const Matrix& GetInvViewMatrix() const
-	{
-		return invViewMatrix;
-	}
-
-	/**
-	 * Get inverse projection matrix
-	 * @return Return inverse projection matrix
-	 */
-	FORCEINLINE const Matrix& GetInvProjectionMatrix() const
-	{
-		return invProjectionMatrix;
-	}
-
-	/**
 	 * Get inverse View * Projection matrix
 	 * @return Return inverse View * Projection matrix
 	 */
@@ -210,8 +192,6 @@ private:
 	Matrix			viewMatrix;							/**< View matrix */
 	Matrix			projectionMatrix;					/**< Projection matrix */
 	Matrix			viewProjectionMatrix;				/**< View * Projection matrix */
-	Matrix			invViewMatrix;						/**< Inverse view matrix */
-	Matrix			invProjectionMatrix;				/**< Inverse projection matrix */
 	Matrix			invViewProjectionMatrix;			/**< Inverse View * Projection matrix */
 	Vector			position;							/**< Camera position */
 	CFrustum		frustum;							/**< Frustum */
@@ -690,8 +670,9 @@ enum ESceneDepthGroup
 #endif // WITH_EDITOR
 	
 	SDG_World,				/**< World */
-	
+
 #if WITH_EDITOR
+	SDG_Highlight,			/**< Heighlight objects (for gizmo) */
 	SDG_WorldEdForeground,	/**< Foreground of viewport in WorldEd */
 #endif // WITH_EDITOR
 

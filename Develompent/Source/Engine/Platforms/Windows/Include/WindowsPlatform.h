@@ -97,5 +97,21 @@
  * @param InCh Char
  */
 #define appIsPathSeparator( InCh )	( ( InCh ) == PATH_SEPARATOR[ 0 ] )
+ 
+/**
+ * @ingroup WindowsPlatform
+ * @brief Align for GCC
+ *
+ * @param[in] InAlignment Alignment
+ */
+#define GCC_ALIGN( InAlignment )
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Align for Microsoft
+ * 
+ * @param[in] InAlignment Alignment
+ */
+#define MS_ALIGN( InAlignment ) __declspec( align( InAlignment ) )
 
 #endif // !WINDOWSPLATFORM_H

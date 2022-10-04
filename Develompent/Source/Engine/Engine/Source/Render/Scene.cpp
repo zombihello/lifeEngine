@@ -6,8 +6,6 @@ CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatr
 	: viewMatrix( InViewMatrix )
 	, projectionMatrix( InProjectionMatrix )
 	, viewProjectionMatrix( InProjectionMatrix * InViewMatrix )
-	, invViewMatrix( SMath::InverseMatrix( InViewMatrix ) )
-	, invProjectionMatrix( SMath::InverseMatrix( InProjectionMatrix ) )
 	, invViewProjectionMatrix( SMath::matrixIdentity )
 	, position( InPosition )
 	, backgroundColor( InBackgroundColor )
@@ -15,7 +13,7 @@ CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatr
 	, sizeX( InSizeX )
 	, sizeY( InSizeY )
 {
-	invViewProjectionMatrix = invViewMatrix * invProjectionMatrix;
+	invViewProjectionMatrix = SMath::InverseMatrix( InViewMatrix ) * SMath::InverseMatrix( InProjectionMatrix );
 	frustum.Update( viewProjectionMatrix );
 }
 

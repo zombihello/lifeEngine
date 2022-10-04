@@ -10,7 +10,7 @@
 
 void MainVS( in FVertexFactoryInput In, out nointerpolation SLightData OutLightData, out float4 OutScreenPosition : TEXCOORD0, out float4 OutPosition : SV_POSITION )
 {
-	OutLightData 		= VertexFactory_GetLightData( In );
-	OutPosition			= MulMatrix( viewProjectionMatrix, VertexFactory_GetWorldPosition( In ) );
-	OutScreenPosition	= OutPosition;
+	OutLightData 			= VertexFactory_GetLightData( In );
+	OutPosition				= MulMatrix( viewProjectionMatrix, VertexFactory_GetWorldPosition( In ) );
+	OutScreenPosition		= OutPosition;
 }

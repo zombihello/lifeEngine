@@ -435,7 +435,7 @@ public:
 	 * @param InDeviceContext		Device context
 	 * @param InNewState			New depth test
 	 */
-	virtual void									SetDepthTest( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState ) override;
+	virtual void									SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState ) override;
 
 	/**
 	 * Set blend state

@@ -501,12 +501,13 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 					continue;
 				}
 
+				std::wstring				errorMsg;
 				CShaderCompiler				shaderCompiler;
 				CVertexFactoryMetaType*		vfType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( usedVertexFectories[ index ] );
-				bool						result = shaderCompiler.CompileShader( shaderMetaType, cookedShaderPlatform, shaderCache, vfType );
+				bool						result = shaderCompiler.CompileShader( shaderMetaType, cookedShaderPlatform, shaderCache, errorMsg, vfType );
 				if ( !result )
 				{
-					appErrorf( TEXT( "Failed cached shader '%s' for vertex factory '%s'" ), shaderMetaTypeName.c_str(), vfType->GetName().c_str() );
+					appErrorf( TEXT( "Failed cached shader '%s' for vertex factory '%s'\n\n%s" ), shaderMetaTypeName.c_str(), vfType->GetName().c_str(), errorMsg.c_str() );
 					return false;
 				}
 			}

@@ -451,7 +451,7 @@ public:
 	 * @param InDeviceContext		Device context
 	 * @param InNewState			New depth test
 	 */
-	virtual void								SetDepthTest( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState ) {}
+	virtual void								SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState ) {}
 
 	/**
 	 * Set blend state

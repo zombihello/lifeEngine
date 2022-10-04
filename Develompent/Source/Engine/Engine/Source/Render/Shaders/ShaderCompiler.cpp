@@ -40,6 +40,7 @@ bool CShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform In
 
 bool CShaderCompiler::CompileAll( CShaderCache& InOutShaderCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
 {
+	std::wstring																			errorMsg;
 	const std::unordered_map< std::wstring, CShaderMetaType* >&								shaderTypes = CShaderManager::SContainerShaderTypes::Get()->shaderMetaTypes;
 	const CVertexFactoryMetaType::SContainerVertexFactoryMetaType::VertexFactoryMap_t&		vertexFactoryTypes = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->GetRegisteredTypes();
 	checkMsg( !vertexFactoryTypes.empty(), TEXT( "In engine not a single vertex factory registered" ) );
@@ -63,15 +64,15 @@ bool CShaderCompiler::CompileAll( CShaderCache& InOutShaderCache, EShaderPlatfor
 			}
 
 			appSetSplashText( STT_StartupProgress, CString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
-			bool		result = CompileShader( metaType, InShaderPlatform, InOutShaderCache, vertexFactoryType );
-			check( result );
+			bool		result = CompileShader( metaType, InShaderPlatform, InOutShaderCache, errorMsg, vertexFactoryType );
+			checkMsg( result, errorMsg.c_str() );
 		}
 	}
 
 	return true;
 }
 
-bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class CShaderCache& InOutShaderCache, class CVertexFactoryMetaType* InVertexFactoryType /* = nullptr */ )
+bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class CShaderCache& InOutShaderCache, std::wstring& OutErrorMsg, class CVertexFactoryMetaType* InVertexFactoryType /* = nullptr */ )
 {
 	SShaderCompilerOutput			output;
 	uint64							vertexFactoryHash = ( uint64 )INVALID_HASH;
@@ -97,6 +98,7 @@ bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, ES
 		shaderCacheItem.code = output.code;
 		shaderCacheItem.numInstructions = output.numInstructions;
 		shaderCacheItem.parameterMap = output.parameterMap;
+		OutErrorMsg = TEXT( "" );
 
 		// Validate compiled shader
 		CShader*		shader = InShaderMetaType->CreateCompiledInstance();
@@ -109,6 +111,7 @@ bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, ES
 	}
 	else
 	{
+		OutErrorMsg = output.errorMsg;
 		LE_LOG( LT_Error, LC_Shader, TEXT( "Failed compiling shader %s for %s" ), InShaderMetaType->GetName().c_str(), InVertexFactoryType->GetName().c_str() );
 	}
 

@@ -1,12 +1,11 @@
 #include "Render/GlobalConstantsHelper.h"
 
-void SetGlobalConstants( SGlobalConstantBufferContents& OutGlobalContents, const CSceneView& InSceneView )
+void SetGlobalConstants( SGlobalConstantBufferContents& OutGlobalContents, const CSceneView& InSceneView, const Vector4D& InScreenAndBufferSize )
 {
 	OutGlobalContents.viewMatrix					= InSceneView.GetViewMatrix();
 	OutGlobalContents.projectionMatrix				= InSceneView.GetProjectionMatrix();
 	OutGlobalContents.viewProjectionMatrix			= InSceneView.GetViewProjectionMatrix();
-	OutGlobalContents.invViewMatrix					= InSceneView.GetInvViewMatrix();
-	OutGlobalContents.invProjectionMatrix			= InSceneView.GetInvProjectionMatrix();
 	OutGlobalContents.invViewProjectionMatrix		= InSceneView.GetInvViewProjectionMatrix();
-	OutGlobalContents.position						= InSceneView.GetPosition();
+	OutGlobalContents.position						= Vector4D( InSceneView.GetPosition(), 1.f );
+	OutGlobalContents.screenAndBufferSize			= InScreenAndBufferSize;
 }

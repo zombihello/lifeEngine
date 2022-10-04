@@ -58,6 +58,17 @@ enum EPlatformType
 };
 
 /**
+ * @ingroup Core
+ * Message box type
+ */
+enum EMessageBox
+{
+    MB_Info,        /**< Info */
+    MB_Warning,     /**< Warning */
+    MB_Error        /**< Error */
+};
+
+/**
  * Returns the string name of the given platform
  *
  * @param InPlatform The platform of interest
@@ -199,6 +210,32 @@ extern void*           appCreateProc( const tchar* InPathToProcess, const tchar*
  * @return Return true if process is end, else returning false
  */
 extern bool            appGetProcReturnCode( void* InProcHandle, int32* OutReturnCode );
+
+/**
+ * @ingroup Core
+ * @brief Show message box
+ * 
+ * @param InTitle   Title
+ * @param InMessage Message
+ * @param InType    Message type
+ */
+extern void appShowMessageBox( const tchar* InTitle, const tchar* InMessage, EMessageBox Intype );
+
+/**
+ * @ingroup Core
+ * @brief Dump call stack
+ * 
+ * @param OutCallStack  Output call stack
+ */
+extern void appDumpCallStack( std::wstring& OutCallStack );
+
+/**
+ * @ingroup Core
+ * @brief Request shutdown application
+ * 
+ * @param InForce   Is need force shutdown application
+ */
+extern void appRequestExit( bool InForce );
 
 /**
  * @ingroup Core

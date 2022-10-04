@@ -22,7 +22,7 @@ void CSceneRenderer::BeginRenderHitProxiesViewTarget( ViewportRHIParamRef_t InVi
 	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
 
 	GRHI->SetViewParameters( immediateContext, *sceneView );
-	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
 
 	// Build visible view on scene
 	if ( scene )

@@ -38,7 +38,7 @@ SamplerState	emissionSampler;
 
 void MainPS( VS_OUT In, out PS_OUT Out )
 {
-	float4 	diffuseColor = diffuseTexture.Sample( diffuseSampler, In.texCoord0 );
+	float4 	diffuseColor 		= diffuseTexture.Sample( diffuseSampler, In.texCoord0 );
 	if ( diffuseColor.a < 0.5f )
 	{
 		discard;

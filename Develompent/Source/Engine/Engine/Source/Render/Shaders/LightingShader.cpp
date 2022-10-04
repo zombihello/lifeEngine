@@ -12,7 +12,6 @@ IMPLEMENT_SHADER_TYPE(, TLightingVertexShader<LT_Directional>, TEXT( "LightingVe
 IMPLEMENT_SHADER_TYPE(, TLightingPixelShader<LT_Point>, TEXT( "LightingPixelShaders.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 IMPLEMENT_SHADER_TYPE(, TLightingPixelShader<LT_Spot>, TEXT( "LightingPixelShaders.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 IMPLEMENT_SHADER_TYPE(, TLightingPixelShader<LT_Directional>, TEXT( "LightingPixelShaders.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
-IMPLEMENT_SHADER_TYPE(, CPostLightingPassPixelShader, TEXT( "LightingPixelShaders.hlsl" ), TEXT( "MainPS_PostLightPass" ), SF_Pixel, true )
 
 CBaseLightingVertexShader::CBaseLightingVertexShader()
 	: vertexFactoryParameters( nullptr )
@@ -62,37 +61,11 @@ void CBaseLightingPixelShader::Init( const CShaderCache::SShaderCacheItem& InSha
 	normalMetalGBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "normalMetalGBufferTexture" ), true );
 	normalMetalGBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "normalMetalGBufferSampler" ), true );
 
+	// Emission GBuffer
+	emissionGBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "emissionGBufferTexture" ), true );
+	emissionGBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "emissionGBufferSampler" ), true );
+
 	// Depth buffer
 	depthBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "depthBufferTexture" ), true );
 	depthBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "depthBufferSampler" ), true );
 }
-
-
-void CPostLightingPassPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
-{
-	CShader::Init( InShaderCacheItem );
-
-	// Diffuse Roughness GBuffer
-	diffuseRoughnessGBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "diffuseRoughnessGBufferTexture" ) );
-	diffuseRoughnessGBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "diffuseRoughnessGBufferSampler" ) );
-
-	// Emission GBuffer
-	emissionGBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "emissionGBufferTexture" ) );
-	emissionGBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "emissionGBufferSampler" ) );
-
-	// Light attenuation
-	lightAttenuationParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "lightAttenuationTexture" ) );
-	lightAttenuationSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "lightAttenuationSampler" ) );
-}
-
-#if WITH_EDITOR
-bool CPostLightingPassPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
-{
-	if ( !InVFMetaType )
-	{
-		return true;
-	}
-
-	return InVFMetaType->GetHash() == CSimpleElementVertexFactory::staticType.GetHash();
-}
-#endif // WITH_EDITOR

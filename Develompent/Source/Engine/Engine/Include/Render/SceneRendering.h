@@ -191,6 +191,15 @@ private:
 	 */
 	void RenderUI( class CBaseDeviceContextRHI* InDeviceContext );
 
+#if WITH_EDITOR
+	/**
+	 * Render highlight layer
+	 * 
+	 * @param InDeviceContext	RHI device context
+	 */
+	void RenderHighlight( class CBaseDeviceContextRHI* InDeviceContext );
+#endif // WITH_EDITOR
+
 	class CScene*	scene;			/**< Scene */
 	CSceneView*		sceneView;		/**< Scene view */
 };

@@ -1,11 +1,13 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <wchar.h>
+#include <SDL.h>
 
 #include "Misc/Types.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/Guid.h"
 #include "Containers/String.h"
+#include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "EngineLoop.h"
 #include "D3D11RHI.h"
@@ -13,6 +15,7 @@
 #include "WindowsFileSystem.h"
 #include "WindowsWindow.h"
 #include "WindowsImGUI.h"
+#include "WindowsStackWalker.h"
 
 // ----
 // Platform specific globals variables
@@ -24,6 +27,51 @@ CBaseWindow*         GWindow		= new CWindowsWindow();
 CBaseRHI*            GRHI			= new CD3D11RHI();
 CEngineLoop*         GEngineLoop	= new CEngineLoop();
 EPlatformType        GPlatform		= PLATFORM_Windows;
+
+// ---
+// Classes
+// ---
+
+/**
+ * @ingroup WindowsPlatform
+ * Stack walker for Windows
+ */
+class CStackWalker : public StackWalker
+{
+public:
+	/**
+	 * Constructor
+	 */
+	CStackWalker() : StackWalker()
+	{}
+
+	/**
+	 * Get buffer
+	 * @return Return call stack buffer
+	 */
+	FORCEINLINE const std::wstring& GetBuffer() const
+	{
+		return buffer;
+	}
+
+protected:
+	virtual void OnOutput( LPCSTR InText ) override
+	{
+		buffer += ANSI_TO_TCHAR( InText );
+	}
+
+	virtual void OnSymInit( LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName )  override
+	{}
+
+	virtual void OnLoadModule( LPCSTR img, LPCSTR mod, DWORD64 baseAddr, DWORD size, DWORD result, LPCSTR symType, LPCSTR pdbName, ULONGLONG fileVersion ) override 
+	{}
+
+	virtual void OnDbgHelpErr( LPCSTR szFuncName, DWORD gle, DWORD64 addr ) override
+	{}
+
+private:
+	std::wstring	buffer;		/**< Output buffer of call stack */
+};
 
 // ----
 // Platform specific functions
@@ -139,6 +187,44 @@ void* appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool I
 bool appGetProcReturnCode( void* InProcHandle, int32* OutReturnCode )
 {
     return GetExitCodeProcess( ( HANDLE )InProcHandle, ( DWORD* )OutReturnCode ) && *( ( DWORD* )OutReturnCode ) != STILL_ACTIVE;
+}
+
+void appShowMessageBox( const tchar* InTitle, const tchar* InMessage, EMessageBox Intype )
+{
+	uint32		flags = 0;
+	switch ( Intype )
+	{
+	case MB_Info:		flags = SDL_MESSAGEBOX_INFORMATION;	break;
+	case MB_Warning:	flags = SDL_MESSAGEBOX_WARNING;		break;
+	case MB_Error:		flags = SDL_MESSAGEBOX_ERROR;		break;
+	}
+
+	SDL_ShowSimpleMessageBox( flags, TCHAR_TO_ANSI( InTitle ), TCHAR_TO_ANSI( InMessage ), nullptr );
+}
+
+void appDumpCallStack( std::wstring& OutCallStack )
+{
+	CStackWalker	stackWalker;
+	stackWalker.ShowCallstack();
+	OutCallStack = stackWalker.GetBuffer();
+}
+
+void appRequestExit( bool InForce )
+{
+	if ( InForce )
+	{
+		// Force immediate exit
+		// Dangerous because config code isn't flushed, global destructors aren't called, etc
+		// Suppress abort message and MS reports
+		_set_abort_behavior( 0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT );
+		abort();
+	}
+	else
+	{
+		// Tell the platform specific code we want to exit cleanly from the main loop.
+		PostQuitMessage( 0 );
+		GIsRequestingExit = true;
+	}
 }
 
 CGuid appCreateGuid()

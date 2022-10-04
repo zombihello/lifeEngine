@@ -105,7 +105,12 @@ void CSpriteComponent::LinkDrawList()
 	// If sprite is valid - add to scene draw policy link
 	if ( sprite )
 	{
-		SSceneDepthGroup&               SDGWorld = scene->GetSDG( SDG_World );
+		SSceneDepthGroup&               SDG = scene->GetSDG( 
+#if WITH_EDITOR
+			bGizmo ? SDG_Highlight :
+#endif // WITH_EDITOR
+			SDG_World );
+		
 		SSpriteSurface					surface = sprite->GetSurface();
 
 		// Generate mesh batch of sprite
@@ -121,18 +126,18 @@ void CSpriteComponent::LinkDrawList()
 #if WITH_EDITOR
 		if ( bGizmo )
 		{
-			gizmoDrawingPolicyLink		= ::MakeDrawingPolicyLink<GizmoDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.gizmoDrawList, DEC_SPRITE );
+			gizmoDrawingPolicyLink		= ::MakeDrawingPolicyLink<GizmoDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDG.gizmoDrawList, DEC_SPRITE );
 		}
 		else
 #endif // WITH_EDITOR
 		{
-			drawingPolicyLink			= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.spriteDrawList, DEC_SPRITE );
+			drawingPolicyLink			= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDG.spriteDrawList, DEC_SPRITE );
 		}
 		meshBatchLinks.push_back( meshBatchLink );
 
 		// Make and add to scene new hit proxy draw policy link
 #if ENABLE_HITPROXY
-		hitProxyDrawingPolicyLink		= ::MakeDrawingPolicyLink<HitProxyDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDGWorld.hitProxyLayers[ HPL_World ].hitProxyDrawList, DEC_SPRITE );
+		hitProxyDrawingPolicyLink		= ::MakeDrawingPolicyLink<HitProxyDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDG.hitProxyLayers[ HPL_World ].hitProxyDrawList, DEC_SPRITE );
 		meshBatchLinks.push_back( meshBatchLink );
 #endif // ENABLE_HITPROXY
 	}

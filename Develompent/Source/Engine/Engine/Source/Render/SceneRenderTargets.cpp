@@ -26,12 +26,8 @@ void CSceneRenderTargets::InitRHI()
 		renderTargets[SRTT_SceneDepthZ].surface					= GRHI->CreateTargetableSurface( TEXT( "SceneDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, renderTargets[SRTT_SceneDepthZ].texture, TCF_ResolveTargetable | TCF_DepthStencil );
 
 		// Light attenuation depth Z
-		renderTargets[SRTT_LightAttenuationDepthZ].texture		= GRHI->CreateTexture2D( TEXT( "LightAttenuationDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, 1, TCF_ResolveTargetable | TCF_DepthStencil );
-		renderTargets[SRTT_LightAttenuationDepthZ].surface		= GRHI->CreateTargetableSurface( TEXT( "LightAttenuationDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, renderTargets[SRTT_LightAttenuationDepthZ].texture, TCF_ResolveTargetable | TCF_DepthStencil );
-
-		// Light attenuation
-		renderTargets[SRTT_LightAttenuation].texture			= GRHI->CreateTexture2D( TEXT( "LightAttenuation" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );
-		renderTargets[SRTT_LightAttenuation].surface			= GRHI->CreateTargetableSurface( TEXT( "LightAttenuation" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[SRTT_LightAttenuation].texture, TCF_ResolveTargetable );
+		renderTargets[SRTT_LightPassDepthZ].texture				= GRHI->CreateTexture2D( TEXT( "LightPassDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, 1, TCF_ResolveTargetable | TCF_DepthStencil );
+		renderTargets[SRTT_LightPassDepthZ].surface				= GRHI->CreateTargetableSurface( TEXT( "LightPassDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, renderTargets[SRTT_LightPassDepthZ].texture, TCF_ResolveTargetable | TCF_DepthStencil );
 
 #if ENABLE_HITPROXY
 		// Hit proxy
@@ -85,20 +81,11 @@ void CSceneRenderTargets::ClearGBufferTargets( class CBaseDeviceContextRHI* InDe
 	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Emission_GBuffer].surface, CColor::black );
 }
 
-void CSceneRenderTargets::ResolveLightAttenuationDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
+void CSceneRenderTargets::ResolveLightPassDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( InDeviceContextRHI );
-	GRHI->CopyToResolveTarget( InDeviceContextRHI, renderTargets[SRTT_SceneDepthZ].surface, SResolveParams( SResolveRect(), renderTargets[SRTT_LightAttenuationDepthZ].texture ) );
+	GRHI->CopyToResolveTarget( InDeviceContextRHI, renderTargets[SRTT_SceneDepthZ].surface, SResolveParams( SResolveRect(), renderTargets[SRTT_LightPassDepthZ].texture ) );
 }
-
-void CSceneRenderTargets::BeginRenderingLightAttenuation( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
-{
-	check( InDeviceContextRHI );
-	GRHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_LightAttenuation].surface, renderTargets[SRTT_SceneDepthZ].surface );
-}
-
-void CSceneRenderTargets::FinishRenderingLightAttenuation( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
-{}
 
 void CSceneRenderTargets::ReleaseRHI()
 {

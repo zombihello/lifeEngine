@@ -31,8 +31,7 @@ enum ESceneRenderTargetTypes
 	SRTT_Diffuse_Roughness_GBuffer,			/**< Render target for diffuse and roughness GBuffer */
 	SRTT_Normal_Metal_GBuffer,				/**< Render target for normal and metal GBuffer */
 	SRTT_Emission_GBuffer,					/**< Render target for emission GBuffer */
-	SRTT_LightAttenuation,					/**< Render target for light pass */
-	SRTT_LightAttenuationDepthZ,			/**< Render target for light pass' depths */
+	SRTT_LightPassDepthZ,					/**< Render target for light pass' depths */
 
 	SRTT_MaxSceneRenderTargets				/**< Max scene RTs available */
 };
@@ -88,21 +87,9 @@ public:
 	void ClearGBufferTargets( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
-	 * @brief Resolve light attenuation depth
+	 * @brief Resolve light pass depth
 	 */
-	void ResolveLightAttenuationDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
-
-	/**
-	 * @brief Begin rendering light attenuation
-	 * @param InDeviceContextRHI	Device context RHI
-	 */
-	void BeginRenderingLightAttenuation( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
-
-	/**
-	 * @brief Finish rendering light attenuation
-	 * @param InDeviceContextRHI	Device context RHI
-	 */
-	void FinishRenderingLightAttenuation( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+	void ResolveLightPassDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
 	 * @brief Get texture of scene color
@@ -215,39 +202,21 @@ public:
 	}
 
 	/**
-	 * @brief Get texture of light attenuation
-	 * @return Return texture of light attenuation
+	 * @brief Get texture of light pass depth
+	 * @return Return texture of light pass depth
 	 */
-	FORCEINLINE Texture2DRHIRef_t GetLightAttenuationTexture() const
+	FORCEINLINE Texture2DRHIRef_t GetLightPassDepthZTexture() const
 	{
-		return renderTargets[SRTT_LightAttenuation].texture;
+		return renderTargets[SRTT_LightPassDepthZ].texture;
 	}
 
 	/**
-	 * @brief Get surface of light attenuation
-	 * @return Return surface of light attenuation
+	 * @brief Get surface of light pass depth
+	 * @return Return surface of light pass depth
 	 */
-	FORCEINLINE SurfaceRHIRef_t GetLightAttenuationSurface() const
+	FORCEINLINE SurfaceRHIRef_t GetLightPassDepthZSurface() const
 	{
-		return renderTargets[SRTT_LightAttenuation].surface;
-	}
-
-	/**
-	 * @brief Get texture of light attenuation depth
-	 * @return Return texture of light attenuation depth
-	 */
-	FORCEINLINE Texture2DRHIRef_t GetLightAttenuationDepthZTexture() const
-	{
-		return renderTargets[SRTT_LightAttenuationDepthZ].texture;
-	}
-
-	/**
-	 * @brief Get surface of light attenuation depth
-	 * @return Return surface of light attenuation depth
-	 */
-	FORCEINLINE SurfaceRHIRef_t GetLightAttenuationDepthZSurface() const
-	{
-		return renderTargets[SRTT_LightAttenuationDepthZ].surface;
+		return renderTargets[SRTT_LightPassDepthZ].surface;
 	}
 
 	/**

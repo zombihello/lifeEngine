@@ -6,7 +6,7 @@
 #include "CPP_HLSL_Glue.hlsl"
 
 #ifdef __cplusplus
-struct SGlobalConstantBufferContents
+MS_ALIGN( 16 ) struct SGlobalConstantBufferContents
 #else
 cbuffer GlobalConstants : register( SOB_GlobalConstants )
 #endif // __cplusplus
@@ -14,10 +14,14 @@ cbuffer GlobalConstants : register( SOB_GlobalConstants )
 	Matrix			viewMatrix;
 	Matrix			projectionMatrix;
 	Matrix			viewProjectionMatrix;
-	Matrix			invViewMatrix;
-	Matrix			invProjectionMatrix;
 	Matrix			invViewProjectionMatrix;
-	Vector			position;
+	Vector4D		position;
+	Vector4D		screenAndBufferSize;
+
+#ifdef __cplusplus
+} GCC_ALIGN( 16 );
+#else
 };
+#endif // __cplusplus
 
 #endif // !CPP_GLOBALCONSTANTBUFFERS_HLSL

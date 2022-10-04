@@ -105,7 +105,7 @@ void CTheoraMovieRenderClient::Draw( CViewport* InViewport )
 	check( screenVertexShader && theoraMoviePixelShader );
 
 	GRHI->SetRenderTarget( immediateContext, viewportRHI->GetSurface(), nullptr );
-	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
+	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
 	GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
 	GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "TheoraMovieDrawBBS" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), theoraMoviePixelShader->GetPixelShader() ) );
 

@@ -48,7 +48,7 @@ void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewpo
 		CTexturePreviewPixelShader*					texturePreviewPixelShader	= GShaderManager->FindInstance< CTexturePreviewPixelShader, CSimpleElementVertexFactory >();
 		check( screenVertexShader && texturePreviewPixelShader );
 
-		GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
+		GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
 		GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
 		GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "PreviewTexture" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), texturePreviewPixelShader->GetPixelShader() ) );
 

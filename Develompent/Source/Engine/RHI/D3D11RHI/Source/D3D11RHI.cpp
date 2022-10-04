@@ -9,6 +9,7 @@
 #include "Render/Shaders/Shader.h"
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/VertexFactory/SimpleElementVertexFactory.h"
+#include "Render/SceneRenderTargets.h"
 #include "RHI/StaticStatesRHI.h"
 #include "D3D11RHI.h"
 #include "D3D11Viewport.h"
@@ -177,7 +178,7 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 			d3d11DeviceContext->ClearDepthStencilView( d3d11DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 0, 0 );
 		}
 
-		GRHI->SetDepthTest( InDeviceContextRHI, TStaticDepthStateRHI<true, CF_Always>::GetRHI() );
+		GRHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<true, CF_Always>::GetRHI() );
 
 		// Write to the dest surface as a depth-stencil target
 		ID3D11RenderTargetView*			nullRTV = nullptr;
@@ -192,7 +193,7 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 			d3d11DeviceContext->ClearRenderTargetView( d3d11RenderTargetView, ( float* ) &clearColor.ToNormalizedVector4D() );
 		}
 
-		GRHI->SetDepthTest( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
+		GRHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
 
 		// Write to the dest surface as a render target.
 		d3d11DeviceContext->OMSetRenderTargets( 1, &d3d11RenderTargetView, nullptr );
@@ -770,7 +771,7 @@ void CD3D11RHI::SetViewParameters( class CBaseDeviceContextRHI* InDeviceContext,
 	check( InDeviceContext );
 
 	SGlobalConstantBufferContents			globalContents;
-	SetGlobalConstants( globalContents, InSceneView );
+	SetGlobalConstants( globalContents, InSceneView, Vector4D( InSceneView.GetSizeX(), InSceneView.GetSizeY(), GSceneRenderTargets.GetBufferWidth(), GSceneRenderTargets.GetBufferHeight() ) );
 
 	globalConstantBuffer->Update( ( byte* ) &globalContents, 0, sizeof( globalContents ) );
 	globalConstantBuffer->CommitConstantsToDevice( ( CD3D11DeviceContext* )InDeviceContext );
@@ -786,7 +787,7 @@ void CD3D11RHI::SetPixelShaderParameter( class CBaseDeviceContextRHI* InDeviceCo
 	psConstantBuffer->Update( ( const byte* )InNewValue, InBaseIndex, InNumBytes );
 }
 
-void CD3D11RHI::SetDepthTest( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState )
+void CD3D11RHI::SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext	= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	ID3D11DepthStencilState*		d3d11DepthState		= InNewState ? ( ( CD3D11DepthStateRHI* )InNewState )->GetResource() : nullptr;
@@ -1333,14 +1334,15 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 		void*		errorBuffer = errorsBlob ? errorsBlob->GetBufferPointer() : nullptr;
 		if ( errorBuffer )
 		{
-			LE_LOG( LT_Error, LC_Shader, ANSI_TO_TCHAR( errorBuffer ) );
+			OutOutput.errorMsg		= ANSI_TO_TCHAR( errorBuffer );
 			errorsBlob->Release();
 		}
 		else
 		{
-			LE_LOG( LT_Error, LC_Shader, TEXT( "Compile Failed without warnings!" ) );
+			OutOutput.errorMsg		= TEXT( "Compile Failed without warnings!" );	
 		}
 
+		LE_LOG( LT_Error, LC_Shader, OutOutput.errorMsg.c_str() );
 		return false;
 	}
 

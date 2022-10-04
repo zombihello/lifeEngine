@@ -16,9 +16,10 @@
  * @ingroup Engine
  * Fill global constants buffer
  * 
- * @param[out] OutGlobalContents Output global constant buffer
- * @param[in] InSceneView Scene view info
+ * @param[out] OutGlobalContents	Output global constant buffer
+ * @param[in] InSceneView			Scene view info
+ * @param[in] InScreenAndTexelSize	Screen and buffer size
  */
-void SetGlobalConstants( SGlobalConstantBufferContents& OutGlobalContents, const CSceneView& InSceneView );
+void SetGlobalConstants( SGlobalConstantBufferContents& OutGlobalContents, const CSceneView& InSceneView, const Vector4D& InScreenAndBufferSize );
 
 #endif // !GLOBALCONSTANTSHELPER_H

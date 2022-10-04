@@ -42,10 +42,17 @@ bool                    GShouldPauseBeforeExit      = false;
  */
 void VARARGS appFailAssertFunc( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat, ... )
 {
-    va_list     arguments;
-    va_start( arguments, InFormat );
-    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str() );
-    va_end( arguments );
+	std::wstring        callStack;
+	appDumpCallStack( callStack );
+
+	va_list             arguments;
+	va_start( arguments, InFormat );
+	std::wstring        message = CString::Format( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str(), callStack.c_str() );
+	va_end( arguments );
+
+	LE_LOG( LT_Error, LC_General, message.c_str() );
+	appShowMessageBox( CString::Format( TEXT( "%s Error" ), GGameName.c_str() ).c_str(), message.c_str(), MB_Error );
+    appRequestExit( true );
 }
 
 /**
@@ -53,10 +60,15 @@ void VARARGS appFailAssertFunc( const achar* InExpr, const achar* InFile, int In
  */
 void VARARGS appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat, ... )
 {
-	va_list     arguments;
+    std::wstring        callStack;
+    appDumpCallStack( callStack );
+
+	va_list             arguments;
 	va_start( arguments, InFormat );
-    LE_LOG( LT_Error, LC_None, TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack: Not avail yet" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str() );
+	std::wstring        message = CString::Format( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str(), callStack.c_str() );
 	va_end( arguments );
+
+	LE_LOG( LT_Error, LC_General, message.c_str() );
 }
 
 std::wstring appPlatformTypeToString( EPlatformType InPlatform )

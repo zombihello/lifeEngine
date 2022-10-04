@@ -114,6 +114,7 @@ struct SShaderCompilerOutput
 	std::vector< byte >			code;				/**< Output compiled code of shader */
 	CShaderParameterMap			parameterMap;		/**< Shader parameter map */
 	uint32						numInstructions;	/**< Number instructions in shader */
+	std::wstring				errorMsg;			/**< Error message. Compiler puting to this field message when shader compiled is fail */
 };
 
 /**
@@ -149,10 +150,11 @@ public:
 	 * @param[in] InShaderMetaType Shader meta type
 	 * @param[in] InShaderPlatform Shader platform enum
 	 * @param[in,out] InOutShaderCache Shader cache
+	 * @param[out] OutErrorMsg Compile error message
 	 * @param[in] InVertexFactoryType Vertex factory type
 	 * @return Return true if shader compile successed, else return false
 	 */
-	bool CompileShader( class CShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class CShaderCache& InOutShaderCache, class CVertexFactoryMetaType* InVertexFactoryType = nullptr );
+	bool CompileShader( class CShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class CShaderCache& InOutShaderCache, std::wstring& OutErrorMsg, class CVertexFactoryMetaType* InVertexFactoryType = nullptr );
 };
 
 #endif // !WITH_EDITOR

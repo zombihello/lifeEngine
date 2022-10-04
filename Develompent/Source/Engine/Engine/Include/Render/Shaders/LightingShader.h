@@ -321,6 +321,28 @@ public:
 	}
 
 	/**
+	 * @brief Set EmissionGBuffer texture parameter
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InTextureRHI			RHI Texture
+	 */
+	FORCEINLINE void SetEmissionGBufferTexture( class CBaseDeviceContextRHI* InDeviceContextRHI, const Texture2DRHIParamRef_t InTextureRHI )
+	{
+		SetTextureParameter( InDeviceContextRHI, emissionGBufferParameter, InTextureRHI );
+	}
+
+	/**
+	 * @brief Set EmissionGBuffer sampler state parameter
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InSamplerStateRHI		RHI sampler state
+	 */
+	FORCEINLINE void SetEmissionGBufferSamplerState( class CBaseDeviceContextRHI* InDeviceContextRHI, const SamplerStateRHIParamRef_t InSamplerStateRHI )
+	{
+		SetSamplerStateParameter( InDeviceContextRHI, emissionGBufferSamplerParameter, InSamplerStateRHI );
+	}
+
+	/**
 	 * @brief Set depth buffer texture parameter
 	 *
 	 * @param InDeviceContextRHI	RHI device context
@@ -347,6 +369,8 @@ private:
 	CShaderResourceParameter		diffuseRoughnessGBufferSamplerParameter;	/**< DiffuseRoughnessGBuffer sampler parameter */
 	CShaderResourceParameter		normalMetalGBufferParameter;				/**< NormalMetalGBuffer texture parameter */
 	CShaderResourceParameter		normalMetalGBufferSamplerParameter;			/**< NormalMetalGBuffer sampler parameter */
+	CShaderResourceParameter		emissionGBufferParameter;					/**< EmissionGBuffer texture parameter */
+	CShaderResourceParameter		emissionGBufferSamplerParameter;			/**< EmissionGBuffer sampler parameter */
 	CShaderResourceParameter		depthBufferParameter;						/**< Depth buffer texture parameter */
 	CShaderResourceParameter		depthBufferSamplerParameter;				/**< Depth buffer sampler parameter */
 };
@@ -467,109 +491,6 @@ public:
 		return CLightingShadersUtils::ShouldCache( InShaderPlatform, InVFMetaType );
 	}
 #endif // WITH_EDITOR
-};
-
-/**
- * @ingroup Engine
- * @brief A shader for post light pass where we blend the light attenuation with other data from GBuffer and write them to the scene color
- * 
- * @warning Need use with CScreenVertexShader
- */
-class CPostLightingPassPixelShader : public CShader
-{
-	DECLARE_SHADER_TYPE( CPostLightingPassPixelShader )
-
-public:
-	/**
-	 * @brief Initialize shader
-	 * @param[in] InShaderCacheItem Cache of shader
-	 */
-	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
-
-#if WITH_EDITOR
-	/**
-	 * @brief Is need compile shader for platform
-	 *
-	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
-	 * @return Return true if need compile shader, else returning false
-	 */
-	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );
-#endif // WITH_EDITOR
-
-	/**
-	 * @brief Set DiffuseRoughnessGBuffer texture parameter
-	 *
-	 * @param InDeviceContextRHI	RHI device context
-	 * @param InTextureRHI			RHI Texture
-	 */
-	FORCEINLINE void SetDiffuseRoughnessGBufferTexture( class CBaseDeviceContextRHI* InDeviceContextRHI, const Texture2DRHIParamRef_t InTextureRHI )
-	{
-		SetTextureParameter( InDeviceContextRHI, diffuseRoughnessGBufferParameter, InTextureRHI );
-	}
-
-	/**
-	 * @brief Set DiffuseRoughnessGBuffer sampler state parameter
-	 *
-	 * @param InDeviceContextRHI	RHI device context
-	 * @param InSamplerStateRHI		RHI sampler state
-	 */
-	FORCEINLINE void SetDiffuseRoughnessGBufferSamplerState( class CBaseDeviceContextRHI* InDeviceContextRHI, const SamplerStateRHIParamRef_t InSamplerStateRHI )
-	{
-		SetSamplerStateParameter( InDeviceContextRHI, diffuseRoughnessGBufferSamplerParameter, InSamplerStateRHI );
-	}
-
-	/**
-	 * @brief Set EmissionGBuffer texture parameter
-	 *
-	 * @param InDeviceContextRHI	RHI device context
-	 * @param InTextureRHI			RHI Texture
-	 */
-	FORCEINLINE void SetEmissionGBufferTexture( class CBaseDeviceContextRHI* InDeviceContextRHI, const Texture2DRHIParamRef_t InTextureRHI )
-	{
-		SetTextureParameter( InDeviceContextRHI, emissionGBufferParameter, InTextureRHI );
-	}
-
-	/**
-	 * @brief Set EmissionGBuffer sampler state parameter
-	 *
-	 * @param InDeviceContextRHI	RHI device context
-	 * @param InSamplerStateRHI		RHI sampler state
-	 */
-	FORCEINLINE void SetEmissionGBufferSamplerState( class CBaseDeviceContextRHI* InDeviceContextRHI, const SamplerStateRHIParamRef_t InSamplerStateRHI )
-	{
-		SetSamplerStateParameter( InDeviceContextRHI, emissionGBufferSamplerParameter, InSamplerStateRHI );
-	}
-
-	/**
-	 * @brief Set light attenuation texture parameter
-	 *
-	 * @param InDeviceContextRHI	RHI device context
-	 * @param InTextureRHI			RHI Texture
-	 */
-	FORCEINLINE void SetLightAttenuationTexture( class CBaseDeviceContextRHI* InDeviceContextRHI, const Texture2DRHIParamRef_t InTextureRHI )
-	{
-		SetTextureParameter( InDeviceContextRHI, lightAttenuationParameter, InTextureRHI );
-	}
-
-	/**
-	 * @brief Set light attenuation sampler state parameter
-	 *
-	 * @param InDeviceContextRHI	RHI device context
-	 * @param InSamplerStateRHI		RHI sampler state
-	 */
-	FORCEINLINE void SetLightAttenuationSamplerState( class CBaseDeviceContextRHI* InDeviceContextRHI, const SamplerStateRHIParamRef_t InSamplerStateRHI )
-	{
-		SetSamplerStateParameter( InDeviceContextRHI, lightAttenuationSamplerParameter, InSamplerStateRHI );
-	}
-
-private:
-	CShaderResourceParameter		diffuseRoughnessGBufferParameter;			/**< DiffuseRoughnessGBuffer texture parameter */
-	CShaderResourceParameter		diffuseRoughnessGBufferSamplerParameter;	/**< DiffuseRoughnessGBuffer sampler parameter */
-	CShaderResourceParameter		emissionGBufferParameter;					/**< EmissionGBuffer texture parameter */
-	CShaderResourceParameter		emissionGBufferSamplerParameter;			/**< EmissionGBuffer sampler parameter */
-	CShaderResourceParameter		lightAttenuationParameter;					/**< Light attenuation texture parameter */
-	CShaderResourceParameter		lightAttenuationSamplerParameter;			/**< Light attenuation sampler parameter */
 };
 
 #endif // !LIGHTINGSHADER_H

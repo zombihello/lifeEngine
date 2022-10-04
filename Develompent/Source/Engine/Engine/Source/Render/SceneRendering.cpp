@@ -46,7 +46,7 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 	
 	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
 	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
-	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
 	GRHI->SetBlendState( immediateContext, TStaticBlendState<>::GetRHI() );
 	GRHI->SetViewParameters( immediateContext, *sceneView );
 
@@ -72,7 +72,7 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	{
 		bDirty |= RenderSDG( immediateContext, SDG_World );
 	}
-
+	
 	// Render lights
 	if ( bDirty && !scene->GetVisibleLights().empty() && showFlags & SHOW_Lights
 #if WITH_EDITOR
@@ -83,12 +83,31 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 		RenderLights( immediateContext );
 	}
 
+#if WITH_EDITOR
+	// If we in editor draw highlight layer (gizmo and etc)
+	if ( GIsEditor )
+	{
+		RenderHighlight( immediateContext );
+	}
+#endif // WITH_EDITOR
+
 	// Render post process
 	RenderPostProcess( immediateContext );
 
 	// Render UI
 	RenderUI( immediateContext );
 }
+
+#if WITH_EDITOR
+void CSceneRenderer::RenderHighlight( class CBaseDeviceContextRHI* InDeviceContext )
+{
+	SCOPED_DRAW_EVENT( EventUI, DEC_CANVAS, TEXT( "Highlight" ) );
+	GRHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
+	GRHI->SetBlendState( InDeviceContext, TStaticBlendState<>::GetRHI() );
+	
+	RenderSDG( InDeviceContext, SDG_Highlight );
+}
+#endif // WITH_EDITOR
 
 bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, uint32 InSDGIndex )
 {
@@ -197,7 +216,7 @@ void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI
 	check( screenVertexShader && screenPixelShader );
 	
 	GRHI->SetRenderTarget( immediateContext, InViewportRHI->GetSurface(), nullptr );
-	GRHI->SetDepthTest( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
+	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
 	GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
 	GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "FinishRenderViewTarget" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), screenPixelShader->GetPixelShader() ) );
 

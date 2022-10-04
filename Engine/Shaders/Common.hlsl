@@ -34,4 +34,20 @@ struct SLightData
 #endif // POINT_LIGHT / SPOT_LIGHT / DIRECTIONAL_LIGHT
 };
 
+/**
+ * Returns the size of the screen/view (in pixels, like (1280,720))
+ */
+float2 GetScreenSize()
+{
+	return screenAndBufferSize.xy;
+}
+
+/**
+ * Returns the size of a render target (in pixels, like (1280,720))
+ */
+float2 GetBufferSize()
+{
+	return screenAndBufferSize.zw;
+}
+
 #endif // !COMMON_HLSL

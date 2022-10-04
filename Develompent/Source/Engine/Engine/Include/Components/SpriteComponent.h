@@ -172,7 +172,8 @@ public:
 	 */
 	FORCEINLINE void SetGizmo( bool InIsGizmo )
 	{
-		bGizmo = InIsGizmo;
+		bIsDirtyDrawingPolicyLink	= true;
+		bGizmo						= InIsGizmo;
 	}
 
 	/**
