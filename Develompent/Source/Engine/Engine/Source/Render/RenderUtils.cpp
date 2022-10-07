@@ -12,14 +12,23 @@ TGlobalResource<CBlackTexture>		GBlackTexture;
 /* Maps members of EPixelFormat to a SPixelFormatInfo describing the format */
 SPixelFormatInfo		GPixelFormats[ PF_Max ] =
 {
-	// Name						BlockSizeX	BlockSizeY	BlockSizeZ	BlockBytes	NumComponents	PlatformFormat	Flags			Supported		EngineFormat
+	// Name						BlockSizeX	BlockSizeY	BlockSizeZ	BlockBytes	NumComponents	PlatformFormat			Flags			Supported		EngineFormat
 
 	{ TEXT( "Unknown" ),				0,			0,			0,			0,			0,				0,				0,				0,				PF_Unknown					},
-	{ TEXT( "A8R8G8B8" ),				1,			1,			1,			4,			4,				0,				0,				1,				PF_A8R8G8B8					},
+	{ TEXT( "A8R8G8B8" ),				1,			1,			1,			4,			4,				0,				0,				0,				PF_A8R8G8B8					},
 	{ TEXT( "DepthStencil" ),			1,			1,			1,			0,			1,				0,				0,				0,				PF_DepthStencil				},
 	{ TEXT( "ShadowDepth" ),			1,			1,			1,			4,			1,				0,				0,				0,				PF_ShadowDepth				},
 	{ TEXT( "FilteredShadowDepth" ),	1,			1,			1,			4,			1,				0,				0,				0,				PF_FilteredShadowDepth		},
-	{ TEXT( "D32" ),					1,			1,			1,			4,			1,				0,				0,				1,				PF_D32						}
+	{ TEXT( "D32" ),					1,			1,			1,			4,			1,				0,				0,				0,				PF_D32						},
+	{ TEXT( "FloatRGB" ),				1,			1,			1,			12,			3,				0,				0,				0,				PF_FloatRGB					},
+	{ TEXT( "FloatRGBA" ),				1,			1,			1,			16,			4,				0,				0,				0,				PF_FloatRGBA				},
+	{ TEXT( "R32F" ),					1,			1,			1,			4,			1,				0,				0,				0,				PF_R32F						},
+	{ TEXT( "BC1" ),					4,			4,			1,			8,			3,				0,				0,				0,				PF_BC1						},
+	{ TEXT( "BC2" ),					4,			4,			1,			16,			4,				0,				0,				0,				PF_BC2						},
+	{ TEXT( "BC3" ),					4,			4,			1,			16,			4,				0,				0,				0,				PF_BC3						},
+	{ TEXT( "BC5" ),					4,			4,			1,			16,			2,				0,				0,				0,				PF_BC5						},
+	{ TEXT( "BC6H" ),					1,			1,			1,			16,			3,				0,				0,				0,				PF_BC6H						},
+	{ TEXT( "BC7" ),					4,			4,			1,			16,			4,				0,				0,				0,				PF_BC7						}
 };
 
 /** Offset to center of the pixel */

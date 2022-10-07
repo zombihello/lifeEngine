@@ -60,6 +60,37 @@ static FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrim
 	return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 }
 
+/**
+ * Init D3D11 texture format
+ */
+static FORCEINLINE void InitD3D11TextureFormat( EPixelFormat InPixelFormat, DXGI_FORMAT InD3D11Format, int32 InBlockBytes = -1 )
+{
+	// Set up basic info
+	GPixelFormats[InPixelFormat].platformFormat = InD3D11Format;
+	GPixelFormats[InPixelFormat].supported		= InD3D11Format != DXGI_FORMAT_UNKNOWN;
+	if ( InBlockBytes != -1 )
+	{
+		GPixelFormats[InPixelFormat].blockBytes = InBlockBytes;
+	}
+}
+
+/**
+ * @ingroup D3D11RHI
+ * @brief Macro for init engine pixel format
+ */
+#define INIT_FORMAT_FULL( InRHIFormat, InD3D11Format, InBlockBytes )				InitD3D11TextureFormat( InRHIFormat, InD3D11Format, InBlockBytes )
+
+/**
+ * @ingroup D3D11RHI
+ * @brief Macro for init engine pixel format
+ */
+#define INIT_FORMAT( InRHIFormat, InD3D11Format )									InitD3D11TextureFormat( InRHIFormat, InD3D11Format )
+
+ /**
+  * @ingroup D3D11RHI
+  * @brief Macro for init unsupported engine pixel format
+  */
+#define INIT_UNSUPPORTED_FORMAT( InRHIFormat, InD3D11Format )						InitD3D11TextureFormat( InRHIFormat, DXGI_FORMAT_UNKNOWN )
 
 /**
  * @ingroup D3D11RHI
@@ -161,8 +192,8 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 	d3d11DeviceContext->RSGetViewports( &numSavedViewports, &d3d11SavedViewport );
 
 	// No alpha blending, no depth tests or writes, no stencil tests or writes, no backface culling.
-	GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<>::GetRHI() );
-	GRHI->SetStencilState( InDeviceContextRHI, TStaticStencilState<>::GetRHI() );
+	GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<>::GetRHI() );
+	GRHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<>::GetRHI() );
 	GRHI->SetRasterizerState( InDeviceContextRHI, TStaticRasterizerStateRHI<FM_Solid, CM_None>::GetRHI() );
 
 	// Determine if the entire destination surface is being resolved to.
@@ -381,14 +412,22 @@ void CD3D11RHI::Init( bool InIsEditor )
 			adapterDesc.SharedSystemMemory / ( 1024 * 1024 ) );
 
 	// Initialize the platform pixel format map
-	GPixelFormats[ PF_Unknown ].platformFormat					= DXGI_FORMAT_UNKNOWN;
-	GPixelFormats[ PF_A8R8G8B8 ].platformFormat					= DXGI_FORMAT_R8G8B8A8_UNORM;
-	GPixelFormats[ PF_DepthStencil ].platformFormat				= DXGI_FORMAT_R32G8X24_TYPELESS;
-	GPixelFormats[ PF_DepthStencil ].blockBytes					= 8;
-	GPixelFormats[ PF_ShadowDepth ].platformFormat				= DXGI_FORMAT_R16_TYPELESS;
-	GPixelFormats[ PF_FilteredShadowDepth ].platformFormat		= DXGI_FORMAT_D32_FLOAT;
-	GPixelFormats[ PF_D32 ].platformFormat						= DXGI_FORMAT_R32_TYPELESS;
+	INIT_FORMAT( PF_A8R8G8B8,				DXGI_FORMAT_R8G8B8A8_UNORM );	
+	INIT_FORMAT_FULL( PF_DepthStencil,		DXGI_FORMAT_R32G8X24_TYPELESS, 8 );
+	INIT_FORMAT( PF_ShadowDepth,			DXGI_FORMAT_R16_TYPELESS );
+	INIT_FORMAT( PF_FilteredShadowDepth,	DXGI_FORMAT_D32_FLOAT );
+	INIT_FORMAT( PF_D32,					DXGI_FORMAT_R32_TYPELESS );
+	INIT_FORMAT_FULL( PF_FloatRGB,			DXGI_FORMAT_R16G16B16A16_FLOAT, 8 );
+	INIT_FORMAT_FULL( PF_FloatRGBA,			DXGI_FORMAT_R16G16B16A16_FLOAT, 8 );
+	INIT_FORMAT( PF_R32F,					DXGI_FORMAT_R32_FLOAT );
+	INIT_FORMAT( PF_BC1,					DXGI_FORMAT_BC1_UNORM );
+	INIT_FORMAT( PF_BC2,					DXGI_FORMAT_BC2_UNORM );
+	INIT_FORMAT( PF_BC3,					DXGI_FORMAT_BC3_UNORM );
+	INIT_FORMAT( PF_BC5,					DXGI_FORMAT_BC5_UNORM );
+	INIT_FORMAT( PF_BC6H,					DXGI_FORMAT_BC6H_UF16 );
+	INIT_FORMAT( PF_BC7,					DXGI_FORMAT_BC7_UNORM );
 
+	INIT_UNSUPPORTED_FORMAT( PF_Unknown );
 	isInitialize = true;
 
 	// Initialize all global render resources

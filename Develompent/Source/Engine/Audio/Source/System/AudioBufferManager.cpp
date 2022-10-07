@@ -1,6 +1,6 @@
 #include "System/AudioBufferManager.h"
 
-AudioBufferRef_t ÑAudioBufferManager::Find( const TAssetHandle<CAudioBank>& InAudioBank )
+AudioBufferRef_t CAudioBufferManager::Find( const TAssetHandle<CAudioBank>& InAudioBank )
 {
 	// If already loaded buffer - return it
 	{

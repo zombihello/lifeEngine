@@ -11,7 +11,7 @@ void CSceneRenderer::RenderUI( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	SCOPED_DRAW_EVENT( EventUI, DEC_CANVAS, TEXT( "UI" ) );
 	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
-	GRHI->SetBlendState( InDeviceContext, TStaticBlendState<>::GetRHI() );
+	GRHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
 	GRHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
 
 	// Render WorldEd background and foreground layer (only in editor)

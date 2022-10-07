@@ -5,7 +5,7 @@ IMPLEMENT_CLASS( CAudioComponent )
 CAudioComponent::CAudioComponent()
 	: bIsLoop( false )
 	, bIsUISound( false )
-	, bIsAutoPlay( false )
+	, bIsAutoPlay( true )
 	, bIsStreamable( false )
 	, volume( 100.f )
 	, pitch( 1.f )
@@ -42,6 +42,10 @@ void CAudioComponent::Serialize( class CArchive& InArchive )
 	if ( InArchive.IsLoading() )
 	{
 		UpdateAudioSourceType();
+		if ( source && bIsAutoPlay )
+		{
+			source->Play();
+		}
 	}
 }
 

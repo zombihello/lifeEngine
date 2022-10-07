@@ -94,7 +94,7 @@ public:
 		{
 		case PT_Base:
 			GRHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
-			GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendState<BO_Add, BF_One, BF_One>::GetRHI() );
+			GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<BO_Add, BF_One, BF_One>::GetRHI() );
 			break;
 
 		case PT_Stencil:

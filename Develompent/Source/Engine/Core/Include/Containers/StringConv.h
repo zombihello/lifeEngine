@@ -18,7 +18,7 @@
  * @ingroup Core
  * @brief Class that handles the ANSI to TCHAR conversion
  */
-class ÑANSIToTCHAR_Convert
+class CANSIToTCHAR_Convert
 {
 public:
 	/**
@@ -67,7 +67,7 @@ public:
  * @ingroup Core
  * @brief Class that handles the TCHAR to ANSI conversion
  */
-class ÑTCHARToANSI_Convert
+class CTCHARToANSI_Convert
 {
 public:
 	 /**
@@ -197,13 +197,13 @@ private:
  * @ingroup Core
  * @brief Typedef for conversion from ANSI to TCHAR
  */
-typedef TStringConversion< tchar, achar, ÑANSIToTCHAR_Convert >			ANSIToTCHAR;
+typedef TStringConversion< tchar, achar, CANSIToTCHAR_Convert >			ANSIToTCHAR;
 
 /**
  * @ingroup Core
  * @brief Typedef for conversion from TCHAR to ANSI
  */
-typedef TStringConversion< achar, tchar, ÑTCHARToANSI_Convert >			TCHARToANSI;
+typedef TStringConversion< achar, tchar, CTCHARToANSI_Convert >			TCHARToANSI;
 
 /**
  * @ingroup Core

@@ -18,7 +18,7 @@
  * @ingroup Audio
  * @brief Class for manager loaded fully banks to memory
  */
-class ÑAudioBufferManager
+class CAudioBufferManager
 {
 public:
 	/**

@@ -40,8 +40,8 @@ void CSceneRenderTargets::InitRHI()
 		renderTargets[SRTT_Diffuse_Roughness_GBuffer].surface	= GRHI->CreateTargetableSurface( TEXT( "Diffuse_Roughness_GBuffer" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[SRTT_Diffuse_Roughness_GBuffer].texture, TCF_ResolveTargetable );
 
 		// Normal_Metal GBuffer
-		renderTargets[SRTT_Normal_Metal_GBuffer].texture		= GRHI->CreateTexture2D( TEXT( "Normal_Metal_GBuffer" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );
-		renderTargets[SRTT_Normal_Metal_GBuffer].surface		= GRHI->CreateTargetableSurface( TEXT( "Normal_Metal_GBuffer" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[SRTT_Normal_Metal_GBuffer].texture, TCF_ResolveTargetable );
+		renderTargets[SRTT_Normal_Metal_GBuffer].texture		= GRHI->CreateTexture2D( TEXT( "Normal_Metal_GBuffer" ), bufferSizeX, bufferSizeY, PF_FloatRGBA, 1, TCF_ResolveTargetable );
+		renderTargets[SRTT_Normal_Metal_GBuffer].surface		= GRHI->CreateTargetableSurface( TEXT( "Normal_Metal_GBuffer" ), bufferSizeX, bufferSizeY, PF_FloatRGBA, renderTargets[SRTT_Normal_Metal_GBuffer].texture, TCF_ResolveTargetable );
 	
 		// Emission GBuffer
 		renderTargets[SRTT_Emission_GBuffer].texture			= GRHI->CreateTexture2D( TEXT( "Emission_GBuffer" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );

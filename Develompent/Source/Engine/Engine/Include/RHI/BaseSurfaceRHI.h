@@ -26,6 +26,15 @@ enum EPixelFormat
 	PF_ShadowDepth,				/**< Shadow depth format */
 	PF_FilteredShadowDepth,		/**< Filtered shadow depth format*/
 	PF_D32,						/**< Depth buffer 32 bit */
+	PF_FloatRGB,				/**< Float RGB */
+	PF_FloatRGBA,				/**< Float RGBA */
+	PF_R32F,					/**< R with float 32 bit channel */
+	PF_BC1,						/**< BC1 (DXT1) compression format */
+	PF_BC2,						/**< BC2 (DXT3) compression format */
+	PF_BC3,						/**< BC3 (DXT5) compression format */
+	PF_BC5,						/**< BC5 compression format */
+	PF_BC6H,					/**< BC6 compression format */
+	PF_BC7,						/**< BC7 compression format */
 	PF_Max						/**< Max count pixel formats */
 };
 

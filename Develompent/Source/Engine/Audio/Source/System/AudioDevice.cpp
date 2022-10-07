@@ -53,7 +53,7 @@ uint32 appGetNumSampleBytes( ESampleFormat InSampleFormat )
 	}
 }
 
-ÑAudioDevice::ÑAudioDevice()
+CAudioDevice::CAudioDevice()
 	: bIsMuted( false )
 	, alDevice( nullptr )
 	, alContext( nullptr )
@@ -61,12 +61,12 @@ uint32 appGetNumSampleBytes( ESampleFormat InSampleFormat )
 	, platformAudioHeadroom( 1.f )
 {}
 
-ÑAudioDevice::~ÑAudioDevice()
+CAudioDevice::~CAudioDevice()
 {
 	Shutdown();
 }
 
-void ÑAudioDevice::Init()
+void CAudioDevice::Init()
 {
 	// Open audio device
 	alDevice = alcOpenDevice( nullptr );
@@ -133,7 +133,7 @@ void ÑAudioDevice::Init()
 	SetGlobalVolume( globalVolume );
 }
 
-void ÑAudioDevice::Shutdown()
+void CAudioDevice::Shutdown()
 {
 	alcMakeContextCurrent( nullptr );
 	if ( alContext )
@@ -150,7 +150,7 @@ void ÑAudioDevice::Shutdown()
 	alDevice = nullptr;
 }
 
-bool ÑAudioDevice::IsExtensionSupported( const std::string& InExtension ) const
+bool CAudioDevice::IsExtensionSupported( const std::string& InExtension ) const
 {
 	if ( InExtension.size() > 2 && InExtension.substr( 0, 3 ) == "ALC" )
 	{

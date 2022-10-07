@@ -8,5 +8,5 @@
 // -------------
 
 ÑAudioEngine				GAudioEngine;
-ÑAudioDevice				GAudioDevice;
-ÑAudioBufferManager			GAudioBufferManager;
+CAudioDevice				GAudioDevice;
+CAudioBufferManager			GAudioBufferManager;

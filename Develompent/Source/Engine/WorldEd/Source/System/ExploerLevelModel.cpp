@@ -126,5 +126,11 @@ void WeExploerLevelModel::OnActorsDestroyed( const std::vector<ActorRef_t>& InAc
 		uint32		numDestroyedActors		= InActors.size();
 		removeRows( 0, numDestroyedActors, QModelIndex() );
 		numRows -= numDestroyedActors;
+
+		// Remove from map references to destroyed actors
+		for ( uint32 index = 0, count = InActors.size(); index < count; ++index )
+		{
+			mapActorsIndex.erase( InActors[index] );
+		}
 	}
 }

@@ -47,7 +47,7 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
 	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
 	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
-	GRHI->SetBlendState( immediateContext, TStaticBlendState<>::GetRHI() );
+	GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
 	GRHI->SetViewParameters( immediateContext, *sceneView );
 
 	// Build visible view on scene
@@ -101,9 +101,9 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 #if WITH_EDITOR
 void CSceneRenderer::RenderHighlight( class CBaseDeviceContextRHI* InDeviceContext )
 {
-	SCOPED_DRAW_EVENT( EventUI, DEC_CANVAS, TEXT( "Highlight" ) );
+	SCOPED_DRAW_EVENT( EventUI, DEC_SCENE_ITEMS, TEXT( "Highlight" ) );
 	GRHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
-	GRHI->SetBlendState( InDeviceContext, TStaticBlendState<>::GetRHI() );
+	GRHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
 	
 	RenderSDG( InDeviceContext, SDG_Highlight );
 }
@@ -119,7 +119,6 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 		return false;
 	}
 
-	bool				bDirty		= false;
 	SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, CString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )InSDGIndex ) ).c_str() );
 
 #if WITH_EDITOR
@@ -128,7 +127,6 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 	{
 		SCOPED_DRAW_EVENT( EventSimpleElements, DEC_SIMPLEELEMENTS, TEXT( "Simple elements" ) );
 		SDG.simpleElements.Draw( InDeviceContext, *sceneView );
-		bDirty = true;
 	}
 
 	// Draw gizmos
@@ -136,7 +134,6 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 	{
 		SCOPED_DRAW_EVENT( EventGizmos, DEC_SPRITE, TEXT( "Gizmos" ) );
 		SDG.gizmoDrawList.Draw( InDeviceContext, *sceneView );
-		bDirty = true;
 	}
 #endif // WITH_EDITOR
 
@@ -145,7 +142,6 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 	{
 		SCOPED_DRAW_EVENT( EventStaticMeshes, DEC_STATIC_MESH, TEXT( "Static meshes" ) );
 		SDG.staticMeshDrawList.Draw( InDeviceContext, *sceneView );
-		bDirty = true;
 	}
 
 	// Draw sprites
@@ -153,7 +149,6 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 	{
 		SCOPED_DRAW_EVENT( EventSprites, DEC_SPRITE, TEXT( "Sprites" ) );
 		SDG.spriteDrawList.Draw( InDeviceContext, *sceneView );
-		bDirty = true;
 	}
 
 	// Draw dynamic meshes
@@ -171,7 +166,6 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 		if ( SDG.dynamicMeshElements.GetNum() > 0 )
 		{
 			SDG.dynamicMeshElements.Draw( InDeviceContext, *sceneView );
-			bDirty = true;
 		}
 
 		// Draw dynamic mesh builders
@@ -186,13 +180,11 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 					element.dynamicMeshBuilder->Draw<CMeshDrawingPolicy>( InDeviceContext, element.localToWorldMatrix, element.material, *sceneView );
 				}
 			}
-
-			bDirty = true;
 		}
 #endif // WITH_EDITOR
 	}
 
-	return bDirty;
+	return true;
 }
 
 void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )

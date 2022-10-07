@@ -28,6 +28,11 @@ public:
 	AAudio();
 
 	/**
+	 * Destructor
+	 */
+	virtual ~AAudio();
+
+	/**
 	 * @brief Set audio bank
 	 * @param InAudioBank		Audio bank
 	 */

@@ -96,18 +96,18 @@ struct SListenerSpatial
  * @ingroup Audio
  * @brief Class of audio device
  */
-class ÑAudioDevice
+class CAudioDevice
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	ÑAudioDevice();
+	CAudioDevice();
 
 	/**
 	 * @brief Destructor
 	 */
-	~ÑAudioDevice();
+	~CAudioDevice();
 
 	/**
 	 * @brief Initialize engine

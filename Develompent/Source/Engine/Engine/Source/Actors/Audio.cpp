@@ -19,6 +19,9 @@ AAudio::AAudio()
 #endif // WITH_EDITOR
 }
 
+AAudio::~AAudio()
+{}
+
 #if WITH_EDITOR
 #include "Commandlets/CookPackagesCommandlet.h"
 
