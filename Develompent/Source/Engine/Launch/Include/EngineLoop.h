@@ -63,9 +63,9 @@ public:
 
 private:
 	/**
-	 * @brief Serialize configs
+	 * @brief Init configs
 	 */
-	void				SerializeConfigs();
+	void				InitConfigs();
 
 	bool				isInitialize;		/**< Is initialized engine */
 	bool				bIsFocus;			/**< Is focus on window */

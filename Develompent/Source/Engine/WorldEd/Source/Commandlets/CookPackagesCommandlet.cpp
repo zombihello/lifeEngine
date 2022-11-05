@@ -1026,7 +1026,7 @@ bool CCookPackagesCommandlet::Main( const std::wstring& InCommand )
 	// Indexing resources in content dirs
 	{
 		// Always cook dirs
-		std::vector< CConfigValue >			configVarAlwaysCookDirs = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "AlwaysCookDirs" ) ).GetArray();
+		std::vector< CConfigValue >			configVarAlwaysCookDirs = GConfig.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "AlwaysCookDirs" ) ).GetArray();
 		for ( uint32 index = 0, count = configVarAlwaysCookDirs.size(); index < count; ++index )
 		{
 			const CConfigValue&		configAlwaysCookDirItem = configVarAlwaysCookDirs[ index ];
@@ -1042,7 +1042,7 @@ bool CCookPackagesCommandlet::Main( const std::wstring& InCommand )
 		}
 
 		// Cooked dirs
-		std::vector< CConfigValue >			configVarCookDirs = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "CookDirs" ) ).GetArray();
+		std::vector< CConfigValue >			configVarCookDirs = GConfig.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookDirs" ) ).GetArray();
 		for ( uint32 index = 0, count = configVarCookDirs.size(); index < count; ++index )
 		{
 			const CConfigValue&		configCookDirItem = configVarCookDirs[ index ];
@@ -1060,7 +1060,7 @@ bool CCookPackagesCommandlet::Main( const std::wstring& InCommand )
 
 	// Getting output cooked directory and extensions for saving
 	{
-		CConfigObject		configObjExtensions = GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "Extensions" ) ).GetObject();
+		CConfigObject		configObjExtensions = GConfig.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "Extensions" ) ).GetObject();
 		extensionInfo.package	= configObjExtensions.GetValue( TEXT( "Package" ) ).GetString();
 		if ( extensionInfo.package.empty() )
 		{

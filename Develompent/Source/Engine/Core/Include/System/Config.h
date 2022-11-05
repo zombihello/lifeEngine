@@ -17,6 +17,31 @@
 
 #undef GetObject
 
+/**
+ * @ingroup Core
+ * @brief Enumeration config type
+ */
+enum EConfigType
+{
+	CT_Engine,		/**< Engine config */
+	CT_Game,		/**< Game config */
+	CT_Input,		/**< Input config */
+	CT_Editor,		/**< Editor config */
+	CT_Num			/**< Number configs type */
+};
+
+/**
+ * @ingroup Core
+ * @brief Enumeration layer of the config
+ */
+enum EConfigLayer
+{
+	CL_Engine,		/**< Engine */
+	CL_Game,		/**< Game */
+	CL_User,		/**< User */
+	CL_Num			/**< Number layers */
+};
+
  /**
   * @ingroup Core
   * @brief Class object of config
@@ -499,6 +524,92 @@ private:
 	typedef std::unordered_map< std::wstring, CConfigObject >		MapGroups_t;
 
 	MapGroups_t			groups;			/**< Config values */
+};
+
+/**
+ * @ingroup Core
+ * @brief Manager for work with all of layers config (Engine, Game, User)
+ */
+class CConfigManager
+{
+public:
+	/**
+	 * @brief Initialize configs
+	 */
+	void Init();
+
+	/**
+	 * @brief Shutdown configs
+	 */
+	FORCEINLINE void Shutdown()
+	{
+		configs.clear();
+	}
+
+	/**
+		 * @brief Get config
+		 *
+		 * @param InType	Config type
+		 * @return Return config object
+		 */
+	FORCEINLINE const CConfig& GetConfig( EConfigType InType ) const
+	{
+		std::unordered_map<EConfigType, CConfig>::const_iterator		itConfig = configs.find( InType );
+		if ( itConfig == configs.end() )
+		{
+			checkMsg( false, TEXT( "All types of configs must be exist all time" ) );
+		}
+
+		return itConfig->second;
+	}
+
+	/**
+	 * @brief Get config
+	 *
+	 * @param InType	Config type
+	 * @return Return config object
+	 */
+	FORCEINLINE CConfig& GetConfig( EConfigType InType )
+	{
+		std::unordered_map<EConfigType, CConfig>::iterator		itConfig = configs.find( InType );
+		if ( itConfig == configs.end() )
+		{
+			checkMsg( false, TEXT( "All types of configs must be exist all time" ) );
+		}
+
+		return itConfig->second;
+	}
+
+	/**
+	 * @brief Set value
+	 *
+	 * @param InType	Config type
+	 * @param InGroup	Name of group in config
+	 * @param InName	Name of value in config group
+	 * @param InValue Value
+	 */
+	FORCEINLINE void SetValue( EConfigType InType, const tchar* InGroup, const tchar* InName, const CConfigValue& InValue )
+	{
+		CConfig&	config = GetConfig( InType );
+		config.SetValue( InGroup, InName, InValue );
+	}
+
+	/**
+	 * @brief Get value
+	 *
+	 * @param InType	Config type
+	 * @param InGroup	Name of group in config
+	 * @param InName	Name of value in config group
+	 * @return Return value from config, if not founded return empty value
+	 */
+	FORCEINLINE CConfigValue GetValue( EConfigType InType, const tchar* InGroup, const tchar* InName ) const
+	{
+		const CConfig&	config = GetConfig( InType );
+		return config.GetValue( InGroup, InName );
+	}
+
+private:
+	std::unordered_map<EConfigType, CConfig>		configs;		/**< Configs */
 };
 
 #endif // !CONFIG_H

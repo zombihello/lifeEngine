@@ -14,9 +14,7 @@
 // GLOBALS
 // ----------------
 
-CConfig                 GEngineConfig;
-CConfig                 GGameConfig;
-CConfig                 GInputConfig;
+CConfigManager          GConfig;
 bool	                GIsRequestingExit           = false;
 uint32			        GGameThreadId               = 0;
 double                  GSecondsPerCycle            = 0.0;
@@ -29,7 +27,6 @@ CTableOfContets		    GTableOfContents;
 std::wstring            GGameName                   = TEXT( "ExampleGame" );
 
 #if WITH_EDITOR
-CConfig                 GEditorConfig;
 bool					GIsGame                     = true;
 bool			        GIsEditor                   = false;
 bool                    GIsCommandlet               = false;

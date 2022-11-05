@@ -26,7 +26,7 @@ void CBaseEngine::Init()
 		// Loading default texture from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
-			CConfigValue		configDefaultTexture = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
+			CConfigValue		configDefaultTexture = GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
 			if ( configDefaultTexture.IsValid() )
 			{
 				std::wstring			pathAsset = configDefaultTexture.GetString();
@@ -65,7 +65,7 @@ void CBaseEngine::Init()
 		// Loading default material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
-			CConfigValue		configDefaultMaterial = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
+			CConfigValue		configDefaultMaterial = GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
 			if ( configDefaultMaterial.IsValid() )
 			{
 				std::wstring			pathAsset = configDefaultMaterial.GetString();
@@ -103,7 +103,7 @@ void CBaseEngine::Init()
 		// Loading default wireframe material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
-			CConfigValue		configDefaultWireframeMaterial = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
+			CConfigValue		configDefaultWireframeMaterial = GConfig.GetValue( CT_Engine, TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
 			if ( configDefaultWireframeMaterial.IsValid() )
 			{
 				std::wstring			pathAsset	= configDefaultWireframeMaterial.GetString();
@@ -166,7 +166,7 @@ void CBaseEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 
 float CBaseEngine::GetMaxTickRate() const
 {
-	CConfigValue		configMaxTickRate = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
+	CConfigValue		configMaxTickRate = GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
 	if ( configMaxTickRate.IsValid() )
 	{
 		return configMaxTickRate.GetNumber();

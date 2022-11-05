@@ -3,8 +3,72 @@
 #include "Logger/LoggerMacros.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
+#include "Misc/CoreGlobals.h"
 #include "System/Archive.h"
 #include "System/Config.h"
+#include "System/BaseFileSystem.h"
+
+static const tchar* GConfigTypeNames[] =
+{
+	TEXT( "Engine" ),		// CT_Engine
+	TEXT( "Game" ),			// CT_Game
+	TEXT( "Input" ),		// CT_Input
+	TEXT( "Editor" ),		// CT_Editor
+};
+
+static const tchar* GConfigLayerNames[] =
+{
+	TEXT( "Engine" ),		// CL_Engine
+	TEXT( "Game" ),			// CL_Game
+	TEXT( "User" )			// CL_User
+};
+
+void CConfigManager::Init()
+{
+	// Serialize all configs
+	for ( uint32 index = 0; index < CT_Num; ++index )
+	{
+		bool		bSuccessed = false;
+		CConfig		config;
+
+		// Serialize configs of all layers
+		for ( uint32 layer = 0; layer < CL_Num; ++layer )
+		{
+			// Getting path to config
+			std::wstring				pathToConfig;
+			switch ( layer )
+			{
+			case CL_Engine:			pathToConfig = appBaseDir() + PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Config" ) PATH_SEPARATOR + GConfigTypeNames[index] + TEXT( ".ini" );		break;
+			case CL_Game:			pathToConfig = appGameDir() + PATH_SEPARATOR TEXT( "Config" ) PATH_SEPARATOR + GConfigTypeNames[index] + TEXT( ".ini" );										break;
+			default:
+				LE_LOG( LT_Warning, LC_General, TEXT( "Config layer '0x%X' not supported" ), layer );
+				continue;
+				break;
+			}
+
+			// Open file for reading
+			CArchive*				archive = GFileSystem->CreateFileReader( pathToConfig );
+			if ( !archive )
+			{
+				LE_LOG( LT_Warning, LC_General, TEXT( "Config layer '%s' not founded" ), pathToConfig.c_str() );
+				continue;
+			}
+
+			// Serialize config
+			config.Serialize( *archive );
+
+			LE_LOG( LT_Log, LC_General, TEXT( "Loaded layer '%s' for config '%s'" ), GConfigLayerNames[layer], GConfigTypeNames[index] );
+			bSuccessed = true;
+		}
+
+		if ( !bSuccessed )
+		{
+			appErrorf( TEXT( "Config type '%s' not loaded" ), GConfigTypeNames[index] );
+		}
+
+		configs[( EConfigType )index] = config;
+	}
+}
 
 /**
  * Serialize
@@ -34,13 +98,24 @@ void CConfig::Serialize( CArchive& InArchive )
 		// Reading all values
 		for ( auto itGroup = jsonDocument.MemberBegin(), itGroupEnd = jsonDocument.MemberEnd(); itGroup != itGroupEnd; ++itGroup )
 		{
-			std::wstring		groupName = ANSI_TO_TCHAR( itGroup->name.GetString() );
+			std::wstring		groupName			= ANSI_TO_TCHAR( itGroup->name.GetString() );
 
+			// Find config object in memory
+			CConfigObject*		configObject		= nullptr;
+			MapGroups_t::iterator	itConfigGroup	= groups.find( groupName );
+			if ( itConfigGroup != groups.end() )
+			{
+				configObject = &itConfigGroup->second;
+			}
+			else
+			{
+				configObject = &groups.insert( std::make_pair( groupName, CConfigObject() ) ).first->second;
+			}
+
+			// Set value to object
 			if ( itGroup->value.IsObject() )
 			{
-				CConfigObject		object;
-				object.Set( itGroup->value, groupName.c_str() );
-				groups[ groupName ] = object;
+				configObject->Set( itGroup->value, groupName.c_str() );
 			}
 			else
 			{

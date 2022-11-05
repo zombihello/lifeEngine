@@ -83,7 +83,7 @@ int32 appWorldEdEntry( const tchar* InCmdLine )
 	QApplication			application( argumentsCount, arguments.data() );
 
 	// Load styles and init engine
-	appShowSplash( GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "Splash" ) ).GetString().c_str() );
+	appShowSplash( GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Splash" ) ).GetString().c_str() );
 
 	{
 		QFile			file( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Styles/Default/Style.css" ) ).c_str() ) );

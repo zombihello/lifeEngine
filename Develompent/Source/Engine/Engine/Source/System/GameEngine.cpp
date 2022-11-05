@@ -28,9 +28,9 @@ void CGameEngine::Init()
 	Super::Init();
 
 	// Create window and viewport
-	std::wstring				gameName = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();;
-	uint32						windowWidth = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
-	uint32						windowHeight = GEngineConfig.GetValue( TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
+	std::wstring				gameName		= GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();;
+	uint32						windowWidth		= GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
+	uint32						windowHeight	= GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
 	
 	GWindow->SetTitle( gameName.c_str() );
 	GWindow->SetSize( windowWidth, windowHeight );

@@ -177,7 +177,7 @@ CFullScreenMovieTheora::CFullScreenMovieTheora()
 	, theoraRender( nullptr )
 {
 	// Get list of startup movies
-	CConfigValue					confStartupMovies = GGameConfig.GetValue( TEXT( "Game.FullScreenMovie" ), TEXT( "StartupMovies" ) );
+	CConfigValue					confStartupMovies = GConfig.GetValue( CT_Game, TEXT( "Game.FullScreenMovie" ), TEXT( "StartupMovies" ) );
 	check( confStartupMovies.IsA( CConfigValue::T_Array ) );
 	std::vector<CConfigValue>		confArrayStartupMovies = confStartupMovies.GetArray();
 

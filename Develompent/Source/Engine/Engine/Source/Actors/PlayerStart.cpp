@@ -29,7 +29,7 @@ void APlayerStart::BeginPlay()
 	Super::BeginPlay();
 
 	// Find class of default player controller
-	CConfigValue			configPlayerController = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerController" ) );
+	CConfigValue			configPlayerController = GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerController" ) );
 	CClass*					classPlayerController = nullptr;
 	if ( configPlayerController.IsA( CConfigValue::T_String ) )
 	{
@@ -51,7 +51,7 @@ void APlayerStart::BeginPlay()
 	}
 
 	// Find class of default player character
-	CConfigValue		configPlayerCharacter = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerCharacter" ) );
+	CConfigValue		configPlayerCharacter = GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerCharacter" ) );
 	CClass*				classPlayerCharacter = nullptr;
 	if ( configPlayerCharacter.IsA( CConfigValue::T_String ) )
 	{

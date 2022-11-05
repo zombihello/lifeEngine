@@ -64,7 +64,7 @@ void CPhysicsEngine::Init()
 		// Loading default material from packages only when we in game
 		if ( !GIsCooker && !GIsCommandlet )
 		{
-			CConfigValue		configDefaultPhysMaterial = GEngineConfig.GetValue( TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
+			CConfigValue		configDefaultPhysMaterial = GConfig.GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
 			if ( configDefaultPhysMaterial.IsValid() )
 			{
 				std::wstring			pathAsset = configDefaultPhysMaterial.GetString();
@@ -97,7 +97,7 @@ void CPhysicsEngine::Init()
 
 	// Load collision profiles
 	{
-		CConfigValue		configCollisionProfiles = GEngineConfig.GetValue( TEXT( "Physics.Physics" ), TEXT( "CollisionProfiles" ) );
+		CConfigValue		configCollisionProfiles = GConfig.GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "CollisionProfiles" ) );
 		if ( configCollisionProfiles.IsValid() )
 		{
 			check( configCollisionProfiles.GetType() == CConfigValue::T_Array );

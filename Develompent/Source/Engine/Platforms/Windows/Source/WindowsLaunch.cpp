@@ -113,7 +113,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 		{		
 			if ( !GIsRequestingExit )
 			{
-				appShowSplash( GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );				
+				appShowSplash( GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );
 				errorLevel = GEngineLoop->Init( commandLine.c_str() );
 				check( errorLevel == 0 );					
 				appHideSplash();

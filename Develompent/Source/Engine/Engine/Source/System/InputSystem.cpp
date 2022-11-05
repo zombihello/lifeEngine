@@ -15,7 +15,7 @@ CInputSystem::CInputSystem() :
 void CInputSystem::Init()
 {
 	// Get mouse sensitivity
-	CConfigValue		configSensitivity = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Sensitivity" ) );
+	CConfigValue		configSensitivity = GConfig.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Sensitivity" ) );
 	if ( configSensitivity.IsValid() )
 	{
 		mouseSensitivity = configSensitivity.GetNumber();

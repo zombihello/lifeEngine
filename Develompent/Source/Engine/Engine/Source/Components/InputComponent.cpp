@@ -14,7 +14,7 @@ void CInputComponent::BeginPlay()
 
 	// Get mapping of buttons
 	// Actions
-	std::vector< CConfigValue >		configActions = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Actions" ) ).GetArray();
+	std::vector< CConfigValue >		configActions = GConfig.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Actions" ) ).GetArray();
 	for ( uint32 indexAction = 0, countActions = configActions.size(); indexAction < countActions; ++indexAction )
 	{
 		// Get JSON object of action item
@@ -57,7 +57,7 @@ void CInputComponent::BeginPlay()
 	}
 
 	// Axis
-	std::vector< CConfigValue >		configArrayAxis = GInputConfig.GetValue( TEXT( "InputSystem.InputSettings" ), TEXT( "Axis" ) ).GetArray();
+	std::vector< CConfigValue >		configArrayAxis = GConfig.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Axis" ) ).GetArray();
 	for ( uint32 indexAxis = 0, countAxis = configArrayAxis.size(); indexAxis < countAxis; ++indexAxis )
 	{
 		// Get JSON object of action item

@@ -105,52 +105,21 @@ CEngineLoop::CEngineLoop()
 CEngineLoop::~CEngineLoop()
 {}
 
-/**
- * Serialize configs
- */
-void CEngineLoop::SerializeConfigs()
+void CEngineLoop::InitConfigs()
 {
-	// Loading engine config
-	CArchive*		arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Engine.json" ) );
-	if ( arConfig )
-	{
-		GEngineConfig.Serialize( *arConfig );
-		delete arConfig;
-	}
+	// Init configs
+	GConfig.Init();
 
-	GUseMaxTickRate			= GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
+	// Set from config max tick rate
+	GUseMaxTickRate			= GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
 
-	// Loading input config
-	arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Input.json" ) );
-	if ( arConfig )
-	{
-		GInputConfig.Serialize( *arConfig );
-		delete arConfig;
-	}
-
-	// Loading game config
-	arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Game.json" ) );
-	if ( arConfig )
-	{
-		GGameConfig.Serialize( *arConfig );
-		delete arConfig;
-	}
-
-	// Loading editor config
 #if WITH_EDITOR
-	arConfig = GFileSystem->CreateFileReader( appGameDir() + TEXT( "Config/Editor.json" ) );
-	if ( arConfig )
-	{
-		GEditorConfig.Serialize( *arConfig );
-		delete arConfig;
-	}
-
 	// Fill table for convert from text to ESurfaceType
 	{
-		std::vector< CConfigValue >		configSurfaceNames = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) ).GetArray();
+		std::vector< CConfigValue >		configSurfaceNames	= GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) ).GetArray();
 		for ( uint32 index = 0, count = configSurfaceNames.size(); index < count; ++index )
 		{
-			const CConfigValue&		configSurface = configSurfaceNames[ index ];
+			const CConfigValue&		configSurface			= configSurfaceNames[ index ];
 			check( configSurface.GetType() == CConfigValue::T_Object );
 			CConfigObject			objectSurface = configSurface.GetObject();
 
@@ -162,14 +131,14 @@ void CEngineLoop::SerializeConfigs()
 	}
 
 	// Is need cook editor content (include dev content)
-	GIsCookEditorContent			= GEditorConfig.GetValue( TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) ).GetBool();
+	GIsCookEditorContent			= GConfig.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) ).GetBool();
 	if ( GIsCookEditorContent )
 	{
 		LE_LOG( LT_Warning, LC_Editor, TEXT( "Enabled cook editor content" ) );
 	}
 
 	// Is allow shader debug dump
-	GAllowDebugShaderDump			= GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) ).GetBool();
+	GAllowDebugShaderDump			= GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) ).GetBool();
 #endif // WITH_EDITOR
 }
 
@@ -187,7 +156,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	appGetCookedContentPath( GPlatform, GCookedDir );
 	
 	CName::StaticInit();
-	SerializeConfigs();
+	InitConfigs();
 
 #if WITH_EDITOR
 	GIsEditor = appParseParam( InCmdLine, TEXT( "editor" ) );
@@ -253,12 +222,12 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		std::wstring		classEngineName = TEXT( "CBaseEngine" );
 		if ( !GIsEditor )
 		{
-			classEngineName = GEngineConfig.GetValue( TEXT( "Engine.Engine" ), TEXT( "Class" ) ).GetString().c_str();
+			classEngineName = GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "Class" ) ).GetString().c_str();
 		}
 #if WITH_EDITOR
 		else
 		{
-			classEngineName = GEditorConfig.GetValue( TEXT( "Editor.Editor" ), TEXT( "Class" ) ).GetString().c_str();
+			classEngineName = GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Class" ) ).GetString().c_str();
 		}
 #endif // WITH_EDITOR
 
@@ -322,7 +291,7 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 	if ( GIsEditor )
 	{
 		// Get map for loading in editor
-		CConfigValue		configEditorStartupMap = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
+		CConfigValue		configEditorStartupMap = GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
 		if ( configEditorStartupMap.IsA( CConfigValue::T_String ) )
 		{
 			map = configEditorStartupMap.GetString();
@@ -332,7 +301,7 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 #endif // WITH_EDITOR
 	{
 		// Get map for loading in game
-		CConfigValue		configGameDefaultMap = GGameConfig.GetValue( TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
+		CConfigValue		configGameDefaultMap = GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
 		if ( configGameDefaultMap.IsA( CConfigValue::T_String ) )
 		{
 			map = configGameDefaultMap.GetString();
@@ -434,4 +403,5 @@ void CEngineLoop::Exit()
 
 	GWindow->Close();
 	GLog->TearDown();
+	GConfig.Shutdown();
 }

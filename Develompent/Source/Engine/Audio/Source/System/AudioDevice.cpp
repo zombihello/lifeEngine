@@ -107,7 +107,7 @@ void CAudioDevice::Init()
 	LE_LOG( LT_Log, LC_Init, TEXT( "OpenAL extensions: %s" ),	ANSI_TO_TCHAR( alGetString( AL_EXTENSIONS ) ) );
 
 	// Init platform audio headroom
-	float		headroom = GEngineConfig.GetValue( TEXT( "Audio.Audio" ), TEXT( "PlatformHeadroomDB" ) ).GetNumber();
+	float		headroom = GConfig.GetValue( CT_Engine, TEXT( "Audio.Audio" ), TEXT( "PlatformHeadroomDB" ) ).GetNumber();
 	if ( headroom != 0.f )
 	{
 		// Convert dB to linear volume
@@ -121,7 +121,7 @@ void CAudioDevice::Init()
 	// Getting global volume from config
 	float		globalVolume = 1.f;
 	{
-		CConfigValue		configGlobalVolume = GEngineConfig.GetValue( TEXT( "Audio.Audio" ), TEXT( "GlobalVolume" ) );
+		CConfigValue		configGlobalVolume = GConfig.GetValue( CT_Engine, TEXT( "Audio.Audio" ), TEXT( "GlobalVolume" ) );
 		if ( configGlobalVolume.IsValid() && ( configGlobalVolume.GetType() == CConfigValue::T_Int || configGlobalVolume.GetType() == CConfigValue::T_Float ) )
 		{
 			globalVolume = configGlobalVolume.GetNumber();

@@ -31,29 +31,9 @@ extern class CBaseWindow*			GWindow;
 
 /**
  * @ingroup Core
- * @brief Config of engine
+ * @brief Config manager
  */
-extern class CConfig				GEngineConfig;
-
-/**
- * @ingroup Core
- * @brief Config of game
- */
-extern class CConfig				GGameConfig;
-
-/**
- * @ingroup Core
- * @brief Config of input system
- */
-extern class CConfig				GInputConfig;
-
-#if WITH_EDITOR
-/**
- * @ingroup Core
- * @brief Config of editor
- */
-extern class CConfig				GEditorConfig;
-#endif // WITH_EDITOR
+extern class CConfigManager			GConfig;
 
 /**
  * @ingroup Core
