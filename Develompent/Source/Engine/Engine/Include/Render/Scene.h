@@ -665,22 +665,22 @@ struct SHitProxyLayer
  */
 enum ESceneDepthGroup
 {
-#if WITH_EDITOR
+#if !SHIPPING_BUILD
 	SDG_WorldEdBackground,	/**< Background of viewport in WorldEd */
-#endif // WITH_EDITOR
+#endif // !SHIPPING_BUILD
 	
 	SDG_World,				/**< World */
 
-#if WITH_EDITOR
+#if !SHIPPING_BUILD
 	SDG_Highlight,			/**< Heighlight objects (for gizmo) */
 	SDG_WorldEdForeground,	/**< Foreground of viewport in WorldEd */
-#endif // WITH_EDITOR
+#endif // !SHIPPING_BUILD
 
 	SDG_Foreground,			/**< Foreground of viewport for rendering UI */
 	SDG_Max					/**< Num depth groups */
 };
 
-#if WITH_EDITOR
+#if !SHIPPING_BUILD
 /**
  * @ingroup Engine
  * @brief Get scene SDG name
@@ -697,7 +697,7 @@ FORCEINLINE const tchar* GetSceneSDGName( ESceneDepthGroup SDG )
 	default:						return TEXT( "Unknown" );
 	}
 }
-#endif // WITH_EDITOR
+#endif // SHIPPING_BUILD
 
 /**
  * @ingroup Engine

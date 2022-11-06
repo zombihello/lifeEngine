@@ -179,7 +179,10 @@ private:
 	VertexBufferRHIRef_t						vertexBufferRHI;	/**< Vertex buffer RHI */
 	IndexBufferRHIRef_t							indexBufferRHI;		/**< Index buffer RHI */
 	TRefCountPtr< CDynamicMeshVertexFactory >	vertexFactory;		/**< Vertex factory */
+
+#if WITH_EDITOR
 	CHitProxyId									hitProxyId;			/**< Hit proxy Id */
+#endif // WITH_EDITOR
 };
 
 #endif // !DYNAMICMESHBUILDER_H
