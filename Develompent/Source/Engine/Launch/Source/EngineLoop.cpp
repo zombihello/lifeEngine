@@ -42,6 +42,7 @@
 
 #if WITH_EDITOR
 #include "Commandlets/BaseCommandlet.h"
+#include "Misc/WorldEdGlobals.h"
 #endif // WITH_EDITOR
 
 /**
@@ -266,6 +267,10 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 
 	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
 	GEngine->Init();
+
+#if WITH_EDITOR
+	check( !GIsEditor || GIsEditor && GEditorEngine );
+#endif // WITH_EDITOR
 
 	// Start render thread
 	StartRenderingThread();

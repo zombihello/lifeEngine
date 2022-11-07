@@ -467,7 +467,7 @@ void CD3D11RHI::Destroy()
 	if ( !isInitialize )		return;
 
 	// Release all global render resources
-	std::set< CRenderResource* >&		globalResourceList = CRenderResource::GetResourceList();
+	std::set<CRenderResource*>		globalResourceList = CRenderResource::GetResourceList();
 	for ( auto it = globalResourceList.begin(), itEnd = globalResourceList.end(); it != itEnd; ++it )
 	{
 		( *it )->ReleaseResource();

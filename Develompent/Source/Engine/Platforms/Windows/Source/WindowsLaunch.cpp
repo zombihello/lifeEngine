@@ -23,6 +23,8 @@
 
 #if WITH_EDITOR
 #include "WorldEd.h"
+#include "Misc/WorldEdGlobals.h"
+#include "System/EditorEngine.h"
 #endif // WITH_EDITOR
 
 /**
@@ -94,45 +96,50 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 	try
 	{
 		std::wstring		commandLine = appGetCommandLine();
-
-		int32		errorLevel = 0;
+		int32				errorLevel = 0;
+		
+		// Pre init engine
 		if ( !GIsRequestingExit )
 		{
 			errorLevel = GEngineLoop->PreInit( commandLine.c_str() );
 			check( errorLevel == 0 );
 		}
 
-#if WITH_EDITOR
-		if ( GIsEditor )
+		// Show splash screen
+		if ( !GIsRequestingExit )
 		{
-			errorLevel = appWorldEdEntry( commandLine.c_str() );
-			check( errorLevel == 0 );
-		}
-		else
-#endif // WITH_EDITOR
-		{		
-			if ( !GIsRequestingExit )
+			if ( GIsEditor )
+			{
+				appShowSplash( GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Splash" ) ).GetString().c_str() );
+			}
+			else if ( GIsGame )
 			{
 				appShowSplash( GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );
-				errorLevel = GEngineLoop->Init( commandLine.c_str() );
-				check( errorLevel == 0 );					
-				appHideSplash();
-
-				// If this game, we show main window
-				if ( GIsGame )
-				{
-					GWindow->Show();
-				}
 			}
-			
-			while ( !GIsRequestingExit )
+		}
+
+		// Init engine
+		if ( !GIsRequestingExit )
+		{
+			errorLevel = GEngineLoop->Init( commandLine.c_str() );
+			check( errorLevel == 0 );
+			if ( GIsEditor || GIsGame )
 			{
-				// Handling system events
-				appProcessWindowEvents();
-
-				// Tick engine
-				GEngineLoop->Tick();
+				GWindow->Show();
 			}
+		}
+
+		// Hide splash screen
+		appHideSplash();
+
+		// Tick engine
+		while ( !GIsRequestingExit )
+		{
+			// Handling system events
+			appProcessWindowEvents();
+
+			// Tick engine
+			GEngineLoop->Tick();
 		}
 
 #if WITH_EDITOR

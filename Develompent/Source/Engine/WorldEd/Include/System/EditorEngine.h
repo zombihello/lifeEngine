@@ -13,8 +13,10 @@
 
 #include "Math/Color.h"
 #include "Logger/LoggerMacros.h"
+#include "Misc/SharedPointer.h"
 #include "System/BaseEngine.h"
 #include "System/EditorConstraints.h"
+#include "Render/EditorViewportClient.h"
 #include "WorldEd.h"
 
 /**
@@ -39,19 +41,19 @@ public:
 	/**
 	 * Initialize engine
 	 */
-	virtual void Init();
+	virtual void Init() override;
 
 	/**
 	 * Update logic of engine
 	 *
 	 * @param[in] InDeltaTime Delta time
 	 */
-	virtual void Tick( float InDeltaSeconds );
+	virtual void Tick( float InDeltaSeconds ) override;
 
 	/**
 	 * Shutdown engine
 	 */
-	virtual void Shutdown();
+	virtual void Shutdown() override;
 
 	/**
 	 * Print log to log widget
@@ -62,11 +64,18 @@ public:
 	virtual void PrintLogToWidget( ELogType InLogType, const tchar* InMessage );
 
 	/**
+	 * @brief Process event
+	 *
+	 * @param InWindowEvent Window event
+	 */
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
+
+	/**
 	 * Add viewport to render list
 	 * 
 	 * @param[in] InViewport Viewport
 	 */
-	FORCEINLINE void AddViewport( class CViewport* InViewport )
+	FORCEINLINE void AddViewport( const TSharedPtr<class CViewport>& InViewport )
 	{
 		viewports.push_back( InViewport );
 	}
@@ -76,11 +85,11 @@ public:
 	 * 
 	 * @param[in] InViewport Viewport
 	 */
-	FORCEINLINE void RemoveViewport( class CViewport* InViewport )
+	FORCEINLINE void RemoveViewport( const TSharedPtr<class CViewport>& InViewport )
 	{
 		for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
 		{
-			class CViewport*&		viewport = viewports[ index ];
+			const TSharedPtr<class CViewport>& viewport = viewports[ index ];
 			if ( viewport == InViewport )
 			{
 				viewports.erase( viewports.begin() + index );
@@ -141,15 +150,6 @@ public:
 	}
 
 	/**
-	 * Get main editor window
-	 * @return Return main editor window
-	 */
-	FORCEINLINE class WeMainWindow* GetMainWindow() const
-	{
-		return mainWindow;
-	}
-
-	/**
 	 * Get game content directory
 	 * @return Return game content directory
 	 */
@@ -202,10 +202,10 @@ private:
 	 */
 	void AddTOCEntries( const std::wstring& InRootDir );
 
-	EEditorMode								currentEditorMode;		/**< Current editor mode */
-	std::vector< class CViewport* >			viewports;				/**< Array of viewports for render */
-	CEditorConstraints						constraints;			/**< Editor constraints */
-	class WeMainWindow*						mainWindow;				/**< Main editor window */
+	EEditorMode									currentEditorMode;		/**< Current editor mode */
+	CEditorViewportClient*						editorViewportClient;	/**< Editor viewport client for render interface */
+	std::vector<TSharedPtr<class CViewport>>	viewports;				/**< Array of viewports for render */
+	CEditorConstraints							constraints;			/**< Editor constraints */
 };
 
 #endif // !EDITORENGINE_H

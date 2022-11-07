@@ -1,5 +1,3 @@
-#include "Windows/MainWindow.h"
-
 #include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
@@ -9,6 +7,7 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/WorldEdGlobals.h"
+#include "Misc/UIGlobals.h"
 #include "System/World.h"
 #include "Render/Viewport.h"
 #include "Render/RenderingThread.h"
@@ -18,7 +17,9 @@
 #include "System/SplashScreen.h"
 #include "System/Archive.h"
 #include "System/InputSystem.h"
-#include "Widgets/LogWidget.h"
+#include "System/Config.h"
+#include "System/BaseWindow.h"
+#include "UIEngine.h"
 
 // Actors
 #include "Actors/PlayerStart.h"
@@ -29,7 +30,7 @@ IMPLEMENT_CLASS( CEditorEngine )
 
 CEditorEngine::CEditorEngine()
 	: currentEditorMode( EM_Default )
-	, mainWindow( nullptr )
+	, editorViewportClient( nullptr )
 {}
 
 CEditorEngine::~CEditorEngine()
@@ -37,6 +38,8 @@ CEditorEngine::~CEditorEngine()
 
 void CEditorEngine::Init()
 {
+	GEditorEngine = this;
+
 	// If failed serialize TOC file, we generate new TOC file and serialize data to archive
 	if ( !SerializeTOC() )
 	{
@@ -55,9 +58,18 @@ void CEditorEngine::Init()
 	GActorFactory.Register( AT_StaticMesh,	&AStaticMesh::SpawnActorAsset );
 	GActorFactory.Register( AT_AudioBank,	&AAudio::SpawnActorAsset );
 
-	// Create main window of editor
-	mainWindow = new WeMainWindow();
-	mainWindow->showMaximized();
+	// Create window and main viewport
+	uint32						windowWidth		= GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
+	uint32						windowHeight	= GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
+
+	GWindow->SetTitle( GetEditorName().c_str() );
+	GWindow->SetSize( windowWidth, windowHeight );
+	
+	editorViewportClient		= new CEditorViewportClient();
+	TSharedPtr<CViewport>		viewport = MakeSharedPtr<CViewport>();
+	viewport->SetViewportClient( editorViewportClient );
+	viewport->Update( false, windowWidth, windowHeight, GWindow->GetHandle() );
+	viewports.push_back( viewport );
 }
 
 void CEditorEngine::Tick( float InDeltaSeconds )
@@ -77,37 +89,61 @@ void CEditorEngine::Tick( float InDeltaSeconds )
 	FlushRenderingCommands();
 
 	// Draw frame to viewports
+	GUIEngine->BeginDraw();
 	for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
 	{
 		viewports[ index ]->Draw();
 	}
+	GUIEngine->EndDraw();
 }
 
 void CEditorEngine::Shutdown()
 {
 	Super::Shutdown();
-
 	viewports.clear();
-	if ( mainWindow )
+	
+	if ( editorViewportClient )
 	{
-		delete mainWindow;
-		mainWindow = nullptr;
+		delete editorViewportClient;
+		editorViewportClient = nullptr;
+	}
+	GEditorEngine = nullptr;
+}
+
+void CEditorEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+{
+	Super::ProcessEvent( InWindowEvent );
+
+	switch ( InWindowEvent.type )
+	{
+	case SWindowEvent::T_WindowClose:
+		if ( InWindowEvent.events.windowClose.windowId == GWindow->GetID() )
+		{
+			GIsRequestingExit = true;
+		}
+		break;
+
+	case SWindowEvent::T_WindowResize:
+		if ( InWindowEvent.events.windowResize.windowId == GWindow->GetID() )
+		{
+			viewports[0]->Update( false, InWindowEvent.events.windowResize.width, InWindowEvent.events.windowResize.height, GWindow->GetHandle() );
+		}
+		break;
+	}
+
+	// Process event in viewport clients
+	for ( uint32 index = 0, count = viewports.size(); index < count; ++index )
+	{
+		CViewportClient*	viewportClient = viewports[index]->GetViewportClient();
+		if ( viewportClient )
+		{
+			viewportClient->ProcessEvent( InWindowEvent );
+		}
 	}
 }
 
 void CEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage )
-{
-	if ( !mainWindow )
-	{
-		return;
-	}
-
-	WeLogWidget*		logWidget = mainWindow->GetLogWidget();
-	if ( logWidget )
-	{
-		logWidget->Print( InLogType, InMessage );
-	}
-}
+{}
 
 bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {

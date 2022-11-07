@@ -245,6 +245,11 @@ bool CFullScreenMovieTheora::PumpMovie()
 
 void CFullScreenMovieTheora::StopCurrentAndPlayNext( bool InIsPlayNext /*= true*/ )
 {
+	if ( !theoraRender )
+	{
+		return;
+	}
+
 	// Close file of movie
 	if ( arMovie )
 	{

@@ -219,6 +219,11 @@ public:
 	void					CloseWindow( ImGuiViewport* InViewport );
 
 private:
+	/**
+	 * @brief Init theme
+	 */
+	void InitTheme();
+
 	struct ImGuiContext*				imguiContext;	/**< Pointer to ImGUI context */
 	std::vector< ÑImGUIWindow* >		windows;		/**< Array of windows ImGUI */
 };

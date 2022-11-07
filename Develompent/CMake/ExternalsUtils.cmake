@@ -1,11 +1,3 @@
-macro( InitQt5 )
-	# Finding Qt library here, because for set AUTOMOC, AUTORCC and AUTOUIC need seting their before create build target
-	find_package( Qt5 COMPONENTS Widgets Core Svg REQUIRED )
-	set( CMAKE_AUTOUIC ON )
-	set( CMAKE_AUTOMOC ON )
-	set( CMAKE_AUTORCC ON )
-endmacro()
-
 function( IncludeExternals MODULE_NAME )
 	# SDL2
 	find_package( SDL2 REQUIRED )
@@ -149,18 +141,6 @@ function( IncludeExternals MODULE_NAME )
 		else()
 			message( SEND_ERROR "Failed to find TMXLite" )
 		endif()
-
-		# Qt5
-		target_link_libraries( ${MODULE_NAME} Qt5::Widgets Qt5::Core )	
-		
-		# Qt ADS
-		find_package( QtADS REQUIRED )
-		if ( QTADS_FOUND )
-			include_directories( ${QTADS_INCLUDE} )
-			target_link_libraries( ${MODULE_NAME} optimized ${QTADS_LIB} debug ${QTADS_DEBUG_LIB} )
-		else()
-			message( SEND_ERROR "Failed to find QtADS" )
-		endif()
 		
 		if ( NOT ENGINE_2D )
 			# PhysX PVD
@@ -212,16 +192,8 @@ function( InstallExternals INSTALL_DIR )
 		
 	if ( WITH_EDITOR )
 		set( BINARES ${BINARES}
-			 "${QT5_PATH}/bin/Qt5Cored${PLATFORM_DLL_EXTENSION}" 											"${QT5_PATH}/bin/Qt5Core${PLATFORM_DLL_EXTENSION}"
-			 "${QT5_PATH}/bin/Qt5Guid${PLATFORM_DLL_EXTENSION}" 											"${QT5_PATH}/bin/Qt5Gui${PLATFORM_DLL_EXTENSION}"
-			 "${QT5_PATH}/bin/Qt5Widgetsd${PLATFORM_DLL_EXTENSION}" 										"${QT5_PATH}/bin/Qt5Widgets${PLATFORM_DLL_EXTENSION}"
-			 "${QTADS_PATH}/bin/${PLATFORM_BIN_DIR}/qtadvanceddocking-d${PLATFORM_DLL_EXTENSION}" 			"${QTADS_PATH}/bin/${PLATFORM_BIN_DIR}/qtadvanceddocking${PLATFORM_DLL_EXTENSION}"
 			 "${ASSIMP_PATH}/bin/${PLATFORM_BIN_DIR}/assimp${PLATFORM_DLL_EXTENSION}" 						"${ASSIMP_PATH}/bin/${PLATFORM_BIN_DIR}/assimpd${PLATFORM_DLL_EXTENSION}" )
 	endif()
 
-	if ( WITH_EDITOR )
-		install( DIRECTORY "${QT5_PATH}/plugins/platforms" DESTINATION ${QT_PLUGIN_DIR} )
-		install( DIRECTORY "${QT5_PATH}/plugins/styles" DESTINATION ${QT_PLUGIN_DIR} )
-	endif()
 	install( FILES ${BINARES} DESTINATION ${INSTALL_DIR} )
 endfunction()

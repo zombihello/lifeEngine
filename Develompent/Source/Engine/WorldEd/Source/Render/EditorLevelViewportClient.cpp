@@ -1,6 +1,3 @@
-#include <QCursor>
-#include <QApplication>
-
 #include "Misc/EngineGlobals.h"
 #include "Misc/AudioGlobals.h"
 #include "Misc/WorldEdGlobals.h"
@@ -322,7 +319,6 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
-			QApplication::setOverrideCursor( QCursor( Qt::BlankCursor ) );
 			trackingType = MT_View;
 		}	
 		else if ( gizmo && InWindowEvent.events.mouseButton.code == BC_MouseLeft && gizmo->IsEnabled() && gizmo->GetCurrentAxis() > A_None )
@@ -335,7 +331,6 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	case SWindowEvent::T_MouseReleased:
 		if ( trackingType == MT_View && InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
-			QApplication::restoreOverrideCursor();
 			trackingType		= MT_None;
 			cameraMoveFlags		= 0x0;
 		}
