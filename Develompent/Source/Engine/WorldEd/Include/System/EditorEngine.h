@@ -16,8 +16,16 @@
 #include "Misc/SharedPointer.h"
 #include "System/BaseEngine.h"
 #include "System/EditorConstraints.h"
-#include "Render/EditorViewportClient.h"
+#include "Render/Viewport.h"
 #include "WorldEd.h"
+
+// Windows
+#include "Windows/ActorClassesWindow.h"
+#include "Windows/ActorPropertiesWindow.h"
+#include "Windows/ContentBrowserWindow.h"
+#include "Windows/ExplorerLevelWindow.h"
+#include "Windows/LogsWindow.h"
+#include "Windows/ViewportWindow.h"
 
 /**
  * @ingroup WorldEd
@@ -69,34 +77,6 @@ public:
 	 * @param InWindowEvent Window event
 	 */
 	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
-
-	/**
-	 * Add viewport to render list
-	 * 
-	 * @param[in] InViewport Viewport
-	 */
-	FORCEINLINE void AddViewport( const TSharedPtr<class CViewport>& InViewport )
-	{
-		viewports.push_back( InViewport );
-	}
-
-	/**
-	 * Remove viewport from render list
-	 * 
-	 * @param[in] InViewport Viewport
-	 */
-	FORCEINLINE void RemoveViewport( const TSharedPtr<class CViewport>& InViewport )
-	{
-		for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
-		{
-			const TSharedPtr<class CViewport>& viewport = viewports[ index ];
-			if ( viewport == InViewport )
-			{
-				viewports.erase( viewports.begin() + index );
-				return;
-			}
-		}
-	}
 
 	/**
 	 * Load map
@@ -195,6 +175,60 @@ public:
 		return currentEditorMode;
 	}
 
+	/**
+	 * @brief Get actor classes window
+	 * @return Return reference to actor classes window
+	 */
+	FORCEINLINE CActorClassesWindow& GetActorClassesWindow()
+	{
+		return actorClassesWindow;
+	}
+
+	/**
+	 * @brief Get actor properties window
+	 * @return Return reference to actor properties window
+	 */
+	FORCEINLINE CActorPropertiesWindow& GetActorPropertiesWindow()
+	{
+		return actorPropertiesWindow;
+	}
+
+	/**
+	 * @brief Get content browser window
+	 * @return Return reference to content browser window
+	 */
+	FORCEINLINE CContentBrowserWindow& GetContentBrowserWindow()
+	{
+		return contentBrowserWindow;
+	}
+
+	/**
+	 * @brief Get explorer level window
+	 * @return Return reference to explorer level window
+	 */
+	FORCEINLINE CExplorerLevelWindow& GetExplorerLevelWindow()
+	{
+		return explorerLevelWindow;
+	}
+
+	/**
+	 * @brief Get logs window
+	 * @return Return reference to logs window
+	 */
+	FORCEINLINE CLogsWindow& GetLogsWindow()
+	{
+		return logsWindow;
+	}
+
+	/**
+	 * @brief Get scene viewport window
+	 * @return Return reference to scene viewport window
+	 */
+	FORCEINLINE CViewportWindow& GetSceneViewportWindow()
+	{
+		return sceneViewportWindow;
+	}
+
 private:
 	/**
 	 * Add TOC entries
@@ -202,10 +236,22 @@ private:
 	 */
 	void AddTOCEntries( const std::wstring& InRootDir );
 
+	/**
+	 * @brief Tick ImGUI interfaces
+	 */
+	void TickImGUI();
+
 	EEditorMode									currentEditorMode;		/**< Current editor mode */
-	CEditorViewportClient*						editorViewportClient;	/**< Editor viewport client for render interface */
-	std::vector<TSharedPtr<class CViewport>>	viewports;				/**< Array of viewports for render */
+	CViewport									viewport;				/**< Viewport */
 	CEditorConstraints							constraints;			/**< Editor constraints */
+	
+	// Windows
+	CActorClassesWindow							actorClassesWindow;		/**< Actor classes window */
+	CActorPropertiesWindow						actorPropertiesWindow;	/**< Actor properties window */
+	CContentBrowserWindow						contentBrowserWindow;	/**< Content browser window */
+	CExplorerLevelWindow						explorerLevelWindow;	/**< Explorer level window */
+	CLogsWindow									logsWindow;				/**< Logs window */
+	CViewportWindow								sceneViewportWindow;	/**< Scene viewport window */
 };
 
 #endif // !EDITORENGINE_H

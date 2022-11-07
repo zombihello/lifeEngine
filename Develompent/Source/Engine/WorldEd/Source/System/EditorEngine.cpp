@@ -1,4 +1,5 @@
 #include "Containers/String.h"
+#include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
 #include "EngineDefines.h"
@@ -20,6 +21,8 @@
 #include "System/Config.h"
 #include "System/BaseWindow.h"
 #include "UIEngine.h"
+#include "ImGUI/imgui.h"
+#include "ImGUI/imgui_internal.h"
 
 // Actors
 #include "Actors/PlayerStart.h"
@@ -30,7 +33,12 @@ IMPLEMENT_CLASS( CEditorEngine )
 
 CEditorEngine::CEditorEngine()
 	: currentEditorMode( EM_Default )
-	, editorViewportClient( nullptr )
+	, actorClassesWindow( TEXT( "Classes" ) )
+	, actorPropertiesWindow( TEXT( "Properties" ) )
+	, contentBrowserWindow( TEXT( "Content" ) )
+	, explorerLevelWindow( TEXT( "Explorer Level" ) )
+	, logsWindow( TEXT( "Logs" ) )
+	, sceneViewportWindow( TEXT( "Scene" ) )
 {}
 
 CEditorEngine::~CEditorEngine()
@@ -64,23 +72,15 @@ void CEditorEngine::Init()
 
 	GWindow->SetTitle( GetEditorName().c_str() );
 	GWindow->SetSize( windowWidth, windowHeight );
-	
-	editorViewportClient		= new CEditorViewportClient();
-	TSharedPtr<CViewport>		viewport = MakeSharedPtr<CViewport>();
-	viewport->SetViewportClient( editorViewportClient );
-	viewport->Update( false, windowWidth, windowHeight, GWindow->GetHandle() );
-	viewports.push_back( viewport );
+	viewport.Update( false, windowWidth, windowHeight, GWindow->GetHandle() );
 }
 
 void CEditorEngine::Tick( float InDeltaSeconds )
 {
 	Super::Tick( InDeltaSeconds );
 
-	// Update viewports
-	for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
-	{
-		viewports[ index ]->Tick( InDeltaSeconds );
-	}
+	// Update viewport
+	viewport.Tick( InDeltaSeconds );
 
 	// Reset input events after engine tick
 	GInputSystem->ResetEvents();
@@ -90,23 +90,104 @@ void CEditorEngine::Tick( float InDeltaSeconds )
 
 	// Draw frame to viewports
 	GUIEngine->BeginDraw();
-	for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
-	{
-		viewports[ index ]->Draw();
-	}
+	viewport.Draw();
+	TickImGUI();
 	GUIEngine->EndDraw();
+}
+
+void CEditorEngine::TickImGUI()
+{
+	ImGuiWindowFlags		windowFlags		= ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+	ImGuiDockNodeFlags		dockspaceFlags	= ImGuiDockNodeFlags_None;
+	const ImGuiViewport*	imguiViewport	= ImGui::GetMainViewport();
+	ImGuiIO&				imguiIO			= ImGui::GetIO();
+
+	// Init dockspace window
+	ImGui::SetNextWindowPos( imguiViewport->WorkPos );
+	ImGui::SetNextWindowSize( imguiViewport->WorkSize );
+	ImGui::SetNextWindowViewport( imguiViewport->ID );
+	ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, 0.0f );
+	ImGui::PushStyleVar( ImGuiStyleVar_WindowBorderSize, 0.0f );
+
+	windowFlags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+	if ( dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode )
+	{
+		windowFlags |= ImGuiWindowFlags_NoBackground;
+	}
+
+	// Draw editor interface
+	ImGui::Begin( "WorldEd_DockSpace", nullptr, windowFlags );
+	ImGui::PopStyleVar( 2 );
+
+	// Create dockspace and init him
+	if ( imguiIO.ConfigFlags & ImGuiConfigFlags_DockingEnable )
+	{
+		ImGuiID			dockspaceId	= ImGui::GetID( "WorldEd_DockSpace" );
+		ImGui::DockSpace( dockspaceId, ImVec2( 0.0f, 0.0f ), dockspaceFlags );
+
+		static bool		bDockInit = false;
+		if ( !bDockInit )
+		{
+			// Add new dock node
+			bDockInit = true;
+			ImGui::DockBuilderRemoveNode( dockspaceId );
+			ImGui::DockBuilderAddNode( dockspaceId, dockspaceFlags | ImGuiDockNodeFlags_DockSpace );
+			ImGui::DockBuilderSetNodeSize( dockspaceId, imguiViewport->Size );
+
+			// Split dock nodes
+			ImGuiID		dockIdRight = ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Right, 0.2f, nullptr, &dockspaceId );
+			ImGuiID		dockIdDown = ImGui::DockBuilderSplitNode( dockIdRight, ImGuiDir_Down, 0.5f, nullptr, &dockIdRight );
+
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( explorerLevelWindow.GetName().c_str() ), dockIdRight );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( actorPropertiesWindow.GetName().c_str() ), dockIdDown );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( contentBrowserWindow.GetName().c_str() ), dockIdDown );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( actorClassesWindow.GetName().c_str() ), dockIdDown );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( logsWindow.GetName().c_str() ), dockIdDown );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( sceneViewportWindow.GetName().c_str() ), dockspaceId );
+			ImGui::DockBuilderFinish( dockspaceId );
+		}
+	}
+
+	if ( ImGui::BeginMenuBar() )
+	{
+		if ( ImGui::BeginMenu( "File" ) )
+		{
+			ImGui::EndMenu();
+		}
+		if ( ImGui::BeginMenu( "View" ) )
+		{
+			ImGui::EndMenu();
+		}
+		if ( ImGui::BeginMenu( "Tools" ) )
+		{
+			ImGui::EndMenu();
+		}
+		if ( ImGui::BeginMenu( "Help" ) )
+		{
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
+	}
+	ImGui::End();
+
+	// Draw all windows
+	explorerLevelWindow.Tick();
+	actorPropertiesWindow.Tick();
+	contentBrowserWindow.Tick();
+	actorClassesWindow.Tick();
+	logsWindow.Tick();
+	sceneViewportWindow.Tick();
 }
 
 void CEditorEngine::Shutdown()
 {
 	Super::Shutdown();
-	viewports.clear();
-	
-	if ( editorViewportClient )
-	{
-		delete editorViewportClient;
-		editorViewportClient = nullptr;
-	}
+
+	// Destroy viewport
+	viewport.Update( true, 0, 0, nullptr );
+	FlushRenderingCommands();
+
 	GEditorEngine = nullptr;
 }
 
@@ -126,19 +207,16 @@ void CEditorEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 	case SWindowEvent::T_WindowResize:
 		if ( InWindowEvent.events.windowResize.windowId == GWindow->GetID() )
 		{
-			viewports[0]->Update( false, InWindowEvent.events.windowResize.width, InWindowEvent.events.windowResize.height, GWindow->GetHandle() );
+			viewport.Update( false, InWindowEvent.events.windowResize.width, InWindowEvent.events.windowResize.height, GWindow->GetHandle() );
 		}
 		break;
 	}
 
-	// Process event in viewport clients
-	for ( uint32 index = 0, count = viewports.size(); index < count; ++index )
+	// Process event in viewport client
+	CViewportClient*	viewportClient = viewport.GetViewportClient();
+	if ( viewportClient )
 	{
-		CViewportClient*	viewportClient = viewports[index]->GetViewportClient();
-		if ( viewportClient )
-		{
-			viewportClient->ProcessEvent( InWindowEvent );
-		}
+		viewportClient->ProcessEvent( InWindowEvent );
 	}
 }
 

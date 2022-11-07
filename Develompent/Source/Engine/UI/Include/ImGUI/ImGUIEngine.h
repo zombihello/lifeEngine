@@ -164,6 +164,65 @@ private:
 
 /**
  * @ingroup UI
+ * @brief ImGUI layer
+ */
+class CImGUILayer
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InName	Layer name
+	 */
+	CImGUILayer( const std::wstring& InName = TEXT( "NewLayer" ) );
+
+	/**
+	 * @brief Tick ImGUI layer
+	 * Need call in main thread
+	 */
+	void Tick();
+
+	/**
+	 * @brief Get layer name
+	 * @return Return layer name
+	 */
+	FORCEINLINE std::wstring GetName() const
+	{
+		return name;
+	}
+
+	/**
+	 * @brief Set visibility of the layer
+	 * @param InVisibility	Is visible the layer
+	 */
+	FORCEINLINE void SetVisibility( bool InVisibility )
+	{
+		bVisibility = InVisibility;
+	}
+
+	/**
+	 * @brief Is visible layer
+	 * @return Return TRUE if layer is visible
+	 */
+	FORCEINLINE bool IsVisibility() const
+	{
+		return bVisibility;
+	}
+
+protected:
+	/**
+	 * @brief Method tick interface of a layer
+	 */
+	virtual void OnTick() = 0;
+
+	bool				bVisibility;		/**< Is visible layer */
+	
+private:
+	std::wstring		name;				/**< Layer name */
+};
+
+/**
+ * @ingroup UI
  * @brief Class for work with ImGUI and initialize her on platforms
  */
 class ÑImGUIEngine

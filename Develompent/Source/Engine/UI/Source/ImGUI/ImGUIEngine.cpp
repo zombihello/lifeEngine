@@ -126,6 +126,24 @@ void ÑImGUIWindow::Tick()
 }
 
 //
+// IMGUI LAYER
+//
+
+CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ )
+	: bVisibility( true )
+	, name( InName )
+{}
+
+void CImGUILayer::Tick()
+{
+	if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility ) )
+	{
+		OnTick();
+	}
+	ImGui::End();
+}
+
+//
 // IMGUI ENGINE
 //
 
