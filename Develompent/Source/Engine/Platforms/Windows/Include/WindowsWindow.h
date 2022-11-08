@@ -146,7 +146,7 @@ public:
 	 * @brief Get OS handle
 	 * @return Return OS handle
 	 */
-	virtual void*					GetHandle() const override;
+	virtual WindowHandle_t GetHandle() const override;
 
 	/**
 	 * @brief Get ID window

@@ -38,6 +38,12 @@ public:
 	virtual ~CD3D11TextureRHI();
 
 	/**
+	 * Get texture handle
+	 * @return Return texture handle
+	 */
+	virtual void* GetHandle() const override;
+
+	/**
 	 * Get shader resource view
 	 * @return Return pointer to shader resource view
 	 */

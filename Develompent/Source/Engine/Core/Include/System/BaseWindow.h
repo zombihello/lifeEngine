@@ -11,6 +11,7 @@
 
 #include "Misc/Types.h"
 #include "System/WindowEvent.h"
+#include "CoreDefines.h"
 
 /**
  * @ingroup Core
@@ -135,7 +136,7 @@ public:
 	 * @brief Get OS handle
 	 * @return Return OS handle
 	 */
-	virtual void*			GetHandle() const { return nullptr; }
+	virtual WindowHandle_t GetHandle() const { return nullptr; }
 
 	/**
 	 * @brief Get ID window

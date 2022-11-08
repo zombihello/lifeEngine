@@ -504,9 +504,14 @@ void CD3D11RHI::Destroy()
 /**
  * Create viewport
  */
-ViewportRHIRef_t CD3D11RHI::CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight )
+ViewportRHIRef_t CD3D11RHI::CreateViewport( WindowHandle_t InWindowHandle, uint32 InWidth, uint32 InHeight )
 {
 	return new CD3D11Viewport( InWindowHandle, InWidth, InHeight );
+}
+
+ViewportRHIRef_t CD3D11RHI::CreateViewport( SurfaceRHIParamRef_t InSurfaceRHI, uint32 InWidth, uint32 InHeight )
+{
+	return new CD3D11Viewport( InSurfaceRHI, InWidth, InHeight );
 }
 
 /**

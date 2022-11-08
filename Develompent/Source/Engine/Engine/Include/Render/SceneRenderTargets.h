@@ -11,6 +11,7 @@
 
 #include "RenderResource.h"
 #include "RenderUtils.h"
+#include "Render/RenderTarget.h"
 #include "RHI/BaseSurfaceRHI.h"
 #include "RHI/TypesRHI.h"
 #include "LEBuild.h"
@@ -97,7 +98,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetSceneColorTexture() const
 	{
-		return renderTargets[SRTT_SceneColor].texture;
+		return renderTargets[SRTT_SceneColor].GetTexture2DRHI();
 	}
 
 	/**
@@ -106,7 +107,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetSceneColorSurface() const
 	{
-		return renderTargets[SRTT_SceneColor].surface;
+		return renderTargets[SRTT_SceneColor].GetSurfaceRHI();
 	}
 
 	/**
@@ -115,7 +116,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetSceneDepthZTexture() const
 	{
-		return renderTargets[SRTT_SceneDepthZ].texture;
+		return renderTargets[SRTT_SceneDepthZ].GetTexture2DRHI();
 	}
 
 	/**
@@ -124,7 +125,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetSceneDepthZSurface() const
 	{
-		return renderTargets[SRTT_SceneDepthZ].surface;
+		return renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI();
 	}
 
 #if ENABLE_HITPROXY
@@ -134,7 +135,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetHitProxyTexture() const
 	{
-		return renderTargets[SRTT_HitProxies].texture;
+		return renderTargets[SRTT_HitProxies].GetTexture2DRHI();
 	}
 
 	/**
@@ -143,7 +144,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetHitProxySurface() const
 	{
-		return renderTargets[SRTT_HitProxies].surface;
+		return renderTargets[SRTT_HitProxies].GetSurfaceRHI();
 	}
 #endif // ENABLE_HITPROXY
 
@@ -153,7 +154,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetDiffuse_Roughness_GBufferTexture() const
 	{
-		return renderTargets[SRTT_Diffuse_Roughness_GBuffer].texture;
+		return renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetTexture2DRHI();
 	}
 
 	/**
@@ -162,7 +163,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetDiffuse_Roughness_GBufferSurface() const
 	{
-		return renderTargets[SRTT_Diffuse_Roughness_GBuffer].surface;
+		return renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetSurfaceRHI();
 	}
 
 	/**
@@ -171,7 +172,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetNormal_Metal_GBufferTexture() const
 	{
-		return renderTargets[SRTT_Normal_Metal_GBuffer].texture;
+		return renderTargets[SRTT_Normal_Metal_GBuffer].GetTexture2DRHI();
 	}
 
 	/**
@@ -180,7 +181,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetNormal_Metal_GBufferSurface() const
 	{
-		return renderTargets[SRTT_Normal_Metal_GBuffer].surface;
+		return renderTargets[SRTT_Normal_Metal_GBuffer].GetSurfaceRHI();
 	}
 
 	/**
@@ -189,7 +190,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetEmission_GBufferTexture() const
 	{
-		return renderTargets[SRTT_Emission_GBuffer].texture;
+		return renderTargets[SRTT_Emission_GBuffer].GetTexture2DRHI();
 	}
 
 	/**
@@ -198,7 +199,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetEmission_GBufferSurface() const
 	{
-		return renderTargets[SRTT_Emission_GBuffer].surface;
+		return renderTargets[SRTT_Emission_GBuffer].GetSurfaceRHI();
 	}
 
 	/**
@@ -207,7 +208,7 @@ public:
 	 */
 	FORCEINLINE Texture2DRHIRef_t GetLightPassDepthZTexture() const
 	{
-		return renderTargets[SRTT_LightPassDepthZ].texture;
+		return renderTargets[SRTT_LightPassDepthZ].GetTexture2DRHI();
 	}
 
 	/**
@@ -216,7 +217,7 @@ public:
 	 */
 	FORCEINLINE SurfaceRHIRef_t GetLightPassDepthZSurface() const
 	{
-		return renderTargets[SRTT_LightPassDepthZ].surface;
+		return renderTargets[SRTT_LightPassDepthZ].GetSurfaceRHI();
 	}
 
 	/**
@@ -262,20 +263,11 @@ protected:
 	virtual void ReleaseRHI() override;
 
 private:
-	/**
-	 * Element of scene render target
-	 */
-	struct SSceneRenderTargetItem
-	{
-		Texture2DRHIRef_t		texture;											/**< Texture for resolving to */
-		SurfaceRHIRef_t			surface;											/**< Surface to render to */
-	};
-
-	uint32						bufferSizeX;										/**< Size of buffer by X */
-	uint32						bufferSizeY;										/**< Size of buffer by Y */
-	SSceneRenderTargetItem		renderTargets[ SRTT_MaxSceneRenderTargets ];		/**< Static array of all the scene render targets */
+	uint32				bufferSizeX;										/**< Size of buffer by X */
+	uint32				bufferSizeY;										/**< Size of buffer by Y */
+	CRenderTarget		renderTargets[ SRTT_MaxSceneRenderTargets ];		/**< Static array of all the scene render targets */
 };
 
-extern TGlobalResource< CSceneRenderTargets >		GSceneRenderTargets;			/**< The global render targets used for scene rendering */
+extern TGlobalResource<CSceneRenderTargets>		GSceneRenderTargets;		/**< The global render targets used for scene rendering */
 
 #endif // !SCENERENDERTARGETS_H

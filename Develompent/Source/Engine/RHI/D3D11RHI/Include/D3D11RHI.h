@@ -64,7 +64,17 @@ public:
 	 * @param[in] InHeight Height of viewport
 	 * @return Pointer on viewport
 	 */
-	virtual ViewportRHIRef_t							CreateViewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight ) override;
+	virtual ViewportRHIRef_t CreateViewport( WindowHandle_t InWindowHandle, uint32 InWidth, uint32 InHeight ) override;
+
+	/**
+	 * @brief Create viewport
+	 *
+	 * @param InTargetSurface	Target surface to render
+	 * @param InWidth			Width of viewport
+	 * @param InHeight			Height of viewport
+	 * @return Pointer on viewport
+	 */
+	virtual ViewportRHIRef_t CreateViewport( SurfaceRHIParamRef_t InSurfaceRHI, uint32 InWidth, uint32 InHeight ) override;
 
 	/**
 	 * @brief Create vertex shader

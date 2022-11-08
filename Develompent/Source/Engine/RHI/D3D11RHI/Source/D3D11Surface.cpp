@@ -137,6 +137,11 @@ CD3D11TextureRHI::~CD3D11TextureRHI()
 	}
 }
 
+void* CD3D11TextureRHI::GetHandle() const
+{
+	return d3d11ShaderResourceView;
+}
+
 CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags, void* InData /*= nullptr*/ ) :
 	CD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags ),
 	d3d11Texture2D( nullptr )

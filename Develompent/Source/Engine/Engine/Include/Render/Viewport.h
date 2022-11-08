@@ -11,6 +11,7 @@
 
 #include "RenderResource.h"
 #include "Misc/RefCounted.h"
+#include "Render/RenderTarget.h"
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/TypesRHI.h"
 
@@ -100,6 +101,16 @@ public:
 	~CViewport();
 
 	/**
+	 * Update RHI viewport use render target
+	 *
+	 * @param[in] InIsDestroyed			Is need destroy viewport
+	 * @param[in] InNewSizeX			New width of viewport
+	 * @param[in] InNewSizeY			New height of viewport
+	 * @param[in] InNewRenderTarget		New render target
+	 */
+	void Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, CRenderTarget* InNewRenderTarget );
+
+	/**
 	 * Update RHI viewport
 	 * 
 	 * @param[in] InIsDestroyed Is need destroy viewport
@@ -107,7 +118,7 @@ public:
 	 * @param[in] InNewSizeY New height of viewport
 	 * @param[in] InNewWindowHandle New window handle of viewport
 	 */
-	void Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, void* InNewWindowHandle );
+	void Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, WindowHandle_t InNewWindowHandle );
 
 	/**
 	 * Draw scene
@@ -153,7 +164,7 @@ public:
 	 * Get viewport RHI
 	 * @return Return pointer to RHI viewport
 	 */
-	ViewportRHIRef_t GetViewportRHI() const
+	FORCEINLINE ViewportRHIRef_t GetViewportRHI() const
 	{
 		return viewportRHI;
 	}
@@ -162,7 +173,7 @@ public:
 	 * Get width of viewport
 	 * @return Return width viewport
 	 */
-	uint32 GetSizeX() const
+	FORCEINLINE uint32 GetSizeX() const
 	{
 		return sizeX;
 	}
@@ -171,18 +182,27 @@ public:
 	 * Get height of viewport
 	 * @return Return height viewport
 	 */
-	uint32 GetSizeY() const
+	FORCEINLINE uint32 GetSizeY() const
 	{
 		return sizeY;
 	}
 
 	/**
 	 * Get window handle of viewport
-	 * @return Return window handle
+	 * @return Return window handle. If used render target this method will return NULL
 	 */
-	void* GetWindowHandle() const
+	FORCEINLINE void* GetWindowHandle() const
 	{
 		return windowHandle;
+	}
+
+	/**
+	 * Get render target
+	 * @return Return render target. If used window handle this method will return NULL
+	 */
+	FORCEINLINE const TRefCountPtr<CRenderTarget>& GetRenderTarget() const
+	{
+		return renderTarget;
 	}
 
 	/**
@@ -216,7 +236,18 @@ protected:
 	virtual void UpdateRHI() override;
 
 private:
-	void*						windowHandle;		/**< Handle to window for render */
+	/**
+	 * Internal update RHI viewport
+	 *
+	 * @param[in] InIsDestroyed		Is need destroy viewport
+	 * @param[in] InNewSizeX		New width of viewport
+	 * @param[in] InNewSizeY		New height of viewport
+	 * @param[in] InIsNewHandle		Is new window handle or render target
+	 */
+	void UpdateInternal( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, bool InIsNewHandle );
+
+	WindowHandle_t				windowHandle;		/**< Handle to window for render */
+	TRefCountPtr<CRenderTarget>	renderTarget;		/**< Render target */
 	class CViewportClient*		viewportClient;		/**< Viewport client */
 	uint32						sizeX;				/**< Width of viewport */
 	uint32						sizeY;				/**< Height of viewport */

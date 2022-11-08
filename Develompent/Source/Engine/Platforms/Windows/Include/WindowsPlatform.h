@@ -114,4 +114,10 @@
  */
 #define MS_ALIGN( InAlignment ) __declspec( align( InAlignment ) )
 
+/**
+ * @ingroup WindowsPlatform
+ * @brief Typedef of window handle
+ */
+typedef void*           WindowHandle_t;
+
 #endif // !WINDOWSPLATFORM_H

@@ -1,3 +1,4 @@
+#include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/AudioGlobals.h"
 #include "Misc/WorldEdGlobals.h"
@@ -14,6 +15,7 @@
 #include "System/InputSystem.h"
 #include "System/World.h"
 #include "System/Gizmo.h"
+#include "System/BaseWindow.h"
 #include "Actors/Actor.h"
 #include "EngineLoop.h"
 #include "EngineDefines.h"
@@ -535,8 +537,6 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		}
 		break;
 	}
-
-	GEngineLoop->ProcessEvent( InWindowEvent );
 }
 
 void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, Quaternion& OutRotation, Vector& OutScale, class CSceneView* InSceneView /* = nullptr */ )
@@ -735,6 +735,6 @@ CColor CEditorLevelViewportClient::GetBackgroundColor() const
 	}
 	else
 	{
-		return CColor( 163, 163, 163 );
+		return CColor( 26, 27, 28 );
 	}
 }

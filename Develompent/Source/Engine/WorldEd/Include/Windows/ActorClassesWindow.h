@@ -25,6 +25,7 @@ public:
 	 */
 	CActorClassesWindow( const std::wstring& InName );
 
+protected:
 	/**
 	 * @brief Method tick interface of a layer
 	 */

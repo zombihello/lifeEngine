@@ -22,6 +22,13 @@ public:
 	void Init();
 
 	/**
+	 * @brief Update logic
+	 *
+	 * @param InDeltaTime	Delta time
+	 */
+	void Tick( float InDeltaSeconds );
+
+	/**
 	 * Process event
 	 *
 	 * @param[in] InWindowEvent Window event

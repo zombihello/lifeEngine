@@ -37,11 +37,12 @@ static class CD3D11Surface* GetSwapChainSurface( IDXGISwapChain* InSwapChain )
 /**
  * Constructor
  */
-CD3D11Viewport::CD3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight ) :
-	backBuffer( nullptr ),
-	dxgiSwapChain( nullptr ),
-	width( InWidth ),
-	height( InHeight )
+CD3D11Viewport::CD3D11Viewport( WindowHandle_t InWindowHandle, uint32 InWidth, uint32 InHeight )
+	: windowHandle( InWindowHandle )
+	, backBuffer( nullptr )
+	, dxgiSwapChain( nullptr )
+	, width( InWidth )
+	, height( InHeight )
 {
 	check( GRHI );
 	CD3D11RHI*				rhi = ( CD3D11RHI* )GRHI;
@@ -74,14 +75,25 @@ CD3D11Viewport::CD3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InH
 	backBuffer = GetSwapChainSurface( dxgiSwapChain );
 }
 
+CD3D11Viewport::CD3D11Viewport( SurfaceRHIParamRef_t InTargetSurface, uint32 InWidth, uint32 InHeight )
+	: windowHandle( nullptr )
+	, backBuffer( InTargetSurface )
+	, dxgiSwapChain( nullptr )
+	, width( InWidth )
+	, height( InHeight )
+{}
+
 /**
  * Destructor
  */
 CD3D11Viewport::~CD3D11Viewport()
 {
 	backBuffer.SafeRelease();
-	dxgiSwapChain->Release();
-	dxgiSwapChain = nullptr;
+	if ( dxgiSwapChain )
+	{
+		dxgiSwapChain->Release();
+		dxgiSwapChain = nullptr;
+	}
 }
 
 /**
@@ -89,8 +101,10 @@ CD3D11Viewport::~CD3D11Viewport()
  */
 void CD3D11Viewport::Present( bool InLockToVsync )
 {
-	check( dxgiSwapChain );
-	dxgiSwapChain->Present( InLockToVsync ? 1 : 0, 0 );
+	if ( dxgiSwapChain )
+	{
+		dxgiSwapChain->Present( InLockToVsync ? 1 : 0, 0 );
+	}
 }
 
 void CD3D11Viewport::Resize( uint32 InWidth, uint32 InHeight )
@@ -100,20 +114,31 @@ void CD3D11Viewport::Resize( uint32 InWidth, uint32 InHeight )
 		return;
 	}
 
-	// Release our backbuffer reference, as required by DXGI before calling ResizeBuffers.
-	backBuffer.SafeRelease();
-	check( dxgiSwapChain );
-
-#if DO_CHECK
-	HRESULT			result = dxgiSwapChain->ResizeBuffers( 1, InWidth, InHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH );
-	check( result == S_OK );
-#else
-	dxgiSwapChain->ResizeBuffers( 1, InWidth, InHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH );
-#endif // DO_CHECK
-
 	width = InWidth;
 	height = InHeight;
-	backBuffer = GetSwapChainSurface( dxgiSwapChain );
+
+	if ( dxgiSwapChain )
+	{
+		// Release our backbuffer reference, as required by DXGI before calling ResizeBuffers.
+		backBuffer.SafeRelease();
+
+#if DO_CHECK
+		HRESULT			result = dxgiSwapChain->ResizeBuffers( 1, InWidth, InHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH );
+		check( result == S_OK );
+#else
+		dxgiSwapChain->ResizeBuffers( 1, InWidth, InHeight, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH );
+#endif // DO_CHECK
+
+		backBuffer = GetSwapChainSurface( dxgiSwapChain );
+	}
+}
+
+void CD3D11Viewport::SetSurface( SurfaceRHIParamRef_t InSurfaceRHI )
+{
+	if ( !dxgiSwapChain )
+	{
+		backBuffer = InSurfaceRHI;
+	}
 }
 
 /**
@@ -138,4 +163,9 @@ uint32 CD3D11Viewport::GetHeight() const
 SurfaceRHIRef_t CD3D11Viewport::GetSurface() const
 {
 	return backBuffer;
+}
+
+WindowHandle_t CD3D11Viewport::GetWindowHandle() const
+{
+	return windowHandle;
 }

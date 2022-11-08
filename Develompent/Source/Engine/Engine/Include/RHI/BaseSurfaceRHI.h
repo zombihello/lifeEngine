@@ -149,6 +149,12 @@ public:
 	virtual ~CBaseTextureRHI() {}
 
 	/**
+	 * Get texture handle
+	 * @return Return texture handle
+	 */
+	virtual void* GetHandle() const { return nullptr; }
+
+	/**
 	 * Get width of texture
 	 * @return Return width of texture
 	 */

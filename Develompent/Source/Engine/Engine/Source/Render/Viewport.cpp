@@ -23,11 +23,24 @@ void CViewport::InitRHI()
 	if ( viewportRHI )
 	{
 		viewportRHI->Resize( sizeX, sizeY );
+		if ( renderTarget )
+		{
+			check( renderTarget->GetSurfaceRHI() );
+			viewportRHI->SetSurface( renderTarget->GetSurfaceRHI() );
+		}
 	}
 	// Else we need create it
 	else
 	{
-		viewportRHI = GRHI->CreateViewport( windowHandle, sizeX, sizeY );
+		if ( windowHandle )
+		{
+			viewportRHI = GRHI->CreateViewport( windowHandle, sizeX, sizeY );
+		}
+		else if ( renderTarget )
+		{
+			check( renderTarget->GetSurfaceRHI() );
+			viewportRHI = GRHI->CreateViewport( renderTarget->GetSurfaceRHI(), sizeX, sizeY );
+		}
 	}
 }
 
@@ -38,43 +51,53 @@ void CViewport::UpdateRHI()
 
 void CViewport::ReleaseRHI()
 {
+	// Release RHI if him is not have parent
 	viewportRHI.SafeRelease();
 }
 
-void CViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, void* InNewWindowHandle )
+void CViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, CRenderTarget* InNewRenderTarget )
 {
-	bool	isNewWindowHandle = windowHandle != InNewWindowHandle;
+	bool			bNewRenderTarget = renderTarget != InNewRenderTarget;
 
 	// Update the viewport attributes
+	windowHandle	= nullptr;
+	renderTarget	= InNewRenderTarget;
+
+	UpdateInternal( InIsDestroyed, InNewSizeX, InNewSizeY, bNewRenderTarget );
+}
+
+void CViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, WindowHandle_t InNewWindowHandle )
+{
+	bool		bNewWindowHandle = windowHandle != InNewWindowHandle;
+
+	// Update the viewport attributes
+	renderTarget.SafeRelease();
 	windowHandle = InNewWindowHandle;
+
+	UpdateInternal( InIsDestroyed, InNewSizeX, InNewSizeY, bNewWindowHandle );
+}
+
+void CViewport::UpdateInternal( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, bool InIsNewHandle )
+{
+	checkMsg( InIsDestroyed || ( windowHandle || renderTarget ) && !( windowHandle && renderTarget ), TEXT( "Must be stated only one" ) );
+	bool		bNeedUpdateViewportRHI = InIsNewHandle || sizeX != InNewSizeX || sizeY != InNewSizeY;
+
+	// Update the viewport attributes
 	sizeX = InNewSizeX;
 	sizeY = InNewSizeY;
 
-#if DO_CHECK
-	if ( !InIsDestroyed )
-	{
-		check( windowHandle );
-	}
-#endif // DO_CHECK
-
 	// Don't reinitialize the viewport RHI if the viewport has been destroyed
-	if ( InIsDestroyed || isNewWindowHandle )
-	{	
+	if ( InIsDestroyed )
+	{
 		BeginReleaseResource( this );
-
 		if ( InIsDestroyed )
 		{
 			return;
 		}
 	}
 
-	// Initialize the viewport's resources if viewport RHI not created
-	if ( !viewportRHI )
-	{
-		BeginInitResource( this );
-	}
-	// Else update resource
-	else
+	// Update the viewport's resources if it need
+	if ( bNeedUpdateViewportRHI )
 	{
 		BeginUpdateResource( this );
 	}
@@ -90,7 +113,7 @@ void CViewport::Tick( float InDeltaSeconds )
 
 void CViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
-	if ( !IsInitialized() )
+	if ( !IsInitialized() || !IsValid() )
 	{
 		return;
 	}

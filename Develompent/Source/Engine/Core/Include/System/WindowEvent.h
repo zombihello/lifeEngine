@@ -11,6 +11,7 @@
 
 #include "Misc/Types.h"
 #include "System/ButtonCode.h"
+#include "CoreDefines.h"
 
 /**
  * @ingroup Core
@@ -154,7 +155,16 @@ struct SWindowEvent
 	/**
 	 * @brief Constructor
 	 */
-						SWindowEvent() : type( T_None ) {}
+	FORCEINLINE SWindowEvent() 
+		: type( T_None ) 
+#if WITH_IMGUI
+		, bImGUIEvent( false )
+#endif // WITH_IMGUI
+	{}
+
+#if WITH_IMGUI
+	bool			bImGUIEvent;	/**< Is ImGUI event (see CImGUILayer::PollImGUIEvents) */
+#endif // WITH_IMGUI
 
 	EType			type;			/**< Type of event */
 	UEvents			events;			/**< Events */

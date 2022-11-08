@@ -12,12 +12,14 @@
 #include "LEBuild.h"
 #if WITH_IMGUI
 
+#include <stack>
 #include <vector>
 
 #include "Core.h"
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
 #include "System/ThreadingBase.h"
+#include "System/WindowEvent.h"
 #include "ImGUI/imgui.h"
 #include "RHI/TypesRHI.h"
 
@@ -177,10 +179,35 @@ public:
 	CImGUILayer( const std::wstring& InName = TEXT( "NewLayer" ) );
 
 	/**
+	 * @brief Destructor
+	 */
+	virtual ~CImGUILayer();
+
+	/**
+	 * @brief Init
+	 */
+	virtual void Init();
+
+	/**
 	 * @brief Tick ImGUI layer
 	 * Need call in main thread
 	 */
 	void Tick();
+
+	/**
+	 * @brief Handle layer event
+	 *
+	 * @param	OutLayerEvent Occurred layer event
+	 * @return Return TRUE if queue of events not empty, else will return FALSE
+	 */
+	bool PollEvent( SWindowEvent& OutLayerEvent );
+
+	/**
+	 * @brief Process event
+	 *
+	 * @param InWindowEvent			Window event
+	 */
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
 
 	/**
 	 * @brief Get layer name
@@ -209,16 +236,60 @@ public:
 		return bVisibility;
 	}
 
+	/**
+	 * @brief Is focused layer
+	 * @return Return TRUE if layer is focused
+	 */
+	FORCEINLINE bool IsFocused() const
+	{
+		return bFocused;
+	}
+
+	/**
+	 * @brief Is hovered layer
+	 * @return Return TRUE if layer is hovered
+	 */
+	FORCEINLINE bool IsHovered() const
+	{
+		return bHovered;
+	}
+
+	/**
+	 * @brief Get layer size by X
+	 * @return Return layer size by X
+	 */
+	FORCEINLINE float GetSizeX() const
+	{
+		return size.x;
+	}
+
+	/**
+	 * @brief Get layer size by Y
+	 * @return Return layer size by Y
+	 */
+	FORCEINLINE float GetSizeY() const
+	{
+		return size.y;
+	}
+
 protected:
 	/**
 	 * @brief Method tick interface of a layer
 	 */
 	virtual void OnTick() = 0;
 
-	bool				bVisibility;		/**< Is visible layer */
-	
 private:
-	std::wstring		name;				/**< Layer name */
+	/**
+	 * @brief Update ImGUI events
+	 */
+	void UpdateEvents();
+
+	bool						bVisibility;		/**< Is visible layer */
+	bool						bFocused;			/**< Is focused layer */
+	bool						bHovered;			/**< Is hovered layer */
+	Vector2D					size;				/**< Layer size */
+	std::wstring				name;				/**< Layer name */
+	std::stack<SWindowEvent>	events;				/**< Stack of ImGUI events who need process */
 };
 
 /**
@@ -247,6 +318,40 @@ public:
 	 * @brief Shutdown ImGUI on platform
 	 */
 	void					Shutdown();
+
+	/**
+	 * @brief Update logic
+	 *
+	 * @param InDeltaTime	Delta time
+	 */
+	void Tick( float InDeltaSeconds );
+
+	/**
+	 * @brief Add ImGUI layer to tick
+	 * @param InImGUILayer	ImGUI layer
+	 */
+	FORCEINLINE void AddLayer( CImGUILayer* InImGUILayer )
+	{
+		check( InImGUILayer );
+		layers.push_back( InImGUILayer );
+	}
+
+	/**
+	 * @brief Remove ImGUI layer from tick
+	 * @param InImGUILayer	ImGUI layer
+	 */
+	FORCEINLINE void RemoveLayer( CImGUILayer* InImGUILayer )
+	{
+		check( InImGUILayer );
+		for ( uint32 index = 0, count = layers.size(); index < count; ++index )
+		{
+			if ( layers[index] == InImGUILayer )
+			{
+				layers.erase( layers.begin() + index );
+				return;
+			}
+		}
+	}
 
 	/**
 	 * @brief Process event for ImGUI
@@ -283,8 +388,9 @@ private:
 	 */
 	void InitTheme();
 
-	struct ImGuiContext*				imguiContext;	/**< Pointer to ImGUI context */
-	std::vector< ÑImGUIWindow* >		windows;		/**< Array of windows ImGUI */
+	struct ImGuiContext*			imguiContext;	/**< Pointer to ImGUI context */
+	std::vector<ÑImGUIWindow*>		windows;		/**< Array of windows ImGUI */
+	std::vector<CImGUILayer*>		layers;			/**< Array of ImGUI layers */
 };
 
 #endif // WITH_IMGUI

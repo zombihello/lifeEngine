@@ -9,26 +9,50 @@
 #ifndef VIEWPORTWINDOW_H
 #define VIEWPORTWINDOW_H
 
+#include "Misc/RefCountPtr.h"
 #include "ImGUI/ImGUIEngine.h"
+#include "Render/Viewport.h"
+#include "Render/RenderTarget.h"
+#include "Render/EditorLevelViewportClient.h"
 
- /**
-  * @ingroup WorldEd
-  * @brief Viewport window
-  */
+/**
+ * @ingroup WorldEd
+ * @brief Viewport window
+ */
 class CViewportWindow : public CImGUILayer
 {
 public:
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InName	Window name
+	 * @param InName			Window name
+	 * @param InViewportType	Viewport type
 	 */
-	CViewportWindow( const std::wstring& InName );
+	CViewportWindow( const std::wstring& InName, ELevelViewportType InViewportType = LVT_Perspective );
 
+	/**
+	 * @brief Init
+	 */
+	virtual void Init() override;
+
+	/**
+	 * @brief Process event
+	 *
+	 * @param InWindowEvent			Window event
+	 */
+	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
+
+protected:
 	/**
 	 * @brief Method tick interface of a layer
 	 */
 	virtual void OnTick() override;
+
+private:
+	uint32							currentBackBuffer;		/**< Current back buffer */
+	CEditorLevelViewportClient		viewportClient;			/**< Viewport client */
+	TRefCountPtr<CViewport>			viewport;				/**< Viewport */
+	TRefCountPtr<CRenderTarget>		renderTarget;			/**< Render target */
 };
 
 #endif // !VIEWPORTWINDOW_H

@@ -41,6 +41,14 @@ public:
 	virtual void						Resize( uint32 InWidth, uint32 InHeight ) {}
 
 	/**
+	 * @brief Set surface of viewport
+	 * @note Viewport who created with window handle must be ignore this method
+	 * 
+	 * @param InSurfaceRHI		Surface RHI
+	 */
+	virtual void SetSurface( SurfaceRHIParamRef_t InSurfaceRHI ) {}
+
+	/**
 	 * @brief Get width
 	 * @return Width of viewport
 	 */
@@ -57,6 +65,12 @@ public:
 	 * @return Pointer to surface of viewport
 	 */
 	virtual SurfaceRHIRef_t				GetSurface() const { return nullptr; }
+
+	/**
+	 * @breif Get window handle
+	 * @return Return pointer to window handle
+	 */
+	virtual WindowHandle_t GetWindowHandle() const { return nullptr; }
 };
 
 #endif // !BASEVIEWPORTRHI_H

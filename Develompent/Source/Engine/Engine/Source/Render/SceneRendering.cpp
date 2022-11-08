@@ -210,6 +210,7 @@ void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI
 	GRHI->SetRenderTarget( immediateContext, InViewportRHI->GetSurface(), nullptr );
 	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
 	GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
+	GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
 	GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "FinishRenderViewTarget" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), screenPixelShader->GetPixelShader() ) );
 
 	screenPixelShader->SetTexture( immediateContext, sceneColorTexture );

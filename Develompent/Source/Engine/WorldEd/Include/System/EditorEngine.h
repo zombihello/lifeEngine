@@ -79,6 +79,34 @@ public:
 	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
 
 	/**
+	 * Add viewport to render list
+	 *
+	 * @param[in] InViewport Viewport
+	 */
+	FORCEINLINE void AddViewport( const TRefCountPtr<class CViewport>& InViewport )
+	{
+		viewports.push_back( InViewport );
+	}
+
+	/**
+	 * Remove viewport from render list
+	 *
+	 * @param[in] InViewport Viewport
+	 */
+	FORCEINLINE void RemoveViewport( const TRefCountPtr<class CViewport>& InViewport )
+	{
+		for ( uint32 index = 0, count = ( uint32 )viewports.size(); index < count; ++index )
+		{
+			const TRefCountPtr<class CViewport>&	viewport = viewports[index];
+			if ( viewport == InViewport )
+			{
+				viewports.erase( viewports.begin() + index );
+				return;
+			}
+		}
+	}
+
+	/**
 	 * Load map
 	 *
 	 * @param[in] InMap Path to map
@@ -221,12 +249,14 @@ public:
 	}
 
 	/**
-	 * @brief Get scene viewport window
-	 * @return Return reference to scene viewport window
+	 * @brief Get viewport window
+	 * 
+	 * @param InViewportType	Viewport type
+	 * @return Return reference to viewport window
 	 */
-	FORCEINLINE CViewportWindow& GetSceneViewportWindow()
+	FORCEINLINE CViewportWindow& GetViewportWindow( ELevelViewportType InViewportType )
 	{
-		return sceneViewportWindow;
+		return viewportWindows[InViewportType];
 	}
 
 private:
@@ -236,22 +266,18 @@ private:
 	 */
 	void AddTOCEntries( const std::wstring& InRootDir );
 
-	/**
-	 * @brief Tick ImGUI interfaces
-	 */
-	void TickImGUI();
+	EEditorMode									currentEditorMode;					/**< Current editor mode */
+	std::vector<TRefCountPtr<class CViewport>>	viewports;							/**< Array of viewports for render */
+	CEditorConstraints							constraints;						/**< Editor constraints */
+	class CEditorInterfaceViewportClient*		editorInterfaceViewportClient;		/**< Viewport client for render editor interface */
 
-	EEditorMode									currentEditorMode;		/**< Current editor mode */
-	CViewport									viewport;				/**< Viewport */
-	CEditorConstraints							constraints;			/**< Editor constraints */
-	
 	// Windows
-	CActorClassesWindow							actorClassesWindow;		/**< Actor classes window */
-	CActorPropertiesWindow						actorPropertiesWindow;	/**< Actor properties window */
-	CContentBrowserWindow						contentBrowserWindow;	/**< Content browser window */
-	CExplorerLevelWindow						explorerLevelWindow;	/**< Explorer level window */
-	CLogsWindow									logsWindow;				/**< Logs window */
-	CViewportWindow								sceneViewportWindow;	/**< Scene viewport window */
+	CActorClassesWindow							actorClassesWindow;					/**< Actor classes window */
+	CActorPropertiesWindow						actorPropertiesWindow;				/**< Actor properties window */
+	CContentBrowserWindow						contentBrowserWindow;				/**< Content browser window */
+	CExplorerLevelWindow						explorerLevelWindow;				/**< Explorer level window */
+	CLogsWindow									logsWindow;							/**< Logs window */
+	CViewportWindow								viewportWindows[LVT_Max];			/**< Viewport windows */
 };
 
 #endif // !EDITORENGINE_H

@@ -154,6 +154,7 @@ void CBaseEngine::Shutdown()
 
 void CBaseEngine::Tick( float InDeltaSeconds )
 {
+	GUIEngine->Tick( InDeltaSeconds );
 	GPhysicsEngine.Tick( InDeltaSeconds );
 }
 

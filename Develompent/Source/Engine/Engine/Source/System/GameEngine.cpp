@@ -56,7 +56,7 @@ void CGameEngine::Shutdown()
 	Super::Shutdown();
 
 	// Destroy viewport
-	viewport.Update( true, 0, 0, nullptr );
+	viewport.Update( true, 0, 0, ( void* )nullptr );
 	viewport.SetViewportClient( nullptr );
 
 	// Wait while viewport RHI is not deleted

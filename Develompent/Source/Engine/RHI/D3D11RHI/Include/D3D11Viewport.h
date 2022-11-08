@@ -28,12 +28,21 @@ public:
 	 * @param[in] InWidth Width of viewport
 	 * @param[in] InHeight Height of viewport
 	 */
-											CD3D11Viewport( void* InWindowHandle, uint32 InWidth, uint32 InHeight );
+	CD3D11Viewport( WindowHandle_t InWindowHandle, uint32 InWidth, uint32 InHeight );
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InTargetSurface	Target surface to render
+	 * @param InWidth			Width of viewport
+	 * @param InHeight			Height of viewport
+	 */
+	CD3D11Viewport( SurfaceRHIParamRef_t InTargetSurface, uint32 InWidth, uint32 InHeight );
 
 	/**
 	 * @brief Destructor
 	 */
-											~CD3D11Viewport();
+	~CD3D11Viewport();
 
 	/**
 	 * @brief Presents the swap chain
@@ -50,6 +59,14 @@ public:
 	 * @param[in] InIsFullscreen Is fullscreen
 	 */
 	virtual void							Resize( uint32 InWidth, uint32 InHeight ) override;
+
+	/**
+	 * @brief Set surface of viewport
+	 * @note Viewport who created with window handle must be ignore this method
+	 *
+	 * @param InSurfaceRHI		Surface RHI
+	 */
+	virtual void SetSurface( SurfaceRHIParamRef_t InSurfaceRHI ) override;
 
 	/**
 	 * @brief Get width
@@ -69,7 +86,14 @@ public:
 	 */
 	virtual SurfaceRHIRef_t					GetSurface() const override;
 
+	/**
+	 * @breif Get window handle
+	 * @return Return pointer to window handle
+	 */
+	virtual WindowHandle_t GetWindowHandle() const override;
+
 private:
+	WindowHandle_t				windowHandle;				/**< Pointer to window handle */
 	SurfaceRHIRef_t				backBuffer;					/**< Pointer to back buffer */
 	IDXGISwapChain*				dxgiSwapChain;				/**< DXGI swap chain */
 	uint32						width;						/**< Width of viewport */

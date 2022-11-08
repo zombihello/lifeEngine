@@ -266,7 +266,7 @@ void CWindowsWindow::GetSize( uint32& OutWidth, uint32& OutHeight ) const
 /**
  * Get OS handle
  */
-void* CWindowsWindow::GetHandle() const
+WindowHandle_t CWindowsWindow::GetHandle() const
 {
 	return handle;
 }

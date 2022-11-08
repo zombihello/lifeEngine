@@ -131,17 +131,91 @@ void ÑImGUIWindow::Tick()
 
 CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ )
 	: bVisibility( true )
+	, size( 0.f, 0.f )
 	, name( InName )
 {}
 
+CImGUILayer::~CImGUILayer()
+{
+	GImGUIEngine->RemoveLayer( this );
+}
+
+void CImGUILayer::Init()
+{
+	GImGUIEngine->AddLayer( this );
+}
+
 void CImGUILayer::Tick()
 {
-	if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility ) )
+	if ( bVisibility )
 	{
-		OnTick();
+		if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility ) )
+		{
+			UpdateEvents();
+			OnTick();
+		}
+		ImGui::End();
 	}
-	ImGui::End();
 }
+
+bool CImGUILayer::PollEvent( SWindowEvent& OutLayerEvent )
+{
+	bool	bNotEndEvent = !events.empty();
+	if ( !bNotEndEvent )
+	{
+		return false;
+	}
+
+	OutLayerEvent = events.top();
+	events.pop();
+	return bNotEndEvent;
+}
+
+void CImGUILayer::UpdateEvents()
+{
+	// Process event of loss/gain focus
+	bool		bLocalFocused = ImGui::IsWindowFocused();
+	if ( bFocused != bLocalFocused )
+	{
+		SWindowEvent	imguiEvent;
+		imguiEvent.bImGUIEvent	= true;
+		if ( !bLocalFocused )
+		{
+			imguiEvent.type = SWindowEvent::T_WindowFocusLost;
+			imguiEvent.events.windowFocusLost.windowId		= 0;
+		}
+		else
+		{
+			imguiEvent.type = SWindowEvent::T_WindowFocusGained;
+			imguiEvent.events.windowFocusGained.windowId	= 0;
+		}
+	
+		bFocused = bLocalFocused;
+		events.push( imguiEvent );
+	}
+	
+	// Process event of hovered
+	bHovered = ImGui::IsWindowHovered();
+	
+	// Process event of resize
+	ImVec2	imguiSize = ImGui::GetContentRegionAvail();
+	if ( size.x != imguiSize.x || size.y != imguiSize.y )
+	{
+		SWindowEvent	imguiEvent;
+		imguiEvent.bImGUIEvent					= true;
+		imguiEvent.type							= SWindowEvent::T_WindowResize;
+		imguiEvent.events.windowResize.windowId = 0;
+		imguiEvent.events.windowResize.width	= Max<float>( imguiSize.x, 1.f );
+		imguiEvent.events.windowResize.height	= Max<float>( imguiSize.y, 1.f );
+		
+		size.x = imguiEvent.events.windowResize.width;
+		size.y = imguiEvent.events.windowResize.height;
+		events.push( imguiEvent );
+	}
+}
+
+void CImGUILayer::ProcessEvent( struct SWindowEvent& InWindowEvent )
+{}
 
 //
 // IMGUI ENGINE
@@ -244,6 +318,19 @@ void ÑImGUIEngine::InitTheme()
 	}
 }
 
+void ÑImGUIEngine::Tick( float InDeltaSeconds )
+{
+	for ( uint32 index = 0, count = layers.size(); index < count; ++index )
+	{
+		CImGUILayer*	layer = layers[index];
+		SWindowEvent	layerEvent;
+		while ( layer->PollEvent( layerEvent ) )
+		{
+			layer->ProcessEvent( layerEvent );
+		}
+	}
+}
+
 /**
  * Shutdown ImGUI on platform
  */
@@ -271,6 +358,15 @@ void ÑImGUIEngine::Shutdown()
 void ÑImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	appImGUIProcessEvent( InWindowEvent );
+
+	// Process event in all layers
+	for ( uint32 index = 0, count = layers.size(); index < count; ++index )
+	{
+		if ( layers[index]->IsHovered() || layers[index]->IsFocused() )
+		{
+			layers[index]->ProcessEvent( InWindowEvent );
+		}
+	}
 }
 
 /**
@@ -306,6 +402,12 @@ void ÑImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
  */
 void ÑImGUIEngine::EndDraw()
 {
+	// Draw all layers
+	for ( uint32 index = 0, count = layers.size(); index < count; ++index )
+	{
+		layers[index]->Tick();
+	}
+
 	ImGui::Render();
 	appImGUIEndDrawing();
 

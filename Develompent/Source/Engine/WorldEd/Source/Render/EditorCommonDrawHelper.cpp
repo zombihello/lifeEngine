@@ -62,8 +62,8 @@ void CEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 		if ( ( index & 1 ) != InIsAlphaCase )
 		{
 			Vector4D		background( InSceneView->GetBackgroundColor().ToNormalizedVector4D() );
-			Vector4D		grid( 0.5f, 0.5f, 0.5f, 0.f );
-			Vector4D		color = background + ( grid - background ) * ( float )( ( ( index << incBits ) & 7 ) ? 0.5f : 1.f );
+			Vector4D		grid( 0.25f, 0.25f, 0.25f, 0.f );
+			Vector4D		color = background + ( grid - background ) * ( float )( ( ( index << incBits ) & 7 ) ? 0.25f : 1.f );
 			if ( index & 1 )
 			{
 				color		= background + ( color - background ) * alpha;

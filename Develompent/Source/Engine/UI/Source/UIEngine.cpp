@@ -12,6 +12,13 @@ void ÑUIEngine::Init()
 #endif // WITH_IMGUI
 }
 
+void ÑUIEngine::Tick( float InDeltaSeconds )
+{
+#if WITH_IMGUI
+	GImGUIEngine->Tick( InDeltaSeconds );
+#endif // WITH_IMGUI
+}
+
 void ÑUIEngine::Shutdown()
 {
 #if WITH_IMGUI

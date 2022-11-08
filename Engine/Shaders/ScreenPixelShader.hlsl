@@ -10,5 +10,7 @@ SamplerState	texture0Sampler		: register( s0 );
 
 float4 MainPS( float2 InUV : TEXCOORD0 ) : SV_Target
 {
-    return texture0.Sample( texture0Sampler, InUV );
+	float4		color = texture0.Sample( texture0Sampler, InUV );
+    color.a = 1.f;		// BS yehor.pohuliaka - Maybe need add macro for ignore alpha channel?
+	return color;
 }

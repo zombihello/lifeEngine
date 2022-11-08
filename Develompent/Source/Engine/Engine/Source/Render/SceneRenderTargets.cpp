@@ -18,41 +18,34 @@ void CSceneRenderTargets::InitRHI()
 	if ( bufferSizeX > 0 && bufferSizeY > 0 )
 	{
 		// Scene color
-		renderTargets[SRTT_SceneColor].texture					= GRHI->CreateTexture2D( TEXT( "SceneColor" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );
-		renderTargets[SRTT_SceneColor].surface					= GRHI->CreateTargetableSurface( TEXT( "SceneColor" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[SRTT_SceneColor].texture, TCF_ResolveTargetable );
+		renderTargets[SRTT_SceneColor].Update( false, bufferSizeX, bufferSizeY, PF_A8R8G8B8, 0, TEXT( "SceneColor" ) );
 
 		// Scene depth Z
-		renderTargets[SRTT_SceneDepthZ].texture					= GRHI->CreateTexture2D( TEXT( "SceneDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, 1, TCF_ResolveTargetable | TCF_DepthStencil );
-		renderTargets[SRTT_SceneDepthZ].surface					= GRHI->CreateTargetableSurface( TEXT( "SceneDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, renderTargets[SRTT_SceneDepthZ].texture, TCF_ResolveTargetable | TCF_DepthStencil );
+		renderTargets[SRTT_SceneDepthZ].Update( false, bufferSizeX, bufferSizeY, PF_DepthStencil, TCF_DepthStencil, TEXT( "SceneDepthZ" ) );
 
 		// Light attenuation depth Z
-		renderTargets[SRTT_LightPassDepthZ].texture				= GRHI->CreateTexture2D( TEXT( "LightPassDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, 1, TCF_ResolveTargetable | TCF_DepthStencil );
-		renderTargets[SRTT_LightPassDepthZ].surface				= GRHI->CreateTargetableSurface( TEXT( "LightPassDepthZ" ), bufferSizeX, bufferSizeY, PF_DepthStencil, renderTargets[SRTT_LightPassDepthZ].texture, TCF_ResolveTargetable | TCF_DepthStencil );
+		renderTargets[SRTT_LightPassDepthZ].Update( false, bufferSizeX, bufferSizeY, PF_DepthStencil, TCF_DepthStencil, TEXT( "LightPassDepthZ" ) );
 
 #if ENABLE_HITPROXY
 		// Hit proxy
-		renderTargets[SRTT_HitProxies].texture					= GRHI->CreateTexture2D( TEXT( "HitProxy" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );
-		renderTargets[SRTT_HitProxies].surface					= GRHI->CreateTargetableSurface( TEXT( "HitProxy" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[SRTT_HitProxies].texture, TCF_ResolveTargetable );
+		renderTargets[SRTT_HitProxies].Update( false, bufferSizeX, bufferSizeY, PF_A8R8G8B8, 0, TEXT( "HitProxy" ) );
 #endif // ENABLE_HITPROXY
 
 		// Diffuse_Roughness GBuffer
-		renderTargets[SRTT_Diffuse_Roughness_GBuffer].texture	= GRHI->CreateTexture2D( TEXT( "Diffuse_Roughness_GBuffer" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );
-		renderTargets[SRTT_Diffuse_Roughness_GBuffer].surface	= GRHI->CreateTargetableSurface( TEXT( "Diffuse_Roughness_GBuffer" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[SRTT_Diffuse_Roughness_GBuffer].texture, TCF_ResolveTargetable );
+		renderTargets[SRTT_Diffuse_Roughness_GBuffer].Update( false, bufferSizeX, bufferSizeY, PF_A8R8G8B8, 0, TEXT( "Diffuse_Roughness_GBuffer" ) );
 
 		// Normal_Metal GBuffer
-		renderTargets[SRTT_Normal_Metal_GBuffer].texture		= GRHI->CreateTexture2D( TEXT( "Normal_Metal_GBuffer" ), bufferSizeX, bufferSizeY, PF_FloatRGBA, 1, TCF_ResolveTargetable );
-		renderTargets[SRTT_Normal_Metal_GBuffer].surface		= GRHI->CreateTargetableSurface( TEXT( "Normal_Metal_GBuffer" ), bufferSizeX, bufferSizeY, PF_FloatRGBA, renderTargets[SRTT_Normal_Metal_GBuffer].texture, TCF_ResolveTargetable );
-	
+		renderTargets[SRTT_Normal_Metal_GBuffer].Update( false, bufferSizeX, bufferSizeY, PF_FloatRGBA, 0, TEXT( "Normal_Metal_GBuffer" ) );
+
 		// Emission GBuffer
-		renderTargets[SRTT_Emission_GBuffer].texture			= GRHI->CreateTexture2D( TEXT( "Emission_GBuffer" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, 1, TCF_ResolveTargetable );
-		renderTargets[SRTT_Emission_GBuffer].surface			= GRHI->CreateTargetableSurface( TEXT( "Emission_GBuffer" ), bufferSizeX, bufferSizeY, PF_A8R8G8B8, renderTargets[SRTT_Emission_GBuffer].texture, TCF_ResolveTargetable );
+		renderTargets[SRTT_Emission_GBuffer].Update( false, bufferSizeX, bufferSizeY, PF_A8R8G8B8, 0, TEXT( "Emission_GBuffer" ) );
 	}
 }
 
 void CSceneRenderTargets::BeginRenderingSceneColor( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( InDeviceContextRHI );
-	GRHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_SceneColor].surface, renderTargets[SRTT_SceneDepthZ].surface );
+	GRHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_SceneColor].GetSurfaceRHI(), renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI() );
 }
 
 void CSceneRenderTargets::FinishRenderingSceneColor( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
@@ -61,9 +54,9 @@ void CSceneRenderTargets::FinishRenderingSceneColor( class CBaseDeviceContextRHI
 void CSceneRenderTargets::BeginRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( InDeviceContextRHI );
-	GRHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Diffuse_Roughness_GBuffer].surface, renderTargets[SRTT_SceneDepthZ].surface );
-	GRHI->SetMRTRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Normal_Metal_GBuffer].surface, 1 );
-	GRHI->SetMRTRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Emission_GBuffer].surface, 2 );
+	GRHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetSurfaceRHI(), renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI() );
+	GRHI->SetMRTRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Normal_Metal_GBuffer].GetSurfaceRHI(), 1 );
+	GRHI->SetMRTRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Emission_GBuffer].GetSurfaceRHI(), 2 );
 }
 
 void CSceneRenderTargets::FinishRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
@@ -76,24 +69,22 @@ void CSceneRenderTargets::FinishRenderingGBuffer( class CBaseDeviceContextRHI* I
 void CSceneRenderTargets::ClearGBufferTargets( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( InDeviceContextRHI );
-	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Diffuse_Roughness_GBuffer].surface, CColor::black );
-	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Normal_Metal_GBuffer].surface, CColor::black );
-	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Emission_GBuffer].surface, CColor::black );
+	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetSurfaceRHI(), CColor::black );
+	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Normal_Metal_GBuffer].GetSurfaceRHI(), CColor::black );
+	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Emission_GBuffer].GetSurfaceRHI(), CColor::black );
 }
 
 void CSceneRenderTargets::ResolveLightPassDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( InDeviceContextRHI );
-	GRHI->CopyToResolveTarget( InDeviceContextRHI, renderTargets[SRTT_SceneDepthZ].surface, SResolveParams( SResolveRect(), renderTargets[SRTT_LightPassDepthZ].texture ) );
+	GRHI->CopyToResolveTarget( InDeviceContextRHI, renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI(), SResolveParams( SResolveRect(), renderTargets[SRTT_LightPassDepthZ].GetTexture2DRHI() ) );
 }
 
 void CSceneRenderTargets::ReleaseRHI()
 {
 	for ( uint32 index = 0; index < SRTT_MaxSceneRenderTargets; ++index )
 	{
-		SSceneRenderTargetItem&		rtItem = renderTargets[index];
-		rtItem.surface.SafeRelease();
-		rtItem.texture.SafeRelease();
+		renderTargets[index].Update( true, 0, 0, PF_Unknown );
 	}
 }
 
@@ -103,6 +94,6 @@ void CSceneRenderTargets::Allocate( uint32 InNewSizeX, uint32 InNewSizeY )
 	{
 		bufferSizeX = InNewSizeX;
 		bufferSizeY = InNewSizeY;
-		UpdateRHI();
+		BeginUpdateResource( this );
 	}
 }
