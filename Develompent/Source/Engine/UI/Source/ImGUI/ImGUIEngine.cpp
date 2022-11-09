@@ -131,6 +131,8 @@ void ÑImGUIWindow::Tick()
 
 CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ )
 	: bVisibility( true )
+	, bFocused( false )
+	, bHovered( false )
 	, size( 0.f, 0.f )
 	, name( InName )
 {}
@@ -155,6 +157,12 @@ void CImGUILayer::Tick()
 			OnTick();
 		}
 		ImGui::End();
+
+		// If visibility is changed, we send event to children
+		if ( !bVisibility )
+		{
+			OnVisibilityChanged( bVisibility );
+		}
 	}
 }
 
@@ -179,6 +187,7 @@ void CImGUILayer::UpdateEvents()
 	{
 		SWindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent	= true;
+		imguiEvent.imGUILayer	= this;
 		if ( !bLocalFocused )
 		{
 			imguiEvent.type = SWindowEvent::T_WindowFocusLost;
@@ -195,14 +204,32 @@ void CImGUILayer::UpdateEvents()
 	}
 	
 	// Process event of hovered
-	bHovered = ImGui::IsWindowHovered();
-	
+	bool		bLocalHovered = ImGui::IsWindowHovered();
+	if ( bHovered != bLocalHovered )
+	{
+		SWindowEvent	imguiEvent;
+		imguiEvent.bImGUIEvent	= true;
+		imguiEvent.imGUILayer	= this;
+		if ( bLocalHovered )
+		{
+			imguiEvent.type = SWindowEvent::T_ImGUILayerHovered;
+		}
+		else
+		{
+			imguiEvent.type = SWindowEvent::T_ImGUILayerUnHovered;
+		}
+
+		bHovered = bLocalHovered;
+		events.push( imguiEvent );
+	}
+
 	// Process event of resize
 	ImVec2	imguiSize = ImGui::GetContentRegionAvail();
 	if ( size.x != imguiSize.x || size.y != imguiSize.y )
 	{
 		SWindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent					= true;
+		imguiEvent.imGUILayer					= this;
 		imguiEvent.type							= SWindowEvent::T_WindowResize;
 		imguiEvent.events.windowResize.windowId = 0;
 		imguiEvent.events.windowResize.width	= Max<float>( imguiSize.x, 1.f );
@@ -215,6 +242,9 @@ void CImGUILayer::UpdateEvents()
 }
 
 void CImGUILayer::ProcessEvent( struct SWindowEvent& InWindowEvent )
+{}
+
+void CImGUILayer::OnVisibilityChanged( bool InNewVisibility )
 {}
 
 //
@@ -357,14 +387,22 @@ void ÑImGUIEngine::Shutdown()
  */
 void ÑImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
+	// Process event by ImGUI
 	appImGUIProcessEvent( InWindowEvent );
+
+	SWindowEvent		imguiEvent;
+	if ( !layers.empty() )
+	{
+		imguiEvent = InWindowEvent;
+	}
 
 	// Process event in all layers
 	for ( uint32 index = 0, count = layers.size(); index < count; ++index )
 	{
 		if ( layers[index]->IsHovered() || layers[index]->IsFocused() )
 		{
-			layers[index]->ProcessEvent( InWindowEvent );
+			imguiEvent.imGUILayer = layers[index];
+			layers[index]->ProcessEvent( imguiEvent );
 		}
 	}
 }
@@ -376,6 +414,12 @@ void ÑImGUIEngine::BeginDraw()
 {
 	appImGUIBeginDrawing();
 	ImGui::NewFrame();
+
+	// Hide cursor if need
+	if ( !bShowCursor )
+	{
+		ImGui::SetMouseCursor( ImGuiMouseCursor_None );
+	}
 }
 
 void ÑImGUIEngine::OpenWindow( ImGuiViewport* InViewport )

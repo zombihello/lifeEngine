@@ -6,6 +6,7 @@
 
 CViewportWindow::CViewportWindow( const std::wstring& InName, ELevelViewportType InViewportType /* = LVT_Perspective */ )
 	: CImGUILayer( InName )
+	, bViewportOnDrawing( false )
 	, viewport( new CViewport() )
 	, renderTarget( new CRenderTarget() )
 {
@@ -16,7 +17,9 @@ CViewportWindow::CViewportWindow( const std::wstring& InName, ELevelViewportType
 void CViewportWindow::Init()
 {
 	CImGUILayer::Init();
+
 	GEditorEngine->AddViewport( viewport );
+	bViewportOnDrawing = true;
 }
 
 void CViewportWindow::OnTick()
@@ -24,6 +27,20 @@ void CViewportWindow::OnTick()
 	if (  renderTarget->IsValid() )
 	{
 		ImGui::Image( renderTarget->GetTexture2DRHI()->GetHandle(), ImVec2( GetSizeX(), GetSizeY() ) );
+	}
+}
+
+void CViewportWindow::OnVisibilityChanged( bool InNewVisibility )
+{
+	if ( InNewVisibility && !bViewportOnDrawing )
+	{
+		GEditorEngine->AddViewport( viewport );
+		bViewportOnDrawing = true;
+	}
+	else
+	{
+		GEditorEngine->RemoveViewport( viewport );
+		bViewportOnDrawing = false;
 	}
 }
 

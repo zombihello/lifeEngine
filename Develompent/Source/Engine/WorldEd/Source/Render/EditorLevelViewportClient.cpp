@@ -3,6 +3,7 @@
 #include "Misc/AudioGlobals.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Misc/LaunchGlobals.h"
+#include "Misc/UIGlobals.h"
 #include "Render/EditorLevelViewportClient.h"
 #include "Render/Scene.h"
 #include "Render/SceneRendering.h"
@@ -16,6 +17,7 @@
 #include "System/World.h"
 #include "System/Gizmo.h"
 #include "System/BaseWindow.h"
+#include "ImGUI/ImGUIEngine.h"
 #include "Actors/Actor.h"
 #include "EngineLoop.h"
 #include "EngineDefines.h"
@@ -308,21 +310,49 @@ Vector CEditorLevelViewportClient::WorldToScreen( const Vector& InWorldPoint, ui
 
 void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
-	if ( bIgnoreInput )
+	// We ignore events when bIgnoreInput is TRUE or when ImGUI layer is unhovered
+	bool		bIsNotUnhoveredEvent = InWindowEvent.type != SWindowEvent::T_ImGUILayerUnHovered;
+	if ( bIgnoreInput || ( bIsNotUnhoveredEvent && InWindowEvent.imGUILayer && !InWindowEvent.imGUILayer->IsHovered() ) )
 	{
 		return;
 	}
 
 	switch ( InWindowEvent.type )
 	{
+		// Event of unhovered ImGUI layer
+	case SWindowEvent::T_ImGUILayerUnHovered:
+		// Show cursor
+		if ( InWindowEvent.imGUILayer )
+		{
+			GImGUIEngine->SetShowCursor( true );
+		}
+		else
+		{
+			GWindow->ShowCursor();
+		}
+
+		trackingType	= MT_None;
+		cameraMoveFlags = 0x0;
+		break;
+
 		// Event of mouse pressed
 	case SWindowEvent::T_MousePressed:
-		bAllowContextMenu	= true;
+		bAllowContextMenu = true;
 
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
+			// Hide cursor
+			if ( InWindowEvent.imGUILayer )
+			{
+				GImGUIEngine->SetShowCursor( false );
+			}
+			else
+			{
+				GWindow->HideCursor();
+			}
+
 			trackingType = MT_View;
-		}	
+		}
 		else if ( gizmo && InWindowEvent.events.mouseButton.code == BC_MouseLeft && gizmo->IsEnabled() && gizmo->GetCurrentAxis() > A_None )
 		{
 			trackingType = MT_Gizmo;
@@ -333,6 +363,16 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	case SWindowEvent::T_MouseReleased:
 		if ( trackingType == MT_View && InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
+			// Show cursor
+			if ( InWindowEvent.imGUILayer )
+			{
+				GImGUIEngine->SetShowCursor( true );
+			}
+			else
+			{
+				GWindow->ShowCursor();
+			}
+
 			trackingType		= MT_None;
 			cameraMoveFlags		= 0x0;
 		}
@@ -408,6 +448,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 					break;
 
 				case LVT_OrthoYZ:
+					moveDelta.x = -moveDelta.x;
 					dX = &viewLocation.z;
 					dY = &viewLocation.y;
 					break;

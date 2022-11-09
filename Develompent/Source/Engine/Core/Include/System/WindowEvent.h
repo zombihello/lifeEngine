@@ -36,7 +36,12 @@ struct SWindowEvent
 		T_MouseReleased,			/**< Mouse released */
 		T_MouseMove,				/**< Mouse move */
 		T_MouseWheel,				/**< Mouse wheel moved */
-		T_TextInput					/**< Input text in window */
+		T_TextInput,				/**< Input text in window */
+
+#if WITH_IMGUI
+		T_ImGUILayerHovered,		/**< ImGUI layer is hovered */
+		T_ImGUILayerUnHovered,		/**< ImGUI layer is unhovered */
+#endif // WITH_IMGUI
 	};
 
 	/**
@@ -159,15 +164,17 @@ struct SWindowEvent
 		: type( T_None ) 
 #if WITH_IMGUI
 		, bImGUIEvent( false )
+		, imGUILayer( nullptr )
 #endif // WITH_IMGUI
 	{}
 
 #if WITH_IMGUI
-	bool			bImGUIEvent;	/**< Is ImGUI event (see CImGUILayer::PollImGUIEvents) */
+	bool					bImGUIEvent;	/**< Is ImGUI event (see CImGUILayer::PollImGUIEvents) */
+	class CImGUILayer*		imGUILayer;		/**< ImGUI layer. Him is valid when process event by ImGUI layer */
 #endif // WITH_IMGUI
 
-	EType			type;			/**< Type of event */
-	UEvents			events;			/**< Events */
+	EType					type;			/**< Type of event */
+	UEvents					events;			/**< Events */
 };
 
 #endif // !WINDOWEVENT_H

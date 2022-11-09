@@ -225,6 +225,7 @@ public:
 	FORCEINLINE void SetVisibility( bool InVisibility )
 	{
 		bVisibility = InVisibility;
+		OnVisibilityChanged( InVisibility );
 	}
 
 	/**
@@ -277,6 +278,12 @@ protected:
 	 * @brief Method tick interface of a layer
 	 */
 	virtual void OnTick() = 0;
+
+	/**
+	 * @brief Method called when in the layer is changed visibility
+	 * @param InNewVisibility		New visibility
+	 */
+	virtual void OnVisibilityChanged( bool InNewVisibility );
 
 private:
 	/**
@@ -361,6 +368,15 @@ public:
 	void					ProcessEvent( struct SWindowEvent& InWindowEvent );
 
 	/**
+	 * @brief Set show cursor
+	 * @param InShow	Is need show cursor
+	 */
+	FORCEINLINE void SetShowCursor( bool InShow = true )
+	{
+		bShowCursor = InShow;
+	}
+
+	/**
 	 * @brief Begin draw commands for render ImGUI
 	 */
 	void					BeginDraw();
@@ -382,12 +398,22 @@ public:
 	 */
 	void					CloseWindow( ImGuiViewport* InViewport );
 
+	/**
+	 * @brief Is show cursor
+	 * @return Return TRUE if cursor is showed, otherwise will return FALSE
+	 */
+	FORCEINLINE bool IsShowCursor() const
+	{
+		return bShowCursor;
+	}
+
 private:
 	/**
 	 * @brief Init theme
 	 */
 	void InitTheme();
 
+	bool							bShowCursor;		/**< Is need show cursor */
 	struct ImGuiContext*			imguiContext;	/**< Pointer to ImGUI context */
 	std::vector<ÑImGUIWindow*>		windows;		/**< Array of windows ImGUI */
 	std::vector<CImGUILayer*>		layers;			/**< Array of ImGUI layers */

@@ -48,8 +48,14 @@ protected:
 	 */
 	virtual void OnTick() override;
 
+	/**
+	 * @brief Method called when in the layer is changed visibility
+	 * @param InNewVisibility		New visibility
+	 */
+	virtual void OnVisibilityChanged( bool InNewVisibility ) override;
+
 private:
-	uint32							currentBackBuffer;		/**< Current back buffer */
+	bool							bViewportOnDrawing;		/**< Is viewport drawing */
 	CEditorLevelViewportClient		viewportClient;			/**< Viewport client */
 	TRefCountPtr<CViewport>			viewport;				/**< Viewport */
 	TRefCountPtr<CRenderTarget>		renderTarget;			/**< Render target */
