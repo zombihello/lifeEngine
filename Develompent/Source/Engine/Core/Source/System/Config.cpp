@@ -94,7 +94,7 @@ void CConfig::Serialize( CArchive& InArchive )
 		{		
 			appErrorf( TEXT( "Failed parse config, not correct syntax of JSON. RapidJSON code error %i" ), jsonDocument.GetParseError() );
 		}
-
+		
 		// Reading all values
 		for ( auto itGroup = jsonDocument.MemberBegin(), itGroupEnd = jsonDocument.MemberEnd(); itGroup != itGroupEnd; ++itGroup )
 		{
