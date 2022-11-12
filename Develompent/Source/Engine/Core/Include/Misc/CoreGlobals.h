@@ -132,4 +132,10 @@ extern std::wstring					GGameName;
  */
 extern enum EPlatformType			GPlatform;
 
+/**
+ * @ingroup Core
+ * @brief Command line
+ */
+extern class CCommandLine			GCommandLine;
+
 #endif // !COREGLOBALS_H

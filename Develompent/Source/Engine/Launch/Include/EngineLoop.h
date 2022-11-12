@@ -39,10 +39,9 @@ public:
 	/**
 	 * @brief Initialize the main loop
 	 * 
-	 * @param[in] InCmdLine Command line
 	 * @return Returns the error level, 0 if successful and > 0 if there were errors
 	 */
-	int32				Init( const tchar* InCmdLine );
+	int32				Init();
 
 	/**
 	 * @brief Advances main loop 

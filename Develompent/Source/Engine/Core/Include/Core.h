@@ -167,11 +167,10 @@ extern int              appGetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, 
 /**
  * @ingroup Core
  * @brief Pre-Initialize platform
- * 
- * @param[in] InCmdLine Command line
+
  * @return Returns the error level, 0 if successful and > 0 if there were errors
  */
-extern int32           appPlatformPreInit( const tchar* InCmdLine );
+extern int32           appPlatformPreInit();
 
 /**
  * @ingroup Core

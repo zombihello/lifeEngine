@@ -17,7 +17,7 @@
 
 IMPLEMENT_CLASS( CImportMeshCommandlet )
 
-bool CImportMeshCommandlet::Main( const std::wstring& InCommand )
+bool CImportMeshCommandlet::Main( const CCommandLine& InCommandLine )
 {
 	std::wstring			srcFilename;
 	std::wstring			dstFilename;
@@ -25,33 +25,9 @@ bool CImportMeshCommandlet::Main( const std::wstring& InCommand )
 
 	// Parse arguments
 	{
-		std::vector< std::wstring >		tokens;
-		std::vector< std::wstring >		switches;
-		appParseCommandLine( InCommand.c_str(), tokens, switches );
-
-		for ( uint32 index = 0, count = ( uint32 ) switches.size(); index < count; ++index )
-		{
-			const std::wstring& param = switches[ index ];
-			const std::wstring& token = tokens[ index + 2 ];
-
-			// Source filename
-			if ( param == TEXT( "src" ) || param == TEXT( "source" ) )
-			{
-				srcFilename = token;
-			}
-
-			// Destination filename
-			else if ( param == TEXT( "dst" ) || param == TEXT( "destination" ) )
-			{
-				dstFilename = token;
-			}
-
-			// Name texture
-			else if ( param == TEXT( "n" ) || param == TEXT( "name" ) )
-			{
-				nameMesh = token;
-			}
-		}
+		srcFilename = InCommandLine.GetFirstValue( TEXT( "src" ) );
+		dstFilename = InCommandLine.GetFirstValue( TEXT( "dst" ) );
+		nameMesh	= InCommandLine.GetFirstValue( TEXT( "n" ) );
 	}
 
 	// If source and destination files is empty - this error

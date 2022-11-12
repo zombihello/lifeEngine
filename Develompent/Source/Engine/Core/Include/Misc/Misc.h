@@ -86,40 +86,6 @@ FORCEINLINE void appNormalizePathSeparators( std::wstring& InOutFilename )
 
 /**
  * @ingroup Core
- * @brief Checks if a command-line parameter exists in the stream
- * 
- * @param[in] InStream String with command-line parameters
- * @param[in] InParam String a command-line parameter for check
- * @return Return true if InParam exist in InStream, else return false
- */
-FORCEINLINE bool				appParseParam( const tchar* InStream, const tchar* InParam )
-{
-	if ( !InStream || !InParam )
-	{
-		return false;
-	}
-
-	if ( wcsstr( InStream, InParam ) )
-	{
-		return true;
-	}
-
-	return false;
-}
-
-/**
- * @ingroup Core
- * Parses a string into tokens, separating switches (beginning with - or /) from
- * other parameters
- * 
- * @param[in] InCmdLine The string to parse
- * @param[out] OutTokens Filled with all parameters found in the string
- * @param[out] OutSwitches Filled with all switches found in the string
- */
-void appParseCommandLine( const tchar* InCmdLine, std::vector< std::wstring >& OutTokens, std::vector< std::wstring >& OutSwitches );
-
-/**
- * @ingroup Core
  * Return base directory of the game
  * @return Return base directory of the game
  */

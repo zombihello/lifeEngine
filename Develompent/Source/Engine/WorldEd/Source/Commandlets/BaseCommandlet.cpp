@@ -4,20 +4,14 @@
 
 IMPLEMENT_CLASS( ÑBaseCommandlet )
 
-bool ÑBaseCommandlet::ExecCommandlet( const std::wstring& InCommands, uint32 InBaseCommandIndex /*= 0*/, bool* OutResultCommand /*= nullptr*/ )
+bool ÑBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* OutResultCommand /* = nullptr */ )
 {
-	std::vector< std::wstring >		tokens;
-	std::vector< std::wstring >		switches;
-	appParseCommandLine( InCommands.c_str(), tokens, switches );
-
-	// If tokens more InBaseCommandIndex we creating commandlet and execute it
-	if ( InBaseCommandIndex >= tokens.size() )
+	std::wstring		nameCommandlet = InCommandLine.GetFirstValue( TEXT( "commandlet" ) );
+	if ( nameCommandlet.empty() )
 	{
 		return false;
 	}
-
-	const std::wstring&			nameCommandlet = tokens[ InBaseCommandIndex ];
-	CClass*						lclassCommandlet = CClass::StaticFindClass( nameCommandlet.c_str() );
+	CClass*				lclassCommandlet = CClass::StaticFindClass( nameCommandlet.c_str() );
 
 	// If class not found try to search by added 'C' in prefix and 'Commandlet' in sufix
 	if ( !lclassCommandlet )
@@ -35,7 +29,7 @@ bool ÑBaseCommandlet::ExecCommandlet( const std::wstring& InCommands, uint32 InB
 		GIsCommandlet = true;
 		LE_LOG( LT_Log, LC_Commandlet, TEXT( "Started commandlet '%s'" ), nameCommandlet.c_str() );
 		double		beginCommandletTime = appSeconds();
-		bool		result = commandlet->Main( InCommands );
+		bool		result = commandlet->Main( InCommandLine );
 		double		endCommandletTime = appSeconds();
 		delete commandlet;
 

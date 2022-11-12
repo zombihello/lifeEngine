@@ -42,7 +42,7 @@ void CCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 	}
 }
 
-bool CCookerSyncCommandlet::Main( const std::wstring& InCommand )
+bool CCookerSyncCommandlet::Main( const CCommandLine& InCommandLine )
 {
 	GTableOfContents.Clear();
 	AddContentEntries( appBaseDir() );

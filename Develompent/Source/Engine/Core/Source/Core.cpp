@@ -9,6 +9,7 @@
 #include "Scripts/ScriptEngine.h"
 #include "System/Package.h"
 #include "Misc/TableOfContents.h"
+#include "Misc/CommandLine.h"
 
 // ----------------
 // GLOBALS
@@ -25,6 +26,7 @@ double                  GDeltaTime                  = 0.0;
 CPackageManager*        GPackageManager             = new CPackageManager();
 CTableOfContets		    GTableOfContents;
 std::wstring            GGameName                   = TEXT( "ExampleGame" );
+CCommandLine			GCommandLine;
 
 #if WITH_EDITOR
 bool					GIsGame                     = true;

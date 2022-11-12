@@ -12,6 +12,7 @@
 #include <string>
 
 #include "Misc/Object.h"
+#include "Misc/CommandLine.h"
 #include "Core.h"
 
 /**
@@ -31,20 +32,19 @@ public:
 	/**
 	 * Main method of execute commandlet
 	 * 
-	 * @param[in] InCommands Arguments of start commandlet
-	 * @return Return true if commandlet executed is seccussed, else returning false
+	 * @param InCommandLine		Command line
+	 * @return Return TRUE if commandlet executed is seccussed, otherwise will return FALSE
 	 */
-	virtual bool Main( const std::wstring& InCommands ) PURE_VIRTUAL( ÑBaseCommandlet::Main, return false; );
+	virtual bool Main( const CCommandLine& InCommandLine ) PURE_VIRTUAL( ÑBaseCommandlet::Main, return false; );
 
 	/**
 	 * @brief Execute commandlet
 	 *
-	 * @param InCommands Arguments of start commandlet
-	 * @param InBaseCommandIndex Base index of commands in InCommands
-	 * @param OutResultCommand Return true if commandlet executed is seccussed, else returning false
-	 * @return Return true if commandlet is executed, else returning false
+	 * @param InCommandLine		Command line (-commandlet <CommandletName> <OtherArgs>)
+	 * @param OutResultCommand	Return TRUE if commandlet executed is seccussed, otherwise will return FALSE
+	 * @return Return TRUE if commandlet is executed, otherwise return FALSE
 	 */
-	static bool ExecCommandlet( const std::wstring& InCommands, uint32 InBaseCommandIndex = 0, bool* OutResultCommand = nullptr );
+	static bool ExecCommandlet( const CCommandLine& InCommandLine, bool* OutResultCommand = nullptr );
 };
 
 #endif // !BASECOMMANDLET_H

@@ -6,7 +6,9 @@
 #include "ImGUI/imgui.h"
 #include "ImGUI/imgui_internal.h"
 #include "UIEngine.h"
-
+#include "Render/Material.h"
+#include "Render/Texture.h"
+#include "System/Package.h"
 void CEditorInterfaceViewportClient::Draw( CViewport* InViewport )
 {
 	GUIEngine->BeginDraw();
@@ -68,9 +70,9 @@ void CEditorInterfaceViewportClient::Draw( CViewport* InViewport )
 			ImGui::DockBuilderFinish( dockspaceId );
 		}
 	}
-
+		
 	if ( ImGui::BeginMenuBar() )
-	{
+	{	
 		if ( ImGui::BeginMenu( "File" ) )
 		{
 			ImGui::EndMenu();

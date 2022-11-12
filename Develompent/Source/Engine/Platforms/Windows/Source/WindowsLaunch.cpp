@@ -2,9 +2,11 @@
 #include <SDL.h>
 
 #include "Core.h"
+#include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/LaunchGlobals.h"
 #include "Misc/Guid.h"
+#include "Misc/CommandLine.h"
 #include "Containers/StringConv.h"
 #include "EngineLoop.h"
 #include "D3D11RHI.h"
@@ -30,9 +32,9 @@
 /**
  * Pre-Initialize platform
  */
-int32 appPlatformPreInit( const tchar* InCmdLine )
+int32 appPlatformPreInit()
 {
-	if ( GIsCommandlet || GIsCooker || appParseParam( InCmdLine, TEXT( "-console" ) ) )
+	if ( GIsCommandlet || GIsCooker || GCommandLine.HasParam( TEXT( "console" ) ) )
 	{
 		static_cast< CWindowsLogger* >( GLog )->Show( true );
 	}
@@ -121,7 +123,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 		// Init engine
 		if ( !GIsRequestingExit )
 		{
-			errorLevel = GEngineLoop->Init( commandLine.c_str() );
+			errorLevel = GEngineLoop->Init();
 			check( errorLevel == 0 );
 			if ( GIsEditor || GIsGame )
 			{

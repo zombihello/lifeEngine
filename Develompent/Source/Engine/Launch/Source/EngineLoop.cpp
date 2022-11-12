@@ -17,6 +17,7 @@
 #include "Containers/StringConv.h"
 #include "Misc/Class.h"
 #include "Math/Color.h"
+#include "Misc/CommandLine.h"
 #include "Misc/TableOfContents.h"
 #include "Scripts/ScriptEngine.h"
 #include "RHI/BaseRHI.h"
@@ -156,31 +157,25 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	GGameName = ANSI_TO_TCHAR( GAMENAME );
 	appGetCookedContentPath( GPlatform, GCookedDir );
 	
+	GCommandLine.Init( InCmdLine );
 	CName::StaticInit();
 	InitConfigs();
 
 #if WITH_EDITOR
-	GIsEditor = appParseParam( InCmdLine, TEXT( "editor" ) );
-	GIsCooker = appParseParam( InCmdLine, TEXT( "CookPackages" ) ) || appParseParam( InCmdLine, TEXT( "CCookPackagesCommandlet" ) );
-
-	// Are we launching a commandlet
+	GIsEditor = GCommandLine.HasParam( TEXT( "editor" ) );
+	
+	CCommandLine::Values_t	paramValues = GCommandLine.GetValues( TEXT( "commandlet" ) );
+	if ( !paramValues.empty() )
 	{
-		std::vector< std::wstring >		tokens;
-		std::vector< std::wstring >		switches;
-		appParseCommandLine( InCmdLine, tokens, switches );
-
-		// PS: 0 index - path to exe file, 1 index - name commandlet
-		if ( !GIsEditor && tokens.size() >= 2 )
-		{
-			GIsCommandlet = true;
-		}
+		GIsCooker		= paramValues[0] == TEXT( "CookPackages" ) || paramValues[0] == TEXT( "CCookPackagesCommandlet" );
+		GIsCommandlet	= !GIsCooker;
 	}
 
 	GIsGame = !GIsEditor && !GIsCooker && !GIsCommandlet;
 #endif // WITH_EDITOR
 
 	GLog->Init();
-	int32		result = appPlatformPreInit( InCmdLine );
+	int32		result = appPlatformPreInit();
 	
 	// Loading table of contents
 	if ( !GIsEditor && !GIsCooker )
@@ -190,7 +185,9 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 #if WITH_EDITOR
 		if ( !GFileSystem->IsExistFile( tocPath ) )
 		{
-			ÑBaseCommandlet::ExecCommandlet( TEXT( "CookerSync" ) );
+			CCommandLine		commandLine;
+			commandLine.Init( TEXT( "-commandlet=CookerSync" ) );
+			ÑBaseCommandlet::ExecCommandlet( commandLine );
 		}
 #endif // WITH_EDITOR
 		
@@ -245,7 +242,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 /**
  * Initialize the main loop
  */
-int32 CEngineLoop::Init( const tchar* InCmdLine )
+int32 CEngineLoop::Init()
 {
 	// Init full screen movie player and start startup movies (only if this game)
 	appInitFullScreenMoviePlayer();
@@ -283,7 +280,7 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 
 	// Parse cmd line for start commandlets
 #if WITH_EDITOR
-	if ( ÑBaseCommandlet::ExecCommandlet( InCmdLine, 1 ) )
+	if ( ÑBaseCommandlet::ExecCommandlet( GCommandLine ) )
 	{
 		return result;
 	}
@@ -311,6 +308,12 @@ int32 CEngineLoop::Init( const tchar* InCmdLine )
 		{
 			map = configGameDefaultMap.GetString();
 		}
+	}
+
+	// If command line has param 'map', we load she
+	if ( GCommandLine.HasParam( TEXT( "map" ) ) )
+	{
+		map = GCommandLine.GetFirstValue( TEXT( "map" ) );
 	}
 
 	if ( !map.empty() )
@@ -409,4 +412,5 @@ void CEngineLoop::Exit()
 	GWindow->Close();
 	GLog->TearDown();
 	GConfig.Shutdown();
+	GCommandLine.Shutdown();
 }

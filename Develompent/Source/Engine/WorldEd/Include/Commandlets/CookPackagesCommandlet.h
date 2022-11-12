@@ -54,10 +54,10 @@ public:
 	/**
 	 * Main method of execute commandlet
 	 *
-	 * @param[in] InCommands Arguments of start commandlet
-	 * @return Return true if commandlet executed is seccussed, else returning false
+	 * @param InCommandLine		Command line
+	 * @return Return TRUE if commandlet executed is seccussed, otherwise will return FALSE
 	 */
-	virtual bool Main( const std::wstring& InCommand ) override;
+	virtual bool Main( const CCommandLine& InCommandLine ) override;
 
 	/**
 	 * Convert texture

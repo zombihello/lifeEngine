@@ -982,37 +982,22 @@ void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 	}
 }
 
-bool CCookPackagesCommandlet::Main( const std::wstring& InCommand )
+bool CCookPackagesCommandlet::Main( const CCommandLine& InCommandLine )
 {
 	GIsCooker = true;
 	std::vector< std::wstring >			mapsToCook;
 
 	// Parse arguments
 	{
-		uint32							offsetToMaps = 2;
-		std::vector< std::wstring >		tokens;
-		std::vector< std::wstring >		switches;
-		appParseCommandLine( InCommand.c_str(), tokens, switches );
-
-		for ( uint32 index = 0, count = ( uint32 )switches.size(); index < count; ++index )
+		std::wstring		platformName = InCommandLine.GetFirstValue( TEXT( "platform" ) );
+		if ( !platformName.empty() )
 		{
-			const std::wstring&		param = switches[ index ];
-			const std::wstring&		token = tokens[ index + 2 ];
-
-			// Getting cooked platform
-			if ( param == TEXT( "platform" ) )
-			{
-				cookedPlatform = appPlatformStringToType( token );
-				check( cookedPlatform != PLATFORM_Unknown );
-				++offsetToMaps;
-			}
+			cookedPlatform = appPlatformStringToType( platformName );
+			check( cookedPlatform != PLATFORM_Unknown );
 		}
 
 		// Getting all maps from commands
-		for ( uint32 index = offsetToMaps, count = tokens.size(); index < count; ++index )
-		{
-			mapsToCook.push_back( tokens[ index ] );
-		}
+		mapsToCook = InCommandLine.GetValues( TEXT( "maps" ) );
 	}
 
 	checkMsg( !mapsToCook.empty(), TEXT( "Mpas to cook not entered" ) );
