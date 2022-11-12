@@ -20,17 +20,6 @@ newoption {
     }
  }
 
-newoption {
-    trigger     = "with-editor",
-    value       = "Value",
-    default     = "true",
-    description = "Choose build engine with/without editor",
-    allowed = {
-        { "true",   "Build engine with editor" },
-        { "false",  "Build engine without editor" }
-     }
-}
-
 --------- GLOBAL VARIABLES -----------------	
 
 -- Path to intermediate directory for engine and game
@@ -66,19 +55,6 @@ if _OPTIONS["engine"] then
     print( "Engine type: " .. _OPTIONS["engine"] )
 else
     error( "Engine type need setted" )
-end
-
--- Is engine with editor
-if _OPTIONS["with-editor"] then
-    if _OPTIONS["with-editor"] == "true" then
-        isWithEditor = true
-    elseif _OPTIONS["with-editor"] == "false" then
-        isWithEditor = false
-    end   
-    
-    print( "With editor: " .. _OPTIONS["with-editor"] )
-else
-    error( "Option 'with-editor' need setted" )
 end
 
 -- Path to externals
@@ -117,7 +93,7 @@ include( extZlib )
 
 workspace( game )
     location( "../Intermediate/" .. _ACTION .. "/" )
-    configurations 	    { "Debug", "Release", "Shipping" }
+    configurations 	    { "Debug", "DebugWithEditor", "Release", "ReleaseWithEditor", "Shipping" }
     platforms 		    { "Win64" }
     defaultplatform	    "Win64"
 
@@ -128,7 +104,7 @@ workspace( game )
 
     targetname( "%{prj.name}-%{cfg.platform}-%{cfg.buildcfg}" )
     targetdir( binariesDir .. outputDir )
-	objdir( intermediateDir .. outputDir .. "%{prj.name}/Obj/" )
+	objdir( intermediateDir .. outputDir .. "%{prj.name}/%{cfg.buildcfg}/" )
 
     flags { "MultiProcessorCompile" }
 
@@ -155,13 +131,13 @@ workspace( game )
 
     --------------- CONFIGURATION SETTINGS --------------
 
-	filter "configurations:Debug"
+	filter "configurations:Debug or DebugWithEditor"
         defines 	        { "DEBUG=1",  "RELEASE=0", "SHIPPING=0" }
         symbols 	        "On"
         inlining            "Disabled"
         runtime 	        "Debug"
 
-    filter "configurations:Release"
+    filter "configurations:Release or ReleaseWithEditor"
         defines 	        { "NDEBUG", "DEBUG=0", "RELEASE=1", "SHIPPING=0" }
         optimize 	        "Full"
         inlining            "Auto"
@@ -170,6 +146,7 @@ workspace( game )
         defines 	        { "NDEBUG", "DEBUG=0", "RELEASE=0", "SHIPPING=1" }
         optimize            "Full"
         inlining            "Auto"
+    filter {}
 
     	-------------- BUILD TYPE SETTINGS -------------
 	
@@ -191,13 +168,12 @@ workspace( game )
         language    "C++"
         location( intermediateDir )
 
-        -- Project settings
+        ----------- PROJECT SETTINGS --------
+
         defines				{
             "GAMENAME=" .. "\"" .. game .. "\"",
             "ENGINE_2D=" .. tostring( is2DEngine and 1 or 0 ),
-            "USE_THEORA_CODEC=1",
-            "WITH_EDITOR=" .. tostring( isWithEditor and 1 or 0 ),
-            "WITH_IMGUI=" .. tostring( isWithEditor and 1 or 0 ),
+            "USE_THEORA_CODEC=1"
         }
 
         includedirs         {
@@ -215,6 +191,8 @@ workspace( game )
             "Games/" .. game .. "/Source/**.cpp",
         }
 
+        ---------- PLATFORM SPECIFIC SETTINGS ---------
+
         -- Exclude platform specific for other platforms
         filter "platforms:not Win64"
             excludes { "**/Windows/**.*", "**/D3D11RHI/**.*" }
@@ -226,7 +204,8 @@ workspace( game )
             links { "d3d11", "d3d9", "dxgi", "dxguid", "d3dcompiler" }
         filter {}
 
-        -- Link external libs
+        --------- LINK EXTERNAL LIBS -------
+       
         LinkOgg()
         LinkVorbis()
         LinkOpenAL()
@@ -244,12 +223,17 @@ workspace( game )
             LinkPhysX()
         end
 
-        -- Editor settings
-        if isWithEditor then
+        ------ EDITOR SETTINGS -----
+
+        filter "configurations:*WithEditor"
             LinkSTB()
             LinkAssmip()
             LinkTmxLite()
-        else
+           
+            defines     { "WITH_EDITOR=1", "WITH_IMGUI=1" }
+
+        filter "configurations:not *WithEditor"
             -- If we build engine without editor, we will need exclude all of WorldEd source files
-            excludes { "Engine/WorldEd/**.*" }
-        end
+            excludes    { "Engine/WorldEd/**.*" }
+            defines     { "WITH_EDITOR=0", "WITH_IMGUI=0" }
+        filter {}

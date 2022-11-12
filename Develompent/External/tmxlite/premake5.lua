@@ -8,12 +8,12 @@ function LinkTmxLite()
     }
 
     filter "platforms:Win64"
-        filter "configurations:Debug"
+        filter "configurations:DebugWithEditor"
             links       {
                 extTmxlite .. "/tmxlite/lib/Win64/tmxlite-s-d.lib"
             }
 
-        filter "configurations:not Debug"
+        filter "configurations:ReleaseWithEditor"
             links       {
                 extTmxlite .. "/tmxlite/lib/Win64/tmxlite-s.lib"
             }

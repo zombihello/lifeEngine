@@ -15,7 +15,7 @@ function LinkPhysX()
             physXHome .. "/PxShared/include/"
         }
 
-        filter "configurations:Debug"
+        filter "configurations:Debug or DebugWithEditor"
             links       {
                 physXHome .. "/bin/win.x86_64.vc142.md/debug/PhysXDEBUG.lib",
                 physXHome .. "/bin/win.x86_64.vc142.md/debug/PhysXCommonDEBUG.lib",
@@ -34,7 +34,7 @@ function LinkPhysX()
                 "{COPY} " .. physXHome .. "/bin/win.x86_64.vc142.md/debug/PhysXDEBUG.bin " .. binariesDir .. outputDir .. "/",
                 "{COPY} " .. physXHome .. "/bin/win.x86_64.vc142.md/debug/PhysXFoundationDEBUG.bin " .. binariesDir .. outputDir .. "/"
             }
-        filter "configurations:not Debug"
+        filter "configurations:not Debug and not DebugWithEditor"
             links       {
                 physXHome .. "/bin/win.x86_64.vc142.md/release/PhysX.lib",
                 physXHome .. "/bin/win.x86_64.vc142.md/release/PhysXCommon.lib",

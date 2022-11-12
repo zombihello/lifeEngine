@@ -12,12 +12,12 @@ function LinkBox2D()
     }
 
     filter "platforms:Win64"
-        filter "configurations:Debug"
+        filter "configurations:Debug or DebugWithEditor"
             links       {
                 extBox2d .. "/install/lib/Win64/Debug/box2d.lib"
             }
 
-        filter "configurations:not Debug"
+        filter "configurations:not Debug and not DebugWithEditor"
             links       {
                 extBox2d .. "/install/lib/Win64/Release/box2d.lib"
             }

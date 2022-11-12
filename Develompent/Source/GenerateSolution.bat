@@ -1,1 +1,1 @@
-"../Tools/BuildSystem/premake5.exe" vs2019 --engine=2D --with-editor=true
+"../Tools/BuildSystem/premake5.exe" vs2019 --engine=2D

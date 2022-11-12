@@ -8,7 +8,7 @@ function LinkOpenAL()
     }
 
     filter "platforms:Win64"
-        filter "configurations:Debug"
+        filter "configurations:Debug or DebugWithEditor"
             links       {
                 extOpenAL .. "/libs/Win64/OpenAL32.lib"
             }
@@ -16,7 +16,7 @@ function LinkOpenAL()
             postbuildcommands    {
                 "{COPY} " .. extOpenAL .. "/bin/Win64/OpenAL32.dll " .. binariesDir .. outputDir .. "/"
             }
-        filter "configurations:not Debug"
+        filter "configurations:not Debug and not DebugWithEditor"
             links       {
                 extOpenAL .. "/libs/Win64/OpenAL32.lib"
             }

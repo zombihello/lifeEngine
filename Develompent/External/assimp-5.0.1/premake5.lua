@@ -8,21 +8,21 @@ function LinkAssmip()
     }
 
     filter "platforms:Win64"
-        filter "configurations:Debug"
+        filter "configurations:DebugWithEditor"
             links       {
-                extAssimp .. "/lib/Win64/assimp.lib",
-                extAssimp .. "/lib/Win64/IrrXML.lib",
-                extAssimp .. "/lib/Win64/zlibstatic.lib"
+                extAssimp .. "/lib/Win64/assimpd.lib",
+                extAssimp .. "/lib/Win64/IrrXMLd.lib",
+                extAssimp .. "/lib/Win64/zlibstaticd.lib"
             }
 
             postbuildcommands    {
                 "{COPY} " .. extAssimp .. "/bin/Win64/assimpd.dll " .. binariesDir .. outputDir .. "/"
             }
-        filter "configurations:not Debug"
+        filter "configurations:ReleaseWithEditor"
             links       {
-                extAssimp .. "/lib/Win64/assimpd.lib",
-                extAssimp .. "/lib/Win64/IrrXMLd.lib",
-                extAssimp .. "/lib/Win64/zlibstaticd.lib"
+                extAssimp .. "/lib/Win64/assimp.lib",
+                extAssimp .. "/lib/Win64/IrrXML.lib",
+                extAssimp .. "/lib/Win64/zlibstatic.lib"
             }
 
             postbuildcommands    {
