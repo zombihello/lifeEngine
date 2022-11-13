@@ -37,13 +37,18 @@ typedef TRefCountPtr< class CPackage >			PackageRef_t;
  */
 enum EAssetType
 {
-	AT_Unknown,				/**< Unknown asset */
-	AT_Texture2D,			/**< Texture 2D */
-	AT_Material,			/**< Material */
-	AT_Script,				/**< Script */
-	AT_StaticMesh,			/**< Static mesh */
-	AT_AudioBank,			/**< Audio bank */
-	AT_PhysicsMaterial,		/**< Physics material */
+	AT_Unknown,								/**< Unknown asset */
+	AT_FirstType,							/**< First type */
+
+	AT_Texture2D = AT_FirstType,			/**< Texture 2D */
+	AT_Material,							/**< Material */
+	AT_Script,								/**< Script */
+	AT_StaticMesh,							/**< Static mesh */
+	AT_AudioBank,							/**< Audio bank */
+	AT_PhysicsMaterial,						/**< Physics material */
+	
+	AT_LastType = AT_PhysicsMaterial,		/**< Last asset type for calculate count */
+	AT_Count	= AT_LastType+1,			/**< Count asset types */
 };
 
 /**

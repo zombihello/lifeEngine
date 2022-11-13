@@ -66,6 +66,26 @@ public:
 			OutString[index] = std::toupper( OutString[index] );
 		}
 	}
+
+	/**
+	 * @brief Is exist substring in string
+	 * 
+	 * @param InString			Base string
+	 * @param InSubString		Substring in InString
+	 * @param InIgnoreRegister	Is need ignore upper/low cases
+	 * @return Return TRUE if InSubString is exist, otherwise will return FALSE
+	 */
+	static FORCEINLINE bool InString( const std::wstring& InString, const std::wstring& InSubString, bool InIgnoreRegister = false )
+	{
+		if ( !InIgnoreRegister )
+		{
+			return InString.find( InSubString ) != std::wstring::npos;
+		}
+		else
+		{
+			return ToUpper( InString ).find( ToUpper( InSubString ) ) != std::wstring::npos;
+		}
+	}
 };
 
 #endif // !STRING_H
