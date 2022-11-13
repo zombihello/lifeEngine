@@ -1,7 +1,11 @@
 #include "Misc/CoreGlobals.h"
+#include "Misc/EngineGlobals.h"
 #include "Misc/Misc.h"
 #include "Containers/StringConv.h"
+#include "Logger/LoggerMacros.h"
+#include "System/BaseEngine.h"
 #include "System/BaseFileSystem.h"
+#include "System/AssetsImport.h"
 #include "Windows/ContentBrowserWindow.h"
 #include "ImGUI/imgui_internal.h"
 #include "ImGUI/imgui_stdlib.h"
@@ -22,12 +26,52 @@ static ImVec4		GAssetBorderColors[] =
 };
 static_assert( ARRAY_COUNT( GAssetBorderColors ) == AT_Count, "Need full init GAssetBorderColors array" );
 
+/** Table of path to asset icons by type */
+static const tchar* GAssetIconPaths[] =
+{
+	TEXT( "Unknown.png" ),				// AT_Unknown
+	TEXT( "Texture.png" ),				// AT_Texture2D
+	TEXT( "Material.png" ),				// AT_Material
+	TEXT( "Script.png" ),				// AT_Script
+	TEXT( "StaticMesh.png" ),			// AT_StaticMesh
+	TEXT( "Audio.png" ),				// AT_AudioBank
+	TEXT( "PhysMaterial.png" )			// AT_PhysicsMaterial
+};
+static_assert( ARRAY_COUNT( GAssetIconPaths ) == AT_Count, "Need full init GAssetIconPaths array" );
+
 CContentBrowserWindow::CContentBrowserWindow( const std::wstring& InName )
 	: CImGUILayer( InName )
 	, padding( 16.f )
 	, thumbnailSize( 64.f )
 {
 	memset( filterAssetType, 1, ARRAY_COUNT( filterAssetType ) * sizeof( bool ) );
+}
+
+void CContentBrowserWindow::Init()
+{
+	CImGUILayer::Init();
+
+	// Loading all of asset icons
+	std::wstring		errorMsg;
+	for ( uint32 index = 0; index < AT_Count; ++index )
+	{
+		TSharedPtr<CTexture2D>		texture2D;
+		texture2D = CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Thumbnails/" ) + GAssetIconPaths[index], errorMsg );
+		if ( !texture2D )
+		{
+			LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load asset icon '%s' for type 0x%X" ), GAssetIconPaths[index], index );
+			assetIcons[index] = GEngine->GetDefaultTexture();
+		}
+		else
+		{
+			TAssetHandle<CTexture2D>	assetHandle = texture2D->GetAssetHandle();
+			PackageRef_t				package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			check( package );
+
+			package->Add( assetHandle );
+			assetIcons[index] = assetHandle;
+		}
+	}
 }
 
 void CContentBrowserWindow::OnTick()
@@ -118,7 +162,18 @@ void CContentBrowserWindow::OnTick()
 			{
 				ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, CONTENTBROWSER_ASSET_BORDERSIZE );
 				ImGui::PushStyleColor( ImGuiCol_Border, GAssetBorderColors[assetInfo.type] );
-				ImGui::Button( TCHAR_TO_ANSI( assetInfo.name.c_str() ), { thumbnailSize, thumbnailSize } );
+				
+				// Draw of the asset's button, if him's icon isn't existing we draw simple button
+				const TAssetHandle<CTexture2D>&		assetIconTexture = assetIcons[assetInfo.type];
+				if ( assetIconTexture.IsAssetValid() )
+				{
+					ImGui::ImageButton( assetIconTexture.ToSharedPtr()->GetTexture2DRHI()->GetHandle(), { thumbnailSize, thumbnailSize } );
+				}
+				else
+				{
+					ImGui::Button( TCHAR_TO_ANSI( assetInfo.name.c_str() ), { thumbnailSize, thumbnailSize } );
+				}
+				
 				ImGui::PopStyleVar();
 				ImGui::PopStyleColor();
 

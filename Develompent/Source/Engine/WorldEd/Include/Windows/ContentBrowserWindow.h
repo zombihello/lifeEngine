@@ -12,6 +12,7 @@
 #include <string>
 
 #include "ImGUI/ImGUIEngine.h"
+#include "Render/Texture.h"
 #include "System/Package.h"
 
  /**
@@ -27,6 +28,11 @@ public:
 	 * @param InName	Window name
 	 */
 	CContentBrowserWindow( const std::wstring& InName );
+
+	/**
+	 * @brief Init
+	 */
+	virtual void Init() override;
 
 protected:
 	/**
@@ -59,12 +65,13 @@ private:
 	 */
 	std::string GetPreviewFilterAssetType() const;
 
-	PackageRef_t		package;					/**< Current package in preview */
-	std::string			filterPackage;				/**< Filter by package name */
-	std::string			filterAsset;				/**< Filter by asset name */
-	bool				filterAssetType[AT_Count];	/**< Filter by asset type */
-	float				padding;					/**< Padding in asset section */
-	float				thumbnailSize;				/**< Size of thumbnail */
+	PackageRef_t				package;					/**< Current package in preview */
+	std::string					filterPackage;				/**< Filter by package name */
+	std::string					filterAsset;				/**< Filter by asset name */
+	bool						filterAssetType[AT_Count];	/**< Filter by asset type */
+	float						padding;					/**< Padding in asset section */
+	float						thumbnailSize;				/**< Size of thumbnail */
+	TAssetHandle<CTexture2D>	assetIcons[AT_Count];		/**< Array of asset icons */
 };
 
 #endif // !CONTENTBROWSERWINDOW_H
