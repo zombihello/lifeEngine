@@ -10,10 +10,10 @@
 #define CONTENTBROWSERWINDOW_H
 
 #include <string>
+#include <set>
 
 #include "ImGUI/ImGUIEngine.h"
 #include "Render/Texture.h"
-#include "System/Package.h"
 
  /**
   * @ingroup WorldEd
@@ -72,6 +72,7 @@ private:
 	float						padding;					/**< Padding in asset section */
 	float						thumbnailSize;				/**< Size of thumbnail */
 	TAssetHandle<CTexture2D>	assetIcons[AT_Count];		/**< Array of asset icons */
+	std::set<std::wstring>		selectedAssets;				/**< Set of selected assets */
 };
 
 #endif // !CONTENTBROWSERWINDOW_H
