@@ -12,6 +12,8 @@
 #include <string>
 #include <set>
 
+#include "Misc/EngineGlobals.h"
+#include "System/InputSystem.h"
 #include "ImGUI/ImGUIEngine.h"
 #include "Render/Texture.h"
 
@@ -49,6 +51,65 @@ private:
 	void DrawPackageList( const std::wstring& InRootDir );
 
 	/**
+	 * @brief Draw all assets in current package
+	 */
+	void DrawAssets();
+
+	/**
+	 * @brief Draw popup menu of assets
+	 */
+	void DrawAssetsPopupMenu();
+
+	/**
+	 * @brief Draw popup menu of packages
+	 */
+	void DrawPackagesPopupMenu();
+
+	/**
+	 * @brief Process select item
+	 * 
+	 * @param InItemName			Item name
+	 * @param InOutSetItems			Array of unique selected items
+	 * @param InMouseButtonType		Mouse button type
+	 * @param InIsAlreadySelected	Is item already exist in InOutSetItems
+	 */
+	FORCEINLINE void ProcessSelectItem( const std::wstring InItemName, std::set<std::wstring>& InOutSetItems, ImGuiMouseButton InMouseButtonType, bool InIsAlreadySelected ) const
+	{
+		const bool		bCtrlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
+
+		// Select item if pressd left mouse button
+		if ( InMouseButtonType == ImGuiMouseButton_Left )
+		{
+			if ( !bCtrlDown )
+			{
+				InOutSetItems.clear();
+			}
+
+			if ( InIsAlreadySelected && bCtrlDown )
+			{
+				InOutSetItems.erase( InItemName );
+			}
+			else if ( !InIsAlreadySelected || InIsAlreadySelected && selectedAssets.empty() )
+			{
+				InOutSetItems.insert( InItemName );
+			}
+		}
+		// Select item for popup menu if pressd right mouse button
+		else if ( InMouseButtonType == ImGuiMouseButton_Right )
+		{
+			if ( !InIsAlreadySelected || InOutSetItems.size() < 2 )
+			{
+				InOutSetItems.clear();
+			}
+
+			if ( !InIsAlreadySelected || InIsAlreadySelected && InOutSetItems.empty() )
+			{
+				InOutSetItems.insert( InItemName );
+			}
+		}
+	}
+
+	/**
 	 * @brief Is show all asset types
 	 * @return Return TRUE if need show all asset types, otherwise will return FALSE
 	 */
@@ -73,6 +134,7 @@ private:
 	float						thumbnailSize;				/**< Size of thumbnail */
 	TAssetHandle<CTexture2D>	assetIcons[AT_Count];		/**< Array of asset icons */
 	std::set<std::wstring>		selectedAssets;				/**< Set of selected assets */
+	std::set<std::wstring>		selectedPackages;			/**< Set of selected packages */
 };
 
 #endif // !CONTENTBROWSERWINDOW_H

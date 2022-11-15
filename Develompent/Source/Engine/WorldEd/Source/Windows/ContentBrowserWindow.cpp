@@ -1,11 +1,9 @@
 #include "Misc/CoreGlobals.h"
-#include "Misc/EngineGlobals.h"
 #include "Misc/Misc.h"
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseEngine.h"
 #include "System/BaseFileSystem.h"
-#include "System/InputSystem.h"
 #include "System/AssetsImport.h"
 #include "Windows/ContentBrowserWindow.h"
 #include "ImGUI/imgui_internal.h"
@@ -15,7 +13,7 @@
 #define CONTENTBROWSER_ASSET_BORDERSIZE		1.f
 
 /** Color of a selected asset */
-#define  CONTENTBROWSER_ASSET_SELECTCOLOR	ImVec4( 0.f, 0.43f, 0.87f, 1.f )
+#define CONTENTBROWSER_ASSET_SELECTCOLOR	ImVec4( 0.f, 0.43f, 0.87f, 1.f )
 
 /** Table of color buttons by asset type */
 static ImVec4		GAssetBorderColors[] =
@@ -81,7 +79,6 @@ void CContentBrowserWindow::Init()
 void CContentBrowserWindow::OnTick()
 {
 	ImGui::Columns( 2 );
-	bool	bCtrlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
 
 	// Draw list of packages in file system
 	ImGui::InputTextWithHint( "##FilterPackage", "Search", &filterPackage );
@@ -107,8 +104,15 @@ void CContentBrowserWindow::OnTick()
 		DrawPackageList( appGameDir() + PATH_SEPARATOR TEXT( "Content/" ) );
 		ImGui::TreePop();
 	}
-
 	ImGui::PopStyleColor();
+	
+	// Reset selection if clicked not on package
+	if ( ImGui::IsWindowHovered() && ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) || ( !ImGui::IsAnyItemHovered() && ImGui::IsMouseDown( ImGuiMouseButton_Right ) ) ) )
+	{
+		selectedPackages.clear();
+	}
+	DrawPackagesPopupMenu();
+
 	ImGui::EndChild();
 	ImGui::NextColumn();
 
@@ -157,78 +161,16 @@ void CContentBrowserWindow::OnTick()
 		{
 			columnCount = 1;
 		}
-		ImGui::Columns( columnCount, 0, false );		
 		
-		SAssetInfo		assetInfo;
-		for ( uint32 index = 0, count = package->GetNumAssets(); index < count; ++index )
-		{
-			package->GetAssetInfo( index, assetInfo );
-			if ( filterAssetType[assetInfo.type-1] && CString::InString( assetInfo.name, ANSI_TO_TCHAR( filterAsset.c_str() ), true ) )
-			{
-				//ImGuiCol_ButtonHovered
-				ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, CONTENTBROWSER_ASSET_BORDERSIZE );
-				ImGui::PushStyleColor( ImGuiCol_Border, GAssetBorderColors[assetInfo.type] );	
-
-				// If asset is selected, we set him button color to CONTENTBROWSER_ASSET_SELECTCOLOR
-				bool	bSelectedAsset	= selectedAssets.find( assetInfo.name ) != selectedAssets.end();
-				if ( bSelectedAsset )
-				{
-					ImGui::PushStyleColor( ImGuiCol_Button, CONTENTBROWSER_ASSET_SELECTCOLOR );
-					ImGui::PushStyleColor( ImGuiCol_ButtonHovered, CONTENTBROWSER_ASSET_SELECTCOLOR );
-					ImGui::PushStyleColor( ImGuiCol_ButtonActive, CONTENTBROWSER_ASSET_SELECTCOLOR );
-				}
-
-				// Draw of the asset's button, if him's icon isn't existing we draw simple button
-				const TAssetHandle<CTexture2D>&		assetIconTexture = assetIcons[assetInfo.type];
-				if ( assetIconTexture.IsAssetValid() )
-				{
-					ImGui::ImageButton( assetIconTexture.ToSharedPtr()->GetTexture2DRHI()->GetHandle(), { thumbnailSize, thumbnailSize } );
-				}
-				else
-				{
-					ImGui::Button( TCHAR_TO_ANSI( assetInfo.name.c_str() ), { thumbnailSize, thumbnailSize } );
-				}
-				
-				// Item event handles
-				if ( ImGui::IsItemHovered() )
-				{				
-					// If user clicked on asset
-					if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
-					{
-						if ( !bCtrlDown )
-						{
-							selectedAssets.clear();
-						}
-
-						if ( bSelectedAsset && bCtrlDown )
-						{
-							selectedAssets.erase( assetInfo.name );
-						}
-						else if ( !bSelectedAsset || bSelectedAsset && selectedAssets.empty() )
-						{
-							selectedAssets.insert( assetInfo.name );
-						}
-					}
-					else if ( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
-					{
-						// TODO: Implement editor of the asset
-					}
-					else if ( ImGui::IsMouseClicked( ImGuiMouseButton_Right ) )
-					{
-						ImGui::OpenPopup( "AssetContextMenu" );
-					}
-				}
-				ImGui::PopStyleVar();
-				ImGui::PopStyleColor( !bSelectedAsset ? 1 : 4 );
-
-				ImGui::Text( TCHAR_TO_ANSI( assetInfo.name.c_str() ) );
-				ImGui::NextColumn();
-			}
-		}
-
+		ImGui::Columns( columnCount, 0, false );				
+		DrawAssets();
+		
 		// Window event handles
 		if ( ImGui::IsWindowHovered() )
 		{
+			// Is pressed Ctrl
+			bool	bCtrlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
+
 			// If pressed Ctrl+A we select all assets in the current package
 			if ( package && selectedAssets.size() != package->GetNumAssets() && bCtrlDown && GInputSystem->IsKeyDown( BC_KeyA ) )
 			{
@@ -242,25 +184,73 @@ void CContentBrowserWindow::OnTick()
 				}
 			}
 			// Reset selection if clicked not on asset
-			else if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
+			else if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) || ( !ImGui::IsAnyItemHovered() && ImGui::IsMouseDown( ImGuiMouseButton_Right ) ) )
 			{
 				selectedAssets.clear();
 			}
 		}
-
-		if ( ImGui::BeginPopup( "AssetContextMenu" ) )
-		{
-			ImGui::MenuItem( "Reload" );
-			ImGui::MenuItem( "Reimport" );
-			ImGui::Separator();
-			ImGui::MenuItem( "Delete" );
-			ImGui::EndPopup();
-		}
-
+		
+		// Draw popup menu of assets
+		DrawAssetsPopupMenu();
 		ImGui::EndChild();
 	}
 
 	ImGui::EndColumns();
+}
+
+void CContentBrowserWindow::DrawAssetsPopupMenu()
+{
+	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
+	{
+		bool		bSelectedAssets = !selectedAssets.empty();
+		if ( ImGui::BeginMenu( "Create" ) )
+		{
+			ImGui::MenuItem( "Material" );
+			if ( ImGui::BeginMenu( "Physics" ) )
+			{
+				ImGui::MenuItem( "Physics Material" );
+				ImGui::EndMenu();
+			}		
+			ImGui::EndMenu();
+		}
+
+		ImGui::Separator();
+		ImGui::MenuItem( "Reload", "", nullptr, bSelectedAssets );
+		ImGui::MenuItem( "Import" );
+		ImGui::MenuItem( "Reimport", "", nullptr, bSelectedAssets );
+		ImGui::MenuItem( "Reimport With New File", "", nullptr, bSelectedAssets );
+		ImGui::Separator();
+		ImGui::MenuItem( "Delete", "", nullptr, bSelectedAssets );
+		ImGui::MenuItem( "Rename", "", nullptr, bSelectedAssets );
+		ImGui::MenuItem( "Copy Reference", "", nullptr, bSelectedAssets );
+		ImGui::EndPopup();
+	}
+}
+
+void CContentBrowserWindow::DrawPackagesPopupMenu()
+{
+	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
+	{
+		bool		bSelectedPackages = !selectedPackages.empty();
+		ImGui::MenuItem( "Save", "", nullptr, bSelectedPackages );
+		ImGui::MenuItem( "Open", "", nullptr, bSelectedPackages );
+		ImGui::MenuItem( "Unload", "", nullptr, bSelectedPackages );
+		ImGui::MenuItem( "Reload", "", nullptr, bSelectedPackages );
+		ImGui::Separator();
+		ImGui::MenuItem( "Show In Explorer", "", nullptr, bSelectedPackages );
+		ImGui::Separator();
+
+		if ( ImGui::BeginMenu( "Create" ) )
+		{
+			ImGui::MenuItem( "Folder" );
+			ImGui::MenuItem( "Package" );
+			ImGui::EndMenu();
+		}
+
+		ImGui::MenuItem( "Delete", "", nullptr, bSelectedPackages );
+		ImGui::MenuItem( "Rename", "", nullptr, bSelectedPackages );
+		ImGui::EndPopup();
+	}
 }
 
 void CContentBrowserWindow::DrawPackageList( const std::wstring& InRootDir )
@@ -287,13 +277,108 @@ void CContentBrowserWindow::DrawPackageList( const std::wstring& InRootDir )
 		extension.erase( 0, dotPos + 1 );
 		if ( extension == TEXT( "pak" ) && CString::InString( file, ANSI_TO_TCHAR( filterPackage.c_str() ), true ) )
 		{
-			ImGui::Button( TCHAR_TO_ANSI( file.c_str() ) );
-			if ( ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
+			// If package is selected, we set him button color to CONTENTBROWSER_ASSET_SELECTCOLOR
+			bool	bSelectedPackage = selectedPackages.find( file ) != selectedPackages.end();
+			if ( bSelectedPackage )
 			{
-				package = GPackageManager->LoadPackage( fullPath );
-				check( package );
-				selectedAssets.clear();
+				ImGui::PushStyleColor( ImGuiCol_Button, CONTENTBROWSER_ASSET_SELECTCOLOR );
+				ImGui::PushStyleColor( ImGuiCol_ButtonHovered, CONTENTBROWSER_ASSET_SELECTCOLOR );
+				ImGui::PushStyleColor( ImGuiCol_ButtonActive, CONTENTBROWSER_ASSET_SELECTCOLOR );
 			}
+
+			ImGui::Button( TCHAR_TO_ANSI( file.c_str() ) );
+
+			// Item event handles
+			if ( ImGui::IsItemHovered() )
+			{
+				// Select package if we press left mouse button
+				if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
+				{
+					ProcessSelectItem( file, selectedPackages, ImGuiMouseButton_Left, bSelectedPackage );
+				}
+				// Select package for popup menu if we press right mouse button
+				else if ( ImGui::IsMouseDown( ImGuiMouseButton_Right ) )
+				{
+					ProcessSelectItem( file, selectedPackages, ImGuiMouseButton_Right, bSelectedPackage );
+				}
+				
+				// If we double clicked by left mouse button, we must open package
+				if ( !GInputSystem->IsKeyDown( BC_KeyLControl ) && !GInputSystem->IsKeyDown( BC_KeyRControl ) && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
+				{
+					package = GPackageManager->LoadPackage( fullPath );
+					check( package );
+					selectedAssets.clear();
+				}
+			}
+
+			// Pop style color
+			if ( bSelectedPackage )
+			{
+				ImGui::PopStyleColor( 3 );
+			}
+		}
+	}
+}
+
+void CContentBrowserWindow::DrawAssets()
+{
+	check( package );
+	SAssetInfo		assetInfo;
+
+	for ( uint32 index = 0, count = package->GetNumAssets(); index < count; ++index )
+	{
+		package->GetAssetInfo( index, assetInfo );
+		if ( filterAssetType[assetInfo.type - 1] && CString::InString( assetInfo.name, ANSI_TO_TCHAR( filterAsset.c_str() ), true ) )
+		{
+			ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, CONTENTBROWSER_ASSET_BORDERSIZE );
+			ImGui::PushStyleColor( ImGuiCol_Border, GAssetBorderColors[assetInfo.type] );
+
+			// If asset is selected, we set him button color to CONTENTBROWSER_ASSET_SELECTCOLOR
+			bool	bSelectedAsset = selectedAssets.find( assetInfo.name ) != selectedAssets.end();
+			if ( bSelectedAsset )
+			{
+				ImGui::PushStyleColor( ImGuiCol_Button, CONTENTBROWSER_ASSET_SELECTCOLOR );
+				ImGui::PushStyleColor( ImGuiCol_ButtonHovered, CONTENTBROWSER_ASSET_SELECTCOLOR );
+				ImGui::PushStyleColor( ImGuiCol_ButtonActive, CONTENTBROWSER_ASSET_SELECTCOLOR );
+			}
+
+			// Draw of the asset's button, if him's icon isn't existing we draw simple button
+			const TAssetHandle<CTexture2D>&		assetIconTexture = assetIcons[assetInfo.type];
+			if ( assetIconTexture.IsAssetValid() )
+			{
+				ImGui::ImageButton( assetIconTexture.ToSharedPtr()->GetTexture2DRHI()->GetHandle(), { thumbnailSize, thumbnailSize } );
+			}
+			else
+			{
+				ImGui::Button( TCHAR_TO_ANSI( assetInfo.name.c_str() ), { thumbnailSize, thumbnailSize } );
+			}
+
+			// Item event handles
+			if ( ImGui::IsItemHovered() )
+			{
+				// Select asset if we press left mouse button
+				if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
+				{
+					ProcessSelectItem( assetInfo.name, selectedAssets, ImGuiMouseButton_Left, bSelectedAsset );
+				}
+				// Select asset for popup menu if we press right mouse button
+				else if ( ImGui::IsMouseDown( ImGuiMouseButton_Right ) )
+				{
+					ProcessSelectItem( assetInfo.name, selectedAssets, ImGuiMouseButton_Right, bSelectedAsset );
+				}
+				
+				// If we double clicked by left mouse button, we must open editor for this type asset
+				if ( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
+				{
+					// TODO: Implement editor of the asset
+					LE_LOG( LT_Warning, LC_Dev, TEXT( "CContentBrowserWindow::DrawAssets: Need implement editor of the asset" ) );
+				}
+			}
+			ImGui::PopStyleVar();
+			ImGui::PopStyleColor( !bSelectedAsset ? 1 : 4 );
+
+			ImGui::Text( TCHAR_TO_ANSI( assetInfo.name.c_str() ) );
+			ImGui::NextColumn();
 		}
 	}
 }
