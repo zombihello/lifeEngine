@@ -37,10 +37,10 @@ CEditorEngine::CEditorEngine()
 	, explorerLevelWindow( TEXT( "Explorer Level" ) )
 	, logsWindow( TEXT( "Logs" ) )
 	, viewportWindows{ 
-		CViewportWindow( TEXT( "Ortho XY" ), LVT_OrthoXY ),
-		CViewportWindow( TEXT( "Ortho XZ" ), LVT_OrthoXZ ),
-		CViewportWindow( TEXT( "Ortho YZ" ), LVT_OrthoYZ ),
-		CViewportWindow( TEXT( "Perspective" ), LVT_Perspective )
+		CViewportWindow( TEXT( "Ortho XY" ), false, LVT_OrthoXY ),
+		CViewportWindow( TEXT( "Ortho XZ" ), false, LVT_OrthoXZ ),
+		CViewportWindow( TEXT( "Ortho YZ" ), false, LVT_OrthoYZ ),
+		CViewportWindow( TEXT( "Perspective" ), true, LVT_Perspective )
 	}
 {}
 
@@ -111,7 +111,7 @@ void CEditorEngine::Tick( float InDeltaSeconds )
 	{
 		viewports[index]->Tick( InDeltaSeconds );
 	}
-
+	
 	// Reset input events after engine tick
 	GInputSystem->ResetEvents();
 

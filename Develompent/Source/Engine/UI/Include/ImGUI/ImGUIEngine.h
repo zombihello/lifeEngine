@@ -229,6 +229,24 @@ public:
 	}
 
 	/**
+	 * @brief Set layer padding
+	 * @param InPadding		New layer padding
+	 */
+	FORCEINLINE void SetPadding( const Vector2D& InPadding )
+	{
+		padding = InPadding;
+	}
+
+	/**
+	 * @brief Is layer inited
+	 * @return Return TRUE if layer is inited
+	 */
+	FORCEINLINE bool IsInit() const
+	{
+		return bInit;
+	}
+
+	/**
 	 * @brief Is visible layer
 	 * @return Return TRUE if layer is visible
 	 */
@@ -273,6 +291,15 @@ public:
 		return size.y;
 	}
 
+	/**
+	 * @brief Get layer padding
+	 * @return Return layer padding
+	 */
+	FORCEINLINE Vector2D GetPadding() const
+	{
+		return padding;
+	}
+
 protected:
 	/**
 	 * @brief Method tick interface of a layer
@@ -291,10 +318,12 @@ private:
 	 */
 	void UpdateEvents();
 
+	bool						bInit;				/**< Is inited layer */
 	bool						bVisibility;		/**< Is visible layer */
 	bool						bFocused;			/**< Is focused layer */
 	bool						bHovered;			/**< Is hovered layer */
 	Vector2D					size;				/**< Layer size */
+	Vector2D					padding;			/**< Layer padding */
 	std::wstring				name;				/**< Layer name */
 	std::stack<SWindowEvent>	events;				/**< Stack of ImGUI events who need process */
 };

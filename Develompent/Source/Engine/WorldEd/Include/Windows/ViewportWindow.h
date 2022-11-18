@@ -26,9 +26,10 @@ public:
 	 * @brief Constructor
 	 *
 	 * @param InName			Window name
+	 * @param InVisibility		Default visibility of the viewport window. If is FALSE him will not draw
 	 * @param InViewportType	Viewport type
 	 */
-	CViewportWindow( const std::wstring& InName, ELevelViewportType InViewportType = LVT_Perspective );
+	CViewportWindow( const std::wstring& InName, bool InVisibility = true, ELevelViewportType InViewportType = LVT_Perspective );
 
 	/**
 	 * @brief Init

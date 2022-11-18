@@ -4,7 +4,7 @@
 
 #include "Render/RenderingThread.h"
 
-CViewportWindow::CViewportWindow( const std::wstring& InName, ELevelViewportType InViewportType /* = LVT_Perspective */ )
+CViewportWindow::CViewportWindow( const std::wstring& InName, bool InVisibility /* = true */, ELevelViewportType InViewportType /* = LVT_Perspective */ )
 	: CImGUILayer( InName )
 	, bViewportOnDrawing( false )
 	, viewport( new CViewport() )
@@ -12,14 +12,18 @@ CViewportWindow::CViewportWindow( const std::wstring& InName, ELevelViewportType
 {
 	viewportClient.SetViewportType( InViewportType );
 	viewport->SetViewportClient( &viewportClient );
+	SetVisibility( InVisibility );
+	SetPadding( Vector2D( 0.f, 0.f ) );
 }
 
 void CViewportWindow::Init()
 {
 	CImGUILayer::Init();
-
-	GEditorEngine->AddViewport( viewport );
-	bViewportOnDrawing = true;
+	if ( IsVisibility() )
+	{
+		GEditorEngine->AddViewport( viewport );
+		bViewportOnDrawing = true;
+	}
 }
 
 void CViewportWindow::OnTick()
@@ -32,15 +36,18 @@ void CViewportWindow::OnTick()
 
 void CViewportWindow::OnVisibilityChanged( bool InNewVisibility )
 {
-	if ( InNewVisibility && !bViewportOnDrawing )
+	if ( IsInit() )
 	{
-		GEditorEngine->AddViewport( viewport );
-		bViewportOnDrawing = true;
-	}
-	else
-	{
-		GEditorEngine->RemoveViewport( viewport );
-		bViewportOnDrawing = false;
+		if ( InNewVisibility && !bViewportOnDrawing )
+		{
+			GEditorEngine->AddViewport( viewport );
+			bViewportOnDrawing = true;
+		}
+		else if ( !InNewVisibility && bViewportOnDrawing )
+		{
+			GEditorEngine->RemoveViewport( viewport );
+			bViewportOnDrawing = false;
+		}
 	}
 }
 

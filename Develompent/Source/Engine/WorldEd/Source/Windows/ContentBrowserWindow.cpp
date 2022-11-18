@@ -12,8 +12,11 @@
 /** Border size for buttons in asset viewer */
 #define CONTENTBROWSER_ASSET_BORDERSIZE		1.f
 
-/** Color of a selected asset */
-#define CONTENTBROWSER_ASSET_SELECTCOLOR	ImVec4( 0.f, 0.43f, 0.87f, 1.f )
+/** Selection colode */
+#define CONTENTBROWSER_SELECTCOLOR			ImVec4( 0.f, 0.43f, 0.87f, 1.f )
+
+/** Drag & drop type of a file node */
+#define CONTENTBROWSER_DND_FILENODETYPE		"DND::FileNode"
 
 /** Table of color buttons by asset type */
 static ImVec4		GAssetBorderColors[] =
@@ -45,9 +48,7 @@ CContentBrowserWindow::CContentBrowserWindow( const std::wstring& InName )
 	: CImGUILayer( InName )
 	, padding( 16.f )
 	, thumbnailSize( 64.f )
-{
-	memset( filterAssetType, 1, ARRAY_COUNT( filterAssetType ) * sizeof( bool ) );
-}
+{}
 
 void CContentBrowserWindow::Init()
 {
@@ -74,125 +75,99 @@ void CContentBrowserWindow::Init()
 			assetIcons[index] = assetHandle;
 		}
 	}
+
+	// Create root nodes for engine and game directories
+	engineRoot	= MakeSharedPtr<CFileTreeNode>( FNT_Folder, TEXT( "Engine" ), appBaseDir() + PATH_SEPARATOR TEXT( "Engine/Content/" ), this );
+	gameRoot	= MakeSharedPtr<CFileTreeNode>( FNT_Folder, TEXT( "Game" ), appGameDir() + PATH_SEPARATOR TEXT( "Content/" ), this );
 }
 
 void CContentBrowserWindow::OnTick()
 {
 	ImGui::Columns( 2 );
 
-	// Draw list of packages in file system
-	ImGui::InputTextWithHint( "##FilterPackage", "Search", &filterPackage );
-	ImGui::SameLine( 0, 0 );
-	if ( ImGui::Button( "X##0" ) )
+	// Draw file system tree
 	{
-		filterPackage.clear();
+		ImGui::InputTextWithHint( "##FilterPackages", "Search", &filterInfo.fileName );
+		ImGui::SameLine( 0, 0 );
+		if ( ImGui::Button( "X##0" ) )
+		{
+			filterInfo.fileName.clear();
+		}
+
+		ImGui::BeginChild( "##Packages" );
+		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
+		
+		engineRoot->Tick();
+		gameRoot->Tick();
+		DrawPackagesPopupMenu();
+		
+		ImGui::PopStyleColor();	
+		ImGui::EndChild();
+		ImGui::NextColumn();
 	}
 
-	ImGui::BeginChild( "##Packages" );
-	ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
-	
-	// Engine category packages
-	if ( ImGui::TreeNode( "Engine" ) )
+	// Draw assets list
 	{
-		DrawPackageList( appBaseDir() + PATH_SEPARATOR TEXT( "Engine/Content/" ) );
-		ImGui::TreePop();
-	}
-
-	// Game category packages
-	if ( ImGui::TreeNode( "Game" ) )
-	{
-		DrawPackageList( appGameDir() + PATH_SEPARATOR TEXT( "Content/" ) );
-		ImGui::TreePop();
-	}
-	ImGui::PopStyleColor();
-	
-	// Reset selection if clicked not on package
-	if ( ImGui::IsWindowHovered() && ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) || ( !ImGui::IsAnyItemHovered() && ImGui::IsMouseDown( ImGuiMouseButton_Right ) ) ) )
-	{
-		selectedPackages.clear();
-	}
-	DrawPackagesPopupMenu();
-
-	ImGui::EndChild();
-	ImGui::NextColumn();
-
-	// Draw assets in current package
-	if ( package )
-	{
-		// Section of filter assets
-		ImGui::InputTextWithHint( "##FilterAsset", "Search", &filterAsset );
+		ImGui::InputTextWithHint( "##FilterAssets", "Search", &filterInfo.assetName );
 		ImGui::SameLine( 0, 0 );
 		if ( ImGui::Button( "X##1" ) )
 		{
-			filterAsset.clear();
+			filterInfo.assetName.clear();
 		}
 
 		ImGui::SameLine();
-		ImGui::PushItemWidth( -1 );
-		if ( ImGui::BeginCombo( "##FilterAssetTypes", GetPreviewFilterAssetType().c_str() ) )
+		if ( ImGui::BeginCombo( "##FilterAssetTypes", filterInfo.GetPreviewFilterAssetType().c_str() ) )
 		{
-			bool		bEnabledAllTypes = IsShowAllAssetTypes();
+			bool		bEnabledAllTypes = filterInfo.IsShowAllAssetTypes();
 			if ( ImGui::Selectable( "All", &bEnabledAllTypes, ImGuiSelectableFlags_DontClosePopups ) )
 			{
-				if ( bEnabledAllTypes )
-				{
-					memset( filterAssetType, 1, ARRAY_COUNT( filterAssetType ) * sizeof( bool ) );
-				}
-				else
-				{
-					memset( filterAssetType, 0, ARRAY_COUNT( filterAssetType ) * sizeof( bool ) );
-				}
+				filterInfo.SetShowAllAssetTypes( bEnabledAllTypes );
 			}
 
 			for ( uint32 index = AT_FirstType; index < AT_Count; ++index )
 			{
-				ImGui::Selectable( TCHAR_TO_ANSI( ConvertAssetTypeToText( ( EAssetType )index ).c_str() ), &filterAssetType[index-1], ImGuiSelectableFlags_DontClosePopups );
+				ImGui::Selectable( TCHAR_TO_ANSI( ConvertAssetTypeToText( ( EAssetType )index ).c_str() ), &filterInfo.assetTypes[index-1], ImGuiSelectableFlags_DontClosePopups );
 			}
 			ImGui::EndCombo();
 		}
-		ImGui::PopItemWidth();
 		ImGui::Separator();
 
-		// Section of assets
-		ImGui::BeginChild( "##Assets" );
-		float	panelWidth		= ImGui::GetContentRegionAvail().x;
-		int32	columnCount		= panelWidth / ( thumbnailSize + padding );
-		if ( columnCount < 1 )
+		// Draw assets in the package
+		if ( package )
 		{
-			columnCount = 1;
-		}
-		
-		ImGui::Columns( columnCount, 0, false );				
-		DrawAssets();
-		
-		// Window event handles
-		if ( ImGui::IsWindowHovered() )
-		{
-			// Is pressed Ctrl
-			bool	bCtrlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
-
-			// If pressed Ctrl+A we select all assets in the current package
-			if ( package && selectedAssets.size() != package->GetNumAssets() && bCtrlDown && GInputSystem->IsKeyDown( BC_KeyA ) )
+			// Section of assets
+			ImGui::BeginChild( "##Assets" );
+			float	panelWidth	= ImGui::GetContentRegionAvail().x;
+			int32	columnCount = panelWidth / ( thumbnailSize + padding );
+			if ( columnCount < 1 )
 			{
-				selectedAssets.clear();
-				SAssetInfo		assetInfo;
+				columnCount = 1;
+			}
 
-				for ( uint32 index = 0, count = package->GetNumAssets(); index < count; ++index )
+			ImGui::Columns( columnCount, 0, false );	
+			for ( uint32 index = 0, count = assets.size(); index < count; ++index )
+			{
+				CAssetNode&		assetNode = assets[index];
+				if ( filterInfo.assetTypes[assetNode.GetType() - 1] && CString::InString( assetNode.GetName(), ANSI_TO_TCHAR( filterInfo.assetName.c_str() ), true ) )
 				{
-					package->GetAssetInfo( index, assetInfo );
-					selectedAssets.insert( assetInfo.name );
+					assetNode.Tick();
+					ImGui::NextColumn();
 				}
 			}
-			// Reset selection if clicked not on asset
-			else if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) || ( !ImGui::IsAnyItemHovered() && ImGui::IsMouseDown( ImGuiMouseButton_Right ) ) )
+
+			// Unselect all assets if clicked on empty space
+			if ( ImGui::IsWindowHovered() && ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) || ( !ImGui::IsAnyItemHovered() && ImGui::IsMouseDown( ImGuiMouseButton_Right ) ) ) )
 			{
-				selectedAssets.clear();
+				for ( uint32 index = 0, count = assets.size(); index < count; ++index )
+				{
+					assets[index].SetSelect( false );
+				}
 			}
+
+			// Draw popup menu of assets
+			DrawAssetsPopupMenu();
+			ImGui::EndChild();
 		}
-		
-		// Draw popup menu of assets
-		DrawAssetsPopupMenu();
-		ImGui::EndChild();
 	}
 
 	ImGui::EndColumns();
@@ -202,7 +177,16 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 {
 	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
 	{
-		bool		bSelectedAssets = !selectedAssets.empty();
+		bool		bSelectedAssets = false;
+		for ( uint32 index = 0, count = assets.size(); index < count; ++index )
+		{
+			bSelectedAssets |= assets[index].IsSelected();
+			if ( bSelectedAssets )
+			{
+				break;
+			}
+		}
+
 		if ( ImGui::BeginMenu( "Create" ) )
 		{
 			ImGui::MenuItem( "Material" );
@@ -231,7 +215,11 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 {
 	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
 	{
-		bool		bSelectedPackages = !selectedPackages.empty();
+		std::vector<TSharedPtr<CFileTreeNode>>		selectedNode;
+		engineRoot->GetSelectedNodes( selectedNode );
+		gameRoot->GetSelectedNodes( selectedNode );
+
+		bool bSelectedPackages = !selectedNode.empty();
 		ImGui::MenuItem( "Save", "", nullptr, bSelectedPackages );
 		ImGui::MenuItem( "Open", "", nullptr, bSelectedPackages );
 		ImGui::MenuItem( "Unload", "", nullptr, bSelectedPackages );
@@ -253,137 +241,7 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 	}
 }
 
-void CContentBrowserWindow::DrawPackageList( const std::wstring& InRootDir )
-{
-	std::vector<std::wstring>	files = GFileSystem->FindFiles( InRootDir, true, true );
-	for ( uint32 index = 0, count = files.size(); index < count; ++index )
-	{
-		std::wstring		file		= files[index];
-		std::size_t			dotPos		= file.find_last_of( TEXT( "." ) );
-		std::wstring		fullPath	= InRootDir + TEXT( "/" ) + file;
-
-		// Draw tree in sub directory
-		if ( dotPos == std::wstring::npos )
-		{
-			if ( ImGui::TreeNode( TCHAR_TO_ANSI( file.c_str() ) ) )
-			{
-				DrawPackageList( fullPath );
-				ImGui::TreePop();
-			}
-			continue;
-		}
-
-		std::wstring		extension = file;
-		extension.erase( 0, dotPos + 1 );
-		if ( extension == TEXT( "pak" ) && CString::InString( file, ANSI_TO_TCHAR( filterPackage.c_str() ), true ) )
-		{
-			// If package is selected, we set him button color to CONTENTBROWSER_ASSET_SELECTCOLOR
-			bool	bSelectedPackage = selectedPackages.find( file ) != selectedPackages.end();
-			if ( bSelectedPackage )
-			{
-				ImGui::PushStyleColor( ImGuiCol_Button, CONTENTBROWSER_ASSET_SELECTCOLOR );
-				ImGui::PushStyleColor( ImGuiCol_ButtonHovered, CONTENTBROWSER_ASSET_SELECTCOLOR );
-				ImGui::PushStyleColor( ImGuiCol_ButtonActive, CONTENTBROWSER_ASSET_SELECTCOLOR );
-			}
-
-			ImGui::Button( TCHAR_TO_ANSI( file.c_str() ) );
-
-			// Item event handles
-			if ( ImGui::IsItemHovered() )
-			{
-				// Select package if we press left mouse button
-				if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
-				{
-					ProcessSelectItem( file, selectedPackages, ImGuiMouseButton_Left, bSelectedPackage );
-				}
-				// Select package for popup menu if we press right mouse button
-				else if ( ImGui::IsMouseDown( ImGuiMouseButton_Right ) )
-				{
-					ProcessSelectItem( file, selectedPackages, ImGuiMouseButton_Right, bSelectedPackage );
-				}
-				
-				// If we double clicked by left mouse button, we must open package
-				if ( !GInputSystem->IsKeyDown( BC_KeyLControl ) && !GInputSystem->IsKeyDown( BC_KeyRControl ) && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
-				{
-					package = GPackageManager->LoadPackage( fullPath );
-					check( package );
-					selectedAssets.clear();
-				}
-			}
-
-			// Pop style color
-			if ( bSelectedPackage )
-			{
-				ImGui::PopStyleColor( 3 );
-			}
-		}
-	}
-}
-
-void CContentBrowserWindow::DrawAssets()
-{
-	check( package );
-	SAssetInfo		assetInfo;
-
-	for ( uint32 index = 0, count = package->GetNumAssets(); index < count; ++index )
-	{
-		package->GetAssetInfo( index, assetInfo );
-		if ( filterAssetType[assetInfo.type - 1] && CString::InString( assetInfo.name, ANSI_TO_TCHAR( filterAsset.c_str() ), true ) )
-		{
-			ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, CONTENTBROWSER_ASSET_BORDERSIZE );
-			ImGui::PushStyleColor( ImGuiCol_Border, GAssetBorderColors[assetInfo.type] );
-
-			// If asset is selected, we set him button color to CONTENTBROWSER_ASSET_SELECTCOLOR
-			bool	bSelectedAsset = selectedAssets.find( assetInfo.name ) != selectedAssets.end();
-			if ( bSelectedAsset )
-			{
-				ImGui::PushStyleColor( ImGuiCol_Button, CONTENTBROWSER_ASSET_SELECTCOLOR );
-				ImGui::PushStyleColor( ImGuiCol_ButtonHovered, CONTENTBROWSER_ASSET_SELECTCOLOR );
-				ImGui::PushStyleColor( ImGuiCol_ButtonActive, CONTENTBROWSER_ASSET_SELECTCOLOR );
-			}
-
-			// Draw of the asset's button, if him's icon isn't existing we draw simple button
-			const TAssetHandle<CTexture2D>&		assetIconTexture = assetIcons[assetInfo.type];
-			if ( assetIconTexture.IsAssetValid() )
-			{
-				ImGui::ImageButton( assetIconTexture.ToSharedPtr()->GetTexture2DRHI()->GetHandle(), { thumbnailSize, thumbnailSize } );
-			}
-			else
-			{
-				ImGui::Button( TCHAR_TO_ANSI( assetInfo.name.c_str() ), { thumbnailSize, thumbnailSize } );
-			}
-
-			// Item event handles
-			if ( ImGui::IsItemHovered() )
-			{
-				// Select asset if we press left mouse button
-				if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
-				{
-					ProcessSelectItem( assetInfo.name, selectedAssets, ImGuiMouseButton_Left, bSelectedAsset );
-				}
-				// Select asset for popup menu if we press right mouse button
-				else if ( ImGui::IsMouseDown( ImGuiMouseButton_Right ) )
-				{
-					ProcessSelectItem( assetInfo.name, selectedAssets, ImGuiMouseButton_Right, bSelectedAsset );
-				}
-				
-				// If we double clicked by left mouse button, we must open editor for this type asset
-				if ( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
-				{
-					// TODO: Implement editor of the asset
-					LE_LOG( LT_Warning, LC_Dev, TEXT( "CContentBrowserWindow::DrawAssets: Need implement editor of the asset" ) );
-				}
-			}
-			ImGui::PopStyleVar();
-			ImGui::PopStyleColor( !bSelectedAsset ? 1 : 4 );
-
-			ImGui::Text( TCHAR_TO_ANSI( assetInfo.name.c_str() ) );
-			ImGui::NextColumn();
-		}
-	}
-}
-
-std::string CContentBrowserWindow::GetPreviewFilterAssetType() const
+std::string CContentBrowserWindow::SFilterInfo::GetPreviewFilterAssetType() const
 {
 	if ( IsShowAllAssetTypes() )
 	{
@@ -393,11 +251,348 @@ std::string CContentBrowserWindow::GetPreviewFilterAssetType() const
 	std::wstring	result;
 	for ( uint32 index = AT_FirstType; index < AT_Count; ++index )
 	{
-		if ( filterAssetType[index - 1] )
+		if ( assetTypes[index - 1] )
 		{
 			result += CString::Format( TEXT( "%s%s" ), result.empty() ? TEXT( "" ) : TEXT( ", " ), ConvertAssetTypeToText( ( EAssetType )index ).c_str() );
 		}
 	}
 
 	return TCHAR_TO_ANSI( result.c_str() );
+}
+
+CContentBrowserWindow::CFileTreeNode::CFileTreeNode( EFileNodeType InType, const std::wstring& InName, const std::wstring& InPath, CContentBrowserWindow* InOwner )
+	: bFreshed( false )
+	, bSelected( false )
+	, type( InType )
+	, path( InPath )
+	, name( InName )
+	, owner( InOwner )
+{
+	check( owner );
+}
+
+void CContentBrowserWindow::CFileTreeNode::Tick()
+{
+	// Reset freshed flag in node
+	bFreshed = false;
+
+	// Refresh info about file system
+	Refresh();
+
+	// If after refreshing of the node flag is staying in FALSE - this is folder/file in FS not exist already
+	if ( !bFreshed )
+	{
+		RemoveFromParent();
+		return;
+	}
+
+	// Draw interface
+	switch ( type )
+	{
+		// Draw folder node
+	case FNT_Folder:
+	{
+		// Set style for selected node
+		bool	bNeedPopStyleColor = false;
+		if ( bSelected )
+		{
+			bNeedPopStyleColor = true;
+			ImGui::PushStyleColor( ImGuiCol_Header,			CONTENTBROWSER_SELECTCOLOR );
+			ImGui::PushStyleColor( ImGuiCol_HeaderActive,	CONTENTBROWSER_SELECTCOLOR );
+			ImGui::PushStyleColor( ImGuiCol_HeaderHovered,	CONTENTBROWSER_SELECTCOLOR );
+		}
+		
+		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( name.c_str() ), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow  | ImGuiTreeNodeFlags_OpenOnDoubleClick );
+
+		// Drag n drop handle
+		DragNDropHandle();
+
+		// Item event handles
+		ProcessEvents();
+
+		// Pop selection node style
+		if ( bNeedPopStyleColor )
+		{
+			ImGui::PopStyleColor( 3 );
+		}
+
+		// Draw tree
+		if ( bTreeNode )
+		{
+			for ( uint32 index = 0, count = children.size(); index < count; ++index )
+			{
+				children[index]->Tick();
+			}
+			ImGui::TreePop();
+		}
+		break;
+	}
+
+		// Draw file node
+	case FNT_File:
+		// Set style for selected node
+		bool	bNeedPopStyleColor = false;
+		if ( bSelected )
+		{
+			bNeedPopStyleColor = true;
+			ImGui::PushStyleColor( ImGuiCol_Button,			CONTENTBROWSER_SELECTCOLOR );
+			ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	CONTENTBROWSER_SELECTCOLOR );
+			ImGui::PushStyleColor( ImGuiCol_ButtonActive,	CONTENTBROWSER_SELECTCOLOR );
+		}
+
+		ImGui::Button( TCHAR_TO_ANSI( name.c_str() ) );
+
+		// Drag n drop handle
+		DragNDropHandle();
+
+		// Item event handles
+		ProcessEvents();
+
+		// Pop style color
+		if ( bNeedPopStyleColor )
+		{
+			ImGui::PopStyleColor( 3 );
+		}
+		break;
+	}
+}
+
+void CContentBrowserWindow::CFileTreeNode::ProcessEvents()
+{
+	const bool		bCtrlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
+	if ( ImGui::IsItemHovered() )
+	{
+		// Select node if we press left mouse button
+		if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
+		{
+			if ( !bCtrlDown )
+			{
+				owner->engineRoot->SetSelect( false );
+				owner->gameRoot->SetSelect( false );
+			}
+
+			switch ( type )
+			{
+			case FNT_Folder:
+				SetSelect( !bSelected && bCtrlDown );
+				break;
+
+			case FNT_File:
+				SetSelect( !bSelected );
+				break;
+			}
+		}
+		// Select node for popup menu if we press right mouse button
+		else if ( ImGui::IsMouseDown( ImGuiMouseButton_Right ) )
+		{
+			if ( !bSelected )
+			{
+				owner->engineRoot->SetSelect( false );
+				owner->gameRoot->SetSelect( false );
+				SetSelect( true, false );
+			}				
+		}
+
+		// If we double clicked by left mouse button, we must open package (if node is file)
+		if ( type == FNT_File && !GInputSystem->IsKeyDown( BC_KeyLControl ) && !GInputSystem->IsKeyDown( BC_KeyRControl ) && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
+		{
+			owner->package = GPackageManager->LoadPackage( path );
+			check( owner->package );
+
+			// Getting asset infos from current package
+			owner->assets.clear();
+			for ( uint32 index = 0, count = owner->package->GetNumAssets(); index < count; ++index )
+			{
+				SAssetInfo		assetInfo;
+				owner->package->GetAssetInfo( index, assetInfo );
+				owner->assets.push_back( CAssetNode( assetInfo, owner ) );
+			}
+		}
+	}
+
+	// Reset selection if clicked not on mode
+	if ( ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) || ImGui::IsMouseDown( ImGuiMouseButton_Right ) ) )
+	{
+		owner->assets.clear();
+		owner->package = nullptr;
+		owner->engineRoot->SetSelect( false );
+		owner->gameRoot->SetSelect( false );
+	}
+}
+
+void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
+{
+	// Begin drag n drop folder/package to other
+	if ( ImGui::BeginDragDropSource() )
+	{
+		TSharedPtr<CFileTreeNode>*		ptrThis = new TSharedPtr<CFileTreeNode>();
+		*ptrThis = AsShared();
+
+		ImGui::SetDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE, &ptrThis, sizeof( TSharedPtr<CFileTreeNode>* ), ImGuiCond_Once );
+		ImGui::EndDragDropSource();
+	}
+
+	// Drag n drop target for packages/folders
+	if ( ImGui::BeginDragDropTarget() )
+	{
+		const ImGuiPayload*		imguiPayload = ImGui::AcceptDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE );
+		if ( imguiPayload )
+		{
+			TSharedPtr<CFileTreeNode>*		pFileNode = ( *( TSharedPtr<CFileTreeNode>** )imguiPayload->Data );
+			check( pFileNode );
+			LE_LOG( LT_Log, LC_Dev, ( *pFileNode  )->GetPath().c_str() );
+			delete pFileNode;
+		}
+		ImGui::EndDragDropTarget();
+	}
+}
+
+void CContentBrowserWindow::CFileTreeNode::Refresh()
+{
+	// If node not exist in file system or need filter him, we mark him not freshed
+	if ( ( type == FNT_File && !CString::InString( name, ANSI_TO_TCHAR( owner->filterInfo.fileName.c_str() ), true ) ) || !GFileSystem->IsExistFile( path, type == FNT_Folder ? true : false ) )
+	{
+		bFreshed = false;
+		return;
+	}
+
+	std::vector<std::wstring>	files			= GFileSystem->FindFiles( path, true, true );
+	for ( uint32 index = 0, count = files.size(); index < count; ++index )
+	{
+		std::wstring					file		= files[index];
+		std::size_t						dotPos		= file.find_last_of( TEXT( "." ) );
+		std::wstring					fullPath	= path + TEXT( "/" ) + file;
+		TSharedPtr<CFileTreeNode>		childNode;
+
+		// Add child node if this is directory
+		if ( dotPos == std::wstring::npos )
+		{
+			childNode = FindChild( fullPath );
+			if ( !childNode )
+			{
+				childNode = MakeSharedPtr<CFileTreeNode>( FNT_Folder, file, fullPath, owner );
+				children.push_back( childNode );
+			}
+
+			childNode->Refresh();
+			continue;
+		}
+
+		// If this package file we add new child node
+		std::wstring		extension = file;
+		extension.erase( 0, dotPos + 1 );
+		if ( extension == TEXT( "pak" ) )
+		{
+			childNode = FindChild( fullPath );
+			if ( !childNode )
+			{
+				childNode = MakeSharedPtr<CFileTreeNode>( FNT_File, file, fullPath, owner );
+				children.push_back( childNode );
+			}
+
+			childNode->bFreshed = true;
+		}
+	}
+
+	bFreshed = true;
+}
+
+void CContentBrowserWindow::CFileTreeNode::GetSelectedNodes( std::vector<TSharedPtr<CFileTreeNode>>& OutSelectedNodes, bool InIsIgnoreChildren /* = false */ ) const
+{
+	if ( bSelected )
+	{
+		OutSelectedNodes.push_back( AsShared() );
+	}
+
+	if ( !InIsIgnoreChildren )
+	{
+		for ( uint32 index = 0, count = children.size(); index < count; ++index )
+		{
+			children[index]->GetSelectedNodes( OutSelectedNodes, InIsIgnoreChildren );
+		}
+	}
+}
+
+void CContentBrowserWindow::CAssetNode::Tick()
+{
+	ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, CONTENTBROWSER_ASSET_BORDERSIZE );
+	ImGui::PushStyleColor( ImGuiCol_Border, GAssetBorderColors[info.type] );
+
+	// If asset is selected, we set him button color to CONTENTBROWSER_SELECTCOLOR
+	bool		bNeedPopStyleColor = false;
+	if ( bSelected )
+	{
+		bNeedPopStyleColor = true;
+		ImGui::PushStyleColor( ImGuiCol_Button, CONTENTBROWSER_SELECTCOLOR );
+		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, CONTENTBROWSER_SELECTCOLOR );
+		ImGui::PushStyleColor( ImGuiCol_ButtonActive, CONTENTBROWSER_SELECTCOLOR );
+	}
+
+	// Draw of the asset's button, if him's icon isn't existing we draw simple button
+	const TAssetHandle<CTexture2D>&		assetIconTexture = owner->assetIcons[info.type];
+	if ( assetIconTexture.IsAssetValid() )
+	{
+		ImGui::ImageButton( assetIconTexture.ToSharedPtr()->GetTexture2DRHI()->GetHandle(), { owner->thumbnailSize, owner->thumbnailSize } );
+	}
+	else
+	{
+		ImGui::Button( TCHAR_TO_ANSI( info.name.c_str() ), { owner->thumbnailSize, owner->thumbnailSize } );
+	}
+
+	// Process events
+	ProcessEvents();
+
+	ImGui::TextWrapped( TCHAR_TO_ANSI( info.name.c_str() ) );
+
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor( !bNeedPopStyleColor ? 1 : 4 );
+}
+
+void CContentBrowserWindow::CAssetNode::ProcessEvents()
+{
+	const bool		bCtrlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
+	if ( ImGui::IsItemHovered() )
+	{
+		// Select asset if we press left mouse button
+		if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
+		{
+			if ( !bCtrlDown )
+			{
+				for ( uint32 index = 0, count = owner->assets.size(); index < count; ++index )
+				{
+					owner->assets[index].SetSelect( false );
+				}
+			}
+
+			SetSelect( !bSelected );
+		}
+		// Select asset for popup menu if we press right mouse button
+		else if ( ImGui::IsMouseDown( ImGuiMouseButton_Right ) )
+		{
+			if ( !bSelected )
+			{
+				for ( uint32 index = 0, count = owner->assets.size(); index < count; ++index )
+				{
+					owner->assets[index].SetSelect( false );
+				}
+				SetSelect( true );
+			}
+		}
+
+		// If we double clicked by left mouse button, we must open editor for this type asset
+		if ( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
+		{
+			// TODO: Implement editor of the asset
+			LE_LOG( LT_Warning, LC_Dev, TEXT( "CContentBrowserWindow::DrawAssets: Need implement editor of the asset" ) );
+		}
+	}
+
+	// If pressed Ctrl+A we select all assets in the current package
+	if ( ImGui::IsWindowHovered() && ( bCtrlDown && GInputSystem->IsKeyDown( BC_KeyA ) ) )
+	{
+		for ( uint32 index = 0, count = owner->assets.size(); index < count; ++index )
+		{
+			owner->assets[index].SetSelect( true );
+		}
+	}
 }

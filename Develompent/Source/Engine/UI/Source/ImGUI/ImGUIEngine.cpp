@@ -130,10 +130,12 @@ void ÑImGUIWindow::Tick()
 //
 
 CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ )
-	: bVisibility( true )
+	: bInit( false )
+	, bVisibility( true )
 	, bFocused( false )
 	, bHovered( false )
 	, size( 0.f, 0.f )
+	, padding( 5.f, 5.f )
 	, name( InName )
 {}
 
@@ -145,18 +147,21 @@ CImGUILayer::~CImGUILayer()
 void CImGUILayer::Init()
 {
 	GImGUIEngine->AddLayer( this );
+	bInit = true;
 }
 
 void CImGUILayer::Tick()
 {
 	if ( bVisibility )
 	{
+		ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2{ padding.x, padding.y } );
 		if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility ) )
 		{
 			UpdateEvents();
 			OnTick();
 		}
 		ImGui::End();
+		ImGui::PopStyleVar();
 
 		// If visibility is changed, we send event to children
 		if ( !bVisibility )

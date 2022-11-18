@@ -51,16 +51,17 @@ void CEditorInterfaceViewportClient::Draw( CViewport* InViewport )
 			ImGui::DockBuilderSetNodeSize( dockspaceId, imguiViewport->Size );
 
 			// Split dock nodes
-			ImGuiID		dockIdRight = ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Right, 0.2f, nullptr, &dockspaceId );
-			ImGuiID		dockIdDown	= ImGui::DockBuilderSplitNode( dockIdRight, ImGuiDir_Down, 0.5f, nullptr, &dockIdRight );
+			ImGuiID		dockIdRight				= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Right, 0.2f, nullptr, &dockspaceId );
+			ImGuiID		dockIdDown				= ImGui::DockBuilderSplitNode( dockIdRight, ImGuiDir_Down, 0.5f, nullptr, &dockIdRight );
 			
-			ImGuiID		dockIdViewportXY	= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Up, 0.5f, nullptr, &dockspaceId );
-			ImGuiID		dockIdViewportXZ	= ImGui::DockBuilderSplitNode( dockIdViewportXY, ImGuiDir_Right, 0.5f, nullptr, &dockIdViewportXY );
-			ImGuiID		dockIdViewportYZ	= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Right, 0.5f, nullptr, &dockspaceId );
+			ImGuiID		dockIdViewportXY		= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Up, 0.5f, nullptr, &dockspaceId );
+			ImGuiID		dockIdContentBrowser	= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Down, 0.25f, nullptr, &dockspaceId );
+			ImGuiID		dockIdViewportXZ		= ImGui::DockBuilderSplitNode( dockIdViewportXY, ImGuiDir_Right, 0.5f, nullptr, &dockIdViewportXY );
+			ImGuiID		dockIdViewportYZ		= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Right, 0.5f, nullptr, &dockspaceId );
 
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetExplorerLevelWindow().GetName().c_str() ), dockIdRight );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetActorPropertiesWindow().GetName().c_str() ), dockIdDown );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetContentBrowserWindow().GetName().c_str() ), dockIdDown );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetContentBrowserWindow().GetName().c_str() ), dockIdContentBrowser );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetActorClassesWindow().GetName().c_str() ), dockIdDown );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLogsWindow().GetName().c_str() ), dockIdDown );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetViewportWindow( LVT_Perspective ).GetName().c_str() ), dockspaceId );
