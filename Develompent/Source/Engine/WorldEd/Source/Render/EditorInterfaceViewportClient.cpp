@@ -51,11 +51,11 @@ void CEditorInterfaceViewportClient::Draw( CViewport* InViewport )
 			ImGui::DockBuilderSetNodeSize( dockspaceId, imguiViewport->Size );
 
 			// Split dock nodes
-			ImGuiID		dockIdRight				= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Right, 0.2f, nullptr, &dockspaceId );
+			ImGuiID		dockIdRight				= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Right, 0.15f, nullptr, &dockspaceId );
 			ImGuiID		dockIdDown				= ImGui::DockBuilderSplitNode( dockIdRight, ImGuiDir_Down, 0.5f, nullptr, &dockIdRight );
 			
 			ImGuiID		dockIdViewportXY		= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Up, 0.5f, nullptr, &dockspaceId );
-			ImGuiID		dockIdContentBrowser	= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Down, 0.25f, nullptr, &dockspaceId );
+			ImGuiID		dockIdContentBrowser	= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Down, 0.2f, nullptr, &dockspaceId );
 			ImGuiID		dockIdViewportXZ		= ImGui::DockBuilderSplitNode( dockIdViewportXY, ImGuiDir_Right, 0.5f, nullptr, &dockIdViewportXY );
 			ImGuiID		dockIdViewportYZ		= ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Right, 0.5f, nullptr, &dockspaceId );
 

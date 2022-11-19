@@ -201,14 +201,33 @@ private:
 			}
 		}
 
-		bool										bFreshed;	/**< Is freshed node */
-		bool										bSelected;	/**< Is selected node */
-		EFileNodeType								type;		/**< Node type */
-		std::wstring								path;		/**< Full path to file */
-		std::wstring								name;		/**< Node name for UI */
-		CContentBrowserWindow*						owner;		/**< Content browser window who owned this node */
-		TWeakPtr<CFileTreeNode>						parent;		/**< Parent node */
-		std::vector<TSharedPtr<CFileTreeNode>>		children;	/**< Array of children */
+		/**
+		 * @brief Set allow drop target
+		 *
+		 * @param InIsAllowDropTarget	Is allowed drop target
+		 * @param InApplyToChildren		Is need apply to children
+		 */
+		FORCEINLINE void SetAllowDropTarget( bool InIsAllowDropTarget, bool InApplyToChildren = true )
+		{
+			bAllowDropTarget = InIsAllowDropTarget;
+			if ( InApplyToChildren )
+			{
+				for ( uint32 index = 0, count = children.size(); index < count; ++index )
+				{
+					children[index]->SetAllowDropTarget( InIsAllowDropTarget, InApplyToChildren );
+				}
+			}
+		}
+
+		bool										bAllowDropTarget;	/**< Is allowed drop target */
+		bool										bFreshed;			/**< Is freshed node */
+		bool										bSelected;			/**< Is selected node */
+		EFileNodeType								type;				/**< Node type */
+		std::wstring								path;				/**< Full path to file */
+		std::wstring								name;				/**< Node name for UI */
+		CContentBrowserWindow*						owner;				/**< Content browser window who owned this node */
+		TWeakPtr<CFileTreeNode>						parent;				/**< Parent node */
+		std::vector<TSharedPtr<CFileTreeNode>>		children;			/**< Array of children */
 	};
 
 	/**

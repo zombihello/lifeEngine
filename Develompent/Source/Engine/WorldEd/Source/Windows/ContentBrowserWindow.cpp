@@ -62,7 +62,7 @@ void CContentBrowserWindow::Init()
 		texture2D = CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Thumbnails/" ) + GAssetIconPaths[index], errorMsg );
 		if ( !texture2D )
 		{
-			LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load asset icon '%s' for type 0x%X" ), GAssetIconPaths[index], index );
+			LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load asset icon '%s' for type 0x%X. Message: %s" ), GAssetIconPaths[index], index, errorMsg.c_str() );
 			assetIcons[index] = GEngine->GetDefaultTexture();
 		}
 		else
@@ -93,7 +93,7 @@ void CContentBrowserWindow::OnTick()
 		{
 			filterInfo.fileName.clear();
 		}
-
+		ImGui::Spacing();
 		ImGui::BeginChild( "##Packages" );
 		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
 		
@@ -136,6 +136,7 @@ void CContentBrowserWindow::OnTick()
 		if ( package )
 		{
 			// Section of assets
+			ImGui::Spacing();
 			ImGui::BeginChild( "##Assets" );
 			float	panelWidth	= ImGui::GetContentRegionAvail().x;
 			int32	columnCount = panelWidth / ( thumbnailSize + padding );
@@ -261,7 +262,8 @@ std::string CContentBrowserWindow::SFilterInfo::GetPreviewFilterAssetType() cons
 }
 
 CContentBrowserWindow::CFileTreeNode::CFileTreeNode( EFileNodeType InType, const std::wstring& InName, const std::wstring& InPath, CContentBrowserWindow* InOwner )
-	: bFreshed( false )
+	: bAllowDropTarget( true )
+	, bFreshed( false )
 	, bSelected( false )
 	, type( InType )
 	, path( InPath )
@@ -273,7 +275,7 @@ CContentBrowserWindow::CFileTreeNode::CFileTreeNode( EFileNodeType InType, const
 
 void CContentBrowserWindow::CFileTreeNode::Tick()
 {
-	// Reset freshed flag in node
+	// Reset freshed flag in node and allow drop target
 	bFreshed = false;
 
 	// Refresh info about file system
@@ -430,19 +432,32 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 
 		ImGui::SetDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE, &ptrThis, sizeof( TSharedPtr<CFileTreeNode>* ), ImGuiCond_Once );
 		ImGui::EndDragDropSource();
+
+		// Block drop targets to children
+		for ( uint32 index = 0, count = children.size(); index < count; ++index )
+		{
+			children[index]->SetAllowDropTarget( false );
+		}
 	}
 
 	// Drag n drop target for packages/folders
-	if ( ImGui::BeginDragDropTarget() )
+	if ( bAllowDropTarget && ImGui::BeginDragDropTarget() )
 	{
 		const ImGuiPayload*		imguiPayload = ImGui::AcceptDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE );
 		if ( imguiPayload )
 		{
 			TSharedPtr<CFileTreeNode>*		pFileNode = ( *( TSharedPtr<CFileTreeNode>** )imguiPayload->Data );
 			check( pFileNode );
-			LE_LOG( LT_Log, LC_Dev, ( *pFileNode  )->GetPath().c_str() );
+
+			CFilename		srcFilename( ( *pFileNode )->path );
+			GFileSystem->Move( CFilename( path ).GetPath() + PATH_SEPARATOR + srcFilename.GetBaseFilename() + srcFilename.GetExtension(true), ( *pFileNode )->path, false, true );
+
 			delete pFileNode;
 		}
+
+		// Allow drop targets for all nodes
+		owner->engineRoot->SetAllowDropTarget( true );
+		owner->gameRoot->SetAllowDropTarget( true );
 		ImGui::EndDragDropTarget();
 	}
 }
@@ -455,7 +470,7 @@ void CContentBrowserWindow::CFileTreeNode::Refresh()
 		bFreshed = false;
 		return;
 	}
-
+	
 	std::vector<std::wstring>	files			= GFileSystem->FindFiles( path, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
 	{

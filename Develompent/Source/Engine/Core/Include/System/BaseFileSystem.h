@@ -38,6 +38,79 @@ enum EArchiveWrite
 
 /**
  * @ingroup Core
+ * @brief Enumeration copy/move result
+ */
+enum ECopyMoveResult
+{
+	CMR_OK,          /**< Ok */
+	CMR_MiscFail,    /**< Misc fail */
+	CMR_ReadFail,    /**< Read fail */
+	CMR_WriteFail,   /**< Write fail */
+	CMR_Canceled,    /**< Canceled */
+};
+
+/**
+ * @ingroup Core
+ * @brief Utility class for quick inquiries against filenames
+ */
+class CFilename
+{
+public:
+    /**
+     * @brief Constructor
+     */
+    CFilename();
+
+    /**
+     * @brief Constructor
+     * 
+     * @param InPath    Path to file
+     */
+    CFilename( const std::wstring& InPath );
+
+    /**
+     * @brief Get file's extension
+     * 
+     * @param InIsIncludeDot        If TRUE, includes the leading dot in the result
+     * @return Return the extension of this filename, or an empty string if the filename doesn't have an extension
+     */
+    std::wstring GetExtension( bool InIsIncludeDot = false ) const;
+
+    /**
+     * @brief Get full path
+     * @return Return full path with extension
+     */
+    FORCEINLINE const std::wstring& GetFullPath() const
+    {
+        return path;
+    }
+
+    /**
+     * @brief Get base filename
+     * @return Return filename (without extension and any path information)
+     */
+    std::wstring GetBaseFilename() const;
+
+    /**
+     * @brief Get path to the file
+     * @return Return path to the file
+     */
+    std::wstring GetPath() const;
+
+    /**
+     * @brief Get localized filename by appending the language suffix before the extension
+     * 
+     * @param InLanguage    Language to use
+     * @return Return localized filename
+     */
+    std::wstring GetLocalizedFilename( const std::wstring& InLanguage = TEXT( "" ) ) const;
+
+private:
+    std::wstring        path;       /**< Path to file */
+};
+
+/**
+ * @ingroup Core
  * @brief The base class for work with file system
  */
 class CBaseFileSystem
@@ -92,13 +165,44 @@ public:
     virtual bool                                    Delete( const std::wstring& InPath, bool InIsEvenReadOnly = false )                    { return false; }
 
     /**
+	 * @brief Make directory
+	 *
+	 * @param InPath    Path to directory
+	 * @param InIsTree  Is need make all tree
+	 * @return Return TRUE if directory is seccussed maked, else returning FALSE
+	 */
+    virtual bool MakeDirectory( const std::wstring& InPath, bool InIsTree = false );
+
+    /**
      * @brief Delete directory
      * 
      * @param InPath Path to directory
      * @param InIsTree Is need delete all tree
      * @return Return true if directory is seccussed deleted, else returning false
      */
-    virtual bool                                    DeleteDirectory( const std::wstring& InPath, bool InIsTree );
+    virtual bool DeleteDirectory( const std::wstring& InPath, bool InIsTree = false );
+
+    /**
+     * @brief Copy file
+     * 
+     * @param InDstFile                 Destination file
+     * @param InSrcFile                 Source file
+     * @param InIsReplaceExisting       Is need replace existing files
+     * @param InIsEvenReadOnly          Is even read only
+     * @return Return copy result (see ECopyMoveResult)
+     */
+    virtual ECopyMoveResult Copy( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting = true, bool InIsEvenReadOnly = false ) { return CMR_Canceled; }
+
+    /**
+     * @brief Move file
+     * 
+	 * @param InDstFile                 Destination file
+	 * @param InSrcFile                 Source file
+	 * @param InIsReplaceExisting       Is need replace existing files
+	 * @param InIsEvenReadOnly          Is even read only
+	 * @return Return move result (see ECopyMoveResult)
+     */
+    virtual ECopyMoveResult Move( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting = true, bool InIsEvenReadOnly = false ) { return CMR_Canceled; }
 
     /**
      * @brief Is exist file or directory
@@ -129,6 +233,15 @@ public:
      * @return Return current directory
      */
     virtual std::wstring                            GetCurrentDirectory() const                                                             { return TEXT( "" ); }
+
+protected:
+    /**
+     * @brief Does Path refer to a drive letter or BNC path
+     * 
+     * @param InPath    Path
+     * @return Return TRUE in case 'yes'
+     */
+    virtual bool IsDrive( const std::wstring& InPath ) const;
 };
 
 #endif

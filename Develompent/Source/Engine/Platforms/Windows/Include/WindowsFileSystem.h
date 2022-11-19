@@ -70,13 +70,44 @@ public:
     virtual bool                                    Delete( const std::wstring& InPath, bool InIsEvenReadOnly = false ) override;
 
     /**
+     * @brief Make directory
+     *
+     * @param InPath    Path to directory
+     * @param InIsTree  Is need make all tree
+     * @return Return TRUE if directory is seccussed maked, else returning FALSE
+     */
+    virtual bool MakeDirectory( const std::wstring& InPath, bool InIsTree = false ) override;
+
+    /**
      * @brief Delete directory
      *
      * @param InPath Path to directory
      * @param InIsTree Is need delete all tree
      * @return Return true if directory is seccussed deleted, else returning false
      */
-    virtual bool                                    DeleteDirectory( const std::wstring& InPath, bool InIsTree ) override;
+    virtual bool DeleteDirectory( const std::wstring& InPath, bool InIsTree ) override;
+
+    /**
+     * @brief Copy file
+     *
+     * @param InDstFile                 Destination file
+     * @param InSrcFile                 Source file
+     * @param InIsReplaceExisting       Is need replace existing files
+     * @param InIsEvenReadOnly          Is even read only
+     * @return Return copy result (see ECopyMoveResult)
+     */
+    virtual ECopyMoveResult Copy( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting = true, bool InIsEvenReadOnly = false ) override;
+
+    /**
+     * @brief Move file
+     *
+     * @param InDstFile                 Destination file
+     * @param InSrcFile                 Source file
+     * @param InIsReplaceExisting       Is need replace existing files
+     * @param InIsEvenReadOnly          Is even read only
+     * @return Return move result (see ECopyMoveResult)
+     */
+    virtual ECopyMoveResult Move( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting = true, bool InIsEvenReadOnly = false ) override;
 
     /**
      * @brief Is exist file or directory

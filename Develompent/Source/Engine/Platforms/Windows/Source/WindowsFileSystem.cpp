@@ -142,6 +142,15 @@ bool CWindowsFileSystem::Delete( const std::wstring& InPath, bool InIsEvenReadOn
 	return result != 0;
 }
 
+bool CWindowsFileSystem::MakeDirectory( const std::wstring& InPath, bool InIsTree /* = false */ )
+{
+	if ( InIsTree )
+	{
+		return CBaseFileSystem::MakeDirectory( InPath, InIsTree );
+	}
+	return CreateDirectoryW( InPath.c_str(), nullptr ) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
+}
+
 bool CWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree )
 {
 	if ( InIsTree )
@@ -155,6 +164,60 @@ bool CWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsT
 		LE_LOG( LT_Warning, LC_General, TEXT( "Failed deleting directory '%s'. GetLastError() = 0x%X" ), InPath.c_str(), GetLastError() );
 	}
 	return result;
+}
+
+ECopyMoveResult CWindowsFileSystem::Copy( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting /* = true */, bool InIsEvenReadOnly /* = false */ )
+{
+	if ( InIsEvenReadOnly )
+	{
+		SetFileAttributesW( InDstFile.c_str(), 0 );
+	}
+
+	ECopyMoveResult		result;
+	MakeDirectory( CFilename( InDstFile ).GetPath(), true );
+	if ( CopyFileW( InSrcFile.c_str(), InDstFile.c_str(), !InIsReplaceExisting ) != 0 )
+	{
+		result = CMR_OK;
+	}
+	else
+	{
+		result = CMR_MiscFail;
+	}
+
+	if ( result == CMR_OK )
+	{
+		SetFileAttributesW( InDstFile.c_str(), 0 );
+	}
+	return result;
+}
+
+ECopyMoveResult CWindowsFileSystem::Move( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting /* = true */, bool InIsEvenReadOnly /* = false */ )
+{
+	MakeDirectory( CFilename( InDstFile ).GetPath(), true );
+	int32		result = MoveFileExW( InSrcFile.c_str(), InDstFile.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH );
+	if ( !result )
+	{
+		// If the move failed, throw a warning but retry before we throw an error
+		DWORD		error = GetLastError();
+		LE_LOG( LT_Warning, LC_General, TEXT( "MoveFileExW was unable to move '%s' to '%s', retrying... (GetLastE-r-r-o-r: %d)" ), InSrcFile.c_str(), InDstFile.c_str(), error );
+
+		// Wait just a little bit (i.e. a totally arbitrary amount)...
+		Sleep( 500 );
+
+		// Try again
+		result = MoveFileExW( InSrcFile.c_str(), InDstFile.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH );
+		if ( !result )
+		{
+			error = GetLastError();
+			LE_LOG( LT_Error, LC_General, TEXT( "Error moving file '%s' to '%s' (GetLastError: %d)" ), InSrcFile.c_str(), InDstFile.c_str(), error );
+		}
+		else
+		{
+			LE_LOG( LT_Warning, LC_General, TEXT( "MoveFileExW recovered during retry!" ) );
+		}
+	}
+
+	return result != 0 ? CMR_OK : CMR_MiscFail;
 }
 
 bool CWindowsFileSystem::IsExistFile( const std::wstring& InPath, bool InIsDirectory /* = false */ )

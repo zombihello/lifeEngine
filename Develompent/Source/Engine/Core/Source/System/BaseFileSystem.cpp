@@ -1,6 +1,116 @@
+#include "Misc/Misc.h"
 #include "System/BaseFileSystem.h"
 
-bool CBaseFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree )
+CFilename::CFilename()
+{}
+
+CFilename::CFilename( const std::wstring& InPath )
+	: path( InPath )
+{}
+
+std::wstring CFilename::GetExtension( bool InIsIncludeDot /* = false */ ) const
+{
+	std::wstring	result = path;
+	appNormalizePathSeparators( result );
+	
+	std::size_t		dotPos = result.find_last_of( TEXT( "." ) );
+	if ( dotPos == std::wstring::npos )
+	{
+		return TEXT( "" );
+	}
+
+	result.erase( 0, dotPos + ( InIsIncludeDot ? 0 : 1 ) );
+	return result;
+}
+
+std::wstring CFilename::GetBaseFilename() const
+{
+	std::wstring	result = path;
+	appNormalizePathSeparators( result );
+
+	std::size_t		lastSlashPos = result.find_last_of( PATH_SEPARATOR );
+	if ( lastSlashPos != std::wstring::npos )
+	{
+		result.erase( 0, lastSlashPos + 1 );
+	}
+
+	std::size_t		dotPos = result.find_last_of( TEXT( "." ) );
+	if ( dotPos != std::wstring::npos )
+	{
+		result.erase( dotPos, result.size() );
+	}
+
+	return result;
+}
+
+std::wstring CFilename::GetPath() const
+{
+	std::wstring	result = path;
+	appNormalizePathSeparators( result );
+	
+	std::size_t		lastSlashPos = result.find_last_of( PATH_SEPARATOR );
+	std::size_t		dotPos = result.find_first_of( TEXT( "." ), lastSlashPos != std::wstring::npos ? lastSlashPos+1 : std::wstring::npos );
+	if ( dotPos != std::wstring::npos )
+	{
+		result.erase( dotPos, result.size() );
+	}
+
+	return result;
+}
+
+std::wstring CFilename::GetLocalizedFilename( const std::wstring& InLanguage /* = TEXT( "" ) */ ) const
+{
+	// Use default language if none specified
+	std::wstring	language = InLanguage;
+	if ( language.empty() )
+	{
+		language = TEXT( "INT" );
+	}
+	
+	// Prepend path and path separator
+	std::wstring	localizedPath = GetPath();
+	if ( !localizedPath.empty() )
+	{
+		localizedPath += PATH_SEPARATOR;
+	}
+
+	// Append _LANG to filename
+	localizedPath += GetBaseFilename() + TEXT( "_" ) + language;
+
+	// Append extension if used
+	std::wstring	extension = GetExtension( true );
+	if ( !extension.empty() )
+	{
+		localizedPath += extension;
+	}
+
+	return localizedPath;
+}
+
+bool CBaseFileSystem::MakeDirectory( const std::wstring& InPath, bool InIsTree /* = false */ )
+{
+	// Support code for making a directory tree
+	check( InIsTree );
+	uint32			createCount = 0;
+	std::wstring	fullPath;
+
+	for ( uint32 index = 0, count = InPath.size(); index < count; ++index )
+	{
+		fullPath += InPath[index];
+		if ( ( appIsPathSeparator( InPath[index] ) || index+1 == count ) && IsDrive( fullPath ) )
+		{
+			if ( !MakeDirectory( fullPath, false ) )
+			{
+				return false;
+			}
+			++createCount;
+		}
+	}
+
+	return createCount != 0;
+}
+
+bool CBaseFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree /* = false */ )
 {
 	// Support code for removing a directory tree.
 	check( InIsTree );
@@ -30,4 +140,9 @@ bool CBaseFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree
 	}
 
 	return DeleteDirectory( InPath, false );
+}
+
+bool CBaseFileSystem::IsDrive( const std::wstring& InPath ) const
+{
+	return InPath.empty() || InPath == TEXT( "\\" ) || InPath == TEXT( "\\\\" ) || InPath == TEXT( "//" ) || InPath == TEXT( "////" );
 }
