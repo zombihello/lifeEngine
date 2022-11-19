@@ -92,6 +92,15 @@ public:
     std::wstring GetBaseFilename() const;
 
     /**
+     * @brief Get filename with extension
+     * @return Return filename with extension
+     */
+    FORCEINLINE std::wstring GetFilename() const
+    {
+        return GetBaseFilename() + GetExtension( true );
+    }
+
+    /**
      * @brief Get path to the file
      * @return Return path to the file
      */

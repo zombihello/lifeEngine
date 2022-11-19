@@ -365,8 +365,8 @@ void CContentBrowserWindow::CFileTreeNode::ProcessEvents()
 	if ( ImGui::IsItemHovered() )
 	{
 		// Select node if we press left mouse button
-		if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
-		{
+		if ( ImGui::IsMouseReleased( ImGuiMouseButton_Left ) )
+		{		
 			if ( !bCtrlDown )
 			{
 				owner->engineRoot->SetSelect( false );
@@ -427,17 +427,30 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 	// Begin drag n drop folder/package to other
 	if ( ImGui::BeginDragDropSource() )
 	{
-		TSharedPtr<CFileTreeNode>*		ptrThis = new TSharedPtr<CFileTreeNode>();
-		*ptrThis = AsShared();
-
-		ImGui::SetDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE, &ptrThis, sizeof( TSharedPtr<CFileTreeNode>* ), ImGuiCond_Once );
-		ImGui::EndDragDropSource();
-
-		// Block drop targets to children
-		for ( uint32 index = 0, count = children.size(); index < count; ++index )
+		// Update selection flags
+		if ( !bSelected )
 		{
-			children[index]->SetAllowDropTarget( false );
+			owner->engineRoot->SetSelect( false );
+			owner->gameRoot->SetSelect( false );
+			SetSelect( true );
 		}
+
+		// Get all selected nodes
+		std::vector<TSharedPtr<CFileTreeNode>>			selectedNodes;
+		owner->engineRoot->GetSelectedNodes( selectedNodes );
+		owner->gameRoot->GetSelectedNodes( selectedNodes );
+		if ( !selectedNodes.empty() )
+		{
+			std::vector<TSharedPtr<CFileTreeNode>>*		pData = new std::vector<TSharedPtr<CFileTreeNode>>( selectedNodes );
+			ImGui::SetDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE, &pData, sizeof( std::vector<TSharedPtr<CFileTreeNode>>* ), ImGuiCond_Once );
+
+			// Block drop targets to children
+			for ( uint32 index = 0, count = children.size(); index < count; ++index )
+			{
+				children[index]->SetAllowDropTarget( false );
+			}
+		}
+		ImGui::EndDragDropSource();
 	}
 
 	// Drag n drop target for packages/folders
@@ -446,13 +459,23 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 		const ImGuiPayload*		imguiPayload = ImGui::AcceptDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE );
 		if ( imguiPayload )
 		{
-			TSharedPtr<CFileTreeNode>*		pFileNode = ( *( TSharedPtr<CFileTreeNode>** )imguiPayload->Data );
-			check( pFileNode );
+			std::vector<TSharedPtr<CFileTreeNode>>*		pData = ( *( std::vector<TSharedPtr<CFileTreeNode>>** )imguiPayload->Data );
+			check( pData );
 
-			CFilename		srcFilename( ( *pFileNode )->path );
-			GFileSystem->Move( CFilename( path ).GetPath() + PATH_SEPARATOR + srcFilename.GetBaseFilename() + srcFilename.GetExtension(true), ( *pFileNode )->path, false, true );
+			CFilename		nodeFilename( path );
+			std::wstring	dstDirectory = nodeFilename.GetPath() + PATH_SEPARATOR;
+			if ( type == FNT_Folder )
+			{
+				dstDirectory += nodeFilename.GetBaseFilename() + PATH_SEPARATOR;
+			}
 
-			delete pFileNode;
+			for ( uint32 index = 0, count = pData->size(); index < count; ++index )
+			{
+				CFilename		srcFilename( pData->at( index )->path );
+				GFileSystem->Move( dstDirectory + srcFilename.GetFilename(), srcFilename.GetFullPath(), false, true );
+			}
+
+			delete pData;
 		}
 
 		// Allow drop targets for all nodes

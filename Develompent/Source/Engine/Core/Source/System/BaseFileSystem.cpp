@@ -13,7 +13,8 @@ std::wstring CFilename::GetExtension( bool InIsIncludeDot /* = false */ ) const
 	std::wstring	result = path;
 	appNormalizePathSeparators( result );
 	
-	std::size_t		dotPos = result.find_last_of( TEXT( "." ) );
+	std::size_t		lastSlashPos = result.find_last_of( PATH_SEPARATOR );
+	std::size_t		dotPos = result.find_first_of( TEXT( "." ), lastSlashPos != std::wstring::npos ? lastSlashPos + 1 : std::wstring::npos );
 	if ( dotPos == std::wstring::npos )
 	{
 		return TEXT( "" );
@@ -48,11 +49,18 @@ std::wstring CFilename::GetPath() const
 	std::wstring	result = path;
 	appNormalizePathSeparators( result );
 	
-	std::size_t		lastSlashPos = result.find_last_of( PATH_SEPARATOR );
-	std::size_t		dotPos = result.find_first_of( TEXT( "." ), lastSlashPos != std::wstring::npos ? lastSlashPos+1 : std::wstring::npos );
-	if ( dotPos != std::wstring::npos )
+	std::size_t		lastSlashPos	= result.find_last_of( PATH_SEPARATOR );
+	if ( lastSlashPos != std::wstring::npos )
 	{
-		result.erase( dotPos, result.size() );
+		result.erase( lastSlashPos < result.size() ? lastSlashPos+1 : lastSlashPos, result.size() );
+	}
+	else
+	{
+		std::size_t		dotPos = result.find_first_of( TEXT( "." ) );
+		if ( dotPos != std::wstring::npos )
+		{
+			result.erase( dotPos, result.size() );
+		}
 	}
 
 	return result;
