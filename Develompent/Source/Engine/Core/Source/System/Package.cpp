@@ -18,40 +18,6 @@
 #include "WorldEd.h"
 #endif // WITH_EDITOR
 
-FORCEINLINE TAssetHandle<CAsset> GetDefaultAsset( EAssetType InType )
-{
-	switch ( InType )
-	{
-	case AT_Texture2D:			return GEngine->GetDefaultTexture();
-	case AT_Material:			return GEngine->GetDefaultMaterial();
-	case AT_PhysicsMaterial:	return GPhysicsEngine.GetDefaultPhysMaterial();
-	default:					
-		/*appErrorf( TEXT( "Unknown asset type 0x%X" ), InType );*/		// TODO BS yehor.pohuliaka - Unknoment this error when fixed getting default asset in serialization
-		return nullptr;
-	}
-}
-
-FORCEINLINE TSharedPtr<CAsset> AssetFactory( EAssetType InType )
-{
-	switch ( InType )
-	{
-	case AT_Texture2D:			return MakeSharedPtr<CTexture2D>();
-	case AT_Material:			return MakeSharedPtr<CMaterial>();
-	case AT_Script:				return MakeSharedPtr<CScript>();
-	case AT_StaticMesh:			return MakeSharedPtr<CStaticMesh>();
-	case AT_AudioBank:			return MakeSharedPtr<CAudioBank>();
-	case AT_PhysicsMaterial:	return MakeSharedPtr<CPhysicsMaterial>();
-
-	//
-	// Instert new asset type her
-	//
-
-	default:	
-		appErrorf( TEXT( "Unknown asset type %i" ), InType );
-		return nullptr;
-	}
-}
-
 CAsset::CAsset( EAssetType InType ) 
 	: bDirty( true )		// by default package is dirty because not serialized package from HDD
 	, package( nullptr )
@@ -142,6 +108,17 @@ TAssetHandle<CAsset> CAsset::GetAssetHandle() const
 		handle = TAssetHandle<CAsset>( SharedThis( this ), MakeSharedPtr<SAssetReference>( type, guid, package ? package->GetGUID() : CGuid() ) );
 	}
 	return handle;
+}
+
+CAssetFactory::CAssetFactory()
+{
+	appMemzero( constructAssetFns, AT_Count * sizeof( CAssetFactory::ConstructAssetFn_t ) );
+	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CTexture2D>(); },			AT_Texture2D );
+	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CMaterial>(); },			AT_Material );
+	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CScript>(); },				AT_Script );
+	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CStaticMesh>(); },			AT_StaticMesh );
+	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CAudioBank>(); },			AT_AudioBank );
+	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CPhysicsMaterial>(); },		AT_PhysicsMaterial );
 }
 
 CPackage::CPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
@@ -442,7 +419,9 @@ TAssetHandle<CAsset> CPackage::LoadAsset( CArchive& InArchive, const CGuid& InAs
 	// Allocate asset if it not valid
 	if ( !InAssetInfo.data )
 	{
-		InAssetInfo.data			= AssetFactory( InAssetInfo.type );
+		InAssetInfo.data			= GAssetFactory.Create( InAssetInfo.type );
+		check( InAssetInfo.data );
+
 		InAssetInfo.data->guid		= InAssetGUID;
 		InAssetInfo.data->package	= this;
 	}
@@ -946,7 +925,7 @@ TAssetHandle<CAsset> CPackageManager::FindAsset( const std::wstring& InString, E
 	EAssetType			assetType;
 	if ( !ParseReferenceToAsset( InString, packageName, assetName, assetType ) || ( InType != AT_Unknown && assetType != InType ) )
 	{
-		return GetDefaultAsset( InType );
+		return GAssetFactory.GetDefault( InType );
 	}
 
 	// Find in TOC path to the package and calculate hash of asset from him name
@@ -957,7 +936,7 @@ TAssetHandle<CAsset> CPackageManager::FindAsset( const std::wstring& InString, E
 		{
 			LE_LOG( LT_Warning, LC_Package, TEXT( "Package with name '%s' not found in TOC file" ), packageName.c_str() );
 		}
-		return GetDefaultAsset( InType );
+		return GAssetFactory.GetDefault( InType );
 	}
 
 	return FindAsset( packagePath, assetName, InType );
@@ -980,7 +959,7 @@ TAssetHandle<CAsset> CPackageManager::FindAsset( const std::wstring& InPath, con
 	// If asset is not valid, we return default
 	if ( !asset.IsAssetValid() )
 	{
-		asset = GetDefaultAsset( InType );
+		asset = GAssetFactory.GetDefault( InType );
 	}
 
 	return asset;
@@ -1000,14 +979,14 @@ TAssetHandle<CAsset> CPackageManager::FindAsset( const std::wstring& InPath, con
 		asset = package->Find( InAsset );
 		if ( !asset.IsAssetValid() )
 		{
-			asset = GetDefaultAsset( InType );
+			asset = GAssetFactory.GetDefault( InType );
 		}
 	}
 
 	// If asset is not valid, we return default
 	if ( !asset.IsAssetValid() )
 	{
-		asset = GetDefaultAsset( InType );
+		asset = GAssetFactory.GetDefault( InType );
 	}
 
 	return asset;
@@ -1015,7 +994,7 @@ TAssetHandle<CAsset> CPackageManager::FindAsset( const std::wstring& InPath, con
 
 TAssetHandle<CAsset> CPackageManager::FindDefaultAsset( EAssetType InType ) const
 {
-	return GetDefaultAsset( InType );
+	return GAssetFactory.GetDefault( InType );
 }
 
 PackageRef_t CPackageManager::LoadPackage( const std::wstring& InPath, bool InCreateIfNotExist /*= false */ )

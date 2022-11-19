@@ -27,6 +27,7 @@ CPackageManager*        GPackageManager             = new CPackageManager();
 CTableOfContets		    GTableOfContents;
 std::wstring            GGameName                   = TEXT( "ExampleGame" );
 CCommandLine			GCommandLine;
+CAssetFactory           GAssetFactory;
 
 #if WITH_EDITOR
 bool					GIsGame                     = true;

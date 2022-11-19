@@ -3,6 +3,7 @@
 #include "Misc/PhysicsGlobals.h"
 #include "System/Config.h"
 #include "System/PhysicsEngine.h"
+#include "System/Package.h"
 #include "PhysicsInterface.h"
 
 FORCEINLINE ECollisionChannel TextToECollisionChannel( const std::wstring& InStr )
@@ -135,6 +136,9 @@ void CPhysicsEngine::Init()
 			LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine'collision profiles in section 'Physics.Physics:CollisionProfiles'" ) );
 		}
 	}
+
+	// Register default assets
+	GAssetFactory.SetDefault( defaultPhysMaterial, AT_PhysicsMaterial );
 }
 
 void CPhysicsEngine::Tick( float InDeltaTime )

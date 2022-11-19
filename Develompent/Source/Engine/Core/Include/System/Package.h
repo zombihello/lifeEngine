@@ -605,6 +605,88 @@ private:
 
 /**
  * @ingroup Core
+ * @brief Asset factory
+ */
+class CAssetFactory
+{
+public:
+	/**
+	 * @brief Pointer to function for create asset
+	 */
+	typedef TSharedPtr<CAsset>( *ConstructAssetFn_t )();
+
+	/**
+	 * @brief Constructor
+	 */
+	CAssetFactory();
+
+	/**
+	 * @brief Register asset type
+	 *
+	 * @param InFunction	Pointer to function for create asset
+	 * @param InType		Asset type to create
+	 */
+	FORCEINLINE void Register( ConstructAssetFn_t InFunction, EAssetType InType )
+	{
+		constructAssetFns[InType] = InFunction;
+	}
+
+	/**
+	 * @brief Unregister asset type
+	 *
+	 * @param InType		Asset type to create
+	 */
+	FORCEINLINE void UnRegister( EAssetType InType )
+	{
+		constructAssetFns[InType] = nullptr;
+	}
+
+	/**
+	 * @brief Set default asset for type
+	 *
+	 * @param InAssetPtr	Asset
+	 * @param InType		Asset type
+	 */
+	FORCEINLINE void SetDefault( const TAssetHandle<CAsset>& InAssetPtr, EAssetType InType )
+	{
+		defaultAssets[InType] = InAssetPtr;
+	}
+
+	/**
+	 * @brief Create asset
+	 *
+	 * @param InType	Asset type to create
+	 * @return Return pointer to asset if it type is registered
+	 */
+	FORCEINLINE TSharedPtr<CAsset> Create( EAssetType InType ) const
+	{
+		ConstructAssetFn_t		constructAsset = constructAssetFns[InType];
+		if ( constructAsset )
+		{
+			return constructAsset();
+		}
+
+		return nullptr;
+	}
+
+	/**
+	 * @brief Get default asset
+	 *
+	 * @param InType	Default asset type
+	 * @return Return pointer to default asset if him exists
+	 */
+	FORCEINLINE TAssetHandle<CAsset> GetDefault( EAssetType InType ) const
+	{
+		return defaultAssets[InType];
+	}
+
+private:
+	ConstructAssetFn_t		constructAssetFns[AT_Count];
+	TAssetHandle<CAsset>	defaultAssets[AT_Count];
+};
+
+/**
+ * @ingroup Core
  * Class for help add, remove and find assets in package
  */
 class CPackage : public CRefCounted

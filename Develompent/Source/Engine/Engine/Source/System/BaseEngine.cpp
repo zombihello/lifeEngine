@@ -1,4 +1,5 @@
 #include "Misc/Class.h"
+#include "Misc/CoreGlobals.h"
 #include "Misc/PhysicsGlobals.h"
 #include "Logger/LoggerMacros.h"
 #include "Containers/String.h"
@@ -136,6 +137,10 @@ void CBaseEngine::Init()
 		}
 	}
 #endif // WITH_EDITOR
+
+	// Register default assets
+	GAssetFactory.SetDefault( defaultTexture, AT_Texture2D );
+	GAssetFactory.SetDefault( defaultMaterial, AT_Material );
 
 	GInputSystem->Init();
 	GUIEngine->Init();

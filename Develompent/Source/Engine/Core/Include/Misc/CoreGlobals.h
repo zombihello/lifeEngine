@@ -138,4 +138,10 @@ extern enum EPlatformType			GPlatform;
  */
 extern class CCommandLine			GCommandLine;
 
+/**
+ * @ingroup Core
+ * @brief Asset factory
+ */
+extern class CAssetFactory			GAssetFactory;
+
 #endif // !COREGLOBALS_H

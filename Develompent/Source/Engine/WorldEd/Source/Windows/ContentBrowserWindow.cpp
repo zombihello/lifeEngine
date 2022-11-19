@@ -424,8 +424,8 @@ void CContentBrowserWindow::CFileTreeNode::ProcessEvents()
 
 void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 {
-	// Begin drag n drop folder/package to other
-	if ( ImGui::BeginDragDropSource() )
+	// Begin drag n drop folder/package to other, if current node is not engine/game root
+	if ( owner->engineRoot != this && owner->gameRoot != this && ImGui::BeginDragDropSource() )
 	{
 		// Update selection flags
 		if ( !bSelected )
