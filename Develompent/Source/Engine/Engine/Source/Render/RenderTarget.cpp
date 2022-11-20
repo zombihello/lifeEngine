@@ -48,10 +48,12 @@ void CRenderTarget::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewS
 	pixelFormat		= InPixelFormat;
 	sizeX			= InNewSizeX;
 	sizeY			= InNewSizeY;
+#if !SHIPPING_BUILD
 	if ( !InName.empty() )
 	{
 		debugName = InName;
 	}
+#endif // !SHIPPING_BUILD
 
 	// Don't reinitialize the render target RHI if him has been destroyed
 	if ( InIsDestroyed )
