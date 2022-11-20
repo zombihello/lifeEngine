@@ -355,6 +355,12 @@ private:
 	 */
 	void DrawPackagesPopupMenu();
 
+	/**
+	 * @brief Set current package
+	 * @param InPackage		Current package
+	 */
+	void SetCurrentPackage( PackageRef_t InPackage );
+
 	TSharedPtr<CFileTreeNode>	engineRoot;					/**< Engine root directory */
 	TSharedPtr<CFileTreeNode>	gameRoot;					/**< Game root directory */
 	PackageRef_t				package;					/**< Current package in preview */

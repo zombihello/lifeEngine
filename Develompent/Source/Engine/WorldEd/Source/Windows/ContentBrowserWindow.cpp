@@ -216,17 +216,146 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 {
 	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
 	{
+		// Getting all selected nodes
 		std::vector<TSharedPtr<CFileTreeNode>>		selectedNode;
 		engineRoot->GetSelectedNodes( selectedNode );
 		gameRoot->GetSelectedNodes( selectedNode );
 
-		bool bSelectedPackages = !selectedNode.empty();
-		ImGui::MenuItem( "Save", "", nullptr, bSelectedPackages );
-		ImGui::MenuItem( "Open", "", nullptr, bSelectedPackages );
-		ImGui::MenuItem( "Unload", "", nullptr, bSelectedPackages );
-		ImGui::MenuItem( "Reload", "", nullptr, bSelectedPackages );
+		// Check what type of nodes we selected
+		bool			bExistLoadedPackage		= false;
+		bool			bExistUnloadedPackage	= false;
+		uint32			numSelectedFolders		= 0;
+		uint32			numSelectedFiles		= 0;
+		for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
+		{
+			switch ( selectedNode[index]->GetType() )
+			{
+			case FNT_File:
+				++numSelectedFiles;
+				if ( !GPackageManager->IsPackageLoaded( selectedNode[index]->GetPath() ) )
+				{
+					bExistUnloadedPackage = true;
+				}
+				else
+				{
+					bExistLoadedPackage = true;
+				}
+				break;
+
+			case FNT_Folder:
+				++numSelectedFolders;
+				break;
+
+			default:
+				checkMsg( false, TEXT( "Unknown type 0x%X" ), selectedNode[index]->GetType() );
+				break;
+			}
+		}
+
+		bool			bSelectedFolders		= numSelectedFolders > 0;
+		bool			bSelectedFiles			= numSelectedFiles > 0;
+		bool			bSelectedMoreOneItems	= selectedNode.size() > 1;
+
+		// Save all packages
+		if ( ImGui::MenuItem( "Save", "", nullptr, bSelectedFiles && bExistLoadedPackage ) )
+		{
+			for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
+			{
+				const TSharedPtr<CFileTreeNode>&		node = selectedNode[index];
+				std::wstring							path = node->GetPath();
+
+				// If package is loaded - we resave him
+				if ( GPackageManager->IsPackageLoaded( path ) )
+				{
+					PackageRef_t		package = GPackageManager->LoadPackage( path );
+					if ( package && package->IsDirty() )
+					{
+						package->Save( path );
+					}
+				}
+			}
+		}
+
+		// Open packages
+		if ( ImGui::MenuItem( "Open", "", nullptr, bSelectedFiles && bExistUnloadedPackage ) )
+		{
+			PackageRef_t	lastLoadedPackage;
+			for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
+			{
+				const TSharedPtr<CFileTreeNode>&	node	= selectedNode[index];
+				std::wstring						path	= node->GetPath();
+				PackageRef_t						package = GPackageManager->LoadPackage( path );
+				if ( package )
+				{
+					lastLoadedPackage = package;
+				}
+			}
+
+			// Set last loaded package for view in package browser
+			if ( lastLoadedPackage )
+			{
+				SetCurrentPackage( lastLoadedPackage );
+			}
+		}
+
+		// Unload packages
+		if ( ImGui::MenuItem( "Unload", "", nullptr, bSelectedFiles && bExistLoadedPackage ) )
+		{
+			PackageRef_t				currentPackage = package;
+			SetCurrentPackage( nullptr );
+
+			std::vector<CFilename>		dirtyPackages;
+			for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
+			{
+				const TSharedPtr<CFileTreeNode>&	node = selectedNode[index];
+				std::wstring						path = node->GetPath();
+
+				// If package already not loaded - skip him
+				if ( !GPackageManager->IsPackageLoaded( path ) )
+				{
+					continue;
+				}
+
+				// If package is dirty - we not unload him
+				PackageRef_t		package = GPackageManager->LoadPackage( path );
+				if ( package->IsDirty() )
+				{
+					dirtyPackages.push_back( CFilename( path ) );
+					continue;
+				}
+
+				// If current package in viewer is closed, we forget about him
+				bool	bSeccussed = GPackageManager->UnloadPackage( path );
+				if ( currentPackage && bSeccussed && path == currentPackage->GetFileName() )
+				{
+					currentPackage.SafeRelease();
+				}
+			}
+
+			// If current package not closed, we restore viewer
+			if ( currentPackage )
+			{
+				SetCurrentPackage( currentPackage );
+			}
+
+			// If we have dirty package - print message
+			if ( !dirtyPackages.empty() )
+			{
+				checkMsg( false, TEXT( "Need implement" ) );
+			}
+		}
+
+		// Reload packages
+		if ( ImGui::MenuItem( "Reload", "", nullptr, bSelectedFiles && bExistLoadedPackage ) )
+		{
+			for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
+			{
+				GPackageManager->ReloadPackage( selectedNode[index]->GetPath() );
+			}
+		}
+
 		ImGui::Separator();
-		ImGui::MenuItem( "Show In Explorer", "", nullptr, bSelectedPackages );
+		ImGui::MenuItem( "Show In Explorer", "", nullptr, ( bSelectedFiles || bSelectedFolders ) && !bSelectedMoreOneItems );
 		ImGui::Separator();
 
 		if ( ImGui::BeginMenu( "Create" ) )
@@ -236,9 +365,26 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 			ImGui::EndMenu();
 		}
 
-		ImGui::MenuItem( "Delete", "", nullptr, bSelectedPackages );
-		ImGui::MenuItem( "Rename", "", nullptr, bSelectedPackages );
+		ImGui::MenuItem( "Delete", "", nullptr,		bSelectedFiles || bSelectedFolders );
+		ImGui::MenuItem( "Rename", "", nullptr,		( bSelectedFiles || bSelectedFolders ) && !bSelectedMoreOneItems );
 		ImGui::EndPopup();
+	}
+}
+
+void CContentBrowserWindow::SetCurrentPackage( PackageRef_t InPackage )
+{
+	package = InPackage;
+
+	// Getting asset infos from current package
+	assets.clear();
+	if ( package )
+	{
+		for ( uint32 index = 0, count = package->GetNumAssets(); index < count; ++index )
+		{
+			SAssetInfo		assetInfo;
+			package->GetAssetInfo( index, assetInfo );
+			assets.push_back( CAssetNode( assetInfo, this ) );
+		}
 	}
 }
 
@@ -398,25 +544,14 @@ void CContentBrowserWindow::CFileTreeNode::ProcessEvents()
 		// If we double clicked by left mouse button, we must open package (if node is file)
 		if ( type == FNT_File && !GInputSystem->IsKeyDown( BC_KeyLControl ) && !GInputSystem->IsKeyDown( BC_KeyRControl ) && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
 		{
-			owner->package = GPackageManager->LoadPackage( path );
-			check( owner->package );
-
-			// Getting asset infos from current package
-			owner->assets.clear();
-			for ( uint32 index = 0, count = owner->package->GetNumAssets(); index < count; ++index )
-			{
-				SAssetInfo		assetInfo;
-				owner->package->GetAssetInfo( index, assetInfo );
-				owner->assets.push_back( CAssetNode( assetInfo, owner ) );
-			}
+			owner->SetCurrentPackage( GPackageManager->LoadPackage( path ) );
 		}
 	}
 
 	// Reset selection if clicked not on mode
 	if ( ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) || ImGui::IsMouseDown( ImGuiMouseButton_Right ) ) )
 	{
-		owner->assets.clear();
-		owner->package = nullptr;
+		owner->SetCurrentPackage( nullptr );
 		owner->engineRoot->SetSelect( false );
 		owner->gameRoot->SetSelect( false );
 	}
