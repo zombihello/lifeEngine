@@ -3,7 +3,7 @@
 #include "Misc/Template.h"
 
 /* Critical section of ring buffer */
-static ÑCriticalSection			GCriticalSection;
+static CCriticalSection			GCriticalSection;
 
 ÑRingBuffer::ÑRingBuffer( uint32 InBufferSize, uint32 InAlignment /*= 1*/ ) :
 	dataWrittenEvent( nullptr ),

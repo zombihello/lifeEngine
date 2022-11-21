@@ -187,7 +187,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		{
 			CCommandLine		commandLine;
 			commandLine.Init( TEXT( "-commandlet=CookerSync" ) );
-			ÑBaseCommandlet::ExecCommandlet( commandLine );
+			CBaseCommandlet::ExecCommandlet( commandLine );
 		}
 #endif // WITH_EDITOR
 		
@@ -280,7 +280,7 @@ int32 CEngineLoop::Init()
 
 	// Parse cmd line for start commandlets
 #if WITH_EDITOR
-	if ( ÑBaseCommandlet::ExecCommandlet( GCommandLine ) )
+	if ( CBaseCommandlet::ExecCommandlet( GCommandLine ) )
 	{
 		return result;
 	}

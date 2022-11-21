@@ -19,15 +19,15 @@
  * @ingroup WorldEd
  * Class of base commandlet
  */
-class ÑBaseCommandlet : public CObject
+class CBaseCommandlet : public CObject
 {
-	DECLARE_CLASS( ÑBaseCommandlet, CObject )
+	DECLARE_CLASS( CBaseCommandlet, CObject )
 
 public:
 	/**
 	 * Destructor
 	 */
-	virtual ~ÑBaseCommandlet() {}
+	virtual ~CBaseCommandlet() {}
 
 	/**
 	 * Main method of execute commandlet
@@ -35,7 +35,7 @@ public:
 	 * @param InCommandLine		Command line
 	 * @return Return TRUE if commandlet executed is seccussed, otherwise will return FALSE
 	 */
-	virtual bool Main( const CCommandLine& InCommandLine ) PURE_VIRTUAL( ÑBaseCommandlet::Main, return false; );
+	virtual bool Main( const CCommandLine& InCommandLine ) PURE_VIRTUAL( CBaseCommandlet::Main, return false; );
 
 	/**
 	 * @brief Execute commandlet

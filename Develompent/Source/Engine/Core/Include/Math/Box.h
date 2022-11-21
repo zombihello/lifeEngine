@@ -15,13 +15,13 @@
  * @ingroup Core
  * @brief A rectangular minimum bounding volume
  */
-class ÑBox
+class CBox
 {
 public:
 	/**
 	 * Constructor
 	 */
-	FORCEINLINE ÑBox()
+	FORCEINLINE CBox()
 		: bIsValid( false )
 	{}
 
@@ -31,7 +31,7 @@ public:
 	 * @param InMin Min position
 	 * @param InMax Max position
 	 */
-	FORCEINLINE ÑBox( const Vector& InMin, const Vector& InMax )
+	FORCEINLINE CBox( const Vector& InMin, const Vector& InMax )
 		: minLocation( InMin ), maxLocation( InMax ), bIsValid( true )
 	{}
 
@@ -42,9 +42,9 @@ public:
 	 * @param InSize Size of AABB
 	 * @return Return created AABB
 	 */
-	static FORCEINLINE ÑBox BuildAABB( const Vector& InLocation, const Vector& InSize )
+	static FORCEINLINE CBox BuildAABB( const Vector& InLocation, const Vector& InSize )
 	{
-		return ÑBox( InLocation - InSize, InLocation + InSize );
+		return CBox( InLocation - InSize, InLocation + InSize );
 	}
 
 	/**

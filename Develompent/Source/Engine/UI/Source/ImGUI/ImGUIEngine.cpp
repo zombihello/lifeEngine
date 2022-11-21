@@ -464,7 +464,7 @@ void ÑImGUIEngine::EndDraw()
 	{
 		ImGui::UpdatePlatformWindows();
 	}
-
+	
 	for ( uint32 index = 0, count = ( uint32 )windows.size(); index < count; ++index )
 	{
 		windows[ index ]->Tick();

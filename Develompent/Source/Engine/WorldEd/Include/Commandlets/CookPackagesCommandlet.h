@@ -41,9 +41,9 @@ struct STMXTileset
   * @ingroup WorldEd
   * Commandlet for generate table of contents
   */
-class CCookPackagesCommandlet : public ÑBaseCommandlet
+class CCookPackagesCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CCookPackagesCommandlet, ÑBaseCommandlet )
+	DECLARE_CLASS( CCookPackagesCommandlet, CBaseCommandlet )
 
 public:
 	/**

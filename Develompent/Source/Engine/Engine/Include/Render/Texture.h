@@ -191,7 +191,7 @@ protected:
 private:
 	uint32						sizeX;				/**< Width of texture */
 	uint32						sizeY;				/**< Height of texture */
-	ÑBulkData<byte>				data;				/**< Data used when loading texture */
+	CBulkData<byte>				data;				/**< Data used when loading texture */
 	EPixelFormat				pixelFormat;		/**< Pixel format of texture */
 	Texture2DRHIRef_t			texture;			/**< Reference to RHI texture */
 	ESamplerAddressMode			addressU;			/**< Address mode for U coord */

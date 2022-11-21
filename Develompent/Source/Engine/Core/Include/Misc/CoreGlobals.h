@@ -15,7 +15,7 @@
  * @ingroup Core
  * @brief Logger
  */
-extern class ÑBaseLogger*			GLog;
+extern class CBaseLogger*			GLog;
 
 /**
  * @ingroup Core

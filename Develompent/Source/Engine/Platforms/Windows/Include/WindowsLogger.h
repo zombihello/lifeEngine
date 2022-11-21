@@ -18,7 +18,7 @@
  * @ingroup WindowsPlatform
  * @brief Class for logging on Windows
  */
-class CWindowsLogger : public ÑBaseLogger
+class CWindowsLogger : public CBaseLogger
 {
 public:
     /**

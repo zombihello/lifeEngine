@@ -69,7 +69,7 @@ void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, floa
 	GRHI->DrawIndexedPrimitiveUP( InDeviceContextRHI, PT_TriangleList, 0, 2, 4, indices, sizeof( indices[ 0 ] ), vertices, sizeof( vertices[ 0 ] ) );
 }
 
-void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class ÑBox& InBox, const class CColor& InColor )
+void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class CBox& InBox, const class CColor& InColor )
 {
 #if WITH_EDITOR
 	Vector		bbox[ 2 ] = { InBox.GetMin(), InBox.GetMax() };

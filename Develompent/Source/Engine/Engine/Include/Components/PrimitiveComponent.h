@@ -118,7 +118,7 @@ public:
 	 * @brief Get bound box
 	 * @return Return bound box
 	 */
-	FORCEINLINE const ÑBox& GetBoundBox() const
+	FORCEINLINE const CBox& GetBoundBox() const
 	{
 		return boundbox;
 	}
@@ -172,7 +172,7 @@ protected:
 
 	bool						bVisibility;					/**< Is primitive visibility */
 	bool						bIsDirtyDrawingPolicyLink;		/**< Is dirty drawing policy link. If flag equal true - need update drawing policy link */
-	ÑBox						boundbox;						/**< Bound box */
+	CBox						boundbox;						/**< Bound box */
 	PhysicsBodySetupRef_t		bodySetup;						/**< Physics body setup */
 	CPhysicsBodyInstance		bodyInstance;					/**< Physics body instance */	
 	class CScene*				scene;							/**< The current scene where the primitive is located  */

@@ -179,6 +179,6 @@ void CEditorCommonDrawHelper::DrawGrid( const class CSceneView* InSceneView, ELe
 	// Draw orthogonal worldframe
 	if ( bDrawWorldBox )
 	{
-		DrawWireframeBox( SDG, ÑBox( Vector( -HALF_WORLD_MAX1, -HALF_WORLD_MAX1, -HALF_WORLD_MAX1 ), Vector( HALF_WORLD_MAX1, HALF_WORLD_MAX1, HALF_WORLD_MAX1 ) ), worldBoxColor );
+		DrawWireframeBox( SDG, CBox( Vector( -HALF_WORLD_MAX1, -HALF_WORLD_MAX1, -HALF_WORLD_MAX1 ), Vector( HALF_WORLD_MAX1, HALF_WORLD_MAX1, HALF_WORLD_MAX1 ) ), worldBoxColor );
 	}
 }

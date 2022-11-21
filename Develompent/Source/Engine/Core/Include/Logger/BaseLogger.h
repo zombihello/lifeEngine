@@ -65,7 +65,7 @@ enum ELogColor
  * @ingroup Core
  * @brief Base class of logging
  */
-class ÑBaseLogger
+class CBaseLogger
 {
     DECLARE_SCRIPT_API()
 
@@ -73,12 +73,12 @@ public:
     /**
      * @brief Constructor
      */
-                        ÑBaseLogger() {}
+                        CBaseLogger() {}
 
     /**
      * @brief Destructor
      */
-    virtual             ~ÑBaseLogger() {}
+    virtual             ~CBaseLogger() {}
 
     /**
      * @brief Initialize logger

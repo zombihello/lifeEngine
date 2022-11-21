@@ -213,7 +213,7 @@ public:
  * @ingroup WindowsPlatform
  * This is the Windows version of a critical section
  */
-class ÑCriticalSection : public CSynchronize
+class CCriticalSection : public CSynchronize
 {
 public:
 	/**
@@ -230,7 +230,7 @@ public:
 	 * @param[in] InDebugName Debug name
 	 * @param[in] InSpinCount Spin count
 	 */
-	FORCEINLINE ÑCriticalSection( const tchar* InDebugName = nullptr, uint32 InSpinCount = DEFAULT_SPIN_COUNT )
+	FORCEINLINE CCriticalSection( const tchar* InDebugName = nullptr, uint32 InSpinCount = DEFAULT_SPIN_COUNT )
 	{
 		InitializeCriticalSection(&criticalSection);
 		SetCriticalSectionSpinCount(&criticalSection, InSpinCount);
@@ -239,7 +239,7 @@ public:
 	/**
 	 * Destructor
 	 */
-	FORCEINLINE ~ÑCriticalSection()
+	FORCEINLINE ~CCriticalSection()
 	{
 		DeleteCriticalSection(&criticalSection);
 	}
@@ -403,7 +403,7 @@ public:
 	 *
 	 * @return The new critical section object or nullptr otherwise
 	 */
-	virtual ÑCriticalSection* CreateCriticalSection() override;
+	virtual CCriticalSection* CreateCriticalSection() override;
 
 	/**
 	 * Creates a new event

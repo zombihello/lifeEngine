@@ -21,7 +21,7 @@
 // Platform specific globals variables
 // ----
 
-ÑBaseLogger*         GLog			= new CWindowsLogger();
+CBaseLogger*         GLog			= new CWindowsLogger();
 CBaseFileSystem*     GFileSystem	= new CWindowsFileSystem();
 CBaseWindow*         GWindow		= new CWindowsWindow();
 CBaseRHI*            GRHI			= new CD3D11RHI();

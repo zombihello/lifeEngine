@@ -18,7 +18,7 @@ static std::wstring			GSplashScreenText[ STT_NumTextTypes ];
 static RECT					GSplashScreenTextRects[ STT_NumTextTypes ];
 static HFONT				GSplashScreenSmallTextFontHandle = nullptr;
 static HFONT				GSplashScreenNormalTextFontHandle = nullptr;
-static ÑCriticalSection		GSplashScreenSynchronizationObject;
+static CCriticalSection		GSplashScreenSynchronizationObject;
 static CEvent*				GThreadInitSyncEvent = nullptr;
 
 /**

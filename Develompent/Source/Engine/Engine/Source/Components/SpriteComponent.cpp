@@ -219,5 +219,5 @@ void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 	}
 
     // Update AABB
-    boundbox = ÑBox::BuildAABB( GetComponentLocation(), Vector( GetSpriteSize(), 1.f ) );
+    boundbox = CBox::BuildAABB( GetComponentLocation(), Vector( GetSpriteSize(), 1.f ) );
 }

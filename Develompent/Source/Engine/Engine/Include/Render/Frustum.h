@@ -97,7 +97,7 @@ public:
 	 * @param InBox Box
 	 * @return Return true if box in frustum, else returning false
 	 */
-	FORCEINLINE bool IsIn( const ÑBox& InBox ) const
+	FORCEINLINE bool IsIn( const CBox& InBox ) const
 	{
 		if ( !InBox.IsValid() )
 		{

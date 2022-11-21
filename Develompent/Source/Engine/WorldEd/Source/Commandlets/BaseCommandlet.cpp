@@ -2,9 +2,9 @@
 #include "Commandlets/BaseCommandlet.h"
 #include "Logger/LoggerMacros.h"
 
-IMPLEMENT_CLASS( ÑBaseCommandlet )
+IMPLEMENT_CLASS( CBaseCommandlet )
 
-bool ÑBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* OutResultCommand /* = nullptr */ )
+bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* OutResultCommand /* = nullptr */ )
 {
 	std::wstring		nameCommandlet = InCommandLine.GetFirstValue( TEXT( "commandlet" ) );
 	if ( nameCommandlet.empty() )
@@ -22,7 +22,7 @@ bool ÑBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 	// Create and execute commandlet
 	if ( lclassCommandlet )
 	{
-		ÑBaseCommandlet*		commandlet = lclassCommandlet->CreateObject< ÑBaseCommandlet >();
+		CBaseCommandlet*		commandlet = lclassCommandlet->CreateObject< CBaseCommandlet >();
 		check( commandlet );
 
 		bool		oldIsCommandlet = GIsCommandlet;

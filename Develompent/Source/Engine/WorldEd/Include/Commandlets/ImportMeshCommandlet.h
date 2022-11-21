@@ -58,9 +58,9 @@ typedef std::unordered_map< uint32, std::vector< SAiMesh > >			AiMeshesMap_t;
   * @ingroup WorldEd
   * Commandlet for import mesh to engine
   */
-class CImportMeshCommandlet : public ÑBaseCommandlet
+class CImportMeshCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CImportMeshCommandlet, ÑBaseCommandlet )
+	DECLARE_CLASS( CImportMeshCommandlet, CBaseCommandlet )
 
 public:
 	/**

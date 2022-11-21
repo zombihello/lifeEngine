@@ -24,14 +24,14 @@ void Print( std::string Instr )
 	LE_LOG( LT_Log, LC_Script, TEXT( "%s" ), ANSI_TO_TCHAR( Instr.c_str() ) );
 }
 
-IMPLEMENT_SCRIPT_API( ÑBaseLogger,
+IMPLEMENT_SCRIPT_API( CBaseLogger,
 					  luabridge::getGlobalNamespace( InVM ).addFunction( "Log", &Print );
 					  )
 
 /**
  * Print message to output device
  */
-void ÑBaseLogger::Logf( ELogType InLogType, ELogCategory InLogCategory, const tchar* InMessage, ... )
+void CBaseLogger::Logf( ELogType InLogType, ELogCategory InLogCategory, const tchar* InMessage, ... )
 {
 #if !NO_LOGGING
 	va_list			arguments;

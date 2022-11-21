@@ -192,10 +192,10 @@ void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, floa
  * Draws a wireframe box
  *
  * @param InSDG			Scene depth group
- * @param InBox			The ÑBox to use for drawing
+ * @param InBox			The CBox to use for drawing
  * @param InColor		Color of the box
  */
-void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class ÑBox& InBox, const class CColor& InColor );
+void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class CBox& InBox, const class CColor& InColor );
 
 /**
  * @ingroup Engine

@@ -358,9 +358,9 @@ bool CSemaphoreWindows::WaitTimeoutMs( uint32 InMilliseconds )
 	return ret != WAIT_TIMEOUT;
 }
 
-ÑCriticalSection* CSynchronizeFactoryWindows::CreateCriticalSection()
+CCriticalSection* CSynchronizeFactoryWindows::CreateCriticalSection()
 {
-	return new ÑCriticalSection();
+	return new CCriticalSection();
 }
 
 CEvent* CSynchronizeFactoryWindows::CreateSynchEvent( bool InIsManualReset /*= false*/, const tchar* InName /*= nullptr*/ )

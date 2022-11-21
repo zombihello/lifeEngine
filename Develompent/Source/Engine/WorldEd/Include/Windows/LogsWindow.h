@@ -11,10 +11,10 @@
 
 #include "ImGUI/ImGUIEngine.h"
 
- /**
-  * @ingroup WorldEd
-  * @brief Window logs
-  */
+/**
+ * @ingroup WorldEd
+ * @brief Window logs
+ */
 class CLogsWindow : public CImGUILayer
 {
 public:

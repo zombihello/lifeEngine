@@ -7,6 +7,6 @@
 // GLOBALS
 // -------------
 
-ÑAudioEngine				GAudioEngine;
+CAudioEngine				GAudioEngine;
 CAudioDevice				GAudioDevice;
 CAudioBufferManager			GAudioBufferManager;

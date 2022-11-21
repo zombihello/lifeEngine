@@ -351,7 +351,7 @@ public:
 /**
  * Forward declaration for a platform specific implementation
  */
-class ÑCriticalSection;
+class CCriticalSection;
 
 /**
  * @ingroup Core
@@ -482,7 +482,7 @@ public:
 	 *
 	 * @return The new critical section object or nullptr otherwise
 	 */
-	virtual ÑCriticalSection* CreateCriticalSection() = 0;
+	virtual CCriticalSection* CreateCriticalSection() = 0;
 
 	/**
 	 * Creates a new event
@@ -548,7 +548,7 @@ public:
 	 *
 	 * @param[in] InSynchObject The synchronization object to manage
 	 */
-	CScopeLock( ÑCriticalSection* InSynchObject ) :
+	CScopeLock( CCriticalSection* InSynchObject ) :
 		synchObject( InSynchObject )
 	{
 		check( synchObject );
@@ -560,7 +560,7 @@ public:
 	 *
 	 * @param[in] InSynchObject The synchronization object to manage
 	 */
-	CScopeLock( ÑCriticalSection& InSynchObject ) :
+	CScopeLock( CCriticalSection& InSynchObject ) :
 		synchObject( &InSynchObject )
 	{
 		check( synchObject );
@@ -601,6 +601,6 @@ private:
 		return *this; 
 	}
 
-	ÑCriticalSection*		synchObject;		/**< The synchronization object to aggregate and scope manage */
+	CCriticalSection*		synchObject;		/**< The synchronization object to aggregate and scope manage */
 };
 #endif // !THREADINGBASE_H

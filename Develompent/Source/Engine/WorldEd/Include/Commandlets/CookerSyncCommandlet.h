@@ -15,9 +15,9 @@
  * @ingroup WorldEd
  * Commandlet for generate table of contents
  */
-class CCookerSyncCommandlet : public ÑBaseCommandlet
+class CCookerSyncCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CCookerSyncCommandlet, ÑBaseCommandlet )
+	DECLARE_CLASS( CCookerSyncCommandlet, CBaseCommandlet )
 
 public:
 	/**

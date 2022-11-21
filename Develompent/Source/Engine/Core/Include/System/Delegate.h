@@ -79,7 +79,7 @@ public:
 
 private:
 	std::list< DelegateType_t >		delegates;				/**< List of delegates */
-	mutable ÑCriticalSection		criticalSection;		/**< Critical section for thread safe broadcast */
+	mutable CCriticalSection		criticalSection;		/**< Critical section for thread safe broadcast */
 };
 
 /**
@@ -133,7 +133,7 @@ public:
 
 private:
 	DelegateType_t				delegate;				/**< Delegate */
-	mutable ÑCriticalSection	criticalSection;		/**< Critical section for thread safe execute */
+	mutable CCriticalSection	criticalSection;		/**< Critical section for thread safe execute */
 };
 
 /**

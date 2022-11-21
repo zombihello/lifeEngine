@@ -13,7 +13,7 @@
  * @ingroup Audio
  * Audio engine
  */
-extern class ÑAudioEngine			GAudioEngine;
+extern class CAudioEngine			GAudioEngine;
 
 /**
  * @ingroup Audio

@@ -376,7 +376,7 @@ extern void appRequestExit( bool InForce );
     #define checkNoReentry()                {}
 #endif // DO_CHECK
 
-// This define must come after the class declaration for ÑBaseLogger, since the macro uses GLog->Logf
+// This define must come after the class declaration for CBaseLogger, since the macro uses GLog->Logf
 #if CHECK_PUREVIRTUALS
     #define PURE_VIRTUAL( InFunc, InExtra ) =0;
 #else

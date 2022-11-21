@@ -6,9 +6,9 @@
 #include "RHI/BaseRHI.h"
 
 /** Critical section of add/remove in CRenderResource::GetResourceList */
-FORCEINLINE ÑCriticalSection& GetGlobalResourcesCS()
+FORCEINLINE CCriticalSection& GetGlobalResourcesCS()
 {
-	static ÑCriticalSection		globalResourcesCS;
+	static CCriticalSection		globalResourcesCS;
 	return globalResourcesCS;
 }
 
@@ -62,7 +62,7 @@ void CRenderResource::InitResource()
 	// If resource is global - add he to global list of resource
 	if ( IsGlobal() && !bInGlobalList )
 	{
-		ÑCriticalSection&		criticalSection = GetGlobalResourcesCS();
+		CCriticalSection&		criticalSection = GetGlobalResourcesCS();
 		criticalSection.Lock();
 		GetResourceList().insert( this );
 		criticalSection.Unlock();
@@ -91,7 +91,7 @@ void CRenderResource::ReleaseResource()
 	// If resource is global - remove he from global list of resource
 	if ( IsGlobal() && bInGlobalList )
 	{
-		ÑCriticalSection&		criticalSection = GetGlobalResourcesCS();
+		CCriticalSection&		criticalSection = GetGlobalResourcesCS();
 		criticalSection.Lock();
 		GetResourceList().erase( this );
 		criticalSection.Unlock();

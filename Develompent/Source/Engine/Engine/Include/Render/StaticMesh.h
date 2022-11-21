@@ -205,7 +205,7 @@ public:
 	 * @brief Get array of verteces
 	 * @return Return array of verteces
 	 */
-	FORCEINLINE const ÑBulkData<SStaticMeshVertexType>& GetVerteces() const
+	FORCEINLINE const CBulkData<SStaticMeshVertexType>& GetVerteces() const
 	{
 		return verteces;
 	}
@@ -214,7 +214,7 @@ public:
 	 * @brief Get array of indeces
 	 * @return Return array of indeces
 	 */
-	FORCEINLINE const ÑBulkData<uint32>& GetIndeces() const
+	FORCEINLINE const CBulkData<uint32>& GetIndeces() const
 	{
 		return indeces;
 	}
@@ -341,8 +341,8 @@ private:
 	TRefCountPtr< CStaticMeshVertexFactory >	vertexFactory;				/**< Vertex factory */
 	std::vector< TAssetHandle<CMaterial> >		materials;					/**< Array materials in mesh */
 	std::vector< SStaticMeshSurface >			surfaces;					/**< Array surfaces in mesh */
-	ÑBulkData< SStaticMeshVertexType >			verteces;					/**< Array verteces to create RHI vertex buffer */
-	ÑBulkData< uint32 >							indeces;					/**< Array indeces to create RHI index buffer */
+	CBulkData< SStaticMeshVertexType >			verteces;					/**< Array verteces to create RHI vertex buffer */
+	CBulkData< uint32 >							indeces;					/**< Array indeces to create RHI index buffer */
 	VertexBufferRHIRef_t						vertexBufferRHI;			/**< RHI vertex buffer */
 	IndexBufferRHIRef_t							indexBufferRHI;				/**< RHI index buffer */
 	ElementDrawingPolicyMap_t					elementDrawingPolicyMap;	/**< Map of adds a drawing policy link to SDGs */
