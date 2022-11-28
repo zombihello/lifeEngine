@@ -338,6 +338,7 @@ bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResu
 	{
 		return false;
 	}
+	SetCurrentDirectoryW( GFileSystem->ConvertToAbsolutePath( appBaseDir() ).c_str() );
 
 	// Extract file paths
 	{

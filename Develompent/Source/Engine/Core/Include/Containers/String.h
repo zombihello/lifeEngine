@@ -68,6 +68,34 @@ public:
 	}
 
 	/**
+	 * @brief Convert string to lower case
+	 *
+	 * @param InString		String
+	 * @return Return string in lower case
+	 */
+	static FORCEINLINE std::wstring ToLower( const std::wstring& InString )
+	{
+		std::wstring	result;
+		ToLower( InString, result );
+		return result;
+	}
+
+	/**
+	 * @brief Convert string to lower case
+	 *
+	 * @param InString		String
+	 * @param OutString		Output string in lower case
+	 */
+	static FORCEINLINE void ToLower( const std::wstring& InString, std::wstring& OutString )
+	{
+		OutString = InString;
+		for ( uint32 index = 0, count = OutString.size(); index < count; ++index )
+		{
+			OutString[index] = std::tolower( OutString[index] );
+		}
+	}
+
+	/**
 	 * @brief Is exist substring in string
 	 * 
 	 * @param InString			Base string
