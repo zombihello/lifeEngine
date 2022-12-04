@@ -73,7 +73,7 @@ bool CConsoleSystem::Exec( const std::wstring& InCommand )
 					case CVT_Float:		stringVar = std::to_wstring( var->GetValueFloat() );				break;
 					case CVT_Bool:		stringVar = var->GetValueBool() ? TEXT( "true" ) : TEXT( "false" ); break;
 					default:			
-						check( false, TEXT( "Unknown ConVar type 0x%X" ), var->GetType() );
+						checkMsg( false, TEXT( "Unknown ConVar type 0x%X" ), var->GetType() );
 						stringVar = TEXT( "" );
 						break;
 					}

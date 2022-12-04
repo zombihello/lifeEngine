@@ -550,7 +550,7 @@ void CPackage::UpdateAssetNameInTable( const CGuid& InGUID )
 	assetInfo.name = assetInfo.data->name;
 }
 
-void CPackage::Add( const TAssetHandle<CAsset>& InAsset )
+void CPackage::Add( const TAssetHandle<CAsset>& InAsset, SAssetInfo* OutAssetInfo /* = nullptr */ )
 {
 	check( InAsset.IsAssetValid() );
 
@@ -567,11 +567,17 @@ void CPackage::Add( const TAssetHandle<CAsset>& InAsset )
 	// Update guid package in asset reference
 	InAsset.reference->guidPackage		= guid;
 
+	SAssetInfo		assetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, assetRef->type, assetRef->name, assetRef };
+	if ( OutAssetInfo )
+	{
+		*OutAssetInfo = assetInfo;
+	}
+
 	bIsDirty							= true;
 	assetRef->package					= this;
 	assetRef->bDirty					= true;
 	assetGUIDTable[ assetRef->name ]	= assetRef->guid;
-	assetsTable[ assetRef->guid ]		= SAssetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, assetRef->type, assetRef->name, assetRef };
+	assetsTable[ assetRef->guid ]		= assetInfo;
 	
 	++numLoadedAssets;
 	++numDirtyAssets;

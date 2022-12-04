@@ -162,7 +162,6 @@ private:
 	{ \
 		if ( GIsThreadedRendering && !IsInRenderingThread() ) \
 		{ \
-			check( IsInGameThread() ); \
 			ÑRingBuffer::ÑAllocationContext			allocationContext( GRenderCommandBuffer, sizeof( InTypeName ) ); \
 			if ( allocationContext.GetAllocatedSize() < sizeof( InTypeName ) ) \
 			{ \

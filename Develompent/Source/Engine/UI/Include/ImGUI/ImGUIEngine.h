@@ -285,6 +285,41 @@ public:
 	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
 
 	/**
+	 * @brief Open popup
+	 * @warning Supported opened only one popup in whole time
+	 *
+	 * @param InArgs	Arguments for construct popup
+	 * @return Return pointer to opened popup
+	 */
+	template< typename ObjectType, typename... ArgTypes >
+	FORCEINLINE TSharedPtr<CImGUIPopup> OpenPopup( ArgTypes&&... InArgs )
+	{
+		popup = MakeSharedPtr<ObjectType>( InArgs... );
+		popup->Open();
+		return popup;
+	}
+
+	/**
+	 * @brief Close current popup
+	 */
+	FORCEINLINE void CloseCurrentPopup()
+	{
+		if ( popup )
+		{
+			popup->Close();
+		}
+	}
+
+	/**
+	 * @brief Get current popup
+	 * @return Return current opened popup, in case when him is not opened will return NULL
+	 */
+	FORCEINLINE TSharedPtr<CImGUIPopup> GetCurrentPopup() const
+	{
+		return popup;
+	}
+
+	/**
 	 * @brief Get layer name
 	 * @return Return layer name
 	 */
@@ -386,41 +421,6 @@ protected:
 	 * @param InNewVisibility		New visibility
 	 */
 	virtual void OnVisibilityChanged( bool InNewVisibility );
-
-	/**
-	 * @brief Open popup
-	 * @warning Supported opened only one popup in whole time
-	 * 
-	 * @param InArgs	Arguments for construct popup
-	 * @return Return pointer to opened popup
-	 */
-	template< typename ObjectType, typename... ArgTypes >
-	FORCEINLINE TSharedPtr<CImGUIPopup> OpenPopup( ArgTypes&&... InArgs )
-	{
-		popup = MakeSharedPtr<ObjectType>( InArgs... );
-		popup->Open();
-		return popup;
-	}
-
-	/**
-	 * @brief Close current popup
-	 */
-	FORCEINLINE void CloseCurrentPopup()
-	{
-		if ( popup )
-		{
-			popup->Close();
-		}
-	}
-
-	/**
-	 * @brief Get current popup
-	 * @return Return current opened popup, in case when him is not opened will return NULL
-	 */
-	FORCEINLINE TSharedPtr<CImGUIPopup> GetCurrentPopup() const
-	{
-		return popup;
-	}
 
 private:
 	/**

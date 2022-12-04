@@ -26,7 +26,11 @@ public:
 	{
 		BT_None		= 0,		/**< No button */
 		BT_Ok		= 1 << 0,	/**< Button 'Ok' */
-		BT_Cancel	= 1 << 1	/**< Button 'Cancel' */
+		BT_Cancel	= 1 << 1,	/**< Button 'Cancel' */
+		BT_Yes		= 1 << 2,	/**< Button 'Yes' */
+		BT_YesToAll	= 1 << 3,	/**< Button 'Yes To All' */
+		BT_No		= 1 << 4,	/**< Button 'No' */
+		BT_NoToAll	= 1 << 5	/**< Button 'No To All' */
 	};
 
 	/**

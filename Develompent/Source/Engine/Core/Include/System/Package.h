@@ -824,9 +824,10 @@ public:
 	/**
 	 * Add asset to package
 	 * 
-	 * @param[in] InAsset Asset
+	 * @param[in] InAsset		Asset
+	 * @param[in] OutAssetInfo	Optional. Output to this parameter asset's info if pointer is not NULL
 	 */
-	void Add( const TAssetHandle<CAsset>& InAsset );
+	void Add( const TAssetHandle<CAsset>& InAsset, SAssetInfo* OutAssetInfo = nullptr );
 
 	/**
 	 * Remove asset from package

@@ -44,6 +44,7 @@ protected:
 
 private:
 	friend class CFileTreeNode;
+	friend class CImportAssetsRunnable;
 
 	/**
 	 * @brief Enumeration file type

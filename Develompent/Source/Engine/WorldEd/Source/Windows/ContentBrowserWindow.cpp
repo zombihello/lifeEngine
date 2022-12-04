@@ -7,6 +7,7 @@
 #include "System/BaseFileSystem.h"
 #include "System/AssetsImport.h"
 #include "System/EditorEngine.h"
+#include "System/ThreadingBase.h"
 #include "Windows/ContentBrowserWindow.h"
 #include "Windows/DialogWindow.h"
 #include "Windows/InputTextDialog.h"
@@ -75,6 +76,157 @@ static FORCEINLINE std::wstring ArrayFilenamesToString( const std::vector<CFilen
 
 	return result;
 }
+
+//
+// IMPORT ASSETS RUNNABLE
+//
+
+class CImportAssetsRunnable : public CRunnable
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InOwner			Owner
+	 * @param InFilesToImport	Array of files to import
+	 */
+	CImportAssetsRunnable( CContentBrowserWindow* InOwner, const std::vector<std::wstring>& InFilesToImport )
+		: importMode( IM_Default )
+		, owner( InOwner )
+		, eventResponse( nullptr )
+		, filesToImport( InFilesToImport )
+	{}
+
+	/**
+	 * @brief Initialize
+	 *
+	 * Allows per runnable object initialization. NOTE: This is called in the
+	 * context of the thread object that aggregates this, not the thread that
+	 * passes this runnable to a new thread.
+	 *
+	 * @return True if initialization was successful, false otherwise
+	 */
+	virtual bool Init() override
+	{
+		check( owner && owner->package );
+		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		return true;
+	}
+
+	/**
+	 * @brief Run
+	 *
+	 * This is where all per object thread work is done. This is only called
+	 * if the initialization was successful.
+	 *
+	 * @return The exit code of the runnable object
+	 */
+	virtual uint32 Run() override
+	{
+		// Import all assets
+		std::wstring		errorMessages;
+		for ( uint32 index = 0, count = filesToImport.size(); index < count; ++index )
+		{
+			CFilename		filename( filesToImport[index] );
+			bool			bExist	= owner->package->IsExist( filename.GetBaseFilename() );
+			if ( bExist )
+			{
+				if ( importMode == IM_SkipConflicts )
+				{
+					continue;
+				}
+				else if ( importMode != IM_Force )
+				{
+					CDialogWindow::EButtonType	pressedButton;
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "Asset '%s' already exist in package.\nDo you want change him?" ), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Yes | CDialogWindow::BT_YesToAll | CDialogWindow::BT_No | CDialogWindow::BT_NoToAll );
+					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
+												  {
+													  pressedButton = InButtonType;
+													  eventResponse->Trigger();
+												  } );
+					eventResponse->Wait();
+					switch ( pressedButton )
+					{
+					case CDialogWindow::BT_Yes:
+						break;
+
+					case CDialogWindow::BT_No:
+						continue;
+
+					case CDialogWindow::BT_YesToAll:
+						importMode = IM_Force;
+						break;
+
+					case CDialogWindow::BT_NoToAll:
+						importMode = IM_SkipConflicts;
+						break;
+					}
+				}
+			}
+
+			std::wstring		errorMsg;
+			TSharedPtr<CAsset>	asset = GAssetFactory.Import( filename.GetFullPath(), errorMsg );
+			if ( asset )
+			{
+				SAssetInfo		assetInfo;
+				owner->package->Add( asset->GetAssetHandle(), &assetInfo );
+				if ( !bExist )
+				{
+					owner->assets.push_back( CContentBrowserWindow::CAssetNode( assetInfo, owner ) );
+				}				
+			}
+			else
+			{
+				errorMessages += CString::Format( TEXT( "\n%s: %s" ), filename.GetBaseFilename().c_str(), errorMsg.c_str() );
+			}
+		}
+
+		// If exist errors, show popup window
+		if ( !errorMessages.empty() )
+		{
+			owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The following assets not imported with following errors\n\nAssets:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
+		}
+		return 0;
+	}
+
+	/**
+	 * @brief Stop
+	 *
+	 * This is called if a thread is requested to terminate early
+	 */
+	virtual void Stop() override
+	{
+		GSynchronizeFactory->Destroy( eventResponse );
+	}
+
+	/**
+	 * @brief Exit
+	 *
+	 * Called in the context of the aggregating thread to perform any cleanup.
+	 */
+	virtual void Exit() override
+	{}
+
+private:
+	/**
+	 * @brief Enumeration of import modes
+	 */
+	enum EImportMode
+	{
+		IM_Default,			/**< Default import mode. When importing asset is exist in package, will show dialog window with question is need change it asset or no */
+		IM_Force,			/**< Import all assets and ignore conflicts */
+		IM_SkipConflicts	/**< Skip conflicts while import assets */
+	};
+
+	EImportMode					importMode;		/**< Import mode */
+	CContentBrowserWindow*		owner;			/**< Owner */
+	CEvent*						eventResponse;	/**< Event used when opened popup of change exist assets */
+	std::vector<std::wstring>	filesToImport;	/**< Array of files to import */
+};
+
+//
+// CONTENT BROWSER WINDOW
+//
 
 CContentBrowserWindow::CContentBrowserWindow( const std::wstring& InName )
 	: CImGUILayer( InName )
@@ -246,14 +398,24 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 			CFileDialogSetup		fileDialogSetup;
 			SOpenFileDialogResult	openFileDialogResult;
 
+			// Init file dialog settings
 			fileDialogSetup.SetMultiselection( true );
 			fileDialogSetup.SetTitle( TEXT( "Import Asset" ) );
 			fileDialogSetup.SetDirectory( gameRoot->GetPath() );
-			fileDialogSetup.AddFormat( GAssetFactory.GetImporterInfo( AT_Texture2D ), TEXT( "Texture 2D" ) );
-			appShowOpenFileDialog( fileDialogSetup, openFileDialogResult );
+			for ( uint32 index = AT_FirstType; index < AT_Count; ++index )
+			{
+				const CAssetFactory::SAssetImporterInfo&		importerInfo = GAssetFactory.GetImporterInfo( ( EAssetType )index );
+				if ( importerInfo.bValid )
+				{
+					fileDialogSetup.AddFormat( importerInfo, ConvertAssetTypeToText( ( EAssetType )index ) );
+				}
+			}
 
-			int a = 0;
-			++a;
+			// Show open file dialog
+			if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) )
+			{
+				GThreadFactory->CreateThread( new CImportAssetsRunnable( this, openFileDialogResult.files ), TEXT( "ImportAssets" ), true, true );
+			}
 		}
 		
 		ImGui::MenuItem( "Reimport", "", nullptr, bSelectedAssets );

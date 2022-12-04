@@ -14,4 +14,3 @@
 ----------------------------------------------------------------
 	- Fix link count for DirectX 11 objects 
 	- Fix depth buffer accuracy
-	- Implement console system

@@ -166,11 +166,11 @@ void CConVar::SetValueBool( bool InValue )
 	SetMin( true, 0.f );
 	SetMax( true, 1.f );
 
-	if ( bHasMin && InValue < minVar )
+	if ( bHasMin && ( float )InValue < minVar )
 	{
 		*boolData = minVar;
 	}
-	else if ( bHasMax && InValue > maxVar )
+	else if ( bHasMax && ( float )InValue > maxVar )
 	{
 		*boolData = maxVar;
 	}
