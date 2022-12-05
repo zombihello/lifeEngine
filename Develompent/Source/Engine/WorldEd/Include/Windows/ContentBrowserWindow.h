@@ -253,7 +253,9 @@ private:
 			: bSelected( false )
 			, info( InAssetInfo )
 			, owner( InOwner )
-		{}
+		{
+			info.data = nullptr;		// We not need remember about loaded asset and keep him
+		}
 
 		/**
 		 * @brief Update asset node
@@ -295,6 +297,27 @@ private:
 		FORCEINLINE const std::wstring GetName() const
 		{
 			return info.name;
+		}
+
+		/**
+		 * @brief Get asset info
+		 * @return Return asset info
+		 */
+		FORCEINLINE const SAssetInfo& GetAssetInfo() const
+		{
+			return info;
+		}
+
+		/**
+		 * @brief Is equal asset node
+		 * 
+		 * @param InOther	Other asset node
+		 * @return Return TRUE if asset node is equal
+		 */
+		FORCEINLINE bool IsEqual( const CAssetNode& InOther ) const
+		{
+			const SAssetInfo&	otherInfo = InOther.GetAssetInfo();
+			return info.name == otherInfo.name && info.offset == otherInfo.offset && info.size == otherInfo.size && info.type == otherInfo.type;
 		}
 
 	private:
@@ -420,6 +443,34 @@ private:
 	 * @param InPackageName		Package name
 	 */
 	void PopupMenu_Package_MakePackage( const std::wstring& InPackageName );
+
+	/**
+	 * @brief Popup action. Reload assets
+	 * @param InAssets	Assets to reload
+	 */
+	void PopupMenu_Asset_Reload( const std::vector<CAssetNode>& InAssets );
+
+	/**
+	 * @brief Popup action. Import assets
+	 */
+	void PopupMenu_Asset_Import();
+
+	/**
+	 * @brief Popup action. Reimport assets
+	 * @param InAssets	Assets to reimport
+	 */
+	void PopupMenu_Asset_Reimport( const std::vector<CAssetNode>& InAssets );
+
+	/**
+	 * @brief Popup action. Reimport asset with new file
+	 * @param InAsset	Asset to reimport with new file
+	 */
+	void PopupMenu_Asset_ReimportWithNewFile( const CAssetNode& InAsset );
+
+	/**
+	 * @brief Popup action. Delete selected assets
+	 */
+	void PopupMenu_Asset_Delete();
 
 	TSharedPtr<CFileTreeNode>	engineRoot;					/**< Engine root directory */
 	TSharedPtr<CFileTreeNode>	gameRoot;					/**< Game root directory */

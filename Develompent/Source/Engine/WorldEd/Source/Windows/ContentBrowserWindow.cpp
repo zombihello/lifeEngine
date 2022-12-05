@@ -368,15 +368,18 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 {
 	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
 	{
-		bool		bSelectedAssets = false;
+		std::vector<CAssetNode>		selectedAssets;
 		for ( uint32 index = 0, count = assets.size(); index < count; ++index )
 		{
-			bSelectedAssets |= assets[index].IsSelected();
-			if ( bSelectedAssets )
+			const CAssetNode&	asset = assets[index];
+			if ( asset.IsSelected() )
 			{
-				break;
+				selectedAssets.push_back( asset );
 			}
 		}
+
+		bool	bSelectedOnlyOneAsset	= selectedAssets.size() == 1;
+		bool	bSelectedAssets			= !selectedAssets.empty();
 
 		if ( ImGui::BeginMenu( "Create" ) )
 		{
@@ -390,40 +393,56 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 		}
 
 		ImGui::Separator();
-		ImGui::MenuItem( "Reload", "", nullptr, bSelectedAssets );
+
+		// Reload assets
+		if ( ImGui::MenuItem( "Reload", "", nullptr, bSelectedAssets ) )
+		{
+			PopupMenu_Asset_Reload( selectedAssets );
+		}
 		
 		// Import asset
 		if ( ImGui::MenuItem( "Import" ) )
 		{
-			CFileDialogSetup		fileDialogSetup;
-			SOpenFileDialogResult	openFileDialogResult;
-
-			// Init file dialog settings
-			fileDialogSetup.SetMultiselection( true );
-			fileDialogSetup.SetTitle( TEXT( "Import Asset" ) );
-			fileDialogSetup.SetDirectory( gameRoot->GetPath() );
-			for ( uint32 index = AT_FirstType; index < AT_Count; ++index )
-			{
-				const CAssetFactory::SAssetImporterInfo&		importerInfo = GAssetFactory.GetImporterInfo( ( EAssetType )index );
-				if ( importerInfo.bValid )
-				{
-					fileDialogSetup.AddFormat( importerInfo, ConvertAssetTypeToText( ( EAssetType )index ) );
-				}
-			}
-
-			// Show open file dialog
-			if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) )
-			{
-				GThreadFactory->CreateThread( new CImportAssetsRunnable( this, openFileDialogResult.files ), TEXT( "ImportAssets" ), true, true );
-			}
+			PopupMenu_Asset_Import();
 		}
 		
-		ImGui::MenuItem( "Reimport", "", nullptr, bSelectedAssets );
-		ImGui::MenuItem( "Reimport With New File", "", nullptr, bSelectedAssets );
+		// Reimport assets
+		if ( ImGui::MenuItem( "Reimport", "", nullptr, bSelectedAssets ) )
+		{
+			PopupMenu_Asset_Reimport( selectedAssets );
+		}
+
+		// Reimport with new file
+		if ( ImGui::MenuItem( "Reimport With New File", "", nullptr, bSelectedOnlyOneAsset ) )
+		{
+			PopupMenu_Asset_ReimportWithNewFile( selectedAssets[0] );
+		}
+
 		ImGui::Separator();
-		ImGui::MenuItem( "Delete", "", nullptr, bSelectedAssets );
-		ImGui::MenuItem( "Rename", "", nullptr, bSelectedAssets );
-		ImGui::MenuItem( "Copy Reference", "", nullptr, bSelectedAssets );
+
+		// Delete assets
+		if ( ImGui::MenuItem( "Delete", "", nullptr, bSelectedAssets ) )
+		{
+			// Convert selected assets to string with they's names for popup
+			std::wstring				selectedAssetNames;
+			for ( uint32 index = 0, count = selectedAssets.size(); index < count; ++index )
+			{
+				selectedAssetNames += CString::Format( TEXT( "\n%s" ), selectedAssets[index].GetAssetInfo().name.c_str() );
+			}
+
+			TSharedPtr<CDialogWindow>		popup = OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "Is need delete selected assets?\n\nAssets:%s" ), selectedAssetNames.c_str() ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
+			popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
+										  {
+											  // We pressed 'Ok', delete selected folders
+											  if ( InButtonType == CDialogWindow::BT_Ok )
+											  {
+												  PopupMenu_Asset_Delete();
+											  }
+										  } );
+		}
+
+		ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneAsset );
+		ImGui::MenuItem( "Copy Reference", "", nullptr, bSelectedOnlyOneAsset );
 		ImGui::EndPopup();
 	}
 }
@@ -841,6 +860,156 @@ void CContentBrowserWindow::PopupMenu_Package_MakePackage( const std::wstring& I
 		// Update TOC file and serialize him
 		GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), package->GetFileName() );
 		GEditorEngine->SerializeTOC( true );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Asset_Reload( const std::vector<CAssetNode>& InAssets )
+{
+	std::wstring		errorMessages;
+	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
+	{
+		const CAssetNode&		assetNode	= InAssets[index];
+		TAssetHandle<CAsset>	asset		= package->Find( assetNode.GetAssetInfo().name );
+		if ( !package->ReloadAsset( asset ) )
+		{
+			errorMessages += CString::Format( TEXT( "\n%s : Failed reload" ), assetNode.GetAssetInfo().name.c_str() );
+		}
+	}
+
+	// If exist errors, show popup window
+	if ( !errorMessages.empty() )
+	{
+		OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The following assets not reloaded with following errors\n\nAssets:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Asset_Import()
+{
+	CFileDialogSetup		fileDialogSetup;
+	SOpenFileDialogResult	openFileDialogResult;
+
+	// Init file dialog settings
+	fileDialogSetup.SetMultiselection( true );
+	fileDialogSetup.SetTitle( TEXT( "Import Asset" ) );
+	fileDialogSetup.SetDirectory( gameRoot->GetPath() );
+	for ( uint32 index = AT_FirstType; index < AT_Count; ++index )
+	{
+		const CAssetFactory::SAssetImporterInfo& importerInfo = GAssetFactory.GetImporterInfo( ( EAssetType )index );
+		if ( importerInfo.bValid )
+		{
+			fileDialogSetup.AddFormat( importerInfo, ConvertAssetTypeToText( ( EAssetType )index ) );
+		}
+	}
+
+	// Show open file dialog
+	if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) )
+	{
+		GThreadFactory->CreateThread( new CImportAssetsRunnable( this, openFileDialogResult.files ), TEXT( "ImportAssets" ), true, true );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Asset_Reimport( const std::vector<CAssetNode>& InAssets )
+{
+	std::wstring		errorMessages;
+	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
+	{
+		const CAssetNode&		assetNode	= InAssets[index];
+		TAssetHandle<CAsset>	asset		= package->Find( assetNode.GetAssetInfo().name );
+		if ( asset.IsAssetValid() )
+		{
+			std::wstring		errorMsg;
+			TSharedPtr<CAsset>	assetPtr = asset.ToSharedPtr();
+			if ( !GAssetFactory.Reimport( assetPtr, errorMsg ) )
+			{
+				errorMessages += CString::Format( TEXT( "\n%s : %s" ), assetPtr->GetAssetName().c_str(), errorMsg.c_str() );
+			}
+		}
+	}
+
+	// If exist errors, show popup window
+	if ( !errorMessages.empty() )
+	{
+		OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The following assets not reimported with following errors\n\nAssets:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile( const CAssetNode& InAsset )
+{
+	std::wstring			errorMessage;
+	TAssetHandle<CAsset>	asset = package->Find( InAsset.GetAssetInfo().name );
+	if ( asset.IsAssetValid() )
+	{
+		TSharedPtr<CAsset>		assetPtr = asset.ToSharedPtr();
+
+		// Select new source file
+		CFileDialogSetup		fileDialogSetup;
+		SOpenFileDialogResult	openFileDialogResult;
+
+		// Init file dialog settings
+		fileDialogSetup.SetMultiselection( false );
+		fileDialogSetup.SetTitle( TEXT( "Reimport Asset" ) );
+		fileDialogSetup.SetDirectory( gameRoot->GetPath() );
+		fileDialogSetup.AddFormat( GAssetFactory.GetImporterInfo( assetPtr->GetType() ), ConvertAssetTypeToText( assetPtr->GetType() ) );
+
+		// Show open file dialog
+		if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
+		{
+			// Let's try to reimport asset
+			std::wstring	oldSourceFile = assetPtr->GetAssetSourceFile();
+			assetPtr->SetAssetSourceFile( openFileDialogResult.files[0] );
+			
+			// If failed we return old source file
+			if ( !GAssetFactory.Reimport( assetPtr, errorMessage ) )
+			{
+				assetPtr->SetAssetSourceFile( oldSourceFile );
+			}
+		}
+	}
+	else
+	{
+		errorMessage = CString::Format( TEXT( "Not found asset in package '%s'" ), InAsset.GetAssetInfo().name.c_str(), package->GetName().c_str() );
+	}
+
+	// If exist error, show popup window
+	if ( !errorMessage.empty() )
+	{
+		OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The asset '%s' not reimported.\n\nError: %s" ), errorMessage.c_str() ), CDialogWindow::BT_Ok );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Asset_Delete()
+{
+	// Remove all selected assets from package
+	std::wstring		usedAssets;
+	for ( uint32 index = 0; index < assets.size(); ++index )
+	{
+		const CAssetNode&	assetNode = assets[index];
+		if ( assetNode.IsSelected() )
+		{
+			if ( !package->Remove( assetNode.GetAssetInfo().name, false, true ) )
+			{
+				usedAssets += CString::Format( TEXT( "\n%s" ), assetNode.GetAssetInfo().name.c_str() );
+			}
+			else
+			{
+				// Remove asset node from array
+				for ( uint32 idxAssetNode = 0, countAssetNodes = assets.size(); idxAssetNode < countAssetNodes; ++idxAssetNode )
+				{
+					if ( assets[idxAssetNode].IsEqual( assetNode ) )
+					{
+						--index;
+						assets.erase( assets.begin() + idxAssetNode );
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	// If we have used assets - print message
+	if ( !usedAssets.empty() )
+	{
+		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following assets in using and cannot be delete. Close all assets will allow them to be deleted\n\nAssets:\n%s" ), usedAssets.c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 
