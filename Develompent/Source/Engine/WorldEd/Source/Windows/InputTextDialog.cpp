@@ -29,6 +29,7 @@ void CInputTextDialog::OnTick()
 	ImGui::SameLine();
 	if ( ImGui::Button( "Cancel", buttonSize ) )
 	{
+		onCenceled.Broadcast();
 		Close();
 	}
 }

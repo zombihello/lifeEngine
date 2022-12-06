@@ -36,6 +36,15 @@ public:
 	 */
 	virtual void Init() override;
 
+	/**
+	 * @brief Get current opened package
+	 * @return Return current opened package. If package not opened will return NULL
+	 */
+	FORCEINLINE PackageRef_t GetCurrentPackage() const
+	{
+		return package;
+	}
+
 protected:
 	/**
 	 * @brief Method tick interface of a layer
@@ -45,6 +54,7 @@ protected:
 private:
 	friend class CFileTreeNode;
 	friend class CImportAssetsRunnable;
+	friend class CRenameAssetRunnable;
 
 	/**
 	 * @brief Enumeration file type
@@ -246,21 +256,29 @@ private:
 		/**
 		 * @brief Constructor
 		 * 
-		 * @param InAssetInfo	Asset info
+		 * @param InAssetInfo	Pointer to asset info in package
 		 * @param InOwner		Owner
 		 */
-		FORCEINLINE CAssetNode( const SAssetInfo& InAssetInfo, CContentBrowserWindow* InOwner )
+		FORCEINLINE CAssetNode( const SAssetInfo* InAssetInfo, CContentBrowserWindow* InOwner )
 			: bSelected( false )
 			, info( InAssetInfo )
 			, owner( InOwner )
 		{
-			info.data = nullptr;		// We not need remember about loaded asset and keep him
+			check( info );
 		}
 
 		/**
 		 * @brief Update asset node
 		 */
 		void Tick();
+
+		/**
+		 * @brief Mark is deleted asset in package
+		 */
+		FORCEINLINE void MarkIsDeleted()
+		{
+			info = nullptr;
+		}
 
 		/**
 		 * @brief Set select
@@ -287,23 +305,25 @@ private:
 		 */
 		FORCEINLINE EAssetType GetType() const
 		{
-			return info.type;
+			check( info );
+			return info->type;
 		}
 
 		/**
 		 * @brief Get asset name
 		 * @return Return asset name
 		 */
-		FORCEINLINE const std::wstring GetName() const
+		FORCEINLINE const std::wstring& GetName() const
 		{
-			return info.name;
+			check( info );
+			return info->name;
 		}
 
 		/**
 		 * @brief Get asset info
 		 * @return Return asset info
 		 */
-		FORCEINLINE const SAssetInfo& GetAssetInfo() const
+		FORCEINLINE const SAssetInfo* GetAssetInfo() const
 		{
 			return info;
 		}
@@ -316,8 +336,7 @@ private:
 		 */
 		FORCEINLINE bool IsEqual( const CAssetNode& InOther ) const
 		{
-			const SAssetInfo&	otherInfo = InOther.GetAssetInfo();
-			return info.name == otherInfo.name && info.offset == otherInfo.offset && info.size == otherInfo.size && info.type == otherInfo.type;
+			return info == InOther.info;
 		}
 
 	private:
@@ -327,7 +346,7 @@ private:
 		void ProcessEvents();
 
 		bool					bSelected;	/**< Is selected node */
-		SAssetInfo				info;		/**< Asset info */
+		const SAssetInfo*		info;		/**< Asset info */
 		CContentBrowserWindow*	owner;		/**< Content browser window who owned this node */
 	};
 
@@ -389,7 +408,11 @@ private:
 	 * @brief Set current package
 	 * @param InPackage		Current package
 	 */
-	void SetCurrentPackage( PackageRef_t InPackage );
+	FORCEINLINE void SetCurrentPackage( PackageRef_t InPackage )
+	{
+		package = InPackage;
+		assets.clear();
+	}
 
 	/**
 	 * @brief Popup action. Save a package
@@ -471,6 +494,17 @@ private:
 	 * @brief Popup action. Delete selected assets
 	 */
 	void PopupMenu_Asset_Delete();
+
+	/**
+	 * @brief Refresh asset nodes
+	 */
+	void RefreshAssetNodes();
+
+	/**
+	 * @brief Popup action. Copy reference to asset
+	 * @param InAsset	Asset
+	 */
+	void PopupMenu_Asset_CopyReference( const CAssetNode& InAsset );
 
 	TSharedPtr<CFileTreeNode>	engineRoot;					/**< Engine root directory */
 	TSharedPtr<CFileTreeNode>	gameRoot;					/**< Game root directory */

@@ -232,11 +232,23 @@ protected:
 	 */
 	virtual void OnTick() = 0;
 
+	/**
+	 * @brief Set popup size
+	 * @param InSize	Popup size
+	 */
+	FORCEINLINE void SetSize( const Vector2D& InSize )
+	{
+		pendingSize = InSize;
+		bPendingChangeSize = true;
+	}
+
 private:
-	bool				bOpen;		/**< Is open popup */
-	bool				bNeedClose;	/**< Is need close popup */
-	bool				bNeedOpen;	/**< Is need open popup */
-	std::wstring		name;		/**< Popup name */
+	bool				bOpen;				/**< Is open popup */
+	bool				bNeedClose;			/**< Is need close popup */
+	bool				bNeedOpen;			/**< Is need open popup */
+	bool				bPendingChangeSize;	/**< Is need update size */
+	Vector2D			pendingSize;		/**< Padding size */
+	std::wstring		name;				/**< Popup name */
 };
 
 /**
@@ -422,6 +434,16 @@ protected:
 	 */
 	virtual void OnVisibilityChanged( bool InNewVisibility );
 
+	/**
+	 * @brief Set layer size
+	 * @param InSize	Layer size
+	 */
+	FORCEINLINE void SetSize( const Vector2D& InSize )
+	{
+		size = InSize;
+		bPendingChangeSize = true;
+	}
+
 private:
 	/**
 	 * @brief Update ImGUI events
@@ -432,6 +454,7 @@ private:
 	bool						bVisibility;		/**< Is visible layer */
 	bool						bFocused;			/**< Is focused layer */
 	bool						bHovered;			/**< Is hovered layer */
+	bool						bPendingChangeSize;	/**< Is need update size of layer */
 	Vector2D					size;				/**< Layer size */
 	Vector2D					padding;			/**< Layer padding */
 	std::wstring				name;				/**< Layer name */

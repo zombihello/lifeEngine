@@ -25,6 +25,11 @@ public:
 	DECLARE_MULTICAST_DELEGATE( COnTextEntered, const std::string& /*InText*/ );
 
 	/**
+	 * @brief Delegate of cancel enter text, called when pressed button 'Cancel'
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnCenceled );
+
+	/**
 	 * @brief Constructor
 	 *
 	 * @param InName			Window name
@@ -42,6 +47,15 @@ public:
 		return onTextEntered;
 	}
 
+	/**
+	 * @brief Get delegate of canceled enter text
+	 * @return Return delegate of canceled enter text
+	 */
+	FORCEINLINE COnCenceled& OnCenceled() const
+	{
+		return onCenceled;
+	}
+
 protected:
 	/**
 	 * @brief Method tick interface of a layer
@@ -52,6 +66,7 @@ private:
 	std::wstring				message;			/**< Message */
 	std::string					text;				/**< Entered text */
 	mutable COnTextEntered		onTextEntered;		/**< Delegates of text entered */
+	mutable COnCenceled			onCenceled;			/**< Delegates of canceled enter text */
 };
 
 #endif // !INPUTTEXTDIALOG_H

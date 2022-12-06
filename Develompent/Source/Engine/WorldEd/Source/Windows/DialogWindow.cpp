@@ -16,7 +16,9 @@ CDialogWindow::CDialogWindow( const std::wstring& InName, const std::wstring& In
 	: CImGUIPopup( InName )
 	, buttons( InButtons )
 	, message( InMessage )
-{}
+{
+	SetSize( Vector2D( 500, 300 ) );
+}
 
 void CDialogWindow::OnTick()
 {

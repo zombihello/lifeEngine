@@ -133,6 +133,7 @@ CImGUIPopup::CImGUIPopup( const std::wstring& InName /* = TEXT( "NewPopup" ) */ 
 	: bOpen( false )
 	, bNeedClose( false )
 	, bNeedOpen( false )
+	, bPendingChangeSize( false )
 	, name( InName )
 {}
 
@@ -150,6 +151,13 @@ void CImGUIPopup::Tick()
 	{
 		// Always center this window when appearing
 		ImGui::SetNextWindowPos( ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2( 0.5f, 0.5f ) );
+
+		// Update window size if need
+		if ( bPendingChangeSize )
+		{
+			ImGui::SetNextWindowSize( ImVec2{ pendingSize.x, pendingSize.y } );
+			bPendingChangeSize = false;
+		}
 
 		// Draw popup window
 		if ( ImGui::BeginPopupModal( TCHAR_TO_ANSI( name.c_str() ), nullptr, ImGuiWindowFlags_AlwaysAutoResize ) )
@@ -176,6 +184,7 @@ CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ 
 	, bVisibility( true )
 	, bFocused( false )
 	, bHovered( false )
+	, bPendingChangeSize( false )
 	, size( 0.f, 0.f )
 	, padding( 5.f, 5.f )
 	, name( InName )
@@ -197,6 +206,14 @@ void CImGUILayer::Tick()
 	if ( bVisibility )
 	{
 		ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2{ padding.x, padding.y } );
+		
+		// Update window size if need
+		if ( bPendingChangeSize )
+		{
+			ImGui::SetNextWindowSize( ImVec2{ size.x, size.y } );
+			bPendingChangeSize = false;
+		}
+
 		if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility ) )
 		{
 			// Update popup if him is existing

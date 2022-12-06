@@ -15,6 +15,10 @@
 #include "ImGUI/imgui_internal.h"
 #include "ImGUI/imgui_stdlib.h"
 
+// Assets
+#include "Render/Material.h"
+#include "System/PhysicsMaterial.h"
+
 /** Border size for buttons in asset viewer */
 #define CONTENTBROWSER_ASSET_BORDERSIZE		1.f
 
@@ -81,6 +85,10 @@ static FORCEINLINE std::wstring ArrayFilenamesToString( const std::vector<CFilen
 // IMPORT ASSETS RUNNABLE
 //
 
+/**
+  * @ingroup WorldEd
+  * @brief Runnable object for import assets in other thread
+ */
 class CImportAssetsRunnable : public CRunnable
 {
 public:
@@ -169,11 +177,7 @@ public:
 			if ( asset )
 			{
 				SAssetInfo		assetInfo;
-				owner->package->Add( asset->GetAssetHandle(), &assetInfo );
-				if ( !bExist )
-				{
-					owner->assets.push_back( CContentBrowserWindow::CAssetNode( assetInfo, owner ) );
-				}				
+				owner->package->Add( asset->GetAssetHandle(), &assetInfo );			
 			}
 			else
 			{
@@ -222,6 +226,254 @@ private:
 	CContentBrowserWindow*		owner;			/**< Owner */
 	CEvent*						eventResponse;	/**< Event used when opened popup of change exist assets */
 	std::vector<std::wstring>	filesToImport;	/**< Array of files to import */
+};
+
+//
+// RENAME ASSET RUNNABLE
+//
+
+/**
+  * @ingroup WorldEd
+  * @brief Runnable object for rename asset in other thread
+  */
+class CRenameAssetRunnable : public CRunnable
+{
+public:
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOwner			Owner
+	 * @param InAssetNode		Asset node to rename
+	 */
+	CRenameAssetRunnable( CContentBrowserWindow* InOwner, CContentBrowserWindow::CAssetNode InAssetNode )
+		: owner( InOwner )
+		, eventResponse( nullptr )
+		, assetNode( InAssetNode )
+	{}
+
+	/**
+	 * @brief Initialize
+	 *
+	 * Allows per runnable object initialization. NOTE: This is called in the
+	 * context of the thread object that aggregates this, not the thread that
+	 * passes this runnable to a new thread.
+	 *
+	 * @return True if initialization was successful, false otherwise
+	 */
+	virtual bool Init() override
+	{
+		check( owner && owner->package );
+		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		return true;
+	}
+
+	/**
+	 * @brief Run
+	 *
+	 * This is where all per object thread work is done. This is only called
+	 * if the initialization was successful.
+	 *
+	 * @return The exit code of the runnable object
+	 */
+	virtual uint32 Run() override
+	{
+		// Get new asset name and check on exist other asset with this name
+		bool			bIsOk = false;
+		std::wstring	newAssetName;
+		while ( !bIsOk )
+		{
+			// Get new asset name. If we not press 'ok' nothing apply and exit from method
+			{
+				TSharedPtr<CInputTextDialog>	popup = owner->OpenPopup<CInputTextDialog>( TEXT( "Enter" ), TEXT( "New Asset Name" ), assetNode.GetName() );
+				popup->OnTextEntered().Add( [&]( const std::string& InText )
+											{
+												bIsOk = true;
+												newAssetName = ANSI_TO_TCHAR( InText.c_str() );
+												eventResponse->Trigger();
+											} );
+
+				popup->OnCenceled().Add(	[&]()
+											{
+												 bIsOk = false;
+												 eventResponse->Trigger();
+											} );
+				eventResponse->Wait();
+				if ( !bIsOk )
+				{
+					return 0;
+				}
+			}		
+
+			// If asset with new name already exist - try enter other name 
+			if ( owner->package->IsExist( newAssetName ) )
+			{
+				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Name '%s' already exist in package" ), newAssetName.c_str() ), CDialogWindow::BT_Ok );
+				popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
+											  {
+												  eventResponse->Trigger();
+											  } );
+				bIsOk = false;
+				eventResponse->Wait();
+			}
+		}
+
+		// Find asset in package
+		TSharedPtr<CAsset>		assetRef = owner->package->Find( assetNode.GetName() ).ToSharedPtr();
+		if ( !assetRef )
+		{
+			return 0;
+		}
+
+		// Add change asset name
+		assetRef->SetAssetName( newAssetName );
+		return 0;
+	}
+
+	/**
+	 * @brief Stop
+	 *
+	 * This is called if a thread is requested to terminate early
+	 */
+	virtual void Stop() override
+	{
+		GSynchronizeFactory->Destroy( eventResponse );
+	}
+
+	/**
+	 * @brief Exit
+	 *
+	 * Called in the context of the aggregating thread to perform any cleanup.
+	 */
+	virtual void Exit() override
+	{}
+
+private:
+	CContentBrowserWindow*				owner;			/**< Owner */
+	CEvent*								eventResponse;	/**< Event used when opened popup of change exist assets */
+	CContentBrowserWindow::CAssetNode	assetNode;		/**< Asset node to rename */
+};
+
+//
+// CREATE ASSET RUNNABLE
+//
+
+/**
+  * @ingroup WorldEd
+  * @brief Runnable object for create asset in other thread
+  */
+template<class TAssetClass>
+class TCreateAssetRunnable : public CRunnable
+{
+public:
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOwner			Owner
+	 */
+	TCreateAssetRunnable( CContentBrowserWindow* InOwner )
+		: owner( InOwner )
+		, eventResponse( nullptr )
+	{
+		package = owner->GetCurrentPackage();
+	}
+
+	/**
+	 * @brief Initialize
+	 *
+	 * Allows per runnable object initialization. NOTE: This is called in the
+	 * context of the thread object that aggregates this, not the thread that
+	 * passes this runnable to a new thread.
+	 *
+	 * @return True if initialization was successful, false otherwise
+	 */
+	virtual bool Init() override
+	{
+		check( owner && package );
+		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		return true;
+	}
+
+	/**
+	 * @brief Run
+	 *
+	 * This is where all per object thread work is done. This is only called
+	 * if the initialization was successful.
+	 *
+	 * @return The exit code of the runnable object
+	 */
+	virtual uint32 Run() override
+	{
+		// Get new asset name and check on exist other asset with this name
+		bool			bIsOk = false;
+		std::wstring	assetName;
+		while ( !bIsOk )
+		{
+			// Get new asset name. If we not press 'ok' nothing apply and exit from method
+			{
+				TSharedPtr<CInputTextDialog>	popup = owner->OpenPopup<CInputTextDialog>( TEXT( "Enter" ), TEXT( "Asset Name" ), TEXT( "NewAsset" ) );
+				popup->OnTextEntered().Add( [&]( const std::string& InText )
+											{
+												bIsOk = true;
+												assetName = ANSI_TO_TCHAR( InText.c_str() );
+												eventResponse->Trigger();
+											} );
+
+				popup->OnCenceled().Add( [&]()
+										 {
+											 bIsOk = false;
+											 eventResponse->Trigger();
+										 } );
+				eventResponse->Wait();
+				if ( !bIsOk )
+				{
+					return 0;
+				}
+			}
+
+			// If asset with new name already exist - try enter other name 
+			if ( package->IsExist( assetName ) )
+			{
+				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Name '%s' already exist in package" ), assetName.c_str() ), CDialogWindow::BT_Ok );
+				popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
+											  {
+												  eventResponse->Trigger();
+											  } );
+				bIsOk = false;
+				eventResponse->Wait();
+			}
+		}
+
+		// Create new asset
+		TSharedPtr<TAssetClass>		asset = MakeSharedPtr<TAssetClass>();
+		asset->SetAssetName( assetName );
+		
+		// Add asset to package
+		package->Add( asset->GetAssetHandle() );
+		return 0;
+	}
+
+	/**
+	 * @brief Stop
+	 *
+	 * This is called if a thread is requested to terminate early
+	 */
+	virtual void Stop() override
+	{
+		GSynchronizeFactory->Destroy( eventResponse );
+	}
+
+	/**
+	 * @brief Exit
+	 *
+	 * Called in the context of the aggregating thread to perform any cleanup.
+	 */
+	virtual void Exit() override
+	{}
+
+private:
+	PackageRef_t			package;		/**< Package */
+	CContentBrowserWindow*	owner;			/**< Owner */
+	CEvent*					eventResponse;	/**< Event used when opened popup of change exist assets */
 };
 
 //
@@ -335,6 +587,10 @@ void CContentBrowserWindow::OnTick()
 				columnCount = 1;
 			}
 
+			// Refresh asset nodes
+			RefreshAssetNodes();
+
+			// Draw all asset nodes
 			ImGui::Columns( columnCount, 0, false );	
 			for ( uint32 index = 0, count = assets.size(); index < count; ++index )
 			{
@@ -364,6 +620,59 @@ void CContentBrowserWindow::OnTick()
 	ImGui::EndColumns();
 }
 
+void CContentBrowserWindow::RefreshAssetNodes()
+{
+	// Mark all asset nodes to delete
+	bool											bNeedRemoveAssetNodes = false;
+	std::unordered_map<std::wstring, uint32>		mapAssets;						// For fast find asset nodes in array by name
+	for ( uint32 index = 0, count = assets.size(); index < count; ++index )
+	{
+		CAssetNode&				assetNode = assets[index];
+		bNeedRemoveAssetNodes	= true;
+		
+		// If asset in package is deleted, we skip him
+		if ( !assetNode.GetAssetInfo() )
+		{
+			continue;
+		}
+
+		mapAssets.insert( std::make_pair( assetNode.GetName(), index ) );
+	}
+
+	// Add new asset node if in package is added new resources
+	if ( package )
+	{
+		for ( uint32 index = 0, count = package->GetNumAssets(); index < count; ++index )
+		{
+			const SAssetInfo*	assetInfo = nullptr;
+			package->GetAssetInfo( index, assetInfo );		
+			check( assetInfo );
+			auto			itFind = mapAssets.find( assetInfo->name );
+			
+			// If this asset is new, we insert node
+			if ( itFind == mapAssets.end() )
+			{
+				CAssetNode	assetNode( assetInfo, this );
+				assets.push_back( assetNode );
+			}
+		}
+	}
+
+	// If need remove some asset nodes
+	if ( bNeedRemoveAssetNodes )
+	{
+		for ( uint32 index = 0; index < assets.size(); ++index )
+		{
+			const CAssetNode&	assetNode = assets[index];
+			if ( !assetNode.GetAssetInfo() )
+			{
+				assets.erase( assets.begin() + index );
+				--index;
+			}
+		}
+	}
+}
+
 void CContentBrowserWindow::DrawAssetsPopupMenu()
 {
 	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
@@ -383,10 +692,19 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 
 		if ( ImGui::BeginMenu( "Create" ) )
 		{
-			ImGui::MenuItem( "Material" );
+			// Create material
+			if ( ImGui::MenuItem( "Material" ) )
+			{
+				GThreadFactory->CreateThread( new TCreateAssetRunnable<CMaterial>( this ), TEXT( "CreateAsset" ), true, true );
+			}
+			
 			if ( ImGui::BeginMenu( "Physics" ) )
 			{
-				ImGui::MenuItem( "Physics Material" );
+				// Create physics material
+				if ( ImGui::MenuItem( "Physics Material" ) )
+				{
+					GThreadFactory->CreateThread( new TCreateAssetRunnable<CPhysicsMaterial>( this ), TEXT( "CreateAsset" ), true, true );
+				}
 				ImGui::EndMenu();
 			}		
 			ImGui::EndMenu();
@@ -427,7 +745,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 			std::wstring				selectedAssetNames;
 			for ( uint32 index = 0, count = selectedAssets.size(); index < count; ++index )
 			{
-				selectedAssetNames += CString::Format( TEXT( "\n%s" ), selectedAssets[index].GetAssetInfo().name.c_str() );
+				selectedAssetNames += CString::Format( TEXT( "\n%s" ), selectedAssets[index].GetAssetInfo()->name.c_str() );
 			}
 
 			TSharedPtr<CDialogWindow>		popup = OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "Is need delete selected assets?\n\nAssets:%s" ), selectedAssetNames.c_str() ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
@@ -441,8 +759,18 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 										  } );
 		}
 
-		ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneAsset );
-		ImGui::MenuItem( "Copy Reference", "", nullptr, bSelectedOnlyOneAsset );
+		// Rename an asset
+		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneAsset ) )
+		{
+			GThreadFactory->CreateThread( new CRenameAssetRunnable( this, selectedAssets[0] ), CString::Format( TEXT( "RenameAsset_%s" ), selectedAssets[0].GetName().c_str() ).c_str(), true, true );
+		}
+
+		// Copy reference to asset
+		if ( ImGui::MenuItem( "Copy Reference", "", nullptr, bSelectedOnlyOneAsset ) )
+		{
+			PopupMenu_Asset_CopyReference( selectedAssets[0] );
+		}
+		
 		ImGui::EndPopup();
 	}
 }
@@ -664,7 +992,7 @@ void CContentBrowserWindow::PopupMenu_Package_Unload( const std::vector<TSharedP
 	// If we have dirty package - print message
 	if ( !dirtyPackages.empty() )
 	{
-		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following packages have been modified and cannot be unloaded. Saving these packages will allow them to be unloaded\n\nPackages:%s\n" ), ArrayFilenamesToString( dirtyPackages ).c_str() ), CDialogWindow::BT_Ok );
+		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following packages have been modified and cannot be unloaded. Saving these packages will allow them to be unloaded\n\nPackages:\n%s\n" ), ArrayFilenamesToString( dirtyPackages ).c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 
@@ -868,11 +1196,11 @@ void CContentBrowserWindow::PopupMenu_Asset_Reload( const std::vector<CAssetNode
 	std::wstring		errorMessages;
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
 	{
-		const CAssetNode&		assetNode	= InAssets[index];
-		TAssetHandle<CAsset>	asset		= package->Find( assetNode.GetAssetInfo().name );
+		const SAssetInfo*		assetInfo	= InAssets[index].GetAssetInfo();
+		TAssetHandle<CAsset>	asset		= package->Find( assetInfo->name );
 		if ( !package->ReloadAsset( asset ) )
 		{
-			errorMessages += CString::Format( TEXT( "\n%s : Failed reload" ), assetNode.GetAssetInfo().name.c_str() );
+			errorMessages += CString::Format( TEXT( "\n%s : Failed reload" ), assetInfo->name.c_str() );
 		}
 	}
 
@@ -913,8 +1241,8 @@ void CContentBrowserWindow::PopupMenu_Asset_Reimport( const std::vector<CAssetNo
 	std::wstring		errorMessages;
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
 	{
-		const CAssetNode&		assetNode	= InAssets[index];
-		TAssetHandle<CAsset>	asset		= package->Find( assetNode.GetAssetInfo().name );
+		const SAssetInfo*		assetInfo	= InAssets[index].GetAssetInfo();
+		TAssetHandle<CAsset>	asset		= package->Find( assetInfo->name );	
 		if ( asset.IsAssetValid() )
 		{
 			std::wstring		errorMsg;
@@ -936,11 +1264,9 @@ void CContentBrowserWindow::PopupMenu_Asset_Reimport( const std::vector<CAssetNo
 void CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile( const CAssetNode& InAsset )
 {
 	std::wstring			errorMessage;
-	TAssetHandle<CAsset>	asset = package->Find( InAsset.GetAssetInfo().name );
-	if ( asset.IsAssetValid() )
+	const SAssetInfo*		assetInfo = InAsset.GetAssetInfo();
+	if ( assetInfo->data )
 	{
-		TSharedPtr<CAsset>		assetPtr = asset.ToSharedPtr();
-
 		// Select new source file
 		CFileDialogSetup		fileDialogSetup;
 		SOpenFileDialogResult	openFileDialogResult;
@@ -949,25 +1275,25 @@ void CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile( const CAssetNod
 		fileDialogSetup.SetMultiselection( false );
 		fileDialogSetup.SetTitle( TEXT( "Reimport Asset" ) );
 		fileDialogSetup.SetDirectory( gameRoot->GetPath() );
-		fileDialogSetup.AddFormat( GAssetFactory.GetImporterInfo( assetPtr->GetType() ), ConvertAssetTypeToText( assetPtr->GetType() ) );
+		fileDialogSetup.AddFormat( GAssetFactory.GetImporterInfo( assetInfo->data->GetType() ), ConvertAssetTypeToText( assetInfo->data->GetType() ) );
 
 		// Show open file dialog
 		if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
 		{
 			// Let's try to reimport asset
-			std::wstring	oldSourceFile = assetPtr->GetAssetSourceFile();
-			assetPtr->SetAssetSourceFile( openFileDialogResult.files[0] );
-			
+			std::wstring	oldSourceFile = assetInfo->data->GetAssetSourceFile();
+			assetInfo->data->SetAssetSourceFile( openFileDialogResult.files[0] );
+
 			// If failed we return old source file
-			if ( !GAssetFactory.Reimport( assetPtr, errorMessage ) )
+			if ( !GAssetFactory.Reimport( assetInfo->data, errorMessage ) )
 			{
-				assetPtr->SetAssetSourceFile( oldSourceFile );
+				assetInfo->data->SetAssetSourceFile( oldSourceFile );
 			}
 		}
 	}
 	else
 	{
-		errorMessage = CString::Format( TEXT( "Not found asset in package '%s'" ), InAsset.GetAssetInfo().name.c_str(), package->GetName().c_str() );
+		errorMessage = CString::Format( TEXT( "Not found asset in package '%s'" ), assetInfo->name.c_str(), package->GetName().c_str() );
 	}
 
 	// If exist error, show popup window
@@ -983,25 +1309,17 @@ void CContentBrowserWindow::PopupMenu_Asset_Delete()
 	std::wstring		usedAssets;
 	for ( uint32 index = 0; index < assets.size(); ++index )
 	{
-		const CAssetNode&	assetNode = assets[index];
+		CAssetNode&	assetNode = assets[index];
 		if ( assetNode.IsSelected() )
 		{
-			if ( !package->Remove( assetNode.GetAssetInfo().name, false, true ) )
+			const SAssetInfo*	assetInfo = assetNode.GetAssetInfo();
+			if ( !package->Remove( assetInfo->name, false, true ) )
 			{
-				usedAssets += CString::Format( TEXT( "\n%s" ), assetNode.GetAssetInfo().name.c_str() );
+				usedAssets += CString::Format( TEXT( "\n%s" ), assetInfo->name.c_str() );
 			}
 			else
 			{
-				// Remove asset node from array
-				for ( uint32 idxAssetNode = 0, countAssetNodes = assets.size(); idxAssetNode < countAssetNodes; ++idxAssetNode )
-				{
-					if ( assets[idxAssetNode].IsEqual( assetNode ) )
-					{
-						--index;
-						assets.erase( assets.begin() + idxAssetNode );
-						break;
-					}
-				}
+				assetNode.MarkIsDeleted();
 			}
 		}
 	}
@@ -1013,20 +1331,15 @@ void CContentBrowserWindow::PopupMenu_Asset_Delete()
 	}
 }
 
-void CContentBrowserWindow::SetCurrentPackage( PackageRef_t InPackage )
+void CContentBrowserWindow::PopupMenu_Asset_CopyReference( const CAssetNode& InAsset )
 {
-	package = InPackage;
+	check( package );
+	const SAssetInfo*	assetInfo = InAsset.GetAssetInfo();
+	std::wstring		assetReference;
 
-	// Getting asset infos from current package
-	assets.clear();
-	if ( package )
+	if ( MakeReferenceToAsset( package->GetName(), assetInfo->name, assetInfo->type, assetReference ) )
 	{
-		for ( uint32 index = 0, count = package->GetNumAssets(); index < count; ++index )
-		{
-			SAssetInfo		assetInfo;
-			package->GetAssetInfo( index, assetInfo );
-			assets.push_back( CAssetNode( assetInfo, this ) );
-		}
+		ImGui::SetClipboardText( TCHAR_TO_ANSI( assetReference.c_str() ) );
 	}
 }
 
@@ -1120,6 +1433,7 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 
 		// Draw file node
 	case FNT_File:
+	{
 		// Set style for selected node
 		bool	bNeedPopStyleColor = false;
 		if ( bSelected )
@@ -1130,7 +1444,15 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 			ImGui::PushStyleColor( ImGuiCol_ButtonActive,	CONTENTBROWSER_SELECTCOLOR );
 		}
 
-		ImGui::Button( TCHAR_TO_ANSI( name.c_str() ) );
+		// If package loaded we check is changed in memory. In successed case mark this package by star
+		std::wstring		packageName = name;
+		if ( GPackageManager->IsPackageLoaded( path ) )
+		{
+			PackageRef_t	package = GPackageManager->LoadPackage( path );
+			check( package );
+			packageName = ( package->IsDirty() ? TEXT( "*" ) : TEXT( "" ) ) + packageName;
+		}
+		ImGui::Button( TCHAR_TO_ANSI( packageName.c_str() ) );
 
 		// Drag n drop handle
 		DragNDropHandle();
@@ -1144,6 +1466,7 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 			ImGui::PopStyleColor( 3 );
 		}
 		break;
+	}
 	}
 }
 
@@ -1332,8 +1655,9 @@ void CContentBrowserWindow::CFileTreeNode::GetSelectedNodes( std::vector<TShared
 
 void CContentBrowserWindow::CAssetNode::Tick()
 {
+	check( info );
 	ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, CONTENTBROWSER_ASSET_BORDERSIZE );
-	ImGui::PushStyleColor( ImGuiCol_Border, GAssetBorderColors[info.type] );
+	ImGui::PushStyleColor( ImGuiCol_Border, GAssetBorderColors[info->type] );
 
 	// If asset is selected, we set him button color to CONTENTBROWSER_SELECTCOLOR
 	bool		bNeedPopStyleColor = false;
@@ -1346,20 +1670,26 @@ void CContentBrowserWindow::CAssetNode::Tick()
 	}
 
 	// Draw of the asset's button, if him's icon isn't existing we draw simple button
-	const TAssetHandle<CTexture2D>&		assetIconTexture = owner->assetIcons[info.type];
+	const TAssetHandle<CTexture2D>&		assetIconTexture = owner->assetIcons[info->type];
 	if ( assetIconTexture.IsAssetValid() )
 	{
 		ImGui::ImageButton( assetIconTexture.ToSharedPtr()->GetTexture2DRHI()->GetHandle(), { owner->thumbnailSize, owner->thumbnailSize } );
 	}
 	else
 	{
-		ImGui::Button( TCHAR_TO_ANSI( info.name.c_str() ), { owner->thumbnailSize, owner->thumbnailSize } );
+		ImGui::Button( TCHAR_TO_ANSI( info->name.c_str() ), { owner->thumbnailSize, owner->thumbnailSize } );
 	}
 
 	// Process events
 	ProcessEvents();
 
-	ImGui::TextWrapped( TCHAR_TO_ANSI( info.name.c_str() ) );
+	// If asset loaded we check is changed in memory. In successed case mark this asset by star
+	std::wstring		assetName = info->name;
+	if ( info->data && info->data->IsDirty() )
+	{
+		assetName = TEXT( "*" ) + assetName;
+	}
+	ImGui::TextWrapped( TCHAR_TO_ANSI( assetName.c_str() ) );
 
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor( !bNeedPopStyleColor ? 1 : 4 );

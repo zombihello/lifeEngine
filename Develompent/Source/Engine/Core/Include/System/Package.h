@@ -1149,6 +1149,32 @@ public:
 		}
 	}
 
+	/**
+	 * @brief Get pointer to asset info by index
+	 * 
+	 * @param InIndex		Index of asset in package
+	 * @param OutAssetInfo	Output pointer to asset info
+	 * @param OutGuidAsset	Optional output of guid asset
+	 */
+	FORCEINLINE void GetAssetInfo( uint32 InIndex, const SAssetInfo*& OutAssetInfo, CGuid* OutGuidAsset = nullptr ) const
+	{
+		check( !assetsTable.empty() && InIndex >= 0 && InIndex < assetsTable.size() );
+
+		uint32		index = 0;
+		for ( auto itAsset = assetsTable.cbegin(), itAssetEnd = assetsTable.cend(); itAsset != itAssetEnd; ++itAsset, ++index )
+		{
+			if ( InIndex == index )
+			{
+				OutAssetInfo = &itAsset->second;
+				if ( OutGuidAsset )
+				{
+					*OutGuidAsset = itAsset->first;
+				}
+				break;
+			}
+		}
+	}
+
 private:
 	/**
 	 * Typedef map of asset name to GUID
