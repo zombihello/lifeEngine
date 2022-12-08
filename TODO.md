@@ -1,0 +1,118 @@
+# Version 0.5.0 :: Next
+- [ ] Fix link count for DirectX 11 objects 
+- [ ] Fix depth buffer accuracy
+- [ ] Module architecture like in Source Engine (interface.h, CreateInterface factory etc)
+- [ ] Implement material shaders
+ 
+ # Version 0.4.0 :: Now	
+- [ ] Migrate WorldEd's interface from Qt to ImGUI 
+- [ ] Implement rendering light with deferred shading technique
+- [ ] Implement physics system
+- [ ] Add supported mip levels in textures
+- [ ] Add possible generate mip levels for textures in WorldEd
+- [ ] Need fix speed of the import static meshes
+- [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to LUA)
+- [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)
+- [x] Implemented functions of exploer level
+- [x] Added gizmo render in WorldEd.
+- [x] Added mouse move event to axis mapping in CInputSystem.
+- [x] Fixed replay sound on start in startup movies
+- [x] Added CName for optimization compare IDs in string view
+- [x] Implemented console system
+
+ # Version 0.3.0 :: 24.08.2022
+- [x] Implemented TOC file (Table Of Content)
+- [x] Fixed serialize already created FPackage (for rewrite package with adding new assets)
+- [x] Implemented draw events for debug render
+- [x] Implemented scene manager and scene renderer
+- [x] Implemented in WorldEd fly on scene
+- [x] Implemented rendering sprites with help sprite vertex factory
+- [x] Implemented compile TMX map to LMAP
+- [x] Fixed serialization FWorld
+- [x] Added actor and component of sprite
+- [x] Added allow enable/disable of using max tick rate and render thread
+- [x] Added synchronization main thread and render thread, due to the fact that the render does not have time to process frames
+- [x] Added shader parameters
+- [x] Changed hash in assets to GUID
+- [x] Fixed working of package manager and packages
+- [x] Added allow set custom text color in logs
+- [x] Implemented frustum culling
+- [x] Changed hash type from uint32 to uint64
+- [x] Fixed commit constants buffer to device in D3D11RHI
+- [x] Fixed containing FDrawingPolicyLink in std::set
+- [x] Implemented instancing rendering
+- [x] Optimized building SDGs in scene
+- [x] Added input component
+- [x] Added flag bAutoViewData in camera component for auto setting view data by FCameraManager (aspect ratio, ortho width/height)
+- [x] Fixed crush on resize window
+- [x] Implemented commandlet for import materials from LMT (JSON) to package (LPAK)
+- [x] Implemented commandlet for cook content
+- [x] Implemented audio system
+- [x] Fixed working with scale (while multipy, add, substract, etc) in FTransform
+- [x] Implemented character movement component
+- [x] Implemented global shaders
+- [x] Implemented static RHI states
+- [x] Implemented shader resource parameters
+- [x] Added in RHI possibility draw from array
+- [x] Removed reference count in FShader as unnecessary
+- [x] Added in RHI possibility change depth test state
+- [x] Added possibility render simple elements (line, points, etc)
+- [x] Implemented rendering grid in WorldEd viewports
+- [x] Implemented TSharedPtr and TWeakPtr
+- [x] Added new interlocked functions (appInterlockedAdd, appInterlockedExchange and other)
+- [x] Implemented TAssetHandle for store assets and unload/reload hims
+- [x] Implemented garbage collector for packages and assets
+- [x] Refactored delegates
+- [x] Implemented in WorldEd texture and material editor
+- [x] Added possibility of reload packages
+- [x] Implemented full screen movie player with using codec Theora
+- [x] Implemented in WorldEd adding actor on scene
+- [x] Implemented in WorldEd base tools: move, rotate and scale actors
+- [x] Implemented content browser and package browser in WorldEd
+- [x] Implemented save map in WorldEd and load in game
+	
+ # Version 0.2.0 :: 13.11.2021
+- [x] Changed lifeBuildTool to CMake for build engine
+- [x] Fixed memory leek while using FString::Format
+- [x] Implemented base material system
+- [x] Implemented serialize assets to package
+- [x] Implemented vertex factory
+- [x] Implemented bind index buffer and draw indexed primitives
+- [x] Removed from vertex factory vertex shader, and revert shader array in materials
+- [x] Implemented class of static meshes
+- [x] Implemented commandlet for import static meshes
+- [x] Added render to depth buffer
+- [x] Refactored serialize in FArchive and FPackage (remove duplicate code)
+- [x] Refactored serialize FTexture2D and FStaticMesh. Removed texture file cache and save data in asset packages
+- [x] Optimized serialize bulk data and implemented compress with ZLIB
+- [x] Added support SHIPPING build
+- [x] Implemented FScopeLock for auto lock and unlock FCriticalSection
+- [x] Implemented caching render states in D3D11RHI
+
+# Version 0.1.0 :: 02.11.2021
+- [x] Implemented lifeBuildTool for build engine
+- [x] Implemented compile cache in lifeBuildTool
+- [x] Implemented base file system
+- [x] Added basic functionality for working with a window
+- [x] Implemented BeginDrawingViewport, EndDrawingViewport and SetViewport for rendering frame
+- [x] Implemented base EngineLoop and ability to clear surface on viewport
+- [x] Implemented class for work with config files
+- [x] Implemented pars JSON objects in configs
+- [x] Implemented loading array from config
+- [x] Added classes for references ​counted
+- [x] Added factory of class with help LClass and LObject
+- [x] Added external LuaBridge-2.6 and LuaJIT-2.1
+- [x] Implemented base interface for use scripts
+- [x] Added function for create child process
+- [x] Implemented serialization of FScript
+- [x] Added support ImGUI
+- [x] Implemented compiling shaders in bytecode and save to cache
+- [x] Implemented loading shaders
+- [x] Implemented rendering of triangle
+- [x] Implemented render thread
+- [x] Implemented rendering of triangle with texture
+- [x] Implemented loading textures
+- [x] Implemented splash screen
+- [x] Implemented base WorldEd functions for entry
+- [x] Implemented commandlet for import texture
+- [x] Implemented camera and the ability to fly around the stage
