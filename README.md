@@ -1,4 +1,4 @@
-![lifeEngine](Engine/Splash/Splash.bmp?raw=true)
+![lifeEngine](EngineLogo.jpg?raw=true)
 
 ## Description
 3D Game Engine with architecture like Unreal Engine
