@@ -137,14 +137,14 @@ private:
  * @ingroup UI
  * Class of update window ImGUI
  */
-class ÑImGUIWindow
+class CImGUIWindow
 {
 public:
 	/**
 	 * Constructor
 	 * @param[in] InViewport Pointer to viewport of ImGUI
 	 */
-	ÑImGUIWindow( ImGuiViewport* InViewport );
+	CImGUIWindow( ImGuiViewport* InViewport );
 
 	/**
 	 * Update ImGUI windows
@@ -170,7 +170,7 @@ private:
  * @ingroup UI
  * @brief ImGUI Popup menu
  */
-class CImGUIPopup
+class CImGUIPopup : public TSharedFromThis<CImGUIPopup>
 {
 public:
 	/**
@@ -255,7 +255,7 @@ private:
  * @ingroup UI
  * @brief ImGUI layer
  */
-class CImGUILayer
+class CImGUILayer : public TSharedFromThis<CImGUILayer>
 {
 public:
 	/**
@@ -466,18 +466,18 @@ private:
  * @ingroup UI
  * @brief Class for work with ImGUI and initialize her on platforms
  */
-class ÑImGUIEngine
+class CImGUIEngine
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-							ÑImGUIEngine();
+							CImGUIEngine();
 
 	/**
 	 * @brief Destructor
 	 */
-							~ÑImGUIEngine();
+							~CImGUIEngine();
 
 	/**
 	 * @brief Initialize ImGUI
@@ -500,7 +500,7 @@ public:
 	 * @brief Add ImGUI layer to tick
 	 * @param InImGUILayer	ImGUI layer
 	 */
-	FORCEINLINE void AddLayer( CImGUILayer* InImGUILayer )
+	FORCEINLINE void AddLayer( const TSharedPtr<CImGUILayer>& InImGUILayer )
 	{
 		check( InImGUILayer );
 		layers.push_back( InImGUILayer );
@@ -510,7 +510,7 @@ public:
 	 * @brief Remove ImGUI layer from tick
 	 * @param InImGUILayer	ImGUI layer
 	 */
-	FORCEINLINE void RemoveLayer( CImGUILayer* InImGUILayer )
+	FORCEINLINE void RemoveLayer( const TSharedPtr<CImGUILayer>& InImGUILayer )
 	{
 		check( InImGUILayer );
 		for ( uint32 index = 0, count = layers.size(); index < count; ++index )
@@ -576,10 +576,10 @@ private:
 	 */
 	void InitTheme();
 
-	bool							bShowCursor;		/**< Is need show cursor */
-	struct ImGuiContext*			imguiContext;	/**< Pointer to ImGUI context */
-	std::vector<ÑImGUIWindow*>		windows;		/**< Array of windows ImGUI */
-	std::vector<CImGUILayer*>		layers;			/**< Array of ImGUI layers */
+	bool										bShowCursor;	/**< Is need show cursor */
+	struct ImGuiContext*						imguiContext;	/**< Pointer to ImGUI context */
+	std::vector<CImGUIWindow*>					windows;		/**< Array of windows ImGUI */
+	std::vector<TSharedPtr<CImGUILayer>>		layers;			/**< Array of ImGUI layers */
 };
 
 #endif // WITH_IMGUI

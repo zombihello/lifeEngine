@@ -207,7 +207,7 @@ public:
 	 * @brief Get actor classes window
 	 * @return Return reference to actor classes window
 	 */
-	FORCEINLINE CActorClassesWindow& GetActorClassesWindow()
+	FORCEINLINE const TSharedPtr<CActorClassesWindow>& GetActorClassesWindow() const
 	{
 		return actorClassesWindow;
 	}
@@ -216,7 +216,7 @@ public:
 	 * @brief Get actor properties window
 	 * @return Return reference to actor properties window
 	 */
-	FORCEINLINE CActorPropertiesWindow& GetActorPropertiesWindow()
+	FORCEINLINE const TSharedPtr<CActorPropertiesWindow>& GetActorPropertiesWindow() const
 	{
 		return actorPropertiesWindow;
 	}
@@ -225,7 +225,7 @@ public:
 	 * @brief Get content browser window
 	 * @return Return reference to content browser window
 	 */
-	FORCEINLINE CContentBrowserWindow& GetContentBrowserWindow()
+	FORCEINLINE const TSharedPtr<CContentBrowserWindow>& GetContentBrowserWindow() const
 	{
 		return contentBrowserWindow;
 	}
@@ -234,7 +234,7 @@ public:
 	 * @brief Get explorer level window
 	 * @return Return reference to explorer level window
 	 */
-	FORCEINLINE CExplorerLevelWindow& GetExplorerLevelWindow()
+	FORCEINLINE const TSharedPtr<CExplorerLevelWindow>& GetExplorerLevelWindow() const
 	{
 		return explorerLevelWindow;
 	}
@@ -243,7 +243,7 @@ public:
 	 * @brief Get logs window
 	 * @return Return reference to logs window
 	 */
-	FORCEINLINE CLogsWindow& GetLogsWindow()
+	FORCEINLINE const TSharedPtr<CLogsWindow>& GetLogsWindow() const
 	{
 		return logsWindow;
 	}
@@ -254,7 +254,7 @@ public:
 	 * @param InViewportType	Viewport type
 	 * @return Return reference to viewport window
 	 */
-	FORCEINLINE CViewportWindow& GetViewportWindow( ELevelViewportType InViewportType )
+	FORCEINLINE const TSharedPtr<CViewportWindow>& GetViewportWindow( ELevelViewportType InViewportType ) const
 	{
 		return viewportWindows[InViewportType];
 	}
@@ -272,12 +272,12 @@ private:
 	class CEditorInterfaceViewportClient*		editorInterfaceViewportClient;		/**< Viewport client for render editor interface */
 
 	// Windows
-	CActorClassesWindow							actorClassesWindow;					/**< Actor classes window */
-	CActorPropertiesWindow						actorPropertiesWindow;				/**< Actor properties window */
-	CContentBrowserWindow						contentBrowserWindow;				/**< Content browser window */
-	CExplorerLevelWindow						explorerLevelWindow;				/**< Explorer level window */
-	CLogsWindow									logsWindow;							/**< Logs window */
-	CViewportWindow								viewportWindows[LVT_Max];			/**< Viewport windows */
+	TSharedPtr<CActorClassesWindow>				actorClassesWindow;					/**< Actor classes window */
+	TSharedPtr<CActorPropertiesWindow>			actorPropertiesWindow;				/**< Actor properties window */
+	TSharedPtr<CContentBrowserWindow>			contentBrowserWindow;				/**< Content browser window */
+	TSharedPtr<CExplorerLevelWindow>			explorerLevelWindow;				/**< Explorer level window */
+	TSharedPtr<CLogsWindow>						logsWindow;							/**< Logs window */
+	TSharedPtr<CViewportWindow>					viewportWindows[LVT_Max];			/**< Viewport windows */
 };
 
 #endif // !EDITORENGINE_H

@@ -65,7 +65,7 @@ void CImGUIDrawData::SetDrawData( ImDrawData* InDrawData )
 // IMGUI WINDOW
 //
 
-ÑImGUIWindow::ÑImGUIWindow( ImGuiViewport* InViewport ) :
+CImGUIWindow::CImGUIWindow( ImGuiViewport* InViewport ) :
 	imguiViewport( InViewport ),
 	indexCurrentBuffer( 0 )
 {
@@ -75,7 +75,7 @@ void CImGUIDrawData::SetDrawData( ImDrawData* InDrawData )
 	}
 }
 
-void ÑImGUIWindow::Tick()
+void CImGUIWindow::Tick()
 {
 	CImGUIDrawData*				currentBuffer = drawDataBuffers[ indexCurrentBuffer ];
 	while ( !currentBuffer->IsFree() )
@@ -192,12 +192,12 @@ CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ 
 
 CImGUILayer::~CImGUILayer()
 {
-	GImGUIEngine->RemoveLayer( this );
+	GImGUIEngine->RemoveLayer( AsShared() );
 }
 
 void CImGUILayer::Init()
 {
-	GImGUIEngine->AddLayer( this );
+	GImGUIEngine->AddLayer( AsShared() );
 	bInit = true;
 }
 
@@ -264,7 +264,7 @@ void CImGUILayer::UpdateEvents()
 	{
 		SWindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent	= true;
-		imguiEvent.imGUILayer	= this;
+		imguiEvent.imGUILayer	= AsShared();
 		if ( !bLocalFocused )
 		{
 			imguiEvent.type = SWindowEvent::T_WindowFocusLost;
@@ -286,7 +286,7 @@ void CImGUILayer::UpdateEvents()
 	{
 		SWindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent	= true;
-		imguiEvent.imGUILayer	= this;
+		imguiEvent.imGUILayer	= AsShared();
 		if ( bLocalHovered )
 		{
 			imguiEvent.type = SWindowEvent::T_ImGUILayerHovered;
@@ -306,7 +306,7 @@ void CImGUILayer::UpdateEvents()
 	{
 		SWindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent					= true;
-		imguiEvent.imGUILayer					= this;
+		imguiEvent.imGUILayer					= AsShared();
 		imguiEvent.type							= SWindowEvent::T_WindowResize;
 		imguiEvent.events.windowResize.windowId = 0;
 		imguiEvent.events.windowResize.width	= Max<float>( imguiSize.x, 1.f );
@@ -331,20 +331,20 @@ void CImGUILayer::OnVisibilityChanged( bool InNewVisibility )
 /**
  * Constructor
  */
-ÑImGUIEngine::ÑImGUIEngine() :
+CImGUIEngine::CImGUIEngine() :
 	imguiContext( nullptr )
 {}
 
 /**
  * Destructor
  */
-ÑImGUIEngine::~ÑImGUIEngine()
+CImGUIEngine::~CImGUIEngine()
 {}
 
 /**
  * Initialize ImGUI
  */
-void ÑImGUIEngine::Init()
+void CImGUIEngine::Init()
 {
 	// Create ImGUI context
 	imguiContext = ImGui::CreateContext();
@@ -374,7 +374,7 @@ void ÑImGUIEngine::Init()
 	OpenWindow( imguiPlatformIO.Viewports[ 0 ] );
 }
 
-void ÑImGUIEngine::InitTheme()
+void CImGUIEngine::InitTheme()
 {
 	// Init dark solors	
 	ImGui::StyleColorsDark();
@@ -425,12 +425,12 @@ void ÑImGUIEngine::InitTheme()
 	}
 }
 
-void ÑImGUIEngine::Tick( float InDeltaSeconds )
+void CImGUIEngine::Tick( float InDeltaSeconds )
 {
 	for ( uint32 index = 0, count = layers.size(); index < count; ++index )
 	{
-		CImGUILayer*	layer = layers[index];
-		SWindowEvent	layerEvent;
+		TSharedPtr<CImGUILayer>	layer = layers[index];
+		SWindowEvent			layerEvent;
 		while ( layer->PollEvent( layerEvent ) )
 		{
 			layer->ProcessEvent( layerEvent );
@@ -441,7 +441,7 @@ void ÑImGUIEngine::Tick( float InDeltaSeconds )
 /**
  * Shutdown ImGUI on platform
  */
-void ÑImGUIEngine::Shutdown()
+void CImGUIEngine::Shutdown()
 {
 	if ( !imguiContext )
 	{
@@ -462,7 +462,7 @@ void ÑImGUIEngine::Shutdown()
 /**
  * Process event for ImGUI
  */
-void ÑImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// Process event by ImGUI
 	appImGUIProcessEvent( InWindowEvent );
@@ -487,7 +487,7 @@ void ÑImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 /**
  * Begin draw commands for render ImGUI
  */
-void ÑImGUIEngine::BeginDraw()
+void CImGUIEngine::BeginDraw()
 {
 	appImGUIBeginDrawing();
 	ImGui::NewFrame();
@@ -499,16 +499,16 @@ void ÑImGUIEngine::BeginDraw()
 	}
 }
 
-void ÑImGUIEngine::OpenWindow( ImGuiViewport* InViewport )
+void CImGUIEngine::OpenWindow( ImGuiViewport* InViewport )
 {
-	windows.push_back( new ÑImGUIWindow( InViewport ) );
+	windows.push_back( new CImGUIWindow( InViewport ) );
 }
 
-void ÑImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
+void CImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
 {
 	for ( uint32 index = 0, count = ( uint32 )windows.size(); index < count; ++index )
 	{
-		ÑImGUIWindow*		window = windows[ index ];
+		CImGUIWindow*		window = windows[ index ];
 		if ( window->GetViewport() == InViewport )
 		{			
 			delete window;
@@ -521,7 +521,7 @@ void ÑImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
 /**
  * End draw commands for render ImGUI
  */
-void ÑImGUIEngine::EndDraw()
+void CImGUIEngine::EndDraw()
 {
 	// Draw all layers
 	for ( uint32 index = 0, count = layers.size(); index < count; ++index )

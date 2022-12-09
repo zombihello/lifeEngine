@@ -19,6 +19,9 @@
 #include "Render/Material.h"
 #include "System/PhysicsMaterial.h"
 
+// Asset editor windows
+#include "Windows/TextureEditorWindow.h"
+
 /** Border size for buttons in asset viewer */
 #define CONTENTBROWSER_ASSET_BORDERSIZE		1.f
 
@@ -1729,8 +1732,26 @@ void CContentBrowserWindow::CAssetNode::ProcessEvents()
 		// If we double clicked by left mouse button, we must open editor for this type asset
 		if ( ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
 		{
-			// TODO: Implement editor of the asset
-			LE_LOG( LT_Warning, LC_Dev, TEXT( "CContentBrowserWindow::DrawAssets: Need implement editor of the asset" ) );
+			// Get asset
+			TSharedPtr<CAsset>	asset;
+			if ( info->data )
+			{
+				asset = info->data;
+			}
+			else
+			{
+				asset = owner->package->Find( info->name ).ToSharedPtr();
+			}	
+
+			// Open editor window
+			check( asset );
+			switch ( info->type )
+			{
+			case AT_Texture2D:	MakeSharedPtr<CTextureEditorWindow>( asset, CString::Format( TEXT( "Texture Editor - %s" ), asset->GetAssetName().c_str() ) )->Init();	break;
+			default:
+				appErrorf( TEXT( "Unsupported asset type 0x%X" ), info->type );
+				break;
+			}
 		}
 	}
 

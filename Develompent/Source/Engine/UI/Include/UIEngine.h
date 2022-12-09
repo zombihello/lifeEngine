@@ -13,7 +13,7 @@
  * @ingroup UI
  * @brief Main class for work UI
  */
-class ÑUIEngine
+class CUIEngine
 {
 public:
 	/**

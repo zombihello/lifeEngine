@@ -32,17 +32,6 @@ IMPLEMENT_CLASS( CEditorEngine )
 CEditorEngine::CEditorEngine()
 	: currentEditorMode( EM_Default )
 	, editorInterfaceViewportClient( nullptr )
-	, actorClassesWindow( TEXT( "Classes" ) )
-	, actorPropertiesWindow( TEXT( "Properties" ) )
-	, contentBrowserWindow( TEXT( "Content" ) )
-	, explorerLevelWindow( TEXT( "Explorer Level" ) )
-	, logsWindow( TEXT( "Logs" ) )
-	, viewportWindows{ 
-		CViewportWindow( TEXT( "Ortho XY" ), false, LVT_OrthoXY ),
-		CViewportWindow( TEXT( "Ortho XZ" ), false, LVT_OrthoXZ ),
-		CViewportWindow( TEXT( "Ortho YZ" ), false, LVT_OrthoYZ ),
-		CViewportWindow( TEXT( "Perspective" ), true, LVT_Perspective )
-	}
 {}
 
 CEditorEngine::~CEditorEngine()
@@ -87,23 +76,32 @@ void CEditorEngine::Init()
 	viewports.push_back( viewport );
 
 	// Init all windows
-	CImGUILayer*	imguiLayers[] =
-	{
-		&actorClassesWindow,
-		&actorPropertiesWindow,
-		&contentBrowserWindow,
-		&explorerLevelWindow,
-		&logsWindow,
-		&viewportWindows[LVT_OrthoXY],
-		&viewportWindows[LVT_OrthoXZ],
-		&viewportWindows[LVT_OrthoYZ],
-		&viewportWindows[LVT_Perspective]
-	};
+	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( TEXT( "Classes" ) );
+	actorClassesWindow->Init();
+	
+	actorPropertiesWindow				= MakeSharedPtr<CActorPropertiesWindow>( TEXT( "Properties" ) );
+	actorPropertiesWindow->Init();
 
-	for ( uint32 index = 0; index < ARRAY_COUNT( imguiLayers ); ++index )
-	{
-		imguiLayers[index]->Init();
-	}
+	contentBrowserWindow				= MakeSharedPtr<CContentBrowserWindow>( TEXT( "Content" ) );
+	contentBrowserWindow->Init();
+
+	explorerLevelWindow					= MakeSharedPtr<CExplorerLevelWindow>( TEXT( "Explorer Level" ) );
+	explorerLevelWindow->Init();
+
+	logsWindow							= MakeSharedPtr<CLogsWindow>( TEXT( "Logs" ) );
+	logsWindow->Init();
+
+	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CViewportWindow>( TEXT( "Ortho XY" ), false, LVT_OrthoXY );
+	viewportWindows[LVT_OrthoXY]->Init();
+
+	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CViewportWindow>( TEXT( "Ortho XZ" ), false, LVT_OrthoXZ );
+	viewportWindows[LVT_OrthoXZ]->Init();
+
+	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CViewportWindow>( TEXT( "Ortho YZ" ), false, LVT_OrthoYZ );
+	viewportWindows[LVT_OrthoYZ]->Init();
+
+	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CViewportWindow>( TEXT( "Perspective" ), true, LVT_Perspective );
+	viewportWindows[LVT_Perspective]->Init();
 }
 
 void CEditorEngine::Tick( float InDeltaSeconds )

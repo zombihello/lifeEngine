@@ -10,6 +10,7 @@
 #define WINDOWEVENT_H
 
 #include "Misc/Types.h"
+#include "Misc/SharedPointer.h"
 #include "System/ButtonCode.h"
 #include "CoreDefines.h"
 
@@ -164,17 +165,16 @@ struct SWindowEvent
 		: type( T_None ) 
 #if WITH_IMGUI
 		, bImGUIEvent( false )
-		, imGUILayer( nullptr )
 #endif // WITH_IMGUI
 	{}
 
 #if WITH_IMGUI
-	bool					bImGUIEvent;	/**< Is ImGUI event (see CImGUILayer::PollImGUIEvents) */
-	class CImGUILayer*		imGUILayer;		/**< ImGUI layer. Him is valid when process event by ImGUI layer */
+	bool								bImGUIEvent;	/**< Is ImGUI event (see CImGUILayer::PollImGUIEvents) */
+	TSharedPtr<class CImGUILayer>		imGUILayer;		/**< ImGUI layer. Him is valid when process event by ImGUI layer */
 #endif // WITH_IMGUI
 
-	EType					type;			/**< Type of event */
-	UEvents					events;			/**< Events */
+	EType								type;			/**< Type of event */
+	UEvents								events;			/**< Events */
 };
 
 #endif // !WINDOWEVENT_H
