@@ -17,6 +17,9 @@
 #include "LEBuild.h"
 #if WITH_IMGUI
 
+// yehor.pohuliaka: We have to use Texture2DRHIRef_t in ImGUI instead of void*
+#define ImTextureID     Texture2DRHIRef_t
+
 //---- Define assertion handler. Defaults to calling assert().
 // If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.
 //#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)

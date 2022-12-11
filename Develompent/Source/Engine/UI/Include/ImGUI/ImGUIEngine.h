@@ -449,6 +449,8 @@ protected:
 		bPendingChangeSize = true;
 	}
 
+	uint32						flags;				/**< ImGUI window flags */
+
 private:
 	/**
 	 * @brief Update ImGUI events
@@ -459,7 +461,7 @@ private:
 	bool						bVisibility;		/**< Is visible layer */
 	bool						bFocused;			/**< Is focused layer */
 	bool						bHovered;			/**< Is hovered layer */
-	bool						bPendingChangeSize;	/**< Is need update size of layer */
+	bool						bPendingChangeSize;	/**< Is need update size of layer */	
 	Vector2D					size;				/**< Layer size */
 	Vector2D					padding;			/**< Layer padding */
 	std::wstring				name;				/**< Layer name */

@@ -290,7 +290,7 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
                 ctx->RSSetScissorRects(1, &r);
 
                 // Bind texture, Draw
-                ID3D11ShaderResourceView* texture_srv = (ID3D11ShaderResourceView*)pcmd->GetTexID();
+                ID3D11ShaderResourceView* texture_srv = (ID3D11ShaderResourceView*)pcmd->GetTexID()->GetHandle();
                 ctx->PSSetShaderResources(0, 1, &texture_srv);
                 ctx->DrawIndexed(pcmd->ElemCount, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset);
             }
@@ -319,6 +319,10 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
     ctx->IASetInputLayout(old.InputLayout); if (old.InputLayout) old.InputLayout->Release();
 }
 
+// yehor.pohuliaka Begin - Change ImTextureID to Texture2DRHIRef_t
+#include "D3D11Surface.h"
+// yehor.pohuliaka End
+
 static void ImGui_ImplDX11_CreateFontsTexture()
 {
     // Build texture atlas
@@ -328,8 +332,10 @@ static void ImGui_ImplDX11_CreateFontsTexture()
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
+    // yehor.pohuliaka Begin - Change ImTextureID to Texture2DRHIRef_t
     // Upload texture to graphics system
-    {
+    // OLD Version
+    /* {
         D3D11_TEXTURE2D_DESC desc;
         ZeroMemory(&desc, sizeof(desc));
         desc.Width = width;
@@ -362,7 +368,12 @@ static void ImGui_ImplDX11_CreateFontsTexture()
     }
 
     // Store our identifier
-    io.Fonts->SetTexID((ImTextureID)bd->pFontTextureView);
+    io.Fonts->SetTexID((ImTextureID)bd->pFontTextureView);*/
+
+    // Store out identifier
+    // NEW Version
+    io.Fonts->SetTexID( new CD3D11Texture2DRHI( TEXT( "ImGUIFont" ), width, height, 1, PF_A8R8G8B8, 0, pixels ) );
+    // yehor.pohuliaka End
 
     // Create texture sampler
     {

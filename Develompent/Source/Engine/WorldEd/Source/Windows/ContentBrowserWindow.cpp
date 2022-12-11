@@ -1676,7 +1676,7 @@ void CContentBrowserWindow::CAssetNode::Tick()
 	const TAssetHandle<CTexture2D>&		assetIconTexture = owner->assetIcons[info->type];
 	if ( assetIconTexture.IsAssetValid() )
 	{
-		ImGui::ImageButton( assetIconTexture.ToSharedPtr()->GetTexture2DRHI()->GetHandle(), { owner->thumbnailSize, owner->thumbnailSize } );
+		ImGui::ImageButton( assetIconTexture.ToSharedPtr()->GetTexture2DRHI(), { owner->thumbnailSize, owner->thumbnailSize } );
 	}
 	else
 	{

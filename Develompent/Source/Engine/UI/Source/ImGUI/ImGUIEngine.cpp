@@ -180,7 +180,8 @@ void CImGUIPopup::Tick()
 //
 
 CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ )
-	: bInit( false )
+	: flags( 0 )
+	, bInit( false )
 	, bVisibility( true )
 	, bFocused( false )
 	, bHovered( false )
@@ -226,7 +227,7 @@ void CImGUILayer::Tick()
 			bPendingChangeSize = false;
 		}
 
-		if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility, ImGuiWindowFlags_MenuBar ) )
+		if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility, flags ) )
 		{
 			// Update popup if him is existing
 			if ( popup )
