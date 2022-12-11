@@ -212,6 +212,24 @@ public:
 	}
 
 	/**
+	 * @brief Overloaded operator ptrint
+	 * @return Return address
+	 */
+	FORCEINLINE operator ptrint() const
+	{
+		return ( ptrint )ptr;
+	}
+
+	/**
+	 * @brief Overloaded operator uptrint
+	 * @return Return address
+	 */
+	FORCEINLINE operator uptrint() const
+	{
+		return ( uptrint )ptr;
+	}
+
+	/**
 	 * @brief Overloaded operator PtrType&
 	 *
 	 * @return Returning reference on value
