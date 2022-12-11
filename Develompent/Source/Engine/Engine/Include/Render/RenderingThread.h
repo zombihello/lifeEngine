@@ -29,7 +29,7 @@ extern uint32			GRenderingThreadId;
  * @ingroup Engine
  * The rendering command queue
  */
-extern ÑRingBuffer		GRenderCommandBuffer;
+extern CRingBuffer		GRenderCommandBuffer;
 
 /**
  * @ingroup Engine
@@ -90,7 +90,7 @@ public:
 	 * @param[in] InSize Size
 	 * @param[in] InAllocation Allocation context in ring buffer
 	 */
-	FORCEINLINE void* operator new( size_t InSize, const ÑRingBuffer::ÑAllocationContext& InAllocation )
+	FORCEINLINE void* operator new( size_t InSize, const CRingBuffer::ÑAllocationContext& InAllocation )
 	{
 		return InAllocation.GetAllocation();
 	}
@@ -101,7 +101,7 @@ public:
 	 * @param[in] InPtr Pointer to data
 	 * @param[in] InAllocation Allocation context in ring buffer
 	 */
-	FORCEINLINE void operator delete( void* InPtr, const ÑRingBuffer::ÑAllocationContext& InAllocation )
+	FORCEINLINE void operator delete( void* InPtr, const CRingBuffer::ÑAllocationContext& InAllocation )
 	{}
 };
 
@@ -162,13 +162,13 @@ private:
 	{ \
 		if ( GIsThreadedRendering && !IsInRenderingThread() ) \
 		{ \
-			ÑRingBuffer::ÑAllocationContext			allocationContext( GRenderCommandBuffer, sizeof( InTypeName ) ); \
+			CRingBuffer::ÑAllocationContext			allocationContext( GRenderCommandBuffer, sizeof( InTypeName ) ); \
 			if ( allocationContext.GetAllocatedSize() < sizeof( InTypeName ) ) \
 			{ \
 				check( allocationContext.GetAllocatedSize() >= sizeof( CSkipRenderCommand ) ); \
 				new( allocationContext ) CSkipRenderCommand( allocationContext.GetAllocatedSize() ); \
 				allocationContext.Commit(); \
-				new( ÑRingBuffer::ÑAllocationContext( GRenderCommandBuffer, sizeof(InTypeName) ) ) InTypeName InParam; \
+				new( CRingBuffer::ÑAllocationContext( GRenderCommandBuffer, sizeof(InTypeName) ) ) InTypeName InParam; \
 			} \
 			else \
 			{ \

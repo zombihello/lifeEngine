@@ -14,6 +14,7 @@
 #include "Render/Viewport.h"
 #include "Render/RenderTarget.h"
 #include "Render/EditorLevelViewportClient.h"
+#include "Widgets/ViewportWidget.h"
 
 /**
  * @ingroup WorldEd
@@ -56,10 +57,8 @@ protected:
 	virtual void OnVisibilityChanged( bool InNewVisibility ) override;
 
 private:
-	bool							bViewportOnDrawing;		/**< Is viewport drawing */
 	CEditorLevelViewportClient		viewportClient;			/**< Viewport client */
-	TRefCountPtr<CViewport>			viewport;				/**< Viewport */
-	TRefCountPtr<CRenderTarget>		renderTarget;			/**< Render target */
+	CViewportWidget					viewportWidget;			/**< Viewport widget */
 };
 
 #endif // !VIEWPORTWINDOW_H

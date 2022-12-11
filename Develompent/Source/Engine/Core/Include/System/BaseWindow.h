@@ -25,6 +25,8 @@ enum EStyleWindow
 	SW_Floating			= 1 << 2,										/**< Floating window  */
 	SW_Fullscreen		= 1 << 3,										/**< Fullscreen window  */
 	SW_Hidden			= 1 << 4,										/**< Hidden window */
+	SW_Minimized		= 1 << 5,										/**< Window is minimized. If set flag SW_Maximized or SW_Fullscreen will be ignore */
+	SW_Maximized		= 1 << 6,										/**< Window is maximized. If set flag SW_Minimized or SW_Fullscreen will be ignore */
 
 	SW_Default			= SW_Decorated | SW_Resizable | SW_Hidden		/**< Default style - combined decorated and resizable style  */
 };
@@ -75,6 +77,16 @@ public:
 	 * @brief Hide window
 	 */
 	virtual void			Hide() {}
+
+	/**
+	 * @brief Maximize window
+	 */
+	virtual void Maximize() {}
+
+	/**
+	 * @brief Minimize window
+	 */
+	virtual void Minimize() {}
 
 	/**
 	 * @brief Handle window event

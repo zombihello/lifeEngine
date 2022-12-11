@@ -1330,7 +1330,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Delete()
 	// If we have used assets - print message
 	if ( !usedAssets.empty() )
 	{
-		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following assets in using and cannot be delete. Close all assets will allow them to be deleted\n\nAssets:\n%s" ), usedAssets.c_str() ), CDialogWindow::BT_Ok );
+		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following assets in using and cannot be delete. Close all assets will allow them to be deleted\n\nAssets:%s" ), usedAssets.c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 

@@ -103,6 +103,15 @@ public:
 		return texture.IsValid() && surface.IsValid();
 	}
 
+	/**
+	 * @brief Is render target is dirty
+	 * @return Return TRUE if render target is dirty, otherwise will return FALSE
+	 */
+	FORCEINLINE bool IsDirty() const
+	{
+		return bDirty;
+	}
+
 protected:
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -125,6 +134,7 @@ protected:
 	virtual void UpdateRHI() override;
 
 private:
+	bool					bDirty;			/**< Is render target is dirty. In true case him will be updated in render thread */
 	uint32					flags;			/**< Texture flags */
 	uint32					sizeX;			/**< Size X */
 	uint32					sizeY;			/**< Size Y */

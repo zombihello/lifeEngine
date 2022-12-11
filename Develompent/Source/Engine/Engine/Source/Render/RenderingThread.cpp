@@ -23,7 +23,7 @@ bool			GIsThreadedRendering = false;
 uint32			GRenderingThreadId = 0;
 
 /* The rendering command queue */
-ÑRingBuffer		GRenderCommandBuffer( RENDERING_COMMAND_BUFFER_SIZE, 16 );
+CRingBuffer		GRenderCommandBuffer( RENDERING_COMMAND_BUFFER_SIZE, 16 );
 
 /* Event of finished rendering frame */
 CEvent*			GRenderFrameFinished = nullptr;

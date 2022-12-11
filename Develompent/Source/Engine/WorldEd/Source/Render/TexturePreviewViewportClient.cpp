@@ -72,7 +72,7 @@ CSceneView* CTexturePreviewViewportClient::CalcSceneView( uint32 InSizeX, uint32
 	Matrix				projectionMatrix	= glm::ortho( -halfWidth, halfWidth, -halfHeight, halfHeight, ( float )-HALF_WORLD_MAX, ( float )HALF_WORLD_MAX );
 
 	// Result
-	CSceneView*			sceneView = new CSceneView( SMath::vectorZero, projectionMatrix, SMath::matrixIdentity, InSizeX, InSizeY, GetBackgroundColor(), SHOW_DefaultEditor );
+	CSceneView*			sceneView = new CSceneView( SMath::vectorZero, projectionMatrix, SMath::matrixIdentity, InSizeX, InSizeY, GetBackgroundColor(), SHOW_DefaultEditor & ~SHOW_Lights );
 	return sceneView;
 }
 

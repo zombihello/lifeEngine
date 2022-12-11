@@ -1,6 +1,16 @@
 #include "Math/Math.h"
 #include "Render/SceneRenderTargets.h"
 #include "Render/Scene.h"
+#include "System/ConVar.h"
+
+/**
+ * @ingroup Engine
+ * @brief CVar enable/disable wireframe mode
+ * @note This console variable is exist only with editor
+ */
+#if WITH_EDITOR
+CConVar		CVarRWireframe( TEXT( "r.wireframe" ), TEXT( "0" ), CVT_Bool, TEXT( "Enable/Disable wireframe mode" ) );
+#endif // WITH_EDITOR
 
 CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const CColor& InBackgroundColor, ShowFlags_t InShowFlags )
 	: viewMatrix( InViewMatrix )
@@ -13,6 +23,13 @@ CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatr
 	, sizeX( InSizeX )
 	, sizeY( InSizeY )
 {
+#if WITH_EDITOR
+	if ( CVarRWireframe.GetValueBool() )
+	{
+		showFlags |= SHOW_Wireframe;
+	}
+#endif // WITH_EDITOR
+
 	invViewProjectionMatrix = SMath::InverseMatrix( InViewMatrix ) * SMath::InverseMatrix( InProjectionMatrix );
 	frustum.Update( viewProjectionMatrix );
 }

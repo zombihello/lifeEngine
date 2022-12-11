@@ -31,17 +31,21 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 	SCOPED_DRAW_EVENT( EventBeginRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Begin Render View Target" ) );
 	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
 
-	// If enabled wireframe mode, we disable depth text and rendering to scene color
+	// If SHOW_Lights setted and disabled wireframe mode, we rendering to the GBuffer
+	ShowFlags_t		showFlags = sceneView->GetShowFlags();
+	if ( showFlags & SHOW_Lights 
 #if WITH_EDITOR
-	if ( sceneView->GetShowFlags() & SHOW_Wireframe )
-	{
-		GSceneRenderTargets.BeginRenderingSceneColor( immediateContext );
-	}
-	else
+		 && !( showFlags & SHOW_Wireframe )
 #endif // WITH_EDITOR
+		 )
 	{
 		GSceneRenderTargets.BeginRenderingGBuffer( immediateContext );
-		GSceneRenderTargets.ClearGBufferTargets( immediateContext );	
+		GSceneRenderTargets.ClearGBufferTargets( immediateContext );
+	}
+	// Otherwise to the scene color
+	else
+	{
+		GSceneRenderTargets.BeginRenderingSceneColor( immediateContext );
 	}
 	
 	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );

@@ -96,7 +96,7 @@ void CImGUIWindow::Tick()
 	// If main window - ViewportRHI is nullptr; If child window - ViewportRHI is valid
 	if ( !imguiViewport->ViewportRHI )
 	{
-		UNIQUE_RENDER_COMMAND_ONEPARAMETER( ÑMainWindow_DrawImGUICommand,
+		UNIQUE_RENDER_COMMAND_ONEPARAMETER( CMainWindow_DrawImGUICommand,
 											TRefCountPtr< CImGUIDrawData >, imGuiDrawData, currentBuffer,
 											{
 												GRHI->DrawImGUI( GRHI->GetImmediateContext(), ( ImDrawData* )imGuiDrawData->GetDrawData() );
@@ -105,7 +105,7 @@ void CImGUIWindow::Tick()
 	}
 	else
 	{
-		UNIQUE_RENDER_COMMAND_THREEPARAMETER( ÑChildWindow_DrawImGUICommand,
+		UNIQUE_RENDER_COMMAND_THREEPARAMETER( CChildWindow_DrawImGUICommand,
 											  TRefCountPtr< CImGUIDrawData >, imGuiDrawData, currentBuffer,
 											  ViewportRHIRef_t, viewportRHI, imguiViewport->ViewportRHI,
 											  bool, isNeedClear, !( imguiViewport->Flags & ImGuiViewportFlags_NoRendererClear ),
@@ -214,7 +214,7 @@ void CImGUILayer::Tick()
 			bPendingChangeSize = false;
 		}
 
-		if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility ) )
+		if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility, ImGuiWindowFlags_MenuBar ) )
 		{
 			// Update popup if him is existing
 			if ( popup )

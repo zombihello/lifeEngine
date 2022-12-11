@@ -35,15 +35,33 @@ typedef glm::vec2		Vector2D;
 
 /**
  * @ingroup Core
+ * Typedef glm::ivec2
+ */
+typedef glm::ivec2		Vector2DInt;
+
+/**
+ * @ingroup Core
  * Typedef glm::vec3
  */
 typedef glm::vec3		Vector;
 
 /**
  * @ingroup Core
+ * Typedef glm::ivec3
+ */
+typedef glm::ivec3		VectorInt;
+
+/**
+ * @ingroup Core
  * Typedef glm::vec4
  */
 typedef glm::vec4		Vector4D;
+
+/**
+ * @ingroup Core
+ * Typedef glm::ivec4
+ */
+typedef glm::ivec4		Vector4DInt;
 
 /**
  * @ingroup Core

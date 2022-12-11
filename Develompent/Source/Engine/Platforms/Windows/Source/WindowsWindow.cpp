@@ -304,6 +304,16 @@ void CWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
 		{
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
+
+		if ( InFlags & SW_Minimized )
+		{
+			flags |= SDL_WINDOW_MINIMIZED;
+		}
+
+		if ( InFlags & SW_Maximized )
+		{
+			flags |= SDL_WINDOW_MAXIMIZED;
+		}
 	}
 	
 	// Creating window
@@ -314,7 +324,7 @@ void CWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
 	}
 
 	id = SDL_GetWindowID( sdlWindow );
-
+	
 	// Getting OS handle on window
 	sdlWindowInfo = new SDL_SysWMinfo();
 
@@ -323,6 +333,22 @@ void CWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
 	handle = sdlWindowInfo->info.win.window;
 
 	LE_LOG( LT_Log, LC_Init, TEXT( "Window created (%ix%i) with title '%s', flags 0x%X and handle 0x%X" ), InWidth, InHeight, InTitle, InFlags, handle );
+}
+
+void CWindowsWindow::Maximize()
+{
+	if ( sdlWindow )
+	{
+		SDL_MaximizeWindow( sdlWindow );
+	}
+}
+
+void CWindowsWindow::Minimize()
+{
+	if ( sdlWindow )
+	{
+		SDL_MinimizeWindow( sdlWindow );
+	}
 }
 
 /**

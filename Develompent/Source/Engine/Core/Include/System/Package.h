@@ -554,7 +554,7 @@ public:
 	 * Get path to asset source file
 	 * @return Return path to asset source file
 	 */
-	FORCEINLINE std::wstring GetAssetSourceFile() const
+	FORCEINLINE const std::wstring& GetAssetSourceFile() const
 	{
 		return sourceFile;
 	}

@@ -16,7 +16,7 @@
  * @ingroup Core
  * A ring buffer for use with two threads: a reading thread and a writing thread
  */
-class ÑRingBuffer
+class CRingBuffer
 {
 public:
 	/**
@@ -25,12 +25,12 @@ public:
 	 * @param[in] InBufferSize The size of the data buffer to allocate
 	 * @param[in] InAlignment Alignment of each allocation unit (in bytes)
 	 */
-	ÑRingBuffer( uint32 InBufferSize, uint32 InAlignment = 1 );
+	CRingBuffer( uint32 InBufferSize, uint32 InAlignment = 1 );
 
 	/**
 	 * Destructor
 	 */
-	~ÑRingBuffer();
+	~CRingBuffer();
 
 	/**
 	 * A reference to an allocated chunk of the ring buffer.
@@ -45,7 +45,7 @@ public:
 		 * @param[in] InRingBuffer The ring buffer to allocate from.
 		 * @param[in] InAllocationSize The size of the allocation to make.
 		 */
-		ÑAllocationContext( ÑRingBuffer& InRingBuffer, uint32 InAllocationSize );
+		ÑAllocationContext( CRingBuffer& InRingBuffer, uint32 InAllocationSize );
 
 		/**
 		 * Upon destruction, the allocation is committed, if Commit hasn't been called manually
@@ -78,7 +78,7 @@ public:
 		}
 
 	private:
-		ÑRingBuffer&		ringBuffer;			/**< Reference to ring buffer */
+		CRingBuffer&		ringBuffer;			/**< Reference to ring buffer */
 		byte*				allocationStart;	/**< Pointer to start allocation data */
 		byte*				allocationEnd;		/**< Pointer to end allocation data */
 	};

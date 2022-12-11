@@ -130,6 +130,10 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 			if ( GIsEditor || GIsGame )
 			{
 				GWindow->Show();
+				if ( GIsEditor )
+				{
+					GWindow->Maximize();
+				}
 			}
 		}
 

@@ -87,6 +87,16 @@ public:
 	virtual void					Hide() override;
 
 	/**
+	 * @brief Maximize window
+	 */
+	virtual void Maximize() override;
+
+	/**
+	 * @brief Minimize window
+	 */
+	virtual void Minimize() override;
+
+	/**
 	 * @brief Handle window event
 	 *
 	 * @param[out] OutWindowEvent Occurred window event
