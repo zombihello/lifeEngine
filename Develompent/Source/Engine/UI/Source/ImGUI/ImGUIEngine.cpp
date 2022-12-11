@@ -34,9 +34,19 @@ void CImGUIDrawData::Clear()
 	check( isFree );
 	if ( drawData.CmdLists )
 	{
+		// Remove all command lists
 		for ( uint32 index = 0; index < ( uint32 )drawData.CmdListsCount; index++ )
 		{
-			delete drawData.CmdLists[ index ];
+			// Remove all texture ids
+			ImDrawList*		cmdList = drawData.CmdLists[index];
+			for ( uint32 cmdIndex = 0; cmdIndex < cmdList->CmdBuffer.Size; ++cmdIndex )
+			{
+				cmdList->CmdBuffer[cmdIndex].TextureId.SafeRelease();
+				
+			}
+
+			// Delete command list
+			delete cmdList;
 		}
 
 		delete[] drawData.CmdLists;

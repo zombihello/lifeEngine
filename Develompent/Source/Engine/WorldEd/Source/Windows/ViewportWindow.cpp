@@ -21,6 +21,11 @@ void CViewportWindow::Init()
 
 void CViewportWindow::OnTick()
 {
+	// We set focus on window if mouse tracking is working and window not taken focus
+	if ( !IsFocused() && viewportClient.GetMouseTrackingType() != CEditorLevelViewportClient::MT_None )
+	{
+		ImGui::SetWindowFocus();
+	}
 	viewportWidget.Tick();
 }
 

@@ -42,6 +42,7 @@ enum ELogCategory
     LC_Movie,               /**< Movie category */
     LC_Render,              /**< Render category */
     LC_RHI,                 /**< RHI category */
+    LC_Console,             /**< Console category */
 
 #if WITH_EDITOR
     LC_Editor,              /**< Editor category */

@@ -170,7 +170,12 @@ void CEditorEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 }
 
 void CEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage )
-{}
+{
+	if ( logsWindow && logsWindow->IsInit() )
+	{
+		logsWindow->PrintLog( InLogType, InMessage );
+	}
+}
 
 bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
