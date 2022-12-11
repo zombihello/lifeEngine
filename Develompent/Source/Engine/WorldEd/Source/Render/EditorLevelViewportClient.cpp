@@ -311,8 +311,9 @@ Vector CEditorLevelViewportClient::WorldToScreen( const Vector& InWorldPoint, ui
 void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// We ignore events when bIgnoreInput is TRUE or when ImGUI layer is unhovered
-	bool		bIsNotUnhoveredEvent = InWindowEvent.type != SWindowEvent::T_ImGUILayerUnHovered;
-	if ( bIgnoreInput || ( bIsNotUnhoveredEvent && InWindowEvent.imGUILayer && !InWindowEvent.imGUILayer->IsHovered() ) )
+	bool						bIsNotUnhoveredEvent = InWindowEvent.type != SWindowEvent::T_ImGUILayerUnHovered;
+	TSharedPtr<CImGUILayer>		imGUILayer = InWindowEvent.imGUILayer.Pin();
+	if ( bIgnoreInput || ( bIsNotUnhoveredEvent && imGUILayer && !imGUILayer->IsHovered() ) )
 	{
 		return;
 	}

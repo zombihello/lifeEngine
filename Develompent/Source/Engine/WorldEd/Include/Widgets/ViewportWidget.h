@@ -30,6 +30,11 @@ public:
 	CViewportWidget( bool InIsEnabled = true, CViewportClient* InViewportClient = nullptr, bool InDeleteViewportClient = false );
 
 	/**
+	 * @brief Destructor
+	 */
+	~CViewportWidget();
+
+	/**
 	 * @brief Init
 	 */
 	void Init();

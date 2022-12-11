@@ -344,3 +344,12 @@ void CTextureEditorWindow::OnTick()
 		}
 	}
 }
+
+void CTextureEditorWindow::OnVisibilityChanged( bool InNewVisibility )
+{
+	// If visibility of the window changed to FALSE, we destroy him
+	if ( !InNewVisibility )
+	{
+		Destroy();
+	}
+}

@@ -424,6 +424,11 @@ public:
 
 protected:
 	/**
+	 * @brief Destroy ImGUILayer and remove him from tick list
+	 */
+	void Destroy();
+
+	/**
 	 * @brief Method tick interface of a layer
 	 */
 	virtual void OnTick() = 0;

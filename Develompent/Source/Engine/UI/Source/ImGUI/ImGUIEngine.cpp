@@ -192,13 +192,25 @@ CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ 
 
 CImGUILayer::~CImGUILayer()
 {
-	GImGUIEngine->RemoveLayer( AsShared() );
+	Destroy();
 }
 
 void CImGUILayer::Init()
 {
-	GImGUIEngine->AddLayer( AsShared() );
-	bInit = true;
+	if ( !bInit )
+	{
+		GImGUIEngine->AddLayer( AsShared() );
+		bInit = true;
+	}
+}
+
+void CImGUILayer::Destroy()
+{
+	if ( bInit )
+	{
+		GImGUIEngine->RemoveLayer( AsShared() );
+		bInit = false;
+	}
 }
 
 void CImGUILayer::Tick()
@@ -331,8 +343,8 @@ void CImGUILayer::OnVisibilityChanged( bool InNewVisibility )
 /**
  * Constructor
  */
-CImGUIEngine::CImGUIEngine() :
-	imguiContext( nullptr )
+CImGUIEngine::CImGUIEngine() 
+	: imguiContext( nullptr )
 {}
 
 /**
@@ -524,9 +536,10 @@ void CImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
 void CImGUIEngine::EndDraw()
 {
 	// Draw all layers
-	for ( uint32 index = 0, count = layers.size(); index < count; ++index )
+	std::vector<TSharedPtr<CImGUILayer>>		layersOnTick = layers;
+	for ( uint32 index = 0, count = layersOnTick.size(); index < count; ++index )
 	{
-		layers[index]->Tick();
+		layersOnTick[index]->Tick();
 	}
 
 	ImGui::Render();

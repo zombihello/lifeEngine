@@ -170,7 +170,7 @@ struct SWindowEvent
 
 #if WITH_IMGUI
 	bool								bImGUIEvent;	/**< Is ImGUI event (see CImGUILayer::PollImGUIEvents) */
-	TSharedPtr<class CImGUILayer>		imGUILayer;		/**< ImGUI layer. Him is valid when process event by ImGUI layer */
+	TWeakPtr<class CImGUILayer>			imGUILayer;		/**< ImGUI layer. Him is valid when process event by ImGUI layer */
 #endif // WITH_IMGUI
 
 	EType								type;			/**< Type of event */

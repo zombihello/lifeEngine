@@ -17,6 +17,11 @@ CViewportWidget::CViewportWidget( bool InIsEnabled /* = true */, CViewportClient
 	SetSize( size );
 }
 
+CViewportWidget::~CViewportWidget()
+{
+	SetEnabled( false );
+}
+
 void CViewportWidget::Init()
 {
 	bInit = true;
@@ -32,7 +37,7 @@ void CViewportWidget::Tick()
 	check( bInit );
 	if ( !renderTarget->IsDirty() && renderTarget->IsValid() )		// FIXME: Need fix flickering when widget is resizing
 	{
-		ImGui::Image( renderTarget->GetTexture2DRHI()->GetHandle(), ImVec2{ ( float )size.x, ( float )size.y } );
+		ImGui::Image( renderTarget->GetTexture2DRHI()->GetHandle(), ImVec2{ ( float )size.x, ( float )size.y } );	// FIXME: Fix crush when texture handle using by ImGUI, but him already destroyed due to ImGUI containing him in type void*
 	}
 }
 
