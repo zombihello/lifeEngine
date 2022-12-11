@@ -334,11 +334,12 @@ bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResu
 	fileDialogSettings.lpstrInitialDir	= absolutePathToDirectory.data();
 
 	// Open file dialog
+	std::wstring		originalCurrentDir = GFileSystem->GetCurrentDirectory();
 	if ( !GetOpenFileNameW( &fileDialogSettings ) )
 	{
 		return false;
 	}
-	SetCurrentDirectoryW( GFileSystem->ConvertToAbsolutePath( appBaseDir() ).c_str() );
+	SetCurrentDirectoryW( originalCurrentDir.c_str() );
 
 	// Extract file paths
 	{
