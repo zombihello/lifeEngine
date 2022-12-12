@@ -290,7 +290,7 @@ void ImGui_ImplDX11_RenderDrawData(ImDrawData* draw_data)
                 ctx->RSSetScissorRects(1, &r);
 
                 // Bind texture, Draw
-                ID3D11ShaderResourceView* texture_srv = (ID3D11ShaderResourceView*)pcmd->GetTexID()->GetHandle();
+                ID3D11ShaderResourceView* texture_srv = (ID3D11ShaderResourceView*)pcmd->GetTexID().handle->GetHandle();
                 ctx->PSSetShaderResources(0, 1, &texture_srv);
                 ctx->DrawIndexed(pcmd->ElemCount, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset);
             }
@@ -372,7 +372,7 @@ static void ImGui_ImplDX11_CreateFontsTexture()
 
     // Store out identifier
     // NEW Version
-    io.Fonts->SetTexID( new CD3D11Texture2DRHI( TEXT( "ImGUIFont" ), width, height, 1, PF_A8R8G8B8, 0, pixels ) );
+    io.Fonts->SetTexID( SImGUILockedTexture2D{ new CD3D11Texture2DRHI( TEXT( "ImGUIFont" ), width, height, 1, PF_A8R8G8B8, 0, pixels ) } );
     // yehor.pohuliaka End
 
     // Create texture sampler
@@ -552,7 +552,7 @@ void    ImGui_ImplDX11_InvalidateDeviceObjects()
         return;
 
     if (bd->pFontSampler)           { bd->pFontSampler->Release(); bd->pFontSampler = NULL; }
-    if (bd->pFontTextureView)       { bd->pFontTextureView->Release(); bd->pFontTextureView = NULL; ImGui::GetIO().Fonts->SetTexID(NULL); } // We copied data->pFontTextureView to io.Fonts->TexID so let's clear that as well.
+    if (bd->pFontTextureView) 		{ bd->pFontTextureView->Release(); bd->pFontTextureView = NULL; ImGui::GetIO().Fonts->SetTexID( SImGUILockedTexture2D{ NULL }  ); } // We copied data->pFontTextureView to io.Fonts->TexID so let's clear that as well.
     if (bd->pIB)                    { bd->pIB->Release(); bd->pIB = NULL; }
     if (bd->pVB)                    { bd->pVB->Release(); bd->pVB = NULL; }
     if (bd->pBlendState)            { bd->pBlendState->Release(); bd->pBlendState = NULL; }

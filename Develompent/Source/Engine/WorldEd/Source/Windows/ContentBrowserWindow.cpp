@@ -1,5 +1,6 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/WorldEdGlobals.h"
+#include "Misc/UIGlobals.h"
 #include "Misc/Misc.h"
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
@@ -12,6 +13,7 @@
 #include "Windows/DialogWindow.h"
 #include "Windows/InputTextDialog.h"
 #include "Windows/FileDialog.h"
+#include "ImGUI/ImGUIEngine.h"
 #include "ImGUI/imgui_internal.h"
 #include "ImGUI/imgui_stdlib.h"
 
@@ -1676,7 +1678,7 @@ void CContentBrowserWindow::CAssetNode::Tick()
 	const TAssetHandle<CTexture2D>&		assetIconTexture = owner->assetIcons[info->type];
 	if ( assetIconTexture.IsAssetValid() )
 	{
-		ImGui::ImageButton( assetIconTexture.ToSharedPtr()->GetTexture2DRHI(), { owner->thumbnailSize, owner->thumbnailSize } );
+		ImGui::ImageButton( GImGUIEngine->LockTexture( assetIconTexture.ToSharedPtr()->GetTexture2DRHI() ), { owner->thumbnailSize, owner->thumbnailSize } );
 	}
 	else
 	{

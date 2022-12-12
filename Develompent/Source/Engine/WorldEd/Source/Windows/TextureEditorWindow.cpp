@@ -1,11 +1,13 @@
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
+#include "Misc/UIGlobals.h"
 #include "Windows/TextureEditorWindow.h"
 #include "Render/TexturePreviewViewportClient.h"
 #include "Windows/FileDialog.h"
 #include "System/AssetsImport.h"
 #include "Windows/DialogWindow.h"
+#include "ImGUI/ImGUIEngine.h"
 
 /** Table names of sampler address mode */
 static const achar*		GSamplerAddresModeNames[] =
@@ -131,7 +133,7 @@ void CTextureEditorWindow::OnTick()
 	{
 		// Button 'Import'
 		{
-			if ( ImGui::ImageButton( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI(), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				std::wstring		errorMsg;
 				if ( !GAssetFactory.Reimport( texture2D, errorMsg ) )
@@ -152,7 +154,7 @@ void CTextureEditorWindow::OnTick()
 				ImGui_ButtonSetButtonSelectedStyle();
 			}
 
-			if ( ImGui::ImageButton( icons[IT_R].ToSharedPtr()->GetTexture2DRHI(), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_R].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				viewportClient->ShowRedChannel( !viewportClient->IsShowRedChannel() );
 			}
@@ -171,7 +173,7 @@ void CTextureEditorWindow::OnTick()
 				ImGui_ButtonSetButtonSelectedStyle();
 			}
 
-			if ( ImGui::ImageButton( icons[IT_G].ToSharedPtr()->GetTexture2DRHI(), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_G].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				viewportClient->ShowGreenChannel( !viewportClient->IsShowGreenChannel() );
 			}
@@ -190,7 +192,7 @@ void CTextureEditorWindow::OnTick()
 				ImGui_ButtonSetButtonSelectedStyle();
 			}
 
-			if ( ImGui::ImageButton( icons[IT_B].ToSharedPtr()->GetTexture2DRHI(), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_B].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				viewportClient->ShowBlueChannel( !viewportClient->IsShowBlueChannel() );
 			}
@@ -209,7 +211,7 @@ void CTextureEditorWindow::OnTick()
 				ImGui_ButtonSetButtonSelectedStyle();
 			}
 
-			if ( ImGui::ImageButton( icons[IT_A].ToSharedPtr()->GetTexture2DRHI(), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_A].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				viewportClient->ShowAlphaChannel( !viewportClient->IsShowAlphaChannel() );
 			}

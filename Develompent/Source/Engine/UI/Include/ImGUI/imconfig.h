@@ -17,8 +17,10 @@
 #include "LEBuild.h"
 #if WITH_IMGUI
 
-// yehor.pohuliaka: We have to use Texture2DRHIRef_t in ImGUI instead of void*
-#define ImTextureID     Texture2DRHIRef_t
+#include "ImGUI/ImGUILockedTexture.h"
+
+// yehor.pohuliaka: We have to use SImGUILockedTexture2D in ImGUI instead of void*
+#define ImTextureID     SImGUILockedTexture2D
 
 //---- Define assertion handler. Defaults to calling assert().
 // If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.

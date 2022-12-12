@@ -577,6 +577,24 @@ public:
 		return bShowCursor;
 	}
 
+	/**
+	 * @brief Lock texture
+	 * @note Locked texture will be unlocked in EndDraw(). This method you need use in ImGui::Image*(), otherwise will be game crashed
+	 * 
+	 * @param InTexture2D	Texture 2D
+	 * @return Return locked texture 2D
+	 */
+	FORCEINLINE SImGUILockedTexture2D LockTexture( Texture2DRHIParamRef_t InTexture2D )
+	{
+		if ( InTexture2D )
+		{
+			InTexture2D->AddRef();
+			lockedTextures.push_back( InTexture2D );
+		}
+
+		return SImGUILockedTexture2D{ InTexture2D };
+	}
+
 private:
 	/**
 	 * @brief Init theme
@@ -587,6 +605,7 @@ private:
 	struct ImGuiContext*						imguiContext;	/**< Pointer to ImGUI context */
 	std::vector<CImGUIWindow*>					windows;		/**< Array of windows ImGUI */
 	std::vector<TSharedPtr<CImGUILayer>>		layers;			/**< Array of ImGUI layers */
+	std::list<Texture2DRHIParamRef_t>			lockedTextures;	/**< List of locked textures */
 };
 
 #endif // WITH_IMGUI

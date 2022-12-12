@@ -1,6 +1,8 @@
 #include "Misc/WorldEdGlobals.h"
+#include "Misc/UIGlobals.h"
 #include "System/EditorEngine.h"
 #include "Widgets/ViewportWidget.h"
+#include "ImGUI/ImGUIEngine.h"
 
 CViewportWidget::CViewportWidget( bool InIsEnabled /* = true */, CViewportClient* InViewportClient /* = nullptr */, bool InDeleteViewportClient /* = false */ )
 	: bInit( false )
@@ -37,7 +39,7 @@ void CViewportWidget::Tick()
 	check( bInit );
 	if ( renderTarget->IsValid() )
 	{
-		ImGui::Image( renderTarget->GetTexture2DRHI(), ImVec2{ ( float )size.x, ( float )size.y } );
+		ImGui::Image( GImGUIEngine->LockTexture( renderTarget->GetTexture2DRHI() ), ImVec2{ ( float )size.x, ( float )size.y } );
 	}
 }
 

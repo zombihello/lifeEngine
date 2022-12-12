@@ -34,19 +34,20 @@ void CImGUIDrawData::Clear()
 	check( isFree );
 	if ( drawData.CmdLists )
 	{
-		// Remove all command lists
 		for ( uint32 index = 0; index < ( uint32 )drawData.CmdListsCount; index++ )
 		{
-			// Remove all texture ids
-			ImDrawList*		cmdList = drawData.CmdLists[index];
-			for ( uint32 cmdIndex = 0; cmdIndex < cmdList->CmdBuffer.Size; ++cmdIndex )
+			// Unlock textures
+			ImDrawList*					drawList = drawData.CmdLists[index];
+			for ( uint32 bufferIndex = 0; bufferIndex < drawList->CmdBuffer.Size; ++bufferIndex )
 			{
-				cmdList->CmdBuffer[cmdIndex].TextureId.SafeRelease();
-				
+				const ImDrawCmd&		drawCmd = drawList->CmdBuffer[bufferIndex];
+				if ( drawCmd.TextureId.handle )
+				{
+					drawCmd.TextureId.handle->ReleaseRef();
+				}
 			}
 
-			// Delete command list
-			delete cmdList;
+			delete drawList;
 		}
 
 		delete[] drawData.CmdLists;
@@ -67,7 +68,18 @@ void CImGUIDrawData::SetDrawData( ImDrawData* InDrawData )
 	drawData.CmdLists = new ImDrawList*[ InDrawData->CmdListsCount ];
 	for ( uint32 index = 0; index < ( uint32 )InDrawData->CmdListsCount; index++ )
 	{
-		drawData.CmdLists[ index ] = InDrawData->CmdLists[ index ]->CloneOutput();
+		ImDrawList* drawList		= InDrawData->CmdLists[index]->CloneOutput();
+		drawData.CmdLists[ index ]	= drawList;
+		
+		// Lock textures 
+		for ( uint32 bufferIndex = 0; bufferIndex < drawList->CmdBuffer.Size; ++bufferIndex )
+		{
+			const ImDrawCmd& drawCmd = drawList->CmdBuffer[bufferIndex];
+			if ( drawCmd.TextureId.handle )
+			{
+				drawCmd.TextureId.handle->AddRef();
+			}
+		}
 	}
 }
 
@@ -565,5 +577,12 @@ void CImGUIEngine::EndDraw()
 	{
 		windows[ index ]->Tick();
 	}
+
+	// Unlock textures
+	for ( auto it = lockedTextures.begin(), itEnd = lockedTextures.end(); it != itEnd; ++it )
+	{
+		( *it )->ReleaseRef();
+	}
+	lockedTextures.clear();
 }
 #endif // WITH_IMGUI
