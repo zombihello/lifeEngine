@@ -23,6 +23,7 @@
 
 // Asset editor windows
 #include "Windows/TextureEditorWindow.h"
+#include "Windows/MaterialEditorWindow.h"
 
 /** Border size for buttons in asset viewer */
 #define CONTENTBROWSER_ASSET_BORDERSIZE		1.f
@@ -623,6 +624,83 @@ void CContentBrowserWindow::OnTick()
 	}
 
 	ImGui::EndColumns();
+}
+
+void CContentBrowserWindow::ShowAsset( const std::wstring& InAssetReference )
+{
+	// If asset reference is not valid, we nothing do
+	if ( InAssetReference.empty() )
+	{
+		return;
+	}
+
+	// Parse asset reference
+	EAssetType		assetType;
+	std::wstring	packageName;
+	std::wstring	assetName;
+	bool			bResult = ParseReferenceToAsset( InAssetReference, packageName, assetName, assetType );
+	if ( !bResult )
+	{
+		return;
+	}
+
+	// Find path to package from TOC table and load him
+	PackageRef_t	package;
+	std::wstring	packagePath;
+	{
+		packagePath = GTableOfContents.GetPackagePath( packageName );
+		if ( !packagePath.empty() )
+		{
+			package = GPackageManager->LoadPackage( packagePath );
+		}
+	}
+
+	// If package not loaded, we exit from method
+	if ( !package )
+	{
+		return;
+	}
+
+	// Set new current package and refresh asset nodes
+	SetCurrentPackage( package );
+	RefreshAssetNodes();
+
+	// Select asset
+	for ( uint32 index = 0, count = assets.size(); index < count; ++index )
+	{
+		CAssetNode&		assetNode = assets[index];
+		if ( assetNode.GetName() == assetName )
+		{
+			assetNode.SetSelect( true );
+			break;
+		}
+	}
+}
+
+std::wstring CContentBrowserWindow::GetSelectedAssetReference() const
+{
+	std::wstring	result;
+	
+	// If current package is valid, we find first selected asset
+	if ( package )
+	{
+		const CAssetNode*	assetNode = nullptr;
+		for ( uint32 index = 0, count = assets.size(); index < count; ++index )
+		{
+			if ( assets[index].IsSelected() )
+			{
+				assetNode = &assets[index];
+				break;
+			}
+		}
+
+		if ( assetNode )
+		{
+			MakeReferenceToAsset( package->GetName(), assetNode->GetName(), assetNode->GetType(), result );
+		}
+	}
+
+	return result;
 }
 
 void CContentBrowserWindow::RefreshAssetNodes()
@@ -1548,7 +1626,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 		owner->gameRoot->GetSelectedNodes( selectedNodes );
 		if ( !selectedNodes.empty() )
 		{
-			std::vector<TSharedPtr<CFileTreeNode>>*		pData = new std::vector<TSharedPtr<CFileTreeNode>>( selectedNodes );
+			std::vector<TSharedPtr<CFileTreeNode>>*		pData = new std::vector<TSharedPtr<CFileTreeNode>>( selectedNodes );			// FIXME: AHTUNG! Maybe memory leak when drop in empty space
 			ImGui::SetDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE, &pData, sizeof( std::vector<TSharedPtr<CFileTreeNode>>* ), ImGuiCond_Once );
 
 			// Block drop targets to children
@@ -1749,7 +1827,8 @@ void CContentBrowserWindow::CAssetNode::ProcessEvents()
 			check( asset );
 			switch ( info->type )
 			{
-			case AT_Texture2D:	MakeSharedPtr<CTextureEditorWindow>( asset, CString::Format( TEXT( "Texture Editor - %s" ), asset->GetAssetName().c_str() ) )->Init();	break;
+			case AT_Texture2D:	MakeSharedPtr<CTextureEditorWindow>( asset )->Init();	break;
+			case AT_Material:	MakeSharedPtr<CMaterialEditorWindow>( asset )->Init();	break;
 			default:
 				appErrorf( TEXT( "Unsupported asset type 0x%X" ), info->type );
 				break;

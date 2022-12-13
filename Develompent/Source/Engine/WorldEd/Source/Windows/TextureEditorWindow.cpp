@@ -70,8 +70,8 @@ void ImGui_ButtonPopStyleColor()
 	}
 }
 
-CTextureEditorWindow::CTextureEditorWindow( const TSharedPtr<CTexture2D>& InTexture2D, const std::wstring& InName )
-	: CImGUILayer( InName )
+CTextureEditorWindow::CTextureEditorWindow( const TSharedPtr<CTexture2D>& InTexture2D )
+	: CImGUILayer( CString::Format( TEXT( "Texture Editor - %s" ), InTexture2D->GetAssetName().c_str() ) )
 	, texture2D( InTexture2D )
 	, viewportClient( new CTexturePreviewViewportClient( InTexture2D ) )
 {

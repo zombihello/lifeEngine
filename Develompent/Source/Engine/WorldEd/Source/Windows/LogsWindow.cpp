@@ -56,7 +56,7 @@ void CLogsWindow::OnTick()
 		float	panelWidth			= ImGui::GetContentRegionAvail().x;
 		float	inputCommandWidth	= panelWidth / 1.15f;
 		ImGui::PushItemWidth( inputCommandWidth );
-		if ( ImGui::InputTextWithHint( "##InputCommand", "Console Command", &commandBuffer, ImGuiInputTextFlags_EnterReturnsTrue) )
+		if ( ImGui::InputTextWithHint( "##InputCommand", "Console Command", &commandBuffer, ImGuiInputTextFlags_EnterReturnsTrue ) )
 		{
 			if ( !commandBuffer.empty() )
 			{

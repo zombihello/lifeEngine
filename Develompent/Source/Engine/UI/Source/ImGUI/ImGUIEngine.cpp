@@ -13,6 +13,16 @@
 #include "Render/RenderingThread.h"
 #include "ImGUI/ImGUIEngine.h"
 #include "Misc/UIGlobals.h"
+#include "System/ConsoleSystem.h"
+
+#if !SHIPPING_BUILD
+/**
+ * @ingroup UI
+ * @brief CVar enable/disable debug mode of the ImGUI
+ * @note This console variable is exist when SHIPPING_BUILD is disabled
+ */
+CConVar		CVarImGUIDebug( TEXT( "imgui.debug" ), TEXT( "0" ), CVT_Bool, TEXT( "Enable/Disable debug mode of the ImGUI" ) );
+#endif // !SHIPPING_BUILD
 
 //
 // IMGUI DRAW DATA
@@ -299,7 +309,7 @@ void CImGUILayer::UpdateEvents()
 	{
 		SWindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent	= true;
-		imguiEvent.imGUILayer	= AsShared();
+		imguiEvent.imGUILayer	= AsWeak();
 		if ( !bLocalFocused )
 		{
 			imguiEvent.type = SWindowEvent::T_WindowFocusLost;
@@ -321,7 +331,7 @@ void CImGUILayer::UpdateEvents()
 	{
 		SWindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent	= true;
-		imguiEvent.imGUILayer	= AsShared();
+		imguiEvent.imGUILayer	= AsWeak();
 		if ( bLocalHovered )
 		{
 			imguiEvent.type = SWindowEvent::T_ImGUILayerHovered;
@@ -341,7 +351,7 @@ void CImGUILayer::UpdateEvents()
 	{
 		SWindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent					= true;
-		imguiEvent.imGUILayer					= AsShared();
+		imguiEvent.imGUILayer					= AsWeak();
 		imguiEvent.type							= SWindowEvent::T_WindowResize;
 		imguiEvent.events.windowResize.windowId = 0;
 		imguiEvent.events.windowResize.width	= Max<float>( imguiSize.x, 1.f );
@@ -564,6 +574,14 @@ void CImGUIEngine::EndDraw()
 	{
 		layersOnTick[index]->Tick();
 	}
+
+	// Draw debug window of the ImGUI if it need
+#if !SHIPPING_BUILD
+	if ( CVarImGUIDebug.GetValueBool() )
+	{
+		ImGui::ShowMetricsWindow();
+	}
+#endif // !SHIPPING_BUILD
 
 	ImGui::Render();
 	appImGUIEndDrawing();

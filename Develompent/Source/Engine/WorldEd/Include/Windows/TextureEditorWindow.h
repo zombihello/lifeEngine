@@ -13,10 +13,10 @@
 #include "Render/Texture.h"
 #include "Widgets/ViewportWidget.h"
 
- /**
-  * @ingroup WorldEd
-  * @brief Texture editor window
-  */
+/**
+ * @ingroup WorldEd
+ * @brief Texture editor window
+ */
 class CTextureEditorWindow : public CImGUILayer
 {
 public:
@@ -35,11 +35,9 @@ public:
 
 	/**
 	 * @brief Constructor
-	 *
 	 * @param InTexture2D	Texture 2D
-	 * @param InName		Window name
 	 */
-	CTextureEditorWindow( const TSharedPtr<CTexture2D>& InTexture2D, const std::wstring& InName );
+	CTextureEditorWindow( const TSharedPtr<CTexture2D>& InTexture2D );
 
 	/**
 	 * @brief Destructor

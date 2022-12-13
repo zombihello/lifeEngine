@@ -15,7 +15,7 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	bIgnoreInput			= true;
 	bSetListenerPosition	= false;
 	viewportType			= LVT_Perspective;
-	showFlags				= SHOW_DefaultEditor;
+	showFlags				= SHOW_DefaultEditor & ~SHOW_Lights;
 	viewLocation			= Vector( 0.f, 0.f, -80.f );
 	viewRotationEuler		= SMath::vectorZero;
 	viewRotationQuat		= SMath::quaternionZero;

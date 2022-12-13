@@ -16,6 +16,9 @@ CStaticMesh::~CStaticMesh()
 	// Remove all drawing policy links from scenes
 	for ( auto itElement = elementDrawingPolicyMap.begin(), itElementEnd = elementDrawingPolicyMap.end(); itElement != itElementEnd; ++itElement )
 	{
+		// Mark dirty drawing policy link
+		itElement->second->bDirty = true;
+
 		for ( uint32 index = 0, count = itElement->second->drawingPolicyLinks.size(); index < count; ++index )
 		{
 			itElement->first.SDG->staticMeshDrawList.RemoveItem( itElement->second->drawingPolicyLinks[ index ] );

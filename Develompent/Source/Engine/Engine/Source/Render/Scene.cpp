@@ -3,13 +3,20 @@
 #include "Render/Scene.h"
 #include "System/ConVar.h"
 
+#if WITH_EDITOR
 /**
  * @ingroup Engine
  * @brief CVar enable/disable wireframe mode
  * @note This console variable is exist only with editor
  */
-#if WITH_EDITOR
 CConVar		CVarRWireframe( TEXT( "r.wireframe" ), TEXT( "0" ), CVT_Bool, TEXT( "Enable/Disable wireframe mode" ) );
+
+/**
+ * @ingroup Engine
+ * @brief CVar enable/disable light pass
+ * @note This console variable is exist only with editor
+ */
+CConVar		CVarRLight( TEXT( "r.light" ), TEXT( "1" ), CVT_Bool, TEXT( "Enable/Disable light pass" ) );
 #endif // WITH_EDITOR
 
 CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const CColor& InBackgroundColor, ShowFlags_t InShowFlags )
@@ -27,6 +34,10 @@ CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatr
 	if ( CVarRWireframe.GetValueBool() )
 	{
 		showFlags |= SHOW_Wireframe;
+	}
+	if ( !CVarRLight.GetValueBool() )
+	{
+		showFlags &= ~SHOW_Lights;
 	}
 #endif // WITH_EDITOR
 

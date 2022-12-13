@@ -45,6 +45,18 @@ public:
 		return package;
 	}
 
+	/**
+	 * @brief Show asset in content browser
+	 * @param InAssetReference		Asset reference
+	 */
+	void ShowAsset( const std::wstring& InAssetReference );
+
+	/**
+	 * @brief Get selected asset reference
+	 * @return Return selected asset reference. If not selected returning empty string
+	 */
+	std::wstring GetSelectedAssetReference() const;
+
 protected:
 	/**
 	 * @brief Method tick interface of a layer
