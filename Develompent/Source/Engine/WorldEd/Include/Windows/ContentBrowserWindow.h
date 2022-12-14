@@ -185,6 +185,15 @@ private:
 		 */
 		void GetSelectedNodes( std::vector<TSharedPtr<CFileTreeNode>>& OutSelectedNodes, bool InIsIgnoreChildren = false ) const;
 
+		/**
+		 * @brief Is node be dragging
+		 * @return Return TRUE if node is be dragging, otherwise will return FALSE
+		 */
+		FORCEINLINE bool IsDragging() const
+		{
+			return bDragging;
+		}
+
 	private:
 		/**
 		 * @brief Refresh info about file system
@@ -249,6 +258,24 @@ private:
 		}
 
 		/**
+		 * @brief Mark dragging flag
+		 * 
+		 * @param InIsDragging			Is be dragging
+		 * @param InApplyToChildren		Is need apply to children
+		 */
+		FORCEINLINE void MarkDragging( bool InIsDragging, bool InApplyToChildren = true )
+		{
+			bDragging = InIsDragging;
+			if ( InApplyToChildren )
+			{
+				for ( uint32 index = 0, count = children.size(); index < count; ++index )
+				{
+					children[index]->MarkDragging( InIsDragging, InApplyToChildren );
+				}
+			}
+		}
+
+		/**
 		 * @brief Get array of selected nodes to drag n drop
 		 * This function need only for DragNDropHandle()
 		 *
@@ -259,6 +286,7 @@ private:
 		bool										bAllowDropTarget;	/**< Is allowed drop target */
 		bool										bFreshed;			/**< Is freshed node */
 		bool										bSelected;			/**< Is selected node */
+		bool										bDragging;			/**< Is be dragging */
 		EFileNodeType								type;				/**< Node type */
 		std::wstring								path;				/**< Full path to file */
 		std::wstring								name;				/**< Node name for UI */
@@ -364,6 +392,11 @@ private:
 		 * @brief Process events
 		 */
 		void ProcessEvents();
+
+		/**
+		 * @brief Drag n drop handle
+		 */
+		void DragNDropHandle();
 
 		bool					bSelected;	/**< Is selected node */
 		const SAssetInfo*		info;		/**< Asset info */

@@ -9,6 +9,7 @@
 #include "System/AssetsImport.h"
 #include "System/EditorEngine.h"
 #include "System/ThreadingBase.h"
+#include "System/DragNDrop.h"
 #include "Windows/ContentBrowserWindow.h"
 #include "Windows/DialogWindow.h"
 #include "Windows/InputTextDialog.h"
@@ -31,7 +32,7 @@
 /** Selection colode */
 #define CONTENTBROWSER_SELECTCOLOR			ImVec4( 0.f, 0.43f, 0.87f, 1.f )
 
-/** Drag & drop type of a file node */
+/** Internal drag & drop type of a file node */
 #define CONTENTBROWSER_DND_FILENODETYPE		"DND::FileNode"
 
 /** Table of color buttons by asset type */
@@ -1449,6 +1450,7 @@ CContentBrowserWindow::CFileTreeNode::CFileTreeNode( EFileNodeType InType, const
 	: bAllowDropTarget( true )
 	, bFreshed( false )
 	, bSelected( false )
+	, bDragging( false )
 	, type( InType )
 	, path( InPath )
 	, name( InName )
@@ -1609,8 +1611,8 @@ void CContentBrowserWindow::CFileTreeNode::ProcessEvents()
 
 void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 {
-	// Begin drag n drop folder/package to other, if current node is not engine/game root
-	if ( owner->engineRoot != this && owner->gameRoot != this && ImGui::BeginDragDropSource() )
+	// Begin drag n drop folder/package to other, if current node is not engine/game root and DND not started
+	if ( !GImGui->DragDropActive && owner->engineRoot != this && owner->gameRoot != this && ImGui::BeginDragDropSource() )
 	{
 		// Update selection flags
 		if ( !bSelected )
@@ -1619,7 +1621,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			owner->gameRoot->SetSelect( false );
 			SetSelect( true );
 		}
-	
+
 		// Get all selected nodes
 		std::vector<CFileTreeNode*>			selectedNodes;
 		owner->engineRoot->GetNodesToDragNDrop( selectedNodes );
@@ -1628,13 +1630,15 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 		{
 			selectedNodes.push_back( nullptr );		// Terminate element
 			ImGui::SetDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE, &selectedNodes[0], sizeof( CFileTreeNode* ) * selectedNodes.size(), ImGuiCond_Once );
-	
+
 			// Block drop targets to children
 			for ( uint32 index = 0, count = children.size(); index < count; ++index )
 			{
 				children[index]->SetAllowDropTarget( false );
 			}
 		}
+
+		MarkDragging( true );		// We start dragging this node
 		ImGui::EndDragDropSource();
 	}
 
@@ -1648,7 +1652,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			CFileTreeNode**		pData			= ( CFileTreeNode** )imguiPayload->Data;
 			check( pData );
 
-			CFilename		filenamePackage = currentPackage->GetFileName();
+			CFilename		filenamePackage		= currentPackage ? currentPackage->GetFileName() : TEXT( "" );
 			CFilename		nodeFilename( path );
 			std::wstring	dstDirectory = nodeFilename.GetPath() + PATH_SEPARATOR;
 			if ( type == FNT_Folder )
@@ -1669,6 +1673,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 				// FIXME:	Need implement check on used assets and will update data in TOC file
 				LE_LOG( LT_Warning, LC_Dev, TEXT( "CContentBrowserWindow::CFileTreeNode::DragNDropHandle :: Need implement check on used assets and will update data in TOC file" ) );
 				GFileSystem->Move( dstDirectory + srcFilename.GetFilename(), srcFilename.GetFullPath(), false, true );
+				pData[index]->MarkDragging( false );
 			}
 
 			// Reset current package
@@ -1676,12 +1681,21 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			{
 				owner->SetCurrentPackage( nullptr );
 			}
+
+			// Allow drop targets for all nodes
+			owner->engineRoot->SetAllowDropTarget( true );
+			owner->gameRoot->SetAllowDropTarget( true );
 		}
 
-		// Allow drop targets for all nodes
-		owner->engineRoot->SetAllowDropTarget( true );
-		owner->gameRoot->SetAllowDropTarget( true );
 		ImGui::EndDragDropTarget();
+	}
+
+	// If in this node flag 'bDragging' is set, but drag'n'drap already disable - this mean what we droped data in empty space and need restore all nodes
+	if ( bDragging && !GImGui->DragDropActive )
+	{
+		SetSelect( false );
+		SetAllowDropTarget( true );
+		MarkDragging( false );
 	}
 }
 
@@ -1783,15 +1797,19 @@ void CContentBrowserWindow::CAssetNode::Tick()
 	}
 
 	// Draw of the asset's button, if him's icon isn't existing we draw simple button
-	const TAssetHandle<CTexture2D>&		assetIconTexture = owner->assetIcons[info->type];
+	const TAssetHandle<CTexture2D>&		assetIconTexture	= owner->assetIcons[info->type];
 	if ( assetIconTexture.IsAssetValid() )
 	{
+		ImGui::PushID( TCHAR_TO_ANSI( info->name.c_str() ) );
 		ImGui::ImageButton( GImGUIEngine->LockTexture( assetIconTexture.ToSharedPtr()->GetTexture2DRHI() ), { owner->thumbnailSize, owner->thumbnailSize } );
 	}
 	else
 	{
 		ImGui::Button( TCHAR_TO_ANSI( info->name.c_str() ), { owner->thumbnailSize, owner->thumbnailSize } );
 	}
+
+	// Drag n drop handle
+	DragNDropHandle();
 
 	// Process events
 	ProcessEvents();
@@ -1804,8 +1822,64 @@ void CContentBrowserWindow::CAssetNode::Tick()
 	}
 	ImGui::TextWrapped( TCHAR_TO_ANSI( assetName.c_str() ) );
 
+	if ( assetIconTexture.IsAssetValid() )
+	{
+		ImGui::PopID();
+	}
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor( !bNeedPopStyleColor ? 1 : 4 );
+}
+
+void CContentBrowserWindow::CAssetNode::DragNDropHandle()
+{
+	// Begin drag n drop asset references
+	if ( !GImGui->DragDropActive && ImGui::BeginDragDropSource() )
+	{
+		// Update selection flags
+		if ( !bSelected )
+		{
+			// Unselect all asset
+			for ( uint32 index = 0, count = owner->assets.size(); index < count; ++index )
+			{
+				owner->assets[index].SetSelect( false );
+			}
+
+			// Select only that asset
+			SetSelect( true );
+		}
+
+		PackageRef_t		package = owner->GetCurrentPackage();
+		check( package );
+
+		// Generate string with all asset references (only selected)
+		std::vector<std::wstring>	assetReferences;
+		for ( uint32 index = 0, count = owner->assets.size(); index < count; ++index )
+		{
+			const CAssetNode&		assetNode = owner->assets[index];
+			if ( assetNode.IsSelected() )
+			{
+				const SAssetInfo*	assetInfo = owner->assets[index].GetAssetInfo();
+				check( assetInfo );
+
+				// Make reference to asset
+				std::wstring		resultRef;
+				if ( MakeReferenceToAsset( package->GetName(), assetInfo->name, assetInfo->type, resultRef ) )
+				{
+					assetReferences.push_back( resultRef );
+				}
+			}
+		}
+
+		// Make dragging data if array of asset references not empty, then we copy him to ImGUI
+		if ( !assetReferences.empty() )
+		{
+			std::vector<tchar>		draggingData;
+			DND_MakeAssetReferenceData( assetReferences, draggingData );
+			ImGui::SetDragDropPayload( DND_ASSETREFERENCEETYPE, &draggingData[0], sizeof( tchar ) * draggingData.size(), ImGuiCond_Once );
+		}
+
+		ImGui::EndDragDropSource();
+	}
 }
 
 void CContentBrowserWindow::CAssetNode::ProcessEvents()
@@ -1814,7 +1888,7 @@ void CContentBrowserWindow::CAssetNode::ProcessEvents()
 	if ( ImGui::IsItemHovered() )
 	{
 		// Select asset if we press left mouse button
-		if ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) )
+		if ( ImGui::IsMouseReleased( ImGuiMouseButton_Left ) )
 		{
 			if ( !bCtrlDown )
 			{

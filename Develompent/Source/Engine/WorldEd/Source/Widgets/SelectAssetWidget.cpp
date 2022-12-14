@@ -5,6 +5,7 @@
 #include "System/BaseEngine.h"
 #include "System/AssetsImport.h"
 #include "System/EditorEngine.h"
+#include "System/DragNDrop.h"
 #include "Widgets/SelectAssetWidget.h"
 #include "Windows/ContentBrowserWindow.h"
 #include "ImGUI/ImGUIEngine.h"
@@ -74,7 +75,8 @@ void CSelectAssetWidget::SetAssetReference( const std::wstring& InAssetReference
 void CSelectAssetWidget::Tick()
 {
 	check( bInit );
-
+	ImGui::BeginGroup();
+	
 	// Preview asset
 	if ( previewTexture )
 	{
@@ -145,5 +147,26 @@ void CSelectAssetWidget::Tick()
 		}
 
 		ImGui::EndTable();
+	}
+	
+	// Manage of drop a asset's reference to input widget
+	ImGui::EndGroup();
+	if ( ImGui::BeginDragDropTarget() )
+	{
+		const ImGuiPayload*		imguiPayload = ImGui::AcceptDragDropPayload( DND_ASSETREFERENCEETYPE );
+		if ( imguiPayload )
+		{
+			tchar*				pData = ( tchar* )imguiPayload->Data;
+			check( pData );
+
+			// Apply dropped asset reference
+			std::vector<std::wstring>	assetReference;
+			DND_ParseAssetReferenceData( pData, assetReference, 1 );
+			if ( !assetReference.empty() )
+			{
+				SetAssetReference( assetReference[0] );
+			}
+		}
+		ImGui::EndDragDropTarget();
 	}
 }
