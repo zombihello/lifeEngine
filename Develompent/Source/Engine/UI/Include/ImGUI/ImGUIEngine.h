@@ -15,9 +15,11 @@
 #include <stack>
 #include <vector>
 
+#include "Containers/StringConv.h"
 #include "Core.h"
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
+#include "Misc/SharedPointer.h"
 #include "System/ThreadingBase.h"
 #include "System/WindowEvent.h"
 #include "ImGUI/imgui.h"
@@ -162,6 +164,79 @@ private:
 	ImGuiViewport*						imguiViewport;									/**< Pointer to ImGUI viewport */
 	TRefCountPtr< CImGUIDrawData >		drawDataBuffers[ IMGUI_DRAWBUFFERS_COUNT ];		/**< Buffers of ImDrawData for draw. In one buffer write, from one read */
 	uint32								indexCurrentBuffer;								/**< Index of current buffer */
+};
+
+/**
+ * @ingroup UI
+ * @brief ImGUI Popup menu
+ */
+class CImGUIPopup
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InName	Popup name
+	 */
+	CImGUIPopup( const std::wstring& InName = TEXT( "NewPopup" ) );
+
+	/**
+	 * @brief Tick ImGUI popup
+	 * Need call in main thread
+	 */
+	void Tick();
+
+	/**
+	 * @brief Open popup
+	 */
+	FORCEINLINE void Open()
+	{
+		if ( !bOpen )
+		{
+			bNeedOpen = true;
+		}
+	}
+
+	/**
+	 * @brief Close popup
+	 */
+	FORCEINLINE void Close()
+	{
+		if ( bOpen )
+		{
+			bNeedClose = true;
+		}
+	}
+
+	/**
+	 * @brief Get layer name
+	 * @return Return layer name
+	 */
+	FORCEINLINE std::wstring GetName() const
+	{
+		return name;
+	}
+
+	/**
+	 * @brief Is opened popup
+	 * @return Return TRUE if popup is opened
+	 */
+	FORCEINLINE bool IsOpen() const
+	{
+		return bOpen;
+	}
+
+protected:
+	/**
+	 * @brief Method tick interface of a popup
+	 */
+	virtual void OnTick() = 0;
+
+private:
+	bool				bOpen;		/**< Is open popup */
+	bool				bNeedClose;	/**< Is need close popup */
+	bool				bNeedOpen;	/**< Is need open popup */
+	std::wstring		name;		/**< Popup name */
 };
 
 /**
@@ -312,6 +387,41 @@ protected:
 	 */
 	virtual void OnVisibilityChanged( bool InNewVisibility );
 
+	/**
+	 * @brief Open popup
+	 * @warning Supported opened only one popup in whole time
+	 * 
+	 * @param InArgs	Arguments for construct popup
+	 * @return Return pointer to opened popup
+	 */
+	template< typename ObjectType, typename... ArgTypes >
+	FORCEINLINE TSharedPtr<CImGUIPopup> OpenPopup( ArgTypes&&... InArgs )
+	{
+		popup = MakeSharedPtr<ObjectType>( InArgs... );
+		popup->Open();
+		return popup;
+	}
+
+	/**
+	 * @brief Close current popup
+	 */
+	FORCEINLINE void CloseCurrentPopup()
+	{
+		if ( popup )
+		{
+			popup->Close();
+		}
+	}
+
+	/**
+	 * @brief Get current popup
+	 * @return Return current opened popup, in case when him is not opened will return NULL
+	 */
+	FORCEINLINE TSharedPtr<CImGUIPopup> GetCurrentPopup() const
+	{
+		return popup;
+	}
+
 private:
 	/**
 	 * @brief Update ImGUI events
@@ -326,6 +436,7 @@ private:
 	Vector2D					padding;			/**< Layer padding */
 	std::wstring				name;				/**< Layer name */
 	std::stack<SWindowEvent>	events;				/**< Stack of ImGUI events who need process */
+	TSharedPtr<CImGUIPopup>		popup;				/**< Current opened popup in layer */
 };
 
 /**

@@ -126,6 +126,48 @@ void ÑImGUIWindow::Tick()
 }
 
 //
+// IMGUI POPUP
+//
+
+CImGUIPopup::CImGUIPopup( const std::wstring& InName /* = TEXT( "NewPopup" ) */ )
+	: bOpen( false )
+	, bNeedClose( false )
+	, bNeedOpen( false )
+	, name( InName )
+{}
+
+void CImGUIPopup::Tick()
+{
+	// Open popup is need
+	if ( bNeedOpen )
+	{
+		ImGui::OpenPopup( TCHAR_TO_ANSI( name.c_str() ) );
+		bNeedOpen	= false;
+		bOpen		= true;
+	}
+
+	if ( bOpen )
+	{
+		// Always center this window when appearing
+		ImGui::SetNextWindowPos( ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2( 0.5f, 0.5f ) );
+
+		// Draw popup window
+		if ( ImGui::BeginPopupModal( TCHAR_TO_ANSI( name.c_str() ), nullptr, ImGuiWindowFlags_AlwaysAutoResize ) )
+		{
+			OnTick();
+
+			if ( bNeedClose )
+			{
+				ImGui::CloseCurrentPopup();
+				bNeedClose = false;
+				bOpen = false;
+			}
+			ImGui::EndPopup();
+		}
+	}
+}
+
+//
 // IMGUI LAYER
 //
 
@@ -157,6 +199,18 @@ void CImGUILayer::Tick()
 		ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2{ padding.x, padding.y } );
 		if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility ) )
 		{
+			// Update popup if him is existing
+			if ( popup )
+			{
+				popup->Tick();
+
+				// If popup is closed, we reset pointer
+				if ( !popup->IsOpen() )
+				{
+					popup = nullptr;
+				}
+			}
+
 			UpdateEvents();
 			OnTick();
 		}

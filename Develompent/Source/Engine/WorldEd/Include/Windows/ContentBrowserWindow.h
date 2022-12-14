@@ -361,6 +361,36 @@ private:
 	 */
 	void SetCurrentPackage( PackageRef_t InPackage );
 
+	/**
+	 * @brief Popup action. Save a package
+	 * @param InSelectedNodes		Array of selected nodes
+	 */
+	void PopupMenu_Package_Save( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes );
+
+	/**
+	 * @brief Popup action. Open a package
+	 * @param InSelectedNodes		Array of selected nodes
+	 */
+	void PopupMenu_Package_Open( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes );
+
+	/**
+	 * @brief Popup action. Unload a package
+	 * @param InSelectedNodes		Array of selected nodes
+	 */
+	void PopupMenu_Package_Unload( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes );
+
+	/**
+	 * @brief Popup action. Reload a package
+	 * @param InSelectedNodes		Array of selected nodes
+	 */
+	void PopupMenu_Package_Reload( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes );
+
+	/**
+	 * @brief Popup action. Delete a package
+	 * @param InSelectedNodes		Array of selected nodes
+	 */
+	void PopupMenu_Package_Delete( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes );
+
 	TSharedPtr<CFileTreeNode>	engineRoot;					/**< Engine root directory */
 	TSharedPtr<CFileTreeNode>	gameRoot;					/**< Game root directory */
 	PackageRef_t				package;					/**< Current package in preview */

@@ -6,6 +6,7 @@
 #include "System/BaseFileSystem.h"
 #include "System/AssetsImport.h"
 #include "Windows/ContentBrowserWindow.h"
+#include "Windows/DialogWindow.h"
 #include "ImGUI/imgui_internal.h"
 #include "ImGUI/imgui_stdlib.h"
 
@@ -43,6 +44,33 @@ static const tchar* GAssetIconPaths[] =
 	TEXT( "PhysMaterial.png" )			// AT_PhysicsMaterial
 };
 static_assert( ARRAY_COUNT( GAssetIconPaths ) == AT_Count, "Need full init GAssetIconPaths array" );
+
+/**
+ * @brief Convert array of filenames to one string
+ *
+ * @param InArray	Array of filenames
+ * @param InMaxSize	Max size of array to print in result string
+ * @return Return formated one string
+ */
+static FORCEINLINE std::wstring ArrayFilenamesToString( const std::vector<CFilename>& InArray, uint32 InMaxSize = 3 )
+{
+	std::wstring	result;
+	for ( uint32 index = 0, count = InArray.size(); index < count; ++index )
+	{
+		result += InArray[index].GetBaseFilename();
+		if ( count > InMaxSize && index + 1 == InMaxSize )
+		{
+			result += TEXT( "\n...\n" );
+			break;
+		}
+		else
+		{
+			result += TEXT( "\n" );
+		}
+	}
+
+	return result;
+}
 
 CContentBrowserWindow::CContentBrowserWindow( const std::wstring& InName )
 	: CImGUILayer( InName )
@@ -259,99 +287,25 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 		// Save all packages
 		if ( ImGui::MenuItem( "Save", "", nullptr, bSelectedFiles && bExistLoadedPackage ) )
 		{
-			for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
-			{
-				const TSharedPtr<CFileTreeNode>&		node = selectedNode[index];
-				std::wstring							path = node->GetPath();
-
-				// If package is loaded - we resave him
-				if ( GPackageManager->IsPackageLoaded( path ) )
-				{
-					PackageRef_t		package = GPackageManager->LoadPackage( path );
-					if ( package && package->IsDirty() )
-					{
-						package->Save( path );
-					}
-				}
-			}
+			PopupMenu_Package_Save( selectedNode );
 		}
 
 		// Open packages
 		if ( ImGui::MenuItem( "Open", "", nullptr, bSelectedFiles && bExistUnloadedPackage ) )
 		{
-			PackageRef_t	lastLoadedPackage;
-			for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
-			{
-				const TSharedPtr<CFileTreeNode>&	node	= selectedNode[index];
-				std::wstring						path	= node->GetPath();
-				PackageRef_t						package = GPackageManager->LoadPackage( path );
-				if ( package )
-				{
-					lastLoadedPackage = package;
-				}
-			}
-
-			// Set last loaded package for view in package browser
-			if ( lastLoadedPackage )
-			{
-				SetCurrentPackage( lastLoadedPackage );
-			}
+			PopupMenu_Package_Open( selectedNode );
 		}
 
 		// Unload packages
 		if ( ImGui::MenuItem( "Unload", "", nullptr, bSelectedFiles && bExistLoadedPackage ) )
 		{
-			PackageRef_t				currentPackage = package;
-			SetCurrentPackage( nullptr );
-
-			std::vector<CFilename>		dirtyPackages;
-			for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
-			{
-				const TSharedPtr<CFileTreeNode>&	node = selectedNode[index];
-				std::wstring						path = node->GetPath();
-
-				// If package already not loaded - skip him
-				if ( !GPackageManager->IsPackageLoaded( path ) )
-				{
-					continue;
-				}
-
-				// If package is dirty - we not unload him
-				PackageRef_t		package = GPackageManager->LoadPackage( path );
-				if ( package->IsDirty() )
-				{
-					dirtyPackages.push_back( CFilename( path ) );
-					continue;
-				}
-
-				// If current package in viewer is closed, we forget about him
-				bool	bSeccussed = GPackageManager->UnloadPackage( path );
-				if ( currentPackage && bSeccussed && path == currentPackage->GetFileName() )
-				{
-					currentPackage.SafeRelease();
-				}
-			}
-
-			// If current package not closed, we restore viewer
-			if ( currentPackage )
-			{
-				SetCurrentPackage( currentPackage );
-			}
-
-			// If we have dirty package - print message
-			if ( !dirtyPackages.empty() )
-			{
-				checkMsg( false, TEXT( "Need implement" ) );
-			}
+			PopupMenu_Package_Unload( selectedNode );
 		}
 
 		// Reload packages
 		if ( ImGui::MenuItem( "Reload", "", nullptr, bSelectedFiles && bExistLoadedPackage ) )
 		{
-			for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
-			{
-				GPackageManager->ReloadPackage( selectedNode[index]->GetPath() );
-			}
+			PopupMenu_Package_Reload( selectedNode );
 		}
 
 		ImGui::Separator();
@@ -365,9 +319,133 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 			ImGui::EndMenu();
 		}
 
-		ImGui::MenuItem( "Delete", "", nullptr,		bSelectedFiles || bSelectedFolders );
+		// Delete packages
+		if ( ImGui::MenuItem( "Delete", "", nullptr, bSelectedFiles || bSelectedFolders ) )
+		{
+			// Convert selected nodes to array of filenames for popup
+			std::vector<CFilename>		selectedFiles;
+			for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
+			{
+				selectedFiles.push_back( selectedNode[index]->GetPath() );
+			}
+
+			TSharedPtr<CDialogWindow>		popup = OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "Is need delete selected files?\n\nFiles:%s" ), ArrayFilenamesToString( selectedFiles ).c_str() ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
+			popup->onButtonPressed.Add( [&]( CDialogWindow::EButtonType InButtonType ) 
+										{ 
+											// We pressed 'Ok', delete selected folders
+											if ( InButtonType == CDialogWindow::BT_Ok )
+											{
+												PopupMenu_Package_Delete( selectedNode );
+											}
+										} );
+		}
+
 		ImGui::MenuItem( "Rename", "", nullptr,		( bSelectedFiles || bSelectedFolders ) && !bSelectedMoreOneItems );
 		ImGui::EndPopup();
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Package_Save( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
+{
+	for ( uint32 index = 0, count = InSelectedNodes.size(); index < count; ++index )
+	{
+		const TSharedPtr<CFileTreeNode>&		node = InSelectedNodes[index];
+		std::wstring							path = node->GetPath();
+
+		// If package is loaded - we resave him
+		if ( GPackageManager->IsPackageLoaded( path ) )
+		{
+			PackageRef_t		package = GPackageManager->LoadPackage( path );
+			if ( package && package->IsDirty() )
+			{
+				package->Save( path );
+			}
+		}
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Package_Open( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
+{
+	PackageRef_t	lastLoadedPackage;
+	for ( uint32 index = 0, count = InSelectedNodes.size(); index < count; ++index )
+	{
+		const TSharedPtr<CFileTreeNode>&	node = InSelectedNodes[index];
+		std::wstring						path = node->GetPath();
+		PackageRef_t						package = GPackageManager->LoadPackage( path );
+		if ( package )
+		{
+			lastLoadedPackage = package;
+		}
+	}
+
+	// Set last loaded package for view in package browser
+	if ( lastLoadedPackage )
+	{
+		SetCurrentPackage( lastLoadedPackage );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Package_Unload( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
+{
+	PackageRef_t				currentPackage = package;
+	SetCurrentPackage( nullptr );
+
+	std::vector<CFilename>		dirtyPackages;
+	for ( uint32 index = 0, count = InSelectedNodes.size(); index < count; ++index )
+	{
+		const TSharedPtr<CFileTreeNode>&	node = InSelectedNodes[index];
+		std::wstring						path = node->GetPath();
+
+		// If package already not loaded - skip him
+		if ( !GPackageManager->IsPackageLoaded( path ) )
+		{
+			continue;
+		}
+
+		// If package is dirty - we not unload him
+		PackageRef_t		package = GPackageManager->LoadPackage( path );
+		if ( package->IsDirty() )
+		{
+			dirtyPackages.push_back( CFilename( path ) );
+			continue;
+		}
+
+		// If current package in viewer is closed, we forget about him
+		bool	bSeccussed = GPackageManager->UnloadPackage( path );
+		if ( currentPackage && bSeccussed && path == currentPackage->GetFileName() )
+		{
+			currentPackage.SafeRelease();
+		}
+	}
+
+	// If current package not closed, we restore viewer
+	if ( currentPackage )
+	{
+		SetCurrentPackage( currentPackage );
+	}
+
+	// If we have dirty package - print message
+	if ( !dirtyPackages.empty() )
+	{
+		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following packages have been modified and cannot be unloaded. Saving these packages will allow them to be unloaded\n\nPackages:%s\n" ), ArrayFilenamesToString( dirtyPackages ).c_str() ), CDialogWindow::BT_Ok );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Package_Reload( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
+{
+	for ( uint32 index = 0, count = InSelectedNodes.size(); index < count; ++index )
+	{
+		GPackageManager->ReloadPackage( InSelectedNodes[index]->GetPath() );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Package_Delete( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
+{
+	// Delete all selected files
+	std::vector<CFilename>		usedPackages;
+	for ( uint32 index = 0, count = InSelectedNodes.size(); index < count; ++index )
+	{
+		CFilename		filename = InSelectedNodes[index]->GetPath();
 	}
 }
 
