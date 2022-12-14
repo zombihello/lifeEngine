@@ -114,6 +114,14 @@ public:
      */
     std::wstring GetLocalizedFilename( const std::wstring& InLanguage = TEXT( "" ) ) const;
 
+    /**
+     * @brief Is in directory
+     * 
+     * @param InPath    Path to directory
+     * @return Return TRUE if that filename containing in InPath, otherwise will return FALSE
+     */
+    bool IsInDirectory( const std::wstring& InPath ) const;
+
 private:
     std::wstring        path;       /**< Path to file */
 };

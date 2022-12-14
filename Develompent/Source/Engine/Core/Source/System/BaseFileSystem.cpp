@@ -6,13 +6,13 @@ CFilename::CFilename()
 
 CFilename::CFilename( const std::wstring& InPath )
 	: path( InPath )
-{}
+{
+	appNormalizePathSeparators( path );
+}
 
 std::wstring CFilename::GetExtension( bool InIsIncludeDot /* = false */ ) const
 {
 	std::wstring	result = path;
-	appNormalizePathSeparators( result );
-	
 	std::size_t		lastSlashPos = result.find_last_of( PATH_SEPARATOR );
 	std::size_t		dotPos = result.find_first_of( TEXT( "." ), lastSlashPos != std::wstring::npos ? lastSlashPos + 1 : std::wstring::npos );
 	if ( dotPos == std::wstring::npos )
@@ -27,8 +27,6 @@ std::wstring CFilename::GetExtension( bool InIsIncludeDot /* = false */ ) const
 std::wstring CFilename::GetBaseFilename() const
 {
 	std::wstring	result = path;
-	appNormalizePathSeparators( result );
-
 	std::size_t		lastSlashPos = result.find_last_of( PATH_SEPARATOR );
 	if ( lastSlashPos != std::wstring::npos )
 	{
@@ -47,8 +45,6 @@ std::wstring CFilename::GetBaseFilename() const
 std::wstring CFilename::GetPath() const
 {
 	std::wstring	result = path;
-	appNormalizePathSeparators( result );
-	
 	std::size_t		lastSlashPos	= result.find_last_of( PATH_SEPARATOR );
 	if ( lastSlashPos != std::wstring::npos )
 	{
@@ -93,6 +89,13 @@ std::wstring CFilename::GetLocalizedFilename( const std::wstring& InLanguage /* 
 	}
 
 	return localizedPath;
+}
+
+bool CFilename::IsInDirectory( const std::wstring& InPath ) const
+{
+	std::wstring	dirPath		= GFileSystem->ConvertToAbsolutePath( InPath );
+	std::wstring	localPath	= GFileSystem->ConvertToAbsolutePath( path );
+	return localPath.substr( 0, dirPath.size() ) == dirPath;
 }
 
 bool CBaseFileSystem::MakeDirectory( const std::wstring& InPath, bool InIsTree /* = false */ )

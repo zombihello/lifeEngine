@@ -1619,16 +1619,16 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			owner->gameRoot->SetSelect( false );
 			SetSelect( true );
 		}
-
+	
 		// Get all selected nodes
-		std::vector<TSharedPtr<CFileTreeNode>>			selectedNodes;
-		owner->engineRoot->GetSelectedNodes( selectedNodes );
-		owner->gameRoot->GetSelectedNodes( selectedNodes );
+		std::vector<CFileTreeNode*>			selectedNodes;
+		owner->engineRoot->GetNodesToDragNDrop( selectedNodes );
+		owner->gameRoot->GetNodesToDragNDrop( selectedNodes );
 		if ( !selectedNodes.empty() )
 		{
-			std::vector<TSharedPtr<CFileTreeNode>>*		pData = new std::vector<TSharedPtr<CFileTreeNode>>( selectedNodes );			// FIXME: AHTUNG! Maybe memory leak when drop in empty space
-			ImGui::SetDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE, &pData, sizeof( std::vector<TSharedPtr<CFileTreeNode>>* ), ImGuiCond_Once );
-
+			selectedNodes.push_back( nullptr );		// Terminate element
+			ImGui::SetDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE, &selectedNodes[0], sizeof( CFileTreeNode* ) * selectedNodes.size(), ImGuiCond_Once );
+	
 			// Block drop targets to children
 			for ( uint32 index = 0, count = children.size(); index < count; ++index )
 			{
@@ -1644,9 +1644,11 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 		const ImGuiPayload*		imguiPayload = ImGui::AcceptDragDropPayload( CONTENTBROWSER_DND_FILENODETYPE );
 		if ( imguiPayload )
 		{
-			std::vector<TSharedPtr<CFileTreeNode>>*		pData = ( *( std::vector<TSharedPtr<CFileTreeNode>>** )imguiPayload->Data );
+			PackageRef_t		currentPackage	= owner->GetCurrentPackage();
+			CFileTreeNode**		pData			= ( CFileTreeNode** )imguiPayload->Data;
 			check( pData );
 
+			CFilename		filenamePackage = currentPackage->GetFileName();
 			CFilename		nodeFilename( path );
 			std::wstring	dstDirectory = nodeFilename.GetPath() + PATH_SEPARATOR;
 			if ( type == FNT_Folder )
@@ -1654,13 +1656,26 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 				dstDirectory += nodeFilename.GetBaseFilename() + PATH_SEPARATOR;
 			}
 
-			for ( uint32 index = 0, count = pData->size(); index < count; ++index )
+			// Move files to new place
+			bool				bNeedResetCurrentPackage = false;
+			for ( uint32 index = 0; pData[index]; ++index )
 			{
-				CFilename		srcFilename( pData->at( index )->path );
+				CFilename		srcFilename( pData[index]->path );
+				if ( pData[index]->GetType() == FNT_Folder && currentPackage && filenamePackage.IsInDirectory( srcFilename.GetFullPath() ) )
+				{
+					bNeedResetCurrentPackage = true;
+				}
+
+				// FIXME:	Need implement check on used assets and will update data in TOC file
+				LE_LOG( LT_Warning, LC_Dev, TEXT( "CContentBrowserWindow::CFileTreeNode::DragNDropHandle :: Need implement check on used assets and will update data in TOC file" ) );
 				GFileSystem->Move( dstDirectory + srcFilename.GetFilename(), srcFilename.GetFullPath(), false, true );
 			}
 
-			delete pData;
+			// Reset current package
+			if ( bNeedResetCurrentPackage )
+			{
+				owner->SetCurrentPackage( nullptr );
+			}
 		}
 
 		// Allow drop targets for all nodes
@@ -1732,6 +1747,21 @@ void CContentBrowserWindow::CFileTreeNode::GetSelectedNodes( std::vector<TShared
 		for ( uint32 index = 0, count = children.size(); index < count; ++index )
 		{
 			children[index]->GetSelectedNodes( OutSelectedNodes, InIsIgnoreChildren );
+		}
+	}
+}
+
+void CContentBrowserWindow::CFileTreeNode::GetNodesToDragNDrop( std::vector<CFileTreeNode*>& OutSelectedNodes ) const
+{
+	if ( bSelected )
+	{
+		OutSelectedNodes.push_back( const_cast<CFileTreeNode*>( this ) );
+	}
+	else
+	{
+		for ( uint32 index = 0, count = children.size(); index < count; ++index )
+		{
+			children[index]->GetNodesToDragNDrop( OutSelectedNodes );
 		}
 	}
 }

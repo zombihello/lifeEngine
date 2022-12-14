@@ -248,6 +248,14 @@ private:
 			}
 		}
 
+		/**
+		 * @brief Get array of selected nodes to drag n drop
+		 * This function need only for DragNDropHandle()
+		 *
+		 * @param OutSelectedNodes		Output. Array of selected nodes to drag n drop
+		 */
+		void GetNodesToDragNDrop( std::vector<CFileTreeNode*>& OutSelectedNodes ) const;
+
 		bool										bAllowDropTarget;	/**< Is allowed drop target */
 		bool										bFreshed;			/**< Is freshed node */
 		bool										bSelected;			/**< Is selected node */
