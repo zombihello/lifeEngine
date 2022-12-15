@@ -43,7 +43,14 @@ public:
 	 */
 	CDialogWindow( const std::wstring& InName, const std::wstring& InMessage, uint32 InButtons = BT_Ok );
 
-	COnButtonPressed		onButtonPressed;		/**< Delegates of button pressed */
+	/**
+	 * @brief Get delegate of button pressed
+	 * @return Return delegate of button pressed
+	 */
+	FORCEINLINE COnButtonPressed& OnButtonPressed() const
+	{
+		return onButtonPressed;
+	}
 
 protected:
 	/**
@@ -52,8 +59,9 @@ protected:
 	virtual void OnTick() override;
 
 private:
-	uint32			buttons;	/**< Buttons (see EButtonType) */
-	std::wstring	message;	/**< Message */
+	uint32						buttons;			/**< Buttons (see EButtonType) */
+	std::wstring				message;			/**< Message */
+	mutable COnButtonPressed	onButtonPressed;	/**< Delegates of button pressed */
 };
 
 #endif // !DIALOGWINDOW_H

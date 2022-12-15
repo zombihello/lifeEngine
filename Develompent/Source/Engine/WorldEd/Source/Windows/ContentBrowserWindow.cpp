@@ -1,12 +1,15 @@
 #include "Misc/CoreGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "Misc/Misc.h"
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseEngine.h"
 #include "System/BaseFileSystem.h"
 #include "System/AssetsImport.h"
+#include "System/EditorEngine.h"
 #include "Windows/ContentBrowserWindow.h"
 #include "Windows/DialogWindow.h"
+#include "Windows/InputTextDialog.h"
 #include "ImGUI/imgui_internal.h"
 #include "ImGUI/imgui_stdlib.h"
 
@@ -307,11 +310,15 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 		{
 			PopupMenu_Package_Reload( selectedNode );
 		}
+		ImGui::Separator();
+		
+		// Show in explorer
+		if ( ImGui::MenuItem( "Show In Explorer", "", nullptr, ( bSelectedFiles || bSelectedFolders ) && !bSelectedMoreOneItems ) )
+		{
+			PopupMenu_Package_ShowInExplorer( selectedNode );
+		}
 
 		ImGui::Separator();
-		ImGui::MenuItem( "Show In Explorer", "", nullptr, ( bSelectedFiles || bSelectedFolders ) && !bSelectedMoreOneItems );
-		ImGui::Separator();
-
 		if ( ImGui::BeginMenu( "Create" ) )
 		{
 			ImGui::MenuItem( "Folder" );
@@ -329,18 +336,27 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 				selectedFiles.push_back( selectedNode[index]->GetPath() );
 			}
 
-			TSharedPtr<CDialogWindow>		popup = OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "Is need delete selected files?\n\nFiles:%s" ), ArrayFilenamesToString( selectedFiles ).c_str() ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
-			popup->onButtonPressed.Add( [&]( CDialogWindow::EButtonType InButtonType ) 
+			TSharedPtr<CDialogWindow>		popup = OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "Is need delete selected files?\n\nFiles:\n%s" ), ArrayFilenamesToString( selectedFiles ).c_str() ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
+			popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType ) 
 										{ 
 											// We pressed 'Ok', delete selected folders
 											if ( InButtonType == CDialogWindow::BT_Ok )
 											{
-												PopupMenu_Package_Delete( selectedNode );
+												PopupMenu_Package_Delete();
 											}
 										} );
 		}
 
-		ImGui::MenuItem( "Rename", "", nullptr,		( bSelectedFiles || bSelectedFolders ) && !bSelectedMoreOneItems );
+		// Rename file or folder
+		if ( ImGui::MenuItem( "Rename", "", nullptr, ( bSelectedFiles || bSelectedFolders ) && !bSelectedMoreOneItems ) )
+		{
+			TSharedPtr<CFileTreeNode>		node	= selectedNode[0];
+			TSharedPtr<CInputTextDialog>	popup	= OpenPopup<CInputTextDialog>( TEXT( "Enter" ), node->GetType() == FNT_Folder ? TEXT( "New Directory Name" ) : TEXT( "New File Name" ), CFilename( node->GetPath() ).GetBaseFilename() );
+			popup->OnTextEntered().Add( [&]( const std::string& InText )
+										{
+											PopupMenu_Package_Rename( ANSI_TO_TCHAR( InText.c_str() ) );
+										} );
+		}
 		ImGui::EndPopup();
 	}
 }
@@ -356,7 +372,7 @@ void CContentBrowserWindow::PopupMenu_Package_Save( const std::vector<TSharedPtr
 		if ( GPackageManager->IsPackageLoaded( path ) )
 		{
 			PackageRef_t		package = GPackageManager->LoadPackage( path );
-			if ( package && package->IsDirty() )
+			if ( package )
 			{
 				package->Save( path );
 			}
@@ -439,13 +455,167 @@ void CContentBrowserWindow::PopupMenu_Package_Reload( const std::vector<TSharedP
 	}
 }
 
-void CContentBrowserWindow::PopupMenu_Package_Delete( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
+void CContentBrowserWindow::PopupMenu_Package_Delete()
 {
+	bool	bDirtyTOC = false;
+
+	// Getting all selected nodes
+	std::vector<TSharedPtr<CFileTreeNode>>		selectedNode;
+	engineRoot->GetSelectedNodes( selectedNode );
+	gameRoot->GetSelectedNodes( selectedNode );
+
 	// Delete all selected files
 	std::vector<CFilename>		usedPackages;
-	for ( uint32 index = 0, count = InSelectedNodes.size(); index < count; ++index )
+	for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
 	{
-		CFilename		filename = InSelectedNodes[index]->GetPath();
+		CFilename		filename = selectedNode[index]->GetPath();
+		if ( GFileSystem->IsDirectory( filename.GetFullPath() ) )
+		{
+			GFileSystem->DeleteDirectory( filename.GetFullPath(), true );
+		}
+		else
+		{
+			std::wstring	fullPath = filename.GetFullPath();
+
+			// If this package, we remove entry from TOC file
+			if ( filename.GetExtension() == TEXT( "pak" ) )
+			{
+				// We try unload package for remove unused assets.
+				// If package still used, we skip him
+				if ( !GPackageManager->UnloadPackage( fullPath ) )
+				{
+					usedPackages.push_back( filename.GetBaseFilename() );
+					continue;
+				}
+
+				// Else we remove entry from TOC file
+				GTableOfContents.RemoveEntry( fullPath );
+				bDirtyTOC = true;
+
+				// If this is package and him opened in package browser, we close it
+				if ( package && fullPath == package->GetFileName() )
+				{
+					SetCurrentPackage( nullptr );
+				}
+			}
+
+			// Delete file
+			GFileSystem->Delete( fullPath, true );
+		}
+	}
+
+	// If TOC file is dirty, we serialize him to cache
+	if ( bDirtyTOC )
+	{
+		GEditorEngine->SerializeTOC( true );
+	}
+
+	// If we have used package - print message
+	if ( !usedPackages.empty() )
+	{
+		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following packages in using and cannot be delete. Close all assets from this package will allow them to be deleted\n\nPackages:\n%s" ), ArrayFilenamesToString( usedPackages ).c_str() ), CDialogWindow::BT_Ok );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Package_ShowInExplorer( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
+{
+	check( InSelectedNodes.size() == 1 );
+
+	TSharedPtr<CFileTreeNode>		selectedNode	= InSelectedNodes[0];
+	std::wstring					pathToDirectory = selectedNode->GetPath();
+	if ( selectedNode->GetType() == FNT_Folder )
+	{
+		pathToDirectory = CFilename( selectedNode->GetPath() ).GetPath();
+	}
+
+	appShowFileInExplorer( pathToDirectory );
+}
+
+void CContentBrowserWindow::PopupMenu_Package_Rename( const std::wstring& InNewFilename )
+{
+	bool	bDirtyTOC = false;
+
+	// Getting all selected nodes
+	std::vector<TSharedPtr<CFileTreeNode>>		selectedNode;
+	engineRoot->GetSelectedNodes( selectedNode );
+	gameRoot->GetSelectedNodes( selectedNode );
+	check( selectedNode.size() == 1 );
+
+	TSharedPtr<CFileTreeNode>		node		= selectedNode[0];
+	CFilename						filename	= node->GetPath();
+	switch ( node->GetType() )
+	{
+	case FNT_Folder:
+		GFileSystem->Move( filename.GetPath() + PATH_SEPARATOR + InNewFilename, filename.GetFullPath() );
+		break;
+
+	case FNT_File:
+	{
+		std::wstring	newFullPath = filename.GetPath() + PATH_SEPARATOR + InNewFilename + filename.GetExtension( true );
+		
+		// If this is package need call SetName in him
+		if ( filename.GetExtension() == TEXT( "pak" ) )
+		{
+			// We try unload package for remove unused assets.
+			// If package still used, we skip him
+			if ( !GPackageManager->UnloadPackage( filename.GetFullPath() ) )
+			{
+				OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The package '%s' in using and cannot be delete. Close all assets from this package will allow them to be deleted" ), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Ok );
+				return;
+			}
+
+			bool			bIsNeedUnloadPackage = !GPackageManager->IsPackageLoaded( filename.GetFullPath() );
+			PackageRef_t	package = GPackageManager->LoadPackage( filename.GetFullPath() );
+
+			// If package failed loaded - we not change him name
+			if ( !package )
+			{
+				OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "File '%s' not renamed because failed loading package for change him name" ), filename.GetFullPath().c_str() ), CDialogWindow::BT_Ok );
+				return;
+			}
+
+			// And if package is dirty - we not change him name
+			if ( package->IsDirty() )
+			{
+				OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "File '%s' not renamed because this package is modified. Saving this package will allow to be rename him" ), filename.GetFullPath().c_str() ), CDialogWindow::BT_Ok );
+				return;
+			}
+
+			// Else we change name and resave package
+			package->SetName( InNewFilename );
+			package->Save( package->GetFileName() );
+
+			// Update TOC file
+			GTableOfContents.RemoveEntry( package->GetGUID() );
+			GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), newFullPath );
+			bDirtyTOC = true;
+
+			// If this is package and him opened in package browser, we close it 
+			if ( this->package == package )
+			{
+				SetCurrentPackage( nullptr );
+			}
+
+			// If need unload package - do it
+			if ( bIsNeedUnloadPackage )
+			{
+				GPackageManager->UnloadPackage( filename.GetFullPath() );
+			}
+		}
+
+		GFileSystem->Move( newFullPath, filename.GetFullPath() );
+		break;
+	}	
+
+	default:
+		checkMsg( false, TEXT( "Unsupported node type 0x%X" ), node->GetType() );
+		break;
+	}
+
+	// If TOC file is dirty, we serialize him to cache
+	if ( bDirtyTOC )
+	{
+		GEditorEngine->SerializeTOC( true );
 	}
 }
 

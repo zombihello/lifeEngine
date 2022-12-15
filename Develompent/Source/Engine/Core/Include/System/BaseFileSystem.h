@@ -200,7 +200,7 @@ public:
      * @param InIsEvenReadOnly          Is even read only
      * @return Return copy result (see ECopyMoveResult)
      */
-    virtual ECopyMoveResult Copy( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting = true, bool InIsEvenReadOnly = false ) { return CMR_Canceled; }
+    virtual ECopyMoveResult Copy( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting = false, bool InIsEvenReadOnly = false ) { return CMR_Canceled; }
 
     /**
      * @brief Move file
@@ -211,7 +211,7 @@ public:
 	 * @param InIsEvenReadOnly          Is even read only
 	 * @return Return move result (see ECopyMoveResult)
      */
-    virtual ECopyMoveResult Move( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting = true, bool InIsEvenReadOnly = false ) { return CMR_Canceled; }
+    virtual ECopyMoveResult Move( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting = false, bool InIsEvenReadOnly = false ) { return CMR_Canceled; }
 
     /**
      * @brief Is exist file or directory
@@ -221,6 +221,14 @@ public:
      * @return Return true if file or directory exist, false is not
      */
     virtual bool                                   IsExistFile( const std::wstring& InPath, bool InIsDirectory = false )                    { return false; }
+
+    /**
+     * @brief Is file is directory
+     * 
+     * @param InPath    Path to file
+     * @return Return TRUE if file is directory, otherwise will return FALSE
+     */
+    virtual bool IsDirectory( const std::wstring& InPath ) const { return false; }
 
     /**
      * @brief Convert to absolute path

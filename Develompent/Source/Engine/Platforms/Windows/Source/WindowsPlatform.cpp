@@ -16,6 +16,7 @@
 #include "WindowsWindow.h"
 #include "WindowsImGUI.h"
 #include "WindowsStackWalker.h"
+#include "WindowsGlobals.h"
 
 // ----
 // Platform specific globals variables
@@ -234,3 +235,33 @@ CGuid appCreateGuid()
 	check( result == S_OK );
 	return guid;
 }
+
+std::wstring appComputerName()
+{
+	static tchar	result[256] = TEXT( "" );
+	if ( !result[0] )
+	{
+		DWORD	size = ARRAY_COUNT( result );
+		GetComputerNameW( result, &size );
+	}
+	return result;
+}
+
+std::wstring appUserName()
+{
+	static tchar	result[256] = TEXT( "" );
+	if ( !result[0] )
+	{
+		DWORD	size = ARRAY_COUNT( result );
+		GetUserNameW( result, &size );
+	}
+	return result;
+}
+
+#if WITH_EDITOR
+void appShowFileInExplorer( const std::wstring& InPath )
+{
+	CFilename		filename( GFileSystem->ConvertToAbsolutePath( InPath ) );
+	appCreateProc( TEXT( "explorer.exe" ), GFileSystem->IsDirectory( filename.GetFullPath() ) ? filename.GetFullPath().c_str() : filename.GetPath().c_str(), true, false, false, 0 );
+}
+#endif // WITH_EDITOR

@@ -5,6 +5,7 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/LaunchGlobals.h"
+#include "WindowsGlobals.h"
 #include "Misc/Guid.h"
 #include "Misc/CommandLine.h"
 #include "Containers/StringConv.h"
@@ -97,6 +98,7 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 {
 	try
 	{
+		GWinHInstance		= hInst;
 		std::wstring		commandLine = appGetCommandLine();
 		int32				errorLevel = 0;
 		

@@ -28,6 +28,14 @@ std::wstring appGetWorldEdName();
 
 /**
  * @ingroup WorldEd
+ * @brief Show file in file explorer
+ * 
+ * @param InPath	Path to file
+ */
+void appShowFileInExplorer( const std::wstring& InPath );
+
+/**
+ * @ingroup WorldEd
  * Helper struct for the COnAssetsCanDelete delegate
  */
 struct SCanDeleteAssetResult

@@ -166,7 +166,7 @@ bool CWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsT
 	return result;
 }
 
-ECopyMoveResult CWindowsFileSystem::Copy( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting /* = true */, bool InIsEvenReadOnly /* = false */ )
+ECopyMoveResult CWindowsFileSystem::Copy( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting /* = false */, bool InIsEvenReadOnly /* = false */ )
 {
 	if ( InIsEvenReadOnly )
 	{
@@ -191,10 +191,12 @@ ECopyMoveResult CWindowsFileSystem::Copy( const std::wstring& InDstFile, const s
 	return result;
 }
 
-ECopyMoveResult CWindowsFileSystem::Move( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting /* = true */, bool InIsEvenReadOnly /* = false */ )
+ECopyMoveResult CWindowsFileSystem::Move( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting /* = false */, bool InIsEvenReadOnly /* = false */ )
 {
 	MakeDirectory( CFilename( InDstFile ).GetPath(), true );
-	int32		result = MoveFileExW( InSrcFile.c_str(), InDstFile.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH );
+
+	DWORD		moveFlags = ( InIsReplaceExisting ? MOVEFILE_REPLACE_EXISTING : 0x0 ) | MOVEFILE_WRITE_THROUGH;
+	int32		result = MoveFileExW( InSrcFile.c_str(), InDstFile.c_str(), moveFlags );
 	if ( !result )
 	{
 		// If the move failed, throw a warning but retry before we throw an error
@@ -205,7 +207,7 @@ ECopyMoveResult CWindowsFileSystem::Move( const std::wstring& InDstFile, const s
 		Sleep( 500 );
 
 		// Try again
-		result = MoveFileExW( InSrcFile.c_str(), InDstFile.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH );
+		result = MoveFileExW( InSrcFile.c_str(), InDstFile.c_str(), moveFlags );
 		if ( !result )
 		{
 			error = GetLastError();
@@ -236,6 +238,12 @@ bool CWindowsFileSystem::IsExistFile( const std::wstring& InPath, bool InIsDirec
 	return !InIsDirectory;
 }
 
+bool CWindowsFileSystem::IsDirectory( const std::wstring& InPath ) const
+{
+	DWORD		fileAttributes = GetFileAttributesW( InPath.c_str() );
+	return fileAttributes != INVALID_FILE_ATTRIBUTES && fileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+}
+
 /**
  * Convert to absolute path
  */
@@ -244,7 +252,8 @@ std::wstring CWindowsFileSystem::ConvertToAbsolutePath( const std::wstring& InPa
 	std::wstring		path = InPath;
 	if ( path.find( TEXT( ".." ) ) != std::wstring::npos )
 	{
-		path = GetCurrentDirectory() + TEXT( "/" ) + path;
+		path = GetCurrentDirectory() + PATH_SEPARATOR + path;
+		appNormalizePathSeparators( path );
 	}
 
 	return path;

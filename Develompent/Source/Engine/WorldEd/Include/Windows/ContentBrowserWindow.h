@@ -387,9 +387,20 @@ private:
 
 	/**
 	 * @brief Popup action. Delete a package
+	 */
+	void PopupMenu_Package_Delete();
+
+	/**
+	 * @brief Popup action. Show a package in explorer
 	 * @param InSelectedNodes		Array of selected nodes
 	 */
-	void PopupMenu_Package_Delete( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes );
+	void PopupMenu_Package_ShowInExplorer( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes );
+
+	/**
+	 * @brief Popup action. Rename file or folder
+	 * @param InNewFilename		New filename
+	 */
+	void PopupMenu_Package_Rename( const std::wstring& InNewFilename );
 
 	TSharedPtr<CFileTreeNode>	engineRoot;					/**< Engine root directory */
 	TSharedPtr<CFileTreeNode>	gameRoot;					/**< Game root directory */

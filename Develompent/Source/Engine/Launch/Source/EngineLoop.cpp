@@ -213,6 +213,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	GScriptEngine->Init();
 	GRHI->Init( GIsEditor );
 
+	LE_LOG( LT_Log, LC_Init, TEXT( "User: %s//%s" ), appComputerName().c_str(), appUserName().c_str() );
 	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
 
 	// Creating engine from config

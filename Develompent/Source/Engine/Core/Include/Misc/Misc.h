@@ -116,6 +116,20 @@ FORCEINLINE std::wstring appShaderDir()
 
 /**
  * @ingroup Core
+ * @brief Get computer name
+ * @return Return computer name
+ */
+std::wstring appComputerName();
+
+/**
+ * @ingroup Core
+ * @brief Get user name
+ * @return Return user name
+ */
+std::wstring appUserName();
+
+/**
+ * @ingroup Core
  * Calculate hash from name
  *
  * @param[in] InName Name

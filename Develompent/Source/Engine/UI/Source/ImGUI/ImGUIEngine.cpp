@@ -202,10 +202,11 @@ void CImGUILayer::Tick()
 			// Update popup if him is existing
 			if ( popup )
 			{
-				popup->Tick();
+				TSharedPtr<CImGUIPopup>		currentPopup = popup;		// It need for remember current popup, because in him Tick will be change to other
+				currentPopup->Tick();
 
-				// If popup is closed, we reset pointer
-				if ( !popup->IsOpen() )
+				// If popup is closed and him is not changed in Tick, we reset pointer
+				if ( !currentPopup->IsOpen() && popup == currentPopup )
 				{
 					popup = nullptr;
 				}

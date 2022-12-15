@@ -88,7 +88,7 @@
  * @ingroup WindowsPlatform
  * @brief Path separator
  */
-#define PATH_SEPARATOR      TEXT( "/" )
+#define PATH_SEPARATOR      TEXT( "\\" )
 
 /**
  * @ingroup WindowsPlatform
