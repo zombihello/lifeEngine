@@ -102,7 +102,13 @@ private:
 		 */
 		FORCEINLINE void SetSelect( bool InIsSelected, bool InApplyToChildren = true )
 		{
-			bSelected = InIsSelected;
+			// Possible select only non-root nodes
+			TSharedPtr<CFileTreeNode>		selfPtr = AsShared();
+			if ( selfPtr != owner->engineRoot && selfPtr != owner->gameRoot )
+			{
+				bSelected = InIsSelected;
+			}
+
 			if ( InApplyToChildren )
 			{
 				for ( uint32 index = 0, count = children.size(); index < count; ++index )
@@ -402,8 +408,21 @@ private:
 	 */
 	void PopupMenu_Package_Rename( const std::wstring& InNewFilename );
 
+	/**
+	 * @brief Popup action. Create a folder
+	 * @param InDirName		Directory name
+	 */
+	void PopupMenu_Package_MakeDirectory( const std::wstring& InDirName );
+
+	/**
+	 * @brief Popup action. Create a package
+	 * @param InPackageName		Package name
+	 */
+	void PopupMenu_Package_MakePackage( const std::wstring& InPackageName );
+
 	TSharedPtr<CFileTreeNode>	engineRoot;					/**< Engine root directory */
 	TSharedPtr<CFileTreeNode>	gameRoot;					/**< Game root directory */
+	TSharedPtr<CFileTreeNode>	hoveredNode;				/**< Hovered node in now time */
 	PackageRef_t				package;					/**< Current package in preview */
 	SFilterInfo					filterInfo;					/**< Filter info */
 	float						padding;					/**< Padding in asset section */

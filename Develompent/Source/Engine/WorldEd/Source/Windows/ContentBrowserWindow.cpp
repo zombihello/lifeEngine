@@ -114,6 +114,12 @@ void CContentBrowserWindow::Init()
 
 void CContentBrowserWindow::OnTick()
 {
+	// If window focused, we reset current hovered node
+	if ( ImGui::IsWindowFocused() )
+	{
+		hoveredNode = nullptr;
+	}
+
 	ImGui::Columns( 2 );
 
 	// Draw file system tree
@@ -125,7 +131,7 @@ void CContentBrowserWindow::OnTick()
 			filterInfo.fileName.clear();
 		}
 		ImGui::Spacing();
-		ImGui::BeginChild( "##Packages" );
+		ImGui::BeginChild( "##Packages", ImVec2{ 0.f, 0.f }, false, ImGuiWindowFlags_HorizontalScrollbar );
 		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
 		
 		engineRoot->Tick();
@@ -321,8 +327,25 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 		ImGui::Separator();
 		if ( ImGui::BeginMenu( "Create" ) )
 		{
-			ImGui::MenuItem( "Folder" );
-			ImGui::MenuItem( "Package" );
+			// Create a folder
+			if ( ImGui::MenuItem( "Folder" ) )
+			{
+				TSharedPtr<CInputTextDialog>	popup = OpenPopup<CInputTextDialog>( TEXT( "Enter" ), TEXT( "New Directory Name" ), TEXT( "NewFolder" ) );
+				popup->OnTextEntered().Add( [&]( const std::string& InText )
+											{
+												PopupMenu_Package_MakeDirectory( ANSI_TO_TCHAR( InText.c_str() ) );
+											} );
+			}
+
+			// Create a package
+			if ( ImGui::MenuItem( "Package" ) )
+			{
+				TSharedPtr<CInputTextDialog>	popup = OpenPopup<CInputTextDialog>( TEXT( "Enter" ), TEXT( "Enter Package Name" ), TEXT( "NewPackage" ) );
+				popup->OnTextEntered().Add( [&]( const std::string& InText )
+											{
+												PopupMenu_Package_MakePackage( ANSI_TO_TCHAR( InText.c_str() ) );
+											} );
+			}
 			ImGui::EndMenu();
 		}
 
@@ -619,6 +642,29 @@ void CContentBrowserWindow::PopupMenu_Package_Rename( const std::wstring& InNewF
 	}
 }
 
+void CContentBrowserWindow::PopupMenu_Package_MakeDirectory( const std::wstring& InDirName )
+{
+	if ( hoveredNode )
+	{		
+		GFileSystem->MakeDirectory( ( hoveredNode->GetType() == FNT_Folder ? hoveredNode->GetPath() : CFilename( hoveredNode->GetPath() ).GetPath() ) + PATH_SEPARATOR + InDirName );
+	}
+}
+
+void CContentBrowserWindow::PopupMenu_Package_MakePackage( const std::wstring& InPackageName )
+{
+	if ( hoveredNode )
+	{
+		// Create a package
+		std::wstring	fullPath	= ( hoveredNode->GetType() == FNT_Folder ? hoveredNode->GetPath() : CFilename( hoveredNode->GetPath() ).GetPath() ) + PATH_SEPARATOR + InPackageName + TEXT( ".pak" );
+		PackageRef_t	package		= GPackageManager->LoadPackage( fullPath, true );
+		package->Save( fullPath );
+
+		// Update TOC file and serialize him
+		GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), package->GetFileName() );
+		GEditorEngine->SerializeTOC( true );
+	}
+}
+
 void CContentBrowserWindow::SetCurrentPackage( PackageRef_t InPackage )
 {
 	package = InPackage;
@@ -794,6 +840,8 @@ void CContentBrowserWindow::CFileTreeNode::ProcessEvents()
 		{
 			owner->SetCurrentPackage( GPackageManager->LoadPackage( path ) );
 		}
+
+		owner->hoveredNode = AsShared();
 	}
 
 	// Reset selection if clicked not on mode

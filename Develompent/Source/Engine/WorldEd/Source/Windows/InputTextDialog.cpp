@@ -1,4 +1,6 @@
 #include "Containers/StringConv.h"
+#include "Misc/EngineGlobals.h"
+#include "System/InputSystem.h"
 #include "Windows/InputTextDialog.h"
 #include "ImGUI/imgui_stdlib.h"
 
@@ -18,7 +20,7 @@ void CInputTextDialog::OnTick()
 
 	// Draw buttons
 	const ImVec2		buttonSize( 120.f, 0.f );
-	if ( ImGui::Button( "Ok", buttonSize ) )
+	if ( ImGui::Button( "Ok", buttonSize ) || GInputSystem->IsKeyDown( BC_KeyEnter ) )
 	{
 		onTextEntered.Broadcast( text );
 		Close();
