@@ -108,7 +108,7 @@ bool CBaseFileSystem::MakeDirectory( const std::wstring& InPath, bool InIsTree /
 	for ( uint32 index = 0, count = InPath.size(); index < count; ++index )
 	{
 		fullPath += InPath[index];
-		if ( ( appIsPathSeparator( InPath[index] ) || index+1 == count ) && IsDrive( fullPath ) )
+		if ( ( appIsPathSeparator( InPath[index] ) || index+1 == count ) && !IsDrive( fullPath ) )
 		{
 			if ( !MakeDirectory( fullPath, false ) )
 			{

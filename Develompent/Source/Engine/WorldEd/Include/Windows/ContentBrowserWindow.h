@@ -67,6 +67,9 @@ private:
 	friend class CFileTreeNode;
 	friend class CImportAssetsRunnable;
 	friend class CRenameAssetRunnable;
+	friend class CMoveCopyFilesRunnable;
+	friend class CCreateFileRunnable;
+	friend class CRenameFileRunnable;
 
 	/**
 	 * @brief Enumeration file type
@@ -501,24 +504,6 @@ private:
 	 * @param InSelectedNodes		Array of selected nodes
 	 */
 	void PopupMenu_Package_ShowInExplorer( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes );
-
-	/**
-	 * @brief Popup action. Rename file or folder
-	 * @param InNewFilename		New filename
-	 */
-	void PopupMenu_Package_Rename( const std::wstring& InNewFilename );
-
-	/**
-	 * @brief Popup action. Create a folder
-	 * @param InDirName		Directory name
-	 */
-	void PopupMenu_Package_MakeDirectory( const std::wstring& InDirName );
-
-	/**
-	 * @brief Popup action. Create a package
-	 * @param InPackageName		Package name
-	 */
-	void PopupMenu_Package_MakePackage( const std::wstring& InPackageName );
 
 	/**
 	 * @brief Popup action. Reload assets

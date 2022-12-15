@@ -163,7 +163,7 @@ public:
 	 */
 	FORCEINLINE std::wstring GetGameContentDir() const
 	{
-		return CString::Format( TEXT( "%s/Content/" ), appGameDir().c_str() );
+		return CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, appGameDir().c_str() );
 	}
 
 	/**
@@ -172,7 +172,7 @@ public:
 	 */
 	FORCEINLINE std::wstring GetEngineContentDir() const
 	{
-		return CString::Format( TEXT( "%s/Engine/Content/" ), appBaseDir().c_str() );
+		return CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, appBaseDir().c_str() );
 	}
 
 	/**
