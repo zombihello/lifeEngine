@@ -107,7 +107,7 @@ static FORCEINLINE std::wstring ArrayFilenamesToString( const std::vector<CFilen
  * @param InNewRootDir	New root directory
  * @param OutResult		Output array of path to packages in directory (old and new)
  */
-void GetPackagesInDirectory( const std::wstring& InRootDir, const std::wstring& InNewRootDir, std::vector<SPackageInfo>& OutResult )
+static void GetPackagesInDirectory( const std::wstring& InRootDir, const std::wstring& InNewRootDir, std::vector<SPackageInfo>& OutResult )
 {
 	// Find all files in directory
 	std::vector<std::wstring>	files = GFileSystem->FindFiles( InRootDir, true, true );
@@ -127,6 +127,72 @@ void GetPackagesInDirectory( const std::wstring& InRootDir, const std::wstring& 
 			OutResult.push_back( SPackageInfo{ oldPath, newPath } );
 		}
 	}
+}
+
+/**
+ * @ingroup WorldEd
+ * @brief Get files in directory (recursive)
+ * 
+ * @param InRootDir		Root directory
+ * @param OutFiles		Output files in directory
+ * @param OutDirs		Output sub directories in directory
+ */
+static void GetFilesInDirectory( const std::wstring& InRootDir, std::vector<std::wstring>& OutFiles, std::vector<std::wstring>& OutDirs )
+{
+	// Find all files in directory
+	std::vector<std::wstring>	files = GFileSystem->FindFiles( InRootDir, true, true );
+	for ( uint32 index = 0, count = files.size(); index < count; ++index )
+	{
+		std::wstring path = InRootDir + PATH_SEPARATOR + files[index];
+
+		// If this directory, we look files inside
+		if ( GFileSystem->IsDirectory( path ) )
+		{
+			GetFilesInDirectory( path, OutFiles, OutDirs );
+			OutDirs.push_back( path );
+		}
+		else
+		{
+			OutFiles.push_back( path );
+		}
+	}
+}
+
+/**
+ * @ingroup WorldEd
+ * @brief Is empty directory (recursive)
+ *
+ * @param InRootDir		Root directory
+ * @param InIgnoreDir	Is need ignore folders
+ * @return Return TRUE if directory is empty, otherwise will return FALSE
+ */
+static bool IsEmptyDirectory( const std::wstring& InRootDir, bool InIgnoreDir = false )
+{
+	std::vector<std::wstring>	files = GFileSystem->FindFiles( InRootDir, true, true );
+	if ( files.empty() )
+	{
+		return true;
+	}
+	else if ( !InIgnoreDir )
+	{
+		return false;
+	}
+
+	bool	bExistFiles = false;
+	for ( uint32 index = 0, count = files.size(); !bExistFiles && index < count; ++index )
+	{
+		const std::wstring&		file = files[index];
+		if ( GFileSystem->IsDirectory( InRootDir + PATH_SEPARATOR + file ) )
+		{
+			bExistFiles |= !IsEmptyDirectory( InRootDir + PATH_SEPARATOR + file, InIgnoreDir );
+		}
+		else
+		{
+			bExistFiles = true;
+		}
+	}
+
+	return !bExistFiles;
 }
 
 //
@@ -655,19 +721,13 @@ public:
 				// If package still used, we skip him
 				if ( !GPackageManager->UnloadPackage( fileInfo.srcPath.GetFullPath() ) )
 				{
-					errorMessages += CString::Format( TEXT( "\n%s: Package in using or modifided and cannot be delete" ), fileInfo.srcPath.GetFullPath().c_str() );
+					errorMessages += CString::Format( TEXT( "\n%s: Package in using or modifided and cannot be moved" ), fileInfo.srcPath.GetBaseFilename().c_str() );
 					continue;
 				}
 
 				// Otherwise we remove entry from TOC file
 				GTableOfContents.RemoveEntry( fileInfo.srcPath.GetFullPath() );
 				bDirtyTOC = true;
-
-				// Close current package if him will been moved
-				if ( owner->package && CFilename( owner->package->GetFileName() ).GetFullPath() == fileInfo.srcPath.GetFullPath() )
-				{
-					owner->SetCurrentPackage( nullptr );
-				}
 			}
 
 			// Copy/move file		
@@ -716,7 +776,7 @@ public:
 			for ( uint32 index = 0, count = directorisToDelete.size(); index < count; ++index )
 			{
 				std::wstring		fullDirPath = directorisToDelete[index].GetFullPath();
-				if ( IsNeedDeleteDirectory( fullDirPath ) )
+				if ( IsEmptyDirectory( fullDirPath, true ) )
 				{
 					GFileSystem->DeleteDirectory( fullDirPath, true );
 				}
@@ -801,37 +861,6 @@ private:
 				OutResult.push_back( fileInfo );
 			}
 		}
-	}
-
-	/**
-	 * @brief Is need delete directory (recursive)
-	 * 
-	 * @param InRootDir		Root directory
-	 * @return Return TRUE if directory is empty (can contain only folders), otherwise will return FALSE
-	 */
-	bool IsNeedDeleteDirectory( const std::wstring& InRootDir ) const
-	{
-		std::vector<std::wstring>	files = GFileSystem->FindFiles( InRootDir, true, true );
-		if ( files.empty() )
-		{
-			return true;
-		}
-
-		bool	bExistFiles = false;
-		for ( uint32 index = 0, count = files.size(); !bExistFiles && index < count; ++index )
-		{
-			const std::wstring&		file = files[index];
-			if ( GFileSystem->IsDirectory( InRootDir + PATH_SEPARATOR + file ) )
-			{
-				bExistFiles |= !IsNeedDeleteDirectory( InRootDir + PATH_SEPARATOR + file );
-			}
-			else
-			{
-				bExistFiles = true;
-			}
-		}
-
-		return !bExistFiles;
 	}
 
 	bool						bMove;				/**< Is need move files? If FALSE we will copy they */
@@ -936,7 +965,7 @@ public:
 			case CM_CreateFolder:			
 				if ( GFileSystem->IsExistFile( rootDir + fileName ) )
 				{
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Name '%s' already exist in '%s'" ), fileName.c_str(), rootDir.c_str() ), CDialogWindow::BT_Ok );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Folder '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  eventResponse->Trigger();
@@ -950,7 +979,7 @@ public:
 			case CM_CreatePackage:
 				if ( GFileSystem->IsExistFile( rootDir + fileName + TEXT( ".pak" ) ) || !GTableOfContents.GetPackagePath( fileName ).empty() )
 				{
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package with name '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  eventResponse->Trigger();
@@ -981,7 +1010,7 @@ public:
 			if ( !package->Save( fullPath ) )
 			{
 				GPackageManager->UnloadPackage( fullPath, true );
-				owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Failed save package '%s' by path '%s'" ), fileName.c_str(), fullPath.c_str() ), CDialogWindow::BT_Ok );
+				owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Failed save package '%s'" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 				return 0;
 			}
 
@@ -1122,7 +1151,7 @@ public:
 			case RM_RenameFolder:
 				if ( GFileSystem->IsExistFile( filename.GetPath() + newFileName ) )
 				{
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Name '%s' already exist in '%s'" ), newFileName.c_str(), filename.GetPath().c_str() ), CDialogWindow::BT_Ok );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Folder '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  eventResponse->Trigger();
@@ -1136,7 +1165,7 @@ public:
 			case RM_RenamePackage:
 				if ( GFileSystem->IsExistFile( filename.GetPath() + newFileName + TEXT( ".pak" ) ) || !GTableOfContents.GetPackagePath( newFileName ).empty() )
 				{
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package with name '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  eventResponse->Trigger();
@@ -1160,18 +1189,24 @@ public:
 			std::vector<SPackageInfo>		updateTOCPackages;
 			GetPackagesInDirectory( filename.GetFullPath(), filename.GetPath() + newFileName, updateTOCPackages );
 			
-			// Remove entries from TOC file
+			// We try unload all package in directory for rename folder.
+			// If package still used, we exit with error
+			for ( uint32 index = 0, count = updateTOCPackages.size(); index < count; ++index )
+			{
+				const SPackageInfo&		packageInfo = updateTOCPackages[index];
+				if ( !GPackageManager->UnloadPackage( packageInfo.oldPath.GetFullPath() ) )
+				{
+					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The package '%s' in using or modifided and folder '%s' cannot be renamed. Close all assets from this package or save him for will allow rename folder" ), packageInfo.oldPath.GetBaseFilename().c_str(), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Ok );
+					return 2;
+				}
+			}
+
+			// All good and we remove entries from TOC file
 			for ( uint32 index = 0, count = updateTOCPackages.size(); index < count; ++index )
 			{
 				const SPackageInfo&		packageInfo = updateTOCPackages[index];
 				GTableOfContents.RemoveEntry( packageInfo.oldPath.GetFullPath() );
 				bDirtyTOC = true;
-
-				// Close current package if him will been renamed
-				if ( owner->package && CFilename( owner->package->GetFileName() ).GetFullPath() == packageInfo.oldPath.GetFullPath() )
-				{
-					owner->SetCurrentPackage( nullptr );
-				}
 			}
 
 			ECopyMoveResult		result = GFileSystem->Move( filename.GetPath() + newFileName, filename.GetFullPath() );
@@ -1198,7 +1233,7 @@ public:
 				// If package still used, we skip him
 				if ( !GPackageManager->UnloadPackage( filename.GetFullPath() ) )
 				{
-					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The package '%s' in using and cannot be delete. Close all assets from this package will allow them to be deleted" ), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Ok );
+					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The package '%s' in using or modifided and cannot be renamed. Close all assets from this package or save him for will allow them to be rename" ), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Ok );
 					return 2;
 				}
 
@@ -1209,13 +1244,6 @@ public:
 				if ( !package )
 				{
 					owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "File '%s' not renamed because failed loading package for change him name" ), filename.GetFullPath().c_str() ), CDialogWindow::BT_Ok );
-					return 2;
-				}
-
-				// And if package is dirty - we not change him name
-				if ( package->IsDirty() )
-				{
-					owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "File '%s' not renamed because this package is modified. Saving this package will allow to be rename him" ), filename.GetFullPath().c_str() ), CDialogWindow::BT_Ok );
 					return 2;
 				}
 
@@ -1306,7 +1334,7 @@ void CContentBrowserWindow::Init()
 		texture2D = CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Thumbnails/" ) + GAssetIconPaths[index], errorMsg );
 		if ( !texture2D )
 		{
-			LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load asset icon '%s' for type 0x%X. Message: %s" ), GAssetIconPaths[index], index, errorMsg.c_str() );
+			LE_LOG( LT_Warning, LC_Editor, TEXT( "Failed to load asset icon '%s' for type 0x%X. Message: %s" ), GAssetIconPaths[index], index, errorMsg.c_str() );
 			assetIcons[index] = GEngine->GetDefaultTexture();
 		}
 		else
@@ -1776,7 +1804,19 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 		// Rename file or folder
 		if ( ImGui::MenuItem( "Rename", "", nullptr, ( bSelectedFiles || bSelectedFolders ) && !bSelectedMoreOneItems ) )
 		{
-			TSharedPtr<CFileTreeNode>	node = selectedNode[0];
+			TSharedPtr<CFileTreeNode>	node			= selectedNode[0];
+			if ( package )
+			{
+				CFilename	filenamePackage = package->GetFileName();
+				CFilename	filenameNode	= node->GetPath();
+				bool		bDirectory		= node->GetType() == FNT_Folder;
+				if ( ( bDirectory && filenamePackage.IsInDirectory( filenameNode.GetFullPath() ) ) ||
+					 ( !bDirectory && filenameNode.GetFullPath() == filenamePackage.GetFullPath() ) )
+				{
+					SetCurrentPackage( nullptr );
+				}
+			}
+
 			GThreadFactory->CreateThread( new CRenameFileRunnable( this, node, node->GetType() == FNT_Folder ? CRenameFileRunnable::RM_RenameFolder : CRenameFileRunnable::RM_RenamePackage ), TEXT( "RenameFileThread" ), true, true );
 		}
 		ImGui::EndPopup();
@@ -1881,57 +1921,67 @@ void CContentBrowserWindow::PopupMenu_Package_Delete()
 {
 	bool	bDirtyTOC = false;
 
-	// Getting all selected nodes
-	std::vector<TSharedPtr<CFileTreeNode>>		selectedNode;
-	engineRoot->GetSelectedNodes( selectedNode );
-	gameRoot->GetSelectedNodes( selectedNode );
-
-	// Delete all selected files
-	for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
+	// Getting list files to delete
+	std::vector<CFilename>							usedPackages;
+	std::vector<std::wstring>						filesToDelete;
+	std::vector<std::wstring>						dirsToDelete;
 	{
-		CFilename		filename = selectedNode[index]->GetPath();
-		if ( GFileSystem->IsDirectory( filename.GetFullPath() ) )
+		std::vector<TSharedPtr<CFileTreeNode>>		selectedNode;
+		engineRoot->GetSelectedNodes( selectedNode, true );
+		gameRoot->GetSelectedNodes( selectedNode, true );
+		
+		for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
 		{
-			std::vector<SPackageInfo>		updateTOCPackages;
-			GetPackagesInDirectory( filename.GetFullPath(), TEXT( "" ), updateTOCPackages);
-
-			// Remove entries from TOC file
-			for ( uint32 index = 0, count = updateTOCPackages.size(); index < count; ++index )
+			CFilename		filename = selectedNode[index]->GetPath();
+			if ( GFileSystem->IsDirectory( filename.GetFullPath() ) )
 			{
-				const SPackageInfo&			packageInfo = updateTOCPackages[index];
-				GTableOfContents.RemoveEntry( packageInfo.oldPath.GetFullPath() );
-				bDirtyTOC = true;
-
-				// Close current package if him will been deleted
-				if ( package && CFilename( package->GetFileName() ).GetFullPath() == packageInfo.oldPath.GetFullPath() )
-				{
-					SetCurrentPackage( nullptr );
-				}
+				GetFilesInDirectory( filename.GetFullPath(), filesToDelete, dirsToDelete );
+				dirsToDelete.push_back( filename.GetFullPath() );
 			}
-
-			GFileSystem->DeleteDirectory( filename.GetFullPath(), true );
+			else
+			{
+				filesToDelete.push_back( filename.GetFullPath() );
+			}
 		}
-		else
+	}
+
+	// Delete all files
+	for ( uint32 index = 0, count = filesToDelete.size(); index < count; ++index )
+	{
+		CFilename		filename = filesToDelete[index];
+
+		// If this package, we remove entry from TOC file
+		if ( filename.GetExtension() == TEXT( "pak" ) )
 		{
-			// If this package, we remove entry from TOC file
-			if ( filename.GetExtension() == TEXT( "pak" ) )
+			// We try unload package for remove unused assets.
+			// If package still used, we skip him
+			if ( !GPackageManager->UnloadPackage( filename.GetFullPath() ) )
 			{
-				// Force unload package for remove unused assets.
-				GPackageManager->UnloadPackage( filename.GetFullPath(), true );
-
-				// Else we remove entry from TOC file
-				GTableOfContents.RemoveEntry( filename.GetFullPath() );
-				bDirtyTOC = true;
-
-				// If this is package and him opened in package browser, we close it
-				if ( package && filename.GetFullPath() == CFilename( package->GetFileName() ).GetFullPath() )
-				{
-					SetCurrentPackage( nullptr );
-				}
+				usedPackages.push_back( filename.GetBaseFilename() );
+				continue;
 			}
 
-			// Delete file
-			GFileSystem->Delete( filename.GetFullPath(), true );
+			// Else we remove entry from TOC file
+			GTableOfContents.RemoveEntry( filename.GetFullPath() );
+			bDirtyTOC = true;
+
+			// If this is package and him opened in package browser, we close it
+			if ( package && filename.GetFullPath() == CFilename( package->GetFileName() ).GetFullPath() )
+			{
+				SetCurrentPackage( nullptr );
+			}
+		}
+
+		GFileSystem->Delete( filename.GetFullPath(), true );
+	}
+
+	// Delete all directories if they is empty
+	for ( uint32 index = 0, count = dirsToDelete.size(); index < count; ++index )
+	{
+		const std::wstring&		fullDirPath = dirsToDelete[index];
+		if ( IsEmptyDirectory( fullDirPath, true ) )
+		{
+			GFileSystem->DeleteDirectory( fullDirPath, true );
 		}
 	}
 
@@ -1939,6 +1989,12 @@ void CContentBrowserWindow::PopupMenu_Package_Delete()
 	if ( bDirtyTOC )
 	{
 		GEditorEngine->SerializeTOC( true );
+	}
+
+	// If we have used package - print message
+	if ( !usedPackages.empty() )
+	{
+		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following packages in using or modifided and cannot be delete. Close all assets from this package or save him for will allow them to be deleted\n\nPackages:\n%s" ), ArrayFilenamesToString( usedPackages ).c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 
@@ -2316,14 +2372,14 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			// Block drop targets to children and parent
 			switch ( GetType() )
 			{
-			case FNT_Folder:
+			case FNT_File:
 				for ( uint32 index = 0, count = children.size(); index < count; ++index )
 				{
 					children[index]->SetAllowDropTarget( false );
 				}
 				break;
 
-			case FNT_File:
+			case FNT_Folder:
 			{
 				TSharedPtr<CFileTreeNode>	parentPtr = parent.Pin();
 				if ( parentPtr )
@@ -2350,12 +2406,14 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 		if ( imguiPayload )
 		{
 			// Prepare data to copy/move
-			CFileTreeNode**		pData = ( CFileTreeNode** )imguiPayload->Data;
+			PackageRef_t		currentPackage	= owner->GetCurrentPackage();
+			CFileTreeNode**		pData			= ( CFileTreeNode** )imguiPayload->Data;
 			check( pData );
 
 			// Get destination folder
-			CFilename		nodeFilename( path );
-			std::wstring	dstDirectory = nodeFilename.GetPath() + PATH_SEPARATOR;
+			CFilename		filenamePackage = currentPackage ? currentPackage->GetFileName() : TEXT( "" );
+			CFilename		nodeFilename	= path;
+			std::wstring	dstDirectory	= nodeFilename.GetPath() + PATH_SEPARATOR;
 			if ( type == FNT_Folder )
 			{
 				dstDirectory += nodeFilename.GetBaseFilename() + PATH_SEPARATOR;
@@ -2363,15 +2421,30 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 
 			// Make array of files to copy/move
 			std::vector<CMoveCopyFilesRunnable::SFileInfo>		filesToMoveCopy;
+			bool												bNeedResetCurrentPackage = false;
 			for ( uint32 index = 0; pData[index]; ++index )
 			{
 				CMoveCopyFilesRunnable::SFileInfo	fileInfo;
 				fileInfo.bDirectory					= pData[index]->GetType() == FNT_Folder;
 				fileInfo.srcPath					= pData[index]->path;
 				fileInfo.dstPath					= dstDirectory + fileInfo.srcPath.GetFilename();
+				if ( !bNeedResetCurrentPackage && currentPackage )
+				{
+					if ( ( fileInfo.bDirectory && filenamePackage.IsInDirectory( fileInfo.srcPath.GetFullPath() ) ) ||
+						 ( !fileInfo.bDirectory && fileInfo.srcPath.GetFullPath() == filenamePackage.GetFullPath() ) )
+					{
+						bNeedResetCurrentPackage = true;
+					}
+				}
 
 				filesToMoveCopy.push_back( fileInfo );
 				pData[index]->MarkDragging( false );
+			}
+
+			// Reset current package
+			if ( bNeedResetCurrentPackage )
+			{
+				owner->SetCurrentPackage( nullptr );
 			}
 
 			// Create and start thread for copy/move files
@@ -2453,7 +2526,7 @@ void CContentBrowserWindow::CFileTreeNode::GetSelectedNodes( std::vector<TShared
 		OutSelectedNodes.push_back( AsShared() );
 	}
 
-	if ( !InIsIgnoreChildren )
+	if ( !bSelected || !InIsIgnoreChildren )
 	{
 		for ( uint32 index = 0, count = children.size(); index < count; ++index )
 		{

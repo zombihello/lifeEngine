@@ -184,7 +184,7 @@ private:
 		 * @brief Get array of selected nodes
 		 * 
 		 * @param OutSelectedNodes		Output. Array of selected nodes
-		 * @param InIsIgnoreChildren	Is need ignore children node
+		 * @param InIsIgnoreChildren	Is need ignore children node if current not selected
 		 */
 		void GetSelectedNodes( std::vector<TSharedPtr<CFileTreeNode>>& OutSelectedNodes, bool InIsIgnoreChildren = false ) const;
 
