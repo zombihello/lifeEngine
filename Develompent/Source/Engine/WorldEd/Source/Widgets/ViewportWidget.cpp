@@ -9,6 +9,7 @@ CViewportWidget::CViewportWidget( bool InIsEnabled /* = true */, CViewportClient
 	, bEnabled( InIsEnabled )
 	, bDeleteViewportClient( InDeleteViewportClient )
 	, bViewportOnDrawing( false )
+	, bHovered( false )
 	, viewport( new CViewport() )
 	, renderTarget( new CRenderTarget() )
 	, viewportClient( InViewportClient )
@@ -40,6 +41,7 @@ void CViewportWidget::Tick()
 	if ( renderTarget->IsValid() )
 	{
 		ImGui::Image( GImGUIEngine->LockTexture( renderTarget->GetTexture2DRHI() ), ImVec2{ ( float )size.x, ( float )size.y } );
+		bHovered = ImGui::IsItemHovered();
 	}
 }
 

@@ -123,11 +123,21 @@ public:
 		return size;
 	}
 
+	/**
+	 * @brief Is hovered viewport
+	 * @return Return TRUE if viewport is hovered, otherwise will return FALSE
+	 */
+	FORCEINLINE bool IsHovered() const
+	{
+		return bHovered;
+	}
+
 private:
 	bool							bInit;						/**< Is inited widget */
 	bool							bEnabled;					/**< Is enabled viewport */
 	bool							bDeleteViewportClient;		/**< Is need delete viewport client in destroy time */
 	bool							bViewportOnDrawing;			/**< Is viewport drawing */
+	bool							bHovered;					/**< Is hovered */
 	TRefCountPtr<CViewport>			viewport;					/**< Viewport of render */
 	TRefCountPtr<CRenderTarget>		renderTarget;				/**< Render target */
 	CViewportClient*				viewportClient;				/**< Viewport client */

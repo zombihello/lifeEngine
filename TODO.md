@@ -6,7 +6,7 @@
  
  # Version 0.4.0 :: Now	
 - [ ] Migrate WorldEd's interface from Qt to ImGUI
-- [ ] Need add check on used assets while dragged packages in content browser, and need updating info about they in TOC file
+- [X] Need add check on used assets while dragged packages in content browser, and need updating info about they in TOC file
 - [ ] Implement rendering light with deferred shading technique
 - [ ] Implement physics system
 - [ ] Add supported mip levels in textures

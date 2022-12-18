@@ -25,6 +25,7 @@
 // Asset editor windows
 #include "Windows/TextureEditorWindow.h"
 #include "Windows/MaterialEditorWindow.h"
+#include "Windows/StaticMeshEditorWindow.h"
 
 /** Border size for buttons in asset viewer */
 #define CONTENTBROWSER_ASSET_BORDERSIZE		1.f
@@ -2701,8 +2702,9 @@ void CContentBrowserWindow::CAssetNode::ProcessEvents()
 			check( asset );
 			switch ( info->type )
 			{
-			case AT_Texture2D:	MakeSharedPtr<CTextureEditorWindow>( asset )->Init();	break;
-			case AT_Material:	MakeSharedPtr<CMaterialEditorWindow>( asset )->Init();	break;
+			case AT_Texture2D:	MakeSharedPtr<CTextureEditorWindow>( asset )->Init();		break;
+			case AT_Material:	MakeSharedPtr<CMaterialEditorWindow>( asset )->Init();		break;
+			case AT_StaticMesh:	MakeSharedPtr<CStaticMeshEditorWindow>( asset )->Init();	break;
 			default:
 				appErrorf( TEXT( "Unsupported asset type 0x%X" ), info->type );
 				break;
