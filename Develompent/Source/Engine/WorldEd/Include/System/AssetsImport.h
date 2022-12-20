@@ -28,7 +28,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return imported the texture 2D, otherwise will return NULL
 	 */
-	static TSharedPtr<CTexture2D> Import( const std::wstring& InPath, std::wstring& OutError );
+	static TSharedPtr<CAsset> Import( const std::wstring& InPath, std::wstring& OutError );
 
 	/**
 	 * @brief Reimport a texture 2D
@@ -37,7 +37,7 @@ public:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if seccussed reimported, otherwise will return FALSE
 	 */
-	static bool Reimport( const TSharedPtr<CTexture2D>& InTexture2D, std::wstring& OutError );
+	static bool Reimport( const TSharedPtr<CAsset>& InTexture2D, std::wstring& OutError );
 
 	/**
 	 * @brief Get supported texture extensions
@@ -47,16 +47,16 @@ public:
 	{
 		static std::vector<std::wstring>		supportedExtensions =
 		{
-			TEXT( "PNG" ),
-			TEXT( "JPG" ),
-			TEXT( "JPEG" ),
-			TEXT( "TGA" ),
-			TEXT( "BMp" ),
-			TEXT( "PSD" ),
-			TEXT( "GIF" ),
-			TEXT( "HDR" ),
-			TEXT( "PIC" ),
-			TEXT( "PNM" )
+			TEXT( "png" ),
+			TEXT( "jpg" ),
+			TEXT( "jpeg" ),
+			TEXT( "tga" ),
+			TEXT( "bmp" ),
+			TEXT( "psd" ),
+			TEXT( "gif" ),
+			TEXT( "hdr" ),
+			TEXT( "pic" ),
+			TEXT( "pnm" )
 		};
 		return supportedExtensions;
 	}

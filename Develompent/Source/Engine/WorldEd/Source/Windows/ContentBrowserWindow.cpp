@@ -10,6 +10,7 @@
 #include "Windows/ContentBrowserWindow.h"
 #include "Windows/DialogWindow.h"
 #include "Windows/InputTextDialog.h"
+#include "Windows/FileDialog.h"
 #include "ImGUI/imgui_internal.h"
 #include "ImGUI/imgui_stdlib.h"
 
@@ -238,7 +239,23 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 
 		ImGui::Separator();
 		ImGui::MenuItem( "Reload", "", nullptr, bSelectedAssets );
-		ImGui::MenuItem( "Import" );
+		
+		// Import asset
+		if ( ImGui::MenuItem( "Import" ) )
+		{
+			CFileDialogSetup		fileDialogSetup;
+			SOpenFileDialogResult	openFileDialogResult;
+
+			fileDialogSetup.SetMultiselection( true );
+			fileDialogSetup.SetTitle( TEXT( "Import Asset" ) );
+			fileDialogSetup.SetDirectory( gameRoot->GetPath() );
+			fileDialogSetup.AddFormat( GAssetFactory.GetImporterInfo( AT_Texture2D ), TEXT( "Texture 2D" ) );
+			appShowOpenFileDialog( fileDialogSetup, openFileDialogResult );
+
+			int a = 0;
+			++a;
+		}
+		
 		ImGui::MenuItem( "Reimport", "", nullptr, bSelectedAssets );
 		ImGui::MenuItem( "Reimport With New File", "", nullptr, bSelectedAssets );
 		ImGui::Separator();

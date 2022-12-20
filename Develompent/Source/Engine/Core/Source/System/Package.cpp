@@ -18,6 +18,10 @@
 #include "WorldEd.h"
 #endif // WITH_EDITOR
 
+//
+// ASSET
+//
+
 CAsset::CAsset( EAssetType InType ) 
 	: bDirty( true )		// by default package is dirty because not serialized package from HDD
 	, package( nullptr )
@@ -110,6 +114,10 @@ TAssetHandle<CAsset> CAsset::GetAssetHandle() const
 	return handle;
 }
 
+//
+// ASSET FACTORY
+//
+
 CAssetFactory::CAssetFactory()
 {
 	appMemzero( constructAssetFns, AT_Count * sizeof( CAssetFactory::ConstructAssetFn_t ) );
@@ -120,6 +128,58 @@ CAssetFactory::CAssetFactory()
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CAudioBank>(); },			AT_AudioBank );
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CPhysicsMaterial>(); },		AT_PhysicsMaterial );
 }
+
+#if WITH_EDITOR
+TSharedPtr<CAsset> CAssetFactory::Import( const std::wstring& InPath, std::wstring& OutError ) const
+{
+	std::wstring		fileExtension = CFilename( InPath ).GetExtension();
+	CString::ToUpper( fileExtension, fileExtension );
+
+	for ( uint32 index = 0; index < AT_Count; ++index )
+	{
+		const SAssetImporterInfo&		importerInfo = importersInfo[index];
+		if ( importerInfo.bValid )
+		{
+			bool	bSupportedFile = false;
+			for ( uint32 extensionId = 0, countExtensions = importerInfo.supportedExtensions.size(); extensionId < countExtensions; ++extensionId )
+			{
+				if ( CString::ToUpper( importerInfo.supportedExtensions[extensionId] ) == fileExtension )
+				{
+					bSupportedFile = true;
+					break;
+				}
+			}
+
+			if ( bSupportedFile )
+			{
+				check( importerInfo.importAssetFn );
+				return importerInfo.importAssetFn( InPath, OutError );
+			}
+		}
+	}
+
+	OutError = CString::Format( TEXT( "Not exist importer for extension '%s'" ), fileExtension.c_str() );
+	return nullptr;
+}
+
+bool CAssetFactory::Reimport( const TSharedPtr<CAsset>& InAsset, std::wstring& OutError ) const
+{
+	check( InAsset );
+	const SAssetImporterInfo&	importerInfo = importersInfo[InAsset->GetType()];
+	
+	if ( !importerInfo.bValid )
+	{
+		OutError = CString::Format( TEXT( "Not exist importer for asset type 0x%X" ), InAsset->GetType() );
+		return false;
+	}
+
+	return importerInfo.reimportAssetFn( InAsset, OutError );
+}
+#endif // WITH_EDITOR
+
+//
+// PACKAGE
+//
 
 CPackage::CPackage( const std::wstring& InName /* = TEXT( "" ) */ ) 
 	: bIsDirty( true )			// by default package is dirty because not serialized package from HDD
@@ -866,6 +926,10 @@ bool CPackage::ReloadPackage( bool InOnlyAsset /* = false */ )
 	numDirtyAssets	= numNewDirtyAssets;
 	return !bNotAllAssetLoaded;
 }
+
+//
+// PACKAGE MANAGER
+//
 
 CPackageManager::CPackageManager()
 {}

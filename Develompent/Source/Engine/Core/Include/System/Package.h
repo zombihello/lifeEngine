@@ -615,6 +615,49 @@ public:
 	 */
 	typedef TSharedPtr<CAsset>( *ConstructAssetFn_t )();
 
+#if WITH_EDITOR
+	/**
+	 * @brief Pointer to function for import asset
+	 */
+	typedef TSharedPtr<CAsset>( *ImportAssetFn_t )( const std::wstring& InPath, std::wstring& OutError );
+
+	/**
+	 * @brief Pointer to function for reimport asset
+	 */
+	typedef bool( *ReimportAssetFn_t )( const TSharedPtr<CAsset>& InAsset, std::wstring& OutError );
+
+	/**
+	 * @brief Struct info about asset's importer
+	 */
+	struct SAssetImporterInfo
+	{
+		/**
+		 * @brief Constructor
+		 */
+		FORCEINLINE SAssetImporterInfo()
+			: bValid( false )
+			, importAssetFn( nullptr )
+			, reimportAssetFn( nullptr )
+		{}
+
+		/**
+		 * @brief Clear
+		 */
+		FORCEINLINE void Clear()
+		{
+			bValid = false;
+			importAssetFn = nullptr;
+			reimportAssetFn = nullptr;
+			supportedExtensions.clear();
+		}
+
+		bool							bValid;							/**< Is importer is exist */
+		ImportAssetFn_t					importAssetFn;					/**< Pointer to function of import asset */
+		ReimportAssetFn_t				reimportAssetFn;				/**< Pointer to function of reimport asset */
+		std::vector<std::wstring>		supportedExtensions;			/**< Supported extensions */
+	};
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Constructor
 	 */
@@ -640,6 +683,40 @@ public:
 	{
 		constructAssetFns[InType] = nullptr;
 	}
+
+#if WITH_EDITOR
+	/**
+	 * @brief Register importer for asset type
+	 * 
+	 * @param InImportFunction		Pointer to function for import asset
+	 * @param InReimportFunction	Pointer to function for reimport asset
+	 * @param InSupportedExtensions	Array with supported extensions
+	 * @param InType				Asset type
+	 */
+	FORCEINLINE void RegisterImporter( ImportAssetFn_t InImportFunction, ReimportAssetFn_t InReimportFunction, const std::vector<std::wstring>& InSupportedExtensions, EAssetType InType )
+	{
+		SAssetImporterInfo&		importInfo = importersInfo[InType];
+		if ( importInfo.bValid )
+		{
+			importInfo.Clear();
+		}
+
+		importInfo.bValid				= true;
+		importInfo.importAssetFn		= InImportFunction;
+		importInfo.reimportAssetFn		= InReimportFunction;
+		importInfo.supportedExtensions	= InSupportedExtensions;
+	}
+
+	/**
+	 * @brief Unregister importer for asset type
+	 * 
+	 * @param InType		Asset type
+	 */
+	FORCEINLINE void UnRegisterImporter( EAssetType InType )
+	{
+		importersInfo[InType].Clear();
+	}
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Set default asset for type
@@ -669,6 +746,37 @@ public:
 		return nullptr;
 	}
 
+#if WITH_EDITOR
+	/**
+	 * @brief Import asset
+	 * 
+	 * @param InPath	Path to asset
+	 * @param OutError	Output error when failed import asset
+	 * @return Return pointer to imported asset, in case fail will return NULL
+	 */
+	TSharedPtr<CAsset> Import( const std::wstring& InPath, std::wstring& OutError ) const;
+	
+	/**
+	 * @brief Reimport asset
+	 * 
+	 * @param InAsset	Asset to reimport
+	 * @param OutError	Output error when failed import asset
+	 * @return Return TRUE when seccussed asset is reimported, otherwise will returning FALSE
+	 */
+	bool Reimport( const TSharedPtr<CAsset>& InAsset, std::wstring& OutError ) const;
+
+	/**
+	 * @brief Get info about asset's importer
+	 * 
+	 * @param InType	Asset type
+	 * @return Return info about asset's importer
+	 */
+	FORCEINLINE const SAssetImporterInfo& GetImporterInfo( EAssetType InType ) const
+	{
+		return importersInfo[InType];
+	}
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Get default asset
 	 *
@@ -681,8 +789,13 @@ public:
 	}
 
 private:
-	ConstructAssetFn_t		constructAssetFns[AT_Count];
-	TAssetHandle<CAsset>	defaultAssets[AT_Count];
+
+#if WITH_EDITOR
+	SAssetImporterInfo					importersInfo[AT_Count];		/**< Importers info for each asset type */
+#endif // WITH_EDITOR
+
+	ConstructAssetFn_t					constructAssetFns[AT_Count];	/**< Array of pointers to function create asset */
+	TAssetHandle<CAsset>				defaultAssets[AT_Count];		/**< Array of default assets */
 };
 
 /**

@@ -7,7 +7,7 @@
 #include "Render/RenderUtils.h"
 #include "WorldEd.h"
 
-TSharedPtr<CTexture2D> CTexture2DImporter::Import( const std::wstring& InPath, std::wstring& OutError )
+TSharedPtr<CAsset> CTexture2DImporter::Import( const std::wstring& InPath, std::wstring& OutError )
 {
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
@@ -32,11 +32,12 @@ TSharedPtr<CTexture2D> CTexture2DImporter::Import( const std::wstring& InPath, s
 	return Reimport( texture2DRef, OutError ) ? texture2DRef : nullptr;
 }
 
-bool CTexture2DImporter::Reimport( const TSharedPtr<CTexture2D>& InTexture2D, std::wstring& OutError )
+bool CTexture2DImporter::Reimport( const TSharedPtr<CAsset>& InTexture2D, std::wstring& OutError )
 {
-	check( InTexture2D );
+	TSharedPtr<CTexture2D>		texture2D = InTexture2D;
+	check( texture2D );
 
-	std::wstring		sourceFile = InTexture2D->GetAssetSourceFile();
+	std::wstring		sourceFile = texture2D->GetAssetSourceFile();
 	if ( sourceFile.empty() )
 	{
 		OutError = TEXT( "Source file is empty" );
@@ -58,13 +59,13 @@ bool CTexture2DImporter::Reimport( const TSharedPtr<CTexture2D>& InTexture2D, st
 	std::vector<byte>		tempData;
 	tempData.resize( sizeX * sizeY * GPixelFormats[PF_A8R8G8B8].blockBytes );
 	memcpy( tempData.data(), data, tempData.size() );
-	InTexture2D->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
+	texture2D->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 
 	// Clean up all data
 	stbi_image_free( data );
 
 	// Broadcast event of reimport/reloaded asset
-	std::vector<TSharedPtr<CAsset>>		reimportedAssets{ InTexture2D };
+	std::vector<TSharedPtr<CAsset>>		reimportedAssets{ texture2D };
 	SEditorDelegates::onAssetsReloaded.Broadcast( reimportedAssets );
 
 	return true;

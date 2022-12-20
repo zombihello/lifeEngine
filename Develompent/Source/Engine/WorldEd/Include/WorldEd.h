@@ -28,6 +28,7 @@ std::wstring appGetWorldEdName();
 
 /**
  * @ingroup WorldEd
+ * @note Need implement on each platform
  * @brief Show file in file explorer
  * 
  * @param InPath	Path to file

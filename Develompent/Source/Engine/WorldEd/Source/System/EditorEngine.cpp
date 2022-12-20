@@ -20,6 +20,7 @@
 #include "System/InputSystem.h"
 #include "System/Config.h"
 #include "System/BaseWindow.h"
+#include "System/AssetsImport.h"
 
 // Actors
 #include "Actors/PlayerStart.h"
@@ -68,6 +69,9 @@ void CEditorEngine::Init()
 	// Register actor factory for assets
 	GActorFactory.Register( AT_StaticMesh,	&AStaticMesh::SpawnActorAsset );
 	GActorFactory.Register( AT_AudioBank,	&AAudio::SpawnActorAsset );
+
+	// Register importers of assets
+	GAssetFactory.RegisterImporter( &CTexture2DImporter::Import, &CTexture2DImporter::Reimport, CTexture2DImporter::GetSupportedExtensions(), AT_Texture2D );
 
 	// Create window and main viewport
 	uint32						windowWidth		= GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();

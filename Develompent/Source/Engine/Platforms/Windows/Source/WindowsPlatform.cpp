@@ -259,9 +259,131 @@ std::wstring appUserName()
 }
 
 #if WITH_EDITOR
+#include "Windows/FileDialog.h"
+
 void appShowFileInExplorer( const std::wstring& InPath )
 {
 	CFilename		filename( GFileSystem->ConvertToAbsolutePath( InPath ) );
 	appCreateProc( TEXT( "explorer.exe" ), GFileSystem->IsDirectory( filename.GetFullPath() ) ? filename.GetFullPath().c_str() : filename.GetPath().c_str(), true, false, false, 0 );
+}
+
+bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResult& OutResult )
+{
+	OPENFILENAME		fileDialogSettings;
+	appMemzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
+	fileDialogSettings.lStructSize = sizeof( OPENFILENAME );
+
+	// Flags
+	fileDialogSettings.hwndOwner	= GWindow ? ( HWND )GWindow->GetHandle() : nullptr;
+	fileDialogSettings.Flags		|= ( InSetup.IsMultiselection() ) ? OFN_ALLOWMULTISELECT : 0;
+	fileDialogSettings.Flags		|= OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_NONETWORKBUTTON | OFN_PATHMUSTEXIST;
+
+	// File name buffer
+	std::wstring		fileNameBuffer;
+	fileNameBuffer.resize( 64 * 1024 );
+	fileDialogSettings.lpstrFile	= fileNameBuffer.data();
+	fileDialogSettings.nMaxFile		= fileNameBuffer.size();
+
+	// Format filters
+	std::wstring		filterBuffer;
+	const std::vector<CFileDialogSetup::SFileNameFilter>		fileNameFilters = InSetup.GetFormats();
+	if ( fileNameFilters.empty() )
+	{
+		fileDialogSettings.nFilterIndex		= 0;
+		fileDialogSettings.lpstrFilter		= TEXT( "All Files (*.*)" );
+	}
+	else	// We are going to filter only those files with the same exact filename
+	{
+		std::wstring		allSupportedFormats;
+		for ( uint32 index = 0, count = fileNameFilters.size(); index < count; ++index )
+		{
+			const CFileDialogSetup::SFileNameFilter&	fileNameFilter = fileNameFilters[index];
+			if ( index > 0 )
+			{
+				allSupportedFormats += TEXT( "; " );
+			}
+			allSupportedFormats += fileNameFilter.filter;
+			
+			filterBuffer		+= CString::Format( TEXT( "%s (%s)" ), fileNameFilter.description.c_str(), fileNameFilter.filter.c_str() );
+			filterBuffer.push_back( TEXT( '\0' ) );
+			filterBuffer		+= fileNameFilter.filter;
+			filterBuffer.push_back( TEXT( '\0' ) );
+		}
+		filterBuffer			+= CString::Format( TEXT( "All Supported Formats (%s)" ), allSupportedFormats.c_str() );
+		filterBuffer.push_back( TEXT( '\0' ) );
+		filterBuffer			+= allSupportedFormats;
+		filterBuffer.push_back( TEXT( '\0' ) );
+
+		fileDialogSettings.nFilterIndex		= 0;
+		fileDialogSettings.lpstrFilter		= filterBuffer.data();
+	}
+
+	// Title text
+	std::wstring		title = InSetup.GetTitle();
+	if ( title.empty() )
+	{
+		fileDialogSettings.lpstrTitle	= InSetup.IsMultiselection() ? TEXT( "Open Files" ) : TEXT( "Open File" );
+	}
+	else
+	{
+		fileDialogSettings.lpstrTitle	= title.data();
+	}
+
+	// Preserve the directory around the calls
+	std::wstring		absolutePathToDirectory = GFileSystem->ConvertToAbsolutePath( InSetup.GetDirectory() );
+	fileDialogSettings.lpstrInitialDir	= absolutePathToDirectory.data();
+
+	// Open file dialog
+	if ( !GetOpenFileNameW( &fileDialogSettings ) )
+	{
+		return false;
+	}
+
+	// Extract file paths
+	{
+		std::vector<std::wstring>		parts;
+
+		// Parse file names
+		tchar*	pPos	= fileNameBuffer.data();
+		tchar*	pStart	= fileNameBuffer.data();
+		while ( true )
+		{
+			if ( *pPos == 0 )
+			{
+				if ( pPos == pStart )
+				{
+					break;
+				}
+				
+				parts.push_back( std::wstring( pStart ) );
+				pStart	= pPos + 1;
+				pPos	+= 1;
+			}
+			else
+			{
+				++pPos;
+			}
+		}
+
+		if ( !parts.empty() )
+		{
+			// If single paths
+			if ( parts.size() == 1 )
+			{
+				OutResult.files.push_back( parts[0] );
+			}
+			// When multiple paths are selected the first entry in the list is the directory
+			else
+			{
+				std::wstring	basePath = parts[0];
+				for ( uint32 index = 1, count = parts.size(); index < count; ++index )
+				{
+					OutResult.files.push_back( basePath + PATH_SEPARATOR + parts[index] );
+				}
+			}
+		}
+	}
+
+	return true;
 }
 #endif // WITH_EDITOR
