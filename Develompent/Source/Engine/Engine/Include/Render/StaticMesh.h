@@ -112,7 +112,7 @@ public:
 	 * @param[in] InSurfaces Array surfaces in mesh
 	 * @param[in] InMaterials Array materials in mesh
 	 */
-	void SetData( const std::vector< SStaticMeshVertexType >& InVerteces, const std::vector< uint32 >& InIndeces, const std::vector< SStaticMeshSurface >& InSurfaces, std::vector< TAssetHandle<CMaterial> >& InMaterials );
+	void SetData( const std::vector< SStaticMeshVertexType >& InVerteces, const std::vector< uint32 >& InIndeces, const std::vector< SStaticMeshSurface >& InSurfaces, const std::vector< TAssetHandle<CMaterial> >& InMaterials );
 
 	/**
 	 * Set material

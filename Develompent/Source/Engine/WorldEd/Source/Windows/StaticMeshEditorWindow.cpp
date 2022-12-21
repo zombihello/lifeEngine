@@ -40,7 +40,7 @@ void CStaticMeshEditorWindow::Init()
 		TSharedPtr<CSelectAssetWidget>	selectAssetWidget = MakeSharedPtr<CSelectAssetWidget>( index );
 
 		selectAssetWidget->Init();
-		selectAssetWidget->SetLabel( "Slot " + std::to_string(index));
+		selectAssetWidget->SetLabel( "Slot " + std::to_string( index ) );
 		selectAssetWidget->OnSelectedAsset().Add(	std::bind( &CStaticMeshEditorWindow::OnSelectedAsset,	this, std::placeholders::_1, std::placeholders::_2	) );
 		selectAssetWidget->OnOpenAssetEditor().Add( std::bind( &CStaticMeshEditorWindow::OnOpenAssetEditor, this, std::placeholders::_1							) );
 		selectAssetWidgets.push_back( SSelectAssetHandle{ index, nullptr, selectAssetWidget } );
@@ -105,7 +105,7 @@ void CStaticMeshEditorWindow::OnTick()
 	// Materials
 	if ( ImGui::CollapsingHeader( "Materials", ImGuiTreeNodeFlags_DefaultOpen ) )
 	{
-		float		heightMaterialsSection	= 80.f * ImGui::GetContentRegionAvail().y / 100.f;
+		float		heightMaterialsSection	= 80.f * ImGui::GetContentRegionAvail().y / 100.f;		// 80% from max height of content region
 		ImGui::BeginChild( "##MaterialSlots", ImVec2( 0, heightMaterialsSection ) );
 		for ( uint32 index = 0, count = selectAssetWidgets.size(); index < count; ++index )
 		{

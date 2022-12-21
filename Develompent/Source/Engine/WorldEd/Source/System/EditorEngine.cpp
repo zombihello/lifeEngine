@@ -60,7 +60,9 @@ void CEditorEngine::Init()
 	GActorFactory.Register( AT_AudioBank,	&AAudio::SpawnActorAsset );
 
 	// Register importers of assets
-	GAssetFactory.RegisterImporter( &CTexture2DImporter::Import, &CTexture2DImporter::Reimport, CTexture2DImporter::GetSupportedExtensions(), AT_Texture2D );
+	GAssetFactory.RegisterImporter( &CTexture2DImporter::Import, &CTexture2DImporter::Reimport, nullptr, CTexture2DImporter::GetSupportedExtensions(), AT_Texture2D );
+	GAssetFactory.RegisterImporter( &CAudioBankImporter::Import, &CAudioBankImporter::Reimport, nullptr, CAudioBankImporter::GetSupportedExtensions(), AT_AudioBank );
+	GAssetFactory.RegisterImporter( &CStaticMeshImporter::Import, &CStaticMeshImporter::Reimport, &CStaticMeshImporter::ShowImportSettings, CStaticMeshImporter::GetSupportedExtensions(), AT_StaticMesh );
 
 	// Create window and main viewport
 	uint32						windowWidth		= GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();

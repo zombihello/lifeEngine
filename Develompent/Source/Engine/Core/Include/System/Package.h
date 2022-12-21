@@ -617,14 +617,29 @@ public:
 
 #if WITH_EDITOR
 	/**
+	 * @brief Enumerate result function 'ShowImportSettingsAsset' (see ShowImportSettingsAssetFn_t and CAssetFactory::ShowImportSettings)
+	 */
+	enum EResultShowImportSettings
+	{
+		RSIS_Import,		/**< Import asset */
+		RSIS_ImportAll,		/**< Import all assets with current settings */
+		RSIS_Cancel,		/**< Cancel import this asset */
+	};
+
+	/**
 	 * @brief Pointer to function for import asset
 	 */
-	typedef TSharedPtr<CAsset>( *ImportAssetFn_t )( const std::wstring& InPath, std::wstring& OutError );
+	typedef bool( *ImportAssetFn_t )( const std::wstring& InPath, std::vector<TSharedPtr<CAsset>>& OutResult, std::wstring& OutError );
 
 	/**
 	 * @brief Pointer to function for reimport asset
 	 */
 	typedef bool( *ReimportAssetFn_t )( const TSharedPtr<CAsset>& InAsset, std::wstring& OutError );
+
+	/**
+	 * @brief Pointer to function for show import asset settings
+	 */
+	typedef void( *ShowImportSettingsAssetFn_t )( class CImGUILayer* InOwner, class CEvent* InEvent, EResultShowImportSettings& OutResult );
 
 	/**
 	 * @brief Struct info about asset's importer
@@ -638,6 +653,7 @@ public:
 			: bValid( false )
 			, importAssetFn( nullptr )
 			, reimportAssetFn( nullptr )
+			, showImportSettingsAssetFn( nullptr )
 		{}
 
 		/**
@@ -648,12 +664,14 @@ public:
 			bValid = false;
 			importAssetFn = nullptr;
 			reimportAssetFn = nullptr;
+			showImportSettingsAssetFn = nullptr;
 			supportedExtensions.clear();
 		}
 
 		bool							bValid;							/**< Is importer is exist */
 		ImportAssetFn_t					importAssetFn;					/**< Pointer to function of import asset */
 		ReimportAssetFn_t				reimportAssetFn;				/**< Pointer to function of reimport asset */
+		ShowImportSettingsAssetFn_t		showImportSettingsAssetFn;		/**< Pointer to function of show import settings asset */
 		std::vector<std::wstring>		supportedExtensions;			/**< Supported extensions */
 	};
 #endif // WITH_EDITOR
@@ -688,12 +706,13 @@ public:
 	/**
 	 * @brief Register importer for asset type
 	 * 
-	 * @param InImportFunction		Pointer to function for import asset
-	 * @param InReimportFunction	Pointer to function for reimport asset
-	 * @param InSupportedExtensions	Array with supported extensions
-	 * @param InType				Asset type
+	 * @param InImportFunction				Pointer to function for import asset
+	 * @param InReimportFunction			Pointer to function for reimport asset
+	 * @param InShowImportSettingsFunction	Pointer to function for show import settings. If it variable is null will not be used
+	 * @param InSupportedExtensions			Array with supported extensions
+	 * @param InType						Asset type
 	 */
-	FORCEINLINE void RegisterImporter( ImportAssetFn_t InImportFunction, ReimportAssetFn_t InReimportFunction, const std::vector<std::wstring>& InSupportedExtensions, EAssetType InType )
+	FORCEINLINE void RegisterImporter( ImportAssetFn_t InImportFunction, ReimportAssetFn_t InReimportFunction, ShowImportSettingsAssetFn_t InShowImportSettingsFunction, const std::vector<std::wstring>& InSupportedExtensions, EAssetType InType )
 	{
 		SAssetImporterInfo&		importInfo = importersInfo[InType];
 		if ( importInfo.bValid )
@@ -701,10 +720,11 @@ public:
 			importInfo.Clear();
 		}
 
-		importInfo.bValid				= true;
-		importInfo.importAssetFn		= InImportFunction;
-		importInfo.reimportAssetFn		= InReimportFunction;
-		importInfo.supportedExtensions	= InSupportedExtensions;
+		importInfo.bValid						= true;
+		importInfo.importAssetFn				= InImportFunction;
+		importInfo.reimportAssetFn				= InReimportFunction;
+		importInfo.supportedExtensions			= InSupportedExtensions;
+		importInfo.showImportSettingsAssetFn	= InShowImportSettingsFunction;
 	}
 
 	/**
@@ -748,13 +768,25 @@ public:
 
 #if WITH_EDITOR
 	/**
+	 * @brief Show import settings for asset type
+	 * 
+	 * @param InAssetType		Asset type
+	 * @param InOwner			Owner ImGUI layer
+	 * @param InEvent			Synchronize event, need trigger it when dialog is closed
+	 * @param OutResult			Result
+	 * @return Return TRUE if dialog is showed, otherwise will return FALSE
+	 */
+	bool ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, class CEvent* InEvent, EResultShowImportSettings& OutResult ) const;
+
+	/**
 	 * @brief Import asset
 	 * 
 	 * @param InPath	Path to asset
+	 * @param OutResult	Output array with imported assets
 	 * @param OutError	Output error when failed import asset
-	 * @return Return pointer to imported asset, in case fail will return NULL
+	 * @return Return TRUE if asset seccussed imported, otherwise will return FALSE
 	 */
-	TSharedPtr<CAsset> Import( const std::wstring& InPath, std::wstring& OutError ) const;
+	bool Import( const std::wstring& InPath, std::vector<TSharedPtr<CAsset>>& OutResult, std::wstring& OutError ) const;
 	
 	/**
 	 * @brief Reimport asset
@@ -764,6 +796,14 @@ public:
 	 * @return Return TRUE when seccussed asset is reimported, otherwise will returning FALSE
 	 */
 	bool Reimport( const TSharedPtr<CAsset>& InAsset, std::wstring& OutError ) const;
+
+	/**
+	 * @brief Get asset type by path
+	 * 
+	 * @param InPath	Path to asset
+	 * @return Return asset type if unknown will return AT_Unknown
+	 */
+	EAssetType GetAssetTypeByPath( const std::wstring& InPath ) const;
 
 	/**
 	 * @brief Get info about asset's importer

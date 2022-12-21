@@ -27,6 +27,9 @@
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/StaticMeshEditorWindow.h"
 
+// Dialogs
+#include "Windows/ImportSettingsDialogs.h"
+
 /** Border size for buttons in asset viewer */
 #define CONTENTBROWSER_ASSET_BORDERSIZE		1.f
 
@@ -247,7 +250,10 @@ public:
 	virtual uint32 Run() override
 	{
 		// Import all assets
-		std::wstring		errorMessages;
+		std::wstring									errorMessages;
+		CAssetFactory::EResultShowImportSettings		importSettingsModes[AT_Count];
+		appMemzero( importSettingsModes, sizeof( CAssetFactory::EResultShowImportSettings ) * AT_Count );
+
 		for ( uint32 index = 0, count = filesToImport.size(); index < count; ++index )
 		{
 			CFilename		filename( filesToImport[index] );
@@ -287,16 +293,28 @@ public:
 				}
 			}
 
-			std::wstring		errorMsg;
-			TSharedPtr<CAsset>	asset = GAssetFactory.Import( filename.GetFullPath(), errorMsg );
-			if ( asset )
+			EAssetType							assetType = GAssetFactory.GetAssetTypeByPath( filename.GetFullPath() );
+			std::wstring						errorMsg;
+			std::vector<TSharedPtr<CAsset>>		result;
+
+			// Show dialog with import settings if it need
+			if ( importSettingsModes[assetType] != CAssetFactory::RSIS_ImportAll && GAssetFactory.ShowImportSettings( assetType, owner, eventResponse, importSettingsModes[assetType] ) && importSettingsModes[assetType] == CAssetFactory::RSIS_Cancel )
 			{
-				SAssetInfo		assetInfo;
-				owner->package->Add( asset->GetAssetHandle(), &assetInfo );			
+				continue;
+			}
+			
+			// Import asset
+			if ( !GAssetFactory.Import( filename.GetFullPath(), result, errorMsg ) )
+			{
+				errorMessages += CString::Format( TEXT( "\n%s: %s" ), filename.GetBaseFilename().c_str(), errorMsg.c_str() );
 			}
 			else
 			{
-				errorMessages += CString::Format( TEXT( "\n%s: %s" ), filename.GetBaseFilename().c_str(), errorMsg.c_str() );
+				// Add to package all imported assets
+				for ( uint32 assetIdx = 0, countAssets = result.size(); assetIdx < countAssets; ++assetIdx )
+				{
+					owner->package->Add( result[assetIdx]->GetAssetHandle() );
+				}
 			}
 		}
 
@@ -1331,16 +1349,15 @@ void CContentBrowserWindow::Init()
 	std::wstring		errorMsg;
 	for ( uint32 index = 0; index < AT_Count; ++index )
 	{
-		TSharedPtr<CTexture2D>		texture2D;
-		texture2D = CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Thumbnails/" ) + GAssetIconPaths[index], errorMsg );
-		if ( !texture2D )
+		std::vector<TSharedPtr<CAsset>>		result;
+		if ( !CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Thumbnails/" ) + GAssetIconPaths[index], result, errorMsg ) )
 		{
 			LE_LOG( LT_Warning, LC_Editor, TEXT( "Failed to load asset icon '%s' for type 0x%X. Message: %s" ), GAssetIconPaths[index], index, errorMsg.c_str() );
 			assetIcons[index] = GEngine->GetDefaultTexture();
 		}
 		else
 		{
-			TAssetHandle<CTexture2D>	assetHandle = texture2D->GetAssetHandle();
+			TAssetHandle<CTexture2D>	assetHandle = result[0]->GetAssetHandle();
 			PackageRef_t				package = GPackageManager->LoadPackage( TEXT( "" ), true );
 			check( package );
 

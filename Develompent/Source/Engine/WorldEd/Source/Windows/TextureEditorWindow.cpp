@@ -106,14 +106,15 @@ void CTextureEditorWindow::Init()
 		assetHandle						= package->Find( assetName );
 		if ( !assetHandle.IsAssetValid() )
 		{
-			TSharedPtr<CTexture2D>		texture2D = CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Icons/" ) + GTextureEditorIconPaths[index], errorMsg );
-			if ( !texture2D )
+			std::vector<TSharedPtr<CAsset>>		result;
+			if ( !CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Icons/" ) + GTextureEditorIconPaths[index], result, errorMsg ) )
 			{
 				LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load texture editor icon '%s' for type 0x%X. Message: %s" ), GTextureEditorIconPaths[index], index, errorMsg.c_str() );
 				assetHandle = GEngine->GetDefaultTexture();
 			}
 			else
 			{
+				TSharedPtr<CTexture2D>		texture2D = result[0];
 				texture2D->SetAssetName( assetName );
 				assetHandle = texture2D->GetAssetHandle();
 				package->Add( assetHandle );

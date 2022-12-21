@@ -11,7 +11,7 @@
 - [ ] Implement physics system
 - [ ] Add supported mip levels in textures
 - [ ] Add possible generate mip levels for textures in WorldEd
-- [ ] Need fix speed of the import static meshes
+- [X] Need fix speed of the import static meshes
 - [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to LUA)
 - [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)
 - [x] Implemented functions of exploer level

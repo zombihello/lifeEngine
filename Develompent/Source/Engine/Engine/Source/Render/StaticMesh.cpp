@@ -101,7 +101,7 @@ void CStaticMesh::Serialize( class CArchive& InArchive )
 	}
 }
 
-void CStaticMesh::SetData( const std::vector<SStaticMeshVertexType>& InVerteces, const std::vector<uint32>& InIndeces, const std::vector<SStaticMeshSurface>& InSurfaces, std::vector< TAssetHandle<CMaterial> >& InMaterials )
+void CStaticMesh::SetData( const std::vector<SStaticMeshVertexType>& InVerteces, const std::vector<uint32>& InIndeces, const std::vector<SStaticMeshSurface>& InSurfaces, const std::vector< TAssetHandle<CMaterial> >& InMaterials )
 {
 	// Copy new parameters of static mesh
 	verteces		= InVerteces;
