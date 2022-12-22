@@ -24,6 +24,8 @@ CMaterialEditorWindow::CMaterialEditorWindow( const TSharedPtr<CMaterial>& InMat
 	, material( InMaterial )
 	, viewportClient( new CMaterialPreviewViewportClient( InMaterial ) )
 {
+	flags |= LF_DestroyOnHide;
+
 	// Init preview viewport
 	viewportWidget.SetViewportClient( viewportClient, false );
 	viewportWidget.SetEnabled( true );
@@ -166,15 +168,6 @@ void CMaterialEditorWindow::OnTick()
 			}
 		}
 		ImGui::EndChild();
-	}
-}
-
-void CMaterialEditorWindow::OnVisibilityChanged( bool InNewVisibility )
-{
-	// If visibility of the window changed to FALSE, we destroy him
-	if ( !InNewVisibility )
-	{
-		Destroy();
 	}
 }
 

@@ -1,15 +1,30 @@
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
+#include "Misc/UIGlobals.h"
 #include "Windows/StaticMeshEditorWindow.h"
 #include "Render/StaticMeshPreviewViewportClient.h"
 #include "Windows/FileDialog.h"
 #include "Windows/MaterialEditorWindow.h"
+#include "windows/DialogWindow.h"
+#include "System/AssetsImport.h"
+
+/** Table pathes to icons */
+static const tchar* GStaticMeshEditorIconPaths[] =
+{
+	TEXT( "Import.png" )		// IT_Import
+};
+static_assert( ARRAY_COUNT( GStaticMeshEditorIconPaths ) == CStaticMeshEditorWindow::IT_Num, "Need full init GStaticMeshEditorIconPaths array" );
+
+/** Macro size button in menu bar */
+#define  STATICMESHEDITOR_MENUBAR_BUTTONSIZE	ImVec2( 16.f, 16.f )
 
 CStaticMeshEditorWindow::CStaticMeshEditorWindow( const TSharedPtr<CStaticMesh>& InStaticMesh )
 	: CImGUILayer( CString::Format( TEXT( "Static Mesh Editor - %s" ), InStaticMesh->GetAssetName().c_str() ) )
 	, staticMesh( InStaticMesh )
 	, viewportClient( new CStaticMeshPreviewViewportClient( InStaticMesh ) )
 {
+	flags |= ImGuiWindowFlags_MenuBar | LF_DestroyOnHide;
+
 	// Init preview viewport
 	viewportWidget.SetViewportClient( viewportClient, false );
 	viewportWidget.SetEnabled( true );
@@ -35,6 +50,35 @@ void CStaticMeshEditorWindow::Init()
 	CImGUILayer::Init();
 	SetSize( Vector2D( 700.f, 450.f ) );
 
+	// Loading icons
+	std::wstring			errorMsg;
+	PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
+	check( package );
+
+	for ( uint32 index = 0; index < IT_Num; ++index )
+	{
+		const std::wstring				assetName	= CString::Format( TEXT( "StaticMeshEditor_%X" ), index );
+		TAssetHandle<CTexture2D>&		assetHandle = icons[index];
+		assetHandle = package->Find( assetName );
+		if ( !assetHandle.IsAssetValid() )
+		{
+			std::vector<TSharedPtr<CAsset>>		result;
+			if ( !CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Icons/" ) + GStaticMeshEditorIconPaths[index], result, errorMsg ) )
+			{
+				LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load static mesh editor icon '%s' for type 0x%X. Message: %s" ), GStaticMeshEditorIconPaths[index], index, errorMsg.c_str() );
+				assetHandle = GEngine->GetDefaultTexture();
+			}
+			else
+			{
+				TSharedPtr<CTexture2D>		texture2D = result[0];
+				texture2D->SetAssetName( assetName );
+				assetHandle = texture2D->GetAssetHandle();
+				package->Add( assetHandle );
+			}
+		}
+	}
+
+	// Ini select asset widgets
 	for ( uint32 index = 0, count = staticMesh->GetNumMaterials(); index < count; ++index )
 	{
 		TSharedPtr<CSelectAssetWidget>	selectAssetWidget = MakeSharedPtr<CSelectAssetWidget>( index );
@@ -72,6 +116,26 @@ void CStaticMeshEditorWindow::UpdateAssetInfo()
 
 void CStaticMeshEditorWindow::OnTick()
 {
+	// Menu bar
+	if ( ImGui::BeginMenuBar() )
+	{
+		// Button 'Import'
+		{
+			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), STATICMESHEDITOR_MENUBAR_BUTTONSIZE ) )
+			{
+				std::wstring		errorMsg;
+				if ( !GAssetFactory.Reimport( staticMesh, errorMsg ) )
+				{
+					OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The static mesh not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
+				}
+			}
+			if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+			{
+				ImGui::SetTooltip( "Reimport Static Mesh" );
+			}
+		}
+		ImGui::EndMenuBar();
+	}
 	ImGui::Columns( 2 );
 
 	// Static mesh preview
@@ -168,15 +232,6 @@ void CStaticMeshEditorWindow::OnTick()
 			}
 			ImGui::EndTable();
 		}
-	}
-}
-
-void CStaticMeshEditorWindow::OnVisibilityChanged( bool InNewVisibility )
-{
-	// If visibility of the window changed to FALSE, we destroy him
-	if ( !InNewVisibility )
-	{
-		Destroy();
 	}
 }
 

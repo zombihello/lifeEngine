@@ -1,8 +1,9 @@
 # Version 0.5.0 :: Next
 - [ ] Fix link count for DirectX 11 objects 
 - [ ] Fix depth buffer accuracy
-- [ ] Module architecture like in Source Engine (interface.h, CreateInterface factory etc)
+- [ ] Rewrite engine to module architecture (like in Doom 3 (https://github.com/id-Software/DOOM-3) or Source Engine)
 - [ ] Implement material shaders
+- [ ] Need refactor import/reimport assets with the ability to customize
  
  # Version 0.4.0 :: Now	
 - [ ] Migrate WorldEd's interface from Qt to ImGUI

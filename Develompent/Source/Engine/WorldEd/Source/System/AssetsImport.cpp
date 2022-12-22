@@ -131,7 +131,7 @@ bool CAudioBankImporter::Reimport( const TSharedPtr<CAsset>& InAudioBank, std::w
 	std::vector<TSharedPtr<CAsset>>		reimportedAssets{ InAudioBank };
 	SEditorDelegates::onAssetsReloaded.Broadcast( reimportedAssets );
 
-	return true;
+	return GFileSystem->IsExistFile( audioBank->GetAssetSourceFile() );
 }
 
 //
@@ -299,7 +299,7 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<S
 			memcpy( path.data(), InPath.data(), sizeof( std::wstring::value_type ) * path.size() );
 
 			++separatePos;
-			if ( separatePos < InPath.size() )
+			if ( !importSettings.bCombineMeshes && separatePos < InPath.size() )
 			{
 				meshName.resize( InPath.size() - separatePos );
 				memcpy( meshName.data(), InPath.data() + separatePos, sizeof( std::wstring::value_type ) * meshName.size() );

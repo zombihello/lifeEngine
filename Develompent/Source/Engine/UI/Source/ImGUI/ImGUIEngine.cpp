@@ -284,6 +284,10 @@ void CImGUILayer::Tick()
 		if ( !bVisibility )
 		{
 			OnVisibilityChanged( bVisibility );
+			if ( flags & LF_DestroyOnHide )
+			{
+				Destroy();
+			}
 		}
 	}
 }

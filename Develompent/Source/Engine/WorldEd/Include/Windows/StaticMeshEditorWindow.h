@@ -23,6 +23,15 @@ class CStaticMeshEditorWindow : public CImGUILayer
 {
 public:
 	/**
+	 * @brief Enumeration icon types
+	 */
+	enum EIconType
+	{
+		IT_Import,		/**< Icon for button 'Import' */
+		IT_Num			/**< Number of icon types */
+	};
+
+	/**
 	 * @brief Constructor
 	 * @param InStaticMesh	Static mesh
 	 */
@@ -50,12 +59,6 @@ protected:
 	 * @brief Method tick interface of a layer
 	 */
 	virtual void OnTick() override;
-
-	/**
-	 * @brief Method called when in the layer is changed visibility
-	 * @param InNewVisibility		New visibility
-	 */
-	virtual void OnVisibilityChanged( bool InNewVisibility ) override;
 
 private:
 	/**
@@ -102,6 +105,7 @@ private:
 	 */
 	void OnOpenAssetEditor( uint32 InAssetSlot );
 
+	TAssetHandle<CTexture2D>								icons[IT_Num];			/**< Array of icons */
 	TSharedPtr<CStaticMesh>									staticMesh;				/**< Static mesh */
 	CViewportWidget											viewportWidget;			/**< Viewport widget */
 	class CStaticMeshPreviewViewportClient*					viewportClient;			/**< Viewport client */

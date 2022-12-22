@@ -26,6 +26,7 @@
 #include "Windows/TextureEditorWindow.h"
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/StaticMeshEditorWindow.h"
+#include "Windows/AudioBankEditorWindow.h"
 
 // Dialogs
 #include "Windows/ImportSettingsDialogs.h"
@@ -2722,6 +2723,7 @@ void CContentBrowserWindow::CAssetNode::ProcessEvents()
 			case AT_Texture2D:	MakeSharedPtr<CTextureEditorWindow>( asset )->Init();		break;
 			case AT_Material:	MakeSharedPtr<CMaterialEditorWindow>( asset )->Init();		break;
 			case AT_StaticMesh:	MakeSharedPtr<CStaticMeshEditorWindow>( asset )->Init();	break;
+			case AT_AudioBank:	MakeSharedPtr<CAudioBankEditorWindow>( asset )->Init();		break;
 			default:
 				appErrorf( TEXT( "Unsupported asset type 0x%X" ), info->type );
 				break;

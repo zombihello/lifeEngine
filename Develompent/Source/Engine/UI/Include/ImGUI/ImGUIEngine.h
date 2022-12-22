@@ -424,6 +424,14 @@ public:
 
 protected:
 	/**
+	 * @brief Enumeration of ImGUI layer flags
+	 */
+	enum ELayerFlags
+	{
+		LF_DestroyOnHide		= 1 << 30	/**< Is need destroy layer after him is hided */
+	};
+
+	/**
 	 * @brief Destroy ImGUILayer and remove him from tick list
 	 */
 	void Destroy();

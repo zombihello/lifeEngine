@@ -75,7 +75,7 @@ CTextureEditorWindow::CTextureEditorWindow( const TSharedPtr<CTexture2D>& InText
 	, texture2D( InTexture2D )
 	, viewportClient( new CTexturePreviewViewportClient( InTexture2D ) )
 {
-	flags |= ImGuiWindowFlags_MenuBar;
+	flags |= ImGuiWindowFlags_MenuBar | LF_DestroyOnHide;
 
 	// Init preview viewport
 	viewportWidget.SetViewportClient( viewportClient, false );
@@ -347,14 +347,5 @@ void CTextureEditorWindow::OnTick()
 			}
 			ImGui::EndTable();
 		}
-	}
-}
-
-void CTextureEditorWindow::OnVisibilityChanged( bool InNewVisibility )
-{
-	// If visibility of the window changed to FALSE, we destroy him
-	if ( !InNewVisibility )
-	{
-		Destroy();
 	}
 }

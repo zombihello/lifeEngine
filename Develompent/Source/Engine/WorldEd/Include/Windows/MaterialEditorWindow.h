@@ -46,12 +46,6 @@ protected:
 	 */
 	virtual void OnTick() override;
 
-	/**
-	 * @brief Method called when in the layer is changed visibility
-	 * @param InNewVisibility		New visibility
-	 */
-	virtual void OnVisibilityChanged( bool InNewVisibility ) override;
-
 private:
 	/**
 	 * @brief Select asset handle
