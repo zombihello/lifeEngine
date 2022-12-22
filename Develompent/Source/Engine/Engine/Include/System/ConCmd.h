@@ -73,4 +73,14 @@ private:
 	COnExecCmd		onExecCmd;		/**< Execute command delegate */
 };
 
+/**
+ * @brief Get console commands
+ * @return Return array of console commands
+ */
+FORCEINLINE std::vector<CConCmd*>& GetGlobalConCmds()
+{
+	static std::vector<CConCmd*>	cmds;
+	return cmds;
+}
+
 #endif // !CONCMD_H

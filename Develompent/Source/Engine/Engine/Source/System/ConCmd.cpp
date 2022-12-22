@@ -7,10 +7,18 @@ CConCmd::CConCmd( const std::wstring& InName, const std::wstring& InHelpText, co
 	, helpText( InHelpText )
 {
 	onExecCmd.Bind( InExecDelegate );
-	CConsoleSystem::RegisterCmd( this );
+	GetGlobalConCmds().push_back( this );
 }
 
 CConCmd::~CConCmd()
 {
-	CConsoleSystem::UnRegisterCmd( this );
+	std::vector<CConCmd*>&		cmds = GetGlobalConCmds();
+	for ( uint32 index = 0, count = cmds.size(); index < count; ++index )
+	{
+		if ( cmds[index] == this )
+		{
+			cmds.erase( cmds.begin() + index );
+			break;
+		}
+	}
 }

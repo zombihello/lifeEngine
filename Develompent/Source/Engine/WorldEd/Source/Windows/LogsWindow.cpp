@@ -87,6 +87,6 @@ void CLogsWindow::ExecCommand( const std::string& InCommand )
 {
 	if ( !InCommand.empty() )
 	{
-		CConsoleSystem::Exec( ANSI_TO_TCHAR( InCommand.c_str() ) );
+		GConsoleSystem.Exec( ANSI_TO_TCHAR( InCommand.c_str() ) );
 	}
 }

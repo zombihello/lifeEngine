@@ -4,6 +4,7 @@
 #include "System/InputSystem.h"
 #include "System/World.h"
 #include "System/CameraManager.h"
+#include "System/ConsoleSystem.h"
 
 // -------------
 // GLOBALS
@@ -25,3 +26,4 @@ bool														GAllowDebugShaderDump = false;
 #endif // WITH_EDITOR
 
 class CFullScreenMovieSupport*								GFullScreenMovie = nullptr;
+CConsoleSystem												GConsoleSystem;

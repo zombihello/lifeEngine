@@ -306,4 +306,14 @@ private:
 	mutable COnChangeVar		onChangeVar;	/**< Change variable delegate */
 };
 
+/**
+ * @brief Get console variables
+ * @return Return array of console variables
+ */
+FORCEINLINE std::vector<CConVar*>& GetGlobalConVars()
+{
+	static std::vector<CConVar*>	vars;
+	return vars;
+}
+
 #endif // !CONVAR_H

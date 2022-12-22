@@ -6,36 +6,6 @@
 //
 CConCmd			CCmdHelp( TEXT( "help" ), TEXT( "Show help variables and comands" ), std::bind( &CConsoleSystem::CmdHelp, std::placeholders::_1 ) );
 
-void CConsoleSystem::UnRegisterVar( CConVar* InConVar )
-{
-	check( InConVar );
-	std::vector<CConVar*>&		vars = GetConVars();
-	
-	for ( uint32 index = 0, count = vars.size(); index < count; ++index )
-	{
-		if ( vars[index] == InConVar )
-		{
-			vars.erase( vars.begin() + index );
-			break;
-		}
-	}
-}
-
-void CConsoleSystem::UnRegisterCmd( CConCmd* InConCmd )
-{
-	check( InConCmd );
-	std::vector<CConCmd*>& cmds = GetConCmds();
-
-	for ( uint32 index = 0, count = cmds.size(); index < count; ++index )
-	{
-		if ( cmds[index] == InConCmd )
-		{
-			cmds.erase( cmds.begin() + index );
-			break;
-		}
-	}
-}
-
 bool CConsoleSystem::Exec( const std::wstring& InCommand )
 {
 	if ( InCommand.empty() )
@@ -144,7 +114,7 @@ bool CConsoleSystem::Exec( const std::wstring& InCommand )
 
 CConVar* CConsoleSystem::FindVar( const std::wstring& InName )
 {
-	std::vector<CConVar*>&		vars = GetConVars();
+	std::vector<CConVar*>&		vars = GetGlobalConVars();
 	for ( uint32 index = 0, count = vars.size(); index < count; ++index )
 	{
 		if ( vars[index]->GetName() == InName )
@@ -158,7 +128,7 @@ CConVar* CConsoleSystem::FindVar( const std::wstring& InName )
 
 CConCmd* CConsoleSystem::FindCmd( const std::wstring& InName )
 {
-	std::vector<CConCmd*>&		cmds = GetConCmds();
+	std::vector<CConCmd*>&		cmds = GetGlobalConCmds();
 	for ( uint32 index = 0, count = cmds.size(); index < count; ++index )
 	{
 		if ( cmds[index]->GetName() == InName )
@@ -176,7 +146,7 @@ void CConsoleSystem::CmdHelp( const std::vector<std::wstring>& InArguments )
 	LE_LOG( LT_Log, LC_Console, TEXT( "" ) );
 	LE_LOG( LT_Log, LC_Console, TEXT( "** Console variables **" ) );
 	{
-		std::vector<CConVar*>&		vars = GetConVars();
+		std::vector<CConVar*>&		vars = GetGlobalConVars();
 		for ( uint32 index = 0, count = vars.size(); index < count; ++index )
 		{
 			CConVar*	var = vars[index];
@@ -188,7 +158,7 @@ void CConsoleSystem::CmdHelp( const std::vector<std::wstring>& InArguments )
 	LE_LOG( LT_Log, LC_Console, TEXT( "" ) );
 	LE_LOG( LT_Log, LC_Console, TEXT( "** Console commands **" ) );
 	{
-		std::vector<CConCmd*>&		cmds = GetConCmds();
+		std::vector<CConCmd*>&		cmds = GetGlobalConCmds();
 		for ( uint32 index = 0, count = cmds.size(); index < count; ++index )
 		{
 			CConCmd*	cmd = cmds[index];

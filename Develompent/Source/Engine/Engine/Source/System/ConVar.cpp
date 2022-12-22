@@ -16,7 +16,7 @@ CConVar::CConVar( const std::wstring& InName, const std::wstring& InDefaultValue
 	, minVar( InMin )
 	, maxVar( InMax )
 {
-	CConsoleSystem::RegisterVar( this );
+	GetGlobalConVars().push_back( this );
 	SetValue( InDefaultValue, InType );
 }
 
@@ -32,13 +32,22 @@ CConVar::CConVar( const std::wstring& InName, const std::wstring& InDefaultValue
 	, minVar( 0.f )
 	, maxVar( 0.f )
 {
-	CConsoleSystem::RegisterVar( this );
+	GetGlobalConVars().push_back( this );
 	SetValue( InDefaultValue, InType );
 }
 
 CConVar::~CConVar()
 {
-	CConsoleSystem::UnRegisterVar( this );
+	std::vector<CConVar*>&	vars = GetGlobalConVars();
+	for ( uint32 index = 0, count = vars.size(); index < count; ++index )
+	{
+		if ( vars[index] == this )
+		{
+			vars.erase( vars.begin() + index );
+			break;
+		}
+	}
+
 	DeleteValue();
 }
 

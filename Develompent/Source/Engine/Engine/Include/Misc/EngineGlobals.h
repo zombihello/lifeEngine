@@ -94,4 +94,10 @@ extern bool						GAllowDebugShaderDump;
  */
 extern class CFullScreenMovieSupport*		GFullScreenMovie;
 
+/**
+ * @ingroup Engine
+ * @brief Console system
+ */
+extern class CConsoleSystem					GConsoleSystem;
+
 #endif // !ENGINEGLOBALS_H
