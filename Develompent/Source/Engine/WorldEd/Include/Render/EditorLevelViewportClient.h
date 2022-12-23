@@ -14,7 +14,6 @@
 #include "Render/EditorCommonDrawHelper.h"
 #include "Render/HitProxies.h"
 #include "System/WindowEvent.h"
-#include "System/Gizmo.h"
 
 /**
  * @ingroup WorldEd
@@ -30,7 +29,6 @@ public:
 	{
 		MT_None,		/**< No mouse tracking */
 		MT_View,		/**< Tacking mouse for view */
-		MT_Gizmo		/**< Tacking mouse for gizmo */
 	};
 
 	/**
@@ -158,22 +156,41 @@ public:
 	}
 
 	/**
-	 * @brief Set gizmo
-	 * @param InNewGizmo	New gizmo
+	 * @brief Get view location
+	 * @return Return view location
 	 */
-	FORCEINLINE void SetGizmo( CGizmo* InNewGizmo )
+	FORCEINLINE const Vector& GetViewLocation() const
 	{
-		gizmo = InNewGizmo;
+		return viewLocation;
 	}
 
 	/**
-	 * @brief Get gizmo
-	 * @return Return pointer to gizmo, if not exist returning NULL
+	 * @brief Get view rotation in euler angles
+	 * @return Return view rotation in euler angles
 	 */
-	FORCEINLINE CGizmo* GetGizmo() const
+	FORCEINLINE const Vector& GetViewRotationEuler() const
 	{
-		return gizmo;
+		return viewRotationEuler;
 	}
+
+	/**
+	 * @brief Get view rotation in quaternion
+	 * @return Return view rotation in quaternion
+	 */
+	FORCEINLINE const Quaternion& GetViewRotationQuat() const
+	{
+		return viewRotationQuat;
+	}
+
+	/**
+	 * @brief Calculate scene view
+	 *
+	 * @warning Need delete allocated pointer
+	 * @param InSizeX	Size X
+	 * @param InSizeY	Size Y
+	 * @return Return scene view
+	 */
+	virtual class CSceneView* CalcSceneView( uint32 InSizeX, uint32 InSizeY );
 
 protected:
 	/**
@@ -188,31 +205,10 @@ protected:
 	};
 
 	/**
-	 * @brief Calculate scene view
-	 * 
-	 * @warning Need delete allocated pointer
-	 * @param InSizeX	Size X
-	 * @param InSizeY	Size Y
-	 * @return Return scene view
-	 */
-	virtual class CSceneView* CalcSceneView( uint32 InSizeX, uint32 InSizeY );
-
-	/**
 	 * @brief Get background color
 	 * @return Return background color
 	 */
 	virtual CColor GetBackgroundColor() const;
-
-	/**
-	 * Converts the delta movement to drag/rotation/scale based on gizmo axis
-	 * 
-	 * @param InDragDelta		Muse move delta
-	 * @param OutDrag			Output delta of move
-	 * @param OutRotation		Output delta of rotation
-	 * @param OutScale			Output delta of scale
-	 * @param InSceneView		Scene view. This parameter using only for perspective viewport type
-	 */
-	void ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, Quaternion& OutRotation, Vector& OutScale, class CSceneView* InSceneView = nullptr );
 
 	bool						bSetListenerPosition;	/**< Is need sets the listener position */
 	EMouseTracking				trackingType;			/**< Mouse tacking type */
@@ -228,7 +224,6 @@ protected:
 	ShowFlags_t					showFlags;				/**< Show flags */
 	CEditorCommonDrawHelper		drawHelper;				/**< Draw helper */
 	byte						cameraMoveFlags;		/**< Camera move flags */
-	CGizmo*						gizmo;					/**< Gizmo for rendering pivot */
 };
 
 #endif // !EDITORLEVELVIEWPORTCLIENT_H

@@ -33,13 +33,16 @@
 #include "Windows/ImportSettingsDialogs.h"
 
 /** Border size for buttons in asset viewer */
-#define CONTENTBROWSER_ASSET_BORDERSIZE		1.f
+#define CONTENTBROWSER_ASSET_BORDERSIZE				1.f
 
 /** Selection colode */
-#define CONTENTBROWSER_SELECTCOLOR			ImVec4( 0.f, 0.43f, 0.87f, 1.f )
+#define CONTENTBROWSER_SELECTCOLOR					ImVec4( 0.f, 0.43f, 0.87f, 1.f )
 
 /** Internal drag & drop type of a file node */
-#define CONTENTBROWSER_DND_FILENODETYPE		"DND::FileNode"
+#define CONTENTBROWSER_DND_FILENODETYPE				"DND::FileNode"
+
+/** Default separator position */
+#define CONTENTBROWSER_DEFAULTSEPARATORPOSITION		230.f
 
 /**
  * @ingroup WorldEd
@@ -1339,6 +1342,7 @@ private:
 
 CContentBrowserWindow::CContentBrowserWindow( const std::wstring& InName )
 	: CImGUILayer( InName )
+	, bSeparatorInit( false )
 	, padding( 16.f )
 	, thumbnailSize( 64.f )
 {}
@@ -1382,7 +1386,7 @@ void CContentBrowserWindow::OnTick()
 	}
 
 	ImGui::Columns( 2 );
-
+	
 	// Draw file system tree
 	{
 		ImGui::InputTextWithHint( "##FilterPackages", "Search", &filterInfo.fileName );
@@ -1406,6 +1410,12 @@ void CContentBrowserWindow::OnTick()
 
 	// Draw assets list
 	{
+		if ( !bSeparatorInit )
+		{
+			ImGui::SetColumnOffset( -1, CONTENTBROWSER_DEFAULTSEPARATORPOSITION );
+			bSeparatorInit = true;
+		}
+
 		ImGui::InputTextWithHint( "##FilterAssets", "Search", &filterInfo.assetName );
 		ImGui::SameLine( 0, 0 );
 		if ( ImGui::Button( "X##1" ) )

@@ -15,7 +15,6 @@
 #include "System/EditorEngine.h"
 #include "System/InputSystem.h"
 #include "System/World.h"
-#include "System/Gizmo.h"
 #include "System/BaseWindow.h"
 #include "ImGUI/ImGUIEngine.h"
 #include "Actors/Actor.h"
@@ -76,7 +75,6 @@ CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InVie
 	, cameraSpeed( MIN_CAMERA_SPEED )
 	, showFlags( SHOW_DefaultEditor )
 	, cameraMoveFlags( 0x0 )
-	, gizmo( nullptr )
 {
 	SetViewportType( InViewportType );
 }
@@ -128,12 +126,6 @@ void CEditorLevelViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportR
 	
 	// Draw grid
 	drawHelper.DrawGrid( InSceneView, viewportType, scene );
-	
-	// Draw gizmo
-	if ( gizmo && gizmo->IsEnabled() )
-	{
-		gizmo->Draw_RenderThread( InViewportRHI, InSceneView, scene, viewportType );
-	}
 
 	// Draw scene
 	sceneRenderer.Render( InViewportRHI );
@@ -170,12 +162,6 @@ void CEditorLevelViewportClient::DrawHitProxies_RenderThread( ViewportRHIRef_t I
 	// Draw hit proxies
 	GRHI->SetViewport( immediateContext, 0, 0, 0.f, InViewportRHI->GetWidth(), InViewportRHI->GetHeight(), 1.f );
 	sceneRenderer.BeginRenderHitProxiesViewTarget( InViewportRHI );
-
-	// Draw gizmo
-	if ( gizmo && gizmo->IsEnabled() )
-	{
-		gizmo->Draw_RenderThread( InViewportRHI, InSceneView, scene, viewportType );
-	}
 
 	// Draw scene
 	sceneRenderer.RenderHitProxies( InViewportRHI, InHitProxyLayer );
@@ -354,10 +340,6 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 			trackingType = MT_View;
 		}
-		else if ( gizmo && InWindowEvent.events.mouseButton.code == BC_MouseLeft && gizmo->IsEnabled() && gizmo->GetCurrentAxis() > A_None )
-		{
-			trackingType = MT_Gizmo;
-		}
 		break;
 
 		// Event of mouse released
@@ -376,10 +358,6 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 			trackingType		= MT_None;
 			cameraMoveFlags		= 0x0;
-		}
-		else if ( trackingType == MT_Gizmo && InWindowEvent.events.mouseButton.code == BC_MouseLeft )
-		{
-			trackingType = MT_None;
 		}
 		break;
 
@@ -494,60 +472,6 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 				viewRotationQuat = SMath::AnglesToQuaternionZXY( viewRotationEuler );
 			}
 		}
-		
-		// Apply transformation for object if we traking mouse for MT_Gizmo
-		else if ( gizmo && trackingType == MT_Gizmo )
-		{
-			Vector		drag;
-			Quaternion	rotator;
-			Vector		scale;
-
-			for ( uint32 axis = 0; axis < 2; ++axis )
-			{
-				Vector2D	delta( 0.f, 0.f );
-				delta[ axis ] = moveDelta[ axis ];
-				if ( delta.x != 0.f || delta.y != 0.f )
-				{
-					// Convert movement mouse to drag/rotate/scale
-					ConvertMovementDeltaToDragRot( delta, drag, rotator, scale );
-
-					// Apply transform to actors
-					const std::vector<ActorRef_t>&	selectedActors = GWorld->GetSelectedActors();
-					switch ( gizmo->GetType() )
-					{
-					// Translate gizmo
-					case GT_Translate:
-						for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
-						{
-							ActorRef_t		actor = selectedActors[ index ];
-							actor->AddActorLocation( drag );
-						}
-
-						CGizmo::OnUpdateAllGizmo().Broadcast( gizmo->IsEnabled(), gizmo->GetLocation() + drag );
-						break;
-
-					// Rotate gizmo
-					case GT_Rotate:
-						for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
-						{
-							ActorRef_t		actor = selectedActors[ index ];
-							actor->AddActorRotation( rotator );
-						}
-						break;
-
-					// Scale gizmo
-					case GT_Scale:
-					case GT_ScaleNonUniform:
-						for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
-						{
-							ActorRef_t		actor = selectedActors[ index ];
-							actor->AddActorScale( scale );
-						}
-						break;
-					}
-				}
-			}
-		}
 		break;
 	}
 
@@ -578,145 +502,6 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			}
 		}
 		break;
-	}
-}
-
-void CEditorLevelViewportClient::ConvertMovementDeltaToDragRot( const Vector2D& InDragDelta, Vector& OutDrag, Quaternion& OutRotation, Vector& OutScale, class CSceneView* InSceneView /* = nullptr */ )
-{
-	if ( !gizmo )
-	{
-		return;
-	}
-
-	Vector2D	axisEnd;
-	uint32		currentAxis = gizmo->GetCurrentAxis();
-	Vector2D	dragDelta	= InDragDelta;
-
-	OutDrag		= SMath::vectorZero;
-	OutRotation = SMath::quaternionZero;
-	OutScale	= SMath::vectorOne;
-
-	// We apply an increase in offset depending on the distance of the camera to gizmo point (for viewport type LVT_Perspective) 
-	if ( gizmo->GetType() == GT_Translate )
-	{
-		if ( viewportType == LVT_Perspective )
-		{
-			dragDelta *= SMath::DistanceVector( viewLocation, gizmo->GetLocation() ) / viewFOV / 4.f;
-		}
-		else
-		{
-			dragDelta *= orthoZoom / CAMERA_ZOOM_DIV;
-		}
-	}
-
-	// Screen space Y axis is inverted
-	dragDelta.y *= -1.f;
-
-	// To move objects in perspective on a plane, we consider offsets relative to the camera
-	if ( viewportType == LVT_Perspective && gizmo->GetType() == GT_Translate )
-	{
-		switch ( currentAxis )
-		{
-		case A_X | A_Y:
-		case A_X | A_Z:
-		case A_Y | A_Z:
-		{
-			CViewport*		viewport = GetViewport();
-			if ( viewport )
-			{
-				CSceneView*	sceneView		= CalcSceneView( viewport->GetSizeX(), viewport->GetSizeY() );
-				Matrix		cameraToWorld	= SMath::InverseMatrix( sceneView->GetViewMatrix() );
-				OutDrag		= cameraToWorld * Vector4D( dragDelta.x, dragDelta.y, 0.f, 0.f );
-				
-				switch ( currentAxis )
-				{
-				case A_X | A_Y:		OutDrag.z = 0.f;	break;
-				case A_X | A_Z:		OutDrag.y = 0.f;	break;
-				case A_Y | A_Z:		OutDrag.x = 0.f;	break;
-				}
-
-				delete sceneView;
-			}
-			return;
-		}
-		}
-	}
-
-	// Get the end of the axis (in screen space) based on which axis is being pulled
-	switch ( currentAxis )
-	{
-	case A_X:					axisEnd = gizmo->GetAxisXEnd();												break;
-	case A_Y:					axisEnd = gizmo->GetAxisYEnd();												break;
-	case A_Z:					axisEnd = gizmo->GetAxisZEnd();												break;
-	case A_X | A_Y:				axisEnd = dragDelta.x != 0 ? gizmo->GetAxisXEnd() : gizmo->GetAxisYEnd();	break;
-	case A_X | A_Z:				axisEnd = dragDelta.x != 0 ? gizmo->GetAxisXEnd() : gizmo->GetAxisZEnd();	break;
-	case A_Y | A_Z:				axisEnd = dragDelta.x != 0 ? gizmo->GetAxisYEnd() : gizmo->GetAxisZEnd();	break;
-	case A_X | A_Y | A_Z:		axisEnd = dragDelta.x != 0 ? gizmo->GetAxisYEnd() : gizmo->GetAxisZEnd();	break;
-	default:																								break;
-	}
-
-	// Get the directions of the axis (on the screen)
-	Vector2D	axisDir = axisEnd - gizmo->GetScreenLocation();
-
-	// Use the most dominant axis the mouse is being dragged along
-	int32		idx = 0;
-	if ( SMath::Abs( dragDelta.x ) < SMath::Abs( dragDelta.y ) )
-	{
-		idx = 1;
-	}
-	float		value = dragDelta[ idx ];
-
-	// If the axis dir is negative, it is pointing in the negative screen direction.  In this situation, the mouse
-	// drag must be inverted so that you are still dragging in the right logical direction.
-	//
-	// For example, if the X axis is pointing left and you drag left, this will ensure that the widget moves left.
-	// Only valid for single axis movement.  For planar movement, this widget gets caught up at the origin and oscillates
-	if ( axisDir[ idx ] < 0.f && ( currentAxis == A_X || currentAxis == A_Y || currentAxis == A_Z ) )
-	{
-		value *= -1.f;
-	}
-
-	switch ( gizmo->GetType() )
-	{
-	// Translate gizmo
-	case GT_Translate:
-		switch ( currentAxis )
-		{
-		case A_X:			OutDrag = Vector( value, 0.f, 0.f );													break;
-		case A_Y:			OutDrag = Vector( 0.f, value, 0.f );													break;
-		case A_Z:			OutDrag = Vector( 0.f, 0.f, value );													break;
-		case A_X | A_Y:		OutDrag = dragDelta.x != 0 ? Vector( -value, 0.f, 0.f ) : Vector( 0.f, value, 0.f );	break;
-		case A_X | A_Z:		OutDrag = dragDelta.x != 0 ? Vector( -value, 0.f, 0.f ) : Vector( 0.f, 0.f, value );	break;
-		case A_Y | A_Z:		OutDrag = dragDelta.x != 0 ? Vector( 0.f, 0.f, value ) : Vector( 0.f, value, 0.f );		break;
-		}
-		break;
-
-	// Rotate gizmo
-	case GT_Rotate:
-		switch ( currentAxis )
-		{
-		case A_X:		OutRotation = SMath::AnglesToQuaternionXYZ( Vector( value, 0.f, 0.f ) );	break;
-		case A_Y:		OutRotation = SMath::AnglesToQuaternionXYZ( Vector( 0.f, value, 0.f ) );	break;
-		case A_Z:		OutRotation = SMath::AnglesToQuaternionXYZ( Vector( 0.f, 0.f, value ) );	break;
-		default:		checkMsg( false, TEXT( "Axis not correctly set while rotating!" ) );		break;
-		}
-		break;
-
-	// Scale gizmo
-	case GT_Scale:
-		OutScale = Vector( 0.005f, 0.005f, 0.005f ) * value;
-		break;
-
-	case GT_ScaleNonUniform:
-		switch ( currentAxis )
-		{
-		case A_X:				OutScale = Vector( 0.005f * value, 0.f, 0.f );																break;
-		case A_Y:				OutScale = Vector( 0.f, 0.005f * value, 0.f );																break;
-		case A_Z:				OutScale = Vector( 0.f, 0.f, 0.005f * value );																break;
-		case A_X | A_Y:			OutScale = dragDelta.x != 0 ? Vector( 0.005f * value, 0.f, 0.f )	: Vector( 0.f, 0.005f * value, 0.f );	break;
-		case A_X | A_Z:			OutScale = dragDelta.x != 0 ? Vector( 0.005f * value, 0.f, 0.f )	: Vector( 0.f, 0.f, -0.005f * value );	break;
-		case A_Y | A_Z:			OutScale = dragDelta.x != 0 ? Vector( 0.f, 0.f, -0.005f * value )	: Vector( 0.f, 0.005f * value, 0.f );	break;														break;
-		}
 	}
 }
 

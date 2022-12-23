@@ -50,7 +50,7 @@ static_assert( ARRAY_COUNT( GTextureEditorIconPaths ) == CTextureEditorWindow::I
 /** Is need pop style color of a button */
 static bool GImGui_ButtonNeedPopStyleColor = false;
 
-void ImGui_ButtonSetButtonSelectedStyle()
+static void ImGui_ButtonSetButtonSelectedStyle()
 {
 	if ( !GImGui_ButtonNeedPopStyleColor )
 	{
@@ -61,7 +61,7 @@ void ImGui_ButtonSetButtonSelectedStyle()
 	}
 }
 
-void ImGui_ButtonPopStyleColor()
+static void ImGui_ButtonPopStyleColor()
 {
 	if ( GImGui_ButtonNeedPopStyleColor )
 	{

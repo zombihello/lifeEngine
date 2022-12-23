@@ -1,4 +1,5 @@
 #include "LEBuild.h"
+#include "LEVersion.h"
 
 #if WITH_EDITOR
 IDI_ICON1               ICON        "EleotEditor.ico"
@@ -24,10 +25,10 @@ BEGIN
         BEGIN
             VALUE "CompanyName", 		"Broken Singularity"
             VALUE "InternalName", 		""
-            VALUE "LegalCopyright", 	"Copyright © 2022 Broken Singularity"
+            VALUE "LegalCopyright", 	"Copyright 2022 Broken Singularity"
             VALUE "OriginalFilename", 	""
             VALUE "ProductName", 		"EleotGame"
-			VALUE "ProductVersion", 	"0.1.0"
+			VALUE "ProductVersion", 	ENGINE_NAME " " ENGINE_VERSION_STRING
         END
     END
     BLOCK "VarFileInfo"

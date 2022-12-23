@@ -6,8 +6,8 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#ifndef VIEWPORTWINDOW_H
-#define VIEWPORTWINDOW_H
+#ifndef LEVELVIEWPORTWINDOW_H
+#define LEVELVIEWPORTWINDOW_H
 
 #include "Misc/RefCountPtr.h"
 #include "ImGUI/ImGUIEngine.h"
@@ -15,14 +15,27 @@
 #include "Render/RenderTarget.h"
 #include "Render/EditorLevelViewportClient.h"
 #include "Widgets/ViewportWidget.h"
+#include "ImGUI/ImGuizmo.h"
 
 /**
  * @ingroup WorldEd
- * @brief Viewport window
+ * @brief Level viewport window
  */
-class CViewportWindow : public CImGUILayer
+class CLevelViewportWindow : public CImGUILayer
 {
 public:
+	/**
+	 * @brief Enumeration icon types
+	 */
+	enum EIconType
+	{
+		IT_ToolSelect,		/**< Tool select */
+		IT_ToolTranslate,	/**< Tool translate */
+		IT_ToolRotate,		/**< Tool rotate */
+		IT_ToolScale,		/**< Tool scale */
+		IT_Num				/**< Number of icon types */
+	};
+
 	/**
 	 * @brief Constructor
 	 *
@@ -30,7 +43,7 @@ public:
 	 * @param InVisibility		Default visibility of the viewport window. If is FALSE him will not draw
 	 * @param InViewportType	Viewport type
 	 */
-	CViewportWindow( const std::wstring& InName, bool InVisibility = true, ELevelViewportType InViewportType = LVT_Perspective );
+	CLevelViewportWindow( const std::wstring& InName, bool InVisibility = true, ELevelViewportType InViewportType = LVT_Perspective );
 
 	/**
 	 * @brief Init
@@ -57,8 +70,13 @@ protected:
 	virtual void OnVisibilityChanged( bool InNewVisibility ) override;
 
 private:
+	bool							bGuizmoUsing;			/**< Is using ImGuizmo now */
+	TAssetHandle<CTexture2D>		icons[IT_Num];			/**< Array of icons */
+	ImGuizmo::OPERATION				guizmoOperationType;	/**< ImGuizmo operation type */
+	ImGuizmo::MODE					guizmoModeType;			/**< ImGuizmo mode type */
+	ImVec2							viewportScreenPos;		/**< Viewport screen position */
 	CEditorLevelViewportClient		viewportClient;			/**< Viewport client */
 	CViewportWidget					viewportWidget;			/**< Viewport widget */
 };
 
-#endif // !VIEWPORTWINDOW_H
+#endif // !LEVELVIEWPORTWINDOW_H

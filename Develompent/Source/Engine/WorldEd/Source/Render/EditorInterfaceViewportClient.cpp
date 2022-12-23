@@ -64,10 +64,10 @@ void CEditorInterfaceViewportClient::Draw( CViewport* InViewport )
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetContentBrowserWindow()->GetName().c_str() ), dockIdContentBrowser );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetActorClassesWindow()->GetName().c_str() ), dockIdDown );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLogsWindow()->GetName().c_str() ), dockIdDown );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetViewportWindow( LVT_Perspective )->GetName().c_str() ), dockspaceId );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetViewportWindow( LVT_OrthoXY )->GetName().c_str() ), dockIdViewportXY );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetViewportWindow( LVT_OrthoXZ )->GetName().c_str() ), dockIdViewportXZ );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetViewportWindow( LVT_OrthoYZ )->GetName().c_str() ), dockIdViewportYZ );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLevelViewportWindow( LVT_Perspective )->GetName().c_str() ), dockspaceId );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLevelViewportWindow( LVT_OrthoXY )->GetName().c_str() ), dockIdViewportXY );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLevelViewportWindow( LVT_OrthoXZ )->GetName().c_str() ), dockIdViewportXZ );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLevelViewportWindow( LVT_OrthoYZ )->GetName().c_str() ), dockIdViewportYZ );
 			ImGui::DockBuilderFinish( dockspaceId );
 		}
 	}

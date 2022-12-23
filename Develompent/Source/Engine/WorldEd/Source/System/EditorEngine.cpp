@@ -93,16 +93,16 @@ void CEditorEngine::Init()
 	logsWindow							= MakeSharedPtr<CLogsWindow>( TEXT( "Logs" ) );
 	logsWindow->Init();
 
-	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CViewportWindow>( TEXT( "Ortho XY" ), false, LVT_OrthoXY );
+	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CLevelViewportWindow>( TEXT( "Ortho XY" ), false, LVT_OrthoXY );
 	viewportWindows[LVT_OrthoXY]->Init();
 
-	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CViewportWindow>( TEXT( "Ortho XZ" ), false, LVT_OrthoXZ );
+	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CLevelViewportWindow>( TEXT( "Ortho XZ" ), false, LVT_OrthoXZ );
 	viewportWindows[LVT_OrthoXZ]->Init();
 
-	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CViewportWindow>( TEXT( "Ortho YZ" ), false, LVT_OrthoYZ );
+	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CLevelViewportWindow>( TEXT( "Ortho YZ" ), false, LVT_OrthoYZ );
 	viewportWindows[LVT_OrthoYZ]->Init();
 
-	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CViewportWindow>( TEXT( "Perspective" ), true, LVT_Perspective );
+	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CLevelViewportWindow>( TEXT( "Perspective" ), true, LVT_Perspective );
 	viewportWindows[LVT_Perspective]->Init();
 }
 

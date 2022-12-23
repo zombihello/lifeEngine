@@ -25,7 +25,7 @@
 #include "Windows/ContentBrowserWindow.h"
 #include "Windows/ExplorerLevelWindow.h"
 #include "Windows/LogsWindow.h"
-#include "Windows/ViewportWindow.h"
+#include "Windows/LevelViewportWindow.h"
 
 /**
  * @ingroup WorldEd
@@ -249,12 +249,12 @@ public:
 	}
 
 	/**
-	 * @brief Get viewport window
+	 * @brief Get level viewport window
 	 * 
 	 * @param InViewportType	Viewport type
 	 * @return Return reference to viewport window
 	 */
-	FORCEINLINE const TSharedPtr<CViewportWindow>& GetViewportWindow( ELevelViewportType InViewportType ) const
+	FORCEINLINE const TSharedPtr<CLevelViewportWindow>& GetLevelViewportWindow( ELevelViewportType InViewportType ) const
 	{
 		return viewportWindows[InViewportType];
 	}
@@ -277,7 +277,7 @@ private:
 	TSharedPtr<CContentBrowserWindow>			contentBrowserWindow;				/**< Content browser window */
 	TSharedPtr<CExplorerLevelWindow>			explorerLevelWindow;				/**< Explorer level window */
 	TSharedPtr<CLogsWindow>						logsWindow;							/**< Logs window */
-	TSharedPtr<CViewportWindow>					viewportWindows[LVT_Max];			/**< Viewport windows */
+	TSharedPtr<CLevelViewportWindow>			viewportWindows[LVT_Max];			/**< Level viewport windows */
 };
 
 #endif // !EDITORENGINE_H

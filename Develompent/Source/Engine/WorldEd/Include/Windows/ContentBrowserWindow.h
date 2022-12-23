@@ -544,6 +544,7 @@ private:
 	 */
 	void PopupMenu_Asset_CopyReference( const CAssetNode& InAsset );
 
+	bool						bSeparatorInit;				/**< Is separator inited */
 	TSharedPtr<CFileTreeNode>	engineRoot;					/**< Engine root directory */
 	TSharedPtr<CFileTreeNode>	gameRoot;					/**< Game root directory */
 	TSharedPtr<CFileTreeNode>	hoveredNode;				/**< Hovered node in now time */

@@ -12,6 +12,7 @@
 #include "RHI/BaseDeviceContextRHI.h"
 #include "Render/RenderingThread.h"
 #include "ImGUI/ImGUIEngine.h"
+#include "ImGUI/ImGuizmo.h"
 #include "Misc/UIGlobals.h"
 #include "System/ConsoleSystem.h"
 
@@ -540,6 +541,7 @@ void CImGUIEngine::BeginDraw()
 {
 	appImGUIBeginDrawing();
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 
 	// Hide cursor if need
 	if ( !bShowCursor )
