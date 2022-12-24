@@ -350,7 +350,7 @@ public:
 	{
 		if ( bDirtyMatrix )
 		{
-			matrix			= SMath::TranslateMatrix( translation ) * SMath::ScaleMatrix( scale ) * SMath::QuaternionToMatrix( rotation );
+			matrix			= SMath::TranslateMatrix( translation ) * SMath::QuaternionToMatrix( rotation ) * SMath::ScaleMatrix( scale );
 			bDirtyMatrix	= false;
 		}
 		OutMatrix			= matrix;

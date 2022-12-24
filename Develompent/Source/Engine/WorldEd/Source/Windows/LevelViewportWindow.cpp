@@ -95,8 +95,7 @@ void CLevelViewportWindow::Init()
 		}
 	}
 }
-#include "EngineDefines.h"
-#include "Misc/Template.h"
+
 void CLevelViewportWindow::OnTick()
 {
 	// We set focus on window if mouse tracking is working and window not taken focus
@@ -167,22 +166,60 @@ void CLevelViewportWindow::OnTick()
 	viewportScreenPos = ImGui::GetCursorScreenPos();
 	viewportWidget.Tick();
 
-	// Draw transform gizmos
+	// Draw transform gizmos if has selected actors
 	std::vector<ActorRef_t>		selectedActors = GWorld->GetSelectedActors();
 	if ( selectedActors.size() > 0 )
 	{
-		ActorRef_t		selectedActor = selectedActors[0];
+		bool			bOrhtoViewportType	= viewportClient.GetViewportType() != LVT_Perspective;
+		ActorRef_t		selectedActor		= selectedActors[0];
 
-		ImGuizmo::SetOrthographic( viewportClient.GetViewportType() != LVT_Perspective );
-		ImGuizmo::AllowAxisFlip( false );
+		ImGuizmo::SetID( viewportClient.GetViewportType() );
+		ImGuizmo::SetOrthographic( bOrhtoViewportType );
+		ImGuizmo::AllowAxisFlip( bOrhtoViewportType );
 		ImGuizmo::SetDrawlist();
 		ImGuizmo::SetRect( ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight() );
+
+		// Calculate operation flags for orthographic projections
+		uint32				guizmoOperationFlags	= guizmoOperationType;
+		switch ( viewportClient.GetViewportType() )
+		{
+			// Ortho XY
+		case LVT_OrthoXY:
+			switch ( guizmoOperationType )
+			{
+			case ImGuizmo::TRANSLATE:	guizmoOperationFlags = ImGuizmo::TRANSLATE_X | ImGuizmo::TRANSLATE_Y;	break;
+			case ImGuizmo::ROTATE:		guizmoOperationFlags = ImGuizmo::ROTATE_SCREEN;							break;
+			case ImGuizmo::SCALE:		guizmoOperationFlags = ImGuizmo::SCALE_X | ImGuizmo::SCALE_Y;			break;
+			}
+			break;
+
+			// Ortho XZ
+		case LVT_OrthoXZ:
+			switch ( guizmoOperationType )
+			{
+			case ImGuizmo::TRANSLATE:	guizmoOperationFlags = ImGuizmo::TRANSLATE_X | ImGuizmo::TRANSLATE_Z;	break;
+			case ImGuizmo::ROTATE:		guizmoOperationFlags = ImGuizmo::ROTATE_SCREEN;							break;
+			case ImGuizmo::SCALE:		guizmoOperationFlags = ImGuizmo::SCALE_X | ImGuizmo::SCALE_Z;			break;
+			}
+			break;
+
+			// Ortho YZ
+		case LVT_OrthoYZ:
+			switch ( guizmoOperationType )
+			{
+			case ImGuizmo::TRANSLATE:	guizmoOperationFlags = ImGuizmo::TRANSLATE_Y | ImGuizmo::TRANSLATE_Z;	break;
+			case ImGuizmo::ROTATE:		guizmoOperationFlags = ImGuizmo::ROTATE_SCREEN;							break;
+			case ImGuizmo::SCALE:		guizmoOperationFlags = ImGuizmo::SCALE_Y | ImGuizmo::SCALE_Z;			break;
+			}
+			break;
+		}
 
 		CSceneView*			sceneView				= viewportClient.CalcSceneView( viewportWidget.GetSize().x, viewportWidget.GetSize().y );
 		Matrix				actorTransformMatrix	= selectedActor->GetActorTransform().ToMatrix();
 		Matrix				deltaMatrix;
 		
-		ImGuizmo::Manipulate( glm::value_ptr( sceneView->GetViewMatrix() ), glm::value_ptr( sceneView->GetProjectionMatrix() ), guizmoOperationType, guizmoModeType, glm::value_ptr( actorTransformMatrix ), glm::value_ptr( deltaMatrix ) );
+		// Draw gizmo and apply changes to actor
+		ImGuizmo::Manipulate( glm::value_ptr( sceneView->GetViewMatrix() ), glm::value_ptr( sceneView->GetProjectionMatrix() ), ( ImGuizmo::OPERATION )guizmoOperationFlags, !bOrhtoViewportType ? guizmoModeType : ImGuizmo::WORLD, glm::value_ptr( actorTransformMatrix ), glm::value_ptr( deltaMatrix ) );
 		bGuizmoUsing = ImGuizmo::IsUsing();
 		if ( bGuizmoUsing )
 		{
@@ -190,8 +227,9 @@ void CLevelViewportWindow::OnTick()
 			float	location[3];
 			float	rotation[3];
 			float	scale[3];
-			ImGuizmo::DecomposeMatrixToComponents( glm::value_ptr( deltaMatrix ), location, rotation, scale );
-			
+			ImGuizmo::DecomposeMatrixToComponents( glm::value_ptr( actorTransformMatrix ), nullptr, nullptr, scale );
+			ImGuizmo::DecomposeMatrixToComponents( glm::value_ptr( deltaMatrix ), location, rotation, nullptr );
+
 			// Apply new transformation to actor
 			switch ( guizmoOperationType )
 			{

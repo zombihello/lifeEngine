@@ -819,8 +819,12 @@ namespace IMGUIZMO_NAMESPACE
       const float mox = ((io.MousePos.x - position.x) / size.x) * 2.f - 1.f;
       const float moy = (1.f - ((io.MousePos.y - position.y) / size.y)) * 2.f - 1.f;
        
-      const float zNear = gContext.mReversed ? (1.f - FLT_EPSILON) : 0.f;
-      const float zFar = gContext.mReversed ? 0.1f : (1.f - FLT_EPSILON);       // for reversed-z, use z = 0.1 for the far plane since the actual far plane may be at infinity
+      // yehor.pohuliaka - Old version of calculating zNear and zFar. New version fixed translate gizmo on infinity distance (how as possible)
+	  /*const float zNear = gContext.mReversed ? ( 1.f - FLT_EPSILON ) : 0.f;
+	  const float zFar = gContext.mReversed ? 0.f : ( 1.f - FLT_EPSILON );*/
+
+      const float zFar = gContext.mReversed ? (1.f - FLT_EPSILON) : 0.f;
+      const float zNear = gContext.mReversed ? 0.1f : (1.f - FLT_EPSILON);       // for reversed-z, use z = 0.1 for the far plane since the actual far plane may be at infinity
 
       rayOrigin.Transform(makeVect(mox, moy, zNear, 1.f), mViewProjInverse);
       rayOrigin *= 1.f / rayOrigin.w;
@@ -2429,19 +2433,28 @@ namespace IMGUIZMO_NAMESPACE
    {
       matrix_t mat = *(matrix_t*)matrix;
 
-      scale[0] = mat.v.right.Length();
-      scale[1] = mat.v.up.Length();
-      scale[2] = mat.v.dir.Length();
+      if ( scale )
+      {
+          scale[0] = mat.v.right.Length();
+          scale[1] = mat.v.up.Length();
+          scale[2] = mat.v.dir.Length();
+      }
 
       mat.OrthoNormalize();
 
-      rotation[0] = RAD2DEG * atan2f(mat.m[1][2], mat.m[2][2]);
-      rotation[1] = RAD2DEG * atan2f(-mat.m[0][2], sqrtf(mat.m[1][2] * mat.m[1][2] + mat.m[2][2] * mat.m[2][2]));
-      rotation[2] = RAD2DEG * atan2f(mat.m[0][1], mat.m[0][0]);
+      if ( rotation )
+      {
+          rotation[0] = RAD2DEG * atan2f( mat.m[1][2], mat.m[2][2] );
+          rotation[1] = RAD2DEG * atan2f( -mat.m[0][2], sqrtf( mat.m[1][2] * mat.m[1][2] + mat.m[2][2] * mat.m[2][2] ) );
+          rotation[2] = RAD2DEG * atan2f( mat.m[0][1], mat.m[0][0] );
+      }
 
-      translation[0] = mat.v.position.x;
-      translation[1] = mat.v.position.y;
-      translation[2] = mat.v.position.z;
+      if ( translation )
+      {
+          translation[0] = mat.v.position.x;
+          translation[1] = mat.v.position.y;
+          translation[2] = mat.v.position.z;
+      }
    }
 
    void RecomposeMatrixFromComponents(const float* translation, const float* rotation, const float* scale, float* matrix)
@@ -2498,10 +2511,10 @@ namespace IMGUIZMO_NAMESPACE
       // behind camera
       vec_t camSpacePosition;
       camSpacePosition.TransformPoint(makeVect(0.f, 0.f, 0.f), gContext.mMVP);
-      /*if (!gContext.mIsOrthographic && camSpacePosition.z < 0.001f)       // yehor.pohuliaka - Removed for fix broken gizmo translation when had been translating to big distance
+      if (!gContext.mIsOrthographic && camSpacePosition.z < 0.001f)
       {
          return false;
-      }*/
+      }
 
       // --
       int type = MT_NONE;
