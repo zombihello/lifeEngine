@@ -87,11 +87,12 @@ void CCommandLine::Parse( const tchar* InCommandLine )
 
 	while ( ParseToken( InCommandLine, nextToken, false ) )
 	{
-		nextToken = CString::ToUpper( nextToken );
 		if ( nextToken[0] == TEXT( '-' ) || nextToken[0] == TEXT( '/' ) )
 		{
+			nextToken = CString::ToUpper( nextToken );
 			std::wstring		token( &nextToken[1], nextToken.size()-1 );
 			itCurrentParam = params.find( token );
+			
 			if ( itCurrentParam == params.end() )
 			{
 				itCurrentParam = params.insert( std::make_pair( token, Values_t() ) ).first;

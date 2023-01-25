@@ -54,11 +54,16 @@
  */
 void appGetCookedContentPath( EPlatformType InPlatform, std::wstring& OutPath )
 {
-#if !WITH_EDITOR
-	OutPath = appGameDir() + PATH_SEPARATOR + TEXT( "Cooked" ) + appPlatformTypeToString( InPlatform ) + PATH_SEPARATOR;
-#else
-	OutPath = appGameDir() + PATH_SEPARATOR + TEXT( "Content" ) + PATH_SEPARATOR;
-#endif // !WITH_EDITOR
+#if WITH_EDITOR
+	if ( !GIsCooker )
+	{
+		OutPath = appGameDir() + PATH_SEPARATOR + TEXT( "Content" ) + PATH_SEPARATOR;
+	}
+	else
+#endif // WITH_EDITOR
+	{
+		OutPath = appGameDir() + PATH_SEPARATOR + TEXT( "Cooked" ) + appPlatformTypeToString( InPlatform ) + PATH_SEPARATOR;
+	}
 }
 
 /**
@@ -155,8 +160,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 {
 	GGameThreadId = appGetCurrentThreadId();
 	GGameName = ANSI_TO_TCHAR( GAMENAME );
-	appGetCookedContentPath( GPlatform, GCookedDir );
-	
+
 	GCommandLine.Init( InCmdLine );
 	CName::StaticInit();
 	InitConfigs();
@@ -173,6 +177,8 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 
 	GIsGame = !GIsEditor && !GIsCooker && !GIsCommandlet;
 #endif // WITH_EDITOR
+
+	appGetCookedContentPath( GPlatform, GCookedDir );
 
 	GLog->Init();
 	int32		result = appPlatformPreInit();
