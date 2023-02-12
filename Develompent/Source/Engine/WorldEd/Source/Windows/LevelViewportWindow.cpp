@@ -171,7 +171,7 @@ void CLevelViewportWindow::OnTick()
 	if ( selectedActors.size() > 0 )
 	{
 		bool			bOrhtoViewportType	= viewportClient.GetViewportType() != LVT_Perspective;
-		ActorRef_t		selectedActor		= selectedActors[0];
+		bool			bMultiSelection		= selectedActors.size() > 1;
 
 		ImGuizmo::SetID( viewportClient.GetViewportType() );
 		ImGuizmo::SetOrthographic( bOrhtoViewportType );
@@ -214,10 +214,10 @@ void CLevelViewportWindow::OnTick()
 			break;
 		}
 
-		CSceneView*			sceneView				= viewportClient.CalcSceneView( viewportWidget.GetSize().x, viewportWidget.GetSize().y );
-		Matrix				actorTransformMatrix	= selectedActor->GetActorTransform().ToMatrix();
-		Matrix				deltaMatrix;
-		
+		CSceneView*	sceneView				= viewportClient.CalcSceneView( viewportWidget.GetSize().x, viewportWidget.GetSize().y );
+		Matrix		actorTransformMatrix	= selectedActors[selectedActors.size() - 1]->GetActorTransform().ToMatrix();
+		Matrix		deltaMatrix;
+
 		// Draw gizmo and apply changes to actor
 		ImGuizmo::Manipulate( glm::value_ptr( sceneView->GetViewMatrix() ), glm::value_ptr( sceneView->GetProjectionMatrix() ), ( ImGuizmo::OPERATION )guizmoOperationFlags, !bOrhtoViewportType ? guizmoModeType : ImGuizmo::WORLD, glm::value_ptr( actorTransformMatrix ), glm::value_ptr( deltaMatrix ) );
 		bGuizmoUsing = ImGuizmo::IsUsing();
@@ -230,23 +230,27 @@ void CLevelViewportWindow::OnTick()
 			ImGuizmo::DecomposeMatrixToComponents( glm::value_ptr( actorTransformMatrix ), nullptr, nullptr, scale );
 			ImGuizmo::DecomposeMatrixToComponents( glm::value_ptr( deltaMatrix ), location, rotation, nullptr );
 
-			// Apply new transformation to actor
-			switch ( guizmoOperationType )
+			// Apply new transformation to actors
+			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
 			{
-				// Translate
-			case ImGuizmo::TRANSLATE:
-				selectedActor->AddActorLocation( Vector( location[0], location[1], location[2] ) );
-				break;
-			
-				// Rotate
-			case ImGuizmo::ROTATE:
-				selectedActor->AddActorRotation( SMath::AnglesToQuaternionXYZ( rotation[0], rotation[1], rotation[2] ) );
-				break;
+				ActorRef_t		actor = selectedActors[index];
+				switch ( guizmoOperationType )
+				{
+					// Translate
+				case ImGuizmo::TRANSLATE:
+					actor->AddActorLocation( Vector( location[0], location[1], location[2] ) );
+					break;
 
-				// Scale
-			case ImGuizmo::SCALE:
-				selectedActor->SetActorScale( Vector( scale[0], scale[1], scale[2] ) );
-				break;
+					// Rotate
+				case ImGuizmo::ROTATE:
+					actor->AddActorRotation( SMath::AnglesToQuaternionXYZ( rotation[0], rotation[1], rotation[2] ) );
+					break;
+
+					// Scale
+				case ImGuizmo::SCALE:
+					actor->SetActorScale( Vector( scale[0], scale[1], scale[2] ) );
+					break;
+				}
 			}
 		}
 
