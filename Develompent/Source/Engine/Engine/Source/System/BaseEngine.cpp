@@ -20,6 +20,10 @@
 
 IMPLEMENT_CLASS( CBaseEngine )
 
+CBaseEngine::CBaseEngine()
+	: bPrePass( true )
+{}
+
 void CBaseEngine::Init()
 {
 	// Load default texture
@@ -137,6 +141,15 @@ void CBaseEngine::Init()
 		}
 	}
 #endif // WITH_EDITOR
+
+	// Get from configs PrePass value
+	{
+		CConfigValue	configPrePass = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "PrePass" ) );
+		if ( configPrePass.IsValid() )
+		{
+			bPrePass = configPrePass.GetBool();
+		}
+	}
 
 	// Register default assets
 	GAssetFactory.SetDefault( defaultTexture, AT_Texture2D );

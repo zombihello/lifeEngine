@@ -45,12 +45,12 @@ public:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef CMeshDrawList<CMeshDrawingPolicy>::SDrawingPolicyLink					DrawingPolicyLink_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy>::SDrawingPolicyLink						DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
 	 */
-	typedef CMeshDrawList<CMeshDrawingPolicy>::DrawingPolicyLinkRef_t				DrawingPolicyLinkRef_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy>::DrawingPolicyLinkRef_t					DrawingPolicyLinkRef_t;
 
 #if ENABLE_HITPROXY
 	/**
@@ -65,6 +65,16 @@ public:
 #endif // ENABLE_HITPROXY
 
 	/**
+	 * @brief Typedef of depth drawing policy link
+	 */
+	typedef CMeshDrawList<CDepthDrawingPolicy>::SDrawingPolicyLink						DepthDrawingPolicyLink_t;
+
+	/**
+	 * @brief Typedef of reference on depth drawing policy link in scene
+	 */
+	typedef CMeshDrawList<CDepthDrawingPolicy>::DrawingPolicyLinkRef_t					DepthDrawingPolicyLinkRef_t;
+
+	/**
 	 * @brief Elements of drawing policy link to SDG
 	 */
 	struct SElementDrawingPolicyLink
@@ -77,10 +87,11 @@ public:
 			, overrideHash( 0 )
 		{}
 
-		bool											bDirty;					/**< Is dirty this element */
-		std::vector<DrawingPolicyLinkRef_t>				drawingPolicyLinks;		/**< Array of reference to drawing policy link in scene */
-		std::vector<const SMeshBatch*>					meshBatchLinks;			/**< Array of references to mesh batch in drawing policy link */
-		uint64											overrideHash;			/**< Hash of overrided segments (custom materials) */
+		bool											bDirty;						/**< Is dirty this element */
+		std::vector<DrawingPolicyLinkRef_t>				drawingPolicyLinks;			/**< Array of reference to drawing policy link in scene */
+		std::vector<DepthDrawingPolicyLinkRef_t>		depthDrawingPolicyLinks;	/**< Array of reference to depth drawing policy link in scene */
+		std::vector<const SMeshBatch*>					meshBatchLinks;				/**< Array of references to mesh batch in drawing policy link */
+		uint64											overrideHash;				/**< Hash of overrided segments (custom materials) */
 
 #if ENABLE_HITPROXY
 		std::vector<HitProxyDrawingPolicyLinkRef_t>		hitProxyDrawingPolicyLinks;		/**< Array of references to hit proxy drawing policy link in scene */

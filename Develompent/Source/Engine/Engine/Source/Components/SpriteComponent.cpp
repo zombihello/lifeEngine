@@ -135,6 +135,10 @@ void CSpriteComponent::LinkDrawList()
 		}
 		meshBatchLinks.push_back( meshBatchLink );
 
+		// Make and add to the scene new depth draw policy link
+		depthDrawingPolicyLink			= ::MakeDrawingPolicyLink<DepthDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDG.depthDrawList, DEC_SPRITE );
+		meshBatchLinks.push_back( meshBatchLink );
+
 		// Make and add to scene new hit proxy draw policy link
 #if ENABLE_HITPROXY
 		hitProxyDrawingPolicyLink		= ::MakeDrawingPolicyLink<HitProxyDrawingPolicyLink_t>( sprite->GetVertexFactory(), sprite->GetMaterial(), meshBatch, meshBatchLink, SDG.hitProxyLayers[ HPL_World ].hitProxyDrawList, DEC_SPRITE );
@@ -159,6 +163,11 @@ void CSpriteComponent::UnlinkDrawList()
 		SDGWorld.gizmoDrawList.RemoveItem( gizmoDrawingPolicyLink );
 	}
 #endif // WITH_EDITOR
+
+	if ( depthDrawingPolicyLink )
+	{
+		SDGWorld.depthDrawList.RemoveItem( depthDrawingPolicyLink );
+	}
 
 #if ENABLE_HITPROXY
 	if ( hitProxyDrawingPolicyLink )

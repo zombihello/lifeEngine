@@ -51,6 +51,25 @@ void CSceneRenderTargets::BeginRenderingSceneColor( class CBaseDeviceContextRHI*
 void CSceneRenderTargets::FinishRenderingSceneColor( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {}
 
+void CSceneRenderTargets::BeginRenderingPrePass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
+{
+	check( InDeviceContextRHI );
+
+	// Set the scene depth surface and a DUMMY buffer as color buffer
+	// (as long as it's the same dimension as the depth buffer)
+	GRHI->SetRenderTarget( InDeviceContextRHI, nullptr, renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI() );
+
+	// Disable color writes since we only want z depths
+	GRHI->SetColorWriteEnable( InDeviceContextRHI, false );
+}
+
+void CSceneRenderTargets::FinishRenderingPrePass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
+{
+	// Re-enable color writes
+	check( InDeviceContextRHI );
+	GRHI->SetColorWriteEnable( InDeviceContextRHI, true );
+}
+
 void CSceneRenderTargets::BeginRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( InDeviceContextRHI );

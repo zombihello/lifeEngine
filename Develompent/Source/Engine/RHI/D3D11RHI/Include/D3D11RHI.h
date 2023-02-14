@@ -10,6 +10,7 @@
 #define D3D11RHI_H
 
 #include <d3d11.h>
+#include <unordered_map>
 
 #include "Misc/EngineGlobals.h"
 #include "Render/BoundShaderStateCache.h"
@@ -456,6 +457,14 @@ public:
 	virtual void									SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState ) override;
 
 	/**
+	 * Set Color write enable
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InIsEnable			Enable or disable color write
+	 */
+	virtual void SetColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable ) override;
+
+	/**
 	 * Set stencil state
 	 *
 	 * @param InDeviceContext		Device context
@@ -669,19 +678,29 @@ public:
 	}
 
 private:
-	bool										isInitialize;						/**< Is RHI is initialized */
-	class CD3D11ConstantBuffer*					globalConstantBuffer;				/**< Global constant buffer */
-	class CD3D11ConstantBuffer*					vsConstantBuffers[ SOB_Max ];		/**< Constant buffers for vertex shader */
-	class CD3D11ConstantBuffer*					psConstantBuffer;					/**< Constant buffer for pixel shader */
-	class CD3D11DeviceContext*					immediateContext;					/**< Immediate context */
-	CBoundShaderStateHistory					boundShaderStateHistory;			/**< History of using bound shader states */
-	SD3D11StateCache							stateCache;							/**< DirectX 11 state cache */
-	TRefCountPtr< CD3D11VertexBufferRHI >		instanceBuffer;						/**< Instance buffer */
+	/**
+	 * @brief Get cached blend state
+	 * 
+	 * @param InBlendStateInfo			Blend state info
+	 * @param InIsColorWriteEnable		Is enabled color write
+	 * @return Return new or old blend state
+	 */
+	TRefCountPtr<CD3D11BlendStateRHI> GetCachedBlendState( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable );
 
-	D3D_FEATURE_LEVEL							d3dFeatureLevel;					/**< DirectX feature level */
-	ID3D11Device*								d3d11Device;						/**< D3D11 Device */
-	IDXGIFactory*								dxgiFactory;						/**< DXGI factory */
-	IDXGIAdapter*								dxgiAdapter;						/**< DXGI adapter */
+	bool																isInitialize;						/**< Is RHI is initialized */
+	class CD3D11ConstantBuffer*											globalConstantBuffer;				/**< Global constant buffer */
+	class CD3D11ConstantBuffer*											vsConstantBuffers[ SOB_Max ];		/**< Constant buffers for vertex shader */
+	class CD3D11ConstantBuffer*											psConstantBuffer;					/**< Constant buffer for pixel shader */
+	class CD3D11DeviceContext*											immediateContext;					/**< Immediate context */
+	CBoundShaderStateHistory											boundShaderStateHistory;			/**< History of using bound shader states */
+	SD3D11StateCache													stateCache;							/**< DirectX 11 state cache */
+	TRefCountPtr< CD3D11VertexBufferRHI >								instanceBuffer;						/**< Instance buffer */
+	std::unordered_map<uint64, TRefCountPtr<CD3D11BlendStateRHI>>		cachedBlendStates;					/**< Cached blend states */
+
+	D3D_FEATURE_LEVEL													d3dFeatureLevel;					/**< DirectX feature level */
+	ID3D11Device*														d3d11Device;						/**< D3D11 Device */
+	IDXGIFactory*														dxgiFactory;						/**< DXGI factory */
+	IDXGIAdapter*														dxgiAdapter;						/**< DXGI adapter */
 };
 
 /**

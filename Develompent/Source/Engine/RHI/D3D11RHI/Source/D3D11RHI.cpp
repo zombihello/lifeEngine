@@ -614,7 +614,7 @@ DepthStateRHIRef_t CD3D11RHI::CreateDepthState( const SDepthStateInitializerRHI&
 
 BlendStateRHIRef_t CD3D11RHI::CreateBlendState( const SBlendStateInitializerRHI& InInitializer )
 {
-	return new CD3D11BlendStateRHI( InInitializer );
+	return GetCachedBlendState( InInitializer, stateCache.bColorWrite );
 }
 
 StencilStateRHIRef_t CD3D11RHI::CreateStencilState( const SStencilStateInitializerRHI& InInitializer )
@@ -849,14 +849,31 @@ void CD3D11RHI::SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, Dep
 
 void CD3D11RHI::SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState )
 {
-	ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
-	ID3D11BlendState*				d3d11BlendState = InNewState ? ( ( CD3D11BlendStateRHI* )InNewState )->GetResource() : nullptr;
+	ID3D11DeviceContext*			d3d11DeviceContext	= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	CD3D11BlendStateRHI*			blendState			= ( CD3D11BlendStateRHI* )InNewState;
 
-	if ( d3d11BlendState != stateCache.blendState )
+	if ( blendState != stateCache.blendState || ( blendState && blendState->IsColorWrite() != stateCache.bColorWrite ) )
 	{
+		ID3D11BlendState*			d3d11BlendState		= InNewState ? blendState->GetResource() : nullptr;
+
+		// Regenerate blend state if color write is not equal
+		if ( blendState && blendState->IsColorWrite() != stateCache.bColorWrite )
+		{
+			d3d11BlendState = GetCachedBlendState( blendState->GetInfo(), stateCache.bColorWrite )->GetResource();
+		}
+
 		float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
 		d3d11DeviceContext->OMSetBlendState( d3d11BlendState, blendFactor, 0xFFFFFFFF );
-		stateCache.blendState = d3d11BlendState;
+		stateCache.blendState = blendState;
+	}
+}
+
+void CD3D11RHI::SetColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable )
+{
+	if ( InIsEnable != stateCache.bColorWrite )
+	{
+		stateCache.bColorWrite = InIsEnable;
+		SetBlendState( InDeviceContext, stateCache.blendState );
 	}
 }
 
@@ -1635,6 +1652,25 @@ void CD3D11RHI::EndDrawEvent( class CBaseDeviceContextRHI* InDeviceContext )
 const tchar* CD3D11RHI::GetRHIName() const
 {
 	return TEXT( "D3D11RHI" );
+}
+
+TRefCountPtr<CD3D11BlendStateRHI> CD3D11RHI::GetCachedBlendState( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable )
+{
+	// Calculate hash
+	uint64		hash = appMemFastHash( InInitializer );
+	hash = appMemFastHash( InIsColorWriteEnable, hash );
+
+	// Try find cached blend state
+	auto	it = cachedBlendStates.find( hash );
+	if ( it != cachedBlendStates.end() )
+	{
+		return it->second;
+	}
+
+	// If we not found then will create new blend state
+	TRefCountPtr<CD3D11BlendStateRHI>	newBlendState = new CD3D11BlendStateRHI( InInitializer, InIsColorWriteEnable );
+	cachedBlendStates[hash] = newBlendState;
+	return newBlendState;
 }
 
 /**

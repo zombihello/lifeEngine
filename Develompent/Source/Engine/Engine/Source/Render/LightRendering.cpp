@@ -270,7 +270,6 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	GSceneRenderTargets.ResolveLightPassDepth( InDeviceContext );
 
 	// Begin rendering light attenuation
-	GSceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
 	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
 	InDeviceContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), CColor::black );
 

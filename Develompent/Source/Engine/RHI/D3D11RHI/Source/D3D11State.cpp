@@ -129,7 +129,7 @@ SD3D11StateCache::SD3D11StateCache()
 	, primitiveTopology( D3D_PRIMITIVE_TOPOLOGY_UNDEFINED )
 	, depthStencilView( nullptr )
 	, depthStencilState( nullptr )
-	, blendState( nullptr )
+	, bColorWrite( true )
 {
 	appMemzero( &vertexBuffers, sizeof( vertexBuffers ) );
 	appMemzero( &psSamplerStates, sizeof( psSamplerStates ) );
@@ -265,8 +265,14 @@ CD3D11DepthStateRHI::~CD3D11DepthStateRHI()
 	d3d11DepthState->Release();
 }
 
-CD3D11BlendStateRHI::CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InInitializer )
+CD3D11BlendStateRHI::CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable /* = true */ )
+	: blendStateInfo( InInitializer )
+	, bColorWrite( InIsColorWriteEnable )
 {
+	// Calculate hash
+	hash = appMemFastHash( blendStateInfo );
+	hash = appMemFastHash( bColorWrite, hash );
+
 	// Init descriptor
 	D3D11_BLEND_DESC		d3d11BlendDesc;
 	appMemzero( &d3d11BlendDesc, sizeof( D3D11_BLEND_DESC ) );
@@ -279,7 +285,7 @@ CD3D11BlendStateRHI::CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InIni
 	d3d11BlendDesc.RenderTarget[0].BlendOpAlpha				= TranslateBlendOp( InInitializer.alphaBlendOperation );
 	d3d11BlendDesc.RenderTarget[0].SrcBlendAlpha			= TranslateBlendFactor( InInitializer.alphaSourceBlendFactor );
 	d3d11BlendDesc.RenderTarget[0].DestBlendAlpha			= TranslateBlendFactor( InInitializer.alphaDestBlendFactor );
-	d3d11BlendDesc.RenderTarget[0].RenderTargetWriteMask	= D3D11_COLOR_WRITE_ENABLE_ALL;
+	d3d11BlendDesc.RenderTarget[0].RenderTargetWriteMask	= InIsColorWriteEnable ? D3D11_COLOR_WRITE_ENABLE_ALL : 0;
 
 	LE_LOG( LT_Warning, LC_RHI, TEXT( "AHTUNG! CD3D11BlendStateRHI::CD3D11BlendStateRHI :: Need implement color write mask" ) );
 

@@ -250,7 +250,7 @@ void CLevelViewportWindow::OnTick()
 					if ( bMultiSelection && actor != actorCenter )
 					{
 						Matrix		translateMatrix = SMath::TranslateMatrix( actorCenter->GetActorLocation() );
-						actor->SetActorLocation( translateMatrix * SMath::QuaternionToMatrix( deltaRotation )* SMath::InverseMatrix( translateMatrix ) * Vector4D( actor->GetActorLocation(), 1.f ) );
+						actor->SetActorLocation( translateMatrix * SMath::QuaternionToMatrix( deltaRotation ) * SMath::InverseMatrix( translateMatrix ) * Vector4D( actor->GetActorLocation(), 1.f ) );
 					}
 					break;
 				}

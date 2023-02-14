@@ -22,6 +22,7 @@ CStaticMesh::~CStaticMesh()
 		for ( uint32 index = 0, count = itElement->second->drawingPolicyLinks.size(); index < count; ++index )
 		{
 			itElement->first.SDG->staticMeshDrawList.RemoveItem( itElement->second->drawingPolicyLinks[ index ] );
+			itElement->first.SDG->depthDrawList.RemoveItem( itElement->second->depthDrawingPolicyLinks[ index ] );
 			
 #if ENABLE_HITPROXY
 			itElement->first.SDG->hitProxyLayers[ HPL_World ].hitProxyDrawList.RemoveItem( itElement->second->hitProxyDrawingPolicyLinks[ index ] );
@@ -276,6 +277,11 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolic
 		element->drawingPolicyLinks.push_back( drawingPolicyLink );
 		element->meshBatchLinks.push_back( meshBatchLink );
 
+		// Make and add to scene new depth mesh drawing policy link
+		DepthDrawingPolicyLinkRef_t			depthDrawingPolicyLink		= ::MakeDrawingPolicyLink<DepthDrawingPolicyLink_t>( vertexFactory, material, meshBatch, meshBatchLink, InSDG.depthDrawList, DEC_STATIC_MESH );
+		element->depthDrawingPolicyLinks.push_back( depthDrawingPolicyLink );
+		element->meshBatchLinks.push_back( meshBatchLink );
+
 		// Make and add to scene new hit proxy drawing policy link
 #if ENABLE_HITPROXY
 		HitProxyDrawingPolicyLinkRef_t		hitProxyDrawingPolicyLink	= ::MakeDrawingPolicyLink<HitProxyDrawingPolicyLink_t>( vertexFactory, material, meshBatch, meshBatchLink, InSDG.hitProxyLayers[ HPL_World ].hitProxyDrawList, DEC_STATIC_MESH );
@@ -313,6 +319,7 @@ void CStaticMesh::UnlinkDrawList( SSceneDepthGroup& InSDG, TSharedPtr<SElementDr
 	for ( uint32 index = 0, count = itElement->second->drawingPolicyLinks.size(); index < count; ++index )
 	{
 		InSDG.staticMeshDrawList.RemoveItem( itElement->second->drawingPolicyLinks[ index ] );
+		InSDG.depthDrawList.RemoveItem( itElement->second->depthDrawingPolicyLinks[ index ] );
 
 #if ENABLE_HITPROXY
 		InSDG.hitProxyLayers[ HPL_World ].hitProxyDrawList.RemoveItem( itElement->second->hitProxyDrawingPolicyLinks[ index ] );

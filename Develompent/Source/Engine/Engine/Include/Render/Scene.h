@@ -19,6 +19,7 @@
 #include "Render/Material.h"
 #include "Render/SceneRendering.h"
 #include "Render/SceneHitProxyRendering.h"
+#include "Render/DepthRendering.h"
 #include "Render/Frustum.h"
 #include "Render/HitProxies.h"
 #include "Render/BatchedSimpleElements.h"
@@ -719,6 +720,7 @@ struct SSceneDepthGroup
 		dynamicMeshElements.Clear();
 		staticMeshDrawList.Clear();
 		spriteDrawList.Clear();
+		depthDrawList.Clear();
 
 #if ENABLE_HITPROXY
 		for ( uint32 index = 0; index < HPL_Num; ++index )
@@ -742,7 +744,7 @@ struct SSceneDepthGroup
 		}
 #endif // ENABLE_HITPROXY
 
-		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0 && dynamicMeshElements.GetNum() <= 0 
+		return staticMeshDrawList.GetNum() <= 0 && spriteDrawList.GetNum() <= 0 && dynamicMeshElements.GetNum() <= 0 && depthDrawList.GetNum() <= 0
 #if WITH_EDITOR
 			&& simpleElements.IsEmpty() && dynamicMeshBuilders.empty() && gizmoDrawList.GetNum() <= 0
 #endif // WITH_EDITOR
@@ -763,6 +765,7 @@ struct SSceneDepthGroup
 	CMeshDrawList<CMeshDrawingPolicy>						dynamicMeshElements;		/**< Draw list of dynamic meshes */
 	CMeshDrawList<CMeshDrawingPolicy>						staticMeshDrawList;			/**< Draw list of static meshes */
 	CMeshDrawList<CMeshDrawingPolicy>						spriteDrawList;				/**< Draw list of sprites */
+	CMeshDrawList<CDepthDrawingPolicy>						depthDrawList;				/**< Draw list all of geometry for PrePass */
 
 #if ENABLE_HITPROXY
 	SHitProxyLayer											hitProxyLayers[ HPL_Num ];	/**< Hit proxy layers */

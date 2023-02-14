@@ -114,6 +114,16 @@ private:
 	typedef CMeshDrawList<CMeshDrawingPolicy>::DrawingPolicyLinkRef_t		DrawingPolicyLinkRef_t;
 
 	/**
+	 * @brief Typedef of depth drawing policy link
+	 */
+	typedef CMeshDrawList<CDepthDrawingPolicy>::SDrawingPolicyLink			DepthDrawingPolicyLink_t;
+
+	/**
+	 * @brief Typedef of reference on depth drawing policy link in scene
+	 */
+	typedef CMeshDrawList<CDepthDrawingPolicy>::DrawingPolicyLinkRef_t		DepthDrawingPolicyLinkRef_t;
+
+	/**
 	 * @brief Adds a draw policy link in SDGs
 	 */
 	virtual void LinkDrawList() override;
@@ -123,12 +133,13 @@ private:
 	 */
 	virtual void UnlinkDrawList() override;
 
-	float						radius;					/**< Radius of sphere */
-	ESceneDepthGroup			SDGLevel;				/**< Mesh on SDG level */
-	ESceneDepthGroup			pendingSDGLevel;		/**< Pending SDG level */
-	TAssetHandle<CMaterial>		material;				/**< Material */
-	DrawingPolicyLinkRef_t		drawingPolicyLink;		/**< Drawing policy link in scene */
-	const SMeshBatch*			meshBatchLink;			/**< Mesh batch in drawing policy link */
+	float								radius;						/**< Radius of sphere */
+	ESceneDepthGroup					SDGLevel;					/**< Mesh on SDG level */
+	ESceneDepthGroup					pendingSDGLevel;			/**< Pending SDG level */
+	TAssetHandle<CMaterial>				material;					/**< Material */
+	DrawingPolicyLinkRef_t				drawingPolicyLink;			/**< Drawing policy link in scene */
+	DepthDrawingPolicyLinkRef_t			depthDrawingPolicyLink;		/**< Depth drawing policy link in scene */
+	std::vector<const SMeshBatch*>		meshBatchLinks;				/**< Reference to mesh batch in drawing policy link */
 };
 
 #endif // !SPHERECOMPONENT_H

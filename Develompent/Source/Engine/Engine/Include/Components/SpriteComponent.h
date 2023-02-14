@@ -222,6 +222,16 @@ private:
 #endif // ENABLE_HITPROXY
 
 	/**
+	 * @brief Typedef of depth drawing policy link
+	 */
+	typedef CMeshDrawList<CDepthDrawingPolicy>::SDrawingPolicyLink						DepthDrawingPolicyLink_t;
+
+	/**
+	 * @brief Typedef of reference on depth drawing policy link in scene
+	 */
+	typedef CMeshDrawList<CDepthDrawingPolicy>::DrawingPolicyLinkRef_t					DepthDrawingPolicyLinkRef_t;
+
+	/**
 	 * @brief Calculate transformation matrix
 	 *
 	 * @param InSceneView Current view of scene
@@ -249,6 +259,7 @@ private:
     ESpriteType							type;							/**< Sprite type */
 	SpriteRef_t							sprite;							/**< Sprite mesh */
 	DrawingPolicyLinkRef_t				drawingPolicyLink;				/**< Reference to drawing policy link in scene */
+	DepthDrawingPolicyLinkRef_t			depthDrawingPolicyLink;			/**< Reference to depth drawing policy link in scene */
 	std::vector<const SMeshBatch*>		meshBatchLinks;					/**< Reference to mesh batch in drawing policy link */
 
 #if ENABLE_HITPROXY

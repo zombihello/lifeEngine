@@ -472,6 +472,14 @@ public:
 	virtual void								SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState ) {}
 
 	/**
+	 * Set Color write enable
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InIsEnable			Enable or disable color write
+	 */
+	virtual void SetColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable ) {}
+
+	/**
 	 * Set stencil state
 	 * 
 	 * @param InDeviceContext		Device context

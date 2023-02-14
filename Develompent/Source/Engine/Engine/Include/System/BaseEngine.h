@@ -26,6 +26,11 @@ class CBaseEngine : public CObject
 
 public:
 	/**
+	 * Constructor
+	 */
+	CBaseEngine();
+
+	/**
 	 * Destructor
 	 */
 	virtual ~CBaseEngine() {}
@@ -98,6 +103,15 @@ public:
 	}
 #endif // WITH_EDITOR
 
+	/**
+	 * Is enabled pre-pass render
+	 * @return Return TRUE if pre-pass render is enabled
+	 */
+	FORCEINLINE bool IsPrePass() const
+	{
+		return bPrePass;
+	}
+
 protected:
 	TAssetHandle<CTexture2D>		defaultTexture;					/**< Default texture */
 	TAssetHandle<CMaterial>			defaultMaterial;				/**< Default material */
@@ -105,6 +119,8 @@ protected:
 #if WITH_EDITOR
 	TAssetHandle<CMaterial>			defaultWireframeMaterial;		/**< Default wireframe material */
 #endif // WITH_EDITOR
+
+	bool							bPrePass;						/**< Is enabled pre-pass render */
 };
 
 #endif // !BASEENGINE_H

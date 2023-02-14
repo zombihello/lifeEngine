@@ -70,6 +70,18 @@ public:
 	void FinishRenderingSceneColor( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
+	 * @brief Begin rendering pre pass
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void BeginRenderingPrePass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Finish rendering pre pass
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void FinishRenderingPrePass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
 	 * @brief Begin rendering GBuffer
 	 * @param InDeviceContextRHI	Device context RHI
 	 */

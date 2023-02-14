@@ -162,6 +162,22 @@ public:
 
 private:
 	/**
+	 * Render PrePass (ZPass)
+	 * 
+	 * @param InDeviceContext	RHI device context
+	 * @return Return TRUE if geometry is drawed
+	 */
+	bool RenderPrePass( class CBaseDeviceContextRHI* InDeviceContext );
+
+	/**
+	 * Render BasePass
+	 *
+	 * @param InDeviceContext	RHI device context
+	 * @return Return TRUE if geometry is drawed
+	 */
+	bool RenderBasePass( class CBaseDeviceContextRHI* InDeviceContext );
+
+	/**
 	 * Render SDG
 	 * 
 	 * @param InDeviceContext	RHI device context

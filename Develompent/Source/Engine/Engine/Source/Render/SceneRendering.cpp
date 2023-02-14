@@ -30,28 +30,6 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 
 	SCOPED_DRAW_EVENT( EventBeginRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Begin Render View Target" ) );
 	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
-
-	// If SHOW_Lights setted and disabled wireframe mode, we rendering to the GBuffer
-	ShowFlags_t		showFlags = sceneView->GetShowFlags();
-	if ( showFlags & SHOW_Lights 
-#if WITH_EDITOR
-		 && !( showFlags & SHOW_Wireframe )
-#endif // WITH_EDITOR
-		 )
-	{
-		GSceneRenderTargets.BeginRenderingGBuffer( immediateContext );
-		GSceneRenderTargets.ClearGBufferTargets( immediateContext );
-	}
-	// Otherwise to the scene color
-	else
-	{
-		GSceneRenderTargets.BeginRenderingSceneColor( immediateContext );
-	}
-	
-	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
-	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
-	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
-	GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
 	GRHI->SetViewParameters( immediateContext, *sceneView );
 
 	// Build visible view on scene
@@ -72,10 +50,14 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	ShowFlags_t				showFlags			= sceneView->GetShowFlags();
 	bool					bDirty				= false;
 
-	// Render world layer
+	// Render PrePass (only if him is enabled in configs)
+	if ( GEngine->IsPrePass() )
 	{
-		bDirty |= RenderSDG( immediateContext, SDG_World );
+		bDirty |= RenderPrePass( immediateContext );
 	}
+
+	// Render BasePass
+	bDirty |= RenderBasePass( immediateContext );
 	
 	// Render lights
 	if ( bDirty && !scene->GetVisibleLights().empty() && showFlags & SHOW_Lights
@@ -112,6 +94,78 @@ void CSceneRenderer::RenderHighlight( class CBaseDeviceContextRHI* InDeviceConte
 	RenderSDG( InDeviceContext, SDG_Highlight );
 }
 #endif // WITH_EDITOR
+
+bool CSceneRenderer::RenderPrePass( class CBaseDeviceContextRHI* InDeviceContext )
+{
+	SSceneDepthGroup&		SDG = scene->GetSDG( SDG_World );
+	CBaseDeviceContextRHI*	immediateContext = GRHI->GetImmediateContext();
+	if ( SDG.depthDrawList.GetNum() <= 0 )
+	{
+		return false;
+	}
+
+	GSceneRenderTargets.BeginRenderingPrePass( immediateContext );
+	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+	GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
+
+	SCOPED_DRAW_EVENT( EventPrePass, DEC_SCENE_ITEMS, TEXT( "PrePass" ) );
+	SDG.depthDrawList.Draw( InDeviceContext, *sceneView );
+
+	GSceneRenderTargets.FinishRenderingPrePass( immediateContext );
+	return true;
+}
+
+bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContext )
+{
+	if ( scene->GetSDG( SDG_World ).IsEmpty() )
+	{
+		return false;
+	}
+
+	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	SCOPED_DRAW_EVENT( EventBasePass, DEC_SCENE_ITEMS, TEXT( "BasePass" ) );
+
+	// If SHOW_Lights setted and disabled wireframe mode, we rendering to the GBuffer
+	ShowFlags_t		showFlags	= sceneView->GetShowFlags();
+	bool			bGBuffer	= false;
+	if ( showFlags & SHOW_Lights
+#if WITH_EDITOR
+		 && !( showFlags & SHOW_Wireframe )
+#endif // WITH_EDITOR
+		 )
+	{
+		GSceneRenderTargets.BeginRenderingGBuffer( immediateContext );
+		GSceneRenderTargets.ClearGBufferTargets( immediateContext );
+		bGBuffer = true;
+	}
+	// Otherwise to the scene color
+	else
+	{
+		GSceneRenderTargets.BeginRenderingSceneColor( immediateContext );
+		bGBuffer = false;
+	}
+
+	// Init render states
+	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+	GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
+
+	// Clear render targets (depth we clear only when PrePass is disabled)
+	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
+	if ( !GEngine->IsPrePass() )
+	{
+		immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+	}
+
+	bool	bDirty = RenderSDG( InDeviceContext, SDG_World );
+
+	// Finish rendering to GBuffer (only when we used him)
+	if ( bGBuffer )
+	{
+		GSceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
+	}
+	return bDirty;
+}
 
 bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, uint32 InSDGIndex )
 {
