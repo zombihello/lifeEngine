@@ -51,10 +51,7 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	bool					bDirty				= false;
 
 	// Render PrePass (only if him is enabled in configs)
-	if ( GEngine->IsPrePass() )
-	{
-		bDirty |= RenderPrePass( immediateContext );
-	}
+	bDirty |= RenderPrePass( immediateContext );
 
 	// Render BasePass
 	bDirty |= RenderBasePass( immediateContext );
@@ -104,13 +101,16 @@ bool CSceneRenderer::RenderPrePass( class CBaseDeviceContextRHI* InDeviceContext
 		return false;
 	}
 
+	SCOPED_DRAW_EVENT( EventPrePass, DEC_SCENE_ITEMS, TEXT( "PrePass" ) );
 	GSceneRenderTargets.BeginRenderingPrePass( immediateContext );
 	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
-	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
-	GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
 
-	SCOPED_DRAW_EVENT( EventPrePass, DEC_SCENE_ITEMS, TEXT( "PrePass" ) );
-	SDG.depthDrawList.Draw( InDeviceContext, *sceneView );
+	if ( GEngine->IsPrePass() )
+	{
+		GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+		GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
+		SDG.depthDrawList.Draw( InDeviceContext, *sceneView );
+	}
 
 	GSceneRenderTargets.FinishRenderingPrePass( immediateContext );
 	return true;
