@@ -215,7 +215,8 @@ void CLevelViewportWindow::OnTick()
 		}
 
 		CSceneView*	sceneView				= viewportClient.CalcSceneView( viewportWidget.GetSize().x, viewportWidget.GetSize().y );
-		Matrix		actorTransformMatrix	= selectedActors[selectedActors.size() - 1]->GetActorTransform().ToMatrix();
+		ActorRef_t	actorCenter				= selectedActors[selectedActors.size() - 1];
+		Matrix		actorTransformMatrix	= actorCenter->GetActorTransform().ToMatrix();
 		Matrix		deltaMatrix;
 
 		// Draw gizmo and apply changes to actor
@@ -243,8 +244,16 @@ void CLevelViewportWindow::OnTick()
 
 					// Rotate
 				case ImGuizmo::ROTATE:
-					actor->AddActorRotation( SMath::AnglesToQuaternionXYZ( rotation[0], rotation[1], rotation[2] ) );
+				{
+					Quaternion		deltaRotation = SMath::AnglesToQuaternionXYZ( rotation[0], rotation[1], rotation[2] );
+					actor->AddActorRotation( deltaRotation );
+					if ( bMultiSelection && actor != actorCenter )
+					{
+						Matrix		translateMatrix = SMath::TranslateMatrix( actorCenter->GetActorLocation() );
+						actor->SetActorLocation( translateMatrix * SMath::QuaternionToMatrix( deltaRotation )* SMath::InverseMatrix( translateMatrix ) * Vector4D( actor->GetActorLocation(), 1.f ) );
+					}
 					break;
+				}
 
 					// Scale
 				case ImGuizmo::SCALE:
