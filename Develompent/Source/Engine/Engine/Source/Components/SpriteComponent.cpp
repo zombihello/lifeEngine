@@ -1,4 +1,6 @@
 #include "Actors/Actor.h"
+#include "System/World.h"
+#include "Render/Scene.h"
 #include "Components/SpriteComponent.h"
 #include "Misc/CoreGlobals.h"
 #include "System/Package.h"
@@ -229,4 +231,12 @@ void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 
     // Update AABB
     boundbox = CBox::BuildAABB( GetComponentLocation(), Vector( GetSpriteSize(), 1.f ) );
+
+	// Draw wireframe box if owner actor is selected (only for WorldEd)
+#if WITH_EDITOR
+	if ( !bGizmo && owner ? owner->IsSelected() : false )
+	{
+		DrawWireframeBox( ( ( CScene* )GWorld->GetScene() )->GetSDG( SDG_Highlight ), boundbox, DEC_SPRITE );
+	}
+#endif // WITH_EDITOR
 }

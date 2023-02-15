@@ -18,6 +18,9 @@
 class CBox
 {
 public:
+	friend CArchive& operator<<( CArchive& InArchive, CBox& InValue );
+	friend CArchive& operator<<( CArchive& InArchive, const CBox& InValue );
+
 	/**
 	 * Constructor
 	 */
@@ -45,6 +48,27 @@ public:
 	static FORCEINLINE CBox BuildAABB( const Vector& InLocation, const Vector& InSize )
 	{
 		return CBox( InLocation - InSize, InLocation + InSize );
+	}
+
+	/**
+	 * Utility function to build an AABB from InLocation, InMinXYZ and InMaxXYZ
+	 *
+	 * @param InLocation	Location of AABB
+	 * @param InMinXYZ		Minimum by XYZ
+	 * @param InMaxXYZ		Maximum by XYZ
+	 * @return Return created AABB
+	 */
+	static FORCEINLINE CBox BuildAABB( const Vector& InLocation, const Vector& InMinXYZ, const Vector& InMaxXYZ )
+	{
+		return CBox( InLocation + InMinXYZ, InLocation + InMaxXYZ );
+	}
+
+	/**
+	 * Clear bounding box
+	 */
+	FORCEINLINE void Clear()
+	{
+		bIsValid = false;
 	}
 
 	/**
@@ -79,5 +103,25 @@ private:
 	Vector			maxLocation;		/**< Max position */
 	bool			bIsValid;			/**< Is valid box */
 };
+
+//
+// Serialization
+//
+
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, CBox& InValue )
+{
+	InArchive << InValue.minLocation;
+	InArchive << InValue.maxLocation;
+	InArchive << InValue.bIsValid;
+	return InArchive;
+}
+
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CBox& InValue )
+{
+	InArchive << InValue.minLocation;
+	InArchive << InValue.maxLocation;
+	InArchive << InValue.bIsValid;
+	return InArchive;
+}
 
 #endif // !BOX_H

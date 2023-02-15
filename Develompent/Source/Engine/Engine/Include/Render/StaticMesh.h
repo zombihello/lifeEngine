@@ -231,6 +231,15 @@ public:
 	}
 
 	/**
+	 * @brief Get bounding box
+	 * @return Return bounding box
+	 */
+	FORCEINLINE const CBox& GetBoundingBox() const
+	{
+		return bbox;
+	}
+
+	/**
 	 * @brief Get dependent assets
 	 * @param OutDependentAssets	Output set of dependent assets
 	 * @param InFilter				Filter of getting assets by type. If setted AT_Unknown return all types
@@ -349,6 +358,11 @@ private:
 		}
 	}
 
+	/**
+	 * @brief Calculate bounding box
+	 */
+	void CalcBoundingBox();
+
 	TRefCountPtr< CStaticMeshVertexFactory >	vertexFactory;				/**< Vertex factory */
 	std::vector< TAssetHandle<CMaterial> >		materials;					/**< Array materials in mesh */
 	std::vector< SStaticMeshSurface >			surfaces;					/**< Array surfaces in mesh */
@@ -357,6 +371,7 @@ private:
 	VertexBufferRHIRef_t						vertexBufferRHI;			/**< RHI vertex buffer */
 	IndexBufferRHIRef_t							indexBufferRHI;				/**< RHI index buffer */
 	ElementDrawingPolicyMap_t					elementDrawingPolicyMap;	/**< Map of adds a drawing policy link to SDGs */
+	CBox										bbox;						/**< Bounding box of the static mesh */
 };
 
 //

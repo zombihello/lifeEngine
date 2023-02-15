@@ -79,14 +79,14 @@ void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class CBox& InBox, 
 	{
 		for ( uint32 j = 0; j < 2; j++ )
 		{
-			start.x = bbox[ i ].z;		end.x = bbox[ i ].x;
+			start.x = bbox[ i ].x;		end.x = bbox[ i ].x;
 			start.y = bbox[ j ].y;		end.y = bbox[ j ].y;
 			start.z = bbox[ 0 ].z;		end.z = bbox[ 1 ].z;
 			InSDG.simpleElements.AddLine( start, end, InColor );
 
-			start.y = bbox[ i ].y; end.y = bbox[ i ].y;
-			start.z = bbox[ j ].z; end.z = bbox[ j ].z;
-			start.x = bbox[ 0 ].x; end.x = bbox[ 1 ].x;
+			start.y = bbox[ i ].y;		end.y = bbox[ i ].y;
+			start.z = bbox[ j ].z;		end.z = bbox[ j ].z;
+			start.x = bbox[ 0 ].x;		end.x = bbox[ 1 ].x;
 			InSDG.simpleElements.AddLine( start, end, InColor );
 
 			start.z = bbox[ i ].z;		end.z = bbox[ i ].z;

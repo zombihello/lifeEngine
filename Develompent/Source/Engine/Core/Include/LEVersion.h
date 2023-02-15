@@ -50,6 +50,7 @@ enum ELifeEnginePackageVersion
 	VER_AssetName_V3						= 18,					/**< Moved asset name to CAsset */
 	VER_AssetOnlyEditor						= 19,					/**< Added field 'bOnlyEditor' to asset */
 	VER_CName								= 20,					/**< Added CName for IDs in string view */
+	VER_BBoxInStaticMesh					= 21,					/**< Added CBox to a static mesh */
 
 	//
 	// New versions can be added here

@@ -94,6 +94,15 @@ void CStaticMesh::Serialize( class CArchive& InArchive )
 	InArchive << surfaces;
 	InArchive << materials;
 
+	if ( InArchive.Ver() < VER_BBoxInStaticMesh )
+	{
+		CalcBoundingBox();
+	}
+	else
+	{
+		InArchive << bbox;
+	}
+
 	if ( InArchive.IsLoading() )
 	{
 		// Mark dirty all drawing policy links
@@ -109,10 +118,57 @@ void CStaticMesh::SetData( const std::vector<SStaticMeshVertexType>& InVerteces,
 	indeces			= InIndeces;
 	surfaces		= InSurfaces;
 	materials		= InMaterials;
+	CalcBoundingBox();
 
 	// Mark dirty all drawing policy links
 	MarkDirtyAllElementDrawingPolices();
 	BeginUpdateResource( this );
+}
+
+void CStaticMesh::CalcBoundingBox()
+{
+	// Find minimum and maximum by XYZ
+	if ( verteces.Num() > 0 )
+	{
+		Vector		minXYZ = verteces.GetElement( 0 ).position;
+		Vector		maxXYZ = verteces.GetElement( 0 ).position;
+
+		for ( uint32 index = 0, count = verteces.Num(); index < count; ++index )
+		{
+			const SStaticMeshVertexType&	vertexType = verteces.GetElement( index );
+			if ( minXYZ.x > vertexType.position.x )
+			{
+				minXYZ.x = vertexType.position.x;
+			}
+			if ( minXYZ.y > vertexType.position.y )
+			{
+				minXYZ.y = vertexType.position.y;
+			}
+			if ( minXYZ.z > vertexType.position.z )
+			{
+				minXYZ.z = vertexType.position.z;
+			}
+
+			if ( maxXYZ.x < vertexType.position.x )
+			{
+				maxXYZ.x = vertexType.position.x;
+			}
+			if ( maxXYZ.y < vertexType.position.y )
+			{
+				maxXYZ.y = vertexType.position.y;
+			}
+			if ( maxXYZ.z < vertexType.position.z )
+			{
+				maxXYZ.z = vertexType.position.z;
+			}
+		}
+
+		bbox = CBox::BuildAABB( SMath::vectorZero, minXYZ, maxXYZ );
+	}
+	else
+	{
+		bbox.Clear();
+	}
 }
 
 void CStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<CMaterial>& InNewMaterial )
