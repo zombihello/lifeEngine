@@ -32,6 +32,9 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
 	GRHI->SetViewParameters( immediateContext, *sceneView );
 
+	// Clear the scene color surface
+	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
+
 	// Build visible view on scene
 	if ( scene )
 	{
@@ -96,16 +99,12 @@ bool CSceneRenderer::RenderPrePass( class CBaseDeviceContextRHI* InDeviceContext
 {
 	SSceneDepthGroup&		SDG = scene->GetSDG( SDG_World );
 	CBaseDeviceContextRHI*	immediateContext = GRHI->GetImmediateContext();
-	if ( SDG.depthDrawList.GetNum() <= 0 )
-	{
-		return false;
-	}
 
 	SCOPED_DRAW_EVENT( EventPrePass, DEC_SCENE_ITEMS, TEXT( "PrePass" ) );
 	GSceneRenderTargets.BeginRenderingPrePass( immediateContext );
 	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
 
-	if ( GEngine->IsPrePass() )
+	if ( GEngine->IsPrePass() && SDG.depthDrawList.GetNum() > 0 )
 	{
 		GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
 		GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
@@ -118,6 +117,7 @@ bool CSceneRenderer::RenderPrePass( class CBaseDeviceContextRHI* InDeviceContext
 
 bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContext )
 {
+	// Do nothing if SDG_World layer is empty
 	if ( scene->GetSDG( SDG_World ).IsEmpty() )
 	{
 		return false;
@@ -150,13 +150,7 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
 	GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
 
-	// Clear render targets (depth we clear only when PrePass is disabled)
-	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
-	if ( !GEngine->IsPrePass() )
-	{
-		immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
-	}
-
+	// Render SDG_World layer
 	bool	bDirty = RenderSDG( InDeviceContext, SDG_World );
 
 	// Finish rendering to GBuffer (only when we used him)

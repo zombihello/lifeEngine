@@ -859,7 +859,8 @@ void CD3D11RHI::SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, Ble
 		// Regenerate blend state if color write is not equal
 		if ( blendState && blendState->IsColorWrite() != stateCache.bColorWrite )
 		{
-			d3d11BlendState = GetCachedBlendState( blendState->GetInfo(), stateCache.bColorWrite )->GetResource();
+			blendState = GetCachedBlendState( blendState->GetInfo(), stateCache.bColorWrite );
+			d3d11BlendState = blendState->GetResource();
 		}
 
 		float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
