@@ -258,15 +258,15 @@ void CLevelViewportWindow::OnTick()
 					// Scale
 				case ImGuizmo::SCALE:
 				{
-					Vector		localScale = Vector( scale[0], scale[1], scale[2] );
-					if ( bMultiSelection && actor != actorCenter && actor->GetActorScale() != localScale )
+					Vector		deltaScale = Vector( scale[0], scale[1], scale[2] ) * ( 1.f / actor->GetActorScale() );
+					actor->SetActorScale( actor->GetActorScale() * deltaScale );			
+					if ( bMultiSelection && actor != actorCenter )
 					{
-						Vector		deltaScale		= actor->GetActorScale() - localScale;
-						Vector		deltaDistance	= Vector( actorCenter->GetActorLocation().x - actor->GetActorLocation().x, actorCenter->GetActorLocation().y - actor->GetActorLocation().y, actorCenter->GetActorLocation().z - actor->GetActorLocation().z ) * deltaScale;
-						actor->AddActorLocation( deltaDistance );
+						deltaScale -= Vector( 1.f, 1.f, 1.f );
+						actor->AddActorLocation( -actorCenter->GetActorLocation() );
+						actor->AddActorLocation( deltaScale * actor->GetActorLocation() );
+						actor->AddActorLocation( actorCenter->GetActorLocation() );
 					}
-
-					actor->SetActorScale( localScale );
 					break;
 				}
 				}
