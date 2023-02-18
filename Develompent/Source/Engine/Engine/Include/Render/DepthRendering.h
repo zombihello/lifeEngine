@@ -30,7 +30,7 @@ public:
 	{
 		InitInternal( InVertexFactory, InMaterial, InDepthBias );
 
-		// Override shaders for hit proxy id rendering
+		// Override shaders for depth only rendering
 		uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
 		vertexShader	= GShaderManager->FindInstance<CDepthOnlyVertexShader>( vertexFactoryHash );
 		pixelShader		= GShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );

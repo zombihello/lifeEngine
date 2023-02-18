@@ -53,7 +53,7 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	ShowFlags_t				showFlags			= sceneView->GetShowFlags();
 	bool					bDirty				= false;
 
-	// Render PrePass (only if him is enabled in configs)
+	// Render PrePass
 	bDirty |= RenderPrePass( immediateContext );
 
 	// Render BasePass
