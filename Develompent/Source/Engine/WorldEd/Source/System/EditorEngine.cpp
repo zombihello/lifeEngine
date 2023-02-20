@@ -21,6 +21,7 @@
 #include "System/Config.h"
 #include "System/BaseWindow.h"
 #include "System/AssetsImport.h"
+#include "Actors/Actor.h"
 
 // Actors
 #include "Actors/PlayerStart.h"
@@ -78,7 +79,7 @@ void CEditorEngine::Init()
 	viewports.push_back( viewport );
 
 	// Init all windows
-	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( TEXT( "Classes" ) );
+	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( TEXT( "Classes" ), AActor::StaticClass() );
 	actorClassesWindow->Init();
 	
 	actorPropertiesWindow				= MakeSharedPtr<CActorPropertiesWindow>( TEXT( "Properties" ) );
