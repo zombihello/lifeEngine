@@ -3,8 +3,10 @@
 #include "Misc/UIGlobals.h"
 #include "Logger/LoggerMacros.h"
 #include "Windows/LevelViewportWindow.h"
+#include "Render/EditorLevelViewportClient.h"
 #include "System/EditorEngine.h"
 #include "System/World.h"
+#include "System/ActorFactory.h"
 #include "Render/RenderingThread.h"
 #include "System/AssetsImport.h"
 
@@ -52,7 +54,7 @@ CLevelViewportWindow::CLevelViewportWindow( const std::wstring& InName, bool InV
 	, bGuizmoUsing( false )
 	, guizmoOperationType( ImGuizmo::TRANSLATE )
 	, guizmoModeType( ImGuizmo::LOCAL )
-	, viewportScreenPos( 0.f, 0.f )
+	, viewportCursorPos( 0.f, 0.f )
 	, viewportWidget( true, &viewportClient )
 {
 	flags |= ImGuiWindowFlags_MenuBar;
@@ -163,8 +165,11 @@ void CLevelViewportWindow::OnTick()
 	}
 
 	// Draw viewport widget
-	viewportScreenPos = ImGui::GetCursorScreenPos();
+	viewportCursorPos = ImVec2( ImGui::GetMousePos().x - ImGui::GetCursorScreenPos().x, ImGui::GetMousePos().y - ImGui::GetCursorScreenPos().y );
 	viewportWidget.Tick();
+
+	// Draw popup menu
+	DrawPopupMenu();
 
 	// Draw transform gizmos if has selected actors
 	std::vector<ActorRef_t>		selectedActors = GWorld->GetSelectedActors();
@@ -277,6 +282,41 @@ void CLevelViewportWindow::OnTick()
 	}
 }
 
+void CLevelViewportWindow::DrawPopupMenu()
+{
+	if ( viewportClient.IsAllowContextMenu() && ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
+	{
+		// Convert from screen space to world space
+		Vector			location = viewportClient.ScreenToWorld( Vector2D( viewportCursorPos.x, viewportCursorPos.y ), GetSizeX(), GetSizeY() );
+
+		// Spawn actor by class
+		CClass*			actorClass = GEditorEngine->GetActorClassesWindow()->GetCurrentClass();
+		if ( ImGui::MenuItem( TCHAR_TO_ANSI( CString::Format( TEXT( "Spawn %s" ), actorClass->GetName().c_str() ).c_str() ) ) )
+		{
+			// Spawn new actor
+			GWorld->SpawnActor( actorClass, location );
+		}
+
+		// Spawn actor by asset from content browser
+		std::wstring	assetReference = GEditorEngine->GetContentBrowserWindow()->GetSelectedAssetReference();
+		if ( !assetReference.empty() )
+		{
+			std::wstring		dummy;
+			EAssetType			assetType;
+			if ( ParseReferenceToAsset( assetReference, dummy, dummy, assetType ) && GActorFactory.IsRegistered( assetType ) && ImGui::MenuItem( TCHAR_TO_ANSI( CString::Format( TEXT( "Spawn %s" ), assetReference.c_str() ).c_str() ) ) )
+			{
+				// Spawn new actor
+				TAssetHandle<CAsset>		asset = GPackageManager->FindAsset( assetReference, assetType );
+				if ( asset.IsAssetValid() )
+				{
+					GActorFactory.Spawn( asset, location );
+				}
+			}
+		}
+		ImGui::EndPopup();
+	}
+}
+
 void CLevelViewportWindow::OnVisibilityChanged( bool InNewVisibility )
 {
 	viewportWidget.SetEnabled( InNewVisibility );
@@ -309,8 +349,7 @@ void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 				// Wait until we rendering scene
 				FlushRenderingCommands();
 
-				Vector2D		cursorPosition( ImGui::GetMousePos().x - viewportScreenPos.x, ImGui::GetMousePos().y - viewportScreenPos.y );
-				CHitProxyId		hitProxyId = viewportClient.GetHitProxyId( cursorPosition.x, cursorPosition.y );
+				CHitProxyId		hitProxyId = viewportClient.GetHitProxyId( viewportCursorPos.x, viewportCursorPos.y );
 				bool			bControlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
 
 				if ( !bControlDown )
@@ -326,12 +365,12 @@ void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 					if ( bControlDown && actor->IsSelected() )
 					{
 						GWorld->UnselectActor( actor );
-						LE_LOG( LT_Log, LC_Editor, TEXT( "(%f;%f) Unselected actor '%s'" ), cursorPosition.x, cursorPosition.y, actor->GetName() );
+						LE_LOG( LT_Log, LC_Editor, TEXT( "(%f;%f) Unselected actor '%s'" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName() );
 					}
 					else
 					{
 						GWorld->SelectActor( actor );
-						LE_LOG( LT_Log, LC_Editor, TEXT( "(%f;%f) Selected actor '%s'" ), cursorPosition.x, cursorPosition.y, actor->GetName() );
+						LE_LOG( LT_Log, LC_Editor, TEXT( "(%f;%f) Selected actor '%s'" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName() );
 					}
 				}
 			}

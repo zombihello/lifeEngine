@@ -70,11 +70,16 @@ protected:
 	virtual void OnVisibilityChanged( bool InNewVisibility ) override;
 
 private:
+	/**
+	 * @brief Draw popup menu
+	 */
+	void DrawPopupMenu();
+
 	bool							bGuizmoUsing;			/**< Is using ImGuizmo now */
 	TAssetHandle<CTexture2D>		icons[IT_Num];			/**< Array of icons */
 	ImGuizmo::OPERATION				guizmoOperationType;	/**< ImGuizmo operation type */
 	ImGuizmo::MODE					guizmoModeType;			/**< ImGuizmo mode type */
-	ImVec2							viewportScreenPos;		/**< Viewport screen position */
+	ImVec2							viewportCursorPos;		/**< Viewport cursor position */
 	CEditorLevelViewportClient		viewportClient;			/**< Viewport client */
 	CViewportWidget					viewportWidget;			/**< Viewport widget */
 };

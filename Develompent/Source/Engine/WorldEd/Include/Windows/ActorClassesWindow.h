@@ -37,13 +37,13 @@ public:
 
 	/**
 	 * @brief Get current class
-	 * @return Return selected class. If isn't select return NULL
+	 * @return Return selected class. If isn't select will return root class
 	 */
 	FORCEINLINE CClass* GetCurrentClass() const
 	{
 		std::vector<CClass*>		classes;
 		root->GetSelectedClasses( classes );
-		return !classes.empty() ? classes[0] : nullptr;
+		return !classes.empty() ? classes[0] : root->GetClass();
 	}
 
 protected:
