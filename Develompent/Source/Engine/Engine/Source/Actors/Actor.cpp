@@ -48,6 +48,7 @@ AActor::AActor()
 	, bNeedReinitCollision( false )
 	, bActorIsBeingDestroyed( false )
 	, bBeginPlay( false )
+	, bVisibility( true )
 
 #if WITH_EDITOR
 	, bSelected( false )
@@ -99,6 +100,7 @@ void AActor::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << bIsStatic;
+	InArchive << bVisibility;
 
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
 	{

@@ -110,3 +110,8 @@ void CPrimitiveComponent::TermPrimitivePhysics()
 		bodyInstance.TermBody();
 	}
 }
+
+bool CPrimitiveComponent::IsVisibility() const
+{
+	return bVisibility && ( GetOwner() ? GetOwner()->IsVisibility() : true );
+}

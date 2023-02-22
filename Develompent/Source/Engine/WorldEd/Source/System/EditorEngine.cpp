@@ -234,7 +234,7 @@ void CEditorEngine::AddTOCEntries( const std::wstring& InRootDir )
 
 bool CEditorEngine::SerializeTOC( bool InIsSave /* = false */ )
 {
-	std::wstring	pathTOC = appGameDir() + ( PATH_SEPARATOR TEXT( "EditorCache" ) ) + PATH_SEPARATOR + GTableOfContents.GetNameTOC();
+	std::wstring	pathTOC = appGameDir() + ( PATH_SEPARATOR TEXT( "Content" ) ) + PATH_SEPARATOR + GTableOfContents.GetNameTOC();
 	CArchive* archiveTOC = !InIsSave ? GFileSystem->CreateFileReader( pathTOC ) : GFileSystem->CreateFileWriter( pathTOC );
 	if ( archiveTOC )
 	{

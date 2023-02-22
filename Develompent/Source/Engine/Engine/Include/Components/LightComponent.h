@@ -12,6 +12,7 @@
 #include "Misc/RefCountPtr.h"
 #include "Math/Color.h"
 #include "Components/SceneComponent.h"
+#include "Actors/Actor.h"
 
 /**
  * @ingroup Engine
@@ -128,7 +129,7 @@ public:
 	 */
 	FORCEINLINE bool IsEnabled() const
 	{
-		return bEnabled;
+		return bEnabled && ( GetOwner() ? GetOwner()->IsVisibility() : true );
 	}
 
 	/**

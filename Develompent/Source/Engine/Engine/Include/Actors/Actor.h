@@ -757,6 +757,25 @@ public:
 #endif // WITH_EDITOR
 
 	/**
+	 * @brief Set visibility
+	 *
+	 * @param InNewVisibility New visibility
+	 */
+	FORCEINLINE void SetVisibility( bool InNewVisibility )
+	{
+		bVisibility = InNewVisibility;
+	}
+
+	/**
+	 * @brief Get visibility
+	 * @return Return visibility of actor
+	 */
+	FORCEINLINE bool IsVisibility() const
+	{
+		return bVisibility;
+	}
+
+	/**
 	 * Get actor location in world space
 	 * @return Return actor location, if root component is not valid return zero vector
 	 */
@@ -914,7 +933,8 @@ private:
 	bool										bNeedReinitCollision;	/**< Is need reinit collision component */
 	bool										bActorIsBeingDestroyed;	/**< Actor is being destroyed */
 	bool										bBeginPlay;				/**< Is begin play for this actor */
-	
+	bool										bVisibility;			/**< Is actor visibility */
+
 #if WITH_EDITOR
 	bool										bSelected;				/**< Is selected this actor */
 #endif // WITH_EDITOR

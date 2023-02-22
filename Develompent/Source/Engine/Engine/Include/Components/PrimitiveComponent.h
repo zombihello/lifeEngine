@@ -109,10 +109,7 @@ public:
 	 * @brief Get visibility
 	 * @return Return visibility of primitive
 	 */
-	FORCEINLINE bool IsVisibility() const
-	{
-		return bVisibility;
-	}
+	bool IsVisibility() const;
 
 	/**
 	 * @brief Get bound box
