@@ -164,8 +164,44 @@ private:
 	Texture2DRHIRef_t		texture2DRHI;		/**< Texture 2D RHI */
 };
 
-extern TGlobalResource<CWhiteTexture>		GWhiteTexture;		/**< White texture */
-extern TGlobalResource<CBlackTexture>		GBlackTexture;		/**< Black texture */
+/**
+ * @ingroup Engine
+ * A empty normal texture
+ */
+class CEmptyNormalTexture : public CRenderResource
+{
+public:
+	/**
+	 * @brief Get texture 2D RHI
+	 * @return Return texture 2D RHI
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetTexture2DRHI() const
+	{
+		return texture2DRHI;
+	}
+
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
+
+private:
+	Texture2DRHIRef_t		texture2DRHI;		/**< Texture 2D RHI */
+};
+
+extern TGlobalResource<CWhiteTexture>		GWhiteTexture;				/**< White texture */
+extern TGlobalResource<CBlackTexture>		GBlackTexture;				/**< Black texture */
+extern TGlobalResource<CEmptyNormalTexture>	GEmptyNormalTexture;		/**< Empty normal texture */
 
 /**
  * @ingroup Engine

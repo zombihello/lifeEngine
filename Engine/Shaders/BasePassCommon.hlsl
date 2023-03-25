@@ -10,11 +10,11 @@
 
 struct VS_OUT
 {
-	float2 texCoord0	: TEXCOORD0;
-	float4 normal		: NORMAL0;
+	float2 		texCoord0	: TEXCOORD0;
+	float3x3 	tbnMatrix	: NORMAL0;
 
 #if WITH_EDITOR
-	float4 colorOverlay	: COLOR0;
+	float4 colorOverlay		: COLOR0;
 #endif // WITH_EDITOR
 };
 

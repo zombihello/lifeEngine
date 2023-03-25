@@ -21,6 +21,16 @@ float4 VertexFactory_GetLocalNormal( FVertexFactoryInput InInput )
 	return float4( 0.5f, 0.5f, 1.f, 0.f );
 }
 
+float4 VertexFactory_GetLocalTangent( FVertexFactoryInput InInput )
+{
+	return float4( 1.f, 0.f, 0.f, 0.f );
+}
+
+float4 VertexFactory_GetLocalBinormal( FVertexFactoryInput InInput )
+{
+	return float4( 0.f, 0.f, 1.f, 0.f );
+}
+
 float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 {
 	return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalPosition( InInput ) );
@@ -29,6 +39,16 @@ float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 float4 VertexFactory_GetWorldNormal( FVertexFactoryInput InInput )
 {
 	return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalNormal( InInput ) );
+}
+
+float4 VertexFactory_GetWorldTangent( FVertexFactoryInput InInput )
+{
+	return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalTangent( InInput ) );
+}
+
+float4 VertexFactory_GetWorldBinormal( FVertexFactoryInput InInput )
+{
+	return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalBinormal( InInput ) );
 }
 
 float2 VertexFactory_GetTexCoord( FVertexFactoryInput InInput, uint InTexCoordIndex )

@@ -13,7 +13,7 @@ void MainVS( in FVertexFactoryInput In, out VS_OUT Out, out float4 OutPosition :
 {
 	OutPosition			= MulMatrix( viewProjectionMatrix, VertexFactory_GetWorldPosition( In ) );
 	Out.texCoord0		= VertexFactory_GetTexCoord( In, 0 );
-	Out.normal			= VertexFactory_GetWorldNormal( In );
+	Out.tbnMatrix		= float3x3( VertexFactory_GetWorldTangent( In ).xyz, VertexFactory_GetWorldBinormal( In ).xyz, VertexFactory_GetWorldNormal( In ).xyz );
 
 #if WITH_EDITOR
 	Out.colorOverlay	= VertexFactory_GetColorOverlay( In );

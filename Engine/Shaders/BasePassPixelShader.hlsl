@@ -51,7 +51,7 @@ void MainPS( VS_OUT In, out PS_OUT Out )
 	#endif // WITH_EDITOR
 		;
 
-	Out.normalMetal.rgb 		= normalize( In.normal.xyz ); //normalTexture.Sample( normalSampler, In.texCoord0 ).rgb;
+	Out.normalMetal.rgb 		= normalize( MulMatrix( normalTexture.Sample( normalSampler, In.texCoord0 ).rgb * 2.f - 1.f, In.tbnMatrix ) );
 	Out.normalMetal.a			= metallicTexture.Sample( metallicSampler, In.texCoord0 ).a;
 
 	Out.emission				= emissionTexture.Sample( emissionSampler, In.texCoord0 );

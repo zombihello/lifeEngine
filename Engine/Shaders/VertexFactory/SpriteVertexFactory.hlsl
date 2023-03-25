@@ -38,6 +38,16 @@ float4 VertexFactory_GetLocalNormal( FVertexFactoryInput InInput )
 	return InInput.normal;
 }
 
+float4 VertexFactory_GetLocalTangent( FVertexFactoryInput InInput )
+{
+	return float4( 1.f, 0.f, 0.f, 0.f );
+}
+
+float4 VertexFactory_GetLocalBinormal( FVertexFactoryInput InInput )
+{
+	return float4( 0.f, 0.f, 1.f, 0.f );
+}
+
 float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 {
 #if USE_INSTANCING
@@ -53,6 +63,24 @@ float4 VertexFactory_GetWorldNormal( FVertexFactoryInput InInput )
 	return MulMatrix( InInput.instanceLocalToWorld, VertexFactory_GetLocalNormal( InInput ) );
 #else
 	return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalNormal( InInput ) );
+#endif // USE_INSTANCING
+}
+
+float4 VertexFactory_GetWorldTangent( FVertexFactoryInput InInput )
+{
+#if USE_INSTANCING
+	return MulMatrix( InInput.instanceLocalToWorld, VertexFactory_GetLocalTangent( InInput ) );
+#else
+	return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalTangent( InInput ) );
+#endif // USE_INSTANCING
+}
+
+float4 VertexFactory_GetWorldBinormal( FVertexFactoryInput InInput )
+{
+#if USE_INSTANCING
+	return MulMatrix( InInput.instanceLocalToWorld, VertexFactory_GetLocalBinormal( InInput ) );
+#else
+	return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalBinormal( InInput ) );
 #endif // USE_INSTANCING
 }
 

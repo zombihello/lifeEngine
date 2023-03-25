@@ -6,8 +6,9 @@
 #include "Render/Scene.h"
 #include "RHI/BaseRHI.h"
 
-TGlobalResource<CWhiteTexture>		GWhiteTexture;
-TGlobalResource<CBlackTexture>		GBlackTexture;
+TGlobalResource<CWhiteTexture>				GWhiteTexture;
+TGlobalResource<CBlackTexture>				GBlackTexture;
+TGlobalResource<CEmptyNormalTexture>		GEmptyNormalTexture;
 
 /* Maps members of EPixelFormat to a SPixelFormatInfo describing the format */
 SPixelFormatInfo		GPixelFormats[ PF_Max ] =
@@ -147,6 +148,17 @@ void CBlackTexture::InitRHI()
 }
 
 void CBlackTexture::ReleaseRHI()
+{
+	texture2DRHI.SafeRelease();
+}
+
+void CEmptyNormalTexture::InitRHI()
+{
+	uint8		rgba[4] = { 0x7F, 0x7F, 0xFF, 0xFF };
+	texture2DRHI = GRHI->CreateTexture2D( TEXT( "EmptyNormalTexture" ), 1, 1, PF_A8R8G8B8, 1, 0, rgba );
+}
+
+void CEmptyNormalTexture::ReleaseRHI()
 {
 	texture2DRHI.SafeRelease();
 }

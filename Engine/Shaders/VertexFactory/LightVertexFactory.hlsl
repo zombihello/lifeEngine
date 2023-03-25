@@ -31,6 +31,16 @@ float4 VertexFactory_GetLocalNormal( FVertexFactoryInput InInput )
 	return float4( 0.5f, 0.5f, 1.f, 0.f );
 }
 
+float4 VertexFactory_GetLocalTangent( FVertexFactoryInput InInput )
+{
+	return float4( 1.f, 0.f, 0.f, 0.f );
+}
+
+float4 VertexFactory_GetLocalBinormal( FVertexFactoryInput InInput )
+{
+	return float4( 0.f, 0.f, 1.f, 0.f );
+}
+
 float4 VertexFactory_GetWorldPosition( FVertexFactoryInput InInput )
 {
 #if POINT_LIGHT || SPOT_LIGHT
@@ -54,6 +64,32 @@ float4 VertexFactory_GetWorldNormal( FVertexFactoryInput InInput )
 	#endif // USE_INSTANCING
 #else
 	return VertexFactory_GetLocalNormal( InInput );
+#endif // POINT_LIGHT || SPOT_LIGHT
+}
+
+float4 VertexFactory_GetWorldTangent( FVertexFactoryInput InInput )
+{
+#if POINT_LIGHT || SPOT_LIGHT
+	#if USE_INSTANCING
+		return MulMatrix( InInput.instanceLocalToWorld, VertexFactory_GetLocalTangent( InInput ) );	
+	#else
+		return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalTangent( InInput ) );
+	#endif // USE_INSTANCING
+#else
+	return VertexFactory_GetLocalTangent( InInput );
+#endif // POINT_LIGHT || SPOT_LIGHT
+}
+
+float4 VertexFactory_GetWorldBinormal( FVertexFactoryInput InInput )
+{
+#if POINT_LIGHT || SPOT_LIGHT
+	#if USE_INSTANCING
+		return MulMatrix( InInput.instanceLocalToWorld, VertexFactory_GetLocalBinormal( InInput ) );	
+	#else
+		return MulMatrix( localToWorldMatrix, VertexFactory_GetLocalBinormal( InInput ) );
+	#endif // USE_INSTANCING
+#else
+	return VertexFactory_GetLocalBinormal( InInput );
 #endif // POINT_LIGHT || SPOT_LIGHT
 }
 

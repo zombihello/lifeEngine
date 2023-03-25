@@ -360,7 +360,7 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<S
 				vertex.position.z = tempVector.z;
 				vertex.position.w = 1.f;
 
-				tempVector = ( aiMatrix3x3 )( *itMesh ).transformation * mesh->mNormals[index];
+				tempVector = ( *itMesh ).transformation * mesh->mNormals[index];
 				ChangeAxisUpInVector( tempVector, importSettings.axisUp );
 
 				vertex.normal.x = tempVector.x;
@@ -370,7 +370,7 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<S
 
 				if ( mesh->mTangents )
 				{
-					tempVector = ( aiMatrix3x3 )( *itMesh ).transformation * mesh->mTangents[index];
+					tempVector = ( *itMesh ).transformation * mesh->mTangents[index];
 					ChangeAxisUpInVector( tempVector, importSettings.axisUp );
 
 					vertex.tangent.x = tempVector.x;
@@ -381,7 +381,7 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<S
 
 				if ( mesh->mBitangents )
 				{
-					tempVector = ( aiMatrix3x3 )( *itMesh ).transformation * mesh->mBitangents[index];
+					tempVector = ( *itMesh ).transformation * mesh->mBitangents[index];
 					ChangeAxisUpInVector( tempVector, importSettings.axisUp );
 
 					vertex.binormal.x = tempVector.x;

@@ -101,7 +101,7 @@ void CBasePassPixelShader::SetConstantParameters( class CBaseDeviceContextRHI* I
     }
 	else
 	{
-		SetTextureParameter( InDeviceContextRHI, normalParameter, GBlackTexture.GetTexture2DRHI() );
+		SetTextureParameter( InDeviceContextRHI, normalParameter, GEmptyNormalTexture.GetTexture2DRHI() );
 		SetSamplerStateParameter( InDeviceContextRHI, normalSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
 	}
 
