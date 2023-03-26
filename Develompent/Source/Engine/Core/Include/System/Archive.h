@@ -27,7 +27,8 @@ enum EArchiveType
 	AT_ShaderCache,		/**< Archive contains shader cache */
 	AT_TextureCache,	/**< Archive contains texture cache */
 	AT_World,			/**< Archive contains world */
-	AT_Package			/**< Archive contains assets */
+	AT_Package,			/**< Archive contains assets */
+	AT_BinaryFile,		/**< Archive is unknown binary file */
 };
 
 /**

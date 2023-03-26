@@ -173,6 +173,7 @@ namespace IMGUIZMO_NAMESPACE
    // translation is applied in world space
    enum OPERATION
    {
+      NONE             = 0,         // BS yehor.pohuliaka
       TRANSLATE_X      = (1u << 0),
       TRANSLATE_Y      = (1u << 1),
       TRANSLATE_Z      = (1u << 2),

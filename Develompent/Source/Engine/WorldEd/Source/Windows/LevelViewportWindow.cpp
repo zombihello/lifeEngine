@@ -109,14 +109,22 @@ void CLevelViewportWindow::OnTick()
 	// Menu bar
 	if ( ImGui::BeginMenuBar() )
 	{
-		// Tool 'Select'
-		ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_ToolSelect].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE );
+		// Tool 'Select objects'
+		if ( guizmoOperationType == ImGuizmo::NONE )
+		{
+			ImGui_ButtonSetButtonSelectedStyle();
+		}
+		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_ToolSelect].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		{
+			guizmoOperationType = ImGuizmo::NONE;
+		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
 		{
-			ImGui::SetTooltip( "Tool 'Select'" );
+			ImGui::SetTooltip( "Select objects" );
 		}
+		ImGui_ButtonPopStyleColor();
 
-		// Tool 'Translate'
+		// Tool 'Select and translate objects'
 		if ( guizmoOperationType == ImGuizmo::TRANSLATE )
 		{
 			ImGui_ButtonSetButtonSelectedStyle();
@@ -127,11 +135,11 @@ void CLevelViewportWindow::OnTick()
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
 		{
-			ImGui::SetTooltip( "Tool 'Translate'" );
+			ImGui::SetTooltip( "Select and translate objects" );
 		}
 		ImGui_ButtonPopStyleColor();
 
-		// Tool 'Rotate'
+		// Tool 'Select and rotate objects'
 		if ( guizmoOperationType == ImGuizmo::ROTATE )
 		{
 			ImGui_ButtonSetButtonSelectedStyle();
@@ -142,11 +150,11 @@ void CLevelViewportWindow::OnTick()
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
 		{
-			ImGui::SetTooltip( "Tool 'Rotate'" );
+			ImGui::SetTooltip( "Select and rotate objects" );
 		}
 		ImGui_ButtonPopStyleColor();
 
-		// Tool 'Scale'
+		// Tool 'Select and scale objects'
 		if ( guizmoOperationType == ImGuizmo::SCALE )
 		{
 			ImGui_ButtonSetButtonSelectedStyle();
@@ -157,7 +165,7 @@ void CLevelViewportWindow::OnTick()
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
 		{
-			ImGui::SetTooltip( "Tool 'Scale'" );
+			ImGui::SetTooltip( "Select and scale objects" );
 		}
 		ImGui_ButtonPopStyleColor();
 
@@ -377,11 +385,14 @@ void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 #endif // ENABLE_HITPROXY
 			break;
 
-			// If pressed 'Escape' we unselect all actors
+			// Key released events
 		case SWindowEvent::T_KeyReleased:
-			if ( InWindowEvent.events.key.code == BC_KeyEscape )
+			switch ( InWindowEvent.events.key.code )
 			{
+				// Unselect all actors
+			case BC_KeyEscape:
 				GWorld->UnselectAllActors();
+				break;
 			}
 			break;
 		}

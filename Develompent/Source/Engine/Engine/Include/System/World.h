@@ -189,6 +189,15 @@ public:
 	}
 
 	/**
+	 * @brief Get number of selected actors
+	 * @return Return number of selected actors
+	 */
+	FORCEINLINE uint32 GetNumSelectedActors() const
+	{
+		return selectedActors.size();
+	}
+
+	/**
 	 * @brief Get name
 	 * @return Return name of world
 	 */
