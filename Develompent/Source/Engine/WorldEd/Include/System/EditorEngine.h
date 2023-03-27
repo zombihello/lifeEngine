@@ -20,6 +20,7 @@
 #include "WorldEd.h"
 
 // Windows
+#include "Windows/EditorWindow.h"
 #include "Windows/ActorClassesWindow.h"
 #include "Windows/ActorPropertiesWindow.h"
 #include "Windows/ContentBrowserWindow.h"
@@ -269,9 +270,10 @@ private:
 	EEditorMode									currentEditorMode;					/**< Current editor mode */
 	std::vector<TRefCountPtr<class CViewport>>	viewports;							/**< Array of viewports for render */
 	CEditorConstraints							constraints;						/**< Editor constraints */
-	class CEditorInterfaceViewportClient*		editorInterfaceViewportClient;		/**< Viewport client for render editor interface */
+	CViewportClient*							editorInterfaceViewportClient;		/**< Viewport client for render editor interface */
 
 	// Windows
+	TSharedPtr<CEditorWindow>					editorWindow;						/**< Main editor window */
 	TSharedPtr<CActorClassesWindow>				actorClassesWindow;					/**< Actor classes window */
 	TSharedPtr<CActorPropertiesWindow>			actorPropertiesWindow;				/**< Actor properties window */
 	TSharedPtr<CContentBrowserWindow>			contentBrowserWindow;				/**< Content browser window */

@@ -457,6 +457,44 @@ protected:
 		bPendingChangeSize = true;
 	}
 
+	/**
+	 * @brief Set layer position
+	 * @param InPosition	Layer position
+	 */
+	FORCEINLINE void SetPosition( const Vector2D& InPosition )
+	{
+		position = InPosition;
+		bPendingChangePos = true;
+	}
+
+	/**
+	 * @brief Set viewport ID
+	 * @param InViewportID		Viewport ID
+	 */
+	FORCEINLINE void SetViewportID( ImGuiID InViewportID )
+	{
+		viewportID = InViewportID;
+		bPendingChangeViewportID = true;
+	}
+
+	/**
+	 * @brief Set rounding
+	 * @param InRounding	Layer rounding
+	 */
+	FORCEINLINE void SetRounding( float InRounding )
+	{
+		rounding = InRounding;
+	}
+
+	/**
+	 * @brief Set border size
+	 * @param InBorderSize		Layer border size
+	 */
+	FORCEINLINE void SetBorderSize( float InBorderSize )
+	{
+		borderSize = InBorderSize;
+	}
+
 	uint32						flags;				/**< ImGUI window flags */
 
 private:
@@ -465,16 +503,22 @@ private:
 	 */
 	void UpdateEvents();
 
-	bool						bInit;				/**< Is inited layer */
-	bool						bVisibility;		/**< Is visible layer */
-	bool						bFocused;			/**< Is focused layer */
-	bool						bHovered;			/**< Is hovered layer */
-	bool						bPendingChangeSize;	/**< Is need update size of layer */	
-	Vector2D					size;				/**< Layer size */
-	Vector2D					padding;			/**< Layer padding */
-	std::wstring				name;				/**< Layer name */
-	std::stack<SWindowEvent>	events;				/**< Stack of ImGUI events who need process */
-	TSharedPtr<CImGUIPopup>		popup;				/**< Current opened popup in layer */
+	bool						bInit;						/**< Is inited layer */
+	bool						bVisibility;				/**< Is visible layer */
+	bool						bFocused;					/**< Is focused layer */
+	bool						bHovered;					/**< Is hovered layer */
+	bool						bPendingChangeSize;			/**< Is need update size of layer */
+	bool						bPendingChangePos;			/**< Is need update position of layer */
+	bool						bPendingChangeViewportID;	/**< Is need update change viewport ID of layer */
+	float						rounding;					/**< Layer rounding */
+	float						borderSize;					/**< Layer border size */
+	Vector2D					size;						/**< Layer size */
+	Vector2D					position;					/**< Layer position */
+	ImGuiID						viewportID;					/**< Viewport ID */
+	Vector2D					padding;					/**< Layer padding */
+	std::wstring				name;						/**< Layer name */
+	std::stack<SWindowEvent>	events;						/**< Stack of ImGUI events who need process */
+	TSharedPtr<CImGUIPopup>		popup;						/**< Current opened popup in layer */
 };
 
 /**

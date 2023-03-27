@@ -8,10 +8,10 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/WorldEdGlobals.h"
+#include "Misc/UIGlobals.h"
 #include "System/World.h"
 #include "Render/Viewport.h"
 #include "Render/RenderingThread.h"
-#include "Render/EditorInterfaceViewportClient.h"
 #include "System/EditorEngine.h"
 #include "System/ActorFactory.h"
 #include "System/Package.h"
@@ -22,6 +22,7 @@
 #include "System/BaseWindow.h"
 #include "System/AssetsImport.h"
 #include "Actors/Actor.h"
+#include "UIEngine.h"
 
 // Actors
 #include "Actors/PlayerStart.h"
@@ -29,6 +30,25 @@
 #include "Actors/Audio.h"
 
 IMPLEMENT_CLASS( CEditorEngine )
+
+/**
+ * @ingroup WorldEd
+ * @brief Viewport client for render editor interface
+ */
+class CEditorInterfaceViewportClient : public CViewportClient
+{
+public:
+	/**
+	 * @brief Draw viewport
+	 *
+	 * @param InViewport	Viewport
+	 */
+	virtual void Draw( CViewport* InViewport ) override
+	{
+		GUIEngine->BeginDraw();
+		GUIEngine->EndDraw();
+	}
+};
 
 CEditorEngine::CEditorEngine()
 	: currentEditorMode( EM_Default )
@@ -79,6 +99,9 @@ void CEditorEngine::Init()
 	viewports.push_back( viewport );
 
 	// Init all windows
+	editorWindow						= MakeSharedPtr<CEditorWindow>();
+	editorWindow->Init();
+
 	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( TEXT( "Classes" ), AActor::StaticClass() );
 	actorClassesWindow->Init();
 	

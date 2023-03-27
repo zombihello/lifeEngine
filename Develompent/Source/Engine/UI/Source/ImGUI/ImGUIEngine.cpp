@@ -219,7 +219,13 @@ CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ 
 	, bFocused( false )
 	, bHovered( false )
 	, bPendingChangeSize( false )
+	, bPendingChangePos( false )
+	, bPendingChangeViewportID( false )
+	, rounding( ImGui::GetStyle().WindowRounding )
+	, borderSize( ImGui::GetStyle().WindowBorderSize )
 	, size( 0.f, 0.f )
+	, position( 0.f, 0.f )
+	, viewportID( -1 )
 	, padding( 5.f, 5.f )
 	, name( InName )
 {}
@@ -252,7 +258,15 @@ void CImGUILayer::Tick()
 	if ( bVisibility )
 	{
 		ImGui::PushStyleVar( ImGuiStyleVar_WindowPadding, ImVec2{ padding.x, padding.y } );
-		
+		uint32		numStyleVarsToPop = 1;
+
+		// Update window position if need
+		if ( bPendingChangePos )
+		{
+			ImGui::SetNextWindowPos( ImVec2{ position.x, position.y } );
+			bPendingChangePos = false;
+		}
+
 		// Update window size if need
 		if ( bPendingChangeSize )
 		{
@@ -260,8 +274,23 @@ void CImGUILayer::Tick()
 			bPendingChangeSize = false;
 		}
 
+		// Update viewport ID if need
+		if ( bPendingChangeViewportID )
+		{
+			ImGui::SetNextWindowViewport( viewportID );
+			bPendingChangeViewportID = false;
+		}
+
+		// Push style variables		
+		ImGui::PushStyleVar( ImGuiStyleVar_WindowRounding, rounding );
+		ImGui::PushStyleVar( ImGuiStyleVar_WindowBorderSize, borderSize );
+		numStyleVarsToPop += 2;
+
 		if ( ImGui::Begin( TCHAR_TO_ANSI( GetName().c_str() ), &bVisibility, flags ) )
 		{
+			ImGui::PopStyleVar( 2 );
+			numStyleVarsToPop -= 2;
+
 			// Update popup if him is existing
 			if ( popup )
 			{
@@ -279,7 +308,7 @@ void CImGUILayer::Tick()
 			OnTick();
 		}
 		ImGui::End();
-		ImGui::PopStyleVar();
+		ImGui::PopStyleVar( Max( ( uint32 )0, numStyleVarsToPop ) );
 
 		// If visibility is changed, we send event to children
 		if ( !bVisibility )
