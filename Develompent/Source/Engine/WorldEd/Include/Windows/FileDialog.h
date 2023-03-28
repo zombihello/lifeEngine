@@ -122,6 +122,15 @@ public:
 	}
 
 	/**
+	 * @brief Set default file extension
+	 * @param InDefaultExtension	Default extension (without '.')
+	 */
+	FORCEINLINE void SetDefaultExtension( const std::wstring& InDefaultExtension )
+	{
+		defaultExtension = InDefaultExtension;
+	}
+
+	/**
 	 * @brief Is need use multiple selection files (only open)
 	 * @return Return TRUE if need use multiple selection files, otherwise will returning FALSE
 	 */
@@ -166,11 +175,21 @@ public:
 		return fileNameFilters;
 	}
 
+	/**
+	 * @brief Get default file extension
+	 * @return Return default file extension
+	 */
+	FORCEINLINE const std::wstring& GetDefaultExtension() const
+	{
+		return defaultExtension;
+	}
+
 private:
 	bool							bMultiselection;	/**< Is use multiselection */
 	std::wstring					title;				/**< Dialog window's title */
 	std::wstring					directoryPath;		/**< Initial path to directory */
 	std::wstring					fileName;			/**< Initial file name */
+	std::wstring					defaultExtension;	/**< Default file extension */
 	std::vector<SFileNameFilter>	fileNameFilters;	/**< Array of file name filters */
 };
 
@@ -180,7 +199,17 @@ private:
  */
 struct SOpenFileDialogResult
 {
-	std::vector<std::wstring>		files;		/**< Selected files */
+	std::vector<std::wstring>				files;				/**< Selected files */
+};
+
+/**
+ * @ingroup WorldEd
+ * @brief Result of file save operation
+ */
+struct SSaveFileDialogResult
+{
+	CFileDialogSetup::SFileNameFilter		selectedFormat;		/**< Selected format */
+	std::vector<std::wstring>				files;				/**< Output files */
 };
 
 /**
@@ -193,5 +222,16 @@ struct SOpenFileDialogResult
  * @return Return TRUE when user clicks OK, otherwise will returning FALSE
  */
 bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResult& OutResult );
+
+/**
+ * @ingroup WorldEd
+ * @note Need implement on each platform
+ * @brief Create a "Save File" dialog
+ *
+ * @param InSetup		File dialog setup
+ * @param OutResult		File dialog result
+ * @return Return TRUE when user clicks OK, otherwise will returning FALSE
+ */
+bool appShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogResult& OutResult );
 
 #endif // !FILEDIALOG_H

@@ -19,15 +19,18 @@
 /**
  * Globals
  */
-SEditorDelegates::COnAssetsCanDelete	SEditorDelegates::onAssetsCanDelete;
-SEditorDelegates::COnAssetsDeleted		SEditorDelegates::onAssetsDeleted;
-SEditorDelegates::COnAssetsReloaded		SEditorDelegates::onAssetsReloaded;
-SEditorDelegates::COnActorsSpawned		SEditorDelegates::onActorsSpawned;
-SEditorDelegates::COnActorsDestroyed	SEditorDelegates::onActorsDestroyed;
-SEditorDelegates::COnEditorModeChanged	SEditorDelegates::onEditorModeChanged;
-SEditorDelegates::COnEditorLoadedMap	SEditorDelegates::onEditorLoadedMap;
-SEditorDelegates::COnActorsSelected		SEditorDelegates::onActorsSelected;
-SEditorDelegates::COnActorsUnselected	SEditorDelegates::onActorsUnselected;
+SEditorDelegates::COnAssetsCanDelete		SEditorDelegates::onAssetsCanDelete;
+SEditorDelegates::COnAssetsDeleted			SEditorDelegates::onAssetsDeleted;
+SEditorDelegates::COnAssetsReloaded			SEditorDelegates::onAssetsReloaded;
+SEditorDelegates::COnActorsSpawned			SEditorDelegates::onActorsSpawned;
+SEditorDelegates::COnActorsDestroyed		SEditorDelegates::onActorsDestroyed;
+SEditorDelegates::COnEditorModeChanged		SEditorDelegates::onEditorModeChanged;
+SEditorDelegates::COnEditorCreatedNewMap	SEditorDelegates::onEditorCreatedNewMap;
+SEditorDelegates::COnEditorLoadedMap		SEditorDelegates::onEditorLoadedMap;
+SEditorDelegates::COnEditorSavedMap			SEditorDelegates::onEditorSavedMap;
+SEditorDelegates::COnActorsSelected			SEditorDelegates::onActorsSelected;
+SEditorDelegates::COnActorsUnselected		SEditorDelegates::onActorsUnselected;
+SEditorDelegates::COnEditorMapMarkedDirty	SEditorDelegates::onEditorMapMarkedDirty;
 
 std::wstring appGetWorldEdName()
 {

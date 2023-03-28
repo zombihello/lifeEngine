@@ -284,6 +284,9 @@ void CLevelViewportWindow::OnTick()
 				}
 				}
 			}
+
+			// Mark world as dirty
+			GWorld->MarkDirty();
 		}
 
 		delete sceneView;

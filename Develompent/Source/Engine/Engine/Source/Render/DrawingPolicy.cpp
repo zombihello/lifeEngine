@@ -163,5 +163,5 @@ bool CMeshDrawingPolicy::Matches( const CMeshDrawingPolicy& InOtherDrawer ) cons
 
 bool CMeshDrawingPolicy::IsValid() const
 {
-	return material.IsAssetValid() && vertexFactory && vertexShader && pixelShader;
+	return material.IsAssetValid() && vertexFactory && vertexShader && pixelShader && vertexFactory->IsInitialized();
 }

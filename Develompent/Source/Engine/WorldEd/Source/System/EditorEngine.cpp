@@ -203,19 +203,36 @@ void CEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage
 	}
 }
 
+void CEditorEngine::NewMap()
+{
+	LE_LOG( LT_Log, LC_General, TEXT( "Create a new map" ) );
+	
+	// Clean up world and call garbage collector of unused packages and assets
+	GWorld->CleanupWorld();
+	GPackageManager->GarbageCollector();
+	
+	SEditorDelegates::onEditorCreatedNewMap.Broadcast();
+}
+
 bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	if ( !Super::LoadMap( InMap, OutError ) )
 	{
 		LE_LOG( LT_Warning, LC_General, TEXT( "Failed loading map '%s'. Error: %s" ), InMap.c_str(), OutError.c_str() );
+		NewMap();
+	}
+	else
+	{
+		SEditorDelegates::onEditorLoadedMap.Broadcast();
 	}
 
-	SEditorDelegates::onEditorLoadedMap.Broadcast();
 	return true;
 }
 
 bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 {
+	LE_LOG( LT_Log, LC_General, TEXT( "Save map: %s" ), InMap.c_str() );
+
 	CArchive*	arWorld = GFileSystem->CreateFileWriter( InMap );
 	if ( !arWorld )
 	{
@@ -228,6 +245,7 @@ bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 	GWorld->Serialize( *arWorld );
 	delete arWorld;
 
+	SEditorDelegates::onEditorSavedMap.Broadcast();
 	return true;
 }
 

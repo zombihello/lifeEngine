@@ -108,6 +108,11 @@ public:
 	}
 
 	/**
+	 * Create new map
+	 */
+	virtual void NewMap();
+
+	/**
 	 * Load map
 	 *
 	 * @param[in] InMap Path to map

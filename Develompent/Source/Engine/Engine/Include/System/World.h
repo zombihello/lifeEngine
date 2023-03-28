@@ -19,6 +19,10 @@
 #include "Actors/Actor.h"
 #include "PhysicsInterface.h"
 
+#if WITH_EDITOR
+#include "WorldEd.h"
+#endif // WITH_EDITOR
+
 /**
  * @ingroup Engine
  * The World is the top level object representing a map or a sandbox in which Actors and Components will exist and be rendered.
@@ -220,7 +224,11 @@ public:
 	 */
 	FORCEINLINE void MarkDirty()
 	{
-		bDirty = true;
+		if ( !bDirty )
+		{
+			bDirty = true;
+			SEditorDelegates::onEditorMapMarkedDirty.Broadcast();
+		}
 	}
 
 	/**

@@ -156,6 +156,9 @@ void CWorld::CleanupWorld()
 		EndPlay();
 	}
 
+	// Wait while render thread is rendering of the frame
+	FlushRenderingCommands();
+
 	// Call event of destroyed actor in each object
 	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
 	{
@@ -176,10 +179,10 @@ void CWorld::CleanupWorld()
 	actorsToDestroy.clear();
 
 #if WITH_EDITOR
-	bDirty		= true;
+	bDirty		= false;
 	selectedActors.clear();
 	filePath	= TEXT( "" );
-	name		= TEXT( "" );
+	name		= TEXT( "Unknown" );
 #endif // WITH_EDITOR
 }
 
@@ -211,7 +214,7 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
 #if WITH_EDITOR
 	std::vector<ActorRef_t>		spawnedActors = { actor };
 	SEditorDelegates::onActorsSpawned.Broadcast( spawnedActors );
-	bDirty = true;
+	MarkDirty();
 #endif // WITH_EDITOR
 
 	return actor;
@@ -246,7 +249,7 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 
 	std::vector<ActorRef_t>		destroyedActors = { InActor };
 	SEditorDelegates::onActorsDestroyed.Broadcast( destroyedActors );
-	bDirty = true;
+	MarkDirty();
 #endif // WITH_EDITOR
 
 	// Call events of destroyed actor

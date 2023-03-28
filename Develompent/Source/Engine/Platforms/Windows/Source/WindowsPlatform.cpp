@@ -276,7 +276,7 @@ bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResu
 	// Flags
 	fileDialogSettings.hwndOwner	= GWindow ? ( HWND )GWindow->GetHandle() : nullptr;
 	fileDialogSettings.Flags		|= ( InSetup.IsMultiselection() ) ? OFN_ALLOWMULTISELECT : 0;
-	fileDialogSettings.Flags		|= OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_NONETWORKBUTTON | OFN_PATHMUSTEXIST;
+	fileDialogSettings.Flags		|= OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_NONETWORKBUTTON | OFN_PATHMUSTEXIST | OFN_EXTENSIONDIFFERENT;
 
 	// File name buffer
 	std::wstring		fileNameBuffer;
@@ -290,7 +290,7 @@ bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResu
 	if ( fileNameFilters.empty() )
 	{
 		fileDialogSettings.nFilterIndex		= 0;
-		fileDialogSettings.lpstrFilter		= TEXT( "All Files (*.*)" );
+		fileDialogSettings.lpstrFilter		= TEXT( "All Formats (*.*)" );
 	}
 	else	// We are going to filter only those files with the same exact filename
 	{
@@ -318,6 +318,13 @@ bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResu
 		fileDialogSettings.lpstrFilter		= filterBuffer.data();
 	}
 
+	// Default file extension
+	std::wstring		defaultFileExtension = InSetup.GetDefaultExtension();
+	if ( !defaultFileExtension.empty() )
+	{
+		fileDialogSettings.lpstrDefExt = defaultFileExtension.data();
+	}
+
 	// Title text
 	std::wstring		title = InSetup.GetTitle();
 	if ( title.empty() )
@@ -340,6 +347,144 @@ bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResu
 		return false;
 	}
 	SetCurrentDirectoryW( originalCurrentDir.c_str() );
+
+	// Extract file paths
+	{
+		std::vector<std::wstring>		parts;
+
+		// Parse file names
+		tchar*	pPos	= fileNameBuffer.data();
+		tchar*	pStart	= fileNameBuffer.data();
+		while ( true )
+		{
+			if ( *pPos == 0 )
+			{
+				if ( pPos == pStart )
+				{
+					break;
+				}
+				
+				parts.push_back( std::wstring( pStart ) );
+				pStart	= pPos + 1;
+				pPos	+= 1;
+			}
+			else
+			{
+				++pPos;
+			}
+		}
+
+		if ( !parts.empty() )
+		{
+			// If single paths
+			if ( parts.size() == 1 )
+			{
+				OutResult.files.push_back( parts[0] );
+			}
+			// When multiple paths are selected the first entry in the list is the directory
+			else
+			{
+				std::wstring	basePath = parts[0];
+				for ( uint32 index = 1, count = parts.size(); index < count; ++index )
+				{
+					OutResult.files.push_back( basePath + PATH_SEPARATOR + parts[index] );
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool appShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogResult& OutResult )
+{
+	OPENFILENAME		fileDialogSettings;
+	appMemzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
+	fileDialogSettings.lStructSize = sizeof( OPENFILENAME );
+
+	// Flags
+	fileDialogSettings.hwndOwner	= GWindow ? ( HWND )GWindow->GetHandle() : nullptr;
+	fileDialogSettings.Flags		|= OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_NONETWORKBUTTON | OFN_PATHMUSTEXIST | OFN_NOTESTFILECREATE | OFN_OVERWRITEPROMPT | OFN_EXTENSIONDIFFERENT;
+
+	// File name buffer
+	std::wstring		fileNameBuffer;
+	fileNameBuffer.resize( 64 * 1024 );
+	fileDialogSettings.lpstrFile	= fileNameBuffer.data();
+	fileDialogSettings.nMaxFile		= fileNameBuffer.size();
+
+	// Format filters
+	std::wstring		filterBuffer;
+	const std::vector<CFileDialogSetup::SFileNameFilter>		fileNameFilters = InSetup.GetFormats();
+	if ( fileNameFilters.empty() )
+	{
+		fileDialogSettings.nFilterIndex		= 0;
+		fileDialogSettings.lpstrFilter		= TEXT( "All Formats (*.*)" );
+	}
+	else	// We are going to filter only those files with the same exact filename
+	{
+		std::wstring		allSupportedFormats;
+		for ( uint32 index = 0, count = fileNameFilters.size(); index < count; ++index )
+		{
+			const CFileDialogSetup::SFileNameFilter&	fileNameFilter = fileNameFilters[index];
+			if ( index > 0 )
+			{
+				allSupportedFormats += TEXT( "; " );
+			}
+			allSupportedFormats += fileNameFilter.filter;
+			
+			filterBuffer		+= CString::Format( TEXT( "%s (%s)" ), fileNameFilter.description.c_str(), fileNameFilter.filter.c_str() );
+			filterBuffer.push_back( TEXT( '\0' ) );
+			filterBuffer		+= fileNameFilter.filter;
+			filterBuffer.push_back( TEXT( '\0' ) );
+		}
+		filterBuffer			+= CString::Format( TEXT( "All Supported Formats (%s)" ), allSupportedFormats.c_str() );
+		filterBuffer.push_back( TEXT( '\0' ) );
+		filterBuffer			+= allSupportedFormats;
+		filterBuffer.push_back( TEXT( '\0' ) );
+
+		fileDialogSettings.nFilterIndex		= 0;
+		fileDialogSettings.lpstrFilter		= filterBuffer.data();
+	}
+
+	// Default file extension
+	std::wstring		defaultFileExtension = InSetup.GetDefaultExtension();
+	if ( !defaultFileExtension.empty() )
+	{
+		fileDialogSettings.lpstrDefExt = defaultFileExtension.data();
+	}
+
+	// Title text
+	std::wstring		title = InSetup.GetTitle();
+	if ( title.empty() )
+	{
+		fileDialogSettings.lpstrTitle	= InSetup.IsMultiselection() ? TEXT( "Save Files" ) : TEXT( "Save File" );
+	}
+	else
+	{
+		fileDialogSettings.lpstrTitle	= title.data();
+	}
+
+	// Preserve the directory around the calls
+	std::wstring		absolutePathToDirectory = GFileSystem->ConvertToAbsolutePath( InSetup.GetDirectory() );
+	fileDialogSettings.lpstrInitialDir	= absolutePathToDirectory.data();
+
+	// Open file dialog
+	std::wstring		originalCurrentDir = GFileSystem->GetCurrentDirectory();
+	if ( !GetSaveFileNameW( &fileDialogSettings ) )
+	{
+		return false;
+	}
+	SetCurrentDirectoryW( originalCurrentDir.c_str() );
+
+	// Get selected format
+	if ( fileDialogSettings.nFilterIndex && fileDialogSettings.nFilterIndex <= fileNameFilters.size() )
+	{
+		OutResult.selectedFormat = fileNameFilters[fileDialogSettings.nFilterIndex - 1];
+	}
+	else if ( !fileNameFilters.empty() )
+	{
+		OutResult.selectedFormat = fileNameFilters[0];
+	}
 
 	// Extract file paths
 	{

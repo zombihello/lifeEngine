@@ -83,6 +83,9 @@ public:
 
 		// Add change actor name
 		actor->SetName( newActorName.c_str() );
+
+		// Mark world as dirty
+		GWorld->MarkDirty();
 		return 0;
 	}
 
@@ -130,7 +133,7 @@ void CExplorerLevelWindow::OnTick()
 		ImGui::PushStyleColor( ImGuiCol_Header, GTableBgSelectColor );
 
 		// Print info about each actor on level
-		for ( uint32 index = 0, numActors = GWorld->GetNumActors(); index < numActors; ++index )
+		for ( uint32 index = 0; index < GWorld->GetNumActors(); ++index )
 		{
 			ActorRef_t		actor = GWorld->GetActor( index );
 			check( actor );

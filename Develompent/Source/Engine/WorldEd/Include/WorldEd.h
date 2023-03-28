@@ -116,6 +116,11 @@ struct SEditorDelegates
 	DECLARE_MULTICAST_DELEGATE( COnEditorLoadedMap );
 
 	/**
+	 * @brief Delegate for called event when saved map
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnEditorSavedMap );
+
+	/**
 	 * @brief Delegate for called event when actors selected
 	 */
 	DECLARE_MULTICAST_DELEGATE( COnActorsSelected, const std::vector<ActorRef_t>& /*InActors*/ );
@@ -125,15 +130,28 @@ struct SEditorDelegates
 	 */
 	DECLARE_MULTICAST_DELEGATE( COnActorsUnselected, const std::vector<ActorRef_t>& /*InActors*/ );
 
-	static COnAssetsCanDelete		onAssetsCanDelete;		/**< Called when one or more assets try delete */
-	static COnAssetsDeleted			onAssetsDeleted;		/**< Called when one or more assets have been deleted */
-	static COnAssetsReloaded		onAssetsReloaded;		/**< Called when one or more assets is reloaded */
-	static COnActorsSpawned			onActorsSpawned;		/**< Called when actors spawned */
-	static COnActorsDestroyed		onActorsDestroyed;		/**< Called when actors destroyed */
-	static COnEditorModeChanged		onEditorModeChanged;	/**< Called when editor mode is changed */
-	static COnEditorLoadedMap		onEditorLoadedMap;		/**< Called when editor loaded map */
-	static COnActorsSelected		onActorsSelected;		/**< Called when actors slected */
-	static COnActorsUnselected		onActorsUnselected;		/**< Called when actors unselected */
+	/**
+	 * @brief Delegate for called event when map was marked dirty
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnEditorMapMarkedDirty );
+
+	/**
+	 * @brief Delegate for called event when created new map
+	 */
+	DECLARE_MULTICAST_DELEGATE( COnEditorCreatedNewMap );
+
+	static COnAssetsCanDelete		onAssetsCanDelete;			/**< Called when one or more assets try delete */
+	static COnAssetsDeleted			onAssetsDeleted;			/**< Called when one or more assets have been deleted */
+	static COnAssetsReloaded		onAssetsReloaded;			/**< Called when one or more assets is reloaded */
+	static COnActorsSpawned			onActorsSpawned;			/**< Called when actors spawned */
+	static COnActorsDestroyed		onActorsDestroyed;			/**< Called when actors destroyed */
+	static COnEditorModeChanged		onEditorModeChanged;		/**< Called when editor mode is changed */
+	static COnEditorCreatedNewMap	onEditorCreatedNewMap;		/**< Called when map created new map */
+	static COnEditorLoadedMap		onEditorLoadedMap;			/**< Called when editor loaded map */
+	static COnEditorSavedMap		onEditorSavedMap;			/**< Called when editor saved map */
+	static COnActorsSelected		onActorsSelected;			/**< Called when actors selected */
+	static COnActorsUnselected		onActorsUnselected;			/**< Called when actors unselected */
+	static COnEditorMapMarkedDirty	onEditorMapMarkedDirty;		/**< Called when map was marked dirty */
 };
 
 #if !WITH_IMGUI
