@@ -41,6 +41,11 @@ protected:
 	virtual void OnTick() override;
 
 	/**
+	 * @brief Open level
+	 */
+	void OpenLevel();
+
+	/**
 	 * @brief Save level
 	 * 
 	 * @param InIsSaveAs		Is save level as...
