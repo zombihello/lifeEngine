@@ -29,11 +29,12 @@ public:
 	 */
 	enum EIconType
 	{
-		IT_ToolSelect,		/**< Tool select */
-		IT_ToolTranslate,	/**< Tool translate */
-		IT_ToolRotate,		/**< Tool rotate */
-		IT_ToolScale,		/**< Tool scale */
-		IT_Num				/**< Number of icon types */
+		IT_ToolSelect,				/**< Tool select */
+		IT_ToolTranslate,			/**< Tool translate */
+		IT_ToolRotate,				/**< Tool rotate */
+		IT_ToolScale,				/**< Tool scale */
+		IT_PlayStandaloneGame,		/**< Player standalone game */
+		IT_Num						/**< Number of icon types */
 	};
 
 	/**

@@ -276,3 +276,10 @@ std::wstring CWindowsFileSystem::GetCurrentDirectory() const
 	::GetCurrentDirectoryW( MAX_PATH, path );
 	return path;
 }
+
+std::wstring CWindowsFileSystem::GetExePath() const
+{
+	TCHAR		path[MAX_PATH];
+	GetModuleFileName( NULL, path, MAX_PATH );
+	return path;
+}

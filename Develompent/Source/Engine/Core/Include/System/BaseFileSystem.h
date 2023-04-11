@@ -259,6 +259,15 @@ public:
      */
     virtual std::wstring                            GetCurrentDirectory() const                                                             { return TEXT( "" ); }
 
+    /**
+     * @brief Get path to current exe
+     * @return Return path to current exe
+     */
+    virtual std::wstring GetExePath() const
+    {
+        return TEXT( "" );
+    }
+
 protected:
     /**
      * @brief Does Path refer to a drive letter or BNC path

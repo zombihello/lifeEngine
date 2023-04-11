@@ -146,6 +146,12 @@ public:
      * @return Return current directory
      */
     virtual std::wstring                            GetCurrentDirectory() const override;
+
+    /**
+     * @brief Get path to current exe
+     * @return Return path to current exe
+     */
+    virtual std::wstring GetExePath() const override;
 };
 
 #endif

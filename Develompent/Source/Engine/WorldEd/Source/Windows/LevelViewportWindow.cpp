@@ -6,6 +6,7 @@
 #include "Render/EditorLevelViewportClient.h"
 #include "System/EditorEngine.h"
 #include "System/World.h"
+#include "System/BaseFileSystem.h"
 #include "System/ActorFactory.h"
 #include "Render/RenderingThread.h"
 #include "System/AssetsImport.h"
@@ -13,10 +14,11 @@
 /** Table pathes to icons */
 static const tchar* GLevelViewportIconPaths[] =
 {
-	TEXT( "Tool_Select.png" ),		// IT_ToolSelect
-	TEXT( "Tool_Translate.png" ),	// IT_ToolTranslate
-	TEXT( "Tool_Rotate.png" ),		// IT_ToolRotate
-	TEXT( "Tool_Scale.png" )		// IT_ToolScale
+	TEXT( "Tool_Select.png" ),			// IT_ToolSelect
+	TEXT( "Tool_Translate.png" ),		// IT_ToolTranslate
+	TEXT( "Tool_Rotate.png" ),			// IT_ToolRotate
+	TEXT( "Tool_Scale.png" ),			// IT_ToolScale
+	TEXT( "PlayStandaloneGame.png" )	// IT_PlayStandaloneGame
 };
 static_assert( ARRAY_COUNT( GLevelViewportIconPaths ) == CLevelViewportWindow::IT_Num, "Need full init GLevelViewportIconPaths array" );
 
@@ -168,6 +170,17 @@ void CLevelViewportWindow::OnTick()
 			ImGui::SetTooltip( "Select and scale objects" );
 		}
 		ImGui_ButtonPopStyleColor();
+
+		// Play standalone game
+		ImGui::Separator();
+		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_PlayStandaloneGame].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		{
+			appCreateProc( GFileSystem->GetExePath().c_str(), CString::Format( TEXT( "-map %s" ), GWorld->GetFilePath().c_str() ).c_str(), false, false, false, 0 );
+		}
+		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+		{
+			ImGui::SetTooltip( "Play game in standalone" );
+		}
 
 		ImGui::EndMenuBar();
 	}

@@ -321,6 +321,10 @@ int32 CEngineLoop::Init()
 	if ( GCommandLine.HasParam( TEXT( "map" ) ) )
 	{
 		map = GCommandLine.GetFirstValue( TEXT( "map" ) );
+		if ( CFilename( map ).GetExtension().empty() )
+		{
+			map += TEXT( ".map" );
+		}
 	}
 
 	if ( !map.empty() )

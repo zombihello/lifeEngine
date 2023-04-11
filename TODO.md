@@ -7,7 +7,7 @@
 - [ ] Need refactor assets system and, maybe, remove packages
  
  # Version 0.4.0 :: Now	
-- [ ] Migrate WorldEd's interface from Qt to ImGUI
+- [X] Migrate WorldEd's interface from Qt to ImGUI
 - [X] Need add check on used assets while dragged packages in content browser, and need updating info about they in TOC file
 - [ ] Implement rendering light with deferred shading technique
 - [ ] Implement physics system
