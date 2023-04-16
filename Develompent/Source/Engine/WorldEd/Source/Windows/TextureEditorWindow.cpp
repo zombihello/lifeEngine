@@ -128,6 +128,7 @@ void CTextureEditorWindow::OnTick()
 	const SPixelFormatInfo&		pixelFormatInfo = GPixelFormats[texture2D->GetPixelFormat()];
 	uint32						sizeX = texture2D->GetSizeX();
 	uint32						sizeY = texture2D->GetSizeY();
+	uint32						numMips	= texture2D->GetNumMips();
 
 	// Menu bar
 	if ( ImGui::BeginMenuBar() )
@@ -248,6 +249,12 @@ void CTextureEditorWindow::OnTick()
 		ImGui::Text( TCHAR_TO_ANSI( pixelFormatInfo.name ) );
 		ImGui::TableNextColumn();
 
+		// Number of mip levels
+		ImGui::Text( "Num Mips:" );
+		ImGui::TableNextColumn();
+		ImGui::Text( TCHAR_TO_ANSI( CString::Format( TEXT( "%i" ), numMips ).c_str() ) );
+		ImGui::TableNextColumn();
+
 		// Resource size
 		ImGui::Text( "Resource Size:" );
 		ImGui::TableNextColumn();
@@ -294,6 +301,24 @@ void CTextureEditorWindow::OnTick()
 				texture2D->SetSamplerFilter( ( ESamplerFilter )filterMode );
 			}
 			ImGui::EndTable();
+		}
+	}
+
+	// Mipmap settings
+	ImGui::Spacing();
+	if ( ImGui::CollapsingHeader( "Mipmap Settings", ImGuiTreeNodeFlags_DefaultOpen ) )
+	{
+		// Generate mipmaps
+		if ( ImGui::Button( "Generate Mipmaps" ) )
+		{
+			texture2D->GenerateMipmaps();
+		}
+
+		// Remove mipmaps
+		ImGui::SameLine();
+		if ( ImGui::Button( "Remove Mipmaps" ) )
+		{
+
 		}
 	}
 

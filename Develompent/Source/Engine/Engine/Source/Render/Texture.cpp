@@ -10,10 +10,69 @@
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
 
+#if WITH_EDITOR
+#include <compressonator.h>
+
+static CMP_FORMAT ConvertEPixelFormatToCmpFormat( EPixelFormat InPixelFormat )
+{
+	switch ( InPixelFormat )
+	{
+	case PF_A8R8G8B8:			return CMP_FORMAT_ARGB_8888;
+	case PF_FloatRGB:			return CMP_FORMAT_RGB_32F;
+	case PF_FloatRGBA:			return CMP_FORMAT_RGBA_32F;
+	case PF_R32F:				return CMP_FORMAT_R_32F;
+	case PF_BC1:				return CMP_FORMAT_BC1;
+	case PF_BC2:				return CMP_FORMAT_BC2;
+	case PF_BC3:				return CMP_FORMAT_BC3;
+	case PF_BC5:				return CMP_FORMAT_BC5;
+	case PF_BC6H:				return CMP_FORMAT_BC6H;
+	case PF_BC7:				return CMP_FORMAT_BC7;
+
+	case PF_DepthStencil:
+	case PF_ShadowDepth:
+	case PF_FilteredShadowDepth:
+	case PF_D32:
+	default:
+		appErrorf( TEXT( "Unsupported EPixelFormat %i" ), ( uint32 )InPixelFormat );
+		return CMP_FORMAT_Unknown;
+	}
+}
+
+static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const STexture2DMipMap& InZeroMip, std::vector<STexture2DMipMap>& OutMipmaps, uint32 InRequestMips = 10 )
+{
+	CMP_MipSet cmp_MipSet;
+	appMemzero( &cmp_MipSet, sizeof( CMP_MipSet ) );
+	CMP_ERROR	result = CMP_CreateMipSet( &cmp_MipSet, InZeroMip.sizeX, InZeroMip.sizeY, 1, CF_8bit, TT_2D );
+	check( result == CMP_OK );
+
+	// Set zero mip data
+	( *cmp_MipSet.m_pMipLevelTable )->m_dwLinearSize	= InZeroMip.data.Num();
+	( *cmp_MipSet.m_pMipLevelTable )->m_pbData			= ( CMP_BYTE* )InZeroMip.data.GetData();
+
+	// Generate mip levels and copy him to OutMipmaps
+	CMP_GenerateMIPLevels( &cmp_MipSet, CMP_CalcMinMipSize( InZeroMip.sizeY, InZeroMip.sizeX, InRequestMips ) );
+	for ( uint32 index = 0; index < cmp_MipSet.m_nMipLevels; index++ )
+	{
+		CMP_MipLevel*		cmp_mipLevel;
+		CMP_GetMipLevel( &cmp_mipLevel, &cmp_MipSet, index, 0 );
+
+		STexture2DMipMap	mipmap;
+		mipmap.sizeX		= cmp_mipLevel->m_nWidth;
+		mipmap.sizeY		= cmp_mipLevel->m_nWidth;
+		mipmap.data.Resize( cmp_mipLevel->m_dwLinearSize );
+		memcpy( mipmap.data.GetData(), cmp_mipLevel->m_pbData, cmp_mipLevel->m_dwLinearSize );
+		OutMipmaps.push_back( mipmap );
+	}
+
+	// Reset zero mip data and free mipset
+	( *cmp_MipSet.m_pMipLevelTable )->m_dwLinearSize	= 0;
+	( *cmp_MipSet.m_pMipLevelTable )->m_pbData			= nullptr;
+	CMP_FreeMipSet( &cmp_MipSet );		// <- AHTUNG! HERE MEMORY LEAK!
+}
+#endif // WITH_EDITOR
+
 CTexture2D::CTexture2D()
 	: CAsset( AT_Texture2D )
-	, sizeX( 0 )
-	, sizeY( 0 )
 	, pixelFormat( PF_Unknown )
 	, addressU( SAM_Wrap )
 	, addressV( SAM_Wrap )
@@ -25,12 +84,27 @@ CTexture2D::~CTexture2D()
 
 void CTexture2D::InitRHI()
 {
-	check( data.Num() > 0 );
-	texture = GRHI->CreateTexture2D( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeX, sizeY, pixelFormat, 1, 0, data.GetData() );
+	check( mipmaps.size() > 0 );
+	texture = GRHI->CreateTexture2D( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), GetSizeX(), GetSizeY(), pixelFormat, mipmaps.size(), 0, nullptr );
+
+	// Load all mip-levels to GPU
+	for ( uint32 index = 0, count = mipmaps.size(); index < count; ++index )
+	{
+		const STexture2DMipMap&		mipmap				= mipmaps[index];
+		CBaseDeviceContextRHI*		deviceContextRHI	= GRHI->GetImmediateContext();
+		SLockedData					lockedData;
+		
+		GRHI->LockTexture2D( deviceContextRHI, texture, index, true, lockedData );
+		memcpy( lockedData.data, mipmap.data.GetData(), mipmap.data.Num() );
+		GRHI->UnlockTexture2D( deviceContextRHI, texture, index, lockedData );
+	}
 
 	if ( !GIsEditor && !GIsCommandlet )
 	{
-		data.RemoveAllElements();
+		for ( uint32 index = 0, count = mipmaps.size(); index < count; ++index )
+		{
+			mipmaps[index].data.RemoveAllElements();
+		}
 	}
 }
 
@@ -39,44 +113,73 @@ void CTexture2D::ReleaseRHI()
 	texture.SafeRelease();
 }
 
-void CTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector<byte>& InData )
+void CTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector<byte>& InData, bool InIsGenerateMipmaps /* = false */ )
 {
-	pixelFormat		= InPixelFormat;
-	sizeX			= InSizeX;
-	sizeY			= InSizeY;
-	data			= InData;
+	STexture2DMipMap	mipmap0;
+	pixelFormat			= InPixelFormat;
+	mipmap0.sizeX		= InSizeX;
+	mipmap0.sizeY		= InSizeY;
+	mipmap0.data		= InData;
+
+	// Clear mipmaps
+	mipmaps.clear();
+
+#if WITH_EDITOR
+	if ( InIsGenerateMipmaps )
+	{
+		GenerateMipmapsMemory( InPixelFormat, mipmap0, mipmaps );
+	}
+	else
+#endif // WITH_EDITOR
+	{		
+		mipmaps.push_back( mipmap0 );
+	}
 
 	MarkDirty();
 	BeginUpdateResource( this );
 }
 
+#if WITH_EDITOR
+void CTexture2D::GenerateMipmaps()
+{
+	check( !mipmaps.empty() );
+	STexture2DMipMap	mipmap0 = mipmaps[0];
+	mipmaps.clear();
+	
+	GenerateMipmapsMemory( pixelFormat, mipmap0, mipmaps );
+
+	MarkDirty();
+	BeginUpdateResource( this );
+}
+#endif // WITH_EDITOR
+
 void CTexture2D::Serialize( class CArchive& InArchive )
 {
 	CAsset::Serialize( InArchive );
 
-	if ( InArchive.Ver() < VER_RemovedTFC )
+	// Clear all mipmaps before loading
+	if ( InArchive.IsLoading() )
 	{
-		std::wstring		textureCachePath;
-		uint32				textureCacheHash;
-
-		InArchive << textureCachePath;
-		InArchive << textureCacheHash;
-		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated version CTexture2D in package. Texture not loaded correctly" ) );
+		mipmaps.clear();
 	}
-	else if ( InArchive.Ver() < VER_CompressedZlib )
+
+	if ( InArchive.Ver() < VER_Mipmaps )
 	{
-		std::vector<byte>		tmpData;
-		InArchive << tmpData;
-		data = tmpData;
-		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package version, in future must be removed supports" ) );
+		STexture2DMipMap	mipmap0;
+		InArchive << mipmap0.data;
+		InArchive << mipmap0.sizeX;
+		InArchive << mipmap0.sizeY;
+		mipmaps.push_back( mipmap0 );
+
+		std::wstring		referenceToThisAsset;
+		MakeReferenceToAsset( GetAssetHandle(), referenceToThisAsset );
+		LE_LOG( LT_Warning, LC_Package, TEXT( "%s :: Deprecated package version, in future must be removed supports" ), referenceToThisAsset.c_str() );
 	}
 	else
 	{
-		InArchive << data;
+		InArchive << mipmaps;
 	}
 
-	InArchive << sizeX;
-	InArchive << sizeY;
 	InArchive << pixelFormat;
 	InArchive << addressU;
 	InArchive << addressV;

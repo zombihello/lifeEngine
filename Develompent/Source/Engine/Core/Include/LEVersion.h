@@ -9,7 +9,7 @@
 #ifndef LEVERSION_H
 #define LEVERSION_H
 
-#define ENGINE_VERSION					40
+#define ENGINE_VERSION					0x040
 #define ENGINE_MAJOR_VERSION			0
 #define ENGINE_MINOR_VERSION			4
 #define ENGINE_PATH_VERSION				0
@@ -51,6 +51,7 @@ enum ELifeEnginePackageVersion
 	VER_AssetOnlyEditor						= 19,					/**< Added field 'bOnlyEditor' to asset */
 	VER_CName								= 20,					/**< Added CName for IDs in string view */
 	VER_BBoxInStaticMesh					= 21,					/**< Added CBox to a static mesh */
+	VER_Mipmaps								= 22,					/**< Added mipmaps to textures */
 
 	//
 	// New versions can be added here

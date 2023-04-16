@@ -21,6 +21,17 @@
 
 /**
  * @ingroup Engine
+ * @brief 2D texture mipmap
+ */
+struct STexture2DMipMap
+{
+	uint32				sizeX;	/**< Width of mipmap */
+	uint32				sizeY;	/**< Height of mipmap */
+	CBulkData<byte>		data;	/**< Data used when loading texture mipmap */
+};
+
+/**
+ * @ingroup Engine
  * @brief Implementation for 2D textures
  */
 class CTexture2D : public CAsset, public CRenderResource
@@ -43,15 +54,24 @@ public:
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
 
+#if WITH_EDITOR
+	/**
+	 * Generate mipmaps
+	 * @note Work only with editor
+	 */
+	void GenerateMipmaps();
+#endif // WITH_EDITOR
+
 	/**
 	 * Set texture data
 	 * 
-	 * @param[in] InPixelFormat Pixel format
-	 * @param[in] InSizeX Width
-	 * @param[in] InSizeY Height
-	 * @param[in] InData Data
+	 * @param InPixelFormat			Pixel format
+	 * @param InSizeX				Width
+	 * @param InSizeY				Height
+	 * @param InData				Data
+	 * @param InIsGenerateMipmaps	Is need generate mipmaps (only with editor)
 	 */
-	void SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector< byte >& InData );
+	void SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector<byte>& InData, bool InIsGenerateMipmaps = false );
 
 	/**
 	 * Set address mod for U coord
@@ -114,21 +134,42 @@ public:
 	}
 
 	/**
+	 * @brief Get number of mipmaps in the texture
+	 * @return Return number of mipmaps in the texture
+	 */
+	FORCEINLINE uint32 GetNumMips() const
+	{
+		return mipmaps.size();
+	}
+
+	/**
 	 * Get texture size by X
+	 * 
+	 * @param InMipLevel	Mip level
 	 * @return Return texture size by X
 	 */
-	FORCEINLINE uint32 GetSizeX() const
+	FORCEINLINE uint32 GetSizeX( uint32 InMipLevel = 0 ) const
 	{
-		return sizeX;
+		if ( InMipLevel >= mipmaps.size() )
+		{
+			return 0;
+		}
+		return mipmaps[InMipLevel].sizeX;
 	}
 
 	/**
 	 * Get texture size by Y
+	 * 
+	 * @param InMipLevel	Mip level
 	 * @return Return texture size by Y
 	 */
-	FORCEINLINE uint32 GetSizeY() const
+	FORCEINLINE uint32 GetSizeY( uint32 InMipLevel = 0 ) const
 	{
-		return sizeY;
+		if ( InMipLevel >= mipmaps.size() )
+		{
+			return 0;
+		}
+		return mipmaps[InMipLevel].sizeY;
 	}
 
 	/**
@@ -173,6 +214,18 @@ public:
 		return samplerStateInitializer;
 	}
 
+	/**
+	 * Get mip data on level
+	 * 
+	 * @param InMipLevel		Mip level
+	 * @return Return refrence to mip data
+	 */
+	FORCEINLINE const STexture2DMipMap& GetMip( uint32 InMipLevel ) const
+	{
+		check( InMipLevel < mipmaps.size() );
+		return mipmaps[InMipLevel];
+	}
+
 protected:
 	/**
 	 * @brief Initializes the RHI resources used by this resource.
@@ -189,14 +242,12 @@ protected:
 	virtual void ReleaseRHI() override;
 
 private:
-	uint32						sizeX;				/**< Width of texture */
-	uint32						sizeY;				/**< Height of texture */
-	CBulkData<byte>				data;				/**< Data used when loading texture */
-	EPixelFormat				pixelFormat;		/**< Pixel format of texture */
-	Texture2DRHIRef_t			texture;			/**< Reference to RHI texture */
-	ESamplerAddressMode			addressU;			/**< Address mode for U coord */
-	ESamplerAddressMode			addressV;			/**< Address mode for V coord */
-	ESamplerFilter				samplerFilter;		/**< Sampler filter */
+	EPixelFormat						pixelFormat;		/**< Pixel format of texture */
+	Texture2DRHIRef_t					texture;			/**< Reference to RHI texture */
+	ESamplerAddressMode					addressU;			/**< Address mode for U coord */
+	ESamplerAddressMode					addressV;			/**< Address mode for V coord */
+	ESamplerFilter						samplerFilter;		/**< Sampler filter */
+	std::vector<STexture2DMipMap>		mipmaps;			/**< Array of mipmaps */
 };
 
 //
@@ -221,5 +272,22 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CTextu
 	InArchive << ( TAssetHandle<CAsset> )InValue;
 	return InArchive;
 }
+
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, STexture2DMipMap& InValue )
+{
+	InArchive << InValue.sizeX;
+	InArchive << InValue.sizeY;
+	InArchive << InValue.data;
+	return InArchive;
+}
+
+//FORCEINLINE CArchive& operator<<( CArchive& InArchive, const STexture2DMipMap& InValue )
+//{
+//	check( InArchive.IsSaving() );
+//	InArchive << InValue.sizeX;
+//	InArchive << InValue.sizeY;
+//	InArchive << InValue.data;
+//	return InArchive;
+//}
 
 #endif // !TEXTURE_H

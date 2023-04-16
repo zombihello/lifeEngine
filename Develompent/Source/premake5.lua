@@ -73,6 +73,7 @@ extStb                          = externalDir .. "stb"
 extTheora                       = externalDir .. "theora-1.2"
 extTmxlite                      = externalDir .. "tmxlite"
 extZlib                         = externalDir .. "zlib"
+extCompressonator				= externalDir .. "Compressonator_4.3.206"
 
 -- Include modules of external libs
 include( extAssimp )
@@ -90,6 +91,7 @@ include( extStb )
 include( extTheora )
 include( extTmxlite )
 include( extZlib )
+include( extCompressonator )
 
 workspace( game )
     location( "../Intermediate/" .. _ACTION .. "/" )
@@ -229,7 +231,8 @@ workspace( game )
             LinkSTB()
             LinkAssmip()
             LinkTmxLite()
-           
+			LinkCompressonator()
+		   
             defines     { "WITH_EDITOR=1", "WITH_IMGUI=1" }
 
         filter "configurations:not *WithEditor"
