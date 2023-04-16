@@ -283,3 +283,8 @@ std::wstring CWindowsFileSystem::GetExePath() const
 	GetModuleFileName( NULL, path, MAX_PATH );
 	return path;
 }
+
+bool CWindowsFileSystem::IsAbsolutePath( const std::wstring& InPath ) const
+{
+	return InPath.find_first_of( TEXT( ":" ) ) != std::wstring::npos;
+}

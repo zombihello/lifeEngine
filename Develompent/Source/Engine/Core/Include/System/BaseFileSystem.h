@@ -268,6 +268,17 @@ public:
         return TEXT( "" );
     }
 
+    /**
+	 * @brief Is absolute path
+     * 
+     * @param InPath    Path
+     * @return Return TRUE if InPath is absolute path, otherwise will return FALSE
+	 */
+    virtual bool IsAbsolutePath( const std::wstring& InPath ) const 
+    { 
+        return false; 
+    }
+
 protected:
     /**
      * @brief Does Path refer to a drive letter or BNC path

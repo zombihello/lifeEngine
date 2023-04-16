@@ -14,7 +14,7 @@ std::wstring CFilename::GetExtension( bool InIsIncludeDot /* = false */ ) const
 {
 	std::wstring	result = path;
 	std::size_t		lastSlashPos = result.find_last_of( PATH_SEPARATOR );
-	std::size_t		dotPos = result.find_first_of( TEXT( "." ), lastSlashPos != std::wstring::npos ? lastSlashPos + 1 : std::wstring::npos );
+	std::size_t		dotPos = result.find_first_of( TEXT( "." ), lastSlashPos != std::wstring::npos ? lastSlashPos + 1 : 0 );
 	if ( dotPos == std::wstring::npos )
 	{
 		return TEXT( "" );

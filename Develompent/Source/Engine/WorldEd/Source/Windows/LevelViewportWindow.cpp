@@ -3,6 +3,7 @@
 #include "Misc/UIGlobals.h"
 #include "Logger/LoggerMacros.h"
 #include "Windows/LevelViewportWindow.h"
+#include "Windows/DialogWindow.h"
 #include "Render/EditorLevelViewportClient.h"
 #include "System/EditorEngine.h"
 #include "System/World.h"
@@ -175,7 +176,14 @@ void CLevelViewportWindow::OnTick()
 		ImGui::Separator();
 		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_PlayStandaloneGame].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
-			appCreateProc( GFileSystem->GetExePath().c_str(), CString::Format( TEXT( "-map %s" ), GWorld->GetFilePath().c_str() ).c_str(), false, false, false, 0 );
+			if ( GWorld->IsDirty() )
+			{
+				OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved.\nFor launch standalone game need it save" ) ), CDialogWindow::BT_Ok );
+			}
+			else
+			{
+				appCreateProc( GFileSystem->GetExePath().c_str(), CString::Format( TEXT( "-map %s" ), GWorld->GetFilePath().c_str() ).c_str(), false, false, false, 0 );
+			}
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
 		{

@@ -234,7 +234,7 @@ void CEditorWindow::OpenLevel()
 	}
 }
 
-void CEditorWindow::SaveLevel( bool InIsSaveAs /* = false */, CEvent* InEventResponse /* = nullptr */ )
+void CEditorWindow::SaveLevel( bool InIsSaveAs /* = false */ )
 {
 	CFileDialogSetup		fileDialogSetup;
 	SSaveFileDialogResult	saveFileDialogResult;

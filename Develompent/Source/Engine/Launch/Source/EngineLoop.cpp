@@ -332,7 +332,8 @@ int32 CEngineLoop::Init()
 		appSetSplashText( STT_StartupProgress, CString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
 
 		std::wstring		error;
-		bool				successed = GEngine->LoadMap( CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), GCookedDir.c_str(), map.c_str() ), error );
+		bool				bAbsolutePath = GFileSystem->IsAbsolutePath( map );
+		bool				successed = GEngine->LoadMap( !bAbsolutePath ? CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), GCookedDir.c_str(), map.c_str() ) : map, error );
 		if ( !successed )
 		{
 			appErrorf( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );

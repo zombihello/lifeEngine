@@ -34,6 +34,13 @@ public:
 	 */
 	virtual void Init() override;
 
+	/**
+	 * @brief Save level
+	 *
+	 * @param InIsSaveAs		Is save level as...
+	 */
+	void SaveLevel( bool InIsSaveAs = false );
+
 protected:
 	/**
 	 * @brief Method tick interface of a layer
@@ -44,14 +51,6 @@ protected:
 	 * @brief Open level
 	 */
 	void OpenLevel();
-
-	/**
-	 * @brief Save level
-	 * 
-	 * @param InIsSaveAs		Is save level as...
-	 * @param InEventResponse	Event used when opened popup. This is need for waiting his response
-	 */
-	void SaveLevel( bool InIsSaveAs = false, CEvent* InEventResponse = nullptr );
 
 private:
 	/**

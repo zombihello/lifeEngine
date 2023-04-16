@@ -5,6 +5,7 @@
 - [ ] Need refactor import/reimport assets with the ability to customize
 - [ ] Need divide modules (Core, Engine, etc) by lib and dll
 - [ ] Need refactor assets system and, maybe, remove packages
+- [ ] Implement import and rendering Quake 3 BSP with lightmaps
  
  # Version 0.4.0 :: Now	
 - [X] Migrate WorldEd's interface from Qt to ImGUI

@@ -265,6 +265,15 @@ public:
 		return viewportWindows[InViewportType];
 	}
 
+	/**
+	 * @brief Get editor window
+	 * @return Return reference to editor window
+	 */
+	FORCEINLINE const TSharedPtr<CEditorWindow>& GetEditorWindow() const
+	{
+		return editorWindow;
+	}
+
 private:
 	/**
 	 * Add TOC entries
