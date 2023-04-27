@@ -43,11 +43,10 @@ static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const STexture2DM
 	CMP_MipSet cmp_MipSet;
 	appMemzero( &cmp_MipSet, sizeof( CMP_MipSet ) );
 	CMP_ERROR	result = CMP_CreateMipSet( &cmp_MipSet, InZeroMip.sizeX, InZeroMip.sizeY, 1, CF_8bit, TT_2D );
-	check( result == CMP_OK );
+	check( result == CMP_OK && ( *cmp_MipSet.m_pMipLevelTable )->m_dwLinearSize == InZeroMip.data.Num() );
 
-	// Set zero mip data
-	( *cmp_MipSet.m_pMipLevelTable )->m_dwLinearSize	= InZeroMip.data.Num();
-	( *cmp_MipSet.m_pMipLevelTable )->m_pbData			= ( CMP_BYTE* )InZeroMip.data.GetData();
+	// Copy data to mipmap0
+	memcpy( ( *cmp_MipSet.m_pMipLevelTable )->m_pbData, ( CMP_BYTE* )InZeroMip.data.GetData(), InZeroMip.data.Num() );
 
 	// Generate mip levels and copy him to OutMipmaps
 	CMP_GenerateMIPLevels( &cmp_MipSet, CMP_CalcMinMipSize( InZeroMip.sizeY, InZeroMip.sizeX, InRequestMips ) );
@@ -64,10 +63,7 @@ static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const STexture2DM
 		OutMipmaps.push_back( mipmap );
 	}
 
-	// Reset zero mip data and free mipset
-	( *cmp_MipSet.m_pMipLevelTable )->m_dwLinearSize	= 0;
-	( *cmp_MipSet.m_pMipLevelTable )->m_pbData			= nullptr;
-	CMP_FreeMipSet( &cmp_MipSet );		// <- AHTUNG! HERE MEMORY LEAK!
+	CMP_FreeMipSet( &cmp_MipSet );
 }
 #endif // WITH_EDITOR
 
