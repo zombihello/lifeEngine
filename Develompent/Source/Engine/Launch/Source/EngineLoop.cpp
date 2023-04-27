@@ -145,7 +145,7 @@ void CEngineLoop::InitConfigs()
 	}
 
 	// Is allow shader debug dump
-	GAllowDebugShaderDump			= GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) ).GetBool();
+	GAllowDebugShaderDump			= GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) ).GetBool() || GCommandLine.HasParam( TEXT( "-shaderdump" ) );
 #endif // WITH_EDITOR
 }
 

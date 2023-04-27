@@ -1379,11 +1379,20 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 	macros.push_back( D3D_SHADER_MACRO{ nullptr, nullptr } );
 
 	// Getting compile flags
-	DWORD				compileFlags = D3D10_SHADER_OPTIMIZATION_LEVEL3;
+	DWORD				compileFlags = 0;
 	for ( uint32 indexFlag = 0, countFlags = ( uint32 )InEnvironment.compilerFlags.size(); indexFlag < countFlags; ++indexFlag )
 	{
 		// Accumulate flags set by the shader
 		compileFlags |= TranslateCompilerFlagD3D11( InEnvironment.compilerFlags[ indexFlag ] );
+	}
+
+	if ( InDebugDump )
+	{
+		compileFlags |= TranslateCompilerFlagD3D11( CF_Debug );
+	}
+	else
+	{
+		compileFlags |= D3D10_SHADER_OPTIMIZATION_LEVEL3;
 	}
 
 	CD3D11IncludeEnvironment		includeEnvironment( InEnvironment );
