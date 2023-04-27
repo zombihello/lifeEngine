@@ -13,6 +13,7 @@ CTexturePreviewViewportClient::CTexturePreviewViewportClient( const TSharedPtr<C
 	: CEditorLevelViewportClient( LVT_OrthoXY )
 	, texture2D( InTexture2D )
 	, colorChannelMask( CColor::white )
+	, mipmapToView( 0 )
 {}
 
 void CTexturePreviewViewportClient::Draw( CViewport* InViewport )
@@ -55,6 +56,7 @@ void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewpo
 		texturePreviewPixelShader->SetTexture( immediateContext, texture2DRHI );
 		texturePreviewPixelShader->SetSamplerState( immediateContext, GRHI->CreateSamplerState( InTexture2D->GetSamplerStateInitialiser() ) );
 		texturePreviewPixelShader->SetColorChannelMask( immediateContext, colorChannelMask );
+		texturePreviewPixelShader->SetMipmap( immediateContext, mipmapToView );
 		GRHI->CommitConstants( immediateContext );
 		GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
 	}

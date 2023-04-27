@@ -154,6 +154,15 @@ public:
 	}
 
 	/**
+	 * Get STD container
+	 * @return Return STD container containing data
+	 */
+	FORCEINLINE const std::vector<TType>& GetStdContainer() const
+	{
+		return data;
+	}
+
+	/**
 	 * Get element
 	 *
 	 * @param[in] InIndex Index element

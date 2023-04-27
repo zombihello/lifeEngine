@@ -12,8 +12,8 @@
 - [X] Need add check on used assets while dragged packages in content browser, and need updating info about they in TOC file
 - [ ] Implement rendering light with deferred shading technique
 - [ ] Implement physics system
-- [ ] Add supported mip levels in textures
-- [ ] Add possible generate mip levels for textures in WorldEd
+- [X] Add supported mip levels in textures
+- [X] Add possible generate mip levels for textures in WorldEd
 - [X] Need fix speed of the import static meshes
 - [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to LUA)
 - [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)

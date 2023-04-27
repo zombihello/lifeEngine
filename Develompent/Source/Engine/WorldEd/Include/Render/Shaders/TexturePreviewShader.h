@@ -50,8 +50,20 @@ public:
 		SetPixelShaderValue( InDeviceContextRHI, colorChannelMask, InColorMask.ToNormalizedVector4D() );
 	}
 
+	/**
+	 * @brief Set mipmap to view
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InMipmap				Mipmap to view
+	 */
+	FORCEINLINE void SetMipmap( class CBaseDeviceContextRHI* InDeviceContextRHI, uint32 InMipmap )
+	{
+		SetPixelShaderValue( InDeviceContextRHI, mipmapToView, InMipmap );
+	}
+
 private:
 	CShaderParameter		colorChannelMask;		/**< Color channel mask */
+	CShaderParameter		mipmapToView;			/**< Mipmap to view */
 };
 
 #endif // !TEXTUREPREVIEWSHADER_H

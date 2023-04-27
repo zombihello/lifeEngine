@@ -74,6 +74,7 @@ CTextureEditorWindow::CTextureEditorWindow( const TSharedPtr<CTexture2D>& InText
 	: CImGUILayer( CString::Format( TEXT( "Texture Editor - %s" ), InTexture2D->GetAssetName().c_str() ) )
 	, texture2D( InTexture2D )
 	, viewportClient( new CTexturePreviewViewportClient( InTexture2D ) )
+	, currentMipmap( 0 )
 {
 	flags |= ImGuiWindowFlags_MenuBar | LF_DestroyOnHide;
 
@@ -224,6 +225,25 @@ void CTextureEditorWindow::OnTick()
 
 			ImGui_ButtonPopStyleColor();
 		}
+
+		// Select mipmap to view
+		ImGui::PushItemWidth( 50 );
+		ImGui::Text( "Mipmap: " );
+		ImGui::SameLine();
+		if ( ImGui::BeginCombo( "##MipmapCombo", TCHAR_TO_ANSI( CString::Format( TEXT( "%i" ), currentMipmap ).c_str() ) ) )
+		{
+			for ( uint32 index = 0, count = texture2D->GetNumMips(); index < count; ++index )
+			{
+				if ( ImGui::Selectable( TCHAR_TO_ANSI( CString::Format( TEXT( "%i" ), index ).c_str() ), currentMipmap == index, ImGuiSelectableFlags_DontClosePopups ) )
+				{
+					currentMipmap = index;
+					viewportClient->SetMipmap( index );
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::PopItemWidth();
+
 		ImGui::EndMenuBar();
 	}
 	ImGui::Columns( 2 );
@@ -306,7 +326,7 @@ void CTextureEditorWindow::OnTick()
 
 	// Mipmap settings
 	ImGui::Spacing();
-	if ( ImGui::CollapsingHeader( "Mipmap Settings", ImGuiTreeNodeFlags_DefaultOpen ) )
+	if ( ImGui::CollapsingHeader( "Mipmap", ImGuiTreeNodeFlags_DefaultOpen ) )
 	{
 		// Generate mipmaps
 		if ( ImGui::Button( "Generate Mipmaps" ) )
@@ -318,7 +338,10 @@ void CTextureEditorWindow::OnTick()
 		ImGui::SameLine();
 		if ( ImGui::Button( "Remove Mipmaps" ) )
 		{
-
+			STexture2DMipMap		mipmap0 = texture2D->GetMip( 0 );
+			texture2D->SetData( texture2D->GetPixelFormat(), mipmap0.sizeX, mipmap0.sizeY, mipmap0.data.GetStdContainer() );
+			viewportClient->SetMipmap( 0 );
+			currentMipmap = 0;
 		}
 	}
 

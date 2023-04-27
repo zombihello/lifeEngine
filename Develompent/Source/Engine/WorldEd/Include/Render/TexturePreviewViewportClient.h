@@ -88,6 +88,15 @@ public:
 	}
 
 	/**
+	 * @brief Set mipmap
+	 * @param InMipmap	Mipmap to view
+	 */
+	FORCEINLINE void SetMipmap( uint32 InMipmap )
+	{
+		mipmapToView = InMipmap;
+	}
+
+	/**
 	 * @brief Is showed red channel
 	 * @return Return TRUE if showed red channel, else return FALSE
 	 */
@@ -123,6 +132,15 @@ public:
 		return colorChannelMask.a > 0;
 	}
 
+	/**
+	 * @brief Get mipmap
+	 * @return Return mipmap for view
+	 */
+	FORCEINLINE uint32 GetMipmap() const
+	{
+		return mipmapToView;
+	}
+
 protected:
 	/**
 	 * @brief Calculate scene view
@@ -142,6 +160,7 @@ protected:
 
 	TSharedPtr<CTexture2D>		texture2D;			/**< Texture 2D to preview */
 	CColor						colorChannelMask;	/**< Color channel mask */
+	uint32						mipmapToView;		/**< Mipmap to view */
 };
 
 #endif // !TEXTUREPREVIEWVIEWPORTCLIENT_H

@@ -60,6 +60,7 @@ private:
 	TSharedPtr<CTexture2D>					texture2D;			/**< Texture 2D */
 	CViewportWidget							viewportWidget;		/**< Viewport widget */
 	class CTexturePreviewViewportClient*	viewportClient;		/**< Viewport client */
+	uint32									currentMipmap;		/**< Current mipmap to view */
 };
 
 #endif // !TEXTUREEDITORWINDOW_H

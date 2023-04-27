@@ -19,4 +19,5 @@ void CTexturePreviewPixelShader::Init( const CShaderCache::SShaderCacheItem& InS
 {
 	CScreenPixelShader::Init( InShaderCacheItem );
 	colorChannelMask.Bind( InShaderCacheItem.parameterMap, TEXT( "colorChannelMask" ) );
+	mipmapToView.Bind( InShaderCacheItem.parameterMap, TEXT( "mipmapToView" ) );
 }
