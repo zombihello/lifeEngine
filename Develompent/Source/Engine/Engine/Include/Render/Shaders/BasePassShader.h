@@ -119,6 +119,8 @@ private:
 	CShaderResourceParameter		roughnessSamplerParameter;		/**< Roughness sampler parameter */
 	CShaderResourceParameter		emissionParameter;				/**< Emission texture parameter */
 	CShaderResourceParameter		emissionSamplerParameter;		/**< Emission sampler parameter */
+	CShaderResourceParameter		aoParameter;					/**< AO texture parameter */
+	CShaderResourceParameter		aoSamplerParameter;				/**< AO sampler parameter */
 };
 
 #endif // !BASEPASSSHADER_H

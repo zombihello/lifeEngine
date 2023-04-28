@@ -15,7 +15,8 @@ static const CName		GTextureParameterNames[] =
 	CMaterial::normalTextureParamName,
 	CMaterial::metallicTextureParamName,
 	CMaterial::roughnessTextureParamName,
-	CMaterial::emissionTextureParamName
+	CMaterial::emissionTextureParamName,
+	CMaterial::aoTextureParamName
 };
 
 CMaterialEditorWindow::CMaterialEditorWindow( const TSharedPtr<CMaterial>& InMaterial )

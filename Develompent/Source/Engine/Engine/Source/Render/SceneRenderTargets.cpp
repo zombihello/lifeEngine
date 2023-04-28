@@ -38,7 +38,7 @@ void CSceneRenderTargets::InitRHI()
 		renderTargets[SRTT_Normal_Metal_GBuffer].Update( false, bufferSizeX, bufferSizeY, PF_FloatRGBA, 0, TEXT( "Normal_Metal_GBuffer" ) );
 
 		// Emission GBuffer
-		renderTargets[SRTT_Emission_GBuffer].Update( false, bufferSizeX, bufferSizeY, PF_A8R8G8B8, 0, TEXT( "Emission_GBuffer" ) );
+		renderTargets[SRTT_Emission_AO_GBuffer].Update( false, bufferSizeX, bufferSizeY, PF_A8R8G8B8, 0, TEXT( "Emission_AO_GBuffer" ) );
 	}
 }
 
@@ -75,7 +75,7 @@ void CSceneRenderTargets::BeginRenderingGBuffer( class CBaseDeviceContextRHI* In
 	check( InDeviceContextRHI );
 	GRHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetSurfaceRHI(), renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI() );
 	GRHI->SetMRTRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Normal_Metal_GBuffer].GetSurfaceRHI(), 1 );
-	GRHI->SetMRTRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Emission_GBuffer].GetSurfaceRHI(), 2 );
+	GRHI->SetMRTRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Emission_AO_GBuffer].GetSurfaceRHI(), 2 );
 }
 
 void CSceneRenderTargets::FinishRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
@@ -90,7 +90,7 @@ void CSceneRenderTargets::ClearGBufferTargets( class CBaseDeviceContextRHI* InDe
 	check( InDeviceContextRHI );
 	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetSurfaceRHI(), CColor::black );
 	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Normal_Metal_GBuffer].GetSurfaceRHI(), CColor::black );
-	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Emission_GBuffer].GetSurfaceRHI(), CColor::black );
+	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Emission_AO_GBuffer].GetSurfaceRHI(), CColor::black );
 }
 
 void CSceneRenderTargets::ResolveLightPassDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const

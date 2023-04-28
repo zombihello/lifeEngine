@@ -278,7 +278,7 @@ void CTextureEditorWindow::OnTick()
 		// Resource size
 		ImGui::Text( "Resource Size:" );
 		ImGui::TableNextColumn();
-		ImGui::Text( TCHAR_TO_ANSI( CString::Format( TEXT( "%.2f Kb" ), ( pixelFormatInfo.blockBytes * sizeX * sizeY ) / 1024.f ).c_str() ) );
+		ImGui::Text( TCHAR_TO_ANSI( CString::Format( TEXT( "%.2f Kb" ), texture2D->GetMemorySize() / 1024.f ).c_str() ) );
 		ImGui::EndTable();
 	}
 

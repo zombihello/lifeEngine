@@ -31,7 +31,7 @@ enum ESceneRenderTargetTypes
 
 	SRTT_Diffuse_Roughness_GBuffer,			/**< Render target for diffuse and roughness GBuffer */
 	SRTT_Normal_Metal_GBuffer,				/**< Render target for normal and metal GBuffer */
-	SRTT_Emission_GBuffer,					/**< Render target for emission GBuffer */
+	SRTT_Emission_AO_GBuffer,				/**< Render target for emission and AO GBuffer */
 	SRTT_LightPassDepthZ,					/**< Render target for light pass' depths */
 
 	SRTT_MaxSceneRenderTargets				/**< Max scene RTs available */
@@ -200,18 +200,18 @@ public:
 	 * @brief Get texture of Emission GBuffer
 	 * @return Return texture of Emission GBuffer
 	 */
-	FORCEINLINE Texture2DRHIRef_t GetEmission_GBufferTexture() const
+	FORCEINLINE Texture2DRHIRef_t GetEmission_AO_GBufferTexture() const
 	{
-		return renderTargets[SRTT_Emission_GBuffer].GetTexture2DRHI();
+		return renderTargets[SRTT_Emission_AO_GBuffer].GetTexture2DRHI();
 	}
 
 	/**
 	 * @brief Get surface of Emission GBuffer
 	 * @return Return surface of Emission GBuffer
 	 */
-	FORCEINLINE SurfaceRHIRef_t GetEmission_GBufferSurface() const
+	FORCEINLINE SurfaceRHIRef_t GetEmission_AO_GBufferSurface() const
 	{
-		return renderTargets[SRTT_Emission_GBuffer].GetSurfaceRHI();
+		return renderTargets[SRTT_Emission_AO_GBuffer].GetSurfaceRHI();
 	}
 
 	/**

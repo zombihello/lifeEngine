@@ -14,6 +14,7 @@ const CName		CMaterial::normalTextureParamName( TEXT( "Normal" ) );
 const CName		CMaterial::metallicTextureParamName( TEXT( "Metallic" ) );
 const CName		CMaterial::roughnessTextureParamName( TEXT( "Roughness" ) );
 const CName		CMaterial::emissionTextureParamName( TEXT( "Emission" ) );
+const CName		CMaterial::aoTextureParamName( TEXT( "AO" ) );
 
 CMaterial::CMaterial() :
 	CAsset( AT_Material ),

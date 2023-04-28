@@ -69,6 +69,10 @@ void CBasePassPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderC
     // Emission
 	emissionParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "emissionTexture" ), true );
 	emissionSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "emissionSampler" ), true );
+
+	// AO
+	aoParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "aoTexture" ), true );
+	aoSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "aoSampler" ), true );
 }
 
 void CBasePassPixelShader::SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const
@@ -150,6 +154,20 @@ void CBasePassPixelShader::SetConstantParameters( class CBaseDeviceContextRHI* I
 		SetSamplerStateParameter( InDeviceContextRHI, emissionSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
     }
 
+	// Getting AO texture
+	TAssetHandle<CTexture2D>    aoTexture;
+	InMaterialResource->GetTextureParameterValue( CMaterial::aoTextureParamName, aoTexture );
+	if ( aoTexture.IsAssetValid() && !GPackageManager->IsDefaultAsset( aoTexture ) )
+	{
+		TSharedPtr<CTexture2D>      texture2DRef = aoTexture.ToSharedPtr();
+		SetTextureParameter( InDeviceContextRHI, aoParameter, texture2DRef->GetTexture2DRHI() );
+		SetSamplerStateParameter( InDeviceContextRHI, aoSamplerParameter, GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ) );
+	}
+	else
+	{
+		SetTextureParameter( InDeviceContextRHI, aoParameter, GWhiteTexture.GetTexture2DRHI() );
+		SetSamplerStateParameter( InDeviceContextRHI, aoSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
+	}
 }
 
 #if WITH_EDITOR

@@ -60,6 +60,14 @@ public:
 	 * @note Work only with editor
 	 */
 	void GenerateMipmaps();
+
+	/**
+	 * Get used memory size by the texture
+	 * 
+	 * @note Work only with editor
+	 * @return Return used memory size in bytes
+	 */
+	uint64 GetMemorySize() const;
 #endif // WITH_EDITOR
 
 	/**

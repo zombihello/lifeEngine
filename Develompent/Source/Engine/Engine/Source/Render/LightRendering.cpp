@@ -299,7 +299,7 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	{
 		TLightingDrawingPolicy<LT_Point>		lightingDrawingPolicy;
 		lightingDrawingPolicy.Init( pointLightComponents );
-		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetEmission_GBufferTexture(), GSceneRenderTargets.GetLightPassDepthZTexture() );
+		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetDiffuse_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetEmission_AO_GBufferTexture(), GSceneRenderTargets.GetLightPassDepthZTexture() );
 		lightingDrawingPolicy.SetRenderState( InDeviceContext, TLightingDrawingPolicy<LT_Point>::PT_Base );
 		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
 	}

@@ -147,6 +147,16 @@ void CTexture2D::GenerateMipmaps()
 	MarkDirty();
 	BeginUpdateResource( this );
 }
+
+uint64 CTexture2D::GetMemorySize() const
+{
+	uint64		totalSize = 0;
+	for ( uint32 index = 0, count = mipmaps.size(); index < count; ++index )
+	{
+		totalSize += mipmaps[index].data.Num();
+	}
+	return totalSize;
+}
 #endif // WITH_EDITOR
 
 void CTexture2D::Serialize( class CArchive& InArchive )

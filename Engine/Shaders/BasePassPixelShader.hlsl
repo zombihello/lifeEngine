@@ -13,7 +13,7 @@ struct PS_OUT
 {
 	float4	diffuseRoughness	: SV_TARGET0;
 	float4	normalMetal			: SV_TARGET1;
-	float4	emission			: SV_TARGET2;
+	float4	emissionAO			: SV_TARGET2;
 };
 
 // Diffuse texture
@@ -36,6 +36,10 @@ SamplerState	roughnessSampler;
 Texture2D		emissionTexture;
 SamplerState	emissionSampler;
 
+// AO texture
+Texture2D		aoTexture;
+SamplerState	aoSampler;
+
 void MainPS( VS_OUT In, out PS_OUT Out )
 {
 	float4 	diffuseColor 		= diffuseTexture.Sample( diffuseSampler, In.texCoord0 );
@@ -44,15 +48,16 @@ void MainPS( VS_OUT In, out PS_OUT Out )
 		discard;
 	}
 
-	Out.diffuseRoughness.a		= roughnessTexture.Sample( roughnessSampler, In.texCoord0 ).a;
-	Out.diffuseRoughness.rgb	= diffuseColor.rgb
-	#if WITH_EDITOR
-		+ In.colorOverlay
-	#endif // WITH_EDITOR
-		;
+	Out.diffuseRoughness.a		= roughnessTexture.Sample( roughnessSampler, In.texCoord0 ).r;
+	Out.diffuseRoughness.rgb	= pow( diffuseColor.rgb
+								#if WITH_EDITOR
+									+ In.colorOverlay
+								#endif // WITH_EDITOR
+									, float3( 2.2f, 2.2f, 2.2f ) );
 
 	Out.normalMetal.rgb 		= normalize( MulMatrix( normalTexture.Sample( normalSampler, In.texCoord0 ).rgb * 2.f - 1.f, In.tbnMatrix ) );
-	Out.normalMetal.a			= metallicTexture.Sample( metallicSampler, In.texCoord0 ).a;
+	Out.normalMetal.a			= metallicTexture.Sample( metallicSampler, In.texCoord0 ).r;
 
-	Out.emission				= emissionTexture.Sample( emissionSampler, In.texCoord0 );
+	Out.emissionAO.rgb			= emissionTexture.Sample( emissionSampler, In.texCoord0 );
+	Out.emissionAO.a			= aoTexture.Sample( aoSampler, In.texCoord0 ).r;
 }
