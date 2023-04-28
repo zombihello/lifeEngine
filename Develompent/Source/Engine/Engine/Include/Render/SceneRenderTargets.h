@@ -33,6 +33,7 @@ enum ESceneRenderTargetTypes
 	SRTT_Normal_Metal_GBuffer,				/**< Render target for normal and metal GBuffer */
 	SRTT_Emission_AO_GBuffer,				/**< Render target for emission and AO GBuffer */
 	SRTT_LightPassDepthZ,					/**< Render target for light pass' depths */
+	SRTT_LightPass,							/**< Render target for light pass */
 
 	SRTT_MaxSceneRenderTargets				/**< Max scene RTs available */
 };
@@ -94,15 +95,22 @@ public:
 	void FinishRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
+	 * @brief Begin rendering light pass
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void BeginRenderingLightPass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Finish rendering light pass
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void FinishRenderingLightPass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
 	 * @brief Clear rendering GBuffer
 	 * @param InDeviceContextRHI	Device context RHI
 	 */
 	void ClearGBufferTargets( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
-
-	/**
-	 * @brief Resolve light pass depth
-	 */
-	void ResolveLightPassDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
 	 * @brief Get texture of scene color
@@ -230,6 +238,24 @@ public:
 	FORCEINLINE SurfaceRHIRef_t GetLightPassDepthZSurface() const
 	{
 		return renderTargets[SRTT_LightPassDepthZ].GetSurfaceRHI();
+	}
+
+	/**
+	 * @brief Get texture of light pass
+	 * @return Return texture of light pass
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetLightPassTexture() const
+	{
+		return renderTargets[SRTT_LightPass].GetTexture2DRHI();
+	}
+
+	/**
+	 * @brief Get surface of light pass
+	 * @return Return surface of light pass
+	 */
+	FORCEINLINE SurfaceRHIRef_t GetLightPassSurface() const
+	{
+		return renderTargets[SRTT_LightPass].GetSurfaceRHI();
 	}
 
 	/**

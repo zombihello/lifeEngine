@@ -216,8 +216,9 @@ private:
 	void RenderHighlight( class CBaseDeviceContextRHI* InDeviceContext );
 #endif // WITH_EDITOR
 
-	class CScene*	scene;			/**< Scene */
-	CSceneView*		sceneView;		/**< Scene view */
+	class CScene*		scene;			/**< Scene */
+	CSceneView*			sceneView;		/**< Scene view */
+	ViewportRHIRef_t	viewportRHI;	/**< Viewport RHI */
 };
 
 #endif // !SCENERENDERING_H

@@ -75,6 +75,12 @@
 
 /**
  * @ingroup Engine
+ * @brief Macro of color draw event for post process
+ */
+#define DEC_POSTPROCESS			CColor( 0,		128,	128,	255 )
+
+/**
+ * @ingroup Engine
  * @brief Macro of color general scene draw events
  */
 #define DEC_SCENE_ITEMS			CColor( 128,	128,	128,	255 )

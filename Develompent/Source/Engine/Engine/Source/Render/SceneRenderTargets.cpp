@@ -23,8 +23,11 @@ void CSceneRenderTargets::InitRHI()
 		// Scene depth Z
 		renderTargets[SRTT_SceneDepthZ].Update( false, bufferSizeX, bufferSizeY, PF_DepthStencil, TCF_DepthStencil, TEXT( "SceneDepthZ" ) );
 
-		// Light attenuation depth Z
+		// Light pass depth Z
 		renderTargets[SRTT_LightPassDepthZ].Update( false, bufferSizeX, bufferSizeY, PF_DepthStencil, TCF_DepthStencil, TEXT( "LightPassDepthZ" ) );
+
+		// Light pass
+		renderTargets[SRTT_LightPass].Update( false, bufferSizeX, bufferSizeY, PF_FloatRGB, 0, TEXT( "LightPass" ) );
 
 #if ENABLE_HITPROXY
 		// Hit proxy
@@ -93,11 +96,17 @@ void CSceneRenderTargets::ClearGBufferTargets( class CBaseDeviceContextRHI* InDe
 	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Emission_AO_GBuffer].GetSurfaceRHI(), CColor::black );
 }
 
-void CSceneRenderTargets::ResolveLightPassDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
+void CSceneRenderTargets::BeginRenderingLightPass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( InDeviceContextRHI );
+
+	// Copy scene depth buffer to light pass depth for using it's data in RT and in shaders (reconstruction world position)
 	GRHI->CopyToResolveTarget( InDeviceContextRHI, renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI(), SResolveParams( SResolveRect(), renderTargets[SRTT_LightPassDepthZ].GetTexture2DRHI() ) );
+	GRHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_LightPass].GetSurfaceRHI(), renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI() );
 }
+
+void CSceneRenderTargets::FinishRenderingLightPass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
+{}
 
 void CSceneRenderTargets::ReleaseRHI()
 {

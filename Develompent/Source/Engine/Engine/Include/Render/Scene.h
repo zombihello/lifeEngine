@@ -54,9 +54,10 @@ enum EShowFlag
 	SHOW_HitProxy			= 1 << 5,		/**< Show hit proxy elements (only for WorldEd) */
 	SHOW_Gizmo				= 1 << 6,		/**< Show gizmo elements (only for WorldEd) */
 	SHOW_Lights				= 1 << 7,		/**< Show lights */
+	SHOW_PostProcess		= 1 << 8,		/**< Show post process */
 
-	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_Lights,								/**< Default show flags for game */
-	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_HitProxy | SHOW_Gizmo | SHOW_Lights	/**< Default show flags for editor */
+	SHOW_DefaultGame		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_Lights | SHOW_PostProcess,								/**< Default show flags for game */
+	SHOW_DefaultEditor		= SHOW_Sprite | SHOW_StaticMesh | SHOW_SimpleElements | SHOW_DynamicElements | SHOW_HitProxy | SHOW_Gizmo | SHOW_Lights | SHOW_PostProcess	/**< Default show flags for editor */
 };
 
 /**

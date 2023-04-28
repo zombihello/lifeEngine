@@ -112,6 +112,24 @@ public:
 		return bPrePass;
 	}
 
+	/**
+	 * Get HDR exposure
+	 * @return Return HDR exposure
+	 */
+	FORCEINLINE float GetHDRExposure() const
+	{
+		return hdrExposure;
+	}
+
+	/**
+	 * Get gamma correction
+	 * @return Return gamma correction
+	 */
+	FORCEINLINE float GetGamma() const
+	{
+		return gamma;
+	}
+
 protected:
 	TAssetHandle<CTexture2D>		defaultTexture;					/**< Default texture */
 	TAssetHandle<CMaterial>			defaultMaterial;				/**< Default material */
@@ -121,6 +139,8 @@ protected:
 #endif // WITH_EDITOR
 
 	bool							bPrePass;						/**< Is enabled pre-pass render */
+	float							hdrExposure;					/**< HDR Exposure */
+	float							gamma;							/**< Gamma correction */
 };
 
 #endif // !BASEENGINE_H

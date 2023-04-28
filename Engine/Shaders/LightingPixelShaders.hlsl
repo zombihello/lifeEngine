@@ -121,14 +121,7 @@ float4 MainPS( in nointerpolation SLightData InLightData, in float4 InScreenPosi
     // Ambient lighting
     // TODO BS yehor.pohuliaka - Need replace this ambient lighting with environment lighting
     float3      ambient             = emissionAO.xyz * diffuseRoughness.xyz * emissionAO.w;
-    float3      finalColor          = ambient + reflectance;
-    
-    // HDR tonemapping
-    finalColor                      = float3( 1.f, 1.f, 1.f ) - exp( -finalColor * 1.f );
-    
-    // gamma correct
-    finalColor = pow( finalColor, float3( 1.f / 2.2f, 1.f / 2.2f, 1.f / 2.2f ) ); 
-    return float4( finalColor, 1.f );
+    return float4( ambient + reflectance, 1.f );
 #else
     return float4( positionFragment, 1.f );
 #endif // POINT_LIGHT

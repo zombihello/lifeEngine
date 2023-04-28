@@ -29,4 +29,5 @@ void CSceneRenderer::RenderUI( class CBaseDeviceContextRHI* InDeviceContext )
 	}
 
 	RenderSDG( InDeviceContext, SDG_Foreground );
+	GSceneRenderTargets.FinishRenderingSceneColor( InDeviceContext );
 }

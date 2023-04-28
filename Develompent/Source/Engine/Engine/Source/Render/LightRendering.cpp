@@ -266,12 +266,9 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 
 	SCOPED_DRAW_EVENT( EventLights, DEC_LIGHT, TEXT( "Lights" ) );
 
-	// Copy scene depth buffer to light pass depth for using him's data in RT and in shaders (reconstruction world position)
-	GSceneRenderTargets.ResolveLightPassDepth( InDeviceContext );
-
-	// Begin rendering light attenuation
-	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
-	InDeviceContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), CColor::black );
+	// Begin rendering light pass
+	GSceneRenderTargets.BeginRenderingLightPass( InDeviceContext );
+	InDeviceContext->ClearSurface( GSceneRenderTargets.GetLightPassSurface(), CColor::black );
 
 	std::list<TRefCountPtr<CPointLightComponent>>			pointLightComponents;
 	std::list<TRefCountPtr<CSpotLightComponent>>			spotLightComponents;
@@ -303,4 +300,7 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 		lightingDrawingPolicy.SetRenderState( InDeviceContext, TLightingDrawingPolicy<LT_Point>::PT_Base );
 		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
 	}
+
+	// Finish rendering light pass
+	GSceneRenderTargets.FinishRenderingLightPass( InDeviceContext );
 }

@@ -22,6 +22,8 @@ IMPLEMENT_CLASS( CBaseEngine )
 
 CBaseEngine::CBaseEngine()
 	: bPrePass( true )
+	, hdrExposure( 1.f )
+	, gamma( 2.2f )
 {}
 
 void CBaseEngine::Init()
@@ -142,12 +144,24 @@ void CBaseEngine::Init()
 	}
 #endif // WITH_EDITOR
 
-	// Get from configs PrePass value
+	// Get from configs PrePass, HDRExposure, etc values
 	{
 		CConfigValue	configPrePass = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "PrePass" ) );
 		if ( configPrePass.IsValid() )
 		{
 			bPrePass = configPrePass.GetBool();
+		}
+
+		CConfigValue	configHDRExposure = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "HDRExposure" ) );
+		if ( configHDRExposure.IsValid() )
+		{
+			hdrExposure = configHDRExposure.GetNumber();
+		}
+
+		CConfigValue	configGamma = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Gamma" ) );
+		if ( configGamma.IsValid() )
+		{
+			gamma = configGamma.GetNumber();
 		}
 	}
 

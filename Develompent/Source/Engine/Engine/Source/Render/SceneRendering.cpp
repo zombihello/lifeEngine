@@ -27,6 +27,9 @@ CSceneRenderer::CSceneRenderer( CSceneView* InSceneView, class CScene* InScene /
 void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
 	CBaseDeviceContextRHI*	immediateContext	= GRHI->GetImmediateContext();
+	
+	check( !viewportRHI );
+	viewportRHI				= InViewportRHI;
 
 	SCOPED_DRAW_EVENT( EventBeginRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Begin Render View Target" ) );
 	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
@@ -69,6 +72,16 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 		RenderLights( immediateContext );
 	}
 
+	// Render post process
+	if ( bDirty && showFlags & SHOW_PostProcess && showFlags & SHOW_Lights
+#if WITH_EDITOR
+		 && !( showFlags & SHOW_Wireframe )
+#endif // WITH_EDITOR
+		 )
+	{
+		RenderPostProcess( immediateContext );
+	}
+
 #if WITH_EDITOR
 	// If we in editor draw highlight layer (gizmo and etc)
 	if ( GIsEditor )
@@ -76,9 +89,6 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 		RenderHighlight( immediateContext );
 	}
 #endif // WITH_EDITOR
-
-	// Render post process
-	RenderPostProcess( immediateContext );
 
 	// Render UI
 	RenderUI( immediateContext );
@@ -88,10 +98,13 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 void CSceneRenderer::RenderHighlight( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	SCOPED_DRAW_EVENT( EventUI, DEC_SCENE_ITEMS, TEXT( "Highlight" ) );
+	
+	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
 	GRHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
 	GRHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
 	
 	RenderSDG( InDeviceContext, SDG_Highlight );
+	GSceneRenderTargets.FinishRenderingSceneColor( InDeviceContext );
 }
 #endif // WITH_EDITOR
 
@@ -157,6 +170,10 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 	if ( bGBuffer )
 	{
 		GSceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
+	}
+	else
+	{
+		GSceneRenderTargets.FinishRenderingSceneColor( InDeviceContext );
 	}
 	return bDirty;
 }
@@ -242,6 +259,7 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
 	SCOPED_DRAW_EVENT( EventFinishRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Finish Render View Target" ) );
+	check( viewportRHI == InViewportRHI );
 
 	// Clear visible view on finish of the scene render
 	if ( scene )
@@ -268,4 +286,5 @@ void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI
 	screenPixelShader->SetTexture( immediateContext, sceneColorTexture );
 	screenPixelShader->SetSamplerState( immediateContext, TStaticSamplerStateRHI<>::GetRHI() );
 	DrawDenormalizedQuad( immediateContext, 1, 1, viewportSizeX, viewportSizeY, 0, 0, viewportSizeX, viewportSizeY, viewportSizeX, viewportSizeY, sceneColorSizeX, sceneColorSizeY, 1.f );
+	viewportRHI = nullptr;
 }
