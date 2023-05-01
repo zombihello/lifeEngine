@@ -68,4 +68,7 @@ void CBaseLightingPixelShader::Init( const CShaderCache::SShaderCacheItem& InSha
 	// Depth buffer
 	depthBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "depthBufferTexture" ), true );
 	depthBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "depthBufferSampler" ), true );
+
+	// Gamma
+	gammaParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "gamma" ), true );
 }

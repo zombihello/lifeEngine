@@ -78,6 +78,9 @@ public:
 		// Depth buffer
 		baseLightingPixelShader->SetDepthBufferTexture( InDeviceContextRHI, InDepthBufferRHI );
 		baseLightingPixelShader->SetDepthBufferSamplerState( InDeviceContextRHI, TStaticSamplerStateRHI<>::GetRHI() );
+
+		// Gamma
+		baseLightingPixelShader->SetGamma( InDeviceContextRHI, GEngine->GetGamma() );
 	}
 
 	/**
@@ -266,9 +269,12 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 
 	SCOPED_DRAW_EVENT( EventLights, DEC_LIGHT, TEXT( "Lights" ) );
 
+	// Copy scene depth buffer to light pass depth for using it's data in RT and in shaders (reconstruction world position)
+	GSceneRenderTargets.ResolveLightPassDepth( InDeviceContext );
+
 	// Begin rendering light pass
-	GSceneRenderTargets.BeginRenderingLightPass( InDeviceContext );
-	InDeviceContext->ClearSurface( GSceneRenderTargets.GetLightPassSurface(), CColor::black );
+	GSceneRenderTargets.BeginRenderingSceneColorHDR( InDeviceContext );
+	InDeviceContext->ClearSurface( GSceneRenderTargets.GetSceneColorHDRSurface(), sceneView->GetBackgroundColor() );
 
 	std::list<TRefCountPtr<CPointLightComponent>>			pointLightComponents;
 	std::list<TRefCountPtr<CSpotLightComponent>>			spotLightComponents;
@@ -302,5 +308,5 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	}
 
 	// Finish rendering light pass
-	GSceneRenderTargets.FinishRenderingLightPass( InDeviceContext );
+	GSceneRenderTargets.FinishRenderingSceneColorHDR( InDeviceContext );
 }

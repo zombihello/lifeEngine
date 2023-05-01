@@ -91,16 +91,16 @@ public:
 	}
 
 	/**
-	 * @brief Set HDR exposure
+	 * @brief Set exposure
 	 * 
 	 * @param InDeviceContextRHI	RHI device context
-	 * @param InHDRExposure			HDR exposure
+	 * @param InExposure			New Exposure
 	 */
-	FORCEINLINE void SetHDRExposure( class CBaseDeviceContextRHI* InDeviceContextRHI, float InHDRExposure )
+	FORCEINLINE void SetExposure( class CBaseDeviceContextRHI* InDeviceContextRHI, float InExposure )
 	{
 		if ( InApplyHDR )
 		{
-			SetPixelShaderValue( InDeviceContextRHI, hdrExposureParameter, InHDRExposure );
+			SetPixelShaderValue( InDeviceContextRHI, hdrExposureParameter, InExposure );
 		}
 	}
 

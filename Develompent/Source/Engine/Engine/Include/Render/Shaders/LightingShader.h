@@ -364,6 +364,17 @@ public:
 		SetSamplerStateParameter( InDeviceContextRHI, depthBufferSamplerParameter, InSamplerStateRHI );
 	}
 
+	/**
+	 * @brief Set gamma
+	 * 
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InGamma				Gamma
+	 */
+	FORCEINLINE void SetGamma( class CBaseDeviceContextRHI* InDeviceContextRHI, float InGamma )
+	{
+		SetPixelShaderValue( InDeviceContextRHI, gammaParameter, InGamma );
+	}
+
 private:
 	CShaderResourceParameter		diffuseRoughnessGBufferParameter;			/**< DiffuseRoughnessGBuffer texture parameter */
 	CShaderResourceParameter		diffuseRoughnessGBufferSamplerParameter;	/**< DiffuseRoughnessGBuffer sampler parameter */
@@ -373,6 +384,7 @@ private:
 	CShaderResourceParameter		emissionGBufferSamplerParameter;			/**< EmissionGBuffer sampler parameter */
 	CShaderResourceParameter		depthBufferParameter;						/**< Depth buffer texture parameter */
 	CShaderResourceParameter		depthBufferSamplerParameter;				/**< Depth buffer sampler parameter */
+	CShaderParameter				gammaParameter;								/**< Gamma parameter */
 };
 
 /**

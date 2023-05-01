@@ -10,7 +10,7 @@
 
 CEditorCommonDrawHelper::CEditorCommonDrawHelper()
 	: bDrawColoredOrigin( true )
-	, bDrawWorldBox( true )
+	, bDrawWorldBox( false )
 	, perspectiveGridSize( HALF_WORLD_MAX1 )
 	, gridColorHi( 127, 127, 127 )
 	, gridColorLo( 63, 63, 63 )

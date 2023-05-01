@@ -35,9 +35,6 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
 	GRHI->SetViewParameters( immediateContext, *sceneView );
 
-	// Clear the scene color surface
-	immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorSurface(), sceneView->GetBackgroundColor() );
-
 	// Build visible view on scene
 	if ( scene )
 	{
@@ -99,12 +96,12 @@ void CSceneRenderer::RenderHighlight( class CBaseDeviceContextRHI* InDeviceConte
 {
 	SCOPED_DRAW_EVENT( EventUI, DEC_SCENE_ITEMS, TEXT( "Highlight" ) );
 	
-	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
+	GSceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
 	GRHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
 	GRHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
 	
 	RenderSDG( InDeviceContext, SDG_Highlight );
-	GSceneRenderTargets.FinishRenderingSceneColor( InDeviceContext );
+	GSceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
 }
 #endif // WITH_EDITOR
 
@@ -155,7 +152,8 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 	// Otherwise to the scene color
 	else
 	{
-		GSceneRenderTargets.BeginRenderingSceneColor( immediateContext );
+		GSceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
+		immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorLDRSurface(), sceneView->GetBackgroundColor() );
 		bGBuffer = false;
 	}
 
@@ -173,7 +171,7 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 	}
 	else
 	{
-		GSceneRenderTargets.FinishRenderingSceneColor( InDeviceContext );
+		GSceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
 	}
 	return bDirty;
 }
@@ -268,7 +266,7 @@ void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI
 	}
 
 	CBaseDeviceContextRHI*					immediateContext	= GRHI->GetImmediateContext();
-	Texture2DRHIRef_t						sceneColorTexture	= GSceneRenderTargets.GetSceneColorTexture();
+	Texture2DRHIRef_t						sceneColorTexture	= GSceneRenderTargets.GetSceneColorLDRTexture();
 	const uint32							sceneColorSizeX		= sceneColorTexture->GetSizeX();
 	const uint32							sceneColorSizeY		= sceneColorTexture->GetSizeY();
 	const uint32							viewportSizeX		= InViewportRHI->GetWidth();

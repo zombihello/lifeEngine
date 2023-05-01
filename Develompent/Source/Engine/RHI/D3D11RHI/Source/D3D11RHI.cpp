@@ -411,6 +411,8 @@ void CD3D11RHI::Init( bool InIsEditor )
 			adapterDesc.DedicatedSystemMemory / ( 1024 * 1024 ),
 			adapterDesc.SharedSystemMemory / ( 1024 * 1024 ) );
 
+	GPixelCenterOffset = 0.f;		// Note that in D3D11, there is no half-texel offset (ala DX9)
+
 	// Initialize the platform pixel format map
 	INIT_FORMAT( PF_A8R8G8B8,				DXGI_FORMAT_R8G8B8A8_UNORM );	
 	INIT_FORMAT_FULL( PF_DepthStencil,		DXGI_FORMAT_R32G8X24_TYPELESS, 8 );
@@ -641,14 +643,14 @@ class CBaseDeviceContextRHI* CD3D11RHI::GetImmediateContext() const
 	return immediateContext;
 }
 
-uint32 CD3D11RHI::GetViewportWidth() const
+void CD3D11RHI::GetViewport( uint32& OutMinX, uint32& OutMinY, float& OutMinZ, uint32& OutMaxX, uint32& OutMaxY, float& OutMaxZ ) const
 {
-	return stateCache.viewport.Width;
-}
-
-uint32 CD3D11RHI::GetViewportHeight() const
-{
-	return stateCache.viewport.Height;
+	OutMinX = stateCache.viewport.TopLeftX;
+	OutMinY = stateCache.viewport.TopLeftY;
+	OutMaxX = stateCache.viewport.Width + OutMinX;
+	OutMaxY = stateCache.viewport.Height + OutMinY;
+	OutMinZ = stateCache.viewport.MinDepth;
+	OutMaxZ = stateCache.viewport.MaxDepth;
 }
 
 void CD3D11RHI::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, void* InInstanceData, uint32 InInstanceStride, uint32 InInstanceSize, uint32 InNumInstances )

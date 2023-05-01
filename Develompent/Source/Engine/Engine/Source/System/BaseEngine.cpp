@@ -22,7 +22,10 @@ IMPLEMENT_CLASS( CBaseEngine )
 
 CBaseEngine::CBaseEngine()
 	: bPrePass( true )
-	, hdrExposure( 1.f )
+	, bAutoExposure( true )
+	, exposure( 1.f )
+	, exposureMin( 0.2f )
+	, exposureMax( 2.f )
 	, gamma( 2.2f )
 {}
 
@@ -152,10 +155,28 @@ void CBaseEngine::Init()
 			bPrePass = configPrePass.GetBool();
 		}
 
-		CConfigValue	configHDRExposure = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "HDRExposure" ) );
-		if ( configHDRExposure.IsValid() )
+		CConfigValue	configExposure = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Exposure" ) );
+		if ( configExposure.IsValid() )
 		{
-			hdrExposure = configHDRExposure.GetNumber();
+			exposure = configExposure.GetNumber();
+		}
+
+		CConfigValue	configAutoExposure = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "AutoExposure" ) );
+		if ( configAutoExposure.IsValid() )
+		{
+			bAutoExposure = configAutoExposure.GetBool();
+		}
+
+		CConfigValue	configExposureMin = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMin" ) );
+		if ( configExposureMin.IsValid() )
+		{
+			exposureMin = configExposureMin.GetNumber();
+		}
+
+		CConfigValue	configExposureMax = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMax" ) );
+		if ( configExposureMax.IsValid() )
+		{
+			exposureMax = configExposureMax.GetNumber();
 		}
 
 		CConfigValue	configGamma = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Gamma" ) );

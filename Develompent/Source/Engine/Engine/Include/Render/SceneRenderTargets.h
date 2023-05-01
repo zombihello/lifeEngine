@@ -22,7 +22,8 @@
  */
 enum ESceneRenderTargetTypes
 {
-	SRTT_SceneColor,						/**< Render target for scene colors */
+	SRTT_SceneColorHDR,						/**< Render target for scene colors in HDR mode */
+	SRTT_SceneColorLDR,						/**< Render target for scene colors in LDR mode */
 	SRTT_SceneDepthZ,						/**< Render target for scene depths */
 
 #if ENABLE_HITPROXY
@@ -33,7 +34,6 @@ enum ESceneRenderTargetTypes
 	SRTT_Normal_Metal_GBuffer,				/**< Render target for normal and metal GBuffer */
 	SRTT_Emission_AO_GBuffer,				/**< Render target for emission and AO GBuffer */
 	SRTT_LightPassDepthZ,					/**< Render target for light pass' depths */
-	SRTT_LightPass,							/**< Render target for light pass */
 
 	SRTT_MaxSceneRenderTargets				/**< Max scene RTs available */
 };
@@ -59,16 +59,28 @@ public:
 	void Allocate( uint32 InNewSizeX, uint32 InNewSizeY );
 
 	/**
-	 * @brief Begin rendering scene color
+	 * @brief Begin rendering scene color in HDR mode
 	 * @param InDeviceContextRHI	Device context RHI
 	 */
-	void BeginRenderingSceneColor( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+	void BeginRenderingSceneColorHDR( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
-	 * @brief Finish rendering scene color
+	 * @brief Finish rendering scene color in HDR mode
 	 * @param InDeviceContextRHI	Device context RHI
 	 */
-	void FinishRenderingSceneColor( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+	void FinishRenderingSceneColorHDR( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Begin rendering scene color in LDR mode
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void BeginRenderingSceneColorLDR( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Finish rendering scene color in LDR mode
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void FinishRenderingSceneColorLDR( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
 	 * @brief Begin rendering pre pass
@@ -95,39 +107,50 @@ public:
 	void FinishRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
-	 * @brief Begin rendering light pass
-	 * @param InDeviceContextRHI	Device context RHI
-	 */
-	void BeginRenderingLightPass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
-
-	/**
-	 * @brief Finish rendering light pass
-	 * @param InDeviceContextRHI	Device context RHI
-	 */
-	void FinishRenderingLightPass( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
-
-	/**
 	 * @brief Clear rendering GBuffer
 	 * @param InDeviceContextRHI	Device context RHI
 	 */
 	void ClearGBufferTargets( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
-	 * @brief Get texture of scene color
-	 * @return Return texture of scene color
+	 * @brief Resolve light pass depth
 	 */
-	FORCEINLINE Texture2DRHIRef_t GetSceneColorTexture() const
+	void ResolveLightPassDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Get texture of scene color in HDR mode
+	 * @return Return texture of scene color in HDR mode
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetSceneColorHDRTexture() const
 	{
-		return renderTargets[SRTT_SceneColor].GetTexture2DRHI();
+		return renderTargets[SRTT_SceneColorHDR].GetTexture2DRHI();
 	}
 
 	/**
-	 * @brief Get surface of scene color
-	 * @return Return surface of scene color
+	 * @brief Get surface of scene color in HDR mode
+	 * @return Return surface of scene color in HDR mode
 	 */
-	FORCEINLINE SurfaceRHIRef_t GetSceneColorSurface() const
+	FORCEINLINE SurfaceRHIRef_t GetSceneColorHDRSurface() const
 	{
-		return renderTargets[SRTT_SceneColor].GetSurfaceRHI();
+		return renderTargets[SRTT_SceneColorHDR].GetSurfaceRHI();
+	}
+
+	/**
+	 * @brief Get texture of scene color in LDR mode
+	 * @return Return texture of scene color in LDR mode
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetSceneColorLDRTexture() const
+	{
+		return renderTargets[SRTT_SceneColorLDR].GetTexture2DRHI();
+	}
+
+	/**
+	 * @brief Get surface of scene color in LDR mode
+	 * @return Return surface of scene color in LDR mode
+	 */
+	FORCEINLINE SurfaceRHIRef_t GetSceneColorLDRSurface() const
+	{
+		return renderTargets[SRTT_SceneColorLDR].GetSurfaceRHI();
 	}
 
 	/**
@@ -238,24 +261,6 @@ public:
 	FORCEINLINE SurfaceRHIRef_t GetLightPassDepthZSurface() const
 	{
 		return renderTargets[SRTT_LightPassDepthZ].GetSurfaceRHI();
-	}
-
-	/**
-	 * @brief Get texture of light pass
-	 * @return Return texture of light pass
-	 */
-	FORCEINLINE Texture2DRHIRef_t GetLightPassTexture() const
-	{
-		return renderTargets[SRTT_LightPass].GetTexture2DRHI();
-	}
-
-	/**
-	 * @brief Get surface of light pass
-	 * @return Return surface of light pass
-	 */
-	FORCEINLINE SurfaceRHIRef_t GetLightPassSurface() const
-	{
-		return renderTargets[SRTT_LightPass].GetSurfaceRHI();
 	}
 
 	/**

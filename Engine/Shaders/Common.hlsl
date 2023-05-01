@@ -10,6 +10,7 @@
 
 #include "Definitions.hlsl"
 
+#define PI                          3.14159265359
 #define MulMatrix( Mtx, Vect )	    mul( Mtx, Vect )
 #define MulBone( Mtx, Vect )		mul( Vect, Mtx )
 

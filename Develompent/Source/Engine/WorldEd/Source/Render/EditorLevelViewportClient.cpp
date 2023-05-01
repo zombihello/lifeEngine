@@ -511,7 +511,7 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 In
 	Matrix		projectionMatrix;
 	if ( viewportType == LVT_Perspective )
 	{
-		projectionMatrix = glm::perspective( SMath::DegreesToRadians( viewFOV ), ( float )InSizeX / InSizeY, 0.01f, ( float )WORLD_MAX );
+		projectionMatrix = glm::perspective( SMath::DegreesToRadians( viewFOV ), ( float )InSizeX / InSizeY, 0.01f, ( float )HALF_WORLD_MAX );
 	}
 	else
 	{

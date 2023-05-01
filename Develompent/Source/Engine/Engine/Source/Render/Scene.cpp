@@ -94,6 +94,10 @@ void CSceneView::ScreenToWorld( const Vector2D& InScreenPoint, Vector& OutWorldO
 }
 
 
+CScene::CScene()
+	: exposure( 1.f )
+{}
+
 CScene::~CScene()
 {
 	Clear();
@@ -182,6 +186,7 @@ void CScene::Clear()
 
 	primitives.clear();
 	lights.clear();
+	exposure = GEngine->GetExposure();
 }
 
 void CScene::BuildView( const CSceneView& InSceneView )
@@ -216,4 +221,14 @@ void CScene::ClearView()
 	}
 
 	frame.visibleLights.clear();
+}
+
+void CScene::SetExposure( float InExposure )
+{
+	exposure = InExposure;
+}
+
+float CScene::GetExposure() const
+{
+	return exposure;
 }

@@ -12,6 +12,7 @@
 - [X] Need add check on used assets while dragged packages in content browser, and need updating info about they in TOC file
 - [ ] Implement rendering light with deferred shading technique
 - [X] Implement HDR and gamma correct support
+- [X] Implement eye adaptation (auto exposure)
 - [ ] Implement physics system
 - [X] Add supported mip levels in textures
 - [X] Add possible generate mip levels for textures in WorldEd

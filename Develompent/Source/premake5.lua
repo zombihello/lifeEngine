@@ -74,6 +74,7 @@ extTheora                       = externalDir .. "theora-1.2"
 extTmxlite                      = externalDir .. "tmxlite"
 extZlib                         = externalDir .. "zlib"
 extCompressonator				= externalDir .. "Compressonator_4.3.206"
+extHalf							= externalDir .. "half-2.2.0"
 
 -- Include modules of external libs
 include( extAssimp )
@@ -92,6 +93,7 @@ include( extTheora )
 include( extTmxlite )
 include( extZlib )
 include( extCompressonator )
+include( extHalf )
 
 workspace( game )
     location( "../Intermediate/" .. _ACTION .. "/" )
@@ -218,6 +220,7 @@ workspace( game )
         LinkZLib()
         LinkSDL2()
         LinkTheora()
+		LinkHalf()
 
         if is2DEngine then
             LinkBox2D()

@@ -13,7 +13,7 @@ CCameraComponent::CCameraComponent()
     , orthoWidth( 512.f )
     , orthoHeight( 512.f )
     , nearClipPlane( 0.01f )
-    , farClipPlane( WORLD_MAX )
+    , farClipPlane( HALF_WORLD_MAX )
     , aspectRatio( 1.777778f )
 {}
 

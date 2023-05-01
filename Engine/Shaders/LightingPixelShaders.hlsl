@@ -24,6 +24,9 @@ SamplerState    emissionGBufferSampler;
 Texture2D		depthBufferTexture;
 SamplerState	depthBufferSampler;
 
+// Gamma correction
+float			gamma;
+
 float DistributionGGX( float3 InNormal, float3 InViewLightDirection, float InRoughness )
 {
     float roughness2    = pow( pow( InRoughness, 2.f ), 2.f );
@@ -74,6 +77,10 @@ float4 MainPS( in nointerpolation SLightData InLightData, in float4 InScreenPosi
     float4      diffuseRoughness    = diffuseRoughnessGBufferTexture.Sample( diffuseRoughnessGBufferSampler, bufferUV );
     float4      normalMetal         = normalMetalGBufferTexture.Sample( normalMetalGBufferSampler, bufferUV );
     float4      emissionAO          = emissionGBufferTexture.Sample( emissionGBufferSampler, bufferUV );
+    
+    // Gamma correction
+    diffuseRoughness.xyz            = pow( diffuseRoughness.xyz, gamma );
+    emissionAO.xyz                  = pow( emissionAO.xyz, gamma );
 
     // Getting postion of fragment and view direction
     float3      positionFragment    = ReconstructPosition( screenUV, bufferUV );
@@ -98,7 +105,7 @@ float4 MainPS( in nointerpolation SLightData InLightData, in float4 InScreenPosi
     float       ggx                 = DistributionGGX( normalMetal.xyz, viewLightDirection, diffuseRoughness.w );   
     float       geometry            = GeometrySmith( normalMetal.xyz, viewDirection, lightDirection, diffuseRoughness.w );      
     float3      fresnel             = FresnelSchlick( max( dot( viewLightDirection, viewDirection ), 0.f ), f0 );
-    float3      specular            = ( ggx * geometry * fresnel ) / ( 4.f * max( dot( normalMetal.xyz, viewDirection ), 0.f ) * max( dot( normalMetal.xyz, lightDirection ), 0.f) + 0.0001f ); // +0.0001 to prevent divide by zero
+    float3      specular            = ( ggx * geometry * fresnel ) / ( 4.f * max( dot( normalMetal.xyz, viewDirection ), 0.f ) * max( dot( normalMetal.xyz, lightDirection ), 0.f ) + 0.0001f ); // +0.0001 to prevent divide by zero
 
     // kS is equal to Fresnel
     float3      kS                  = fresnel;

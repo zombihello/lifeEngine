@@ -113,12 +113,39 @@ public:
 	}
 
 	/**
-	 * Get HDR exposure
-	 * @return Return HDR exposure
+	 * Is enabled auto exposure
+	 * @return Return TRUE if auto exposure is enabled
 	 */
-	FORCEINLINE float GetHDRExposure() const
+	FORCEINLINE bool IsAutoExposure() const
 	{
-		return hdrExposure;
+		return bAutoExposure;
+	}
+
+	/**
+	 * Get exposure
+	 * @return Return exposure
+	 */
+	FORCEINLINE float GetExposure() const
+	{
+		return exposure;
+	}
+
+	/**
+	 * Get exposure min
+	 * @return Return exposure min
+	 */
+	FORCEINLINE float GetExposureMin() const
+	{
+		return exposureMin;
+	}
+
+	/**
+	 * Get exposure max
+	 * @return Return exposure max
+	 */
+	FORCEINLINE float GetExposureMax() const
+	{
+		return exposureMax;
 	}
 
 	/**
@@ -139,7 +166,10 @@ protected:
 #endif // WITH_EDITOR
 
 	bool							bPrePass;						/**< Is enabled pre-pass render */
-	float							hdrExposure;					/**< HDR Exposure */
+	bool							bAutoExposure;					/**< Is enabled auto exposure */
+	float							exposure;						/**< Exposure */
+	float							exposureMin;					/**< Exposure min */
+	float							exposureMax;					/**< Exposure max */
 	float							gamma;							/**< Gamma correction */
 };
 

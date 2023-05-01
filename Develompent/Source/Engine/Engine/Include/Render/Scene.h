@@ -829,6 +829,18 @@ public:
 	 * @brief Clear all instances from scene frame
 	 */
 	virtual void ClearView() {}
+
+	/**
+	 * @brief Set current exposure of the scene
+	 * @paran InExposure		New exposure
+	 */
+	virtual void SetExposure( float InExposure ) {};
+
+	/**
+	 * @brief Get current exposure of the scene
+	 * @return Return exposure
+	 */
+	virtual float GetExposure() const { return GEngine->GetExposure(); };
 };
 
 /**
@@ -838,6 +850,11 @@ public:
 class CScene : public CBaseScene
 {
 public:
+	/**
+	 * @brief Constructor
+	 */
+	CScene();
+
 	/**
 	 * @brief Destructor
 	 */
@@ -921,6 +938,18 @@ public:
 		return frame.visibleLights;
 	}
 
+	/**
+	 * @brief Set current exposure of the scene
+	 * @paran InExposure		New exposure
+	 */
+	virtual void SetExposure( float InExposure ) override;
+
+	/**
+	 * @brief Get current exposure of the scene
+	 * @return Return exposure
+	 */
+	virtual float GetExposure() const override;
+
 private:
 	/**
 	 * @brief One frame of the scene
@@ -931,6 +960,7 @@ private:
 		std::list<LightComponentRef_t>		visibleLights;		/**< List of visible lights */
 	};
 	
+	float									exposure;			/**< Current exposure of the scene */
 	SSceneFrame								frame;				/**< Scene frame */
 	std::list<PrimitiveComponentRef_t>		primitives;			/**< List of primitives on scene */
 	std::list<LightComponentRef_t>			lights;				/**< List of lights on scene */

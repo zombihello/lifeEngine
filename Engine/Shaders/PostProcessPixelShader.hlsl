@@ -5,15 +5,42 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
+#include "Common.hlsl"
+
 Texture2D		sceneColor			: register( t0 );
 SamplerState	sceneColorSampler	: register( s0 );
 
 #if APPLY_HDR
-	float			hdrExposure;
+float			hdrExposure;
+
+float3 ACESToneMap( float3 InColor )
+{
+	float3		result;
+	float3x3	inputMatrix =
+	{
+		0.59719f, 0.07600f, 0.02840f,
+		0.35458f, 0.90834f, 0.13383f,
+		0.04823f, 0.01566f, 0.83777f
+	};
+	float3x3	outputMatrix =
+	{
+		1.60475f, -0.10208f, -0.00327f,
+		-0.53108f, 1.10813f, -0.07276f,
+		-0.07367f, -0.00605f, 1.07602f
+	};
+	float3		unitVector = { 1.f, 1.f, 1.f };
+	float3		v = MulMatrix( InColor, inputMatrix );
+	float3		a = v * ( v + unitVector * 0.0245786f ) - unitVector * 0.000090537f;
+	float		b = v * ( 0.983729f * v + unitVector * 0.4329510f ) + unitVector * 0.238081f;
+	
+	v = MulMatrix( a / b, outputMatrix );
+	result = saturate( v );
+	return result;
+}
 #endif // APPLY_HDR
 
 #if APPLY_GAMMA_CORRECTION
-	float			gamma;
+float			gamma;
 #endif // APPLY_GAMMA_CORRECTION
 
 float4 MainPS( float2 InUV : TEXCOORD0 ) : SV_Target
@@ -23,6 +50,7 @@ float4 MainPS( float2 InUV : TEXCOORD0 ) : SV_Target
 	// Apply HDR tonemapping and gamma correction if it need
 #if APPLY_HDR
 	color.xyz   = float3( 1.f, 1.f, 1.f ) - exp( -color.xyz * hdrExposure );
+	color.xyz	= ACESToneMap( color.xyz );
 #endif // APPLY_HDR
 
 #if APPLY_GAMMA_CORRECTION

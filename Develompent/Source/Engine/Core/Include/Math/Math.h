@@ -13,6 +13,7 @@
 #include <gtx/quaternion.hpp>
 #include <gtc/type_ptr.hpp>
 #include <gtx/transform.hpp>
+#include <gtx/compatibility.hpp>
 
 #include "Math/Axis.h"
 #include "System/Archive.h"
@@ -482,6 +483,17 @@ struct SMath
 	}
 
 	/**
+	 * @brief Log2
+	 *
+	 * @param InA	Value whose logarithm is calculated
+	 * @return Return the binary logarithm of InA
+	 */
+	static FORCEINLINE float Log2( float InA )
+	{
+		return log2( InA );
+	}
+
+	/**
 	 * @brief Converts number with truncation towards zero
 	 * 
 	 * @param InA		Value
@@ -587,6 +599,19 @@ struct SMath
 	static FORCEINLINE float DistanceVector( const Vector& InVectorA, const Vector& InVectorB )
 	{
 		return glm::distance( InVectorA, InVectorB );
+	}
+
+	/**
+	 * @brief Lerp
+	 * 
+	 * @param InX	Value X
+	 * @param InY	Value Y
+	 * @param InA	Alpha
+	 * @return Return the linear blend of InX and InY using the floating-point value InA
+	 */
+	static FORCEINLINE float Lerp( float InX, float InY, float InA )
+	{
+		return glm::lerp( InX, InY, InA );
 	}
 
 	static const Vector				vectorZero;			/**< Zero 3D vector */

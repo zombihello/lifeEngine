@@ -43,17 +43,17 @@ SamplerState	aoSampler;
 void MainPS( VS_OUT In, out PS_OUT Out )
 {
 	float4 	diffuseColor 		= diffuseTexture.Sample( diffuseSampler, In.texCoord0 );
-	if ( diffuseColor.a < 0.5f )
+	if ( diffuseColor.a < 0.01f )
 	{
 		discard;
 	}
 
 	Out.diffuseRoughness.a		= roughnessTexture.Sample( roughnessSampler, In.texCoord0 ).r;
-	Out.diffuseRoughness.rgb	= pow( diffuseColor.rgb
+	Out.diffuseRoughness.rgb	= diffuseColor.rgb
 								#if WITH_EDITOR
 									+ In.colorOverlay
 								#endif // WITH_EDITOR
-									, float3( 2.2f, 2.2f, 2.2f ) );
+									;
 
 	Out.normalMetal.rgb 		= normalize( MulMatrix( normalTexture.Sample( normalSampler, In.texCoord0 ).rgb * 2.f - 1.f, In.tbnMatrix ) );
 	Out.normalMetal.a			= metallicTexture.Sample( metallicSampler, In.texCoord0 ).r;

@@ -637,16 +637,16 @@ public:
 	virtual class CBaseDeviceContextRHI*		GetImmediateContext() const		{ return nullptr; }
 
 	/**
-	 * @brief Get viewport width
-	 * @return Return viewport width
+	 * @brief Get viewport
+	 *
+	 * @param OutMinX Min x
+	 * @param OutMinY Min y
+	 * @param OutMinZ Min z
+	 * @param OutMaxX Max x
+	 * @param OutMaxY Max y
+	 * @param OutMaxZ Max z
 	 */
-	virtual uint32								GetViewportWidth() const		{ return 0; }
-
-	/**
-	 * @brief Get viewport height
-	 * @return Return viewport height
-	 */
-	virtual uint32								GetViewportHeight() const		{ return 0; }
+	virtual void GetViewport( uint32& OutMinX, uint32& OutMinY, float& OutMinZ, uint32& OutMaxX, uint32& OutMaxY, float& OutMaxZ ) const {}
 };
 
 #endif // !BASERHI_H

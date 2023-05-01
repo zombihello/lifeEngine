@@ -8,8 +8,6 @@
  #ifndef DEFINITIONS_H
  #define DEFINITIONS_H 0
  
-#define PI                                  3.14159265359
-
  #ifndef USE_INSTANCING
  #define USE_INSTANCING						0
  #endif // !USE_INSTANCING

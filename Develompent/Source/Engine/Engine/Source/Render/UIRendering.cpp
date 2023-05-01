@@ -10,7 +10,7 @@
 void CSceneRenderer::RenderUI( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	SCOPED_DRAW_EVENT( EventUI, DEC_CANVAS, TEXT( "UI" ) );
-	GSceneRenderTargets.BeginRenderingSceneColor( InDeviceContext );
+	GSceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
 	GRHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
 	GRHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
 
@@ -29,5 +29,5 @@ void CSceneRenderer::RenderUI( class CBaseDeviceContextRHI* InDeviceContext )
 	}
 
 	RenderSDG( InDeviceContext, SDG_Foreground );
-	GSceneRenderTargets.FinishRenderingSceneColor( InDeviceContext );
+	GSceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
 }
