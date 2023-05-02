@@ -5,7 +5,7 @@
 #include "Render/SceneUtils.h"
 #include "Render/Scene.h"
 #include "Render/DrawingPolicy.h"
-#include "Render/Sphere.h"
+#include "Render/LightGeometry.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
 #include "RHI/BaseSurfaceRHI.h"
@@ -57,6 +57,41 @@ public:
 			else
 			{
 				GRHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, GLightSphereMesh.GetNumPrimitives(), InLights->size() );
+			}
+		}
+	}
+
+	/**
+	 * Draw directional lights
+	 *
+	 * @param InDeviceContextRHI		RHI device context
+	 * @param InVertexFactory			Vertex factory
+	 * @param InLightingVertexShader	Lighting vertex shader
+	 * @param InLights					List of directionl lights
+	 * @param InSceneView				Scene view
+	 */
+	template<class TShaderClass>
+	static void DrawDirectionalLights( class CBaseDeviceContextRHI* InDeviceContextRHI, CVertexFactory* InVertexFactory, TShaderClass* InLightingVertexShader, const std::list<TRefCountPtr<CDirectionalLightComponent>>* InLights, const class CSceneView& InSceneView )
+	{
+		// If vertex factory not support instancig - draw without it
+		if ( !InVertexFactory->SupportsInstancing() )
+		{
+			appErrorf( TEXT( "Not implemented" ) );
+		}
+		// Else we draw geometry with help instancing
+		else
+		{
+			InLightingVertexShader->SetMesh( InDeviceContextRHI, *InLights, InVertexFactory, &InSceneView, InLights->size() );
+			GRHI->CommitConstants( InDeviceContextRHI );
+
+			IndexBufferRHIRef_t		indexBufferRHI = GLightQuadMesh.GetIndexBufferRHI();
+			if ( indexBufferRHI )
+			{
+				GRHI->DrawIndexedPrimitive( InDeviceContextRHI, indexBufferRHI, PT_TriangleList, 0, 0, GLightQuadMesh.GetNumPrimitives(), InLights->size() );
+			}
+			else
+			{
+				GRHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, GLightQuadMesh.GetNumPrimitives(), InLights->size() );
 			}
 		}
 	}
@@ -274,25 +309,24 @@ public:
 	/**
 	 * Initialize mesh drawing policy
 	 *
-	 * @param InVertexFactory	Vertex factory
 	 * @param InLights			List of spot lights
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, float InDepthBias = 0.f )
+	FORCEINLINE void Init( const std::list<TRefCountPtr<CSpotLightComponent>>* InLights, float InDepthBias = 0.f )
 	{
-		CBaseLightingDrawingPolicy::Init( InVertexFactory, InDepthBias );
+		CBaseLightingDrawingPolicy::Init( nullptr, InDepthBias );
 
 		// Override shaders for lighting rendering
-		uint64					vertexFactoryHash		= InVertexFactory->GetType()->GetHash();
+		uint64					vertexFactoryHash		= vertexFactory->GetType()->GetHash();
 		vertexShader			= lightingVertexShader	= GShaderManager->FindInstance<TLightingVertexShader<LT_Spot>>( vertexFactoryHash );
 		pixelShader				= lightingPixelShader	= GShaderManager->FindInstance<TLightingPixelShader<LT_Spot>>( vertexFactoryHash );
 		spotLightComponents		= InLights;
 	}
 
 private:
-	TLightingVertexShader<LT_Spot>*					lightingVertexShader;		/**< Spot light vertex shader */
-	TLightingPixelShader<LT_Spot>*					lightingPixelShader;		/**< Spot light pixel shader */
-	std::list<TRefCountPtr<CSpotLightComponent>>	spotLightComponents;		/**< List of spot light components */
+	TLightingVertexShader<LT_Spot>*							lightingVertexShader;		/**< Spot light vertex shader */
+	TLightingPixelShader<LT_Spot>*							lightingPixelShader;		/**< Spot light pixel shader */
+	const std::list<TRefCountPtr<CSpotLightComponent>>*		spotLightComponents;		/**< List of spot light components */
 };
 
 /**
@@ -306,25 +340,63 @@ public:
 	/**
 	 * Initialize mesh drawing policy
 	 *
-	 * @param InVertexFactory	Vertex factory
 	 * @param InLights			List of directional lights
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, float InDepthBias = 0.f )
+	FORCEINLINE void Init( const std::list<TRefCountPtr<CDirectionalLightComponent>>* InLights, float InDepthBias = 0.f )
 	{
-		CBaseLightingDrawingPolicy::Init( InVertexFactory, InDepthBias );
+		CBaseLightingDrawingPolicy::Init( GLightQuadMesh.GetVertexFactory(), InDepthBias );
 
 		// Override shaders for lighting rendering
-		uint64						vertexFactoryHash		= InVertexFactory->GetType()->GetHash();
+		uint64						vertexFactoryHash		= vertexFactory->GetType()->GetHash();
 		vertexShader				= lightingVertexShader	= GShaderManager->FindInstance<TLightingVertexShader<LT_Directional>>( vertexFactoryHash );
 		pixelShader					= lightingPixelShader	= GShaderManager->FindInstance<TLightingPixelShader<LT_Directional>>( vertexFactoryHash );
 		directionalLightComponents	= InLights;
 	}
 
+	/**
+	 * Set render state for drawing
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InPassType			Pass type
+	 */
+	virtual void SetRenderState( class CBaseDeviceContextRHI* InDeviceContextRHI ) override
+	{
+		CMeshDrawingPolicy::SetRenderState( InDeviceContextRHI );
+		GRHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
+		GRHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<>::GetRHI() );
+		GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<BO_Add, BF_One, BF_One>::GetRHI() );
+		GRHI->SetColorWriteEnable( InDeviceContextRHI, true );
+	}
+
+	/**
+	 * @brief Get rasterizer state
+	 * @return Return rasterizer state of current drawing policy
+	 */
+	virtual RasterizerStateRHIRef_t GetRasterizerState() const override
+	{
+		if ( !rasterizerState )
+		{
+			rasterizerState = TStaticRasterizerStateRHI<FM_Solid, CM_CCW>::GetRHI();
+		}
+		return rasterizerState;
+	}
+
+	/**
+	 * Draw light
+	 *
+	 * @param InDeviceContextRHI RHI device context
+	 * @param InSceneView Scene view
+	 */
+	void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CSceneView& InSceneView )
+	{
+		CLightingDrawingPolicyUtils::DrawDirectionalLights( InDeviceContextRHI, vertexFactory, lightingVertexShader, directionalLightComponents, InSceneView );
+	}
+
 private:
-	TLightingVertexShader<LT_Directional>*				lightingVertexShader;			/**< Directional light vertex shader */
-	TLightingPixelShader<LT_Directional>*				lightingPixelShader;			/**< Directional light pixel shader */
-	std::list<TRefCountPtr<CDirectionalLightComponent>>	directionalLightComponents;		/**< List of directional light components */
+	TLightingVertexShader<LT_Directional>*							lightingVertexShader;			/**< Directional light vertex shader */
+	TLightingPixelShader<LT_Directional>*							lightingPixelShader;			/**< Directional light pixel shader */
+	const std::list<TRefCountPtr<CDirectionalLightComponent>>*		directionalLightComponents;		/**< List of directional light components */
 };
 
 /**
@@ -359,7 +431,7 @@ public:
 		uint64					vertexFactoryHash = vertexFactory->GetType()->GetHash();
 		vertexShader			= lightingVertexShader = GShaderManager->FindInstance<TDepthOnlyLightingVertexShader<LT_Point>>( vertexFactoryHash );
 		pixelShader				= GShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );
-		pointLightComponents = InLights;
+		pointLightComponents	= InLights;
 	}
 
 	/**
@@ -383,22 +455,21 @@ private:
  * @brief Stencil spot lighting pass drawing policy
  */
 template<>
-class TStencilLightingDrawingPolicy<LT_Spot> : public CBaseLightingDrawingPolicy
+class TStencilLightingDrawingPolicy<LT_Spot> : public CBaseStencilLightingDrawingPolicy
 {
 public:
 	/**
 	 * Initialize mesh drawing policy
 	 *
-	 * @param InVertexFactory	Vertex factory
 	 * @param InLights			List of spot lights
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, const std::list<TRefCountPtr<CSpotLightComponent>>* InLights, float InDepthBias = 0.f )
+	FORCEINLINE void Init( const std::list<TRefCountPtr<CSpotLightComponent>>* InLights, float InDepthBias = 0.f )
 	{
-		CBaseLightingDrawingPolicy::Init( InVertexFactory, InDepthBias );
+		CBaseStencilLightingDrawingPolicy::Init( nullptr, InDepthBias );
 
 		// Override shaders for lighting rendering
-		uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
+		uint64			vertexFactoryHash = vertexFactory->GetType()->GetHash();
 		vertexShader	= lightingVertexShader = GShaderManager->FindInstance<TDepthOnlyLightingVertexShader<LT_Spot>>( vertexFactoryHash );
 		pixelShader		= GShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );
 		spotLightComponents = InLights;
@@ -407,37 +478,6 @@ public:
 private:
 	TDepthOnlyLightingVertexShader<LT_Spot>*			lightingVertexShader;		/**< Depth only spot light vertex shader */
 	const std::list<TRefCountPtr<CSpotLightComponent>>*	spotLightComponents;		/**< List of spot light components */
-};
-
-/**
- * @ingroup Engine
- * @brief Stencil directional lighting pass drawing policy
- */
-template<>
-class TStencilLightingDrawingPolicy<LT_Directional> : public CBaseLightingDrawingPolicy
-{
-public:
-	/**
-	 * Initialize mesh drawing policy
-	 *
-	 * @param InVertexFactory	Vertex factory
-	 * @param InLights			List of directional lights
-	 * @param InDepthBias		Depth bias
-	 */
-	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, const std::list<TRefCountPtr<CDirectionalLightComponent>>* InLights, float InDepthBias = 0.f )
-	{
-		CBaseLightingDrawingPolicy::Init( InVertexFactory, InDepthBias );
-
-		// Override shaders for lighting rendering
-		uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
-		vertexShader	= lightingVertexShader = GShaderManager->FindInstance<TDepthOnlyLightingVertexShader<LT_Directional>>( vertexFactoryHash );
-		pixelShader		= GShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );
-		directionalLightComponents = InLights;
-	}
-
-private:
-	TDepthOnlyLightingVertexShader<LT_Directional>*				lightingVertexShader;			/**< Depth only directional light vertex shader */
-	const std::list<TRefCountPtr<CDirectionalLightComponent>>*	directionalLightComponents;		/**< List of directional light components */
 };
 
 void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext )
@@ -479,6 +519,7 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	}
 
 	// Render point lights
+	if ( !pointLightComponents.empty() )
 	{
 		TStencilLightingDrawingPolicy<LT_Point>	stencilLightingDrawingPolicy;
 		TLightingDrawingPolicy<LT_Point>		lightingDrawingPolicy;
@@ -489,6 +530,18 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 		stencilLightingDrawingPolicy.SetRenderState( InDeviceContext );
 		stencilLightingDrawingPolicy.SetShaderParameters( InDeviceContext );
 		stencilLightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
+
+		// Base pass
+		lightingDrawingPolicy.SetRenderState( InDeviceContext );
+		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetAlbedo_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetEmission_AO_GBufferTexture(), GSceneRenderTargets.GetLightPassDepthZTexture() );
+		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
+	}
+
+	// Render directional lights
+	if ( !directionalLightComponents.empty() )
+	{
+		TLightingDrawingPolicy<LT_Directional>			lightingDrawingPolicy;
+		lightingDrawingPolicy.Init( &directionalLightComponents );
 
 		// Base pass
 		lightingDrawingPolicy.SetRenderState( InDeviceContext );

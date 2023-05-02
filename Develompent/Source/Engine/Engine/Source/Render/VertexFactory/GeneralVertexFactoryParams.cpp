@@ -14,7 +14,7 @@ void CGeneralVertexShaderParameters::Bind( const class CShaderParameterMap& InPa
 {
     if ( !bSupportsInstancing )
     {
-        localToWorldMatrixParameter.Bind( InParameterMap, TEXT( "localToWorldMatrix" ) );
+        localToWorldMatrixParameter.Bind( InParameterMap, TEXT( "localToWorldMatrix" ), true );
 
 #if WITH_EDITOR
         colorOverlayParameter.Bind( InParameterMap, TEXT( "colorOverlay" ), true );

@@ -201,6 +201,23 @@ class TLightingVertexShader<LT_Spot> : public CBaseLightingVertexShader
 	DECLARE_SHADER_TYPE( TLightingVertexShader<LT_Spot> )
 
 public:
+	/**
+	 * @brief Set the l2w transform shader
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InLights				List of spot light componenets
+	 * @param InMesh				Mesh data
+	 * @param InVertexFactory		Vertex factory
+	 * @param InView				Scene view
+	 * @param InNumInstances		Number instances
+	 * @param InStartInstanceID		ID of first instance
+	 */
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	{
+		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
+	}
+
 #if WITH_EDITOR
 	/**
 	 * @brief Modify compilation environment
@@ -237,6 +254,23 @@ class TLightingVertexShader<LT_Directional> : public CBaseLightingVertexShader
 	DECLARE_SHADER_TYPE( TLightingVertexShader<LT_Directional> )
 
 public:
+	/**
+	 * @brief Set the l2w transform shader
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InLights				List of directional light componenets
+	 * @param InMesh				Mesh data
+	 * @param InVertexFactory		Vertex factory
+	 * @param InView				Scene view
+	 * @param InNumInstances		Number instances
+	 * @param InStartInstanceID		ID of first instance
+	 */
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	{
+		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
+	}
+
 #if WITH_EDITOR
 	/**
 	 * @brief Modify compilation environment
@@ -310,6 +344,7 @@ public:
 	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
 	{
 		CLightingShadersUtils::ModifyCompilationEnvironment( LT_Point, InEnvironment );
+		CDepthOnlyShadersUtils::ModifyCompilationEnvironment( true, InEnvironment );
 	}
 
 	/**
@@ -336,6 +371,23 @@ class TDepthOnlyLightingVertexShader<LT_Spot> : public CBaseLightingVertexShader
 	DECLARE_SHADER_TYPE( TDepthOnlyLightingVertexShader<LT_Spot> )
 
 public:
+	/**
+	 * @brief Set the l2w transform shader
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InLights				List of spot light componenets
+	 * @param InMesh				Mesh data
+	 * @param InVertexFactory		Vertex factory
+	 * @param InView				Scene view
+	 * @param InNumInstances		Number instances
+	 * @param InStartInstanceID		ID of first instance
+	 */
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	{
+		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
+	}
+
 #if WITH_EDITOR
 	/**
 	 * @brief Modify compilation environment
@@ -346,6 +398,7 @@ public:
 	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
 	{
 		CLightingShadersUtils::ModifyCompilationEnvironment( LT_Spot, InEnvironment );
+		CDepthOnlyShadersUtils::ModifyCompilationEnvironment( true, InEnvironment );
 	}
 
 	/**
@@ -372,6 +425,23 @@ class TDepthOnlyLightingVertexShader<LT_Directional> : public CBaseLightingVerte
 	DECLARE_SHADER_TYPE( TDepthOnlyLightingVertexShader<LT_Directional> )
 
 public:
+	/**
+	 * @brief Set the l2w transform shader
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InLights				List of directional light componenets
+	 * @param InMesh				Mesh data
+	 * @param InVertexFactory		Vertex factory
+	 * @param InView				Scene view
+	 * @param InNumInstances		Number instances
+	 * @param InStartInstanceID		ID of first instance
+	 */
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	{
+		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
+	}
+
 #if WITH_EDITOR
 	/**
 	 * @brief Modify compilation environment
@@ -382,6 +452,7 @@ public:
 	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
 	{
 		CLightingShadersUtils::ModifyCompilationEnvironment( LT_Directional, InEnvironment );
+		CDepthOnlyShadersUtils::ModifyCompilationEnvironment( false, InEnvironment );
 	}
 
 	/**

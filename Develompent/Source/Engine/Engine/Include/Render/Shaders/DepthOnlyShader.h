@@ -14,28 +14,69 @@
 
 /**
  * @ingroup Engine
+ * @brief Class of utils for depth only shaders
+ */
+class CDepthOnlyShadersUtils
+{
+public:
+#if WITH_EDITOR
+	/**
+	 * @brief Modify compilation environment
+	 * This method added to the compiler environment base definitions of lighting system
+	 *
+	 * @param InIsUseWorldPos	Is need use in the shader world position
+	 * @param InEnvironment Shader compiler environment
+	 */
+	static FORCEINLINE void ModifyCompilationEnvironment( bool InIsUseWorldPos, SShaderCompilerEnvironment& InEnvironment )
+	{
+		InEnvironment.difinitions.insert( std::make_pair( TEXT( "WORLD_POS" ), InIsUseWorldPos ? TEXT( "1" ) : TEXT( "0" ) ) );
+	}
+#endif // WITH_EDITOR
+};
+
+/**
+ * @ingroup Engine
  * @brief Class of depth only vertex shader
  */
-class CDepthOnlyVertexShader : public CShader
+template<bool InIsUseWorldPos = true>
+class TDepthOnlyVertexShader : public CShader
 {
-	DECLARE_SHADER_TYPE( CDepthOnlyVertexShader )
+	DECLARE_SHADER_TYPE( TDepthOnlyVertexShader )
 
 public:
 	/**
-	 * @brief Construct a new CDepthVertexShader object
+	 * @brief Construct a new TDepthOnlyVertexShader object
 	 */
-	CDepthOnlyVertexShader();
+	TDepthOnlyVertexShader()
+		: vertexFactoryParameters( nullptr )
+	{}
 
 	/**
-	 * @brief Destructor of a CDepthVertexShader object
+	 * @brief Destructor of a TDepthOnlyVertexShader object
 	 */
-	virtual ~CDepthOnlyVertexShader();
+	virtual ~TDepthOnlyVertexShader()
+	{
+		if ( vertexFactoryParameters )
+		{
+			delete vertexFactoryParameters;
+		}
+	}
 
 	/**
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
+	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override
+	{
+		CShader::Init( InShaderCacheItem );
+
+		// Bind shader parameters
+		CVertexFactoryMetaType* vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
+		check( vertexFactoryType );
+
+		vertexFactoryParameters = vertexFactoryType->CreateShaderParameters( SF_Vertex );
+		vertexFactoryParameters->Bind( InShaderCacheItem.parameterMap );
+	}
 
 	/**
 	 * @brief Set the constant shader parameters
@@ -44,7 +85,11 @@ public:
 	 * @param InVertexFactory Vertex factory
 	 * @param InMaterialResource Material
 	 */
-	virtual void SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const override;
+	virtual void SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const override
+	{
+		check( vertexFactoryParameters );
+		vertexFactoryParameters->Set( InDeviceContextRHI, InVertexFactory );
+	}
 
 	/**
 	 * @brief Set the l2w transform shader
@@ -56,7 +101,24 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override
+	{
+		check( vertexFactoryParameters );
+		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InMesh, InVertexFactory, InView, InNumInstances, InStartInstanceID );
+	}
+
+#if WITH_EDITOR
+	/**
+	 * @brief Modify compilation environment
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InEnvironment Shader compiler environment
+	 */
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
+	{
+		CDepthOnlyShadersUtils::ModifyCompilationEnvironment( InIsUseWorldPos, InEnvironment );
+	}
+#endif // WITH_EDITOR
 
 private:
 	class CVertexFactoryShaderParameters*	vertexFactoryParameters;	/**< Vertex factory shader parameters */

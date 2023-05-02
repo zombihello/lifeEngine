@@ -66,6 +66,17 @@ float3 ReconstructPosition( float2 InScreenUV, float2 InBufferUV )
     return worldPosition.xyz / worldPosition.w;
 }
 
+float CalcLightAttenuation( SLightData InLightData, float InDistance )
+{
+#if POINT_LIGHT
+    return pow( saturate( 1.f - pow( InDistance / InLightData.radius, 4.f ) ), 2.f ) / ( pow( InDistance, 2.f ) + 1.f );
+#elif SPOT_LIGHT
+    return pow( saturate( 1.f - pow( InDistance / InLightData.height, 4.f ) ), 2.f ) / ( pow( InDistance, 2.f ) + 1.f );
+#else
+    return 1.f;
+#endif // POINT_LIGHT
+}
+
 // Main function for calculate light attenuation
 float4 MainPS( in nointerpolation SLightData InLightData, in float4 InScreenPosition : TEXCOORD0 ) : SV_TARGET0
 {
@@ -86,19 +97,28 @@ float4 MainPS( in nointerpolation SLightData InLightData, in float4 InScreenPosi
     float3      positionFragment    = ReconstructPosition( screenUV, bufferUV );
     float3      viewDirection       = normalize( position.xyz - positionFragment );
 
-#if POINT_LIGHT
     // Calculate reflectance at normal incidence
     // If dia-electric (like plastic) use F0 of 0.04 
     // And if it's a metal, use the albedo color as F0 (metallic workflow)    
     float3      f0 = float3( 0.04f, 0.04f, 0.04f ); 
     f0          = lerp( f0, diffuseRoughness.xyz, normalMetal.w );
 
-    // Calculate per-light radiance
+    // Calculate per-light radiance  
+#if POINT_LIGHT || SPOT_LIGHT
     float3      lightDirection      = InLightData.position - positionFragment;
-    float       distance            = length( lightDirection );
+    float       attenuation         = CalcLightAttenuation( InLightData, length( lightDirection ) );
     lightDirection                  = normalize( lightDirection );
-    float3      viewLightDirection  = normalize( viewDirection + lightDirection );
-    float       attenuation         = pow( saturate( 1.f - pow( distance / InLightData.radius, 4.f ) ), 2.f ) / ( pow( distance, 2.f ) + 1.f );
+#else
+    float3      lightDirection      = normalize( InLightData.direction );
+    float       attenuation         = 1.f;
+#endif // POINT_LIGHT || SPOT_LIGHT
+
+#if SPOT_LIGHT
+    float       spotFactor          = dot( -lightDirection, normalize( InLightData.direction ) );
+    attenuation                     *= clamp( ( spotFactor - InLightData.cutoff ) / ( 0.95f - InLightData.cutoff ), 0.f, 1.f );
+#endif // SPOT_LIGHT
+
+    float3      viewLightDirection  = normalize( viewDirection + lightDirection );  
     float3      radiance            = InLightData.lightColor * InLightData.intensivity * attenuation;
 
      // Cook-Torrance BRDF
@@ -129,7 +149,4 @@ float4 MainPS( in nointerpolation SLightData InLightData, in float4 InScreenPosi
     // TODO BS yehor.pohuliaka - Need replace this ambient lighting with environment lighting
     float3      ambient             = emissionAO.xyz * diffuseRoughness.xyz * emissionAO.w;
     return float4( ambient + reflectance, 1.f );
-#else
-    return float4( positionFragment, 1.f );
-#endif // POINT_LIGHT
 }

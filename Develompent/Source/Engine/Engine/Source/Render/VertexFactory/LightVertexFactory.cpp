@@ -54,6 +54,11 @@ template<>
 struct TLightInstanceBuffer<LT_Spot> : public SBaseLightInstanceBuffer
 {
 	Matrix		instanceLocalToWorld;		/**< Local to World matrix for each instance */
+	Vector		position;					/**< Position */
+	float		radius;						/**< Radius */
+	float		height;						/**< Height */
+	float		cutoff;						/**< Cutoff */
+	Vector		direction;					/**< Direction */
 };
 
 /**
@@ -62,7 +67,9 @@ struct TLightInstanceBuffer<LT_Spot> : public SBaseLightInstanceBuffer
  */
 template<>
 struct TLightInstanceBuffer<LT_Directional> : public SBaseLightInstanceBuffer
-{};
+{
+	Vector		direction;					/**< Direction */
+};
 
 void CLightVertexDeclaration::InitRHI()
 {
@@ -101,6 +108,11 @@ void CLightVertexDeclaration::InitRHI()
 			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Spot> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Spot>, lightColor ),						VET_Color,	VEU_Color,				0, true ),
 			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Spot> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Spot>, specularColor ),					VET_Color,	VEU_Color,				1, true ),
 			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Spot> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Spot>, intensivity ),					VET_Float1,	VEU_BlendWeight,		0, true ),
+			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Spot> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Spot>, position ),						VET_Float3,	VEU_Position,			5, true ),
+			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Spot> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Spot>, radius ),							VET_Float1,	VEU_BlendWeight,		1, true ),
+			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Spot> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Spot>, height ),							VET_Float1,	VEU_BlendWeight,		2, true ),
+			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Spot> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Spot>, cutoff ),							VET_Float1,	VEU_BlendWeight,		3, true ),
+			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Spot> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Spot>, direction ),						VET_Float3,	VEU_Normal,				0, true ),
 #endif // USE_INSTANCING
 		};
 		vertexDeclarationRHI[LT_Spot] = GRHI->CreateVertexDeclaration( vertexDeclElementList );
@@ -116,6 +128,7 @@ void CLightVertexDeclaration::InitRHI()
 			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Directional> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Directional>, lightColor ),				VET_Color,	VEU_Color,				0, true ),
 			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Directional> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Directional>, specularColor ),			VET_Color,	VEU_Color,				1, true ),
 			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Directional> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Directional>, intensivity ),				VET_Float1,	VEU_BlendWeight,		0, true ),
+			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Directional> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Directional>, direction ),				VET_Float3,	VEU_Normal,				0, true ),
 #endif // USE_INSTANCING
 		};
 		vertexDeclarationRHI[LT_Directional] = GRHI->CreateVertexDeclaration( vertexDeclElementList );
@@ -234,6 +247,11 @@ void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDevice
 		instanceBuffer.lightColor									= spotLightComponent->GetLightColor();
 		instanceBuffer.specularColor								= spotLightComponent->GetSpecularColor();
 		instanceBuffer.intensivity									= spotLightComponent->GetIntensivity();
+		instanceBuffer.position										= spotLightComponent->GetComponentLocation();
+		instanceBuffer.radius										= spotLightComponent->GetRadius();
+		instanceBuffer.height										= spotLightComponent->GetHeight();
+		instanceBuffer.cutoff										= spotLightComponent->GetCutoff();
+		instanceBuffer.direction									= -SMath::vectorUp * spotLightComponent->GetComponentRotation();
 	}
 
 	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Spot> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Spot> ), InNumInstances );
@@ -255,6 +273,7 @@ void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDevice
 		instanceBuffer.lightColor													= directionalLightComponent->GetLightColor();
 		instanceBuffer.specularColor												= directionalLightComponent->GetSpecularColor();
 		instanceBuffer.intensivity													= directionalLightComponent->GetIntensivity();
+		instanceBuffer.direction													= -SMath::vectorUp * directionalLightComponent->GetComponentRotation();
 	}
 
 	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Directional> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Directional> ), InNumInstances );

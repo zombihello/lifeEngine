@@ -32,7 +32,7 @@ public:
 
 		// Override shaders for depth only rendering
 		uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
-		vertexShader	= GShaderManager->FindInstance<CDepthOnlyVertexShader>( vertexFactoryHash );
+		vertexShader	= GShaderManager->FindInstance<TDepthOnlyVertexShader<>>( vertexFactoryHash );
 		pixelShader		= GShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );
 	}
 };

@@ -3,7 +3,9 @@
 IMPLEMENT_CLASS( CDirectionalLightComponent )
 
 CDirectionalLightComponent::CDirectionalLightComponent()
-{}
+{
+	intensivity = 3.f;
+}
 
 ELightType CDirectionalLightComponent::GetLightType() const
 {

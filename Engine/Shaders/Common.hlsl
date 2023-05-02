@@ -31,7 +31,13 @@ struct SLightData
     float3      position        : POSITION5;
     float       radius          : BLENDWEIGHT1;
 #elif SPOT_LIGHT
+    float3      position        : POSITION5;
+    float       radius          : BLENDWEIGHT1;
+    float       height          : BLENDWEIGHT2;
+    float       cutoff          : BLENDWEIGHT3;
+    float3      direction       : NORMAL0;
 #elif DIRECTIONAL_LIGHT
+    float3      direction       : NORMAL0;
 #endif // POINT_LIGHT / SPOT_LIGHT / DIRECTIONAL_LIGHT
 };
 
