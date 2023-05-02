@@ -109,8 +109,8 @@ public:
 #endif // WITH_EDITOR
 
 private:
-	CShaderResourceParameter		diffuseParameter;				/**< Diffuse texture parameter */
-	CShaderResourceParameter		diffuseSamplerParameter;		/**< Diffuse sampler parameter */
+	CShaderResourceParameter		albedoParameter;				/**< Albedo texture parameter */
+	CShaderResourceParameter		albedoSamplerParameter;			/**< Albedo sampler parameter */
 	CShaderResourceParameter		normalParameter;				/**< Normal texture parameter */
 	CShaderResourceParameter		normalSamplerParameter;			/**< Normal sampler parameter */
 	CShaderResourceParameter		metallicParameter;				/**< Metallic texture parameter */

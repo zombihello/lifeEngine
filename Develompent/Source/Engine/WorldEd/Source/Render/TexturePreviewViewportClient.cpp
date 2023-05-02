@@ -6,6 +6,7 @@
 #include "Render/SceneUtils.h"
 #include "Render/Shaders/ScreenShader.h"
 #include "Render/Shaders/TexturePreviewShader.h"
+#include "Render/SceneRenderTargets.h"
 #include "RHI/StaticStatesRHI.h"
 #include "EngineDefines.h"
 
@@ -49,6 +50,8 @@ void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewpo
 		CTexturePreviewPixelShader*					texturePreviewPixelShader	= GShaderManager->FindInstance< CTexturePreviewPixelShader, CSimpleElementVertexFactory >();
 		check( screenVertexShader && texturePreviewPixelShader );
 
+		GSceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
+		immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorLDRSurface(), GetBackgroundColor() );
 		GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
 		GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
 		GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "PreviewTexture" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), texturePreviewPixelShader->GetPixelShader() ) );
@@ -59,6 +62,7 @@ void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewpo
 		texturePreviewPixelShader->SetMipmap( immediateContext, mipmapToView );
 		GRHI->CommitConstants( immediateContext );
 		GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
+		GSceneRenderTargets.FinishRenderingSceneColorLDR( immediateContext );
 	}
 	
 	// Finishing render and delete scene view

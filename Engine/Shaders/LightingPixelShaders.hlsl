@@ -8,9 +8,9 @@
 #include "Common.hlsl"
 #include "VertexFactory.hlsl"
 
-// DiffuseRoughnessGBuffer texture
-Texture2D		diffuseRoughnessGBufferTexture;
-SamplerState	diffuseRoughnessGBufferSampler;
+// AlbedoRoughnessGBuffer texture
+Texture2D		albedoRoughnessGBufferTexture;
+SamplerState	albedoRoughnessGBufferSampler;
 
 // NormalMetalGBuffer texture
 Texture2D		normalMetalGBufferTexture;
@@ -74,7 +74,7 @@ float4 MainPS( in nointerpolation SLightData InLightData, in float4 InScreenPosi
     float2      bufferUV            = screenUV * ( GetScreenSize() / GetBufferSize() );
 
     // Getting data from GBuffer
-    float4      diffuseRoughness    = diffuseRoughnessGBufferTexture.Sample( diffuseRoughnessGBufferSampler, bufferUV );
+    float4      diffuseRoughness    = albedoRoughnessGBufferTexture.Sample( albedoRoughnessGBufferSampler, bufferUV );
     float4      normalMetal         = normalMetalGBufferTexture.Sample( normalMetalGBufferSampler, bufferUV );
     float4      emissionAO          = emissionGBufferTexture.Sample( emissionGBufferSampler, bufferUV );
     

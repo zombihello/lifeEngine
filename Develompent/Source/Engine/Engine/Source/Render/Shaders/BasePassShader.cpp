@@ -50,9 +50,9 @@ void CBasePassPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderC
 {
     CShader::Init( InShaderCacheItem );
 
-    // Diffuse
-    diffuseParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "diffuseTexture" ) );
-    diffuseSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "diffuseSampler" ) );
+    // Albedo
+    albedoParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "albedoTexture" ) );
+    albedoSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "albedoSampler" ) );
 
     // Normal
     normalParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "normalTexture" ), true );              // TODO: Need remove 'true', because Normal, Metallic and Roughness this is non-optional parameters.
@@ -80,18 +80,18 @@ void CBasePassPixelShader::SetConstantParameters( class CBaseDeviceContextRHI* I
     check( InMaterialResource );
 
     // Bind diffuse texture
-    TAssetHandle<CTexture2D>    diffuseTexture;
-    InMaterialResource->GetTextureParameterValue( CMaterial::diffuseTextureParamName, diffuseTexture );
-    if ( diffuseTexture.IsAssetValid() )
+    TAssetHandle<CTexture2D>    albedoTexture;
+    InMaterialResource->GetTextureParameterValue( CMaterial::albedoTextureParamName, albedoTexture );
+    if ( albedoTexture.IsAssetValid() )
     {
-        TSharedPtr<CTexture2D>		texture2DRef = diffuseTexture.ToSharedPtr();
-        SetTextureParameter( InDeviceContextRHI, diffuseParameter, texture2DRef->GetTexture2DRHI() );
-        SetSamplerStateParameter( InDeviceContextRHI, diffuseSamplerParameter, GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ) );
+        TSharedPtr<CTexture2D>		texture2DRef = albedoTexture.ToSharedPtr();
+        SetTextureParameter( InDeviceContextRHI, albedoParameter, texture2DRef->GetTexture2DRHI() );
+        SetSamplerStateParameter( InDeviceContextRHI, albedoSamplerParameter, GRHI->CreateSamplerState( texture2DRef->GetSamplerStateInitialiser() ) );
     }
 	else
 	{
-		SetTextureParameter( InDeviceContextRHI, diffuseParameter, GBlackTexture.GetTexture2DRHI() );
-		SetSamplerStateParameter( InDeviceContextRHI, diffuseSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
+		SetTextureParameter( InDeviceContextRHI, albedoParameter, GBlackTexture.GetTexture2DRHI() );
+		SetSamplerStateParameter( InDeviceContextRHI, albedoSamplerParameter, TStaticSamplerStateRHI<>::GetRHI() );
 	}
 
     // Getting normal texture

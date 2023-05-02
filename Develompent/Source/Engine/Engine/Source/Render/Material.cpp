@@ -9,7 +9,7 @@
 #include "Render/VertexFactory/DynamicMeshVertexFactory.h"
 #endif // !SHIPPING_BUILD
 
-const CName		CMaterial::diffuseTextureParamName( TEXT( "Diffuse" ) );
+const CName		CMaterial::albedoTextureParamName( TEXT( "Albedo" ) );
 const CName		CMaterial::normalTextureParamName( TEXT( "Normal" ) );
 const CName		CMaterial::metallicTextureParamName( TEXT( "Metallic" ) );
 const CName		CMaterial::roughnessTextureParamName( TEXT( "Roughness" ) );

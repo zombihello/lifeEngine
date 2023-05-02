@@ -41,8 +41,8 @@ void CSceneRenderTargets::InitRHI()
 		renderTargets[SRTT_HitProxies].Update( false, bufferSizeX, bufferSizeY, PF_A8R8G8B8, 0, TEXT( "HitProxy" ) );
 #endif // ENABLE_HITPROXY
 
-		// Diffuse_Roughness GBuffer
-		renderTargets[SRTT_Diffuse_Roughness_GBuffer].Update( false, bufferSizeX, bufferSizeY, PF_A8R8G8B8, 0, TEXT( "Diffuse_Roughness_GBuffer" ) );
+		// Albedo_Roughness GBuffer
+		renderTargets[SRTT_Albedo_Roughness_GBuffer].Update( false, bufferSizeX, bufferSizeY, PF_A8R8G8B8, 0, TEXT( "Albedo_Roughness_GBuffer" ) );
 
 		// Normal_Metal GBuffer
 		renderTargets[SRTT_Normal_Metal_GBuffer].Update( false, bufferSizeX, bufferSizeY, PF_FloatRGBA, 0, TEXT( "Normal_Metal_GBuffer" ) );
@@ -92,7 +92,7 @@ void CSceneRenderTargets::FinishRenderingPrePass( class CBaseDeviceContextRHI* I
 void CSceneRenderTargets::BeginRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( InDeviceContextRHI );
-	GRHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetSurfaceRHI(), renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI() );
+	GRHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Albedo_Roughness_GBuffer].GetSurfaceRHI(), renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI() );
 	GRHI->SetMRTRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Normal_Metal_GBuffer].GetSurfaceRHI(), 1 );
 	GRHI->SetMRTRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Emission_AO_GBuffer].GetSurfaceRHI(), 2 );
 }
@@ -107,7 +107,7 @@ void CSceneRenderTargets::FinishRenderingGBuffer( class CBaseDeviceContextRHI* I
 void CSceneRenderTargets::ClearGBufferTargets( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	check( InDeviceContextRHI );
-	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetSurfaceRHI(), CColor::black );
+	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Albedo_Roughness_GBuffer].GetSurfaceRHI(), CColor::black );
 	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Normal_Metal_GBuffer].GetSurfaceRHI(), CColor::black );
 	InDeviceContextRHI->ClearSurface( renderTargets[SRTT_Emission_AO_GBuffer].GetSurfaceRHI(), CColor::black );
 }

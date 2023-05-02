@@ -30,7 +30,7 @@ enum ESceneRenderTargetTypes
 	SRTT_HitProxies,						/**< Render target for hitProxiesy */
 #endif // ENABLE_HITPROXY
 
-	SRTT_Diffuse_Roughness_GBuffer,			/**< Render target for diffuse and roughness GBuffer */
+	SRTT_Albedo_Roughness_GBuffer,			/**< Render target for albedo and roughness GBuffer */
 	SRTT_Normal_Metal_GBuffer,				/**< Render target for normal and metal GBuffer */
 	SRTT_Emission_AO_GBuffer,				/**< Render target for emission and AO GBuffer */
 	SRTT_LightPassDepthZ,					/**< Render target for light pass' depths */
@@ -192,21 +192,21 @@ public:
 #endif // ENABLE_HITPROXY
 
 	/**
-	 * @brief Get texture of Diffuse/Roughness GBuffer
-	 * @return Return texture of Diffuse/Roughness GBuffer
+	 * @brief Get texture of Albedo/Roughness GBuffer
+	 * @return Return texture of Albedo/Roughness GBuffer
 	 */
-	FORCEINLINE Texture2DRHIRef_t GetDiffuse_Roughness_GBufferTexture() const
+	FORCEINLINE Texture2DRHIRef_t GetAlbedo_Roughness_GBufferTexture() const
 	{
-		return renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetTexture2DRHI();
+		return renderTargets[SRTT_Albedo_Roughness_GBuffer].GetTexture2DRHI();
 	}
 
 	/**
-	 * @brief Get surface of Diffuse/Roughness GBuffer
-	 * @return Return surface of Diffuse/Roughness GBuffer
+	 * @brief Get surface of Albedo/Roughness GBuffer
+	 * @return Return surface of Albedo/Roughness GBuffer
 	 */
-	FORCEINLINE SurfaceRHIRef_t GetDiffuse_Roughness_GBufferSurface() const
+	FORCEINLINE SurfaceRHIRef_t GetAlbedo_Roughness_GBufferSurface() const
 	{
-		return renderTargets[SRTT_Diffuse_Roughness_GBuffer].GetSurfaceRHI();
+		return renderTargets[SRTT_Albedo_Roughness_GBuffer].GetSurfaceRHI();
 	}
 
 	/**

@@ -13,6 +13,7 @@
 #include "Render/Material.h"
 #include "Render/Scene.h"
 #include "Components/SphereComponent.h"
+#include "Components/PointLightComponent.h"
 
 /**
  * @ingroup WorldEd
@@ -69,9 +70,10 @@ public:
 	}
 
 private:
-	CScene*								scene;				/**< Scene for preview material */
-	TSharedPtr<CMaterial>				material;			/**< Material */
-	TRefCountPtr< CSphereComponent >	sphereComponent;	/**< Sphere component */
+	CScene*								scene;					/**< Scene for preview material */
+	TSharedPtr<CMaterial>				material;				/**< Material */
+	TRefCountPtr<CSphereComponent> 		sphereComponent;		/**< Sphere component */
+	TRefCountPtr<CPointLightComponent>	pointLightComponent;	/**< Point light component */
 };
 
 #endif // !MATERIALPREVIEWVIEWPORTCLIENT_H

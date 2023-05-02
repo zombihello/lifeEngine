@@ -324,7 +324,7 @@ public:
 		return isWireframe;
 	}
 
-	const static CName		diffuseTextureParamName;			/**< Name of Diffuse texture parameter */
+	const static CName		albedoTextureParamName;				/**< Name of Albedo texture parameter */
 	const static CName		normalTextureParamName;				/**< Name of Normal texture parameter */
 	const static CName		metallicTextureParamName;			/**< Name of Metallic texture parameter */
 	const static CName		roughnessTextureParamName;			/**< Name of Roughness texture parameter */

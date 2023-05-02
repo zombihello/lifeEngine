@@ -11,14 +11,14 @@
 // Output of pixel shader
 struct PS_OUT
 {
-	float4	diffuseRoughness	: SV_TARGET0;
+	float4	albedoRoughness		: SV_TARGET0;
 	float4	normalMetal			: SV_TARGET1;
 	float4	emissionAO			: SV_TARGET2;
 };
 
-// Diffuse texture
-Texture2D		diffuseTexture;
-SamplerState	diffuseSampler;
+// Albedo texture
+Texture2D		albedoTexture;
+SamplerState	albedoSampler;
 
 // Normal texture
 Texture2D		normalTexture;
@@ -42,14 +42,14 @@ SamplerState	aoSampler;
 
 void MainPS( VS_OUT In, out PS_OUT Out )
 {
-	float4 	diffuseColor 		= diffuseTexture.Sample( diffuseSampler, In.texCoord0 );
-	if ( diffuseColor.a < 0.01f )
+	float4 	albedoColor 		= albedoTexture.Sample( albedoSampler, In.texCoord0 );
+	if ( albedoColor.a < 0.01f )
 	{
 		discard;
 	}
 
-	Out.diffuseRoughness.a		= roughnessTexture.Sample( roughnessSampler, In.texCoord0 ).r;
-	Out.diffuseRoughness.rgb	= diffuseColor.rgb
+	Out.albedoRoughness.a		= roughnessTexture.Sample( roughnessSampler, In.texCoord0 ).r;
+	Out.albedoRoughness.rgb		= albedoColor.rgb
 								#if WITH_EDITOR
 									+ In.colorOverlay
 								#endif // WITH_EDITOR

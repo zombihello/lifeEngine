@@ -10,12 +10,13 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	, scene( new CScene() )
 	, material( InMaterial )
 	, sphereComponent( new CSphereComponent() )
+	, pointLightComponent( new CPointLightComponent() )
 {
 	// Init view
 	bIgnoreInput			= true;
 	bSetListenerPosition	= false;
 	viewportType			= LVT_Perspective;
-	showFlags				= SHOW_DefaultEditor & ~SHOW_Lights;
+	showFlags				= SHOW_DefaultEditor;
 	viewLocation			= Vector( 0.f, 0.f, -80.f );
 	viewRotationEuler		= SMath::vectorZero;
 	viewRotationQuat		= SMath::quaternionZero;
@@ -26,6 +27,9 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	sphereComponent->SetVisibility( true );
 	sphereComponent->SetRelativeRotation( SMath::AnglesToQuaternionXYZ( Vector( 90.f, 0.f, 0.f ) ) );
 	scene->AddPrimitive( sphereComponent );
+
+	pointLightComponent->SetRelativeLocation( Vector( 0.f, 20.f, -80.f ) );
+	scene->AddLight( pointLightComponent );
 }
 
 CMaterialPreviewViewportClient::~CMaterialPreviewViewportClient()
@@ -37,7 +41,7 @@ CMaterialPreviewViewportClient::~CMaterialPreviewViewportClient()
 void CMaterialPreviewViewportClient::Tick( float InDeltaSeconds )
 {
 	CEditorLevelViewportClient::Tick( InDeltaSeconds );
-	sphereComponent->AddRelativeRotate( SMath::AnglesToQuaternionXYZ( Vector( 0.f, 0.f, 10.f * InDeltaSeconds ) ) );
+	sphereComponent->AddRelativeRotate( SMath::AnglesToQuaternionXYZ( Vector( 0.f, 10.f * InDeltaSeconds, 0.f ) ) );
 }
 
 void CMaterialPreviewViewportClient::Draw( CViewport* InViewport )

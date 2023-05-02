@@ -7,6 +7,9 @@
 IMPLEMENT_SHADER_TYPE(, TLightingVertexShader<LT_Point>, TEXT( "LightingVertexShaders.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
 IMPLEMENT_SHADER_TYPE(, TLightingVertexShader<LT_Spot>, TEXT( "LightingVertexShaders.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
 IMPLEMENT_SHADER_TYPE(, TLightingVertexShader<LT_Directional>, TEXT( "LightingVertexShaders.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
+IMPLEMENT_SHADER_TYPE(, TDepthOnlyLightingVertexShader<LT_Point>, TEXT( "DepthOnlyVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
+IMPLEMENT_SHADER_TYPE(, TDepthOnlyLightingVertexShader<LT_Spot>, TEXT( "DepthOnlyVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
+IMPLEMENT_SHADER_TYPE(, TDepthOnlyLightingVertexShader<LT_Directional>, TEXT( "DepthOnlyVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
 
 // Pixel shaders
 IMPLEMENT_SHADER_TYPE(, TLightingPixelShader<LT_Point>, TEXT( "LightingPixelShaders.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
@@ -54,8 +57,8 @@ void CBaseLightingPixelShader::Init( const CShaderCache::SShaderCacheItem& InSha
 	CShader::Init( InShaderCacheItem );
 
 	// Diffuse Roughness GBuffer
-	diffuseRoughnessGBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "diffuseRoughnessGBufferTexture" ), true );
-	diffuseRoughnessGBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "diffuseRoughnessGBufferSampler" ), true );
+	albedoRoughnessGBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "albedoRoughnessGBufferTexture" ), true );
+	albedoRoughnessGBufferSamplerParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "albedoRoughnessGBufferSampler" ), true );
 
 	// Normal Metal GBuffer
 	normalMetalGBufferParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "normalMetalGBufferTexture" ), true );

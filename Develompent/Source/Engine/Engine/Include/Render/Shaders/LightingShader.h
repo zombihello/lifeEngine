@@ -12,6 +12,7 @@
 #include "Shader.h"
 #include "ShaderManager.h"
 #include "Render/VertexFactory/LightVertexFactory.h"
+#include "Render/Shaders/DepthOnlyShader.h"
 #include "Components/LightComponent.h"
 
 /**
@@ -262,6 +263,140 @@ public:
 #endif // WITH_EDITOR
 };
 
+/**
+ * @ingroup Engine
+ * @brief Empty template class of depth only lighting vertex shader (don't use!)
+ */
+template<ELightType InType>
+class TDepthOnlyLightingVertexShader : public CBaseLightingVertexShader
+{
+	static_assert( InType != LT_Unknown, "This template class cannot be used" );
+};
+
+/**
+ * @ingroup Engine
+ * @brief Class of depth only point lighting vertex shader
+ */
+template<>
+class TDepthOnlyLightingVertexShader<LT_Point> : public CBaseLightingVertexShader
+{
+	DECLARE_SHADER_TYPE( TDepthOnlyLightingVertexShader<LT_Point> )
+
+public:
+	/**
+	 * @brief Set the l2w transform shader
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InLights				List of point light componenets
+	 * @param InMesh				Mesh data
+	 * @param InVertexFactory		Vertex factory
+	 * @param InView				Scene view
+	 * @param InNumInstances		Number instances
+	 * @param InStartInstanceID		ID of first instance
+	 */
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CPointLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	{
+		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
+	}
+
+#if WITH_EDITOR
+	/**
+	 * @brief Modify compilation environment
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InEnvironment Shader compiler environment
+	 */
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
+	{
+		CLightingShadersUtils::ModifyCompilationEnvironment( LT_Point, InEnvironment );
+	}
+
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
+	{
+		return CLightingShadersUtils::ShouldCache( InShaderPlatform, InVFMetaType );
+	}
+#endif // WITH_EDITOR
+};
+
+/**
+ * @ingroup Engine
+ * @brief Class of spot lighting vertex shader
+ */
+template<>
+class TDepthOnlyLightingVertexShader<LT_Spot> : public CBaseLightingVertexShader
+{
+	DECLARE_SHADER_TYPE( TDepthOnlyLightingVertexShader<LT_Spot> )
+
+public:
+#if WITH_EDITOR
+	/**
+	 * @brief Modify compilation environment
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InEnvironment Shader compiler environment
+	 */
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
+	{
+		CLightingShadersUtils::ModifyCompilationEnvironment( LT_Spot, InEnvironment );
+	}
+
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
+	{
+		return CLightingShadersUtils::ShouldCache( InShaderPlatform, InVFMetaType );
+	}
+#endif // WITH_EDITOR
+};
+
+/**
+ * @ingroup Engine
+ * @brief Class of directional lighting vertex shader
+ */
+template<>
+class TDepthOnlyLightingVertexShader<LT_Directional> : public CBaseLightingVertexShader
+{
+	DECLARE_SHADER_TYPE( TDepthOnlyLightingVertexShader<LT_Directional> )
+
+public:
+#if WITH_EDITOR
+	/**
+	 * @brief Modify compilation environment
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InEnvironment Shader compiler environment
+	 */
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
+	{
+		CLightingShadersUtils::ModifyCompilationEnvironment( LT_Directional, InEnvironment );
+	}
+
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
+	{
+		return CLightingShadersUtils::ShouldCache( InShaderPlatform, InVFMetaType );
+	}
+#endif // WITH_EDITOR
+};
 
 /**
  * @ingroup Engine
@@ -277,25 +412,25 @@ public:
 	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
 
 	/**
-	 * @brief Set DiffuseRoughnessGBuffer texture parameter
+	 * @brief Set AlbedoRoughnessGBuffer texture parameter
 	 *
 	 * @param InDeviceContextRHI	RHI device context
 	 * @param InTextureRHI			RHI Texture
 	 */
-	FORCEINLINE void SetDiffuseRoughnessGBufferTexture( class CBaseDeviceContextRHI* InDeviceContextRHI, const Texture2DRHIParamRef_t InTextureRHI )
+	FORCEINLINE void SetAlbedoRoughnessGBufferTexture( class CBaseDeviceContextRHI* InDeviceContextRHI, const Texture2DRHIParamRef_t InTextureRHI )
 	{
-		SetTextureParameter( InDeviceContextRHI, diffuseRoughnessGBufferParameter, InTextureRHI );
+		SetTextureParameter( InDeviceContextRHI, albedoRoughnessGBufferParameter, InTextureRHI );
 	}
 
 	/**
-	 * @brief Set DiffuseRoughnessGBuffer sampler state parameter
+	 * @brief Set AlbedoRoughnessGBuffer sampler state parameter
 	 *
 	 * @param InDeviceContextRHI	RHI device context
 	 * @param InSamplerStateRHI		RHI sampler state
 	 */
-	FORCEINLINE void SetDiffuseRoughnessGBufferSamplerState( class CBaseDeviceContextRHI* InDeviceContextRHI, const SamplerStateRHIParamRef_t InSamplerStateRHI )
+	FORCEINLINE void SetAlbedoRoughnessGBufferSamplerState( class CBaseDeviceContextRHI* InDeviceContextRHI, const SamplerStateRHIParamRef_t InSamplerStateRHI )
 	{
-		SetSamplerStateParameter( InDeviceContextRHI, diffuseRoughnessGBufferSamplerParameter, InSamplerStateRHI );
+		SetSamplerStateParameter( InDeviceContextRHI, albedoRoughnessGBufferSamplerParameter, InSamplerStateRHI );
 	}
 
 	/**
@@ -376,8 +511,8 @@ public:
 	}
 
 private:
-	CShaderResourceParameter		diffuseRoughnessGBufferParameter;			/**< DiffuseRoughnessGBuffer texture parameter */
-	CShaderResourceParameter		diffuseRoughnessGBufferSamplerParameter;	/**< DiffuseRoughnessGBuffer sampler parameter */
+	CShaderResourceParameter		albedoRoughnessGBufferParameter;			/**< AlbedoRoughnessGBuffer texture parameter */
+	CShaderResourceParameter		albedoRoughnessGBufferSamplerParameter;		/**< AlbedoRoughnessGBuffer sampler parameter */
 	CShaderResourceParameter		normalMetalGBufferParameter;				/**< NormalMetalGBuffer texture parameter */
 	CShaderResourceParameter		normalMetalGBufferSamplerParameter;			/**< NormalMetalGBuffer sampler parameter */
 	CShaderResourceParameter		emissionGBufferParameter;					/**< EmissionGBuffer texture parameter */

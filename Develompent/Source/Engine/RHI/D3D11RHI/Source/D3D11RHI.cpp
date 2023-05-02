@@ -90,7 +90,7 @@ static FORCEINLINE void InitD3D11TextureFormat( EPixelFormat InPixelFormat, DXGI
   * @ingroup D3D11RHI
   * @brief Macro for init unsupported engine pixel format
   */
-#define INIT_UNSUPPORTED_FORMAT( InRHIFormat, InD3D11Format )						InitD3D11TextureFormat( InRHIFormat, DXGI_FORMAT_UNKNOWN )
+#define INIT_UNSUPPORTED_FORMAT( InRHIFormat )										InitD3D11TextureFormat( InRHIFormat, DXGI_FORMAT_UNKNOWN )
 
 /**
  * @ingroup D3D11RHI
@@ -1785,7 +1785,7 @@ ID3D11DepthStencilState* CD3D11RHI::GetCachedDepthStencilState( const D3D11_DEPT
 {
 	// Calculate hash
 	uint64		hash = appMemFastHash( InDepthStateInfo );
-	hash = appMemFastHash( InDepthStateInfo, hash );
+	hash = appMemFastHash( InStencilStateInfo, hash );
 
 	// Try find cached depth stencil state
 	auto	it = cachedDepthStencilStates.find( hash );

@@ -11,7 +11,7 @@
 /** Table of texture parameters in material */
 static const CName		GTextureParameterNames[] =
 {
-	CMaterial::diffuseTextureParamName,
+	CMaterial::albedoTextureParamName,
 	CMaterial::normalTextureParamName,
 	CMaterial::metallicTextureParamName,
 	CMaterial::roughnessTextureParamName,
