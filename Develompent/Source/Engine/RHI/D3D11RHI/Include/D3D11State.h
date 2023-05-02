@@ -144,21 +144,53 @@ public:
 	CD3D11DepthStateRHI( const SDepthStateInitializerRHI& InInitializer );
 
 	/**
-	 * Destructor
+	 * @brief Get DirectX 11 depth state info
+	 * @return Return DirectX 11 depth state info
 	 */
-	~CD3D11DepthStateRHI();
-
-	/**
-	 * @brief Get DirectX resource
-	 * @return Pointer to DirectX resource
-	 */
-	FORCEINLINE struct ID3D11DepthStencilState* GetResource()
+	FORCEINLINE const struct D3D11_DEPTH_STENCIL_DESC& GetInfo() const
 	{
-		return d3d11DepthState;
+		return d3d11DepthStateInfo;
 	}
 
 private:
-	struct ID3D11DepthStencilState*		d3d11DepthState;		/**< Pointer to DirectX 11 depth state */
+	struct D3D11_DEPTH_STENCIL_DESC		d3d11DepthStateInfo;		/**< DirectX 11 depth state info */
+};
+
+/**
+ * @ingroup D3D11RHI
+ * Class of stencil state DirectX 11
+ */
+class CD3D11StencilStateRHI : public CBaseStencilStateRHI
+{
+public:
+	/**
+	 * Constructor
+	 *
+	 * @param InInitializer		Initializer of stencil state
+	 */
+	CD3D11StencilStateRHI( const SStencilStateInitializerRHI& InInitializer );
+
+	/**
+	 * @brief Get DirectX 11 stencil state info
+	 * @return Return DirectX 11 stencil state info
+	 */
+	FORCEINLINE const struct D3D11_DEPTH_STENCIL_DESC& GetInfo() const
+	{
+		return d3d11StencilStateInfo;
+	}
+
+	/**
+	 * @brief Get stencil reference
+	 * @return Return stencil reference
+	 */
+	FORCEINLINE uint32 GetStencilRef() const
+	{
+		return stencilRef;
+	}
+
+private:
+	struct D3D11_DEPTH_STENCIL_DESC		d3d11StencilStateInfo;		/**< DirectX 11 stencil state info */
+	uint32								stencilRef;					/**< Stencil reference */
 };
 
 /**
@@ -177,35 +209,12 @@ public:
 	CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable = true );
 
 	/**
-	 * Destructor
+	 * @brief Get DirectX 11 blend state info
+	 * @return Return DirectX 11 blend state info
 	 */
-	~CD3D11BlendStateRHI();
-
-	/**
-	 * @brief Get DirectX resource
-	 * @return Pointer to DirectX resource
-	 */
-	FORCEINLINE struct ID3D11BlendState* GetResource()
+	FORCEINLINE const struct D3D11_BLEND_DESC& GetInfo() const
 	{
-		return d3d11BlendState;
-	}
-
-	/**
-	 * @brief Get blend state info
-	 * @return Return blend state info
-	 */
-	FORCEINLINE const SBlendStateInitializerRHI& GetInfo() const
-	{
-		return blendStateInfo;
-	}
-
-	/**
-	 * @brief Get hash
-	 * @return Return hash of blend state
-	 */
-	FORCEINLINE uint64 GetHash() const
-	{
-		return hash;
+		return d3d11blendStateInfo;
 	}
 
 	/**
@@ -218,10 +227,8 @@ public:
 	}
 
 private:
-	uint64								hash;					/**< Hash */
-	SBlendStateInitializerRHI			blendStateInfo;			/**< Blend state info */
-	struct ID3D11BlendState*			d3d11BlendState;		/**< Point to DirectX 11 blend state */
-	bool								bColorWrite;			/**< Is enabled color write */
+	struct D3D11_BLEND_DESC			d3d11blendStateInfo;	/**< DirectX 11 blend state info */
+	bool							bColorWrite;			/**< Is enabled color write */
 };
 
 /**
@@ -236,6 +243,11 @@ public:
 	 */
 	SD3D11StateCache();
 
+	/**
+	 * Reset state cache to default
+	 */
+	void Reset();
+
 	struct D3D11_VIEWPORT				viewport;																/**< Viewport */
 	struct ID3D11InputLayout*			inputLayout;															/**< Input layout */
 	struct ID3D11VertexShader*			vertexShader;															/**< Vertex shader */
@@ -243,17 +255,19 @@ public:
 	struct ID3D11GeometryShader*		geometryShader;															/**< Geometry shader */
 	struct ID3D11HullShader*			hullShader;																/**< Hull shader */
 	struct ID3D11DomainShader*			domainShader;															/**< Domain shader */
-	CD3D11StateVertexBuffer				vertexBuffers[ D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT ];				/**< Vertex buffers */
+	CD3D11StateVertexBuffer				vertexBuffers[D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];				/**< Vertex buffers */
 	struct ID3D11RasterizerState*		rasterizerState;														/**< Rasterizer state */
-	struct ID3D11SamplerState*			psSamplerStates[ D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT ];				/**< Sampler state for pixel shader */
-	struct ID3D11ShaderResourceView*	psShaderResourceViews[ D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT ];	/**< Shader resource view for pixel shader */
+	struct ID3D11SamplerState*			psSamplerStates[D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT];					/**< Sampler state for pixel shader */
+	struct ID3D11ShaderResourceView*	psShaderResourceViews[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];	/**< Shader resource view for pixel shader */
 	D3D11_PRIMITIVE_TOPOLOGY			primitiveTopology;														/**< Primitive topology */
 	CD3D11StateIndexBuffer				indexBuffer;															/**< Index buffer */
-	struct ID3D11RenderTargetView*		renderTargetViews[ D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT ];			/**< Render target view */
+	struct ID3D11RenderTargetView*		renderTargetViews[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT];				/**< Render target view */
 	struct ID3D11DepthStencilView*		depthStencilView;														/**< Depth stencil view */
-	struct ID3D11DepthStencilState*		depthStencilState;														/**< Depth stencil state */
-	TRefCountPtr<CD3D11BlendStateRHI>	blendState;																/**< Blend state */
-	bool								bColorWrite;															/**< Is enabled color write */
+	struct D3D11_DEPTH_STENCIL_DESC		depthState;																/**< Depth state info */
+	struct D3D11_DEPTH_STENCIL_DESC		stencilState;															/**< Stencil state info */
+	struct D3D11_BLEND_DESC				blendState;																/**< Blend state */
+	uint32								stencilRef;																/**< Stencil reference */
+	uint8								colorWriteMasks[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT];				/**< Color write masks for each render target */
 };
 
 #endif // !D3D11STATE_H

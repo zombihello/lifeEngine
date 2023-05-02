@@ -472,12 +472,38 @@ public:
 	virtual void								SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState ) {}
 
 	/**
-	 * Set Color write enable
+	 * Set color write enable
 	 *
 	 * @param InDeviceContext		Device context
 	 * @param InIsEnable			Enable or disable color write
 	 */
 	virtual void SetColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable ) {}
+
+	/**
+	 * Set MRT color write enable
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InIsEnable			Enable or disable color write
+	 * @param InTargetIndex			Render target index
+	 */
+	virtual void SetMRTColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable, uint32 InTargetIndex ) {}
+
+	/**
+	 * Set color write mask
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InColorWriteMask		Color write mask (see EColorWriteMask)
+	 */
+	virtual void SetColorWriteMask( class CBaseDeviceContextRHI* InDeviceContext, uint8 InColorWriteMask ) {}
+
+	/**
+	 * Set MRT color write mask
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InColorWriteMask		Color write mask (see EColorWriteMask)
+	 * @param InTargetIndex			Render target index
+	 */
+	virtual void SetMRTColorWriteMask( class CBaseDeviceContextRHI* InDeviceContext, uint8 InColorWriteMask, uint32 InTargetIndex ) {}
 
 	/**
 	 * Set stencil state

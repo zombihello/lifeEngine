@@ -110,6 +110,21 @@ enum EStencilOp
 
 /**
  * @ingroup Engine
+ * @brief Enumeration of color write mask
+ */
+enum EColorWriteMask
+{
+	CW_Red		= 1 << 0,								/**< Red channel */
+	CW_Green	= 1 << 1,								/**< Green channel */
+	CW_Blue		= 1 << 2,								/**< Blue channel */
+	CW_Alpha	= 1 << 3,								/**< Alpha channel */
+
+	CW_RGB = CW_Red | CW_Green | CW_Blue,				/**< RGB combination */
+	CW_RGBA = CW_Red | CW_Green | CW_Blue | CW_Alpha,	/**< RGBA combination */
+};
+
+/**
+ * @ingroup Engine
  * @brief Struct for create resterize state in RHI
  */
 struct SRasterizerStateInitializerRHI

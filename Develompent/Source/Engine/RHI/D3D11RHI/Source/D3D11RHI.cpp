@@ -499,7 +499,7 @@ void CD3D11RHI::Destroy()
 	dxgiAdapter = nullptr;
 	dxgiFactory = nullptr;
 
-	appMemzero( &stateCache, sizeof( SD3D11StateCache ) );
+	stateCache.Reset();
 	appMemzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
 }
 
@@ -616,13 +616,12 @@ DepthStateRHIRef_t CD3D11RHI::CreateDepthState( const SDepthStateInitializerRHI&
 
 BlendStateRHIRef_t CD3D11RHI::CreateBlendState( const SBlendStateInitializerRHI& InInitializer )
 {
-	return GetCachedBlendState( InInitializer, stateCache.bColorWrite );
+	return new CD3D11BlendStateRHI( InInitializer );
 }
 
 StencilStateRHIRef_t CD3D11RHI::CreateStencilState( const SStencilStateInitializerRHI& InInitializer )
 {
-	appErrorf( TEXT( "Not implemented!" ) );
-	return nullptr;
+	return new CD3D11StencilStateRHI( InInitializer );
 }
 
 Texture2DRHIRef_t CD3D11RHI::CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData /*= nullptr*/ )
@@ -836,53 +835,134 @@ void CD3D11RHI::SetPixelShaderParameter( class CBaseDeviceContextRHI* InDeviceCo
 void CD3D11RHI::SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext	= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
-	ID3D11DepthStencilState*		d3d11DepthState		= InNewState ? ( ( CD3D11DepthStateRHI* )InNewState )->GetResource() : nullptr;
-
-	if ( d3d11DepthState != stateCache.depthStencilState )
+	D3D11_DEPTH_STENCIL_DESC		d3d11DepthStateDesc;
+	
+	if ( InNewState )
 	{
-		uint32						oldStencilRef = 0;
-		ID3D11DepthStencilState*	oldStencilState = nullptr;
-		
-		d3d11DeviceContext->OMGetDepthStencilState( &oldStencilState, &oldStencilRef );
-		d3d11DeviceContext->OMSetDepthStencilState( d3d11DepthState, oldStencilRef );
-		stateCache.depthStencilState = d3d11DepthState;
+		d3d11DepthStateDesc = ( ( CD3D11DepthStateRHI* )InNewState )->GetInfo();
+	}
+	else
+	{
+		appMemzero( &d3d11DepthStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	}
+
+	if ( memcmp( &d3d11DepthStateDesc, &stateCache.depthState, sizeof( D3D11_DEPTH_STENCIL_DESC ) ) )
+	{
+		d3d11DeviceContext->OMSetDepthStencilState( GetCachedDepthStencilState( d3d11DepthStateDesc, stateCache.stencilState ), stateCache.stencilRef );
+		stateCache.depthState = d3d11DepthStateDesc;
 	}
 }
 
 void CD3D11RHI::SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext	= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
-	CD3D11BlendStateRHI*			blendState			= ( CD3D11BlendStateRHI* )InNewState;
+	D3D11_BLEND_DESC				d3d11BlendStateDesc;
 
-	if ( blendState != stateCache.blendState || ( blendState && blendState->IsColorWrite() != stateCache.bColorWrite ) )
+	if ( InNewState )
 	{
-		ID3D11BlendState*			d3d11BlendState		= InNewState ? blendState->GetResource() : nullptr;
+		d3d11BlendStateDesc = ( ( CD3D11BlendStateRHI* )InNewState )->GetInfo();
+	}
+	else
+	{
+		appMemzero( &d3d11BlendStateDesc, sizeof( D3D11_BLEND_DESC ) );
+	}
 
-		// Regenerate blend state if color write is not equal
-		if ( blendState && blendState->IsColorWrite() != stateCache.bColorWrite )
-		{
-			blendState = GetCachedBlendState( blendState->GetInfo(), stateCache.bColorWrite );
-			d3d11BlendState = blendState->GetResource();
-		}
-
-		float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
-		d3d11DeviceContext->OMSetBlendState( d3d11BlendState, blendFactor, 0xFFFFFFFF );
-		stateCache.blendState = blendState;
+	if ( memcmp( &d3d11BlendStateDesc, &stateCache.blendState, sizeof( D3D11_BLEND_DESC ) ) )
+	{
+		float blendFactor[4]	= { 0.f, 0.f, 0.f, 0.f };
+		d3d11DeviceContext->OMSetBlendState( GetCachedBlendState( d3d11BlendStateDesc, stateCache.colorWriteMasks ), blendFactor, 0xFFFFFFFF );
+		stateCache.blendState = d3d11BlendStateDesc;
 	}
 }
 
 void CD3D11RHI::SetColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable )
 {
-	if ( InIsEnable != stateCache.bColorWrite )
+	ID3D11DeviceContext*	d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	uint8					d3d11ColorWriteMask = InIsEnable ? D3D11_COLOR_WRITE_ENABLE_ALL : 0;
+	
+	if ( d3d11ColorWriteMask != stateCache.colorWriteMasks[0] )
 	{
-		stateCache.bColorWrite = InIsEnable;
-		SetBlendState( InDeviceContext, stateCache.blendState );
+		float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
+		
+		stateCache.colorWriteMasks[0] = d3d11ColorWriteMask;
+		d3d11DeviceContext->OMSetBlendState( GetCachedBlendState( stateCache.blendState, stateCache.colorWriteMasks ), blendFactor, 0xFFFFFFFF );
+	}
+}
+
+void CD3D11RHI::SetMRTColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable, uint32 InTargetIndex )
+{
+	check( InTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT );
+	ID3D11DeviceContext*	d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	uint8					d3d11ColorWriteMask = InIsEnable ? D3D11_COLOR_WRITE_ENABLE_ALL : 0;
+	
+	if ( d3d11ColorWriteMask != stateCache.colorWriteMasks[InTargetIndex] )
+	{
+		float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
+		
+		stateCache.colorWriteMasks[InTargetIndex] = d3d11ColorWriteMask;
+		d3d11DeviceContext->OMSetBlendState( GetCachedBlendState( stateCache.blendState, stateCache.colorWriteMasks ), blendFactor, 0xFFFFFFFF );
+	}
+}
+
+void CD3D11RHI::SetColorWriteMask( class CBaseDeviceContextRHI* InDeviceContext, uint8 InColorWriteMask )
+{
+	ID3D11DeviceContext*	d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	uint8					d3d11ColorWriteMask = 0;
+	d3d11ColorWriteMask		= ( InColorWriteMask & CW_Red ) ? D3D11_COLOR_WRITE_ENABLE_RED : 0;
+	d3d11ColorWriteMask		|= ( InColorWriteMask & CW_Green ) ? D3D11_COLOR_WRITE_ENABLE_GREEN : 0;
+	d3d11ColorWriteMask		|= ( InColorWriteMask & CW_Blue ) ? D3D11_COLOR_WRITE_ENABLE_BLUE : 0;
+	d3d11ColorWriteMask		|= ( InColorWriteMask & CW_Alpha ) ? D3D11_COLOR_WRITE_ENABLE_ALPHA : 0;
+
+	if ( d3d11ColorWriteMask != stateCache.colorWriteMasks[0] )
+	{
+		float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
+
+		stateCache.colorWriteMasks[0] = d3d11ColorWriteMask;
+		d3d11DeviceContext->OMSetBlendState( GetCachedBlendState( stateCache.blendState, stateCache.colorWriteMasks ), blendFactor, 0xFFFFFFFF );
+	}
+}
+
+void CD3D11RHI::SetMRTColorWriteMask( class CBaseDeviceContextRHI* InDeviceContext, uint8 InColorWriteMask, uint32 InTargetIndex )
+{
+	check( InTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT );
+	ID3D11DeviceContext*	d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	uint8					d3d11ColorWriteMask = 0;
+	d3d11ColorWriteMask		= ( InColorWriteMask & CW_Red ) ? D3D11_COLOR_WRITE_ENABLE_RED : 0;
+	d3d11ColorWriteMask		|= ( InColorWriteMask & CW_Green ) ? D3D11_COLOR_WRITE_ENABLE_GREEN : 0;
+	d3d11ColorWriteMask		|= ( InColorWriteMask & CW_Blue ) ? D3D11_COLOR_WRITE_ENABLE_BLUE : 0;
+	d3d11ColorWriteMask		|= ( InColorWriteMask & CW_Alpha ) ? D3D11_COLOR_WRITE_ENABLE_ALPHA : 0;
+
+	if ( d3d11ColorWriteMask != stateCache.colorWriteMasks[InTargetIndex] )
+	{
+		float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
+
+		stateCache.colorWriteMasks[InTargetIndex] = d3d11ColorWriteMask;
+		d3d11DeviceContext->OMSetBlendState( GetCachedBlendState( stateCache.blendState, stateCache.colorWriteMasks ), blendFactor, 0xFFFFFFFF );
 	}
 }
 
 void CD3D11RHI::SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, StencilStateRHIParamRef_t InNewState )
 {
-	appErrorf( TEXT( "Not implemented" ) );
+	ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
+	D3D11_DEPTH_STENCIL_DESC		d3d1StencilStateDesc;
+	uint32							stencilRef = 0;
+
+	if ( InNewState )
+	{
+		d3d1StencilStateDesc	= ( ( CD3D11StencilStateRHI* )InNewState )->GetInfo();
+		stencilRef				= ( ( CD3D11StencilStateRHI* )InNewState )->GetStencilRef();
+	}
+	else
+	{
+		appMemzero( &d3d1StencilStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	}
+
+	if ( memcmp( &d3d1StencilStateDesc, &stateCache.stencilState, sizeof( D3D11_DEPTH_STENCIL_DESC ) ) || stencilRef != stateCache.stencilRef )
+	{
+		d3d11DeviceContext->OMSetDepthStencilState( GetCachedDepthStencilState( stateCache.depthState, d3d1StencilStateDesc ), stencilRef );	
+		stateCache.stencilState = d3d1StencilStateDesc;
+		stateCache.stencilRef	= stencilRef;
+	}
 }
 
 void CD3D11RHI::CommitConstants( class CBaseDeviceContextRHI* InDeviceContext )
@@ -1144,7 +1224,7 @@ void CD3D11RHI::BeginDrawingViewport( class CBaseDeviceContextRHI* InDeviceConte
 #endif // FRAME_CAPTURE_MARKERS
 
 	// Clear state cache
-	appMemzero( &stateCache, sizeof( SD3D11StateCache ) );
+	stateCache.Reset();
 
 	SetRenderTarget( InDeviceContext, viewport->GetSurface(), nullptr );
 	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );
@@ -1666,23 +1746,71 @@ const tchar* CD3D11RHI::GetRHIName() const
 	return TEXT( "D3D11RHI" );
 }
 
-TRefCountPtr<CD3D11BlendStateRHI> CD3D11RHI::GetCachedBlendState( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable )
+ID3D11BlendState* CD3D11RHI::GetCachedBlendState( const D3D11_BLEND_DESC& InBlendState, uint8* InColorWriteMasks )
 {
 	// Calculate hash
-	uint64		hash = appMemFastHash( InInitializer );
-	hash = appMemFastHash( InIsColorWriteEnable, hash );
+	uint64		hash = appMemFastHash( InBlendState );
+	hash = appMemFastHash( InColorWriteMasks, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT * sizeof( uint8 ), hash );
 
 	// Try find cached blend state
-	auto	it = cachedBlendStates.find( hash );
+	auto		it = cachedBlendStates.find( hash );
 	if ( it != cachedBlendStates.end() )
 	{
 		return it->second;
 	}
 
 	// If we not found then will create new blend state
-	TRefCountPtr<CD3D11BlendStateRHI>	newBlendState = new CD3D11BlendStateRHI( InInitializer, InIsColorWriteEnable );
-	cachedBlendStates[hash] = newBlendState;
-	return newBlendState;
+	ID3D11BlendState*	d3d11BlendState = nullptr;
+	D3D11_BLEND_DESC	d3d11BlendStateDesc;
+	memcpy( &d3d11BlendStateDesc, &InBlendState, sizeof( D3D11_BLEND_DESC ) );
+
+	for ( uint32 renderTargetIndex = 0; renderTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT; ++renderTargetIndex )
+	{
+		d3d11BlendStateDesc.RenderTarget[renderTargetIndex].RenderTargetWriteMask = InColorWriteMasks[renderTargetIndex];
+	}
+	d3d11BlendStateDesc.IndependentBlendEnable = true;
+
+#if DO_CHECK
+	HRESULT				result = d3d11Device->CreateBlendState( &d3d11BlendStateDesc, &d3d11BlendState );
+	check( result == S_OK );
+#else
+	d3d11Device->CreateBlendState( &d3d11BlendStateDesc, &d3d11BlendState );
+#endif // DO_CHECK
+
+	cachedBlendStates[hash] = d3d11BlendState;
+	return d3d11BlendState;
+}
+
+ID3D11DepthStencilState* CD3D11RHI::GetCachedDepthStencilState( const D3D11_DEPTH_STENCIL_DESC& InDepthStateInfo, const D3D11_DEPTH_STENCIL_DESC& InStencilStateInfo )
+{
+	// Calculate hash
+	uint64		hash = appMemFastHash( InDepthStateInfo );
+	hash = appMemFastHash( InDepthStateInfo, hash );
+
+	// Try find cached depth stencil state
+	auto	it = cachedDepthStencilStates.find( hash );
+	if ( it != cachedDepthStencilStates.end() )
+	{
+		return it->second;
+	}
+
+	// If we not found then will create new depth stencil state
+	ID3D11DepthStencilState*		d3d11DepthStencilState = nullptr;
+	D3D11_DEPTH_STENCIL_DESC		d3d11DepthStencilDesc;
+	memcpy( &d3d11DepthStencilDesc, &InStencilStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	d3d11DepthStencilDesc.DepthEnable		= InDepthStateInfo.DepthEnable;
+	d3d11DepthStencilDesc.DepthWriteMask	= InDepthStateInfo.DepthWriteMask;
+	d3d11DepthStencilDesc.DepthFunc			= InDepthStateInfo.DepthFunc;
+
+#if DO_CHECK
+	HRESULT				result = d3d11Device->CreateDepthStencilState( &d3d11DepthStencilDesc, &d3d11DepthStencilState );
+	check( result == S_OK );
+#else
+	d3d11Device->CreateDepthStencilState( &d3d11DepthStencilDesc, &d3d11DepthStencilState );
+#endif // DO_CHECK
+
+	cachedDepthStencilStates[hash] = d3d11DepthStencilState;
+	return d3d11DepthStencilState;
 }
 
 /**

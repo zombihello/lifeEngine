@@ -73,6 +73,21 @@ static FORCEINLINE D3D11_COMPARISON_FUNC TranslateCompareFunction( ECompareFunct
 	};
 }
 
+static FORCEINLINE D3D11_STENCIL_OP TranslateStencilOp( EStencilOp InStencilOp )
+{
+	switch ( InStencilOp )
+	{
+	case SO_Zero:				return D3D11_STENCIL_OP_ZERO;
+	case SO_Replace:			return D3D11_STENCIL_OP_REPLACE;
+	case SO_SaturatedIncrement: return D3D11_STENCIL_OP_INCR_SAT;
+	case SO_SaturatedDecrement: return D3D11_STENCIL_OP_DECR_SAT;
+	case SO_Invert:				return D3D11_STENCIL_OP_INVERT;
+	case SO_Increment:			return D3D11_STENCIL_OP_INCR;
+	case SO_Decrement:			return D3D11_STENCIL_OP_DECR;
+	default:					return D3D11_STENCIL_OP_KEEP;
+	};
+}
+
 static FORCEINLINE float TranslateMipBias( ESamplerMipMapLODBias InMipBias )
 {
 	switch ( InMipBias )
@@ -128,14 +143,33 @@ SD3D11StateCache::SD3D11StateCache()
 	, rasterizerState( nullptr )
 	, primitiveTopology( D3D_PRIMITIVE_TOPOLOGY_UNDEFINED )
 	, depthStencilView( nullptr )
-	, depthStencilState( nullptr )
-	, bColorWrite( true )
+	, stencilRef( 0 )
 {
+	Reset();
+}
+
+void SD3D11StateCache::Reset()
+{
+	inputLayout = nullptr;
+	vertexShader = nullptr;
+	pixelShader = nullptr;
+	geometryShader = nullptr;
+	hullShader = nullptr;
+	domainShader = nullptr;
+	rasterizerState = nullptr;
+	primitiveTopology = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+	depthStencilView = nullptr;
+	stencilRef = 0;
+
 	appMemzero( &vertexBuffers, sizeof( vertexBuffers ) );
 	appMemzero( &psSamplerStates, sizeof( psSamplerStates ) );
 	appMemzero( &psShaderResourceViews, sizeof( psShaderResourceViews ) );
 	appMemzero( &indexBuffer, sizeof( CD3D11StateIndexBuffer ) );
 	appMemzero( &renderTargetViews, sizeof( renderTargetViews ) );
+	appMemzero( &depthState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	appMemzero( &stencilState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	appMemzero( &blendState, sizeof( D3D11_BLEND_DESC ) );
+	memset( &colorWriteMasks, CW_RGBA, sizeof( colorWriteMasks ) );
 }
 
 /**
@@ -242,70 +276,55 @@ CD3D11SamplerStateRHI::~CD3D11SamplerStateRHI()
 
 CD3D11DepthStateRHI::CD3D11DepthStateRHI( const SDepthStateInitializerRHI& InInitializer )
 {
-	// Init descriptor
-	D3D11_DEPTH_STENCIL_DESC		d3d11DepthStencilDesc;
-	appMemzero( &d3d11DepthStencilDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
-	d3d11DepthStencilDesc.DepthEnable		= InInitializer.depthTest != CF_Always || InInitializer.bEnableDepthWrite;
-	d3d11DepthStencilDesc.DepthWriteMask	= InInitializer.bEnableDepthWrite ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
-	d3d11DepthStencilDesc.DepthFunc			= TranslateCompareFunction( InInitializer.depthTest );
-
-	// Create DirectX resource
-	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
-
-#if DO_CHECK
-	HRESULT				result = d3d11Device->CreateDepthStencilState( &d3d11DepthStencilDesc, &d3d11DepthState );
-	check( result == S_OK );
-#else
-	d3d11Device->CreateDepthStencilState( &d3d11DepthStencilDesc, &d3d11DepthState );
-#endif // DO_CHECK
+	appMemzero( &d3d11DepthStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	d3d11DepthStateInfo.DepthEnable		= InInitializer.depthTest != CF_Always || InInitializer.bEnableDepthWrite;
+	d3d11DepthStateInfo.DepthWriteMask	= InInitializer.bEnableDepthWrite ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+	d3d11DepthStateInfo.DepthFunc		= TranslateCompareFunction( InInitializer.depthTest );
 }
 
-CD3D11DepthStateRHI::~CD3D11DepthStateRHI()
+CD3D11StencilStateRHI::CD3D11StencilStateRHI( const SStencilStateInitializerRHI& InInitializer )
+	: stencilRef( InInitializer.stencilRef )
 {
-	d3d11DepthState->Release();
+	appMemzero( &d3d11StencilStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	d3d11StencilStateInfo.StencilEnable						= InInitializer.bEnableFrontFaceStencil || InInitializer.bEnableBackFaceStencil;
+	d3d11StencilStateInfo.StencilReadMask					= InInitializer.stencilReadMask;
+	d3d11StencilStateInfo.StencilWriteMask					= InInitializer.stencilWriteMask;
+	d3d11StencilStateInfo.FrontFace.StencilFunc				= TranslateCompareFunction( InInitializer.frontFaceStencilTest );
+	d3d11StencilStateInfo.FrontFace.StencilFailOp			= TranslateStencilOp( InInitializer.frontFaceStencilFailStencilOp );
+	d3d11StencilStateInfo.FrontFace.StencilDepthFailOp		= TranslateStencilOp( InInitializer.frontFaceDepthFailStencilOp );
+	d3d11StencilStateInfo.FrontFace.StencilPassOp			= TranslateStencilOp( InInitializer.frontFacePassStencilOp );
+	
+	if ( InInitializer.bEnableBackFaceStencil )
+	{
+		d3d11StencilStateInfo.BackFace.StencilFunc			= TranslateCompareFunction( InInitializer.backFaceStencilTest );
+		d3d11StencilStateInfo.BackFace.StencilFailOp		= TranslateStencilOp( InInitializer.backFaceStencilFailStencilOp );
+		d3d11StencilStateInfo.BackFace.StencilDepthFailOp	= TranslateStencilOp( InInitializer.backFaceDepthFailStencilOp );
+		d3d11StencilStateInfo.BackFace.StencilPassOp		= TranslateStencilOp( InInitializer.backFacePassStencilOp );
+	}
+	else
+	{
+		d3d11StencilStateInfo.BackFace = d3d11StencilStateInfo.FrontFace;
+	}
 }
 
 CD3D11BlendStateRHI::CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable /* = true */ )
-	: blendStateInfo( InInitializer )
-	, bColorWrite( InIsColorWriteEnable )
+	: bColorWrite( InIsColorWriteEnable )
 {
-	// Calculate hash
-	hash = appMemFastHash( blendStateInfo );
-	hash = appMemFastHash( bColorWrite, hash );
-
 	// Init descriptor
-	D3D11_BLEND_DESC		d3d11BlendDesc;
-	appMemzero( &d3d11BlendDesc, sizeof( D3D11_BLEND_DESC ) );
-	d3d11BlendDesc.AlphaToCoverageEnable					= false;
-	d3d11BlendDesc.IndependentBlendEnable					= true;
-	d3d11BlendDesc.RenderTarget[0].BlendEnable				= InInitializer.colorBlendOperation != BO_Add || InInitializer.colorDestBlendFactor != BF_Zero || InInitializer.colorSourceBlendFactor != BF_One || InInitializer.alphaBlendOperation != BO_Add || InInitializer.alphaDestBlendFactor != BF_Zero || InInitializer.alphaSourceBlendFactor != BF_One;
-	d3d11BlendDesc.RenderTarget[0].BlendOp					= TranslateBlendOp( InInitializer.colorBlendOperation );
-	d3d11BlendDesc.RenderTarget[0].SrcBlend					= TranslateBlendFactor( InInitializer.colorSourceBlendFactor );
-	d3d11BlendDesc.RenderTarget[0].DestBlend				= TranslateBlendFactor( InInitializer.colorDestBlendFactor );
-	d3d11BlendDesc.RenderTarget[0].BlendOpAlpha				= TranslateBlendOp( InInitializer.alphaBlendOperation );
-	d3d11BlendDesc.RenderTarget[0].SrcBlendAlpha			= TranslateBlendFactor( InInitializer.alphaSourceBlendFactor );
-	d3d11BlendDesc.RenderTarget[0].DestBlendAlpha			= TranslateBlendFactor( InInitializer.alphaDestBlendFactor );
-	d3d11BlendDesc.RenderTarget[0].RenderTargetWriteMask	= InIsColorWriteEnable ? D3D11_COLOR_WRITE_ENABLE_ALL : 0;
-
-	LE_LOG( LT_Warning, LC_RHI, TEXT( "AHTUNG! CD3D11BlendStateRHI::CD3D11BlendStateRHI :: Need implement color write mask" ) );
+	appMemzero( &d3d11blendStateInfo, sizeof( D3D11_BLEND_DESC ) );
+	d3d11blendStateInfo.AlphaToCoverageEnable					= false;
+	d3d11blendStateInfo.IndependentBlendEnable					= true;
+	d3d11blendStateInfo.RenderTarget[0].BlendEnable				= InInitializer.colorBlendOperation != BO_Add || InInitializer.colorDestBlendFactor != BF_Zero || InInitializer.colorSourceBlendFactor != BF_One || InInitializer.alphaBlendOperation != BO_Add || InInitializer.alphaDestBlendFactor != BF_Zero || InInitializer.alphaSourceBlendFactor != BF_One;
+	d3d11blendStateInfo.RenderTarget[0].BlendOp					= TranslateBlendOp( InInitializer.colorBlendOperation );
+	d3d11blendStateInfo.RenderTarget[0].SrcBlend				= TranslateBlendFactor( InInitializer.colorSourceBlendFactor );
+	d3d11blendStateInfo.RenderTarget[0].DestBlend				= TranslateBlendFactor( InInitializer.colorDestBlendFactor );
+	d3d11blendStateInfo.RenderTarget[0].BlendOpAlpha			= TranslateBlendOp( InInitializer.alphaBlendOperation );
+	d3d11blendStateInfo.RenderTarget[0].SrcBlendAlpha			= TranslateBlendFactor( InInitializer.alphaSourceBlendFactor );
+	d3d11blendStateInfo.RenderTarget[0].DestBlendAlpha			= TranslateBlendFactor( InInitializer.alphaDestBlendFactor );
+	d3d11blendStateInfo.RenderTarget[0].RenderTargetWriteMask	= InIsColorWriteEnable ? D3D11_COLOR_WRITE_ENABLE_ALL : 0;
 
 	for ( uint32 renderTargetIndex = 1; renderTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT; ++renderTargetIndex )
 	{
-		memcpy( &d3d11BlendDesc.RenderTarget[renderTargetIndex], &d3d11BlendDesc.RenderTarget[0], sizeof( d3d11BlendDesc.RenderTarget[0] ) );		
+		memcpy( &d3d11blendStateInfo.RenderTarget[renderTargetIndex], &d3d11blendStateInfo.RenderTarget[0], sizeof( d3d11blendStateInfo.RenderTarget[0] ) );
 	}
-
-	// Create DirectX resource
-	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
-
-#if DO_CHECK
-	HRESULT				result = d3d11Device->CreateBlendState( &d3d11BlendDesc, &d3d11BlendState );
-	check( result == S_OK );
-#else
-	d3d11Device->CreateBlendState( &d3d11BlendDesc, &d3d11BlendState );
-#endif // DO_CHECK
-}
-
-CD3D11BlendStateRHI::~CD3D11BlendStateRHI()
-{
-	d3d11BlendState->Release();
 }

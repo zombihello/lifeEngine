@@ -465,6 +465,32 @@ public:
 	virtual void SetColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable ) override;
 
 	/**
+	 * Set MRT color write enable
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InIsEnable			Enable or disable color write
+	 * @param InTargetIndex			Render target index
+	 */
+	virtual void SetMRTColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable, uint32 InTargetIndex ) override;
+
+	/**
+	 * Set color write mask
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InColorWriteMask		Color write mask (see EColorWriteMask)
+	 */
+	virtual void SetColorWriteMask( class CBaseDeviceContextRHI* InDeviceContext, uint8 InColorWriteMask ) override;
+
+	/**
+	 * Set MRT color write mask
+	 *
+	 * @param InDeviceContext		Device context
+	 * @param InColorWriteMask		Color write mask (see EColorWriteMask)
+	 * @param InTargetIndex			Render target index
+	 */
+	virtual void SetMRTColorWriteMask( class CBaseDeviceContextRHI* InDeviceContext, uint8 InColorWriteMask, uint32 InTargetIndex ) override;
+
+	/**
 	 * Set stencil state
 	 *
 	 * @param InDeviceContext		Device context
@@ -681,11 +707,20 @@ private:
 	/**
 	 * @brief Get cached blend state
 	 * 
-	 * @param InBlendStateInfo			Blend state info
-	 * @param InIsColorWriteEnable		Is enabled color write
+	 * @param InBlendState			Blend state info
+	 * @param InColorWriteMasks		Pointer to array of color write masks for each render target (count must be equal to D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT)
 	 * @return Return new or old blend state
 	 */
-	TRefCountPtr<CD3D11BlendStateRHI> GetCachedBlendState( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable );
+	ID3D11BlendState* GetCachedBlendState( const D3D11_BLEND_DESC& InBlendState, uint8* InColorWriteMasks );
+
+	/**
+	 * @brief Get cached depth stencil state
+	 *
+	 * @param InDepthStateInfo			Depth state info
+	 * @param InStencilStateInfo		Stencil state info
+	 * @return Return new or old depth stencil state
+	 */
+	ID3D11DepthStencilState* GetCachedDepthStencilState( const D3D11_DEPTH_STENCIL_DESC& InDepthStateInfo, const D3D11_DEPTH_STENCIL_DESC& InStencilStateInfo );
 
 	bool																isInitialize;						/**< Is RHI is initialized */
 	class CD3D11ConstantBuffer*											globalConstantBuffer;				/**< Global constant buffer */
@@ -695,7 +730,8 @@ private:
 	CBoundShaderStateHistory											boundShaderStateHistory;			/**< History of using bound shader states */
 	SD3D11StateCache													stateCache;							/**< DirectX 11 state cache */
 	TRefCountPtr< CD3D11VertexBufferRHI >								instanceBuffer;						/**< Instance buffer */
-	std::unordered_map<uint64, TRefCountPtr<CD3D11BlendStateRHI>>		cachedBlendStates;					/**< Cached blend states */
+	std::unordered_map<uint64, ID3D11BlendState*>						cachedBlendStates;					/**< Cached blend states */
+	std::unordered_map<uint64, ID3D11DepthStencilState*>				cachedDepthStencilStates;			/**< Cached depth stencil states */
 
 	D3D_FEATURE_LEVEL													d3dFeatureLevel;					/**< DirectX feature level */
 	ID3D11Device*														d3d11Device;						/**< D3D11 Device */
