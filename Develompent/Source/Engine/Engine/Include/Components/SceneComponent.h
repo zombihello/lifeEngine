@@ -106,28 +106,28 @@ public:
 	}
 
 	/**
-	 * Get forward vector
-	 * @return Return forward vector
+	 * Get relative forward vector
+	 * @return Return relative forward vector
 	 */
-	FORCEINLINE Vector GetForwardVector() const
+	FORCEINLINE Vector GetRelativeForwardVector() const
 	{
 		return transform.GetUnitAxis( A_Z );
 	}
 
 	/**
-	 * Get right vector
-	 * @return Return right vector
+	 * Get relative right vector
+	 * @return Return relative right vector
 	 */
-	FORCEINLINE Vector GetRightVector() const
+	FORCEINLINE Vector GetRelativeRightVector() const
 	{
 		return transform.GetUnitAxis( A_X );
 	}
 
 	/**
-	 * Get up vector
-	 * @return Return right vector
+	 * Get relative up vector
+	 * @return Return relative up vector
 	 */
-	FORCEINLINE Vector GetUpVector() const
+	FORCEINLINE Vector GetRelativeUpVector() const
 	{
 		return transform.GetUnitAxis( A_Y );
 	}
@@ -148,6 +148,33 @@ public:
 	FORCEINLINE CTransform GetComponentTransform() const
 	{
 		return attachParent ? attachParent->GetComponentTransform() + GetRelativeTransform() : GetRelativeTransform();
+	}
+
+	/**
+	 * Get forward vector in world space
+	 * @return Return forward vector in world space
+	 */
+	FORCEINLINE Vector GetComponentForwardVector() const
+	{
+		return GetComponentTransform().GetUnitAxis( A_Z );
+	}
+
+	/**
+	 * Get right vector in world space
+	 * @return Return right vector in world space
+	 */
+	FORCEINLINE Vector GetComponentRightVector() const
+	{
+		return GetComponentTransform().GetUnitAxis( A_X );
+	}
+
+	/**
+	 * Get up vector in world space
+	 * @return Return up vector in world space
+	 */
+	FORCEINLINE Vector GetComponentUpVector() const
+	{
+		return GetComponentTransform().GetUnitAxis( A_Y );
 	}
 
 	/**

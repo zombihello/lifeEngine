@@ -251,7 +251,7 @@ void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDevice
 		instanceBuffer.radius										= spotLightComponent->GetRadius();
 		instanceBuffer.height										= spotLightComponent->GetHeight();
 		instanceBuffer.cutoff										= spotLightComponent->GetCutoff();
-		instanceBuffer.direction									= -SMath::vectorUp * spotLightComponent->GetComponentRotation();
+		instanceBuffer.direction									= spotLightComponent->GetComponentForwardVector();
 	}
 
 	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Spot> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Spot> ), InNumInstances );
@@ -273,7 +273,7 @@ void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDevice
 		instanceBuffer.lightColor													= directionalLightComponent->GetLightColor();
 		instanceBuffer.specularColor												= directionalLightComponent->GetSpecularColor();
 		instanceBuffer.intensivity													= directionalLightComponent->GetIntensivity();
-		instanceBuffer.direction													= -SMath::vectorUp * directionalLightComponent->GetComponentRotation();
+		instanceBuffer.direction													= -directionalLightComponent->GetComponentForwardVector();
 	}
 
 	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Directional> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Directional> ), InNumInstances );

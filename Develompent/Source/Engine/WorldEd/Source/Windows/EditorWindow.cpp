@@ -196,6 +196,20 @@ void CEditorWindow::OnTick()
 		}
 		if ( ImGui::BeginMenu( "View" ) )
 		{
+			// Viewports
+			if ( ImGui::BeginMenu( "Viewports" ) )
+			{
+				for ( uint32 index = 0; index < LVT_Max; ++index )
+				{
+					TSharedPtr<CLevelViewportWindow>		levelViewportWindow = GEditorEngine->GetLevelViewportWindow( ( ELevelViewportType )index );
+					bool									bVisibility = levelViewportWindow->IsVisibility();
+					if ( ImGui::MenuItem( TCHAR_TO_ANSI( levelViewportWindow->GetName().c_str() ), nullptr, &bVisibility ) )
+					{
+						levelViewportWindow->SetVisibility( bVisibility );
+					}
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenu();
 		}
 		if ( ImGui::BeginMenu( "Tools" ) )

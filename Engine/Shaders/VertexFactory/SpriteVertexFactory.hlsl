@@ -30,7 +30,7 @@ float2		spriteSize;
 
 float4 VertexFactory_GetLocalPosition( FVertexFactoryInput InInput )
 {
-	return InInput.position * float4( spriteSize, 1.f, 1.f );
+	return InInput.position * float4( spriteSize / 2.f, 1.f, 1.f );
 }
 
 float4 VertexFactory_GetLocalNormal( FVertexFactoryInput InInput )

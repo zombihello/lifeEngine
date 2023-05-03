@@ -4,7 +4,8 @@ IMPLEMENT_CLASS( CDirectionalLightComponent )
 
 CDirectionalLightComponent::CDirectionalLightComponent()
 {
-	intensivity = 3.f;
+	intensivity = 30.f;
+	SetRelativeRotation( SMath::AnglesToQuaternionXYZ( Vector( 90.f, 0.f, 0.f ) ) );
 }
 
 ELightType CDirectionalLightComponent::GetLightType() const

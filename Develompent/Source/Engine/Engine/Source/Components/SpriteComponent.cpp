@@ -54,7 +54,20 @@ void CSpriteComponent::Serialize( class CArchive& InArchive )
 
 void CSpriteComponent::CalcTransformationMatrix( const class CSceneView& InSceneView, Matrix& OutResult ) const
 {
-    CTransform      transform = GetComponentTransform();
+	CTransform      transform( NoInit );
+	
+	// If current sprite is gizmo then we must ignore rotate and scale
+#if WITH_EDITOR
+	if ( bGizmo )
+	{
+		transform = CTransform( GetComponentLocation() );
+	}
+	else
+#endif // WITH_EDITOR
+	{
+		transform = GetComponentTransform();
+	}
+
     if ( type == ST_Static )
     {
         transform.ToMatrix( OutResult );

@@ -9,7 +9,7 @@ TGlobalResource< CSpriteMesh >				GSpriteMesh;
 
 void CSpriteMesh::InitRHI()
 {
-	float	x0 = 0.f,	y0 = 0.f;
+	float	x0 = -1.f,	y0 = -1.f;
 	float	x1 = 1.f,	y1 = 1.f;
 
 	SSpriteVertexType		verteces[] =

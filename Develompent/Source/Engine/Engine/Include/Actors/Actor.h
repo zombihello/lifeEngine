@@ -817,7 +817,7 @@ public:
 	 */
 	FORCEINLINE Vector GetActorForwardVector() const
 	{
-		return rootComponent ? rootComponent->GetForwardVector() : SMath::vectorForward;
+		return rootComponent ? rootComponent->GetComponentForwardVector() : SMath::vectorForward;
 	}
 
 	/**
@@ -826,7 +826,7 @@ public:
 	 */
 	FORCEINLINE Vector GetActorRightVector() const
 	{
-		return rootComponent ? rootComponent->GetRightVector() : SMath::vectorRight;
+		return rootComponent ? rootComponent->GetComponentRightVector() : SMath::vectorRight;
 	}
 
 	/**
@@ -835,7 +835,7 @@ public:
 	 */
 	FORCEINLINE Vector GetActorUpVector() const
 	{
-		return rootComponent ? rootComponent->GetUpVector() : SMath::vectorUp;
+		return rootComponent ? rootComponent->GetComponentUpVector() : SMath::vectorUp;
 	}
 
 	/**
