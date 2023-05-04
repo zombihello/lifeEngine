@@ -147,6 +147,7 @@ void CExplorerLevelWindow::OnTick()
 			if ( ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##Visibility_ID_%i" ), index ).c_str() ), &bNewVisibility ) )
 			{
 				actor->SetVisibility( bNewVisibility );
+				GWorld->MarkDirty();
 			}
 			
 			// Label

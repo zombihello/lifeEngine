@@ -196,16 +196,35 @@ void CEditorWindow::OnTick()
 		}
 		if ( ImGui::BeginMenu( "View" ) )
 		{
+			TSharedPtr<CImGUILayer>				imguiLayers[] =
+			{
+				GEditorEngine->GetActorClassesWindow(),
+				GEditorEngine->GetActorPropertiesWindow(),
+				GEditorEngine->GetContentBrowserWindow(),
+				GEditorEngine->GetExplorerLevelWindow(),
+				GEditorEngine->GetLogsWindow()
+			};
+			
+			for ( uint32 index = 0; index < ARRAY_COUNT( imguiLayers ); ++index )
+			{
+				const TSharedPtr<CImGUILayer>&	imguiLayer	= imguiLayers[index];
+				bool							bVisibility = imguiLayer->IsVisibility();
+				if ( ImGui::MenuItem( TCHAR_TO_ANSI( imguiLayer->GetName().c_str() ), nullptr, &bVisibility ) )
+				{
+					imguiLayer->SetVisibility( bVisibility );
+				}
+			}
+
 			// Viewports
 			if ( ImGui::BeginMenu( "Viewports" ) )
 			{
 				for ( uint32 index = 0; index < LVT_Max; ++index )
 				{
-					TSharedPtr<CLevelViewportWindow>		levelViewportWindow = GEditorEngine->GetLevelViewportWindow( ( ELevelViewportType )index );
-					bool									bVisibility = levelViewportWindow->IsVisibility();
-					if ( ImGui::MenuItem( TCHAR_TO_ANSI( levelViewportWindow->GetName().c_str() ), nullptr, &bVisibility ) )
+					TSharedPtr<CImGUILayer> imguiLayer	= GEditorEngine->GetLevelViewportWindow( ( ELevelViewportType )index );
+					bool					bVisibility = imguiLayer->IsVisibility();
+					if ( ImGui::MenuItem( TCHAR_TO_ANSI( imguiLayer->GetName().c_str() ), nullptr, &bVisibility ) )
 					{
-						levelViewportWindow->SetVisibility( bVisibility );
+						imguiLayer->SetVisibility( bVisibility );
 					}
 				}
 				ImGui::EndMenu();
