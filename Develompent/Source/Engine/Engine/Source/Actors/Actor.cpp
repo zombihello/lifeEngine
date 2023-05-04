@@ -102,19 +102,83 @@ void AActor::Serialize( class CArchive& InArchive )
 	InArchive << bIsStatic;
 	InArchive << bVisibility;
 
-	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
+	check( InArchive.Ver() >= VER_FixedSerializeComponents );
+	uint32		startToNumComponents = InArchive.Tell();
+	uint32		numComponents = 0;
+	InArchive << numComponents;
+
+	for ( uint32 index = 0, count = InArchive.IsSaving() ? ownedComponents.size() : numComponents; index < count; ++index )
 	{
-		ActorComponentRef_t		ownedComponent = ownedComponents[index];
+		uint32					componentSize = 0;
+		ActorComponentRef_t		ownedComponent;
+		std::wstring			name;
+		std::wstring			className;
 
-		// Skip editor only component if we cooking packages
-#if WITH_EDITOR
-		if ( ownedComponent->IsEditorOnly() && GIsCooker )
+		if ( InArchive.IsSaving() )
 		{
-			continue;
-		}
-#endif // WITH_EDITOR
+			ownedComponent = ownedComponents[index];
+			name = ownedComponent->GetName();
+			className = ownedComponent->GetClass()->GetName();
 
+			// Skip editor only component if we cooking packages
+#if WITH_EDITOR
+			if ( ownedComponent->IsEditorOnly() && GIsCooker )
+			{
+				continue;
+			}
+#endif // WITH_EDITOR
+		}
+
+		InArchive << name;
+		InArchive << className;
+		InArchive << componentSize;
+
+		if ( InArchive.IsLoading() )
+		{
+			CClass*		cclass = CClass::StaticFindClass( className.c_str() );
+			for ( uint32 indexComponent = 0, countComponents = ownedComponents.size(); indexComponent < countComponents; ++indexComponent )
+			{
+				ActorComponentRef_t		component = ownedComponents[indexComponent];
+				if ( name == component->GetName() && cclass == component->GetClass() )
+				{
+					ownedComponent = component;
+					break;
+				}
+			}
+
+			if ( !ownedComponent )
+			{
+				LE_LOG( LT_Warning, LC_Package, TEXT( "In actor %s didn't find component %s (%s) for serialize" ), GetName(), name.c_str(), className.c_str() );
+				InArchive.Seek( InArchive.Tell() + componentSize );
+				continue;
+			}
+		}
+
+		uint32	startOffset = InArchive.Tell();
 		ownedComponent->Serialize( InArchive );
+
+		if ( InArchive.IsSaving() )
+		{
+			uint32	currentOffset = InArchive.Tell();
+			componentSize = currentOffset - startOffset;
+			++numComponents;
+
+			InArchive.Seek( startOffset - sizeof( componentSize ) );
+			InArchive << componentSize;
+			InArchive.Seek( currentOffset );
+		}
+		else
+		{
+			check( InArchive.Tell() - startOffset == componentSize );
+		}
+	}
+
+	if ( InArchive.IsSaving() )
+	{
+		uint32	currentOffset = InArchive.Tell();
+		InArchive.Seek( startToNumComponents );
+		InArchive << numComponents;
+		InArchive.Seek( currentOffset );
 	}
 }
 

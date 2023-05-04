@@ -11,6 +11,7 @@
 
 #include "Actors/Actor.h"
 #include "Components/SpriteComponent.h"
+#include "Components/ArrowComponent.h"
 
 /**
  * @ingroup Engine
@@ -45,6 +46,7 @@ public:
 
 private:
 	TRefCountPtr<CSpriteComponent>		gizmoComponent;				/**< Gizmo component */
+	TRefCountPtr<CArrowComponent>		arrowComponent;				/**< Arrow component */
 #endif // WITH_EDITOR
 };
 

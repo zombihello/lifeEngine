@@ -52,6 +52,7 @@ enum ELifeEnginePackageVersion
 	VER_CName								= 20,					/**< Added CName for IDs in string view */
 	VER_BBoxInStaticMesh					= 21,					/**< Added CBox to a static mesh */
 	VER_Mipmaps								= 22,					/**< Added mipmaps to textures */
+	VER_FixedSerializeComponents			= 23,					/**< Fixed serialization components in actors */
 
 	//
 	// New versions can be added here
