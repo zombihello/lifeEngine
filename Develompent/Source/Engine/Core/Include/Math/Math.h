@@ -353,6 +353,50 @@ struct SMath
 	}
 
 	/**
+	 * @brief Dot product
+	 * 
+	 * @param InX	Vector X
+	 * @param InY	Vector Y
+	 * @return Returns the dot product of InX and InY.
+	 */
+	static FORCEINLINE float DotProduct( const Vector& InX, const Vector& InY )
+	{
+		return glm::dot( InX, InY );
+	}
+
+	/**
+	 * @brief LookAt quaternion
+	 * 
+	 * @param InLookFrom	Look from position
+	 * @param InLookTo		Look to position
+	 * @param InUp			Up vector
+	 * @param InGlobalUp	Global up vector
+	 */
+	static FORCEINLINE Quaternion LookAtQuatenrion( const Vector& InLookFrom, const Vector& InLookTo, const Vector& InUp, const Vector& InGlobalUp )
+	{
+		Vector		direction		= InLookTo - InLookFrom;
+		float      directionLength	= SMath::LengthVector( direction );
+		direction = SMath::NormalizeVector( direction );
+
+		// Check if the direction is valid; Also deals with NaN
+		if ( directionLength <= 0.0001f )
+		{
+			return Quaternion( 1.f, 0.f, 0.f, 0.f );	// Just return identity
+		}
+
+		// Is the normal up (nearly) parallel to direction?
+		if ( SMath::Abs( SMath::DotProduct( direction, InUp ) ) > 0.9999f )
+		{
+			// Use alternative up
+			return glm::quatLookAt( direction, InGlobalUp ) * glm::angleAxis( SMath::DegreesToRadians( 90.f ), Vector( 1.f, 0.f, 0.f ) );
+		}
+		else
+		{
+			return glm::quatLookAt( direction, InUp ) * glm::angleAxis( SMath::DegreesToRadians( 90.f ), Vector( 1.f, 0.f, 0.f ) );
+		}
+	}
+
+	/**
 	 * @brief Get origin from matrix
 	 * 
 	 * @param InMatric		Input matrix

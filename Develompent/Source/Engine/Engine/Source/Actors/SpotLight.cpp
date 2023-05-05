@@ -12,6 +12,8 @@ ASpotLight::ASpotLight()
 	gizmoComponent->SetType( ST_Rotating );
 	gizmoComponent->SetSpriteSize( Vector2D( 64.f, 64.f ) );
 	gizmoComponent->SetMaterial( GPackageManager->FindAsset( TEXT( "Material'EditorMaterials:ASpotLight_Gizmo_Mat" ), AT_Material ) );
+
+	arrowComponent		= CreateComponent<CArrowComponent>( TEXT( "ArrowComponent0" ), true );
 #endif // WITH_EDITOR
 }
 

@@ -3,18 +3,23 @@
 - [ ] Fix depth buffer accuracy
 - [ ] Implement material shaders
 - [ ] Need refactor import/reimport assets with the ability to customize
-- [ ] Implement import and rendering Quake 3 BSP with lightmaps
-- [ ] Refactor engine architecture to module style
 - [ ] Refactor assets system and remove packages
- 
+- [ ] Implement shadow maps
+- [ ] Implement skeletal meshes
+- [ ] Implement skeletal animations
+- [ ] Implement particle system
+- [ ] Implement support UI in the game
+- [ ] Implement base AI
+
  # Version 0.4.0 :: Now	
 - [X] Migrate WorldEd's interface from Qt to ImGUI
 - [X] Need add check on used assets while dragged packages in content browser, and need updating info about they in TOC file
-- [ ] Implement rendering light with deferred shading technique
+- [X] Implement rendering light with deferred shading technique
 - [X] Implement HDR and gamma correct support
 - [X] Implement eye adaptation (auto exposure)
 - [ ] Implement physics system
 - [ ] Refactor source code to Source Engine/Quake style
+- [ ] Refactor engine architecture to module style
 - [X] Add supported mip levels in textures
 - [X] Add possible generate mip levels for textures in WorldEd
 - [X] Need fix speed of the import static meshes

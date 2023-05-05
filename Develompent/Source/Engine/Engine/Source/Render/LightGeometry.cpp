@@ -9,6 +9,7 @@
 // -------------
 TGlobalResource<CLightSphereMesh>			GLightSphereMesh;
 TGlobalResource<CLightQuadMesh>				GLightQuadMesh;
+TGlobalResource<CLightConeMesh>				GLightConeMesh;
 
 
 CLightSphereMesh::CLightSphereMesh()
@@ -95,6 +96,88 @@ void CLightQuadMesh::InitRHI()
 }
 
 void CLightQuadMesh::ReleaseRHI()
+{
+	vertexBufferRHI.SafeRelease();
+	indexBufferRHI.SafeRelease();
+	vertexFactory->ReleaseResource();
+}
+
+
+CLightConeMesh::CLightConeMesh()
+	: numPrimitives( 0 )
+	, vertexFactory( new CLightVertexFactory( LT_Spot ) )
+{}
+
+void CLightConeMesh::InitRHI()
+{
+	const uint32					resolution = 30.f;
+	const float						radius = 1.f;
+	const float						height = 1.f;
+	std::vector<SLightVertexType>	verteces;
+	std::vector<uint32>				indeces;
+
+	{
+		float	step = 2.f * PI * ( 1.f / resolution );
+		float	angle = 0.f;
+
+		// Add vertices subdividing a circle
+		for ( uint32 index = 0; index < resolution; ++index )
+		{
+			verteces.push_back( SLightVertexType{ Vector4D( SMath::Cos( angle ) * radius, -height, SMath::Sin( angle ) * radius, 1.f ) } );
+			verteces.push_back( SLightVertexType{ Vector4D( SMath::Cos( angle ) * 0.f, 0.f, SMath::Sin( angle ) * 0.f, 1.f ) } );
+			angle += step;
+		}
+
+		// Add the bottom of the cone
+		verteces.push_back( SLightVertexType{ Vector4D( 0.f, -height, 0.f, 1.f ) } );
+	}
+
+	// Generate indices
+	{
+		// Indices for the main body
+		for ( uint32 index = 0; index < resolution * 2 - 2; index += 2 )
+		{
+			indeces.push_back( index + 2 );
+			indeces.push_back( index );
+			indeces.push_back( index + 1 );
+
+			indeces.push_back( index + 2 );
+			indeces.push_back( index + 1 );
+			indeces.push_back( index + 3 );
+		}
+
+		indeces.push_back( 0 );
+		indeces.push_back( resolution * 2 - 2 );
+		indeces.push_back( resolution * 2 - 1 );
+
+		indeces.push_back( 0 );
+		indeces.push_back( resolution * 2 - 1 );
+		indeces.push_back( 1 );
+
+		// Indices for the bottom
+		for ( uint32 index = 0; index < resolution * 2 - 2; index += 2 )
+		{
+			indeces.push_back( index );
+			indeces.push_back( index + 2 );
+			indeces.push_back( resolution * 2 );
+		}
+
+		indeces.push_back( resolution * 2 - 2 );
+		indeces.push_back( 0 );
+		indeces.push_back( resolution * 2 );
+	}
+	numPrimitives = indeces.size() / 3;
+
+	// Create vertex and index buffer
+	vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "LightCone" ), sizeof( SLightVertexType ) * verteces.size(), ( byte* )verteces.data(), RUF_Static );
+	indexBufferRHI = GRHI->CreateIndexBuffer( TEXT( "LightCone" ), sizeof( uint32 ), sizeof( uint32 ) * indeces.size(), ( byte* )indeces.data(), RUF_Static );
+
+	// Initialize vertex factory
+	vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SLightVertexType ) } );		// 0 stream slot
+	vertexFactory->Init();
+}
+
+void CLightConeMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
 	indexBufferRHI.SafeRelease();

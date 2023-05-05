@@ -3,10 +3,13 @@
 IMPLEMENT_CLASS( CSpotLightComponent )
 
 CSpotLightComponent::CSpotLightComponent()
-	: radius( 850.f )
-	, height( 300.f )
-	, cutoff( 150.f )
-{}
+	: bNeedUpdateCutoff( true )
+	, radius( 850.f )
+	, height( 1500.f )
+	, cutoff( 0.f )
+{
+	intensivity = 100400.f;
+}
 
 ELightType CSpotLightComponent::GetLightType() const
 {

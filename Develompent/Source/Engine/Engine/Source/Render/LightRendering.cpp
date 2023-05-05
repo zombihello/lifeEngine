@@ -62,6 +62,41 @@ public:
 	}
 
 	/**
+	 * Draw spot lights
+	 *
+	 * @param InDeviceContextRHI		RHI device context
+	 * @param InVertexFactory			Vertex factory
+	 * @param InLightingVertexShader	Lighting vertex shader
+	 * @param InLights					List of spot lights
+	 * @param InSceneView				Scene view
+	 */
+	template<class TShaderClass>
+	static void DrawSpotLights( class CBaseDeviceContextRHI* InDeviceContextRHI, CVertexFactory* InVertexFactory, TShaderClass* InLightingVertexShader, const std::list<TRefCountPtr<CSpotLightComponent>>* InLights, const class CSceneView& InSceneView )
+	{
+		// If vertex factory not support instancig - draw without it
+		if ( !InVertexFactory->SupportsInstancing() )
+		{
+			appErrorf( TEXT( "Not implemented" ) );
+		}
+		// Else we draw geometry with help instancing
+		else
+		{
+			InLightingVertexShader->SetMesh( InDeviceContextRHI, *InLights, InVertexFactory, &InSceneView, InLights->size() );
+			GRHI->CommitConstants( InDeviceContextRHI );
+
+			IndexBufferRHIRef_t		indexBufferRHI = GLightConeMesh.GetIndexBufferRHI();
+			if ( indexBufferRHI )
+			{
+				GRHI->DrawIndexedPrimitive( InDeviceContextRHI, indexBufferRHI, PT_TriangleList, 0, 0, GLightConeMesh.GetNumPrimitives(), InLights->size() );
+			}
+			else
+			{
+				GRHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, GLightConeMesh.GetNumPrimitives(), InLights->size() );
+			}
+		}
+	}
+
+	/**
 	 * Draw directional lights
 	 *
 	 * @param InDeviceContextRHI		RHI device context
@@ -314,13 +349,24 @@ public:
 	 */
 	FORCEINLINE void Init( const std::list<TRefCountPtr<CSpotLightComponent>>* InLights, float InDepthBias = 0.f )
 	{
-		CBaseLightingDrawingPolicy::Init( nullptr, InDepthBias );
+		CBaseLightingDrawingPolicy::Init( GLightConeMesh.GetVertexFactory(), InDepthBias );
 
 		// Override shaders for lighting rendering
 		uint64					vertexFactoryHash		= vertexFactory->GetType()->GetHash();
 		vertexShader			= lightingVertexShader	= GShaderManager->FindInstance<TLightingVertexShader<LT_Spot>>( vertexFactoryHash );
 		pixelShader				= lightingPixelShader	= GShaderManager->FindInstance<TLightingPixelShader<LT_Spot>>( vertexFactoryHash );
 		spotLightComponents		= InLights;
+	}
+
+	/**
+	 * Draw light
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InSceneView			Scene view
+	 */
+	void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CSceneView& InSceneView )
+	{
+		CLightingDrawingPolicyUtils::DrawSpotLights( InDeviceContextRHI, vertexFactory, lightingVertexShader, spotLightComponents, InSceneView );
 	}
 
 private:
@@ -466,13 +512,24 @@ public:
 	 */
 	FORCEINLINE void Init( const std::list<TRefCountPtr<CSpotLightComponent>>* InLights, float InDepthBias = 0.f )
 	{
-		CBaseStencilLightingDrawingPolicy::Init( nullptr, InDepthBias );
+		CBaseStencilLightingDrawingPolicy::Init( GLightConeMesh.GetVertexFactory(), InDepthBias );
 
 		// Override shaders for lighting rendering
 		uint64			vertexFactoryHash = vertexFactory->GetType()->GetHash();
 		vertexShader	= lightingVertexShader = GShaderManager->FindInstance<TDepthOnlyLightingVertexShader<LT_Spot>>( vertexFactoryHash );
 		pixelShader		= GShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );
 		spotLightComponents = InLights;
+	}
+
+	/**
+	 * Draw light
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InSceneView			Scene view
+	 */
+	void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CSceneView& InSceneView )
+	{
+		CLightingDrawingPolicyUtils::DrawSpotLights( InDeviceContextRHI, vertexFactory, lightingVertexShader, spotLightComponents, InSceneView );
 	}
 
 private:
@@ -526,6 +583,25 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 		stencilLightingDrawingPolicy.Init( &pointLightComponents );
 		lightingDrawingPolicy.Init( &pointLightComponents );
 		
+		// Stencil pass
+		stencilLightingDrawingPolicy.SetRenderState( InDeviceContext );
+		stencilLightingDrawingPolicy.SetShaderParameters( InDeviceContext );
+		stencilLightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
+
+		// Base pass
+		lightingDrawingPolicy.SetRenderState( InDeviceContext );
+		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetAlbedo_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetEmission_AO_GBufferTexture(), GSceneRenderTargets.GetLightPassDepthZTexture() );
+		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
+	}
+
+	// Render spot lights
+	if ( !spotLightComponents.empty() )
+	{
+		TStencilLightingDrawingPolicy<LT_Spot>	stencilLightingDrawingPolicy;
+		TLightingDrawingPolicy<LT_Spot>			lightingDrawingPolicy;
+		stencilLightingDrawingPolicy.Init( &spotLightComponents );
+		lightingDrawingPolicy.Init( &spotLightComponents );
+
 		// Stencil pass
 		stencilLightingDrawingPolicy.SetRenderState( InDeviceContext );
 		stencilLightingDrawingPolicy.SetShaderParameters( InDeviceContext );

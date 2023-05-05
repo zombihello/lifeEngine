@@ -32,6 +32,7 @@ public:
 	FORCEINLINE void SetRadius( float InRadius )
 	{
 		radius = InRadius;
+		bNeedUpdateCutoff = true;
 	}
 
 	/**
@@ -41,15 +42,7 @@ public:
 	FORCEINLINE void SetHeight( float InHeight )
 	{
 		height = InHeight;
-	}
-
-	/**
-	 * @brief Set cutoff
-	 * @param InCutoff		Cutoff
-	 */
-	FORCEINLINE void SetCutoff( float InCutoff )
-	{
-		cutoff = InCutoff;
+		bNeedUpdateCutoff = true;
 	}
 
 	/**
@@ -84,13 +77,19 @@ public:
 	 */
 	FORCEINLINE float GetCutoff() const
 	{
+		if ( bNeedUpdateCutoff )
+		{
+			cutoff = height / ( SMath::Sqrt( SMath::Pow( height, 2.f ) + SMath::Pow( radius, 2 ) ) );
+			bNeedUpdateCutoff = false;
+		}
 		return cutoff;
 	}
 
 private:
-	float		radius;		/**< Radius */
-	float		height;		/**< Height */
-	float		cutoff;		/**< Cutoff */
+	mutable bool	bNeedUpdateCutoff;	/**< Is need update cutoff */
+	float			radius;				/**< Radius */
+	float			height;				/**< Height */
+	mutable float	cutoff;				/**< Cutoff */
 };
 
 #endif // !SPOTLIGHTCOMPONENT_H

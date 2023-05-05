@@ -20,7 +20,7 @@ float4 VertexFactory_GetLocalPosition( FVertexFactoryInput InInput )
 #if POINT_LIGHT
 	return float4( InInput.position.x * InInput.lightData.radius, InInput.position.y * InInput.lightData.radius, InInput.position.z * InInput.lightData.radius, 1.f );
 #elif SPOT_LIGHT
-	return InInput.position;
+	return float4( InInput.position.x * InInput.lightData.radius, InInput.position.y * InInput.lightData.height, InInput.position.z * InInput.lightData.radius, 1.f );
 #else
 	return InInput.position;
 #endif // POINT_LIGHT / SPOT_LIGHT 

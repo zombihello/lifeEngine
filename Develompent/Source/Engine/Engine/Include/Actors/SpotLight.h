@@ -12,6 +12,7 @@
 #include "Actors/Light.h"
 #include "Components/SpriteComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Components/ArrowComponent.h"
 
  /**
   * @ingroup Engine
@@ -49,6 +50,7 @@ private:
 
 #if WITH_EDITOR
 	TRefCountPtr<CSpriteComponent>				gizmoComponent;			/**< Gizmo component */
+	TRefCountPtr<CArrowComponent>				arrowComponent;			/**< Arrow component */
 #endif // WITH_EDITOR
 };
 
