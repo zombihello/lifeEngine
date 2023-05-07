@@ -10,17 +10,17 @@
 #include "ImGUI/ImGUIEngine.h"
 
 /** Table names of sampler address mode */
-static const achar*		GSamplerAddresModeNames[] =
+static const achar*		s_SamplerAddresModeNames[] =
 {
 	"Wrap",		// SAM_Wrap
 	"Clamp",	// SAM_Clamp
 	"Mirror",	// SAM_Mirror
 	"Border"	// SAM_Border
 };
-static_assert( ARRAY_COUNT( GSamplerAddresModeNames ) == SAM_Max, "Need full init GSamplerAddresModeNames array" );
+static_assert( ARRAY_COUNT( s_SamplerAddresModeNames ) == SAM_Max, "Need full init s_SamplerAddresModeNames array" );
 
 /** Table names of sampler filter */
-static const achar*		GSamplerFilterNames[] =
+static const achar*		s_SamplerFilterNames[] =
 {
 	"Point",				// SF_Point
 	"Bilinear",				// SF_Bilinear
@@ -28,10 +28,10 @@ static const achar*		GSamplerFilterNames[] =
 	"Anisotropic Point",	// SF_AnisotropicPoint
 	"Anisotropic Linear"	// SF_AnisotropicLinear
 };
-static_assert( ARRAY_COUNT( GSamplerFilterNames ) == SF_Max, "Need full init GSamplerFilterNames array" );
+static_assert( ARRAY_COUNT( s_SamplerFilterNames ) == SF_Max, "Need full init s_SamplerFilterNames array" );
 
 /** Table pathes to icons */
-static const tchar*		GTextureEditorIconPaths[] =
+static const tchar*		s_TextureEditorIconPaths[] =
 {
 	TEXT( "Import.png" ),		// IT_Import
 	TEXT( "Color_R.png" ),		// IT_R
@@ -39,7 +39,7 @@ static const tchar*		GTextureEditorIconPaths[] =
 	TEXT( "Color_B.png" ),		// IT_B
 	TEXT( "Color_A.png" )		// IT_A
 };
-static_assert( ARRAY_COUNT( GTextureEditorIconPaths ) == CTextureEditorWindow::IT_Num, "Need full init GTextureEditorIconPaths array" );
+static_assert( ARRAY_COUNT( s_TextureEditorIconPaths ) == CTextureEditorWindow::IT_Num, "Need full init s_TextureEditorIconPaths array" );
 
 /** Macro size button in menu bar */
 #define  TEXTUREEDITOR_MENUBAR_BUTTONSIZE	ImVec2( 16.f, 16.f )
@@ -48,28 +48,44 @@ static_assert( ARRAY_COUNT( GTextureEditorIconPaths ) == CTextureEditorWindow::I
 #define TEXTUREEDITOR_SELECTCOLOR			ImVec4( 0.f, 0.43f, 0.87f, 1.f )
 
 /** Is need pop style color of a button */
-static bool GImGui_ButtonNeedPopStyleColor = false;
+static bool s_ImGui_ButtonNeedPopStyleColor = false;
 
+/*
+==================
+ImGui_ButtonSetButtonSelectedStyle
+==================
+*/
 static void ImGui_ButtonSetButtonSelectedStyle()
 {
-	if ( !GImGui_ButtonNeedPopStyleColor )
+	if ( !s_ImGui_ButtonNeedPopStyleColor )
 	{
-		GImGui_ButtonNeedPopStyleColor = true;
+		s_ImGui_ButtonNeedPopStyleColor = true;
 		ImGui::PushStyleColor( ImGuiCol_Button,			TEXTUREEDITOR_SELECTCOLOR );
 		ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	TEXTUREEDITOR_SELECTCOLOR );
 		ImGui::PushStyleColor( ImGuiCol_ButtonActive,	TEXTUREEDITOR_SELECTCOLOR );
 	}
 }
 
+/*
+==================
+ImGui_ButtonPopStyleColor
+==================
+*/
 static void ImGui_ButtonPopStyleColor()
 {
-	if ( GImGui_ButtonNeedPopStyleColor )
+	if ( s_ImGui_ButtonNeedPopStyleColor )
 	{
 		ImGui::PopStyleColor( 3 );
-		GImGui_ButtonNeedPopStyleColor = false;
+		s_ImGui_ButtonNeedPopStyleColor = false;
 	}
 }
 
+
+/*
+==================
+CTextureEditorWindow::CTextureEditorWindow
+==================
+*/
 CTextureEditorWindow::CTextureEditorWindow( const TSharedPtr<CTexture2D>& InTexture2D )
 	: CImGUILayer( CString::Format( TEXT( "Texture Editor - %s" ), InTexture2D->GetAssetName().c_str() ) )
 	, texture2D( InTexture2D )
@@ -84,12 +100,22 @@ CTextureEditorWindow::CTextureEditorWindow( const TSharedPtr<CTexture2D>& InText
 	viewportWidget.Init();
 }
 
+/*
+==================
+CTextureEditorWindow::~CTextureEditorWindow
+==================
+*/
 CTextureEditorWindow::~CTextureEditorWindow()
 {
 	viewportWidget.SetViewportClient( nullptr, false );
 	delete viewportClient;
 }
 
+/*
+==================
+CTextureEditorWindow::Init
+==================
+*/
 void CTextureEditorWindow::Init()
 {
 	CImGUILayer::Init();
@@ -97,8 +123,8 @@ void CTextureEditorWindow::Init()
 
 	// Loading icons
 	std::wstring			errorMsg;
-	PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
-	check( package );
+	PackageRef_t			package = g_PackageManager->LoadPackage( TEXT( "" ), true );
+	Assert( package );
 
 	for ( uint32 index = 0; index < IT_Num; ++index )
 	{
@@ -108,10 +134,10 @@ void CTextureEditorWindow::Init()
 		if ( !assetHandle.IsAssetValid() )
 		{
 			std::vector<TSharedPtr<CAsset>>		result;
-			if ( !CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Icons/" ) + GTextureEditorIconPaths[index], result, errorMsg ) )
+			if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Icons/" ) + s_TextureEditorIconPaths[index], result, errorMsg ) )
 			{
-				LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load texture editor icon '%s' for type 0x%X. Message: %s" ), GTextureEditorIconPaths[index], index, errorMsg.c_str() );
-				assetHandle = GEngine->GetDefaultTexture();
+				Warnf( TEXT( "Fail to load texture editor icon '%s' for type 0x%X. Message: %s\n" ), s_TextureEditorIconPaths[index], index, errorMsg.c_str() );
+				assetHandle = g_Engine->GetDefaultTexture();
 			}
 			else
 			{
@@ -124,9 +150,14 @@ void CTextureEditorWindow::Init()
 	}
 }
 
+/*
+==================
+CTextureEditorWindow::OnTick
+==================
+*/
 void CTextureEditorWindow::OnTick()
 {
-	const SPixelFormatInfo&		pixelFormatInfo = GPixelFormats[texture2D->GetPixelFormat()];
+	const SPixelFormatInfo&		pixelFormatInfo = g_PixelFormats[texture2D->GetPixelFormat()];
 	uint32						sizeX = texture2D->GetSizeX();
 	uint32						sizeY = texture2D->GetSizeY();
 	uint32						numMips	= texture2D->GetNumMips();
@@ -136,10 +167,10 @@ void CTextureEditorWindow::OnTick()
 	{
 		// Button 'Import'
 		{
-			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				std::wstring		errorMsg;
-				if ( !GAssetFactory.Reimport( texture2D, errorMsg ) )
+				if ( !g_AssetFactory.Reimport( texture2D, errorMsg ) )
 				{
 					OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The texture 2D not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
 				}
@@ -157,7 +188,7 @@ void CTextureEditorWindow::OnTick()
 				ImGui_ButtonSetButtonSelectedStyle();
 			}
 
-			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_R].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_R].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				viewportClient->ShowRedChannel( !viewportClient->IsShowRedChannel() );
 			}
@@ -176,7 +207,7 @@ void CTextureEditorWindow::OnTick()
 				ImGui_ButtonSetButtonSelectedStyle();
 			}
 
-			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_G].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_G].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				viewportClient->ShowGreenChannel( !viewportClient->IsShowGreenChannel() );
 			}
@@ -195,7 +226,7 @@ void CTextureEditorWindow::OnTick()
 				ImGui_ButtonSetButtonSelectedStyle();
 			}
 
-			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_B].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_B].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				viewportClient->ShowBlueChannel( !viewportClient->IsShowBlueChannel() );
 			}
@@ -214,7 +245,7 @@ void CTextureEditorWindow::OnTick()
 				ImGui_ButtonSetButtonSelectedStyle();
 			}
 
-			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_A].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_A].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				viewportClient->ShowAlphaChannel( !viewportClient->IsShowAlphaChannel() );
 			}
@@ -294,7 +325,7 @@ void CTextureEditorWindow::OnTick()
 			ImGui::TableNextColumn();
 
 			int32	samplerAddressMode = texture2D->GetAddressU();
-			if ( ImGui::Combo( "##ComboAddressU", &samplerAddressMode, GSamplerAddresModeNames, ARRAY_COUNT( GSamplerAddresModeNames ) ) )
+			if ( ImGui::Combo( "##ComboAddressU", &samplerAddressMode, s_SamplerAddresModeNames, ARRAY_COUNT( s_SamplerAddresModeNames ) ) )
 			{
 				texture2D->SetAddressU( ( ESamplerAddressMode )samplerAddressMode );
 			}
@@ -305,7 +336,7 @@ void CTextureEditorWindow::OnTick()
 			ImGui::TableNextColumn();
 
 			samplerAddressMode = texture2D->GetAddressV();
-			if ( ImGui::Combo( "##ComboAddressV", &samplerAddressMode, GSamplerAddresModeNames, ARRAY_COUNT( GSamplerAddresModeNames ) ) )
+			if ( ImGui::Combo( "##ComboAddressV", &samplerAddressMode, s_SamplerAddresModeNames, ARRAY_COUNT( s_SamplerAddresModeNames ) ) )
 			{
 				texture2D->SetAddressV( ( ESamplerAddressMode )samplerAddressMode );
 			}
@@ -316,7 +347,7 @@ void CTextureEditorWindow::OnTick()
 			ImGui::TableNextColumn();
 
 			int32	filterMode = texture2D->GetSamplerFilter();
-			if ( ImGui::Combo( "##FilterMode", &filterMode, GSamplerFilterNames, ARRAY_COUNT( GSamplerFilterNames ) ) )
+			if ( ImGui::Combo( "##FilterMode", &filterMode, s_SamplerFilterNames, ARRAY_COUNT( s_SamplerFilterNames ) ) )
 			{
 				texture2D->SetSamplerFilter( ( ESamplerFilter )filterMode );
 			}
@@ -377,11 +408,11 @@ void CTextureEditorWindow::OnTick()
 				// Init file dialog settings
 				fileDialogSetup.SetMultiselection( false );
 				fileDialogSetup.SetTitle( TEXT( "Select New Source File" ) );
-				fileDialogSetup.SetDirectory( appGameDir() + PATH_SEPARATOR + TEXT( "Content/" ) );
-				fileDialogSetup.AddFormat( GAssetFactory.GetImporterInfo( AT_Texture2D ), ConvertAssetTypeToText( AT_Texture2D ) );
+				fileDialogSetup.SetDirectory( Sys_GameDir() + PATH_SEPARATOR + TEXT( "Content/" ) );
+				fileDialogSetup.AddFormat( g_AssetFactory.GetImporterInfo( AT_Texture2D ), ConvertAssetTypeToText( AT_Texture2D ) );
 
 				// Show open file dialog
-				if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
+				if ( Sys_ShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
 				{
 					texture2D->SetAssetSourceFile( openFileDialogResult.files[0] );
 				}

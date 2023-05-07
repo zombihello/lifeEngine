@@ -25,12 +25,12 @@ public:
 	 * 
 	 * @param[in] InD3D11DeviceContext Pointer to D3D11 device context
 	 */
-											CD3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext );
+	CD3D11DeviceContext( ID3D11DeviceContext* InD3D11DeviceContext );
 
 	/**
 	 * @brief Destructor
 	 */
-											~CD3D11DeviceContext();
+	~CD3D11DeviceContext();
 
 	/**
 	 * @brief Clear surface
@@ -38,7 +38,7 @@ public:
 	 * @param[in] InSurface Surface for rendering
 	 * @param[in] InColor Color for clearing render target
 	 */
-	virtual void							ClearSurface( SurfaceRHIParamRef_t InSurface, const class CColor& InColor ) override;
+	virtual void ClearSurface( SurfaceRHIParamRef_t InSurface, const class CColor& InColor ) override;
 
 	/**
 	 * Clear depth stencil
@@ -49,13 +49,13 @@ public:
 	 * @param[in] InDepthValue Clear the depth buffer with this value
 	 * @param[in] InStencilValue Clear the stencil buffer with this value
 	 */
-	virtual void							ClearDepthStencil( SurfaceRHIParamRef_t InSurface, bool InIsClearDepth = true, bool InIsClearStencil = true, float InDepthValue = 1.f, uint8 InStencilValue = 0 ) override;
+	virtual void ClearDepthStencil( SurfaceRHIParamRef_t InSurface, bool InIsClearDepth = true, bool InIsClearStencil = true, float InDepthValue = 1.f, uint8 InStencilValue = 0 ) override;
 
 	/**
 	 * @brief Get D3D11 device context
 	 * @return Pointer to D3D11 device context
 	 */
-	FORCEINLINE ID3D11DeviceContext*		GetD3D11DeviceContext() const
+	FORCEINLINE ID3D11DeviceContext* GetD3D11DeviceContext() const
 	{
 		return d3d11DeviceContext;
 	}

@@ -2,6 +2,11 @@
 #include "Render/RenderTarget.h"
 #include "RHI/BaseRHI.h"
 
+/*
+==================
+CRenderTarget::CRenderTarget
+==================
+*/
 CRenderTarget::CRenderTarget()
 	: bDirty( false )
 	, flags( 0 )
@@ -10,6 +15,11 @@ CRenderTarget::CRenderTarget()
 	, pixelFormat( PF_Unknown )
 {}
 
+/*
+==================
+CRenderTarget::InitRHI
+==================
+*/
 void CRenderTarget::InitRHI()
 {
 #if !SHIPPING_BUILD
@@ -18,17 +28,27 @@ void CRenderTarget::InitRHI()
 	const tchar* cDebugName = TEXT( "" );
 #endif // !SHIPPING_BUILD
 
-	check( sizeX > 0 && sizeY > 0 && pixelFormat != PF_Unknown );
-	texture		= GRHI->CreateTexture2D( cDebugName, sizeX, sizeY, pixelFormat, 1, flags );
-	surface		= GRHI->CreateTargetableSurface( cDebugName, sizeX, sizeY, pixelFormat, texture, flags );
+	Assert( sizeX > 0 && sizeY > 0 && pixelFormat != PF_Unknown );
+	texture		= g_RHI->CreateTexture2D( cDebugName, sizeX, sizeY, pixelFormat, 1, flags );
+	surface		= g_RHI->CreateTargetableSurface( cDebugName, sizeX, sizeY, pixelFormat, texture, flags );
 	bDirty		= false;
 }
 
+/*
+==================
+CRenderTarget::UpdateRHI
+==================
+*/
 void CRenderTarget::UpdateRHI()
 {
 	InitRHI();
 }
 
+/*
+==================
+CRenderTarget::ReleaseRHI
+==================
+*/
 void CRenderTarget::ReleaseRHI()
 {
 	surface.SafeRelease();
@@ -36,6 +56,11 @@ void CRenderTarget::ReleaseRHI()
 	bDirty = false;
 }
 
+/*
+==================
+CRenderTarget::Update
+==================
+*/
 void CRenderTarget::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, EPixelFormat InPixelFormat, uint32 InFlags /* = 0 */, const std::wstring& InName /* = TEXT( "" ) */ )
 {
 	bool			bNeedUpdateRHI	= pixelFormat != InPixelFormat || sizeX != InNewSizeX || sizeY != InNewSizeY || flags != (TCF_ResolveTargetable | InFlags);

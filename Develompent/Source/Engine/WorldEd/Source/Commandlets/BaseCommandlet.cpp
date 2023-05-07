@@ -4,6 +4,11 @@
 
 IMPLEMENT_CLASS( CBaseCommandlet )
 
+/*
+==================
+CBaseCommandlet::ExecCommandlet
+==================
+*/
 bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* OutResultCommand /* = nullptr */ )
 {
 	std::wstring		nameCommandlet = InCommandLine.GetFirstValue( TEXT( "commandlet" ) );
@@ -23,26 +28,27 @@ bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 	if ( lclassCommandlet )
 	{
 		CBaseCommandlet*		commandlet = lclassCommandlet->CreateObject< CBaseCommandlet >();
-		check( commandlet );
+		Assert( commandlet );
 
-		bool		oldIsCommandlet = GIsCommandlet;
-		GIsCommandlet = true;
-		LE_LOG( LT_Log, LC_Commandlet, TEXT( "Started commandlet '%s'" ), nameCommandlet.c_str() );
+		bool		oldIsCommandlet = g_IsCommandlet;
+		g_IsCommandlet = true;
+		Logf( TEXT( "Started commandlet '%s'\n" ), nameCommandlet.c_str() );
 		double		beginCommandletTime = appSeconds();
 		bool		result = commandlet->Main( InCommandLine );
 		double		endCommandletTime = appSeconds();
 		delete commandlet;
 
 		ELogColor		logColor = result ? LC_Green : LC_Red;
-		LE_LOG( LT_Log, LC_Commandlet, TEXT( "" ) );
-		LE_LOG_COLOR( logColor, LT_Log, LC_Commandlet, TEXT( "----------------------" ) );
-		LE_LOG_COLOR( logColor, LT_Log, LC_Commandlet, TEXT( "Result: %s" ), result ? TEXT( "seccussed" ) : TEXT( "error" ) );
-		LE_LOG( LT_Log, LC_Commandlet, TEXT( "" ) );
-		LE_LOG( LT_Log, LC_Commandlet, TEXT( "Execution of commandlet took: %f seconds" ), endCommandletTime - beginCommandletTime );
+		g_Log->SetTextColor( logColor );
+		Logf( TEXT( "\n" ) );
+		Logf( TEXT( "----------------------\n" ) );
+		Logf( TEXT( "Result: %s\n" ), result ? TEXT( "seccussed" ) : TEXT( "error" ) );
+		Logf( TEXT( "\n" ) );
+		Logf( TEXT( "Execution of commandlet took: %f seconds\n" ), endCommandletTime - beginCommandletTime );
 
-		GIsCommandlet = oldIsCommandlet;
-		GIsRequestingExit = true;
-		GShouldPauseBeforeExit = true;
+		g_IsCommandlet = oldIsCommandlet;
+		g_IsRequestingExit = true;
+		g_ShouldPauseBeforeExit = true;
 		if ( OutResultCommand )
 		{
 			*OutResultCommand = result;

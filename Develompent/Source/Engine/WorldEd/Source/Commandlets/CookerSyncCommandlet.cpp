@@ -13,9 +13,14 @@
 
 IMPLEMENT_CLASS( CCookerSyncCommandlet )
 
+/*
+==================
+CCookerSyncCommandlet::AddContentEntries
+==================
+*/
 void CCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 {
-	std::vector< std::wstring >		files = GFileSystem->FindFiles( InRootDir, true, true );
+	std::vector< std::wstring >		files = g_FileSystem->FindFiles( InRootDir, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
 	{
 		std::wstring		file = files[ index ];
@@ -32,24 +37,29 @@ void CCookerSyncCommandlet::AddContentEntries( const std::wstring& InRootDir )
 		extension.erase( 0, dotPos + 1 );
 		if ( extension == TEXT( "pak" ) )
 		{
-			PackageRef_t		package = GPackageManager->LoadPackage( fullPath );
-			check( package );
+			PackageRef_t		package = g_PackageManager->LoadPackage( fullPath );
+			Assert( package );
 
-			LE_LOG( LT_Log, LC_Commandlet, TEXT( "Added package '%s'" ), fullPath.c_str() );
-			GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), fullPath );
-			GPackageManager->UnloadPackage( fullPath );
+			Logf( TEXT( "Added package '%s'\n" ), fullPath.c_str() );
+			g_TableOfContents.AddEntry( package->GetGUID(), package->GetName(), fullPath );
+			g_PackageManager->UnloadPackage( fullPath );
 		}
 	}
 }
 
+/*
+==================
+CCookerSyncCommandlet::Main
+==================
+*/
 bool CCookerSyncCommandlet::Main( const CCommandLine& InCommandLine )
 {
-	GTableOfContents.Clear();
-	AddContentEntries( appBaseDir() );
+	g_TableOfContents.Clear();
+	AddContentEntries( Sys_BaseDir() );
 
 	// Serialize table of contents
-	CArchive*		archiveTOC = GFileSystem->CreateFileWriter( GCookedDir + CTableOfContets::GetNameTOC(), AW_NoFail );
-	GTableOfContents.Serialize( *archiveTOC );
+	CArchive*		archiveTOC = g_FileSystem->CreateFileWriter( g_CookedDir + CTableOfContets::GetNameTOC(), AW_NoFail );
+	g_TableOfContents.Serialize( *archiveTOC );
 	delete archiveTOC;
 
 	return true;

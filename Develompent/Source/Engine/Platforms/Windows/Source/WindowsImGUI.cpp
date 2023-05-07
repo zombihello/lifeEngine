@@ -25,7 +25,7 @@
 //  2021-07-29: Inputs: MousePos is correctly reported when the host platform window is hovered but not focused (using SDL_GetMouseFocus() + SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, requires SDL 2.0.5+)
 //  2021-06:29: *BREAKING CHANGE* Removed 'SDL_Window* window' parameter to ImGui_ImplSDL2_NewFrame() which was unnecessary.
 //  2021-06-29: Reorganized backend to pull data from a single structure to facilitate usage with multiple-contexts (all g_XXXX access changed to bd->XXXX).
-//  2021-03-22: Rework global mouse pos availability check listing supported platforms explicitly, effectively fixing mouse access on Raspberry Pi. (#2837, #3950)
+//  2021-03-22: Rework global mouse pos availability Assert listing supported platforms explicitly, effectively fixing mouse access on Raspberry Pi. (#2837, #3950)
 //  2020-05-25: Misc: Report a zero display-size when window is minimized, to be consistent with other backends.
 //  2020-02-20: Inputs: Fixed mapping for ImGuiKey_KeyPadEnter (using SDL_SCANCODE_KP_ENTER instead of SDL_SCANCODE_RETURN2).
 //  2019-12-17: Inputs: On Wayland, use SDL_GetMouseState (because there is no global mouse state).
@@ -128,7 +128,7 @@ static void ImGui_ImplSDL2_SetClipboardText(void*, const char* text)
 }
 
 // BS yehor.pohuliaka Begin - Implement ImGUI in lifeEngine
-void appImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
+void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	ImGuiIO&			    imguiIO = ImGui::GetIO();
     ImGui_ImplSDL2_Data*    imguiData = ImGui_ImplSDL2_GetBackendData();
@@ -157,7 +157,7 @@ void appImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
 	case SWindowEvent::T_KeyPressed:
 	case SWindowEvent::T_KeyReleased:
 	{
-		uint32			key = appButtonCodeToScanCode( InWindowEvent.events.key.code );
+		uint32			key = Sys_ButtonCodeToScanCode( InWindowEvent.events.key.code );
 		IM_ASSERT( key >= 0 && key < IM_ARRAYSIZE( imguiIO.KeysDown ) );
 
 		imguiIO.KeysDown[ key ]	= InWindowEvent.type == SWindowEvent::T_KeyPressed;
@@ -867,13 +867,13 @@ static void ImGui_ImplSDL2_ShutdownPlatformInterface()
 /**
  * Initialize ImGUI on platform
  */
-bool appImGUIInit()
+bool Sys_ImGUIInit()
 {
-	check( GWindow );
+	Assert( g_Window );
 
-    SDL_Window*         sdlWindow = static_cast< CWindowsWindow* >( GWindow )->GetSDLWindow();
+    SDL_Window*         sdlWindow = static_cast< CWindowsWindow* >( g_Window )->GetSDLWindow();
     bool                result = ImGui_ImplSDL2_Init( sdlWindow, nullptr );
-    check( result );
+    Assert( result );
 
     ImGui_ImplSDL2_InitPlatformInterface( sdlWindow, nullptr );
 	return result;
@@ -882,7 +882,7 @@ bool appImGUIInit()
 /**
  * Shutdown ImGUI on platform
  */
-void appImGUIShutdown()
+void Sys_ImGUIShutdown()
 {
 	ImGui_ImplSDL2_Shutdown();
 }
@@ -890,15 +890,15 @@ void appImGUIShutdown()
 /**
  * Begin drawing ImGUI
  */
-void appImGUIBeginDrawing()
+void Sys_ImGUIBeginDrawing()
 {
-	check( GWindow );
-	ImGui_ImplSDL2_NewFrame( static_cast< CWindowsWindow* >( GWindow )->GetSDLWindow() );
+	Assert( g_Window );
+	ImGui_ImplSDL2_NewFrame( static_cast< CWindowsWindow* >( g_Window )->GetSDLWindow() );
 }
 
 /**
  * End drawing ImGUI
  */
-void appImGUIEndDrawing()
+void Sys_ImGUIEndDrawing()
 {}
 #endif // !WITH_IMGUI

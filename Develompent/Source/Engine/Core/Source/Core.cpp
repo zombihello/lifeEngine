@@ -15,63 +15,72 @@
 // GLOBALS
 // ----------------
 
-CConfigManager          GConfig;
-bool	                GIsRequestingExit           = false;
-uint32			        GGameThreadId               = 0;
-double                  GSecondsPerCycle            = 0.0;
-double                  GStartTime                  = appInitTiming();
-double                  GCurrentTime                = GStartTime;
-double                  GLastTime                   = 0.0;
-double                  GDeltaTime                  = 0.0;
-CPackageManager*        GPackageManager             = new CPackageManager();
-CTableOfContets		    GTableOfContents;
-std::wstring            GGameName                   = TEXT( "ExampleGame" );
-CCommandLine			GCommandLine;
-CAssetFactory           GAssetFactory;
+CConfigManager          g_Config;
+bool	                g_IsRequestingExit           = false;
+uint32			        g_GameThreadId               = 0;
+double                  g_SecondsPerCycle            = 0.0;
+double                  g_StartTime                  = Sys_InitTiming();
+double                  g_CurrentTime                = g_StartTime;
+double                  g_LastTime                   = 0.0;
+double                  g_DeltaTime                  = 0.0;
+CPackageManager*        g_PackageManager             = new CPackageManager();
+CTableOfContets		    g_TableOfContents;
+std::wstring            g_GameName                   = TEXT( "ExampleGame" );
+CCommandLine			g_CommandLine;
+CAssetFactory           g_AssetFactory;
 
 #if WITH_EDITOR
-bool					GIsGame                     = true;
-bool			        GIsEditor                   = false;
-bool                    GIsCommandlet               = false;
-bool					GIsCooker                   = false;
-bool                    GShouldPauseBeforeExit      = false;
+bool					g_IsGame                     = true;
+bool			        g_IsEditor                   = false;
+bool                    g_IsCommandlet               = false;
+bool					g_IsCooker                   = false;
+bool                    g_ShouldPauseBeforeExit      = false;
 #endif // WITH_EDITOR
 
-/**
- * Failed assertion handler
- */
-void VARARGS appFailAssertFunc( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat, ... )
+/*
+==================
+Sys_FailAssertFunc
+==================
+*/
+void VARARGS Sys_FailAssertFunc( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat, ... )
 {
 	std::wstring        callStack;
-	appDumpCallStack( callStack );
+	Sys_DumpCallStack( callStack );
 
 	va_list             arguments;
 	va_start( arguments, InFormat );
 	std::wstring        message = CString::Format( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str(), callStack.c_str() );
 	va_end( arguments );
 
-	LE_LOG( LT_Error, LC_General, message.c_str() );
-	appShowMessageBox( CString::Format( TEXT( "%s Error" ), GGameName.c_str() ).c_str(), message.c_str(), MB_Error );
-    appRequestExit( true );
+	Errorf( TEXT( "%s\n" ), message.c_str());
+	Sys_ShowMessageBox( CString::Format( TEXT( "%s Error" ), g_GameName.c_str() ).c_str(), message.c_str(), MB_Error );
+    Sys_RequestExit( true );
 }
 
-/**
- * Failed assertion handler debug version
- */
-void VARARGS appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat, ... )
+/*
+==================
+Sys_FailAssertFuncDebug
+==================
+*/
+void VARARGS Sys_FailAssertFuncDebug( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat, ... )
 {
     std::wstring        callStack;
-    appDumpCallStack( callStack );
+    Sys_DumpCallStack( callStack );
 
 	va_list             arguments;
 	va_start( arguments, InFormat );
 	std::wstring        message = CString::Format( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str(), callStack.c_str() );
 	va_end( arguments );
 
-	LE_LOG( LT_Error, LC_General, message.c_str() );
+	Errorf( TEXT( "%s\n" ), message.c_str());
 }
 
-std::wstring appPlatformTypeToString( EPlatformType InPlatform )
+/*
+==================
+Sys_PlatformTypeToString
+==================
+*/
+std::wstring Sys_PlatformTypeToString( EPlatformType InPlatform )
 {
     switch ( InPlatform )
     {
@@ -80,7 +89,12 @@ std::wstring appPlatformTypeToString( EPlatformType InPlatform )
     }
 }
 
-EPlatformType appPlatformStringToType( const std::wstring& InPlatformStr )
+/*
+==================
+Sys_PlatformStringToType
+==================
+*/
+EPlatformType Sys_PlatformStringToType( const std::wstring& InPlatformStr )
 {
     if ( InPlatformStr == TEXT( "PC" ) )
     {

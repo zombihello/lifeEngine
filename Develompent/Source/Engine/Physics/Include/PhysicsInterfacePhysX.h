@@ -238,7 +238,7 @@ struct SPhysicsInterfacePhysX
 	static FORCEINLINE SPhysicsShapeHandlePhysX CreateBoxGeometry( const Vector& InSize, const SPhysicsMaterialHandlePhysX& InPhysMaterial )
 	{
 		SPhysicsShapeHandlePhysX		shapeHandle;
-		shapeHandle.pxShape = GPhysXSDK->createShape( physx::PxBoxGeometry( InSize.x, InSize.y, InSize.z ), *InPhysMaterial.pxMaterial );
+		shapeHandle.pxShape = g_PhysXSDK->createShape( physx::PxBoxGeometry( InSize.x, InSize.y, InSize.z ), *InPhysMaterial.pxMaterial );
 		return shapeHandle;
 	}
 
@@ -324,7 +324,7 @@ struct SPhysicsInterfacePhysX
 	 */
 	static FORCEINLINE void UpdateMassAndInertia( const SPhysicsActorHandlePhysX& InActorHandle, float InDensity, const Vector* InMassLocalPose = nullptr, bool InIncludeNonSimShapes = false )
 	{
-		check( IsValidActor( InActorHandle ) );
+		Assert( IsValidActor( InActorHandle ) );
 		if ( InActorHandle.bStatic )
 		{
 			return;
@@ -379,7 +379,7 @@ struct SPhysicsInterfacePhysX
 	 */
 	static FORCEINLINE void AttachShape( const SPhysicsActorHandlePhysX& InActorHandle, const SPhysicsShapeHandlePhysX& InShapeHandle )
 	{
-		check( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
+		Assert( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
 		InActorHandle.pxRigidActor->attachShape( *InShapeHandle.pxShape );
 	}
 
@@ -390,7 +390,7 @@ struct SPhysicsInterfacePhysX
 	 */
 	static FORCEINLINE void DetachShape( const SPhysicsActorHandlePhysX& InActorHandle, const SPhysicsShapeHandlePhysX& InShapeHandle )
 	{
-		check( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
+		Assert( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
 		InActorHandle.pxRigidActor->detachShape( *InShapeHandle.pxShape );
 	}
 };

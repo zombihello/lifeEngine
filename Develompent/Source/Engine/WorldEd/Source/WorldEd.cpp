@@ -16,9 +16,6 @@
 #include "EngineLoop.h"
 #include "WorldEd.h"
 
-/**
- * Globals
- */
 SEditorDelegates::COnAssetsCanDelete		SEditorDelegates::onAssetsCanDelete;
 SEditorDelegates::COnAssetsDeleted			SEditorDelegates::onAssetsDeleted;
 SEditorDelegates::COnAssetsReloaded			SEditorDelegates::onAssetsReloaded;
@@ -32,7 +29,12 @@ SEditorDelegates::COnActorsSelected			SEditorDelegates::onActorsSelected;
 SEditorDelegates::COnActorsUnselected		SEditorDelegates::onActorsUnselected;
 SEditorDelegates::COnEditorMapMarkedDirty	SEditorDelegates::onEditorMapMarkedDirty;
 
-std::wstring appGetWorldEdName()
+/*
+==================
+Sys_GetWorldEdName
+==================
+*/
+std::wstring Sys_GetWorldEdName()
 {
 #if PLATFORM_WINDOWS
 #if _WIN64
@@ -44,5 +46,5 @@ std::wstring appGetWorldEdName()
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
 
-	return CString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
+	return CString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString.c_str(), g_RHI->GetRHIName() );
 }

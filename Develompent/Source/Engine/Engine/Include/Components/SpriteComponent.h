@@ -285,7 +285,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESpriteType& InValue )
  */
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESpriteType& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( ESpriteType ) );
 	return InArchive;
 }

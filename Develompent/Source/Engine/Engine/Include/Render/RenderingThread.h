@@ -17,25 +17,25 @@
  * Whether the renderer is currently running in a separate thread.
  * If this is false, then all rendering commands will be executed immediately instead of being enqueued in the rendering command buffer.
  */
-extern bool				GIsThreadedRendering;
+extern bool				g_IsThreadedRendering;
 
 /**
  * @ingroup Engine
  * ID of rendering thread
  */
-extern uint32			GRenderingThreadId;
+extern uint32			g_RenderingThreadId;
 
 /**
  * @ingroup Engine
  * The rendering command queue
  */
-extern CRingBuffer		GRenderCommandBuffer;
+extern CRingBuffer		g_RenderCommandBuffer;
 
 /**
  * @ingroup Engine
  * @brief Event of finished rendering frame
  */
-extern CEvent*			GRenderFrameFinished;
+extern CEvent*			g_RenderFrameFinished;
 
 /**
  * @ingroup Engine
@@ -45,7 +45,7 @@ extern CEvent*			GRenderFrameFinished;
  */
 FORCEINLINE bool IsInRenderingThread()
 {
-	return ( GRenderingThreadId == 0 ) || ( appGetCurrentThreadId() == GRenderingThreadId );
+	return ( g_RenderingThreadId == 0 ) || ( Sys_GetCurrentThreadId() == g_RenderingThreadId );
 }
 
 /**
@@ -90,7 +90,7 @@ public:
 	 * @param[in] InSize Size
 	 * @param[in] InAllocation Allocation context in ring buffer
 	 */
-	FORCEINLINE void* operator new( size_t InSize, const CRingBuffer::ÑAllocationContext& InAllocation )
+	FORCEINLINE void* operator new( size_t InSize, const CRingBuffer::CAllocationContext& InAllocation )
 	{
 		return InAllocation.GetAllocation();
 	}
@@ -101,7 +101,7 @@ public:
 	 * @param[in] InPtr Pointer to data
 	 * @param[in] InAllocation Allocation context in ring buffer
 	 */
-	FORCEINLINE void operator delete( void* InPtr, const CRingBuffer::ÑAllocationContext& InAllocation )
+	FORCEINLINE void operator delete( void* InPtr, const CRingBuffer::CAllocationContext& InAllocation )
 	{}
 };
 
@@ -160,15 +160,15 @@ private:
  */
 #define SEND_RENDER_COMMAND( InTypeName, InParam ) \
 	{ \
-		if ( GIsThreadedRendering && !IsInRenderingThread() ) \
+		if ( g_IsThreadedRendering && !IsInRenderingThread() ) \
 		{ \
-			CRingBuffer::ÑAllocationContext			allocationContext( GRenderCommandBuffer, sizeof( InTypeName ) ); \
+			CRingBuffer::CAllocationContext			allocationContext( g_RenderCommandBuffer, sizeof( InTypeName ) ); \
 			if ( allocationContext.GetAllocatedSize() < sizeof( InTypeName ) ) \
 			{ \
-				check( allocationContext.GetAllocatedSize() >= sizeof( CSkipRenderCommand ) ); \
+				Assert( allocationContext.GetAllocatedSize() >= sizeof( CSkipRenderCommand ) ); \
 				new( allocationContext ) CSkipRenderCommand( allocationContext.GetAllocatedSize() ); \
 				allocationContext.Commit(); \
-				new( CRingBuffer::ÑAllocationContext( GRenderCommandBuffer, sizeof(InTypeName) ) ) InTypeName InParam; \
+				new( CRingBuffer::CAllocationContext( g_RenderCommandBuffer, sizeof( InTypeName ) ) ) InTypeName InParam; \
 			} \
 			else \
 			{ \
@@ -460,15 +460,15 @@ extern void StopRenderingThread();
  */
 FORCEINLINE void FlushRenderingCommands()
 {
-	if ( !IsInRenderingThread() && GRenderFrameFinished )
+	if ( !IsInRenderingThread() && g_RenderFrameFinished )
 	{
 		// Mark of flushed rendering commands
 		UNIQUE_RENDER_COMMAND( CFlushedRenderCommands,
 							   {
-								   GRenderFrameFinished->Trigger();
+								   g_RenderFrameFinished->Trigger();
 							   } );
 
-		GRenderFrameFinished->Wait();
+		g_RenderFrameFinished->Wait();
 	}
 }
 

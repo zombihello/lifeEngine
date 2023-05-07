@@ -11,7 +11,7 @@
 
 #include "../CoreDefines.h"
 
-#ifndef DEFINED_appMemzero
+#ifndef DEFINED_Sys_Memzero
 	/**
 	 * @ingroup Core
 	 * @brief Fill memory zero
@@ -19,7 +19,7 @@
 	 * @param[in] InDest Destination for fill zero
 	 * @param[in] InCount Size of data
 	 */
-	#define appMemzero( InDest, InCount )		memset( InDest, 0, InCount )
+	#define Sys_Memzero( InDest, InCount )		memset( InDest, 0, InCount )
 #endif
 
 /**
@@ -31,7 +31,7 @@
  * @param[in] InHash Start hash
  * @return Return calculated hash
  */
-FORCEINLINE uint64 appMemFastHash( const void* InData, uint64 InLength, uint64 InHash = 0 )
+FORCEINLINE uint64 Sys_MemFastHash( const void* InData, uint64 InLength, uint64 InHash = 0 )
 {
 	byte*		data = ( byte* )InData;
 	for ( uint64 index = 0; index < InLength; ++index )
@@ -51,9 +51,9 @@ FORCEINLINE uint64 appMemFastHash( const void* InData, uint64 InLength, uint64 I
  * @return Return calculated hash
  */
 template< typename TType >
-FORCEINLINE uint64 appMemFastHash( const TType& InValue, uint64 InHash = 0 )
+FORCEINLINE uint64 Sys_MemFastHash( const TType& InValue, uint64 InHash = 0 )
 {
-	return appMemFastHash( &InValue, sizeof( InValue ), InHash);
+	return Sys_MemFastHash( &InValue, sizeof( InValue ), InHash);
 }
 
 #endif // !MEMORYBASE_H

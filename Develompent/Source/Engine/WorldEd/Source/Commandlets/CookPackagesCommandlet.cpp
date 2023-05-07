@@ -47,8 +47,10 @@ struct STMXObject
 	std::vector< CActorVar >		actorVars;	/**< Actor properties */
 };
 
-/**
- * Convert TMX property type to text
+/*
+==================
+TMXPropertyTypeToText
+==================
 */
 FORCEINLINE std::wstring TMXPropertyTypeToText( tmx::Property::Type InTmxPropertyType )
 {
@@ -66,6 +68,11 @@ FORCEINLINE std::wstring TMXPropertyTypeToText( tmx::Property::Type InTmxPropert
 	}
 }
 
+/*
+==================
+CCookPackagesCommandlet::CCookPackagesCommandlet
+==================
+*/
 CCookPackagesCommandlet::CCookPackagesCommandlet()
 	: cookedShaderPlatform( SP_Unknown )
 	, cookedPlatform( PLATFORM_Unknown )
@@ -77,15 +84,20 @@ CCookPackagesCommandlet::CCookPackagesCommandlet()
  * --------------------
  */
 
+ /*
+ ==================
+ CCookPackagesCommandlet::CookMap
+ ==================
+ */
 bool CCookPackagesCommandlet::CookMap( const SResourceInfo& InMapInfo )
 {
-	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking map '%s'" ), InMapInfo.filename.c_str() );
+	Logf( TEXT( "Cooking map '%s'\n" ), InMapInfo.filename.c_str() );
 
 	// Load TMX map
 	tmx::Map		tmxMap;
 	if ( !tmxMap.load( TCHAR_TO_ANSI( InMapInfo.path.c_str() ) ) )
 	{
-		appErrorf( TEXT( "Map '%s' not found" ), InMapInfo.path.c_str() );
+		Sys_Errorf( TEXT( "Map '%s' not found" ), InMapInfo.path.c_str() );
 		return false;
 	}
 
@@ -93,12 +105,12 @@ bool CCookPackagesCommandlet::CookMap( const SResourceInfo& InMapInfo )
 	std::vector< STMXTileset >			tilesets;
 	if ( !LoadTMXTilests( tmxMap, tilesets ) )
 	{
-		appErrorf( TEXT( "Failed loading TMX tilesets" ) );
+		Sys_Errorf( TEXT( "Failed loading TMX tilesets" ) );
 		return false;
 	}
 
 	// Clear world for spawn new actors
-	GWorld->CleanupWorld();
+	g_World->CleanupWorld();
 
 	// Spawn tiles
 	SpawnTilesInWorld( tmxMap, tilesets );
@@ -107,14 +119,19 @@ bool CCookPackagesCommandlet::CookMap( const SResourceInfo& InMapInfo )
 	SpawnActorsInWorld( tmxMap, tilesets );
 
 	// Serialize world to HDD
-	CArchive*		archive = GFileSystem->CreateFileWriter( CString::Format( TEXT( "%s") PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InMapInfo.filename.c_str(), extensionInfo.map.c_str() ), AW_NoFail );
+	CArchive*		archive = g_FileSystem->CreateFileWriter( CString::Format( TEXT( "%s") PATH_SEPARATOR TEXT( "%s.%s" ), g_CookedDir.c_str(), InMapInfo.filename.c_str(), extensionInfo.map.c_str() ), AW_NoFail );
 	archive->SetType( AT_World );
 	archive->SerializeHeader();
-	GWorld->Serialize( *archive );
+	g_World->Serialize( *archive );
 	delete archive;
 	return true;
 }
 
+/*
+==================
+CCookPackagesCommandlet::LoadTMXTilests
+==================
+*/
 bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vector<STMXTileset>& OutTilesets )
 {
 	const std::vector< tmx::Tileset >&		tmxTilesets		= InTMXMap.getTilesets();
@@ -127,7 +144,7 @@ bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 		tmx::Vector2u			tmxTileSize		= tmxTileset.getTileSize();
 		int32					countCulumns	= tmxTilesetSize.x / tmxTileSize.x;
 		int32					countRows		= tmxTilesetSize.y / tmxTileSize.y;
-		TAssetHandle<CMaterial>	tilesetMaterial = GPackageManager->FindAsset( tmxTilesetName, AT_Unknown );
+		TAssetHandle<CMaterial>	tilesetMaterial = g_PackageManager->FindAsset( tmxTilesetName, AT_Unknown );
 		if ( !tilesetMaterial.IsAssetValid() )
 		{
 			std::wstring		packageName;
@@ -138,20 +155,20 @@ bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 			ParseReferenceToAsset( tmxTilesetName, packageName, assetName, assetType );
 			if ( assetType != AT_Material )
 			{
-				appErrorf( TEXT( "Asset '%s' is not material" ), tmxTilesetName.c_str() );
+				Sys_Errorf( TEXT( "Asset '%s' is not material" ), tmxTilesetName.c_str() );
 				return false;
 			}
 
 			if ( !FindResource( materialsMap, packageName, assetName, resourceInfo ) )
 			{
-				appErrorf( TEXT( "Material '%s' not founded" ), tmxTilesetName.c_str() );
+				Sys_Errorf( TEXT( "Material '%s' not founded" ), tmxTilesetName.c_str() );
 				return false;
 			}
 
 			bool	result = CookMaterial( resourceInfo, tilesetMaterial );
 			if ( !result )
 			{
-				appErrorf( TEXT( "Failed cooking material '%s'" ), tmxTilesetName.c_str() );
+				Sys_Errorf( TEXT( "Failed cooking material '%s'" ), tmxTilesetName.c_str() );
 				return false;
 			}
 		}
@@ -191,6 +208,11 @@ bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 	return true;
 }
 
+/*
+==================
+CCookPackagesCommandlet::FindTileset
+==================
+*/
 bool CCookPackagesCommandlet::FindTileset( const std::vector<STMXTileset>& InTilesets, uint32 InIDTile, STMXTileset& OutTileset, RectFloat_t& OutTextureRect ) const
 {
 	for ( uint32 indexTileset = 0, countTilesets = InTilesets.size(); indexTileset < countTilesets; ++indexTileset )
@@ -209,6 +231,11 @@ bool CCookPackagesCommandlet::FindTileset( const std::vector<STMXTileset>& InTil
 	return false;
 }
 
+/*
+==================
+CCookPackagesCommandlet::SpawnTilesInWorld
+==================
+*/
 void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const std::vector<STMXTileset>& InTilesets )
 {
 	const std::vector< tmx::Layer::Ptr >&		tmxLayers	= InTMXMap.getLayers();
@@ -232,9 +259,9 @@ void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 					STMXTileset		tileset;
 					RectFloat_t		textureRect;
 					bool			result = FindTileset( InTilesets, tile.ID, tileset, textureRect );
-					checkMsg( result, TEXT( "Not founded tileset for tile with ID %i" ), tile.ID );
+					AssertMsg( result, TEXT( "Not founded tileset for tile with ID %i" ), tile.ID );
 
-					ASprite*			sprite				= GWorld->SpawnActor< ASprite >( Vector( x * mapTileSize.x, y * mapTileSize.y, indexLayer ) );					
+					ASprite*			sprite				= g_World->SpawnActor< ASprite >( Vector( x * mapTileSize.x, y * mapTileSize.y, indexLayer ) );					
 					CSpriteComponent*	spriteComponent		= sprite->GetSpriteComponent();
 					spriteComponent->SetType( ST_Static );
 					spriteComponent->SetMaterial( tileset.material );
@@ -255,6 +282,11 @@ void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 	}
 }
 
+/*
+==================
+CCookPackagesCommandlet::SpawnActorsInWorld
+==================
+*/
 void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, const std::vector<STMXTileset>& InTileset )
 {
 	const std::vector< tmx::Layer::Ptr >&		tmxLayers = InTMXMap.getLayers();
@@ -327,7 +359,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 						}
 						else
 						{
-							LE_LOG( LT_Warning, LC_Commandlet, TEXT( "For actor '%s' not founded tile with ID %i" ), tmxObject.name.c_str(), tileID );
+							Warnf( TEXT( "For actor '%s' not founded tile with ID %i\n" ), tmxObject.name.c_str(), tileID );
 						}
 					}
 				}
@@ -344,7 +376,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					if ( actorVar.GetName() == TEXT( "Class" ) )
 					{
 						bIsClassName = true;
-						checkMsg( objectProperty.getType() == tmx::Property::Type::String, TEXT( "Class name must be is string" ) );
+						AssertMsg( objectProperty.getType() == tmx::Property::Type::String, TEXT( "Class name must be is string" ) );
 						tmxObject.className = ANSI_TO_TCHAR( objectProperty.getStringValue().c_str() );
 						continue;
 					}
@@ -375,7 +407,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 						break;
 
 					default:
-						LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Property '%s' in actor '%s' have not supported type '%s'" ), actorVar.GetName().c_str(), tmxObject.name.c_str(), TMXPropertyTypeToText( objectProperty.getType() ).c_str() );
+						Warnf( TEXT( "Property '%s' in actor '%s' have not supported type '%s'\n" ), actorVar.GetName().c_str(), tmxObject.name.c_str(), TMXPropertyTypeToText( objectProperty.getType() ).c_str() );
 						break;
 					}
 
@@ -388,21 +420,21 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					CClass*		classActor = CClass::StaticFindClass( tmxObject.className.c_str() );
 					if ( !classActor )
 					{
-						LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Actor '%s' not spanwed because class '%s' not founded" ), tmxObject.className.c_str() );
+						Warnf( TEXT( "Actor '%s' not spanwed because class '%s' not founded\n" ), tmxObject.className.c_str() );
 						continue;
 					}
 
-					ActorRef_t		actor = GWorld->SpawnActor( classActor, tmxObject.transform.GetLocation(), tmxObject.transform.GetRotation() );
+					ActorRef_t		actor = g_World->SpawnActor( classActor, tmxObject.transform.GetLocation(), tmxObject.transform.GetRotation() );
 					actor->SetName( tmxObject.name.c_str() );
 					if ( !actor->InitProperties( tmxObject.actorVars, this ) )
 					{
-						appErrorf( TEXT( "Failed init properties in actor '%s'" ), tmxObject.name.c_str() );
+						Sys_Errorf( TEXT( "Failed init properties in actor '%s'" ), tmxObject.name.c_str() );
 						return;
 					}
 				}
 				else
 				{
-					LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Actor '%s' not spawned because class name in properties not setted" ), tmxObject.name.c_str() );
+					Warnf( TEXT( "Actor '%s' not spawned because class name in properties not setted\n" ), tmxObject.name.c_str() );
 				}
 			}
 		}
@@ -415,28 +447,33 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
  * --------------------
  */
 
+ /*
+ ==================
+ CCookPackagesCommandlet::CookMaterial
+ ==================
+ */
 bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo, TAssetHandle<CMaterial>& OutMaterial )
 {
-	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking material '%s:%s'" ), InMaterialInfo.packageName.c_str(), InMaterialInfo.filename.c_str() );
+	Logf( TEXT( "Cooking material '%s:%s'\n" ), InMaterialInfo.packageName.c_str(), InMaterialInfo.filename.c_str() );
 
 	// Parse material in JSON format
 	CConfig		lmtMaterial;
 	{
-		CArchive*		arMaterial = GFileSystem->CreateFileReader( InMaterialInfo.path, AR_NoFail );
+		CArchive*		arMaterial = g_FileSystem->CreateFileReader( InMaterialInfo.path, AR_NoFail );
 		lmtMaterial.Serialize( *arMaterial );
 		delete arMaterial;
 	}
 
 	// Getting general data
 	bool				bIsEditorContent		= lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "IsEditorContent" ) ).GetBool();
-	if ( bIsEditorContent && !GIsCookEditorContent )
+	if ( bIsEditorContent && !g_IsCookEditorContent )
 	{
-		LE_LOG( LT_Log, LC_Commandlet, TEXT( "... Skiped editor content" ) );
+		Logf( TEXT( "... Skiped editor content\n" ) );
 		return true;
 	}
 	else if ( bIsEditorContent )
 	{
-		LE_LOG( LT_Log, LC_Commandlet, TEXT( "... Editor content" ) );
+		Logf( TEXT( "... Editor content\n" ) );
 	}
 
 	bool				bIsTwoSided				= lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "IsTwoSided" ) ).GetBool();
@@ -472,7 +509,7 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 		}
 		else
 		{
-			LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Not correct type in block 'Material::Usage', must be is object. Usage flags setted to MU_AllMeshes" ) );
+			Warnf( TEXT( "Not correct type in block 'Material::Usage', must be is object. Usage flags setted to MU_AllMeshes\n" ) );
 		}
 	}
 
@@ -480,16 +517,16 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 	std::vector< CShaderMetaType* >		shaderMetaTypes;
 	{
 		CConfigValue	configVarShadersType = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "ShadersType" ) );
-		check( configVarShadersType.GetType() == CConfigValue::T_Array );
+		Assert( configVarShadersType.GetType() == CConfigValue::T_Array );
 
 		std::vector< CConfigValue >		configValues = configVarShadersType.GetArray();
 		for ( uint32 index = 0, count = configValues.size(); index < count; ++index )
 		{
 			std::wstring		shaderMetaTypeName	= configValues[ index ].GetString();
-			CShaderMetaType*	shaderMetaType		= GShaderManager->FindShaderType( shaderMetaTypeName );
+			CShaderMetaType*	shaderMetaType		= g_ShaderManager->FindShaderType( shaderMetaTypeName );
 			if ( !shaderMetaType )
 			{
-				appErrorf( TEXT( "Shader '%s' not found in engine" ), shaderMetaTypeName.c_str() );
+				Sys_Errorf( TEXT( "Shader '%s' not found in engine" ), shaderMetaTypeName.c_str() );
 				return false;
 			}
 
@@ -507,7 +544,7 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 				bool						result = shaderCompiler.CompileShader( shaderMetaType, cookedShaderPlatform, shaderCache, errorMsg, vfType );
 				if ( !result )
 				{
-					appErrorf( TEXT( "Failed cached shader '%s' for vertex factory '%s'\n\n%s" ), shaderMetaTypeName.c_str(), vfType->GetName().c_str(), errorMsg.c_str() );
+					Sys_Errorf( TEXT( "Failed cached shader '%s' for vertex factory '%s'\n\n%s" ), shaderMetaTypeName.c_str(), vfType->GetName().c_str(), errorMsg.c_str() );
 					return false;
 				}
 			}
@@ -522,7 +559,7 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 		CConfigValue	configVarScalarParameters = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "ScalarParameters" ) );
 		if ( configVarScalarParameters.IsValid() )
 		{
-			check( configVarScalarParameters.GetType() == CConfigValue::T_Array );
+			Assert( configVarScalarParameters.GetType() == CConfigValue::T_Array );
 
 			std::vector< CConfigValue >		configObjects = configVarScalarParameters.GetArray();
 			for ( uint32 index = 0, count = configObjects.size(); index < count; ++index )
@@ -541,7 +578,7 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 		CConfigValue	configVarTextureParameters = lmtMaterial.GetValue( TEXT( "Material" ), TEXT( "TextureParameters" ) );
 		if ( configVarTextureParameters.IsValid() )
 		{
-			check( configVarTextureParameters.GetType() == CConfigValue::T_Array );
+			Assert( configVarTextureParameters.GetType() == CConfigValue::T_Array );
 
 			std::vector< CConfigValue >		configObjects = configVarTextureParameters.GetArray();
 			for ( uint32 index = 0, count = configObjects.size(); index < count; ++index )
@@ -549,7 +586,7 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 				CConfigObject				configObject	= configObjects[ index ].GetObject();
 				std::wstring				name			= configObject.GetValue( TEXT( "Name" ) ).GetString();
 				std::wstring				assetReference	= configObject.GetValue( TEXT( "AssetReference" ) ).GetString();
-				TAssetHandle<CTexture2D>	texture			= GPackageManager->FindAsset( assetReference, AT_Unknown );
+				TAssetHandle<CTexture2D>	texture			= g_PackageManager->FindAsset( assetReference, AT_Unknown );
 				if ( !texture.IsAssetValid() )
 				{
 					std::wstring		packageName;
@@ -560,20 +597,20 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 					ParseReferenceToAsset( assetReference, packageName, assetName, assetType );
 					if ( assetType != AT_Texture2D )
 					{
-						appErrorf( TEXT( "Asset '%s' is not texture" ), assetReference.c_str() );
+						Sys_Errorf( TEXT( "Asset '%s' is not texture" ), assetReference.c_str() );
 						return false;
 					}
 
 					if ( !FindResource( texturesMap, packageName, assetName, resourceInfo ) )
 					{
-						appErrorf( TEXT( "Texture '%s' not founded" ), assetReference.c_str() );
+						Sys_Errorf( TEXT( "Texture '%s' not founded" ), assetReference.c_str() );
 						return false;
 					}
 
 					bool	result = CookTexture2D( resourceInfo, texture );
 					if ( !result )
 					{
-						appErrorf( TEXT( "Failed cooking texture '%s'" ), assetReference.c_str() );
+						Sys_Errorf( TEXT( "Failed cooking texture '%s'" ), assetReference.c_str() );
 						return false;
 					}
 				}
@@ -614,6 +651,11 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
  * ----------------------
  */
 
+ /*
+ ==================
+ CCookPackagesCommandlet::ConvertTexture2D
+ ==================
+ */
 TSharedPtr<CTexture2D> CCookPackagesCommandlet::ConvertTexture2D( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
 {
 	// Loading data from image
@@ -632,7 +674,7 @@ TSharedPtr<CTexture2D> CCookPackagesCommandlet::ConvertTexture2D( const std::wst
 	{
 		filename = InPath;
 
-		appNormalizePathSeparators( filename );
+		Sys_NormalizePathSeparators( filename );
 		std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 		if ( pathSeparatorPos != std::string::npos )
 		{
@@ -652,7 +694,7 @@ TSharedPtr<CTexture2D> CCookPackagesCommandlet::ConvertTexture2D( const std::wst
 	texture2DRef->SetAssetSourceFile( InPath );
 	{
 		std::vector< byte >		tempData;
-		tempData.resize( sizeX * sizeY * GPixelFormats[ PF_A8R8G8B8 ].blockBytes );
+		tempData.resize( sizeX * sizeY * g_PixelFormats[ PF_A8R8G8B8 ].blockBytes );
 		memcpy( tempData.data(), data, tempData.size() );
 		texture2DRef->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 	}
@@ -662,9 +704,14 @@ TSharedPtr<CTexture2D> CCookPackagesCommandlet::ConvertTexture2D( const std::wst
 	return texture2DRef;
 }
 
+/*
+==================
+CCookPackagesCommandlet::CookTexture2D
+==================
+*/
 bool CCookPackagesCommandlet::CookTexture2D( const SResourceInfo& InTexture2DInfo, TAssetHandle<CTexture2D>& OutTexture2D )
 {
-	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking texture 2D '%s:%s'" ), InTexture2DInfo.packageName.c_str(), InTexture2DInfo.filename.c_str() );
+	Logf( TEXT( "Cooking texture 2D '%s:%s'\n" ), InTexture2DInfo.packageName.c_str(), InTexture2DInfo.filename.c_str() );
 	
 	TSharedPtr<CTexture2D>		texture2DRef = ConvertTexture2D( InTexture2DInfo.path, InTexture2DInfo.filename );
 	OutTexture2D				= TAssetHandle<CTexture2D>( texture2DRef, MakeSharedPtr<SAssetReference>( AT_Texture2D, texture2DRef->GetGUID() ) );
@@ -677,17 +724,22 @@ bool CCookPackagesCommandlet::CookTexture2D( const SResourceInfo& InTexture2DInf
  * ---------------------
  */
 
+ /*
+ ==================
+ CCookPackagesCommandlet::CookAllResources
+ ==================
+ */
 void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = false */ )
 {
 	// Compile all global shaders
 	{
-		LE_LOG( LT_Log, LC_Commandlet, TEXT( "Compiling global shaders" ) );
+		Logf( TEXT( "Compiling global shaders\n" ) );
 		
 		CShaderCompiler		shaderCompiler;
 		bool		result = shaderCompiler.CompileAll( shaderCache, cookedShaderPlatform, true );
 		if ( !result )
 		{
-			appErrorf( TEXT( "Failed compiling global shaders" ) );
+			Sys_Errorf( TEXT( "Failed compiling global shaders" ) );
 			return;
 		}
 	}
@@ -706,7 +758,7 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			bool	result = CookTexture2D( itAsset->second, texture2D );
 			if ( !result )
 			{
-				appErrorf( TEXT( "Failed cooking texture 2D '%s'" ), itAsset->second.filename.c_str() );
+				Sys_Errorf( TEXT( "Failed cooking texture 2D '%s'" ), itAsset->second.filename.c_str() );
 				return;
 			}
 		}
@@ -726,7 +778,7 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			bool	result = CookMaterial( itAsset->second, material );
 			if ( !result )
 			{
-				appErrorf( TEXT( "Failed cooking material '%s'" ), itAsset->second.filename.c_str() );
+				Sys_Errorf( TEXT( "Failed cooking material '%s'" ), itAsset->second.filename.c_str() );
 				return;
 			}
 		}
@@ -746,7 +798,7 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			bool	result = CookAudioBank( itAsset->second, audioBank );
 			if ( !result )
 			{
-				appErrorf( TEXT( "Failed cooking audio bank '%s'" ), itAsset->second.filename.c_str() );
+				Sys_Errorf( TEXT( "Failed cooking audio bank '%s'" ), itAsset->second.filename.c_str() );
 				return;
 			}
 		}
@@ -766,7 +818,7 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			bool					result = CookPhysMaterial( itAsset->second, physMaterial );
 			if ( !result )
 			{
-				appErrorf( TEXT( "Failed cooking physics material '%s'" ), itAsset->second.filename.c_str() );
+				Sys_Errorf( TEXT( "Failed cooking physics material '%s'" ), itAsset->second.filename.c_str() );
 				return;
 			}
 		}
@@ -779,6 +831,11 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
  * ----------------------
  */
 
+ /*
+ ==================
+ CCookPackagesCommandlet::ConvertAudioBank
+ ==================
+ */
 TSharedPtr<CAudioBank> CCookPackagesCommandlet::ConvertAudioBank( const std::wstring& InPath, const std::wstring& InName /* = TEXT( "" ) */ )
 {
 	// Create audio bank and init him
@@ -790,7 +847,7 @@ TSharedPtr<CAudioBank> CCookPackagesCommandlet::ConvertAudioBank( const std::wst
 	{
 		filename = InPath;
 
-		appNormalizePathSeparators( filename );
+		Sys_NormalizePathSeparators( filename );
 		std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 		if ( pathSeparatorPos != std::string::npos )
 		{
@@ -810,9 +867,14 @@ TSharedPtr<CAudioBank> CCookPackagesCommandlet::ConvertAudioBank( const std::wst
 	return audioBankRef;
 }
 
+/*
+==================
+CCookPackagesCommandlet::CookAudioBank
+==================
+*/
 bool CCookPackagesCommandlet::CookAudioBank( const SResourceInfo& InAudioBankInfo, TAssetHandle<CAudioBank>& OutAudioBank )
 {
-	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking audio bank '%s:%s'" ), InAudioBankInfo.packageName.c_str(), InAudioBankInfo.filename.c_str() );
+	Logf( TEXT( "Cooking audio bank '%s:%s'\n" ), InAudioBankInfo.packageName.c_str(), InAudioBankInfo.filename.c_str() );
 	
 	TSharedPtr<CAudioBank>		audioBankRef = ConvertAudioBank( InAudioBankInfo.path, InAudioBankInfo.filename );
 	OutAudioBank				= TAssetHandle<CAudioBank>( audioBankRef, MakeSharedPtr<SAssetReference>( AT_AudioBank, audioBankRef->GetGUID() ) );
@@ -825,14 +887,19 @@ bool CCookPackagesCommandlet::CookAudioBank( const SResourceInfo& InAudioBankInf
  * --------------------
  */
 
+ /*
+ ==================
+ CCookPackagesCommandlet::CookPhysMaterial
+ ==================
+ */
 bool CCookPackagesCommandlet::CookPhysMaterial( const SResourceInfo& InPhysMaterialInfo, TAssetHandle<CPhysicsMaterial>& OutPhysMaterial )
 {
-	LE_LOG( LT_Log, LC_Commandlet, TEXT( "Cooking physics material '%s:%s'" ), InPhysMaterialInfo.packageName.c_str(), InPhysMaterialInfo.filename.c_str() );
+	Logf( TEXT( "Cooking physics material '%s:%s'\n" ), InPhysMaterialInfo.packageName.c_str(), InPhysMaterialInfo.filename.c_str() );
 	
 	// Parse physics material in JSON format
 	CConfig		pmtMaterial;
 	{
-		CArchive*	arMaterial = GFileSystem->CreateFileReader( InPhysMaterialInfo.path, AR_NoFail );
+		CArchive*	arMaterial = g_FileSystem->CreateFileReader( InPhysMaterialInfo.path, AR_NoFail );
 		pmtMaterial.Serialize( *arMaterial );
 		delete arMaterial;
 	}
@@ -851,7 +918,7 @@ bool CCookPackagesCommandlet::CookPhysMaterial( const SResourceInfo& InPhysMater
 	physMaterialRef->SetDynamicFriction( dynamicFriction );
 	physMaterialRef->SetRestitution( restitution );
 	physMaterialRef->SetDensity( density );
-	physMaterialRef->SetSurfaceType( appTextToESurfaceType( surfaceTypeName ) );
+	physMaterialRef->SetSurfaceType( Sys_TextToESurfaceType( surfaceTypeName ) );
 
 	// Save to package
 	OutPhysMaterial = TAssetHandle<CPhysicsMaterial>( physMaterialRef, MakeSharedPtr<SAssetReference>( AT_PhysicsMaterial, physMaterialRef->GetGUID() ) );
@@ -864,22 +931,32 @@ bool CCookPackagesCommandlet::CookPhysMaterial( const SResourceInfo& InPhysMater
  * --------------------
  */
 
+ /*
+ ==================
+ CCookPackagesCommandlet::SaveToPackage
+ ==================
+ */
 bool CCookPackagesCommandlet::SaveToPackage( const SResourceInfo& InResourceInfo, const TAssetHandle<CAsset>& InAsset )
 {
-	std::wstring		outputPackage = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), GCookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
-	PackageRef_t			package = GPackageManager->LoadPackage( outputPackage, true );
+	std::wstring		outputPackage = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), g_CookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
+	PackageRef_t			package = g_PackageManager->LoadPackage( outputPackage, true );
 	package->Add( InAsset );
 
 	bool	result = package->Save( outputPackage );
 	if ( !result )
 	{
-		appErrorf( TEXT( "Failed saving package '%s'" ), InResourceInfo.packageName.c_str() );
+		Sys_Errorf( TEXT( "Failed saving package '%s'" ), InResourceInfo.packageName.c_str() );
 		return false;
 	}
 
 	return true;
 }
 
+/*
+==================
+CCookPackagesCommandlet::InsertResourceToList
+==================
+*/
 void CCookPackagesCommandlet::InsertResourceToList( ResourceMap_t& InOutResourceMap, const std::wstring& InPackageName, const std::wstring& InFilename, const SResourceInfo& InResourceInfo )
 {
 	auto		itPackage = InOutResourceMap.find( InPackageName );
@@ -897,6 +974,11 @@ void CCookPackagesCommandlet::InsertResourceToList( ResourceMap_t& InOutResource
 	}
 }
 
+/*
+==================
+CCookPackagesCommandlet::IndexingResources
+==================
+*/
 void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, bool InIsRootDir /* = false */, bool InIsAlwaysCookDir /* = false */, const std::wstring& InParentDirName /* = TEXT( "" ) */ )
 {
 	// Getting package name from dir name
@@ -904,7 +986,7 @@ void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 	if ( !InIsRootDir )
 	{
 		packageName = InRootDir;
-		appNormalizePathSeparators( packageName );
+		Sys_NormalizePathSeparators( packageName );
 		std::size_t			pathSeparatorPos = packageName.find_last_of( PATH_SEPARATOR );
 		if ( pathSeparatorPos != std::string::npos )
 		{
@@ -918,7 +1000,7 @@ void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 		}
 	}
 
-	std::vector< std::wstring >		files = GFileSystem->FindFiles( InRootDir, true, true );
+	std::vector< std::wstring >		files = g_FileSystem->FindFiles( InRootDir, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
 	{
 		std::wstring		file		= files[ index ];
@@ -931,14 +1013,14 @@ void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 			continue;
 		}
 
-		// Getting extension for check resource type
+		// Getting extension for Assert resource type
 		std::wstring		extension = file;
 		extension.erase( 0, dotPos + 1 );
 
 		// Getting filename
 		std::wstring		filename = file;
 		{
-			appNormalizePathSeparators( filename );
+			Sys_NormalizePathSeparators( filename );
 			std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 			if ( pathSeparatorPos != std::string::npos )
 			{
@@ -981,9 +1063,14 @@ void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 	}
 }
 
+/*
+==================
+CCookPackagesCommandlet::Main
+==================
+*/
 bool CCookPackagesCommandlet::Main( const CCommandLine& InCommandLine )
 {
-	GIsCooker = true;
+	g_IsCooker = true;
 	std::vector< std::wstring >			mapsToCook;
 
 	// Parse arguments
@@ -991,61 +1078,61 @@ bool CCookPackagesCommandlet::Main( const CCommandLine& InCommandLine )
 		std::wstring		platformName = InCommandLine.GetFirstValue( TEXT( "platform" ) );
 		if ( !platformName.empty() )
 		{
-			cookedPlatform = appPlatformStringToType( platformName );
-			check( cookedPlatform != PLATFORM_Unknown );
+			cookedPlatform = Sys_PlatformStringToType( platformName );
+			Assert( cookedPlatform != PLATFORM_Unknown );
 		}
 
 		// Getting all maps from commands
 		mapsToCook = InCommandLine.GetValues( TEXT( "maps" ) );
 	}
 
-	checkMsg( !mapsToCook.empty(), TEXT( "Mpas to cook not entered" ) );
+	AssertMsg( !mapsToCook.empty(), TEXT( "Mpas to cook not entered" ) );
 
 	// Set shader cooked platform by cooked platform
 	switch ( cookedPlatform )
 	{
 	case PLATFORM_Windows:		cookedShaderPlatform = SP_PCD3D_SM5;			break;
-	default:					appErrorf( TEXT( "Unknown platform" ) );		break;
+	default:					Sys_Errorf( TEXT( "Unknown platform" ) );		break;
 	}
 
 	// Indexing resources in content dirs
 	{
 		// Always cook dirs
-		std::vector< CConfigValue >			configVarAlwaysCookDirs = GConfig.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "AlwaysCookDirs" ) ).GetArray();
+		std::vector< CConfigValue >			configVarAlwaysCookDirs = g_Config.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "AlwaysCookDirs" ) ).GetArray();
 		for ( uint32 index = 0, count = configVarAlwaysCookDirs.size(); index < count; ++index )
 		{
 			const CConfigValue&		configAlwaysCookDirItem = configVarAlwaysCookDirs[ index ];
-			check( configAlwaysCookDirItem.GetType() == CConfigValue::T_Object );
+			Assert( configAlwaysCookDirItem.GetType() == CConfigValue::T_Object );
 			CConfigObject			objectAlwaysCookDir = configAlwaysCookDirItem.GetObject();
 
 			std::wstring		packageSufix	= objectAlwaysCookDir.GetValue( TEXT( "PackageSufix" ) ).GetString();
 			std::wstring		path			= objectAlwaysCookDir.GetValue( TEXT( "Path" ) ).GetString();
 			if ( !path.empty() )
 			{
-				IndexingResources( appBaseDir() + PATH_SEPARATOR + path, true, true, packageSufix );
+				IndexingResources( Sys_BaseDir() + PATH_SEPARATOR + path, true, true, packageSufix );
 			}
 		}
 
 		// Cooked dirs
-		std::vector< CConfigValue >			configVarCookDirs = GConfig.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookDirs" ) ).GetArray();
+		std::vector< CConfigValue >			configVarCookDirs = g_Config.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookDirs" ) ).GetArray();
 		for ( uint32 index = 0, count = configVarCookDirs.size(); index < count; ++index )
 		{
 			const CConfigValue&		configCookDirItem = configVarCookDirs[ index ];
-			check( configCookDirItem.GetType() == CConfigValue::T_Object );
+			Assert( configCookDirItem.GetType() == CConfigValue::T_Object );
 			CConfigObject			objectCookDir = configCookDirItem.GetObject();
 
 			std::wstring		packageSufix	= objectCookDir.GetValue( TEXT( "PackageSufix" ) ).GetString();
 			std::wstring		path			= objectCookDir.GetValue( TEXT( "Path" ) ).GetString();
 			if ( !path.empty() )
 			{
-				IndexingResources( appBaseDir() + PATH_SEPARATOR + path, true, false, packageSufix );
+				IndexingResources( Sys_BaseDir() + PATH_SEPARATOR + path, true, false, packageSufix );
 			}
 		}
 	}
 
 	// Getting output cooked directory and extensions for saving
 	{
-		CConfigObject		configObjExtensions = GConfig.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "Extensions" ) ).GetObject();
+		CConfigObject		configObjExtensions = g_Config.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "Extensions" ) ).GetObject();
 		extensionInfo.package	= configObjExtensions.GetValue( TEXT( "Package" ) ).GetString();
 		if ( extensionInfo.package.empty() )
 		{
@@ -1060,10 +1147,10 @@ bool CCookPackagesCommandlet::Main( const CCommandLine& InCommandLine )
 	}
 
 	// Clear table of content and if cooked dir already created remove it
-	GTableOfContents.Clear();
-	if ( GFileSystem->IsExistFile( GCookedDir, true ) )
+	g_TableOfContents.Clear();
+	if ( g_FileSystem->IsExistFile( g_CookedDir, true ) )
 	{
-		GFileSystem->DeleteDirectory( GCookedDir, true );
+		g_FileSystem->DeleteDirectory( g_CookedDir, true );
 	}
 
 	// Cook all resource with flag bAlwaysCook = true
@@ -1076,21 +1163,21 @@ bool CCookPackagesCommandlet::Main( const CCommandLine& InCommandLine )
 		auto					itResource	= mapsMap.find( mapsToCook[ index ] );
 		if ( itResource == mapsMap.end() )
 		{
-			LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Map '%s' not found, cook it map skiped" ), mapName.c_str() );
+			Warnf( TEXT( "Map '%s' not found, cook it map skiped\n" ), mapName.c_str() );
 			continue;
 		}
 
 		bool	result = CookMap( itResource->second );
 		if ( !result )
 		{
-			appErrorf( TEXT( "Failed cooking map '%s'" ), mapName.c_str() );
+			Sys_Errorf( TEXT( "Failed cooking map '%s'" ), mapName.c_str() );
 			return false;
 		}
 	}
 
 	// Serialize shader cache
 	{
-		CArchive*		archive = GFileSystem->CreateFileWriter( GCookedDir + PATH_SEPARATOR + GShaderManager->GetShaderCacheFilename( cookedShaderPlatform ), AW_NoFail );
+		CArchive*		archive = g_FileSystem->CreateFileWriter( g_CookedDir + PATH_SEPARATOR + g_ShaderManager->GetShaderCacheFilename( cookedShaderPlatform ), AW_NoFail );
 		archive->SetType( AT_ShaderCache );
 		archive->SerializeHeader();
 		shaderCache.Serialize( *archive );
@@ -1099,11 +1186,11 @@ bool CCookPackagesCommandlet::Main( const CCommandLine& InCommandLine )
 
 	// Serialize table of contents
 	{
-		CArchive*		archive = GFileSystem->CreateFileWriter( GCookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC(), AW_NoFail );
-		GTableOfContents.Serialize( *archive );
+		CArchive*		archive = g_FileSystem->CreateFileWriter( g_CookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC(), AW_NoFail );
+		g_TableOfContents.Serialize( *archive );
 		delete archive;
 	}
 
-	GIsCooker = false;
+	g_IsCooker = false;
 	return true;
 }

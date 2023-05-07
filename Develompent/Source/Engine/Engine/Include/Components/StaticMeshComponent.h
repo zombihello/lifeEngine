@@ -54,7 +54,7 @@ public:
      */
     FORCEINLINE void SetMaterial( uint32 InIndex, const TAssetHandle<CMaterial>& InMaterial )
     {
-        check( InIndex < overrideMaterials.size() );
+        Assert( InIndex < overrideMaterials.size() );
 		overrideMaterials[ InIndex ] = InMaterial;
 		bIsDirtyDrawingPolicyLink = true;
     }
@@ -99,7 +99,7 @@ public:
 		{
 			return nullptr;
 		}
-        check( InIndex < overrideMaterials.size() );
+        Assert( InIndex < overrideMaterials.size() );
 		
 		TAssetHandle<CMaterial>		material = overrideMaterials[ InIndex ];
         return material.IsValid() ? material : staticMeshRef->GetMaterial( InIndex );

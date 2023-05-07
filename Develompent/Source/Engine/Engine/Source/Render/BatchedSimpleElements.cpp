@@ -5,18 +5,23 @@
 #include "Render/Shaders/SimpleElementShader.h"
 #include "Render/Scene.h"
 
+/*
+==================
+CBatchedSimpleElements::Draw
+==================
+*/
 void CBatchedSimpleElements::Draw( class CBaseDeviceContextRHI* InDeviceContext, const CSceneView& InSceneView ) const
 {
-	CSimpleElementVertexShader*			vertexShader	= GShaderManager->FindInstance< CSimpleElementVertexShader, CSimpleElementVertexFactory >();
-	CSimpleElementPixelShader*			pixelShader		= GShaderManager->FindInstance< CSimpleElementPixelShader, CSimpleElementVertexFactory >();
+	CSimpleElementVertexShader*			vertexShader	= g_ShaderManager->FindInstance< CSimpleElementVertexShader, CSimpleElementVertexFactory >();
+	CSimpleElementPixelShader*			pixelShader		= g_ShaderManager->FindInstance< CSimpleElementPixelShader, CSimpleElementVertexFactory >();
 
-	GRHI->SetBoundShaderState( InDeviceContext, GRHI->CreateBoundShaderState( TEXT( "SimpleElementBoundShaderState" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), vertexShader->GetVertexShader(), pixelShader->GetPixelShader() ) );
+	g_RHI->SetBoundShaderState( InDeviceContext, g_RHI->CreateBoundShaderState( TEXT( "SimpleElementBoundShaderState" ), g_SimpleElementVertexDeclaration.GetVertexDeclarationRHI(), vertexShader->GetVertexShader(), pixelShader->GetPixelShader() ) );
 	
 	// Draw lines
 	if ( !lineVerteces.empty() )
 	{
 		SCOPED_DRAW_EVENT( EventSimpleElements, DEC_SIMPLEELEMENTS, TEXT( "Lines" ) );
-		GRHI->DrawPrimitiveUP( InDeviceContext, PT_LineList, 0, lineVerteces.size() / 2, lineVerteces.data(), sizeof( SSimpleElementVertexType ) );
+		g_RHI->DrawPrimitiveUP( InDeviceContext, PT_LineList, 0, lineVerteces.size() / 2, lineVerteces.data(), sizeof( SSimpleElementVertexType ) );
 	}
 
 	// Draw thick lines
@@ -37,7 +42,7 @@ void CBatchedSimpleElements::Draw( class CBaseDeviceContextRHI* InDeviceContext,
 			thickVertices[ 3 ]			= SSimpleElementVertexType{ Vector4D( thickLine.start + rectUp, 1.f ), Vector2D( 0.f, 1.f ), thickLine.color };
 			thickVertices[ 1 ]			= SSimpleElementVertexType{ Vector4D( thickLine.end + rectUp, 1.f ), Vector2D( 1.f, 1.f ), thickLine.color };
 			thickVertices[ 0 ]			= SSimpleElementVertexType{ Vector4D( thickLine.end - rectUp, 1.f ), Vector2D( 1.f, 0.f ), thickLine.color };
-			GRHI->DrawPrimitiveUP( InDeviceContext, PT_TriangleStrip, 0, 2, &thickVertices[ 0 ], sizeof( SSimpleElementVertexType ) );
+			g_RHI->DrawPrimitiveUP( InDeviceContext, PT_TriangleStrip, 0, 2, &thickVertices[ 0 ], sizeof( SSimpleElementVertexType ) );
 		}
 	}
 }

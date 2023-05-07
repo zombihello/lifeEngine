@@ -19,6 +19,11 @@ CConVar		CVarRWireframe( TEXT( "r.wireframe" ), TEXT( "0" ), CVT_Bool, TEXT( "En
 CConVar		CVarRLight( TEXT( "r.light" ), TEXT( "1" ), CVT_Bool, TEXT( "Enable/Disable light pass" ) );
 #endif // WITH_EDITOR
 
+/*
+==================
+CSceneView::CSceneView
+==================
+*/
 CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatrix, const Matrix& InViewMatrix, float InSizeX, float InSizeY, const CColor& InBackgroundColor, ShowFlags_t InShowFlags )
 	: viewMatrix( InViewMatrix )
 	, projectionMatrix( InProjectionMatrix )
@@ -45,6 +50,11 @@ CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatr
 	frustum.Update( viewProjectionMatrix );
 }
 
+/*
+==================
+CSceneView::ScreenToWorld
+==================
+*/
 void CSceneView::ScreenToWorld( const Vector2D& InScreenPoint, Vector& OutWorldOrigin, Vector& OutWorldDirection ) const
 {
 	int32	x = SMath::Trunc( InScreenPoint.x ),
@@ -94,18 +104,33 @@ void CSceneView::ScreenToWorld( const Vector2D& InScreenPoint, Vector& OutWorldO
 }
 
 
+/*
+==================
+CScene::CScene
+==================
+*/
 CScene::CScene()
 	: exposure( 1.f )
 {}
 
+/*
+==================
+CScene::~CScene
+==================
+*/
 CScene::~CScene()
 {
 	Clear();
 }
 
+/*
+==================
+CScene::AddPrimitive
+==================
+*/
 void CScene::AddPrimitive( class CPrimitiveComponent* InPrimitive )
 {
-	check( InPrimitive );
+	Assert( InPrimitive );
 
 	// If primitive already on scene
 	if ( InPrimitive->scene == this )
@@ -123,6 +148,11 @@ void CScene::AddPrimitive( class CPrimitiveComponent* InPrimitive )
 	primitives.push_back( InPrimitive );
 }
 
+/*
+==================
+CScene::RemovePrimitive
+==================
+*/
 void CScene::RemovePrimitive( class CPrimitiveComponent* InPrimitive )
 {
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
@@ -137,9 +167,14 @@ void CScene::RemovePrimitive( class CPrimitiveComponent* InPrimitive )
 	}
 }
 
+/*
+==================
+CScene::AddLight
+==================
+*/
 void CScene::AddLight( class CLightComponent* InLight )
 {
-	check( InLight );
+	Assert( InLight );
 
 	// If light already on scene
 	if ( InLight->scene == this )
@@ -156,6 +191,11 @@ void CScene::AddLight( class CLightComponent* InLight )
 	lights.push_back( InLight );
 }
 
+/*
+==================
+CScene::RemoveLight
+==================
+*/
 void CScene::RemoveLight( class CLightComponent* InLight )
 {
 	for ( auto it = lights.begin(), itEnd = lights.end(); it != itEnd; ++it )
@@ -169,6 +209,11 @@ void CScene::RemoveLight( class CLightComponent* InLight )
 	}
 }
 
+/*
+==================
+CScene::Clear
+==================
+*/
 void CScene::Clear()
 {
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
@@ -186,9 +231,14 @@ void CScene::Clear()
 
 	primitives.clear();
 	lights.clear();
-	exposure = GEngine->GetExposure();
+	exposure = g_Engine->GetExposure();
 }
 
+/*
+==================
+CScene::BuildView
+==================
+*/
 void CScene::BuildView( const CSceneView& InSceneView )
 {
 	// Add to SDGs visible primitives
@@ -212,6 +262,11 @@ void CScene::BuildView( const CSceneView& InSceneView )
 	}
 }
 
+/*
+==================
+CScene::ClearView
+==================
+*/
 void CScene::ClearView()
 {
 	// Clear all instances in scene depth groups
@@ -223,11 +278,21 @@ void CScene::ClearView()
 	frame.visibleLights.clear();
 }
 
+/*
+==================
+CScene::SetExposure
+==================
+*/
 void CScene::SetExposure( float InExposure )
 {
 	exposure = InExposure;
 }
 
+/*
+==================
+CScene::GetExposure
+==================
+*/
 float CScene::GetExposure() const
 {
 	return exposure;

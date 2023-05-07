@@ -219,7 +219,7 @@ public:
 	 */
 	FORCEINLINE ID3D11Texture2D* GetResource()
 	{
-		check( resolveTarget2D );
+		Assert( resolveTarget2D );
 		return resolveTarget2D->GetResource();
 	}
 

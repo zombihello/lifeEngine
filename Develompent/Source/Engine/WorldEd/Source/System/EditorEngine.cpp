@@ -45,30 +45,45 @@ public:
 	 */
 	virtual void Draw( CViewport* InViewport ) override
 	{
-		GUIEngine->BeginDraw();
-		GUIEngine->EndDraw();
+		g_UIEngine->BeginDraw();
+		g_UIEngine->EndDraw();
 	}
 };
 
+/*
+==================
+CEditorEngine::CEditorEngine
+==================
+*/
 CEditorEngine::CEditorEngine()
 	: currentEditorMode( EM_Default )
 	, editorInterfaceViewportClient( nullptr )
 {}
 
+/*
+==================
+CEditorEngine::~CEditorEngine
+==================
+*/
 CEditorEngine::~CEditorEngine()
 {}
 
+/*
+==================
+CEditorEngine::Init
+==================
+*/
 void CEditorEngine::Init()
 {
-	GEditorEngine = this;
+	g_EditorEngine = this;
 
 	// If failed serialize TOC file, we generate new TOC file and serialize data to archive
 	if ( !SerializeTOC() )
 	{
-		appSetSplashText( STT_StartupProgress, TEXT( "Prepare engine content" ) );
+		Sys_SetSplashText( STT_StartupProgress, TEXT( "Prepare engine content" ) );
 		AddTOCEntries( GetEngineContentDir() );
 
-		appSetSplashText( STT_StartupProgress, TEXT( "Prepare game content" ) );
+		Sys_SetSplashText( STT_StartupProgress, TEXT( "Prepare game content" ) );
 		AddTOCEntries( GetGameContentDir() );
 
 		SerializeTOC( true );
@@ -77,25 +92,25 @@ void CEditorEngine::Init()
 	Super::Init();
 
 	// Register actor factory for assets
-	GActorFactory.Register( AT_StaticMesh,	&AStaticMesh::SpawnActorAsset );
-	GActorFactory.Register( AT_AudioBank,	&AAudio::SpawnActorAsset );
+	g_ActorFactory.Register( AT_StaticMesh,	&AStaticMesh::SpawnActorAsset );
+	g_ActorFactory.Register( AT_AudioBank,	&AAudio::SpawnActorAsset );
 
 	// Register importers of assets
-	GAssetFactory.RegisterImporter( &CTexture2DImporter::Import, &CTexture2DImporter::Reimport, nullptr, CTexture2DImporter::GetSupportedExtensions(), AT_Texture2D );
-	GAssetFactory.RegisterImporter( &CAudioBankImporter::Import, &CAudioBankImporter::Reimport, nullptr, CAudioBankImporter::GetSupportedExtensions(), AT_AudioBank );
-	GAssetFactory.RegisterImporter( &CStaticMeshImporter::Import, &CStaticMeshImporter::Reimport, &CStaticMeshImporter::ShowImportSettings, CStaticMeshImporter::GetSupportedExtensions(), AT_StaticMesh );
+	g_AssetFactory.RegisterImporter( &CTexture2DImporter::Import, &CTexture2DImporter::Reimport, nullptr, CTexture2DImporter::GetSupportedExtensions(), AT_Texture2D );
+	g_AssetFactory.RegisterImporter( &CAudioBankImporter::Import, &CAudioBankImporter::Reimport, nullptr, CAudioBankImporter::GetSupportedExtensions(), AT_AudioBank );
+	g_AssetFactory.RegisterImporter( &CStaticMeshImporter::Import, &CStaticMeshImporter::Reimport, &CStaticMeshImporter::ShowImportSettings, CStaticMeshImporter::GetSupportedExtensions(), AT_StaticMesh );
 
 	// Create window and main viewport
-	uint32						windowWidth		= GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
-	uint32						windowHeight	= GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
+	uint32						windowWidth		= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
+	uint32						windowHeight	= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
 
-	GWindow->SetTitle( GetEditorName().c_str() );
-	GWindow->SetSize( windowWidth, windowHeight );
+	g_Window->SetTitle( GetEditorName().c_str() );
+	g_Window->SetSize( windowWidth, windowHeight );
 
 	editorInterfaceViewportClient	= new CEditorInterfaceViewportClient();
 	CViewport*	viewport			= new CViewport();
 	viewport->SetViewportClient( editorInterfaceViewportClient );
-	viewport->Update( false, windowWidth, windowHeight, GWindow->GetHandle() );
+	viewport->Update( false, windowWidth, windowHeight, g_Window->GetHandle() );
 	viewports.push_back( viewport );
 
 	// Init all windows
@@ -130,6 +145,11 @@ void CEditorEngine::Init()
 	viewportWindows[LVT_Perspective]->Init();
 }
 
+/*
+==================
+CEditorEngine::Tick
+==================
+*/
 void CEditorEngine::Tick( float InDeltaSeconds )
 {
 	Super::Tick( InDeltaSeconds );
@@ -141,7 +161,7 @@ void CEditorEngine::Tick( float InDeltaSeconds )
 	}
 	
 	// Reset input events after engine tick
-	GInputSystem->ResetEvents();
+	g_InputSystem->ResetEvents();
 
 	// Wait while render thread is rendering of the frame
 	FlushRenderingCommands();
@@ -153,6 +173,11 @@ void CEditorEngine::Tick( float InDeltaSeconds )
 	}
 }
 
+/*
+==================
+CEditorEngine::Shutdown
+==================
+*/
 void CEditorEngine::Shutdown()
 {
 	Super::Shutdown();
@@ -170,9 +195,14 @@ void CEditorEngine::Shutdown()
 		delete editorInterfaceViewportClient;
 		editorInterfaceViewportClient = nullptr;
 	}
-	GEditorEngine = nullptr;
+	g_EditorEngine = nullptr;
 }
 
+/*
+==================
+CEditorEngine::ProcessEvent
+==================
+*/
 void CEditorEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	Super::ProcessEvent( InWindowEvent );
@@ -180,21 +210,26 @@ void CEditorEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 	switch ( InWindowEvent.type )
 	{
 	case SWindowEvent::T_WindowClose:
-		if ( InWindowEvent.events.windowClose.windowId == GWindow->GetID() )
+		if ( InWindowEvent.events.windowClose.windowId == g_Window->GetID() )
 		{
-			GIsRequestingExit = true;
+			g_IsRequestingExit = true;
 		}
 		break;
 
 	case SWindowEvent::T_WindowResize:
-		if ( InWindowEvent.events.windowResize.windowId == GWindow->GetID() )
+		if ( InWindowEvent.events.windowResize.windowId == g_Window->GetID() )
 		{
-			viewports[0]->Update( false, InWindowEvent.events.windowResize.width, InWindowEvent.events.windowResize.height, GWindow->GetHandle() );
+			viewports[0]->Update( false, InWindowEvent.events.windowResize.width, InWindowEvent.events.windowResize.height, g_Window->GetHandle() );
 		}
 		break;
 	}
 }
 
+/*
+==================
+CEditorEngine::PrintLogToWidget
+==================
+*/
 void CEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage )
 {
 	if ( logsWindow && logsWindow->IsInit() )
@@ -203,22 +238,32 @@ void CEditorEngine::PrintLogToWidget( ELogType InLogType, const tchar* InMessage
 	}
 }
 
+/*
+==================
+CEditorEngine::NewMap
+==================
+*/
 void CEditorEngine::NewMap()
 {
-	LE_LOG( LT_Log, LC_General, TEXT( "Create a new map" ) );
+	Logf( TEXT( "Create a new map\n" ) );
 	
 	// Clean up world and call garbage collector of unused packages and assets
-	GWorld->CleanupWorld();
-	GPackageManager->GarbageCollector();
+	g_World->CleanupWorld();
+	g_PackageManager->GarbageCollector();
 	
 	SEditorDelegates::onEditorCreatedNewMap.Broadcast();
 }
 
+/*
+==================
+CEditorEngine::LoadMap
+==================
+*/
 bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	if ( !Super::LoadMap( InMap, OutError ) )
 	{
-		LE_LOG( LT_Warning, LC_General, TEXT( "Failed loading map '%s'. Error: %s" ), InMap.c_str(), OutError.c_str() );
+		Warnf( TEXT( "Failed loading map '%s'. Error: %s\n" ), InMap.c_str(), OutError.c_str() );
 		NewMap();
 	}
 	else
@@ -229,11 +274,16 @@ bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 	return true;
 }
 
+/*
+==================
+CEditorEngine::SaveMap
+==================
+*/
 bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 {
-	LE_LOG( LT_Log, LC_General, TEXT( "Save map: %s" ), InMap.c_str() );
+	Logf( TEXT( "Save map: %s\n" ), InMap.c_str() );
 
-	CArchive*	arWorld = GFileSystem->CreateFileWriter( InMap );
+	CArchive*	arWorld = g_FileSystem->CreateFileWriter( InMap );
 	if ( !arWorld )
 	{
 		OutError = TEXT( "Failed open archive" );
@@ -242,16 +292,21 @@ bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 
 	arWorld->SetType( AT_World );
 	arWorld->SerializeHeader();
-	GWorld->Serialize( *arWorld );
+	g_World->Serialize( *arWorld );
 	delete arWorld;
 
 	SEditorDelegates::onEditorSavedMap.Broadcast();
 	return true;
 }
 
+/*
+==================
+CEditorEngine::AddTOCEntries
+==================
+*/
 void CEditorEngine::AddTOCEntries( const std::wstring& InRootDir )
 {
-	std::vector< std::wstring >		files = GFileSystem->FindFiles( InRootDir, true, true );
+	std::vector< std::wstring >		files = g_FileSystem->FindFiles( InRootDir, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
 	{
 		std::wstring		file = files[ index ];
@@ -268,28 +323,38 @@ void CEditorEngine::AddTOCEntries( const std::wstring& InRootDir )
 		extension.erase( 0, dotPos + 1 );
 		if ( extension == TEXT( "pak" ) )
 		{
-			GTableOfContents.AddEntry( fullPath );
+			g_TableOfContents.AddEntry( fullPath );
 		}
 	}
 }
 
+/*
+==================
+CEditorEngine::SerializeTOC
+==================
+*/
 bool CEditorEngine::SerializeTOC( bool InIsSave /* = false */ )
 {
-	std::wstring	pathTOC = appGameDir() + ( PATH_SEPARATOR TEXT( "Content" ) ) + PATH_SEPARATOR + GTableOfContents.GetNameTOC();
-	CArchive* archiveTOC = !InIsSave ? GFileSystem->CreateFileReader( pathTOC ) : GFileSystem->CreateFileWriter( pathTOC );
+	std::wstring	pathTOC = Sys_GameDir() + ( PATH_SEPARATOR TEXT( "Content" ) ) + PATH_SEPARATOR + g_TableOfContents.GetNameTOC();
+	CArchive* archiveTOC = !InIsSave ? g_FileSystem->CreateFileReader( pathTOC ) : g_FileSystem->CreateFileWriter( pathTOC );
 	if ( archiveTOC )
 	{
-		GTableOfContents.Serialize( *archiveTOC );
+		g_TableOfContents.Serialize( *archiveTOC );
 		delete archiveTOC;
 		return true;
 	}
 	else
 	{
-		LE_LOG( LT_Warning, LC_Editor, TEXT( "Failed serialize TOC file '%s'" ), pathTOC.c_str() );
+		Warnf( TEXT( "Failed serialize TOC file '%s'\n" ), pathTOC.c_str() );
 		return false;
 	}
 }
 
+/*
+==================
+CEditorEngine::GetEditorName
+==================
+*/
 std::wstring CEditorEngine::GetEditorName() const
 {
 #if PLATFORM_WINDOWS
@@ -302,5 +367,5 @@ std::wstring CEditorEngine::GetEditorName() const
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
 	
-	return CString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), GGameName.c_str(), platformBitsString.c_str(), GRHI->GetRHIName() );
+	return CString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString.c_str(), g_RHI->GetRHIName() );
 }

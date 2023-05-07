@@ -29,20 +29,35 @@ CConVar		CVarImGUIDebug( TEXT( "imgui.debug" ), TEXT( "0" ), CVT_Bool, TEXT( "En
 // IMGUI DRAW DATA
 //
 
+/*
+==================
+CImGUIDrawData::CImGUIDrawData
+==================
+*/
 CImGUIDrawData::CImGUIDrawData() :
 	isFree( true )
 {
-	appMemzero( &drawData, sizeof( ImDrawData ) );
+	Sys_Memzero( &drawData, sizeof( ImDrawData ) );
 }
 
+/*
+==================
+CImGUIDrawData::CImGUIDrawData
+==================
+*/
 CImGUIDrawData::~CImGUIDrawData()
 {
 	Clear();
 }
 
+/*
+==================
+CImGUIDrawData::CImGUIDrawData
+==================
+*/
 void CImGUIDrawData::Clear()
 {
-	check( isFree );
+	Assert( isFree );
 	if ( drawData.CmdLists )
 	{
 		for ( uint32 index = 0; index < ( uint32 )drawData.CmdListsCount; index++ )
@@ -68,9 +83,14 @@ void CImGUIDrawData::Clear()
 	drawData.Clear();
 }
 
+/*
+==================
+CImGUIDrawData::CImGUIDrawData
+==================
+*/
 void CImGUIDrawData::SetDrawData( ImDrawData* InDrawData )
 {
-	check( isFree && InDrawData && InDrawData->Valid );
+	Assert( isFree && InDrawData && InDrawData->Valid );
 	Clear();
 
 	isFree = false;
@@ -98,6 +118,11 @@ void CImGUIDrawData::SetDrawData( ImDrawData* InDrawData )
 // IMGUI WINDOW
 //
 
+/*
+==================
+CImGUIWindow::CImGUIWindow
+==================
+*/
 CImGUIWindow::CImGUIWindow( ImGuiViewport* InViewport ) :
 	imguiViewport( InViewport ),
 	indexCurrentBuffer( 0 )
@@ -108,6 +133,11 @@ CImGUIWindow::CImGUIWindow( ImGuiViewport* InViewport ) :
 	}
 }
 
+/*
+==================
+CImGUIWindow::CImGUIWindow
+==================
+*/
 void CImGUIWindow::Tick()
 {
 	CImGUIDrawData*				currentBuffer = drawDataBuffers[ indexCurrentBuffer ];
@@ -132,7 +162,7 @@ void CImGUIWindow::Tick()
 		UNIQUE_RENDER_COMMAND_ONEPARAMETER( CMainWindow_DrawImGUICommand,
 											TRefCountPtr< CImGUIDrawData >, imGuiDrawData, currentBuffer,
 											{
-												GRHI->DrawImGUI( GRHI->GetImmediateContext(), ( ImDrawData* )imGuiDrawData->GetDrawData() );
+												g_RHI->DrawImGUI( g_RHI->GetImmediateContext(), ( ImDrawData* )imGuiDrawData->GetDrawData() );
 												imGuiDrawData->MarkFree();
 											} );
 	}
@@ -143,16 +173,16 @@ void CImGUIWindow::Tick()
 											  ViewportRHIRef_t, viewportRHI, imguiViewport->ViewportRHI,
 											  bool, isNeedClear, !( imguiViewport->Flags & ImGuiViewportFlags_NoRendererClear ),
 											  {
-													CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-													GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
+													CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
+													g_RHI->BeginDrawingViewport( immediateContext, viewportRHI );
 													
 													if ( isNeedClear )
 													{
 														immediateContext->ClearSurface( viewportRHI->GetSurface(), CColor::black );
 													}
-													GRHI->DrawImGUI( immediateContext, ( ImDrawData* )imGuiDrawData->GetDrawData() );
+													g_RHI->DrawImGUI( immediateContext, ( ImDrawData* )imGuiDrawData->GetDrawData() );
 													
-													GRHI->EndDrawingViewport( immediateContext, viewportRHI, true, false );												
+													g_RHI->EndDrawingViewport( immediateContext, viewportRHI, true, false );												
 													imGuiDrawData->MarkFree();
 											  } );
 	}
@@ -162,6 +192,11 @@ void CImGUIWindow::Tick()
 // IMGUI POPUP
 //
 
+/*
+==================
+CImGUIPopup::CImGUIPopup
+==================
+*/
 CImGUIPopup::CImGUIPopup( const std::wstring& InName /* = TEXT( "NewPopup" ) */ )
 	: bOpen( false )
 	, bNeedClose( false )
@@ -170,6 +205,11 @@ CImGUIPopup::CImGUIPopup( const std::wstring& InName /* = TEXT( "NewPopup" ) */ 
 	, name( InName )
 {}
 
+/*
+==================
+CImGUIPopup::CImGUIPopup
+==================
+*/
 void CImGUIPopup::Tick()
 {
 	// Open popup is need
@@ -212,6 +252,11 @@ void CImGUIPopup::Tick()
 // IMGUI LAYER
 //
 
+/*
+==================
+CImGUILayer::CImGUILayer
+==================
+*/
 CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ )
 	: flags( 0 )
 	, bInit( false )
@@ -230,29 +275,49 @@ CImGUILayer::CImGUILayer( const std::wstring& InName /* = TEXT( "NewLayer" ) */ 
 	, name( InName )
 {}
 
+/*
+==================
+CImGUILayer::~CImGUILayer
+==================
+*/
 CImGUILayer::~CImGUILayer()
 {
 	Destroy();
 }
 
+/*
+==================
+CImGUILayer::Init
+==================
+*/
 void CImGUILayer::Init()
 {
 	if ( !bInit )
 	{
-		GImGUIEngine->AddLayer( AsShared() );
+		g_ImGUIEngine->AddLayer( AsShared() );
 		bInit = true;
 	}
 }
 
+/*
+==================
+CImGUILayer::Destroy
+==================
+*/
 void CImGUILayer::Destroy()
 {
 	if ( bInit )
 	{
-		GImGUIEngine->RemoveLayer( AsShared() );
+		g_ImGUIEngine->RemoveLayer( AsShared() );
 		bInit = false;
 	}
 }
 
+/*
+==================
+CImGUILayer::Tick
+==================
+*/
 void CImGUILayer::Tick()
 {
 	if ( bVisibility )
@@ -322,6 +387,11 @@ void CImGUILayer::Tick()
 	}
 }
 
+/*
+==================
+CImGUILayer::PollEvent
+==================
+*/
 bool CImGUILayer::PollEvent( SWindowEvent& OutLayerEvent )
 {
 	bool	bNotEndEvent = !events.empty();
@@ -335,6 +405,11 @@ bool CImGUILayer::PollEvent( SWindowEvent& OutLayerEvent )
 	return bNotEndEvent;
 }
 
+/*
+==================
+CImGUILayer::UpdateEvents
+==================
+*/
 void CImGUILayer::UpdateEvents()
 {
 	// Process event of loss/gain focus
@@ -397,9 +472,19 @@ void CImGUILayer::UpdateEvents()
 	}
 }
 
+/*
+==================
+CImGUILayer::ProcessEvent
+==================
+*/
 void CImGUILayer::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {}
 
+/*
+==================
+CImGUILayer::OnVisibilityChanged
+==================
+*/
 void CImGUILayer::OnVisibilityChanged( bool InNewVisibility )
 {}
 
@@ -407,27 +492,33 @@ void CImGUILayer::OnVisibilityChanged( bool InNewVisibility )
 // IMGUI ENGINE
 //
 
-/**
- * Constructor
- */
+/*
+==================
+CImGUIEngine::CImGUIEngine
+==================
+*/
 CImGUIEngine::CImGUIEngine() 
 	: imguiContext( nullptr )
 {}
 
-/**
- * Destructor
- */
+/*
+==================
+CImGUIEngine::~CImGUIEngine
+==================
+*/
 CImGUIEngine::~CImGUIEngine()
 {}
 
-/**
- * Initialize ImGUI
- */
+/*
+==================
+CImGUIEngine::Init
+==================
+*/
 void CImGUIEngine::Init()
 {
 	// Create ImGUI context
 	imguiContext = ImGui::CreateContext();
-	check( imguiContext );
+	Assert( imguiContext );
 
 	ImGuiIO&		imguiIO = ImGui::GetIO();
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -437,30 +528,35 @@ void CImGUIEngine::Init()
 	InitTheme();
 
 	// Initialize platform for ImGUI
-	bool			result = appImGUIInit();
-	check( result );
+	bool			result = Sys_ImGUIInit();
+	Assert( result );
 
 	// Initialize RHI for ImGUI
 	UNIQUE_RENDER_COMMAND( ÑInitImGUICommand,
 		{
-			GRHI->InitImGUI( GRHI->GetImmediateContext() );
+			g_RHI->InitImGUI( g_RHI->GetImmediateContext() );
 		} );
 
-	LE_LOG( LT_Log, LC_Init, TEXT( "ImGui version: " IMGUI_VERSION ) );
+	Logf( TEXT( "ImGui version: " IMGUI_VERSION "\n" ) );
 
 	// Open main window
 	ImGuiPlatformIO&	imguiPlatformIO = ImGui::GetPlatformIO();
 	OpenWindow( imguiPlatformIO.Viewports[ 0 ] );
 }
 
+/*
+==================
+CImGUIEngine::InitTheme
+==================
+*/
 void CImGUIEngine::InitTheme()
 {
 	// Init dark solors	
 	ImGui::StyleColorsDark();
 
 	float	fontSize			= 15.0f;
-	ImGui::GetIO().Fonts->AddFontFromFileTTF( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Fonts/Roboto/Roboto-Bold.ttf ") ).c_str() ), fontSize );
-	ImGui::GetIO().FontDefault	= ImGui::GetIO().Fonts->AddFontFromFileTTF( TCHAR_TO_ANSI( ( appBaseDir() + TEXT( "Engine/Editor/Fonts/Roboto/Roboto-Regular.ttf " ) ).c_str() ), fontSize );
+	ImGui::GetIO().Fonts->AddFontFromFileTTF( TCHAR_TO_ANSI( ( Sys_BaseDir() + TEXT( "Engine/Editor/Fonts/Roboto/Roboto-Bold.ttf ") ).c_str() ), fontSize );
+	ImGui::GetIO().FontDefault	= ImGui::GetIO().Fonts->AddFontFromFileTTF( TCHAR_TO_ANSI( ( Sys_BaseDir() + TEXT( "Engine/Editor/Fonts/Roboto/Roboto-Regular.ttf " ) ).c_str() ), fontSize );
 
 	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones
 	ImGuiStyle&		style	= ImGui::GetStyle();
@@ -504,6 +600,11 @@ void CImGUIEngine::InitTheme()
 	}
 }
 
+/*
+==================
+CImGUIEngine::Tick
+==================
+*/
 void CImGUIEngine::Tick( float InDeltaSeconds )
 {
 	for ( uint32 index = 0, count = layers.size(); index < count; ++index )
@@ -517,9 +618,11 @@ void CImGUIEngine::Tick( float InDeltaSeconds )
 	}
 }
 
-/**
- * Shutdown ImGUI on platform
- */
+/*
+==================
+CImGUIEngine::Shutdown
+==================
+*/
 void CImGUIEngine::Shutdown()
 {
 	if ( !imguiContext )
@@ -529,22 +632,24 @@ void CImGUIEngine::Shutdown()
 
 	UNIQUE_RENDER_COMMAND( ÑShutdownImGUICommand,
 		{
-			GRHI->ShutdownImGUI( GRHI->GetImmediateContext() );
+			g_RHI->ShutdownImGUI( g_RHI->GetImmediateContext() );
 		} );
 
-	appImGUIShutdown();
+	Sys_ImGUIShutdown();
 	ImGui::DestroyContext( imguiContext );
 
 	imguiContext = nullptr;
 }
 
-/**
- * Process event for ImGUI
- */
+/*
+==================
+CImGUIEngine::ProcessEvent
+==================
+*/
 void CImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// Process event by ImGUI
-	appImGUIProcessEvent( InWindowEvent );
+	Sys_ImGUIProcessEvent( InWindowEvent );
 
 	SWindowEvent		imguiEvent;
 	if ( !layers.empty() )
@@ -563,12 +668,14 @@ void CImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 	}
 }
 
-/**
- * Begin draw commands for render ImGUI
- */
+/*
+==================
+CImGUIEngine::BeginDraw
+==================
+*/
 void CImGUIEngine::BeginDraw()
 {
-	appImGUIBeginDrawing();
+	Sys_ImGUIBeginDrawing();
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
 
@@ -579,11 +686,21 @@ void CImGUIEngine::BeginDraw()
 	}
 }
 
+/*
+==================
+CImGUIEngine::OpenWindow
+==================
+*/
 void CImGUIEngine::OpenWindow( ImGuiViewport* InViewport )
 {
 	windows.push_back( new CImGUIWindow( InViewport ) );
 }
 
+/*
+==================
+CImGUIEngine::CloseWindow
+==================
+*/
 void CImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
 {
 	for ( uint32 index = 0, count = ( uint32 )windows.size(); index < count; ++index )
@@ -598,9 +715,11 @@ void CImGUIEngine::CloseWindow( ImGuiViewport* InViewport )
 	}
 }
 
-/**
- * End draw commands for render ImGUI
- */
+/*
+==================
+CImGUIEngine::EndDraw
+==================
+*/
 void CImGUIEngine::EndDraw()
 {
 	// Draw all layers
@@ -619,7 +738,7 @@ void CImGUIEngine::EndDraw()
 #endif // !SHIPPING_BUILD
 
 	ImGui::Render();
-	appImGUIEndDrawing();
+	Sys_ImGUIEndDrawing();
 
 	if ( ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable )
 	{

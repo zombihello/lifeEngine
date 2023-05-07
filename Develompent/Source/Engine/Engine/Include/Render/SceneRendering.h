@@ -51,7 +51,7 @@ public:
 	 */
 	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, const CColor& InWireframeColor = CColor::red, float InDepthBias = 0.f )
 	{
-		TAssetHandle<CMaterial>		wireframeMaterial = GEngine->GetDefaultWireframeMaterial();
+		TAssetHandle<CMaterial>		wireframeMaterial = g_Engine->GetDefaultWireframeMaterial();
 		TSharedPtr<CMaterial>		wireframeMaterialRef = wireframeMaterial.ToSharedPtr();
 		if ( !wireframeMaterialRef )
 		{
@@ -65,8 +65,8 @@ public:
 
 		// Override shaders for wireframe rendering
 		uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
-		vertexShader	= GShaderManager->FindInstance<CWireframeVertexShader>( vertexFactoryHash );
-		pixelShader		= GShaderManager->FindInstance<CWireframePixelShader>( vertexFactoryHash );
+		vertexShader	= g_ShaderManager->FindInstance<CWireframeVertexShader>( vertexFactoryHash );
+		pixelShader		= g_ShaderManager->FindInstance<CWireframePixelShader>( vertexFactoryHash );
 	}
 
 	/**
@@ -85,7 +85,7 @@ public:
 				0.f,
 				true
 			};
-			rasterizerState = GRHI->CreateRasterizerState( initializer );
+			rasterizerState = g_RHI->CreateRasterizerState( initializer );
 		}
 
 		return rasterizerState;
@@ -97,7 +97,7 @@ public:
 	 */
 	virtual uint64 GetTypeHash() const override
 	{
-		return appMemFastHash( wireframeColor, TBaseMeshDrawingPolicy::GetTypeHash() );
+		return Sys_MemFastHash( wireframeColor, TBaseMeshDrawingPolicy::GetTypeHash() );
 	}
 
 private:
@@ -196,9 +196,10 @@ private:
 	/**
 	 * Render post process
 	 *
-	 * @param InDeviceContext	RHI device context
+	 * @param InDeviceContext		RHI device context
+	 * @param InIsApplyLightPP		Is need apply light post process
 	 */
-	void RenderPostProcess( class CBaseDeviceContextRHI* InDeviceContext );
+	void RenderPostProcess( class CBaseDeviceContextRHI* InDeviceContext, bool InIsApplyLightPP );
 
 	/**
 	 * Render UI

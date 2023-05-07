@@ -16,7 +16,7 @@
  * @ingroup Physics
  * Physics scene
  */
-extern class CBox2DScene		GPhysicsScene;
+extern class CBox2DScene		g_PhysicsScene;
 #endif // WITH_BOX2D
 
 #endif // !BOX2DGLOBALS_H

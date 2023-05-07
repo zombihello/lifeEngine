@@ -80,7 +80,7 @@ public:
 
 #if WITH_EDITOR
 	/**
-	 * @brief Pointer to static method for check is need compile shader
+	 * @brief Pointer to static method for Assert is need compile shader
 	 */
 	typedef bool ( *ShouldCacheFn_t )( EShaderPlatform InShaderPlatform );
 
@@ -122,7 +122,7 @@ public:
 		 */
 		FORCEINLINE void RegisterType( CVertexFactoryMetaType* InVertexFactoryMetaType )
 		{
-			check( InVertexFactoryMetaType );
+			Assert( InVertexFactoryMetaType );
 			vertexFactoryMetaTypes[ InVertexFactoryMetaType->hash ] = InVertexFactoryMetaType;
 		}
 
@@ -172,7 +172,7 @@ public:
 	 * @param[in] InSupportsInstancing Is supported instancing
 	 * @param[in] InInstanceStreamIndex Instance stream index
 	 * @param[in] InConstructParameters Function for create vertex factory shader parameters
-	 * @param[in] InShouldCacheFunc Pointer to static method for check is need compile shader. WARNING! Only with enabled define WITH_EDITOR
+	 * @param[in] InShouldCacheFunc Pointer to static method for Assert is need compile shader. WARNING! Only with enabled define WITH_EDITOR
 	 * @param[in] InModifyCompilationEnvironmentFunc Pointer to static method for modify compilation environment of shader. WARNING! Only with enabled define WITH_EDITOR
 	 */
 	CVertexFactoryMetaType( const std::wstring& InFactoryName, const std::wstring& InFileName, bool InSupportsInstancing, uint32 InInstanceStreamIndex, ConstructParametersType InConstructParameters
@@ -228,7 +228,7 @@ public:
 	 */
 	FORCEINLINE bool ShouldCache( EShaderPlatform InShaderPlatform ) const
 	{
-		check( ShouldCacheFunc );
+		Assert( ShouldCacheFunc );
 		return ShouldCacheFunc( InShaderPlatform );
 	}
 
@@ -240,18 +240,18 @@ public:
 	 */
 	FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment ) const
 	{
-		check( ModifyCompilationEnvironmentFunc );
+		Assert( ModifyCompilationEnvironmentFunc );
 		ModifyCompilationEnvironmentFunc( InShaderPlatform, InEnvironment );
 
 		InEnvironment.difinitions.insert( std::make_pair( TEXT( "USE_INSTANCING" ), bSupportsInstancing ? TEXT( "1" ) : TEXT( "0" ) ) );
 		InEnvironment.difinitions.insert( std::make_pair( TEXT( "ENABLE_HITPROXY" ),
 #if ENABLE_HITPROXY
-										  !GIsCooker ? TEXT( "1" ) : TEXT( "0" )
+										  !g_IsCooker ? TEXT( "1" ) : TEXT( "0" )
 #else
 										  TEXT( "0" )
 #endif // ENABLE_HITPROXY
 		) );
-		InEnvironment.difinitions.insert( std::make_pair( TEXT( "WITH_EDITOR" ), !GIsCooker ? TEXT( "1" ) : TEXT( "0" ) ) );
+		InEnvironment.difinitions.insert( std::make_pair( TEXT( "WITH_EDITOR" ), !g_IsCooker ? TEXT( "1" ) : TEXT( "0" ) ) );
 	}
 #endif // WITH_EDITOR
 
@@ -282,7 +282,7 @@ private:
 
 #if WITH_EDITOR
 	std::wstring							sourceFilename;						/**< Source file name of vertex factory */
-	ShouldCacheFn_t						ShouldCacheFunc;                    /**< Pointer to static method for check if need compile shader for platform */
+	ShouldCacheFn_t						ShouldCacheFunc;                    /**< Pointer to static method for Assert if need compile shader for platform */
 	ModifyCompilationEnvironmentFn_t		ModifyCompilationEnvironmentFunc;   /**< Pointer to static method for modify compilation environment */
 #endif // WITH_EDITOR
 };

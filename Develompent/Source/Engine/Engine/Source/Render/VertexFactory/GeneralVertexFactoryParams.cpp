@@ -6,10 +6,20 @@
     #include "System/EditorEngine.h"
 #endif // WITH_EDITOR
 
+/*
+==================
+CGeneralVertexShaderParameters::CGeneralVertexShaderParameters
+==================
+*/
 CGeneralVertexShaderParameters::CGeneralVertexShaderParameters( bool InSupportsInstancing )
     : bSupportsInstancing( InSupportsInstancing )
 {}
 
+/*
+==================
+CGeneralVertexShaderParameters::Bind
+==================
+*/
 void CGeneralVertexShaderParameters::Bind( const class CShaderParameterMap& InParameterMap )
 {
     if ( !bSupportsInstancing )
@@ -22,21 +32,31 @@ void CGeneralVertexShaderParameters::Bind( const class CShaderParameterMap& InPa
     }
 }
 
+/*
+==================
+CGeneralVertexShaderParameters::Set
+==================
+*/
 void CGeneralVertexShaderParameters::Set( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory ) const
 {}
 
+/*
+==================
+CGeneralVertexShaderParameters::SetMesh
+==================
+*/
 void CGeneralVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
     if ( !bSupportsInstancing )
     {
-        check( InNumInstances == 1 );
+        Assert( InNumInstances == 1 );
         const SMeshInstance&        meshInstance = InMesh.instances[ InStartInstanceID ];
         SetVertexShaderValue( InDeviceContextRHI, localToWorldMatrixParameter, meshInstance.transformMatrix );
        
 #if WITH_EDITOR
         if ( meshInstance.bSelected )
         {
-            SetVertexShaderValue( InDeviceContextRHI, colorOverlayParameter, GEditorEngine->GetSelectionColor().ToNormalizedVector4D() );
+            SetVertexShaderValue( InDeviceContextRHI, colorOverlayParameter, g_EditorEngine->GetSelectionColor().ToNormalizedVector4D() );
         }
         else
         {
@@ -46,7 +66,7 @@ void CGeneralVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDev
     }
     else
     {
-        check( InVertexFactory );
+        Assert( InVertexFactory );
         InVertexFactory->SetupInstancing( InDeviceContextRHI, InMesh, InView, InNumInstances, InStartInstanceID );
     }
 }

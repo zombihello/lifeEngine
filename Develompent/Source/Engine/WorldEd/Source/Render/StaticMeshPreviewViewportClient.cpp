@@ -5,6 +5,11 @@
 #include "Render/StaticMeshPreviewViewportClient.h"
 #include "Render/RenderUtils.h"
 
+/*
+==================
+CStaticMeshPreviewViewportClient::CStaticMeshPreviewViewportClient
+==================
+*/
 CStaticMeshPreviewViewportClient::CStaticMeshPreviewViewportClient( const TSharedPtr<CStaticMesh>& InStaticMesh )
 	: CEditorLevelViewportClient( LVT_Perspective )
 	, scene( new CScene() )
@@ -25,20 +30,35 @@ CStaticMeshPreviewViewportClient::CStaticMeshPreviewViewportClient( const TShare
 	scene->AddPrimitive( staticMeshComponent );
 }
 
+/*
+==================
+CStaticMeshPreviewViewportClient::~CStaticMeshPreviewViewportClient
+==================
+*/
 CStaticMeshPreviewViewportClient::~CStaticMeshPreviewViewportClient()
 {
 	FlushRenderingCommands();
 	delete scene;
 }
 
+/*
+==================
+CStaticMeshPreviewViewportClient::Tick
+==================
+*/
 void CStaticMeshPreviewViewportClient::Tick( float InDeltaSeconds )
 {
 	CEditorLevelViewportClient::Tick( InDeltaSeconds );
 }
 
+/*
+==================
+CStaticMeshPreviewViewportClient::Draw
+==================
+*/
 void CStaticMeshPreviewViewportClient::Draw( CViewport* InViewport )
 {
-	check( InViewport );
+	Assert( InViewport );
 	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
 
 	// Draw viewport
@@ -51,10 +71,15 @@ void CStaticMeshPreviewViewportClient::Draw( CViewport* InViewport )
 										  } );
 }
 
+/*
+==================
+CStaticMeshPreviewViewportClient::Draw_RenderThread
+==================
+*/
 void CStaticMeshPreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView )
 {
-	check( IsInRenderingThread() );
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	Assert( IsInRenderingThread() );
+	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
 	CSceneRenderer				sceneRenderer( InSceneView, scene );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 
@@ -69,5 +94,10 @@ void CStaticMeshPreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InVie
 	delete InSceneView;
 }
 
+/*
+==================
+CStaticMeshPreviewViewportClient::SetViewportType
+==================
+*/
 void CStaticMeshPreviewViewportClient::SetViewportType( ELevelViewportType InViewportType )
 {}

@@ -2,12 +2,27 @@
 
 IMPLEMENT_CLASS( CSceneComponent )
 
+/*
+==================
+CSceneComponent::CSceneComponent
+==================
+*/
 CSceneComponent::CSceneComponent()
 {}
 
+/*
+==================
+CSceneComponent::~CSceneComponent
+==================
+*/
 CSceneComponent::~CSceneComponent()
 {}
 
+/*
+==================
+CSceneComponent::IsAttachedTo
+==================
+*/
 bool CSceneComponent::IsAttachedTo( CSceneComponent* InTestComp ) const
 {
 	if ( InTestComp != nullptr )
@@ -23,17 +38,27 @@ bool CSceneComponent::IsAttachedTo( CSceneComponent* InTestComp ) const
 	return false;
 }
 
+/*
+==================
+CSceneComponent::Serialize
+==================
+*/
 void CSceneComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << transform;
 }
 
+/*
+==================
+CSceneComponent::SetupAttachment
+==================
+*/
 void CSceneComponent::SetupAttachment( CSceneComponent* InParent )
 {
-	checkMsg( InParent != this, TEXT( "Cannot attach a component to itself" ) );
-	checkMsg( InParent && !InParent->IsAttachedTo( this ), TEXT( "Setting up attachment would create a cycle" ) );
-	checkMsg( !attachParent, TEXT( "Need detach before attach component" ) );
+	AssertMsg( InParent != this, TEXT( "Cannot attach a component to itself" ) );
+	AssertMsg( InParent && !InParent->IsAttachedTo( this ), TEXT( "Setting up attachment would create a cycle" ) );
+	AssertMsg( !attachParent, TEXT( "Need detach before attach component" ) );
 
 	attachParent = InParent;
 }

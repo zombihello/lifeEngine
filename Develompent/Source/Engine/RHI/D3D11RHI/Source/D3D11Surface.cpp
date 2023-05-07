@@ -7,10 +7,11 @@
 #include "D3D11Surface.h"
 #include "D3D11DeviceContext.h"
 
-/**
- * Find an appropriate DXGI format for the input texture format and SRGB setting.  If the incoming
- * format is recognized as typeless, a fully formed format will be returned
- */
+/*
+==================
+FindDXGIFormat
+==================
+*/
 FORCEINLINE DXGI_FORMAT FindDXGIFormat( DXGI_FORMAT InFormat, bool InIsSRGB )
 {
 	if ( InIsSRGB )
@@ -59,19 +60,29 @@ FORCEINLINE DXGI_FORMAT FindDXGIFormat( DXGI_FORMAT InFormat, bool InIsSRGB )
 	return InFormat;
 }
 
+/*
+==================
+CD3D11Surface::CD3D11Surface
+==================
+*/
 CD3D11Surface::CD3D11Surface( ID3D11RenderTargetView* InRenderTargetView ) 
 	: d3d11ShaderResourceView( nullptr )
 	, d3d11RenderTargetView( InRenderTargetView )
 	, d3d11DepthStencilView( nullptr )
 {}
 
+/*
+==================
+CD3D11Surface::CD3D11Surface
+==================
+*/
 CD3D11Surface::CD3D11Surface( Texture2DRHIParamRef_t InResolveTargetTexture ) 
 	: d3d11ShaderResourceView( nullptr )
 	, d3d11RenderTargetView( nullptr )
 	, d3d11DepthStencilView( nullptr )
 	, resolveTarget2D( ( CD3D11Texture2DRHI* )InResolveTargetTexture )
 {
-	check( resolveTarget2D );
+	Assert( resolveTarget2D );
 	d3d11ShaderResourceView = resolveTarget2D->GetShaderResourceView();
 	d3d11RenderTargetView = resolveTarget2D->GetRenderTargetView();
 	d3d11DepthStencilView = resolveTarget2D->GetDepthStencilView();
@@ -92,6 +103,11 @@ CD3D11Surface::CD3D11Surface( Texture2DRHIParamRef_t InResolveTargetTexture )
 	}
 }
 
+/*
+==================
+CD3D11Surface::~CD3D11Surface
+==================
+*/
 CD3D11Surface::~CD3D11Surface()
 {
 	if ( d3d11ShaderResourceView )
@@ -112,6 +128,12 @@ CD3D11Surface::~CD3D11Surface()
 	resolveTarget2D.SafeRelease();
 }
 
+
+/*
+==================
+CD3D11TextureRHI::CD3D11TextureRHI
+==================
+*/
 CD3D11TextureRHI::CD3D11TextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) :
 	CBaseTextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags ),
 	d3d11ShaderResourceView( nullptr ),
@@ -119,6 +141,11 @@ CD3D11TextureRHI::CD3D11TextureRHI( uint32 InSizeX, uint32 InSizeY, uint32 InNum
 	d3d11DepthStencilView( nullptr )
 {}
 
+/*
+==================
+CD3D11TextureRHI::~CD3D11TextureRHI
+==================
+*/
 CD3D11TextureRHI::~CD3D11TextureRHI()
 {
 	if ( d3d11ShaderResourceView )
@@ -137,16 +164,27 @@ CD3D11TextureRHI::~CD3D11TextureRHI()
 	}
 }
 
+/*
+==================
+CD3D11TextureRHI::GetHandle
+==================
+*/
 void* CD3D11TextureRHI::GetHandle() const
 {
 	return d3d11ShaderResourceView;
 }
 
+
+/*
+==================
+CD3D11Texture2DRHI::CD3D11Texture2DRHI
+==================
+*/
 CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags, void* InData /*= nullptr*/ ) :
 	CD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags ),
 	d3d11Texture2D( nullptr )
 {
-	DXGI_FORMAT					platformFormat = FindDXGIFormat( ( DXGI_FORMAT )GPixelFormats[ InFormat ].platformFormat, InFlags & TCF_sRGB );
+	DXGI_FORMAT					platformFormat = FindDXGIFormat( ( DXGI_FORMAT )g_PixelFormats[ InFormat ].platformFormat, InFlags & TCF_sRGB );
 	D3D11_TEXTURE2D_DESC		d3d11Texture2DDesc;
 	d3d11Texture2DDesc.Width				= InSizeX;
 	d3d11Texture2DDesc.Height				= InSizeY;
@@ -176,8 +214,8 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 		}
 	}
 
-	ID3D11Device*	d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
-	check( d3d11Device );
+	ID3D11Device*	d3d11Device = ( ( CD3D11RHI* )g_RHI )->GetD3D11Device();
+	Assert( d3d11Device );
 
 	std::vector< D3D11_SUBRESOURCE_DATA >	subResourceData;
 	if ( InData )
@@ -188,10 +226,10 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 		
 		for ( uint32 mipIndex = 0; mipIndex < numMips; ++mipIndex )
 		{
-			uint32		mipSizeX	= Max< uint32 >( InSizeX >> mipIndex, GPixelFormats[ InFormat ].blockSizeX );
-			uint32		pitch		= ( mipSizeX / GPixelFormats[ InFormat ].blockSizeX ) * GPixelFormats[ InFormat ].blockBytes;
-			uint32		mipSizeY	= Max< uint32 >( InSizeY >> mipIndex, GPixelFormats[ InFormat ].blockSizeY );
-			uint32		numRows		= mipSizeY / GPixelFormats[ InFormat ].blockSizeY;
+			uint32		mipSizeX	= Max< uint32 >( InSizeX >> mipIndex, g_PixelFormats[ InFormat ].blockSizeX );
+			uint32		pitch		= ( mipSizeX / g_PixelFormats[ InFormat ].blockSizeX ) * g_PixelFormats[ InFormat ].blockBytes;
+			uint32		mipSizeY	= Max< uint32 >( InSizeY >> mipIndex, g_PixelFormats[ InFormat ].blockSizeY );
+			uint32		numRows		= mipSizeY / g_PixelFormats[ InFormat ].blockSizeY;
 
 			D3D11_SUBRESOURCE_DATA&		d3d11SubresourceData = subResourceData[ mipIndex ];
 			d3d11SubresourceData.pSysMem = data + offset;
@@ -203,7 +241,7 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 	}
 
 	HRESULT			result = d3d11Device->CreateTexture2D( &d3d11Texture2DDesc, InData ? subResourceData.data() : nullptr, &d3d11Texture2D );
-	check( result == S_OK );
+	Assert( result == S_OK );
 	D3D11SetDebugName( d3d11Texture2D, TCHAR_TO_ANSI( InDebugName ) );
 
 	if ( d3d11Texture2DDesc.BindFlags & D3D11_BIND_SHADER_RESOURCE )
@@ -229,7 +267,7 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 		}
 
 		result = d3d11Device->CreateShaderResourceView( d3d11Texture2D, &d3d11ShaderResourceViewDesc, &d3d11ShaderResourceView );
-		check( result == S_OK );
+		Assert( result == S_OK );
 	}
 
 	if ( InFlags & TCF_ResolveTargetable )
@@ -243,7 +281,7 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 			d3d11RenderTargetViewDesc.Texture2D.MipSlice	= 0;
 
 			result = d3d11Device->CreateRenderTargetView( d3d11Texture2D, &d3d11RenderTargetViewDesc, &d3d11RenderTargetView );
-			check( result == S_OK );
+			Assert( result == S_OK );
 		}
 		else if ( d3d11Texture2DDesc.BindFlags & D3D11_BIND_DEPTH_STENCIL )
 		{
@@ -275,29 +313,44 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 			d3d11DepthStencilViewDesc.Texture2D.MipSlice = 0;
 			
 			result = d3d11Device->CreateDepthStencilView( d3d11Texture2D, &d3d11DepthStencilViewDesc, &d3d11DepthStencilView );
-			check( result == S_OK );
+			Assert( result == S_OK );
 		}
 	}
 }
 
+/*
+==================
+CD3D11Texture2DRHI::CD3D11Texture2DRHI
+==================
+*/
 CD3D11Texture2DRHI::CD3D11Texture2DRHI( ID3D11Texture2D* InD3D11Texture2D, uint32 InSizeX, uint32 InSizeY, uint32 InNumMips, EPixelFormat InFormat, uint32 InFlags ) 
 	: CD3D11TextureRHI( InSizeX, InSizeY, InNumMips, InFormat, InFlags )
 	, d3d11Texture2D( InD3D11Texture2D )
 {}
 
+/*
+==================
+CD3D11Texture2DRHI::CD3D11Texture2DRHI~
+==================
+*/
 CD3D11Texture2DRHI::~CD3D11Texture2DRHI()
 {
 	d3d11Texture2D->Release();
 }
 
+/*
+==================
+CD3D11Texture2DRHI::Lock
+==================
+*/
 void CD3D11Texture2DRHI::Lock( CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, SLockedData& OutLockedData )
 {
-	check( OutLockedData.data == nullptr );
+	Assert( OutLockedData.data == nullptr );
 
 	// Calculate the dimensions of the mip-map
-	const uint32 blockSizeX			= GPixelFormats[ format ].blockSizeX;
-	const uint32 blockSizeY			= GPixelFormats[ format ].blockSizeY;
-	const uint32 blockBytes			= GPixelFormats[ format ].blockBytes;
+	const uint32 blockSizeX			= g_PixelFormats[ format ].blockSizeX;
+	const uint32 blockSizeY			= g_PixelFormats[ format ].blockSizeY;
+	const uint32 blockBytes			= g_PixelFormats[ format ].blockBytes;
 	const uint32 mipSizeX			= Max( sizeX >> InMipIndex, blockSizeX );
 	const uint32 mipSizeY			= Max( sizeY >> InMipIndex, blockSizeY );
 	const uint32 numBlocksX			= ( mipSizeX + blockSizeX - 1 ) / blockSizeX;
@@ -316,7 +369,7 @@ void CD3D11Texture2DRHI::Lock( CBaseDeviceContextRHI* InDeviceContext, uint32 In
 	{
 		// Calculate the subresource index corresponding to the specified mip-map
 		const uint32			subresource = D3D11CalcSubresource( InMipIndex, 0, numMips );
-		checkMsg( subresource < numMips, TEXT( "CD3D11Texture2DRHI::Lock; ERROR! Subresource is out of range" ) );
+		AssertMsg( subresource < numMips, TEXT( "CD3D11Texture2DRHI::Lock; ERROR! Subresource is out of range" ) );
 
 		// If we're reading from the texture, or writing to a dynamic texture, we create a staging resource, 
 		// copy the texture contents to it, and map it.
@@ -329,12 +382,12 @@ void CD3D11Texture2DRHI::Lock( CBaseDeviceContextRHI* InDeviceContext, uint32 In
 		ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 		D3D11_MAPPED_SUBRESOURCE		d3d11MappedTexture2D;
 
-#if DO_CHECK
+#if ENABLED_ASSERT
 		HRESULT							result = d3d11DeviceContext->Map( stagingResource->GetResource(), 0, InIsDataWrite ? D3D11_MAP_WRITE : D3D11_MAP_READ, 0, &d3d11MappedTexture2D );
-		check( result == S_OK );
+		Assert( result == S_OK );
 #else
 		d3d11DeviceContext->Map( stagingResource->GetResource(), 0, InIsDataWrite ? D3D11_MAP_WRITE : D3D11_MAP_READ, 0, &d3d11MappedTexture2D );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 
 		OutLockedData.data = ( byte* )d3d11MappedTexture2D.pData;
 		OutLockedData.pitch = d3d11MappedTexture2D.RowPitch;
@@ -343,6 +396,11 @@ void CD3D11Texture2DRHI::Lock( CBaseDeviceContextRHI* InDeviceContext, uint32 In
 	}
 }
 
+/*
+==================
+CD3D11Texture2DRHI::Unlock
+==================
+*/
 void CD3D11Texture2DRHI::Unlock( CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, SLockedData& InLockedData, bool InDiscardUpdate /*= false*/ )
 {
 	bool			isNeedUpdate = ( !InLockedData.stagingResource.IsValid() || flags & TCF_Dynamic ) && !InDiscardUpdate;
@@ -350,7 +408,7 @@ void CD3D11Texture2DRHI::Unlock( CBaseDeviceContextRHI* InDeviceContext, uint32 
 	{
 		// Calculate the subresource index corresponding to the specified mip-map
 		const uint32			subresource = D3D11CalcSubresource( InMipIndex, 0, numMips );
-		checkMsg( subresource < numMips, TEXT( "CD3D11Texture2DRHI::Unlock; ERROR! Subresource is out of range" ) );
+		AssertMsg( subresource < numMips, TEXT( "CD3D11Texture2DRHI::Unlock; ERROR! Subresource is out of range" ) );
 
 		// If we're writing, we need to update the subresource
 		ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -366,9 +424,14 @@ void CD3D11Texture2DRHI::Unlock( CBaseDeviceContextRHI* InDeviceContext, uint32 
 	InLockedData.data = nullptr;
 }
 
+/*
+==================
+CD3D11Texture2DRHI::CreateStagingResource
+==================
+*/
 CD3D11Texture2DRHI* CD3D11Texture2DRHI::CreateStagingResource( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMipSizeX, uint32 InMipSizeY, uint32 InSubresource, bool InIsDataWrite, bool InIsUseCPUShadow )
 {
-	check( d3d11Texture2D );
+	Assert( d3d11Texture2D );
 	D3D11_TEXTURE2D_DESC			d3d11StagingTextureDesc;
 	d3d11Texture2D->GetDesc( &d3d11StagingTextureDesc );
 	d3d11StagingTextureDesc.Width				= InMipSizeX;
@@ -381,12 +444,12 @@ CD3D11Texture2DRHI* CD3D11Texture2DRHI::CreateStagingResource( class CBaseDevice
 
 	ID3D11Texture2D*		d3d11StagingTexture2D = nullptr;
 
-#if DO_CHECK
-	HRESULT					result = ( ( CD3D11RHI* )GRHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
-	check( result == S_OK );
+#if ENABLED_ASSERT
+	HRESULT					result = ( ( CD3D11RHI* )g_RHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
+	Assert( result == S_OK );
 #else
-	( ( CD3D11RHI* )GRHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
-#endif // DO_CHECK
+	( ( CD3D11RHI* )g_RHI )->GetD3D11Device()->CreateTexture2D( &d3d11StagingTextureDesc, nullptr, &d3d11StagingTexture2D );
+#endif // ENABLED_ASSERT
 
 #if !SHIPPING_BUILD
 	D3D11SetDebugName( d3d11StagingTexture2D, "LockingStaging2DTexture" );

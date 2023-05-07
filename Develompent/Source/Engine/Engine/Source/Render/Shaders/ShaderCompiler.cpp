@@ -12,9 +12,11 @@
 #include "Render/Shaders/ShaderManager.h"
 #include "Render/VertexFactory/VertexFactory.h"
 
-/**
- * Compile all shaders
- */
+/*
+==================
+CShaderCompiler::CompileAll
+==================
+*/
 bool CShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
 {
 	CShaderCache	shaderCache;
@@ -25,7 +27,7 @@ bool CShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform In
 	}
 
 	// Save shader cache
-	CArchive*			archive = GFileSystem->CreateFileWriter( InOutputCache, AW_NoFail );
+	CArchive*			archive = g_FileSystem->CreateFileWriter( InOutputCache, AW_NoFail );
 	if ( archive )
 	{
 		archive->SetType( AT_ShaderCache );
@@ -38,12 +40,17 @@ bool CShaderCompiler::CompileAll( const tchar* InOutputCache, EShaderPlatform In
 	return true;
 }
 
+/*
+==================
+CShaderCompiler::CompileAll
+==================
+*/
 bool CShaderCompiler::CompileAll( CShaderCache& InOutShaderCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
 {
 	std::wstring																			errorMsg;
 	const std::unordered_map< std::wstring, CShaderMetaType* >&								shaderTypes = CShaderManager::SContainerShaderTypes::Get()->shaderMetaTypes;
 	const CVertexFactoryMetaType::SContainerVertexFactoryMetaType::VertexFactoryMap_t&		vertexFactoryTypes = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->GetRegisteredTypes();
-	checkMsg( !vertexFactoryTypes.empty(), TEXT( "In engine not a single vertex factory registered" ) );
+	AssertMsg( !vertexFactoryTypes.empty(), TEXT( "In engine not a single vertex factory registered" ) );
 	
 	for ( auto itShader = shaderTypes.begin(), itShaderEnd = shaderTypes.end(); itShader != itShaderEnd; ++itShader )
 	{
@@ -63,15 +70,20 @@ bool CShaderCompiler::CompileAll( CShaderCache& InOutShaderCache, EShaderPlatfor
 				continue;
 			}
 
-			appSetSplashText( STT_StartupProgress, CString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
+			Sys_SetSplashText( STT_StartupProgress, CString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
 			bool		result = CompileShader( metaType, InShaderPlatform, InOutShaderCache, errorMsg, vertexFactoryType );
-			checkMsg( result, errorMsg.c_str() );
+			AssertMsg( result, errorMsg.c_str() );
 		}
 	}
 
 	return true;
 }
 
+/*
+==================
+CShaderCompiler::CompileShader
+==================
+*/
 bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class CShaderCache& InOutShaderCache, std::wstring& OutErrorMsg, class CVertexFactoryMetaType* InVertexFactoryType /* = nullptr */ )
 {
 	SShaderCompilerOutput			output;
@@ -88,7 +100,7 @@ bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, ES
 		InVertexFactoryType->ModifyCompilationEnvironment( InShaderPlatform, environment );
 	}
 
-	bool		result = GRHI->CompileShader( InShaderMetaType->GetFileName().c_str(), InShaderMetaType->GetFunctionName().c_str(), shaderFrequency, environment, output, GAllowDebugShaderDump );
+	bool		result = g_RHI->CompileShader( InShaderMetaType->GetFileName().c_str(), InShaderMetaType->GetFunctionName().c_str(), shaderFrequency, environment, output, g_AllowDebugShaderDump );
 	if ( result )
 	{
 		CShaderCache::SShaderCacheItem			shaderCacheItem;
@@ -107,12 +119,12 @@ bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, ES
 
 		// Add shader to cache
 		InOutShaderCache.Add( shaderCacheItem );
-		LE_LOG( LT_Log, LC_Shader, TEXT( "Shader %s for %s compiled" ), InShaderMetaType->GetName().c_str(), InVertexFactoryType->GetName().c_str() );
+		Logf( TEXT( "Shader %s for %s compiled\n" ), InShaderMetaType->GetName().c_str(), InVertexFactoryType->GetName().c_str() );
 	}
 	else
 	{
 		OutErrorMsg = output.errorMsg;
-		LE_LOG( LT_Error, LC_Shader, TEXT( "Failed compiling shader %s for %s" ), InShaderMetaType->GetName().c_str(), InVertexFactoryType->GetName().c_str() );
+		Errorf( TEXT( "Failed compiling shader %s for %s\n" ), InShaderMetaType->GetName().c_str(), InVertexFactoryType->GetName().c_str() );
 	}
 
 	return result;

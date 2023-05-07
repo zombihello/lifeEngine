@@ -23,14 +23,14 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE							TRefCountPtr() : ptr( nullptr )
+	FORCEINLINE TRefCountPtr() : ptr( nullptr )
 	{}
 
 	/**
 	 * @brief Constructor
 	 * @param[in] InPtr Pointer to PtrType value
 	 */
-	FORCEINLINE							TRefCountPtr( PtrType* InPtr ) : ptr( InPtr )
+	FORCEINLINE TRefCountPtr( PtrType* InPtr ) : ptr( InPtr )
 	{
 		if ( ptr )
 		{
@@ -42,7 +42,7 @@ public:
 	 * @brief Constructor of copy
 	 * @param[in] InCopy Copy
 	 */
-	FORCEINLINE							TRefCountPtr( const TRefCountPtr& InCopy ) : ptr( InCopy.ptr )
+	FORCEINLINE TRefCountPtr( const TRefCountPtr& InCopy ) : ptr( InCopy.ptr )
 	{
 		if ( ptr )
 		{
@@ -55,7 +55,7 @@ public:
 	 * @param[in] InCopy Copy
 	 */
 	template< typename BasePtrType >
-	FORCEINLINE							TRefCountPtr( const TRefCountPtr< BasePtrType >& InCopy ) : ptr( static_cast< PtrType* >( InCopy.GetPtr() ) )
+	FORCEINLINE TRefCountPtr( const TRefCountPtr< BasePtrType >& InCopy ) : ptr( static_cast< PtrType* >( InCopy.GetPtr() ) )
 	{
 		if ( ptr )
 		{
@@ -66,7 +66,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	FORCEINLINE							~TRefCountPtr()
+	FORCEINLINE ~TRefCountPtr()
 	{
 		if ( ptr )
 		{
@@ -86,7 +86,7 @@ public:
 		 */
 		FORCEINLINE std::size_t operator()( const TRefCountPtr& InRefPtr ) const
 		{
-			return appMemFastHash( InRefPtr );
+			return Sys_MemFastHash( InRefPtr );
 		}
 	};
 
@@ -96,7 +96,7 @@ public:
 	 * 
 	 * @return Return reference to current object
 	 */
-	FORCEINLINE TRefCountPtr&			operator=( PtrType* InPtr )
+	FORCEINLINE TRefCountPtr& operator=( PtrType* InPtr )
 	{
 		if ( ptr )
 		{
@@ -118,7 +118,7 @@ public:
 	 *
 	 * @return Return reference to current object
 	 */
-	FORCEINLINE TRefCountPtr&			operator=( const TRefCountPtr& InCopy )
+	FORCEINLINE TRefCountPtr& operator=( const TRefCountPtr& InCopy )
 	{
 		if ( ptr )
 		{
@@ -141,7 +141,7 @@ public:
 	 * @return Return reference to current object
 	 */
 	template< typename BasePtrType >
-	FORCEINLINE TRefCountPtr&			operator=( const TRefCountPtr< BasePtrType >& InCopy )
+	FORCEINLINE TRefCountPtr& operator=( const TRefCountPtr< BasePtrType >& InCopy )
 	{
 		if ( ptr )
 		{
@@ -163,7 +163,7 @@ public:
 	 *
 	 * @return Returning true if pointers is equal, else returning false
 	 */
-	FORCEINLINE bool					operator==( const TRefCountPtr& InRight ) const 
+	FORCEINLINE bool operator==( const TRefCountPtr& InRight ) const 
 	{ 
 		return ptr == InRight.ptr; 
 	}
@@ -174,7 +174,7 @@ public:
 	 *
 	 * @return Returning true if pointers is equal, else returning false
 	 */
-	FORCEINLINE bool					operator==( PtrType* InRight ) const
+	FORCEINLINE bool operator==( PtrType* InRight ) const
 	{
 		return ptr == InRight;
 	}
@@ -185,7 +185,7 @@ public:
 	 *
 	 * @return Returning true if pointers is not equal, else returning false
 	 */
-	FORCEINLINE bool					operator!=( const TRefCountPtr& InRight ) const 
+	FORCEINLINE bool operator!=( const TRefCountPtr& InRight ) const 
 	{ 
 		return ptr != InRight.ptr; 
 	}
@@ -196,7 +196,7 @@ public:
 	 *
 	 * @return Returning true if pointers is not equal, else returning false
 	 */
-	FORCEINLINE bool					operator!=( PtrType* InRight ) const
+	FORCEINLINE bool operator!=( PtrType* InRight ) const
 	{
 		return ptr != InRight;
 	}
@@ -206,7 +206,7 @@ public:
 	 *
 	 * @return Returning true if pointer not null, else returning false
 	 */
-	FORCEINLINE							operator bool() const 
+	FORCEINLINE operator bool() const 
 	{ 
 		return ptr; 
 	}
@@ -234,7 +234,7 @@ public:
 	 *
 	 * @return Returning reference on value
 	 */
-	FORCEINLINE							operator PtrType&() const
+	FORCEINLINE operator PtrType&() const
 	{
 		return *ptr;
 	}
@@ -244,7 +244,7 @@ public:
 	 * 
 	 * @return Returning pointer to value
 	 */
-	FORCEINLINE							operator PtrType*() const
+	FORCEINLINE operator PtrType*() const
 	{
 		return ptr;
 	}
@@ -254,7 +254,7 @@ public:
 	 *
 	 * @return Returning reference to pointer value
 	 */
-	FORCEINLINE							operator PtrType*&()
+	FORCEINLINE operator PtrType*&()
 	{
 		return ptr;
 	}
@@ -264,9 +264,9 @@ public:
 	 *
 	 * @return Return pointer to PtrType value
 	 */
-	FORCEINLINE PtrType*				operator->() const
+	FORCEINLINE PtrType* operator->() const
 	{
-		check( ptr );
+		Assert( ptr );
 		return ptr;
 	}
 
@@ -275,9 +275,9 @@ public:
 	 *
 	 * @return Return reference to PtrType value
 	 */
-	FORCEINLINE PtrType&				operator*()
+	FORCEINLINE PtrType& operator*()
 	{
-		check( ptr );
+		Assert( ptr );
 		return *ptr;
 	}
 
@@ -286,9 +286,9 @@ public:
 	 *
 	 * @return Return reference to pointer of PtrType value
 	 */
-	FORCEINLINE PtrType**				operator&()
+	FORCEINLINE PtrType** operator&()
 	{
-		check( ptr );
+		Assert( ptr );
 		return &ptr;
 	}
 
@@ -305,7 +305,7 @@ public:
 	 *
 	 * @return Returning true if pointer is valid, else returning false
 	 */
-	FORCEINLINE bool					IsValid() const 
+	FORCEINLINE bool IsValid() const 
 	{ 
 		return ptr; 
 	}
@@ -315,7 +315,7 @@ public:
 	 *
 	 * @return Return reference count
 	 */
-	FORCEINLINE uint32					GetRefCount() const
+	FORCEINLINE uint32 GetRefCount() const
 	{
 		if ( !ptr )
 		{
@@ -330,7 +330,7 @@ public:
 	 *
 	 * @return Return pointer, if not set returned nullptr
 	 */
-	FORCEINLINE PtrType*				GetPtr() const 
+	FORCEINLINE PtrType* GetPtr() const 
 	{ 
 		return ptr; 
 	}

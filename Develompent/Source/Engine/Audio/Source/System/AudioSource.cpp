@@ -2,6 +2,11 @@
 #include "System/AudioDevice.h"
 #include "System/AudioSource.h"
 
+/*
+==================
+CAudioSource::CAudioSource
+==================
+*/
 CAudioSource::CAudioSource()
 	: bMuted( false )
 	, alHandle( 0 )
@@ -25,15 +30,20 @@ CAudioSource::CAudioSource()
 	SetLocation( SMath::vectorZero );
 
 	// Subscribe to event of muted/unmuted audio device
-	audioDeviceMutedHandle = GAudioDevice.OnAudioDeviceMuted().Add( std::bind( &CAudioSource::OnAudioDeviceMuted, this, std::placeholders::_1 ) );
+	audioDeviceMutedHandle = g_AudioDevice.OnAudioDeviceMuted().Add( std::bind( &CAudioSource::OnAudioDeviceMuted, this, std::placeholders::_1 ) );
 }
 
+/*
+==================
+CAudioSource::~CAudioSource
+==================
+*/
 CAudioSource::~CAudioSource()
 {
 	alDeleteSources( 1, &alHandle );
 
 	// Unsubscribe from event of muted/unmuted audio device
-	GAudioDevice.OnAudioDeviceMuted().Remove( audioDeviceMutedHandle );
+	g_AudioDevice.OnAudioDeviceMuted().Remove( audioDeviceMutedHandle );
 
 	// Unsubscribe from event of audio buffer if him is exist
 	TSharedPtr<CAudioBank>		audioBankRef = audioBank.ToSharedPtr();
@@ -52,6 +62,11 @@ CAudioSource::~CAudioSource()
 	}
 }
 
+/*
+==================
+CAudioSource::Play
+==================
+*/
 void CAudioSource::Play()
 {
 	if ( !bMuted )
@@ -60,6 +75,11 @@ void CAudioSource::Play()
 	}
 }
 
+/*
+==================
+CAudioSource::Pause
+==================
+*/
 void CAudioSource::Pause()
 {
 	if ( !bMuted )
@@ -68,6 +88,11 @@ void CAudioSource::Pause()
 	}
 }
 
+/*
+==================
+CAudioSource::Stop
+==================
+*/
 void CAudioSource::Stop()
 {
 	if ( !bMuted )
@@ -76,37 +101,72 @@ void CAudioSource::Stop()
 	}
 }
 
+/*
+==================
+CAudioSource::SetLoop
+==================
+*/
 void CAudioSource::SetLoop( bool InIsLoop )
 {
 	alSourcei( alHandle, AL_LOOPING, InIsLoop );
 }
 
+/*
+==================
+CAudioSource::SetRelativeToListener
+==================
+*/
 void CAudioSource::SetRelativeToListener( bool InIsRelativeToListener )
 {
 	alSourcei( alHandle, AL_SOURCE_RELATIVE, InIsRelativeToListener );
 }
 
+/*
+==================
+CAudioSource::SetVolume
+==================
+*/
 void CAudioSource::SetVolume( float InVolume )
 {
-	alSourcef( alHandle, AL_GAIN, InVolume * GAudioDevice.GetPlatformAudioHeadroom() );
+	alSourcef( alHandle, AL_GAIN, InVolume * g_AudioDevice.GetPlatformAudioHeadroom() );
 	volume = InVolume;
 }
 
+/*
+==================
+CAudioSource::SetPitch
+==================
+*/
 void CAudioSource::SetPitch( float InPitch )
 {
 	alSourcef( alHandle, AL_PITCH, InPitch );
 }
 
+/*
+==================
+CAudioSource::SetMinDistance
+==================
+*/
 void CAudioSource::SetMinDistance( float InMinDistance )
 {
 	alSourcef( alHandle, AL_REFERENCE_DISTANCE, InMinDistance );
 }
 
+/*
+==================
+CAudioSource::SetAttenuation
+==================
+*/
 void CAudioSource::SetAttenuation( float InAttenuation )
 {
 	alSourcef( alHandle, AL_ROLLOFF_FACTOR, InAttenuation );
 }
 
+/*
+==================
+CAudioSource::SetAudioBank
+==================
+*/
 void CAudioSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 {
 	AudioBufferRef_t		audioBuffer;
@@ -156,11 +216,21 @@ void CAudioSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 	alSourcei( alHandle, AL_BUFFER, audioBuffer ? audioBuffer->GetALHandle() : 0 );
 }
 
+/*
+==================
+CAudioSource::SetLocation
+==================
+*/
 void CAudioSource::SetLocation( const Vector& InLocation )
 {
 	alSource3f( alHandle, AL_POSITION, InLocation.x, InLocation.y, InLocation.z );
 }
 
+/*
+==================
+CAudioSource::IsLooped
+==================
+*/
 bool CAudioSource::IsLooped() const
 {
 	ALint			isLoop = 0;
@@ -168,6 +238,11 @@ bool CAudioSource::IsLooped() const
 	return isLoop != 0;
 }
 
+/*
+==================
+CAudioSource::IsRelativeToListener
+==================
+*/
 bool CAudioSource::IsRelativeToListener() const
 {
 	ALint			isRelativeToListener = 0;
@@ -175,11 +250,21 @@ bool CAudioSource::IsRelativeToListener() const
 	return isRelativeToListener != 0;
 }
 
+/*
+==================
+CAudioSource::GetVolume
+==================
+*/
 float CAudioSource::GetVolume() const
 {
 	return volume;
 }
 
+/*
+==================
+CAudioSource::GetPitch
+==================
+*/
 float CAudioSource::GetPitch() const
 {
 	ALfloat			pitch = 0.f;
@@ -187,6 +272,11 @@ float CAudioSource::GetPitch() const
 	return pitch;
 }
 
+/*
+==================
+CAudioSource::GetMinDistance
+==================
+*/
 float CAudioSource::GetMinDistance() const
 {
 	ALfloat			distance = 0.f;
@@ -194,6 +284,11 @@ float CAudioSource::GetMinDistance() const
 	return distance;
 }
 
+/*
+==================
+CAudioSource::GetAttenuation
+==================
+*/
 float CAudioSource::GetAttenuation() const
 {
 	ALfloat			attenuation = 0.f;
@@ -201,6 +296,11 @@ float CAudioSource::GetAttenuation() const
 	return attenuation;
 }
 
+/*
+==================
+CAudioSource::GetStatus
+==================
+*/
 EAudioSourceStatus CAudioSource::GetStatus() const
 {
 	ALint			alStatus = 0;
@@ -215,11 +315,21 @@ EAudioSourceStatus CAudioSource::GetStatus() const
 	}
 }
 
+/*
+==================
+CAudioSource::GetAudioBank
+==================
+*/
 TAssetHandle<CAudioBank> CAudioSource::GetAudioBank() const
 {
 	return audioBank;
 }
 
+/*
+==================
+CAudioSource::GetLocation
+==================
+*/
 Vector CAudioSource::GetLocation() const
 {
 	Vector			location;
@@ -227,6 +337,11 @@ Vector CAudioSource::GetLocation() const
 	return location;
 }
 
+/*
+==================
+CAudioSource::OnAudioDeviceMuted
+==================
+*/
 void CAudioSource::OnAudioDeviceMuted( bool InIsAudioDeviceMuted )
 {
 	if ( InIsAudioDeviceMuted && GetStatus() == ASS_Playing )
@@ -241,12 +356,22 @@ void CAudioSource::OnAudioDeviceMuted( bool InIsAudioDeviceMuted )
 	}
 }
 
+/*
+==================
+CAudioSource::OnAudioBufferDestroyed
+==================
+*/
 void CAudioSource::OnAudioBufferDestroyed( class CAudioBuffer* InAudioBuffer )
 {
 	// Reset OpenAL buffer for audio source
 	alSourcei( alHandle, AL_BUFFER, 0 );
 }
 
+/*
+==================
+CAudioSource::OnAudioBufferUpdated
+==================
+*/
 void CAudioSource::OnAudioBufferUpdated( class CAudioBuffer* InAudioBuffer )
 {
 	// When audio buffer is updated we recreating OpenAL buffer
@@ -254,10 +379,15 @@ void CAudioSource::OnAudioBufferUpdated( class CAudioBuffer* InAudioBuffer )
 }
 
 #if WITH_EDITOR
+/*
+==================
+CAudioSource::OnAudioBankUpdated
+==================
+*/
 void CAudioSource::OnAudioBankUpdated( class CAudioBank* InAudioBank )
 {
 	// Update data from audio bank
-	check( InAudioBank );
+	Assert( InAudioBank );
 	SetAudioBank( InAudioBank->GetAssetHandle() );
 }
 #endif // WITH_EDITOR

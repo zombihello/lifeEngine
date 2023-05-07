@@ -27,12 +27,12 @@ public:
 	 * @param InFile Link to file
 	 * @param InPath Path to archive
 	 */
-									CWindowsArchiveReading( std::ifstream* InFile, const std::wstring& InPath );
+	CWindowsArchiveReading( std::ifstream* InFile, const std::wstring& InPath );
 
 	/**
 	 * @brief Destructor
 	 */
-									~CWindowsArchiveReading();
+	~CWindowsArchiveReading();
 
 	/**
 	 * @brief Serialize data
@@ -40,49 +40,49 @@ public:
 	 * @param[in] InBuffer Pointer to buffer for serialize
 	 * @param[in] InSize Size of buffer
 	 */
-	virtual void					Serialize( void* InBuffer, uint32 InSize ) override;
+	virtual void Serialize( void* InBuffer, uint32 InSize ) override;
 
 	/**
 	 * @brief Get current position in archive
 	 * @return Current position in archive
 	 */
-	virtual uint32					Tell() override;
+	virtual uint32 Tell() override;
 
 	/**
 	 * @brief Set current position in archive
 	 *
 	 * @param[in] InPosition New position in archive
 	 */
-	virtual void					Seek( uint32 InPosition ) override;
+	virtual void Seek( uint32 InPosition ) override;
 
 	/**
 	 * @brief Flush data
 	 */
-	virtual void					Flush() override;
+	virtual void Flush() override;
 
 	/**
 	 * @breif Is loading archive
 	 * @return True if archive loading, false if archive saving
 	 */
-	virtual bool					IsLoading() const;
+	virtual bool IsLoading() const;
 
 	/**
 	 * Is end of file
 	 * @return Return true if end of file, else return false
 	 */
-	virtual bool					IsEndOfFile() override;
+	virtual bool IsEndOfFile() override;
 
 	/**
 	 * @brief Get size of archive
 	 * @return Size of archive
 	 */
-	virtual uint32					GetSize() override;
+	virtual uint32 GetSize() override;
 
 	/**
 	 * @brief Get file handle
 	 * @return Pointer to file
 	 */
-	FORCEINLINE std::ifstream*		GetHandle() const
+	FORCEINLINE std::ifstream* GetHandle() const
 	{
 		return file;
 	}
@@ -104,12 +104,12 @@ public:
 	 * @param InFile Link to file
 	 * @param InPath Path to archive
 	 */
-							CWindowsArchiveWriter( std::ofstream* InFile, const std::wstring& InPath );
+	CWindowsArchiveWriter( std::ofstream* InFile, const std::wstring& InPath );
 
 	/**
 	 * @brief Destructor
 	 */
-							~CWindowsArchiveWriter();
+	~CWindowsArchiveWriter();
 
 	/**
 	 * @brief Serialize data
@@ -117,43 +117,43 @@ public:
 	 * @param[in] InBuffer Pointer to buffer for serialize
 	 * @param[in] InSize Size of buffer
 	 */
-	virtual void			Serialize( void* InBuffer, uint32 InSize ) override;
+	virtual void Serialize( void* InBuffer, uint32 InSize ) override;
 
 	/**
 	 * @brief Get current position in archive
 	 * @return Current position in archive
 	 */
-	virtual uint32			Tell() override;
+	virtual uint32 Tell() override;
 
 	/**
 	 * @brief Set current position in archive
 	 *
 	 * @param[in] InPosition New position in archive
 	 */
-	virtual void			Seek( uint32 InPosition ) override;
+	virtual void Seek( uint32 InPosition ) override;
 
 	/**
 	 * @brief Flush data
 	 */
-	virtual void			Flush() override;
+	virtual void Flush() override;
 
 	/**
 	 * @brief Is saving archive
 	 * @return True if archive saving, false if archive loading
 	 */
-	virtual bool			IsSaving() const;
+	virtual bool IsSaving() const;
 
 	/**
 	 * Is end of file
 	 * @return Return true if end of file, else return false
 	 */
-	virtual bool			IsEndOfFile() override;
+	virtual bool IsEndOfFile() override;
 
 	/**
 	 * @brief Get size of archive
 	 * @return Size of archive
 	 */
-	virtual uint32			GetSize() override;
+	virtual uint32 GetSize() override;
 
 	/**
 	 * @brief Get file handle

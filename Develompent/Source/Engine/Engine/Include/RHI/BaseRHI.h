@@ -47,29 +47,29 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual										~CBaseRHI() {}
+	virtual ~CBaseRHI() {}
 
 	/**
 	 * @brief Initialize RHI
 	 * 
 	 * @param[in] InIsEditor Is current application editor
 	 */
-	virtual void								Init( bool InIsEditor )	{}
+	virtual void Init( bool InIsEditor )	{}
 
 	/**
 	 * @brief Destroy RHI
 	 */
-	virtual void								Destroy() {}
+	virtual void Destroy() {}
 
 	/**
 	 * @brief Acquire thread ownership
 	 */
-	virtual void								AcquireThreadOwnership() {}
+	virtual void AcquireThreadOwnership() {}
 
 	/**
 	 * @brief Release thread ownership
 	 */
-	virtual void								ReleaseThreadOwnership() {}
+	virtual void ReleaseThreadOwnership() {}
 
 	/**
 	 * @brief Create viewport
@@ -99,7 +99,7 @@ public:
 	 * @param[in] InSize Size of data
 	 * @return Pointer to vertex shader
 	 */
-	virtual VertexShaderRHIRef_t					CreateVertexShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
+	virtual VertexShaderRHIRef_t CreateVertexShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
 
 	/**
 	 * @brief Create hull shader
@@ -109,7 +109,7 @@ public:
 	 * @param[in] InSize Size of data
 	 * @return Pointer to hull shader
 	 */
-	virtual HullShaderRHIRef_t					CreateHullShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
+	virtual HullShaderRHIRef_t CreateHullShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
 
 	/**
 	 * @brief Create domain shader
@@ -119,7 +119,7 @@ public:
 	 * @param[in] InSize Size of data
 	 * @return Pointer to domain shader
 	 */
-	virtual DomainShaderRHIRef_t					CreateDomainShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
+	virtual DomainShaderRHIRef_t CreateDomainShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
 
 	/**
 	 * @brief Create pixel shader
@@ -129,7 +129,7 @@ public:
 	 * @param[in] InSize Size of data
 	 * @return Pointer to pixel shader
 	 */
-	virtual PixelShaderRHIRef_t					CreatePixelShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
+	virtual PixelShaderRHIRef_t CreatePixelShader( const tchar* InShaderName, const byte* InData, uint32 InSize )					{ return nullptr; }
 
 	/**
 	 * @brief Create geometry shader
@@ -139,7 +139,7 @@ public:
 	 * @param[in] InSize Size of data
 	 * @return Pointer to geometry shader
 	 */
-	virtual GeometryShaderRHIRef_t				CreateGeometryShader( const tchar* InShaderName, const byte* InData, uint32 InSize )				{ return nullptr; }
+	virtual GeometryShaderRHIRef_t CreateGeometryShader( const tchar* InShaderName, const byte* InData, uint32 InSize )				{ return nullptr; }
 
 	/**
 	 * @brief Create vertex buffer
@@ -150,7 +150,7 @@ public:
 	 * @param[in] InUsage Usage flags
 	 * @return Pointer to vertex buffer
 	 */
-	virtual VertexBufferRHIRef_t					CreateVertexBuffer( const tchar* InBufferName, uint32 InSize, const byte* InData, uint32 InUsage )	{ return nullptr; }
+	virtual VertexBufferRHIRef_t CreateVertexBuffer( const tchar* InBufferName, uint32 InSize, const byte* InData, uint32 InUsage )	{ return nullptr; }
 
 	/**
 	 * @brief Create index buffer
@@ -162,7 +162,7 @@ public:
 	 * @param[in] InUsage Usage flags
 	 * @return Pointer to index buffer
 	 */
-	virtual IndexBufferRHIRef_t					CreateIndexBuffer( const tchar* InBufferName, uint32 InStride, uint32 InSize, const byte* InData, uint32 InUsage )	{ return nullptr; }
+	virtual IndexBufferRHIRef_t CreateIndexBuffer( const tchar* InBufferName, uint32 InStride, uint32 InSize, const byte* InData, uint32 InUsage )	{ return nullptr; }
 
 	/**
 	 * @brief Create vertex declaration
@@ -170,7 +170,7 @@ public:
 	 * @param[in] InElementList Array of vertex elements
 	 * @return Pointer to vertex declaration
 	 */
-	virtual VertexDeclarationRHIRef_t			CreateVertexDeclaration( const VertexDeclarationElementList_t& InElementList ) { return nullptr; }
+	virtual VertexDeclarationRHIRef_t CreateVertexDeclaration( const VertexDeclarationElementList_t& InElementList ) { return nullptr; }
 
 	/**
 	 * @brief Create bound shader state
@@ -184,7 +184,7 @@ public:
 	 * @param[in] InGeometryShader Geometry shader
 	 * @return Pointer to bound shader state
 	 */
-	virtual BoundShaderStateRHIRef_t				CreateBoundShaderState( const tchar* InBoundShaderStateName, VertexDeclarationRHIRef_t InVertexDeclaration, VertexShaderRHIRef_t InVertexShader, PixelShaderRHIRef_t InPixelShader, HullShaderRHIRef_t InHullShader = nullptr, DomainShaderRHIRef_t InDomainShader = nullptr, GeometryShaderRHIRef_t InGeometryShader = nullptr ) { return nullptr; }
+	virtual BoundShaderStateRHIRef_t CreateBoundShaderState( const tchar* InBoundShaderStateName, VertexDeclarationRHIRef_t InVertexDeclaration, VertexShaderRHIRef_t InVertexShader, PixelShaderRHIRef_t InPixelShader, HullShaderRHIRef_t InHullShader = nullptr, DomainShaderRHIRef_t InDomainShader = nullptr, GeometryShaderRHIRef_t InGeometryShader = nullptr ) { return nullptr; }
 
 	/**
 	 * @brief Create rasterizer state
@@ -192,7 +192,7 @@ public:
 	 * @param[in] InInitializer Initializer of rasterizer state
 	 * @return Pointer to rasterizer state
 	 */
-	virtual RasterizerStateRHIRef_t					CreateRasterizerState( const SRasterizerStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual RasterizerStateRHIRef_t CreateRasterizerState( const SRasterizerStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create sampler state
@@ -200,7 +200,7 @@ public:
 	 * @param[in] InInitializer Initializer of sampler state
 	 * @return Pointer to sampler state
 	 */
-	virtual SamplerStateRHIRef_t					CreateSamplerState( const SSamplerStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual SamplerStateRHIRef_t CreateSamplerState( const SSamplerStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create depth state
@@ -208,7 +208,7 @@ public:
 	 * @param InInitializer		Initializer of depth state
 	 * @return Pointer to depth state
 	 */
-	virtual DepthStateRHIRef_t						CreateDepthState( const SDepthStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual DepthStateRHIRef_t CreateDepthState( const SDepthStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create blend state
@@ -216,7 +216,7 @@ public:
 	 * @param InInitializer		Initializer of blend state
 	 * @return Pointer to blend state
 	 */
-	virtual BlendStateRHIRef_t						CreateBlendState( const SBlendStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual BlendStateRHIRef_t CreateBlendState( const SBlendStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create stencil state
@@ -224,7 +224,7 @@ public:
 	 * @param InInitializer		Initializer of stencil state
 	 * @return Pointer to stencil state
 	 */
-	virtual StencilStateRHIRef_t					CreateStencilState( const SStencilStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual StencilStateRHIRef_t CreateStencilState( const SStencilStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create texture 2D
@@ -238,7 +238,7 @@ public:
 	 * @param[in] InData Pointer to data texture
 	 * @return Return pointer to created texture 2D
 	 */
-	virtual Texture2DRHIRef_t					CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData = nullptr ) { return nullptr; }
+	virtual Texture2DRHIRef_t CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData = nullptr ) { return nullptr; }
 
 	/**
 	 * Creates a RHI surface that can be bound as a render target
@@ -251,7 +251,7 @@ public:
 	 * @param[in] InFlags Surface creation flags
 	 * @return Return pointer to created surface
 	 */
-	virtual SurfaceRHIRef_t						CreateTargetableSurface( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, Texture2DRHIParamRef_t InResolveTargetTexture, uint32 InFlags ) { return nullptr; }
+	virtual SurfaceRHIRef_t CreateTargetableSurface( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, Texture2DRHIParamRef_t InResolveTargetTexture, uint32 InFlags ) { return nullptr; }
 
 	/**
 	 * @brief Begin drawing viewport
@@ -259,7 +259,7 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InViewport Viewport
 	 */
-	virtual void								BeginDrawingViewport( class CBaseDeviceContextRHI* InDeviceContext, class CBaseViewportRHI* InViewport ) {}
+	virtual void BeginDrawingViewport( class CBaseDeviceContextRHI* InDeviceContext, class CBaseViewportRHI* InViewport ) {}
 
 	/**
 	 * @brief End drawing viewport
@@ -269,7 +269,7 @@ public:
 	 * @param[in] InIsPresent Whether to display the frame on the screen
 	 * @param[in] InLockToVsync Is it necessary to block for Vsync
 	 */
-	virtual void								EndDrawingViewport( class CBaseDeviceContextRHI* InDeviceContext, class CBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync ) {}
+	virtual void EndDrawingViewport( class CBaseDeviceContextRHI* InDeviceContext, class CBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync ) {}
 
 #if WITH_EDITOR
 	/**
@@ -284,14 +284,14 @@ public:
 	 * @param[in] InShaderSubDir SubDir for debug dump
 	 * @return Return true if compilation is succeed, else returning false
 	 */
-	virtual bool								CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const SShaderCompilerEnvironment& InEnvironment, SShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) )			{ return false; }
+	virtual bool CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const SShaderCompilerEnvironment& InEnvironment, SShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) )			{ return false; }
 #endif // WITH_EDITOR
 
 	/**
 	 * @brief Get shader platform
 	 * @return Return shader platform
 	 */
-	virtual EShaderPlatform						GetShaderPlatform() const			{ return SP_NumPlatforms; }
+	virtual EShaderPlatform GetShaderPlatform() const { return SP_NumPlatforms; }
 
 #if WITH_IMGUI
 	/**
@@ -299,14 +299,14 @@ public:
 	 *
 	 * @param[in] InDeviceContext Device context
 	 */
-	virtual void								InitImGUI( class CBaseDeviceContextRHI* InDeviceContext ) {}
+	virtual void InitImGUI( class CBaseDeviceContextRHI* InDeviceContext ) {}
 
 	/**
 	 * @brief Shutdown render of ImGUI
 	 *
 	 * @param[in] InDeviceContext Device context
 	 */
-	virtual void								ShutdownImGUI( class CBaseDeviceContextRHI* InDeviceContext ) {}
+	virtual void ShutdownImGUI( class CBaseDeviceContextRHI* InDeviceContext ) {}
 
 	/**
 	 * @brief Draw ImGUI
@@ -314,7 +314,7 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InImGUIDrawData Pointer to draw data of ImGUI
 	 */
-	virtual void								DrawImGUI( class CBaseDeviceContextRHI* InDeviceContext, struct ImDrawData* InImGUIDrawData ) {}
+	virtual void DrawImGUI( class CBaseDeviceContextRHI* InDeviceContext, struct ImDrawData* InImGUIDrawData ) {}
 #endif // WITH_IMGUI
 
 #if FRAME_CAPTURE_MARKERS
@@ -325,14 +325,14 @@ public:
 	 * @param InColor Color event
 	 * @param InName Event name
 	 */
-	virtual void								BeginDrawEvent( class CBaseDeviceContextRHI* InDeviceContext, const CColor& InColor, const tchar* InName ) {}
+	virtual void BeginDrawEvent( class CBaseDeviceContextRHI* InDeviceContext, const CColor& InColor, const tchar* InName ) {}
 
 	/**
 	 * @brief End draw event
 	 *
 	 * @param[in] InDeviceContext Device context
 	 */
-	virtual void								EndDrawEvent( class CBaseDeviceContextRHI* InDeviceContext ) {}
+	virtual void EndDrawEvent( class CBaseDeviceContextRHI* InDeviceContext ) {}
 #endif // FRAME_CAPTURE_MARKERS
 
 	/**
@@ -345,7 +345,7 @@ public:
 	 * @param[in] InInstanceSize Size in bytes of instance data
 	 * @param[in] InNumInstances Number of instances
 	 */
-	virtual void								SetupInstancing( class CBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, void* InInstanceData, uint32 InInstanceStride, uint32 InInstanceSize, uint32 InNumInstances ) {}
+	virtual void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, void* InInstanceData, uint32 InInstanceStride, uint32 InInstanceSize, uint32 InNumInstances ) {}
 
 	/**
 	 * @brief Set viewport
@@ -358,7 +358,7 @@ public:
 	 * @param[in] InMaxY Max y
 	 * @param[in] InMaxZ Max z
 	 */
-	virtual void								SetViewport( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) {}
+	virtual void SetViewport( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ ) {}
 
 	/**
 	 * @brief Set bound shader state
@@ -366,7 +366,7 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InBoundShaderState Bound shader state
 	 */
-	virtual void								SetBoundShaderState( class CBaseDeviceContextRHI* InDeviceContext, BoundShaderStateRHIParamRef_t InBoundShaderState ) {}
+	virtual void SetBoundShaderState( class CBaseDeviceContextRHI* InDeviceContext, BoundShaderStateRHIParamRef_t InBoundShaderState ) {}
 
 	/**
 	 * @brief Set stream source
@@ -377,7 +377,7 @@ public:
 	 * @param[in] InStride Stride
 	 * @param[in] InOffset Offset
 	 */
-	virtual void								SetStreamSource( class CBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, VertexBufferRHIParamRef_t InVertexBuffer, uint32 InStride, uint32 InOffset ) {}
+	virtual void SetStreamSource( class CBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, VertexBufferRHIParamRef_t InVertexBuffer, uint32 InStride, uint32 InOffset ) {}
 
 	/**
 	 * @brief Set rasterizer state
@@ -385,7 +385,7 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InNewState New rasterizer state
 	 */
-	virtual void								SetRasterizerState( class CBaseDeviceContextRHI* InDeviceContext, RasterizerStateRHIParamRef_t InNewState ) {}
+	virtual void SetRasterizerState( class CBaseDeviceContextRHI* InDeviceContext, RasterizerStateRHIParamRef_t InNewState ) {}
 
 	/**
 	 * @brief Set sampler state
@@ -395,7 +395,7 @@ public:
 	 * @param[in] InNewState New sampler state
 	 * @param[in] InStateIndex Slot for bind sampler
 	 */
-	virtual void								SetSamplerState( class CBaseDeviceContextRHI* InDeviceContext, PixelShaderRHIParamRef_t InPixelShader, SamplerStateRHIParamRef_t InNewState, uint32 InStateIndex ) {}
+	virtual void SetSamplerState( class CBaseDeviceContextRHI* InDeviceContext, PixelShaderRHIParamRef_t InPixelShader, SamplerStateRHIParamRef_t InNewState, uint32 InStateIndex ) {}
 
 	/**
 	 * Set texture parameter in pixel shader
@@ -405,7 +405,7 @@ public:
 	 * @param[in] InTexture Pointer to texture
 	 * @param[in] InTextureIndex Slot for bind texture
 	 */
-	virtual void								SetTextureParameter( class CBaseDeviceContextRHI* InDeviceContext, PixelShaderRHIParamRef_t InPixelShader, TextureRHIParamRef_t InTexture, uint32 InTextureIndex ) {}
+	virtual void SetTextureParameter( class CBaseDeviceContextRHI* InDeviceContext, PixelShaderRHIParamRef_t InPixelShader, TextureRHIParamRef_t InTexture, uint32 InTextureIndex ) {}
 
 	/**
 	 * Set view parameters
@@ -413,7 +413,7 @@ public:
 	 * @param[in] InDeviceContext Device context
 	 * @param[in] InSceneView Scene view
 	 */
-	virtual void								SetViewParameters( class CBaseDeviceContextRHI* InDeviceContext, class CSceneView& InSceneView ) {}
+	virtual void SetViewParameters( class CBaseDeviceContextRHI* InDeviceContext, class CSceneView& InSceneView ) {}
 
 	/**
 	 * Set render target
@@ -422,7 +422,7 @@ public:
 	 * @param[in] InNewRenderTarget New render target
 	 * @param[in] InNewDepthStencilTarget New depth stencil target
 	 */
-	virtual void								SetRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget , SurfaceRHIParamRef_t InNewDepthStencilTarget ) {}
+	virtual void SetRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget , SurfaceRHIParamRef_t InNewDepthStencilTarget ) {}
 
 	/**
 	 * Set MRT render target
@@ -431,7 +431,7 @@ public:
 	 * @param[in] InNewRenderTarget New render target
 	 * @param[in] InTargetIndex Target index
 	 */
-	virtual void								SetMRTRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget, uint32 InTargetIndex ) {}
+	virtual void SetMRTRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget, uint32 InTargetIndex ) {}
 
 	/**
 	 * Set vertex shader parameter
@@ -442,7 +442,7 @@ public:
 	 * @param[in] InNumBytes Number bytes of parameter
 	 * @param[in] InNewValue New value
 	 */
-	virtual void								SetVertexShaderParameter( class CBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) {}
+	virtual void SetVertexShaderParameter( class CBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) {}
 
 	/**
 	 * Set pixel shader parameter
@@ -453,7 +453,7 @@ public:
 	 * @param[in] InNumBytes Number bytes of parameter
 	 * @param[in] InNewValue New value
 	 */
-	virtual void								SetPixelShaderParameter( class CBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) {}
+	virtual void SetPixelShaderParameter( class CBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue ) {}
 
 	/**
 	 * Set depth test
@@ -461,7 +461,7 @@ public:
 	 * @param InDeviceContext		Device context
 	 * @param InNewState			New depth test
 	 */
-	virtual void								SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState ) {}
+	virtual void SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState ) {}
 
 	/**
 	 * Set blend state
@@ -469,7 +469,7 @@ public:
 	 * @param InDeviceContext		Device context
 	 * @param InNewState			New blend state
 	 */
-	virtual void								SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState ) {}
+	virtual void SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState ) {}
 
 	/**
 	 * Set color write enable
@@ -511,14 +511,14 @@ public:
 	 * @param InDeviceContext		Device context
 	 * @param InNewState			New stencil state
 	 */
-	virtual void								SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, StencilStateRHIParamRef_t InNewState ) {}
+	virtual void SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, StencilStateRHIParamRef_t InNewState ) {}
 
 	/**
 	 * Commit constants
 	 * 
 	 * @param[in] InDeviceContext Device context
 	 */
-	virtual void								CommitConstants( class CBaseDeviceContextRHI* InDeviceContext ) {}
+	virtual void CommitConstants( class CBaseDeviceContextRHI* InDeviceContext ) {}
 
 	/**
 	 * @brief Lock vertex buffer
@@ -529,7 +529,7 @@ public:
 	 * @param[in] InOffset Offset in buffer
 	 * @param[out] OutLockedData Locked data in buffer	 
 	 */
-	virtual void								LockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData ) {}
+	virtual void LockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData ) {}
 
 	/**
 	 * @brief Unlock vertex buffer
@@ -538,7 +538,7 @@ public:
 	 * @param[in] InVertexBuffer Pointer to vertex buffer
 	 * @param[in] InLockedData Locked data in buffer
 	 */
-	virtual void								UnlockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, SLockedData& InLockedData ) {}
+	virtual void UnlockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, SLockedData& InLockedData ) {}
 
 	/**
 	 * @brief Lock index buffer
@@ -549,7 +549,7 @@ public:
 	 * @param[in] InOffset Offset in buffer
 	 * @param[out] OutLockedData Locked data in buffer
 	 */
-	virtual void								LockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData ) {}
+	virtual void LockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData ) {}
 
 	/**
 	 * @brief Unlock index buffer
@@ -558,7 +558,7 @@ public:
 	 * @param[in] InIndexBuffer Pointer to index buffer
 	 * @param[in] InLockedData Locked data in buffer
 	 */
-	virtual void								UnlockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, SLockedData& InLockedData ) {}
+	virtual void UnlockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, SLockedData& InLockedData ) {}
 
 	/**
 	 * @brief Lock texture 2D
@@ -570,7 +570,7 @@ public:
 	 * @param[out] OutLockedData Locked data in texture
 	 * @param[in] InIsUseCPUShadow Is use CPU shadow
 	 */
-	virtual void								LockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, bool InIsDataWrite, SLockedData& OutLockedData, bool InIsUseCPUShadow = false ) {}
+	virtual void LockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, bool InIsDataWrite, SLockedData& OutLockedData, bool InIsUseCPUShadow = false ) {}
 
 	/**
 	 * @brief Unlock texture 2D
@@ -580,7 +580,7 @@ public:
 	 * @param[in] InMipIndex Mip index
 	 * @param[in] InLockedData Locked data in texture
 	 */
-	virtual void								UnlockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, SLockedData& InLockedData ) {}
+	virtual void UnlockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, SLockedData& InLockedData ) {}
 
 	/**
 	 * @brief Draw primitive
@@ -591,7 +591,7 @@ public:
 	 * @param[in] InNumPrimitives Number primitives for render
 	 * @param[in] InNumInstances Number instances to draw
 	 */
-	virtual void								DrawPrimitive( class CBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) {}
+	virtual void DrawPrimitive( class CBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) {}
 
 	/**
 	 * @brief Draw primitive
@@ -604,7 +604,7 @@ public:
 	 * @param[in] InNumPrimitives Number primitives for render
 	 * @param[in] InNumInstances Number instances to draw
 	 */
-	virtual void								DrawIndexedPrimitive( class CBaseDeviceContextRHI* InDeviceContext, class CBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) {}
+	virtual void DrawIndexedPrimitive( class CBaseDeviceContextRHI* InDeviceContext, class CBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives, uint32 InNumInstances = 1 ) {}
 
 	/**
 	 * @brief Copies the contents of the given surface to its resolve target texture
@@ -648,19 +648,19 @@ public:
 	 * @brief Is initialized RHI
 	 * @return Return true if RHI is initialized, else false
 	 */
-	virtual bool								IsInitialize() const			{ return false; }
+	virtual bool IsInitialize() const { return false; }
 
 	/**
 	 * @brief Get RHI name
 	 * @return Return RHI name
 	 */
-	virtual const tchar*						GetRHIName() const				{ return TEXT( "NullRHI" ); }
+	virtual const tchar* GetRHIName() const { return TEXT( "NullRHI" ); }
 
 	/**
 	 * @brief Get device context
 	 * @return Pointer to device context
 	 */
-	virtual class CBaseDeviceContextRHI*		GetImmediateContext() const		{ return nullptr; }
+	virtual class CBaseDeviceContextRHI* GetImmediateContext() const { return nullptr; }
 
 	/**
 	 * @brief Get viewport

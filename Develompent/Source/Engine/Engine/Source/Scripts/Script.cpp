@@ -2,14 +2,16 @@
 #include "Misc/Class.h"
 #include "Scripts/Script.h"
 
-/**
- * Constructor
- */
+/*
+==================
+CScript::CScript
+==================
+*/
 CScript::CScript() : 
 	CAsset( AT_Script ),
 	luaVM( luaL_newstate() )
 {
-	check( luaVM );
+	Assert( luaVM );
 
 	// Create new Lua VM and open libs
 	luabridge::enableExceptions( luaVM );
@@ -20,9 +22,11 @@ CScript::CScript() :
 	CScriptEngine::StaticRegisterClassAPI( luaVM );
 }
 
-/**
- * Destructor
- */
+/*
+==================
+CScript::~CScript
+==================
+*/
 CScript::~CScript()
 {
 	if ( luaVM )
@@ -32,9 +36,11 @@ CScript::~CScript()
 	}
 }
 
-/**
- * Serialize script
- */
+/*
+==================
+CScript::Serialize
+==================
+*/
 void CScript::Serialize( CArchive& InArchive )
 {
 	if ( InArchive.Type() != AT_TextFile )
@@ -93,20 +99,22 @@ void CScript::Serialize( CArchive& InArchive )
 	}
 }
 
-/**
- * Set byte code
- */
+/*
+==================
+CScript::SetByteCode
+==================
+*/
 void CScript::SetByteCode( const byte* InByteCode, uint32 InSize )
 {
-	check( InByteCode && InSize > 0 );
+	Assert( InByteCode && InSize > 0 );
 	
 	// loading byte code of script
 	int32		result = luaL_loadbufferx( luaVM, ( achar* )InByteCode, InSize, name.c_str(), "bt" );		// b - binary format, t - text format, bt - all
-	check( result == 0 );
+	Assert( result == 0 );
 
 	// Initialize script with help first call
 	result = lua_pcall( luaVM, 0, 1, 0 );
-	check( result == 0 );
+	Assert( result == 0 );
 
 	// Save byte code for serialization
 	byteCode.resize( InSize );

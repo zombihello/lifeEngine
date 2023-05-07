@@ -313,7 +313,7 @@ private:
 			 */
 			FORCEINLINE std::size_t operator()( const SElementKeyDrawingPolicyLink& InElementKey ) const
 			{
-				return appMemFastHash( &( *InElementKey.SDG ), InElementKey.overrideHash );
+				return Sys_MemFastHash( &( *InElementKey.SDG ), InElementKey.overrideHash );
 			}
 		};
 
@@ -404,7 +404,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CStaticMesh>
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CStaticMesh>& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive << ( TAssetHandle<CAsset> )InValue;
 	return InArchive;
 }

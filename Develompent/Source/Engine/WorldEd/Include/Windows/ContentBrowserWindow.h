@@ -315,7 +315,7 @@ private:
 			, info( InAssetInfo )
 			, owner( InOwner )
 		{
-			check( info );
+			Assert( info );
 		}
 
 		/**
@@ -356,7 +356,7 @@ private:
 		 */
 		FORCEINLINE EAssetType GetType() const
 		{
-			check( info );
+			Assert( info );
 			return info->type;
 		}
 
@@ -366,7 +366,7 @@ private:
 		 */
 		FORCEINLINE const std::wstring& GetName() const
 		{
-			check( info );
+			Assert( info );
 			return info->name;
 		}
 

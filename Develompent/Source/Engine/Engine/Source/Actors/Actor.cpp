@@ -6,16 +6,31 @@
 IMPLEMENT_CLASS( AActor )
 
 #if WITH_EDITOR
+/*
+==================
+CActorVar::CActorVar
+==================
+*/
 CActorVar::CActorVar()
 	: type( AVT_Unknown )
 	, value( nullptr )
 {}
 
+/*
+==================
+CActorVar::CActorVar
+==================
+*/
 CActorVar::CActorVar( const CActorVar& InCopy )
 {
 	*this = InCopy;
 }
 
+/*
+==================
+CActorVar::Clear
+==================
+*/
 void CActorVar::Clear()
 {
 	if ( !value )
@@ -43,6 +58,11 @@ void CActorVar::Clear()
 }
 #endif // WITH_EDITOR
 
+/*
+==================
+AActor::AActor
+==================
+*/
 AActor::AActor()
 	: bIsStatic( false )
 	, bNeedReinitCollision( false )
@@ -55,11 +75,21 @@ AActor::AActor()
 #endif // WITH_EDITOR
 {}
 
+/*
+==================
+AActor::~AActor
+==================
+*/
 AActor::~AActor()
 {
 	ResetOwnedComponents();
 }
 
+/*
+==================
+AActor::BeginPlay
+==================
+*/
 void AActor::BeginPlay()
 {
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
@@ -70,6 +100,11 @@ void AActor::BeginPlay()
 	bBeginPlay = true;
 }
 
+/*
+==================
+AActor::EndPlay
+==================
+*/
 void AActor::EndPlay()
 {
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
@@ -80,6 +115,11 @@ void AActor::EndPlay()
 	bBeginPlay = false;
 }
 
+/*
+==================
+AActor::Tick
+==================
+*/
 void AActor::Tick( float InDeltaTime )
 {
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
@@ -96,13 +136,18 @@ void AActor::Tick( float InDeltaTime )
 	}
 }
 
+/*
+==================
+AActor::Serialize
+==================
+*/
 void AActor::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << bIsStatic;
 	InArchive << bVisibility;
 
-	check( InArchive.Ver() >= VER_FixedSerializeComponents );
+	Assert( InArchive.Ver() >= VER_FixedSerializeComponents );
 	uint32		startToNumComponents = InArchive.Tell();
 	uint32		numComponents = 0;
 	InArchive << numComponents;
@@ -122,7 +167,7 @@ void AActor::Serialize( class CArchive& InArchive )
 
 			// Skip editor only component if we cooking packages
 #if WITH_EDITOR
-			if ( ownedComponent->IsEditorOnly() && GIsCooker )
+			if ( ownedComponent->IsEditorOnly() && g_IsCooker )
 			{
 				continue;
 			}
@@ -148,7 +193,7 @@ void AActor::Serialize( class CArchive& InArchive )
 
 			if ( !ownedComponent )
 			{
-				LE_LOG( LT_Warning, LC_Package, TEXT( "In actor %s didn't find component %s (%s) for serialize" ), GetName(), name.c_str(), className.c_str() );
+				Warnf( TEXT( "In actor %s didn't find component %s (%s) for serialize\n" ), GetName(), name.c_str(), className.c_str() );
 				InArchive.Seek( InArchive.Tell() + componentSize );
 				continue;
 			}
@@ -169,7 +214,7 @@ void AActor::Serialize( class CArchive& InArchive )
 		}
 		else
 		{
-			check( InArchive.Tell() - startOffset == componentSize );
+			Assert( InArchive.Tell() - startOffset == componentSize );
 		}
 	}
 
@@ -182,6 +227,11 @@ void AActor::Serialize( class CArchive& InArchive )
 	}
 }
 
+/*
+==================
+AActor::Spawned
+==================
+*/
 void AActor::Spawned()
 {
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
@@ -190,16 +240,26 @@ void AActor::Spawned()
 	}
 }
 
+/*
+==================
+AActor::Destroy
+==================
+*/
 bool AActor::Destroy()
 {
 	if ( !bActorIsBeingDestroyed )
 	{
-		GWorld->DestroyActor( this );
+		g_World->DestroyActor( this );
 		bActorIsBeingDestroyed = true;
 	}
 	return bActorIsBeingDestroyed;
 }
 
+/*
+==================
+AActor::Destroyed
+==================
+*/
 void AActor::Destroyed()
 {
 	// If for this actor allready started play, call event of end play
@@ -221,6 +281,11 @@ void AActor::Destroyed()
 	onActorDestroyed.Broadcast( this );
 }
 
+/*
+==================
+AActor::InitPhysics
+==================
+*/
 void AActor::InitPhysics()
 {
 	if ( collisionComponent )
@@ -229,6 +294,11 @@ void AActor::InitPhysics()
 	}
 }
 
+/*
+==================
+AActor::TermPhysics
+==================
+*/
 void AActor::TermPhysics()
 {
 	if ( collisionComponent )
@@ -237,6 +307,11 @@ void AActor::TermPhysics()
 	}
 }
 
+/*
+==================
+AActor::SyncPhysics
+==================
+*/
 void AActor::SyncPhysics()
 {
 	if ( collisionComponent )
@@ -246,26 +321,41 @@ void AActor::SyncPhysics()
 }
 
 #if WITH_EDITOR
+/*
+==================
+AActor::InitProperties
+==================
+*/
 bool AActor::InitProperties( const std::vector<CActorVar>& InActorVars, class CCookPackagesCommandlet* InCooker )
 {
 	return true;
 }
 
+/*
+==================
+AActor::GetActorIcon
+==================
+*/
 std::wstring AActor::GetActorIcon() const
 {
 	return TEXT( "Engine/Editor/Icons/Actor_Default.png" );
 }
 #endif // WITH_EDITOR
 
+/*
+==================
+AActor::CreateComponent
+==================
+*/
 ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InName, bool InEditorOnly /*= false*/ )
 {
-	check( InClass );
+	Assert( InClass );
 
 	CObject*				newObject = InClass->CreateObject();
-	check( newObject->IsA< CActorComponent >() );
+	Assert( newObject->IsA< CActorComponent >() );
 
 	CActorComponent*		component = newObject->Cast< CActorComponent >();
-	check( component );
+	Assert( component );
 
 	bool		bIsASceneComponent		= component->IsA< CSceneComponent >();
 
@@ -281,7 +371,7 @@ ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InNam
 
 #if WITH_EDITOR
 	component->SetEditorOnly( InEditorOnly );
-	if ( !GIsEditor && InEditorOnly && component->IsA<CPrimitiveComponent>() )
+	if ( !g_IsEditor && InEditorOnly && component->IsA<CPrimitiveComponent>() )
 	{
 		( ( CPrimitiveComponent* )component )->SetVisibility( false );
 	}
@@ -292,9 +382,14 @@ ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InNam
 	return component;
 }
 
+/*
+==================
+AActor::AddOwnedComponent
+==================
+*/
 void AActor::AddOwnedComponent( class CActorComponent* InComponent )
 {
-	check( InComponent && InComponent->GetOwner() != this );
+	Assert( InComponent && InComponent->GetOwner() != this );
 
 	// If already owned exist in component - remove component from owner
 	{
@@ -310,9 +405,14 @@ void AActor::AddOwnedComponent( class CActorComponent* InComponent )
 	ownedComponents.push_back( InComponent );
 }
 
+/*
+==================
+AActor::RemoveOwnedComponent
+==================
+*/
 void AActor::RemoveOwnedComponent( class CActorComponent* InComponent )
 {
-	check( InComponent && InComponent->GetOwner() == this );
+	Assert( InComponent && InComponent->GetOwner() == this );
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )
 	{
 		CActorComponent*		component = ownedComponents[ index ];
@@ -325,7 +425,7 @@ void AActor::RemoveOwnedComponent( class CActorComponent* InComponent )
 			}
 			else if ( component == rootComponent )
 			{
-				check( false && "Need implement change root component" );
+				Assert( false && "Need implement change root component" );
 			}
 
 			InComponent->SetOwner( nullptr );
@@ -335,6 +435,11 @@ void AActor::RemoveOwnedComponent( class CActorComponent* InComponent )
 	}
 }
 
+/*
+==================
+AActor::ResetOwnedComponents
+==================
+*/
 void AActor::ResetOwnedComponents()
 {
 	for ( uint32 index = 0, count = ( uint32 )ownedComponents.size(); index < count; ++index )

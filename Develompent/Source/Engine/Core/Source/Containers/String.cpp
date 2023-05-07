@@ -3,9 +3,11 @@
 #include "Core.h"
 #include "Containers/String.h"
 
-/**
- * Getting a formatted string
- */
+/*
+==================
+CString::Format
+==================
+*/
 std::wstring CString::Format( const tchar* InFormat, ... )
 {
 	va_list			arguments;
@@ -17,9 +19,11 @@ std::wstring CString::Format( const tchar* InFormat, ... )
 	return formatedString;
 }
 
-/**
- * Getting a formatted string
- */
+/*
+==================
+CString::Format
+==================
+*/
 std::wstring CString::Format( const tchar* InFormat, va_list InArguments )
 {
 	int32           bufferSize = 1024;
@@ -32,7 +36,7 @@ std::wstring CString::Format( const tchar* InFormat, va_list InArguments )
 		buffer = ( tchar* )malloc( bufferSize * sizeof( tchar ) );
 
 		// Get formated string with args
-		result = appGetVarArgs( buffer, bufferSize, bufferSize - 1, InFormat, InArguments );
+		result = Sys_GetVarArgs( buffer, bufferSize, bufferSize - 1, InFormat, InArguments );
 		if ( result >= bufferSize )
 		{
 			result = -1;

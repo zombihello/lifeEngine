@@ -3,9 +3,11 @@
 #include "D3D11RHI.h"
 #include "D3D11State.h"
 
-/**
- * Translate cull mode from engine to DirectX 11
- */
+/*
+==================
+TranslateCullMode
+==================
+*/
 static FORCEINLINE D3D11_CULL_MODE TranslateCullMode( ERasterizerCullMode InCullMode )
 {
 	switch ( InCullMode )
@@ -16,9 +18,11 @@ static FORCEINLINE D3D11_CULL_MODE TranslateCullMode( ERasterizerCullMode InCull
 	};
 }
 
-/**
- * Translate fill mode from engine to DirectX 11
- */
+/*
+==================
+TranslateFillMode
+==================
+*/
 static FORCEINLINE D3D11_FILL_MODE TranslateFillMode( ERasterizerFillMode InFillMode )
 {
 	switch ( InFillMode )
@@ -28,9 +32,11 @@ static FORCEINLINE D3D11_FILL_MODE TranslateFillMode( ERasterizerFillMode InFill
 	};
 }
 
-/**
- * Translate address mode from engine to DirectX 11
- */
+/*
+==================
+TranslateAddressMode
+==================
+*/
 static FORCEINLINE D3D11_TEXTURE_ADDRESS_MODE TranslateAddressMode( ESamplerAddressMode InAddressMode )
 {
 	switch ( InAddressMode )
@@ -42,9 +48,11 @@ static FORCEINLINE D3D11_TEXTURE_ADDRESS_MODE TranslateAddressMode( ESamplerAddr
 	};
 }
 
-/**
- * Translate sampler compare function from engine to DirectX 11
- */
+/*
+==================
+TranslateSamplerCompareFunction
+==================
+*/
 static FORCEINLINE D3D11_COMPARISON_FUNC TranslateSamplerCompareFunction( ESamplerCompareFunction InSamplerComparisonFunction )
 {
 	switch ( InSamplerComparisonFunction )
@@ -55,9 +63,11 @@ static FORCEINLINE D3D11_COMPARISON_FUNC TranslateSamplerCompareFunction( ESampl
 	};
 }
 
-/**
- * Translate compare function from engine to DirectX 11
- */
+/*
+==================
+TranslateCompareFunction
+==================
+*/
 static FORCEINLINE D3D11_COMPARISON_FUNC TranslateCompareFunction( ECompareFunction InCompareFunction )
 {
 	switch ( InCompareFunction )
@@ -73,6 +83,11 @@ static FORCEINLINE D3D11_COMPARISON_FUNC TranslateCompareFunction( ECompareFunct
 	};
 }
 
+/*
+==================
+TranslateStencilOp
+==================
+*/
 static FORCEINLINE D3D11_STENCIL_OP TranslateStencilOp( EStencilOp InStencilOp )
 {
 	switch ( InStencilOp )
@@ -88,6 +103,11 @@ static FORCEINLINE D3D11_STENCIL_OP TranslateStencilOp( EStencilOp InStencilOp )
 	};
 }
 
+/*
+==================
+TranslateMipBias
+==================
+*/
 static FORCEINLINE float TranslateMipBias( ESamplerMipMapLODBias InMipBias )
 {
 	switch ( InMipBias )
@@ -97,6 +117,11 @@ static FORCEINLINE float TranslateMipBias( ESamplerMipMapLODBias InMipBias )
 	};
 }
 
+/*
+==================
+TranslateBlendOp
+==================
+*/
 static FORCEINLINE D3D11_BLEND_OP TranslateBlendOp( EBlendOperation InBlendOp )
 {
 	switch ( InBlendOp )
@@ -109,6 +134,11 @@ static FORCEINLINE D3D11_BLEND_OP TranslateBlendOp( EBlendOperation InBlendOp )
 	};
 }
 
+/*
+==================
+TranslateBlendFactor
+==================
+*/
 static FORCEINLINE D3D11_BLEND TranslateBlendFactor( EBlendFactor InBlendFactor )
 {
 	switch ( InBlendFactor )
@@ -133,6 +163,12 @@ static FORCEINLINE D3D11_BLEND TranslateBlendFactor( EBlendFactor InBlendFactor 
 	};
 }
 
+
+/*
+==================
+SD3D11StateCache::SD3D11StateCache
+==================
+*/
 SD3D11StateCache::SD3D11StateCache()
 	: inputLayout( nullptr )
 	, vertexShader( nullptr )
@@ -148,6 +184,11 @@ SD3D11StateCache::SD3D11StateCache()
 	Reset();
 }
 
+/*
+==================
+SD3D11StateCache::Reset
+==================
+*/
 void SD3D11StateCache::Reset()
 {
 	inputLayout = nullptr;
@@ -161,26 +202,29 @@ void SD3D11StateCache::Reset()
 	depthStencilView = nullptr;
 	stencilRef = 0;
 
-	appMemzero( &vertexBuffers, sizeof( vertexBuffers ) );
-	appMemzero( &psSamplerStates, sizeof( psSamplerStates ) );
-	appMemzero( &psShaderResourceViews, sizeof( psShaderResourceViews ) );
-	appMemzero( &indexBuffer, sizeof( CD3D11StateIndexBuffer ) );
-	appMemzero( &renderTargetViews, sizeof( renderTargetViews ) );
-	appMemzero( &depthState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
-	appMemzero( &stencilState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
-	appMemzero( &blendState, sizeof( D3D11_BLEND_DESC ) );
+	Sys_Memzero( &vertexBuffers, sizeof( vertexBuffers ) );
+	Sys_Memzero( &psSamplerStates, sizeof( psSamplerStates ) );
+	Sys_Memzero( &psShaderResourceViews, sizeof( psShaderResourceViews ) );
+	Sys_Memzero( &indexBuffer, sizeof( CD3D11StateIndexBuffer ) );
+	Sys_Memzero( &renderTargetViews, sizeof( renderTargetViews ) );
+	Sys_Memzero( &depthState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	Sys_Memzero( &stencilState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	Sys_Memzero( &blendState, sizeof( D3D11_BLEND_DESC ) );
 	memset( &colorWriteMasks, CW_RGBA, sizeof( colorWriteMasks ) );
 }
 
-/**
- * Constructor CD3D11RasterizerStateRHI
- */
+
+/*
+==================
+CD3D11RasterizerStateRHI::CD3D11RasterizerStateRHI
+==================
+*/
 CD3D11RasterizerStateRHI::CD3D11RasterizerStateRHI( const SRasterizerStateInitializerRHI& InInitializer ) 
 	: CBaseRasterizerStateRHI( InInitializer )
 	, d3d11RasterizerState( nullptr )
 {
 	D3D11_RASTERIZER_DESC			d3d11RasterizerDesc;
-	appMemzero( &d3d11RasterizerDesc, sizeof( D3D11_RASTERIZER_DESC ) );
+	Sys_Memzero( &d3d11RasterizerDesc, sizeof( D3D11_RASTERIZER_DESC ) );
 
 	d3d11RasterizerDesc.CullMode					= TranslateCullMode( InInitializer.cullMode );
 	d3d11RasterizerDesc.FillMode					= TranslateFillMode( InInitializer.fillMode );
@@ -198,29 +242,37 @@ CD3D11RasterizerStateRHI::CD3D11RasterizerStateRHI( const SRasterizerStateInitia
 		d3d11RasterizerDesc.FrontCounterClockwise	= true;
 	}
 
-	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
+	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )g_RHI )->GetD3D11Device();
 
-#if DO_CHECK
+#if ENABLED_ASSERT
 	HRESULT				result = d3d11Device->CreateRasterizerState( &d3d11RasterizerDesc, &d3d11RasterizerState );
-	check( result == S_OK );
+	Assert( result == S_OK );
 #else
 	d3d11Device->CreateRasterizerState( &d3d11RasterizerDesc, &d3d11RasterizerState );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 }
 
-/**
- * Destructor CD3D11RasterizerStateRHI
- */
+/*
+==================
+CD3D11RasterizerStateRHI::~CD3D11RasterizerStateRHI
+==================
+*/
 CD3D11RasterizerStateRHI::~CD3D11RasterizerStateRHI()
 {
 	d3d11RasterizerState->Release();
 }
 
+
+/*
+==================
+CD3D11SamplerStateRHI::CD3D11SamplerStateRHI
+==================
+*/
 CD3D11SamplerStateRHI::CD3D11SamplerStateRHI( const SSamplerStateInitializerRHI& InInitializer ) :
 	d3d11SamplerState( nullptr )
 {
 	D3D11_SAMPLER_DESC			d3d11SamplerDesc;
-	appMemzero( &d3d11SamplerDesc, sizeof( D3D11_SAMPLER_DESC ) );
+	Sys_Memzero( &d3d11SamplerDesc, sizeof( D3D11_SAMPLER_DESC ) );
 
 	d3d11SamplerDesc.AddressU		= TranslateAddressMode( InInitializer.addressU );
 	d3d11SamplerDesc.AddressV		= TranslateAddressMode( InInitializer.addressV );
@@ -259,33 +311,50 @@ CD3D11SamplerStateRHI::CD3D11SamplerStateRHI( const SSamplerStateInitializerRHI&
 	d3d11SamplerDesc.BorderColor[ 3 ] = borderColor.a;
 	d3d11SamplerDesc.ComparisonFunc = TranslateSamplerCompareFunction( InInitializer.comparisonFunction );
 
-	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )GRHI )->GetD3D11Device();
+	ID3D11Device*		d3d11Device = ( ( CD3D11RHI* )g_RHI )->GetD3D11Device();
 
-#if DO_CHECK
+#if ENABLED_ASSERT
 	HRESULT				result = d3d11Device->CreateSamplerState( &d3d11SamplerDesc, &d3d11SamplerState );
-	check(result == S_OK);
+	Assert(result == S_OK);
 #else
 	d3d11Device->CreateSamplerState( &d3d11SamplerDesc, &d3d11SamplerState );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 }
 
+/*
+==================
+CD3D11SamplerStateRHI::~CD3D11SamplerStateRHI
+==================
+*/
 CD3D11SamplerStateRHI::~CD3D11SamplerStateRHI()
 {
 	d3d11SamplerState->Release();
 }
 
+
+/*
+==================
+CD3D11DepthStateRHI::CD3D11DepthStateRHI
+==================
+*/
 CD3D11DepthStateRHI::CD3D11DepthStateRHI( const SDepthStateInitializerRHI& InInitializer )
 {
-	appMemzero( &d3d11DepthStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	Sys_Memzero( &d3d11DepthStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	d3d11DepthStateInfo.DepthEnable		= InInitializer.depthTest != CF_Always || InInitializer.bEnableDepthWrite;
 	d3d11DepthStateInfo.DepthWriteMask	= InInitializer.bEnableDepthWrite ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
 	d3d11DepthStateInfo.DepthFunc		= TranslateCompareFunction( InInitializer.depthTest );
 }
 
+
+/*
+==================
+CD3D11StencilStateRHI::CD3D11StencilStateRHI
+==================
+*/
 CD3D11StencilStateRHI::CD3D11StencilStateRHI( const SStencilStateInitializerRHI& InInitializer )
 	: stencilRef( InInitializer.stencilRef )
 {
-	appMemzero( &d3d11StencilStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	Sys_Memzero( &d3d11StencilStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	d3d11StencilStateInfo.StencilEnable						= InInitializer.bEnableFrontFaceStencil || InInitializer.bEnableBackFaceStencil;
 	d3d11StencilStateInfo.StencilReadMask					= InInitializer.stencilReadMask;
 	d3d11StencilStateInfo.StencilWriteMask					= InInitializer.stencilWriteMask;
@@ -307,11 +376,17 @@ CD3D11StencilStateRHI::CD3D11StencilStateRHI( const SStencilStateInitializerRHI&
 	}
 }
 
+
+/*
+==================
+CD3D11BlendStateRHI::CD3D11BlendStateRHI
+==================
+*/
 CD3D11BlendStateRHI::CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable /* = true */ )
 	: bColorWrite( InIsColorWriteEnable )
 {
 	// Init descriptor
-	appMemzero( &d3d11blendStateInfo, sizeof( D3D11_BLEND_DESC ) );
+	Sys_Memzero( &d3d11blendStateInfo, sizeof( D3D11_BLEND_DESC ) );
 	d3d11blendStateInfo.AlphaToCoverageEnable					= false;
 	d3d11blendStateInfo.IndependentBlendEnable					= true;
 	d3d11blendStateInfo.RenderTarget[0].BlendEnable				= InInitializer.colorBlendOperation != BO_Add || InInitializer.colorDestBlendFactor != BF_Zero || InInitializer.colorSourceBlendFactor != BF_One || InInitializer.alphaBlendOperation != BO_Add || InInitializer.alphaDestBlendFactor != BF_Zero || InInitializer.alphaSourceBlendFactor != BF_One;

@@ -5,8 +5,13 @@
 // -------------
 // GLOBALS
 // -------------
-TGlobalResource< CSpriteMesh >				GSpriteMesh;
+TGlobalResource< CSpriteMesh >				g_SpriteMesh;
 
+/*
+==================
+CSpriteMesh::InitRHI
+==================
+*/
 void CSpriteMesh::InitRHI()
 {
 	float	x0 = -1.f,	y0 = -1.f;
@@ -22,21 +27,37 @@ void CSpriteMesh::InitRHI()
 	};
 	uint32					indeces[] = { 0, 1, 2, 0, 2, 3 };
 
-	vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "SpriteMesh" ), sizeof( SSpriteVertexType ) * ARRAY_COUNT( verteces ), ( byte* ) &verteces[ 0 ], RUF_Static );
-	indexBufferRHI = GRHI->CreateIndexBuffer( TEXT( "SpriteMesh" ), sizeof( uint32 ), sizeof( uint32 ) * ARRAY_COUNT( indeces ), ( byte* ) &indeces[ 0 ], RUF_Static );
+	vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "SpriteMesh" ), sizeof( SSpriteVertexType ) * ARRAY_COUNT( verteces ), ( byte* ) &verteces[ 0 ], RUF_Static );
+	indexBufferRHI = g_RHI->CreateIndexBuffer( TEXT( "SpriteMesh" ), sizeof( uint32 ), sizeof( uint32 ) * ARRAY_COUNT( indeces ), ( byte* ) &indeces[ 0 ], RUF_Static );
 }
 
+/*
+==================
+CSpriteMesh::ReleaseRHI
+==================
+*/
 void CSpriteMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
 	indexBufferRHI.SafeRelease();
 }
 
+
+/*
+==================
+CSprite::CSprite
+==================
+*/
 CSprite::CSprite()
 	: vertexFactory( new CSpriteVertexFactory() )
-	, material( GEngine->GetDefaultMaterial() )
+	, material( g_Engine->GetDefaultMaterial() )
 {}
 
+/*
+==================
+CSprite::InitRHI
+==================
+*/
 void CSprite::InitRHI()
 {
 	// Initialize vertex factory
@@ -44,6 +65,11 @@ void CSprite::InitRHI()
 	vertexFactory->Init();
 }
 
+/*
+==================
+CSprite::ReleaseRHI
+==================
+*/
 void CSprite::ReleaseRHI()
 {
 	vertexFactory->ReleaseResource();

@@ -6,6 +6,11 @@
 #include "System/Package.h"
 #include "PhysicsInterface.h"
 
+/*
+==================
+TextToECollisionChannel
+==================
+*/
 FORCEINLINE ECollisionChannel TextToECollisionChannel( const std::wstring& InStr )
 {
 	if ( InStr == TEXT( "WorldStatic" ) )
@@ -21,10 +26,15 @@ FORCEINLINE ECollisionChannel TextToECollisionChannel( const std::wstring& InStr
 		return CC_Character;
 	}
 	
-	appErrorf( TEXT( "Unknown collision channel %s" ), InStr.c_str() );
+	Sys_Errorf( TEXT( "Unknown collision channel %s" ), InStr.c_str() );
 	return CC_Max;
 }
 
+/*
+==================
+TextToECollisionChannel
+==================
+*/
 FORCEINLINE ECollisionResponse TextToECollisionResponse( const std::wstring& InStr )
 {
 	if ( InStr == TEXT( "Block" ) )
@@ -40,55 +50,71 @@ FORCEINLINE ECollisionResponse TextToECollisionResponse( const std::wstring& InS
 		return CR_Ignore;
 	}
 
-	appErrorf( TEXT( "Unknown collision response %s" ), InStr.c_str() );
+	Sys_Errorf( TEXT( "Unknown collision response %s" ), InStr.c_str() );
 	return CR_Max;
 }
 
+
+/*
+==================
+CPhysicsEngine::CPhysicsEngine
+==================
+*/
 CPhysicsEngine::CPhysicsEngine()
 {}
 
+/*
+==================
+CPhysicsEngine::~CPhysicsEngine
+==================
+*/
 CPhysicsEngine::~CPhysicsEngine()
 {
 	Shutdown();
 }
 
+/*
+==================
+CPhysicsEngine::Init
+==================
+*/
 void CPhysicsEngine::Init()
 {
 	// Init physics interface
 	CPhysicsInterface::Init();
 
 	// Init physics scene
-	GPhysicsScene.Init();
+	g_PhysicsScene.Init();
 
 	// Load default physics material
 	{
 		// Loading default material from packages only when we in game
-		if ( !GIsCooker && !GIsCommandlet )
+		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultPhysMaterial = GConfig.GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
+			CConfigValue		configDefaultPhysMaterial = g_Config.GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
 			if ( configDefaultPhysMaterial.IsValid() )
 			{
 				std::wstring			pathAsset = configDefaultPhysMaterial.GetString();
-				TAssetHandle<CAsset>	asset = GPackageManager->FindAsset( pathAsset );
+				TAssetHandle<CAsset>	asset = g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
 					defaultPhysMaterial = asset;
 				}
 				else
 				{
-					LE_LOG( LT_Warning, LC_Init, TEXT( "Default physics material '%s' not loaded" ), pathAsset.c_str() );
+					Warnf( TEXT( "Default physics material '%s' not loaded\n" ), pathAsset.c_str() );
 				}
 			}
 			else
 			{
-				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default physics material in section 'Physics.Physics:DefaultPhysMaterial'" ) );
+				Warnf( TEXT( "Need set in config 'Engine' default physics material in section 'Physics.Physics:DefaultPhysMaterial'\n" ) );
 			}
 		}
 
 		// If default physics material not loaded we create in virtual package
 		if ( !defaultPhysMaterial.IsAssetValid() )
 		{
-			PackageRef_t					package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			PackageRef_t					package = g_PackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<CPhysicsMaterial>	physMaterial = MakeSharedPtr<CPhysicsMaterial>();
 
 			defaultPhysMaterial		= physMaterial->GetAssetHandle();
@@ -98,16 +124,16 @@ void CPhysicsEngine::Init()
 
 	// Load collision profiles
 	{
-		CConfigValue		configCollisionProfiles = GConfig.GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "CollisionProfiles" ) );
+		CConfigValue		configCollisionProfiles = g_Config.GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "CollisionProfiles" ) );
 		if ( configCollisionProfiles.IsValid() )
 		{
-			check( configCollisionProfiles.GetType() == CConfigValue::T_Array );
+			Assert( configCollisionProfiles.GetType() == CConfigValue::T_Array );
 			std::vector< CConfigValue >		arrayCollisionProfiles = configCollisionProfiles.GetArray();
 
 			for ( uint32 index = 0, count = arrayCollisionProfiles.size(); index < count; ++index )
 			{
 				const CConfigValue&		configCollisionProfile = arrayCollisionProfiles[ index ];
-				check( configCollisionProfile.GetType() == CConfigValue::T_Object );
+				Assert( configCollisionProfile.GetType() == CConfigValue::T_Object );
 				CConfigObject			objectCollisionProfile = configCollisionProfile.GetObject();
 
 				SCollisionProfile		collisionProfile;
@@ -120,7 +146,7 @@ void CPhysicsEngine::Init()
 				for ( uint32 indexResponse = 0, countResponse = arrayCollisionResponses.size(); indexResponse < countResponse; ++indexResponse )
 				{
 					const CConfigValue&		configCollisionResponse = arrayCollisionResponses[ indexResponse ];
-					check( configCollisionResponse.GetType() == CConfigValue::T_Object );
+					Assert( configCollisionResponse.GetType() == CConfigValue::T_Object );
 					CConfigObject			objectCollisionResponse = configCollisionResponse.GetObject();
 
 					std::wstring			name = objectCollisionResponse.GetValue( TEXT( "Name" ) ).GetString();
@@ -133,23 +159,33 @@ void CPhysicsEngine::Init()
 		}
 		else
 		{
-			LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine'collision profiles in section 'Physics.Physics:CollisionProfiles'" ) );
+			Warnf( TEXT( "Need set in config 'Engine'collision profiles in section 'Physics.Physics:CollisionProfiles'\n" ) );
 		}
 	}
 
 	// Register default assets
-	GAssetFactory.SetDefault( defaultPhysMaterial, AT_PhysicsMaterial );
+	g_AssetFactory.SetDefault( defaultPhysMaterial, AT_PhysicsMaterial );
 }
 
+/*
+==================
+CPhysicsEngine::Tick
+==================
+*/
 void CPhysicsEngine::Tick( float InDeltaTime )
 {
-	GPhysicsScene.Tick( InDeltaTime );
+	g_PhysicsScene.Tick( InDeltaTime );
 }
 
+/*
+==================
+CPhysicsEngine::Shutdown
+==================
+*/
 void CPhysicsEngine::Shutdown()
 {
 	// Free allocated memory
-	GPhysicsScene.Shutdown();
+	g_PhysicsScene.Shutdown();
 	defaultPhysMaterial.Reset();
 	CPhysicsInterface::Shutdown();
 }

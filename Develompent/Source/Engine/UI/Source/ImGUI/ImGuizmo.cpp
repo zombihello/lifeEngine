@@ -839,14 +839,14 @@ namespace IMGUIZMO_NAMESPACE
       vec_t startOfSegment = start;
       const matrix_t& mvp = localCoordinates ? gContext.mMVPLocal : gContext.mMVP;
       startOfSegment.TransformPoint(mvp);
-      if (fabsf(startOfSegment.w) > FLT_EPSILON) // check for axis aligned with camera direction
+      if (fabsf(startOfSegment.w) > FLT_EPSILON) // Assert for axis aligned with camera direction
       {
          startOfSegment *= 1.f / startOfSegment.w;
       }
 
       vec_t endOfSegment = end;
       endOfSegment.TransformPoint(mvp);
-      if (fabsf(endOfSegment.w) > FLT_EPSILON) // check for axis aligned with camera direction
+      if (fabsf(endOfSegment.w) > FLT_EPSILON) // Assert for axis aligned with camera direction
       {
          endOfSegment *= 1.f / endOfSegment.w;
       }
@@ -863,7 +863,7 @@ namespace IMGUIZMO_NAMESPACE
       for (unsigned int i = 0; i < 3; i++)
       {
          pts[i].TransformPoint(gContext.mMVP);
-         if (fabsf(pts[i].w) > FLT_EPSILON) // check for axis aligned with camera direction
+         if (fabsf(pts[i].w) > FLT_EPSILON) // Assert for axis aligned with camera direction
          {
             pts[i] *= 1.f / pts[i].w;
          }

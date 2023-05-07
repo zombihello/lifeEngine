@@ -35,25 +35,25 @@
  * @ingroup UI
  * @brief Initialize ImGUI on platform
  */
-extern bool				appImGUIInit();
+bool Sys_ImGUIInit();
 
 /**
  * @ingroup UI
  * @brief Shutdown ImGUI on platform
  */
-extern void				appImGUIShutdown();
+void Sys_ImGUIShutdown();
 
 /**
  * @ingroup UI
  * @brief Begin drawing ImGUI
  */
-extern void				appImGUIBeginDrawing();
+void Sys_ImGUIBeginDrawing();
 
 /**
  * @ingroup UI
  * @brief End drawing ImGUI
  */
-extern void				appImGUIEndDrawing();
+void Sys_ImGUIEndDrawing();
 
 /**
  * @ingroup UI
@@ -61,7 +61,7 @@ extern void				appImGUIEndDrawing();
  * 
  * @param[in] InWindowEvent Window event
  */
-extern void				appImGUIProcessEvent( struct SWindowEvent& InWindowEvent );
+void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent );
 
 /**
  * @ingroup UI
@@ -531,22 +531,22 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-							CImGUIEngine();
+	CImGUIEngine();
 
 	/**
 	 * @brief Destructor
 	 */
-							~CImGUIEngine();
+	~CImGUIEngine();
 
 	/**
 	 * @brief Initialize ImGUI
 	 */
-	void					Init();
+	void Init();
 
 	/**
 	 * @brief Shutdown ImGUI on platform
 	 */
-	void					Shutdown();
+	void Shutdown();
 
 	/**
 	 * @brief Update logic
@@ -561,7 +561,7 @@ public:
 	 */
 	FORCEINLINE void AddLayer( const TSharedPtr<CImGUILayer>& InImGUILayer )
 	{
-		check( InImGUILayer );
+		Assert( InImGUILayer );
 		layers.push_back( InImGUILayer );
 	}
 
@@ -571,7 +571,7 @@ public:
 	 */
 	FORCEINLINE void RemoveLayer( const TSharedPtr<CImGUILayer>& InImGUILayer )
 	{
-		check( InImGUILayer );
+		Assert( InImGUILayer );
 		for ( uint32 index = 0, count = layers.size(); index < count; ++index )
 		{
 			if ( layers[index] == InImGUILayer )
@@ -587,7 +587,7 @@ public:
 	 * 
 	 * @param[in] InWindowEvent Window event
 	 */
-	void					ProcessEvent( struct SWindowEvent& InWindowEvent );
+	void ProcessEvent( struct SWindowEvent& InWindowEvent );
 
 	/**
 	 * @brief Set show cursor
@@ -601,24 +601,24 @@ public:
 	/**
 	 * @brief Begin draw commands for render ImGUI
 	 */
-	void					BeginDraw();
+	void BeginDraw();
 
 	/**
 	 * @brief End draw commands for render ImGUI
 	 */
-	void					EndDraw();
+	void EndDraw();
 
 	/**
 	 * @brief Open new ImGUI window
 	 * @param[in] InViewport Pointer to viewport of ImGUI
 	 */
-	void					OpenWindow( ImGuiViewport* InViewport );
+	void OpenWindow( ImGuiViewport* InViewport );
 
 	/**
 	 * @brief Close ImGUI window
 	 * @param[in] InViewport Pointer to viewport of ImGUI
 	 */
-	void					CloseWindow( ImGuiViewport* InViewport );
+	void CloseWindow( ImGuiViewport* InViewport );
 
 	/**
 	 * @brief Is show cursor

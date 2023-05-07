@@ -138,7 +138,7 @@ CODE
 
  READ FIRST
  ----------
- - Remember to check the wonderful Wiki (https://github.com/ocornut/imgui/wiki)
+ - Remember to Assert the wonderful Wiki (https://github.com/ocornut/imgui/wiki)
  - Your code creates the UI, if your code doesn't run the UI is gone! The UI can be highly dynamic, there are no construction or
    destruction steps, less superfluous data retention on your side, less state duplication, less state synchronization, fewer bugs.
  - Call and read ImGui::ShowDemoWindow() for demo code demonstrating most features.
@@ -454,7 +454,7 @@ CODE
                        - if you set the 'power' parameter to >1.0f (to enable non-linear editing): 1/ your compiler may warn on float>int conversion, 2/ code will assert at runtime, 3/ in case asserts are disabled, the code will not crash and enable the _Logarithmic flag. 4/ you can replace the >1.0f value with ImGuiSliderFlags_Logarithmic to fix the warning/assert and get a _similar_ effect as previous uses of power >1.0f.
                        see https://github.com/ocornut/imgui/issues/3361 for all details.
                        kept inline redirection functions (will obsolete) apart for: DragFloatRange2(), VSliderFloat(), VSliderScalar(). For those three the 'float power=1.0f' version was removed directly as they were most unlikely ever used.
-                       for shared code, you can version check at compile-time with `#if IMGUI_VERSION_NUM >= 17704`.
+                       for shared code, you can version Assert at compile-time with `#if IMGUI_VERSION_NUM >= 17704`.
                      - obsoleted use of v_min > v_max in DragInt, DragFloat, DragScalar to lock edits (introduced in 1.73, was not demoed nor documented very), will be replaced by a more generic ReadOnly feature. You may use the ImGuiSliderFlags_ReadOnly internal flag in the meantime.
  - 2020/06/23 (1.77) - removed BeginPopupContextWindow(const char*, int mouse_button, bool also_over_items) in favor of BeginPopupContextWindow(const char*, ImGuiPopupFlags flags) with ImGuiPopupFlags_NoOverItems.
  - 2020/06/15 (1.77) - renamed OpenPopupOnItemClick() to OpenPopupContextItem(). Kept inline redirection function (will obsolete). [NOTE: THIS WAS REVERTED IN 1.79]
@@ -537,7 +537,7 @@ CODE
  - 2018/04/09 (1.61) - IM_DELETE() helper function added in 1.60 doesn't clear the input _pointer_ reference, more consistent with expectation and allows passing r-value.
  - 2018/03/20 (1.60) - renamed io.WantMoveMouse to io.WantSetMousePos for consistency and ease of understanding (was added in 1.52, _not_ used by core and only honored by some backend ahead of merging the Nav branch).
  - 2018/03/12 (1.60) - removed ImGuiCol_CloseButton, ImGuiCol_CloseButtonActive, ImGuiCol_CloseButtonHovered as the closing cross uses regular button colors now.
- - 2018/03/08 (1.60) - changed ImFont::DisplayOffset.y to default to 0 instead of +1. Fixed rounding of Ascent/Descent to match TrueType renderer. If you were adding or subtracting to ImFont::DisplayOffset check if your fonts are correctly aligned vertically.
+ - 2018/03/08 (1.60) - changed ImFont::DisplayOffset.y to default to 0 instead of +1. Fixed rounding of Ascent/Descent to match TrueType renderer. If you were adding or subtracting to ImFont::DisplayOffset Assert if your fonts are correctly aligned vertically.
  - 2018/03/03 (1.60) - renamed ImGuiStyleVar_Count_ to ImGuiStyleVar_COUNT and ImGuiMouseCursor_Count_ to ImGuiMouseCursor_COUNT for consistency with other public enums.
  - 2018/02/18 (1.60) - BeginDragDropSource(): temporarily removed the optional mouse_button=0 parameter because it is not really usable in many situations at the moment.
  - 2018/02/16 (1.60) - obsoleted the io.RenderDrawListsFn callback, you can call your graphics engine render function after ImGui::Render(). Use ImGui::GetDrawData() to retrieve the ImDrawData* to display.
@@ -591,7 +591,7 @@ CODE
  - 2017/08/11 (1.51) - renamed ImGuiSetCond_Always to ImGuiCond_Always, ImGuiSetCond_Once to ImGuiCond_Once, ImGuiSetCond_FirstUseEver to ImGuiCond_FirstUseEver, ImGuiSetCond_Appearing to ImGuiCond_Appearing. Kept redirection enums (will obsolete).
  - 2017/08/09 (1.51) - removed ValueColor() helpers, they are equivalent to calling Text(label) + SameLine() + ColorButton().
  - 2017/08/08 (1.51) - removed ColorEditMode() and ImGuiColorEditMode in favor of ImGuiColorEditFlags and parameters to the various Color*() functions. The SetColorEditOptions() allows to initialize default but the user can still change them with right-click context menu.
-                     - changed prototype of 'ColorEdit4(const char* label, float col[4], bool show_alpha = true)' to 'ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flags = 0)', where passing flags = 0x01 is a safe no-op (hello dodgy backward compatibility!). - check and run the demo window, under "Color/Picker Widgets", to understand the various new options.
+                     - changed prototype of 'ColorEdit4(const char* label, float col[4], bool show_alpha = true)' to 'ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flags = 0)', where passing flags = 0x01 is a safe no-op (hello dodgy backward compatibility!). - Assert and run the demo window, under "Color/Picker Widgets", to understand the various new options.
                      - changed prototype of rarely used 'ColorButton(ImVec4 col, bool small_height = false, bool outline_border = true)' to 'ColorButton(const char* desc_id, ImVec4 col, ImGuiColorEditFlags flags = 0, ImVec2 size = ImVec2(0, 0))'
  - 2017/07/20 (1.51) - removed IsPosHoveringAnyWindow(ImVec2), which was partly broken and misleading. ASSERT + redirect user to io.WantCaptureMouse
  - 2017/05/26 (1.50) - removed ImFontConfig::MergeGlyphCenterV in favor of a more multipurpose ImFontConfig::GlyphOffset.
@@ -3328,10 +3328,10 @@ bool ImGui::ItemHoverable(const ImRect& bb, ImGuiID id)
     if (id != 0)
     {
         // [DEBUG] Item Picker tool!
-        // We perform the check here because SetHoveredID() is not frequently called (1~ time a frame), making
+        // We perform the Assert here because SetHoveredID() is not frequently called (1~ time a frame), making
         // the cost of this tool near-zero. We can get slightly better call-stack and support picking non-hovered
         // items if we perform the test in ItemAdd(), but that would incur a small runtime cost.
-        // #define IMGUI_DEBUG_TOOL_ITEM_PICKER_EX in imconfig.h if you want this check to also be performed in ItemAdd().
+        // #define IMGUI_DEBUG_TOOL_ITEM_PICKER_EX in imconfig.h if you want this Assert to also be performed in ItemAdd().
         if (g.DebugItemPickerActive && g.HoveredIdPreviousFrame == id)
             GetForegroundDrawList()->AddRect(bb.Min, bb.Max, IM_COL32(255, 255, 0, 255));
         if (g.DebugItemPickerBreakId == id)
@@ -4512,7 +4512,7 @@ static void AddDrawListToDrawData(ImVector<ImDrawList*>* out_list, ImDrawList* d
     if (draw_list->CmdBuffer.Size == 0)
         return;
 
-    // Draw list sanity check. Detect mismatch between PrimReserve() calls and incrementing _VtxCurrentIdx, _VtxWritePtr etc.
+    // Draw list sanity Assert. Detect mismatch between PrimReserve() calls and incrementing _VtxCurrentIdx, _VtxWritePtr etc.
     // May trigger for you if you are using PrimXXX functions incorrectly.
     IM_ASSERT(draw_list->VtxBuffer.Size == 0 || draw_list->_VtxWritePtr == draw_list->VtxBuffer.Data + draw_list->VtxBuffer.Size);
     IM_ASSERT(draw_list->IdxBuffer.Size == 0 || draw_list->_IdxWritePtr == draw_list->IdxBuffer.Data + draw_list->IdxBuffer.Size);
@@ -4891,7 +4891,7 @@ static void FindHoveredWindow()
 {
     ImGuiContext& g = *GImGui;
 
-    // Special handling for the window being moved: Ignore the mouse viewport check (because it may reset/lose its viewport during the undocking frame)
+    // Special handling for the window being moved: Ignore the mouse viewport Assert (because it may reset/lose its viewport during the undocking frame)
     ImGuiViewportP* moving_window_viewport = g.MovingWindow ? g.MovingWindow->Viewport : NULL;
     if (g.MovingWindow)
         g.MovingWindow->Viewport = g.MouseViewport;
@@ -6962,7 +6962,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
                 skip_items = true;
         window->SkipItems = skip_items;
 
-        // Sanity check: there are two spots which can set Appearing = true
+        // Sanity Assert: there are two spots which can set Appearing = true
         // - when 'window_just_activated_by_user' is set -> HiddenFramesCannotSkipItems is set -> SkipItems always false
         // - in BeginDocked() path when DockNodeIsVisible == DockTabIsVisible == true -> hidden _should_ be all zero // FIXME: Not formally proven, hence the assert.
         if (window->SkipItems && !window->Appearing)
@@ -7870,7 +7870,7 @@ static void ImGui::ErrorCheckNewFrameSanityChecks()
     for (int n = 0; n < ImGuiKey_COUNT; n++)
         IM_ASSERT(g.IO.KeyMap[n] >= -1 && g.IO.KeyMap[n] < IM_ARRAYSIZE(g.IO.KeysDown) && "io.KeyMap[] contains an out of bound value (need to be 0..512, or -1 for unmapped key)");
 
-    // Check: required key mapping (we intentionally do NOT check all keys to not pressure user into setting up everything, but Space is required and was only added in 1.60 WIP)
+    // Check: required key mapping (we intentionally do NOT Assert all keys to not pressure user into setting up everything, but Space is required and was only added in 1.60 WIP)
     if (g.IO.ConfigFlags & ImGuiConfigFlags_NavEnableKeyboard)
         IM_ASSERT(g.IO.KeyMap[ImGuiKey_Space] != -1 && "ImGuiKey_Space is not mapped, required for keyboard navigation.");
 
@@ -7878,7 +7878,7 @@ static void ImGui::ErrorCheckNewFrameSanityChecks()
     if (g.IO.ConfigWindowsResizeFromEdges && !(g.IO.BackendFlags & ImGuiBackendFlags_HasMouseCursors))
         g.IO.ConfigWindowsResizeFromEdges = false;
 
-    // Perform simple check: error if Docking or Viewport are enabled _exactly_ on frame 1 (instead of frame 0 or later), which is a common error leading to loss of .ini data.
+    // Perform simple Assert: error if Docking or Viewport are enabled _exactly_ on frame 1 (instead of frame 0 or later), which is a common error leading to loss of .ini data.
     if (g.FrameCount == 1 && (g.IO.ConfigFlags & ImGuiConfigFlags_DockingEnable) && (g.ConfigFlagsLastFrame & ImGuiConfigFlags_DockingEnable) == 0)
         IM_ASSERT(0 && "Please set DockingEnable before the first call to NewFrame()! Otherwise you will lose your .ini settings!");
     if (g.FrameCount == 1 && (g.IO.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) && (g.ConfigFlagsLastFrame & ImGuiConfigFlags_ViewportsEnable) == 0)
@@ -8162,7 +8162,7 @@ bool ImGui::ItemAdd(const ImRect& bb, ImGuiID id, const ImRect* nav_bb_arg, ImGu
         //      thousands of item, but at least NavMoveRequest is only set on user interaction, aka maximum once a frame.
         //      We could early out with "if (is_clipped && !g.NavInitRequest) return false;" but when we wouldn't be able
         //      to reach unclipped widgets. This would work if user had explicit scrolling control (e.g. mapped on a stick).
-        // We intentionally don't check if g.NavWindow != NULL because g.NavAnyRequest should only be set when it is non null.
+        // We intentionally don't Assert if g.NavWindow != NULL because g.NavAnyRequest should only be set when it is non null.
         // If we crash on a NULL g.NavWindow we need to fix the bug elsewhere.
         window->DC.NavLayersActiveMaskNext |= (1 << window->DC.NavLayerCurrent);
         if (g.NavId == id || g.NavAnyRequest)
@@ -8170,7 +8170,7 @@ bool ImGui::ItemAdd(const ImRect& bb, ImGuiID id, const ImRect* nav_bb_arg, ImGu
                 if (window == g.NavWindow || ((window->Flags | g.NavWindow->Flags) & ImGuiWindowFlags_NavFlattened))
                     NavProcessItem();
 
-        // [DEBUG] Item Picker tool, when enabling the "extended" version we perform the check in ItemAdd()
+        // [DEBUG] Item Picker tool, when enabling the "extended" version we perform the Assert in ItemAdd()
 #ifdef IMGUI_DEBUG_TOOL_ITEM_PICKER_EX
         if (id == g.DebugItemPickerBreakId)
         {
@@ -9529,7 +9529,7 @@ static bool ImGui::NavScoreItem(ImGuiNavItemData* result)
         }
     }
 
-    // Axial check: if 'curr' has no link at all in some direction and 'cand' lies roughly in that direction, add a tentative link. This will only be kept if no "real" matches
+    // Axial Assert: if 'curr' has no link at all in some direction and 'cand' lies roughly in that direction, add a tentative link. This will only be kept if no "real" matches
     // are found, so it only augments the graph produced by the above method using extra links. (important, since it doesn't guarantee strong connectedness)
     // This is just to avoid buttons having no links in a particular direction when there's a suitable neighbor. you get good graphs without this too.
     // 2017/09/29: FIXME: This now currently only enabled inside menu bars, ideally we'd disable it everywhere. Menus in particular need to catch failure. For general navigation it feels awkward.
@@ -11753,7 +11753,7 @@ static void ImGui::UpdateViewportsNewFrame()
         // Erase unused viewports
         if (n > 0 && viewport->LastFrameActive < g.FrameCount - 2)
         {
-            GImGUIEngine->CloseWindow( viewport );
+            g_ImGUIEngine->CloseWindow( viewport );
             DestroyViewport(viewport);
             
             n--;
@@ -12243,7 +12243,7 @@ void ImGui::UpdatePlatformWindows()
         if (destroy_platform_window)
         {
             DestroyPlatformWindow(viewport);
-            GImGUIEngine->CloseWindow( viewport );
+            g_ImGUIEngine->CloseWindow( viewport );
             continue;
         }
 
@@ -12264,7 +12264,7 @@ void ImGui::UpdatePlatformWindows()
             viewport->LastRendererSize = viewport->Size;                                       // We don't need to call Renderer_SetWindowSize() as it is expected Renderer_CreateWindow() already did it.
             viewport->PlatformWindowCreated = true;
 
-            GImGUIEngine->OpenWindow( viewport );
+            g_ImGUIEngine->OpenWindow( viewport );
         }
 
         // Apply Position and Size (from ImGui to Platform/Renderer backends)
@@ -12361,7 +12361,7 @@ void ImGui::UpdatePlatformWindows()
 //
 void ImGui::RenderPlatformWindowsDefault(void* platform_render_arg, void* renderer_render_arg)
 {
-    checkMsg( false, TEXT( "This function is deprecated" ) );
+    AssertMsg( false, TEXT( "This function is deprecated" ) );
 
     // Skip the main viewport (index 0), which is always fully handled by the application!
     ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();

@@ -23,7 +23,7 @@ FORCEINLINE double appSeconds()
 	QueryPerformanceCounter( &cycles );
 
 	// Add big number to make bugs apparent where return value is being passed to FLOAT
-	return cycles.QuadPart * GSecondsPerCycle + 16777216.0;
+	return cycles.QuadPart * g_SecondsPerCycle + 16777216.0;
 }
 
 #endif // !WINDOWSMISC_H

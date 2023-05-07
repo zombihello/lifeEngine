@@ -3,6 +3,11 @@
 
 #define SHADER_CACHE_VERSION			4
 
+/*
+==================
+CShaderParameterMap::FindParameterAllocation
+==================
+*/
 bool CShaderParameterMap::FindParameterAllocation( const tchar* InParameterName, uint32& OutBufferIndex, uint32& OutBaseIndex, uint32& OutSize, uint32& OutSamplerIndex ) const
 {
 	auto		itParamAllocation = parameterMap.find( InParameterName );
@@ -22,6 +27,11 @@ bool CShaderParameterMap::FindParameterAllocation( const tchar* InParameterName,
 	}
 }
 
+/*
+==================
+CShaderParameterMap::AddParameterAllocation
+==================
+*/
 void CShaderParameterMap::AddParameterAllocation( const tchar* InParameterName, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InSize, uint32 InSamplerIndex )
 {
 	SParameterAllocation 		allocation;
@@ -32,9 +42,11 @@ void CShaderParameterMap::AddParameterAllocation( const tchar* InParameterName, 
 	parameterMap[ InParameterName ] = allocation;
 }
 
-/**
- * Serialize of SShaderCacheItem
- */
+/*
+==================
+CShaderCache::SShaderCacheItem::Serialize
+==================
+*/
 void CShaderCache::SShaderCacheItem::Serialize( CArchive& InArchive )
 {
 	InArchive << frequency;
@@ -70,12 +82,14 @@ void CShaderCache::SShaderCacheItem::Serialize( CArchive& InArchive )
 	}
 }
 
-/**
- * Serialize
- */
+/*
+==================
+CShaderCache::Serialize
+==================
+*/
 void CShaderCache::Serialize( CArchive& InArchive )
 {
-	check( InArchive.Type() == AT_ShaderCache );
+	Assert( InArchive.Type() == AT_ShaderCache );
 
 	if ( InArchive.IsLoading() )
 	{
@@ -84,7 +98,7 @@ void CShaderCache::Serialize( CArchive& InArchive )
 		InArchive << shaderCacheVersion;
 		if ( shaderCacheVersion != SHADER_CACHE_VERSION )
 		{
-			appErrorf( TEXT( "Not supported version of shader cache. In archive version %i, need %i" ), shaderCacheVersion, SHADER_CACHE_VERSION );
+			Sys_Errorf( TEXT( "Not supported version of shader cache. In archive version %i, need %i" ), shaderCacheVersion, SHADER_CACHE_VERSION );
 			return;
 		}
 

@@ -1,6 +1,11 @@
 #include "Containers/String.h"
 #include "Windows/FileDialog.h"
 
+/*
+==================
+CFileDialogSetup::AddFormat
+==================
+*/
 void CFileDialogSetup::AddFormat( const CAssetFactory::SAssetImporterInfo& InImporterInfo, const std::wstring& InDescription )
 {
 	std::wstring	filter;

@@ -6,11 +6,21 @@
 #include "Render/SceneUtils.h"
 #include "Render/SceneHitProxyRendering.h"
 
+/*
+==================
+CStaticMesh::CStaticMesh
+==================
+*/
 CStaticMesh::CStaticMesh()
 	: CAsset( AT_StaticMesh )
 	, vertexFactory( new CStaticMeshVertexFactory() )
 {}
 
+/*
+==================
+CStaticMesh::~CStaticMesh
+==================
+*/
 CStaticMesh::~CStaticMesh()
 {
 	// Remove all drawing policy links from scenes
@@ -31,13 +41,18 @@ CStaticMesh::~CStaticMesh()
 	}
 }
 
+/*
+==================
+CStaticMesh::InitRHI
+==================
+*/
 void CStaticMesh::InitRHI()
 {
 	// Create vertex buffer
 	uint32			numVerteces = ( uint32 )verteces.Num();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = GRHI->CreateVertexBuffer( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( SStaticMeshVertexType ) * numVerteces, ( byte* )verteces.GetData(), RUF_Static );
+		vertexBufferRHI = g_RHI->CreateVertexBuffer( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( SStaticMeshVertexType ) * numVerteces, ( byte* )verteces.GetData(), RUF_Static );
 
 		// Initialize vertex factory
 		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SStaticMeshVertexType ) } );		// 0 stream slot
@@ -48,16 +63,21 @@ void CStaticMesh::InitRHI()
 	uint32			numIndeces = ( uint32 )indeces.Num();
 	if ( numIndeces > 0 )
 	{
-		indexBufferRHI = GRHI->CreateIndexBuffer( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.GetData(), RUF_Static );
+		indexBufferRHI = g_RHI->CreateIndexBuffer( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.GetData(), RUF_Static );
 	}
 
-	if ( !GIsEditor && !GIsCommandlet )
+	if ( !g_IsEditor && !g_IsCommandlet )
 	{
 		verteces.RemoveAllElements();
 		indeces.RemoveAllElements();
 	}
 }
 
+/*
+==================
+CStaticMesh::ReleaseRHI
+==================
+*/
 void CStaticMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
@@ -65,6 +85,11 @@ void CStaticMesh::ReleaseRHI()
 	vertexFactory->ReleaseResource();
 }
 
+/*
+==================
+CStaticMesh::Serialize
+==================
+*/
 void CStaticMesh::Serialize( class CArchive& InArchive )
 {
 	if ( InArchive.Ver() < VER_StaticMesh )
@@ -83,7 +108,7 @@ void CStaticMesh::Serialize( class CArchive& InArchive )
 
 		verteces = tmpVerteces;
 		indeces = tmpIndeces;
-		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package version, in future must be removed supports" ) );
+		Warnf( TEXT( "Deprecated package version, in future must be removed supports\n" ) );
 	}
 	else
 	{
@@ -111,6 +136,11 @@ void CStaticMesh::Serialize( class CArchive& InArchive )
 	}
 }
 
+/*
+==================
+CStaticMesh::SetData
+==================
+*/
 void CStaticMesh::SetData( const std::vector<SStaticMeshVertexType>& InVerteces, const std::vector<uint32>& InIndeces, const std::vector<SStaticMeshSurface>& InSurfaces, const std::vector< TAssetHandle<CMaterial> >& InMaterials )
 {
 	// Copy new parameters of static mesh
@@ -125,6 +155,11 @@ void CStaticMesh::SetData( const std::vector<SStaticMeshVertexType>& InVerteces,
 	BeginUpdateResource( this );
 }
 
+/*
+==================
+CStaticMesh::CalcBoundingBox
+==================
+*/
 void CStaticMesh::CalcBoundingBox()
 {
 	// Find minimum and maximum by XYZ
@@ -171,6 +206,11 @@ void CStaticMesh::CalcBoundingBox()
 	}
 }
 
+/*
+==================
+CStaticMesh::SetMaterial
+==================
+*/
 void CStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<CMaterial>& InNewMaterial )
 {
 	if ( InMaterialIndex > materials.size() )
@@ -189,6 +229,11 @@ void CStaticMesh::SetMaterial( uint32 InMaterialIndex, const TAssetHandle<CMater
 	materials[ InMaterialIndex ] = InNewMaterial;
 }
 
+/*
+==================
+CStaticMesh::GetDependentAssets
+==================
+*/
 void CStaticMesh::GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
 {
 	// TODO BS yehor.pohuliaka - Need optimize it
@@ -222,6 +267,11 @@ void CStaticMesh::GetDependentAssets( SetDependentAssets_t& OutDependentAssets, 
 	}
 }
 
+/*
+==================
+CStaticMesh::ReloadDependentAssets
+==================
+*/
 void CStaticMesh::ReloadDependentAssets( bool InForce /* = false */ )
 {
 	bool		bDirtyElementDrawingPolices = false;
@@ -234,7 +284,7 @@ void CStaticMesh::ReloadDependentAssets( bool InForce /* = false */ )
 		}
 
 		TSharedPtr<SAssetReference>		assetReference = assetHandle.GetReference();
-		assetHandle					= GPackageManager->FindAsset( assetReference->guidPackage, assetReference->guidAsset, assetReference->type );
+		assetHandle					= g_PackageManager->FindAsset( assetReference->guidPackage, assetReference->guidAsset, assetReference->type );
 		bDirtyElementDrawingPolices = true;
 	}
 
@@ -245,6 +295,11 @@ void CStaticMesh::ReloadDependentAssets( bool InForce /* = false */ )
 	}
 }
 
+/*
+==================
+CStaticMesh::LinkDrawList
+==================
+*/
 TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::LinkDrawList( SSceneDepthGroup& InSDG )
 {
 	// Make key for element drawing policy link
@@ -267,6 +322,11 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::LinkDrawList( SS
 	return element;
 }
 
+/*
+==================
+CStaticMesh::LinkDrawList
+==================
+*/
 TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::LinkDrawList( SSceneDepthGroup& InSDG, const std::vector< TAssetHandle<CMaterial> >& InOverrideMaterials )
 {
 	// Make key for element drawing policy link
@@ -275,8 +335,8 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::LinkDrawList( SS
 	// Calculate override hash
 	for ( uint32 index = 0, count = InOverrideMaterials.size(); index < count; ++index )
 	{
-		elementKey.overrideHash = appMemFastHash( index, elementKey.overrideHash );
-		elementKey.overrideHash = appMemFastHash( InOverrideMaterials[ index ].ToSharedPtr(), elementKey.overrideHash );
+		elementKey.overrideHash = Sys_MemFastHash( index, elementKey.overrideHash );
+		elementKey.overrideHash = Sys_MemFastHash( InOverrideMaterials[ index ].ToSharedPtr(), elementKey.overrideHash );
 	}
 
 	// If already added drawing policy link for this scene depth group - return exist element
@@ -296,6 +356,11 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::LinkDrawList( SS
 	return element;
 }
 
+/*
+==================
+CStaticMesh::MakeDrawingPolicyLink
+==================
+*/
 TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolicyLink( SSceneDepthGroup& InSDG, uint64 InOverrideHash /* = 0 */, std::vector<TAssetHandle<CMaterial>>* InOverrideMaterials /* = nullptr */ )
 {
 	// Allocate new element
@@ -349,6 +414,11 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolic
 	return element;
 }
 
+/*
+==================
+CStaticMesh::UnlinkDrawList
+==================
+*/
 void CStaticMesh::UnlinkDrawList( SSceneDepthGroup& InSDG, TSharedPtr<SElementDrawingPolicyLink>& InDrawingPolicyLink )
 {
 	// If pointer is not valid, we exist

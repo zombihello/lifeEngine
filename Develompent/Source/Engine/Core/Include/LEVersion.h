@@ -59,7 +59,7 @@ enum ELifeEnginePackageVersion
 	//
 
 	VER_AutomaticVersionPlusOne,									/**< This needs for automatic update last version of package */
-	VER_MinVersion							= VER_PackageBase,		/**< This need for check min supported version */
+	VER_MinVersion							= VER_PackageBase,		/**< This need for Assert min supported version */
 };
 
 /**

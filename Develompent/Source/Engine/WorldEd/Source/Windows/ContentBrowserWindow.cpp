@@ -55,7 +55,7 @@ struct SPackageInfo
 };
 
 /** Table of color buttons by asset type */
-static ImVec4		GAssetBorderColors[] =
+static ImVec4		s_AssetBorderColors[] =
 {
 	ImVec4( 1.f, 1.f, 1.f, 1.f ),				// AT_Unknown
 	ImVec4( 0.75f, 0.25f, 0.25f, 1.f ),			// AT_Texture2D
@@ -65,10 +65,10 @@ static ImVec4		GAssetBorderColors[] =
 	ImVec4( 0.38f, 0.33f, 0.83f, 1.f ),			// AT_AudioBank
 	ImVec4( 0.78f, 0.75f, 0.5f, 1.f )			// AT_PhysicsMaterial
 };
-static_assert( ARRAY_COUNT( GAssetBorderColors ) == AT_Count, "Need full init GAssetBorderColors array" );
+static_assert( ARRAY_COUNT( s_AssetBorderColors ) == AT_Count, "Need full init s_AssetBorderColors array" );
 
 /** Table of path to asset icons by type */
-static const tchar* GAssetIconPaths[] =
+static const tchar* s_AssetIconPaths[] =
 {
 	TEXT( "Unknown.png" ),				// AT_Unknown
 	TEXT( "Texture.png" ),				// AT_Texture2D
@@ -78,16 +78,13 @@ static const tchar* GAssetIconPaths[] =
 	TEXT( "Audio.png" ),				// AT_AudioBank
 	TEXT( "PhysMaterial.png" )			// AT_PhysicsMaterial
 };
-static_assert( ARRAY_COUNT( GAssetIconPaths ) == AT_Count, "Need full init GAssetIconPaths array" );
+static_assert( ARRAY_COUNT( s_AssetIconPaths ) == AT_Count, "Need full init s_AssetIconPaths array" );
 
-/**
- * @ingroup WorldEd
- * @brief Convert array of filenames to one string
- *
- * @param InArray	Array of filenames
- * @param InMaxSize	Max size of array to print in result string
- * @return Return formated one string
- */
+/*
+==================
+ArrayFilenamesToString
+==================
+*/
 static FORCEINLINE std::wstring ArrayFilenamesToString( const std::vector<CFilename>& InArray, uint32 InMaxSize = 3 )
 {
 	std::wstring	result;
@@ -108,25 +105,22 @@ static FORCEINLINE std::wstring ArrayFilenamesToString( const std::vector<CFilen
 	return result;
 }
 
-/**
- * @ingroup WorldEd
- * @brief Get packages in directory (recursive)
- *
- * @param InRootDir		Root directory
- * @param InNewRootDir	New root directory
- * @param OutResult		Output array of path to packages in directory (old and new)
- */
+/*
+==================
+GetPackagesInDirectory
+==================
+*/
 static void GetPackagesInDirectory( const std::wstring& InRootDir, const std::wstring& InNewRootDir, std::vector<SPackageInfo>& OutResult )
 {
 	// Find all files in directory
-	std::vector<std::wstring>	files = GFileSystem->FindFiles( InRootDir, true, true );
+	std::vector<std::wstring>	files = g_FileSystem->FindFiles( InRootDir, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
 	{
 		CFilename		oldPath = InRootDir + PATH_SEPARATOR + files[index];
 		CFilename		newPath = InNewRootDir + PATH_SEPARATOR + files[index];
 
 		// If this directory, we look packages inside
-		if ( GFileSystem->IsDirectory( oldPath.GetFullPath() ) )
+		if ( g_FileSystem->IsDirectory( oldPath.GetFullPath() ) )
 		{
 			GetPackagesInDirectory( oldPath.GetFullPath(), newPath.GetFullPath(), OutResult );
 		}
@@ -138,24 +132,21 @@ static void GetPackagesInDirectory( const std::wstring& InRootDir, const std::ws
 	}
 }
 
-/**
- * @ingroup WorldEd
- * @brief Get files in directory (recursive)
- * 
- * @param InRootDir		Root directory
- * @param OutFiles		Output files in directory
- * @param OutDirs		Output sub directories in directory
- */
+/*
+==================
+GetFilesInDirectory
+==================
+*/
 static void GetFilesInDirectory( const std::wstring& InRootDir, std::vector<std::wstring>& OutFiles, std::vector<std::wstring>& OutDirs )
 {
 	// Find all files in directory
-	std::vector<std::wstring>	files = GFileSystem->FindFiles( InRootDir, true, true );
+	std::vector<std::wstring>	files = g_FileSystem->FindFiles( InRootDir, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
 	{
 		std::wstring path = InRootDir + PATH_SEPARATOR + files[index];
 
 		// If this directory, we look files inside
-		if ( GFileSystem->IsDirectory( path ) )
+		if ( g_FileSystem->IsDirectory( path ) )
 		{
 			GetFilesInDirectory( path, OutFiles, OutDirs );
 			OutDirs.push_back( path );
@@ -167,17 +158,14 @@ static void GetFilesInDirectory( const std::wstring& InRootDir, std::vector<std:
 	}
 }
 
-/**
- * @ingroup WorldEd
- * @brief Is empty directory (recursive)
- *
- * @param InRootDir		Root directory
- * @param InIgnoreDir	Is need ignore folders
- * @return Return TRUE if directory is empty, otherwise will return FALSE
- */
+/*
+==================
+IsEmptyDirectory
+==================
+*/
 static bool IsEmptyDirectory( const std::wstring& InRootDir, bool InIgnoreDir = false )
 {
-	std::vector<std::wstring>	files = GFileSystem->FindFiles( InRootDir, true, true );
+	std::vector<std::wstring>	files = g_FileSystem->FindFiles( InRootDir, true, true );
 	if ( files.empty() )
 	{
 		return true;
@@ -191,7 +179,7 @@ static bool IsEmptyDirectory( const std::wstring& InRootDir, bool InIgnoreDir = 
 	for ( uint32 index = 0, count = files.size(); !bExistFiles && index < count; ++index )
 	{
 		const std::wstring&		file = files[index];
-		if ( GFileSystem->IsDirectory( InRootDir + PATH_SEPARATOR + file ) )
+		if ( g_FileSystem->IsDirectory( InRootDir + PATH_SEPARATOR + file ) )
 		{
 			bExistFiles |= !IsEmptyDirectory( InRootDir + PATH_SEPARATOR + file, InIgnoreDir );
 		}
@@ -239,8 +227,8 @@ public:
 	 */
 	virtual bool Init() override
 	{
-		check( owner && owner->package );
-		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		Assert( owner && owner->package );
+		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -257,7 +245,7 @@ public:
 		// Import all assets
 		std::wstring									errorMessages;
 		CAssetFactory::EResultShowImportSettings		importSettingsModes[AT_Count];
-		appMemzero( importSettingsModes, sizeof( CAssetFactory::EResultShowImportSettings ) * AT_Count );
+		Sys_Memzero( importSettingsModes, sizeof( CAssetFactory::EResultShowImportSettings ) * AT_Count );
 
 		for ( uint32 index = 0, count = filesToImport.size(); index < count; ++index )
 		{
@@ -298,18 +286,18 @@ public:
 				}
 			}
 
-			EAssetType							assetType = GAssetFactory.GetAssetTypeByPath( filename.GetFullPath() );
+			EAssetType							assetType = g_AssetFactory.GetAssetTypeByPath( filename.GetFullPath() );
 			std::wstring						errorMsg;
 			std::vector<TSharedPtr<CAsset>>		result;
 
 			// Show dialog with import settings if it need
-			if ( importSettingsModes[assetType] != CAssetFactory::RSIS_ImportAll && GAssetFactory.ShowImportSettings( assetType, owner, eventResponse, importSettingsModes[assetType] ) && importSettingsModes[assetType] == CAssetFactory::RSIS_Cancel )
+			if ( importSettingsModes[assetType] != CAssetFactory::RSIS_ImportAll && g_AssetFactory.ShowImportSettings( assetType, owner, eventResponse, importSettingsModes[assetType] ) && importSettingsModes[assetType] == CAssetFactory::RSIS_Cancel )
 			{
 				continue;
 			}
 			
 			// Import asset
-			if ( !GAssetFactory.Import( filename.GetFullPath(), result, errorMsg ) )
+			if ( !g_AssetFactory.Import( filename.GetFullPath(), result, errorMsg ) )
 			{
 				errorMessages += CString::Format( TEXT( "\n%s: %s" ), filename.GetBaseFilename().c_str(), errorMsg.c_str() );
 			}
@@ -338,7 +326,7 @@ public:
 	 */
 	virtual void Stop() override
 	{
-		GSynchronizeFactory->Destroy( eventResponse );
+		g_SynchronizeFactory->Destroy( eventResponse );
 	}
 
 	/**
@@ -400,8 +388,8 @@ public:
 	 */
 	virtual bool Init() override
 	{
-		check( owner && owner->package );
-		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		Assert( owner && owner->package );
+		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -415,7 +403,7 @@ public:
 	 */
 	virtual uint32 Run() override
 	{
-		// Get new asset name and check on exist other asset with this name
+		// Get new asset name and Assert on exist other asset with this name
 		bool			bIsOk = false;
 		std::wstring	newAssetName;
 		while ( !bIsOk )
@@ -474,7 +462,7 @@ public:
 	 */
 	virtual void Stop() override
 	{
-		GSynchronizeFactory->Destroy( eventResponse );
+		g_SynchronizeFactory->Destroy( eventResponse );
 	}
 
 	/**
@@ -526,8 +514,8 @@ public:
 	 */
 	virtual bool Init() override
 	{
-		check( owner && package );
-		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		Assert( owner && package );
+		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -541,7 +529,7 @@ public:
 	 */
 	virtual uint32 Run() override
 	{
-		// Get new asset name and check on exist other asset with this name
+		// Get new asset name and Assert on exist other asset with this name
 		bool			bIsOk = false;
 		std::wstring	assetName;
 		while ( !bIsOk )
@@ -597,7 +585,7 @@ public:
 	 */
 	virtual void Stop() override
 	{
-		GSynchronizeFactory->Destroy( eventResponse );
+		g_SynchronizeFactory->Destroy( eventResponse );
 	}
 
 	/**
@@ -660,8 +648,8 @@ public:
 	 */
 	virtual bool Init() override
 	{
-		check( owner );
-		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		Assert( owner );
+		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 
 		// Expanding all folders. It need for we contain in array only files
 		std::vector<SFileInfo>		oldFilesToMoveCopy = filesToMoveCopy;
@@ -701,7 +689,7 @@ public:
 		for ( uint32 index = 0, count = filesToMoveCopy.size(); index < count; ++index )
 		{
 			const SFileInfo&	fileInfo			= filesToMoveCopy[index];
-			bool				bExistFile			= !fileInfo.bDirectory && GFileSystem->IsExistFile( fileInfo.dstPath.GetFullPath() );
+			bool				bExistFile			= !fileInfo.bDirectory && g_FileSystem->IsExistFile( fileInfo.dstPath.GetFullPath() );
 			bool				bPackage			= fileInfo.srcPath.GetExtension() == TEXT( "pak" );
 			if ( bExistFile )
 			{
@@ -743,14 +731,14 @@ public:
 			{
 				// We try unload package for remove unused assets.
 				// If package still used, we skip him
-				if ( !GPackageManager->UnloadPackage( fileInfo.srcPath.GetFullPath() ) )
+				if ( !g_PackageManager->UnloadPackage( fileInfo.srcPath.GetFullPath() ) )
 				{
 					errorMessages += CString::Format( TEXT( "\n%s: Package in using or modifided and cannot be moved" ), fileInfo.srcPath.GetBaseFilename().c_str() );
 					continue;
 				}
 
 				// Otherwise we remove entry from TOC file
-				GTableOfContents.RemoveEntry( fileInfo.srcPath.GetFullPath() );
+				g_TableOfContents.RemoveEntry( fileInfo.srcPath.GetFullPath() );
 				bDirtyTOC = true;
 			}
 
@@ -758,11 +746,11 @@ public:
 			ECopyMoveResult	result;
 			if ( bMove )
 			{
-				result = GFileSystem->Move( fileInfo.dstPath.GetFullPath(), fileInfo.srcPath.GetFullPath(), true, true );
+				result = g_FileSystem->Move( fileInfo.dstPath.GetFullPath(), fileInfo.srcPath.GetFullPath(), true, true );
 			}
 			else
 			{
-				result = GFileSystem->Copy( fileInfo.dstPath.GetFullPath(), fileInfo.srcPath.GetFullPath(), true, true );
+				result = g_FileSystem->Copy( fileInfo.dstPath.GetFullPath(), fileInfo.srcPath.GetFullPath(), true, true );
 			}
 
 			if ( result != CMR_OK )
@@ -780,7 +768,7 @@ public:
 				errorMessages += CString::Format( TEXT( "\n%s: %s" ), fileInfo.srcPath.GetFullPath().c_str(), errorMsg );
 				if ( bMove && bPackage )		// We must restore entry in TOC file if this is package
 				{
-					GTableOfContents.AddEntry( fileInfo.srcPath.GetFullPath() );
+					g_TableOfContents.AddEntry( fileInfo.srcPath.GetFullPath() );
 				}
 			}
 			else
@@ -788,7 +776,7 @@ public:
 				// We update TOC file if this is package
 				if ( bPackage )
 				{
-					GTableOfContents.AddEntry( fileInfo.dstPath.GetFullPath() );
+					g_TableOfContents.AddEntry( fileInfo.dstPath.GetFullPath() );
 					bDirtyTOC = true;
 				}
 			}
@@ -802,7 +790,7 @@ public:
 				std::wstring		fullDirPath = directorisToDelete[index].GetFullPath();
 				if ( IsEmptyDirectory( fullDirPath, true ) )
 				{
-					GFileSystem->DeleteDirectory( fullDirPath, true );
+					g_FileSystem->DeleteDirectory( fullDirPath, true );
 				}
 			}
 		}
@@ -810,7 +798,7 @@ public:
 		// If TOC file is dirty, we serialize him
 		if ( bDirtyTOC )
 		{
-			GEditorEngine->SerializeTOC( true );
+			g_EditorEngine->SerializeTOC( true );
 		}
 
 		// If exist errors, show popup window
@@ -828,7 +816,7 @@ public:
 	 */
 	virtual void Stop() override
 	{
-		GSynchronizeFactory->Destroy( eventResponse );
+		g_SynchronizeFactory->Destroy( eventResponse );
 	}
 
 	/**
@@ -867,14 +855,14 @@ private:
 		// Find all files in directory
 		std::wstring				srcDirectory		= InFileInfo.srcPath.GetPath() + InFileInfo.srcPath.GetBaseFilename() + PATH_SEPARATOR;
 		std::wstring				dstDirectory		= InFileInfo.dstPath.GetPath() + InFileInfo.dstPath.GetBaseFilename() + PATH_SEPARATOR;
-		std::vector<std::wstring>	files				= GFileSystem->FindFiles( srcDirectory, true, true );
+		std::vector<std::wstring>	files				= g_FileSystem->FindFiles( srcDirectory, true, true );
 		for ( uint32 index = 0, count = files.size(); index < count; ++index )
 		{
 			CFilename			filename = files[index];
 			SFileInfo			fileInfo;
 			fileInfo.dstPath	= dstDirectory + filename.GetFullPath();
 			fileInfo.srcPath	= srcDirectory + filename.GetFullPath();
-			fileInfo.bDirectory = GFileSystem->IsDirectory( fileInfo.srcPath.GetFullPath() );		
+			fileInfo.bDirectory = g_FileSystem->IsDirectory( fileInfo.srcPath.GetFullPath() );		
 			
 			if ( fileInfo.bDirectory )
 			{
@@ -940,8 +928,8 @@ public:
 	 */
 	virtual bool Init() override
 	{
-		check( owner && rootNode );
-		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		Assert( owner && rootNode );
+		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -955,7 +943,7 @@ public:
 	 */
 	virtual uint32 Run() override
 	{
-		// Get file name and check on exist other file with this name
+		// Get file name and Assert on exist other file with this name
 		bool			bIsOk		= false;
 		std::wstring	fileName;
 		std::wstring	rootDir		= ( rootNode->GetType() == CContentBrowserWindow::FNT_Folder ? rootNode->GetPath() : CFilename( rootNode->GetPath() ).GetPath() ) + PATH_SEPARATOR;
@@ -987,7 +975,7 @@ public:
 			{
 				// If folder with name already exist - try enter other name 
 			case CM_CreateFolder:			
-				if ( GFileSystem->IsExistFile( rootDir + fileName ) )
+				if ( g_FileSystem->IsExistFile( rootDir + fileName ) )
 				{
 					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Folder '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
@@ -1001,7 +989,7 @@ public:
 
 				// If package with name already exist - try enter other name 
 			case CM_CreatePackage:
-				if ( GFileSystem->IsExistFile( rootDir + fileName + TEXT( ".pak" ) ) || !GTableOfContents.GetPackagePath( fileName ).empty() )
+				if ( g_FileSystem->IsExistFile( rootDir + fileName + TEXT( ".pak" ) ) || !g_TableOfContents.GetPackagePath( fileName ).empty() )
 				{
 					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
@@ -1014,7 +1002,7 @@ public:
 				break;
 
 			default: 
-				appErrorf( TEXT( "Unknown mode 0x%X" ), mode );
+				Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
 				return 1;
 			}
 		}
@@ -1023,29 +1011,29 @@ public:
 		{
 			// Create directory
 		case CM_CreateFolder:
-			GFileSystem->MakeDirectory( rootDir + fileName );
+			g_FileSystem->MakeDirectory( rootDir + fileName );
 			break;
 
 			// Create new package
 		case CM_CreatePackage:
 		{
 			std::wstring	fullPath	= rootDir + fileName + TEXT( ".pak" );
-			PackageRef_t	package		= GPackageManager->LoadPackage( fullPath, true );
+			PackageRef_t	package		= g_PackageManager->LoadPackage( fullPath, true );
 			if ( !package->Save( fullPath ) )
 			{
-				GPackageManager->UnloadPackage( fullPath, true );
+				g_PackageManager->UnloadPackage( fullPath, true );
 				owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Failed save package '%s'" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 				return 0;
 			}
 
 			// Update TOC file and serialize him
-			GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), package->GetFileName() );
-			GEditorEngine->SerializeTOC( true );
+			g_TableOfContents.AddEntry( package->GetGUID(), package->GetName(), package->GetFileName() );
+			g_EditorEngine->SerializeTOC( true );
 			break;
 		}
 
 		default:
-			appErrorf( TEXT( "Unknown mode 0x%X" ), mode );
+			Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
 			return 1;
 		}
 
@@ -1059,7 +1047,7 @@ public:
 	 */
 	virtual void Stop() override
 	{
-		GSynchronizeFactory->Destroy( eventResponse );
+		g_SynchronizeFactory->Destroy( eventResponse );
 	}
 
 	/**
@@ -1122,8 +1110,8 @@ public:
 	 */
 	virtual bool Init() override
 	{
-		check( owner && nodeToRename );
-		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		Assert( owner && nodeToRename );
+		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -1137,13 +1125,13 @@ public:
 	 */
 	virtual uint32 Run() override
 	{
-		// Get file name and check on exist other file with this name
+		// Get file name and Assert on exist other file with this name
 		bool			bIsOk		= false;
 		bool			bDirtyTOC	= false;
 		std::wstring	newFileName;
 		CFilename		filename	= nodeToRename->GetPath();
 		bool			bPackage	= filename.GetExtension() == TEXT( "pak" );
-		check( mode == RM_RenamePackage && bPackage || mode == RM_RenameFolder );
+		Assert( mode == RM_RenamePackage && bPackage || mode == RM_RenameFolder );
 
 		while ( !bIsOk )
 		{
@@ -1173,7 +1161,7 @@ public:
 			{
 				// If folder with name already exist - try enter other name 
 			case RM_RenameFolder:
-				if ( GFileSystem->IsExistFile( filename.GetPath() + newFileName ) )
+				if ( g_FileSystem->IsExistFile( filename.GetPath() + newFileName ) )
 				{
 					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Folder '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
@@ -1187,7 +1175,7 @@ public:
 
 				// If package with name already exist - try enter other name 
 			case RM_RenamePackage:
-				if ( GFileSystem->IsExistFile( filename.GetPath() + newFileName + TEXT( ".pak" ) ) || !GTableOfContents.GetPackagePath( newFileName ).empty() )
+				if ( g_FileSystem->IsExistFile( filename.GetPath() + newFileName + TEXT( ".pak" ) ) || !g_TableOfContents.GetPackagePath( newFileName ).empty() )
 				{
 					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
@@ -1200,7 +1188,7 @@ public:
 				break;
 
 			default:
-				appErrorf( TEXT( "Unknown mode 0x%X" ), mode );
+				Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
 				return 1;
 			}
 		}
@@ -1218,7 +1206,7 @@ public:
 			for ( uint32 index = 0, count = updateTOCPackages.size(); index < count; ++index )
 			{
 				const SPackageInfo&		packageInfo = updateTOCPackages[index];
-				if ( !GPackageManager->UnloadPackage( packageInfo.oldPath.GetFullPath() ) )
+				if ( !g_PackageManager->UnloadPackage( packageInfo.oldPath.GetFullPath() ) )
 				{
 					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The package '%s' in using or modifided and folder '%s' cannot be renamed. Close all assets from this package or save him for will allow rename folder" ), packageInfo.oldPath.GetBaseFilename().c_str(), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Ok );
 					return 2;
@@ -1229,17 +1217,17 @@ public:
 			for ( uint32 index = 0, count = updateTOCPackages.size(); index < count; ++index )
 			{
 				const SPackageInfo&		packageInfo = updateTOCPackages[index];
-				GTableOfContents.RemoveEntry( packageInfo.oldPath.GetFullPath() );
+				g_TableOfContents.RemoveEntry( packageInfo.oldPath.GetFullPath() );
 				bDirtyTOC = true;
 			}
 
-			ECopyMoveResult		result = GFileSystem->Move( filename.GetPath() + newFileName, filename.GetFullPath() );
-			check( result == CMR_OK );
+			ECopyMoveResult		result = g_FileSystem->Move( filename.GetPath() + newFileName, filename.GetFullPath() );
+			Assert( result == CMR_OK );
 
 			// Insert new entries to TOC file
 			for ( uint32 index = 0, count = updateTOCPackages.size(); index < count; ++index )
 			{
-				GTableOfContents.AddEntry( updateTOCPackages[index].newPath.GetFullPath() );
+				g_TableOfContents.AddEntry( updateTOCPackages[index].newPath.GetFullPath() );
 				bDirtyTOC = true;
 			}
 			break;
@@ -1255,14 +1243,14 @@ public:
 			{
 				// We try unload package for remove unused assets.
 				// If package still used, we skip him
-				if ( !GPackageManager->UnloadPackage( filename.GetFullPath() ) )
+				if ( !g_PackageManager->UnloadPackage( filename.GetFullPath() ) )
 				{
 					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The package '%s' in using or modifided and cannot be renamed. Close all assets from this package or save him for will allow them to be rename" ), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Ok );
 					return 2;
 				}
 
-				bool			bIsNeedUnloadPackage = !GPackageManager->IsPackageLoaded( filename.GetFullPath() );
-				PackageRef_t	package = GPackageManager->LoadPackage( filename.GetFullPath() );
+				bool			bIsNeedUnloadPackage = !g_PackageManager->IsPackageLoaded( filename.GetFullPath() );
+				PackageRef_t	package = g_PackageManager->LoadPackage( filename.GetFullPath() );
 
 				// If package failed loaded - we not change him name
 				if ( !package )
@@ -1276,8 +1264,8 @@ public:
 				package->Save( package->GetFileName() );
 
 				// Update TOC file
-				GTableOfContents.RemoveEntry( package->GetGUID() );
-				GTableOfContents.AddEntry( package->GetGUID(), package->GetName(), newFullPath );
+				g_TableOfContents.RemoveEntry( package->GetGUID() );
+				g_TableOfContents.AddEntry( package->GetGUID(), package->GetName(), newFullPath );
 				bDirtyTOC = true;
 
 				// If this is package and him opened in package browser, we close it 
@@ -1289,23 +1277,23 @@ public:
 				// If need unload package - do it
 				if ( bIsNeedUnloadPackage )
 				{
-					GPackageManager->UnloadPackage( filename.GetFullPath() );
+					g_PackageManager->UnloadPackage( filename.GetFullPath() );
 				}
 			}
 
-			GFileSystem->Move( newFullPath, filename.GetFullPath() );
+			g_FileSystem->Move( newFullPath, filename.GetFullPath() );
 			break;
 		}
 
 		default:
-			appErrorf( TEXT( "Unknown mode 0x%X" ), mode );
+			Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
 			return 1;
 		}
 
 		// If TOC file is dirty, we serialize him to cache
 		if ( bDirtyTOC )
 		{
-			GEditorEngine->SerializeTOC( true );
+			g_EditorEngine->SerializeTOC( true );
 		}
 
 		return 0;
@@ -1318,7 +1306,7 @@ public:
 	 */
 	virtual void Stop() override
 	{
-		GSynchronizeFactory->Destroy( eventResponse );
+		g_SynchronizeFactory->Destroy( eventResponse );
 	}
 
 	/**
@@ -1340,6 +1328,11 @@ private:
 // CONTENT BROWSER WINDOW
 //
 
+/*
+==================
+CContentBrowserWindow::CContentBrowserWindow
+==================
+*/
 CContentBrowserWindow::CContentBrowserWindow( const std::wstring& InName )
 	: CImGUILayer( InName )
 	, bSeparatorInit( false )
@@ -1347,6 +1340,11 @@ CContentBrowserWindow::CContentBrowserWindow( const std::wstring& InName )
 	, thumbnailSize( 64.f )
 {}
 
+/*
+==================
+CContentBrowserWindow::Init
+==================
+*/
 void CContentBrowserWindow::Init()
 {
 	CImGUILayer::Init();
@@ -1356,16 +1354,16 @@ void CContentBrowserWindow::Init()
 	for ( uint32 index = 0; index < AT_Count; ++index )
 	{
 		std::vector<TSharedPtr<CAsset>>		result;
-		if ( !CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Thumbnails/" ) + GAssetIconPaths[index], result, errorMsg ) )
+		if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Thumbnails/" ) + s_AssetIconPaths[index], result, errorMsg ) )
 		{
-			LE_LOG( LT_Warning, LC_Editor, TEXT( "Failed to load asset icon '%s' for type 0x%X. Message: %s" ), GAssetIconPaths[index], index, errorMsg.c_str() );
-			assetIcons[index] = GEngine->GetDefaultTexture();
+			Warnf( TEXT( "Failed to load asset icon '%s' for type 0x%X. Message: %s\n" ), s_AssetIconPaths[index], index, errorMsg.c_str() );
+			assetIcons[index] = g_Engine->GetDefaultTexture();
 		}
 		else
 		{
 			TAssetHandle<CTexture2D>	assetHandle = result[0]->GetAssetHandle();
-			PackageRef_t				package = GPackageManager->LoadPackage( TEXT( "" ), true );
-			check( package );
+			PackageRef_t				package = g_PackageManager->LoadPackage( TEXT( "" ), true );
+			Assert( package );
 
 			package->Add( assetHandle );
 			assetIcons[index] = assetHandle;
@@ -1373,10 +1371,15 @@ void CContentBrowserWindow::Init()
 	}
 
 	// Create root nodes for engine and game directories
-	engineRoot	= MakeSharedPtr<CFileTreeNode>( FNT_Folder, TEXT( "Engine" ), appBaseDir() + PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, this );
-	gameRoot	= MakeSharedPtr<CFileTreeNode>( FNT_Folder, TEXT( "Game" ), appGameDir() + PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, this );
+	engineRoot	= MakeSharedPtr<CFileTreeNode>( FNT_Folder, TEXT( "Engine" ), Sys_BaseDir() + PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, this );
+	gameRoot	= MakeSharedPtr<CFileTreeNode>( FNT_Folder, TEXT( "Game" ), Sys_GameDir() + PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, this );
 }
 
+/*
+==================
+CContentBrowserWindow::OnTick
+==================
+*/
 void CContentBrowserWindow::OnTick()
 {
 	// If window focused, we reset current hovered node
@@ -1486,6 +1489,11 @@ void CContentBrowserWindow::OnTick()
 	ImGui::EndColumns();
 }
 
+/*
+==================
+CContentBrowserWindow::ShowAsset
+==================
+*/
 void CContentBrowserWindow::ShowAsset( const std::wstring& InAssetReference )
 {
 	// If asset reference is not valid, we nothing do
@@ -1508,10 +1516,10 @@ void CContentBrowserWindow::ShowAsset( const std::wstring& InAssetReference )
 	PackageRef_t	package;
 	std::wstring	packagePath;
 	{
-		packagePath = GTableOfContents.GetPackagePath( packageName );
+		packagePath = g_TableOfContents.GetPackagePath( packageName );
 		if ( !packagePath.empty() )
 		{
-			package = GPackageManager->LoadPackage( packagePath );
+			package = g_PackageManager->LoadPackage( packagePath );
 		}
 	}
 
@@ -1537,6 +1545,11 @@ void CContentBrowserWindow::ShowAsset( const std::wstring& InAssetReference )
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::GetSelectedAssetReference
+==================
+*/
 std::wstring CContentBrowserWindow::GetSelectedAssetReference() const
 {
 	std::wstring	result;
@@ -1563,6 +1576,11 @@ std::wstring CContentBrowserWindow::GetSelectedAssetReference() const
 	return result;
 }
 
+/*
+==================
+CContentBrowserWindow::RefreshAssetNodes
+==================
+*/
 void CContentBrowserWindow::RefreshAssetNodes()
 {
 	// Mark all asset nodes to delete
@@ -1589,7 +1607,7 @@ void CContentBrowserWindow::RefreshAssetNodes()
 		{
 			const SAssetInfo*	assetInfo = nullptr;
 			package->GetAssetInfo( index, assetInfo );		
-			check( assetInfo );
+			Assert( assetInfo );
 			auto			itFind = mapAssets.find( assetInfo->name );
 			
 			// If this asset is new, we insert node
@@ -1616,6 +1634,11 @@ void CContentBrowserWindow::RefreshAssetNodes()
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::DrawAssetsPopupMenu
+==================
+*/
 void CContentBrowserWindow::DrawAssetsPopupMenu()
 {
 	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
@@ -1638,7 +1661,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 			// Create material
 			if ( ImGui::MenuItem( "Material" ) )
 			{
-				GThreadFactory->CreateThread( new TCreateAssetRunnable<CMaterial>( this ), TEXT( "CreateAsset" ), true, true );
+				g_ThreadFactory->CreateThread( new TCreateAssetRunnable<CMaterial>( this ), TEXT( "CreateAsset" ), true, true );
 			}
 			
 			if ( ImGui::BeginMenu( "Physics" ) )
@@ -1646,7 +1669,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 				// Create physics material
 				if ( ImGui::MenuItem( "Physics Material" ) )
 				{
-					GThreadFactory->CreateThread( new TCreateAssetRunnable<CPhysicsMaterial>( this ), TEXT( "CreateAsset" ), true, true );
+					g_ThreadFactory->CreateThread( new TCreateAssetRunnable<CPhysicsMaterial>( this ), TEXT( "CreateAsset" ), true, true );
 				}
 				ImGui::EndMenu();
 			}		
@@ -1705,7 +1728,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 		// Rename an asset
 		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneAsset ) )
 		{
-			GThreadFactory->CreateThread( new CRenameAssetRunnable( this, selectedAssets[0] ), CString::Format( TEXT( "RenameAsset_%s" ), selectedAssets[0].GetName().c_str() ).c_str(), true, true );
+			g_ThreadFactory->CreateThread( new CRenameAssetRunnable( this, selectedAssets[0] ), CString::Format( TEXT( "RenameAsset_%s" ), selectedAssets[0].GetName().c_str() ).c_str(), true, true );
 		}
 
 		// Copy reference to asset
@@ -1718,6 +1741,11 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::DrawPackagesPopupMenu
+==================
+*/
 void CContentBrowserWindow::DrawPackagesPopupMenu()
 {
 	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
@@ -1738,7 +1766,7 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 			{
 			case FNT_File:
 				++numSelectedFiles;
-				if ( !GPackageManager->IsPackageLoaded( selectedNode[index]->GetPath() ) )
+				if ( !g_PackageManager->IsPackageLoaded( selectedNode[index]->GetPath() ) )
 				{
 					bExistUnloadedPackage = true;
 				}
@@ -1753,7 +1781,7 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 				break;
 
 			default:
-				checkMsg( false, TEXT( "Unknown type 0x%X" ), selectedNode[index]->GetType() );
+				AssertMsg( false, TEXT( "Unknown type 0x%X" ), selectedNode[index]->GetType() );
 				break;
 			}
 		}
@@ -1799,13 +1827,13 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 			// Create a folder
 			if ( ImGui::MenuItem( "Folder" ) && hoveredNode )
 			{
-				GThreadFactory->CreateThread( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreateFolder ), TEXT( "CreateDirectoryThread" ), true, true );
+				g_ThreadFactory->CreateThread( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreateFolder ), TEXT( "CreateDirectoryThread" ), true, true );
 			}
 
 			// Create a package
 			if ( ImGui::MenuItem( "Package" ) && hoveredNode )
 			{
-				GThreadFactory->CreateThread( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreatePackage ), TEXT( "CreatePackageThread" ), true, true );
+				g_ThreadFactory->CreateThread( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreatePackage ), TEXT( "CreatePackageThread" ), true, true );
 			}
 			ImGui::EndMenu();
 		}
@@ -1847,12 +1875,17 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 				}
 			}
 
-			GThreadFactory->CreateThread( new CRenameFileRunnable( this, node, node->GetType() == FNT_Folder ? CRenameFileRunnable::RM_RenameFolder : CRenameFileRunnable::RM_RenamePackage ), TEXT( "RenameFileThread" ), true, true );
+			g_ThreadFactory->CreateThread( new CRenameFileRunnable( this, node, node->GetType() == FNT_Folder ? CRenameFileRunnable::RM_RenameFolder : CRenameFileRunnable::RM_RenamePackage ), TEXT( "RenameFileThread" ), true, true );
 		}
 		ImGui::EndPopup();
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Package_Save
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Package_Save( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
 {
 	for ( uint32 index = 0, count = InSelectedNodes.size(); index < count; ++index )
@@ -1861,9 +1894,9 @@ void CContentBrowserWindow::PopupMenu_Package_Save( const std::vector<TSharedPtr
 		std::wstring							path = node->GetPath();
 
 		// If package is loaded - we resave him
-		if ( GPackageManager->IsPackageLoaded( path ) )
+		if ( g_PackageManager->IsPackageLoaded( path ) )
 		{
-			PackageRef_t		package = GPackageManager->LoadPackage( path );
+			PackageRef_t		package = g_PackageManager->LoadPackage( path );
 			if ( package )
 			{
 				package->Save( path );
@@ -1872,6 +1905,11 @@ void CContentBrowserWindow::PopupMenu_Package_Save( const std::vector<TSharedPtr
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Package_Open
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Package_Open( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
 {
 	PackageRef_t	lastLoadedPackage;
@@ -1879,7 +1917,7 @@ void CContentBrowserWindow::PopupMenu_Package_Open( const std::vector<TSharedPtr
 	{
 		const TSharedPtr<CFileTreeNode>&	node = InSelectedNodes[index];
 		std::wstring						path = node->GetPath();
-		PackageRef_t						package = GPackageManager->LoadPackage( path );
+		PackageRef_t						package = g_PackageManager->LoadPackage( path );
 		if ( package )
 		{
 			lastLoadedPackage = package;
@@ -1893,6 +1931,11 @@ void CContentBrowserWindow::PopupMenu_Package_Open( const std::vector<TSharedPtr
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Package_Unload
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Package_Unload( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
 {
 	PackageRef_t				currentPackage = package;
@@ -1905,13 +1948,13 @@ void CContentBrowserWindow::PopupMenu_Package_Unload( const std::vector<TSharedP
 		std::wstring						path = node->GetPath();
 
 		// If package already not loaded - skip him
-		if ( !GPackageManager->IsPackageLoaded( path ) )
+		if ( !g_PackageManager->IsPackageLoaded( path ) )
 		{
 			continue;
 		}
 
 		// If package is dirty - we not unload him
-		PackageRef_t		package = GPackageManager->LoadPackage( path );
+		PackageRef_t		package = g_PackageManager->LoadPackage( path );
 		if ( package->IsDirty() )
 		{
 			dirtyPackages.push_back( CFilename( path ) );
@@ -1919,7 +1962,7 @@ void CContentBrowserWindow::PopupMenu_Package_Unload( const std::vector<TSharedP
 		}
 
 		// If current package in viewer is closed, we forget about him
-		bool	bSeccussed = GPackageManager->UnloadPackage( path );
+		bool	bSeccussed = g_PackageManager->UnloadPackage( path );
 		if ( currentPackage && bSeccussed && path == currentPackage->GetFileName() )
 		{
 			currentPackage.SafeRelease();
@@ -1939,14 +1982,24 @@ void CContentBrowserWindow::PopupMenu_Package_Unload( const std::vector<TSharedP
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Package_Reload
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Package_Reload( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
 {
 	for ( uint32 index = 0, count = InSelectedNodes.size(); index < count; ++index )
 	{
-		GPackageManager->ReloadPackage( InSelectedNodes[index]->GetPath() );
+		g_PackageManager->ReloadPackage( InSelectedNodes[index]->GetPath() );
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Package_Delete
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Package_Delete()
 {
 	bool	bDirtyTOC = false;
@@ -1963,7 +2016,7 @@ void CContentBrowserWindow::PopupMenu_Package_Delete()
 		for ( uint32 index = 0, count = selectedNode.size(); index < count; ++index )
 		{
 			CFilename		filename = selectedNode[index]->GetPath();
-			if ( GFileSystem->IsDirectory( filename.GetFullPath() ) )
+			if ( g_FileSystem->IsDirectory( filename.GetFullPath() ) )
 			{
 				GetFilesInDirectory( filename.GetFullPath(), filesToDelete, dirsToDelete );
 				dirsToDelete.push_back( filename.GetFullPath() );
@@ -1985,14 +2038,14 @@ void CContentBrowserWindow::PopupMenu_Package_Delete()
 		{
 			// We try unload package for remove unused assets.
 			// If package still used, we skip him
-			if ( !GPackageManager->UnloadPackage( filename.GetFullPath() ) )
+			if ( !g_PackageManager->UnloadPackage( filename.GetFullPath() ) )
 			{
 				usedPackages.push_back( filename.GetBaseFilename() );
 				continue;
 			}
 
 			// Else we remove entry from TOC file
-			GTableOfContents.RemoveEntry( filename.GetFullPath() );
+			g_TableOfContents.RemoveEntry( filename.GetFullPath() );
 			bDirtyTOC = true;
 
 			// If this is package and him opened in package browser, we close it
@@ -2002,7 +2055,7 @@ void CContentBrowserWindow::PopupMenu_Package_Delete()
 			}
 		}
 
-		GFileSystem->Delete( filename.GetFullPath(), true );
+		g_FileSystem->Delete( filename.GetFullPath(), true );
 	}
 
 	// Delete all directories if they is empty
@@ -2011,14 +2064,14 @@ void CContentBrowserWindow::PopupMenu_Package_Delete()
 		const std::wstring&		fullDirPath = dirsToDelete[index];
 		if ( IsEmptyDirectory( fullDirPath, true ) )
 		{
-			GFileSystem->DeleteDirectory( fullDirPath, true );
+			g_FileSystem->DeleteDirectory( fullDirPath, true );
 		}
 	}
 
 	// If TOC file is dirty, we serialize him to cache
 	if ( bDirtyTOC )
 	{
-		GEditorEngine->SerializeTOC( true );
+		g_EditorEngine->SerializeTOC( true );
 	}
 
 	// If we have used package - print message
@@ -2028,9 +2081,14 @@ void CContentBrowserWindow::PopupMenu_Package_Delete()
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Package_ShowInExplorer
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Package_ShowInExplorer( const std::vector<TSharedPtr<CFileTreeNode>>& InSelectedNodes )
 {
-	check( InSelectedNodes.size() == 1 );
+	Assert( InSelectedNodes.size() == 1 );
 
 	TSharedPtr<CFileTreeNode>		selectedNode	= InSelectedNodes[0];
 	std::wstring					pathToDirectory = selectedNode->GetPath();
@@ -2039,9 +2097,14 @@ void CContentBrowserWindow::PopupMenu_Package_ShowInExplorer( const std::vector<
 		pathToDirectory = CFilename( selectedNode->GetPath() ).GetPath();
 	}
 
-	appShowFileInExplorer( pathToDirectory );
+	Sys_ShowFileInExplorer( pathToDirectory );
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Asset_Reload
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Asset_Reload( const std::vector<CAssetNode>& InAssets )
 {
 	std::wstring		errorMessages;
@@ -2062,6 +2125,11 @@ void CContentBrowserWindow::PopupMenu_Asset_Reload( const std::vector<CAssetNode
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Asset_Import
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Asset_Import()
 {
 	CFileDialogSetup		fileDialogSetup;
@@ -2073,7 +2141,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Import()
 	fileDialogSetup.SetDirectory( gameRoot->GetPath() );
 	for ( uint32 index = AT_FirstType; index < AT_Count; ++index )
 	{
-		const CAssetFactory::SAssetImporterInfo& importerInfo = GAssetFactory.GetImporterInfo( ( EAssetType )index );
+		const CAssetFactory::SAssetImporterInfo& importerInfo = g_AssetFactory.GetImporterInfo( ( EAssetType )index );
 		if ( importerInfo.bValid )
 		{
 			fileDialogSetup.AddFormat( importerInfo, ConvertAssetTypeToText( ( EAssetType )index ) );
@@ -2081,12 +2149,17 @@ void CContentBrowserWindow::PopupMenu_Asset_Import()
 	}
 
 	// Show open file dialog
-	if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) )
+	if ( Sys_ShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) )
 	{
-		GThreadFactory->CreateThread( new CImportAssetsRunnable( this, openFileDialogResult.files ), TEXT( "ImportAssets" ), true, true );
+		g_ThreadFactory->CreateThread( new CImportAssetsRunnable( this, openFileDialogResult.files ), TEXT( "ImportAssets" ), true, true );
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Asset_Reimport
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Asset_Reimport( const std::vector<CAssetNode>& InAssets )
 {
 	std::wstring		errorMessages;
@@ -2098,7 +2171,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Reimport( const std::vector<CAssetNo
 		{
 			std::wstring		errorMsg;
 			TSharedPtr<CAsset>	assetPtr = asset.ToSharedPtr();
-			if ( !GAssetFactory.Reimport( assetPtr, errorMsg ) )
+			if ( !g_AssetFactory.Reimport( assetPtr, errorMsg ) )
 			{
 				errorMessages += CString::Format( TEXT( "\n%s : %s" ), assetPtr->GetAssetName().c_str(), errorMsg.c_str() );
 			}
@@ -2112,6 +2185,11 @@ void CContentBrowserWindow::PopupMenu_Asset_Reimport( const std::vector<CAssetNo
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile( const CAssetNode& InAsset )
 {
 	std::wstring			errorMessage;
@@ -2126,17 +2204,17 @@ void CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile( const CAssetNod
 		fileDialogSetup.SetMultiselection( false );
 		fileDialogSetup.SetTitle( TEXT( "Reimport Asset" ) );
 		fileDialogSetup.SetDirectory( gameRoot->GetPath() );
-		fileDialogSetup.AddFormat( GAssetFactory.GetImporterInfo( assetInfo->data->GetType() ), ConvertAssetTypeToText( assetInfo->data->GetType() ) );
+		fileDialogSetup.AddFormat( g_AssetFactory.GetImporterInfo( assetInfo->data->GetType() ), ConvertAssetTypeToText( assetInfo->data->GetType() ) );
 
 		// Show open file dialog
-		if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
+		if ( Sys_ShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
 		{
 			// Let's try to reimport asset
 			std::wstring	oldSourceFile = assetInfo->data->GetAssetSourceFile();
 			assetInfo->data->SetAssetSourceFile( openFileDialogResult.files[0] );
 
 			// If failed we return old source file
-			if ( !GAssetFactory.Reimport( assetInfo->data, errorMessage ) )
+			if ( !g_AssetFactory.Reimport( assetInfo->data, errorMessage ) )
 			{
 				assetInfo->data->SetAssetSourceFile( oldSourceFile );
 			}
@@ -2154,6 +2232,11 @@ void CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile( const CAssetNod
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Asset_Delete
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Asset_Delete()
 {
 	// Remove all selected assets from package
@@ -2182,9 +2265,14 @@ void CContentBrowserWindow::PopupMenu_Asset_Delete()
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::PopupMenu_Asset_CopyReference
+==================
+*/
 void CContentBrowserWindow::PopupMenu_Asset_CopyReference( const CAssetNode& InAsset )
 {
-	check( package );
+	Assert( package );
 	const SAssetInfo*	assetInfo = InAsset.GetAssetInfo();
 	std::wstring		assetReference;
 
@@ -2194,6 +2282,12 @@ void CContentBrowserWindow::PopupMenu_Asset_CopyReference( const CAssetNode& InA
 	}
 }
 
+
+/*
+==================
+CContentBrowserWindow::SFilterInfo::GetPreviewFilterAssetType
+==================
+*/
 std::string CContentBrowserWindow::SFilterInfo::GetPreviewFilterAssetType() const
 {
 	if ( IsShowAllAssetTypes() )
@@ -2213,6 +2307,12 @@ std::string CContentBrowserWindow::SFilterInfo::GetPreviewFilterAssetType() cons
 	return TCHAR_TO_ANSI( result.c_str() );
 }
 
+
+/*
+==================
+CContentBrowserWindow::CFileTreeNode::CFileTreeNode
+==================
+*/
 CContentBrowserWindow::CFileTreeNode::CFileTreeNode( EFileNodeType InType, const std::wstring& InName, const std::wstring& InPath, CContentBrowserWindow* InOwner )
 	: bAllowDropTarget( true )
 	, bFreshed( false )
@@ -2223,9 +2323,14 @@ CContentBrowserWindow::CFileTreeNode::CFileTreeNode( EFileNodeType InType, const
 	, name( InName )
 	, owner( InOwner )
 {
-	check( owner );
+	Assert( owner );
 }
 
+/*
+==================
+CContentBrowserWindow::CFileTreeNode::Tick
+==================
+*/
 void CContentBrowserWindow::CFileTreeNode::Tick()
 {
 	// Reset freshed flag in node and allow drop target
@@ -2297,12 +2402,12 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 			ImGui::PushStyleColor( ImGuiCol_ButtonActive,	CONTENTBROWSER_SELECTCOLOR );
 		}
 
-		// If package loaded we check is changed in memory. In successed case mark this package by star
+		// If package loaded we Assert is changed in memory. In successed case mark this package by star
 		std::wstring		packageName = name;
-		if ( GPackageManager->IsPackageLoaded( path ) )
+		if ( g_PackageManager->IsPackageLoaded( path ) )
 		{
-			PackageRef_t	package = GPackageManager->LoadPackage( path );
-			check( package );
+			PackageRef_t	package = g_PackageManager->LoadPackage( path );
+			Assert( package );
 			packageName = ( package->IsDirty() ? TEXT( "*" ) : TEXT( "" ) ) + packageName;
 		}
 		ImGui::Button( TCHAR_TO_ANSI( packageName.c_str() ) );
@@ -2323,9 +2428,14 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::CFileTreeNode::ProcessEvents
+==================
+*/
 void CContentBrowserWindow::CFileTreeNode::ProcessEvents()
 {
-	const bool		bCtrlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
+	const bool		bCtrlDown = g_InputSystem->IsKeyDown( BC_KeyLControl ) || g_InputSystem->IsKeyDown( BC_KeyRControl );
 	if ( ImGui::IsItemHovered() )
 	{
 		// Select node if we press left mouse button
@@ -2360,9 +2470,9 @@ void CContentBrowserWindow::CFileTreeNode::ProcessEvents()
 		}
 
 		// If we double clicked by left mouse button, we must open package (if node is file)
-		if ( type == FNT_File && !GInputSystem->IsKeyDown( BC_KeyLControl ) && !GInputSystem->IsKeyDown( BC_KeyRControl ) && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
+		if ( type == FNT_File && !g_InputSystem->IsKeyDown( BC_KeyLControl ) && !g_InputSystem->IsKeyDown( BC_KeyRControl ) && ImGui::IsMouseDoubleClicked( ImGuiMouseButton_Left ) )
 		{
-			owner->SetCurrentPackage( GPackageManager->LoadPackage( path ) );
+			owner->SetCurrentPackage( g_PackageManager->LoadPackage( path ) );
 		}
 
 		owner->hoveredNode = AsShared();
@@ -2377,6 +2487,11 @@ void CContentBrowserWindow::CFileTreeNode::ProcessEvents()
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::CFileTreeNode::DragNDropHandle
+==================
+*/
 void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 {
 	// Begin drag n drop folder/package to other, if current node is not engine/game root and DND not started
@@ -2420,7 +2535,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			}
 
 			default:
-				appErrorf( TEXT( "Unknown node type 0x%X" ), GetType() );
+				Sys_Errorf( TEXT( "Unknown node type 0x%X" ), GetType() );
 				break;
 			}
 		}
@@ -2438,7 +2553,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			// Prepare data to copy/move
 			PackageRef_t		currentPackage	= owner->GetCurrentPackage();
 			CFileTreeNode**		pData			= ( CFileTreeNode** )imguiPayload->Data;
-			check( pData );
+			Assert( pData );
 
 			// Get destination folder
 			CFilename		filenamePackage = currentPackage ? currentPackage->GetFileName() : TEXT( "" );
@@ -2478,7 +2593,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			}
 
 			// Create and start thread for copy/move files
-			GThreadFactory->CreateThread( new CMoveCopyFilesRunnable( owner, filesToMoveCopy ), TEXT( "MoveCopyFilesThread" ), true, true );
+			g_ThreadFactory->CreateThread( new CMoveCopyFilesRunnable( owner, filesToMoveCopy ), TEXT( "MoveCopyFilesThread" ), true, true );
 
 			// Allow drop targets for all nodes
 			owner->engineRoot->SetAllowDropTarget( true );
@@ -2497,16 +2612,21 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::CFileTreeNode::Refresh
+==================
+*/
 void CContentBrowserWindow::CFileTreeNode::Refresh()
 {
 	// If node not exist in file system or need filter him, we mark him not freshed
-	if ( ( type == FNT_File && !CString::InString( name, ANSI_TO_TCHAR( owner->filterInfo.fileName.c_str() ), true ) ) || !GFileSystem->IsExistFile( path, type == FNT_Folder ? true : false ) )
+	if ( ( type == FNT_File && !CString::InString( name, ANSI_TO_TCHAR( owner->filterInfo.fileName.c_str() ), true ) ) || !g_FileSystem->IsExistFile( path, type == FNT_Folder ? true : false ) )
 	{
 		bFreshed = false;
 		return;
 	}
 	
-	std::vector<std::wstring>	files			= GFileSystem->FindFiles( path, true, true );
+	std::vector<std::wstring>	files			= g_FileSystem->FindFiles( path, true, true );
 	for ( uint32 index = 0, count = files.size(); index < count; ++index )
 	{
 		std::wstring					file		= files[index];
@@ -2549,6 +2669,11 @@ void CContentBrowserWindow::CFileTreeNode::Refresh()
 	bFreshed = true;
 }
 
+/*
+==================
+CContentBrowserWindow::CFileTreeNode::GetSelectedNodes
+==================
+*/
 void CContentBrowserWindow::CFileTreeNode::GetSelectedNodes( std::vector<TSharedPtr<CFileTreeNode>>& OutSelectedNodes, bool InIsIgnoreChildren /* = false */ ) const
 {
 	if ( bSelected )
@@ -2565,6 +2690,11 @@ void CContentBrowserWindow::CFileTreeNode::GetSelectedNodes( std::vector<TShared
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::CFileTreeNode::GetNodesToDragNDrop
+==================
+*/
 void CContentBrowserWindow::CFileTreeNode::GetNodesToDragNDrop( std::vector<CFileTreeNode*>& OutSelectedNodes ) const
 {
 	if ( bSelected )
@@ -2580,11 +2710,17 @@ void CContentBrowserWindow::CFileTreeNode::GetNodesToDragNDrop( std::vector<CFil
 	}
 }
 
+
+/*
+==================
+CContentBrowserWindow::CAssetNode::Tick
+==================
+*/
 void CContentBrowserWindow::CAssetNode::Tick()
 {
-	check( info );
+	Assert( info );
 	ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, CONTENTBROWSER_ASSET_BORDERSIZE );
-	ImGui::PushStyleColor( ImGuiCol_Border, GAssetBorderColors[info->type] );
+	ImGui::PushStyleColor( ImGuiCol_Border, s_AssetBorderColors[info->type] );
 
 	// If asset is selected, we set him button color to CONTENTBROWSER_SELECTCOLOR
 	bool		bNeedPopStyleColor = false;
@@ -2601,7 +2737,7 @@ void CContentBrowserWindow::CAssetNode::Tick()
 	if ( assetIconTexture.IsAssetValid() )
 	{
 		ImGui::PushID( TCHAR_TO_ANSI( info->name.c_str() ) );
-		ImGui::ImageButton( GImGUIEngine->LockTexture( assetIconTexture.ToSharedPtr()->GetTexture2DRHI() ), { owner->thumbnailSize, owner->thumbnailSize } );
+		ImGui::ImageButton( g_ImGUIEngine->LockTexture( assetIconTexture.ToSharedPtr()->GetTexture2DRHI() ), { owner->thumbnailSize, owner->thumbnailSize } );
 	}
 	else
 	{
@@ -2614,7 +2750,7 @@ void CContentBrowserWindow::CAssetNode::Tick()
 	// Process events
 	ProcessEvents();
 
-	// If asset loaded we check is changed in memory. In successed case mark this asset by star
+	// If asset loaded we Assert is changed in memory. In successed case mark this asset by star
 	std::wstring		assetName = info->name;
 	if ( info->data && info->data->IsDirty() )
 	{
@@ -2630,6 +2766,11 @@ void CContentBrowserWindow::CAssetNode::Tick()
 	ImGui::PopStyleColor( !bNeedPopStyleColor ? 1 : 4 );
 }
 
+/*
+==================
+CContentBrowserWindow::CAssetNode::DragNDropHandle
+==================
+*/
 void CContentBrowserWindow::CAssetNode::DragNDropHandle()
 {
 	// Begin drag n drop asset references
@@ -2649,7 +2790,7 @@ void CContentBrowserWindow::CAssetNode::DragNDropHandle()
 		}
 
 		PackageRef_t		package = owner->GetCurrentPackage();
-		check( package );
+		Assert( package );
 
 		// Generate string with all asset references (only selected)
 		std::vector<std::wstring>	assetReferences;
@@ -2659,7 +2800,7 @@ void CContentBrowserWindow::CAssetNode::DragNDropHandle()
 			if ( assetNode.IsSelected() )
 			{
 				const SAssetInfo*	assetInfo = owner->assets[index].GetAssetInfo();
-				check( assetInfo );
+				Assert( assetInfo );
 
 				// Make reference to asset
 				std::wstring		resultRef;
@@ -2682,9 +2823,14 @@ void CContentBrowserWindow::CAssetNode::DragNDropHandle()
 	}
 }
 
+/*
+==================
+CContentBrowserWindow::CAssetNode::ProcessEvents
+==================
+*/
 void CContentBrowserWindow::CAssetNode::ProcessEvents()
 {
-	const bool		bCtrlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
+	const bool		bCtrlDown = g_InputSystem->IsKeyDown( BC_KeyLControl ) || g_InputSystem->IsKeyDown( BC_KeyRControl );
 	if ( ImGui::IsItemHovered() )
 	{
 		// Select asset if we press left mouse button
@@ -2728,7 +2874,7 @@ void CContentBrowserWindow::CAssetNode::ProcessEvents()
 			}	
 
 			// Open editor window
-			check( asset );
+			Assert( asset );
 			switch ( info->type )
 			{
 			case AT_Texture2D:			MakeSharedPtr<CTextureEditorWindow>( asset )->Init();			break;
@@ -2737,14 +2883,14 @@ void CContentBrowserWindow::CAssetNode::ProcessEvents()
 			case AT_AudioBank:			MakeSharedPtr<CAudioBankEditorWindow>( asset )->Init();			break;
 			case AT_PhysicsMaterial:	MakeSharedPtr<CPhysicsMaterialEditorWindow>( asset )->Init();	break;
 			default:
-				appErrorf( TEXT( "Unsupported asset type 0x%X" ), info->type );
+				Sys_Errorf( TEXT( "Unsupported asset type 0x%X" ), info->type );
 				break;
 			}
 		}
 	}
 
 	// If pressed Ctrl+A we select all assets in the current package
-	if ( ImGui::IsWindowHovered() && ( bCtrlDown && GInputSystem->IsKeyDown( BC_KeyA ) ) )
+	if ( ImGui::IsWindowHovered() && ( bCtrlDown && g_InputSystem->IsKeyDown( BC_KeyA ) ) )
 	{
 		for ( uint32 index = 0, count = owner->assets.size(); index < count; ++index )
 		{

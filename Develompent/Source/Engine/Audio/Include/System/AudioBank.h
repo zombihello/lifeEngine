@@ -184,7 +184,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CAudioBank>&
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CAudioBank>& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive << ( TAssetHandle<CAsset> )InValue;
 	return InArchive;
 }

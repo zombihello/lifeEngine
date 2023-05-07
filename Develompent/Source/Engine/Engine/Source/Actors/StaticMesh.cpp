@@ -8,20 +8,40 @@
 
 IMPLEMENT_CLASS( AStaticMesh )
 
+/*
+==================
+AStaticMesh::AStaticMesh
+==================
+*/
 AStaticMesh::AStaticMesh()
 {
 	staticMeshComponent = CreateComponent< CStaticMeshComponent >( TEXT( "StaticMeshComponent0" ) );
 }
 
+/*
+==================
+AStaticMesh::~AStaticMesh
+==================
+*/
 AStaticMesh::~AStaticMesh()
 {}
 
+/*
+==================
+AStaticMesh::BeginPlay
+==================
+*/
 void AStaticMesh::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
 #if WITH_EDITOR
+/*
+==================
+AStaticMesh::SpawnActorAsset
+==================
+*/
 ActorRef_t AStaticMesh::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation )
 {
 	// If asset is not valid or not static mesh asset, we do nothing
@@ -31,7 +51,7 @@ ActorRef_t AStaticMesh::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, cons
 	}
 
 	// Spawn new actor
-	TRefCountPtr<AStaticMesh>		staticMeshActor = GWorld->SpawnActor<AStaticMesh>( InLocation, InRotation );
+	TRefCountPtr<AStaticMesh>		staticMeshActor = g_World->SpawnActor<AStaticMesh>( InLocation, InRotation );
 	if ( !staticMeshActor )
 	{
 		return nullptr;
@@ -42,6 +62,11 @@ ActorRef_t AStaticMesh::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, cons
 	return staticMeshActor;
 }
 
+/*
+==================
+AStaticMesh::GetActorIcon
+==================
+*/
 std::wstring AStaticMesh::GetActorIcon() const
 {
 	return TEXT( "Engine/Editor/Icons/Asset_StaticMesh.png" );

@@ -75,7 +75,7 @@ public:
 	 */
 	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, const SPhysicsBoxGeometry& InBoxGometry )
 	{
-		check( InAr.IsSaving() );
+		Assert( InAr.IsSaving() );
 		( ( SPhysicsBoxGeometry& )InBoxGometry ).Serialize( InAr );
 		return InAr;
 	}

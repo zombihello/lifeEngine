@@ -74,7 +74,7 @@ enum EMessageBox
  * @param InPlatform The platform of interest
  * @return The name of the platform, "" if not found
  */
-std::wstring appPlatformTypeToString( EPlatformType InPlatform );
+std::wstring Sys_PlatformTypeToString( EPlatformType InPlatform );
 
 /**
  * Returns the enumeration value for the given platform
@@ -82,7 +82,7 @@ std::wstring appPlatformTypeToString( EPlatformType InPlatform );
  * @param InPlatformStr The platform of interest
  * @return The platform type, or PLATFORM_Unknown if bad input
  */
-EPlatformType appPlatformStringToType( const std::wstring& InPlatformStr );
+EPlatformType Sys_PlatformStringToType( const std::wstring& InPlatformStr );
 
 /**
  * @ingroup Core
@@ -120,9 +120,9 @@ EPlatformType appPlatformStringToType( const std::wstring& InPlatformStr );
   * @param[in] InFormat Displayed message format
   * @param[in] ... Message parameters
   *
-  * Example usage: @code appFailAssertFunc( "Value != 0", __FILE__, __LINE__, TEXT( "Value = %i" ), Value ); @endcode
+  * Example usage: @code Sys_FailAssertFunc( "Value != 0", __FILE__, __LINE__, TEXT( "Value = %i" ), Value ); @endcode
   */
-void VARARGS            appFailAssertFunc( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
+void VARARGS Sys_FailAssertFunc( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
 
 /**
  * @ingroup Core
@@ -134,9 +134,9 @@ void VARARGS            appFailAssertFunc( const achar* InExpr, const achar* InF
  * @param[in] InFormat Displayed message format
  * @param[in] ... Message parameters
  *
- * Example usage: @code appFailAssertFuncDebug( "Value != 0", __FILE__, __LINE__, TEXT( "Value = %i" ), Value ); @endcode
+ * Example usage: @code Sys_FailAssertFuncDebug( "Value != 0", __FILE__, __LINE__, TEXT( "Value = %i" ), Value ); @endcode
  */
-void VARARGS            appFailAssertFuncDebug( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
+void VARARGS Sys_FailAssertFuncDebug( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
 
 /**
  * @ingroup Core
@@ -149,7 +149,7 @@ void VARARGS            appFailAssertFuncDebug( const achar* InExpr, const achar
  * @param[in] InArgPtr Argument list
  * @return Number of characters written or -1 if truncated
  */
-extern int              appGetVarArgs( tchar* InOutDest, uint32 InDestSize, uint32 InCount, const tchar*& InFormat, va_list InArgPtr );
+int Sys_GetVarArgs( tchar* InOutDest, uint32 InDestSize, uint32 InCount, const tchar*& InFormat, va_list InArgPtr );
 
 /**
  * @ingroup Core
@@ -162,7 +162,7 @@ extern int              appGetVarArgs( tchar* InOutDest, uint32 InDestSize, uint
  * @param[in] InArgPtr Argument list
  * @return Number of characters written or -1 if truncated
  */
-extern int              appGetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, uint32 InCount, const achar*& InFormat, va_list InArgPtr );
+int Sys_GetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, uint32 InCount, const achar*& InFormat, va_list InArgPtr );
 
 /**
  * @ingroup Core
@@ -170,7 +170,7 @@ extern int              appGetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, 
 
  * @return Returns the error level, 0 if successful and > 0 if there were errors
  */
-extern int32           appPlatformPreInit();
+int32 Sys_PlatformPreInit();
 
 /**
  * @ingroup Core
@@ -178,13 +178,13 @@ extern int32           appPlatformPreInit();
  * 
  * @return Returns the error level, 0 if successful and > 0 if there were errors 
  */
-extern int32           appPlatformInit();
+int32 Sys_PlatformInit();
 
 /**
  * @ingroup Core
  * @brief Process window events
  */
-extern void appProcessWindowEvents();
+void Sys_ProcessWindowEvents();
 
 /**
  * @ingroup Core
@@ -198,7 +198,7 @@ extern void appProcessWindowEvents();
  * @param[in] OutProcessId if non-NULL, this will be filled in with the ProcessId
  * @return The process handle for use in other process functions
  */
-extern void*           appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool InLaunchDetached, bool InLaunchHidden, bool InLaunchReallyHidden, int32 InPriorityModifier, uint64* OutProcessId = nullptr );
+void* Sys_CreateProc( const tchar* InPathToProcess, const tchar* InParams, bool InLaunchDetached, bool InLaunchHidden, bool InLaunchReallyHidden, int32 InPriorityModifier, uint64* OutProcessId = nullptr );
 
 /**
  * @ingroup Core
@@ -208,7 +208,7 @@ extern void*           appCreateProc( const tchar* InPathToProcess, const tchar*
  * @param[out] OutReturnCode Return code
  * @return Return true if process is end, else returning false
  */
-extern bool            appGetProcReturnCode( void* InProcHandle, int32* OutReturnCode );
+bool Sys_GetProcReturnCode( void* InProcHandle, int32* OutReturnCode );
 
 /**
  * @ingroup Core
@@ -218,7 +218,7 @@ extern bool            appGetProcReturnCode( void* InProcHandle, int32* OutRetur
  * @param InMessage Message
  * @param InType    Message type
  */
-extern void appShowMessageBox( const tchar* InTitle, const tchar* InMessage, EMessageBox Intype );
+void Sys_ShowMessageBox( const tchar* InTitle, const tchar* InMessage, EMessageBox Intype );
 
 /**
  * @ingroup Core
@@ -226,7 +226,7 @@ extern void appShowMessageBox( const tchar* InTitle, const tchar* InMessage, EMe
  * 
  * @param OutCallStack  Output call stack
  */
-extern void appDumpCallStack( std::wstring& OutCallStack );
+void Sys_DumpCallStack( std::wstring& OutCallStack );
 
 /**
  * @ingroup Core
@@ -234,7 +234,7 @@ extern void appDumpCallStack( std::wstring& OutCallStack );
  * 
  * @param InForce   Is need force shutdown application
  */
-extern void appRequestExit( bool InForce );
+void Sys_RequestExit( bool InForce );
 
 /**
  * @ingroup Core
@@ -245,12 +245,12 @@ extern void appRequestExit( bool InForce );
  * @param[in] Line Error line
  * @param[in] ... Message parameters
  *
- * Example usage: @code appFailAssert( Value != 0, __FILE__, __LINE__, TEXT( "Value = %i" ), Value ) @endcode
+ * Example usage: @code Sys_FailAssert( Value != 0, __FILE__, __LINE__, TEXT( "Value = %i" ), Value ) @endcode
  */
-#define appFailAssert( Expr, File, Line, ... )				{ if ( appIsDebuggerPresent() )  { appFailAssertFuncDebug( Expr, File, Line, ##__VA_ARGS__ ); } appDebugBreak(); appFailAssertFunc( Expr, File, Line, ##__VA_ARGS__ ); }
+#define Sys_FailAssert( Expr, File, Line, ... )				{ if ( Sys_IsDebuggerPresent() )  { Sys_FailAssertFuncDebug( Expr, File, Line, ##__VA_ARGS__ ); } Sys_DebugBreak(); Sys_FailAssertFunc( Expr, File, Line, ##__VA_ARGS__ ); }
 
 #if SHIPPING_BUILD && !PLATFORM_DOXYGEN
-    #define appErrorf( ... )
+    #define Sys_Errorf( ... )
 #else
     /**
     * @ingroup Core
@@ -259,80 +259,80 @@ extern void appRequestExit( bool InForce );
     *
     * @param[in] ... Message parameters
     *
-    * Example usage: @code appErrorf( TEXT( "Failed :(" ) ) @endcode
+    * Example usage: @code Sys_Errorf( TEXT( "Failed :(" ) ) @endcode
     */
-    #define appErrorf( ... )				( ( appIsDebuggerPresent() ? appFailAssertFuncDebug( "appErrorf", __FILE__, __LINE__, ##__VA_ARGS__ ), 1 : 1 ), appDebugBreak(), 1 )
+    #define Sys_Errorf( ... )				                ( ( Sys_IsDebuggerPresent() ? Sys_FailAssertFuncDebug( "Sys_Errorf", __FILE__, __LINE__, ##__VA_ARGS__ ), 1 : 1 ), Sys_DebugBreak(), 1 )
 #endif // SHIPPING_BUILD
 
-#if DO_CHECK || PLATFORM_DOXYGEN
+#if ENABLED_ASSERT || PLATFORM_DOXYGEN
     /**
     * @ingroup Core
     * @brief Macro for checking the condition with your code
-    * @warning With enabled define DO_CHECK this macro is empty
+    * @warning With enabled define ENABLED_ASSERT this macro is empty
     *
     * @param[in] Code Verification code
     *
-    * Example usage: @code checkCode( if( !isValid ) appErrorf( TEXT( "Value not valid" ) ) ) @endcode
+    * Example usage: @code AssertCode( if( !isValid ) Sys_Errorf( TEXT( "Value not valid" ) ) ) @endcode
     */
-    #define checkCode( Code )		        do { Code } while ( false );
+    #define AssertCode( Code )		            do { Code } while ( false );
 
     /**
     * @ingroup Core
     * @brief Macro for checking the condition and in case of failure, display your message
-    * @warning With enabled define DO_CHECK this macro is empty
+    * @warning With enabled define ENABLED_ASSERT this macro is empty
     *
     * @param[in] Expr Checkable condition
     * @param[in] Msg Message
     *
-    * Example usage: @code checkf( Value == 0, TEXT( "Value = %i" ), Value ) @endcode
+    * Example usage: @code Assertf( Value == 0, TEXT( "Value = %i" ), Value ) @endcode
     */
-    #define checkf( Expr, Msg, ... )		{ if ( !( Expr ) ) { appFailAssert( #Expr, __FILE__, __LINE__, Msg, __VA_ARGS__ ); } }
+    #define Assertf( Expr, Msg, ... )		    { if ( !( Expr ) ) { Sys_FailAssert( #Expr, __FILE__, __LINE__, Msg, __VA_ARGS__ ); } }
 
     /**
     * @ingroup Core
     * @brief Macro for checking the condition and in case of failure, display your message
-    * @warning With enabled define DO_CHECK this macro is empty
+    * @warning With enabled define ENABLED_ASSERT this macro is empty
     *
     * @param[in] Expr Checkable condition
     * @param[in] Msg Message
     *
-    * Example usage: @code checkMsg( Value == 0, TEXT( "Value = %i" ), Value ) @endcode
+    * Example usage: @code AssertMsg( Value == 0, TEXT( "Value = %i" ), Value ) @endcode
     */
-    #define checkMsg( Expr, Msg, ... )		{ if ( !( Expr ) ) { appFailAssert( #Expr, __FILE__, __LINE__, Msg, __VA_ARGS__ ); } }
+    #define AssertMsg( Expr, Msg, ... )		    { if ( !( Expr ) ) { Sys_FailAssert( #Expr, __FILE__, __LINE__, Msg, __VA_ARGS__ ); } }
 
     /**
     * @ingroup Core
     * @brief Macro for checking the condition and in case of failure, call your function
-    * @warning With enabled define DO_CHECK this macro is empty
+    * @warning With enabled define ENABLED_ASSERT this macro is empty
     *
     * @param[in] Expr Checkable condition
     * @param[in] Func Called function
     *
-    * Example usage: @code checkFunc( Value == 0, MyFunction() ) @endcode
+    * Example usage: @code AssertFunc( Value == 0, MyFunction() ) @endcode
     */
-    #define checkFunc( Expr, Func )	        { if ( !( Expr ) ) { Func; appFailAssert( #Expr, __FILE__, __LINE__ ); } }
+    #define AssertFunc( Expr, Func )	        { if ( !( Expr ) ) { Func; Sys_FailAssert( #Expr, __FILE__, __LINE__ ); } }
 
     /**
     * @ingroup Core
     * @brief Macro for checking the condition
-    * @warning With enabled define DO_CHECK this macro is empty
+    * @warning With enabled define ENABLED_ASSERT this macro is empty
     *
     * @param[in] Expr Checkable condition
     *
-    * Example usage: @code check( Value == 0 ) @endcode
+    * Example usage: @code Assert( Value == 0 ) @endcode
     */
-    #define check( Expr )				    { if ( !( Expr ) ) { appFailAssert( #Expr, __FILE__, __LINE__ ); } }
+    #define Assert( Expr )				        { if ( !( Expr ) ) { Sys_FailAssert( #Expr, __FILE__, __LINE__ ); } }
 
     /**
     * @ingroup Core
     * @brief Macro for triggering an error if a prohibited function is entered
-    * @warning With enabled define DO_CHECK this macro is empty
+    * @warning With enabled define ENABLED_ASSERT this macro is empty
     *
     * Example usage:
      * @code
      * void Function()
      * {
-     *      checkNoEntry()
+     *      AssertNoEntry()
      * }
      *
      * int main()
@@ -341,18 +341,18 @@ extern void appRequestExit( bool InForce );
      * }
      * @endcode
     */
-    #define checkNoEntry()                  { appFailAssert( "Enclosing block should never be called", __FILE__, __LINE__ ); }
+    #define AssertNoEntry()                     { Sys_FailAssert( "Enclosing block should never be called", __FILE__, __LINE__ ); }
 
     /**
     * @ingroup Core
     * @brief Macro to handle the case for a single entry into a function
-    * @warning With enabled define DO_CHECK this macro is empty
+    * @warning With enabled define ENABLED_ASSERT this macro is empty
     *
     * Example usage:
     * @code
     * void Function()
     * {
-    *      checkNoReentry()
+    *      AssertNoReentry()
     * }
     *
     * int main()
@@ -362,25 +362,25 @@ extern void appRequestExit( bool InForce );
     * }
     * @endcode
     */
-    #define checkNoReentry()                {   static bool s_beenHere##__LINE__ = false;                                       \
-                                                checkMsg( !s_beenHere##__LINE__, Enclosing block was called more than once );   \
+    #define AssertNoReentry()                {  static bool s_beenHere##__LINE__ = false;                                       \
+                                                AssertMsg( !s_beenHere##__LINE__, "Enclosing block was called more than once" );  \
                                                 s_beenHere##__LINE__ = true; }
 #else
-    #define checkCode( Code )		        {}
-    #define checkf( Expr, Msg, ... )        {}
-    #define checkMsg( Expr, Msg, ... )		{}
-    #define checkFunc( Expr, Func )	        {}
+    #define AssertCode( Code )		        {}
+    #define Assertf( Expr, Msg, ... )        {}
+    #define AssertMsg( Expr, Msg, ... )		{}
+    #define AssertFunc( Expr, Func )	        {}
     #define verify( Expr )			        {}
-    #define check( Expr )				    {}
-    #define checkNoEntry()                  {}
-    #define checkNoReentry()                {}
-#endif // DO_CHECK
+    #define Assert( Expr )				    {}
+    #define AssertNoEntry()                  {}
+    #define AssertNoReentry()                {}
+#endif // ENABLED_ASSERT
 
-// This define must come after the class declaration for CBaseLogger, since the macro uses GLog->Logf
+// This define must come after the class declaration for CBaseLogger, since the macro uses g_Log->Logf
 #if CHECK_PUREVIRTUALS
     #define PURE_VIRTUAL( InFunc, InExtra ) =0;
 #else
-    #define PURE_VIRTUAL( InFunc, InExtra ) { appErrorf( TEXT( "Pure virtual not implemented (%s)" ), TEXT( #InFunc ) ); InExtra }
+    #define PURE_VIRTUAL( InFunc, InExtra ) { Sys_Errorf( TEXT( "Pure virtual not implemented (%s)" ), TEXT( #InFunc ) ); InExtra }
 #endif
 
 #endif //CORE_H

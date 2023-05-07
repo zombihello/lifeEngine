@@ -5,6 +5,11 @@
 #include "Render/MaterialPreviewViewportClient.h"
 #include "Render/RenderUtils.h"
 
+/*
+==================
+CMaterialPreviewViewportClient::CMaterialPreviewViewportClient
+==================
+*/
 CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr<CMaterial>& InMaterial )
 	: CEditorLevelViewportClient( LVT_Perspective )
 	, scene( new CScene() )
@@ -32,21 +37,36 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	scene->AddLight( pointLightComponent );
 }
 
+/*
+==================
+CMaterialPreviewViewportClient::~CMaterialPreviewViewportClient
+==================
+*/
 CMaterialPreviewViewportClient::~CMaterialPreviewViewportClient()
 {
 	FlushRenderingCommands();
 	delete scene;
 }
 
+/*
+==================
+CMaterialPreviewViewportClient::Tick
+==================
+*/
 void CMaterialPreviewViewportClient::Tick( float InDeltaSeconds )
 {
 	CEditorLevelViewportClient::Tick( InDeltaSeconds );
 	sphereComponent->AddRelativeRotate( SMath::AnglesToQuaternionXYZ( Vector( 0.f, 10.f * InDeltaSeconds, 0.f ) ) );
 }
 
+/*
+==================
+CMaterialPreviewViewportClient::Draw
+==================
+*/
 void CMaterialPreviewViewportClient::Draw( CViewport* InViewport )
 {
-	check( InViewport );
+	Assert( InViewport );
 	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
 
 	// Draw viewport
@@ -59,10 +79,15 @@ void CMaterialPreviewViewportClient::Draw( CViewport* InViewport )
 										  } );
 }
 
+/*
+==================
+CMaterialPreviewViewportClient::Draw_RenderThread
+==================
+*/
 void CMaterialPreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView )
 {
-	check( IsInRenderingThread() );
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	Assert( IsInRenderingThread() );
+	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
 	CSceneRenderer				sceneRenderer( InSceneView, scene );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 
@@ -74,5 +99,10 @@ void CMaterialPreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewp
 	delete InSceneView;
 }
 
+/*
+==================
+CMaterialPreviewViewportClient::SetViewportType
+==================
+*/
 void CMaterialPreviewViewportClient::SetViewportType( ELevelViewportType InViewportType )
 {}

@@ -1,19 +1,34 @@
 #include "System/AudioStreamSource.h"
 #include "Logger/LoggerMacros.h"
 
+/*
+==================
+CAudioStreamRunnable::CAudioStreamRunnable
+==================
+*/
 CAudioStreamRunnable::CAudioStreamRunnable( CAudioStreamSource* InStreamSource )
 	: streamSource( InStreamSource )
 {}
 
+/*
+==================
+CAudioStreamRunnable::Init
+==================
+*/
 bool CAudioStreamRunnable::Init()
 {
 	return true;
 }
 
+/*
+==================
+CAudioStreamRunnable::Run
+==================
+*/
 uint32 CAudioStreamRunnable::Run()
 {
 	bool			bRequestStop = false;
-	check( streamSource );
+	Assert( streamSource );
 
 	{
 		// Check if the thread was launched is stopped
@@ -104,7 +119,7 @@ uint32 CAudioStreamRunnable::Run()
 		// Leave some time for the other threads if the stream is still playing
 		if ( streamSource->GetStatus() != ASS_Stoped )
 		{
-			appSleep( 0.01f );		// 10 milliseconds
+			Sys_Sleep( 0.01f );		// 10 milliseconds
 		}
 	}
 
@@ -120,12 +135,27 @@ uint32 CAudioStreamRunnable::Run()
 	return 0;
 }
 
+/*
+==================
+CAudioStreamRunnable::Stop
+==================
+*/
 void CAudioStreamRunnable::Stop()
 {}
 
+/*
+==================
+CAudioStreamRunnable::Exit
+==================
+*/
 void CAudioStreamRunnable::Exit()
 {}
 
+/*
+==================
+CAudioStreamRunnable::FillQueue
+==================
+*/
 bool CAudioStreamRunnable::FillQueue()
 {	
 	// Fill and enqueue all the available buffers
@@ -143,6 +173,11 @@ bool CAudioStreamRunnable::FillQueue()
 	return requestStop;
 }
 
+/*
+==================
+CAudioStreamRunnable::ClearQueue
+==================
+*/
 void CAudioStreamRunnable::ClearQueue()
 {
 	// Get the number of buffers still in the queue
@@ -157,6 +192,11 @@ void CAudioStreamRunnable::ClearQueue()
 	}
 }
 
+/*
+==================
+CAudioStreamRunnable::FillAndPushBuffer
+==================
+*/
 bool CAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 {
 	bool		requestStop = false;
@@ -182,7 +222,7 @@ bool CAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 		uint32			buffer = alBuffers[ InBufferIndex ];
 
 		// Fill the buffer and push it into the sound queue
-		alBufferData( buffer, appSampleFormatToEngine( streamSource->audioBankInfo.format ), data.samples, data.numSamples, streamSource->audioBankInfo.rate );
+		alBufferData( buffer, Sys_SampleFormatToEngine( streamSource->audioBankInfo.format ), data.samples, data.numSamples, streamSource->audioBankInfo.rate );
 		alSourceQueueBuffers( streamSource->GetALHandle(), 1, &buffer );
 	}
 	else
@@ -194,6 +234,11 @@ bool CAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 	return requestStop;
 }
 
+/*
+==================
+CAudioStreamRunnable::GetData
+==================
+*/
 bool CAudioStreamRunnable::GetData( SChunk& OutData )
 {
 	CScopeLock	scopeLock( &streamSource->csStreamData );
@@ -217,6 +262,12 @@ bool CAudioStreamRunnable::GetData( SChunk& OutData )
 	return OutData.numSamples != 0 && currentOffset != numSamples;
 }
 
+
+/*
+==================
+CAudioStreamSource::CAudioStreamSource
+==================
+*/
 CAudioStreamSource::CAudioStreamSource()
 	: bIsStreaming( false )
 	, bIsLoop( false )
@@ -226,6 +277,11 @@ CAudioStreamSource::CAudioStreamSource()
 	, threadStreamData( nullptr )
 {}
 
+/*
+==================
+CAudioStreamSource::~CAudioStreamSource
+==================
+*/
 CAudioStreamSource::~CAudioStreamSource()
 {
 	if ( audioBankHandle )
@@ -234,6 +290,11 @@ CAudioStreamSource::~CAudioStreamSource()
 	}
 }
 
+/*
+==================
+CAudioStreamSource::Play
+==================
+*/
 void CAudioStreamSource::Play()
 {
 	// If audio bank handle is not valid or source is muted, do nothing
@@ -270,9 +331,14 @@ void CAudioStreamSource::Play()
 	bIsStreaming		= true;
 	this->status		= ASS_Playing;
 	audioStreamRunnable = new CAudioStreamRunnable( this );
-	threadStreamData	= GThreadFactory->CreateThread( audioStreamRunnable, TEXT( "AudioStream" ), true, true, 0, TP_Normal );
+	threadStreamData	= g_ThreadFactory->CreateThread( audioStreamRunnable, TEXT( "AudioStream" ), true, true, 0, TP_Normal );
 }
 
+/*
+==================
+CAudioStreamSource::Pause
+==================
+*/
 void CAudioStreamSource::Pause()
 {
 	// If audio source is muted, do nothing
@@ -294,6 +360,11 @@ void CAudioStreamSource::Pause()
 	alSourcePause( GetALHandle() );
 }
 
+/*
+==================
+CAudioStreamSource::Stop
+==================
+*/
 void CAudioStreamSource::Stop()
 {
 	// If audio source is muted, do nothing
@@ -324,11 +395,21 @@ void CAudioStreamSource::Stop()
 	}
 }
 
+/*
+==================
+CAudioStreamSource::SetLoop
+==================
+*/
 void CAudioStreamSource::SetLoop( bool InIsLoop )
 {
 	bIsLoop = InIsLoop;
 }
 
+/*
+==================
+CAudioStreamSource::OpenBank
+==================
+*/
 void CAudioStreamSource::OpenBank( const TAssetHandle<CAudioBank>& InAudioBank )
 {
 	// If already opened bank - close
@@ -352,11 +433,16 @@ void CAudioStreamSource::OpenBank( const TAssetHandle<CAudioBank>& InAudioBank )
 	if ( audioBankInfo.format == SF_Unknown )
 	{
 		CloseBank();
-		LE_LOG( LT_Warning, LC_Audio, TEXT( "Unsupported sample format in audio bank '%s'" ), audioBankRef->GetAssetName().c_str() );
+		Warnf( TEXT( "Unsupported sample format in audio bank '%s'\n" ), audioBankRef->GetAssetName().c_str() );
 		return;
 	}
 }
 
+/*
+==================
+CAudioStreamSource::CloseBank
+==================
+*/
 void CAudioStreamSource::CloseBank()
 {
 	if ( !audioBankHandle )
@@ -376,6 +462,11 @@ void CAudioStreamSource::CloseBank()
 	audioBankHandle = nullptr;
 }
 
+/*
+==================
+CAudioStreamSource::SetAudioBank
+==================
+*/
 void CAudioStreamSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 {
 	// If bank opened - close
@@ -417,11 +508,21 @@ void CAudioStreamSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBa
 	audioBank = InAudioBank;
 }
 
+/*
+==================
+CAudioStreamSource::IsLooped
+==================
+*/
 bool CAudioStreamSource::IsLooped() const
 {
 	return bIsLoop;
 }
 
+/*
+==================
+CAudioStreamSource::GetStatus
+==================
+*/
 EAudioSourceStatus CAudioStreamSource::GetStatus() const
 {
 	ALint			alStatus = 0;
@@ -445,10 +546,15 @@ EAudioSourceStatus CAudioStreamSource::GetStatus() const
 }
 
 #if WITH_EDITOR
+/*
+==================
+CAudioStreamSource::OnAudioBankUpdated
+==================
+*/
 void CAudioStreamSource::OnAudioBankUpdated( class CAudioBank* InAudioBank )
 {
 	// Update data from audio bank
-	check( InAudioBank );
+	Assert( InAudioBank );
 	EAudioSourceStatus		currentStatus = GetStatus();
 	SetAudioBank( InAudioBank->GetAssetHandle() );
 

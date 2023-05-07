@@ -87,6 +87,6 @@ private:
 	TRefCountPtr< CDynamicMeshVertexFactory >		vertexFactory;		/**< Vertex factory */
 };
 
-extern TGlobalResource<CSphereMesh>					GSphereMesh;			/**< The global sphere mesh data */
+extern TGlobalResource<CSphereMesh>					g_SphereMesh;			/**< The global sphere mesh data */
 
 #endif // !SPHERE_H

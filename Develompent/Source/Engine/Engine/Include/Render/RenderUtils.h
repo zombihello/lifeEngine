@@ -41,13 +41,13 @@ struct SPixelFormatInfo
  * @ingroup Engine
  * Maps members of EPixelFormat to a SPixelFormatInfo describing the format
  */
-extern SPixelFormatInfo			GPixelFormats[ PF_Max ];
+extern SPixelFormatInfo			g_PixelFormats[ PF_Max ];
 
 /**
  * @ingroup Engine
  * @brief Offset to center of the pixel
  */
-extern float					GPixelCenterOffset;
+extern float					g_PixelCenterOffset;
 
 /**
  * @ingroup Engine
@@ -199,9 +199,9 @@ private:
 	Texture2DRHIRef_t		texture2DRHI;		/**< Texture 2D RHI */
 };
 
-extern TGlobalResource<CWhiteTexture>		GWhiteTexture;				/**< White texture */
-extern TGlobalResource<CBlackTexture>		GBlackTexture;				/**< Black texture */
-extern TGlobalResource<CEmptyNormalTexture>	GEmptyNormalTexture;		/**< Empty normal texture */
+extern TGlobalResource<CWhiteTexture>		g_WhiteTexture;				/**< White texture */
+extern TGlobalResource<CBlackTexture>		g_BlackTexture;				/**< Black texture */
+extern TGlobalResource<CEmptyNormalTexture>	g_EmptyNormalTexture;		/**< Empty normal texture */
 
 /**
  * @ingroup Engine

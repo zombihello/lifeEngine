@@ -119,7 +119,7 @@ public:
 	 */
 	FORCEINLINE CScopedDrawEvent( const CColor& InColor, const tchar* InStatId )
 	{
-		GRHI->BeginDrawEvent( GRHI->GetImmediateContext(), InColor, InStatId );
+		g_RHI->BeginDrawEvent( g_RHI->GetImmediateContext(), InColor, InStatId );
 	}
 
 	/**
@@ -127,7 +127,7 @@ public:
 	 */
 	FORCEINLINE ~CScopedDrawEvent()
 	{
-		GRHI->EndDrawEvent( GRHI->GetImmediateContext() );
+		g_RHI->EndDrawEvent( g_RHI->GetImmediateContext() );
 	}
 
 protected:

@@ -5,4 +5,4 @@
 // GLOBALS
 // -------------
 
-CPhysicsEngine				GPhysicsEngine;
+CPhysicsEngine				g_PhysicsEngine;

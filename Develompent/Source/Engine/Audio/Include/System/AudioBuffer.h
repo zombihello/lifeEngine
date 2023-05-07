@@ -73,7 +73,7 @@ public:
 		}
 
 		alGenBuffers( 1, &alHandle );
-		alBufferData( alHandle, appSampleFormatToEngine( InSampleFormat ), InSampleData, InSamplesSize, InSampleRate );
+		alBufferData( alHandle, Sys_SampleFormatToEngine( InSampleFormat ), InSampleData, InSamplesSize, InSampleRate );
 
 		// Tell to all users this buffer what we is updated him
 		onAudioBufferUpdated.Broadcast( this );

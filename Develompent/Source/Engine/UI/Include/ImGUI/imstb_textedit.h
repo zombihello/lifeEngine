@@ -237,7 +237,7 @@
 //          do both (as in Win32), or distinguish Unicode characters from control
 //          inputs, set a high bit to distinguish the two; then you can define the
 //          various definitions like STB_TEXTEDIT_K_LEFT have the is-key-event bit
-//          set, and make STB_TEXTEDIT_KEYTOCHAR check that the is-key-event bit is
+//          set, and make STB_TEXTEDIT_KEYTOCHAR Assert that the is-key-event bit is
 //          clear. STB_TEXTEDIT_KEYTYPE defaults to int, but you can #define it to
 //          anything other type you wante before including.
 //
@@ -429,11 +429,11 @@ static int stb_text_locate_coord(STB_TEXTEDIT_STRING *str, float x, float y)
    if (i >= n)
       return n;
 
-   // check if it's before the beginning of the line
+   // Assert if it's before the beginning of the line
    if (x < r.x0)
       return i;
 
-   // check if it's before the end of the line
+   // Assert if it's before the end of the line
    if (x < r.x1) {
       // search characters in row for one that straddles 'x'
       prev_x = r.x0;
@@ -1280,7 +1280,7 @@ static void stb_text_undo(STB_TEXTEDIT_STRING *str, STB_TexteditState *state)
       STB_TEXTEDIT_DELETECHARS(str, u.where, u.delete_length);
    }
 
-   // check type of recorded action:
+   // Assert type of recorded action:
    if (u.insert_length) {
       // easy case: was a deletion, so we need to insert n characters
       STB_TEXTEDIT_INSERTCHARS(str, u.where, &s->undo_char[u.char_storage], u.insert_length);

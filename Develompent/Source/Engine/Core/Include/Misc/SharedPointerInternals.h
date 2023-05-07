@@ -51,7 +51,7 @@ namespace SharedPointerInternals
 		 */
 		virtual ~TReferenceController()
 		{
-			check( !object && !sharedReferenceCount && !weakReferenceCount );
+			Assert( !object && !sharedReferenceCount && !weakReferenceCount );
 		}
 
 		/**
@@ -77,7 +77,7 @@ namespace SharedPointerInternals
 		 */
 		FORCEINLINE void AddSharedReference()
 		{
-			appInterlockedIncrement( ( int32* )&sharedReferenceCount );
+			Sys_InterlockedIncrement( ( int32* )&sharedReferenceCount );
 		}
 
 		/**
@@ -97,7 +97,7 @@ namespace SharedPointerInternals
 				DestroyObject();
 
 				// Clear shared reference count
-				appInterlockedDecrement( ( int32* )&sharedReferenceCount );
+				Sys_InterlockedDecrement( ( int32* )&sharedReferenceCount );
 
 				// No more shared referencers, so decrement the weak reference count by one.  When the weak
 				// reference count reaches zero, this object will be deleted.
@@ -105,7 +105,7 @@ namespace SharedPointerInternals
 			}
 			else
 			{
-				appInterlockedDecrement( ( int32* )&sharedReferenceCount );
+				Sys_InterlockedDecrement( ( int32* )&sharedReferenceCount );
 			}
 		}
 
@@ -114,7 +114,7 @@ namespace SharedPointerInternals
 		 */
 		FORCEINLINE void AddWeakReference()
 		{
-			appInterlockedIncrement( ( int32* )&weakReferenceCount );
+			Sys_InterlockedIncrement( ( int32* )&weakReferenceCount );
 		}
 
 		/**
@@ -129,7 +129,7 @@ namespace SharedPointerInternals
 				return false;
 			}
 
-			appInterlockedIncrement( ( int32* )&sharedReferenceCount );
+			Sys_InterlockedIncrement( ( int32* )&sharedReferenceCount );
 			return true;
 		}
 
@@ -138,7 +138,7 @@ namespace SharedPointerInternals
 		 */
 		FORCEINLINE void ReleaseWeakReference()
 		{
-			if ( !appInterlockedDecrement( ( int32* )&weakReferenceCount ) )
+			if ( !Sys_InterlockedDecrement( ( int32* )&weakReferenceCount ) )
 			{
 				delete this;
 			}

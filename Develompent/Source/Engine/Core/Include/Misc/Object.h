@@ -68,7 +68,7 @@
         { \
             CClass::StaticRegisterClass( TClass::StaticClass() ); \
         } \
-    } GRegister##TClass;
+    } g_Register##TClass;
 
 /**
  * @ingroup Core
@@ -82,19 +82,19 @@ public:
     /**
      * @brief Destructor
      */
-    virtual                         ~CObject() {}
+    virtual ~CObject() {}
 
     /**
      * @brief Serialize object
      * @param[in] InArchive Archive for serialize
      */
-    virtual void                    Serialize( class CArchive& InArchive );
+    virtual void Serialize( class CArchive& InArchive );
 
     /**
      * @brief Set name object
      * @param[in] InName Name object
      */
-    FORCEINLINE void                SetName( const tchar* InName )
+    FORCEINLINE void SetName( const tchar* InName )
     {
         name = InName;
     }
@@ -104,7 +104,7 @@ public:
      * @return Return true if object is a class TClass, else returning false
      */
     template< typename TClass >
-    FORCEINLINE bool                IsA() const
+    FORCEINLINE bool IsA() const
     {
         return InternalIsA( TClass::StaticClass() );
     }
@@ -114,7 +114,7 @@ public:
      * @return Return pointer with type TClass. If object not is the class TClass returning nullptr
      */
 	template< typename TClass >
-    FORCEINLINE TClass*             Cast()
+    FORCEINLINE TClass* Cast()
 	{
 		if ( IsA< TClass >() )
 		{
@@ -129,7 +129,7 @@ public:
      * @return Return const pointer with type TClass. If object not is the class TClass returning nullptr
      */
 	template< typename TClass >
-    FORCEINLINE const TClass*       ConstCast() const
+    FORCEINLINE const TClass* ConstCast() const
 	{
 		if ( IsA< TClass >() )
 		{
@@ -143,7 +143,7 @@ public:
      * @brief Get name object
      * @return Return name object
      */
-    FORCEINLINE const tchar*        GetName() const
+    FORCEINLINE const tchar* GetName() const
     {
         return name.c_str();
     }
@@ -155,9 +155,9 @@ public:
      * @return Return pointer to new object
      */
     template< typename TClass >
-    static FORCEINLINE CObject*      StaticNewObject( const CClass* InClass )
+    static FORCEINLINE CObject* StaticNewObject( const CClass* InClass )
     {
-        check( InClass );
+        Assert( InClass );
         return InClass->CreateObject< TClass >();
     }
 
@@ -173,7 +173,7 @@ private:
      * 
      * @return Return true if object is a class InClass, else returning false
      */
-    bool                            InternalIsA( const CClass* InClass ) const;
+    bool InternalIsA( const CClass* InClass ) const;
 
     std::wstring            name;               /**< Name object */
 };

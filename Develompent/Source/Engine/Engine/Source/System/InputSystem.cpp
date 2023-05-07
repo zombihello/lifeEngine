@@ -4,6 +4,11 @@
 #include "System/InputSystem.h"
 #include "System/WindowEvent.h"
 
+/*
+==================
+CInputSystem::CInputSystem
+==================
+*/
 CInputSystem::CInputSystem() :
 	mouseLocation( SMath::vectorZero ),
 	mouseOffset( SMath::vectorZero ),
@@ -12,16 +17,26 @@ CInputSystem::CInputSystem() :
 	memset( &buttonEvents, BE_None, BC_Count * sizeof( EButtonEvent ) );
 }
 
+/*
+==================
+CInputSystem::Init
+==================
+*/
 void CInputSystem::Init()
 {
 	// Get mouse sensitivity
-	CConfigValue		configSensitivity = GConfig.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Sensitivity" ) );
+	CConfigValue		configSensitivity = g_Config.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Sensitivity" ) );
 	if ( configSensitivity.IsValid() )
 	{
 		mouseSensitivity = configSensitivity.GetNumber();
 	}
 }
 
+/*
+==================
+CInputSystem::ProcessEvent
+==================
+*/
 void CInputSystem::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	switch ( InWindowEvent.type )
@@ -58,6 +73,11 @@ void CInputSystem::ProcessEvent( struct SWindowEvent& InWindowEvent )
 	}
 }
 
+/*
+==================
+CInputSystem::ResetEvents
+==================
+*/
 void CInputSystem::ResetEvents()
 {
 	for ( uint32 index = 0; index < BC_Count; ++index )

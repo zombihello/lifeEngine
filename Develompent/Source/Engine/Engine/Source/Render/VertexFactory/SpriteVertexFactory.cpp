@@ -13,7 +13,7 @@ IMPLEMENT_VERTEX_FACTORY_TYPE( CSpriteVertexFactory, TEXT( "SpriteVertexFactory.
 // 
 // GLOBALS
 //
-TGlobalResource< CSpriteVertexDeclaration >			GSpriteVertexDeclaration;
+TGlobalResource< CSpriteVertexDeclaration >			g_SpriteVertexDeclaration;
 
 /**
  * @ingroup Engine
@@ -32,6 +32,12 @@ struct SSpriteInstanceBuffer
 #endif // WITH_EDITOR
 };
 
+
+/*
+==================
+CSpriteVertexDeclaration::InitRHI
+==================
+*/
 void CSpriteVertexDeclaration::InitRHI()
 {
 	VertexDeclarationElementList_t		vertexDeclElementList =
@@ -55,18 +61,34 @@ void CSpriteVertexDeclaration::InitRHI()
 #endif // WITH_EDITOR
 #endif // USE_INSTANCING
 	};
-	vertexDeclarationRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
+	vertexDeclarationRHI = g_RHI->CreateVertexDeclaration( vertexDeclElementList );
 }
 
+/*
+==================
+CSpriteVertexDeclaration::ReleaseRHI
+==================
+*/
 void CSpriteVertexDeclaration::ReleaseRHI()
 {
 	vertexDeclarationRHI.SafeRelease();
 }
 
+
+/*
+==================
+CSpriteVertexShaderParameters::CSpriteVertexShaderParameters
+==================
+*/
 CSpriteVertexShaderParameters::CSpriteVertexShaderParameters()
 	: CGeneralVertexShaderParameters( CSpriteVertexFactory::staticType.SupportsInstancing() )
 {}
 
+/*
+==================
+CSpriteVertexShaderParameters::Bind
+==================
+*/
 void CSpriteVertexShaderParameters::Bind( const class CShaderParameterMap& InParameterMap )
 {
 	CGeneralVertexShaderParameters::Bind( InParameterMap );
@@ -76,11 +98,16 @@ void CSpriteVertexShaderParameters::Bind( const class CShaderParameterMap& InPar
 	spriteSizeParameter.Bind( InParameterMap, TEXT( "spriteSize" ) );
 }
 
+/*
+==================
+CSpriteVertexShaderParameters::Set
+==================
+*/
 void CSpriteVertexShaderParameters::Set( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory ) const
 {
 	CGeneralVertexShaderParameters::Set( InDeviceContextRHI, InVertexFactory );
 	CSpriteVertexFactory*		vertexFactory = ( CSpriteVertexFactory* )InVertexFactory;
-	check( InVertexFactory );
+	Assert( InVertexFactory );
 
 	SetVertexShaderValue( InDeviceContextRHI, flipVerticalParameter, vertexFactory->IsFlipedVertical() );
 	SetVertexShaderValue( InDeviceContextRHI, flipHorizontalParameter, vertexFactory->IsFlipedHorizontal() );
@@ -88,6 +115,11 @@ void CSpriteVertexShaderParameters::Set( class CBaseDeviceContextRHI* InDeviceCo
 	SetVertexShaderValue( InDeviceContextRHI, spriteSizeParameter, vertexFactory->GetSpriteSize() );
 }
 
+/*
+==================
+CSpriteVertexFactory::CSpriteVertexFactory
+==================
+*/
 CSpriteVertexFactory::CSpriteVertexFactory()
 	: bFlipVertical( false )
 	, bFlipHorizontal( false )
@@ -95,17 +127,27 @@ CSpriteVertexFactory::CSpriteVertexFactory()
 	, spriteSize( 1.f, 1.f )
 {}
 
+/*
+==================
+CSpriteVertexFactory::GetTypeHash
+==================
+*/
 uint64 CSpriteVertexFactory::GetTypeHash() const
 {
-	uint64		hash = appMemFastHash( bFlipVertical, staticType.GetHash() );
-	hash = appMemFastHash( bFlipHorizontal, hash );
-	hash = appMemFastHash( textureRect, hash );
-	return appMemFastHash( spriteSize, hash );
+	uint64		hash = Sys_MemFastHash( bFlipVertical, staticType.GetHash() );
+	hash = Sys_MemFastHash( bFlipHorizontal, hash );
+	hash = Sys_MemFastHash( textureRect, hash );
+	return Sys_MemFastHash( spriteSize, hash );
 }
 
+/*
+==================
+CSpriteVertexFactory::SetupInstancing
+==================
+*/
 void CSpriteVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	check( InStartInstanceID < InMesh.instances.size() && InNumInstances <= InMesh.instances.size() - InStartInstanceID );
+	Assert( InStartInstanceID < InMesh.instances.size() && InNumInstances <= InMesh.instances.size() - InStartInstanceID );
 	
 	std::vector<SSpriteInstanceBuffer>		instanceBuffers;
 	instanceBuffers.resize( InNumInstances );
@@ -120,18 +162,28 @@ void CSpriteVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDevic
 #endif // ENABLE_HITPROXY
 
 #if WITH_EDITOR
-		instanceBuffer.colorOverlay				= meshInstance.bSelected ? GEditorEngine->GetSelectionColor().ToNormalizedVector4D() : Vector4D( 0.f, 0.f, 0.f, 0.f );
+		instanceBuffer.colorOverlay				= meshInstance.bSelected ? g_EditorEngine->GetSelectionColor().ToNormalizedVector4D() : Vector4D( 0.f, 0.f, 0.f, 0.f );
 #endif // WITH_EDITOR
 	}
 
-	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( SSpriteInstanceBuffer ), InNumInstances * sizeof( SSpriteInstanceBuffer ), InNumInstances );
+	g_RHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( SSpriteInstanceBuffer ), InNumInstances * sizeof( SSpriteInstanceBuffer ), InNumInstances );
 }
 
+/*
+==================
+CSpriteVertexFactory::InitRHI
+==================
+*/
 void CSpriteVertexFactory::InitRHI()
 {
-	InitDeclaration( GSpriteVertexDeclaration.GetVertexDeclarationRHI() );
+	InitDeclaration( g_SpriteVertexDeclaration.GetVertexDeclarationRHI() );
 }
 
+/*
+==================
+CSpriteVertexFactory::ConstructShaderParameters
+==================
+*/
 CVertexFactoryShaderParameters* CSpriteVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )
 {
 	return InShaderFrequency == SF_Vertex ? new CSpriteVertexShaderParameters() : nullptr;

@@ -13,6 +13,11 @@
 
 IMPLEMENT_CLASS( CSpriteComponent )
 
+/*
+==================
+CSpriteComponent::CSpriteComponent
+==================
+*/
 CSpriteComponent::CSpriteComponent()
 #if WITH_EDITOR
 	: bGizmo( false ),
@@ -27,6 +32,11 @@ CSpriteComponent::CSpriteComponent()
 	BeginInitResource( sprite );
 }
 
+/*
+==================
+CSpriteComponent::Serialize
+==================
+*/
 void CSpriteComponent::Serialize( class CArchive& InArchive )
 {
     Super::Serialize( InArchive );
@@ -52,6 +62,11 @@ void CSpriteComponent::Serialize( class CArchive& InArchive )
     }
 }
 
+/*
+==================
+CSpriteComponent::CalcTransformationMatrix
+==================
+*/
 void CSpriteComponent::CalcTransformationMatrix( const class CSceneView& InSceneView, Matrix& OutResult ) const
 {
 	CTransform      transform( NoInit );
@@ -103,9 +118,14 @@ void CSpriteComponent::CalcTransformationMatrix( const class CSceneView& InScene
 	OutResult *= SMath::QuaternionToMatrix( transform.GetRotation() );
 }
 
+/*
+==================
+CSpriteComponent::LinkDrawList
+==================
+*/
 void CSpriteComponent::LinkDrawList()
 {
-    check( scene );
+    Assert( scene );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( drawingPolicyLink
@@ -162,9 +182,14 @@ void CSpriteComponent::LinkDrawList()
 	}
 }
 
+/*
+==================
+CSpriteComponent::UnlinkDrawList
+==================
+*/
 void CSpriteComponent::UnlinkDrawList()
 {
-    check( scene );
+    Assert( scene );
 	SSceneDepthGroup&		SDGWorld = scene->GetSDG( SDG_World );
 
 	// If the primitive already added to scene - remove all draw policy links
@@ -194,6 +219,11 @@ void CSpriteComponent::UnlinkDrawList()
 	meshBatchLinks.clear();
 }
 
+/*
+==================
+CSpriteComponent::AddToDrawList
+==================
+*/
 void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 {
 	// If primitive is empty - exit from method
@@ -249,7 +279,7 @@ void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 #if WITH_EDITOR
 	if ( !bGizmo && owner ? owner->IsSelected() : false )
 	{
-		DrawWireframeBox( ( ( CScene* )GWorld->GetScene() )->GetSDG( SDG_Highlight ), boundbox, DEC_SPRITE );
+		DrawWireframeBox( ( ( CScene* )g_World->GetScene() )->GetSDG( SDG_Highlight ), boundbox, DEC_SPRITE );
 	}
 #endif // WITH_EDITOR
 }

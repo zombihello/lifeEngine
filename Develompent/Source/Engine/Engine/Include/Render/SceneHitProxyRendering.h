@@ -35,8 +35,8 @@ public:
 
 		// Override shaders for hit proxy id rendering
 		uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
-		vertexShader	= GShaderManager->FindInstance<CHitProxyVertexShader>( vertexFactoryHash );
-		pixelShader		= GShaderManager->FindInstance<CHitProxyPixelShader>( vertexFactoryHash );
+		vertexShader	= g_ShaderManager->FindInstance<CHitProxyVertexShader>( vertexFactoryHash );
+		pixelShader		= g_ShaderManager->FindInstance<CHitProxyPixelShader>( vertexFactoryHash );
 	}
 };
 #endif // ENABLE_HITPROXY

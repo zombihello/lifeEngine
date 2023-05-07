@@ -4,6 +4,11 @@
 #include "Widgets/ViewportWidget.h"
 #include "ImGUI/ImGUIEngine.h"
 
+/*
+==================
+CViewportWidget::CViewportWidget
+==================
+*/
 CViewportWidget::CViewportWidget( bool InIsEnabled /* = true */, CViewportClient* InViewportClient /* = nullptr */, bool InDeleteViewportClient /* = false */ )
 	: bInit( false )
 	, bEnabled( InIsEnabled )
@@ -20,31 +25,51 @@ CViewportWidget::CViewportWidget( bool InIsEnabled /* = true */, CViewportClient
 	SetSize( size );
 }
 
+/*
+==================
+CViewportWidget::~CViewportWidget
+==================
+*/
 CViewportWidget::~CViewportWidget()
 {
 	SetEnabled( false );
 }
 
+/*
+==================
+CViewportWidget::Init
+==================
+*/
 void CViewportWidget::Init()
 {
 	bInit = true;
 	if ( IsEnabled() )
 	{
-		GEditorEngine->AddViewport( viewport );
+		g_EditorEngine->AddViewport( viewport );
 		bViewportOnDrawing = true;
 	}
 }
 
+/*
+==================
+CViewportWidget::Tick
+==================
+*/
 void CViewportWidget::Tick()
 {
-	check( bInit );
+	Assert( bInit );
 	if ( renderTarget->IsValid() )
 	{
-		ImGui::Image( GImGUIEngine->LockTexture( renderTarget->GetTexture2DRHI() ), ImVec2{ ( float )size.x, ( float )size.y } );
+		ImGui::Image( g_ImGUIEngine->LockTexture( renderTarget->GetTexture2DRHI() ), ImVec2{ ( float )size.x, ( float )size.y } );
 		bHovered = ImGui::IsItemHovered();
 	}
 }
 
+/*
+==================
+CViewportWidget::ProcessEvent
+==================
+*/
 void CViewportWidget::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// Process ImGUI events
@@ -59,6 +84,11 @@ void CViewportWidget::ProcessEvent( struct SWindowEvent& InWindowEvent )
 	}
 }
 
+/*
+==================
+CViewportWidget::SetEnabled
+==================
+*/
 void CViewportWidget::SetEnabled( bool InIsEnabled )
 {
 	bEnabled = InIsEnabled;
@@ -66,12 +96,12 @@ void CViewportWidget::SetEnabled( bool InIsEnabled )
 	{
 		if ( InIsEnabled && !bViewportOnDrawing )
 		{
-			GEditorEngine->AddViewport( viewport );
+			g_EditorEngine->AddViewport( viewport );
 			bViewportOnDrawing = true;
 		}
 		else if ( !InIsEnabled && bViewportOnDrawing )
 		{
-			GEditorEngine->RemoveViewport( viewport );
+			g_EditorEngine->RemoveViewport( viewport );
 			bViewportOnDrawing = false;
 		}
 	}

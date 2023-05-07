@@ -16,10 +16,20 @@ IMPLEMENT_SHADER_TYPE(, TLightingPixelShader<LT_Point>, TEXT( "LightingPixelShad
 IMPLEMENT_SHADER_TYPE(, TLightingPixelShader<LT_Spot>, TEXT( "LightingPixelShaders.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 IMPLEMENT_SHADER_TYPE(, TLightingPixelShader<LT_Directional>, TEXT( "LightingPixelShaders.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 
+/*
+==================
+CBaseLightingVertexShader::CBaseLightingVertexShader
+==================
+*/
 CBaseLightingVertexShader::CBaseLightingVertexShader()
 	: vertexFactoryParameters( nullptr )
 {}
 
+/*
+==================
+CBaseLightingVertexShader::~CBaseLightingVertexShader
+==================
+*/
 CBaseLightingVertexShader::~CBaseLightingVertexShader()
 {
 	if ( vertexFactoryParameters )
@@ -28,30 +38,50 @@ CBaseLightingVertexShader::~CBaseLightingVertexShader()
 	}
 }
 
+/*
+==================
+CBaseLightingVertexShader::Init
+==================
+*/
 void CBaseLightingVertexShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
 {
 	CShader::Init( InShaderCacheItem );
 
 	// Supported only light vertex factory
-	check( GetVertexFactoryHash() == CLightVertexFactory::staticType.GetHash() );
+	Assert( GetVertexFactoryHash() == CLightVertexFactory::staticType.GetHash() );
 
 	// Bind shader parameters
 	vertexFactoryParameters = ( CLightVertexShaderParameters* )CLightVertexFactory::staticType.CreateShaderParameters( SF_Vertex );
 	vertexFactoryParameters->Bind( InShaderCacheItem.parameterMap );
 }
 
+/*
+==================
+CBaseLightingVertexShader::SetConstantParameters
+==================
+*/
 void CBaseLightingVertexShader::SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const
 {
-	check( vertexFactoryParameters );
+	Assert( vertexFactoryParameters );
 	vertexFactoryParameters->Set( InDeviceContextRHI, InVertexFactory );
 }
 
+/*
+==================
+CBaseLightingVertexShader::SetMesh
+==================
+*/
 void CBaseLightingVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	appErrorf( TEXT( "CBaseLightingVertexShader::SetMesh( MeshBatch ) Not supported" ) );
+	Sys_Errorf( TEXT( "CBaseLightingVertexShader::SetMesh( MeshBatch ) Not supported" ) );
 }
 
 
+/*
+==================
+CBaseLightingPixelShader::Init
+==================
+*/
 void CBaseLightingPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
 {
 	CShader::Init( InShaderCacheItem );

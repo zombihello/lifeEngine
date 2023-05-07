@@ -479,7 +479,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESamplerAddressMode& InVa
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESamplerAddressMode& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -492,7 +492,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESamplerFilter& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESamplerFilter& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }

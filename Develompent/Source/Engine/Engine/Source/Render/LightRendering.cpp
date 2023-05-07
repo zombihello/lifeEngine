@@ -41,22 +41,22 @@ public:
 		// If vertex factory not support instancig - draw without it
 		if ( !InVertexFactory->SupportsInstancing() )
 		{
-			appErrorf( TEXT( "Not implemented" ) );
+			Sys_Errorf( TEXT( "Not implemented" ) );
 		}
 		// Else we draw geometry with help instancing
 		else
 		{
 			InLightingVertexShader->SetMesh( InDeviceContextRHI, *InLights, InVertexFactory, &InSceneView, InLights->size() );
-			GRHI->CommitConstants( InDeviceContextRHI );
+			g_RHI->CommitConstants( InDeviceContextRHI );
 
 			IndexBufferRHIRef_t		indexBufferRHI = GLightSphereMesh.GetIndexBufferRHI();
 			if ( indexBufferRHI )
 			{
-				GRHI->DrawIndexedPrimitive( InDeviceContextRHI, indexBufferRHI, PT_TriangleList, 0, 0, GLightSphereMesh.GetNumPrimitives(), InLights->size() );
+				g_RHI->DrawIndexedPrimitive( InDeviceContextRHI, indexBufferRHI, PT_TriangleList, 0, 0, GLightSphereMesh.GetNumPrimitives(), InLights->size() );
 			}
 			else
 			{
-				GRHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, GLightSphereMesh.GetNumPrimitives(), InLights->size() );
+				g_RHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, GLightSphereMesh.GetNumPrimitives(), InLights->size() );
 			}
 		}
 	}
@@ -76,22 +76,22 @@ public:
 		// If vertex factory not support instancig - draw without it
 		if ( !InVertexFactory->SupportsInstancing() )
 		{
-			appErrorf( TEXT( "Not implemented" ) );
+			Sys_Errorf( TEXT( "Not implemented" ) );
 		}
 		// Else we draw geometry with help instancing
 		else
 		{
 			InLightingVertexShader->SetMesh( InDeviceContextRHI, *InLights, InVertexFactory, &InSceneView, InLights->size() );
-			GRHI->CommitConstants( InDeviceContextRHI );
+			g_RHI->CommitConstants( InDeviceContextRHI );
 
 			IndexBufferRHIRef_t		indexBufferRHI = GLightConeMesh.GetIndexBufferRHI();
 			if ( indexBufferRHI )
 			{
-				GRHI->DrawIndexedPrimitive( InDeviceContextRHI, indexBufferRHI, PT_TriangleList, 0, 0, GLightConeMesh.GetNumPrimitives(), InLights->size() );
+				g_RHI->DrawIndexedPrimitive( InDeviceContextRHI, indexBufferRHI, PT_TriangleList, 0, 0, GLightConeMesh.GetNumPrimitives(), InLights->size() );
 			}
 			else
 			{
-				GRHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, GLightConeMesh.GetNumPrimitives(), InLights->size() );
+				g_RHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, GLightConeMesh.GetNumPrimitives(), InLights->size() );
 			}
 		}
 	}
@@ -111,22 +111,22 @@ public:
 		// If vertex factory not support instancig - draw without it
 		if ( !InVertexFactory->SupportsInstancing() )
 		{
-			appErrorf( TEXT( "Not implemented" ) );
+			Sys_Errorf( TEXT( "Not implemented" ) );
 		}
 		// Else we draw geometry with help instancing
 		else
 		{
 			InLightingVertexShader->SetMesh( InDeviceContextRHI, *InLights, InVertexFactory, &InSceneView, InLights->size() );
-			GRHI->CommitConstants( InDeviceContextRHI );
+			g_RHI->CommitConstants( InDeviceContextRHI );
 
 			IndexBufferRHIRef_t		indexBufferRHI = GLightQuadMesh.GetIndexBufferRHI();
 			if ( indexBufferRHI )
 			{
-				GRHI->DrawIndexedPrimitive( InDeviceContextRHI, indexBufferRHI, PT_TriangleList, 0, 0, GLightQuadMesh.GetNumPrimitives(), InLights->size() );
+				g_RHI->DrawIndexedPrimitive( InDeviceContextRHI, indexBufferRHI, PT_TriangleList, 0, 0, GLightQuadMesh.GetNumPrimitives(), InLights->size() );
 			}
 			else
 			{
-				GRHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, GLightQuadMesh.GetNumPrimitives(), InLights->size() );
+				g_RHI->DrawPrimitive( InDeviceContextRHI, PT_TriangleList, 0, GLightQuadMesh.GetNumPrimitives(), InLights->size() );
 			}
 		}
 	}
@@ -147,7 +147,7 @@ public:
 	 */
 	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, float InDepthBias = 0.f )
 	{
-		InitInternal( InVertexFactory, GEngine->GetDefaultMaterial(), InDepthBias );
+		InitInternal( InVertexFactory, g_Engine->GetDefaultMaterial(), InDepthBias );
 	}
 
 	/**
@@ -162,7 +162,7 @@ public:
 	void SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, Texture2DRHIParamRef_t InAlbedoRoughnessGBufferRHI, Texture2DRHIParamRef_t InNormalMetalGBufferRHI, Texture2DRHIParamRef_t InEmissionGBufferRHI, Texture2DRHIParamRef_t InDepthBufferRHI )
 	{
 		CBaseLightingPixelShader*		baseLightingPixelShader = ( CBaseLightingPixelShader* )pixelShader;
-		check( baseLightingPixelShader );
+		Assert( baseLightingPixelShader );
 
 		// Set constant parameters
 		vertexShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, nullptr );
@@ -185,7 +185,7 @@ public:
 		baseLightingPixelShader->SetDepthBufferSamplerState( InDeviceContextRHI, TStaticSamplerStateRHI<>::GetRHI() );
 
 		// Gamma
-		baseLightingPixelShader->SetGamma( InDeviceContextRHI, GEngine->GetGamma() );
+		baseLightingPixelShader->SetGamma( InDeviceContextRHI, g_Engine->GetGamma() );
 	}
 
 	/**
@@ -197,10 +197,10 @@ public:
 	virtual void SetRenderState( class CBaseDeviceContextRHI* InDeviceContextRHI ) override
 	{
 		CMeshDrawingPolicy::SetRenderState( InDeviceContextRHI );
-		GRHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
-		GRHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<true, CF_NotEqual, SO_Keep, SO_Increment, SO_Keep, true, CF_NotEqual, SO_Keep, SO_Decrement, SO_Keep, 0xFF, 0>::GetRHI() );
-		GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<BO_Add, BF_One, BF_One>::GetRHI() );
-		GRHI->SetColorWriteEnable( InDeviceContextRHI, true );
+		g_RHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
+		g_RHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<true, CF_NotEqual, SO_Keep, SO_Increment, SO_Keep, true, CF_NotEqual, SO_Keep, SO_Decrement, SO_Keep, 0xFF, 0>::GetRHI() );
+		g_RHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<BO_Add, BF_One, BF_One>::GetRHI() );
+		g_RHI->SetColorWriteEnable( InDeviceContextRHI, true );
 	}
 
 	/**
@@ -232,7 +232,7 @@ public:
 	 */
 	FORCEINLINE void Init( class CVertexFactory* InVertexFactory, float InDepthBias = 0.f )
 	{
-		InitInternal( InVertexFactory, GEngine->GetDefaultMaterial(), InDepthBias );
+		InitInternal( InVertexFactory, g_Engine->GetDefaultMaterial(), InDepthBias );
 	}
 
 	/**
@@ -260,11 +260,11 @@ public:
 	virtual void SetRenderState( class CBaseDeviceContextRHI* InDeviceContextRHI ) override
 	{
 		CMeshDrawingPolicy::SetRenderState( InDeviceContextRHI );
-		GRHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false>::GetRHI() );
-		GRHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<true, CF_Always, SO_Keep, SO_Increment, SO_Keep, true, CF_Always, SO_Keep, SO_Decrement, SO_Keep>::GetRHI() );
-		GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<>::GetRHI() );
-		GRHI->SetColorWriteEnable( InDeviceContextRHI, false );
-		InDeviceContextRHI->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface(), false, true );
+		g_RHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false>::GetRHI() );
+		g_RHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<true, CF_Always, SO_Keep, SO_Increment, SO_Keep, true, CF_Always, SO_Keep, SO_Decrement, SO_Keep>::GetRHI() );
+		g_RHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<>::GetRHI() );
+		g_RHI->SetColorWriteEnable( InDeviceContextRHI, false );
+		InDeviceContextRHI->ClearDepthStencil( g_SceneRenderTargets.GetSceneDepthZSurface(), false, true );
 	}
 
 	/**
@@ -311,8 +311,8 @@ public:
 
 		// Override shaders for lighting rendering	
 		uint64					vertexFactoryHash = vertexFactory->GetType()->GetHash();
-		vertexShader			= lightingVertexShader	= GShaderManager->FindInstance<TLightingVertexShader<LT_Point>>( vertexFactoryHash );
-		pixelShader				= lightingPixelShader	= GShaderManager->FindInstance<TLightingPixelShader<LT_Point>>( vertexFactoryHash );
+		vertexShader			= lightingVertexShader	= g_ShaderManager->FindInstance<TLightingVertexShader<LT_Point>>( vertexFactoryHash );
+		pixelShader				= lightingPixelShader	= g_ShaderManager->FindInstance<TLightingPixelShader<LT_Point>>( vertexFactoryHash );
 		pointLightComponents	= InLights;
 	}
 
@@ -353,8 +353,8 @@ public:
 
 		// Override shaders for lighting rendering
 		uint64					vertexFactoryHash		= vertexFactory->GetType()->GetHash();
-		vertexShader			= lightingVertexShader	= GShaderManager->FindInstance<TLightingVertexShader<LT_Spot>>( vertexFactoryHash );
-		pixelShader				= lightingPixelShader	= GShaderManager->FindInstance<TLightingPixelShader<LT_Spot>>( vertexFactoryHash );
+		vertexShader			= lightingVertexShader	= g_ShaderManager->FindInstance<TLightingVertexShader<LT_Spot>>( vertexFactoryHash );
+		pixelShader				= lightingPixelShader	= g_ShaderManager->FindInstance<TLightingPixelShader<LT_Spot>>( vertexFactoryHash );
 		spotLightComponents		= InLights;
 	}
 
@@ -395,8 +395,8 @@ public:
 
 		// Override shaders for lighting rendering
 		uint64						vertexFactoryHash		= vertexFactory->GetType()->GetHash();
-		vertexShader				= lightingVertexShader	= GShaderManager->FindInstance<TLightingVertexShader<LT_Directional>>( vertexFactoryHash );
-		pixelShader					= lightingPixelShader	= GShaderManager->FindInstance<TLightingPixelShader<LT_Directional>>( vertexFactoryHash );
+		vertexShader				= lightingVertexShader	= g_ShaderManager->FindInstance<TLightingVertexShader<LT_Directional>>( vertexFactoryHash );
+		pixelShader					= lightingPixelShader	= g_ShaderManager->FindInstance<TLightingPixelShader<LT_Directional>>( vertexFactoryHash );
 		directionalLightComponents	= InLights;
 	}
 
@@ -409,10 +409,10 @@ public:
 	virtual void SetRenderState( class CBaseDeviceContextRHI* InDeviceContextRHI ) override
 	{
 		CMeshDrawingPolicy::SetRenderState( InDeviceContextRHI );
-		GRHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
-		GRHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<>::GetRHI() );
-		GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<BO_Add, BF_One, BF_One>::GetRHI() );
-		GRHI->SetColorWriteEnable( InDeviceContextRHI, true );
+		g_RHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
+		g_RHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<>::GetRHI() );
+		g_RHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<BO_Add, BF_One, BF_One>::GetRHI() );
+		g_RHI->SetColorWriteEnable( InDeviceContextRHI, true );
 	}
 
 	/**
@@ -475,8 +475,8 @@ public:
 
 		// Override shaders for lighting rendering	
 		uint64					vertexFactoryHash = vertexFactory->GetType()->GetHash();
-		vertexShader			= lightingVertexShader = GShaderManager->FindInstance<TDepthOnlyLightingVertexShader<LT_Point>>( vertexFactoryHash );
-		pixelShader				= GShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );
+		vertexShader			= lightingVertexShader = g_ShaderManager->FindInstance<TDepthOnlyLightingVertexShader<LT_Point>>( vertexFactoryHash );
+		pixelShader				= g_ShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );
 		pointLightComponents	= InLights;
 	}
 
@@ -516,8 +516,8 @@ public:
 
 		// Override shaders for lighting rendering
 		uint64			vertexFactoryHash = vertexFactory->GetType()->GetHash();
-		vertexShader	= lightingVertexShader = GShaderManager->FindInstance<TDepthOnlyLightingVertexShader<LT_Spot>>( vertexFactoryHash );
-		pixelShader		= GShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );
+		vertexShader	= lightingVertexShader = g_ShaderManager->FindInstance<TDepthOnlyLightingVertexShader<LT_Spot>>( vertexFactoryHash );
+		pixelShader		= g_ShaderManager->FindInstance<CDepthOnlyPixelShader>( vertexFactoryHash );
 		spotLightComponents = InLights;
 	}
 
@@ -537,6 +537,12 @@ private:
 	const std::list<TRefCountPtr<CSpotLightComponent>>*	spotLightComponents;		/**< List of spot light components */
 };
 
+
+/*
+==================
+CSceneRenderer::RenderLights
+==================
+*/
 void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	if ( !scene )
@@ -547,11 +553,11 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	SCOPED_DRAW_EVENT( EventLightPass, DEC_LIGHT, TEXT( "LightPass" ) );
 
 	// Copy scene depth buffer to light pass depth for using it's data in RT and in shaders (reconstruction world position)
-	GSceneRenderTargets.ResolveLightPassDepth( InDeviceContext );
+	g_SceneRenderTargets.ResolveLightPassDepth( InDeviceContext );
 
 	// Begin rendering light pass
-	GSceneRenderTargets.BeginRenderingSceneColorHDR( InDeviceContext );
-	InDeviceContext->ClearSurface( GSceneRenderTargets.GetSceneColorHDRSurface(), sceneView->GetBackgroundColor() );
+	g_SceneRenderTargets.BeginRenderingSceneColorHDR( InDeviceContext );
+	InDeviceContext->ClearSurface( g_SceneRenderTargets.GetSceneColorHDRSurface(), sceneView->GetBackgroundColor() );
 
 	std::list<TRefCountPtr<CPointLightComponent>>			pointLightComponents;
 	std::list<TRefCountPtr<CSpotLightComponent>>			spotLightComponents;
@@ -569,7 +575,7 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 			case LT_Spot:			spotLightComponents.push_back( lightComponent );		break;
 			case LT_Directional:	directionalLightComponents.push_back( lightComponent );	break;
 			default:
-				LE_LOG( LT_Warning, LC_Render, TEXT( "Unknown light type in '%s'" ), lightComponent->GetName() );
+				Warnf( TEXT( "Unknown light type in '%s'\n" ), lightComponent->GetName() );
 				break;
 			}
 		}
@@ -590,7 +596,7 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 
 		// Base pass
 		lightingDrawingPolicy.SetRenderState( InDeviceContext );
-		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetAlbedo_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetEmission_AO_GBufferTexture(), GSceneRenderTargets.GetLightPassDepthZTexture() );
+		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, g_SceneRenderTargets.GetAlbedo_Roughness_GBufferTexture(), g_SceneRenderTargets.GetNormal_Metal_GBufferTexture(), g_SceneRenderTargets.GetEmission_AO_GBufferTexture(), g_SceneRenderTargets.GetLightPassDepthZTexture() );
 		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
 	}
 
@@ -609,7 +615,7 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 
 		// Base pass
 		lightingDrawingPolicy.SetRenderState( InDeviceContext );
-		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetAlbedo_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetEmission_AO_GBufferTexture(), GSceneRenderTargets.GetLightPassDepthZTexture() );
+		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, g_SceneRenderTargets.GetAlbedo_Roughness_GBufferTexture(), g_SceneRenderTargets.GetNormal_Metal_GBufferTexture(), g_SceneRenderTargets.GetEmission_AO_GBufferTexture(), g_SceneRenderTargets.GetLightPassDepthZTexture() );
 		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
 	}
 
@@ -621,11 +627,11 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 
 		// Base pass
 		lightingDrawingPolicy.SetRenderState( InDeviceContext );
-		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, GSceneRenderTargets.GetAlbedo_Roughness_GBufferTexture(), GSceneRenderTargets.GetNormal_Metal_GBufferTexture(), GSceneRenderTargets.GetEmission_AO_GBufferTexture(), GSceneRenderTargets.GetLightPassDepthZTexture() );
+		lightingDrawingPolicy.SetShaderParameters( InDeviceContext, g_SceneRenderTargets.GetAlbedo_Roughness_GBufferTexture(), g_SceneRenderTargets.GetNormal_Metal_GBufferTexture(), g_SceneRenderTargets.GetEmission_AO_GBufferTexture(), g_SceneRenderTargets.GetLightPassDepthZTexture() );
 		lightingDrawingPolicy.Draw( InDeviceContext, *sceneView );
 	}
 
 	// Finish rendering light pass
-	GRHI->SetStencilState( InDeviceContext, TStaticStencilStateRHI<>::GetRHI() );
-	GSceneRenderTargets.FinishRenderingSceneColorHDR( InDeviceContext );
+	g_RHI->SetStencilState( InDeviceContext, TStaticStencilStateRHI<>::GetRHI() );
+	g_SceneRenderTargets.FinishRenderingSceneColorHDR( InDeviceContext );
 }

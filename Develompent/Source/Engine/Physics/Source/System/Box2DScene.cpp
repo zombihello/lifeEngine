@@ -6,26 +6,51 @@
 #include "System/PhysicsMaterial.h"
 #include "Components/PrimitiveComponent.h"
 
+/*
+==================
+CBox2DScene::CBox2DScene
+==================
+*/
 CBox2DScene::CBox2DScene()
 	: bx2World( nullptr )
 {}
 
+/*
+==================
+CBox2DScene::~CBox2DScene
+==================
+*/
 CBox2DScene::~CBox2DScene()
 {
 	Shutdown();
 }
 
+/*
+==================
+CBox2DScene::Init
+==================
+*/
 void CBox2DScene::Init()
 {
-	check( !bx2World );
+	Assert( !bx2World );
 	bx2World = new b2World( b2Vec2( 0.f, -9.81f ) );
 }
 
+/*
+==================
+CBox2DScene::Tick
+==================
+*/
 void CBox2DScene::Tick( float InDeltaTime )
 {
 	bx2World->Step( InDeltaTime, 8, 3 );
 }
 
+/*
+==================
+CBox2DScene::Shutdown
+==================
+*/
 void CBox2DScene::Shutdown()
 {
 	if ( bx2World )
@@ -35,6 +60,11 @@ void CBox2DScene::Shutdown()
 	}
 }
 
+/*
+==================
+CBox2DScene::AddBody
+==================
+*/
 void CBox2DScene::AddBody( class CPhysicsBodyInstance* InBodyInstance )
 {
 	bodies.push_back( InBodyInstance );
@@ -43,11 +73,16 @@ void CBox2DScene::AddBody( class CPhysicsBodyInstance* InBodyInstance )
 	for ( b2Fixture* bx2Fixture = actorHandle.bx2Body->GetFixtureList(); bx2Fixture; bx2Fixture = bx2Fixture->GetNext() )
 	{
 		SPhysicsShapeHandleBox2D*	shapeHandle = ( SPhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
-		check( shapeHandle );
+		Assert( shapeHandle );
 		fixturesMap[ shapeHandle->collisionProfile->objectType ][ InBodyInstance ].push_back( bx2Fixture );
 	}
 }
 
+/*
+==================
+CBox2DScene::RemoveBody
+==================
+*/
 void CBox2DScene::RemoveBody( CPhysicsBodyInstance* InBodyInstance )
 {
 	for ( uint32 index = 0, count = bodies.size(); index < count; ++index )
@@ -67,6 +102,11 @@ void CBox2DScene::RemoveBody( CPhysicsBodyInstance* InBodyInstance )
 	}
 }
 
+/*
+==================
+CBox2DScene::LineTraceSingleByChannel
+==================
+*/
 bool CBox2DScene::LineTraceSingleByChannel( SHitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const SCollisionQueryParams& InCollisionQueryParams /* = SCollisionQueryParams::defaultQueryParam */ )
 {
 	// Ray cast input
@@ -95,7 +135,7 @@ bool CBox2DScene::LineTraceSingleByChannel( SHitResult& OutHitResult, const Vect
 				if ( InCollisionQueryParams.bReturnPhysicalMaterial )
 				{
 					SPhysicsShapeHandleBox2D*		shapeHandle = ( SPhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
-					check( shapeHandle );
+					Assert( shapeHandle );
 					OutHitResult.physMaterial	= shapeHandle->physMaterial.ToSharedPtr();
 				}
 

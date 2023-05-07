@@ -14,6 +14,11 @@
 #include "System/Package.h"
 #include "System/World.h"
 
+/*
+==================
+CEditorWindow::CEditorWindow
+==================
+*/
 CEditorWindow::CEditorWindow()
 	: CImGUILayer( TEXT( "WorldEd" ) )
 	, dockspaceFlags( ImGuiDockNodeFlags_None )
@@ -37,6 +42,11 @@ CEditorWindow::CEditorWindow()
 	editorMapMarkedDirtyDelegate		= SEditorDelegates::onEditorMapMarkedDirty.Add( std::bind( &CEditorWindow::UpdateWindowTitle, this ) );
 }
 
+/*
+==================
+CEditorWindow::~CEditorWindow
+==================
+*/
 CEditorWindow::~CEditorWindow()
 {
 	SEditorDelegates::onEditorCreatedNewMap.Remove( editorCreatedNewMapDelegate );
@@ -45,6 +55,11 @@ CEditorWindow::~CEditorWindow()
 	SEditorDelegates::onEditorMapMarkedDirty.Remove( editorMapMarkedDirtyDelegate );
 }
 
+/*
+==================
+CEditorWindow::Init
+==================
+*/
 void CEditorWindow::Init()
 {
 	CImGUILayer::Init();
@@ -52,11 +67,21 @@ void CEditorWindow::Init()
 	SetBorderSize( 0.f );
 }
 
+/*
+==================
+CEditorWindow::UpdateWindowTitle
+==================
+*/
 void CEditorWindow::UpdateWindowTitle()
 {
-	GWindow->SetTitle( CString::Format( TEXT( "%s%s - %s" ), GWorld->IsDirty() ? TEXT( "*" ) : TEXT( "" ), GWorld->GetName().c_str(), GEditorEngine->GetEditorName().c_str()).c_str());
+	g_Window->SetTitle( CString::Format( TEXT( "%s%s - %s" ), g_World->IsDirty() ? TEXT( "*" ) : TEXT( "" ), g_World->GetName().c_str(), g_EditorEngine->GetEditorName().c_str()).c_str());
 }
 
+/*
+==================
+CEditorWindow::OnTick
+==================
+*/
 void CEditorWindow::OnTick()
 {
 	const ImGuiViewport*	imguiViewport	= ImGui::GetMainViewport();
@@ -91,15 +116,15 @@ void CEditorWindow::OnTick()
 			ImGuiID		dockIdViewportXZ = ImGui::DockBuilderSplitNode( dockIdViewportXY, ImGuiDir_Right, 0.5f, nullptr, &dockIdViewportXY );
 			ImGuiID		dockIdViewportYZ = ImGui::DockBuilderSplitNode( dockspaceId, ImGuiDir_Right, 0.5f, nullptr, &dockspaceId );
 
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetExplorerLevelWindow()->GetName().c_str() ), dockIdRight );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetActorPropertiesWindow()->GetName().c_str() ), dockIdDown );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetContentBrowserWindow()->GetName().c_str() ), dockIdContentBrowser );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetActorClassesWindow()->GetName().c_str() ), dockIdDown );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLogsWindow()->GetName().c_str() ), dockIdDown );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLevelViewportWindow( LVT_Perspective )->GetName().c_str() ), dockspaceId );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLevelViewportWindow( LVT_OrthoXY )->GetName().c_str() ), dockIdViewportXY );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLevelViewportWindow( LVT_OrthoXZ )->GetName().c_str() ), dockIdViewportXZ );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( GEditorEngine->GetLevelViewportWindow( LVT_OrthoYZ )->GetName().c_str() ), dockIdViewportYZ );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetExplorerLevelWindow()->GetName().c_str() ), dockIdRight );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetActorPropertiesWindow()->GetName().c_str() ), dockIdDown );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetContentBrowserWindow()->GetName().c_str() ), dockIdContentBrowser );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetActorClassesWindow()->GetName().c_str() ), dockIdDown );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLogsWindow()->GetName().c_str() ), dockIdDown );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_Perspective )->GetName().c_str() ), dockspaceId );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_OrthoXY )->GetName().c_str() ), dockIdViewportXY );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_OrthoXZ )->GetName().c_str() ), dockIdViewportXZ );
+			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_OrthoYZ )->GetName().c_str() ), dockIdViewportYZ );
 			ImGui::DockBuilderFinish( dockspaceId );
 		}
 	}
@@ -112,7 +137,7 @@ void CEditorWindow::OnTick()
 			if ( ImGui::MenuItem( "New Level" ) )
 			{
 				// If map is dirty we ask user would he sure want to create a new map
-				if ( GWorld->IsDirty() )
+				if ( g_World->IsDirty() )
 				{
 					CDialogWindow::EButtonType	pressedButton;
 					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to create a new level?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
@@ -120,7 +145,7 @@ void CEditorWindow::OnTick()
 												  {
 													  if ( InButtonType == CDialogWindow::BT_Ok )
 													  {
-														  GEditorEngine->NewMap();
+														  g_EditorEngine->NewMap();
 													  }
 												  } );
 				}
@@ -128,7 +153,7 @@ void CEditorWindow::OnTick()
 				else
 				{
 					
-					GEditorEngine->NewMap();
+					g_EditorEngine->NewMap();
 				}
 			}
 
@@ -136,7 +161,7 @@ void CEditorWindow::OnTick()
 			if ( ImGui::MenuItem( "Open Level" ) )
 			{
 				// If map is dirty we ask user would he sure want to open other map
-				if ( GWorld->IsDirty() )
+				if ( g_World->IsDirty() )
 				{
 					CDialogWindow::EButtonType	pressedButton;
 					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to open other a level?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
@@ -173,7 +198,7 @@ void CEditorWindow::OnTick()
 			if ( ImGui::MenuItem( "Exit" ) )
 			{
 				// If map is dirty we ask user would he sure want to exit from WorldEd
-				if ( GWorld->IsDirty() )
+				if ( g_World->IsDirty() )
 				{
 					CDialogWindow::EButtonType	pressedButton;
 					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to exit from WorldEd?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
@@ -181,14 +206,14 @@ void CEditorWindow::OnTick()
 												  {
 													  if ( InButtonType == CDialogWindow::BT_Ok )
 													  {
-														  appRequestExit( false );
+														  Sys_RequestExit( false );
 													  }
 												  } );
 				}
 				// Otherwise we simple exit from WorldEd
 				else
 				{
-					appRequestExit( false );
+					Sys_RequestExit( false );
 				}
 			}
 
@@ -198,11 +223,11 @@ void CEditorWindow::OnTick()
 		{
 			TSharedPtr<CImGUILayer>				imguiLayers[] =
 			{
-				GEditorEngine->GetActorClassesWindow(),
-				GEditorEngine->GetActorPropertiesWindow(),
-				GEditorEngine->GetContentBrowserWindow(),
-				GEditorEngine->GetExplorerLevelWindow(),
-				GEditorEngine->GetLogsWindow()
+				g_EditorEngine->GetActorClassesWindow(),
+				g_EditorEngine->GetActorPropertiesWindow(),
+				g_EditorEngine->GetContentBrowserWindow(),
+				g_EditorEngine->GetExplorerLevelWindow(),
+				g_EditorEngine->GetLogsWindow()
 			};
 			
 			for ( uint32 index = 0; index < ARRAY_COUNT( imguiLayers ); ++index )
@@ -220,7 +245,7 @@ void CEditorWindow::OnTick()
 			{
 				for ( uint32 index = 0; index < LVT_Max; ++index )
 				{
-					TSharedPtr<CImGUILayer> imguiLayer	= GEditorEngine->GetLevelViewportWindow( ( ELevelViewportType )index );
+					TSharedPtr<CImGUILayer> imguiLayer	= g_EditorEngine->GetLevelViewportWindow( ( ELevelViewportType )index );
 					bool					bVisibility = imguiLayer->IsVisibility();
 					if ( ImGui::MenuItem( TCHAR_TO_ANSI( imguiLayer->GetName().c_str() ), nullptr, &bVisibility ) )
 					{
@@ -243,6 +268,11 @@ void CEditorWindow::OnTick()
 	}
 }
 
+/*
+==================
+CEditorWindow::OpenLevel
+==================
+*/
 void CEditorWindow::OpenLevel()
 {
 	// Init file dialog settings
@@ -250,23 +280,28 @@ void CEditorWindow::OpenLevel()
 	SOpenFileDialogResult	openFileDialogResult;
 
 	fileDialogSetup.SetTitle( TEXT( "Open Level" ) );
-	fileDialogSetup.SetDirectory( appGameDir() + PATH_SEPARATOR + TEXT( "Content" ) );
+	fileDialogSetup.SetDirectory( Sys_GameDir() + PATH_SEPARATOR + TEXT( "Content" ) );
 	fileDialogSetup.SetDefaultExtension( TEXT( "map" ) );
 	fileDialogSetup.AddFormat( TEXT( "*.map" ), TEXT( "lifeEngine Map" ) );
 
 	// Open other map
-	if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) )
+	if ( Sys_ShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) )
 	{
-		check( !openFileDialogResult.files.empty() );
+		Assert( !openFileDialogResult.files.empty() );
 
 		std::wstring		error;
-		if ( !GEditorEngine->LoadMap( openFileDialogResult.files[0], error ) )
+		if ( !g_EditorEngine->LoadMap( openFileDialogResult.files[0], error ) )
 		{
 			OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The level %s wasn't open.\n\nError: %s" ), openFileDialogResult.files[0].c_str(), error.c_str() ), CDialogWindow::BT_Ok );
 		}
 	}
 }
 
+/*
+==================
+CEditorWindow::SaveLevel
+==================
+*/
 void CEditorWindow::SaveLevel( bool InIsSaveAs /* = false */ )
 {
 	CFileDialogSetup		fileDialogSetup;
@@ -274,18 +309,18 @@ void CEditorWindow::SaveLevel( bool InIsSaveAs /* = false */ )
 
 	// Init file dialog settings
 	fileDialogSetup.SetTitle( TEXT( "Save Level" ) );
-	fileDialogSetup.SetDirectory( appGameDir() + PATH_SEPARATOR + TEXT( "Content" ) );
+	fileDialogSetup.SetDirectory( Sys_GameDir() + PATH_SEPARATOR + TEXT( "Content" ) );
 	fileDialogSetup.SetDefaultExtension( TEXT( "map" ) );
 	fileDialogSetup.AddFormat( TEXT( "*.map" ), TEXT( "lifeEngine Map" ) );
 
 	// Save level, if file path isn't we show save file dialog
-	if ( !InIsSaveAs && !GWorld->GetFilePath().empty() || appShowSaveFileDialog( fileDialogSetup, saveFileDialogResult ) )
+	if ( !InIsSaveAs && !g_World->GetFilePath().empty() || Sys_ShowSaveFileDialog( fileDialogSetup, saveFileDialogResult ) )
 	{
 		// Get file path to level file
-		std::wstring		filePath = GWorld->GetFilePath();
+		std::wstring		filePath = g_World->GetFilePath();
 		if ( InIsSaveAs || filePath.empty() )
 		{
-			check( !saveFileDialogResult.files.empty() );
+			Assert( !saveFileDialogResult.files.empty() );
 			filePath = saveFileDialogResult.files[0];
 			if ( CFilename( filePath ).GetExtension().empty() )
 			{
@@ -295,7 +330,7 @@ void CEditorWindow::SaveLevel( bool InIsSaveAs /* = false */ )
 
 		// Save map
 		std::wstring		error;
-		if ( !GEditorEngine->SaveMap( filePath, error ) )
+		if ( !g_EditorEngine->SaveMap( filePath, error ) )
 		{
 			OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The level %s wasn't save.\n\nError: %s" ), filePath.c_str(), error.c_str() ), CDialogWindow::BT_Ok );
 		}

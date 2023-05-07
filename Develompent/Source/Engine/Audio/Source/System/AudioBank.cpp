@@ -38,9 +38,11 @@ struct SAudioBankOGG
 	uint64				sampleOffset;		/**< Sample offset */
 };
 
-/**
- * Read bytes in OGG file from archive
- */
+/*
+==================
+Archive_ReadOgg
+==================
+*/
 size_t Archive_ReadOgg( void* InDst, size_t InSize1, size_t InSize2, void* InUser )
 {
 	SArchiveOGGRawData*		rawDataInfo		= ( SArchiveOGGRawData* )InUser;
@@ -60,9 +62,11 @@ size_t Archive_ReadOgg( void* InDst, size_t InSize1, size_t InSize2, void* InUse
 	return size;
 }
 
-/**
- * Seek bytes in OGG file in archive
- */
+/*
+==================
+Archive_SeekOgg
+==================
+*/
 int Archive_SeekOgg( void* InUser, ogg_int64_t InTo, int InType )
 {
 	SArchiveOGGRawData*		rawDataInfo		= ( SArchiveOGGRawData* )InUser;
@@ -93,9 +97,11 @@ int Archive_SeekOgg( void* InUser, ogg_int64_t InTo, int InType )
 	return result;
 }
 
-/**
- * Close OGG file in archive
- */
+/*
+==================
+Archive_CloseOgg
+==================
+*/
 int Archive_CloseOgg( void* InUser )
 {
 	SArchiveOGGRawData*		rawDataInfo = ( SArchiveOGGRawData* )InUser;
@@ -104,9 +110,11 @@ int Archive_CloseOgg( void* InUser )
 	return 0;
 }
 
-/**
- * Tell OGG file in archive
- */
+/*
+==================
+Archive_TellOgg
+==================
+*/
 long Archive_TellOgg( void* InUser )
 {
 	SArchiveOGGRawData*		rawDataInfo = ( SArchiveOGGRawData* )InUser;
@@ -114,17 +122,27 @@ long Archive_TellOgg( void* InUser )
 	return currentOffset - rawDataInfo->beginOffset;
 }
 
+/*
+==================
+CAudioBank::CAudioBank
+==================
+*/
 CAudioBank::CAudioBank()
 	: CAsset( AT_AudioBank )
 	, offsetToRawData( -1 )
 	, rawDataSize( 0 )
 {}
 
+/*
+==================
+CAudioBank::~CAudioBank
+==================
+*/
 CAudioBank::~CAudioBank()
 {
 	if ( audioBuffer )
 	{
-		GAudioBufferManager.Remove( GetAssetHandle() );
+		g_AudioBufferManager.Remove( GetAssetHandle() );
 	}
 
 	// Close all opened handles
@@ -134,6 +152,11 @@ CAudioBank::~CAudioBank()
 	}
 }
 
+/*
+==================
+CAudioBank::Serialize
+==================
+*/
 void CAudioBank::Serialize( class CArchive& InArchive )
 {
 	CAsset::Serialize( InArchive );
@@ -158,7 +181,7 @@ void CAudioBank::Serialize( class CArchive& InArchive )
 		std::vector<byte>		rawData;
 		rawData.resize( rawDataSize );
 
-		CArchive*				archive = GFileSystem->CreateFileReader( pathToArchive, AR_NoFail );	
+		CArchive*				archive = g_FileSystem->CreateFileReader( pathToArchive, AR_NoFail );	
 		archive->Seek( offsetToRawData );
 		archive->Serialize( rawData.data(), rawDataSize );
 		delete archive;
@@ -167,6 +190,11 @@ void CAudioBank::Serialize( class CArchive& InArchive )
 	}
 }
 
+/*
+==================
+CAudioBank::OpenBank
+==================
+*/
 AudioBankHandle_t CAudioBank::OpenBank( SAudioBankInfo& OutBankInfo )
 {
 	// If bank is empty - we exit from method
@@ -174,7 +202,7 @@ AudioBankHandle_t CAudioBank::OpenBank( SAudioBankInfo& OutBankInfo )
 	{
 		return nullptr;
 	}
-	check( offsetToRawData != -1 );
+	Assert( offsetToRawData != -1 );
 
 	// Init callback for read OGG/Vorbis from raw data
 	ov_callbacks				ovCallbacks;
@@ -185,7 +213,7 @@ AudioBankHandle_t CAudioBank::OpenBank( SAudioBankInfo& OutBankInfo )
 
 	// Init descriptor for read OGG/Vorbis from memory
 	SArchiveOGGRawData*			oggRawDataDesc = new SArchiveOGGRawData();
-	oggRawDataDesc->archive		= GFileSystem->CreateFileReader( pathToArchive );
+	oggRawDataDesc->archive		= g_FileSystem->CreateFileReader( pathToArchive );
 	oggRawDataDesc->beginOffset	= offsetToRawData;
 	oggRawDataDesc->endOffset	= offsetToRawData + rawDataSize;
 
@@ -221,14 +249,14 @@ AudioBankHandle_t CAudioBank::OpenBank( SAudioBankInfo& OutBankInfo )
 		{
 			delete audioBankOgg;
 		}
-		
-		LE_LOG( LT_Warning, LC_Audio, TEXT( "Failed loading bank: %s" ), strError.c_str() );
+	
+		Warnf( TEXT( "Failed loading bank: %s\n" ), strError.c_str() );
 		return nullptr;
 	}
 
 	// Getting info about bank
 	audioBankOgg->vorbisInfo = ov_info( &audioBankOgg->oggVorbisFile, -1 );
-	check( audioBankOgg->vorbisInfo );
+	Assert( audioBankOgg->vorbisInfo );
 
 	OutBankInfo.numChannels = audioBankOgg->vorbisInfo->channels;
 	OutBankInfo.format		= audioBankOgg->vorbisInfo->channels == 1 ? SF_Mono16 : SF_Stereo16;
@@ -240,6 +268,11 @@ AudioBankHandle_t CAudioBank::OpenBank( SAudioBankInfo& OutBankInfo )
 	return audioBankOgg;
 }
 
+/*
+==================
+CAudioBank::CloseBankInternal
+==================
+*/
 void CAudioBank::CloseBankInternal( AudioBankHandle_t InBankHandle, bool InNeedFreeFromList /* = true */ )
 {
 	if ( !InBankHandle )
@@ -266,9 +299,14 @@ void CAudioBank::CloseBankInternal( AudioBankHandle_t InBankHandle, bool InNeedF
 	}
 }
 
+/*
+==================
+CAudioBank::ReadBankPCM
+==================
+*/
 uint64 CAudioBank::ReadBankPCM( AudioBankHandle_t InBankHandle, byte* InSamples, uint64 InMaxSize )
 {
-	check( InBankHandle && InSamples );
+	Assert( InBankHandle && InSamples );
 	SAudioBankOGG*		audioBankOgg = ( SAudioBankOGG* )InBankHandle;
 
 	// Try to read the requested number of samples, stop only on error or end of file
@@ -294,7 +332,7 @@ uint64 CAudioBank::ReadBankPCM( AudioBankHandle_t InBankHandle, byte* InSamples,
 			// If less 0 - this is error
 			if ( bytesToRead < 0 )
 			{
-				appErrorf( TEXT( "Failed read from bank. Vorbisfile error code: 0x%X" ), bytesToRead );
+				Sys_Errorf( TEXT( "Failed read from bank. Vorbisfile error code: 0x%X" ), bytesToRead );
 			}
 			break;
 		}
@@ -303,21 +341,36 @@ uint64 CAudioBank::ReadBankPCM( AudioBankHandle_t InBankHandle, byte* InSamples,
 	return size;
 }
 
+/*
+==================
+CAudioBank::SeekBankPCM
+==================
+*/
 void CAudioBank::SeekBankPCM( AudioBankHandle_t InBankHandle, uint64 InSampleOffset )
 {
-	check( InBankHandle );
+	Assert( InBankHandle );
 	SAudioBankOGG*		audioBankOgg = ( SAudioBankOGG* )InBankHandle;
 	ov_pcm_seek( &audioBankOgg->oggVorbisFile, InSampleOffset / audioBankOgg->info.numChannels );
 	audioBankOgg->sampleOffset = InSampleOffset;
 }
 
+/*
+==================
+CAudioBank::GetOffsetBankPCM
+==================
+*/
 uint64 CAudioBank::GetOffsetBankPCM( AudioBankHandle_t InBankHandle ) const
 {
-	check( InBankHandle );
+	Assert( InBankHandle );
 	SAudioBankOGG*		audioBankOgg = ( SAudioBankOGG* )InBankHandle;
 	return audioBankOgg->sampleOffset;
 }
 
+/*
+==================
+CAudioBank::SetOGGFile
+==================
+*/
 void CAudioBank::SetOGGFile( const std::wstring& InPath )
 {
 	if ( pathToArchive == InPath )
@@ -326,10 +379,10 @@ void CAudioBank::SetOGGFile( const std::wstring& InPath )
 	}
 
 	// Read raw data of Ogg/Vorbis file
-	CArchive*		archive = GFileSystem->CreateFileReader( InPath.c_str() );
+	CArchive*		archive = g_FileSystem->CreateFileReader( InPath.c_str() );
 	if ( !archive )
 	{
-		LE_LOG( LT_Warning, LC_Audio, TEXT( "Failed open archive '%s'" ), InPath.c_str() );
+		Warnf( TEXT( "Failed open archive '%s'\n" ), InPath.c_str() );
 		return;
 	}
 
@@ -345,7 +398,7 @@ void CAudioBank::SetOGGFile( const std::wstring& InPath )
 	// Remove loaded old audio buffer
 	if ( audioBuffer )
 	{
-		GAudioBufferManager.Remove( GetAssetHandle() );
+		g_AudioBufferManager.Remove( GetAssetHandle() );
 		audioBuffer.SafeRelease();
 	}
 
@@ -355,6 +408,11 @@ void CAudioBank::SetOGGFile( const std::wstring& InPath )
 #endif // WITH_EDITOR
 }
 
+/*
+==================
+CAudioBank::GetAudioBuffer
+==================
+*/
 AudioBufferRef_t CAudioBank::GetAudioBuffer()
 {
 	if ( audioBuffer )
@@ -362,6 +420,6 @@ AudioBufferRef_t CAudioBank::GetAudioBuffer()
 		return audioBuffer;
 	}
 
-	audioBuffer = GAudioBufferManager.Find( GetAssetHandle() );
+	audioBuffer = g_AudioBufferManager.Find( GetAssetHandle() );
 	return audioBuffer;
 }

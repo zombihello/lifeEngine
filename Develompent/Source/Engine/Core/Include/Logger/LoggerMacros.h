@@ -20,33 +20,34 @@
 	 * @brief Macro for print message to log
 	 * @warning In shipping this macro is empty and logging disabled
 	 * 
-	 * @param[in] InType Type message
-	 * @param[in] InCategory Category of message
 	 * @param[in] InMessage Message
 	 * @param[in] ... Other arguments of message
 	 */
-	#define LE_LOG( InType, InCategory, InMessage, ... )				GLog->Logf( InType, InCategory, InMessage, __VA_ARGS__ )
+	#define Logf( InMessage, ... )				g_Log->Printf( LT_Log, InMessage, __VA_ARGS__ )
 	 
 	 /**
-	   * @ingroup Core
-	   * @brief Macro for print message to log with custom color
-	   * @warning In shipping this macro is empty and logging disabled
-	   *
-	   * @param[in] InColor Color message
-	   * @param[in] InType Type message
-	   * @param[in] InCategory Category of message
-	   * @param[in] InMessage Message
-	   * @param[in] ... Other arguments of message
-	   */
-	#define LE_LOG_COLOR( InColor, InType, InCategory, InMessage, ...  ) \
-		{ \
-			GLog->SetTextColor( InColor ); \
-			GLog->Logf( InType, InCategory, InMessage, __VA_ARGS__ ); \
-			GLog->ResetTextColor(); \
-		}
+	  * @ingroup Core
+	  * @brief Macro for print warning to log
+	  * @warning In shipping this macro is empty and logging disabled
+	  *
+	  * @param[in] InMessage Message
+	  * @param[in] ... Other arguments of message
+	  */
+	#define Warnf( InMessage, ... )				g_Log->Printf( LT_Warning, InMessage, __VA_ARGS__ )
+
+	/**
+	 * @ingroup Core
+	 * @brief Macro for print error to log
+	 * @warning In shipping this macro is empty and logging disabled
+	 *
+	 * @param[in] InMessage Message
+	 * @param[in] ... Other arguments of message
+	 */
+	#define Errorf( InMessage, ... )			g_Log->Printf( LT_Error, InMessage, __VA_ARGS__ )
 #else
-	#define LE_LOG( InType, InCategory, InMessage, ... )
-	#define LE_LOG_COLOR( InColor, InType, InCategory, InMessage, ...  )
+	#define Logf( InMessage, ... )
+	#define Warnf( InMessage, ... )
+	#define Errorf( InMessage, ... )
 #endif // !NO_LOGGING || PLATFORM_DOXYGEN
 
 #endif // !LOGGERMACROS_H

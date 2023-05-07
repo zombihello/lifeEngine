@@ -3,17 +3,21 @@
 
 IMPLEMENT_CLASS( CObject )
 
-/**
- * Serialize object
- */
+/*
+==================
+CObject::Serialize
+==================
+*/
 void CObject::Serialize( CArchive& InArchive )
 {
 	InArchive << name;
 }
 
-/**
- * Whether the object is of the specified class
- */
+/*
+==================
+CObject::InternalIsA
+==================
+*/
 bool CObject::InternalIsA( const CClass* InClass ) const
 {
 	if ( !InClass )

@@ -2,6 +2,11 @@
 
 IMPLEMENT_CLASS( ADirectionalLight )
 
+/*
+==================
+ADirectionalLight::ADirectionalLight
+==================
+*/
 ADirectionalLight::ADirectionalLight()
 {
 	directionalLightComponent	= CreateComponent<CDirectionalLightComponent>( TEXT( "DirectionalLightComponent0" ) );
@@ -11,13 +16,18 @@ ADirectionalLight::ADirectionalLight()
 	gizmoComponent->SetGizmo( true );
 	gizmoComponent->SetType( ST_Rotating );
 	gizmoComponent->SetSpriteSize( Vector2D( 64.f, 64.f ) );
-	gizmoComponent->SetMaterial( GPackageManager->FindAsset( TEXT( "Material'EditorMaterials:ADirectionalLight_Gizmo_Mat" ), AT_Material ) );
+	gizmoComponent->SetMaterial( g_PackageManager->FindAsset( TEXT( "Material'EditorMaterials:ADirectionalLight_Gizmo_Mat" ), AT_Material ) );
 
 	arrowComponent				= CreateComponent<CArrowComponent>( TEXT( "ArrowComponent0" ), true );
 #endif // WITH_EDITOR
 }
 
 #if WITH_EDITOR
+/*
+==================
+ADirectionalLight::GetActorIcon
+==================
+*/
 std::wstring ADirectionalLight::GetActorIcon() const
 {
 	return TEXT( "Engine/Editor/Icons/Actor_DirectionalLight.png" );

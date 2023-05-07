@@ -2,7 +2,7 @@
 #include "Windows/DialogWindow.h"
 
 /** Table of buttons name by flag */
-static const tchar* GButtonsText[] =
+static const tchar* s_ButtonsText[] =
 {
 	TEXT( "Ok" ),			// BT_Ok
 	TEXT( "Cancel" ),		// BT_Cancel
@@ -12,6 +12,12 @@ static const tchar* GButtonsText[] =
 	TEXT( "No To All" )		// BT_NoToAll
 };
 
+
+/*
+==================
+CDialogWindow::CDialogWindow
+==================
+*/
 CDialogWindow::CDialogWindow( const std::wstring& InName, const std::wstring& InMessage, uint32 InButtons /* = BT_Ok */ )
 	: CImGUIPopup( InName )
 	, buttons( InButtons )
@@ -20,6 +26,11 @@ CDialogWindow::CDialogWindow( const std::wstring& InName, const std::wstring& In
 	SetSize( Vector2D( 500, 300 ) );
 }
 
+/*
+==================
+CDialogWindow::OnTick
+==================
+*/
 void CDialogWindow::OnTick()
 {
 	// Draw text message
@@ -27,7 +38,7 @@ void CDialogWindow::OnTick()
 	ImGui::Separator();
 
 	// Draw buttons
-	for ( uint32 index = 0, count = ARRAY_COUNT( GButtonsText ); index < count; ++index )
+	for ( uint32 index = 0, count = ARRAY_COUNT( s_ButtonsText ); index < count; ++index )
 	{
 		if ( !( buttons & 1 << index ) )
 		{
@@ -39,7 +50,7 @@ void CDialogWindow::OnTick()
 			ImGui::SameLine();
 		}
 
-		if ( ImGui::Button( TCHAR_TO_ANSI( GButtonsText[index] ), ImVec2{ 120.f, 0.f } ) )
+		if ( ImGui::Button( TCHAR_TO_ANSI( s_ButtonsText[index] ), ImVec2{ 120.f, 0.f } ) )
 		{
 			onButtonPressed.Broadcast( ( EButtonType )( 1 << index ) );
 			Close();

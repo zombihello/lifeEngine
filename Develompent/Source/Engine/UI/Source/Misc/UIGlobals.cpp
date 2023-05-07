@@ -8,7 +8,7 @@
 // -------------
 
 #if WITH_IMGUI
-CImGUIEngine*			GImGUIEngine = new CImGUIEngine();
+CImGUIEngine*			g_ImGUIEngine = new CImGUIEngine();
 #endif // WITH_IMGUI
 
-CUIEngine*				GUIEngine = new CUIEngine();
+CUIEngine*				g_UIEngine = new CUIEngine();

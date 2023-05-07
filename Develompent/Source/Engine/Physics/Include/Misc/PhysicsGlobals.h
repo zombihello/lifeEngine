@@ -13,6 +13,6 @@
  * @ingroup Physics
  * Physics engine
  */
-extern class CPhysicsEngine				GPhysicsEngine;
+extern class CPhysicsEngine				g_PhysicsEngine;
 
 #endif // !PHYSICSGLOBALS_H

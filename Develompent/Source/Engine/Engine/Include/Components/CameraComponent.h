@@ -225,7 +225,7 @@ FORCEINLINE CArchive operator<<( CArchive& InArchive, ECameraProjectionMode& InV
 
 FORCEINLINE CArchive operator<<( CArchive& InArchive, const ECameraProjectionMode& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }

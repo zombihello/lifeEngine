@@ -224,11 +224,11 @@ FORCEINLINE void SetVertexShaderValue( class CBaseDeviceContextRHI* InDeviceCont
 {
     const uint32       alignedTypeSize = Align( sizeof( TParameterType ), ShaderArrayElementAlignBytes );
     const int32        numBytesToSet = Min<int32>( alignedTypeSize, InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
-    check( numBytesToSet >= InParameter.GetNumBytes() );
+    Assert( numBytesToSet >= InParameter.GetNumBytes() );
 
     if ( numBytesToSet > 0 )
     {
-        GRHI->SetVertexShaderParameter(
+        g_RHI->SetVertexShaderParameter(
                     InDeviceContextRHI,
                     InParameter.GetBufferIndex(),
                     InParameter.GetBaseIndex() + InElementIndex * alignedTypeSize,
@@ -265,11 +265,11 @@ FORCEINLINE void SetPixelShaderValue( class CBaseDeviceContextRHI* InDeviceConte
 {
     const uint32       alignedTypeSize = Align( sizeof( TParameterType ), ShaderArrayElementAlignBytes );
     const int32        numBytesToSet = Min<int32>( sizeof( TParameterType ), InParameter.GetNumBytes() - InElementIndex * alignedTypeSize );
-    check( numBytesToSet >= InParameter.GetNumBytes() );
+    Assert( numBytesToSet >= InParameter.GetNumBytes() );
 
     if ( numBytesToSet > 0 )
     {
-        GRHI->SetPixelShaderParameter(
+        g_RHI->SetPixelShaderParameter(
                     InDeviceContextRHI,
                     InParameter.GetBufferIndex(),
                     InParameter.GetBaseIndex() + InElementIndex * alignedTypeSize,
@@ -290,8 +290,8 @@ FORCEINLINE void SetTextureParameter( class CBaseDeviceContextRHI* InDeviceConte
 {
 	if ( InParameter.IsBound() )
 	{
-		check( InElementIndex < InParameter.GetNumResources() );
-        GRHI->SetTextureParameter( InDeviceContextRHI, nullptr, InTextureRHI, InParameter.GetBaseIndex() + InElementIndex );
+		Assert( InElementIndex < InParameter.GetNumResources() );
+        g_RHI->SetTextureParameter( InDeviceContextRHI, nullptr, InTextureRHI, InParameter.GetBaseIndex() + InElementIndex );
 	}
 }
 
@@ -307,8 +307,8 @@ FORCEINLINE void SetSamplerStateParameter( class CBaseDeviceContextRHI* InDevice
 {
 	if ( InParameter.IsBound() )
 	{
-        check( InElementIndex < InParameter.GetNumResources() );
-        GRHI->SetSamplerState( InDeviceContextRHI, nullptr, InSamplerStateRHI, InParameter.GetSamplerIndex() + InElementIndex );
+        Assert( InElementIndex < InParameter.GetNumResources() );
+        g_RHI->SetSamplerState( InDeviceContextRHI, nullptr, InSamplerStateRHI, InParameter.GetSamplerIndex() + InElementIndex );
 	}
 }
 
@@ -346,7 +346,7 @@ public:
 
 #if WITH_EDITOR
     /**
-     * @brief Pointer to static method for check is need compile shader for vertex factory. If vertex factory is nullptr - checking general
+     * @brief Pointer to static method for Assert is need compile shader for vertex factory. If vertex factory is nullptr - checking general
      */
     typedef bool                  ( *ShouldCacheFn_t )( EShaderPlatform InShaderPlatform, CVertexFactoryMetaType* InVFMetaType );
 
@@ -366,7 +366,7 @@ public:
      * @param[in] IsIsGlobal Shader is global?
      * @param[in] InConstructSerializedInstance Pointer to static method for create object of shader for serialize
      * @param[in] InConstructCompiledInstance Pointer to static method for create object of shader for compiling
-     * @param[in] InShouldCacheFunc Pointer to static method for check is need compile shader. WARNING! Only with enabled define WITH_EDITOR
+     * @param[in] InShouldCacheFunc Pointer to static method for Assert is need compile shader. WARNING! Only with enabled define WITH_EDITOR
      * @param[in] InModifyCompilationEnvironmentFunc Pointer to static method for modify compilation environment of shader. WARNING! Only with enabled define WITH_EDITOR
      */
     CShaderMetaType( const std::wstring& InName, const std::wstring& InFileName, const std::wstring& InFunctionName, EShaderFrequency InFrequency, bool InIsGlobal, ConstructSerializedInstanceFn_t InConstructSerializedInstance, ConstructCompiledInstanceFn_t InConstructCompiledInstance
@@ -385,7 +385,7 @@ public:
      * @brief Get name
      * @return Return name of shader
      */
-    FORCEINLINE const std::wstring&         GetName() const
+    FORCEINLINE const std::wstring& GetName() const
     {
         return name;
     }
@@ -394,7 +394,7 @@ public:
      * @brief Get file name
      * @return Return file name
      */
-    FORCEINLINE const std::wstring&         GetFileName() const
+    FORCEINLINE const std::wstring& GetFileName() const
     {
         return fileName;
     }
@@ -403,7 +403,7 @@ public:
      * @brief Get main function name in shader
      * @return Return main function name in shader
      */
-    FORCEINLINE const std::wstring&         GetFunctionName() const
+    FORCEINLINE const std::wstring& GetFunctionName() const
     {
         return functionName;
     }
@@ -412,7 +412,7 @@ public:
      * @brief Get frequency of shader
      * @return Return frequency of shader
      */
-    FORCEINLINE EShaderFrequency            GetFrequency() const
+    FORCEINLINE EShaderFrequency GetFrequency() const
     {
         return frequency;
     }
@@ -421,9 +421,9 @@ public:
      * @brief Create instance shader for serialize
      * @return Return new instance of shader
      */
-    FORCEINLINE CShader*                    CreateSerializedInstace() const
+    FORCEINLINE CShader* CreateSerializedInstace() const
     {
-        check( ConstructSerializedInstance );
+        Assert( ConstructSerializedInstance );
         return ConstructSerializedInstance();
     }
 
@@ -431,9 +431,9 @@ public:
 	 * @brief Create instance shader for compile
 	 * @return Return new instance of shader
      */
-    FORCEINLINE CShader*                    CreateCompiledInstance() const
+    FORCEINLINE CShader* CreateCompiledInstance() const
     {
-        check( ConstructCompiledInstance );
+        Assert( ConstructCompiledInstance );
         return ConstructCompiledInstance();
     }
 
@@ -442,12 +442,12 @@ public:
      * @brief Is need compile shader for platform
      * 
      * @param InShaderPlatform Shader platform
-     * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+     * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
      * @return Return true if need compile shader, else returning false
      */
     FORCEINLINE bool ShouldCache( EShaderPlatform InShaderPlatform, CVertexFactoryMetaType* InVFMetaType = nullptr ) const
     {
-        check( ShouldCacheFunc );
+        Assert( ShouldCacheFunc );
         return ShouldCacheFunc( InShaderPlatform, InVFMetaType );
     }
 
@@ -459,7 +459,7 @@ public:
      */
     FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment ) const
     {
-        check( ModifyCompilationEnvironmentFunc );
+        Assert( ModifyCompilationEnvironmentFunc );
         ModifyCompilationEnvironmentFunc( InShaderPlatform, InEnvironment );
     }
 #endif // WITH_EDITOR
@@ -479,11 +479,11 @@ private:
     std::wstring                        fileName;                               /**< Source file name */
     std::wstring                        functionName;                           /**< Main function in shader */
     EShaderFrequency                    frequency;                              /**< Frequency of shader */
-    ConstructSerializedInstanceFn_t        ConstructSerializedInstance;            /**< Pointer to static method for create object of shader for serialize */
-    ConstructCompiledInstanceFn_t          ConstructCompiledInstance;              /**< Pointer to static method for create object of shader for compiling */
+    ConstructSerializedInstanceFn_t     ConstructSerializedInstance;            /**< Pointer to static method for create object of shader for serialize */
+    ConstructCompiledInstanceFn_t       ConstructCompiledInstance;              /**< Pointer to static method for create object of shader for compiling */
 
 #if WITH_EDITOR
-    ShouldCacheFn_t                     ShouldCacheFunc;                        /**< Pointer to static method for check if need compile shader for platform */
+    ShouldCacheFn_t                     ShouldCacheFunc;                        /**< Pointer to static method for Assert if need compile shader for platform */
     ModifyCompilationEnvironmentFn_t    ModifyCompilationEnvironmentFunc;       /**< Pointer to static method for modify compilation environment */
 #endif // WITH_EDITOR
 };
@@ -524,7 +524,7 @@ public:
      * @return Return reference to shader
      */
     template< typename TShaderClass >
-    FORCEINLINE TShaderClass*     FindInstance( uint64 InVertexFactoryHash )
+    FORCEINLINE TShaderClass* FindInstance( uint64 InVertexFactoryHash )
     {
         return ( TShaderClass* )FindInstance( TShaderClass::staticType.GetName(), InVertexFactoryHash );
     }
@@ -534,7 +534,7 @@ public:
      * @return Return reference to shader
      */
     template< typename TShaderClass, typename TVertexFactoryClass >
-    FORCEINLINE TShaderClass*    FindInstance()
+    FORCEINLINE TShaderClass* FindInstance()
     {
         return ( TShaderClass* )FindInstance( TShaderClass::staticType.GetName(), TVertexFactoryClass::staticType.GetHash() );
     }
@@ -548,7 +548,7 @@ public:
     static FORCEINLINE CShaderMetaType* FindShaderType( const std::wstring& InShaderName )
     {
         SContainerShaderTypes* container = SContainerShaderTypes::Get();
-        check( container );
+        Assert( container );
 
         auto        itShaderType = container->shaderMetaTypes.find( InShaderName );
         if ( itShaderType == container->shaderMetaTypes.end() )
@@ -598,7 +598,7 @@ private:
          * @brief Get instance of container
          * @return Return instance of container
          */
-        static FORCEINLINE SContainerShaderTypes*           Get()
+        static FORCEINLINE SContainerShaderTypes* Get()
         {
             static SContainerShaderTypes*       container = nullptr;
             if ( !container )
@@ -615,7 +615,7 @@ private:
 		 * @param[in] InShaderName Name of shader class
 		 * @return Return pointer to new object of shader class
 		 */
-        static CShader*                                   CreateShaderInstance( const tchar* InShaderName );
+        static CShader* CreateShaderInstance( const tchar* InShaderName );
 
         std::unordered_map< std::wstring, CShaderMetaType* >        shaderMetaTypes;
     };
@@ -624,10 +624,10 @@ private:
      * @brief Register shader type
      * @param[in] InShaderMetaType Pointer to static meta type by shader
      */
-    static FORCEINLINE void                                 RegisterShaderType( CShaderMetaType* InShaderMetaType )
+    static FORCEINLINE void RegisterShaderType( CShaderMetaType* InShaderMetaType )
     {
         SContainerShaderTypes*          container = SContainerShaderTypes::Get();
-        check( container && InShaderMetaType );
+        Assert( container && InShaderMetaType );
 
         container->shaderMetaTypes.insert( std::make_pair( InShaderMetaType->GetName(), InShaderMetaType ) );
     }
@@ -638,7 +638,7 @@ private:
      * @param[in] InPathShaderCache Path to shader cache
      * @return Return true if shader successed loaded, else return false
      */
-    bool                                                    LoadShaders( const tchar* InPathShaderCache );
+    bool LoadShaders( const tchar* InPathShaderCache );
 
     MeshShaderMap_t            shaders;            /**< Map of loaded shaders */
 };
@@ -669,7 +669,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, CShaderMetaType*& InValue
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CShaderMetaType*& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
     InArchive << ( InValue ? InValue->GetName() : std::wstring() );
 	return InArchive;
 }

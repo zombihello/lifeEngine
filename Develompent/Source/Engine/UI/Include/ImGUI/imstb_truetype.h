@@ -200,7 +200,7 @@
 //    Set the current point where the first character will appear. The
 //    first character could extend left of the current point; this is font
 //    dependent. You can either choose a current point that is the leftmost
-//    point and hope, or add some padding, or check the bounding box or
+//    point and hope, or add some padding, or Assert the bounding box or
 //    left-side-bearing of the first character to be displayed and set
 //    the current point based on that.
 //
@@ -1014,7 +1014,7 @@ STBTT_DEF int stbtt_FindMatchingFont(const unsigned char *fontdata, const char *
 #define STBTT_MACSTYLE_BOLD         1
 #define STBTT_MACSTYLE_ITALIC       2
 #define STBTT_MACSTYLE_UNDERSCORE   4
-#define STBTT_MACSTYLE_NONE         8   // <= not same as 0, this makes us check the bitfield is 0
+#define STBTT_MACSTYLE_NONE         8   // <= not same as 0, this makes us Assert the bitfield is 0
 
 STBTT_DEF int stbtt_CompareUTF8toUTF16_bigendian(const char *s1, int len1, const char *s2, int len2);
 // returns 1/0 whether the first string interpreted as utf8 is identical to
@@ -1280,7 +1280,7 @@ static stbtt_int32 ttLONG(stbtt_uint8 *p)    { return (p[0]<<24) + (p[1]<<16) + 
 
 static int stbtt__isfont(stbtt_uint8 *font)
 {
-   // check the version number
+   // Assert the version number
    if (stbtt_tag4(font, '1',0,0,0))  return 1; // TrueType 1
    if (stbtt_tag(font, "typ1"))   return 1; // TrueType with type 1 font -- we don't support this!
    if (stbtt_tag(font, "OTTO"))   return 1; // OpenType with CFF
@@ -1309,7 +1309,7 @@ static int stbtt_GetFontOffsetForIndex_internal(unsigned char *font_collection, 
    if (stbtt__isfont(font_collection))
       return index == 0 ? 0 : -1;
 
-   // check if it's a TTC
+   // Assert if it's a TTC
    if (stbtt_tag(font_collection, "ttcf")) {
       // version 1?
       if (ttULONG(font_collection+4) == 0x00010000 || ttULONG(font_collection+4) == 0x00020000) {
@@ -1328,7 +1328,7 @@ static int stbtt_GetNumberOfFonts_internal(unsigned char *font_collection)
    if (stbtt__isfont(font_collection))
       return 1;
 
-   // check if it's a TTC
+   // Assert if it's a TTC
    if (stbtt_tag(font_collection, "ttcf")) {
       // version 1?
       if (ttULONG(font_collection+4) == 0x00010000 || ttULONG(font_collection+4) == 0x00020000) {
@@ -1450,7 +1450,7 @@ static int stbtt_InitFont_internal(stbtt_fontinfo *info, unsigned char *data, in
             break;
         case STBTT_PLATFORM_ID_UNICODE:
             // Mac/iOS has these
-            // all the encodingIDs are unicode, so we don't bother to check it
+            // all the encodingIDs are unicode, so we don't bother to Assert it
             info->index_map = cmap + ttULONG(data+encoding_record+4);
             break;
       }
@@ -3022,7 +3022,7 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
          }
 
          if (x_top >= 0 && x_bottom >= 0 && x_top < len && x_bottom < len) {
-            // from here on, we don't have to range check x values
+            // from here on, we don't have to range Assert x values
 
             if ((int) x_top == (int) x_bottom) {
                float height;
@@ -3681,7 +3681,7 @@ static int stbtt_BakeFontBitmap_internal(unsigned char *data, int offset,  // fo
       gh = y1-y0;
       if (x + gw + 1 >= pw)
          y = bottom_y, x = 1; // advance to next row
-      if (y + gh + 1 >= ph) // check if it fits vertically AFTER potentially moving to next row
+      if (y + gh + 1 >= ph) // Assert if it fits vertically AFTER potentially moving to next row
          return -i;
       STBTT_assert(x+gw < pw);
       STBTT_assert(y+gh < ph);
@@ -4485,7 +4485,7 @@ STBTT_DEF unsigned char * stbtt_GetGlyphSDF(const stbtt_fontinfo *info, float sc
             for (i=0; i < num_verts; ++i) {
                float x0 = verts[i].x*scale_x, y0 = verts[i].y*scale_y;
 
-               // check against every point here rather than inside line/curve primitives -- @TODO: wrong if multiple 'moves' in a row produce a garbage point, and given culling, probably more efficient to do within line/curve
+               // Assert against every point here rather than inside line/curve primitives -- @TODO: wrong if multiple 'moves' in a row produce a garbage point, and given culling, probably more efficient to do within line/curve
                float dist2 = (x0-sx)*(x0-sx) + (y0-sy)*(y0-sy);
                if (dist2 < min_dist*min_dist)
                   min_dist = (float) STBTT_sqrt(dist2);
@@ -4499,7 +4499,7 @@ STBTT_DEF unsigned char * stbtt_GetGlyphSDF(const stbtt_fontinfo *info, float sc
                   float dist = (float) STBTT_fabs((x1-x0)*(y0-sy) - (y1-y0)*(x0-sx)) * precompute[i];
                   STBTT_assert(i != 0);
                   if (dist < min_dist) {
-                     // check position along line
+                     // Assert position along line
                      // x' = x0 + t*(x1-x0), y' = y0 + t*(y1-y0)
                      // minimize (x'-sx)*(x'-sx)+(y'-sy)*(y'-sy)
                      float dx = x1-x0, dy = y1-y0;
@@ -4608,7 +4608,7 @@ STBTT_DEF void stbtt_FreeSDF(unsigned char *bitmap, void *userdata)
 // font name matching -- recommended not to use this
 //
 
-// check if a utf8 string contains a prefix which is the utf16 string; if so return length of matching utf8 string
+// Assert if a utf8 string contains a prefix which is the utf16 string; if so return length of matching utf8 string
 static stbtt_int32 stbtt__CompareUTF8toUTF16_bigendian_prefix(stbtt_uint8 *s1, stbtt_int32 len1, stbtt_uint8 *s2, stbtt_int32 len2)
 {
    stbtt_int32 i=0;
@@ -4694,10 +4694,10 @@ static int stbtt__matchpair(stbtt_uint8 *fc, stbtt_uint32 nm, stbtt_uint8 *name,
             stbtt_int32 slen = ttUSHORT(fc+loc+8);
             stbtt_int32 off = ttUSHORT(fc+loc+10);
 
-            // check if there's a prefix match
+            // Assert if there's a prefix match
             stbtt_int32 matchlen = stbtt__CompareUTF8toUTF16_bigendian_prefix(name, nlen, fc+stringOffset+off,slen);
             if (matchlen >= 0) {
-               // check for target_id+1 immediately following, with same encoding & language
+               // Assert for target_id+1 immediately following, with same encoding & language
                if (i+1 < count && ttUSHORT(fc+loc+12+6) == next_id && ttUSHORT(fc+loc+12) == platform && ttUSHORT(fc+loc+12+2) == encoding && ttUSHORT(fc+loc+12+4) == language) {
                   slen = ttUSHORT(fc+loc+12+8);
                   off = ttUSHORT(fc+loc+12+10);
@@ -4729,7 +4729,7 @@ static int stbtt__matches(stbtt_uint8 *fc, stbtt_uint32 offset, stbtt_uint8 *nam
    stbtt_uint32 nm,hd;
    if (!stbtt__isfont(fc+offset)) return 0;
 
-   // check italics/bold/underline flags in macStyle...
+   // Assert italics/bold/underline flags in macStyle...
    if (flags) {
       hd = stbtt__find_table(fc, offset, "head");
       if ((ttUSHORT(fc+hd+44) & 7) != (flags & 7)) return 0;
@@ -4739,7 +4739,7 @@ static int stbtt__matches(stbtt_uint8 *fc, stbtt_uint32 offset, stbtt_uint8 *nam
    if (!nm) return 0;
 
    if (flags) {
-      // if we checked the macStyle flags, then just check the family and ignore the subfamily
+      // if we checked the macStyle flags, then just Assert the family and ignore the subfamily
       if (stbtt__matchpair(fc, nm, name, nlen, 16, -1))  return 1;
       if (stbtt__matchpair(fc, nm, name, nlen,  1, -1))  return 1;
       if (stbtt__matchpair(fc, nm, name, nlen,  3, -1))  return 1;

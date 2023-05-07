@@ -9,53 +9,78 @@
 #include "Render/Scene.h"
 #include "Render/DrawingPolicy.h"
 
+/*
+==================
+CMeshDrawingPolicy::CMeshDrawingPolicy
+==================
+*/
 CMeshDrawingPolicy::CMeshDrawingPolicy()
 	: bInit( false )
 	, depthBias( 0.f )
 	, hash( INVALID_HASH )
 {}
 
+/*
+==================
+CMeshDrawingPolicy::~CMeshDrawingPolicy
+==================
+*/
 CMeshDrawingPolicy::~CMeshDrawingPolicy()
 {}
 
+/*
+==================
+CMeshDrawingPolicy::InitInternal
+==================
+*/
 void CMeshDrawingPolicy::InitInternal( class CVertexFactory* InVertexFactory, const TAssetHandle<CMaterial>& InMaterial, float InDepthBias /* = 0.f */ )
 {
 	// If material is not valid, we use default material
 	TSharedPtr<CMaterial>		materialRef = InMaterial.ToSharedPtr();
 	if ( !materialRef )
 	{
-		materialRef = GEngine->GetDefaultMaterial().ToSharedPtr();
+		materialRef = g_Engine->GetDefaultMaterial().ToSharedPtr();
 	}
-	checkMsg( InVertexFactory && materialRef, TEXT( "Vertex factory and material must be valid for init drawing policy" ) );
+	AssertMsg( InVertexFactory && materialRef, TEXT( "Vertex factory and material must be valid for init drawing policy" ) );
 
 	uint64			vertexFactoryHash = InVertexFactory->GetType()->GetHash();
 	vertexShader	= materialRef->GetShader( vertexFactoryHash, SF_Vertex );
 	pixelShader		= materialRef->GetShader( vertexFactoryHash, SF_Pixel );
 
-	hash			= appMemFastHash( materialRef, InVertexFactory->GetTypeHash() );
+	hash			= Sys_MemFastHash( materialRef, InVertexFactory->GetTypeHash() );
 	vertexFactory	= InVertexFactory;
 	material		= materialRef->GetAssetHandle();
 	depthBias		= InDepthBias;
 	bInit			= true;
 }
 
+/*
+==================
+CMeshDrawingPolicy::SetRenderState
+==================
+*/
 void CMeshDrawingPolicy::SetRenderState( class CBaseDeviceContextRHI* InDeviceContextRHI )
 {
-	check( bInit );
+	Assert( bInit );
 
 	vertexFactory->Set( InDeviceContextRHI );
-	GRHI->SetRasterizerState( InDeviceContextRHI, GetRasterizerState() );
-	GRHI->SetBoundShaderState( InDeviceContextRHI, GetBoundShaderState() );
+	g_RHI->SetRasterizerState( InDeviceContextRHI, GetRasterizerState() );
+	g_RHI->SetBoundShaderState( InDeviceContextRHI, GetBoundShaderState() );
 }
 
+/*
+==================
+CMeshDrawingPolicy::SetShaderParameters
+==================
+*/
 void CMeshDrawingPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDeviceContextRHI )
 {
-	check( bInit );
+	Assert( bInit );
 
 	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
 	if ( !materialRef )
 	{
-		materialRef = GEngine->GetDefaultMaterial().ToSharedPtr();
+		materialRef = g_Engine->GetDefaultMaterial().ToSharedPtr();
 		if ( !materialRef )
 		{
 			return;
@@ -66,6 +91,11 @@ void CMeshDrawingPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDev
 	pixelShader->SetConstantParameters( InDeviceContextRHI, vertexFactory, materialRef );
 }
 
+/*
+==================
+CMeshDrawingPolicy::Draw
+==================
+*/
 void CMeshDrawingPolicy::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMeshBatch, const class CSceneView& InSceneView )
 {
 	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
@@ -79,8 +109,8 @@ void CMeshDrawingPolicy::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, 
 			for ( uint32 instanceId = 0; instanceId < InMeshBatch.numInstances; ++instanceId )
 			{
 				vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, vertexFactory, &InSceneView, 1, instanceId );
-				GRHI->CommitConstants( InDeviceContextRHI );
-				GRHI->DrawIndexedPrimitive( InDeviceContextRHI, InMeshBatch.indexBufferRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.firstIndex, InMeshBatch.numPrimitives );
+				g_RHI->CommitConstants( InDeviceContextRHI );
+				g_RHI->DrawIndexedPrimitive( InDeviceContextRHI, InMeshBatch.indexBufferRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.firstIndex, InMeshBatch.numPrimitives );
 			}
 		}
 		else
@@ -88,8 +118,8 @@ void CMeshDrawingPolicy::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, 
 			for ( uint32 instanceId = 0; instanceId < InMeshBatch.numInstances; ++instanceId )
 			{
 				vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, vertexFactory, &InSceneView, 1, instanceId );
-				GRHI->CommitConstants( InDeviceContextRHI );
-				GRHI->DrawPrimitive( InDeviceContextRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.numPrimitives );
+				g_RHI->CommitConstants( InDeviceContextRHI );
+				g_RHI->DrawPrimitive( InDeviceContextRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.numPrimitives );
 			}
 		}
 	}
@@ -97,32 +127,42 @@ void CMeshDrawingPolicy::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, 
 	else
 	{
 		vertexShader->SetMesh( InDeviceContextRHI, InMeshBatch, vertexFactory, &InSceneView, InMeshBatch.numInstances );
-		GRHI->CommitConstants( InDeviceContextRHI );
+		g_RHI->CommitConstants( InDeviceContextRHI );
 
 		if ( InMeshBatch.indexBufferRHI )
 		{
-			GRHI->DrawIndexedPrimitive( InDeviceContextRHI, InMeshBatch.indexBufferRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.firstIndex, InMeshBatch.numPrimitives, InMeshBatch.numInstances );
+			g_RHI->DrawIndexedPrimitive( InDeviceContextRHI, InMeshBatch.indexBufferRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.firstIndex, InMeshBatch.numPrimitives, InMeshBatch.numInstances );
 		}
 		else
 		{
-			GRHI->DrawPrimitive( InDeviceContextRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.numPrimitives, InMeshBatch.numInstances );
+			g_RHI->DrawPrimitive( InDeviceContextRHI, InMeshBatch.primitiveType, InMeshBatch.baseVertexIndex, InMeshBatch.numPrimitives, InMeshBatch.numInstances );
 		}
 	}
 }
 
+/*
+==================
+CMeshDrawingPolicy::GetTypeHash
+==================
+*/
 uint64 CMeshDrawingPolicy::GetTypeHash() const
 {
 	return hash;
 }
 
+/*
+==================
+CMeshDrawingPolicy::GetBoundShaderState
+==================
+*/
 BoundShaderStateRHIRef_t CMeshDrawingPolicy::GetBoundShaderState() const
 {
 	if ( !boundShaderState )
 	{
 		TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
-		check( materialRef && vertexFactory && vertexShader && pixelShader );
+		Assert( materialRef && vertexFactory && vertexShader && pixelShader );
 		
-		boundShaderState = GRHI->CreateBoundShaderState(
+		boundShaderState = g_RHI->CreateBoundShaderState(
 			materialRef->GetAssetName().c_str(),
 			vertexFactory->GetDeclaration(),
 			vertexShader->GetVertexShader(),
@@ -132,6 +172,11 @@ BoundShaderStateRHIRef_t CMeshDrawingPolicy::GetBoundShaderState() const
 	return boundShaderState;
 }
 
+/*
+==================
+CMeshDrawingPolicy::GetRasterizerState
+==================
+*/
 RasterizerStateRHIRef_t CMeshDrawingPolicy::GetRasterizerState() const
 {
 	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
@@ -146,12 +191,17 @@ RasterizerStateRHIRef_t CMeshDrawingPolicy::GetRasterizerState() const
 
 	if ( !rasterizerState || rasterizerState->GetInitializer() != initializer )
 	{
-		rasterizerState = GRHI->CreateRasterizerState( initializer );
+		rasterizerState = g_RHI->CreateRasterizerState( initializer );
 	}
 
 	return rasterizerState;
 }
 
+/*
+==================
+CMeshDrawingPolicy::Matches
+==================
+*/
 bool CMeshDrawingPolicy::Matches( const CMeshDrawingPolicy& InOtherDrawer ) const
 {
 	return
@@ -161,6 +211,11 @@ bool CMeshDrawingPolicy::Matches( const CMeshDrawingPolicy& InOtherDrawer ) cons
 		pixelShader == InOtherDrawer.pixelShader;
 }
 
+/*
+==================
+CMeshDrawingPolicy::IsValid
+==================
+*/
 bool CMeshDrawingPolicy::IsValid() const
 {
 	return material.IsAssetValid() && vertexFactory && vertexShader && pixelShader && vertexFactory->IsInitialized();

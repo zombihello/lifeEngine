@@ -18,8 +18,7 @@
 - [X] Implement HDR and gamma correct support
 - [X] Implement eye adaptation (auto exposure)
 - [ ] Implement physics system
-- [ ] Refactor source code to Source Engine/Quake style
-- [ ] Refactor engine architecture to module style
+- [X] Refactor source code to Source Engine/Quake style
 - [X] Add supported mip levels in textures
 - [X] Add possible generate mip levels for textures in WorldEd
 - [X] Need fix speed of the import static meshes

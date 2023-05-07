@@ -22,14 +22,14 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual								~CBaseViewportRHI() {}
+	virtual ~CBaseViewportRHI() {}
 
 	/**
 	 * @brief Presents the swap chain
 	 * 
 	 * @param[in] InLockToVsync Is it necessary to block for Vsync
 	 */
-	virtual void						Present( bool InLockToVsync ) {}
+	virtual void Present( bool InLockToVsync ) {}
 
 	/**
 	 * Resize viewport
@@ -38,7 +38,7 @@ public:
 	 * @param[in] InHeight New height
 	 * @param[in] InIsFullscreen Is fullscreen
 	 */
-	virtual void						Resize( uint32 InWidth, uint32 InHeight ) {}
+	virtual void Resize( uint32 InWidth, uint32 InHeight ) {}
 
 	/**
 	 * @brief Set surface of viewport
@@ -52,19 +52,19 @@ public:
 	 * @brief Get width
 	 * @return Width of viewport
 	 */
-	virtual uint32						GetWidth() const { return 0; }
+	virtual uint32 GetWidth() const { return 0; }
 
 	/**
 	 * @brief Get height
 	 * @return Height of viewport
 	 */
-	virtual uint32						GetHeight() const { return 0; }
+	virtual uint32 GetHeight() const { return 0; }
 
 	/**
 	 * @breif Get surface of viewport
 	 * @return Pointer to surface of viewport
 	 */
-	virtual SurfaceRHIRef_t				GetSurface() const { return nullptr; }
+	virtual SurfaceRHIRef_t GetSurface() const { return nullptr; }
 
 	/**
 	 * @breif Get window handle

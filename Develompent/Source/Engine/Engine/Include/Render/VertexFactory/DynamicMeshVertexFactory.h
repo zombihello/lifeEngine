@@ -125,7 +125,7 @@ private:
  * @ingroup Engine
  * Global resource of dynamic mesh vertex declaration
  */
-extern TGlobalResource< CDynamicMeshVertexDeclaration >			GDynamicMeshVertexDeclaration;
+extern TGlobalResource< CDynamicMeshVertexDeclaration >			g_DynamicMeshVertexDeclaration;
 
 /**
  * @ingroup Engine

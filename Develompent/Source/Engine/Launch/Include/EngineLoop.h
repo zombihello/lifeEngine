@@ -21,12 +21,12 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-						CEngineLoop();
+	CEngineLoop();
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual				~CEngineLoop();
+	virtual ~CEngineLoop();
 
 	/**
 	 * @brief Pre-Initialize the main loop
@@ -34,37 +34,37 @@ public:
 	 * @param[in] InCmdLine Command line
 	 * @return Returns the error level, 0 if successful and > 0 if there were errors
 	 */
-	int32				PreInit( const tchar* InCmdLine );
+	int32 PreInit( const tchar* InCmdLine );
 
 	/**
 	 * @brief Initialize the main loop
 	 * 
 	 * @return Returns the error level, 0 if successful and > 0 if there were errors
 	 */
-	int32				Init();
+	int32 Init();
 
 	/**
 	 * @brief Advances main loop 
 	 */
-	void				Tick();
+	void Tick();
 
 	/**
 	 * @brief Performs shut down 
 	 */
-	void				Exit();
+	void Exit();
 
 	/**
 	 * @brief Process event
 	 *
 	 * @param[in] InWindowEvent Window event
 	 */
-	void				ProcessEvent( struct SWindowEvent& InWindowEvent );
+	void ProcessEvent( struct SWindowEvent& InWindowEvent );
 
 private:
 	/**
 	 * @brief Init configs
 	 */
-	void				InitConfigs();
+	void InitConfigs();
 
 	bool				isInitialize;		/**< Is initialized engine */
 	bool				bIsFocus;			/**< Is focus on window */

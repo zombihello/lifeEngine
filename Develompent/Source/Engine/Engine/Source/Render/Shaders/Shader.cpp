@@ -6,9 +6,11 @@
 #include "RHI/BaseRHI.h"
 #include "Render/Shaders/Shader.h"
 
-/**
- * Initialize shader
- */
+/*
+==================
+CShader::Init
+==================
+*/
 void CShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
 {
 	name = InShaderCacheItem.name;
@@ -19,52 +21,77 @@ void CShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
 	switch ( frequency )
 	{
 	case SF_Vertex:
-		vertexShader = GRHI->CreateVertexShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
-		check( vertexShader );
+		vertexShader = g_RHI->CreateVertexShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
+		Assert( vertexShader );
 		break;
 
 	case SF_Hull:
-		hullShader = GRHI->CreateHullShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
-		check( hullShader );
+		hullShader = g_RHI->CreateHullShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
+		Assert( hullShader );
 		break;
 
 	case SF_Domain:
-		domainShader = GRHI->CreateDomainShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
-		check( domainShader );
+		domainShader = g_RHI->CreateDomainShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
+		Assert( domainShader );
 		break;
 
 	case SF_Pixel:
-		pixelShader = GRHI->CreatePixelShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
-		check( pixelShader );
+		pixelShader = g_RHI->CreatePixelShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
+		Assert( pixelShader );
 		break;
 
 	case SF_Geometry:
-		geometryShader = GRHI->CreateGeometryShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
-		check( geometryShader );
+		geometryShader = g_RHI->CreateGeometryShader( name.c_str(), InShaderCacheItem.code.GetData(), InShaderCacheItem.code.Num() );
+		Assert( geometryShader );
 		break;
 
 	default:
-		appErrorf( TEXT( "Unsupported shader frequency %i" ), frequency );
+		Sys_Errorf( TEXT( "Unsupported shader frequency %i" ), frequency );
 		break;
 	}
 }
 
+/*
+==================
+CShader::SetConstantParameters
+==================
+*/
 void CShader::SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const
 {}
 
+/*
+==================
+CShader::SetMesh
+==================
+*/
 void CShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {}
 
 #if WITH_EDITOR
+/*
+==================
+CShader::ShouldCache
+==================
+*/
 bool CShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
 	return true;
 }
 
+/*
+==================
+CShader::ModifyCompilationEnvironment
+==================
+*/
 void CShader::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
 {}
 #endif // WITH_EDITOR
 
+/*
+==================
+operator<<
+==================
+*/
 CArchive& operator<<( CArchive& InArchive, CShader*& InValue )
 {
 	if ( InArchive.IsSaving() )
@@ -103,7 +130,7 @@ CArchive& operator<<( CArchive& InArchive, CShader*& InValue )
 		{
 			if ( !shaderName.empty() )
 			{
-				LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package version (0x%X), shader %s not loaded" ), InArchive.Ver(), shaderName.c_str() );
+				Warnf( TEXT( "Deprecated package version (0x%X), shader %s not loaded\n" ), InArchive.Ver(), shaderName.c_str() );
 			}
 
 			InValue = nullptr;
@@ -112,7 +139,7 @@ CArchive& operator<<( CArchive& InArchive, CShader*& InValue )
 
 		if ( !shaderName.empty() )
 		{
-			InValue = GShaderManager->FindInstance( shaderName, vertexFactoryHash );
+			InValue = g_ShaderManager->FindInstance( shaderName, vertexFactoryHash );
 		}
 	}
 

@@ -52,21 +52,21 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE						CConfigObject()
+	FORCEINLINE CConfigObject()
 	{}
 
 	/**
 	 * @brief Constructor of copy
 	 * @param[in] InCopy Copy of object
 	 */
-	FORCEINLINE						CConfigObject( const CConfigObject& InCopy ) :
+	FORCEINLINE CConfigObject( const CConfigObject& InCopy ) :
 		values( InCopy.values )
 	{}
 
 	/**
 	 * @brief Destructor
 	 */
-	FORCEINLINE						~CConfigObject()
+	FORCEINLINE ~CConfigObject()
 	{
 		Clear();
 	}
@@ -74,7 +74,7 @@ public:
 	/**
 	 * @brief Clear
 	 */
-	FORCEINLINE void				Clear()
+	FORCEINLINE void Clear()
 	{
 		values.clear();
 	}
@@ -83,7 +83,7 @@ public:
 	 * @brief Copy
 	 * @param[in] InCopy Copy of object
 	 */
-	FORCEINLINE void				Copy( const CConfigObject& InCopy )
+	FORCEINLINE void Copy( const CConfigObject& InCopy )
 	{
 		values = InCopy.values;
 	}
@@ -94,14 +94,14 @@ public:
 	 * @param[in] InCountTabs Number of tabs for indentation
 	 * @return Return converted object in JSON string
 	 */
-	std::string						ToJSON( uint32 InCountTabs = 0 ) const;
+	std::string ToJSON( uint32 InCountTabs = 0 ) const;
 
 	/**
 	 * @brief Set object from RapidJSON value
 	 * @param[in] InValue RapidJSON value
 	 * @param[in] InName RapidJSON name for print name of object in log while error
 	 */
-	void							Set( const rapidjson::Value& InValue, const tchar* InName = TEXT( "UNKNOWN" ) );
+	void Set( const rapidjson::Value& InValue, const tchar* InName = TEXT( "UNKNOWN" ) );
 
 	/**
 	 * @brief Set value
@@ -109,7 +109,7 @@ public:
 	 * @param[in] InName Name of value
 	 * @param[in] InValue Value
 	 */
-	void							SetValue( const tchar* InName, const class CConfigValue& InValue );
+	void SetValue( const tchar* InName, const class CConfigValue& InValue );
 
 	/**
 	 * @brief Get value
@@ -117,7 +117,7 @@ public:
 	 * @param[in] InName Name of value
 	 * @return Return value from object. If not exist value in object - return empty
 	 */
-	class CConfigValue				GetValue( const tchar* InName ) const;
+	class CConfigValue GetValue( const tchar* InName ) const;
 
 	/**
 	 * @brief Operator = for copy value
@@ -157,7 +157,7 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE										CConfigValue() :
+	FORCEINLINE CConfigValue() :
 		type( T_None ),
 		value( nullptr )
 	{}
@@ -166,7 +166,7 @@ public:
 	 * @brief Constructor of copy
 	 * @param[in] InCopy Copy of value
 	 */
-	FORCEINLINE										CConfigValue( const CConfigValue& InCopy ) :
+	FORCEINLINE CConfigValue( const CConfigValue& InCopy ) :
 		type( T_None ),
 		value( nullptr )
 	{
@@ -176,7 +176,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	FORCEINLINE										~CConfigValue()
+	FORCEINLINE ~CConfigValue()
 	{
 		Clear();
 	}
@@ -184,13 +184,13 @@ public:
 	/**
 	 * @brief Clear value
 	 */
-	void											Clear();
+	void Clear();
 
 	/**
 	 * @brief Copy value
 	 * @param[in] InCopy Copy
 	 */
-	void											Copy( const CConfigValue& InCopy );
+	void Copy( const CConfigValue& InCopy );
 
 	/**
 	 * @brief Convert value to JSON string
@@ -198,7 +198,7 @@ public:
 	 * @param[in] InCountTabs Number of tabs for indentation
 	 * @return Return converted value in JSON string
 	 */
-	std::string										ToJSON( uint32 InCountTabs = 0 ) const;
+	std::string ToJSON( uint32 InCountTabs = 0 ) const;
 
 	/**
 	 * Is valid config value
@@ -225,13 +225,13 @@ public:
 	 * @param[in] InValue RapidJSON value
 	 * @param[in] InName RapidJSON name for print name of value in log while error
 	 */
-	void											Set( const rapidjson::Value& InValue, const tchar* InName = TEXT( "UNKNOWN" ) );
+	void Set( const rapidjson::Value& InValue, const tchar* InName = TEXT( "UNKNOWN" ) );
 
 	/**
 	 * @brief Set bool
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void								SetBool( bool InValue )
+	FORCEINLINE void SetBool( bool InValue )
 	{
 		if ( type != T_Bool )
 		{
@@ -251,7 +251,7 @@ public:
 	 * @brief Set int
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void								SetInt( int32 InValue )
+	FORCEINLINE void SetInt( int32 InValue )
 	{
 		if ( type != T_Int )
 		{
@@ -271,7 +271,7 @@ public:
 	 * @brief Set float
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void								SetFloat( float InValue )
+	FORCEINLINE void SetFloat( float InValue )
 	{
 		if ( type != T_Float )
 		{
@@ -291,7 +291,7 @@ public:
 	 * @brief Set string
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void								SetString( const std::wstring& InValue )
+	FORCEINLINE void SetString( const std::wstring& InValue )
 	{
 		if ( type != T_String )
 		{
@@ -311,7 +311,7 @@ public:
 	 * @brief Set object
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void								SetObject( const CConfigObject& InValue )
+	FORCEINLINE void SetObject( const CConfigObject& InValue )
 	{
 		if ( type != T_Object )
 		{
@@ -331,7 +331,7 @@ public:
 	 * @brief Set array
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void								SetArray( const std::vector< CConfigValue >& InValue )
+	FORCEINLINE void SetArray( const std::vector< CConfigValue >& InValue )
 	{
 		if ( type != T_Array )
 		{
@@ -351,7 +351,7 @@ public:
 	 * @brief Get type value
 	 * @return Type of value
 	 */
-	FORCEINLINE EType								GetType() const
+	FORCEINLINE EType GetType() const
 	{
 		return type;
 	}
@@ -360,7 +360,7 @@ public:
 	 * @brief Get bool
 	 * @return Value with type bool, if type not correct return false
 	 */
-	FORCEINLINE bool								GetBool() const
+	FORCEINLINE bool GetBool() const
 	{
 		if ( type != T_Bool || !value )
 		{
@@ -395,7 +395,7 @@ public:
 	 * @brief Get int
 	 * @return Value with type integer, if type not correct return 0
 	 */
-	FORCEINLINE int32								GetInt() const
+	FORCEINLINE int32 GetInt() const
 	{
 		if ( type != T_Int || !value )
 		{
@@ -409,7 +409,7 @@ public:
 	 * @brief Get float
 	 * @return Value with type float, if type not correct return 0.f
 	 */
-	FORCEINLINE float								GetFloat() const
+	FORCEINLINE float GetFloat() const
 	{
 		if ( type != T_Float || !value )
 		{
@@ -423,7 +423,7 @@ public:
 	 * @brief Get string
 	 * @return Value with type string, if type not correct return TEXT( "" )
 	 */
-	FORCEINLINE std::wstring						GetString() const
+	FORCEINLINE std::wstring GetString() const
 	{
 		if ( type != T_String || !value )
 		{
@@ -437,7 +437,7 @@ public:
 	 * @brief Get object
 	 * @return Value with type object, if type not correct return empty object
 	 */
-	FORCEINLINE CConfigObject						GetObject() const
+	FORCEINLINE CConfigObject GetObject() const
 	{
 		if ( type != T_Object || !value )
 		{
@@ -451,7 +451,7 @@ public:
 	 * @brief Get array
 	 * @return Value with type array, if type not correct return empty array
 	 */
-	FORCEINLINE std::vector< CConfigValue >			GetArray() const
+	FORCEINLINE std::vector< CConfigValue > GetArray() const
 	{
 		if ( type != T_Array || !value )
 		{
@@ -465,7 +465,7 @@ public:
 	 * @brief Operator = for copy value
 	 * @param[in] InCopy Copy of value
 	 */
-	FORCEINLINE CConfigValue&						operator=( const CConfigValue& InCopy )
+	FORCEINLINE CConfigValue& operator=( const CConfigValue& InCopy )
 	{
 		Copy( InCopy );
 		return *this;
@@ -488,7 +488,7 @@ public:
 	 * 
 	 * @param[in] InArchive Archive for serialization
 	 */
-	void						Serialize( class CArchive& InArchive );
+	void Serialize( class CArchive& InArchive );
 
 	/**
 	 * @brief Set value
@@ -497,7 +497,7 @@ public:
 	 * @param[in] InName Name of value in config group
 	 * @param[in] InValue Value
 	 */
-	FORCEINLINE void			SetValue( const tchar* InGroup, const tchar* InName, const CConfigValue& InValue )
+	FORCEINLINE void SetValue( const tchar* InGroup, const tchar* InName, const CConfigValue& InValue )
 	{
 		groups[ InGroup ].SetValue( InName, InValue );
 	}
@@ -509,7 +509,7 @@ public:
 	 * @param[in] InName Name of value in config group
 	 * @return Return value from config, if not founded return empty value
 	 */
-	FORCEINLINE CConfigValue		GetValue( const tchar* InGroup, const tchar* InName ) const
+	FORCEINLINE CConfigValue GetValue( const tchar* InGroup, const tchar* InName ) const
 	{
 		MapGroups_t::const_iterator		itGroup = groups.find( InGroup );
 		if ( itGroup == groups.end() )
@@ -557,7 +557,7 @@ public:
 		std::unordered_map<EConfigType, CConfig>::const_iterator		itConfig = configs.find( InType );
 		if ( itConfig == configs.end() )
 		{
-			checkMsg( false, TEXT( "All types of configs must be exist all time" ) );
+			AssertMsg( false, TEXT( "All types of configs must be exist all time" ) );
 		}
 
 		return itConfig->second;
@@ -574,7 +574,7 @@ public:
 		std::unordered_map<EConfigType, CConfig>::iterator		itConfig = configs.find( InType );
 		if ( itConfig == configs.end() )
 		{
-			checkMsg( false, TEXT( "All types of configs must be exist all time" ) );
+			AssertMsg( false, TEXT( "All types of configs must be exist all time" ) );
 		}
 
 		return itConfig->second;

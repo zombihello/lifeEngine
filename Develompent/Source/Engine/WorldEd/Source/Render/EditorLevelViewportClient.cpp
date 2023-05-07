@@ -46,14 +46,14 @@
 #define MAX_CAMERA_SPEED			1000.f
 
 /** Default camera position for level editor perspective viewports */
-static const Vector			GDefaultPerspectiveViewLocation( 495.166962, 167.584518, -400.f );
+static const Vector				s_DefaultPerspectiveViewLocation( 495.166962, 167.584518, -400.f );
 
 /** Default camera orientation for level editor perspective viewports */
-static const Quaternion		GDefaultPerspectiveViewRotationQuat( SMath::quaternionZero );
-static const Vector			GDefaultPerspectiveViewRotationEuler( SMath::vectorZero );
+static const Quaternion			s_DefaultPerspectiveViewRotationQuat( SMath::quaternionZero );
+static const Vector				s_DefaultPerspectiveViewRotationEuler( SMath::vectorZero );
 
 /** Show flags for each viewport type */
-static const ShowFlags_t		GShowFlags[ LVT_Max ] =
+static const ShowFlags_t		s_ShowFlags[ LVT_Max ] =
 {
 	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXY
 	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXZ
@@ -61,6 +61,11 @@ static const ShowFlags_t		GShowFlags[ LVT_Max ] =
 	SHOW_DefaultEditor							// LVT_Perspective
 };
 
+/*
+==================
+CEditorLevelViewportClient::CEditorLevelViewportClient
+==================
+*/
 CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InViewportType /* = LVT_Perspective */ )
 	: bSetListenerPosition( true )
 	, trackingType( CEditorLevelViewportClient::MT_None )
@@ -79,6 +84,11 @@ CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InVie
 	SetViewportType( InViewportType );
 }
 
+/*
+==================
+CEditorLevelViewportClient::Tick
+==================
+*/
 void CEditorLevelViewportClient::Tick( float InDeltaSeconds )
 {
 	// If we tracking mouse and this is perspective viewport - change view location
@@ -95,15 +105,20 @@ void CEditorLevelViewportClient::Tick( float InDeltaSeconds )
 	}
 }
 
+/*
+==================
+CEditorLevelViewportClient::Draw
+==================
+*/
 void CEditorLevelViewportClient::Draw( CViewport* InViewport )
 {
-	check( InViewport );
+	Assert( InViewport );
 	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
 
 	// Update audio listener spatial if allowed
 	if ( viewportType == LVT_Perspective && bSetListenerPosition )
 	{
-		GAudioDevice.SetListenerSpatial( viewLocation, SMath::vectorForward * viewRotationQuat, SMath::vectorUp * viewRotationQuat );
+		g_AudioDevice.SetListenerSpatial( viewLocation, SMath::vectorForward * viewRotationQuat, SMath::vectorUp * viewRotationQuat );
 	}
 
 	// Draw viewport
@@ -116,11 +131,16 @@ void CEditorLevelViewportClient::Draw( CViewport* InViewport )
 										  } );
 }
 
+/*
+==================
+CEditorLevelViewportClient::Draw_RenderThread
+==================
+*/
 void CEditorLevelViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView )
 {
-	check( IsInRenderingThread() );
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	CScene*						scene = ( CScene* )GWorld->GetScene();
+	Assert( IsInRenderingThread() );
+	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
+	CScene*						scene = ( CScene* )g_World->GetScene();
 	CSceneRenderer				sceneRenderer( InSceneView, scene );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	
@@ -136,9 +156,14 @@ void CEditorLevelViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportR
 }
 
 #if ENABLE_HITPROXY
+/*
+==================
+CEditorLevelViewportClient::DrawHitProxies
+==================
+*/
 void CEditorLevelViewportClient::DrawHitProxies( CViewport* InViewport, EHitProxyLayer InHitProxyLayer /* = HPL_World */ )
 { 
-	check( InViewport );
+	Assert( InViewport );
 	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
 
 	// Draw viewport
@@ -152,15 +177,20 @@ void CEditorLevelViewportClient::DrawHitProxies( CViewport* InViewport, EHitProx
 										 } );
 }
 
+/*
+==================
+CEditorLevelViewportClient::DrawHitProxies_RenderThread
+==================
+*/
 void CEditorLevelViewportClient::DrawHitProxies_RenderThread( ViewportRHIRef_t InViewportRHI, class CSceneView* InSceneView, EHitProxyLayer InHitProxyLayer /* = HPL_World */ )
 {
-	check( IsInRenderingThread() );
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	CScene*						scene = ( CScene* )GWorld->GetScene();
+	Assert( IsInRenderingThread() );
+	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
+	CScene*						scene = ( CScene* )g_World->GetScene();
 	CSceneRenderer				sceneRenderer( InSceneView, scene );
 
 	// Draw hit proxies
-	GRHI->SetViewport( immediateContext, 0, 0, 0.f, InViewportRHI->GetWidth(), InViewportRHI->GetHeight(), 1.f );
+	g_RHI->SetViewport( immediateContext, 0, 0, 0.f, InViewportRHI->GetWidth(), InViewportRHI->GetHeight(), 1.f );
 	sceneRenderer.BeginRenderHitProxiesViewTarget( InViewportRHI );
 
 	// Draw scene
@@ -170,6 +200,11 @@ void CEditorLevelViewportClient::DrawHitProxies_RenderThread( ViewportRHIRef_t I
 	delete InSceneView;
 }
 
+/*
+==================
+CEditorLevelViewportClient::GetHitProxyId
+==================
+*/
 CHitProxyId CEditorLevelViewportClient::GetHitProxyId( uint32 InX, uint32 InY ) const
 {
 	CHitProxyId		result;
@@ -179,13 +214,13 @@ CHitProxyId CEditorLevelViewportClient::GetHitProxyId( uint32 InX, uint32 InY ) 
 										  uint32, y, InY,
 										  {
 											  // Getting hit proxy texture and lock him for read
-											  CBaseDeviceContextRHI*	deviceContext	= GRHI->GetImmediateContext();
-											  Texture2DRHIRef_t			hitProxyTexture = GSceneRenderTargets.GetHitProxyTexture();
+											  CBaseDeviceContextRHI*	deviceContext	= g_RHI->GetImmediateContext();
+											  Texture2DRHIRef_t			hitProxyTexture = g_SceneRenderTargets.GetHitProxyTexture();
 											  SLockedData				lockedData;
-											  GRHI->LockTexture2D( deviceContext, hitProxyTexture, 0, false, lockedData );
+											  g_RHI->LockTexture2D( deviceContext, hitProxyTexture, 0, false, lockedData );
 
 											  // Getting pointer to we interested data in texture
-											  CColor*		data = ( CColor* )lockedData.data + x + y * ( lockedData.pitch / GPixelFormats[ hitProxyTexture->GetFormat() ].blockBytes );
+											  CColor*		data = ( CColor* )lockedData.data + x + y * ( lockedData.pitch / g_PixelFormats[ hitProxyTexture->GetFormat() ].blockBytes );
 
 											  // If color is not black (black is color of clear texture), then hit proxy is valid
 											  if ( *data != CColor::black )
@@ -194,7 +229,7 @@ CHitProxyId CEditorLevelViewportClient::GetHitProxyId( uint32 InX, uint32 InY ) 
 											  }
 
 											  // Unlock texture
-											  GRHI->UnlockTexture2D( deviceContext, hitProxyTexture, 0, lockedData );
+											  g_RHI->UnlockTexture2D( deviceContext, hitProxyTexture, 0, lockedData );
 										  } );
 
 	FlushRenderingCommands();
@@ -202,19 +237,24 @@ CHitProxyId CEditorLevelViewportClient::GetHitProxyId( uint32 InX, uint32 InY ) 
 }
 #endif // ENABLE_HITPROXY
 
+/*
+==================
+CEditorLevelViewportClient::SetViewportType
+==================
+*/
 void CEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportType )
 {
 	bSetListenerPosition	= false;
 	viewportType			= InViewportType;
-	showFlags				= GShowFlags[ InViewportType ];
+	showFlags				= s_ShowFlags[ InViewportType ];
 
 	// Init for perspective mode default location and rotation
 	if ( viewportType == LVT_Perspective )
 	{
 		bSetListenerPosition = true;
-		viewLocation		= GDefaultPerspectiveViewLocation;
-		viewRotationEuler	= GDefaultPerspectiveViewRotationEuler;
-		viewRotationQuat	= GDefaultPerspectiveViewRotationQuat;
+		viewLocation		= s_DefaultPerspectiveViewLocation;
+		viewRotationEuler	= s_DefaultPerspectiveViewRotationEuler;
+		viewRotationQuat	= s_DefaultPerspectiveViewRotationQuat;
 	}
 	// Else we init default location of axis up for other viewport types
 	else
@@ -239,6 +279,11 @@ void CEditorLevelViewportClient::SetViewportType( ELevelViewportType InViewportT
 	}
 }
 
+/*
+==================
+CEditorLevelViewportClient::ScreenToWorld
+==================
+*/
 Vector CEditorLevelViewportClient::ScreenToWorld( const Vector2D& InScreenPoint, uint32 InViewportSizeX, uint32 InViewportSizeY )
 {
 	// Convert screen point to screen space
@@ -286,6 +331,11 @@ Vector CEditorLevelViewportClient::ScreenToWorld( const Vector2D& InScreenPoint,
 	}
 }
 
+/*
+==================
+CEditorLevelViewportClient::WorldToScreen
+==================
+*/
 Vector CEditorLevelViewportClient::WorldToScreen( const Vector& InWorldPoint, uint32 InViewportSizeX, uint32 InViewportSizeY )
 {
 	CSceneView*		sceneView = CalcSceneView( InViewportSizeX, InViewportSizeY );
@@ -294,6 +344,11 @@ Vector CEditorLevelViewportClient::WorldToScreen( const Vector& InWorldPoint, ui
 	return result;
 }
 
+/*
+==================
+CEditorLevelViewportClient::ProcessEvent
+==================
+*/
 void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// We ignore events when bIgnoreInput is TRUE or when ImGUI layer is unhovered
@@ -311,11 +366,11 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		// Show cursor
 		if ( InWindowEvent.imGUILayer )
 		{
-			GImGUIEngine->SetShowCursor( true );
+			g_ImGUIEngine->SetShowCursor( true );
 		}
 		else
 		{
-			GWindow->ShowCursor();
+			g_Window->ShowCursor();
 		}
 
 		trackingType	= MT_None;
@@ -331,11 +386,11 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			// Hide cursor
 			if ( InWindowEvent.imGUILayer )
 			{
-				GImGUIEngine->SetShowCursor( false );
+				g_ImGUIEngine->SetShowCursor( false );
 			}
 			else
 			{
-				GWindow->HideCursor();
+				g_Window->HideCursor();
 			}
 
 			trackingType = MT_View;
@@ -349,11 +404,11 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			// Show cursor
 			if ( InWindowEvent.imGUILayer )
 			{
-				GImGUIEngine->SetShowCursor( true );
+				g_ImGUIEngine->SetShowCursor( true );
 			}
 			else
 			{
-				GWindow->ShowCursor();
+				g_Window->ShowCursor();
 			}
 
 			trackingType		= MT_None;
@@ -402,8 +457,8 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 			}
 			else
 			{
-				moveDelta.x		= InWindowEvent.events.mouseMove.xDirection * GInputSystem->GetMouseSensitivity();
-				moveDelta.y		= InWindowEvent.events.mouseMove.yDirection * GInputSystem->GetMouseSensitivity();
+				moveDelta.x		= InWindowEvent.events.mouseMove.xDirection * g_InputSystem->GetMouseSensitivity();
+				moveDelta.y		= InWindowEvent.events.mouseMove.yDirection * g_InputSystem->GetMouseSensitivity();
 			}
 
 			// We moved mouse when press right mouse button, in this case we not allow opening context menu after release
@@ -433,7 +488,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 					break;
 
 				default:
-					check( false );		// Not supported viewport type
+					Assert( false );		// Not supported viewport type
 					break;
 				}
 
@@ -505,6 +560,11 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	}
 }
 
+/*
+==================
+CEditorLevelViewportClient::CalcSceneView
+==================
+*/
 CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 InSizeY )
 {
 	// Calculate projection matrix
@@ -544,7 +604,7 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 In
 		break;
 
 	default:
-		check( false );		// Unknown viewport type
+		Assert( false );		// Unknown viewport type
 		break;
 	}
 
@@ -554,6 +614,11 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 In
 	return sceneView;
 }
 
+/*
+==================
+CEditorLevelViewportClient::GetBackgroundColor
+==================
+*/
 CColor CEditorLevelViewportClient::GetBackgroundColor() const
 {
 	if ( viewportType == LVT_Perspective )

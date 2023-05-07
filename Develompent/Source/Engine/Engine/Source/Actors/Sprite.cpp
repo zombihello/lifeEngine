@@ -8,15 +8,30 @@
 
 IMPLEMENT_CLASS( ASprite )
 
+/*
+==================
+ASprite::ASprite
+==================
+*/
 ASprite::ASprite()
 {
     spriteComponent     = CreateComponent< CSpriteComponent >( TEXT( "SpriteComponent0" ) );   
 }
 
+/*
+==================
+ASprite::~ASprite
+==================
+*/
 ASprite::~ASprite()
 {}
 
 #if WITH_EDITOR
+/*
+==================
+ASprite::GetActorIcon
+==================
+*/
 std::wstring ASprite::GetActorIcon() const
 {
     return TEXT( "Engine/Editor/Icons/CB_Map.png" );

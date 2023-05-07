@@ -1,16 +1,23 @@
 #include "Misc/Misc.h"
 #include "Misc/CommandLine.h"
 
-//
-// Grab the next space-delimited string from the input stream.
-// If quoted, gets entire quoted string.
-//
+
+/*
+==================
+ParseToken
+==================
+*/
 bool ParseToken( const tchar*& InOutStr, std::wstring& OutResult, bool InIsUseEscape )
 {
+	//
+	// Grab the next space-delimited string from the input stream.
+	// If quoted, gets entire quoted string.
+	//
+
 	OutResult.clear();
 
 	// Skip preceeding spaces and tabs.
-	while ( appIsWhitespace( *InOutStr ) || *InOutStr == TEXT( '=' ) )
+	while ( Sys_IsWhitespace( *InOutStr ) || *InOutStr == TEXT( '=' ) )
 	{
 		InOutStr++;
 	}
@@ -50,13 +57,13 @@ bool ParseToken( const tchar*& InOutStr, std::wstring& OutResult, bool InIsUseEs
 		while ( true )
 		{
 			tchar		character = *InOutStr;
-			if ( character == 0 || ( ( appIsWhitespace( character ) || character == TEXT( '=' ) ) && !isInQuote ) )
+			if ( character == 0 || ( ( Sys_IsWhitespace( character ) || character == TEXT( '=' ) ) && !isInQuote ) )
 			{
 				break;
 			}
 			InOutStr++;
 
-			// Preserve escapes if they're in a quoted string (the check for " is in the else to let \" work as expected)
+			// Preserve escapes if they're in a quoted string (the Assert for " is in the else to let \" work as expected)
 			if ( character == TEXT( '\\' ) && InIsUseEscape && isInQuote )
 			{
 				OutResult += character;
@@ -80,6 +87,11 @@ bool ParseToken( const tchar*& InOutStr, std::wstring& OutResult, bool InIsUseEs
 	return !OutResult.empty();
 }
 
+/*
+==================
+CCommandLine::Parse
+==================
+*/
 void CCommandLine::Parse( const tchar* InCommandLine )
 {
 	std::wstring		nextToken;

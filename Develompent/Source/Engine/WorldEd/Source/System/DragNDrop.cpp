@@ -1,5 +1,10 @@
 #include "System/DragNDrop.h"
 
+/*
+==================
+DND_MakeAssetReferenceData
+==================
+*/
 void DND_MakeAssetReferenceData( const std::vector<std::wstring>& InAssetReferences, std::vector<tchar>& OutResult )
 {
 	for ( uint32 index = 0, count = InAssetReferences.size(); index < count; ++index )
@@ -13,6 +18,11 @@ void DND_MakeAssetReferenceData( const std::vector<std::wstring>& InAssetReferen
 	OutResult.push_back( TEXT( '\0' ) );	// Terminate element
 }
 
+/*
+==================
+DND_ParseAssetReferenceData
+==================
+*/
 void DND_ParseAssetReferenceData( const tchar* InData, std::vector<std::wstring>& OutResult, uint32 InMaxParseElements /* = 0 */ )
 {
 	// We do nothing if InData is not valid 

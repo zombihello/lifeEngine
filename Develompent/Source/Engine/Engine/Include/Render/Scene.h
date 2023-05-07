@@ -288,11 +288,11 @@ struct SMeshBatch
 	 */
 	FORCEINLINE uint64 GetTypeHash() const
 	{
-		uint64		hash = appMemFastHash( indexBufferRHI );
-		hash = appMemFastHash( primitiveType, hash );
-		hash = appMemFastHash( baseVertexIndex, hash );
-		hash = appMemFastHash( firstIndex, hash );
-		hash = appMemFastHash( numPrimitives, hash );
+		uint64		hash = Sys_MemFastHash( indexBufferRHI );
+		hash = Sys_MemFastHash( primitiveType, hash );
+		hash = Sys_MemFastHash( baseVertexIndex, hash );
+		hash = Sys_MemFastHash( firstIndex, hash );
+		hash = Sys_MemFastHash( numPrimitives, hash );
 		return hash;
 	}
 
@@ -445,7 +445,7 @@ public:
 	 */
 	DrawingPolicyLinkRef_t AddItem( const DrawingPolicyLinkRef_t& InDrawingPolicyLink )
 	{
-		check( InDrawingPolicyLink );
+		Assert( InDrawingPolicyLink );
 
 		// Get drawing policy link in std::set
 		MapDrawData_t::iterator		it = meshes.find( InDrawingPolicyLink );
@@ -467,7 +467,7 @@ public:
 	 */
 	void RemoveItem( DrawingPolicyLinkRef_t& InDrawingPolicyLink )
 	{
-		check( InDrawingPolicyLink );
+		Assert( InDrawingPolicyLink );
 		if ( InDrawingPolicyLink->GetRefCount() <= 2 )
 		{
 			meshes.erase( InDrawingPolicyLink );
@@ -509,7 +509,7 @@ public:
 	 */
 	FORCEINLINE void Draw( class CBaseDeviceContextRHI* InDeviceContext, const CSceneView& InSceneView )
 	{
-		check( IsInRenderingThread() );
+		Assert( IsInRenderingThread() );
 
 		// Wireframe drawing available only with editor
 #if WITH_EDITOR
@@ -583,14 +583,14 @@ template<typename TDrawingPolicyLink, typename TMeshDrawList>
 FORCEINLINE TRefCountPtr<TDrawingPolicyLink> MakeDrawingPolicyLink( CVertexFactory* InVertexFactory, const TAssetHandle<CMaterial>& InMaterial, const SMeshBatch& InMeshBatch, const SMeshBatch*& OutMeshBatchLink, TMeshDrawList& InMeshDrawList, const CColor& InWireframeColor = CColor::red )
 {
 	// Init new drawing policy link
-	check( InVertexFactory );
+	Assert( InVertexFactory );
 	TRefCountPtr<TDrawingPolicyLink>		tmpDrawPolicyLink = new TDrawingPolicyLink( InWireframeColor );
 	tmpDrawPolicyLink->drawingPolicy.Init( InVertexFactory, InMaterial );
 	tmpDrawPolicyLink->meshBatchList.insert( InMeshBatch );
 
 	// Add to scene new drawing policy link
 	TRefCountPtr<TDrawingPolicyLink>		drawingPolicyLink = InMeshDrawList.AddItem( tmpDrawPolicyLink );
-	check( drawingPolicyLink );
+	Assert( drawingPolicyLink );
 
 	// Get link to mesh batch. If not founded insert new
 	MeshBatchList_t::iterator        itMeshBatchLink = drawingPolicyLink->meshBatchList.find( InMeshBatch );
@@ -840,7 +840,7 @@ public:
 	 * @brief Get current exposure of the scene
 	 * @return Return exposure
 	 */
-	virtual float GetExposure() const { return GEngine->GetExposure(); };
+	virtual float GetExposure() const { return g_Engine->GetExposure(); };
 };
 
 /**
@@ -913,7 +913,7 @@ public:
 	 */
 	FORCEINLINE SSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType )
 	{
-		check( InSDGType < SDG_Max );
+		Assert( InSDGType < SDG_Max );
 		return frame.SDGs[ InSDGType ];
 	}
 
@@ -925,7 +925,7 @@ public:
 	 */
 	FORCEINLINE const SSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType ) const
 	{
-		check( InSDGType < SDG_Max );
+		Assert( InSDGType < SDG_Max );
 		return frame.SDGs[ InSDGType ];
 	}
 
@@ -978,7 +978,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESceneDepthGroup& InValue
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESceneDepthGroup& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* )&InValue, sizeof( InValue ) );
 	return InArchive;
 }

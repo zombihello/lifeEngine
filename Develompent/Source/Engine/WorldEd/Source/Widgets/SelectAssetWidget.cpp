@@ -12,13 +12,13 @@
 #include "ImGUI/imgui_stdlib.h"
 
 /** Table pathes to icons */
-static const tchar*			GSelectAssetWidgetIconPaths[] =
+static const tchar*			s_SelectAssetWidgetIconPaths[] =
 {
 	TEXT( "CSW_PasteAsset.png" ),		// IT_Insert
 	TEXT( "CSW_ShowAsset.png" ),		// IT_Browse
 	TEXT( "CSW_RemoveAsset.png" )		// IT_Remove
 };
-static_assert( ARRAY_COUNT( GSelectAssetWidgetIconPaths ) == CSelectAssetWidget::IT_Num, "Need full init GSelectAssetWidgetIconPaths array" );
+static_assert( ARRAY_COUNT( s_SelectAssetWidgetIconPaths ) == CSelectAssetWidget::IT_Num, "Need full init s_SelectAssetWidgetIconPaths array" );
 
 /** Macro size image buttons */
 #define  SELECTWIDGETASSET_IMAGEBUTTONSIZE		ImVec2( 16.f, 16.f )
@@ -26,19 +26,29 @@ static_assert( ARRAY_COUNT( GSelectAssetWidgetIconPaths ) == CSelectAssetWidget:
 /** Macro size of asset preview */
 #define  SELECTWIDGETASSET_ASSETPREVIEWSIZE		ImVec2( 64.f, 64.f )
 
+/*
+==================
+CSelectAssetWidget::CSelectAssetWidget
+==================
+*/
 CSelectAssetWidget::CSelectAssetWidget( uint32 InAssetSlot )
 	: bInit( false )
 	, assetSlot( InAssetSlot )
 {}
 
+/*
+==================
+CSelectAssetWidget::Init
+==================
+*/
 void CSelectAssetWidget::Init()
 {
 	bInit = true;
 
 	// Loading icons
 	std::wstring			errorMsg;
-	PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
-	check( package );
+	PackageRef_t			package = g_PackageManager->LoadPackage( TEXT( "" ), true );
+	Assert( package );
 
 	for ( uint32 index = 0; index < IT_Num; ++index )
 	{
@@ -48,10 +58,10 @@ void CSelectAssetWidget::Init()
 		if ( !assetHandle.IsAssetValid() )
 		{
 			std::vector<TSharedPtr<CAsset>>		result;
-			if ( !CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Icons/" ) + GSelectAssetWidgetIconPaths[index], result, errorMsg ) )
+			if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Icons/" ) + s_SelectAssetWidgetIconPaths[index], result, errorMsg ) )
 			{
-				LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load texture editor icon '%s' for type 0x%X. Message: %s" ), GSelectAssetWidgetIconPaths[index], index, errorMsg.c_str() );
-				assetHandle = GEngine->GetDefaultTexture();
+				Warnf( TEXT( "Fail to load texture editor icon '%s' for type 0x%X. Message: %s\n" ), s_SelectAssetWidgetIconPaths[index], index, errorMsg.c_str() );
+				assetHandle = g_Engine->GetDefaultTexture();
 			}
 			else
 			{
@@ -64,6 +74,11 @@ void CSelectAssetWidget::Init()
 	}
 }
 
+/*
+==================
+CSelectAssetWidget::SetAssetReference
+==================
+*/
 void CSelectAssetWidget::SetAssetReference( const std::wstring& InAssetReference, bool InIsEmitEvent /* = true */ )
 {
 	assetReference = TCHAR_TO_ANSI( InAssetReference.c_str() );
@@ -73,9 +88,14 @@ void CSelectAssetWidget::SetAssetReference( const std::wstring& InAssetReference
 	}
 }
 
+/*
+==================
+CSelectAssetWidget::Tick
+==================
+*/
 void CSelectAssetWidget::Tick()
 {
-	check( bInit );
+	Assert( bInit );
 	ImGui::BeginGroup();
 	
 	// Preview asset
@@ -85,7 +105,7 @@ void CSelectAssetWidget::Tick()
 		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
 		ImGui::PushStyleColor( ImGuiCol_ButtonActive, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
 		
-		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( previewTexture ), SELECTWIDGETASSET_ASSETPREVIEWSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( previewTexture ), SELECTWIDGETASSET_ASSETPREVIEWSIZE ) )
 		{
 			onOpenAssetEditor.Broadcast( assetSlot );
 		}
@@ -116,9 +136,9 @@ void CSelectAssetWidget::Tick()
 		ImGui::TableNextColumn();
 
 		// Insert button
-		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_Insert].ToSharedPtr()->GetTexture2DRHI() ), SELECTWIDGETASSET_IMAGEBUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_Insert].ToSharedPtr()->GetTexture2DRHI() ), SELECTWIDGETASSET_IMAGEBUTTONSIZE ) )
 		{
-			SetAssetReference( GEditorEngine->GetContentBrowserWindow()->GetSelectedAssetReference() );
+			SetAssetReference( g_EditorEngine->GetContentBrowserWindow()->GetSelectedAssetReference() );
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
 		{
@@ -127,9 +147,9 @@ void CSelectAssetWidget::Tick()
 
 		// Browser button
 		ImGui::SameLine();
-		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_Browse].ToSharedPtr()->GetTexture2DRHI() ), SELECTWIDGETASSET_IMAGEBUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_Browse].ToSharedPtr()->GetTexture2DRHI() ), SELECTWIDGETASSET_IMAGEBUTTONSIZE ) )
 		{
-			GEditorEngine->GetContentBrowserWindow()->ShowAsset( ANSI_TO_TCHAR( assetReference.c_str() ) );
+			g_EditorEngine->GetContentBrowserWindow()->ShowAsset( ANSI_TO_TCHAR( assetReference.c_str() ) );
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
 		{
@@ -138,7 +158,7 @@ void CSelectAssetWidget::Tick()
 
 		// Remove button
 		ImGui::SameLine();
-		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_Remove].ToSharedPtr()->GetTexture2DRHI() ), SELECTWIDGETASSET_IMAGEBUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_Remove].ToSharedPtr()->GetTexture2DRHI() ), SELECTWIDGETASSET_IMAGEBUTTONSIZE ) )
 		{
 			SetAssetReference( TEXT( "" ) );
 		}
@@ -158,7 +178,7 @@ void CSelectAssetWidget::Tick()
 		if ( imguiPayload )
 		{
 			tchar*				pData = ( tchar* )imguiPayload->Data;
-			check( pData );
+			Assert( pData );
 
 			// Apply dropped asset reference
 			std::vector<std::wstring>	assetReference;

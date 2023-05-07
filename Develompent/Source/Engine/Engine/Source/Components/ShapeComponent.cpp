@@ -2,27 +2,47 @@
 
 IMPLEMENT_CLASS( CShapeComponent )
 
+/*
+==================
+CShapeComponent::CShapeComponent
+==================
+*/
 CShapeComponent::CShapeComponent()
-	: collisionProfile( GPhysicsEngine.FindCollisionProfile( SCollisionProfile::blockAll_ProfileName ) )
+	: collisionProfile( g_PhysicsEngine.FindCollisionProfile( SCollisionProfile::blockAll_ProfileName ) )
 	, physicsMaterial( nullptr )
 {
 	SetVisibility( false );
 }
 
+/*
+==================
+CShapeComponent::~CShapeComponent
+==================
+*/
 CShapeComponent::~CShapeComponent()
 {}
 
+/*
+==================
+CShapeComponent::BeginPlay
+==================
+*/
 void CShapeComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	if ( !physicsMaterial.IsAssetValid() )
 	{
-		physicsMaterial = GPhysicsEngine.GetDefaultPhysMaterial();
+		physicsMaterial = g_PhysicsEngine.GetDefaultPhysMaterial();
 	}
 
 	UpdateBodySetup();
 }
 
+/*
+==================
+CShapeComponent::Serialize
+==================
+*/
 void CShapeComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );

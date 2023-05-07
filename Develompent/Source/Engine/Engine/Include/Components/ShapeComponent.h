@@ -57,7 +57,7 @@ public:
 	FORCEINLINE void SetCollisionProfile( const std::wstring& InName )
 	{
 		SCollisionProfile*		newCollisionProfile;
-		newCollisionProfile = GPhysicsEngine.FindCollisionProfile( InName );
+		newCollisionProfile = g_PhysicsEngine.FindCollisionProfile( InName );
 		if ( newCollisionProfile )
 		{
 			collisionProfile = newCollisionProfile;
@@ -70,7 +70,7 @@ public:
 	 */
 	FORCEINLINE void SetPhysMaterial( const TAssetHandle<CPhysicsMaterial>& InPhysMaterial )
 	{
-		physicsMaterial = InPhysMaterial.IsAssetValid() ? InPhysMaterial : GPhysicsEngine.GetDefaultPhysMaterial();
+		physicsMaterial = InPhysMaterial.IsAssetValid() ? InPhysMaterial : g_PhysicsEngine.GetDefaultPhysMaterial();
 	}
 
 	/**

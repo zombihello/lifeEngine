@@ -7,27 +7,32 @@
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
 
+/*
+==================
+CSceneRenderer::RenderUI
+==================
+*/
 void CSceneRenderer::RenderUI( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	SCOPED_DRAW_EVENT( EventUI, DEC_CANVAS, TEXT( "UI" ) );
-	GSceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
-	GRHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
-	GRHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
+	g_SceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
+	g_RHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
+	g_RHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
 
 	// Render WorldEd background and foreground layer (only in editor)
 #if WITH_EDITOR
-	if ( GIsEditor )
+	if ( g_IsEditor )
 	{
 		RenderSDG( InDeviceContext, SDG_WorldEdBackground );
-		InDeviceContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+		InDeviceContext->ClearDepthStencil( g_SceneRenderTargets.GetSceneDepthZSurface() );
 		RenderSDG( InDeviceContext, SDG_WorldEdForeground );
 	}
 	else
 #endif // WITH_EDITOR
 	{
-		InDeviceContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+		InDeviceContext->ClearDepthStencil( g_SceneRenderTargets.GetSceneDepthZSurface() );
 	}
 
 	RenderSDG( InDeviceContext, SDG_Foreground );
-	GSceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
+	g_SceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
 }

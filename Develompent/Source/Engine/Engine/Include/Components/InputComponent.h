@@ -68,7 +68,7 @@ public:
 	 */
 	FORCEINLINE void ShowCursor()
 	{
-		GWindow->ShowCursor();
+		g_Window->ShowCursor();
 	}
 
 	/**
@@ -76,7 +76,7 @@ public:
 	 */
 	FORCEINLINE void HideCursor()
 	{
-		GWindow->HideCursor();
+		g_Window->HideCursor();
 	}
 
 	/**
@@ -94,7 +94,7 @@ public:
 			return;
 		}
 
-		check( InTriggerEvent != IE_Num );
+		Assert( InTriggerEvent != IE_Num );
 		it->second.inputActionDelegate[ InTriggerEvent ].Bind( InDelegate );
 	}
 

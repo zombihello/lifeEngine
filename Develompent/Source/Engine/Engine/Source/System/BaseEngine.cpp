@@ -20,6 +20,11 @@
 
 IMPLEMENT_CLASS( CBaseEngine )
 
+/*
+==================
+CBaseEngine::CBaseEngine
+==================
+*/
 CBaseEngine::CBaseEngine()
 	: bPrePass( true )
 	, bAutoExposure( true )
@@ -29,30 +34,35 @@ CBaseEngine::CBaseEngine()
 	, gamma( 2.2f )
 {}
 
+/*
+==================
+CBaseEngine::Init
+==================
+*/
 void CBaseEngine::Init()
 {
 	// Load default texture
 	{	
 		// Loading default texture from packages only when we in game
-		if ( !GIsCooker && !GIsCommandlet )
+		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultTexture = GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
+			CConfigValue		configDefaultTexture = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
 			if ( configDefaultTexture.IsValid() )
 			{
 				std::wstring			pathAsset = configDefaultTexture.GetString();
-				TAssetHandle<CAsset>	asset = GPackageManager->FindAsset( pathAsset );
+				TAssetHandle<CAsset>	asset = g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
 					defaultTexture = asset;
 				}
 				else
 				{
-					LE_LOG( LT_Warning, LC_Init, TEXT( "Default texture '%s' not loaded" ), pathAsset.c_str() );
+					Warnf( TEXT( "Default texture '%s' not loaded\n" ), pathAsset.c_str() );
 				}
 			}
 			else
 			{
-				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default texture in section 'Engine.Engine:DefaultTexture'" ) );
+				Warnf( TEXT( "Need set in config 'Engine' default texture in section 'Engine.Engine:DefaultTexture'\n" ) );
 			}
 		}
 
@@ -60,7 +70,7 @@ void CBaseEngine::Init()
 		if ( !defaultTexture.IsAssetValid() )
 		{
 			std::vector< byte >			data		= { 0, 0, 0, 0 };
-			PackageRef_t				package		= GPackageManager->LoadPackage( TEXT( "" ), true );
+			PackageRef_t				package		= g_PackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<CTexture2D>		texture2D	= MakeSharedPtr<CTexture2D>();
 			texture2D->SetAssetName( TEXT( "DefaultTexture" ) );
 			texture2D->SetData( PF_A8R8G8B8, 1, 1, data );
@@ -73,32 +83,32 @@ void CBaseEngine::Init()
 	// Load default material
 	{
 		// Loading default material from packages only when we in game
-		if ( !GIsCooker && !GIsCommandlet )
+		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultMaterial = GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
+			CConfigValue		configDefaultMaterial = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
 			if ( configDefaultMaterial.IsValid() )
 			{
 				std::wstring			pathAsset = configDefaultMaterial.GetString();
-				TAssetHandle<CAsset>	asset = GPackageManager->FindAsset( pathAsset );
+				TAssetHandle<CAsset>	asset = g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
 					defaultMaterial = asset;
 				}
 				else
 				{
-					LE_LOG( LT_Warning, LC_Init, TEXT( "Default material '%s' not loaded" ), pathAsset.c_str() );
+					Warnf( TEXT( "Default material '%s' not loaded\n" ), pathAsset.c_str() );
 				}
 			}
 			else
 			{
-				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Engine' default material in section 'Engine.Engine:DefaultMaterial'" ) );
+				Warnf( TEXT( "Need set in config 'Engine' default material in section 'Engine.Engine:DefaultMaterial'\n" ) );
 			}
 		}
 
 		// If default material not loaded we create in virtual package
 		if ( !defaultMaterial.IsAssetValid() )
 		{
-			PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			PackageRef_t			package = g_PackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<CMaterial>	material = MakeSharedPtr<CMaterial>();
 			material->SetAssetName( TEXT( "DefaultMaterial" ) );
 
@@ -111,32 +121,32 @@ void CBaseEngine::Init()
 #if WITH_EDITOR
 	{
 		// Loading default wireframe material from packages only when we in game
-		if ( !GIsCooker && !GIsCommandlet )
+		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultWireframeMaterial = GConfig.GetValue( CT_Engine, TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
+			CConfigValue		configDefaultWireframeMaterial = g_Config.GetValue( CT_Engine, TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
 			if ( configDefaultWireframeMaterial.IsValid() )
 			{
 				std::wstring			pathAsset	= configDefaultWireframeMaterial.GetString();
-				TAssetHandle<CAsset>	asset		= GPackageManager->FindAsset( pathAsset );
+				TAssetHandle<CAsset>	asset		= g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
 					defaultWireframeMaterial = asset;
 				}
 				else
 				{
-					LE_LOG( LT_Warning, LC_Init, TEXT( "Default wireframe material '%s' not loaded" ), pathAsset.c_str() );
+					Warnf( TEXT( "Default wireframe material '%s' not loaded\n" ), pathAsset.c_str() );
 				}
 			}
 			else
 			{
-				LE_LOG( LT_Warning, LC_Init, TEXT( "Need set in config 'Editor' default wireframe material in section 'Editor.Editor:DefaultWireframeMaterial'" ) );
+				Warnf( TEXT( "Need set in config 'Editor' default wireframe material in section 'Editor.Editor:DefaultWireframeMaterial'\n" ) );
 			}
 		}
 
 		// If default wireframe material not loaded we create in virtual package
 		if ( !defaultWireframeMaterial.IsAssetValid() )
 		{
-			PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
+			PackageRef_t			package = g_PackageManager->LoadPackage( TEXT( "" ), true );
 			TSharedPtr<CMaterial>	material = MakeSharedPtr<CMaterial>();
 			material->SetAssetName( TEXT( "DefaultWireframeMaterial" ) );
 			material->SetWireframe( true );
@@ -149,37 +159,37 @@ void CBaseEngine::Init()
 
 	// Get from configs PrePass, HDRExposure, etc values
 	{
-		CConfigValue	configPrePass = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "PrePass" ) );
+		CConfigValue	configPrePass = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "PrePass" ) );
 		if ( configPrePass.IsValid() )
 		{
 			bPrePass = configPrePass.GetBool();
 		}
 
-		CConfigValue	configExposure = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Exposure" ) );
+		CConfigValue	configExposure = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Exposure" ) );
 		if ( configExposure.IsValid() )
 		{
 			exposure = configExposure.GetNumber();
 		}
 
-		CConfigValue	configAutoExposure = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "AutoExposure" ) );
+		CConfigValue	configAutoExposure = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "AutoExposure" ) );
 		if ( configAutoExposure.IsValid() )
 		{
 			bAutoExposure = configAutoExposure.GetBool();
 		}
 
-		CConfigValue	configExposureMin = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMin" ) );
+		CConfigValue	configExposureMin = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMin" ) );
 		if ( configExposureMin.IsValid() )
 		{
 			exposureMin = configExposureMin.GetNumber();
 		}
 
-		CConfigValue	configExposureMax = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMax" ) );
+		CConfigValue	configExposureMax = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMax" ) );
 		if ( configExposureMax.IsValid() )
 		{
 			exposureMax = configExposureMax.GetNumber();
 		}
 
-		CConfigValue	configGamma = GConfig.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Gamma" ) );
+		CConfigValue	configGamma = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Gamma" ) );
 		if ( configGamma.IsValid() )
 		{
 			gamma = configGamma.GetNumber();
@@ -187,40 +197,60 @@ void CBaseEngine::Init()
 	}
 
 	// Register default assets
-	GAssetFactory.SetDefault( defaultTexture, AT_Texture2D );
-	GAssetFactory.SetDefault( defaultMaterial, AT_Material );
+	g_AssetFactory.SetDefault( defaultTexture, AT_Texture2D );
+	g_AssetFactory.SetDefault( defaultMaterial, AT_Material );
 
-	GInputSystem->Init();
-	GUIEngine->Init();
-	GPhysicsEngine.Init();
+	g_InputSystem->Init();
+	g_UIEngine->Init();
+	g_PhysicsEngine.Init();
 }
 
+/*
+==================
+CBaseEngine::Shutdown
+==================
+*/
 void CBaseEngine::Shutdown()
 {
 	// Wait while render thread is rendering of the frame
 	FlushRenderingCommands();
 
-	GWorld->CleanupWorld();
-	GUIEngine->Shutdown();
-	GPhysicsEngine.Shutdown();
+	g_World->CleanupWorld();
+	g_UIEngine->Shutdown();
+	g_PhysicsEngine.Shutdown();
 }
 
+/*
+==================
+CBaseEngine::Tick
+==================
+*/
 void CBaseEngine::Tick( float InDeltaSeconds )
 {
-	GUIEngine->Tick( InDeltaSeconds );
-	GPhysicsEngine.Tick( InDeltaSeconds );
+	g_UIEngine->Tick( InDeltaSeconds );
+	g_PhysicsEngine.Tick( InDeltaSeconds );
 }
 
+/*
+==================
+CBaseEngine::ProcessEvent
+==================
+*/
 void CBaseEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
-	GInputSystem->ProcessEvent( InWindowEvent );
-	GUIEngine->ProcessEvent( InWindowEvent );
-	GCameraManager->ProcessEvent( InWindowEvent );
+	g_InputSystem->ProcessEvent( InWindowEvent );
+	g_UIEngine->ProcessEvent( InWindowEvent );
+	g_CameraManager->ProcessEvent( InWindowEvent );
 }
 
+/*
+==================
+CBaseEngine::GetMaxTickRate
+==================
+*/
 float CBaseEngine::GetMaxTickRate() const
 {
-	CConfigValue		configMaxTickRate = GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
+	CConfigValue		configMaxTickRate = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
 	if ( configMaxTickRate.IsValid() )
 	{
 		return configMaxTickRate.GetNumber();
@@ -229,11 +259,16 @@ float CBaseEngine::GetMaxTickRate() const
 	return 0.f;
 }
 
+/*
+==================
+CBaseEngine::LoadMap
+==================
+*/
 bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
-	LE_LOG( LT_Log, LC_General, TEXT( "Load map: %s" ), InMap.c_str() );
+	Logf( TEXT( "Load map: %s\n" ), InMap.c_str() );
 
-	CArchive*		archive = GFileSystem->CreateFileReader( InMap );
+	CArchive*		archive = g_FileSystem->CreateFileReader( InMap );
 	if ( !archive )
 	{
 		OutError = TEXT( "Map not found" );
@@ -242,9 +277,9 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 
 	// Serialize world
 	archive->SerializeHeader();
-	GWorld->Serialize( *archive );
+	g_World->Serialize( *archive );
 	
 	// Call garbage collector of unused packages and assets
-	GPackageManager->GarbageCollector();
+	g_PackageManager->GarbageCollector();
 	return true;
 }

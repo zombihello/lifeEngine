@@ -214,7 +214,7 @@ public:
 	FORCEINLINE SSamplerStateInitializerRHI GetSamplerStateInitialiser() const
 	{
 		SSamplerStateInitializerRHI		samplerStateInitializer;
-		appMemzero( &samplerStateInitializer, sizeof( SSamplerStateInitializerRHI ) );
+		Sys_Memzero( &samplerStateInitializer, sizeof( SSamplerStateInitializerRHI ) );
 
 		samplerStateInitializer.filter = samplerFilter;
 		samplerStateInitializer.addressU = addressU;
@@ -230,7 +230,7 @@ public:
 	 */
 	FORCEINLINE const STexture2DMipMap& GetMip( uint32 InMipLevel ) const
 	{
-		check( InMipLevel < mipmaps.size() );
+		Assert( InMipLevel < mipmaps.size() );
 		return mipmaps[InMipLevel];
 	}
 
@@ -276,7 +276,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CTexture2D>&
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CTexture2D>& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive << ( TAssetHandle<CAsset> )InValue;
 	return InArchive;
 }
@@ -288,14 +288,5 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, STexture2DMipMap& InValue
 	InArchive << InValue.data;
 	return InArchive;
 }
-
-//FORCEINLINE CArchive& operator<<( CArchive& InArchive, const STexture2DMipMap& InValue )
-//{
-//	check( InArchive.IsSaving() );
-//	InArchive << InValue.sizeX;
-//	InArchive << InValue.sizeY;
-//	InArchive << InValue.data;
-//	return InArchive;
-//}
 
 #endif // !TEXTURE_H

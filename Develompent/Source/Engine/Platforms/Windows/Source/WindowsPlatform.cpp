@@ -22,12 +22,12 @@
 // Platform specific globals variables
 // ----
 
-CBaseLogger*         GLog			= new CWindowsLogger();
-CBaseFileSystem*     GFileSystem	= new CWindowsFileSystem();
-CBaseWindow*         GWindow		= new CWindowsWindow();
-CBaseRHI*            GRHI			= new CD3D11RHI();
-CEngineLoop*         GEngineLoop	= new CEngineLoop();
-EPlatformType        GPlatform		= PLATFORM_Windows;
+CBaseLogger*         g_Log			= new CWindowsLogger();
+CBaseFileSystem*     g_FileSystem	= new CWindowsFileSystem();
+CBaseWindow*         g_Window		= new CWindowsWindow();
+CBaseRHI*            g_RHI			= new CD3D11RHI();
+CEngineLoop*         g_EngineLoop	= new CEngineLoop();
+EPlatformType        g_Platform		= PLATFORM_Windows;
 
 // ---
 // Classes
@@ -78,28 +78,34 @@ private:
 // Platform specific functions
 // ----
 
-/**
- * Get formatted string (for Unicode strings)
- */
-int appGetVarArgs( tchar* InOutDest, uint32 InDestSize, uint32 InCount, const tchar*& InFormat, va_list InArgPtr )
+/*
+==================
+Sys_GetVarArgs
+==================
+*/
+int Sys_GetVarArgs( tchar* InOutDest, uint32 InDestSize, uint32 InCount, const tchar*& InFormat, va_list InArgPtr )
 {
     return vswprintf( InOutDest, InCount, InFormat, InArgPtr );
 }
 
-/**
- * Get formatted string (for ANSI strings)
- */
-int appGetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, uint32 InCount, const achar*& InFormat, va_list InArgPtr )
+/*
+==================
+Sys_GetVarArgsAnsi
+==================
+*/
+int Sys_GetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, uint32 InCount, const achar*& InFormat, va_list InArgPtr )
 {
     return vsnprintf( InOutDest, InCount, InFormat, InArgPtr );
 }
 
-/**
- * Create process
- */
-void* appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool InLaunchDetached, bool InLaunchHidden, bool InLaunchReallyHidden, int32 InPriorityModifier, uint64* OutProcessId /* = nullptr */ )
+/*
+==================
+Sys_CreateProc
+==================
+*/
+void* Sys_CreateProc( const tchar* InPathToProcess, const tchar* InParams, bool InLaunchDetached, bool InLaunchHidden, bool InLaunchReallyHidden, int32 InPriorityModifier, uint64* OutProcessId /* = nullptr */ )
 {
-    LE_LOG( LT_Log, LC_Dev, TEXT( "CreateProc %s %s" ), InPathToProcess, InParams );
+    Logf( TEXT( "CreateProc %s %s\n" ), InPathToProcess, InParams );
 
 	std::wstring				commandLine = CString::Format( TEXT( "%s %s" ), InPathToProcess, InParams );
 
@@ -164,7 +170,7 @@ void* appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool I
 		NULL,								NULL
 	};
 
-	if ( !CreateProcessW( NULL, ( LPWSTR )commandLine.c_str(), &attributes, &attributes, TRUE, ( DWORD )createFlags, NULL, ( LPCWSTR )GFileSystem->GetCurrentDirectory().c_str(), ( LPSTARTUPINFOW ) &startupInfo, &procInfo ) )
+	if ( !CreateProcessW( NULL, ( LPWSTR )commandLine.c_str(), &attributes, &attributes, TRUE, ( DWORD )createFlags, NULL, ( LPCWSTR )g_FileSystem->GetCurrentDirectory().c_str(), ( LPSTARTUPINFOW ) &startupInfo, &procInfo ) )
 	{
 		if ( OutProcessId )
 		{
@@ -182,15 +188,22 @@ void* appCreateProc( const tchar* InPathToProcess, const tchar* InParams, bool I
 	return ( void* )procInfo.hProcess;
 }
 
-/**
- * Retrieves the termination status of the specified process
- */
-bool appGetProcReturnCode( void* InProcHandle, int32* OutReturnCode )
+/*
+==================
+Sys_GetProcReturnCode
+==================
+*/
+bool Sys_GetProcReturnCode( void* InProcHandle, int32* OutReturnCode )
 {
     return GetExitCodeProcess( ( HANDLE )InProcHandle, ( DWORD* )OutReturnCode ) && *( ( DWORD* )OutReturnCode ) != STILL_ACTIVE;
 }
 
-void appShowMessageBox( const tchar* InTitle, const tchar* InMessage, EMessageBox Intype )
+/*
+==================
+Sys_ShowMessageBox
+==================
+*/
+void Sys_ShowMessageBox( const tchar* InTitle, const tchar* InMessage, EMessageBox Intype )
 {
 	uint32		flags = 0;
 	switch ( Intype )
@@ -203,14 +216,24 @@ void appShowMessageBox( const tchar* InTitle, const tchar* InMessage, EMessageBo
 	SDL_ShowSimpleMessageBox( flags, TCHAR_TO_ANSI( InTitle ), TCHAR_TO_ANSI( InMessage ), nullptr );
 }
 
-void appDumpCallStack( std::wstring& OutCallStack )
+/*
+==================
+Sys_DumpCallStack
+==================
+*/
+void Sys_DumpCallStack( std::wstring& OutCallStack )
 {
 	CStackWalker	stackWalker;
 	stackWalker.ShowCallstack();
 	OutCallStack = stackWalker.GetBuffer();
 }
 
-void appRequestExit( bool InForce )
+/*
+==================
+Sys_RequestExit
+==================
+*/
+void Sys_RequestExit( bool InForce )
 {
 	if ( InForce )
 	{
@@ -224,19 +247,29 @@ void appRequestExit( bool InForce )
 	{
 		// Tell the platform specific code we want to exit cleanly from the main loop.
 		PostQuitMessage( 0 );
-		GIsRequestingExit = true;
+		g_IsRequestingExit = true;
 	}
 }
 
-CGuid appCreateGuid()
+/*
+==================
+Sys_CreateGuid
+==================
+*/
+CGuid Sys_CreateGuid()
 {
 	CGuid	guid;
 	HRESULT result = CoCreateGuid( ( GUID* ) &guid );
-	check( result == S_OK );
+	Assert( result == S_OK );
 	return guid;
 }
 
-std::wstring appComputerName()
+/*
+==================
+Sys_ComputerName
+==================
+*/
+std::wstring Sys_ComputerName()
 {
 	static tchar	result[256] = TEXT( "" );
 	if ( !result[0] )
@@ -247,7 +280,12 @@ std::wstring appComputerName()
 	return result;
 }
 
-std::wstring appUserName()
+/*
+==================
+Sys_UserName
+==================
+*/
+std::wstring Sys_UserName()
 {
 	static tchar	result[256] = TEXT( "" );
 	if ( !result[0] )
@@ -261,20 +299,30 @@ std::wstring appUserName()
 #if WITH_EDITOR
 #include "Windows/FileDialog.h"
 
-void appShowFileInExplorer( const std::wstring& InPath )
+/*
+==================
+Sys_ShowFileInExplorer
+==================
+*/
+void Sys_ShowFileInExplorer( const std::wstring& InPath )
 {
-	CFilename		filename( GFileSystem->ConvertToAbsolutePath( InPath ) );
-	appCreateProc( TEXT( "explorer.exe" ), GFileSystem->IsDirectory( filename.GetFullPath() ) ? filename.GetFullPath().c_str() : filename.GetPath().c_str(), true, false, false, 0 );
+	CFilename		filename( g_FileSystem->ConvertToAbsolutePath( InPath ) );
+	Sys_CreateProc( TEXT( "explorer.exe" ), g_FileSystem->IsDirectory( filename.GetFullPath() ) ? filename.GetFullPath().c_str() : filename.GetPath().c_str(), true, false, false, 0 );
 }
 
-bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResult& OutResult )
+/*
+==================
+Sys_ShowOpenFileDialog
+==================
+*/
+bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResult& OutResult )
 {
 	OPENFILENAME		fileDialogSettings;
-	appMemzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
+	Sys_Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
 	fileDialogSettings.lStructSize = sizeof( OPENFILENAME );
 
 	// Flags
-	fileDialogSettings.hwndOwner	= GWindow ? ( HWND )GWindow->GetHandle() : nullptr;
+	fileDialogSettings.hwndOwner	= g_Window ? ( HWND )g_Window->GetHandle() : nullptr;
 	fileDialogSettings.Flags		|= ( InSetup.IsMultiselection() ) ? OFN_ALLOWMULTISELECT : 0;
 	fileDialogSettings.Flags		|= OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_NONETWORKBUTTON | OFN_PATHMUSTEXIST | OFN_EXTENSIONDIFFERENT;
 
@@ -337,11 +385,11 @@ bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResu
 	}
 
 	// Preserve the directory around the calls
-	std::wstring		absolutePathToDirectory = GFileSystem->ConvertToAbsolutePath( InSetup.GetDirectory() );
+	std::wstring		absolutePathToDirectory = g_FileSystem->ConvertToAbsolutePath( InSetup.GetDirectory() );
 	fileDialogSettings.lpstrInitialDir	= absolutePathToDirectory.data();
 
 	// Open file dialog
-	std::wstring		originalCurrentDir = GFileSystem->GetCurrentDirectory();
+	std::wstring		originalCurrentDir = g_FileSystem->GetCurrentDirectory();
 	if ( !GetOpenFileNameW( &fileDialogSettings ) )
 	{
 		return false;
@@ -396,14 +444,19 @@ bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResu
 	return true;
 }
 
-bool appShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogResult& OutResult )
+/*
+==================
+Sys_ShowSaveFileDialog
+==================
+*/
+bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogResult& OutResult )
 {
 	OPENFILENAME		fileDialogSettings;
-	appMemzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
+	Sys_Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
 	fileDialogSettings.lStructSize = sizeof( OPENFILENAME );
 
 	// Flags
-	fileDialogSettings.hwndOwner	= GWindow ? ( HWND )GWindow->GetHandle() : nullptr;
+	fileDialogSettings.hwndOwner	= g_Window ? ( HWND )g_Window->GetHandle() : nullptr;
 	fileDialogSettings.Flags		|= OFN_EXPLORER | OFN_HIDEREADONLY | OFN_ENABLESIZING | OFN_NONETWORKBUTTON | OFN_PATHMUSTEXIST | OFN_NOTESTFILECREATE | OFN_OVERWRITEPROMPT | OFN_EXTENSIONDIFFERENT;
 
 	// File name buffer
@@ -465,11 +518,11 @@ bool appShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogResu
 	}
 
 	// Preserve the directory around the calls
-	std::wstring		absolutePathToDirectory = GFileSystem->ConvertToAbsolutePath( InSetup.GetDirectory() );
+	std::wstring		absolutePathToDirectory = g_FileSystem->ConvertToAbsolutePath( InSetup.GetDirectory() );
 	fileDialogSettings.lpstrInitialDir	= absolutePathToDirectory.data();
 
 	// Open file dialog
-	std::wstring		originalCurrentDir = GFileSystem->GetCurrentDirectory();
+	std::wstring		originalCurrentDir = g_FileSystem->GetCurrentDirectory();
 	if ( !GetSaveFileNameW( &fileDialogSettings ) )
 	{
 		return false;

@@ -10,20 +10,22 @@
 #include "WorldEd.h"
 #endif // WITH_EDITOR
 
-static std::wstring			GSplashScreenFileName;
-static HANDLE				GSplashScreenThread = nullptr;
-static HBITMAP				GSplashScreenBitmap = nullptr;
-static HWND					GSplashScreenWnd = nullptr;
-static std::wstring			GSplashScreenText[ STT_NumTextTypes ];
-static RECT					GSplashScreenTextRects[ STT_NumTextTypes ];
-static HFONT				GSplashScreenSmallTextFontHandle = nullptr;
-static HFONT				GSplashScreenNormalTextFontHandle = nullptr;
-static CCriticalSection		GSplashScreenSynchronizationObject;
-static CEvent*				GThreadInitSyncEvent = nullptr;
+static std::wstring			s_SplashScreenFileName;
+static HANDLE				s_SplashScreenThread = nullptr;
+static HBITMAP				s_SplashScreenBitmap = nullptr;
+static HWND					s_SplashScreenWnd = nullptr;
+static std::wstring			s_SplashScreenText[ STT_NumTextTypes ];
+static RECT					s_SplashScreenTextRects[ STT_NumTextTypes ];
+static HFONT				s_SplashScreenSmallTextFontHandle = nullptr;
+static HFONT				s_SplashScreenNormalTextFontHandle = nullptr;
+static CCriticalSection		s_SplashScreenSynchronizationObject;
+static CEvent*				s_ThreadInitSyncEvent = nullptr;
 
-/**
- * Window's proc for splash screen
- */
+/*
+==================
+SplashScreenWindowProc
+==================
+*/
 LRESULT CALLBACK SplashScreenWindowProc( HWND InHWND, UINT InMessage, WPARAM InWParam, LPARAM InLParam )
 {
 	HDC				hdc;
@@ -36,28 +38,28 @@ LRESULT CALLBACK SplashScreenWindowProc( HWND InHWND, UINT InMessage, WPARAM InW
 		hdc = BeginPaint( InHWND, &ps );
 
 		// Draw splash bitmap
-		DrawState( hdc, DSS_NORMAL, NULL, ( LPARAM ) GSplashScreenBitmap, 0, 0, 0, 0, 0, DST_BITMAP );
+		DrawState( hdc, DSS_NORMAL, NULL, ( LPARAM ) s_SplashScreenBitmap, 0, 0, 0, 0, 0, DST_BITMAP );
 
 		{
 			// Take a critical section since another thread may be trying to set the splash text
-			CScopeLock		scopeLock( GSplashScreenSynchronizationObject );
+			CScopeLock		scopeLock( s_SplashScreenSynchronizationObject );
 
 			// Draw splash text
 			for ( int32 curTypeIndex = 0; curTypeIndex < STT_NumTextTypes; ++curTypeIndex )
 			{
-				const std::wstring&		splashText = GSplashScreenText[ curTypeIndex ];
-				const RECT&				textRect = GSplashScreenTextRects[ curTypeIndex ];
+				const std::wstring&		splashText = s_SplashScreenText[ curTypeIndex ];
+				const RECT&				textRect = s_SplashScreenTextRects[ curTypeIndex ];
 
 				if ( splashText.size() > 0 )
 				{
 					if ( curTypeIndex == STT_StartupProgress ||
 						 curTypeIndex == STT_GameName )
 					{
-						SelectObject( hdc, GSplashScreenNormalTextFontHandle );
+						SelectObject( hdc, s_SplashScreenNormalTextFontHandle );
 					}
 					else
 					{
-						SelectObject( hdc, GSplashScreenSmallTextFontHandle );
+						SelectObject( hdc, s_SplashScreenSmallTextFontHandle );
 					}
 
 					SetBkColor( hdc, 0x00000000 );
@@ -122,9 +124,11 @@ LRESULT CALLBACK SplashScreenWindowProc( HWND InHWND, UINT InMessage, WPARAM InW
 	return 0;
 }
 
-/**
- * Splash screen thread entry function
- */
+/*
+==================
+SplashScreenThread
+==================
+*/
 DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 {
 	HINSTANCE		hInstance = GetModuleHandle( nullptr );
@@ -135,7 +139,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 	wndClass.cbWndExtra		= 0;
 	wndClass.hInstance		= hInstance;
 
-	//wndClass.hIcon = LoadIcon( hInstance, MAKEINTRESOURCE( GIsEditor ? GEditorIcon : GGameIcon ) );
+	//wndClass.hIcon = LoadIcon( hInstance, MAKEINTRESOURCE( g_IsEditor ? GEditorIcon : GGameIcon ) );
 	//if ( wndClass.hIcon == NULL )
 	{
 		wndClass.hIcon		= LoadIcon( ( HINSTANCE )NULL, IDI_APPLICATION );
@@ -152,27 +156,27 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 	}
 
 	// Load splash screen image, display it and handle all window's messages
-	GSplashScreenBitmap = ( HBITMAP )LoadImage( hInstance, ( LPCTSTR )GSplashScreenFileName.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
+	s_SplashScreenBitmap = ( HBITMAP )LoadImage( hInstance, ( LPCTSTR )s_SplashScreenFileName.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
 	
 	// If splash screen not loaded - try load engine splash
-	if ( !GSplashScreenBitmap )
+	if ( !s_SplashScreenBitmap )
 	{
-		if ( GIsEditor )
+		if ( g_IsEditor )
 		{
-			GSplashScreenFileName = appBaseDir() + TEXT( "Engine/Splash/EdSplash.bmp" );
+			s_SplashScreenFileName = Sys_BaseDir() + TEXT( "Engine/Splash/EdSplash.bmp" );
 		}
 		else
 		{
-			GSplashScreenFileName = appBaseDir() + TEXT( "Engine/Splash/Splash.bmp" );
+			s_SplashScreenFileName = Sys_BaseDir() + TEXT( "Engine/Splash/Splash.bmp" );
 		}
 
-		GSplashScreenBitmap = ( HBITMAP )LoadImage( hInstance, ( LPCTSTR )GSplashScreenFileName.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
+		s_SplashScreenBitmap = ( HBITMAP )LoadImage( hInstance, ( LPCTSTR )s_SplashScreenFileName.c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
 	}
 
-	if ( GSplashScreenBitmap )
+	if ( s_SplashScreenBitmap )
 	{
 		BITMAP			bitmap;
-		GetObjectW( GSplashScreenBitmap, sizeof( bitmap ), &bitmap );
+		GetObjectW( s_SplashScreenBitmap, sizeof( bitmap ), &bitmap );
 
 		int32			screenPosX = ( GetSystemMetrics( SM_CXSCREEN ) - bitmap.bmWidth ) / 2;
 		int32			screenPosY = ( GetSystemMetrics( SM_CYSCREEN ) - bitmap.bmHeight ) / 2;
@@ -180,7 +184,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 		// Force the editor splash screen to show up in the taskbar and alt-tab lists
 		uint32			windowStyle = WS_EX_APPWINDOW;
 
-		GSplashScreenWnd = CreateWindowEx( windowStyle, wndClass.lpszClassName, TEXT( "SplashScreen" ), WS_BORDER | WS_POPUP,
+		s_SplashScreenWnd = CreateWindowEx( windowStyle, wndClass.lpszClassName, TEXT( "SplashScreen" ), WS_BORDER | WS_POPUP,
 										   screenPosX, screenPosY, bitmap.bmWidth, bitmap.bmHeight, nullptr, nullptr, hInstance, nullptr );
 
 		// Setup font
@@ -190,88 +194,88 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			// Create small font
 			{
 				LOGFONT		myFont;
-				appMemzero( &myFont, sizeof( myFont ) );
+				Sys_Memzero( &myFont, sizeof( myFont ) );
 				GetObjectW( systemFontHandle, sizeof( myFont ), &myFont );
 				myFont.lfHeight = 10;
 
-				GSplashScreenSmallTextFontHandle = CreateFontIndirect( &myFont );
-				if ( GSplashScreenSmallTextFontHandle == NULL )
+				s_SplashScreenSmallTextFontHandle = CreateFontIndirect( &myFont );
+				if ( s_SplashScreenSmallTextFontHandle == NULL )
 				{
 					// Couldn't create font, so just use a system font
-					GSplashScreenSmallTextFontHandle = systemFontHandle;
+					s_SplashScreenSmallTextFontHandle = systemFontHandle;
 				}
 			}
 
 			// Create normal font
 			{
 				LOGFONT			myFont;
-				appMemzero( &myFont, sizeof( myFont ) );
+				Sys_Memzero( &myFont, sizeof( myFont ) );
 				GetObjectW( systemFontHandle, sizeof( myFont ), &myFont );
 				myFont.lfHeight = 12;
 
-				GSplashScreenNormalTextFontHandle = CreateFontIndirect( &myFont );
-				if ( GSplashScreenNormalTextFontHandle == NULL )
+				s_SplashScreenNormalTextFontHandle = CreateFontIndirect( &myFont );
+				if ( s_SplashScreenNormalTextFontHandle == NULL )
 				{
 					// Couldn't create font, so just use a system font
-					GSplashScreenNormalTextFontHandle = systemFontHandle;
+					s_SplashScreenNormalTextFontHandle = systemFontHandle;
 				}
 			}
 		}
 
 		// Setup bounds for game name
-		GSplashScreenTextRects[ STT_GameName ].top						= bitmap.bmHeight - 60;
-		GSplashScreenTextRects[ STT_GameName ].bottom					= bitmap.bmHeight - 30;
-		GSplashScreenTextRects[ STT_GameName ].left						= 10;
-		GSplashScreenTextRects[ STT_GameName ].right					= bitmap.bmWidth - 20;
+		s_SplashScreenTextRects[ STT_GameName ].top						= bitmap.bmHeight - 60;
+		s_SplashScreenTextRects[ STT_GameName ].bottom					= bitmap.bmHeight - 30;
+		s_SplashScreenTextRects[ STT_GameName ].left						= 10;
+		s_SplashScreenTextRects[ STT_GameName ].right					= bitmap.bmWidth - 20;
 
 		// Setup bounds for copyright info text
-		GSplashScreenTextRects[ STT_CopyrightInfo ].top					= bitmap.bmHeight - 15;
-		GSplashScreenTextRects[ STT_CopyrightInfo ].bottom				= bitmap.bmHeight - 10;
-		GSplashScreenTextRects[ STT_CopyrightInfo ].left				= bitmap.bmWidth - 150;
-		GSplashScreenTextRects[ STT_CopyrightInfo ].right				= bitmap.bmWidth;
+		s_SplashScreenTextRects[ STT_CopyrightInfo ].top					= bitmap.bmHeight - 15;
+		s_SplashScreenTextRects[ STT_CopyrightInfo ].bottom				= bitmap.bmHeight - 10;
+		s_SplashScreenTextRects[ STT_CopyrightInfo ].left				= bitmap.bmWidth - 150;
+		s_SplashScreenTextRects[ STT_CopyrightInfo ].right				= bitmap.bmWidth;
 
 		// Setup bounds for version info text
-		GSplashScreenTextRects[ STT_VersionInfo1 ].top					= bitmap.bmHeight - 40;
-		GSplashScreenTextRects[ STT_VersionInfo1 ].bottom				= bitmap.bmHeight - 20;
-		GSplashScreenTextRects[ STT_VersionInfo1 ].left					= 10;
-		GSplashScreenTextRects[ STT_VersionInfo1 ].right				= bitmap.bmWidth - 20;
+		s_SplashScreenTextRects[ STT_VersionInfo1 ].top					= bitmap.bmHeight - 40;
+		s_SplashScreenTextRects[ STT_VersionInfo1 ].bottom				= bitmap.bmHeight - 20;
+		s_SplashScreenTextRects[ STT_VersionInfo1 ].left					= 10;
+		s_SplashScreenTextRects[ STT_VersionInfo1 ].right				= bitmap.bmWidth - 20;
 
 		// Setup bounds for startup progress text
-		GSplashScreenTextRects[ STT_StartupProgress ].top				= bitmap.bmHeight - 20;
-		GSplashScreenTextRects[ STT_StartupProgress ].bottom			= bitmap.bmHeight;
-		GSplashScreenTextRects[ STT_StartupProgress ].left				= 10;
-		GSplashScreenTextRects[ STT_StartupProgress ].right				= bitmap.bmWidth - 20;
+		s_SplashScreenTextRects[ STT_StartupProgress ].top				= bitmap.bmHeight - 20;
+		s_SplashScreenTextRects[ STT_StartupProgress ].bottom			= bitmap.bmHeight;
+		s_SplashScreenTextRects[ STT_StartupProgress ].left				= 10;
+		s_SplashScreenTextRects[ STT_StartupProgress ].right				= bitmap.bmWidth - 20;
 
 		// In the editor, we'll display loading info
 #if WITH_EDITOR
-		if ( GIsEditor )
+		if ( g_IsEditor )
 		{
 			// Set initial startup progress info
-			appSetSplashText( STT_StartupProgress, TEXT( "Loading..." ) );
+			Sys_SetSplashText( STT_StartupProgress, TEXT( "Loading..." ) );
 
 			// Set game name
 			{
-				std::wstring		finalGameName = appGetWorldEdName();				
-				appSetSplashText( STT_GameName, finalGameName.c_str() );
+				std::wstring		finalGameName = Sys_GetWorldEdName();				
+				Sys_SetSplashText( STT_GameName, finalGameName.c_str() );
 
 				// Change the window text (which will be displayed in the taskbar)
-				SetWindowText( GSplashScreenWnd, finalGameName.c_str() );
+				SetWindowText( s_SplashScreenWnd, finalGameName.c_str() );
 			}
 
 			// Set version info and copyright
-			appSetSplashText( STT_VersionInfo1, ENGINE_NAME TEXT( " (version " ) ENGINE_VERSION_STRING TEXT( ")" ) );
-			appSetSplashText( STT_CopyrightInfo, TEXT( "(C) Broken Singularity. All rights reserved" ) );			
+			Sys_SetSplashText( STT_VersionInfo1, ENGINE_NAME TEXT( " (version " ) ENGINE_VERSION_STRING TEXT( ")" ) );
+			Sys_SetSplashText( STT_CopyrightInfo, TEXT( "(C) Broken Singularity. All rights reserved" ) );			
 		}
 #endif // WITH_EDITOR
 
-		if ( GSplashScreenWnd )
+		if ( s_SplashScreenWnd )
 		{
-			ShowWindow( GSplashScreenWnd, SW_SHOW );
-			UpdateWindow( GSplashScreenWnd );
+			ShowWindow( s_SplashScreenWnd, SW_SHOW );
+			UpdateWindow( s_SplashScreenWnd );
 
-			if ( GThreadInitSyncEvent )
+			if ( s_ThreadInitSyncEvent )
 			{
-				GThreadInitSyncEvent->Trigger();
+				s_ThreadInitSyncEvent->Trigger();
 			}
 
 			MSG			message;
@@ -282,69 +286,84 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			}
 		}
 
-		DeleteObject( GSplashScreenBitmap );
-		GSplashScreenBitmap = nullptr;
+		DeleteObject( s_SplashScreenBitmap );
+		s_SplashScreenBitmap = nullptr;
 	}
 
 	UnregisterClass( wndClass.lpszClassName, hInstance );
 	return 0;
 }
 
-void appShowSplash( const tchar* InSplashName )
+/*
+==================
+Sys_ShowSplash
+==================
+*/
+void Sys_ShowSplash( const tchar* InSplashName )
 {
-	if ( !GIsCommandlet )
+	if ( !g_IsCommandlet )
 	{
-		GSplashScreenFileName = appGameDir() + CString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
-		GThreadInitSyncEvent = GSynchronizeFactory->CreateSynchEvent( true );
-		GSplashScreenThread = CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
+		s_SplashScreenFileName = Sys_GameDir() + CString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
+		s_ThreadInitSyncEvent = g_SynchronizeFactory->CreateSynchEvent( true );
+		s_SplashScreenThread = CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
 
 		// Wait of open splash screen
-		GThreadInitSyncEvent->Wait( INFINITE );
-		GSynchronizeFactory->Destroy( GThreadInitSyncEvent );
-		GThreadInitSyncEvent = nullptr;
+		s_ThreadInitSyncEvent->Wait( INFINITE );
+		g_SynchronizeFactory->Destroy( s_ThreadInitSyncEvent );
+		s_ThreadInitSyncEvent = nullptr;
 	}
 }
 
-void appHideSplash()
+/*
+==================
+Sys_HideSplash
+==================
+*/
+void Sys_HideSplash()
 {
-	if ( GSplashScreenThread )
+	if ( s_SplashScreenThread )
 	{
-		if ( GSplashScreenWnd )
+		if ( s_SplashScreenWnd )
 		{
 			// Send message to splash screen window to destroy itself
-			PostMessage( GSplashScreenWnd, WM_DESTROY, 0, 0 );
+			PostMessage( s_SplashScreenWnd, WM_DESTROY, 0, 0 );
 		}
 
 		// Wait for splash screen thread to finish
-		WaitForSingleObject( GSplashScreenThread, INFINITE );
+		WaitForSingleObject( s_SplashScreenThread, INFINITE );
 
 		// Clean up
-		CloseHandle( GSplashScreenThread );
-		GSplashScreenThread = nullptr;
-		GSplashScreenThread = nullptr;
-		GSplashScreenWnd = nullptr;
+		CloseHandle( s_SplashScreenThread );
+		s_SplashScreenThread = nullptr;
+		s_SplashScreenThread = nullptr;
+		s_SplashScreenWnd = nullptr;
 	}
 }
 
-void appSetSplashText( const ESplashTextType InType, const tchar* InText )
+/*
+==================
+Sys_SetSplashText
+==================
+*/
+void Sys_SetSplashText( const ESplashTextType InType, const tchar* InText )
 {
 	// We only want to bother drawing startup progress in the editor, since this information is
 	// not interesting to an end-user (also, it's not usually localized properly.)
-	if ( GSplashScreenThread )
+	if ( s_SplashScreenThread )
 	{
 		// Only allow copyright text displayed while loading the game.  Editor displays all.
-		if ( InType == STT_CopyrightInfo || InType == STT_GameName || GIsEditor )
+		if ( InType == STT_CopyrightInfo || InType == STT_GameName || g_IsEditor )
 		{
 			{
 				// Take a critical section since the splash thread may already be repainting using this text
-				CScopeLock			scopeLock( GSplashScreenSynchronizationObject );
+				CScopeLock			scopeLock( s_SplashScreenSynchronizationObject );
 				
 				// Update splash text
-				GSplashScreenText[ InType ] = InText;
+				s_SplashScreenText[ InType ] = InText;
 			}
 
 			// Repaint the window
-			InvalidateRect( GSplashScreenWnd, &GSplashScreenTextRects[ InType ], false );
+			InvalidateRect( s_SplashScreenWnd, &s_SplashScreenTextRects[ InType ], false );
 		}
 	}
 }

@@ -6,6 +6,11 @@
 
 IMPLEMENT_CLASS( APlayerController )
 
+/*
+==================
+APlayerController::APlayerController
+==================
+*/
 APlayerController::APlayerController()
 	: bShowMouseCursor( false )
 	, bConstrainYaw( true )
@@ -15,29 +20,44 @@ APlayerController::APlayerController()
 	inputComponent = CreateComponent< CInputComponent >( TEXT( "InputComponent0" ) );
 }
 
+/*
+==================
+APlayerController::~APlayerController
+==================
+*/
 APlayerController::~APlayerController()
 {}
 
+/*
+==================
+APlayerController::BeginPlay
+==================
+*/
 void APlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	SetupInputComponent();
 }
 
+/*
+==================
+APlayerController::Tick
+==================
+*/
 void APlayerController::Tick( float InDeltaTime )
 {
 	Super::Tick( InDeltaTime );
 
 	// Update show mouse cursor if need
-	if ( bShowMouseCursor != GWindow->IsShowingCursor() )
+	if ( bShowMouseCursor != g_Window->IsShowingCursor() )
 	{
 		if ( bShowMouseCursor )
 		{
-			GWindow->ShowCursor();
+			g_Window->ShowCursor();
 		}
 		else
 		{
-			GWindow->HideCursor();
+			g_Window->HideCursor();
 		}
 	}
 
@@ -45,9 +65,19 @@ void APlayerController::Tick( float InDeltaTime )
 	UpdateRotation( InDeltaTime );
 }
 
+/*
+==================
+APlayerController::SetupInputComponent
+==================
+*/
 void APlayerController::SetupInputComponent()
 {}
 
+/*
+==================
+APlayerController::UpdateRotation
+==================
+*/
 void APlayerController::UpdateRotation( float InDeltaTime )
 {
 	if ( rotationInput == SMath::vectorZero )

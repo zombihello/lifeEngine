@@ -48,7 +48,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual					~CArchive() {}
+	virtual ~CArchive() {}
 
 	/**
 	 * @brief Serialize data
@@ -56,7 +56,7 @@ public:
 	 * @param[in] InBuffer Pointer to buffer for serialize
 	 * @param[in] InSize Size of buffer
 	 */
-	virtual void			Serialize( void* InBuffer, uint32 InSize ) {}
+	virtual void Serialize( void* InBuffer, uint32 InSize ) {}
 
 	/**
 	 * Serialize compression data
@@ -76,19 +76,19 @@ public:
 	 * @brief Get current position in archive
 	 * @return Current position in archive
 	 */
-	virtual uint32			Tell() { return 0; };
+	virtual uint32 Tell() { return 0; };
 
 	/**
 	 * @brief Set current position in archive
 	 * 
 	 * @param[in] InPosition New position in archive
 	 */
-	virtual void			Seek( uint32 InPosition ) {}
+	virtual void Seek( uint32 InPosition ) {}
 
 	/**
 	 * @brief Flush data
 	 */
-	virtual void			Flush() {}
+	virtual void Flush() {}
 
 	/**
 	 * Set archive type
@@ -104,31 +104,31 @@ public:
 	 * @brief Is saving archive
 	 * @return True if archive saving, false if archive loading
 	 */
-	virtual bool			IsSaving() const { return false; }
+	virtual bool IsSaving() const { return false; }
 
 	/**
 	 * @breif Is loading archive
 	 * @return True if archive loading, false if archive saving
 	 */
-	virtual bool			IsLoading() const { return false; }
+	virtual bool IsLoading() const { return false; }
 
 	/**
 	 * Is end of file
 	 * @return Return true if end of file, else return false
 	 */
-	virtual bool			IsEndOfFile() { return false; }
+	virtual bool IsEndOfFile() { return false; }
 
 	/**
 	 * @brief Get size of archive
 	 * @return Size of archive
 	 */
-	virtual uint32			GetSize() { return 0; }
+	virtual uint32 GetSize() { return 0; }
 
 	/**
 	 * Get archive version
 	 * @return Return archive version
 	 */
-	FORCEINLINE uint32		Ver() const
+	FORCEINLINE uint32 Ver() const
 	{
 		return arVer;
 	}
@@ -180,7 +180,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, int8& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const int8& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -193,7 +193,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, uint8& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const uint8& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -206,7 +206,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, int16& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const int16& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -219,7 +219,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, uint16& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const uint16& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -232,7 +232,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, int32& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const int32& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -245,7 +245,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, uint32& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const uint32& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -258,7 +258,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, int64& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const int64& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -271,7 +271,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, uint64& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const uint64& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -284,7 +284,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, bool& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const bool& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -297,7 +297,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, float& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const float& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -310,7 +310,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, EArchiveType& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const EArchiveType& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -323,7 +323,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, SCompressedChunkInfo& InV
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SCompressedChunkInfo& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -336,7 +336,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, achar& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const achar& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -349,21 +349,21 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, tchar& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const tchar& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const tchar* InStringC )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* )InStringC, ( uint32 )wcslen( InStringC ) * 2 );
 	return InArchive;
 }
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const achar* InStringC )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* )InStringC, ( uint32 )strlen( InStringC ) );
 	return InArchive;
 }
@@ -397,7 +397,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::string& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::string& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 
 	// If we serialize text file
 	if ( InArchive.Type() == AT_TextFile )
@@ -448,7 +448,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::wstring& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::wstring& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 
 	// If we serialize text file
 	if ( InArchive.Type() == AT_TextFile )
@@ -500,7 +500,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::vector< TType >& InV
 template< typename TType >
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::vector< TType >& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 
 	uint32		arraySize = InValue.size();
 	InArchive << arraySize;
@@ -557,7 +557,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, std::unordered_map< TKey,
 template< typename TKey, typename TValue, typename THasher = std::hash<TKey> >
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const std::unordered_map< TKey, TValue, THasher >& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 
 	uint32		arraySize = InValue.size();
 	InArchive << arraySize;

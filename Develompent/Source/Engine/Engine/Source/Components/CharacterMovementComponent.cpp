@@ -8,6 +8,11 @@
 
 IMPLEMENT_CLASS( CCharacterMovementComponent )
 
+/*
+==================
+CCharacterMovementComponent::CCharacterMovementComponent
+==================
+*/
 CCharacterMovementComponent::CCharacterMovementComponent()
 	: bOnGround( false )
 	, bJump( false )
@@ -19,11 +24,16 @@ CCharacterMovementComponent::CCharacterMovementComponent()
 	, ownerCharacter( nullptr )
 {}
 
+/*
+==================
+CCharacterMovementComponent::BeginPlay
+==================
+*/
 void CCharacterMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	ownerCharacter		= GetOwner()->Cast< ACharacter >();
-	check( ownerCharacter );
+	Assert( ownerCharacter );
 
 	// TODO BS yehor.pohuliaka - Need add subscribe to event when body instance recreating or changed to other body (in case welding)
 	CPrimitiveComponent*		collisionComponent = ownerCharacter->GetCollisionComponent();
@@ -33,6 +43,11 @@ void CCharacterMovementComponent::BeginPlay()
 	}
 }
 
+/*
+==================
+CCharacterMovementComponent::TickComponent
+==================
+*/
 void CCharacterMovementComponent::TickComponent( float InDeltaTime )
 {
 	Super::TickComponent( InDeltaTime );
@@ -41,7 +56,7 @@ void CCharacterMovementComponent::TickComponent( float InDeltaTime )
 	Vector		startRay	= GetOwner()->GetActorLocation();
 	Vector		endRay		= startRay + GetOwner()->GetActorUpVector() * -1.f;
 	SHitResult	hitResult;
-	bool		bResult		= GWorld->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic );
+	bool		bResult		= g_World->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic );
 	if ( bResult && !bOnGround )
 	{
 		ownerCharacter->Landed();
@@ -64,6 +79,11 @@ void CCharacterMovementComponent::TickComponent( float InDeltaTime )
 	bWalk = false;
 }
 
+/*
+==================
+CCharacterMovementComponent::Serialize
+==================
+*/
 void CCharacterMovementComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
@@ -72,14 +92,24 @@ void CCharacterMovementComponent::Serialize( class CArchive& InArchive )
 	InArchive << jumpSpeed;
 }
 
+/*
+==================
+CCharacterMovementComponent::IsCanWalk
+==================
+*/
 bool CCharacterMovementComponent::IsCanWalk( const Vector& InWorldDirection, float InScale ) const
 {
 	Vector		startRay = GetOwner()->GetActorLocation();
 	Vector		endRay = startRay + InWorldDirection * InScale;
 	SHitResult	hitResult;
-	return !GWorld->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic );
+	return !g_World->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic );
 }
 
+/*
+==================
+CCharacterMovementComponent::Walk
+==================
+*/
 void CCharacterMovementComponent::Walk( const Vector& InWorldDirection, float InScale )
 {
 	if ( !bodyInstance )
@@ -112,6 +142,11 @@ void CCharacterMovementComponent::Walk( const Vector& InWorldDirection, float In
 	bWalk = true;
 }
 
+/*
+==================
+CCharacterMovementComponent::Jump
+==================
+*/
 void CCharacterMovementComponent::Jump()
 {
 	if ( bJump || !bodyInstance || !bOnGround )
@@ -125,6 +160,11 @@ void CCharacterMovementComponent::Jump()
 	bJump = true;
 }
 
+/*
+==================
+CCharacterMovementComponent::StopJump
+==================
+*/
 void CCharacterMovementComponent::StopJump()
 {
 	bJump = false;

@@ -75,7 +75,7 @@ public:
 	 * @param[in] InBlue Blue component of color
 	 * @param[in] InAlpha Alpha component of color
 	 */
-	FORCEINLINE void			Set( uint8 InRed, uint8 InGreen, uint8 InBlue, uint8 InAlpha = 255 )
+	FORCEINLINE void Set( uint8 InRed, uint8 InGreen, uint8 InBlue, uint8 InAlpha = 255 )
 	{
 		r = InRed;
 		g = InGreen;
@@ -92,7 +92,7 @@ public:
 	 * @param InBlue		Blue component of color
 	 * @param InAlpha		Alpha component of color
 	 */
-	FORCEINLINE void			Set( float InRed, float InGreen, float InBlue, float InAlpha = 255 )
+	FORCEINLINE void Set( float InRed, float InGreen, float InBlue, float InAlpha = 255 )
 	{
 		r = InRed * 255.f;
 		g = InGreen * 255.f;
@@ -106,7 +106,7 @@ public:
 	 *
 	 * @param InLinearColor	Linear color
 	 */
-	FORCEINLINE void			Set( const Vector4D& InLinearColor )
+	FORCEINLINE void Set( const Vector4D& InLinearColor )
 	{
 		Set( InLinearColor.x, InLinearColor.y, InLinearColor.z, InLinearColor.a );
 	}

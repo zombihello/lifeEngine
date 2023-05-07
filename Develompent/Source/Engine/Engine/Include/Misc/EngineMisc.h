@@ -20,7 +20,7 @@
  * @param InString String
  * @return Return converted text to ESurfaceType. If unknown InString return ST_Default
  */
-ESurfaceType appTextToESurfaceType( const std::wstring& InString );
+ESurfaceType Sys_TextToESurfaceType( const std::wstring& InString );
 #endif // WITH_EDITOR
 
 #endif // !ENGINEMISC_H

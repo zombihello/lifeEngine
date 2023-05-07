@@ -2,17 +2,32 @@
 #include "System/PhysicsEngine.h"
 #include "System/PhysicsShapeGeometry.h"
 
+/*
+==================
+SPhysicsShapeGeometry::SPhysicsShapeGeometry
+==================
+*/
 SPhysicsShapeGeometry::SPhysicsShapeGeometry( ECollisionShape InCollisionShape )
 	: collisionShape( InCollisionShape )
-	, collisionProfile( GPhysicsEngine.FindCollisionProfile( SCollisionProfile::blockAll_ProfileName ) )
-	, material( GPhysicsEngine.GetDefaultPhysMaterial() )
+	, collisionProfile( g_PhysicsEngine.FindCollisionProfile( SCollisionProfile::blockAll_ProfileName ) )
+	, material( g_PhysicsEngine.GetDefaultPhysMaterial() )
 {}
 
+/*
+==================
+SPhysicsShapeGeometry::~SPhysicsShapeGeometry
+==================
+*/
 SPhysicsShapeGeometry::~SPhysicsShapeGeometry()
 {
 	CPhysicsInterface::ReleaseShapeGeometry( handle );
 }
 
+/*
+==================
+SPhysicsShapeGeometry::Serialize
+==================
+*/
 void SPhysicsShapeGeometry::Serialize( class CArchive& InArchive )
 {
 	InArchive << collisionShape;

@@ -24,7 +24,7 @@
  * 
  * @return Return WorldEd name
  */
-std::wstring appGetWorldEdName();
+std::wstring Sys_GetWorldEdName();
 
 /**
  * @ingroup WorldEd
@@ -33,7 +33,7 @@ std::wstring appGetWorldEdName();
  * 
  * @param InPath	Path to file
  */
-void appShowFileInExplorer( const std::wstring& InPath );
+void Sys_ShowFileInExplorer( const std::wstring& InPath );
 
 /**
  * @ingroup WorldEd

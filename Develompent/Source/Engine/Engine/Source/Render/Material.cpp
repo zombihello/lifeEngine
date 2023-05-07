@@ -16,6 +16,12 @@ const CName		CMaterial::roughnessTextureParamName( TEXT( "Roughness" ) );
 const CName		CMaterial::emissionTextureParamName( TEXT( "Emission" ) );
 const CName		CMaterial::aoTextureParamName( TEXT( "AO" ) );
 
+
+/*
+==================
+CMaterial::CMaterial
+==================
+*/
 CMaterial::CMaterial() :
 	CAsset( AT_Material ),
 	isNeedUpdateShaderMap( true ),
@@ -24,9 +30,19 @@ CMaterial::CMaterial() :
 	usage( MU_AllMeshes )
 {}
 
+/*
+==================
+CMaterial::~CMaterial
+==================
+*/
 CMaterial::~CMaterial()
 {}
 
+/*
+==================
+CMaterial::Serialize
+==================
+*/
 void CMaterial::Serialize( class CArchive& InArchive )
 {
 	if ( InArchive.Ver() < VER_ShaderMap )
@@ -50,7 +66,7 @@ void CMaterial::Serialize( class CArchive& InArchive )
 	if ( InArchive.Ver() < VER_RemovedShadersTypeFromMaterial )
 	{
 		class CShaderMetaType*		shadersType[ SF_NumDrawFrequencies ];
-		appMemzero( shadersType, sizeof( shadersType ) );
+		Sys_Memzero( shadersType, sizeof( shadersType ) );
 
 		for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )
 		{
@@ -81,7 +97,7 @@ void CMaterial::Serialize( class CArchive& InArchive )
 			textureParameters[it->first] = it->second;
 		}
 
-		LE_LOG( LT_Warning, LC_Package, TEXT( "Deprecated package version (0x%X). Need to re-save the package '%s', because in the future it may not open" ), InArchive.Ver(), InArchive.GetPath().c_str() );
+		Warnf( TEXT( "Deprecated package version (0x%X). Need to re-save the package '%s', because in the future it may not open\n" ), InArchive.Ver(), InArchive.GetPath().c_str() );
 	}
 	else
 	{
@@ -91,9 +107,14 @@ void CMaterial::Serialize( class CArchive& InArchive )
 	}
 }
 
+/*
+==================
+CMaterial::GetShader
+==================
+*/
 CShader* CMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
 {
-	check( InShaderFrequency < SF_NumDrawFrequencies );
+	Assert( InShaderFrequency < SF_NumDrawFrequencies );
 	if ( isNeedUpdateShaderMap )
 	{
 		CacheShaderMap();
@@ -107,6 +128,11 @@ CShader* CMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InSh
 	return itVT->second[ InShaderFrequency ];
 }
 
+/*
+==================
+CMaterial::CacheShaderMap
+==================
+*/
 void CMaterial::CacheShaderMap()
 {
 	if ( !isNeedUpdateShaderMap )
@@ -152,6 +178,11 @@ void CMaterial::CacheShaderMap()
 	isNeedUpdateShaderMap = false;
 }
 
+/*
+==================
+CMaterial::GetMeshShaders
+==================
+*/
 std::vector< CShader* > CMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) const
 {
 	std::vector< CShader* >		result;
@@ -165,12 +196,17 @@ std::vector< CShader* > CMaterial::GetMeshShaders( uint64 InVertexFactoryHash ) 
 			continue;
 		}
 
-		result[ index ] = GShaderManager->FindInstance( shaderType->GetName(), InVertexFactoryHash );
+		result[ index ] = g_ShaderManager->FindInstance( shaderType->GetName(), InVertexFactoryHash );
 	}
 
 	return result;
 }
 
+/*
+==================
+CMaterial::GetScalarParameterValue
+==================
+*/
 bool CMaterial::GetScalarParameterValue( const CName& InParameterName, float& OutValue ) const
 {
 	auto		itFind = scalarParameters.find( InParameterName );
@@ -184,19 +220,29 @@ bool CMaterial::GetScalarParameterValue( const CName& InParameterName, float& Ou
 	return true;
 }
 
+/*
+==================
+CMaterial::GetTextureParameterValue
+==================
+*/
 bool CMaterial::GetTextureParameterValue( const CName& InParameterName, TAssetHandle<CTexture2D>& OutValue ) const
 {
 	auto		itFind = textureParameters.find( InParameterName );
 	if ( itFind == textureParameters.end() )
 	{
-		OutValue = GPackageManager->FindDefaultAsset( AT_Texture2D );
+		OutValue = g_PackageManager->FindDefaultAsset( AT_Texture2D );
 		return false;
 	}
 
-	OutValue = itFind->second.IsAssetValid() ? itFind->second : GPackageManager->FindDefaultAsset( AT_Texture2D );
+	OutValue = itFind->second.IsAssetValid() ? itFind->second : g_PackageManager->FindDefaultAsset( AT_Texture2D );
 	return itFind->second.IsAssetValid();
 }
 
+/*
+==================
+CMaterial::GetVectorParameterValue
+==================
+*/
 bool CMaterial::GetVectorParameterValue( const CName& InParameterName, Vector4D& OutValue ) const
 {
 	auto		itFind = vectorParameters.find( InParameterName );
@@ -210,6 +256,11 @@ bool CMaterial::GetVectorParameterValue( const CName& InParameterName, Vector4D&
 	return true;
 }
 
+/*
+==================
+CMaterial::GetDependentAssets
+==================
+*/
 void CMaterial::GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EAssetType InFilter /* = AT_Unknown */ ) const
 {
 	// Fill set of dependent assets
@@ -227,6 +278,11 @@ void CMaterial::GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EA
 	}
 }
 
+/*
+==================
+CMaterial::ReloadDependentAssets
+==================
+*/
 void CMaterial::ReloadDependentAssets( bool InForce /* = false */ )
 {
 	for ( auto itTexture = textureParameters.begin(), itTextureEnd = textureParameters.end(); itTexture != itTextureEnd; ++itTexture )
@@ -238,6 +294,6 @@ void CMaterial::ReloadDependentAssets( bool InForce /* = false */ )
 		}
 
 		TSharedPtr<SAssetReference>	assetReference = itTexture->second.GetReference();
-		itTexture->second			= GPackageManager->FindAsset( assetReference->guidPackage, assetReference->guidAsset, assetReference->type );
+		itTexture->second			= g_PackageManager->FindAsset( assetReference->guidPackage, assetReference->guidAsset, assetReference->type );
 	}
 }

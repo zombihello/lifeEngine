@@ -1,5 +1,10 @@
 #include "System/EditorConstraints.h"
 
+/*
+==================
+CEditorConstraints::CEditorConstraints
+==================
+*/
 CEditorConstraints::CEditorConstraints()
 	: currentGridSize( 4 )
 {

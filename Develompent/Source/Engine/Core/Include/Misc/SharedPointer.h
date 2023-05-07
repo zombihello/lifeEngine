@@ -257,7 +257,7 @@ public:
 	 */
 	FORCEINLINE ObjectType* operator->() const
 	{
-		check( IsValid() );
+		Assert( IsValid() );
 		return Get();
 	}
 
@@ -267,7 +267,7 @@ public:
 	 */
 	FORCEINLINE ObjectType& operator*()
 	{
-		check( IsValid() );
+		Assert( IsValid() );
 		return *Get();
 	}
 
@@ -684,7 +684,7 @@ public:
 		// To fix this, make sure you create at least one shared reference to your object instance before requested,
 		// and also avoid calling this function from your object's destructor.
 		//
-		check( sharedThis.Get() == this );
+		Assert( sharedThis.Get() == this );
 
 		// Now that we've verified the shared pointer is valid, we return it!
 		return sharedThis;
@@ -710,7 +710,7 @@ public:
 		// To fix this, make sure you create at least one shared reference to your object instance before requested,
 		// and also avoid calling this function from your object's destructor.
 		//
-		check( sharedThis.Get() == this );
+		Assert( sharedThis.Get() == this );
 
 		// Now that we've verified the shared pointer is valid, we return it!
 		return sharedThis;
@@ -736,7 +736,7 @@ public:
 		// To fix this, make sure you create at least one shared reference to your object instance before requested,
 		// and also avoid calling this function from your object's destructor.
 		//
-		check( result.Pin().Get() == this );
+		Assert( result.Pin().Get() == this );
 
 		// Now that we've verified the pointer is valid, we'll return it!
 		return result;
@@ -762,7 +762,7 @@ public:
 		// To fix this, make sure you create at least one shared reference to your object instance before requested,
 		// and also avoid calling this function from your object's destructor.
 		//
-		check( result.Pin().Get() == this );
+		Assert( result.Pin().Get() == this );
 
 		// Now that we've verified the pointer is valid, we'll return it!
 		return result;

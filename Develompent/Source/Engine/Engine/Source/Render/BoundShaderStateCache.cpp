@@ -1,9 +1,11 @@
 #include "Render/BoundShaderStateCache.h"
 #include "RHI/BaseShaderRHI.h"
 
-/**
- * Constructor
- */
+/*
+==================
+CBoundShaderStateKey::CBoundShaderStateKey
+==================
+*/
 CBoundShaderStateKey::CBoundShaderStateKey( VertexDeclarationRHIParamRef_t InVertexDeclaration, VertexShaderRHIParamRef_t InVertexShader, PixelShaderRHIParamRef_t InPixelShader, HullShaderRHIParamRef_t InHullShader /*= nullptr*/, DomainShaderRHIParamRef_t InDomainShader /*= nullptr*/, GeometryShaderRHIParamRef_t InGeometryShader /*= nullptr*/ ) :
 	hash( 94875494 ),
 	vertexDeclaration( InVertexDeclaration ),
@@ -13,12 +15,12 @@ CBoundShaderStateKey::CBoundShaderStateKey( VertexDeclarationRHIParamRef_t InVer
 	domainShader( InDomainShader ),
 	geometryShader( InGeometryShader )
 {
-	check( vertexDeclaration );
+	Assert( vertexDeclaration );
 
 	hash = vertexDeclaration->GetHash( hash );
-	hash = appMemFastHash( vertexShader, hash );
-	hash = appMemFastHash( pixelShader, hash );
-	hash = appMemFastHash( hullShader, hash );
-	hash = appMemFastHash( domainShader, hash );
-	hash = appMemFastHash( geometryShader, hash );
+	hash = Sys_MemFastHash( vertexShader, hash );
+	hash = Sys_MemFastHash( pixelShader, hash );
+	hash = Sys_MemFastHash( hullShader, hash );
+	hash = Sys_MemFastHash( domainShader, hash );
+	hash = Sys_MemFastHash( geometryShader, hash );
 }

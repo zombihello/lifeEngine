@@ -2,25 +2,40 @@
 #include "Misc/Template.h"
 #include "LEVersion.h"
 
+/*
+==================
+CArchive::CArchive
+==================
+*/
 CArchive::CArchive( const std::wstring& InPath )
 	: arVer( VER_PACKAGE_LATEST )
 	, arType( AT_TextFile )
 	, arPath( InPath )
 {}
 
+/*
+==================
+CArchive::SerializeHeader
+==================
+*/
 void CArchive::SerializeHeader()
 {
 	// Serialize header package
 	uint32		archiveFileTag = ARCHIVE_FILE_TAG;
 	*this << archiveFileTag;
-	checkMsg( archiveFileTag == ARCHIVE_FILE_TAG, TEXT( "Unknown archive file tag. Current archive file tag is 0x%X, need 0x%X" ), archiveFileTag, ARCHIVE_FILE_TAG );
+	AssertMsg( archiveFileTag == ARCHIVE_FILE_TAG, TEXT( "Unknown archive file tag. Current archive file tag is 0x%X, need 0x%X" ), archiveFileTag, ARCHIVE_FILE_TAG );
 
 	*this << arVer;
-	checkMsg( arVer >= VER_MinVersion, TEXT( "Min supported version %i, but current version is %i" ), VER_MinVersion, arVer );
+	AssertMsg( arVer >= VER_MinVersion, TEXT( "Min supported version %i, but current version is %i" ), VER_MinVersion, arVer );
 
 	*this << arType;
 }
 
+/*
+==================
+CArchive::SerializeCompressed
+==================
+*/
 void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionFlags InFlags )
 {
 	if ( InFlags == CF_None )
@@ -63,8 +78,8 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 			Serialize( compressedBuffer, chunk.compressedSize );
 			
 			// Decompress into dest pointer directly.
-			bool		result = appUncompressMemory( InFlags, dest, chunk.uncompressedSize, compressedBuffer, chunk.compressedSize );
-			check( result );
+			bool		result = Sys_UncompressMemory( InFlags, dest, chunk.uncompressedSize, compressedBuffer, chunk.compressedSize );
+			Assert( result );
 			
 			// And advance it by read amount.
 			dest += chunk.uncompressedSize;
@@ -105,8 +120,8 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 			uint32		bytesToCompress = Min( bytesRemaining, SAVING_COMPRESSION_CHUNK_SIZE );
 			uint32		compressedSize = compressedBufferSize;
 
-			bool		result = appCompressMemory( InFlags, compressedBuffer, compressedSize, src, bytesToCompress );
-			check( result );
+			bool		result = Sys_CompressMemory( InFlags, compressedBuffer, compressedSize, src, bytesToCompress );
+			Assert( result );
 
 			// Move to next chunk
 			src += bytesToCompress;
@@ -116,7 +131,7 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 			compressionChunks[ 0 ].compressedSize += compressedSize;
 
 			// Update current chunk.
-			check( currentChunkIndex < totalChunkCount );
+			Assert( currentChunkIndex < totalChunkCount );
 			compressionChunks[ currentChunkIndex ].compressedSize = compressedSize;
 			compressionChunks[ currentChunkIndex ].uncompressedSize = bytesToCompress;
 			currentChunkIndex++;

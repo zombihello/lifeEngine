@@ -136,7 +136,7 @@ public:
     /**
      * @brief Destructor
      */
-    virtual                                         ~CBaseFileSystem() {}
+    virtual ~CBaseFileSystem() {}
 
     /**
      * @brief Create file reader
@@ -148,7 +148,7 @@ public:
      * 
      * @warning After use need delete file reader
      */
-    virtual class CArchive*                     CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None )            { return nullptr; }
+    virtual class CArchive* CreateFileReader( const std::wstring& InFileName, uint32 InFlags = AR_None ) { return nullptr; }
 
     /**
 	 * @brief Create file writer
@@ -160,7 +160,7 @@ public:
 	 *
 	 * @warning After use need delete file writer
 	 */
-    virtual class CArchive*                     CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None )            { return nullptr; }
+    virtual class CArchive* CreateFileWriter( const std::wstring& InFileName, uint32 InFlags = AW_None ) { return nullptr; }
 
     /**
      * @brief Find files in directory
@@ -170,7 +170,7 @@ public:
      * @param[in] InIsDirectories Whether to search directories
      * @return Array of paths to files in directory
      */
-    virtual std::vector< std::wstring >             FindFiles( const std::wstring& InDirectory, bool InIsFiles, bool InIsDirectories )     { return std::vector< std::wstring >(); }
+    virtual std::vector< std::wstring > FindFiles( const std::wstring& InDirectory, bool InIsFiles, bool InIsDirectories ) { return std::vector< std::wstring >(); }
 
     /**
      * @brief Delete file
@@ -179,7 +179,7 @@ public:
      * @param InIsEvenReadOnly Is even read only
      * @return Return true if file is seccussed deleted, else returning false
      */
-    virtual bool                                    Delete( const std::wstring& InPath, bool InIsEvenReadOnly = false )                    { return false; }
+    virtual bool Delete( const std::wstring& InPath, bool InIsEvenReadOnly = false ) { return false; }
 
     /**
 	 * @brief Make directory
@@ -228,7 +228,7 @@ public:
      * @param InIsDirectory Checlable file is directory?
      * @return Return true if file or directory exist, false is not
      */
-    virtual bool                                   IsExistFile( const std::wstring& InPath, bool InIsDirectory = false )                    { return false; }
+    virtual bool IsExistFile( const std::wstring& InPath, bool InIsDirectory = false ) { return false; }
 
     /**
      * @brief Is file is directory
@@ -244,20 +244,20 @@ public:
      * @param[in] InPath Path
      * @return Absolute path
      */
-    virtual std::wstring                          ConvertToAbsolutePath( const std::wstring& InPath ) const                                 { return TEXT( "" ); }
+    virtual std::wstring ConvertToAbsolutePath( const std::wstring& InPath ) const { return TEXT( "" ); }
 
     /**
      * @brief Set current directory
      * 
      * @param[in] InDirectory Path to directory
      */
-    virtual void                                    SetCurrentDirectory( const std::wstring& InDirectory )                                  {}
+    virtual void SetCurrentDirectory( const std::wstring& InDirectory ) {}
 
     /**
      * @brief Get current directory
      * @return Return current directory
      */
-    virtual std::wstring                            GetCurrentDirectory() const                                                             { return TEXT( "" ); }
+    virtual std::wstring GetCurrentDirectory() const { return TEXT( "" ); }
 
     /**
      * @brief Get path to current exe

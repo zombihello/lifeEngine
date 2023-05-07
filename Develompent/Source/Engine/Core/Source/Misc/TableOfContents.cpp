@@ -6,6 +6,11 @@
 #include "Containers/StringConv.h"
 #include "System/Package.h"
 
+/*
+==================
+CTableOfContets::Serialize
+==================
+*/
 void CTableOfContets::Serialize( CArchive& InArchive )
 {
 	if ( InArchive.IsLoading() )
@@ -30,7 +35,7 @@ void CTableOfContets::Serialize( CArchive& InArchive )
 			CGuid			guid;
 			if ( !guid.InitFromString( ANSI_TO_TCHAR( strGuid.c_str() ) ) )
 			{ 
-				LE_LOG( LT_Warning, LC_Package, TEXT( "Failed init GUID for content '%s'" ), ANSI_TO_TCHAR( strPath.c_str() ) );
+				Warnf( TEXT( "Failed init GUID for content '%s'\n" ), ANSI_TO_TCHAR( strPath.c_str() ) );
 				continue;
 			}
 
@@ -51,22 +56,32 @@ void CTableOfContets::Serialize( CArchive& InArchive )
 	}
 }
 
+/*
+==================
+CTableOfContets::AddEntry
+==================
+*/
 void CTableOfContets::AddEntry( const std::wstring& InPath )
 {
-	PackageRef_t		package = GPackageManager->LoadPackage( InPath );
+	PackageRef_t		package = g_PackageManager->LoadPackage( InPath );
 	if ( package )
 	{
 		AddEntry( package->GetGUID(), package->GetName(), InPath );
-		GPackageManager->UnloadPackage( InPath );
+		g_PackageManager->UnloadPackage( InPath );
 	}
 }
 
+/*
+==================
+CTableOfContets::RemoveEntry
+==================
+*/
 void CTableOfContets::RemoveEntry( const std::wstring& InPath )
 {
-	PackageRef_t		package = GPackageManager->LoadPackage( InPath );
+	PackageRef_t		package = g_PackageManager->LoadPackage( InPath );
 	if ( package )
 	{
 		RemoveEntry( package->GetGUID() );
-		GPackageManager->UnloadPackage( InPath );
+		g_PackageManager->UnloadPackage( InPath );
 	}
 }

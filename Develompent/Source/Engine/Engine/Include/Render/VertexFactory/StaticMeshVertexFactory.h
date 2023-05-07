@@ -81,7 +81,7 @@ private:
  * @ingroup Engine
  * Global resource of static mesh vertex declaration
  */
-extern TGlobalResource< CStaticMeshVertexDeclaration >			GStaticMeshVertexDeclaration;
+extern TGlobalResource< CStaticMeshVertexDeclaration >			g_StaticMeshVertexDeclaration;
 
 /**
  * @ingroup Engine

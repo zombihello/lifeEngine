@@ -603,8 +603,8 @@ static void ShowDemoWindowWidgets()
             ImGui::Text("Thanks for clicking me!");
         }
 
-        static bool check = true;
-        ImGui::Checkbox("checkbox", &check);
+        static bool Assert = true;
+        ImGui::Checkbox("checkbox", &Assert);
 
         static int e = 0;
         ImGui::RadioButton("radio a", &e, 0); ImGui::SameLine();

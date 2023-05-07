@@ -81,7 +81,7 @@ struct SCollisionProfile
 		: name( TEXT( "Unknown" ) )
 		, objectType( CC_WorldStatic )
 	{
-		appMemzero( responses, sizeof( ECollisionResponse ) * CC_Max );
+		Sys_Memzero( responses, sizeof( ECollisionResponse ) * CC_Max );
 	}
 
 	/**
@@ -155,7 +155,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InAr, ESurfaceType& InSurfaceType )
 
 FORCEINLINE CArchive& operator<<( CArchive& InAr, const ESurfaceType& InSurfaceType )
 {
-	check( InAr.IsSaving() );
+	Assert( InAr.IsSaving() );
 	InAr.Serialize( ( void* ) &InSurfaceType, sizeof( ESurfaceType ) );
 	return InAr;
 }

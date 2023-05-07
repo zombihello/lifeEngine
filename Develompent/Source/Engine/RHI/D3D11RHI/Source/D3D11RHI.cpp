@@ -20,9 +20,11 @@
 #include "D3D11ImGUI.h"
 #include "D3D11State.h"
 
-/**
- * Get vertex count for primitive count
- */
+/*
+==================
+GetVertexCountForPrimitiveCount
+==================
+*/
 static FORCEINLINE uint32 GetVertexCountForPrimitiveCount( uint32 InNumPrimitives, EPrimitiveType InPrimitiveType )
 {
 	uint32		vertexCount = 0;
@@ -34,18 +36,20 @@ static FORCEINLINE uint32 GetVertexCountForPrimitiveCount( uint32 InNumPrimitive
 	case PT_LineList:			vertexCount = InNumPrimitives * 2;	break;
 
 	default:
-		appErrorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
+		Sys_Errorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
 	}
 
 	return vertexCount;
 }
 
-/**
- * Get D3D11 primitive type from engine primitive type
- */
+/*
+==================
+GetD3D11PrimitiveType
+==================
+*/
 static FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrimitiveType, bool InIsUsingTessellation )
 {
-	checkMsg( !InIsUsingTessellation, TEXT( "Tessellation not supported!" ) );
+	AssertMsg( !InIsUsingTessellation, TEXT( "Tessellation not supported!" ) );
 	switch ( InPrimitiveType )
 	{
 	case PT_PointList:			return D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
@@ -54,23 +58,25 @@ static FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrim
 	case PT_LineList:			return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 
 	default: 
-		appErrorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
+		Sys_Errorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
 	};
 
 	return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 }
 
-/**
- * Init D3D11 texture format
- */
+/*
+==================
+InitD3D11TextureFormat
+==================
+*/
 static FORCEINLINE void InitD3D11TextureFormat( EPixelFormat InPixelFormat, DXGI_FORMAT InD3D11Format, int32 InBlockBytes = -1 )
 {
 	// Set up basic info
-	GPixelFormats[InPixelFormat].platformFormat = InD3D11Format;
-	GPixelFormats[InPixelFormat].supported		= InD3D11Format != DXGI_FORMAT_UNKNOWN;
+	g_PixelFormats[InPixelFormat].platformFormat = InD3D11Format;
+	g_PixelFormats[InPixelFormat].supported		= InD3D11Format != DXGI_FORMAT_UNKNOWN;
 	if ( InBlockBytes != -1 )
 	{
-		GPixelFormats[InPixelFormat].blockBytes = InBlockBytes;
+		g_PixelFormats[InPixelFormat].blockBytes = InBlockBytes;
 	}
 }
 
@@ -106,7 +112,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -145,7 +151,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -179,6 +185,11 @@ private:
 IMPLEMENT_SHADER_TYPE(, CResolveVertexShader, TEXT( "RHI/D3D11RHI/ResolveVertexShader.hlsl" ), TEXT( "MainVS" ), SF_Vertex, true );
 IMPLEMENT_SHADER_TYPE(, CResolveDepthPixelShader, TEXT( "RHI/D3D11RHI/ResolvePixelShader.hlsl" ), TEXT( "MainDepth" ), SF_Pixel, true );
 
+/*
+==================
+ResolveSurfaceUsingShader
+==================
+*/
 void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11Surface* InSourceSurfaceRHI, CD3D11Texture2DRHI* InDestTexture2D, const D3D11_TEXTURE2D_DESC& InD3D11ResolveTargetDesc, const SResolveRect& InSourceRect, const SResolveRect& InDestRect )
 {
 	ID3D11DeviceContext*		d3d11DeviceContext		= InDeviceContextRHI->GetD3D11DeviceContext();
@@ -192,9 +203,9 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 	d3d11DeviceContext->RSGetViewports( &numSavedViewports, &d3d11SavedViewport );
 
 	// No alpha blending, no depth tests or writes, no stencil tests or writes, no backface culling.
-	GRHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<>::GetRHI() );
-	GRHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<>::GetRHI() );
-	GRHI->SetRasterizerState( InDeviceContextRHI, TStaticRasterizerStateRHI<FM_Solid, CM_None>::GetRHI() );
+	g_RHI->SetBlendState( InDeviceContextRHI, TStaticBlendStateRHI<>::GetRHI() );
+	g_RHI->SetStencilState( InDeviceContextRHI, TStaticStencilStateRHI<>::GetRHI() );
+	g_RHI->SetRasterizerState( InDeviceContextRHI, TStaticRasterizerStateRHI<FM_Solid, CM_None>::GetRHI() );
 
 	// Determine if the entire destination surface is being resolved to.
 	// If the entire surface is being resolved to, then it means we can clear it and signal the driver that it can discard
@@ -209,7 +220,7 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 			d3d11DeviceContext->ClearDepthStencilView( d3d11DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 0, 0 );
 		}
 
-		GRHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<true, CF_Always>::GetRHI() );
+		g_RHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<true, CF_Always>::GetRHI() );
 
 		// Write to the dest surface as a depth-stencil target
 		ID3D11RenderTargetView*			nullRTV = nullptr;
@@ -224,7 +235,7 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 			d3d11DeviceContext->ClearRenderTargetView( d3d11RenderTargetView, ( float* ) &clearColor.ToNormalizedVector4D() );
 		}
 
-		GRHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
+		g_RHI->SetDepthState( InDeviceContextRHI, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
 
 		// Write to the dest surface as a render target.
 		d3d11DeviceContext->OMSetRenderTargets( 1, &d3d11RenderTargetView, nullptr );
@@ -252,20 +263,20 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 	static BoundShaderStateRHIRef_t	resolveBoundShaderState;
 
 	// Set the vertex and pixel shader
-	CResolveVertexShader*			resolveVertexShader = GShaderManager->FindInstance<CResolveVertexShader, CSimpleElementVertexFactory>();
-	CResolveDepthPixelShader*		resolvePixelShader	= GShaderManager->FindInstance<CResolveDepthPixelShader, CSimpleElementVertexFactory>();
+	CResolveVertexShader*			resolveVertexShader = g_ShaderManager->FindInstance<CResolveVertexShader, CSimpleElementVertexFactory>();
+	CResolveDepthPixelShader*		resolvePixelShader	= g_ShaderManager->FindInstance<CResolveDepthPixelShader, CSimpleElementVertexFactory>();
 	resolvePixelShader->SetUnresolvedSurface( InDeviceContextRHI, InSourceSurfaceRHI );
 	
 	if ( !resolveBoundShaderState )
 	{
-		resolveBoundShaderState = GRHI->CreateBoundShaderState( TEXT( "Resolve" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), resolveVertexShader->GetVertexShader(), resolvePixelShader->GetPixelShader() );
-		check( resolveBoundShaderState );
+		resolveBoundShaderState = g_RHI->CreateBoundShaderState( TEXT( "Resolve" ), g_SimpleElementVertexDeclaration.GetVertexDeclarationRHI(), resolveVertexShader->GetVertexShader(), resolvePixelShader->GetPixelShader() );
+		Assert( resolveBoundShaderState );
 	}
-	GRHI->SetBoundShaderState( InDeviceContextRHI, resolveBoundShaderState );
+	g_RHI->SetBoundShaderState( InDeviceContextRHI, resolveBoundShaderState );
 
 	// Generate the vertices used
 	SSimpleElementVertexType	vertices[4];
-	appMemzero( vertices, sizeof( SSimpleElementVertexType ) * 4 );
+	Sys_Memzero( vertices, sizeof( SSimpleElementVertexType ) * 4 );
 
 	vertices[0].position.x = maxX;
 	vertices[0].position.y = minY;
@@ -287,11 +298,11 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 	vertices[3].texCoord.x = minU;
 	vertices[3].texCoord.y = maxV;
 
-	GRHI->DrawPrimitiveUP( InDeviceContextRHI, PT_TriangleStrip, 0, 2, vertices, sizeof( vertices[0] ) );
+	g_RHI->DrawPrimitiveUP( InDeviceContextRHI, PT_TriangleStrip, 0, 2, vertices, sizeof( vertices[0] ) );
 
 	// Reset saved render targets
 	{
-		const SD3D11StateCache&		d3d11StateCache = ( ( CD3D11RHI* )GRHI )->GetStateCache();
+		const SD3D11StateCache&		d3d11StateCache = ( ( CD3D11RHI* )g_RHI )->GetStateCache();
 		d3d11DeviceContext->OMSetRenderTargets( D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, d3d11StateCache.renderTargetViews, d3d11StateCache.depthStencilView );
 	}
 
@@ -299,6 +310,11 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 	d3d11DeviceContext->RSSetViewports( numSavedViewports, &d3d11SavedViewport );
 }
 
+/*
+==================
+GetDefaultRect
+==================
+*/
 static FORCEINLINE SResolveRect GetDefaultRect( const SResolveRect& InRect, uint32 InDefaultWidth, uint32 InDefaultHeight )
 {
 	if ( InRect.x1 >= 0 && InRect.x2 >= 0 && InRect.y1 >= 0 && InRect.y2 >= 0 )
@@ -311,9 +327,11 @@ static FORCEINLINE SResolveRect GetDefaultRect( const SResolveRect& InRect, uint
 	}
 }
 
-/**
- * Constructor
- */
+/*
+==================
+CD3D11RHI::CD3D11RHI
+==================
+*/
 CD3D11RHI::CD3D11RHI() 
 	: isInitialize( false )
 	, immediateContext( nullptr )
@@ -321,20 +339,24 @@ CD3D11RHI::CD3D11RHI()
 	, psConstantBuffer( nullptr )
 	, d3d11Device( nullptr )
 {
-	appMemzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
+	Sys_Memzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
 }
 
-/**
- * Destructor
- */
+/*
+==================
+CD3D11RHI::~CD3D11RHI
+==================
+*/
 CD3D11RHI::~CD3D11RHI()
 {
 	Destroy();
 }
 
-/**
- * Initialize RHI
- */
+/*
+==================
+CD3D11RHI::Init
+==================
+*/
 void CD3D11RHI::Init( bool InIsEditor )
 {
 	if ( IsInitialize() )			return;
@@ -352,19 +374,19 @@ void CD3D11RHI::Init( bool InIsEditor )
 
 	// Create DXGI factory and adapter
 	HRESULT		result = CreateDXGIFactory( __uuidof( IDXGIFactory ), ( void** ) &dxgiFactory );
-	check( result == S_OK );
+	Assert( result == S_OK );
 
 	uint32			currentAdapter = 0;
 	while ( dxgiFactory->EnumAdapters( currentAdapter, &dxgiAdapter ) == DXGI_ERROR_NOT_FOUND )
 	{
 		++currentAdapter;
 	}
-	checkMsg( dxgiAdapter, TEXT( "GPU adapter not found" ) );
+	AssertMsg( dxgiAdapter, TEXT( "GPU adapter not found" ) );
 
 	D3D_FEATURE_LEVEL				maxFeatureLevel = D3D_FEATURE_LEVEL_11_0;
 	ID3D11DeviceContext*			d3d11DeviceContext = nullptr;
 	result = D3D11CreateDevice( dxgiAdapter, driverType, nullptr, deviceFlags, &maxFeatureLevel, 1, D3D11_SDK_VERSION, &d3d11Device, &d3dFeatureLevel, &d3d11DeviceContext );
-	check( result == S_OK );
+	Assert( result == S_OK );
 
 	immediateContext = new CD3D11DeviceContext( d3d11DeviceContext );
 	
@@ -405,13 +427,13 @@ void CD3D11RHI::Init( bool InIsEditor )
 	DXGI_ADAPTER_DESC				adapterDesc;
 	dxgiAdapter->GetDesc( &adapterDesc );
 
-	LE_LOG( LT_Log, LC_Init, TEXT( "Found D3D11 adapter: %s" ), adapterDesc.Description );
-	LE_LOG( LT_Log, LC_Init, TEXT( "Adapter has %uMB of dedicated video memory, %uMB of dedicated system memory, and %uMB of shared system memory" ),
+	Logf( TEXT( "Found D3D11 adapter: %s\n" ), adapterDesc.Description );
+	Logf( TEXT( "Adapter has %uMB of dedicated video memory, %uMB of dedicated system memory, and %uMB of shared system memory\n" ),
 			adapterDesc.DedicatedVideoMemory / ( 1024 * 1024 ),
 			adapterDesc.DedicatedSystemMemory / ( 1024 * 1024 ),
 			adapterDesc.SharedSystemMemory / ( 1024 * 1024 ) );
 
-	GPixelCenterOffset = 0.f;		// Note that in D3D11, there is no half-texel offset (ala DX9)
+	g_PixelCenterOffset = 0.f;		// Note that in D3D11, there is no half-texel offset (ala DX9)
 
 	// Initialize the platform pixel format map
 	INIT_FORMAT( PF_A8R8G8B8,				DXGI_FORMAT_R8G8B8A8_UNORM );	
@@ -440,30 +462,38 @@ void CD3D11RHI::Init( bool InIsEditor )
 	}
 }
 
-/**
- * Acquire thread ownership
- */
+/*
+==================
+CD3D11RHI::AcquireThreadOwnership
+==================
+*/
 void CD3D11RHI::AcquireThreadOwnership()
 {}
 
-/**
- * Release thread ownership
- */
+/*
+==================
+CD3D11RHI::ReleaseThreadOwnership
+==================
+*/
 void CD3D11RHI::ReleaseThreadOwnership()
 {
 }
 
-/**
- * Is initialized RHI
- */
+/*
+==================
+CD3D11RHI::IsInitialize
+==================
+*/
 bool CD3D11RHI::IsInitialize() const
 {
 	return isInitialize;
 }
 
-/**
- * Destroy RHI
- */
+/*
+==================
+CD3D11RHI::Destroy
+==================
+*/
 void CD3D11RHI::Destroy()
 {
 	if ( !isInitialize )		return;
@@ -500,89 +530,114 @@ void CD3D11RHI::Destroy()
 	dxgiFactory = nullptr;
 
 	stateCache.Reset();
-	appMemzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
+	Sys_Memzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
 }
 
-/**
- * Create viewport
- */
+/*
+==================
+CD3D11RHI::CreateViewport
+==================
+*/
 ViewportRHIRef_t CD3D11RHI::CreateViewport( WindowHandle_t InWindowHandle, uint32 InWidth, uint32 InHeight )
 {
 	return new CD3D11Viewport( InWindowHandle, InWidth, InHeight );
 }
 
+/*
+==================
+CD3D11RHI::CreateViewport
+==================
+*/
 ViewportRHIRef_t CD3D11RHI::CreateViewport( SurfaceRHIParamRef_t InSurfaceRHI, uint32 InWidth, uint32 InHeight )
 {
 	return new CD3D11Viewport( InSurfaceRHI, InWidth, InHeight );
 }
 
-/**
- * Create vertex shader
- */
+/*
+==================
+CD3D11RHI::CreateVertexShader
+==================
+*/
 VertexShaderRHIRef_t CD3D11RHI::CreateVertexShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
 	return new CD3D11VertexShaderRHI( InData, InSize, InShaderName );
 }
 
-/**
- * Create hull shader
- */
+/*
+==================
+CD3D11RHI::CreateHullShader
+==================
+*/
 HullShaderRHIRef_t CD3D11RHI::CreateHullShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
 	return new CD3D11HullShaderRHI( InData, InSize, InShaderName );
 }
 
-/**
- * Create domain shader
- */
+/*
+==================
+CD3D11RHI::CreateDomainShader
+==================
+*/
 DomainShaderRHIRef_t CD3D11RHI::CreateDomainShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
 	return new CD3D11DomainShaderRHI( InData, InSize, InShaderName );
 }
 
-/**
- * Create pixel shader
- */
+/*
+==================
+CD3D11RHI::CreatePixelShader
+==================
+*/
 PixelShaderRHIRef_t CD3D11RHI::CreatePixelShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
 	return new CD3D11PixelShaderRHI( InData, InSize, InShaderName );
 }
 
-/**
- * Create geometry shader
- */
+/*
+==================
+CD3D11RHI::CreateGeometryShader
+==================
+*/
 GeometryShaderRHIRef_t CD3D11RHI::CreateGeometryShader( const tchar* InShaderName, const byte* InData, uint32 InSize )
 {
 	return new CD3D11GeometryShaderRHI( InData, InSize, InShaderName );
 }
 
-/**
- * Create vertex buffer
- */
+/*
+==================
+CD3D11RHI::CreateVertexBuffer
+==================
+*/
 VertexBufferRHIRef_t CD3D11RHI::CreateVertexBuffer( const tchar* InBufferName, uint32 InSize, const byte* InData, uint32 InUsage )
 {
 	return new CD3D11VertexBufferRHI( InUsage, InSize, InData, InBufferName );
 }
 
-/**
- * Create index buffer
- */
+/*
+==================
+CD3D11RHI::CreateIndexBuffer
+==================
+*/
 IndexBufferRHIRef_t CD3D11RHI::CreateIndexBuffer( const tchar* InBufferName, uint32 InStride, uint32 InSize, const byte* InData, uint32 InUsage )
 {
 	return new CD3D11IndexBufferRHI( InUsage, InStride, InSize, InData, InBufferName );
 }
 
-/**
- * Create vertex declaration
- */
+/*
+==================
+CD3D11RHI::CreateVertexDeclaration
+==================
+*/
 VertexDeclarationRHIRef_t CD3D11RHI::CreateVertexDeclaration( const VertexDeclarationElementList_t& InElementList )
 {
 	return new CD3D11VertexDeclarationRHI( InElementList );
 }
 
-/**
- * Create bound shader state
- */
+/*
+==================
+CD3D11RHI::CreateBoundShaderState
+==================
+*/
 BoundShaderStateRHIRef_t CD3D11RHI::CreateBoundShaderState( const tchar* InBoundShaderStateName, VertexDeclarationRHIRef_t InVertexDeclaration, VertexShaderRHIRef_t InVertexShader, PixelShaderRHIRef_t InPixelShader, HullShaderRHIRef_t InHullShader /*= nullptr*/, DomainShaderRHIRef_t InDomainShader /*= nullptr*/, GeometryShaderRHIRef_t InGeometryShader /*= nullptr*/ )
 {
 	CBoundShaderStateKey		key( InVertexDeclaration, InVertexShader, InPixelShader, InHullShader, InDomainShader, InGeometryShader );
@@ -596,52 +651,91 @@ BoundShaderStateRHIRef_t CD3D11RHI::CreateBoundShaderState( const tchar* InBound
 	return boundShaderStateRHI;
 }
 
-/**
- * Create rasterizer state
- */
+/*
+==================
+CD3D11RHI::CreateRasterizerState
+==================
+*/
 RasterizerStateRHIRef_t CD3D11RHI::CreateRasterizerState( const SRasterizerStateInitializerRHI& InInitializer )
 {
 	return new CD3D11RasterizerStateRHI( InInitializer );
 }
 
+/*
+==================
+CD3D11RHI::CreateSamplerState
+==================
+*/
 SamplerStateRHIRef_t CD3D11RHI::CreateSamplerState( const SSamplerStateInitializerRHI& InInitializer )
 {
 	return new CD3D11SamplerStateRHI( InInitializer );
 }
 
+/*
+==================
+CD3D11RHI::CreateDepthState
+==================
+*/
 DepthStateRHIRef_t CD3D11RHI::CreateDepthState( const SDepthStateInitializerRHI& InInitializer )
 {
 	return new CD3D11DepthStateRHI( InInitializer );
 }
 
+/*
+==================
+CD3D11RHI::CreateBlendState
+==================
+*/
 BlendStateRHIRef_t CD3D11RHI::CreateBlendState( const SBlendStateInitializerRHI& InInitializer )
 {
 	return new CD3D11BlendStateRHI( InInitializer );
 }
 
+/*
+==================
+CD3D11RHI::CreateStencilState
+==================
+*/
 StencilStateRHIRef_t CD3D11RHI::CreateStencilState( const SStencilStateInitializerRHI& InInitializer )
 {
 	return new CD3D11StencilStateRHI( InInitializer );
 }
 
+/*
+==================
+CD3D11RHI::CreateTexture2D
+==================
+*/
 Texture2DRHIRef_t CD3D11RHI::CreateTexture2D( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, uint32 InNumMips, uint32 InFlags, void* InData /*= nullptr*/ )
 {
 	return new CD3D11Texture2DRHI( InDebugName, InSizeX, InSizeY, InNumMips, InFormat, InFlags, InData );
 }
 
+/*
+==================
+CD3D11RHI::CreateTargetableSurface
+==================
+*/
 SurfaceRHIRef_t CD3D11RHI::CreateTargetableSurface( const tchar* InDebugName, uint32 InSizeX, uint32 InSizeY, EPixelFormat InFormat, Texture2DRHIParamRef_t InResolveTargetTexture, uint32 InFlags )
 {
 	return new CD3D11Surface( InResolveTargetTexture );
 }
 
-/**
- * Get device context
- */
+/*
+==================
+CD3D11RHI::GetImmediateContext
+==================
+*/
 class CBaseDeviceContextRHI* CD3D11RHI::GetImmediateContext() const
 {
 	return immediateContext;
 }
 
+/*
+==================
+CD3D11RHI::GetViewport
+==================
+*/
 void CD3D11RHI::GetViewport( uint32& OutMinX, uint32& OutMinY, float& OutMinZ, uint32& OutMaxX, uint32& OutMaxY, float& OutMaxZ ) const
 {
 	OutMinX = stateCache.viewport.TopLeftX;
@@ -652,6 +746,11 @@ void CD3D11RHI::GetViewport( uint32& OutMinX, uint32& OutMinY, float& OutMinZ, u
 	OutMaxZ = stateCache.viewport.MaxDepth;
 }
 
+/*
+==================
+CD3D11RHI::SetupInstancing
+==================
+*/
 void CD3D11RHI::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, void* InInstanceData, uint32 InInstanceStride, uint32 InInstanceSize, uint32 InNumInstances )
 {
 	if ( !instanceBuffer || instanceBuffer->GetSize() < InInstanceSize )
@@ -669,9 +768,11 @@ void CD3D11RHI::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContext, u
 	SetStreamSource( InDeviceContext, InStreamIndex, instanceBuffer, InInstanceStride, 0 );
 }
 
-/**
- * Set viewport
- */
+/*
+==================
+CD3D11RHI::SetViewport
+==================
+*/
 void CD3D11RHI::SetViewport( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMinX, uint32 InMinY, float InMinZ, uint32 InMaxX, uint32 InMaxY, float InMaxZ )
 {
 	D3D11_VIEWPORT			d3d11Viewport = { ( float )InMinX, ( float )InMinY, ( float )InMaxX - InMinX, ( float )InMaxY - InMinY, ( float )InMinZ, InMaxZ };
@@ -682,9 +783,11 @@ void CD3D11RHI::SetViewport( class CBaseDeviceContextRHI* InDeviceContext, uint3
 	}
 }
 
-/**
- * Set bound shader state
- */
+/*
+==================
+CD3D11RHI::SetBoundShaderState
+==================
+*/
 void CD3D11RHI::SetBoundShaderState( class CBaseDeviceContextRHI* InDeviceContext, BoundShaderStateRHIParamRef_t InBoundShaderState )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -756,9 +859,11 @@ void CD3D11RHI::SetBoundShaderState( class CBaseDeviceContextRHI* InDeviceContex
 	}
 }
 
-/**
- * Set stream source
- */
+/*
+==================
+CD3D11RHI::SetStreamSource
+==================
+*/
 void CD3D11RHI::SetStreamSource( class CBaseDeviceContextRHI* InDeviceContext, uint32 InStreamIndex, VertexBufferRHIParamRef_t InVertexBuffer, uint32 InStride, uint32 InOffset )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext		= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -772,9 +877,11 @@ void CD3D11RHI::SetStreamSource( class CBaseDeviceContextRHI* InDeviceContext, u
 	}
 }
 
-/**
- * Set rasterizer state
- */
+/*
+==================
+CD3D11RHI::SetRasterizerState
+==================
+*/
 void CD3D11RHI::SetRasterizerState( class CBaseDeviceContextRHI* InDeviceContext, RasterizerStateRHIParamRef_t InNewState )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext		= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -787,6 +894,11 @@ void CD3D11RHI::SetRasterizerState( class CBaseDeviceContextRHI* InDeviceContext
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetSamplerState
+==================
+*/
 void CD3D11RHI::SetSamplerState( class CBaseDeviceContextRHI* InDeviceContext, PixelShaderRHIParamRef_t InPixelShader, SamplerStateRHIParamRef_t InNewState, uint32 InStateIndex )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext		= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -799,6 +911,11 @@ void CD3D11RHI::SetSamplerState( class CBaseDeviceContextRHI* InDeviceContext, P
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetTextureParameter
+==================
+*/
 void CD3D11RHI::SetTextureParameter( class CBaseDeviceContextRHI* InDeviceContext, PixelShaderRHIParamRef_t InPixelShader, TextureRHIParamRef_t InTexture, uint32 InTextureIndex )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* ) InDeviceContext )->GetD3D11DeviceContext();
@@ -811,27 +928,47 @@ void CD3D11RHI::SetTextureParameter( class CBaseDeviceContextRHI* InDeviceContex
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetViewParameters
+==================
+*/
 void CD3D11RHI::SetViewParameters( class CBaseDeviceContextRHI* InDeviceContext, class CSceneView& InSceneView )
 {
-	check( InDeviceContext );
+	Assert( InDeviceContext );
 
 	SGlobalConstantBufferContents			globalContents;
-	SetGlobalConstants( globalContents, InSceneView, Vector4D( InSceneView.GetSizeX(), InSceneView.GetSizeY(), GSceneRenderTargets.GetBufferWidth(), GSceneRenderTargets.GetBufferHeight() ) );
+	SetGlobalConstants( globalContents, InSceneView, Vector4D( InSceneView.GetSizeX(), InSceneView.GetSizeY(), g_SceneRenderTargets.GetBufferWidth(), g_SceneRenderTargets.GetBufferHeight() ) );
 
 	globalConstantBuffer->Update( ( byte* ) &globalContents, 0, sizeof( globalContents ) );
 	globalConstantBuffer->CommitConstantsToDevice( ( CD3D11DeviceContext* )InDeviceContext );
 }
 
+/*
+==================
+CD3D11RHI::SetVertexShaderParameter
+==================
+*/
 void CD3D11RHI::SetVertexShaderParameter( class CBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
 {
 	vsConstantBuffers[ InBufferIndex ]->Update( ( const byte* )InNewValue, InBaseIndex, InNumBytes );
 }
 
+/*
+==================
+CD3D11RHI::SetPixelShaderParameter
+==================
+*/
 void CD3D11RHI::SetPixelShaderParameter( class CBaseDeviceContextRHI* InDeviceContext, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InNumBytes, const void* InNewValue )
 {
 	psConstantBuffer->Update( ( const byte* )InNewValue, InBaseIndex, InNumBytes );
 }
 
+/*
+==================
+CD3D11RHI::SetDepthState
+==================
+*/
 void CD3D11RHI::SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, DepthStateRHIParamRef_t InNewState )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext	= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -843,7 +980,7 @@ void CD3D11RHI::SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, Dep
 	}
 	else
 	{
-		appMemzero( &d3d11DepthStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+		Sys_Memzero( &d3d11DepthStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	}
 
 	if ( memcmp( &d3d11DepthStateDesc, &stateCache.depthState, sizeof( D3D11_DEPTH_STENCIL_DESC ) ) )
@@ -853,6 +990,11 @@ void CD3D11RHI::SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, Dep
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetBlendState
+==================
+*/
 void CD3D11RHI::SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, BlendStateRHIParamRef_t InNewState )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext	= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -864,7 +1006,7 @@ void CD3D11RHI::SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, Ble
 	}
 	else
 	{
-		appMemzero( &d3d11BlendStateDesc, sizeof( D3D11_BLEND_DESC ) );
+		Sys_Memzero( &d3d11BlendStateDesc, sizeof( D3D11_BLEND_DESC ) );
 	}
 
 	if ( memcmp( &d3d11BlendStateDesc, &stateCache.blendState, sizeof( D3D11_BLEND_DESC ) ) )
@@ -875,6 +1017,11 @@ void CD3D11RHI::SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, Ble
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetColorWriteEnable
+==================
+*/
 void CD3D11RHI::SetColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable )
 {
 	ID3D11DeviceContext*	d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -889,9 +1036,14 @@ void CD3D11RHI::SetColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContex
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetMRTColorWriteEnable
+==================
+*/
 void CD3D11RHI::SetMRTColorWriteEnable( class CBaseDeviceContextRHI* InDeviceContext, bool InIsEnable, uint32 InTargetIndex )
 {
-	check( InTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT );
+	Assert( InTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT );
 	ID3D11DeviceContext*	d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	uint8					d3d11ColorWriteMask = InIsEnable ? D3D11_COLOR_WRITE_ENABLE_ALL : 0;
 	
@@ -904,6 +1056,11 @@ void CD3D11RHI::SetMRTColorWriteEnable( class CBaseDeviceContextRHI* InDeviceCon
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetColorWriteMask
+==================
+*/
 void CD3D11RHI::SetColorWriteMask( class CBaseDeviceContextRHI* InDeviceContext, uint8 InColorWriteMask )
 {
 	ID3D11DeviceContext*	d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -922,9 +1079,14 @@ void CD3D11RHI::SetColorWriteMask( class CBaseDeviceContextRHI* InDeviceContext,
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetMRTColorWriteMask
+==================
+*/
 void CD3D11RHI::SetMRTColorWriteMask( class CBaseDeviceContextRHI* InDeviceContext, uint8 InColorWriteMask, uint32 InTargetIndex )
 {
-	check( InTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT );
+	Assert( InTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT );
 	ID3D11DeviceContext*	d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	uint8					d3d11ColorWriteMask = 0;
 	d3d11ColorWriteMask		= ( InColorWriteMask & CW_Red ) ? D3D11_COLOR_WRITE_ENABLE_RED : 0;
@@ -941,6 +1103,11 @@ void CD3D11RHI::SetMRTColorWriteMask( class CBaseDeviceContextRHI* InDeviceConte
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetStencilState
+==================
+*/
 void CD3D11RHI::SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, StencilStateRHIParamRef_t InNewState )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -954,7 +1121,7 @@ void CD3D11RHI::SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, S
 	}
 	else
 	{
-		appMemzero( &d3d1StencilStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+		Sys_Memzero( &d3d1StencilStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	}
 
 	if ( memcmp( &d3d1StencilStateDesc, &stateCache.stencilState, sizeof( D3D11_DEPTH_STENCIL_DESC ) ) || stencilRef != stateCache.stencilRef )
@@ -965,6 +1132,11 @@ void CD3D11RHI::SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, S
 	}
 }
 
+/*
+==================
+CD3D11RHI::CommitConstants
+==================
+*/
 void CD3D11RHI::CommitConstants( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	// Commit vertex shader constants
@@ -981,12 +1153,14 @@ void CD3D11RHI::CommitConstants( class CBaseDeviceContextRHI* InDeviceContext )
 	psConstantBuffer->CommitConstantsToDevice( ( CD3D11DeviceContext* )InDeviceContext );
 }
 
-/**
- * Lock vertex buffer
- */
+/*
+==================
+CD3D11RHI::LockVertexBuffer
+==================
+*/
 void CD3D11RHI::LockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData )
 {
-	check( OutLockedData.data == nullptr && InOffset < InSize );
+	Assert( OutLockedData.data == nullptr && InOffset < InSize );
 
 	D3D11_MAP						writeMode = D3D11_MAP_WRITE_DISCARD;
 	D3D11_MAPPED_SUBRESOURCE		mappedSubresource;
@@ -997,23 +1171,27 @@ void CD3D11RHI::LockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, 
 	OutLockedData.isNeedFree	= false;
 }
 
-/**
- * Unlock vertex buffer
- */
+/*
+==================
+CD3D11RHI::UnlockVertexBuffer
+==================
+*/
 void CD3D11RHI::UnlockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, SLockedData& InLockedData )
 {
-	check( InLockedData.data );
+	Assert( InLockedData.data );
 
 	static_cast< CD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->Unmap( static_cast< CD3D11VertexBufferRHI* >( InVertexBuffer.GetPtr() )->GetD3D11Buffer(), 0 );
 	InLockedData.data = nullptr;
 }
 
-/**
- * Lock index buffer
- */
+/*
+==================
+CD3D11RHI::LockIndexBuffer
+==================
+*/
 void CD3D11RHI::LockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData )
 {
-	check( OutLockedData.data == nullptr && InOffset < InSize );
+	Assert( OutLockedData.data == nullptr && InOffset < InSize );
 
 	D3D11_MAP						writeMode = D3D11_MAP_WRITE_DISCARD;
 	D3D11_MAPPED_SUBRESOURCE		mappedSubresource;
@@ -1024,30 +1202,44 @@ void CD3D11RHI::LockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, c
 	OutLockedData.isNeedFree = false;
 }
 
-/**
- * Unlock index buffer
- */
+/*
+==================
+CD3D11RHI::UnlockIndexBuffer
+==================
+*/
 void CD3D11RHI::UnlockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, SLockedData& InLockedData )
 {
-	check( InLockedData.data );
+	Assert( InLockedData.data );
 
 	static_cast< CD3D11DeviceContext* >( InDeviceContext )->GetD3D11DeviceContext()->Unmap( static_cast< CD3D11IndexBufferRHI* >( InIndexBuffer.GetPtr() )->GetD3D11Buffer(), 0 );
 	InLockedData.data = nullptr;
 }
 
+/*
+==================
+CD3D11RHI::LockTexture2D
+==================
+*/
 void CD3D11RHI::LockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, bool InIsDataWrite, SLockedData& OutLockedData, bool InIsUseCPUShadow /*= false*/ )
 {
 	( ( CD3D11Texture2DRHI* )InTexture )->Lock( InDeviceContext, InMipIndex, InIsDataWrite, InIsUseCPUShadow, OutLockedData );
 }
 
+/*
+==================
+CD3D11RHI::UnlockTexture2D
+==================
+*/
 void CD3D11RHI::UnlockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, SLockedData& InLockedData )
 {
 	( ( CD3D11Texture2DRHI* )InTexture )->Unlock( InDeviceContext, InMipIndex, InLockedData );
 }
 
-/**
- * Draw primitive
- */
+/*
+==================
+CD3D11RHI::DrawPrimitive
+==================
+*/
 void CD3D11RHI::DrawPrimitive( class CBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumInstances /* = 1 */ )
 {
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
@@ -1074,9 +1266,14 @@ void CD3D11RHI::DrawPrimitive( class CBaseDeviceContextRHI* InDeviceContext, EPr
 	}
 }
 
+/*
+==================
+CD3D11RHI::DrawIndexedPrimitive
+==================
+*/
 void CD3D11RHI::DrawIndexedPrimitive( class CBaseDeviceContextRHI* InDeviceContext, class CBaseIndexBufferRHI* InIndexBuffer, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InStartIndex, uint32 InNumPrimitives, uint32 InNumInstances /* = 1 */ )
 {
-	check( InIndexBuffer );
+	Assert( InIndexBuffer );
 	ID3D11DeviceContext*			d3d11DeviceContext = ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	CD3D11IndexBufferRHI*			indexBuffer = ( CD3D11IndexBufferRHI* )InIndexBuffer;
 
@@ -1115,6 +1312,11 @@ void CD3D11RHI::DrawIndexedPrimitive( class CBaseDeviceContextRHI* InDeviceConte
 	}
 }
 
+/*
+==================
+CD3D11RHI::DrawPrimitiveUP
+==================
+*/
 void CD3D11RHI::DrawPrimitiveUP( class CBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances /* = 1 */ )
 {
 	uint32										vertexCount		= GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
@@ -1124,6 +1326,11 @@ void CD3D11RHI::DrawPrimitiveUP( class CBaseDeviceContextRHI* InDeviceContext, E
 	DrawPrimitive( InDeviceContext, InPrimitiveType, InBaseVertexIndex, InNumPrimitives, InNumInstances );
 }
 
+/*
+==================
+CD3D11RHI::DrawIndexedPrimitiveUP
+==================
+*/
 void CD3D11RHI::DrawIndexedPrimitiveUP( class CBaseDeviceContextRHI* InDeviceContext, EPrimitiveType InPrimitiveType, uint32 InBaseVertexIndex, uint32 InNumPrimitives, uint32 InNumVertices, const void* InIndexData, uint32 InIndexDataStride, const void* InVertexData, uint32 InVertexDataStride, uint32 InNumInstances /* = 1 */ )
 {
 	uint32										indexCount		= GetVertexCountForPrimitiveCount( InNumPrimitives, InPrimitiveType );
@@ -1134,12 +1341,17 @@ void CD3D11RHI::DrawIndexedPrimitiveUP( class CBaseDeviceContextRHI* InDeviceCon
 	DrawIndexedPrimitive( InDeviceContext, indexBuffer, InPrimitiveType, InBaseVertexIndex, 0, InNumPrimitives, InNumInstances );
 }
 
+/*
+==================
+CD3D11RHI::CopyToResolveTarget
+==================
+*/
 void CD3D11RHI::CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InSourceSurface, const SResolveParams& InResolveParams )
 {
 	ID3D11DeviceContext*	d3d11DeviceContext		= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	CD3D11Surface*			resolveTargetSurface	= InResolveParams.resolveTargetSurface ? ( CD3D11Surface* )InResolveParams.resolveTargetSurface : nullptr;
 	CD3D11Texture2DRHI*		resolveTarget2D			= InResolveParams.resolveTarget ? ( CD3D11Texture2DRHI* )InResolveParams.resolveTarget : nullptr;
-	check( resolveTargetSurface || resolveTarget2D );
+	Assert( resolveTargetSurface || resolveTarget2D );
 
 	ID3D11Texture2D*		d3d11SourceSurface		= ( ( CD3D11Surface* )InSourceSurface )->GetResource();
 	ID3D11Texture2D*		d3d11ResolveTarget		= resolveTargetSurface ? resolveTargetSurface->GetResource() : resolveTarget2D->GetResource();
@@ -1209,15 +1421,17 @@ void CD3D11RHI::CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContex
 	}
 }
 
-/**
- * Begin drawing viewport
- */
+/*
+==================
+CD3D11RHI::BeginDrawingViewport
+==================
+*/
 void CD3D11RHI::BeginDrawingViewport( class CBaseDeviceContextRHI* InDeviceContext, class CBaseViewportRHI* InViewport )
 {
-	check( InDeviceContext && InViewport );
+	Assert( InDeviceContext && InViewport );
 	CD3D11DeviceContext*			deviceContext = ( CD3D11DeviceContext* )InDeviceContext;
 	CD3D11Viewport*					viewport = ( CD3D11Viewport* )InViewport;
-	check( viewport );
+	Assert( viewport );
 
 #if FRAME_CAPTURE_MARKERS
 	BeginDrawEvent( InDeviceContext, DEC_SCENE_ITEMS, TEXT( "Viewport" ) );
@@ -1230,9 +1444,14 @@ void CD3D11RHI::BeginDrawingViewport( class CBaseDeviceContextRHI* InDeviceConte
 	SetViewport( InDeviceContext, 0, 0, 0.f, viewport->GetWidth(), viewport->GetHeight(), 1.f );
 }
 
+/*
+==================
+CD3D11RHI::SetRenderTarget
+==================
+*/
 void CD3D11RHI::SetRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget, SurfaceRHIParamRef_t InNewDepthStencilTarget )
 {
-	check( InDeviceContext );
+	Assert( InDeviceContext );
 	CD3D11DeviceContext*			deviceContext				= ( CD3D11DeviceContext* )InDeviceContext;
 	CD3D11Surface*					renderTarget				= ( CD3D11Surface* )InNewRenderTarget;
 	CD3D11Surface*					depthStencilTarget			= ( CD3D11Surface* )InNewDepthStencilTarget;
@@ -1251,9 +1470,14 @@ void CD3D11RHI::SetRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, S
 	}
 }
 
+/*
+==================
+CD3D11RHI::SetMRTRenderTarget
+==================
+*/
 void CD3D11RHI::SetMRTRenderTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InNewRenderTarget, uint32 InTargetIndex )
 {
-	check( InDeviceContext && InTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT );
+	Assert( InDeviceContext && InTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT );
 	CD3D11DeviceContext*	deviceContext	= ( CD3D11DeviceContext* )InDeviceContext;
 	CD3D11Surface*			renderTarget	= ( CD3D11Surface* )InNewRenderTarget;
 
@@ -1268,12 +1492,14 @@ void CD3D11RHI::SetMRTRenderTarget( class CBaseDeviceContextRHI* InDeviceContext
 	}
 }
 
-/**
- * End drawing viewport
- */
+/*
+==================
+CD3D11RHI::EndDrawingViewport
+==================
+*/
 void CD3D11RHI::EndDrawingViewport( class CBaseDeviceContextRHI* InDeviceContext, class CBaseViewportRHI* InViewport, bool InIsPresent, bool InLockToVsync )
 {
-	check( InViewport );
+	Assert( InViewport );
 
 #if FRAME_CAPTURE_MARKERS
 	EndDrawEvent( InDeviceContext );
@@ -1327,25 +1553,25 @@ public:
 		// For including 'VertexFactory.hlsl' we take path from Environment
 		if ( filename == TEXT( "VertexFactory.hlsl" ) )
 		{
-			filename = appShaderDir() + TEXT( "VertexFactory/" ) + environment.vertexFactoryFileName;
+			filename = Sys_ShaderDir() + TEXT( "VertexFactory/" ) + environment.vertexFactoryFileName;
 		}
 		// Else we search in root shader dir
 		else
 		{
-			filename = appShaderDir() + filename;
+			filename = Sys_ShaderDir() + filename;
 		}
 
-		CArchive*		archive = GFileSystem->CreateFileReader( filename );
+		CArchive*		archive = g_FileSystem->CreateFileReader( filename );
 		if ( !archive )
 		{
-			LE_LOG( LT_Error, LC_Shader, TEXT( "Not found included shader file '%s'" ), filename.c_str() );
+			Errorf( TEXT( "Not found included shader file '%s'\n" ), filename.c_str() );
 			return E_FAIL;
 		}
 
 		// Create data buffer and fill '\0'
 		*OutBytes = archive->GetSize() + 1;
 		byte*		data = new byte[ *OutBytes ];
-		appMemzero( data, *OutBytes );
+		Sys_Memzero( data, *OutBytes );
 
 		// Serialize data to buffer
 		archive->Serialize( data, *OutBytes );
@@ -1370,11 +1596,11 @@ private:
 	SShaderCompilerEnvironment			environment;		/**< Shader compiler environment */
 };
 
-/**
- * TranslateCompilerFlag - Translates the platform-independent compiler flags into D3DX defines
- * @param[in] CompilerFlag - The platform-independent compiler flag to translate
- * @return DWORD - The value of the appropriate D3DX enum
- */
+/*
+==================
+TranslateCompilerFlagD3D11
+==================
+*/
 static DWORD TranslateCompilerFlagD3D11( ECompilerFlags CompilerFlag )
 {
 	switch ( CompilerFlag )
@@ -1386,12 +1612,14 @@ static DWORD TranslateCompilerFlagD3D11( ECompilerFlags CompilerFlag )
 	};
 }
 
-/**
- * Compile shader
- */
+/*
+==================
+CD3D11RHI::CompileShader
+==================
+*/
 bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const SShaderCompilerEnvironment& InEnvironment, SShaderCompilerOutput& OutOutput, bool InDebugDump /* = false */, const tchar* InShaderSubDir /* = TEXT( "" ) */ )
 {
-	CArchive*		shaderArchive = GFileSystem->CreateFileReader( InSourceFileName );
+	CArchive*		shaderArchive = g_FileSystem->CreateFileReader( InSourceFileName );
 	if ( !shaderArchive )
 	{
 		return false;
@@ -1434,7 +1662,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 		break;
 
 	default:
-		appErrorf( TEXT( "Unknown shader frequency %i" ), InFrequency );
+		Sys_Errorf( TEXT( "Unknown shader frequency %i" ), InFrequency );
 		return false;
 	}
 
@@ -1495,7 +1723,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 			OutOutput.errorMsg		= TEXT( "Compile Failed without warnings!" );	
 		}
 
-		LE_LOG( LT_Error, LC_Shader, OutOutput.errorMsg.c_str() );
+		Errorf( TEXT( "%s\n" ), OutOutput.errorMsg.c_str() );
 		return false;
 	}
 
@@ -1506,7 +1734,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 
 	ID3D11ShaderReflection*				reflector = nullptr;
 	result = D3DReflect( OutOutput.code.data(), OutOutput.code.size(), IID_ID3D11ShaderReflection, ( void** ) &reflector );
-	check( result == S_OK );
+	Assert( result == S_OK );
 
 	// Read the constant table description.
 	D3D11_SHADER_DESC					shaderDesc;
@@ -1527,7 +1755,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 
 			if ( cbDesc.Size > GConstantBufferSizes[ cbIndex ] )
 			{
-				appErrorf( TEXT( "Set GConstantBufferSizes[%d] to >= %d" ), cbIndex, cbDesc.Size) ;
+				Sys_Errorf( TEXT( "Set GConstantBufferSizes[%d] to >= %d" ), cbIndex, cbDesc.Size) ;
 			}
 
 			// Track all of the variables in this constant buffer
@@ -1549,7 +1777,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 				}
 				else
 				{
-					LE_LOG( LT_Warning, LC_Shader, TEXT( "Found Unused shader parameter: %s at offset: %i size: %i" ), ANSI_TO_TCHAR( variableDesc.Name ), variableDesc.StartOffset, variableDesc.Size );
+					Warnf( TEXT( "Found Unused shader parameter: %s at offset: %i size: %i\n" ), ANSI_TO_TCHAR( variableDesc.Name ), variableDesc.StartOffset, variableDesc.Size );
 				}
 			}
 		}
@@ -1690,36 +1918,47 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 }
 #endif // WITH_EDITOR
 
+/*
+==================
+CD3D11RHI::GetShaderPlatform
+==================
+*/
 EShaderPlatform CD3D11RHI::GetShaderPlatform() const
 {
 	return SP_PCD3D_SM5;
 }
 
 #if WITH_IMGUI
-/**
- * Initialize ImGUI
- */
+/*
+==================
+CD3D11RHI::InitImGUI
+==================
+*/
 void CD3D11RHI::InitImGUI( class CBaseDeviceContextRHI* InDeviceContext )
 {
-	check( d3d11Device && InDeviceContext );
+	Assert( d3d11Device && InDeviceContext );
 	CD3D11DeviceContext* deviceContext = ( CD3D11DeviceContext* ) InDeviceContext;
 
 	bool		result = ImGui_ImplDX11_Init( d3d11Device, deviceContext->GetD3D11DeviceContext() );
-	check( result );
+	Assert( result );
 	ImGui_ImplDX11_NewFrame();
 }
 
-/**
- * Shutdown render of ImGUI
- */
+/*
+==================
+CD3D11RHI::ShutdownImGUI
+==================
+*/
 void CD3D11RHI::ShutdownImGUI( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	ImGui_ImplDX11_Shutdown();
 }
 
-/**
- * Draw ImGUI
- */
+/*
+==================
+CD3D11RHI::DrawImGUI
+==================
+*/
 void CD3D11RHI::DrawImGUI( class CBaseDeviceContextRHI* InDeviceContext, ImDrawData* InImGUIDrawData )
 {
 	ImGui_ImplDX11_RenderDrawData( InImGUIDrawData );
@@ -1727,30 +1966,47 @@ void CD3D11RHI::DrawImGUI( class CBaseDeviceContextRHI* InDeviceContext, ImDrawD
 #endif // WITH_IMGUI
 
 #if FRAME_CAPTURE_MARKERS
+/*
+==================
+CD3D11RHI::BeginDrawEvent
+==================
+*/
 void CD3D11RHI::BeginDrawEvent( class CBaseDeviceContextRHI* InDeviceContext, const CColor& InColor, const tchar* InName )
 {
 	D3DPERF_BeginEvent( D3DCOLOR_RGBA( InColor.r, InColor.g, InColor.b, InColor.a ), InName );
 }
 
+/*
+==================
+CD3D11RHI::EndDrawEvent
+==================
+*/
 void CD3D11RHI::EndDrawEvent( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	D3DPERF_EndEvent();
 }
 #endif // FRAME_CAPTURE_MARKERS
 
-/**
- * Get RHI name
- */
+/*
+==================
+CD3D11RHI::GetRHIName
+==================
+*/
 const tchar* CD3D11RHI::GetRHIName() const
 {
 	return TEXT( "D3D11RHI" );
 }
 
+/*
+==================
+CD3D11RHI::GetCachedBlendState
+==================
+*/
 ID3D11BlendState* CD3D11RHI::GetCachedBlendState( const D3D11_BLEND_DESC& InBlendState, uint8* InColorWriteMasks )
 {
 	// Calculate hash
-	uint64		hash = appMemFastHash( InBlendState );
-	hash = appMemFastHash( InColorWriteMasks, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT * sizeof( uint8 ), hash );
+	uint64		hash = Sys_MemFastHash( InBlendState );
+	hash = Sys_MemFastHash( InColorWriteMasks, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT * sizeof( uint8 ), hash );
 
 	// Try find cached blend state
 	auto		it = cachedBlendStates.find( hash );
@@ -1770,22 +2026,27 @@ ID3D11BlendState* CD3D11RHI::GetCachedBlendState( const D3D11_BLEND_DESC& InBlen
 	}
 	d3d11BlendStateDesc.IndependentBlendEnable = true;
 
-#if DO_CHECK
+#if ENABLED_ASSERT
 	HRESULT				result = d3d11Device->CreateBlendState( &d3d11BlendStateDesc, &d3d11BlendState );
-	check( result == S_OK );
+	Assert( result == S_OK );
 #else
 	d3d11Device->CreateBlendState( &d3d11BlendStateDesc, &d3d11BlendState );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 
 	cachedBlendStates[hash] = d3d11BlendState;
 	return d3d11BlendState;
 }
 
+/*
+==================
+CD3D11RHI::GetCachedDepthStencilState
+==================
+*/
 ID3D11DepthStencilState* CD3D11RHI::GetCachedDepthStencilState( const D3D11_DEPTH_STENCIL_DESC& InDepthStateInfo, const D3D11_DEPTH_STENCIL_DESC& InStencilStateInfo )
 {
 	// Calculate hash
-	uint64		hash = appMemFastHash( InDepthStateInfo );
-	hash = appMemFastHash( InStencilStateInfo, hash );
+	uint64		hash = Sys_MemFastHash( InDepthStateInfo );
+	hash = Sys_MemFastHash( InStencilStateInfo, hash );
 
 	// Try find cached depth stencil state
 	auto	it = cachedDepthStencilStates.find( hash );
@@ -1802,29 +2063,33 @@ ID3D11DepthStencilState* CD3D11RHI::GetCachedDepthStencilState( const D3D11_DEPT
 	d3d11DepthStencilDesc.DepthWriteMask	= InDepthStateInfo.DepthWriteMask;
 	d3d11DepthStencilDesc.DepthFunc			= InDepthStateInfo.DepthFunc;
 
-#if DO_CHECK
+#if ENABLED_ASSERT
 	HRESULT				result = d3d11Device->CreateDepthStencilState( &d3d11DepthStencilDesc, &d3d11DepthStencilState );
-	check( result == S_OK );
+	Assert( result == S_OK );
 #else
 	d3d11Device->CreateDepthStencilState( &d3d11DepthStencilDesc, &d3d11DepthStencilState );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 
 	cachedDepthStencilStates[hash] = d3d11DepthStencilState;
 	return d3d11DepthStencilState;
 }
 
-/**
- * Set debug name fore DirectX 11 resource
- */
+/*
+==================
+D3D11SetDebugName
+==================
+*/
 void D3D11SetDebugName( ID3D11DeviceChild* InObject, const achar* InName )
 {
 	if ( !InName )			return;
 	InObject->SetPrivateData( WKPDID_D3DDebugObjectName, ( uint32 )strlen( InName ), InName );
 }
 
-/**
- * Set debug name fore DirectX 11 resource
- */
+/*
+==================
+D3D11SetDebugName
+==================
+*/
 void D3D11SetDebugName( IDXGIObject* InObject, const achar* InName )
 {
 	if ( !InName )			return;

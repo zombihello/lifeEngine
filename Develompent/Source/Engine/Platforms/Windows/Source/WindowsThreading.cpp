@@ -4,10 +4,10 @@
 #include "Containers/StringConv.h"
 
 /* Global factory for creating threads */
-CThreadFactory*			GThreadFactory = new CThreadFactoryWindows();
+CThreadFactory*			g_ThreadFactory = new CThreadFactoryWindows();
 
 /* Global factory for creating synchronization objects */
-CSynchronizeFactory*	GSynchronizeFactory = new CSynchronizeFactoryWindows();
+CSynchronizeFactory*	g_SynchronizeFactory = new CSynchronizeFactoryWindows();
 
 /**
  * Code setting the thread name for use in the debugger.
@@ -26,6 +26,11 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack( pop )
 
+/*
+==================
+SetThreadName
+==================
+*/
 void SetThreadName( HANDLE InThreadHandle, const achar* InThreadName )
 {
 	THREADNAME_INFO			threadNameInfo;
@@ -43,6 +48,12 @@ void SetThreadName( HANDLE InThreadHandle, const achar* InThreadName )
 	}
 }
 
+
+/*
+==================
+CRunnableThreadWindows::CRunnableThreadWindows
+==================
+*/
 CRunnableThreadWindows::CRunnableThreadWindows() :
 	threadId( 0 ),
 	thread( nullptr ),
@@ -53,6 +64,11 @@ CRunnableThreadWindows::CRunnableThreadWindows() :
 	isAutoDeleteRunnable( false )
 {}
 
+/*
+==================
+CRunnableThreadWindows::~CRunnableThreadWindows
+==================
+*/
 CRunnableThreadWindows::~CRunnableThreadWindows()
 {
 	if ( thread != nullptr )
@@ -61,15 +77,30 @@ CRunnableThreadWindows::~CRunnableThreadWindows()
 	}
 }
 
+/*
+==================
+CRunnableThreadWindows::SetProcessorAffinity
+==================
+*/
 void CRunnableThreadWindows::SetProcessorAffinity( uint32 InProcessorNum )
 {}
 
+/*
+==================
+CRunnableThreadWindows::SetProcessorAffinityMask
+==================
+*/
 void CRunnableThreadWindows::SetProcessorAffinityMask( uint32 InProcessorMask )
 {}
 
+/*
+==================
+CRunnableThreadWindows::Suspend
+==================
+*/
 void CRunnableThreadWindows::Suspend( bool InIsShouldPause /*= true*/ )
 {
-	check( thread );
+	Assert( thread );
 	if ( InIsShouldPause )
 	{
 		SuspendThread( thread );
@@ -80,9 +111,14 @@ void CRunnableThreadWindows::Suspend( bool InIsShouldPause /*= true*/ )
 	}
 }
 
+/*
+==================
+CRunnableThreadWindows::Kill
+==================
+*/
 bool CRunnableThreadWindows::Kill( bool InIsShouldWait /*= false*/ )
 {
-	check( thread );
+	Assert( thread );
 	bool		didExitOK = true;
 
 	// Let the runnable have a chance to stop without brute force killing
@@ -115,26 +151,41 @@ bool CRunnableThreadWindows::Kill( bool InIsShouldWait /*= false*/ )
 	}
 
 	// Delete ourselves if requested and we didn't shut down gracefully already.
-	// This check prevents a double-delete of self when we shut down gracefully.
+	// This Assert prevents a double-delete of self when we shut down gracefully.
 	if ( !didExitOK && isAutoDeleteSelf )
 	{
-		GThreadFactory->Destroy( this );
+		g_ThreadFactory->Destroy( this );
 	}
 
 	return didExitOK;
 }
 
+/*
+==================
+CRunnableThreadWindows::WaitForCompletion
+==================
+*/
 void CRunnableThreadWindows::WaitForCompletion()
 {
 	// Block until this thread exits
 	WaitForSingleObject( thread, INFINITE );
 }
 
+/*
+==================
+CRunnableThreadWindows::GetThreadID
+==================
+*/
 uint32 CRunnableThreadWindows::GetThreadID() const
 {
 	return threadId;
 }
 
+/*
+==================
+CRunnableThreadWindows::Create
+==================
+*/
 bool CRunnableThreadWindows::Create( CRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf /*= false*/, bool InIsAutoDeleteRunnable /*= false*/, uint32 InStackSize /*= 0*/, EThreadPriority InThreadPriority /*= TP_Normal*/ )
 {
 	// Remember our inputs
@@ -144,7 +195,7 @@ bool CRunnableThreadWindows::Create( CRunnable* InRunnable, const tchar* InThrea
 	threadPriority = InThreadPriority;
 
 	// Create a sync event to guarantee the Init() function is called first
-	threadInitSyncEvent = GSynchronizeFactory->CreateSynchEvent( true );
+	threadInitSyncEvent = g_SynchronizeFactory->CreateSynchEvent( true );
 
 	// Create the new thread
 	thread = CreateThread( nullptr, InStackSize, &CRunnableThreadWindows::StaticMainProc, this, 0, ( LPDWORD ) &threadId );
@@ -167,25 +218,35 @@ bool CRunnableThreadWindows::Create( CRunnable* InRunnable, const tchar* InThrea
 	}
 
 	// Cleanup the sync event
-	GSynchronizeFactory->Destroy( threadInitSyncEvent );
+	g_SynchronizeFactory->Destroy( threadInitSyncEvent );
 	threadInitSyncEvent = nullptr;
 	return thread != nullptr;
 }
 
+/*
+==================
+CRunnableThreadWindows::StaticMainProc
+==================
+*/
 DWORD CRunnableThreadWindows::StaticMainProc( LPVOID InThis )
 {
 	CRunnableThreadWindows*		thisThread = ( CRunnableThreadWindows* )InThis;
 	return thisThread->Run();
 }
 
+/*
+==================
+CRunnableThreadWindows::Run
+==================
+*/
 uint32 CRunnableThreadWindows::Run()
 {
-	check( runnable );
-	appSetThreadPriority( thread, threadPriority );
+	Assert( runnable );
+	Sys_SetThreadPriority( thread, threadPriority );
 
 	// Initialize the runnable object
 	bool		initReturn = runnable->Init();
-	check( initReturn );
+	Assert( initReturn );
 	UNUSED_VAR( initReturn );
 
 	// Initialization has completed, release the sync event
@@ -210,35 +271,57 @@ uint32 CRunnableThreadWindows::Run()
 		// Now clean up the thread handle so we don't leak
 		CloseHandle( thread );
 		thread = nullptr;
-		GThreadFactory->Destroy( this );
+		g_ThreadFactory->Destroy( this );
 	}
 
 	// Return from the thread with the exit code
 	return exitCode;
 }
 
+
+/*
+==================
+CThreadFactoryWindows::CreateThread
+==================
+*/
 CRunnableThread* CThreadFactoryWindows::CreateThread( CRunnable* InRunnable, const tchar* InThreadName, bool InIsAutoDeleteSelf /*= false*/, bool InIsAutoDeleteRunnable /*= false*/, uint32 InStackSize /*= 0*/, EThreadPriority InThreadPriority /*= TP_Normal*/ )
 {
 	CRunnableThreadWindows*		newThread = new CRunnableThreadWindows();
 	
-#if DO_CHECK
-	check( newThread->Create( InRunnable, InThreadName, InIsAutoDeleteSelf, InIsAutoDeleteRunnable, InStackSize, InThreadPriority ) );
+#if ENABLED_ASSERT
+	Assert( newThread->Create( InRunnable, InThreadName, InIsAutoDeleteSelf, InIsAutoDeleteRunnable, InStackSize, InThreadPriority ) );
 #else
 	newThread->Create( InRunnable, InThreadName, InIsAutoDeleteSelf, InIsAutoDeleteRunnable, InStackSize, InThreadPriority );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 	
 	return newThread;
 }
 
+/*
+==================
+CThreadFactoryWindows::Destroy
+==================
+*/
 void CThreadFactoryWindows::Destroy( CRunnableThread* InThread )
 {
 	delete ( CRunnableThreadWindows* )InThread;
 }
 
+
+/*
+==================
+CEventWindows::CEventWindows
+==================
+*/
 CEventWindows::CEventWindows() :
 	event( nullptr )
 {}
 
+/*
+==================
+CEventWindows::~CEventWindows
+==================
+*/
 CEventWindows::~CEventWindows()
 {
 	if ( event )
@@ -247,40 +330,76 @@ CEventWindows::~CEventWindows()
 	}
 }
 
+/*
+==================
+CEventWindows::Create
+==================
+*/
 bool CEventWindows::Create( bool InIsManualReset /*= false*/, const tchar* InName /*= nullptr*/ )
 {
 	event = CreateEventW( nullptr, InIsManualReset, 0, InName );
 	return event != nullptr;
 }
 
+/*
+==================
+CEventWindows::Trigger
+==================
+*/
 void CEventWindows::Trigger()
 {
-	check( event );
+	Assert( event );
 	SetEvent( event );
 }
 
+/*
+==================
+CEventWindows::Reset
+==================
+*/
 void CEventWindows::Reset()
 {
-	check( event );
+	Assert( event );
 	ResetEvent( event );
 }
 
+/*
+==================
+CEventWindows::Pulse
+==================
+*/
 void CEventWindows::Pulse()
 {
-	check( event );
+	Assert( event );
 	PulseEvent( event );
 }
 
+/*
+==================
+CEventWindows::Wait
+==================
+*/
 bool CEventWindows::Wait( uint32 InWaitTime /*= (uint32)-1*/ )
 {
-	check( event );
+	Assert( event );
 	return WaitForSingleObject( event, InWaitTime) == WAIT_OBJECT_0;
 }
 
+
+/*
+==================
+CSemaphoreWindows::CSemaphoreWindows
+==================
+*/
 CSemaphoreWindows::CSemaphoreWindows() :
 	semaphore( nullptr )
 {}
 
+/*
+==================
+CSemaphoreWindows::~CSemaphoreWindows
+==================
+*/
 CSemaphoreWindows::~CSemaphoreWindows()
 {
 	if ( semaphore )
@@ -289,6 +408,11 @@ CSemaphoreWindows::~CSemaphoreWindows()
 	}
 }
 
+/*
+==================
+CSemaphoreWindows::Create
+==================
+*/
 bool CSemaphoreWindows::Create( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName /*= nullptr*/ )
 {
 	semaphore = CreateSemaphoreW(
@@ -303,66 +427,102 @@ bool CSemaphoreWindows::Create( uint32 InMaxCount, uint32 InInitialCount, const 
 	if ( !success )
 	{
 		uint32			error = GetLastError();
-		appErrorf( TEXT( "Failed in CSemaphoreWindows::Create() with ERROR CODE: %u" ), error );
+		Sys_Errorf( TEXT( "Failed in CSemaphoreWindows::Create() with ERROR CODE: %u" ), error );
 	}
 #endif
 
 	return success;
 }
 
+/*
+==================
+CSemaphoreWindows::Signal
+==================
+*/
 bool CSemaphoreWindows::Signal()
 {
 	return Post( 1 );
 }
 
+/*
+==================
+CSemaphoreWindows::Post
+==================
+*/
 bool CSemaphoreWindows::Post( uint32 InCount )
 {
-	check( semaphore );
+	Assert( semaphore );
 	bool success = ReleaseSemaphore( semaphore, InCount, nullptr );
 
 #if !SHIPPING_BUILD
 	if ( !success )
 	{
 		uint32				error = GetLastError();
-		appErrorf( TEXT( "Failed in CSemaphoreWindows::Post() with ERROR CODE: %u" ), error );
+		Sys_Errorf( TEXT( "Failed in CSemaphoreWindows::Post() with ERROR CODE: %u" ), error );
 	}
 #endif
 
 	return success;
 }
 
+/*
+==================
+CSemaphoreWindows::TryWait
+==================
+*/
 bool CSemaphoreWindows::TryWait()
 {
-	check( semaphore );
+	Assert( semaphore );
 	uint32		ret = ( uint32 )WaitForSingleObject( semaphore, 0 );
 
-	check( ret != WAIT_FAILED );
+	Assert( ret != WAIT_FAILED );
 	return ret != WAIT_TIMEOUT;
 }
 
+/*
+==================
+CSemaphoreWindows::Wait
+==================
+*/
 void CSemaphoreWindows::Wait()
 {
-	check( semaphore );
+	Assert( semaphore );
 	
 	uint32		ret = ( uint32 )WaitForSingleObject( semaphore, INFINITE );
-	check( ret == WAIT_OBJECT_0 );
+	Assert( ret == WAIT_OBJECT_0 );
 	UNUSED_VAR( ret );
 }
 
+/*
+==================
+CSemaphoreWindows::WaitTimeoutMs
+==================
+*/
 bool CSemaphoreWindows::WaitTimeoutMs( uint32 InMilliseconds )
 {
-	check( semaphore );
+	Assert( semaphore );
 	uint32		ret = ( uint32 )WaitForSingleObject( semaphore, InMilliseconds );
 
-	check( ret != WAIT_FAILED );
+	Assert( ret != WAIT_FAILED );
 	return ret != WAIT_TIMEOUT;
 }
 
+
+/*
+==================
+CSynchronizeFactoryWindows::CreateCriticalSection
+==================
+*/
 CCriticalSection* CSynchronizeFactoryWindows::CreateCriticalSection()
 {
 	return new CCriticalSection();
 }
 
+/*
+==================
+CSynchronizeFactoryWindows::CreateSynchEvent
+==================
+*/
 CEvent* CSynchronizeFactoryWindows::CreateSynchEvent( bool InIsManualReset /*= false*/, const tchar* InName /*= nullptr*/ )
 {
 	// Allocate the new object
@@ -378,6 +538,11 @@ CEvent* CSynchronizeFactoryWindows::CreateSynchEvent( bool InIsManualReset /*= f
 	return newEvent;
 }
 
+/*
+==================
+CSynchronizeFactoryWindows::CreateSemaphore
+==================
+*/
 CSemaphore* CSynchronizeFactoryWindows::CreateSemaphore( uint32 InMaxCount, uint32 InInitialCount, const tchar* InName /*= nullptr*/ )
 {
 	// Allocate the new object
@@ -393,6 +558,11 @@ CSemaphore* CSynchronizeFactoryWindows::CreateSemaphore( uint32 InMaxCount, uint
 	return newSemaphore;
 }
 
+/*
+==================
+CSynchronizeFactoryWindows::Destroy
+==================
+*/
 void CSynchronizeFactoryWindows::Destroy( CSynchronize* InSynchObj )
 {
 	delete InSynchObj;

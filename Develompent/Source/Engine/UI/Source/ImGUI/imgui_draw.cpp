@@ -411,7 +411,7 @@ void ImDrawListSharedData::SetCircleTessellationMaxError(float max_error)
 void ImDrawList::_ResetForNewFrame()
 {
     // Verify that the ImDrawCmd fields we want to memcmp() are contiguous in memory.
-    // (those should be IM_STATIC_ASSERT() in theory but with our pre C++11 setup the whole check doesn't compile with GCC)
+    // (those should be IM_STATIC_ASSERT() in theory but with our pre C++11 setup the whole Assert doesn't compile with GCC)
     IM_ASSERT(IM_OFFSETOF(ImDrawCmd, ClipRect) == 0);
     IM_ASSERT(IM_OFFSETOF(ImDrawCmd, TextureId) == sizeof(ImVec4));
     IM_ASSERT(IM_OFFSETOF(ImDrawCmd, VtxOffset) == sizeof(ImVec4) + sizeof(ImTextureID));
@@ -512,7 +512,7 @@ void ImDrawList::_TryMergeDrawCmds()
     }
 }
 
-// Our scheme may appears a bit unusual, basically we want the most-common calls AddLine AddRect etc. to not have to perform any check so we always have a command ready in the stack.
+// Our scheme may appears a bit unusual, basically we want the most-common calls AddLine AddRect etc. to not have to perform any Assert so we always have a command ready in the stack.
 // The cost of figuring out if a new command has to be added or if we can merge is paid in those Update** functions only.
 void ImDrawList::_OnChangedClipRect()
 {
@@ -640,7 +640,7 @@ void ImDrawList::PrimReserve(int idx_count, int vtx_count)
     {
         // FIXME: In theory we should be testing that vtx_count <64k here.
         // In practice, RenderText() relies on reserving ahead for a worst case scenario so it is currently useful for us
-        // to not make that check until we rework the text functions to handle clipping and large horizontal lines better.
+        // to not make that Assert until we rework the text functions to handle clipping and large horizontal lines better.
         _CmdHeader.VtxOffset = VtxBuffer.Size;
         _OnChangedVtxOffset();
     }
@@ -2364,7 +2364,7 @@ static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
     memset(src_tmp_array.Data, 0, (size_t)src_tmp_array.size_in_bytes());
     memset(dst_tmp_array.Data, 0, (size_t)dst_tmp_array.size_in_bytes());
 
-    // 1. Initialize font loading structure, check font data validity
+    // 1. Initialize font loading structure, Assert font data validity
     for (int src_i = 0; src_i < atlas->ConfigData.Size; src_i++)
     {
         ImFontBuildSrcData& src_tmp = src_tmp_array[src_i];
@@ -2396,7 +2396,7 @@ static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
         dst_tmp.GlyphsHighest = ImMax(dst_tmp.GlyphsHighest, src_tmp.GlyphsHighest);
     }
 
-    // 2. For every requested codepoint, check for their presence in the font data, and handle redundancy or overlaps between source fonts to avoid unused glyphs.
+    // 2. For every requested codepoint, Assert for their presence in the font data, and handle redundancy or overlaps between source fonts to avoid unused glyphs.
     int total_glyphs_count = 0;
     for (int src_i = 0; src_i < src_tmp_array.Size; src_i++)
     {

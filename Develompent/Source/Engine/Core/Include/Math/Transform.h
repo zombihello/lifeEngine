@@ -405,7 +405,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, CTransform& InValue )
  */
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CTransform& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive << InValue.translation;
 	InArchive << InValue.rotation;
 	InArchive << InValue.scale;

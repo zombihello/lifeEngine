@@ -940,7 +940,7 @@ bool ImGui::ScrollbarEx(const ImRect& bb_frame, ImGuiID id, ImGuiAxis axis, floa
 
     // Calculate the height of our grabbable box. It generally represent the amount visible (vs the total scrollable amount)
     // But we maintain a minimum size in pixel to allow for the user to still aim inside.
-    IM_ASSERT(ImMax(size_contents_v, size_avail_v) > 0.0f); // Adding this assert to check if the ImMax(XXX,1.0f) is still needed. PLEASE CONTACT ME if this triggers.
+    IM_ASSERT(ImMax(size_contents_v, size_avail_v) > 0.0f); // Adding this assert to Assert if the ImMax(XXX,1.0f) is still needed. PLEASE CONTACT ME if this triggers.
     const float win_size_v = ImMax(ImMax(size_contents_v, size_avail_v), 1.0f);
     const float grab_h_pixels = ImClamp(scrollbar_size_v * (size_avail_v / win_size_v), style.GrabMinSize, scrollbar_size_v);
     const float grab_h_norm = grab_h_pixels / scrollbar_size_v;
@@ -2780,7 +2780,7 @@ TYPE ImGui::ScaleValueFromRatioT(ImGuiDataType data_type, float t, TYPE v_min, T
             // - For integer values we want the clicking position to match the grab box so we round above
             //   This code is carefully tuned to work with large values (e.g. high ranges of U64) while preserving this property..
             // - Not doing a *1.0 multiply at the end of a range as it tends to be lossy. While absolute aiming at a large s64/u64
-            //   range is going to be imprecise anyway, with this check we at least make the edge values matches expected limits.
+            //   range is going to be imprecise anyway, with this Assert we at least make the edge values matches expected limits.
             if (t < 1.0)
             {
                 FLOATTYPE v_new_off_f = (SIGNEDTYPE)(v_max - v_min) * t;
@@ -4214,7 +4214,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
                     state->OnKeyPressed((int)c);
             }
 
-        // Process regular text input (before we check for Return because using some IME will effectively send a Return?)
+        // Process regular text input (before we Assert for Return because using some IME will effectively send a Return?)
         // We ignore CTRL inputs, but need to allow ALT+CTRL as some keyboards (e.g. German) use AltGR (which _is_ Alt+Ctrl) to input certain characters.
         if (io.InputQueueCharacters.Size > 0)
         {
@@ -4239,7 +4239,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     if (g.ActiveId == id && !g.ActiveIdIsJustActivated && !clear_active_id)
     {
         IM_ASSERT(state != NULL);
-        IM_ASSERT(io.KeyMods == GetMergedKeyModFlags() && "Mismatching io.KeyCtrl/io.KeyShift/io.KeyAlt/io.KeySuper vs io.KeyMods"); // We rarely do this check, but if anything let's do it here.
+        IM_ASSERT(io.KeyMods == GetMergedKeyModFlags() && "Mismatching io.KeyCtrl/io.KeyShift/io.KeyAlt/io.KeySuper vs io.KeyMods"); // We rarely do this Assert, but if anything let's do it here.
 
         const int row_count_per_page = ImMax((int)((inner_size.y - style.FramePadding.y) / g.FontSize), 1);
         state->Stb.row_count_per_page = row_count_per_page;
@@ -6702,7 +6702,7 @@ void ImGui::EndMenuBar()
             // To do so we claim focus back, restore NavId and then process the movement request for yet another frame.
             // This involve a one-frame delay which isn't very problematic in this situation. We could remove it by scoring in advance for multiple window (probably not worth bothering)
             const ImGuiNavLayer layer = ImGuiNavLayer_Menu;
-            IM_ASSERT(window->DC.NavLayersActiveMaskNext & (1 << layer)); // Sanity check
+            IM_ASSERT(window->DC.NavLayersActiveMaskNext & (1 << layer)); // Sanity Assert
             FocusWindow(window);
             SetNavID(window->NavLastIds[layer], layer, 0, window->NavRectRel[layer]);
             g.NavDisableHighlight = true; // Hide highlight for the current frame so we don't see the intermediary selection.

@@ -221,7 +221,7 @@ struct SSaveFileDialogResult
  * @param OutResult		File dialog result
  * @return Return TRUE when user clicks OK, otherwise will returning FALSE
  */
-bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResult& OutResult );
+bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResult& OutResult );
 
 /**
  * @ingroup WorldEd
@@ -232,6 +232,6 @@ bool appShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResu
  * @param OutResult		File dialog result
  * @return Return TRUE when user clicks OK, otherwise will returning FALSE
  */
-bool appShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogResult& OutResult );
+bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogResult& OutResult );
 
 #endif // !FILEDIALOG_H

@@ -10,6 +10,11 @@
 #include "RHI/StaticStatesRHI.h"
 #include "EngineDefines.h"
 
+/*
+==================
+CTexturePreviewViewportClient::CTexturePreviewViewportClient
+==================
+*/
 CTexturePreviewViewportClient::CTexturePreviewViewportClient( const TSharedPtr<CTexture2D>& InTexture2D )
 	: CEditorLevelViewportClient( LVT_OrthoXY )
 	, texture2D( InTexture2D )
@@ -17,9 +22,14 @@ CTexturePreviewViewportClient::CTexturePreviewViewportClient( const TSharedPtr<C
 	, mipmapToView( 0 )
 {}
 
+/*
+==================
+CTexturePreviewViewportClient::Draw
+==================
+*/
 void CTexturePreviewViewportClient::Draw( CViewport* InViewport )
 {
-	check( InViewport );
+	Assert( InViewport );
 	CSceneView*		sceneView = CalcSceneView( InViewport->GetSizeX(), InViewport->GetSizeY() );
 
 	// Draw preview texture viewport
@@ -33,10 +43,15 @@ void CTexturePreviewViewportClient::Draw( CViewport* InViewport )
 										  } );
 }
 
+/*
+==================
+CTexturePreviewViewportClient::Draw_RenderThread
+==================
+*/
 void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, const TSharedPtr<CTexture2D>& InTexture2D, class CSceneView* InSceneView )
 {
-	check( IsInRenderingThread() );
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	Assert( IsInRenderingThread() );
+	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
 	CSceneRenderer				sceneRenderer( InSceneView );
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	
@@ -46,23 +61,23 @@ void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewpo
 		SCOPED_DRAW_EVENT( EventDrawPreviewTexture, DEC_SCENE_ITEMS, CString::Format( TEXT( "Preview %s" ), InTexture2D->GetAssetName().c_str() ).c_str() );
 
 		Texture2DRHIRef_t							texture2DRHI				= InTexture2D->GetTexture2DRHI();
-		CScreenVertexShader<SVST_Fullscreen>*		screenVertexShader			= GShaderManager->FindInstance< CScreenVertexShader<SVST_Fullscreen>, CSimpleElementVertexFactory >();
-		CTexturePreviewPixelShader*					texturePreviewPixelShader	= GShaderManager->FindInstance< CTexturePreviewPixelShader, CSimpleElementVertexFactory >();
-		check( screenVertexShader && texturePreviewPixelShader );
+		CScreenVertexShader<SVST_Fullscreen>*		screenVertexShader			= g_ShaderManager->FindInstance< CScreenVertexShader<SVST_Fullscreen>, CSimpleElementVertexFactory >();
+		CTexturePreviewPixelShader*					texturePreviewPixelShader	= g_ShaderManager->FindInstance< CTexturePreviewPixelShader, CSimpleElementVertexFactory >();
+		Assert( screenVertexShader && texturePreviewPixelShader );
 
-		GSceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
-		immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorLDRSurface(), GetBackgroundColor() );
-		GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
-		GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
-		GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "PreviewTexture" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), texturePreviewPixelShader->GetPixelShader() ) );
+		g_SceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
+		immediateContext->ClearSurface( g_SceneRenderTargets.GetSceneColorLDRSurface(), GetBackgroundColor() );
+		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
+		g_RHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
+		g_RHI->SetBoundShaderState( immediateContext, g_RHI->CreateBoundShaderState( TEXT( "PreviewTexture" ), g_SimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), texturePreviewPixelShader->GetPixelShader() ) );
 
 		texturePreviewPixelShader->SetTexture( immediateContext, texture2DRHI );
-		texturePreviewPixelShader->SetSamplerState( immediateContext, GRHI->CreateSamplerState( InTexture2D->GetSamplerStateInitialiser() ) );
+		texturePreviewPixelShader->SetSamplerState( immediateContext, g_RHI->CreateSamplerState( InTexture2D->GetSamplerStateInitialiser() ) );
 		texturePreviewPixelShader->SetColorChannelMask( immediateContext, colorChannelMask );
 		texturePreviewPixelShader->SetMipmap( immediateContext, mipmapToView );
-		GRHI->CommitConstants( immediateContext );
-		GRHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
-		GSceneRenderTargets.FinishRenderingSceneColorLDR( immediateContext );
+		g_RHI->CommitConstants( immediateContext );
+		g_RHI->DrawPrimitive( immediateContext, PT_TriangleList, 0, 1 );
+		g_SceneRenderTargets.FinishRenderingSceneColorLDR( immediateContext );
 	}
 	
 	// Finishing render and delete scene view
@@ -70,6 +85,11 @@ void CTexturePreviewViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewpo
 	delete InSceneView;
 }
 
+/*
+==================
+CTexturePreviewViewportClient::CalcSceneView
+==================
+*/
 CSceneView* CTexturePreviewViewportClient::CalcSceneView( uint32 InSizeX, uint32 InSizeY )
 {
 	// Calculate projection matrix
@@ -82,6 +102,11 @@ CSceneView* CTexturePreviewViewportClient::CalcSceneView( uint32 InSizeX, uint32
 	return sceneView;
 }
 
+/*
+==================
+CTexturePreviewViewportClient::GetBackgroundColor
+==================
+*/
 CColor CTexturePreviewViewportClient::GetBackgroundColor() const
 {
 	return CColor::black;

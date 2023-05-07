@@ -14,12 +14,17 @@
 
 CStaticMeshImportSettingsDialog::SImportSettings		CStaticMeshImporter::importSettings;
 
+/*
+==================
+CTexture2DImporter::Import
+==================
+*/
 bool CTexture2DImporter::Import( const std::wstring& InPath, std::vector<TSharedPtr<CAsset>>& OutResult, std::wstring& OutError )
 {
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
 
-	appNormalizePathSeparators( filename );
+	Sys_NormalizePathSeparators( filename );
 	std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 	if ( pathSeparatorPos != std::string::npos )
 	{
@@ -46,10 +51,15 @@ bool CTexture2DImporter::Import( const std::wstring& InPath, std::vector<TShared
 	return false;
 }
 
+/*
+==================
+CTexture2DImporter::Reimport
+==================
+*/
 bool CTexture2DImporter::Reimport( const TSharedPtr<CAsset>& InTexture2D, std::wstring& OutError )
 {
 	TSharedPtr<CTexture2D>		texture2D = InTexture2D;
-	check( texture2D );
+	Assert( texture2D );
 
 	std::wstring		sourceFile = texture2D->GetAssetSourceFile();
 	if ( sourceFile.empty() )
@@ -71,7 +81,7 @@ bool CTexture2DImporter::Reimport( const TSharedPtr<CAsset>& InTexture2D, std::w
 
 	// Set new data in texture
 	std::vector<byte>		tempData;
-	tempData.resize( sizeX * sizeY * GPixelFormats[PF_A8R8G8B8].blockBytes );
+	tempData.resize( sizeX * sizeY * g_PixelFormats[PF_A8R8G8B8].blockBytes );
 	memcpy( tempData.data(), data, tempData.size() );
 	texture2D->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 
@@ -89,12 +99,17 @@ bool CTexture2DImporter::Reimport( const TSharedPtr<CAsset>& InTexture2D, std::w
 // AUDIO BANK
 //
 
+/*
+==================
+CAudioBankImporter::Import
+==================
+*/
 bool CAudioBankImporter::Import( const std::wstring& InPath, std::vector<TSharedPtr<CAsset>>& OutResult, std::wstring& OutError )
 {
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
 
-	appNormalizePathSeparators( filename );
+	Sys_NormalizePathSeparators( filename );
 	std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 	if ( pathSeparatorPos != std::string::npos )
 	{
@@ -121,23 +136,33 @@ bool CAudioBankImporter::Import( const std::wstring& InPath, std::vector<TShared
 	return false;
 }
 
+/*
+==================
+CAudioBankImporter::Reimport
+==================
+*/
 bool CAudioBankImporter::Reimport( const TSharedPtr<CAsset>& InAudioBank, std::wstring& OutError )
 {
 	TSharedPtr<CAudioBank>		audioBank = InAudioBank;
-	check( audioBank );
+	Assert( audioBank );
 	audioBank->SetOGGFile( audioBank->GetAssetSourceFile() );
 
 	// Broadcast event of reimport/reloaded asset
 	std::vector<TSharedPtr<CAsset>>		reimportedAssets{ InAudioBank };
 	SEditorDelegates::onAssetsReloaded.Broadcast( reimportedAssets );
 
-	return GFileSystem->IsExistFile( audioBank->GetAssetSourceFile() );
+	return g_FileSystem->IsExistFile( audioBank->GetAssetSourceFile() );
 }
 
 //
 // STATIC MESH
 //
 
+/*
+==================
+CStaticMeshImporter::Import
+==================
+*/
 bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TSharedPtr<CAsset>>& OutResult, std::wstring& OutError )
 {
 	// Parse meshes data from file
@@ -166,7 +191,7 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 		for ( auto itMaterial = meshesMap.begin(), itMaterialEnd = meshesMap.end(); itMaterial != itMaterialEnd; ++itMaterial )
 		{
 			SStaticMeshSurface		surface;
-			appMemzero( &surface, sizeof( SStaticMeshSurface ) );
+			Sys_Memzero( &surface, sizeof( SStaticMeshSurface ) );
 
 			surface.firstIndex		= indeces.size();
 			surface.materialID		= materials.size();
@@ -191,7 +216,7 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 
 			surface.numPrimitives = ( indeces.size() - surface.firstIndex ) / 3.f;		// 1 primitive = 3 indeces (triangles)
 			
-			materials.push_back( GEngine->GetDefaultMaterial() );
+			materials.push_back( g_Engine->GetDefaultMaterial() );
 			surfaces.push_back( surface );
 		}
 
@@ -223,9 +248,14 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 	return true;
 }
 
+/*
+==================
+CStaticMeshImporter::ShowImportSettings
+==================
+*/
 void CStaticMeshImporter::ShowImportSettings( class CImGUILayer* InOwner, class CEvent* InEvent, CAssetFactory::EResultShowImportSettings& OutResult )
 {
-	check( InOwner && InEvent );
+	Assert( InOwner && InEvent );
 	TSharedPtr<CStaticMeshImportSettingsDialog>			popup = InOwner->OpenPopup<CStaticMeshImportSettingsDialog>();
 	popup->OnResume().Add( [&]( CAssetFactory::EResultShowImportSettings InResult, const CStaticMeshImportSettingsDialog::SImportSettings& InImportSettings )
 						   {					   
@@ -240,10 +270,15 @@ void CStaticMeshImporter::ShowImportSettings( class CImGUILayer* InOwner, class 
 	InEvent->Wait();
 }
 
+/*
+==================
+CStaticMeshImporter::Reimport
+==================
+*/
 bool CStaticMeshImporter::Reimport( const TSharedPtr<CAsset>& InStaticMesh, std::wstring& OutError )
 {
 	TSharedPtr<CStaticMesh>		staticMesh = InStaticMesh;
-	check( staticMesh );
+	Assert( staticMesh );
 
 	// Parse meshes data from file
 	std::vector<SMeshData>		meshes;
@@ -252,7 +287,7 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CAsset>& InStaticMesh, std:
 		return false;
 	}
 
-	check( meshes.size() == 1 );		// We support reimport only one mesh
+	Assert( meshes.size() == 1 );		// We support reimport only one mesh
 	
 	const SMeshData&						meshData = meshes[0];
 	std::vector<SStaticMeshSurface>			surfaces;
@@ -268,6 +303,11 @@ bool CStaticMeshImporter::Reimport( const TSharedPtr<CAsset>& InStaticMesh, std:
 	return true;
 }
 
+/*
+==================
+CStaticMeshImporter::ProcessNode
+==================
+*/
 void CStaticMeshImporter::ProcessNode( aiNode* InNode, const aiScene* InScene, AiMeshesMap_t& OutMeshes )
 {
 	for ( uint32 index = 0; index < InNode->mNumMeshes; ++index )
@@ -282,6 +322,11 @@ void CStaticMeshImporter::ProcessNode( aiNode* InNode, const aiScene* InScene, A
 	}
 }
 
+/*
+==================
+CStaticMeshImporter::ParseMeshes
+==================
+*/
 bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<SMeshData>& OutResult, std::wstring& OutError )
 {
 	// Parse path and mesh name
@@ -339,10 +384,10 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<S
 			}
 
 			SStaticMeshVertexType	vertex;
-			appMemzero( &vertex, sizeof( SStaticMeshVertexType ) );
+			Sys_Memzero( &vertex, sizeof( SStaticMeshVertexType ) );
 
 			SMeshData		meshData;
-			appMemzero( &meshData.surface, sizeof( SStaticMeshSurface ) );
+			Sys_Memzero( &meshData.surface, sizeof( SStaticMeshSurface ) );
 			meshData.name		= aiName;
 			meshData.materialId = itMaterial->first;
 			
@@ -410,7 +455,7 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<S
 				}
 			}
 
-			meshData.material					= GEngine->GetDefaultMaterial();
+			meshData.material					= g_Engine->GetDefaultMaterial();
 			meshData.surface.numPrimitives		= meshData.indeces.size() / 3;		// 1 primitive = 3 indeces (triangles)
 			OutResult.push_back( meshData );
 		}
@@ -420,6 +465,11 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<S
 	return true;
 }
 
+/*
+==================
+CStaticMeshImporter::GetSupportedExtensions
+==================
+*/
 const std::vector<std::wstring>& CStaticMeshImporter::GetSupportedExtensions()
 {
 	// If supported extension not cached - get extensions from aiImport

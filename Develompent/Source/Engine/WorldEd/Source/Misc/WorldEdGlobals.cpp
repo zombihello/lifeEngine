@@ -5,5 +5,5 @@
 // GLOBALS
 // -------------
 
-class CEditorEngine*			GEditorEngine = nullptr;
-CActorFactory					GActorFactory;
+class CEditorEngine*			g_EditorEngine = nullptr;
+CActorFactory					g_ActorFactory;

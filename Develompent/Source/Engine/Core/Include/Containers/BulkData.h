@@ -210,7 +210,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, CBulkData< TType >& InVal
 template< typename TType >
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CBulkData< TType >& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InValue.Serialize( InArchive );
 	return InArchive;
 }

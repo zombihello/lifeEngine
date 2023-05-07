@@ -51,7 +51,7 @@ public:
 			break;
 
 		default:
-			appErrorf( TEXT( "Unknown light type 0x%X" ), InLightType );
+			Sys_Errorf( TEXT( "Unknown light type 0x%X" ), InLightType );
 			return;
 		}
 
@@ -64,7 +64,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform	Shader platform
-	 * @param InVFMetaType		Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType		Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static FORCEINLINE bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -161,7 +161,7 @@ public:
 	 */
 	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CPointLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
-		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
 	}
 
@@ -181,7 +181,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -214,7 +214,7 @@ public:
 	 */
 	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
-		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
 	}
 
@@ -234,7 +234,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -267,7 +267,7 @@ public:
 	 */
 	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
-		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
 	}
 
@@ -287,7 +287,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -330,7 +330,7 @@ public:
 	 */
 	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CPointLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
-		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
 	}
 
@@ -351,7 +351,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -384,7 +384,7 @@ public:
 	 */
 	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
-		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
 	}
 
@@ -405,7 +405,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -438,7 +438,7 @@ public:
 	 */
 	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
-		check( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
+		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
 	}
 
@@ -459,7 +459,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -629,7 +629,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -665,7 +665,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
@@ -701,7 +701,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )

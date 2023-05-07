@@ -3,6 +3,11 @@
 #include "System/PhysicsBodyInstance.h"
 #include "Components/PrimitiveComponent.h"
 
+/*
+==================
+CPhysicsBodyInstance::CPhysicsBodyInstance
+==================
+*/
 CPhysicsBodyInstance::CPhysicsBodyInstance()
 	: bStatic( true )
 	, bEnableGravity( false )
@@ -13,11 +18,21 @@ CPhysicsBodyInstance::CPhysicsBodyInstance()
 	, mass( 1.f )
 {}
 
+/*
+==================
+CPhysicsBodyInstance::~CPhysicsBodyInstance
+==================
+*/
 CPhysicsBodyInstance::~CPhysicsBodyInstance()
 {
 	TermBody();
 }
 
+/*
+==================
+CPhysicsBodyInstance::InitBody
+==================
+*/
 void CPhysicsBodyInstance::InitBody( CPhysicsBodySetup* InBodySetup, const CTransform& InTransform, CPrimitiveComponent* InPrimComp )
 {
 	bDirty = false;
@@ -28,7 +43,7 @@ void CPhysicsBodyInstance::InitBody( CPhysicsBodySetup* InBodySetup, const CTran
 		TermBody();
 	}
 
-	check( InBodySetup );
+	Assert( InBodySetup );
 	ownerComponent	= InPrimComp;
 	bodySetup		= InBodySetup;
 
@@ -41,7 +56,7 @@ void CPhysicsBodyInstance::InitBody( CPhysicsBodySetup* InBodySetup, const CTran
 	params.bEnableGravity	= bEnableGravity;
 	params.bStartAwake		= bStartAwake;
 	handle = CPhysicsInterface::CreateActor( params );
-	check( CPhysicsInterface::IsValidActor( handle ) );
+	Assert( CPhysicsInterface::IsValidActor( handle ) );
 
 	// Attach all shapes in body setup to physics actor
 	// Box shapes
@@ -60,9 +75,14 @@ void CPhysicsBodyInstance::InitBody( CPhysicsBodySetup* InBodySetup, const CTran
 	}
 
 	// Add rigid body to physics scene
-	GPhysicsScene.AddBody( this );
+	g_PhysicsScene.AddBody( this );
 }
 
+/*
+==================
+CPhysicsBodyInstance::TermBody
+==================
+*/
 void CPhysicsBodyInstance::TermBody()
 {
 	if ( !CPhysicsInterface::IsValidActor( handle ) )
@@ -71,7 +91,7 @@ void CPhysicsBodyInstance::TermBody()
 	}
 
 	// Remove from scene
-	GPhysicsScene.RemoveBody( this );
+	g_PhysicsScene.RemoveBody( this );
 
 	// Release resource
 	CPhysicsInterface::ReleaseActor( handle );

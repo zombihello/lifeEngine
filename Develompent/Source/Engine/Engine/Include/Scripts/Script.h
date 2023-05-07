@@ -25,17 +25,17 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-										CScript();
+	CScript();
 
 	/**
 	 * @brief Destructor
 	 */
-										~CScript();
+	~CScript();
 
 	/**
 	 * @brief Serialize script
 	 */
-	virtual void						Serialize( class CArchive& InArchive ) override;
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Execute function
@@ -44,7 +44,7 @@ public:
 	 * @param[in] InArgs Arguments of function
 	 */
 	template< typename... TArgs >
-	FORCEINLINE void					Execute( const achar* InFunctionName, TArgs... InArgs )
+	FORCEINLINE void Execute( const achar* InFunctionName, TArgs... InArgs )
 	{
 		luabridge::LuaRef		luaRef = luabridge::getGlobal( luaVM, InFunctionName );
 		if ( luaRef && luaRef.isFunction() )
@@ -53,7 +53,7 @@ public:
 		}
 		else
 		{
-			LE_LOG( LT_Warning, LC_Script, TEXT( "Script function [%s] not found in script" ), ANSI_TO_TCHAR( InFunctionName ) );
+			Warnf( TEXT( "Script function [%s] not found in script\n" ), ANSI_TO_TCHAR( InFunctionName ) );
 		}
 	}
 
@@ -65,7 +65,7 @@ public:
 	 * @return Return result of script function
 	 */
 	template< typename TReturnType, typename... TArgs >
-	FORCEINLINE TReturnType				Execute( const achar* InFunctionName, TArgs... InArgs )
+	FORCEINLINE TReturnType Execute( const achar* InFunctionName, TArgs... InArgs )
 	{
 		luabridge::LuaRef		luaRef = luabridge::getGlobal( luaVM, InFunctionName );
 		if ( luaRef && luaRef.isFunction() )
@@ -73,7 +73,7 @@ public:
 			return luaRef( InArgs... );
 		}
 
-		LE_LOG( LT_Warning, LC_Script, TEXT( "Script function [%s] not found in script" ), ANSI_TO_TCHAR( InFunctionName ) );
+		Warnf( TEXT( "Script function [%s] not found in script\n" ), ANSI_TO_TCHAR( InFunctionName ) );
 		return TReturnType();
 	}
 
@@ -81,7 +81,7 @@ public:
 	 * @brief Set name of script
 	 * @param[in] InName
 	 */
-	FORCEINLINE void					SetName( const achar* InName )
+	FORCEINLINE void SetName( const achar* InName )
 	{
 		name = InName;
 	}
@@ -91,7 +91,7 @@ public:
 	 * @param[in] InByteCode Byte code of script
 	 * @param[in] InType Byte code type
 	 */
-	FORCEINLINE void					SetByteCode( const std::vector< byte >& InByteCode )
+	FORCEINLINE void SetByteCode( const std::vector< byte >& InByteCode )
 	{
 		SetByteCode( InByteCode.data(), ( uint32 )InByteCode.size() );
 	}
@@ -102,7 +102,7 @@ public:
 	 * @param[in] InSize Size of byte code
 	 * @param[in] InType Byte code type
 	 */
-	void								SetByteCode( const byte* InByteCode, uint32 InSize );
+	void SetByteCode( const byte* InByteCode, uint32 InSize );
 
 	/**
 	 * @brief Get variable
@@ -111,7 +111,7 @@ public:
 	 * @return Return script variable
 	 */
 	template< typename TType >
-	FORCEINLINE TType					GetVariable( const achar* InVariableName ) const
+	FORCEINLINE TType GetVariable( const achar* InVariableName ) const
 	{
 		luabridge::LuaRef		luaRef = luabridge::getGlobal( luaVM, InVariableName );
 		if ( luaRef && !luaRef.isFunction() )
@@ -119,7 +119,7 @@ public:
 			return luaRef;
 		}
 
-		LE_LOG( LT_Warning, LC_Script, TEXT( "Script variable [%s] not found in script" ), ANSI_TO_TCHAR( InVariableName ) );
+		Warnf( TEXT( "Script variable [%s] not found in script\n" ), ANSI_TO_TCHAR( InVariableName ) );
 		return TType();
 	}
 
@@ -127,7 +127,7 @@ public:
 	 * @brief Get name of script
 	 * @return Return name of script
 	 */
-	FORCEINLINE const achar*			GetName() const
+	FORCEINLINE const achar* GetName() const
 	{
 		return name.c_str();
 	}

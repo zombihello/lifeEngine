@@ -253,7 +253,7 @@ public:
 	 */
 	FORCEINLINE class CShaderMetaType* GetShaderType( EShaderFrequency InShaderFrequency ) const
 	{
-		check( InShaderFrequency < SF_NumDrawFrequencies );
+		Assert( InShaderFrequency < SF_NumDrawFrequencies );
 		static class CShaderMetaType*		shadersType[ SF_NumDrawFrequencies ] =
 		{			
 			&CBasePassVertexShader::staticType,		// SF_Vertex
@@ -378,7 +378,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CMaterial>& 
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CMaterial>& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive << ( TAssetHandle<CAsset> )InValue;
 	return InArchive;
 }

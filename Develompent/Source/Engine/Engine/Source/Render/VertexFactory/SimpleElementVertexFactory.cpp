@@ -7,8 +7,13 @@ IMPLEMENT_VERTEX_FACTORY_TYPE( CSimpleElementVertexFactory, TEXT( "SimpleElement
 //
 // GLOBALS
 //
-TGlobalResource< CSimpleElementVertexDeclaration >			GSimpleElementVertexDeclaration;
+TGlobalResource< CSimpleElementVertexDeclaration >			g_SimpleElementVertexDeclaration;
 
+/*
+==================
+CSimpleElementVertexDeclaration::InitRHI
+==================
+*/
 void CSimpleElementVertexDeclaration::InitRHI()
 {
 	VertexDeclarationElementList_t		vertexDeclElementList =
@@ -17,24 +22,44 @@ void CSimpleElementVertexDeclaration::InitRHI()
 		SVertexElement( CSimpleElementVertexFactory::SSS_Main,		sizeof( SSimpleElementVertexType ),		STRUCT_OFFSET( SSimpleElementVertexType, texCoord ),	VET_Float2, VEU_TextureCoordinate,	0 ),
 		SVertexElement( CSimpleElementVertexFactory::SSS_Main,		sizeof( SSimpleElementVertexType ),		STRUCT_OFFSET( SSimpleElementVertexType, color ),		VET_Color,	VEU_Color,				0 )
 	};
-	vertexDeclarationRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
+	vertexDeclarationRHI = g_RHI->CreateVertexDeclaration( vertexDeclElementList );
 }
 
+/*
+==================
+CSimpleElementVertexDeclaration::ReleaseRHI
+==================
+*/
 void CSimpleElementVertexDeclaration::ReleaseRHI()
 {
 	vertexDeclarationRHI.SafeRelease();
 }
 
+/*
+==================
+CSimpleElementVertexFactory::GetTypeHash
+==================
+*/
 uint64 CSimpleElementVertexFactory::GetTypeHash() const
 {
 	return staticType.GetHash();
 }
 
+/*
+==================
+CSimpleElementVertexFactory::InitRHI
+==================
+*/
 void CSimpleElementVertexFactory::InitRHI()
 {
-	InitDeclaration( GSimpleElementVertexDeclaration.GetVertexDeclarationRHI() );
+	InitDeclaration( g_SimpleElementVertexDeclaration.GetVertexDeclarationRHI() );
 }
 
+/*
+==================
+CSimpleElementVertexFactory::ConstructShaderParameters
+==================
+*/
 CVertexFactoryShaderParameters* CSimpleElementVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )
 {
 	return InShaderFrequency == SF_Vertex ? new CGeneralVertexShaderParameters( staticType.SupportsInstancing() ) : nullptr;

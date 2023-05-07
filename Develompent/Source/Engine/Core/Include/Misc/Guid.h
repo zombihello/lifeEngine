@@ -209,7 +209,7 @@ public:
 	 */
 	FORCEINLINE uint64 GetTypeHash() const
 	{
-		return appMemFastHash( *this );
+		return Sys_MemFastHash( *this );
 	}
 
 private:
@@ -223,6 +223,6 @@ private:
  * @ingroup Core
  * @return Return created GUID
  */
-CGuid appCreateGuid();
+CGuid Sys_CreateGuid();
 
 #endif // !GUID_H

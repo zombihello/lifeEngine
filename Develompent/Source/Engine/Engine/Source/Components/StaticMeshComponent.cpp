@@ -7,12 +7,27 @@
 
 IMPLEMENT_CLASS( CStaticMeshComponent )
 
+/*
+==================
+CStaticMeshComponent::CStaticMeshComponent
+==================
+*/
 CStaticMeshComponent::CStaticMeshComponent()
 {}
 
+/*
+==================
+CStaticMeshComponent::~CStaticMeshComponent
+==================
+*/
 CStaticMeshComponent::~CStaticMeshComponent()
 {}
 
+/*
+==================
+CStaticMeshComponent::Serialize
+==================
+*/
 void CStaticMeshComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
@@ -20,9 +35,14 @@ void CStaticMeshComponent::Serialize( class CArchive& InArchive )
 	InArchive << overrideMaterials;
 }
 
+/*
+==================
+CStaticMeshComponent::LinkDrawList
+==================
+*/
 void CStaticMeshComponent::LinkDrawList()
 {
-	check( scene );
+	Assert( scene );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( elementDrawingPolicyLink )
@@ -38,9 +58,14 @@ void CStaticMeshComponent::LinkDrawList()
 	}
 }
 
+/*
+==================
+CStaticMeshComponent::UnlinkDrawList
+==================
+*/
 void CStaticMeshComponent::UnlinkDrawList()
 {
-	check( scene );
+	Assert( scene );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( elementDrawingPolicyLink )
@@ -57,6 +82,11 @@ void CStaticMeshComponent::UnlinkDrawList()
 	}
 }
 
+/*
+==================
+CStaticMeshComponent::AddToDrawList
+==================
+*/
 void CStaticMeshComponent::AddToDrawList( const class CSceneView& InSceneView )
 {
 	// If primitive is empty - exit from method
@@ -151,7 +181,7 @@ void CStaticMeshComponent::AddToDrawList( const class CSceneView& InSceneView )
 #if WITH_EDITOR
 		if ( owner ? owner->IsSelected() : false )
 		{
-			DrawWireframeBox( ( ( CScene* )GWorld->GetScene() )->GetSDG( SDG_Highlight ), boundbox, DEC_STATIC_MESH );
+			DrawWireframeBox( ( ( CScene* )g_World->GetScene() )->GetSDG( SDG_Highlight ), boundbox, DEC_STATIC_MESH );
 		}
 #endif // WITH_EDITOR
 	}

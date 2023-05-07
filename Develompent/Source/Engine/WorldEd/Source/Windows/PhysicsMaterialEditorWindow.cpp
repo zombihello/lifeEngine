@@ -3,6 +3,11 @@
 #include "Windows/PhysicsMaterialEditorWindow.h"
 #include "ImGUI/imgui_internal.h"
 
+/*
+==================
+CPhysicsMaterialEditorWindow::CPhysicsMaterialEditorWindow
+==================
+*/
 CPhysicsMaterialEditorWindow::CPhysicsMaterialEditorWindow( const TSharedPtr<CPhysicsMaterial>& InPhysMaterial )
 	: CImGUILayer( CString::Format( TEXT( "Physics Material Editor - %s" ), InPhysMaterial->GetAssetName().c_str() ) )
 	, physMaterial( InPhysMaterial )
@@ -13,18 +18,33 @@ CPhysicsMaterialEditorWindow::CPhysicsMaterialEditorWindow( const TSharedPtr<CPh
 	assetsCanDeleteHandle = SEditorDelegates::onAssetsCanDelete.Add( std::bind( &CPhysicsMaterialEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2	) );
 }
 
+/*
+==================
+CPhysicsMaterialEditorWindow::~CPhysicsMaterialEditorWindow
+==================
+*/
 CPhysicsMaterialEditorWindow::~CPhysicsMaterialEditorWindow()
 {
 	// Unsubscribe from event when assets try destroy and reload
 	SEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
 }
 
+/*
+==================
+CPhysicsMaterialEditorWindow::Init
+==================
+*/
 void CPhysicsMaterialEditorWindow::Init()
 {
 	CImGUILayer::Init();
 	SetSize( Vector2D( 365.f, 200.f ) );
 }
 
+/*
+==================
+CPhysicsMaterialEditorWindow::OnTick
+==================
+*/
 void CPhysicsMaterialEditorWindow::OnTick()
 {
 	ImGui::Columns( 2, 0, false );
@@ -84,9 +104,9 @@ void CPhysicsMaterialEditorWindow::OnTick()
 
 		// Find current surface index
 		uint32		surfaceIndex = 0;
-		for ( uint32 index = 0, count = GSurfaceTypeNames.size(); index < count; ++index )
+		for ( uint32 index = 0, count = g_SurfaceTypeNames.size(); index < count; ++index )
 		{
-			if ( GSurfaceTypeNames[index].second == physMaterial->GetSurfaceType() )
+			if ( g_SurfaceTypeNames[index].second == physMaterial->GetSurfaceType() )
 			{
 				surfaceIndex = index;
 				break;
@@ -94,14 +114,14 @@ void CPhysicsMaterialEditorWindow::OnTick()
 		}
 
 		// Draw combobox with all surface types
-		if ( ImGui::BeginCombo( "##SurfaceTypeCombo", TCHAR_TO_ANSI( GSurfaceTypeNames[surfaceIndex].first.c_str() ) ) )
+		if ( ImGui::BeginCombo( "##SurfaceTypeCombo", TCHAR_TO_ANSI( g_SurfaceTypeNames[surfaceIndex].first.c_str() ) ) )
 		{
-			for ( uint32 index = 0, count = GSurfaceTypeNames.size(); index < count; ++index )
+			for ( uint32 index = 0, count = g_SurfaceTypeNames.size(); index < count; ++index )
 			{
 				bool	bDummy = false;
-				if ( ImGui::Selectable( TCHAR_TO_ANSI( GSurfaceTypeNames[index].first.c_str() ), &bDummy ) )
+				if ( ImGui::Selectable( TCHAR_TO_ANSI( g_SurfaceTypeNames[index].first.c_str() ), &bDummy ) )
 				{
-					physMaterial->SetSurfaceType( GSurfaceTypeNames[index].second );
+					physMaterial->SetSurfaceType( g_SurfaceTypeNames[index].second );
 				}
 			}
 
@@ -112,6 +132,11 @@ void CPhysicsMaterialEditorWindow::OnTick()
 	ImGui::EndColumns();
 }
 
+/*
+==================
+CPhysicsMaterialEditorWindow::OnAssetsCanDelete
+==================
+*/
 void CPhysicsMaterialEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, SCanDeleteAssetResult& OutResult )
 {
 	// If in InAssets exist audio bank who is editing now - need is block

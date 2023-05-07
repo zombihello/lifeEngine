@@ -5,6 +5,11 @@
 
 IMPLEMENT_CLASS( CCameraComponent )
 
+/*
+==================
+CCameraComponent::CCameraComponent
+==================
+*/
 CCameraComponent::CCameraComponent()
     : bIsActive( false )
 	, bAutoViewData( false )
@@ -17,6 +22,11 @@ CCameraComponent::CCameraComponent()
     , aspectRatio( 1.777778f )
 {}
 
+/*
+==================
+CCameraComponent::Serialize
+==================
+*/
 void CCameraComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
@@ -37,6 +47,11 @@ void CCameraComponent::Serialize( class CArchive& InArchive )
 	}
 }
 
+/*
+==================
+CCameraComponent::GetCameraView
+==================
+*/
 void CCameraComponent::GetCameraView( SCameraView& OutDesiredView )
 {
 	OutDesiredView.location			= GetComponentLocation();

@@ -56,7 +56,7 @@ extern "C"
         { \
             CScriptEngine::StaticAddRegisterClassAPI( &TClass::StaticRegisterClassAPI ); \
         } \
-    } GRegisterClassAPI##TClass;
+    } g_RegisterClassAPI##TClass;
 
 /**
  * @ingroup Engine
@@ -68,13 +68,13 @@ public:
 	/**
 	 * @brief Initialize script engine
 	 */
-	void				                Init();
+	void Init();
 
     /**
      * @brief Add register class API for scripts
      * @param[in] InRegisterClassAPI Pointer to function for register script API
      */
-    static FORCEINLINE void             StaticAddRegisterClassAPI( void( *InRegisterClassAPI )( struct lua_State* InVM ) )
+    static FORCEINLINE void StaticAddRegisterClassAPI( void( *InRegisterClassAPI )( struct lua_State* InVM ) )
     {
         SManagerClassAPI::Get()->registerClassAPIs.push_back( InRegisterClassAPI );
     }
@@ -83,7 +83,7 @@ public:
      * @brief Register class API
      * @param[in] InVM Pointer to virtual machine
      */
-    static FORCEINLINE void             StaticRegisterClassAPI( struct lua_State* InVM )
+    static FORCEINLINE void StaticRegisterClassAPI( struct lua_State* InVM )
     {
         SManagerClassAPI*           managerClassAPI = SManagerClassAPI::Get();
         for ( uint32 indexRegister = 0, countRegisters = ( uint32 ) managerClassAPI->registerClassAPIs.size(); indexRegister < countRegisters; ++indexRegister )
@@ -102,7 +102,7 @@ private:
          * @brief Get instance
          * @return Pointer to instance of SManagerClassAPI
          */
-        static FORCEINLINE SManagerClassAPI*        Get()
+        static FORCEINLINE SManagerClassAPI* Get()
         {
             static SManagerClassAPI*        managerClassAPI = nullptr;
             if ( !managerClassAPI )

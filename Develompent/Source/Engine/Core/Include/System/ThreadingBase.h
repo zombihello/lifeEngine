@@ -17,7 +17,7 @@
  * @ingroup Core
  * ID of game thread
  */
-extern uint32			GGameThreadId;
+extern uint32			g_GameThreadId;
 
 /**
  * @ingroup Core
@@ -25,7 +25,7 @@ extern uint32			GGameThreadId;
  *
  * @return Return ID of current thread
  */
-extern FORCEINLINE uint32 appGetCurrentThreadId();
+extern uint32 Sys_GetCurrentThreadId();
 
 /**
  * @ingroup Core
@@ -37,7 +37,7 @@ FORCEINLINE bool IsInGameThread()
 {
 	// if the game or rendering threads are uninitialized, then we probably are calling this VERY early before other threads will have started up, 
 	// or we're running the commandlet with rendering thread or we're running in single threaded mode
-	return ( GGameThreadId == 0 ) || ( appGetCurrentThreadId() == GGameThreadId );
+	return ( g_GameThreadId == 0 ) || ( Sys_GetCurrentThreadId() == g_GameThreadId );
 }
 
 //
@@ -51,7 +51,7 @@ FORCEINLINE bool IsInGameThread()
  * @param[in] InValue Pointer to value
  * @return Returns the incremented value
  */
-extern FORCEINLINE int32 appInterlockedIncrement( volatile int32* InValue );
+extern int32 Sys_InterlockedIncrement( volatile int32* InValue );
 
 /**
  * @ingroup Core
@@ -60,7 +60,7 @@ extern FORCEINLINE int32 appInterlockedIncrement( volatile int32* InValue );
  * @param[in] InValue Pointer to value
  * @return Returns the minified value
  */
-extern FORCEINLINE int32 appInterlockedDecrement( volatile int32* InValue );
+extern int32 Sys_InterlockedDecrement( volatile int32* InValue );
 
 /**
  * @ingroup Core
@@ -71,7 +71,7 @@ extern FORCEINLINE int32 appInterlockedDecrement( volatile int32* InValue );
  * @param InAmount	Amount
  * @return Return the old value to the caller
  */
-extern FORCEINLINE int32 appInterlockedAdd( volatile int32* InValue, int32 InAmount );
+extern int32 Sys_InterlockedAdd( volatile int32* InValue, int32 InAmount );
 
 /**
  * @ingroup Core
@@ -81,7 +81,7 @@ extern FORCEINLINE int32 appInterlockedAdd( volatile int32* InValue, int32 InAmo
  * @param InExchange	Exchange
  * @return Returning the original value to the caller
  */
-extern FORCEINLINE int32 appInterlockedExchange( volatile int32* InValue, int32 InExchange );
+extern int32 Sys_InterlockedExchange( volatile int32* InValue, int32 InExchange );
 
 /**
  * @ingroup Core
@@ -91,7 +91,7 @@ extern FORCEINLINE int32 appInterlockedExchange( volatile int32* InValue, int32 
  * @param InExchange	Exchange
  * @return Returning the original value to the caller
  */
-extern FORCEINLINE int64 appInterlockedExchange64( volatile int64* InValue, int64 InExchange );
+extern int64 Sys_InterlockedExchange64( volatile int64* InValue, int64 InExchange );
 
 /**
  * @ingroup Core
@@ -103,7 +103,7 @@ extern FORCEINLINE int64 appInterlockedExchange64( volatile int64* InValue, int6
  * @param InComperand	Comperand
  * @return Returns the original value
  */
-extern FORCEINLINE int32 appInterlockedCompareExchange( volatile int32* InDest, int32 InExchange, int32 InComperand );
+extern int32 Sys_InterlockedCompareExchange( volatile int32* InDest, int32 InExchange, int32 InComperand );
 
 /**
  * @ingroup Core
@@ -115,7 +115,7 @@ extern FORCEINLINE int32 appInterlockedCompareExchange( volatile int32* InDest, 
  * @param InComperand	Comperand
  * @return Returns the original value
  */
-extern FORCEINLINE int64 appInterlockedCompareExchange64( volatile int64* InDest, int64 InExchange, int64 InComperand );
+extern int64 Sys_InterlockedCompareExchange64( volatile int64* InDest, int64 InExchange, int64 InComperand );
 
 /**
  * @ingroup Core
@@ -127,7 +127,7 @@ extern FORCEINLINE int64 appInterlockedCompareExchange64( volatile int64* InDest
  * @param InComperand	Comperand
  * @return Returns the original value
  */
-extern FORCEINLINE void* appInterlockedCompareExchangePointer( void** InDest, void* InExchange, void* InComperand );
+extern void* Sys_InterlockedCompareExchangePointer( void** InDest, void* InExchange, void* InComperand );
 
 /**
  * Atomically or's the value pointed to with the value and returns that to the caller
@@ -140,7 +140,7 @@ extern FORCEINLINE void* appInterlockedCompareExchangePointer( void** InDest, vo
  * @param InValue	Value
  * @return Return that to the caller
  */
-extern FORCEINLINE int32 appInterlockedOr( volatile int32* InDest, int32 InValue );
+extern int32 Sys_InterlockedOr( volatile int32* InDest, int32 InValue );
 
 /**
  * @ingroup Core
@@ -160,7 +160,7 @@ enum EThreadPriority
  * @ingroup Core
  * Set thread priority
  */
-extern FORCEINLINE void appSetThreadPriority( void* InThreadHandle, EThreadPriority InThreadPriority );
+extern void Sys_SetThreadPriority( void* InThreadHandle, EThreadPriority InThreadPriority );
 
 /**
  * @ingroup Core
@@ -168,7 +168,7 @@ extern FORCEINLINE void appSetThreadPriority( void* InThreadHandle, EThreadPrior
  * 
  * @param[in] InSeconds Seconds of sleep
  */
-extern FORCEINLINE void appSleep( float InSeconds );
+extern void Sys_Sleep( float InSeconds );
 
 /**
  * @ingroup Core
@@ -333,7 +333,7 @@ public:
  * @ingroup Core
  * Global factory for creating threads
  */
-extern CThreadFactory*			GThreadFactory;
+extern CThreadFactory*			g_ThreadFactory;
 
 /**
  * @ingroup Core
@@ -515,7 +515,7 @@ public:
  * @ingroup Core
  * Global factory for creating synchronization objects
  */
-extern CSynchronizeFactory*				GSynchronizeFactory;
+extern CSynchronizeFactory*				g_SynchronizeFactory;
 
 // Include platform specific implementation
 #if PLATFORM_WINDOWS
@@ -548,10 +548,10 @@ public:
 	 *
 	 * @param[in] InSynchObject The synchronization object to manage
 	 */
-	CScopeLock( CCriticalSection* InSynchObject ) :
-		synchObject( InSynchObject )
+	CScopeLock( CCriticalSection* InSynchObject ) 
+		: synchObject( InSynchObject )
 	{
-		check( synchObject );
+		Assert( synchObject );
 		synchObject->Lock();
 	}
 
@@ -560,10 +560,10 @@ public:
 	 *
 	 * @param[in] InSynchObject The synchronization object to manage
 	 */
-	CScopeLock( CCriticalSection& InSynchObject ) :
-		synchObject( &InSynchObject )
+	CScopeLock( CCriticalSection& InSynchObject ) 
+		: synchObject( &InSynchObject )
 	{
-		check( synchObject );
+		Assert( synchObject );
 		synchObject->Lock();
 	}
 
@@ -572,7 +572,7 @@ public:
 	 */
 	~CScopeLock()
 	{
-		check( synchObject );
+		Assert( synchObject );
 		synchObject->Unlock();
 	}
 

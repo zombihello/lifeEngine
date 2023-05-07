@@ -111,7 +111,7 @@ public:
 	 */
 	FORCEINLINE bool LineTraceSingleByChannel( SHitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const SCollisionQueryParams& InCollisionQueryParams = SCollisionQueryParams::defaultQueryParam )
 	{
-		return GPhysicsScene.LineTraceSingleByChannel( OutHitResult, InStart, InEnd, InTraceChannel, InCollisionQueryParams );
+		return g_PhysicsScene.LineTraceSingleByChannel( OutHitResult, InStart, InEnd, InTraceChannel, InCollisionQueryParams );
 	}
 
 #if ENABLE_HITPROXY
@@ -178,7 +178,7 @@ public:
 	 */
 	FORCEINLINE ActorRef_t GetActor( uint32 InIndex ) const
 	{
-		check( InIndex >= 0 && InIndex < actors.size() );
+		Assert( InIndex >= 0 && InIndex < actors.size() );
 		return actors[ InIndex ];
 	}
 

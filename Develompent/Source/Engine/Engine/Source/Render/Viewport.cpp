@@ -7,6 +7,11 @@
 #include "Render/SceneRenderTargets.h"
 #include "Render/Scene.h"
 
+/*
+==================
+CViewport::CViewport
+==================
+*/
 CViewport::CViewport() 
 	: windowHandle( nullptr )
 	, viewportClient( nullptr )
@@ -14,9 +19,19 @@ CViewport::CViewport()
 	, sizeY( 0 )
 {}
 
+/*
+==================
+CViewport::~CViewport
+==================
+*/
 CViewport::~CViewport()
 {}
 
+/*
+==================
+CViewport::InitRHI
+==================
+*/
 void CViewport::InitRHI()
 {
 	// If viewport already created - we need resize
@@ -25,7 +40,7 @@ void CViewport::InitRHI()
 		viewportRHI->Resize( sizeX, sizeY );
 		if ( renderTarget )
 		{
-			check( renderTarget->GetSurfaceRHI() );
+			Assert( renderTarget->GetSurfaceRHI() );
 			viewportRHI->SetSurface( renderTarget->GetSurfaceRHI() );
 		}
 	}
@@ -34,27 +49,42 @@ void CViewport::InitRHI()
 	{
 		if ( windowHandle )
 		{
-			viewportRHI = GRHI->CreateViewport( windowHandle, sizeX, sizeY );
+			viewportRHI = g_RHI->CreateViewport( windowHandle, sizeX, sizeY );
 		}
 		else if ( renderTarget )
 		{
-			check( renderTarget->GetSurfaceRHI() );
-			viewportRHI = GRHI->CreateViewport( renderTarget->GetSurfaceRHI(), sizeX, sizeY );
+			Assert( renderTarget->GetSurfaceRHI() );
+			viewportRHI = g_RHI->CreateViewport( renderTarget->GetSurfaceRHI(), sizeX, sizeY );
 		}
 	}
 }
 
+/*
+==================
+CViewport::UpdateRHI
+==================
+*/
 void CViewport::UpdateRHI()
 {
 	InitRHI();
 }
 
+/*
+==================
+CViewport::ReleaseRHI
+==================
+*/
 void CViewport::ReleaseRHI()
 {
 	// Release RHI if him is not have parent
 	viewportRHI.SafeRelease();
 }
 
+/*
+==================
+CViewport::Update
+==================
+*/
 void CViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, CRenderTarget* InNewRenderTarget )
 {
 	bool			bNewRenderTarget = renderTarget != InNewRenderTarget;
@@ -66,6 +96,11 @@ void CViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 	UpdateInternal( InIsDestroyed, InNewSizeX, InNewSizeY, bNewRenderTarget );
 }
 
+/*
+==================
+CViewport::Update
+==================
+*/
 void CViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, WindowHandle_t InNewWindowHandle )
 {
 	bool		bNewWindowHandle = windowHandle != InNewWindowHandle;
@@ -77,9 +112,14 @@ void CViewport::Update( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY
 	UpdateInternal( InIsDestroyed, InNewSizeX, InNewSizeY, bNewWindowHandle );
 }
 
+/*
+==================
+CViewport::UpdateInternal
+==================
+*/
 void CViewport::UpdateInternal( bool InIsDestroyed, uint32 InNewSizeX, uint32 InNewSizeY, bool InIsNewHandle )
 {
-	checkMsg( InIsDestroyed || ( windowHandle || renderTarget ) && !( windowHandle && renderTarget ), TEXT( "Must be stated only one" ) );
+	AssertMsg( InIsDestroyed || ( windowHandle || renderTarget ) && !( windowHandle && renderTarget ), TEXT( "Must be stated only one" ) );
 	bool		bNeedUpdateViewportRHI = InIsNewHandle || sizeX != InNewSizeX || sizeY != InNewSizeY;
 
 	// Update the viewport attributes
@@ -103,6 +143,11 @@ void CViewport::UpdateInternal( bool InIsDestroyed, uint32 InNewSizeX, uint32 In
 	}
 }
 
+/*
+==================
+CViewport::Tick
+==================
+*/
 void CViewport::Tick( float InDeltaSeconds )
 {
 	if ( viewportClient )
@@ -111,6 +156,11 @@ void CViewport::Tick( float InDeltaSeconds )
 	}
 }
 
+/*
+==================
+CViewport::Draw
+==================
+*/
 void CViewport::Draw( bool InIsShouldPresent /* = true */ )
 {
 	if ( !IsInitialized() || !IsValid() )
@@ -122,8 +172,8 @@ void CViewport::Draw( bool InIsShouldPresent /* = true */ )
 	UNIQUE_RENDER_COMMAND_ONEPARAMETER( CBeginRenderCommand,
 										ViewportRHIRef_t, viewportRHI, viewportRHI,
 										{
-											CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-											GRHI->BeginDrawingViewport( immediateContext, viewportRHI );
+											CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
+											g_RHI->BeginDrawingViewport( immediateContext, viewportRHI );
 										} );
 
 	// Draw viewport
@@ -137,7 +187,7 @@ void CViewport::Draw( bool InIsShouldPresent /* = true */ )
 										ViewportRHIRef_t, viewportRHI, viewportRHI,
 										bool, isShouldPresent, InIsShouldPresent,
 										{
-											CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-											GRHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
+											CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
+											g_RHI->EndDrawingViewport( immediateContext, viewportRHI, isShouldPresent, false );
 										} );
 }

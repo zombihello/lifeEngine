@@ -169,9 +169,9 @@ enum EButtonCode
  * @param[in] InButtonName Button name
  * @return Button code
  * 
- * Example usage: @code appGetButtonCodeByName( TEXT( "SHIFT" ) ) @endcode
+ * Example usage: @code Sys_GetButtonCodeByName( TEXT( "SHIFT" ) ) @endcode
  */
-EButtonCode					appGetButtonCodeByName( const tchar* InButtonName );
+EButtonCode Sys_GetButtonCodeByName( const tchar* InButtonName );
 
 /**
  * @ingroup Core
@@ -180,8 +180,8 @@ EButtonCode					appGetButtonCodeByName( const tchar* InButtonName );
  * @param[in] InButtonCode Button code
  * @return Button name
  *
- * Example usage: @code appGetButtonName( BC_KeyA ) @endcode
+ * Example usage: @code Sys_GetButtonName( BC_KeyA ) @endcode
  */
-const tchar*				appGetButtonName( EButtonCode InButtonCode );
+const tchar* Sys_GetButtonName( EButtonCode InButtonCode );
 
 #endif // !BUTTONCODE_H

@@ -8,15 +8,20 @@
 #include "System/AssetsImport.h"
 
 /** Table pathes to icons */
-static const tchar* GAudioBankEditorIconPaths[] =
+static const tchar* s_AudioBankEditorIconPaths[] =
 {
 	TEXT( "Import.png" )		// IT_Import
 };
-static_assert( ARRAY_COUNT( GAudioBankEditorIconPaths ) == CAudioBankEditorWindow::IT_Num, "Need full init GAudioBankEditorIconPaths array" );
+static_assert( ARRAY_COUNT( s_AudioBankEditorIconPaths ) == CAudioBankEditorWindow::IT_Num, "Need full init s_AudioBankEditorIconPaths array" );
 
 /** Macro size button in menu bar */
 #define  AUDIOBANKEDITOR_MENUBAR_BUTTONSIZE		ImVec2( 16.f, 16.f )
 
+/*
+==================
+CAudioBankEditorWindow::CAudioBankEditorWindow
+==================
+*/
 CAudioBankEditorWindow::CAudioBankEditorWindow( const TSharedPtr<CAudioBank>& InAudioBank )
 	: CImGUILayer( CString::Format( TEXT( "Audio Bank Editor - %s" ), InAudioBank->GetAssetName().c_str() ) )
 	, audioBank( InAudioBank )
@@ -35,6 +40,11 @@ CAudioBankEditorWindow::CAudioBankEditorWindow( const TSharedPtr<CAudioBank>& In
 	audioComponent->SetStreamable( true );
 }
 
+/*
+==================
+CAudioBankEditorWindow::~CAudioBankEditorWindow
+==================
+*/
 CAudioBankEditorWindow::~CAudioBankEditorWindow()
 {
 	// Unsubscribe from event when assets try destroy and reload
@@ -49,6 +59,11 @@ CAudioBankEditorWindow::~CAudioBankEditorWindow()
 	}
 }
 
+/*
+==================
+CAudioBankEditorWindow::Init
+==================
+*/
 void CAudioBankEditorWindow::Init()
 {
 	CImGUILayer::Init();
@@ -56,8 +71,8 @@ void CAudioBankEditorWindow::Init()
 
 	// Loading icons
 	std::wstring			errorMsg;
-	PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
-	check( package );
+	PackageRef_t			package = g_PackageManager->LoadPackage( TEXT( "" ), true );
+	Assert( package );
 
 	for ( uint32 index = 0; index < IT_Num; ++index )
 	{
@@ -67,10 +82,10 @@ void CAudioBankEditorWindow::Init()
 		if ( !assetHandle.IsAssetValid() )
 		{
 			std::vector<TSharedPtr<CAsset>>		result;
-			if ( !CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Icons/" ) + GAudioBankEditorIconPaths[index], result, errorMsg ) )
+			if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Icons/" ) + s_AudioBankEditorIconPaths[index], result, errorMsg ) )
 			{
-				LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load audio bank editor icon '%s' for type 0x%X. Message: %s" ), GAudioBankEditorIconPaths[index], index, errorMsg.c_str() );
-				assetHandle = GEngine->GetDefaultTexture();
+				Warnf( TEXT( "Fail to load audio bank editor icon '%s' for type 0x%X. Message: %s\n" ), s_AudioBankEditorIconPaths[index], index, errorMsg.c_str() );
+				assetHandle = g_Engine->GetDefaultTexture();
 			}
 			else
 			{
@@ -86,6 +101,11 @@ void CAudioBankEditorWindow::Init()
 	UpdateAssetInfo();
 }
 
+/*
+==================
+CAudioBankEditorWindow::UpdateAssetInfo
+==================
+*/
 void CAudioBankEditorWindow::UpdateAssetInfo()
 {
 	// Close old audio bank handle
@@ -98,6 +118,11 @@ void CAudioBankEditorWindow::UpdateAssetInfo()
 	audioBankHandle = audioBank->OpenBank( audioBankInfo );
 }
 
+/*
+==================
+CAudioBankEditorWindow::OnTick
+==================
+*/
 void CAudioBankEditorWindow::OnTick()
 {
 	// Menu bar
@@ -105,10 +130,10 @@ void CAudioBankEditorWindow::OnTick()
 	{
 		// Button 'Import'
 		{
-			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), AUDIOBANKEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), AUDIOBANKEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				std::wstring		errorMsg;
-				if ( !GAssetFactory.Reimport( audioBank, errorMsg ) )
+				if ( !g_AssetFactory.Reimport( audioBank, errorMsg ) )
 				{
 					OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The audio bank not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
 				}
@@ -128,7 +153,7 @@ void CAudioBankEditorWindow::OnTick()
 		ImGui::TableNextColumn();
 		ImGui::Text( "Format:" );
 		ImGui::TableNextColumn();
-		ImGui::Text( audioBankHandle ? TCHAR_TO_ANSI( appSampleFormatToText( audioBankInfo.format ).c_str() ) : "None" );
+		ImGui::Text( audioBankHandle ? TCHAR_TO_ANSI( Sys_SampleFormatToText( audioBankInfo.format ).c_str() ) : "None" );
 		ImGui::TableNextColumn();
 
 		// Draw number channels in audio
@@ -146,7 +171,7 @@ void CAudioBankEditorWindow::OnTick()
 		// Draw resource size
 		ImGui::Text( "Resource Size:" );
 		ImGui::TableNextColumn();
-		ImGui::Text( audioBankHandle ? TCHAR_TO_ANSI( CString::Format( TEXT( "%.2f Kb" ), ( appGetNumSampleBytes( audioBankInfo.format ) * audioBankInfo.numSamples ) / 1024.f ).c_str() ) : "0 Kb" );
+		ImGui::Text( audioBankHandle ? TCHAR_TO_ANSI( CString::Format( TEXT( "%.2f Kb" ), ( Sys_GetNumSampleBytes( audioBankInfo.format ) * audioBankInfo.numSamples ) / 1024.f ).c_str() ) : "0 Kb" );
 		ImGui::EndTable();
 	}
 
@@ -182,11 +207,11 @@ void CAudioBankEditorWindow::OnTick()
 				// Init file dialog settings
 				fileDialogSetup.SetMultiselection( false );
 				fileDialogSetup.SetTitle( TEXT( "Select New Source File" ) );
-				fileDialogSetup.SetDirectory( appGameDir() + PATH_SEPARATOR + TEXT( "Content/" ) );
-				fileDialogSetup.AddFormat( GAssetFactory.GetImporterInfo( AT_AudioBank ), ConvertAssetTypeToText( AT_AudioBank ) );
+				fileDialogSetup.SetDirectory( Sys_GameDir() + PATH_SEPARATOR + TEXT( "Content/" ) );
+				fileDialogSetup.AddFormat( g_AssetFactory.GetImporterInfo( AT_AudioBank ), ConvertAssetTypeToText( AT_AudioBank ) );
 
 				// Show open file dialog
-				if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
+				if ( Sys_ShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
 				{
 					audioBank->SetAssetSourceFile( openFileDialogResult.files[0] );
 				}
@@ -234,6 +259,11 @@ void CAudioBankEditorWindow::OnTick()
 	}
 }
 
+/*
+==================
+CAudioBankEditorWindow::OnAssetsCanDelete
+==================
+*/
 void CAudioBankEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, SCanDeleteAssetResult& OutResult )
 {
 	// If in InAssets exist audio bank who is editing now - need is block
@@ -248,6 +278,11 @@ void CAudioBankEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAs
 	}
 }
 
+/*
+==================
+CAudioBankEditorWindow::OnAssetsReloaded
+==================
+*/
 void CAudioBankEditorWindow::OnAssetsReloaded( const std::vector<TSharedPtr<CAsset>>& InAssets )
 {
 	// If audio bank who is edition reloaded, we update UI

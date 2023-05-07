@@ -13,12 +13,12 @@
  * @ingroup WorldEd
  * Editor engine
  */
-extern class CEditorEngine*			GEditorEngine;
+extern class CEditorEngine*			g_EditorEngine;
 
 /**
  * @ingroup WorldEd
  * Factory actors for spawn from assets in content browser
  */
-extern class CActorFactory			GActorFactory;
+extern class CActorFactory			g_ActorFactory;
 
 #endif // !WORLDEDGLOBALS_H

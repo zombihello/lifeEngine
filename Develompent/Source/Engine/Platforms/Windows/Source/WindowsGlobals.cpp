@@ -1,4 +1,4 @@
 #include "WindowsPlatform.h"
 #include "WindowsGlobals.h"
 
-HINSTANCE		GWinHInstance = nullptr;
+HINSTANCE		g_WinHInstance = nullptr;

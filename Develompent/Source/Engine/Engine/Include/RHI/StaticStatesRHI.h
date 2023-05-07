@@ -125,7 +125,7 @@ public:
 			InBorderColor, 
 			InSamplerComparisonFunction 
 		};
-		return GRHI->CreateSamplerState( initializerRHI );
+		return g_RHI->CreateSamplerState( initializerRHI );
 	}
 };
 
@@ -154,7 +154,7 @@ public:
 	static RasterizerStateRHIRef_t CreateRHI()
 	{
 		SRasterizerStateInitializerRHI initializerRHI = { InFillMode, InCullMode, 0.f, 0.f, true };
-		return GRHI->CreateRasterizerState( initializerRHI );
+		return g_RHI->CreateRasterizerState( initializerRHI );
 	}
 };
 
@@ -177,7 +177,7 @@ public:
 	static DepthStateRHIRef_t CreateRHI()
 	{
 		SDepthStateInitializerRHI		initializerRHI = { InEnableDepthWrite, InDepthTest };
-		return GRHI->CreateDepthState( initializerRHI );
+		return g_RHI->CreateDepthState( initializerRHI );
 	}
 };
 
@@ -206,7 +206,7 @@ public:
 	static BlendStateRHIRef_t CreateRHI()
 	{
 		SBlendStateInitializerRHI		initializerRHI = { InColorBlendOp, InColorSrcBlend, InColorDestBlend, InAlphaBlendOp, InAlphaSrcBlend, InAlphaDestBlend, InAlphaTest, InAlphaRef };
-		return GRHI->CreateBlendState( initializerRHI );
+		return g_RHI->CreateBlendState( initializerRHI );
 	}
 };
 
@@ -240,7 +240,7 @@ public:
 	static StencilStateRHIRef_t CreateRHI()
 	{
 		SStencilStateInitializerRHI		initializerRHI( InEnableFrontFaceStencil, InFrontFaceStencilTest, InFrontFaceStencilFailStencilOp, InFrontFaceDepthFailStencilOp, InFrontFacePassStencilOp, InEnableBackFaceStencil, InBackFaceStencilTest, InBackFaceStencilFailStencilOp, InBackFaceDepthFailStencilOp, InBackFacePassStencilOp, InStencilReadMask, InStencilWriteMask, InStencilRef );
-		return GRHI->CreateStencilState( initializerRHI );
+		return g_RHI->CreateStencilState( initializerRHI );
 	}
 };
 

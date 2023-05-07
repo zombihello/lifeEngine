@@ -6,31 +6,41 @@ const std::wstring		SCollisionProfile::noCollision_ProfileName		= TEXT( "NoColli
 const std::wstring		SCollisionProfile::blockAll_ProfileName			= TEXT( "BlockAll" );
 SCollisionQueryParams	SCollisionQueryParams::defaultQueryParam;
 
+/*
+==================
+operator<<
+==================
+*/
 CArchive& operator<<( CArchive& InAr, SCollisionProfile*& InCollisionProfile )
 {
 	if ( InAr.IsSaving() )
 	{
-		check( InCollisionProfile );
+		Assert( InCollisionProfile );
 		InAr << InCollisionProfile->name;
 	}
 	else
 	{
 		std::wstring		profileName;
 		InAr << profileName;
-		InCollisionProfile = GPhysicsEngine.FindCollisionProfile( profileName );
+		InCollisionProfile = g_PhysicsEngine.FindCollisionProfile( profileName );
 		if ( !InCollisionProfile )
 		{
-			InCollisionProfile = GPhysicsEngine.FindCollisionProfile( SCollisionProfile::noCollision_ProfileName );
-			check( InCollisionProfile );
+			InCollisionProfile = g_PhysicsEngine.FindCollisionProfile( SCollisionProfile::noCollision_ProfileName );
+			Assert( InCollisionProfile );
 		}
 	}
 
 	return InAr;
 }
 
+/*
+==================
+operator<<
+==================
+*/
 CArchive& operator<<( CArchive& InAr, const SCollisionProfile*& InCollisionProfile )
 {
-	check( InAr.IsSaving() && InCollisionProfile );
+	Assert( InAr.IsSaving() && InCollisionProfile );
 	InAr << InCollisionProfile->name;
 	return InAr;
 }

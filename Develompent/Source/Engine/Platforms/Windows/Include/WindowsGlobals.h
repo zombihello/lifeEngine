@@ -13,6 +13,6 @@
   * @ingroup WindowsPlatform
   * @brief Application instance
   */
-extern HINSTANCE		GWinHInstance;
+extern HINSTANCE		g_WinHInstance;
 
 #endif // !COREGLOBALS_H

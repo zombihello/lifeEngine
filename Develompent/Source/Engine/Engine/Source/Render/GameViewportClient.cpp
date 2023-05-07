@@ -10,11 +10,16 @@
 #include "System/World.h"
 #include "UIEngine.h"
 
+/*
+==================
+CGameViewportClient::Draw
+==================
+*/
 void CGameViewportClient::Draw( CViewport* InViewport )
 {
 	// Create scene view for draw scene
 	SCameraView			cameraView;
-	CCameraComponent*	cameraComponent = GCameraManager->GetActiveCamera();
+	CCameraComponent*	cameraComponent = g_CameraManager->GetActiveCamera();
 	if ( cameraComponent )
 	{
 		cameraComponent->GetCameraView( cameraView );
@@ -22,7 +27,7 @@ void CGameViewportClient::Draw( CViewport* InViewport )
 
 	// Calculate scene view and update audio listener spatial
 	CSceneView*		sceneView = CalcSceneView( InViewport, cameraView );
-	GAudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation * SMath::vectorForward, cameraView.rotation * SMath::vectorUp );
+	g_AudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation * SMath::vectorForward, cameraView.rotation * SMath::vectorUp );
 
 	// Draw viewport
 	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,
@@ -34,25 +39,35 @@ void CGameViewportClient::Draw( CViewport* InViewport )
 										  } );
 }
 
+/*
+==================
+CGameViewportClient::Draw_RenderThread
+==================
+*/
 void CGameViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, CSceneView* InSceneView )
 {
-	check( IsInRenderingThread() );
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
-	CSceneRenderer				sceneRenderer( InSceneView, ( CScene* )GWorld->GetScene() );
+	Assert( IsInRenderingThread() );
+	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
+	CSceneRenderer				sceneRenderer( InSceneView, ( CScene* )g_World->GetScene() );
 
 	// Scene render
 	sceneRenderer.BeginRenderViewTarget( InViewportRHI );
 	sceneRenderer.Render( InViewportRHI );
 
 	// UI render
-	GUIEngine->BeginDraw();
-	GUIEngine->EndDraw();
+	g_UIEngine->BeginDraw();
+	g_UIEngine->EndDraw();
 	sceneRenderer.FinishRenderViewTarget( InViewportRHI );
 
 	// Delete scene view
 	delete InSceneView;
 }
 
+/*
+==================
+CGameViewportClient::CalcSceneView
+==================
+*/
 CSceneView* CGameViewportClient::CalcSceneView( CViewport* InViewport, const SCameraView& InCameraView )
 {
 	// Calculate projection matrix

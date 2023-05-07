@@ -6,5 +6,5 @@
 // GLOBALS
 // -------------
 
-CBox2DScene		GPhysicsScene;
+CBox2DScene		g_PhysicsScene;
 #endif // WITH_BOX2D

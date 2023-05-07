@@ -4,6 +4,11 @@
 IMPLEMENT_SHADER_TYPE(, CScreenPixelShader, TEXT( "ScreenPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 
 #if WITH_EDITOR
+/*
+==================
+CScreenPixelShader::ShouldCache
+==================
+*/
 bool CScreenPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
 	if ( !InVFMetaType )
@@ -15,6 +20,11 @@ bool CScreenPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class CV
 }
 #endif // WITH_EDITOR
 
+/*
+==================
+CScreenPixelShader::Init
+==================
+*/
 void CScreenPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
 {
 	CShader::Init( InShaderCacheItem );

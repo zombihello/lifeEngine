@@ -1,15 +1,30 @@
 #include "Misc/Misc.h"
 #include "System/BaseFileSystem.h"
 
+/*
+==================
+CFilename::CFilename
+==================
+*/
 CFilename::CFilename()
 {}
 
+/*
+==================
+CFilename::CFilename
+==================
+*/
 CFilename::CFilename( const std::wstring& InPath )
 	: path( InPath )
 {
-	appNormalizePathSeparators( path );
+	Sys_NormalizePathSeparators( path );
 }
 
+/*
+==================
+CFilename::GetExtension
+==================
+*/
 std::wstring CFilename::GetExtension( bool InIsIncludeDot /* = false */ ) const
 {
 	std::wstring	result = path;
@@ -24,6 +39,11 @@ std::wstring CFilename::GetExtension( bool InIsIncludeDot /* = false */ ) const
 	return result;
 }
 
+/*
+==================
+CFilename::GetBaseFilename
+==================
+*/
 std::wstring CFilename::GetBaseFilename() const
 {
 	std::wstring	result = path;
@@ -42,6 +62,11 @@ std::wstring CFilename::GetBaseFilename() const
 	return result;
 }
 
+/*
+==================
+CFilename::GetPath
+==================
+*/
 std::wstring CFilename::GetPath() const
 {
 	std::wstring	result = path;
@@ -62,6 +87,11 @@ std::wstring CFilename::GetPath() const
 	return result;
 }
 
+/*
+==================
+CFilename::GetLocalizedFilename
+==================
+*/
 std::wstring CFilename::GetLocalizedFilename( const std::wstring& InLanguage /* = TEXT( "" ) */ ) const
 {
 	// Use default language if none specified
@@ -91,24 +121,34 @@ std::wstring CFilename::GetLocalizedFilename( const std::wstring& InLanguage /* 
 	return localizedPath;
 }
 
+/*
+==================
+CFilename::IsInDirectory
+==================
+*/
 bool CFilename::IsInDirectory( const std::wstring& InPath ) const
 {
-	std::wstring	dirPath		= GFileSystem->ConvertToAbsolutePath( InPath );
-	std::wstring	localPath	= GFileSystem->ConvertToAbsolutePath( path );
+	std::wstring	dirPath		= g_FileSystem->ConvertToAbsolutePath( InPath );
+	std::wstring	localPath	= g_FileSystem->ConvertToAbsolutePath( path );
 	return localPath.substr( 0, dirPath.size() ) == dirPath;
 }
 
+/*
+==================
+CFilename::MakeDirectory
+==================
+*/
 bool CBaseFileSystem::MakeDirectory( const std::wstring& InPath, bool InIsTree /* = false */ )
 {
 	// Support code for making a directory tree
-	check( InIsTree );
+	Assert( InIsTree );
 	uint32			createCount = 0;
 	std::wstring	fullPath;
 
 	for ( uint32 index = 0, count = InPath.size(); index < count; ++index )
 	{
 		fullPath += InPath[index];
-		if ( ( appIsPathSeparator( InPath[index] ) || index+1 == count ) && !IsDrive( fullPath ) )
+		if ( ( Sys_IsPathSeparator( InPath[index] ) || index+1 == count ) && !IsDrive( fullPath ) )
 		{
 			if ( !MakeDirectory( fullPath, false ) )
 			{
@@ -121,10 +161,15 @@ bool CBaseFileSystem::MakeDirectory( const std::wstring& InPath, bool InIsTree /
 	return createCount != 0;
 }
 
+/*
+==================
+CFilename::DeleteDirectory
+==================
+*/
 bool CBaseFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree /* = false */ )
 {
 	// Support code for removing a directory tree.
-	check( InIsTree );
+	Assert( InIsTree );
 	if ( InPath.empty() )
 	{
 		return false;
@@ -153,6 +198,11 @@ bool CBaseFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree
 	return DeleteDirectory( InPath, false );
 }
 
+/*
+==================
+CFilename::IsDrive
+==================
+*/
 bool CBaseFileSystem::IsDrive( const std::wstring& InPath ) const
 {
 	return InPath.empty() || InPath == TEXT( "\\" ) || InPath == TEXT( "\\\\" ) || InPath == TEXT( "//" ) || InPath == TEXT( "////" );

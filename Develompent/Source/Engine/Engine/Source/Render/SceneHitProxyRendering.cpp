@@ -10,19 +10,24 @@
 #include "Render/SceneRenderTargets.h"
 #include "Render/SceneUtils.h"
 
+/*
+==================
+CSceneRenderer::BeginRenderHitProxiesViewTarget
+==================
+*/
 void CSceneRenderer::BeginRenderHitProxiesViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
 	// Allocate the maximum scene render target space for the current view
-	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	g_SceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
+	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
 
 	// Write to the hit proxy render target
-	GRHI->SetRenderTarget( immediateContext, GSceneRenderTargets.GetHitProxySurface(), GSceneRenderTargets.GetSceneDepthZSurface() );
-	immediateContext->ClearSurface( GSceneRenderTargets.GetHitProxySurface(), CColor::black );
-	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+	g_RHI->SetRenderTarget( immediateContext, g_SceneRenderTargets.GetHitProxySurface(), g_SceneRenderTargets.GetSceneDepthZSurface() );
+	immediateContext->ClearSurface( g_SceneRenderTargets.GetHitProxySurface(), CColor::black );
+	immediateContext->ClearDepthStencil( g_SceneRenderTargets.GetSceneDepthZSurface() );
 
-	GRHI->SetViewParameters( immediateContext, *sceneView );
-	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+	g_RHI->SetViewParameters( immediateContext, *sceneView );
+	g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
 
 	// Build visible view on scene
 	if ( scene )
@@ -31,15 +36,20 @@ void CSceneRenderer::BeginRenderHitProxiesViewTarget( ViewportRHIParamRef_t InVi
 	}
 }
 
+/*
+==================
+CSceneRenderer::RenderHitProxies
+==================
+*/
 void CSceneRenderer::RenderHitProxies( ViewportRHIParamRef_t InViewportRHI, EHitProxyLayer InHitProxyLayer /* = HPL_World */ )
 {
 	ShowFlags_t					showFlags = sceneView->GetShowFlags();
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
 	if ( !( showFlags & SHOW_HitProxy ) )
 	{
 		return;
 	}
-	check( InHitProxyLayer >= 0 && InHitProxyLayer < HPL_Num );
+	Assert( InHitProxyLayer >= 0 && InHitProxyLayer < HPL_Num );
 
 	// Draw the hit proxy IDs for all visible primitives
 	{
@@ -88,6 +98,11 @@ void CSceneRenderer::RenderHitProxies( ViewportRHIParamRef_t InViewportRHI, EHit
 	}
 }
 
+/*
+==================
+CSceneRenderer::FinishRenderHitProxiesViewTarget
+==================
+*/
 void CSceneRenderer::FinishRenderHitProxiesViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
 	// Clear visible view on finish of the scene render

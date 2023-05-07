@@ -36,9 +36,9 @@
 #endif // !WITH_IMGUI
 
 // Enable or disable checks in build
-#ifndef DO_CHECK
-	#define DO_CHECK				!SHIPPING_BUILD
-#endif // !DO_CHECK
+#ifndef ENABLED_ASSERT
+	#define ENABLED_ASSERT				!SHIPPING_BUILD
+#endif // !ENABLED_ASSERT
 
 // Enable or disable in build editor
 #ifndef WITH_EDITOR

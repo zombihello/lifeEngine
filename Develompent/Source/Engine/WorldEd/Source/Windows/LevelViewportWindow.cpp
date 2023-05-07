@@ -13,7 +13,7 @@
 #include "System/AssetsImport.h"
 
 /** Table pathes to icons */
-static const tchar* GLevelViewportIconPaths[] =
+static const tchar* s_LevelViewportIconPaths[] =
 {
 	TEXT( "Tool_Select.png" ),			// IT_ToolSelect
 	TEXT( "Tool_Translate.png" ),		// IT_ToolTranslate
@@ -21,7 +21,7 @@ static const tchar* GLevelViewportIconPaths[] =
 	TEXT( "Tool_Scale.png" ),			// IT_ToolScale
 	TEXT( "PlayStandaloneGame.png" )	// IT_PlayStandaloneGame
 };
-static_assert( ARRAY_COUNT( GLevelViewportIconPaths ) == CLevelViewportWindow::IT_Num, "Need full init GLevelViewportIconPaths array" );
+static_assert( ARRAY_COUNT( s_LevelViewportIconPaths ) == CLevelViewportWindow::IT_Num, "Need full init s_LevelViewportIconPaths array" );
 
 /** Macro size button in menu bar */
 #define LEVELVIEWPORT_MENUBAR_BUTTONSIZE	ImVec2( 16.f, 16.f )
@@ -30,28 +30,44 @@ static_assert( ARRAY_COUNT( GLevelViewportIconPaths ) == CLevelViewportWindow::I
 #define LEVELVIEWPORT_SELECTCOLOR			ImVec4( 0.f, 0.43f, 0.87f, 1.f )
 
 /** Is need pop style color of a button */
-static bool GImGui_ButtonNeedPopStyleColor = false;
+static bool s_ImGui_ButtonNeedPopStyleColor = false;
 
+/*
+==================
+ImGui_ButtonSetButtonSelectedStyle
+==================
+*/
 static void ImGui_ButtonSetButtonSelectedStyle()
 {
-	if ( !GImGui_ButtonNeedPopStyleColor )
+	if ( !s_ImGui_ButtonNeedPopStyleColor )
 	{
-		GImGui_ButtonNeedPopStyleColor = true;
+		s_ImGui_ButtonNeedPopStyleColor = true;
 		ImGui::PushStyleColor( ImGuiCol_Button,			LEVELVIEWPORT_SELECTCOLOR );
 		ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	LEVELVIEWPORT_SELECTCOLOR );
 		ImGui::PushStyleColor( ImGuiCol_ButtonActive,	LEVELVIEWPORT_SELECTCOLOR );
 	}
 }
 
+/*
+==================
+ImGui_ButtonPopStyleColor
+==================
+*/
 static void ImGui_ButtonPopStyleColor()
 {
-	if ( GImGui_ButtonNeedPopStyleColor )
+	if ( s_ImGui_ButtonNeedPopStyleColor )
 	{
 		ImGui::PopStyleColor( 3 );
-		GImGui_ButtonNeedPopStyleColor = false;
+		s_ImGui_ButtonNeedPopStyleColor = false;
 	}
 }
 
+
+/*
+==================
+CLevelViewportWindow::CLevelViewportWindow
+==================
+*/
 CLevelViewportWindow::CLevelViewportWindow( const std::wstring& InName, bool InVisibility /* = true */, ELevelViewportType InViewportType /* = LVT_Perspective */ )
 	: CImGUILayer( InName )
 	, bGuizmoUsing( false )
@@ -67,6 +83,11 @@ CLevelViewportWindow::CLevelViewportWindow( const std::wstring& InName, bool InV
 	SetPadding( Vector2D( 0.f, 0.f ) );
 }
 
+/*
+==================
+CLevelViewportWindow::Init
+==================
+*/
 void CLevelViewportWindow::Init()
 {
 	CImGUILayer::Init();
@@ -74,8 +95,8 @@ void CLevelViewportWindow::Init()
 
 	// Loading icons
 	std::wstring	errorMsg;
-	PackageRef_t	package = GPackageManager->LoadPackage( TEXT( "" ), true );
-	check( package );
+	PackageRef_t	package = g_PackageManager->LoadPackage( TEXT( "" ), true );
+	Assert( package );
 
 	for ( uint32 index = 0; index < IT_Num; ++index )
 	{
@@ -85,10 +106,10 @@ void CLevelViewportWindow::Init()
 		if ( !assetHandle.IsAssetValid() )
 		{
 			std::vector<TSharedPtr<CAsset>>		result;
-			if ( !CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Icons/" ) + GLevelViewportIconPaths[index], result, errorMsg ) )
+			if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Icons/" ) + s_LevelViewportIconPaths[index], result, errorMsg ) )
 			{
-				LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load level viewport window icon '%s' for type 0x%X. Message: %s" ), GLevelViewportIconPaths[index], index, errorMsg.c_str() );
-				assetHandle = GEngine->GetDefaultTexture();
+				Warnf( TEXT( "Fail to load level viewport window icon '%s' for type 0x%X. Message: %s\n" ), s_LevelViewportIconPaths[index], index, errorMsg.c_str() );
+				assetHandle = g_Engine->GetDefaultTexture();
 			}
 			else
 			{
@@ -101,6 +122,11 @@ void CLevelViewportWindow::Init()
 	}
 }
 
+/*
+==================
+CLevelViewportWindow::OnTick
+==================
+*/
 void CLevelViewportWindow::OnTick()
 {
 	// We set focus on window if mouse tracking is working and window not taken focus
@@ -117,7 +143,7 @@ void CLevelViewportWindow::OnTick()
 		{
 			ImGui_ButtonSetButtonSelectedStyle();
 		}
-		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_ToolSelect].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_ToolSelect].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
 			guizmoOperationType = ImGuizmo::NONE;
 		}
@@ -132,7 +158,7 @@ void CLevelViewportWindow::OnTick()
 		{
 			ImGui_ButtonSetButtonSelectedStyle();
 		}
-		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_ToolTranslate].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_ToolTranslate].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
 			guizmoOperationType = ImGuizmo::TRANSLATE;
 		}
@@ -147,7 +173,7 @@ void CLevelViewportWindow::OnTick()
 		{
 			ImGui_ButtonSetButtonSelectedStyle();
 		}
-		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_ToolRotate].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_ToolRotate].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
 			guizmoOperationType = ImGuizmo::ROTATE;
 		}
@@ -162,7 +188,7 @@ void CLevelViewportWindow::OnTick()
 		{
 			ImGui_ButtonSetButtonSelectedStyle();
 		}
-		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_ToolScale].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_ToolScale].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
 			guizmoOperationType = ImGuizmo::SCALE;
 		}
@@ -174,15 +200,15 @@ void CLevelViewportWindow::OnTick()
 
 		// Play standalone game
 		ImGui::Separator();
-		if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_PlayStandaloneGame].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_PlayStandaloneGame].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
-			if ( GWorld->IsDirty() )
+			if ( g_World->IsDirty() )
 			{
 				OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved.\nFor launch standalone game need it save" ) ), CDialogWindow::BT_Ok );
 			}
 			else
 			{
-				appCreateProc( GFileSystem->GetExePath().c_str(), CString::Format( TEXT( "-map %s" ), GWorld->GetFilePath().c_str() ).c_str(), false, false, false, 0 );
+				Sys_CreateProc( g_FileSystem->GetExePath().c_str(), CString::Format( TEXT( "-map %s" ), g_World->GetFilePath().c_str() ).c_str(), false, false, false, 0 );
 			}
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
@@ -201,7 +227,7 @@ void CLevelViewportWindow::OnTick()
 	DrawPopupMenu();
 
 	// Draw transform gizmos if has selected actors
-	std::vector<ActorRef_t>		selectedActors = GWorld->GetSelectedActors();
+	std::vector<ActorRef_t>		selectedActors = g_World->GetSelectedActors();
 	if ( selectedActors.size() > 0 )
 	{
 		bool			bOrhtoViewportType	= viewportClient.GetViewportType() != LVT_Perspective;
@@ -307,13 +333,18 @@ void CLevelViewportWindow::OnTick()
 			}
 
 			// Mark world as dirty
-			GWorld->MarkDirty();
+			g_World->MarkDirty();
 		}
 
 		delete sceneView;
 	}
 }
 
+/*
+==================
+CLevelViewportWindow::DrawPopupMenu
+==================
+*/
 void CLevelViewportWindow::DrawPopupMenu()
 {
 	if ( viewportClient.IsAllowContextMenu() && ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
@@ -322,26 +353,26 @@ void CLevelViewportWindow::DrawPopupMenu()
 		Vector			location = viewportClient.ScreenToWorld( Vector2D( viewportCursorPos.x, viewportCursorPos.y ), GetSizeX(), GetSizeY() );
 
 		// Spawn actor by class
-		CClass*			actorClass = GEditorEngine->GetActorClassesWindow()->GetCurrentClass();
+		CClass*			actorClass = g_EditorEngine->GetActorClassesWindow()->GetCurrentClass();
 		if ( ImGui::MenuItem( TCHAR_TO_ANSI( CString::Format( TEXT( "Spawn %s" ), actorClass->GetName().c_str() ).c_str() ) ) )
 		{
 			// Spawn new actor
-			GWorld->SpawnActor( actorClass, location );
+			g_World->SpawnActor( actorClass, location );
 		}
 
 		// Spawn actor by asset from content browser
-		std::wstring	assetReference = GEditorEngine->GetContentBrowserWindow()->GetSelectedAssetReference();
+		std::wstring	assetReference = g_EditorEngine->GetContentBrowserWindow()->GetSelectedAssetReference();
 		if ( !assetReference.empty() )
 		{
 			std::wstring		dummy;
 			EAssetType			assetType;
-			if ( ParseReferenceToAsset( assetReference, dummy, dummy, assetType ) && GActorFactory.IsRegistered( assetType ) && ImGui::MenuItem( TCHAR_TO_ANSI( CString::Format( TEXT( "Spawn %s" ), assetReference.c_str() ).c_str() ) ) )
+			if ( ParseReferenceToAsset( assetReference, dummy, dummy, assetType ) && g_ActorFactory.IsRegistered( assetType ) && ImGui::MenuItem( TCHAR_TO_ANSI( CString::Format( TEXT( "Spawn %s" ), assetReference.c_str() ).c_str() ) ) )
 			{
 				// Spawn new actor
-				TAssetHandle<CAsset>		asset = GPackageManager->FindAsset( assetReference, assetType );
+				TAssetHandle<CAsset>		asset = g_PackageManager->FindAsset( assetReference, assetType );
 				if ( asset.IsAssetValid() )
 				{
-					GActorFactory.Spawn( asset, location );
+					g_ActorFactory.Spawn( asset, location );
 				}
 			}
 		}
@@ -349,11 +380,21 @@ void CLevelViewportWindow::DrawPopupMenu()
 	}
 }
 
+/*
+==================
+CLevelViewportWindow::OnVisibilityChanged
+==================
+*/
 void CLevelViewportWindow::OnVisibilityChanged( bool InNewVisibility )
 {
 	viewportWidget.SetEnabled( InNewVisibility );
 }
 
+/*
+==================
+CLevelViewportWindow::ProcessEvent
+==================
+*/
 void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// Process ImGUI events
@@ -373,7 +414,7 @@ void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 			if ( !bGuizmoUsing && InWindowEvent.events.mouseButton.code == BC_MouseLeft )
 			{
 				// Update hit proxies id in all actors
-				GWorld->UpdateHitProxiesId();
+				g_World->UpdateHitProxiesId();
 
 				// Render hit proxies to render target
 				viewportClient.DrawHitProxies( const_cast< CViewport* >( &viewportWidget.GetViewport() ) );
@@ -382,27 +423,27 @@ void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 				FlushRenderingCommands();
 
 				CHitProxyId		hitProxyId = viewportClient.GetHitProxyId( viewportCursorPos.x, viewportCursorPos.y );
-				bool			bControlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
+				bool			bControlDown = g_InputSystem->IsKeyDown( BC_KeyLControl ) || g_InputSystem->IsKeyDown( BC_KeyRControl );
 
 				if ( !bControlDown )
 				{
-					GWorld->UnselectAllActors();
+					g_World->UnselectAllActors();
 				}
 
 				if ( hitProxyId.IsValid() )
 				{
 					uint32			index = hitProxyId.GetIndex();
-					ActorRef_t		actor = GWorld->GetActor( index > 0 ? index - 1 : index );
+					ActorRef_t		actor = g_World->GetActor( index > 0 ? index - 1 : index );
 
 					if ( bControlDown && actor->IsSelected() )
 					{
-						GWorld->UnselectActor( actor );
-						LE_LOG( LT_Log, LC_Editor, TEXT( "(%f;%f) Unselected actor '%s'" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName() );
+						g_World->UnselectActor( actor );
+						Logf( TEXT( "(%f;%f) Unselected actor '%s'\n" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName() );
 					}
 					else
 					{
-						GWorld->SelectActor( actor );
-						LE_LOG( LT_Log, LC_Editor, TEXT( "(%f;%f) Selected actor '%s'" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName() );
+						g_World->SelectActor( actor );
+						Logf( TEXT( "(%f;%f) Selected actor '%s'\n" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName() );
 					}
 				}
 			}
@@ -415,7 +456,7 @@ void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 			{
 				// Unselect all actors
 			case BC_KeyEscape:
-				GWorld->UnselectAllActors();
+				g_World->UnselectAllActors();
 				break;
 			}
 			break;

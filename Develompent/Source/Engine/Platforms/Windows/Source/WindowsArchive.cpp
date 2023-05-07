@@ -10,25 +10,31 @@
 // Archive reading
 // ====================================
 
-/**
- * Constructor
- */
+/*
+==================
+CWindowsArchiveReading::CWindowsArchiveReading
+==================
+*/
 CWindowsArchiveReading::CWindowsArchiveReading( std::ifstream* InFile, const std::wstring& InPath )
 	: CArchive( InPath )
 	, file( InFile )
 {}
 
-/**
- * Destructor
- */
+/*
+==================
+CWindowsArchiveReading::~CWindowsArchiveReading
+==================
+*/
 CWindowsArchiveReading::~CWindowsArchiveReading()
 {
 	delete file;
 }
 
-/**
- * Get size of archive
- */
+/*
+==================
+CWindowsArchiveReading::GetSize
+==================
+*/
 uint32 CWindowsArchiveReading::GetSize()
 {
 	uint32			currentPosition = ( uint32 )Tell();
@@ -41,45 +47,60 @@ uint32 CWindowsArchiveReading::GetSize()
 	return sizeFile;
 }
 
-/**
- * Set current position in archive
- */
+/*
+==================
+CWindowsArchiveReading::Seek
+==================
+*/
 void CWindowsArchiveReading::Seek( uint32 InPosition )
 {
 	file->seekg( InPosition, std::ios::beg );
 }
 
-/**
- * Flush data
- */
+/*
+==================
+CWindowsArchiveReading::Flush
+==================
+*/
 void CWindowsArchiveReading::Flush()
 {}
 
-/**
- * Get current position in archive
- */
+/*
+==================
+CWindowsArchiveReading::Tell
+==================
+*/
 uint32 CWindowsArchiveReading::Tell()
 {
 	return ( uint32 )file->tellg();
 }
 
-/**
- * Serialize data
- */
+/*
+==================
+CWindowsArchiveReading::Serialize
+==================
+*/
 void CWindowsArchiveReading::Serialize( void* InBuffer, uint32 InSize )
 {
 	file->read( ( achar* )InBuffer, InSize );
 }
 
+/*
+==================
+CWindowsArchiveReading::IsEndOfFile
+==================
+*/
 bool CWindowsArchiveReading::IsEndOfFile()
 {
 	uint32		sizeFile = GetSize();
 	return Tell() == sizeFile;
 }
 
-/**
- * Is loading archive
- */
+/*
+==================
+CWindowsArchiveReading::IsLoading
+==================
+*/
 bool CWindowsArchiveReading::IsLoading() const
 {
 	return true;
@@ -89,26 +110,32 @@ bool CWindowsArchiveReading::IsLoading() const
 // Archive writing
 // ====================================
 
-/**
- * Constructor
- */
+/*
+==================
+CWindowsArchiveWriter::CWindowsArchiveWriter
+==================
+*/
 CWindowsArchiveWriter::CWindowsArchiveWriter( std::ofstream* InFile, const std::wstring& InPath )
 	: CArchive( InPath )
 	, file( InFile )
 {}
 
-/**
- * Destructor
- */
+/*
+==================
+CWindowsArchiveWriter::~CWindowsArchiveWriter
+==================
+*/
 CWindowsArchiveWriter::~CWindowsArchiveWriter()
 {
 	Flush();
 	delete file;
 }
 
-/**
- * Get size of archive
- */
+/*
+==================
+CWindowsArchiveWriter::GetSize
+==================
+*/
 uint32 CWindowsArchiveWriter::GetSize()
 {
 	// Make sure that all data is written before looking at file size.
@@ -124,50 +151,65 @@ uint32 CWindowsArchiveWriter::GetSize()
 	return sizeFile;
 }
 
-/**
- * Set current position in archive
- */
+/*
+==================
+CWindowsArchiveWriter::Seek
+==================
+*/
 void CWindowsArchiveWriter::Seek( uint32 InPosition )
 {
 	Flush();
 	file->seekp( InPosition, std::ios::beg );
 }
 
-/**
- * Flush data
- */
+/*
+==================
+CWindowsArchiveWriter::Flush
+==================
+*/
 void CWindowsArchiveWriter::Flush()
 {
 	file->flush();
 }
 
-/**
- * Get current position in archive
- */
+/*
+==================
+CWindowsArchiveWriter::Tell
+==================
+*/
 uint32 CWindowsArchiveWriter::Tell()
 {
 	Flush();
 	return ( uint32 )file->tellp();
 }
 
-/**
- * Serialize data
- */
+/*
+==================
+CWindowsArchiveWriter::Serialize
+==================
+*/
 void CWindowsArchiveWriter::Serialize( void* InBuffer, uint32 InSize )
 {
 	file->write( ( achar* )InBuffer, InSize );
 	Flush();
 }
 
+/*
+==================
+CWindowsArchiveWriter::IsEndOfFile
+==================
+*/
 bool CWindowsArchiveWriter::IsEndOfFile()
 {
 	uint32		sizeFile = GetSize();
 	return Tell() == sizeFile;
 }
 
-/**
- * Is saving archive
- */
+/*
+==================
+CWindowsArchiveWriter::IsSaving
+==================
+*/
 bool CWindowsArchiveWriter::IsSaving() const
 {
 	return true;

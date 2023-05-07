@@ -61,7 +61,7 @@ public:
 		auto	itProfile = collisionProfiles.find( InName );
 		if ( itProfile == collisionProfiles.end() )
 		{
-			LE_LOG( LT_Warning, LC_Physics, TEXT( "Collision profile '%s' not founded" ), InName.c_str() );
+			Warnf( TEXT( "Collision profile '%s' not founded\n" ), InName.c_str() );
 			return nullptr;
 		}
 

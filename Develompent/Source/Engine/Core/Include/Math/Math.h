@@ -680,7 +680,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, Vector2D& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Vector2D& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -693,7 +693,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, Vector& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Vector& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -706,7 +706,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, Vector4D& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Vector4D& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -719,7 +719,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, Matrix& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Matrix& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }
@@ -732,7 +732,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, Quaternion& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const Quaternion& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }

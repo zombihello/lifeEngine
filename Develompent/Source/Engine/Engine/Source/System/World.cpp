@@ -13,6 +13,11 @@
 #include "WorldEd.h"
 #endif // WITH_EDITOR
 
+/*
+==================
+CWorld::CWorld
+==================
+*/
 CWorld::CWorld() 
 	: isBeginPlay( false )
 	, scene( new CScene() )
@@ -21,12 +26,22 @@ CWorld::CWorld()
 #endif // WITH_EDITOR
 {}
 
+/*
+==================
+CWorld::~CWorld
+==================
+*/
 CWorld::~CWorld()
 {
 	CleanupWorld();
 	delete scene;
 }
 
+/*
+==================
+CWorld::BeginPlay
+==================
+*/
 void CWorld::BeginPlay()
 {
 	// If allready playing started, do nothing
@@ -47,10 +62,15 @@ void CWorld::BeginPlay()
 		actors[ index ]->InitPhysics();
 	}
 
-	GCameraManager->BeginPlay();
+	g_CameraManager->BeginPlay();
 	isBeginPlay = true;
 }
 
+/*
+==================
+CWorld::EndPlay
+==================
+*/
 void CWorld::EndPlay()
 {
 	// If not playing, do nothing
@@ -67,10 +87,15 @@ void CWorld::EndPlay()
 		actor->TermPhysics();
 	}
 
-	GCameraManager->EndPlay();
+	g_CameraManager->EndPlay();
 	isBeginPlay = false;
 }
 
+/*
+==================
+CWorld::Tick
+==================
+*/
 void CWorld::Tick( float InDeltaTime )
 {
 	// Tick all actors
@@ -92,6 +117,11 @@ void CWorld::Tick( float InDeltaTime )
 	}
 }
 
+/*
+==================
+CWorld::Serialize
+==================
+*/
 void CWorld::Serialize( CArchive& InArchive )
 {
 	if ( InArchive.IsSaving() )
@@ -130,7 +160,7 @@ void CWorld::Serialize( CArchive& InArchive )
 	filePath	= InArchive.GetPath();
 	name		= filePath;
 	{
-		appNormalizePathSeparators( name );
+		Sys_NormalizePathSeparators( name );
 		std::size_t			pathSeparatorPos = name.find_last_of( PATH_SEPARATOR );
 		if ( pathSeparatorPos != std::string::npos )
 		{
@@ -148,6 +178,11 @@ void CWorld::Serialize( CArchive& InArchive )
 #endif // WITH_EDITOR
 }
 
+/*
+==================
+CWorld::CleanupWorld
+==================
+*/
 void CWorld::CleanupWorld()
 {
 	// If we playing, end it
@@ -173,7 +208,7 @@ void CWorld::CleanupWorld()
 	}
 #endif // WITH_EDITOR
 
-	GPhysicsScene.RemoveAllBodies();
+	g_PhysicsScene.RemoveAllBodies();
 	scene->Clear();
 	actors.clear();
 	actorsToDestroy.clear();
@@ -186,12 +221,17 @@ void CWorld::CleanupWorld()
 #endif // WITH_EDITOR
 }
 
+/*
+==================
+CWorld::SpawnActor
+==================
+*/
 ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const Quaternion& InRotation /* = SMath::quaternionZero */ )
 {
-	check( InClass );
+	Assert( InClass );
 
 	AActor*		actor = InClass->CreateObject< AActor >();
-	check( actor );
+	Assert( actor );
 
 	// Set default actor name and location with rotation
 	actor->SetName( InClass->GetName().c_str() );
@@ -220,9 +260,14 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
 	return actor;
 }
 
+/*
+==================
+CWorld::DestroyActor
+==================
+*/
 void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 {
-	check( InActor );
+	Assert( InActor );
 
 	// If actor allready penging kill, exit from method
 	if ( InActor->IsPendingKill() )
@@ -267,6 +312,11 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 }
 
 #if ENABLE_HITPROXY
+/*
+==================
+CWorld::UpdateHitProxiesId
+==================
+*/
 void CWorld::UpdateHitProxiesId()
 {
 	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
@@ -277,9 +327,14 @@ void CWorld::UpdateHitProxiesId()
 #endif // ENABLE_HITPROXY
 
 #if WITH_EDITOR
+/*
+==================
+CWorld::SelectActor
+==================
+*/
 void CWorld::SelectActor( ActorRef_t InActor )
 {
-	check( InActor );
+	Assert( InActor );
 	if ( InActor->IsSelected() )
 	{
 		return;
@@ -291,9 +346,14 @@ void CWorld::SelectActor( ActorRef_t InActor )
 	SEditorDelegates::onActorsSelected.Broadcast( std::vector<ActorRef_t>{ InActor } );
 }
 
+/*
+==================
+CWorld::UnselectActor
+==================
+*/
 void CWorld::UnselectActor( ActorRef_t InActor )
 {
-	check( InActor );
+	Assert( InActor );
 	if ( !InActor->IsSelected() )
 	{
 		return;
@@ -312,6 +372,11 @@ void CWorld::UnselectActor( ActorRef_t InActor )
 	SEditorDelegates::onActorsUnselected.Broadcast( std::vector<ActorRef_t>{ InActor } );
 }
 
+/*
+==================
+CWorld::SelectActors
+==================
+*/
 void CWorld::SelectActors( const std::vector<ActorRef_t>& InActors )
 {
 	bool		bNeedBroadcast = false;
@@ -332,6 +397,11 @@ void CWorld::SelectActors( const std::vector<ActorRef_t>& InActors )
 	}
 }
 
+/*
+==================
+CWorld::UnselectActors
+==================
+*/
 void CWorld::UnselectActors( const std::vector<ActorRef_t>& InActors )
 {
 	std::vector<ActorRef_t>		unselectedActors;
@@ -362,6 +432,11 @@ void CWorld::UnselectActors( const std::vector<ActorRef_t>& InActors )
 	}
 }
 
+/*
+==================
+CWorld::UnselectAllActors
+==================
+*/
 void CWorld::UnselectAllActors()
 {
 	for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )

@@ -30,39 +30,45 @@
 #include "System/EditorEngine.h"
 #endif // WITH_EDITOR
 
-/**
- * Pre-Initialize platform
- */
-int32 appPlatformPreInit()
+/*
+==================
+Sys_PlatformPreInit
+==================
+*/
+int32 Sys_PlatformPreInit()
 {
-	if ( GIsCommandlet || GIsCooker || GCommandLine.HasParam( TEXT( "console" ) ) )
+	if ( g_IsCommandlet || g_IsCooker || g_CommandLine.HasParam( TEXT( "console" ) ) )
 	{
-		static_cast< CWindowsLogger* >( GLog )->Show( true );
+		static_cast< CWindowsLogger* >( g_Log )->Show( true );
 	}
 
 	// Print version SDL to logs
 	{
 		SDL_version		sdlVersion;
 		SDL_GetVersion( &sdlVersion );
-		LE_LOG( LT_Log, LC_Init, TEXT( "SDL version: %i.%i.%i" ), sdlVersion.major, sdlVersion.minor, sdlVersion.patch );
+		Logf( TEXT( "SDL version: %i.%i.%i\n" ), sdlVersion.major, sdlVersion.minor, sdlVersion.patch );
 	}
 
 	return 0;
 }
 
-/**
- * Initialize platform
- */
-int32 appPlatformInit()
+/*
+==================
+Sys_PlatformInit
+==================
+*/
+int32 Sys_PlatformInit()
 {
-	GWindow->ShowCursor();
+	g_Window->ShowCursor();
 	return 0;
 }
 
-/**
- * Get arguments from command line
- */
-std::wstring appGetCommandLine()
+/*
+==================
+Sys_GetCommandLine
+==================
+*/
+std::wstring Sys_GetCommandLine()
 {
 	int32			argc = 0;
 	LPWSTR*			argv = CommandLineToArgvW( GetCommandLineW(), &argc );
@@ -78,96 +84,100 @@ std::wstring appGetCommandLine()
 	return commandLine;
 }
 
-/**
- * Process window events
- */
-void appProcessWindowEvents()
+/*
+==================
+Sys_ProcessWindowEvents
+==================
+*/
+void Sys_ProcessWindowEvents()
 {
 	// Handling system events
 	SWindowEvent		windowEvent;
-	while ( GWindow->PollEvent( windowEvent ) )
+	while ( g_Window->PollEvent( windowEvent ) )
 	{
-		GEngineLoop->ProcessEvent( windowEvent );
+		g_EngineLoop->ProcessEvent( windowEvent );
 	}
 }
 
-/**
- * Main function
- */
+/*
+==================
+WinMain
+==================
+*/
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nCmdShow )
 {
 	try
 	{
-		GWinHInstance		= hInst;
-		std::wstring		commandLine = appGetCommandLine();
+		g_WinHInstance		= hInst;
+		std::wstring		commandLine = Sys_GetCommandLine();
 		int32				errorLevel = 0;
 		
 		// Pre init engine
-		if ( !GIsRequestingExit )
+		if ( !g_IsRequestingExit )
 		{
-			errorLevel = GEngineLoop->PreInit( commandLine.c_str() );
-			check( errorLevel == 0 );
+			errorLevel = g_EngineLoop->PreInit( commandLine.c_str() );
+			Assert( errorLevel == 0 );
 		}
 
 		// Show splash screen
-		if ( !GIsRequestingExit )
+		if ( !g_IsRequestingExit )
 		{
-			if ( GIsEditor )
+			if ( g_IsEditor )
 			{
-				appShowSplash( GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Splash" ) ).GetString().c_str() );
+				Sys_ShowSplash( g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Splash" ) ).GetString().c_str() );
 			}
-			else if ( GIsGame )
+			else if ( g_IsGame )
 			{
-				appShowSplash( GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );
+				Sys_ShowSplash( g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );
 			}
 		}
 
 		// Init engine
-		if ( !GIsRequestingExit )
+		if ( !g_IsRequestingExit )
 		{
-			errorLevel = GEngineLoop->Init();
-			check( errorLevel == 0 );
-			if ( GIsEditor || GIsGame )
+			errorLevel = g_EngineLoop->Init();
+			Assert( errorLevel == 0 );
+			if ( g_IsEditor || g_IsGame )
 			{
-				GWindow->Show();
-				if ( GIsEditor )
+				g_Window->Show();
+				if ( g_IsEditor )
 				{
-					GWindow->Maximize();
+					g_Window->Maximize();
 				}
 			}
 		}
 
 		// Hide splash screen
-		appHideSplash();
+		Sys_HideSplash();
 
 		// Tick engine
-		while ( !GIsRequestingExit )
+		while ( !g_IsRequestingExit )
 		{
 			// Handling system events
-			appProcessWindowEvents();
+			Sys_ProcessWindowEvents();
 
 			// Tick engine
-			GEngineLoop->Tick();
+			g_EngineLoop->Tick();
 		}
 
 #if WITH_EDITOR
 		// Pause if we should
-		if ( GShouldPauseBeforeExit )
+		if ( g_ShouldPauseBeforeExit )
 		{
 			Sleep( INFINITE );
 		}
 #endif // WITH_EDITOR
 
-		GEngineLoop->Exit();
+		g_EngineLoop->Exit();
 	}
 	catch ( std::exception InException )
 	{
-		appErrorf( ANSI_TO_TCHAR( InException.what() ) );
+		Sys_Errorf( ANSI_TO_TCHAR( InException.what() ) );
 		return 1;
 	}
 	catch ( ... )
 	{
-		appErrorf( TEXT( "Unknown exception" ) );
+		Sys_Errorf( TEXT( "Unknown exception" ) );
 		return 1;
 	}
 

@@ -5,24 +5,33 @@
 #include "Misc/EngineGlobals.h"
 #include "RHI/BaseRHI.h"
 
-/** Critical section of add/remove in CRenderResource::GetResourceList */
+/*
+==================
+GetGlobalResourcesCS
+==================
+*/
 FORCEINLINE CCriticalSection& GetGlobalResourcesCS()
 {
+	// Critical section of add/remove in CRenderResource::GetResourceList
 	static CCriticalSection		globalResourcesCS;
 	return globalResourcesCS;
 }
 
-/**
- * Constructor
- */
+/*
+==================
+CRenderResource::CRenderResource
+==================
+*/
 CRenderResource::CRenderResource() 
 	: isInitialized( false )
 	, bInGlobalList( false )
 {}
 
-/**
- * Destructor
- */
+/*
+==================
+CRenderResource::~CRenderResource
+==================
+*/
 CRenderResource::~CRenderResource()
 {
 	if ( !isInitialized )
@@ -31,27 +40,36 @@ CRenderResource::~CRenderResource()
 	}
 
 	// Deleting an initialized CRenderResource will result in a crash later since it is still linked
-	//appErrorf( TEXT( "An CRenderResource was deleted without being released first!" ) );
+	//Sys_Errorf( TEXT( "An CRenderResource was deleted without being released first!" ) );
 }
 
+/*
+==================
+CRenderResource::GetResourceList
+==================
+*/
 std::set< CRenderResource* >& CRenderResource::GetResourceList()
 {
 	static std::set< CRenderResource* >		globalResources;
 	return globalResources;
 }
 
-/**
- * Update RHI resource
- */
+/*
+==================
+CRenderResource::UpdateRHI
+==================
+*/
 void CRenderResource::UpdateRHI()
 {
 	ReleaseRHI();
 	InitRHI();
 }
 
-/**
- * Initializes the resource
- */
+/*
+==================
+CRenderResource::InitResource
+==================
+*/
 void CRenderResource::InitResource()
 {
 	if ( isInitialized )
@@ -71,16 +89,18 @@ void CRenderResource::InitResource()
 	}
 
 	// Init resource if RHI is initialized
-	if ( GRHI && GRHI->IsInitialize() )
+	if ( g_RHI && g_RHI->IsInitialize() )
 	{
 		InitRHI();
 		isInitialized = true;
 	}
 }
 
-/**
- * Prepares the resource for deletion
- */
+/*
+==================
+CRenderResource::ReleaseResource
+==================
+*/
 void CRenderResource::ReleaseResource()
 {
 	if ( !isInitialized )
@@ -100,16 +120,18 @@ void CRenderResource::ReleaseResource()
 	}
 
 	// Release resource if RHI is initialized
-	if ( GRHI && GRHI->IsInitialize() )
+	if ( g_RHI && g_RHI->IsInitialize() )
 	{
 		ReleaseRHI();
 		isInitialized = false;
 	}
 }
 
-/**
- * If the resource's RHI has been initialized, then release and reinitialize it.  Otherwise, do nothing
- */
+/*
+==================
+CRenderResource::UpdateResource
+==================
+*/
 void CRenderResource::UpdateResource()
 {
 	if ( !isInitialized )
@@ -122,11 +144,22 @@ void CRenderResource::UpdateResource()
 	}
 }
 
+/*
+==================
+CRenderResource::IsGlobal
+==================
+*/
 bool CRenderResource::IsGlobal() const
 {
 	return false;
 }
 
+
+/*
+==================
+BeginInitResource
+==================
+*/
 void BeginInitResource( CRenderResource* InResource )
 {
 	UNIQUE_RENDER_COMMAND_ONEPARAMETER( CInitResourceCommand, CRenderResource*, resource, InResource,
@@ -135,6 +168,11 @@ void BeginInitResource( CRenderResource* InResource )
 		} );
 }
 
+/*
+==================
+BeginUpdateResource
+==================
+*/
 void BeginUpdateResource( CRenderResource* InResource )
 {
 	UNIQUE_RENDER_COMMAND_ONEPARAMETER( CUpdateResourceCommand, CRenderResource*, resource, InResource,
@@ -143,6 +181,11 @@ void BeginUpdateResource( CRenderResource* InResource )
 		} );
 }
 
+/*
+==================
+BeginReleaseResource
+==================
+*/
 void BeginReleaseResource( CRenderResource* InResource )
 {
 	UNIQUE_RENDER_COMMAND_ONEPARAMETER( CReleaseResourceCommand, CRenderResource*, resource, InResource,

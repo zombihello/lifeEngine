@@ -330,7 +330,7 @@ struct SPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE void SetLinearVelocity( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InVelocity, bool InIsAddToCurrent = false )
 	{
-		check( IsValidActor( InActorHandle ) );
+		Assert( IsValidActor( InActorHandle ) );
 		b2Vec2			bx2NewVelocity = LE2BVector( ( Vector2D )InVelocity / BOX2D_SCALE );
 		InActorHandle.bx2Body->SetLinearVelocity( !InIsAddToCurrent ? bx2NewVelocity : InActorHandle.bx2Body->GetLinearVelocity() + bx2NewVelocity );
 	}
@@ -343,7 +343,7 @@ struct SPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE Vector GetLinearVelocity( const SPhysicsActorHandleBox2D& InActorHandle )
 	{
-		check( IsValidActor( InActorHandle ) );
+		Assert( IsValidActor( InActorHandle ) );
 		return Vector( B2LEVector( InActorHandle.bx2Body->GetLinearVelocity() ) * BOX2D_SCALE, 0.f );
 	}
 
@@ -356,7 +356,7 @@ struct SPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE void AddAngularImpulse( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InAngularImpulse, bool InIsWake )
 	{
-		check( IsValidActor( InActorHandle ) );
+		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyAngularImpulse( InAngularImpulse.z / BOX2D_ANGLES, InIsWake );
 	}
 
@@ -369,7 +369,7 @@ struct SPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE void AddImpulse( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InImpulse, bool InIsWake )
 	{
-		check( IsValidActor( InActorHandle ) );
+		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyLinearImpulse( LE2BVector( ( Vector2D )InImpulse ), b2Vec2( 0.f, 0.f ), InIsWake );
 	}
 
@@ -383,7 +383,7 @@ struct SPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE void AddImpulseAtLocation( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InImpulse, const Vector& InLocation, bool InIsWake )
 	{
-		check( IsValidActor( InActorHandle ) );
+		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyLinearImpulse( LE2BVector( ( Vector2D )InImpulse ), LE2BVector( ( Vector2D )InLocation / BOX2D_SCALE ), InIsWake );
 	}
 
@@ -396,7 +396,7 @@ struct SPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE void AddForce( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InForce, bool InIsWake )
 	{
-		check( IsValidActor( InActorHandle ) );
+		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyForceToCenter( LE2BVector( ( Vector2D )InForce ), InIsWake );
 	}
 
@@ -410,7 +410,7 @@ struct SPhysicsInterfaceBox2D
 	 */
 	static FORCEINLINE void AddForceAtLocation( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InForce, const Vector& InLocation, bool InIsWake )
 	{
-		check( IsValidActor( InActorHandle ) );
+		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyForce( LE2BVector( ( Vector2D )InForce ), LE2BVector( ( Vector2D )InLocation / BOX2D_SCALE ), InIsWake );
 	}
 
@@ -422,7 +422,7 @@ struct SPhysicsInterfaceBox2D
 	{
 		if ( InActorHandle.bx2Body )
 		{
-			GPhysicsScene.GetBox2DWorld()->DestroyBody( InActorHandle.bx2Body );
+			g_PhysicsScene.GetBox2DWorld()->DestroyBody( InActorHandle.bx2Body );
 			InActorHandle.bx2Body = nullptr;
 		}
 	}

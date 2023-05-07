@@ -19,21 +19,32 @@
 #include "Render/VertexFactory/SimpleElementVertexFactory.h"
 #include "Render/SceneRenderTargets.h"
 
+/*
+==================
+CSceneRenderer::CSceneRenderer
+==================
+*/
 CSceneRenderer::CSceneRenderer( CSceneView* InSceneView, class CScene* InScene /* = nullptr */ )
 	: scene( InScene )
 	, sceneView( InSceneView )
 {}
 
+/*
+==================
+CSceneRenderer::BeginRenderViewTarget
+==================
+*/
 void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
-	CBaseDeviceContextRHI*	immediateContext	= GRHI->GetImmediateContext();
+	CBaseDeviceContextRHI*	immediateContext	= g_RHI->GetImmediateContext();
 	
-	check( !viewportRHI );
+	Assert( !viewportRHI );
 	viewportRHI				= InViewportRHI;
 
 	SCOPED_DRAW_EVENT( EventBeginRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Begin Render View Target" ) );
-	GSceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
-	GRHI->SetViewParameters( immediateContext, *sceneView );
+	g_SceneRenderTargets.Allocate( InViewportRHI->GetWidth(), InViewportRHI->GetHeight() );
+	g_RHI->SetViewParameters( immediateContext, *sceneView );
+	immediateContext->ClearSurface( g_SceneRenderTargets.GetSceneColorLDRSurface(), sceneView->GetBackgroundColor() );
 
 	// Build visible view on scene
 	if ( scene )
@@ -42,6 +53,11 @@ void CSceneRenderer::BeginRenderViewTarget( ViewportRHIParamRef_t InViewportRHI 
 	}
 }
 
+/*
+==================
+CSceneRenderer::Render
+==================
+*/
 void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 {
 	if ( !scene )
@@ -49,7 +65,7 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 		return;
 	}
 
-	CBaseDeviceContextRHI*	immediateContext	= GRHI->GetImmediateContext();
+	CBaseDeviceContextRHI*	immediateContext	= g_RHI->GetImmediateContext();
 	ShowFlags_t				showFlags			= sceneView->GetShowFlags();
 	bool					bDirty				= false;
 
@@ -60,7 +76,8 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	bDirty |= RenderBasePass( immediateContext );
 	
 	// Render lights
-	if ( bDirty && !scene->GetVisibleLights().empty() && showFlags & SHOW_Lights
+	bool		bVisibleLights = !scene->GetVisibleLights().empty();
+	if ( bDirty && bVisibleLights && showFlags & SHOW_Lights
 #if WITH_EDITOR
 		 && !( showFlags & SHOW_Wireframe )
 #endif // WITH_EDITOR
@@ -70,18 +87,18 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	}
 
 	// Render post process
-	if ( bDirty && showFlags & SHOW_PostProcess && showFlags & SHOW_Lights
+	if ( bDirty && showFlags & SHOW_PostProcess
 #if WITH_EDITOR
 		 && !( showFlags & SHOW_Wireframe )
 #endif // WITH_EDITOR
 		 )
 	{
-		RenderPostProcess( immediateContext );
+		RenderPostProcess( immediateContext, bVisibleLights );
 	}
 
 #if WITH_EDITOR
 	// If we in editor draw highlight layer (gizmo and etc)
-	if ( GIsEditor )
+	if ( g_IsEditor )
 	{
 		RenderHighlight( immediateContext );
 	}
@@ -92,39 +109,54 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 }
 
 #if WITH_EDITOR
+/*
+==================
+CSceneRenderer::RenderHighlight
+==================
+*/
 void CSceneRenderer::RenderHighlight( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	SCOPED_DRAW_EVENT( EventUI, DEC_SCENE_ITEMS, TEXT( "Highlight" ) );
 	
-	GSceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
-	GRHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
-	GRHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
+	g_SceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
+	g_RHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
+	g_RHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
 	
 	RenderSDG( InDeviceContext, SDG_Highlight );
-	GSceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
+	g_SceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
 }
 #endif // WITH_EDITOR
 
+/*
+==================
+CSceneRenderer::RenderPrePass
+==================
+*/
 bool CSceneRenderer::RenderPrePass( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	SSceneDepthGroup&		SDG = scene->GetSDG( SDG_World );
-	CBaseDeviceContextRHI*	immediateContext = GRHI->GetImmediateContext();
+	CBaseDeviceContextRHI*	immediateContext = g_RHI->GetImmediateContext();
 
 	SCOPED_DRAW_EVENT( EventPrePass, DEC_SCENE_ITEMS, TEXT( "PrePass" ) );
-	GSceneRenderTargets.BeginRenderingPrePass( immediateContext );
-	immediateContext->ClearDepthStencil( GSceneRenderTargets.GetSceneDepthZSurface() );
+	g_SceneRenderTargets.BeginRenderingPrePass( immediateContext );
+	immediateContext->ClearDepthStencil( g_SceneRenderTargets.GetSceneDepthZSurface() );
 
-	if ( GEngine->IsPrePass() && SDG.depthDrawList.GetNum() > 0 )
+	if ( g_Engine->IsPrePass() && SDG.depthDrawList.GetNum() > 0 )
 	{
-		GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
-		GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
+		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+		g_RHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
 		SDG.depthDrawList.Draw( InDeviceContext, *sceneView );
 	}
 
-	GSceneRenderTargets.FinishRenderingPrePass( immediateContext );
+	g_SceneRenderTargets.FinishRenderingPrePass( immediateContext );
 	return true;
 }
 
+/*
+==================
+CSceneRenderer::RenderBasePass
+==================
+*/
 bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	// Do nothing if SDG_World layer is empty
@@ -133,7 +165,7 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 		return false;
 	}
 
-	CBaseDeviceContextRHI*		immediateContext = GRHI->GetImmediateContext();
+	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
 	SCOPED_DRAW_EVENT( EventBasePass, DEC_SCENE_ITEMS, TEXT( "BasePass" ) );
 
 	// If SHOW_Lights setted and disabled wireframe mode, we rendering to the GBuffer
@@ -145,21 +177,20 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 #endif // WITH_EDITOR
 		 )
 	{
-		GSceneRenderTargets.BeginRenderingGBuffer( immediateContext );
-		GSceneRenderTargets.ClearGBufferTargets( immediateContext );
+		g_SceneRenderTargets.BeginRenderingGBuffer( immediateContext );
+		g_SceneRenderTargets.ClearGBufferTargets( immediateContext );
 		bGBuffer = true;
 	}
 	// Otherwise to the scene color
 	else
 	{
-		GSceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
-		immediateContext->ClearSurface( GSceneRenderTargets.GetSceneColorLDRSurface(), sceneView->GetBackgroundColor() );
+		g_SceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
 		bGBuffer = false;
 	}
 
 	// Init render states
-	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
-	GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
+	g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+	g_RHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
 
 	// Render SDG_World layer
 	bool	bDirty = RenderSDG( InDeviceContext, SDG_World );
@@ -167,15 +198,20 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 	// Finish rendering to GBuffer (only when we used him)
 	if ( bGBuffer )
 	{
-		GSceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
+		g_SceneRenderTargets.FinishRenderingGBuffer( InDeviceContext );
 	}
 	else
 	{
-		GSceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
+		g_SceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
 	}
 	return bDirty;
 }
 
+/*
+==================
+CSceneRenderer::RenderSDG
+==================
+*/
 bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, uint32 InSDGIndex )
 {
 	ShowFlags_t			showFlags	= sceneView->GetShowFlags();
@@ -254,10 +290,15 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 	return true;
 }
 
+/*
+==================
+CSceneRenderer::FinishRenderViewTarget
+==================
+*/
 void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI )
 {
 	SCOPED_DRAW_EVENT( EventFinishRenderViewTarget, DEC_SCENE_ITEMS, TEXT( "Finish Render View Target" ) );
-	check( viewportRHI == InViewportRHI );
+	Assert( viewportRHI == InViewportRHI );
 
 	// Clear visible view on finish of the scene render
 	if ( scene )
@@ -265,21 +306,21 @@ void CSceneRenderer::FinishRenderViewTarget( ViewportRHIParamRef_t InViewportRHI
 		scene->ClearView();
 	}
 
-	CBaseDeviceContextRHI*					immediateContext	= GRHI->GetImmediateContext();
-	Texture2DRHIRef_t						sceneColorTexture	= GSceneRenderTargets.GetSceneColorLDRTexture();
+	CBaseDeviceContextRHI*					immediateContext	= g_RHI->GetImmediateContext();
+	Texture2DRHIRef_t						sceneColorTexture	= g_SceneRenderTargets.GetSceneColorLDRTexture();
 	const uint32							sceneColorSizeX		= sceneColorTexture->GetSizeX();
 	const uint32							sceneColorSizeY		= sceneColorTexture->GetSizeY();
 	const uint32							viewportSizeX		= InViewportRHI->GetWidth();
 	const uint32							viewportSizeY		= InViewportRHI->GetHeight();
-	CScreenVertexShader<SVST_Default>*		screenVertexShader	= GShaderManager->FindInstance< CScreenVertexShader<SVST_Default>, CSimpleElementVertexFactory >();
-	CScreenPixelShader*						screenPixelShader	= GShaderManager->FindInstance< CScreenPixelShader, CSimpleElementVertexFactory >();
-	check( screenVertexShader && screenPixelShader );
+	CScreenVertexShader<SVST_Default>*		screenVertexShader	= g_ShaderManager->FindInstance< CScreenVertexShader<SVST_Default>, CSimpleElementVertexFactory >();
+	CScreenPixelShader*						screenPixelShader	= g_ShaderManager->FindInstance< CScreenPixelShader, CSimpleElementVertexFactory >();
+	Assert( screenVertexShader && screenPixelShader );
 	
-	GRHI->SetRenderTarget( immediateContext, InViewportRHI->GetSurface(), nullptr );
-	GRHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
-	GRHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
-	GRHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
-	GRHI->SetBoundShaderState( immediateContext, GRHI->CreateBoundShaderState( TEXT( "FinishRenderViewTarget" ), GSimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), screenPixelShader->GetPixelShader() ) );
+	g_RHI->SetRenderTarget( immediateContext, InViewportRHI->GetSurface(), nullptr );
+	g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false>::GetRHI() );
+	g_RHI->SetRasterizerState( immediateContext, TStaticRasterizerStateRHI<>::GetRHI() );
+	g_RHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
+	g_RHI->SetBoundShaderState( immediateContext, g_RHI->CreateBoundShaderState( TEXT( "FinishRenderViewTarget" ), g_SimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), screenPixelShader->GetPixelShader() ) );
 
 	screenPixelShader->SetTexture( immediateContext, sceneColorTexture );
 	screenPixelShader->SetSamplerState( immediateContext, TStaticSamplerStateRHI<>::GetRHI() );

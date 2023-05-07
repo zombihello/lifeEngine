@@ -6,21 +6,27 @@
 #include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 
-/**
- * Constructor
- */
+/*
+==================
+CWindowsFileSystem::CWindowsFileSystem
+==================
+*/
 CWindowsFileSystem::CWindowsFileSystem()
 {}
 
-/**
- * Destructor
- */
+/*
+==================
+CWindowsFileSystem::~CWindowsFileSystem
+==================
+*/
 CWindowsFileSystem::~CWindowsFileSystem()
 {}
 
-/**
- * Create file reader
- */
+/*
+==================
+CWindowsFileSystem::CreateFileReader
+==================
+*/
 class CArchive* CWindowsFileSystem::CreateFileReader( const std::wstring& InFileName, uint32 InFlags )
 {
 	std::ifstream*			inputFile = new std::ifstream();
@@ -31,7 +37,7 @@ class CArchive* CWindowsFileSystem::CreateFileReader( const std::wstring& InFile
 	{
 		if ( InFlags & AR_NoFail )
 		{
-			appErrorf( TEXT( "Failed to create file: %s, InFlags = 0x%X" ), InFileName.c_str(), InFlags );
+			Sys_Errorf( TEXT( "Failed to create file: %s, InFlags = 0x%X" ), InFileName.c_str(), InFlags );
 		}
 
 		delete inputFile;
@@ -41,9 +47,11 @@ class CArchive* CWindowsFileSystem::CreateFileReader( const std::wstring& InFile
 	return new CWindowsArchiveReading( inputFile, InFileName );
 }
 
-/**
- * Create file writer
- */
+/*
+==================
+CWindowsFileSystem::CreateFileWriter
+==================
+*/
 class CArchive* CWindowsFileSystem::CreateFileWriter( const std::wstring& InFileName, uint32 InFlags )
 {
 	std::ofstream*			outputFile = new std::ofstream();
@@ -76,7 +84,7 @@ class CArchive* CWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 	{
 		if ( InFlags & AW_NoFail )
 		{
-			appErrorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName.c_str(), InFlags );
+			Sys_Errorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName.c_str(), InFlags );
 		}
 
 		delete outputFile;
@@ -86,9 +94,11 @@ class CArchive* CWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 	return new CWindowsArchiveWriter( outputFile, InFileName );
 }
 
-/**
- * Find files in directory
- */
+/*
+==================
+CWindowsFileSystem::FindFiles
+==================
+*/
 std::vector< std::wstring > CWindowsFileSystem::FindFiles( const std::wstring& InDirectory, bool InIsFiles, bool InIsDirectories )
 {
 	HANDLE								handle = nullptr;
@@ -116,6 +126,11 @@ std::vector< std::wstring > CWindowsFileSystem::FindFiles( const std::wstring& I
 	return result;
 }
 
+/*
+==================
+CWindowsFileSystem::Delete
+==================
+*/
 bool CWindowsFileSystem::Delete( const std::wstring& InPath, bool InIsEvenReadOnly /* = false */ )
 {
 	if ( InIsEvenReadOnly )
@@ -128,20 +143,25 @@ bool CWindowsFileSystem::Delete( const std::wstring& InPath, bool InIsEvenReadOn
 	result = result || error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND;
 	if ( !result )
 	{
-		if ( GIsCommandlet )
+		if ( g_IsCommandlet )
 		{
 			// This is not an error while doing commandlets
-			LE_LOG( LT_Warning, LC_General, TEXT( "Could not delete '%s'" ), InPath.c_str() );
+			Warnf( TEXT( "Could not delete '%s'\n" ), InPath.c_str() );
 		}
 		else
 		{
-			appErrorf( TEXT( "Error deleting file '%s' (GetLastError: %d)" ), InPath.c_str(), error );
+			Sys_Errorf( TEXT( "Error deleting file '%s' (GetLastError: %d)" ), InPath.c_str(), error );
 		}
 	}
 
 	return result != 0;
 }
 
+/*
+==================
+CWindowsFileSystem::MakeDirectory
+==================
+*/
 bool CWindowsFileSystem::MakeDirectory( const std::wstring& InPath, bool InIsTree /* = false */ )
 {
 	if ( InIsTree )
@@ -151,6 +171,11 @@ bool CWindowsFileSystem::MakeDirectory( const std::wstring& InPath, bool InIsTre
 	return CreateDirectoryW( InPath.c_str(), nullptr ) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
 }
 
+/*
+==================
+CWindowsFileSystem::DeleteDirectory
+==================
+*/
 bool CWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsTree )
 {
 	if ( InIsTree )
@@ -161,11 +186,16 @@ bool CWindowsFileSystem::DeleteDirectory( const std::wstring& InPath, bool InIsT
 	bool		result = RemoveDirectoryW( InPath.c_str() );
 	if ( !result )
 	{
-		LE_LOG( LT_Warning, LC_General, TEXT( "Failed deleting directory '%s'. GetLastError() = 0x%X" ), InPath.c_str(), GetLastError() );
+		Warnf( TEXT( "Failed deleting directory '%s'. GetLastError() = 0x%X\n" ), InPath.c_str(), GetLastError() );
 	}
 	return result;
 }
 
+/*
+==================
+CWindowsFileSystem::Copy
+==================
+*/
 ECopyMoveResult CWindowsFileSystem::Copy( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting /* = false */, bool InIsEvenReadOnly /* = false */ )
 {
 	if ( InIsEvenReadOnly )
@@ -191,6 +221,11 @@ ECopyMoveResult CWindowsFileSystem::Copy( const std::wstring& InDstFile, const s
 	return result;
 }
 
+/*
+==================
+CWindowsFileSystem::Move
+==================
+*/
 ECopyMoveResult CWindowsFileSystem::Move( const std::wstring& InDstFile, const std::wstring& InSrcFile, bool InIsReplaceExisting /* = false */, bool InIsEvenReadOnly /* = false */ )
 {
 	MakeDirectory( CFilename( InDstFile ).GetPath(), true );
@@ -201,7 +236,7 @@ ECopyMoveResult CWindowsFileSystem::Move( const std::wstring& InDstFile, const s
 	{
 		// If the move failed, throw a warning but retry before we throw an error
 		DWORD		error = GetLastError();
-		LE_LOG( LT_Warning, LC_General, TEXT( "MoveFileExW was unable to move '%s' to '%s', retrying... (GetLastE-r-r-o-r: %d)" ), InSrcFile.c_str(), InDstFile.c_str(), error );
+		Warnf( TEXT( "MoveFileExW was unable to move '%s' to '%s', retrying... (GetLastE-r-r-o-r: %d)\n" ), InSrcFile.c_str(), InDstFile.c_str(), error );
 
 		// Wait just a little bit (i.e. a totally arbitrary amount)...
 		Sleep( 500 );
@@ -211,17 +246,22 @@ ECopyMoveResult CWindowsFileSystem::Move( const std::wstring& InDstFile, const s
 		if ( !result )
 		{
 			error = GetLastError();
-			LE_LOG( LT_Error, LC_General, TEXT( "Error moving file '%s' to '%s' (GetLastError: %d)" ), InSrcFile.c_str(), InDstFile.c_str(), error );
+			Errorf( TEXT( "Error moving file '%s' to '%s' (GetLastError: %d)\n" ), InSrcFile.c_str(), InDstFile.c_str(), error );
 		}
 		else
 		{
-			LE_LOG( LT_Warning, LC_General, TEXT( "MoveFileExW recovered during retry!" ) );
+			Warnf( TEXT( "MoveFileExW recovered during retry!\n" ) );
 		}
 	}
 
 	return result != 0 ? CMR_OK : CMR_MiscFail;
 }
 
+/*
+==================
+CWindowsFileSystem::IsExistFile
+==================
+*/
 bool CWindowsFileSystem::IsExistFile( const std::wstring& InPath, bool InIsDirectory /* = false */ )
 {
 	DWORD		fileAttributes = GetFileAttributesW( InPath.c_str() );
@@ -238,38 +278,49 @@ bool CWindowsFileSystem::IsExistFile( const std::wstring& InPath, bool InIsDirec
 	return !InIsDirectory;
 }
 
+/*
+==================
+CWindowsFileSystem::IsDirectory
+==================
+*/
 bool CWindowsFileSystem::IsDirectory( const std::wstring& InPath ) const
 {
 	DWORD		fileAttributes = GetFileAttributesW( InPath.c_str() );
 	return fileAttributes != INVALID_FILE_ATTRIBUTES && fileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 }
 
-/**
- * Convert to absolute path
- */
+/*
+==================
+CWindowsFileSystem::ConvertToAbsolutePath
+==================
+*/
 std::wstring CWindowsFileSystem::ConvertToAbsolutePath( const std::wstring& InPath ) const
 {
 	std::wstring		path = InPath;
 	if ( path.find( TEXT( ".." ) ) != std::wstring::npos )
 	{
 		path = GetCurrentDirectory() + PATH_SEPARATOR + path;
-		appNormalizePathSeparators( path );
+		Sys_NormalizePathSeparators( path );
 	}
 
 	return path;
 }
 
-/**
- * Set current directory
- */
+/*
+==================
+CWindowsFileSystem::SetCurrentDirectory
+==================
+*/
 void CWindowsFileSystem::SetCurrentDirectory( const std::wstring& InDirectory )
 {
 	SetCurrentDirectoryW( InDirectory.c_str() );
 }
 
-/**
- * Get current directory
- */
+/*
+==================
+CWindowsFileSystem::GetCurrentDirectory
+==================
+*/
 std::wstring CWindowsFileSystem::GetCurrentDirectory() const
 {
 	tchar		path[ MAX_PATH ];
@@ -277,6 +328,11 @@ std::wstring CWindowsFileSystem::GetCurrentDirectory() const
 	return path;
 }
 
+/*
+==================
+CWindowsFileSystem::GetExePath
+==================
+*/
 std::wstring CWindowsFileSystem::GetExePath() const
 {
 	TCHAR		path[MAX_PATH];
@@ -284,6 +340,11 @@ std::wstring CWindowsFileSystem::GetExePath() const
 	return path;
 }
 
+/*
+==================
+CWindowsFileSystem::IsAbsolutePath
+==================
+*/
 bool CWindowsFileSystem::IsAbsolutePath( const std::wstring& InPath ) const
 {
 	return InPath.find_first_of( TEXT( ":" ) ) != std::wstring::npos;

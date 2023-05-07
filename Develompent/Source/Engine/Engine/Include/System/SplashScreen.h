@@ -32,14 +32,14 @@ enum ESplashTextType
  *
  * @param[in] InSplashName Name of splash screen file (and relative path if needed)
  */
-extern void appShowSplash( const tchar* InSplashName );
+extern void Sys_ShowSplash( const tchar* InSplashName );
 
 /**
  * @ingroup Engine
- * Destroys the splash window that was previously shown by appShowSplash(). If the splash screen isn't active,
+ * Destroys the splash window that was previously shown by Sys_ShowSplash(). If the splash screen isn't active,
  * it will do nothing.
  */
-extern void appHideSplash();
+extern void Sys_HideSplash();
 
 /**
  * @ingroup Engine
@@ -48,6 +48,6 @@ extern void appHideSplash();
  * @param[in] InType Type of text to change
  * @param[in] InText Text to display
  */
-extern void appSetSplashText( const ESplashTextType InType, const tchar* InText );
+extern void Sys_SetSplashText( const ESplashTextType InType, const tchar* InText );
 
 #endif // !SPLASHSCREEN_H

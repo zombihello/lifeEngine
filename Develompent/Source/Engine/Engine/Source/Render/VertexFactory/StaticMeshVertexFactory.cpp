@@ -7,8 +7,13 @@ IMPLEMENT_VERTEX_FACTORY_TYPE( CStaticMeshVertexFactory, TEXT( "StaticMeshVertex
 //
 // GLOBALS
 //
-TGlobalResource< CStaticMeshVertexDeclaration >			GStaticMeshVertexDeclaration;
+TGlobalResource< CStaticMeshVertexDeclaration >			g_StaticMeshVertexDeclaration;
 
+/*
+==================
+CStaticMeshVertexDeclaration::InitRHI
+==================
+*/
 void CStaticMeshVertexDeclaration::InitRHI()
 {
 	VertexDeclarationElementList_t		vertexDeclElementList =
@@ -19,24 +24,44 @@ void CStaticMeshVertexDeclaration::InitRHI()
 		SVertexElement( CStaticMeshVertexFactory::SSS_Main, sizeof( SStaticMeshVertexType ), STRUCT_OFFSET( SStaticMeshVertexType, tangent ),     VET_Float4, VEU_Tangent, 0 ),
 		SVertexElement( CStaticMeshVertexFactory::SSS_Main, sizeof( SStaticMeshVertexType ), STRUCT_OFFSET( SStaticMeshVertexType, binormal ),    VET_Float4, VEU_Binormal, 0 )
 	};
-	vertexDeclarationRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
+	vertexDeclarationRHI = g_RHI->CreateVertexDeclaration( vertexDeclElementList );
 }
 
+/*
+==================
+CStaticMeshVertexDeclaration::ReleaseRHI
+==================
+*/
 void CStaticMeshVertexDeclaration::ReleaseRHI()
 {
     vertexDeclarationRHI.SafeRelease();
 }
 
+/*
+==================
+CStaticMeshVertexFactory::InitRHI
+==================
+*/
 void CStaticMeshVertexFactory::InitRHI()
 {
-	InitDeclaration( GStaticMeshVertexDeclaration.GetVertexDeclarationRHI() );
+	InitDeclaration( g_StaticMeshVertexDeclaration.GetVertexDeclarationRHI() );
 }
 
+/*
+==================
+CStaticMeshVertexFactory::GetTypeHash
+==================
+*/
 uint64 CStaticMeshVertexFactory::GetTypeHash() const
 {
     return staticType.GetHash();
 }
 
+/*
+==================
+CStaticMeshVertexFactory::ConstructShaderParameters
+==================
+*/
 CVertexFactoryShaderParameters* CStaticMeshVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )
 {
     return InShaderFrequency == SF_Vertex ? new CGeneralVertexShaderParameters( staticType.SupportsInstancing() ) : nullptr;

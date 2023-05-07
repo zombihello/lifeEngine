@@ -25,18 +25,18 @@ public:
      * @ingroup WindowsPlatform
      * @brief Constructor
      */
-                            CWindowsLogger();
+    CWindowsLogger();
 
     /**
      * @ingroup WindowsPlatform
      * @brief Destructor
      */
-                            ~CWindowsLogger();
+    ~CWindowsLogger();
 
     /**
      * @brief Initialize logger
      */
-    virtual void            Init() override;
+    virtual void Init() override;
 
     /**
      * @ingroup WindowsPlatform
@@ -45,7 +45,7 @@ public:
      * @param[in] InMessage Message
      * @param[in] InEvent Type event of message
      */
-    virtual void            Serialize( const tchar* InMessage, ELogType InLogType, ELogCategory InLogCategory );
+    virtual void Serialize( const tchar* InMessage, ELogType InLogType );
 
     /**
      * @brief Closes output device and cleans up
@@ -54,7 +54,7 @@ public:
      * as we might have to call "delete" which cannot be done for static/ global
      * objects
      */
-    virtual void            TearDown() override;
+    virtual void TearDown() override;
 
     /**
      * @ingroup WindowsPlatform
@@ -62,26 +62,26 @@ public:
      * 
      * @param[in] InShowWindow Whether to show or hide the console window
      */
-    void                    Show( bool InShowWindow );
+    void Show( bool InShowWindow );
     
     /**
      * @ingroup WindowsPlatform
      * @brief Is showed console
      * @return Return true if console is shown or false if not
      */
-    FORCEINLINE bool        IsShow() const                 { return consoleHandle; }
+    FORCEINLINE bool IsShow() const { return consoleHandle; }
 
     /**
      * @brief Set color for text in log
      *
      * @param InLogColor Log color
      */
-    virtual void        SetTextColor( ELogColor InLogColor ) override;
+    virtual void SetTextColor( ELogColor InLogColor ) override;
 
     /**
      * @brief Reset color text to default
      */
-    virtual void        ResetTextColor() override;
+    virtual void ResetTextColor() override;
 
 private:
     HANDLE              consoleHandle;      /**< OS handle on console*/

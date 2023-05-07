@@ -133,8 +133,8 @@ public:
 	 * @param[in] InFrequency Frequency of shader
 	 * @param[in] InShaderName Shader name
 	 */
-	explicit									CBaseShaderRHI( EShaderFrequency InFrequency, const tchar* InShaderName ) :
-		frequency( InFrequency )
+	explicit CBaseShaderRHI( EShaderFrequency InFrequency, const tchar* InShaderName ) 
+		: frequency( InFrequency )
 #if !SHIPPING_BUILD
 		, shaderName( InShaderName )
 #endif // !SHIPPING_BUILD
@@ -144,7 +144,7 @@ public:
 	 * @brief Get shader name
 	 * @return Return shader name
 	 */
-	FORCEINLINE const tchar*					GetShaderName() const
+	FORCEINLINE const tchar* GetShaderName() const
 	{
 #if !SHIPPING_BUILD
 		return shaderName.c_str();
@@ -157,7 +157,7 @@ public:
 	 * @brief Get frequency
 	 * @return Return frequency of shader
 	 */
-	FORCEINLINE EShaderFrequency				GetFrequency() const
+	FORCEINLINE EShaderFrequency GetFrequency() const
 	{
 		return frequency;
 	}
@@ -201,7 +201,7 @@ public:
 	 * @param[in] InHash Start hash
 	 * @return Return calculated hash
 	 */
-	virtual uint64 GetHash( uint64 InHash = 0 ) const					{ return 0; }
+	virtual uint64 GetHash( uint64 InHash = 0 ) const { return 0; }
 };
 
 /**
@@ -323,7 +323,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, EShaderFrequency& InValue
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const EShaderFrequency& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }

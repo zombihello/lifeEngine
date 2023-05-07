@@ -72,7 +72,7 @@ public:
 
 		// Bind shader parameters
 		CVertexFactoryMetaType* vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
-		check( vertexFactoryType );
+		Assert( vertexFactoryType );
 
 		vertexFactoryParameters = vertexFactoryType->CreateShaderParameters( SF_Vertex );
 		vertexFactoryParameters->Bind( InShaderCacheItem.parameterMap );
@@ -87,7 +87,7 @@ public:
 	 */
 	virtual void SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContextRHI, const class CVertexFactory* InVertexFactory, const TSharedPtr<class CMaterial>& InMaterialResource ) const override
 	{
-		check( vertexFactoryParameters );
+		Assert( vertexFactoryParameters );
 		vertexFactoryParameters->Set( InDeviceContextRHI, InVertexFactory );
 	}
 
@@ -103,7 +103,7 @@ public:
 	 */
 	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override
 	{
-		check( vertexFactoryParameters );
+		Assert( vertexFactoryParameters );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InMesh, InVertexFactory, InView, InNumInstances, InStartInstanceID );
 	}
 

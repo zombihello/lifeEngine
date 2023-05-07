@@ -4,12 +4,22 @@
 #include "Windows/InputTextDialog.h"
 #include "ImGUI/imgui_stdlib.h"
 
+/*
+==================
+CInputTextDialog::CInputTextDialog
+==================
+*/
 CInputTextDialog::CInputTextDialog( const std::wstring& InName, const std::wstring& InMessage, const std::wstring& InDefaultText /* = TEXT( "" ) */ )
 	: CImGUIPopup( InName )
 	, message( InMessage )
 	, text( TCHAR_TO_ANSI( InDefaultText.c_str() ) )
 {}
 
+/*
+==================
+CInputTextDialog::OnTick
+==================
+*/
 void CInputTextDialog::OnTick()
 {
 	// Draw text message and input field
@@ -20,7 +30,7 @@ void CInputTextDialog::OnTick()
 
 	// Draw buttons
 	const ImVec2		buttonSize( 120.f, 0.f );
-	if ( ImGui::Button( "Ok", buttonSize ) || GInputSystem->IsKeyDown( BC_KeyEnter ) )
+	if ( ImGui::Button( "Ok", buttonSize ) || g_InputSystem->IsKeyDown( BC_KeyEnter ) )
 	{
 		onTextEntered.Broadcast( text );
 		Close();

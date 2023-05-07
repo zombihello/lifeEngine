@@ -6,12 +6,22 @@
 
 IMPLEMENT_CLASS( CPrimitiveComponent )
 
+/*
+==================
+CPrimitiveComponent::CPrimitiveComponent
+==================
+*/
 CPrimitiveComponent::CPrimitiveComponent()
 	: bIsDirtyDrawingPolicyLink( true )
 	, bVisibility( true )
 	, scene( nullptr )
 {}
 
+/*
+==================
+CPrimitiveComponent::~CPrimitiveComponent
+==================
+*/
 CPrimitiveComponent::~CPrimitiveComponent()
 {
 	if ( scene )
@@ -20,18 +30,33 @@ CPrimitiveComponent::~CPrimitiveComponent()
 	}
 }
 
+/*
+==================
+CPrimitiveComponent::Spawned
+==================
+*/
 void CPrimitiveComponent::Spawned()
 {
 	Super::Spawned();
-	GWorld->GetScene()->AddPrimitive( this );
+	g_World->GetScene()->AddPrimitive( this );
 }
 
+/*
+==================
+CPrimitiveComponent::Destroyed
+==================
+*/
 void CPrimitiveComponent::Destroyed()
 {
 	Super::Destroyed();
-	GWorld->GetScene()->RemovePrimitive( this );
+	g_World->GetScene()->RemovePrimitive( this );
 }
 
+/*
+==================
+CPrimitiveComponent::TickComponent
+==================
+*/
 void CPrimitiveComponent::TickComponent( float InDeltaTime )
 {
 	Super::TickComponent( InDeltaTime );
@@ -44,12 +69,17 @@ void CPrimitiveComponent::TickComponent( float InDeltaTime )
 	}
 }
 
+/*
+==================
+CPrimitiveComponent::Serialize
+==================
+*/
 void CPrimitiveComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 
 #if WITH_EDITOR
-	if ( IsEditorOnly() && !GIsEditor )
+	if ( IsEditorOnly() && !g_IsEditor )
 	{
 		bool	tmpVisibility;
 		InArchive << tmpVisibility;
@@ -61,15 +91,35 @@ void CPrimitiveComponent::Serialize( class CArchive& InArchive )
 	}
 }
 
+/*
+==================
+CPrimitiveComponent::LinkDrawList
+==================
+*/
 void CPrimitiveComponent::LinkDrawList()
 {}
 
+/*
+==================
+CPrimitiveComponent::UnlinkDrawList
+==================
+*/
 void CPrimitiveComponent::UnlinkDrawList()
 {}
 
+/*
+==================
+CPrimitiveComponent::AddToDrawList
+==================
+*/
 void CPrimitiveComponent::AddToDrawList( const class CSceneView& InSceneView )
 {}
 
+/*
+==================
+CPrimitiveComponent::InitPrimitivePhysics
+==================
+*/
 void CPrimitiveComponent::InitPrimitivePhysics()
 {
 	if ( bodySetup )
@@ -80,12 +130,17 @@ void CPrimitiveComponent::InitPrimitivePhysics()
 	}
 }
 
+/*
+==================
+CPrimitiveComponent::SyncComponentToPhysics
+==================
+*/
 void CPrimitiveComponent::SyncComponentToPhysics()
 {
 	if ( bodyInstance.IsValid() )
 	{
 		AActor*		actorOwner = GetOwner();
-		check( actorOwner );
+		Assert( actorOwner );
 
 		CTransform		oldTransform = actorOwner->GetActorTransform();
 		CTransform		newTransform = bodyInstance.GetLEWorldTransform();
@@ -103,6 +158,11 @@ void CPrimitiveComponent::SyncComponentToPhysics()
 	}
 }
 
+/*
+==================
+CPrimitiveComponent::TermPrimitivePhysics
+==================
+*/
 void CPrimitiveComponent::TermPrimitivePhysics()
 {
 	if ( bodyInstance.IsValid() )
@@ -111,6 +171,11 @@ void CPrimitiveComponent::TermPrimitivePhysics()
 	}
 }
 
+/*
+==================
+CPrimitiveComponent::IsVisibility
+==================
+*/
 bool CPrimitiveComponent::IsVisibility() const
 {
 	return bVisibility && ( GetOwner() ? GetOwner()->IsVisibility() : true );

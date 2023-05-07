@@ -4,10 +4,20 @@
 #include "Windows/LogsWindow.h"
 #include "ImGUI/imgui_stdlib.h"
 
+/*
+==================
+CLogsWindow::CLogsWindow
+==================
+*/
 CLogsWindow::CLogsWindow( const std::wstring& InName )
 	: CImGUILayer( InName )
 {}
 
+/*
+==================
+CLogsWindow::OnTick
+==================
+*/
 void CLogsWindow::OnTick()
 {
 	// Draw log history
@@ -83,10 +93,15 @@ void CLogsWindow::OnTick()
 	}
 }
 
+/*
+==================
+CLogsWindow::ExecCommand
+==================
+*/
 void CLogsWindow::ExecCommand( const std::string& InCommand )
 {
 	if ( !InCommand.empty() )
 	{
-		GConsoleSystem.Exec( ANSI_TO_TCHAR( InCommand.c_str() ) );
+		g_ConsoleSystem.Exec( ANSI_TO_TCHAR( InCommand.c_str() ) );
 	}
 }

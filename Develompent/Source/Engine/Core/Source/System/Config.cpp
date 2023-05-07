@@ -8,7 +8,7 @@
 #include "System/Config.h"
 #include "System/BaseFileSystem.h"
 
-static const tchar* GConfigTypeNames[] =
+static const tchar* s_ConfigTypeNames[] =
 {
 	TEXT( "Engine" ),		// CT_Engine
 	TEXT( "Game" ),			// CT_Game
@@ -16,13 +16,18 @@ static const tchar* GConfigTypeNames[] =
 	TEXT( "Editor" ),		// CT_Editor
 };
 
-static const tchar* GConfigLayerNames[] =
+static const tchar* s_ConfigLayerNames[] =
 {
 	TEXT( "Engine" ),		// CL_Engine
 	TEXT( "Game" ),			// CL_Game
 	TEXT( "User" )			// CL_User
 };
 
+/*
+==================
+CConfigManager::Init
+==================
+*/
 void CConfigManager::Init()
 {
 	// Serialize all configs
@@ -38,41 +43,43 @@ void CConfigManager::Init()
 			std::wstring				pathToConfig;
 			switch ( layer )
 			{
-			case CL_Engine:			pathToConfig = appBaseDir() + PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Config" ) PATH_SEPARATOR + GConfigTypeNames[index] + TEXT( ".ini" );		break;
-			case CL_Game:			pathToConfig = appGameDir() + PATH_SEPARATOR TEXT( "Config" ) PATH_SEPARATOR + GConfigTypeNames[index] + TEXT( ".ini" );										break;
+			case CL_Engine:			pathToConfig = Sys_BaseDir() + PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Config" ) PATH_SEPARATOR + s_ConfigTypeNames[index] + TEXT( ".ini" );		break;
+			case CL_Game:			pathToConfig = Sys_GameDir() + PATH_SEPARATOR TEXT( "Config" ) PATH_SEPARATOR + s_ConfigTypeNames[index] + TEXT( ".ini" );										break;
 			default:
-				LE_LOG( LT_Warning, LC_General, TEXT( "Config layer '0x%X' not supported" ), layer );
+				Warnf( TEXT( "Config layer '0x%X' not supported\n" ), layer );
 				continue;
 				break;
 			}
 
 			// Open file for reading
-			CArchive*				archive = GFileSystem->CreateFileReader( pathToConfig );
+			CArchive*				archive = g_FileSystem->CreateFileReader( pathToConfig );
 			if ( !archive )
 			{
-				LE_LOG( LT_Warning, LC_General, TEXT( "Config layer '%s' not founded" ), pathToConfig.c_str() );
+				Warnf( TEXT( "Config layer '%s' not founded\n" ), pathToConfig.c_str() );
 				continue;
 			}
 
 			// Serialize config
 			config.Serialize( *archive );
 
-			LE_LOG( LT_Log, LC_General, TEXT( "Loaded layer '%s' for config '%s'" ), GConfigLayerNames[layer], GConfigTypeNames[index] );
+			Logf( TEXT( "Loaded layer '%s' for config '%s'\n" ), s_ConfigLayerNames[layer], s_ConfigTypeNames[index] );
 			bSuccessed = true;
 		}
 
 		if ( !bSuccessed )
 		{
-			appErrorf( TEXT( "Config type '%s' not loaded" ), GConfigTypeNames[index] );
+			Sys_Errorf( TEXT( "Config type '%s' not loaded" ), s_ConfigTypeNames[index] );
 		}
 
 		configs[( EConfigType )index] = config;
 	}
 }
 
-/**
- * Serialize
- */
+/*
+==================
+CConfig::Serialize
+==================
+*/
 void CConfig::Serialize( CArchive& InArchive )
 {
 	if ( InArchive.IsLoading() )
@@ -92,7 +99,7 @@ void CConfig::Serialize( CArchive& InArchive )
 
 		if ( jsonDocument.HasParseError() )
 		{		
-			appErrorf( TEXT( "Failed parse config, not correct syntax of JSON. RapidJSON code error %i" ), jsonDocument.GetParseError() );
+			Sys_Errorf( TEXT( "Failed parse config, not correct syntax of JSON. RapidJSON code error %i" ), jsonDocument.GetParseError() );
 		}
 		
 		// Reading all values
@@ -119,7 +126,7 @@ void CConfig::Serialize( CArchive& InArchive )
 			}
 			else
 			{
-				LE_LOG( LT_Warning, LC_General, TEXT( "Member %s in config is not group" ), groupName.c_str() );
+				Warnf( TEXT( "Member %s in config is not group\n" ), groupName.c_str() );
 			}
 		}
 	}
@@ -142,9 +149,11 @@ void CConfig::Serialize( CArchive& InArchive )
 	}
 }
 
-/**
- * Convert value to JSON string
- */
+/*
+==================
+CConfigValue::ToJSON
+==================
+*/
 std::string CConfigValue::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 {
 	std::stringstream	strStream;
@@ -162,9 +171,11 @@ std::string CConfigValue::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 	return strStream.str();
 }
 
-/**
- * Convert object to JSON string
- */
+/*
+==================
+CConfigObject::ToJSON
+==================
+*/
 std::string CConfigObject::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 {
 	std::stringstream	strStream;
@@ -193,9 +204,11 @@ std::string CConfigObject::ToJSON( uint32 InCountTabs /* = 0 */ ) const
 	return strStream.str();
 }
 
-/**
- * Set value from RapidJSON value
- */
+/*
+==================
+CConfigValue::Set
+==================
+*/
 void CConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
 {
 	if ( InValue.IsNull() )
@@ -240,13 +253,15 @@ void CConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* 
 	}
 	else
 	{
-		LE_LOG( LT_Warning, LC_General, TEXT( "Unsupported type of config value in %s" ), InName );
+		Warnf( TEXT( "Unsupported type of config value in %s\n" ), InName );
 	}
 }
 
-/**
- * Set object from RapidJSON value
- */
+/*
+==================
+CConfigObject::Set
+==================
+*/
 void CConfigObject::Set( const rapidjson::Value& InValue, const tchar* InName /* = TEXT( "UNKNOWN" ) */ )
 {
 	std::wstring			objectName = InName;
@@ -261,17 +276,21 @@ void CConfigObject::Set( const rapidjson::Value& InValue, const tchar* InName /*
 	}
 }
 
-/**
- * Set value
- */
+/*
+==================
+CConfigObject::SetValue
+==================
+*/
 void CConfigObject::SetValue( const tchar* InName, const CConfigValue& InValue )
 {
 	values[ InName ] = InValue;
 }
 
-/**
- * Get value
- */
+/*
+==================
+CConfigObject::GetValue
+==================
+*/
 CConfigValue CConfigObject::GetValue( const tchar* InName ) const
 {
 	auto		itValue = values.find( InName );
@@ -283,9 +302,11 @@ CConfigValue CConfigObject::GetValue( const tchar* InName ) const
 	return itValue->second;
 }
 
-/**
- * Copy value
- */
+/*
+==================
+CConfigValue::Copy
+==================
+*/
 void CConfigValue::Copy( const CConfigValue& InCopy )
 {
 	type = InCopy.type;
@@ -302,9 +323,11 @@ void CConfigValue::Copy( const CConfigValue& InCopy )
 	}
 }
 
-/**
- * Clear value
- */
+/*
+==================
+CConfigValue::Clear
+==================
+*/
 void CConfigValue::Clear()
 {
 	if ( !value ) return;

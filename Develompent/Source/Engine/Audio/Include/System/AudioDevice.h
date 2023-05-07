@@ -52,7 +52,7 @@ enum EAudioSourceStatus
  * @param InSampleFormat Sample format
  * @return Return format in OpenAL
  */
-uint32 appSampleFormatToEngine( ESampleFormat InSampleFormat );
+uint32 Sys_SampleFormatToEngine( ESampleFormat InSampleFormat );
 
 /**
  * @ingroup Audio
@@ -61,7 +61,7 @@ uint32 appSampleFormatToEngine( ESampleFormat InSampleFormat );
  * @param InSampleFormat	Sample format
  * @return Return text sampler format
  */
-std::wstring appSampleFormatToText( ESampleFormat InSampleFormat );
+std::wstring Sys_SampleFormatToText( ESampleFormat InSampleFormat );
 
 /**
  * @ingroup Audio
@@ -70,7 +70,7 @@ std::wstring appSampleFormatToText( ESampleFormat InSampleFormat );
  * @param InSampleFormat	Sample format
  * @return Return number bytes for one sample
  */
-uint32 appGetNumSampleBytes( ESampleFormat InSampleFormat );
+uint32 Sys_GetNumSampleBytes( ESampleFormat InSampleFormat );
 
 /**
  * @ingroup Audio
@@ -233,7 +233,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, ESampleFormat& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ESampleFormat& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( byte* ) &InValue, sizeof( ESampleFormat ) );
 	return InArchive;
 }

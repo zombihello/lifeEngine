@@ -3,12 +3,22 @@
 
 IMPLEMENT_CLASS( AELPlayerController )
 
+/*
+==================
+AELPlayerController::AELPlayerController
+==================
+*/
 AELPlayerController::AELPlayerController()
 {
 	bShowMouseCursor	= false;
 	bConstrainYaw		= true;
 }
 
+/*
+==================
+AELPlayerController::SetupInputComponent
+==================
+*/
 void AELPlayerController::SetupInputComponent()
 {
 	// Bind actions
@@ -23,36 +33,71 @@ void AELPlayerController::SetupInputComponent()
 	inputComponent->BindAxis( TEXT( "LookUp" ),			std::bind( &AELPlayerController::LookUp, this, std::placeholders::_1		) );
 }
 
+/*
+==================
+AELPlayerController::ExitFromGame
+==================
+*/
 void AELPlayerController::ExitFromGame()
 {
-	GIsRequestingExit = true;
+	g_IsRequestingExit = true;
 }
 
+/*
+==================
+AELPlayerController::MoveForward
+==================
+*/
 void AELPlayerController::MoveForward( float InValue )
 {
 	character->Walk( character->GetActorForwardVector(), InValue );
 }
 
+/*
+==================
+AELPlayerController::MoveRight
+==================
+*/
 void AELPlayerController::MoveRight( float InValue )
 {
 	character->Walk( character->GetActorRightVector(), InValue );
 }
 
+/*
+==================
+AELPlayerController::Turn
+==================
+*/
 void AELPlayerController::Turn( float InValue )
 {
 	AddYawInput( InValue );
 }
 
+/*
+==================
+AELPlayerController::LookUp
+==================
+*/
 void AELPlayerController::LookUp( float InValue )
 {
 	AddPitchInput( InValue );
 }
 
+/*
+==================
+AELPlayerController::Jump
+==================
+*/
 void AELPlayerController::Jump()
 {
 	character->Jump();
 }
 
+/*
+==================
+AELPlayerController::StopJump
+==================
+*/
 void AELPlayerController::StopJump()
 {
 	character->StopJump();

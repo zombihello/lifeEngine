@@ -4,14 +4,24 @@
 
 IMPLEMENT_CLASS( CArrowComponent )
 
+/*
+==================
+CArrowComponent::CArrowComponent
+==================
+*/
 CArrowComponent::CArrowComponent()
 	: length( 100.f )
 {}
 
+/*
+==================
+CArrowComponent::AddToDrawList
+==================
+*/
 void CArrowComponent::AddToDrawList( const class CSceneView& InSceneView )
 {
 #if WITH_EDITOR
-	CScene*		scene			= ( CScene* )GWorld->GetScene();
+	CScene*		scene			= ( CScene* )g_World->GetScene();
 	float		oneThirdLength	= length / 10.f;
 	Vector		direction		= GetComponentForwardVector();
 

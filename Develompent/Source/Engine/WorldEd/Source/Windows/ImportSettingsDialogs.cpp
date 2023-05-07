@@ -2,7 +2,7 @@
 #include "ImGUI/imgui_internal.h"
 
 /** Table names of axis up */
-static const achar* GAxisUpNames[] =
+static const achar* s_AxisUpNames[] =
 {
 	"+X",	// AU_PlusX
 	"-X",	// AU_MinusX
@@ -11,14 +11,24 @@ static const achar* GAxisUpNames[] =
 	"+Z",	// AU_PlusZ
 	"-Z"	// AU_MinusZ
 };
-static_assert( ARRAY_COUNT( GAxisUpNames ) == CStaticMeshImportSettingsDialog::AU_Num, "Need full init GAxisUpNames array" );
+static_assert( ARRAY_COUNT( s_AxisUpNames ) == CStaticMeshImportSettingsDialog::AU_Num, "Need full init s_AxisUpNames array" );
 
+/*
+==================
+CStaticMeshImportSettingsDialog::CStaticMeshImportSettingsDialog
+==================
+*/
 CStaticMeshImportSettingsDialog::CStaticMeshImportSettingsDialog()
 	: CImGUIPopup( TEXT( "Static Mesh Import Settings" ) )
 {
 	SetSize( Vector2D( 125.f, 700.f ) );
 }
 
+/*
+==================
+CStaticMeshImportSettingsDialog::OnTick
+==================
+*/
 void CStaticMeshImportSettingsDialog::OnTick()
 {
 	// Mesh section
@@ -49,7 +59,7 @@ void CStaticMeshImportSettingsDialog::OnTick()
 
 			ImGui::NextColumn();
 			int32	axisUp = importSettings.axisUp;
-			if ( ImGui::Combo( "##AxisUp", &axisUp, GAxisUpNames, ARRAY_COUNT( GAxisUpNames ) ) )
+			if ( ImGui::Combo( "##AxisUp", &axisUp, s_AxisUpNames, ARRAY_COUNT( s_AxisUpNames ) ) )
 			{
 				importSettings.axisUp = ( EAxisUp )axisUp;
 			}

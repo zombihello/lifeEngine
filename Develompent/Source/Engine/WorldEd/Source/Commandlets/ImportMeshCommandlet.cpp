@@ -17,6 +17,11 @@
 
 IMPLEMENT_CLASS( CImportMeshCommandlet )
 
+/*
+==================
+CImportMeshCommandlet::Main
+==================
+*/
 bool CImportMeshCommandlet::Main( const CCommandLine& InCommandLine )
 {
 	std::wstring			srcFilename;
@@ -31,13 +36,13 @@ bool CImportMeshCommandlet::Main( const CCommandLine& InCommandLine )
 	}
 
 	// If source and destination files is empty - this error
-	checkMsg( !srcFilename.empty() || !dstFilename.empty(), TEXT( "Not entered source file name and destination file name" ) );
+	AssertMsg( !srcFilename.empty() || !dstFilename.empty(), TEXT( "Not entered source file name and destination file name" ) );
 
 	// If name mesh not seted - use name from srcFilename
 	if ( nameMesh.empty() )
 	{
 		nameMesh = srcFilename;
-		LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Mesh name is not specified, by default it is assigned %s" ), srcFilename.c_str() );
+		Warnf( TEXT( "Mesh name is not specified, by default it is assigned %s\n" ), srcFilename.c_str() );
 	}
 
 	// Convert static mesh
@@ -47,11 +52,16 @@ bool CImportMeshCommandlet::Main( const CCommandLine& InCommandLine )
 		return false;
 	}
 
-	PackageRef_t		package = GPackageManager->LoadPackage( dstFilename, true );
+	PackageRef_t		package = g_PackageManager->LoadPackage( dstFilename, true );
 	package->Add( TAssetHandle<CStaticMesh>( staticMesh, MakeSharedPtr<SAssetReference>( AT_StaticMesh, staticMesh->GetGUID() ) ) );
 	return package->Save( dstFilename );
 }
 
+/*
+==================
+CImportMeshCommandlet::ConvertStaticMesh
+==================
+*/
 TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wstring& InPath, const std::wstring& InAssetName )
 {
 	// Loading mesh with help Assimp
@@ -69,7 +79,7 @@ TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	ProcessNode( aiScene->mRootNode, aiScene, meshes );
 	if ( meshes.empty() )
 	{
-		LE_LOG( LT_Error, LC_Commandlet, TEXT( "In file not found meshes" ) );
+		Errorf( TEXT( "In file not found meshes\n" ) );
 		aiImport.FreeScene();
 		return nullptr;
 	}
@@ -84,7 +94,7 @@ TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	for ( auto itRoot = meshes.begin(), itRootEnd = meshes.end(); itRoot != itRootEnd; ++itRoot )
 	{
 		SStaticMeshSurface							surface;
-		appMemzero( &surface, sizeof( SStaticMeshSurface ) );
+		Sys_Memzero( &surface, sizeof( SStaticMeshSurface ) );
 
 		surface.firstIndex = indeces.size();
 		surface.materialID = materials.size();
@@ -94,7 +104,7 @@ TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wst
 			std::vector< SStaticMeshVertexType >	vertexBuffer;
 			SStaticMeshVertexType					vertex;
 			aiMesh*									mesh = ( *itMesh ).mesh;
-			appMemzero( &vertex, sizeof( SStaticMeshVertexType ) );
+			Sys_Memzero( &vertex, sizeof( SStaticMeshVertexType ) );
 
 			// Prepare the vertex buffer.
 			// If the vertices of the mesh do not fit into the buffer, then
@@ -175,11 +185,11 @@ TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wst
 		// We process material
 		if ( itRoot->first < aiScene->mNumMaterials )
 		{
-			materials.push_back( GEngine->GetDefaultMaterial() );
+			materials.push_back( g_Engine->GetDefaultMaterial() );
 		}
 		else
 		{
-			LE_LOG( LT_Warning, LC_Commandlet, TEXT( "Material with id %i large. Surface not created" ), itRoot->first );
+			Warnf( TEXT( "Material with id %i large. Surface not created\n" ), itRoot->first );
 			continue;
 		}
 
@@ -197,6 +207,11 @@ TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	return staticMeshRef;
 }
 
+/*
+==================
+CImportMeshCommandlet::ProcessNode
+==================
+*/
 void CImportMeshCommandlet::ProcessNode( aiNode* InNode, const aiScene* InScene, AiMeshesMap_t& OutMeshes )
 {
 	for ( uint32 index = 0; index < InNode->mNumMeshes; ++index )

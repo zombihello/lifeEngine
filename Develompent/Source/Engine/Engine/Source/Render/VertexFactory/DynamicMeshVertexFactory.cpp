@@ -7,8 +7,13 @@ IMPLEMENT_VERTEX_FACTORY_TYPE( CDynamicMeshVertexFactory, TEXT( "DynamicMeshVert
 //
 // GLOBALS
 //
-TGlobalResource< CDynamicMeshVertexDeclaration >			GDynamicMeshVertexDeclaration;
+TGlobalResource< CDynamicMeshVertexDeclaration >			g_DynamicMeshVertexDeclaration;
 
+/*
+==================
+CDynamicMeshVertexDeclaration::InitRHI
+==================
+*/
 void CDynamicMeshVertexDeclaration::InitRHI()
 {
 	VertexDeclarationElementList_t		vertexDeclElementList =
@@ -20,24 +25,44 @@ void CDynamicMeshVertexDeclaration::InitRHI()
 		SVertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( SDynamicMeshVertexType ), STRUCT_OFFSET( SDynamicMeshVertexType, binormal ),    VET_Float4, VEU_Binormal, 0 ),
 		SVertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( SDynamicMeshVertexType ), STRUCT_OFFSET( SDynamicMeshVertexType, color ),		VET_Float4, VEU_Color, 0 )
 	};
-	vertexDeclarationRHI = GRHI->CreateVertexDeclaration( vertexDeclElementList );
+	vertexDeclarationRHI = g_RHI->CreateVertexDeclaration( vertexDeclElementList );
 }
 
+/*
+==================
+CDynamicMeshVertexDeclaration::ReleaseRHI
+==================
+*/
 void CDynamicMeshVertexDeclaration::ReleaseRHI()
 {
     vertexDeclarationRHI.SafeRelease();
 }
 
+/*
+==================
+CDynamicMeshVertexFactory::InitRHI
+==================
+*/
 void CDynamicMeshVertexFactory::InitRHI()
 {
-	InitDeclaration( GDynamicMeshVertexDeclaration.GetVertexDeclarationRHI() );
+	InitDeclaration( g_DynamicMeshVertexDeclaration.GetVertexDeclarationRHI() );
 }
 
+/*
+==================
+CDynamicMeshVertexFactory::GetTypeHash
+==================
+*/
 uint64 CDynamicMeshVertexFactory::GetTypeHash() const
 {
     return staticType.GetHash();
 }
 
+/*
+==================
+CDynamicMeshVertexFactory::ConstructShaderParameters
+==================
+*/
 CVertexFactoryShaderParameters* CDynamicMeshVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )
 {
     return InShaderFrequency == SF_Vertex ? new CGeneralVertexShaderParameters( staticType.SupportsInstancing() ) : nullptr;

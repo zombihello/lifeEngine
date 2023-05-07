@@ -15,133 +15,133 @@
  * @ingroup Core
  * @brief Logger
  */
-extern class CBaseLogger*			GLog;
+extern class CBaseLogger*			g_Log;
 
 /**
  * @ingroup Core
  * @brief File system
  */
-extern class CBaseFileSystem*		GFileSystem;
+extern class CBaseFileSystem*		g_FileSystem;
 
 /**
  * @ingroup Core
  * @brief Window
  */
-extern class CBaseWindow*			GWindow;
+extern class CBaseWindow*			g_Window;
 
 /**
  * @ingroup Core
  * @brief Config manager
  */
-extern class CConfigManager			GConfig;
+extern class CConfigManager			g_Config;
 
 /**
  * @ingroup Core
  * @brief Indicates that MainLoop() should be exited at the end of the current iteration
  */
-extern bool							GIsRequestingExit;
+extern bool							g_IsRequestingExit;
 
 #if WITH_EDITOR
 /**
  * @ingroup Core
  * @brief Whether engine was launched for game
  */
-extern bool							GIsGame;
+extern bool							g_IsGame;
 
 /**
  * @ingroup Core
  * Whether engine was launched for editing
  */
-extern bool							GIsEditor;
+extern bool							g_IsEditor;
 
 /**
  * @ingroup Core
  * Whether engine was launched for commandlet
  */
-extern bool							GIsCommandlet;
+extern bool							g_IsCommandlet;
 
 /**
  * @ingroup Core
  * Whether engine was launched for cooked packages
  */
-extern bool							GIsCooker;
+extern bool							g_IsCooker;
 
 /**
  * @ingroup Core
  * Whether we should pause before exiting. Used by commandlets
  */
-extern bool							GShouldPauseBeforeExit;
+extern bool							g_ShouldPauseBeforeExit;
 #else
-#define								GIsGame 1
-#define								GIsEditor 0
-#define								GIsCommandlet 0
-#define								GIsCooker 0
+#define								g_IsGame 1
+#define								g_IsEditor 0
+#define								g_IsCommandlet 0
+#define								g_IsCooker 0
 #endif // WITH_EDITOR
 
 /**
  * @ingroup Core
  * Seconds per CPU cycle for this PC 
  */
-extern double						GSecondsPerCycle;
+extern double						g_SecondsPerCycle;
 
 /**
 * @ingroup Core
 * Time at which appSeconds() was first initialized (very early on)
 */
-extern double						GStartTime;
+extern double						g_StartTime;
 
 /**
  * @ingroup Core
  * Current delta time in seconds
  */
-extern double						GDeltaTime;
+extern double						g_DeltaTime;
 
 /**
  * @ingroup Core
  * Current time in seconds
  */
-extern double						GCurrentTime;
+extern double						g_CurrentTime;
 
 /**
  * @ingroup Core
  * Last time in seconds
  */
-extern double						GLastTime;
+extern double						g_LastTime;
 
 /**
  * @ingroup Core
  * Package manager
  */
-extern class CPackageManager*		GPackageManager;
+extern class CPackageManager*		g_PackageManager;
 
 /**
  * @ingroup Core
  * Table of contents
  */
-extern class CTableOfContets		GTableOfContents;
+extern class CTableOfContets		g_TableOfContents;
 
 /**
  * @ingroup Core
  * Game name
  */
-extern std::wstring					GGameName;
+extern std::wstring					g_GameName;
 
 /**
  * @ingroup Core
  * Platform type
  */
-extern enum EPlatformType			GPlatform;
+extern enum EPlatformType			g_Platform;
 
 /**
  * @ingroup Core
  * @brief Command line
  */
-extern class CCommandLine			GCommandLine;
+extern class CCommandLine			g_CommandLine;
 
 /**
  * @ingroup Core
  * @brief Asset factory
  */
-extern class CAssetFactory			GAssetFactory;
+extern class CAssetFactory			g_AssetFactory;
 
 #endif // !COREGLOBALS_H

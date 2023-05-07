@@ -1,12 +1,22 @@
 #include "Math/Math.h"
 #include "Render/IcosphereMeshBuilder.h"
 
+/*
+==================
+CIcosphereMeshBuilder::CIcosphereMeshBuilder
+==================
+*/
 CIcosphereMeshBuilder::CIcosphereMeshBuilder()
 	: subdivision( 3 )
 	, radius( 1.f )
 	, numPrimitives( 0 )
 {}
 
+/*
+==================
+CIcosphereMeshBuilder::Build
+==================
+*/
 void CIcosphereMeshBuilder::Build()
 {
 	const float sStep	= 0.5;         // Horizontal texture step
@@ -189,6 +199,11 @@ void CIcosphereMeshBuilder::Build()
 	numPrimitives = indeces.size() / 3;
 }
 
+/*
+==================
+CIcosphereMeshBuilder::SubdivideVertices
+==================
+*/
 void CIcosphereMeshBuilder::SubdivideVertices()
 {
 	std::vector<uint32>				tmpIndices;
@@ -235,7 +250,7 @@ void CIcosphereMeshBuilder::SubdivideVertices()
 			ComputeVertexNormal( newV3, newN3 );
 
 			// Add new vertices to arrays
-			// It will check if it is shared/non-shared and return index
+			// It will Assert if it is shared/non-shared and return index
 			newI1 = AddSubVertex( newV1, newT1, newN1 );
 			newI2 = AddSubVertex( newV2, newT2, newN2 );
 			newI3 = AddSubVertex( newV3, newT3, newN3 );
@@ -260,6 +275,11 @@ void CIcosphereMeshBuilder::SubdivideVertices()
 	}
 }
 
+/*
+==================
+CIcosphereMeshBuilder::AddSubVertex
+==================
+*/
 uint32 CIcosphereMeshBuilder::AddSubVertex( const Vector4D& InVertex, const Vector2D& InTexCoord, const Vector4D& InNormal )
 {
 	uint32		index = 0;     // Return value;
@@ -292,6 +312,11 @@ uint32 CIcosphereMeshBuilder::AddSubVertex( const Vector4D& InVertex, const Vect
 	return index;
 }
 
+/*
+==================
+CIcosphereMeshBuilder::ComputeIcosahedronVerteces
+==================
+*/
 std::vector<Vector4D> CIcosphereMeshBuilder::ComputeIcosahedronVerteces()
 {
 	const float		hAngle = PI / 180.f * 72.f;				// 72 degree = 360 / 5
@@ -324,6 +349,11 @@ std::vector<Vector4D> CIcosphereMeshBuilder::ComputeIcosahedronVerteces()
 	return vertices;
 }
 
+/*
+==================
+CIcosphereMeshBuilder::ComputeFaceNormal
+==================
+*/
 void CIcosphereMeshBuilder::ComputeFaceNormal( const Vector4D& InVert0, const Vector4D& InVert1, const Vector4D& InVert2, Vector4D& OutNormal )
 {
 	// Default return value (0, 0, 0)

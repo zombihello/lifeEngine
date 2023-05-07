@@ -1,5 +1,10 @@
 #include "Render/GlobalConstantsHelper.h"
 
+/*
+==================
+SetGlobalConstants
+==================
+*/
 void SetGlobalConstants( SGlobalConstantBufferContents& OutGlobalContents, const CSceneView& InSceneView, const Vector4D& InScreenAndBufferSize )
 {
 	OutGlobalContents.viewMatrix					= InSceneView.GetViewMatrix();

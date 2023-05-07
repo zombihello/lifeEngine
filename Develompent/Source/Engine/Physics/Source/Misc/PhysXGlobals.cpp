@@ -6,14 +6,14 @@
 // GLOBALS
 // -------------
 
-physx::PxFoundation*			GPhysXFoundation		= nullptr;
-physx::PxPhysics*				GPhysXSDK				= nullptr;
-physx::PxAllocatorCallback*		GPhysXAllocator			= nullptr;
-physx::PxErrorCallback*			GPhysXError				= nullptr;
+physx::PxFoundation*			g_PhysXFoundation		= nullptr;
+physx::PxPhysics*				g_PhysXSDK				= nullptr;
+physx::PxAllocatorCallback*		g_PhysXAllocator			= nullptr;
+physx::PxErrorCallback*			g_PhysXError				= nullptr;
 
 #if !SHIPPING_BUILD
-physx::PxPvd*					GPhysXVisualDebugger	= nullptr;
+physx::PxPvd*					g_PhysXVisualDebugger	= nullptr;
 #endif // !SHIPPING_BUILD
 
-CPhysXScene						GPhysicsScene;
+CPhysXScene						g_PhysicsScene;
 #endif // WITH_PHYSX

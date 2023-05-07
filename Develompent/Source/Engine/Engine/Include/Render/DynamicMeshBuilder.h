@@ -98,7 +98,7 @@ public:
 	template<typename TDrawingPolicyType>
 	FORCEINLINE void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, const class CSceneView& InSceneView ) const
 	{
-		checkMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call CDynamicMeshBuilder::Build" ) );
+		AssertMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call CDynamicMeshBuilder::Build" ) );
 
 		TDrawingPolicyType		drawingPolicy;
 		drawingPolicy.Init( vertexFactory, InMaterial );

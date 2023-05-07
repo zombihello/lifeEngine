@@ -46,7 +46,7 @@ public:
 		if ( bRenderingThreadObject )
 		{
 			// Make sure that only the rendering thread is attempting remove items from the 'renderingThreadTickableObjects' list
-			checkMsg( IsInRenderingThread(), TEXT( "Game thread attempted remove an object from the RenderingThreadTickableObjects array" ) );
+			AssertMsg( IsInRenderingThread(), TEXT( "Game thread attempted remove an object from the RenderingThreadTickableObjects array" ) );
 			for ( uint32 index = 0, count = renderingThreadTickableObjects.size(); index < count; ++index )
 			{
 				if ( renderingThreadTickableObjects[ index ] == this )
@@ -59,7 +59,7 @@ public:
 		else
 		{
 			// Make sure that only the game thread is attempting remove items from the 'tickableObjects' list
-			checkMsg( IsInGameThread(), TEXT( "Rendering thread attempted remove an object from the TickableObjects array" ) );
+			AssertMsg( IsInGameThread(), TEXT( "Rendering thread attempted remove an object from the TickableObjects array" ) );
 			for ( uint32 index = 0, count = tickableObjects.size(); index < count; ++index )
 			{
 				if ( tickableObjects[ index ] == this )
@@ -82,13 +82,13 @@ public:
 		if ( InIsRenderingThreadObject )
 		{
 			// Make sure that only the rendering thread is attempting to add items to the 'renderingThreadTickableObjects' list
-			checkMsg( IsInRenderingThread(), TEXT( "Game thread attempted to register an object in the RenderingThreadTickableObjects array" ) );
+			AssertMsg( IsInRenderingThread(), TEXT( "Game thread attempted to register an object in the RenderingThreadTickableObjects array" ) );
 			renderingThreadTickableObjects.push_back( this );
 		}
 		else
 		{
 			// Make sure that only the game thread is attempting to add items to the 'tickableObjects' list
-			checkMsg( IsInGameThread(), TEXT( "Rendering thread attempted to register an object in the TickableObjects array" ) );
+			AssertMsg( IsInGameThread(), TEXT( "Rendering thread attempted to register an object in the TickableObjects array" ) );
 			tickableObjects.push_back( this );
 		}
 	}

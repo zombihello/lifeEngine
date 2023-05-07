@@ -7,11 +7,21 @@
 #include "Render/SceneRendering.h"
 #include "Render/Scene.h"
 
+/*
+==================
+CDynamicMeshBuilder::CDynamicMeshBuilder
+==================
+*/
 CDynamicMeshBuilder::CDynamicMeshBuilder()
 	: numPrimitives( 0 )
 	, vertexFactory( new CDynamicMeshVertexFactory() )
 {}
 
+/*
+==================
+CDynamicMeshBuilder::InitRHI
+==================
+*/
 void CDynamicMeshBuilder::InitRHI()
 {
 	CScopeLock		scopeLock( &readWriteCS );
@@ -20,7 +30,7 @@ void CDynamicMeshBuilder::InitRHI()
 	uint32			numVerteces = verteces.size();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "DynamicMesh" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "DynamicMesh" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
 		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SDynamicMeshVertexType ) } );		// 0 stream slot
@@ -31,7 +41,7 @@ void CDynamicMeshBuilder::InitRHI()
 	uint32			numIndeces = indeces.size();
 	if ( numIndeces > 0 )
 	{
-		indexBufferRHI = GRHI->CreateIndexBuffer( TEXT( "DynamicMesh" ), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
+		indexBufferRHI = g_RHI->CreateIndexBuffer( TEXT( "DynamicMesh" ), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
 	}
 
 	// Free source data
@@ -39,6 +49,11 @@ void CDynamicMeshBuilder::InitRHI()
 	indeces.clear();
 }
 
+/*
+==================
+CDynamicMeshBuilder::ReleaseRHI
+==================
+*/
 void CDynamicMeshBuilder::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
@@ -46,9 +61,14 @@ void CDynamicMeshBuilder::ReleaseRHI()
 	vertexFactory->ReleaseResource();
 }
 
+/*
+==================
+CDynamicMeshBuilder::Draw
+==================
+*/
 void CDynamicMeshBuilder::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const Matrix& InLocalToWorld, const TAssetHandle<CMaterial>& InMaterial, CMeshDrawingPolicy& InDrawingPolicy, const class CSceneView& InSceneView ) const
 {
-	checkMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call CDynamicMeshBuilder::Build" ) );
+	AssertMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call CDynamicMeshBuilder::Build" ) );
 	
 	// Init mesh batch
 	SMeshBatch		meshBatch;
@@ -73,6 +93,6 @@ void CDynamicMeshBuilder::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI,
 	}
 	else
 	{
-		checkMsg( false, TEXT( "Need init drawing policy before drawing" ) );
+		AssertMsg( false, TEXT( "Need init drawing policy before drawing" ) );
 	}
 }

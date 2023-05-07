@@ -53,7 +53,7 @@ public:
 	 */
 	FORCEINLINE VertexDeclarationRHIRef_t GetVertexDeclarationRHI( ELightType InLightType )
 	{
-		check( InLightType != LT_Unknown );
+		Assert( InLightType != LT_Unknown );
 		if ( !vertexDeclarationRHI[InLightType] )
 		{
 			InitRHI();
@@ -84,7 +84,7 @@ private:
  * @ingroup Engine
  * @brief Global resource of light vertex declaration
  */
-extern TGlobalResource<CLightVertexDeclaration>			GLightVertexDeclaration;
+extern TGlobalResource<CLightVertexDeclaration>			g_LightVertexDeclaration;
 
 /**
  * @ingroup Engine

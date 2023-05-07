@@ -8,6 +8,11 @@
 
 IMPLEMENT_CLASS( AELPlayerCharacter )
 
+/*
+==================
+AELPlayerCharacter::AELPlayerCharacter
+==================
+*/
 AELPlayerCharacter::AELPlayerCharacter()
 {
 	// Create camera component
@@ -17,19 +22,29 @@ AELPlayerCharacter::AELPlayerCharacter()
 	cameraComponent->SetFieldOfView( 90.f );
 }
 
+/*
+==================
+AELPlayerCharacter::~AELPlayerCharacter
+==================
+*/
 AELPlayerCharacter::~AELPlayerCharacter()
 {
 	// Deactive player camera if need
 	if ( cameraComponent->IsActive() )
 	{
-		GCameraManager->SetActiveCamera( nullptr );
+		g_CameraManager->SetActiveCamera( nullptr );
 	}
 }
 
+/*
+==================
+AELPlayerCharacter::BeginPlay
+==================
+*/
 void AELPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// Set player camera to active
-	GCameraManager->SetActiveCamera( cameraComponent );
+	g_CameraManager->SetActiveCamera( cameraComponent );
 }

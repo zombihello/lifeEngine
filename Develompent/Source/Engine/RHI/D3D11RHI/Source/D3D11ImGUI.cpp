@@ -637,15 +637,15 @@ static void ImGui_ImplDX11_CreateWindow(ImGuiViewport* viewport)
     public:
         static void Execute( ImGuiViewport* InViewport )
         {
-            check( InViewport );
+            Assert( InViewport );
 
 			// PlatformHandleRaw should always be a HWND, whereas PlatformHandle might be a higher-level handle (e.g. GLFWWindow*, SDL_Window*).
 			// Some backend will leave PlatformHandleRaw NULL, in which case we assume PlatformHandle will contain the HWND.
             HWND        windowHandle = InViewport->PlatformHandleRaw ? ( HWND )InViewport->PlatformHandleRaw : ( HWND )InViewport->PlatformHandle;
-            check( windowHandle );
+            Assert( windowHandle );
 
-            InViewport->ViewportRHI = GRHI->CreateViewport( windowHandle, ( uint32 )InViewport->Size.x, ( uint32 )InViewport->Size.y );
-            check( InViewport->ViewportRHI );
+            InViewport->ViewportRHI = g_RHI->CreateViewport( windowHandle, ( uint32 )InViewport->Size.x, ( uint32 )InViewport->Size.y );
+            Assert( InViewport->ViewportRHI );
         }
     };
 
@@ -668,7 +668,7 @@ static void ImGui_ImplDX11_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
     public:
         static void Execute( ImGuiViewport* InViewport, ImVec2 InSize )
         {
-            check( InViewport && InViewport->ViewportRHI.IsValid() );
+            Assert( InViewport && InViewport->ViewportRHI.IsValid() );
             InViewport->ViewportRHI->Resize( ( uint32 )InSize.x, ( uint32 )InSize.y );
         }
     };

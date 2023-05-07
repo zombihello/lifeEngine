@@ -6,21 +6,26 @@
 #include "System/PhysicsEngine.h"
 #include "PhysicsInterfaceBox2D.h"
 
-static uint32 GCollisionChannelBits[] =
+static uint32 s_CollisionChannelBits[] =
 {
 	0x0001,			// CC_WorldStatic
 	0x0002,			// CC_Visibility
 	0x0004,			// CC_Character
 };
-static_assert( ARRAY_COUNT( GCollisionChannelBits ) == CC_Max, "Need full init GCollisionChannelBits array" );
+static_assert( ARRAY_COUNT( s_CollisionChannelBits ) == CC_Max, "Need full init s_CollisionChannelBits array" );
 
+/*
+==================
+SPhysicsActorHandleBox2D::OnMaterialUpdated
+==================
+*/
 void SPhysicsActorHandleBox2D::OnMaterialUpdated( const TSharedPtr<CPhysicsMaterial>& InPhysMaterial )
 {
 	for ( auto itFixture = fixtureMap.begin(), itFixtureEnd = fixtureMap.end(); itFixture != itFixtureEnd; ++itFixture )
 	{
 		b2Fixture*						bx2Fixture = itFixture->second;
 		SPhysicsShapeHandleBox2D*		shapeHandle = ( SPhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
-		check( shapeHandle );
+		Assert( shapeHandle );
 
 		if ( shapeHandle->physMaterial != InPhysMaterial )
 		{
@@ -33,6 +38,11 @@ void SPhysicsActorHandleBox2D::OnMaterialUpdated( const TSharedPtr<CPhysicsMater
 	}
 }
 
+/*
+==================
+SPhysicsActorHandleBox2D::OnMaterialDestroyed
+==================
+*/
 void SPhysicsActorHandleBox2D::OnMaterialDestroyed( const TSharedPtr<CPhysicsMaterial>& InPhysMaterial )
 {
 	float	defaultDensity			= 0.f;
@@ -40,7 +50,7 @@ void SPhysicsActorHandleBox2D::OnMaterialDestroyed( const TSharedPtr<CPhysicsMat
 	float	defaultDynamicFriction	= 0.f;
 	float	defaultRestitution		= 0.f;
 	
-	TAssetHandle<CPhysicsMaterial>	defaultPhysMaterial		= GPhysicsEngine.GetDefaultPhysMaterial();
+	TAssetHandle<CPhysicsMaterial>	defaultPhysMaterial		= g_PhysicsEngine.GetDefaultPhysMaterial();
 	TSharedPtr<CPhysicsMaterial>	defaultPhysMaterialRef	= defaultPhysMaterial.ToSharedPtr();
 	if ( defaultPhysMaterialRef )
 	{
@@ -54,7 +64,7 @@ void SPhysicsActorHandleBox2D::OnMaterialDestroyed( const TSharedPtr<CPhysicsMat
 	{
 		b2Fixture*					bx2Fixture = itFixture->second;
 		SPhysicsShapeHandleBox2D*	shapeHandle = ( SPhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
-		check( shapeHandle );
+		Assert( shapeHandle );
 
 		if ( shapeHandle->physMaterial != InPhysMaterial )
 		{
@@ -68,14 +78,29 @@ void SPhysicsActorHandleBox2D::OnMaterialDestroyed( const TSharedPtr<CPhysicsMat
 	}
 }
 
+/*
+==================
+SPhysicsInterfaceBox2D::Init
+==================
+*/
 void SPhysicsInterfaceBox2D::Init()
 {
-	LE_LOG( LT_Log, LC_Init, TEXT( "Box2D version: %i.%i.%i" ), b2_version.major, b2_version.minor, b2_version.revision );
+	Logf( TEXT( "Box2D version: %i.%i.%i\n" ), b2_version.major, b2_version.minor, b2_version.revision );
 }
 
+/*
+==================
+SPhysicsInterfaceBox2D::Shutdown
+==================
+*/
 void SPhysicsInterfaceBox2D::Shutdown()
 {}
 
+/*
+==================
+SPhysicsInterfaceBox2D::CreateMaterial
+==================
+*/
 SPhysicsMaterialHandleBox2D SPhysicsInterfaceBox2D::CreateMaterial( const TSharedPtr<class CPhysicsMaterial>& InPhysMaterial )
 {
 	SPhysicsMaterialHandleBox2D		materialHandle;
@@ -83,6 +108,11 @@ SPhysicsMaterialHandleBox2D SPhysicsInterfaceBox2D::CreateMaterial( const TShare
 	return materialHandle;
 }
 
+/*
+==================
+SPhysicsInterfaceBox2D::CreateShapeGeometry
+==================
+*/
 SPhysicsShapeHandleBox2D SPhysicsInterfaceBox2D::CreateShapeGeometry( const struct SPhysicsBoxGeometry& InBoxGeometry )
 {
 	SPhysicsShapeHandleBox2D		shapeHandle;
@@ -112,6 +142,11 @@ SPhysicsShapeHandleBox2D SPhysicsInterfaceBox2D::CreateShapeGeometry( const stru
 	return shapeHandle;
 }
 
+/*
+==================
+SPhysicsInterfaceBox2D::CreateActor
+==================
+*/
 SPhysicsActorHandleBox2D SPhysicsInterfaceBox2D::CreateActor( const SActorCreationParams& InParams )
 {
 	PhysicsActorHandle_t			actorHandle;
@@ -126,7 +161,7 @@ SPhysicsActorHandleBox2D SPhysicsInterfaceBox2D::CreateActor( const SActorCreati
 	bx2BodyDef.fixedRotation	= LE2BLockFlags( InParams.lockFlags );
 	bx2BodyDef.enabled			= InParams.bSimulatePhysics;
 	bx2BodyDef.gravityScale		= InParams.bEnableGravity ? 1.f : 0.f;
-	actorHandle.bx2Body			= GPhysicsScene.GetBox2DWorld()->CreateBody( &bx2BodyDef );
+	actorHandle.bx2Body			= g_PhysicsScene.GetBox2DWorld()->CreateBody( &bx2BodyDef );
 
 	b2MassData			bx2MassData;
 	bx2MassData.mass	= InParams.mass;
@@ -137,9 +172,14 @@ SPhysicsActorHandleBox2D SPhysicsInterfaceBox2D::CreateActor( const SActorCreati
 	return actorHandle;
 }
 
+/*
+==================
+SPhysicsInterfaceBox2D::AttachShape
+==================
+*/
 void SPhysicsInterfaceBox2D::AttachShape( SPhysicsActorHandleBox2D& InActorHandle, const SPhysicsShapeHandleBox2D& InShapeHandle )
 {
-	check( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
+	Assert( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
 
 	// If we already attach this shape - exit from function
 	{
@@ -154,8 +194,8 @@ void SPhysicsInterfaceBox2D::AttachShape( SPhysicsActorHandleBox2D& InActorHandl
 	TSharedPtr<CPhysicsMaterial>	physMaterialRef = InShapeHandle.physMaterial.ToSharedPtr();
 	if ( !physMaterialRef )
 	{
-		physMaterialRef		= GPhysicsEngine.GetDefaultPhysMaterial().ToSharedPtr();
-		check( physMaterialRef );
+		physMaterialRef		= g_PhysicsEngine.GetDefaultPhysMaterial().ToSharedPtr();
+		Assert( physMaterialRef );
 	}
 
 	b2FixtureUserData			bx2FixtureUserData;
@@ -167,7 +207,7 @@ void SPhysicsInterfaceBox2D::AttachShape( SPhysicsActorHandleBox2D& InActorHandl
 	bx2FixtureDef.density				= physMaterialRef->GetDensity();
 	bx2FixtureDef.restitution			= physMaterialRef->GetRestitution();
 	bx2FixtureDef.userData				= bx2FixtureUserData;
-	bx2FixtureDef.filter.categoryBits	= GCollisionChannelBits[ InShapeHandle.collisionProfile->objectType ];
+	bx2FixtureDef.filter.categoryBits	= s_CollisionChannelBits[ InShapeHandle.collisionProfile->objectType ];
 	bx2FixtureDef.filter.maskBits		= 0x0;
 	for ( uint32 indexCollisionChannel = 0; indexCollisionChannel < CC_Max; ++indexCollisionChannel )
 	{
@@ -176,7 +216,7 @@ void SPhysicsInterfaceBox2D::AttachShape( SPhysicsActorHandleBox2D& InActorHandl
 			continue;
 		}
 
-		bx2FixtureDef.filter.maskBits |= GCollisionChannelBits[ indexCollisionChannel ];
+		bx2FixtureDef.filter.maskBits |= s_CollisionChannelBits[ indexCollisionChannel ];
 	}
 
 	b2Fixture*		bx2Fixture = InActorHandle.bx2Body->CreateFixture( &bx2FixtureDef );
@@ -185,9 +225,14 @@ void SPhysicsInterfaceBox2D::AttachShape( SPhysicsActorHandleBox2D& InActorHandl
 	InActorHandle.physicsMaterialDestroyedHandle	= physMaterialRef->OnPhysicsMaterialDestroyed().Add(	std::bind( &SPhysicsActorHandleBox2D::OnMaterialDestroyed, &InActorHandle, std::placeholders::_1 )	);
 }
 
+/*
+==================
+SPhysicsInterfaceBox2D::DetachShape
+==================
+*/
 void SPhysicsInterfaceBox2D::DetachShape( SPhysicsActorHandleBox2D& InActorHandle, const SPhysicsShapeHandleBox2D& InShapeHandle )
 {
-	check( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
+	Assert( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
 
 	// Remove fixture
 	auto		itFixture = InActorHandle.fixtureMap.find( InShapeHandle.bx2Shape );

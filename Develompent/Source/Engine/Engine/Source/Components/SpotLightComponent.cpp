@@ -2,6 +2,11 @@
 
 IMPLEMENT_CLASS( CSpotLightComponent )
 
+/*
+==================
+CSpotLightComponent::CSpotLightComponent
+==================
+*/
 CSpotLightComponent::CSpotLightComponent()
 	: bNeedUpdateCutoff( true )
 	, radius( 850.f )
@@ -11,6 +16,11 @@ CSpotLightComponent::CSpotLightComponent()
 	intensivity = 100400.f;
 }
 
+/*
+==================
+CSpotLightComponent::GetLightType
+==================
+*/
 ELightType CSpotLightComponent::GetLightType() const
 {
 	return LT_Spot;

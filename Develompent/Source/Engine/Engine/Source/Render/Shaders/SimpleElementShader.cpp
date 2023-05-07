@@ -5,6 +5,11 @@ IMPLEMENT_SHADER_TYPE(, CSimpleElementVertexShader, TEXT( "SimpleElementVertexSh
 IMPLEMENT_SHADER_TYPE(, CSimpleElementPixelShader, TEXT( "SimpleElementPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true );
 
 #if WITH_EDITOR
+/*
+==================
+CSimpleElementVertexShader::ShouldCache
+==================
+*/
 bool CSimpleElementVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
 	if ( !InVFMetaType )
@@ -16,6 +21,11 @@ bool CSimpleElementVertexShader::ShouldCache( EShaderPlatform InShaderPlatform, 
 	return InVFMetaType->GetHash() == CSimpleElementVertexFactory::staticType.GetHash();
 }
 
+/*
+==================
+CSimpleElementPixelShader::ShouldCache
+==================
+*/
 bool CSimpleElementPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType /* = nullptr */ )
 {
 	if ( !InVFMetaType )

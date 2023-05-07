@@ -75,7 +75,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, ECollisionShape& InValue 
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const ECollisionShape& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( ECollisionShape ) );
 	return InArchive;
 }

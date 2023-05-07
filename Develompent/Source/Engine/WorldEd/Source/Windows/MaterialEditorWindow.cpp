@@ -9,7 +9,7 @@
 #include "Render/RenderUtils.h"
 
 /** Table of texture parameters in material */
-static const CName		GTextureParameterNames[] =
+static const CName		s_TextureParameterNames[] =
 {
 	CMaterial::albedoTextureParamName,
 	CMaterial::normalTextureParamName,
@@ -19,6 +19,12 @@ static const CName		GTextureParameterNames[] =
 	CMaterial::aoTextureParamName
 };
 
+
+/*
+==================
+CMaterialEditorWindow::CMaterialEditorWindow
+==================
+*/
 CMaterialEditorWindow::CMaterialEditorWindow( const TSharedPtr<CMaterial>& InMaterial )
 	: CImGUILayer( CString::Format( TEXT( "Material Editor - %s" ), InMaterial->GetAssetName().c_str() ) )
 	, bIsDefaultMaterial( false )
@@ -37,6 +43,11 @@ CMaterialEditorWindow::CMaterialEditorWindow( const TSharedPtr<CMaterial>& InMat
 	assetsReloadedHandle	= SEditorDelegates::onAssetsReloaded.Add( std::bind(	&CMaterialEditorWindow::OnAssetsReloaded,	this, std::placeholders::_1							) );
 }
 
+/*
+==================
+CMaterialEditorWindow::~CMaterialEditorWindow
+==================
+*/
 CMaterialEditorWindow::~CMaterialEditorWindow()
 {
 	viewportWidget.SetViewportClient( nullptr, false );
@@ -47,25 +58,35 @@ CMaterialEditorWindow::~CMaterialEditorWindow()
 	SEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 }
 
+/*
+==================
+CMaterialEditorWindow::Init
+==================
+*/
 void CMaterialEditorWindow::Init()
 {
 	CImGUILayer::Init();
 	SetSize( Vector2D( 700.f, 450.f ) );
 
-	bIsDefaultMaterial = GPackageManager->IsDefaultAsset( material->GetAssetHandle() );
-	for ( uint32 index = 0; index < ARRAY_COUNT( GTextureParameterNames ); ++index )
+	bIsDefaultMaterial = g_PackageManager->IsDefaultAsset( material->GetAssetHandle() );
+	for ( uint32 index = 0; index < ARRAY_COUNT( s_TextureParameterNames ); ++index )
 	{
 		TSharedPtr<CSelectAssetWidget>	selectAssetWidget = MakeSharedPtr<CSelectAssetWidget>( index );
 		
 		selectAssetWidget->Init();
-		selectAssetWidget->SetLabel( TCHAR_TO_ANSI( GTextureParameterNames[index].ToString().c_str() ) );
+		selectAssetWidget->SetLabel( TCHAR_TO_ANSI( s_TextureParameterNames[index].ToString().c_str() ) );
 		selectAssetWidget->OnSelectedAsset().Add( std::bind(	&CMaterialEditorWindow::OnSelectedAsset,	this, std::placeholders::_1, std::placeholders::_2	) );
 		selectAssetWidget->OnOpenAssetEditor().Add( std::bind(	&CMaterialEditorWindow::OnOpenAssetEditor,	this, std::placeholders::_1							) );
-		selectAssetWidgets.push_back( SSelectAssetHandle{GTextureParameterNames[index], nullptr, selectAssetWidget } );
+		selectAssetWidgets.push_back( SSelectAssetHandle{s_TextureParameterNames[index], nullptr, selectAssetWidget } );
 	}
 	UpdateAssetInfo();
 }
 
+/*
+==================
+CMaterialEditorWindow::UpdateAssetInfo
+==================
+*/
 void CMaterialEditorWindow::UpdateAssetInfo()
 {
 	for ( uint32 index = 0, count = selectAssetWidgets.size(); index < count; ++index )
@@ -74,7 +95,7 @@ void CMaterialEditorWindow::UpdateAssetInfo()
 		TAssetHandle<CTexture2D>		textureRef;
 		
 		material->GetTextureParameterValue( selectAssetHandle.parameterName, textureRef );
-		if ( textureRef.IsAssetValid() && ( bIsDefaultMaterial || !GPackageManager->IsDefaultAsset( textureRef ) ) )
+		if ( textureRef.IsAssetValid() && ( bIsDefaultMaterial || !g_PackageManager->IsDefaultAsset( textureRef ) ) )
 		{
 			std::wstring	assetReference;
 			MakeReferenceToAsset( textureRef, assetReference );
@@ -90,6 +111,11 @@ void CMaterialEditorWindow::UpdateAssetInfo()
 	}
 }
 
+/*
+==================
+CMaterialEditorWindow::OnTick
+==================
+*/
 void CMaterialEditorWindow::OnTick()
 {
 	ImGui::Columns( 2 );
@@ -153,7 +179,7 @@ void CMaterialEditorWindow::OnTick()
 			{
 				// Update preview texture if it need
 				Texture2DRHIRef_t	currentTexturePreview	= selectAssetHandle.widget->GetPreviewTexture();
-				Texture2DRHIRef_t	newTexturePreview		= GBlackTexture.GetTexture2DRHI();
+				Texture2DRHIRef_t	newTexturePreview		= g_BlackTexture.GetTexture2DRHI();
 				if ( selectAssetHandle.asset.IsAssetValid() )
 				{
 					newTexturePreview = selectAssetHandle.asset.ToSharedPtr()->GetTexture2DRHI();
@@ -172,6 +198,11 @@ void CMaterialEditorWindow::OnTick()
 	}
 }
 
+/*
+==================
+CMaterialEditorWindow::OnSelectedAsset
+==================
+*/
 void CMaterialEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::wstring& InNewAssetReference )
 {
 	if ( !material )
@@ -179,18 +210,18 @@ void CMaterialEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::wstr
 		return;
 	}
 	
-	check( InAssetSlot < selectAssetWidgets.size() );
+	Assert( InAssetSlot < selectAssetWidgets.size() );
 	SSelectAssetHandle&		selectAssetHandle = selectAssetWidgets[InAssetSlot];
 
 	// If asset reference is valid, we find asset
 	TAssetHandle<CTexture2D>	newTexture2DRef;
 	if ( !InNewAssetReference.empty() )
 	{
-		newTexture2DRef = GPackageManager->FindAsset( InNewAssetReference, AT_Texture2D );
+		newTexture2DRef = g_PackageManager->FindAsset( InNewAssetReference, AT_Texture2D );
 	}
 
 	// If asset is not valid we clear asset reference
-	if ( !newTexture2DRef.IsAssetValid() || ( !bIsDefaultMaterial && GPackageManager->IsDefaultAsset( newTexture2DRef ) ) )
+	if ( !newTexture2DRef.IsAssetValid() || ( !bIsDefaultMaterial && g_PackageManager->IsDefaultAsset( newTexture2DRef ) ) )
 	{
 		newTexture2DRef = nullptr;
 		selectAssetHandle.widget->SetAssetReference( TEXT( "" ), false );
@@ -200,6 +231,11 @@ void CMaterialEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::wstr
 	material->SetTextureParameterValue( selectAssetHandle.parameterName, newTexture2DRef );
 }
 
+/*
+==================
+CMaterialEditorWindow::OnAssetsCanDelete
+==================
+*/
 void CMaterialEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, SCanDeleteAssetResult& OutResult )
 {
 	CAsset::SetDependentAssets_t		dependentAssets;
@@ -227,6 +263,11 @@ void CMaterialEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAss
 	}
 }
 
+/*
+==================
+CMaterialEditorWindow::OnAssetsReloaded
+==================
+*/
 void CMaterialEditorWindow::OnAssetsReloaded( const std::vector<TSharedPtr<CAsset>>& InAssets )
 {
 	// If material who is edition reloaded, we update UI
@@ -240,6 +281,11 @@ void CMaterialEditorWindow::OnAssetsReloaded( const std::vector<TSharedPtr<CAsse
 	}
 }
 
+/*
+==================
+CMaterialEditorWindow::OnOpenAssetEditor
+==================
+*/
 void CMaterialEditorWindow::OnOpenAssetEditor( uint32 InAssetSlot )
 {
 	if ( !material )
@@ -247,7 +293,7 @@ void CMaterialEditorWindow::OnOpenAssetEditor( uint32 InAssetSlot )
 		return;
 	}
 
-	check( InAssetSlot < selectAssetWidgets.size() );
+	Assert( InAssetSlot < selectAssetWidgets.size() );
 	const SSelectAssetHandle&		selectAssetHandle = selectAssetWidgets[InAssetSlot];
 
 	// Open texture editor if asset is valid

@@ -59,7 +59,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );
@@ -77,7 +77,7 @@ public:
 	 * @brief Get name of shader
 	 * @return Return shader name
 	 */
-	FORCEINLINE const std::wstring&				GetName() const
+	FORCEINLINE const std::wstring& GetName() const
 	{
 		return name;
 	}
@@ -86,7 +86,7 @@ public:
 	 * @brief Get frequency of shader
 	 * @return Return Frequency of shader
 	 */
-	FORCEINLINE EShaderFrequency				GetFrequency() const
+	FORCEINLINE EShaderFrequency GetFrequency() const
 	{
 		return frequency;
 	}
@@ -104,7 +104,7 @@ public:
 	 * @brief Get count instructions in shader
 	 * @return Return count instruction in shader
 	 */
-	FORCEINLINE uint32							GetNumInstructions() const
+	FORCEINLINE uint32 GetNumInstructions() const
 	{
 		return numInstructions;
 	}
@@ -113,7 +113,7 @@ public:
 	 * @brief Get vertex shader
 	 * @return Return pointer to RHI vertex shader. If this shader not SF_Vertex return nullptr
 	 */
-	FORCEINLINE VertexShaderRHIRef_t				GetVertexShader() const
+	FORCEINLINE VertexShaderRHIRef_t GetVertexShader() const
 	{
 		return vertexShader;
 	}
@@ -122,7 +122,7 @@ public:
 	 * @brief Get hull shader
 	 * @return Return pointer to RHI hull shader. If this shader not SF_Hull return nullptr
 	 */
-	FORCEINLINE HullShaderRHIRef_t				GetHullShader() const
+	FORCEINLINE HullShaderRHIRef_t GetHullShader() const
 	{
 		return hullShader;
 	}
@@ -131,7 +131,7 @@ public:
 	 * @brief Get domain shader
 	 * @return Return pointer to RHI domain shader. If this shader not SF_Domain return nullptr
 	 */
-	FORCEINLINE DomainShaderRHIRef_t				GetDomainShader() const
+	FORCEINLINE DomainShaderRHIRef_t GetDomainShader() const
 	{
 		return domainShader;
 	}
@@ -140,7 +140,7 @@ public:
 	 * @brief Get geometry shader
 	 * @return Return pointer to RHI geometry shader. If this shader not SF_Geometry return nullptr
 	 */
-	FORCEINLINE GeometryShaderRHIRef_t			GetGeometryShader() const
+	FORCEINLINE GeometryShaderRHIRef_t GetGeometryShader() const
 	{
 		return geometryShader;
 	}
@@ -149,7 +149,7 @@ public:
 	 * @brief Get pixel shader
 	 * @return Return pointer to RHI pixel shader. If this shader not SF_Pixel return nullptr
 	 */
-	FORCEINLINE PixelShaderRHIRef_t				GetPixelShader() const
+	FORCEINLINE PixelShaderRHIRef_t GetPixelShader() const
 	{
 		return pixelShader;
 	}
@@ -186,7 +186,7 @@ CArchive& operator<<( CArchive& InArchive, CShader*& InValue );
  */
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CShader*& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	if ( InValue )
 	{
 		InArchive << InValue->GetName();

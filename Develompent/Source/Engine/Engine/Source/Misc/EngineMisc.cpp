@@ -2,11 +2,16 @@
 #include "Misc/EngineMisc.h"
 
 #if WITH_EDITOR
-ESurfaceType appTextToESurfaceType( const std::wstring& InString )
+/*
+==================
+Sys_TextToESurfaceType
+==================
+*/
+ESurfaceType Sys_TextToESurfaceType( const std::wstring& InString )
 {
-	for ( uint32 index = 0, count = GSurfaceTypeNames.size(); index < count; ++index )
+	for ( uint32 index = 0, count = g_SurfaceTypeNames.size(); index < count; ++index )
 	{
-		const std::pair< std::wstring, ESurfaceType >&		surfaceInfo = GSurfaceTypeNames[ index ];
+		const std::pair< std::wstring, ESurfaceType >&		surfaceInfo = g_SurfaceTypeNames[ index ];
 		if ( surfaceInfo.first == InString )
 		{
 			return surfaceInfo.second;

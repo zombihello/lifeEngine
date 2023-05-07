@@ -49,7 +49,7 @@ public:
 	 * 
 	 * @param[in] InLockToVsync Is it necessary to block for Vsync
 	 */
-	virtual void							Present( bool InLockToVsync ) override;
+	virtual void Present( bool InLockToVsync ) override;
 
 	/**
 	 * Resize viewport
@@ -58,7 +58,7 @@ public:
 	 * @param[in] InHeight New height
 	 * @param[in] InIsFullscreen Is fullscreen
 	 */
-	virtual void							Resize( uint32 InWidth, uint32 InHeight ) override;
+	virtual void Resize( uint32 InWidth, uint32 InHeight ) override;
 
 	/**
 	 * @brief Set surface of viewport
@@ -72,19 +72,19 @@ public:
 	 * @brief Get width
 	 * @return Width of viewport
 	 */
-	virtual uint32							GetWidth() const override;
+	virtual uint32 GetWidth() const override;
 
 	/**
 	 * @brief Get height
 	 * @return Height of viewport
 	 */
-	virtual uint32							GetHeight() const override;
+	virtual uint32 GetHeight() const override;
 
 	/**
 	 * @breif Get surface of viewport
 	 * @return Pointer to surface of viewport
 	 */
-	virtual SurfaceRHIRef_t					GetSurface() const override;
+	virtual SurfaceRHIRef_t GetSurface() const override;
 
 	/**
 	 * @breif Get window handle

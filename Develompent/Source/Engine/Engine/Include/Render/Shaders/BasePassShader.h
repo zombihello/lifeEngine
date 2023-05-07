@@ -63,7 +63,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );
@@ -102,7 +102,7 @@ public:
 	 * @brief Is need compile shader for platform
 	 *
 	 * @param InShaderPlatform Shader platform
-	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general check
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
 	 * @return Return true if need compile shader, else returning false
 	 */
 	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr );

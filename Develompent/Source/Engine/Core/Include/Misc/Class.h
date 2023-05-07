@@ -26,9 +26,9 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE										CClass() :
-		ClassConstructor( nullptr ),
-		superClass( nullptr )
+	FORCEINLINE CClass() 
+		: ClassConstructor( nullptr )
+		, superClass( nullptr )
 	{}
 
 	/**
@@ -38,17 +38,17 @@ public:
 	 * @param[in] InClassConstructor Pointer to class constructor
 	 * @param[in] InSuperClass Pointer to super class
 	 */
-	FORCEINLINE										CClass( const std::wstring& InClassName, class CObject*( *InClassConstructor )(), CClass* InSuperClass = nullptr ) :
-		ClassConstructor( InClassConstructor ),
-		superClass( InSuperClass ),
-		name( InClassName )
+	FORCEINLINE CClass( const std::wstring& InClassName, class CObject*( *InClassConstructor )(), CClass* InSuperClass = nullptr ) 
+		: ClassConstructor( InClassConstructor )
+		, superClass( InSuperClass )
+		, name( InClassName )
 	{}
 
 	/**
 	 * @brief Get class name
 	 * @return Return class name
 	 */
-	FORCEINLINE const std::wstring&					GetName() const
+	FORCEINLINE const std::wstring& GetName() const
 	{
 		return name;
 	}
@@ -57,7 +57,7 @@ public:
 	 * @brief Get super class
 	 * @return Return pointer to super class. If it is not, it will return nullptr
 	 */
-	FORCEINLINE CClass*								GetSuperClass() const
+	FORCEINLINE CClass* GetSuperClass() const
 	{
 		return superClass;
 	}
@@ -66,9 +66,9 @@ public:
 	 * @brief Create instance of class object
 	 * @return Return pointer to instance of class object
 	 */
-	FORCEINLINE class CObject*						CreateObject() const
+	FORCEINLINE class CObject* CreateObject() const
 	{
-		check( ClassConstructor );
+		Assert( ClassConstructor );
 		return ClassConstructor();
 	}
 
@@ -77,7 +77,7 @@ public:
 	 * @return Return pointer to instance of class object
 	 */
 	template< typename TObject >
-	FORCEINLINE TObject*							CreateObject() const
+	FORCEINLINE TObject* CreateObject() const
 	{
 		return ( TObject* )CreateObject();
 	}
@@ -86,9 +86,9 @@ public:
 	 * @brief Register class in table
 	 * @param[in] InClass Class
 	 */
-	static FORCEINLINE void							StaticRegisterClass( const CClass* InClass )
+	static FORCEINLINE void StaticRegisterClass( const CClass* InClass )
 	{
-		check( InClass );
+		Assert( InClass );
 		classesTable.insert( std::make_pair( InClass->GetName(), InClass ) );
 	}
 
@@ -98,7 +98,7 @@ public:
 	 * 
 	 * @return Return pointer to class. If not found returning nullptr
 	 */
-	static FORCEINLINE CClass*					StaticFindClass( const tchar* InClassName )
+	static FORCEINLINE CClass* StaticFindClass( const tchar* InClassName )
 	{
 		auto		itClass = classesTable.find( InClassName );
 		if ( itClass == classesTable.end() )

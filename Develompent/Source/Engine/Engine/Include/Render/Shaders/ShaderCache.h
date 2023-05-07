@@ -116,7 +116,7 @@ public:
 		 * @brief Serialize
 		 * @param[in] InArchive Archive
 		 */
-		void						Serialize( CArchive& InArchive );
+		void Serialize( CArchive& InArchive );
 
 		std::wstring				name;				/**< Name of class shader */
 		EShaderFrequency			frequency;			/**< Frequency of shader */
@@ -130,13 +130,13 @@ public:
 	 * @brief Serialize
 	 * @param[in] InArchive Archive
 	 */
-	void													Serialize( CArchive& InArchive );
+	void Serialize( CArchive& InArchive );
 
 	/**
 	 * @brief Add to cache compiled shader
 	 * @param[in] InShaderCacheItem Shader cache item
 	 */
-	FORCEINLINE void										Add( const SShaderCacheItem& InShaderCacheItem )
+	FORCEINLINE void Add( const SShaderCacheItem& InShaderCacheItem )
 	{
 		items.push_back( InShaderCacheItem );
 		itemsMap[ InShaderCacheItem.vertexFactoryHash ].insert( InShaderCacheItem.name );
@@ -146,7 +146,7 @@ public:
 	 * @brief Get array of items shader cache
 	 * @return Return const reference to array of items shader cache
 	 */
-	FORCEINLINE const std::vector< SShaderCacheItem >&		GetItems() const
+	FORCEINLINE const std::vector< SShaderCacheItem >& GetItems() const
 	{
 		return items;
 	}
@@ -177,7 +177,7 @@ public:
 
 private:
 	std::vector< SShaderCacheItem >											items;		/**< Array of items shader cache */
-	std::unordered_map< uint64, std::unordered_set< std::wstring > >		itemsMap;	/**< Map of items separated by vertex factory. Need for check on exist in cache */
+	std::unordered_map< uint64, std::unordered_set< std::wstring > >		itemsMap;	/**< Map of items separated by vertex factory. Need for Assert on exist in cache */
 };
 
 #endif // !SHADERCACHE_H

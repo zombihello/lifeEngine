@@ -5,6 +5,11 @@
 
 IMPLEMENT_CLASS( CLightComponent )
 
+/*
+==================
+CLightComponent::CLightComponent
+==================
+*/
 CLightComponent::CLightComponent()
 	: bEnabled( true )
 	, scene( nullptr )
@@ -13,6 +18,11 @@ CLightComponent::CLightComponent()
 	, intensivity( 22400.f )
 {}
 
+/*
+==================
+CLightComponent::~CLightComponent
+==================
+*/
 CLightComponent::~CLightComponent()
 {
 	if ( scene )
@@ -21,24 +31,44 @@ CLightComponent::~CLightComponent()
 	}
 }
 
+/*
+==================
+CLightComponent::Serialize
+==================
+*/
 void CLightComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << bEnabled;
 }
 
+/*
+==================
+CLightComponent::Spawned
+==================
+*/
 void CLightComponent::Spawned()
 {
 	Super::Spawned();
-	GWorld->GetScene()->AddLight( this );
+	g_World->GetScene()->AddLight( this );
 }
 
+/*
+==================
+CLightComponent::Destroyed
+==================
+*/
 void CLightComponent::Destroyed()
 {
 	Super::Destroyed();
-	GWorld->GetScene()->RemoveLight( this );
+	g_World->GetScene()->RemoveLight( this );
 }
 
+/*
+==================
+CLightComponent::GetLightType
+==================
+*/
 ELightType CLightComponent::GetLightType() const
 {
 	return LT_Unknown;

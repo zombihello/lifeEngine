@@ -6,12 +6,12 @@
 #include "Render/Scene.h"
 #include "RHI/BaseRHI.h"
 
-TGlobalResource<CWhiteTexture>				GWhiteTexture;
-TGlobalResource<CBlackTexture>				GBlackTexture;
-TGlobalResource<CEmptyNormalTexture>		GEmptyNormalTexture;
+TGlobalResource<CWhiteTexture>				g_WhiteTexture;
+TGlobalResource<CBlackTexture>				g_BlackTexture;
+TGlobalResource<CEmptyNormalTexture>		g_EmptyNormalTexture;
 
 /* Maps members of EPixelFormat to a SPixelFormatInfo describing the format */
-SPixelFormatInfo		GPixelFormats[ PF_Max ] =
+SPixelFormatInfo		g_PixelFormats[ PF_Max ] =
 {
 	// Name						BlockSizeX	BlockSizeY	BlockSizeZ	BlockBytes	NumComponents	PlatformFormat			Flags			Supported		EngineFormat
 
@@ -33,8 +33,13 @@ SPixelFormatInfo		GPixelFormats[ PF_Max ] =
 };
 
 /** Offset to center of the pixel */
-float			GPixelCenterOffset		= 0.5f;
+float			g_PixelCenterOffset		= 0.5f;
 
+/*
+==================
+DrawDenormalizedQuad
+==================
+*/
 void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, float InX, float InY, float InSizeX, float InSizeY, float InU, float InV, float InSizeU, float InSizeV, uint32 InTargetSizeX, uint32 InTargetSizeY, uint32 InTextureSizeX, uint32 InTextureSizeY, float InClipSpaceQuadZ )
 {
 	// Set up the vertices
@@ -57,8 +62,8 @@ void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, floa
 
 	for ( uint32 vertexIndex = 0; vertexIndex < 4; ++vertexIndex )
 	{
-		vertices[ vertexIndex ].position.x		= -1.0f + 2.0f * ( vertices[ vertexIndex ].position.x - GPixelCenterOffset ) / ( float )InTargetSizeX;
-		vertices[ vertexIndex ].position.y		= +1.0f - 2.0f * ( vertices[ vertexIndex ].position.y - GPixelCenterOffset ) / ( float )InTargetSizeY;
+		vertices[ vertexIndex ].position.x		= -1.0f + 2.0f * ( vertices[ vertexIndex ].position.x - g_PixelCenterOffset ) / ( float )InTargetSizeX;
+		vertices[ vertexIndex ].position.y		= +1.0f - 2.0f * ( vertices[ vertexIndex ].position.y - g_PixelCenterOffset ) / ( float )InTargetSizeY;
 
 		vertices[ vertexIndex ].texCoord.x		= vertices[ vertexIndex ].texCoord.x / ( float )InTextureSizeX;
 		vertices[ vertexIndex ].texCoord.y		= vertices[ vertexIndex ].texCoord.y / ( float )InTextureSizeY;
@@ -67,9 +72,14 @@ void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, floa
 	static uint32 indices[] = { 0, 1, 3, 0, 3, 2 };
 
 	// Draw quad
-	GRHI->DrawIndexedPrimitiveUP( InDeviceContextRHI, PT_TriangleList, 0, 2, 4, indices, sizeof( indices[ 0 ] ), vertices, sizeof( vertices[ 0 ] ) );
+	g_RHI->DrawIndexedPrimitiveUP( InDeviceContextRHI, PT_TriangleList, 0, 2, 4, indices, sizeof( indices[ 0 ] ), vertices, sizeof( vertices[ 0 ] ) );
 }
 
+/*
+==================
+DrawWireframeBox
+==================
+*/
 void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class CBox& InBox, const class CColor& InColor )
 {
 #if WITH_EDITOR
@@ -99,6 +109,11 @@ void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class CBox& InBox, 
 #endif // WITH_EDITOR
 }
 
+/*
+==================
+DrawCircle
+==================
+*/
 void DrawCircle( struct SSceneDepthGroup& InSDG, const Vector& InLocation, const Vector& InX, const Vector& InY, const class CColor& InColor, float InRadius, uint32 InNumSides, float InThickness /*= 0.f*/ )
 {
 #if WITH_EDITOR
@@ -115,6 +130,11 @@ void DrawCircle( struct SSceneDepthGroup& InSDG, const Vector& InLocation, const
 }
 
 #if ENABLE_HITPROXY
+/*
+==================
+DrawHitProxyCircle
+==================
+*/
 void DrawHitProxyCircle( struct SSceneDepthGroup& InSDG, EHitProxyLayer InHitProxyLayer, const Vector& InLocation, const Vector& InX, const Vector& InY, const CHitProxyId& InHitProxyId, float InRadius, uint32 InNumSides, float InThickness /*= 0.f*/ )
 {
 #if WITH_EDITOR
@@ -131,33 +151,66 @@ void DrawHitProxyCircle( struct SSceneDepthGroup& InSDG, EHitProxyLayer InHitPro
 }
 #endif // ENABLE_HITPROXY
 
+
+/*
+==================
+CWhiteTexture::InitRHI
+==================
+*/
 void CWhiteTexture::InitRHI()
 {
 	uint8		rgba[4] = { 0xFF, 0xFF, 0xFF, 0xFF };
-	texture2DRHI = GRHI->CreateTexture2D( TEXT( "WhiteTexture"), 1, 1, PF_A8R8G8B8, 1, 0, rgba );
+	texture2DRHI = g_RHI->CreateTexture2D( TEXT( "WhiteTexture"), 1, 1, PF_A8R8G8B8, 1, 0, rgba );
 }
 
+/*
+==================
+CWhiteTexture::ReleaseRHI
+==================
+*/
 void CWhiteTexture::ReleaseRHI()
 {
 	texture2DRHI.SafeRelease();
 }
 
+
+/*
+==================
+CBlackTexture::InitRHI
+==================
+*/
 void CBlackTexture::InitRHI()
 {
-	texture2DRHI = GRHI->CreateTexture2D( TEXT( "BlackTexture" ), 1, 1, PF_A8R8G8B8, 1, 0, nullptr );
+	texture2DRHI = g_RHI->CreateTexture2D( TEXT( "BlackTexture" ), 1, 1, PF_A8R8G8B8, 1, 0, nullptr );
 }
 
+/*
+==================
+CBlackTexture::ReleaseRHI
+==================
+*/
 void CBlackTexture::ReleaseRHI()
 {
 	texture2DRHI.SafeRelease();
 }
 
+
+/*
+==================
+CEmptyNormalTexture::InitRHI
+==================
+*/
 void CEmptyNormalTexture::InitRHI()
 {
 	uint8		rgba[4] = { 0x7F, 0x7F, 0xFF, 0xFF };
-	texture2DRHI = GRHI->CreateTexture2D( TEXT( "EmptyNormalTexture" ), 1, 1, PF_A8R8G8B8, 1, 0, rgba );
+	texture2DRHI = g_RHI->CreateTexture2D( TEXT( "EmptyNormalTexture" ), 1, 1, PF_A8R8G8B8, 1, 0, rgba );
 }
 
+/*
+==================
+CEmptyNormalTexture::ReleaseRHI
+==================
+*/
 void CEmptyNormalTexture::ReleaseRHI()
 {
 	texture2DRHI.SafeRelease();

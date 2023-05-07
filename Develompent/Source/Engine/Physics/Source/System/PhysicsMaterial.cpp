@@ -2,6 +2,11 @@
 #include "System/PhysicsEngine.h"
 #include "System/PhysicsMaterial.h"
 
+/*
+==================
+CPhysicsMaterial::CPhysicsMaterial
+==================
+*/
 CPhysicsMaterial::CPhysicsMaterial()
 	: CAsset( AT_PhysicsMaterial )
 	, staticFriction( 0.f )
@@ -11,12 +16,22 @@ CPhysicsMaterial::CPhysicsMaterial()
 	, surfaceType( ST_Default )
 {}
 
+/*
+==================
+CPhysicsMaterial::~CPhysicsMaterial
+==================
+*/
 CPhysicsMaterial::~CPhysicsMaterial()
 {
 	onPhysicsMaterialDestroyed.Broadcast( SharedThis( this ) );
 	CPhysicsInterface::ReleaseMaterial( handle );
 }
 
+/*
+==================
+CPhysicsMaterial::Serialize
+==================
+*/
 void CPhysicsMaterial::Serialize( class CArchive& InArchive )
 {
 	CAsset::Serialize( InArchive );

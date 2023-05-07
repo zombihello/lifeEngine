@@ -2428,7 +2428,7 @@ struct ImGuiTable
     ImRect                      BgClipRect;                 // We use this to cpu-clip cell background color fill
     ImRect                      Bg0ClipRectForDrawCmd;      // Actual ImDrawCmd clip rect for BG0/1 channel. This tends to be == OuterWindow->ClipRect at BeginTable() because output in BG0/BG1 is cpu-clipped
     ImRect                      Bg2ClipRectForDrawCmd;      // Actual ImDrawCmd clip rect for BG2 channel. This tends to be a correct, tight-fit, because output to BG2 are done by widgets relying on regular ClipRect.
-    ImRect                      HostClipRect;               // This is used to check if we can eventually merge our columns draw calls into the current draw call of the current window.
+    ImRect                      HostClipRect;               // This is used to Assert if we can eventually merge our columns draw calls into the current draw call of the current window.
     ImRect                      HostBackupInnerClipRect;    // Backup of InnerWindow->ClipRect during PushTableBackground()/PopTableBackground()
     ImGuiWindow*                OuterWindow;                // Parent window for the table
     ImGuiWindow*                InnerWindow;                // Window holding the table data (== OuterWindow or a child window)

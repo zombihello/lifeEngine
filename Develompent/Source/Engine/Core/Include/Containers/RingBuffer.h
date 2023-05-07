@@ -36,7 +36,7 @@ public:
 	 * A reference to an allocated chunk of the ring buffer.
 	 * Upon destruction of the context, the chunk is committed as written.
 	 */
-	class ÑAllocationContext
+	class CAllocationContext
 	{
 	public:
 		/**
@@ -45,12 +45,12 @@ public:
 		 * @param[in] InRingBuffer The ring buffer to allocate from.
 		 * @param[in] InAllocationSize The size of the allocation to make.
 		 */
-		ÑAllocationContext( CRingBuffer& InRingBuffer, uint32 InAllocationSize );
+		CAllocationContext( CRingBuffer& InRingBuffer, uint32 InAllocationSize );
 
 		/**
 		 * Upon destruction, the allocation is committed, if Commit hasn't been called manually
 		 */
-		~ÑAllocationContext();
+		~CAllocationContext();
 
 		/**
 		 * Commits the allocated chunk of memory to the ring buffer

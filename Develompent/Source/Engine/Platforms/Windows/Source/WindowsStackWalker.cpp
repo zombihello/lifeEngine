@@ -295,7 +295,7 @@ public:
     // Dynamically load the Entry-Points for dbghelp.dll:
     // First try to load the newest one from
     TCHAR szTemp[4096];
-    // But before we do this, we first check if the ".local" file exists
+    // But before we do this, we first Assert if the ".local" file exists
     if (GetModuleFileName(NULL, szTemp, 4096) > 0)
     {
       _tcscat_s(szTemp, _T(".local"));
@@ -307,7 +307,7 @@ public:
         if ((m_hDbhHelp == NULL) && (GetEnvironmentVariable(_T("ProgramFiles"), szTemp, 4096) > 0))
         {
           _tcscat_s(szTemp, _T("\\Debugging Tools for Windows (x86)\\dbghelp.dll"));
-          // now check if the file exists:
+          // now Assert if the file exists:
           if (GetFileAttributes(szTemp) != INVALID_FILE_ATTRIBUTES)
           {
             m_hDbhHelp = LoadLibrary(szTemp);
@@ -317,7 +317,7 @@ public:
         if ((m_hDbhHelp == NULL) && (GetEnvironmentVariable(_T("ProgramFiles"), szTemp, 4096) > 0))
         {
           _tcscat_s(szTemp, _T("\\Debugging Tools for Windows (x64)\\dbghelp.dll"));
-          // now check if the file exists:
+          // now Assert if the file exists:
           if (GetFileAttributes(szTemp) != INVALID_FILE_ATTRIBUTES)
           {
             m_hDbhHelp = LoadLibrary(szTemp);
@@ -327,7 +327,7 @@ public:
         if ((m_hDbhHelp == NULL) && (GetEnvironmentVariable(_T("ProgramFiles"), szTemp, 4096) > 0))
         {
           _tcscat_s(szTemp, _T("\\Debugging Tools for Windows (ia64)\\dbghelp.dll"));
-          // now check if the file exists:
+          // now Assert if the file exists:
           if (GetFileAttributes(szTemp) != INVALID_FILE_ATTRIBUTES)
           {
             m_hDbhHelp = LoadLibrary(szTemp);
@@ -338,7 +338,7 @@ public:
         if ((m_hDbhHelp == NULL) && (GetEnvironmentVariable(_T("ProgramFiles"), szTemp, 4096) > 0))
         {
           _tcscat_s(szTemp, _T("\\Debugging Tools for Windows\\dbghelp.dll"));
-          // now check if the file exists:
+          // now Assert if the file exists:
           if (GetFileAttributes(szTemp) != INVALID_FILE_ATTRIBUTES)
           {
             m_hDbhHelp = LoadLibrary(szTemp);

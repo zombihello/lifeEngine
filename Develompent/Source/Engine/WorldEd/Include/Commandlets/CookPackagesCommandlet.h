@@ -94,20 +94,20 @@ public:
 		ParseReferenceToAsset( InAssetRef, packageName, assetName, assetType );
 		if ( assetType != AT_AudioBank )
 		{
-			appErrorf( TEXT( "Asset '%s' is not audio bank" ), InAssetRef.c_str() );
+			Sys_Errorf( TEXT( "Asset '%s' is not audio bank" ), InAssetRef.c_str() );
 			return false;
 		}
 
 		if ( !FindResource( audiosMap, packageName, assetName, resourceInfo ) )
 		{
-			appErrorf( TEXT( "Audio bank '%s' not founded" ), InAssetRef.c_str() );
+			Sys_Errorf( TEXT( "Audio bank '%s' not founded" ), InAssetRef.c_str() );
 			return false;
 		}
 
 		bool	result = CookAudioBank( resourceInfo, OutAudioBank );
 		if ( !result )
 		{
-			appErrorf( TEXT( "Failed cooking audio bank '%s'" ), InAssetRef.c_str() );
+			Sys_Errorf( TEXT( "Failed cooking audio bank '%s'" ), InAssetRef.c_str() );
 			return false;
 		}
 
@@ -131,20 +131,20 @@ public:
 		ParseReferenceToAsset( InAssetRef, packageName, assetName, assetType );
 		if ( assetType != AT_PhysicsMaterial )
 		{
-			appErrorf( TEXT( "Asset '%s' is not physics material" ), InAssetRef.c_str() );
+			Sys_Errorf( TEXT( "Asset '%s' is not physics material" ), InAssetRef.c_str() );
 			return false;
 		}
 
 		if ( !FindResource( physMaterialsMap, packageName, assetName, resourceInfo ) )
 		{
-			appErrorf( TEXT( "Physics material '%s' not founded" ), InAssetRef.c_str() );
+			Sys_Errorf( TEXT( "Physics material '%s' not founded" ), InAssetRef.c_str() );
 			return false;
 		}
 
 		bool	result = CookPhysMaterial( resourceInfo, OutPhysMaterial );
 		if ( !result )
 		{
-			appErrorf( TEXT( "Failed cooking physics material '%s'" ), InAssetRef.c_str() );
+			Sys_Errorf( TEXT( "Failed cooking physics material '%s'" ), InAssetRef.c_str() );
 			return false;
 		}
 
@@ -369,7 +369,7 @@ private:
 	 * @param InIsAlwaysCookDir Is always cook dir
 	 * @param InParentDirName Parent directory name
 	 */
-	void IndexingResources( const std::wstring& InRootDir, bool InIsRootDir = false, bool InIsAlwaysCookDir = false, const std::wstring& InPackageSufix = GGameName );
+	void IndexingResources( const std::wstring& InRootDir, bool InIsRootDir = false, bool InIsAlwaysCookDir = false, const std::wstring& InPackageSufix = g_GameName );
 
 	/**
 	 * Cook all resources

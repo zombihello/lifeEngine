@@ -17,22 +17,22 @@
 #define PLATFORM_WINDOWS					        1
 
 #if SHIPPING_BUILD && !PLATFORM_DOXYGEN
-    #define appIsDebuggerPresent()	                false
-    #define appDebugBreak()
+    #define Sys_IsDebuggerPresent()	                false
+    #define Sys_DebugBreak()
 #else
     /**
      * @ingroup WindowsPlatform
      * @brief Macro for checking the presence of a debugger
      * @warning With enabled define SHIPPING_BUILD this macro is always return false
      */
-    #define appIsDebuggerPresent                    IsDebuggerPresent
+    #define Sys_IsDebuggerPresent                    IsDebuggerPresent
 
     /**
     * @ingroup WindowsPlatform
     * @brief Macro for for triggering breakpoint
     * @warning With enabled define SHIPPING_BUILD this macro is empty
     */
-    #define appDebugBreak()			                ( appIsDebuggerPresent() ? ( DebugBreak(), 1 ) : 1 )
+    #define Sys_DebugBreak()			             ( Sys_IsDebuggerPresent() ? ( DebugBreak(), 1 ) : 1 )
 #endif // SHIPPING_BUILD
 
 /**
@@ -92,11 +92,11 @@
 
 /**
  * @ingroup WindowsPlatform
- * @brief Macro for check on char is path separator
+ * @brief Macro for Assert on char is path separator
  * 
  * @param InCh Char
  */
-#define appIsPathSeparator( InCh )	( ( InCh ) == PATH_SEPARATOR[ 0 ] )
+#define Sys_IsPathSeparator( InCh )	( ( InCh ) == PATH_SEPARATOR[ 0 ] )
  
 /**
  * @ingroup WindowsPlatform

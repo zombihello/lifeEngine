@@ -4,6 +4,11 @@
 #include "System/ConVar.h"
 #include "System/ConsoleSystem.h"
 
+/*
+==================
+CConVar::CConVar
+==================
+*/
 CConVar::CConVar( const std::wstring& InName, const std::wstring& InDefaultValue, EConVarType InType, const std::wstring& InHelpText, bool InHasMin, float InMin, bool InHasMax, float InMax, bool InIsReadOnly /* = false */ )
 	: bHasMin( InHasMin )
 	, bHasMax( InHasMax )
@@ -20,6 +25,11 @@ CConVar::CConVar( const std::wstring& InName, const std::wstring& InDefaultValue
 	SetValue( InDefaultValue, InType );
 }
 
+/*
+==================
+CConVar::CConVar
+==================
+*/
 CConVar::CConVar( const std::wstring& InName, const std::wstring& InDefaultValue, EConVarType InType, const std::wstring& InHelpText, bool InIsReadOnly /* = false */ )
 	: bHasMin( false )
 	, bHasMax( false )
@@ -36,6 +46,11 @@ CConVar::CConVar( const std::wstring& InName, const std::wstring& InDefaultValue
 	SetValue( InDefaultValue, InType );
 }
 
+/*
+==================
+CConVar::~CConVar
+==================
+*/
 CConVar::~CConVar()
 {
 	std::vector<CConVar*>&	vars = GetGlobalConVars();
@@ -51,6 +66,11 @@ CConVar::~CConVar()
 	DeleteValue();
 }
 
+/*
+==================
+CConVar::SetValue
+==================
+*/
 void CConVar::SetValue( const std::wstring& InValue, EConVarType InVarType )
 {
 	if ( bReadOnly )
@@ -80,10 +100,15 @@ void CConVar::SetValue( const std::wstring& InValue, EConVarType InVarType )
 		break;
 
 	default:
-		checkMsg( false, TEXT( "Unknown ConVar type 0x%X" ), InVarType );
+		AssertMsg( false, TEXT( "Unknown ConVar type 0x%X" ), InVarType );
 	}
 }
 
+/*
+==================
+CConVar::SetValueInt
+==================
+*/
 void CConVar::SetValueInt( int32 InValue )
 {
 	if ( bReadOnly )
@@ -119,6 +144,11 @@ void CConVar::SetValueInt( int32 InValue )
 	onChangeVar.Broadcast( this );
 }
 
+/*
+==================
+CConVar::SetValueFloat
+==================
+*/
 void CConVar::SetValueFloat( float InValue )
 {
 	if ( bReadOnly )
@@ -154,6 +184,11 @@ void CConVar::SetValueFloat( float InValue )
 	onChangeVar.Broadcast( this );
 }
 
+/*
+==================
+CConVar::SetValueBool
+==================
+*/
 void CConVar::SetValueBool( bool InValue )
 {
 	if ( bReadOnly )
@@ -192,6 +227,11 @@ void CConVar::SetValueBool( bool InValue )
 	onChangeVar.Broadcast( this );
 }
 
+/*
+==================
+CConVar::SetValueString
+==================
+*/
 void CConVar::SetValueString( const std::wstring& InValue )
 {
 	if ( bReadOnly )
@@ -228,6 +268,11 @@ void CConVar::SetValueString( const std::wstring& InValue )
 	onChangeVar.Broadcast( this );
 }
 
+/*
+==================
+CConVar::DeleteValue
+==================
+*/
 void CConVar::DeleteValue()
 {
 	if ( type == CVT_None )

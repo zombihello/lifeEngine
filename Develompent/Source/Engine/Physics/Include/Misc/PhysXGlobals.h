@@ -17,39 +17,39 @@
  * @ingroup Physics
  * PhysX foundation
  */
-extern physx::PxFoundation*				GPhysXFoundation;
+extern physx::PxFoundation*				g_PhysXFoundation;
 
 /**
  * @ingroup Physics
  * PhysX SDK
  */
-extern physx::PxPhysics*				GPhysXSDK;
+extern physx::PxPhysics*				g_PhysXSDK;
 
 /**
  * @ingroup Physics
  * PhysX allocator callback
  */
-extern physx::PxAllocatorCallback*		GPhysXAllocator;
+extern physx::PxAllocatorCallback*		g_PhysXAllocator;
 
 /**
  * @ingroup Physics
  * PhysX error callback
  */
-extern physx::PxErrorCallback*			GPhysXError;
+extern physx::PxErrorCallback*			g_PhysXError;
 
 #if !SHIPPING_BUILD
 /**
  * @ingroup Physics
  * PhysX visual debugger
  */
-extern physx::PxPvd*					GPhysXVisualDebugger;
+extern physx::PxPvd*					g_PhysXVisualDebugger;
 #endif // !SHIPPING_BUILD
 
 /**
  * @ingroup Physics
  * Physics scene
  */
-extern class CPhysXScene				GPhysicsScene;
+extern class CPhysXScene				g_PhysicsScene;
 #endif // WITH_PHYSX
 
 #endif // !PHYSXGLOBALS_H

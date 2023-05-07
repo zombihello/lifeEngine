@@ -364,7 +364,7 @@ namespace ImGui
     IMGUI_API bool          IsWindowAppearing();
     IMGUI_API bool          IsWindowCollapsed();
     IMGUI_API bool          IsWindowFocused(ImGuiFocusedFlags flags=0); // is current window focused? or its root/child, depending on flags. see flags for options.
-    IMGUI_API bool          IsWindowHovered(ImGuiHoveredFlags flags=0); // is current window hovered (and typically: not blocked by a popup/modal)? see flags for options. NB: If you are trying to check whether your mouse should be dispatched to imgui or to your app, you should use the 'io.WantCaptureMouse' boolean for that! Please read the FAQ!
+    IMGUI_API bool          IsWindowHovered(ImGuiHoveredFlags flags=0); // is current window hovered (and typically: not blocked by a popup/modal)? see flags for options. NB: If you are trying to Assert whether your mouse should be dispatched to imgui or to your app, you should use the 'io.WantCaptureMouse' boolean for that! Please read the FAQ!
     IMGUI_API ImDrawList*   GetWindowDrawList();                        // get draw list associated to the current window, to append your own drawing primitives
     IMGUI_API float         GetWindowDpiScale();                        // get DPI scale currently associated to the current window's viewport.
     IMGUI_API ImVec2        GetWindowPos();                             // get current window position in screen space (useful if you want to do your own drawing via the DrawList API)
@@ -1323,7 +1323,7 @@ enum ImGuiFocusedFlags_
 };
 
 // Flags for ImGui::IsItemHovered(), ImGui::IsWindowHovered()
-// Note: if you are trying to check whether your mouse should be dispatched to Dear ImGui or to your app, you should use 'io.WantCaptureMouse' instead! Please read the FAQ!
+// Note: if you are trying to Assert whether your mouse should be dispatched to Dear ImGui or to your app, you should use 'io.WantCaptureMouse' instead! Please read the FAQ!
 // Note: windows with the ImGuiWindowFlags_NoInputs flag are ignored by IsWindowHovered() calls.
 enum ImGuiHoveredFlags_
 {
@@ -2575,7 +2575,7 @@ struct ImDrawList
     IMGUI_API void  PathRect(const ImVec2& rect_min, const ImVec2& rect_max, float rounding = 0.0f, ImDrawFlags flags = 0);
 
     // Advanced
-    IMGUI_API void  AddCallback(ImDrawCallback callback, void* callback_data);  // Your rendering function must check for 'UserCallback' in ImDrawCmd and call the function instead of rendering triangles.
+    IMGUI_API void  AddCallback(ImDrawCallback callback, void* callback_data);  // Your rendering function must Assert for 'UserCallback' in ImDrawCmd and call the function instead of rendering triangles.
     IMGUI_API void  AddDrawCmd();                                               // This is useful if you need to forcefully create a new draw call (to allow for dependent rendering / blending). Otherwise primitives are merged into the same draw-call as much as possible
     IMGUI_API ImDrawList* CloneOutput() const;                                  // Create a clone of the CmdBuffer/IdxBuffer/VtxBuffer.
 
@@ -2762,7 +2762,7 @@ struct ImFontAtlas
     IMGUI_API bool              Build();                    // Build pixels data. This is called automatically for you by the GetTexData*** functions.
     IMGUI_API void              GetTexDataAsAlpha8(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL);  // 1 byte per-pixel
     IMGUI_API void              GetTexDataAsRGBA32(unsigned char** out_pixels, int* out_width, int* out_height, int* out_bytes_per_pixel = NULL);  // 4 bytes-per-pixel
-    bool                        IsBuilt() const             { return Fonts.Size > 0 && TexReady; } // Bit ambiguous: used to detect when user didn't built texture but effectively we should check TexID != 0 except that would be backend dependent...
+    bool                        IsBuilt() const             { return Fonts.Size > 0 && TexReady; } // Bit ambiguous: used to detect when user didn't built texture but effectively we should Assert TexID != 0 except that would be backend dependent...
     void                        SetTexID(ImTextureID id)    { TexID = id; }
 
     //-------------------------------------------
@@ -2993,7 +2993,7 @@ struct ImGuiViewport
 //
 // About ImGui::RenderPlatformWindowsDefault():
 // - This function is a mostly a _helper_ for the common-most cases, and to facilitate using default backends.
-// - You can check its simple source code to understand what it does.
+// - You can Assert its simple source code to understand what it does.
 //   It basically iterates secondary viewports and call 4 functions that are setup in ImGuiPlatformIO, if available:
 //     Platform_RenderWindow(), Renderer_RenderWindow(), Platform_SwapBuffers(), Renderer_SwapBuffers()
 //   Those functions pointers exists only for the benefit of RenderPlatformWindowsDefault().
@@ -3095,7 +3095,7 @@ namespace ImGui
     static inline void  OpenPopupContextItem(const char* str_id = NULL, ImGuiMouseButton mb = 1) { OpenPopupOnItemClick(str_id, mb); } // Bool return value removed. Use IsWindowAppearing() in BeginPopup() instead. Renamed in 1.77, renamed back in 1.79. Sorry!
     // OBSOLETED in 1.78 (from June 2020)
     // Old drag/sliders functions that took a 'float power = 1.0' argument instead of flags.
-    // For shared code, you can version check at compile-time with `#if IMGUI_VERSION_NUM >= 17704`.
+    // For shared code, you can version Assert at compile-time with `#if IMGUI_VERSION_NUM >= 17704`.
     IMGUI_API bool      DragScalar(const char* label, ImGuiDataType data_type, void* p_data, float v_speed, const void* p_min, const void* p_max, const char* format, float power);
     IMGUI_API bool      DragScalarN(const char* label, ImGuiDataType data_type, void* p_data, int components, float v_speed, const void* p_min, const void* p_max, const char* format, float power);
     static inline bool  DragFloat(const char* label, float* v, float v_speed, float v_min, float v_max, const char* format, float power)    { return DragScalar(label, ImGuiDataType_Float, v, v_speed, &v_min, &v_max, format, power); }

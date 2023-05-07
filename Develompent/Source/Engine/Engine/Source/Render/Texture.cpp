@@ -13,6 +13,11 @@
 #if WITH_EDITOR
 #include <compressonator.h>
 
+/*
+==================
+ConvertEPixelFormatToCmpFormat
+==================
+*/
 static CMP_FORMAT ConvertEPixelFormatToCmpFormat( EPixelFormat InPixelFormat )
 {
 	switch ( InPixelFormat )
@@ -33,17 +38,22 @@ static CMP_FORMAT ConvertEPixelFormatToCmpFormat( EPixelFormat InPixelFormat )
 	case PF_FilteredShadowDepth:
 	case PF_D32:
 	default:
-		appErrorf( TEXT( "Unsupported EPixelFormat %i" ), ( uint32 )InPixelFormat );
+		Sys_Errorf( TEXT( "Unsupported EPixelFormat %i" ), ( uint32 )InPixelFormat );
 		return CMP_FORMAT_Unknown;
 	}
 }
 
+/*
+==================
+GenerateMipmapsMemory
+==================
+*/
 static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const STexture2DMipMap& InZeroMip, std::vector<STexture2DMipMap>& OutMipmaps, uint32 InRequestMips = 10 )
 {
 	CMP_MipSet cmp_MipSet;
-	appMemzero( &cmp_MipSet, sizeof( CMP_MipSet ) );
+	Sys_Memzero( &cmp_MipSet, sizeof( CMP_MipSet ) );
 	CMP_ERROR	result = CMP_CreateMipSet( &cmp_MipSet, InZeroMip.sizeX, InZeroMip.sizeY, 1, CF_8bit, TT_2D );
-	check( result == CMP_OK && ( *cmp_MipSet.m_pMipLevelTable )->m_dwLinearSize == InZeroMip.data.Num() );
+	Assert( result == CMP_OK && ( *cmp_MipSet.m_pMipLevelTable )->m_dwLinearSize == InZeroMip.data.Num() );
 
 	// Copy data to mipmap0
 	memcpy( ( *cmp_MipSet.m_pMipLevelTable )->m_pbData, ( CMP_BYTE* )InZeroMip.data.GetData(), InZeroMip.data.Num() );
@@ -67,6 +77,12 @@ static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const STexture2DM
 }
 #endif // WITH_EDITOR
 
+
+/*
+==================
+CTexture2D::CTexture2D
+==================
+*/
 CTexture2D::CTexture2D()
 	: CAsset( AT_Texture2D )
 	, pixelFormat( PF_Unknown )
@@ -75,27 +91,37 @@ CTexture2D::CTexture2D()
 	, samplerFilter( SF_Point )
 {}
 
+/*
+==================
+CTexture2D::~CTexture2D
+==================
+*/
 CTexture2D::~CTexture2D()
 {}
 
+/*
+==================
+CTexture2D::InitRHI
+==================
+*/
 void CTexture2D::InitRHI()
 {
-	check( mipmaps.size() > 0 );
-	texture = GRHI->CreateTexture2D( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), GetSizeX(), GetSizeY(), pixelFormat, mipmaps.size(), 0, nullptr );
+	Assert( mipmaps.size() > 0 );
+	texture = g_RHI->CreateTexture2D( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), GetSizeX(), GetSizeY(), pixelFormat, mipmaps.size(), 0, nullptr );
 
 	// Load all mip-levels to GPU
 	for ( uint32 index = 0, count = mipmaps.size(); index < count; ++index )
 	{
 		const STexture2DMipMap&		mipmap				= mipmaps[index];
-		CBaseDeviceContextRHI*		deviceContextRHI	= GRHI->GetImmediateContext();
+		CBaseDeviceContextRHI*		deviceContextRHI	= g_RHI->GetImmediateContext();
 		SLockedData					lockedData;
 		
-		GRHI->LockTexture2D( deviceContextRHI, texture, index, true, lockedData );
+		g_RHI->LockTexture2D( deviceContextRHI, texture, index, true, lockedData );
 		memcpy( lockedData.data, mipmap.data.GetData(), mipmap.data.Num() );
-		GRHI->UnlockTexture2D( deviceContextRHI, texture, index, lockedData );
+		g_RHI->UnlockTexture2D( deviceContextRHI, texture, index, lockedData );
 	}
 
-	if ( !GIsEditor && !GIsCommandlet )
+	if ( !g_IsEditor && !g_IsCommandlet )
 	{
 		for ( uint32 index = 0, count = mipmaps.size(); index < count; ++index )
 		{
@@ -104,11 +130,21 @@ void CTexture2D::InitRHI()
 	}
 }
 
+/*
+==================
+CTexture2D::ReleaseRHI
+==================
+*/
 void CTexture2D::ReleaseRHI()
 {
 	texture.SafeRelease();
 }
 
+/*
+==================
+CTexture2D::SetData
+==================
+*/
 void CTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector<byte>& InData, bool InIsGenerateMipmaps /* = false */ )
 {
 	STexture2DMipMap	mipmap0;
@@ -136,9 +172,14 @@ void CTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InS
 }
 
 #if WITH_EDITOR
+/*
+==================
+CTexture2D::GenerateMipmaps
+==================
+*/
 void CTexture2D::GenerateMipmaps()
 {
-	check( !mipmaps.empty() );
+	Assert( !mipmaps.empty() );
 	STexture2DMipMap	mipmap0 = mipmaps[0];
 	mipmaps.clear();
 	
@@ -148,6 +189,11 @@ void CTexture2D::GenerateMipmaps()
 	BeginUpdateResource( this );
 }
 
+/*
+==================
+CTexture2D::GetMemorySize
+==================
+*/
 uint64 CTexture2D::GetMemorySize() const
 {
 	uint64		totalSize = 0;
@@ -159,6 +205,11 @@ uint64 CTexture2D::GetMemorySize() const
 }
 #endif // WITH_EDITOR
 
+/*
+==================
+CTexture2D::Serialize
+==================
+*/
 void CTexture2D::Serialize( class CArchive& InArchive )
 {
 	CAsset::Serialize( InArchive );
@@ -179,7 +230,7 @@ void CTexture2D::Serialize( class CArchive& InArchive )
 
 		std::wstring		referenceToThisAsset;
 		MakeReferenceToAsset( GetAssetHandle(), referenceToThisAsset );
-		LE_LOG( LT_Warning, LC_Package, TEXT( "%s :: Deprecated package version, in future must be removed supports" ), referenceToThisAsset.c_str() );
+		Warnf( TEXT( "%s :: Deprecated package version, in future must be removed supports\n" ), referenceToThisAsset.c_str() );
 	}
 	else
 	{

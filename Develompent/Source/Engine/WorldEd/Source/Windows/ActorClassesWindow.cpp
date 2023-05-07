@@ -2,8 +2,13 @@
 #include "Windows/ActorClassesWindow.h"
 
 /** Selection color */
-#define CONTENTBROWSER_SELECTCOLOR					ImVec4( 0.f, 0.43f, 0.87f, 1.f )
+#define ACTORCLASSES_SELECTCOLOR					ImVec4( 0.f, 0.43f, 0.87f, 1.f )
 
+/*
+==================
+CActorClassesWindow::CClassNode::CClassNode
+==================
+*/
 CActorClassesWindow::CClassNode::CClassNode( CActorClassesWindow* InOwner, CClass* InClass /* = nullptr */ )
 	: bSelected( false )
 	, id( 0 )
@@ -11,9 +16,14 @@ CActorClassesWindow::CClassNode::CClassNode( CActorClassesWindow* InOwner, CClas
 	, parent( nullptr )
 	, owner( InOwner )
 {
-	check( InOwner );
+	Assert( InOwner );
 }
 
+/*
+==================
+CActorClassesWindow::CClassNode::~CClassNode
+==================
+*/
 CActorClassesWindow::CClassNode::~CClassNode()
 {
 	// Delete all child nodes
@@ -23,9 +33,14 @@ CActorClassesWindow::CClassNode::~CClassNode()
 	}
 }
 
+/*
+==================
+CActorClassesWindow::CClassNode::AddChild
+==================
+*/
 void CActorClassesWindow::CClassNode::AddChild( CClassNode* InNode )
 {
-	check( InNode );
+	Assert( InNode );
 
 	// If parent this node, do nothing
 	if ( InNode->parent == this )
@@ -45,9 +60,14 @@ void CActorClassesWindow::CClassNode::AddChild( CClassNode* InNode )
 	children.push_back( InNode );
 }
 
+/*
+==================
+CActorClassesWindow::CClassNode::RemoveChild
+==================
+*/
 void CActorClassesWindow::CClassNode::RemoveChild( CClassNode* InNode, bool InIsDeleteNode /* = false */ )
 {
-	check( InNode );
+	Assert( InNode );
 
 	// If parent not this node, do nothing
 	if ( InNode->parent != this )
@@ -78,6 +98,11 @@ void CActorClassesWindow::CClassNode::RemoveChild( CClassNode* InNode, bool InIs
 	}
 }
 
+/*
+==================
+CActorClassesWindow::CClassNode::Find
+==================
+*/
 CActorClassesWindow::CClassNode* CActorClassesWindow::CClassNode::Find( CClass* InClass, bool InIsRecursive /* = true */ ) const
 {
 	if ( lclass == InClass )
@@ -108,9 +133,14 @@ CActorClassesWindow::CClassNode* CActorClassesWindow::CClassNode::Find( CClass* 
 	return result;
 }
 
+/*
+==================
+CActorClassesWindow::CClassNode::GetChild
+==================
+*/
 CActorClassesWindow::CClassNode* CActorClassesWindow::CClassNode::GetChild( uint32 InIndex ) const
 {
-	check( InIndex >= 0 && InIndex < children.size() );
+	Assert( InIndex >= 0 && InIndex < children.size() );
 
 	uint32		index = 0;
 	for ( auto itNode = children.begin(), itNodeEnd = children.end(); itNode != itNodeEnd; ++itNode, ++index )
@@ -124,6 +154,11 @@ CActorClassesWindow::CClassNode* CActorClassesWindow::CClassNode::GetChild( uint
 	return nullptr;
 }
 
+/*
+==================
+CActorClassesWindow::CClassNode::Tick
+==================
+*/
 void CActorClassesWindow::CClassNode::Tick()
 {
 	if ( lclass )
@@ -133,9 +168,9 @@ void CActorClassesWindow::CClassNode::Tick()
 		if ( bSelected )
 		{
 			bNeedPopStyleColor = true;
-			ImGui::PushStyleColor( ImGuiCol_Header, CONTENTBROWSER_SELECTCOLOR );
-			ImGui::PushStyleColor( ImGuiCol_HeaderActive, CONTENTBROWSER_SELECTCOLOR );
-			ImGui::PushStyleColor( ImGuiCol_HeaderHovered, CONTENTBROWSER_SELECTCOLOR );
+			ImGui::PushStyleColor( ImGuiCol_Header, ACTORCLASSES_SELECTCOLOR );
+			ImGui::PushStyleColor( ImGuiCol_HeaderActive, ACTORCLASSES_SELECTCOLOR );
+			ImGui::PushStyleColor( ImGuiCol_HeaderHovered, ACTORCLASSES_SELECTCOLOR );
 		}
 
 		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( lclass->GetName().c_str() ), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick );
@@ -161,6 +196,11 @@ void CActorClassesWindow::CClassNode::Tick()
 	}
 }
 
+/*
+==================
+CActorClassesWindow::CClassNode::ProcessEvents
+==================
+*/
 void CActorClassesWindow::CClassNode::ProcessEvents()
 {
 	// If we clicked on item then select him
@@ -177,6 +217,11 @@ void CActorClassesWindow::CClassNode::ProcessEvents()
 	}
 }
 
+/*
+==================
+CActorClassesWindow::CClassNode::GetSelectedClasses
+==================
+*/
 void CActorClassesWindow::CClassNode::GetSelectedClasses( std::vector<CClass*>& OutSelectedNodes, bool InIsIgnoreChildren /* = false */ ) const
 {
 	if ( bSelected )
@@ -194,6 +239,11 @@ void CActorClassesWindow::CClassNode::GetSelectedClasses( std::vector<CClass*>& 
 }
 
 
+/*
+==================
+CActorClassesWindow::CActorClassesWindow
+==================
+*/
 CActorClassesWindow::CActorClassesWindow( const std::wstring& InName, CClass* InBaseClass /* = nullptr */ )
 	: CImGUILayer( InName )
 {
@@ -243,11 +293,21 @@ CActorClassesWindow::CActorClassesWindow( const std::wstring& InName, CClass* In
 	}
 }
 
+/*
+==================
+CActorClassesWindow::~CActorClassesWindow
+==================
+*/
 CActorClassesWindow::~CActorClassesWindow()
 {
 	delete root;
 }
 
+/*
+==================
+CActorClassesWindow::OnTick
+==================
+*/
 void CActorClassesWindow::OnTick()
 {
 	root->Tick();

@@ -126,8 +126,7 @@ struct SAssetReference
 	 */
 	FORCEINLINE SAssetReference( EAssetType InType = AT_Unknown, const CGuid& InGUIDAsset = CGuid(), const CGuid& InGUIDPackage = CGuid() )
 		: type( InType ), guidAsset( InGUIDAsset ), guidPackage( InGUIDPackage )
-	{
-	}
+	{}
 
 	/**
 	 * Is valid
@@ -178,7 +177,7 @@ public:
 		 */
 		FORCEINLINE std::size_t operator()( const TAssetHandle& InAssetPtr ) const
 		{
-			return appMemFastHash( InAssetPtr.reference.Get(), InAssetPtr.asset.GetTypeHash() );
+			return Sys_MemFastHash( InAssetPtr.reference.Get(), InAssetPtr.asset.GetTypeHash() );
 		}
 	};
 
@@ -1172,7 +1171,7 @@ public:
 	 */
 	FORCEINLINE void GetAssetInfo( uint32 InIndex, SAssetInfo& OutAssetInfo, CGuid* OutGuidAsset = nullptr ) const
 	{
-		check( !assetsTable.empty() && InIndex >= 0 && InIndex < assetsTable.size() );
+		Assert( !assetsTable.empty() && InIndex >= 0 && InIndex < assetsTable.size() );
 		
 		uint32		index = 0;
 		for ( auto itAsset = assetsTable.cbegin(), itAssetEnd = assetsTable.cend(); itAsset != itAssetEnd; ++itAsset, ++index )
@@ -1198,7 +1197,7 @@ public:
 	 */
 	FORCEINLINE void GetAssetInfo( uint32 InIndex, const SAssetInfo*& OutAssetInfo, CGuid* OutGuidAsset = nullptr ) const
 	{
-		check( !assetsTable.empty() && InIndex >= 0 && InIndex < assetsTable.size() );
+		Assert( !assetsTable.empty() && InIndex >= 0 && InIndex < assetsTable.size() );
 
 		uint32		index = 0;
 		for ( auto itAsset = assetsTable.cbegin(), itAssetEnd = assetsTable.cend(); itAsset != itAssetEnd; ++itAsset, ++index )
@@ -1376,7 +1375,7 @@ public:
 	 */
 	FORCEINLINE TAssetHandle<CAsset> FindAsset( const CGuid& InGUIDPackage, const CGuid& InGUIDAsset, EAssetType InType = AT_Unknown )
 	{
-		std::wstring		path = GTableOfContents.GetPackagePath( InGUIDPackage );
+		std::wstring		path = g_TableOfContents.GetPackagePath( InGUIDPackage );
 		if ( path.empty() )
 		{
 			return nullptr;
@@ -1547,7 +1546,7 @@ private:
 		FORCEINLINE SNormalizedPath( const std::wstring& InPath )
 			: path( InPath )
 		{
-			appNormalizePathSeparators( path );
+			Sys_NormalizePathSeparators( path );
 		}
 
 		/**
@@ -1558,7 +1557,7 @@ private:
 		FORCEINLINE void Set( const std::wstring& InPath )
 		{
 			path = InPath;
-			appNormalizePathSeparators( path );
+			Sys_NormalizePathSeparators( path );
 		}
 
 		/**
@@ -1576,7 +1575,7 @@ private:
 		 */
 		FORCEINLINE uint64 GetTypeHash() const
 		{
-			return appMemFastHash( ( const void* ) path.c_str(), path.size() );
+			return Sys_MemFastHash( ( const void* ) path.c_str(), path.size() );
 		}
 
 		/**
@@ -1684,14 +1683,14 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, EAssetType& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const EAssetType& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( EAssetType ) );
 	return InArchive;
 }
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, SAssetReference& InValue )
 {
-	check( InArchive.Ver() >= VER_GUIDPackages );
+	Assert( InArchive.Ver() >= VER_GUIDPackages );
 	InArchive << InValue.type;
 
 	if ( InArchive.IsLoading() && InArchive.Ver() < VER_GUIDAssets )
@@ -1711,7 +1710,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, SAssetReference& InValue 
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SAssetReference& InValue )
 {
-	check( InArchive.IsSaving() && InArchive.Ver() >= VER_GUIDPackages );
+	Assert( InArchive.IsSaving() && InArchive.Ver() >= VER_GUIDPackages );
 	InArchive << InValue.type;
 	InArchive << InValue.guidAsset;
 	InArchive << InValue.guidPackage;
@@ -1725,13 +1724,13 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CAsset>& InV
 		TSharedPtr<CAsset>		asset = InValue.ToSharedPtr();
 		InArchive << ( asset ? asset->GetAssetReference() : SAssetReference() );
 
-#if DO_CHECK
+#if ENABLED_ASSERT
 		if ( asset )
 		{
 			SAssetReference		assetRef = asset->GetAssetReference();
-			check( assetRef.guidAsset.IsValid() && assetRef.guidPackage.IsValid() );
+			Assert( assetRef.guidAsset.IsValid() && assetRef.guidPackage.IsValid() );
 		}
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 	}
 	else
 	{
@@ -1739,11 +1738,11 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CAsset>& InV
 		InArchive << assetReference;
 		if ( assetReference.IsValid() )
 		{
-			InValue = GPackageManager->FindAsset( assetReference.guidPackage, assetReference.guidAsset, assetReference.type );
+			InValue = g_PackageManager->FindAsset( assetReference.guidPackage, assetReference.guidAsset, assetReference.type );
 		}
 		else
 		{
-			InValue = GPackageManager->FindDefaultAsset( assetReference.type );
+			InValue = g_PackageManager->FindDefaultAsset( assetReference.type );
 		}
 	}
 
@@ -1752,7 +1751,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CAsset>& InV
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CAsset>& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	
 	TSharedPtr<CAsset>		asset = InValue.ToSharedPtr();
 	InArchive << ( asset ? asset->GetAssetReference() : SAssetReference() );

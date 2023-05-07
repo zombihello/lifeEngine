@@ -10,13 +10,15 @@
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
 
-/**
- * Constructor
- */
+/*
+==================
+CD3D11ShaderRHI::CD3D11ShaderRHI
+==================
+*/
 CD3D11ShaderRHI::CD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InData, uint32 InSize, const tchar* InShaderName ) :
 	CBaseShaderRHI( InFrequency, InShaderName )
 {
-	ID3D11Device*		device = static_cast< CD3D11RHI* >( GRHI )->GetD3D11Device();
+	ID3D11Device*		device = static_cast< CD3D11RHI* >( g_RHI )->GetD3D11Device();
 	HRESULT				result = 0;
 
 	// Creating DirectX shader
@@ -48,21 +50,29 @@ CD3D11ShaderRHI::CD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InDa
 		break;
 
 	default:
-		appErrorf( TEXT( "Unsupported shader frequency %i" ), InFrequency );
+		Sys_Errorf( TEXT( "Unsupported shader frequency %i" ), InFrequency );
 		break;
 	}
 
-	check( result == S_OK );
+	Assert( result == S_OK );
 }
 
+/*
+==================
+CD3D11ShaderRHI::~CD3D11ShaderRHI
+==================
+*/
 CD3D11ShaderRHI::~CD3D11ShaderRHI()
 {
 	shader.object->Release();
 }
 
-/**
- * Constructor
- */
+
+/*
+==================
+CD3D11VertexDeclarationRHI::CD3D11VertexDeclarationRHI
+==================
+*/
 CD3D11VertexDeclarationRHI::CD3D11VertexDeclarationRHI( const VertexDeclarationElementList_t& InElementList ) :
 	CBaseVertexDeclarationRHI( InElementList ),
 	streamCount( 0 )
@@ -83,7 +93,7 @@ CD3D11VertexDeclarationRHI::CD3D11VertexDeclarationRHI( const VertexDeclarationE
 		case VET_UByte4:		d3dElement.Format = DXGI_FORMAT_R8G8B8A8_UINT;													break;
 		case VET_UByte4N:		d3dElement.Format = DXGI_FORMAT_R8G8B8A8_UNORM;													break;
 		case VET_Color:			d3dElement.Format = DXGI_FORMAT_R8G8B8A8_UNORM;													break;
-		default:				appErrorf( TEXT( "Unknown RHI vertex element type %u" ), InElementList[ elementIndex ].type );	break;
+		default:				Sys_Errorf( TEXT( "Unknown RHI vertex element type %u" ), InElementList[ elementIndex ].type );	break;
 		}
 
 		switch ( element.usage )
@@ -110,40 +120,45 @@ CD3D11VertexDeclarationRHI::CD3D11VertexDeclarationRHI( const VertexDeclarationE
 	}
 }
 
-/**
- * Get hash of vertex declaration
- */
+/*
+==================
+CD3D11VertexDeclarationRHI::GetHash
+==================
+*/
 uint64 CD3D11VertexDeclarationRHI::GetHash( uint64 InHash /*= 0*/ ) const
 {
-	return appMemFastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint64 )vertexElements.size(), InHash );
+	return Sys_MemFastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint64 )vertexElements.size(), InHash );
 }
 
-/**
- * Constructor of CD3D11BoundShaderStateRHI
- */
+
+/*
+==================
+CD3D11BoundShaderStateRHI::CD3D11BoundShaderStateRHI
+==================
+*/
 CD3D11BoundShaderStateRHI::CD3D11BoundShaderStateRHI( const tchar* InDebugName, const CBoundShaderStateKey& InKey, VertexDeclarationRHIRef_t InVertexDeclaration, VertexShaderRHIRef_t InVertexShader, PixelShaderRHIRef_t InPixelShader, HullShaderRHIRef_t InHullShader /*= nullptr*/, DomainShaderRHIRef_t InDomainShader /*= nullptr*/, GeometryShaderRHIRef_t InGeometryShader /*= nullptr*/ ) :
 	CBaseBoundShaderStateRHI( InKey, InVertexDeclaration, InVertexShader, InPixelShader, InHullShader, InDomainShader, InGeometryShader ),
 	d3d11InputLayout( nullptr )
 {
-	CD3D11RHI*		rhi = ( CD3D11RHI* )GRHI;
-	check( rhi );
+	CD3D11RHI*		rhi = ( CD3D11RHI* )g_RHI;
+	Assert( rhi );
 
 	ID3D11Device*	d3d11Device = rhi->GetD3D11Device();
-	check( d3d11Device );
+	Assert( d3d11Device );
 
 	const std::vector< D3D11_INPUT_ELEMENT_DESC >&		d3d11VertexElements = ( ( CD3D11VertexDeclarationRHI* )InVertexDeclaration.GetPtr() )->GetVertexElements();
 	const std::vector< byte >&							vertexShaderBytecode = ( ( CD3D11VertexShaderRHI* )InVertexShader.GetPtr() )->GetCode();
 	
-#if DO_CHECK
+#if ENABLED_ASSERT
 	HRESULT			result = d3d11Device->CreateInputLayout( d3d11VertexElements.data(), ( uint32 )d3d11VertexElements.size(), vertexShaderBytecode.data(), vertexShaderBytecode.size(), &d3d11InputLayout );
 	if ( result != S_OK )
 	{
-		LE_LOG( LT_Warning, LC_Shader, TEXT( "d3d11Device->CreateInputLayout failed. Dumping the vertex-shader assembly and the vertex declaration.\n" ) );
+		Warnf( TEXT( "d3d11Device->CreateInputLayout failed. Dumping the vertex-shader assembly and the vertex declaration.\n\n" ) );
 		for ( uint32 index = 0, count = ( uint32 )d3d11VertexElements.size(); index < count; ++index )
 		{
 			const D3D11_INPUT_ELEMENT_DESC&			d3d11InputElementDesc = d3d11VertexElements[ index ];
 
-			LE_LOG( LT_Warning, LC_Shader, TEXT( "VertexElements[%d]: SemanticName=%s SemanticIndex=%d InputSlot=%d AlignedByteOffset=%d" ),
+			Warnf( TEXT( "VertexElements[%d]: SemanticName=%s SemanticIndex=%d InputSlot=%d AlignedByteOffset=%d\n" ),
 					index,
 					ANSI_TO_TCHAR( d3d11InputElementDesc.SemanticName ),
 					d3d11InputElementDesc.SemanticIndex,
@@ -155,29 +170,31 @@ CD3D11BoundShaderStateRHI::CD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 		result = D3DDisassemble( vertexShaderBytecode.data(), vertexShaderBytecode.size(), false, nullptr, &vertexShaderAssembly );
 		if ( result == S_OK )
 		{
-			LE_LOG( LT_Warning, LC_Shader, TEXT( "VertexShaderAssembly: %s" ), ANSI_TO_TCHAR( vertexShaderAssembly->GetBufferPointer() ) );
+			Warnf( TEXT( "VertexShaderAssembly: %s\n" ), ANSI_TO_TCHAR( vertexShaderAssembly->GetBufferPointer() ) );
 			vertexShaderAssembly->Release();
 			vertexShaderAssembly = nullptr;
 		}
 
-		check( false );
+		Assert( false );
 	}
 #else
 	d3d11Device->CreateInputLayout( d3d11VertexElements.data(), ( uint32 )d3d11VertexElements.size(), vertexShaderBytecode.data(), vertexShaderBytecode.size(), &d3d11InputLayout );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 	
 #if !SHIPPING_BUILD
 	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
-/**
- * Destructor of CD3D11BoundShaderStateRHI
- */
+/*
+==================
+CD3D11BoundShaderStateRHI::~CD3D11BoundShaderStateRHI
+==================
+*/
 CD3D11BoundShaderStateRHI::~CD3D11BoundShaderStateRHI()
 {
-	CD3D11RHI*		rhi = ( CD3D11RHI* )GRHI;
-	check( rhi );
+	CD3D11RHI*		rhi = ( CD3D11RHI* )g_RHI;
+	Assert( rhi );
 
 	d3d11InputLayout->Release();
 	rhi->GetBoundShaderStateHistory().Remove( key );

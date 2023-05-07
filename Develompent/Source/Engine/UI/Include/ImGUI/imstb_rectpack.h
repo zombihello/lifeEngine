@@ -461,7 +461,7 @@ static stbrp__findresult stbrp__skyline_pack_rectangle(stbrp_context *context, i
 
    // bail if:
    //    1. it failed
-   //    2. the best node doesn't fit (we don't always check this)
+   //    2. the best node doesn't fit (we don't always Assert this)
    //    3. we're out of memory
    if (res.prev_link == NULL || res.y + height > context->height || context->free_head == NULL) {
       res.prev_link = NULL;

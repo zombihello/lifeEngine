@@ -25,33 +25,6 @@ enum ELogType
 
 /**
  * @ingroup Core
- * @brief Enumerating of log categories
- */
-enum ELogCategory
-{
-    LC_None,                /**< No category */
-    LC_General,             /**< General category */
-    LC_Init,                /**< Initialize category  */
-    LC_Script,              /**< Log from script */
-    LC_Dev,                 /**< Development category */
-    LC_Shader,              /**< Shader category */
-    LC_Input,               /**< Input category */
-    LC_Package,             /**< Package category */
-    LC_Audio,               /**< Audio category */
-    LC_Physics,             /**< Physics category */
-    LC_Movie,               /**< Movie category */
-    LC_Render,              /**< Render category */
-    LC_RHI,                 /**< RHI category */
-    LC_Console,             /**< Console category */
-
-#if WITH_EDITOR
-    LC_Editor,              /**< Editor category */
-    LC_Commandlet           /**< Commandlet category */
-#endif // WITH_EDITOR
-};
-
-/**
- * @ingroup Core
  * @brief Enumerating of log color
  */
 enum ELogColor
@@ -74,17 +47,17 @@ public:
     /**
      * @brief Constructor
      */
-                        CBaseLogger() {}
+    CBaseLogger() {}
 
     /**
      * @brief Destructor
      */
-    virtual             ~CBaseLogger() {}
+    virtual ~CBaseLogger() {}
 
     /**
      * @brief Initialize logger
      */
-    virtual void        Init() {}
+    virtual void Init() {}
 
     /**
      * @ingroup Core
@@ -92,15 +65,14 @@ public:
      *
      * @param[in] InMessage Message
      * @param[in] InLogType Type of message
-     * @param[in] InLogCategory Log category
      */
-    virtual void        Serialize( const tchar* InMessage, ELogType InLogType, ELogCategory InLogCategory ) {};
+    virtual void Serialize( const tchar* InMessage, ELogType InLogType ) {};
 
     /**
      * @ingroup Core
      * @brief Flush of output device
      */
-    virtual void        Flush() {};
+    virtual void Flush() {};
 
     /**
      * @ingroup Core
@@ -110,30 +82,29 @@ public:
 	 * as we might have to call "delete" which cannot be done for static/ global
 	 * objects
      */
-    virtual void        TearDown() {};
+    virtual void TearDown() {};
 
     /**
      * @ingroup Core
      * @brief Print message to output device
      *
      * @param[in] InLogType Type of message
-     * @param[in] InLogCategory Log category 
      * @param[in] InMessage Message
      * @param[in] ... Other arguments of message
      */
-    void                Logf( ELogType InLogType, ELogCategory InLogCategory, const tchar* InMessage, ... );
+    void Printf( ELogType InLogType, const tchar* InMessage, ... );
 
     /**
      * @brief Set color for text in log
      * 
      * @param InLogColor Log color
      */
-    virtual void        SetTextColor( ELogColor InLogColor ) {}
+    virtual void SetTextColor( ELogColor InLogColor ) {}
 
     /**
      * @brief Reset color text to default
      */
-    virtual void        ResetTextColor() {}
+    virtual void ResetTextColor() {}
 };
 
 #endif // !BASELOGGER_H

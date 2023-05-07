@@ -83,19 +83,19 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~CBaseVertexBufferRHI()												{}
+	virtual ~CBaseVertexBufferRHI() {}
 
 	/**
 	 * @brief Get usage flags
 	 * @return Usage flags
 	 */
-	FORCEINLINE uint32 GetUsage() const											{ return usage; }
+	FORCEINLINE uint32 GetUsage() const { return usage; }
 
 	/**
 	 * @brief Get buffer size
 	 * @return Buffer size
 	 */
-	FORCEINLINE uint32 GetSize() const											{ return size; }
+	FORCEINLINE uint32 GetSize() const { return size; }
 
 private:
 	uint32			usage;		/**< Usage flags */
@@ -121,25 +121,25 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~CBaseIndexBufferRHI()							{}
+	virtual ~CBaseIndexBufferRHI() {}
 
 	/**
 	 * @brief Get usage flags
 	 * @return Usage flags
 	 */
-	FORCEINLINE uint32 GetUsage() const						{ return usage; }
+	FORCEINLINE uint32 GetUsage() const { return usage; }
 
 	/**
 	 * @brief Get buffer size
 	 * @return Buffer size
 	 */
-	FORCEINLINE uint32 GetSize() const						{ return size; }
+	FORCEINLINE uint32 GetSize() const { return size; }
 
 	/**
 	 * @brief Get stride
 	 * @return Stride of struct
 	 */
-	FORCEINLINE uint32 GetStride() const					{ return stride; }
+	FORCEINLINE uint32 GetStride() const { return stride; }
 
 private:
 	uint32			usage;		/**< Usage flags */

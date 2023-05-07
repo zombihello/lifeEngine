@@ -10,20 +10,20 @@
 // GLOBALS
 // -------------
 
-CScriptEngine*												GScriptEngine = new CScriptEngine();
-CShaderManager*												GShaderManager = new CShaderManager();
-std::wstring												GCookedDir = TEXT( "" );
-class CBaseEngine*											GEngine = nullptr;
-CInputSystem*												GInputSystem = new CInputSystem();
-CWorld*														GWorld = new CWorld();
-bool														GUseMaxTickRate = true;
-CCameraManager*												GCameraManager = new CCameraManager();
+CScriptEngine*												g_ScriptEngine = new CScriptEngine();
+CShaderManager*												g_ShaderManager = new CShaderManager();
+std::wstring												g_CookedDir = TEXT( "" );
+class CBaseEngine*											g_Engine = nullptr;
+CInputSystem*												g_InputSystem = new CInputSystem();
+CWorld*														g_World = new CWorld();
+bool														g_UseMaxTickRate = true;
+CCameraManager*												g_CameraManager = new CCameraManager();
 
 #if WITH_EDITOR
-std::vector< std::pair< std::wstring, ESurfaceType > >		GSurfaceTypeNames( 1, std::make_pair( TEXT( "Default" ), ST_Default ) );
-bool														GIsCookEditorContent = false;
-bool														GAllowDebugShaderDump = false;
+std::vector< std::pair< std::wstring, ESurfaceType > >		g_SurfaceTypeNames( 1, std::make_pair( TEXT( "Default" ), ST_Default ) );
+bool														g_IsCookEditorContent = false;
+bool														g_AllowDebugShaderDump = false;
 #endif // WITH_EDITOR
 
-class CFullScreenMovieSupport*								GFullScreenMovie = nullptr;
-CConsoleSystem												GConsoleSystem;
+class CFullScreenMovieSupport*								g_FullScreenMovie = nullptr;
+CConsoleSystem												g_ConsoleSystem;

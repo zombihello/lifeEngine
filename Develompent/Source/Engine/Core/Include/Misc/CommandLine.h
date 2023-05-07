@@ -20,7 +20,7 @@
 
 /**
  * @ingroup Core
- * @brief Holds parsed data from command line like strings, provides access to a single global GCommandLine object
+ * @brief Holds parsed data from command line like strings, provides access to a single global g_CommandLine object
  * 
  * Usage: 
  * @code

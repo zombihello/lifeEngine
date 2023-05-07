@@ -47,7 +47,7 @@ enum ECompressionFlags
  * @param[in] InChar Tested char
  * @return Return true if InChar is whitespace, else return false
  */
-FORCEINLINE bool appIsWhitespace( tchar InChar )
+FORCEINLINE bool Sys_IsWhitespace( tchar InChar )
 {
 	return InChar == TEXT( ' ' ) || InChar == TEXT( '\t' );
 }
@@ -58,7 +58,7 @@ FORCEINLINE bool appIsWhitespace( tchar InChar )
  * 
  * @param InOutFilename Path to file
  */
-FORCEINLINE void appNormalizePathSeparators( std::wstring& InOutFilename )
+FORCEINLINE void Sys_NormalizePathSeparators( std::wstring& InOutFilename )
 {
 	bool		bIsNeedDeleteNextSeparator = false;
 	for ( uint32 index = 0, count = InOutFilename.size(); index < count; ++index )
@@ -89,7 +89,7 @@ FORCEINLINE void appNormalizePathSeparators( std::wstring& InOutFilename )
  * Return base directory of the game
  * @return Return base directory of the game
  */
-FORCEINLINE std::wstring appBaseDir()
+FORCEINLINE std::wstring Sys_BaseDir()
 {
 	return TEXT( ".." ) PATH_SEPARATOR TEXT( ".." ) PATH_SEPARATOR;
 }
@@ -99,9 +99,9 @@ FORCEINLINE std::wstring appBaseDir()
  * Return directory of the game
  * @return Return directory of the game
  */
-FORCEINLINE std::wstring appGameDir()
+FORCEINLINE std::wstring Sys_GameDir()
 {
-	return CString::Format( TEXT( ".." ) PATH_SEPARATOR TEXT( ".." ) PATH_SEPARATOR TEXT( "%s" ) PATH_SEPARATOR, GGameName.c_str() );
+	return CString::Format( TEXT( ".." ) PATH_SEPARATOR TEXT( ".." ) PATH_SEPARATOR TEXT( "%s" ) PATH_SEPARATOR, g_GameName.c_str() );
 }
 
 /**
@@ -109,7 +109,7 @@ FORCEINLINE std::wstring appGameDir()
  * Return shader directory
  * @return Return shader directory
  */
-FORCEINLINE std::wstring appShaderDir()
+FORCEINLINE std::wstring Sys_ShaderDir()
 {
 	return TEXT( ".." ) PATH_SEPARATOR TEXT( ".." ) PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Shaders" ) PATH_SEPARATOR;
 }
@@ -119,14 +119,14 @@ FORCEINLINE std::wstring appShaderDir()
  * @brief Get computer name
  * @return Return computer name
  */
-std::wstring appComputerName();
+std::wstring Sys_ComputerName();
 
 /**
  * @ingroup Core
  * @brief Get user name
  * @return Return user name
  */
-std::wstring appUserName();
+std::wstring Sys_UserName();
 
 /**
  * @ingroup Core
@@ -136,9 +136,9 @@ std::wstring appUserName();
  * @param[in] InHash Start hash
  * @return Return hash
  */
-FORCEINLINE uint64 appCalcHash( const std::wstring& InName, uint64 InHash = 0 )
+FORCEINLINE uint64 Sys_CalcHash( const std::wstring& InName, uint64 InHash = 0 )
 {
-	return appMemFastHash( InName.data(), ( uint64 )InName.size() * sizeof( std::wstring::value_type ), InHash );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
+	return Sys_MemFastHash( InName.data(), ( uint64 )InName.size() * sizeof( std::wstring::value_type ), InHash );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
 }
 
 /**
@@ -153,7 +153,7 @@ FORCEINLINE uint64 appCalcHash( const std::wstring& InName, uint64 InHash = 0 )
  * @param[in] InUncompressedSize Size of uncompressed data in bytes
  * @return true if compression succeeds, false if it fails because CompressedBuffer was too small or other reasons
  */
-bool appCompressMemory( ECompressionFlags InFlags, void* InCompressedBuffer, uint32& InOutCompressedSize, const void* InUncompressedBuffer, uint32 InUncompressedSize );
+bool Sys_CompressMemory( ECompressionFlags InFlags, void* InCompressedBuffer, uint32& InOutCompressedSize, const void* InUncompressedBuffer, uint32 InUncompressedSize );
 
 /**
  * @ingroup Core
@@ -167,14 +167,14 @@ bool appCompressMemory( ECompressionFlags InFlags, void* InCompressedBuffer, uin
  * @param[in] InCompressedSize Size of CompressedBuffer data in bytes
  * @return true if compression succeeds, false if it fails because CompressedBuffer was too small or other reasons
  */
-bool appUncompressMemory( ECompressionFlags InFlags, void* InUncompressedBuffer, uint32 InUncompressedSize, const void* InCompressedBuffer, uint32 InCompressedSize );
+bool Sys_UncompressMemory( ECompressionFlags InFlags, void* InUncompressedBuffer, uint32 InUncompressedSize, const void* InCompressedBuffer, uint32 InCompressedSize );
 
 /**
  * @ingroup Core
  * Does per platform initialization of timing information and returns the current time
  * @return Return current time
  */
-extern double appInitTiming();
+double Sys_InitTiming();
 
 // Platform specific functions
 #if PLATFORM_WINDOWS

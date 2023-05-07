@@ -9,15 +9,21 @@
 #include "System/AssetsImport.h"
 
 /** Table pathes to icons */
-static const tchar* GStaticMeshEditorIconPaths[] =
+static const tchar* s_StaticMeshEditorIconPaths[] =
 {
 	TEXT( "Import.png" )		// IT_Import
 };
-static_assert( ARRAY_COUNT( GStaticMeshEditorIconPaths ) == CStaticMeshEditorWindow::IT_Num, "Need full init GStaticMeshEditorIconPaths array" );
+static_assert( ARRAY_COUNT( s_StaticMeshEditorIconPaths ) == CStaticMeshEditorWindow::IT_Num, "Need full init s_StaticMeshEditorIconPaths array" );
 
 /** Macro size button in menu bar */
 #define  STATICMESHEDITOR_MENUBAR_BUTTONSIZE	ImVec2( 16.f, 16.f )
 
+
+/*
+==================
+CStaticMeshEditorWindow::CStaticMeshEditorWindow
+==================
+*/
 CStaticMeshEditorWindow::CStaticMeshEditorWindow( const TSharedPtr<CStaticMesh>& InStaticMesh )
 	: CImGUILayer( CString::Format( TEXT( "Static Mesh Editor - %s" ), InStaticMesh->GetAssetName().c_str() ) )
 	, staticMesh( InStaticMesh )
@@ -35,6 +41,11 @@ CStaticMeshEditorWindow::CStaticMeshEditorWindow( const TSharedPtr<CStaticMesh>&
 	assetsReloadedHandle = SEditorDelegates::onAssetsReloaded.Add(		std::bind( &CStaticMeshEditorWindow::OnAssetsReloaded,	this, std::placeholders::_1							) );
 }
 
+/*
+==================
+CStaticMeshEditorWindow::~CStaticMeshEditorWindow
+==================
+*/
 CStaticMeshEditorWindow::~CStaticMeshEditorWindow()
 {
 	viewportWidget.SetViewportClient( nullptr, false );
@@ -45,6 +56,11 @@ CStaticMeshEditorWindow::~CStaticMeshEditorWindow()
 	SEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 }
 
+/*
+==================
+CStaticMeshEditorWindow::Init
+==================
+*/
 void CStaticMeshEditorWindow::Init()
 {
 	CImGUILayer::Init();
@@ -52,8 +68,8 @@ void CStaticMeshEditorWindow::Init()
 
 	// Loading icons
 	std::wstring			errorMsg;
-	PackageRef_t			package = GPackageManager->LoadPackage( TEXT( "" ), true );
-	check( package );
+	PackageRef_t			package = g_PackageManager->LoadPackage( TEXT( "" ), true );
+	Assert( package );
 
 	for ( uint32 index = 0; index < IT_Num; ++index )
 	{
@@ -63,10 +79,10 @@ void CStaticMeshEditorWindow::Init()
 		if ( !assetHandle.IsAssetValid() )
 		{
 			std::vector<TSharedPtr<CAsset>>		result;
-			if ( !CTexture2DImporter::Import( appBaseDir() + TEXT( "Engine/Editor/Icons/" ) + GStaticMeshEditorIconPaths[index], result, errorMsg ) )
+			if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Icons/" ) + s_StaticMeshEditorIconPaths[index], result, errorMsg ) )
 			{
-				LE_LOG( LT_Warning, LC_Editor, TEXT( "Fail to load static mesh editor icon '%s' for type 0x%X. Message: %s" ), GStaticMeshEditorIconPaths[index], index, errorMsg.c_str() );
-				assetHandle = GEngine->GetDefaultTexture();
+				Warnf( TEXT( "Fail to load static mesh editor icon '%s' for type 0x%X. Message: %s\n" ), s_StaticMeshEditorIconPaths[index], index, errorMsg.c_str() );
+				assetHandle = g_Engine->GetDefaultTexture();
 			}
 			else
 			{
@@ -92,13 +108,18 @@ void CStaticMeshEditorWindow::Init()
 	UpdateAssetInfo();
 }
 
+/*
+==================
+CStaticMeshEditorWindow::UpdateAssetInfo
+==================
+*/
 void CStaticMeshEditorWindow::UpdateAssetInfo()
 {
 	for ( uint32 index = 0, count = selectAssetWidgets.size(); index < count; ++index )
 	{
 		SSelectAssetHandle&			selectAssetHandle	= selectAssetWidgets[index];
 		TAssetHandle<CMaterial>		materialRef			= staticMesh->GetMaterial( index );
-		if ( materialRef.IsAssetValid() && !GPackageManager->IsDefaultAsset( materialRef ) )
+		if ( materialRef.IsAssetValid() && !g_PackageManager->IsDefaultAsset( materialRef ) )
 		{
 			std::wstring	assetReference;
 			MakeReferenceToAsset( materialRef, assetReference );
@@ -114,6 +135,11 @@ void CStaticMeshEditorWindow::UpdateAssetInfo()
 	}
 }
 
+/*
+==================
+CStaticMeshEditorWindow::OnTick
+==================
+*/
 void CStaticMeshEditorWindow::OnTick()
 {
 	// Menu bar
@@ -121,10 +147,10 @@ void CStaticMeshEditorWindow::OnTick()
 	{
 		// Button 'Import'
 		{
-			if ( ImGui::ImageButton( GImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), STATICMESHEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), STATICMESHEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				std::wstring		errorMsg;
-				if ( !GAssetFactory.Reimport( staticMesh, errorMsg ) )
+				if ( !g_AssetFactory.Reimport( staticMesh, errorMsg ) )
 				{
 					OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The static mesh not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
 				}
@@ -214,11 +240,11 @@ void CStaticMeshEditorWindow::OnTick()
 				// Init file dialog settings
 				fileDialogSetup.SetMultiselection( false );
 				fileDialogSetup.SetTitle( TEXT( "Select New Source File" ) );
-				fileDialogSetup.SetDirectory( appGameDir() + PATH_SEPARATOR + TEXT( "Content/" ) );
-				fileDialogSetup.AddFormat( GAssetFactory.GetImporterInfo( AT_StaticMesh ), ConvertAssetTypeToText( AT_StaticMesh ) );
+				fileDialogSetup.SetDirectory( Sys_GameDir() + PATH_SEPARATOR + TEXT( "Content/" ) );
+				fileDialogSetup.AddFormat( g_AssetFactory.GetImporterInfo( AT_StaticMesh ), ConvertAssetTypeToText( AT_StaticMesh ) );
 
 				// Show open file dialog
-				if ( appShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
+				if ( Sys_ShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) && !openFileDialogResult.files.empty() )
 				{
 					staticMesh->SetAssetSourceFile( openFileDialogResult.files[0] );
 				}
@@ -235,6 +261,11 @@ void CStaticMeshEditorWindow::OnTick()
 	}
 }
 
+/*
+==================
+CStaticMeshEditorWindow::ProcessEvent
+==================
+*/
 void CStaticMeshEditorWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// Process event in viewport client
@@ -244,6 +275,11 @@ void CStaticMeshEditorWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 	}
 }
 
+/*
+==================
+CStaticMeshEditorWindow::OnSelectedAsset
+==================
+*/
 void CStaticMeshEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::wstring& InNewAssetReference )
 {
 	if ( !staticMesh )
@@ -251,18 +287,18 @@ void CStaticMeshEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::ws
 		return;
 	}
 
-	check( InAssetSlot < selectAssetWidgets.size() );
+	Assert( InAssetSlot < selectAssetWidgets.size() );
 	SSelectAssetHandle&		selectAssetHandle = selectAssetWidgets[InAssetSlot];
 
 	// If asset reference is valid, we find asset
 	TAssetHandle<CMaterial>		newMaterialRef;
 	if ( !InNewAssetReference.empty() )
 	{
-		newMaterialRef = GPackageManager->FindAsset( InNewAssetReference, AT_Material );
+		newMaterialRef = g_PackageManager->FindAsset( InNewAssetReference, AT_Material );
 	}
 
 	// If asset is not valid we clear asset reference
-	if ( !newMaterialRef.IsAssetValid() || GPackageManager->IsDefaultAsset( newMaterialRef ) )
+	if ( !newMaterialRef.IsAssetValid() || g_PackageManager->IsDefaultAsset( newMaterialRef ) )
 	{
 		newMaterialRef = nullptr;
 		selectAssetHandle.widget->SetAssetReference( TEXT( "" ), false );
@@ -272,6 +308,11 @@ void CStaticMeshEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::ws
 	staticMesh->SetMaterial( InAssetSlot, newMaterialRef );
 }
 
+/*
+==================
+CStaticMeshEditorWindow::OnAssetsCanDelete
+==================
+*/
 void CStaticMeshEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, SCanDeleteAssetResult& OutResult )
 {
 	CAsset::SetDependentAssets_t		dependentAssets;
@@ -299,6 +340,11 @@ void CStaticMeshEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CA
 	}
 }
 
+/*
+==================
+CStaticMeshEditorWindow::OnAssetsReloaded
+==================
+*/
 void CStaticMeshEditorWindow::OnAssetsReloaded( const std::vector<TSharedPtr<CAsset>>& InAssets )
 {
 	// If static mesh who is edition reloaded, we update UI
@@ -312,6 +358,11 @@ void CStaticMeshEditorWindow::OnAssetsReloaded( const std::vector<TSharedPtr<CAs
 	}
 }
 
+/*
+==================
+CStaticMeshEditorWindow::OnOpenAssetEditor
+==================
+*/
 void CStaticMeshEditorWindow::OnOpenAssetEditor( uint32 InAssetSlot )
 {
 	if ( !staticMesh )
@@ -319,7 +370,7 @@ void CStaticMeshEditorWindow::OnOpenAssetEditor( uint32 InAssetSlot )
 		return;
 	}
 
-	check( InAssetSlot < selectAssetWidgets.size() );
+	Assert( InAssetSlot < selectAssetWidgets.size() );
 	const SSelectAssetHandle&	selectAssetHandle = selectAssetWidgets[InAssetSlot];
 
 	// Open material editor if asset is valid

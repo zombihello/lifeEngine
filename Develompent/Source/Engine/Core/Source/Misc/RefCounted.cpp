@@ -1,26 +1,32 @@
 #include "Misc/RefCounted.h"
 
-/**
- * Constructor
- */
+/*
+==================
+CRefCounted::CRefCounted
+==================
+*/
 CRefCounted::CRefCounted() :
 	countReferences( 0 )
 {}
 
-/**
- * Destructor
- */
+/*
+==================
+CRefCounted::~CRefCounted
+==================
+*/
 CRefCounted::~CRefCounted()
 {
-	check( !countReferences );
+	Assert( !countReferences );
 }
 
-/**
- * Decrement reference count and delete self if no more references
- */
+/*
+==================
+CRefCounted::ReleaseRef
+==================
+*/
 void CRefCounted::ReleaseRef()
 {	 
-	if ( !countReferences || !appInterlockedDecrement( ( int32* )&countReferences ) )
+	if ( !countReferences || !Sys_InterlockedDecrement( ( int32* )&countReferences ) )
 	{
 		delete this;
 	}

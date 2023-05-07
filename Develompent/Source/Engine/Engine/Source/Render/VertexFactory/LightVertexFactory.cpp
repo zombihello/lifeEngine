@@ -11,7 +11,7 @@ IMPLEMENT_VERTEX_FACTORY_TYPE( CLightVertexFactory, TEXT( "LightVertexFactory.hl
 //
 // GLOBALS
 //
-TGlobalResource<CLightVertexDeclaration>			GLightVertexDeclaration;
+TGlobalResource<CLightVertexDeclaration>			g_LightVertexDeclaration;
 
 /**
  * @ingroup Engine
@@ -71,6 +71,12 @@ struct TLightInstanceBuffer<LT_Directional> : public SBaseLightInstanceBuffer
 	Vector		direction;					/**< Direction */
 };
 
+
+/*
+==================
+CLightVertexDeclaration::InitRHI
+==================
+*/
 void CLightVertexDeclaration::InitRHI()
 {
 	// Init vertex declaration for point light
@@ -91,7 +97,7 @@ void CLightVertexDeclaration::InitRHI()
 			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Point> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Point>, radius ),						VET_Float1,	VEU_BlendWeight,		1, true ),
 #endif // USE_INSTANCING
 		};
-		vertexDeclarationRHI[LT_Point] = GRHI->CreateVertexDeclaration( vertexDeclElementList );
+		vertexDeclarationRHI[LT_Point] = g_RHI->CreateVertexDeclaration( vertexDeclElementList );
 	}
 
 	// Init vertex declaration for spot light
@@ -115,7 +121,7 @@ void CLightVertexDeclaration::InitRHI()
 			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Spot> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Spot>, direction ),						VET_Float3,	VEU_Normal,				0, true ),
 #endif // USE_INSTANCING
 		};
-		vertexDeclarationRHI[LT_Spot] = GRHI->CreateVertexDeclaration( vertexDeclElementList );
+		vertexDeclarationRHI[LT_Spot] = g_RHI->CreateVertexDeclaration( vertexDeclElementList );
 	}
 
 	// Init vertex declaration for directional light
@@ -131,10 +137,15 @@ void CLightVertexDeclaration::InitRHI()
 			SVertexElement( CLightVertexFactory::SSS_Instance,	sizeof( TLightInstanceBuffer<LT_Directional> ),	STRUCT_OFFSET( TLightInstanceBuffer<LT_Directional>, direction ),				VET_Float3,	VEU_Normal,				0, true ),
 #endif // USE_INSTANCING
 		};
-		vertexDeclarationRHI[LT_Directional] = GRHI->CreateVertexDeclaration( vertexDeclElementList );
+		vertexDeclarationRHI[LT_Directional] = g_RHI->CreateVertexDeclaration( vertexDeclElementList );
 	}
 }
 
+/*
+==================
+CLightVertexDeclaration::ReleaseRHI
+==================
+*/
 void CLightVertexDeclaration::ReleaseRHI()
 {
 	vertexDeclarationRHI[LT_Point].SafeRelease();
@@ -143,73 +154,118 @@ void CLightVertexDeclaration::ReleaseRHI()
 }
 
 
+/*
+==================
+CLightVertexShaderParameters::CLightVertexShaderParameters
+==================
+*/
 CLightVertexShaderParameters::CLightVertexShaderParameters()
 	: CGeneralVertexShaderParameters( CLightVertexFactory::staticType.SupportsInstancing() )
 {}
 
+/*
+==================
+CLightVertexShaderParameters::SetMesh
+==================
+*/
 void CLightVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	appErrorf( TEXT( "CLightVertexShaderParameters::SetMesh( MeshBatch ) Not supported" ) );
+	Sys_Errorf( TEXT( "CLightVertexShaderParameters::SetMesh( MeshBatch ) Not supported" ) );
 }
 
+/*
+==================
+CLightVertexShaderParameters::SetMesh
+==================
+*/
 void CLightVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CPointLightComponent>>& InLights, const class CLightVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
 	if ( !bSupportsInstancing )
 	{
-		appErrorf( TEXT( "Not implemented, need add it in future" ) );
+		Sys_Errorf( TEXT( "Not implemented, need add it in future" ) );
 	}
 	else
 	{
-		check( InVertexFactory );
+		Assert( InVertexFactory );
 		InVertexFactory->SetupInstancing( InDeviceContextRHI, InLights, InView, InNumInstances, InStartInstanceID );
 	}
 }
 
+/*
+==================
+CLightVertexShaderParameters::SetMesh
+==================
+*/
 void CLightVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CLightVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
 	if ( !bSupportsInstancing )
 	{
-		appErrorf( TEXT( "Not implemented, need add it in future" ) );
+		Sys_Errorf( TEXT( "Not implemented, need add it in future" ) );
 	}
 	else
 	{
-		check( InVertexFactory );
+		Assert( InVertexFactory );
 		InVertexFactory->SetupInstancing( InDeviceContextRHI, InLights, InView, InNumInstances, InStartInstanceID );
 	}
 }
 
+/*
+==================
+CLightVertexShaderParameters::SetMesh
+==================
+*/
 void CLightVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CLightVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
 	if ( !bSupportsInstancing )
 	{
-		appErrorf( TEXT( "Not implemented, need add it in future" ) );
+		Sys_Errorf( TEXT( "Not implemented, need add it in future" ) );
 	}
 	else
 	{
-		check( InVertexFactory );
+		Assert( InVertexFactory );
 		InVertexFactory->SetupInstancing( InDeviceContextRHI, InLights, InView, InNumInstances, InStartInstanceID );
 	}
 }
 
 
+/*
+==================
+CLightVertexFactory::CLightVertexFactory
+==================
+*/
 CLightVertexFactory::CLightVertexFactory( ELightType InLightType )
 	: lightType( InLightType )
 {}
 
+/*
+==================
+CLightVertexFactory::InitRHI
+==================
+*/
 void CLightVertexFactory::InitRHI()
 {
-	InitDeclaration( GLightVertexDeclaration.GetVertexDeclarationRHI( lightType ) );
+	InitDeclaration( g_LightVertexDeclaration.GetVertexDeclarationRHI( lightType ) );
 }
 
+/*
+==================
+CLightVertexFactory::SetupInstancing
+==================
+*/
 void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	appErrorf( TEXT( "CLightVertexFactory::SetupInstancing( SMeshBatch ) :: Not supported" ) );
+	Sys_Errorf( TEXT( "CLightVertexFactory::SetupInstancing( SMeshBatch ) :: Not supported" ) );
 }
 
+/*
+==================
+CLightVertexFactory::SetupInstancing
+==================
+*/
 void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CPointLightComponent>>& InLights, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	check( lightType == LT_Point );
-	check( InStartInstanceID < InLights.size() && InNumInstances <= InLights.size() - InStartInstanceID );
+	Assert( lightType == LT_Point );
+	Assert( InStartInstanceID < InLights.size() && InNumInstances <= InLights.size() - InStartInstanceID );
 
 	std::vector<TLightInstanceBuffer<LT_Point>>		instanceBuffers;
 	instanceBuffers.resize( InNumInstances );
@@ -227,13 +283,18 @@ void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDevice
 		instanceBuffer.radius									= pointLightComponent->GetRadius();
 	}
 
-	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Point> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Point> ), InNumInstances );
+	g_RHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Point> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Point> ), InNumInstances );
 }
 
+/*
+==================
+CLightVertexFactory::SetupInstancing
+==================
+*/
 void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	check( lightType == LT_Spot );
-	check( InStartInstanceID < InLights.size() && InNumInstances <= InLights.size() - InStartInstanceID );
+	Assert( lightType == LT_Spot );
+	Assert( InStartInstanceID < InLights.size() && InNumInstances <= InLights.size() - InStartInstanceID );
 
 	std::vector<TLightInstanceBuffer<LT_Spot>>		instanceBuffers;
 	instanceBuffers.resize( InNumInstances );
@@ -258,13 +319,18 @@ void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDevice
 		instanceBuffer.direction									= direction;
 	}
 
-	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Spot> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Spot> ), InNumInstances );
+	g_RHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Spot> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Spot> ), InNumInstances );
 }
 
+/*
+==================
+CLightVertexFactory::SetupInstancing
+==================
+*/
 void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	check( lightType == LT_Directional );
-	check( InStartInstanceID < InLights.size() && InNumInstances <= InLights.size() - InStartInstanceID );
+	Assert( lightType == LT_Directional );
+	Assert( InStartInstanceID < InLights.size() && InNumInstances <= InLights.size() - InStartInstanceID );
 
 	std::vector<TLightInstanceBuffer<LT_Directional>>		instanceBuffers;
 	instanceBuffers.resize( InNumInstances );
@@ -280,14 +346,24 @@ void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDevice
 		instanceBuffer.direction													= -directionalLightComponent->GetComponentForwardVector();
 	}
 
-	GRHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Directional> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Directional> ), InNumInstances );
+	g_RHI->SetupInstancing( InDeviceContextRHI, SSS_Instance, instanceBuffers.data(), sizeof( TLightInstanceBuffer<LT_Directional> ), InNumInstances * sizeof( TLightInstanceBuffer<LT_Directional> ), InNumInstances );
 }
 
+/*
+==================
+CLightVertexFactory::GetTypeHash
+==================
+*/
 uint64 CLightVertexFactory::GetTypeHash() const
 {
 	return staticType.GetHash();
 }
 
+/*
+==================
+CLightVertexFactory::ConstructShaderParameters
+==================
+*/
 CVertexFactoryShaderParameters* CLightVertexFactory::ConstructShaderParameters( EShaderFrequency InShaderFrequency )
 {
 	return InShaderFrequency == SF_Vertex ? new CLightVertexShaderParameters() : nullptr;

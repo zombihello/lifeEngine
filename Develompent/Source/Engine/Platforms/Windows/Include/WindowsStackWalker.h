@@ -38,7 +38,7 @@
  *
  * **********************************************************************/
 // #pragma once is supported starting with _MSC_VER 1000,
-// so we need not to check the version (because we only support _MSC_VER >= 1100)!
+// so we need not to Assert the version (because we only support _MSC_VER >= 1100)!
 #pragma once
 
 #include <windows.h>

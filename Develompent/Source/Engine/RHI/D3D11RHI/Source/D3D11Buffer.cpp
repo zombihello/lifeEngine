@@ -24,15 +24,17 @@ const uint32 GConstantBufferSizes[ SOB_Max ] =
 // VERTEX BUFFER
 // ------------------------------------
 
-/**
- * Constructor
- */
+/*
+==================
+CD3D11VertexBufferRHI::CD3D11VertexBufferRHI
+==================
+*/
 CD3D11VertexBufferRHI::CD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, const byte* InData, const tchar* InBufferName ) :
 	CBaseVertexBufferRHI( InUsage, InSize ),
 	d3d11Buffer( nullptr )
 {
-	// Explicitly check that the size is nonzero before allowing create vertex buffer to opaquely fail
-	check( InSize > 0 );
+	// Explicitly Assert that the size is nonzero before allowing create vertex buffer to opaquely fail
+	Assert( InSize > 0 );
 
 	D3D11_BUFFER_DESC		bufferDesc;
 	bufferDesc.ByteWidth			= InSize;
@@ -54,23 +56,25 @@ CD3D11VertexBufferRHI::CD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, con
 	}
 
 	// Creating DirectX 11 vertex buffer
-	ID3D11Device*		device = static_cast< CD3D11RHI* >( GRHI )->GetD3D11Device();
+	ID3D11Device*		device = static_cast< CD3D11RHI* >( g_RHI )->GetD3D11Device();
 
-#if DO_CHECK
+#if ENABLED_ASSERT
 	HRESULT				result = device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
-	check( result == S_OK );
+	Assert( result == S_OK );
 #else
 	device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 
 #if !SHIPPING_BUILD
 	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[VERTEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
-/**
- * Destructor
- */
+/*
+==================
+CD3D11VertexBufferRHI::~CD3D11VertexBufferRHI
+==================
+*/
 CD3D11VertexBufferRHI::~CD3D11VertexBufferRHI()
 {
 	if ( d3d11Buffer )
@@ -83,15 +87,17 @@ CD3D11VertexBufferRHI::~CD3D11VertexBufferRHI()
 // INDEX BUFFER
 // ------------------------------------
 
-/**
- * Constructor
- */
+/*
+==================
+CD3D11IndexBufferRHI::CD3D11IndexBufferRHI
+==================
+*/
 CD3D11IndexBufferRHI::CD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uint32 InSize, const byte* InData, const tchar* InBufferName ) :
 	CBaseIndexBufferRHI( InUsage, InStride, InSize ),
 	d3d11Buffer( nullptr )
 {	
-	// Explicitly check that the size is nonzero before allowing create index buffer to opaquely fail
-	check( InSize > 0 );
+	// Explicitly Assert that the size is nonzero before allowing create index buffer to opaquely fail
+	Assert( InSize > 0 );
 
 	D3D11_BUFFER_DESC		bufferDesc;
 	bufferDesc.ByteWidth = InSize;
@@ -113,23 +119,25 @@ CD3D11IndexBufferRHI::CD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uin
 	}
 
 	// Creating DirectX 11 index buffer
-	ID3D11Device*		device = static_cast< CD3D11RHI* >( GRHI )->GetD3D11Device();
+	ID3D11Device*		device = static_cast< CD3D11RHI* >( g_RHI )->GetD3D11Device();
 
-#if DO_CHECK
+#if ENABLED_ASSERT
 	HRESULT				result = device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
-	check( result == S_OK );
+	Assert( result == S_OK );
 #else
 	device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 
 #if !SHIPPING_BUILD
 	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[INDEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
-/**
- * Destructor
- */
+/*
+==================
+CD3D11IndexBufferRHI::~CD3D11IndexBufferRHI
+==================
+*/
 CD3D11IndexBufferRHI::~CD3D11IndexBufferRHI()
 {
 	if ( d3d11Buffer )
@@ -142,6 +150,11 @@ CD3D11IndexBufferRHI::~CD3D11IndexBufferRHI()
 // CONSTANT BUFFER
 // ------------------------------------
 
+/*
+==================
+CD3D11ConstantBuffer::CD3D11ConstantBuffer
+==================
+*/
 CD3D11ConstantBuffer::CD3D11ConstantBuffer( uint32 InSize, const tchar* InBufferName ) :
 	isNeedCommit( false ),
 	d3d11Buffer( nullptr ),
@@ -149,8 +162,8 @@ CD3D11ConstantBuffer::CD3D11ConstantBuffer( uint32 InSize, const tchar* InBuffer
 	shadowData( nullptr ),
 	currentUpdateSize( 0 )
 {
-	// Explicitly check that the size is nonzero before allowing create constant buffer to opaquely fail
-	check( size > 0 );
+	// Explicitly Assert that the size is nonzero before allowing create constant buffer to opaquely fail
+	Assert( size > 0 );
 	shadowData = new byte[ size ];
 	Clear();
 
@@ -170,20 +183,25 @@ CD3D11ConstantBuffer::CD3D11ConstantBuffer( uint32 InSize, const tchar* InBuffer
 	pInitData					= &initData;
 
 	// Creating DirectX 11 constant buffer
-	ID3D11Device*		device = static_cast< CD3D11RHI* >( GRHI )->GetD3D11Device();
+	ID3D11Device*		device = static_cast< CD3D11RHI* >( g_RHI )->GetD3D11Device();
 
-#if DO_CHECK
+#if ENABLED_ASSERT
 	HRESULT				result = device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
-	check( result == S_OK );
+	Assert( result == S_OK );
 #else
 	device->CreateBuffer( &bufferDesc, pInitData, &d3d11Buffer );
-#endif // DO_CHECK
+#endif // ENABLED_ASSERT
 
 #if !SHIPPING_BUILD
 	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[CONSTANT_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
+/*
+==================
+CD3D11ConstantBuffer::~CD3D11ConstantBuffer
+==================
+*/
 CD3D11ConstantBuffer::~CD3D11ConstantBuffer()
 {
 	// Delete shadow data
@@ -199,6 +217,11 @@ CD3D11ConstantBuffer::~CD3D11ConstantBuffer()
 	}
 }
 
+/*
+==================
+CD3D11ConstantBuffer::Update
+==================
+*/
 void CD3D11ConstantBuffer::Update( const byte* InData, uint32 InOffset, uint32 InSize )
 {
 	memcpy( shadowData + InOffset, InData, InSize );
@@ -206,6 +229,11 @@ void CD3D11ConstantBuffer::Update( const byte* InData, uint32 InOffset, uint32 I
 	isNeedCommit = true;
 }
 
+/*
+==================
+CD3D11ConstantBuffer::CommitConstantsToDevice
+==================
+*/
 void CD3D11ConstantBuffer::CommitConstantsToDevice( class CD3D11DeviceContext* InDeviceContext )
 {
 	if ( !isNeedCommit )
@@ -213,7 +241,7 @@ void CD3D11ConstantBuffer::CommitConstantsToDevice( class CD3D11DeviceContext* I
 		return;
 	}
 
-	check( InDeviceContext );
+	Assert( InDeviceContext );
 	ID3D11DeviceContext*			d3d11DeviceContext = InDeviceContext->GetD3D11DeviceContext();
 	D3D11_MAPPED_SUBRESOURCE		d3d11Mapped;
 
@@ -231,11 +259,16 @@ void CD3D11ConstantBuffer::CommitConstantsToDevice( class CD3D11DeviceContext* I
 	currentUpdateSize = 0;
 }
 
+/*
+==================
+CD3D11ConstantBuffer::Clear
+==================
+*/
 void CD3D11ConstantBuffer::Clear()
 {
 	if ( !shadowData )		return;
 
-	appMemzero( shadowData, size );
+	Sys_Memzero( shadowData, size );
 	isNeedCommit = true;
 	currentUpdateSize = size;
 }

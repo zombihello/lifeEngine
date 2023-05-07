@@ -4,12 +4,17 @@
 #include "Misc/CoreGlobals.h"
 #include "Core.h"
 
-double appInitTiming()
+/*
+==================
+Sys_InitTiming
+==================
+*/
+double Sys_InitTiming()
 {
 	LARGE_INTEGER		frequency;
 	bool				result = QueryPerformanceFrequency( &frequency );
-	check( result );
+	Assert( result );
 
-	GSecondsPerCycle = 1.0 / frequency.QuadPart;
+	g_SecondsPerCycle = 1.0 / frequency.QuadPart;
 	return appSeconds();
 }

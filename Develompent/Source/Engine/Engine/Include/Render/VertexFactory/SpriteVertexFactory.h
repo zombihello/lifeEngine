@@ -79,7 +79,7 @@ private:
  * @ingroup Engine
  * Global resource of sprite vertex declaration
  */
-extern TGlobalResource< CSpriteVertexDeclaration >			GSpriteVertexDeclaration;
+extern TGlobalResource< CSpriteVertexDeclaration >			g_SpriteVertexDeclaration;
 
 /**
  * @ingroup Engine

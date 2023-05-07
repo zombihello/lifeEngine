@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "System/ButtonCode.h"
 
-static const tchar* GButtonName[] =
+static const tchar* s_ButtonName[] =
 {
 	TEXT( "" ),							// BC_None
 	TEXT( "0" ),						// BC_Key0
@@ -124,15 +124,17 @@ static const tchar* GButtonName[] =
 	TEXT( "MOUSEY" ),					// BC_MouseY				
 };
 
-/**
- * Get button code by name
- */
-EButtonCode appGetButtonCodeByName( const tchar* InButtonName )
+/*
+==================
+Sys_GetButtonCodeByName
+==================
+*/
+EButtonCode Sys_GetButtonCodeByName( const tchar* InButtonName )
 {
-	check( InButtonName );
+	Assert( InButtonName );
 	
 	for ( uint32 index = 0; index < BC_Count; ++index )
-		if ( !wcscmp( GButtonName[ index ], InButtonName ) )
+		if ( !wcscmp( s_ButtonName[ index ], InButtonName ) )
 		{
 			return ( EButtonCode )index;
 		}
@@ -140,10 +142,12 @@ EButtonCode appGetButtonCodeByName( const tchar* InButtonName )
 	return BC_None;
 }
 
-/**
- * Get button name
- */
-const tchar* appGetButtonName( EButtonCode InButtonCode )
+/*
+==================
+Sys_GetButtonName
+==================
+*/
+const tchar* Sys_GetButtonName( EButtonCode InButtonCode )
 {
 	if ( InButtonCode == BC_KeyCount ||
 		 InButtonCode == BC_MouseCount ||
@@ -152,5 +156,5 @@ const tchar* appGetButtonName( EButtonCode InButtonCode )
 		return TEXT( "" );
 	}
 
-	return GButtonName[ ( uint32 )InButtonCode ];
+	return s_ButtonName[ ( uint32 )InButtonCode ];
 }

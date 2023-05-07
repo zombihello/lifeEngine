@@ -6,6 +6,11 @@
 //
 CConCmd			CCmdHelp( TEXT( "help" ), TEXT( "Show help variables and comands" ), std::bind( &CConsoleSystem::CmdHelp, std::placeholders::_1 ) );
 
+/*
+==================
+CConsoleSystem::Exec
+==================
+*/
 bool CConsoleSystem::Exec( const std::wstring& InCommand )
 {
 	if ( InCommand.empty() )
@@ -43,18 +48,18 @@ bool CConsoleSystem::Exec( const std::wstring& InCommand )
 					case CVT_Float:		stringVar = std::to_wstring( var->GetValueFloat() );				break;
 					case CVT_Bool:		stringVar = var->GetValueBool() ? TEXT( "true" ) : TEXT( "false" ); break;
 					default:			
-						checkMsg( false, TEXT( "Unknown ConVar type 0x%X" ), var->GetType() );
+						AssertMsg( false, TEXT( "Unknown ConVar type 0x%X" ), var->GetType() );
 						stringVar = TEXT( "" );
 						break;
 					}
 				}
 
-				LE_LOG( LT_Log, LC_Console, TEXT( "%s: %s" ), name.c_str(), var->GetHelpText().c_str() );
-				LE_LOG( LT_Log, LC_Console, TEXT( "Value: %s" ), stringVar.c_str() );
-				LE_LOG( LT_Log, LC_Console, TEXT( "Default value: %s" ), var->GetValueDefault().c_str() );
+				Logf( TEXT( "%s: %s\n" ), name.c_str(), var->GetHelpText().c_str() );
+				Logf( TEXT( "Value: %s\n" ), stringVar.c_str() );
+				Logf( TEXT( "Default value: %s\n" ), var->GetValueDefault().c_str() );
 			}
 
-			LE_LOG( LT_Log, LC_Console, InCommand.c_str() );
+			Logf( TEXT( "%s\n" ), InCommand.c_str());
 			return true;
 		}
 	}
@@ -108,10 +113,15 @@ bool CConsoleSystem::Exec( const std::wstring& InCommand )
 		}
 	}
 	
-	LE_LOG( LT_Error, LC_Console, TEXT( "Not correct command: \"%s\"" ), InCommand.c_str() );
+	Errorf( TEXT( "Not correct command: \"%s\"\n" ), InCommand.c_str() );
 	return false;
 }
 
+/*
+==================
+CConsoleSystem::FindVar
+==================
+*/
 CConVar* CConsoleSystem::FindVar( const std::wstring& InName )
 {
 	std::vector<CConVar*>&		vars = GetGlobalConVars();
@@ -126,6 +136,11 @@ CConVar* CConsoleSystem::FindVar( const std::wstring& InName )
 	return nullptr;
 }
 
+/*
+==================
+CConsoleSystem::FindCmd
+==================
+*/
 CConCmd* CConsoleSystem::FindCmd( const std::wstring& InName )
 {
 	std::vector<CConCmd*>&		cmds = GetGlobalConCmds();
@@ -140,29 +155,32 @@ CConCmd* CConsoleSystem::FindCmd( const std::wstring& InName )
 	return nullptr;
 }
 
+/*
+==================
+CConsoleSystem::CmdHelp
+==================
+*/
 void CConsoleSystem::CmdHelp( const std::vector<std::wstring>& InArguments )
 {
 	// Print all console variables
-	LE_LOG( LT_Log, LC_Console, TEXT( "" ) );
-	LE_LOG( LT_Log, LC_Console, TEXT( "** Console variables **" ) );
+	Logf( TEXT( "\n** Console variables **\n" ) );
 	{
 		std::vector<CConVar*>&		vars = GetGlobalConVars();
 		for ( uint32 index = 0, count = vars.size(); index < count; ++index )
 		{
 			CConVar*	var = vars[index];
-			LE_LOG( LT_Log, LC_Console, TEXT( "%s : %s. Default value: %s" ), var->GetName().c_str(), var->GetHelpText().c_str(), var->GetValueDefault().c_str() );
+			Logf( TEXT( "%s : %s. Default value: %s\n" ), var->GetName().c_str(), var->GetHelpText().c_str(), var->GetValueDefault().c_str() );
 		}
 	}
 
 	// Print all console commands
-	LE_LOG( LT_Log, LC_Console, TEXT( "" ) );
-	LE_LOG( LT_Log, LC_Console, TEXT( "** Console commands **" ) );
+	Logf( TEXT( "\n** Console commands **\n" ) );
 	{
 		std::vector<CConCmd*>&		cmds = GetGlobalConCmds();
 		for ( uint32 index = 0, count = cmds.size(); index < count; ++index )
 		{
 			CConCmd*	cmd = cmds[index];
-			LE_LOG( LT_Log, LC_Console, TEXT( "%s : %s" ), cmd->GetName().c_str(), cmd->GetHelpText().c_str() );
+			Logf( TEXT( "%s : %s\n" ), cmd->GetName().c_str(), cmd->GetHelpText().c_str() );
 		}
 	}
 }

@@ -1,5 +1,10 @@
 #include "System/AudioBufferManager.h"
 
+/*
+==================
+CAudioBufferManager::Find
+==================
+*/
 AudioBufferRef_t CAudioBufferManager::Find( const TAssetHandle<CAudioBank>& InAudioBank )
 {
 	// If already loaded buffer - return it
@@ -12,7 +17,7 @@ AudioBufferRef_t CAudioBufferManager::Find( const TAssetHandle<CAudioBank>& InAu
 	}
 
 	// Load samples and create buffer
-	check( InAudioBank.IsAssetValid() );
+	Assert( InAudioBank.IsAssetValid() );
 
 	TSharedPtr<CAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
 	SAudioBankInfo				audioBankInfo;

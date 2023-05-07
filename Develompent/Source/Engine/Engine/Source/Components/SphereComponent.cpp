@@ -4,12 +4,22 @@
 
 IMPLEMENT_CLASS( CSphereComponent )
 
+/*
+==================
+CSphereComponent::CSphereComponent
+==================
+*/
 CSphereComponent::CSphereComponent()
 	: radius( 0.f )
 	, SDGLevel( SDG_World )
 	, pendingSDGLevel( SDG_World )
 {}
 
+/*
+==================
+CSphereComponent::Serialize
+==================
+*/
 void CSphereComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
@@ -18,9 +28,19 @@ void CSphereComponent::Serialize( class CArchive& InArchive )
 	InArchive << material;
 }
 
+/*
+==================
+CSphereComponent::UpdateBodySetup
+==================
+*/
 void CSphereComponent::UpdateBodySetup()
 {}
 
+/*
+==================
+CSphereComponent::AddToDrawList
+==================
+*/
 void CSphereComponent::AddToDrawList( const class CSceneView& InSceneView )
 {
 	// If primitive is empty - exit from method
@@ -48,9 +68,14 @@ void CSphereComponent::AddToDrawList( const class CSceneView& InSceneView )
 	}
 }
 
+/*
+==================
+CSphereComponent::LinkDrawList
+==================
+*/
 void CSphereComponent::LinkDrawList()
 {
-	check( scene );
+	Assert( scene );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( drawingPolicyLink )
@@ -65,23 +90,28 @@ void CSphereComponent::LinkDrawList()
 	SMeshBatch			            meshBatch;
 	meshBatch.baseVertexIndex		= 0;
 	meshBatch.firstIndex			= 0;
-	meshBatch.numPrimitives			= GSphereMesh.GetNumPrimitives();
-	meshBatch.indexBufferRHI		= GSphereMesh.GetIndexBufferRHI();
+	meshBatch.numPrimitives			= g_SphereMesh.GetNumPrimitives();
+	meshBatch.indexBufferRHI		= g_SphereMesh.GetIndexBufferRHI();
 	meshBatch.primitiveType			= PT_TriangleList;
 	
 	// Make and add to scene new draw policy link	
 	const SMeshBatch*				meshBatchLink = nullptr;
-	drawingPolicyLink				= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( GSphereMesh.GetVertexFactory(), material, meshBatch, meshBatchLink, SDG.dynamicMeshElements, DEC_DYNAMICELEMENTS );
+	drawingPolicyLink				= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( g_SphereMesh.GetVertexFactory(), material, meshBatch, meshBatchLink, SDG.dynamicMeshElements, DEC_DYNAMICELEMENTS );
 	meshBatchLinks.push_back( meshBatchLink );
 
 	// Make and add to scene new depth draw policy link
-	depthDrawingPolicyLink			= ::MakeDrawingPolicyLink<DepthDrawingPolicyLink_t>( GSphereMesh.GetVertexFactory(), material, meshBatch, meshBatchLink, SDG.depthDrawList, DEC_DYNAMICELEMENTS );
+	depthDrawingPolicyLink			= ::MakeDrawingPolicyLink<DepthDrawingPolicyLink_t>( g_SphereMesh.GetVertexFactory(), material, meshBatch, meshBatchLink, SDG.depthDrawList, DEC_DYNAMICELEMENTS );
 	meshBatchLinks.push_back( meshBatchLink );
 }
 
+/*
+==================
+CSphereComponent::UnlinkDrawList
+==================
+*/
 void CSphereComponent::UnlinkDrawList()
 {
-	check( scene );
+	Assert( scene );
 	SSceneDepthGroup&	SDG = scene->GetSDG( SDGLevel );
 
 	// If the primitive already added to scene - remove all draw policy links

@@ -8,9 +8,9 @@
 #include "Windows/InputTextDialog.h"
 
 /** Static constant colors of row background in a table */
-static const uint32		GTableBgColor0			= CColor( 26.f, 27.f, 28.f ).GetUInt32Color();
-static const uint32		GTableBgColor1			= CColor( 32.f, 35.f, 36.f ).GetUInt32Color();
-static const ImVec4		GTableBgSelectColor		= ImVec4( 0.f, 0.43f, 0.87f, 1.f );
+static const uint32		s_TableBgColor0			= CColor( 26.f, 27.f, 28.f ).GetUInt32Color();
+static const uint32		s_TableBgColor1			= CColor( 32.f, 35.f, 36.f ).GetUInt32Color();
+static const ImVec4		s_TableBgSelectColor	= ImVec4( 0.f, 0.43f, 0.87f, 1.f );
 
 /**
   * @ingroup WorldEd
@@ -42,8 +42,8 @@ public:
 	 */
 	virtual bool Init() override
 	{
-		check( owner && actor );
-		eventResponse = GSynchronizeFactory->CreateSynchEvent();
+		Assert( owner && actor );
+		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -85,7 +85,7 @@ public:
 		actor->SetName( newActorName.c_str() );
 
 		// Mark world as dirty
-		GWorld->MarkDirty();
+		g_World->MarkDirty();
 		return 0;
 	}
 
@@ -96,7 +96,7 @@ public:
 	 */
 	virtual void Stop() override
 	{
-		GSynchronizeFactory->Destroy( eventResponse );
+		g_SynchronizeFactory->Destroy( eventResponse );
 	}
 
 	/**
@@ -113,10 +113,20 @@ private:
 	ActorRef_t				actor;			/**< Actor to rename */
 };
 
+/*
+==================
+CExplorerLevelWindow::CExplorerLevelWindow
+==================
+*/
 CExplorerLevelWindow::CExplorerLevelWindow( const std::wstring& InName )
 	: CImGUILayer( InName )
 {}
 
+/*
+==================
+CExplorerLevelWindow::OnTick
+==================
+*/
 void CExplorerLevelWindow::OnTick()
 {
 	// Draw table of actors
@@ -130,24 +140,24 @@ void CExplorerLevelWindow::OnTick()
 
 		// Init style
 		ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( ImGui::GetStyle().FramePadding.x, 2.f ) );
-		ImGui::PushStyleColor( ImGuiCol_Header, GTableBgSelectColor );
+		ImGui::PushStyleColor( ImGuiCol_Header, s_TableBgSelectColor );
 
 		// Print info about each actor on level
-		for ( uint32 index = 0; index < GWorld->GetNumActors(); ++index )
+		for ( uint32 index = 0; index < g_World->GetNumActors(); ++index )
 		{
-			ActorRef_t		actor = GWorld->GetActor( index );
-			check( actor );
+			ActorRef_t		actor = g_World->GetActor( index );
+			Assert( actor );
 			bool			bNewVisibility = actor->IsVisibility();
 
 			ImGui::TableNextRow();
-			ImGui::TableSetBgColor( ImGuiTableBgTarget_RowBg0, !( index % 2 ) ? GTableBgColor0 : GTableBgColor1 );
+			ImGui::TableSetBgColor( ImGuiTableBgTarget_RowBg0, !( index % 2 ) ? s_TableBgColor0 : s_TableBgColor1 );
 			
 			// Visibility flag
 			ImGui::TableNextColumn();
 			if ( ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##Visibility_ID_%i" ), index ).c_str() ), &bNewVisibility ) )
 			{
 				actor->SetVisibility( bNewVisibility );
-				GWorld->MarkDirty();
+				g_World->MarkDirty();
 			}
 			
 			// Label
@@ -173,22 +183,27 @@ void CExplorerLevelWindow::OnTick()
 	// Reset selection if clicked not on item
 	if ( ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered() && ( ImGui::IsMouseClicked( ImGuiMouseButton_Left ) || ImGui::IsMouseDown( ImGuiMouseButton_Right ) ) )
 	{
-		GWorld->UnselectAllActors();
+		g_World->UnselectAllActors();
 	}
 }
 
+/*
+==================
+CExplorerLevelWindow::ProcessItemEvents
+==================
+*/
 void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, ActorRef_t InActor )
 {
 	ImGui::SameLine();
 	{
-		const bool	bCtrlDown = GInputSystem->IsKeyDown( BC_KeyLControl ) || GInputSystem->IsKeyDown( BC_KeyRControl );
+		const bool	bCtrlDown = g_InputSystem->IsKeyDown( BC_KeyLControl ) || g_InputSystem->IsKeyDown( BC_KeyRControl );
 		const bool	bRMBDown = ImGui::IsMouseDown( ImGuiMouseButton_Right );
 		bool		bNeedPopStyleColor = false;
 		bool		bSelected = InActor->IsSelected();
 
 		if ( bSelected )
 		{
-			ImGui::PushStyleColor( ImGuiCol_HeaderHovered, GTableBgSelectColor );
+			ImGui::PushStyleColor( ImGuiCol_HeaderHovered, s_TableBgSelectColor );
 			bNeedPopStyleColor = true;
 		}
 		if ( ImGui::Selectable( TCHAR_TO_ANSI( CString::Format( TEXT( "##Selectable_ID_%i" ), InIndex ).c_str() ), &bSelected, ImGuiSelectableFlags_SpanAllColumns ) ||
@@ -197,17 +212,17 @@ void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, ActorRef_t InActor
 			bool	bUnselectedAllActors = false;
 			if ( ( !bCtrlDown && !bRMBDown ) || ( bRMBDown && !bSelected ) )
 			{
-				GWorld->UnselectAllActors();
+				g_World->UnselectAllActors();
 				bUnselectedAllActors = true;
 			}
 
 			if ( bSelected || ( bUnselectedAllActors && !bCtrlDown ) || bRMBDown )
 			{
-				GWorld->SelectActor( InActor );
+				g_World->SelectActor( InActor );
 			}
 			else
 			{
-				GWorld->UnselectActor( InActor );
+				g_World->UnselectActor( InActor );
 			}
 		}
 		if ( bNeedPopStyleColor )
@@ -217,24 +232,29 @@ void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, ActorRef_t InActor
 	}
 }
 
+/*
+==================
+CExplorerLevelWindow::DrawPopupMenu
+==================
+*/
 void CExplorerLevelWindow::DrawPopupMenu()
 {
 	if ( ImGui::BeginPopupContextWindow( "", ImGuiMouseButton_Right ) )
 	{	
-		bool	bSelectedActors			= GWorld->GetNumSelectedActors() > 0;
-		bool	bSelectedOnlyOneActor	= GWorld->GetNumSelectedActors() == 1;
+		bool	bSelectedActors			= g_World->GetNumSelectedActors() > 0;
+		bool	bSelectedOnlyOneActor	= g_World->GetNumSelectedActors() == 1;
 
 		// Rename
 		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneActor ) )
 		{
-			const std::vector<ActorRef_t>&		selectedActors = GWorld->GetSelectedActors();
-			GThreadFactory->CreateThread( new CRenameActorRunnable( this, selectedActors[0] ), CString::Format( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
+			const std::vector<ActorRef_t>&		selectedActors = g_World->GetSelectedActors();
+			g_ThreadFactory->CreateThread( new CRenameActorRunnable( this, selectedActors[0] ), CString::Format( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
 		}
 
 		// Duplicate
 		if ( ImGui::MenuItem( "Duplicate", "", nullptr, bSelectedActors ) )
 		{
-			std::vector<ActorRef_t>		selectedActors = GWorld->GetSelectedActors();
+			std::vector<ActorRef_t>		selectedActors = g_World->GetSelectedActors();
 			std::vector<byte>			memoryData;
 			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
 			{			
@@ -244,7 +264,7 @@ void CExplorerLevelWindow::DrawPopupMenu()
 				actor->Serialize( memoryWriter );
 
 				// Spawn new actor and serialize data from memory
-				ActorRef_t				newActor = GWorld->SpawnActor( actor->GetClass(), actor->GetActorLocation(), actor->GetActorRotation() );
+				ActorRef_t				newActor = g_World->SpawnActor( actor->GetClass(), actor->GetActorLocation(), actor->GetActorRotation() );
 				CMemoryReading			memoryReading( memoryData );
 				newActor->Serialize( memoryReading );
 			}
@@ -253,10 +273,10 @@ void CExplorerLevelWindow::DrawPopupMenu()
 		// Delete
 		if ( ImGui::MenuItem( "Delete", "", nullptr, bSelectedActors ) )
 		{
-			std::vector<ActorRef_t>		selectedActors = GWorld->GetSelectedActors();
+			std::vector<ActorRef_t>		selectedActors = g_World->GetSelectedActors();
 			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
 			{
-				GWorld->DestroyActor( selectedActors[index] );
+				g_World->DestroyActor( selectedActors[index] );
 			}
 		}
 

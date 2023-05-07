@@ -311,6 +311,6 @@ private:
 	CRenderTarget		renderTargets[ SRTT_MaxSceneRenderTargets ];		/**< Static array of all the scene render targets */
 };
 
-extern TGlobalResource<CSceneRenderTargets>		GSceneRenderTargets;		/**< The global render targets used for scene rendering */
+extern TGlobalResource<CSceneRenderTargets>		g_SceneRenderTargets;		/**< The global render targets used for scene rendering */
 
 #endif // !SCENERENDERTARGETS_H

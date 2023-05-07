@@ -7,13 +7,23 @@
 // -------------
 // GLOBALS
 // -------------
-TGlobalResource<CSphereMesh>				GSphereMesh;
+TGlobalResource<CSphereMesh>				g_SphereMesh;
 
+/*
+==================
+CSphereMesh::CSphereMesh
+==================
+*/
 CSphereMesh::CSphereMesh()
 	: numPrimitives( 0 )
 	, vertexFactory( new CDynamicMeshVertexFactory() )
 {}
 
+/*
+==================
+CSphereMesh::InitRHI
+==================
+*/
 void CSphereMesh::InitRHI()
 {
 	std::vector< SDynamicMeshVertexType >		verteces;
@@ -35,7 +45,7 @@ void CSphereMesh::InitRHI()
 	uint32			numVerteces = verteces.size();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "Sphere" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "Sphere" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
 		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SDynamicMeshVertexType ) } );		// 0 stream slot
@@ -46,10 +56,15 @@ void CSphereMesh::InitRHI()
 	uint32			numIndeces = indeces.size();
 	if ( numIndeces > 0 )
 	{
-		indexBufferRHI = GRHI->CreateIndexBuffer( TEXT( "Sphere" ), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
+		indexBufferRHI = g_RHI->CreateIndexBuffer( TEXT( "Sphere" ), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
 	}
 }
 
+/*
+==================
+CSphereMesh::ReleaseRHI
+==================
+*/
 void CSphereMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();

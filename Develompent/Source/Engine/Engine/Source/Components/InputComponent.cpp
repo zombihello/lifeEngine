@@ -8,18 +8,23 @@
 
 IMPLEMENT_CLASS( CInputComponent )
 
+/*
+==================
+CInputComponent::BeginPlay
+==================
+*/
 void CInputComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// Get mapping of buttons
 	// Actions
-	std::vector< CConfigValue >		configActions = GConfig.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Actions" ) ).GetArray();
+	std::vector< CConfigValue >		configActions = g_Config.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Actions" ) ).GetArray();
 	for ( uint32 indexAction = 0, countActions = configActions.size(); indexAction < countActions; ++indexAction )
 	{
 		// Get JSON object of action item
 		const CConfigValue&		configAction = configActions[ indexAction ];
-		check( configAction.GetType() == CConfigValue::T_Object );
+		Assert( configAction.GetType() == CConfigValue::T_Object );
 		CConfigObject			configObject = configAction.GetObject();
 
 		// Get name of action
@@ -36,14 +41,14 @@ void CInputComponent::BeginPlay()
 		{
 			// Get JSON item
 			const CConfigValue& configButton = configButtons[ indexButton ];
-			check( configButton.GetType() == CConfigValue::T_String );
+			Assert( configButton.GetType() == CConfigValue::T_String );
 			std::wstring		buttonName = configButton.GetString();
 
 			// Get button code from name of button
-			EButtonCode			buttonCode = appGetButtonCodeByName( buttonName.c_str() );
+			EButtonCode			buttonCode = Sys_GetButtonCodeByName( buttonName.c_str() );
 			if ( buttonCode == BC_None )
 			{
-				LE_LOG( LT_Warning, LC_Input, TEXT( "Action '%s': unknown button name '%s'" ), inputAction.name.c_str(), buttonName.c_str() );
+				Warnf( TEXT( "Action '%s': unknown button name '%s'\n" ), inputAction.name.c_str(), buttonName.c_str() );
 				continue;
 			}
 			inputAction.buttons.push_back( buttonCode );
@@ -57,12 +62,12 @@ void CInputComponent::BeginPlay()
 	}
 
 	// Axis
-	std::vector< CConfigValue >		configArrayAxis = GConfig.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Axis" ) ).GetArray();
+	std::vector< CConfigValue >		configArrayAxis = g_Config.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Axis" ) ).GetArray();
 	for ( uint32 indexAxis = 0, countAxis = configArrayAxis.size(); indexAxis < countAxis; ++indexAxis )
 	{
 		// Get JSON object of action item
 		const CConfigValue&		configAxis = configArrayAxis[ indexAxis ];
-		check( configAxis.GetType() == CConfigValue::T_Object );
+		Assert( configAxis.GetType() == CConfigValue::T_Object );
 		CConfigObject			configObject = configAxis.GetObject();
 
 		// Get name of axis
@@ -79,17 +84,17 @@ void CInputComponent::BeginPlay()
 		{
 			// Get JSON item
 			const CConfigValue&		configButton = configButtons[ indexButton ];
-			check( configAxis.GetType() == CConfigValue::T_Object );
+			Assert( configAxis.GetType() == CConfigValue::T_Object );
 			CConfigObject			configButtonObject = configButton.GetObject();
 			
 			std::wstring			buttonName = configButtonObject.GetValue( TEXT( "Name" ) ).GetString();
 			float					scale = configButtonObject.GetValue( TEXT( "Scale" ) ).GetNumber();
 
 			// Get button code from name of button
-			EButtonCode			buttonCode = appGetButtonCodeByName( buttonName.c_str() );
+			EButtonCode			buttonCode = Sys_GetButtonCodeByName( buttonName.c_str() );
 			if ( buttonCode == BC_None )
 			{
-				LE_LOG( LT_Warning, LC_Input, TEXT( "Axis '%s' with scale %f: unknown button name '%s'" ), inputAxis.name.c_str(), scale, buttonName.c_str() );
+				Warnf( TEXT( "Axis '%s' with scale %f: unknown button name '%s'\n" ), inputAxis.name.c_str(), scale, buttonName.c_str() );
 				continue;
 			}
 			inputAxis.buttons.push_back( std::make_pair( buttonCode, scale ) );
@@ -114,6 +119,11 @@ enum EInputActionFlags
 	IAF_All			= IAF_Pressed | IAF_Released		/**< Need call press and release events */
 };
 
+/*
+==================
+CInputComponent::TickComponent
+==================
+*/
 void CInputComponent::TickComponent( float InDeltaTime )
 {
 	Super::TickComponent( InDeltaTime );
@@ -124,7 +134,7 @@ void CInputComponent::TickComponent( float InDeltaTime )
 		uint32		executeFlags = IAF_None;
 		for ( uint32 indexButton = 0, countButtons = it->second.buttons.size(); indexButton < countButtons; ++indexButton )
 		{
-			switch ( GInputSystem->GetButtonEvent( it->second.buttons[ indexButton ] ) )
+			switch ( g_InputSystem->GetButtonEvent( it->second.buttons[ indexButton ] ) )
 			{
 			case BE_Pressed:	executeFlags |= IAF_Pressed;	break;
 			case BE_Released:	executeFlags |= IAF_Released;	break;
@@ -162,7 +172,7 @@ void CInputComponent::TickComponent( float InDeltaTime )
 		for ( uint32 indexButton = 0, countButtons = it->second.buttons.size(); indexButton < countButtons; ++indexButton )
 		{
 			const SInputAxis::PairAxisButton_t&		pairAxisButton	= it->second.buttons[ indexButton ];
-			EButtonEvent							buttonEvent		= GInputSystem->GetButtonEvent( pairAxisButton.first );
+			EButtonEvent							buttonEvent		= g_InputSystem->GetButtonEvent( pairAxisButton.first );
 			switch ( buttonEvent )
 			{
 			case BE_Pressed:
@@ -173,7 +183,7 @@ void CInputComponent::TickComponent( float InDeltaTime )
 				float		value = pairAxisButton.second;
 				if ( buttonEvent == BE_Moved )
 				{
-					value *= GInputSystem->GetMouseOffset( pairAxisButton.first ) * GInputSystem->GetMouseSensitivity();
+					value *= g_InputSystem->GetMouseOffset( pairAxisButton.first ) * g_InputSystem->GetMouseSensitivity();
 				}
 
 				triggeredScales.insert( value );

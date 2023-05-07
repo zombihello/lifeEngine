@@ -23,31 +23,31 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-							CRefCounted();
+	CRefCounted();
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual					~CRefCounted();
+	virtual ~CRefCounted();
 
 	/**
 	 * @brief Increment reference count
 	 */
-	FORCEINLINE void		AddRef()					
+	FORCEINLINE void AddRef()					
 	{ 
-		appInterlockedIncrement( ( int32* )&countReferences );
+		Sys_InterlockedIncrement( ( int32* )&countReferences );
 	}
 
 	/**
 	 * @brief Decrement reference count and delete self if no more references
 	 */
-	void					ReleaseRef();
+	void ReleaseRef();
 
 	/**
 	 * @brief Get reference count
 	 * @return Return reference count
 	 */
-	FORCEINLINE uint32		GetRefCount() const		
+	FORCEINLINE uint32 GetRefCount() const		
 	{ 
 		return countReferences; 
 	}

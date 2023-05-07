@@ -11,12 +11,21 @@ TGlobalResource<CLightSphereMesh>			GLightSphereMesh;
 TGlobalResource<CLightQuadMesh>				GLightQuadMesh;
 TGlobalResource<CLightConeMesh>				GLightConeMesh;
 
-
+/*
+==================
+CLightSphereMesh::CLightSphereMesh
+==================
+*/
 CLightSphereMesh::CLightSphereMesh()
 	: numPrimitives( 0 )
 	, vertexFactory( new CLightVertexFactory( LT_Point ) )
 {}
 
+/*
+==================
+CLightSphereMesh::InitRHI
+==================
+*/
 void CLightSphereMesh::InitRHI()
 {
 	std::vector<SLightVertexType>		verteces;
@@ -45,7 +54,7 @@ void CLightSphereMesh::InitRHI()
 	uint32			numVerteces = verteces.size();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "LightSphere" ), sizeof( SLightVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "LightSphere" ), sizeof( SLightVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
 		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SLightVertexType ) } );		// 0 stream slot
@@ -56,10 +65,15 @@ void CLightSphereMesh::InitRHI()
 	uint32			numIndeces = indeces.size();
 	if ( numIndeces > 0 )
 	{
-		indexBufferRHI = GRHI->CreateIndexBuffer( TEXT( "LightSphere" ), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
+		indexBufferRHI = g_RHI->CreateIndexBuffer( TEXT( "LightSphere" ), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.data(), RUF_Static );
 	}
 }
 
+/*
+==================
+CLightSphereMesh::ReleaseRHI
+==================
+*/
 void CLightSphereMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
@@ -68,10 +82,20 @@ void CLightSphereMesh::ReleaseRHI()
 }
 
 
+/*
+==================
+CLightQuadMesh::CLightQuadMesh
+==================
+*/
 CLightQuadMesh::CLightQuadMesh()
 	: vertexFactory( new CLightVertexFactory( LT_Directional ) )
 {}
 
+/*
+==================
+CLightQuadMesh::InitRHI
+==================
+*/
 void CLightQuadMesh::InitRHI()
 {
 	float	x0 = -1.f, y0 = -1.f;
@@ -87,14 +111,19 @@ void CLightQuadMesh::InitRHI()
 	};
 	uint32					indeces[] = { 0, 1, 2, 0, 2, 3 };
 
-	vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "LightQuad" ), sizeof( SLightVertexType ) * ARRAY_COUNT( verteces ), ( byte* )&verteces[0], RUF_Static );
-	indexBufferRHI	= GRHI->CreateIndexBuffer( TEXT( "LightQuad" ), sizeof( uint32 ), sizeof( uint32 ) * ARRAY_COUNT( indeces ), ( byte* )&indeces[0], RUF_Static );
+	vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "LightQuad" ), sizeof( SLightVertexType ) * ARRAY_COUNT( verteces ), ( byte* )&verteces[0], RUF_Static );
+	indexBufferRHI	= g_RHI->CreateIndexBuffer( TEXT( "LightQuad" ), sizeof( uint32 ), sizeof( uint32 ) * ARRAY_COUNT( indeces ), ( byte* )&indeces[0], RUF_Static );
 
 	// Initialize vertex factory
 	vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SLightVertexType ) } );		// 0 stream slot
 	vertexFactory->Init();
 }
 
+/*
+==================
+CLightQuadMesh::ReleaseRHI
+==================
+*/
 void CLightQuadMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();
@@ -103,11 +132,21 @@ void CLightQuadMesh::ReleaseRHI()
 }
 
 
+/*
+==================
+CLightConeMesh::CLightConeMesh
+==================
+*/
 CLightConeMesh::CLightConeMesh()
 	: numPrimitives( 0 )
 	, vertexFactory( new CLightVertexFactory( LT_Spot ) )
 {}
 
+/*
+==================
+CLightConeMesh::InitRHI
+==================
+*/
 void CLightConeMesh::InitRHI()
 {
 	const uint32					resolution = 30.f;
@@ -169,14 +208,19 @@ void CLightConeMesh::InitRHI()
 	numPrimitives = indeces.size() / 3;
 
 	// Create vertex and index buffer
-	vertexBufferRHI = GRHI->CreateVertexBuffer( TEXT( "LightCone" ), sizeof( SLightVertexType ) * verteces.size(), ( byte* )verteces.data(), RUF_Static );
-	indexBufferRHI = GRHI->CreateIndexBuffer( TEXT( "LightCone" ), sizeof( uint32 ), sizeof( uint32 ) * indeces.size(), ( byte* )indeces.data(), RUF_Static );
+	vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "LightCone" ), sizeof( SLightVertexType ) * verteces.size(), ( byte* )verteces.data(), RUF_Static );
+	indexBufferRHI = g_RHI->CreateIndexBuffer( TEXT( "LightCone" ), sizeof( uint32 ), sizeof( uint32 ) * indeces.size(), ( byte* )indeces.data(), RUF_Static );
 
 	// Initialize vertex factory
 	vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SLightVertexType ) } );		// 0 stream slot
 	vertexFactory->Init();
 }
 
+/*
+==================
+CLightConeMesh::ReleaseRHI
+==================
+*/
 void CLightConeMesh::ReleaseRHI()
 {
 	vertexBufferRHI.SafeRelease();

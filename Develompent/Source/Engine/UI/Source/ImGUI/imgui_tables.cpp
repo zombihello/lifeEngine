@@ -2362,7 +2362,7 @@ void ImGui::TableMergeDrawChannels(ImGuiTable* table)
             if (src_channel->_CmdBuffer.Size != 1)
                 continue;
 
-            // Find out the width of this merge group and check if it will fit in our column
+            // Find out the width of this merge group and Assert if it will fit in our column
             // (note that we assume that rendering didn't stray on the left direction. we should need a CursorMinPos to detect it)
             if (!(column->Flags & ImGuiTableColumnFlags_NoClip))
             {

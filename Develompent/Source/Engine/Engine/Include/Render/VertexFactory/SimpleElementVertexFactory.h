@@ -76,7 +76,7 @@ private:
  * @ingroup Engine
  * Global resource of simple element vertex declaration
  */
-extern TGlobalResource< CSimpleElementVertexDeclaration >			GSimpleElementVertexDeclaration;
+extern TGlobalResource< CSimpleElementVertexDeclaration >			g_SimpleElementVertexDeclaration;
 
 /**
  * @ingroup Engine

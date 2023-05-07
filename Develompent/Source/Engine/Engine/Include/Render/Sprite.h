@@ -88,7 +88,7 @@ private:
 	IndexBufferRHIRef_t			indexBufferRHI;			/**< Index buffer RHI */
 };
 
-extern TGlobalResource< CSpriteMesh >		GSpriteMesh;			/**< The global sprite mesh data for rendering sprites */
+extern TGlobalResource< CSpriteMesh >		g_SpriteMesh;			/**< The global sprite mesh data for rendering sprites */
 
 /**
  * @ingroup Engine
@@ -117,7 +117,7 @@ public:
 	 */
 	FORCEINLINE SSpriteSurface GetSurface() const
 	{
-		return GSpriteMesh.GetSurface();
+		return g_SpriteMesh.GetSurface();
 	}
 
 	/**
@@ -144,7 +144,7 @@ public:
 	 */
 	FORCEINLINE VertexBufferRHIRef_t GetVertexBufferRHI() const
 	{
-		return GSpriteMesh.GetVertexBufferRHI();
+		return g_SpriteMesh.GetVertexBufferRHI();
 	}
 
 	/**
@@ -153,7 +153,7 @@ public:
 	 */
 	FORCEINLINE IndexBufferRHIRef_t GetIndexBufferRHI() const
 	{
-		return GSpriteMesh.GetIndexBufferRHI();
+		return g_SpriteMesh.GetIndexBufferRHI();
 	}
 
 	/**

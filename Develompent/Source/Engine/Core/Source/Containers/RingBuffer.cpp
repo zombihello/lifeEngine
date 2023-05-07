@@ -3,8 +3,13 @@
 #include "Misc/Template.h"
 
 /* Critical section of ring buffer */
-static CCriticalSection			GCriticalSection;
+static CCriticalSection			s_CriticalSection;
 
+/*
+==================
+CRingBuffer::CRingBuffer
+==================
+*/
 CRingBuffer::CRingBuffer( uint32 InBufferSize, uint32 InAlignment /*= 1*/ ) :
 	dataWrittenEvent( nullptr ),
 	alignment( InAlignment )
@@ -14,25 +19,35 @@ CRingBuffer::CRingBuffer( uint32 InBufferSize, uint32 InAlignment /*= 1*/ ) :
 	readPointer = writePointer = data;
 }
 
+/*
+==================
+CRingBuffer::~CRingBuffer
+==================
+*/
 CRingBuffer::~CRingBuffer()
 {
-	GSynchronizeFactory->Destroy( dataWrittenEvent );
+	g_SynchronizeFactory->Destroy( dataWrittenEvent );
 	delete[] data;	
 }
 
-CRingBuffer::ÑAllocationContext::ÑAllocationContext( CRingBuffer& InRingBuffer, uint32 InAllocationSize ) :
+/*
+==================
+CRingBuffer::CAllocationContext::CAllocationContext
+==================
+*/
+CRingBuffer::CAllocationContext::CAllocationContext( CRingBuffer& InRingBuffer, uint32 InAllocationSize ) :
 	ringBuffer( InRingBuffer )
 {
-	GCriticalSection.Lock();
+	s_CriticalSection.Lock();
 
 	// Only allow a single AllocationContext at a time for the ring buffer.
-	check( !ringBuffer.isWriting );
+	Assert( !ringBuffer.isWriting );
 	ringBuffer.isWriting = true;
 
 	// Check that the allocation will fit in the buffer.
 	const uint32		alignedAllocationSize = Align( InAllocationSize, ringBuffer.alignment );
 	const uint32		bufferSize = ( uint32 )( ringBuffer.dataEnd - ringBuffer.data );
-	check( alignedAllocationSize < bufferSize );
+	Assert( alignedAllocationSize < bufferSize );
 
 	// Use the memory referenced by WritePointer for the allocation, wrapped around to the beginning of the buffer
 	// if it was at the end.
@@ -64,16 +79,26 @@ CRingBuffer::ÑAllocationContext::ÑAllocationContext( CRingBuffer& InRingBuffer, 
 			}
 		}
 
-		appSleep( 0.1f );
+		Sys_Sleep( 0.1f );
 	}
 }
 
-CRingBuffer::ÑAllocationContext::~ÑAllocationContext()
+/*
+==================
+CRingBuffer::CAllocationContext::~CAllocationContext
+==================
+*/
+CRingBuffer::CAllocationContext::~CAllocationContext()
 {
 	Commit();
 }
 
-void CRingBuffer::ÑAllocationContext::Commit()
+/*
+==================
+CRingBuffer::CAllocationContext::Commit
+==================
+*/
+void CRingBuffer::CAllocationContext::Commit()
 {
 	if ( allocationStart )
 	{
@@ -82,17 +107,17 @@ void CRingBuffer::ÑAllocationContext::Commit()
 
 		// Reset the IsWriting flag to allow other AllocationContexts to be created for the ring buffer.
 		ringBuffer.isWriting = false;
-		GCriticalSection.Unlock();
+		s_CriticalSection.Unlock();
 
 		// Clear the allocation pointer, to signal that it has been committed.
 		allocationStart = nullptr;
 
-		// Lazily create the data-written event. It can't be done in the CRingBuffer constructor because GSynchronizeFactory may not
+		// Lazily create the data-written event. It can't be done in the CRingBuffer constructor because g_SynchronizeFactory may not
 		// be initialized at that point.
 		if ( !ringBuffer.dataWrittenEvent )
 		{
-			ringBuffer.dataWrittenEvent = GSynchronizeFactory->CreateSynchEvent();
-			checkMsg( ringBuffer.dataWrittenEvent, TEXT( "Failed to create data-write event for CRingBuffer" ) );
+			ringBuffer.dataWrittenEvent = g_SynchronizeFactory->CreateSynchEvent();
+			AssertMsg( ringBuffer.dataWrittenEvent, TEXT( "Failed to create data-write event for CRingBuffer" ) );
 		}
 
 		// Trigger the data-written event to wake the reader thread.
@@ -100,6 +125,11 @@ void CRingBuffer::ÑAllocationContext::Commit()
 	}
 }
 
+/*
+==================
+CRingBuffer::BeginRead
+==================
+*/
 bool CRingBuffer::BeginRead( void*& OutReadPointer, uint32& OutReadSize )
 {
 	// Make a snapshot of a recent value of WritePointer, and use a memory barrier to ensure that reads from the data buffer
@@ -137,11 +167,21 @@ bool CRingBuffer::BeginRead( void*& OutReadPointer, uint32& OutReadSize )
 	return false;
 }
 
+/*
+==================
+CRingBuffer::FinishRead
+==================
+*/
 void CRingBuffer::FinishRead( uint32 InReadSize )
 {
 	readPointer += Align( InReadSize, alignment );
 }
 
+/*
+==================
+CRingBuffer::WaitForRead
+==================
+*/
 void CRingBuffer::WaitForRead( uint32 InWaitTime /*= (uint32)-1*/ )
 {
 	// If the buffer is empty, wait for the data-written event to be triggered.
@@ -153,7 +193,7 @@ void CRingBuffer::WaitForRead( uint32 InWaitTime /*= (uint32)-1*/ )
 		}
 		else
 		{
-			appSleep( 0.001f );			// Changed from 0 to 1ms (the shortest delay supported)
+			Sys_Sleep( 0.001f );			// Changed from 0 to 1ms (the shortest delay supported)
 		}
 	}
 }

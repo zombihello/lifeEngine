@@ -219,7 +219,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, EPixelFormat& InValue )
 
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const EPixelFormat& InValue )
 {
-	check( InArchive.IsSaving() );
+	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );
 	return InArchive;
 }

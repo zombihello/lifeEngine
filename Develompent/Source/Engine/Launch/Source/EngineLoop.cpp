@@ -46,106 +46,122 @@
 #include "Misc/WorldEdGlobals.h"
 #endif // WITH_EDITOR
 
-/**
- *	Returns the path to the cooked data for the given platform
- *
- *	@param InPlatform The platform of interest
- *	@param OutPath The path to the cooked content for that platform
- */
-void appGetCookedContentPath( EPlatformType InPlatform, std::wstring& OutPath )
+/*
+==================
+Sys_GetCookedContentPath
+==================
+*/
+void Sys_GetCookedContentPath( EPlatformType InPlatform, std::wstring& OutPath )
 {
+	// Returns the path to the cooked data for the given platform
 #if WITH_EDITOR
-	if ( !GIsCooker )
+	if ( !g_IsCooker )
 	{
-		OutPath = appGameDir() + PATH_SEPARATOR + TEXT( "Content" ) + PATH_SEPARATOR;
+		OutPath = Sys_GameDir() + PATH_SEPARATOR + TEXT( "Content" ) + PATH_SEPARATOR;
 	}
 	else
 #endif // WITH_EDITOR
 	{
-		OutPath = appGameDir() + PATH_SEPARATOR + TEXT( "Cooked" ) + appPlatformTypeToString( InPlatform ) + PATH_SEPARATOR;
+		OutPath = Sys_GameDir() + PATH_SEPARATOR + TEXT( "Cooked" ) + Sys_PlatformTypeToString( InPlatform ) + PATH_SEPARATOR;
 	}
 }
 
-/**
- * Update GCurrentTime and GDeltaTime while taking into account max tick rate
- */
-void appUpdateTimeAndHandleMaxTickRate()
+/*
+==================
+Sys_UpdateTimeAndHandleMaxTickRate
+==================
+*/
+void Sys_UpdateTimeAndHandleMaxTickRate()
 {
-	GLastTime = GCurrentTime;
-	GCurrentTime = appSeconds();
-	GDeltaTime = GCurrentTime - GLastTime;
+	// Update g_CurrentTime and g_DeltaTime while taking into account max tick rate
+	g_LastTime = g_CurrentTime;
+	g_CurrentTime = appSeconds();
+	g_DeltaTime = g_CurrentTime - g_LastTime;
 
-	if ( GUseMaxTickRate )
+	if ( g_UseMaxTickRate )
 	{
-		float		maxTickRate = Max( GEngine->GetMaxTickRate(), 1.f );
-		appSleep( Max( 1.f / maxTickRate - GDeltaTime, 0.0 ) );		// BS yehor.pohuliaka - It is possible that you need to somehow fix the stalling of the render thread another way
+		float		maxTickRate = Max( g_Engine->GetMaxTickRate(), 1.f );
+		Sys_Sleep( Max( 1.f / maxTickRate - g_DeltaTime, 0.0 ) );		// BS yehor.pohuliaka - It is possible that you need to somehow fix the stalling of the render thread another way
 	}
 }
 
-/**
- * Initialize the global full screen movie player
- */
-void appInitFullScreenMoviePlayer()
+/*
+==================
+Sys_InitFullScreenMoviePlayer
+==================
+*/
+void Sys_InitFullScreenMoviePlayer()
 {
-	check( !GFullScreenMovie );
+	// Initialize the global full screen movie player
+	Assert( !g_FullScreenMovie );
 
 #if USE_THEORA_CODEC
-	GFullScreenMovie = new CFullScreenMovieTheora();
+	g_FullScreenMovie = new CFullScreenMovieTheora();
 #else
-	GFullScreenMovie = new CFullScreenMovieFallback();
+	g_FullScreenMovie = new CFullScreenMovieFallback();
 #endif // USE_THEORA_CODEC
 
-	check( GFullScreenMovie );
+	Assert( g_FullScreenMovie );
 }
 
-/**
- * Constructor
- */
+
+/*
+==================
+CEngineLoop::CEngineLoop
+==================
+*/
 CEngineLoop::CEngineLoop() 
 	: isInitialize( false )
 	, bIsFocus( true )
 {}
 
-/**
- * Destructor
- */
+/*
+==================
+CEngineLoop::~CEngineLoop
+==================
+*/
 CEngineLoop::~CEngineLoop()
 {}
 
+/*
+==================
+CEngineLoop::InitConfigs
+==================
+*/
 void CEngineLoop::InitConfigs()
 {
 	// Init configs
-	GConfig.Init();
+	g_Config.Init();
 
 	// Set from config max tick rate
-	GUseMaxTickRate			= GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
+	g_UseMaxTickRate			= g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
 
 #if WITH_EDITOR
 	// Fill table for convert from text to ESurfaceType
 	{
-		std::vector< CConfigValue >		configSurfaceNames	= GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) ).GetArray();
+		std::vector< CConfigValue >		configSurfaceNames	= g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) ).GetArray();
 		for ( uint32 index = 0, count = configSurfaceNames.size(); index < count; ++index )
 		{
 			const CConfigValue&		configSurface			= configSurfaceNames[ index ];
-			check( configSurface.GetType() == CConfigValue::T_Object );
+			Assert( configSurface.GetType() == CConfigValue::T_Object );
 			CConfigObject			objectSurface = configSurface.GetObject();
 
 			std::wstring		name		= objectSurface.GetValue( TEXT( "Name" ) ).GetString();
 			int32				surfaceID	= objectSurface.GetValue( TEXT( "ID" ) ).GetInt();
-			check( surfaceID < ST_Max );
-			GSurfaceTypeNames.push_back( std::make_pair( name, ( ESurfaceType )surfaceID ) );
+			Assert( surfaceID < ST_Max );
+			g_SurfaceTypeNames.push_back( std::make_pair( name, ( ESurfaceType )surfaceID ) );
 		}
 	}
 
 	// Is need cook editor content (include dev content)
-	GIsCookEditorContent			= GConfig.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) ).GetBool();
-	if ( GIsCookEditorContent )
+	g_IsCookEditorContent			= g_Config.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) ).GetBool();
+	if ( g_IsCookEditorContent )
 	{
-		LE_LOG( LT_Warning, LC_Editor, TEXT( "Enabled cook editor content" ) );
+		Warnf( TEXT( "Enabled cook editor content\n" ) );
 	}
 
 	// Is allow shader debug dump
-	GAllowDebugShaderDump			= GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) ).GetBool() || GCommandLine.HasParam( TEXT( "-shaderdump" ) );
+	g_AllowDebugShaderDump			= g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) ).GetBool() || g_CommandLine.HasParam( TEXT( "-shaderdump" ) );
 #endif // WITH_EDITOR
 }
 
@@ -153,43 +169,45 @@ void CEngineLoop::InitConfigs()
 #include "System/BaseFileSystem.h"
 #include "System/Archive.h"
 
-/**
- * Pre-Initialize the main loop
- */
+/*
+==================
+CEngineLoop::PreInit
+==================
+*/
 int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 {
-	GGameThreadId = appGetCurrentThreadId();
-	GGameName = ANSI_TO_TCHAR( GAMENAME );
+	g_GameThreadId = Sys_GetCurrentThreadId();
+	g_GameName = ANSI_TO_TCHAR( GAMENAME );
 
-	GCommandLine.Init( InCmdLine );
+	g_CommandLine.Init( InCmdLine );
 	CName::StaticInit();
 	InitConfigs();
 
 #if WITH_EDITOR
-	GIsEditor = GCommandLine.HasParam( TEXT( "editor" ) );
+	g_IsEditor = g_CommandLine.HasParam( TEXT( "editor" ) );
 	
-	CCommandLine::Values_t	paramValues = GCommandLine.GetValues( TEXT( "commandlet" ) );
+	CCommandLine::Values_t	paramValues = g_CommandLine.GetValues( TEXT( "commandlet" ) );
 	if ( !paramValues.empty() )
 	{
-		GIsCooker		= paramValues[0] == TEXT( "CookPackages" ) || paramValues[0] == TEXT( "CCookPackagesCommandlet" );
-		GIsCommandlet	= !GIsCooker;
+		g_IsCooker		= paramValues[0] == TEXT( "CookPackages" ) || paramValues[0] == TEXT( "CCookPackagesCommandlet" );
+		g_IsCommandlet	= !g_IsCooker;
 	}
 
-	GIsGame = !GIsEditor && !GIsCooker && !GIsCommandlet;
+	g_IsGame = !g_IsEditor && !g_IsCooker && !g_IsCommandlet;
 #endif // WITH_EDITOR
 
-	appGetCookedContentPath( GPlatform, GCookedDir );
+	Sys_GetCookedContentPath( g_Platform, g_CookedDir );
 
-	GLog->Init();
-	int32		result = appPlatformPreInit();
+	g_Log->Init();
+	int32		result = Sys_PlatformPreInit();
 	
 	// Loading table of contents
-	if ( !GIsEditor && !GIsCooker )
+	if ( !g_IsEditor && !g_IsCooker )
 	{
-		std::wstring	tocPath = GCookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC();
+		std::wstring	tocPath = g_CookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC();
 
 #if WITH_EDITOR
-		if ( !GFileSystem->IsExistFile( tocPath ) )
+		if ( !g_FileSystem->IsExistFile( tocPath ) )
 		{
 			CCommandLine		commandLine;
 			commandLine.Init( TEXT( "-commandlet=CookerSync" ) );
@@ -197,97 +215,99 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		}
 #endif // WITH_EDITOR
 		
-		CArchive*		archiveTOC	= GFileSystem->CreateFileReader( tocPath );
+		CArchive*		archiveTOC	= g_FileSystem->CreateFileReader( tocPath );
 		if ( archiveTOC )
 		{
-			GTableOfContents.Serialize( *archiveTOC );
+			g_TableOfContents.Serialize( *archiveTOC );
 			delete archiveTOC;
 		}
 		else
 		{
-			LE_LOG( LT_Warning, LC_Package, TEXT( "TOC file '%s' not found.." ), tocPath.c_str() );
+			Warnf( TEXT( "TOC file '%s' not found..\n" ), tocPath.c_str() );
 		}
 	}
 
-	if ( !GIsCooker && !GIsEditor && !GFileSystem->IsExistFile( GCookedDir, true ) )
+	if ( !g_IsCooker && !g_IsEditor && !g_FileSystem->IsExistFile( g_CookedDir, true ) )
 	{
-		appErrorf( TEXT( "Cooked directory '%s' not exist. For work need cook packages" ), GCookedDir.c_str() );
+		Sys_Errorf( TEXT( "Cooked directory '%s' not exist. For work need cook packages" ), g_CookedDir.c_str() );
 		return -1;
 	}
 
-	GWindow->Create( ANSI_TO_TCHAR( ENGINE_NAME " " ENGINE_VERSION_STRING ), 1, 1, SW_Default );
-	GScriptEngine->Init();
-	GRHI->Init( GIsEditor );
+	g_Window->Create( ANSI_TO_TCHAR( ENGINE_NAME " " ENGINE_VERSION_STRING ), 1, 1, SW_Default );
+	g_ScriptEngine->Init();
+	g_RHI->Init( g_IsEditor );
 
-	LE_LOG( LT_Log, LC_Init, TEXT( "User: %s//%s" ), appComputerName().c_str(), appUserName().c_str() );
-	LE_LOG( LT_Log, LC_Init, TEXT( "Started with arguments: %s" ), InCmdLine );
+	Logf( TEXT( "User: %s//%s\n" ), Sys_ComputerName().c_str(), Sys_UserName().c_str() );
+	Logf( TEXT( "Started with arguments: %s\n" ), InCmdLine );
 
 	// Creating engine from config
 	{
 		std::wstring		classEngineName = TEXT( "CBaseEngine" );
-		if ( !GIsEditor )
+		if ( !g_IsEditor )
 		{
-			classEngineName = GConfig.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "Class" ) ).GetString().c_str();
+			classEngineName = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "Class" ) ).GetString().c_str();
 		}
 #if WITH_EDITOR
 		else
 		{
-			classEngineName = GConfig.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Class" ) ).GetString().c_str();
+			classEngineName = g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Class" ) ).GetString().c_str();
 		}
 #endif // WITH_EDITOR
 
 		const CClass*		lclass = CClass::StaticFindClass( classEngineName.c_str() );
-		checkMsg( lclass, TEXT( "Class engine %s not found" ), classEngineName.c_str() );
+		AssertMsg( lclass, TEXT( "Class engine %s not found" ), classEngineName.c_str() );
 		
-		GEngine = lclass->CreateObject< CBaseEngine >();
-		check( GEngine );
+		g_Engine = lclass->CreateObject< CBaseEngine >();
+		Assert( g_Engine );
 	}
 
 	return result;
 }
 
-/**
- * Initialize the main loop
- */
+/*
+==================
+CEngineLoop::Init
+==================
+*/
 int32 CEngineLoop::Init()
 {
 	// Init full screen movie player and start startup movies (only if this game)
-	appInitFullScreenMoviePlayer();
+	Sys_InitFullScreenMoviePlayer();
 
-	LE_LOG( LT_Log, LC_Init, TEXT( "Engine version: " ENGINE_VERSION_STRING ) );
+	Logf( TEXT( "Engine version: " ENGINE_VERSION_STRING "\n" ) );
 
-	appSetSplashText( STT_StartupProgress, TEXT( "Init platform" ) );
-	int32		result = appPlatformInit();
-	check( !result );
+	Sys_SetSplashText( STT_StartupProgress, TEXT( "Init platform" ) );
+	int32		result = Sys_PlatformInit();
+	Assert( !result );
 
-	appSetSplashText( STT_StartupProgress, TEXT( "Init package manager" ) );
-	GPackageManager->Init();
+	Sys_SetSplashText( STT_StartupProgress, TEXT( "Init package manager" ) );
+	g_PackageManager->Init();
 
-	appSetSplashText( STT_StartupProgress, TEXT( "Init shaders" ) );
-	GShaderManager->Init();
+	Sys_SetSplashText( STT_StartupProgress, TEXT( "Init shaders" ) );
+	g_ShaderManager->Init();
 
-	appSetSplashText( STT_StartupProgress, TEXT( "Init audio" ) );
-	GAudioEngine.Init();
+	Sys_SetSplashText( STT_StartupProgress, TEXT( "Init audio" ) );
+	g_AudioEngine.Init();
 
-	appSetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
-	GEngine->Init();
+	Sys_SetSplashText( STT_StartupProgress, TEXT( "Init engine" ) );
+	g_Engine->Init();
 
 #if WITH_EDITOR
-	check( !GIsEditor || GIsEditor && GEditorEngine );
+	Assert( !g_IsEditor || g_IsEditor && g_EditorEngine );
 #endif // WITH_EDITOR
 
 	// Start render thread
 	StartRenderingThread();
 
 	// Playing startup movies (only for game)
-	if ( GIsGame )
+	if ( g_IsGame )
 	{
-		GFullScreenMovie->GameThreadInitiateStartupSequence();
+		g_FullScreenMovie->GameThreadInitiateStartupSequence();
 	}
 
 	// Parse cmd line for start commandlets
 #if WITH_EDITOR
-	if ( CBaseCommandlet::ExecCommandlet( GCommandLine ) )
+	if ( CBaseCommandlet::ExecCommandlet( g_CommandLine ) )
 	{
 		return result;
 	}
@@ -297,10 +317,10 @@ int32 CEngineLoop::Init()
 	std::wstring		map;
 
 #if WITH_EDITOR
-	if ( GIsEditor )
+	if ( g_IsEditor )
 	{
 		// Get map for loading in editor
-		CConfigValue		configEditorStartupMap = GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
+		CConfigValue		configEditorStartupMap = g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
 		if ( configEditorStartupMap.IsA( CConfigValue::T_String ) )
 		{
 			map = configEditorStartupMap.GetString();
@@ -310,7 +330,7 @@ int32 CEngineLoop::Init()
 #endif // WITH_EDITOR
 	{
 		// Get map for loading in game
-		CConfigValue		configGameDefaultMap = GConfig.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
+		CConfigValue		configGameDefaultMap = g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
 		if ( configGameDefaultMap.IsA( CConfigValue::T_String ) )
 		{
 			map = configGameDefaultMap.GetString();
@@ -318,9 +338,9 @@ int32 CEngineLoop::Init()
 	}
 
 	// If command line has param 'map', we load she
-	if ( GCommandLine.HasParam( TEXT( "map" ) ) )
+	if ( g_CommandLine.HasParam( TEXT( "map" ) ) )
 	{
-		map = GCommandLine.GetFirstValue( TEXT( "map" ) );
+		map = g_CommandLine.GetFirstValue( TEXT( "map" ) );
 		if ( CFilename( map ).GetExtension().empty() )
 		{
 			map += TEXT( ".map" );
@@ -329,58 +349,62 @@ int32 CEngineLoop::Init()
 
 	if ( !map.empty() )
 	{
-		appSetSplashText( STT_StartupProgress, CString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
+		Sys_SetSplashText( STT_StartupProgress, CString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
 
 		std::wstring		error;
-		bool				bAbsolutePath = GFileSystem->IsAbsolutePath( map );
-		bool				successed = GEngine->LoadMap( !bAbsolutePath ? CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), GCookedDir.c_str(), map.c_str() ) : map, error );
+		bool				bAbsolutePath = g_FileSystem->IsAbsolutePath( map );
+		bool				successed = g_Engine->LoadMap( !bAbsolutePath ? CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), g_CookedDir.c_str(), map.c_str() ) : map, error );
 		if ( !successed )
 		{
-			appErrorf( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
+			Sys_Errorf( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
 			result = 2;
 		}
 	}
-	else if ( !GIsEditor )
+	else if ( !g_IsEditor )
 	{
-		appErrorf( TEXT( "In game config not setted or not valid default map (parameter 'GameDefaultMap')" ) );
+		Sys_Errorf( TEXT( "In game config not setted or not valid default map (parameter 'GameDefaultMap')" ) );
 		result = 1;
 	}
 
 	// Stop playing startup movies (only for game)
-	if ( GIsGame )
+	if ( g_IsGame )
 	{
-		GFullScreenMovie->GameThreadSetSkippable( true );		// After loading map we allow skip startup movies sequence
-		GFullScreenMovie->GameThreadStopMovie();
+		g_FullScreenMovie->GameThreadSetSkippable( true );		// After loading map we allow skip startup movies sequence
+		g_FullScreenMovie->GameThreadStopMovie();
 	}
 	return result;
 }
 
-/**
- * Process event
- */
+/*
+==================
+CEngineLoop::ProcessEvent
+==================
+*/
 void CEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
 {
 	// Handling system events
-	GEngine->ProcessEvent( InWindowEvent );
+	g_Engine->ProcessEvent( InWindowEvent );
 
 	// Handling window focus event
 	switch ( InWindowEvent.type )
 	{
 	case SWindowEvent::T_WindowFocusGained:
 		bIsFocus = true;
-		GAudioDevice.SetMutedDevice( false );
+		g_AudioDevice.SetMutedDevice( false );
 		break;
 
 	case SWindowEvent::T_WindowFocusLost:
 		bIsFocus = false;
-		GAudioDevice.SetMutedDevice( true );
+		g_AudioDevice.SetMutedDevice( true );
 		break;
 	}
 }
 
-/**
- * Advances main loop
- */
+/*
+==================
+CEngineLoop::Tick
+==================
+*/
 void CEngineLoop::Tick()
 {
 	// If we lost focus - not update engine tick
@@ -389,40 +413,42 @@ void CEngineLoop::Tick()
 		return;
 	}
 
-	appUpdateTimeAndHandleMaxTickRate();
+	Sys_UpdateTimeAndHandleMaxTickRate();
 
 	// Update package manager
-	GPackageManager->Tick();
+	g_PackageManager->Tick();
 	
 	// Update engine
-	GEngine->Tick( GDeltaTime );
+	g_Engine->Tick( g_DeltaTime );
 
 	// Reset input events after game frame
-	GInputSystem->ResetEvents();
+	g_InputSystem->ResetEvents();
 }
 
-/**
- * Performs shut down
- */
+/*
+==================
+CEngineLoop::Exit
+==================
+*/
 void CEngineLoop::Exit()
 {
 	StopRenderingThread();
 
-	GPackageManager->Shutdown();
+	g_PackageManager->Shutdown();
 
-	GEngine->Shutdown();
-	delete GEngine;
-	GEngine = nullptr;
+	g_Engine->Shutdown();
+	delete g_Engine;
+	g_Engine = nullptr;
 
-	delete GFullScreenMovie;
-	GFullScreenMovie = nullptr;
+	delete g_FullScreenMovie;
+	g_FullScreenMovie = nullptr;
 
-	GAudioEngine.Shutdown();
-	GShaderManager->Shutdown();
-	GRHI->Destroy();
+	g_AudioEngine.Shutdown();
+	g_ShaderManager->Shutdown();
+	g_RHI->Destroy();
 
-	GWindow->Close();
-	GLog->TearDown();
-	GConfig.Shutdown();
-	GCommandLine.Shutdown();
+	g_Window->Close();
+	g_Log->TearDown();
+	g_Config.Shutdown();
+	g_CommandLine.Shutdown();
 }

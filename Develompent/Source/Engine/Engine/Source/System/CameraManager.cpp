@@ -3,6 +3,11 @@
 #include "System/BaseWindow.h"
 #include "System/WindowEvent.h"
 
+/*
+==================
+CCameraManager::BeginPlay
+==================
+*/
 void CCameraManager::BeginPlay()
 {
 	// If camera is active - we update aspect ratio and width/height
@@ -10,7 +15,7 @@ void CCameraManager::BeginPlay()
 	{
 		uint32		windowWidth;
 		uint32		windowHeight;
-		GWindow->GetSize( windowWidth, windowHeight );
+		g_Window->GetSize( windowWidth, windowHeight );
 
 		activeCamera->SetAspectRatio( ( float )windowWidth / windowHeight );
 		activeCamera->SetOrthoWidth( windowWidth );
@@ -18,11 +23,21 @@ void CCameraManager::BeginPlay()
 	}
 }
 
+/*
+==================
+CCameraManager::EndPlay
+==================
+*/
 void CCameraManager::EndPlay()
 {
 	activeCamera = nullptr;
 }
 
+/*
+==================
+CCameraManager::ProcessEvent
+==================
+*/
 void CCameraManager::ProcessEvent( struct SWindowEvent &InWindowEvent )
 {
 	if ( !activeCamera )

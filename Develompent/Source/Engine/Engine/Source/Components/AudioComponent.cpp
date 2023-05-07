@@ -2,6 +2,11 @@
 
 IMPLEMENT_CLASS( CAudioComponent )
 
+/*
+==================
+CAudioComponent::CAudioComponent
+==================
+*/
 CAudioComponent::CAudioComponent()
 	: bIsLoop( false )
 	, bIsUISound( false )
@@ -17,6 +22,11 @@ CAudioComponent::CAudioComponent()
 	UpdateAudioSourceType();
 }
 
+/*
+==================
+CAudioComponent::~CAudioComponent
+==================
+*/
 CAudioComponent::~CAudioComponent()
 {
 	if ( source )
@@ -25,6 +35,11 @@ CAudioComponent::~CAudioComponent()
 	}
 }
 
+/*
+==================
+CAudioComponent::Serialize
+==================
+*/
 void CAudioComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );	
@@ -49,6 +64,11 @@ void CAudioComponent::Serialize( class CArchive& InArchive )
 	}
 }
 
+/*
+==================
+CAudioComponent::BeginPlay
+==================
+*/
 void CAudioComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -71,6 +91,11 @@ void CAudioComponent::BeginPlay()
 	source->SetLocation( oldSourceLocation );
 }
 
+/*
+==================
+CAudioComponent::TickComponent
+==================
+*/
 void CAudioComponent::TickComponent( float InDeltaTime )
 {
 	Super::TickComponent( InDeltaTime );
@@ -87,6 +112,11 @@ void CAudioComponent::TickComponent( float InDeltaTime )
 	}
 }
 
+/*
+==================
+CAudioComponent::UpdateAudioSourceType
+==================
+*/
 void CAudioComponent::UpdateAudioSourceType()
 {
 	// If source is valid - we getting current status and free allocated memory

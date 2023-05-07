@@ -2,6 +2,11 @@
 #include "System/ConCmd.h"
 #include "System/ConsoleSystem.h"
 
+/*
+==================
+CConCmd::CConCmd
+==================
+*/
 CConCmd::CConCmd( const std::wstring& InName, const std::wstring& InHelpText, const COnExecCmd::DelegateType_t& InExecDelegate )
 	: name( InName )
 	, helpText( InHelpText )
@@ -10,6 +15,11 @@ CConCmd::CConCmd( const std::wstring& InName, const std::wstring& InHelpText, co
 	GetGlobalConCmds().push_back( this );
 }
 
+/*
+==================
+CConCmd::~CConCmd
+==================
+*/
 CConCmd::~CConCmd()
 {
 	std::vector<CConCmd*>&		cmds = GetGlobalConCmds();

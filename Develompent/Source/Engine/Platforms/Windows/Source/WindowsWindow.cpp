@@ -7,7 +7,7 @@
 #include "WindowsWindow.h"
 #include "WindowsImGUI.h"
 
-static SDL_Scancode		GScanCodeToButtonCode[] =
+static SDL_Scancode		s_ScanCodeToButtonCode[] =
 {
 	SDL_SCANCODE_UNKNOWN,				// BC_None
 	SDL_SCANCODE_0,						// BC_Key0
@@ -119,13 +119,15 @@ static SDL_Scancode		GScanCodeToButtonCode[] =
 	SDL_SCANCODE_F12					// BC_KeyF12
 };
 
-/**
- * Convert scancode to engine keycode
- */
-EButtonCode appScanCodeToButtonCode( uint32 InScancode )
+/*
+==================
+Sys_ScanCodeToButtonCode
+==================
+*/
+EButtonCode Sys_ScanCodeToButtonCode( uint32 InScancode )
 {
 	for ( uint32 index = 0; index < BC_KeyCount; ++index )
-		if ( GScanCodeToButtonCode[ index ] == ( SDL_Scancode )InScancode )
+		if ( s_ScanCodeToButtonCode[ index ] == ( SDL_Scancode )InScancode )
 		{
 			return ( EButtonCode )index;
 		}
@@ -133,19 +135,23 @@ EButtonCode appScanCodeToButtonCode( uint32 InScancode )
 	return BC_None;
 }
 
-/**
- * Convert engine keycode scancode
- */
-uint32 appButtonCodeToScanCode( EButtonCode InButtonCode )
+/*
+==================
+Sys_ButtonCodeToScanCode
+==================
+*/
+uint32 Sys_ButtonCodeToScanCode( EButtonCode InButtonCode )
 {
-	check( InButtonCode >= BC_KeyFirst && InButtonCode <= BC_KeyLast );
-	return GScanCodeToButtonCode[ ( uint32 )InButtonCode ];
+	Assert( InButtonCode >= BC_KeyFirst && InButtonCode <= BC_KeyLast );
+	return s_ScanCodeToButtonCode[ ( uint32 )InButtonCode ];
 }
 
-/**
- * Convert mouse key code to engine key code
- */
-EButtonCode appMouseButtonToButtonCode( uint8 InButtonIndex )
+/*
+==================
+Sys_MouseButtonToButtonCode
+==================
+*/
+EButtonCode Sys_MouseButtonToButtonCode( uint8 InButtonIndex )
 {
 	switch ( InButtonIndex )
 	{
@@ -161,9 +167,11 @@ EButtonCode appMouseButtonToButtonCode( uint8 InButtonIndex )
 	}
 }
 
-/**
- * Constructor
- */
+/*
+==================
+CWindowsWindow::CWindowsWindow
+==================
+*/
 CWindowsWindow::CWindowsWindow() :
 	isShowCursor( false ),
 	isFullscreen( false ),
@@ -173,110 +181,134 @@ CWindowsWindow::CWindowsWindow() :
     handle( nullptr )
 {}
 
-/**
- * Destructor
- */
+/*
+==================
+CWindowsWindow::~CWindowsWindow
+==================
+*/
 CWindowsWindow::~CWindowsWindow()
 {
     Close();
 }
 
-/**
- * Show cursor
- */
+/*
+==================
+CWindowsWindow::ShowCursor
+==================
+*/
 void CWindowsWindow::ShowCursor()
 {
 	SDL_SetRelativeMouseMode( SDL_FALSE );
 	isShowCursor = true;
 }
 
-/**
- * Hide cursor
- */
+/*
+==================
+CWindowsWindow::HideCursor
+==================
+*/
 void CWindowsWindow::HideCursor()
 {
 	SDL_SetRelativeMouseMode( SDL_TRUE );
 	isShowCursor = false;
 }
 
-/**
- * Set title of window
- */
+/*
+==================
+CWindowsWindow::SetTitle
+==================
+*/
 void CWindowsWindow::SetTitle( const tchar* InTitle )
 {
-	check( sdlWindow );
+	Assert( sdlWindow );
 	SDL_SetWindowTitle( sdlWindow, TCHAR_TO_ANSI( InTitle ) );
 }
 
-/**
- * Set size of window
- */
+/*
+==================
+CWindowsWindow::SetSize
+==================
+*/
 void CWindowsWindow::SetSize( uint32 InWidth, uint32 InHeight )
 {
-	check( sdlWindow );
+	Assert( sdlWindow );
 
 	SDL_SetWindowSize( sdlWindow, InWidth, InHeight );
 	SDL_SetWindowPosition( sdlWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED );
 }
 
-/**
- * Set fullscreen mode
- */
+/*
+==================
+CWindowsWindow::SetFullscreen
+==================
+*/
 void CWindowsWindow::SetFullscreen( bool InIsFullscreen )
 {
-	check( sdlWindow );
+	Assert( sdlWindow );
 
 	SDL_SetWindowFullscreen( sdlWindow, InIsFullscreen ? SDL_WINDOW_FULLSCREEN : 0 );
 	isFullscreen = InIsFullscreen;
 }
 
-/**
- * Is window open
- */
+/*
+==================
+CWindowsWindow::IsOpen
+==================
+*/
 bool CWindowsWindow::IsOpen() const
 {
 	return sdlWindow;
 }
 
-/**
- * Is showing cursor
- */
+/*
+==================
+CWindowsWindow::IsShowingCursor
+==================
+*/
 bool CWindowsWindow::IsShowingCursor() const
 {
 	return isShowCursor;
 }
 
-/**
- * Is enabled fullscreen mode
- */
+/*
+==================
+CWindowsWindow::IsFullscreen
+==================
+*/
 bool CWindowsWindow::IsFullscreen() const
 {
 	return isFullscreen;
 }
 
-/**
- * Get size window
- */
+/*
+==================
+CWindowsWindow::GetSize
+==================
+*/
 void CWindowsWindow::GetSize( uint32& OutWidth, uint32& OutHeight ) const
 {
-	check( sdlWindow );
+	Assert( sdlWindow );
 	SDL_GetWindowSize( sdlWindow, ( int* ) &OutWidth, ( int* ) &OutHeight );
 }
 
-/**
- * Get OS handle
- */
+/*
+==================
+CWindowsWindow::GetHandle
+==================
+*/
 WindowHandle_t CWindowsWindow::GetHandle() const
 {
 	return handle;
 }
 
-/**
- * Create window
- */
+/*
+==================
+CWindowsWindow::Create
+==================
+*/
 void CWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeight, uint32 InFlags /* = SW_Default */ )
 {
-    check( !sdlWindow );
+    Assert( !sdlWindow );
 
 	// Combine flags for SDL2
     uint32              flags = 0;
@@ -320,7 +352,7 @@ void CWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
 	sdlWindow = SDL_CreateWindow( TCHAR_TO_ANSI( InTitle ), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, InWidth, InHeight, flags );
 	if ( !sdlWindow )
 	{
-		appErrorf( TEXT( "Failed created window (%ix%i) with title '%s' and flags 0x%X. SDL error: %s" ), InWidth, InHeight, InTitle, InFlags, SDL_GetError() );
+		Sys_Errorf( TEXT( "Failed created window (%ix%i) with title '%s' and flags 0x%X. SDL error: %s" ), InWidth, InHeight, InTitle, InFlags, SDL_GetError() );
 	}
 
 	id = SDL_GetWindowID( sdlWindow );
@@ -332,9 +364,14 @@ void CWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
 	SDL_GetWindowWMInfo( sdlWindow, sdlWindowInfo );
 	handle = sdlWindowInfo->info.win.window;
 
-	LE_LOG( LT_Log, LC_Init, TEXT( "Window created (%ix%i) with title '%s', flags 0x%X and handle 0x%X" ), InWidth, InHeight, InTitle, InFlags, handle );
+	Logf( TEXT( "Window created (%ix%i) with title '%s', flags 0x%X and handle 0x%X\n" ), InWidth, InHeight, InTitle, InFlags, handle );
 }
 
+/*
+==================
+CWindowsWindow::Maximize
+==================
+*/
 void CWindowsWindow::Maximize()
 {
 	if ( sdlWindow )
@@ -343,6 +380,11 @@ void CWindowsWindow::Maximize()
 	}
 }
 
+/*
+==================
+CWindowsWindow::Minimize
+==================
+*/
 void CWindowsWindow::Minimize()
 {
 	if ( sdlWindow )
@@ -351,9 +393,11 @@ void CWindowsWindow::Minimize()
 	}
 }
 
-/**
- * Close window
- */
+/*
+==================
+CWindowsWindow::Close
+==================
+*/
 void CWindowsWindow::Close()
 {
 	if ( !sdlWindow )		return;
@@ -366,7 +410,7 @@ void CWindowsWindow::Close()
 		SDL_SetRelativeMouseMode( SDL_FALSE );
 	}
 
-	LE_LOG( LT_Log, LC_General, TEXT( "Window with handle 0x%X closed" ), handle );
+	Logf( TEXT( "Window with handle 0x%X closed\n" ), handle );
 
 	id = ( uint32 )-1;
 	sdlWindow = nullptr;
@@ -376,9 +420,11 @@ void CWindowsWindow::Close()
 	isShowCursor = false;
 }
 
-/**
- * Show window
- */
+/*
+==================
+CWindowsWindow::Show
+==================
+*/
 void CWindowsWindow::Show()
 {
 	if ( sdlWindow )
@@ -387,9 +433,11 @@ void CWindowsWindow::Show()
 	}
 }
 
-/**
- * Hide window
- */
+/*
+==================
+CWindowsWindow::Hide
+==================
+*/
 void CWindowsWindow::Hide()
 {
 	if ( sdlWindow )
@@ -398,12 +446,14 @@ void CWindowsWindow::Hide()
 	}
 }
 
-/**
- * Handle window event
- */
+/*
+==================
+CWindowsWindow::PollEvent
+==================
+*/
 bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 {
-	check( sdlWindow );
+	Assert( sdlWindow );
 	OutWindowEvent.type = SWindowEvent::T_None;
 
 	SDL_Event			sdlEvent;
@@ -436,7 +486,7 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 		OutWindowEvent.events.key.isNumLock		= sdlEvent.key.keysym.mod & KMOD_NUM;
 		OutWindowEvent.events.key.isShift		= sdlEvent.key.keysym.mod & KMOD_SHIFT;
 		OutWindowEvent.events.key.isSuper		= sdlEvent.key.keysym.mod & KMOD_GUI;
-		OutWindowEvent.events.key.code			= appScanCodeToButtonCode( sdlEvent.key.keysym.scancode );
+		OutWindowEvent.events.key.code			= Sys_ScanCodeToButtonCode( sdlEvent.key.keysym.scancode );
 		break;
 
 		// Event of mouse button pressed and released
@@ -451,7 +501,7 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 			OutWindowEvent.type = SWindowEvent::T_MousePressed;
 		}
 
-		OutWindowEvent.events.mouseButton.code = appMouseButtonToButtonCode( sdlEvent.button.button );
+		OutWindowEvent.events.mouseButton.code = Sys_MouseButtonToButtonCode( sdlEvent.button.button );
 		OutWindowEvent.events.mouseButton.x = sdlEvent.button.x;
 		OutWindowEvent.events.mouseButton.y = sdlEvent.button.y;
 		break;
@@ -532,6 +582,11 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 	return isNotEndEvent;
 }
 
+/*
+==================
+CWindowsWindow::GetID
+==================
+*/
 uint32 CWindowsWindow::GetID() const
 {
 	return id;
