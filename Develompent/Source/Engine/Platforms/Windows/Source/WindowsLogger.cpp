@@ -5,6 +5,7 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/Misc.h"
+#include "Logger/LoggerMacros.h"
 #include "Containers/String.h"
 #include "System/BaseFileSystem.h"
 #include "WindowsLogger.h"

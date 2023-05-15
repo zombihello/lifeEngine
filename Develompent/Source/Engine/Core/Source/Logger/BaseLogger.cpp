@@ -29,9 +29,10 @@ void Print( std::string Instr )
 	Logf( TEXT( "%s\n" ), ANSI_TO_TCHAR( Instr.c_str() ) );
 }
 
-IMPLEMENT_SCRIPT_API( CBaseLogger,
-					  luabridge::getGlobalNamespace( InVM ).addFunction( "Log", &Print );
-					  )
+BEGIN_SCRIPT_API( CBaseLogger )
+	luabridge::getGlobalNamespace( InVM )
+		.addFunction( "Log", &Print );
+END_SCRIPT_API()
 
 /*
 ==================

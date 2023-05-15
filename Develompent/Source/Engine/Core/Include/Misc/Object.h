@@ -10,6 +10,8 @@
 #define OBJECT_H
 
 #include <string>
+
+#include "Misc/DataMap.h"
 #include "Misc/Class.h"
 
 /**
@@ -77,6 +79,7 @@
 class CObject
 {
     DECLARE_CLASS( CObject, CObject )
+    DECLARE_DATADESC()
 
 public:
     /**

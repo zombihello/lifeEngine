@@ -3,6 +3,9 @@
 
 IMPLEMENT_CLASS( CObject )
 
+BEGIN_DATADESC_NO_BASE( CObject )
+END_DATADESC()
+
 /*
 ==================
 CObject::Serialize

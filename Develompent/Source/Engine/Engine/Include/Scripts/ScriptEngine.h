@@ -36,27 +36,29 @@ extern "C"
 
 /**
  * @ingroup Engine
- * @brief Macro for implement class API for scripts
+ * @brief Macro for begin implement a class API for scripts
  *
- * @param[in] TClass Class
- * @param[in] TRegisterClassAPICode Code of register class API for script
- *
- * Example usage: @code IMPLEMENT_SCRIPT_API( CObject, <Code of register class API for scripts with help LuaBridge> ) @endcode
+ * @param Class     Class
 */
-#define IMPLEMENT_SCRIPT_API( TClass, TRegisterClassAPICode ) \
-	/** Register API class for scripts */ \
-    void        TClass::StaticRegisterClassAPI( struct lua_State* InVM ) \
+#define BEGIN_SCRIPT_API( Class ) \
+    struct SRegisterClassAPI##Class \
     { \
-        TRegisterClassAPICode \
-    } \
-    \
-    struct SRegisterClassAPI##TClass \
-    { \
-        SRegisterClassAPI##TClass() \
+        SRegisterClassAPI##Class() \
         { \
-            CScriptEngine::StaticAddRegisterClassAPI( &TClass::StaticRegisterClassAPI ); \
+            CScriptEngine::StaticAddRegisterClassAPI( &Class::StaticRegisterClassAPI ); \
         } \
-    } g_RegisterClassAPI##TClass;
+    } g_RegisterClassAPI##Class; \
+    \
+	/** Register API class for scripts */ \
+    void        Class::StaticRegisterClassAPI( struct lua_State* InVM ) \
+    {
+
+/**
+* @ingroup Engine
+* @brief Macro for end implement a class API for scripts
+*/
+#define END_SCRIPT_API() \
+    }
 
 /**
  * @ingroup Engine

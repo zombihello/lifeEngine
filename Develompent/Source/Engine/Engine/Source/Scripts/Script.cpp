@@ -64,7 +64,7 @@ void CScript::Serialize( CArchive& InArchive )
 			InArchive.Serialize( buffer, archiveSize );
 
 			// Loading source code of script
-			SetByteCode( buffer, archiveSize );
+			SetByteCode( buffer, strlen( ( achar* )buffer ) );
 			delete[] buffer;
 		}
 		else
@@ -107,8 +107,8 @@ CScript::SetByteCode
 void CScript::SetByteCode( const byte* InByteCode, uint32 InSize )
 {
 	Assert( InByteCode && InSize > 0 );
-	
-	// loading byte code of script
+
+	// Loading byte code of script
 	int32		result = luaL_loadbufferx( luaVM, ( achar* )InByteCode, InSize, name.c_str(), "bt" );		// b - binary format, t - text format, bt - all
 	Assert( result == 0 );
 
