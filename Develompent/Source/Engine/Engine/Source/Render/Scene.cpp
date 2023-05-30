@@ -17,6 +17,13 @@ CConVar		CVarRWireframe( TEXT( "r.wireframe" ), TEXT( "0" ), CVT_Bool, TEXT( "En
  * @note This console variable is exist only with editor
  */
 CConVar		CVarRLight( TEXT( "r.light" ), TEXT( "1" ), CVT_Bool, TEXT( "Enable/Disable light pass" ) );
+
+/**
+ * @ingroup Engine
+ * @brief CVar freeze rendering
+ * @note This console variable is exist only with editor
+ */
+CConVar		CVarRFreezeRendering( TEXT( "r.freeze_rendering" ), TEXT( "0" ), CVT_Bool, TEXT( "Freeze rendering" ) );
 #endif // WITH_EDITOR
 
 /*
@@ -241,6 +248,14 @@ CScene::BuildView
 */
 void CScene::BuildView( const CSceneView& InSceneView )
 {
+	// We do nothing if r.freeze_rendering is true
+#if WITH_EDITOR
+	if ( CVarRFreezeRendering.GetValueBool() )
+	{
+		return;
+	}
+#endif // WITH_EDITOR
+
 	// Add to SDGs visible primitives
 	for ( auto it = primitives.begin(), itEnd = primitives.end(); it != itEnd; ++it )
 	{
@@ -269,6 +284,14 @@ CScene::ClearView
 */
 void CScene::ClearView()
 {
+	// We do nothing if r.freeze_rendering is true
+#if WITH_EDITOR
+	if ( CVarRFreezeRendering.GetValueBool() )
+	{
+		return;
+	}
+#endif // WITH_EDITOR
+
 	// Clear all instances in scene depth groups
 	for ( uint32 index = 0; index < SDG_Max; ++index )
 	{

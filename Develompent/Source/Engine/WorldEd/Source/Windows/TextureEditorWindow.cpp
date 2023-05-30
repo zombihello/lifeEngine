@@ -108,6 +108,7 @@ CTextureEditorWindow::~CTextureEditorWindow
 CTextureEditorWindow::~CTextureEditorWindow()
 {
 	viewportWidget.SetViewportClient( nullptr, false );
+	FlushRenderingCommands();
 	delete viewportClient;
 }
 

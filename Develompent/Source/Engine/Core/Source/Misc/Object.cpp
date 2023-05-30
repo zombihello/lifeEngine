@@ -3,6 +3,7 @@
 
 IMPLEMENT_CLASS( CObject )
 
+// WorldEd reflection
 BEGIN_DATADESC_NO_BASE( CObject )
 END_DATADESC()
 

@@ -11,8 +11,11 @@
 
 #include <string>
 
-#include "Misc/DataMap.h"
 #include "Misc/Class.h"
+
+#if WITH_EDITOR
+#include "Misc/DataMap.h"
+#endif // WITH_EDITOR
 
 /**
  * @ingroup Core
