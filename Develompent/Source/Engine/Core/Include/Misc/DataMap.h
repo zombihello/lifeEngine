@@ -23,6 +23,10 @@ enum EFieldType
 	FT_Integer,			/**< Any integer or enum */
 	FT_Float,			/**< Any floating point value */
 	FT_Boolean,			/**< Boolean, implemented as an int */
+	FT_Vector2D,		/**< Float vector 2D */
+	FT_Vector3D,		/**< Float vector 3D */
+	FT_Vector4D,		/**< Float vector 4D */
+	FT_Color,			/**< Color 8-bit, 4 channel */
 
 	// Place here your new field types
 
@@ -86,31 +90,6 @@ struct SDataMap
 
 		/**
 		 * @ingroup Core
-		 * @brief Access to all fields in data map, include base classes
-		 * @warning Only for editor
-		 *
-		 * @param InDataMap		Data map in the class
-		 * @param OutFields		Output array with all fields
-		 */
-		template<class TSTLContainer = std::vector<const SFieldDescription*>>
-		FORCEINLINE void AllFieldsAccess( const SDataMap* InDataMap, TSTLContainer& OutFields )
-		{
-			for ( const SDataMap* pDataMap = InDataMap; pDataMap; pDataMap = pDataMap->baseMap )
-			{
-				for ( uint32 idxField = 0; idxField < pDataMap->numFields; ++idxField )
-				{
-					// We add to OutFields only valid fields
-					const SFieldDescription&		field = pDataMap->fields[idxField];
-					if ( field.name )
-					{
-						OutFields.push_back( &pDataMap->fields[idxField] );
-					}
-				}
-			}
-		}
-
-		/**
-		 * @ingroup Core
 		 * @brief Access to field of the object
 		 * @warning Only for editor
 		 *
@@ -119,7 +98,7 @@ struct SDataMap
 		 * @return Return pointer to field in the object
 		 */
 		template<typename TType>
-		FORCEINLINE TType* DataFieldAccess( void* InObject, SFieldDescription* InFieldDesc )
+		FORCEINLINE TType* DataFieldAccess( void* InObject, const SFieldDescription* InFieldDesc )
 		{
 			return ( TType* )( ( ( byte* )InObject ) + InFieldDesc->offset );
 		}
@@ -227,10 +206,6 @@ struct SDataMap
 		{
 			OutDataMap = nullptr;
 		}
-
-		template<class TSTLContainer = std::vector<const SFieldDescription*>>
-		FORCEINLINE void AllFieldsAccess( const SDataMap* InDataMap, TSTLContainer& OutFields )
-		{}
 
 		template<typename TType>
 		FORCEINLINE TType* DataFieldAccess( void* InObject, SFieldDescription* InFieldDesc )

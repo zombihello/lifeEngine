@@ -6,6 +6,11 @@
 
 IMPLEMENT_CLASS( CPrimitiveComponent )
 
+// WorldEd reflection
+BEGIN_DATADESC( CPrimitiveComponent, CSceneComponent )
+	DEFINE_FIELD( bVisibility, "Rendering", "Is primitive visibility", FT_Boolean )
+END_DATADESC()
+
 /*
 ==================
 CPrimitiveComponent::CPrimitiveComponent

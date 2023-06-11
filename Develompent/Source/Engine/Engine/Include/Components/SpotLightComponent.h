@@ -18,12 +18,19 @@
 class CSpotLightComponent : public CLightComponent
 {
 	DECLARE_CLASS( CSpotLightComponent, CLightComponent )
+	DECLARE_DATADESC()
 
 public:
 	/**
 	 * @brief Constructor
 	 */
 	CSpotLightComponent();
+
+	/**
+	 * @brief Serialize component
+	 * @param[in] InArchive Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Set radius

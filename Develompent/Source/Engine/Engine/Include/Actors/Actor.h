@@ -546,6 +546,7 @@ DECLARE_MULTICAST_DELEGATE( COnActorDestroyed, class AActor* );
 class AActor : public CObject, public CRefCounted
 {
 	DECLARE_CLASS( AActor, CObject )
+	DECLARE_DATADESC()
 
 public:
 	/**

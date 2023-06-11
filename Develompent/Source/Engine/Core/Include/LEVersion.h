@@ -53,6 +53,7 @@ enum ELifeEnginePackageVersion
 	VER_BBoxInStaticMesh					= 21,					/**< Added CBox to a static mesh */
 	VER_Mipmaps								= 22,					/**< Added mipmaps to textures */
 	VER_FixedSerializeComponents			= 23,					/**< Fixed serialization components in actors */
+	VER_NewSeriallizeDataInLightComponents	= 24,					/**< Added some properties to serialize in CLightComponent, CPointLightCompontn and CSpotLightComponent */
 
 	//
 	// New versions can be added here

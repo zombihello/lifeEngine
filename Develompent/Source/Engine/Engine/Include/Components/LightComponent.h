@@ -40,6 +40,7 @@ enum ELightType
 class CLightComponent : public CSceneComponent
 {
 	DECLARE_CLASS( CLightComponent, CSceneComponent )
+	DECLARE_DATADESC()
 
 public:
 	friend class CScene;			// For add and remove lights in scene
@@ -89,15 +90,6 @@ public:
 	}
 
 	/**
-	 * @brief Set specular color
-	 * @param InSpecularColor	Specular color
-	 */
-	FORCEINLINE void SetSpecularColor( const CColor& InSpecularColor )
-	{
-		specularColor = InSpecularColor;
-	}
-
-	/**
 	 * @brief Set intensivity
 	 * @param InIntensivity		Intensivity
 	 */
@@ -142,15 +134,6 @@ public:
 	}
 
 	/**
-	 * @brief Get specular color
-	 * @return Return specular color
-	 */
-	FORCEINLINE const CColor& GetSpecularColor() const
-	{
-		return specularColor;
-	}
-
-	/**
 	 * @brief Get intensivity
 	 * @return Return intensivity
 	 */
@@ -163,7 +146,6 @@ protected:
 	bool				bEnabled;		/**< Is enabled the light component */
 	class CScene*		scene;			/**< The current scene where the primitive is located  */
 	CColor				lightColor;		/**< Light color */
-	CColor				specularColor;	/**< Specular color */
 	float				intensivity;	/**< intensivity */
 };
 

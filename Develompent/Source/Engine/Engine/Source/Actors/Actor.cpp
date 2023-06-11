@@ -5,6 +5,12 @@
 
 IMPLEMENT_CLASS( AActor )
 
+// WorldEd reflection
+BEGIN_DATADESC( AActor, CObject )
+	DEFINE_FIELD( bVisibility, "Rendering", "Is actor visibility", FT_Boolean )
+	DEFINE_FIELD( bIsStatic, "Actor", "Is static actor", FT_Boolean )
+END_DATADESC()
+
 #if WITH_EDITOR
 /*
 ==================

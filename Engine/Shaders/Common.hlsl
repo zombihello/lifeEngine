@@ -24,7 +24,6 @@
 struct SLightData
 {
     float4      lightColor      : COLOR0;
-    float4      specularColor   : COLOR1;
     float       intensivity     : BLENDWEIGHT0;
 
 #if POINT_LIGHT
