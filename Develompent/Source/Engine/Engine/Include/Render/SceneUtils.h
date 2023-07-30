@@ -51,6 +51,12 @@
 
 /**
  * @ingroup Engine
+ * @brief Macro of color draw event for collision
+ */
+#define DEC_COLLISION			CColor( 0,		153,	0,		255 )
+
+/**
+ * @ingroup Engine
  * @brief Macro of color draw event for shadows
  */
 #define DEC_SHADOW				CColor( 128,	128,	128,	255 )

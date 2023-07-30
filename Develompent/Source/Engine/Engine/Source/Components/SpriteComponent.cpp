@@ -1,6 +1,5 @@
 #include "Actors/Actor.h"
 #include "System/World.h"
-#include "Render/Scene.h"
 #include "Components/SpriteComponent.h"
 #include "Misc/CoreGlobals.h"
 #include "System/Package.h"

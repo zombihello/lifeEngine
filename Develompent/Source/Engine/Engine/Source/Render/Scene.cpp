@@ -263,6 +263,13 @@ void CScene::BuildView( const CSceneView& InSceneView )
 		if ( primitiveComponent->IsVisibility() && InSceneView.GetFrustum().IsIn( primitiveComponent->GetBoundBox() ) )
 		{
 			primitiveComponent->AddToDrawList( InSceneView );
+
+#if WITH_EDITOR
+			if ( g_IsEditor )
+			{
+				primitiveComponent->DrawDebugComponent();
+			}
+#endif // WITH_EDITOR
 		}
 	}
 

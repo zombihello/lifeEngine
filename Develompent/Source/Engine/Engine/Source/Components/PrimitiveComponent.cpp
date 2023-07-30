@@ -74,6 +74,16 @@ void CPrimitiveComponent::TickComponent( float InDeltaTime )
 	}
 }
 
+#if WITH_EDITOR
+/*
+==================
+CPrimitiveComponent::DrawDebugComponent
+==================
+*/
+void CPrimitiveComponent::DrawDebugComponent()
+{}
+#endif // WITH_EDITOR
+
 /*
 ==================
 CPrimitiveComponent::Serialize

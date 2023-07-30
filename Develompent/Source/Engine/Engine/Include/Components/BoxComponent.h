@@ -25,6 +25,13 @@ public:
 	 */
 	CBoxComponent();
 
+#if WITH_EDITOR
+	/**
+	 * Function called every frame for drawing debug geometry. Override this function to implement custom logic of drawing debug geometry
+	 */
+	virtual void DrawDebugComponent() override;
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize

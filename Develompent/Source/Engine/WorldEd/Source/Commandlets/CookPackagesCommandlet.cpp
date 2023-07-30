@@ -261,7 +261,7 @@ void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 					bool			result = FindTileset( InTilesets, tile.ID, tileset, textureRect );
 					AssertMsg( result, TEXT( "Not founded tileset for tile with ID %i" ), tile.ID );
 
-					ASprite*			sprite				= g_World->SpawnActor< ASprite >( Vector( x * mapTileSize.x, y * mapTileSize.y, indexLayer ) );					
+					ASprite*			sprite				= g_World->SpawnActor< ASprite >( Vector( x * mapTileSize.x + tileset.tileSize.x / 2.f, y * mapTileSize.y + tileset.tileSize.y / 2.f, indexLayer ) );
 					CSpriteComponent*	spriteComponent		= sprite->GetSpriteComponent();
 					spriteComponent->SetType( ST_Static );
 					spriteComponent->SetMaterial( tileset.material );
