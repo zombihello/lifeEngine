@@ -430,7 +430,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		{
 			// Scrolling the mousewheel up/down zooms the orthogonal viewport in/out
 			int32		delta = 25;
-			if ( InWindowEvent.events.mouseWheel.y < 0.f )
+			if ( InWindowEvent.events.mouseWheel.y > 0.f )
 			{
 				delta *= -1.f;
 			}

@@ -14,6 +14,46 @@
 #include "System/Package.h"
 #include "System/World.h"
 
+/** Macro size button in menu bar */
+#define EDITORWINDOW_MENUBAR_BUTTONSIZE		ImVec2( 16.f, 16.f )
+
+/** Selection color */
+#define EDITORWINDOW_SELECTCOLOR			ImVec4( 0.f, 0.43f, 0.87f, 1.f )
+
+/** Is need pop style color of a button */
+static bool s_ImGui_ButtonNeedPopStyleColor = false;
+
+/*
+==================
+ImGui_ButtonSetButtonSelectedStyle
+==================
+*/
+static void ImGui_ButtonSetButtonSelectedStyle()
+{
+	if ( !s_ImGui_ButtonNeedPopStyleColor )
+	{
+		s_ImGui_ButtonNeedPopStyleColor = true;
+		ImGui::PushStyleColor( ImGuiCol_Button, EDITORWINDOW_SELECTCOLOR );
+		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, EDITORWINDOW_SELECTCOLOR );
+		ImGui::PushStyleColor( ImGuiCol_ButtonActive, EDITORWINDOW_SELECTCOLOR );
+	}
+}
+
+/*
+==================
+ImGui_ButtonPopStyleColor
+==================
+*/
+static void ImGui_ButtonPopStyleColor()
+{
+	if ( s_ImGui_ButtonNeedPopStyleColor )
+	{
+		ImGui::PopStyleColor( 3 );
+		s_ImGui_ButtonNeedPopStyleColor = false;
+	}
+}
+
+
 /*
 ==================
 CEditorWindow::CEditorWindow
@@ -77,6 +117,18 @@ void CEditorWindow::UpdateWindowTitle()
 	g_Window->SetTitle( CString::Format( TEXT( "%s%s - %s" ), g_World->IsDirty() ? TEXT( "*" ) : TEXT( "" ), g_World->GetName().c_str(), g_EditorEngine->GetEditorName().c_str()).c_str());
 }
 
+void HY_ImGui_EndMainStatusBar()
+{
+	ImGui::EndMenuBar();
+
+	// When the user has left the menu layer (typically: closed menus through activation of an item), we restore focus to the previous window
+	// FIXME: With this strategy we won't be able to restore a NULL focus.
+	ImGuiContext& g = *GImGui;
+	if ( g.CurrentWindow == g.NavWindow && g.NavLayer == ImGuiNavLayer_Main && !g.NavAnyRequest )
+		ImGui::FocusTopMostWindowUnderOne( g.NavWindow, NULL );
+
+	ImGui::End();
+}
 /*
 ==================
 CEditorWindow::OnTick
@@ -84,7 +136,7 @@ CEditorWindow::OnTick
 */
 void CEditorWindow::OnTick()
 {
-	const ImGuiViewport*	imguiViewport	= ImGui::GetMainViewport();
+	ImGuiViewport*			imguiViewport	= ImGui::GetMainViewport();
 	ImGuiIO&				imguiIO			= ImGui::GetIO();
 
 	// Init position and size of window
@@ -274,6 +326,142 @@ void CEditorWindow::OnTick()
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();
+	}
+
+	// Status bar
+	if ( ImGui::BeginViewportSideBar( "##MainStatusBar", imguiViewport, ImGuiDir_Down, ImGui::GetFrameHeight(), ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar ) )
+	{
+		if ( ImGui::BeginMenuBar() )
+		{
+			const ImVec2	buttonSize = ImVec2( 16.f, 0.f );
+			const float		comboboxSize = ImGui::GetWindowWidth() * 0.04f;
+			ImGui::Dummy( ImVec2( ImGui::GetWindowWidth() - buttonSize.x * 3 - comboboxSize * 3 - 100.f, 0.f ) );
+	
+			// Snap translation
+			{
+				// Button
+				bool	bUseSnapTranslation = g_EditorEngine->GetConstraints().IsUseSnapTranslation();
+				if ( bUseSnapTranslation )
+				{
+					ImGui_ButtonSetButtonSelectedStyle();
+				}
+				if ( ImGui::Button( "T", buttonSize ) )
+				{
+					g_EditorEngine->GetConstraints().UseSnapTranslation( !bUseSnapTranslation );
+				}
+				if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+				{
+					ImGui::SetTooltip( "Enables or disables snapping to the grid when dragging objects around" );
+				}
+				ImGui_ButtonPopStyleColor();
+
+				// Combobox
+				ImGui::SetNextItemWidth( comboboxSize );
+				CEditorConstraints::ESnapTranslation		currentSnapTranslation = g_EditorEngine->GetConstraints().GetGridTranslationID();
+				if ( ImGui::BeginCombo( "##T_Grids", TCHAR_TO_ANSI( CEditorConstraints::ConvSnapTranslationToText( currentSnapTranslation ) ) ) )
+				{
+					for ( uint32 index = 0; index < CEditorConstraints::ESnapTranslation::ST_Num; ++index )
+					{
+						bool	bSelected = index == currentSnapTranslation;
+						if ( ImGui::Selectable( TCHAR_TO_ANSI( CEditorConstraints::ConvSnapTranslationToText( ( CEditorConstraints::ESnapTranslation )index ) ), &bSelected ) )
+						{
+							g_EditorEngine->GetConstraints().SetGridTranslationSize( ( CEditorConstraints::ESnapTranslation )index );
+						}
+					}
+					ImGui::EndCombo();
+				}
+				if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+				{
+					ImGui::SetTooltip( "Set the Position Grid value" );
+				}
+			}
+
+			ImGui::Separator();
+
+			// Snap rotation
+			{
+				// Button
+				bool	bUseSnapRotation = g_EditorEngine->GetConstraints().IsUseSnapRotation();
+				if ( bUseSnapRotation )
+				{
+					ImGui_ButtonSetButtonSelectedStyle();
+				}
+				if ( ImGui::Button( "R", buttonSize ) )
+				{
+					g_EditorEngine->GetConstraints().UseSnapRotation( !bUseSnapRotation );
+				}
+				if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+				{
+					ImGui::SetTooltip( "Enables or disables snapping objects to a rotation grid" );
+				}
+				ImGui_ButtonPopStyleColor();
+
+				// Combobox
+				ImGui::SetNextItemWidth( comboboxSize );
+				CEditorConstraints::ESnapRotation		currentSnapRotation = g_EditorEngine->GetConstraints().GetGridRotationID();
+				if ( ImGui::BeginCombo( "##R_Grids", TCHAR_TO_ANSI( CEditorConstraints::ConvSnapRotationToText( currentSnapRotation ) ) ) )
+				{
+					for ( uint32 index = 0; index < CEditorConstraints::ESnapRotation::SR_Num; ++index )
+					{
+						bool	bSelected = index == currentSnapRotation;
+						if ( ImGui::Selectable( TCHAR_TO_ANSI( CEditorConstraints::ConvSnapRotationToText( ( CEditorConstraints::ESnapRotation )index ) ), &bSelected ) )
+						{
+							g_EditorEngine->GetConstraints().SetGridRotationSize( ( CEditorConstraints::ESnapRotation )index );
+						}
+					}
+					ImGui::EndCombo();
+				}
+				if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+				{
+					ImGui::SetTooltip( "Set the Rotation Grid value" );
+				}
+			}
+
+			ImGui::Separator();
+
+			// Snap scale
+			{
+				// Button
+				bool	bUseSnapScale = g_EditorEngine->GetConstraints().IsUseSnapScale();
+				if ( bUseSnapScale )
+				{
+					ImGui_ButtonSetButtonSelectedStyle();
+				}
+				if ( ImGui::Button( "S", buttonSize ) )
+				{
+					g_EditorEngine->GetConstraints().UseSnapScale( !bUseSnapScale );
+				}
+				if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+				{
+					ImGui::SetTooltip( "Enables or disables snapping objects to a scale grid" );
+				}
+				ImGui_ButtonPopStyleColor();
+
+				// Combobox
+				ImGui::SetNextItemWidth( comboboxSize );
+				CEditorConstraints::ESnapScale		currentSnapScale = g_EditorEngine->GetConstraints().GetGridScalingID();
+				if ( ImGui::BeginCombo( "##S_Grids", TCHAR_TO_ANSI( CEditorConstraints::ConvSnapScaleToText( currentSnapScale ) ) ) )
+				{
+					for ( uint32 index = 0; index < CEditorConstraints::ESnapScale::SS_Num; ++index )
+					{
+						bool	bSelected = index == currentSnapScale;
+						if ( ImGui::Selectable( TCHAR_TO_ANSI( CEditorConstraints::ConvSnapScaleToText( ( CEditorConstraints::ESnapScale )index ) ), &bSelected ) )
+						{
+							g_EditorEngine->GetConstraints().SetGridScalingSize( ( CEditorConstraints::ESnapScale )index );
+						}
+					}
+					ImGui::EndCombo();
+				}
+				if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+				{
+					ImGui::SetTooltip( "Set scaling options" );
+				}
+			}
+			
+
+			ImGui::EndMenuBar();
+		}
+		ImGui::End();
 	}
 }
 

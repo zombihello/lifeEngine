@@ -279,8 +279,47 @@ void CLevelViewportWindow::OnTick()
 		Matrix		actorTransformMatrix	= actorCenter->GetActorTransform().ToMatrix();
 		Matrix		deltaMatrix;
 
+		// Get snap size
+		bool		bUseSnap = false;
+		float		gridSize = 0.f;
+		switch ( guizmoOperationType )
+		{
+			// Translate
+			case ImGuizmo::TRANSLATE:
+				bUseSnap = g_EditorEngine->GetConstraints().IsUseSnapTranslation();
+				if ( bUseSnap )
+				{
+					gridSize = g_EditorEngine->GetConstraints().GetGridTranslationSize();
+				}
+				break;
+
+			// Rotate
+			case ImGuizmo::ROTATE:
+				bUseSnap = g_EditorEngine->GetConstraints().IsUseSnapRotation();
+				if ( bUseSnap )
+				{
+					gridSize = g_EditorEngine->GetConstraints().GetGridRotationSize();
+				}
+				break;
+
+			// Scale
+			case ImGuizmo::SCALE:
+				bUseSnap = g_EditorEngine->GetConstraints().IsUseSnapScale();
+				if ( bUseSnap )
+				{
+					gridSize = g_EditorEngine->GetConstraints().GetGridScalingSize();
+				}
+				break;
+		}
+
 		// Draw gizmo and apply changes to actor
-		ImGuizmo::Manipulate( glm::value_ptr( sceneView->GetViewMatrix() ), glm::value_ptr( sceneView->GetProjectionMatrix() ), ( ImGuizmo::OPERATION )guizmoOperationFlags, !bOrhtoViewportType ? guizmoModeType : ImGuizmo::WORLD, glm::value_ptr( actorTransformMatrix ), glm::value_ptr( deltaMatrix ) );
+		Vector		snapSize;
+		if ( bUseSnap )
+		{
+			snapSize = Vector( gridSize, gridSize, gridSize );
+		}
+
+		ImGuizmo::Manipulate( glm::value_ptr( sceneView->GetViewMatrix() ), glm::value_ptr( sceneView->GetProjectionMatrix() ), ( ImGuizmo::OPERATION )guizmoOperationFlags, !bOrhtoViewportType ? guizmoModeType : ImGuizmo::WORLD, glm::value_ptr( actorTransformMatrix ), glm::value_ptr( deltaMatrix ), bUseSnap ? &snapSize.x : nullptr );
 		bGuizmoUsing = ImGuizmo::IsUsing();
 		if ( bGuizmoUsing )
 		{
@@ -351,6 +390,10 @@ void CLevelViewportWindow::DrawPopupMenu()
 	{
 		// Convert from screen space to world space
 		Vector			location = viewportClient.ScreenToWorld( Vector2D( viewportCursorPos.x, viewportCursorPos.y ), GetSizeX(), GetSizeY() );
+		if ( g_EditorEngine->GetConstraints().IsUseSnapTranslation() )
+		{
+			location = SMath::GridSnap( location, g_EditorEngine->GetConstraints().GetGridTranslationSize() );
+		}
 
 		// Spawn actor by class
 		CClass*			actorClass = g_EditorEngine->GetActorClassesWindow()->GetCurrentClass();

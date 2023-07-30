@@ -33,6 +33,7 @@ void CEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 	{
 		return;
 	}
+	InViewportGridY = Max<int32>( InViewportGridY, 5 );
 
 	const Matrix&				projectionMatrix = InSceneView->GetProjectionMatrix();
 	Matrix	invViewProjMatrix	= SMath::InverseMatrix( projectionMatrix ) * SMath::InverseMatrix( InSceneView->GetViewMatrix() );
@@ -134,36 +135,36 @@ void CEditorCommonDrawHelper::DrawGrid( const class CSceneView* InSceneView, ELe
 				// Do X-Axis lines.
 				a.x = +HALF_WORLD_MAX1;			a.y = 0.0;
 				b.x = -HALF_WORLD_MAX1;			b.y = 0.0;
-				DrawGridSection( origin.z, g_EditorEngine->GetConstraints().GetGridSize(), a, b, a.z, b.z, 2, alphaCase, InSceneView, SDG );
+				DrawGridSection( origin.z, g_EditorEngine->GetConstraints().GetGridTranslationSize(), a, b, a.z, b.z, 2, alphaCase, InSceneView, SDG );
 				
 				// Do Z-Axis lines.
 				a.z = +HALF_WORLD_MAX1;			a.y = 0.f;
 				b.z = -HALF_WORLD_MAX1;			b.y = 0.f;
-				DrawGridSection( origin.x, g_EditorEngine->GetConstraints().GetGridSize(), a, b, a.x, b.x, 0, alphaCase, InSceneView, SDG );
+				DrawGridSection( origin.x, g_EditorEngine->GetConstraints().GetGridTranslationSize(), a, b, a.x, b.x, 0, alphaCase, InSceneView, SDG );
 				break;
 
 			case LVT_OrthoXY:
 				// Do X-Axis lines.
 				a.x = +HALF_WORLD_MAX1;			a.z = 0.f;
 				b.x = -HALF_WORLD_MAX1;			b.z = 0.f;
-				DrawGridSection( origin.y, g_EditorEngine->GetConstraints().GetGridSize(), a, b, a.y, b.y, 1, alphaCase, InSceneView, SDG );
+				DrawGridSection( origin.y, g_EditorEngine->GetConstraints().GetGridTranslationSize(), a, b, a.y, b.y, 1, alphaCase, InSceneView, SDG );
 				
 				// Do Y-Axis lines.
 				a.y = +HALF_WORLD_MAX1;			a.z = 0.f;
 				b.y = -HALF_WORLD_MAX1;			b.z = 0.f;
-				DrawGridSection( origin.x, g_EditorEngine->GetConstraints().GetGridSize(), a, b, a.x, b.x, 0, alphaCase, InSceneView, SDG );
+				DrawGridSection( origin.x, g_EditorEngine->GetConstraints().GetGridTranslationSize(), a, b, a.x, b.x, 0, alphaCase, InSceneView, SDG );
 				break;
 
 			case LVT_OrthoYZ:
 				// Do Y-Axis lines.
 				a.y = +HALF_WORLD_MAX1;			a.x = 0.f;
 				b.y = -HALF_WORLD_MAX1;			b.x = 0.f;
-				DrawGridSection( origin.z, g_EditorEngine->GetConstraints().GetGridSize(), a, b, a.z, b.z, 2, alphaCase, InSceneView, SDG );
+				DrawGridSection( origin.z, g_EditorEngine->GetConstraints().GetGridTranslationSize(), a, b, a.z, b.z, 2, alphaCase, InSceneView, SDG );
 
 				// Do Z-Axis lines.
 				a.z = +HALF_WORLD_MAX1;			a.x = 0.f;
 				b.z = -HALF_WORLD_MAX1;			b.x = 0.f;
-				DrawGridSection( origin.y, g_EditorEngine->GetConstraints().GetGridSize(), a, b, a.y, b.y, 1, alphaCase, InSceneView, SDG );
+				DrawGridSection( origin.y, g_EditorEngine->GetConstraints().GetGridTranslationSize(), a, b, a.y, b.y, 1, alphaCase, InSceneView, SDG );
 				break;
 			}
 		}

@@ -658,6 +658,103 @@ struct SMath
 		return glm::lerp( InX, InY, InA );
 	}
 
+	/**
+	 * @brief Snaps a value to the nearest grid multiple
+	 * 
+	 * @param InValue	Value
+	 * @param InGrid	Grid
+	 * @return Return snapped value to the nearest grid multiple
+	 */
+	static FORCEINLINE float GridSnap( float InValue, float InGrid )
+	{
+		if ( InGrid == 0.f )
+		{
+			return InValue;
+		}
+		else
+		{
+			return Floor( ( InValue + 0.5f * InGrid ) / InGrid ) * InGrid;
+		}
+	}
+
+	/**
+	 * @brief Snaps a Vector2D to the nearest grid multiple
+	 * 
+	 * @param InValue	Value
+	 * @param InGrid	Grid
+	 * @return Return snapped Vector2D to the nearest grid multiple
+	 */
+	static FORCEINLINE Vector2D GridSnap( const Vector2D& InValue, float InGrid )
+	{
+		Vector2D	retVec;
+		GridSnap( InValue, InGrid, retVec );
+		return retVec;
+	}
+
+	/**
+	 * @brief Snaps a Vector2D to the nearest grid multiple
+	 *
+	 * @param InValue	Value
+	 * @param InGrid	Grid
+	 * @param OutValue	Return snapped Vector2D to the nearest grid multiple
+	 */
+	static FORCEINLINE void GridSnap( const Vector2D& InValue, float InGrid, Vector2D& OutValue )
+	{
+		OutValue = Vector2D( GridSnap( InValue.x, InGrid ), GridSnap( InValue.y, InGrid ) );
+	}
+
+	/**
+	 * @brief Snaps a Vector to the nearest grid multiple
+	 *
+	 * @param InValue	Value
+	 * @param InGrid	Grid
+	 * @return Return snapped Vector to the nearest grid multiple
+	 */
+	static FORCEINLINE Vector GridSnap( const Vector& InValue, float InGrid )
+	{
+		Vector	retVec;
+		GridSnap( InValue, InGrid, retVec );
+		return retVec;
+	}
+
+	/**
+	 * @brief Snaps a Vector to the nearest grid multiple
+	 *
+	 * @param InValue	Value
+	 * @param InGrid	Grid
+	 * @param OutValue	Return snapped Vector to the nearest grid multiple
+	 */
+	static FORCEINLINE void GridSnap( const Vector& InValue, float InGrid, Vector& OutValue )
+	{
+		OutValue = Vector( GridSnap( InValue.x, InGrid ), GridSnap( InValue.y, InGrid ), GridSnap( InValue.z, InGrid ) );
+	}
+
+	/**
+	 * @brief Snaps a Vector4D to the nearest grid multiple
+	 *
+	 * @param InValue	Value
+	 * @param InGrid	Grid
+	 * @return Return snapped Vector4D to the nearest grid multiple
+	 */
+	static FORCEINLINE Vector4D GridSnap( const Vector4D& InValue, float InGrid )
+	{
+		Vector4D	retVec;
+		GridSnap( InValue, InGrid, retVec );
+		return retVec;
+	}
+
+	/**
+	 * @brief Snaps a Vector4D to the nearest grid multiple
+	 *
+	 * @param InValue	Value
+	 * @param InGrid	Grid
+	 * @param OutValue	Return snapped Vector4D to the nearest grid multiple
+	 */
+	static FORCEINLINE void GridSnap( const Vector4D& InValue, float InGrid, Vector4D& OutValue )
+	{
+		OutValue = Vector4D( GridSnap( InValue.x, InGrid ), GridSnap( InValue.y, InGrid ), GridSnap( InValue.z, InGrid ), GridSnap( InValue.w, InGrid ) );
+	}
+
 	static const Vector				vectorZero;			/**< Zero 3D vector */
 	static const Vector				vectorOne;			/**< One 3D vector */
 	static const Quaternion			quaternionZero;		/**< Quaternion zero */

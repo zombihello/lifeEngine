@@ -189,7 +189,7 @@ public:
 	{
 		translation	+= InOther.translation;
 		rotation	=  InOther.rotation * rotation;
-		scale		*= InOther.scale;
+		scale		+= InOther.scale;
 		bDirtyMatrix = true;
 	}
 
@@ -200,10 +200,10 @@ public:
 	 */
 	FORCEINLINE void Subtract( const CTransform& InOther )
 	{
-		translation		-= InOther.translation;
-		rotation		= SMath::InverseQuaternion( InOther.rotation ) * rotation;
-		scale			/= InOther.scale;
-		bDirtyMatrix	= true;
+		translation	-= InOther.translation;
+		rotation	= SMath::InverseQuaternion( InOther.rotation ) * rotation;
+		scale		-= InOther.scale;
+		bDirtyMatrix = true;
 	}
 
 	/**
@@ -361,7 +361,7 @@ public:
 	 */
 	FORCEINLINE CTransform operator+( const CTransform& InOther ) const
 	{
-		return CTransform( InOther.rotation * rotation, translation + InOther.translation, scale * InOther.scale );
+		return CTransform( InOther.rotation * rotation, translation + InOther.translation, scale + InOther.scale );
 	}
 
 	/**
@@ -369,7 +369,7 @@ public:
 	 */
 	FORCEINLINE CTransform operator-( const CTransform& InOther ) const
 	{
-		return CTransform( SMath::InverseQuaternion( InOther.rotation ) * rotation, translation - InOther.translation, scale / InOther.scale );
+		return CTransform( SMath::InverseQuaternion( InOther.rotation ) * rotation, translation - InOther.translation, scale - InOther.scale );
 	}
 
 protected:
