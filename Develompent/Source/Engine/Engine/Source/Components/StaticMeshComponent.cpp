@@ -181,7 +181,7 @@ void CStaticMeshComponent::AddToDrawList( const class CSceneView& InSceneView )
 #if WITH_EDITOR
 		if ( owner ? owner->IsSelected() : false )
 		{
-			DrawWireframeBox( ( ( CScene* )g_World->GetScene() )->GetSDG( SDG_Highlight ), boundbox, DEC_STATIC_MESH );
+			DrawWireframeBox( ( ( CScene* )g_World->GetScene() )->GetSDG( SDG_WorldEdForeground ), boundbox, DEC_STATIC_MESH );
 		}
 #endif // WITH_EDITOR
 	}

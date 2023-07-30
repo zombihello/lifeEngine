@@ -210,11 +210,11 @@ private:
 
 #if WITH_EDITOR
 	/**
-	 * Render highlight layer
+	 * Render WorldEd foreground
 	 * 
 	 * @param InDeviceContext	RHI device context
 	 */
-	void RenderHighlight( class CBaseDeviceContextRHI* InDeviceContext );
+	void RenderWorldEdForeground( class CBaseDeviceContextRHI* InDeviceContext );
 #endif // WITH_EDITOR
 
 	class CScene*		scene;			/**< Scene */

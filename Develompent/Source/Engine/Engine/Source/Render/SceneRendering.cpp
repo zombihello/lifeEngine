@@ -97,10 +97,10 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	}
 
 #if WITH_EDITOR
-	// If we in editor draw highlight layer (gizmo and etc)
+	// If we in editor draw WorldEd foreground layer (gizmo and etc)
 	if ( g_IsEditor )
 	{
-		RenderHighlight( immediateContext );
+		RenderWorldEdForeground( immediateContext );
 	}
 #endif // WITH_EDITOR
 
@@ -111,18 +111,19 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 #if WITH_EDITOR
 /*
 ==================
-CSceneRenderer::RenderHighlight
+CSceneRenderer::RenderWorldEdForeground
 ==================
 */
-void CSceneRenderer::RenderHighlight( class CBaseDeviceContextRHI* InDeviceContext )
+void CSceneRenderer::RenderWorldEdForeground( class CBaseDeviceContextRHI* InDeviceContext )
 {
-	SCOPED_DRAW_EVENT( EventUI, DEC_SCENE_ITEMS, TEXT( "Highlight" ) );
+	SCOPED_DRAW_EVENT( EventUI, DEC_SCENE_ITEMS, TEXT( "WorldEdForeground" ) );
 	
 	g_SceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
+	InDeviceContext->ClearDepthStencil( g_SceneRenderTargets.GetSceneDepthZSurface() );
 	g_RHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
 	g_RHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
 	
-	RenderSDG( InDeviceContext, SDG_Highlight );
+	RenderSDG( InDeviceContext, SDG_WorldEdForeground );
 	g_SceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
 }
 #endif // WITH_EDITOR
@@ -160,13 +161,34 @@ CSceneRenderer::RenderBasePass
 bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	// Do nothing if SDG_World layer is empty
-	if ( scene->GetSDG( SDG_World ).IsEmpty() )
+	if ( scene->GetSDG( SDG_World ).IsEmpty()
+#if WITH_EDITOR
+		 && scene->GetSDG( SDG_WorldEdBackground ).IsEmpty()
+#endif // WITH_EDITOR
+		 )
 	{
 		return false;
 	}
 
+	bool						bDirty = false;
 	CBaseDeviceContextRHI*		immediateContext = g_RHI->GetImmediateContext();
 	SCOPED_DRAW_EVENT( EventBasePass, DEC_SCENE_ITEMS, TEXT( "BasePass" ) );
+
+	// Init render states
+	g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+	g_RHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
+
+	// Render WorldEd background
+#if WITH_EDITOR
+	if ( g_IsEditor )
+	{
+		g_SceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
+		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false, CF_Less>::GetRHI() );
+		bDirty = RenderSDG( immediateContext, SDG_WorldEdBackground );
+		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+		g_SceneRenderTargets.FinishRenderingSceneColorLDR( immediateContext );
+	}
+#endif // WITH_EDITOR
 
 	// If SHOW_Lights setted and disabled wireframe mode, we rendering to the GBuffer
 	ShowFlags_t		showFlags	= sceneView->GetShowFlags();
@@ -188,12 +210,8 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 		bGBuffer = false;
 	}
 
-	// Init render states
-	g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
-	g_RHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
-
 	// Render SDG_World layer
-	bool	bDirty = RenderSDG( InDeviceContext, SDG_World );
+	bDirty = RenderSDG( InDeviceContext, SDG_World );
 
 	// Finish rendering to GBuffer (only when we used him)
 	if ( bGBuffer )

@@ -20,6 +20,7 @@
 #include "Actors/Actor.h"
 #include "EngineLoop.h"
 #include "EngineDefines.h"
+#include "LEBuild.h"
 
 /**
  * @ingroup WorldEd
@@ -55,7 +56,12 @@ static const Vector				s_DefaultPerspectiveViewRotationEuler( SMath::vectorZero 
 /** Show flags for each viewport type */
 static const ShowFlags_t		s_ShowFlags[ LVT_Max ] =
 {
+#if !ENGINE_2D
 	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXY
+#else 
+	SHOW_DefaultEditor,							// LVT_OrthoXY
+#endif // !ENGINE_2D
+
 	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoXZ
 	SHOW_DefaultEditor | SHOW_Wireframe,		// LVT_OrthoYZ
 	SHOW_DefaultEditor							// LVT_Perspective
@@ -621,7 +627,11 @@ CEditorLevelViewportClient::GetBackgroundColor
 */
 CColor CEditorLevelViewportClient::GetBackgroundColor() const
 {
-	if ( viewportType == LVT_Perspective )
+	if ( viewportType == LVT_Perspective 
+#if ENGINE_2D
+		 || viewportType == LVT_OrthoXY
+#endif // ENGINE_2D
+		 )
 	{
 		return CColor::black;
 	}

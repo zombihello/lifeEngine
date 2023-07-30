@@ -674,7 +674,6 @@ enum ESceneDepthGroup
 	SDG_World,				/**< World */
 
 #if !SHIPPING_BUILD
-	SDG_Highlight,			/**< Heighlight objects (for gizmo) */
 	SDG_WorldEdForeground,	/**< Foreground of viewport in WorldEd */
 #endif // !SHIPPING_BUILD
 

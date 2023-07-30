@@ -142,7 +142,7 @@ void CSpriteComponent::LinkDrawList()
 	{
 		SSceneDepthGroup&               SDG = scene->GetSDG( 
 #if WITH_EDITOR
-			bGizmo ? SDG_Highlight :
+			bGizmo ? SDG_WorldEdForeground :
 #endif // WITH_EDITOR
 			SDG_World );
 		
@@ -273,13 +273,14 @@ void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 	}
 
     // Update AABB
-    boundbox = CBox::BuildAABB( GetComponentLocation(), Vector( GetSpriteSize(), 1.f ) );
+	const Vector				componentScale = GetComponentScale();
+    boundbox = CBox::BuildAABB( GetComponentLocation(), Vector( Vector2D( componentScale.x, componentScale.y ) * ( GetSpriteSize() / 2.f ), 1.f ) );
 
 	// Draw wireframe box if owner actor is selected (only for WorldEd)
 #if WITH_EDITOR
 	if ( !bGizmo && owner ? owner->IsSelected() : false )
 	{
-		DrawWireframeBox( ( ( CScene* )g_World->GetScene() )->GetSDG( SDG_Highlight ), boundbox, DEC_SPRITE );
+		DrawWireframeBox( ( ( CScene* )g_World->GetScene() )->GetSDG( SDG_WorldEdForeground ), boundbox, DEC_SPRITE );
 	}
 #endif // WITH_EDITOR
 }

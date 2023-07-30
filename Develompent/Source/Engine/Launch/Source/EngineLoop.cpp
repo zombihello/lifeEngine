@@ -55,7 +55,7 @@ void Sys_GetCookedContentPath( EPlatformType InPlatform, std::wstring& OutPath )
 {
 	// Returns the path to the cooked data for the given platform
 #if WITH_EDITOR
-	if ( !g_IsCooker )
+	if ( !g_IsCooker && !g_CommandLine.HasParam( TEXT( "usecooked" ) ) )
 	{
 		OutPath = Sys_GameDir() + PATH_SEPARATOR + TEXT( "Content" ) + PATH_SEPARATOR;
 	}

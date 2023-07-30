@@ -43,8 +43,6 @@ void CSceneRenderer::RenderPostProcess( class CBaseDeviceContextRHI* InDeviceCon
 		Assert( screenVertexShader && postProcessPixelShader );
 
 		g_SceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
-		InDeviceContext->ClearSurface( g_SceneRenderTargets.GetSceneColorLDRSurface(), sceneView->GetBackgroundColor() );
-
 		g_RHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<false, CF_Always>::GetRHI() );
 		g_RHI->SetBoundShaderState( InDeviceContext, g_RHI->CreateBoundShaderState( TEXT( "PostProcess" ), g_SimpleElementVertexDeclaration.GetVertexDeclarationRHI(), screenVertexShader->GetVertexShader(), postProcessPixelShader->GetPixelShader() ) );
 
