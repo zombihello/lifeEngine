@@ -1,23 +1,17 @@
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Misc/UIGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "Windows/StaticMeshEditorWindow.h"
 #include "Render/StaticMeshPreviewViewportClient.h"
 #include "Windows/FileDialog.h"
 #include "Windows/MaterialEditorWindow.h"
 #include "windows/DialogWindow.h"
 #include "System/AssetsImport.h"
-
-/** Table pathes to icons */
-static const tchar* s_StaticMeshEditorIconPaths[] =
-{
-	TEXT( "Import.png" )		// IT_Import
-};
-static_assert( ARRAY_COUNT( s_StaticMeshEditorIconPaths ) == CStaticMeshEditorWindow::IT_Num, "Need full init s_StaticMeshEditorIconPaths array" );
+#include "System/EditorEngine.h"
 
 /** Macro size button in menu bar */
 #define  STATICMESHEDITOR_MENUBAR_BUTTONSIZE	ImVec2( 16.f, 16.f )
-
 
 /*
 ==================
@@ -65,34 +59,6 @@ void CStaticMeshEditorWindow::Init()
 {
 	CImGUILayer::Init();
 	SetSize( Vector2D( 700.f, 450.f ) );
-
-	// Loading icons
-	std::wstring			errorMsg;
-	PackageRef_t			package = g_PackageManager->LoadPackage( TEXT( "" ), true );
-	Assert( package );
-
-	for ( uint32 index = 0; index < IT_Num; ++index )
-	{
-		const std::wstring				assetName	= CString::Format( TEXT( "StaticMeshEditor_%X" ), index );
-		TAssetHandle<CTexture2D>&		assetHandle = icons[index];
-		assetHandle = package->Find( assetName );
-		if ( !assetHandle.IsAssetValid() )
-		{
-			std::vector<TSharedPtr<CAsset>>		result;
-			if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Icons/" ) + s_StaticMeshEditorIconPaths[index], result, errorMsg ) )
-			{
-				Warnf( TEXT( "Fail to load static mesh editor icon '%s' for type 0x%X. Message: %s\n" ), s_StaticMeshEditorIconPaths[index], index, errorMsg.c_str() );
-				assetHandle = g_Engine->GetDefaultTexture();
-			}
-			else
-			{
-				TSharedPtr<CTexture2D>		texture2D = result[0];
-				texture2D->SetAssetName( assetName );
-				assetHandle = texture2D->GetAssetHandle();
-				package->Add( assetHandle );
-			}
-		}
-	}
 
 	// Ini select asset widgets
 	for ( uint32 index = 0, count = staticMesh->GetNumMaterials(); index < count; ++index )
@@ -147,7 +113,7 @@ void CStaticMeshEditorWindow::OnTick()
 	{
 		// Button 'Import'
 		{
-			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), STATICMESHEDITOR_MENUBAR_BUTTONSIZE ) )
+			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_Import ).ToSharedPtr()->GetTexture2DRHI() ), STATICMESHEDITOR_MENUBAR_BUTTONSIZE ) )
 			{
 				std::wstring		errorMsg;
 				if ( !g_AssetFactory.Reimport( staticMesh, errorMsg ) )

@@ -1,16 +1,13 @@
 #include "Containers/StringConv.h"
 #include "Containers/String.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/UIGlobals.h"
 #include "System/MemoryArchive.h"
 #include "System/World.h"
 #include "System/InputSystem.h"
 #include "Windows/ExplorerLevelWindow.h"
 #include "Windows/InputTextDialog.h"
-
-/** Static constant colors of row background in a table */
-static const uint32		s_TableBgColor0			= CColor( 26.f, 27.f, 28.f ).GetUInt32Color();
-static const uint32		s_TableBgColor1			= CColor( 32.f, 35.f, 36.f ).GetUInt32Color();
-static const ImVec4		s_TableBgSelectColor	= ImVec4( 0.f, 0.43f, 0.87f, 1.f );
+#include "ImGUI/ImGUIEngine.h"
 
 /**
   * @ingroup WorldEd
@@ -139,8 +136,8 @@ void CExplorerLevelWindow::OnTick()
 		ImGui::TableHeadersRow();
 
 		// Init style
-		ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( ImGui::GetStyle().FramePadding.x, 2.f ) );
-		ImGui::PushStyleColor( ImGuiCol_Header, s_TableBgSelectColor );
+		ImGui::PushStyleVar( ImGuiStyleVar_FramePadding,	ImVec2( ImGui::GetStyle().FramePadding.x, 2.f ) );
+		ImGui::PushStyleColor( ImGuiCol_Header,				g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
 
 		// Print info about each actor on level
 		for ( uint32 index = 0; index < g_World->GetNumActors(); ++index )
@@ -150,7 +147,7 @@ void CExplorerLevelWindow::OnTick()
 			bool			bNewVisibility = actor->IsVisibility();
 
 			ImGui::TableNextRow();
-			ImGui::TableSetBgColor( ImGuiTableBgTarget_RowBg0, !( index % 2 ) ? s_TableBgColor0 : s_TableBgColor1 );
+			ImGui::TableSetBgColor( ImGuiTableBgTarget_RowBg0, !( index % 2 ) ? ImGui::ColorConvertFloat4ToU32( g_ImGUIEngine->GetStyleColor( IGC_TableBgColor0 ) ) : ImGui::ColorConvertFloat4ToU32( g_ImGUIEngine->GetStyleColor( IGC_TableBgColor1 ) ) );
 			
 			// Visibility flag
 			ImGui::TableNextColumn();
@@ -203,7 +200,7 @@ void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, ActorRef_t InActor
 
 		if ( bSelected )
 		{
-			ImGui::PushStyleColor( ImGuiCol_HeaderHovered, s_TableBgSelectColor );
+			ImGui::PushStyleColor( ImGuiCol_HeaderHovered, g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
 			bNeedPopStyleColor = true;
 		}
 		if ( ImGui::Selectable( TCHAR_TO_ANSI( CString::Format( TEXT( "##Selectable_ID_%i" ), InIndex ).c_str() ), &bSelected, ImGuiSelectableFlags_SpanAllColumns ) ||

@@ -35,9 +35,6 @@
 /** Border size for buttons in asset viewer */
 #define CONTENTBROWSER_ASSET_BORDERSIZE				1.f
 
-/** Selection colode */
-#define CONTENTBROWSER_SELECTCOLOR					ImVec4( 0.f, 0.43f, 0.87f, 1.f )
-
 /** Internal drag & drop type of a file node */
 #define CONTENTBROWSER_DND_FILENODETYPE				"DND::FileNode"
 
@@ -55,30 +52,30 @@ struct SPackageInfo
 };
 
 /** Table of color buttons by asset type */
-static ImVec4		s_AssetBorderColors[] =
+static EImGuiColors		s_AssetBorderColors[] =
 {
-	ImVec4( 1.f, 1.f, 1.f, 1.f ),				// AT_Unknown
-	ImVec4( 0.75f, 0.25f, 0.25f, 1.f ),			// AT_Texture2D
-	ImVec4( 0.25f, 0.75f, 0.25f, 1.f ),			// AT_Material
-	ImVec4( 0.f, 0.f, 0.f, 0.f ),				// AT_Script
-	ImVec4( 0.f, 1.f, 1.f, 1.f ),				// AT_StaticMesh
-	ImVec4( 0.38f, 0.33f, 0.83f, 1.f ),			// AT_AudioBank
-	ImVec4( 0.78f, 0.75f, 0.5f, 1.f )			// AT_PhysicsMaterial
+	IGC_Asset_Unknown,				// AT_Unknown
+	IGC_Asset_Texture2D,			// AT_Texture2D
+	IGC_Asset_Material,				// AT_Material
+	IGC_Asset_Script,				// AT_Script
+	IGC_Asset_StaticMesh,			// AT_StaticMesh
+	IGC_Asset_AudioBank,			// AT_AudioBank
+	IGC_Asset_PhysicsMaterial		// AT_PhysicsMaterial
 };
 static_assert( ARRAY_COUNT( s_AssetBorderColors ) == AT_Count, "Need full init s_AssetBorderColors array" );
 
-/** Table of path to asset icons by type */
-static const tchar* s_AssetIconPaths[] =
+/** Table of asset icons */
+static EIconType		s_AssetIcons[] =
 {
-	TEXT( "Unknown.png" ),				// AT_Unknown
-	TEXT( "Texture.png" ),				// AT_Texture2D
-	TEXT( "Material.png" ),				// AT_Material
-	TEXT( "Script.png" ),				// AT_Script
-	TEXT( "StaticMesh.png" ),			// AT_StaticMesh
-	TEXT( "Audio.png" ),				// AT_AudioBank
-	TEXT( "PhysMaterial.png" )			// AT_PhysicsMaterial
+	IT_Thumbnail_Asset_Unknown,				// AT_Unknown
+	IT_Thumbnail_Asset_Texture2D,			// AT_Texture2D
+	IT_Thumbnail_Asset_Material,			// AT_Material
+	IT_Thumbnail_Asset_Script,				// AT_Script
+	IT_Thumbnail_Asset_StaticMesh,			// AT_StaticMesh
+	IT_Thumbnail_Asset_AudioBank,			// AT_AudioBank
+	IT_Thumbnail_Asset_PhysicsMaterial		// AT_PhysicsMaterial
 };
-static_assert( ARRAY_COUNT( s_AssetIconPaths ) == AT_Count, "Need full init s_AssetIconPaths array" );
+static_assert( ARRAY_COUNT( s_AssetIcons ) == AT_Count, "Need full init s_AssetIcons array" );
 
 /*
 ==================
@@ -1349,27 +1346,6 @@ void CContentBrowserWindow::Init()
 {
 	CImGUILayer::Init();
 
-	// Loading all of asset icons
-	std::wstring		errorMsg;
-	for ( uint32 index = 0; index < AT_Count; ++index )
-	{
-		std::vector<TSharedPtr<CAsset>>		result;
-		if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Thumbnails/" ) + s_AssetIconPaths[index], result, errorMsg ) )
-		{
-			Warnf( TEXT( "Failed to load asset icon '%s' for type 0x%X. Message: %s\n" ), s_AssetIconPaths[index], index, errorMsg.c_str() );
-			assetIcons[index] = g_Engine->GetDefaultTexture();
-		}
-		else
-		{
-			TAssetHandle<CTexture2D>	assetHandle = result[0]->GetAssetHandle();
-			PackageRef_t				package = g_PackageManager->LoadPackage( TEXT( "" ), true );
-			Assert( package );
-
-			package->Add( assetHandle );
-			assetIcons[index] = assetHandle;
-		}
-	}
-
 	// Create root nodes for engine and game directories
 	engineRoot	= MakeSharedPtr<CFileTreeNode>( FNT_Folder, TEXT( "Engine" ), Sys_BaseDir() + PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, this );
 	gameRoot	= MakeSharedPtr<CFileTreeNode>( FNT_Folder, TEXT( "Game" ), Sys_GameDir() + PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, this );
@@ -2352,17 +2328,18 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 		// Draw folder node
 	case FNT_Folder:
 	{
-		// Set style for selected node
-		bool	bNeedPopStyleColor = false;
+		std::vector<TSharedPtr<CFileTreeNode>>	childrenOnTick = children;
+		if ( childrenOnTick.empty() )
+		{
+			return;
+		}
+
+		ImGuiTreeNodeFlags	imguiFlags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		if ( bSelected )
 		{
-			bNeedPopStyleColor = true;
-			ImGui::PushStyleColor( ImGuiCol_Header,			CONTENTBROWSER_SELECTCOLOR );
-			ImGui::PushStyleColor( ImGuiCol_HeaderActive,	CONTENTBROWSER_SELECTCOLOR );
-			ImGui::PushStyleColor( ImGuiCol_HeaderHovered,	CONTENTBROWSER_SELECTCOLOR );
+			imguiFlags |= ImGuiTreeNodeFlags_Selected;
 		}
-		
-		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( name.c_str() ), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow  | ImGuiTreeNodeFlags_OpenOnDoubleClick );
+		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( name.c_str() ), imguiFlags );
 
 		// Drag n drop handle
 		DragNDropHandle();
@@ -2370,16 +2347,9 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 		// Item event handles
 		ProcessEvents();
 
-		// Pop selection node style
-		if ( bNeedPopStyleColor )
-		{
-			ImGui::PopStyleColor( 3 );
-		}
-
 		// Draw tree
 		if ( bTreeNode )
 		{
-			std::vector<TSharedPtr<CFileTreeNode>>		childrenOnTick = children;
 			for ( uint32 index = 0, count = childrenOnTick.size(); index < count; ++index )
 			{
 				childrenOnTick[index]->Tick();
@@ -2392,16 +2362,6 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 		// Draw file node
 	case FNT_File:
 	{
-		// Set style for selected node
-		bool	bNeedPopStyleColor = false;
-		if ( bSelected )
-		{
-			bNeedPopStyleColor = true;
-			ImGui::PushStyleColor( ImGuiCol_Button,			CONTENTBROWSER_SELECTCOLOR );
-			ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	CONTENTBROWSER_SELECTCOLOR );
-			ImGui::PushStyleColor( ImGuiCol_ButtonActive,	CONTENTBROWSER_SELECTCOLOR );
-		}
-
 		// If package loaded we Assert is changed in memory. In successed case mark this package by star
 		std::wstring		packageName = name;
 		if ( g_PackageManager->IsPackageLoaded( path ) )
@@ -2410,19 +2370,13 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 			Assert( package );
 			packageName = ( package->IsDirty() ? TEXT( "*" ) : TEXT( "" ) ) + packageName;
 		}
-		ImGui::Button( TCHAR_TO_ANSI( packageName.c_str() ) );
-
+		ImGui::Selectable( TCHAR_TO_ANSI( packageName.c_str() ), &bSelected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick );
+	
 		// Drag n drop handle
 		DragNDropHandle();
 
 		// Item event handles
 		ProcessEvents();
-
-		// Pop style color
-		if ( bNeedPopStyleColor )
-		{
-			ImGui::PopStyleColor( 3 );
-		}
 		break;
 	}
 	}
@@ -2720,28 +2674,18 @@ void CContentBrowserWindow::CAssetNode::Tick()
 {
 	Assert( info );
 	ImGui::PushStyleVar( ImGuiStyleVar_FrameBorderSize, CONTENTBROWSER_ASSET_BORDERSIZE );
-	ImGui::PushStyleColor( ImGuiCol_Border, s_AssetBorderColors[info->type] );
-
-	// If asset is selected, we set him button color to CONTENTBROWSER_SELECTCOLOR
-	bool		bNeedPopStyleColor = false;
-	if ( bSelected )
-	{
-		bNeedPopStyleColor = true;
-		ImGui::PushStyleColor( ImGuiCol_Button, CONTENTBROWSER_SELECTCOLOR );
-		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, CONTENTBROWSER_SELECTCOLOR );
-		ImGui::PushStyleColor( ImGuiCol_ButtonActive, CONTENTBROWSER_SELECTCOLOR );
-	}
+	ImGui::PushStyleColor( ImGuiCol_Border, g_ImGUIEngine->GetStyleColor( s_AssetBorderColors[info->type] ) );
 
 	// Draw of the asset's button, if him's icon isn't existing we draw simple button
-	const TAssetHandle<CTexture2D>&		assetIconTexture	= owner->assetIcons[info->type];
+	const TAssetHandle<CTexture2D>&		assetIconTexture	= g_EditorEngine->GetIcon( s_AssetIcons[info->type] );
 	if ( assetIconTexture.IsAssetValid() )
 	{
 		ImGui::PushID( TCHAR_TO_ANSI( info->name.c_str() ) );
-		ImGui::ImageButton( g_ImGUIEngine->LockTexture( assetIconTexture.ToSharedPtr()->GetTexture2DRHI() ), { owner->thumbnailSize, owner->thumbnailSize } );
+		ImGui::ImageButton( g_ImGUIEngine->LockTexture( assetIconTexture.ToSharedPtr()->GetTexture2DRHI() ), bSelected, { owner->thumbnailSize, owner->thumbnailSize } );
 	}
 	else
 	{
-		ImGui::Button( TCHAR_TO_ANSI( info->name.c_str() ), { owner->thumbnailSize, owner->thumbnailSize } );
+		ImGui::Button( TCHAR_TO_ANSI( info->name.c_str() ), bSelected,{ owner->thumbnailSize, owner->thumbnailSize } );
 	}
 
 	// Drag n drop handle
@@ -2763,7 +2707,7 @@ void CContentBrowserWindow::CAssetNode::Tick()
 		ImGui::PopID();
 	}
 	ImGui::PopStyleVar();
-	ImGui::PopStyleColor( !bNeedPopStyleColor ? 1 : 4 );
+	ImGui::PopStyleColor( 1 );
 }
 
 /*

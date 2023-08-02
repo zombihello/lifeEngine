@@ -21,19 +21,6 @@ class CTextureEditorWindow : public CImGUILayer
 {
 public:
 	/**
-	 * @brief Enumeration icon types
-	 */
-	enum EIconType
-	{
-		IT_Import,		/**< Icon for button 'Import' */
-		IT_R,			/**< Icon for button 'R' */
-		IT_G,			/**< Icon for button 'G' */
-		IT_B,			/**< Icon for button 'B' */
-		IT_A,			/**< Icon for button 'A' */
-		IT_Num			/**< Number of icon types */
-	};
-
-	/**
 	 * @brief Constructor
 	 * @param InTexture2D	Texture 2D
 	 */
@@ -56,7 +43,6 @@ protected:
 	virtual void OnTick() override;
 
 private:
-	TAssetHandle<CTexture2D>				icons[IT_Num];		/**< Array of icons */
 	TSharedPtr<CTexture2D>					texture2D;			/**< Texture 2D */
 	CViewportWidget							viewportWidget;		/**< Viewport widget */
 	class CTexturePreviewViewportClient*	viewportClient;		/**< Viewport client */

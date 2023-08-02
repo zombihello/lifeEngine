@@ -12,56 +12,8 @@
 #include "Render/RenderingThread.h"
 #include "System/AssetsImport.h"
 
-/** Table pathes to icons */
-static const tchar* s_LevelViewportIconPaths[] =
-{
-	TEXT( "Tool_Select.png" ),			// IT_ToolSelect
-	TEXT( "Tool_Translate.png" ),		// IT_ToolTranslate
-	TEXT( "Tool_Rotate.png" ),			// IT_ToolRotate
-	TEXT( "Tool_Scale.png" ),			// IT_ToolScale
-	TEXT( "PlayStandaloneGame.png" )	// IT_PlayStandaloneGame
-};
-static_assert( ARRAY_COUNT( s_LevelViewportIconPaths ) == CLevelViewportWindow::IT_Num, "Need full init s_LevelViewportIconPaths array" );
-
 /** Macro size button in menu bar */
 #define LEVELVIEWPORT_MENUBAR_BUTTONSIZE	ImVec2( 16.f, 16.f )
-
-/** Selection color */
-#define LEVELVIEWPORT_SELECTCOLOR			ImVec4( 0.f, 0.43f, 0.87f, 1.f )
-
-/** Is need pop style color of a button */
-static bool s_ImGui_ButtonNeedPopStyleColor = false;
-
-/*
-==================
-ImGui_ButtonSetButtonSelectedStyle
-==================
-*/
-static void ImGui_ButtonSetButtonSelectedStyle()
-{
-	if ( !s_ImGui_ButtonNeedPopStyleColor )
-	{
-		s_ImGui_ButtonNeedPopStyleColor = true;
-		ImGui::PushStyleColor( ImGuiCol_Button,			LEVELVIEWPORT_SELECTCOLOR );
-		ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	LEVELVIEWPORT_SELECTCOLOR );
-		ImGui::PushStyleColor( ImGuiCol_ButtonActive,	LEVELVIEWPORT_SELECTCOLOR );
-	}
-}
-
-/*
-==================
-ImGui_ButtonPopStyleColor
-==================
-*/
-static void ImGui_ButtonPopStyleColor()
-{
-	if ( s_ImGui_ButtonNeedPopStyleColor )
-	{
-		ImGui::PopStyleColor( 3 );
-		s_ImGui_ButtonNeedPopStyleColor = false;
-	}
-}
-
 
 /*
 ==================
@@ -92,34 +44,6 @@ void CLevelViewportWindow::Init()
 {
 	CImGUILayer::Init();
 	viewportWidget.Init();
-
-	// Loading icons
-	std::wstring	errorMsg;
-	PackageRef_t	package = g_PackageManager->LoadPackage( TEXT( "" ), true );
-	Assert( package );
-
-	for ( uint32 index = 0; index < IT_Num; ++index )
-	{
-		const std::wstring				assetName = CString::Format( TEXT( "LevelViewportWindow_%X" ), index );
-		TAssetHandle<CTexture2D>&		assetHandle = icons[index];
-		assetHandle = package->Find( assetName );
-		if ( !assetHandle.IsAssetValid() )
-		{
-			std::vector<TSharedPtr<CAsset>>		result;
-			if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Icons/" ) + s_LevelViewportIconPaths[index], result, errorMsg ) )
-			{
-				Warnf( TEXT( "Fail to load level viewport window icon '%s' for type 0x%X. Message: %s\n" ), s_LevelViewportIconPaths[index], index, errorMsg.c_str() );
-				assetHandle = g_Engine->GetDefaultTexture();
-			}
-			else
-			{
-				TSharedPtr<CTexture2D>		texture2D = result[0];
-				texture2D->SetAssetName( assetName );
-				assetHandle = texture2D->GetAssetHandle();
-				package->Add( assetHandle );
-			}
-		}
-	}
 }
 
 /*
@@ -139,11 +63,7 @@ void CLevelViewportWindow::OnTick()
 	if ( ImGui::BeginMenuBar() )
 	{
 		// Tool 'Select objects'
-		if ( guizmoOperationType == ImGuizmo::NONE )
-		{
-			ImGui_ButtonSetButtonSelectedStyle();
-		}
-		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_ToolSelect].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_ToolSelect ).ToSharedPtr()->GetTexture2DRHI() ), guizmoOperationType == ImGuizmo::NONE, LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
 			guizmoOperationType = ImGuizmo::NONE;
 		}
@@ -151,14 +71,9 @@ void CLevelViewportWindow::OnTick()
 		{
 			ImGui::SetTooltip( "Select objects" );
 		}
-		ImGui_ButtonPopStyleColor();
 
 		// Tool 'Select and translate objects'
-		if ( guizmoOperationType == ImGuizmo::TRANSLATE )
-		{
-			ImGui_ButtonSetButtonSelectedStyle();
-		}
-		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_ToolTranslate].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_ToolTranslate ).ToSharedPtr()->GetTexture2DRHI() ), guizmoOperationType == ImGuizmo::TRANSLATE, LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
 			guizmoOperationType = ImGuizmo::TRANSLATE;
 		}
@@ -166,14 +81,9 @@ void CLevelViewportWindow::OnTick()
 		{
 			ImGui::SetTooltip( "Select and translate objects" );
 		}
-		ImGui_ButtonPopStyleColor();
 
 		// Tool 'Select and rotate objects'
-		if ( guizmoOperationType == ImGuizmo::ROTATE )
-		{
-			ImGui_ButtonSetButtonSelectedStyle();
-		}
-		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_ToolRotate].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_ToolRotate ).ToSharedPtr()->GetTexture2DRHI() ), guizmoOperationType == ImGuizmo::ROTATE, LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
 			guizmoOperationType = ImGuizmo::ROTATE;
 		}
@@ -181,14 +91,9 @@ void CLevelViewportWindow::OnTick()
 		{
 			ImGui::SetTooltip( "Select and rotate objects" );
 		}
-		ImGui_ButtonPopStyleColor();
 
 		// Tool 'Select and scale objects'
-		if ( guizmoOperationType == ImGuizmo::SCALE )
-		{
-			ImGui_ButtonSetButtonSelectedStyle();
-		}
-		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_ToolScale].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_ToolScale ).ToSharedPtr()->GetTexture2DRHI() ), guizmoOperationType == ImGuizmo::SCALE, LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
 			guizmoOperationType = ImGuizmo::SCALE;
 		}
@@ -196,11 +101,10 @@ void CLevelViewportWindow::OnTick()
 		{
 			ImGui::SetTooltip( "Select and scale objects" );
 		}
-		ImGui_ButtonPopStyleColor();
 
 		// Play standalone game
 		ImGui::Separator();
-		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_PlayStandaloneGame].ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_PlayStandaloneGame ).ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
 			if ( g_World->IsDirty() )
 			{

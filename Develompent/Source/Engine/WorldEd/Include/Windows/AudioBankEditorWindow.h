@@ -21,15 +21,6 @@ class CAudioBankEditorWindow : public CImGUILayer
 {
 public:
 	/**
-	 * @brief Enumeration icon types
-	 */
-	enum EIconType
-	{
-		IT_Import,		/**< Icon for button 'Import' */
-		IT_Num			/**< Number of icon types */
-	};
-
-	/**
 	 * @brief Constructor
 	 * @param InAudioBank	Audio bank
 	 */
@@ -71,7 +62,6 @@ private:
 	 */
 	void OnAssetsReloaded( const std::vector<TSharedPtr<CAsset>>& InAssets );
 
-	TAssetHandle<CTexture2D>								icons[IT_Num];			/**< Array of icons */
 	TSharedPtr<CAudioBank>									audioBank;				/**< Audio bank */
 	SAudioBankInfo											audioBankInfo;			/**< Audio bank info */
 	AudioBankHandle_t										audioBankHandle;		/**< Audio bank handle */

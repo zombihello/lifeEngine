@@ -63,6 +63,50 @@ void Sys_ImGUIEndDrawing();
  */
 void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent );
 
+namespace ImGui
+{
+	/**
+	 * @ingroup UI
+	 * @brief ImGui help function for draw ImageButton with selection opportunity
+	 * 
+	 * @param InTextureID	Texture ID
+	 * @param InIsSelected	Is selected button
+	 * @param InSize		Imgae button size
+	 * @return Return TRUE if image button is pressed (same behavior as original ImGui::ImageButton)
+	 */
+	bool ImageButton( ImTextureID InTextureID, bool InIsSelected, const ImVec2& InSize );
+
+	/**
+	 * @ingroup UI
+	 * @brief ImGui help function for draw Button with selection opportunity
+	 *
+	 * @param InLabel		Label
+	 * @param InIsSelected	Is selected button
+	 * @param InSize		Imgae button size
+	 * @return Return TRUE if button is pressed (same behavior as original ImGui::Button)
+	 */
+	bool Button( const char* InLabel, bool InIsSelected, const ImVec2& InSize = ImVec2( 0.f, 0.f ) );
+}
+
+/**
+ * @ingroup UI
+ * @brief Enumeration of ImGUI style colors
+ */
+enum EImGuiColors
+{
+	IGC_Selection,					/**< Color of selection */
+	IGC_Asset_Unknown,				/**< Unknown asset */
+	IGC_Asset_Texture2D,			/**< Texture2D asset */
+	IGC_Asset_Material,				/**< Material asset */
+	IGC_Asset_Script,				/**< Script asset */
+	IGC_Asset_StaticMesh,			/**< StaticMesh asset */
+	IGC_Asset_AudioBank,			/**< AudioBank asset */
+	IGC_Asset_PhysicsMaterial,		/**< PhysicsMaterial asset */
+	IGC_TableBgColor0,				/**< Table background color 0 */
+	IGC_TableBgColor1,				/**< Table background color 1 */
+	IGC_Num
+};
+
 /**
  * @ingroup UI
  * @brief Class for draw data of ImGUI
@@ -647,17 +691,30 @@ public:
 		return SImGUILockedTexture2D{ InTexture2D };
 	}
 
+	/**
+	 * @brief Get style color
+	 * 
+	 * @param InColorType	Color type (see ImGuiColors)
+	 * @return Return style color for InColorType
+	 */
+	FORCEINLINE const ImVec4& GetStyleColor( EImGuiColors InColorType ) const
+	{
+		Assert( InColorType != IGC_Num );
+		return styleColors[( uint32 )InColorType];
+	}
+
 private:
 	/**
 	 * @brief Init theme
 	 */
 	void InitTheme();
 
-	bool										bShowCursor;	/**< Is need show cursor */
-	struct ImGuiContext*						imguiContext;	/**< Pointer to ImGUI context */
-	std::vector<CImGUIWindow*>					windows;		/**< Array of windows ImGUI */
-	std::vector<TSharedPtr<CImGUILayer>>		layers;			/**< Array of ImGUI layers */
-	std::list<Texture2DRHIParamRef_t>			lockedTextures;	/**< List of locked textures */
+	bool										bShowCursor;			/**< Is need show cursor */
+	struct ImGuiContext*						imguiContext;			/**< Pointer to ImGUI context */
+	ImVec4										styleColors[IGC_Num];	/**< ImGui style colors */
+	std::vector<CImGUIWindow*>					windows;				/**< Array of windows ImGUI */
+	std::vector<TSharedPtr<CImGUILayer>>		layers;					/**< Array of ImGUI layers */
+	std::list<Texture2DRHIParamRef_t>			lockedTextures;			/**< List of locked textures */
 };
 
 #endif // WITH_IMGUI

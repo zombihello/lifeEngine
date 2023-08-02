@@ -552,7 +552,6 @@ private:
 	SFilterInfo					filterInfo;					/**< Filter info */
 	float						padding;					/**< Padding in asset section */
 	float						thumbnailSize;				/**< Size of thumbnail */
-	TAssetHandle<CTexture2D>	assetIcons[AT_Count];		/**< Array of asset icons */
 	std::vector<CAssetNode>		assets;						/**< Assets in package */
 };
 

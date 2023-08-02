@@ -20,13 +20,41 @@
 #include "Core.h"
 
 // Constants
-#undef  PI
+#undef PI
+#undef SMALL_NUMBER
+#undef KINDA_SMALL_NUMBER
+#undef BIG_NUMBER
+#undef EULERS_NUMBER
 
 /**
  * @ingroup Core
  * Macro of PI value
  */
 #define PI 					(3.1415926535897932)
+
+/**
+ * @ingroup Core
+ * Macro of small number
+ */
+#define SMALL_NUMBER		(1.e-8)
+
+/**
+ * @ingroup Core
+ * Macro of kinda small number
+ */
+#define KINDA_SMALL_NUMBER	(1.e-4)
+
+/**
+ * @ingroup Core
+ * Macro of big number
+ */
+#define BIG_NUMBER			(3.4e+38f)
+
+/**
+ * @ingroup Core
+ * Macro of Euler's number
+ */
+#define EULERS_NUMBER       (2.71828182845904523536)
 
 /**
  * @ingroup Core
@@ -753,6 +781,60 @@ struct SMath
 	static FORCEINLINE void GridSnap( const Vector4D& InValue, float InGrid, Vector4D& OutValue )
 	{
 		OutValue = Vector4D( GridSnap( InValue.x, InGrid ), GridSnap( InValue.y, InGrid ), GridSnap( InValue.z, InGrid ), GridSnap( InValue.w, InGrid ) );
+	}
+
+	/**
+	 * @brief Checks if a floating point number is nearly zero
+	 *	
+	 * @param InValue			Number to compare
+	 * @param InErrorTolerance	Maximum allowed difference for considering InValue as 'nearly zero'
+	 * @return Return TRUE if InValue is nearly zero
+	 **/
+	static FORCEINLINE bool IsNearlyZero( float InValue, float InErrorTolerance = SMALL_NUMBER )
+	{
+		return Abs( InValue ) < InErrorTolerance;
+	}
+
+	/**
+	 * @brief Checks if a Vector2D number is nearly zero
+	 *
+	 * @param InValue			Vector2D to compare
+	 * @param InErrorTolerance	Maximum allowed difference for considering InValue as 'nearly zero'
+	 * @return Return TRUE if InValue is nearly zero
+	 **/
+	static FORCEINLINE bool IsNearlyZero( const Vector2D& InValue, float InErrorTolerance = SMALL_NUMBER )
+	{
+		return	Abs( InValue.x ) < InErrorTolerance &&
+				Abs( InValue.y ) < InErrorTolerance;
+	}
+
+	/**
+	 * @brief Checks if a Vector number is nearly zero
+	 *
+	 * @param InValue			Vector to compare
+	 * @param InErrorTolerance	Maximum allowed difference for considering InValue as 'nearly zero'
+	 * @return Return TRUE if InValue is nearly zero
+	 **/
+	static FORCEINLINE bool IsNearlyZero( const Vector& InValue, float InErrorTolerance = SMALL_NUMBER )
+	{
+		return	Abs( InValue.x ) < InErrorTolerance &&
+				Abs( InValue.y ) < InErrorTolerance &&
+				Abs( InValue.z ) < InErrorTolerance;
+	}
+
+	/**
+	 * @brief Checks if a Vector4D number is nearly zero
+	 *
+	 * @param InValue			Vector4D to compare
+	 * @param InErrorTolerance	Maximum allowed difference for considering InValue as 'nearly zero'
+	 * @return Return TRUE if InValue is nearly zero
+	 **/
+	static FORCEINLINE bool IsNearlyZero( const Vector4D& InValue, float InErrorTolerance = SMALL_NUMBER )
+	{
+		return	Abs( InValue.x ) < InErrorTolerance &&
+				Abs( InValue.y ) < InErrorTolerance &&
+				Abs( InValue.z ) < InErrorTolerance &&
+				Abs( InValue.w ) < InErrorTolerance;
 	}
 
 	static const Vector				vectorZero;			/**< Zero 3D vector */

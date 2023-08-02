@@ -2,10 +2,12 @@
 #include "Containers/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Misc/UIGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "Windows/TextureEditorWindow.h"
 #include "Render/TexturePreviewViewportClient.h"
 #include "Windows/FileDialog.h"
 #include "System/AssetsImport.h"
+#include "System/EditorEngine.h"
 #include "Windows/DialogWindow.h"
 #include "ImGUI/ImGUIEngine.h"
 
@@ -30,56 +32,8 @@ static const achar*		s_SamplerFilterNames[] =
 };
 static_assert( ARRAY_COUNT( s_SamplerFilterNames ) == SF_Max, "Need full init s_SamplerFilterNames array" );
 
-/** Table pathes to icons */
-static const tchar*		s_TextureEditorIconPaths[] =
-{
-	TEXT( "Import.png" ),		// IT_Import
-	TEXT( "Color_R.png" ),		// IT_R
-	TEXT( "Color_G.png" ),		// IT_G
-	TEXT( "Color_B.png" ),		// IT_B
-	TEXT( "Color_A.png" )		// IT_A
-};
-static_assert( ARRAY_COUNT( s_TextureEditorIconPaths ) == CTextureEditorWindow::IT_Num, "Need full init s_TextureEditorIconPaths array" );
-
 /** Macro size button in menu bar */
 #define  TEXTUREEDITOR_MENUBAR_BUTTONSIZE	ImVec2( 16.f, 16.f )
-
-/** Selection color */
-#define TEXTUREEDITOR_SELECTCOLOR			ImVec4( 0.f, 0.43f, 0.87f, 1.f )
-
-/** Is need pop style color of a button */
-static bool s_ImGui_ButtonNeedPopStyleColor = false;
-
-/*
-==================
-ImGui_ButtonSetButtonSelectedStyle
-==================
-*/
-static void ImGui_ButtonSetButtonSelectedStyle()
-{
-	if ( !s_ImGui_ButtonNeedPopStyleColor )
-	{
-		s_ImGui_ButtonNeedPopStyleColor = true;
-		ImGui::PushStyleColor( ImGuiCol_Button,			TEXTUREEDITOR_SELECTCOLOR );
-		ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	TEXTUREEDITOR_SELECTCOLOR );
-		ImGui::PushStyleColor( ImGuiCol_ButtonActive,	TEXTUREEDITOR_SELECTCOLOR );
-	}
-}
-
-/*
-==================
-ImGui_ButtonPopStyleColor
-==================
-*/
-static void ImGui_ButtonPopStyleColor()
-{
-	if ( s_ImGui_ButtonNeedPopStyleColor )
-	{
-		ImGui::PopStyleColor( 3 );
-		s_ImGui_ButtonNeedPopStyleColor = false;
-	}
-}
-
 
 /*
 ==================
@@ -121,34 +75,6 @@ void CTextureEditorWindow::Init()
 {
 	CImGUILayer::Init();
 	SetSize( Vector2D( 700.f, 450.f ) );
-
-	// Loading icons
-	std::wstring			errorMsg;
-	PackageRef_t			package = g_PackageManager->LoadPackage( TEXT( "" ), true );
-	Assert( package );
-
-	for ( uint32 index = 0; index < IT_Num; ++index )
-	{
-		const std::wstring				assetName	= CString::Format( TEXT( "TextureEditor_%X" ), index );
-		TAssetHandle<CTexture2D>&		assetHandle = icons[index];
-		assetHandle						= package->Find( assetName );
-		if ( !assetHandle.IsAssetValid() )
-		{
-			std::vector<TSharedPtr<CAsset>>		result;
-			if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/Icons/" ) + s_TextureEditorIconPaths[index], result, errorMsg ) )
-			{
-				Warnf( TEXT( "Fail to load texture editor icon '%s' for type 0x%X. Message: %s\n" ), s_TextureEditorIconPaths[index], index, errorMsg.c_str() );
-				assetHandle = g_Engine->GetDefaultTexture();
-			}
-			else
-			{
-				TSharedPtr<CTexture2D>		texture2D = result[0];
-				texture2D->SetAssetName( assetName );
-				assetHandle = texture2D->GetAssetHandle();
-				package->Add( assetHandle );
-			}
-		}
-	}
 }
 
 /*
@@ -167,95 +93,57 @@ void CTextureEditorWindow::OnTick()
 	if ( ImGui::BeginMenuBar() )
 	{
 		// Button 'Import'
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_Import ).ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 		{
-			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_Import].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
+			std::wstring		errorMsg;
+			if ( !g_AssetFactory.Reimport( texture2D, errorMsg ) )
 			{
-				std::wstring		errorMsg;
-				if ( !g_AssetFactory.Reimport( texture2D, errorMsg ) )
-				{
-					OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The texture 2D not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
-				}
+				OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The texture 2D not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
 			}
-			if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
-			{
-				ImGui::SetTooltip( "Reimport Texture" );
-			}
+		}
+		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+		{
+			ImGui::SetTooltip( "Reimport Texture" );
 		}
 
 		// Button 'R'
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_Color_R ).ToSharedPtr()->GetTexture2DRHI() ), viewportClient->IsShowRedChannel(), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 		{
-			if ( viewportClient->IsShowRedChannel() )
-			{
-				ImGui_ButtonSetButtonSelectedStyle();
-			}
-
-			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_R].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
-			{
-				viewportClient->ShowRedChannel( !viewportClient->IsShowRedChannel() );
-			}
-			if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
-			{
-				ImGui::SetTooltip( "Show R Channel" );
-			}
-
-			ImGui_ButtonPopStyleColor();
+			viewportClient->ShowRedChannel( !viewportClient->IsShowRedChannel() );
+		}
+		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+		{
+			ImGui::SetTooltip( "Show R Channel" );
 		}
 
 		// Button 'G'
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_Color_G ).ToSharedPtr()->GetTexture2DRHI() ), viewportClient->IsShowGreenChannel(), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 		{
-			if ( viewportClient->IsShowGreenChannel() )
-			{
-				ImGui_ButtonSetButtonSelectedStyle();
-			}
-
-			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_G].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
-			{
-				viewportClient->ShowGreenChannel( !viewportClient->IsShowGreenChannel() );
-			}
-			if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
-			{
-				ImGui::SetTooltip( "Show G Channel" );
-			}
-
-			ImGui_ButtonPopStyleColor();
+			viewportClient->ShowGreenChannel( !viewportClient->IsShowGreenChannel() );
+		}
+		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+		{
+			ImGui::SetTooltip( "Show G Channel" );
 		}
 
 		// Button 'B'
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_Color_B ).ToSharedPtr()->GetTexture2DRHI() ), viewportClient->IsShowBlueChannel(), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 		{
-			if ( viewportClient->IsShowBlueChannel() )
-			{
-				ImGui_ButtonSetButtonSelectedStyle();
-			}
-
-			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_B].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
-			{
-				viewportClient->ShowBlueChannel( !viewportClient->IsShowBlueChannel() );
-			}
-			if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
-			{
-				ImGui::SetTooltip( "Show B Channel" );
-			}
-
-			ImGui_ButtonPopStyleColor();
+			viewportClient->ShowBlueChannel( !viewportClient->IsShowBlueChannel() );
+		}
+		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+		{
+			ImGui::SetTooltip( "Show B Channel" );
 		}
 
 		// Button 'A'
+		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_Color_A ).ToSharedPtr()->GetTexture2DRHI() ), viewportClient->IsShowAlphaChannel(), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
 		{
-			if ( viewportClient->IsShowAlphaChannel() )
-			{
-				ImGui_ButtonSetButtonSelectedStyle();
-			}
-
-			if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( icons[IT_A].ToSharedPtr()->GetTexture2DRHI() ), TEXTUREEDITOR_MENUBAR_BUTTONSIZE ) )
-			{
-				viewportClient->ShowAlphaChannel( !viewportClient->IsShowAlphaChannel() );
-			}
-			if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
-			{
-				ImGui::SetTooltip( "Show A Channel" );
-			}
-
-			ImGui_ButtonPopStyleColor();
+			viewportClient->ShowAlphaChannel( !viewportClient->IsShowAlphaChannel() );
+		}
+		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+		{
+			ImGui::SetTooltip( "Show A Channel" );
 		}
 
 		// Select mipmap to view

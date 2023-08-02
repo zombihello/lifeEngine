@@ -31,6 +31,29 @@
 
 IMPLEMENT_CLASS( CEditorEngine )
 
+/** Table of icons */
+static const tchar*	s_IconPaths[] =
+{
+	TEXT( "Icons/Color_R.png" ),			// IT_Color_R
+	TEXT( "Icons/Color_G.png" ),			// IT_Color_G
+	TEXT( "Icons/Color_B.png" ),			// IT_Color_B
+	TEXT( "Icons/Color_A.png" ),			// IT_Color_A
+	TEXT( "Icons/Import.png" ),				// IT_Import
+	TEXT( "Icons/Tool_Select.png" ),		// IT_ToolSelect
+	TEXT( "Icons/Tool_Translate.png" ),		// IT_ToolTranslate
+	TEXT( "Icons/Tool_Rotate.png" ),		// IT_ToolRotate
+	TEXT( "Icons/Tool_Scale.png" ),			// IT_ToolScale
+	TEXT( "Icons/PlayStandaloneGame.png" ),	// IT_PlayStandaloneGame
+	TEXT( "Thumbnails/Unknown.png" ),		// IT_Thumbnail_Asset_Unknown
+	TEXT( "Thumbnails/Texture.png" ),		// IT_Thumbnail_Asset_Texture2D
+	TEXT( "Thumbnails/Material.png" ),		// IT_Thumbnail_Asset_Material
+	TEXT( "Thumbnails/Script.png" ),		// IT_Thumbnail_Asset_Script
+	TEXT( "Thumbnails/StaticMesh.png" ),	// IT_Thumbnail_Asset_StaticMesh
+	TEXT( "Thumbnails/Audio.png" ),			// IT_Thumbnail_Asset_AudioBank
+	TEXT( "Thumbnails/PhysMaterial.png" )	// IT_Thumbnail_Asset_PhysicsMaterial
+};
+static_assert( ARRAY_COUNT( s_IconPaths ) == IT_Num, "Need full init s_IconPaths array" );
+
 /**
  * @ingroup WorldEd
  * @brief Viewport client for render editor interface
@@ -112,6 +135,36 @@ void CEditorEngine::Init()
 	viewport->SetViewportClient( editorInterfaceViewportClient );
 	viewport->Update( false, windowWidth, windowHeight, g_Window->GetHandle() );
 	viewports.push_back( viewport );
+
+	// Load icons
+	{
+		std::wstring	errorMsg;
+		PackageRef_t	package = g_PackageManager->LoadPackage( TEXT( "" ), true );
+		Assert( package );
+
+		for ( uint32 index = 0; index < IT_Num; ++index )
+		{
+			const std::wstring				assetName = CString::Format( TEXT( "EditorIcon_%X" ), index );
+			TAssetHandle<CTexture2D>&		assetHandle = icons[index];
+			assetHandle = package->Find( assetName );
+			if ( !assetHandle.IsAssetValid() )
+			{
+				std::vector<TSharedPtr<CAsset>>		result;
+				if ( !CTexture2DImporter::Import( Sys_BaseDir() + TEXT( "Engine/Editor/" ) + s_IconPaths[index], result, errorMsg ) )
+				{
+					Warnf( TEXT( "Fail to load editor icon '%s' for type 0x%X. Message: %s\n" ), s_IconPaths[index], index, errorMsg.c_str() );
+					assetHandle = g_Engine->GetDefaultTexture();
+				}
+				else
+				{
+					TSharedPtr<CTexture2D>		texture2D = result[0];
+					texture2D->SetAssetName( assetName );
+					assetHandle = texture2D->GetAssetHandle();
+					package->Add( assetHandle );
+				}
+			}
+		}
+	}
 
 	// Init all windows
 	editorWindow						= MakeSharedPtr<CEditorWindow>();

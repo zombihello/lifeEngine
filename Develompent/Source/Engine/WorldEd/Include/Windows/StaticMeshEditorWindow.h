@@ -23,15 +23,6 @@ class CStaticMeshEditorWindow : public CImGUILayer
 {
 public:
 	/**
-	 * @brief Enumeration icon types
-	 */
-	enum EIconType
-	{
-		IT_Import,		/**< Icon for button 'Import' */
-		IT_Num			/**< Number of icon types */
-	};
-
-	/**
 	 * @brief Constructor
 	 * @param InStaticMesh	Static mesh
 	 */
@@ -105,7 +96,6 @@ private:
 	 */
 	void OnOpenAssetEditor( uint32 InAssetSlot );
 
-	TAssetHandle<CTexture2D>								icons[IT_Num];			/**< Array of icons */
 	TSharedPtr<CStaticMesh>									staticMesh;				/**< Static mesh */
 	CViewportWidget											viewportWidget;			/**< Viewport widget */
 	class CStaticMeshPreviewViewportClient*					viewportClient;			/**< Viewport client */

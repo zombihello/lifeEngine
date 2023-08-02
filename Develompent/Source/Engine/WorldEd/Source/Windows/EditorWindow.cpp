@@ -17,43 +17,6 @@
 /** Macro size button in menu bar */
 #define EDITORWINDOW_MENUBAR_BUTTONSIZE		ImVec2( 16.f, 16.f )
 
-/** Selection color */
-#define EDITORWINDOW_SELECTCOLOR			ImVec4( 0.f, 0.43f, 0.87f, 1.f )
-
-/** Is need pop style color of a button */
-static bool s_ImGui_ButtonNeedPopStyleColor = false;
-
-/*
-==================
-ImGui_ButtonSetButtonSelectedStyle
-==================
-*/
-static void ImGui_ButtonSetButtonSelectedStyle()
-{
-	if ( !s_ImGui_ButtonNeedPopStyleColor )
-	{
-		s_ImGui_ButtonNeedPopStyleColor = true;
-		ImGui::PushStyleColor( ImGuiCol_Button, EDITORWINDOW_SELECTCOLOR );
-		ImGui::PushStyleColor( ImGuiCol_ButtonHovered, EDITORWINDOW_SELECTCOLOR );
-		ImGui::PushStyleColor( ImGuiCol_ButtonActive, EDITORWINDOW_SELECTCOLOR );
-	}
-}
-
-/*
-==================
-ImGui_ButtonPopStyleColor
-==================
-*/
-static void ImGui_ButtonPopStyleColor()
-{
-	if ( s_ImGui_ButtonNeedPopStyleColor )
-	{
-		ImGui::PopStyleColor( 3 );
-		s_ImGui_ButtonNeedPopStyleColor = false;
-	}
-}
-
-
 /*
 ==================
 CEditorWindow::CEditorWindow
@@ -341,11 +304,7 @@ void CEditorWindow::OnTick()
 			{
 				// Button
 				bool	bUseSnapTranslation = g_EditorEngine->GetConstraints().IsUseSnapTranslation();
-				if ( bUseSnapTranslation )
-				{
-					ImGui_ButtonSetButtonSelectedStyle();
-				}
-				if ( ImGui::Button( "T", buttonSize ) )
+				if ( ImGui::Button( "T", bUseSnapTranslation, buttonSize ) )
 				{
 					g_EditorEngine->GetConstraints().UseSnapTranslation( !bUseSnapTranslation );
 				}
@@ -353,7 +312,6 @@ void CEditorWindow::OnTick()
 				{
 					ImGui::SetTooltip( "Enables or disables snapping to the grid when dragging objects around" );
 				}
-				ImGui_ButtonPopStyleColor();
 
 				// Combobox
 				ImGui::SetNextItemWidth( comboboxSize );
@@ -382,11 +340,7 @@ void CEditorWindow::OnTick()
 			{
 				// Button
 				bool	bUseSnapRotation = g_EditorEngine->GetConstraints().IsUseSnapRotation();
-				if ( bUseSnapRotation )
-				{
-					ImGui_ButtonSetButtonSelectedStyle();
-				}
-				if ( ImGui::Button( "R", buttonSize ) )
+				if ( ImGui::Button( "R", bUseSnapRotation, buttonSize ) )
 				{
 					g_EditorEngine->GetConstraints().UseSnapRotation( !bUseSnapRotation );
 				}
@@ -394,7 +348,6 @@ void CEditorWindow::OnTick()
 				{
 					ImGui::SetTooltip( "Enables or disables snapping objects to a rotation grid" );
 				}
-				ImGui_ButtonPopStyleColor();
 
 				// Combobox
 				ImGui::SetNextItemWidth( comboboxSize );
@@ -423,11 +376,7 @@ void CEditorWindow::OnTick()
 			{
 				// Button
 				bool	bUseSnapScale = g_EditorEngine->GetConstraints().IsUseSnapScale();
-				if ( bUseSnapScale )
-				{
-					ImGui_ButtonSetButtonSelectedStyle();
-				}
-				if ( ImGui::Button( "S", buttonSize ) )
+				if ( ImGui::Button( "S", bUseSnapScale, buttonSize ) )
 				{
 					g_EditorEngine->GetConstraints().UseSnapScale( !bUseSnapScale );
 				}
@@ -435,7 +384,6 @@ void CEditorWindow::OnTick()
 				{
 					ImGui::SetTooltip( "Enables or disables snapping objects to a scale grid" );
 				}
-				ImGui_ButtonPopStyleColor();
 
 				// Combobox
 				ImGui::SetNextItemWidth( comboboxSize );

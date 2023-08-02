@@ -1,9 +1,6 @@
 #include "Containers/StringConv.h"
 #include "Windows/ActorClassesWindow.h"
 
-/** Selection color */
-#define ACTORCLASSES_SELECTCOLOR					ImVec4( 0.f, 0.43f, 0.87f, 1.f )
-
 /*
 ==================
 CActorClassesWindow::CClassNode::CClassNode
@@ -163,26 +160,19 @@ void CActorClassesWindow::CClassNode::Tick()
 {
 	if ( lclass )
 	{
-		// Set style for selected node
-		bool	bNeedPopStyleColor = false;
+		ImGuiTreeNodeFlags		imguiFlags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+		if ( children.empty() )
+		{
+			imguiFlags |= ImGuiTreeNodeFlags_Leaf;
+		}
 		if ( bSelected )
 		{
-			bNeedPopStyleColor = true;
-			ImGui::PushStyleColor( ImGuiCol_Header, ACTORCLASSES_SELECTCOLOR );
-			ImGui::PushStyleColor( ImGuiCol_HeaderActive, ACTORCLASSES_SELECTCOLOR );
-			ImGui::PushStyleColor( ImGuiCol_HeaderHovered, ACTORCLASSES_SELECTCOLOR );
+			imguiFlags |= ImGuiTreeNodeFlags_Selected;
 		}
-
-		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( lclass->GetName().c_str() ), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick );
+		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( lclass->GetName().c_str() ), imguiFlags );
 		
 		// Item event handles
 		ProcessEvents();
-
-		// Pop selection node style
-		if ( bNeedPopStyleColor )
-		{
-			ImGui::PopStyleColor( 3 );
-		}
 
 		// Draw tree
 		if ( bTreeNode )

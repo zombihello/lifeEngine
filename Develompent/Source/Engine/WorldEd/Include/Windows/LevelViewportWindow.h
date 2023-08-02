@@ -25,19 +25,6 @@ class CLevelViewportWindow : public CImGUILayer
 {
 public:
 	/**
-	 * @brief Enumeration icon types
-	 */
-	enum EIconType
-	{
-		IT_ToolSelect,				/**< Tool select */
-		IT_ToolTranslate,			/**< Tool translate */
-		IT_ToolRotate,				/**< Tool rotate */
-		IT_ToolScale,				/**< Tool scale */
-		IT_PlayStandaloneGame,		/**< Player standalone game */
-		IT_Num						/**< Number of icon types */
-	};
-
-	/**
 	 * @brief Constructor
 	 *
 	 * @param InName			Window name
@@ -77,7 +64,6 @@ private:
 	void DrawPopupMenu();
 
 	bool							bGuizmoUsing;			/**< Is using ImGuizmo now */
-	TAssetHandle<CTexture2D>		icons[IT_Num];			/**< Array of icons */
 	ImGuizmo::OPERATION				guizmoOperationType;	/**< ImGuizmo operation type */
 	ImGuizmo::MODE					guizmoModeType;			/**< ImGuizmo mode type */
 	ImVec2							viewportCursorPos;		/**< Viewport cursor position */

@@ -499,7 +499,9 @@ CImGUIEngine::CImGUIEngine
 */
 CImGUIEngine::CImGUIEngine() 
 	: imguiContext( nullptr )
-{}
+{
+	Sys_Memzero( &styleColors, sizeof( styleColors ) );
+}
 
 /*
 ==================
@@ -598,6 +600,18 @@ void CImGUIEngine::InitTheme()
 		colors[ImGuiCol_TitleBgActive]		= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgCollapsed]	= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 	}
+
+	styleColors[IGC_Selection]				= ImVec4{ 0.f, 0.43f, 0.87f, 1.f };
+	styleColors[IGC_Asset_Unknown]			= ImVec4( 1.f, 1.f, 1.f, 1.f );
+	styleColors[IGC_Asset_Texture2D]		= ImVec4( 0.75f, 0.25f, 0.25f, 1.f );
+	styleColors[IGC_Asset_Material]			= ImVec4( 0.25f, 0.75f, 0.25f, 1.f );
+	styleColors[IGC_Asset_Script]			= ImVec4( 0.f, 0.f, 0.f, 0.f );
+	styleColors[IGC_Asset_StaticMesh]		= ImVec4( 0.f, 1.f, 1.f, 1.f );
+	styleColors[IGC_Asset_AudioBank]		= ImVec4( 0.38f, 0.33f, 0.83f, 1.f );
+	styleColors[IGC_Asset_PhysicsMaterial]	= ImVec4( 0.78f, 0.75f, 0.5f, 1.f );
+	styleColors[IGC_TableBgColor0]			= ImGui::ColorConvertU32ToFloat4( CColor( 26.f, 27.f, 28.f ).GetUInt32Color() );
+	styleColors[IGC_TableBgColor1]			= ImGui::ColorConvertU32ToFloat4( CColor( 32.f, 35.f, 36.f ).GetUInt32Color() );
+
 }
 
 /*
@@ -757,4 +771,54 @@ void CImGUIEngine::EndDraw()
 	}
 	lockedTextures.clear();
 }
+
+namespace ImGui
+{
+	/*
+	==================
+	ImGui::ImageButton
+	==================
+	*/
+	bool ImageButton( ImTextureID InTextureID, bool InIsSelected, const ImVec2& InSize )
+	{
+		if ( InIsSelected )
+		{
+			ImGui::PushStyleColor( ImGuiCol_Button,			g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonActive,	g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
+		}
+		
+		bool	bRet = ImageButton( InTextureID, InSize );
+		
+		if ( InIsSelected )
+		{
+			ImGui::PopStyleColor( 3 );
+		}
+		return bRet;
+	}
+
+	/*
+	==================
+	ImGui::Button
+	==================
+	*/
+	bool Button( const char* InLabel, bool InIsSelected, const ImVec2& InSize /*= ImVec2( 0.f, 0.f )*/ )
+	{
+		if ( InIsSelected )
+		{
+			ImGui::PushStyleColor( ImGuiCol_Button,			g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
+			ImGui::PushStyleColor( ImGuiCol_ButtonActive,	g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
+		}
+		
+		bool	bRet = Button( InLabel, InSize );
+		
+		if ( InIsSelected )
+		{
+			ImGui::PopStyleColor( 3 );
+		}
+		return bRet;
+	}
+}
+
 #endif // WITH_IMGUI

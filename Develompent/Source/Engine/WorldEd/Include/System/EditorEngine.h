@@ -30,6 +30,32 @@
 
 /**
  * @ingroup WorldEd
+ * Enumeration icon types
+ */
+enum EIconType
+{
+	IT_Color_R,										/**< Color R channel */
+	IT_Color_G,										/**< Color G channel */
+	IT_Color_B,										/**< Color B channel */
+	IT_Color_A,										/**< Color A channel */
+	IT_Import,										/**< Import */
+	IT_ToolSelect,									/**< Tool select */
+	IT_ToolTranslate,								/**< Tool translate */
+	IT_ToolRotate,									/**< Tool rotate */
+	IT_ToolScale,									/**< Tool scale */
+	IT_PlayStandaloneGame,							/**< Play standalone game */
+	IT_Thumbnail_Asset_Unknown,						/**< Unknown asset */
+	IT_Thumbnail_Asset_Texture2D,					/**< Texture2D asset */
+	IT_Thumbnail_Asset_Material,					/**< Material asset */
+	IT_Thumbnail_Asset_Script,						/**< Script asset */
+	IT_Thumbnail_Asset_StaticMesh,					/**< StaticMesh asset */
+	IT_Thumbnail_Asset_AudioBank,					/**< AudioBank asset */
+	IT_Thumbnail_Asset_PhysicsMaterial,				/**< PhysicsMaterial asset */
+	IT_Num											/**< Number of icon types */
+};
+
+/**
+ * @ingroup WorldEd
  * Class of editor engine
  */
 class CEditorEngine : public CBaseEngine
@@ -274,6 +300,18 @@ public:
 		return editorWindow;
 	}
 
+	/**
+	 * @brief Get icon
+	 * 
+	 * @param InIcon	Icon
+	 * @return Return asset handle of icon
+	 */
+	FORCEINLINE TAssetHandle<CTexture2D> GetIcon( EIconType InIcon ) const
+	{
+		Assert( InIcon != IT_Num );
+		return icons[InIcon];
+	}
+
 private:
 	/**
 	 * Add TOC entries
@@ -285,6 +323,7 @@ private:
 	std::vector<TRefCountPtr<class CViewport>>	viewports;							/**< Array of viewports for render */
 	CEditorConstraints							constraints;						/**< Editor constraints */
 	CViewportClient*							editorInterfaceViewportClient;		/**< Viewport client for render editor interface */
+	TAssetHandle<CTexture2D>					icons[IT_Num];						/**< Icons */
 
 	// Windows
 	TSharedPtr<CEditorWindow>					editorWindow;						/**< Main editor window */
