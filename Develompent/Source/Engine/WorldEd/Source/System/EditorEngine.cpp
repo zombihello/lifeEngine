@@ -39,6 +39,9 @@ static const tchar*	s_IconPaths[] =
 	TEXT( "Icons/Color_B.png" ),			// IT_Color_B
 	TEXT( "Icons/Color_A.png" ),			// IT_Color_A
 	TEXT( "Icons/Import.png" ),				// IT_Import
+	TEXT( "Icons/CSW_PasteAsset.png" ),		// IT_Insert
+	TEXT( "Icons/CSW_ShowAsset.png" ),		// IT_Browse
+	TEXT( "Icons/CSW_RemoveAsset.png" ),	// IT_Remove
 	TEXT( "Icons/Tool_Select.png" ),		// IT_ToolSelect
 	TEXT( "Icons/Tool_Translate.png" ),		// IT_ToolTranslate
 	TEXT( "Icons/Tool_Rotate.png" ),		// IT_ToolRotate
@@ -170,31 +173,31 @@ void CEditorEngine::Init()
 	editorWindow						= MakeSharedPtr<CEditorWindow>();
 	editorWindow->Init();
 
-	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( TEXT( "Classes" ), AActor::StaticClass() );
+	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( CString::Format( TEXT( "%s Classes" ), ANSI_TO_TCHAR( IMGUI_ICON_CODE ) ), AActor::StaticClass() );
 	actorClassesWindow->Init();
 	
-	actorPropertiesWindow				= MakeSharedPtr<CActorPropertiesWindow>( TEXT( "Properties" ) );
+	actorPropertiesWindow				= MakeSharedPtr<CActorPropertiesWindow>( CString::Format( TEXT( "%s Properties" ), ANSI_TO_TCHAR( IMGUI_ICON_MENU ) ) );
 	actorPropertiesWindow->Init();
 
-	contentBrowserWindow				= MakeSharedPtr<CContentBrowserWindow>( TEXT( "Content" ) );
+	contentBrowserWindow				= MakeSharedPtr<CContentBrowserWindow>( CString::Format( TEXT( "%s Content" ), ANSI_TO_TCHAR( IMGUI_ICON_DATABASE ) ) );
 	contentBrowserWindow->Init();
 
-	explorerLevelWindow					= MakeSharedPtr<CExplorerLevelWindow>( TEXT( "Explorer Level" ) );
+	explorerLevelWindow					= MakeSharedPtr<CExplorerLevelWindow>( CString::Format( TEXT( "%s Explorer Level" ), ANSI_TO_TCHAR( IMGUI_ICON_GLOBE ) ) );
 	explorerLevelWindow->Init();
 
-	logsWindow							= MakeSharedPtr<CLogsWindow>( TEXT( "Logs" ) );
+	logsWindow							= MakeSharedPtr<CLogsWindow>( CString::Format( TEXT( "%s Logs" ), ANSI_TO_TCHAR( IMGUI_ICON_FILETEXT ) ) );
 	logsWindow->Init();
 
-	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CLevelViewportWindow>( TEXT( "Ortho XY" ), ENGINE_2D ? true : false, LVT_OrthoXY );
+	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho XY" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), ENGINE_2D ? true : false, LVT_OrthoXY );
 	viewportWindows[LVT_OrthoXY]->Init();
 
-	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CLevelViewportWindow>( TEXT( "Ortho XZ" ), false, LVT_OrthoXZ );
+	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho XZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXZ );
 	viewportWindows[LVT_OrthoXZ]->Init();
 
-	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CLevelViewportWindow>( TEXT( "Ortho YZ" ), false, LVT_OrthoYZ );
+	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho YZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoYZ );
 	viewportWindows[LVT_OrthoYZ]->Init();
 
-	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CLevelViewportWindow>( TEXT( "Perspective" ), ENGINE_2D ? false : true, LVT_Perspective );
+	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Perspective" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), ENGINE_2D ? false : true, LVT_Perspective );
 	viewportWindows[LVT_Perspective]->Init();
 }
 

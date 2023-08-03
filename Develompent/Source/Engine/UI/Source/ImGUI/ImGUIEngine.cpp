@@ -559,6 +559,13 @@ void CImGUIEngine::InitTheme()
 	float	fontSize			= 15.0f;
 	ImGui::GetIO().Fonts->AddFontFromFileTTF( TCHAR_TO_ANSI( ( Sys_BaseDir() + TEXT( "Engine/Editor/Fonts/Roboto/Roboto-Bold.ttf ") ).c_str() ), fontSize );
 	ImGui::GetIO().FontDefault	= ImGui::GetIO().Fonts->AddFontFromFileTTF( TCHAR_TO_ANSI( ( Sys_BaseDir() + TEXT( "Engine/Editor/Fonts/Roboto/Roboto-Regular.ttf " ) ).c_str() ), fontSize );
+	
+	ImFontConfig	imguiIconsConfig;
+	imguiIconsConfig.OversampleH			= 2;
+	imguiIconsConfig.MergeMode				= true;
+	imguiIconsConfig.GlyphMinAdvanceX		= 14.0f;									// Use if you want to make the icon monospaced
+	static const ImWchar	iconRanges[]	= { IMGUI_ICON_MIN, IMGUI_ICON_MAX, 0 };
+	ImGui::GetIO().Fonts->AddFontFromFileTTF( TCHAR_TO_ANSI( ( Sys_BaseDir() + TEXT( "Engine/Editor/Fonts/OpenFontIcons/OpenFontIcons.ttf " ) ).c_str() ), 12, &imguiIconsConfig, iconRanges );
 
 	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones
 	ImGuiStyle&		style	= ImGui::GetStyle();

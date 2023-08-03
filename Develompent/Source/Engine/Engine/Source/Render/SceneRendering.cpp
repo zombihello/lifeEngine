@@ -119,10 +119,8 @@ void CSceneRenderer::RenderWorldEdForeground( class CBaseDeviceContextRHI* InDev
 	SCOPED_DRAW_EVENT( EventUI, DEC_SCENE_ITEMS, TEXT( "WorldEdForeground" ) );
 	
 	g_SceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
-	InDeviceContext->ClearDepthStencil( g_SceneRenderTargets.GetSceneDepthZSurface() );
 	g_RHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
-	g_RHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );
-	
+	g_RHI->SetBlendState( InDeviceContext, TStaticBlendStateRHI<>::GetRHI() );	
 	RenderSDG( InDeviceContext, SDG_WorldEdForeground );
 	g_SceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
 }

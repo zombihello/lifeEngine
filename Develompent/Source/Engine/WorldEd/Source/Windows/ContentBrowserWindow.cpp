@@ -1379,6 +1379,11 @@ void CContentBrowserWindow::OnTick()
 		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.f, 0.f, 0.f, 0.f ) );
 		
 		engineRoot->Tick();
+		{
+			ImGui::Dummy( ImVec2( 0.f, 0.5f ) );
+			ImGui::Separator();
+			ImGui::Dummy( ImVec2( 0.f, 0.5f ) );
+		}
 		gameRoot->Tick();
 		DrawPackagesPopupMenu();
 		
@@ -2339,7 +2344,7 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 		{
 			imguiFlags |= ImGuiTreeNodeFlags_Selected;
 		}
-		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( name.c_str() ), imguiFlags );
+		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( CString::Format( TEXT( "%s %s" ), ANSI_TO_TCHAR( IMGUI_ICON_FOLDER ), name.c_str() ).c_str() ), imguiFlags );
 
 		// Drag n drop handle
 		DragNDropHandle();
@@ -2368,8 +2373,10 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 		{
 			PackageRef_t	package = g_PackageManager->LoadPackage( path );
 			Assert( package );
-			packageName = ( package->IsDirty() ? TEXT( "*" ) : TEXT( "" ) ) + packageName;
+			packageName = ( package->IsDirty() ? TEXT("*") : TEXT("") ) + packageName;
 		}
+		
+		packageName = CString::Format( TEXT( "%s %s" ), ANSI_TO_TCHAR( IMGUI_ICON_PACKAGE ), packageName.c_str() );
 		ImGui::Selectable( TCHAR_TO_ANSI( packageName.c_str() ), &bSelected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick );
 	
 		// Drag n drop handle

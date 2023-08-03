@@ -52,10 +52,10 @@ private:
 		/**
 		 * @brief Constructor
 		 * 
-		 * @param InObjects	Array of objects to edit
 		 * @param InField	Field
+		 * @param InObjects	Array of objects to edit
 		 */
-		FORCEINLINE CObjectField( const std::list<CObject*> InObjects, const SFieldDescription* InField )
+		FORCEINLINE CObjectField( const SFieldDescription* InField, const std::list<CObject*> InObjects )
 			: field( InField )
 			, objects( InObjects )
 		{}
@@ -83,6 +83,11 @@ private:
 		const SFieldDescription*		field;		/**< Field */
 		std::list<CObject*>				objects;	/**< Array of objects to edit */
 	};
+
+	/**
+	 * @brief Typedef map of object fields separated by category
+	 */
+	typedef std::unordered_map<std::string, std::list<CObjectField>>		MapObjectFields_t;
 
 	/**
 	 * @brief Event called when actors selected or unselected
@@ -114,7 +119,8 @@ private:
 		}
 	}
 
-	std::unordered_map<std::string, std::list<CObjectField>>	objectFields;				/**< Map of fields to edit */
+	MapObjectFields_t											objectFields;				/**< Map of actor fields to edit */
+	std::unordered_map<std::string, MapObjectFields_t>			componentsFields;			/**< Map of components fields to edit */
 	SEditorDelegates::COnActorsSelected::DelegateType_t*		actorsSelectedDelegate;		/**< Actors selected delegate */
 	SEditorDelegates::COnActorsUnselected::DelegateType_t*		actorsUnselectedDelegate;	/**< Actors unselected delegate */
 };

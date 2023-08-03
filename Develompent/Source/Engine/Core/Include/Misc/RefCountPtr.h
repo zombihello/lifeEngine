@@ -288,7 +288,6 @@ public:
 	 */
 	FORCEINLINE PtrType** operator&()
 	{
-		Assert( ptr );
 		return &ptr;
 	}
 

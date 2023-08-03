@@ -39,6 +39,9 @@ enum EIconType
 	IT_Color_B,										/**< Color B channel */
 	IT_Color_A,										/**< Color A channel */
 	IT_Import,										/**< Import */
+	IT_Insert,										/**< Insert */
+	IT_Browse,										/**< Browse */
+	IT_Remove,										/**< Remove */
 	IT_ToolSelect,									/**< Tool select */
 	IT_ToolTranslate,								/**< Tool translate */
 	IT_ToolRotate,									/**< Tool rotate */

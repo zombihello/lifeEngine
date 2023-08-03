@@ -24,6 +24,7 @@
 #include "System/WindowEvent.h"
 #include "ImGUI/imgui.h"
 #include "RHI/TypesRHI.h"
+#include "ImGUI/ImGUIIcons.h"
 
 /**
  * @ingroup UI

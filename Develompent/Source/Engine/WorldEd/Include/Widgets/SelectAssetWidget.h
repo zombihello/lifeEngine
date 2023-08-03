@@ -20,17 +20,6 @@ class CSelectAssetWidget
 {
 public:
 	/**
-	 * @brief Enumeration icon types
-	 */
-	enum EIconType
-	{
-		IT_Insert,		/**< Icon for button 'Insert' */
-		IT_Browse,		/**< Icon for button 'Browse' */
-		IT_Remove,		/**< Icon for button 'Remove' */
-		IT_Num			/**< Number of icon types */
-	};
-
-	/**
 	 * @brief Delegate for called event when selected asset
 	 */
 	DECLARE_MULTICAST_DELEGATE( COnSelectedAsset, uint32 /*InAssetSlot*/, const std::wstring& /*InNewAssetReference*/ );
@@ -136,10 +125,19 @@ public:
 		return onOpenAssetEditor;
 	}
 
+	/**
+	 * @brief Is selected asset
+	 * @return Return true if asset is selected
+	 */
+	FORCEINLINE bool IsSelectedAsset() const
+	{
+		return bSelectedAsset;
+	}
+
 private:
 	bool						bInit;				/**< Is inited widget */
+	bool						bSelectedAsset;		/**< Is selected asset */
 	uint32						assetSlot;			/**< Index of slot */
-	TAssetHandle<CTexture2D>	icons[IT_Num];		/**< Array of icons */
 	std::string					assetReference;		/**< Reference to asset in string type */
 	std::string					label;				/**< Label */
 	Texture2DRHIRef_t			previewTexture;		/**< Preview texture */
