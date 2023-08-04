@@ -17,8 +17,7 @@
   */
 class CSpotLightComponent : public CLightComponent
 {
-	DECLARE_CLASS( CSpotLightComponent, CLightComponent )
-	DECLARE_DATADESC()
+	DECLARE_CLASS( CSpotLightComponent, CLightComponent, 0, 0 )
 
 public:
 	/**
@@ -31,6 +30,16 @@ public:
 	 * @param[in] InArchive Archive for serialize
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Function called by the editor when property is changed
+	 *
+	 * @param InProperty    Property
+	 * @param InChangeType  Change type
+	 */
+	virtual void PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType ) override;
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Set radius

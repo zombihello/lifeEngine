@@ -30,6 +30,17 @@ void CSphereComponent::Serialize( class CArchive& InArchive )
 
 /*
 ==================
+CSphereComponent::StaticInitializeClass
+==================
+*/
+void CSphereComponent::StaticInitializeClass()
+{
+	new CFloatProperty( staticClass, TEXT( "radius" ), TEXT( "Primitive" ), TEXT( "Radius of sphere" ), CPP_PROPERTY( radius ), 0 );
+	// TODO BS yehor.pohuliaka - Need implement CAssetProperty for asset references
+}
+
+/*
+==================
 CSphereComponent::UpdateBodySetup
 ==================
 */

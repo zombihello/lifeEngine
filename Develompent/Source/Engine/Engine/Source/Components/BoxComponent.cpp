@@ -21,6 +21,16 @@ CBoxComponent::CBoxComponent()
 	bodyInstance.SetSimulatePhysics( true );
 }
 
+/*
+==================
+CBoxComponent::StaticInitializeClass
+==================
+*/
+void CBoxComponent::StaticInitializeClass()
+{
+	new CVectorProperty( staticClass, TEXT( "size" ), TEXT( "Primitive" ), TEXT( "Set size of box" ), CPP_PROPERTY( size ), 0 );
+}
+
 #if WITH_EDITOR
 /*
 ==================

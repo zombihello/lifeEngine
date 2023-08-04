@@ -2,11 +2,6 @@
 
 IMPLEMENT_CLASS( CPointLightComponent )
 
-// WorldEd reflection
-BEGIN_DATADESC( CPointLightComponent, CLightComponent )
-	DEFINE_FIELD( radius, "Light", "Light radius", FT_Float )
-END_DATADESC()
-
 /*
 ==================
 CPointLightComponent::CPointLightComponent
@@ -15,6 +10,16 @@ CPointLightComponent::CPointLightComponent
 CPointLightComponent::CPointLightComponent()
 	: radius( 850.f )
 {}
+
+/*
+==================
+CPointLightComponent::StaticInitializeClass
+==================
+*/
+void CPointLightComponent::StaticInitializeClass()
+{
+	new CFloatProperty( staticClass, TEXT( "radius" ), TEXT( "Light" ), TEXT( "Light radius" ), CPP_PROPERTY( radius ), 0 );
+}
 
 /*
 ==================

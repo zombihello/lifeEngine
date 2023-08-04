@@ -3,6 +3,7 @@
 #include "Logger/LoggerMacros.h"
 
 IMPLEMENT_CLASS( CBaseCommandlet )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CBaseCommandlet )
 
 /*
 ==================

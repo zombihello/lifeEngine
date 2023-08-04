@@ -12,6 +12,7 @@
 #include "Misc/Object.h"
 #include "Misc/RefCounted.h"
 #include "Misc/EngineTypes.h"
+#include "Misc/Property.h"
 
 /**
  * @ingroup Engine
@@ -20,7 +21,7 @@
  */
 class CActorComponent : public CObject, public CRefCounted
 {
-	DECLARE_CLASS( CActorComponent, CObject )
+	DECLARE_CLASS( CActorComponent, CObject, 0, 0 )
 
 public:
 	/**

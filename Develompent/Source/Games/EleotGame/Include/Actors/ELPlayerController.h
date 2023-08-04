@@ -17,7 +17,7 @@
   */
 class AELPlayerController : public APlayerController
 {
-	DECLARE_CLASS( AELPlayerController, APlayerController )
+	DECLARE_CLASS( AELPlayerController, APlayerController, 0, 0 )
 
 public:
 	/**

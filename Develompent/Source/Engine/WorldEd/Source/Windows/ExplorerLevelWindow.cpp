@@ -159,7 +159,7 @@ void CExplorerLevelWindow::OnTick()
 			
 			// Label
 			ImGui::TableNextColumn();
-			ImGui::Text( TCHAR_TO_ANSI( actor->GetName() ) );		
+			ImGui::Text( TCHAR_TO_ANSI( actor->GetName().c_str() ) );		
 
 			// Class name
 			ImGui::TableNextColumn();

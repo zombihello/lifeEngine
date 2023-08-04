@@ -20,7 +20,7 @@
   */
 class AELPlayerCharacter : public ACharacter
 {
-	DECLARE_CLASS( AELPlayerCharacter, ACharacter )
+	DECLARE_CLASS( AELPlayerCharacter, ACharacter, 0, 0 )
 
 public:
 	/**

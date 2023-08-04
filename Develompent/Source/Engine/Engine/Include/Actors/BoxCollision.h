@@ -18,7 +18,7 @@
   */
 class ABoxCollision : public AActor
 {
-    DECLARE_CLASS( ABoxCollision, AActor )
+    DECLARE_CLASS( ABoxCollision, AActor, 0, 0 )
 
 public:
     /**
@@ -54,7 +54,7 @@ public:
 	}
 
 private:
-	TRefCountPtr< CBoxComponent >			boxComponent;		/**< Box component */
+	TRefCountPtr<CBoxComponent>			boxComponent;		/**< Box component */
 };
 
 #endif // !ABOXCOLLISION_H

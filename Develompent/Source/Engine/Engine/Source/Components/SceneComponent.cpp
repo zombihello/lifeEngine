@@ -20,6 +20,16 @@ CSceneComponent::~CSceneComponent()
 
 /*
 ==================
+CSceneComponent::StaticInitializeClass
+==================
+*/
+void CSceneComponent::StaticInitializeClass()
+{
+	new CTransformProperty( staticClass, TEXT( "transform" ), TEXT( "Drawing" ), TEXT( "Transform of component" ), CPP_PROPERTY( transform ), 0 );
+}
+
+/*
+==================
 CSceneComponent::IsAttachedTo
 ==================
 */

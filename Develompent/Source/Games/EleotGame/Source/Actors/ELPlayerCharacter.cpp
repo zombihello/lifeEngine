@@ -38,6 +38,16 @@ AELPlayerCharacter::~AELPlayerCharacter()
 
 /*
 ==================
+AELPlayerCharacter::StaticInitializeClass
+==================
+*/
+void AELPlayerCharacter::StaticInitializeClass()
+{
+	new CComponentProperty( staticClass, TEXT( "cameraComponent" ), TEXT( "Camera" ), TEXT( "Camera component" ), CPP_PROPERTY( cameraComponent ), 0 );
+}
+
+/*
+==================
 AELPlayerCharacter::BeginPlay
 ==================
 */

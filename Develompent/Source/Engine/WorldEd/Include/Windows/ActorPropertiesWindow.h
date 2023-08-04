@@ -44,50 +44,74 @@ protected:
 
 private:
 	/**
-	 * @brief Object field
+	 * @brief Object properties
 	 */
-	class CObjectField
+	class CObjectProperties
 	{
 	public:
 		/**
-		 * @brief Constructor
+		 * @brief Method tick interface of a objects property
 		 * 
-		 * @param InField	Field
-		 * @param InObjects	Array of objects to edit
+		 * @param InItemWidthSpacing			Item spacing by width
+		 * @param InApplySpacingToCategories	Is need apply item spacing to categories
 		 */
-		FORCEINLINE CObjectField( const SFieldDescription* InField, const std::list<CObject*> InObjects )
-			: field( InField )
-			, objects( InObjects )
-		{}
+		void Tick( float InItemWidthSpacing, bool InApplySpacingToCategories = false );
 
 		/**
-		 * @brief Method tick interface of a objects property
+		 * @brief Clear object properties
 		 */
-		void Tick();
+		FORCEINLINE void Clear()
+		{
+			properties.clear();
+			objects.clear();
+		}
+
+		/**
+		 * @brief Is empty object properties
+		 * @return Return TRUE if object properties is empty
+		 */
+		FORCEINLINE bool IsEmpty() const
+		{
+			return properties.empty();
+		}
+
+		/**
+		 * @brief Get array of properties
+		 * @return Return array of properties
+		 */
+		FORCEINLINE std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& GetProperties()
+		{
+			return properties;
+		}
+
+		/**
+		 * @brief Get array of objects
+		 * @return Return array of objects
+		 */
+		FORCEINLINE std::vector<CObject*>& GetObjects()
+		{
+			return objects;
+		}
 
 	private:
 		/**
-		 * @brief Apply value to all objects
+		 * @brief Tick property (draw and handle it's events)
 		 * 
-		 * @param InValue	Value
+		 * @param InProperty	Property
 		 */
-		template<typename TType>
-		FORCEINLINE void SetObjectValue( const TType& InValue )
-		{
-			for ( auto it = objects.begin(), itEnd = objects.end(); it != itEnd; ++it )
-			{
-				*DataMap::DataFieldAccess<TType>( *it, field ) = InValue;
-			}
-		}
+		void TickProperty( CProperty* InProperty );
 
-		const SFieldDescription*		field;		/**< Field */
-		std::list<CObject*>				objects;	/**< Array of objects to edit */
+		/**
+		 * @brief Set property value
+		 * 
+		 * @param InProperty		Property
+		 * @param InPropertyValue	Contains the value that should be copied into all objects
+		 */
+		void SetPropertyValue( CProperty* InProperty, const UPropertyValue& InPropertyValue );
+
+		std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>		properties;	/**< Array of properties */
+		std::vector<CObject*>															objects;	/**< Array of objects */
 	};
-
-	/**
-	 * @brief Typedef map of object fields separated by category
-	 */
-	typedef std::unordered_map<std::string, std::list<CObjectField>>		MapObjectFields_t;
 
 	/**
 	 * @brief Event called when actors selected or unselected
@@ -97,32 +121,36 @@ private:
 	void OnActorsUnSelected( const std::vector<ActorRef_t>& InActors );
 
 	/**
-	 * @brief Access to all object fields in data map, include base classes
+	 * @brief Get all properties from object
 	 *
-	 * @param InDataMap		Data map in the class
-	 * @param InObject		Object
-	 * @param OutFields		Output array with all fields
+	 * @param InObject					Object
+	 * @param OutObjectProperties		Output object properties
+	 * @param OutComponentsProperties	Output array of all components' properties in the object
 	 */
-	FORCEINLINE static void GetAllObjectFields( const SDataMap* InDataMap, CObject* InObject, std::unordered_map<const SFieldDescription*, std::list<CObject*>>& OutFields )
-	{
-		for ( const SDataMap* pDataMap = InDataMap; pDataMap; pDataMap = pDataMap->baseMap )
-		{
-			for ( uint32 idxField = 0; idxField < pDataMap->numFields; ++idxField )
-			{
-				// We add to OutFields only valid fields
-				const SFieldDescription&	field = pDataMap->fields[idxField];
-				if ( field.name )
-				{
-					OutFields[&field].push_back( InObject );
-				}
-			}
-		}
-	}
+	void GetAllPropertiesFromObject( CObject* InObject, CObjectProperties& OutObjectProperties, std::unordered_map<CName, CObjectProperties, CName::SHashFunction>& OutComponentsProperties ) const;
 
-	MapObjectFields_t											objectFields;				/**< Map of actor fields to edit */
-	std::unordered_map<std::string, MapObjectFields_t>			componentsFields;			/**< Map of components fields to edit */
-	SEditorDelegates::COnActorsSelected::DelegateType_t*		actorsSelectedDelegate;		/**< Actors selected delegate */
-	SEditorDelegates::COnActorsUnselected::DelegateType_t*		actorsUnselectedDelegate;	/**< Actors unselected delegate */
+	/**
+	 * @brief Remove properties that are not in the array InArrayB
+	 * 
+	 * @param InArrayA			Check array with properties
+	 * @param InOutArrayB		An array with properties. After the method is executed, it will contain only those properties that are also in InActorA
+	 * @return Return TRUE if there are matches in the array InArrayA, otherwise FALSE
+	 */
+	bool RemoveMissingProperties( const std::vector<CProperty*>& InArrayA, std::vector<CProperty*>& InOutArrayB ) const;
+
+	/**
+	 * @brief Remove properties that are not in the array InArrayB
+	 *
+	 * @param InArrayA			Check array with properties
+	 * @param InOutArrayB		An array with properties. After the method is executed, it will contain only those properties that are also in InActorA
+	 * @return Return TRUE if there are matches in the array InArrayA, otherwise FALSE
+	 */
+	bool RemoveMissingProperties( const std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& InArrayA, std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& InOutArrayB ) const;
+
+	CObjectProperties														actorProperties;			/**< Array of actor properties */
+	std::unordered_map<CName, CObjectProperties, CName::SHashFunction>		componentsProperties;		/**< Array of components properties */
+	SEditorDelegates::COnActorsSelected::DelegateType_t*					actorsSelectedDelegate;		/**< Actors selected delegate */
+	SEditorDelegates::COnActorsUnselected::DelegateType_t*					actorsUnselectedDelegate;	/**< Actors unselected delegate */
 };
 
 #endif // !ACTORPROPERTIESWINDOW_H

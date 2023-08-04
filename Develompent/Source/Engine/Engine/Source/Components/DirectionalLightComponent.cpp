@@ -1,6 +1,7 @@
 #include "Components/DirectionalLightComponent.h"
 
 IMPLEMENT_CLASS( CDirectionalLightComponent )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CDirectionalLightComponent )
 
 /*
 ==================

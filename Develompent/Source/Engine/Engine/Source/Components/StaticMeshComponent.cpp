@@ -25,6 +25,17 @@ CStaticMeshComponent::~CStaticMeshComponent()
 
 /*
 ==================
+CStaticMeshComponent::StaticInitializeClass
+==================
+*/
+void CStaticMeshComponent::StaticInitializeClass()
+{
+	// TODO BS yehor.pohuliaka - Need implement CAssetProperty for assets
+	// TODO BS yehor.pohuliaka - Need implement CArrayProperty for arrays
+}
+
+/*
+==================
 CStaticMeshComponent::Serialize
 ==================
 */

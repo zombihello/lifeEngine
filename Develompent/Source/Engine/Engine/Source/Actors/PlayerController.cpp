@@ -5,6 +5,7 @@
 #include "Components/CameraComponent.h"
 
 IMPLEMENT_CLASS( APlayerController )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( APlayerController )
 
 /*
 ==================

@@ -26,6 +26,18 @@ CCharacterMovementComponent::CCharacterMovementComponent()
 
 /*
 ==================
+CCharacterMovementComponent::StaticInitializeClass
+==================
+*/
+void CCharacterMovementComponent::StaticInitializeClass()
+{
+	new CFloatProperty( staticClass, TEXT( "walkSpeed" ), TEXT( "Movement" ), TEXT( "Walk speed" ), CPP_PROPERTY( walkSpeed ), 0 );
+	new CFloatProperty( staticClass, TEXT( "walkSpeedInFly" ), TEXT( "Movement" ), TEXT( "Walk speed in fly" ), CPP_PROPERTY( walkSpeedInFly ), 0 );
+	new CFloatProperty( staticClass, TEXT( "jumpSpeed" ), TEXT( "Movement" ), TEXT( "Jump speed" ), CPP_PROPERTY( jumpSpeed ), 0 );
+}
+
+/*
+==================
 CCharacterMovementComponent::BeginPlay
 ==================
 */

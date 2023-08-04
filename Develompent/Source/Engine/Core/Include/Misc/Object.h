@@ -10,29 +10,29 @@
 #define OBJECT_H
 
 #include <string>
-
 #include "Misc/Class.h"
-
-#if WITH_EDITOR
-#include "Misc/DataMap.h"
-#endif // WITH_EDITOR
 
 /**
  * @ingroup Core
  * @brief Macro for declare class
  * 
- * @param[in] TClass Class
- * @param[in] TSuperClass Super class
+ * @param TClass            Class
+ * @param TClassFlags       Class flags
+ * @param TClassCastFlags   Class cast flags
+ * @param TSuperClass       Super class
  * 
  * Example usage: @code DECLARE_CLASS( CClass, CObject ) @endcode
  */
-#define DECLARE_CLASS( TClass, TSuperClass ) \
+#define DECLARE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
     private: \
         static class CClass*        staticClass; \
     public: \
+        enum { StaticClassFlags=TClassFlags }; \
+        enum { StaticClassCastFlags=TClassCastFlags }; \
 	    typedef TClass		        ThisClass; \
 	    typedef TSuperClass	        Super; \
         static CObject*             StaticConstructor(); \
+        static void                 StaticInitializeClass(); \
         static class CClass*        StaticClass(); \
         virtual class CClass*       GetClass() const;
 
@@ -40,7 +40,7 @@
  * @ingroup Core
  * @brief Macro for implement class
  * 
- * @param[in] TClass Class
+ * @param TClass    Class
  * 
  * Example usage: @code IMPLEMENT_CLASS( CObject ) @endcode
  */
@@ -55,10 +55,19 @@
     { \
         if ( !staticClass ) \
         { \
-            bool        isBaseClass = &ThisClass::StaticClass == &Super::StaticClass; \
-            staticClass = new CClass( TEXT( #TClass ), &ThisClass::StaticConstructor, !isBaseClass ? Super::StaticClass() : nullptr ); \
+            bool        bBaseClass = &ThisClass::StaticClass == &Super::StaticClass; \
+            staticClass = new CClass \
+            ( \
+                TEXT( #TClass ), \
+                StaticClassFlags, \
+                StaticClassCastFlags, \
+                &ThisClass::StaticConstructor, \
+                !bBaseClass ? Super::StaticClass() : nullptr \
+            ); \
+            TClass::StaticInitializeClass(); \
         } \
         \
+        Assert( staticClass ); \
         return staticClass; \
     } \
     \
@@ -77,12 +86,31 @@
 
 /**
  * @ingroup Core
+ * @brief Macro for implement default StaticInitializeClass()
+ *
+ * @param TClass    Class
+ *
+ * Example usage: @code IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CObject ) @endcode
+ */
+#define IMPLEMENT_DEFAULT_INITIALIZE_CLASS( TClass ) \
+        void TClass::StaticInitializeClass() {} \
+
+/**
+ * @ingroup Core
+ * @brief Enumeration property change type
+ */
+enum EPropertyChangeType
+{
+    PCT_ValueSet        /**< Value set */
+};
+
+/**
+ * @ingroup Core
  * @brief The base class of all objects
  */
 class CObject
 {
-    DECLARE_CLASS( CObject, CObject )
-    DECLARE_DATADESC()
+    DECLARE_CLASS( CObject, CObject, CLASS_Abstract, 0 )
 
 public:
     /**
@@ -96,9 +124,36 @@ public:
      */
     virtual void Serialize( class CArchive& InArchive );
 
+#if WITH_EDITOR
+    /**
+     * @brief Function called by the editor when property is changed
+     * 
+     * @param InProperty    Property
+     * @param InChangeType  Change type
+     */
+    virtual void PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType );
+
+    /**
+     * @brief Called by the editor to query whether a property of this object is allowed to be modified
+     * 
+     * @param InProperty    Property
+     * @return Return TRUE if the property can be modified in the editor, otherwise FALSE
+     */
+    virtual bool CanEditProperty( class CProperty* InProperty ) const;
+#endif // WITH_EDITOR
+
     /**
      * @brief Set name object
-     * @param[in] InName Name object
+     * @param InName    Name object (CName)
+     */
+    FORCEINLINE void SetCName( const CName& InName )
+    {
+        name = InName;
+    }
+
+    /**
+     * @brief Set name object
+     * @param InName    Name object
      */
     FORCEINLINE void SetName( const tchar* InName )
     {
@@ -109,7 +164,7 @@ public:
      * @brief Is the object a class TClass
      * @return Return true if object is a class TClass, else returning false
      */
-    template< typename TClass >
+    template<typename TClass>
     FORCEINLINE bool IsA() const
     {
         return InternalIsA( TClass::StaticClass() );
@@ -119,8 +174,8 @@ public:
      * @brief Cast object to class a TClass
      * @return Return pointer with type TClass. If object not is the class TClass returning nullptr
      */
-	template< typename TClass >
-    FORCEINLINE TClass* Cast()
+	template<typename TClass>
+    FORCEINLINE TClass* Cast() const
 	{
 		if ( IsA< TClass >() )
 		{
@@ -129,6 +184,36 @@ public:
 
 		return nullptr;
 	}
+
+    /**
+     * @brief Cast object to class a TClass (excluding class parents)
+     * @return Return pointer with type TClass. If object not is the class TClass returning nullptr
+     */
+    template<typename TClass>
+	FORCEINLINE TClass* ExactCast() const
+	{
+		if ( GetClass() == TClass::StaticClass() )
+		{
+			return ( TClass* )this;
+		}
+
+		return nullptr;
+	}
+
+    /**
+     * @brief Cast object to class a TClass (excluding class parents)
+     * @return Return const pointer with type TClass. If InObject not is the class TClass returning nullptr
+     */
+    template<typename TClass>
+    FORCEINLINE const TClass* ConstExactCast() const
+    {
+        if ( GetClass() == TClass::StaticClass() )
+        {
+            return ( const TClass* )InObject;
+        }
+
+        return nullptr;
+    }
 
     /**
      * @brief Cast object to class a TClass
@@ -146,12 +231,32 @@ public:
 	}
 
     /**
-     * @brief Get name object
-     * @return Return name object
+     * @brief Get object name
+     * @return Return object name
      */
-    FORCEINLINE const tchar* GetName() const
+    FORCEINLINE std::wstring GetName() const
     {
-        return name.c_str();
+        std::wstring	retName;
+        name.ToString( retName );
+        return retName;
+    }
+
+    /**
+     * @brief Get object name
+     * @param OutName	Output object name
+     */
+    FORCEINLINE void GetName( std::wstring& OutName ) const
+    {
+        name.ToString( OutName );
+    }
+
+    /**
+     * @brief Get object name
+     * @return Return object name (CName)
+     */
+    FORCEINLINE const CName& GetCName() const
+    {
+        return name;
     }
 
     /**
@@ -168,6 +273,40 @@ public:
     }
 
     /**
+     * @brief Get array of class properties
+     *
+     * @param OutArrayProperties		Output array properties
+     * @param InPropertiesInParents		Take into account the properties of the parents
+     */
+    FORCEINLINE void GetProperties( std::vector<class CProperty*>& OutArrayProperties, bool InPropertiesInParents = true ) const
+    {
+        GetClass()->GetProperties( OutArrayProperties, InPropertiesInParents );
+    }
+
+    /**
+     * @brief Get number properties in the class
+     *
+     * @param InPropertiesInParents		Take into account the properties of the parents
+     * @return Return number properties in the class
+     */
+    FORCEINLINE uint32 GetNumProperties( bool InPropertiesInParents = true ) const
+    {
+        return GetClass()->GetNumProperties( InPropertiesInParents );
+    }
+
+    /**
+     * @brief Find property
+     *
+     * @param InName		Property name
+     * @return Return pointer to class property, if not found return NULL
+     */
+    template<typename TPropertyClass>
+    FORCEINLINE TPropertyClass* FindProperty( const CName& InName ) const
+    {
+        return GetClass()->FindProperty<TPropertyClass>( InName );
+    }
+
+    /**
      * Overload operator of serialization in archive
      */
     friend CArchive& operator<<( CArchive& InArchive, CObject& InObject );
@@ -181,7 +320,7 @@ private:
      */
     bool InternalIsA( const CClass* InClass ) const;
 
-    std::wstring            name;               /**< Name object */
+    CName       name;               /**< Name object */
 };
 
 /**
@@ -234,6 +373,42 @@ FORCEINLINE const TClass* ConstCast( CObject* InObject )
     {
         return ( const TClass* )InObject;
    }
+
+    return nullptr;
+}
+
+/**
+ * @ingroup Core
+ * @brief Cast object to class a TClass (excluding class parents)
+ * 
+ * @param InObject      Object
+ * @return Return const pointer with type TClass. If InObject not is the class TClass returning nullptr
+ */
+template<typename TClass>
+FORCEINLINE TClass* ExactCast( CObject* InObject )
+{
+    if ( InObject && InObject->GetClass() == TClass::StaticClass() )
+    {
+        return ( TClass* )InObject;
+    }
+
+    return nullptr;
+}
+
+/**
+ * @ingroup Core
+ * @brief Cast object to class a TClass (excluding class parents)
+ *
+ * @param InObject      Object
+ * @return Return const pointer with type TClass. If InObject not is the class TClass returning nullptr
+ */
+template<typename TClass>
+FORCEINLINE const TClass* ConstExactCast( CObject* InObject )
+{
+    if ( InObject && InObject->GetClass() == TClass::StaticClass() )
+    {
+        return ( const TClass* )InObject;
+    }
 
     return nullptr;
 }

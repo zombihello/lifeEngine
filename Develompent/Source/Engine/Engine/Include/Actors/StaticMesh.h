@@ -20,7 +20,7 @@
   */
 class AStaticMesh : public AActor
 {
-	DECLARE_CLASS( AStaticMesh, AActor )
+	DECLARE_CLASS( AStaticMesh, AActor, 0, 0 )
 
 public:
 	/**
@@ -66,7 +66,7 @@ public:
 #endif // WITH_EDITOR
 
 private:
-	TRefCountPtr< CStaticMeshComponent >			staticMeshComponent;		/**< Static mesh component */
+	TRefCountPtr<CStaticMeshComponent>			staticMeshComponent;		/**< Static mesh component */
 };
 
 #endif // !ASTATICMESH_H

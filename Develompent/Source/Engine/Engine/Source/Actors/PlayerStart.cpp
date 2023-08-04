@@ -7,6 +7,7 @@
 #include "Actors/Character.h"
 
 IMPLEMENT_CLASS( APlayerStart )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( APlayerStart )
 
 /*
 ==================

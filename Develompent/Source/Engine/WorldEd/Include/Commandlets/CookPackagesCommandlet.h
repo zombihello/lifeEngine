@@ -43,7 +43,7 @@ struct STMXTileset
   */
 class CCookPackagesCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CCookPackagesCommandlet, CBaseCommandlet )
+	DECLARE_CLASS( CCookPackagesCommandlet, CBaseCommandlet, 0, 0 )
 
 public:
 	/**

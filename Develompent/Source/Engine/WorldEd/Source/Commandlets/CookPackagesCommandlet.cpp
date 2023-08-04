@@ -29,6 +29,7 @@
 #include "Render/VertexFactory/SpriteVertexFactory.h"
 
 IMPLEMENT_CLASS( CCookPackagesCommandlet )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CCookPackagesCommandlet )
 
 /** Default package extension */
 #define DEFAULT_PACKAGE_EXTENSION		TEXT( "pak" )

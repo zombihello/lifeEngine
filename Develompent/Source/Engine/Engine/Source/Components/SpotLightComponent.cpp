@@ -2,12 +2,6 @@
 
 IMPLEMENT_CLASS( CSpotLightComponent )
 
-// WorldEd reflection
-BEGIN_DATADESC( CSpotLightComponent, CLightComponent )
-	DEFINE_FIELD( radius, "Light", "Light radius", FT_Float )
-	DEFINE_FIELD( height, "Light", "Light height", FT_Float )
-END_DATADESC()
-
 /*
 ==================
 CSpotLightComponent::CSpotLightComponent
@@ -20,6 +14,17 @@ CSpotLightComponent::CSpotLightComponent()
 	, cutoff( 0.f )
 {
 	intensivity = 100400.f;
+}
+
+/*
+==================
+CSpotLightComponent::StaticInitializeClass
+==================
+*/
+void CSpotLightComponent::StaticInitializeClass()
+{
+	new CFloatProperty( staticClass, TEXT( "radius" ), TEXT( "Light" ), TEXT( "Light radius" ), CPP_PROPERTY( radius ), 0 );
+	new CFloatProperty( staticClass, TEXT( "height" ), TEXT( "Light" ), TEXT( "Light height" ), CPP_PROPERTY( height ), 0 );
 }
 
 /*
@@ -43,6 +48,26 @@ void CSpotLightComponent::Serialize( class CArchive& InArchive )
 		bNeedUpdateCutoff = true;
 	}
 }
+
+#if WITH_EDITOR
+/*
+==================
+CSpotLightComponent::PostEditChangeProperty
+==================
+*/
+void CSpotLightComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+{
+	if ( InProperty )
+	{
+		if ( InProperty->GetCName() == TEXT( "radius" ) || InProperty->GetCName() == TEXT( "height" ) )
+		{
+			bNeedUpdateCutoff = true;
+		}
+	}
+
+	Super::PostEditChangeProperty( InProperty, InChangeType );
+}
+#endif // WITH_EDITOR
 
 /*
 ==================

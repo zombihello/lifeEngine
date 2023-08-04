@@ -17,7 +17,7 @@
  */
 class CArrowComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( CArrowComponent, CPrimitiveComponent )
+	DECLARE_CLASS( CArrowComponent, CPrimitiveComponent, 0, 0 )
 
 public:
 	/**

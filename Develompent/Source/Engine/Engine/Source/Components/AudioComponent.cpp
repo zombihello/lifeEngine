@@ -37,6 +37,24 @@ CAudioComponent::~CAudioComponent()
 
 /*
 ==================
+CAudioComponent::StaticInitializeClass
+==================
+*/
+void CAudioComponent::StaticInitializeClass()
+{
+	new CBoolProperty( staticClass, TEXT( "bIsLoop" ), TEXT( "Audio" ), TEXT( "Is looped" ), CPP_PROPERTY( bIsLoop ), 0 );
+	new CBoolProperty( staticClass, TEXT( "bIsUISound" ), TEXT( "Audio" ), TEXT( "Is UI sound" ), CPP_PROPERTY( bIsUISound ), 0 );
+	new CBoolProperty( staticClass, TEXT( "bIsAutoPlay" ), TEXT( "Audio" ), TEXT( "Is need auto play on begin play" ), CPP_PROPERTY( bIsAutoPlay ), 0 );
+	new CBoolProperty( staticClass, TEXT( "bIsStreamable" ), TEXT( "Audio" ), TEXT( "Is streamable" ), CPP_PROPERTY( bIsStreamable ), 0 );
+	new CFloatProperty( staticClass, TEXT( "volume" ), TEXT( "Audio" ), TEXT( "Volume of sound" ), CPP_PROPERTY( volume ), 0 );
+	new CFloatProperty( staticClass, TEXT( "pitch" ), TEXT( "Audio" ), TEXT( "Pitch" ), CPP_PROPERTY( pitch ), 0 );
+	new CFloatProperty( staticClass, TEXT( "minDistance" ), TEXT( "Audio" ), TEXT( "Min distance" ), CPP_PROPERTY( minDistance ), 0 );
+	new CFloatProperty( staticClass, TEXT( "attenuation" ), TEXT( "Audio" ), TEXT( "Attenuation" ), CPP_PROPERTY( attenuation ), 0 );
+	// TODO BS yehor.pohuliaka - Need implement asset property for 'bank'
+}
+
+/*
+==================
 CAudioComponent::Serialize
 ==================
 */

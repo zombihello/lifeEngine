@@ -19,7 +19,7 @@
  */
 class CCharacterMovementComponent : public CActorComponent
 {
-	DECLARE_CLASS( CCharacterMovementComponent, CActorComponent )
+	DECLARE_CLASS( CCharacterMovementComponent, CActorComponent, 0, 0 )
 
 public:
 	/**

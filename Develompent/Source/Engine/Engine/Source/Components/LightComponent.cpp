@@ -5,13 +5,6 @@
 
 IMPLEMENT_CLASS( CLightComponent )
 
-// WorldEd reflection
-BEGIN_DATADESC( CLightComponent, CSceneComponent )
-	DEFINE_FIELD( bEnabled, "Light", "Is enabled light", FT_Boolean )
-	DEFINE_FIELD( lightColor, "Light", "Light color", FT_Color )
-	DEFINE_FIELD( intensivity, "Light", "Light intensivity", FT_Float )
-END_DATADESC()
-
 /*
 ==================
 CLightComponent::CLightComponent
@@ -35,6 +28,18 @@ CLightComponent::~CLightComponent()
 	{
 		scene->RemoveLight( this );
 	}
+}
+
+/*
+==================
+CLightComponent::StaticInitializeClass
+==================
+*/
+void CLightComponent::StaticInitializeClass()
+{
+	new CBoolProperty( staticClass, TEXT( "bEnabled" ), TEXT( "Light" ), TEXT( "Is enabled light" ), CPP_PROPERTY( bEnabled ), 0 );
+	new CColorProperty( staticClass, TEXT( "lightColor" ), TEXT( "Light" ), TEXT( "Light color" ), CPP_PROPERTY( lightColor ), 0 );
+	new CFloatProperty( staticClass, TEXT( "intensivity" ), TEXT( "Light" ), TEXT( "Light intensivity" ), CPP_PROPERTY( intensivity ), 0 );
 }
 
 /*

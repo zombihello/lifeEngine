@@ -2,6 +2,7 @@
 #include "Actors/Character.h"
 
 IMPLEMENT_CLASS( ABaseController )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( ABaseController )
 
 /*
 ==================

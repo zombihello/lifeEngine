@@ -30,6 +30,7 @@
 #include "Actors/Audio.h"
 
 IMPLEMENT_CLASS( CEditorEngine )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CEditorEngine )
 
 /** Table of icons */
 static const tchar*	s_IconPaths[] =

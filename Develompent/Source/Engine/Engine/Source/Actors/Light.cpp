@@ -1,3 +1,4 @@
 #include "Actors/Light.h"
 
 IMPLEMENT_CLASS( ALight )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( ALight )

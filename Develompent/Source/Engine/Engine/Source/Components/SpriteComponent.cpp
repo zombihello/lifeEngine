@@ -33,6 +33,18 @@ CSpriteComponent::CSpriteComponent()
 
 /*
 ==================
+CSpriteComponent::StaticInitializeClass
+==================
+*/
+void CSpriteComponent::StaticInitializeClass()
+{
+	new CBoolProperty( staticClass, TEXT( "bFlipVertical" ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by vertical" ), CPP_PROPERTY( bFlipVertical ), 0 );
+	new CFloatProperty( staticClass, TEXT( "bFlipHorizontal" ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPP_PROPERTY( bFlipHorizontal ), 0 );
+	// TODO BS yehor.pohuliaka - Need implement CNameProperty for enums
+}
+
+/*
+==================
 CSpriteComponent::Serialize
 ==================
 */

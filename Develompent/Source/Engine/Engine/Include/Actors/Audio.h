@@ -19,7 +19,7 @@
   */
 class AAudio : public AActor
 {
-	DECLARE_CLASS( AAudio, AActor )
+	DECLARE_CLASS( AAudio, AActor, 0, 0 )
 
 public:
 	/**
@@ -73,13 +73,13 @@ public:
 	 * Get audio component
 	 * @return Return audio component
 	 */
-	FORCEINLINE TRefCountPtr< CAudioComponent > GetAudioComponent() const
+	FORCEINLINE TRefCountPtr<CAudioComponent> GetAudioComponent() const
 	{
 		return audioComponent;
 	}
 
 private:
-	TRefCountPtr< CAudioComponent >			audioComponent;		/**< Audio component */
+	TRefCountPtr<CAudioComponent>			audioComponent;		/**< Audio component */
 
 #if WITH_EDITOR
 	TRefCountPtr<CSpriteComponent>			gizmoComponent;		/**< Gizmo component */

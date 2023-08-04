@@ -24,6 +24,17 @@ CShapeComponent::~CShapeComponent()
 
 /*
 ==================
+CShapeComponent::StaticInitializeClass
+==================
+*/
+void CShapeComponent::StaticInitializeClass()
+{
+	// TODO BS yehor.pohuliaka - Need implemente CStructProperty for user structs
+	// TODO BS yehor.pohuliaka - Need implement CAssetProperty for asset references
+}
+
+/*
+==================
 CShapeComponent::BeginPlay
 ==================
 */

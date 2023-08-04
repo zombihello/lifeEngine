@@ -6,11 +6,6 @@
 
 IMPLEMENT_CLASS( CPrimitiveComponent )
 
-// WorldEd reflection
-BEGIN_DATADESC( CPrimitiveComponent, CSceneComponent )
-	DEFINE_FIELD( bVisibility, "Rendering", "Is primitive visibility", FT_Boolean )
-END_DATADESC()
-
 /*
 ==================
 CPrimitiveComponent::CPrimitiveComponent
@@ -33,6 +28,16 @@ CPrimitiveComponent::~CPrimitiveComponent()
 	{
 		scene->RemovePrimitive( this );
 	}
+}
+
+/*
+==================
+CPrimitiveComponent::StaticInitializeClass
+==================
+*/
+void CPrimitiveComponent::StaticInitializeClass()
+{
+	new CBoolProperty( staticClass, TEXT( "bVisibility" ), TEXT( "Drawing" ), TEXT( "Is primitive visibility" ), CPP_PROPERTY( bVisibility ), 0 );
 }
 
 /*

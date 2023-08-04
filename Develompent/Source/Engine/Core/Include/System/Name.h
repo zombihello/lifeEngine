@@ -166,6 +166,14 @@ public:
 	bool operator==( const std::wstring& InOther ) const;
 
 	/**
+	 * @brief Compare operator
+	 *
+	 * @param InOther	String to compare
+	 * @return Return TRUE if name matches the string, FALSE otherwise
+	 */
+	bool operator==( const tchar* InOther ) const;
+
+	/**
 	 * @brief Assignment operator
 	 *
 	 * @param InOther	New string
@@ -208,6 +216,18 @@ public:
 	FORCEINLINE CName& operator=( const CName& InOther )
 	{
 		index = InOther.index;
+		return *this;
+	}
+
+	/**
+	 * @brief Assignment operator
+	 *
+	 * @param InString		New string
+	 * @return Return reference to self
+	 */
+	FORCEINLINE CName& operator=( const tchar* InString )
+	{
+		Init( InString );
 		return *this;
 	}
 

@@ -14,6 +14,16 @@ ABoxCollision::ABoxCollision()
 	SetStatic( true );
 }
 
+/*
+==================
+ABoxCollision::StaticInitializeClass
+==================
+*/
+void ABoxCollision::StaticInitializeClass()
+{
+	new CComponentProperty( staticClass, TEXT( "boxComponent" ), TEXT( "Collision" ), TEXT( "Box component" ), CPP_PROPERTY( boxComponent ), 0 );
+}
+
 #if WITH_EDITOR
 #include "Commandlets/CookPackagesCommandlet.h"
 

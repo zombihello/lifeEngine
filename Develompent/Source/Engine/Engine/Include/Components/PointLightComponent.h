@@ -17,8 +17,7 @@
   */
 class CPointLightComponent : public CLightComponent
 {
-	DECLARE_CLASS( CPointLightComponent, CLightComponent )
-	DECLARE_DATADESC()
+	DECLARE_CLASS( CPointLightComponent, CLightComponent, 0, 0 )
 
 public:
 	/**

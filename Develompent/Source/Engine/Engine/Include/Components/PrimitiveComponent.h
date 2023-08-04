@@ -26,8 +26,7 @@ typedef TRefCountPtr< class CPrimitiveComponent >		PrimitiveComponentRef_t;
  */
 class CPrimitiveComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CPrimitiveComponent, CSceneComponent )
-	DECLARE_DATADESC()
+	DECLARE_CLASS( CPrimitiveComponent, CSceneComponent, 0, 0 )
 
 public:
 	friend class CScene;			// For add and remove primitive in scene

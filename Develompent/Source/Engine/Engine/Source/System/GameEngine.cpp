@@ -16,6 +16,7 @@
 #include "Actors/PlayerStart.h"
 
 IMPLEMENT_CLASS( CGameEngine )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CGameEngine )
 
 /*
 ==================

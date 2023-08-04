@@ -28,6 +28,16 @@ AStaticMesh::~AStaticMesh()
 
 /*
 ==================
+AStaticMesh::StaticInitializeClass
+==================
+*/
+void AStaticMesh::StaticInitializeClass()
+{
+	new CComponentProperty( staticClass, TEXT( "staticMeshComponent" ), TEXT( "Drawing" ), TEXT( "Static mesh component" ), CPP_PROPERTY( staticMeshComponent ), 0 );
+}
+
+/*
+==================
 AStaticMesh::BeginPlay
 ==================
 */

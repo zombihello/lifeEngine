@@ -20,7 +20,7 @@
   */
 class ACharacter : public AActor
 {
-	DECLARE_CLASS( ACharacter, AActor )
+	DECLARE_CLASS( ACharacter, AActor, 0, 0 )
 
 public:
 	/**
@@ -69,7 +69,7 @@ public:
 	 * @brief Get controller of character
 	 * @return Return controller of character. If not exist return nullptr
 	 */
-	FORCEINLINE TRefCountPtr< ABaseController > GetController() const
+	FORCEINLINE TRefCountPtr<ABaseController> GetController() const
 	{
 		return controller;
 	}
@@ -78,14 +78,14 @@ public:
 	 * @brief Get character movement component
 	 * @return Return character movement component
 	 */
-	FORCEINLINE TRefCountPtr< CCharacterMovementComponent > GetCharacterMovement() const
+	FORCEINLINE TRefCountPtr<CCharacterMovementComponent> GetCharacterMovement() const
 	{
 		return characterMovement;
 	}
 
 private:
-	TRefCountPtr< ABaseController >						controller;				/**< Controller of this character */
-	TRefCountPtr< CCharacterMovementComponent >			characterMovement;		/**< Character movement component */
+	TRefCountPtr<ABaseController>						controller;				/**< Controller of this character */
+	TRefCountPtr<CCharacterMovementComponent>			characterMovement;		/**< Character movement component */
 };
 
 #endif // !CHARACTER_H

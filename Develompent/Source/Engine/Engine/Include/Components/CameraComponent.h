@@ -18,7 +18,7 @@
   */
 class CCameraComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CCameraComponent, CSceneComponent )
+	DECLARE_CLASS( CCameraComponent, CSceneComponent, 0, 0 )
 
 public:
     friend class CCameraManager;

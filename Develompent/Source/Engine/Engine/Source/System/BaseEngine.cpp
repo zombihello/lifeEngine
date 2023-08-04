@@ -19,6 +19,7 @@
 #include "System/CameraManager.h"
 
 IMPLEMENT_CLASS( CBaseEngine )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CBaseEngine )
 
 /*
 ==================

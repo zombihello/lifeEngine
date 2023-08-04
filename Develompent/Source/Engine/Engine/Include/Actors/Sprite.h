@@ -21,7 +21,7 @@
   */
 class ASprite : public AActor
 {
-    DECLARE_CLASS( ASprite, AActor )
+    DECLARE_CLASS( ASprite, AActor, 0, 0 )
 
 public:
     /**
@@ -38,7 +38,7 @@ public:
      * Get sprite component
      * @return Return pointer to sprite component
      */
-    FORCEINLINE TRefCountPtr< CSpriteComponent > GetSpriteComponent() const
+    FORCEINLINE TRefCountPtr<CSpriteComponent> GetSpriteComponent() const
     {
         return spriteComponent;
     }
@@ -52,7 +52,7 @@ public:
 #endif // WITH_EDITOR
 
 private:
-    TRefCountPtr< CSpriteComponent >			spriteComponent;		/**< Sprite component */
+    TRefCountPtr<CSpriteComponent>			spriteComponent;		/**< Sprite component */
 };
 
 #endif // !ASPRITE_H

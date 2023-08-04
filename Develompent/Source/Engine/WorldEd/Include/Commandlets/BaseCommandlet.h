@@ -21,7 +21,7 @@
  */
 class CBaseCommandlet : public CObject
 {
-	DECLARE_CLASS( CBaseCommandlet, CObject )
+	DECLARE_CLASS( CBaseCommandlet, CObject, 0, 0 )
 
 public:
 	/**

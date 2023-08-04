@@ -20,7 +20,7 @@
   */
 class CShapeComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( CShapeComponent, CPrimitiveComponent )
+	DECLARE_CLASS( CShapeComponent, CPrimitiveComponent, 0, 0 )
 
 public:
 	/**

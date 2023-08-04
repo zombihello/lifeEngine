@@ -14,6 +14,7 @@
 #include "Misc/Object.h"
 #include "Misc/RefCounted.h"
 #include "Misc/EngineTypes.h"
+#include "Misc/Property.h"
 #include "Math/Rect.h"
 #include "Math/Color.h"
 #include "Render/Material.h"
@@ -545,8 +546,7 @@ DECLARE_MULTICAST_DELEGATE( COnActorDestroyed, class AActor* );
  */
 class AActor : public CObject, public CRefCounted
 {
-	DECLARE_CLASS( AActor, CObject )
-	DECLARE_DATADESC()
+	DECLARE_CLASS( AActor, CObject, 0, 0 )
 
 public:
 	/**
@@ -926,8 +926,8 @@ protected:
 		return onActorDestroyed;
 	}
 
-	TRefCountPtr< CSceneComponent >				rootComponent;			/**< Root component, default is null */
-	TRefCountPtr< CPrimitiveComponent >			collisionComponent;		/**< Collision component */
+	TRefCountPtr<CSceneComponent>				rootComponent;			/**< Root component, default is null */
+	TRefCountPtr<CPrimitiveComponent>			collisionComponent;		/**< Collision component */
 
 private:
 	bool										bIsStatic;				/**< Is static actor */
@@ -940,7 +940,7 @@ private:
 	bool										bSelected;				/**< Is selected this actor */
 #endif // WITH_EDITOR
 
-	std::vector< ActorComponentRef_t >			ownedComponents;		/**< Owned components */
+	std::vector<ActorComponentRef_t>			ownedComponents;		/**< Owned components */
 	mutable COnActorDestroyed					onActorDestroyed;		/**< Called event when actor is destroyed */
 
 #if ENABLE_HITPROXY

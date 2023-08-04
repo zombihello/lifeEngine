@@ -12,6 +12,7 @@
 #include "Commandlets/CookerSyncCommandlet.h"
 
 IMPLEMENT_CLASS( CCookerSyncCommandlet )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CCookerSyncCommandlet )
 
 /*
 ==================

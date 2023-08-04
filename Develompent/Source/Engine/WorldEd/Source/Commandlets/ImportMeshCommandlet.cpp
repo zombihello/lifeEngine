@@ -16,6 +16,7 @@
 #include "Commandlets/ImportMeshCommandlet.h"
 
 IMPLEMENT_CLASS( CImportMeshCommandlet )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CImportMeshCommandlet )
 
 /*
 ==================

@@ -17,7 +17,7 @@
   */
 class CDirectionalLightComponent : public CLightComponent
 {
-	DECLARE_CLASS( CDirectionalLightComponent, CLightComponent )
+	DECLARE_CLASS( CDirectionalLightComponent, CLightComponent, 0, 0 )
 
 public:
 	/**

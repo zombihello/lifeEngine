@@ -30,7 +30,7 @@ enum ESpriteType
   */
 class CSpriteComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( CSpriteComponent, CPrimitiveComponent )
+	DECLARE_CLASS( CSpriteComponent, CPrimitiveComponent, 0, 0 )
 
 public:
     /**

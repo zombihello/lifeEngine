@@ -3,6 +3,7 @@
 #include "System/World.h"
 
 IMPLEMENT_CLASS( CArrowComponent )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CArrowComponent )
 
 /*
 ==================

@@ -2,6 +2,7 @@
 #include "Actors/Character.h"
 
 IMPLEMENT_CLASS( AELPlayerController )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( AELPlayerController )
 
 /*
 ==================

@@ -42,8 +42,8 @@ CActorPropertiesWindow::OnTick
 */
 void CActorPropertiesWindow::OnTick()
 {
-	const ImVec2&		itemSpacing = ImGui::GetStyle().ItemSpacing;
-	if ( objectFields.empty() && componentsFields.empty() )
+	const ImVec2&	itemSpacing = ImGui::GetStyle().ItemSpacing;
+	if ( actorProperties.IsEmpty() && componentsProperties.empty() )
 	{
 		return;
 	}
@@ -53,23 +53,7 @@ void CActorPropertiesWindow::OnTick()
 	ImGui::Text( "Actor" );
 	ImGui::Separator();
 
-	for ( auto it = objectFields.begin(), itEnd = objectFields.end(); it != itEnd; ++it )
-	{
-		if ( it->second.empty() )
-		{
-			continue;
-		}
-
-		if ( ImGui::CollapsingHeader( it->first.c_str(), ImGuiTreeNodeFlags_DefaultOpen ) )
-		{
-			for ( auto itObj = it->second.begin(), itObjEnd = it->second.end(); itObj != itObjEnd; ++itObj )
-			{
-				ImGui::Dummy( ImVec2( itemSpacing.x, 0.f ) );
-				ImGui::SameLine();
-				( *itObj ).Tick();
-			}
-		}
-	}
+	actorProperties.Tick( itemSpacing.x );
 
 	// Components properties
 	ImGui::Dummy( ImVec2( 0, itemSpacing.y ) );
@@ -77,36 +61,160 @@ void CActorPropertiesWindow::OnTick()
 	ImGui::Text( "Components" );
 	ImGui::Separator();
 
-	for ( auto itComponent = componentsFields.begin(), itComponentEnd = componentsFields.end(); itComponent != itComponentEnd; ++itComponent )
+	for ( auto itComponent = componentsProperties.begin(), itComponentEnd = componentsProperties.end(); itComponent != itComponentEnd; ++itComponent )
 	{
-		if ( itComponent->second.empty() )
+		if ( ImGui::CollapsingHeader( TCHAR_TO_ANSI( itComponent->first.ToString().c_str() ) ) )
 		{
+			itComponent->second.Tick( itemSpacing.x, true );
+		}
+	}
+}
+
+/*
+==================
+CActorPropertiesWindow::GetAllPropertiesFromObject
+==================
+*/
+void CActorPropertiesWindow::GetAllPropertiesFromObject( CObject* InObject, CObjectProperties& OutObjectProperties, std::unordered_map<CName, CObjectProperties, CName::SHashFunction>& OutComponentsProperties ) const
+{
+	// Get all properties of object
+	Assert( InObject );
+	if ( InObject->GetNumProperties() == 0 )
+	{
+		return;
+	}
+
+	// Get all object's properties
+	std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>&	objectProperties = OutObjectProperties.GetProperties();
+	{
+		std::vector<CProperty*>		tempProperties;
+		InObject->GetProperties( tempProperties );
+		for ( uint32 index = 0, count = tempProperties.size(); index < count; ++index )
+		{
+			CProperty*		property = tempProperties[index];
+			objectProperties[property->GetCategory()].push_back( property );
+		}
+	}
+
+	// Get all properties from components
+	for ( auto itObjectProperties = objectProperties.begin(); itObjectProperties != objectProperties.end(); )
+	{
+		std::vector<CProperty*>&		properties = itObjectProperties->second;
+		for ( uint32 index = 0; index < properties.size(); )
+		{
+			CProperty*		property = properties[index];
+			if ( property->GetClass()->HasAnyCastFlags( CASTCLASS_CComponentProperty ) )
+			{
+				UPropertyValue	propertyValue;
+				property->GetPropertyValue( ( byte* )InObject, propertyValue );
+				Assert( propertyValue.componentValue );
+			
+				if ( propertyValue.componentValue->GetNumProperties() > 0 )
+				{
+					CObjectProperties&															componentProps = OutComponentsProperties.insert( std::make_pair( property->GetCName(), CObjectProperties() ) ).first->second;
+					std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>&	componentProperties = componentProps.GetProperties();
+					std::vector<CProperty*>														tempProperties;
+				
+					propertyValue.componentValue->GetProperties( tempProperties );
+					for ( uint32 compPropIdx = 0, count = tempProperties.size(); compPropIdx < count; ++compPropIdx )
+					{
+						CProperty*	compProperty = tempProperties[compPropIdx];
+						componentProperties[compProperty->GetCategory()].push_back( compProperty );
+					}
+
+					Assert( !tempProperties.empty() );
+					componentProps.GetObjects().push_back( propertyValue.componentValue );
+				}
+				properties.erase( properties.begin() + index );
+			}
+			else
+			{
+				++index;
+			}
+		}
+
+		if ( properties.empty() )
+		{
+			itObjectProperties = objectProperties.erase( itObjectProperties );
+		}
+		else
+		{
+			++itObjectProperties;
+		}
+	}
+
+	// If the array of object properties is not empty, then remember the pointer to it
+	if ( !objectProperties.empty() )
+	{
+		OutObjectProperties.GetObjects().push_back( InObject );
+	}
+}
+
+/*
+==================
+CActorPropertiesWindow::RemoveMissingProperties
+==================
+*/
+bool CActorPropertiesWindow::RemoveMissingProperties( const std::vector<CProperty*>& InArrayA, std::vector<CProperty*>& InOutArrayB ) const
+{
+	bool	bResult = false;
+	for ( uint32 propIdx = 0; propIdx < InOutArrayB.size(); )
+	{
+		bool		bFound = false;
+		CProperty*	property = InOutArrayB[propIdx];
+		for ( uint32 checkPropIdx = 0, countCheckProps = InArrayA.size(); checkPropIdx < countCheckProps; ++checkPropIdx )
+		{
+			if ( property == InArrayA[checkPropIdx] )
+			{
+				bFound = true;
+				break;
+			}
+		}
+
+		if ( !bFound )
+		{
+			InOutArrayB.erase( InOutArrayB.begin() + propIdx );
+		}
+		else
+		{
+			bResult = true;
+			++propIdx;
+		}
+	}
+
+	return bResult;
+}
+
+/*
+==================
+CActorPropertiesWindow::RemoveMissingProperties
+==================
+*/
+bool CActorPropertiesWindow::RemoveMissingProperties( const std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& InArrayA, std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& InOutArrayB ) const
+{
+	bool		bWereMatches = false;
+	for ( auto itBProperties = InOutArrayB.begin(); itBProperties != InOutArrayB.end(); )
+	{
+		auto	itAProperties = InArrayA.find( itBProperties->first );
+		if ( itAProperties == InArrayA.end() )
+		{
+			itBProperties = InOutArrayB.erase( itBProperties );
 			continue;
 		}
 
-		if ( ImGui::CollapsingHeader( itComponent->first.c_str() ) )
+		if ( RemoveMissingProperties( itAProperties->second, itBProperties->second ) )
 		{
-			for ( auto itCategory = itComponent->second.begin(), itCategoryEnd = itComponent->second.end(); itCategory != itCategoryEnd; ++itCategory )
-			{
-				if ( itCategory->second.empty() )
-				{
-					continue;
-				}
-
-				ImGui::Dummy( ImVec2( itemSpacing.x, 0.f ) );
-				ImGui::SameLine();
-				if ( ImGui::CollapsingHeader( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%s" ), ANSI_TO_TCHAR( itCategory->first.c_str() ), ANSI_TO_TCHAR( itComponent->first.c_str() ) ).c_str() ) ) )
-				{
-					for ( auto itObj = itCategory->second.begin(), itObjEnd = itCategory->second.end(); itObj != itObjEnd; ++itObj )
-					{
-						ImGui::Dummy( ImVec2( itemSpacing.x * 2, 0.f ) );
-						ImGui::SameLine();
-						( *itObj ).Tick();
-					}
-				}
-			}
+			bWereMatches = true;
+			++itBProperties;
+			continue;
+		}
+		else
+		{
+			itBProperties = InOutArrayB.erase( itBProperties );
 		}
 	}
+
+	return bWereMatches;
 }
 
 /*
@@ -117,8 +225,8 @@ CActorPropertiesWindow::OnActorsUnSelected
 void CActorPropertiesWindow::OnActorsUnSelected( const std::vector<ActorRef_t>& InActors )
 {
 	// Clear old object properties
-	objectFields.clear();
-	componentsFields.clear();
+	actorProperties.Clear();
+	componentsProperties.clear();
 
 	// Getting an array of selected actors (we ignore InActors because it may not contain all of the selected actors)
 	const std::vector<ActorRef_t>&						selectedActors = g_World->GetSelectedActors();
@@ -127,158 +235,160 @@ void CActorPropertiesWindow::OnActorsUnSelected( const std::vector<ActorRef_t>& 
 		return;
 	}
 
-	// Create a set to store the fields present in each actor
-	std::unordered_map<const SFieldDescription*, std::list<CObject*>>										commonFields;
-	std::unordered_map<std::string, std::unordered_map<const SFieldDescription*, std::list<CObject*>>>		commonComponentsFileds;
-
 	// Initialization of the set by the components of the first actor
-	{
-		ActorRef_t					actorZero = selectedActors[0];
-	
-		// Get all fields of actor
-		GetAllObjectFields( actorZero->GetDataDescMap(), actorZero, commonFields );
-	
-		// Get all fields of each component
-		const std::vector<ActorComponentRef_t>&			components = actorZero->GetComponents();
-		for ( uint32 index = 0, count = components.size(); index < count; ++index )
-		{
-			ActorComponentRef_t		component = components[index];
-			auto					it = commonComponentsFileds.insert( std::make_pair( TCHAR_TO_ANSI( component->GetName() ), std::unordered_map<const SFieldDescription*, std::list<CObject*>>() ) ).first;
-			GetAllObjectFields( component->GetDataDescMap(), component, it->second );
-		}
-	}
-	
+	GetAllPropertiesFromObject( selectedActors[0], actorProperties, componentsProperties );
+
 	// Checking for the presence of components in other actors
 	for ( uint32 actorIdx = 1, actorNum = selectedActors.size(); actorIdx < actorNum; ++actorIdx )
 	{
-		ActorRef_t																								actor = selectedActors[actorIdx];
-		std::unordered_map<const SFieldDescription*, std::list<CObject*>>										actorFields;
-		std::unordered_map<std::string, std::unordered_map<const SFieldDescription*, std::list<CObject*>>>		componentsFileds;
+		// Get all properties in the actor
+		ActorRef_t																		actor = selectedActors[actorIdx];
+		CObjectProperties																localActorProperties;
+		std::unordered_map<CName, CObjectProperties, CName::SHashFunction>				localComponentsProperties;
+		GetAllPropertiesFromObject( actor, localActorProperties, localComponentsProperties );
 
-		// Get all fields of actor
-		GetAllObjectFields( actor->GetDataDescMap(), actor, actorFields );
-	
-		// Get all fields of each component
-		const std::vector<ActorComponentRef_t>&			components = actor->GetComponents();
-		for ( uint32 index = 0, count = components.size(); index < count; ++index )
-		{
-			ActorComponentRef_t		component = components[index];
-			auto					it = componentsFileds.insert( std::make_pair( TCHAR_TO_ANSI( component->GetName() ), std::unordered_map<const SFieldDescription*, std::list<CObject*>>() ) ).first;
-			GetAllObjectFields( component->GetDataDescMap(), component, it->second );
-		}
-	
 		// Remove components that are not present in the current actor
-		for ( auto it = commonFields.begin(); it != commonFields.end(); )
+		// Actor properties
+		if ( RemoveMissingProperties( localActorProperties.GetProperties(), actorProperties.GetProperties() ) )
 		{
-			auto	itActorField = actorFields.find( it->first );
-			if ( itActorField == actorFields.end() )
+			actorProperties.GetObjects().push_back( actor );
+		}
+
+		// Components properties
+		for ( auto itComponentProps = componentsProperties.begin(); itComponentProps != componentsProperties.end(); )
+		{
+			auto	itActorComponentProps = localComponentsProperties.find( itComponentProps->first );
+			if ( itActorComponentProps == localComponentsProperties.end() )
 			{
-				it = commonFields.erase( it );
+				itComponentProps = componentsProperties.erase( itComponentProps );
 				continue;
 			}
-	
-			// If we found a component then add pointer to objects to common
-			for ( auto itActorObj = itActorField->second.begin(), itActorObjEnd = itActorField->second.end(); itActorObj != itActorObjEnd; ++itActorObj )
+
+			CObjectProperties&		globalObjectProperties = itComponentProps->second;
+			CObjectProperties&		localObjectProperties = itActorComponentProps->second;
+			bool					bWereMatches = RemoveMissingProperties( localObjectProperties.GetProperties(), globalObjectProperties.GetProperties() );
+			if ( bWereMatches )
 			{
-				it->second.push_back( *itActorObj );
-			}
-	
-			++it;
-		}
-
-		// TODO: BS yehor.pohuliaka - Need fix it
-		/*for ( auto itComponentMap = commonComponentsFileds.begin(); itComponentMap != commonComponentsFileds.end(); )
-		{
-			for ( auto it = itComponentMap->second.begin(); it != itComponentMap->second.end(); )
-			{
-				auto	itComponentField = itComponentMap->second.find( it->first );
-				if ( itComponentField == itComponentMap->second.end() )
-				{
-					it = itComponentMap->second.erase( it );
-					continue;
-				}
-
-				// If we found a component then add pointer to objects to common
-				for ( auto itComponentObj = itComponentField->second.begin(), itComponentObjEnd = itComponentField->second.end(); itComponentObj != itComponentObjEnd; ++itComponentObj )
-				{
-					it->second.push_back( *itComponentObj );
-				}
-
-				++it;
+				// Size array of objects in the local CObjectProperties must be 1, because it contain only one component
+				Assert( localObjectProperties.GetObjects().size() == 1 );
+				itComponentProps->second.GetObjects().push_back( localObjectProperties.GetObjects()[0] );
 			}
 
-			if ( itComponentMap->second.empty() )
+			// If array of component properties in the global CObjectProperties is empty then we remove it from array
+			if ( globalObjectProperties.GetProperties().empty() )
 			{
-				itComponentMap = commonComponentsFileds.erase( itComponentMap );
+				itComponentProps = componentsProperties.erase( itComponentProps );
 				continue;
 			}
 			else
 			{
-				++itComponentMap;
+				++itComponentProps;
 			}
-		}*/
-	}
-	
-	// Add actor fields to final map
-	for ( auto it = commonFields.begin(), itEnd = commonFields.end(); it != itEnd; ++it )
-	{
-		objectFields[it->first->category].push_back( CObjectField( it->first, it->second ) );
-	}
-
-	// Add components fields to final map
-	for ( auto itComponent = commonComponentsFileds.begin(), itComponentEnd = commonComponentsFileds.end(); itComponent != itComponentEnd; ++itComponent )
-	{
-		auto	newMapIt = componentsFields.insert( std::make_pair( itComponent->first, MapObjectFields_t() ) ).first;
-		for ( auto itField = itComponent->second.begin(), itFieldEnd = itComponent->second.end(); itField != itFieldEnd; ++itField )
-		{
-			newMapIt->second[itField->first->category].push_back( CObjectField( itField->first, itField->second ) );
 		}
+	}
+}
+
+
+/*
+==================
+CActorPropertiesWindow::CObjectProperties::SetPropertyValue
+==================
+*/
+void CActorPropertiesWindow::CObjectProperties::SetPropertyValue( CProperty* InProperty, const UPropertyValue& InPropertyValue )
+{
+	for ( uint32 objIdx = 0, countObjs = objects.size(); objIdx < countObjs; ++objIdx )
+	{
+		CObject*		object = objects[objIdx];
+		InProperty->SetPropertyValue( ( byte* )object, InPropertyValue );
+		object->PostEditChangeProperty( InProperty, PCT_ValueSet );
 	}
 }
 
 /*
 ==================
-CActorPropertiesWindow::CObjectField::Tick
+CActorPropertiesWindow::CObjectProperties::TickProperty
 ==================
 */
-void CActorPropertiesWindow::CObjectField::Tick()
+void CActorPropertiesWindow::CObjectProperties::TickProperty( CProperty* InProperty )
 {
-	if ( !field || objects.empty() )
-	{
-		return;
-	}
-	CObject*		objectZero = *objects.begin();
+	CObject*		objectZero = objects[0];
+	CClass*			theClass = InProperty->GetClass();
+	UPropertyValue	propertyValue;
 
-	switch ( field->type )
+	// Bool property
+	if ( theClass->HasAnyCastFlags( CASTCLASS_CBoolProperty ) )
 	{
-	case FT_Boolean:
-	{
-		bool	bValue = *DataMap::DataFieldAccess<bool>( objectZero, field );
-		if ( ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), ANSI_TO_TCHAR( field->name ), this ).c_str() ), &bValue) )
-		{
-			SetObjectValue( bValue );
-		}
-		break;
-	}
+		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
 
-	case FT_Float:
-	{
-		float	value = *DataMap::DataFieldAccess<float>( objectZero, field );
-		if ( ImGui::InputFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), ANSI_TO_TCHAR( field->name ), this ).c_str() ), &value ) )
+		ImGui::BeginDisabled( !objectZero->CanEditProperty( InProperty ) );
+		if ( ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), InProperty->GetCName().ToString().c_str(), this ).c_str() ), &propertyValue.boolValue ) )
 		{
-			SetObjectValue( value );
+			SetPropertyValue( InProperty, propertyValue );
 		}
-		break;
+		ImGui::EndDisabled();
 	}
 
-	case FT_Color:
+	// Float property
+	else if ( theClass->HasAnyCastFlags( CASTCLASS_CFloatProperty ) )
 	{
-		Vector4D	color = DataMap::DataFieldAccess<CColor>( objectZero, field )->ToNormalizedVector4D();
-		if ( ImGui::ColorPicker4( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), ANSI_TO_TCHAR( field->name ), this ).c_str() ), ( float* )&color ) )
+		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+
+		ImGui::BeginDisabled( !objectZero->CanEditProperty( InProperty ) );
+		if ( ImGui::InputFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), InProperty->GetCName().ToString().c_str(), this ).c_str() ), &propertyValue.floatValue ) )
 		{
-			SetObjectValue<CColor>( color );
+			SetPropertyValue( InProperty, propertyValue );
 		}
-		break;
+		ImGui::EndDisabled();
 	}
+
+	// Color property
+	else if ( theClass->HasAnyCastFlags( CASTCLASS_CColorProperty ) )
+	{
+		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		Vector4D	color = propertyValue.colorValue.ToNormalizedVector4D();
+
+		ImGui::BeginDisabled( !objectZero->CanEditProperty( InProperty ) );
+		if ( ImGui::ColorPicker4( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), InProperty->GetCName().ToString().c_str(), this ).c_str() ), ( float* )&color ) )
+		{
+			propertyValue.colorValue = color;
+			SetPropertyValue( InProperty, propertyValue );
+		}
+		ImGui::EndDisabled();
+	}
+
+	// Unknown property
+	else
+	{
+		ImGui::TextColored( ImVec4( 1.0f, 0.4f, 0.4f, 1.0f ), TCHAR_TO_ANSI( CString::Format( TEXT( "> Unknown type of '%s'" ), InProperty->GetCName().ToString().c_str() ).c_str() ) );
+	}
+}
+
+/*
+==================
+CActorPropertiesWindow::CObjectProperties::Tick
+==================
+*/
+void CActorPropertiesWindow::CObjectProperties::Tick( float InItemWidthSpacing, bool InApplySpacingToCategories /*= false*/ )
+{
+	for ( auto itCategory = properties.begin(), itCategoryEnd = properties.end(); itCategory != itCategoryEnd; ++itCategory )
+	{
+		if ( InApplySpacingToCategories )
+		{
+			ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
+			ImGui::SameLine();
+		}
+		
+		if ( ImGui::CollapsingHeader( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), itCategory->first.ToString().c_str(), this ).c_str() ) ) )
+		{ 
+			const std::vector<CProperty*>&		categoryProperties = itCategory->second;
+			for ( uint32 propIdx = 0, countProps = categoryProperties.size(); propIdx < countProps; ++propIdx )
+			{
+				CProperty*		property = categoryProperties[propIdx];
+				
+				ImGui::Dummy( ImVec2( InApplySpacingToCategories ? InItemWidthSpacing * 2.f : InItemWidthSpacing, 0.f ) );
+				ImGui::SameLine();
+				TickProperty( property );
+			}
+		}
 	}
 }

@@ -120,6 +120,20 @@ bool CName::operator==( const std::wstring& InOther ) const
 
 /*
 ==================
+CName::operator==
+==================
+*/
+bool CName::operator==( const tchar* InOther ) const
+{
+	// Calculate hash for string
+	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+	uint32								hash = Sys_CalcHash( CString::ToUpper( InOther ) );
+
+	return globalNameTable[IsValid() ? index : NAME_None].hash == hash;
+}
+
+/*
+==================
 CName::operator<<
 ==================
 */

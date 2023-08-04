@@ -54,6 +54,7 @@ enum ELifeEnginePackageVersion
 	VER_Mipmaps								= 22,					/**< Added mipmaps to textures */
 	VER_FixedSerializeComponents			= 23,					/**< Fixed serialization components in actors */
 	VER_NewSeriallizeDataInLightComponents	= 24,					/**< Added some properties to serialize in CLightComponent, CPointLightCompontn and CSpotLightComponent */
+	VER_CObjectHasCName						= 25,					/**< In CObject field 'name' changed to CName type */
 
 	//
 	// New versions can be added here

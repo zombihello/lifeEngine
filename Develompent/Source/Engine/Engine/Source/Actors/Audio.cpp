@@ -32,6 +32,16 @@ AAudio::~AAudio
 AAudio::~AAudio()
 {}
 
+/*
+==================
+AAudio::StaticInitializeClass
+==================
+*/
+void AAudio::StaticInitializeClass()
+{
+	new CComponentProperty( staticClass, TEXT( "audioComponent" ), TEXT( "Audio" ), TEXT( "Audio component" ), CPP_PROPERTY( audioComponent ), 0 );
+}
+
 #if WITH_EDITOR
 #include "Commandlets/CookPackagesCommandlet.h"
 

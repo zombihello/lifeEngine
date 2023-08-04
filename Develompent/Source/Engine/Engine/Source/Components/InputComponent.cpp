@@ -7,6 +7,7 @@
 #include "System/InputSystem.h"
 
 IMPLEMENT_CLASS( CInputComponent )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CInputComponent )
 
 /*
 ==================

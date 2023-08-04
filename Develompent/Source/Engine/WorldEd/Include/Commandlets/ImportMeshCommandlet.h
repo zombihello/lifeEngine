@@ -58,9 +58,9 @@ typedef std::unordered_map< uint32, std::vector< SAiMesh > >			AiMeshesMap_t;
   * @ingroup WorldEd
   * Commandlet for import mesh to engine
   */
-class CImportMeshCommandlet : public CBaseCommandlet
+class LE_DEPRECATED( 0.4.0, "CImportMeshCommandlet is deprecated, use CStaticMeshImporter." ) CImportMeshCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CImportMeshCommandlet, CBaseCommandlet )
+	DECLARE_CLASS( CImportMeshCommandlet, CBaseCommandlet, CLASS_Deprecated, 0 )
 
 public:
 	/**

@@ -2,6 +2,7 @@
 #include "Components/ActorComponent.h"
 
 IMPLEMENT_CLASS( CActorComponent )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CActorComponent )
 
 /*
 ==================

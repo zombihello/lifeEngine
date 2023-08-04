@@ -18,7 +18,7 @@
   */
 class CSceneComponent : public CActorComponent
 {
-	DECLARE_CLASS( CSceneComponent, CActorComponent )
+	DECLARE_CLASS( CSceneComponent, CActorComponent, 0, 0 )
 
 public:
 	/**
