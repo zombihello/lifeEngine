@@ -27,7 +27,7 @@ APointLight::StaticInitializeClass
 */
 void APointLight::StaticInitializeClass()
 {
-	new CComponentProperty( staticClass, TEXT( "pointLightComponent" ), TEXT( "Light" ), TEXT( "Point light component" ), CPP_PROPERTY( pointLightComponent ), 0 );
+	new CComponentProperty( staticClass, TEXT( "Point Light Component" ), TEXT( "Light" ), TEXT( "Point light component" ), CPP_PROPERTY( pointLightComponent ), 0 );
 }
 
 #if WITH_EDITOR

@@ -105,7 +105,9 @@ enum EImGuiColors
 	IGC_Asset_PhysicsMaterial,		/**< PhysicsMaterial asset */
 	IGC_TableBgColor0,				/**< Table background color 0 */
 	IGC_TableBgColor1,				/**< Table background color 1 */
-	IGC_Num
+	IGC_WarningColor,				/**< Warning color */
+	IGC_ErrorColor,					/**< Error color */
+	IGC_Num							/**< Number of ImGUI colors */
 };
 
 /**

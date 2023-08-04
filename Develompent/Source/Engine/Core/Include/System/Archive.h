@@ -59,7 +59,7 @@ public:
 	virtual void Serialize( void* InBuffer, uint32 InSize ) {}
 
 	/**
-	 * Serialize compression data
+	 * @brief Serialize compression data
 	 * 
 	 * @param[in] InBuffer Pointer to buffer for serialize
 	 * @param[in] InSize Size of buffer
@@ -68,7 +68,7 @@ public:
 	void SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionFlags InFlags );
 
 	/**
-	 * Serialize archive header
+	 * @brief Serialize archive header
 	 */
 	void SerializeHeader();
 
@@ -152,9 +152,9 @@ public:
 	}
 
 protected:
-	uint32					arVer;		/**< Archive version (look ELifeEnginePackageVersion) */
-	EArchiveType			arType;		/**< Archive type */
-	std::wstring			arPath;		/**< Path to archive */
+	uint32					arVer;			/**< Archive version (look ELifeEnginePackageVersion) */
+	EArchiveType			arType;			/**< Archive type */
+	std::wstring			arPath;			/**< Path to archive */
 };
 
 /**

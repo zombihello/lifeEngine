@@ -23,8 +23,8 @@ CSpotLightComponent::StaticInitializeClass
 */
 void CSpotLightComponent::StaticInitializeClass()
 {
-	new CFloatProperty( staticClass, TEXT( "radius" ), TEXT( "Light" ), TEXT( "Light radius" ), CPP_PROPERTY( radius ), 0 );
-	new CFloatProperty( staticClass, TEXT( "height" ), TEXT( "Light" ), TEXT( "Light height" ), CPP_PROPERTY( height ), 0 );
+	new CFloatProperty( staticClass, TEXT( "Radius" ), TEXT( "Light" ), TEXT( "Light radius" ), CPP_PROPERTY( radius ), 0 );
+	new CFloatProperty( staticClass, TEXT( "Height" ), TEXT( "Light" ), TEXT( "Light height" ), CPP_PROPERTY( height ), 0 );
 }
 
 /*
@@ -59,7 +59,7 @@ void CSpotLightComponent::PostEditChangeProperty( class CProperty* InProperty, E
 {
 	if ( InProperty )
 	{
-		if ( InProperty->GetCName() == TEXT( "radius" ) || InProperty->GetCName() == TEXT( "height" ) )
+		if ( InProperty->GetCName() == TEXT( "Radius" ) || InProperty->GetCName() == TEXT( "Height" ) )
 		{
 			bNeedUpdateCutoff = true;
 		}

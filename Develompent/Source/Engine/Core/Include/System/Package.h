@@ -425,7 +425,7 @@ private:
 
 /**
  * @ingroup Core
- * Base class for serialize assets in package
+ * @brief Base class for serialize assets in package
  */
 class CAsset : public TSharedFromThis<CAsset>
 {
@@ -438,26 +438,26 @@ public:
 	typedef std::unordered_set< TAssetHandle<CAsset>, TAssetHandle<CAsset>::SHashFunction >		SetDependentAssets_t;
 
 	/**
-	 * Constructor
+	 * @brief Constructor
 	 * 
 	 * @param[in] InType Asset type
 	 */
 	CAsset( EAssetType InType );
 
 	/**
-	 * Destructor
+	 * @brief Destructor
 	 */
 	virtual ~CAsset();
 
 	/**
-	 * Serialize
+	 * @brief Serialize
 	 * 
 	 * @param[in] InArchive Archive
 	 */
 	virtual void Serialize( class CArchive& InArchive );
 
 	/**
-	 * Set asset name
+	 * @brief Set asset name
 	 * 
 	 * @param[in] InName Asset name
 	 */
@@ -465,7 +465,7 @@ public:
 
 #if WITH_EDITOR
 	/**
-	 * Set path to asset source file
+	 * @brief Set path to asset source file
 	 * @param InPath		Path to asset source file
 	 */
 	FORCEINLINE void SetAssetSourceFile( const std::wstring& InPath )
@@ -478,7 +478,7 @@ public:
 	}
 
 	/**
-	 * Set this asset only for editor
+	 * @brief Set this asset only for editor
 	 * @param InIsOnlyEditor	Is asset only for editor
 	 */
 	FORCEINLINE void SetOnlyEditor( bool InIsOnlyEditor )
@@ -492,7 +492,7 @@ public:
 #endif // WITH_EDITOR
 
 	/**
-	 * Is dirty asset
+	 * @brief Is dirty asset
 	 * @return Return TRUE if asset is dirty, else return FALSE
 	 */
 	FORCEINLINE bool IsDirty() const
@@ -501,7 +501,7 @@ public:
 	}
 
 	/**
-	 * Get asset type
+	 * @brief Get asset type
 	 * @return Return asset type
 	 */
 	FORCEINLINE EAssetType GetType() const
@@ -510,7 +510,7 @@ public:
 	}
 
 	/**
-	 * Get GUID of asset
+	 * @brief Get GUID of asset
 	 * @return Return GUID of asset
 	 */
 	FORCEINLINE const CGuid& GetGUID() const
@@ -519,7 +519,7 @@ public:
 	}
 
 	/**
-	 * Get name asset
+	 * @brief Get name asset
 	 * @return Return name asset
 	 */
 	FORCEINLINE const std::wstring& GetAssetName() const
@@ -528,7 +528,7 @@ public:
 	}
 
 	/**
-	 * Get package
+	 * @brief Get package
 	 * @return Return package where the asset is located. If asset not located in package return nullptr
 	 */
 	class CPackage* GetPackage() const
@@ -537,20 +537,20 @@ public:
 	}
 
 	/**
-	 * Get reference to asset
+	 * @brief Get reference to asset
 	 * @return Return struct info for reference to asset
 	 */
 	SAssetReference GetAssetReference() const;
 
 	/**
-	 * Get asset handle
+	 * @brief Get asset handle
 	 * @return Return asset handle
 	 */
 	TAssetHandle<CAsset> GetAssetHandle() const;
 
 #if WITH_EDITOR
 	/**
-	 * Get path to asset source file
+	 * @brief Get path to asset source file
 	 * @return Return path to asset source file
 	 */
 	FORCEINLINE const std::wstring& GetAssetSourceFile() const
@@ -559,7 +559,7 @@ public:
 	}
 
 	/**
-	 * Is asset only for editor
+	 * @brief Is asset only for editor
 	 * @return Return TRUE if this asset only for editor
 	 */
 	FORCEINLINE bool IsOnlyEditor() const
@@ -569,24 +569,29 @@ public:
 #endif // WITH_EDITOR
 
 	/**
-	 * Get dependent assets
+	 * @brief Get dependent assets
 	 * @param OutDependentAssets	Output set of dependent assets
 	 * @param InFilter				Filter of getting assets by type. If setted AT_Unknown return all types
 	 */
 	virtual void GetDependentAssets( SetDependentAssets_t& OutDependentAssets, EAssetType InFilter = AT_Unknown ) const;
 
 	/**
-	 * Reload dependent assets
+	 * @brief Reload dependent assets
 	 * @param InForce	Is need force reload assets
 	 */
 	virtual void ReloadDependentAssets( bool InForce = false );
 
 protected:
 	/**
-	 * Mark dirty asset
+	 * @brief Mark dirty asset
 	 * @note When changing serializable fields, child classes should mark themselves as dirty
 	 */
 	void MarkDirty();
+
+	/**
+	 * @brief Fully load asset. This function called by CPackage::FullyLoad() for load ALL data
+	 */
+	virtual void OnFullyLoad();
 
 private:
 	bool							bDirty;				/**< Is asset is dirty */

@@ -39,7 +39,7 @@ CSpriteComponent::StaticInitializeClass
 void CSpriteComponent::StaticInitializeClass()
 {
 	new CBoolProperty( staticClass, TEXT( "bFlipVertical" ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by vertical" ), CPP_PROPERTY( bFlipVertical ), 0 );
-	new CFloatProperty( staticClass, TEXT( "bFlipHorizontal" ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPP_PROPERTY( bFlipHorizontal ), 0 );
+	new CBoolProperty( staticClass, TEXT( "bFlipHorizontal" ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPP_PROPERTY( bFlipHorizontal ), 0 );
 	// TODO BS yehor.pohuliaka - Need implement CNameProperty for enums
 }
 
@@ -72,6 +72,31 @@ void CSpriteComponent::Serialize( class CArchive& InArchive )
 		SetFlipHorizontal( bFlipHorizontal );
     }
 }
+
+#if WITH_EDITOR
+/*
+==================
+CSpriteComponent::PostEditChangeProperty
+==================
+*/
+void CSpriteComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+{
+	if ( InProperty )
+	{
+		CName		nameProperty = InProperty->GetCName();
+		if ( nameProperty == TEXT( "bFlipVertical" ) )
+		{
+			SetFlipVertical( bFlipVertical );
+		} 
+		else if ( nameProperty == TEXT( "bFlipHorizontal" ) )
+		{
+			SetFlipHorizontal( bFlipHorizontal );
+		}
+	}
+
+	Super::PostEditChangeProperty( InProperty, InChangeType );
+}
+#endif // WITH_EDITOR
 
 /*
 ==================

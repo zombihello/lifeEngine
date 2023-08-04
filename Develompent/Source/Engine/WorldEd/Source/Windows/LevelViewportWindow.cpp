@@ -385,12 +385,12 @@ void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 					if ( bControlDown && actor->IsSelected() )
 					{
 						g_World->UnselectActor( actor );
-						Logf( TEXT( "(%f;%f) Unselected actor '%s'\n" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName() );
+						Logf( TEXT( "(%f;%f) Unselected actor '%s'\n" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName().c_str() );
 					}
 					else
 					{
 						g_World->SelectActor( actor );
-						Logf( TEXT( "(%f;%f) Selected actor '%s'\n" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName() );
+						Logf( TEXT( "(%f;%f) Selected actor '%s'\n" ), viewportCursorPos.x, viewportCursorPos.y, actor->GetName().c_str() );
 					}
 				}
 			}

@@ -51,6 +51,16 @@ public:
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
 
+#if WITH_EDITOR
+	/**
+	 * @brief Function called by the editor when property is changed
+	 *
+	 * @param InProperty    Property
+	 * @param InChangeType  Change type
+	 */
+	virtual void PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType ) override;
+#endif // WITH_EDITOR
+
     /**
      * @brief Set sprite type
      *

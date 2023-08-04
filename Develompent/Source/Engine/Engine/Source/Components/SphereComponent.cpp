@@ -35,7 +35,7 @@ CSphereComponent::StaticInitializeClass
 */
 void CSphereComponent::StaticInitializeClass()
 {
-	new CFloatProperty( staticClass, TEXT( "radius" ), TEXT( "Primitive" ), TEXT( "Radius of sphere" ), CPP_PROPERTY( radius ), 0 );
+	new CFloatProperty( staticClass, TEXT( "Radius" ), TEXT( "Primitive" ), TEXT( "Radius of sphere" ), CPP_PROPERTY( radius ), 0 );
 	// TODO BS yehor.pohuliaka - Need implement CAssetProperty for asset references
 }
 

@@ -618,6 +618,8 @@ void CImGUIEngine::InitTheme()
 	styleColors[IGC_Asset_PhysicsMaterial]	= ImVec4( 0.78f, 0.75f, 0.5f, 1.f );
 	styleColors[IGC_TableBgColor0]			= ImGui::ColorConvertU32ToFloat4( CColor( 26.f, 27.f, 28.f ).GetUInt32Color() );
 	styleColors[IGC_TableBgColor1]			= ImGui::ColorConvertU32ToFloat4( CColor( 32.f, 35.f, 36.f ).GetUInt32Color() );
+	styleColors[IGC_WarningColor]			= ImVec4( 1.0f, 0.8f, 0.6f, 1.0f );
+	styleColors[IGC_ErrorColor]				= ImVec4( 1.0f, 0.4f, 0.4f, 1.0f );
 
 }
 

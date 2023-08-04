@@ -121,6 +121,14 @@ void CAsset::MarkDirty()
 
 /*
 ==================
+CAsset::OnFullyLoad
+==================
+*/
+void CAsset::OnFullyLoad()
+{}
+
+/*
+==================
 CAsset::GetDependentAssets
 ==================
 */
@@ -422,6 +430,7 @@ void CPackage::FullyLoad( std::vector< TAssetHandle<CAsset> >& OutAssetArray )
 		TAssetHandle<CAsset>		asset = LoadAsset( *archive, itAsset->first, assetInfo );
 		if ( asset.IsAssetValid() )
 		{
+			asset.ToSharedPtr()->OnFullyLoad();
 			OutAssetArray.push_back( asset );
 		}
 		else

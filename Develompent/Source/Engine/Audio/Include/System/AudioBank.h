@@ -52,24 +52,24 @@ class CAudioBank : public CAsset, public TSharedFromThis<CAudioBank>
 {
 public:
 	/**
-	 * Constructor
+	 * @brief Constructor
 	 */
 	CAudioBank();
 
 	/**
-	 * Destructor
+	 * @brief Destructor
 	 */
 	~CAudioBank();
 
 	/**
-	 * Serialize
+	 * @brief Serialize
 	 *
 	 * @param[in] InArchive Archive
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
-	 * Open bank
+	 * @brief Open bank
 	 * 
 	 * @param OutBankInfo Output parameter, return info about bank
 	 * @return Return handle of opened bank. If failed return nullptr
@@ -77,7 +77,7 @@ public:
 	AudioBankHandle_t OpenBank( SAudioBankInfo& OutBankInfo );
 
 	/**
-	 * Close bank
+	 * @brief Close bank
 	 * 
 	 * @param InBankHandle Handle to opened bank
 	 */
@@ -87,7 +87,7 @@ public:
 	} 
 
 	/**
-	 * Read PCM from bank
+	 * @brief Read PCM from bank
 	 * 
 	 * @param InBankHandle Handle to opened bank
 	 * @param InSamples Pointer to destination buffer
@@ -97,7 +97,7 @@ public:
 	uint64 ReadBankPCM( AudioBankHandle_t InBankHandle, byte* InSamples, uint64 InMaxSize );
 
 	/**
-	 * Seek PCM in bank
+	 * @brief Seek PCM in bank
 	 * 
 	 * @param InBankHandle Handle to opened bank
 	 * @param InSampleOffset Offset in PCM of bank
@@ -105,7 +105,7 @@ public:
 	void SeekBankPCM( AudioBankHandle_t InBankHandle, uint64 InSampleOffset );
 
 	/**
-	 * Get PCM offset in bank
+	 * @brief Get PCM offset in bank
 	 * 
 	 * @param InBankHandle Handle to opened bank
 	 * @return Return current offset PCM in bank
@@ -113,7 +113,7 @@ public:
 	uint64 GetOffsetBankPCM( AudioBankHandle_t InBankHandle ) const;
 
 	/**
-	 * Set OGG file for this bank
+	 * @brief Set OGG file for this bank
 	 * This method takes an Ogg/Vorbis file, which it decodes and applies in the audio engine
 	 *
 	 * @param InPath Path to Ogg/Vorbis file
@@ -121,7 +121,7 @@ public:
 	void SetOGGFile( const std::wstring& InPath );
 
 	/**
-	 * Is empty bank
+	 * @brief Is empty bank
 	 * @return Return true if bank is empty, else return false
 	 */
 	FORCEINLINE bool IsEmpty() const
@@ -130,14 +130,14 @@ public:
 	}
 
 	/**
-	 * Get audio buffer
+	 * @brief Get audio buffer
 	 * @return Return audio buffer, if failed return nullptr
 	 */
 	AudioBufferRef_t GetAudioBuffer();
 
 #if WITH_EDITOR
 	/**
-	 * Get delegate of event when audio bank is updated
+	 * @brief Get delegate of event when audio bank is updated
 	 * @return Return delegate of event when audio bank is updated
 	 */
 	FORCEINLINE COnAudioBankUpdated& OnAudioBankUpdated() const
@@ -148,18 +148,24 @@ public:
 
 private:
 	/**
-	 * Close bank. Internal implementation
+	 * @brief Close bank. Internal implementation
 	 *
 	 * @param InBankHandle			Handle to opened bank
 	 * @param InNeedFreeFromList	If setted TRUE method remove item of opened handle from 'openedHandles'
 	 */
 	void CloseBankInternal( AudioBankHandle_t InBankHandle, bool InNeedFreeFromList = true );
 
+	/**
+	 * @brief Fully load asset. This function called by CPackage::FullyLoad() for load ALL data
+	 */
+	virtual void OnFullyLoad() override;
+
 	uint64							offsetToRawData;	/**< Offset in archive to raw data */
 	uint64							rawDataSize;		/**< Size in bytes of raw data */
 	std::wstring					pathToArchive;		/**< Path to archive */
 	AudioBufferRef_t				audioBuffer;		/**< Audio buffer with fully loaded bank. Used only by CAudioSource */
 	std::list<AudioBankHandle_t>	openedHandles;		/**< List opened handles of this audio bank */
+	std::vector<byte>				rawData;			/**< Raw data of the bank */
 
 #if WITH_EDITOR
 	mutable COnAudioBankUpdated		onAudioBankUpdated;	/**< Event when audio bank is updated */

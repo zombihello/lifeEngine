@@ -1,5 +1,7 @@
 #include "Containers/StringConv.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/UIGlobals.h"
+#include "ImGUI/ImGUIEngine.h"
 #include "System/ConsoleSystem.h"
 #include "Windows/LogsWindow.h"
 #include "ImGUI/imgui_stdlib.h"
@@ -34,12 +36,12 @@ void CLogsWindow::OnTick()
 			switch ( logInfo.type )
 			{
 			case LT_Warning:
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.8f, 0.6f, 1.0f ) );
+				ImGui::PushStyleColor( ImGuiCol_Text, g_ImGUIEngine->GetStyleColor( IGC_WarningColor ) );
 				bHasColor = true;
 				break;
 
 			case LT_Error:
-				ImGui::PushStyleColor( ImGuiCol_Text, ImVec4( 1.0f, 0.4f, 0.4f, 1.0f ) );
+				ImGui::PushStyleColor( ImGuiCol_Text, g_ImGUIEngine->GetStyleColor( IGC_ErrorColor ) );
 				bHasColor = true;
 				break;
 			}

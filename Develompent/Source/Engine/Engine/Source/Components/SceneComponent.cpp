@@ -25,7 +25,7 @@ CSceneComponent::StaticInitializeClass
 */
 void CSceneComponent::StaticInitializeClass()
 {
-	new CTransformProperty( staticClass, TEXT( "transform" ), TEXT( "Drawing" ), TEXT( "Transform of component" ), CPP_PROPERTY( transform ), 0 );
+	new CTransformProperty( staticClass, TEXT( "Transform" ), TEXT( "Drawing" ), TEXT( "Transform of component" ), CPP_PROPERTY( transform ), 0 );
 }
 
 /*

@@ -6,6 +6,7 @@
 #include "Misc/CoreGlobals.h"
 #include "System/BaseFileSystem.h"
 #include "System/AudioBufferManager.h"
+#include "System/MemoryArchive.h"
 #include "Logger/LoggerMacros.h"
 #include "System/AudioBank.h"
 
@@ -165,6 +166,7 @@ void CAudioBank::Serialize( class CArchive& InArchive )
 	// If archive loaded, we remembre offset to raw data and seek it
 	if ( InArchive.IsLoading() && rawDataSize > 0 )
 	{
+		rawData.clear();
 		offsetToRawData		= InArchive.Tell();
 		pathToArchive		= InArchive.GetPath();
 		InArchive.Seek( offsetToRawData + rawDataSize );
@@ -178,15 +180,29 @@ void CAudioBank::Serialize( class CArchive& InArchive )
 	// Save OGG file to archive if rawDataSize more then 0
 	else if ( rawDataSize > 0 )
 	{
-		std::vector<byte>		rawData;
-		rawData.resize( rawDataSize );
-
-		CArchive*				archive = g_FileSystem->CreateFileReader( pathToArchive, AR_NoFail );	
-		archive->Seek( offsetToRawData );
-		archive->Serialize( rawData.data(), rawDataSize );
-		delete archive;
-
+		Assert( !rawData.empty() );
 		InArchive.Serialize( rawData.data(), rawDataSize );
+	}
+}
+
+/*
+==================
+CAudioBank::OnFullyLoad
+==================
+*/
+void CAudioBank::OnFullyLoad()
+{
+	CAsset::OnFullyLoad();
+	
+	if ( rawDataSize > 0 && rawData.empty() )
+	{
+		CArchive*	archive = g_FileSystem->CreateFileReader( pathToArchive, AR_NoFail );
+		archive->Seek( offsetToRawData );		
+		rawData.resize( rawDataSize );
+		archive->Serialize( rawData.data(), rawDataSize );
+		
+		offsetToRawData = 0;
+		delete archive;
 	}
 }
 
@@ -213,7 +229,14 @@ AudioBankHandle_t CAudioBank::OpenBank( SAudioBankInfo& OutBankInfo )
 
 	// Init descriptor for read OGG/Vorbis from memory
 	SArchiveOGGRawData*			oggRawDataDesc = new SArchiveOGGRawData();
-	oggRawDataDesc->archive		= g_FileSystem->CreateFileReader( pathToArchive );
+	if ( rawData.empty() )
+	{
+		oggRawDataDesc->archive = g_FileSystem->CreateFileReader( pathToArchive );
+	}
+	else
+	{
+		oggRawDataDesc->archive = new CMemoryReading( rawData );
+	}
 	oggRawDataDesc->beginOffset	= offsetToRawData;
 	oggRawDataDesc->endOffset	= offsetToRawData + rawDataSize;
 
@@ -387,9 +410,14 @@ void CAudioBank::SetOGGFile( const std::wstring& InPath )
 	}
 
 	// Update info about raw data
+	rawData.clear();
 	offsetToRawData		= 0;
 	pathToArchive		= InPath;
 	rawDataSize			= archive->GetSize();
+
+	// Serialize new data
+	rawData.resize( rawDataSize );
+	archive->Serialize( rawData.data(), rawDataSize );
 
 	// Mark dirty asset and close archive
 	MarkDirty();
