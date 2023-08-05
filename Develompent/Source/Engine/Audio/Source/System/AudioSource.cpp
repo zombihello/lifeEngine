@@ -351,8 +351,8 @@ void CAudioSource::OnAudioDeviceMuted( bool InIsAudioDeviceMuted )
 	}
 	else if ( !InIsAudioDeviceMuted && bMuted )
 	{
-		Play();
 		bMuted = false;
+		Play();
 	}
 }
 
