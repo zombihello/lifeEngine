@@ -2,6 +2,7 @@
 #if WITH_IMGUI
 
 #include "ImGUI/imgui.h"
+#include "ImGUI/imgui_internal.h"
 
 #include "Core.h"
 #include "Containers/StringConv.h"
@@ -620,7 +621,15 @@ void CImGUIEngine::InitTheme()
 	styleColors[IGC_TableBgColor1]			= ImGui::ColorConvertU32ToFloat4( CColor( 32.f, 35.f, 36.f ).GetUInt32Color() );
 	styleColors[IGC_WarningColor]			= ImVec4( 1.0f, 0.8f, 0.6f, 1.0f );
 	styleColors[IGC_ErrorColor]				= ImVec4( 1.0f, 0.4f, 0.4f, 1.0f );
-
+	styleColors[IGC_AxisXColor]				= ImVec4( 0.8f, 0.1f, 0.15f, 1.f );
+	styleColors[IGC_AxisYColor]				= ImVec4( 0.1f, 0.25f, 0.8f, 1.f );
+	styleColors[IGC_AxisZColor]				= ImVec4( 0.2f, 0.7f, 0.2f, 1.f );
+	styleColors[IGC_AxisXColor_Hovered]		= ImVec4( 0.9f, 0.2f, 0.25f, 1.f );
+	styleColors[IGC_AxisYColor_Hovered]		= ImVec4( 0.2f, 0.35f, 0.9f, 1.f );
+	styleColors[IGC_AxisZColor_Hovered]		= ImVec4( 0.3f, 0.8f, 0.3f, 1.f );
+	styleColors[IGC_AxisXColor_Active]		= styleColors[IGC_AxisXColor];
+	styleColors[IGC_AxisYColor_Active]		= styleColors[IGC_AxisYColor];
+	styleColors[IGC_AxisZColor_Active]		= styleColors[IGC_AxisZColor];
 }
 
 /*
@@ -779,55 +788,6 @@ void CImGUIEngine::EndDraw()
 		( *it )->ReleaseRef();
 	}
 	lockedTextures.clear();
-}
-
-namespace ImGui
-{
-	/*
-	==================
-	ImGui::ImageButton
-	==================
-	*/
-	bool ImageButton( ImTextureID InTextureID, bool InIsSelected, const ImVec2& InSize )
-	{
-		if ( InIsSelected )
-		{
-			ImGui::PushStyleColor( ImGuiCol_Button,			g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonActive,	g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
-		}
-		
-		bool	bRet = ImageButton( InTextureID, InSize );
-		
-		if ( InIsSelected )
-		{
-			ImGui::PopStyleColor( 3 );
-		}
-		return bRet;
-	}
-
-	/*
-	==================
-	ImGui::Button
-	==================
-	*/
-	bool Button( const char* InLabel, bool InIsSelected, const ImVec2& InSize /*= ImVec2( 0.f, 0.f )*/ )
-	{
-		if ( InIsSelected )
-		{
-			ImGui::PushStyleColor( ImGuiCol_Button,			g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonHovered,	g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
-			ImGui::PushStyleColor( ImGuiCol_ButtonActive,	g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
-		}
-		
-		bool	bRet = Button( InLabel, InSize );
-		
-		if ( InIsSelected )
-		{
-			ImGui::PopStyleColor( 3 );
-		}
-		return bRet;
-	}
 }
 
 #endif // WITH_IMGUI

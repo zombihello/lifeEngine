@@ -97,9 +97,10 @@ private:
 		/**
 		 * @brief Tick property (draw and handle it's events)
 		 * 
-		 * @param InProperty	Property
+		 * @param InItemWidthSpacing	Item spacing by width
+		 * @param InProperty			Property
 		 */
-		void TickProperty( CProperty* InProperty );
+		void TickProperty( float InItemWidthSpacing, CProperty* InProperty );
 
 		/**
 		 * @brief Set property value

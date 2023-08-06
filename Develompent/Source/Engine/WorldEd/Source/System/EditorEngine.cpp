@@ -318,6 +318,7 @@ CEditorEngine::LoadMap
 */
 bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
+	g_World->UnselectAllActors();
 	if ( !Super::LoadMap( InMap, OutError ) )
 	{
 		Warnf( TEXT( "Failed loading map '%s'. Error: %s\n" ), InMap.c_str(), OutError.c_str() );

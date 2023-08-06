@@ -74,11 +74,23 @@ void CAudioComponent::Serialize( class CArchive& InArchive )
 	// If we archive loading - init audio source
 	if ( InArchive.IsLoading() )
 	{
-		UpdateAudioSourceType();
-		if ( source && bIsAutoPlay )
+		// Init first location of audio source and update it type
+		if ( !bIsUISound )
 		{
-			source->Play();
+			oldSourceLocation = GetComponentLocation();
 		}
+		else
+		{
+			oldSourceLocation = SMath::vectorZero;
+		}
+		UpdateAudioSourceType();
+
+#if WITH_EDITOR
+		if ( g_IsEditor && bIsAutoPlay )
+		{
+			Play();
+		}
+#endif // WITH_EDITOR
 	}
 }
 
@@ -96,17 +108,6 @@ void CAudioComponent::BeginPlay()
 	{
 		Play();
 	}
-
-	// Init first location of audio source
-	if ( !bIsUISound )
-	{
-		oldSourceLocation = GetComponentLocation();
-	}
-	else
-	{
-		oldSourceLocation = SMath::vectorZero;
-	}
-	source->SetLocation( oldSourceLocation );
 }
 
 /*

@@ -25,6 +25,7 @@
 #include "ImGUI/imgui.h"
 #include "RHI/TypesRHI.h"
 #include "ImGUI/ImGUIIcons.h"
+#include "ImGUI/ImGUIExtension.h"
 
 /**
  * @ingroup UI
@@ -64,31 +65,6 @@ void Sys_ImGUIEndDrawing();
  */
 void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent );
 
-namespace ImGui
-{
-	/**
-	 * @ingroup UI
-	 * @brief ImGui help function for draw ImageButton with selection opportunity
-	 * 
-	 * @param InTextureID	Texture ID
-	 * @param InIsSelected	Is selected button
-	 * @param InSize		Imgae button size
-	 * @return Return TRUE if image button is pressed (same behavior as original ImGui::ImageButton)
-	 */
-	bool ImageButton( ImTextureID InTextureID, bool InIsSelected, const ImVec2& InSize );
-
-	/**
-	 * @ingroup UI
-	 * @brief ImGui help function for draw Button with selection opportunity
-	 *
-	 * @param InLabel		Label
-	 * @param InIsSelected	Is selected button
-	 * @param InSize		Imgae button size
-	 * @return Return TRUE if button is pressed (same behavior as original ImGui::Button)
-	 */
-	bool Button( const char* InLabel, bool InIsSelected, const ImVec2& InSize = ImVec2( 0.f, 0.f ) );
-}
-
 /**
  * @ingroup UI
  * @brief Enumeration of ImGUI style colors
@@ -107,6 +83,15 @@ enum EImGuiColors
 	IGC_TableBgColor1,				/**< Table background color 1 */
 	IGC_WarningColor,				/**< Warning color */
 	IGC_ErrorColor,					/**< Error color */
+	IGC_AxisXColor,					/**< Color of X axis */
+	IGC_AxisYColor,					/**< Color of Y axis */
+	IGC_AxisZColor,					/**< Color of Z axis */
+	IGC_AxisXColor_Hovered,			/**< Color of X axis when hovered */
+	IGC_AxisYColor_Hovered,			/**< Color of Y axis when hovered */
+	IGC_AxisZColor_Hovered,			/**< Color of Z axis when hovered */
+	IGC_AxisXColor_Active,			/**< Color of X axis when is active */
+	IGC_AxisYColor_Active,			/**< Color of Y axis when is active */
+	IGC_AxisZColor_Active,			/**< Color of Z axis when is active */
 	IGC_Num							/**< Number of ImGUI colors */
 };
 

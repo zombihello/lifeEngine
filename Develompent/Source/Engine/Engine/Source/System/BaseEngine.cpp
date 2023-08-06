@@ -228,6 +228,7 @@ CBaseEngine::Tick
 */
 void CBaseEngine::Tick( float InDeltaSeconds )
 {
+	g_World->Tick( InDeltaSeconds );
 	g_UIEngine->Tick( InDeltaSeconds );
 	g_PhysicsEngine.Tick( InDeltaSeconds );
 }

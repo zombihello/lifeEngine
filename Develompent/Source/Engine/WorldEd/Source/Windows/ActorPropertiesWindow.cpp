@@ -1,7 +1,11 @@
 #include "Containers/StringConv.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/WorldEdGlobals.h"
+#include "Misc/UIGlobals.h"
 #include "System/World.h"
+#include "ImGUI/ImGUIEngine.h"
 #include "Windows/ActorPropertiesWindow.h"
+#include "System/EditorEngine.h"
 
 /*
 ==================
@@ -309,57 +313,116 @@ void CActorPropertiesWindow::CObjectProperties::SetPropertyValue( CProperty* InP
 CActorPropertiesWindow::CObjectProperties::TickProperty
 ==================
 */
-void CActorPropertiesWindow::CObjectProperties::TickProperty( CProperty* InProperty )
+void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthSpacing, CProperty* InProperty )
 {
+	bool			bPropertyIsChanged = false;
 	CObject*		objectZero = objects[0];
 	CClass*			theClass = InProperty->GetClass();
 	UPropertyValue	propertyValue;
 
+	// Draw name of property
+	ImGui::TableNextColumn();
+	ImGui::BeginDisabled( !objectZero->CanEditProperty( InProperty ) );
+	ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
+	ImGui::SameLine();
+	ImGui::Text( TCHAR_TO_ANSI( InProperty->GetCName().ToString().c_str() ) );
+	if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+	{
+		ImGui::SetTooltip( TCHAR_TO_ANSI( InProperty->GetDescription().c_str() ) );
+	}
+	ImGui::TableNextColumn();
+
+	// Draw value of property
 	// Bool property
 	if ( theClass->HasAnyCastFlags( CASTCLASS_CBoolProperty ) )
 	{
 		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-
-		ImGui::BeginDisabled( !objectZero->CanEditProperty( InProperty ) );
-		if ( ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), InProperty->GetCName().ToString().c_str(), this ).c_str() ), &propertyValue.boolValue ) )
-		{
-			SetPropertyValue( InProperty, propertyValue );
-		}
-		ImGui::EndDisabled();
+		bPropertyIsChanged = ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &propertyValue.boolValue );	
 	}
 
 	// Float property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CFloatProperty ) )
 	{
 		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-
-		ImGui::BeginDisabled( !objectZero->CanEditProperty( InProperty ) );
-		if ( ImGui::InputFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), InProperty->GetCName().ToString().c_str(), this ).c_str() ), &propertyValue.floatValue ) )
-		{
-			SetPropertyValue( InProperty, propertyValue );
-		}
-		ImGui::EndDisabled();
+		bPropertyIsChanged = ImGui::InputFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &propertyValue.floatValue );
 	}
 
 	// Color property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CColorProperty ) )
 	{
 		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		
 		Vector4D	color = propertyValue.colorValue.ToNormalizedVector4D();
-
-		ImGui::BeginDisabled( !objectZero->CanEditProperty( InProperty ) );
-		if ( ImGui::ColorPicker4( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), InProperty->GetCName().ToString().c_str(), this ).c_str() ), ( float* )&color ) )
+		if ( ImGui::ColorEdit4( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), ( float* )&color, ImGuiColorEditFlags_NoInputs ) )
 		{
 			propertyValue.colorValue = color;
-			SetPropertyValue( InProperty, propertyValue );
+			bPropertyIsChanged = true;
+		}	
+	}
+
+	// Vector property
+	else if ( theClass->HasAnyCastFlags( CASTCLASS_CVectorProperty ) )
+	{
+		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), propertyValue.vectorValue, 0.f );
+	}
+
+	// Transform property
+	else if ( theClass->HasAnyCastFlags( CASTCLASS_CTrasformProperty ) )
+	{
+		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+
+		// Location
+		if ( ImGui::TreeNodeEx( "Location", ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen ) )
+		{
+			Vector		location = propertyValue.transformValue.GetLocation();
+			bool		bChangedLocation = ImGui::DragVectorFloat( CString::Format( TEXT( "%s_Location_%p" ), InProperty->GetName().c_str(), this ), location, 0.f, 0.1f );
+			if ( bChangedLocation )
+			{
+				propertyValue.transformValue.SetLocation( location );
+				bPropertyIsChanged |= bChangedLocation;
+			}
+			ImGui::TreePop();
 		}
-		ImGui::EndDisabled();
+
+		// Rotation
+		if ( ImGui::TreeNodeEx( "Rotation", ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen ) )
+		{
+			Vector		rotation = SMath::QuaternionToAngles( propertyValue.transformValue.GetRotation() );
+			bool		bChangedRotation = ImGui::DragVectorFloat( CString::Format( TEXT( "%s_Rotation_%p" ), InProperty->GetName().c_str(), this ), rotation, 0.f, 0.1f );
+			if ( bChangedRotation )
+			{
+				propertyValue.transformValue.SetRotation( SMath::AnglesToQuaternionXYZ( rotation ) );
+				bPropertyIsChanged |= bChangedRotation;
+			}
+			ImGui::TreePop();
+		}
+
+		// Scale
+		if ( ImGui::TreeNodeEx( "Scale", ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen ) )
+		{
+			Vector			scale = propertyValue.transformValue.GetScale();
+			bool			bChangedScale = ImGui::DragVectorFloat( CString::Format( TEXT( "%s_Scale_%p" ), InProperty->GetName().c_str(), this ), scale, 1.f, 0.1f );
+			if ( bChangedScale )
+			{
+				propertyValue.transformValue.SetScale( scale );
+				bPropertyIsChanged |= bChangedScale;
+			}
+			ImGui::TreePop();
+		}
 	}
 
 	// Unknown property
 	else
 	{
-		ImGui::TextColored( ImVec4( 1.0f, 0.4f, 0.4f, 1.0f ), TCHAR_TO_ANSI( CString::Format( TEXT( "> Unknown type of '%s'" ), InProperty->GetCName().ToString().c_str() ).c_str() ) );
+		ImGui::TextColored( g_ImGUIEngine->GetStyleColor( IGC_ErrorColor ), TCHAR_TO_ANSI( CString::Format( TEXT( "Unknown type of '%s'" ), InProperty->GetCName().ToString().c_str() ).c_str() ) );
+	}
+	ImGui::EndDisabled();
+
+	if ( bPropertyIsChanged )
+	{
+		SetPropertyValue( InProperty, propertyValue );
+		g_World->MarkDirty();
 	}
 }
 
@@ -370,24 +433,34 @@ CActorPropertiesWindow::CObjectProperties::Tick
 */
 void CActorPropertiesWindow::CObjectProperties::Tick( float InItemWidthSpacing, bool InApplySpacingToCategories /*= false*/ )
 {
+	float		currentSpacing = InItemWidthSpacing;
 	for ( auto itCategory = properties.begin(), itCategoryEnd = properties.end(); itCategory != itCategoryEnd; ++itCategory )
 	{
 		if ( InApplySpacingToCategories )
 		{
 			ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
+			currentSpacing = InItemWidthSpacing * 2.f;
 			ImGui::SameLine();
 		}
 		
-		if ( ImGui::CollapsingHeader( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), itCategory->first.ToString().c_str(), this ).c_str() ) ) )
-		{ 
-			const std::vector<CProperty*>&		categoryProperties = itCategory->second;
-			for ( uint32 propIdx = 0, countProps = categoryProperties.size(); propIdx < countProps; ++propIdx )
+		if ( ImGui::CollapsingHeader( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), itCategory->first.ToString().c_str(), this ).c_str() ), ImGuiTreeNodeFlags_DefaultOpen ) )
+		{
+			ImGui::Dummy( ImVec2( currentSpacing, 0.f ) );
+			ImGui::SameLine();
+			
+			if ( ImGui::BeginTable( TCHAR_TO_ANSI( CString::Format( TEXT( "##TableObjectProperties_%p" ), this ).c_str() ), 2, ImGuiTableFlags_Resizable  ) )
 			{
-				CProperty*		property = categoryProperties[propIdx];
-				
-				ImGui::Dummy( ImVec2( InApplySpacingToCategories ? InItemWidthSpacing * 2.f : InItemWidthSpacing, 0.f ) );
-				ImGui::SameLine();
-				TickProperty( property );
+				const std::vector<CProperty*>&		categoryProperties = itCategory->second;
+				for ( uint32 propIdx = 0, countProps = categoryProperties.size(); propIdx < countProps; ++propIdx )
+				{
+					CProperty*		property = categoryProperties[propIdx];
+					
+					ImGui::TableNextRow();
+					ImGui::TableSetBgColor( ImGuiTableBgTarget_RowBg0, !( propIdx % 2 ) ? ImGui::ColorConvertFloat4ToU32( g_ImGUIEngine->GetStyleColor( IGC_TableBgColor0 ) ) : ImGui::ColorConvertFloat4ToU32( g_ImGUIEngine->GetStyleColor( IGC_TableBgColor1 ) ) );
+					TickProperty( currentSpacing + InItemWidthSpacing / 10.f, property );
+				}
+
+				ImGui::EndTable();
 			}
 		}
 	}

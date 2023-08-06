@@ -10,6 +10,9 @@
 - [ ] Implement particle system
 - [ ] Implement support UI in the game
 - [ ] Implement base AI
+- [ ] Implement rendering translucent geometry
+- [ ] Fix rendering masked materials with prepass
+- [ ] Fix rendering the editor grid without prepass
 
  # Version 0.4.0 :: Now	
 - [X] Migrate WorldEd's interface from Qt to ImGUI

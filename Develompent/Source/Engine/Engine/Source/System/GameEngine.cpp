@@ -62,7 +62,6 @@ CGameEngine::Tick
 void CGameEngine::Tick( float InDeltaSeconds )
 {
 	Super::Tick( InDeltaSeconds );
-	g_World->Tick( InDeltaSeconds );
 	viewport.Tick( InDeltaSeconds );
 
 	// Wait while render thread is rendering of the frame
