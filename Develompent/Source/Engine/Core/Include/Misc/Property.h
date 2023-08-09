@@ -11,7 +11,7 @@
 
 #include "Misc/Object.h"
 #include "Math/Color.h"
-#include "Math/Transform.h"
+#include "Math/Rotator.h"
 #include "Misc/RefCountPtr.h"
 #include "System/Name.h"
 
@@ -59,7 +59,7 @@ union UPropertyValue
 	CColor						colorValue;			/**< Color */
 	class CActorComponent*		componentValue;		/**< Component */
 	Vector						vectorValue;		/**< Vector */
-	CTransform					transformValue;		/**< Transform */
+	CRotator					rotatorValue;		/**< Rotator */
 };
 
 /**
@@ -565,17 +565,17 @@ public:
 
 /**
  * @ingroup Core
- * @brief Transform property
+ * @brief Rotator property
  */
-class CTransformProperty : public CProperty
+class CRotatorProperty : public CProperty
 {
-	DECLARE_CLASS( CTransformProperty, CProperty, 0, CASTCLASS_CTrasformProperty )
+	DECLARE_CLASS( CRotatorProperty, CProperty, 0, CASTCLASS_CRotatorProperty )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
-	CTransformProperty() {}
+	CRotatorProperty() {}
 
 	/**
 	 * @brief Constructor
@@ -588,7 +588,7 @@ public:
 	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 */
-	CTransformProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
+	CRotatorProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
 		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
 	{}
 

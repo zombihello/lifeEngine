@@ -484,6 +484,17 @@ struct SMath
 	}
 
 	/**
+	 * @brief Normalize quaternion
+	 *
+	 * @param InQuat	Quaternion
+	 * @return Return normalized quaternion
+	 */
+	static FORCEINLINE Quaternion NormalizeQuaternion( const Quaternion& InQuat )
+	{
+		return glm::normalize( InQuat );
+	}
+
+	/**
 	 * @brie Length vector
 	 * 
 	 * @param InVector Vector
@@ -837,11 +848,24 @@ struct SMath
 				Abs( InValue.w ) < InErrorTolerance;
 	}
 
+	/**
+	 * @brief Calculates the floating-point remainder
+	 * 
+	 * @param InX	Value X
+	 * @param InY	Value Y
+	 * @return Returns the floating-point remainder of InX / InY
+	 */
+	static FORCEINLINE float Fmod( float InX, float InY )
+	{
+		return fmod( InX, InY );
+	}
+
 	static const Vector				vectorZero;			/**< Zero 3D vector */
 	static const Vector				vectorOne;			/**< One 3D vector */
 	static const Quaternion			quaternionZero;		/**< Quaternion zero */
+	static const class CRotator		rotatorZero;		/**< Rotator zero */
 	static const Matrix				matrixIdentity;		/**< Identity matrix */
-	static const struct CTransform	transformZero;		/**< Transform zero */
+	static const class CTransform	transformZero;		/**< Transform zero */
 	static const Vector				vectorForward;		/**< Forward vector */
 	static const Vector				vectorRight;		/**< Right vector */
 	static const Vector				vectorUp;			/**< Up vector */

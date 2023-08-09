@@ -542,7 +542,7 @@ DECLARE_MULTICAST_DELEGATE( COnActorDestroyed, class AActor* );
 
 /**
  * @ingroup Engine
- * Base class of all actors in world
+ * @brief Base class of all actors in world
  */
 class AActor : public CObject, public CRefCounted
 {
@@ -550,29 +550,29 @@ class AActor : public CObject, public CRefCounted
 
 public:
 	/**
-	 * Constructor
+	 * @brief Constructor
 	 */
 	AActor();
 
 	/**
-	 * Destructor
+	 * @brief Destructor
 	 */
 	virtual ~AActor();
 
 	/**
-	 * Overridable native event for when play begins for this actor
+	 * @brief Overridable native event for when play begins for this actor
 	 */
 	virtual void BeginPlay();
 
 	/**
-	 * Overridable native event for when end play for this actor
+	 * @brief Overridable native event for when end play for this actor
 	 */
 	virtual void EndPlay();
 
 	/**
-	 * Function called every frame on this Actor. Override this function to implement custom logic to be executed every frame.
+	 * @brief Function called every frame on this Actor. Override this function to implement custom logic to be executed every frame.
 	 * 
-	 * @param[in] InDeltaTime The time since the last tick.
+	 * @param InDeltaTime	The time since the last tick.
 	 */
 	virtual void Tick( float InDeltaTime );
 
@@ -633,7 +633,7 @@ public:
 #endif // WITH_EDITOR
 
 	/**
-	 * Get array of owned components
+	 * @brief Get array of owned components
 	 * @return Return array owned components
 	 */
 	FORCEINLINE const std::vector< ActorComponentRef_t >& GetComponents() const
@@ -642,9 +642,9 @@ public:
 	}
 
 	/**
-	 * Adds a delta to the location of this actor in world space
+	 * @brief Adds a delta to the location of this actor in world space
 	 * 
-	 * @param[in] InDeltaLocation Delta location
+	 * @param InDeltaLocation	Delta location
 	 */
 	FORCEINLINE void AddActorLocation( const Vector& InDeltaLocation )
 	{
@@ -653,20 +653,31 @@ public:
 	}
 
 	/**
-	 * Adds a delta to the rotation of this actor in world space
+	 * @brief Adds a delta to the rotation of this actor in world space
 	 * 
-	 * @param[in] InDeltaRotation Delta rotation
+	 * @param InDeltaRotation	Delta rotation
 	 */
 	FORCEINLINE void AddActorRotation( const Quaternion& InDeltaRotation )
 	{
 		if ( !rootComponent )	return;
-		rootComponent->AddRelativeRotate( InDeltaRotation );
+		rootComponent->AddRelativeRotation( InDeltaRotation );
 	}
 
 	/**
-	 * Adds a delta to the scale of this actor in world space
+	 * @brief Adds a delta to the rotation of this actor in world space
+	 *
+	 * @param InDeltaRotation	Delta rotation
+	 */
+	FORCEINLINE void AddActorRotation( const CRotator& InDeltaRotation )
+	{
+		if ( !rootComponent )	return;
+		rootComponent->AddRelativeRotation( InDeltaRotation );
+	}
+
+	/**
+	 * @brief Adds a delta to the scale of this actor in world space
 	 * 
-	 * @param[in] InDeltaScale Delta scale
+	 * @param InDeltaScale	Delta scale
 	 */
 	FORCEINLINE void AddActorScale( const Vector& InDeltaScale )
 	{
@@ -675,9 +686,9 @@ public:
 	}
 
 	/**
-	 * Set actor location in world space
+	 * @brief Set actor location in world space
 	 * 
-	 * @param[in] InNewLocation New actor location
+	 * @param InNewLocation		New actor location
 	 */
 	FORCEINLINE void SetActorLocation( const Vector& InNewLocation )
 	{
@@ -686,9 +697,9 @@ public:
 	}
 
 	/**
-	 * Set actor rotation in world space
+	 * @brief Set actor rotation in world space
 	 * 
-	 * @param[in] InNewRotation New actor rotation
+	 * @param InNewRotation		New actor rotation
 	 */
 	FORCEINLINE void SetActorRotation( const Quaternion& InNewRotation )
 	{
@@ -697,9 +708,20 @@ public:
 	}
 
 	/**
-	 * Set actor scale in world space
+	 * @brief Set actor rotation in world space
+	 *
+	 * @param InNewRotation		New actor rotation
+	 */
+	FORCEINLINE void SetActorRotation( const CRotator& InNewRotation )
+	{
+		if ( !rootComponent )	return;
+		rootComponent->SetRelativeRotation( InNewRotation );
+	}
+
+	/**
+	 * @brief Set actor scale in world space
 	 * 
-	 * @param[in] InNewScale New actor scale
+	 * @param InNewScale	New actor scale
 	 */
 	FORCEINLINE void SetActorScale( const Vector& InNewScale )
 	{
@@ -708,7 +730,7 @@ public:
 	}
 
 	/**
-	 * Set static actor
+	 * @brief Set static actor
 	 * @param InIsStatic Is actor static
 	 */
 	FORCEINLINE void SetStatic( bool InIsStatic )
@@ -719,7 +741,7 @@ public:
 
 #if ENABLE_HITPROXY
 	/**
-	 * Set hit proxy id
+	 * @brief Set hit proxy id
 	 * @param InIndex	Index
 	 */
 	FORCEINLINE void SetHitProxyId( uint32 InIndex )
@@ -728,7 +750,7 @@ public:
 	}
 
 	/**
-	 * Get hit proxy id
+	 * @brief Get hit proxy id
 	 * @return Return hit proxy id
 	 */
 	FORCEINLINE const CHitProxyId& GetHitProxyId() const
@@ -739,7 +761,7 @@ public:
 
 #if WITH_EDITOR
 	/**
-	 * Set selected actor
+	 * @brief Set selected actor
 	 * @param InIsSelected	Is selected this actor
 	 */
 	FORCEINLINE void SetSelected( bool InIsSelected )
@@ -748,7 +770,7 @@ public:
 	}
 
 	/**
-	 * Is selected actor
+	 * @brief Is selected actor
 	 * @return Return TRUE if actor is selected, else returning FALSE
 	 */
 	FORCEINLINE bool IsSelected() const
@@ -777,7 +799,7 @@ public:
 	}
 
 	/**
-	 * Get actor location in world space
+	 * @brief Get actor location in world space
 	 * @return Return actor location, if root component is not valid return zero vector
 	 */
 	FORCEINLINE Vector GetActorLocation() const
@@ -786,16 +808,25 @@ public:
 	}
 
 	/**
-	 * Get actor rotation in world space
+	 * @brief Get actor rotation in world space
 	 * @return Return actor rotation, if root component is not valid return zero rotator
 	 */
-	FORCEINLINE Quaternion GetActorRotation() const
+	FORCEINLINE CRotator GetActorRotation() const
 	{
 		return rootComponent ? rootComponent->GetComponentRotation() : SMath::quaternionZero;
 	}
 
 	/**
-	 * Get actor scale in world space
+	 * @brief Get actor's quaternion rotation in world space
+	 * @return Return actor's quaternion rotation, if root component is not valid return zero quaternion
+	 */
+	FORCEINLINE Quaternion GetActorQuat() const
+	{
+		return rootComponent ? rootComponent->GetComponentQuat() : SMath::quaternionZero;
+	}
+
+	/**
+	 * @brief Get actor scale in world space
 	 * @return Return actor scale, if root component is not valid return one vector
 	 */
 	FORCEINLINE Vector GetActorScale() const
@@ -804,7 +835,7 @@ public:
 	}
 
 	/**
-	 * Get actor transform in world space
+	 * @brief Get actor transform in world space
 	 * @return Return actor transform, if root component is not valid return zero transform
 	 */
 	FORCEINLINE CTransform GetActorTransform() const
@@ -813,43 +844,67 @@ public:
 	}
 
 	/**
-	 * Get actor forward vector
+	 * @brief Get actor forward vector
 	 * @return Return actor forward vector
 	 */
 	FORCEINLINE Vector GetActorForwardVector() const
 	{
-		return rootComponent ? rootComponent->GetComponentForwardVector() : SMath::vectorForward;
+		if ( !rootComponent )
+		{
+			return SMath::vectorForward;
+		}
+		else
+		{
+			const CTransform&	componentTransform = rootComponent->GetComponentTransform();
+			return componentTransform.GetUnitAxis( A_Z );
+		}
 	}
 
 	/**
-	 * Get actor right vector
+	 * @brief Get actor right vector
 	 * @return Return actor right vector
 	 */
 	FORCEINLINE Vector GetActorRightVector() const
 	{
-		return rootComponent ? rootComponent->GetComponentRightVector() : SMath::vectorRight;
+		if ( !rootComponent )
+		{
+			return SMath::vectorForward;
+		}
+		else
+		{
+			const CTransform&	componentTransform = rootComponent->GetComponentTransform();
+			return componentTransform.GetUnitAxis( A_X );
+		}
 	}
 
 	/**
-	 * Get actor up vector
+	 * @brief Get actor up vector
 	 * @return Return actor up vector
 	 */
 	FORCEINLINE Vector GetActorUpVector() const
 	{
-		return rootComponent ? rootComponent->GetComponentUpVector() : SMath::vectorUp;
+		if ( !rootComponent )
+		{
+			return SMath::vectorForward;
+		}
+		else
+		{
+			const CTransform&	componentTransform = rootComponent->GetComponentTransform();
+			return componentTransform.GetUnitAxis( A_Y );
+		}
 	}
 
 	/**
-	 * Get collision component
+	 * @brief Get collision component
 	 * @return Return collision component. If not exist return nullptr
 	 */
-	FORCEINLINE TRefCountPtr< CPrimitiveComponent > GetCollisionComponent() const
+	FORCEINLINE TRefCountPtr<CPrimitiveComponent> GetCollisionComponent() const
 	{
 		return collisionComponent;
 	}
 
 	/**
-	 * Is static actor
+	 * @brief Is static actor
 	 * @return Return true if actor is static, else return false
 	 */
 	FORCEINLINE bool IsStatic() const
@@ -858,7 +913,7 @@ public:
 	}
 
 	/**
-	 * Is this actor has begun the destruction process
+	 * @brief Is this actor has begun the destruction process
 	 * @return Return TRUE if this actor has begun destruction, or if this actor has been destroyed already
 	 */
 	FORCEINLINE bool IsPendingKill() const
@@ -867,7 +922,7 @@ public:
 	}
 
 	/**
-	 * Is actor playing
+	 * @brief Is actor playing
 	 * @return Return TRUE if actor is playing, else returning FALSE
 	 */
 	FORCEINLINE bool IsPlaying() const
@@ -877,20 +932,20 @@ public:
 
 protected:
 	/**
-	 * Create component and add to array of owned components
+	 * @brief Create component and add to array of owned components
 	 * If creating CSceneComponent, if RootComponent is nullptr, automatic new component setted to root
 	 *
-	 * @param[in] InClass Class component
-	 * @param[in] InName Name component
-	 * @param[in] InEditorOnly Is editor only component
+	 * @param InClass		Class component
+	 * @param InName		Name component
+	 * @param InEditorOnly	Is editor only component
 	 * @return Return pointer to component
 	 */
 	ActorComponentRef_t CreateComponent( CClass* InClass, const tchar* InName, bool InEditorOnly = false );
 
 	/**
-	 * Create component and add to array of owned components
+	 * @brief Create component and add to array of owned components
 	 *
-	 * @param[in] InName Name component
+	 * @param InName	Name component
 	 * @return Return pointer to component
 	 */
 	template< typename TClass >
@@ -901,24 +956,24 @@ protected:
 	}
 
 	/**
-	 * Puts a component in to the OwnedComponents array of the Actor
-	 * @param[in] InComponent Component
+	 * @brief Puts a component in to the OwnedComponents array of the Actor
+	 * @param InComponent	Component
 	 */
 	void AddOwnedComponent( class CActorComponent* InComponent );
 
 	/**
-	 * Removes a component from the OwnedComponents array of the Actor
-	 * @param[in] InComponent Component
+	 * @brief Removes a component from the OwnedComponents array of the Actor
+	 * @param InComponent	Component
 	 */
 	void RemoveOwnedComponent( class CActorComponent* InComponent );
 
 	/**
-	 * Clear array owned components
+	 * @brief Clear array owned components
 	 */
 	void ResetOwnedComponents();
 
 	/**
-	 * Get event when actor is destroyed
+	 * @brief Get event when actor is destroyed
 	 * @return Return event when actor is destroyed
 	 */
 	FORCEINLINE COnActorDestroyed& OnActorDestroyed() const

@@ -74,7 +74,7 @@ CCameraComponent::GetCameraView
 void CCameraComponent::GetCameraView( SCameraView& OutDesiredView )
 {
 	OutDesiredView.location			= GetComponentLocation();
-	OutDesiredView.rotation			= GetComponentRotation();
+	OutDesiredView.rotation			= GetComponentQuat();
 	OutDesiredView.aspectRatio		= aspectRatio;
 	OutDesiredView.farClipPlane		= farClipPlane;
 	OutDesiredView.fov				= fieldOfView;

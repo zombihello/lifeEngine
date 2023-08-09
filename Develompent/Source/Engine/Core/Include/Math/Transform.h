@@ -15,16 +15,16 @@
 
 /**
  * @ingroup Core
- * @brief Struct for work with transform
+ * @brief Class for work with transform
  */
-struct CTransform
+class CTransform
 {
 public:
 	friend CArchive& operator<<( CArchive& InArchive, CTransform& InValue );
 	friend CArchive& operator<<( CArchive& InArchive, const CTransform& InValue );
 
 	/**
-	 * Constructor with initialization to the identity transform
+	 * @brief Constructor with initialization to the identity transform
 	 */
 	FORCEINLINE CTransform() 
 		: bDirtyMatrix( true )
@@ -35,9 +35,9 @@ public:
 	{}
 
 	/**
-	 * Constructor with an initial translation
+	 * @brief Constructor with an initial translation
 	 * 
-	 * @param[in] InTranslation The value to use for the translation component
+	 * @param InTranslation		The value to use for the translation component
 	 */
 	FORCEINLINE explicit CTransform( const Vector& InTranslation ) 
 		: bDirtyMatrix( true )
@@ -48,9 +48,9 @@ public:
 	{}
 
 	/**
-	 * Constructor with an initial rotation
+	 * @brief Constructor with an initial rotation
 	 * 
-	 * @param[in] InRotation The value to use for rotation component
+	 * @param InRotation	The value to use for rotation component
 	 */
 	FORCEINLINE explicit CTransform( const Quaternion& InRotation ) 
 		: bDirtyMatrix( true )
@@ -61,11 +61,11 @@ public:
 	{}
 
 	/**
-	 * Constructor with all components initialized
+	 * @brief Constructor with all components initialized
 	 * 
-	 * @param[in] InRotation The value to use for rotation component
-	 * @param[in] InTranslation The value to use for the translation component
-	 * @param[in] InScale The value to use for the scale component
+	 * @param InRotation	The value to use for rotation component
+	 * @param InTranslation The value to use for the translation component
+	 * @param InScale		The value to use for the scale component
 	 */
 	FORCEINLINE CTransform( const Quaternion& InRotation, const Vector& InTranslation, const Vector& InScale = SMath::vectorOne ) 
 		: bDirtyMatrix( true )
@@ -76,15 +76,15 @@ public:
 	{}
 
 	/**
-	 * Constructor with leaving uninitialized memory
+	 * @brief Constructor with leaving uninitialized memory
 	 */
 	FORCEINLINE explicit CTransform( ENoInit )
 	{}
 
 	/**
-	 * Copy translation from another CTransform
+	 * @brief Copy translation from another CTransform
 	 * 
-	 * @param[in] InOther Another transform
+	 * @param InOther	Another transform
 	 */
 	FORCEINLINE void CopyTranslation( const CTransform& InOther )
 	{
@@ -93,9 +93,9 @@ public:
 	}
 
 	/**
-	 * Adjusts the translation component of this transformation
+	 * @brief Adjusts the translation component of this transformation
 	 * 
-	 * @param[in] InDeltaTranslation The translation to add in the following fashion: Translation += InDeltaTranslation
+	 * @param InDeltaTranslation	The translation to add in the following fashion: Translation += InDeltaTranslation
 	 */
 	FORCEINLINE void AddToTranslation( const Vector& InDeltaTranslation )
 	{
@@ -104,9 +104,9 @@ public:
 	}
 
 	/**
-	 * Subtract from the translation component of this transformation
+	 * @brief Subtract from the translation component of this transformation
 	 *
-	 * @param[in] InDeltaTranslation Delta translation
+	 * @param InDeltaTranslation	Delta translation
 	 */
 	FORCEINLINE void SubtractFromTranslation( const Vector& InDeltaTranslation )
 	{
@@ -115,9 +115,9 @@ public:
 	}
 
 	/**
-	 * Add another rotation to this transformation 
+	 * @brief Add another rotation to this transformation 
 	 * 
-	 * @param[in] InDeltaRotation The rotation to add in the following fashion: Rotation = Rotation * DeltaRotation
+	 * @param InDeltaRotation	The rotation to add in the following fashion: Rotation = Rotation * DeltaRotation
 	 */
 	FORCEINLINE void AddToRotation( const Quaternion& InDeltaRotation )
 	{
@@ -126,9 +126,9 @@ public:
 	}
 
 	/**
-	 * Subtract another rotation from this transformation
+	 * @brief Subtract another rotation from this transformation
 	 *
-	 * @param[in] InDeltaRotation Delta rotation
+	 * @param InDeltaRotation	Delta rotation
 	 */
 	FORCEINLINE void SubtractFromRotation( const Quaternion& InDeltaRotation )
 	{
@@ -137,9 +137,9 @@ public:
 	}
 
 	/**
-	 * Adjusts the scale component of this transformation
+	 * @brief Adjusts the scale component of this transformation
 	 * 
-	 * @param[in] InDeltaScale The scale to add in the following fashion: Scale += InDeltaScale
+	 * @param InDeltaScale	The scale to add in the following fashion: Scale += InDeltaScale
 	 */
 	FORCEINLINE void AddToScale( const Vector& InDeltaScale )
 	{
@@ -148,9 +148,9 @@ public:
 	}
 
 	/**
-	 * Subtract from the scale component of this transformation
+	 * @brief Subtract from the scale component of this transformation
 	 *
-	 * @param[in] InDeltaScale Delta scale
+	 * @param InDeltaScale	Delta scale
 	 */
 	FORCEINLINE void SubtractFromScale( const Vector& InDeltaScale )
 	{
@@ -159,9 +159,9 @@ public:
 	}
 
 	/**
-	 * Copy rotation from another CTransform
+	 * @brief Copy rotation from another CTransform
 	 * 
-	 * @param[in] InOther Another transform
+	 * @param InOther	Another transform
 	 */
 	FORCEINLINE void CopyRotation( const CTransform& InOther )
 	{
@@ -170,9 +170,9 @@ public:
 	}
 
 	/**
-	 * Copy scale from another CTransform
+	 * @brief Copy scale from another CTransform
 	 * 
-	 * @param[in] InOther Another transform
+	 * @param InOther	Another transform
 	 */
 	FORCEINLINE void CopyScale( const CTransform& InOther )
 	{
@@ -181,9 +181,9 @@ public:
 	}
 
 	/**
-	 * Add transform to transform
+	 * @brief Add transform to transform
 	 * 
-	 * @param[in] InOther Another transform
+	 * @param InOther	Another transform
 	 */
 	FORCEINLINE void Add( const CTransform& InOther )
 	{
@@ -194,9 +194,9 @@ public:
 	}
 
 	/**
-	 * Subtract transform from transform
+	 * @brief Subtract transform from transform
 	 * 
-	 * @param[in] InOther Another transform
+	 * @param InOther	Another transform
 	 */
 	FORCEINLINE void Subtract( const CTransform& InOther )
 	{
@@ -209,7 +209,7 @@ public:
 	/**
 	 * Rotate vector
 	 * 
-	 * @param[in] InVector Vector
+	 * @param InVector 	Vector
 	 * @return Return rotated vector
 	 */
 	FORCEINLINE Vector RotateVector( const Vector& InVector ) const
@@ -220,7 +220,7 @@ public:
 	/**
 	 * @brief Compare transform without scale
 	 *
-	 * @param InOtherTransform Other transform
+	 * @param InOtherTransform	Other transform
 	 * @return Return true if equal with InOtherTransform, else returning false
 	 */
 	FORCEINLINE bool MatchesNoScale( const CTransform& InOtherTransform ) const
@@ -231,7 +231,7 @@ public:
 	/**
 	 * @brief Compare transform
 	 *
-	 * @param InOtherTransform Other transform
+	 * @param InOtherTransform	Other transform
 	 * @return Return true if equal with InOtherTransform, else returning false
 	 */
 	FORCEINLINE bool Matches( const CTransform& InOtherTransform ) const
@@ -242,7 +242,7 @@ public:
 	/**
 	 * Set location
 	 * 
-	 * @param[in] InLocation New location
+	 * @param InLocation	New location
 	 */
 	FORCEINLINE void SetLocation( const Vector& InLocation )
 	{
@@ -251,9 +251,9 @@ public:
 	}
 
 	/**
-	 * Set rotation
+	 * @brief Set rotation
 	 * 
-	 * @param[in] InRotation New rotation
+	 * @param InRotation	New rotation
 	 */
 	FORCEINLINE void SetRotation( const Quaternion& InRotation )
 	{
@@ -262,9 +262,9 @@ public:
 	}
 
 	/**
-	 * Set scale
+	 * @brief Set scale
 	 * 
-	 * @param[in] InScale New scale
+	 * @param InScale	New scale
 	 */
 	FORCEINLINE void SetScale( const Vector& InScale )
 	{
@@ -273,7 +273,7 @@ public:
 	}
 
 	/**
-	 * Set identity
+	 * @brief Set identity
 	 */
 	FORCEINLINE void SetIdentity()
 	{
@@ -284,9 +284,9 @@ public:
 	}
 
 	/**
-	 * Get unit axis
+	 * @brief Get unit axis
 	 * 
-	 * @param[in] InAxis Axis
+	 * @param InAxis	Axis
 	 * @return Return unit axis, if InAxis = A_None return SMath::vectorZero
 	 */
 	FORCEINLINE Vector GetUnitAxis( EAxis InAxis ) const
@@ -302,7 +302,7 @@ public:
 	}
 
 	/**
-	 * Get location
+	 * @brief Get location
 	 * @return Return location of transform
 	 */
 	FORCEINLINE Vector GetLocation() const
@@ -311,7 +311,7 @@ public:
 	}
 
 	/**
-	 * Get rotation
+	 * @brief Get rotation
 	 * @return Return rotation of transform
 	 */
 	FORCEINLINE Quaternion GetRotation() const
@@ -320,7 +320,7 @@ public:
 	}
 
 	/**
-	 * Get scale
+	 * @brief Get scale
 	 * @return Return scale of transform
 	 */
 	FORCEINLINE Vector GetScale() const
@@ -329,7 +329,7 @@ public:
 	}
 
 	/**
-	 * Convert transform to matrix
+	 * @brief Convert transform to matrix
 	 * @return Return matrix with location, scale and rotation
 	 */
 	FORCEINLINE const Matrix& ToMatrix() const
@@ -343,7 +343,7 @@ public:
 	}
 
 	/**
-	 * Convert transform to matrix
+	 * @brief Convert transform to matrix
 	 * @param OutMatrix Output matrix with location, scale and rotation
 	 */
 	FORCEINLINE void ToMatrix( Matrix& OutMatrix ) const
@@ -357,7 +357,7 @@ public:
 	}
 
 	/**
-	 * Override operator +
+	 * @brief Override operator +
 	 */
 	FORCEINLINE CTransform operator+( const CTransform& InOther ) const
 	{
@@ -365,7 +365,7 @@ public:
 	}
 
 	/**
-	 * Override operator -
+	 * @brief Override operator -
 	 */
 	FORCEINLINE CTransform operator-( const CTransform& InOther ) const
 	{

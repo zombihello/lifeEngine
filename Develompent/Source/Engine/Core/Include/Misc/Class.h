@@ -43,7 +43,7 @@ enum EClassCastFlags
 	CASTCLASS_CColorProperty		= 1 << 5,	/**< Cast to CColorProperty */
 	CASTCLASS_CComponentProperty	= 1 << 6,	/**< Cast to CComponentProperty */
 	CASTCLASS_CVectorProperty		= 1 << 7,	/**< Cast to CVectorProperty */
-	CASTCLASS_CTrasformProperty		= 1 << 8,	/**< Cast to CTrasformProperty */
+	CASTCLASS_CRotatorProperty		= 1 << 8,	/**< Cast to CRotatorProperty */
 };
 
 /**

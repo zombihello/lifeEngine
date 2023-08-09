@@ -155,10 +155,10 @@ void CStaticMeshComponent::AddToDrawList( const class CSceneView& InSceneView )
 			Vector{ minLocation.x, maxLocation.y, maxLocation.z },
 		};
 
-		minLocation = maxLocation	= GetComponentRotation() * ( GetComponentScale() * verteces[0] );	
+		minLocation = maxLocation	= GetComponentQuat() * ( GetComponentScale() * verteces[0] );
 		for ( uint32 index = 0; index < 7; ++index )
 		{
-			Vector		vertex		= GetComponentRotation() * ( GetComponentScale() * verteces[index] );
+			Vector		vertex		= GetComponentQuat() * ( GetComponentScale() * verteces[index] );
 			if ( minLocation.x > vertex.x )
 			{
 				minLocation.x = vertex.x;

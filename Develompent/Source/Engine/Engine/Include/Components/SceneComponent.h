@@ -10,11 +10,12 @@
 #define SCENECOMPONENT_H
 
 #include "Math/Transform.h"
+#include "Math/Rotator.h"
 #include "Components/ActorComponent.h"
 
  /**
   * @ingroup Engine
-  * A SceneComponent has a transform and supports attachment, but has no rendering or collision capabilities.
+  * @brief A SceneComponent has a transform and supports attachment, but has no rendering or collision capabilities.
   */
 class CSceneComponent : public CActorComponent
 {
@@ -32,12 +33,17 @@ public:
 	virtual ~CSceneComponent();
 
 	/**
-	 * Attaches a component to a given parent
+	 * @brief Attaches a component to a given parent
 	 * @warning Need use only in constructor or BeginPlay()
 	 * 
-	 * @param[in] InParent Parent component
+	 * @param InParent		Parent component
 	 */
 	void SetupAttachment( CSceneComponent* InParent );
+
+	/**
+	 * @brief Called when this component is destroyed
+	 */
+	virtual void Destroyed() override;
 
 	/**
 	 * @brief Serialize component
@@ -46,193 +52,204 @@ public:
 	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
-	 * Add to relative location component
+	 * @brief Detach this component from whatever it is attached to
 	 * 
-	 * @param[in] InLocationDelta Relative location delta
+	 * @param InIsMaintainWorldPosition		Is need save world position
+	 */
+	void DetachFromParent( bool InIsMaintainWorldPosition = false );
+
+#if WITH_EDITOR
+	/**
+	 * @brief Function called by the editor when property is changed
+	 *
+	 * @param InProperty    Property
+	 * @param InChangeType  Change type
+	 */
+	virtual void PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType ) override;
+#endif // WITH_EDITOR
+
+	/**
+	 * @brief Add to relative location component
+	 * 
+	 * @param InLocationDelta	Relative location delta
 	 */
 	FORCEINLINE void AddRelativeLocation( const Vector& InLocationDelta )
 	{
-		transform.AddToTranslation( InLocationDelta );
+		SetRelativeLocation( GetRelativeLocation() + InLocationDelta );
 	}
 
 	/**
-	 * Add to relative rotate component
+	 * @brief Add to relative rotation component
 	 * 
-	 * @param[in] InRotationDelta Relative rotation delta
+	 * @param InRotationDelta	Relative rotation delta
 	 */
-	FORCEINLINE void AddRelativeRotate( const Quaternion& InRotationDelta )
+	FORCEINLINE void AddRelativeRotation( const Quaternion& InRotationDelta )
 	{
-		transform.AddToRotation( InRotationDelta );
+		const Quaternion	currentRelativeRotation = relativeRotationCache.RotatorToQuat( GetRelativeRotation() );
+		const Quaternion	newRelativeRotation		= InRotationDelta * currentRelativeRotation;
+		SetRelativeRotation( newRelativeRotation );
 	}
 
 	/**
-	 * Add to relative scale component
+	 * @brief Add to relative rotation component
+	 *
+	 * @param InRotationDelta	Relative rotation delta
+	 */
+	FORCEINLINE void AddRelativeRotation( const CRotator& InRotationDelta )
+	{
+		SetRelativeRotation( GetRelativeRotation() + InRotationDelta );
+	}
+
+	/**
+	 * @brief Add to relative scale component
 	 * 
-	 * @param[in] InScaleDelta Relative scale delta
+	 * @param InScaleDelta	Relative scale delta
 	 */
 	FORCEINLINE void AddRelativeScale( const Vector& InScaleDelta )
 	{
-		transform.AddToScale( InScaleDelta );
+		SetRelativeScale( GetRelativeScale() + InScaleDelta );
 	}
 
 	/**
-	 * Set relative location component
+	 * @brief Set relative location component
 	 * 
-	 * @param[in] InLocation New relative location
+	 * @param InLocation	New relative location
 	 */
 	FORCEINLINE void SetRelativeLocation( const Vector& InLocation )
 	{
-		transform.SetLocation( InLocation );
+		if ( InLocation != GetRelativeLocation() )
+		{
+			relativeLocation		= InLocation;
+			bDityComponentToWorld	= true;
+		}
 	}
 
 	/**
-	 * Set relative rotation component
+	 * @brief Set relative rotation component
 	 * 
-	 * @param[in] InRotation New relative rotation of component
+	 * @param InRotation	New relative rotation of component
 	 */
 	FORCEINLINE void SetRelativeRotation( const Quaternion& InRotation )
 	{
-		transform.SetRotation( InRotation );
+		const CRotator	newRelativeRotation = relativeRotationCache.QuatToRotator_ReadOnly( InRotation );
+		if ( !newRelativeRotation.Equals( GetRelativeRotation() ) )
+		{
+			relativeRotation		= newRelativeRotation;
+			bDityComponentToWorld	= true;
+			relativeRotationCache.QuatToRotator( InRotation );
+		}
 	}
 
 	/**
-	 * Set relative scale component
+	 * @brief Set relative rotation component
+	 *
+	 * @param InRotation	New relative rotation of component
+	 */
+	FORCEINLINE void SetRelativeRotation( const CRotator& InRotation )
+	{
+		if ( !InRotation.Equals( GetRelativeRotation() ) )
+		{
+			relativeRotation		= InRotation;
+			bDityComponentToWorld	= true;
+			relativeRotationCache.RotatorToQuat( InRotation );
+		}
+	}
+
+	/**
+	 * @brief Set relative scale component
 	 * 
-	 * @param[in] InScale New relative scale
+	 * @param InScale	New relative scale
 	 */
 	FORCEINLINE void SetRelativeScale( const Vector& InScale )
 	{
-		transform.SetScale( InScale );
+		if ( InScale != GetRelativeScale() )
+		{
+			relativeScale			= InScale;
+			bDityComponentToWorld	= true;
+		}
 	}
 
 	/**
-	 * Get relative forward vector
-	 * @return Return relative forward vector
-	 */
-	FORCEINLINE Vector GetRelativeForwardVector() const
-	{
-		return transform.GetUnitAxis( A_Z );
-	}
-
-	/**
-	 * Get relative right vector
-	 * @return Return relative right vector
-	 */
-	FORCEINLINE Vector GetRelativeRightVector() const
-	{
-		return transform.GetUnitAxis( A_X );
-	}
-
-	/**
-	 * Get relative up vector
-	 * @return Return relative up vector
-	 */
-	FORCEINLINE Vector GetRelativeUpVector() const
-	{
-		return transform.GetUnitAxis( A_Y );
-	}
-
-	/**
-	 * Get the relative current transform for this component
+	 * @brief Get the relative current transform for this component
 	 * @return Return relative current transform for this component
 	 */
 	FORCEINLINE CTransform GetRelativeTransform() const
 	{
-		return transform;
+		const CTransform	relativeTransform( relativeRotationCache.RotatorToQuat( GetRelativeRotation() ), GetRelativeLocation(), GetRelativeScale() );
+		return relativeTransform;
 	}
 
 	/**
-	 * Get the current transform for this component in world space
+	 * @brief Get the current transform for this component in world space
 	 * @return Return current transform in world space for this component
 	 */
-	FORCEINLINE CTransform GetComponentTransform() const
-	{
-		return attachParent ? attachParent->GetComponentTransform() + GetRelativeTransform() : GetRelativeTransform();
-	}
+	const CTransform& GetComponentTransform() const;
 
 	/**
-	 * Get forward vector in world space
-	 * @return Return forward vector in world space
-	 */
-	FORCEINLINE Vector GetComponentForwardVector() const
-	{
-		return GetComponentTransform().GetUnitAxis( A_Z );
-	}
-
-	/**
-	 * Get right vector in world space
-	 * @return Return right vector in world space
-	 */
-	FORCEINLINE Vector GetComponentRightVector() const
-	{
-		return GetComponentTransform().GetUnitAxis( A_X );
-	}
-
-	/**
-	 * Get up vector in world space
-	 * @return Return up vector in world space
-	 */
-	FORCEINLINE Vector GetComponentUpVector() const
-	{
-		return GetComponentTransform().GetUnitAxis( A_Y );
-	}
-
-	/**
-	 * Get relative location
+	 * @brief Get relative location
 	 * @return Return relative location
 	 */
 	FORCEINLINE Vector GetRelativeLocation() const
 	{
-		return transform.GetLocation();
+		return relativeLocation;
 	}
 
 	/**
-	 * Get relative rotation
+	 * @brief Get relative rotation
 	 * @return Return relative rotation
 	 */
-	FORCEINLINE Quaternion GetRelativeRotation() const
+	FORCEINLINE CRotator GetRelativeRotation() const
 	{
-		return transform.GetRotation();
+		return relativeRotation;
 	}
 
 	/**
-	 * Get relative scale
+	 * @brief Get relative scale
 	 * @return Return relative scale
 	 */
 	FORCEINLINE Vector GetRelativeScale() const
 	{
-		return transform.GetScale();
+		return relativeScale;
 	}
 
 	/**
-	 * Get location of the component in world space
+	 * @brief Get location of the component in world space
 	 * @return Return location of the component in world space
 	 */
 	FORCEINLINE Vector GetComponentLocation() const
 	{
-		return attachParent ? attachParent->GetComponentLocation() + GetRelativeLocation() : GetRelativeLocation();
+		return GetComponentTransform().GetLocation();
 	}
 
 	/**
-	 * Get rotation of the component in world space
+	 * @brief Get rotation of the component in world space
 	 * @return Return rotation of the component in world space
 	 */
-	FORCEINLINE Quaternion GetComponentRotation() const
+	FORCEINLINE CRotator GetComponentRotation() const
 	{
-		return attachParent ? attachParent->GetComponentRotation() + GetRelativeRotation() : GetRelativeRotation();
+		return worldRotationCache.NormalizedQuatToRotator( GetComponentTransform().GetRotation() );
 	}
 
 	/**
-	 * Get scale of the component in world space
+	 * @brief Get rotation quaternion of the component in world space
+	 * @return Return rotation quaternion of the component in world space
+	 */
+	FORCEINLINE Quaternion GetComponentQuat() const
+	{
+		return GetComponentTransform().GetRotation();
+	}
+
+	/**
+	 * @brief Get scale of the component in world space
 	 * @return Return scale of the component in world space
 	 */
 	FORCEINLINE Vector GetComponentScale() const
 	{
-		return attachParent ? attachParent->GetComponentScale() + GetRelativeScale() : GetRelativeScale();
+		return GetComponentTransform().GetScale();
 	}
 
 	/**
-	 * Walks up the attachment chain to see if this component is attached to the supplied component
+	 * @brief Walks up the attachment chain to see if this component is attached to the supplied component
 	 * 
 	 * @param[in] InTestComp Test component
 	 * @return Return true if we attached to test component, else return false. If InTestComp == this, returns false
@@ -240,18 +257,38 @@ public:
 	bool IsAttachedTo( CSceneComponent* InTestComp ) const;
 
 	/**
-	 * Get the SceneComponent we are attached to
+	 * @brief Get the SceneComponent we are attached to
 	 * @return Return SceneComponent we are attached to, if parent not exist - return nullptr
 	 */
-	FORCEINLINE TRefCountPtr< CSceneComponent > GetAttachParent() const
+	FORCEINLINE TRefCountPtr<CSceneComponent> GetAttachParent() const
 	{
 		return attachParent;
 	}
 
+	/**
+	 * @brief Get the SceneComponents that are attached to this component
+	 * @return Return the SceneComponents that are attached to this component
+	 */
+	FORCEINLINE const std::vector<TRefCountPtr<CSceneComponent>>&GetAttachChildren() const
+	{
+		return attachChildren;
+	}
+
 private:
-	// TODO BS yehor.pohuliaka - Need add array of child components
-	TRefCountPtr< CSceneComponent >		attachParent;	/**< What we are currently attached to. If valid, transform are used relative to this object */
-	CTransform							transform;		/**< Transform of component */
+	/**
+	 * @brief Update component to world
+	 */
+	void UpdateComponentToWorld();
+
+	bool											bDityComponentToWorld;	/**< Is need update ComponentToWorld */
+	TRefCountPtr<CSceneComponent>					attachParent;			/**< What we are currently attached to. If valid, transform are used relative to this object */
+	Vector											relativeLocation;		/**< Location of the component relative to its parent */
+	CRotator										relativeRotation;		/**< Rotation of the component relative to its parent */
+	Vector											relativeScale;			/**< Non-uniform scaling of the component relative to its parent */
+	SRotationConversionCache						worldRotationCache;		/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with GetComponentTransform().GetRotation() */	
+	SRotationConversionCache						relativeRotationCache;	/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with 'relativeRotation' */
+	CTransform										componentToWorld;		/**< Current transform of the component, relative to the world */
+	std::vector<TRefCountPtr<CSceneComponent>>		attachChildren;			/**< List of child SceneComponents that are attached to us */
 };
 
 #endif // !SCENECOMPONENT_H

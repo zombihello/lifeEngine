@@ -87,7 +87,7 @@ FORCEINLINE b2Transform LE2BTransform( const CTransform& InTransform )
  */
 FORCEINLINE Quaternion B2LERot( const b2Rot& InRot )
 {
-	return SMath::AnglesToQuaternionXYZ( Vector( 0.f, 0.f, InRot.GetAngle() * BOX2D_ANGLES ) );
+	return SMath::AnglesToQuaternionZYX( Vector( 0.f, 0.f, InRot.GetAngle() * BOX2D_ANGLES ) );
 }
 
 /**

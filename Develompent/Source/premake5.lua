@@ -105,6 +105,7 @@ workspace( game )
 
     characterset 		"Unicode"
     floatingpoint 		"Fast"
+	vectorextensions 	"SSE2"	
 
     targetname( "%{prj.name}-%{cfg.platform}-%{cfg.buildcfg}" )
     targetdir( binariesDir .. outputDir )
@@ -143,12 +144,14 @@ workspace( game )
 
     filter "configurations:Release or ReleaseWithEditor"
         defines 	        { "NDEBUG", "DEBUG=0", "RELEASE=1", "SHIPPING=0" }
-        optimize 	        "Full"
+        optimize 	        "Speed"
+		runtime 			"Release"
         inlining            "Auto"
 
     filter "configurations:Shipping"
         defines 	        { "NDEBUG", "DEBUG=0", "RELEASE=0", "SHIPPING=1" }
-        optimize            "Full"
+        optimize            "Speed"
+		runtime 			"Release"
         inlining            "Auto"
     filter {}
 

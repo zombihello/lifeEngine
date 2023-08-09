@@ -1,4 +1,5 @@
 #include "Components/SceneComponent.h"
+#include "Logger/LoggerMacros.h"
 
 IMPLEMENT_CLASS( CSceneComponent )
 
@@ -8,6 +9,10 @@ CSceneComponent::CSceneComponent
 ==================
 */
 CSceneComponent::CSceneComponent()
+	: bDityComponentToWorld( true )
+	, relativeLocation( SMath::vectorZero )
+	, relativeRotation( SMath::rotatorZero )
+	, relativeScale( SMath::vectorOne )
 {}
 
 /*
@@ -25,8 +30,26 @@ CSceneComponent::StaticInitializeClass
 */
 void CSceneComponent::StaticInitializeClass()
 {
-	new CTransformProperty( staticClass, TEXT( "Transform" ), TEXT( "Drawing" ), TEXT( "Transform of component" ), CPP_PROPERTY( transform ), 0 );
+	new CVectorProperty( staticClass, TEXT( "Location" ), TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), CPP_PROPERTY( relativeLocation ), 0 );
+	new CRotatorProperty( staticClass, TEXT( "Rotation" ), TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), CPP_PROPERTY( relativeRotation ), 0 );
+	new CVectorProperty( staticClass, TEXT( "Scale" ), TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), CPP_PROPERTY( relativeScale ), 0 );
 }
+
+#if WITH_EDITOR
+/*
+==================
+CSceneComponent::PostEditChangeProperty
+==================
+*/
+void CSceneComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+{
+	if ( InProperty->GetCName() == TEXT( "Location" ) || InProperty->GetCName() == TEXT( "Rotation" ) || InProperty->GetCName() == TEXT( "Scale" ) )
+	{
+		bDityComponentToWorld = true;
+	}
+	Super::PostEditChangeProperty( InProperty, InChangeType );
+}
+#endif // WITH_EDITOR
 
 /*
 ==================
@@ -56,7 +79,22 @@ CSceneComponent::Serialize
 void CSceneComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
-	InArchive << transform;
+	if ( InArchive.IsLoading() && InArchive.Ver() < VER_UpdateTrasformSceneComponent )
+	{
+		CTransform		tmpTransform;
+		InArchive << tmpTransform;
+
+		relativeLocation	= tmpTransform.GetLocation();
+		relativeRotation	= relativeRotationCache.QuatToRotator( tmpTransform.GetRotation() );
+		relativeScale		= tmpTransform.GetScale();
+
+		Warnf( TEXT( "Deprecated package version (0x%X). Need to re-save the package '%s', because in the future it may not open\n" ), InArchive.Ver(), InArchive.GetPath().c_str() );
+		return;
+	}
+
+	InArchive << relativeLocation;
+	InArchive << relativeRotation;
+	InArchive << relativeScale;
 }
 
 /*
@@ -71,4 +109,98 @@ void CSceneComponent::SetupAttachment( CSceneComponent* InParent )
 	AssertMsg( !attachParent, TEXT( "Need detach before attach component" ) );
 
 	attachParent = InParent;
+	InParent->attachChildren.push_back( this );
+}
+
+/*
+==================
+CSceneComponent::Destroyed
+==================
+*/
+void CSceneComponent::Destroyed()
+{
+	Super::Destroyed();
+	DetachFromParent( true );
+}
+
+/*
+==================
+CSceneComponent::DetachFromParent
+==================
+*/
+void CSceneComponent::DetachFromParent( bool InIsMaintainWorldPosition /* = false */ )
+{
+	if ( attachParent )
+	{
+		// Remove our component from parent's children array
+		for ( uint32 index = 0, count = attachParent->attachChildren.size(); index < count; ++index )
+		{
+			CSceneComponent*		component = attachParent->attachChildren[index];
+			if ( component == this )
+			{
+				attachParent->attachChildren.erase( attachParent->attachChildren.begin() + index );
+				break;
+			}
+		}
+
+		// If not need maintain world position then we update component to world transformation
+		if ( !InIsMaintainWorldPosition )
+		{
+			UpdateComponentToWorld();
+		}
+
+		attachParent = nullptr;
+	}
+}
+
+/*
+==================
+CSceneComponent::GetComponentTransform
+==================
+*/
+const CTransform& CSceneComponent::GetComponentTransform() const
+{
+	if ( bDityComponentToWorld )
+	{
+		CSceneComponent*	thisComponent = const_cast<CSceneComponent*>( this );
+		thisComponent->UpdateComponentToWorld();
+	}
+	return componentToWorld;
+}
+
+/*
+==================
+CSceneComponent::UpdateComponentToWorld
+==================
+*/
+void CSceneComponent::UpdateComponentToWorld()
+{
+	// If out parent hasn't been updated before, we'll need walk up out parent attach hierarchy
+	if ( attachParent && attachParent->bDityComponentToWorld )
+	{
+		attachParent->UpdateComponentToWorld();
+
+		// Updating the parent may (depending on if we were already attached to parent) result in our being updated, so just return
+		if ( bDityComponentToWorld )
+		{
+			return;
+		}
+	}
+
+	// Update our component to world
+	bDityComponentToWorld = false;
+	if ( attachParent )
+	{
+		componentToWorld = GetRelativeTransform() + attachParent->GetComponentTransform();
+	}
+	else
+	{
+		componentToWorld = GetRelativeTransform();
+	}
+
+	// Update child components
+	for ( uint32 index = 0, count = attachChildren.size(); index < count; ++index )
+	{
+		attachChildren[index]->UpdateComponentToWorld();
+	}
 }

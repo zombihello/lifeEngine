@@ -344,7 +344,7 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CFloatProperty ) )
 	{
 		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-		bPropertyIsChanged = ImGui::InputFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &propertyValue.floatValue );
+		bPropertyIsChanged = ImGui::DragFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &propertyValue.floatValue );
 	}
 
 	// Color property
@@ -367,55 +367,23 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), propertyValue.vectorValue, 0.f );
 	}
 
-	// Transform property
-	else if ( theClass->HasAnyCastFlags( CASTCLASS_CTrasformProperty ) )
+	// Rotator property
+	else if ( theClass->HasAnyCastFlags( CASTCLASS_CRotatorProperty ) )
 	{
 		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-
-		// Location
-		if ( ImGui::TreeNodeEx( "Location", ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen ) )
+		Vector		rotation = propertyValue.rotatorValue.ToEuler();
+		
+		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), rotation, 0.f );
+		if ( bPropertyIsChanged )
 		{
-			Vector		location = propertyValue.transformValue.GetLocation();
-			bool		bChangedLocation = ImGui::DragVectorFloat( CString::Format( TEXT( "%s_Location_%p" ), InProperty->GetName().c_str(), this ), location, 0.f, 0.1f );
-			if ( bChangedLocation )
-			{
-				propertyValue.transformValue.SetLocation( location );
-				bPropertyIsChanged |= bChangedLocation;
-			}
-			ImGui::TreePop();
-		}
-
-		// Rotation
-		if ( ImGui::TreeNodeEx( "Rotation", ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen ) )
-		{
-			Vector		rotation = SMath::QuaternionToAngles( propertyValue.transformValue.GetRotation() );
-			bool		bChangedRotation = ImGui::DragVectorFloat( CString::Format( TEXT( "%s_Rotation_%p" ), InProperty->GetName().c_str(), this ), rotation, 0.f, 0.1f );
-			if ( bChangedRotation )
-			{
-				propertyValue.transformValue.SetRotation( SMath::AnglesToQuaternionXYZ( rotation ) );
-				bPropertyIsChanged |= bChangedRotation;
-			}
-			ImGui::TreePop();
-		}
-
-		// Scale
-		if ( ImGui::TreeNodeEx( "Scale", ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen ) )
-		{
-			Vector			scale = propertyValue.transformValue.GetScale();
-			bool			bChangedScale = ImGui::DragVectorFloat( CString::Format( TEXT( "%s_Scale_%p" ), InProperty->GetName().c_str(), this ), scale, 1.f, 0.1f );
-			if ( bChangedScale )
-			{
-				propertyValue.transformValue.SetScale( scale );
-				bPropertyIsChanged |= bChangedScale;
-			}
-			ImGui::TreePop();
+			propertyValue.rotatorValue = CRotator::MakeFromEuler( rotation );
 		}
 	}
 
 	// Unknown property
 	else
 	{
-		ImGui::TextColored( g_ImGUIEngine->GetStyleColor( IGC_ErrorColor ), TCHAR_TO_ANSI( CString::Format( TEXT( "Unknown type of '%s'" ), InProperty->GetCName().ToString().c_str() ).c_str() ) );
+		ImGui::TextColored( g_ImGUIEngine->GetStyleColor( IGC_ErrorColor ), "Unknown type" );
 	}
 	ImGui::EndDisabled();
 

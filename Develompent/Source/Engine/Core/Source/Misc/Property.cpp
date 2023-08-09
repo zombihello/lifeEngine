@@ -10,7 +10,7 @@ IMPLEMENT_CLASS( CFloatProperty )
 IMPLEMENT_CLASS( CColorProperty )
 IMPLEMENT_CLASS( CComponentProperty )
 IMPLEMENT_CLASS( CVectorProperty )
-IMPLEMENT_CLASS( CTransformProperty )
+IMPLEMENT_CLASS( CRotatorProperty )
 
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CByteProperty )
@@ -20,7 +20,7 @@ IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CFloatProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CColorProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CComponentProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CVectorProperty )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CTransformProperty )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CRotatorProperty )
 
 /*
 ==================
@@ -290,15 +290,15 @@ bool CVectorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 
 /*
 ==================
-CTransformProperty::GetPropertyValue
+CRotatorProperty::GetPropertyValue
 ==================
 */
-bool CTransformProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
+bool CRotatorProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		OutPropertyValue.transformValue = *( CTransform* )( InObjectAddress + offset );
+		OutPropertyValue.rotatorValue = *( CRotator* )( InObjectAddress + offset );
 		bResult = true;
 	}
 
@@ -307,15 +307,15 @@ bool CTransformProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue
 
 /*
 ==================
-CTransformProperty::SetPropertyValue
+CRotatorProperty::SetPropertyValue
 ==================
 */
-bool CTransformProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue )
+bool CRotatorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue )
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		*( CTransform* )( InObjectAddress + offset ) = InPropertyValue.transformValue;
+		*( CRotator* )( InObjectAddress + offset ) = InPropertyValue.rotatorValue;
 		bResult = true;
 	}
 	return bResult;

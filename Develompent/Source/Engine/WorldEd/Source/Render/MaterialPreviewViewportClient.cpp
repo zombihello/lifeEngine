@@ -30,7 +30,7 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	sphereComponent->SetRadius( 40.f );
 	sphereComponent->SetMaterial( InMaterial->GetAssetHandle() );
 	sphereComponent->SetVisibility( true );
-	sphereComponent->SetRelativeRotation( SMath::AnglesToQuaternionXYZ( Vector( 90.f, 0.f, 0.f ) ) );
+	sphereComponent->SetRelativeRotation( CRotator( 90.f, 0.f, 0.f ) );
 	scene->AddPrimitive( sphereComponent );
 
 	pointLightComponent->SetRelativeLocation( Vector( 0.f, 20.f, -80.f ) );
@@ -56,7 +56,7 @@ CMaterialPreviewViewportClient::Tick
 void CMaterialPreviewViewportClient::Tick( float InDeltaSeconds )
 {
 	CEditorLevelViewportClient::Tick( InDeltaSeconds );
-	sphereComponent->AddRelativeRotate( SMath::AnglesToQuaternionXYZ( Vector( 0.f, 10.f * InDeltaSeconds, 0.f ) ) );
+	sphereComponent->AddRelativeRotation( CRotator( 0.f, 10.f * InDeltaSeconds, 0.f )  );
 }
 
 /*

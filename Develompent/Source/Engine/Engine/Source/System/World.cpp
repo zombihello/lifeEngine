@@ -226,11 +226,11 @@ void CWorld::CleanupWorld()
 CWorld::SpawnActor
 ==================
 */
-ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const Quaternion& InRotation /* = SMath::quaternionZero */ )
+ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /*= SMath::rotatorZero*/ )
 {
 	Assert( InClass );
 
-	AActor*		actor = InClass->CreateObject< AActor >();
+	AActor*		actor = InClass->CreateObject<AActor>();
 	Assert( actor );
 
 	// Set default actor name and location with rotation

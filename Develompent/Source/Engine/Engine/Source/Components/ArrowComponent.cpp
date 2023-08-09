@@ -22,9 +22,10 @@ CArrowComponent::AddToDrawList
 void CArrowComponent::AddToDrawList( const class CSceneView& InSceneView )
 {
 #if WITH_EDITOR
-	CScene*		scene			= ( CScene* )g_World->GetScene();
-	float		oneThirdLength	= length / 10.f;
-	Vector		direction		= GetComponentForwardVector();
+	CScene*				scene				= ( CScene* )g_World->GetScene();
+	float				oneThirdLength		= length / 10.f;
+	const CTransform&	componentTransform	= GetComponentTransform();
+	Vector				direction			= componentTransform.GetUnitAxis( A_Z );
 
 	// Arrow body
 	Vector		start	= GetComponentLocation();
@@ -34,19 +35,19 @@ void CArrowComponent::AddToDrawList( const class CSceneView& InSceneView )
 	// First arrow side
 	start				= end;
 	Vector	arrowBase	= start - direction * oneThirdLength;
-	end					= arrowBase + GetComponentRightVector() * 2.f;
+	end					= arrowBase + componentTransform.GetUnitAxis( A_X ) * 2.f;
 	scene->GetSDG( SDG_WorldEdForeground ).simpleElements.AddLine( start, end, CColor::red );
 
 	// Second arrow side
-	end = arrowBase - GetComponentRightVector() * 2.f;
+	end = arrowBase - componentTransform.GetUnitAxis( A_X ) * 2.f;
 	scene->GetSDG( SDG_WorldEdForeground ).simpleElements.AddLine( start, end, CColor::red );
 
 	// Third arrow side
-	end = arrowBase + GetComponentUpVector() * 2.f;
+	end = arrowBase + componentTransform.GetUnitAxis( A_Y ) * 2.f;
 	scene->GetSDG( SDG_WorldEdForeground ).simpleElements.AddLine( start, end, CColor::red );
 	
 	// Fourth arrow side
-	end = arrowBase - GetComponentUpVector() * 2.f;
+	end = arrowBase - componentTransform.GetUnitAxis( A_Y ) * 2.f;
 	scene->GetSDG( SDG_WorldEdForeground ).simpleElements.AddLine( start, end, CColor::red );
 #endif // WITH_EDITOR
 }

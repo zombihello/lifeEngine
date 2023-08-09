@@ -248,7 +248,7 @@ void CLevelViewportWindow::OnTick()
 					// Rotate
 				case ImGuizmo::ROTATE:
 				{
-					Quaternion		deltaRotation = SMath::AnglesToQuaternionXYZ( rotation[0], rotation[1], rotation[2] );
+					Quaternion		deltaRotation = SMath::AnglesToQuaternionZYX( rotation[0], rotation[1], rotation[2] );
 					actor->AddActorRotation( deltaRotation );
 					if ( bMultiSelection && actor != actorCenter )
 					{

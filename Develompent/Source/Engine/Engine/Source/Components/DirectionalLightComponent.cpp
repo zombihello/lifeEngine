@@ -11,7 +11,7 @@ CDirectionalLightComponent::CDirectionalLightComponent
 CDirectionalLightComponent::CDirectionalLightComponent()
 {
 	intensivity = 30.f;
-	SetRelativeRotation( SMath::AnglesToQuaternionXYZ( Vector( 90.f, 0.f, 0.f ) ) );
+	SetRelativeRotation( SMath::AnglesToQuaternionZYX( Vector( 90.f, 0.f, 0.f ) ) );
 }
 
 /*
