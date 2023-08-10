@@ -100,8 +100,8 @@ void CEditorLevelViewportClient::Tick( float InDeltaSeconds )
 	// If we tracking mouse and this is perspective viewport - change view location
 	if ( trackingType == MT_View && viewportType == LVT_Perspective )
 	{
-		Vector		targetDirection = SMath::vectorForward	* viewRotationQuat;
-		Vector		axisUp			= SMath::vectorUp		* viewRotationQuat;
+		Vector		targetDirection = viewRotationQuat * SMath::vectorForward;
+		Vector		axisUp			= viewRotationQuat * SMath::vectorUp;
 		Vector		axisRight		= SMath::CrossVector( targetDirection, axisUp );
 
 		if ( cameraMoveFlags & CMV_MoveForward )		viewLocation +=	targetDirection	* cameraSpeed;
@@ -124,7 +124,7 @@ void CEditorLevelViewportClient::Draw( CViewport* InViewport )
 	// Update audio listener spatial if allowed
 	if ( viewportType == LVT_Perspective && bSetListenerPosition )
 	{
-		g_AudioDevice.SetListenerSpatial( viewLocation, SMath::vectorForward * viewRotationQuat, SMath::vectorUp * viewRotationQuat );
+		g_AudioDevice.SetListenerSpatial( viewLocation, viewRotationQuat * SMath::vectorForward, viewRotationQuat * SMath::vectorUp );
 	}
 
 	// Draw viewport
@@ -508,7 +508,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 				// Update Yaw axis
 				if ( moveDelta.x != 0.f )
 				{
-					viewRotationEuler.y += moveDelta.x;
+					viewRotationEuler.y -= moveDelta.x;
 					if ( viewRotationEuler.y < -360.f || viewRotationEuler.y > 360.f )
 					{
 						viewRotationEuler.y = 0.f;
@@ -518,7 +518,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 				// Update Pitch axis
 				if ( moveDelta.y != 0.f )
 				{
-					viewRotationEuler.x -= moveDelta.y;
+					viewRotationEuler.x += moveDelta.y;
 					if ( viewRotationEuler.x > 90.f )
 					{
 						viewRotationEuler.x = 90.f;
@@ -530,7 +530,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 				}
 
-				viewRotationQuat = SMath::AnglesToQuaternionZXY( viewRotationEuler );
+				viewRotationQuat = SMath::AnglesToQuaternion( viewRotationEuler );
 			}
 		}
 		break;
@@ -595,18 +595,18 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 In
 	{
 	case LVT_Perspective:
 	case LVT_OrthoXY:
-		targetDirection		= SMath::vectorForward	* viewRotationQuat ;
-		axisUp				= SMath::vectorUp		* viewRotationQuat;
+		targetDirection		= viewRotationQuat * SMath::vectorForward;
+		axisUp				= viewRotationQuat * SMath::vectorUp;
 		break;
 
 	case LVT_OrthoXZ:
-		targetDirection		= -SMath::vectorUp		* viewRotationQuat;
-		axisUp				= SMath::vectorForward	* viewRotationQuat;
+		targetDirection		= viewRotationQuat * ( -SMath::vectorUp );
+		axisUp				= viewRotationQuat * SMath::vectorForward;
 		break;
 
 	case LVT_OrthoYZ:
-		targetDirection		= SMath::vectorRight	* viewRotationQuat;
-		axisUp				= SMath::vectorUp		* viewRotationQuat;
+		targetDirection		= viewRotationQuat * SMath::vectorRight;
+		axisUp				= viewRotationQuat * SMath::vectorUp;
 		break;
 
 	default:

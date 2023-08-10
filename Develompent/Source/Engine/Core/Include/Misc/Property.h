@@ -532,16 +532,18 @@ public:
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
-	 * @param InCategory		Category
-	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
-	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InClass					Class where property is stored
+	 * @param InName					Property name
+	 * @param InCategory				Category
+	 * @param InDescription				Description
+	 * @param InOffset					Offset to property
+	 * @param InSize					Property size
+	 * @param InFlags					Flags (see EPropertyFlags)
+	 * @param InDefaultComponentValue	Default component value
 	 */
-	CVectorProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
+	CVectorProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags, float InDefaultComponentValue = 0.f )
 		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+		, defaultComponentValue( InDefaultComponentValue )
 	{}
 
 	/**
@@ -561,6 +563,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Get default component value
+	 * @return Return default component value
+	 */
+	FORCEINLINE float GetDefaultComponentValue() const
+	{
+		return defaultComponentValue;
+	}
+
+private:
+	float	defaultComponentValue;		/**< Default component value */
 };
 
 /**

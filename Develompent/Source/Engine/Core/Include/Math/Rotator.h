@@ -156,7 +156,7 @@ public:
 	 */
 	FORCEINLINE Quaternion ToQuaternion() const
 	{
-		return SMath::AnglesToQuaternionZYX( pitch, yaw, roll );
+		return SMath::AnglesToQuaternion( pitch, yaw, roll );
 	}
 
 	/**

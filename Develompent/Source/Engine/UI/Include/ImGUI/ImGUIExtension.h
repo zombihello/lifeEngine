@@ -55,7 +55,7 @@ namespace ImGui
 	 * @param InFlags		ImGui flags (see enum ImGuiSliderFlags_)
 	 * @return Return TRUE if some component of InValue was changed, otherwise FALSE
 	 */
-	bool DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float InResetValue = 0.f, float InSpeed = 1.f, float InMin = 0.f, float InMax = 0.f, const char* InFormat = "%.3f", ImGuiSliderFlags InFlags = 0 );
+	bool DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float InResetValue = 0.f, float InSpeed = 1.f, float InMin = 0.f, float InMax = 0.f, const char* InFormat = "%.2f", ImGuiSliderFlags InFlags = 0 );
 }
 
 #endif // WITH_IMGUI

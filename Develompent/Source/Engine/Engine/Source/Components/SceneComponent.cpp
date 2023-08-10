@@ -32,7 +32,7 @@ void CSceneComponent::StaticInitializeClass()
 {
 	new CVectorProperty( staticClass, TEXT( "Location" ), TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), CPP_PROPERTY( relativeLocation ), 0 );
 	new CRotatorProperty( staticClass, TEXT( "Rotation" ), TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), CPP_PROPERTY( relativeRotation ), 0 );
-	new CVectorProperty( staticClass, TEXT( "Scale" ), TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), CPP_PROPERTY( relativeScale ), 0 );
+	new CVectorProperty( staticClass, TEXT( "Scale" ), TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), CPP_PROPERTY( relativeScale ), 0, 1.f );
 }
 
 #if WITH_EDITOR

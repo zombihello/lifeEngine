@@ -59,7 +59,7 @@ bool ImGui::Button( const char* InLabel, bool InIsSelected, const ImVec2& InSize
 ImGui::DragVectorFloat
 ==================
 */
-bool ImGui::DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float InResetValue /*= 0.f*/, float InSpeed /*= 1.f*/, float InMin /*= 0.f*/, float InMax /*= 0.f*/, const char* InFormat /*= "%.3f"*/, ImGuiSliderFlags InFlags /*= 0*/ )
+bool ImGui::DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float InResetValue /*= 0.f*/, float InSpeed /*= 1.f*/, float InMin /*= 0.f*/, float InMax /*= 0.f*/, const char* InFormat /*= "%.2f"*/, ImGuiSliderFlags InFlags /*= 0*/ )
 {
 	bool	bValueChanged = false;
 	ImGui::PushMultiItemsWidths( 3, ImGui::CalcItemWidth() );

@@ -112,43 +112,27 @@ struct SMath
 {
 	/**
 	 * @ingroup Core
-	 * Convert from euler angles to quaternion XYZ
-	 * 
-	 * @param[in] InEulerAngleX Euler angle by X
-	 * @param[in] InEulerAngleY Euler angle by Y
-	 * @param[in] InEulerAngleZ Euler angle by Z
-	 */
-	static FORCEINLINE Quaternion AnglesToQuaternionXYZ( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
-	{
-		return 
-			glm::angleAxis( DegreesToRadians( InEulerAngleX ), Vector( 1.f, 0.f, 0.f ) )*
-			glm::angleAxis( DegreesToRadians( InEulerAngleY ), Vector( 0.f, 1.f, 0.f ) )*
-			glm::angleAxis( DegreesToRadians( InEulerAngleZ ), Vector( 0.f, 0.f, 1.f ) );
-	}
-
-	/**
-	 * @ingroup Core
-	 * Convert from euler angles to quaternion ZXY
+	 * Convert from euler angles to quaternion YZX (default)
 	 *
-	 * @param[in] InEulerAngleX Euler angle by X
-	 * @param[in] InEulerAngleY Euler angle by Y
-	 * @param[in] InEulerAngleZ Euler angle by Z
+	 * @param InEulerAngleX		Euler angle by X
+	 * @param InEulerAngleY		Euler angle by Y
+	 * @param InEulerAngleZ		Euler angle by Z
 	 */
-	static FORCEINLINE Quaternion AnglesToQuaternionZXY( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
+	static FORCEINLINE Quaternion AnglesToQuaternion( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
 	{
 		return
+			glm::angleAxis( DegreesToRadians( InEulerAngleY ), Vector( 0.f, 1.f, 0.f ) ) *
 			glm::angleAxis( DegreesToRadians( InEulerAngleZ ), Vector( 0.f, 0.f, 1.f ) ) *
-			glm::angleAxis( DegreesToRadians( InEulerAngleX ), Vector( 1.f, 0.f, 0.f ) ) *
-			glm::angleAxis( DegreesToRadians( InEulerAngleY ), Vector( 0.f, 1.f, 0.f ) );
+			glm::angleAxis( DegreesToRadians( InEulerAngleX ), Vector( 1.f, 0.f, 0.f ) );
 	}
 
 	/**
 	 * @ingroup Core
 	 * Convert from euler angles to quaternion ZYX
 	 *
-	 * @param[in] InEulerAngleX Euler angle by X
-	 * @param[in] InEulerAngleY Euler angle by Y
-	 * @param[in] InEulerAngleZ Euler angle by Z
+	 * @param InEulerAngleX		Euler angle by X
+	 * @param InEulerAngleY		Euler angle by Y
+	 * @param InEulerAngleZ		Euler angle by Z
 	 */
 	static FORCEINLINE Quaternion AnglesToQuaternionZYX( float InEulerAngleX, float InEulerAngleY, float InEulerAngleZ )
 	{
@@ -157,27 +141,15 @@ struct SMath
 			glm::angleAxis( DegreesToRadians( InEulerAngleY ), Vector( 0.f, 1.f, 0.f ) ) *
 			glm::angleAxis( DegreesToRadians( InEulerAngleX ), Vector( 1.f, 0.f, 0.f ) );
 	}
-
 	/**
 	 * @ingroup Core
-	 * Convert from euler angles to quaternion XYZ
-	 * 
-	 * @param[in] InEulerAngles Euler angles
-	 */
-	static FORCEINLINE Quaternion AnglesToQuaternionXYZ( const Vector& InEulerAngles )
-	{
-		return AnglesToQuaternionXYZ( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
-	}
-
-	/**
-	 * @ingroup Core
-	 * Convert from euler angles to quaternion ZXY
+	 * Convert from euler angles to quaternion YZX (default)
 	 *
 	 * @param[in] InEulerAngles Euler angles
 	 */
-	static FORCEINLINE Quaternion AnglesToQuaternionZXY( const Vector& InEulerAngles )
+	static FORCEINLINE Quaternion AnglesToQuaternion( const Vector& InEulerAngles )
 	{
-		return AnglesToQuaternionZXY( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
+		return AnglesToQuaternion( InEulerAngles.x, InEulerAngles.y, InEulerAngles.z );
 	}
 
 	/**

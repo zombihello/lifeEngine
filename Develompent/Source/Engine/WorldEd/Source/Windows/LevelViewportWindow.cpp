@@ -228,11 +228,11 @@ void CLevelViewportWindow::OnTick()
 		if ( bGuizmoUsing )
 		{
 			// Decompose matrix to components: location, rotation and scale
-			float	location[3];
-			float	rotation[3];
-			float	scale[3];
-			ImGuizmo::DecomposeMatrixToComponents( glm::value_ptr( actorTransformMatrix ), nullptr, nullptr, scale );
-			ImGuizmo::DecomposeMatrixToComponents( glm::value_ptr( deltaMatrix ), location, rotation, nullptr );
+			Vector	location;
+			Vector	rotation;
+			Vector	scale;
+			ImGuizmo::DecomposeMatrixToComponents( glm::value_ptr( actorTransformMatrix ), nullptr, nullptr, &scale.x );
+			ImGuizmo::DecomposeMatrixToComponents( glm::value_ptr( deltaMatrix ), &location.x, &rotation.x, nullptr );
 
 			// Apply new transformation to actors
 			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
@@ -242,13 +242,13 @@ void CLevelViewportWindow::OnTick()
 				{
 					// Translate
 				case ImGuizmo::TRANSLATE:
-					actor->AddActorLocation( Vector( location[0], location[1], location[2] ) );
+					actor->AddActorLocation( location );
 					break;
 
 					// Rotate
 				case ImGuizmo::ROTATE:
 				{
-					Quaternion		deltaRotation = SMath::AnglesToQuaternionZYX( rotation[0], rotation[1], rotation[2] );
+					Quaternion		deltaRotation =  SMath::AnglesToQuaternionZYX( rotation );
 					actor->AddActorRotation( deltaRotation );
 					if ( bMultiSelection && actor != actorCenter )
 					{
@@ -261,7 +261,7 @@ void CLevelViewportWindow::OnTick()
 					// Scale
 				case ImGuizmo::SCALE:
 				{
-					Vector		deltaScale = Vector( scale[0], scale[1], scale[2] ) * ( 1.f / actor->GetActorScale() );
+					Vector		deltaScale = scale * ( 1.f / actor->GetActorScale() );
 					actor->SetActorScale( actor->GetActorScale() * deltaScale );			
 					if ( bMultiSelection && actor != actorCenter )
 					{

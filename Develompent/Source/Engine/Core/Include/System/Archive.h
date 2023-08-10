@@ -302,6 +302,19 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, const float& InValue )
 	return InArchive;
 }
 
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, double& InValue )
+{
+	InArchive.Serialize( &InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const double& InValue )
+{
+	Assert( InArchive.IsSaving() );
+	InArchive.Serialize( ( void* )&InValue, sizeof( InValue ) );
+	return InArchive;
+}
+
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, EArchiveType& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );

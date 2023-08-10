@@ -118,6 +118,6 @@ void APlayerController::UpdateRotation( float InDeltaTime )
 	rotationInput = SMath::vectorZero;
 	if ( character )
 	{
-		character->SetActorRotation( SMath::AnglesToQuaternionZYX( viewRotation ) );
+		character->SetActorRotation( SMath::AnglesToQuaternion( viewRotation ) );
 	}
 }

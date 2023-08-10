@@ -363,8 +363,11 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 	// Vector property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CVectorProperty ) )
 	{
-		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), propertyValue.vectorValue, 0.f );
+		CVectorProperty*	vectorProperty = ExactCast<CVectorProperty>( InProperty );
+		Assert( vectorProperty );
+
+		vectorProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), propertyValue.vectorValue, vectorProperty->GetDefaultComponentValue(), 0.1f );
 	}
 
 	// Rotator property
@@ -373,7 +376,7 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
 		Vector		rotation = propertyValue.rotatorValue.ToEuler();
 		
-		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), rotation, 0.f );
+		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), rotation, 0.f, 0.1f );
 		if ( bPropertyIsChanged )
 		{
 			propertyValue.rotatorValue = CRotator::MakeFromEuler( rotation );
