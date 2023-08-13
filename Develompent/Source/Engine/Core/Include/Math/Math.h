@@ -172,11 +172,42 @@ struct SMath
 	 */
 	static FORCEINLINE Vector QuaternionToAngles( const Quaternion& InQuaternion )
 	{
-		Vector		result = glm::eulerAngles( InQuaternion );
-		result.x = RadiansToDegrees( result.x );
-		result.y = RadiansToDegrees( result.y );
-		result.z = RadiansToDegrees( result.z );
-		return result;
+		float	quatSquareW			= Pow( InQuaternion.w, 2.f );
+		float	quatSquareX			= Pow( InQuaternion.x, 2.f );
+		float	quatSquareY			= Pow( InQuaternion.y, 2.f );
+		float	quatSquareZ			= Pow( InQuaternion.z, 2.f );
+		float	normalizeFactor		= quatSquareX + quatSquareY + quatSquareZ + quatSquareW;				// Normalize factor. If quaternion already is normalized it's will be one, otherwise it's correct factor
+		float	singularityTest		= InQuaternion.x * InQuaternion.y + InQuaternion.z * InQuaternion.w;
+
+		// Reference
+		// http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+		// http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+
+		const float	SINGULARITY_THRESHOLD = 0.4999995f;
+		float		pitch, yaw, roll;
+
+		// Singularity at north pole
+		if ( singularityTest > SINGULARITY_THRESHOLD * normalizeFactor )
+		{
+			pitch	= 0.f;
+			yaw		= 2.f * ATan2( InQuaternion.x, InQuaternion.w );
+			roll	= PI / 2.f;
+		}
+		// Singularity at south pole
+		else if ( singularityTest < -SINGULARITY_THRESHOLD * normalizeFactor )
+		{
+			pitch	= 0.f;
+			yaw		= -2.f * ATan2( InQuaternion.x, InQuaternion.w );
+			roll	= -PI / 2.f;
+		}
+		else
+		{
+			pitch	= ATan2( 2.f * InQuaternion.x * InQuaternion.w - 2.f * InQuaternion.y * InQuaternion.z, -quatSquareX + quatSquareY - quatSquareZ + quatSquareW );
+			yaw		= ATan2( 2.f * InQuaternion.y * InQuaternion.w - 2.f * InQuaternion.x * InQuaternion.z, quatSquareX - quatSquareY - quatSquareZ + quatSquareW );
+			roll	= ASin( 2.f * singularityTest / normalizeFactor );
+		}
+
+		return Vector( RadiansToDegrees( pitch ), RadiansToDegrees( yaw ), RadiansToDegrees( roll ) );
 	}
 
     /**
@@ -577,7 +608,7 @@ struct SMath
 	 */
 	static FORCEINLINE float Sin( float InA )
 	{
-		return sin( InA );
+		return sinf( InA );
 	}
 
 	/**
@@ -587,7 +618,17 @@ struct SMath
 	 */
 	static FORCEINLINE float Cos( float InA )
 	{
-		return cos( InA );
+		return cosf( InA );
+	}
+
+	/**
+	 * @brief ASin
+	 * @param InA	Value whose arc sine is computed, in the interval [-1,+1].
+	 * @return Returns principal arc sine of x, in the interval [-pi/2,+pi/2] radians.
+	 */
+	static FORCEINLINE float ASin( float InA )
+	{
+		return asinf( InA );
 	}
 
 	/**
@@ -598,6 +639,17 @@ struct SMath
 	static FORCEINLINE float ATan( float InA )
 	{
 		return atanf( InA );
+	}
+
+	/**
+	 * @brief ATan2
+	 * @param InY		Value representing the proportion of the y-coordinate
+	 * @param InX		Value representing the proportion of the x-coordinate.
+	 * @return Return principal arc tangent of y/x, in the interval [-pi,+pi] radians
+	 */
+	static FORCEINLINE float ATan2( float InY, float InX )
+	{
+		return atan2f( InY, InX );
 	}
 
 	/**

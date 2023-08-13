@@ -287,7 +287,7 @@ public:
 	 * @brief Get unit axis
 	 * 
 	 * @param InAxis	Axis
-	 * @return Return unit axis, if InAxis = A_None return SMath::vectorZero
+	 * @return Return unit axis
 	 */
 	FORCEINLINE Vector GetUnitAxis( EAxis InAxis ) const
 	{
@@ -296,6 +296,7 @@ public:
 		case A_X:		return RotateVector( Vector( 1.f, 0.f, 0.f ) );	break;
 		case A_Y:		return RotateVector( Vector( 0.f, 1.f, 0.f ) );	break;
 		case A_Z:		return RotateVector( Vector( 0.f, 0.f, 1.f ) );	break;
+		default:		Assert( false ); break;
 		}
 
 		return SMath::vectorZero;

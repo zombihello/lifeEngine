@@ -856,7 +856,7 @@ public:
 		else
 		{
 			const CTransform&	componentTransform = rootComponent->GetComponentTransform();
-			return componentTransform.GetUnitAxis( A_Z );
+			return componentTransform.GetUnitAxis( A_Forward );
 		}
 	}
 
@@ -873,7 +873,7 @@ public:
 		else
 		{
 			const CTransform&	componentTransform = rootComponent->GetComponentTransform();
-			return componentTransform.GetUnitAxis( A_X );
+			return componentTransform.GetUnitAxis( A_Right );
 		}
 	}
 
@@ -890,7 +890,7 @@ public:
 		else
 		{
 			const CTransform&	componentTransform = rootComponent->GetComponentTransform();
-			return componentTransform.GetUnitAxis( A_Y );
+			return componentTransform.GetUnitAxis( A_Up );
 		}
 	}
 
