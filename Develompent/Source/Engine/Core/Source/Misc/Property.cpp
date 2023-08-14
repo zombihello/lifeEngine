@@ -11,6 +11,7 @@ IMPLEMENT_CLASS( CColorProperty )
 IMPLEMENT_CLASS( CComponentProperty )
 IMPLEMENT_CLASS( CVectorProperty )
 IMPLEMENT_CLASS( CRotatorProperty )
+IMPLEMENT_CLASS( CAssetProperty )
 
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CByteProperty )
@@ -21,6 +22,7 @@ IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CColorProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CComponentProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CVectorProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CRotatorProperty )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CAssetProperty )
 
 /*
 ==================
@@ -316,6 +318,40 @@ bool CRotatorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyV
 	if ( InObjectAddress )
 	{
 		*( CRotator* )( InObjectAddress + offset ) = InPropertyValue.rotatorValue;
+		bResult = true;
+	}
+	return bResult;
+}
+
+
+/*
+==================
+CAssetProperty::GetPropertyValue
+==================
+*/
+bool CAssetProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
+{
+	bool	bResult = false;
+	if ( InObjectAddress )
+	{
+		OutPropertyValue.assetValue = *( TAssetHandle<CAsset>* )( InObjectAddress + offset );
+		bResult = true;
+	}
+
+	return bResult;
+}
+
+/*
+==================
+CAssetProperty::SetPropertyValue
+==================
+*/
+bool CAssetProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue )
+{
+	bool	bResult = false;
+	if ( InObjectAddress )
+	{
+		*( TAssetHandle<CAsset>* )( InObjectAddress + offset ) = InPropertyValue.assetValue;
 		bResult = true;
 	}
 	return bResult;

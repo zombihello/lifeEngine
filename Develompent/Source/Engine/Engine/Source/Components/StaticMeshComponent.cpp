@@ -30,7 +30,7 @@ CStaticMeshComponent::StaticInitializeClass
 */
 void CStaticMeshComponent::StaticInitializeClass()
 {
-	// TODO BS yehor.pohuliaka - Need implement CAssetProperty for assets
+	new CAssetProperty( staticClass, TEXT( "Static Mesh" ), TEXT( "Disaply" ), TEXT( "Static mesh asset" ), CPP_PROPERTY( staticMesh ), 0, AT_StaticMesh );
 	// TODO BS yehor.pohuliaka - Need implement CArrayProperty for arrays
 }
 
@@ -45,6 +45,22 @@ void CStaticMeshComponent::Serialize( class CArchive& InArchive )
 	InArchive << staticMesh;
 	InArchive << overrideMaterials;
 }
+
+#if WITH_EDITOR
+/*
+==================
+CStaticMeshComponent::PostEditChangeProperty
+==================
+*/
+void CStaticMeshComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+{
+	if ( InProperty->GetCName() == TEXT( "Static Mesh" ) )
+	{
+		SetStaticMesh( staticMesh );
+	}
+	Super::PostEditChangeProperty( InProperty, InChangeType );
+}
+#endif // WITH_EDITOR
 
 /*
 ==================

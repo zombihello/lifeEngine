@@ -14,6 +14,7 @@
 #include "Math/Rotator.h"
 #include "Misc/RefCountPtr.h"
 #include "System/Name.h"
+#include "System/Package.h"
 
 /**
  * @ingroup Core
@@ -50,6 +51,13 @@ union UPropertyValue
 		, colorValue( 0 )
 		, componentValue( nullptr )
 		, vectorValue( 0.f, 0.f, 0.f )
+		, assetValue( nullptr, nullptr )
+	{}
+
+	/**
+	 * @brief Destructor
+	 */
+	~UPropertyValue()
 	{}
 
 	byte						byteValue;			/**< Byte */
@@ -60,6 +68,7 @@ union UPropertyValue
 	class CActorComponent*		componentValue;		/**< Component */
 	Vector						vectorValue;		/**< Vector */
 	CRotator					rotatorValue;		/**< Rotator */
+	TAssetHandle<CAsset>		assetValue;			/**< Asset */
 };
 
 /**
@@ -624,5 +633,68 @@ public:
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
 };
+
+/**
+ * @ingroup Core
+ * @brief Asset property
+ */
+class CAssetProperty : public CProperty
+{
+	DECLARE_CLASS( CAssetProperty, CProperty, 0, CASTCLASS_CAssetProperty )
+
+public:
+	/**
+	 * @brief Constructor
+	 */
+	CAssetProperty() {}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InClass			Class where property is stored
+	 * @param InName			Property name
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InOffset			Offset to property
+	 * @param InSize			Property size
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InAssetType		Asset type
+	 */
+	CAssetProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags, EAssetType InAssetType )
+		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+		, assetType( InAssetType )
+	{}
+
+	/**
+	 * @brief Get property value
+	 *
+	 * @param InObjectAddress		The address of a object where the value of this property is stored
+	 * @param OutPropertyValue		Will be filled with the value located at InObjectAddress+Offset
+	 * @return Return TRUE if OutPropertyValue was filled with a property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
+	 */
+	virtual bool GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const override;
+
+	/**
+	 * @brief Set property value
+	 *
+	 * @param InObjectAddress		The address of a object where the value of this property is stored
+	 * @param InPropertyValue		Contains the value that should be copied into InObjectAddress+Offset
+	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
+	 */
+	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Get asset type
+	 * @return Return asset type
+	 */
+	FORCEINLINE EAssetType GetAssetType() const
+	{
+		return assetType;
+	}
+
+private:
+	EAssetType			assetType;		/**< Asset type */
+};
+
 
 #endif // !PROPERTY_H

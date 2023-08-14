@@ -74,7 +74,7 @@ void CMaterialEditorWindow::Init()
 		TSharedPtr<CSelectAssetWidget>	selectAssetWidget = MakeSharedPtr<CSelectAssetWidget>( index );
 		
 		selectAssetWidget->Init();
-		selectAssetWidget->SetLabel( TCHAR_TO_ANSI( s_TextureParameterNames[index].ToString().c_str() ) );
+		selectAssetWidget->SetLabel( s_TextureParameterNames[index].ToString() );
 		selectAssetWidget->OnSelectedAsset().Add( std::bind(	&CMaterialEditorWindow::OnSelectedAsset,	this, std::placeholders::_1, std::placeholders::_2	) );
 		selectAssetWidget->OnOpenAssetEditor().Add( std::bind(	&CMaterialEditorWindow::OnOpenAssetEditor,	this, std::placeholders::_1							) );
 		selectAssetWidgets.push_back( SSelectAssetHandle{s_TextureParameterNames[index], nullptr, selectAssetWidget } );

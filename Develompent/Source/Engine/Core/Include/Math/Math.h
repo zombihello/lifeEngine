@@ -580,6 +580,29 @@ struct SMath
 	}
 
 	/**
+	 * @brief Loge
+	 *
+	 * @param InA	Floating point value
+	 * @return Return the natural (base-e) logarithm of arg (ln(arg) or loge(arg)) is returned.
+	 */
+	static FORCEINLINE float Loge( float InA )
+	{
+		return logf( InA );
+	}
+
+	/**
+	 * @brief LogX
+	 *
+	 * @param InBase	Base of logarithm
+	 * @param InValue	Value of logarithm
+	 * @return Return the logarithm of Log( InValue ) with base of InBase
+	 */
+	static FORCEINLINE float LogX( float InBase, float InValue )
+	{
+		return Loge( InValue ) / Loge( InBase );
+	}
+
+	/**
 	 * @brief Converts number with truncation towards zero
 	 * 
 	 * @param InA		Value

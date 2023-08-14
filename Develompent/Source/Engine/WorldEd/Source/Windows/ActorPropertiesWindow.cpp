@@ -1,8 +1,10 @@
 #include "Containers/StringConv.h"
+#include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Misc/UIGlobals.h"
 #include "System/World.h"
+#include "System/Package.h"
 #include "ImGUI/ImGUIEngine.h"
 #include "Windows/ActorPropertiesWindow.h"
 #include "System/EditorEngine.h"
@@ -375,11 +377,28 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 	{
 		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
 		Vector		rotation = propertyValue.rotatorValue.ToEuler();
-		
+
 		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), rotation, 0.f, 0.1f );
 		if ( bPropertyIsChanged )
 		{
 			propertyValue.rotatorValue = CRotator::MakeFromEuler( rotation );
+		}
+	}
+
+	// Asset property
+	else if ( theClass->HasAnyCastFlags( CASTCLASS_CAssetProperty ) )
+	{
+		CAssetProperty*		assetProperty = ExactCast<CAssetProperty>( InProperty );
+		Assert( assetProperty );
+	
+		assetProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		std::wstring		assetReference;
+		MakeReferenceToAsset( propertyValue.assetValue, assetReference );
+	
+		bPropertyIsChanged |= ImGui::SelectAsset( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), TEXT( "" ), assetReference );
+		if ( bPropertyIsChanged )
+		{
+			propertyValue.assetValue = g_PackageManager->FindAsset( assetReference, assetProperty->GetAssetType() );
 		}
 	}
 

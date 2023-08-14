@@ -40,6 +40,7 @@ void CSpriteComponent::StaticInitializeClass()
 {
 	new CBoolProperty( staticClass, TEXT( "bFlipVertical" ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by vertical" ), CPP_PROPERTY( bFlipVertical ), 0 );
 	new CBoolProperty( staticClass, TEXT( "bFlipHorizontal" ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPP_PROPERTY( bFlipHorizontal ), 0 );
+	new CAssetProperty( staticClass, TEXT( "Material" ), TEXT( "Disaply" ), TEXT( "Sprite material" ), CPP_PROPERTY( material ), 0, AT_Material );
 	// TODO BS yehor.pohuliaka - Need implement CNameProperty for enums
 }
 
@@ -91,6 +92,10 @@ void CSpriteComponent::PostEditChangeProperty( class CProperty* InProperty, EPro
 		else if ( nameProperty == TEXT( "bFlipHorizontal" ) )
 		{
 			SetFlipHorizontal( bFlipHorizontal );
+		}
+		else if ( nameProperty == TEXT( "Material" ) )
+		{
+			SetMaterial( material );
 		}
 	}
 

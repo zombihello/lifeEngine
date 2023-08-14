@@ -268,6 +268,7 @@ private:
 	bool								bFlipHorizontal;				/**< Is need flip sprite by horizontal */
     ESpriteType							type;							/**< Sprite type */
 	SpriteRef_t							sprite;							/**< Sprite mesh */
+	TAssetHandle<CMaterial>				material;						/**< Sprite material */
 	DrawingPolicyLinkRef_t				drawingPolicyLink;				/**< Reference to drawing policy link in scene */
 	DepthDrawingPolicyLinkRef_t			depthDrawingPolicyLink;			/**< Reference to depth drawing policy link in scene */
 	std::vector<const SMeshBatch*>		meshBatchLinks;					/**< Reference to mesh batch in drawing policy link */

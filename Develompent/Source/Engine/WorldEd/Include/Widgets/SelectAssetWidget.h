@@ -66,7 +66,7 @@ public:
 	 * @brief Set label of the widget
 	 * @param InNewLabel	New label of the widget
 	 */
-	FORCEINLINE void SetLabel( const std::string& InNewLabel )
+	FORCEINLINE void SetLabel( const std::wstring& InNewLabel )
 	{
 		label = InNewLabel;
 	}
@@ -93,7 +93,7 @@ public:
 	 * @brief Get asset reference
 	 * @return Return asset reference
 	 */
-	FORCEINLINE const std::string& GetAssetReference() const
+	FORCEINLINE const std::wstring& GetAssetReference() const
 	{
 		return assetReference;
 	}
@@ -111,7 +111,7 @@ public:
 	 * @brief Get label of the widget
 	 * @return Return label of the widget
 	 */
-	FORCEINLINE const std::string& GetLabel() const
+	FORCEINLINE const std::wstring& GetLabel() const
 	{
 		return label;
 	}
@@ -138,8 +138,8 @@ private:
 	bool						bInit;				/**< Is inited widget */
 	bool						bSelectedAsset;		/**< Is selected asset */
 	uint32						assetSlot;			/**< Index of slot */
-	std::string					assetReference;		/**< Reference to asset in string type */
-	std::string					label;				/**< Label */
+	std::wstring				assetReference;		/**< Reference to asset in string type */
+	std::wstring				label;				/**< Label */
 	Texture2DRHIRef_t			previewTexture;		/**< Preview texture */
 	mutable COnSelectedAsset	onSelectedAsset;	/**< Delegates of selected asset */
 	mutable COnOpenAssetEditor	onOpenAssetEditor;	/**< Delegates of open asset editor */

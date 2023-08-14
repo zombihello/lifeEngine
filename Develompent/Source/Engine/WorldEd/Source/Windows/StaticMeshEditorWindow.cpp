@@ -66,7 +66,7 @@ void CStaticMeshEditorWindow::Init()
 		TSharedPtr<CSelectAssetWidget>	selectAssetWidget = MakeSharedPtr<CSelectAssetWidget>( index );
 
 		selectAssetWidget->Init();
-		selectAssetWidget->SetLabel( "Slot " + std::to_string( index ) );
+		selectAssetWidget->SetLabel( CString::Format( TEXT( "Slot %i" ), index ) );
 		selectAssetWidget->OnSelectedAsset().Add(	std::bind( &CStaticMeshEditorWindow::OnSelectedAsset,	this, std::placeholders::_1, std::placeholders::_2	) );
 		selectAssetWidget->OnOpenAssetEditor().Add( std::bind( &CStaticMeshEditorWindow::OnOpenAssetEditor, this, std::placeholders::_1							) );
 		selectAssetWidgets.push_back( SSelectAssetHandle{ index, nullptr, selectAssetWidget } );
@@ -169,7 +169,6 @@ void CStaticMeshEditorWindow::OnTick()
 			if ( selectAssetHandle.widget )
 			{
 				selectAssetHandle.widget->Tick();
-				ImGui::NewLine();
 			}
 		}
 		ImGui::EndChild();

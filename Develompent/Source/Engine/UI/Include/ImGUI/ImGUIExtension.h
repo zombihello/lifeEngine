@@ -16,6 +16,7 @@
 
 #include "Math/Math.h"
 #include "ImGUI/imgui.h"
+#include "Render/Texture.h"
 
 namespace ImGui
 {
@@ -56,6 +57,21 @@ namespace ImGui
 	 * @return Return TRUE if some component of InValue was changed, otherwise FALSE
 	 */
 	bool DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float InResetValue = 0.f, float InSpeed = 1.f, float InMin = 0.f, float InMax = 0.f, const char* InFormat = "%.2f", ImGuiSliderFlags InFlags = 0 );
+
+#if WITH_EDITOR
+	/**
+	 * @ingroup UI
+	 * @brief Draw a widget for select asset
+	 * 
+	 * @param InStrId					String that used as an ID
+	 * @param InLabel					Label
+	 * @param InOutAssetReference		String of asset reference to display. If it changed here will be new value
+	 * @param OutNeedOpenAssetEditor	TRUE when user pressed on button of preview image
+	 * @param InPreviewTexture			Preview texture. If NULL she will not drawed
+	 * @return Return TRUE when asset reference is changed, otherwise FALSE
+	 */
+	bool SelectAsset( const std::wstring& InStrId, const std::wstring& InLabel, std::wstring& InOutAssetReference, bool* OutNeedOpenAssetEditor = nullptr, Texture2DRHIParamRef_t InPreviewTexture = nullptr );
+#endif // WITH_EDITOR
 }
 
 #endif // WITH_IMGUI
