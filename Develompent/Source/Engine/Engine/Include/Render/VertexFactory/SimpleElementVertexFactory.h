@@ -100,12 +100,6 @@ public:
 	virtual void InitRHI() override;
 
 	/**
-	 * @brief Get type hash
-	 * @return Return hash of vertex factory
-	 */
-	virtual uint64 GetTypeHash() const override;
-
-	/**
 	 * @brief Construct vertex factory shader parameters
 	 *
 	 * @param InShaderFrequency Shader frequency

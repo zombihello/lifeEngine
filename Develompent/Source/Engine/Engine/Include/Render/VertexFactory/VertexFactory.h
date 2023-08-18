@@ -325,7 +325,7 @@ private:
  */
 struct SVertexStream
 {
-	VertexBufferRHIRef_t			vertexBuffer;		/**< Vertex buffer. NOTE: Need change to FVertexBuffer */
+	VertexBufferRHIRef_t		vertexBuffer;		/**< Vertex buffer. NOTE: Need change to FVertexBuffer */
 	uint32						stride;				/**< Stride */
 };
 
@@ -433,7 +433,7 @@ public:
 	 * @brief Get type hash
 	 * @return Return hash of vertex factory
 	 */
-	virtual uint64 GetTypeHash() const = 0;
+	virtual uint64 GetTypeHash() const;
 
 	/**
 	 * Get RHI vertex declaration

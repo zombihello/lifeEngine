@@ -78,7 +78,8 @@ void CStaticMeshComponent::LinkDrawList()
 	}
 
 	// If static mesh is valid - add to scene draw policy link
-	TSharedPtr<CStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
+	drawStaticMesh = staticMesh;
+	TSharedPtr<CStaticMesh>		staticMeshRef = drawStaticMesh.ToSharedPtr();
 	if ( staticMeshRef )
 	{
 		elementDrawingPolicyLink = staticMeshRef->LinkDrawList( scene->GetSDG( SDG_World ), overrideMaterials );
@@ -97,7 +98,7 @@ void CStaticMeshComponent::UnlinkDrawList()
 	// If the primitive already added to scene - remove all draw policy links
 	if ( elementDrawingPolicyLink )
 	{
-		TSharedPtr<CStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
+		TSharedPtr<CStaticMesh>		staticMeshRef = drawStaticMesh.ToSharedPtr();
 		if ( staticMeshRef )
 		{
 			staticMeshRef->UnlinkDrawList( scene->GetSDG( SDG_World ), elementDrawingPolicyLink );
@@ -106,6 +107,8 @@ void CStaticMeshComponent::UnlinkDrawList()
 		{
 			elementDrawingPolicyLink.Reset();
 		}
+
+		drawStaticMesh = nullptr;
 	}
 }
 

@@ -50,16 +50,6 @@ void CDynamicMeshVertexFactory::InitRHI()
 
 /*
 ==================
-CDynamicMeshVertexFactory::GetTypeHash
-==================
-*/
-uint64 CDynamicMeshVertexFactory::GetTypeHash() const
-{
-    return staticType.GetHash();
-}
-
-/*
-==================
 CDynamicMeshVertexFactory::ConstructShaderParameters
 ==================
 */

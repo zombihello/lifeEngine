@@ -127,6 +127,7 @@ private:
 	virtual void UnlinkDrawList() override;
 
 	TAssetHandle<CStaticMesh>								staticMesh;						/**< Static mesh */
+	TAssetHandle<CStaticMesh>								drawStaticMesh;					/**< Static mesh which drawing now */
 	std::vector< TAssetHandle<CMaterial> >					overrideMaterials;				/**< Override materials */
 	TSharedPtr<CStaticMesh::SElementDrawingPolicyLink>		elementDrawingPolicyLink;		/**< Element drawing policy link of current static mesh */
 };

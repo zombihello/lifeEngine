@@ -134,7 +134,7 @@ CSpriteVertexFactory::GetTypeHash
 */
 uint64 CSpriteVertexFactory::GetTypeHash() const
 {
-	uint64		hash = Sys_MemFastHash( bFlipVertical, staticType.GetHash() );
+	uint64		hash = Sys_MemFastHash( bFlipVertical, CVertexFactory::GetTypeHash() );
 	hash = Sys_MemFastHash( bFlipHorizontal, hash );
 	hash = Sys_MemFastHash( textureRect, hash );
 	return Sys_MemFastHash( spriteSize, hash );

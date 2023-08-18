@@ -49,16 +49,6 @@ void CStaticMeshVertexFactory::InitRHI()
 
 /*
 ==================
-CStaticMeshVertexFactory::GetTypeHash
-==================
-*/
-uint64 CStaticMeshVertexFactory::GetTypeHash() const
-{
-    return staticType.GetHash();
-}
-
-/*
-==================
 CStaticMeshVertexFactory::ConstructShaderParameters
 ==================
 */

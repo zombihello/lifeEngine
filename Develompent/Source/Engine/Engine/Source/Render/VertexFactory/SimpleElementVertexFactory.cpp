@@ -37,16 +37,6 @@ void CSimpleElementVertexDeclaration::ReleaseRHI()
 
 /*
 ==================
-CSimpleElementVertexFactory::GetTypeHash
-==================
-*/
-uint64 CSimpleElementVertexFactory::GetTypeHash() const
-{
-	return staticType.GetHash();
-}
-
-/*
-==================
 CSimpleElementVertexFactory::InitRHI
 ==================
 */

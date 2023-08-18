@@ -349,7 +349,7 @@ CLightVertexFactory::GetTypeHash
 */
 uint64 CLightVertexFactory::GetTypeHash() const
 {
-	return staticType.GetHash();
+	return Sys_MemFastHash( lightType, CVertexFactory::GetTypeHash() );
 }
 
 /*
