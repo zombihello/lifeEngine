@@ -24,9 +24,10 @@ CMaterial::CMaterial
 */
 CMaterial::CMaterial() :
 	CAsset( AT_Material ),
-	isNeedUpdateShaderMap( true ),
-	isTwoSided( false ),
-	isWireframe( false ),
+	bNeedUpdateShaderMap( true ),
+	bTwoSided( false ),
+	bWireframe( false ),
+	bTranslucency( false ),
 	usage( MU_AllMeshes )
 {}
 
@@ -52,15 +53,15 @@ void CMaterial::Serialize( class CArchive& InArchive )
 
 	if ( InArchive.IsLoading() )
 	{
-		isNeedUpdateShaderMap = true;
+		bNeedUpdateShaderMap = true;
 		scalarParameters.clear();
 		vectorParameters.clear();
 		textureParameters.clear();
 	}
 
 	CAsset::Serialize( InArchive );
-	InArchive << isTwoSided;
-	InArchive << isWireframe;
+	InArchive << bTwoSided;
+	InArchive << bWireframe;
 	InArchive << usage;
 
 	if ( InArchive.Ver() < VER_RemovedShadersTypeFromMaterial )
@@ -105,6 +106,11 @@ void CMaterial::Serialize( class CArchive& InArchive )
 		InArchive << vectorParameters;
 		InArchive << textureParameters;
 	}
+
+	if ( InArchive.Ver() >= VER_AddTranslucencyFlag )
+	{
+		InArchive << bTranslucency;
+	}
 }
 
 /*
@@ -115,7 +121,7 @@ CMaterial::GetShader
 CShader* CMaterial::GetShader( uint64 InVertexFactoryHash, EShaderFrequency InShaderFrequency )
 {
 	Assert( InShaderFrequency < SF_NumDrawFrequencies );
-	if ( isNeedUpdateShaderMap )
+	if ( bNeedUpdateShaderMap )
 	{
 		CacheShaderMap();
 	}
@@ -135,7 +141,7 @@ CMaterial::CacheShaderMap
 */
 void CMaterial::CacheShaderMap()
 {
-	if ( !isNeedUpdateShaderMap )
+	if ( !bNeedUpdateShaderMap )
 	{
 		return;
 	}
@@ -175,7 +181,7 @@ void CMaterial::CacheShaderMap()
 	}
 #endif // !SHIPPING_BUILD
 
-	isNeedUpdateShaderMap = false;
+	bNeedUpdateShaderMap = false;
 }
 
 /*

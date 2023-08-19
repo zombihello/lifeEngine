@@ -1371,6 +1371,17 @@ public:
 	TAssetHandle<CAsset> FindAsset( const std::wstring& InString, EAssetType InType = AT_Unknown );
 
 	/**
+	 * @brief Find asset in package by SAssetReference
+	 * 
+	 * @param InAssetReference		Asset reference
+	 * @return Return found asset. If not found then return NULL
+	 */
+	FORCEINLINE TAssetHandle<CAsset> FindAsset( const SAssetReference& InAssetReference )
+	{
+		return FindAsset( InAssetReference.guidPackage, InAssetReference.guidAsset, InAssetReference.type );
+	}
+
+	/**
 	 * Find asset in package
 	 * 
 	 * @param InGUIDPackage GUID of the package
@@ -1663,6 +1674,7 @@ FORCEINLINE bool MakeReferenceToAsset( const std::wstring& InPackageName, const 
  */
 FORCEINLINE bool MakeReferenceToAsset( const TAssetHandle<CAsset>& InAsset, std::wstring& OutString )
 {
+	// TODO yehor.pohuliaka - Maybe need rewrite either this function or SAssetReference, because when asset was unloaded then function don't convert TAssetHandle to string reference
 	if ( !InAsset.IsAssetValid() )
 	{
 		return false;

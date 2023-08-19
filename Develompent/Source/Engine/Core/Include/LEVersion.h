@@ -56,6 +56,7 @@ enum ELifeEnginePackageVersion
 	VER_NewSeriallizeDataInLightComponents	= 24,					/**< Added some properties to serialize in CLightComponent, CPointLightCompontn and CSpotLightComponent */
 	VER_CObjectHasCName						= 25,					/**< In CObject field 'name' changed to CName type */
 	VER_UpdateTrasformSceneComponent		= 26,					/**< To CSceneComponent added Location, Scale, Rotation (CRotator) and updated method of transformations */
+	VER_AddTranslucencyFlag					= 27,					/**< Added to CMaterial bTranslucency flag */
 
 	//
 	// New versions can be added here

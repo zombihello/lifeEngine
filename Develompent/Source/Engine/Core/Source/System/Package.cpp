@@ -1562,6 +1562,7 @@ void CPackageManager::GarbageCollector()
 			{
 				// Try unload dependent assets
 				CAsset::SetDependentAssets_t		dependentAssets;
+				CAsset::SetDependentAssets_t		reservedAssets;
 				assetInfo.data->GetDependentAssets( dependentAssets );
 
 				for ( auto itDependentAsset = dependentAssets.begin(), itDependentAssetEnd = dependentAssets.end(); itDependentAsset != itDependentAssetEnd; ++itDependentAsset )
@@ -1578,6 +1579,8 @@ void CPackageManager::GarbageCollector()
 																																						// Weak reference: 5 because one in current section (SetDependentAssets_t), second in parent asset and other self this resource, SharedThis and GetAssetHandle
 					if ( !bCanUnloadDependentAsset )
 					{
+						// Get dependent asset again for reserve assets of parent
+						dependetAsset->GetDependentAssets( reservedAssets );
 						continue;
 					}
 

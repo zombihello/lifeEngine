@@ -189,7 +189,7 @@ void CEditorEngine::Init()
 	logsWindow							= MakeSharedPtr<CLogsWindow>( CString::Format( TEXT( "%s Logs" ), ANSI_TO_TCHAR( IMGUI_ICON_FILETEXT ) ) );
 	logsWindow->Init();
 
-	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho XY" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), ENGINE_2D ? true : false, LVT_OrthoXY );
+	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho XY" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXY );
 	viewportWindows[LVT_OrthoXY]->Init();
 
 	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho XZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXZ );
@@ -198,7 +198,7 @@ void CEditorEngine::Init()
 	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho YZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoYZ );
 	viewportWindows[LVT_OrthoYZ]->Init();
 
-	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Perspective" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), ENGINE_2D ? false : true, LVT_Perspective );
+	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Perspective" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), true, LVT_Perspective );
 	viewportWindows[LVT_Perspective]->Init();
 }
 

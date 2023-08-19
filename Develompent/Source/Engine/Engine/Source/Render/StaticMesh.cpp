@@ -29,15 +29,25 @@ CStaticMesh::~CStaticMesh()
 		// Mark dirty drawing policy link
 		itElement->second->bDirty = true;
 
+		// Remove items from static mesh draw list
 		for ( uint32 index = 0, count = itElement->second->drawingPolicyLinks.size(); index < count; ++index )
 		{
 			itElement->first.SDG->staticMeshDrawList.RemoveItem( itElement->second->drawingPolicyLinks[ index ] );
-			itElement->first.SDG->depthDrawList.RemoveItem( itElement->second->depthDrawingPolicyLinks[ index ] );
-			
-#if ENABLE_HITPROXY
-			itElement->first.SDG->hitProxyLayers[ HPL_World ].hitProxyDrawList.RemoveItem( itElement->second->hitProxyDrawingPolicyLinks[ index ] );
-#endif // ENABLE_HITPROXY
 		}
+
+		// Remove items from depth draw list
+		for ( uint32 index = 0, count = itElement->second->depthDrawingPolicyLinks.size(); index < count; ++index )
+		{
+			itElement->first.SDG->depthDrawList.RemoveItem( itElement->second->depthDrawingPolicyLinks[index] );
+		}
+
+#if ENABLE_HITPROXY
+		// Remove items from hit proxy layers
+		for ( uint32 index = 0, count = itElement->second->hitProxyDrawingPolicyLinks.size(); index < count; ++index )
+		{
+			itElement->first.SDG->hitProxyLayers[HPL_World].hitProxyDrawList.RemoveItem( itElement->second->hitProxyDrawingPolicyLinks[index] );
+		}
+#endif // ENABLE_HITPROXY
 	}
 }
 
@@ -373,15 +383,36 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolic
 	{
 		const SStaticMeshSurface&		surface				= surfaces[ indexSurface ];
 		TAssetHandle<CMaterial>			material			= materials[ surface.materialID ];
+		TSharedPtr<CMaterial>			materialRef;
 
 		// If current material is override - use custom material
 		if ( indexSurface < numOverrideMaterials )
 		{
-			TAssetHandle<CMaterial>			overrideMaterial = InOverrideMaterials->at( surface.materialID );
+			TAssetHandle<CMaterial>		overrideMaterial = InOverrideMaterials->at( surface.materialID );
 			if ( overrideMaterial.IsValid() )
 			{
 				material = overrideMaterial;
 			}
+		}
+		
+		// In case when reference to material is valid then get TSharedPtr to material
+		if ( material.IsValid() )
+		{
+			materialRef = material.ToSharedPtr();
+			
+			// If materialRef still NULL then try load it from package
+			if ( !materialRef )
+			{
+				materialRef = g_PackageManager->FindAsset( *material.GetReference() ).ToSharedPtr();
+			}
+		}
+		
+		// Otherwise we must use default material if materialRef is still NULL
+		if ( !materialRef )
+		{
+			material = g_Engine->GetDefaultMaterial();
+			materialRef = material.ToSharedPtr();
+			Assert( materialRef );
 		}
 
 		// Generate mesh batch of surface
@@ -399,9 +430,12 @@ TSharedPtr<CStaticMesh::SElementDrawingPolicyLink> CStaticMesh::MakeDrawingPolic
 		element->meshBatchLinks.push_back( meshBatchLink );
 
 		// Make and add to scene new depth mesh drawing policy link
-		DepthDrawingPolicyLinkRef_t			depthDrawingPolicyLink		= ::MakeDrawingPolicyLink<DepthDrawingPolicyLink_t>( vertexFactory, material, meshBatch, meshBatchLink, InSDG.depthDrawList, DEC_STATIC_MESH );
-		element->depthDrawingPolicyLinks.push_back( depthDrawingPolicyLink );
-		element->meshBatchLinks.push_back( meshBatchLink );
+		if ( !materialRef->IsTranslucency() )	// TODO yehor.pohuliaka - Need implement normal translucency support in the render
+		{
+			DepthDrawingPolicyLinkRef_t		depthDrawingPolicyLink		= ::MakeDrawingPolicyLink<DepthDrawingPolicyLink_t>( vertexFactory, material, meshBatch, meshBatchLink, InSDG.depthDrawList, DEC_STATIC_MESH );
+			element->depthDrawingPolicyLinks.push_back( depthDrawingPolicyLink );
+			element->meshBatchLinks.push_back( meshBatchLink );
+		}
 
 		// Make and add to scene new hit proxy drawing policy link
 #if ENABLE_HITPROXY
@@ -442,15 +476,25 @@ void CStaticMesh::UnlinkDrawList( SSceneDepthGroup& InSDG, TSharedPtr<SElementDr
 	}
 
 	// Else we remove drawing policy link from SDG
+	// Remove items from static mesh draw list
 	for ( uint32 index = 0, count = itElement->second->drawingPolicyLinks.size(); index < count; ++index )
 	{
-		InSDG.staticMeshDrawList.RemoveItem( itElement->second->drawingPolicyLinks[ index ] );
-		InSDG.depthDrawList.RemoveItem( itElement->second->depthDrawingPolicyLinks[ index ] );
+		InSDG.staticMeshDrawList.RemoveItem( itElement->second->drawingPolicyLinks[index] );
+	}
+
+	// Remove items from depth draw list
+	for ( uint32 index = 0, count = itElement->second->depthDrawingPolicyLinks.size(); index < count; ++index )
+	{
+		InSDG.depthDrawList.RemoveItem( itElement->second->depthDrawingPolicyLinks[index] );
+	}
 
 #if ENABLE_HITPROXY
-		InSDG.hitProxyLayers[ HPL_World ].hitProxyDrawList.RemoveItem( itElement->second->hitProxyDrawingPolicyLinks[ index ] );
-#endif // ENABLE_HITPROXY
+	// Remove items from hit proxy layers
+	for ( uint32 index = 0, count = itElement->second->hitProxyDrawingPolicyLinks.size(); index < count; ++index )
+	{
+		InSDG.hitProxyLayers[HPL_World].hitProxyDrawList.RemoveItem( itElement->second->hitProxyDrawingPolicyLinks[index] );
 	}
+#endif // ENABLE_HITPROXY
 
 	InDrawingPolicyLink.Reset();
 	elementDrawingPolicyMap.erase( itElement );

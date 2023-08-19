@@ -137,16 +137,23 @@ void CMaterialEditorWindow::OnTick()
 		
 		// Is two sided
 		bool bIsTwoSided		= material->IsTwoSided();
-		if ( ImGui::Checkbox( "Is Two Sided", &bIsTwoSided ), &bIsTwoSided )
+		if ( ImGui::Checkbox( "Is Two Sided", &bIsTwoSided ) )
 		{
 			material->SetTwoSided( bIsTwoSided );
 		}
 
 		// Is wireframe
 		bool bIsWireframe		= material->IsWireframe();
-		if ( ImGui::Checkbox( "Is Wireframe", &bIsWireframe ), &bIsTwoSided )
+		if ( ImGui::Checkbox( "Is Wireframe", &bIsWireframe ) )
 		{
 			material->SetWireframe( bIsWireframe );
+		}
+
+		// Is translucency
+		bool bTranslucency		= material->IsTranslucency();
+		if ( ImGui::Checkbox( "Is Translucency", &bTranslucency ) )
+		{
+			material->SetTranslucency( bTranslucency );
 		}
 	}
 

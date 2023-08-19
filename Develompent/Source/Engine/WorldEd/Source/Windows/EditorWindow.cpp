@@ -137,17 +137,10 @@ void CEditorWindow::OnTick()
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetActorClassesWindow()->GetName().c_str() ), dockIdDown );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLogsWindow()->GetName().c_str() ), dockIdDown );
 
-#if !ENGINE_2D
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_Perspective )->GetName().c_str() ), dockspaceId );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_OrthoXY )->GetName().c_str() ), dockIdViewportXY );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_OrthoXZ )->GetName().c_str() ), dockIdViewportXZ );
 			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_OrthoYZ )->GetName().c_str() ), dockIdViewportYZ );
-#else
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_Perspective )->GetName().c_str() ), dockspaceId );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_OrthoXY )->GetName().c_str() ), dockspaceId );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_OrthoXZ )->GetName().c_str() ), dockspaceId );
-			ImGui::DockBuilderDockWindow( TCHAR_TO_ANSI( g_EditorEngine->GetLevelViewportWindow( LVT_OrthoYZ )->GetName().c_str() ), dockspaceId );
-#endif // !ENGINE_2D
 
 			ImGui::DockBuilderFinish( dockspaceId );
 		}

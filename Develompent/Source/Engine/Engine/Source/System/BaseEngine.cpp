@@ -277,11 +277,12 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 		return false;
 	}
 
-	// Serialize world
+	// Clean up and serialize world
+	g_World->CleanupWorld();
 	archive->SerializeHeader();
 	g_World->Serialize( *archive );
-	
-	// Call garbage collector of unused packages and assets
+
+	// Call garbage collector of unused packages and assets for free used memory
 	g_PackageManager->GarbageCollector();
 	return true;
 }

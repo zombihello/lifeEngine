@@ -18,9 +18,13 @@ CActorPropertiesWindow::CActorPropertiesWindow( const std::wstring& InName )
 	: CImGUILayer( InName )
 	, actorsSelectedDelegate( nullptr )
 	, actorsUnselectedDelegate( nullptr )
+	, createdNewMapDelegate( nullptr )
+	, loadedMapDelegate( nullptr )
 {
 	actorsSelectedDelegate = SEditorDelegates::onActorsSelected.Add(		std::bind( &CActorPropertiesWindow::OnActorsUnSelected, this, std::placeholders::_1 ) );
 	actorsUnselectedDelegate = SEditorDelegates::onActorsUnselected.Add(	std::bind( &CActorPropertiesWindow::OnActorsUnSelected, this, std::placeholders::_1 ) );
+	createdNewMapDelegate = SEditorDelegates::onEditorCreatedNewMap.Add(	std::bind( &CActorPropertiesWindow::OnMapChanged,		this						) );
+	loadedMapDelegate = SEditorDelegates::onEditorLoadedMap.Add(			std::bind( &CActorPropertiesWindow::OnMapChanged,		this						) );
 }
 
 /*
@@ -38,6 +42,16 @@ CActorPropertiesWindow::~CActorPropertiesWindow()
 	if ( actorsUnselectedDelegate )
 	{
 		SEditorDelegates::onActorsUnselected.Remove( actorsUnselectedDelegate );
+	}
+
+	if ( createdNewMapDelegate )
+	{
+		SEditorDelegates::onEditorCreatedNewMap.Remove( createdNewMapDelegate );
+	}
+
+	if ( loadedMapDelegate )
+	{
+		SEditorDelegates::onEditorLoadedMap.Remove( loadedMapDelegate );
 	}
 }
 
@@ -292,6 +306,18 @@ void CActorPropertiesWindow::OnActorsUnSelected( const std::vector<ActorRef_t>& 
 			}
 		}
 	}
+}
+
+/*
+==================
+CActorPropertiesWindow::OnMapChanged
+==================
+*/
+void CActorPropertiesWindow::OnMapChanged()
+{
+	// Clear object properties
+	actorProperties.Clear();
+	componentsProperties.clear();
 }
 
 

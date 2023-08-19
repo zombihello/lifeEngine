@@ -176,18 +176,6 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 	g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
 	g_RHI->SetBlendState( immediateContext, TStaticBlendStateRHI<>::GetRHI() );
 
-	// Render WorldEd background
-#if WITH_EDITOR
-	if ( g_IsEditor )
-	{
-		g_SceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
-		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false, CF_Less>::GetRHI() );
-		bDirty = RenderSDG( immediateContext, SDG_WorldEdBackground );
-		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
-		g_SceneRenderTargets.FinishRenderingSceneColorLDR( immediateContext );
-	}
-#endif // WITH_EDITOR
-
 	// If SHOW_Lights setted and disabled wireframe mode, we rendering to the GBuffer
 	ShowFlags_t		showFlags	= sceneView->GetShowFlags();
 	bool			bGBuffer	= false;
@@ -210,6 +198,18 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 
 	// Render SDG_World layer
 	bDirty = RenderSDG( InDeviceContext, SDG_World );
+
+	// Render WorldEd background
+#if WITH_EDITOR
+	if ( g_IsEditor )
+	{
+		g_SceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
+		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false, CF_Less>::GetRHI() );
+		bDirty = RenderSDG( immediateContext, SDG_WorldEdBackground );
+		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
+		g_SceneRenderTargets.FinishRenderingSceneColorLDR( immediateContext );
+	}
+#endif // WITH_EDITOR
 
 	// Finish rendering to GBuffer (only when we used him)
 	if ( bGBuffer )

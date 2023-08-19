@@ -122,6 +122,11 @@ private:
 	void OnActorsUnSelected( const std::vector<ActorRef_t>& InActors );
 
 	/**
+	 * @brief Event called when map changed (created or loaded)
+	 */
+	void OnMapChanged();
+
+	/**
 	 * @brief Get all properties from object
 	 *
 	 * @param InObject					Object
@@ -152,6 +157,8 @@ private:
 	std::unordered_map<CName, CObjectProperties, CName::SHashFunction>		componentsProperties;		/**< Array of components properties */
 	SEditorDelegates::COnActorsSelected::DelegateType_t*					actorsSelectedDelegate;		/**< Actors selected delegate */
 	SEditorDelegates::COnActorsUnselected::DelegateType_t*					actorsUnselectedDelegate;	/**< Actors unselected delegate */
+	SEditorDelegates::COnEditorCreatedNewMap::DelegateType_t*				createdNewMapDelegate;		/**< Created new map delegate */
+	SEditorDelegates::COnEditorLoadedMap::DelegateType_t*					loadedMapDelegate;			/**< Loaded map delegate */
 };
 
 #endif // !ACTORPROPERTIESWINDOW_H
