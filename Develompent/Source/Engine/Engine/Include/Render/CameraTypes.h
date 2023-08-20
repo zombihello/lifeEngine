@@ -10,6 +10,7 @@
 #define CAMERATYPES_H
 
 #include "Math/Math.h"
+#include "Misc/Enum.h"
 
 /**
  * @ingroup Engine
@@ -20,6 +21,11 @@ enum ECameraProjectionMode
 	CPM_Perspective,		/**< Perspective mode */
 	CPM_Orthographic		/**< Orthographic mode */
 };
+
+DECLARE_ENUM( ECameraProjectionMode )
+#define FOREACH_ENUM_CAMERAPROJECTMODE( X ) \
+	X( CPM_Perspective ) \
+	X( CPM_Orthographic )
 
 /**
  * @ingroup Engine

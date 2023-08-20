@@ -13,6 +13,7 @@
 #include "Math/Color.h"
 #include "Math/Rotator.h"
 #include "Misc/RefCountPtr.h"
+#include "Misc/Enum.h"
 #include "System/Name.h"
 #include "System/Package.h"
 
@@ -260,9 +261,11 @@ public:
 	 * @param InOffset			Offset to property
 	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InEnum			If InEnum not null then it's mean this property is enum
 	 */
-	CByteProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
+	CByteProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags, CEnum* InEnum = nullptr )
 		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+		, cenum( InEnum )
 	{}
 
 	/**
@@ -282,6 +285,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
+
+	/**
+	 * @brief Get enum
+	 * @return Return enum if this property is enum
+	 */
+	FORCEINLINE CEnum* GetEnum() const
+	{
+		return cenum;
+	}
+
+private:
+	CEnum*		cenum;		/**< Enum */
 };
 
 /**

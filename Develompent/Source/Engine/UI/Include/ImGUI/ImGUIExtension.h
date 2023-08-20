@@ -72,6 +72,17 @@ namespace ImGui
 	 */
 	bool SelectAsset( const std::wstring& InStrId, const std::wstring& InLabel, std::wstring& InOutAssetReference, bool* OutNeedOpenAssetEditor = nullptr, Texture2DRHIParamRef_t InPreviewTexture = nullptr );
 #endif // WITH_EDITOR
+
+	/**
+	 * @ingroup UI
+	 * @brief Draw a widget for select enum
+	 * 
+	 * @param InStrId			String that used as an ID
+	 * @param InEnum			Enum
+	 * @param InOutEnumIndex	Current index of enum. In here will be return new enum index 
+	 * @return Return TRUE when enum is changed, otherwise FALSE
+	 */
+	bool SelectEnum( const std::wstring& InStrId, class CEnum* InEnum, byte& InOutEnumIndex );
 }
 
 #endif // WITH_IMGUI

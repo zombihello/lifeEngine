@@ -4,6 +4,7 @@
 #include "Misc/UIGlobals.h"
 #include "Containers/StringConv.h"
 #include "Containers/String.h"
+#include "Misc/Enum.h"
 #include "ImGUI/ImGUIExtension.h"
 #include "ImGUI/ImGUIEngine.h"
 #include "ImGUI/imgui_internal.h"
@@ -253,5 +254,32 @@ bool ImGui::SelectAsset( const std::wstring& InStrId, const std::wstring& InLabe
 	return bSelectedAsset;
 }
 #endif // WITH_EDITOR
+
+/*
+==================
+ImGui::SelectEnum
+==================
+*/
+bool ImGui::SelectEnum( const std::wstring& InStrId, class CEnum* InEnum, byte& InOutEnumIndex )
+{
+	Assert( InEnum );
+	bool	bSelectedEnum = false;
+
+	if ( ImGui::BeginCombo( TCHAR_TO_ANSI( InStrId.c_str() ), TCHAR_TO_ANSI( InEnum->GetEnum( InOutEnumIndex ).ToString().c_str() ) ) )
+	{
+		const std::vector<CName>&	enums = InEnum->GetEnums();
+		for ( uint32 index = 0, count = enums.size(); index < count; ++index )
+		{
+			if ( ImGui::Selectable( TCHAR_TO_ANSI( CString::Format( TEXT( "%s" ), enums[index].ToString().c_str() ).c_str() ), index == InOutEnumIndex, ImGuiSelectableFlags_DontClosePopups ) )
+			{
+				bSelectedEnum	= true;
+				InOutEnumIndex	= index;
+			}
+		}
+		ImGui::EndCombo();
+	}
+
+	return bSelectedEnum;
+}
 
 #endif // WITH_IMGUI

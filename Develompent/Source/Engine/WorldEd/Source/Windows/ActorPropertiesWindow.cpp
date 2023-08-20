@@ -368,6 +368,38 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 		bPropertyIsChanged = ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &propertyValue.boolValue );	
 	}
 
+	// Byte property
+	else if ( theClass->HasAnyCastFlags( CASTCLASS_CByteProperty ) )
+	{
+		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		CByteProperty*		byteProperty = ExactCast<CByteProperty>( InProperty );
+		Assert( byteProperty );
+
+		// Get cenum. If it null then byte property is simple byte field
+		CEnum*				cenum = byteProperty->GetEnum();
+		if ( !cenum )
+		{
+			int32	intValue = propertyValue.byteValue;
+			bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &intValue, 1.f, 0, 255 );
+			if ( bPropertyIsChanged )
+			{
+				propertyValue.byteValue = intValue;
+			}
+		}
+		// Otherwise it's enum
+		else
+		{
+			bPropertyIsChanged = ImGui::SelectEnum( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ), cenum, propertyValue.byteValue );
+		}
+	}
+
+	// Int property
+	else if ( theClass->HasAnyCastFlags( CASTCLASS_CIntProperty ) )
+	{
+		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &propertyValue.intValue );
+	}
+
 	// Float property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CFloatProperty ) )
 	{

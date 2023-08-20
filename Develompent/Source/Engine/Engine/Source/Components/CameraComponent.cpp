@@ -4,6 +4,7 @@
 #include "EngineDefines.h"
 
 IMPLEMENT_CLASS( CCameraComponent )
+IMPLEMENT_ENUM( ECameraProjectionMode, FOREACH_ENUM_CAMERAPROJECTMODE )
 
 /*
 ==================
@@ -30,9 +31,8 @@ CCameraComponent::StaticInitializeClass
 void CCameraComponent::StaticInitializeClass()
 {
 	new CBoolProperty( staticClass, TEXT( "bIsActive" ), TEXT( "Camera" ), TEXT( "Is active camera. This field setted from CCameraManager::SetActiveCamera" ), CPP_PROPERTY( bIsActive ), 0 );
-	new CBoolProperty( staticClass, TEXT( "bAutoViewData" ), TEXT( "Camera" ), TEXT( "Auto view data. If this flag is true, CCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic)" ), CPP_PROPERTY( bAutoViewData ), 0 );	
-	// TODO BS yehor.pohuliaka - Need implemente CEnumProperty for enums
-	//new CByteProperty( staticClass, TEXT( "projectionMode" ), TEXT( "Camera" ), TEXT( "Projection mode" ), CPP_PROPERTY( projectionMode ), 0 );
+	new CBoolProperty( staticClass, TEXT( "bAutoViewData" ), TEXT( "Camera" ), TEXT( "Auto view data. If this flag is true, CCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic)" ), CPP_PROPERTY( bAutoViewData ), 0 );
+	new CByteProperty( staticClass, TEXT( "Projection Mode" ), TEXT( "Camera" ), TEXT( "Projection mode" ), CPP_PROPERTY( projectionMode ), 0, Enum::GetECameraProjectionMode() );
 	new CFloatProperty( staticClass, TEXT( "Field Of View" ), TEXT( "Camera" ), TEXT( "The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode)" ), CPP_PROPERTY( fieldOfView ), 0 );
 	new CFloatProperty( staticClass, TEXT( "Ortho Width" ), TEXT( "Camera" ), TEXT( "The desired width (in world units) of the orthographic view (ignored in Perspective mode)" ), CPP_PROPERTY( orthoWidth ), 0 );
 	new CFloatProperty( staticClass, TEXT( "Ortho Height" ), TEXT( "Camera" ), TEXT( "The desired height (in world units) of the orthographic view (ignored in Perspective mode)" ), CPP_PROPERTY( orthoHeight ), 0 );

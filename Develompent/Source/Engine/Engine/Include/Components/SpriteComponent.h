@@ -24,6 +24,12 @@ enum ESpriteType
     ST_RotatingOnlyVertical     /**< Rotating sprite to player camera only by vertical */
 };
 
+DECLARE_ENUM( ESpriteType )
+#define FOREACH_ENUM_SPRITETYPE( X ) \
+	X( ST_Static ) \
+	X( ST_Rotating ) \
+	X( ST_RotatingOnlyVertical )
+
  /**
   * @ingroup Engine
   * @brief Component for work with sprite
