@@ -10,8 +10,8 @@ TGlobalResource<CWhiteTexture>				g_WhiteTexture;
 TGlobalResource<CBlackTexture>				g_BlackTexture;
 TGlobalResource<CEmptyNormalTexture>		g_EmptyNormalTexture;
 
-/* Maps members of EPixelFormat to a SPixelFormatInfo describing the format */
-SPixelFormatInfo		g_PixelFormats[ PF_Max ] =
+/* Maps members of EPixelFormat to a PixelFormatInfo describing the format */
+PixelFormatInfo		g_PixelFormats[ PF_Max ] =
 {
 	// Name						BlockSizeX	BlockSizeY	BlockSizeZ	BlockBytes	NumComponents	PlatformFormat			Flags			Supported		EngineFormat
 
@@ -43,7 +43,7 @@ DrawDenormalizedQuad
 void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, float InX, float InY, float InSizeX, float InSizeY, float InU, float InV, float InSizeU, float InSizeV, uint32 InTargetSizeX, uint32 InTargetSizeY, uint32 InTextureSizeX, uint32 InTextureSizeY, float InClipSpaceQuadZ )
 {
 	// Set up the vertices
-	SSimpleElementVertexType		vertices[ 4 ];
+	SimpleElementVertexType		vertices[ 4 ];
 
 	vertices[ 0 ].position		= Vector4D( InX,			InY,			InClipSpaceQuadZ, 1.f );
 	vertices[ 1 ].position		= Vector4D( InX + InSizeX,	InY,			InClipSpaceQuadZ, 1.f );
@@ -80,7 +80,7 @@ void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, floa
 DrawWireframeBox
 ==================
 */
-void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class CBox& InBox, const class CColor& InColor )
+void DrawWireframeBox( struct SceneDepthGroup& InSDG, const class CBox& InBox, const class CColor& InColor )
 {
 #if WITH_EDITOR
 	Vector		bbox[ 2 ] = { InBox.GetMin(), InBox.GetMax() };
@@ -114,7 +114,7 @@ void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class CBox& InBox, 
 DrawCircle
 ==================
 */
-void DrawCircle( struct SSceneDepthGroup& InSDG, const Vector& InLocation, const Vector& InX, const Vector& InY, const class CColor& InColor, float InRadius, uint32 InNumSides, float InThickness /*= 0.f*/ )
+void DrawCircle( struct SceneDepthGroup& InSDG, const Vector& InLocation, const Vector& InX, const Vector& InY, const class CColor& InColor, float InRadius, uint32 InNumSides, float InThickness /*= 0.f*/ )
 {
 #if WITH_EDITOR
 	const float		angleDelta = 2.f * PI / InNumSides;
@@ -122,7 +122,7 @@ void DrawCircle( struct SSceneDepthGroup& InSDG, const Vector& InLocation, const
 
 	for ( uint32 sideIndex = 0; sideIndex < InNumSides; ++sideIndex )
 	{
-		const Vector	vertex = InLocation + ( InX * SMath::Cos( angleDelta * ( sideIndex + 1 ) ) + InY * SMath::Sin( angleDelta * ( sideIndex + 1 ) ) ) * InRadius;
+		const Vector	vertex = InLocation + ( InX * Math::Cos( angleDelta * ( sideIndex + 1 ) ) + InY * Math::Sin( angleDelta * ( sideIndex + 1 ) ) ) * InRadius;
 		InSDG.simpleElements.AddLine( lastVertex, vertex, InColor, InThickness );
 		lastVertex = vertex;
 	}
@@ -135,7 +135,7 @@ void DrawCircle( struct SSceneDepthGroup& InSDG, const Vector& InLocation, const
 DrawHitProxyCircle
 ==================
 */
-void DrawHitProxyCircle( struct SSceneDepthGroup& InSDG, EHitProxyLayer InHitProxyLayer, const Vector& InLocation, const Vector& InX, const Vector& InY, const CHitProxyId& InHitProxyId, float InRadius, uint32 InNumSides, float InThickness /*= 0.f*/ )
+void DrawHitProxyCircle( struct SceneDepthGroup& InSDG, EHitProxyLayer InHitProxyLayer, const Vector& InLocation, const Vector& InX, const Vector& InY, const CHitProxyId& InHitProxyId, float InRadius, uint32 InNumSides, float InThickness /*= 0.f*/ )
 {
 #if WITH_EDITOR
 	const float		angleDelta = 2.f * PI / InNumSides;
@@ -143,7 +143,7 @@ void DrawHitProxyCircle( struct SSceneDepthGroup& InSDG, EHitProxyLayer InHitPro
 
 	for ( uint32 sideIndex = 0; sideIndex < InNumSides; ++sideIndex )
 	{
-		const Vector	vertex = InLocation + ( InX * SMath::Cos( angleDelta * ( sideIndex + 1 ) ) + InY * SMath::Sin( angleDelta * ( sideIndex + 1 ) ) ) * InRadius;
+		const Vector	vertex = InLocation + ( InX * Math::Cos( angleDelta * ( sideIndex + 1 ) ) + InY * Math::Sin( angleDelta * ( sideIndex + 1 ) ) ) * InRadius;
 		InSDG.hitProxyLayers[ InHitProxyLayer ].simpleHitProxyElements.AddLine( lastVertex, vertex, InHitProxyId.GetColor(), InThickness );
 		lastVertex = vertex;
 	}

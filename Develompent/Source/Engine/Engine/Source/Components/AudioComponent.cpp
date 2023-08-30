@@ -17,7 +17,7 @@ CAudioComponent::CAudioComponent()
 	, minDistance( 1.f )
 	, attenuation( 1.f )
 	, source( nullptr )
-	, oldSourceLocation( SMath::vectorZero )
+	, oldSourceLocation( Math::vectorZero )
 {
 	UpdateAudioSourceType();
 }
@@ -81,7 +81,7 @@ void CAudioComponent::Serialize( class CArchive& InArchive )
 		}
 		else
 		{
-			oldSourceLocation = SMath::vectorZero;
+			oldSourceLocation = Math::vectorZero;
 		}
 		UpdateAudioSourceType();
 

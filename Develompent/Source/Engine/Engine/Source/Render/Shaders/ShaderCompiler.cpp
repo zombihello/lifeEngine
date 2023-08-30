@@ -48,8 +48,8 @@ CShaderCompiler::CompileAll
 bool CShaderCompiler::CompileAll( CShaderCache& InOutShaderCache, EShaderPlatform InShaderPlatform, bool InOnlyGlobals /* = false */ )
 {
 	std::wstring																			errorMsg;
-	const std::unordered_map< std::wstring, CShaderMetaType* >&								shaderTypes = CShaderManager::SContainerShaderTypes::Get()->shaderMetaTypes;
-	const CVertexFactoryMetaType::SContainerVertexFactoryMetaType::VertexFactoryMap_t&		vertexFactoryTypes = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->GetRegisteredTypes();
+	const std::unordered_map< std::wstring, CShaderMetaType* >&								shaderTypes = CShaderManager::ContainerShaderTypes::Get()->shaderMetaTypes;
+	const CVertexFactoryMetaType::ContainerVertexFactoryMetaType::VertexFactoryMap_t&		vertexFactoryTypes = CVertexFactoryMetaType::ContainerVertexFactoryMetaType::Get()->GetRegisteredTypes();
 	AssertMsg( !vertexFactoryTypes.empty(), TEXT( "In engine not a single vertex factory registered" ) );
 	
 	for ( auto itShader = shaderTypes.begin(), itShaderEnd = shaderTypes.end(); itShader != itShaderEnd; ++itShader )
@@ -86,11 +86,11 @@ CShaderCompiler::CompileShader
 */
 bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, EShaderPlatform InShaderPlatform, class CShaderCache& InOutShaderCache, std::wstring& OutErrorMsg, class CVertexFactoryMetaType* InVertexFactoryType /* = nullptr */ )
 {
-	SShaderCompilerOutput			output;
+	ShaderCompilerOutput			output;
 	uint64							vertexFactoryHash = ( uint64 )INVALID_HASH;
 	EShaderFrequency				shaderFrequency = InShaderMetaType->GetFrequency();
 	
-	SShaderCompilerEnvironment		environment( shaderFrequency );
+	ShaderCompilerEnvironment		environment( shaderFrequency );
 	InShaderMetaType->ModifyCompilationEnvironment( InShaderPlatform, environment );
 
 	if ( InVertexFactoryType )
@@ -103,7 +103,7 @@ bool CShaderCompiler::CompileShader( class CShaderMetaType* InShaderMetaType, ES
 	bool		result = g_RHI->CompileShader( InShaderMetaType->GetFileName().c_str(), InShaderMetaType->GetFunctionName().c_str(), shaderFrequency, environment, output, g_AllowDebugShaderDump );
 	if ( result )
 	{
-		CShaderCache::SShaderCacheItem			shaderCacheItem;
+		CShaderCache::ShaderCacheItem			shaderCacheItem;
 		shaderCacheItem.name = InShaderMetaType->GetName();
 		shaderCacheItem.frequency = shaderFrequency;
 		shaderCacheItem.vertexFactoryHash = vertexFactoryHash;

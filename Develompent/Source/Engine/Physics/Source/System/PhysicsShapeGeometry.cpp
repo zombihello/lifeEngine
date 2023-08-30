@@ -4,31 +4,31 @@
 
 /*
 ==================
-SPhysicsShapeGeometry::SPhysicsShapeGeometry
+PhysicsShapeGeometry::PhysicsShapeGeometry
 ==================
 */
-SPhysicsShapeGeometry::SPhysicsShapeGeometry( ECollisionShape InCollisionShape )
+PhysicsShapeGeometry::PhysicsShapeGeometry( ECollisionShape InCollisionShape )
 	: collisionShape( InCollisionShape )
-	, collisionProfile( g_PhysicsEngine.FindCollisionProfile( SCollisionProfile::blockAll_ProfileName ) )
+	, collisionProfile( g_PhysicsEngine.FindCollisionProfile( CollisionProfile::blockAll_ProfileName ) )
 	, material( g_PhysicsEngine.GetDefaultPhysMaterial() )
 {}
 
 /*
 ==================
-SPhysicsShapeGeometry::~SPhysicsShapeGeometry
+PhysicsShapeGeometry::~PhysicsShapeGeometry
 ==================
 */
-SPhysicsShapeGeometry::~SPhysicsShapeGeometry()
+PhysicsShapeGeometry::~PhysicsShapeGeometry()
 {
 	CPhysicsInterface::ReleaseShapeGeometry( handle );
 }
 
 /*
 ==================
-SPhysicsShapeGeometry::Serialize
+PhysicsShapeGeometry::Serialize
 ==================
 */
-void SPhysicsShapeGeometry::Serialize( class CArchive& InArchive )
+void PhysicsShapeGeometry::Serialize( class CArchive& InArchive )
 {
 	InArchive << collisionShape;
 	InArchive << collisionProfile;

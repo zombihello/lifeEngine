@@ -40,7 +40,7 @@
  */
 FORCEINLINE b2Rot LE2BRot( const Quaternion& InRot )
 {
-	return b2Rot( SMath::QuaternionToAngles( InRot ).y / BOX2D_ANGLES );
+	return b2Rot( Math::QuaternionToAngles( InRot ).y / BOX2D_ANGLES );
 }
 
 /**
@@ -87,7 +87,7 @@ FORCEINLINE b2Transform LE2BTransform( const CTransform& InTransform )
  */
 FORCEINLINE Quaternion B2LERot( const b2Rot& InRot )
 {
-	return SMath::AnglesToQuaternion( Vector( 0.f, 0.f, InRot.GetAngle() * BOX2D_ANGLES ) );
+	return Math::AnglesToQuaternion( Vector( 0.f, 0.f, InRot.GetAngle() * BOX2D_ANGLES ) );
 }
 
 /**
@@ -146,7 +146,7 @@ FORCEINLINE bool LE2BLockFlags( uint32 InLockFlags )
  * @ingroup Physics
  * @brief Handle of material for Box2D
  */
-struct SPhysicsMaterialHandleBox2D
+struct PhysicsMaterialHandleBox2D
 {
 	TAssetHandle<class CPhysicsMaterial>	physMaterial;				/**< Physical material */
 };
@@ -155,18 +155,18 @@ struct SPhysicsMaterialHandleBox2D
  * @ingroup Physics
  * @brief Handle of shape for Box2D
  */
-struct SPhysicsShapeHandleBox2D
+struct PhysicsShapeHandleBox2D
 {
 	/**
 	 * @brief Constructor
 	 */
-	SPhysicsShapeHandleBox2D()
+	PhysicsShapeHandleBox2D()
 		: collisionProfile( nullptr )
 		, bx2Shape( nullptr )
 	{}
 
 	TAssetHandle<class CPhysicsMaterial>	physMaterial;		/**< Physical material */
-	SCollisionProfile*						collisionProfile;	/**< Collision profile */
+	CollisionProfile*						collisionProfile;	/**< Collision profile */
 	b2Shape*								bx2Shape;			/**< Box2D shape */
 };
 
@@ -174,12 +174,12 @@ struct SPhysicsShapeHandleBox2D
  * @ingroup Physics
  * @brief Handle of actor for Box2D
  */
-struct SPhysicsActorHandleBox2D
+struct PhysicsActorHandleBox2D
 {
 	/**
 	 * @brief Constructor
 	 */
-	SPhysicsActorHandleBox2D()
+	PhysicsActorHandleBox2D()
 		: bx2Body( nullptr )
 		, physicsMaterialUpdateHandle( nullptr )
 		, physicsMaterialDestroyedHandle( nullptr )
@@ -205,7 +205,7 @@ struct SPhysicsActorHandleBox2D
  * @ingroup Physics
  * @brief Box2D interface
  */
-struct SPhysicsInterfaceBox2D
+struct PhysicsInterfaceBox2D
 {
 	/**
 	 * @brief Init physics
@@ -223,13 +223,13 @@ struct SPhysicsInterfaceBox2D
 	 * @param InBoxGeometry Box geometry info
 	 * @return Return shape handle
 	 */
-	static SPhysicsShapeHandleBox2D CreateShapeGeometry( const struct SPhysicsBoxGeometry& InBoxGeometry );
+	static PhysicsShapeHandleBox2D CreateShapeGeometry( const struct PhysicsBoxGeometry& InBoxGeometry );
 
 	/**
 	 * @brief Release shape
 	 * @param InShapeHandle Shape handle
 	 */
-	static FORCEINLINE void ReleaseShapeGeometry( SPhysicsShapeHandleBox2D& InShapeHandle )
+	static FORCEINLINE void ReleaseShapeGeometry( PhysicsShapeHandleBox2D& InShapeHandle )
 	{
 		if ( InShapeHandle.bx2Shape )
 		{
@@ -245,7 +245,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InShapeHandle Shape handle
 	 * @return Return true if shape handle is valid, else return false
 	 */
-	static FORCEINLINE bool IsValidShapeGeometry( const SPhysicsShapeHandleBox2D& InShapeHandle )
+	static FORCEINLINE bool IsValidShapeGeometry( const PhysicsShapeHandleBox2D& InShapeHandle )
 	{
 		return InShapeHandle.physMaterial.IsAssetValid() && InShapeHandle.bx2Shape;
 	}
@@ -256,7 +256,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InPhysMaterial Physics material
 	 * @return Return material handle
 	 */
-	static SPhysicsMaterialHandleBox2D CreateMaterial( const TSharedPtr<class CPhysicsMaterial>& InPhysMaterial );
+	static PhysicsMaterialHandleBox2D CreateMaterial( const TSharedPtr<class CPhysicsMaterial>& InPhysMaterial );
 
 	/**
 	 * @brief Update material
@@ -264,14 +264,14 @@ struct SPhysicsInterfaceBox2D
 	 * @param InMaterialHandle Handle of phys material
 	 * @param InPhysMaterial Physics material
 	 */
-	static FORCEINLINE void UpdateMaterial( const SPhysicsMaterialHandleBox2D& InMaterialHandle, const TSharedPtr<class CPhysicsMaterial>& InPhysMaterial )
+	static FORCEINLINE void UpdateMaterial( const PhysicsMaterialHandleBox2D& InMaterialHandle, const TSharedPtr<class CPhysicsMaterial>& InPhysMaterial )
 	{}
 
 	/**
 	 * @brief Release material
 	 * @param InMaterialHandle Handle of phys material
 	 */
-	static FORCEINLINE void ReleaseMaterial( SPhysicsMaterialHandleBox2D& InMaterialHandle )
+	static FORCEINLINE void ReleaseMaterial( PhysicsMaterialHandleBox2D& InMaterialHandle )
 	{
 		InMaterialHandle.physMaterial = nullptr;
 	}
@@ -282,7 +282,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InMaterialHandle Material handle
 	 * @return Return true if material handle is valid, else return false
 	 */
-	static FORCEINLINE bool IsValidMaterial( const SPhysicsMaterialHandleBox2D& InMaterialHandle )
+	static FORCEINLINE bool IsValidMaterial( const PhysicsMaterialHandleBox2D& InMaterialHandle )
 	{
 		return InMaterialHandle.physMaterial.IsAssetValid();
 	}
@@ -293,7 +293,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InParams Actor params for create
 	 * @return Return actor handle
 	 */
-	static SPhysicsActorHandleBox2D CreateActor( const SActorCreationParams& InParams );
+	static PhysicsActorHandleBox2D CreateActor( const ActorCreationParams& InParams );
 
 	/**
 	 * @brief Computation of mass properties for a physics actor
@@ -303,7 +303,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InMassLocalPose The center of mass relative to the actor frame.  If set to null then (0,0,0) is assumed.
 	 * @param InIncludeNonSimShapes True if all kind of shapes (Query shape, trigger shape) should be taken into account.
 	 */
-	static FORCEINLINE void UpdateMassAndInertia( const SPhysicsActorHandleBox2D& InActorHandle, float InDensity, const Vector* InMassLocalPose = nullptr, bool InIncludeNonSimShapes = false )
+	static FORCEINLINE void UpdateMassAndInertia( const PhysicsActorHandleBox2D& InActorHandle, float InDensity, const Vector* InMassLocalPose = nullptr, bool InIncludeNonSimShapes = false )
 	{}
 
 	/**
@@ -311,7 +311,7 @@ struct SPhysicsInterfaceBox2D
 	 *
 	 * @param InActorHandle Handle of physics actor
 	 */
-	static FORCEINLINE CTransform GetTransform( const SPhysicsActorHandleBox2D& InActorHandle )
+	static FORCEINLINE CTransform GetTransform( const PhysicsActorHandleBox2D& InActorHandle )
 	{
 		if ( !IsValidActor( InActorHandle ) )
 		{
@@ -328,7 +328,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InVelocity New linear velocity to apply to physics
 	 * @param InIsAddToCurrent If true, InVelocity is added to the existing velocity of the body
 	 */
-	static FORCEINLINE void SetLinearVelocity( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InVelocity, bool InIsAddToCurrent = false )
+	static FORCEINLINE void SetLinearVelocity( const PhysicsActorHandleBox2D& InActorHandle, const Vector& InVelocity, bool InIsAddToCurrent = false )
 	{
 		Assert( IsValidActor( InActorHandle ) );
 		b2Vec2			bx2NewVelocity = LE2BVector( ( Vector2D )InVelocity / BOX2D_SCALE );
@@ -341,7 +341,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InActorHandle Handle of physics actor
 	 * @return Return actor linear velocity
 	 */
-	static FORCEINLINE Vector GetLinearVelocity( const SPhysicsActorHandleBox2D& InActorHandle )
+	static FORCEINLINE Vector GetLinearVelocity( const PhysicsActorHandleBox2D& InActorHandle )
 	{
 		Assert( IsValidActor( InActorHandle ) );
 		return Vector( B2LEVector( InActorHandle.bx2Body->GetLinearVelocity() ) * BOX2D_SCALE, 0.f );
@@ -354,7 +354,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InAngularImpulse Angular impulse
 	 * @param InIsWake Also wake up the body
 	 */
-	static FORCEINLINE void AddAngularImpulse( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InAngularImpulse, bool InIsWake )
+	static FORCEINLINE void AddAngularImpulse( const PhysicsActorHandleBox2D& InActorHandle, const Vector& InAngularImpulse, bool InIsWake )
 	{
 		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyAngularImpulse( InAngularImpulse.z / BOX2D_ANGLES, InIsWake );
@@ -367,7 +367,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InImpulse Impulse
 	 * @param InIsWake Also wake up the body
 	 */
-	static FORCEINLINE void AddImpulse( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InImpulse, bool InIsWake )
+	static FORCEINLINE void AddImpulse( const PhysicsActorHandleBox2D& InActorHandle, const Vector& InImpulse, bool InIsWake )
 	{
 		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyLinearImpulse( LE2BVector( ( Vector2D )InImpulse ), b2Vec2( 0.f, 0.f ), InIsWake );
@@ -381,7 +381,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InLocation Location
 	 * @param InIsWake Also wake up the body
 	 */
-	static FORCEINLINE void AddImpulseAtLocation( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InImpulse, const Vector& InLocation, bool InIsWake )
+	static FORCEINLINE void AddImpulseAtLocation( const PhysicsActorHandleBox2D& InActorHandle, const Vector& InImpulse, const Vector& InLocation, bool InIsWake )
 	{
 		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyLinearImpulse( LE2BVector( ( Vector2D )InImpulse ), LE2BVector( ( Vector2D )InLocation / BOX2D_SCALE ), InIsWake );
@@ -394,7 +394,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InForce Force
 	 * @param InIsWake Also wake up the body
 	 */
-	static FORCEINLINE void AddForce( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InForce, bool InIsWake )
+	static FORCEINLINE void AddForce( const PhysicsActorHandleBox2D& InActorHandle, const Vector& InForce, bool InIsWake )
 	{
 		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyForceToCenter( LE2BVector( ( Vector2D )InForce ), InIsWake );
@@ -408,7 +408,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InLocation Location
 	 * @param InIsWake Also wake up the body
 	 */
-	static FORCEINLINE void AddForceAtLocation( const SPhysicsActorHandleBox2D& InActorHandle, const Vector& InForce, const Vector& InLocation, bool InIsWake )
+	static FORCEINLINE void AddForceAtLocation( const PhysicsActorHandleBox2D& InActorHandle, const Vector& InForce, const Vector& InLocation, bool InIsWake )
 	{
 		Assert( IsValidActor( InActorHandle ) );
 		InActorHandle.bx2Body->ApplyForce( LE2BVector( ( Vector2D )InForce ), LE2BVector( ( Vector2D )InLocation / BOX2D_SCALE ), InIsWake );
@@ -418,7 +418,7 @@ struct SPhysicsInterfaceBox2D
 	 * @brief Release actor
 	 * @param InActorHandle Handle of physics actor
 	 */
-	static FORCEINLINE void ReleaseActor( SPhysicsActorHandleBox2D& InActorHandle )
+	static FORCEINLINE void ReleaseActor( PhysicsActorHandleBox2D& InActorHandle )
 	{
 		if ( InActorHandle.bx2Body )
 		{
@@ -433,7 +433,7 @@ struct SPhysicsInterfaceBox2D
 	 * @param InActorHandle Handle of physics actor
 	 * @return Return true if actor handle is valid, else return false
 	 */
-	static FORCEINLINE bool IsValidActor( const SPhysicsActorHandleBox2D& InActorHandle )
+	static FORCEINLINE bool IsValidActor( const PhysicsActorHandleBox2D& InActorHandle )
 	{
 		return InActorHandle.bx2Body;
 	}
@@ -443,14 +443,14 @@ struct SPhysicsInterfaceBox2D
 	 * @param InActorHandle Handle of physics actor
 	 * @param InShapeHandle Handle of physics shape
 	 */
-	static void AttachShape( SPhysicsActorHandleBox2D& InActorHandle, const SPhysicsShapeHandleBox2D& InShapeHandle );
+	static void AttachShape( PhysicsActorHandleBox2D& InActorHandle, const PhysicsShapeHandleBox2D& InShapeHandle );
 
 	/**
 	 * @brief Detach shape
 	 * @param InActorHandle Handle of physics actor
 	 * @param InShapeHandle Handle of physics shape
 	 */
-	static void DetachShape( SPhysicsActorHandleBox2D& InActorHandle, const SPhysicsShapeHandleBox2D& InShapeHandle );
+	static void DetachShape( PhysicsActorHandleBox2D& InActorHandle, const PhysicsShapeHandleBox2D& InShapeHandle );
 };
 #endif // WITH_BOX2D
 

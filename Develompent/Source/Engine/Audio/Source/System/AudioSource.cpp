@@ -27,7 +27,7 @@ CAudioSource::CAudioSource()
 	SetPitch( 1.f );
 	SetMinDistance( 1.f );
 	SetAttenuation( 1.f );
-	SetLocation( SMath::vectorZero );
+	SetLocation( Math::vectorZero );
 
 	// Subscribe to event of muted/unmuted audio device
 	audioDeviceMutedHandle = g_AudioDevice.OnAudioDeviceMuted().Add( std::bind( &CAudioSource::OnAudioDeviceMuted, this, std::placeholders::_1 ) );

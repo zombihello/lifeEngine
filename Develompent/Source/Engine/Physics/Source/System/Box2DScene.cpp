@@ -69,10 +69,10 @@ void CBox2DScene::AddBody( class CPhysicsBodyInstance* InBodyInstance )
 {
 	bodies.push_back( InBodyInstance );
 
-	SPhysicsActorHandleBox2D		actorHandle = InBodyInstance->GetActorHandle();
+	PhysicsActorHandleBox2D		actorHandle = InBodyInstance->GetActorHandle();
 	for ( b2Fixture* bx2Fixture = actorHandle.bx2Body->GetFixtureList(); bx2Fixture; bx2Fixture = bx2Fixture->GetNext() )
 	{
-		SPhysicsShapeHandleBox2D*	shapeHandle = ( SPhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
+		PhysicsShapeHandleBox2D*	shapeHandle = ( PhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
 		Assert( shapeHandle );
 		fixturesMap[ shapeHandle->collisionProfile->objectType ][ InBodyInstance ].push_back( bx2Fixture );
 	}
@@ -107,7 +107,7 @@ void CBox2DScene::RemoveBody( CPhysicsBodyInstance* InBodyInstance )
 CBox2DScene::LineTraceSingleByChannel
 ==================
 */
-bool CBox2DScene::LineTraceSingleByChannel( SHitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const SCollisionQueryParams& InCollisionQueryParams /* = SCollisionQueryParams::defaultQueryParam */ )
+bool CBox2DScene::LineTraceSingleByChannel( HitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const CollisionQueryParams& InCollisionQueryParams /* = CollisionQueryParams::defaultQueryParam */ )
 {
 	// Ray cast input
 	b2RayCastInput				bx2RayCastInput;
@@ -134,7 +134,7 @@ bool CBox2DScene::LineTraceSingleByChannel( SHitResult& OutHitResult, const Vect
 				// If need return physics material
 				if ( InCollisionQueryParams.bReturnPhysicalMaterial )
 				{
-					SPhysicsShapeHandleBox2D*		shapeHandle = ( SPhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
+					PhysicsShapeHandleBox2D*		shapeHandle = ( PhysicsShapeHandleBox2D* )bx2Fixture->GetUserData().pointer;
 					Assert( shapeHandle );
 					OutHitResult.physMaterial	= shapeHandle->physMaterial.ToSharedPtr();
 				}

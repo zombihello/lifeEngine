@@ -162,7 +162,7 @@ protected:
  * Helper structure for compression support, containing information on compressed
  * and uncompressed size of a chunk of data.
  */
-struct SCompressedChunkInfo
+struct CompressedChunkInfo
 {
 	uint32		compressedSize;			/**< Compressed size of data */
 	uint32		uncompressedSize;		/**< Uncompresses size of data */
@@ -328,13 +328,13 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, const EArchiveType& InVal
 	return InArchive;
 }
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, SCompressedChunkInfo& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, CompressedChunkInfo& InValue )
 {
 	InArchive.Serialize( &InValue, sizeof( InValue ) );
 	return InArchive;
 }
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SCompressedChunkInfo& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const CompressedChunkInfo& InValue )
 {
 	Assert( InArchive.IsSaving() );
 	InArchive.Serialize( ( void* ) &InValue, sizeof( InValue ) );

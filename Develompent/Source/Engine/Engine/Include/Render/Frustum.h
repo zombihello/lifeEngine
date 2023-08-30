@@ -149,7 +149,7 @@ private:
 	{
 		for ( uint32 side = 0; side < 6; ++side )
 		{
-			planes[ side ] = SMath::NormalizeVector( planes[ side ] );
+			planes[ side ] = Math::NormalizeVector( planes[ side ] );
 		}
 	}
 

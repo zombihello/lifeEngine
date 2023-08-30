@@ -56,7 +56,7 @@ public:
 	 */
 	FORCEINLINE void SetCollisionProfile( const std::wstring& InName )
 	{
-		SCollisionProfile*		newCollisionProfile;
+		CollisionProfile*		newCollisionProfile;
 		newCollisionProfile = g_PhysicsEngine.FindCollisionProfile( InName );
 		if ( newCollisionProfile )
 		{
@@ -77,7 +77,7 @@ public:
 	 * @brief Get collision profile
 	 * @return Return collision profile
 	 */
-	FORCEINLINE SCollisionProfile* GetCollisionProfile() const
+	FORCEINLINE CollisionProfile* GetCollisionProfile() const
 	{
 		return collisionProfile;
 	}
@@ -92,7 +92,7 @@ public:
 	}
 
 protected:
-	SCollisionProfile*				collisionProfile;		/**< Collision profile */
+	CollisionProfile*				collisionProfile;		/**< Collision profile */
 	TAssetHandle<CPhysicsMaterial>	physicsMaterial;		/**< Physics material */
 };
 

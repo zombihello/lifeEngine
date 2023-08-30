@@ -150,7 +150,7 @@ void CWorld::Serialize( CArchive& InArchive )
 			InArchive << className;
 
 			// Spawn actor, serialize and add to array
-			AActor*			actor = SpawnActor( CClass::StaticFindClass( className.c_str() ), SMath::vectorZero, SMath::quaternionZero );
+			AActor*			actor = SpawnActor( CClass::StaticFindClass( className.c_str() ), Math::vectorZero, Math::quaternionZero );
 			actor->Serialize( InArchive );
 		}
 	}
@@ -204,7 +204,7 @@ void CWorld::CleanupWorld()
 #if WITH_EDITOR
 	if ( !actors.empty() )
 	{
-		SEditorDelegates::onActorsDestroyed.Broadcast( actors );
+		EditorDelegates::onActorsDestroyed.Broadcast( actors );
 	}
 #endif // WITH_EDITOR
 
@@ -226,7 +226,7 @@ void CWorld::CleanupWorld()
 CWorld::SpawnActor
 ==================
 */
-ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /*= SMath::rotatorZero*/ )
+ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /*= Math::rotatorZero*/ )
 {
 	Assert( InClass );
 
@@ -253,7 +253,7 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
 	// Broadcast event of spawned actor
 #if WITH_EDITOR
 	std::vector<ActorRef_t>		spawnedActors = { actor };
-	SEditorDelegates::onActorsSpawned.Broadcast( spawnedActors );
+	EditorDelegates::onActorsSpawned.Broadcast( spawnedActors );
 	MarkDirty();
 #endif // WITH_EDITOR
 
@@ -293,7 +293,7 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 	}
 
 	std::vector<ActorRef_t>		destroyedActors = { InActor };
-	SEditorDelegates::onActorsDestroyed.Broadcast( destroyedActors );
+	EditorDelegates::onActorsDestroyed.Broadcast( destroyedActors );
 	MarkDirty();
 #endif // WITH_EDITOR
 
@@ -343,7 +343,7 @@ void CWorld::SelectActor( ActorRef_t InActor )
 	InActor->SetSelected( true );
 	selectedActors.push_back( InActor );
 
-	SEditorDelegates::onActorsSelected.Broadcast( std::vector<ActorRef_t>{ InActor } );
+	EditorDelegates::onActorsSelected.Broadcast( std::vector<ActorRef_t>{ InActor } );
 }
 
 /*
@@ -369,7 +369,7 @@ void CWorld::UnselectActor( ActorRef_t InActor )
 		}
 	}
 
-	SEditorDelegates::onActorsUnselected.Broadcast( std::vector<ActorRef_t>{ InActor } );
+	EditorDelegates::onActorsUnselected.Broadcast( std::vector<ActorRef_t>{ InActor } );
 }
 
 /*
@@ -393,7 +393,7 @@ void CWorld::SelectActors( const std::vector<ActorRef_t>& InActors )
 
 	if ( bNeedBroadcast )
 	{
-		SEditorDelegates::onActorsSelected.Broadcast( InActors );
+		EditorDelegates::onActorsSelected.Broadcast( InActors );
 	}
 }
 
@@ -428,7 +428,7 @@ void CWorld::UnselectActors( const std::vector<ActorRef_t>& InActors )
 
 	if ( !unselectedActors.empty() )
 	{
-		SEditorDelegates::onActorsUnselected.Broadcast( unselectedActors );
+		EditorDelegates::onActorsUnselected.Broadcast( unselectedActors );
 	}
 }
 
@@ -446,6 +446,6 @@ void CWorld::UnselectAllActors()
 
 	std::vector<ActorRef_t>		unselectedActors;
 	std::swap( selectedActors, unselectedActors );
-	SEditorDelegates::onActorsUnselected.Broadcast( unselectedActors );
+	EditorDelegates::onActorsUnselected.Broadcast( unselectedActors );
 }
 #endif // WITH_EDITOR

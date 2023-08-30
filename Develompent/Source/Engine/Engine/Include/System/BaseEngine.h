@@ -66,7 +66,7 @@ public:
 	 *
 	 * @param[in] InWindowEvent Window event
 	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
+	virtual void ProcessEvent( struct WindowEvent& InWindowEvent );
 
 	/**
 	 * Get max tick rate in second

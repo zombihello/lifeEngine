@@ -77,7 +77,7 @@ public:
 	/**
 	 * @brief Hash function for STL containers
 	 */
-	struct SHashFunction
+	struct HashFunction
 	{
 		/**
 		 * @brief Calculate hash of TRefCountPtr

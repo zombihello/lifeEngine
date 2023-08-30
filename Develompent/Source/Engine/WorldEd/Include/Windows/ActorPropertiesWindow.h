@@ -79,7 +79,7 @@ private:
 		 * @brief Get array of properties
 		 * @return Return array of properties
 		 */
-		FORCEINLINE std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& GetProperties()
+		FORCEINLINE std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>& GetProperties()
 		{
 			return properties;
 		}
@@ -110,7 +110,7 @@ private:
 		 */
 		void SetPropertyValue( CProperty* InProperty, const UPropertyValue& InPropertyValue );
 
-		std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>		properties;	/**< Array of properties */
+		std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>		properties;	/**< Array of properties */
 		std::vector<CObject*>															objects;	/**< Array of objects */
 	};
 
@@ -133,7 +133,7 @@ private:
 	 * @param OutObjectProperties		Output object properties
 	 * @param OutComponentsProperties	Output array of all components' properties in the object
 	 */
-	void GetAllPropertiesFromObject( CObject* InObject, CObjectProperties& OutObjectProperties, std::unordered_map<CName, CObjectProperties, CName::SHashFunction>& OutComponentsProperties ) const;
+	void GetAllPropertiesFromObject( CObject* InObject, CObjectProperties& OutObjectProperties, std::unordered_map<CName, CObjectProperties, CName::HashFunction>& OutComponentsProperties ) const;
 
 	/**
 	 * @brief Remove properties that are not in the array InArrayB
@@ -151,14 +151,14 @@ private:
 	 * @param InOutArrayB		An array with properties. After the method is executed, it will contain only those properties that are also in InActorA
 	 * @return Return TRUE if there are matches in the array InArrayA, otherwise FALSE
 	 */
-	bool RemoveMissingProperties( const std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& InArrayA, std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& InOutArrayB ) const;
+	bool RemoveMissingProperties( const std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>& InArrayA, std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>& InOutArrayB ) const;
 
 	CObjectProperties														actorProperties;			/**< Array of actor properties */
-	std::unordered_map<CName, CObjectProperties, CName::SHashFunction>		componentsProperties;		/**< Array of components properties */
-	SEditorDelegates::COnActorsSelected::DelegateType_t*					actorsSelectedDelegate;		/**< Actors selected delegate */
-	SEditorDelegates::COnActorsUnselected::DelegateType_t*					actorsUnselectedDelegate;	/**< Actors unselected delegate */
-	SEditorDelegates::COnEditorCreatedNewMap::DelegateType_t*				createdNewMapDelegate;		/**< Created new map delegate */
-	SEditorDelegates::COnEditorLoadedMap::DelegateType_t*					loadedMapDelegate;			/**< Loaded map delegate */
+	std::unordered_map<CName, CObjectProperties, CName::HashFunction>		componentsProperties;		/**< Array of components properties */
+	EditorDelegates::COnActorsSelected::DelegateType_t*					actorsSelectedDelegate;		/**< Actors selected delegate */
+	EditorDelegates::COnActorsUnselected::DelegateType_t*					actorsUnselectedDelegate;	/**< Actors unselected delegate */
+	EditorDelegates::COnEditorCreatedNewMap::DelegateType_t*				createdNewMapDelegate;		/**< Created new map delegate */
+	EditorDelegates::COnEditorLoadedMap::DelegateType_t*					loadedMapDelegate;			/**< Loaded map delegate */
 };
 
 #endif // !ACTORPROPERTIESWINDOW_H

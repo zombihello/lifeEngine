@@ -70,14 +70,14 @@ void CViewportWidget::Tick()
 CViewportWidget::ProcessEvent
 ==================
 */
-void CViewportWidget::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CViewportWidget::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	// Process ImGUI events
 	if ( InWindowEvent.bImGUIEvent )
 	{
 		switch ( InWindowEvent.type )
 		{
-		case SWindowEvent::T_WindowResize:
+		case WindowEvent::T_WindowResize:
 			SetSize( Vector2D( InWindowEvent.events.windowResize.width, InWindowEvent.events.windowResize.height ) );
 			break;
 		}

@@ -43,7 +43,7 @@ public:
 	 *
 	 * @param InWindowEvent			Window event
 	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
+	virtual void ProcessEvent( struct WindowEvent& InWindowEvent ) override;
 
 protected:
 	/**
@@ -55,7 +55,7 @@ private:
 	/**
 	 * @brief Select asset handle
 	 */
-	struct SSelectAssetHandle
+	struct SelectAssetHandle
 	{
 		uint32								slotId;				/**< Slot ID */
 		TAssetHandle<CMaterial>				asset;				/**< Asset */
@@ -81,7 +81,7 @@ private:
 	 * @param InAssets	Array of assets to delete
 	 * @param OutResult Result, we can is delete this assets?
 	 */
-	void OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, struct SCanDeleteAssetResult& OutResult );
+	void OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, struct CanDeleteAssetResult& OutResult );
 
 	/**
 	 * @brief Called event when asset is reloaded
@@ -99,9 +99,9 @@ private:
 	TSharedPtr<CStaticMesh>									staticMesh;				/**< Static mesh */
 	CViewportWidget											viewportWidget;			/**< Viewport widget */
 	class CStaticMeshPreviewViewportClient*					viewportClient;			/**< Viewport client */
-	std::vector<SSelectAssetHandle>							selectAssetWidgets;		/**< Array of select asset widgets */
-	SEditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;	/**< Handle delegate of assets can delete */
-	SEditorDelegates::COnAssetsReloaded::DelegateType_t*	assetsReloadedHandle;	/**< Handle delegate of reloaded assets */
+	std::vector<SelectAssetHandle>							selectAssetWidgets;		/**< Array of select asset widgets */
+	EditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;	/**< Handle delegate of assets can delete */
+	EditorDelegates::COnAssetsReloaded::DelegateType_t*	assetsReloadedHandle;	/**< Handle delegate of reloaded assets */
 };
 
 #endif // !STATICMESHEDITORWINDOW_H

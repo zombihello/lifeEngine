@@ -36,7 +36,7 @@ DECLARE_MULTICAST_DELEGATE( COnAudioBankUpdated, class CAudioBank* );
  * @ingroup Audio
  * @brief Audio bank info
  */
-struct SAudioBankInfo
+struct AudioBankInfo
 {
 	ESampleFormat		format;			/**< Sample format */
 	uint32				rate;			/**< Rate */
@@ -74,7 +74,7 @@ public:
 	 * @param OutBankInfo Output parameter, return info about bank
 	 * @return Return handle of opened bank. If failed return nullptr
 	 */
-	AudioBankHandle_t OpenBank( SAudioBankInfo& OutBankInfo );
+	AudioBankHandle_t OpenBank( AudioBankInfo& OutBankInfo );
 
 	/**
 	 * @brief Close bank

@@ -85,7 +85,7 @@ public:
 	 * @param InCollisionQueryParams Collision query params
 	 * @return Return TRUE if a blocking hit is found, else false
 	 */
-	bool LineTraceSingleByChannel( SHitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const SCollisionQueryParams& InCollisionQueryParams = SCollisionQueryParams::defaultQueryParam );
+	bool LineTraceSingleByChannel( HitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const CollisionQueryParams& InCollisionQueryParams = CollisionQueryParams::defaultQueryParam );
 
 	/**
 	 * @brief Get Box2D world

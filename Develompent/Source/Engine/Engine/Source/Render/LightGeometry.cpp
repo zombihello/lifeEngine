@@ -28,7 +28,7 @@ CLightSphereMesh::InitRHI
 */
 void CLightSphereMesh::InitRHI()
 {
-	std::vector<SLightVertexType>		verteces;
+	std::vector<LightVertexType>		verteces;
 	std::vector<uint32>					indeces;
 
 	// Generate sphere from icosphere
@@ -38,8 +38,8 @@ void CLightSphereMesh::InitRHI()
 		icosphereMeshBuilder.SetSubdivision( 3 );
 		icosphereMeshBuilder.Build();
 
-		// Convert SDynamicMeshVertexType to SLightVertexType
-		const std::vector<SDynamicMeshVertexType>& tempVerteces = icosphereMeshBuilder.GetVerteces();
+		// Convert DynamicMeshVertexType to LightVertexType
+		const std::vector<DynamicMeshVertexType>& tempVerteces = icosphereMeshBuilder.GetVerteces();
 		verteces.resize( tempVerteces.size() );
 		for ( uint32 index = 0, count = tempVerteces.size(); index < count; ++index )
 		{
@@ -54,10 +54,10 @@ void CLightSphereMesh::InitRHI()
 	uint32			numVerteces = verteces.size();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "LightSphere" ), sizeof( SLightVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "LightSphere" ), sizeof( LightVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
-		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SLightVertexType ) } );		// 0 stream slot
+		vertexFactory->AddVertexStream( VertexStream{ vertexBufferRHI, sizeof( LightVertexType ) } );		// 0 stream slot
 		vertexFactory->Init();
 	}
 
@@ -101,7 +101,7 @@ void CLightQuadMesh::InitRHI()
 	float	x0 = -1.f, y0 = -1.f;
 	float	x1 = 1.f, y1 = 1.f;
 
-	SLightVertexType		verteces[] =
+	LightVertexType		verteces[] =
 	{
 		//			POSITION			
 		{ Vector4D( x0, y0, 0.f, 1.f ) },	// 0
@@ -111,11 +111,11 @@ void CLightQuadMesh::InitRHI()
 	};
 	uint32					indeces[] = { 0, 1, 2, 0, 2, 3 };
 
-	vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "LightQuad" ), sizeof( SLightVertexType ) * ARRAY_COUNT( verteces ), ( byte* )&verteces[0], RUF_Static );
+	vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "LightQuad" ), sizeof( LightVertexType ) * ARRAY_COUNT( verteces ), ( byte* )&verteces[0], RUF_Static );
 	indexBufferRHI	= g_RHI->CreateIndexBuffer( TEXT( "LightQuad" ), sizeof( uint32 ), sizeof( uint32 ) * ARRAY_COUNT( indeces ), ( byte* )&indeces[0], RUF_Static );
 
 	// Initialize vertex factory
-	vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SLightVertexType ) } );		// 0 stream slot
+	vertexFactory->AddVertexStream( VertexStream{ vertexBufferRHI, sizeof( LightVertexType ) } );		// 0 stream slot
 	vertexFactory->Init();
 }
 
@@ -152,7 +152,7 @@ void CLightConeMesh::InitRHI()
 	const uint32					resolution = 30.f;
 	const float						radius = 1.f;
 	const float						height = 1.f;
-	std::vector<SLightVertexType>	verteces;
+	std::vector<LightVertexType>	verteces;
 	std::vector<uint32>				indeces;
 
 	{
@@ -162,13 +162,13 @@ void CLightConeMesh::InitRHI()
 		// Add vertices subdividing a circle
 		for ( uint32 index = 0; index < resolution; ++index )
 		{
-			verteces.push_back( SLightVertexType{ Vector4D( SMath::Cos( angle ) * radius, -height, SMath::Sin( angle ) * radius, 1.f ) } );
-			verteces.push_back( SLightVertexType{ Vector4D( SMath::Cos( angle ) * 0.f, 0.f, SMath::Sin( angle ) * 0.f, 1.f ) } );
+			verteces.push_back( LightVertexType{ Vector4D( Math::Cos( angle ) * radius, -height, Math::Sin( angle ) * radius, 1.f ) } );
+			verteces.push_back( LightVertexType{ Vector4D( Math::Cos( angle ) * 0.f, 0.f, Math::Sin( angle ) * 0.f, 1.f ) } );
 			angle += step;
 		}
 
 		// Add the bottom of the cone
-		verteces.push_back( SLightVertexType{ Vector4D( 0.f, -height, 0.f, 1.f ) } );
+		verteces.push_back( LightVertexType{ Vector4D( 0.f, -height, 0.f, 1.f ) } );
 	}
 
 	// Generate indices
@@ -208,11 +208,11 @@ void CLightConeMesh::InitRHI()
 	numPrimitives = indeces.size() / 3;
 
 	// Create vertex and index buffer
-	vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "LightCone" ), sizeof( SLightVertexType ) * verteces.size(), ( byte* )verteces.data(), RUF_Static );
+	vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "LightCone" ), sizeof( LightVertexType ) * verteces.size(), ( byte* )verteces.data(), RUF_Static );
 	indexBufferRHI = g_RHI->CreateIndexBuffer( TEXT( "LightCone" ), sizeof( uint32 ), sizeof( uint32 ) * indeces.size(), ( byte* )indeces.data(), RUF_Static );
 
 	// Initialize vertex factory
-	vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SLightVertexType ) } );		// 0 stream slot
+	vertexFactory->AddVertexStream( VertexStream{ vertexBufferRHI, sizeof( LightVertexType ) } );		// 0 stream slot
 	vertexFactory->Init();
 }
 

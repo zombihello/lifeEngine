@@ -11,7 +11,7 @@
 CShader::Init
 ==================
 */
-void CShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
+void CShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 {
 	name = InShaderCacheItem.name;
 	frequency = InShaderCacheItem.frequency;
@@ -64,7 +64,7 @@ void CShader::SetConstantParameters( class CBaseDeviceContextRHI* InDeviceContex
 CShader::SetMesh
 ==================
 */
-void CShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+void CShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {}
 
 #if WITH_EDITOR
@@ -83,7 +83,7 @@ bool CShader::ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactor
 CShader::ModifyCompilationEnvironment
 ==================
 */
-void CShader::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
+void CShader::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment )
 {}
 #endif // WITH_EDITOR
 

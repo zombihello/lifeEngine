@@ -86,7 +86,7 @@ extern double						g_SecondsPerCycle;
 
 /**
 * @ingroup Core
-* Time at which appSeconds() was first initialized (very early on)
+* Time at which Sys_Seconds() was first initialized (very early on)
 */
 extern double						g_StartTime;
 

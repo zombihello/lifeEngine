@@ -17,7 +17,7 @@
   * @ingroup Engine
   * Vertex type for static mesh
   */
-struct SStaticMeshVertexType
+struct StaticMeshVertexType
 {
 	Vector4D		position;		/**< Position vertex */
 	Vector2D		texCoord;		/**< Texture coords */
@@ -28,7 +28,7 @@ struct SStaticMeshVertexType
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const SStaticMeshVertexType& InOther ) const
+	bool FORCEINLINE operator==( const StaticMeshVertexType& InOther ) const
 	{
 		return position == InOther.position &&
 			texCoord == InOther.texCoord &&
@@ -117,7 +117,7 @@ public:
 // Serialization
 //
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, SStaticMeshVertexType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, StaticMeshVertexType& InValue )
 {
 	InArchive << InValue.position;
 	InArchive << InValue.texCoord;
@@ -127,7 +127,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, SStaticMeshVertexType& In
 	return InArchive;
 }
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SStaticMeshVertexType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const StaticMeshVertexType& InValue )
 {
 	InArchive << InValue.position;
 	InArchive << InValue.texCoord;

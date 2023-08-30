@@ -140,7 +140,7 @@ public:
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override
+	virtual void Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem ) override
 	{
 		CShader::Init( InShaderCacheItem );
 		unresolvedSurfaceParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "unresolvedSurface" ) );
@@ -190,7 +190,7 @@ IMPLEMENT_SHADER_TYPE(, CResolveDepthPixelShader, TEXT( "RHI/D3D11RHI/ResolvePix
 ResolveSurfaceUsingShader
 ==================
 */
-void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11Surface* InSourceSurfaceRHI, CD3D11Texture2DRHI* InDestTexture2D, const D3D11_TEXTURE2D_DESC& InD3D11ResolveTargetDesc, const SResolveRect& InSourceRect, const SResolveRect& InDestRect )
+void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11Surface* InSourceSurfaceRHI, CD3D11Texture2DRHI* InDestTexture2D, const D3D11_TEXTURE2D_DESC& InD3D11ResolveTargetDesc, const ResolveRect& InSourceRect, const ResolveRect& InDestRect )
 {
 	ID3D11DeviceContext*		d3d11DeviceContext		= InDeviceContextRHI->GetD3D11DeviceContext();
 	ID3D11Texture2D*			d3d11DestTexture2D		= InDestTexture2D->GetResource();
@@ -275,8 +275,8 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 	g_RHI->SetBoundShaderState( InDeviceContextRHI, resolveBoundShaderState );
 
 	// Generate the vertices used
-	SSimpleElementVertexType	vertices[4];
-	Sys_Memzero( vertices, sizeof( SSimpleElementVertexType ) * 4 );
+	SimpleElementVertexType	vertices[4];
+	Sys_Memzero( vertices, sizeof( SimpleElementVertexType ) * 4 );
 
 	vertices[0].position.x = maxX;
 	vertices[0].position.y = minY;
@@ -302,7 +302,7 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 
 	// Reset saved render targets
 	{
-		const SD3D11StateCache&		d3d11StateCache = ( ( CD3D11RHI* )g_RHI )->GetStateCache();
+		const D3D11StateCache&		d3d11StateCache = ( ( CD3D11RHI* )g_RHI )->GetStateCache();
 		d3d11DeviceContext->OMSetRenderTargets( D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT, d3d11StateCache.renderTargetViews, d3d11StateCache.depthStencilView );
 	}
 
@@ -315,7 +315,7 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 GetDefaultRect
 ==================
 */
-static FORCEINLINE SResolveRect GetDefaultRect( const SResolveRect& InRect, uint32 InDefaultWidth, uint32 InDefaultHeight )
+static FORCEINLINE ResolveRect GetDefaultRect( const ResolveRect& InRect, uint32 InDefaultWidth, uint32 InDefaultHeight )
 {
 	if ( InRect.x1 >= 0 && InRect.x2 >= 0 && InRect.y1 >= 0 && InRect.y2 >= 0 )
 	{
@@ -323,7 +323,7 @@ static FORCEINLINE SResolveRect GetDefaultRect( const SResolveRect& InRect, uint
 	}
 	else
 	{
-		return SResolveRect( 0, 0, InDefaultWidth, InDefaultHeight );
+		return ResolveRect( 0, 0, InDefaultWidth, InDefaultHeight );
 	}
 }
 
@@ -656,7 +656,7 @@ BoundShaderStateRHIRef_t CD3D11RHI::CreateBoundShaderState( const tchar* InBound
 CD3D11RHI::CreateRasterizerState
 ==================
 */
-RasterizerStateRHIRef_t CD3D11RHI::CreateRasterizerState( const SRasterizerStateInitializerRHI& InInitializer )
+RasterizerStateRHIRef_t CD3D11RHI::CreateRasterizerState( const RasterizerStateInitializerRHI& InInitializer )
 {
 	return new CD3D11RasterizerStateRHI( InInitializer );
 }
@@ -676,7 +676,7 @@ SamplerStateRHIRef_t CD3D11RHI::CreateSamplerState( const SSamplerStateInitializ
 CD3D11RHI::CreateDepthState
 ==================
 */
-DepthStateRHIRef_t CD3D11RHI::CreateDepthState( const SDepthStateInitializerRHI& InInitializer )
+DepthStateRHIRef_t CD3D11RHI::CreateDepthState( const DepthStateInitializerRHI& InInitializer )
 {
 	return new CD3D11DepthStateRHI( InInitializer );
 }
@@ -686,7 +686,7 @@ DepthStateRHIRef_t CD3D11RHI::CreateDepthState( const SDepthStateInitializerRHI&
 CD3D11RHI::CreateBlendState
 ==================
 */
-BlendStateRHIRef_t CD3D11RHI::CreateBlendState( const SBlendStateInitializerRHI& InInitializer )
+BlendStateRHIRef_t CD3D11RHI::CreateBlendState( const BlendStateInitializerRHI& InInitializer )
 {
 	return new CD3D11BlendStateRHI( InInitializer );
 }
@@ -696,7 +696,7 @@ BlendStateRHIRef_t CD3D11RHI::CreateBlendState( const SBlendStateInitializerRHI&
 CD3D11RHI::CreateStencilState
 ==================
 */
-StencilStateRHIRef_t CD3D11RHI::CreateStencilState( const SStencilStateInitializerRHI& InInitializer )
+StencilStateRHIRef_t CD3D11RHI::CreateStencilState( const StencilStateInitializerRHI& InInitializer )
 {
 	return new CD3D11StencilStateRHI( InInitializer );
 }
@@ -759,7 +759,7 @@ void CD3D11RHI::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContext, u
 	}
 	else
 	{
-		SLockedData		lockedData;
+		LockedData		lockedData;
 		LockVertexBuffer( InDeviceContext, instanceBuffer, InInstanceSize, 0, lockedData );
 		memcpy( lockedData.data, InInstanceData, InInstanceSize );
 		UnlockVertexBuffer( InDeviceContext, instanceBuffer, lockedData );
@@ -1158,7 +1158,7 @@ void CD3D11RHI::CommitConstants( class CBaseDeviceContextRHI* InDeviceContext )
 CD3D11RHI::LockVertexBuffer
 ==================
 */
-void CD3D11RHI::LockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData )
+void CD3D11RHI::LockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, uint32 InSize, uint32 InOffset, LockedData& OutLockedData )
 {
 	Assert( OutLockedData.data == nullptr && InOffset < InSize );
 
@@ -1176,7 +1176,7 @@ void CD3D11RHI::LockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, 
 CD3D11RHI::UnlockVertexBuffer
 ==================
 */
-void CD3D11RHI::UnlockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, SLockedData& InLockedData )
+void CD3D11RHI::UnlockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, LockedData& InLockedData )
 {
 	Assert( InLockedData.data );
 
@@ -1189,7 +1189,7 @@ void CD3D11RHI::UnlockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext
 CD3D11RHI::LockIndexBuffer
 ==================
 */
-void CD3D11RHI::LockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData )
+void CD3D11RHI::LockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, uint32 InSize, uint32 InOffset, LockedData& OutLockedData )
 {
 	Assert( OutLockedData.data == nullptr && InOffset < InSize );
 
@@ -1207,7 +1207,7 @@ void CD3D11RHI::LockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, c
 CD3D11RHI::UnlockIndexBuffer
 ==================
 */
-void CD3D11RHI::UnlockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, SLockedData& InLockedData )
+void CD3D11RHI::UnlockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, LockedData& InLockedData )
 {
 	Assert( InLockedData.data );
 
@@ -1220,7 +1220,7 @@ void CD3D11RHI::UnlockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext,
 CD3D11RHI::LockTexture2D
 ==================
 */
-void CD3D11RHI::LockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, bool InIsDataWrite, SLockedData& OutLockedData, bool InIsUseCPUShadow /*= false*/ )
+void CD3D11RHI::LockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, bool InIsDataWrite, LockedData& OutLockedData, bool InIsUseCPUShadow /*= false*/ )
 {
 	( ( CD3D11Texture2DRHI* )InTexture )->Lock( InDeviceContext, InMipIndex, InIsDataWrite, InIsUseCPUShadow, OutLockedData );
 }
@@ -1230,7 +1230,7 @@ void CD3D11RHI::LockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Tex
 CD3D11RHI::UnlockTexture2D
 ==================
 */
-void CD3D11RHI::UnlockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, SLockedData& InLockedData )
+void CD3D11RHI::UnlockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, LockedData& InLockedData )
 {
 	( ( CD3D11Texture2DRHI* )InTexture )->Unlock( InDeviceContext, InMipIndex, InLockedData );
 }
@@ -1346,7 +1346,7 @@ void CD3D11RHI::DrawIndexedPrimitiveUP( class CBaseDeviceContextRHI* InDeviceCon
 CD3D11RHI::CopyToResolveTarget
 ==================
 */
-void CD3D11RHI::CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InSourceSurface, const SResolveParams& InResolveParams )
+void CD3D11RHI::CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InSourceSurface, const ResolveParams& InResolveParams )
 {
 	ID3D11DeviceContext*	d3d11DeviceContext		= ( ( CD3D11DeviceContext* )InDeviceContext )->GetD3D11DeviceContext();
 	CD3D11Surface*			resolveTargetSurface	= InResolveParams.resolveTargetSurface ? ( CD3D11Surface* )InResolveParams.resolveTargetSurface : nullptr;
@@ -1363,7 +1363,7 @@ void CD3D11RHI::CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContex
 		if ( d3dFeatureLevel == D3D_FEATURE_LEVEL_11_0 && d3d11ResolveTargetDesc.BindFlags & D3D11_BIND_DEPTH_STENCIL )
 		{
 			// If we're resolving part of the depth buffer, we need to do a copy using a shader. Otherwise we can do a CopySubresourceRegion
-			SResolveRect		resolveRect = InResolveParams.rect;
+			ResolveRect		resolveRect = InResolveParams.rect;
 			if ( resolveRect.x1 >= 0 && resolveRect.x2 < ( int32 )d3d11ResolveTargetDesc.Width && resolveRect.y1 >= 0 && resolveRect.y2 < ( int32 )d3d11ResolveTargetDesc.Height )
 			{
 				ResolveSurfaceUsingShader( ( CD3D11DeviceContext* )InDeviceContext, ( CD3D11Surface* )InSourceSurface, resolveTarget2D, d3d11ResolveTargetDesc, GetDefaultRect( InResolveParams.rect, d3d11ResolveTargetDesc.Width, d3d11ResolveTargetDesc.Height ), GetDefaultRect( InResolveParams.rect, d3d11ResolveTargetDesc.Width, d3d11ResolveTargetDesc.Height ) );
@@ -1391,7 +1391,7 @@ void CD3D11RHI::CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContex
 				d3d11SrcBox.top				= 0;
 				d3d11SrcBox.front			= 0;
 				D3D11_BOX*	pD3D11SrcBox	= nullptr;
-				SResolveRect resolveRect	= InResolveParams.rect;
+				ResolveRect resolveRect	= InResolveParams.rect;
 				
 				if ( resolveRect.x1 >= 0 && resolveRect.x2 >= 0 && resolveRect.y1 >= 0 && resolveRect.y2 >= 0 && ( resolveRect.x1 > 0 || resolveRect.y1 > 0 || resolveRect.x2 < ( int32 )d3d11ResolveTargetDesc.Width || resolveRect.y2 < ( int32 )d3d11ResolveTargetDesc.Height || resolveRect.x2 < ( int32 )d3d11SourceSurfaceDesc.Width || resolveRect.y2 < ( int32 )d3d11SourceSurfaceDesc.Height ) )
 				{
@@ -1523,7 +1523,7 @@ void CD3D11RHI::EndDrawingViewport( class CBaseDeviceContextRHI* InDeviceContext
 
 /**
  * @ingroup D3D11RHI
- * An implementation of the D3DX include interface to access a SShaderCompilerEnvironment
+ * An implementation of the D3DX include interface to access a ShaderCompilerEnvironment
  */
 class CD3D11IncludeEnvironment : public ID3DInclude
 {
@@ -1533,7 +1533,7 @@ public:
 	 * 
 	 * @param[in] InEnvironment Shader compiler environment
 	 */
-	CD3D11IncludeEnvironment( const SShaderCompilerEnvironment& InEnvironment ) :
+	CD3D11IncludeEnvironment( const ShaderCompilerEnvironment& InEnvironment ) :
 		environment( InEnvironment )
 	{}
 
@@ -1593,7 +1593,7 @@ public:
 	}
 
 private:
-	SShaderCompilerEnvironment			environment;		/**< Shader compiler environment */
+	ShaderCompilerEnvironment			environment;		/**< Shader compiler environment */
 };
 
 /*
@@ -1617,7 +1617,7 @@ static DWORD TranslateCompilerFlagD3D11( ECompilerFlags CompilerFlag )
 CD3D11RHI::CompileShader
 ==================
 */
-bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const SShaderCompilerEnvironment& InEnvironment, SShaderCompilerOutput& OutOutput, bool InDebugDump /* = false */, const tchar* InShaderSubDir /* = TEXT( "" ) */ )
+bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const ShaderCompilerEnvironment& InEnvironment, ShaderCompilerOutput& OutOutput, bool InDebugDump /* = false */, const tchar* InShaderSubDir /* = TEXT( "" ) */ )
 {
 	CArchive*		shaderArchive = g_FileSystem->CreateFileReader( InSourceFileName );
 	if ( !shaderArchive )

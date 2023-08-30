@@ -51,7 +51,7 @@ public:
      * @param InRotation    Rotation actor on spawn
      * @return Return spawned actor. If failed returning NULL
      */
-    FORCEINLINE ActorRef_t Spawn( const TAssetHandle<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation = SMath::quaternionZero )
+    FORCEINLINE ActorRef_t Spawn( const TAssetHandle<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation = Math::quaternionZero )
     {
         // If asset is not valid, we exit from method
         if ( !InAsset.IsAssetValid() )

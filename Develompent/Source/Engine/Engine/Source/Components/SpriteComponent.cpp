@@ -131,8 +131,8 @@ void CSpriteComponent::CalcTransformationMatrix( const class CSceneView& InScene
 		return;
     }
 
-	SMath::IdentityMatrix( OutResult );
-	SMath::TranslateMatrix( transform.GetLocation(), OutResult );
+	Math::IdentityMatrix( OutResult );
+	Math::TranslateMatrix( transform.GetLocation(), OutResult );
     
 	const Matrix&      viewMatrix = InSceneView.GetViewMatrix();
 	OutResult[ 0 ].x = viewMatrix[ 0 ].x;
@@ -156,8 +156,8 @@ void CSpriteComponent::CalcTransformationMatrix( const class CSceneView& InScene
 	OutResult[ 2 ].y = viewMatrix[ 1 ].z;
 	OutResult[ 2 ].z = viewMatrix[ 2 ].z;
 
-	OutResult *= SMath::ScaleMatrix( transform.GetScale() );
-	OutResult *= SMath::QuaternionToMatrix( transform.GetRotation() );
+	OutResult *= Math::ScaleMatrix( transform.GetScale() );
+	OutResult *= Math::QuaternionToMatrix( transform.GetRotation() );
 }
 
 /*
@@ -182,16 +182,16 @@ void CSpriteComponent::LinkDrawList()
 	// If sprite is valid - add to scene draw policy link
 	if ( sprite )
 	{
-		SSceneDepthGroup&               SDG = scene->GetSDG( 
+		SceneDepthGroup&               SDG = scene->GetSDG( 
 #if WITH_EDITOR
 			bGizmo ? SDG_WorldEdForeground :
 #endif // WITH_EDITOR
 			SDG_World );
 		
-		SSpriteSurface					surface = sprite->GetSurface();
+		SpriteSurface					surface = sprite->GetSurface();
 
 		// Generate mesh batch of sprite
-		SMeshBatch			            meshBatch;
+		MeshBatch			            meshBatch;
 		meshBatch.baseVertexIndex       = surface.baseVertexIndex;
 		meshBatch.firstIndex            = surface.firstIndex;
 		meshBatch.numPrimitives         = surface.numPrimitives;
@@ -199,7 +199,7 @@ void CSpriteComponent::LinkDrawList()
 		meshBatch.primitiveType         = PT_TriangleList;
 
 		// Make and add to scene new draw policy link
-		const SMeshBatch*				meshBatchLink = nullptr;
+		const MeshBatch*				meshBatchLink = nullptr;
 #if WITH_EDITOR
 		if ( bGizmo )
 		{
@@ -232,7 +232,7 @@ CSpriteComponent::UnlinkDrawList
 void CSpriteComponent::UnlinkDrawList()
 {
     Assert( scene );
-	SSceneDepthGroup&		SDGWorld = scene->GetSDG( SDG_World );
+	SceneDepthGroup&		SDGWorld = scene->GetSDG( SDG_World );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( drawingPolicyLink )
@@ -298,11 +298,11 @@ void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
     // Add to mesh batch new instance
 	for ( uint32 index = 0, count = meshBatchLinks.size(); index < count; ++index )
 	{
-		const SMeshBatch*	meshBatchLink = meshBatchLinks[ index ];	
+		const MeshBatch*	meshBatchLink = meshBatchLinks[ index ];	
 		++meshBatchLink->numInstances;
 		meshBatchLink->instances.resize( meshBatchLink->numInstances );
 
-		SMeshInstance&		instanceMesh = meshBatchLink->instances[ meshBatchLink->numInstances - 1 ];
+		MeshInstance&		instanceMesh = meshBatchLink->instances[ meshBatchLink->numInstances - 1 ];
 		instanceMesh.transformMatrix	 = transformMatrix;
 
 #if ENABLE_HITPROXY

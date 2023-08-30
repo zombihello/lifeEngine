@@ -25,14 +25,14 @@
  * @ingroup Engine
  * @brief Vertex type for light render
  */
-struct SLightVertexType
+struct LightVertexType
 {
 	Vector4D		position;		/**< Position vertex */
 
 	/**
 	 * @brief Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const SLightVertexType& InOther ) const
+	bool FORCEINLINE operator==( const LightVertexType& InOther ) const
 	{
 		return position == InOther.position;
 	}
@@ -108,7 +108,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 	/**
 	 * @brief Set the l2w transform shader
@@ -184,7 +184,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 	/**
 	 * @brief Setup instancing for point lights

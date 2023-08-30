@@ -13,7 +13,7 @@ bool CShaderParameterMap::FindParameterAllocation( const tchar* InParameterName,
 	auto		itParamAllocation = parameterMap.find( InParameterName );
 	if ( itParamAllocation != parameterMap.end() )
 	{
-		const SParameterAllocation&		allocation = itParamAllocation->second;
+		const ParameterAllocation&		allocation = itParamAllocation->second;
 		OutBufferIndex = allocation.bufferIndex;
 		OutBaseIndex = allocation.baseIndex;
 		OutSize = allocation.size;
@@ -34,7 +34,7 @@ CShaderParameterMap::AddParameterAllocation
 */
 void CShaderParameterMap::AddParameterAllocation( const tchar* InParameterName, uint32 InBufferIndex, uint32 InBaseIndex, uint32 InSize, uint32 InSamplerIndex )
 {
-	SParameterAllocation 		allocation;
+	ParameterAllocation 		allocation;
 	allocation.bufferIndex = InBufferIndex;
 	allocation.baseIndex = InBaseIndex;
 	allocation.size = InSize;
@@ -44,10 +44,10 @@ void CShaderParameterMap::AddParameterAllocation( const tchar* InParameterName, 
 
 /*
 ==================
-CShaderCache::SShaderCacheItem::Serialize
+CShaderCache::ShaderCacheItem::Serialize
 ==================
 */
-void CShaderCache::SShaderCacheItem::Serialize( CArchive& InArchive )
+void CShaderCache::ShaderCacheItem::Serialize( CArchive& InArchive )
 {
 	InArchive << frequency;
 
@@ -109,7 +109,7 @@ void CShaderCache::Serialize( CArchive& InArchive )
 		// Loading all items from archive
 		for ( uint32 indexItem = 0; indexItem < countItems; ++indexItem )
 		{
-			SShaderCacheItem&		item = items[ indexItem ];
+			ShaderCacheItem&		item = items[ indexItem ];
 			item.Serialize( InArchive );
 			itemsMap[ item.vertexFactoryHash ].insert( item.name );
 		}

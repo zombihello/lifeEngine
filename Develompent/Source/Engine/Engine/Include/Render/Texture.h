@@ -23,7 +23,7 @@
  * @ingroup Engine
  * @brief 2D texture mipmap
  */
-struct STexture2DMipMap
+struct Texture2DMipMap
 {
 	uint32				sizeX;	/**< Width of mipmap */
 	uint32				sizeY;	/**< Height of mipmap */
@@ -228,7 +228,7 @@ public:
 	 * @param InMipLevel		Mip level
 	 * @return Return refrence to mip data
 	 */
-	FORCEINLINE const STexture2DMipMap& GetMip( uint32 InMipLevel ) const
+	FORCEINLINE const Texture2DMipMap& GetMip( uint32 InMipLevel ) const
 	{
 		Assert( InMipLevel < mipmaps.size() );
 		return mipmaps[InMipLevel];
@@ -255,7 +255,7 @@ private:
 	ESamplerAddressMode					addressU;			/**< Address mode for U coord */
 	ESamplerAddressMode					addressV;			/**< Address mode for V coord */
 	ESamplerFilter						samplerFilter;		/**< Sampler filter */
-	std::vector<STexture2DMipMap>		mipmaps;			/**< Array of mipmaps */
+	std::vector<Texture2DMipMap>		mipmaps;			/**< Array of mipmaps */
 };
 
 //
@@ -281,7 +281,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CTextu
 	return InArchive;
 }
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, STexture2DMipMap& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, Texture2DMipMap& InValue )
 {
 	InArchive << InValue.sizeX;
 	InArchive << InValue.sizeY;

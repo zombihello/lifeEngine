@@ -141,7 +141,7 @@ void CAudioDevice::Init()
 	if ( headroom != 0.f )
 	{
 		// Convert dB to linear volume
-		platformAudioHeadroom = SMath::Pow( 10.f, headroom / 20.f );
+		platformAudioHeadroom = Math::Pow( 10.f, headroom / 20.f );
 	}
 	else
 	{
@@ -159,7 +159,7 @@ void CAudioDevice::Init()
 	}
 
 	// Initialize listener spatial
-	SetListenerSpatial( SMath::vectorZero, SMath::vectorForward, SMath::vectorUp );
+	SetListenerSpatial( Math::vectorZero, Math::vectorForward, Math::vectorUp );
 	SetGlobalVolume( globalVolume );
 }
 

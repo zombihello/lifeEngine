@@ -22,12 +22,12 @@
  * You must use it struct in ImGui::Image*(). 
  * She contain handle of locked texture in CImGUIEngine and for locking texture use CImGUIEngine::LockTexture
  */
-struct SImGUILockedTexture2D
+struct ImGUILockedTexture2D
 {
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE SImGUILockedTexture2D()
+	FORCEINLINE ImGUILockedTexture2D()
 		: handle( nullptr )
 	{}
 
@@ -35,7 +35,7 @@ struct SImGUILockedTexture2D
 	 * @brief Constructor
 	 * @param InTexture2D		Texture 2D
 	 */
-	FORCEINLINE SImGUILockedTexture2D( Texture2DRHIParamRef_t InTexture2D )
+	FORCEINLINE ImGUILockedTexture2D( Texture2DRHIParamRef_t InTexture2D )
 		: handle( InTexture2D )
 	{}
 
@@ -63,7 +63,7 @@ struct SImGUILockedTexture2D
 	 *
 	 * @return Return TRUE if is equal to InRight, otherwise will return FALSE
 	 */
-	FORCEINLINE bool operator==( const SImGUILockedTexture2D& InRight ) const
+	FORCEINLINE bool operator==( const ImGUILockedTexture2D& InRight ) const
 	{
 		return handle == InRight.handle;
 	}
@@ -74,7 +74,7 @@ struct SImGUILockedTexture2D
 	 *
 	 * @return Return TRUE if isn't equal to InRight, otherwise will return FALSE
 	 */
-	FORCEINLINE bool operator!=( const SImGUILockedTexture2D& InRight ) const
+	FORCEINLINE bool operator!=( const ImGUILockedTexture2D& InRight ) const
 	{
 		return handle != InRight.handle;
 	}

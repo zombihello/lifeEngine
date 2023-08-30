@@ -34,9 +34,9 @@ bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 		bool		oldIsCommandlet = g_IsCommandlet;
 		g_IsCommandlet = true;
 		Logf( TEXT( "Started commandlet '%s'\n" ), nameCommandlet.c_str() );
-		double		beginCommandletTime = appSeconds();
+		double		beginCommandletTime = Sys_Seconds();
 		bool		result = commandlet->Main( InCommandLine );
-		double		endCommandletTime = appSeconds();
+		double		endCommandletTime = Sys_Seconds();
 		delete commandlet;
 
 		ELogColor		logColor = result ? LC_Green : LC_Red;

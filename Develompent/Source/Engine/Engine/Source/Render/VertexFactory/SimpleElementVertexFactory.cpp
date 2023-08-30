@@ -18,9 +18,9 @@ void CSimpleElementVertexDeclaration::InitRHI()
 {
 	VertexDeclarationElementList_t		vertexDeclElementList =
 	{
-		SVertexElement( CSimpleElementVertexFactory::SSS_Main,		sizeof( SSimpleElementVertexType ),		STRUCT_OFFSET( SSimpleElementVertexType, position ),	VET_Float4, VEU_Position,			0 ),
-		SVertexElement( CSimpleElementVertexFactory::SSS_Main,		sizeof( SSimpleElementVertexType ),		STRUCT_OFFSET( SSimpleElementVertexType, texCoord ),	VET_Float2, VEU_TextureCoordinate,	0 ),
-		SVertexElement( CSimpleElementVertexFactory::SSS_Main,		sizeof( SSimpleElementVertexType ),		STRUCT_OFFSET( SSimpleElementVertexType, color ),		VET_Color,	VEU_Color,				0 )
+		VertexElement( CSimpleElementVertexFactory::SSS_Main,		sizeof( SimpleElementVertexType ),		STRUCT_OFFSET( SimpleElementVertexType, position ),	VET_Float4, VEU_Position,			0 ),
+		VertexElement( CSimpleElementVertexFactory::SSS_Main,		sizeof( SimpleElementVertexType ),		STRUCT_OFFSET( SimpleElementVertexType, texCoord ),	VET_Float2, VEU_TextureCoordinate,	0 ),
+		VertexElement( CSimpleElementVertexFactory::SSS_Main,		sizeof( SimpleElementVertexType ),		STRUCT_OFFSET( SimpleElementVertexType, color ),		VET_Color,	VEU_Color,				0 )
 	};
 	vertexDeclarationRHI = g_RHI->CreateVertexDeclaration( vertexDeclElementList );
 }

@@ -26,7 +26,7 @@ CSphereMesh::InitRHI
 */
 void CSphereMesh::InitRHI()
 {
-	std::vector< SDynamicMeshVertexType >		verteces;
+	std::vector< DynamicMeshVertexType >		verteces;
 	std::vector< uint32 >						indeces;
 
 	// Generate sphere from icosphere
@@ -45,10 +45,10 @@ void CSphereMesh::InitRHI()
 	uint32			numVerteces = verteces.size();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "Sphere" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "Sphere" ), sizeof( DynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
-		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SDynamicMeshVertexType ) } );		// 0 stream slot
+		vertexFactory->AddVertexStream( VertexStream{ vertexBufferRHI, sizeof( DynamicMeshVertexType ) } );		// 0 stream slot
 		vertexFactory->Init();
 	}
 

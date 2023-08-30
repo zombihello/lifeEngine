@@ -108,7 +108,7 @@ typedef glm::quat		Quaternion;
  * @ingroup Core
  * Structure for all math helper functions
  */
-struct SMath
+struct Math
 {
 	/**
 	 * @ingroup Core
@@ -406,8 +406,8 @@ struct SMath
 	static FORCEINLINE Quaternion LookAtQuatenrion( const Vector& InLookFrom, const Vector& InLookTo, const Vector& InUp, const Vector& InGlobalUp )
 	{
 		Vector		direction		= InLookTo - InLookFrom;
-		float      directionLength	= SMath::LengthVector( direction );
-		direction = SMath::NormalizeVector( direction );
+		float      directionLength	= Math::LengthVector( direction );
+		direction = Math::NormalizeVector( direction );
 
 		// Check if the direction is valid; Also deals with NaN
 		if ( directionLength <= 0.0001f )
@@ -416,14 +416,14 @@ struct SMath
 		}
 
 		// Is the normal up (nearly) parallel to direction?
-		if ( SMath::Abs( SMath::DotProduct( direction, InUp ) ) > 0.9999f )
+		if ( Math::Abs( Math::DotProduct( direction, InUp ) ) > 0.9999f )
 		{
 			// Use alternative up
-			return glm::quatLookAt( direction, InGlobalUp ) * glm::angleAxis( SMath::DegreesToRadians( 90.f ), Vector( 1.f, 0.f, 0.f ) );
+			return glm::quatLookAt( direction, InGlobalUp ) * glm::angleAxis( Math::DegreesToRadians( 90.f ), Vector( 1.f, 0.f, 0.f ) );
 		}
 		else
 		{
-			return glm::quatLookAt( direction, InUp ) * glm::angleAxis( SMath::DegreesToRadians( 90.f ), Vector( 1.f, 0.f, 0.f ) );
+			return glm::quatLookAt( direction, InUp ) * glm::angleAxis( Math::DegreesToRadians( 90.f ), Vector( 1.f, 0.f, 0.f ) );
 		}
 	}
 

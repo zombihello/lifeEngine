@@ -39,16 +39,16 @@ void Sys_ShowFileInExplorer( const std::wstring& InPath );
  * @ingroup WorldEd
  * Helper struct for the COnAssetsCanDelete delegate
  */
-struct SCanDeleteAssetResult
+struct CanDeleteAssetResult
 {
 public:
-	SCanDeleteAssetResult( const SCanDeleteAssetResult& )	= delete;
-	SCanDeleteAssetResult( SCanDeleteAssetResult&& )		= delete;
+	CanDeleteAssetResult( const CanDeleteAssetResult& )	= delete;
+	CanDeleteAssetResult( CanDeleteAssetResult&& )		= delete;
 
 	/**
 	 * Constructor
 	 */
-	SCanDeleteAssetResult() : 
+	CanDeleteAssetResult() : 
 		bResult( true ) 
 	{}
 
@@ -78,12 +78,12 @@ private:
  * @ingroup WorldEd
  * @brief Delegates used by the editor
  */
-struct SEditorDelegates
+struct EditorDelegates
 {
 	/**
 	 * @brief Delegate for called event when assets try delete
 	 */
-	DECLARE_MULTICAST_DELEGATE( COnAssetsCanDelete, const std::vector< TSharedPtr<class CAsset> >& /*InAssets*/, SCanDeleteAssetResult& /*OutResult*/ );
+	DECLARE_MULTICAST_DELEGATE( COnAssetsCanDelete, const std::vector< TSharedPtr<class CAsset> >& /*InAssets*/, CanDeleteAssetResult& /*OutResult*/ );
 
 	/**
 	 * @brief Delegate for called event when assets deleted

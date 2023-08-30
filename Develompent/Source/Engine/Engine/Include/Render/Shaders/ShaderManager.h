@@ -353,7 +353,7 @@ public:
     /**
      * @brief Pointer to static method for modify compilation environment of shader
      */
-    typedef void                  ( *ModifyCompilationEnvironmentFn_t )( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment );
+    typedef void                  ( *ModifyCompilationEnvironmentFn_t )( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment );
 #endif // WITH_EDITOR
 
     /**
@@ -457,7 +457,7 @@ public:
      * @param InShaderPlatform Shader platform
      * @param InEnvironment Shader compiler environment
      */
-    FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment ) const
+    FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment ) const
     {
         Assert( ModifyCompilationEnvironmentFunc );
         ModifyCompilationEnvironmentFunc( InShaderPlatform, InEnvironment );
@@ -547,7 +547,7 @@ public:
      */
     static FORCEINLINE CShaderMetaType* FindShaderType( const std::wstring& InShaderName )
     {
-        SContainerShaderTypes* container = SContainerShaderTypes::Get();
+        ContainerShaderTypes* container = ContainerShaderTypes::Get();
         Assert( container );
 
         auto        itShaderType = container->shaderMetaTypes.find( InShaderName );
@@ -565,7 +565,7 @@ public:
      */
     static FORCEINLINE const std::unordered_map< std::wstring, CShaderMetaType* >& GetShaderTypes()
     {
-        return SContainerShaderTypes::Get()->shaderMetaTypes;
+        return ContainerShaderTypes::Get()->shaderMetaTypes;
     }
 
     /**
@@ -592,18 +592,18 @@ private:
     /**
      * @brief Class container for storage global shader types
      */
-    struct SContainerShaderTypes
+    struct ContainerShaderTypes
     {
         /**
          * @brief Get instance of container
          * @return Return instance of container
          */
-        static FORCEINLINE SContainerShaderTypes* Get()
+        static FORCEINLINE ContainerShaderTypes* Get()
         {
-            static SContainerShaderTypes*       container = nullptr;
+            static ContainerShaderTypes*       container = nullptr;
             if ( !container )
             {
-                container = new SContainerShaderTypes();
+                container = new ContainerShaderTypes();
             }
 
             return container;
@@ -626,7 +626,7 @@ private:
      */
     static FORCEINLINE void RegisterShaderType( CShaderMetaType* InShaderMetaType )
     {
-        SContainerShaderTypes*          container = SContainerShaderTypes::Get();
+        ContainerShaderTypes*          container = ContainerShaderTypes::Get();
         Assert( container && InShaderMetaType );
 
         container->shaderMetaTypes.insert( std::make_pair( InShaderMetaType->GetName(), InShaderMetaType ) );

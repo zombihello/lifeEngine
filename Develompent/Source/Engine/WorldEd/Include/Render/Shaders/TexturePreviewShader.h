@@ -26,7 +26,7 @@ public:
 	 * @brief Initialize shader
 	 * @param InShaderCacheItem			Cache of shader
 	 */
-	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
+	virtual void Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem ) override;
 
 #if WITH_EDITOR
 	/**

@@ -31,7 +31,7 @@ CVertexFactoryMetaType::CVertexFactoryMetaType( const std::wstring& InFactoryNam
 	, ModifyCompilationEnvironmentFunc( InModifyCompilationEnvironmentFunc )
 #endif // WITH_EDITOR
 {
-	SContainerVertexFactoryMetaType::Get()->RegisterType( this );
+	ContainerVertexFactoryMetaType::Get()->RegisterType( this );
 }
 
 
@@ -66,7 +66,7 @@ void CVertexFactory::Set( class CBaseDeviceContextRHI* InDeviceContextRHI ) cons
 	Assert( IsInitialized() );
 	for ( uint32 streamIndex = 0, streamNum = ( uint32 )streams.size(); streamIndex < streamNum; ++streamIndex )
 	{
-		const SVertexStream&		stream = streams[ streamIndex ];
+		const VertexStream&		stream = streams[ streamIndex ];
 		Assert( stream.vertexBuffer );
 		g_RHI->SetStreamSource( InDeviceContextRHI, streamIndex, stream.vertexBuffer, stream.stride, 0 );
 	}
@@ -77,7 +77,7 @@ void CVertexFactory::Set( class CBaseDeviceContextRHI* InDeviceContextRHI ) cons
 CVertexFactory::SetupInstancing
 ==================
 */
-void CVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+void CVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
 	Sys_Errorf( TEXT( "CVertexFactory::SetupInstancing :: Not implemented" ) );
 }
@@ -153,6 +153,6 @@ bool CVertexFactory::ShouldCache( EShaderPlatform InShaderPlatform )
 CVertexFactory::ModifyCompilationEnvironment
 ==================
 */
-void CVertexFactory::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
+void CVertexFactory::ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment )
 {}
 #endif // WITH_EDITOR

@@ -166,12 +166,12 @@ FORCEINLINE physx::PxRigidDynamicLockFlags LE2PLockFlags( uint32 InLockFlags )
  * @ingroup Physics
  * @brief Handle of material for PhysX
  */
-struct SPhysicsMaterialHandlePhysX
+struct PhysicsMaterialHandlePhysX
 {
 	/**
 	 * @brief Constructor
 	 */
-	SPhysicsMaterialHandlePhysX()
+	PhysicsMaterialHandlePhysX()
 		: pxMaterial( nullptr )
 	{}
 
@@ -182,12 +182,12 @@ struct SPhysicsMaterialHandlePhysX
  * @ingroup Physics
  * @brief Handle of shape for PhysX
  */
-struct SPhysicsShapeHandlePhysX
+struct PhysicsShapeHandlePhysX
 {
 	/**
 	 * @brief Constructor
 	 */
-	SPhysicsShapeHandlePhysX()
+	PhysicsShapeHandlePhysX()
 		: pxShape( nullptr )
 	{}
 
@@ -198,12 +198,12 @@ struct SPhysicsShapeHandlePhysX
  * @ingroup Physics
  * @brief Handle of actor for PhysX
  */
-struct SPhysicsActorHandlePhysX
+struct PhysicsActorHandlePhysX
 {
 	/**
 	 * @brief Constructor
 	 */
-	SPhysicsActorHandlePhysX()
+	PhysicsActorHandlePhysX()
 		: bStatic( false )
 		, pxRigidActor( nullptr )
 	{}
@@ -216,7 +216,7 @@ struct SPhysicsActorHandlePhysX
  * @ingroup Physics
  * @brief PhysX interface
  */
-struct SPhysicsInterfacePhysX
+struct PhysicsInterfacePhysX
 {
 	/**
 	 * @brief Init physics
@@ -235,9 +235,9 @@ struct SPhysicsInterfacePhysX
 	 * @param InPhysMaterial Physics Material
 	 * @return Return shape handle
 	 */
-	static FORCEINLINE SPhysicsShapeHandlePhysX CreateBoxGeometry( const Vector& InSize, const SPhysicsMaterialHandlePhysX& InPhysMaterial )
+	static FORCEINLINE PhysicsShapeHandlePhysX CreateBoxGeometry( const Vector& InSize, const PhysicsMaterialHandlePhysX& InPhysMaterial )
 	{
-		SPhysicsShapeHandlePhysX		shapeHandle;
+		PhysicsShapeHandlePhysX		shapeHandle;
 		shapeHandle.pxShape = g_PhysXSDK->createShape( physx::PxBoxGeometry( InSize.x, InSize.y, InSize.z ), *InPhysMaterial.pxMaterial );
 		return shapeHandle;
 	}
@@ -246,7 +246,7 @@ struct SPhysicsInterfacePhysX
 	 * @brief Release shape
 	 * @param InShapeHandle Shape handle
 	 */
-	static FORCEINLINE void ReleaseShapeGeometry( SPhysicsShapeHandlePhysX& InShapeHandle )
+	static FORCEINLINE void ReleaseShapeGeometry( PhysicsShapeHandlePhysX& InShapeHandle )
 	{
 		if ( InShapeHandle.pxShape )
 		{
@@ -261,7 +261,7 @@ struct SPhysicsInterfacePhysX
 	 * @param InShapeHandle Shape handle
 	 * @return Return true if shape handle is valid, else return false
 	 */
-	static FORCEINLINE bool IsValidShapeGeometry( const SPhysicsShapeHandlePhysX& InShapeHandle )
+	static FORCEINLINE bool IsValidShapeGeometry( const PhysicsShapeHandlePhysX& InShapeHandle )
 	{
 		return InShapeHandle.pxShape;
 	}
@@ -272,7 +272,7 @@ struct SPhysicsInterfacePhysX
 	 * @param InPhysMaterial Physics material
 	 * @return Return material handle
 	 */
-	static SPhysicsMaterialHandlePhysX CreateMaterial( class CPhysicsMaterial* InPhysMaterial );
+	static PhysicsMaterialHandlePhysX CreateMaterial( class CPhysicsMaterial* InPhysMaterial );
 
 	/**
 	 * @brief Update material
@@ -280,13 +280,13 @@ struct SPhysicsInterfacePhysX
 	 * @param InMaterialHandle Handle of phys material
 	 * @param InPhysMaterial Physics material
 	 */
-	static void UpdateMaterial( const SPhysicsMaterialHandlePhysX& InMaterialHandle, class CPhysicsMaterial* InPhysMaterial );
+	static void UpdateMaterial( const PhysicsMaterialHandlePhysX& InMaterialHandle, class CPhysicsMaterial* InPhysMaterial );
 
 	/**
 	 * @brief Release material
 	 * @param InMaterialHandle Handle of phys material
 	 */
-	static FORCEINLINE void ReleaseMaterial( SPhysicsMaterialHandlePhysX& InMaterialHandle )
+	static FORCEINLINE void ReleaseMaterial( PhysicsMaterialHandlePhysX& InMaterialHandle )
 	{
 		if ( InMaterialHandle.pxMaterial )
 		{
@@ -301,7 +301,7 @@ struct SPhysicsInterfacePhysX
 	 * @param InMaterialHandle Material handle
 	 * @return Return true if material handle is valid, else return false
 	 */
-	static FORCEINLINE bool IsValidMaterial( const SPhysicsMaterialHandlePhysX& InMaterialHandle )
+	static FORCEINLINE bool IsValidMaterial( const PhysicsMaterialHandlePhysX& InMaterialHandle )
 	{
 		return InMaterialHandle.pxMaterial;
 	}
@@ -312,7 +312,7 @@ struct SPhysicsInterfacePhysX
 	 * @param InParams Actor params for create
 	 * @return Return actor handle
 	 */
-	static SPhysicsActorHandlePhysX CreateActor( const SActorCreationParams& InParams );
+	static PhysicsActorHandlePhysX CreateActor( const ActorCreationParams& InParams );
 
 	/**
 	 * @brief Computation of mass properties for a physics actor
@@ -322,7 +322,7 @@ struct SPhysicsInterfacePhysX
 	 * @param InMassLocalPose The center of mass relative to the actor frame.  If set to null then (0,0,0) is assumed.
 	 * @param InIncludeNonSimShapes True if all kind of shapes (Query shape, trigger shape) should be taken into account.
 	 */
-	static FORCEINLINE void UpdateMassAndInertia( const SPhysicsActorHandlePhysX& InActorHandle, float InDensity, const Vector* InMassLocalPose = nullptr, bool InIncludeNonSimShapes = false )
+	static FORCEINLINE void UpdateMassAndInertia( const PhysicsActorHandlePhysX& InActorHandle, float InDensity, const Vector* InMassLocalPose = nullptr, bool InIncludeNonSimShapes = false )
 	{
 		Assert( IsValidActor( InActorHandle ) );
 		if ( InActorHandle.bStatic )
@@ -338,7 +338,7 @@ struct SPhysicsInterfacePhysX
 	 * 
 	 * @param InActorHandle Handle of physics actor
 	 */
-	static FORCEINLINE CTransform GetTransform( const SPhysicsActorHandlePhysX& InActorHandle )
+	static FORCEINLINE CTransform GetTransform( const PhysicsActorHandlePhysX& InActorHandle )
 	{
 		if ( !IsValidActor( InActorHandle ) )
 		{
@@ -352,7 +352,7 @@ struct SPhysicsInterfacePhysX
 	 * @brief Release actor
 	 * @param InActorHandle Handle of physics actor
 	 */
-	static FORCEINLINE void ReleaseActor( SPhysicsActorHandlePhysX& InActorHandle )
+	static FORCEINLINE void ReleaseActor( PhysicsActorHandlePhysX& InActorHandle )
 	{
 		if ( InActorHandle.pxRigidActor )
 		{
@@ -367,7 +367,7 @@ struct SPhysicsInterfacePhysX
 	 * @param InActorHandle Handle of physics actor
 	 * @return Return true if actor handle is valid, else return false
 	 */
-	static FORCEINLINE bool IsValidActor( const SPhysicsActorHandlePhysX& InActorHandle )
+	static FORCEINLINE bool IsValidActor( const PhysicsActorHandlePhysX& InActorHandle )
 	{
 		return InActorHandle.pxRigidActor;
 	}
@@ -377,7 +377,7 @@ struct SPhysicsInterfacePhysX
 	 * @param InActorHandle Handle of physics actor
 	 * @param InShapeHandle Handle of physics shape
 	 */
-	static FORCEINLINE void AttachShape( const SPhysicsActorHandlePhysX& InActorHandle, const SPhysicsShapeHandlePhysX& InShapeHandle )
+	static FORCEINLINE void AttachShape( const PhysicsActorHandlePhysX& InActorHandle, const PhysicsShapeHandlePhysX& InShapeHandle )
 	{
 		Assert( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
 		InActorHandle.pxRigidActor->attachShape( *InShapeHandle.pxShape );
@@ -388,7 +388,7 @@ struct SPhysicsInterfacePhysX
 	 * @param InActorHandle Handle of physics actor
 	 * @param InShapeHandle Handle of physics shape
 	 */
-	static FORCEINLINE void DetachShape( const SPhysicsActorHandlePhysX& InActorHandle, const SPhysicsShapeHandlePhysX& InShapeHandle )
+	static FORCEINLINE void DetachShape( const PhysicsActorHandlePhysX& InActorHandle, const PhysicsShapeHandlePhysX& InShapeHandle )
 	{
 		Assert( IsValidActor( InActorHandle ) && IsValidShapeGeometry( InShapeHandle ) );
 		InActorHandle.pxRigidActor->detachShape( *InShapeHandle.pxShape );

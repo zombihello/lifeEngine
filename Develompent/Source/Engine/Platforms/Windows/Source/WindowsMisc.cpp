@@ -16,5 +16,5 @@ double Sys_InitTiming()
 	Assert( result );
 
 	g_SecondsPerCycle = 1.0 / frequency.QuadPart;
-	return appSeconds();
+	return Sys_Seconds();
 }

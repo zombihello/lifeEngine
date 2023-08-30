@@ -51,7 +51,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 protected:
     CShaderParameter		localToWorldMatrixParameter;	/**< Local to world parameter */

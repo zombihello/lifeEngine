@@ -23,7 +23,7 @@ public:
 	 *
 	 * @param[in] InInitializer Initializer of rasterizer state
 	 */
-	CD3D11RasterizerStateRHI( const SRasterizerStateInitializerRHI& InInitializer );
+	CD3D11RasterizerStateRHI( const RasterizerStateInitializerRHI& InInitializer );
 
 	/**
 	 * @brief Destructor
@@ -141,7 +141,7 @@ public:
 	 * 
 	 * @param InInitializer		Initializer of depth state
 	 */
-	CD3D11DepthStateRHI( const SDepthStateInitializerRHI& InInitializer );
+	CD3D11DepthStateRHI( const DepthStateInitializerRHI& InInitializer );
 
 	/**
 	 * @brief Get DirectX 11 depth state info
@@ -168,7 +168,7 @@ public:
 	 *
 	 * @param InInitializer		Initializer of stencil state
 	 */
-	CD3D11StencilStateRHI( const SStencilStateInitializerRHI& InInitializer );
+	CD3D11StencilStateRHI( const StencilStateInitializerRHI& InInitializer );
 
 	/**
 	 * @brief Get DirectX 11 stencil state info
@@ -206,7 +206,7 @@ public:
 	 * @param InInitializer				Initializer of blend state
 	 * @param InIsColorWriteEnable		Is enabled color write
 	 */
-	CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable = true );
+	CD3D11BlendStateRHI( const BlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable = true );
 
 	/**
 	 * @brief Get DirectX 11 blend state info
@@ -235,13 +235,13 @@ private:
  * @ingroup D3D11RHI
  * Class for caching DirectX 11 states
  */
-struct SD3D11StateCache
+struct D3D11StateCache
 {
 public:
 	/**
 	 * Constructor
 	 */
-	SD3D11StateCache();
+	D3D11StateCache();
 
 	/**
 	 * Reset state cache to default

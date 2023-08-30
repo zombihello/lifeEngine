@@ -50,8 +50,8 @@
 static const Vector				s_DefaultPerspectiveViewLocation( 495.166962, 167.584518, -400.f );
 
 /** Default camera orientation for level editor perspective viewports */
-static const Quaternion			s_DefaultPerspectiveViewRotationQuat( SMath::quaternionZero );
-static const Vector				s_DefaultPerspectiveViewRotationEuler( SMath::vectorZero );
+static const Quaternion			s_DefaultPerspectiveViewRotationQuat( Math::quaternionZero );
+static const Vector				s_DefaultPerspectiveViewRotationEuler( Math::vectorZero );
 
 /** Show flags for each viewport type */
 static const ShowFlags_t		s_ShowFlags[ LVT_Max ] =
@@ -73,9 +73,9 @@ CEditorLevelViewportClient::CEditorLevelViewportClient( ELevelViewportType InVie
 	, bIgnoreInput( false )
 	, bAllowContextMenu( true )
 	, viewportType( InViewportType )
-	, viewLocation( SMath::vectorZero )
-	, viewRotationEuler( SMath::vectorZero )
-	, viewRotationQuat( SMath::quaternionZero )
+	, viewLocation( Math::vectorZero )
+	, viewRotationEuler( Math::vectorZero )
+	, viewRotationQuat( Math::quaternionZero )
 	, viewFOV( 90.f )
 	, orthoZoom( 10000.f )
 	, cameraSpeed( MIN_CAMERA_SPEED )
@@ -95,9 +95,9 @@ void CEditorLevelViewportClient::Tick( float InDeltaSeconds )
 	// If we tracking mouse and this is perspective viewport - change view location
 	if ( trackingType == MT_View && viewportType == LVT_Perspective )
 	{
-		Vector		targetDirection = viewRotationQuat * SMath::vectorForward;
-		Vector		axisUp			= viewRotationQuat * SMath::vectorUp;
-		Vector		axisRight		= SMath::CrossVector( targetDirection, axisUp );
+		Vector		targetDirection = viewRotationQuat * Math::vectorForward;
+		Vector		axisUp			= viewRotationQuat * Math::vectorUp;
+		Vector		axisRight		= Math::CrossVector( targetDirection, axisUp );
 
 		if ( cameraMoveFlags & CMV_MoveForward )		viewLocation +=	targetDirection	* cameraSpeed;
 		if ( cameraMoveFlags & CMV_MoveBackward )		viewLocation +=	targetDirection	* -cameraSpeed;
@@ -119,7 +119,7 @@ void CEditorLevelViewportClient::Draw( CViewport* InViewport )
 	// Update audio listener spatial if allowed
 	if ( viewportType == LVT_Perspective && bSetListenerPosition )
 	{
-		g_AudioDevice.SetListenerSpatial( viewLocation, viewRotationQuat * SMath::vectorForward, viewRotationQuat * SMath::vectorUp );
+		g_AudioDevice.SetListenerSpatial( viewLocation, viewRotationQuat * Math::vectorForward, viewRotationQuat * Math::vectorUp );
 	}
 
 	// Draw viewport
@@ -217,7 +217,7 @@ CHitProxyId CEditorLevelViewportClient::GetHitProxyId( uint32 InX, uint32 InY ) 
 											  // Getting hit proxy texture and lock him for read
 											  CBaseDeviceContextRHI*	deviceContext	= g_RHI->GetImmediateContext();
 											  Texture2DRHIRef_t			hitProxyTexture = g_SceneRenderTargets.GetHitProxyTexture();
-											  SLockedData				lockedData;
+											  LockedData				lockedData;
 											  g_RHI->LockTexture2D( deviceContext, hitProxyTexture, 0, false, lockedData );
 
 											  // Getting pointer to we interested data in texture
@@ -328,7 +328,7 @@ Vector CEditorLevelViewportClient::ScreenToWorld( const Vector2D& InScreenPoint,
 
 		// In default case we return empty vector
 	default:
-		return SMath::vectorZero;
+		return Math::vectorZero;
 	}
 }
 
@@ -350,10 +350,10 @@ Vector CEditorLevelViewportClient::WorldToScreen( const Vector& InWorldPoint, ui
 CEditorLevelViewportClient::ProcessEvent
 ==================
 */
-void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CEditorLevelViewportClient::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	// We ignore events when bIgnoreInput is TRUE or when ImGUI layer is unhovered
-	bool						bIsNotUnhoveredEvent = InWindowEvent.type != SWindowEvent::T_ImGUILayerUnHovered;
+	bool						bIsNotUnhoveredEvent = InWindowEvent.type != WindowEvent::T_ImGUILayerUnHovered;
 	TSharedPtr<CImGUILayer>		imGUILayer = InWindowEvent.imGUILayer.Pin();
 	if ( bIgnoreInput || ( bIsNotUnhoveredEvent && imGUILayer && !imGUILayer->IsHovered() ) )
 	{
@@ -363,7 +363,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	switch ( InWindowEvent.type )
 	{
 		// Event of unhovered ImGUI layer
-	case SWindowEvent::T_ImGUILayerUnHovered:
+	case WindowEvent::T_ImGUILayerUnHovered:
 		// Show cursor
 		if ( InWindowEvent.imGUILayer )
 		{
@@ -379,7 +379,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		break;
 
 		// Event of mouse pressed
-	case SWindowEvent::T_MousePressed:
+	case WindowEvent::T_MousePressed:
 		bAllowContextMenu = true;
 
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseRight )
@@ -399,7 +399,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		break;
 
 		// Event of mouse released
-	case SWindowEvent::T_MouseReleased:
+	case WindowEvent::T_MouseReleased:
 		if ( trackingType == MT_View && InWindowEvent.events.mouseButton.code == BC_MouseRight )
 		{
 			// Show cursor
@@ -418,7 +418,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		break;
 
 		// Event of mouse wheel moved
-	case SWindowEvent::T_MouseWheel:
+	case WindowEvent::T_MouseWheel:
 	{
 		// For ortho viewports we change zoom
 		if ( viewportType != LVT_Perspective )
@@ -444,7 +444,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 	}
 
 		// Event of mouse move
-	case SWindowEvent::T_MouseMove:
+	case WindowEvent::T_MouseMove:
 	{
 		Vector2D		moveDelta = Vector2D( InWindowEvent.events.mouseMove.xDirection, InWindowEvent.events.mouseMove.yDirection );
 
@@ -525,14 +525,14 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 
 				}
 
-				viewRotationQuat = SMath::AnglesToQuaternion( viewRotationEuler );
+				viewRotationQuat = Math::AnglesToQuaternion( viewRotationEuler );
 			}
 		}
 		break;
 	}
 
 		// Event of key press
-	case SWindowEvent::T_KeyPressed:
+	case WindowEvent::T_KeyPressed:
 		if ( trackingType == MT_View && viewportType == LVT_Perspective )
 		{
 			switch ( InWindowEvent.events.key.code )
@@ -546,7 +546,7 @@ void CEditorLevelViewportClient::ProcessEvent( struct SWindowEvent& InWindowEven
 		break;
 
 		// Event of release key
-	case SWindowEvent::T_KeyReleased:
+	case WindowEvent::T_KeyReleased:
 		if ( trackingType == MT_View && viewportType == LVT_Perspective )
 		{
 			switch ( InWindowEvent.events.key.code )
@@ -572,7 +572,7 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 In
 	Matrix		projectionMatrix;
 	if ( viewportType == LVT_Perspective )
 	{
-		projectionMatrix = glm::perspective( SMath::DegreesToRadians( viewFOV ), ( float )InSizeX / InSizeY, 0.01f, ( float )HALF_WORLD_MAX );
+		projectionMatrix = glm::perspective( Math::DegreesToRadians( viewFOV ), ( float )InSizeX / InSizeY, 0.01f, ( float )HALF_WORLD_MAX );
 	}
 	else
 	{
@@ -590,18 +590,18 @@ CSceneView* CEditorLevelViewportClient::CalcSceneView( uint32 InSizeX, uint32 In
 	{
 	case LVT_Perspective:
 	case LVT_OrthoXY:
-		targetDirection		= viewRotationQuat * SMath::vectorForward;
-		axisUp				= viewRotationQuat * SMath::vectorUp;
+		targetDirection		= viewRotationQuat * Math::vectorForward;
+		axisUp				= viewRotationQuat * Math::vectorUp;
 		break;
 
 	case LVT_OrthoXZ:
-		targetDirection		= viewRotationQuat * ( -SMath::vectorUp );
-		axisUp				= viewRotationQuat * SMath::vectorForward;
+		targetDirection		= viewRotationQuat * ( -Math::vectorUp );
+		axisUp				= viewRotationQuat * Math::vectorForward;
 		break;
 
 	case LVT_OrthoYZ:
-		targetDirection		= viewRotationQuat * SMath::vectorRight;
-		axisUp				= viewRotationQuat * SMath::vectorUp;
+		targetDirection		= viewRotationQuat * Math::vectorRight;
+		axisUp				= viewRotationQuat * Math::vectorUp;
 		break;
 
 	default:

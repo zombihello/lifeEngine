@@ -49,7 +49,7 @@ public:
 	 *
 	 * @param InWindowEvent		Window event
 	 */
-	void ProcessEvent( struct SWindowEvent& InWindowEvent );
+	void ProcessEvent( struct WindowEvent& InWindowEvent );
 
 	/**
 	 * @brief Set enabled

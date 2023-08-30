@@ -8,7 +8,7 @@ CShapeComponent::CShapeComponent
 ==================
 */
 CShapeComponent::CShapeComponent()
-	: collisionProfile( g_PhysicsEngine.FindCollisionProfile( SCollisionProfile::blockAll_ProfileName ) )
+	: collisionProfile( g_PhysicsEngine.FindCollisionProfile( CollisionProfile::blockAll_ProfileName ) )
 	, physicsMaterial( nullptr )
 {
 	SetVisibility( false );

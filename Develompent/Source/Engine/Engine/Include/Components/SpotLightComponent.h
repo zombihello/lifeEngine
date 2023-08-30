@@ -95,7 +95,7 @@ public:
 	{
 		if ( bNeedUpdateCutoff )
 		{
-			cutoff = height / ( SMath::Sqrt( SMath::Pow( height, 2.f ) + SMath::Pow( radius, 2 ) ) );
+			cutoff = height / ( Math::Sqrt( Math::Pow( height, 2.f ) + Math::Pow( radius, 2 ) ) );
 			bNeedUpdateCutoff = false;
 		}
 		return cutoff;

@@ -42,7 +42,7 @@ private:
 	 * @param InCameraView		Camera view
 	 * @return Return scene view
 	 */
-	class CSceneView* CalcSceneView( CViewport* InViewport, const struct SCameraView& InCameraView );
+	class CSceneView* CalcSceneView( CViewport* InViewport, const struct CameraView& InCameraView );
 };
 
 #endif // !GAMEVIEWPORTCLIENT_H

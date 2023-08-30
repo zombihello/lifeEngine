@@ -76,9 +76,9 @@
         return StaticClass(); \
     } \
     \
-    struct SRegister##TClass \
+    struct Register##TClass \
     { \
-        SRegister##TClass() \
+        Register##TClass() \
         { \
             CClass::StaticRegisterClass( TClass::StaticClass() ); \
         } \

@@ -39,10 +39,10 @@ CEditorWindow::CEditorWindow()
 	}
 
 	// Bind to events when map created, loaded, saved and marked dirty
-	editorCreatedNewMapDelegate			= SEditorDelegates::onEditorCreatedNewMap.Add( std::bind( &CEditorWindow::UpdateWindowTitle, this ) );
-	editorLoadedMapDelegate				= SEditorDelegates::onEditorLoadedMap.Add( std::bind( &CEditorWindow::UpdateWindowTitle, this ) );
-	editorSavedMapDelegate				= SEditorDelegates::onEditorSavedMap.Add( std::bind( &CEditorWindow::UpdateWindowTitle, this ) );
-	editorMapMarkedDirtyDelegate		= SEditorDelegates::onEditorMapMarkedDirty.Add( std::bind( &CEditorWindow::UpdateWindowTitle, this ) );
+	editorCreatedNewMapDelegate			= EditorDelegates::onEditorCreatedNewMap.Add( std::bind( &CEditorWindow::UpdateWindowTitle, this ) );
+	editorLoadedMapDelegate				= EditorDelegates::onEditorLoadedMap.Add( std::bind( &CEditorWindow::UpdateWindowTitle, this ) );
+	editorSavedMapDelegate				= EditorDelegates::onEditorSavedMap.Add( std::bind( &CEditorWindow::UpdateWindowTitle, this ) );
+	editorMapMarkedDirtyDelegate		= EditorDelegates::onEditorMapMarkedDirty.Add( std::bind( &CEditorWindow::UpdateWindowTitle, this ) );
 }
 
 /*
@@ -52,10 +52,10 @@ CEditorWindow::~CEditorWindow
 */
 CEditorWindow::~CEditorWindow()
 {
-	SEditorDelegates::onEditorCreatedNewMap.Remove( editorCreatedNewMapDelegate );
-	SEditorDelegates::onEditorLoadedMap.Remove( editorLoadedMapDelegate );
-	SEditorDelegates::onEditorSavedMap.Remove( editorSavedMapDelegate );
-	SEditorDelegates::onEditorMapMarkedDirty.Remove( editorMapMarkedDirtyDelegate );
+	EditorDelegates::onEditorCreatedNewMap.Remove( editorCreatedNewMapDelegate );
+	EditorDelegates::onEditorLoadedMap.Remove( editorLoadedMapDelegate );
+	EditorDelegates::onEditorSavedMap.Remove( editorSavedMapDelegate );
+	EditorDelegates::onEditorMapMarkedDirty.Remove( editorMapMarkedDirtyDelegate );
 }
 
 /*
@@ -415,7 +415,7 @@ void CEditorWindow::OpenLevel()
 {
 	// Init file dialog settings
 	CFileDialogSetup		fileDialogSetup;
-	SOpenFileDialogResult	openFileDialogResult;
+	OpenFileDialogResult	openFileDialogResult;
 
 	fileDialogSetup.SetTitle( TEXT( "Open Level" ) );
 	fileDialogSetup.SetDirectory( Sys_GameDir() + PATH_SEPARATOR + TEXT( "Content" ) );
@@ -443,7 +443,7 @@ CEditorWindow::SaveLevel
 void CEditorWindow::SaveLevel( bool InIsSaveAs /* = false */ )
 {
 	CFileDialogSetup		fileDialogSetup;
-	SSaveFileDialogResult	saveFileDialogResult;
+	SaveFileDialogResult	saveFileDialogResult;
 
 	// Init file dialog settings
 	fileDialogSetup.SetTitle( TEXT( "Save Level" ) );

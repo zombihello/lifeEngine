@@ -79,7 +79,7 @@ CD3D11VertexDeclarationRHI::CD3D11VertexDeclarationRHI( const VertexDeclarationE
 {
 	for ( uint32 elementIndex = 0, elementCount = ( uint32 )InElementList.size(); elementIndex < elementCount; ++elementIndex )
 	{
-		const SVertexElement&		element = InElementList[ elementIndex ];
+		const VertexElement&		element = InElementList[ elementIndex ];
 		D3D11_INPUT_ELEMENT_DESC	d3dElement;
 		d3dElement.InputSlot = element.streamIndex;
 		d3dElement.AlignedByteOffset = element.offset;

@@ -19,7 +19,7 @@ GetNearestPow2
 static FORCEINLINE uint32 GetNearestPow2( uint32 InResolution )
 {
 	//Rounded exponent. Adds +0.5f to round to the nearest integer
-	return SMath::Pow( 2, SMath::Log2( InResolution * 0.5f ) + 0.5f );
+	return Math::Pow( 2, Math::Log2( InResolution * 0.5f ) + 0.5f );
 }
 
 /*
@@ -103,11 +103,11 @@ void CSceneRenderer::RenderPostProcess( class CBaseDeviceContextRHI* InDeviceCon
 				bFirstIteration = false;
 			}
 
-			SLockedData			lockedData;
+			LockedData			lockedData;
 			g_RHI->LockTexture2D( InDeviceContext, avgLuminanceBuffers[readBuffer].GetTexture2DRHI(), 0, false, lockedData );
 			half_float::half* luminescence = ( half_float::half* )lockedData.data;
 			float				avgLuminance = 0.2126f * luminescence[0] + 0.7152f * luminescence[1] + 0.0722f * luminescence[2];
-			float				hdrExposure = SMath::Lerp( scene->GetExposure(), 0.023f / Max( avgLuminance, 0.0001f ), 0.005f );
+			float				hdrExposure = Math::Lerp( scene->GetExposure(), 0.023f / Max( avgLuminance, 0.0001f ), 0.005f );
 			g_RHI->UnlockTexture2D( InDeviceContext, avgLuminanceBuffers[readBuffer].GetTexture2DRHI(), 0, lockedData );
 
 			// Restore viewport size and update HDR exposure

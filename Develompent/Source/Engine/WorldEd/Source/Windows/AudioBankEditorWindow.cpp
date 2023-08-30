@@ -25,8 +25,8 @@ CAudioBankEditorWindow::CAudioBankEditorWindow( const TSharedPtr<CAudioBank>& In
 	flags |= ImGuiWindowFlags_MenuBar | LF_DestroyOnHide;
 
 	// Subscribe to event when assets try destroy of editing audio bank and reload. It need is block
-	assetsCanDeleteHandle = SEditorDelegates::onAssetsCanDelete.Add(	std::bind(	&CAudioBankEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2	) );
-	assetsReloadedHandle = SEditorDelegates::onAssetsReloaded.Add(		std::bind(	&CAudioBankEditorWindow::OnAssetsReloaded, this, std::placeholders::_1							) );
+	assetsCanDeleteHandle = EditorDelegates::onAssetsCanDelete.Add(	std::bind(	&CAudioBankEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2	) );
+	assetsReloadedHandle = EditorDelegates::onAssetsReloaded.Add(		std::bind(	&CAudioBankEditorWindow::OnAssetsReloaded, this, std::placeholders::_1							) );
 
 	// Create audio component
 	audioComponent = new CAudioComponent();
@@ -43,8 +43,8 @@ CAudioBankEditorWindow::~CAudioBankEditorWindow
 CAudioBankEditorWindow::~CAudioBankEditorWindow()
 {
 	// Unsubscribe from event when assets try destroy and reload
-	SEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
-	SEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
+	EditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
+	EditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 
 	// Delete audio component and close handle
 	delete audioComponent;
@@ -169,7 +169,7 @@ void CAudioBankEditorWindow::OnTick()
 			if ( ImGui::Button( "..." ) )
 			{
 				CFileDialogSetup		fileDialogSetup;
-				SOpenFileDialogResult	openFileDialogResult;
+				OpenFileDialogResult	openFileDialogResult;
 
 				// Init file dialog settings
 				fileDialogSetup.SetMultiselection( false );
@@ -231,7 +231,7 @@ void CAudioBankEditorWindow::OnTick()
 CAudioBankEditorWindow::OnAssetsCanDelete
 ==================
 */
-void CAudioBankEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, SCanDeleteAssetResult& OutResult )
+void CAudioBankEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, CanDeleteAssetResult& OutResult )
 {
 	// If in InAssets exist audio bank who is editing now - need is block
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )

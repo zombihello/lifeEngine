@@ -106,7 +106,7 @@ public:
 	 *
 	 * @param InWindowEvent Window event
 	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
+	virtual void ProcessEvent( struct WindowEvent& InWindowEvent ) override;
 
 	/**
 	 * Add viewport to render list
@@ -226,7 +226,7 @@ public:
 	FORCEINLINE void SetEditorMode( EEditorMode InNewEditorMode )
 	{
 		currentEditorMode = InNewEditorMode;
-		SEditorDelegates::onEditorModeChanged.Broadcast( InNewEditorMode );
+		EditorDelegates::onEditorModeChanged.Broadcast( InNewEditorMode );
 	}
 
 	/**

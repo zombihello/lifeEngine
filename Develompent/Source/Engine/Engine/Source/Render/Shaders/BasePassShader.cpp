@@ -36,12 +36,12 @@ CBasePassVertexShader::~CBasePassVertexShader()
 CBasePassVertexShader::Init
 ==================
 */
-void CBasePassVertexShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
+void CBasePassVertexShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 {
     CShader::Init( InShaderCacheItem );
 
     // Bind shader parameters
-    CVertexFactoryMetaType*			vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
+    CVertexFactoryMetaType*			vertexFactoryType = CVertexFactoryMetaType::ContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
     Assert( vertexFactoryType );
 
     vertexFactoryParameters = vertexFactoryType->CreateShaderParameters( SF_Vertex );
@@ -64,7 +64,7 @@ void CBasePassVertexShader::SetConstantParameters( class CBaseDeviceContextRHI* 
 CBasePassVertexShader::SetMesh
 ==================
 */
-void CBasePassVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+void CBasePassVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
     Assert( vertexFactoryParameters );
     vertexFactoryParameters->SetMesh( InDeviceContextRHI, InMesh, InVertexFactory, InView, InNumInstances, InStartInstanceID );
@@ -76,7 +76,7 @@ void CBasePassVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContex
 CBasePassPixelShader::Init
 ==================
 */
-void CBasePassPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
+void CBasePassPixelShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 {
     CShader::Init( InShaderCacheItem );
 

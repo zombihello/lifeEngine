@@ -26,7 +26,7 @@ public:
 	/**
 	 * @brief Functions to extract the GUID as a key for std::unordered_map and std::unordered_set
 	 */
-	struct SGuidKeyFunc
+	struct GuidKeyFunc
 	{
 		/**
 		 * @brief Calculate hash of the GUID

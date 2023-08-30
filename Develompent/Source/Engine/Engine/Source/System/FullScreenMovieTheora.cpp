@@ -109,7 +109,7 @@ void CTheoraMovieRenderClient::CopyFrameToTexture( yuv_buffer* InYUVBuffer )
 {
 	Assert( textureFrame );
 	CBaseDeviceContextRHI*		deviceContext = g_RHI->GetImmediateContext();
-	SLockedData					lockedData;
+	LockedData					lockedData;
 	g_RHI->LockTexture2D( deviceContext, textureFrame, 0, true, lockedData );
 
 	// Copy data from YUV444 buffer to texture
@@ -159,14 +159,14 @@ void CTheoraMovieRenderClient::Draw( CViewport* InViewport )
 CTheoraMovieRenderClient::ProcessEvent
 ==================
 */
-void CTheoraMovieRenderClient::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CTheoraMovieRenderClient::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	// Check if we skipping current movie	
 	bool		bIsNeedSkip = false;
 	switch ( InWindowEvent.type )
 	{
 		// If released Space, Escape or Left Mouse Button, we skip current movie 
-	case SWindowEvent::T_KeyReleased:
+	case WindowEvent::T_KeyReleased:
 		switch ( InWindowEvent.events.key.code )
 		{
 		case BC_KeySpace:
@@ -176,7 +176,7 @@ void CTheoraMovieRenderClient::ProcessEvent( struct SWindowEvent& InWindowEvent 
 		}
 		break;
 
-	case SWindowEvent::T_MouseReleased:
+	case WindowEvent::T_MouseReleased:
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseLeft )
 		{
 			bIsNeedSkip = true;
@@ -184,13 +184,13 @@ void CTheoraMovieRenderClient::ProcessEvent( struct SWindowEvent& InWindowEvent 
 		break;
 
 		// Pause movie if focus lost
-	case SWindowEvent::T_WindowFocusLost:
+	case WindowEvent::T_WindowFocusLost:
 		Assert( moviePlayer );
 		moviePlayer->PauseMovie( true );
 		break;
 
 		// Resume movie if focus gained
-	case SWindowEvent::T_WindowFocusGained:
+	case WindowEvent::T_WindowFocusGained:
 		Assert( moviePlayer );
 		moviePlayer->PauseMovie( false );
 		break;
@@ -379,7 +379,7 @@ CFullScreenMovieTheora::DecodeVideoFrame
 void CFullScreenMovieTheora::DecodeVideoFrame()
 {
 	// If the interval between the previous frame is less than the frame rate, then we do not decode the new one
-	double		currentTime = appSeconds();
+	double		currentTime = Sys_Seconds();
 	if ( currentTime - lastFrameTime <= frameRate )
 	{
 		return;
@@ -537,8 +537,8 @@ void CFullScreenMovieTheora::GameThreadWaitForMovie()
 	while ( !bIsFinished && !g_IsRequestingExit )
 	{
 		// Compute the time since the last tick
-		static double		lastTickTime	= appSeconds();
-		const double		currentTime		= appSeconds();
+		static double		lastTickTime	= Sys_Seconds();
+		const double		currentTime		= Sys_Seconds();
 		const float			deltaTime		= currentTime - lastTickTime;
 		lastTickTime = currentTime;
 
@@ -663,7 +663,7 @@ void CFullScreenMovieTheora::PauseMovie( bool InPause )
 	// If movie is unpaused, we shift the beginning of the video playback by the duration of the pause
 	if ( !InPause )
 	{
-		beginPlaybackTime += appSeconds() - lastFrameTime;
+		beginPlaybackTime += Sys_Seconds() - lastFrameTime;
 	}
 
 	// Pause/Resume audio stream if him is exist
@@ -807,7 +807,7 @@ bool CFullScreenMovieTheora::OpenStreamedMovie( const std::wstring& InMovieFilen
 		frameWidth			= theoraInfo.frame_width;
 		frameHeight			= theoraInfo.frame_height;
 		frameRate			= 1.f / ( ( float )theoraInfo.fps_numerator / theoraInfo.fps_denominator );
-		beginPlaybackTime	= appSeconds();
+		beginPlaybackTime	= Sys_Seconds();
 		lastFrameTime		= 0;
 		bStopped			= false;
 		return true;

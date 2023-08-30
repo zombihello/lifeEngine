@@ -50,7 +50,7 @@ private:
 	/**
 	 * @brief Select asset handle
 	 */
-	struct SSelectAssetHandle
+	struct SelectAssetHandle
 	{
 		CName								parameterName;		/**< Parameter name */
 		TAssetHandle<CTexture2D>			asset;				/**< Asset */
@@ -76,7 +76,7 @@ private:
 	 * @param InAssets	Array of assets to delete
 	 * @param OutResult Result, we can is delete this assets?
 	 */
-	void OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, struct SCanDeleteAssetResult& OutResult );
+	void OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, struct CanDeleteAssetResult& OutResult );
 
 	/**
 	 * @brief Called event when asset is reloaded
@@ -95,9 +95,9 @@ private:
 	TSharedPtr<CMaterial>									material;				/**< Material */
 	CViewportWidget											viewportWidget;			/**< Viewport widget */
 	class CMaterialPreviewViewportClient*					viewportClient;			/**< Viewport client */
-	std::vector<SSelectAssetHandle>							selectAssetWidgets;		/**< Array of select asset widgets */
-	SEditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;	/**< Handle delegate of assets can delete */
-	SEditorDelegates::COnAssetsReloaded::DelegateType_t*	assetsReloadedHandle;	/**< Handle delegate of reloaded assets */
+	std::vector<SelectAssetHandle>							selectAssetWidgets;		/**< Array of select asset widgets */
+	EditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;	/**< Handle delegate of assets can delete */
+	EditorDelegates::COnAssetsReloaded::DelegateType_t*	assetsReloadedHandle;	/**< Handle delegate of reloaded assets */
 };
 
 #endif // !MATERIALEDITORWINDOW_H

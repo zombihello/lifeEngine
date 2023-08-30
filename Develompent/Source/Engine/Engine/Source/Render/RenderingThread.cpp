@@ -35,10 +35,10 @@ TickRenderingTickables
 */
 void TickRenderingTickables()
 {
-	static double		lastTickTime = appSeconds();
+	static double		lastTickTime = Sys_Seconds();
 
 	// Calc how long has passed since last tick
-	double		currentTime		= appSeconds();
+	double		currentTime		= Sys_Seconds();
 	float		deltaTime		= currentTime - lastTickTime;
 
 	// Tick any rendering thread tickables

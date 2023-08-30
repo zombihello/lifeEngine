@@ -148,9 +148,9 @@ void CAsset::ReloadDependentAssets( bool InForce /* = false */ )
 CAsset::GetAssetReference
 ==================
 */
-SAssetReference CAsset::GetAssetReference() const
+AssetReference CAsset::GetAssetReference() const
 {
-	return SAssetReference( type, guid, package ? package->GetGUID() : CGuid() );
+	return AssetReference( type, guid, package ? package->GetGUID() : CGuid() );
 }
 
 /*
@@ -162,7 +162,7 @@ TAssetHandle<CAsset> CAsset::GetAssetHandle() const
 {
 	if ( !handle.IsValid() )
 	{
-		handle = TAssetHandle<CAsset>( SharedThis( this ), MakeSharedPtr<SAssetReference>( type, guid, package ? package->GetGUID() : CGuid() ) );
+		handle = TAssetHandle<CAsset>( SharedThis( this ), MakeSharedPtr<AssetReference>( type, guid, package ? package->GetGUID() : CGuid() ) );
 	}
 	return handle;
 }
@@ -196,7 +196,7 @@ CAssetFactory::ShowImportSettings
 bool CAssetFactory::ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, class CEvent* InEvent, EResultShowImportSettings& OutResult ) const
 {
 	Assert( InOwner );
-	const SAssetImporterInfo&	importerInfo = importersInfo[InAssetType];
+	const AssetImporterInfo&	importerInfo = importersInfo[InAssetType];
 	if ( importerInfo.bValid && importerInfo.showImportSettingsAssetFn )
 	{
 		importerInfo.showImportSettingsAssetFn( InOwner, InEvent, OutResult );
@@ -220,7 +220,7 @@ bool CAssetFactory::Import( const std::wstring& InPath, std::vector<TSharedPtr<C
 		return nullptr;
 	}
 
-	const SAssetImporterInfo&	importerInfo = importersInfo[assetType];
+	const AssetImporterInfo&	importerInfo = importersInfo[assetType];
 	Assert( importerInfo.bValid && importerInfo.importAssetFn );
 	return importerInfo.importAssetFn( InPath, OutResult, OutError );
 }
@@ -233,7 +233,7 @@ CAssetFactory::Reimport
 bool CAssetFactory::Reimport( const TSharedPtr<CAsset>& InAsset, std::wstring& OutError ) const
 {
 	Assert( InAsset );
-	const SAssetImporterInfo&	importerInfo = importersInfo[InAsset->GetType()];
+	const AssetImporterInfo&	importerInfo = importersInfo[InAsset->GetType()];
 	
 	if ( !importerInfo.bValid )
 	{
@@ -256,7 +256,7 @@ EAssetType CAssetFactory::GetAssetTypeByPath( const std::wstring& InPath ) const
 
 	for ( uint32 index = 0; index < AT_Count; ++index )
 	{
-		const SAssetImporterInfo&	importerInfo = importersInfo[index];
+		const AssetImporterInfo&	importerInfo = importersInfo[index];
 		if ( importerInfo.bValid )
 		{
 			bool	bSupportedFile = false;
@@ -418,7 +418,7 @@ void CPackage::FullyLoad( std::vector< TAssetHandle<CAsset> >& OutAssetArray )
 
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
-		SAssetInfo&		assetInfo = itAsset->second;
+		AssetInfo&		assetInfo = itAsset->second;
 
 		// If asset info is not valid - return nullptr
 		if ( assetInfo.offset == ( uint32 )INVALID_ID || assetInfo.size == ( uint32 )INVALID_ID )
@@ -497,7 +497,7 @@ void CPackage::Serialize( CArchive& InArchive )
 	{
 		for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 		{
-			SAssetInfo&			assetInfo = itAsset->second;
+			AssetInfo&			assetInfo = itAsset->second;
 			if ( !assetInfo.data )
 			{
 				Warnf( TEXT( "Asset '%s' is not valid, skiped saving to package\n" ), assetInfo.name.c_str() );
@@ -528,9 +528,9 @@ void CPackage::Serialize( CArchive& InArchive )
 		while ( !InArchive.IsEndOfFile() )
 		{
 			// Serialize asset header and add to table
-			SAssetInfo			localAssetInfo;
+			AssetInfo			localAssetInfo;
 			CGuid				assetGUID;
-			Sys_Memzero( &localAssetInfo, sizeof( SAssetInfo ) );
+			Sys_Memzero( &localAssetInfo, sizeof( AssetInfo ) );
 
 			// Serialize hash with size data
 			InArchive << localAssetInfo.type;
@@ -561,7 +561,7 @@ void CPackage::Serialize( CArchive& InArchive )
 			}
 
 			// Update asset info in table			
-			SAssetInfo&			assetInfo			= assetsTable[ assetGUID ];
+			AssetInfo&			assetInfo			= assetsTable[ assetGUID ];
 			localAssetInfo.data						= assetInfo.data;
 			assetGUIDTable[ localAssetInfo.name ]	= assetGUID;
 			
@@ -617,7 +617,7 @@ void CPackage::SerializeHeader( CArchive& InArchive, bool InIsNeedSkip /* = fals
 CPackage::LoadAsset
 ==================
 */
-TAssetHandle<CAsset> CPackage::LoadAsset( CArchive& InArchive, const CGuid& InAssetGUID, SAssetInfo& InAssetInfo, bool InNeedReload /* = false */ )
+TAssetHandle<CAsset> CPackage::LoadAsset( CArchive& InArchive, const CGuid& InAssetGUID, AssetInfo& InAssetInfo, bool InNeedReload /* = false */ )
 {
 	uint32		oldOffset = InArchive.Tell();
 
@@ -703,7 +703,7 @@ void CPackage::UpdateAssetNameInTable( const CGuid& InGUID )
 		return;
 	}
 
-	SAssetInfo&		assetInfo = itAsset->second;
+	AssetInfo&		assetInfo = itAsset->second;
 	Assert( assetInfo.data );
 
 	// Remove from GUID table old name
@@ -719,7 +719,7 @@ void CPackage::UpdateAssetNameInTable( const CGuid& InGUID )
 CPackage::Add
 ==================
 */
-void CPackage::Add( const TAssetHandle<CAsset>& InAsset, SAssetInfo* OutAssetInfo /* = nullptr */ )
+void CPackage::Add( const TAssetHandle<CAsset>& InAsset, AssetInfo* OutAssetInfo /* = nullptr */ )
 {
 	Assert( InAsset.IsAssetValid() );
 
@@ -736,7 +736,7 @@ void CPackage::Add( const TAssetHandle<CAsset>& InAsset, SAssetInfo* OutAssetInf
 	// Update guid package in asset reference
 	InAsset.reference->guidPackage		= guid;
 
-	SAssetInfo		assetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, assetRef->type, assetRef->name, assetRef };
+	AssetInfo		assetInfo{ ( uint32 )INVALID_ID, ( uint32 )INVALID_ID, assetRef->type, assetRef->name, assetRef };
 	if ( OutAssetInfo )
 	{
 		*OutAssetInfo = assetInfo;
@@ -766,7 +766,7 @@ bool CPackage::Remove( const CGuid& InGUID, bool InForceUnload /* = false */, bo
 	}
 
 	// Unload asset, if failed we exit from method
-	SAssetInfo&				assetInfo		= itAsset->second;
+	AssetInfo&				assetInfo		= itAsset->second;
 	TWeakPtr<CAsset>		assetPtr		= assetInfo.data;
 	bool					bIsExistOnHDD	= assetInfo.offset != INVALID_ID && assetInfo.size != INVALID_ID;		// Is asset containing in package on HDD?
 	if ( assetInfo.data && !UnloadAsset( assetInfo, InForceUnload, true, InIgnoreDirty ) )
@@ -812,7 +812,7 @@ bool CPackage::RemoveAll( bool InForceUnload /* = false */, bool InIgnoreDirty /
 	std::vector< TWeakPtr<CAsset> >		assetsToUnload;
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
-		SAssetInfo&		assetInfo = itAsset->second;
+		AssetInfo&		assetInfo = itAsset->second;
 		if ( assetInfo.data )
 		{
 			assetsToUnload.push_back( assetInfo.data );
@@ -849,7 +849,7 @@ bool CPackage::RemoveAll( bool InForceUnload /* = false */, bool InIgnoreDirty /
 CPackage::UnloadAsset
 ==================
 */
-bool CPackage::UnloadAsset( SAssetInfo& InAssetInfo, bool InForceUnload /* = false */, bool InBroadcastEvent /* = true */, bool InIgnoreDirty /* = false */ )
+bool CPackage::UnloadAsset( AssetInfo& InAssetInfo, bool InForceUnload /* = false */, bool InBroadcastEvent /* = true */, bool InIgnoreDirty /* = false */ )
 {
 	// We must unload only not dirty assets and with unique shared reference
 	if ( InAssetInfo.data && ( !InIgnoreDirty ? !InAssetInfo.data->bDirty : true ) )
@@ -864,9 +864,9 @@ bool CPackage::UnloadAsset( SAssetInfo& InAssetInfo, bool InForceUnload /* = fal
 #if WITH_EDITOR
 		if ( g_IsEditor && InBroadcastEvent )
 		{
-			SCanDeleteAssetResult					result;
+			CanDeleteAssetResult					result;
 			std::vector< TSharedPtr<CAsset>	>		assets = { InAssetInfo.data };
-			SEditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
+			EditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
 
 			// If this asset is blocked, we exit from method
 			if ( !result.Get() )
@@ -875,7 +875,7 @@ bool CPackage::UnloadAsset( SAssetInfo& InAssetInfo, bool InForceUnload /* = fal
 			}
 
 			// Else we tell all what asset is deleted
-			SEditorDelegates::onAssetsDeleted.Broadcast( assets );
+			EditorDelegates::onAssetsDeleted.Broadcast( assets );
 		}
 #endif // WITH_EDITOR
 
@@ -927,12 +927,12 @@ CPackage::UnloadAllAssetsInternal
 bool CPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool InIgnoreDirty /* = false */ )
 {
 	bool		bExistDirtyAssets = false;
-	std::vector<SAssetInfo*>		assetsToUnload;
+	std::vector<AssetInfo*>		assetsToUnload;
 
 	// Fill array assets to unload
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
-		SAssetInfo&		assetInfo = itAsset->second;
+		AssetInfo&		assetInfo = itAsset->second;
 
 		// If asset is not loaded - skip it
 		if ( !assetInfo.data )
@@ -955,7 +955,7 @@ bool CPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool I
 #if WITH_EDITOR
 	if ( g_IsEditor )
 	{
-		// Convert array of SAssetInfo to TSharedPtr<CAsset> for events
+		// Convert array of AssetInfo to TSharedPtr<CAsset> for events
 		std::vector< TSharedPtr<CAsset> >		assets;
 		for ( uint32 index = 0, count = assetsToUnload.size(); index < count; ++index )
 		{
@@ -963,8 +963,8 @@ bool CPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool I
 		}
 
 		// Tell all user of we want delete this assets 
-		SCanDeleteAssetResult		result;
-		SEditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
+		CanDeleteAssetResult		result;
+		EditorDelegates::onAssetsCanDelete.Broadcast( assets, result );
 
 		// If this assets is blocked, we exit from method
 		if ( !result.Get() )
@@ -973,7 +973,7 @@ bool CPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool I
 		}
 
 		// Else we tell all what asset is deleted
-		SEditorDelegates::onAssetsDeleted.Broadcast( assets );
+		EditorDelegates::onAssetsDeleted.Broadcast( assets );
 	}
 #endif // WITH_EDITOR
 
@@ -991,7 +991,7 @@ bool CPackage::UnloadAllAssetsInternal( bool InForceUnload /* = false */, bool I
 CPackage::ReloadAsset
 ==================
 */
-bool CPackage::ReloadAsset( SAssetInfo& InAssetInfo )
+bool CPackage::ReloadAsset( AssetInfo& InAssetInfo )
 {
 	// If we not load package from HDD - exit from function
 	if ( filename.empty() )
@@ -1033,7 +1033,7 @@ bool CPackage::ReloadAsset( SAssetInfo& InAssetInfo )
 	if ( g_IsEditor )
 	{
 		std::vector< TSharedPtr<CAsset>	>		assets = { InAssetInfo.data };
-		SEditorDelegates::onAssetsReloaded.Broadcast( assets );
+		EditorDelegates::onAssetsReloaded.Broadcast( assets );
 	}
 #endif // WITH_EDITOR
 
@@ -1084,7 +1084,7 @@ bool CPackage::ReloadPackage( bool InOnlyAsset /* = false */ )
 	uint32		numNewDirtyAssets = 0;
 	for ( auto itAsset = assetsTable.begin(), itAssetEnd = assetsTable.end(); itAsset != itAssetEnd; ++itAsset )
 	{
-		SAssetInfo&		assetInfo = itAsset->second;
+		AssetInfo&		assetInfo = itAsset->second;
 
 		// If asset is not loaded - skip it
 		if ( !assetInfo.data )
@@ -1123,7 +1123,7 @@ bool CPackage::ReloadPackage( bool InOnlyAsset /* = false */ )
 #if WITH_EDITOR
 	if ( g_IsEditor )
 	{
-		SEditorDelegates::onAssetsReloaded.Broadcast( reloadedAssets );
+		EditorDelegates::onAssetsReloaded.Broadcast( reloadedAssets );
 	}
 #endif // WITH_EDITOR
 
@@ -1531,12 +1531,12 @@ CPackageManager::GarbageCollector
 */
 void CPackageManager::GarbageCollector()
 {
-	double		startGCTime = appSeconds();
+	double		startGCTime = Sys_Seconds();
 	Logf( TEXT( "Collecting garbage of packages\n" ) );
 
 	uint32															numUnloadedAssets	= 0;
 	uint32															numUnloadedPackages = 0;
-	std::unordered_set< PackageRef_t, PackageRef_t::SHashFunction >	packagesToUnload;
+	std::unordered_set< PackageRef_t, PackageRef_t::HashFunction >	packagesToUnload;
 
 	// We go through all the packages and unload unused assets
 	Logf( TEXT( "Assets:\n" ) );
@@ -1546,7 +1546,7 @@ void CPackageManager::GarbageCollector()
 		uint32			numAssets	= package->GetNumAssets();		
 		for ( uint32 index = 0; index < numAssets; ++index )
 		{
-			SAssetInfo		assetInfo;
+			AssetInfo		assetInfo;
 			package->GetAssetInfo( index, assetInfo );
 
 			// Skip asset if him is not loaded
@@ -1556,7 +1556,7 @@ void CPackageManager::GarbageCollector()
 			}
 
 			// Unload asset only if weak references is not exist
-			bool		bCanUnloadAsset = assetInfo.data.GetSharedReferenceCount() <= 2 && assetInfo.data.GetWeakReferenceCount() <= 3;		// 2 shared reference this is two SAssetInfo, one in current section, other in package
+			bool		bCanUnloadAsset = assetInfo.data.GetSharedReferenceCount() <= 2 && assetInfo.data.GetWeakReferenceCount() <= 3;		// 2 shared reference this is two AssetInfo, one in current section, other in package
 																																			// 3 weak references containing in SharedThis, GetAssetHandle and self this resource
 			if ( bCanUnloadAsset && package->UnloadAsset( assetInfo.data->GetGUID(), true ) )
 			{
@@ -1629,7 +1629,7 @@ void CPackageManager::GarbageCollector()
 		packages.erase( package->GetFileName() );
 	}
 
-	double		endGCTime = appSeconds();
+	double		endGCTime = Sys_Seconds();
 	Logf( TEXT( "Unloaded %i assets and %i packages\n" ), numUnloadedAssets, numUnloadedPackages );
 	Logf( TEXT( "%f ms for realtime GC\n" ), ( endGCTime - startGCTime ) / 1000.f );
 }

@@ -128,13 +128,13 @@ static void ImGui_ImplSDL2_SetClipboardText(void*, const char* text)
 }
 
 // BS yehor.pohuliaka Begin - Implement ImGUI in lifeEngine
-void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
+void Sys_ImGUIProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	ImGuiIO&			    imguiIO = ImGui::GetIO();
     ImGui_ImplSDL2_Data*    imguiData = ImGui_ImplSDL2_GetBackendData();
 	switch ( InWindowEvent.type )
 	{
-	case SWindowEvent::T_MouseWheel:
+	case WindowEvent::T_MouseWheel:
 	{
 		if ( InWindowEvent.events.mouseWheel.x > 0 )		imguiIO.MouseWheelH	+= 1;
 		if ( InWindowEvent.events.mouseWheel.x < 0 )		imguiIO.MouseWheelH	-= 1;
@@ -142,25 +142,25 @@ void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
 		if ( InWindowEvent.events.mouseWheel.y < 0 )		imguiIO.MouseWheel	-= 1;
 		break;
 	}
-	case SWindowEvent::T_MousePressed:
+	case WindowEvent::T_MousePressed:
 	{
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseLeft )	imguiData->MousePressed[ 0 ] = true;
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseRight )	imguiData->MousePressed[ 1 ] = true;
 		if ( InWindowEvent.events.mouseButton.code == BC_MouseMiddle )	imguiData->MousePressed[ 2 ] = true;
 		break;
 	}
-	case SWindowEvent::T_TextInput:
+	case WindowEvent::T_TextInput:
 	{
 		imguiIO.AddInputCharactersUTF8( InWindowEvent.events.textInputEvent.text );
 		break;
 	}
-	case SWindowEvent::T_KeyPressed:
-	case SWindowEvent::T_KeyReleased:
+	case WindowEvent::T_KeyPressed:
+	case WindowEvent::T_KeyReleased:
 	{
 		uint32			key = Sys_ButtonCodeToScanCode( InWindowEvent.events.key.code );
 		IM_ASSERT( key >= 0 && key < IM_ARRAYSIZE( imguiIO.KeysDown ) );
 
-		imguiIO.KeysDown[ key ]	= InWindowEvent.type == SWindowEvent::T_KeyPressed;
+		imguiIO.KeysDown[ key ]	= InWindowEvent.type == WindowEvent::T_KeyPressed;
 		imguiIO.KeyShift		= InWindowEvent.events.key.isShift;
 		imguiIO.KeyCtrl			= InWindowEvent.events.key.isControl;
 		imguiIO.KeyAlt			= InWindowEvent.events.key.isAlt;
@@ -169,7 +169,7 @@ void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
 	}
 
     // Multi-viewport support
-    case SWindowEvent::T_WindowClose:
+    case WindowEvent::T_WindowClose:
     {
         ImGuiViewport*          viewport = ImGui::FindViewportByPlatformHandle( ( void* )SDL_GetWindowFromID( InWindowEvent.events.windowClose.windowId ) );
         if ( viewport )
@@ -179,7 +179,7 @@ void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
         break;
     }
 
-    case SWindowEvent::T_WindowResize:
+    case WindowEvent::T_WindowResize:
     {
         ImGuiViewport*          viewport = ImGui::FindViewportByPlatformHandle( ( void* )SDL_GetWindowFromID( InWindowEvent.events.windowResize.windowId ) );
         if ( viewport )
@@ -189,7 +189,7 @@ void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
         break;
     }
 
-	case SWindowEvent::T_WindowMove:
+	case WindowEvent::T_WindowMove:
 	{
         ImGuiViewport*          viewport = ImGui::FindViewportByPlatformHandle( ( void* )SDL_GetWindowFromID( InWindowEvent.events.windowResize.windowId ) );
         if ( viewport )
@@ -199,13 +199,13 @@ void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent )
 		break;
 	}
 
-    case SWindowEvent::T_WindowFocusGained:
+    case WindowEvent::T_WindowFocusGained:
     {
         imguiIO.AddFocusEvent( true );
         break;
     }
 
-    case SWindowEvent::T_WindowFocusLost:
+    case WindowEvent::T_WindowFocusLost:
     {
         imguiIO.AddFocusEvent( false );
         break;

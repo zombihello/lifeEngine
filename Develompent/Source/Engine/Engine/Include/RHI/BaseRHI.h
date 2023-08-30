@@ -192,7 +192,7 @@ public:
 	 * @param[in] InInitializer Initializer of rasterizer state
 	 * @return Pointer to rasterizer state
 	 */
-	virtual RasterizerStateRHIRef_t CreateRasterizerState( const SRasterizerStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual RasterizerStateRHIRef_t CreateRasterizerState( const RasterizerStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create sampler state
@@ -208,7 +208,7 @@ public:
 	 * @param InInitializer		Initializer of depth state
 	 * @return Pointer to depth state
 	 */
-	virtual DepthStateRHIRef_t CreateDepthState( const SDepthStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual DepthStateRHIRef_t CreateDepthState( const DepthStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create blend state
@@ -216,7 +216,7 @@ public:
 	 * @param InInitializer		Initializer of blend state
 	 * @return Pointer to blend state
 	 */
-	virtual BlendStateRHIRef_t CreateBlendState( const SBlendStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual BlendStateRHIRef_t CreateBlendState( const BlendStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create stencil state
@@ -224,7 +224,7 @@ public:
 	 * @param InInitializer		Initializer of stencil state
 	 * @return Pointer to stencil state
 	 */
-	virtual StencilStateRHIRef_t CreateStencilState( const SStencilStateInitializerRHI& InInitializer ) { return nullptr; }
+	virtual StencilStateRHIRef_t CreateStencilState( const StencilStateInitializerRHI& InInitializer ) { return nullptr; }
 
 	/**
 	 * @brief Create texture 2D
@@ -284,7 +284,7 @@ public:
 	 * @param[in] InShaderSubDir SubDir for debug dump
 	 * @return Return true if compilation is succeed, else returning false
 	 */
-	virtual bool CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const SShaderCompilerEnvironment& InEnvironment, SShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) )			{ return false; }
+	virtual bool CompileShader( const tchar* InSourceFileName, const tchar* InFunctionName, EShaderFrequency InFrequency, const ShaderCompilerEnvironment& InEnvironment, ShaderCompilerOutput& InOutput, bool InDebugDump = false, const tchar* InShaderSubDir = TEXT( "" ) )			{ return false; }
 #endif // WITH_EDITOR
 
 	/**
@@ -529,7 +529,7 @@ public:
 	 * @param[in] InOffset Offset in buffer
 	 * @param[out] OutLockedData Locked data in buffer	 
 	 */
-	virtual void LockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData ) {}
+	virtual void LockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, uint32 InSize, uint32 InOffset, LockedData& OutLockedData ) {}
 
 	/**
 	 * @brief Unlock vertex buffer
@@ -538,7 +538,7 @@ public:
 	 * @param[in] InVertexBuffer Pointer to vertex buffer
 	 * @param[in] InLockedData Locked data in buffer
 	 */
-	virtual void UnlockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, SLockedData& InLockedData ) {}
+	virtual void UnlockVertexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const VertexBufferRHIRef_t InVertexBuffer, LockedData& InLockedData ) {}
 
 	/**
 	 * @brief Lock index buffer
@@ -549,7 +549,7 @@ public:
 	 * @param[in] InOffset Offset in buffer
 	 * @param[out] OutLockedData Locked data in buffer
 	 */
-	virtual void LockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, uint32 InSize, uint32 InOffset, SLockedData& OutLockedData ) {}
+	virtual void LockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, uint32 InSize, uint32 InOffset, LockedData& OutLockedData ) {}
 
 	/**
 	 * @brief Unlock index buffer
@@ -558,7 +558,7 @@ public:
 	 * @param[in] InIndexBuffer Pointer to index buffer
 	 * @param[in] InLockedData Locked data in buffer
 	 */
-	virtual void UnlockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, SLockedData& InLockedData ) {}
+	virtual void UnlockIndexBuffer( class CBaseDeviceContextRHI* InDeviceContext, const IndexBufferRHIRef_t InIndexBuffer, LockedData& InLockedData ) {}
 
 	/**
 	 * @brief Lock texture 2D
@@ -570,7 +570,7 @@ public:
 	 * @param[out] OutLockedData Locked data in texture
 	 * @param[in] InIsUseCPUShadow Is use CPU shadow
 	 */
-	virtual void LockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, bool InIsDataWrite, SLockedData& OutLockedData, bool InIsUseCPUShadow = false ) {}
+	virtual void LockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, bool InIsDataWrite, LockedData& OutLockedData, bool InIsUseCPUShadow = false ) {}
 
 	/**
 	 * @brief Unlock texture 2D
@@ -580,7 +580,7 @@ public:
 	 * @param[in] InMipIndex Mip index
 	 * @param[in] InLockedData Locked data in texture
 	 */
-	virtual void UnlockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, SLockedData& InLockedData ) {}
+	virtual void UnlockTexture2D( class CBaseDeviceContextRHI* InDeviceContext, Texture2DRHIParamRef_t InTexture, uint32 InMipIndex, LockedData& InLockedData ) {}
 
 	/**
 	 * @brief Draw primitive
@@ -613,7 +613,7 @@ public:
 	 * @param InSourceSurface		Surface with a resolve texture to copy to
 	 * @param InResolveParams		Optional resolve params
 	 */
-	virtual void CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InSourceSurface, const SResolveParams& InResolveParams ) {}
+	virtual void CopyToResolveTarget( class CBaseDeviceContextRHI* InDeviceContext, SurfaceRHIParamRef_t InSourceSurface, const ResolveParams& InResolveParams ) {}
 
 	/**
 	 * @brief Draw primitive

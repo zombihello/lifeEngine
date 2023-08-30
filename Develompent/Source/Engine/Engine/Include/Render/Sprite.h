@@ -27,7 +27,7 @@ typedef TRefCountPtr< class CSprite >				SpriteRef_t;
  * @ingroup Engine
  * Surface in sprite mesh
  */
-struct SSpriteSurface
+struct SpriteSurface
 {
 	uint32		baseVertexIndex;		/**< First index vertex in vertex buffer */
 	uint32		firstIndex;				/**< First index */
@@ -45,9 +45,9 @@ public:
 	 * Get surface
 	 * @return Return surface info
 	 */
-	FORCEINLINE SSpriteSurface GetSurface() const
+	FORCEINLINE SpriteSurface GetSurface() const
 	{
-		return SSpriteSurface{ 0, 0, 2 };
+		return SpriteSurface{ 0, 0, 2 };
 	}
 
 	/**
@@ -115,7 +115,7 @@ public:
 	 * Get surface
 	 * @return Return surface info
 	 */
-	FORCEINLINE SSpriteSurface GetSurface() const
+	FORCEINLINE SpriteSurface GetSurface() const
 	{
 		return g_SpriteMesh.GetSurface();
 	}

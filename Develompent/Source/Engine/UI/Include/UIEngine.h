@@ -33,7 +33,7 @@ public:
 	 *
 	 * @param[in] InWindowEvent Window event
 	 */
-	void ProcessEvent( struct SWindowEvent& InWindowEvent );
+	void ProcessEvent( struct WindowEvent& InWindowEvent );
 
 	/**
 	 * @brief Begin draw commands for render UI

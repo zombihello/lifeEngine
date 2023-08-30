@@ -73,7 +73,7 @@ public:
 	 */
 	FORCEINLINE CRotator( const Quaternion& InQuaternion )
 	{
-		Vector	eulerAngles = SMath::QuaternionToAngles( InQuaternion );
+		Vector	eulerAngles = Math::QuaternionToAngles( InQuaternion );
 		pitch	= eulerAngles.x;
 		yaw		= eulerAngles.y;
 		roll	= eulerAngles.z;
@@ -94,9 +94,9 @@ public:
 	 */
 	FORCEINLINE bool IsNearlyZero( float InTolerance = KINDA_SMALL_NUMBER ) const
 	{
-		return	SMath::Abs( NormalizeAxis( pitch ) ) <= InTolerance &&
-				SMath::Abs( NormalizeAxis( yaw ) ) <= InTolerance &&
-				SMath::Abs( NormalizeAxis( roll ) ) <= InTolerance;
+		return	Math::Abs( NormalizeAxis( pitch ) ) <= InTolerance &&
+				Math::Abs( NormalizeAxis( yaw ) ) <= InTolerance &&
+				Math::Abs( NormalizeAxis( roll ) ) <= InTolerance;
 	}
 
 	/**
@@ -120,9 +120,9 @@ public:
 	 */
 	FORCEINLINE bool Equals( const CRotator& InOther, float InTolerance = KINDA_SMALL_NUMBER ) const
 	{
-		return	SMath::Abs( NormalizeAxis( pitch - InOther.pitch ) ) <= InTolerance &&
-				SMath::Abs( NormalizeAxis( yaw - InOther.yaw ) ) <= InTolerance &&
-				SMath::Abs( NormalizeAxis( roll - InOther.roll ) ) <= InTolerance;
+		return	Math::Abs( NormalizeAxis( pitch - InOther.pitch ) ) <= InTolerance &&
+				Math::Abs( NormalizeAxis( yaw - InOther.yaw ) ) <= InTolerance &&
+				Math::Abs( NormalizeAxis( roll - InOther.roll ) ) <= InTolerance;
 	}
 
 	/**
@@ -147,7 +147,7 @@ public:
 	 */
 	FORCEINLINE CRotator GetInverse() const
 	{
-		return CRotator( SMath::QuaternionToAngles( SMath::InverseQuaternion( ToQuaternion() ) ) );
+		return CRotator( Math::QuaternionToAngles( Math::InverseQuaternion( ToQuaternion() ) ) );
 	}
 
 	/**
@@ -156,7 +156,7 @@ public:
 	 */
 	FORCEINLINE Quaternion ToQuaternion() const
 	{
-		return SMath::AnglesToQuaternion( pitch, yaw, roll );
+		return Math::AnglesToQuaternion( pitch, yaw, roll );
 	}
 
 	/**
@@ -234,7 +234,7 @@ public:
 	static FORCEINLINE float ClampAxis( float InAngle )
 	{
 		// Returns Angle in the range (-360,360)
-		InAngle = SMath::Fmod( InAngle, 360.f );
+		InAngle = Math::Fmod( InAngle, 360.f );
 		if ( InAngle < 0.f )
 		{
 			// Shift to [0,360) range
@@ -368,14 +368,14 @@ public:
   * @ingroup Core
   * @brief Struct for caching Quat<->Rotator conversions
  */
-struct SRotationConversionCache
+struct RotationConversionCache
 {
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE SRotationConversionCache()
-		: cachedQuat( SMath::quaternionZero )
-		, cachedRotator( SMath::rotatorZero )
+	FORCEINLINE RotationConversionCache()
+		: cachedQuat( Math::quaternionZero )
+		, cachedRotator( Math::rotatorZero )
 	{}
 
 	/**
@@ -422,8 +422,8 @@ struct SRotationConversionCache
 	{
 		if ( cachedQuat != InQuat )
 		{
-			cachedQuat		= SMath::NormalizeQuaternion( InQuat );
-			cachedRotator	= CRotator( SMath::QuaternionToAngles( cachedQuat ) );
+			cachedQuat		= Math::NormalizeQuaternion( InQuat );
+			cachedRotator	= CRotator( Math::QuaternionToAngles( cachedQuat ) );
 		}
 		return cachedRotator;
 	}
@@ -441,7 +441,7 @@ struct SRotationConversionCache
 		{
 			return cachedRotator;
 		}
-		return CRotator( SMath::QuaternionToAngles( SMath::NormalizeQuaternion( InQuat ) ) );
+		return CRotator( Math::QuaternionToAngles( Math::NormalizeQuaternion( InQuat ) ) );
 	}
 
 	/**
@@ -455,7 +455,7 @@ struct SRotationConversionCache
 		if ( cachedQuat != InNormalizedQuat )
 		{
 			cachedQuat		= InNormalizedQuat;
-			cachedRotator	= CRotator( SMath::QuaternionToAngles( InNormalizedQuat ) );
+			cachedRotator	= CRotator( Math::QuaternionToAngles( InNormalizedQuat ) );
 		}
 		return cachedRotator;
 	}
@@ -473,7 +473,7 @@ struct SRotationConversionCache
 		{
 			return cachedRotator;
 		}
-		return CRotator( SMath::QuaternionToAngles( InNormalizedQuat ) );
+		return CRotator( Math::QuaternionToAngles( InNormalizedQuat ) );
 	}
 
 	/**

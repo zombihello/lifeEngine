@@ -56,15 +56,15 @@ public:
 			lineVerteces.resize( oldSize + 2 );
 
 			// Fill data
-			lineVerteces[ oldSize ]		= SSimpleElementVertexType{ Vector4D( InStart, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
-			lineVerteces[ oldSize + 1 ] = SSimpleElementVertexType{ Vector4D( InEnd, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
+			lineVerteces[ oldSize ]		= SimpleElementVertexType{ Vector4D( InStart, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
+			lineVerteces[ oldSize + 1 ] = SimpleElementVertexType{ Vector4D( InEnd, 1.f ),	Vector2D( 0.f, 0.f ), InColor };
 		}
 		else
 		{
 			uint32		oldSize = thickLines.size();
 			thickLines.resize( oldSize + 1 );
 
-			SBatchedThickLines&		thickLine = thickLines[ oldSize ];
+			BatchedThickLines&		thickLine = thickLines[ oldSize ];
 			thickLine.start			= InStart;
 			thickLine.end			= InEnd;
 			thickLine.thickness		= InThickness;
@@ -102,7 +102,7 @@ protected:
 	/**
 	 * @brief Struct of batched thick lines
 	 */
-	struct SBatchedThickLines
+	struct BatchedThickLines
 	{
 		Vector		start;		/**< Start line */
 		Vector		end;		/**< End line */
@@ -110,8 +110,8 @@ protected:
 		CColor		color;		/**< Color */
 	};
 
-	std::vector<SSimpleElementVertexType>		lineVerteces;		/**< Array of line verteces */
-	std::vector<SBatchedThickLines>				thickLines;			/**< Array of thick lines */
+	std::vector<SimpleElementVertexType>		lineVerteces;		/**< Array of line verteces */
+	std::vector<BatchedThickLines>				thickLines;			/**< Array of thick lines */
 };
 
 #endif // !BATCHEDSIMPLEELEMENTS_H

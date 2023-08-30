@@ -15,8 +15,8 @@ APlayerController::APlayerController
 APlayerController::APlayerController()
 	: bShowMouseCursor( false )
 	, bConstrainYaw( true )
-	, rotationInput( SMath::vectorZero )
-	, viewRotation( SMath::vectorZero )
+	, rotationInput( Math::vectorZero )
+	, viewRotation( Math::vectorZero )
 {
 	inputComponent = CreateComponent< CInputComponent >( TEXT( "InputComponent0" ) );
 }
@@ -81,7 +81,7 @@ APlayerController::UpdateRotation
 */
 void APlayerController::UpdateRotation( float InDeltaTime )
 {
-	if ( rotationInput == SMath::vectorZero )
+	if ( rotationInput == Math::vectorZero )
 	{
 		return;
 	}
@@ -115,9 +115,9 @@ void APlayerController::UpdateRotation( float InDeltaTime )
 		}
 	}
 
-	rotationInput = SMath::vectorZero;
+	rotationInput = Math::vectorZero;
 	if ( character )
 	{
-		character->SetActorRotation( SMath::AnglesToQuaternion( viewRotation ) );
+		character->SetActorRotation( Math::AnglesToQuaternion( viewRotation ) );
 	}
 }

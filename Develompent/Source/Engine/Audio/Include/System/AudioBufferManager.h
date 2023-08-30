@@ -39,7 +39,7 @@ public:
 	}
 
 private:
-	std::unordered_map< TAssetHandle<CAudioBank>, AudioBufferRef_t, TAssetHandle<CAudioBank>::SHashFunction >		buffers;		/**< Map of fully loaded banks to buffer */
+	std::unordered_map< TAssetHandle<CAudioBank>, AudioBufferRef_t, TAssetHandle<CAudioBank>::HashFunction >		buffers;		/**< Map of fully loaded banks to buffer */
 };
 
 #endif // !AUDIOBUFFERMANAGER_H

@@ -55,7 +55,7 @@ enum ETextureCreateFlags
  * @ingroup Engine
  * Rect for resolve targets
  */
-struct SResolveRect
+struct ResolveRect
 {
 	int32	x1;		/**< X1 */
 	int32	y1;		/**< Y1 */
@@ -70,7 +70,7 @@ struct SResolveRect
 	 * @param InX2	X2
 	 * @param InY2	Y2
 	 */
-	SResolveRect( int32 InX1 = -1, int32 InY1 = -1, int32 InX2 = -1, int32 InY2 = -1 )
+	ResolveRect( int32 InX1 = -1, int32 InY1 = -1, int32 InX2 = -1, int32 InY2 = -1 )
 		: x1( InX1 )
 		, y1( InY1 )
 		, x2( InX2 )
@@ -82,16 +82,16 @@ struct SResolveRect
  * @ingroup Engine
  * Parameters for resolve targets
  */
-struct SResolveParams
+struct ResolveParams
 {
-	SResolveRect			rect;					/**< Resolve rect bounded by [X1,Y1]..[X2,Y2]. Or -1 for fullscreen */
+	ResolveRect			rect;					/**< Resolve rect bounded by [X1,Y1]..[X2,Y2]. Or -1 for fullscreen */
 	SurfaceRHIParamRef_t	resolveTargetSurface;	/**< Surface to resolve to. If NULL attempt to use 'resolveTarget' */
 	Texture2DRHIParamRef_t	resolveTarget;			/**< Texture to resolve to. If NULL it will resolve to the texture associated with the render target */
 
 	/**
 	 * Constructor
 	 */ 
-	SResolveParams( const SResolveRect& InRect = SResolveRect(), Texture2DRHIParamRef_t InResolveTarget = nullptr, SurfaceRHIParamRef_t InResolveTargetSurface = nullptr )
+	ResolveParams( const ResolveRect& InRect = ResolveRect(), Texture2DRHIParamRef_t InResolveTarget = nullptr, SurfaceRHIParamRef_t InResolveTargetSurface = nullptr )
 		: rect( InRect )
 		, resolveTargetSurface( InResolveTargetSurface )
 		, resolveTarget( InResolveTarget )
@@ -100,7 +100,7 @@ struct SResolveParams
 	/**
 	 * Constructor
 	 */
-	SResolveParams( Texture2DRHIParamRef_t InResolveTarget )
+	ResolveParams( Texture2DRHIParamRef_t InResolveTarget )
 		: resolveTargetSurface( nullptr )
 		, resolveTarget( InResolveTarget )
 	{}

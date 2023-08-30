@@ -30,12 +30,12 @@ enum EBodyLockFlag
  * @ingroup Physics
  * @brief Parameters to create physics actor
  */
-struct SActorCreationParams
+struct ActorCreationParams
 {
 	/**
 	 * @brief Constructor
 	 */
-	SActorCreationParams()
+	ActorCreationParams()
 		: bStatic( false )
 		, bQueryOnly( false )
 		, bEnableGravity( false )

@@ -21,10 +21,10 @@ CActorPropertiesWindow::CActorPropertiesWindow( const std::wstring& InName )
 	, createdNewMapDelegate( nullptr )
 	, loadedMapDelegate( nullptr )
 {
-	actorsSelectedDelegate = SEditorDelegates::onActorsSelected.Add(		std::bind( &CActorPropertiesWindow::OnActorsUnSelected, this, std::placeholders::_1 ) );
-	actorsUnselectedDelegate = SEditorDelegates::onActorsUnselected.Add(	std::bind( &CActorPropertiesWindow::OnActorsUnSelected, this, std::placeholders::_1 ) );
-	createdNewMapDelegate = SEditorDelegates::onEditorCreatedNewMap.Add(	std::bind( &CActorPropertiesWindow::OnMapChanged,		this						) );
-	loadedMapDelegate = SEditorDelegates::onEditorLoadedMap.Add(			std::bind( &CActorPropertiesWindow::OnMapChanged,		this						) );
+	actorsSelectedDelegate = EditorDelegates::onActorsSelected.Add(		std::bind( &CActorPropertiesWindow::OnActorsUnSelected, this, std::placeholders::_1 ) );
+	actorsUnselectedDelegate = EditorDelegates::onActorsUnselected.Add(	std::bind( &CActorPropertiesWindow::OnActorsUnSelected, this, std::placeholders::_1 ) );
+	createdNewMapDelegate = EditorDelegates::onEditorCreatedNewMap.Add(	std::bind( &CActorPropertiesWindow::OnMapChanged,		this						) );
+	loadedMapDelegate = EditorDelegates::onEditorLoadedMap.Add(			std::bind( &CActorPropertiesWindow::OnMapChanged,		this						) );
 }
 
 /*
@@ -36,22 +36,22 @@ CActorPropertiesWindow::~CActorPropertiesWindow()
 {
 	if ( actorsSelectedDelegate )
 	{
-		SEditorDelegates::onActorsSelected.Remove( actorsSelectedDelegate );
+		EditorDelegates::onActorsSelected.Remove( actorsSelectedDelegate );
 	}
 
 	if ( actorsUnselectedDelegate )
 	{
-		SEditorDelegates::onActorsUnselected.Remove( actorsUnselectedDelegate );
+		EditorDelegates::onActorsUnselected.Remove( actorsUnselectedDelegate );
 	}
 
 	if ( createdNewMapDelegate )
 	{
-		SEditorDelegates::onEditorCreatedNewMap.Remove( createdNewMapDelegate );
+		EditorDelegates::onEditorCreatedNewMap.Remove( createdNewMapDelegate );
 	}
 
 	if ( loadedMapDelegate )
 	{
-		SEditorDelegates::onEditorLoadedMap.Remove( loadedMapDelegate );
+		EditorDelegates::onEditorLoadedMap.Remove( loadedMapDelegate );
 	}
 }
 
@@ -95,7 +95,7 @@ void CActorPropertiesWindow::OnTick()
 CActorPropertiesWindow::GetAllPropertiesFromObject
 ==================
 */
-void CActorPropertiesWindow::GetAllPropertiesFromObject( CObject* InObject, CObjectProperties& OutObjectProperties, std::unordered_map<CName, CObjectProperties, CName::SHashFunction>& OutComponentsProperties ) const
+void CActorPropertiesWindow::GetAllPropertiesFromObject( CObject* InObject, CObjectProperties& OutObjectProperties, std::unordered_map<CName, CObjectProperties, CName::HashFunction>& OutComponentsProperties ) const
 {
 	// Get all properties of object
 	Assert( InObject );
@@ -105,7 +105,7 @@ void CActorPropertiesWindow::GetAllPropertiesFromObject( CObject* InObject, CObj
 	}
 
 	// Get all object's properties
-	std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>&	objectProperties = OutObjectProperties.GetProperties();
+	std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>&	objectProperties = OutObjectProperties.GetProperties();
 	{
 		std::vector<CProperty*>		tempProperties;
 		InObject->GetProperties( tempProperties );
@@ -132,7 +132,7 @@ void CActorPropertiesWindow::GetAllPropertiesFromObject( CObject* InObject, CObj
 				if ( propertyValue.componentValue->GetNumProperties() > 0 )
 				{
 					CObjectProperties&															componentProps = OutComponentsProperties.insert( std::make_pair( property->GetCName(), CObjectProperties() ) ).first->second;
-					std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>&	componentProperties = componentProps.GetProperties();
+					std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>&	componentProperties = componentProps.GetProperties();
 					std::vector<CProperty*>														tempProperties;
 				
 					propertyValue.componentValue->GetProperties( tempProperties );
@@ -210,7 +210,7 @@ bool CActorPropertiesWindow::RemoveMissingProperties( const std::vector<CPropert
 CActorPropertiesWindow::RemoveMissingProperties
 ==================
 */
-bool CActorPropertiesWindow::RemoveMissingProperties( const std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& InArrayA, std::unordered_map<CName, std::vector<CProperty*>, CName::SHashFunction>& InOutArrayB ) const
+bool CActorPropertiesWindow::RemoveMissingProperties( const std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>& InArrayA, std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>& InOutArrayB ) const
 {
 	bool		bWereMatches = false;
 	for ( auto itBProperties = InOutArrayB.begin(); itBProperties != InOutArrayB.end(); )
@@ -264,7 +264,7 @@ void CActorPropertiesWindow::OnActorsUnSelected( const std::vector<ActorRef_t>& 
 		// Get all properties in the actor
 		ActorRef_t																		actor = selectedActors[actorIdx];
 		CObjectProperties																localActorProperties;
-		std::unordered_map<CName, CObjectProperties, CName::SHashFunction>				localComponentsProperties;
+		std::unordered_map<CName, CObjectProperties, CName::HashFunction>				localComponentsProperties;
 		GetAllPropertiesFromObject( actor, localActorProperties, localComponentsProperties );
 
 		// Remove components that are not present in the current actor

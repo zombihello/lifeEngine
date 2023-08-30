@@ -102,7 +102,7 @@ public:
 	 * @param[out] OutWindowEvent Occurred window event
 	 * @return True if queue of events not empty, else false
 	 */
-	virtual bool PollEvent( SWindowEvent& OutWindowEvent ) override;
+	virtual bool PollEvent( WindowEvent& OutWindowEvent ) override;
 
 	/**
 	 * @brief Set title of window

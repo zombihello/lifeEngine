@@ -175,7 +175,7 @@ CSceneRenderTargets::ResolveLightPassDepth
 void CSceneRenderTargets::ResolveLightPassDepth( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
 {
 	Assert( InDeviceContextRHI );
-	g_RHI->CopyToResolveTarget( InDeviceContextRHI, renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI(), SResolveParams( SResolveRect(), renderTargets[SRTT_LightPassDepthZ].GetTexture2DRHI() ) );
+	g_RHI->CopyToResolveTarget( InDeviceContextRHI, renderTargets[SRTT_SceneDepthZ].GetSurfaceRHI(), ResolveParams( ResolveRect(), renderTargets[SRTT_LightPassDepthZ].GetTexture2DRHI() ) );
 }
 
 /*

@@ -17,14 +17,14 @@
  * @ingroup Core
  * @brief The class for work with rect
  */
-template< typename TType >
-struct SRect
+template<typename TType>
+struct Rect
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE SRect()
+	FORCEINLINE Rect()
 	{}
 
 	/**
@@ -35,7 +35,7 @@ public:
 	 * @param InWidth Width of rect
 	 * @param InHeight Height of rect
 	 */
-	FORCEINLINE SRect( const TType& InLeft, const TType& InTop, const TType& InWidth, const TType& InHeight )
+	FORCEINLINE Rect( const TType& InLeft, const TType& InTop, const TType& InWidth, const TType& InHeight )
 		: left( InLeft ), top( InTop ), width( InWidth ), height( InHeight )
 	{}
 
@@ -43,7 +43,7 @@ public:
 	 * @brief Constructor of copy
 	 * @param InCopy Copy of object
 	 */
-	FORCEINLINE SRect( const SRect< TType >& InCopy )
+	FORCEINLINE Rect( const Rect< TType >& InCopy )
 		: left( InCopy.left ), top( InCopy.top ), width( InCopy.width ), height( InCopy.height )
 	{}
 
@@ -51,7 +51,7 @@ public:
 	/**
 	 * @brief Override of operator copy
 	 */
-	FORCEINLINE SRect< TType >& operator=( const SRect< TType >& InRight )
+	FORCEINLINE Rect< TType >& operator=( const Rect< TType >& InRight )
 	{
 		left = InRight.left;
 		top = InRight.top;
@@ -63,7 +63,7 @@ public:
 	/**
 	 * @brief Override of operator copy
 	 */
-	FORCEINLINE const SRect< TType >& operator=( const SRect< TType >& InRight ) const
+	FORCEINLINE const Rect< TType >& operator=( const Rect< TType >& InRight ) const
 	{
 		left = InRight.left;
 		top = InRight.top;
@@ -75,18 +75,18 @@ public:
 	/**
 	 * Overload operator for serialize
 	 */
-	FORCEINLINE friend CArchive& operator<<( CArchive& InArchive, SRect<TType>& InValue )
+	FORCEINLINE friend CArchive& operator<<( CArchive& InArchive, Rect<TType>& InValue )
 	{
-		InArchive.Serialize( &InValue, sizeof( SRect<TType> ) );
+		InArchive.Serialize( &InValue, sizeof( Rect<TType> ) );
 		return InArchive;
 	}
 
 	/**
 	 * Overload operator for serialize
 	 */
-	FORCEINLINE friend CArchive& operator<<( CArchive& InArchive, const SRect<TType>& InValue )
+	FORCEINLINE friend CArchive& operator<<( CArchive& InArchive, const Rect<TType>& InValue )
 	{
-		InArchive.Serialize( &InValue, sizeof( SRect<TType> ) );
+		InArchive.Serialize( &InValue, sizeof( Rect<TType> ) );
 		return InArchive;
 	}
 
@@ -100,12 +100,12 @@ public:
  * @ingroup Core
  * @brief Typedef of rect with type int32
  */
-typedef SRect< int32 >		RectInt32_t;
+typedef Rect<int32>		RectInt32_t;
 
 /**
  * @ingroup Core
  * @brief Typedef of rect with type float
  */
-typedef SRect< float >		RectFloat_t;
+typedef Rect<float>		RectFloat_t;
 
 #endif // !COLOR_H

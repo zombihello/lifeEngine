@@ -62,14 +62,14 @@ enum ECompilerFlags
  * @ingroup Engine
  * @brief The environment used to compile a shader
  */
-struct SShaderCompilerEnvironment
+struct ShaderCompilerEnvironment
 {
 	/**
 	 * @brief Constructor
 	 * @param[in] InFrequency Shader frequency
 	 * @param[in] InVertexFactoryFileName Vertex factory file name
 	 */
-	SShaderCompilerEnvironment( EShaderFrequency InFrequency, const std::wstring InVertexFactoryFileName = TEXT( "" ) ) :
+	ShaderCompilerEnvironment( EShaderFrequency InFrequency, const std::wstring InVertexFactoryFileName = TEXT( "" ) ) :
 		vertexFactoryFileName( InVertexFactoryFileName )
 	{
 		difinitions.insert( std::make_pair( TEXT( "VERTEXSHADER" ), InFrequency == SF_Vertex ? TEXT( "1" ) : TEXT( "0" ) ) );
@@ -84,7 +84,7 @@ struct SShaderCompilerEnvironment
 	 * @brief Constructor of copy
 	 * @param[in] InCopy Copy
 	 */
-	SShaderCompilerEnvironment( const SShaderCompilerEnvironment& InCopy )
+	ShaderCompilerEnvironment( const ShaderCompilerEnvironment& InCopy )
 	{
 		vertexFactoryFileName = InCopy.vertexFactoryFileName;
 		includeFiles = InCopy.includeFiles;
@@ -102,12 +102,12 @@ struct SShaderCompilerEnvironment
  * @ingroup Engine
  * @brief The output of the shader compiler
  */
-struct SShaderCompilerOutput
+struct ShaderCompilerOutput
 {
 	/**
 	 * @brief Constructor
 	 */
-	SShaderCompilerOutput() :
+	ShaderCompilerOutput() :
 		numInstructions( 0 )
 	{}
 

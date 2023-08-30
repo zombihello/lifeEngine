@@ -78,7 +78,7 @@ public:
 	 * @param[in] InMeshBatch Mesh batch to draw
 	 * @param[in] InSceneView Scene view
 	 */
-	virtual void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMeshBatch, const class CSceneView& InSceneView );
+	virtual void Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMeshBatch, const class CSceneView& InSceneView );
 
 	/**
 	 * @brief Get type hash

@@ -48,7 +48,7 @@ void CTableOfContets::Serialize( CArchive& InArchive )
 	{
 		for ( auto itEntry = guidEntries.begin(), itEntryEnd = guidEntries.end(); itEntry != itEntryEnd; ++itEntry )
 		{
-			const STOCEntry&		tocEntry = itEntry->second;
+			const TOCEntry&		tocEntry = itEntry->second;
 
 			//						GUID													Name										Path to content
 			InArchive << TCHAR_TO_ANSI( itEntry->first.String().c_str() ) << " " << TCHAR_TO_ANSI( tocEntry.name.c_str() ) << " " << TCHAR_TO_ANSI( tocEntry.path.c_str() ) << "\n";

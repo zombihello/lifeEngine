@@ -19,8 +19,8 @@
 
 #include "ImGUI/ImGUILockedTexture.h"
 
-// yehor.pohuliaka: We have to use SImGUILockedTexture2D in ImGUI instead of void*
-#define ImTextureID     SImGUILockedTexture2D
+// yehor.pohuliaka: We have to use ImGUILockedTexture2D in ImGUI instead of void*
+#define ImTextureID     ImGUILockedTexture2D
 
 //---- Define assertion handler. Defaults to calling assert().
 // If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.

@@ -299,7 +299,7 @@ void CMaterial::ReloadDependentAssets( bool InForce /* = false */ )
 			continue;
 		}
 
-		TSharedPtr<SAssetReference>	assetReference = itTexture->second.GetReference();
+		TSharedPtr<AssetReference>	assetReference = itTexture->second.GetReference();
 		itTexture->second			= g_PackageManager->FindAsset( assetReference->guidPackage, assetReference->guidAsset, assetReference->type );
 	}
 }

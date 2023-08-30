@@ -16,18 +16,18 @@
 #include "EngineLoop.h"
 #include "WorldEd.h"
 
-SEditorDelegates::COnAssetsCanDelete		SEditorDelegates::onAssetsCanDelete;
-SEditorDelegates::COnAssetsDeleted			SEditorDelegates::onAssetsDeleted;
-SEditorDelegates::COnAssetsReloaded			SEditorDelegates::onAssetsReloaded;
-SEditorDelegates::COnActorsSpawned			SEditorDelegates::onActorsSpawned;
-SEditorDelegates::COnActorsDestroyed		SEditorDelegates::onActorsDestroyed;
-SEditorDelegates::COnEditorModeChanged		SEditorDelegates::onEditorModeChanged;
-SEditorDelegates::COnEditorCreatedNewMap	SEditorDelegates::onEditorCreatedNewMap;
-SEditorDelegates::COnEditorLoadedMap		SEditorDelegates::onEditorLoadedMap;
-SEditorDelegates::COnEditorSavedMap			SEditorDelegates::onEditorSavedMap;
-SEditorDelegates::COnActorsSelected			SEditorDelegates::onActorsSelected;
-SEditorDelegates::COnActorsUnselected		SEditorDelegates::onActorsUnselected;
-SEditorDelegates::COnEditorMapMarkedDirty	SEditorDelegates::onEditorMapMarkedDirty;
+EditorDelegates::COnAssetsCanDelete		EditorDelegates::onAssetsCanDelete;
+EditorDelegates::COnAssetsDeleted			EditorDelegates::onAssetsDeleted;
+EditorDelegates::COnAssetsReloaded			EditorDelegates::onAssetsReloaded;
+EditorDelegates::COnActorsSpawned			EditorDelegates::onActorsSpawned;
+EditorDelegates::COnActorsDestroyed		EditorDelegates::onActorsDestroyed;
+EditorDelegates::COnEditorModeChanged		EditorDelegates::onEditorModeChanged;
+EditorDelegates::COnEditorCreatedNewMap	EditorDelegates::onEditorCreatedNewMap;
+EditorDelegates::COnEditorLoadedMap		EditorDelegates::onEditorLoadedMap;
+EditorDelegates::COnEditorSavedMap			EditorDelegates::onEditorSavedMap;
+EditorDelegates::COnActorsSelected			EditorDelegates::onActorsSelected;
+EditorDelegates::COnActorsUnselected		EditorDelegates::onActorsUnselected;
+EditorDelegates::COnEditorMapMarkedDirty	EditorDelegates::onEditorMapMarkedDirty;
 
 /*
 ==================

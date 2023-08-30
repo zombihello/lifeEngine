@@ -17,7 +17,7 @@
   * @ingroup Engine
   * Vertex type for dynamic mesh
   */
-struct SDynamicMeshVertexType
+struct DynamicMeshVertexType
 {
 	Vector4D		position;		/**< Position vertex */
 	Vector2D		texCoord;		/**< Texture coords */
@@ -29,7 +29,7 @@ struct SDynamicMeshVertexType
 	/**
 	 * Constructor
 	 */
-	SDynamicMeshVertexType()
+	DynamicMeshVertexType()
 	{}
 
 	/**
@@ -42,7 +42,7 @@ struct SDynamicMeshVertexType
 	 * @param InBinormal	Binormal
 	 * @param InColor		Color
 	 */
-	SDynamicMeshVertexType( const Vector4D& InPosition, const Vector2D& InTexCoord, const Vector4D& InNormal, const Vector4D& InTangent, const Vector4D& InBinormal, const Vector4D& InColor = Vector4D( 1.f, 1.f, 1.f, 1.f ) )
+	DynamicMeshVertexType( const Vector4D& InPosition, const Vector2D& InTexCoord, const Vector4D& InNormal, const Vector4D& InTangent, const Vector4D& InBinormal, const Vector4D& InColor = Vector4D( 1.f, 1.f, 1.f, 1.f ) )
 		: position( InPosition )
 		, texCoord( InTexCoord )
 		, normal( InNormal )
@@ -59,7 +59,7 @@ struct SDynamicMeshVertexType
 	 * @param InNormal		Normal
 	 * @param InColor		Color
 	 */
-	SDynamicMeshVertexType( const Vector4D& InPosition, const Vector2D& InTexCoord, const Vector4D& InNormal, const Vector4D& InColor = Vector4D( 1.f, 1.f, 1.f, 1.f ) )
+	DynamicMeshVertexType( const Vector4D& InPosition, const Vector2D& InTexCoord, const Vector4D& InNormal, const Vector4D& InColor = Vector4D( 1.f, 1.f, 1.f, 1.f ) )
 		: position( InPosition )
 		, texCoord( InTexCoord )
 		, normal( InNormal )
@@ -71,7 +71,7 @@ struct SDynamicMeshVertexType
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const SDynamicMeshVertexType& InOther ) const
+	bool FORCEINLINE operator==( const DynamicMeshVertexType& InOther ) const
 	{
 		return position == InOther.position &&
 			texCoord == InOther.texCoord &&

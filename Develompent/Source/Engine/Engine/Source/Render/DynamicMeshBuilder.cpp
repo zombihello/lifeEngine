@@ -30,10 +30,10 @@ void CDynamicMeshBuilder::InitRHI()
 	uint32			numVerteces = verteces.size();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "DynamicMesh" ), sizeof( SDynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
+		vertexBufferRHI = g_RHI->CreateVertexBuffer( TEXT( "DynamicMesh" ), sizeof( DynamicMeshVertexType ) * numVerteces, ( byte* )verteces.data(), RUF_Static );
 
 		// Initialize vertex factory
-		vertexFactory->AddVertexStream( SVertexStream{ vertexBufferRHI, sizeof( SDynamicMeshVertexType ) } );		// 0 stream slot
+		vertexFactory->AddVertexStream( VertexStream{ vertexBufferRHI, sizeof( DynamicMeshVertexType ) } );		// 0 stream slot
 		vertexFactory->Init();
 	}
 
@@ -71,14 +71,14 @@ void CDynamicMeshBuilder::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI,
 	AssertMsg( vertexFactory && vertexBufferRHI, TEXT( "Before draw dynamic mesh need call CDynamicMeshBuilder::Build" ) );
 	
 	// Init mesh batch
-	SMeshBatch		meshBatch;
+	MeshBatch		meshBatch;
 	meshBatch.indexBufferRHI	= indexBufferRHI;
 	meshBatch.baseVertexIndex	= 0;
 	meshBatch.firstIndex		= 0;
 	meshBatch.numInstances		= 1;
 	meshBatch.numPrimitives		= numPrimitives;
 	meshBatch.primitiveType		= PT_TriangleList;
-	meshBatch.instances.push_back( SMeshInstance{ InLocalToWorld, 
+	meshBatch.instances.push_back( MeshInstance{ InLocalToWorld, 
 #if ENABLE_HITPROXY
 								   hitProxyId 
 #endif // ENABLE_HITPROXY

@@ -207,7 +207,7 @@ private:
  * @ingroup Engine
  * Mesh instance of batch
  */
-struct SMeshInstance
+struct MeshInstance
 {
 	Matrix			transformMatrix;	/**< Transform matrix */
 
@@ -224,32 +224,32 @@ struct SMeshInstance
  * @ingroup Engine
  * A batch of mesh elements, all with the same material and vertex buffer
  */
-struct SMeshBatch
+struct MeshBatch
 {
 	/**
-	 * @brief Functions to extract the mesh batch from SMeshBatch as a key for std::set
+	 * @brief Functions to extract the mesh batch from MeshBatch as a key for std::set
 	 */
-	struct SMeshBatchKeyFunc
+	struct MeshBatchKeyFunc
 	{
 		/**
-		 * @brief Compare SMeshBatch
+		 * @brief Compare MeshBatch
 		 *
 		 * @param InA First mesh batch
 		 * @param InB Second mesh batch
 		 * @return Return true if InA and InB equal, else returning false
 		 */
-		FORCEINLINE bool operator()( const SMeshBatch& InA, const SMeshBatch& InB ) const
+		FORCEINLINE bool operator()( const MeshBatch& InA, const MeshBatch& InB ) const
 		{
 			return InA.GetTypeHash() < InB.GetTypeHash();
 		}
 
 		/**
-		 * @brief Calculate hash of the SMeshBatch
+		 * @brief Calculate hash of the MeshBatch
 		 *
 		 * @param InMeshBatch Mesh batch
-		 * @return Return hash of this SMeshBatch
+		 * @return Return hash of this MeshBatch
 		 */
-		FORCEINLINE std::size_t operator()( const SMeshBatch& InMeshBatch ) const
+		FORCEINLINE std::size_t operator()( const MeshBatch& InMeshBatch ) const
 		{
 			return InMeshBatch.GetTypeHash();
 		}
@@ -258,14 +258,14 @@ struct SMeshBatch
 	/**
 	 * Constructor
 	 */
-	FORCEINLINE SMeshBatch()
+	FORCEINLINE MeshBatch()
 		: baseVertexIndex( 0 ), firstIndex( 0 ), numPrimitives( 0 ), numInstances( 0 )
 	{}
 
 	/**
 	 * Overrload operator ==
 	 */
-	FORCEINLINE friend bool operator==( const SMeshBatch& InA, const SMeshBatch& InB )
+	FORCEINLINE friend bool operator==( const MeshBatch& InA, const MeshBatch& InB )
 	{
 		return	InA.indexBufferRHI == InB.indexBufferRHI		&& 
 				InA.primitiveType == InB.primitiveType			&& 
@@ -277,7 +277,7 @@ struct SMeshBatch
 	/**
 	 * Overrload operator !=
 	 */
-	FORCEINLINE friend bool operator!=( const SMeshBatch& InA, const SMeshBatch& InB )
+	FORCEINLINE friend bool operator!=( const MeshBatch& InA, const MeshBatch& InB )
 	{
 		return !( InA == InB );
 	}
@@ -302,13 +302,13 @@ struct SMeshBatch
 	uint32										firstIndex;			/**< First index */
 	uint32										numPrimitives;		/**< Number primitives to render */
 	mutable uint32								numInstances;		/**< Number instances of mesh */
-	mutable std::vector< SMeshInstance >		instances;			/**< Array of mesh instances */
+	mutable std::vector< MeshInstance >		instances;			/**< Array of mesh instances */
 };
 
 /**
  * @brief Typedef set of mesh batches
  */
-typedef std::unordered_set< SMeshBatch, SMeshBatch::SMeshBatchKeyFunc >		MeshBatchList_t;
+typedef std::unordered_set< MeshBatch, MeshBatch::MeshBatchKeyFunc >		MeshBatchList_t;
 
 /**
  * @ingroup Engine
@@ -321,14 +321,14 @@ public:
 	/**
 	 * @brief A set of draw list elements with the same drawing policy
 	 */
-	struct SDrawingPolicyLink : public CRefCounted
+	struct DrawingPolicyLink : public CRefCounted
 	{
 		/**
 		 * @brief Constructor
 		 * 
 		 * @param InWireframeColor		Wireframe color
 		 */
-		SDrawingPolicyLink( const CColor& InWireframeColor = CColor::red )
+		DrawingPolicyLink( const CColor& InWireframeColor = CColor::red )
 #if WITH_EDITOR
 			: wireframeColor( InWireframeColor )
 #endif // WITH_EDITOR
@@ -340,7 +340,7 @@ public:
 		 * @param InDrawingPolicy		Drawing policy
 		 * @param InWireframeColor		Wireframe color
 		 */
-		SDrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const CColor& InWireframeColor = CColor::red )
+		DrawingPolicyLink( const TDrawingPolicyType& InDrawingPolicy, const CColor& InWireframeColor = CColor::red )
 			: drawingPolicy( InDrawingPolicy )
 #if WITH_EDITOR
 			, wireframeColor( InWireframeColor )
@@ -350,7 +350,7 @@ public:
 		/**
 		 * Overrload operator ==
 		 */
-		FORCEINLINE friend bool operator==( const SDrawingPolicyLink& InA, const SDrawingPolicyLink& InB )
+		FORCEINLINE friend bool operator==( const DrawingPolicyLink& InA, const DrawingPolicyLink& InB )
 		{
 			return InA.drawingPolicy.GetTypeHash() == InB.drawingPolicy.GetTypeHash();
 		}
@@ -358,7 +358,7 @@ public:
 		/**
 		 * Overrload operator !=
 		 */
-		FORCEINLINE friend bool operator!=( const SDrawingPolicyLink& InA, const SDrawingPolicyLink& InB )
+		FORCEINLINE friend bool operator!=( const DrawingPolicyLink& InA, const DrawingPolicyLink& InB )
 		{
 			return !( InA == InB );
 		}
@@ -383,12 +383,12 @@ public:
 	/**
 	 * @brief Typedef of reference to drawing policy link
 	 */
-	typedef TRefCountPtr< SDrawingPolicyLink >		DrawingPolicyLinkRef_t;
+	typedef TRefCountPtr< DrawingPolicyLink >		DrawingPolicyLinkRef_t;
 
 	/**
 	 * @brief Functions to extract the drawing policy from DrawingPolicyLink_t as a key for std::set
 	 */
-	struct SDrawingPolicyKeyFunc
+	struct DrawingPolicyKeyFunc
 	{
 		/**
 		 * @brief Compare DrawingPolicyLink_t
@@ -417,7 +417,7 @@ public:
 	/**
 	 * @brief Functions for custom equal the drawing policy in std::set 
 	 */
-	struct SDrawingPolicyEqualFunc
+	struct DrawingPolicyEqualFunc
 	{
 		/**
 		  * @brief Compare DrawingPolicyLinkRef_t
@@ -435,7 +435,7 @@ public:
 	/**
 	 * @brief Typedef map of draw data
 	 */
-	typedef std::unordered_set< DrawingPolicyLinkRef_t, SDrawingPolicyKeyFunc, SDrawingPolicyEqualFunc >		MapDrawData_t;
+	typedef std::unordered_set< DrawingPolicyLinkRef_t, DrawingPolicyKeyFunc, DrawingPolicyEqualFunc >		MapDrawData_t;
 
 	/**
 	 * @brief Add item
@@ -580,7 +580,7 @@ private:
  * @param InWireframeColor	Wireframe color
  */
 template<typename TDrawingPolicyLink, typename TMeshDrawList>
-FORCEINLINE TRefCountPtr<TDrawingPolicyLink> MakeDrawingPolicyLink( CVertexFactory* InVertexFactory, const TAssetHandle<CMaterial>& InMaterial, const SMeshBatch& InMeshBatch, const SMeshBatch*& OutMeshBatchLink, TMeshDrawList& InMeshDrawList, const CColor& InWireframeColor = CColor::red )
+FORCEINLINE TRefCountPtr<TDrawingPolicyLink> MakeDrawingPolicyLink( CVertexFactory* InVertexFactory, const TAssetHandle<CMaterial>& InMaterial, const MeshBatch& InMeshBatch, const MeshBatch*& OutMeshBatchLink, TMeshDrawList& InMeshDrawList, const CColor& InWireframeColor = CColor::red )
 {
 	// Init new drawing policy link
 	Assert( InVertexFactory );
@@ -611,7 +611,7 @@ FORCEINLINE TRefCountPtr<TDrawingPolicyLink> MakeDrawingPolicyLink( CVertexFacto
  * @ingroup Engine
  * @brief Struct of dynamic mesh builder element
  */
-struct SDynamicMeshBuilderElement
+struct DynamicMeshBuilderElement
 {
 	DynamicMeshBuilderRef_t			dynamicMeshBuilder;		/**< Dynamic mesh builder */
 	Matrix							localToWorldMatrix;		/**< Matrix local to world */
@@ -624,7 +624,7 @@ struct SDynamicMeshBuilderElement
  * @ingroup Engine
  * @brief Struct of hit proxy layer on scene
  */
-struct SHitProxyLayer
+struct HitProxyLayer
 {
 	/**
 	 * @brief Clear
@@ -654,7 +654,7 @@ struct SHitProxyLayer
 
 #if WITH_EDITOR
 	CBatchedSimpleElements							simpleHitProxyElements;			/**< Batched simple hit proxy elements (lines, points, etc) */
-	std::list<SDynamicMeshBuilderElement>			dynamicHitProxyMeshBuilders;	/**< List of dynamic hit proxy mesh builders */
+	std::list<DynamicMeshBuilderElement>			dynamicHitProxyMeshBuilders;	/**< List of dynamic hit proxy mesh builders */
 #endif // WITH_EDITOR
 
 	CMeshDrawList<CHitProxyDrawingPolicy, false>	hitProxyDrawList;				/**< Draw list of hit proxy */
@@ -704,7 +704,7 @@ FORCEINLINE const tchar* GetSceneSDGName( ESceneDepthGroup SDG )
  * @ingroup Engine
  * @brief Scene depth group
  */
-struct SSceneDepthGroup
+struct SceneDepthGroup
 {
 	/**
 	 * @brief Clear
@@ -758,7 +758,7 @@ struct SSceneDepthGroup
 	// Simple elements use only for debug and WorldEd
 #if WITH_EDITOR
 	CBatchedSimpleElements									simpleElements;				/**< Batched simple elements (lines, points, etc) */
-	std::list<SDynamicMeshBuilderElement>					dynamicMeshBuilders;		/**< List of dynamic mesh builders */
+	std::list<DynamicMeshBuilderElement>					dynamicMeshBuilders;		/**< List of dynamic mesh builders */
 	CMeshDrawList<CMeshDrawingPolicy, false>				gizmoDrawList;				/**< Draw list of gizmos */
 #endif // WITH_EDITOR
 
@@ -768,7 +768,7 @@ struct SSceneDepthGroup
 	CMeshDrawList<CDepthDrawingPolicy>						depthDrawList;				/**< Draw list all of geometry for PrePass */
 
 #if ENABLE_HITPROXY
-	SHitProxyLayer											hitProxyLayers[ HPL_Num ];	/**< Hit proxy layers */
+	HitProxyLayer											hitProxyLayers[ HPL_Num ];	/**< Hit proxy layers */
 #endif // ENABLE_HITPROXY
 };
 
@@ -910,7 +910,7 @@ public:
 	 * @param InSDGType SDG type
 	 * @return Return reference to depth group
 	 */
-	FORCEINLINE SSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType )
+	FORCEINLINE SceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType )
 	{
 		Assert( InSDGType < SDG_Max );
 		return frame.SDGs[ InSDGType ];
@@ -922,7 +922,7 @@ public:
 	 * @param InSDGType SDG type
 	 * @return Return reference to depth group
 	 */
-	FORCEINLINE const SSceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType ) const
+	FORCEINLINE const SceneDepthGroup& GetSDG( ESceneDepthGroup InSDGType ) const
 	{
 		Assert( InSDGType < SDG_Max );
 		return frame.SDGs[ InSDGType ];
@@ -953,14 +953,14 @@ private:
 	/**
 	 * @brief One frame of the scene
 	 */
-	struct SSceneFrame
+	struct SceneFrame
 	{
-		SSceneDepthGroup					SDGs[SDG_Max];		/**< Scene depth groups */
+		SceneDepthGroup						SDGs[SDG_Max];		/**< Scene depth groups */
 		std::list<LightComponentRef_t>		visibleLights;		/**< List of visible lights */
 	};
 	
 	float									exposure;			/**< Current exposure of the scene */
-	SSceneFrame								frame;				/**< Scene frame */
+	SceneFrame								frame;				/**< Scene frame */
 	std::list<PrimitiveComponentRef_t>		primitives;			/**< List of primitives on scene */
 	std::list<LightComponentRef_t>			lights;				/**< List of lights on scene */
 };

@@ -18,7 +18,7 @@ CGameViewportClient::Draw
 void CGameViewportClient::Draw( CViewport* InViewport )
 {
 	// Create scene view for draw scene
-	SCameraView			cameraView;
+	CameraView			cameraView;
 	CCameraComponent*	cameraComponent = g_CameraManager->GetActiveCamera();
 	if ( cameraComponent )
 	{
@@ -27,7 +27,7 @@ void CGameViewportClient::Draw( CViewport* InViewport )
 
 	// Calculate scene view and update audio listener spatial
 	CSceneView*		sceneView = CalcSceneView( InViewport, cameraView );
-	g_AudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation * SMath::vectorForward, cameraView.rotation * SMath::vectorUp );
+	g_AudioDevice.SetListenerSpatial( cameraView.location, cameraView.rotation * Math::vectorForward, cameraView.rotation * Math::vectorUp );
 
 	// Draw viewport
 	UNIQUE_RENDER_COMMAND_THREEPARAMETER( CViewportRenderCommand,
@@ -68,13 +68,13 @@ void CGameViewportClient::Draw_RenderThread( ViewportRHIRef_t InViewportRHI, CSc
 CGameViewportClient::CalcSceneView
 ==================
 */
-CSceneView* CGameViewportClient::CalcSceneView( CViewport* InViewport, const SCameraView& InCameraView )
+CSceneView* CGameViewportClient::CalcSceneView( CViewport* InViewport, const CameraView& InCameraView )
 {
 	// Calculate projection matrix
 	Matrix		projectionMatrix;
 	if ( InCameraView.projectionMode == CPM_Perspective )
 	{
-		projectionMatrix		= glm::perspective( SMath::DegreesToRadians( InCameraView.fov ), InCameraView.aspectRatio, InCameraView.nearClipPlane, InCameraView.farClipPlane );
+		projectionMatrix		= glm::perspective( Math::DegreesToRadians( InCameraView.fov ), InCameraView.aspectRatio, InCameraView.nearClipPlane, InCameraView.farClipPlane );
 	}
 	else
 	{
@@ -84,8 +84,8 @@ CSceneView* CGameViewportClient::CalcSceneView( CViewport* InViewport, const SCa
 	}
 
 	// Update view matrix
-	Vector		targetDirection		= InCameraView.rotation * SMath::vectorForward;
-	Vector		axisUp				= InCameraView.rotation * SMath::vectorUp;
+	Vector		targetDirection		= InCameraView.rotation * Math::vectorForward;
+	Vector		axisUp				= InCameraView.rotation * Math::vectorUp;
 	Matrix		viewMatrix			= glm::lookAt( InCameraView.location, InCameraView.location + targetDirection, axisUp );
 
 	CSceneView*		sceneView = new CSceneView( InCameraView.location, projectionMatrix, viewMatrix, InViewport->GetSizeX(), InViewport->GetSizeY(), CColor::black, SHOW_DefaultGame );

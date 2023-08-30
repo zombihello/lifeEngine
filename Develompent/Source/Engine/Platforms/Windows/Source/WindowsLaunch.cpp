@@ -92,7 +92,7 @@ Sys_ProcessWindowEvents
 void Sys_ProcessWindowEvents()
 {
 	// Handling system events
-	SWindowEvent		windowEvent;
+	WindowEvent		windowEvent;
 	while ( g_Window->PollEvent( windowEvent ) )
 	{
 		g_EngineLoop->ProcessEvent( windowEvent );

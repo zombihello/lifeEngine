@@ -112,20 +112,20 @@ bool CGameEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 CGameEngine::ProcessEvent
 ==================
 */
-void CGameEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CGameEngine::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	Super::ProcessEvent( InWindowEvent );
 
 	switch ( InWindowEvent.type )
 	{
-	case SWindowEvent::T_WindowClose:
+	case WindowEvent::T_WindowClose:
 		if ( InWindowEvent.events.windowClose.windowId == g_Window->GetID() )
 		{
 			g_IsRequestingExit = true;
 		}
 		break;
 
-	case SWindowEvent::T_WindowResize:
+	case WindowEvent::T_WindowResize:
 		if ( InWindowEvent.events.windowResize.windowId == g_Window->GetID() )
 		{
 			viewport.Update( false, InWindowEvent.events.windowResize.width, InWindowEvent.events.windowResize.height, g_Window->GetHandle() );

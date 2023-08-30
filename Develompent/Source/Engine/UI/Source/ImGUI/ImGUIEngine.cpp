@@ -393,7 +393,7 @@ void CImGUILayer::Tick()
 CImGUILayer::PollEvent
 ==================
 */
-bool CImGUILayer::PollEvent( SWindowEvent& OutLayerEvent )
+bool CImGUILayer::PollEvent( WindowEvent& OutLayerEvent )
 {
 	bool	bNotEndEvent = !events.empty();
 	if ( !bNotEndEvent )
@@ -417,17 +417,17 @@ void CImGUILayer::UpdateEvents()
 	bool		bLocalFocused = ImGui::IsWindowFocused();
 	if ( bFocused != bLocalFocused )
 	{
-		SWindowEvent	imguiEvent;
+		WindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent	= true;
 		imguiEvent.imGUILayer	= AsWeak();
 		if ( !bLocalFocused )
 		{
-			imguiEvent.type = SWindowEvent::T_WindowFocusLost;
+			imguiEvent.type = WindowEvent::T_WindowFocusLost;
 			imguiEvent.events.windowFocusLost.windowId		= 0;
 		}
 		else
 		{
-			imguiEvent.type = SWindowEvent::T_WindowFocusGained;
+			imguiEvent.type = WindowEvent::T_WindowFocusGained;
 			imguiEvent.events.windowFocusGained.windowId	= 0;
 		}
 	
@@ -439,16 +439,16 @@ void CImGUILayer::UpdateEvents()
 	bool		bLocalHovered = ImGui::IsWindowHovered();
 	if ( bHovered != bLocalHovered )
 	{
-		SWindowEvent	imguiEvent;
+		WindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent	= true;
 		imguiEvent.imGUILayer	= AsWeak();
 		if ( bLocalHovered )
 		{
-			imguiEvent.type = SWindowEvent::T_ImGUILayerHovered;
+			imguiEvent.type = WindowEvent::T_ImGUILayerHovered;
 		}
 		else
 		{
-			imguiEvent.type = SWindowEvent::T_ImGUILayerUnHovered;
+			imguiEvent.type = WindowEvent::T_ImGUILayerUnHovered;
 		}
 
 		bHovered = bLocalHovered;
@@ -459,10 +459,10 @@ void CImGUILayer::UpdateEvents()
 	ImVec2	imguiSize = ImGui::GetContentRegionAvail();
 	if ( size.x != imguiSize.x || size.y != imguiSize.y )
 	{
-		SWindowEvent	imguiEvent;
+		WindowEvent	imguiEvent;
 		imguiEvent.bImGUIEvent					= true;
 		imguiEvent.imGUILayer					= AsWeak();
-		imguiEvent.type							= SWindowEvent::T_WindowResize;
+		imguiEvent.type							= WindowEvent::T_WindowResize;
 		imguiEvent.events.windowResize.windowId = 0;
 		imguiEvent.events.windowResize.width	= Max<float>( imguiSize.x, 1.f );
 		imguiEvent.events.windowResize.height	= Max<float>( imguiSize.y, 1.f );
@@ -478,7 +478,7 @@ void CImGUILayer::UpdateEvents()
 CImGUILayer::ProcessEvent
 ==================
 */
-void CImGUILayer::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CImGUILayer::ProcessEvent( struct WindowEvent& InWindowEvent )
 {}
 
 /*
@@ -642,7 +642,7 @@ void CImGUIEngine::Tick( float InDeltaSeconds )
 	for ( uint32 index = 0, count = layers.size(); index < count; ++index )
 	{
 		TSharedPtr<CImGUILayer>	layer = layers[index];
-		SWindowEvent			layerEvent;
+		WindowEvent			layerEvent;
 		while ( layer->PollEvent( layerEvent ) )
 		{
 			layer->ProcessEvent( layerEvent );
@@ -678,12 +678,12 @@ void CImGUIEngine::Shutdown()
 CImGUIEngine::ProcessEvent
 ==================
 */
-void CImGUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CImGUIEngine::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	// Process event by ImGUI
 	Sys_ImGUIProcessEvent( InWindowEvent );
 
-	SWindowEvent		imguiEvent;
+	WindowEvent		imguiEvent;
 	if ( !layers.empty() )
 	{
 		imguiEvent = InWindowEvent;

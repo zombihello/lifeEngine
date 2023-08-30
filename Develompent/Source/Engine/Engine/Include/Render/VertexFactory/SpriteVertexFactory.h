@@ -19,7 +19,7 @@
   * @ingroup Engine
   * Vertex type for sprite
   */
-struct SSpriteVertexType
+struct SpriteVertexType
 {
 	Vector4D		position;		/**< Position vertex */
 	Vector2D		texCoord;		/**< Texture coords */
@@ -28,7 +28,7 @@ struct SSpriteVertexType
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const SSpriteVertexType& InOther ) const
+	bool FORCEINLINE operator==( const SpriteVertexType& InOther ) const
 	{
 		return position == InOther.position &&
 			texCoord == InOther.texCoord &&
@@ -151,7 +151,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 	/**
 	 * @brief Get type hash
@@ -250,7 +250,7 @@ private:
 // Serialization
 //
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, SSpriteVertexType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, SpriteVertexType& InValue )
 {
 	InArchive << InValue.position;
 	InArchive << InValue.texCoord;
@@ -258,7 +258,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, SSpriteVertexType& InValu
 	return InArchive;
 }
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SSpriteVertexType& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SpriteVertexType& InValue )
 {
 	InArchive << InValue.position;
 	InArchive << InValue.texCoord;

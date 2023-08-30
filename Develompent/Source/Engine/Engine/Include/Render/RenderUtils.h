@@ -23,7 +23,7 @@
  * @ingroup Engine
  * Information about pixel format
  */
-struct SPixelFormatInfo
+struct PixelFormatInfo
 {
 	const tchar*			name;			/**< Pixel format name */
 	uint32					blockSizeX;		/**< Size of block by X */
@@ -39,9 +39,9 @@ struct SPixelFormatInfo
 
 /**
  * @ingroup Engine
- * Maps members of EPixelFormat to a SPixelFormatInfo describing the format
+ * Maps members of EPixelFormat to a PixelFormatInfo describing the format
  */
-extern SPixelFormatInfo			g_PixelFormats[ PF_Max ];
+extern PixelFormatInfo			g_PixelFormats[ PF_Max ];
 
 /**
  * @ingroup Engine
@@ -231,7 +231,7 @@ void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, floa
  * @param InBox			The CBox to use for drawing
  * @param InColor		Color of the box
  */
-void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class CBox& InBox, const class CColor& InColor );
+void DrawWireframeBox( struct SceneDepthGroup& InSDG, const class CBox& InBox, const class CColor& InColor );
 
 /**
  * @ingroup Engine
@@ -246,7 +246,7 @@ void DrawWireframeBox( struct SSceneDepthGroup& InSDG, const class CBox& InBox, 
  * @param	InNumSides		Numbers of sides that the circle has
  * @param	Thickness		Optional. Thickness for lines
  */
-void DrawCircle( struct SSceneDepthGroup& InSDG, const Vector& InLocation, const Vector& InX, const Vector& InY, const class CColor& InColor, float InRadius, uint32 InNumSides, float InThickness = 0.f );
+void DrawCircle( struct SceneDepthGroup& InSDG, const Vector& InLocation, const Vector& InX, const Vector& InY, const class CColor& InColor, float InRadius, uint32 InNumSides, float InThickness = 0.f );
 
 #if ENABLE_HITPROXY
 /**
@@ -263,7 +263,7 @@ void DrawCircle( struct SSceneDepthGroup& InSDG, const Vector& InLocation, const
  * @param	InNumSides		Numbers of sides that the circle has
  * @param	Thickness		Optional. Thickness for lines
  */
-void DrawHitProxyCircle( struct SSceneDepthGroup& InSDG, EHitProxyLayer InHitProxyLayer, const Vector& InLocation, const Vector& InX, const Vector& InY, const CHitProxyId& InHitProxyId, float InRadius, uint32 InNumSides, float InThickness = 0.f );
+void DrawHitProxyCircle( struct SceneDepthGroup& InSDG, EHitProxyLayer InHitProxyLayer, const Vector& InLocation, const Vector& InX, const Vector& InY, const CHitProxyId& InHitProxyId, float InRadius, uint32 InNumSides, float InThickness = 0.f );
 #endif // ENABLE_HITPROXY
 
 #endif // !RENDERUTILS_H

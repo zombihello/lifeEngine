@@ -133,7 +133,7 @@ CSceneRenderer::RenderPrePass
 */
 bool CSceneRenderer::RenderPrePass( class CBaseDeviceContextRHI* InDeviceContext )
 {
-	SSceneDepthGroup&		SDG = scene->GetSDG( SDG_World );
+	SceneDepthGroup&		SDG = scene->GetSDG( SDG_World );
 	CBaseDeviceContextRHI*	immediateContext = g_RHI->GetImmediateContext();
 
 	SCOPED_DRAW_EVENT( EventPrePass, DEC_SCENE_ITEMS, TEXT( "PrePass" ) );
@@ -231,7 +231,7 @@ CSceneRenderer::RenderSDG
 bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, uint32 InSDGIndex )
 {
 	ShowFlags_t			showFlags	= sceneView->GetShowFlags();
-	SSceneDepthGroup&	SDG			= scene->GetSDG( ( ESceneDepthGroup )InSDGIndex );
+	SceneDepthGroup&	SDG			= scene->GetSDG( ( ESceneDepthGroup )InSDGIndex );
 	
 	if ( SDG.IsEmpty() )
 	{
@@ -293,7 +293,7 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 		{
 			for ( auto it = SDG.dynamicMeshBuilders.begin(), itEnd = SDG.dynamicMeshBuilders.end(); it != itEnd; ++it )
 			{
-				const SDynamicMeshBuilderElement& element = *it;
+				const DynamicMeshBuilderElement& element = *it;
 				if ( element.dynamicMeshBuilder )
 				{
 					element.dynamicMeshBuilder->Draw<CMeshDrawingPolicy>( InDeviceContext, element.localToWorldMatrix, element.material, *sceneView );

@@ -63,7 +63,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const = 0;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const = 0;
 };
 
 /**
@@ -87,13 +87,13 @@ public:
 	/**
 	 * @brief Pointer to static method for modify compilation environment of shader
 	 */
-	typedef void ( *ModifyCompilationEnvironmentFn_t )( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment );
+	typedef void ( *ModifyCompilationEnvironmentFn_t )( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment );
 #endif // WITH_EDITOR
 
 	/**
 	 * @brief Class container for storage global vertex factory types
 	 */
-	struct SContainerVertexFactoryMetaType
+	struct ContainerVertexFactoryMetaType
 	{
 		/**
 		 * Typedef for vertex factory type map
@@ -104,12 +104,12 @@ public:
 		 * @brief Get instance of container
 		 * @return Return instance of container
 		 */
-		static FORCEINLINE SContainerVertexFactoryMetaType* Get()
+		static FORCEINLINE ContainerVertexFactoryMetaType* Get()
 		{
-			static SContainerVertexFactoryMetaType*			container = nullptr;
+			static ContainerVertexFactoryMetaType*			container = nullptr;
 			if ( !container )
 			{
-				container = new SContainerVertexFactoryMetaType();
+				container = new ContainerVertexFactoryMetaType();
 			}
 
 			return container;
@@ -238,7 +238,7 @@ public:
 	 * @param InShaderPlatform Shader platform
 	 * @param InEnvironment Shader compiler environment
 	 */
-	FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment ) const
+	FORCEINLINE void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment ) const
 	{
 		Assert( ModifyCompilationEnvironmentFunc );
 		ModifyCompilationEnvironmentFunc( InShaderPlatform, InEnvironment );
@@ -323,7 +323,7 @@ private:
  * @ingroup Engine
  * Struct information about vertex buffer
  */
-struct SVertexStream
+struct VertexStream
 {
 	VertexBufferRHIRef_t		vertexBuffer;		/**< Vertex buffer. NOTE: Need change to FVertexBuffer */
 	uint32						stride;				/**< Stride */
@@ -357,7 +357,7 @@ public:
 	 *
 	 * @param[in] InVertexStream Vertex stream info
 	 */
-	FORCEINLINE void AddVertexStream( const SVertexStream& InVertexStream )
+	FORCEINLINE void AddVertexStream( const VertexStream& InVertexStream )
 	{
 		streams.push_back( InVertexStream );
 	}
@@ -371,7 +371,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+	virtual void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
 
 	/**
 	 * Activates the vertex factory
@@ -402,7 +402,7 @@ public:
 	 * @param InShaderPlatform Shader platform
 	 * @param InEnvironment Shader compiler environment
 	 */
-	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment );
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment );
 #endif // WITH_EDITOR
 
 	/**
@@ -469,7 +469,7 @@ protected:
 	virtual void ReleaseRHI() override;
 
 private:
-	std::vector< SVertexStream >	streams;					/**< Array vertex streams */
+	std::vector< VertexStream >	streams;					/**< Array vertex streams */
 	VertexDeclarationRHIRef_t		declaration;				/**< Vertex declaration */
 };
 

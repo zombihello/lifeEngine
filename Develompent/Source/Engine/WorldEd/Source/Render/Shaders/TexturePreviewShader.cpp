@@ -25,7 +25,7 @@ bool CTexturePreviewPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, 
 CTexturePreviewPixelShader::Init
 ==================
 */
-void CTexturePreviewPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
+void CTexturePreviewPixelShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 {
 	CScreenPixelShader::Init( InShaderCacheItem );
 	colorChannelMask.Bind( InShaderCacheItem.parameterMap, TEXT( "colorChannelMask" ) );

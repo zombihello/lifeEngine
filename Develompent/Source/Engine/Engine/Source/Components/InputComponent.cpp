@@ -29,7 +29,7 @@ void CInputComponent::BeginPlay()
 		CConfigObject			configObject = configAction.GetObject();
 
 		// Get name of action
-		SInputAction			inputAction;
+		InputAction			inputAction;
 		inputAction.name = configObject.GetValue( TEXT( "Name" ) ).GetString();
 		if ( inputAction.name.empty() )
 		{
@@ -72,7 +72,7 @@ void CInputComponent::BeginPlay()
 		CConfigObject			configObject = configAxis.GetObject();
 
 		// Get name of axis
-		SInputAxis			inputAxis;
+		InputAxis			inputAxis;
 		inputAxis.name = configObject.GetValue( TEXT( "Name" ) ).GetString();
 		if ( inputAxis.name.empty() )
 		{
@@ -172,7 +172,7 @@ void CInputComponent::TickComponent( float InDeltaTime )
 		std::unordered_set< float >		triggeredScales;
 		for ( uint32 indexButton = 0, countButtons = it->second.buttons.size(); indexButton < countButtons; ++indexButton )
 		{
-			const SInputAxis::PairAxisButton_t&		pairAxisButton	= it->second.buttons[ indexButton ];
+			const InputAxis::PairAxisButton_t&		pairAxisButton	= it->second.buttons[ indexButton ];
 			EButtonEvent							buttonEvent		= g_InputSystem->GetButtonEvent( pairAxisButton.first );
 			switch ( buttonEvent )
 			{

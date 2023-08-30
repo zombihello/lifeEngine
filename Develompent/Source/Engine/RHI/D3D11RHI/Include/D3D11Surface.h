@@ -110,7 +110,7 @@ public:
 	 * @param[in] InIsUseCPUShadow Is use CPU shadow
 	 * @param[out] OutLockedData Locked data in texture
 	 */
-	void Lock( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, struct SLockedData& OutLockedData );
+	void Lock( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, struct LockedData& OutLockedData );
 
 	/**
 	 * Unlock texture for apply changes to texture
@@ -120,7 +120,7 @@ public:
 	 * @param[in] InLockedData Locked data
 	 * @param[in] InDiscardUpdate Disczrd update
 	 */
-	void Unlock( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, struct SLockedData& InLockedData, bool InDiscardUpdate = false );
+	void Unlock( class CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, struct LockedData& InLockedData, bool InDiscardUpdate = false );
 
 	/**
 	 * Get DirectX resource

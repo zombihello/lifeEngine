@@ -15,7 +15,7 @@ CPhysicsMaterialEditorWindow::CPhysicsMaterialEditorWindow( const TSharedPtr<CPh
 	flags |= LF_DestroyOnHide;
 
 	// Subscribe to event when assets try destroy of editing audio bank and reload. It need is block
-	assetsCanDeleteHandle = SEditorDelegates::onAssetsCanDelete.Add( std::bind( &CPhysicsMaterialEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2	) );
+	assetsCanDeleteHandle = EditorDelegates::onAssetsCanDelete.Add( std::bind( &CPhysicsMaterialEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2	) );
 }
 
 /*
@@ -26,7 +26,7 @@ CPhysicsMaterialEditorWindow::~CPhysicsMaterialEditorWindow
 CPhysicsMaterialEditorWindow::~CPhysicsMaterialEditorWindow()
 {
 	// Unsubscribe from event when assets try destroy and reload
-	SEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
+	EditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
 }
 
 /*
@@ -137,7 +137,7 @@ void CPhysicsMaterialEditorWindow::OnTick()
 CPhysicsMaterialEditorWindow::OnAssetsCanDelete
 ==================
 */
-void CPhysicsMaterialEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, SCanDeleteAssetResult& OutResult )
+void CPhysicsMaterialEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, CanDeleteAssetResult& OutResult )
 {
 	// If in InAssets exist audio bank who is editing now - need is block
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )

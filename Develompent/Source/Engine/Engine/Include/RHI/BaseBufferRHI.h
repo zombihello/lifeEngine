@@ -30,12 +30,12 @@ enum EResourceUsageFlags
  * @ingroup Engine
  * @brief Information about a resource that is currently locked
  */
-struct SLockedData
+struct LockedData
 {
 	/**
 	 * Constructor
 	 */
-	SLockedData() :
+	LockedData() :
 		data( nullptr ),
 		isNeedFree( false ),
 		size( 0 ),
@@ -45,7 +45,7 @@ struct SLockedData
 	/**
 	 * Destructor
 	 */
-	~SLockedData()
+	~LockedData()
 	{
 		if ( isNeedFree )
 		{

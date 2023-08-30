@@ -31,7 +31,7 @@ DECLARE_ENUM( ECameraProjectionMode )
  * @ingroup Engine
  * Struct of camera view info
  */
-struct SCameraView
+struct CameraView
 {
 	Vector						location;		/**< Location */
 	Quaternion					rotation;		/**< Rotation */

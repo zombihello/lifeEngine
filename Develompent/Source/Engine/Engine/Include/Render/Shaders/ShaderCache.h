@@ -25,19 +25,19 @@
 class CShaderParameterMap
 {
 public:
-	struct SParameterAllocation
+	struct ParameterAllocation
 	{
 		/**
-		 * @brief Construct a new SParameterAllocation object
+		 * @brief Construct a new ParameterAllocation object
 		 */
-		SParameterAllocation() :
+		ParameterAllocation() :
 			isBound( false )
 		{}
 
 		/**
 		 * Overload operator << for serialize
 		 */
-		FORCEINLINE friend CArchive& operator<<( CArchive& InAr, SParameterAllocation& InParameterAllocation )
+		FORCEINLINE friend CArchive& operator<<( CArchive& InAr, ParameterAllocation& InParameterAllocation )
 		{
 			return InAr << InParameterAllocation.bufferIndex << InParameterAllocation.baseIndex << InParameterAllocation.size << InParameterAllocation.samplerIndex << InParameterAllocation.isBound;
 		}
@@ -45,7 +45,7 @@ public:
 		/**
 		 * Overload operator << for serialize
 		 */
-		FORCEINLINE friend CArchive& operator<<( CArchive& InAr, const SParameterAllocation& InParameterAllocation )
+		FORCEINLINE friend CArchive& operator<<( CArchive& InAr, const ParameterAllocation& InParameterAllocation )
 		{
 			return InAr << InParameterAllocation.bufferIndex << InParameterAllocation.baseIndex << InParameterAllocation.size << InParameterAllocation.samplerIndex << InParameterAllocation.isBound;
 		}
@@ -97,7 +97,7 @@ public:
 	}
 
 private:
-	std::unordered_map< std::wstring, SParameterAllocation >		parameterMap;		/**< Parameter map */
+	std::unordered_map< std::wstring, ParameterAllocation >		parameterMap;		/**< Parameter map */
 };
 
 /**
@@ -110,7 +110,7 @@ public:
 	/**
 	 * @brief Struct of shader cache item
 	 */
-	struct SShaderCacheItem
+	struct ShaderCacheItem
 	{
 		/**
 		 * @brief Serialize
@@ -136,7 +136,7 @@ public:
 	 * @brief Add to cache compiled shader
 	 * @param[in] InShaderCacheItem Shader cache item
 	 */
-	FORCEINLINE void Add( const SShaderCacheItem& InShaderCacheItem )
+	FORCEINLINE void Add( const ShaderCacheItem& InShaderCacheItem )
 	{
 		items.push_back( InShaderCacheItem );
 		itemsMap[ InShaderCacheItem.vertexFactoryHash ].insert( InShaderCacheItem.name );
@@ -146,7 +146,7 @@ public:
 	 * @brief Get array of items shader cache
 	 * @return Return const reference to array of items shader cache
 	 */
-	FORCEINLINE const std::vector< SShaderCacheItem >& GetItems() const
+	FORCEINLINE const std::vector< ShaderCacheItem >& GetItems() const
 	{
 		return items;
 	}
@@ -176,7 +176,7 @@ public:
 	}
 
 private:
-	std::vector< SShaderCacheItem >											items;		/**< Array of items shader cache */
+	std::vector< ShaderCacheItem >											items;		/**< Array of items shader cache */
 	std::unordered_map< uint64, std::unordered_set< std::wstring > >		itemsMap;	/**< Map of items separated by vertex factory. Need for Assert on exist in cache */
 };
 

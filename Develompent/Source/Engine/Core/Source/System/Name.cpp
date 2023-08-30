@@ -4,9 +4,9 @@
 #include "Containers/String.h"
 #include "System/Name.h"
 
-static std::vector<CName::SNameEntry>& GetGlobalNameTable()
+static std::vector<CName::NameEntry>& GetGlobalNameTable()
 {
-	static std::vector<CName::SNameEntry>		globalNameTable;
+	static std::vector<CName::NameEntry>		globalNameTable;
 	return globalNameTable;
 }
 
@@ -17,7 +17,7 @@ AllocateNameEntry
 */
 static FORCEINLINE void AllocateNameEntry( const std::wstring& InName, uint32 InHash )
 {
-	GetGlobalNameTable().push_back( CName::SNameEntry( InName, InHash ) );
+	GetGlobalNameTable().push_back( CName::NameEntry( InName, InHash ) );
 }
 
 /*
@@ -56,10 +56,10 @@ void CName::Init( const std::wstring& InString )
 	uint32				hash = Sys_CalcHash( CString::ToUpper( InString ) );
 
 	// Try find already exist name in global table
-	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
 	for ( uint32 nameEntryId = 0, numNameEntries = globalNameTable.size(); nameEntryId < numNameEntries; ++nameEntryId )
 	{
-		const CName::SNameEntry&		nameEntry = globalNameTable[nameEntryId];
+		const CName::NameEntry&		nameEntry = globalNameTable[nameEntryId];
 		if ( nameEntry.hash == hash )
 		{
 			index = nameEntryId;
@@ -81,7 +81,7 @@ CName::ToString
 */
 void CName::ToString( std::wstring& OutString ) const
 {
-	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
 	if ( !IsValid() )
 	{
 		OutString = globalNameTable[NAME_None].name;
@@ -112,7 +112,7 @@ CName::operator==
 bool CName::operator==( const std::wstring& InOther ) const
 {
 	// Calculate hash for string
-	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
 	uint32								hash = Sys_CalcHash( CString::ToUpper( InOther ) );
 
 	return globalNameTable[IsValid() ? index : NAME_None].hash == hash;
@@ -126,7 +126,7 @@ CName::operator==
 bool CName::operator==( const tchar* InOther ) const
 {
 	// Calculate hash for string
-	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
 	uint32								hash = Sys_CalcHash( CString::ToUpper( InOther ) );
 
 	return globalNameTable[IsValid() ? index : NAME_None].hash == hash;
@@ -139,11 +139,11 @@ CName::operator<<
 */
 CArchive& operator<<( CArchive& InArchive, CName& InValue )
 {
-	std::vector<CName::SNameEntry>&		globalNameTable = GetGlobalNameTable();
+	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
 
 	if ( InArchive.IsSaving() )
 	{
-		const CName::SNameEntry& nameEntry = globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
+		const CName::NameEntry& nameEntry = globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
 		InArchive << nameEntry.name;
 		InArchive << InValue.index;
 	}
@@ -184,8 +184,8 @@ operator<<
 */
 CArchive& operator<<( CArchive& InArchive, const CName& InValue )
 {
-	std::vector<CName::SNameEntry>&	globalNameTable = GetGlobalNameTable();
-	const CName::SNameEntry&		nameEntry		= globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
+	std::vector<CName::NameEntry>&	globalNameTable = GetGlobalNameTable();
+	const CName::NameEntry&		nameEntry		= globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
 
 	Assert( InArchive.IsSaving() );
 	InArchive << nameEntry.name;

@@ -18,12 +18,12 @@ void CDynamicMeshVertexDeclaration::InitRHI()
 {
 	VertexDeclarationElementList_t		vertexDeclElementList =
 	{
-		SVertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( SDynamicMeshVertexType ), STRUCT_OFFSET( SDynamicMeshVertexType, position ),    VET_Float4, VEU_Position, 0 ),
-		SVertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( SDynamicMeshVertexType ), STRUCT_OFFSET( SDynamicMeshVertexType, texCoord ),    VET_Float2, VEU_TextureCoordinate, 0 ),
-		SVertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( SDynamicMeshVertexType ), STRUCT_OFFSET( SDynamicMeshVertexType, normal ),      VET_Float4, VEU_Normal, 0 ),
-		SVertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( SDynamicMeshVertexType ), STRUCT_OFFSET( SDynamicMeshVertexType, tangent ),     VET_Float4, VEU_Tangent, 0 ),
-		SVertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( SDynamicMeshVertexType ), STRUCT_OFFSET( SDynamicMeshVertexType, binormal ),    VET_Float4, VEU_Binormal, 0 ),
-		SVertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( SDynamicMeshVertexType ), STRUCT_OFFSET( SDynamicMeshVertexType, color ),		VET_Float4, VEU_Color, 0 )
+		VertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( DynamicMeshVertexType ), STRUCT_OFFSET( DynamicMeshVertexType, position ),    VET_Float4, VEU_Position, 0 ),
+		VertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( DynamicMeshVertexType ), STRUCT_OFFSET( DynamicMeshVertexType, texCoord ),    VET_Float2, VEU_TextureCoordinate, 0 ),
+		VertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( DynamicMeshVertexType ), STRUCT_OFFSET( DynamicMeshVertexType, normal ),      VET_Float4, VEU_Normal, 0 ),
+		VertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( DynamicMeshVertexType ), STRUCT_OFFSET( DynamicMeshVertexType, tangent ),     VET_Float4, VEU_Tangent, 0 ),
+		VertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( DynamicMeshVertexType ), STRUCT_OFFSET( DynamicMeshVertexType, binormal ),    VET_Float4, VEU_Binormal, 0 ),
+		VertexElement( CDynamicMeshVertexFactory::SSS_Main, sizeof( DynamicMeshVertexType ), STRUCT_OFFSET( DynamicMeshVertexType, color ),		VET_Float4, VEU_Color, 0 )
 	};
 	vertexDeclarationRHI = g_RHI->CreateVertexDeclaration( vertexDeclElementList );
 }

@@ -10,9 +10,9 @@ CSceneComponent::CSceneComponent
 */
 CSceneComponent::CSceneComponent()
 	: bDityComponentToWorld( true )
-	, relativeLocation( SMath::vectorZero )
-	, relativeRotation( SMath::rotatorZero )
-	, relativeScale( SMath::vectorOne )
+	, relativeLocation( Math::vectorZero )
+	, relativeRotation( Math::rotatorZero )
+	, relativeScale( Math::vectorOne )
 {}
 
 /*

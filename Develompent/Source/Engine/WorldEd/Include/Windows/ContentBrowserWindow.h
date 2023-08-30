@@ -310,7 +310,7 @@ private:
 		 * @param InAssetInfo	Pointer to asset info in package
 		 * @param InOwner		Owner
 		 */
-		FORCEINLINE CAssetNode( const SAssetInfo* InAssetInfo, CContentBrowserWindow* InOwner )
+		FORCEINLINE CAssetNode( const AssetInfo* InAssetInfo, CContentBrowserWindow* InOwner )
 			: bSelected( false )
 			, info( InAssetInfo )
 			, owner( InOwner )
@@ -374,7 +374,7 @@ private:
 		 * @brief Get asset info
 		 * @return Return asset info
 		 */
-		FORCEINLINE const SAssetInfo* GetAssetInfo() const
+		FORCEINLINE const AssetInfo* GetAssetInfo() const
 		{
 			return info;
 		}
@@ -402,19 +402,19 @@ private:
 		void DragNDropHandle();
 
 		bool					bSelected;	/**< Is selected node */
-		const SAssetInfo*		info;		/**< Asset info */
+		const AssetInfo*		info;		/**< Asset info */
 		CContentBrowserWindow*	owner;		/**< Content browser window who owned this node */
 	};
 
 	/**
 	 * @brief Filter info
 	 */
-	struct SFilterInfo
+	struct FilterInfo
 	{
 		/**
 		 * @brief Constructor
 		 */
-		FORCEINLINE SFilterInfo()
+		FORCEINLINE FilterInfo()
 		{
 			SetShowAllAssetTypes( true );
 		}
@@ -549,7 +549,7 @@ private:
 	TSharedPtr<CFileTreeNode>	gameRoot;					/**< Game root directory */
 	TSharedPtr<CFileTreeNode>	hoveredNode;				/**< Hovered node in now time */
 	PackageRef_t				package;					/**< Current package in preview */
-	SFilterInfo					filterInfo;					/**< Filter info */
+	FilterInfo					filterInfo;					/**< Filter info */
 	float						padding;					/**< Padding in asset section */
 	float						thumbnailSize;				/**< Size of thumbnail */
 	std::vector<CAssetNode>		assets;						/**< Assets in package */

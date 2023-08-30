@@ -47,7 +47,7 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 	if ( arVer >= VER_CompressedZlib && IsLoading() )
 	{
 		// Read in base summary
-		SCompressedChunkInfo		summary;
+		CompressedChunkInfo		summary;
 		*this << summary;
 
 		// Handle change in compression chunk size in backward compatible way
@@ -57,7 +57,7 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 		uint32	totalChunkCount = ( summary.uncompressedSize + loadingCompressionChunkSize - 1 ) / loadingCompressionChunkSize;
 
 		// Allocate compression chunk infos and serialize them, keeping track of max size of compression chunks used.
-		SCompressedChunkInfo*	compressionChunks = new SCompressedChunkInfo[ totalChunkCount ];
+		CompressedChunkInfo*	compressionChunks = new CompressedChunkInfo[ totalChunkCount ];
 		uint32					maxCompressedSize = 0;
 		for ( uint32 chunkIndex = 0; chunkIndex < totalChunkCount; chunkIndex++ )
 		{
@@ -72,7 +72,7 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 		// Iterate over all chunks, serialize them into memory and decompress them directly into the destination pointer
 		for ( uint32 chunkIndex = 0; chunkIndex < totalChunkCount; chunkIndex++ )
 		{
-			const SCompressedChunkInfo&			chunk = compressionChunks[ chunkIndex ];
+			const CompressedChunkInfo&			chunk = compressionChunks[ chunkIndex ];
 			
 			// Read compressed data.
 			Serialize( compressedBuffer, chunk.compressedSize );
@@ -98,7 +98,7 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 		uint32			startPosition = Tell();
 
 		// Allocate compression chunk infos and serialize them so we can later overwrite the data
-		SCompressedChunkInfo*		compressionChunks = new SCompressedChunkInfo[ totalChunkCount ];
+		CompressedChunkInfo*		compressionChunks = new CompressedChunkInfo[ totalChunkCount ];
 		for ( uint32 chunkIndex = 0; chunkIndex < totalChunkCount; ++chunkIndex )
 		{
 			*this << compressionChunks[ chunkIndex ];

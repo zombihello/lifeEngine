@@ -804,7 +804,7 @@ public:
 	 */
 	FORCEINLINE Vector GetActorLocation() const
 	{
-		return rootComponent ? rootComponent->GetComponentLocation() : SMath::vectorZero;
+		return rootComponent ? rootComponent->GetComponentLocation() : Math::vectorZero;
 	}
 
 	/**
@@ -813,7 +813,7 @@ public:
 	 */
 	FORCEINLINE CRotator GetActorRotation() const
 	{
-		return rootComponent ? rootComponent->GetComponentRotation() : SMath::quaternionZero;
+		return rootComponent ? rootComponent->GetComponentRotation() : Math::quaternionZero;
 	}
 
 	/**
@@ -822,7 +822,7 @@ public:
 	 */
 	FORCEINLINE Quaternion GetActorQuat() const
 	{
-		return rootComponent ? rootComponent->GetComponentQuat() : SMath::quaternionZero;
+		return rootComponent ? rootComponent->GetComponentQuat() : Math::quaternionZero;
 	}
 
 	/**
@@ -831,7 +831,7 @@ public:
 	 */
 	FORCEINLINE Vector GetActorScale() const
 	{
-		return rootComponent ? rootComponent->GetComponentScale() : SMath::vectorOne;
+		return rootComponent ? rootComponent->GetComponentScale() : Math::vectorOne;
 	}
 
 	/**
@@ -840,7 +840,7 @@ public:
 	 */
 	FORCEINLINE CTransform GetActorTransform() const
 	{
-		return rootComponent ? rootComponent->GetComponentTransform() : SMath::transformZero;
+		return rootComponent ? rootComponent->GetComponentTransform() : Math::transformZero;
 	}
 
 	/**
@@ -851,7 +851,7 @@ public:
 	{
 		if ( !rootComponent )
 		{
-			return SMath::vectorForward;
+			return Math::vectorForward;
 		}
 		else
 		{
@@ -868,7 +868,7 @@ public:
 	{
 		if ( !rootComponent )
 		{
-			return SMath::vectorForward;
+			return Math::vectorForward;
 		}
 		else
 		{
@@ -885,7 +885,7 @@ public:
 	{
 		if ( !rootComponent )
 		{
-			return SMath::vectorForward;
+			return Math::vectorForward;
 		}
 		else
 		{

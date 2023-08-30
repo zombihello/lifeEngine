@@ -4,10 +4,10 @@
 
 /*
 ==================
-SPhysicsBoxGeometry::InitPhysicsShape
+PhysicsBoxGeometry::InitPhysicsShape
 ==================
 */
-void SPhysicsBoxGeometry::InitPhysicsShape() const
+void PhysicsBoxGeometry::InitPhysicsShape() const
 {
 	if ( CPhysicsInterface::IsValidShapeGeometry( handle ) )
 	{
@@ -20,12 +20,12 @@ void SPhysicsBoxGeometry::InitPhysicsShape() const
 
 /*
 ==================
-SPhysicsBoxGeometry::Serialize
+PhysicsBoxGeometry::Serialize
 ==================
 */
-void SPhysicsBoxGeometry::Serialize( class CArchive& InArchive )
+void PhysicsBoxGeometry::Serialize( class CArchive& InArchive )
 {
-	SPhysicsShapeGeometry::Serialize( InArchive );
+	PhysicsShapeGeometry::Serialize( InArchive );
 	InArchive << location;
 	InArchive << rotation;
 	InArchive << extent;

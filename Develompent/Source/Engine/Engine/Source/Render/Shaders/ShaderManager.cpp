@@ -109,12 +109,12 @@ CShaderMetaType::CShaderMetaType( const CShaderMetaType& InCopy )
 
 /*
 ==================
-CShaderManager::SContainerShaderTypes::CreateShaderInstance
+CShaderManager::ContainerShaderTypes::CreateShaderInstance
 ==================
 */
-CShader* CShaderManager::SContainerShaderTypes::CreateShaderInstance( const tchar* InShaderName )
+CShader* CShaderManager::ContainerShaderTypes::CreateShaderInstance( const tchar* InShaderName )
 {
-	SContainerShaderTypes*		container = SContainerShaderTypes::Get();
+	ContainerShaderTypes*		container = ContainerShaderTypes::Get();
 	auto		itShaderMetaType = container->shaderMetaTypes.find( InShaderName );
 	if ( itShaderMetaType == container->shaderMetaTypes.end() )
 	{
@@ -144,11 +144,11 @@ bool CShaderManager::LoadShaders( const tchar* InPathShaderCache )
 
 	uint32														numLoadedShaders = 0;
 	uint32														numLegacyShaders = 0;
-	const std::vector< CShaderCache::SShaderCacheItem >			shaderCacheItems = shaderCache.GetItems();
+	const std::vector< CShaderCache::ShaderCacheItem >			shaderCacheItems = shaderCache.GetItems();
 	for ( uint32 indexItem = 0, countItems = ( uint32 )shaderCacheItems.size(); indexItem < countItems; ++indexItem )
 	{
-		const CShaderCache::SShaderCacheItem&		item = shaderCacheItems[ indexItem ];
-		CShader*									shader = SContainerShaderTypes::CreateShaderInstance( item.name.c_str() );
+		const CShaderCache::ShaderCacheItem&		item = shaderCacheItems[ indexItem ];
+		CShader*									shader = ContainerShaderTypes::CreateShaderInstance( item.name.c_str() );
 		if ( !shader )
 		{
 			Warnf( TEXT( "Shader %s not loaded, because not found meta type\n" ), item.name.c_str() );
@@ -156,7 +156,7 @@ bool CShaderManager::LoadShaders( const tchar* InPathShaderCache )
 			continue;
 		}
 
-		CVertexFactoryMetaType*			vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
+		CVertexFactoryMetaType*			vertexFactoryType = CVertexFactoryMetaType::ContainerVertexFactoryMetaType::Get()->FindRegisteredType( item.vertexFactoryHash );
 
 #if WITH_EDITOR
 		if ( g_IsEditor )

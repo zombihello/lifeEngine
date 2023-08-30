@@ -17,7 +17,7 @@
  * Get time in seconds. Origin is arbitrary
  * @reutrn Return time in seconds
  */
-FORCEINLINE double appSeconds()
+FORCEINLINE double Sys_Seconds()
 {
 	LARGE_INTEGER		cycles;
 	QueryPerformanceCounter( &cycles );

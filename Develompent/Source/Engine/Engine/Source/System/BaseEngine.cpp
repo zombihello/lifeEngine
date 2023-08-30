@@ -238,7 +238,7 @@ void CBaseEngine::Tick( float InDeltaSeconds )
 CBaseEngine::ProcessEvent
 ==================
 */
-void CBaseEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CBaseEngine::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	g_InputSystem->ProcessEvent( InWindowEvent );
 	g_UIEngine->ProcessEvent( InWindowEvent );

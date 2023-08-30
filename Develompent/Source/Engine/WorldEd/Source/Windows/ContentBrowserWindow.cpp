@@ -45,7 +45,7 @@
  * @ingroup WorldEd
  * @brief Struct package info
  */
-struct SPackageInfo
+struct PackageInfo
 {
 	CFilename	oldPath;		/**< Old path to package */
 	CFilename	newPath;		/**< New path to package */
@@ -107,7 +107,7 @@ static FORCEINLINE std::wstring ArrayFilenamesToString( const std::vector<CFilen
 GetPackagesInDirectory
 ==================
 */
-static void GetPackagesInDirectory( const std::wstring& InRootDir, const std::wstring& InNewRootDir, std::vector<SPackageInfo>& OutResult )
+static void GetPackagesInDirectory( const std::wstring& InRootDir, const std::wstring& InNewRootDir, std::vector<PackageInfo>& OutResult )
 {
 	// Find all files in directory
 	std::vector<std::wstring>	files = g_FileSystem->FindFiles( InRootDir, true, true );
@@ -124,7 +124,7 @@ static void GetPackagesInDirectory( const std::wstring& InRootDir, const std::ws
 		// Else if this is package, we add to OutResult
 		else if ( oldPath.GetExtension() == TEXT( "pak" ) )
 		{
-			OutResult.push_back( SPackageInfo{ oldPath, newPath } );
+			OutResult.push_back( PackageInfo{ oldPath, newPath } );
 		}
 	}
 }
@@ -613,7 +613,7 @@ public:
 	/**
 	 * @brief Info about copied/moved file
 	 */
-	struct SFileInfo
+	struct FileInfo
 	{
 		bool		bDirectory;		/**< File is directory? */
 		CFilename	srcPath;		/**< Source path to file */
@@ -626,7 +626,7 @@ public:
 	 * @param InOwner			Owner
 	 * @param InFilesToMoveCopy	Array of files to move/copy
 	 */
-	CMoveCopyFilesRunnable( CContentBrowserWindow* InOwner, const std::vector<SFileInfo>& InFilesToMoveCopy )
+	CMoveCopyFilesRunnable( CContentBrowserWindow* InOwner, const std::vector<FileInfo>& InFilesToMoveCopy )
 		: bMove( true )
 		, mode( CMM_Default )
 		, owner( InOwner )
@@ -649,11 +649,11 @@ public:
 		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 
 		// Expanding all folders. It need for we contain in array only files
-		std::vector<SFileInfo>		oldFilesToMoveCopy = filesToMoveCopy;
-		filesToMoveCopy.swap( std::vector<SFileInfo>() );
+		std::vector<FileInfo>		oldFilesToMoveCopy = filesToMoveCopy;
+		filesToMoveCopy.swap( std::vector<FileInfo>() );
 		for ( uint32 index = 0, count = oldFilesToMoveCopy.size(); index < count; ++index )
 		{
-			const SFileInfo&	oldFileInfo = oldFilesToMoveCopy[index];
+			const FileInfo&	oldFileInfo = oldFilesToMoveCopy[index];
 			if ( oldFileInfo.bDirectory )
 			{
 				GetFilesFromDirectory( oldFileInfo, filesToMoveCopy );
@@ -685,7 +685,7 @@ public:
 		std::wstring		errorMessages;
 		for ( uint32 index = 0, count = filesToMoveCopy.size(); index < count; ++index )
 		{
-			const SFileInfo&	fileInfo			= filesToMoveCopy[index];
+			const FileInfo&	fileInfo			= filesToMoveCopy[index];
 			bool				bExistFile			= !fileInfo.bDirectory && g_FileSystem->IsExistFile( fileInfo.dstPath.GetFullPath() );
 			bool				bPackage			= fileInfo.srcPath.GetExtension() == TEXT( "pak" );
 			if ( bExistFile )
@@ -841,7 +841,7 @@ private:
 	 * @param InFileInfo	Info about directory
 	 * @param OutResult		Output array of info about files in directory
 	 */
-	void GetFilesFromDirectory( const SFileInfo& InFileInfo, std::vector<SFileInfo>& OutResult ) const
+	void GetFilesFromDirectory( const FileInfo& InFileInfo, std::vector<FileInfo>& OutResult ) const
 	{
 		// Do nothing if file info it's not directory
 		if ( !InFileInfo.bDirectory )
@@ -856,7 +856,7 @@ private:
 		for ( uint32 index = 0, count = files.size(); index < count; ++index )
 		{
 			CFilename			filename = files[index];
-			SFileInfo			fileInfo;
+			FileInfo			fileInfo;
 			fileInfo.dstPath	= dstDirectory + filename.GetFullPath();
 			fileInfo.srcPath	= srcDirectory + filename.GetFullPath();
 			fileInfo.bDirectory = g_FileSystem->IsDirectory( fileInfo.srcPath.GetFullPath() );		
@@ -876,7 +876,7 @@ private:
 	ECopyMoveMode				mode;				/**< Copy/move mode */
 	CContentBrowserWindow*		owner;				/**< Owner */
 	CEvent*						eventResponse;		/**< Event used when opened popup of change exist files */
-	std::vector<SFileInfo>		filesToMoveCopy;	/**< Array of files to move/copy */
+	std::vector<FileInfo>		filesToMoveCopy;	/**< Array of files to move/copy */
 	std::vector<CFilename>		directorisToDelete;	/**< Array of directories who need delete after move */
 };
 
@@ -1195,14 +1195,14 @@ public:
 			// Rename directory
 		case RM_RenameFolder:
 		{
-			std::vector<SPackageInfo>		updateTOCPackages;
+			std::vector<PackageInfo>		updateTOCPackages;
 			GetPackagesInDirectory( filename.GetFullPath(), filename.GetPath() + newFileName, updateTOCPackages );
 			
 			// We try unload all package in directory for rename folder.
 			// If package still used, we exit with error
 			for ( uint32 index = 0, count = updateTOCPackages.size(); index < count; ++index )
 			{
-				const SPackageInfo&		packageInfo = updateTOCPackages[index];
+				const PackageInfo&		packageInfo = updateTOCPackages[index];
 				if ( !g_PackageManager->UnloadPackage( packageInfo.oldPath.GetFullPath() ) )
 				{
 					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The package '%s' in using or modifided and folder '%s' cannot be renamed. Close all assets from this package or save him for will allow rename folder" ), packageInfo.oldPath.GetBaseFilename().c_str(), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Ok );
@@ -1213,7 +1213,7 @@ public:
 			// All good and we remove entries from TOC file
 			for ( uint32 index = 0, count = updateTOCPackages.size(); index < count; ++index )
 			{
-				const SPackageInfo&		packageInfo = updateTOCPackages[index];
+				const PackageInfo&		packageInfo = updateTOCPackages[index];
 				g_TableOfContents.RemoveEntry( packageInfo.oldPath.GetFullPath() );
 				bDirtyTOC = true;
 			}
@@ -1586,7 +1586,7 @@ void CContentBrowserWindow::RefreshAssetNodes()
 	{
 		for ( uint32 index = 0, count = package->GetNumAssets(); index < count; ++index )
 		{
-			const SAssetInfo*	assetInfo = nullptr;
+			const AssetInfo*	assetInfo = nullptr;
 			package->GetAssetInfo( index, assetInfo );		
 			Assert( assetInfo );
 			auto			itFind = mapAssets.find( assetInfo->name );
@@ -2091,7 +2091,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Reload( const std::vector<CAssetNode
 	std::wstring		errorMessages;
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
 	{
-		const SAssetInfo*		assetInfo	= InAssets[index].GetAssetInfo();
+		const AssetInfo*		assetInfo	= InAssets[index].GetAssetInfo();
 		TAssetHandle<CAsset>	asset		= package->Find( assetInfo->name );
 		if ( !package->ReloadAsset( asset ) )
 		{
@@ -2114,7 +2114,7 @@ CContentBrowserWindow::PopupMenu_Asset_Import
 void CContentBrowserWindow::PopupMenu_Asset_Import()
 {
 	CFileDialogSetup		fileDialogSetup;
-	SOpenFileDialogResult	openFileDialogResult;
+	OpenFileDialogResult	openFileDialogResult;
 
 	// Init file dialog settings
 	fileDialogSetup.SetMultiselection( true );
@@ -2122,7 +2122,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Import()
 	fileDialogSetup.SetDirectory( gameRoot->GetPath() );
 	for ( uint32 index = AT_FirstType; index < AT_Count; ++index )
 	{
-		const CAssetFactory::SAssetImporterInfo& importerInfo = g_AssetFactory.GetImporterInfo( ( EAssetType )index );
+		const CAssetFactory::AssetImporterInfo& importerInfo = g_AssetFactory.GetImporterInfo( ( EAssetType )index );
 		if ( importerInfo.bValid )
 		{
 			fileDialogSetup.AddFormat( importerInfo, ConvertAssetTypeToText( ( EAssetType )index ) );
@@ -2146,7 +2146,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Reimport( const std::vector<CAssetNo
 	std::wstring		errorMessages;
 	for ( uint32 index = 0, count = InAssets.size(); index < count; ++index )
 	{
-		const SAssetInfo*		assetInfo	= InAssets[index].GetAssetInfo();
+		const AssetInfo*		assetInfo	= InAssets[index].GetAssetInfo();
 		TAssetHandle<CAsset>	asset		= package->Find( assetInfo->name );	
 		if ( asset.IsAssetValid() )
 		{
@@ -2174,12 +2174,12 @@ CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile
 void CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile( const CAssetNode& InAsset )
 {
 	std::wstring			errorMessage;
-	const SAssetInfo*		assetInfo = InAsset.GetAssetInfo();
+	const AssetInfo*		assetInfo = InAsset.GetAssetInfo();
 	if ( assetInfo->data )
 	{
 		// Select new source file
 		CFileDialogSetup		fileDialogSetup;
-		SOpenFileDialogResult	openFileDialogResult;
+		OpenFileDialogResult	openFileDialogResult;
 
 		// Init file dialog settings
 		fileDialogSetup.SetMultiselection( false );
@@ -2227,7 +2227,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Delete()
 		CAssetNode&	assetNode = assets[index];
 		if ( assetNode.IsSelected() )
 		{
-			const SAssetInfo*	assetInfo = assetNode.GetAssetInfo();
+			const AssetInfo*	assetInfo = assetNode.GetAssetInfo();
 			if ( !package->Remove( assetInfo->name, false, true ) )
 			{
 				usedAssets += CString::Format( TEXT( "\n%s" ), assetInfo->name.c_str() );
@@ -2254,7 +2254,7 @@ CContentBrowserWindow::PopupMenu_Asset_CopyReference
 void CContentBrowserWindow::PopupMenu_Asset_CopyReference( const CAssetNode& InAsset )
 {
 	Assert( package );
-	const SAssetInfo*	assetInfo = InAsset.GetAssetInfo();
+	const AssetInfo*	assetInfo = InAsset.GetAssetInfo();
 	std::wstring		assetReference;
 
 	if ( MakeReferenceToAsset( package->GetName(), assetInfo->name, assetInfo->type, assetReference ) )
@@ -2266,10 +2266,10 @@ void CContentBrowserWindow::PopupMenu_Asset_CopyReference( const CAssetNode& InA
 
 /*
 ==================
-CContentBrowserWindow::SFilterInfo::GetPreviewFilterAssetType
+CContentBrowserWindow::FilterInfo::GetPreviewFilterAssetType
 ==================
 */
-std::string CContentBrowserWindow::SFilterInfo::GetPreviewFilterAssetType() const
+std::string CContentBrowserWindow::FilterInfo::GetPreviewFilterAssetType() const
 {
 	if ( IsShowAllAssetTypes() )
 	{
@@ -2526,11 +2526,11 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			}
 
 			// Make array of files to copy/move
-			std::vector<CMoveCopyFilesRunnable::SFileInfo>		filesToMoveCopy;
+			std::vector<CMoveCopyFilesRunnable::FileInfo>		filesToMoveCopy;
 			bool												bNeedResetCurrentPackage = false;
 			for ( uint32 index = 0; pData[index]; ++index )
 			{
-				CMoveCopyFilesRunnable::SFileInfo	fileInfo;
+				CMoveCopyFilesRunnable::FileInfo	fileInfo;
 				fileInfo.bDirectory					= pData[index]->GetType() == FNT_Folder;
 				fileInfo.srcPath					= pData[index]->path;
 				fileInfo.dstPath					= dstDirectory + fileInfo.srcPath.GetFilename();
@@ -2750,7 +2750,7 @@ void CContentBrowserWindow::CAssetNode::DragNDropHandle()
 			const CAssetNode&		assetNode = owner->assets[index];
 			if ( assetNode.IsSelected() )
 			{
-				const SAssetInfo*	assetInfo = owner->assets[index].GetAssetInfo();
+				const AssetInfo*	assetInfo = owner->assets[index].GetAssetInfo();
 				Assert( assetInfo );
 
 				// Make reference to asset

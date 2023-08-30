@@ -27,12 +27,12 @@ public:
 	/**
 	 * @brief Struct of containing name entry in global table
 	 */
-	struct SNameEntry
+	struct NameEntry
 	{
 		/**
 		 * @brief Constructor
 		 */
-		FORCEINLINE SNameEntry()
+		FORCEINLINE NameEntry()
 			: hash( INVALID_HASH )
 		{}
 
@@ -41,7 +41,7 @@ public:
 		 * @param InName	Name
 		 * @param InHash	Hash
 		 */
-		FORCEINLINE SNameEntry( const std::wstring& InName, uint32 InHash = INVALID_HASH )
+		FORCEINLINE NameEntry( const std::wstring& InName, uint32 InHash = INVALID_HASH )
 			: name( InName )
 			, hash( InHash )
 		{}
@@ -53,7 +53,7 @@ public:
 	/**
 	 * @brief Hash function for STL containers
 	 */
-	struct SHashFunction
+	struct HashFunction
 	{
 		/**
 		 * @brief Calculate hash of CName

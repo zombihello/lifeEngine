@@ -25,12 +25,12 @@ public:
 	/**
 	 * @brief File name filter
 	 */
-	struct SFileNameFilter
+	struct FileNameFilter
 	{
 		/**
 		 * @brief Constructor
 		 */
-		FORCEINLINE SFileNameFilter()
+		FORCEINLINE FileNameFilter()
 		{}
 
 		/**
@@ -39,7 +39,7 @@ public:
 		 * @param InFilter			Filter
 		 * @param InDescription		Description
 		 */
-		FORCEINLINE SFileNameFilter( const std::wstring& InFilter, const std::wstring& InDescription )
+		FORCEINLINE FileNameFilter( const std::wstring& InFilter, const std::wstring& InDescription )
 			: filter( InFilter )
 			, description( InDescription )
 		{}
@@ -61,7 +61,7 @@ public:
 	 * @param InImporterInfo	Asset importer info
 	 * @param InDescription		Description
 	 */
-	void AddFormat( const CAssetFactory::SAssetImporterInfo& InImporterInfo, const std::wstring& InDescription );
+	void AddFormat( const CAssetFactory::AssetImporterInfo& InImporterInfo, const std::wstring& InDescription );
 
 	/**
 	 * @brief Add format
@@ -71,14 +71,14 @@ public:
 	 */
 	FORCEINLINE void AddFormat( const std::wstring& InExtension, const std::wstring& InDescription )
 	{
-		AddFormat( SFileNameFilter( InExtension, InDescription ) );
+		AddFormat( FileNameFilter( InExtension, InDescription ) );
 	}
 
 	/**
 	 * @brief Add format
 	 * @param InFilerInfo		File name's filer info
 	 */
-	FORCEINLINE void AddFormat( const SFileNameFilter& InFilerInfo )
+	FORCEINLINE void AddFormat( const FileNameFilter& InFilerInfo )
 	{
 		fileNameFilters.push_back( InFilerInfo );
 	}
@@ -170,7 +170,7 @@ public:
 	 * @brief Get array of formats
 	 * @return Return array of formats
 	 */
-	FORCEINLINE const std::vector<SFileNameFilter>& GetFormats() const
+	FORCEINLINE const std::vector<FileNameFilter>& GetFormats() const
 	{
 		return fileNameFilters;
 	}
@@ -190,14 +190,14 @@ private:
 	std::wstring					directoryPath;		/**< Initial path to directory */
 	std::wstring					fileName;			/**< Initial file name */
 	std::wstring					defaultExtension;	/**< Default file extension */
-	std::vector<SFileNameFilter>	fileNameFilters;	/**< Array of file name filters */
+	std::vector<FileNameFilter>	fileNameFilters;	/**< Array of file name filters */
 };
 
 /**
  * @ingroup WorldEd
  * @brief Result of file open operation
  */
-struct SOpenFileDialogResult
+struct OpenFileDialogResult
 {
 	std::vector<std::wstring>				files;				/**< Selected files */
 };
@@ -206,9 +206,9 @@ struct SOpenFileDialogResult
  * @ingroup WorldEd
  * @brief Result of file save operation
  */
-struct SSaveFileDialogResult
+struct SaveFileDialogResult
 {
-	CFileDialogSetup::SFileNameFilter		selectedFormat;		/**< Selected format */
+	CFileDialogSetup::FileNameFilter		selectedFormat;		/**< Selected format */
 	std::vector<std::wstring>				files;				/**< Output files */
 };
 
@@ -221,7 +221,7 @@ struct SSaveFileDialogResult
  * @param OutResult		File dialog result
  * @return Return TRUE when user clicks OK, otherwise will returning FALSE
  */
-bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResult& OutResult );
+bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, OpenFileDialogResult& OutResult );
 
 /**
  * @ingroup WorldEd
@@ -232,6 +232,6 @@ bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogRes
  * @param OutResult		File dialog result
  * @return Return TRUE when user clicks OK, otherwise will returning FALSE
  */
-bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogResult& OutResult );
+bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SaveFileDialogResult& OutResult );
 
 #endif // !FILEDIALOG_H

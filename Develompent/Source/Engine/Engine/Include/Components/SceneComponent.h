@@ -285,8 +285,8 @@ private:
 	Vector											relativeLocation;		/**< Location of the component relative to its parent */
 	CRotator										relativeRotation;		/**< Rotation of the component relative to its parent */
 	Vector											relativeScale;			/**< Non-uniform scaling of the component relative to its parent */
-	SRotationConversionCache						worldRotationCache;		/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with GetComponentTransform().GetRotation() */	
-	SRotationConversionCache						relativeRotationCache;	/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with 'relativeRotation' */
+	RotationConversionCache						worldRotationCache;		/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with GetComponentTransform().GetRotation() */	
+	RotationConversionCache						relativeRotationCache;	/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with 'relativeRotation' */
 	CTransform										componentToWorld;		/**< Current transform of the component, relative to the world */
 	std::vector<TRefCountPtr<CSceneComponent>>		attachChildren;			/**< List of child SceneComponents that are attached to us */
 };

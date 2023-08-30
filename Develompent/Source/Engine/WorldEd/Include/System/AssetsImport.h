@@ -158,7 +158,7 @@ public:
 	 * @brief Set import settings
 	 * @param InImportSettings		New import settings	
 	 */
-	FORCEINLINE static void SetImportSettings( const CStaticMeshImportSettingsDialog::SImportSettings& InImportSettings )
+	FORCEINLINE static void SetImportSettings( const CStaticMeshImportSettingsDialog::ImportSettings& InImportSettings )
 	{
 		importSettings = InImportSettings;
 	}
@@ -167,12 +167,12 @@ private:
 	/**
 	 * @brief Container for Assimp mesh
 	 */
-	struct SAiMesh
+	struct AiMesh
 	{
 		/**
 		 * @brief Constructor
 		 */
-		FORCEINLINE SAiMesh()
+		FORCEINLINE AiMesh()
 		{}
 
 		/**
@@ -181,7 +181,7 @@ private:
 		 * @param InTransformation	Transform matrix
 		 * @param InMesh			Pointer to Assimp mesh
 		 */
-		FORCEINLINE SAiMesh( const aiMatrix4x4& InTransformation, struct aiMesh* InMesh )
+		FORCEINLINE AiMesh( const aiMatrix4x4& InTransformation, struct aiMesh* InMesh )
 			: transformation( InTransformation )
 			, mesh( InMesh )
 		{}
@@ -193,12 +193,12 @@ private:
 	/**
 	 * @brief Mesh data
 	 */
-	struct SMeshData
+	struct MeshData
 	{
 		std::wstring							name;			/**< Mesh name */
-		std::vector<SStaticMeshVertexType>		verteces;		/**< Array of mesh verteces */
+		std::vector<StaticMeshVertexType>		verteces;		/**< Array of mesh verteces */
 		std::vector<uint32>						indeces;		/**< Array of indeces */
-		SStaticMeshSurface						surface;		/**< Mesh surface */
+		StaticMeshSurface						surface;		/**< Mesh surface */
 		TAssetHandle<CMaterial>					material;		/**< Material */
 		uint32									materialId;		/**< Assimp material Id */
 	};
@@ -206,7 +206,7 @@ private:
 	/**
 	 * @brief Typedef container AiMeshes
 	 */
-	typedef std::unordered_map<uint32, std::vector<SAiMesh>>			AiMeshesMap_t;
+	typedef std::unordered_map<uint32, std::vector<AiMesh>>			AiMeshesMap_t;
 
 	/**
 	 * @brief Fill array meshes from Assimp root scene
@@ -226,7 +226,7 @@ private:
 	 * @param OutError		Output error message
 	 * @return Return TRUE if parsed succussed, otherwise will return FALSE
 	 */
-	static bool ParseMeshes( const std::wstring& InPath, std::vector<SMeshData>& OutResult, std::wstring& OutError );
+	static bool ParseMeshes( const std::wstring& InPath, std::vector<MeshData>& OutResult, std::wstring& OutError );
 
 	/**
 	 * @brief Change axis up in vector
@@ -260,7 +260,7 @@ private:
 		}
 	}
 
-	static CStaticMeshImportSettingsDialog::SImportSettings		importSettings;		/**< Import settings */
+	static CStaticMeshImportSettingsDialog::ImportSettings		importSettings;		/**< Import settings */
 };
 
 #endif // !ASSETSIMPORT_H

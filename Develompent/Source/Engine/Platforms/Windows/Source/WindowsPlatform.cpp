@@ -315,7 +315,7 @@ void Sys_ShowFileInExplorer( const std::wstring& InPath )
 Sys_ShowOpenFileDialog
 ==================
 */
-bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogResult& OutResult )
+bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, OpenFileDialogResult& OutResult )
 {
 	OPENFILENAME		fileDialogSettings;
 	Sys_Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
@@ -334,7 +334,7 @@ bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogRes
 
 	// Format filters
 	std::wstring		filterBuffer;
-	const std::vector<CFileDialogSetup::SFileNameFilter>		fileNameFilters = InSetup.GetFormats();
+	const std::vector<CFileDialogSetup::FileNameFilter>		fileNameFilters = InSetup.GetFormats();
 	if ( fileNameFilters.empty() )
 	{
 		fileDialogSettings.nFilterIndex		= 0;
@@ -345,7 +345,7 @@ bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogRes
 		std::wstring		allSupportedFormats;
 		for ( uint32 index = 0, count = fileNameFilters.size(); index < count; ++index )
 		{
-			const CFileDialogSetup::SFileNameFilter&	fileNameFilter = fileNameFilters[index];
+			const CFileDialogSetup::FileNameFilter&	fileNameFilter = fileNameFilters[index];
 			if ( index > 0 )
 			{
 				allSupportedFormats += TEXT( "; " );
@@ -449,7 +449,7 @@ bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, SOpenFileDialogRes
 Sys_ShowSaveFileDialog
 ==================
 */
-bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogResult& OutResult )
+bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SaveFileDialogResult& OutResult )
 {
 	OPENFILENAME		fileDialogSettings;
 	Sys_Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
@@ -467,7 +467,7 @@ bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogRes
 
 	// Format filters
 	std::wstring		filterBuffer;
-	const std::vector<CFileDialogSetup::SFileNameFilter>		fileNameFilters = InSetup.GetFormats();
+	const std::vector<CFileDialogSetup::FileNameFilter>		fileNameFilters = InSetup.GetFormats();
 	if ( fileNameFilters.empty() )
 	{
 		fileDialogSettings.nFilterIndex		= 0;
@@ -478,7 +478,7 @@ bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SSaveFileDialogRes
 		std::wstring		allSupportedFormats;
 		for ( uint32 index = 0, count = fileNameFilters.size(); index < count; ++index )
 		{
-			const CFileDialogSetup::SFileNameFilter&	fileNameFilter = fileNameFilters[index];
+			const CFileDialogSetup::FileNameFilter&	fileNameFilter = fileNameFilters[index];
 			if ( index > 0 )
 			{
 				allSupportedFormats += TEXT( "; " );

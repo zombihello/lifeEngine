@@ -27,7 +27,7 @@
  * @ingroup Engine
  * Surface in static mesh
  */
-struct SStaticMeshSurface
+struct StaticMeshSurface
 {
 	uint32			materialID;				/**< Material ID */
 	uint32			baseVertexIndex;		/**< First index vertex in vertex buffer */
@@ -45,7 +45,7 @@ public:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef CMeshDrawList<CMeshDrawingPolicy>::SDrawingPolicyLink						DrawingPolicyLink_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy>::DrawingPolicyLink						DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
@@ -56,7 +56,7 @@ public:
 	/**
 	 * @brief Typedef of hit proxy drawing policy link
 	 */
-	typedef CMeshDrawList<CHitProxyDrawingPolicy, false>::SDrawingPolicyLink			HitProxyDrawingPolicyLink_t;
+	typedef CMeshDrawList<CHitProxyDrawingPolicy, false>::DrawingPolicyLink			HitProxyDrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
@@ -67,7 +67,7 @@ public:
 	/**
 	 * @brief Typedef of depth drawing policy link
 	 */
-	typedef CMeshDrawList<CDepthDrawingPolicy>::SDrawingPolicyLink						DepthDrawingPolicyLink_t;
+	typedef CMeshDrawList<CDepthDrawingPolicy>::DrawingPolicyLink						DepthDrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on depth drawing policy link in scene
@@ -77,12 +77,12 @@ public:
 	/**
 	 * @brief Elements of drawing policy link to SDG
 	 */
-	struct SElementDrawingPolicyLink
+	struct ElementDrawingPolicyLink
 	{
 		/**
 		 * @brief Constructor
 		 */
-		FORCEINLINE SElementDrawingPolicyLink()
+		FORCEINLINE ElementDrawingPolicyLink()
 			: bDirty( false )
 			, overrideHash( 0 )
 		{}
@@ -90,7 +90,7 @@ public:
 		bool											bDirty;						/**< Is dirty this element */
 		std::vector<DrawingPolicyLinkRef_t>				drawingPolicyLinks;			/**< Array of reference to drawing policy link in scene */
 		std::vector<DepthDrawingPolicyLinkRef_t>		depthDrawingPolicyLinks;	/**< Array of reference to depth drawing policy link in scene */
-		std::vector<const SMeshBatch*>					meshBatchLinks;				/**< Array of references to mesh batch in drawing policy link */
+		std::vector<const MeshBatch*>					meshBatchLinks;				/**< Array of references to mesh batch in drawing policy link */
 		uint64											overrideHash;				/**< Hash of overrided segments (custom materials) */
 
 #if ENABLE_HITPROXY
@@ -123,7 +123,7 @@ public:
 	 * @param[in] InSurfaces Array surfaces in mesh
 	 * @param[in] InMaterials Array materials in mesh
 	 */
-	void SetData( const std::vector< SStaticMeshVertexType >& InVerteces, const std::vector< uint32 >& InIndeces, const std::vector< SStaticMeshSurface >& InSurfaces, const std::vector< TAssetHandle<CMaterial> >& InMaterials );
+	void SetData( const std::vector< StaticMeshVertexType >& InVerteces, const std::vector< uint32 >& InIndeces, const std::vector< StaticMeshSurface >& InSurfaces, const std::vector< TAssetHandle<CMaterial> >& InMaterials );
 
 	/**
 	 * Set material
@@ -155,7 +155,7 @@ public:
 	 * Get surfaces
 	 * @return Return array surfaces
 	 */
-	FORCEINLINE const std::vector< SStaticMeshSurface > GetSurfaces() const
+	FORCEINLINE const std::vector< StaticMeshSurface > GetSurfaces() const
 	{
 		return surfaces;
 	}
@@ -216,7 +216,7 @@ public:
 	 * @brief Get array of verteces
 	 * @return Return array of verteces
 	 */
-	FORCEINLINE const CBulkData<SStaticMeshVertexType>& GetVerteces() const
+	FORCEINLINE const CBulkData<StaticMeshVertexType>& GetVerteces() const
 	{
 		return verteces;
 	}
@@ -259,7 +259,7 @@ public:
 	 * @param InSDG		Scene depth group
 	 * @return Return pointer to drawing policy link for SDG
 	 */
-	TSharedPtr<SElementDrawingPolicyLink> LinkDrawList( SSceneDepthGroup& InSDG );
+	TSharedPtr<ElementDrawingPolicyLink> LinkDrawList( SceneDepthGroup& InSDG );
 
 	/**
 	 * @brief Adds a drawing policy link with override materials in SDGs
@@ -269,7 +269,7 @@ public:
 	 * @param InOverrideMaterials	Array of override materials
 	 * @return Return pointer to drawing policy link for SDG
 	 */
-	TSharedPtr<SElementDrawingPolicyLink> LinkDrawList( SSceneDepthGroup& InSDG, const std::vector< TAssetHandle<CMaterial> >& InOverrideMaterials );
+	TSharedPtr<ElementDrawingPolicyLink> LinkDrawList( SceneDepthGroup& InSDG, const std::vector< TAssetHandle<CMaterial> >& InOverrideMaterials );
 
 	/**
 	 * @brief Removes a drawing policy link from SDGs
@@ -279,7 +279,7 @@ public:
 	 * @param InSDG					Scene depth group
 	 * @param InDrawingPolicyLink	Drawing policy link to delete
 	 */
-	void UnlinkDrawList( SSceneDepthGroup& InSDG, TSharedPtr<SElementDrawingPolicyLink>& InDrawingPolicyLink );
+	void UnlinkDrawList( SceneDepthGroup& InSDG, TSharedPtr<ElementDrawingPolicyLink>& InDrawingPolicyLink );
 
 protected:
 	/**
@@ -300,31 +300,31 @@ private:
 	/**
 	 * @brief Key for containing element drawing policy link in map
 	 */
-	struct SElementKeyDrawingPolicyLink
+	struct ElementKeyDrawingPolicyLink
 	{
 		/**
 		 * @brief Hash function for STL containers
 		 */
-		struct SHashFunction
+		struct HashFunction
 		{
 			/**
 			 * @brief Calculate hash
 			 * @param InElementKey	Element key of drawing policy link
 			 */
-			FORCEINLINE std::size_t operator()( const SElementKeyDrawingPolicyLink& InElementKey ) const
+			FORCEINLINE std::size_t operator()( const ElementKeyDrawingPolicyLink& InElementKey ) const
 			{
 				return Sys_MemFastHash( &( *InElementKey.SDG ), InElementKey.overrideHash );
 			}
 		};
 
-		SSceneDepthGroup*		SDG;			/**< Scene depth group */
+		SceneDepthGroup*		SDG;			/**< Scene depth group */
 		uint64					overrideHash;	/**< Hash of overrided segments (custom materials) */
 
 		/**
 		 * @brief Override operator ==
 		 * @return Return TRUE if two values is equal
 		 */
-		FORCEINLINE bool operator==( const SElementKeyDrawingPolicyLink& InRight ) const
+		FORCEINLINE bool operator==( const ElementKeyDrawingPolicyLink& InRight ) const
 		{
 			return SDG == InRight.SDG && overrideHash == InRight.overrideHash;
 		}
@@ -333,7 +333,7 @@ private:
 	/**
 	 * @brief Typedef of element drawing policy map
 	 */
-	typedef std::unordered_map< SElementKeyDrawingPolicyLink, TSharedPtr<SElementDrawingPolicyLink>, SElementKeyDrawingPolicyLink::SHashFunction >		ElementDrawingPolicyMap_t;
+	typedef std::unordered_map< ElementKeyDrawingPolicyLink, TSharedPtr<ElementDrawingPolicyLink>, ElementKeyDrawingPolicyLink::HashFunction >		ElementDrawingPolicyMap_t;
 
 	/**
 	 * @brief Create element drawing policy link
@@ -344,7 +344,7 @@ private:
 	 * @param InOverrideMaterials	Optional. Pointer to array of override materials
 	 * @return Return pointer to drawing policy link for SDG
 	 */
-	TSharedPtr<SElementDrawingPolicyLink> MakeDrawingPolicyLink( SSceneDepthGroup& InSDG, uint64 InOverrideHash = 0, std::vector< TAssetHandle<CMaterial> >* InOverrideMaterials = nullptr );
+	TSharedPtr<ElementDrawingPolicyLink> MakeDrawingPolicyLink( SceneDepthGroup& InSDG, uint64 InOverrideHash = 0, std::vector< TAssetHandle<CMaterial> >* InOverrideMaterials = nullptr );
 
 	/**
 	 * @brief Mark dirty all element drawing polices
@@ -365,8 +365,8 @@ private:
 
 	TRefCountPtr< CStaticMeshVertexFactory >	vertexFactory;				/**< Vertex factory */
 	std::vector< TAssetHandle<CMaterial> >		materials;					/**< Array materials in mesh */
-	std::vector< SStaticMeshSurface >			surfaces;					/**< Array surfaces in mesh */
-	CBulkData< SStaticMeshVertexType >			verteces;					/**< Array verteces to create RHI vertex buffer */
+	std::vector< StaticMeshSurface >			surfaces;					/**< Array surfaces in mesh */
+	CBulkData< StaticMeshVertexType >			verteces;					/**< Array verteces to create RHI vertex buffer */
 	CBulkData< uint32 >							indeces;					/**< Array indeces to create RHI index buffer */
 	VertexBufferRHIRef_t						vertexBufferRHI;			/**< RHI vertex buffer */
 	IndexBufferRHIRef_t							indexBufferRHI;				/**< RHI index buffer */
@@ -378,15 +378,15 @@ private:
 // Serialization
 //
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, SStaticMeshSurface& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, StaticMeshSurface& InValue )
 {
-	InArchive.Serialize( &InValue, sizeof( SStaticMeshSurface ) );
+	InArchive.Serialize( &InValue, sizeof( StaticMeshSurface ) );
 	return InArchive;
 }
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SStaticMeshSurface& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const StaticMeshSurface& InValue )
 {
-	InArchive.Serialize( ( SStaticMeshSurface* ) &InValue, sizeof( SStaticMeshSurface ) );
+	InArchive.Serialize( ( StaticMeshSurface* ) &InValue, sizeof( StaticMeshSurface ) );
 	return InArchive;
 }
 

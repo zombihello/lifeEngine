@@ -68,7 +68,7 @@ public:
 	 *
 	 * @param InWindowEvent			Window event
 	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) {}
+	virtual void ProcessEvent( struct WindowEvent& InWindowEvent ) {}
 
 	/**
 	 * @brief Get viewport

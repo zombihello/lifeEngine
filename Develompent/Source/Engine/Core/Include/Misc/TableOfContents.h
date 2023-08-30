@@ -54,8 +54,8 @@ public:
 	 */
 	FORCEINLINE void AddEntry( const CGuid& InGUID, const std::wstring& InName, const std::wstring& InPath )
 	{
-		nameEntries.insert( std::make_pair( InName, STOCEntry{ InName, InPath } ) );
-		guidEntries.insert( std::make_pair( InGUID, STOCEntry{ InName, InPath } ) );
+		nameEntries.insert( std::make_pair( InName, TOCEntry{ InName, InPath } ) );
+		guidEntries.insert( std::make_pair( InGUID, TOCEntry{ InName, InPath } ) );
 	}
 
 	/**
@@ -145,14 +145,14 @@ private:
 	/**
 	 * TOC entry
 	 */
-	struct STOCEntry
+	struct TOCEntry
 	{
 		std::wstring		name;		/**< Name of entry */
 		std::wstring		path;		/**< Path to entry */
 	};
 
-	std::unordered_map< std::wstring, STOCEntry >					nameEntries;			/**< Entries of table content. Key - Name of the package, Item - Path to package */
-	std::unordered_map< CGuid, STOCEntry, CGuid::SGuidKeyFunc >		guidEntries;			/**< Entries of table content. Key - GUID of the package, Item - Path to package */
+	std::unordered_map< std::wstring, TOCEntry >					nameEntries;			/**< Entries of table content. Key - Name of the package, Item - Path to package */
+	std::unordered_map< CGuid, TOCEntry, CGuid::GuidKeyFunc >		guidEntries;			/**< Entries of table content. Key - GUID of the package, Item - Path to package */
 };
 
 #endif // !TABLEOFCONTENTS_H

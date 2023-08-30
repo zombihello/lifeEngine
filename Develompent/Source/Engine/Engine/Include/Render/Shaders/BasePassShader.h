@@ -35,7 +35,7 @@ public:
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
+	virtual void Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem ) override;
 
 	/**
 	 * @brief Set the constant shader parameters
@@ -56,7 +56,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override;
 
 #if WITH_EDITOR
 	/**
@@ -86,7 +86,7 @@ public:
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override;
+	virtual void Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem ) override;
 
 	/**
 	 * @brief Set the constant shader parameters

@@ -27,7 +27,7 @@
  * @ingroup WorldEd
  * @brief Info about TMX tileset
  */
-struct STMXTileset
+struct TMXTileset
 {
 	uint32							firstGID;		/**< First ID of tile in set */
 	uint32							lastGID;		/**< Last ID of tile in set */
@@ -89,7 +89,7 @@ public:
 		std::wstring		packageName;
 		std::wstring		assetName;
 		EAssetType			assetType;
-		SResourceInfo		resourceInfo;
+		ResourceInfo		resourceInfo;
 
 		ParseReferenceToAsset( InAssetRef, packageName, assetName, assetType );
 		if ( assetType != AT_AudioBank )
@@ -126,7 +126,7 @@ public:
 		std::wstring		packageName;
 		std::wstring		assetName;
 		EAssetType			assetType;
-		SResourceInfo		resourceInfo;
+		ResourceInfo		resourceInfo;
 
 		ParseReferenceToAsset( InAssetRef, packageName, assetName, assetType );
 		if ( assetType != AT_PhysicsMaterial )
@@ -283,7 +283,7 @@ private:
 	/**
 	 * Struct info about resource
 	 */
-	struct SResourceInfo
+	struct ResourceInfo
 	{
 		std::wstring		packageName;		/**< Name of package */
 		std::wstring		filename;			/**< Name of file */
@@ -294,7 +294,7 @@ private:
 	/**
 	 * Struct for containing of extensions for all resource type
 	 */
-	struct SExtensionInfo
+	struct ExtensionInfo
 	{
 		std::wstring		package;		/**< Package extension */
 		std::wstring		map;			/**< Map extension */
@@ -303,7 +303,7 @@ private:
 	/**
 	 * Typedef map of resources
 	 */
-	typedef std::unordered_map< std::wstring, std::unordered_map< std::wstring, SResourceInfo > >		ResourceMap_t;
+	typedef std::unordered_map< std::wstring, std::unordered_map< std::wstring, ResourceInfo > >		ResourceMap_t;
 
 	/**
 	 * Is supported extension
@@ -332,7 +332,7 @@ private:
 	 * @param OutTilesets Output loaded tilesets
 	 * @return Return true if tileset is seccussed loaded, else returning false
 	 */
-	bool LoadTMXTilests( const tmx::Map& InTMXMap, std::vector< STMXTileset >& OutTilesets );
+	bool LoadTMXTilests( const tmx::Map& InTMXMap, std::vector< TMXTileset >& OutTilesets );
 
 	/**
 	 * @brief Spawn tiles in world
@@ -340,7 +340,7 @@ private:
 	 * @param InTMXMap TMX map
 	 * @param InTilesets Array of tilesets
 	 */
-	void SpawnTilesInWorld( const tmx::Map& InTMXMap, const std::vector< STMXTileset >& InTilesets );
+	void SpawnTilesInWorld( const tmx::Map& InTMXMap, const std::vector< TMXTileset >& InTilesets );
 
 	/**
 	 * @brief Spawn actors in world
@@ -348,7 +348,7 @@ private:
 	 * @param InTMXMap TMX map
 	 * @param InTilesets Array of tilesets
 	 */
-	void SpawnActorsInWorld( const tmx::Map& InTMXMap, const std::vector< STMXTileset >& InTileset );
+	void SpawnActorsInWorld( const tmx::Map& InTMXMap, const std::vector< TMXTileset >& InTileset );
 
 	/**
 	 * Find tileset by ID tile
@@ -359,7 +359,7 @@ private:
 	 * @param OutTextureRect Output texture rect for InIDTile
 	 * @return Return true if tileset is finded, else returning false
 	 */
-	bool FindTileset( const std::vector< STMXTileset >& InTilesets, uint32 InIDTile, STMXTileset& OutTileset, RectFloat_t& OutTextureRect ) const;
+	bool FindTileset( const std::vector< TMXTileset >& InTilesets, uint32 InIDTile, TMXTileset& OutTileset, RectFloat_t& OutTextureRect ) const;
 
 	/**
 	 * Indexing all resources in engine and game. Recursive method
@@ -384,7 +384,7 @@ private:
 	 * @param InMapInfo Info about resource
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookMap( const SResourceInfo& InMapInfo );
+	bool CookMap( const ResourceInfo& InMapInfo );
 
 	/**
 	 * Cook material
@@ -393,7 +393,7 @@ private:
 	 * @param OutMaterial Output cooked material
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookMaterial( const SResourceInfo& InMaterialInfo, TAssetHandle<CMaterial>& OutMaterial );
+	bool CookMaterial( const ResourceInfo& InMaterialInfo, TAssetHandle<CMaterial>& OutMaterial );
 
 	/**
 	 * Cook texture 2D
@@ -402,7 +402,7 @@ private:
 	 * @param OutTexture2D Output cooked texture
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookTexture2D( const SResourceInfo& InTexture2DInfo, TAssetHandle<CTexture2D>& OutTexture2D );
+	bool CookTexture2D( const ResourceInfo& InTexture2DInfo, TAssetHandle<CTexture2D>& OutTexture2D );
 
 	/**
 	 * Cook audio bank
@@ -411,7 +411,7 @@ private:
 	 * @param OutAudioBank Output cooked audio bank
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookAudioBank( const SResourceInfo& InAudioBankInfo, TAssetHandle<CAudioBank>& OutAudioBank );
+	bool CookAudioBank( const ResourceInfo& InAudioBankInfo, TAssetHandle<CAudioBank>& OutAudioBank );
 
 	/**
 	 * Cook physics material
@@ -420,7 +420,7 @@ private:
 	 * @param OutPhysMaterial Output cooked physics material
 	 * @return Return true if seccussed cook, else returning false
 	 */
-	bool CookPhysMaterial( const SResourceInfo& InPhysMaterialInfo, TAssetHandle<CPhysicsMaterial>& OutPhysMaterial );
+	bool CookPhysMaterial( const ResourceInfo& InPhysMaterialInfo, TAssetHandle<CPhysicsMaterial>& OutPhysMaterial );
 
 	/**
 	 * Insert resource to list
@@ -430,7 +430,7 @@ private:
 	 * @param InFilename Filename
 	 * @param InResourceInfo Resource info
 	 */
-	void InsertResourceToList( ResourceMap_t& InOutResourceMap, const std::wstring& InPackageName, const std::wstring& InFilename, const SResourceInfo& InResourceInfo );
+	void InsertResourceToList( ResourceMap_t& InOutResourceMap, const std::wstring& InPackageName, const std::wstring& InFilename, const ResourceInfo& InResourceInfo );
 
 	/**
 	 * Find resource
@@ -441,7 +441,7 @@ private:
 	 * @param OutResourceInfo Output founded resource
 	 * @return Return true if resource is founded, else returning false
 	 */
-	FORCEINLINE bool FindResource( const ResourceMap_t& InResourceMap, const std::wstring& InPackageName, const std::wstring& InAssetName, SResourceInfo& OutResourceInfo ) const
+	FORCEINLINE bool FindResource( const ResourceMap_t& InResourceMap, const std::wstring& InPackageName, const std::wstring& InAssetName, ResourceInfo& OutResourceInfo ) const
 	{
 		auto		itPackage = InResourceMap.find( InPackageName );
 		if ( itPackage == InResourceMap.end() )
@@ -466,14 +466,14 @@ private:
 	 * @param InAsset Asset for save
 	 * @return Return true if package saved seccussed, else return false
 	 */
-	bool SaveToPackage( const SResourceInfo& InResourceInfo, const TAssetHandle<CAsset>& InAsset );
+	bool SaveToPackage( const ResourceInfo& InResourceInfo, const TAssetHandle<CAsset>& InAsset );
 
-	SExtensionInfo											extensionInfo;			/**< Info about extensions of output formats */
+	ExtensionInfo											extensionInfo;			/**< Info about extensions of output formats */
 	ResourceMap_t											texturesMap;			/**< All textures */
 	ResourceMap_t											materialsMap;			/**< All materials */
 	ResourceMap_t											audiosMap;				/**< All audios */
 	ResourceMap_t											physMaterialsMap;		/**< All physics materials */
-	std::unordered_map< std::wstring, SResourceInfo >		mapsMap;				/**< All maps */
+	std::unordered_map< std::wstring, ResourceInfo >		mapsMap;				/**< All maps */
 	CShaderCache											shaderCache;			/**< Cooked shader cache */
 	EShaderPlatform											cookedShaderPlatform;	/**< Cooked shader platform */
 	EPlatformType											cookedPlatform;			/**< Cooked platform */

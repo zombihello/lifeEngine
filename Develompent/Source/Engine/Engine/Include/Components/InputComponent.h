@@ -118,7 +118,7 @@ private:
 	/**
 	 * Struct description of input action
 	 */
-	struct SInputAction
+	struct InputAction
 	{
 		std::wstring					name;								/**< Name of action */
 		std::vector< EButtonCode >		buttons;							/**< Buttons for trigger action */
@@ -128,7 +128,7 @@ private:
 	/**
 	 * Struct description of input axis
 	 */
-	struct SInputAxis
+	struct InputAxis
 	{
 		/**
 		 * Typedef of pair EButtonCode and float (scale)
@@ -143,12 +143,12 @@ private:
 	/**
 	 * Typedef of input action map
 	 */
-	typedef std::unordered_map< std::wstring, SInputAction >		InputActionMap_t;
+	typedef std::unordered_map< std::wstring, InputAction >		InputActionMap_t;
 
 	/**
 	 * Typedef of input axis map
 	 */
-	typedef std::unordered_map< std::wstring, SInputAxis >			InputAxisMap_t;
+	typedef std::unordered_map< std::wstring, InputAxis >			InputAxisMap_t;
 
 	InputActionMap_t			inputActionMap;		/**< Input action map */
 	InputAxisMap_t				inputAxisMap;		/**< Input axis map */

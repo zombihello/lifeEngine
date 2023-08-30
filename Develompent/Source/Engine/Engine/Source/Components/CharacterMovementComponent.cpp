@@ -67,7 +67,7 @@ void CCharacterMovementComponent::TickComponent( float InDeltaTime )
 	// Check if character on ground
 	Vector		startRay	= GetOwner()->GetActorLocation();
 	Vector		endRay		= startRay + GetOwner()->GetActorUpVector() * -1.f;
-	SHitResult	hitResult;
+	HitResult	hitResult;
 	bool		bResult		= g_World->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic );
 	if ( bResult && !bOnGround )
 	{
@@ -113,7 +113,7 @@ bool CCharacterMovementComponent::IsCanWalk( const Vector& InWorldDirection, flo
 {
 	Vector		startRay = GetOwner()->GetActorLocation();
 	Vector		endRay = startRay + InWorldDirection * InScale;
-	SHitResult	hitResult;
+	HitResult	hitResult;
 	return !g_World->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic );
 }
 

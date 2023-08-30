@@ -76,15 +76,15 @@ uint32 Sys_GetNumSampleBytes( ESampleFormat InSampleFormat );
  * @ingroup Audio
  * @brief Struct of descriptrion listener spatial
  */
-struct SListenerSpatial
+struct ListenerSpatial
 {
 	/**
 	 * @brief Constructor
 	 */
-	SListenerSpatial()
-		: location( SMath::vectorZero )
-		, forward( SMath::vectorForward )
-		, up( SMath::vectorUp )
+	ListenerSpatial()
+		: location( Math::vectorZero )
+		, forward( Math::vectorForward )
+		, up( Math::vectorUp )
 	{}
 
 	Vector		location;	/**< Location in world */
@@ -162,7 +162,7 @@ public:
 	 * @brief Get listener spatial
 	 * @return Return listener spatial
 	 */
-	FORCEINLINE const SListenerSpatial& GetListenerSpatial() const
+	FORCEINLINE const ListenerSpatial& GetListenerSpatial() const
 	{
 		return listener;
 	}
@@ -215,7 +215,7 @@ private:
 	bool							bIsMuted;				/**< Is muted device */
 	class ALCdevice*				alDevice;				/**< OpenAL device */
 	class ALCcontext*				alContext;				/**< OpenAL context */
-	SListenerSpatial				listener;				/**< Listener */
+	ListenerSpatial				listener;				/**< Listener */
 	float							globalVolume;			/**< Global volume */
 	float							platformAudioHeadroom;	/**< Defines a platform-specific volume headroom (in dB) for audio to provide better platform consistency with respect to volume levels */
 	mutable COnAudioDeviceMuted		onAudioDeviceMuted;		/**< Delegate called when audio device muted/unmuted */

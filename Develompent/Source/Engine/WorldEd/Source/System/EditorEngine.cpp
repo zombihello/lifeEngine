@@ -260,20 +260,20 @@ void CEditorEngine::Shutdown()
 CEditorEngine::ProcessEvent
 ==================
 */
-void CEditorEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CEditorEngine::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	Super::ProcessEvent( InWindowEvent );
 
 	switch ( InWindowEvent.type )
 	{
-	case SWindowEvent::T_WindowClose:
+	case WindowEvent::T_WindowClose:
 		if ( InWindowEvent.events.windowClose.windowId == g_Window->GetID() )
 		{
 			g_IsRequestingExit = true;
 		}
 		break;
 
-	case SWindowEvent::T_WindowResize:
+	case WindowEvent::T_WindowResize:
 		if ( InWindowEvent.events.windowResize.windowId == g_Window->GetID() )
 		{
 			viewports[0]->Update( false, InWindowEvent.events.windowResize.width, InWindowEvent.events.windowResize.height, g_Window->GetHandle() );
@@ -308,7 +308,7 @@ void CEditorEngine::NewMap()
 	g_World->CleanupWorld();
 	g_PackageManager->GarbageCollector();
 	
-	SEditorDelegates::onEditorCreatedNewMap.Broadcast();
+	EditorDelegates::onEditorCreatedNewMap.Broadcast();
 }
 
 /*
@@ -326,7 +326,7 @@ bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 	}
 	else
 	{
-		SEditorDelegates::onEditorLoadedMap.Broadcast();
+		EditorDelegates::onEditorLoadedMap.Broadcast();
 	}
 
 	return true;
@@ -353,7 +353,7 @@ bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 	g_World->Serialize( *arWorld );
 	delete arWorld;
 
-	SEditorDelegates::onEditorSavedMap.Broadcast();
+	EditorDelegates::onEditorSavedMap.Broadcast();
 	return true;
 }
 

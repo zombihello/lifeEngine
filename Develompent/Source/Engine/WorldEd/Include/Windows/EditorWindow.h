@@ -59,10 +59,10 @@ private:
 	void UpdateWindowTitle();
 
 	ImGuiDockNodeFlags												dockspaceFlags;					/**< ImGui dockspace flags */
-	SEditorDelegates::COnEditorCreatedNewMap::DelegateType_t*		editorCreatedNewMapDelegate;	/**< Delegate of created new map */
-	SEditorDelegates::COnEditorLoadedMap::DelegateType_t*			editorLoadedMapDelegate;		/**< Delegate of loaded map */
-	SEditorDelegates::COnEditorSavedMap::DelegateType_t*			editorSavedMapDelegate;			/**< Delegate of saved map */
-	SEditorDelegates::COnEditorMapMarkedDirty::DelegateType_t*		editorMapMarkedDirtyDelegate;	/**< Delegate of map marked dirty */
+	EditorDelegates::COnEditorCreatedNewMap::DelegateType_t*		editorCreatedNewMapDelegate;	/**< Delegate of created new map */
+	EditorDelegates::COnEditorLoadedMap::DelegateType_t*			editorLoadedMapDelegate;		/**< Delegate of loaded map */
+	EditorDelegates::COnEditorSavedMap::DelegateType_t*			editorSavedMapDelegate;			/**< Delegate of saved map */
+	EditorDelegates::COnEditorMapMarkedDirty::DelegateType_t*		editorMapMarkedDirtyDelegate;	/**< Delegate of map marked dirty */
 };
 
 #endif // !EDITORWINDOW_H

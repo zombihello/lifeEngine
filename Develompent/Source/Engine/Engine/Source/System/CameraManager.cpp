@@ -38,7 +38,7 @@ void CCameraManager::EndPlay()
 CCameraManager::ProcessEvent
 ==================
 */
-void CCameraManager::ProcessEvent( struct SWindowEvent &InWindowEvent )
+void CCameraManager::ProcessEvent( struct WindowEvent &InWindowEvent )
 {
 	if ( !activeCamera )
 	{
@@ -47,7 +47,7 @@ void CCameraManager::ProcessEvent( struct SWindowEvent &InWindowEvent )
 
 	switch ( InWindowEvent.type )
 	{
-	case SWindowEvent::T_WindowResize:
+	case WindowEvent::T_WindowResize:
 		if ( activeCamera && activeCamera->IsAutoViewData() )
 		{
 			activeCamera->SetAspectRatio( ( float )InWindowEvent.events.windowResize.width / InWindowEvent.events.windowResize.height );

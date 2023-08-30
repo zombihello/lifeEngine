@@ -48,7 +48,7 @@ private:
 	 * @param InSceneView			Scene view
 	 * @param InSDG					Scene depth group
 	 */
-	void DrawGridSection( int32 InViewportLocX, int32 InViewportGridY, Vector& InStart, Vector& InEnd, float& InStartX, float& InEndX, int32 InAxis, bool InIsAlphaCase, const class CSceneView* InSceneView, struct SSceneDepthGroup& InSDG );
+	void DrawGridSection( int32 InViewportLocX, int32 InViewportGridY, Vector& InStart, Vector& InEnd, float& InStartX, float& InEndX, int32 InAxis, bool InIsAlphaCase, const class CSceneView* InSceneView, struct SceneDepthGroup& InSDG );
 
 	bool		bDrawColoredOrigin;			/**< Is need draw colored origins */
 	bool		bDrawWorldBox;				/**< Is need draw world box */

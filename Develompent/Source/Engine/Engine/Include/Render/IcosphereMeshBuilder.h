@@ -62,7 +62,7 @@ public:
 	 * @brief Get array of verteces
 	 * @return Return array of verteces
 	 */
-	FORCEINLINE const std::vector< SDynamicMeshVertexType >& GetVerteces() const
+	FORCEINLINE const std::vector< DynamicMeshVertexType >& GetVerteces() const
 	{
 		return verteces;
 	}
@@ -107,7 +107,7 @@ private:
 	/**
 	 * @brief Functions to extract the texture coord as a key for std::unordered_map and std::unordered_set
 	 */
-	struct STexCoordKeyFunc
+	struct TexCoordKeyFunc
 	{
 		/**
 		 * @brief Calculate hash of the texture coord
@@ -202,7 +202,7 @@ private:
 	 */
 	FORCEINLINE float ComputeScaleForLength( const Vector4D& InVertex, float InLength ) const
 	{
-		return InLength / SMath::Sqrt( InVertex.x * InVertex.x + InVertex.y * InVertex.y + InVertex.z * InVertex.z );
+		return InLength / Math::Sqrt( InVertex.x * InVertex.x + InVertex.y * InVertex.y + InVertex.z * InVertex.z );
 	}
 
 	/**
@@ -297,9 +297,9 @@ private:
 	uint32															subdivision;		/**< Subdivision */
 	float															radius;				/**< Radius */
 	uint32															numPrimitives;		/**< Number primitives in builded mesh */
-	std::vector< SDynamicMeshVertexType >							verteces;			/**< Array of verteces */
+	std::vector< DynamicMeshVertexType >							verteces;			/**< Array of verteces */
 	std::vector< uint32 >											indeces;			/**< Array of indeces */
-	std::unordered_map< Vector2D, uint32, STexCoordKeyFunc >		sharedIndeces;		/**< Shared indeces */
+	std::unordered_map< Vector2D, uint32, TexCoordKeyFunc >		sharedIndeces;		/**< Shared indeces */
 };
 
 #endif // !ICOSPHEREMESHBUILDER_H

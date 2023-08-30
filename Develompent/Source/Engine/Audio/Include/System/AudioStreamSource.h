@@ -78,7 +78,7 @@ private:
 	/**
 	 * Struct of streamed chunk
 	 */
-	struct SChunk
+	struct Chunk
 	{
 		const byte*		samples;	/**< Pointer to array of samples */
 		uint32			numSamples;	/**< Number samples in array */
@@ -109,7 +109,7 @@ private:
 	 * @param OutData Output loaded data
 	 * @return Return true if seccussed loaded, else return false
 	 */
-	bool GetData( SChunk& OutData );
+	bool GetData( Chunk& OutData );
 	
 	class CAudioStreamSource*		streamSource;				/**< Stream source */
 	uint32							alBuffers[ BufferCount ];	/**< OpenAL buffers */
@@ -198,7 +198,7 @@ private:
 	bool						bIsLoop;				/**< Is need loop audio */
 	EAudioSourceStatus			status;					/**< Source audio status */
 	AudioBankHandle_t			audioBankHandle;		/**< Handle to opened bank for streamed audio */
-	SAudioBankInfo				audioBankInfo;			/**< Info about opened bank */
+	AudioBankInfo				audioBankInfo;			/**< Info about opened bank */
 	mutable CCriticalSection	csStreamData;			/**< Critical section of stream data */
 	CAudioStreamRunnable*		audioStreamRunnable;	/**< Audio stream runnable */
 	CRunnableThread*			threadStreamData;		/**< Thread for streaming audio */

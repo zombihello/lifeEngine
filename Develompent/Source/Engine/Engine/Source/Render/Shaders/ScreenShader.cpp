@@ -25,7 +25,7 @@ bool CScreenPixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class CV
 CScreenPixelShader::Init
 ==================
 */
-void CScreenPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
+void CScreenPixelShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 {
 	CShader::Init( InShaderCacheItem );
 	textureParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "texture0" ) );

@@ -136,7 +136,7 @@ void CPhysicsEngine::Init()
 				Assert( configCollisionProfile.GetType() == CConfigValue::T_Object );
 				CConfigObject			objectCollisionProfile = configCollisionProfile.GetObject();
 
-				SCollisionProfile		collisionProfile;
+				CollisionProfile		collisionProfile;
 				collisionProfile.name = objectCollisionProfile.GetValue( TEXT( "Name" ) ).GetString();
 
 				std::wstring		objectType = objectCollisionProfile.GetValue( TEXT( "ObjectType" ) ).GetString();

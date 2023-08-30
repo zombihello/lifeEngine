@@ -18,7 +18,7 @@
   * @ingroup Engine
   * Simple element vertex type
   */
-struct SSimpleElementVertexType
+struct SimpleElementVertexType
 {
 	Vector4D		position;		/**< Position vertex */
 	Vector2D		texCoord;		/**< Texture coords */
@@ -27,7 +27,7 @@ struct SSimpleElementVertexType
 	/**
 	 * Overload operator ==
 	 */
-	bool FORCEINLINE operator==( const SSimpleElementVertexType& InOther ) const
+	bool FORCEINLINE operator==( const SimpleElementVertexType& InOther ) const
 	{
 		return position == InOther.position && texCoord == InOther.texCoord && color == InOther.color;
 	}

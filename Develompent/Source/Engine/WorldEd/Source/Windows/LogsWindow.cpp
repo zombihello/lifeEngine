@@ -32,7 +32,7 @@ void CLogsWindow::OnTick()
 		for ( uint32 index = 0, count = history.size(); index < count; ++index )
 		{
 			bool				bHasColor = false;
-			const SLogInfo&		logInfo = history[index];
+			const LogInfo&		logInfo = history[index];
 			switch ( logInfo.type )
 			{
 			case LT_Warning:

@@ -39,12 +39,12 @@ public:
 	/**
 	 * @brief Struct with import settings
 	 */
-	struct SImportSettings
+	struct ImportSettings
 	{
 		/**
 		 * @brief Constructor
 		 */
-		SImportSettings()
+		ImportSettings()
 			: bCombineMeshes( false )
 			, axisUp( AU_PlusY )
 		{}
@@ -56,7 +56,7 @@ public:
 	/**
 	 * @brief Delegate of resume, called when pressed button 'Import', 'Import All or 'Cancel'
 	 */
-	DECLARE_MULTICAST_DELEGATE( COnResume, CAssetFactory::EResultShowImportSettings /*InResult*/, const SImportSettings& /*InImportSettings*/ );
+	DECLARE_MULTICAST_DELEGATE( COnResume, CAssetFactory::EResultShowImportSettings /*InResult*/, const ImportSettings& /*InImportSettings*/ );
 
 	/**
 	 * @brief Constructor
@@ -79,7 +79,7 @@ protected:
 	virtual void OnTick() override;
 
 private:
-	SImportSettings			importSettings;	/**< Import settings */
+	ImportSettings			importSettings;	/**< Import settings */
 	mutable COnResume		onResume;		/**< Delegates of resume */
 };
 

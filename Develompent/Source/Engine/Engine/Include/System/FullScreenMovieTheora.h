@@ -58,7 +58,7 @@ public:
 	 * @brief Process event
 	 * @param InWindowEvent			Window event
 	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent ) override;
+	virtual void ProcessEvent( struct WindowEvent& InWindowEvent ) override;
 
 	/**
 	 * @brief Initialize internal rendering structures for a particular movie

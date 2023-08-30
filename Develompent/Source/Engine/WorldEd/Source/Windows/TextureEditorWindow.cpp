@@ -84,7 +84,7 @@ CTextureEditorWindow::OnTick
 */
 void CTextureEditorWindow::OnTick()
 {
-	const SPixelFormatInfo&		pixelFormatInfo = g_PixelFormats[texture2D->GetPixelFormat()];
+	const PixelFormatInfo&		pixelFormatInfo = g_PixelFormats[texture2D->GetPixelFormat()];
 	uint32						sizeX = texture2D->GetSizeX();
 	uint32						sizeY = texture2D->GetSizeY();
 	uint32						numMips	= texture2D->GetNumMips();
@@ -258,7 +258,7 @@ void CTextureEditorWindow::OnTick()
 		ImGui::SameLine();
 		if ( ImGui::Button( "Remove Mipmaps" ) )
 		{
-			STexture2DMipMap		mipmap0 = texture2D->GetMip( 0 );
+			Texture2DMipMap		mipmap0 = texture2D->GetMip( 0 );
 			texture2D->SetData( texture2D->GetPixelFormat(), mipmap0.sizeX, mipmap0.sizeY, mipmap0.data.GetStdContainer() );
 			viewportClient->SetMipmap( 0 );
 			currentMipmap = 0;
@@ -292,7 +292,7 @@ void CTextureEditorWindow::OnTick()
 			if ( ImGui::Button( "..." ) )
 			{
 				CFileDialogSetup		fileDialogSetup;
-				SOpenFileDialogResult	openFileDialogResult;
+				OpenFileDialogResult	openFileDialogResult;
 
 				// Init file dialog settings
 				fileDialogSetup.SetMultiselection( false );

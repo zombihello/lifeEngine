@@ -106,7 +106,7 @@ private:
 	/**
 	 * @brief Typedef of drawing policy link
 	 */
-	typedef CMeshDrawList<CMeshDrawingPolicy>::SDrawingPolicyLink			DrawingPolicyLink_t;
+	typedef CMeshDrawList<CMeshDrawingPolicy>::DrawingPolicyLink			DrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on drawing policy link in scene
@@ -116,7 +116,7 @@ private:
 	/**
 	 * @brief Typedef of depth drawing policy link
 	 */
-	typedef CMeshDrawList<CDepthDrawingPolicy>::SDrawingPolicyLink			DepthDrawingPolicyLink_t;
+	typedef CMeshDrawList<CDepthDrawingPolicy>::DrawingPolicyLink			DepthDrawingPolicyLink_t;
 
 	/**
 	 * @brief Typedef of reference on depth drawing policy link in scene
@@ -139,7 +139,7 @@ private:
 	TAssetHandle<CMaterial>				material;					/**< Material */
 	DrawingPolicyLinkRef_t				drawingPolicyLink;			/**< Drawing policy link in scene */
 	DepthDrawingPolicyLinkRef_t			depthDrawingPolicyLink;		/**< Depth drawing policy link in scene */
-	std::vector<const SMeshBatch*>		meshBatchLinks;				/**< Reference to mesh batch in drawing policy link */
+	std::vector<const MeshBatch*>		meshBatchLinks;				/**< Reference to mesh batch in drawing policy link */
 };
 
 #endif // !SPHERECOMPONENT_H

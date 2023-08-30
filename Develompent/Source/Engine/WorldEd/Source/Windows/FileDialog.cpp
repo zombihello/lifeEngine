@@ -6,7 +6,7 @@
 CFileDialogSetup::AddFormat
 ==================
 */
-void CFileDialogSetup::AddFormat( const CAssetFactory::SAssetImporterInfo& InImporterInfo, const std::wstring& InDescription )
+void CFileDialogSetup::AddFormat( const CAssetFactory::AssetImporterInfo& InImporterInfo, const std::wstring& InDescription )
 {
 	std::wstring	filter;
 	for ( uint32 index = 0, count = InImporterInfo.supportedExtensions.size(); index < count; ++index )

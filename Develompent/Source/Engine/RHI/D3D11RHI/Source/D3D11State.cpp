@@ -166,10 +166,10 @@ static FORCEINLINE D3D11_BLEND TranslateBlendFactor( EBlendFactor InBlendFactor 
 
 /*
 ==================
-SD3D11StateCache::SD3D11StateCache
+D3D11StateCache::D3D11StateCache
 ==================
 */
-SD3D11StateCache::SD3D11StateCache()
+D3D11StateCache::D3D11StateCache()
 	: inputLayout( nullptr )
 	, vertexShader( nullptr )
 	, pixelShader( nullptr )
@@ -186,10 +186,10 @@ SD3D11StateCache::SD3D11StateCache()
 
 /*
 ==================
-SD3D11StateCache::Reset
+D3D11StateCache::Reset
 ==================
 */
-void SD3D11StateCache::Reset()
+void D3D11StateCache::Reset()
 {
 	inputLayout = nullptr;
 	vertexShader = nullptr;
@@ -219,7 +219,7 @@ void SD3D11StateCache::Reset()
 CD3D11RasterizerStateRHI::CD3D11RasterizerStateRHI
 ==================
 */
-CD3D11RasterizerStateRHI::CD3D11RasterizerStateRHI( const SRasterizerStateInitializerRHI& InInitializer ) 
+CD3D11RasterizerStateRHI::CD3D11RasterizerStateRHI( const RasterizerStateInitializerRHI& InInitializer ) 
 	: CBaseRasterizerStateRHI( InInitializer )
 	, d3d11RasterizerState( nullptr )
 {
@@ -337,7 +337,7 @@ CD3D11SamplerStateRHI::~CD3D11SamplerStateRHI()
 CD3D11DepthStateRHI::CD3D11DepthStateRHI
 ==================
 */
-CD3D11DepthStateRHI::CD3D11DepthStateRHI( const SDepthStateInitializerRHI& InInitializer )
+CD3D11DepthStateRHI::CD3D11DepthStateRHI( const DepthStateInitializerRHI& InInitializer )
 {
 	Sys_Memzero( &d3d11DepthStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	d3d11DepthStateInfo.DepthEnable		= InInitializer.depthTest != CF_Always || InInitializer.bEnableDepthWrite;
@@ -351,7 +351,7 @@ CD3D11DepthStateRHI::CD3D11DepthStateRHI( const SDepthStateInitializerRHI& InIni
 CD3D11StencilStateRHI::CD3D11StencilStateRHI
 ==================
 */
-CD3D11StencilStateRHI::CD3D11StencilStateRHI( const SStencilStateInitializerRHI& InInitializer )
+CD3D11StencilStateRHI::CD3D11StencilStateRHI( const StencilStateInitializerRHI& InInitializer )
 	: stencilRef( InInitializer.stencilRef )
 {
 	Sys_Memzero( &d3d11StencilStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
@@ -382,7 +382,7 @@ CD3D11StencilStateRHI::CD3D11StencilStateRHI( const SStencilStateInitializerRHI&
 CD3D11BlendStateRHI::CD3D11BlendStateRHI
 ==================
 */
-CD3D11BlendStateRHI::CD3D11BlendStateRHI( const SBlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable /* = true */ )
+CD3D11BlendStateRHI::CD3D11BlendStateRHI( const BlendStateInitializerRHI& InInitializer, bool InIsColorWriteEnable /* = true */ )
 	: bColorWrite( InIsColorWriteEnable )
 {
 	// Init descriptor

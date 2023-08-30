@@ -27,7 +27,7 @@ public:
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override
+	virtual void Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem ) override
 	{
 		CShader::Init( InShaderCacheItem );
 		sceneColorParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "sceneColor" ) );
@@ -60,7 +60,7 @@ public:
 	 * @param InShaderPlatform Shader platform
 	 * @param InEnvironment Shader compiler environment
 	 */
-	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment )
 	{
 		CShader::ModifyCompilationEnvironment( InShaderPlatform, InEnvironment );
 		InEnvironment.difinitions.insert( std::make_pair( TEXT( "APPLY_HDR" ), InApplyHDR ? TEXT( "1" ) : TEXT( "0" ) ) );

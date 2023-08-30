@@ -45,12 +45,12 @@ void CGeneralVertexShaderParameters::Set( class CBaseDeviceContextRHI* InDeviceC
 CGeneralVertexShaderParameters::SetMesh
 ==================
 */
-void CGeneralVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+void CGeneralVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
     if ( !bSupportsInstancing )
     {
         Assert( InNumInstances == 1 );
-        const SMeshInstance&        meshInstance = InMesh.instances[ InStartInstanceID ];
+        const MeshInstance&        meshInstance = InMesh.instances[ InStartInstanceID ];
         SetVertexShaderValue( InDeviceContextRHI, localToWorldMatrixParameter, meshInstance.transformMatrix );
        
 #if WITH_EDITOR

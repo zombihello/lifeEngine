@@ -18,7 +18,7 @@
  * @ingroup Core
  * @brief Struct for storage event of window
  */
-struct SWindowEvent
+struct WindowEvent
 {
 	/**
 	 * @brief Enumeration of types event window
@@ -48,7 +48,7 @@ struct SWindowEvent
 	/**
 	 * @brief Event of key pressed/released
 	 */
-	struct SKeyEvent
+	struct KeyEvent
 	{
 		EButtonCode			code;			/**< Code of key */
 		bool				isAlt;			/**< Is event with alt */
@@ -62,7 +62,7 @@ struct SWindowEvent
 	/**
 	 * @brief Event of mouse button pressed/released
 	 */
-	struct SMouseButtonEvent
+	struct MouseButtonEvent
 	{
 		EButtonCode			code;		/**< Code of mouse button */
 		int32				x;			/**< Mouse position by X */
@@ -72,7 +72,7 @@ struct SWindowEvent
 	/**
 	 * @brief Event of mouse moving
 	 */
-	struct SMouseMoveEvent
+	struct MouseMoveEvent
 	{
 		int32		x;					/**< Current position by X */
 		int32		y;					/**< Current position by Y */
@@ -83,7 +83,7 @@ struct SWindowEvent
 	/**
 	 * @brief Event of mouse wheel moving
 	 */
-	struct SMouseWheelEvent
+	struct MouseWheelEvent
 	{
 		int32		x;					/**< Moving wheel by X */
 		int32		y;					/**< Moving wheel by Y */
@@ -92,7 +92,7 @@ struct SWindowEvent
 	/**
 	 * @brief Event of window resize
 	 */
-	struct SWindowResizeEvent
+	struct WindowResizeEvent
 	{
 		uint32		windowId;			/**< Id of window */
 		int32		width;				/**< New width window */
@@ -102,7 +102,7 @@ struct SWindowEvent
 	/**
 	 * Event of window close
 	 */
-	struct SWindowCloseEvent
+	struct WindowCloseEvent
 	{
 		uint32		windowId;			/**< Id window */
 	};
@@ -110,7 +110,7 @@ struct SWindowEvent
 	/**
 	 * Event of window focus gained
 	 */
-	struct SWindowFocusGainedEvent
+	struct WindowFocusGainedEvent
 	{
 		uint32		windowId;			/**< Id window */
 	};
@@ -118,7 +118,7 @@ struct SWindowEvent
 	/**
 	 * Event of window focus lost
 	 */
-	struct SWindowFocusLostEvent
+	struct WindowFocusLostEvent
 	{
 		uint32		windowId;			/**< Id window */
 	};
@@ -126,7 +126,7 @@ struct SWindowEvent
 	/**
 	 * Event of window move
 	 */
-	struct SWindowMoveEvent
+	struct WindowMoveEvent
 	{
 		uint32		windowId;			/**< Id window */
 		int32		x;					/**< Current position by X */
@@ -136,7 +136,7 @@ struct SWindowEvent
 	/**
 	 * @brief Event of text input
 	 */
-	struct STextInputEvent
+	struct TextInputEvent
 	{
 		achar*			text;			/**< Entered text */
 	};
@@ -146,22 +146,22 @@ struct SWindowEvent
 	 */
 	union UEvents
 	{
-		SWindowCloseEvent			windowClose;		/**< Event of window close */
-		SWindowResizeEvent			windowResize;		/**< Event of window resize */
-		SWindowFocusGainedEvent		windowFocusGained;	/**< Event of window focus gained */
-		SWindowFocusLostEvent		windowFocusLost;	/**< Event of window focus lost */
-		SWindowMoveEvent			windowMove;			/**< Event of window move */
-		SKeyEvent					key;				/**< Event of key pressed/released */
-		SMouseButtonEvent			mouseButton;		/**< Event of mouse button pressed/released */
-		SMouseMoveEvent				mouseMove;			/**< Event of mouse moving */
-		SMouseWheelEvent			mouseWheel;			/**< Event of mouse wheel moving */
-		STextInputEvent				textInputEvent;		/**< Event of input text */
+		WindowCloseEvent			windowClose;		/**< Event of window close */
+		WindowResizeEvent			windowResize;		/**< Event of window resize */
+		WindowFocusGainedEvent		windowFocusGained;	/**< Event of window focus gained */
+		WindowFocusLostEvent		windowFocusLost;	/**< Event of window focus lost */
+		WindowMoveEvent			windowMove;			/**< Event of window move */
+		KeyEvent					key;				/**< Event of key pressed/released */
+		MouseButtonEvent			mouseButton;		/**< Event of mouse button pressed/released */
+		MouseMoveEvent				mouseMove;			/**< Event of mouse moving */
+		MouseWheelEvent			mouseWheel;			/**< Event of mouse wheel moving */
+		TextInputEvent				textInputEvent;		/**< Event of input text */
 	};
 
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE SWindowEvent() 
+	FORCEINLINE WindowEvent() 
 		: type( T_None ) 
 #if WITH_IMGUI
 		, bImGUIEvent( false )

@@ -28,10 +28,10 @@ public:
 	 */
 	FORCEINLINE CTransform() 
 		: bDirtyMatrix( true )
-		, translation( SMath::vectorZero )
-		, rotation( SMath::quaternionZero )
-		, scale( SMath::vectorOne )
-		, matrix( SMath::matrixIdentity )
+		, translation( Math::vectorZero )
+		, rotation( Math::quaternionZero )
+		, scale( Math::vectorOne )
+		, matrix( Math::matrixIdentity )
 	{}
 
 	/**
@@ -42,9 +42,9 @@ public:
 	FORCEINLINE explicit CTransform( const Vector& InTranslation ) 
 		: bDirtyMatrix( true )
 		, translation( InTranslation )
-		, rotation( SMath::quaternionZero )
-		, scale( SMath::vectorOne )
-		, matrix( SMath::matrixIdentity )
+		, rotation( Math::quaternionZero )
+		, scale( Math::vectorOne )
+		, matrix( Math::matrixIdentity )
 	{}
 
 	/**
@@ -54,10 +54,10 @@ public:
 	 */
 	FORCEINLINE explicit CTransform( const Quaternion& InRotation ) 
 		: bDirtyMatrix( true )
-		, translation( SMath::vectorZero )
+		, translation( Math::vectorZero )
 		, rotation( InRotation )
-		, scale( SMath::vectorOne )
-		, matrix( SMath::matrixIdentity )
+		, scale( Math::vectorOne )
+		, matrix( Math::matrixIdentity )
 	{}
 
 	/**
@@ -67,12 +67,12 @@ public:
 	 * @param InTranslation The value to use for the translation component
 	 * @param InScale		The value to use for the scale component
 	 */
-	FORCEINLINE CTransform( const Quaternion& InRotation, const Vector& InTranslation, const Vector& InScale = SMath::vectorOne ) 
+	FORCEINLINE CTransform( const Quaternion& InRotation, const Vector& InTranslation, const Vector& InScale = Math::vectorOne ) 
 		: bDirtyMatrix( true )
 		, translation( InTranslation )
 		, rotation( InRotation )
 		, scale( InScale )
-		, matrix( SMath::matrixIdentity )
+		, matrix( Math::matrixIdentity )
 	{}
 
 	/**
@@ -132,7 +132,7 @@ public:
 	 */
 	FORCEINLINE void SubtractFromRotation( const Quaternion& InDeltaRotation )
 	{
-		rotation		= SMath::InverseQuaternion( InDeltaRotation ) * rotation;
+		rotation		= Math::InverseQuaternion( InDeltaRotation ) * rotation;
 		bDirtyMatrix	= true;
 	}
 
@@ -201,7 +201,7 @@ public:
 	FORCEINLINE void Subtract( const CTransform& InOther )
 	{
 		translation	-= InOther.translation;
-		rotation	= SMath::InverseQuaternion( InOther.rotation ) * rotation;
+		rotation	= Math::InverseQuaternion( InOther.rotation ) * rotation;
 		scale		-= InOther.scale;
 		bDirtyMatrix = true;
 	}
@@ -277,9 +277,9 @@ public:
 	 */
 	FORCEINLINE void SetIdentity()
 	{
-		translation		= SMath::vectorZero;
-		rotation		= SMath::quaternionZero;
-		scale			= SMath::vectorOne;
+		translation		= Math::vectorZero;
+		rotation		= Math::quaternionZero;
+		scale			= Math::vectorOne;
 		bDirtyMatrix	= true;
 	}
 
@@ -299,7 +299,7 @@ public:
 		default:		Assert( false ); break;
 		}
 
-		return SMath::vectorZero;
+		return Math::vectorZero;
 	}
 
 	/**
@@ -351,7 +351,7 @@ public:
 	{
 		if ( bDirtyMatrix )
 		{
-			matrix			= SMath::TranslateMatrix( translation ) * SMath::QuaternionToMatrix( rotation ) * SMath::ScaleMatrix( scale );
+			matrix			= Math::TranslateMatrix( translation ) * Math::QuaternionToMatrix( rotation ) * Math::ScaleMatrix( scale );
 			bDirtyMatrix	= false;
 		}
 		OutMatrix			= matrix;
@@ -370,7 +370,7 @@ public:
 	 */
 	FORCEINLINE CTransform operator-( const CTransform& InOther ) const
 	{
-		return CTransform( SMath::InverseQuaternion( InOther.rotation ) * rotation, translation - InOther.translation, scale - InOther.scale );
+		return CTransform( Math::InverseQuaternion( InOther.rotation ) * rotation, translation - InOther.translation, scale - InOther.scale );
 	}
 
 protected:

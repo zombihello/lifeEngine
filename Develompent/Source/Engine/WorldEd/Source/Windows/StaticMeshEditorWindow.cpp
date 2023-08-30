@@ -31,8 +31,8 @@ CStaticMeshEditorWindow::CStaticMeshEditorWindow( const TSharedPtr<CStaticMesh>&
 	viewportWidget.Init();
 
 	// Subscribe to event when assets try destroy of editing material and reload. It need is block
-	assetsCanDeleteHandle = SEditorDelegates::onAssetsCanDelete.Add(	std::bind( &CStaticMeshEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2	) );
-	assetsReloadedHandle = SEditorDelegates::onAssetsReloaded.Add(		std::bind( &CStaticMeshEditorWindow::OnAssetsReloaded,	this, std::placeholders::_1							) );
+	assetsCanDeleteHandle = EditorDelegates::onAssetsCanDelete.Add(	std::bind( &CStaticMeshEditorWindow::OnAssetsCanDelete, this, std::placeholders::_1, std::placeholders::_2	) );
+	assetsReloadedHandle = EditorDelegates::onAssetsReloaded.Add(		std::bind( &CStaticMeshEditorWindow::OnAssetsReloaded,	this, std::placeholders::_1							) );
 }
 
 /*
@@ -46,8 +46,8 @@ CStaticMeshEditorWindow::~CStaticMeshEditorWindow()
 	delete viewportClient;
 
 	// Unsubscribe from event when assets try destroy and reload
-	SEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
-	SEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
+	EditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
+	EditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 }
 
 /*
@@ -69,7 +69,7 @@ void CStaticMeshEditorWindow::Init()
 		selectAssetWidget->SetLabel( CString::Format( TEXT( "Slot %i" ), index ) );
 		selectAssetWidget->OnSelectedAsset().Add(	std::bind( &CStaticMeshEditorWindow::OnSelectedAsset,	this, std::placeholders::_1, std::placeholders::_2	) );
 		selectAssetWidget->OnOpenAssetEditor().Add( std::bind( &CStaticMeshEditorWindow::OnOpenAssetEditor, this, std::placeholders::_1							) );
-		selectAssetWidgets.push_back( SSelectAssetHandle{ index, nullptr, selectAssetWidget } );
+		selectAssetWidgets.push_back( SelectAssetHandle{ index, nullptr, selectAssetWidget } );
 	}
 	UpdateAssetInfo();
 }
@@ -83,7 +83,7 @@ void CStaticMeshEditorWindow::UpdateAssetInfo()
 {
 	for ( uint32 index = 0, count = selectAssetWidgets.size(); index < count; ++index )
 	{
-		SSelectAssetHandle&			selectAssetHandle	= selectAssetWidgets[index];
+		SelectAssetHandle&			selectAssetHandle	= selectAssetWidgets[index];
 		TAssetHandle<CMaterial>		materialRef			= staticMesh->GetMaterial( index );
 		if ( materialRef.IsAssetValid() && !g_PackageManager->IsDefaultAsset( materialRef ) )
 		{
@@ -154,7 +154,7 @@ void CStaticMeshEditorWindow::OnTick()
 		// Resource size
 		ImGui::Text( "Resource Size:" );
 		ImGui::TableNextColumn();
-		ImGui::Text( TCHAR_TO_ANSI( CString::Format( TEXT( "%.2f Kb" ), ( staticMesh->GetVerteces().Num() * sizeof( SStaticMeshVertexType ) + staticMesh->GetIndeces().Num() * sizeof( uint32 ) ) / 1024.f ).c_str() ) );
+		ImGui::Text( TCHAR_TO_ANSI( CString::Format( TEXT( "%.2f Kb" ), ( staticMesh->GetVerteces().Num() * sizeof( StaticMeshVertexType ) + staticMesh->GetIndeces().Num() * sizeof( uint32 ) ) / 1024.f ).c_str() ) );
 		ImGui::EndTable();
 	}
 
@@ -165,7 +165,7 @@ void CStaticMeshEditorWindow::OnTick()
 		ImGui::BeginChild( "##MaterialSlots", ImVec2( 0, heightMaterialsSection ) );
 		for ( uint32 index = 0, count = selectAssetWidgets.size(); index < count; ++index )
 		{
-			const SSelectAssetHandle		selectAssetHandle = selectAssetWidgets[index];
+			const SelectAssetHandle		selectAssetHandle = selectAssetWidgets[index];
 			if ( selectAssetHandle.widget )
 			{
 				selectAssetHandle.widget->Tick();
@@ -200,7 +200,7 @@ void CStaticMeshEditorWindow::OnTick()
 			if ( ImGui::Button( "..." ) )
 			{
 				CFileDialogSetup		fileDialogSetup;
-				SOpenFileDialogResult	openFileDialogResult;
+				OpenFileDialogResult	openFileDialogResult;
 
 				// Init file dialog settings
 				fileDialogSetup.SetMultiselection( false );
@@ -231,7 +231,7 @@ void CStaticMeshEditorWindow::OnTick()
 CStaticMeshEditorWindow::ProcessEvent
 ==================
 */
-void CStaticMeshEditorWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CStaticMeshEditorWindow::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	// Process event in viewport client
 	if ( viewportWidget.IsHovered() )
@@ -253,7 +253,7 @@ void CStaticMeshEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::ws
 	}
 
 	Assert( InAssetSlot < selectAssetWidgets.size() );
-	SSelectAssetHandle&		selectAssetHandle = selectAssetWidgets[InAssetSlot];
+	SelectAssetHandle&		selectAssetHandle = selectAssetWidgets[InAssetSlot];
 
 	// If asset reference is valid, we find asset
 	TAssetHandle<CMaterial>		newMaterialRef;
@@ -278,7 +278,7 @@ void CStaticMeshEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::ws
 CStaticMeshEditorWindow::OnAssetsCanDelete
 ==================
 */
-void CStaticMeshEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, SCanDeleteAssetResult& OutResult )
+void CStaticMeshEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, CanDeleteAssetResult& OutResult )
 {
 	CAsset::SetDependentAssets_t		dependentAssets;
 	staticMesh->GetDependentAssets( dependentAssets );
@@ -336,7 +336,7 @@ void CStaticMeshEditorWindow::OnOpenAssetEditor( uint32 InAssetSlot )
 	}
 
 	Assert( InAssetSlot < selectAssetWidgets.size() );
-	const SSelectAssetHandle&	selectAssetHandle = selectAssetWidgets[InAssetSlot];
+	const SelectAssetHandle&	selectAssetHandle = selectAssetWidgets[InAssetSlot];
 
 	// Open material editor if asset is valid
 	if ( selectAssetHandle.asset.IsAssetValid() )

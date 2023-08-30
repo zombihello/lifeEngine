@@ -49,7 +49,7 @@ private:
 	 * @param InAssets	Array of assets to delete
 	 * @param OutResult Result, we can is delete this assets?
 	 */
-	void OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, struct SCanDeleteAssetResult& OutResult );
+	void OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, struct CanDeleteAssetResult& OutResult );
 
 	/**
 	 * @brief Called event when asset is reloaded
@@ -58,7 +58,7 @@ private:
 	void OnAssetsReloaded( const std::vector<TSharedPtr<CAsset>>& InAssets );
 
 	TSharedPtr<CPhysicsMaterial>							physMaterial;			/**< Physics material */
-	SEditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;	/**< Handle delegate of assets can delete */
+	EditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;	/**< Handle delegate of assets can delete */
 };
 
 

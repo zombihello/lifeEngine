@@ -56,8 +56,8 @@ void CSceneRenderer::RenderHitProxies( ViewportRHIParamRef_t InViewportRHI, EHit
 		SCOPED_DRAW_EVENT( EventHitProxiesSDGs, DEC_SCENE_ITEMS, TEXT( "HitProxies SDGs" ) );
 		for ( uint32 SDGIndex = 0; SDGIndex < SDG_Max; ++SDGIndex )
 		{
-			SSceneDepthGroup&		SDG = scene->GetSDG( ( ESceneDepthGroup ) SDGIndex );
-			SHitProxyLayer&			hitProxyLayer = SDG.hitProxyLayers[ InHitProxyLayer ];
+			SceneDepthGroup&		SDG = scene->GetSDG( ( ESceneDepthGroup ) SDGIndex );
+			HitProxyLayer&			hitProxyLayer = SDG.hitProxyLayers[ InHitProxyLayer ];
 			if ( hitProxyLayer.IsEmpty() )
 			{
 				continue;
@@ -79,7 +79,7 @@ void CSceneRenderer::RenderHitProxies( ViewportRHIParamRef_t InViewportRHI, EHit
 				SCOPED_DRAW_EVENT( EventDynamicElements, DEC_DYNAMICELEMENTS, TEXT( "Dynamic elements" ) );
 				for ( auto it = hitProxyLayer.dynamicHitProxyMeshBuilders.begin(), itEnd = hitProxyLayer.dynamicHitProxyMeshBuilders.end(); it != itEnd; ++it )
 				{
-					const SDynamicMeshBuilderElement&		element = *it;
+					const DynamicMeshBuilderElement&		element = *it;
 					if ( element.dynamicMeshBuilder )
 					{
 						element.dynamicMeshBuilder->Draw<CHitProxyDrawingPolicy>( immediateContext, element.localToWorldMatrix, element.material, *sceneView );

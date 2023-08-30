@@ -77,7 +77,7 @@ public:
 	{
 		if ( !rasterizerState )
 		{
-			const SRasterizerStateInitializerRHI		initializer =
+			const RasterizerStateInitializerRHI		initializer =
 			{
 				FM_Wireframe,
 				CM_None,

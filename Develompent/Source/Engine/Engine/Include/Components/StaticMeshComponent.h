@@ -129,7 +129,7 @@ private:
 	TAssetHandle<CStaticMesh>								staticMesh;						/**< Static mesh */
 	TAssetHandle<CStaticMesh>								drawStaticMesh;					/**< Static mesh which drawing now */
 	std::vector< TAssetHandle<CMaterial> >					overrideMaterials;				/**< Override materials */
-	TSharedPtr<CStaticMesh::SElementDrawingPolicyLink>		elementDrawingPolicyLink;		/**< Element drawing policy link of current static mesh */
+	TSharedPtr<CStaticMesh::ElementDrawingPolicyLink>		elementDrawingPolicyLink;		/**< Element drawing policy link of current static mesh */
 };
 
 #endif // !STATICMESHCOMPONENT_H

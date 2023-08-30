@@ -127,7 +127,7 @@ enum EColorWriteMask
  * @ingroup Engine
  * @brief Struct for create resterize state in RHI
  */
-struct SRasterizerStateInitializerRHI
+struct RasterizerStateInitializerRHI
 {
 	ERasterizerFillMode			fillMode;				/**< Fill mode */
 	ERasterizerCullMode			cullMode;				/**< Cull mode */
@@ -138,7 +138,7 @@ struct SRasterizerStateInitializerRHI
 	/**
 	 * Overload operator ==
 	 */
-	FORCEINLINE bool operator==( const SRasterizerStateInitializerRHI& InRight ) const
+	FORCEINLINE bool operator==( const RasterizerStateInitializerRHI& InRight ) const
 	{
 		return	fillMode == InRight.fillMode && 
 				cullMode == InRight.cullMode &&
@@ -150,7 +150,7 @@ struct SRasterizerStateInitializerRHI
 	/**
 	 * Overload operator !=
 	 */
-	FORCEINLINE bool operator!=( const SRasterizerStateInitializerRHI& InRight ) const
+	FORCEINLINE bool operator!=( const RasterizerStateInitializerRHI& InRight ) const
 	{
 		return !( *this == InRight );
 	}
@@ -160,7 +160,7 @@ struct SRasterizerStateInitializerRHI
  * @ingroup Engine
  * @brief Struct for create depth state in RHI
  */
-struct SDepthStateInitializerRHI
+struct DepthStateInitializerRHI
 {
 	bool						bEnableDepthWrite;		/**< Is eneable depth write */
 	ECompareFunction			depthTest;				/**< Depth test compare function */
@@ -170,12 +170,12 @@ struct SDepthStateInitializerRHI
  * @ingroup Engine
  * @brief Struct for create blend state in RHI
  */
-struct SBlendStateInitializerRHI
+struct BlendStateInitializerRHI
 {
 	/**
 	 * @brief Constructor
 	 */
-	SBlendStateInitializerRHI()
+	BlendStateInitializerRHI()
 	{}
 
 	/**
@@ -190,7 +190,7 @@ struct SBlendStateInitializerRHI
 	 * @param InAlphaTest				Alpha test
 	 * @param InAlphaRef				Alpha reference
 	 */
-	SBlendStateInitializerRHI( EBlendOperation InColorBlendOp, EBlendFactor InColorSourceBlendFactor, EBlendFactor InColorDestBlendFactor, EBlendOperation InAlphaBlendOp, EBlendFactor InAlphaSourceBlendFactor, EBlendFactor InAlphaDestBlendFactor, ECompareFunction InAlphaTest, byte InAlphaRef )
+	BlendStateInitializerRHI( EBlendOperation InColorBlendOp, EBlendFactor InColorSourceBlendFactor, EBlendFactor InColorDestBlendFactor, EBlendOperation InAlphaBlendOp, EBlendFactor InAlphaSourceBlendFactor, EBlendFactor InAlphaDestBlendFactor, ECompareFunction InAlphaTest, byte InAlphaRef )
 		: colorBlendOperation( InColorBlendOp )
 		, colorSourceBlendFactor( InColorSourceBlendFactor )
 		, colorDestBlendFactor( InColorDestBlendFactor )
@@ -215,12 +215,12 @@ struct SBlendStateInitializerRHI
  * @ingroup Engine
  * @brief Struct for create stencil state in RHI
  */
-struct SStencilStateInitializerRHI
+struct StencilStateInitializerRHI
 {
 	/**
 	 * @brief Constructor
 	 */
-	SStencilStateInitializerRHI( bool InEnableFrontFaceStencil = false, ECompareFunction InFrontFaceStencilTest = CF_Always, EStencilOp InFrontFaceStencilFailStencilOp = SO_Keep, EStencilOp InFrontFaceDepthFailStencilOp = SO_Keep, EStencilOp InFrontFacePassStencilOp  = SO_Keep, bool InEnableBackFaceStencil = false, ECompareFunction InBackFaceStencilTest = CF_Always, EStencilOp InBackFaceStencilFailStencilOp = SO_Keep, EStencilOp InBackFaceDepthFailStencilOp  = SO_Keep, EStencilOp InBackFacePassStencilOp = SO_Keep, uint32 InStencilReadMask = 0xFFFFFFFF, uint32 InStencilWriteMask = 0xFFFFFFFF, uint32 InStencilRef = 0 )
+	StencilStateInitializerRHI( bool InEnableFrontFaceStencil = false, ECompareFunction InFrontFaceStencilTest = CF_Always, EStencilOp InFrontFaceStencilFailStencilOp = SO_Keep, EStencilOp InFrontFaceDepthFailStencilOp = SO_Keep, EStencilOp InFrontFacePassStencilOp  = SO_Keep, bool InEnableBackFaceStencil = false, ECompareFunction InBackFaceStencilTest = CF_Always, EStencilOp InBackFaceStencilFailStencilOp = SO_Keep, EStencilOp InBackFaceDepthFailStencilOp  = SO_Keep, EStencilOp InBackFacePassStencilOp = SO_Keep, uint32 InStencilReadMask = 0xFFFFFFFF, uint32 InStencilWriteMask = 0xFFFFFFFF, uint32 InStencilRef = 0 )
 		: bEnableFrontFaceStencil( InEnableFrontFaceStencil )
 		, frontFaceStencilTest( InFrontFaceStencilTest )
 		, frontFaceStencilFailStencilOp( InFrontFaceStencilFailStencilOp )
@@ -262,7 +262,7 @@ public:
 	 * @brief Constructor
 	 * @param InInitializer		Initializer of rasterizer state
 	 */
-	FORCEINLINE CBaseRasterizerStateRHI( const SRasterizerStateInitializerRHI& InInitializer )
+	FORCEINLINE CBaseRasterizerStateRHI( const RasterizerStateInitializerRHI& InInitializer )
 		: initializer( InInitializer )
 	{}
 
@@ -276,13 +276,13 @@ public:
 	 * @brief Get initializer of rasterizer state
 	 * @return Return initializer of rasterizer state
 	 */
-	FORCEINLINE SRasterizerStateInitializerRHI GetInitializer() const
+	FORCEINLINE RasterizerStateInitializerRHI GetInitializer() const
 	{
 		return initializer;
 	}
 
 protected:
-	SRasterizerStateInitializerRHI		initializer;		/**< Initializer of rasterizer state */
+	RasterizerStateInitializerRHI		initializer;		/**< Initializer of rasterizer state */
 };
 
 /**

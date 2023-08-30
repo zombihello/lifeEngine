@@ -72,7 +72,7 @@ enum EVertexElementUsage
  * @ingroup Engine
  * @brief Struct of vertex element
  */
-struct SVertexElement
+struct VertexElement
 {
 	uint32			stride;						/**< Stride element */
 	byte			streamIndex;				/**< Index of buffer */
@@ -86,7 +86,7 @@ struct SVertexElement
 	/**
 	 * @brief Constructor
 	 */
-	SVertexElement() :
+	VertexElement() :
 		streamIndex( 0 ),
 		stride( 0 ),
 		offset( 0 ),
@@ -109,7 +109,7 @@ struct SVertexElement
 	 * @param[in] InIsUseInstanceIndex Is use instance index
 	 * @param[in] InNumVerticesPerInstance Number vertices per one instance
 	 */
-	SVertexElement( byte InStreamIndex, uint32 InStride, byte InOffset, byte InType, byte InUsage, byte InUsageIndex, bool InIsUseInstanceIndex = false, uint32 InNumVerticesPerInstance = 0 ) :
+	VertexElement( byte InStreamIndex, uint32 InStride, byte InOffset, byte InType, byte InUsage, byte InUsageIndex, bool InIsUseInstanceIndex = false, uint32 InNumVerticesPerInstance = 0 ) :
 		streamIndex( InStreamIndex ),
 		stride( InStride ),
 		offset( InOffset ),
@@ -174,7 +174,7 @@ private:
  * @ingroup Engine Engine
  * @brief Element list for vertex declaration
  */
-typedef std::vector< SVertexElement >		VertexDeclarationElementList_t;
+typedef std::vector< VertexElement >		VertexDeclarationElementList_t;
 
 /**
  * @ingroup Engine

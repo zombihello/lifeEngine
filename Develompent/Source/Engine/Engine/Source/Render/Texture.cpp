@@ -48,7 +48,7 @@ static CMP_FORMAT ConvertEPixelFormatToCmpFormat( EPixelFormat InPixelFormat )
 GenerateMipmapsMemory
 ==================
 */
-static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const STexture2DMipMap& InZeroMip, std::vector<STexture2DMipMap>& OutMipmaps, uint32 InRequestMips = 10 )
+static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const Texture2DMipMap& InZeroMip, std::vector<Texture2DMipMap>& OutMipmaps, uint32 InRequestMips = 10 )
 {
 	CMP_MipSet cmp_MipSet;
 	Sys_Memzero( &cmp_MipSet, sizeof( CMP_MipSet ) );
@@ -65,7 +65,7 @@ static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const STexture2DM
 		CMP_MipLevel*		cmp_mipLevel;
 		CMP_GetMipLevel( &cmp_mipLevel, &cmp_MipSet, index, 0 );
 
-		STexture2DMipMap	mipmap;
+		Texture2DMipMap	mipmap;
 		mipmap.sizeX		= cmp_mipLevel->m_nWidth;
 		mipmap.sizeY		= cmp_mipLevel->m_nWidth;
 		mipmap.data.Resize( cmp_mipLevel->m_dwLinearSize );
@@ -112,9 +112,9 @@ void CTexture2D::InitRHI()
 	// Load all mip-levels to GPU
 	for ( uint32 index = 0, count = mipmaps.size(); index < count; ++index )
 	{
-		const STexture2DMipMap&		mipmap				= mipmaps[index];
+		const Texture2DMipMap&		mipmap				= mipmaps[index];
 		CBaseDeviceContextRHI*		deviceContextRHI	= g_RHI->GetImmediateContext();
-		SLockedData					lockedData;
+		LockedData					lockedData;
 		
 		g_RHI->LockTexture2D( deviceContextRHI, texture, index, true, lockedData );
 		memcpy( lockedData.data, mipmap.data.GetData(), mipmap.data.Num() );
@@ -147,7 +147,7 @@ CTexture2D::SetData
 */
 void CTexture2D::SetData( EPixelFormat InPixelFormat, uint32 InSizeX, uint32 InSizeY, const std::vector<byte>& InData, bool InIsGenerateMipmaps /* = false */ )
 {
-	STexture2DMipMap	mipmap0;
+	Texture2DMipMap	mipmap0;
 	pixelFormat			= InPixelFormat;
 	mipmap0.sizeX		= InSizeX;
 	mipmap0.sizeY		= InSizeY;
@@ -180,7 +180,7 @@ CTexture2D::GenerateMipmaps
 void CTexture2D::GenerateMipmaps()
 {
 	Assert( !mipmaps.empty() );
-	STexture2DMipMap	mipmap0 = mipmaps[0];
+	Texture2DMipMap	mipmap0 = mipmaps[0];
 	mipmaps.clear();
 	
 	GenerateMipmapsMemory( pixelFormat, mipmap0, mipmaps );
@@ -222,7 +222,7 @@ void CTexture2D::Serialize( class CArchive& InArchive )
 
 	if ( InArchive.Ver() < VER_Mipmaps )
 	{
-		STexture2DMipMap	mipmap0;
+		Texture2DMipMap	mipmap0;
 		InArchive << mipmap0.data;
 		InArchive << mipmap0.sizeX;
 		InArchive << mipmap0.sizeY;

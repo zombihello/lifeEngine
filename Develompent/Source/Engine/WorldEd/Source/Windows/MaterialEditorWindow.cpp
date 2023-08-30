@@ -39,8 +39,8 @@ CMaterialEditorWindow::CMaterialEditorWindow( const TSharedPtr<CMaterial>& InMat
 	viewportWidget.Init();
 
 	// Subscribe to event when assets try destroy of editing material and reload. It need is block
-	assetsCanDeleteHandle	= SEditorDelegates::onAssetsCanDelete.Add( std::bind(	&CMaterialEditorWindow::OnAssetsCanDelete,	this, std::placeholders::_1, std::placeholders::_2	) );
-	assetsReloadedHandle	= SEditorDelegates::onAssetsReloaded.Add( std::bind(	&CMaterialEditorWindow::OnAssetsReloaded,	this, std::placeholders::_1							) );
+	assetsCanDeleteHandle	= EditorDelegates::onAssetsCanDelete.Add( std::bind(	&CMaterialEditorWindow::OnAssetsCanDelete,	this, std::placeholders::_1, std::placeholders::_2	) );
+	assetsReloadedHandle	= EditorDelegates::onAssetsReloaded.Add( std::bind(	&CMaterialEditorWindow::OnAssetsReloaded,	this, std::placeholders::_1							) );
 }
 
 /*
@@ -54,8 +54,8 @@ CMaterialEditorWindow::~CMaterialEditorWindow()
 	delete viewportClient;
 
 	// Unsubscribe from event when assets try destroy and reload
-	SEditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
-	SEditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
+	EditorDelegates::onAssetsCanDelete.Remove( assetsCanDeleteHandle );
+	EditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 }
 
 /*
@@ -77,7 +77,7 @@ void CMaterialEditorWindow::Init()
 		selectAssetWidget->SetLabel( s_TextureParameterNames[index].ToString() );
 		selectAssetWidget->OnSelectedAsset().Add( std::bind(	&CMaterialEditorWindow::OnSelectedAsset,	this, std::placeholders::_1, std::placeholders::_2	) );
 		selectAssetWidget->OnOpenAssetEditor().Add( std::bind(	&CMaterialEditorWindow::OnOpenAssetEditor,	this, std::placeholders::_1							) );
-		selectAssetWidgets.push_back( SSelectAssetHandle{s_TextureParameterNames[index], nullptr, selectAssetWidget } );
+		selectAssetWidgets.push_back( SelectAssetHandle{s_TextureParameterNames[index], nullptr, selectAssetWidget } );
 	}
 	UpdateAssetInfo();
 }
@@ -91,7 +91,7 @@ void CMaterialEditorWindow::UpdateAssetInfo()
 {
 	for ( uint32 index = 0, count = selectAssetWidgets.size(); index < count; ++index )
 	{
-		SSelectAssetHandle&				selectAssetHandle = selectAssetWidgets[index];
+		SelectAssetHandle&				selectAssetHandle = selectAssetWidgets[index];
 		TAssetHandle<CTexture2D>		textureRef;
 		
 		material->GetTextureParameterValue( selectAssetHandle.parameterName, textureRef );
@@ -181,7 +181,7 @@ void CMaterialEditorWindow::OnTick()
 		ImGui::BeginChild( "##Parameters" );
 		for ( uint32 index = 0, count = selectAssetWidgets.size(); index < count; ++index )
 		{
-			const SSelectAssetHandle		selectAssetHandle = selectAssetWidgets[index];
+			const SelectAssetHandle		selectAssetHandle = selectAssetWidgets[index];
 			if ( selectAssetHandle.widget )
 			{
 				// Update preview texture if it need
@@ -218,7 +218,7 @@ void CMaterialEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::wstr
 	}
 	
 	Assert( InAssetSlot < selectAssetWidgets.size() );
-	SSelectAssetHandle&		selectAssetHandle = selectAssetWidgets[InAssetSlot];
+	SelectAssetHandle&		selectAssetHandle = selectAssetWidgets[InAssetSlot];
 
 	// If asset reference is valid, we find asset
 	TAssetHandle<CTexture2D>	newTexture2DRef;
@@ -243,7 +243,7 @@ void CMaterialEditorWindow::OnSelectedAsset( uint32 InAssetSlot, const std::wstr
 CMaterialEditorWindow::OnAssetsCanDelete
 ==================
 */
-void CMaterialEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, SCanDeleteAssetResult& OutResult )
+void CMaterialEditorWindow::OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, CanDeleteAssetResult& OutResult )
 {
 	CAsset::SetDependentAssets_t		dependentAssets;
 	material->GetDependentAssets( dependentAssets );
@@ -301,7 +301,7 @@ void CMaterialEditorWindow::OnOpenAssetEditor( uint32 InAssetSlot )
 	}
 
 	Assert( InAssetSlot < selectAssetWidgets.size() );
-	const SSelectAssetHandle&		selectAssetHandle = selectAssetWidgets[InAssetSlot];
+	const SelectAssetHandle&		selectAssetHandle = selectAssetWidgets[InAssetSlot];
 
 	// Open texture editor if asset is valid
 	if ( selectAssetHandle.asset.IsAssetValid() )

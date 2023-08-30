@@ -46,7 +46,7 @@ public:
 	 * @brief Add box geometry
 	 * @param InBoxGeometry Box geometry
 	 */
-	FORCEINLINE void AddBoxGeometry( const SPhysicsBoxGeometry& InBoxGeometry )
+	FORCEINLINE void AddBoxGeometry( const PhysicsBoxGeometry& InBoxGeometry )
 	{
 		boxGeometries.push_back( InBoxGeometry );
 	}
@@ -55,7 +55,7 @@ public:
 	 * @brief Remove box geometry
 	 * @param InBoxGeometry Box geometry to remove
 	 */
-	void RemoveBoxGeometry( const SPhysicsBoxGeometry& InBoxGeometry );
+	void RemoveBoxGeometry( const PhysicsBoxGeometry& InBoxGeometry );
 
 	/**
 	 * @brief Remove box geometry by index
@@ -82,7 +82,7 @@ public:
 	 * @brief Get array of box geometries
 	 * @return Return array of box geometries
 	 */
-	FORCEINLINE const std::vector< SPhysicsBoxGeometry >& GetBoxGeometries() const
+	FORCEINLINE const std::vector< PhysicsBoxGeometry >& GetBoxGeometries() const
 	{
 		return boxGeometries;
 	}
@@ -91,13 +91,13 @@ public:
 	 * @brief Get array of box geometries
 	 * @return Return array of box geometries
 	 */
-	FORCEINLINE std::vector< SPhysicsBoxGeometry >& GetBoxGeometries()
+	FORCEINLINE std::vector< PhysicsBoxGeometry >& GetBoxGeometries()
 	{
 		return boxGeometries;
 	}
 
 private:
-	std::vector< SPhysicsBoxGeometry >		boxGeometries;		/**< Array of box collisions */
+	std::vector< PhysicsBoxGeometry >		boxGeometries;		/**< Array of box collisions */
 };
 
 #endif // !PHYSICSBODYSETUP_H

@@ -17,18 +17,18 @@
  * @ingroup Physics
  * @brief Base shape used for collision
  */
-struct SPhysicsShapeGeometry
+struct PhysicsShapeGeometry
 {
 	/**
 	 * @brief Constructor
 	 * @param InCollisionShape Collision shape type
 	 */
-	SPhysicsShapeGeometry( ECollisionShape InCollisionShape );
+	PhysicsShapeGeometry( ECollisionShape InCollisionShape );
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~SPhysicsShapeGeometry(); 
+	virtual ~PhysicsShapeGeometry(); 
 
 	/**
 	 * Serialize
@@ -51,7 +51,7 @@ struct SPhysicsShapeGeometry
 	}
 
 	ECollisionShape						collisionShape;		/**< Collision shape */
-	SCollisionProfile*					collisionProfile;	/**< Collision profile */
+	CollisionProfile*					collisionProfile;	/**< Collision profile */
 	TAssetHandle<CPhysicsMaterial>		material;			/**< Physics material */
 
 protected:

@@ -72,12 +72,12 @@ enum ESurfaceType
  * @ingroup Physics
  * @brief Struct of collision profile
  */
-struct SCollisionProfile
+struct CollisionProfile
 {
 	/**
 	 * @brief Constructor
 	 */
-	SCollisionProfile()
+	CollisionProfile()
 		: name( TEXT( "Unknown" ) )
 		, objectType( CC_WorldStatic )
 	{
@@ -87,12 +87,12 @@ struct SCollisionProfile
 	/**
 	 * Overload operator << for serialize
 	 */
-	friend CArchive& operator<<( CArchive& InAr, SCollisionProfile*& InCollisionProfile );
+	friend CArchive& operator<<( CArchive& InAr, CollisionProfile*& InCollisionProfile );
 
 	/**
 	 * Overload operator << for serialize
 	 */
-	friend CArchive& operator<<( CArchive& InAr, const SCollisionProfile*& InCollisionProfile );
+	friend CArchive& operator<<( CArchive& InAr, const CollisionProfile*& InCollisionProfile );
 
 	std::wstring				name;					/**< Profile name */
 	ECollisionChannel			objectType;				/**< Object type */
@@ -106,16 +106,16 @@ struct SCollisionProfile
  * @ingroup Physics
  * @brief Struct of result ray cast
  */
-struct SHitResult
+struct HitResult
 {
 	/**
 	 * @brief Constructor
 	 */
-	SHitResult()
+	HitResult()
 		: actor( nullptr )
 		, component( nullptr )
-		, impactNormal( SMath::vectorZero )
-		, impactPoint( SMath::vectorZero )
+		, impactNormal( Math::vectorZero )
+		, impactPoint( Math::vectorZero )
 		, physMaterial( nullptr )
 	{ }
 
@@ -130,17 +130,17 @@ struct SHitResult
  * @ingroup Physics
  * @brief Structure that defines parameters passed into collision function 
  */
-struct SCollisionQueryParams
+struct CollisionQueryParams
 {
 	/**
 	 * @brief Constructor
 	 */
-	SCollisionQueryParams()
+	CollisionQueryParams()
 		: bReturnPhysicalMaterial( false )
 	{}
 
 	bool							bReturnPhysicalMaterial;		/**< Whether we want to include the physical material in the results */
-	static SCollisionQueryParams	defaultQueryParam;				/**< Static variable for default data to be used without reconstructing everytime */
+	static CollisionQueryParams	defaultQueryParam;				/**< Static variable for default data to be used without reconstructing everytime */
 };
 
 //

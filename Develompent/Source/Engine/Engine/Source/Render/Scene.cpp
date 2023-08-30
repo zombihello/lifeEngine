@@ -35,7 +35,7 @@ CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatr
 	: viewMatrix( InViewMatrix )
 	, projectionMatrix( InProjectionMatrix )
 	, viewProjectionMatrix( InProjectionMatrix * InViewMatrix )
-	, invViewProjectionMatrix( SMath::matrixIdentity )
+	, invViewProjectionMatrix( Math::matrixIdentity )
 	, position( InPosition )
 	, backgroundColor( InBackgroundColor )
 	, showFlags( InShowFlags )
@@ -53,7 +53,7 @@ CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatr
 	}
 #endif // WITH_EDITOR
 
-	invViewProjectionMatrix = SMath::InverseMatrix( InViewMatrix ) * SMath::InverseMatrix( InProjectionMatrix );
+	invViewProjectionMatrix = Math::InverseMatrix( InViewMatrix ) * Math::InverseMatrix( InProjectionMatrix );
 	frustum.Update( viewProjectionMatrix );
 }
 
@@ -64,13 +64,13 @@ CSceneView::ScreenToWorld
 */
 void CSceneView::ScreenToWorld( const Vector2D& InScreenPoint, Vector& OutWorldOrigin, Vector& OutWorldDirection ) const
 {
-	int32	x = SMath::Trunc( InScreenPoint.x ),
-			y = SMath::Trunc( InScreenPoint.y );
+	int32	x = Math::Trunc( InScreenPoint.x ),
+			y = Math::Trunc( InScreenPoint.y );
 
 	// Get the eye position and direction of the mouse cursor in two stages (inverse transform projection, then inverse transform view).
 	// This avoids the numerical instability that occurs when a view matrix with large translation is composed with a projection matrix
-	Matrix		inverseView			= SMath::InverseMatrix( viewMatrix );
-	Matrix		inverseProjection	= SMath::InverseMatrix( projectionMatrix );
+	Matrix		inverseView			= Math::InverseMatrix( viewMatrix );
+	Matrix		inverseProjection	= Math::InverseMatrix( projectionMatrix );
 
 	// The start of the raytrace is defined to be at mousex,mousey,0 in projection space
 	// The end of the raytrace is at mousex, mousey, 0.5 in projection space
@@ -97,7 +97,7 @@ void CSceneView::ScreenToWorld( const Vector2D& InScreenPoint, Vector& OutWorldO
 	}
 
 	Vector		rayDirViewSpace = rayEndViewSpace - rayStartViewSpace;
-	rayDirViewSpace = SMath::NormalizeVector( rayDirViewSpace );
+	rayDirViewSpace = Math::NormalizeVector( rayDirViewSpace );
 
 	// The view transform does not have projection, so we can use the standard functions that deal with vectors and normals (normals
 	// are vectors that do not use the translational part of a rotation/translation)
@@ -107,7 +107,7 @@ void CSceneView::ScreenToWorld( const Vector2D& InScreenPoint, Vector& OutWorldO
 	// Finally, store the results in the hitcheck inputs.  The start position is the eye, and the end position
 	// is the eye plus a long distance in the direction the mouse is pointing.
 	OutWorldOrigin		= rayStartWorldSpace;
-	OutWorldDirection	= SMath::NormalizeVector( rayDirWorldSpace );
+	OutWorldDirection	= Math::NormalizeVector( rayDirWorldSpace );
 }
 
 

@@ -76,7 +76,7 @@ public:
 	 * @param[in] InLocation Location actor on spawn
 	 * @param[in] InRotation Rotation actor on spawn
 	 */
-	ActorRef_t SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation = SMath::rotatorZero );
+	ActorRef_t SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero );
 
 	/**
 	 * Destroy actor in world
@@ -94,7 +94,7 @@ public:
 	 * @param[in] InRotation Rotation actor on spawn
 	 */
 	template< typename TClass >
-	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const Vector& InLocation, const CRotator& InRotation = SMath::rotatorZero )
+	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero )
 	{
 		return SpawnActor( TClass::StaticClass(), InLocation, InRotation );
 	}
@@ -109,7 +109,7 @@ public:
 	 * @param InCollisionQueryParams Collision query params
 	 * @return Return TRUE if a blocking hit is found, else false
 	 */
-	FORCEINLINE bool LineTraceSingleByChannel( SHitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const SCollisionQueryParams& InCollisionQueryParams = SCollisionQueryParams::defaultQueryParam )
+	FORCEINLINE bool LineTraceSingleByChannel( HitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const CollisionQueryParams& InCollisionQueryParams = CollisionQueryParams::defaultQueryParam )
 	{
 		return g_PhysicsScene.LineTraceSingleByChannel( OutHitResult, InStart, InEnd, InTraceChannel, InCollisionQueryParams );
 	}
@@ -227,7 +227,7 @@ public:
 		if ( !bDirty )
 		{
 			bDirty = true;
-			SEditorDelegates::onEditorMapMarkedDirty.Broadcast();
+			EditorDelegates::onEditorMapMarkedDirty.Broadcast();
 		}
 	}
 

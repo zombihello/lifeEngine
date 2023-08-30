@@ -20,7 +20,7 @@ AudioBufferRef_t CAudioBufferManager::Find( const TAssetHandle<CAudioBank>& InAu
 	Assert( InAudioBank.IsAssetValid() );
 
 	TSharedPtr<CAudioBank>		audioBankRef = InAudioBank.ToSharedPtr();
-	SAudioBankInfo				audioBankInfo;
+	AudioBankInfo				audioBankInfo;
 	AudioBankHandle_t			audioBankHandle = audioBankRef->OpenBank( audioBankInfo );
 	if ( audioBankHandle )
 	{

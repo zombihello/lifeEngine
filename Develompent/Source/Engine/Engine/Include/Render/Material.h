@@ -380,9 +380,9 @@ private:
 	bool																			bTranslucency;			/**< Is translucency material */
 	uint32																			usage;					/**< Usage flags (see EMaterialUsage) */
 	MeshShaderMap_t																	shaderMap;				/**< Shader map for material */
-	std::unordered_map<CName, float, CName::SHashFunction>							scalarParameters;		/**< Array scalar parameters */
-	std::unordered_map<CName, Vector4D, CName::SHashFunction>						vectorParameters;		/**< Vector parameters */
-	std::unordered_map<CName, TAssetHandle<CTexture2D>, CName::SHashFunction>		textureParameters;		/**< Array texture parameters */
+	std::unordered_map<CName, float, CName::HashFunction>							scalarParameters;		/**< Array scalar parameters */
+	std::unordered_map<CName, Vector4D, CName::HashFunction>						vectorParameters;		/**< Vector parameters */
+	std::unordered_map<CName, TAssetHandle<CTexture2D>, CName::HashFunction>		textureParameters;		/**< Array texture parameters */
 };
 
 //

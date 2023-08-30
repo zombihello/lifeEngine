@@ -96,7 +96,7 @@ void CMeshDrawingPolicy::SetShaderParameters( class CBaseDeviceContextRHI* InDev
 CMeshDrawingPolicy::Draw
 ==================
 */
-void CMeshDrawingPolicy::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMeshBatch, const class CSceneView& InSceneView )
+void CMeshDrawingPolicy::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMeshBatch, const class CSceneView& InSceneView )
 {
 	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
 	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, CString::Format( TEXT( "Material %s" ), materialRef ? materialRef->GetAssetName().c_str() : TEXT( "Unloaded" ) ).c_str());
@@ -180,7 +180,7 @@ CMeshDrawingPolicy::GetRasterizerState
 RasterizerStateRHIRef_t CMeshDrawingPolicy::GetRasterizerState() const
 {
 	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
-	const SRasterizerStateInitializerRHI		initializer =
+	const RasterizerStateInitializerRHI		initializer =
 	{
 		materialRef->IsWireframe() ? FM_Wireframe : FM_Solid,
 		materialRef->IsTwoSided() ? CM_None : CM_CW,

@@ -202,7 +202,7 @@ bool CAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 	bool		requestStop = false;
 
 	// Acquire audio data, also address EOF and error cases if they occur
-	SChunk		data = { nullptr, 0 };
+	Chunk		data = { nullptr, 0 };
 	for ( uint32 retryCount = 0; !GetData( data ) && retryCount < BufferRetries; ++retryCount )
 	{
 		// Check if the stream must loop or stop
@@ -239,7 +239,7 @@ bool CAudioStreamRunnable::FillAndPushBuffer( uint32 InBufferIndex )
 CAudioStreamRunnable::GetData
 ==================
 */
-bool CAudioStreamRunnable::GetData( SChunk& OutData )
+bool CAudioStreamRunnable::GetData( Chunk& OutData )
 {
 	CScopeLock	scopeLock( &streamSource->csStreamData );
 	TSharedPtr<CAudioBank>		audioBankRef	= streamSource->audioBank.ToSharedPtr();

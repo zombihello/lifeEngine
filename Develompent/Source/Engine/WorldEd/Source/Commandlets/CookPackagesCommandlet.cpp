@@ -40,7 +40,7 @@ IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CCookPackagesCommandlet )
 /**
  * Struct of TMX object for spawn actor in world
  */
-struct STMXObject
+struct TMXObject
 {
 	std::wstring					name;		/**< Actor name */
 	std::wstring					className;	/**< Class actor */
@@ -90,7 +90,7 @@ CCookPackagesCommandlet::CCookPackagesCommandlet()
  CCookPackagesCommandlet::CookMap
  ==================
  */
-bool CCookPackagesCommandlet::CookMap( const SResourceInfo& InMapInfo )
+bool CCookPackagesCommandlet::CookMap( const ResourceInfo& InMapInfo )
 {
 	Logf( TEXT( "Cooking map '%s'\n" ), InMapInfo.filename.c_str() );
 
@@ -103,7 +103,7 @@ bool CCookPackagesCommandlet::CookMap( const SResourceInfo& InMapInfo )
 	}
 
 	// Loading tilesets from TMX
-	std::vector< STMXTileset >			tilesets;
+	std::vector< TMXTileset >			tilesets;
 	if ( !LoadTMXTilests( tmxMap, tilesets ) )
 	{
 		Sys_Errorf( TEXT( "Failed loading TMX tilesets" ) );
@@ -133,7 +133,7 @@ bool CCookPackagesCommandlet::CookMap( const SResourceInfo& InMapInfo )
 CCookPackagesCommandlet::LoadTMXTilests
 ==================
 */
-bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vector<STMXTileset>& OutTilesets )
+bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vector<TMXTileset>& OutTilesets )
 {
 	const std::vector< tmx::Tileset >&		tmxTilesets		= InTMXMap.getTilesets();
 	const tmx::Vector2u&					mapTileSize		= InTMXMap.getTileSize();
@@ -151,7 +151,7 @@ bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 			std::wstring		packageName;
 			std::wstring		assetName;
 			EAssetType			assetType;
-			SResourceInfo		resourceInfo;
+			ResourceInfo		resourceInfo;
 
 			ParseReferenceToAsset( tmxTilesetName, packageName, assetName, assetType );
 			if ( assetType != AT_Material )
@@ -175,7 +175,7 @@ bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 		}
 
 		// Save info about tileset
-		STMXTileset			tileset;
+		TMXTileset			tileset;
 		tileset.firstGID	= tmxTileset.getFirstGID();
 		tileset.lastGID		= tmxTileset.getLastGID();
 		tileset.material	= tilesetMaterial;
@@ -214,11 +214,11 @@ bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 CCookPackagesCommandlet::FindTileset
 ==================
 */
-bool CCookPackagesCommandlet::FindTileset( const std::vector<STMXTileset>& InTilesets, uint32 InIDTile, STMXTileset& OutTileset, RectFloat_t& OutTextureRect ) const
+bool CCookPackagesCommandlet::FindTileset( const std::vector<TMXTileset>& InTilesets, uint32 InIDTile, TMXTileset& OutTileset, RectFloat_t& OutTextureRect ) const
 {
 	for ( uint32 indexTileset = 0, countTilesets = InTilesets.size(); indexTileset < countTilesets; ++indexTileset )
 	{
-		const STMXTileset&		tileset = InTilesets[ indexTileset ];
+		const TMXTileset&		tileset = InTilesets[ indexTileset ];
 		if ( InIDTile < tileset.firstGID || InIDTile > tileset.lastGID )
 		{
 			continue;
@@ -237,7 +237,7 @@ bool CCookPackagesCommandlet::FindTileset( const std::vector<STMXTileset>& InTil
 CCookPackagesCommandlet::SpawnTilesInWorld
 ==================
 */
-void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const std::vector<STMXTileset>& InTilesets )
+void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const std::vector<TMXTileset>& InTilesets )
 {
 	const std::vector< tmx::Layer::Ptr >&		tmxLayers	= InTMXMap.getLayers();
 	const tmx::Vector2u&						mapSize		= InTMXMap.getTileCount();
@@ -257,7 +257,7 @@ void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 				if ( tile.ID != 0 )
 				{
 					// Find material for tile
-					STMXTileset		tileset;
+					TMXTileset		tileset;
 					RectFloat_t		textureRect;
 					bool			result = FindTileset( InTilesets, tile.ID, tileset, textureRect );
 					AssertMsg( result, TEXT( "Not founded tileset for tile with ID %i" ), tile.ID );
@@ -288,7 +288,7 @@ void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 CCookPackagesCommandlet::SpawnActorsInWorld
 ==================
 */
-void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, const std::vector<STMXTileset>& InTileset )
+void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, const std::vector<TMXTileset>& InTileset )
 {
 	const std::vector< tmx::Layer::Ptr >&		tmxLayers = InTMXMap.getLayers();
 
@@ -312,7 +312,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 			{			
 				// Getting all parameters from object
 				const tmx::Object&		object = tmxObjects[ indexObject ];							
-				STMXObject				tmxObject;
+				TMXObject				tmxObject;
 				tmxObject.name = ANSI_TO_TCHAR( object.getName().c_str() );
 
 				// Getting transformation and settings from object
@@ -327,7 +327,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 
 					// Getting rotation
 					{
-						tmxObject.transform.SetRotation( SMath::AnglesToQuaternion( Vector( 0.f, 0.f, object.getRotation() ) ) );
+						tmxObject.transform.SetRotation( Math::AnglesToQuaternion( Vector( 0.f, 0.f, object.getRotation() ) ) );
 					}
 
 					// Getting size
@@ -343,7 +343,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					if ( tileID > 0 )
 					{
 						// Find material for tile
-						STMXTileset			tileset;
+						TMXTileset			tileset;
 						RectFloat_t			textureRect;
 						if ( FindTileset( InTileset, tileID, tileset, textureRect ) )
 						{
@@ -453,7 +453,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
  CCookPackagesCommandlet::CookMaterial
  ==================
  */
-bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo, TAssetHandle<CMaterial>& OutMaterial )
+bool CCookPackagesCommandlet::CookMaterial( const ResourceInfo& InMaterialInfo, TAssetHandle<CMaterial>& OutMaterial )
 {
 	Logf( TEXT( "Cooking material '%s:%s'\n" ), InMaterialInfo.packageName.c_str(), InMaterialInfo.filename.c_str() );
 
@@ -541,7 +541,7 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 
 				std::wstring				errorMsg;
 				CShaderCompiler				shaderCompiler;
-				CVertexFactoryMetaType*		vfType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( usedVertexFectories[ index ] );
+				CVertexFactoryMetaType*		vfType = CVertexFactoryMetaType::ContainerVertexFactoryMetaType::Get()->FindRegisteredType( usedVertexFectories[ index ] );
 				bool						result = shaderCompiler.CompileShader( shaderMetaType, cookedShaderPlatform, shaderCache, errorMsg, vfType );
 				if ( !result )
 				{
@@ -593,7 +593,7 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 					std::wstring		packageName;
 					std::wstring		assetName;
 					EAssetType			assetType;
-					SResourceInfo		resourceInfo;
+					ResourceInfo		resourceInfo;
 
 					ParseReferenceToAsset( assetReference, packageName, assetName, assetType );
 					if ( assetType != AT_Texture2D )
@@ -640,7 +640,7 @@ bool CCookPackagesCommandlet::CookMaterial( const SResourceInfo& InMaterialInfo,
 		materialRef->SetTextureParameterValue( it->first, it->second );
 	}
 
-	OutMaterial = TAssetHandle<CMaterial>( materialRef, MakeSharedPtr<SAssetReference>( AT_Material, materialRef->GetGUID() ) );
+	OutMaterial = TAssetHandle<CMaterial>( materialRef, MakeSharedPtr<AssetReference>( AT_Material, materialRef->GetGUID() ) );
 
 	// Save to package
 	return SaveToPackage( InMaterialInfo, OutMaterial );
@@ -710,12 +710,12 @@ TSharedPtr<CTexture2D> CCookPackagesCommandlet::ConvertTexture2D( const std::wst
 CCookPackagesCommandlet::CookTexture2D
 ==================
 */
-bool CCookPackagesCommandlet::CookTexture2D( const SResourceInfo& InTexture2DInfo, TAssetHandle<CTexture2D>& OutTexture2D )
+bool CCookPackagesCommandlet::CookTexture2D( const ResourceInfo& InTexture2DInfo, TAssetHandle<CTexture2D>& OutTexture2D )
 {
 	Logf( TEXT( "Cooking texture 2D '%s:%s'\n" ), InTexture2DInfo.packageName.c_str(), InTexture2DInfo.filename.c_str() );
 	
 	TSharedPtr<CTexture2D>		texture2DRef = ConvertTexture2D( InTexture2DInfo.path, InTexture2DInfo.filename );
-	OutTexture2D				= TAssetHandle<CTexture2D>( texture2DRef, MakeSharedPtr<SAssetReference>( AT_Texture2D, texture2DRef->GetGUID() ) );
+	OutTexture2D				= TAssetHandle<CTexture2D>( texture2DRef, MakeSharedPtr<AssetReference>( AT_Texture2D, texture2DRef->GetGUID() ) );
 	return OutTexture2D.IsAssetValid() && SaveToPackage( InTexture2DInfo, OutTexture2D );
 }
 
@@ -873,12 +873,12 @@ TSharedPtr<CAudioBank> CCookPackagesCommandlet::ConvertAudioBank( const std::wst
 CCookPackagesCommandlet::CookAudioBank
 ==================
 */
-bool CCookPackagesCommandlet::CookAudioBank( const SResourceInfo& InAudioBankInfo, TAssetHandle<CAudioBank>& OutAudioBank )
+bool CCookPackagesCommandlet::CookAudioBank( const ResourceInfo& InAudioBankInfo, TAssetHandle<CAudioBank>& OutAudioBank )
 {
 	Logf( TEXT( "Cooking audio bank '%s:%s'\n" ), InAudioBankInfo.packageName.c_str(), InAudioBankInfo.filename.c_str() );
 	
 	TSharedPtr<CAudioBank>		audioBankRef = ConvertAudioBank( InAudioBankInfo.path, InAudioBankInfo.filename );
-	OutAudioBank				= TAssetHandle<CAudioBank>( audioBankRef, MakeSharedPtr<SAssetReference>( AT_AudioBank, audioBankRef->GetGUID() ) );
+	OutAudioBank				= TAssetHandle<CAudioBank>( audioBankRef, MakeSharedPtr<AssetReference>( AT_AudioBank, audioBankRef->GetGUID() ) );
 	return OutAudioBank.IsAssetValid() && SaveToPackage( InAudioBankInfo, OutAudioBank );
 }
 
@@ -893,7 +893,7 @@ bool CCookPackagesCommandlet::CookAudioBank( const SResourceInfo& InAudioBankInf
  CCookPackagesCommandlet::CookPhysMaterial
  ==================
  */
-bool CCookPackagesCommandlet::CookPhysMaterial( const SResourceInfo& InPhysMaterialInfo, TAssetHandle<CPhysicsMaterial>& OutPhysMaterial )
+bool CCookPackagesCommandlet::CookPhysMaterial( const ResourceInfo& InPhysMaterialInfo, TAssetHandle<CPhysicsMaterial>& OutPhysMaterial )
 {
 	Logf( TEXT( "Cooking physics material '%s:%s'\n" ), InPhysMaterialInfo.packageName.c_str(), InPhysMaterialInfo.filename.c_str() );
 	
@@ -922,7 +922,7 @@ bool CCookPackagesCommandlet::CookPhysMaterial( const SResourceInfo& InPhysMater
 	physMaterialRef->SetSurfaceType( Sys_TextToESurfaceType( surfaceTypeName ) );
 
 	// Save to package
-	OutPhysMaterial = TAssetHandle<CPhysicsMaterial>( physMaterialRef, MakeSharedPtr<SAssetReference>( AT_PhysicsMaterial, physMaterialRef->GetGUID() ) );
+	OutPhysMaterial = TAssetHandle<CPhysicsMaterial>( physMaterialRef, MakeSharedPtr<AssetReference>( AT_PhysicsMaterial, physMaterialRef->GetGUID() ) );
 	return SaveToPackage( InPhysMaterialInfo, OutPhysMaterial );
 }
 
@@ -937,7 +937,7 @@ bool CCookPackagesCommandlet::CookPhysMaterial( const SResourceInfo& InPhysMater
  CCookPackagesCommandlet::SaveToPackage
  ==================
  */
-bool CCookPackagesCommandlet::SaveToPackage( const SResourceInfo& InResourceInfo, const TAssetHandle<CAsset>& InAsset )
+bool CCookPackagesCommandlet::SaveToPackage( const ResourceInfo& InResourceInfo, const TAssetHandle<CAsset>& InAsset )
 {
 	std::wstring		outputPackage = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), g_CookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
 	PackageRef_t			package = g_PackageManager->LoadPackage( outputPackage, true );
@@ -958,7 +958,7 @@ bool CCookPackagesCommandlet::SaveToPackage( const SResourceInfo& InResourceInfo
 CCookPackagesCommandlet::InsertResourceToList
 ==================
 */
-void CCookPackagesCommandlet::InsertResourceToList( ResourceMap_t& InOutResourceMap, const std::wstring& InPackageName, const std::wstring& InFilename, const SResourceInfo& InResourceInfo )
+void CCookPackagesCommandlet::InsertResourceToList( ResourceMap_t& InOutResourceMap, const std::wstring& InPackageName, const std::wstring& InFilename, const ResourceInfo& InResourceInfo )
 {
 	auto		itPackage = InOutResourceMap.find( InPackageName );
 	if ( itPackage == InOutResourceMap.end() )
@@ -1036,7 +1036,7 @@ void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 		}
 
 		// If this resource is texture
-		SResourceInfo			resourceInfo = SResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
+		ResourceInfo			resourceInfo = ResourceInfo{ packageName, filename, fullPath, InIsAlwaysCookDir };
 		if ( IsSupportedTextureExtension( extension ) )
 		{
 			InsertResourceToList( texturesMap, packageName, filename, resourceInfo );

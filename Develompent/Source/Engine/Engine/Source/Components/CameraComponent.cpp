@@ -71,7 +71,7 @@ void CCameraComponent::Serialize( class CArchive& InArchive )
 CCameraComponent::GetCameraView
 ==================
 */
-void CCameraComponent::GetCameraView( SCameraView& OutDesiredView )
+void CCameraComponent::GetCameraView( CameraView& OutDesiredView )
 {
 	OutDesiredView.location			= GetComponentLocation();
 	OutDesiredView.rotation			= GetComponentQuat();

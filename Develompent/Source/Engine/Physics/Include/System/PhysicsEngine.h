@@ -56,7 +56,7 @@ public:
 	 * @param InName Name of collision profile
 	 * @return Return pointer to finded collision profile. If not founded retulr nullptr
 	 */
-	FORCEINLINE SCollisionProfile* FindCollisionProfile( const std::wstring& InName ) const
+	FORCEINLINE CollisionProfile* FindCollisionProfile( const std::wstring& InName ) const
 	{
 		auto	itProfile = collisionProfiles.find( InName );
 		if ( itProfile == collisionProfiles.end() )
@@ -79,7 +79,7 @@ public:
 
 private:
 	TAssetHandle<CPhysicsMaterial>										defaultPhysMaterial;			/**< Default physics material */
-	mutable std::unordered_map< std::wstring,  SCollisionProfile >		collisionProfiles;				/**< Collision profiles map */
+	mutable std::unordered_map< std::wstring,  CollisionProfile >		collisionProfiles;				/**< Collision profiles map */
 };
 
 #endif // !PHYSICSENGINE_H

@@ -248,12 +248,12 @@ void CLevelViewportWindow::OnTick()
 					// Rotate
 				case ImGuizmo::ROTATE:
 				{
-					Quaternion		deltaRotation =  SMath::AnglesToQuaternionZYX( rotation );
+					Quaternion		deltaRotation =  Math::AnglesToQuaternionZYX( rotation );
 					actor->AddActorRotation( deltaRotation );
 					if ( bMultiSelection && actor != actorCenter )
 					{
-						Matrix		translateMatrix = SMath::TranslateMatrix( actorCenter->GetActorLocation() );
-						actor->SetActorLocation( translateMatrix * SMath::QuaternionToMatrix( deltaRotation ) * SMath::InverseMatrix( translateMatrix ) * Vector4D( actor->GetActorLocation(), 1.f ) );
+						Matrix		translateMatrix = Math::TranslateMatrix( actorCenter->GetActorLocation() );
+						actor->SetActorLocation( translateMatrix * Math::QuaternionToMatrix( deltaRotation ) * Math::InverseMatrix( translateMatrix ) * Vector4D( actor->GetActorLocation(), 1.f ) );
 					}
 					break;
 				}
@@ -296,7 +296,7 @@ void CLevelViewportWindow::DrawPopupMenu()
 		Vector			location = viewportClient.ScreenToWorld( Vector2D( viewportCursorPos.x, viewportCursorPos.y ), GetSizeX(), GetSizeY() );
 		if ( g_EditorEngine->GetConstraints().IsUseSnapTranslation() )
 		{
-			location = SMath::GridSnap( location, g_EditorEngine->GetConstraints().GetGridTranslationSize() );
+			location = Math::GridSnap( location, g_EditorEngine->GetConstraints().GetGridTranslationSize() );
 		}
 
 		// Spawn actor by class
@@ -342,7 +342,7 @@ void CLevelViewportWindow::OnVisibilityChanged( bool InNewVisibility )
 CLevelViewportWindow::ProcessEvent
 ==================
 */
-void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CLevelViewportWindow::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	// Process ImGUI events
 	viewportWidget.ProcessEvent( InWindowEvent );
@@ -356,7 +356,7 @@ void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 		switch ( InWindowEvent.type )
 		{
 			// If pressed left mouse button, we try select actor in world
-		case SWindowEvent::T_MouseReleased:
+		case WindowEvent::T_MouseReleased:
 #if ENABLE_HITPROXY
 			if ( !bGuizmoUsing && InWindowEvent.events.mouseButton.code == BC_MouseLeft )
 			{
@@ -398,7 +398,7 @@ void CLevelViewportWindow::ProcessEvent( struct SWindowEvent& InWindowEvent )
 			break;
 
 			// Key released events
-		case SWindowEvent::T_KeyReleased:
+		case WindowEvent::T_KeyReleased:
 			switch ( InWindowEvent.events.key.code )
 			{
 				// Unselect all actors

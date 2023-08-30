@@ -43,7 +43,7 @@ CBaseLightingVertexShader::~CBaseLightingVertexShader()
 CBaseLightingVertexShader::Init
 ==================
 */
-void CBaseLightingVertexShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
+void CBaseLightingVertexShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 {
 	CShader::Init( InShaderCacheItem );
 
@@ -71,7 +71,7 @@ void CBaseLightingVertexShader::SetConstantParameters( class CBaseDeviceContextR
 CBaseLightingVertexShader::SetMesh
 ==================
 */
-void CBaseLightingVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+void CBaseLightingVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
 	Sys_Errorf( TEXT( "CBaseLightingVertexShader::SetMesh( MeshBatch ) Not supported" ) );
 }
@@ -82,7 +82,7 @@ void CBaseLightingVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceCo
 CBaseLightingPixelShader::Init
 ==================
 */
-void CBaseLightingPixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
+void CBaseLightingPixelShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 {
 	CShader::Init( InShaderCacheItem );
 

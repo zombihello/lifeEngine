@@ -53,7 +53,7 @@ void CBoxComponent::UpdateBodySetup()
 {
 	bodySetup = new CPhysicsBodySetup();
 
-	SPhysicsBoxGeometry				boxGeometry( size.x, size.y, size.z );
+	PhysicsBoxGeometry				boxGeometry( size.x, size.y, size.z );
 	boxGeometry.collisionProfile	= collisionProfile;
 	boxGeometry.material			= physicsMaterial;
 	bodySetup->AddBoxGeometry( boxGeometry );

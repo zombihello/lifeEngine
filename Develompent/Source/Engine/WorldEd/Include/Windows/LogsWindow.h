@@ -38,7 +38,7 @@ public:
 	 */
 	FORCEINLINE void PrintLog( ELogType InLogType, const tchar* InMessage )
 	{
-		SLogInfo		logInfo;
+		LogInfo		logInfo;
 		logInfo.type = InLogType;
 		logInfo.message = TCHAR_TO_ANSI( InMessage );
 		history.push_back( logInfo );
@@ -54,7 +54,7 @@ private:
 	/**
 	 * @brief Struct log info
 	 */
-	struct SLogInfo
+	struct LogInfo
 	{
 		ELogType			type;			/**< Log type */
 		std::string			message;		/**< Message */
@@ -66,7 +66,7 @@ private:
 	 */
 	void ExecCommand( const std::string& InCommand );
 
-	std::vector<SLogInfo>	history;		/**< Array of log history */
+	std::vector<LogInfo>	history;		/**< Array of log history */
 	std::string				commandBuffer;	/**< Command buffer */
 };
 

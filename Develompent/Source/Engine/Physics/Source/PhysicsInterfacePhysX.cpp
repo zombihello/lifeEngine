@@ -5,10 +5,10 @@
 
 /*
 ==================
-SPhysicsInterfacePhysX::Init
+PhysicsInterfacePhysX::Init
 ==================
 */
-void SPhysicsInterfacePhysX::Init()
+void PhysicsInterfacePhysX::Init()
 {
 	Logf( TEXT( "PhysX version: %i.%i.%i\n" ), PX_PHYSICS_VERSION_MAJOR, PX_PHYSICS_VERSION_MINOR, PX_PHYSICS_VERSION_BUGFIX );
 
@@ -38,10 +38,10 @@ void SPhysicsInterfacePhysX::Init()
 
 /*
 ==================
-SPhysicsInterfacePhysX::Shutdown
+PhysicsInterfacePhysX::Shutdown
 ==================
 */
-void SPhysicsInterfacePhysX::Shutdown()
+void PhysicsInterfacePhysX::Shutdown()
 {
 	if ( g_PhysXSDK )
 	{
@@ -76,26 +76,26 @@ void SPhysicsInterfacePhysX::Shutdown()
 
 /*
 ==================
-SPhysicsInterfacePhysX::CreateMaterial
+PhysicsInterfacePhysX::CreateMaterial
 ==================
 */
-SPhysicsMaterialHandlePhysX SPhysicsInterfacePhysX::CreateMaterial( class CPhysicsMaterial* InPhysMaterial )
+PhysicsMaterialHandlePhysX PhysicsInterfacePhysX::CreateMaterial( class CPhysicsMaterial* InPhysMaterial )
 {
 	Assert( InPhysMaterial );
 
-	SPhysicsMaterialHandlePhysX		materialHandle;
+	PhysicsMaterialHandlePhysX		materialHandle;
 	materialHandle.pxMaterial = g_PhysXSDK->createMaterial( InPhysMaterial->GetStaticFriction(), InPhysMaterial->GetDynamicFriction(), InPhysMaterial->GetRestitution() );
 	return materialHandle;
 }
 
 /*
 ==================
-SPhysicsInterfacePhysX::UpdateMaterial
+PhysicsInterfacePhysX::UpdateMaterial
 ==================
 */
-void SPhysicsInterfacePhysX::UpdateMaterial( const SPhysicsMaterialHandlePhysX& InMaterialHandle, class CPhysicsMaterial* InPhysMaterial )
+void PhysicsInterfacePhysX::UpdateMaterial( const PhysicsMaterialHandlePhysX& InMaterialHandle, class CPhysicsMaterial* InPhysMaterial )
 {
-	Assert( SPhysicsInterfacePhysX::IsValidMaterial( InMaterialHandle ) && InPhysMaterial );
+	Assert( PhysicsInterfacePhysX::IsValidMaterial( InMaterialHandle ) && InPhysMaterial );
 	InMaterialHandle.pxMaterial->setStaticFriction( InPhysMaterial->GetStaticFriction() );
 	InMaterialHandle.pxMaterial->setDynamicFriction( InPhysMaterial->GetDynamicFriction() );
 	InMaterialHandle.pxMaterial->setRestitution( InPhysMaterial->GetRestitution() );
@@ -103,10 +103,10 @@ void SPhysicsInterfacePhysX::UpdateMaterial( const SPhysicsMaterialHandlePhysX& 
 
 /*
 ==================
-SPhysicsInterfacePhysX::CreateActor
+PhysicsInterfacePhysX::CreateActor
 ==================
 */
-SPhysicsActorHandlePhysX SPhysicsInterfacePhysX::CreateActor( const SActorCreationParams& InParams )
+PhysicsActorHandlePhysX PhysicsInterfacePhysX::CreateActor( const ActorCreationParams& InParams )
 {
 	PhysicsActorHandle_t		actorHandle;
 	physx::PxTransform		pxTransform = LE2PTransform( InParams.initialTM );

@@ -63,7 +63,7 @@ void Sys_ImGUIEndDrawing();
  * 
  * @param[in] InWindowEvent Window event
  */
-void Sys_ImGUIProcessEvent( struct SWindowEvent& InWindowEvent );
+void Sys_ImGUIProcessEvent( struct WindowEvent& InWindowEvent );
 
 /**
  * @ingroup UI
@@ -319,14 +319,14 @@ public:
 	 * @param	OutLayerEvent Occurred layer event
 	 * @return Return TRUE if queue of events not empty, else will return FALSE
 	 */
-	bool PollEvent( SWindowEvent& OutLayerEvent );
+	bool PollEvent( WindowEvent& OutLayerEvent );
 
 	/**
 	 * @brief Process event
 	 *
 	 * @param InWindowEvent			Window event
 	 */
-	virtual void ProcessEvent( struct SWindowEvent& InWindowEvent );
+	virtual void ProcessEvent( struct WindowEvent& InWindowEvent );
 
 	/**
 	 * @brief Open popup
@@ -549,7 +549,7 @@ private:
 	ImGuiID						viewportID;					/**< Viewport ID */
 	Vector2D					padding;					/**< Layer padding */
 	std::wstring				name;						/**< Layer name */
-	std::stack<SWindowEvent>	events;						/**< Stack of ImGUI events who need process */
+	std::stack<WindowEvent>	events;						/**< Stack of ImGUI events who need process */
 	TSharedPtr<CImGUIPopup>		popup;						/**< Current opened popup in layer */
 };
 
@@ -619,7 +619,7 @@ public:
 	 * 
 	 * @param[in] InWindowEvent Window event
 	 */
-	void ProcessEvent( struct SWindowEvent& InWindowEvent );
+	void ProcessEvent( struct WindowEvent& InWindowEvent );
 
 	/**
 	 * @brief Set show cursor
@@ -668,7 +668,7 @@ public:
 	 * @param InTexture2D	Texture 2D
 	 * @return Return locked texture 2D
 	 */
-	FORCEINLINE SImGUILockedTexture2D LockTexture( Texture2DRHIParamRef_t InTexture2D )
+	FORCEINLINE ImGUILockedTexture2D LockTexture( Texture2DRHIParamRef_t InTexture2D )
 	{
 		if ( InTexture2D )
 		{
@@ -676,7 +676,7 @@ public:
 			lockedTextures.push_back( InTexture2D );
 		}
 
-		return SImGUILockedTexture2D{ InTexture2D };
+		return ImGUILockedTexture2D{ InTexture2D };
 	}
 
 	/**

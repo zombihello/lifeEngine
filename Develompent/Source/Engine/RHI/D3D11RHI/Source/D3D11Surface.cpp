@@ -343,7 +343,7 @@ CD3D11Texture2DRHI::~CD3D11Texture2DRHI()
 CD3D11Texture2DRHI::Lock
 ==================
 */
-void CD3D11Texture2DRHI::Lock( CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, SLockedData& OutLockedData )
+void CD3D11Texture2DRHI::Lock( CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, bool InIsDataWrite, bool InIsUseCPUShadow, LockedData& OutLockedData )
 {
 	Assert( OutLockedData.data == nullptr );
 
@@ -401,7 +401,7 @@ void CD3D11Texture2DRHI::Lock( CBaseDeviceContextRHI* InDeviceContext, uint32 In
 CD3D11Texture2DRHI::Unlock
 ==================
 */
-void CD3D11Texture2DRHI::Unlock( CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, SLockedData& InLockedData, bool InDiscardUpdate /*= false*/ )
+void CD3D11Texture2DRHI::Unlock( CBaseDeviceContextRHI* InDeviceContext, uint32 InMipIndex, LockedData& InLockedData, bool InDiscardUpdate /*= false*/ )
 {
 	bool			isNeedUpdate = ( !InLockedData.stagingResource.IsValid() || flags & TCF_Dynamic ) && !InDiscardUpdate;
 	if ( isNeedUpdate )

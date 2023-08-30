@@ -73,9 +73,9 @@ void CSphereComponent::AddToDrawList( const class CSceneView& InSceneView )
 
 	for ( uint32 index = 0, count = meshBatchLinks.size(); index < count; ++index )
 	{
-		const SMeshBatch*	meshBatchLink = meshBatchLinks[index];
+		const MeshBatch*	meshBatchLink = meshBatchLinks[index];
 		++meshBatchLink->numInstances;
-		meshBatchLink->instances.push_back( SMeshInstance{ transform.ToMatrix() } );
+		meshBatchLink->instances.push_back( MeshInstance{ transform.ToMatrix() } );
 	}
 }
 
@@ -95,10 +95,10 @@ void CSphereComponent::LinkDrawList()
 	}
 
 	SDGLevel = pendingSDGLevel;
-	SSceneDepthGroup&				SDG = scene->GetSDG( SDGLevel );
+	SceneDepthGroup&				SDG = scene->GetSDG( SDGLevel );
 
 	// Generate mesh batch of sprite
-	SMeshBatch			            meshBatch;
+	MeshBatch			            meshBatch;
 	meshBatch.baseVertexIndex		= 0;
 	meshBatch.firstIndex			= 0;
 	meshBatch.numPrimitives			= g_SphereMesh.GetNumPrimitives();
@@ -106,7 +106,7 @@ void CSphereComponent::LinkDrawList()
 	meshBatch.primitiveType			= PT_TriangleList;
 	
 	// Make and add to scene new draw policy link	
-	const SMeshBatch*				meshBatchLink = nullptr;
+	const MeshBatch*				meshBatchLink = nullptr;
 	drawingPolicyLink				= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( g_SphereMesh.GetVertexFactory(), material, meshBatch, meshBatchLink, SDG.dynamicMeshElements, DEC_DYNAMICELEMENTS );
 	meshBatchLinks.push_back( meshBatchLink );
 
@@ -123,7 +123,7 @@ CSphereComponent::UnlinkDrawList
 void CSphereComponent::UnlinkDrawList()
 {
 	Assert( scene );
-	SSceneDepthGroup&	SDG = scene->GetSDG( SDGLevel );
+	SceneDepthGroup&	SDG = scene->GetSDG( SDGLevel );
 
 	// If the primitive already added to scene - remove all draw policy links
 	if ( drawingPolicyLink  )

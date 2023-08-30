@@ -451,10 +451,10 @@ void CWindowsWindow::Hide()
 CWindowsWindow::PollEvent
 ==================
 */
-bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
+bool CWindowsWindow::PollEvent( WindowEvent& OutWindowEvent )
 {
 	Assert( sdlWindow );
-	OutWindowEvent.type = SWindowEvent::T_None;
+	OutWindowEvent.type = WindowEvent::T_None;
 
 	SDL_Event			sdlEvent;
 	bool				isNotEndEvent = SDL_PollEvent( &sdlEvent );
@@ -464,7 +464,7 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 		// Event of text input
 	case SDL_TEXTINPUT:
 		// TODO BG yehor.pohuliaka: I don't like this shit, I'm not sure about this kind of storage of the input string.
-		OutWindowEvent.type = SWindowEvent::T_TextInput;
+		OutWindowEvent.type = WindowEvent::T_TextInput;
 		OutWindowEvent.events.textInputEvent.text = sdlEvent.text.text;
 		break;
 
@@ -473,11 +473,11 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 	case SDL_KEYUP:
 		if ( sdlEvent.type == SDL_KEYUP )
 		{
-			OutWindowEvent.type = SWindowEvent::T_KeyReleased;
+			OutWindowEvent.type = WindowEvent::T_KeyReleased;
 		}
 		else
 		{
-			OutWindowEvent.type = SWindowEvent::T_KeyPressed;
+			OutWindowEvent.type = WindowEvent::T_KeyPressed;
 		}
 
 		OutWindowEvent.events.key.isAlt			= sdlEvent.key.keysym.mod & KMOD_ALT;
@@ -494,11 +494,11 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 	case SDL_MOUSEBUTTONUP:
 		if ( sdlEvent.type == SDL_MOUSEBUTTONUP )
 		{
-			OutWindowEvent.type = SWindowEvent::T_MouseReleased;
+			OutWindowEvent.type = WindowEvent::T_MouseReleased;
 		}
 		else
 		{
-			OutWindowEvent.type = SWindowEvent::T_MousePressed;
+			OutWindowEvent.type = WindowEvent::T_MousePressed;
 		}
 
 		OutWindowEvent.events.mouseButton.code = Sys_MouseButtonToButtonCode( sdlEvent.button.button );
@@ -508,14 +508,14 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 
 		// Event of moving wheel mouse
 	case SDL_MOUSEWHEEL:
-		OutWindowEvent.type = SWindowEvent::T_MouseWheel;
+		OutWindowEvent.type = WindowEvent::T_MouseWheel;
 		OutWindowEvent.events.mouseWheel.x = sdlEvent.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? sdlEvent.wheel.x * -1 : sdlEvent.wheel.x;
 		OutWindowEvent.events.mouseWheel.y = sdlEvent.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? sdlEvent.wheel.y * -1 : sdlEvent.wheel.y;
 		break;
 
 		// Event of mouse moving
 	case SDL_MOUSEMOTION:
-		OutWindowEvent.type = SWindowEvent::T_MouseMove;
+		OutWindowEvent.type = WindowEvent::T_MouseMove;
 		OutWindowEvent.events.mouseMove.x = sdlEvent.motion.x;
 		OutWindowEvent.events.mouseMove.y = sdlEvent.motion.y;
 		OutWindowEvent.events.mouseMove.xDirection = sdlEvent.motion.xrel;
@@ -528,14 +528,14 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 		{
 			// Event of close window
 		case SDL_WINDOWEVENT_CLOSE:
-			OutWindowEvent.type = SWindowEvent::T_WindowClose;
+			OutWindowEvent.type = WindowEvent::T_WindowClose;
 			OutWindowEvent.events.windowClose.windowId = sdlEvent.window.windowID;
 			break;
 
 			// Event of resize window
 		case SDL_WINDOWEVENT_SIZE_CHANGED:
 		case SDL_WINDOWEVENT_RESIZED:
-			OutWindowEvent.type = SWindowEvent::T_WindowResize;
+			OutWindowEvent.type = WindowEvent::T_WindowResize;
 			OutWindowEvent.events.windowResize.width = sdlEvent.window.data1;
 			OutWindowEvent.events.windowResize.height = sdlEvent.window.data2;
 			OutWindowEvent.events.windowResize.windowId = sdlEvent.window.windowID;
@@ -543,7 +543,7 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 
 			// Event of gained focus
 		case SDL_WINDOWEVENT_FOCUS_GAINED:
-			OutWindowEvent.type = SWindowEvent::T_WindowFocusGained;
+			OutWindowEvent.type = WindowEvent::T_WindowFocusGained;
 			OutWindowEvent.events.windowFocusGained.windowId = sdlEvent.window.windowID;
 
 			if ( !isShowCursor )
@@ -554,7 +554,7 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 
 			// Event of lost focus
 		case SDL_WINDOWEVENT_FOCUS_LOST:
-			OutWindowEvent.type = SWindowEvent::T_WindowFocusLost;
+			OutWindowEvent.type = WindowEvent::T_WindowFocusLost;
 			OutWindowEvent.events.windowFocusLost.windowId = sdlEvent.window.windowID;
 
 			if ( !isShowCursor )
@@ -565,7 +565,7 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 
 			// Event of move
 		case SDL_WINDOWEVENT_MOVED:
-			OutWindowEvent.type = SWindowEvent::T_WindowMove;
+			OutWindowEvent.type = WindowEvent::T_WindowMove;
 			OutWindowEvent.events.windowMove.x = sdlEvent.window.data1;
 			OutWindowEvent.events.windowMove.y = sdlEvent.window.data2;
 			break;
@@ -575,7 +575,7 @@ bool CWindowsWindow::PollEvent( SWindowEvent& OutWindowEvent )
 
 		// In default cast we not getting event
 	default:		
-		OutWindowEvent.type = SWindowEvent::T_None;		
+		OutWindowEvent.type = WindowEvent::T_None;		
 		break;
 	}
 

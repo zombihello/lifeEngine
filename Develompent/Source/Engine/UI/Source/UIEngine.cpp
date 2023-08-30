@@ -46,7 +46,7 @@ void CUIEngine::Shutdown()
 CUIEngine::ProcessEvent
 ==================
 */
-void CUIEngine::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CUIEngine::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 #if WITH_IMGUI
 	g_ImGUIEngine->ProcessEvent( InWindowEvent );

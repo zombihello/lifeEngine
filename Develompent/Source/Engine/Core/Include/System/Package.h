@@ -115,7 +115,7 @@ FORCEINLINE std::wstring ConvertAssetTypeToText( EAssetType InAssetType )
  * @ingroup Core
  * Struct reference to asset
  */
-struct SAssetReference
+struct AssetReference
 {
 	/**
 	 * Constructor
@@ -124,7 +124,7 @@ struct SAssetReference
 	 * @param[in] InGUIDAsset GUID of asset
 	 * @param[in] InGUIDPackage GUID of the package
 	 */
-	FORCEINLINE SAssetReference( EAssetType InType = AT_Unknown, const CGuid& InGUIDAsset = CGuid(), const CGuid& InGUIDPackage = CGuid() )
+	FORCEINLINE AssetReference( EAssetType InType = AT_Unknown, const CGuid& InGUIDAsset = CGuid(), const CGuid& InGUIDPackage = CGuid() )
 		: type( InType ), guidAsset( InGUIDAsset ), guidPackage( InGUIDPackage )
 	{}
 
@@ -146,7 +146,7 @@ struct SAssetReference
  * @ingroup Core
  * Asset info in package
  */
-struct SAssetInfo
+struct AssetInfo
 {
 	uint32						offset;		/**< Offset in archive to asset */
 	uint32						size;		/**< Size data in archive */
@@ -159,7 +159,7 @@ struct SAssetInfo
  * @ingroup Core
  * Asset handle for containing in TSharedPtr and TWeakPtr reference to asset and him pointer
  */
-template< class ObjectType >
+template<class ObjectType>
 struct TAssetHandle
 {
 public:
@@ -169,7 +169,7 @@ public:
 	/**
 	 * @brief Hash function for STL containers
 	 */
-	struct SHashFunction
+	struct HashFunction
 	{
 		/**
 		 * @brief Calculate hash of TAssetHandle
@@ -199,7 +199,7 @@ public:
 	 * @param InAssetPtr		Asset ptr
 	 * @param InReferencePtr	Reference ptr
 	 */
-	FORCEINLINE TAssetHandle( const TWeakPtr<ObjectType>& InAssetPtr, const TSharedPtr<SAssetReference>& InReferencePtr )
+	FORCEINLINE TAssetHandle( const TWeakPtr<ObjectType>& InAssetPtr, const TSharedPtr<AssetReference>& InReferencePtr )
 		: asset( InAssetPtr )
 		, reference( InReferencePtr )
 	{}
@@ -209,7 +209,7 @@ public:
 	 *
 	 * @param InAssetInfo		Asset info
 	 */
-	FORCEINLINE TAssetHandle( const SAssetInfo& InAssetInfo )
+	FORCEINLINE TAssetHandle( const AssetInfo& InAssetInfo )
 		: asset( InAssetInfo.data )
 		, reference( InAssetInfo.reference )
 	{}
@@ -410,7 +410,7 @@ public:
 	 * @brief Get asset reference
 	 * @return Return pointer to asset reference
 	 */
-	FORCEINLINE TSharedPtr<SAssetReference> GetReference() const
+	FORCEINLINE TSharedPtr<AssetReference> GetReference() const
 	{
 		return reference;
 	}
@@ -420,7 +420,7 @@ public:
 
 private:
 	TWeakPtr<ObjectType>					asset;		/**< Pointer to asset */
-	mutable TSharedPtr<SAssetReference>		reference;	/**< Reference to asset for reload */
+	mutable TSharedPtr<AssetReference>		reference;	/**< Reference to asset for reload */
 };
 
 /**
@@ -435,7 +435,7 @@ public:
 	/**
 	 * @brief Typedef of dependent assets
 	 */
-	typedef std::unordered_set< TAssetHandle<CAsset>, TAssetHandle<CAsset>::SHashFunction >		SetDependentAssets_t;
+	typedef std::unordered_set< TAssetHandle<CAsset>, TAssetHandle<CAsset>::HashFunction >		SetDependentAssets_t;
 
 	/**
 	 * @brief Constructor
@@ -540,7 +540,7 @@ public:
 	 * @brief Get reference to asset
 	 * @return Return struct info for reference to asset
 	 */
-	SAssetReference GetAssetReference() const;
+	AssetReference GetAssetReference() const;
 
 	/**
 	 * @brief Get asset handle
@@ -648,12 +648,12 @@ public:
 	/**
 	 * @brief Struct info about asset's importer
 	 */
-	struct SAssetImporterInfo
+	struct AssetImporterInfo
 	{
 		/**
 		 * @brief Constructor
 		 */
-		FORCEINLINE SAssetImporterInfo()
+		FORCEINLINE AssetImporterInfo()
 			: bValid( false )
 			, importAssetFn( nullptr )
 			, reimportAssetFn( nullptr )
@@ -718,7 +718,7 @@ public:
 	 */
 	FORCEINLINE void RegisterImporter( ImportAssetFn_t InImportFunction, ReimportAssetFn_t InReimportFunction, ShowImportSettingsAssetFn_t InShowImportSettingsFunction, const std::vector<std::wstring>& InSupportedExtensions, EAssetType InType )
 	{
-		SAssetImporterInfo&		importInfo = importersInfo[InType];
+		AssetImporterInfo&		importInfo = importersInfo[InType];
 		if ( importInfo.bValid )
 		{
 			importInfo.Clear();
@@ -815,7 +815,7 @@ public:
 	 * @param InType	Asset type
 	 * @return Return info about asset's importer
 	 */
-	FORCEINLINE const SAssetImporterInfo& GetImporterInfo( EAssetType InType ) const
+	FORCEINLINE const AssetImporterInfo& GetImporterInfo( EAssetType InType ) const
 	{
 		return importersInfo[InType];
 	}
@@ -835,7 +835,7 @@ public:
 private:
 
 #if WITH_EDITOR
-	SAssetImporterInfo					importersInfo[AT_Count];		/**< Importers info for each asset type */
+	AssetImporterInfo					importersInfo[AT_Count];		/**< Importers info for each asset type */
 #endif // WITH_EDITOR
 
 	ConstructAssetFn_t					constructAssetFns[AT_Count];	/**< Array of pointers to function create asset */
@@ -871,7 +871,7 @@ public:
 	 * @param[in] InAsset		Asset
 	 * @param[in] OutAssetInfo	Optional. Output to this parameter asset's info if pointer is not NULL
 	 */
-	void Add( const TAssetHandle<CAsset>& InAsset, SAssetInfo* OutAssetInfo = nullptr );
+	void Add( const TAssetHandle<CAsset>& InAsset, AssetInfo* OutAssetInfo = nullptr );
 
 	/**
 	 * Remove asset from package
@@ -966,7 +966,7 @@ public:
 			return true;
 		}
 
-		SAssetInfo&		assetInfo = itAsset->second;
+		AssetInfo&		assetInfo = itAsset->second;
 		return UnloadAsset( assetInfo, InForceUnload );
 	}
 
@@ -1013,7 +1013,7 @@ public:
 			return false;
 		}
 
-		SAssetInfo&		assetInfo = itAsset->second;
+		AssetInfo&		assetInfo = itAsset->second;
 		return ReloadAsset( assetInfo );
 	}
 
@@ -1174,7 +1174,7 @@ public:
 	 * @param OutAssetInfo Output reference to asset info
 	 * @param OutGuidAsset Optional output of guid asset
 	 */
-	FORCEINLINE void GetAssetInfo( uint32 InIndex, SAssetInfo& OutAssetInfo, CGuid* OutGuidAsset = nullptr ) const
+	FORCEINLINE void GetAssetInfo( uint32 InIndex, AssetInfo& OutAssetInfo, CGuid* OutGuidAsset = nullptr ) const
 	{
 		Assert( !assetsTable.empty() && InIndex >= 0 && InIndex < assetsTable.size() );
 		
@@ -1200,7 +1200,7 @@ public:
 	 * @param OutAssetInfo	Output pointer to asset info
 	 * @param OutGuidAsset	Optional output of guid asset
 	 */
-	FORCEINLINE void GetAssetInfo( uint32 InIndex, const SAssetInfo*& OutAssetInfo, CGuid* OutGuidAsset = nullptr ) const
+	FORCEINLINE void GetAssetInfo( uint32 InIndex, const AssetInfo*& OutAssetInfo, CGuid* OutGuidAsset = nullptr ) const
 	{
 		Assert( !assetsTable.empty() && InIndex >= 0 && InIndex < assetsTable.size() );
 
@@ -1228,7 +1228,7 @@ private:
 	/**
 	 * Typedef map of assets table
 	 */
-	typedef std::unordered_map< CGuid, SAssetInfo, CGuid::SGuidKeyFunc >			AssetTable_t;
+	typedef std::unordered_map< CGuid, AssetInfo, CGuid::GuidKeyFunc >			AssetTable_t;
 
 	/**
 	 * Constructor
@@ -1260,7 +1260,7 @@ private:
 	 * @param InIgnoreDirty		Is need ignore dirty flag in asset
 	 * @return Return TRUE if asset is unloaded
 	 */
-	bool UnloadAsset( SAssetInfo& InAssetInfo, bool InForceUnload = false, bool InBroadcastEvent = true, bool InIgnoreDirty = false );
+	bool UnloadAsset( AssetInfo& InAssetInfo, bool InForceUnload = false, bool InBroadcastEvent = true, bool InIgnoreDirty = false );
 
 	/**
 	 * Internal unload all assets
@@ -1277,7 +1277,7 @@ private:
 	 * @param InAssetInfo		Asset info
 	 * @return Return TRUE if asset is reloaded
 	 */
-	bool ReloadAsset( SAssetInfo& InAssetInfo );
+	bool ReloadAsset( AssetInfo& InAssetInfo );
 
 	/**
 	 * Serialize package
@@ -1303,7 +1303,7 @@ private:
 	 * @param InNeedReload				Is need reload asset if it already loaded
 	 * @return Return loaded asset from package, if failed returning nullptr
 	 */
-	TAssetHandle<CAsset> LoadAsset( CArchive& InArchive, const CGuid& InAssetGUID, SAssetInfo& InAssetInfo, bool InNeedReload = false );
+	TAssetHandle<CAsset> LoadAsset( CArchive& InArchive, const CGuid& InAssetGUID, AssetInfo& InAssetInfo, bool InNeedReload = false );
 
 	/**
 	 * Update asset name in table
@@ -1371,12 +1371,12 @@ public:
 	TAssetHandle<CAsset> FindAsset( const std::wstring& InString, EAssetType InType = AT_Unknown );
 
 	/**
-	 * @brief Find asset in package by SAssetReference
+	 * @brief Find asset in package by AssetReference
 	 * 
 	 * @param InAssetReference		Asset reference
 	 * @return Return found asset. If not found then return NULL
 	 */
-	FORCEINLINE TAssetHandle<CAsset> FindAsset( const SAssetReference& InAssetReference )
+	FORCEINLINE TAssetHandle<CAsset> FindAsset( const AssetReference& InAssetReference )
 	{
 		return FindAsset( InAssetReference.guidPackage, InAssetReference.guidAsset, InAssetReference.type );
 	}
@@ -1523,32 +1523,32 @@ private:
 	/**
 	 * Struct of normalized path in file system
 	 */
-	struct SNormalizedPath
+	struct NormalizedPath
 	{
 		/**
-		 * @brief Functions to extract the SNormalizedPath as a key for std::unordered_map and std::unordered_set
+		 * @brief Functions to extract the NormalizedPath as a key for std::unordered_map and std::unordered_set
 		 */
-		struct SNormalizedPathKeyFunc
+		struct NormalizedPathKeyFunc
 		{
 			/**
-			 * @brief Calculate hash of the SNormalizedPath
+			 * @brief Calculate hash of the NormalizedPath
 			 *
 			 * @param InPath Path
-			 * @return Return hash of this SNormalizedPath
+			 * @return Return hash of this NormalizedPath
 			 */
-			FORCEINLINE std::size_t operator()( const SNormalizedPath& InPath ) const
+			FORCEINLINE std::size_t operator()( const NormalizedPath& InPath ) const
 			{
 				return InPath.GetTypeHash();
 			}
 
 			/**
-			 * @brief Compare SNormalizedPath
+			 * @brief Compare NormalizedPath
 			 *
-			 * @param InA First SNormalizedPath
-			 * @param InB Second SNormalizedPath
+			 * @param InA First NormalizedPath
+			 * @param InB Second NormalizedPath
 			 * @return Return true if InA and InB equal, else returning false
 			 */
-			FORCEINLINE bool operator()( const SNormalizedPath& InA, const SNormalizedPath& InB ) const
+			FORCEINLINE bool operator()( const NormalizedPath& InA, const NormalizedPath& InB ) const
 			{
 				return InA.GetTypeHash() < InB.GetTypeHash();
 			}
@@ -1559,7 +1559,7 @@ private:
 		 * 
 		 * @param InPath Path
 		 */
-		FORCEINLINE SNormalizedPath( const std::wstring& InPath )
+		FORCEINLINE NormalizedPath( const std::wstring& InPath )
 			: path( InPath )
 		{
 			Sys_NormalizePathSeparators( path );
@@ -1587,7 +1587,7 @@ private:
 
 		/**
 		 * Get hash of type
-		 * @return Return hash of this SNormalizedPath
+		 * @return Return hash of this NormalizedPath
 		 */
 		FORCEINLINE uint64 GetTypeHash() const
 		{
@@ -1597,16 +1597,16 @@ private:
 		/**
 		 * Override operator for set new path
 		 */
-		FORCEINLINE SNormalizedPath& operator=( const std::wstring& InRight )
+		FORCEINLINE NormalizedPath& operator=( const std::wstring& InRight )
 		{
 			Set( InRight );
 			return *this;
 		}
 
 		/**
-		 * Override operator for compare to SNormalizedPath
+		 * Override operator for compare to NormalizedPath
 		 */
-		FORCEINLINE bool operator==( const SNormalizedPath& InRight ) const
+		FORCEINLINE bool operator==( const NormalizedPath& InRight ) const
 		{
 			return path == InRight.path;
 		}
@@ -1626,7 +1626,7 @@ private:
 	/**
 	 * Typedef of list loaded packages
 	 */
-	typedef std::unordered_map< SNormalizedPath, PackageRef_t, SNormalizedPath::SNormalizedPathKeyFunc >			PackageList_t;
+	typedef std::unordered_map< NormalizedPath, PackageRef_t, NormalizedPath::NormalizedPathKeyFunc >			PackageList_t;
 
 	PackageList_t			packages;				/**< Opened packages */
 };
@@ -1674,7 +1674,7 @@ FORCEINLINE bool MakeReferenceToAsset( const std::wstring& InPackageName, const 
  */
 FORCEINLINE bool MakeReferenceToAsset( const TAssetHandle<CAsset>& InAsset, std::wstring& OutString )
 {
-	// TODO yehor.pohuliaka - Maybe need rewrite either this function or SAssetReference, because when asset was unloaded then function don't convert TAssetHandle to string reference
+	// TODO yehor.pohuliaka - Maybe need rewrite either this function or AssetReference, because when asset was unloaded then function don't convert TAssetHandle to string reference
 	if ( !InAsset.IsAssetValid() )
 	{
 		return false;
@@ -1705,7 +1705,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, const EAssetType& InValue
 	return InArchive;
 }
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, SAssetReference& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, AssetReference& InValue )
 {
 	Assert( InArchive.Ver() >= VER_GUIDPackages );
 	InArchive << InValue.type;
@@ -1725,7 +1725,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, SAssetReference& InValue 
 	return InArchive;
 }
 
-FORCEINLINE CArchive& operator<<( CArchive& InArchive, const SAssetReference& InValue )
+FORCEINLINE CArchive& operator<<( CArchive& InArchive, const AssetReference& InValue )
 {
 	Assert( InArchive.IsSaving() && InArchive.Ver() >= VER_GUIDPackages );
 	InArchive << InValue.type;
@@ -1739,19 +1739,19 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, TAssetHandle<CAsset>& InV
 	if ( InArchive.IsSaving() )
 	{
 		TSharedPtr<CAsset>		asset = InValue.ToSharedPtr();
-		InArchive << ( asset ? asset->GetAssetReference() : SAssetReference() );
+		InArchive << ( asset ? asset->GetAssetReference() : AssetReference() );
 
 #if ENABLED_ASSERT
 		if ( asset )
 		{
-			SAssetReference		assetRef = asset->GetAssetReference();
+			AssetReference		assetRef = asset->GetAssetReference();
 			Assert( assetRef.guidAsset.IsValid() && assetRef.guidPackage.IsValid() );
 		}
 #endif // ENABLED_ASSERT
 	}
 	else
 	{
-		SAssetReference			assetReference;
+		AssetReference			assetReference;
 		InArchive << assetReference;
 		if ( assetReference.IsValid() )
 		{
@@ -1771,7 +1771,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, const TAssetHandle<CAsset
 	Assert( InArchive.IsSaving() );
 	
 	TSharedPtr<CAsset>		asset = InValue.ToSharedPtr();
-	InArchive << ( asset ? asset->GetAssetReference() : SAssetReference() );
+	InArchive << ( asset ? asset->GetAssetReference() : AssetReference() );
 	return InArchive;
 }
 

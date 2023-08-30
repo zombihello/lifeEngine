@@ -54,7 +54,7 @@ private:
 	 * @param InAssets	Array of assets to delete
 	 * @param OutResult Result, we can is delete this assets?
 	 */
-	void OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, struct SCanDeleteAssetResult& OutResult );
+	void OnAssetsCanDelete( const std::vector<TSharedPtr<CAsset>>& InAssets, struct CanDeleteAssetResult& OutResult );
 
 	/**
 	 * @brief Called event when asset is reloaded
@@ -63,11 +63,11 @@ private:
 	void OnAssetsReloaded( const std::vector<TSharedPtr<CAsset>>& InAssets );
 
 	TSharedPtr<CAudioBank>									audioBank;				/**< Audio bank */
-	SAudioBankInfo											audioBankInfo;			/**< Audio bank info */
+	AudioBankInfo											audioBankInfo;			/**< Audio bank info */
 	AudioBankHandle_t										audioBankHandle;		/**< Audio bank handle */
 	class CAudioComponent*									audioComponent;			/**< Audio component */
-	SEditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;	/**< Handle delegate of assets can delete */
-	SEditorDelegates::COnAssetsReloaded::DelegateType_t*	assetsReloadedHandle;	/**< Handle delegate of reloaded assets */
+	EditorDelegates::COnAssetsCanDelete::DelegateType_t*	assetsCanDeleteHandle;	/**< Handle delegate of assets can delete */
+	EditorDelegates::COnAssetsReloaded::DelegateType_t*	assetsReloadedHandle;	/**< Handle delegate of reloaded assets */
 };
 
 #endif // !AUDIOBANKEDITORWINDOW_H

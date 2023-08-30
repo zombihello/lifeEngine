@@ -33,11 +33,11 @@ void CPhysicsBodySetup::Serialize( class CArchive& InArchive )
 CPhysicsBodySetup::RemoveBoxGeometry
 ==================
 */
-void CPhysicsBodySetup::RemoveBoxGeometry( const SPhysicsBoxGeometry& InBoxGeometry )
+void CPhysicsBodySetup::RemoveBoxGeometry( const PhysicsBoxGeometry& InBoxGeometry )
 {
 	for ( uint32 index = 0, count = boxGeometries.size(); index < count; ++index )
 	{
-		const SPhysicsBoxGeometry&		boxGeometry = boxGeometries[ index ];
+		const PhysicsBoxGeometry&		boxGeometry = boxGeometries[ index ];
 		if ( boxGeometry == InBoxGeometry )
 		{
 			RemoveBoxGeometry( index );

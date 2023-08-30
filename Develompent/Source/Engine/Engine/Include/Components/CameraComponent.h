@@ -181,7 +181,7 @@ public:
 	 * Get camera view
 	 * @param[out] OutDesiredView Desired view info
 	 */
-	void GetCameraView( SCameraView& OutDesiredView );
+	void GetCameraView( CameraView& OutDesiredView );
 
     /**
      * @brief Is active camera

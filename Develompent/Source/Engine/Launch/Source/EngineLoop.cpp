@@ -75,7 +75,7 @@ void Sys_UpdateTimeAndHandleMaxTickRate()
 {
 	// Update g_CurrentTime and g_DeltaTime while taking into account max tick rate
 	g_LastTime = g_CurrentTime;
-	g_CurrentTime = appSeconds();
+	g_CurrentTime = Sys_Seconds();
 	g_DeltaTime = g_CurrentTime - g_LastTime;
 
 	if ( g_UseMaxTickRate )
@@ -380,7 +380,7 @@ int32 CEngineLoop::Init()
 CEngineLoop::ProcessEvent
 ==================
 */
-void CEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
+void CEngineLoop::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	// Handling system events
 	g_Engine->ProcessEvent( InWindowEvent );
@@ -388,12 +388,12 @@ void CEngineLoop::ProcessEvent( struct SWindowEvent& InWindowEvent )
 	// Handling window focus event
 	switch ( InWindowEvent.type )
 	{
-	case SWindowEvent::T_WindowFocusGained:
+	case WindowEvent::T_WindowFocusGained:
 		bIsFocus = true;
 		g_AudioDevice.SetMutedDevice( false );
 		break;
 
-	case SWindowEvent::T_WindowFocusLost:
+	case WindowEvent::T_WindowFocusLost:
 		bIsFocus = false;
 		g_AudioDevice.SetMutedDevice( true );
 		break;

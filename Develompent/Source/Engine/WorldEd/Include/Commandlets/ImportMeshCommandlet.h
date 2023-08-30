@@ -25,12 +25,12 @@ struct aiScene;
  * @ingroup WorldEd
  * Container for Assimp mesh
  */
-struct SAiMesh
+struct AiMesh
 {
 	/**
 	 * Constructor
 	 */
-	SAiMesh()
+	AiMesh()
 	{}
 
 	/**
@@ -39,7 +39,7 @@ struct SAiMesh
 	 * @param[in] InTransformation Transform matrix
 	 * @param[in] InMesh Pointer to Assimp mesh
 	 */
-	SAiMesh( const aiMatrix4x4& InTransformation, struct aiMesh* InMesh )
+	AiMesh( const aiMatrix4x4& InTransformation, struct aiMesh* InMesh )
 		: transformation( InTransformation )
 		, mesh( InMesh )
 	{}
@@ -52,7 +52,7 @@ struct SAiMesh
  * @ingroup WorldEd
  * Typedef container AiMeshes
  */
-typedef std::unordered_map< uint32, std::vector< SAiMesh > >			AiMeshesMap_t;
+typedef std::unordered_map< uint32, std::vector< AiMesh > >			AiMeshesMap_t;
 
  /**
   * @ingroup WorldEd

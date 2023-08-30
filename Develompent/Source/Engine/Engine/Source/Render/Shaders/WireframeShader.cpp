@@ -56,12 +56,12 @@ bool CWireframePixelShader::ShouldCache( EShaderPlatform InShaderPlatform, class
 CWireframeVertexShader::Init
 ==================
 */
-void CWireframeVertexShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
+void CWireframeVertexShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 {
 	CShader::Init( InShaderCacheItem );
 
 	// Bind shader parameters
-	CVertexFactoryMetaType* vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
+	CVertexFactoryMetaType* vertexFactoryType = CVertexFactoryMetaType::ContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
 	Assert( vertexFactoryType );
 
 	vertexFactoryParameters = vertexFactoryType->CreateShaderParameters( SF_Vertex );
@@ -84,7 +84,7 @@ void CWireframeVertexShader::SetConstantParameters( class CBaseDeviceContextRHI*
 CWireframeVertexShader::SetMesh
 ==================
 */
-void CWireframeVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
+void CWireframeVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
 	Assert( vertexFactoryParameters );
 	vertexFactoryParameters->SetMesh( InDeviceContextRHI, InMesh, InVertexFactory, InView, InNumInstances, InStartInstanceID );
@@ -96,7 +96,7 @@ void CWireframeVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceConte
 CWireframePixelShader::Init
 ==================
 */
-void CWireframePixelShader::Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem )
+void CWireframePixelShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 {
 	CShader::Init( InShaderCacheItem );
 

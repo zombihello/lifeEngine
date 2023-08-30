@@ -125,7 +125,7 @@ private:
 	/**
 	 * @brief key hasher for using CBoundShaderStateKey in std::unordered_map
 	 */
-	struct SBoundShaderStateKeyHasher
+	struct BoundShaderStateKeyHasher
 	{
 		/**
 		 * @brief Get hash from CBoundShaderStateKey
@@ -136,7 +136,7 @@ private:
 		}
 	};
 
-	std::unordered_map< CBoundShaderStateKey, BoundShaderStateRHIParamRef_t, SBoundShaderStateKeyHasher >			boundShaderStateMap;
+	std::unordered_map< CBoundShaderStateKey, BoundShaderStateRHIParamRef_t, BoundShaderStateKeyHasher >			boundShaderStateMap;
 };
 
 #endif // !BOUNDSHADERSTATECACHE_H

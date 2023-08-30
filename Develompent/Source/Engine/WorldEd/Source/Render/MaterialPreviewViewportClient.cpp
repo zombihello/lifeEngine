@@ -23,8 +23,8 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	viewportType			= LVT_Perspective;
 	showFlags				= SHOW_DefaultEditor;
 	viewLocation			= Vector( 0.f, 0.f, -80.f );
-	viewRotationEuler		= SMath::vectorZero;
-	viewRotationQuat		= SMath::quaternionZero;
+	viewRotationEuler		= Math::vectorZero;
+	viewRotationQuat		= Math::quaternionZero;
 
 	// Init scene
 	sphereComponent->SetRadius( 40.f );

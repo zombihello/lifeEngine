@@ -27,7 +27,7 @@ public:
 	 * @param InIsUseWorldPos	Is need use in the shader world position
 	 * @param InEnvironment Shader compiler environment
 	 */
-	static FORCEINLINE void ModifyCompilationEnvironment( bool InIsUseWorldPos, SShaderCompilerEnvironment& InEnvironment )
+	static FORCEINLINE void ModifyCompilationEnvironment( bool InIsUseWorldPos, ShaderCompilerEnvironment& InEnvironment )
 	{
 		InEnvironment.difinitions.insert( std::make_pair( TEXT( "WORLD_POS" ), InIsUseWorldPos ? TEXT( "1" ) : TEXT( "0" ) ) );
 	}
@@ -66,12 +66,12 @@ public:
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem ) override
+	virtual void Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem ) override
 	{
 		CShader::Init( InShaderCacheItem );
 
 		// Bind shader parameters
-		CVertexFactoryMetaType* vertexFactoryType = CVertexFactoryMetaType::SContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
+		CVertexFactoryMetaType* vertexFactoryType = CVertexFactoryMetaType::ContainerVertexFactoryMetaType::Get()->FindRegisteredType( GetVertexFactoryHash() );
 		Assert( vertexFactoryType );
 
 		vertexFactoryParameters = vertexFactoryType->CreateShaderParameters( SF_Vertex );
@@ -101,7 +101,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const override
 	{
 		Assert( vertexFactoryParameters );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InMesh, InVertexFactory, InView, InNumInstances, InStartInstanceID );
@@ -114,7 +114,7 @@ public:
 	 * @param InShaderPlatform Shader platform
 	 * @param InEnvironment Shader compiler environment
 	 */
-	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment )
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment )
 	{
 		CDepthOnlyShadersUtils::ModifyCompilationEnvironment( InIsUseWorldPos, InEnvironment );
 	}

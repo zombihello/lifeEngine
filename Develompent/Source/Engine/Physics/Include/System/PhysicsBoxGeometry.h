@@ -16,27 +16,27 @@
  * @ingroup Physics
  * @brief Box shape used for collision
  */
-struct SPhysicsBoxGeometry : public SPhysicsShapeGeometry
+struct PhysicsBoxGeometry : public PhysicsShapeGeometry
 {
 public:
 	/**
 	 * @brief Constructor
 	 */
-	FORCEINLINE SPhysicsBoxGeometry()
-		: SPhysicsShapeGeometry( CS_Box )
-		, location( SMath::vectorZero )
-		, rotation( SMath::quaternionZero )
-		, extent( SMath::vectorZero )
+	FORCEINLINE PhysicsBoxGeometry()
+		: PhysicsShapeGeometry( CS_Box )
+		, location( Math::vectorZero )
+		, rotation( Math::quaternionZero )
+		, extent( Math::vectorZero )
 	{}
 
 	/**
 	 * @brief Constructor
 	 * @param InSize Size by X, Y and Z
 	 */
-	FORCEINLINE SPhysicsBoxGeometry( float InSize )
-		: SPhysicsShapeGeometry( CS_Box )
-		, location( SMath::vectorZero )
-		, rotation( SMath::quaternionZero )
+	FORCEINLINE PhysicsBoxGeometry( float InSize )
+		: PhysicsShapeGeometry( CS_Box )
+		, location( Math::vectorZero )
+		, rotation( Math::quaternionZero )
 		, extent( InSize, InSize, InSize )
 	{}
 
@@ -47,10 +47,10 @@ public:
 	 * @param InSizeY Size by Y
 	 * @param InSizeZ Size by Z
 	 */
-	FORCEINLINE SPhysicsBoxGeometry( float InSizeX, float InSizeY, float InSizeZ )
-		: SPhysicsShapeGeometry( CS_Box )
-		, location( SMath::vectorZero )
-		, rotation( SMath::quaternionZero )
+	FORCEINLINE PhysicsBoxGeometry( float InSizeX, float InSizeY, float InSizeZ )
+		: PhysicsShapeGeometry( CS_Box )
+		, location( Math::vectorZero )
+		, rotation( Math::quaternionZero )
 		, extent( InSizeX, InSizeY, InSizeZ )
 	{}
 
@@ -64,7 +64,7 @@ public:
 	/**
 	 * Overload operator << for serialize
 	 */
-	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, SPhysicsBoxGeometry& InBoxGometry )
+	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, PhysicsBoxGeometry& InBoxGometry )
 	{
 		InBoxGometry.Serialize( InAr );
 		return InAr;
@@ -73,17 +73,17 @@ public:
 	/**
 	 * Overload operator << for serialize
 	 */
-	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, const SPhysicsBoxGeometry& InBoxGometry )
+	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, const PhysicsBoxGeometry& InBoxGometry )
 	{
 		Assert( InAr.IsSaving() );
-		( ( SPhysicsBoxGeometry& )InBoxGometry ).Serialize( InAr );
+		( ( PhysicsBoxGeometry& )InBoxGometry ).Serialize( InAr );
 		return InAr;
 	}
 
 	/**
 	 * Overload operator ==
 	 */
-	FORCEINLINE bool operator==( const SPhysicsBoxGeometry& InBoxGometry ) const
+	FORCEINLINE bool operator==( const PhysicsBoxGeometry& InBoxGometry ) const
 	{
 		return
 			collisionShape == InBoxGometry.collisionShape &&

@@ -27,7 +27,7 @@ CEditorCommonDrawHelper::CEditorCommonDrawHelper()
 CEditorCommonDrawHelper::DrawGridSection
 ==================
 */
-void CEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InViewportGridY, Vector& InStart, Vector& InEnd, float& InStartX, float& InEndX, int32 InAxis, bool InIsAlphaCase, const class CSceneView* InSceneView, struct SSceneDepthGroup& InSDG )
+void CEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InViewportGridY, Vector& InStart, Vector& InEnd, float& InStartX, float& InEndX, int32 InAxis, bool InIsAlphaCase, const class CSceneView* InSceneView, struct SceneDepthGroup& InSDG )
 {
 	if ( !InViewportGridY )
 	{
@@ -36,9 +36,9 @@ void CEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 	InViewportGridY = Max<int32>( InViewportGridY, 5 );
 
 	const Matrix&				projectionMatrix = InSceneView->GetProjectionMatrix();
-	Matrix	invViewProjMatrix	= SMath::InverseMatrix( projectionMatrix ) * SMath::InverseMatrix( InSceneView->GetViewMatrix() );
-	int32	start				= SMath::Trunc( ( Vector4D( -1.f, -1.f, -1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) + InViewportLocX;
-	int32	end					= SMath::Trunc( ( Vector4D( +1.f, +1.f, +1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) - InViewportLocX;
+	Matrix	invViewProjMatrix	= Math::InverseMatrix( projectionMatrix ) * Math::InverseMatrix( InSceneView->GetViewMatrix() );
+	int32	start				= Math::Trunc( ( Vector4D( -1.f, -1.f, -1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) + InViewportLocX;
+	int32	end					= Math::Trunc( ( Vector4D( +1.f, +1.f, +1.f, 1.f ) * invViewProjMatrix )[ InAxis ] / InViewportGridY ) - InViewportLocX;
 	if ( start > end )
 	{
 		Swap( start, end );
@@ -46,7 +46,7 @@ void CEditorCommonDrawHelper::DrawGridSection( int32 InViewportLocX, int32 InVie
 
 	float	sizeX		= InSceneView->GetSizeX();
 	float	zoom		= ( 1.0f / projectionMatrix[ 0 ].x ) * 2.0f / sizeX;
-	int32   dist		= SMath::Trunc( sizeX * zoom / InViewportGridY );
+	int32   dist		= Math::Trunc( sizeX * zoom / InViewportGridY );
 
 	// Figure out alpha interpolator for fading in the grid lines.
 	float	alpha		= 0.f;
@@ -93,11 +93,11 @@ CEditorCommonDrawHelper::DrawGrid
 void CEditorCommonDrawHelper::DrawGrid( const class CSceneView* InSceneView, ELevelViewportType InViewportType, class CScene* InScene )
 {
 	Assert( InScene );
-	SSceneDepthGroup&		SDG = InScene->GetSDG( SDG_WorldEdBackground );
+	SceneDepthGroup&		SDG = InScene->GetSDG( SDG_WorldEdBackground );
 	Vector					origin;
 	Vector					a( 0.f, 0.f, 0.f );			// Start line
 	Vector					b( 0.f, 0.f, 0.f );			// End line
-	SMath::GetOriginMatrix( SMath::InverseMatrix( InSceneView->GetViewMatrix() ), origin );
+	Math::GetOriginMatrix( Math::InverseMatrix( InSceneView->GetViewMatrix() ), origin );
 
 	// Draw 3D perspective grid
 	if ( InViewportType == LVT_Perspective )

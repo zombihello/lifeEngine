@@ -54,7 +54,7 @@ bool CImportMeshCommandlet::Main( const CCommandLine& InCommandLine )
 	}
 
 	PackageRef_t		package = g_PackageManager->LoadPackage( dstFilename, true );
-	package->Add( TAssetHandle<CStaticMesh>( staticMesh, MakeSharedPtr<SAssetReference>( AT_StaticMesh, staticMesh->GetGUID() ) ) );
+	package->Add( TAssetHandle<CStaticMesh>( staticMesh, MakeSharedPtr<AssetReference>( AT_StaticMesh, staticMesh->GetGUID() ) ) );
 	return package->Save( dstFilename );
 }
 
@@ -88,24 +88,24 @@ TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	// TODO BS yehor.pohuliaka - I'm not sure how correct this code is, it may need to be rewritten
 	// Go through the material ID, take the mesh and write its vertices, and indices
 	// to the shared buffer
-	std::vector< SStaticMeshVertexType >		verteces;
+	std::vector< StaticMeshVertexType >		verteces;
 	std::vector< uint32 >						indeces;
-	std::vector< SStaticMeshSurface >			surfaces;
+	std::vector< StaticMeshSurface >			surfaces;
 	std::vector< TAssetHandle<CMaterial> >		materials;
 	for ( auto itRoot = meshes.begin(), itRootEnd = meshes.end(); itRoot != itRootEnd; ++itRoot )
 	{
-		SStaticMeshSurface							surface;
-		Sys_Memzero( &surface, sizeof( SStaticMeshSurface ) );
+		StaticMeshSurface							surface;
+		Sys_Memzero( &surface, sizeof( StaticMeshSurface ) );
 
 		surface.firstIndex = indeces.size();
 		surface.materialID = materials.size();
 
 		for ( auto itMesh = itRoot->second.begin(), itMeshEnd = itRoot->second.end(); itMesh != itMeshEnd; ++itMesh )
 		{
-			std::vector< SStaticMeshVertexType >	vertexBuffer;
-			SStaticMeshVertexType					vertex;
+			std::vector< StaticMeshVertexType >	vertexBuffer;
+			StaticMeshVertexType					vertex;
 			aiMesh*									mesh = ( *itMesh ).mesh;
-			Sys_Memzero( &vertex, sizeof( SStaticMeshVertexType ) );
+			Sys_Memzero( &vertex, sizeof( StaticMeshVertexType ) );
 
 			// Prepare the vertex buffer.
 			// If the vertices of the mesh do not fit into the buffer, then
@@ -218,7 +218,7 @@ void CImportMeshCommandlet::ProcessNode( aiNode* InNode, const aiScene* InScene,
 	for ( uint32 index = 0; index < InNode->mNumMeshes; ++index )
 	{
 		aiMesh*			mesh = InScene->mMeshes[ InNode->mMeshes[ index ] ];
-		OutMeshes[ mesh->mMaterialIndex ].push_back( SAiMesh( InNode->mTransformation, mesh ) );
+		OutMeshes[ mesh->mMaterialIndex ].push_back( AiMesh( InNode->mTransformation, mesh ) );
 	}
 
 	for ( uint32 index = 0; index < InNode->mNumChildren; ++index )

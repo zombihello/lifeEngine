@@ -45,7 +45,7 @@ public:
 	 * @param InVertex		Vertex
 	 * @return Return index of vertex
 	 */
-	FORCEINLINE uint32 AddVertex( const SDynamicMeshVertexType& InVertex )
+	FORCEINLINE uint32 AddVertex( const DynamicMeshVertexType& InVertex )
 	{
 		CScopeLock	scopeLock( &readWriteCS );
 		uint32		idVertex = verteces.size();
@@ -143,7 +143,7 @@ public:
 	 * @brief Get array of verteces
 	 * @return Return array of verteces
 	 */
-	FORCEINLINE const std::vector< SDynamicMeshVertexType >& GetVerteces() const
+	FORCEINLINE const std::vector< DynamicMeshVertexType >& GetVerteces() const
 	{
 		return verteces;
 	}
@@ -174,7 +174,7 @@ private:
 
 	uint32										numPrimitives;		/**< Number primitives in builded mesh */
 	CCriticalSection							readWriteCS;		/**< Read and write critical section */
-	std::vector< SDynamicMeshVertexType >		verteces;			/**< Array of verteces */
+	std::vector< DynamicMeshVertexType >		verteces;			/**< Array of verteces */
 	std::vector< uint32 >						indeces;			/**< Array of indeces */
 	VertexBufferRHIRef_t						vertexBufferRHI;	/**< Vertex buffer RHI */
 	IndexBufferRHIRef_t							indexBufferRHI;		/**< Index buffer RHI */

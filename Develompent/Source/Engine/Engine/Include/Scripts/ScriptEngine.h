@@ -41,9 +41,9 @@ extern "C"
  * @param Class     Class
 */
 #define BEGIN_SCRIPT_API( Class ) \
-    struct SRegisterClassAPI##Class \
+    struct RegisterClassAPI##Class \
     { \
-        SRegisterClassAPI##Class() \
+        RegisterClassAPI##Class() \
         { \
             CScriptEngine::StaticAddRegisterClassAPI( &Class::StaticRegisterClassAPI ); \
         } \
@@ -78,7 +78,7 @@ public:
      */
     static FORCEINLINE void StaticAddRegisterClassAPI( void( *InRegisterClassAPI )( struct lua_State* InVM ) )
     {
-        SManagerClassAPI::Get()->registerClassAPIs.push_back( InRegisterClassAPI );
+        ManagerClassAPI::Get()->registerClassAPIs.push_back( InRegisterClassAPI );
     }
 
     /**
@@ -87,7 +87,7 @@ public:
      */
     static FORCEINLINE void StaticRegisterClassAPI( struct lua_State* InVM )
     {
-        SManagerClassAPI*           managerClassAPI = SManagerClassAPI::Get();
+        ManagerClassAPI*           managerClassAPI = ManagerClassAPI::Get();
         for ( uint32 indexRegister = 0, countRegisters = ( uint32 ) managerClassAPI->registerClassAPIs.size(); indexRegister < countRegisters; ++indexRegister )
         {
             managerClassAPI->registerClassAPIs[ indexRegister ]( InVM );
@@ -98,18 +98,18 @@ private:
     /**
      * @brief Structure for storing in the global area an array of pointers to functions for registering API classes for scripts
      */
-    struct SManagerClassAPI
+    struct ManagerClassAPI
     {
         /**
          * @brief Get instance
-         * @return Pointer to instance of SManagerClassAPI
+         * @return Pointer to instance of ManagerClassAPI
          */
-        static FORCEINLINE SManagerClassAPI* Get()
+        static FORCEINLINE ManagerClassAPI* Get()
         {
-            static SManagerClassAPI*        managerClassAPI = nullptr;
+            static ManagerClassAPI*        managerClassAPI = nullptr;
             if ( !managerClassAPI )
             {
-                managerClassAPI = new SManagerClassAPI();
+                managerClassAPI = new ManagerClassAPI();
             }
 
             return managerClassAPI;

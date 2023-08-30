@@ -143,9 +143,9 @@ void CStaticMeshComponent::AddToDrawList( const class CSceneView& InSceneView )
 	const Matrix				transformationMatrix = GetComponentTransform().ToMatrix();
 	for ( uint32 index = 0, count = elementDrawingPolicyLink->meshBatchLinks.size(); index < count; ++index )
 	{
-		const SMeshBatch*		meshBatch = elementDrawingPolicyLink->meshBatchLinks[ index ];
+		const MeshBatch*		meshBatch = elementDrawingPolicyLink->meshBatchLinks[ index ];
 		++meshBatch->numInstances;
-		meshBatch->instances.push_back( SMeshInstance{ transformationMatrix 
+		meshBatch->instances.push_back( MeshInstance{ transformationMatrix 
 #if ENABLE_HITPROXY
 										, owner ? owner->GetHitProxyId() : CHitProxyId()
 #endif // ENABLE_HITPROXY

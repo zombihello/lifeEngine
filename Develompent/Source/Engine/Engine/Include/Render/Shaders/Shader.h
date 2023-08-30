@@ -31,7 +31,7 @@ public:
 	 * @brief Initialize shader
 	 * @param[in] InShaderCacheItem Cache of shader
 	 */
-	virtual void Init( const CShaderCache::SShaderCacheItem& InShaderCacheItem );
+	virtual void Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem );
 
 	/**
 	 * @brief Set the constant shader parameters
@@ -52,7 +52,7 @@ public:
 	 * @param InNumInstances Number instances
 	 * @param InStartInstanceID ID of first instance
 	 */
-	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct SMeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+	virtual void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
 
 #if WITH_EDITOR
 	/**
@@ -70,7 +70,7 @@ public:
 	 * @param InShaderPlatform Shader platform
 	 * @param InEnvironment Shader compiler environment
 	 */
-	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, SShaderCompilerEnvironment& InEnvironment );
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment );
 #endif // WITH_EDITOR
 
 	/**

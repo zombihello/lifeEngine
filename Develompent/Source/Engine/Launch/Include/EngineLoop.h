@@ -58,7 +58,7 @@ public:
 	 *
 	 * @param[in] InWindowEvent Window event
 	 */
-	void ProcessEvent( struct SWindowEvent& InWindowEvent );
+	void ProcessEvent( struct WindowEvent& InWindowEvent );
 
 private:
 	/**

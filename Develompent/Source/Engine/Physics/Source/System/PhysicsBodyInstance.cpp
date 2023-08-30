@@ -47,7 +47,7 @@ void CPhysicsBodyInstance::InitBody( CPhysicsBodySetup* InBodySetup, const CTran
 	ownerComponent	= InPrimComp;
 	bodySetup		= InBodySetup;
 
-	SActorCreationParams	params;
+	ActorCreationParams	params;
 	params.bStatic			= bStatic;
 	params.lockFlags		= lockFlags;
 	params.initialTM		= InTransform;
@@ -61,7 +61,7 @@ void CPhysicsBodyInstance::InitBody( CPhysicsBodySetup* InBodySetup, const CTran
 	// Attach all shapes in body setup to physics actor
 	// Box shapes
 	{
-		std::vector< SPhysicsBoxGeometry >&		boxGeometries = bodySetup->GetBoxGeometries();
+		std::vector< PhysicsBoxGeometry >&		boxGeometries = bodySetup->GetBoxGeometries();
 		for ( uint32 index = 0, count = boxGeometries.size(); index < count; ++index )
 		{
 			CPhysicsInterface::AttachShape( handle, boxGeometries[ index ].GetShapeHandle() );
