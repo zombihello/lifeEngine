@@ -470,6 +470,7 @@ CAudioStreamSource::SetAudioBank
 void CAudioStreamSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 {
 	// If bank opened - close
+	bool		bIsPlaying = GetStatus() == ASS_Playing;
 	if ( audioBankHandle )
 	{
 		CloseBank();
@@ -506,6 +507,12 @@ void CAudioStreamSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBa
 #endif // WITH_EDITOR
 
 	audioBank = InAudioBank;
+
+	// If the early the audio was playing we turn on back
+	if ( audioBank.IsAssetValid() && bIsPlaying )
+	{
+		Play();
+	}
 }
 
 /*

@@ -212,8 +212,21 @@ void CAudioSource::SetAudioBank( const TAssetHandle<CAudioBank>& InAudioBank )
 #endif // WITH_EDITOR
 	}
 
+	// Stop playing audio
+	EAudioSourceStatus		status = GetStatus();
+	if ( status != ASS_Stoped )
+	{
+		Stop();
+	}
+
 	audioBank		= InAudioBank;
 	alSourcei( alHandle, AL_BUFFER, audioBuffer ? audioBuffer->GetALHandle() : 0 );
+	
+	// If the early the audio was playing we turn on back
+	if ( audioBank.IsAssetValid() && status == ASS_Playing )
+	{
+		Play();
+	}
 }
 
 /*
@@ -363,8 +376,12 @@ CAudioSource::OnAudioBufferDestroyed
 */
 void CAudioSource::OnAudioBufferDestroyed( class CAudioBuffer* InAudioBuffer )
 {
-	// Reset OpenAL buffer for audio source
+	// Reset OpenAL buffer for audio source and stop playing
 	alSourcei( alHandle, AL_BUFFER, 0 );
+	if ( GetStatus() != ASS_Stoped )
+	{
+		Stop();
+	}
 }
 
 /*
@@ -374,8 +391,23 @@ CAudioSource::OnAudioBufferUpdated
 */
 void CAudioSource::OnAudioBufferUpdated( class CAudioBuffer* InAudioBuffer )
 {
+	uint32		alBufferHandle = InAudioBuffer->GetALHandle();
+
+	// Stop playing audio
+	EAudioSourceStatus		status = GetStatus();
+	if ( status != ASS_Stoped )
+	{
+		Stop();
+	}
+
 	// When audio buffer is updated we recreating OpenAL buffer
-	alSourcei( alHandle, AL_BUFFER, InAudioBuffer->GetALHandle() );
+	alSourcei( alHandle, AL_BUFFER, alBufferHandle );
+
+	// If the early the audio was playing we turn on back
+	if ( alBufferHandle && status == ASS_Playing )
+	{
+		Play();
+	}
 }
 
 #if WITH_EDITOR

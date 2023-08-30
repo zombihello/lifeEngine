@@ -50,8 +50,69 @@ void CAudioComponent::StaticInitializeClass()
 	new CFloatProperty( staticClass, TEXT( "Pitch" ), TEXT( "Audio" ), TEXT( "Pitch" ), CPP_PROPERTY( pitch ), 0 );
 	new CFloatProperty( staticClass, TEXT( "Min Distance" ), TEXT( "Audio" ), TEXT( "Min distance" ), CPP_PROPERTY( minDistance ), 0 );
 	new CFloatProperty( staticClass, TEXT( "Attenuation" ), TEXT( "Audio" ), TEXT( "Attenuation" ), CPP_PROPERTY( attenuation ), 0 );
-	// TODO BS yehor.pohuliaka - Need implement asset property for 'bank'
+	new CAssetProperty( staticClass, TEXT( "Audio Bank" ), TEXT( "Audio" ), TEXT( "Audio bank" ), CPP_PROPERTY( bank ), 0, AT_AudioBank );
 }
+
+#if WITH_EDITOR
+/*
+==================
+CAudioComponent::PostEditChangeProperty
+==================
+*/
+void CAudioComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+{
+	if ( InProperty )
+	{
+		static const CName		property_bIsLoop( TEXT( "bIsLoop" ) );
+		static const CName		property_bIsUISound( TEXT( "bIsUISound" ) );
+		static const CName		property_volume( TEXT( "Volume" ) );
+		static const CName		property_pitch( TEXT( "Pitch" ) );
+		static const CName		property_minDistance( TEXT( "Min Distance" ) );
+		static const CName		property_attenuation( TEXT( "Attenuation" ) );
+		static const CName		property_audioBank( TEXT( "Audio Bank" ) );
+		static const CName		property_bIsStreamable( TEXT( "bIsStreamable" ) );
+
+		if ( InProperty->GetCName() == property_bIsLoop )
+		{
+			SetLoop( bIsLoop );
+		}
+		else if ( InProperty->GetCName() == property_bIsUISound )
+		{
+			SetUISound( bIsUISound );
+		}
+		else if ( InProperty->GetCName() == property_volume )
+		{
+			SetVolume( volume );
+		}
+		else if ( InProperty->GetCName() == property_pitch )
+		{
+			SetPitch( pitch );
+		}
+		else if ( InProperty->GetCName() == property_minDistance )
+		{
+			SetMinDistance( minDistance );
+		}
+		else if ( InProperty->GetCName() == property_attenuation )
+		{
+			SetAttenuation( attenuation );
+		}
+		else if ( InProperty->GetCName() == property_audioBank )
+		{
+			SetAudioBank( bank );
+			if ( bank.IsAssetValid() && GetStatus() != ASS_Playing && bIsAutoPlay )
+			{
+				Play();
+			}
+		}
+		else if ( InProperty->GetCName() == property_bIsStreamable )
+		{
+			UpdateAudioSourceType();
+		}
+	}
+
+	Super::PostEditChangeProperty( InProperty, InChangeType );
+}
+#endif // WITH_EDITOR
 
 /*
 ==================
