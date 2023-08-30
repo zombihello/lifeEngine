@@ -1,3 +1,7 @@
+#include "Misc/EngineGlobals.h"
+#include "Render/Scene.h"
+#include "Render/SceneUtils.h"
+#include "System/World.h"
 #include "Components/PointLightComponent.h"
 
 IMPLEMENT_CLASS( CPointLightComponent )
@@ -36,6 +40,21 @@ void CPointLightComponent::Serialize( class CArchive& InArchive )
 
 	InArchive << radius;
 }
+
+#if WITH_EDITOR
+/*
+==================
+CPointLightComponent::DrawDebugComponent
+==================
+*/
+void CPointLightComponent::DrawDebugComponent()
+{
+	if ( GetOwner() && GetOwner()->IsSelected() )
+	{
+		DrawWireSphere( ( ( CScene* )g_World->GetScene() )->GetSDG( SDG_WorldEdBackground ), GetComponentLocation(), DEC_LIGHT, radius, 50 );
+	}
+}
+#endif // WITH_EDITOR
 
 /*
 ==================

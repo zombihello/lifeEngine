@@ -205,7 +205,7 @@ extern TGlobalResource<CEmptyNormalTexture>	g_EmptyNormalTexture;		/**< Empty no
 
 /**
  * @ingroup Engine
- * Draws a quad with the given vertex positions and UVs in denormalized pixel/texel coordinates.
+ * @brief Draws a quad with the given vertex positions and UVs in denormalized pixel/texel coordinates.
  * Note that the positions are affected by the current viewport
  *
  * @param InDeviceContextRHI		RHI Device context
@@ -225,7 +225,7 @@ void DrawDenormalizedQuad( class CBaseDeviceContextRHI* InDeviceContextRHI, floa
 
 /**
  * @ingroup Engine
- * Draws a wireframe box
+ * @brief Draws a wireframe box
  *
  * @param InSDG			Scene depth group
  * @param InBox			The CBox to use for drawing
@@ -235,7 +235,7 @@ void DrawWireframeBox( struct SceneDepthGroup& InSDG, const class CBox& InBox, c
 
 /**
  * @ingroup Engine
- * Draw circle using lines
+ * @brief Draw circle using lines
  * 
  * @param	InSDG			Scene depth group
  * @param	InLocation		Center of the circle
@@ -251,7 +251,7 @@ void DrawCircle( struct SceneDepthGroup& InSDG, const Vector& InLocation, const 
 #if ENABLE_HITPROXY
 /**
  * @ingroup Engine
- * Draw circle using lines to hit proxy
+ * @brief Draw circle using lines to hit proxy
  * 
  * @param	InSDG			Scene depth group
  * @param	InHitProxyLayer	Hit proxy layer
@@ -265,5 +265,33 @@ void DrawCircle( struct SceneDepthGroup& InSDG, const Vector& InLocation, const 
  */
 void DrawHitProxyCircle( struct SceneDepthGroup& InSDG, EHitProxyLayer InHitProxyLayer, const Vector& InLocation, const Vector& InX, const Vector& InY, const CHitProxyId& InHitProxyId, float InRadius, uint32 InNumSides, float InThickness = 0.f );
 #endif // ENABLE_HITPROXY
+
+/**
+ * @ingroup Engine
+ * @brief Draws a sphere using circles
+ * 
+ * @param InSDG				Scene depth group
+ * @param InBase			Center of the sphere
+ * @param InColor			Color of the sphere
+ * @param InRadius			Radius of the sphere
+ * @param InNumSides		Numbers of sides that the circle has
+ * @param InDepthPriority	Depth priority for the circle
+ */
+void DrawWireSphere( struct SceneDepthGroup& InSDG, const Vector& InBase, CColor InColor, float InRadius, uint32 InNumSides, byte InDepthPriority = 0 );
+
+/**
+ * @ingroup Engine
+ * @brief Draws a wireframe cone
+ *
+ * @param InSDG				Scene depth group
+ * @param InTransform		Generic transform to apply (ex. a local-to-world transform)
+ * @param InConeRadius		Radius of the cone
+ * @param InConeHeight		Height of the cone
+ * @param InConeSides		Numbers of sides that the cone has
+ * @param InColor			Color of the cone
+ * @param InDepthPriority	Depth priority for the cone
+ * @param InVerts			Out param, the positions of the verts at the cone's base
+ */
+void DrawWireCone( struct SceneDepthGroup& InSDG, const Matrix& InTransform, float InConeRadius, float InConeHeight, uint32 InConeSides, CColor InColor, std::vector<Vector>& OutVerts, byte InDepthPriority = 0 );
 
 #endif // !RENDERUTILS_H

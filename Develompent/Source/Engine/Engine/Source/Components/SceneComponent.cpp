@@ -49,6 +49,14 @@ void CSceneComponent::PostEditChangeProperty( class CProperty* InProperty, EProp
 	}
 	Super::PostEditChangeProperty( InProperty, InChangeType );
 }
+
+/*
+==================
+CSceneComponent::DrawDebugComponent
+==================
+*/
+void CSceneComponent::DrawDebugComponent()
+{}
 #endif // WITH_EDITOR
 
 /*

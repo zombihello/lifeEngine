@@ -30,7 +30,7 @@ CShapeComponent::StaticInitializeClass
 void CShapeComponent::StaticInitializeClass()
 {
 	// TODO BS yehor.pohuliaka - Need implemente CStructProperty for user structs
-	// TODO BS yehor.pohuliaka - Need implement CAssetProperty for asset references
+	new CAssetProperty( staticClass, TEXT( "Physics Material" ), TEXT( "Physics" ), TEXT( "Physics material" ), CPP_PROPERTY( physicsMaterial ), 0, AT_PhysicsMaterial );
 }
 
 /*

@@ -1,3 +1,7 @@
+#include "Misc/EngineGlobals.h"
+#include "Render/Scene.h"
+#include "Render/SceneUtils.h"
+#include "System/World.h"
 #include "Components/SpotLightComponent.h"
 
 IMPLEMENT_CLASS( CSpotLightComponent )
@@ -66,6 +70,20 @@ void CSpotLightComponent::PostEditChangeProperty( class CProperty* InProperty, E
 	}
 
 	Super::PostEditChangeProperty( InProperty, InChangeType );
+}
+
+/*
+==================
+CSpotLightComponent::DrawDebugComponent
+==================
+*/
+void CSpotLightComponent::DrawDebugComponent()
+{
+	if ( GetOwner() && GetOwner()->IsSelected() )
+	{
+		std::vector<Vector>		verteces;
+		DrawWireCone( ( ( CScene* )g_World->GetScene() )->GetSDG( SDG_WorldEdBackground ), GetComponentTransform().ToMatrix(), radius, height, 50, DEC_LIGHT, verteces );
+	}
 }
 #endif // WITH_EDITOR
 

@@ -129,6 +129,64 @@ void DrawCircle( struct SceneDepthGroup& InSDG, const Vector& InLocation, const 
 #endif // WITH_EDITOR
 }
 
+/*
+==================
+DrawWireSphere
+==================
+*/
+void DrawWireSphere( struct SceneDepthGroup& InSDG, const Vector& InBase, CColor InColor, float InRadius, uint32 InNumSides, byte InDepthPriority /*= 0*/ )
+{
+#if WITH_EDITOR
+	DrawCircle( InSDG, InBase, Vector( 1.f, 0.f, 0.f ), Vector( 0.f, 1.f, 0.f ), InColor, InRadius, InNumSides );
+	DrawCircle( InSDG, InBase, Vector( 1.f, 0.f, 0.f ), Vector( 0.f, 0.f, 1.f ), InColor, InRadius, InNumSides );
+	DrawCircle( InSDG, InBase, Vector( 0.f, 1.f, 0.f ), Vector( 0.f, 0.f, 1.f ), InColor, InRadius, InNumSides );
+#endif // WITH_EDITOR
+}
+
+/*
+==================
+DrawWireCone
+==================
+*/
+void DrawWireCone( struct SceneDepthGroup& InSDG, const Matrix& InTransform, float InConeRadius, float InConeHeight, uint32 InConeSides, CColor InColor, std::vector<Vector>& OutVerts, byte InDepthPriority /*= 0*/ )
+{
+#if WITH_EDITOR
+	static const float		twoPI = 2.0f * PI;
+	static const float		toRads = PI / 180.0f;
+	static const float		maxRadius = 89.0f * toRads + 0.001f;
+	const float				clampedConeRadius= Clamp( InConeRadius * toRads, 0.001f, maxRadius );
+	const float				sinClampedConeRadius = Math::Sin( clampedConeRadius );
+	const float				cosClampedConeRadius = Math::Cos( clampedConeRadius );
+	const Vector coneDirection( 0.f, 0.f, 1.f );
+	const Vector coneUpVector( 0.f, 1.f, 0.f );
+	const Vector coneLeftVector( -1.f, 0.f, 0.f );
+
+	OutVerts.resize( InConeSides );
+
+	// Generate verteces in world space
+	for ( uint32 index = 0, count = OutVerts.size(); index < count; ++index )
+	{
+		const float		theta = static_cast<float>( ( twoPI * index ) / count );
+		OutVerts[index] = InTransform * Vector4D( ( coneDirection * ( InConeHeight * cosClampedConeRadius ) ) +
+			( ( sinClampedConeRadius * InConeHeight * Math::Cos( theta ) ) * coneUpVector ) +
+			( ( sinClampedConeRadius * InConeHeight * Math::Sin( theta ) ) * coneLeftVector ), 1.f );
+	}
+
+	// Draw spokes
+	for ( uint32 index = 0, count = OutVerts.size(); index < count; ++index )
+	{
+		InSDG.simpleElements.AddLine( Math::GetOriginMatrix( InTransform ), OutVerts[index], InColor, 0.f );
+	}
+
+	// Draw rim
+	for ( uint32 index = 0, count = OutVerts.size()-1; index < count; ++index )
+	{
+		InSDG.simpleElements.AddLine( OutVerts[index], OutVerts[index+1], InColor, 0.f );
+	}
+	InSDG.simpleElements.AddLine( OutVerts[OutVerts.size()-1], OutVerts[0], InColor, 0.f );
+#endif // WITH_EDITOR
+}
+
 #if ENABLE_HITPROXY
 /*
 ==================

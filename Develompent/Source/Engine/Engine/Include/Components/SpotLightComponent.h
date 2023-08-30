@@ -39,6 +39,11 @@ public:
 	 * @param InChangeType  Change type
 	 */
 	virtual void PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType ) override;
+
+	/**
+	 * @brief Function called every frame for drawing debug geometry. Override this function to implement custom logic of drawing debug geometry
+	 */
+	virtual void DrawDebugComponent() override;
 #endif // WITH_EDITOR
 
 	/**

@@ -48,13 +48,6 @@ public:
 	 */
 	virtual void TickComponent( float InDeltaTime );
 
-#if WITH_EDITOR
-	/**
-	 * Function called every frame for drawing debug geometry. Override this function to implement custom logic of drawing debug geometry
-	 */
-	virtual void DrawDebugComponent();
-#endif // WITH_EDITOR
-
 	/**
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize

@@ -280,6 +280,13 @@ void CScene::BuildView( const CSceneView& InSceneView )
 		if ( lightComponent->IsEnabled() )
 		{
 			frame.visibleLights.push_back( lightComponent );
+
+#if WITH_EDITOR
+			if ( g_IsEditor )
+			{
+				lightComponent->DrawDebugComponent();
+			}
+#endif // WITH_EDITOR
 		}
 	}
 }

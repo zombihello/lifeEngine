@@ -36,8 +36,24 @@ CSphereComponent::StaticInitializeClass
 void CSphereComponent::StaticInitializeClass()
 {
 	new CFloatProperty( staticClass, TEXT( "Radius" ), TEXT( "Primitive" ), TEXT( "Radius of sphere" ), CPP_PROPERTY( radius ), 0 );
-	// TODO BS yehor.pohuliaka - Need implement CAssetProperty for asset references
+	new CAssetProperty( staticClass, TEXT( "Material" ), TEXT( "Display" ), TEXT( "Material" ), CPP_PROPERTY( material ), 0, AT_Material );
 }
+
+#if WITH_EDITOR
+/*
+==================
+CStaticMeshComponent::PostEditChangeProperty
+==================
+*/
+void CSphereComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+{
+	if ( InProperty->GetCName() == TEXT( "Material" ) )
+	{
+		SetMaterial( material );
+	}
+	Super::PostEditChangeProperty( InProperty, InChangeType );
+}
+#endif // WITH_EDITOR
 
 /*
 ==================
