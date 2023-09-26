@@ -83,6 +83,17 @@ namespace ImGui
 	 * @return Return TRUE when enum is changed, otherwise FALSE
 	 */
 	bool SelectEnum( const std::wstring& InStrId, class CEnum* InEnum, byte& InOutEnumIndex );
+
+	/**
+	 * @ingroup UI
+	 * @brief Draw a collapsing header
+	 * 
+	 * @param InLabel			Label
+	 * @param InIgnoreDisabled	Is need ignore disable flag
+	 * @param InFlags			Flags
+	 * @return Return TRUE when header is opened, otherwise FALSE
+	 */
+	bool CollapsingHeader( const std::wstring& InLabel, bool InIgnoreDisabled, ImGuiTreeNodeFlags InFlags = 0 );
 }
 
 #endif // WITH_IMGUI

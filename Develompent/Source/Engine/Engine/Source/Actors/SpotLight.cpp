@@ -29,7 +29,7 @@ ASpotLight::StaticInitializeClass
 */
 void ASpotLight::StaticInitializeClass()
 {
-	new CComponentProperty( staticClass, TEXT( "Spot Light Component" ), TEXT( "Light" ), TEXT( "Spot light component" ), CPP_PROPERTY( spotLightComponent ), 0 );
+	new CObjectProperty( staticClass, TEXT( "Spot Light Component" ), TEXT( "Light" ), TEXT( "Spot light component" ), CPP_PROPERTY( spotLightComponent ), CPF_Pointer, CSpotLightComponent::StaticClass() );
 }
 
 #if WITH_EDITOR

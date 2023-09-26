@@ -69,7 +69,7 @@ bool ImGui::DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float
 {
 	bool	bValueChanged = false;
 	ImGui::PushMultiItemsWidths( 3, ImGui::CalcItemWidth() );
-	ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2{ 0.f, 0.f } );
+	ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2{ 0.f, 3.f } );
 	
 	// X axis
 	ImGui::PushStyleColor( ImGuiCol_Button, g_ImGUIEngine->GetStyleColor( IGC_AxisXColor ) );
@@ -280,6 +280,28 @@ bool ImGui::SelectEnum( const std::wstring& InStrId, class CEnum* InEnum, byte& 
 	}
 
 	return bSelectedEnum;
+}
+
+/*
+==================
+ImGui::CollapsingHeader
+==================
+*/
+bool ImGui::CollapsingHeader( const std::wstring& InLabel, bool InIgnoreDisabled, ImGuiTreeNodeFlags InFlags /*= 0*/ )
+{
+	bool	bWasDisabled = ( ImGui::GetCurrentContext()->CurrentItemFlags & ImGuiItemFlags_Disabled ) != 0;
+	if ( bWasDisabled )
+	{
+		ImGui::EndDisabled();
+	}
+	
+	bool	bResult = ImGui::CollapsingHeader( TCHAR_TO_ANSI( InLabel.c_str() ), InFlags );
+	
+	if ( bWasDisabled )
+	{
+		ImGui::BeginDisabled( true );
+	}
+	return bResult;
 }
 
 #endif // WITH_IMGUI

@@ -41,7 +41,7 @@ enum EClassCastFlags
 	CASTCLASS_CFloatProperty		= 1 << 3,	/**< Cast to CFloatProperty */
 	CASTCLASS_CBoolProperty			= 1 << 4,	/**< Cast to CBoolProperty */
 	CASTCLASS_CColorProperty		= 1 << 5,	/**< Cast to CColorProperty */
-	CASTCLASS_CComponentProperty	= 1 << 6,	/**< Cast to CComponentProperty */
+	CASTCLASS_CObjectProperty		= 1 << 6,	/**< Cast to CObjectProperty */
 	CASTCLASS_CVectorProperty		= 1 << 7,	/**< Cast to CVectorProperty */
 	CASTCLASS_CRotatorProperty		= 1 << 8,	/**< Cast to CRotatorProperty */
 	CASTCLASS_CAssetProperty		= 1 << 9,	/**< Cast to CAssetProperty */

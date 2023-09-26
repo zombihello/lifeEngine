@@ -33,7 +33,7 @@ AStaticMesh::StaticInitializeClass
 */
 void AStaticMesh::StaticInitializeClass()
 {
-	new CComponentProperty( staticClass, TEXT( "Static Mesh Component" ), TEXT( "Drawing" ), TEXT( "Static mesh component" ), CPP_PROPERTY( staticMeshComponent ), 0 );
+	new CObjectProperty( staticClass, TEXT( "Static Mesh Component" ), TEXT( "Drawing" ), TEXT( "Static mesh component" ), CPP_PROPERTY( staticMeshComponent ), CPF_Pointer, CStaticMeshComponent::StaticClass() );
 }
 
 /*

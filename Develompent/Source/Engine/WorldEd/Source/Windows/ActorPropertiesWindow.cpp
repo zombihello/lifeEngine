@@ -6,6 +6,7 @@
 #include "System/World.h"
 #include "System/Package.h"
 #include "ImGUI/ImGUIEngine.h"
+#include "ImGUI/imgui_internal.h"
 #include "Windows/ActorPropertiesWindow.h"
 #include "System/EditorEngine.h"
 
@@ -62,32 +63,11 @@ CActorPropertiesWindow::OnTick
 */
 void CActorPropertiesWindow::OnTick()
 {
-	const ImVec2&	itemSpacing = ImGui::GetStyle().ItemSpacing;
-	if ( actorProperties.IsEmpty() && componentsProperties.empty() )
+	if ( properties.IsEmpty() )
 	{
 		return;
 	}
-
-	// Actor properties
-	ImGui::Separator();
-	ImGui::Text( "Actor" );
-	ImGui::Separator();
-
-	actorProperties.Tick( itemSpacing.x );
-
-	// Components properties
-	ImGui::Dummy( ImVec2( 0, itemSpacing.y ) );
-	ImGui::Separator();
-	ImGui::Text( "Components" );
-	ImGui::Separator();
-
-	for ( auto itComponent = componentsProperties.begin(), itComponentEnd = componentsProperties.end(); itComponent != itComponentEnd; ++itComponent )
-	{
-		if ( ImGui::CollapsingHeader( TCHAR_TO_ANSI( itComponent->first.ToString().c_str() ) ) )
-		{
-			itComponent->second.Tick( itemSpacing.x, true );
-		}
-	}
+	properties.Tick();
 }
 
 /*
@@ -95,7 +75,7 @@ void CActorPropertiesWindow::OnTick()
 CActorPropertiesWindow::GetAllPropertiesFromObject
 ==================
 */
-void CActorPropertiesWindow::GetAllPropertiesFromObject( CObject* InObject, CObjectProperties& OutObjectProperties, std::unordered_map<CName, CObjectProperties, CName::HashFunction>& OutComponentsProperties ) const
+void CActorPropertiesWindow::GetAllPropertiesFromObject( CObject* InObject, CObjectProperties& OutObjectProperties ) const
 {
 	// Get all properties of object
 	Assert( InObject );
@@ -105,61 +85,36 @@ void CActorPropertiesWindow::GetAllPropertiesFromObject( CObject* InObject, CObj
 	}
 
 	// Get all object's properties
-	std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>&	objectProperties = OutObjectProperties.GetProperties();
+	std::unordered_map<CName, std::vector<TSharedPtr<PropertyHandler>>, CName::HashFunction>&	objectProperties = OutObjectProperties.GetProperties();
 	{
 		std::vector<CProperty*>		tempProperties;
 		InObject->GetProperties( tempProperties );
 		for ( uint32 index = 0, count = tempProperties.size(); index < count; ++index )
 		{
-			CProperty*		property = tempProperties[index];
-			objectProperties[property->GetCategory()].push_back( property );
+			CProperty*					property = tempProperties[index];
+			objectProperties[property->GetCategory()].push_back( MakeSharedPtr<PropertyHandler>( property ) );
 		}
 	}
 
 	// Get all properties from components
-	for ( auto itObjectProperties = objectProperties.begin(); itObjectProperties != objectProperties.end(); )
+	for ( auto itObjectProperties = objectProperties.begin(); itObjectProperties != objectProperties.end(); ++itObjectProperties )
 	{
-		std::vector<CProperty*>&		properties = itObjectProperties->second;
-		for ( uint32 index = 0; index < properties.size(); )
+		std::vector<TSharedPtr<PropertyHandler>>&		properties = itObjectProperties->second;
+		for ( uint32 index = 0; index < properties.size(); ++index )
 		{
-			CProperty*		property = properties[index];
-			if ( property->GetClass()->HasAnyCastFlags( CASTCLASS_CComponentProperty ) )
+			// If in property handler objectProperties is a valid then we get all it's properties 
+			const TSharedPtr<PropertyHandler>&			propertyHandler = properties[index];
+			if ( propertyHandler->objectProperties )
 			{
-				UPropertyValue	propertyValue;
-				property->GetPropertyValue( ( byte* )InObject, propertyValue );
-				Assert( propertyValue.componentValue );
-			
-				if ( propertyValue.componentValue->GetNumProperties() > 0 )
+				UPropertyValue		propertyValue;
+				propertyHandler->property->GetPropertyValue( ( byte* )InObject, propertyValue );
+				Assert( propertyValue.objectValue );
+
+				if ( propertyValue.objectValue->GetNumProperties() > 0 )
 				{
-					CObjectProperties&															componentProps = OutComponentsProperties.insert( std::make_pair( property->GetCName(), CObjectProperties() ) ).first->second;
-					std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>&	componentProperties = componentProps.GetProperties();
-					std::vector<CProperty*>														tempProperties;
-				
-					propertyValue.componentValue->GetProperties( tempProperties );
-					for ( uint32 compPropIdx = 0, count = tempProperties.size(); compPropIdx < count; ++compPropIdx )
-					{
-						CProperty*	compProperty = tempProperties[compPropIdx];
-						componentProperties[compProperty->GetCategory()].push_back( compProperty );
-					}
-
-					Assert( !tempProperties.empty() );
-					componentProps.GetObjects().push_back( propertyValue.componentValue );
+					GetAllPropertiesFromObject( propertyValue.objectValue, *propertyHandler->objectProperties );
 				}
-				properties.erase( properties.begin() + index );
 			}
-			else
-			{
-				++index;
-			}
-		}
-
-		if ( properties.empty() )
-		{
-			itObjectProperties = objectProperties.erase( itObjectProperties );
-		}
-		else
-		{
-			++itObjectProperties;
 		}
 	}
 
@@ -175,18 +130,33 @@ void CActorPropertiesWindow::GetAllPropertiesFromObject( CObject* InObject, CObj
 CActorPropertiesWindow::RemoveMissingProperties
 ==================
 */
-bool CActorPropertiesWindow::RemoveMissingProperties( const std::vector<CProperty*>& InArrayA, std::vector<CProperty*>& InOutArrayB ) const
+bool CActorPropertiesWindow::RemoveMissingProperties( const std::vector<TSharedPtr<PropertyHandler>>& InArrayA, std::vector<TSharedPtr<PropertyHandler>>& InOutArrayB ) const
 {
 	bool	bResult = false;
 	for ( uint32 propIdx = 0; propIdx < InOutArrayB.size(); )
 	{
-		bool		bFound = false;
-		CProperty*	property = InOutArrayB[propIdx];
+		bool										bFound = false;
+		const TSharedPtr<PropertyHandler>&			dstPropertyHandler = InOutArrayB[propIdx];
 		for ( uint32 checkPropIdx = 0, countCheckProps = InArrayA.size(); checkPropIdx < countCheckProps; ++checkPropIdx )
 		{
-			if ( property == InArrayA[checkPropIdx] )
+			const TSharedPtr<PropertyHandler>&		srcPropertyHandler = InArrayA[checkPropIdx];
+			if ( dstPropertyHandler->property == srcPropertyHandler->property )
 			{
-				bFound = true;
+				// If the property is object then we recursive remove missing properties in the objectProperties
+				if ( dstPropertyHandler->objectProperties )
+				{
+					if ( RemoveMissingProperties( srcPropertyHandler->objectProperties->GetProperties(), dstPropertyHandler->objectProperties->GetProperties() ) )
+					{
+						// Size array of objects in the local CObjectProperties must be 1, because it contain only one object
+						Assert( srcPropertyHandler->objectProperties->GetObjects().size() == 1 );
+						dstPropertyHandler->objectProperties->GetObjects().push_back( srcPropertyHandler->objectProperties->GetObjects()[0] );
+						bFound = true;
+					}
+				}
+				else
+				{
+					bFound = true;
+				}
 				break;
 			}
 		}
@@ -210,7 +180,7 @@ bool CActorPropertiesWindow::RemoveMissingProperties( const std::vector<CPropert
 CActorPropertiesWindow::RemoveMissingProperties
 ==================
 */
-bool CActorPropertiesWindow::RemoveMissingProperties( const std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>& InArrayA, std::unordered_map<CName, std::vector<CProperty*>, CName::HashFunction>& InOutArrayB ) const
+bool CActorPropertiesWindow::RemoveMissingProperties( const std::unordered_map<CName, std::vector<TSharedPtr<PropertyHandler>>, CName::HashFunction>& InArrayA, std::unordered_map<CName, std::vector<TSharedPtr<PropertyHandler>>, CName::HashFunction>& InOutArrayB ) const
 {
 	bool		bWereMatches = false;
 	for ( auto itBProperties = InOutArrayB.begin(); itBProperties != InOutArrayB.end(); )
@@ -245,65 +215,30 @@ CActorPropertiesWindow::OnActorsUnSelected
 void CActorPropertiesWindow::OnActorsUnSelected( const std::vector<ActorRef_t>& InActors )
 {
 	// Clear old object properties
-	actorProperties.Clear();
-	componentsProperties.clear();
+	properties.Clear();
 
 	// Getting an array of selected actors (we ignore InActors because it may not contain all of the selected actors)
-	const std::vector<ActorRef_t>&						selectedActors = g_World->GetSelectedActors();
+	const std::vector<ActorRef_t>&		selectedActors = g_World->GetSelectedActors();
 	if ( selectedActors.empty() )
 	{
 		return;
 	}
 
 	// Initialization of the set by the components of the first actor
-	GetAllPropertiesFromObject( selectedActors[0], actorProperties, componentsProperties );
+	GetAllPropertiesFromObject( selectedActors[0], properties );
 
 	// Checking for the presence of components in other actors
 	for ( uint32 actorIdx = 1, actorNum = selectedActors.size(); actorIdx < actorNum; ++actorIdx )
 	{
 		// Get all properties in the actor
-		ActorRef_t																		actor = selectedActors[actorIdx];
-		CObjectProperties																localActorProperties;
-		std::unordered_map<CName, CObjectProperties, CName::HashFunction>				localComponentsProperties;
-		GetAllPropertiesFromObject( actor, localActorProperties, localComponentsProperties );
+		ActorRef_t			actor = selectedActors[actorIdx];
+		CObjectProperties	localActorProperties;
+		GetAllPropertiesFromObject( actor, localActorProperties );
 
-		// Remove components that are not present in the current actor
-		// Actor properties
-		if ( RemoveMissingProperties( localActorProperties.GetProperties(), actorProperties.GetProperties() ) )
+		// Remove properties that are not present in the current actor
+		if ( RemoveMissingProperties( localActorProperties.GetProperties(), properties.GetProperties() ) )
 		{
-			actorProperties.GetObjects().push_back( actor );
-		}
-
-		// Components properties
-		for ( auto itComponentProps = componentsProperties.begin(); itComponentProps != componentsProperties.end(); )
-		{
-			auto	itActorComponentProps = localComponentsProperties.find( itComponentProps->first );
-			if ( itActorComponentProps == localComponentsProperties.end() )
-			{
-				itComponentProps = componentsProperties.erase( itComponentProps );
-				continue;
-			}
-
-			CObjectProperties&		globalObjectProperties = itComponentProps->second;
-			CObjectProperties&		localObjectProperties = itActorComponentProps->second;
-			bool					bWereMatches = RemoveMissingProperties( localObjectProperties.GetProperties(), globalObjectProperties.GetProperties() );
-			if ( bWereMatches )
-			{
-				// Size array of objects in the local CObjectProperties must be 1, because it contain only one component
-				Assert( localObjectProperties.GetObjects().size() == 1 );
-				itComponentProps->second.GetObjects().push_back( localObjectProperties.GetObjects()[0] );
-			}
-
-			// If array of component properties in the global CObjectProperties is empty then we remove it from array
-			if ( globalObjectProperties.GetProperties().empty() )
-			{
-				itComponentProps = componentsProperties.erase( itComponentProps );
-				continue;
-			}
-			else
-			{
-				++itComponentProps;
-			}
+			properties.GetObjects().push_back( actor );
 		}
 	}
 }
@@ -316,8 +251,7 @@ CActorPropertiesWindow::OnMapChanged
 void CActorPropertiesWindow::OnMapChanged()
 {
 	// Clear object properties
-	actorProperties.Clear();
-	componentsProperties.clear();
+	properties.Clear();
 }
 
 
@@ -330,7 +264,7 @@ void CActorPropertiesWindow::CObjectProperties::SetPropertyValue( CProperty* InP
 {
 	for ( uint32 objIdx = 0, countObjs = objects.size(); objIdx < countObjs; ++objIdx )
 	{
-		CObject*		object = objects[objIdx];
+		CObject*	object = objects[objIdx];
 		InProperty->SetPropertyValue( ( byte* )object, InPropertyValue );
 		object->PostEditChangeProperty( InProperty, PCT_ValueSet );
 	}
@@ -341,38 +275,46 @@ void CActorPropertiesWindow::CObjectProperties::SetPropertyValue( CProperty* InP
 CActorPropertiesWindow::CObjectProperties::TickProperty
 ==================
 */
-void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthSpacing, CProperty* InProperty )
+void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthSpacing, bool InApplySpacingToCategories, const TSharedPtr<PropertyHandler>& InPropertyHandler )
 {
 	bool			bPropertyIsChanged = false;
 	CObject*		objectZero = objects[0];
-	CClass*			theClass = InProperty->GetClass();
+	CClass*			theClass = InPropertyHandler->property->GetClass();
+	bool			bPropertyIsDisabled = InPropertyHandler->property->HasAnyFlags( CPF_Const ) || !objectZero->CanEditProperty( InPropertyHandler->property );
+	bool			bPropertyIsObject = theClass->HasAnyCastFlags( CASTCLASS_CObjectProperty );
 	UPropertyValue	propertyValue;
 
 	// Draw name of property
-	ImGui::TableNextColumn();
-	ImGui::BeginDisabled( !objectZero->CanEditProperty( InProperty ) );
-	ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
-	ImGui::SameLine();
-	ImGui::Text( TCHAR_TO_ANSI( InProperty->GetCName().ToString().c_str() ) );
-	if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+	if ( bPropertyIsDisabled )
 	{
-		ImGui::SetTooltip( TCHAR_TO_ANSI( InProperty->GetDescription().c_str() ) );
+		ImGui::BeginDisabled( true );
 	}
-	ImGui::TableNextColumn();
+	if ( !bPropertyIsObject )
+	{
+		ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
+		ImGui::SameLine();
+		ImGui::Text( TCHAR_TO_ANSI( InPropertyHandler->property->GetCName().ToString().c_str() ) );
+		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+		{
+			ImGui::SetTooltip( TCHAR_TO_ANSI( InPropertyHandler->property->GetDescription().c_str() ) );
+		}
+		
+		ImGui::NextColumn();
+	}
 
 	// Draw value of property
 	// Bool property
 	if ( theClass->HasAnyCastFlags( CASTCLASS_CBoolProperty ) )
 	{
-		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-		bPropertyIsChanged = ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &propertyValue.boolValue );	
+		InPropertyHandler->property->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		bPropertyIsChanged = ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InPropertyHandler->property->GetName().c_str(), this ).c_str() ), &propertyValue.boolValue );
 	}
 
 	// Byte property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CByteProperty ) )
 	{
-		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-		CByteProperty*		byteProperty = ExactCast<CByteProperty>( InProperty );
+		InPropertyHandler->property->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		CByteProperty*		byteProperty = ExactCast<CByteProperty>( InPropertyHandler->property );
 		Assert( byteProperty );
 
 		// Get cenum. If it null then byte property is simple byte field
@@ -380,7 +322,7 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 		if ( !cenum )
 		{
 			int32	intValue = propertyValue.byteValue;
-			bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &intValue, 1.f, 0, 255 );
+			bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InPropertyHandler->property->GetName().c_str(), this ).c_str() ), &intValue, 1.f, 0, 255 );
 			if ( bPropertyIsChanged )
 			{
 				propertyValue.byteValue = intValue;
@@ -389,31 +331,31 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 		// Otherwise it's enum
 		else
 		{
-			bPropertyIsChanged = ImGui::SelectEnum( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ), cenum, propertyValue.byteValue );
+			bPropertyIsChanged = ImGui::SelectEnum( CString::Format( TEXT( "##%s_%p" ), InPropertyHandler->property->GetName().c_str(), this ), cenum, propertyValue.byteValue );
 		}
 	}
 
 	// Int property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CIntProperty ) )
 	{
-		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-		bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &propertyValue.intValue );
+		InPropertyHandler->property->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InPropertyHandler->property->GetName().c_str(), this ).c_str() ), &propertyValue.intValue );
 	}
 
 	// Float property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CFloatProperty ) )
 	{
-		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-		bPropertyIsChanged = ImGui::DragFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), &propertyValue.floatValue );
+		InPropertyHandler->property->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		bPropertyIsChanged = ImGui::DragFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InPropertyHandler->property->GetName().c_str(), this ).c_str() ), &propertyValue.floatValue );
 	}
 
 	// Color property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CColorProperty ) )
 	{
-		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		InPropertyHandler->property->GetPropertyValue( ( byte* )objectZero, propertyValue );
 		
 		Vector4D	color = propertyValue.colorValue.ToNormalizedVector4D();
-		if ( ImGui::ColorEdit4( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InProperty->GetName().c_str(), this ).c_str() ), ( float* )&color, ImGuiColorEditFlags_NoInputs ) )
+		if ( ImGui::ColorEdit4( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), InPropertyHandler->property->GetName().c_str(), this ).c_str() ), ( float* )&color, ImGuiColorEditFlags_NoInputs ) )
 		{
 			propertyValue.colorValue = color;
 			bPropertyIsChanged = true;
@@ -423,20 +365,20 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 	// Vector property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CVectorProperty ) )
 	{
-		CVectorProperty*	vectorProperty = ExactCast<CVectorProperty>( InProperty );
+		CVectorProperty*	vectorProperty = ExactCast<CVectorProperty>( InPropertyHandler->property );
 		Assert( vectorProperty );
 
 		vectorProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
-		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), propertyValue.vectorValue, vectorProperty->GetDefaultComponentValue(), 0.1f );
+		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InPropertyHandler->property->GetName().c_str(), this ), propertyValue.vectorValue, vectorProperty->GetDefaultComponentValue(), 0.1f );
 	}
 
 	// Rotator property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CRotatorProperty ) )
 	{
-		InProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
+		InPropertyHandler->property->GetPropertyValue( ( byte* )objectZero, propertyValue );
 		Vector		rotation = propertyValue.rotatorValue.ToEuler();
 
-		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), rotation, 0.f, 0.1f );
+		bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), InPropertyHandler->property->GetName().c_str(), this ), rotation, 0.f, 0.1f );
 		if ( bPropertyIsChanged )
 		{
 			propertyValue.rotatorValue = CRotator::MakeFromEuler( rotation );
@@ -446,18 +388,35 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 	// Asset property
 	else if ( theClass->HasAnyCastFlags( CASTCLASS_CAssetProperty ) )
 	{
-		CAssetProperty*		assetProperty = ExactCast<CAssetProperty>( InProperty );
+		CAssetProperty*		assetProperty = ExactCast<CAssetProperty>( InPropertyHandler->property );
 		Assert( assetProperty );
 	
 		assetProperty->GetPropertyValue( ( byte* )objectZero, propertyValue );
 		std::wstring		assetReference;
 		MakeReferenceToAsset( propertyValue.assetValue, assetReference );
 	
-		bPropertyIsChanged |= ImGui::SelectAsset( CString::Format( TEXT( "%s_%p" ), InProperty->GetName().c_str(), this ), TEXT( "" ), assetReference );
+		bPropertyIsChanged |= ImGui::SelectAsset( CString::Format( TEXT( "%s_%p" ), InPropertyHandler->property->GetName().c_str(), this ), TEXT( "" ), assetReference );
 		if ( bPropertyIsChanged )
 		{
 			propertyValue.assetValue = g_PackageManager->FindAsset( assetReference, assetProperty->GetAssetType() );
 		}
+	}
+
+	// Object property
+	else if ( theClass->HasAnyCastFlags( CASTCLASS_CObjectProperty ) )
+	{
+		Assert( InPropertyHandler->objectProperties );
+		ImGui::Columns( 1 );
+		ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
+		ImGui::SameLine();
+		
+		if ( ImGui::CollapsingHeader( CString::Format( TEXT( "%s##%p" ), InPropertyHandler->property->GetName().c_str(), this ), true ) )
+		{
+			InPropertyHandler->objectProperties->Tick( InItemWidthSpacing + ImGui::GetStyle().ItemSpacing.x, true );
+		}
+
+		ImGui::Columns( 2 );
+		ImGui::NextColumn();
 	}
 
 	// Unknown property
@@ -465,11 +424,16 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 	{
 		ImGui::TextColored( g_ImGUIEngine->GetStyleColor( IGC_ErrorColor ), "Unknown type" );
 	}
-	ImGui::EndDisabled();
+	ImGui::NextColumn();
+
+	if ( bPropertyIsDisabled )
+	{
+		ImGui::EndDisabled();
+	}
 
 	if ( bPropertyIsChanged )
 	{
-		SetPropertyValue( InProperty, propertyValue );
+		SetPropertyValue( InPropertyHandler->property, propertyValue );
 		g_World->MarkDirty();
 	}
 }
@@ -479,7 +443,7 @@ void CActorPropertiesWindow::CObjectProperties::TickProperty( float InItemWidthS
 CActorPropertiesWindow::CObjectProperties::Tick
 ==================
 */
-void CActorPropertiesWindow::CObjectProperties::Tick( float InItemWidthSpacing, bool InApplySpacingToCategories /*= false*/ )
+void CActorPropertiesWindow::CObjectProperties::Tick( float InItemWidthSpacing /*= 0.f*/, bool InApplySpacingToCategories /*= false*/)
 {
 	float		currentSpacing = InItemWidthSpacing;
 	for ( auto itCategory = properties.begin(), itCategoryEnd = properties.end(); itCategory != itCategoryEnd; ++itCategory )
@@ -487,29 +451,20 @@ void CActorPropertiesWindow::CObjectProperties::Tick( float InItemWidthSpacing, 
 		if ( InApplySpacingToCategories )
 		{
 			ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
-			currentSpacing = InItemWidthSpacing * 2.f;
 			ImGui::SameLine();
 		}
 		
-		if ( ImGui::CollapsingHeader( TCHAR_TO_ANSI( CString::Format( TEXT( "%s##%p" ), itCategory->first.ToString().c_str(), this ).c_str() ), ImGuiTreeNodeFlags_DefaultOpen ) )
+		if ( ImGui::CollapsingHeader( CString::Format( TEXT( "%s##%p" ), itCategory->first.ToString().c_str(), this ), true, ImGuiTreeNodeFlags_DefaultOpen ) )
 		{
-			ImGui::Dummy( ImVec2( currentSpacing, 0.f ) );
-			ImGui::SameLine();
-			
-			if ( ImGui::BeginTable( TCHAR_TO_ANSI( CString::Format( TEXT( "##TableObjectProperties_%p" ), this ).c_str() ), 2, ImGuiTableFlags_Resizable  ) )
+			ImGui::Columns( 2 );			
+			const std::vector<TSharedPtr<PropertyHandler>>&		categoryProperties = itCategory->second;
+			for ( uint32 propIdx = 0, countProps = categoryProperties.size(); propIdx < countProps; ++propIdx )
 			{
-				const std::vector<CProperty*>&		categoryProperties = itCategory->second;
-				for ( uint32 propIdx = 0, countProps = categoryProperties.size(); propIdx < countProps; ++propIdx )
-				{
-					CProperty*		property = categoryProperties[propIdx];
-					
-					ImGui::TableNextRow();
-					ImGui::TableSetBgColor( ImGuiTableBgTarget_RowBg0, !( propIdx % 2 ) ? ImGui::ColorConvertFloat4ToU32( g_ImGUIEngine->GetStyleColor( IGC_TableBgColor0 ) ) : ImGui::ColorConvertFloat4ToU32( g_ImGUIEngine->GetStyleColor( IGC_TableBgColor1 ) ) );
-					TickProperty( currentSpacing + InItemWidthSpacing / 10.f, property );
-				}
-
-				ImGui::EndTable();
+				const TSharedPtr<PropertyHandler>&				propertyHandler = categoryProperties[propIdx];
+				Assert( propertyHandler );
+				TickProperty( InItemWidthSpacing + ImGui::GetStyle().ItemSpacing.x, InApplySpacingToCategories, propertyHandler );
 			}
+			ImGui::Columns( 1 );
 		}
 	}
 }

@@ -39,7 +39,7 @@ AAudio::StaticInitializeClass
 */
 void AAudio::StaticInitializeClass()
 {
-	new CComponentProperty( staticClass, TEXT( "Audio Component" ), TEXT( "Audio" ), TEXT( "Audio component" ), CPP_PROPERTY( audioComponent ), 0 );
+	new CObjectProperty( staticClass, TEXT( "Audio Component" ), TEXT( "Audio" ), TEXT( "Audio component" ), CPP_PROPERTY( audioComponent ), CPF_Pointer, CAudioComponent::StaticClass() );
 }
 
 #if WITH_EDITOR

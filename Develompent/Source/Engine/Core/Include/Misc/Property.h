@@ -32,7 +32,9 @@
 enum EPropertyFlags
 {
 	CPF_None		= 0,		/**< None */
-	CPF_EditorOnly	= 1 << 0	/**< Property only for the editor */
+	CPF_EditorOnly	= 1 << 0,	/**< Property only for the editor */
+	CPF_Pointer		= 1 << 1,	/**< Property is pointer */
+	CPF_Const		= 1 << 2	/**< Property is constant */
 };
 
 /**
@@ -50,7 +52,7 @@ union UPropertyValue
 		, boolValue( false )
 		, floatValue( 0.f )
 		, colorValue( 0 )
-		, componentValue( nullptr )
+		, objectValue( nullptr )
 		, vectorValue( 0.f, 0.f, 0.f )
 		, assetValue( nullptr, nullptr )
 	{}
@@ -66,7 +68,7 @@ union UPropertyValue
 	bool						boolValue;			/**< Bool */
 	float						floatValue;			/**< Float */
 	CColor						colorValue;			/**< Color */
-	class CActorComponent*		componentValue;		/**< Component */
+	class CObject*				objectValue;		/**< Object */
 	Vector						vectorValue;		/**< Vector */
 	CRotator					rotatorValue;		/**< Rotator */
 	TAssetHandle<CAsset>		assetValue;			/**< Asset */
@@ -493,17 +495,17 @@ public:
 
 /**
  * @ingroup Core
- * @brief Component property
+ * @brief Object property
  */
-class CComponentProperty : public CProperty
+class CObjectProperty : public CProperty
 {
-	DECLARE_CLASS( CComponentProperty, CProperty, 0, CASTCLASS_CComponentProperty )
+	DECLARE_CLASS( CObjectProperty, CProperty, 0, CASTCLASS_CObjectProperty )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
-	CComponentProperty() {}
+	CObjectProperty() {}
 
 	/**
 	 * @brief Constructor
@@ -515,9 +517,11 @@ public:
 	 * @param InOffset			Offset to property
 	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InPropertyClass	Property class
 	 */
-	CComponentProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
+	CObjectProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags, CClass* InPropertyClass )
 		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+		, propertyClass( InPropertyClass )
 	{}
 
 	/**
@@ -537,6 +541,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Get property class
+	 * @return Return property class
+	 */
+	FORCEINLINE CClass* GetPropertyClass() const
+	{
+		return propertyClass;
+	}
+
+private:
+	CClass*		propertyClass;		/**< Property class */
 };
 
 /**
@@ -710,6 +726,5 @@ public:
 private:
 	EAssetType			assetType;		/**< Asset type */
 };
-
 
 #endif // !PROPERTY_H

@@ -29,7 +29,7 @@ CShapeComponent::StaticInitializeClass
 */
 void CShapeComponent::StaticInitializeClass()
 {
-	// TODO BS yehor.pohuliaka - Need implemente CStructProperty for user structs
+	new CObjectProperty( staticClass, TEXT( "Collision Profile" ), TEXT( "Physics" ), TEXT( "Collision Profile" ), CPP_PROPERTY( collisionProfile ), CPF_Pointer | CPF_Const, CollisionProfile::StaticClass() );
 	new CAssetProperty( staticClass, TEXT( "Physics Material" ), TEXT( "Physics" ), TEXT( "Physics material" ), CPP_PROPERTY( physicsMaterial ), 0, AT_PhysicsMaterial );
 }
 

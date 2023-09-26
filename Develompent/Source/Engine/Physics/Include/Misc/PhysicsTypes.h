@@ -12,6 +12,8 @@
 #include <string>
 
 #include "Math/Math.h"
+#include "Misc/Object.h"
+#include "Misc/Enum.h"
 #include "System/Package.h"
 #include "System/Archive.h"
 
@@ -36,6 +38,12 @@ enum ECollisionChannel
 	CC_Max				/**< Count collision channels */
 };
 
+DECLARE_ENUM( ECollisionChannel )
+#define FOREACH_ENUM_COLLISIONCHANNEL( X ) \
+	X( CC_WorldStatic ) \
+	X( CC_Visibility ) \
+	X( CC_Character )
+
 /**
  * @ingroup Physics
  * @brief Enumeration indicating how each type should respond
@@ -47,6 +55,12 @@ enum ECollisionResponse
 	CR_Block,			/**< Block collision */
 	CR_Max				/**< Count responses */
 };
+
+DECLARE_ENUM( ECollisionResponse )
+#define FOREACH_ENUM_COLLISIONRESPONSE( X ) \
+	X( CR_Ignore ) \
+	X( CR_Overlap ) \
+	X( CR_Block )
 
 /**
  * @ingroup Physics
@@ -72,8 +86,10 @@ enum ESurfaceType
  * @ingroup Physics
  * @brief Struct of collision profile
  */
-struct CollisionProfile
+struct CollisionProfile : public CObject
 {
+	DECLARE_CLASS( CollisionProfile, CObject, 0, 0 )
+
 	/**
 	 * @brief Constructor
 	 */
