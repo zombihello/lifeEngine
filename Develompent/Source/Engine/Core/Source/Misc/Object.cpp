@@ -73,13 +73,28 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	// Allocated data for a new object
 	uint32		alignedSize = Align( InClass->GetPropertiesSize(), InClass->GetMinAlignment() );
 	CObject*	object = ( CObject* )malloc( alignedSize );
-
-	// Call the class constructor at allocated memory
-	InClass->ClassConstructor( object );
+	Sys_Memzero( ( void* )object, InClass->GetPropertiesSize() );
 
 	// Init object properties
 	object->outer		= InOuter;
 	object->name		= InName;
+	return object;
+}
+
+/*
+==================
+CObject::StaticConstructObject
+==================
+*/
+CObject* CObject::StaticConstructObject( class CClass* InClass, CObject* InOuter /* = nullptr */, CName InName /* = NAME_None */ )
+{
+	// Allocate a new object and call the class constructor
+	CObject*	object = StaticAllocateObject( InClass, InOuter, InName );
+	if ( object )
+	{
+		InClass->ClassConstructor( object );
+	}
+
 	return object;
 }
 

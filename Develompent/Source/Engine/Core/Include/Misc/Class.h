@@ -156,7 +156,7 @@ public:
 	 */
 	FORCEINLINE class CObject* CreateObject( class CObject* InOuter = nullptr, const CName& InName = NAME_None ) const
 	{
-		return CObject::StaticAllocateObject( ( CClass* )this, InOuter, InName );
+		return CObject::StaticConstructObject( ( CClass* )this, InOuter, InName );
 	}
 
 	/**

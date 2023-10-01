@@ -206,8 +206,19 @@ public:
      * @param Class		The class of the object to create
      * @param InOuter   The object to create this object within
      * @param InName	The name to give the new object
+     * @return Return allocated object, but it not initialized
      */
     static CObject* StaticAllocateObject( class CClass* InClass, CObject* InOuter = nullptr, CName InName = NAME_None );
+
+    /**
+     * @brief Create a new instance of an object
+     *
+     * @param Class		The class of the object to create
+     * @param InOuter   The object to create this object within
+     * @param InName	The name to give the new object
+     * @return Return allocated object, it will be fully initialized
+     */
+    static CObject* StaticConstructObject( class CClass* InClass, CObject* InOuter = nullptr, CName InName = NAME_None );
 
     /**
      * @brief Serialize object
