@@ -30,8 +30,11 @@ CStaticMeshComponent::StaticInitializeClass
 */
 void CStaticMeshComponent::StaticInitializeClass()
 {
-	new CAssetProperty( staticClass, TEXT( "Static Mesh" ), TEXT( "Disaply" ), TEXT( "Static mesh asset" ), CPP_PROPERTY( staticMesh ), 0, AT_StaticMesh );
-	// TODO BS yehor.pohuliaka - Need implement CArrayProperty for arrays
+	new( staticClass, TEXT( "Static Mesh" ) )							CAssetProperty( TEXT( "Display" ), TEXT( "Static mesh asset" ), CPP_PROPERTY( staticMesh ), 0, AT_StaticMesh );
+	{
+		CProperty*	array = new( staticClass, TEXT( "Materials" ) )		CArrayProperty( TEXT( "Display" ), TEXT( "Override materials" ), CPP_PROPERTY( overrideMaterials ), 0 );
+		new( array, TEXT( "AssetProperty0" ) )							CAssetProperty( NAME_None, TEXT( "" ), 0, 0, AT_Material );
+	}
 }
 
 /*
@@ -52,13 +55,18 @@ void CStaticMeshComponent::Serialize( class CArchive& InArchive )
 CStaticMeshComponent::PostEditChangeProperty
 ==================
 */
-void CStaticMeshComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+void CStaticMeshComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet )
 {
-	if ( InProperty->GetCName() == TEXT( "Static Mesh" ) )
+	CProperty*		changedProperty = InPropertyChangedEvenet.property;
+	if ( changedProperty->GetCName() == TEXT( "Static Mesh" ) )
 	{
 		SetStaticMesh( staticMesh );
 	}
-	Super::PostEditChangeProperty( InProperty, InChangeType );
+	else if ( changedProperty->GetCName() == TEXT( "Materials" ) )
+	{
+		bIsDirtyDrawingPolicyLink = true;
+	}
+	Super::PostEditChangeProperty( InPropertyChangedEvenet );
 }
 #endif // WITH_EDITOR
 

@@ -11,11 +11,8 @@ CActorComponent::CActorComponent
 */
 CActorComponent::CActorComponent() 
 #if WITH_EDITOR
-	: bEditorOnly( false ),
-#else
-	:
+	: bEditorOnly( false )
 #endif // WITH_EDITOR
-	 owner( nullptr )
 {}
 
 /*
@@ -65,3 +62,13 @@ CActorComponent::Destroyed
 */
 void CActorComponent::Destroyed()
 {}
+
+/*
+==================
+CActorComponent::GetOwner
+==================
+*/
+AActor* CActorComponent::GetOwner() const
+{
+	return Cast<AActor>( GetOuter() );
+}

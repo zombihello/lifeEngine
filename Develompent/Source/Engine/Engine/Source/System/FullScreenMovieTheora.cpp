@@ -53,8 +53,8 @@ void CTheoraMovieRenderClient::CreateViewport()
 {
 	if ( !viewport )
 	{
-		Assert( g_Engine->IsA<CGameEngine>() );
-		viewport				= const_cast<CViewport*>( &g_Engine->Cast<CGameEngine>()->GetViewport() );
+		Assert( IsA<CGameEngine>( g_Engine ) );
+		viewport				= const_cast<CViewport*>( &Cast<CGameEngine>( g_Engine )->GetViewport() );
 		originalViewportClient	= viewport->GetViewportClient();
 
 		Assert( viewport );

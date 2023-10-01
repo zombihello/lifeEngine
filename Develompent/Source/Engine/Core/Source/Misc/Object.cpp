@@ -6,6 +6,25 @@ IMPLEMENT_CLASS( CObject )
 
 /*
 ==================
+CObject::CObject
+==================
+*/
+CObject::CObject()
+	: name( NoInit )
+{}
+
+/*
+==================
+CObject::CObject
+==================
+*/
+CObject::CObject( const CName& InName )
+	: name( InName )
+	, outer( nullptr )
+{}
+
+/*
+==================
 CObject::Serialize
 ==================
 */
@@ -22,6 +41,46 @@ void CObject::Serialize( CArchive& InArchive )
 	{
 		InArchive << name;
 	}
+}
+
+/*
+==================
+CObject::StaticAllocateObject
+==================
+*/
+CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter /* = nullptr */, CName InName /* = NAME_None */ )
+{
+	AssertMsg( IsInGameThread(), TEXT( "Can't create %s/%s while outside of game thread" ), InClass->GetName().c_str(), InName.ToString().c_str() );
+	if ( !InClass )
+	{
+		Sys_Errorf( TEXT( "Empty class for object %s\n" ), InName.ToString().c_str() );
+		return nullptr;
+	}
+
+	// If we try to create abstract object it's wrong and we call error
+	if ( InClass->HasAnyClassFlags( CLASS_Abstract ) )
+	{
+		Sys_Errorf( TEXT( "Class which was marked abstract was trying to be allocated. %s/%s" ), InClass->GetName().c_str(), InName.ToString().c_str() );
+		return nullptr;
+	}
+
+	// Compose name, if unnamed
+	if ( InName == NAME_None )
+	{
+		InName = InClass->GetCName();
+	}
+
+	// Allocated data for a new object
+	uint32		alignedSize = Align( InClass->GetPropertiesSize(), InClass->GetMinAlignment() );
+	CObject*	object = ( CObject* )malloc( alignedSize );
+
+	// Call the class constructor at allocated memory
+	InClass->ClassConstructor( object );
+
+	// Init object properties
+	object->outer		= InOuter;
+	object->name		= InName;
+	return object;
 }
 
 /*
@@ -61,7 +120,7 @@ void CObject::StaticInitializeClass()
 CObject::PostEditChangeProperty
 ==================
 */
-void CObject::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+void CObject::PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet )
 {}
 
 /*
@@ -74,3 +133,13 @@ bool CObject::CanEditProperty( class CProperty* InProperty ) const
 	return true;
 }
 #endif // WITH_EDITOR
+
+/*
+==================
+CObject::AddProperty
+==================
+*/
+void CObject::AddProperty( class CProperty* InProperty )
+{
+	Sys_Errorf( TEXT( "CObject::AddProperty: Not implemented" ) );
+}

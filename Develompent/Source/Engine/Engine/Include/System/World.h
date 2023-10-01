@@ -72,11 +72,12 @@ public:
 	/**
 	 * Spawn actor in world
 	 * 
-	 * @param[in] InClass Class of spawned actor
-	 * @param[in] InLocation Location actor on spawn
-	 * @param[in] InRotation Rotation actor on spawn
+	 * @param InClass		Class of spawned actor
+	 * @param InLocation	Location actor on spawn
+	 * @param InRotation	Rotation actor on spawn
+	 * @param InName		Actor name
 	 */
-	ActorRef_t SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero );
+	ActorRef_t SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero, const CName& InName = NAME_None );
 
 	/**
 	 * Destroy actor in world
@@ -90,13 +91,14 @@ public:
 	/**
 	 * Spawn actor in world
 	 * 
-	 * @param[in] InLocation Location actor on spawn
-	 * @param[in] InRotation Rotation actor on spawn
+	 * @param InLocation	Location actor on spawn
+	 * @param InRotation	Rotation actor on spawn
+	 * @param InName		Actor name
 	 */
 	template< typename TClass >
-	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero )
+	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero, const CName& InName = NAME_None )
 	{
-		return SpawnActor( TClass::StaticClass(), InLocation, InRotation );
+		return SpawnActor( TClass::StaticClass(), InLocation, InRotation, InName );
 	}
 
 	/**

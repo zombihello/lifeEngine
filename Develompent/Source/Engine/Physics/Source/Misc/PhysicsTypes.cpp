@@ -5,21 +5,10 @@
 
 IMPLEMENT_ENUM( ECollisionChannel, FOREACH_ENUM_COLLISIONCHANNEL )
 IMPLEMENT_ENUM( ECollisionResponse, FOREACH_ENUM_COLLISIONRESPONSE )
-IMPLEMENT_CLASS( CollisionProfile )
 
 const std::wstring		CollisionProfile::noCollision_ProfileName		= TEXT( "NoCollision" );
 const std::wstring		CollisionProfile::blockAll_ProfileName			= TEXT( "BlockAll" );
 CollisionQueryParams	CollisionQueryParams::defaultQueryParam;
-
-/*
-==================
-CollisionProfile::StaticInitializeClass
-==================
-*/
-void CollisionProfile::StaticInitializeClass()
-{
-	new CByteProperty( staticClass, TEXT( "Object type" ), TEXT( "Physics" ), TEXT( "Object type" ), CPP_PROPERTY( objectType ), 0, Enum::GetECollisionChannel() );
-}
 
 /*
 ==================

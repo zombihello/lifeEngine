@@ -1,6 +1,7 @@
 #include "Misc/Class.h"
 #include "Misc/Property.h"
 #include "Misc/Object.h"
+#include "Logger/LoggerMacros.h"
 
 IMPLEMENT_CLASS( CProperty )
 IMPLEMENT_CLASS( CByteProperty )
@@ -12,6 +13,7 @@ IMPLEMENT_CLASS( CObjectProperty )
 IMPLEMENT_CLASS( CVectorProperty )
 IMPLEMENT_CLASS( CRotatorProperty )
 IMPLEMENT_CLASS( CAssetProperty )
+IMPLEMENT_CLASS( CArrayProperty )
 
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CByteProperty )
@@ -23,6 +25,7 @@ IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CObjectProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CVectorProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CRotatorProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CAssetProperty )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CArrayProperty )
 
 /*
 ==================
@@ -31,7 +34,6 @@ CProperty::CProperty
 */
 CProperty::CProperty()
 	: offset( 0 )
-	, size( 0 )
 	, flags( CPF_None )
 {}
 
@@ -40,17 +42,36 @@ CProperty::CProperty()
 CProperty::CProperty
 ==================
 */
-CProperty::CProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
+CProperty::CProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize /*= 1*/ )
 	: category( InCategory )
 	, description( InDescription )
 	, offset( InOffset )
-	, size( InSize )
 	, flags( InFlags )
+	, arraySize( InArraySize )
 {
-	SetCName( InName );
-	InClass->AddProperty( this );
+	GetOuter()->AddProperty( this );
 }
 
+
+/*
+==================
+CByteProperty::GetPropertyValue
+==================
+*/
+uint32 CByteProperty::GetElementSize() const
+{
+	return sizeof( byte );
+}
+
+/*
+==================
+CByteProperty::GetPropertyValue
+==================
+*/
+uint32 CByteProperty::GetMinAlignment() const
+{
+	return alignof( byte );
+}
 
 /*
 ==================
@@ -62,14 +83,7 @@ bool CByteProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& Out
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			OutPropertyValue.byteValue = **( byte** )( InObjectAddress + offset );
-		}
-		else
-		{
-			OutPropertyValue.byteValue = *( InObjectAddress + offset );
-		}
+		OutPropertyValue.byteValue = *( InObjectAddress + offset );
 		bResult = true;
 	}
 
@@ -86,14 +100,7 @@ bool CByteProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValu
 	bool	bResult = false;
 	if ( !( flags & CPF_Const ) && InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			**( byte** )( InObjectAddress + offset ) = InPropertyValue.byteValue;
-		}
-		else
-		{
-			*( InObjectAddress + offset ) = InPropertyValue.byteValue;
-		}
+		*( InObjectAddress + offset ) = InPropertyValue.byteValue;
 		bResult = true;
 	}
 	return bResult;
@@ -105,19 +112,32 @@ bool CByteProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValu
 CIntProperty::GetPropertyValue
 ==================
 */
+uint32 CIntProperty::GetElementSize() const
+{
+	return sizeof( int32 );
+}
+
+/*
+==================
+CIntProperty::GetPropertyValue
+==================
+*/
+uint32 CIntProperty::GetMinAlignment() const
+{
+	return alignof( int32 );
+}
+
+/*
+==================
+CIntProperty::GetPropertyValue
+==================
+*/
 bool CIntProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			OutPropertyValue.intValue = **( int32** )( InObjectAddress + offset );
-		}
-		else
-		{
-			OutPropertyValue.intValue = *( int32* )( InObjectAddress + offset );
-		}
+		OutPropertyValue.intValue = *( int32* )( InObjectAddress + offset );
 		bResult = true;
 	}
 
@@ -134,14 +154,7 @@ bool CIntProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue
 	bool	bResult = false;
 	if ( !( flags & CPF_Const ) && InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			**( int32** )( InObjectAddress + offset ) = InPropertyValue.intValue;
-		}
-		else
-		{
-			*( int32* )( InObjectAddress + offset ) = InPropertyValue.intValue;
-		}
+		*( int32* )( InObjectAddress + offset ) = InPropertyValue.intValue;
 		bResult = true;
 	}
 	return bResult;
@@ -153,19 +166,32 @@ bool CIntProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue
 CFloatProperty::GetPropertyValue
 ==================
 */
+uint32 CFloatProperty::GetElementSize() const
+{
+	return sizeof( float );
+}
+
+/*
+==================
+CFloatProperty::GetPropertyValue
+==================
+*/
+uint32 CFloatProperty::GetMinAlignment() const
+{
+	return alignof( float );
+}
+
+/*
+==================
+CFloatProperty::GetPropertyValue
+==================
+*/
 bool CFloatProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			OutPropertyValue.floatValue = **( float** )( InObjectAddress + offset );
-		}
-		else
-		{
-			OutPropertyValue.floatValue = *( float* )( InObjectAddress + offset );
-		}		
+		OutPropertyValue.floatValue = *( float* )( InObjectAddress + offset );	
 		bResult = true;
 	}
 
@@ -182,14 +208,7 @@ bool CFloatProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 	bool	bResult = false;
 	if ( !( flags & CPF_Const ) && InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			**( float** )( InObjectAddress + offset ) = InPropertyValue.floatValue;
-		}
-		else
-		{
-			*( float* )( InObjectAddress + offset ) = InPropertyValue.floatValue;
-		}
+		*( float* )( InObjectAddress + offset ) = InPropertyValue.floatValue;
 		bResult = true;
 	}
 	return bResult;
@@ -201,19 +220,32 @@ bool CFloatProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 CBoolProperty::GetPropertyValue
 ==================
 */
+uint32 CBoolProperty::GetElementSize() const
+{
+	return sizeof( bool );
+}
+
+/*
+==================
+CBoolProperty::GetPropertyValue
+==================
+*/
+uint32 CBoolProperty::GetMinAlignment() const
+{
+	return alignof( bool );
+}
+
+/*
+==================
+CBoolProperty::GetPropertyValue
+==================
+*/
 bool CBoolProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			OutPropertyValue.boolValue = **( bool** )( InObjectAddress + offset );
-		}
-		else
-		{
-			OutPropertyValue.boolValue = *( bool* )( InObjectAddress + offset );
-		}
+		OutPropertyValue.boolValue = *( bool* )( InObjectAddress + offset );
 		bResult = true;
 	}
 
@@ -230,14 +262,7 @@ bool CBoolProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValu
 	bool	bResult = false;
 	if ( !( flags & CPF_Const ) && InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			**( bool** )( InObjectAddress + offset ) = InPropertyValue.boolValue;
-		}
-		else
-		{
-			*( bool* )( InObjectAddress + offset ) = InPropertyValue.boolValue;
-		}
+		*( bool* )( InObjectAddress + offset ) = InPropertyValue.boolValue;
 		bResult = true;
 	}
 	return bResult;
@@ -249,19 +274,32 @@ bool CBoolProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValu
 CColorProperty::GetPropertyValue
 ==================
 */
+uint32 CColorProperty::GetElementSize() const
+{
+	return sizeof( CColor );
+}
+
+/*
+==================
+CColorProperty::GetPropertyValue
+==================
+*/
+uint32 CColorProperty::GetMinAlignment() const
+{
+	return alignof( CColor );
+}
+
+/*
+==================
+CColorProperty::GetPropertyValue
+==================
+*/
 bool CColorProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			OutPropertyValue.colorValue = **( CColor** )( InObjectAddress + offset );
-		}
-		else
-		{
-			OutPropertyValue.colorValue = *( CColor* )( InObjectAddress + offset );
-		}
+		OutPropertyValue.colorValue = *( CColor* )( InObjectAddress + offset );
 		bResult = true;
 	}
 
@@ -278,14 +316,7 @@ bool CColorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 	bool	bResult = false;
 	if ( !( flags & CPF_Const ) && InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			**( CColor** )( InObjectAddress + offset ) = InPropertyValue.colorValue;
-		}
-		else
-		{
-			*( CColor* )( InObjectAddress + offset ) = InPropertyValue.colorValue;
-		}
+		*( CColor* )( InObjectAddress + offset ) = InPropertyValue.colorValue;
 		bResult = true;
 	}
 	return bResult;
@@ -297,19 +328,32 @@ bool CColorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 CObjectProperty::GetPropertyValue
 ==================
 */
+uint32 CObjectProperty::GetElementSize() const
+{
+	return sizeof( void* );
+}
+
+/*
+==================
+CObjectProperty::GetPropertyValue
+==================
+*/
+uint32 CObjectProperty::GetMinAlignment() const
+{
+	return alignof( void* );
+}
+
+/*
+==================
+CObjectProperty::GetPropertyValue
+==================
+*/
 bool CObjectProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			OutPropertyValue.objectValue = *( CObject** )( InObjectAddress + offset );
-		}
-		else
-		{
-			OutPropertyValue.objectValue = ( CObject* )( InObjectAddress + offset );
-		}
+		OutPropertyValue.objectValue = *( CObject** )( InObjectAddress + offset );
 		bResult = true;
 	}
 
@@ -326,14 +370,7 @@ bool CObjectProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 	bool	bResult = false;
 	if ( !( flags & CPF_Const ) && InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			*( CObject** )( InObjectAddress + offset ) = InPropertyValue.objectValue;
-		}
-		else
-		{
-			memcpy( InObjectAddress + offset, InPropertyValue.objectValue, sizeof( CObject* ) );
-		}
+		*( CObject** )( InObjectAddress + offset ) = InPropertyValue.objectValue;
 		bResult = true;
 	}
 	return bResult;
@@ -345,19 +382,32 @@ bool CObjectProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 CVectorProperty::GetPropertyValue
 ==================
 */
+uint32 CVectorProperty::GetElementSize() const
+{
+	return sizeof( Vector );
+}
+
+/*
+==================
+CVectorProperty::GetPropertyValue
+==================
+*/
+uint32 CVectorProperty::GetMinAlignment() const
+{
+	return alignof( Vector );
+}
+
+/*
+==================
+CVectorProperty::GetPropertyValue
+==================
+*/
 bool CVectorProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			OutPropertyValue.vectorValue = **( Vector** )( InObjectAddress + offset );
-		}
-		else
-		{
-			OutPropertyValue.vectorValue = *( Vector* )( InObjectAddress + offset );
-		}
+		OutPropertyValue.vectorValue = *( Vector* )( InObjectAddress + offset );
 		bResult = true;
 	}
 
@@ -374,14 +424,7 @@ bool CVectorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 	bool	bResult = false;
 	if ( !( flags & CPF_Const ) && InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			**( Vector** )( InObjectAddress + offset ) = InPropertyValue.vectorValue;
-		}
-		else
-		{
-			*( Vector* )( InObjectAddress + offset ) = InPropertyValue.vectorValue;
-		}
+		*( Vector* )( InObjectAddress + offset ) = InPropertyValue.vectorValue;
 		bResult = true;
 	}
 	return bResult;
@@ -393,19 +436,32 @@ bool CVectorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 CRotatorProperty::GetPropertyValue
 ==================
 */
+uint32 CRotatorProperty::GetElementSize() const
+{
+	return sizeof( CRotator );
+}
+
+/*
+==================
+CRotatorProperty::GetPropertyValue
+==================
+*/
+uint32 CRotatorProperty::GetMinAlignment() const
+{
+	return alignof( CRotator );
+}
+
+/*
+==================
+CRotatorProperty::GetPropertyValue
+==================
+*/
 bool CRotatorProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			OutPropertyValue.rotatorValue = **( CRotator** )( InObjectAddress + offset );
-		}
-		else
-		{
-			OutPropertyValue.rotatorValue = *( CRotator* )( InObjectAddress + offset );
-		}
+		OutPropertyValue.rotatorValue = *( CRotator* )( InObjectAddress + offset );
 		bResult = true;
 	}
 
@@ -422,14 +478,7 @@ bool CRotatorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyV
 	bool	bResult = false;
 	if ( !( flags & CPF_Const ) && InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			**( CRotator** )( InObjectAddress + offset ) = InPropertyValue.rotatorValue;
-		}
-		else
-		{
-			*( CRotator* )( InObjectAddress + offset ) = InPropertyValue.rotatorValue;
-		}
+		*( CRotator* )( InObjectAddress + offset ) = InPropertyValue.rotatorValue;
 		bResult = true;
 	}
 	return bResult;
@@ -441,19 +490,32 @@ bool CRotatorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyV
 CAssetProperty::GetPropertyValue
 ==================
 */
+uint32 CAssetProperty::GetElementSize() const
+{
+	return sizeof( TAssetHandle<CAsset> );
+}
+
+/*
+==================
+CAssetProperty::GetPropertyValue
+==================
+*/
+uint32 CAssetProperty::GetMinAlignment() const
+{
+	return alignof( TAssetHandle<CAsset> );
+}
+
+/*
+==================
+CAssetProperty::GetPropertyValue
+==================
+*/
 bool CAssetProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
 {
 	bool	bResult = false;
 	if ( InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			OutPropertyValue.assetValue = **( TAssetHandle<CAsset>** )( InObjectAddress + offset );
-		}
-		else
-		{
-			OutPropertyValue.assetValue = *( TAssetHandle<CAsset>* )( InObjectAddress + offset );
-		}
+		OutPropertyValue.assetValue = *( TAssetHandle<CAsset>* )( InObjectAddress + offset );
 		bResult = true;
 	}
 
@@ -470,14 +532,73 @@ bool CAssetProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 	bool	bResult = false;
 	if ( !( flags & CPF_Const ) && InObjectAddress )
 	{
-		if ( flags & CPF_Pointer )
-		{
-			**( TAssetHandle<CAsset>** )( InObjectAddress + offset ) = InPropertyValue.assetValue;
-		}
-		else
-		{
-			*( TAssetHandle<CAsset>* )( InObjectAddress + offset ) = InPropertyValue.assetValue;
-		}
+		*( TAssetHandle<CAsset>* )( InObjectAddress + offset ) = InPropertyValue.assetValue;
+		bResult = true;
+	}
+	return bResult;
+}
+
+
+/*
+==================
+CArrayProperty::AddProperty
+==================
+*/
+void CArrayProperty::AddProperty( class CProperty* InProperty )
+{
+	innerProperty = InProperty;
+}
+
+/*
+==================
+CArrayProperty::GetPropertyValue
+==================
+*/
+uint32 CArrayProperty::GetElementSize() const
+{
+	return sizeof( std::vector<byte> );
+}
+
+/*
+==================
+CArrayProperty::GetPropertyValue
+==================
+*/
+uint32 CArrayProperty::GetMinAlignment() const
+{
+	return alignof( std::vector<byte> );
+}
+
+/*
+==================
+CArrayProperty::GetPropertyValue
+==================
+*/
+bool CArrayProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
+{
+	bool	bResult = false;
+	if ( InObjectAddress )
+	{
+		OutPropertyValue.arrayValue = ( std::vector<byte>* )( InObjectAddress + offset );
+		bResult = true;
+	}
+
+	return bResult;
+}
+
+/*
+==================
+CArrayProperty::SetPropertyValue
+==================
+*/
+bool CArrayProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue )
+{
+	bool	bResult = false;
+	if ( !( flags & CPF_Const ) && InObjectAddress )
+	{
+		std::vector<byte>*		dstArray = ( std::vector<byte>* )( InObjectAddress + offset );
+		dstArray->resize( InPropertyValue.arrayValue->size() );
+		memcpy( dstArray->data(), InPropertyValue.arrayValue->data(), dstArray->size() );
 		bResult = true;
 	}
 	return bResult;

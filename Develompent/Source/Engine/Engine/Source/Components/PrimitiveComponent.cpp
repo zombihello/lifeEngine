@@ -37,7 +37,7 @@ CPrimitiveComponent::StaticInitializeClass
 */
 void CPrimitiveComponent::StaticInitializeClass()
 {
-	new CBoolProperty( staticClass, TEXT( "bVisibility" ), TEXT( "Drawing" ), TEXT( "Is primitive visibility" ), CPP_PROPERTY( bVisibility ), 0 );
+	new( staticClass, TEXT( "bVisibility" ) ) CBoolProperty( TEXT( "Drawing" ), TEXT( "Is primitive visibility" ), CPP_PROPERTY( bVisibility ), 0 );
 }
 
 /*

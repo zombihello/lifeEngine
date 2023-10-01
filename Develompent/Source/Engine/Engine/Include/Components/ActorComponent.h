@@ -10,6 +10,7 @@
 #define ACTORCOMPONENT_H
 
 #include "Misc/Object.h"
+#include "Misc/Class.h"
 #include "Misc/RefCounted.h"
 #include "Misc/EngineTypes.h"
 #include "Misc/Property.h"
@@ -64,22 +65,10 @@ public:
 	virtual void Destroyed();
 
 	/**
-	 * Set owner
-	 * @param[in] InOwner Actor owner
-	 */
-	FORCEINLINE void SetOwner( class AActor* InOwner )
-	{
-		owner = InOwner;
-	}
-
-	/**
-	 * Get owner
+	 * @brief Get owner
 	 * @return Return owner
 	 */
-	FORCEINLINE class AActor* GetOwner() const
-	{
-		return owner;
-	}
+	class AActor* GetOwner() const;
 
 #if WITH_EDITOR
 	/**
@@ -105,8 +94,6 @@ private:
 #if WITH_EDITOR
 	bool					bEditorOnly;	/**< Is component only for editor */
 #endif // WITH_EDITOR
-
-	class AActor*			owner;			/**< Actor owner */
 };
 
 #endif // !ACTORCOMPONENT_H

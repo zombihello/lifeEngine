@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "Misc/Object.h"
+#include "Misc/Class.h"
 #include "Misc/RefCounted.h"
 #include "Misc/EngineTypes.h"
 #include "Misc/Property.h"
@@ -940,7 +941,7 @@ protected:
 	 * @param InEditorOnly	Is editor only component
 	 * @return Return pointer to component
 	 */
-	ActorComponentRef_t CreateComponent( CClass* InClass, const tchar* InName, bool InEditorOnly = false );
+	ActorComponentRef_t CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly = false );
 
 	/**
 	 * @brief Create component and add to array of owned components
@@ -949,7 +950,7 @@ protected:
 	 * @return Return pointer to component
 	 */
 	template< typename TClass >
-	FORCEINLINE TRefCountPtr< TClass > CreateComponent( const tchar* InName, bool InEditorOnly = false )
+	FORCEINLINE TRefCountPtr< TClass > CreateComponent( const CName& InName, bool InEditorOnly = false )
 	{
 		CActorComponent*		newComponent = CreateComponent( TClass::StaticClass(), InName, InEditorOnly );
 		return ( TClass* )newComponent;

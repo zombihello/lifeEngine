@@ -1,11 +1,8 @@
 #include "Misc/Class.h"
 #include "Misc/Property.h"
 
-// ----------------
-// STATIC VALUES
-// ----------------
-
-std::unordered_map< std::wstring, const CClass* >			CClass::classesTable;
+IMPLEMENT_CLASS( CClass )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CClass )
 
 /*
 ==================
@@ -59,4 +56,14 @@ uint32 CClass::GetNumProperties( bool InPropertiesInParents /* = true */ ) const
 	}
 
 	return numProps;
+}
+
+/*
+==================
+CClass::AddProperty
+==================
+*/
+void CClass::AddProperty( CProperty* InProperty )
+{
+	properties.push_back( InProperty );
 }

@@ -61,11 +61,9 @@ public:
 #if WITH_EDITOR
 	/**
 	 * @brief Function called by the editor when property is changed
-	 *
-	 * @param InProperty    Property
-	 * @param InChangeType  Change type
+	 * @param InPropertyChangedEvenet    Property changed event
 	 */
-	virtual void PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType ) override;
+	virtual void PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet ) override;
 
 	/**
 	 * @brief Function called every frame for drawing debug geometry. Override this function to implement custom logic of drawing debug geometry

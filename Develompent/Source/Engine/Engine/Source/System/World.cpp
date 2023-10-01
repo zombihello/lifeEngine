@@ -226,15 +226,18 @@ void CWorld::CleanupWorld()
 CWorld::SpawnActor
 ==================
 */
-ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /*= Math::rotatorZero*/ )
+ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /* = Math::rotatorZero */, const CName& InName /* = NAME_None */)
 {
 	Assert( InClass );
 
-	AActor*		actor = InClass->CreateObject<AActor>();
+	AActor*		actor = InClass->CreateObject<AActor>( nullptr, InName );
 	Assert( actor );
 
-	// Set default actor name and location with rotation
-	actor->SetName( InClass->GetName().c_str() );
+	// Set default actor location with rotation
+	if ( InName == NAME_None )
+	{
+		actor->SetCName( InClass->GetCName() );
+	}
     actor->AddActorLocation( InLocation );
     actor->AddActorRotation( InRotation );
 

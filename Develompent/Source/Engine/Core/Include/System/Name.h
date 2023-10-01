@@ -70,6 +70,12 @@ public:
 	friend CArchive& operator<<( CArchive& InArchive, const CName& InValue );
 
 	/**
+	 * @brief Constructor with leaving uninitialized memory
+	 */
+	FORCEINLINE explicit CName( ENoInit )
+	{}
+
+	/**
 	 * @brief Constructor
 	 * @param InString		String
 	 */

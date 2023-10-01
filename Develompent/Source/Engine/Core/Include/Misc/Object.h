@@ -10,18 +10,20 @@
 #define OBJECT_H
 
 #include <string>
-#include "Misc/Class.h"
+
+#include "Core.h"
+#include "System/Name.h"
 
 /**
  * @ingroup Core
  * @brief Macro for declare class
  * 
  * @param TClass            Class
+ * @param TSuperClass       Super class
  * @param TClassFlags       Class flags
  * @param TClassCastFlags   Class cast flags
- * @param TSuperClass       Super class
  * 
- * Example usage: @code DECLARE_CLASS( CClass, CObject ) @endcode
+ * Example usage: @code DECLARE_CLASS( CClass, CObject, 0, 0 ) @endcode
  */
 #define DECLARE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
     private: \
@@ -31,10 +33,22 @@
         enum { StaticClassCastFlags=TClassCastFlags }; \
 	    typedef TClass		        ThisClass; \
 	    typedef TSuperClass	        Super; \
-        static CObject*             StaticConstructor(); \
+        static CObject*             StaticConstructor( void* InPtr ); \
         static void                 StaticInitializeClass(); \
         static class CClass*        StaticClass(); \
-        virtual class CClass*       GetClass() const;
+        virtual class CClass*       GetClass() const; \
+        void* operator new( size_t InSize, CObject* InOuter = nullptr, const CName& InName = NAME_None ) \
+        { \
+            return StaticAllocateObject( StaticClass(), InOuter, InName ); \
+		} \
+        void operator delete( void* InPtr, CObject* InOuter, const CName& InName ) \
+        { \
+            free( InPtr ); \
+        } \
+        void operator delete( void* InPtr ) \
+        { \
+            ::delete InPtr; \
+        }
 
 /**
  * @ingroup Core
@@ -46,9 +60,9 @@
  */
 #define IMPLEMENT_CLASS( TClass ) \
     CClass*     TClass::staticClass = nullptr; \
-    CObject*    TClass::StaticConstructor() \
+    CObject*    TClass::StaticConstructor( void* InPtr ) \
     { \
-        return new ThisClass(); \
+        return ::new( InPtr ) ThisClass(); \
     } \
     \
     CClass*     TClass::StaticClass() \
@@ -56,11 +70,13 @@
         if ( !staticClass ) \
         { \
             bool        bBaseClass = &ThisClass::StaticClass == &Super::StaticClass; \
-            staticClass = new CClass \
+            staticClass = ::new CClass \
             ( \
                 TEXT( #TClass ), \
                 StaticClassFlags, \
                 StaticClassCastFlags, \
+                sizeof( ThisClass ), \
+                alignof( ThisClass ), \
                 &ThisClass::StaticConstructor, \
                 !bBaseClass ? Super::StaticClass() : nullptr \
             ); \
@@ -97,11 +113,64 @@
 
 /**
  * @ingroup Core
+ * @brief Enumeration of flags describing a class
+ */
+enum EClassFlags
+{
+	CLASS_None			= 0,		/**< None */
+	CLASS_Deprecated	= 1 << 0,	/**< Class is deprecated */
+	CLASS_Abstract		= 1 << 1,	/**< Class is abstract and can't be instantiated directly  */
+};
+
+/**
+ * @ingroup Core
+ * @brief Enumeration of flags used for quickly casting classes of certain types; all class cast flags are inherited
+ */
+enum EClassCastFlags
+{
+	CASTCLASS_None					= 0,		/**< None */
+	CASTCLASS_CProperty				= 1 << 0,	/**< Cast to CProperty */
+	CASTCLASS_CByteProperty			= 1 << 1,	/**< Cast to CByteProperty */
+	CASTCLASS_CIntProperty			= 1 << 2,	/**< Cast to CIntProperty */
+	CASTCLASS_CFloatProperty		= 1 << 3,	/**< Cast to CFloatProperty */
+	CASTCLASS_CBoolProperty			= 1 << 4,	/**< Cast to CBoolProperty */
+	CASTCLASS_CColorProperty		= 1 << 5,	/**< Cast to CColorProperty */
+	CASTCLASS_CObjectProperty		= 1 << 6,	/**< Cast to CObjectProperty */
+	CASTCLASS_CVectorProperty		= 1 << 7,	/**< Cast to CVectorProperty */
+	CASTCLASS_CRotatorProperty		= 1 << 8,	/**< Cast to CRotatorProperty */
+	CASTCLASS_CAssetProperty		= 1 << 9,	/**< Cast to CAssetProperty */
+	CASTCLASS_CArrayProperty		= 1 << 10,	/**< Cast to CArrayProperty */
+};
+
+/**
+ * @ingroup Core
  * @brief Enumeration property change type
  */
 enum EPropertyChangeType
 {
+    PCT_Unspecified,    /**< Default value. Add new enums to add new functionality */
     PCT_ValueSet        /**< Value set */
+};
+
+/**
+ * @ingroup Core
+ * @brief Structure for passing post edit change events
+ */
+struct PropertyChangedEvenet
+{
+    /**
+     * @brief Constructor
+     *
+     * @param InProperty	Property
+     * @param InChangeType	Change type
+     */
+    PropertyChangedEvenet( class CProperty* InProperty, EPropertyChangeType InChangeType = PCT_Unspecified )
+        : property( InProperty )
+        , changeType( InChangeType )
+    {}
+
+    class CProperty*        property;	/**< Changed property */
+    EPropertyChangeType		changeType;	/**< Change type */
 };
 
 /**
@@ -113,10 +182,32 @@ class CObject
     DECLARE_CLASS( CObject, CObject, CLASS_Abstract, 0 )
 
 public:
+	template<typename TClass>   friend bool IsA( CObject* InObject );
+
+    /**
+     * @brief Constructor
+     */
+    CObject();
+
+    /**
+     * @brief Constructor
+     * @param InName    Object name
+     */
+    CObject( const CName& InName );
+
     /**
      * @brief Destructor
      */
     virtual ~CObject() {}
+
+    /**
+     * @brief Create a new instance of an object
+     *
+     * @param Class		The class of the object to create
+     * @param InOuter   The object to create this object within
+     * @param InName	The name to give the new object
+     */
+    static CObject* StaticAllocateObject( class CClass* InClass, CObject* InOuter = nullptr, CName InName = NAME_None );
 
     /**
      * @brief Serialize object
@@ -127,11 +218,9 @@ public:
 #if WITH_EDITOR
     /**
      * @brief Function called by the editor when property is changed
-     * 
-     * @param InProperty    Property
-     * @param InChangeType  Change type
+     * @param InPropertyChangedEvenet    Property changed event
      */
-    virtual void PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType );
+    virtual void PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet );
 
     /**
      * @brief Called by the editor to query whether a property of this object is allowed to be modified
@@ -141,6 +230,21 @@ public:
      */
     virtual bool CanEditProperty( class CProperty* InProperty ) const;
 #endif // WITH_EDITOR
+
+    /**
+     * @brief Add class property
+     * @param InProperty	Property
+     */
+    virtual void AddProperty( class CProperty* InProperty );
+
+    /**
+     * @brief Set the object this object is in
+     * @param InOuter   The object this object is in (can be NULL)
+     */
+    FORCEINLINE void SetOuter( CObject* InOuter )
+    {
+        outer = InOuter;
+    }
 
     /**
      * @brief Set name object
@@ -159,76 +263,6 @@ public:
     {
         name = InName;
     }
-
-    /**
-     * @brief Is the object a class TClass
-     * @return Return true if object is a class TClass, else returning false
-     */
-    template<typename TClass>
-    FORCEINLINE bool IsA() const
-    {
-        return InternalIsA( TClass::StaticClass() );
-    }
-
-    /**
-     * @brief Cast object to class a TClass
-     * @return Return pointer with type TClass. If object not is the class TClass returning nullptr
-     */
-	template<typename TClass>
-    FORCEINLINE TClass* Cast() const
-	{
-		if ( IsA< TClass >() )
-		{
-			return ( TClass* )this;
-		}
-
-		return nullptr;
-	}
-
-    /**
-     * @brief Cast object to class a TClass (excluding class parents)
-     * @return Return pointer with type TClass. If object not is the class TClass returning nullptr
-     */
-    template<typename TClass>
-	FORCEINLINE TClass* ExactCast() const
-	{
-		if ( GetClass() == TClass::StaticClass() )
-		{
-			return ( TClass* )this;
-		}
-
-		return nullptr;
-	}
-
-    /**
-     * @brief Cast object to class a TClass (excluding class parents)
-     * @return Return const pointer with type TClass. If InObject not is the class TClass returning nullptr
-     */
-    template<typename TClass>
-    FORCEINLINE const TClass* ConstExactCast() const
-    {
-        if ( GetClass() == TClass::StaticClass() )
-        {
-            return ( const TClass* )InObject;
-        }
-
-        return nullptr;
-    }
-
-    /**
-     * @brief Cast object to class a TClass
-     * @return Return const pointer with type TClass. If object not is the class TClass returning nullptr
-     */
-	template< typename TClass >
-    FORCEINLINE const TClass* ConstCast() const
-	{
-		if ( IsA< TClass >() )
-		{
-			return ( const TClass* )this;
-		}
-
-		return nullptr;
-	}
 
     /**
      * @brief Get object name
@@ -260,56 +294,13 @@ public:
     }
 
     /**
-     * @brief Create new instance of object with setted class
-     * @param[in] InClass Class of object
-     * 
-     * @return Return pointer to new object
+     * @brief Get the object this object is in
+     * @return Return the object this object is in (can be NULL)
      */
-    template< typename TClass >
-    static FORCEINLINE CObject* StaticNewObject( const CClass* InClass )
-    {
-        Assert( InClass );
-        return InClass->CreateObject< TClass >();
-    }
-
-    /**
-     * @brief Get array of class properties
-     *
-     * @param OutArrayProperties		Output array properties
-     * @param InPropertiesInParents		Take into account the properties of the parents
-     */
-    FORCEINLINE void GetProperties( std::vector<class CProperty*>& OutArrayProperties, bool InPropertiesInParents = true ) const
-    {
-        GetClass()->GetProperties( OutArrayProperties, InPropertiesInParents );
-    }
-
-    /**
-     * @brief Get number properties in the class
-     *
-     * @param InPropertiesInParents		Take into account the properties of the parents
-     * @return Return number properties in the class
-     */
-    FORCEINLINE uint32 GetNumProperties( bool InPropertiesInParents = true ) const
-    {
-        return GetClass()->GetNumProperties( InPropertiesInParents );
-    }
-
-    /**
-     * @brief Find property
-     *
-     * @param InName		Property name
-     * @return Return pointer to class property, if not found return NULL
-     */
-    template<typename TPropertyClass>
-    FORCEINLINE TPropertyClass* FindProperty( const CName& InName ) const
-    {
-        return GetClass()->FindProperty<TPropertyClass>( InName );
-    }
-
-    /**
-     * Overload operator of serialization in archive
-     */
-    friend CArchive& operator<<( CArchive& InArchive, CObject& InObject );
+	FORCEINLINE CObject* GetOuter() const
+	{
+		return outer;
+	}
 
 private:
     /**
@@ -320,7 +311,8 @@ private:
      */
     bool InternalIsA( const CClass* InClass ) const;
 
-    CName       name;               /**< Name object */
+    CName           name;       /**< Name object */ 
+    CObject*        outer;      /**< Object this object resides in */
 };
 
 /**
@@ -335,7 +327,7 @@ FORCEINLINE bool IsA( CObject* InObject )
 {
     if ( InObject )
     {
-        return InObject->IsA<TClass>();
+        return InObject->InternalIsA( TClass::StaticClass() );
     }
 
     return false;

@@ -15,6 +15,7 @@
 #include <string>
 
 #include "ImGUI/ImGUIEngine.h"
+#include "System/ObjectPropertyNode.h"
 #include "WorldEd.h"
 
 /**
@@ -43,6 +44,7 @@ protected:
 	virtual void OnTick() override;
 
 private:
+#if 0
 	// Forward declarations
 	class CObjectProperties;
 
@@ -161,6 +163,24 @@ private:
 		std::vector<CObject*>																			objects;	/**< Array of objects */
 	};
 
+	class CArrayProperties
+	{
+	public:
+		/**
+		 * @brief Method tick interface of a objects property
+		 * 
+		 * @param InItemWidthSpacing			Item spacing by width
+		 * @param InApplySpacingToCategories	Is need apply item spacing to categories
+		 */
+		//void Tick( float InItemWidthSpacing = 0.f, bool InApplySpacingToCategories = false );
+	private:
+		//void TickProperty( uint32 index );
+
+		std::vector<TSharedPtr<PropertyHandler>>		properties;
+		std::vector<std::vector<byte>*>					addresses;
+	};
+#endif // 0
+
 	/**
 	 * @brief Event called when actors selected or unselected
 	 * 
@@ -173,6 +193,12 @@ private:
 	 */
 	void OnMapChanged();
 
+	/**
+	 * @brief Destroy property tree
+	 */
+	void DestroyPropertyTree();
+
+#if 0
 	/**
 	 * @brief Get all properties from object
 	 *
@@ -200,6 +226,9 @@ private:
 	bool RemoveMissingProperties( const std::unordered_map<CName, std::vector<TSharedPtr<PropertyHandler>>, CName::HashFunction>& InArrayA, std::unordered_map<CName, std::vector<TSharedPtr<PropertyHandler>>, CName::HashFunction>& InOutArrayB ) const;
 
 	CObjectProperties														properties;					/**< Array of actor properties */
+#endif // 0
+	
+	CObjectPropertyNode*													rootPropertyNode;			/**< Root property node */
 	EditorDelegates::COnActorsSelected::DelegateType_t*						actorsSelectedDelegate;		/**< Actors selected delegate */
 	EditorDelegates::COnActorsUnselected::DelegateType_t*					actorsUnselectedDelegate;	/**< Actors unselected delegate */
 	EditorDelegates::COnEditorCreatedNewMap::DelegateType_t*				createdNewMapDelegate;		/**< Created new map delegate */

@@ -10,6 +10,7 @@
 #define PROPERTY_H
 
 #include "Misc/Object.h"
+#include "Misc/Class.h"
 #include "Math/Color.h"
 #include "Math/Rotator.h"
 #include "Misc/RefCountPtr.h"
@@ -23,7 +24,7 @@
  * 
  * @param Name	Property name in a class
  */
-#define CPP_PROPERTY( Name )	STRUCT_OFFSET( ThisClass, Name ), sizeof( Name )
+#define CPP_PROPERTY( Name )	STRUCT_OFFSET( ThisClass, Name )
 
 /**
  * @ingroup Core
@@ -33,7 +34,6 @@ enum EPropertyFlags
 {
 	CPF_None		= 0,		/**< None */
 	CPF_EditorOnly	= 1 << 0,	/**< Property only for the editor */
-	CPF_Pointer		= 1 << 1,	/**< Property is pointer */
 	CPF_Const		= 1 << 2	/**< Property is constant */
 };
 
@@ -72,6 +72,7 @@ union UPropertyValue
 	Vector						vectorValue;		/**< Vector */
 	CRotator					rotatorValue;		/**< Rotator */
 	TAssetHandle<CAsset>		assetValue;			/**< Asset */
+	std::vector<byte>*			arrayValue;			/**< Array */
 };
 
 /**
@@ -91,15 +92,13 @@ public:
 	/**
 	 * @brief Constructor
 	 * 
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
 	 * @param InCategory		Category
 	 * @param InDescription		Description
 	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
 	 */
-	CProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags );
+	CProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 );
 
 	/**
 	 * @brief Get category
@@ -147,13 +146,16 @@ public:
 	}
 
 	/**
-	 * @brief Get property size
-	 * @return Return property size
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
 	 */
-	FORCEINLINE uint32 GetSize() const
-	{
-		return size;
-	}
+	virtual uint32 GetElementSize() const		PURE_VIRTUAL( CProperty::GetElementSize, return 0; );
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const		PURE_VIRTUAL( CProperty::GetMinAlignment, return 1; );
 
 	/**
 	 * @brief Get property flags
@@ -162,6 +164,15 @@ public:
 	FORCEINLINE uint32 GetFlags() const
 	{
 		return flags;
+	}
+
+	/**
+	 * @brief Get count of persistent variables
+	 * @return Return count of persistent variables
+	 */
+	FORCEINLINE uint32 GetArraySize() const
+	{
+		return arraySize;
 	}
 
 	/**
@@ -235,8 +246,8 @@ protected:
 	CName			category;		/**< Category */
 	std::wstring	description;	/**< Description */
 	uint32			offset;			/**< Offset */
-	uint32			size;			/**< Size */
 	uint32			flags;			/**< Flags */
+	uint32			arraySize;		/**< Count of persistent variables */
 };
 
 /**
@@ -251,22 +262,22 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	CByteProperty() {}
+	CByteProperty() 
+		: cenum( nullptr )
+	{}
 
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
 	 * @param InCategory		Category
 	 * @param InDescription		Description
 	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
 	 * @param InEnum			If InEnum not null then it's mean this property is enum
 	 */
-	CByteProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags, CEnum* InEnum = nullptr )
-		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+	CByteProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, CEnum* InEnum = nullptr, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
 		, cenum( InEnum )
 	{}
 
@@ -287,6 +298,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
 
 	/**
 	 * @brief Get enum
@@ -318,16 +341,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
 	 * @param InCategory		Category
 	 * @param InDescription		Description
 	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
 	 */
-	CIntProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
-		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+	CIntProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
 	{}
 
 	/**
@@ -347,6 +368,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
 };
 
 /**
@@ -366,16 +399,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
 	 * @param InCategory		Category
 	 * @param InDescription		Description
 	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
 	 */
-	CFloatProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
-		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+	CFloatProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
 	{}
 
 	/**
@@ -395,6 +426,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
 };
 
 /**
@@ -414,16 +457,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
 	 * @param InCategory		Category
 	 * @param InDescription		Description
 	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
 	 */
-	CBoolProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
-		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+	CBoolProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
 	{}
 
 	/**
@@ -443,6 +484,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
 };
 
 /**
@@ -462,16 +515,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
 	 * @param InCategory		Category
 	 * @param InDescription		Description
 	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
 	 */
-	CColorProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
-		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+	CColorProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
 	{}
 
 	/**
@@ -491,6 +542,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
 };
 
 /**
@@ -505,22 +568,22 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	CObjectProperty() {}
+	CObjectProperty() 
+		: propertyClass( nullptr )
+	{}
 
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
 	 * @param InCategory		Category
 	 * @param InDescription		Description
 	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InPropertyClass	Property class
+	 * @param InArraySize		Count of persistent variables
 	 */
-	CObjectProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags, CClass* InPropertyClass )
-		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+	CObjectProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, CClass* InPropertyClass, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
 		, propertyClass( InPropertyClass )
 	{}
 
@@ -541,6 +604,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
 
 	/**
 	 * @brief Get property class
@@ -567,22 +642,22 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	CVectorProperty() {}
+	CVectorProperty() 
+		: defaultComponentValue( 0.f )
+	{}
 
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass					Class where property is stored
-	 * @param InName					Property name
 	 * @param InCategory				Category
 	 * @param InDescription				Description
 	 * @param InOffset					Offset to property
-	 * @param InSize					Property size
 	 * @param InFlags					Flags (see EPropertyFlags)
 	 * @param InDefaultComponentValue	Default component value
+	 * @param InArraySize				Count of persistent variables
 	 */
-	CVectorProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags, float InDefaultComponentValue = 0.f )
-		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+	CVectorProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, float InDefaultComponentValue = 0.f, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
 		, defaultComponentValue( InDefaultComponentValue )
 	{}
 
@@ -603,6 +678,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
 
 	/**
 	 * @brief Get default component value
@@ -634,16 +721,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
 	 * @param InCategory		Category
 	 * @param InDescription		Description
 	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
 	 */
-	CRotatorProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags )
-		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+	CRotatorProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
 	{}
 
 	/**
@@ -663,6 +748,18 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
 };
 
 /**
@@ -677,22 +774,22 @@ public:
 	/**
 	 * @brief Constructor
 	 */
-	CAssetProperty() {}
+	CAssetProperty() 
+		: assetType( AT_Unknown )
+	{}
 
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InClass			Class where property is stored
-	 * @param InName			Property name
 	 * @param InCategory		Category
 	 * @param InDescription		Description
 	 * @param InOffset			Offset to property
-	 * @param InSize			Property size
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InAssetType		Asset type
+	 * @param InArraySize		Count of persistent variables
 	 */
-	CAssetProperty( CClass* InClass, const CName& InName, const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InSize, uint32 InFlags, EAssetType InAssetType )
-		: CProperty( InClass, InName, InCategory, InDescription, InOffset, InSize, InFlags )
+	CAssetProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, EAssetType InAssetType, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
 		, assetType( InAssetType )
 	{}
 
@@ -715,6 +812,18 @@ public:
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
 
 	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
+
+	/**
 	 * @brief Get asset type
 	 * @return Return asset type
 	 */
@@ -725,6 +834,85 @@ public:
 
 private:
 	EAssetType			assetType;		/**< Asset type */
+};
+
+/**
+ * @ingroup Core
+ * @brief Array property
+ */
+class CArrayProperty : public CProperty
+{
+	DECLARE_CLASS( CArrayProperty, CProperty, 0, CASTCLASS_CArrayProperty )
+
+public:
+	/**
+	 * @brief Constructor
+	 */
+	CArrayProperty()
+		: innerProperty( nullptr )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InOffset			Offset to property
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CArrayProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+		, innerProperty( nullptr )
+	{}
+
+	/**
+	 * @brief Add class property
+	 * @param InProperty	Property
+	 */
+	virtual void AddProperty( class CProperty* InProperty ) override;
+
+	/**
+	 * @brief Get property value
+	 *
+	 * @param InObjectAddress		The address of a object where the value of this property is stored
+	 * @param OutPropertyValue		Will be filled with the value located at InObjectAddress+Offset
+	 * @return Return TRUE if OutPropertyValue was filled with a property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
+	 */
+	virtual bool GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const override;
+
+	/**
+	 * @brief Set property value
+	 *
+	 * @param InObjectAddress		The address of a object where the value of this property is stored
+	 * @param InPropertyValue		Contains the value that should be copied into InObjectAddress+Offset
+	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
+	 */
+	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
+
+	/**
+	 * @brief Get inner property
+	 * @return Return inner property
+	 */
+	FORCEINLINE CProperty* GetInnerProperty() const
+	{
+		return innerProperty;
+	}
+
+private:
+	CProperty*		innerProperty;	/**< Inner property */
 };
 
 #endif // !PROPERTY_H

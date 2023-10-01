@@ -12,48 +12,19 @@
 #include <string>
 #include <unordered_map>
 
-#include "Core.h"
-#include "System/Archive.h"
-#include "Scripts/ScriptEngine.h"
-#include "System/Name.h"
-
-/**
- * @ingroup Core
- * @brief Enumeration of flags describing a class
- */
-enum EClassFlags
-{
-	CLASS_None			= 0,		/**< None */
-	CLASS_Deprecated	= 1 << 0,	/**< Class is deprecated */
-	CLASS_Abstract		= 1 << 1,	/**< Class is abstract and can't be instantiated directly  */
-};
-
-/**
- * @ingroup Core
- * @brief Enumeration of flags used for quickly casting classes of certain types; all class cast flags are inherited
- */
-enum EClassCastFlags
-{
-	CASTCLASS_None					= 0,		/**< None */
-	CASTCLASS_CProperty				= 1 << 0,	/**< Cast to CProperty */
-	CASTCLASS_CByteProperty			= 1 << 1,	/**< Cast to CByteProperty */
-	CASTCLASS_CIntProperty			= 1 << 2,	/**< Cast to CIntProperty */
-	CASTCLASS_CFloatProperty		= 1 << 3,	/**< Cast to CFloatProperty */
-	CASTCLASS_CBoolProperty			= 1 << 4,	/**< Cast to CBoolProperty */
-	CASTCLASS_CColorProperty		= 1 << 5,	/**< Cast to CColorProperty */
-	CASTCLASS_CObjectProperty		= 1 << 6,	/**< Cast to CObjectProperty */
-	CASTCLASS_CVectorProperty		= 1 << 7,	/**< Cast to CVectorProperty */
-	CASTCLASS_CRotatorProperty		= 1 << 8,	/**< Cast to CRotatorProperty */
-	CASTCLASS_CAssetProperty		= 1 << 9,	/**< Cast to CAssetProperty */
-};
+#include "Misc/Object.h"
 
 /**
  * @ingroup Core
  * @brief Class description for reflection
  */
-class CClass
+class CClass : public CObject
 {
+	DECLARE_CLASS( CClass, CObject, 0, 0 )
+
 public:
+	friend CObject;
+
 	/**
 	 * @brief Constructor
 	 */
@@ -61,6 +32,8 @@ public:
 		: ClassConstructor( nullptr )
 		, classFlags( CLASS_None )
 		, classCastFlags( CASTCLASS_None )
+		, propertiesSize( 0 )
+		, minAlignment( 1 )
 		, superClass( nullptr )
 	{}
 
@@ -70,45 +43,20 @@ public:
 	 * @param InClassName			Class name
 	 * @param InClassFlags			Class flags
 	 * @param InClassCastFlags		Class cast flags
+	 * @param InPropertiesSize		Properties size in bytes
+	 * @param InMinAlignment		Minimum alignment for the class
 	 * @param InClassConstructor	Pointer to class constructor
 	 * @param InSuperClass			Pointer to super class
 	 */
-	FORCEINLINE CClass( const CName& InClassName, uint32 InClassFlags, uint32 InClassCastFlags, class CObject*( *InClassConstructor )(), CClass* InSuperClass = nullptr ) 
-		: ClassConstructor( InClassConstructor )
+	FORCEINLINE CClass( const CName& InClassName, uint32 InClassFlags, uint32 InClassCastFlags, uint32 InPropertiesSize, uint32 InMinAlignment, class CObject*( *InClassConstructor )( void* InPtr ), CClass* InSuperClass = nullptr )
+		: CObject( InClassName )
+		, ClassConstructor( InClassConstructor )
 		, classFlags( InClassFlags )
 		, classCastFlags( InClassCastFlags )
+		, propertiesSize( InPropertiesSize )
+		, minAlignment( InMinAlignment )
 		, superClass( InSuperClass )
-		, name( InClassName )
 	{}
-
-	/**
-	 * @brief Get class name
-	 * @return Return class name
-	 */
-	FORCEINLINE std::wstring GetName() const
-	{
-		std::wstring	retName;
-		name.ToString( retName );
-		return retName;
-	}
-
-	/**
-	 * @brief Get class name
-	 * @param OutName	Output class name
-	 */
-	FORCEINLINE void GetName( std::wstring& OutName ) const
-	{
-		name.ToString( OutName );
-	}
-
-	/**
-	 * @brief Get class name
-	 * @return Return class name (CName)
-	 */
-	FORCEINLINE const CName& GetCName() const
-	{
-		return name;
-	}
 
 	/**
 	 * @brief Get super class
@@ -126,6 +74,24 @@ public:
 	FORCEINLINE uint32 GetClassFlags() const
 	{
 		return classFlags;
+	}
+
+	/**
+	 * @brief Get properties size in bytes
+	 * @return Return properties size in bytes
+	 */
+	FORCEINLINE uint32 GetPropertiesSize() const
+	{
+		return propertiesSize;
+	}
+
+	/**
+	 * @brief Get minimum alignment for the class
+	 * @return Return minimum alignment for the class
+	 */
+	FORCEINLINE uint32 GetMinAlignment() const
+	{
+		return minAlignment;
 	}
 
 	/**
@@ -183,22 +149,27 @@ public:
 
 	/**
 	 * @brief Create instance of class object
+	 * 
+	 * @param InOuter	Object this object resides in
+	 * @param InName	Name object
 	 * @return Return pointer to instance of class object
 	 */
-	FORCEINLINE class CObject* CreateObject() const
+	FORCEINLINE class CObject* CreateObject( class CObject* InOuter = nullptr, const CName& InName = NAME_None ) const
 	{
-		Assert( ClassConstructor );
-		return ClassConstructor();
+		return CObject::StaticAllocateObject( ( CClass* )this, InOuter, InName );
 	}
 
 	/**
 	 * @brief Create instance of class object
+	 * 
+	 * @param InOuter	Object this object resides in
+	 * @param InName	Name object
 	 * @return Return pointer to instance of class object
 	 */
-	template< typename TObject >
-	FORCEINLINE TObject* CreateObject() const
+	template<typename TObject>
+	FORCEINLINE TObject* CreateObject( class CObject* InOuter = nullptr, const CName& InName = NAME_None ) const
 	{
-		return ( TObject* )CreateObject();
+		return ( TObject* )CreateObject( InOuter, InName );
 	}
 
 	/**
@@ -208,7 +179,7 @@ public:
 	static FORCEINLINE void StaticRegisterClass( const CClass* InClass )
 	{
 		Assert( InClass );
-		classesTable.insert( std::make_pair( InClass->GetName(), InClass ) );
+		StaticRegisteredClassesInternal().insert( std::make_pair( InClass->GetCName(), InClass ) );
 	}
 
 	/**
@@ -219,7 +190,8 @@ public:
 	 */
 	static FORCEINLINE CClass* StaticFindClass( const tchar* InClassName )
 	{
-		auto		itClass = classesTable.find( InClassName );
+		const std::unordered_map<CName, const CClass*, CName::HashFunction>&	classesTable = StaticRegisteredClasses();
+		auto	itClass = classesTable.find( InClassName );
 		if ( itClass == classesTable.end() )
 		{
 			return nullptr;
@@ -232,9 +204,9 @@ public:
 	 * @brief Get array of all registered classes
 	 * @return Return array of all registered classes
 	 */
-	static FORCEINLINE const std::unordered_map<std::wstring, const CClass*>& StaticGetRegisteredClasses()
+	static FORCEINLINE const std::unordered_map<CName, const CClass*, CName::HashFunction>& StaticRegisteredClasses()
 	{
-		return classesTable;
+		return StaticRegisteredClassesInternal();
 	}
 
 	/**
@@ -269,10 +241,7 @@ public:
 	 * @brief Add class property
 	 * @param InProperty	Property
 	 */
-	FORCEINLINE void AddProperty( class CProperty* InProperty )
-	{
-		properties.push_back( InProperty );
-	}
+	virtual void AddProperty( class CProperty* InProperty ) override;
 
 	/**
 	 * @brief Get array of class properties
@@ -304,6 +273,16 @@ public:
 
 private:
 	/**
+	 * @brief Get array of all registered classes
+	 * @return Return array of all registered classes
+	 */
+	static FORCEINLINE std::unordered_map<CName, const CClass*, CName::HashFunction>& StaticRegisteredClassesInternal()
+	{
+		static std::unordered_map<CName, const CClass*, CName::HashFunction>		classesTable;
+		return classesTable;
+	}
+
+	/**
 	 * @brief Find property
 	 *
 	 * @param InName		Property name
@@ -311,13 +290,13 @@ private:
 	 */
 	class CProperty* InternalFindProperty( const CName& InName ) const;
 	
-	class CObject*( *ClassConstructor )();											/**< Pointer to constructor of class */
-	uint32														classFlags;			/**< Class flags */
-	uint32														classCastFlags;		/**< Class cast flags */
-	CClass*														superClass;			/**< Pointer to super class */
-	CName														name;				/**< Class name */
-	std::vector<class CProperty*>								properties;			/**< Class properties */
-	static std::unordered_map<std::wstring, const CClass*>		classesTable;		/**< Table of all classes in system */
+	class CObject*( *ClassConstructor )( void* InPtr );										/**< Pointer to constructor of class */
+	uint32														classFlags;					/**< Class flags */
+	uint32														classCastFlags;				/**< Class cast flags */
+	uint32														propertiesSize;				/**< Properties size in bytes */
+	uint32														minAlignment;				/**< Minimum alignment for the class */
+	CClass*														superClass;					/**< Pointer to super class */
+	std::vector<class CProperty*>								properties;					/**< Class properties */
 };
 
 #endif // !CLASS_H

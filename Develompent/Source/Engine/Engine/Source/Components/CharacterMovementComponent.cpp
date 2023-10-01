@@ -31,9 +31,9 @@ CCharacterMovementComponent::StaticInitializeClass
 */
 void CCharacterMovementComponent::StaticInitializeClass()
 {
-	new CFloatProperty( staticClass, TEXT( "Walk Speed" ), TEXT( "Movement" ), TEXT( "Walk speed" ), CPP_PROPERTY( walkSpeed ), 0 );
-	new CFloatProperty( staticClass, TEXT( "Walk Speed In Fly" ), TEXT( "Movement" ), TEXT( "Walk speed in fly" ), CPP_PROPERTY( walkSpeedInFly ), 0 );
-	new CFloatProperty( staticClass, TEXT( "Jump Speed" ), TEXT( "Movement" ), TEXT( "Jump speed" ), CPP_PROPERTY( jumpSpeed ), 0 );
+	new( staticClass, TEXT( "Walk Speed" ) )		CFloatProperty( TEXT( "Movement" ), TEXT( "Walk speed" ), CPP_PROPERTY( walkSpeed ), 0 );
+	new( staticClass, TEXT( "Walk Speed In Fly" ) ) CFloatProperty( TEXT( "Movement" ), TEXT( "Walk speed in fly" ), CPP_PROPERTY( walkSpeedInFly ), 0 );
+	new( staticClass, TEXT( "Jump Speed" ) )		CFloatProperty( TEXT( "Movement" ), TEXT( "Jump speed" ), CPP_PROPERTY( jumpSpeed ), 0 );
 }
 
 /*
@@ -44,7 +44,7 @@ CCharacterMovementComponent::BeginPlay
 void CCharacterMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	ownerCharacter		= GetOwner()->Cast< ACharacter >();
+	ownerCharacter		= Cast<ACharacter>( GetOwner() );
 	Assert( ownerCharacter );
 
 	// TODO BS yehor.pohuliaka - Need add subscribe to event when body instance recreating or changed to other body (in case welding)

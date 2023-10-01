@@ -35,8 +35,8 @@ CSphereComponent::StaticInitializeClass
 */
 void CSphereComponent::StaticInitializeClass()
 {
-	new CFloatProperty( staticClass, TEXT( "Radius" ), TEXT( "Primitive" ), TEXT( "Radius of sphere" ), CPP_PROPERTY( radius ), 0 );
-	new CAssetProperty( staticClass, TEXT( "Material" ), TEXT( "Display" ), TEXT( "Material" ), CPP_PROPERTY( material ), 0, AT_Material );
+	new( staticClass, TEXT( "Radius" ) )	CFloatProperty( TEXT( "Primitive" ), TEXT( "Radius of sphere" ), CPP_PROPERTY( radius ), 0 );
+	new( staticClass, TEXT( "Material" ) )	CAssetProperty( TEXT( "Display" ), TEXT( "Material" ), CPP_PROPERTY( material ), 0, AT_Material );
 }
 
 #if WITH_EDITOR
@@ -45,13 +45,14 @@ void CSphereComponent::StaticInitializeClass()
 CStaticMeshComponent::PostEditChangeProperty
 ==================
 */
-void CSphereComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+void CSphereComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet )
 {
-	if ( InProperty->GetCName() == TEXT( "Material" ) )
+	CProperty*	changedProperty = InPropertyChangedEvenet.property;
+	if ( changedProperty->GetCName() == TEXT( "Material" ) )
 	{
 		SetMaterial( material );
 	}
-	Super::PostEditChangeProperty( InProperty, InChangeType );
+	Super::PostEditChangeProperty( InPropertyChangedEvenet );
 }
 #endif // WITH_EDITOR
 

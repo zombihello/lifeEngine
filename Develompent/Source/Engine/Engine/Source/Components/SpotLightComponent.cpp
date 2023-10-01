@@ -27,8 +27,8 @@ CSpotLightComponent::StaticInitializeClass
 */
 void CSpotLightComponent::StaticInitializeClass()
 {
-	new CFloatProperty( staticClass, TEXT( "Radius" ), TEXT( "Light" ), TEXT( "Light radius" ), CPP_PROPERTY( radius ), 0 );
-	new CFloatProperty( staticClass, TEXT( "Height" ), TEXT( "Light" ), TEXT( "Light height" ), CPP_PROPERTY( height ), 0 );
+	new( staticClass, TEXT( "Radius" ) ) CFloatProperty( TEXT( "Light" ), TEXT( "Light radius" ), CPP_PROPERTY( radius ), 0 );
+	new( staticClass, TEXT( "Height" ) ) CFloatProperty( TEXT( "Light" ), TEXT( "Light height" ), CPP_PROPERTY( height ), 0 );
 }
 
 /*
@@ -59,17 +59,18 @@ void CSpotLightComponent::Serialize( class CArchive& InArchive )
 CSpotLightComponent::PostEditChangeProperty
 ==================
 */
-void CSpotLightComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+void CSpotLightComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet )
 {
-	if ( InProperty )
+	CProperty*		changedProperty = InPropertyChangedEvenet.property;
+	if ( changedProperty )
 	{
-		if ( InProperty->GetCName() == TEXT( "Radius" ) || InProperty->GetCName() == TEXT( "Height" ) )
+		if ( changedProperty->GetCName() == TEXT( "Radius" ) || changedProperty->GetCName() == TEXT( "Height" ) )
 		{
 			bNeedUpdateCutoff = true;
 		}
 	}
 
-	Super::PostEditChangeProperty( InProperty, InChangeType );
+	Super::PostEditChangeProperty( InPropertyChangedEvenet );
 }
 
 /*

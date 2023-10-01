@@ -39,10 +39,10 @@ CSpriteComponent::StaticInitializeClass
 */
 void CSpriteComponent::StaticInitializeClass()
 {
-	new CBoolProperty( staticClass, TEXT( "bFlipVertical" ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by vertical" ), CPP_PROPERTY( bFlipVertical ), 0 );
-	new CBoolProperty( staticClass, TEXT( "bFlipHorizontal" ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPP_PROPERTY( bFlipHorizontal ), 0 );
-	new CAssetProperty( staticClass, TEXT( "Material" ), TEXT( "Disaply" ), TEXT( "Sprite material" ), CPP_PROPERTY( material ), 0, AT_Material );
-	new CByteProperty( staticClass, TEXT( "Type" ), TEXT( "Sprite" ), TEXT( "Sprite type" ), CPP_PROPERTY( type ), 0, Enum::GetESpriteType() );
+	new( staticClass, TEXT( "bFlipVertical" ) )		CBoolProperty( TEXT( "Sprite" ), TEXT( "Is need flip sprite by vertical" ), CPP_PROPERTY( bFlipVertical ), 0 );
+	new( staticClass, TEXT( "bFlipHorizontal" ) )	CBoolProperty( TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPP_PROPERTY( bFlipHorizontal ), 0 );
+	new( staticClass, TEXT( "Material" ) )			CAssetProperty( TEXT( "Disaply" ), TEXT( "Sprite material" ), CPP_PROPERTY( material ), 0, AT_Material );
+	new( staticClass, TEXT( "Type" ) )				CByteProperty( TEXT( "Sprite" ), TEXT( "Sprite type" ), CPP_PROPERTY( type ), 0, Enum::GetESpriteType() );
 }
 
 /*
@@ -81,11 +81,12 @@ void CSpriteComponent::Serialize( class CArchive& InArchive )
 CSpriteComponent::PostEditChangeProperty
 ==================
 */
-void CSpriteComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+void CSpriteComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet )
 {
-	if ( InProperty )
+	CProperty*		changedProperty = InPropertyChangedEvenet.property;
+	if ( changedProperty )
 	{
-		CName		nameProperty = InProperty->GetCName();
+		CName		nameProperty = changedProperty->GetCName();
 		if ( nameProperty == TEXT( "bFlipVertical" ) )
 		{
 			SetFlipVertical( bFlipVertical );
@@ -100,7 +101,7 @@ void CSpriteComponent::PostEditChangeProperty( class CProperty* InProperty, EPro
 		}
 	}
 
-	Super::PostEditChangeProperty( InProperty, InChangeType );
+	Super::PostEditChangeProperty( InPropertyChangedEvenet );
 }
 #endif // WITH_EDITOR
 

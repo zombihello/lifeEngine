@@ -92,8 +92,8 @@ AActor::StaticInitializeClass
 */
 void AActor::StaticInitializeClass()
 {
-	new CBoolProperty( staticClass, TEXT( "bVisibility" ), TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPP_PROPERTY( bVisibility ), 0 );
-	new CBoolProperty( staticClass, TEXT( "bIsStatic" ), TEXT( "Actor" ), TEXT( "Is static actor" ), CPP_PROPERTY( bIsStatic ), 0 );
+	new( staticClass, TEXT( "bVisibility" ) )	CBoolProperty( TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPP_PROPERTY( bVisibility ), 0 );
+	new( staticClass, TEXT( "bIsStatic" ) )		CBoolProperty( TEXT( "Actor" ), TEXT( "Is static actor" ), CPP_PROPERTY( bIsStatic ), 0 );
 }
 
 /*
@@ -358,22 +358,21 @@ std::wstring AActor::GetActorIcon() const
 AActor::CreateComponent
 ==================
 */
-ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InName, bool InEditorOnly /*= false*/ )
+ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly /*= false*/ )
 {
 	Assert( InClass );
 
-	CObject*				newObject = InClass->CreateObject();
-	Assert( newObject->IsA< CActorComponent >() );
+	CObject*				newObject = InClass->CreateObject( this, InName );
+	Assert( IsA<CActorComponent>( newObject ) );
 
-	CActorComponent*		component = newObject->Cast< CActorComponent >();
+	CActorComponent*		component = Cast<CActorComponent>( newObject );
+	bool					bIsASceneComponent	= IsA<CSceneComponent>( component );
 	Assert( component );
-
-	bool		bIsASceneComponent		= component->IsA< CSceneComponent >();
 
 	// If created component is a CSceneComponent and RootComponent not setted - set it!
 	if ( !rootComponent && bIsASceneComponent )
 	{
-		rootComponent = component->Cast< CSceneComponent >();
+		rootComponent = Cast<CSceneComponent>( component );
 	}
 	else if ( rootComponent && bIsASceneComponent )
 	{
@@ -382,14 +381,14 @@ ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const tchar* InNam
 
 #if WITH_EDITOR
 	component->SetEditorOnly( InEditorOnly );
-	if ( !g_IsEditor && InEditorOnly && component->IsA<CPrimitiveComponent>() )
+	if ( !g_IsEditor && InEditorOnly && IsA<CPrimitiveComponent>( component ) )
 	{
 		( ( CPrimitiveComponent* )component )->SetVisibility( false );
 	}
 #endif // WITH_EDITOR
 
-	component->SetName( InName );
-	AddOwnedComponent( component );
+	component->SetCName( InName );
+	ownedComponents.push_back( component );
 	return component;
 }
 
@@ -412,7 +411,7 @@ void AActor::AddOwnedComponent( class CActorComponent* InComponent )
 	}
 
 	// Add component
-	InComponent->SetOwner( this );
+	InComponent->SetOuter( this );
 	ownedComponents.push_back( InComponent );
 }
 
@@ -439,7 +438,7 @@ void AActor::RemoveOwnedComponent( class CActorComponent* InComponent )
 				Assert( false && "Need implement change root component" );
 			}
 
-			InComponent->SetOwner( nullptr );
+			InComponent->SetOuter( nullptr );
 			ownedComponents.erase( ownedComponents.begin() + index );
 			return;
 		}
@@ -459,7 +458,7 @@ void AActor::ResetOwnedComponents()
 		{
 			collisionComponent->TermPrimitivePhysics();
 		}
-		ownedComponents[ index ]->SetOwner( nullptr );
+		ownedComponents[index]->SetOuter( nullptr );
 	}
 
 	ownedComponents.clear();

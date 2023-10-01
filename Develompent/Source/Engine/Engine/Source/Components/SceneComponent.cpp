@@ -30,9 +30,9 @@ CSceneComponent::StaticInitializeClass
 */
 void CSceneComponent::StaticInitializeClass()
 {
-	new CVectorProperty( staticClass, TEXT( "Location" ), TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), CPP_PROPERTY( relativeLocation ), 0 );
-	new CRotatorProperty( staticClass, TEXT( "Rotation" ), TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), CPP_PROPERTY( relativeRotation ), 0 );
-	new CVectorProperty( staticClass, TEXT( "Scale" ), TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), CPP_PROPERTY( relativeScale ), 0, 1.f );
+	new( staticClass, TEXT( "Location" ) )	CVectorProperty( TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), CPP_PROPERTY( relativeLocation ), 0 );
+	new( staticClass, TEXT( "Rotation" ) )	CRotatorProperty( TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), CPP_PROPERTY( relativeRotation ), 0 );
+	new( staticClass, TEXT( "Scale" ) )		CVectorProperty( TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), CPP_PROPERTY( relativeScale ), 0, 1.f );
 }
 
 #if WITH_EDITOR
@@ -41,13 +41,14 @@ void CSceneComponent::StaticInitializeClass()
 CSceneComponent::PostEditChangeProperty
 ==================
 */
-void CSceneComponent::PostEditChangeProperty( class CProperty* InProperty, EPropertyChangeType InChangeType )
+void CSceneComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet )
 {
-	if ( InProperty->GetCName() == TEXT( "Location" ) || InProperty->GetCName() == TEXT( "Rotation" ) || InProperty->GetCName() == TEXT( "Scale" ) )
+	CProperty*		changedProperty = InPropertyChangedEvenet.property;
+	if ( changedProperty->GetCName() == TEXT( "Location" ) || changedProperty->GetCName() == TEXT( "Rotation" ) || changedProperty->GetCName() == TEXT( "Scale" ) )
 	{
 		bDityComponentToWorld = true;
 	}
-	Super::PostEditChangeProperty( InProperty, InChangeType );
+	Super::PostEditChangeProperty( InPropertyChangedEvenet );
 }
 
 /*

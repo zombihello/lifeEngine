@@ -13,6 +13,7 @@
 
 #include "Math/Math.h"
 #include "Misc/Object.h"
+#include "Misc/Class.h"
 #include "Misc/Enum.h"
 #include "System/Package.h"
 #include "System/Archive.h"
@@ -86,10 +87,8 @@ enum ESurfaceType
  * @ingroup Physics
  * @brief Struct of collision profile
  */
-struct CollisionProfile : public CObject
+struct CollisionProfile
 {
-	DECLARE_CLASS( CollisionProfile, CObject, 0, 0 )
-
 	/**
 	 * @brief Constructor
 	 */
