@@ -30,15 +30,15 @@ CCameraComponent::StaticInitializeClass
 */
 void CCameraComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bIsActive" ) )			CBoolProperty( TEXT( "Camera" ), TEXT( "Is active camera. This field setted from CCameraManager::SetActiveCamera" ), CPP_PROPERTY( bIsActive ), CPF_Edit );
-	new( staticClass, TEXT( "bAutoViewData" ) )		CBoolProperty( TEXT( "Camera" ), TEXT( "Auto view data. If this flag is true, CCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic)" ), CPP_PROPERTY( bAutoViewData ), CPF_Edit );
-	new( staticClass, TEXT( "Projection Mode" ) )	CByteProperty( TEXT( "Camera" ), TEXT( "Projection mode" ), CPP_PROPERTY( projectionMode ), CPF_Edit, Enum::GetECameraProjectionMode() );
-	new( staticClass, TEXT( "Field Of View" ) )		CFloatProperty( TEXT( "Camera" ), TEXT( "The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode)" ), CPP_PROPERTY( fieldOfView ), CPF_Edit );
-	new( staticClass, TEXT( "Ortho Width" ) )		CFloatProperty( TEXT( "Camera" ), TEXT( "The desired width (in world units) of the orthographic view (ignored in Perspective mode)" ), CPP_PROPERTY( orthoWidth ), CPF_Edit );
-	new( staticClass, TEXT( "Ortho Height" ) )		CFloatProperty( TEXT( "Camera" ), TEXT( "The desired height (in world units) of the orthographic view (ignored in Perspective mode)" ), CPP_PROPERTY( orthoHeight ), CPF_Edit );
-	new( staticClass, TEXT( "Near Clip Plane" ) )	CFloatProperty( TEXT( "Camera" ), TEXT( "The near plane distance (in world units)" ), CPP_PROPERTY( nearClipPlane ), CPF_Edit );
-	new( staticClass, TEXT( "Far Clip Plane" ) )	CFloatProperty( TEXT( "Camera" ), TEXT( "The far plane distance (in world units)" ), CPP_PROPERTY( farClipPlane ), CPF_Edit );
-	new( staticClass, TEXT( "Aspect Ratio" ) )		CFloatProperty( TEXT( "Camera" ), TEXT( "Aspect Ratio (Width/Height) (ignored in Orthographic mode)" ), CPP_PROPERTY( aspectRatio ), CPF_Edit );
+	new( staticClass, TEXT( "bIsActive" ) )			CBoolProperty( TEXT( "Camera" ), TEXT( "Is active camera. This field setted from CCameraManager::SetActiveCamera" ), STRUCT_OFFSET( ThisClass, bIsActive ), CPF_Edit );
+	new( staticClass, TEXT( "bAutoViewData" ) )		CBoolProperty( TEXT( "Camera" ), TEXT( "Auto view data. If this flag is true, CCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic)" ), STRUCT_OFFSET( ThisClass, bAutoViewData ), CPF_Edit );
+	new( staticClass, TEXT( "Projection Mode" ) )	CByteProperty( TEXT( "Camera" ), TEXT( "Projection mode" ), STRUCT_OFFSET( ThisClass, projectionMode ), CPF_Edit, Enum::GetECameraProjectionMode() );
+	new( staticClass, TEXT( "Field Of View" ) )		CFloatProperty( TEXT( "Camera" ), TEXT( "The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode)" ), STRUCT_OFFSET( ThisClass, fieldOfView ), CPF_Edit );
+	new( staticClass, TEXT( "Ortho Width" ) )		CFloatProperty( TEXT( "Camera" ), TEXT( "The desired width (in world units) of the orthographic view (ignored in Perspective mode)" ), STRUCT_OFFSET( ThisClass, orthoWidth ), CPF_Edit );
+	new( staticClass, TEXT( "Ortho Height" ) )		CFloatProperty( TEXT( "Camera" ), TEXT( "The desired height (in world units) of the orthographic view (ignored in Perspective mode)" ), STRUCT_OFFSET( ThisClass, orthoHeight ), CPF_Edit );
+	new( staticClass, TEXT( "Near Clip Plane" ) )	CFloatProperty( TEXT( "Camera" ), TEXT( "The near plane distance (in world units)" ), STRUCT_OFFSET( ThisClass, nearClipPlane ), CPF_Edit );
+	new( staticClass, TEXT( "Far Clip Plane" ) )	CFloatProperty( TEXT( "Camera" ), TEXT( "The far plane distance (in world units)" ), STRUCT_OFFSET( ThisClass, farClipPlane ), CPF_Edit );
+	new( staticClass, TEXT( "Aspect Ratio" ) )		CFloatProperty( TEXT( "Camera" ), TEXT( "Aspect Ratio (Width/Height) (ignored in Orthographic mode)" ), STRUCT_OFFSET( ThisClass, aspectRatio ), CPF_Edit );
 }
 
 /*

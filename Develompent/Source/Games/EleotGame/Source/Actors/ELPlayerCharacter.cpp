@@ -43,7 +43,7 @@ AELPlayerCharacter::StaticInitializeClass
 */
 void AELPlayerCharacter::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Camera Component" ) ) CObjectProperty( TEXT( "Camera" ), TEXT( "Camera component" ), CPP_PROPERTY( cameraComponent ), CPF_Edit, CCameraComponent::StaticClass() );
+	new( staticClass, TEXT( "Camera Component" ) ) CObjectProperty( TEXT( "Camera" ), TEXT( "Camera component" ), STRUCT_OFFSET( ThisClass, cameraComponent ), CPF_Edit, CCameraComponent::StaticClass() );
 }
 
 /*

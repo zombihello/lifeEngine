@@ -109,7 +109,7 @@
  * Example usage: @code IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CObject ) @endcode
  */
 #define IMPLEMENT_DEFAULT_INITIALIZE_CLASS( TClass ) \
-        void TClass::StaticInitializeClass() {} \
+        void TClass::StaticInitializeClass() {}
 
 /**
  * @ingroup Core
@@ -140,6 +140,8 @@ enum EClassCastFlags
 	CASTCLASS_CRotatorProperty		= 1 << 8,	/**< Cast to CRotatorProperty */
 	CASTCLASS_CAssetProperty		= 1 << 9,	/**< Cast to CAssetProperty */
 	CASTCLASS_CArrayProperty		= 1 << 10,	/**< Cast to CArrayProperty */
+    CASTCLASS_CStructProperty       = 1 << 11,	/**< Cast to CStructProperty */
+    CASTCLASS_CStringProperty       = 1 << 12,	/**< Cast to CStringProperty */
 };
 
 /**

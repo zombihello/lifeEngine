@@ -4,9 +4,11 @@
 #include "Misc/WorldEdGlobals.h"
 #include "System/ItemPropertyNode.h"
 #include "System/ObjectPropertyNode.h"
+#include "System/CategoryPropertyNode.h"
 #include "System/EditorEngine.h"
 #include "ImGUI/ImGUIEngine.h"
 #include "ImGUI/imgui.h"
+#include "ImGUI/imgui_stdlib.h"
 #include "ImGUI/ImGUIExtension.h"
 
 /*
@@ -24,7 +26,7 @@ CItemPropertyNode::~CItemPropertyNode
 */
 CItemPropertyNode::~CItemPropertyNode()
 {}
-#include "ImGUI/imgui_internal.h"
+
 /*
 ==================
 CItemPropertyNode::Tick
@@ -40,8 +42,8 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 		CObject*			 objectZero						= parentObjectNode->GetObject( 0 );
 		CClass*				 theClass						= property->GetClass();
 		bool				 bPropertyIsDisabled			= property->HasAnyFlags( CPF_Const ) || property->HasAnyFlags( CPF_EditConst ) || !objectZero->CanEditProperty( property );
-		bool				 bPropertyInArray				= Cast<CArrayProperty>( property->GetOuter() );
-		bool				 bPropertyIsStaticArray			= property->HasAnyFlags( CPF_EditFixedSize ) || ( property->GetArraySize() > 1 && arrayIndex == INDEX_NONE );
+		bool				 bPropertyInArray				= Cast<CArrayProperty>( property->GetOuter() ) || arrayIndex != INDEX_NONE;
+		bool				 bPropertyIsStaticArray			= property->GetArraySize() > 1 && arrayIndex == INDEX_NONE;
 		byte*				 valueData						= addresses[0];
 
 		// Disable property if need		
@@ -50,8 +52,8 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 			ImGui::BeginDisabled( true );
 		}
 
-		// Object property
-		if ( theClass->HasAnyCastFlags( CASTCLASS_CObjectProperty ) )
+		// Struct and Object property
+		if ( theClass->HasAnyCastFlags( CASTCLASS_CStructProperty ) || theClass->HasAnyCastFlags( CASTCLASS_CObjectProperty ) )
 		{
 			// If out property in an array then we not draw collapsing header
 			if ( !bPropertyInArray )
@@ -65,29 +67,30 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 			}
 		}
 
-		// Array property
+		// Static and Dynamic Array property
 		else if ( bPropertyIsStaticArray || theClass->HasAnyCastFlags( CASTCLASS_CArrayProperty ) )
 		{
-			bool								bPropertyIsChanged = false;
-			uint32								elementIdToRemove = -1;
-			CProperty*							innerProperty = ExactCast<CArrayProperty>( property )->GetInnerProperty();
+			bool		bPropertyIsChanged	= false;
+			bool		bFixedArraySize		= property->HasAnyFlags( CPF_EditFixedSize ) || bPropertyIsStaticArray;
+			uint32		elementIdToRemove	= -1;
+			CProperty*	innerProperty		= !bPropertyIsStaticArray ? ExactCast<CArrayProperty>( property )->GetInnerProperty() : property;
 			
-			// If array size was changed and the node have not equal number of children then we rebuild children
-			if ( ( ( std::vector<byte>* )valueData )->size() / innerProperty->GetElementSize() != childNodes.size() )
+			// If array size was changed and the node have not equal number of children then we rebuild it (only for dynamic array)
+			if ( !bPropertyIsStaticArray && ( ( std::vector<byte>* )valueData )->size() / innerProperty->GetElementSize() != childNodes.size() )
 			{
 				RebuildChildren();
 			}
 
 			ImGui::CollapsingArrayHeaderResult	arrayCollapseResult = ImGui::CollapsingArrayHeader( 
-																						CString::Format( TEXT( "##%p" ), this ),																					// InStrId
-																						property->GetCName().ToString(),																							// InLabel
-																						!bPropertyIsStaticArray ? ImGuiCollapsingArrayHeaderFlags_AllButtons : ImGuiCollapsingArrayHeaderFlags_RemoveButton,		// InFlags
-																						InItemWidthSpacing,																											// InItemWidthSpacing
-																						CString::Format( TEXT( "%i elements" ), childNodes.size() ),																// InMessage
-																						property->GetDescription(),																									// InLabelToolTip
-																						TEXT( "Add a new element to array" ),																						// InAddButtonToolTip
-																						!bPropertyIsStaticArray ? TEXT( "Remove all elements from array" ) : TEXT( "Clear all elements in the array" ),				// InRemoveButtonToolTip
-																						true );																														// InIgnoreDisabled
+																						CString::Format( TEXT( "##%p" ), this ),																			// InStrId
+																						property->GetCName().ToString(),																					// InLabel
+																						!bFixedArraySize ? ImGuiCollapsingArrayHeaderFlags_AllButtons : ImGuiCollapsingArrayHeaderFlags_RemoveButton,		// InFlags
+																						InItemWidthSpacing,																									// InItemWidthSpacing
+																						CString::Format( TEXT( "%i elements" ), childNodes.size() ),														// InMessage
+																						property->GetDescription(),																							// InLabelToolTip
+																						TEXT( "Add a new element to array" ),																				// InAddButtonToolTip
+																						!bFixedArraySize ? TEXT( "Remove all elements from array" ) : TEXT( "Clear all elements in the array" ),			// InRemoveButtonToolTip
+																						true );																												// InIgnoreDisabled
 		
 			if ( arrayCollapseResult.bIsOpened )
 			{
@@ -96,15 +99,15 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				{
 					CPropertyNode*		childNode = childNodes[index];
 					ImGui::CollapsingArrayHeaderResult	elementCollapseResult = ImGui::CollapsingArrayHeader(
-																						CString::Format( TEXT( "##%p_%i" ), this, index ),														// InStrId
-																						CString::Format( TEXT( "%i" ), index ),																	// InLabel
-																						ImGuiCollapsingArrayHeaderFlags_RemoveButton,															// InFlags
-																						innerArrayItemSpacing,																					// InItemWidthSpacing
-																						TEXT( "" ),																								// InMessage
-																						TEXT( "" ),																								// InLabelToolTip
-																						TEXT( "" ),																								// InAddButtonToolTip
-																						!bPropertyIsStaticArray ? TEXT( "Remove element from array" ) : TEXT( "Clear element in the array" ),	// InRemoveButtonToolTip
-																						true );																									// InIgnoreDisabled
+																						CString::Format( TEXT( "##%p_%i" ), this, index ),												// InStrId
+																						CString::Format( TEXT( "%i" ), index ),															// InLabel
+																						ImGuiCollapsingArrayHeaderFlags_RemoveButton,													// InFlags
+																						innerArrayItemSpacing,																			// InItemWidthSpacing
+																						TEXT( "" ),																						// InMessage
+																						TEXT( "" ),																						// InLabelToolTip
+																						TEXT( "" ),																						// InAddButtonToolTip
+																						!bFixedArraySize ? TEXT( "Remove element from array" ) : TEXT( "Clear element in the array" ),	// InRemoveButtonToolTip
+																						true );																							// InIgnoreDisabled
 					if ( elementCollapseResult.bIsOpened )
 					{
 						childNode->Tick( innerArrayItemSpacing + ImGui::GetStyle().ItemSpacing.x * 2.f );
@@ -117,8 +120,8 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				}
 			}
 
-			// If was pressed add button then we add a new element if array isn't static
-			if ( !bPropertyIsStaticArray && arrayCollapseResult.bPressedAdd )
+			// If was pressed add button then we add a new element if array isn't static (only for dynamic array)
+			if ( !bPropertyIsStaticArray && !bFixedArraySize && arrayCollapseResult.bPressedAdd )
 			{
 				bPropertyIsChanged = true;
 				for ( uint32 index = 0, count = addresses.size(); index < count; ++index )
@@ -134,18 +137,25 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				bPropertyIsChanged = true;
 				for ( uint32 index = 0, count = addresses.size(); index < count; ++index )
 				{
-					std::vector<byte>*		vectorData = ( std::vector<byte>* )addresses[index];
-					
+					std::vector<byte>*	vectorData	= ( std::vector<byte>* )addresses[index];
+	
 					// Clear/Remove whole array
 					if ( arrayCollapseResult.bPressedRemove )
 					{
 						if ( !bPropertyIsStaticArray )
 						{
-							vectorData->clear();
+							if ( !bFixedArraySize )
+							{
+								vectorData->clear();
+							}
+							else
+							{
+								Sys_Memzero( vectorData->data(), vectorData->size() );
+							}
 						}
 						else
 						{
-							Sys_Memzero( vectorData->data(), vectorData->size() );
+							Sys_Memzero( addresses[index], innerProperty->GetArraySize() * innerProperty->GetElementSize() );
 						}
 					}
 					// Clear/Remove only one array's element
@@ -154,11 +164,18 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 						uint32		dataOffset = elementIdToRemove * innerProperty->GetElementSize();
 						if ( !bPropertyIsStaticArray )
 						{
-							vectorData->erase( vectorData->begin() + dataOffset, vectorData->begin() + dataOffset + innerProperty->GetElementSize() );
+							if ( !bFixedArraySize )
+							{
+								vectorData->erase( vectorData->begin() + dataOffset, vectorData->begin() + dataOffset + innerProperty->GetElementSize() );
+							}
+							else
+							{
+								Sys_Memzero( vectorData->data() + dataOffset, innerProperty->GetElementSize() );
+							}
 						}
 						else
 						{
-							Sys_Memzero( vectorData->data() + dataOffset, innerProperty->GetElementSize() );
+							Sys_Memzero( addresses[index] + dataOffset, innerProperty->GetElementSize() );
 						}
 					}
 				}
@@ -166,8 +183,11 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 
 			if ( bPropertyIsChanged )
 			{
-				// Rebuild children because array size was changed
-				RebuildChildren();
+				// Rebuild children because array size was changed (only for dynamic array)
+				if ( !bFixedArraySize )
+				{
+					RebuildChildren();
+				}
 
 				// Notify all object if property was changed
 				NotifyPostChange( PropertyChangedEvenet( !bPropertyInArray ? property : Cast<CArrayProperty>( property->GetOuter() ), PCT_ValueSet ) );
@@ -281,6 +301,17 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				}
 			}
 
+			// String property
+			else if ( theClass->HasAnyCastFlags( CASTCLASS_CStringProperty ) )
+			{
+				std::string			ansiString = TCHAR_TO_ANSI( ( ( std::wstring* )valueData )->c_str() );
+				bPropertyIsChanged |= ImGui::InputText( TCHAR_TO_ANSI( CString::Format( TEXT( "##%p" ), this ).c_str() ), &ansiString );
+				if ( bPropertyIsChanged )
+				{
+					*( std::wstring* )valueData = ANSI_TO_TCHAR( ansiString.c_str() );
+				}
+			}
+
 			// Unknown property
 			else
 			{
@@ -376,6 +407,25 @@ void CItemPropertyNode::InitChildNodes()
 			CItemPropertyNode*	newItemNode = new CItemPropertyNode();
 			newItemNode->InitNode( this, property, index * property->GetElementSize(), index );
 			AddChildNode( newItemNode );
+		}
+	}
+	// Struct property
+	else if ( propertyClass->HasAnyCastFlags( CASTCLASS_CStructProperty ) )
+	{ 
+		CStructProperty*								structProperty = ExactCast<CStructProperty>( property );
+		std::vector<CProperty*>							properties;
+		structProperty->GetPropertyStruct()->GetProperties( properties );
+		
+		for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+		{
+			// We ignore property if it not have neither CPF_Edit nor CPF_EditConst
+			CProperty*		property = properties[index];
+			if ( property->HasAnyFlags( CPF_Edit ) || property->HasAnyFlags( CPF_EditConst ) )
+			{
+				CItemPropertyNode*		itemNode = new CItemPropertyNode();
+				itemNode->InitNode( this, property, property->GetOffset(), INDEX_NONE );
+				AddChildNode( itemNode );
+			}
 		}
 	}
 	// Object property

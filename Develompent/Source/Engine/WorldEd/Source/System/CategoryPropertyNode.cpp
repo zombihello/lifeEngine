@@ -62,7 +62,7 @@ void CCategoryPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 {
 	ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
 	ImGui::SameLine();
-	if ( ImGui::CollapsingHeader( CString::Format( TEXT( "%s##%p" ), categoryName.ToString().c_str(), this ), true, ImGuiTreeNodeFlags_DefaultOpen ) )
+	if ( categoryName == NAME_None || ImGui::CollapsingHeader( CString::Format( TEXT( "%s##%p" ), categoryName.ToString().c_str(), this ), true, ImGuiTreeNodeFlags_DefaultOpen ) )
 	{
 		TickChildren( InItemWidthSpacing + ImGui::GetStyle().ItemSpacing.x );
 	}

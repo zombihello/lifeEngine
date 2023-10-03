@@ -42,15 +42,15 @@ CAudioComponent::StaticInitializeClass
 */
 void CAudioComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bIsLoop" ) )		CBoolProperty( TEXT( "Audio" ), TEXT( "Is looped" ), CPP_PROPERTY( bIsLoop ), CPF_Edit );
-	new( staticClass, TEXT( "bIsUISound" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is UI sound" ), CPP_PROPERTY( bIsUISound ), CPF_Edit );
-	new( staticClass, TEXT( "bIsAutoPlay" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is need auto play on begin play" ), CPP_PROPERTY( bIsAutoPlay ), CPF_Edit );
-	new( staticClass, TEXT( "bIsStreamable" ) ) CBoolProperty( TEXT( "Audio" ), TEXT( "Is streamable" ), CPP_PROPERTY( bIsStreamable ), CPF_Edit );
-	new( staticClass, TEXT( "Volume" ) )		CFloatProperty( TEXT( "Audio" ), TEXT( "Volume of sound" ), CPP_PROPERTY( volume ), CPF_Edit );
-	new( staticClass, TEXT( "Pitch" ) )			CFloatProperty( TEXT( "Audio" ), TEXT( "Pitch" ), CPP_PROPERTY( pitch ), CPF_Edit );
-	new( staticClass, TEXT( "Min Distance" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Min distance" ), CPP_PROPERTY( minDistance ), CPF_Edit );
-	new( staticClass, TEXT( "Attenuation" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Attenuation" ), CPP_PROPERTY( attenuation ), CPF_Edit );
-	new( staticClass, TEXT( "Audio Bank" ) )	CAssetProperty( TEXT( "Audio" ), TEXT( "Audio bank" ), CPP_PROPERTY( bank ), CPF_Edit, AT_AudioBank );
+	new( staticClass, TEXT( "bIsLoop" ) )		CBoolProperty( TEXT( "Audio" ), TEXT( "Is looped" ), STRUCT_OFFSET( ThisClass, bIsLoop ), CPF_Edit );
+	new( staticClass, TEXT( "bIsUISound" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is UI sound" ), STRUCT_OFFSET( ThisClass, bIsUISound ), CPF_Edit );
+	new( staticClass, TEXT( "bIsAutoPlay" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is need auto play on begin play" ), STRUCT_OFFSET( ThisClass, bIsAutoPlay ), CPF_Edit );
+	new( staticClass, TEXT( "bIsStreamable" ) ) CBoolProperty( TEXT( "Audio" ), TEXT( "Is streamable" ), STRUCT_OFFSET( ThisClass, bIsStreamable ), CPF_Edit );
+	new( staticClass, TEXT( "Volume" ) )		CFloatProperty( TEXT( "Audio" ), TEXT( "Volume of sound" ), STRUCT_OFFSET( ThisClass, volume ), CPF_Edit );
+	new( staticClass, TEXT( "Pitch" ) )			CFloatProperty( TEXT( "Audio" ), TEXT( "Pitch" ), STRUCT_OFFSET( ThisClass, pitch ), CPF_Edit );
+	new( staticClass, TEXT( "Min Distance" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Min distance" ), STRUCT_OFFSET( ThisClass, minDistance ), CPF_Edit );
+	new( staticClass, TEXT( "Attenuation" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Attenuation" ), STRUCT_OFFSET( ThisClass, attenuation ), CPF_Edit );
+	new( staticClass, TEXT( "Audio Bank" ) )	CAssetProperty( TEXT( "Audio" ), TEXT( "Audio bank" ), STRUCT_OFFSET( ThisClass, bank ), CPF_Edit, AT_AudioBank );
 }
 
 #if WITH_EDITOR

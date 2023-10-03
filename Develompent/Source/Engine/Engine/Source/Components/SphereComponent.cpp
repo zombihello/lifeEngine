@@ -35,8 +35,8 @@ CSphereComponent::StaticInitializeClass
 */
 void CSphereComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Radius" ) )	CFloatProperty( TEXT( "Primitive" ), TEXT( "Radius of sphere" ), CPP_PROPERTY( radius ), CPF_Edit );
-	new( staticClass, TEXT( "Material" ) )	CAssetProperty( TEXT( "Display" ), TEXT( "Material" ), CPP_PROPERTY( material ), CPF_Edit, AT_Material );
+	new( staticClass, TEXT( "Radius" ) )	CFloatProperty( TEXT( "Primitive" ), TEXT( "Radius of sphere" ), STRUCT_OFFSET( ThisClass, radius ), CPF_Edit );
+	new( staticClass, TEXT( "Material" ) )	CAssetProperty( TEXT( "Display" ), TEXT( "Material" ), STRUCT_OFFSET( ThisClass, material ), CPF_Edit, AT_Material );
 }
 
 #if WITH_EDITOR

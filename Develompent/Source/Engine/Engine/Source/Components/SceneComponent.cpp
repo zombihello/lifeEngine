@@ -30,9 +30,9 @@ CSceneComponent::StaticInitializeClass
 */
 void CSceneComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Location" ) )	CVectorProperty( TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), CPP_PROPERTY( relativeLocation ), CPF_Edit );
-	new( staticClass, TEXT( "Rotation" ) )	CRotatorProperty( TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), CPP_PROPERTY( relativeRotation ), CPF_Edit );
-	new( staticClass, TEXT( "Scale" ) )		CVectorProperty( TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), CPP_PROPERTY( relativeScale ), CPF_Edit, 1.f );
+	new( staticClass, TEXT( "Location" ) )	CVectorProperty( TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), STRUCT_OFFSET( ThisClass, relativeLocation ), CPF_Edit );
+	new( staticClass, TEXT( "Rotation" ) )	CRotatorProperty( TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), STRUCT_OFFSET( ThisClass, relativeRotation ), CPF_Edit );
+	new( staticClass, TEXT( "Scale" ) )		CVectorProperty( TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), STRUCT_OFFSET( ThisClass, relativeScale ), CPF_Edit, 1.f );
 }
 
 #if WITH_EDITOR

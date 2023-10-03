@@ -57,6 +57,7 @@ enum ELifeEnginePackageVersion
 	VER_CObjectHasCName						= 25,					/**< In CObject field 'name' changed to CName type */
 	VER_UpdateTrasformSceneComponent		= 26,					/**< To CSceneComponent added Location, Scale, Rotation (CRotator) and updated method of transformations */
 	VER_AddTranslucencyFlag					= 27,					/**< Added to CMaterial bTranslucency flag */
+	VER_EnumAsByte							= 28,					/**< Added TEnumAsByte */
 
 	//
 	// New versions can be added here

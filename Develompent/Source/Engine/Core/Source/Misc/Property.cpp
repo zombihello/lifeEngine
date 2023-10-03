@@ -14,6 +14,8 @@ IMPLEMENT_CLASS( CVectorProperty )
 IMPLEMENT_CLASS( CRotatorProperty )
 IMPLEMENT_CLASS( CAssetProperty )
 IMPLEMENT_CLASS( CArrayProperty )
+IMPLEMENT_CLASS( CStructProperty )
+IMPLEMENT_CLASS( CStringProperty )
 
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CByteProperty )
@@ -26,6 +28,8 @@ IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CVectorProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CRotatorProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CAssetProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CArrayProperty )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CStructProperty )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CStringProperty )
 
 /*
 ==================
@@ -599,6 +603,101 @@ bool CArrayProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 		std::vector<byte>*		dstArray = ( std::vector<byte>* )( InObjectAddress + offset );
 		dstArray->resize( InPropertyValue.arrayValue->size() );
 		memcpy( dstArray->data(), InPropertyValue.arrayValue->data(), dstArray->size() );
+		bResult = true;
+	}
+	return bResult;
+}
+
+
+/*
+==================
+CStructProperty::GetPropertyValue
+==================
+*/
+uint32 CStructProperty::GetElementSize() const
+{
+	return propertyStruct->GetPropertiesSize();
+}
+
+/*
+==================
+CStructProperty::GetPropertyValue
+==================
+*/
+uint32 CStructProperty::GetMinAlignment() const
+{
+	return propertyStruct->GetMinAlignment();
+}
+
+/*
+==================
+CStructProperty::GetPropertyValue
+==================
+*/
+bool CStructProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
+{
+	return false;
+}
+
+/*
+==================
+CStructProperty::SetPropertyValue
+==================
+*/
+bool CStructProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue )
+{
+	return false;
+}
+
+
+/*
+==================
+CStringProperty::GetPropertyValue
+==================
+*/
+uint32 CStringProperty::GetElementSize() const
+{
+	return sizeof( std::wstring );
+}
+
+/*
+==================
+CStringProperty::GetPropertyValue
+==================
+*/
+uint32 CStringProperty::GetMinAlignment() const
+{
+	return alignof( std::wstring );
+}
+
+/*
+==================
+CStringProperty::GetPropertyValue
+==================
+*/
+bool CStringProperty::GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const
+{
+	bool	bResult = false;
+	if ( InObjectAddress )
+	{
+		OutPropertyValue.stringValue = ( std::wstring* )( InObjectAddress + offset );
+		bResult = true;
+	}
+
+	return bResult;
+}
+
+/*
+==================
+CStringProperty::SetPropertyValue
+==================
+*/
+bool CStringProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue )
+{
+	bool	bResult = false;
+	if ( !( flags & CPF_Const ) && InObjectAddress )
+	{
+		*( std::wstring* )( InObjectAddress + offset ) = *InPropertyValue.stringValue;
 		bResult = true;
 	}
 	return bResult;

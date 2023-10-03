@@ -12,9 +12,9 @@
 #include <string>
 
 #include "Math/Math.h"
-#include "Misc/Object.h"
-#include "Misc/Class.h"
+#include "Misc/Struct.h"
 #include "Misc/Enum.h"
+#include "Misc/EnumAsByte.h"
 #include "System/Package.h"
 #include "System/Archive.h"
 
@@ -89,6 +89,8 @@ enum ESurfaceType
  */
 struct CollisionProfile
 {
+	DECLARE_STRUCT( CollisionProfile, CollisionProfile )
+
 	/**
 	 * @brief Constructor
 	 */
@@ -96,7 +98,7 @@ struct CollisionProfile
 		: name( TEXT( "Unknown" ) )
 		, objectType( CC_WorldStatic )
 	{
-		Sys_Memzero( responses, sizeof( ECollisionResponse ) * CC_Max );
+		Sys_Memzero( responses, sizeof( TEnumAsByte<ECollisionResponse> ) * CC_Max );
 	}
 
 	/**
@@ -109,9 +111,9 @@ struct CollisionProfile
 	 */
 	friend CArchive& operator<<( CArchive& InAr, const CollisionProfile*& InCollisionProfile );
 
-	std::wstring				name;					/**< Profile name */
-	ECollisionChannel			objectType;				/**< Object type */
-	ECollisionResponse			responses[ CC_Max ];	/**< Map of responses each collision channel */
+	std::wstring							name;					/**< Profile name */
+	TEnumAsByte<ECollisionChannel>			objectType;				/**< Object type */
+	TEnumAsByte<ECollisionResponse>			responses[CC_Max];		/**< Map of responses each collision channel */
 
 	static const std::wstring	noCollision_ProfileName;	/**< No collision profile name */
 	static const std::wstring	blockAll_ProfileName;		/**< Block all profile name */

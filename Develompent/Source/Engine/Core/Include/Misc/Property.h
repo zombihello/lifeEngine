@@ -20,14 +20,6 @@
 
 /**
  * @ingroup Core
- * @brief Macro property declaration
- * 
- * @param Name	Property name in a class
- */
-#define CPP_PROPERTY( Name )	STRUCT_OFFSET( ThisClass, Name )
-
-/**
- * @ingroup Core
  * @brief Enumeration property flags
  */
 enum EPropertyFlags
@@ -57,7 +49,10 @@ union UPropertyValue
 		, colorValue( 0 )
 		, objectValue( nullptr )
 		, vectorValue( 0.f, 0.f, 0.f )
+		, rotatorValue( 0.f, 0.f, 0.f )
 		, assetValue( nullptr, nullptr )
+		, arrayValue( nullptr )
+		, stringValue( nullptr )
 	{}
 
 	/**
@@ -76,6 +71,7 @@ union UPropertyValue
 	CRotator					rotatorValue;		/**< Rotator */
 	TAssetHandle<CAsset>		assetValue;			/**< Asset */
 	std::vector<byte>*			arrayValue;			/**< Array */
+	std::wstring*				stringValue;		/**< String */
 };
 
 /**
@@ -916,6 +912,138 @@ public:
 
 private:
 	CProperty*		innerProperty;	/**< Inner property */
+};
+
+/**
+ * @ingroup Core
+ * @brief Struct property
+ */
+class CStructProperty : public CProperty
+{
+	DECLARE_CLASS( CStructProperty, CProperty, 0, CASTCLASS_CStructProperty )
+
+public:
+	/**
+	 * @brief Constructor
+	 */
+	CStructProperty()
+		: propertyStruct( nullptr )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InOffset			Offset to property
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InPropertyStruct	Property struct
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CStructProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, CStruct* InPropertyStruct, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+		, propertyStruct( InPropertyStruct )
+	{}
+
+	/**
+	 * @brief Get property value
+	 *
+	 * @param InObjectAddress		The address of a object where the value of this property is stored
+	 * @param OutPropertyValue		Will be filled with the value located at InObjectAddress+Offset
+	 * @return Return TRUE if OutPropertyValue was filled with a property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
+	 */
+	virtual bool GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const override;
+
+	/**
+	 * @brief Set property value
+	 *
+	 * @param InObjectAddress		The address of a object where the value of this property is stored
+	 * @param InPropertyValue		Contains the value that should be copied into InObjectAddress+Offset
+	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
+	 */
+	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
+
+	/**
+	 * @brief Get property struct
+	 * @return Return property struct
+	 */
+	FORCEINLINE CStruct* GetPropertyStruct() const
+	{
+		return propertyStruct;
+	}
+
+private:
+	CStruct*	propertyStruct;		/**< Property struct */
+};
+
+/**
+ * @ingroup Core
+ * @brief String property
+ */
+class CStringProperty : public CProperty
+{
+	DECLARE_CLASS( CStringProperty, CProperty, 0, CASTCLASS_CStringProperty )
+
+public:
+	/**
+	 * @brief Constructor
+	 */
+	CStringProperty() {}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InOffset			Offset to property
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CStringProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	{}
+
+	/**
+	 * @brief Get property value
+	 *
+	 * @param InObjectAddress		The address of a object where the value of this property is stored
+	 * @param OutPropertyValue		Will be filled with the value located at InObjectAddress+Offset
+	 * @return Return TRUE if OutPropertyValue was filled with a property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
+	 */
+	virtual bool GetPropertyValue( byte* InObjectAddress, UPropertyValue& OutPropertyValue ) const override;
+
+	/**
+	 * @brief Set property value
+	 *
+	 * @param InObjectAddress		The address of a object where the value of this property is stored
+	 * @param InPropertyValue		Contains the value that should be copied into InObjectAddress+Offset
+	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
+	 */
+	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
+
+	/**
+	 * @brief Get property's one element size
+	 * @return Return property's one element size
+	 */
+	virtual uint32 GetElementSize() const override;
+
+	/**
+	 * @brief Get minimal alignment for property
+	 * @return Return minimal alignment for property
+	 */
+	virtual uint32 GetMinAlignment() const override;
 };
 
 #endif // !PROPERTY_H

@@ -31,9 +31,9 @@ CCharacterMovementComponent::StaticInitializeClass
 */
 void CCharacterMovementComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Walk Speed" ) )		CFloatProperty( TEXT( "Movement" ), TEXT( "Walk speed" ), CPP_PROPERTY( walkSpeed ), CPF_Edit );
-	new( staticClass, TEXT( "Walk Speed In Fly" ) ) CFloatProperty( TEXT( "Movement" ), TEXT( "Walk speed in fly" ), CPP_PROPERTY( walkSpeedInFly ), CPF_Edit );
-	new( staticClass, TEXT( "Jump Speed" ) )		CFloatProperty( TEXT( "Movement" ), TEXT( "Jump speed" ), CPP_PROPERTY( jumpSpeed ), CPF_Edit );
+	new( staticClass, TEXT( "Walk Speed" ) )		CFloatProperty( TEXT( "Movement" ), TEXT( "Walk speed" ), STRUCT_OFFSET( ThisClass, walkSpeed ), CPF_Edit );
+	new( staticClass, TEXT( "Walk Speed In Fly" ) ) CFloatProperty( TEXT( "Movement" ), TEXT( "Walk speed in fly" ), STRUCT_OFFSET( ThisClass, walkSpeedInFly ), CPF_Edit );
+	new( staticClass, TEXT( "Jump Speed" ) )		CFloatProperty( TEXT( "Movement" ), TEXT( "Jump speed" ), STRUCT_OFFSET( ThisClass, jumpSpeed ), CPF_Edit );
 }
 
 /*

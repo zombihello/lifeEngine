@@ -27,7 +27,7 @@ APointLight::StaticInitializeClass
 */
 void APointLight::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Point Light Component" ) ) CObjectProperty( TEXT( "Light" ), TEXT( "Point light component" ), CPP_PROPERTY( pointLightComponent ), CPF_Edit, CPointLightComponent::StaticClass() );
+	new( staticClass, TEXT( "Point Light Component" ) ) CObjectProperty( TEXT( "Light" ), TEXT( "Point light component" ), STRUCT_OFFSET( ThisClass, pointLightComponent ), CPF_Edit, CPointLightComponent::StaticClass() );
 }
 
 #if WITH_EDITOR

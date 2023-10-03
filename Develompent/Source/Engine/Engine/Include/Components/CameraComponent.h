@@ -11,6 +11,7 @@
 
 #include "Render/CameraTypes.h"
 #include "Components/SceneComponent.h"
+#include "Misc/EnumAsByte.h"
 
  /**
   * @ingroup Engine
@@ -202,15 +203,15 @@ public:
 	}
 
 private:
-    bool                            bIsActive;					/**< Is active camera. This field setted from CCameraManager::SetActiveCamera */
-	bool							bAutoViewData;				/**< Auto view data. If this flag is true, CCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic) */
-	ECameraProjectionMode			projectionMode;				/**< Projection mode */
-	float							fieldOfView;				/**< The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode) */
-	float							orthoWidth;					/**< The desired width (in world units) of the orthographic view (ignored in Perspective mode) */
-	float							orthoHeight;				/**< The desired height (in world units) of the orthographic view (ignored in Perspective mode) */
-	float							nearClipPlane;				/**< The near plane distance (in world units) */
-	float							farClipPlane;				/**< The far plane distance (in world units) */
-	float							aspectRatio;				/**< Aspect Ratio (Width/Height) (ignored in Orthographic mode) */
+    bool									bIsActive;					/**< Is active camera. This field setted from CCameraManager::SetActiveCamera */
+	bool									bAutoViewData;				/**< Auto view data. If this flag is true, CCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic) */
+	TEnumAsByte<ECameraProjectionMode>		projectionMode;				/**< Projection mode */
+	float									fieldOfView;				/**< The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode) */
+	float									orthoWidth;					/**< The desired width (in world units) of the orthographic view (ignored in Perspective mode) */
+	float									orthoHeight;				/**< The desired height (in world units) of the orthographic view (ignored in Perspective mode) */
+	float									nearClipPlane;				/**< The near plane distance (in world units) */
+	float									farClipPlane;				/**< The far plane distance (in world units) */
+	float									aspectRatio;				/**< Aspect Ratio (Width/Height) (ignored in Orthographic mode) */
 };
 
 //

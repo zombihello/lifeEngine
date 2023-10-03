@@ -63,7 +63,14 @@ public:
     FORCEINLINE void SetMaterial( uint32 InIndex, const TAssetHandle<CMaterial>& InMaterial )
     {
         Assert( InIndex < overrideMaterials.size() );
-		overrideMaterials[ InIndex ] = InMaterial;
+		TAssetHandle<CMaterial>		material = InMaterial;
+		TSharedPtr<CStaticMesh>		staticMeshRef = staticMesh.ToSharedPtr();
+		if ( staticMeshRef && !material.IsValid() )
+		{
+			material = staticMeshRef->GetMaterial( InIndex );
+		}
+	
+		overrideMaterials[InIndex] = material;
 		bIsDirtyDrawingPolicyLink = true;
     }
 
@@ -78,7 +85,12 @@ public:
 			TSharedPtr<CStaticMesh>		staticMeshRef = InNewStaticMesh.ToSharedPtr();
 			if ( staticMeshRef )
 			{
-				overrideMaterials.resize( staticMeshRef->GetNumMaterials() );
+				uint32		numMaterials = staticMeshRef->GetNumMaterials();
+				overrideMaterials.resize( numMaterials );
+				for ( uint32 index = 0; index < numMaterials; ++index )
+				{
+					overrideMaterials[index] = staticMeshRef->GetMaterial( index );
+				}
 			}
 		}
 		bIsDirtyDrawingPolicyLink = true;

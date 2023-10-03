@@ -12,15 +12,15 @@
 #include <string>
 #include <unordered_map>
 
-#include "Misc/Object.h"
+#include "Misc/Struct.h"
 
 /**
  * @ingroup Core
  * @brief Class description for reflection
  */
-class CClass : public CObject
+class CClass : public CStruct
 {
-	DECLARE_CLASS( CClass, CObject, 0, 0 )
+	DECLARE_CLASS( CClass, CStruct, 0, 0 )
 
 public:
 	friend CObject;
@@ -32,9 +32,6 @@ public:
 		: ClassConstructor( nullptr )
 		, classFlags( CLASS_None )
 		, classCastFlags( CASTCLASS_None )
-		, propertiesSize( 0 )
-		, minAlignment( 1 )
-		, superClass( nullptr )
 	{}
 
 	/**
@@ -49,13 +46,10 @@ public:
 	 * @param InSuperClass			Pointer to super class
 	 */
 	FORCEINLINE CClass( const CName& InClassName, uint32 InClassFlags, uint32 InClassCastFlags, uint32 InPropertiesSize, uint32 InMinAlignment, class CObject*( *InClassConstructor )( void* InPtr ), CClass* InSuperClass = nullptr )
-		: CObject( InClassName )
+		: CStruct( InClassName, InPropertiesSize, InMinAlignment, InSuperClass )
 		, ClassConstructor( InClassConstructor )
 		, classFlags( InClassFlags )
 		, classCastFlags( InClassCastFlags )
-		, propertiesSize( InPropertiesSize )
-		, minAlignment( InMinAlignment )
-		, superClass( InSuperClass )
 	{}
 
 	/**
@@ -64,7 +58,7 @@ public:
 	 */
 	FORCEINLINE CClass* GetSuperClass() const
 	{
-		return superClass;
+		return ( CClass* )GetSuperStruct();
 	}
 
 	/**
@@ -74,24 +68,6 @@ public:
 	FORCEINLINE uint32 GetClassFlags() const
 	{
 		return classFlags;
-	}
-
-	/**
-	 * @brief Get properties size in bytes
-	 * @return Return properties size in bytes
-	 */
-	FORCEINLINE uint32 GetPropertiesSize() const
-	{
-		return propertiesSize;
-	}
-
-	/**
-	 * @brief Get minimum alignment for the class
-	 * @return Return minimum alignment for the class
-	 */
-	FORCEINLINE uint32 GetMinAlignment() const
-	{
-		return minAlignment;
 	}
 
 	/**
@@ -209,68 +185,6 @@ public:
 		return StaticRegisteredClassesInternal();
 	}
 
-	/**
-	 * @brief Is a class
-	 * 
-	 * @param InClass	Checking class
-	 * @return Return TRUE if object is a class InClass, else returning FALSE
-	 */
-	FORCEINLINE bool IsA( CClass* InClass ) const
-	{
-		// If class is not valid, we return false
-		if ( !InClass )
-		{
-			return false;
-		}
-
-		// Iterate over each class ancestor
-		for ( const CClass* tempClass = this; tempClass; tempClass = tempClass->superClass )
-		{
-			// Success! This class contains the class being checked
-			if ( tempClass == InClass )
-			{
-				return true;
-			}
-		}
-
-		// Otherwise the class does not contain the class being checked 
-		return false;
-	}
-
-	/**
-	 * @brief Add class property
-	 * @param InProperty	Property
-	 */
-	virtual void AddProperty( class CProperty* InProperty ) override;
-
-	/**
-	 * @brief Get array of class properties
-	 * 
-	 * @param OutArrayProperties		Output array properties
-	 * @param InPropertiesInParents		Take into account the properties of the parents
-	 */
-	void GetProperties( std::vector<class CProperty*>& OutArrayProperties, bool InPropertiesInParents = true ) const;
-
-	/**
-	 * @brief Get number properties in the class
-	 * 
-	 * @param InPropertiesInParents		Take into account the properties of the parents
-	 * @return Return number properties in the class
-	 */
-	uint32 GetNumProperties( bool InPropertiesInParents = true ) const;
-
-	/**
-	 * @brief Find property
-	 *
-	 * @param InName		Property name
-	 * @return Return pointer to class property, if not found return NULL
-	 */
-	template<typename TPropertyClass>
-	FORCEINLINE TPropertyClass* FindProperty( const CName& InName ) const
-	{
-		return Cast<TPropertyClass>( InternalFindProperty( InName ) );
-	}
-
 private:
 	/**
 	 * @brief Get array of all registered classes
@@ -282,21 +196,9 @@ private:
 		return classesTable;
 	}
 
-	/**
-	 * @brief Find property
-	 *
-	 * @param InName		Property name
-	 * @return Return pointer to class property, if not found return NULL
-	 */
-	class CProperty* InternalFindProperty( const CName& InName ) const;
-	
 	class CObject*( *ClassConstructor )( void* InPtr );										/**< Pointer to constructor of class */
-	uint32														classFlags;					/**< Class flags */
-	uint32														classCastFlags;				/**< Class cast flags */
-	uint32														propertiesSize;				/**< Properties size in bytes */
-	uint32														minAlignment;				/**< Minimum alignment for the class */
-	CClass*														superClass;					/**< Pointer to super class */
-	std::vector<class CProperty*>								properties;					/**< Class properties */
+	uint32		classFlags;					/**< Class flags */
+	uint32		classCastFlags;				/**< Class cast flags */
 };
 
 #endif // !CLASS_H

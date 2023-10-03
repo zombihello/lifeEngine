@@ -29,7 +29,10 @@ CShapeComponent::StaticInitializeClass
 */
 void CShapeComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Physics Material" ) )	CAssetProperty( TEXT( "Physics" ), TEXT( "Physics material" ), CPP_PROPERTY( physicsMaterial ), CPF_Edit, AT_PhysicsMaterial );
+	new( staticClass, TEXT( "Physics Material" ) )		CAssetProperty( TEXT( "Physics" ), TEXT( "Physics material" ), STRUCT_OFFSET( ThisClass, physicsMaterial ), CPF_Edit, AT_PhysicsMaterial );
+	
+	// TODO yehor.pohuliaka - Need rework containing collision profile because CStructProperty can't use with pointers
+	//new( staticClass, TEXT( "Collision Profile" ) )		CStructProperty( TEXT( "Physics" ), TEXT( "Collision profile" ), STRUCT_OFFSET( ThisClass, collisionProfile ), CPF_Edit, CollisionProfile::StaticStruct() );
 }
 
 /*

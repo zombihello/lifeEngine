@@ -12,11 +12,16 @@
 #include "Components/PrimitiveComponent.h"
 #include "Render/Scene.h"
 #include "Render/Sprite.h"
+#include "Misc/EnumAsByte.h"
 
 #if ENABLE_HITPROXY
 #include "Render/SceneHitProxyRendering.h"
 #endif // ENABLE_HITPROXY
 
+/**
+ * @ingroup Engine
+ * @brief Enumeration of sprite types
+ */
 enum ESpriteType
 {
     ST_Static,                  /**< Static sprite */
@@ -270,7 +275,7 @@ private:
 
 	bool								bFlipVertical;					/**< Is need flip sprite by vertical */
 	bool								bFlipHorizontal;				/**< Is need flip sprite by horizontal */
-    ESpriteType							type;							/**< Sprite type */
+    TEnumAsByte<ESpriteType>			type;							/**< Sprite type */
 	SpriteRef_t							sprite;							/**< Sprite mesh */
 	TAssetHandle<CMaterial>				material;						/**< Sprite material */
 	DrawingPolicyLinkRef_t				drawingPolicyLink;				/**< Reference to drawing policy link in scene */
