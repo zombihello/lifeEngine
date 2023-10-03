@@ -39,12 +39,16 @@ void CCategoryPropertyNode::InitChildNodes()
 	objectBaseClass->GetProperties( properties );
 	for ( uint32 index = 0, count = properties.size(); index < count; ++index )
 	{
+		// We ignore property if it not have neither CPF_Edit nor CPF_EditConst
 		CProperty*				property = properties[index];
-		if ( property->GetCategory() == categoryName )
+		if ( property->HasAnyFlags( CPF_Edit ) || property->HasAnyFlags( CPF_EditConst ) )
 		{
-			CItemPropertyNode*	itemNode = new CItemPropertyNode();
-			itemNode->InitNode( this, property, property->GetOffset(), INDEX_NONE );
-			AddChildNode( itemNode );
+			if ( property->GetCategory() == categoryName )
+			{
+				CItemPropertyNode* itemNode = new CItemPropertyNode();
+				itemNode->InitNode( this, property, property->GetOffset(), INDEX_NONE );
+				AddChildNode( itemNode );
+			}
 		}
 	}
 }

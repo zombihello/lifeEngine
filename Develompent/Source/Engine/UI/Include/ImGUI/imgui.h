@@ -1114,12 +1114,16 @@ enum ImGuiPopupFlags_
 // Flags for ImGui::Selectable()
 enum ImGuiSelectableFlags_
 {
-    ImGuiSelectableFlags_None               = 0,
-    ImGuiSelectableFlags_DontClosePopups    = 1 << 0,   // Clicking this don't close parent popup window
-    ImGuiSelectableFlags_SpanAllColumns     = 1 << 1,   // Selectable frame can span all columns (text will still fit in current column)
-    ImGuiSelectableFlags_AllowDoubleClick   = 1 << 2,   // Generate press events on double clicks too
-    ImGuiSelectableFlags_Disabled           = 1 << 3,   // Cannot be selected, display grayed out text
-    ImGuiSelectableFlags_AllowItemOverlap   = 1 << 4    // (WIP) Hit testing to allow subsequent widgets to overlap this one
+    ImGuiSelectableFlags_None                   = 0,
+    ImGuiSelectableFlags_DontClosePopups        = 1 << 0,   // Clicking this don't close parent popup window
+    ImGuiSelectableFlags_SpanAllColumns         = 1 << 1,   // Selectable frame can span all columns (text will still fit in current column)
+    ImGuiSelectableFlags_AllowDoubleClick       = 1 << 2,   // Generate press events on double clicks too
+    ImGuiSelectableFlags_Disabled               = 1 << 3,   // Cannot be selected, display grayed out text
+    ImGuiSelectableFlags_AllowItemOverlap       = 1 << 4,   // (WIP) Hit testing to allow subsequent widgets to overlap this one
+
+    // BS yehor.pohuliaka - Begin - Implement array support in ItemPropertyNode
+    ImGuiSelectableFlags_SpanRemainingColumns   = 1 << 5    // Selectable frame can span remaining columns (same as ImGuiSelectableFlags_SpanAllColumns, but take to count current item position)
+    // BS yehor.pohuliaka - End - Implement array support in ItemPropertyNode
 };
 
 // Flags for ImGui::BeginCombo()

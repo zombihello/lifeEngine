@@ -32,9 +32,12 @@
  */
 enum EPropertyFlags
 {
-	CPF_None		= 0,		/**< None */
-	CPF_EditorOnly	= 1 << 0,	/**< Property only for the editor */
-	CPF_Const		= 1 << 2	/**< Property is constant */
+	CPF_None			= 0,		/**< None */
+	CPF_Const			= 1 << 0,	/**< Property is constant */
+	CPF_EditorOnly		= 1 << 1,	/**< Property only for the editor */
+	CPF_Edit			= 1 << 2,	/**< Property is user-settable in the editor */
+	CPF_EditFixedSize	= 1 << 3,	/**< Indicates that elements of an array can be modified, but its size cannot be changed */
+	CPF_EditConst		= 1 << 4,	/**< Property is uneditable in the editor */
 };
 
 /**

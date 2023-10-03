@@ -92,8 +92,8 @@ AActor::StaticInitializeClass
 */
 void AActor::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bVisibility" ) )	CBoolProperty( TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPP_PROPERTY( bVisibility ), 0 );
-	new( staticClass, TEXT( "bIsStatic" ) )		CBoolProperty( TEXT( "Actor" ), TEXT( "Is static actor" ), CPP_PROPERTY( bIsStatic ), 0 );
+	new( staticClass, TEXT( "bVisibility" ) )	CBoolProperty( TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPP_PROPERTY( bVisibility ), CPF_Edit );
+	new( staticClass, TEXT( "bIsStatic" ) )		CBoolProperty( TEXT( "Actor" ), TEXT( "Is static actor" ), CPP_PROPERTY( bIsStatic ), CPF_Edit );
 }
 
 /*

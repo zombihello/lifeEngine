@@ -29,7 +29,7 @@ ADirectionalLight::StaticInitializeClass
 */
 void ADirectionalLight::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Directional Light Component" ) ) CObjectProperty( TEXT( "Light" ), TEXT( "Directional light component" ), CPP_PROPERTY( directionalLightComponent ), 0, CDirectionalLightComponent::StaticClass() );
+	new( staticClass, TEXT( "Directional Light Component" ) ) CObjectProperty( TEXT( "Light" ), TEXT( "Directional light component" ), CPP_PROPERTY( directionalLightComponent ), CPF_Edit, CDirectionalLightComponent::StaticClass() );
 }
 
 #if WITH_EDITOR

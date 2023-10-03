@@ -37,9 +37,9 @@ CLightComponent::StaticInitializeClass
 */
 void CLightComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bEnabled" ) )		CBoolProperty( TEXT( "Light" ), TEXT( "Is enabled light" ), CPP_PROPERTY( bEnabled ), 0 );
-	new( staticClass, TEXT( "Color" ) )			CColorProperty( TEXT( "Light" ), TEXT( "Light color" ), CPP_PROPERTY( lightColor ), 0 );
-	new( staticClass, TEXT( "Intensivity" ) )	CFloatProperty( TEXT( "Light" ), TEXT( "Light intensivity" ), CPP_PROPERTY( intensivity ), 0 );
+	new( staticClass, TEXT( "bEnabled" ) )		CBoolProperty( TEXT( "Light" ), TEXT( "Is enabled light" ), CPP_PROPERTY( bEnabled ), CPF_Edit );
+	new( staticClass, TEXT( "Color" ) )			CColorProperty( TEXT( "Light" ), TEXT( "Light color" ), CPP_PROPERTY( lightColor ), CPF_Edit );
+	new( staticClass, TEXT( "Intensivity" ) )	CFloatProperty( TEXT( "Light" ), TEXT( "Light intensivity" ), CPP_PROPERTY( intensivity ), CPF_Edit );
 }
 
 /*

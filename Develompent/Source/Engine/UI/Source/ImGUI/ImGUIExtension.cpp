@@ -1,6 +1,10 @@
 #include "LEBuild.h"
 #if WITH_IMGUI
 
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+	#define IMGUI_DEFINE_MATH_OPERATORS
+#endif
+
 #include "Misc/UIGlobals.h"
 #include "Containers/StringConv.h"
 #include "Containers/String.h"
@@ -289,7 +293,8 @@ ImGui::CollapsingHeader
 */
 bool ImGui::CollapsingHeader( const std::wstring& InLabel, bool InIgnoreDisabled, ImGuiTreeNodeFlags InFlags /*= 0*/ )
 {
-	bool	bWasDisabled = ( ImGui::GetCurrentContext()->CurrentItemFlags & ImGuiItemFlags_Disabled ) != 0;
+	// If need to ignore disable flag we call ImGui::EndDisabled and then in the end of the function have to re-enable it
+	bool	bWasDisabled = InIgnoreDisabled && ( ImGui::GetCurrentContext()->CurrentItemFlags & ImGuiItemFlags_Disabled ) != 0;
 	if ( bWasDisabled )
 	{
 		ImGui::EndDisabled();
@@ -297,11 +302,131 @@ bool ImGui::CollapsingHeader( const std::wstring& InLabel, bool InIgnoreDisabled
 	
 	bool	bResult = ImGui::CollapsingHeader( TCHAR_TO_ANSI( InLabel.c_str() ), InFlags );
 	
+	// If items was disabled we re-enable it
 	if ( bWasDisabled )
 	{
 		ImGui::BeginDisabled( true );
 	}
 	return bResult;
+}
+
+/*
+==================
+ImGui::Arrow
+==================
+*/
+void ImGui::Arrow( ImGuiDir InArrowDir, ImVec2 InSize )
+{
+	ImGuiContext*	imguiContext = GetCurrentContext();
+	ImGuiWindow*	imguiWindow = GetCurrentWindow();
+	if ( imguiWindow->SkipItems )
+	{
+		return;
+	}
+	
+	if ( InSize.x == 0.f )
+	{
+		InSize.x = ImGui::GetFrameHeight();
+	}
+
+	const ImRect	rect( imguiWindow->DC.CursorPos, imguiWindow->DC.CursorPos + InSize );
+	const float		defaultSize = GetFrameHeight();
+	const ImU32		arrowColor = GetColorU32( ImGuiCol_Text );
+	ItemSize( InSize, ( InSize.y >= defaultSize ) ? imguiContext->Style.FramePadding.y : -1.0f );
+	RenderArrow( imguiWindow->DrawList, rect.Min + ImVec2( ImMax( 0.0f, ( InSize.x - imguiContext->FontSize ) * 0.5f ), ImMax( 0.0f, ( InSize.y - imguiContext->FontSize ) * 0.5f ) ), arrowColor, InArrowDir );
+}
+
+/*
+==================
+ImGui::CollapsingArrayHeader
+==================
+*/
+ImGui::CollapsingArrayHeaderResult ImGui::CollapsingArrayHeader( const std::wstring& InStrId, const std::wstring& InLabel, uint32 InFlags /* = 0 */, float InItemWidthSpacing /* = 0.f */, const std::wstring& InMessage /* = TEXT( "" ) */, const std::wstring& InLabelToolTip /* = TEXT( "" ) */, const std::wstring& InAddButtonToolTip /* = TEXT( "" ) */, const std::wstring& InRemoveButtonToolTip /* = TEXT( "" ) */, bool InIgnoreDisabled /* = false */ )
+{
+	static const ImVec2			s_ImageButtonSize( 12.f, 12.f );
+	ImGuiWindow*				imguiWindow		= GetCurrentWindow();
+	ImGuiStorage*				storage			= imguiWindow->DC.StateStorage;
+	ImGuiID						arrowButtonId	= imguiWindow->GetID( TCHAR_TO_ANSI( InStrId.c_str() ) );
+	CollapsingArrayHeaderResult	result;
+	
+	// If need to ignore disable flag we call ImGui::EndDisabled and then in the end of the function have to re-enable it
+	bool	bWasDisabled = InIgnoreDisabled && ( ImGui::GetCurrentContext()->CurrentItemFlags & ImGuiItemFlags_Disabled ) != 0;
+	if ( bWasDisabled )
+	{
+		ImGui::EndDisabled();
+	}
+
+	ImGui::Columns( 2 );
+	ImGui::PushStyleVar( ImGuiStyleVar_FramePadding, ImVec2( ImGui::GetStyle().FramePadding.x, 1.f ) );
+	ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
+	ImGui::SameLine();
+	
+	// Draw selectable and arrow widget
+	result.bIsOpened = storage->GetInt( arrowButtonId, 0 );
+	if ( ImGui::Selectable( TCHAR_TO_ANSI( InStrId.c_str() ), false, ImGuiSelectableFlags_SpanRemainingColumns | ImGuiSelectableFlags_AllowItemOverlap ) )
+	{
+		result.bIsOpened = !result.bIsOpened;
+		storage->SetInt( arrowButtonId, result.bIsOpened );
+	}
+	ImGui::SameLine();
+	ImGui::Arrow( result.bIsOpened ? ImGuiDir_Down : ImGuiDir_Right );
+
+	// Draw label
+	ImGui::SameLine();
+	ImGui::Text( TCHAR_TO_ANSI( InLabel.c_str() ) );
+	if ( !InLabelToolTip.empty() && ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+	{
+		ImGui::SetTooltip( TCHAR_TO_ANSI( InLabelToolTip.c_str() ) );
+	}
+
+	// Draw message
+	ImGui::NextColumn();
+	if ( !InMessage.empty() )
+	{
+		ImGui::Text( TCHAR_TO_ANSI( InMessage.c_str() ) );
+		ImGui::SameLine();
+	}
+	
+	// If items was disabled we re-enable it
+	if ( bWasDisabled )
+	{
+		ImGui::BeginDisabled( true );
+	}
+
+	// Draw add button
+	if ( InFlags & ImGuiCollapsingArrayHeaderFlags_AddButton )
+	{
+		ImGui::PushID( arrowButtonId );
+		result.bPressedAdd = ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_Add ).ToSharedPtr()->GetTexture2DRHI() ), s_ImageButtonSize );
+		ImGui::PopID();
+
+		if ( !InAddButtonToolTip.empty() && ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+		{
+			ImGui::SetTooltip( TCHAR_TO_ANSI( InAddButtonToolTip.c_str() ) );
+		}	
+	}
+
+	if ( ( InFlags & ImGuiCollapsingArrayHeaderFlags_AllButtons ) == ImGuiCollapsingArrayHeaderFlags_AllButtons )
+	{
+		ImGui::SameLine( 0, 2.f );
+	}
+
+	// Draw remove button
+	if ( InFlags & ImGuiCollapsingArrayHeaderFlags_RemoveButton )
+	{
+		ImGui::PushID( arrowButtonId );
+		result.bPressedRemove = ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_Remove ).ToSharedPtr()->GetTexture2DRHI() ), s_ImageButtonSize );
+		ImGui::PopID();
+
+		if ( !InRemoveButtonToolTip.empty() && ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
+		{
+			ImGui::SetTooltip( TCHAR_TO_ANSI( InRemoveButtonToolTip.c_str() ) );
+		}
+	}
+
+	ImGui::PopStyleVar();
+	ImGui::Columns( 1 );
+	return result;
 }
 
 #endif // WITH_IMGUI

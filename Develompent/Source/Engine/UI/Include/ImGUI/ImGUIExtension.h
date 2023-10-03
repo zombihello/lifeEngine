@@ -18,8 +18,39 @@
 #include "ImGUI/imgui.h"
 #include "Render/Texture.h"
 
+/**
+ * @ingroup UI
+ * @brief Enumeration flags for ImGui::CollapsingArrayHeader
+ */
+enum ImGuiCollapsingArrayHeaderFlags
+{
+	ImGuiCollapsingArrayHeaderFlags_AddButton		= 1 << 1,																						/**< Draw an add button */
+	ImGuiCollapsingArrayHeaderFlags_RemoveButton	= 1 << 2,																						/**< Draw an remove button */
+	ImGuiCollapsingArrayHeaderFlags_AllButtons		= ImGuiCollapsingArrayHeaderFlags_AddButton | ImGuiCollapsingArrayHeaderFlags_RemoveButton		/**< Draw all buttons */
+};
+
 namespace ImGui
 {
+	/**
+	 * @ingroup UI
+	 * @brief Structure for return results from ImGui::CollapsingArrayHeader
+	 */
+	struct CollapsingArrayHeaderResult
+	{
+		/**
+		 * @brief Constructor
+		 */
+		CollapsingArrayHeaderResult()
+			: bIsOpened( false )
+			, bPressedAdd( false )
+			, bPressedRemove( false )
+		{}
+
+		bool	bIsOpened;		/**< Is opened header */
+		bool	bPressedAdd;	/**< Button 'Add' was pressed */
+		bool	bPressedRemove;	/**< Button 'Remove' was pressed */
+	};
+
 	/**
 	 * @ingroup UI
 	 * @brief ImGui help function for draw ImageButton with selection opportunity
@@ -94,6 +125,32 @@ namespace ImGui
 	 * @return Return TRUE when header is opened, otherwise FALSE
 	 */
 	bool CollapsingHeader( const std::wstring& InLabel, bool InIgnoreDisabled, ImGuiTreeNodeFlags InFlags = 0 );
+
+	/**
+	 * @ingroup UI
+	 * @brief Draw an arrow
+	 * 
+	 * @param InArrowDir	Arrow direction
+	 * @param InSize		Arrow Size. If X component is zero it will be replaced on ImGui::GetFrameHeight()
+	 */
+	void Arrow( ImGuiDir InArrowDir, ImVec2 InSize = ImVec2( 0.f, 0.f ) );
+
+	/**
+	 * @ingroup UI
+	 * @brief Draw a collapsing header for array
+	 * 
+	 * @param InStrId				String that used as an ID
+	 * @param InLabel				Label
+	 * @param InFlags				Flags (see ImGuiCollapsingArrayHeaderFlags)
+	 * @param InItemWidthSpacing	Item spacing by width
+	 * @param InMessage				Message in second column, may be empty
+	 * @param InLabelToolTip		Tooltip message for label. If is empty tooltip won't show
+	 * @param InAddButtonToolTip	Tooltip message for add button. If is empty tooltip won't show
+	 * @param InRemoveButtonToolTip	Tooltip message for remove button. If is empty tooltip won't show
+	 * @param InIgnoreDisabled		Is need ignore disable flag
+	 * @return Return CollapsingArrayHeaderResult whom describe any statuses, i.g is opened header or was pressed add button
+	 */
+	CollapsingArrayHeaderResult CollapsingArrayHeader( const std::wstring& InStrId, const std::wstring& InLabel, uint32 InFlags = 0, float InItemWidthSpacing = 0.f, const std::wstring& InMessage = TEXT( "" ), const std::wstring& InLabelToolTip = TEXT( "" ), const std::wstring& InAddButtonToolTip = TEXT( "" ), const std::wstring& InRemoveButtonToolTip = TEXT( "" ), bool InIgnoreDisabled = false );
 }
 
 #endif // WITH_IMGUI

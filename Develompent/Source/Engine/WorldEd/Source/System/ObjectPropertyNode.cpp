@@ -64,6 +64,65 @@ bool CObjectPropertyNode::GetReadAddress( CPropertyNode* InNode, std::vector<byt
 		return false;
 	}
 
+	CProperty*		nodeProperty = InNode->GetProperty();
+	if ( !nodeProperty )
+	{
+		return false;
+	}
+	bool			bAllPropertiesIsSame = true;
+
+	// If this item is the child of an array, return FALSE if there is a different number
+	// of items in the array in different objects, when multi-selecting
+	if ( Cast<CArrayProperty>( nodeProperty->GetOuter() ) )
+	{
+		CPropertyNode*		parentNode = InNode->GetParentNode();
+		Assert( parentNode );
+		CObject*			objectTmp = GetObject( 0 );
+		uint32				arraySize = ( ( std::vector<byte>* )parentNode->GetValueBaseAddress( ( byte* )objectTmp ) )->size();
+		for ( uint32 index = 1, count = GetNumObjects(); index < count; ++index )
+		{
+			objectTmp = GetObject( index );
+			if ( ( ( std::vector<byte>* )parentNode->GetValueBaseAddress( ( byte* )objectTmp ) )->size() != arraySize )
+			{
+				bAllPropertiesIsSame = false;
+			}
+		}
+	}
+
+	byte*	baseAddress = InNode->GetValueBaseAddress( ( byte* )GetObject( 0 ) );
+	if ( baseAddress )
+	{
+		// If the item is an array itself, return FALSE if there are a different number of
+		// items in the array in different objects, when multi-selecting
+		if ( Cast<CArrayProperty>( nodeProperty ) )
+		{
+			CObject*	objectTmp = GetObject( 0 );
+			uint32		arraySize = ( ( std::vector<byte>* )InNode->GetValueBaseAddress( ( byte* )objectTmp ) )->size();
+			for ( uint32 index = 1, count = GetNumObjects(); index < count; ++index )
+			{
+				CObject*	objectTmp = GetObject( index );
+				if ( ( ( std::vector<byte>* )InNode->GetValueBaseAddress( ( byte* )objectTmp ) )->size() != arraySize )
+				{
+					bAllPropertiesIsSame = false;
+				}
+			}
+		}
+		// If the item is an object itself, return FALSE if there are a different values (e.g base object isn't NULL and other is NULL or vice versa)
+		else if ( Cast<CObjectProperty>( nodeProperty ) )
+		{
+			CObject*	objectBase = *( CObject** )baseAddress;
+			for ( uint32 index = 1, count = GetNumObjects(); index < count; ++index )
+			{
+				CObject*	objectTmp = GetObject( index );
+				CObject*	objectCurrent = *( CObject** )InNode->GetValueBaseAddress( ( byte* )objectTmp );
+				if ( ( bool )objectBase != ( bool )objectCurrent )
+				{
+					bAllPropertiesIsSame = false;
+				}
+			}
+		}
+	}
+
 	// Write addresses to the output
 	for ( auto it = objects.begin(), itEnd = objects.end(); it != itEnd; ++it )
 	{
@@ -72,7 +131,7 @@ bool CObjectPropertyNode::GetReadAddress( CPropertyNode* InNode, std::vector<byt
 	}
 
 	// Everything checked out and we have usable addresses
-	return true;
+	return bAllPropertiesIsSame;
 }
 
 /*
@@ -101,7 +160,12 @@ void CObjectPropertyNode::InitChildNodes()
 	
 	for ( uint32 index = 0, count = baseClassProperties.size(); index < count; ++index )
 	{
-		categories.insert( baseClassProperties[index]->GetCategory() );
+		// We ignore property if it not have neither CPF_Edit nor CPF_EditConst
+		CProperty*		property = baseClassProperties[index];
+		if ( property->HasAnyFlags( CPF_Edit ) || property->HasAnyFlags( CPF_EditConst ) )
+		{
+			categories.insert( baseClassProperties[index]->GetCategory() );
+		}
 	}
 
 	// Create and init category node

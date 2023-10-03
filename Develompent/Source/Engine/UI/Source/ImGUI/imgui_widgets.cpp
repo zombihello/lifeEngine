@@ -6128,8 +6128,15 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
 
     // Fill horizontal space
     // We don't support (size < 0.0f) in Selectable() because the ItemSpacing extension would make explicitly right-aligned sizes not visibly match other widgets.
-    const bool span_all_columns = (flags & ImGuiSelectableFlags_SpanAllColumns) != 0;
-    const float min_x = span_all_columns ? window->ParentWorkRect.Min.x : pos.x;
+   
+    // BS yehor.pohuliaka - Begin - Implement array support in ItemPropertyNode
+    // If we have ImGuiSelectableFlags_SpanRemainingColumns set span_all_columns too. It need for whole original logic will work
+    const bool span_remaining_columns = (flags & ImGuiSelectableFlags_SpanRemainingColumns) != 0;
+    const bool span_all_columns = (flags & ImGuiSelectableFlags_SpanAllColumns) != 0 || span_remaining_columns;
+    const float min_x = ( span_all_columns && !span_remaining_columns ) ? window->ParentWorkRect.Min.x : pos.x;
+    // BS yehor.pohuliaka - End - Implement array support in ItemPropertyNode
+   
+    //ImGuiSelectableFlags_SpanRemainingColumns
     const float max_x = span_all_columns ? window->ParentWorkRect.Max.x : window->WorkRect.Max.x;
     if (size_arg.x == 0.0f || (flags & ImGuiSelectableFlags_SpanAvailWidth))
         size.x = ImMax(label_size.x, max_x - min_x);

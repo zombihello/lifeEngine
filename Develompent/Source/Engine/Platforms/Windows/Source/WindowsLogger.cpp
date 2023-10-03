@@ -92,7 +92,7 @@ void CWindowsLogger::Init()
 	if ( archiveLogs )
 	{
 		archiveLogs->SetType( AT_TextFile );
-		Logf( TEXT( "Opened log file '%s'" ), logFile.c_str() );
+		Logf( TEXT( "Opened log file '%s'\n" ), logFile.c_str() );
 	}
 #endif // !NO_LOGGING
 }

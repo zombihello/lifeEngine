@@ -42,15 +42,15 @@ CAudioComponent::StaticInitializeClass
 */
 void CAudioComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bIsLoop" ) )		CBoolProperty( TEXT( "Audio" ), TEXT( "Is looped" ), CPP_PROPERTY( bIsLoop ), 0 );
-	new( staticClass, TEXT( "bIsUISound" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is UI sound" ), CPP_PROPERTY( bIsUISound ), 0 );
-	new( staticClass, TEXT( "bIsAutoPlay" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is need auto play on begin play" ), CPP_PROPERTY( bIsAutoPlay ), 0 );
-	new( staticClass, TEXT( "bIsStreamable" ) ) CBoolProperty( TEXT( "Audio" ), TEXT( "Is streamable" ), CPP_PROPERTY( bIsStreamable ), 0 );
-	new( staticClass, TEXT( "Volume" ) )		CFloatProperty( TEXT( "Audio" ), TEXT( "Volume of sound" ), CPP_PROPERTY( volume ), 0 );
-	new( staticClass, TEXT( "Pitch" ) )			CFloatProperty( TEXT( "Audio" ), TEXT( "Pitch" ), CPP_PROPERTY( pitch ), 0 );
-	new( staticClass, TEXT( "Min Distance" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Min distance" ), CPP_PROPERTY( minDistance ), 0 );
-	new( staticClass, TEXT( "Attenuation" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Attenuation" ), CPP_PROPERTY( attenuation ), 0 );
-	new( staticClass, TEXT( "Audio Bank" ) )	CAssetProperty( TEXT( "Audio" ), TEXT( "Audio bank" ), CPP_PROPERTY( bank ), 0, AT_AudioBank );
+	new( staticClass, TEXT( "bIsLoop" ) )		CBoolProperty( TEXT( "Audio" ), TEXT( "Is looped" ), CPP_PROPERTY( bIsLoop ), CPF_Edit );
+	new( staticClass, TEXT( "bIsUISound" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is UI sound" ), CPP_PROPERTY( bIsUISound ), CPF_Edit );
+	new( staticClass, TEXT( "bIsAutoPlay" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is need auto play on begin play" ), CPP_PROPERTY( bIsAutoPlay ), CPF_Edit );
+	new( staticClass, TEXT( "bIsStreamable" ) ) CBoolProperty( TEXT( "Audio" ), TEXT( "Is streamable" ), CPP_PROPERTY( bIsStreamable ), CPF_Edit );
+	new( staticClass, TEXT( "Volume" ) )		CFloatProperty( TEXT( "Audio" ), TEXT( "Volume of sound" ), CPP_PROPERTY( volume ), CPF_Edit );
+	new( staticClass, TEXT( "Pitch" ) )			CFloatProperty( TEXT( "Audio" ), TEXT( "Pitch" ), CPP_PROPERTY( pitch ), CPF_Edit );
+	new( staticClass, TEXT( "Min Distance" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Min distance" ), CPP_PROPERTY( minDistance ), CPF_Edit );
+	new( staticClass, TEXT( "Attenuation" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Attenuation" ), CPP_PROPERTY( attenuation ), CPF_Edit );
+	new( staticClass, TEXT( "Audio Bank" ) )	CAssetProperty( TEXT( "Audio" ), TEXT( "Audio bank" ), CPP_PROPERTY( bank ), CPF_Edit, AT_AudioBank );
 }
 
 #if WITH_EDITOR

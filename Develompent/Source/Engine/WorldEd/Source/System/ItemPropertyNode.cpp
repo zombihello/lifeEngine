@@ -1,8 +1,10 @@
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Misc/UIGlobals.h"
+#include "Misc/WorldEdGlobals.h"
 #include "System/ItemPropertyNode.h"
 #include "System/ObjectPropertyNode.h"
+#include "System/EditorEngine.h"
 #include "ImGUI/ImGUIEngine.h"
 #include "ImGUI/imgui.h"
 #include "ImGUI/ImGUIExtension.h"
@@ -22,7 +24,7 @@ CItemPropertyNode::~CItemPropertyNode
 */
 CItemPropertyNode::~CItemPropertyNode()
 {}
-
+#include "ImGUI/imgui_internal.h"
 /*
 ==================
 CItemPropertyNode::Tick
@@ -34,12 +36,13 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 	if ( GetReadAddress( this, addresses ) )
 	{
 		// Get all data for tick property node
-		CObjectPropertyNode* parentObjectNode		= FindObjectItemParent();
-		CObject*			 objectZero				= parentObjectNode->GetObject( 0 );
-		CClass*				 theClass				= property->GetClass();
-		bool				 bPropertyIsDisabled	= property->HasAnyFlags( CPF_Const ) || !objectZero->CanEditProperty( property );
-		bool				 bPropertyInArray		= Cast<CArrayProperty>( property->GetOuter() );
-		byte*				 valueData				= addresses[0];
+		CObjectPropertyNode* parentObjectNode				= FindObjectItemParent();
+		CObject*			 objectZero						= parentObjectNode->GetObject( 0 );
+		CClass*				 theClass						= property->GetClass();
+		bool				 bPropertyIsDisabled			= property->HasAnyFlags( CPF_Const ) || property->HasAnyFlags( CPF_EditConst ) || !objectZero->CanEditProperty( property );
+		bool				 bPropertyInArray				= Cast<CArrayProperty>( property->GetOuter() );
+		bool				 bPropertyIsStaticArray			= property->HasAnyFlags( CPF_EditFixedSize ) || ( property->GetArraySize() > 1 && arrayIndex == INDEX_NONE );
+		byte*				 valueData						= addresses[0];
 
 		// Disable property if need		
 		if ( bPropertyIsDisabled )
@@ -50,13 +53,127 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 		// Object property
 		if ( theClass->HasAnyCastFlags( CASTCLASS_CObjectProperty ) )
 		{
-			ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
-			ImGui::SameLine();
-			if ( ImGui::CollapsingHeader( CString::Format( TEXT( "%s##%p" ), property->GetName().c_str(), this ), true ) )
+			// If out property in an array then we not draw collapsing header
+			if ( !bPropertyInArray )
+			{
+				ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
+				ImGui::SameLine();
+			}
+			if ( bPropertyInArray || ImGui::CollapsingHeader( CString::Format( TEXT( "%s##%p" ), property->GetName().c_str(), this ), true ) )
 			{
 				TickChildren( InItemWidthSpacing + ImGui::GetStyle().ItemSpacing.x );
 			}
 		}
+
+		// Array property
+		else if ( bPropertyIsStaticArray || theClass->HasAnyCastFlags( CASTCLASS_CArrayProperty ) )
+		{
+			bool								bPropertyIsChanged = false;
+			uint32								elementIdToRemove = -1;
+			CProperty*							innerProperty = ExactCast<CArrayProperty>( property )->GetInnerProperty();
+			
+			// If array size was changed and the node have not equal number of children then we rebuild children
+			if ( ( ( std::vector<byte>* )valueData )->size() / innerProperty->GetElementSize() != childNodes.size() )
+			{
+				RebuildChildren();
+			}
+
+			ImGui::CollapsingArrayHeaderResult	arrayCollapseResult = ImGui::CollapsingArrayHeader( 
+																						CString::Format( TEXT( "##%p" ), this ),																					// InStrId
+																						property->GetCName().ToString(),																							// InLabel
+																						!bPropertyIsStaticArray ? ImGuiCollapsingArrayHeaderFlags_AllButtons : ImGuiCollapsingArrayHeaderFlags_RemoveButton,		// InFlags
+																						InItemWidthSpacing,																											// InItemWidthSpacing
+																						CString::Format( TEXT( "%i elements" ), childNodes.size() ),																// InMessage
+																						property->GetDescription(),																									// InLabelToolTip
+																						TEXT( "Add a new element to array" ),																						// InAddButtonToolTip
+																						!bPropertyIsStaticArray ? TEXT( "Remove all elements from array" ) : TEXT( "Clear all elements in the array" ),				// InRemoveButtonToolTip
+																						true );																														// InIgnoreDisabled
+		
+			if ( arrayCollapseResult.bIsOpened )
+			{
+				float	innerArrayItemSpacing = InItemWidthSpacing + ImGui::GetStyle().ItemSpacing.x;
+				for ( uint32 index = 0, count = childNodes.size(); index < count; ++index )
+				{
+					CPropertyNode*		childNode = childNodes[index];
+					ImGui::CollapsingArrayHeaderResult	elementCollapseResult = ImGui::CollapsingArrayHeader(
+																						CString::Format( TEXT( "##%p_%i" ), this, index ),														// InStrId
+																						CString::Format( TEXT( "%i" ), index ),																	// InLabel
+																						ImGuiCollapsingArrayHeaderFlags_RemoveButton,															// InFlags
+																						innerArrayItemSpacing,																					// InItemWidthSpacing
+																						TEXT( "" ),																								// InMessage
+																						TEXT( "" ),																								// InLabelToolTip
+																						TEXT( "" ),																								// InAddButtonToolTip
+																						!bPropertyIsStaticArray ? TEXT( "Remove element from array" ) : TEXT( "Clear element in the array" ),	// InRemoveButtonToolTip
+																						true );																									// InIgnoreDisabled
+					if ( elementCollapseResult.bIsOpened )
+					{
+						childNode->Tick( innerArrayItemSpacing + ImGui::GetStyle().ItemSpacing.x * 2.f );
+					}
+
+					if ( elementCollapseResult.bPressedRemove )
+					{
+						elementIdToRemove = index;
+					}
+				}
+			}
+
+			// If was pressed add button then we add a new element if array isn't static
+			if ( !bPropertyIsStaticArray && arrayCollapseResult.bPressedAdd )
+			{
+				bPropertyIsChanged = true;
+				for ( uint32 index = 0, count = addresses.size(); index < count; ++index )
+				{
+					std::vector<byte>*		vectorData = ( std::vector<byte>* )addresses[index];
+					vectorData->resize( vectorData->size() + innerProperty->GetElementSize() );
+				}
+			}
+
+			// If was pressed remove button then we remove all elements from the array or one element
+			if ( arrayCollapseResult.bPressedRemove || elementIdToRemove != -1 )
+			{
+				bPropertyIsChanged = true;
+				for ( uint32 index = 0, count = addresses.size(); index < count; ++index )
+				{
+					std::vector<byte>*		vectorData = ( std::vector<byte>* )addresses[index];
+					
+					// Clear/Remove whole array
+					if ( arrayCollapseResult.bPressedRemove )
+					{
+						if ( !bPropertyIsStaticArray )
+						{
+							vectorData->clear();
+						}
+						else
+						{
+							Sys_Memzero( vectorData->data(), vectorData->size() );
+						}
+					}
+					// Clear/Remove only one array's element
+					else if ( elementIdToRemove != -1 )
+					{
+						uint32		dataOffset = elementIdToRemove * innerProperty->GetElementSize();
+						if ( !bPropertyIsStaticArray )
+						{
+							vectorData->erase( vectorData->begin() + dataOffset, vectorData->begin() + dataOffset + innerProperty->GetElementSize() );
+						}
+						else
+						{
+							Sys_Memzero( vectorData->data() + dataOffset, innerProperty->GetElementSize() );
+						}
+					}
+				}
+			}
+
+			if ( bPropertyIsChanged )
+			{
+				// Rebuild children because array size was changed
+				RebuildChildren();
+
+				// Notify all object if property was changed
+				NotifyPostChange( PropertyChangedEvenet( !bPropertyInArray ? property : Cast<CArrayProperty>( property->GetOuter() ), PCT_ValueSet ) );
+			}
+		}
+		// Other simple property types
 		else
 		{
 			bool	bPropertyIsChanged = false;
@@ -161,26 +278,6 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				if ( bPropertyIsChanged )
 				{
 					*( TAssetHandle<CAsset>* )valueData = g_PackageManager->FindAsset( assetReference, assetProperty->GetAssetType() );
-				}
-			}
-
-			// Array property
-			else if ( theClass->HasAnyCastFlags( CASTCLASS_CArrayProperty ) )
-			{
-				if ( !childNodes.empty() )
-				{
-					ImGui::Text("%i elements", childNodes.size());
-					ImGui::Columns( 1 );
-					ImGui::Dummy( ImVec2( InItemWidthSpacing + ImGui::GetStyle().ItemSpacing.x, 0.f ) );
-					ImGui::SameLine();
-					if ( ImGui::CollapsingHeader( CString::Format( TEXT( "##%p" ), this ), true ) )
-					{
-						TickChildren( InItemWidthSpacing + ImGui::GetStyle().ItemSpacing.x * 2.f );
-					}
-				}
-				else
-				{
-					ImGui::Text( "Empty array" );
 				}
 			}
 

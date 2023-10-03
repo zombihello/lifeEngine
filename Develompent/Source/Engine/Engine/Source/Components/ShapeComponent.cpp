@@ -29,7 +29,7 @@ CShapeComponent::StaticInitializeClass
 */
 void CShapeComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Physics Material" ) )	CAssetProperty( TEXT( "Physics" ), TEXT( "Physics material" ), CPP_PROPERTY( physicsMaterial ), 0, AT_PhysicsMaterial );
+	new( staticClass, TEXT( "Physics Material" ) )	CAssetProperty( TEXT( "Physics" ), TEXT( "Physics material" ), CPP_PROPERTY( physicsMaterial ), CPF_Edit, AT_PhysicsMaterial );
 }
 
 /*

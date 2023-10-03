@@ -42,6 +42,7 @@ enum EIconType
 	IT_Insert,										/**< Insert */
 	IT_Browse,										/**< Browse */
 	IT_Remove,										/**< Remove */
+	IT_Add,											/**< Add */
 	IT_ToolSelect,									/**< Tool select */
 	IT_ToolTranslate,								/**< Tool translate */
 	IT_ToolRotate,									/**< Tool rotate */

@@ -27,7 +27,7 @@ ACharacter::StaticInitializeClass
 */
 void ACharacter::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Character Movement" ) ) CObjectProperty( TEXT( "Character" ), TEXT( "Character movement component" ), CPP_PROPERTY( characterMovement ), 0, CCharacterMovementComponent::StaticClass() );
+	new( staticClass, TEXT( "Character Movement" ) ) CObjectProperty( TEXT( "Character" ), TEXT( "Character movement component" ), CPP_PROPERTY( characterMovement ), CPF_Edit, CCharacterMovementComponent::StaticClass() );
 }
 
 /*

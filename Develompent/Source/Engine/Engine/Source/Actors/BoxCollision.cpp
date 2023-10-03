@@ -21,7 +21,7 @@ ABoxCollision::StaticInitializeClass
 */
 void ABoxCollision::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Box Component" ) )	CObjectProperty( TEXT( "Collision" ), TEXT( "Box component" ), CPP_PROPERTY( boxComponent ), 0, CBoxComponent::StaticClass() );
+	new( staticClass, TEXT( "Box Component" ) )	CObjectProperty( TEXT( "Collision" ), TEXT( "Box component" ), CPP_PROPERTY( boxComponent ), CPF_Edit, CBoxComponent::StaticClass() );
 }
 
 #if WITH_EDITOR

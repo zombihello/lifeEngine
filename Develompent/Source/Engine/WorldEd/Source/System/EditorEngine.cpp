@@ -43,6 +43,7 @@ static const tchar*	s_IconPaths[] =
 	TEXT( "Icons/CSW_PasteAsset.png" ),		// IT_Insert
 	TEXT( "Icons/CSW_ShowAsset.png" ),		// IT_Browse
 	TEXT( "Icons/CSW_RemoveAsset.png" ),	// IT_Remove
+	TEXT( "Icons/Properties_Add.png" ),		// IT_Add
 	TEXT( "Icons/Tool_Select.png" ),		// IT_ToolSelect
 	TEXT( "Icons/Tool_Translate.png" ),		// IT_ToolTranslate
 	TEXT( "Icons/Tool_Rotate.png" ),		// IT_ToolRotate
