@@ -79,27 +79,27 @@ void PhysicsInterfacePhysX::Shutdown()
 PhysicsInterfacePhysX::CreateMaterial
 ==================
 */
-PhysicsMaterialHandlePhysX PhysicsInterfacePhysX::CreateMaterial( class CPhysicsMaterial* InPhysMaterial )
-{
-	Assert( InPhysMaterial );
-
-	PhysicsMaterialHandlePhysX		materialHandle;
-	materialHandle.pxMaterial = g_PhysXSDK->createMaterial( InPhysMaterial->GetStaticFriction(), InPhysMaterial->GetDynamicFriction(), InPhysMaterial->GetRestitution() );
-	return materialHandle;
-}
-
-/*
-==================
-PhysicsInterfacePhysX::UpdateMaterial
-==================
-*/
-void PhysicsInterfacePhysX::UpdateMaterial( const PhysicsMaterialHandlePhysX& InMaterialHandle, class CPhysicsMaterial* InPhysMaterial )
-{
-	Assert( PhysicsInterfacePhysX::IsValidMaterial( InMaterialHandle ) && InPhysMaterial );
-	InMaterialHandle.pxMaterial->setStaticFriction( InPhysMaterial->GetStaticFriction() );
-	InMaterialHandle.pxMaterial->setDynamicFriction( InPhysMaterial->GetDynamicFriction() );
-	InMaterialHandle.pxMaterial->setRestitution( InPhysMaterial->GetRestitution() );
-}
+//PhysicsMaterialHandlePhysX PhysicsInterfacePhysX::CreateMaterial( class CPhysicsMaterial* InPhysMaterial )
+//{
+//	Assert( InPhysMaterial );
+//
+//	PhysicsMaterialHandlePhysX		materialHandle;
+//	materialHandle.pxMaterial = g_PhysXSDK->createMaterial( InPhysMaterial->GetStaticFriction(), InPhysMaterial->GetDynamicFriction(), InPhysMaterial->GetRestitution() );
+//	return materialHandle;
+//}
+//
+///*
+//==================
+//PhysicsInterfacePhysX::UpdateMaterial
+//==================
+//*/
+//void PhysicsInterfacePhysX::UpdateMaterial( const PhysicsMaterialHandlePhysX& InMaterialHandle, class CPhysicsMaterial* InPhysMaterial )
+//{
+//	Assert( PhysicsInterfacePhysX::IsValidMaterial( InMaterialHandle ) && InPhysMaterial );
+//	InMaterialHandle.pxMaterial->setStaticFriction( InPhysMaterial->GetStaticFriction() );
+//	InMaterialHandle.pxMaterial->setDynamicFriction( InPhysMaterial->GetDynamicFriction() );
+//	InMaterialHandle.pxMaterial->setRestitution( InPhysMaterial->GetRestitution() );
+//}
 
 /*
 ==================
@@ -140,6 +140,10 @@ PhysicsActorHandlePhysX PhysicsInterfacePhysX::CreateActor( const ActorCreationP
 		actorHandle.pxRigidActor->setActorFlag( physx::PxActorFlag::eDISABLE_SIMULATION, true );
 	}
 	return actorHandle;
+}
+
+void PhysicsInterfacePhysX::AttachShape(PhysicsActorHandlePhysX& InActorHandle, const PhysicsShapeHandlePhysX& InShapeHandle)
+{
 }
 
 #endif // WITH_PHYSX

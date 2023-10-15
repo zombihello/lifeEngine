@@ -113,7 +113,7 @@ public:
 	 */
 	FORCEINLINE bool LineTraceSingleByChannel( HitResult& OutHitResult, const Vector& InStart, const Vector& InEnd, ECollisionChannel InTraceChannel, const CollisionQueryParams& InCollisionQueryParams = CollisionQueryParams::defaultQueryParam )
 	{
-		return g_PhysicsScene.LineTraceSingleByChannel( OutHitResult, InStart, InEnd, InTraceChannel, InCollisionQueryParams );
+		return  false;//g_PhysicsScene.LineTraceSingleByChannel( OutHitResult, InStart, InEnd, InTraceChannel, InCollisionQueryParams );
 	}
 
 #if ENABLE_HITPROXY

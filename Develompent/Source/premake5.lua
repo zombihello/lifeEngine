@@ -12,7 +12,7 @@ newoption {
 newoption {
     trigger     = "engine",
     value       = "EngineType",
-    default     = "2D",
+    default     = "3D",
     description = "Choose engine type for generation",
     allowed = {
        { "2D",    "2D Engine" },

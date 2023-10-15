@@ -36,22 +36,22 @@ function LinkPhysX()
             }
         filter "configurations:not Debug and not DebugWithEditor"
             links       {
-                physXHome .. "/bin/win.x86_64.vc142.md/release/PhysX.lib",
-                physXHome .. "/bin/win.x86_64.vc142.md/release/PhysXCommon.lib",
-                physXHome .. "/bin/win.x86_64.vc142.md/release/PhysXCooking.lib",
-                physXHome .. "/bin/win.x86_64.vc142.md/release/PhysXExtensions_static.lib",
-                physXHome .. "/bin/win.x86_64.vc142.md/release/PhysXFoundation.lib",
-                physXHome .. "/bin/win.x86_64.vc142.md/release/PhysXCharacterKinematic_static_64.lib",
-                physXHome .. "/bin/win.x86_64.vc142.md/release/PhysXPvdSDK_static_64.lib",
-                physXHome .. "/bin/win.x86_64.vc142.md/release/PhysXTask_static_64.lib",
-                physXHome .. "/bin/win.x86_64.vc142.md/release/PhysXVehicle_static_64.lib"
+                physXHome .. "PhysX/bin/win.x86_64.vc142.md/release/PhysX_64.lib",
+                physXHome .. "PhysX/bin/win.x86_64.vc142.md/release/PhysXCommon_64.lib",
+                physXHome .. "PhysX/bin/win.x86_64.vc142.md/release/PhysXCooking_64.lib",
+                physXHome .. "PhysX/bin/win.x86_64.vc142.md/release/PhysXExtensions_static_64.lib",
+                physXHome .. "PhysX/bin/win.x86_64.vc142.md/release/PhysXFoundation_64.lib",
+                physXHome .. "PhysX/bin/win.x86_64.vc142.md/release/PhysXCharacterKinematic_static_64.lib",
+                physXHome .. "PhysX/bin/win.x86_64.vc142.md/release/PhysXPvdSDK_static_64.lib",
+                physXHome .. "PhysX/bin/win.x86_64.vc142.md/release/PhysXTask_static_64.lib",
+                physXHome .. "PhysX/bin/win.x86_64.vc142.md/release/PhysXVehicle_static_64.lib"
             }
 
             postbuildcommands    {
-                "{COPY} " .. physXHome .. "/bin/win.x86_64.vc142.md/debug/PhysXCommon.bin " .. binariesDir .. outputDir .. "/",
-                "{COPY} " .. physXHome .. "/bin/win.x86_64.vc142.md/debug/PhysXCooking.bin " .. binariesDir .. outputDir .. "/",
-                "{COPY} " .. physXHome .. "/bin/win.x86_64.vc142.md/debug/PhysX.bin " .. binariesDir .. outputDir .. "/",
-                "{COPY} " .. physXHome .. "/bin/win.x86_64.vc142.md/debug/PhysXFoundation.bin " .. binariesDir .. outputDir .. "/"
+                "{COPY} " .. physXHome .. "PhysX/bin/win.x86_64.vc142.md/debug/PhysXCommon_64.bin " .. binariesDir .. outputDir .. "/",
+                "{COPY} " .. physXHome .. "PhysX/bin/win.x86_64.vc142.md/debug/PhysXCooking_64.bin " .. binariesDir .. outputDir .. "/",
+                "{COPY} " .. physXHome .. "PhysX/bin/win.x86_64.vc142.md/debug/PhysX_64.bin " .. binariesDir .. outputDir .. "/",
+                "{COPY} " .. physXHome .. "PhysX/bin/win.x86_64.vc142.md/debug/PhysXFoundation_64.bin " .. binariesDir .. outputDir .. "/"
             }
         filter {}
     filter {}

@@ -2,6 +2,7 @@
 #include "Misc/PhysicsGlobals.h"
 #include "System/PhysicsEngine.h"
 #include "System/PhysicsBodyInstance.h"
+#include "Components/PrimitiveComponent.h"
 #include "System/PhysXScene.h"
 
 /*
