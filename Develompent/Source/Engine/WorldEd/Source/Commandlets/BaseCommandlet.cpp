@@ -1,4 +1,4 @@
-#include "Misc/Class.h"
+#include "Reflection/ReflectionEnvironment.h"
 #include "Commandlets/BaseCommandlet.h"
 #include "Logger/LoggerMacros.h"
 
@@ -17,12 +17,12 @@ bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 	{
 		return false;
 	}
-	CClass*				lclassCommandlet = CClass::StaticFindClass( nameCommandlet.c_str() );
+	CClass*				lclassCommandlet = CReflectionEnvironment::Get().FindClass( nameCommandlet.c_str() );
 
 	// If class not found try to search by added 'C' in prefix and 'Commandlet' in sufix
 	if ( !lclassCommandlet )
 	{
-		lclassCommandlet = CClass::StaticFindClass( ( std::wstring( TEXT( "C" ) ) + nameCommandlet + TEXT( "Commandlet" ) ).c_str() );
+		lclassCommandlet = CReflectionEnvironment::Get().FindClass( ( std::wstring( TEXT( "C" ) ) + nameCommandlet + TEXT( "Commandlet" ) ).c_str() );
 	}
 
 	// Create and execute commandlet

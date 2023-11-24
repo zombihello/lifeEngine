@@ -9,9 +9,9 @@
 #ifndef CAMERACOMPONENT_H
 #define CAMERACOMPONENT_H
 
+#include "Containers/EnumAsByte.h"
 #include "Render/CameraTypes.h"
 #include "Components/SceneComponent.h"
-#include "Misc/EnumAsByte.h"
 
  /**
   * @ingroup Engine

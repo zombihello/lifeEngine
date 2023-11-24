@@ -109,6 +109,99 @@ FORCEINLINE void Swap( TType& InOutA, TType& InOutB )
 
 /**
  * @ingroup Core
+ * @brief Inherit from this class to prevent your class from being copied
+ */
+class CNonCopyable
+{
+protected:
+	/**
+	 * @brief Constructor
+	 */
+	CNonCopyable() {}
+
+	/**
+	 * @brief Constructor of move
+	 * @param InOther	Other object
+	 */
+	CNonCopyable( CNonCopyable&& InOther ) {}
+
+	/**
+	 * @brief Destructor
+	 */
+	~CNonCopyable() {}
+
+	/**
+	 * @brief Override operator = for move
+	 * @param InOther	Other object
+	 */
+	CNonCopyable& operator=( CNonCopyable&& InOther ) { return *this; }
+
+private:
+	/**
+	 * @brief Constructor of copy
+	 * @param InOther	Other object
+	 */
+	CNonCopyable( const CNonCopyable& InOther ) {}
+
+	/**
+	 * @brief Override operator =
+	 * @param InOther	Other object
+	 */
+	CNonCopyable& operator=( const CNonCopyable& InOther ) { return *this; }
+};
+
+/**
+ * @ingroup Core
+ * @brief Exception-safe guard around saving/restoring a value
+ */
+template<typename TType>
+struct TGuardValue : private CNonCopyable
+{
+	/**
+	 * @brief Constructor
+	 * @param InValue		Value to change
+	 * @param InNewValue	New value to change
+	 */
+	TGuardValue( TType& InValue, const TType& InNewValue )
+		: value( InValue )
+		, oldValue( InValue )
+	{
+		value = InNewValue;
+	}
+
+	/**
+	 * @brief Constructor
+	 * @param InValue	Value to change
+	 */
+	TGuardValue( TType& InValue )
+		: value( InValue )
+		, oldValue( InValue )
+	{}
+
+	/**
+	 * @brief Destructor
+	 */
+	~TGuardValue()
+	{
+		value = oldValue;
+	}
+
+	/**
+	 * @brief Override dereference operator
+	 * @return Return a const reference to the original data value
+	 */
+	FORCEINLINE const TType& operator*() const
+	{
+		return oldValue;
+	}
+
+private:
+	TType&	value;		/**< Value to change */
+	TType	oldValue;	/**< Backup of the value */
+};
+
+/**
+ * @ingroup Core
  * @brief MoveTemp will cast a reference to an rvalue reference.
  * This is lifeEngine equivalent of std::move except that it will not compile when passed an rvalue or
  * const object, because we would prefer to be informed when MoveTemp will have no effect

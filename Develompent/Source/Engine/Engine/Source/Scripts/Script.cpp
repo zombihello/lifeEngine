@@ -1,5 +1,5 @@
 #include "System/Archive.h"
-#include "Misc/Class.h"
+#include "Reflection/Class.h"
 #include "Scripts/Script.h"
 
 /*

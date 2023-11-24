@@ -51,7 +51,7 @@ void APlayerStart::BeginPlay()
 	CClass*					classPlayerController = nullptr;
 	if ( configPlayerController.IsA( CConfigValue::T_String ) )
 	{
-		classPlayerController = CClass::StaticFindClass( configPlayerController.GetString().c_str() );
+		classPlayerController = CReflectionEnvironment::Get().FindClass( configPlayerController.GetString().c_str() );
 	}
 
 	// If not found - use APlayerController
@@ -73,7 +73,7 @@ void APlayerStart::BeginPlay()
 	CClass*				classPlayerCharacter = nullptr;
 	if ( configPlayerCharacter.IsA( CConfigValue::T_String ) )
 	{
-		classPlayerCharacter = CClass::StaticFindClass( configPlayerCharacter.GetString().c_str() );
+		classPlayerCharacter = CReflectionEnvironment::Get().FindClass( configPlayerCharacter.GetString().c_str() );
 	}
 
 	// If not found - use ACharacter

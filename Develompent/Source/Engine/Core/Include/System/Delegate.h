@@ -13,7 +13,7 @@
 #include <list>
 
 #include "Core.h"
-#include "Misc/Object.h"
+#include "Reflection/Object.h"
 #include "ThreadingBase.h"
 
 /**

@@ -10,7 +10,7 @@
 #define CAMERATYPES_H
 
 #include "Math/Math.h"
-#include "Misc/Enum.h"
+#include "Reflection/Enum.h"
 
 /**
  * @ingroup Engine

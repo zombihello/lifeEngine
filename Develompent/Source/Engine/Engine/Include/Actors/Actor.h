@@ -11,16 +11,15 @@
 
 #include <vector>
 
-#include "Misc/Object.h"
-#include "Misc/Class.h"
 #include "Misc/RefCounted.h"
 #include "Misc/EngineTypes.h"
-#include "Misc/Property.h"
 #include "Math/Rect.h"
 #include "Math/Color.h"
+#include "System/Delegate.h"
+#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/Property.h"
 #include "Render/Material.h"
 #include "Render/HitProxies.h"
-#include "System/Delegate.h"
 #include "Components/SceneComponent.h"
 #include "Components/PrimitiveComponent.h"
 

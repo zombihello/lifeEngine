@@ -1,4 +1,0 @@
-#include "Misc/Class.h"
-
-IMPLEMENT_CLASS( CClass )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CClass )

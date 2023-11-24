@@ -9,10 +9,10 @@
 #ifndef SPRITECOMPONENT_H
 #define SPRITECOMPONENT_H
 
+#include "Containers/EnumAsByte.h"
 #include "Components/PrimitiveComponent.h"
 #include "Render/Scene.h"
 #include "Render/Sprite.h"
-#include "Misc/EnumAsByte.h"
 
 #if ENABLE_HITPROXY
 #include "Render/SceneHitProxyRendering.h"

@@ -12,9 +12,8 @@
 #include <string>
 
 #include "Math/Math.h"
-#include "Misc/Struct.h"
-#include "Misc/Enum.h"
-#include "Misc/EnumAsByte.h"
+#include "Containers/EnumAsByte.h"
+#include "Reflection/ReflectionEnvironment.h"
 #include "System/Package.h"
 #include "System/Archive.h"
 

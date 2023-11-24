@@ -15,7 +15,8 @@
 #include "System/AudioEngine.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
-#include "Misc/Class.h"
+#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/ObjectPackage.h"
 #include "Math/Color.h"
 #include "Misc/CommandLine.h"
 #include "Misc/TableOfContents.h"
@@ -171,6 +172,50 @@ void CEngineLoop::InitConfigs()
 
 /*
 ==================
+CEngineLoop::LoadScriptPackages
+==================
+*/
+void CEngineLoop::LoadScriptPackages()
+{
+	// Grab all files from directory
+	std::wstring				scriptDir = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Scripts" ) PATH_SEPARATOR, Sys_GameDir().c_str() );
+	std::vector<std::wstring>	files = g_FileSystem->FindFiles( scriptDir, true, false );
+	for ( uint32 index = 0, count = files.size(); index < count; ++index )
+	{
+		// If the file has 'classes' extension its our LifeScript package and load it
+		CFilename		filename = scriptDir + files[index];
+		if ( filename.GetExtension() == TEXT( "classes" ) )
+		{
+			// Load object package and register all classes
+			CObjectPackage		objectPackage;
+			if ( !objectPackage.Load( filename.GetFullPath() ) )
+			{
+				Sys_Errorf( TEXT( "Failed to load script package '%s'\n" ), filename.GetFullPath().c_str() );
+				return;
+			}
+			Logf( TEXT( "Script package '%s' loaded\n" ), filename.GetFullPath().c_str() );
+
+			for ( uint32 index = 0, numObjects = objectPackage.GetNumObjects(); index < numObjects; ++index )
+			{
+				CObject*	object = objectPackage.GetObject( index );
+				object->RemoveObjectFlag( OBJECT_NeedDestroy );
+
+				if ( IsA<CField>( object ) )
+				{
+					Cast<CField>( object )->Bind();
+				}
+
+				if ( IsA<CClass>( object ) )
+				{
+					CReflectionEnvironment::Get().AddClass( ( CClass* )object );
+				}
+			}
+		}
+	}
+}
+
+/*
+==================
 CEngineLoop::PreInit
 ==================
 */
@@ -189,11 +234,13 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	CCommandLine::Values_t	paramValues = g_CommandLine.GetValues( TEXT( "commandlet" ) );
 	if ( !paramValues.empty() )
 	{
-		g_IsCooker		= paramValues[0] == TEXT( "CookPackages" ) || paramValues[0] == TEXT( "CCookPackagesCommandlet" );
-		g_IsCommandlet	= !g_IsCooker;
+		std::wstring		commandletName = CString::ToUpper( paramValues[0] );
+		g_IsCooker			= commandletName == CString::ToUpper( TEXT( "CookPackages" ) ) || commandletName == CString::ToUpper( TEXT( "CCookPackagesCommandlet" ) );
+		g_IsScriptCompiler	= commandletName == CString::ToUpper( TEXT( "ScriptCompiler" ) ) || commandletName == CString::ToUpper( TEXT( "CScriptCompilerCommandlet" ) );
+		g_IsCommandlet		= !g_IsCooker && !g_IsScriptCompiler;
 	}
 
-	g_IsGame = !g_IsEditor && !g_IsCooker && !g_IsCommandlet;
+	g_IsGame = !g_IsEditor && !g_IsCooker && !g_IsCommandlet && !g_IsScriptCompiler;
 #endif // WITH_EDITOR
 
 	Sys_GetCookedContentPath( g_Platform, g_CookedDir );
@@ -201,6 +248,12 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	g_Log->Init();
 	int32		result = Sys_PlatformPreInit();
 	
+	// Load script packages
+	if ( !g_IsScriptCompiler )
+	{
+		LoadScriptPackages();
+	}
+
 	// Loading table of contents
 	if ( !g_IsEditor && !g_IsCooker )
 	{
@@ -254,7 +307,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		}
 #endif // WITH_EDITOR
 
-		const CClass*		lclass = CClass::StaticFindClass( classEngineName.c_str() );
+		const CClass*		lclass = CReflectionEnvironment::Get().FindClass( classEngineName.c_str() );
 		AssertMsg( lclass, TEXT( "Class engine %s not found" ), classEngineName.c_str() );
 		
 		g_Engine = lclass->CreateObject< CBaseEngine >();

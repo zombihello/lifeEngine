@@ -11,8 +11,8 @@
 
 #include <string>
 
-#include "Misc/Object.h"
 #include "Misc/CommandLine.h"
+#include "Reflection/Object.h"
 #include "Core.h"
 
 /**

@@ -4,7 +4,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/material.h>
 
-#include "Misc/Class.h"
+#include "Reflection/Class.h"
 #include "Misc/Misc.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"

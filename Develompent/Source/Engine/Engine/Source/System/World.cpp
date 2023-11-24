@@ -150,7 +150,7 @@ void CWorld::Serialize( CArchive& InArchive )
 			InArchive << className;
 
 			// Spawn actor, serialize and add to array
-			AActor*			actor = SpawnActor( CClass::StaticFindClass( className.c_str() ), Math::vectorZero, Math::quaternionZero );
+			AActor*			actor = SpawnActor( CReflectionEnvironment::Get().FindClass( className.c_str() ), Math::vectorZero, Math::quaternionZero );
 			actor->Serialize( InArchive );
 		}
 	}

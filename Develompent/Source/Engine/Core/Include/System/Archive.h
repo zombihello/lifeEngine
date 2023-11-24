@@ -25,10 +25,11 @@ enum EArchiveType
 {
 	AT_TextFile,		/**< Archive is text file */
 	AT_ShaderCache,		/**< Archive contains shader cache */
-	AT_TextureCache,	/**< Archive contains texture cache */
+	AT_TextureCache,	/**< DEPRECATED. Archive contains texture cache */
 	AT_World,			/**< Archive contains world */
 	AT_Package,			/**< Archive contains assets */
 	AT_BinaryFile,		/**< Archive is unknown binary file */
+	AT_Scripts			/**< Archive contains scripts */
 };
 
 /**
@@ -149,6 +150,16 @@ public:
 	FORCEINLINE const std::wstring& GetPath() const
 	{
 		return arPath;
+	}
+
+	/**
+	 * @brief Override operator << for serialize CObjects
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CObject*& InValue )
+	{
+		AssertMsg( false, TEXT( "Default CArchive not support serialize CObject. Use CObjectPackage" ) );
+		return *this;
 	}
 
 protected:

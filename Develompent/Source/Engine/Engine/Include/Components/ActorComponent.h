@@ -9,11 +9,11 @@
 #ifndef ACTORCOMPONENT_H
 #define ACTORCOMPONENT_H
 
-#include "Misc/Object.h"
-#include "Misc/Class.h"
 #include "Misc/RefCounted.h"
 #include "Misc/EngineTypes.h"
-#include "Misc/Property.h"
+#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/Object.h"
+#include "Reflection/Property.h"
 
 /**
  * @ingroup Engine

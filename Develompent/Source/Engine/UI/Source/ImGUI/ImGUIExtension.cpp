@@ -8,7 +8,7 @@
 #include "Misc/UIGlobals.h"
 #include "Containers/StringConv.h"
 #include "Containers/String.h"
-#include "Misc/Enum.h"
+#include "Reflection/Enum.h"
 #include "ImGUI/ImGUIExtension.h"
 #include "ImGUI/ImGUIEngine.h"
 #include "ImGUI/imgui_internal.h"

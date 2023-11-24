@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include "Misc/Object.h"
+#include "Reflection/Object.h"
 #include "Render/Texture.h"
 #include "Render/Material.h"
 #include "Core.h"

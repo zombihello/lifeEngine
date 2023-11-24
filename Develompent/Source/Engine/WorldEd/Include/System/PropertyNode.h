@@ -10,7 +10,7 @@
 #define PROPERTYNODE_H
 
 #include <vector>
-#include "Misc/Property.h"
+#include "Reflection/Property.h"
 
 // Forward declarations
 class CObjectPropertyNode;

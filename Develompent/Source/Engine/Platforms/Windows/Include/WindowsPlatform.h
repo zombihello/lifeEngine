@@ -35,6 +35,8 @@
     #define Sys_DebugBreak()			             ( Sys_IsDebuggerPresent() ? ( DebugBreak(), 1 ) : 1 )
 #endif // SHIPPING_BUILD
 
+#undef GetObject
+
 /**
  * @ingroup WindowsPlatform
  * @brief Calling convention. Functions with variable arguments

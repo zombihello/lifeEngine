@@ -418,7 +418,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 				// Spawn actor and init properties if class name is valid
 				if ( !tmxObject.className.empty() )
 				{
-					CClass*		classActor = CClass::StaticFindClass( tmxObject.className.c_str() );
+					CClass*		classActor = CReflectionEnvironment::Get().FindClass( tmxObject.className.c_str() );
 					if ( !classActor )
 					{
 						Warnf( TEXT( "Actor '%s' not spanwed because class '%s' not founded\n" ), tmxObject.className.c_str() );

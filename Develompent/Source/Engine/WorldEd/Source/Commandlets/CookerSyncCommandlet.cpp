@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "Misc/Class.h"
+#include "Reflection/Class.h"
 #include "Misc/Misc.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/TableOfContents.h"

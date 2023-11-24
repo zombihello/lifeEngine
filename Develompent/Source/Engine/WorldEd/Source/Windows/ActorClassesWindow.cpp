@@ -1,4 +1,5 @@
 #include "Containers/StringConv.h"
+#include "Reflection/ReflectionEnvironment.h"
 #include "Windows/ActorClassesWindow.h"
 
 /*
@@ -241,7 +242,7 @@ CActorClassesWindow::CActorClassesWindow( const std::wstring& InName, CClass* In
 	root = new CClassNode( this, InBaseClass );
 
 	// Build tree of child classes of InBaseClass
-	const std::unordered_map<CName, const CClass*, CName::HashFunction>&		classesTable = CClass::StaticRegisteredClasses();
+	const std::unordered_map<CName, const CClass*, CName::HashFunction>&		classesTable = CReflectionEnvironment::Get().GetAllClasses();
 	for ( auto itClass = classesTable.begin(), itClassEnd = classesTable.end(); itClass != itClassEnd; ++itClass )
 	{
 		CClass*			lclass = const_cast<CClass*>( itClass->second );

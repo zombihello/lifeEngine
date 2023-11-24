@@ -48,6 +48,7 @@ enum EInputEvent
 class CInputComponent : public CActorComponent
 {
 	DECLARE_CLASS( CInputComponent, CActorComponent, 0, 0 )
+	NO_DEFAULT_CONSTRUCTOR( CInputComponent )
 
 public:
 	/**

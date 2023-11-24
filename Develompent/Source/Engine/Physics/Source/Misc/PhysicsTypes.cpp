@@ -1,6 +1,6 @@
 #include "Misc/PhysicsTypes.h"
 #include "Misc/PhysicsGlobals.h"
-#include "Misc/Property.h"
+#include "Reflection/Property.h"
 #include "System/PhysicsEngine.h"
 
 IMPLEMENT_STRUCT( CollisionProfile )

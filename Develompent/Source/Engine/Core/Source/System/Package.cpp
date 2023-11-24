@@ -754,6 +754,18 @@ void CPackage::Add( const TAssetHandle<CAsset>& InAsset, AssetInfo* OutAssetInfo
 
 /*
 ==================
+CPackage::Add
+==================
+*/
+void CPackage::Add( CObject* InObject, ObjectInfo* OutObjectInfo /* = nullptr */ )
+{
+	Assert( InObject );
+
+
+}
+
+/*
+==================
 CPackage::Remove
 ==================
 */

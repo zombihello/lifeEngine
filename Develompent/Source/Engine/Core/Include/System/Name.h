@@ -180,6 +180,28 @@ public:
 	bool operator==( const tchar* InOther ) const;
 
 	/**
+	 * @brief Compare operator
+	 *
+	 * @param InOther	String to compare
+	 * @return Return TRUE if name not equal to the string, FALSE otherwise
+	 */
+	FORCEINLINE bool operator!=( const std::wstring& InOther ) const
+	{
+		return !( *this == InOther );
+	}
+
+	/**
+	 * @brief Compare operator
+	 *
+	 * @param InOther	String to compare
+	 * @return Return TRUE if name not equal to the string, FALSE otherwise
+	 */
+	FORCEINLINE bool operator!=( const tchar* InOther ) const
+	{
+		return !( *this == InOther );
+	}
+
+	/**
 	 * @brief Assignment operator
 	 *
 	 * @param InOther	New string
@@ -211,6 +233,28 @@ public:
 	FORCEINLINE bool operator==( EName InOther ) const
 	{
 		return index == InOther;
+	}
+
+	/**
+	 * @brief Compare operator
+	 *
+	 * @param InOther	Name to compare
+	 * @return Return TRUE if name not equal to InOther, FALSE otherwise
+	 */
+	FORCEINLINE bool operator!=( const CName& InOther ) const
+	{
+		return !( *this == InOther );
+	}
+
+	/**
+	 * @brief Compare operator
+	 *
+	 * @param InOther	Name to compare
+	 * @return Return TRUE if name not equal to InOther, FALSE otherwise
+	 */
+	FORCEINLINE bool operator!=( EName InOther ) const
+	{
+		return !( *this == InOther );
 	}
 
 	/**

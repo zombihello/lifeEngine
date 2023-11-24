@@ -11,7 +11,7 @@ extern "C"
 #include <LuaBridge/LuaBridge.h>
 
 #include "Containers/String.h"
-#include "Misc/Class.h"
+#include "Reflection/Class.h"
 #include "Logger/BaseLogger.h"
 
 #include <string>
@@ -29,9 +29,12 @@ void Print( std::string Instr )
 	Logf( TEXT( "%s\n" ), ANSI_TO_TCHAR( Instr.c_str() ) );
 }
 
+
 BEGIN_SCRIPT_API( CBaseLogger )
 	luabridge::getGlobalNamespace( InVM )
-		.addFunction( "Log", &Print );
+		.addFunction( "Log", &Print )
+		.beginClass<CBaseLogger>("Logger")
+		.endClass();
 END_SCRIPT_API()
 
 /*

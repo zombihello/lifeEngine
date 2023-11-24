@@ -22,22 +22,40 @@ class CString
 {
 public:
 	/**
-	 * @brief Getting a formatted string
+	 * @brief Getting a formatted string (Unicode version)
 	 * 
-	 * @param[in] InFormat Format of string
-	 * @param[in] ... Other arguments string
+	 * @param InFormat	Format of string
+	 * @param ...		Other arguments string
 	 * @return Return formated string. This line must be removed manually
 	 */
 	static std::wstring Format( const tchar* InFormat, ... );
 
 	/**
-	 * @brief Getting a formatted string
+	 * @brief Getting a formatted string (Unicode version)
 	 *
-	 * @param[in] InFormat Format of string
-	 * @param[in] InArguments Other arguments string
+	 * @param InFormat		Format of string
+	 * @param InArguments	Other arguments string
 	 * @return Return formated string. This line must be removed manually
 	 */
 	static std::wstring Format( const tchar* InFormat, va_list InArguments );
+
+	/**
+	 * @brief Getting a formatted string (ANSI version)
+	 *
+	 * @param InFormat	Format of string
+	 * @param ...		Other arguments string
+	 * @return Return formated string. This line must be removed manually
+	 */
+	static std::string Format( const achar* InFormat, ... );
+
+	/**
+	 * @brief Getting a formatted string (ANSI version)
+	 *
+	 * @param InFormat		Format of string
+	 * @param InArguments	Other arguments string
+	 * @return Return formated string. This line must be removed manually
+	 */
+	static std::string Format( const achar* InFormat, va_list InArguments );
 
 	/**
 	 * @brief Convert string to upper case

@@ -3,7 +3,7 @@
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
 #include "EngineDefines.h"
-#include "Misc/Class.h"
+#include "Reflection/Class.h"
 #include "Misc/Misc.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"

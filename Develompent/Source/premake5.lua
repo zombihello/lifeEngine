@@ -95,6 +95,10 @@ include( extZlib )
 include( extCompressonator )
 include( extHalf )
 
+-- Include other Premake scripts
+include( "Premake/RuleFlex.lua" )
+include( "Premake/RuleBison.lua" )
+
 workspace( game )
     location( "../Intermediate/" .. _ACTION .. "/" )
     configurations 	    { "Debug", "DebugWithEditor", "Release", "ReleaseWithEditor", "Shipping" }
@@ -193,6 +197,8 @@ workspace( game )
             "Engine/**/Include/**.h",
             "Engine/**/Include/**.inl",
             "Engine/**/Source/**.cpp",
+            "Engine/**/Source/**.flex",
+            "Engine/**/Source/**.bison",
             "Games/" .. game .. "/Include/**.h",
             "Games/" .. game .. "/Include/**.inl",
             "Games/" .. game .. "/Source/**.cpp",
@@ -239,7 +245,13 @@ workspace( game )
             LinkTmxLite()
 			LinkCompressonator()
 		   
+            includedirs {
+                flexOutputDir,
+                bisonOutputDir
+            }
+
             defines     { "WITH_EDITOR=1", "WITH_IMGUI=1" }
+            rules       { "Flex", "Bison" }
 
         filter "configurations:not *WithEditor"
             -- If we build engine without editor, we will need exclude all of WorldEd source files

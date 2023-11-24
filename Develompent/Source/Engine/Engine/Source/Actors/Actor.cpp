@@ -191,7 +191,7 @@ void AActor::Serialize( class CArchive& InArchive )
 
 		if ( InArchive.IsLoading() )
 		{
-			CClass*		cclass = CClass::StaticFindClass( className.c_str() );
+			CClass*		cclass = CReflectionEnvironment::Get().FindClass( className.c_str() );
 			for ( uint32 indexComponent = 0, countComponents = ownedComponents.size(); indexComponent < countComponents; ++indexComponent )
 			{
 				ActorComponentRef_t		component = ownedComponents[indexComponent];

@@ -66,6 +66,11 @@ private:
 	 */
 	void InitConfigs();
 
+	/**
+	 * @brief Load script packages
+	 */
+	void LoadScriptPackages();
+
 	bool				isInitialize;		/**< Is initialized engine */
 	bool				bIsFocus;			/**< Is focus on window */
 };
