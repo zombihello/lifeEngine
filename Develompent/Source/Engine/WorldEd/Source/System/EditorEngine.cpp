@@ -90,14 +90,6 @@ CEditorEngine::CEditorEngine()
 
 /*
 ==================
-CEditorEngine::~CEditorEngine
-==================
-*/
-CEditorEngine::~CEditorEngine()
-{}
-
-/*
-==================
 CEditorEngine::Init
 ==================
 */

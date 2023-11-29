@@ -28,14 +28,6 @@ CGameEngine::CGameEngine()
 
 /*
 ==================
-CGameEngine::~CGameEngine
-==================
-*/
-CGameEngine::~CGameEngine()
-{}
-
-/*
-==================
 CGameEngine::Init
 ==================
 */

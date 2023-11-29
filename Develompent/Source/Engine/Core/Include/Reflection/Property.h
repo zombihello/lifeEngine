@@ -158,6 +158,22 @@ public:
 	virtual uint32 GetMinAlignment() const		PURE_VIRTUAL( CProperty::GetMinAlignment, return 1; );
 
 	/**
+	 * @brief Is the property contains object reference
+	 * @retrun Return TRUE if property (or sub-properties) contain  a CObject reference, otherwise returns FALSE
+	 */
+	virtual bool IsContainsObjectReference() const;
+
+	/**
+	 * @brief Emits tokens used by realtime garbage collection code to passed in InReferenceTokenStream
+	 * Emits tokens used by realtime garbage collection code to passed in ReferenceTokenStream. The offset emitted is relative
+	 * to the passed in BaseOffset which is used by e.g. arrays of structs
+	 * 
+	 * @param InReferenceTokenStream	Reference token stream
+	 * @param InBaseOffset				Base offset
+	 */
+	virtual void EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTokenStream, uint32 InBaseOffset ) const;
+
+	/**
 	 * @brief Get property flags
 	 * @return Return property flags
 	 */
@@ -618,6 +634,22 @@ public:
 	virtual uint32 GetMinAlignment() const override;
 
 	/**
+	 * @brief Is the property contains object reference
+	 * @retrun Return TRUE if property (or sub-properties) contain  a CObject reference, otherwise returns FALSE
+	 */
+	virtual bool IsContainsObjectReference() const override;
+
+	/**
+	 * @brief Emits tokens used by realtime garbage collection code to passed in InReferenceTokenStream
+	 * Emits tokens used by realtime garbage collection code to passed in ReferenceTokenStream. The offset emitted is relative
+	 * to the passed in BaseOffset which is used by e.g. arrays of structs
+	 *
+	 * @param InReferenceTokenStream	Reference token stream
+	 * @param InBaseOffset				Base offset
+	 */
+	virtual void EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTokenStream, uint32 InBaseOffset ) const override;
+
+	/**
 	 * @brief Get property class
 	 * @return Return property class
 	 */
@@ -903,6 +935,22 @@ public:
 	virtual uint32 GetMinAlignment() const override;
 
 	/**
+	 * @brief Is the property contains object reference
+	 * @retrun Return TRUE if property (or sub-properties) contain  a CObject reference, otherwise returns FALSE
+	 */
+	virtual bool IsContainsObjectReference() const override;
+
+	/**
+	 * @brief Emits tokens used by realtime garbage collection code to passed in InReferenceTokenStream
+	 * Emits tokens used by realtime garbage collection code to passed in ReferenceTokenStream. The offset emitted is relative
+	 * to the passed in BaseOffset which is used by e.g. arrays of structs
+	 *
+	 * @param InReferenceTokenStream	Reference token stream
+	 * @param InBaseOffset				Base offset
+	 */
+	virtual void EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTokenStream, uint32 InBaseOffset ) const override;
+
+	/**
 	 * @brief Get inner property
 	 * @return Return inner property
 	 */
@@ -975,6 +1023,22 @@ public:
 	 * @return Return minimal alignment for property
 	 */
 	virtual uint32 GetMinAlignment() const override;
+
+	/**
+	 * @brief Is the property contains object reference
+	 * @retrun Return TRUE if property (or sub-properties) contain  a CObject reference, otherwise returns FALSE
+	 */
+	virtual bool IsContainsObjectReference() const override;
+
+	/**
+	 * @brief Emits tokens used by realtime garbage collection code to passed in InReferenceTokenStream
+	 * Emits tokens used by realtime garbage collection code to passed in ReferenceTokenStream. The offset emitted is relative
+	 * to the passed in BaseOffset which is used by e.g. arrays of structs
+	 *
+	 * @param InReferenceTokenStream	Reference token stream
+	 * @param InBaseOffset				Base offset
+	 */
+	virtual void EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTokenStream, uint32 InBaseOffset ) const override;
 
 	/**
 	 * @brief Get property struct

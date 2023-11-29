@@ -22,11 +22,101 @@ CObject::CObject
 ==================
 */
 CObject::CObject( const CName& InName, ObjectFlags_t InFlags /* = OBJECT_None */ )
-	: name( InName )
+	: index( INDEX_NONE )
+	, name( InName )
 	, outer( nullptr )
 	, flags( InFlags )
 	, theClass( nullptr )
 {}
+
+/*
+==================
+CObject::~CObject
+==================
+*/
+CObject::~CObject()
+{
+	if ( index != INDEX_NONE )
+	{
+		// Destroy the object if necessary
+		ConditionalBeginDestroy();
+
+		// Remove object from the GC
+		CObjectGC::Get().RemoveObject( this );
+	}
+}
+
+/*
+==================
+CObject::operator delete
+==================
+*/
+void CObject::operator delete( void* InObject, size_t InSize )
+{
+	// Do nothing if we're deleting NULL
+	if ( InObject )
+	{
+		free( InObject );
+	}
+}
+
+/*
+==================
+CObject::BeginDestroy
+==================
+*/
+void CObject::BeginDestroy()
+{}
+
+/*
+==================
+CObject::FinishDestroy
+==================
+*/
+void CObject::FinishDestroy()
+{}
+
+/*
+==================
+CObject::IsReadyForFinishDestroy
+==================
+*/
+bool CObject::IsReadyForFinishDestroy() const
+{
+	return true;
+}
+
+/*
+==================
+CObject::AddReferencedObjects
+==================
+*/
+void CObject::AddReferencedObjects( std::vector<CObject*>& InOutObjectArray )
+{}
+
+/*
+==================
+CObject::ConditionalDestroy
+==================
+*/
+void CObject::ConditionalDestroy()
+{
+	// Check that the object hasn't been destroyed yet
+	if ( !HasAnyObjectFlags( OBJECT_FinishDestroyed ) )
+	{
+		// Begin the asynchronous object cleanup
+		ConditionalBeginDestroy();
+
+		// Wait for the object's asynchronous cleanup to finish
+		while ( !IsReadyForFinishDestroy() )
+		{
+			Sys_Sleep( 0.f );
+		}
+
+		// Finish destroying the object
+		ConditionalFinishDestroy();
+	}
+}
 
 /*
 ==================
@@ -86,10 +176,14 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	Sys_Memzero( ( void* )object, InClass->GetPropertiesSize() );
 
 	// Init object properties
+	object->index		= INDEX_NONE;
 	object->outer		= InOuter;
 	object->name		= InName;
 	object->flags		= InFlags;
 	object->theClass	= InClass;
+
+	// Add a new object to the GC
+	CObjectGC::Get().AddObject( object );
 	return object;
 }
 
@@ -131,6 +225,38 @@ bool CObject::InternalIsA( const CClass* InClass ) const
 	}
 
 	return false;
+}
+
+/*
+==================
+CObject::IsValid
+==================
+*/
+bool CObject::IsValid() const
+{
+	CObjectGC&		objectGC = CObjectGC::Get();
+	if ( !this )
+	{
+		Warnf( TEXT( "NULL object\n" ) );
+		return false;
+	}
+	else if ( !objectGC.IsValidIndex( index ) )
+	{
+		Warnf( TEXT( "[%s] Invalid object index %i\n" ), GetName().c_str(), index );
+		return false;
+	}
+	else if ( !objectGC.GetObject( index ) )
+	{
+		Warnf( TEXT( "[%s] Empty slot\n" ), GetName().c_str() );
+		return false;
+	}
+	else if ( objectGC.GetObject( index ) != this )
+	{
+		Warnf( TEXT( "[%s] Other object in slot. Other is %s\n" ), GetName().c_str(), objectGC.GetObject( index )->GetName().c_str() );
+		return false;
+	}
+
+	return true;
 }
 
 /*

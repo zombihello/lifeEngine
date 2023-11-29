@@ -27,11 +27,6 @@ public:
 	ABaseController();
 
 	/**
-	 * @brief Destructor
-	 */
-	virtual ~ABaseController();
-
-	/**
 	 * @brief Set controlled character
 	 * @param InCharacter Character
 	 */

@@ -20,14 +20,6 @@ AStaticMesh::AStaticMesh()
 
 /*
 ==================
-AStaticMesh::~AStaticMesh
-==================
-*/
-AStaticMesh::~AStaticMesh()
-{}
-
-/*
-==================
 AStaticMesh::StaticInitializeClass
 ==================
 */

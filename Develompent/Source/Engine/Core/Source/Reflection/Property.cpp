@@ -18,17 +18,13 @@ IMPLEMENT_CLASS( CStructProperty )
 IMPLEMENT_CLASS( CStringProperty )
 
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CProperty )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CByteProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CIntProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CBoolProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CFloatProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CColorProperty )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CObjectProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CVectorProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CRotatorProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CAssetProperty )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CArrayProperty )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CStructProperty )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CStringProperty )
 
 /*
@@ -53,9 +49,39 @@ CProperty::CProperty( const CName& InCategory, const std::wstring& InDescription
 	, flags( InFlags )
 	, arraySize( InArraySize )
 {
+	AddObjectFlag( OBJECT_Native );
 	GetOuterCField()->AddProperty( this );
 }
 
+/*
+==================
+CProperty::IsContainsObjectReference
+==================
+*/
+bool CProperty::IsContainsObjectReference() const
+{
+	return false;
+}
+
+/*
+==================
+CProperty::EmitReferenceInfo
+==================
+*/
+void CProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTokenStream, uint32 InBaseOffset ) const
+{}
+
+
+/*
+==================
+CByteProperty::StaticInitializeClass
+==================
+*/
+void CByteProperty::StaticInitializeClass()
+{
+	CClass*		theClass = StaticClass();
+	theClass->EmitObjectReference( STRUCT_OFFSET( CByteProperty, cenum ) );
+}
 
 /*
 ==================
@@ -329,6 +355,17 @@ bool CColorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 
 /*
 ==================
+CObjectProperty::StaticInitializeClass
+==================
+*/
+void CObjectProperty::StaticInitializeClass()
+{
+	CClass*		theClass = StaticClass();
+	theClass->EmitObjectReference( STRUCT_OFFSET( CObjectProperty, propertyClass ) );
+}
+
+/*
+==================
 CObjectProperty::GetPropertyValue
 ==================
 */
@@ -378,6 +415,27 @@ bool CObjectProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CObjectProperty::IsContainsObjectReference
+==================
+*/
+bool CObjectProperty::IsContainsObjectReference() const
+{
+	return true;
+}
+
+/*
+==================
+CObjectProperty::EmitReferenceInfo
+==================
+*/
+void CObjectProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTokenStream, uint32 InBaseOffset ) const
+{
+	GCReferenceFixedArrayTokenHelper fixedArrayHelper( InReferenceTokenStream, InBaseOffset + offset, arraySize, sizeof( CObject* ) );
+	InReferenceTokenStream->EmitReferenceInfo( GCReferenceInfo( GCRT_Object, InBaseOffset + offset ) );
 }
 
 
@@ -545,6 +603,17 @@ bool CAssetProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 
 /*
 ==================
+CArrayProperty::StaticInitializeClass
+==================
+*/
+void CArrayProperty::StaticInitializeClass()
+{
+	CClass*		theClass = StaticClass();
+	theClass->EmitObjectReference( STRUCT_OFFSET( CArrayProperty, innerProperty ) );
+}
+
+/*
+==================
 CArrayProperty::AddProperty
 ==================
 */
@@ -608,6 +677,57 @@ bool CArrayProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 	return bResult;
 }
 
+/*
+==================
+CArrayProperty::IsContainsObjectReference
+==================
+*/
+bool CArrayProperty::IsContainsObjectReference() const
+{
+	Assert( innerProperty );
+	return innerProperty->IsContainsObjectReference();
+}
+
+/*
+==================
+CArrayProperty::EmitReferenceInfo
+==================
+*/
+void CArrayProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTokenStream, uint32 InBaseOffset ) const
+{
+	if ( innerProperty->IsContainsObjectReference() )
+	{
+		if ( IsA<CStructProperty>( innerProperty ) )
+		{
+			InReferenceTokenStream->EmitReferenceInfo( GCReferenceInfo( GCRT_ArrayStruct, InBaseOffset + offset ) );
+			InReferenceTokenStream->EmitStride( innerProperty->GetElementSize() );
+			const uint32	skipIndexIndex = InReferenceTokenStream->EmitSkipIndexPlaceholder();
+			innerProperty->EmitReferenceInfo( InReferenceTokenStream, 0 );
+			const uint32	skipIndex = InReferenceTokenStream->EmitReturn();
+			InReferenceTokenStream->UpdateSkipIndexPlaceholder( skipIndexIndex, skipIndex );
+		}
+		else if ( IsA<CObjectProperty>( innerProperty ) )
+		{
+			InReferenceTokenStream->EmitReferenceInfo( GCReferenceInfo( GCRT_ArrayObject, InBaseOffset + offset ) );
+		}
+		else
+		{
+			Sys_Errorf( TEXT( "Encountered unknown property containing object or name reference: %s in %s" ), innerProperty->GetName().c_str(), GetName().c_str() );
+		}
+	}
+}
+
+
+/*
+==================
+CStructProperty::StaticInitializeClass
+==================
+*/
+void CStructProperty::StaticInitializeClass()
+{
+	CClass*		theClass = StaticClass();
+	theClass->EmitObjectReference( STRUCT_OFFSET( CStructProperty, propertyStruct ) );
+}
 
 /*
 ==================
@@ -647,6 +767,63 @@ CStructProperty::SetPropertyValue
 bool CStructProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue )
 {
 	return false;
+}
+
+/*
+==================
+CStructProperty::IsContainsObjectReference
+==================
+*/
+bool CStructProperty::IsContainsObjectReference() const
+{
+	// Prevent recursion in the case of structs containing dynamic arrays of themselves
+	static std::list<const CStructProperty*>	encounteredStructProps;
+	if ( std::find( encounteredStructProps.begin(), encounteredStructProps.end(), this ) != encounteredStructProps.end() )
+	{
+		return false;
+	}
+	else
+	{
+		Assert( propertyStruct );
+		encounteredStructProps.push_back( this );
+
+		std::vector<CProperty*>		properties;
+		propertyStruct->GetProperties( properties );
+		for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+		{
+			CProperty*	property = properties[index];
+			if ( property->IsContainsObjectReference() )
+			{
+				encounteredStructProps.erase( std::find( encounteredStructProps.begin(), encounteredStructProps.end(), this ) );
+				return true;
+			}
+		}
+
+		encounteredStructProps.erase( std::find( encounteredStructProps.begin(), encounteredStructProps.end(), this ) );
+		return false;
+	}
+}
+
+/*
+==================
+CStructProperty::EmitReferenceInfo
+==================
+*/
+void CStructProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTokenStream, uint32 InBaseOffset ) const
+{
+	Assert( propertyStruct );
+	if ( IsContainsObjectReference() )
+	{
+		GCReferenceFixedArrayTokenHelper	fixedArrayHelper( InReferenceTokenStream, InBaseOffset + offset, arraySize, GetElementSize() );
+		std::vector<CProperty*>				properties;
+		
+		propertyStruct->GetProperties( properties );
+		for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+		{
+			CProperty*	property = properties[index];
+			property->EmitReferenceInfo( InReferenceTokenStream, InBaseOffset + offset );
+		}
+	}
 }
 
 

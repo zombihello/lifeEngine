@@ -23,12 +23,22 @@
  */
 #define DECLARE_STRUCT( TStruct, TSuperStruct ) \
     private: \
-        static class CStruct*       staticStruct; \
+        static class CStruct*					staticStruct; \
+		static class CStruct*					GetStaticStruct(); \
+        static void								InternalInitializeStruct(); \
     public: \
-	    typedef TStruct		        ThisStruct; \
-	    typedef TSuperStruct	    Super; \
-        static void                 StaticInitializeStruct(); \
-        static class CStruct*       StaticStruct();
+	    typedef TStruct							ThisStruct; \
+	    typedef TSuperStruct					Super; \
+        static void								StaticInitializeStruct(); \
+        static FORCEINLINE class CStruct*       StaticStruct() \
+		{ \
+			if ( !staticStruct ) \
+            { \
+                staticStruct = GetStaticStruct(); \
+                InternalInitializeStruct(); \
+            } \
+            return staticStruct; \
+		}
 
 /**
  * @ingroup Core
@@ -40,26 +50,25 @@
  */
 #define IMPLEMENT_STRUCT( TStruct ) \
     CStruct* TStruct::staticStruct = nullptr; \
-    CStruct* TStruct::StaticStruct() \
-    { \
-        if ( !staticStruct ) \
-        { \
-            bool        bBaseStruct = &ThisStruct::StaticStruct == &Super::StaticStruct; \
-            staticStruct = ::new CStruct \
-            ( \
-                TEXT( #TStruct ), \
-                sizeof( ThisStruct ), \
-                alignof( ThisStruct ), \
-                !bBaseStruct ? Super::StaticStruct() : nullptr \
-            ); \
-            staticStruct->SetClass( CStruct::StaticClass() ); \
-            TStruct::StaticInitializeStruct(); \
-        } \
-        \
-        Assert( staticStruct ); \
-        return staticStruct; \
-    } \
-	\
+	CStruct* TStruct::GetStaticStruct() \
+	{ \
+		CStruct*	returnStruct = ::new CStruct \
+		( \
+			TEXT( #TStruct ), \
+            sizeof( ThisStruct ), \
+            alignof( ThisStruct ) \
+		); \
+		Assert( returnStruct ); \
+		return returnStruct; \
+	} \
+	void TStruct::InternalInitializeStruct() \
+	{ \
+		staticStruct->SetSuperStruct( Super::StaticStruct() != staticStruct ? Super::StaticStruct() : nullptr ); \
+		staticStruct->SetClass( CStruct::StaticClass() ); \
+		staticStruct->AddObjectFlag( OBJECT_RootSet | OBJECT_DisregardForGC ); \
+		CObjectGC::Get().AddObject( staticStruct ); \
+        ThisStruct::StaticInitializeStruct(); \
+	} \
 	struct Register##TStruct \
     { \
         Register##TStruct() \

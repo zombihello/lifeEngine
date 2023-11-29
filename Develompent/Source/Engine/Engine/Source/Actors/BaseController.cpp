@@ -14,14 +14,6 @@ ABaseController::ABaseController()
 
 /*
 ==================
-ABaseController::~ABaseController
-==================
-*/
-ABaseController::~ABaseController()
-{}
-
-/*
-==================
 ABaseController::SetCharacter
 ==================
 */

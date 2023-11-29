@@ -25,11 +25,6 @@ class CBaseCommandlet : public CObject
 
 public:
 	/**
-	 * Destructor
-	 */
-	virtual ~CBaseCommandlet() {}
-
-	/**
 	 * Main method of execute commandlet
 	 * 
 	 * @param InCommandLine		Command line

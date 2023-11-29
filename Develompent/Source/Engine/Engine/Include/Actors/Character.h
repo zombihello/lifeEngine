@@ -27,11 +27,6 @@ public:
 	 * @brief Constructor
 	 */
 	ACharacter();
-	
-	/**
-	 * @brief Destructor
-	 */
-	virtual ~ACharacter();
 
 	/**
 	 * @brief Walk

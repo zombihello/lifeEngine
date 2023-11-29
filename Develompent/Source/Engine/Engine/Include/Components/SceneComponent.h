@@ -28,11 +28,6 @@ public:
 	CSceneComponent();
 
 	/**
-	 * @brief Destructor
-	 */
-	virtual ~CSceneComponent();
-
-	/**
 	 * @brief Attaches a component to a given parent
 	 * @warning Need use only in constructor or BeginPlay()
 	 * 

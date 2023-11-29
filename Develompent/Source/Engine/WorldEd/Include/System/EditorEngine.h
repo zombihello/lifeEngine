@@ -73,11 +73,6 @@ public:
 	CEditorEngine();
 
 	/**
-	 * Destructor
-	 */
-	virtual ~CEditorEngine();
-
-	/**
 	 * Initialize engine
 	 */
 	virtual void Init() override;

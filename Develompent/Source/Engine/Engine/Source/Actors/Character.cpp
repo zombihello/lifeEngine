@@ -14,14 +14,6 @@ ACharacter::ACharacter()
 
 /*
 ==================
-ACharacter::~ACharacter
-==================
-*/
-ACharacter::~ACharacter()
-{}
-
-/*
-==================
 ACharacter::StaticInitializeClass
 ==================
 */

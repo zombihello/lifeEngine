@@ -20,14 +20,6 @@ ASprite::ASprite()
 
 /*
 ==================
-ASprite::~ASprite
-==================
-*/
-ASprite::~ASprite()
-{}
-
-/*
-==================
 ASprite::StaticInitializeClass
 ==================
 */

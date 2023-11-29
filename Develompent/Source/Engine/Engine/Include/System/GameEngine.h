@@ -28,11 +28,6 @@ public:
 	CGameEngine();
 
 	/**
-	 * Destructor
-	 */
-	virtual ~CGameEngine();
-
-	/**
 	 * Initialize engine
 	 */
 	virtual void Init() override;

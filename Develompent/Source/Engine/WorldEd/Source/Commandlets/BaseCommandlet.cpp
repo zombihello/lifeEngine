@@ -37,7 +37,8 @@ bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 		double		beginCommandletTime = Sys_Seconds();
 		bool		result = commandlet->Main( InCommandLine );
 		double		endCommandletTime = Sys_Seconds();
-		delete commandlet;
+		AssertNoEntry();
+		//delete commandlet;
 
 		ELogColor		logColor = result ? LC_Green : LC_Red;
 		g_Log->SetTextColor( logColor );

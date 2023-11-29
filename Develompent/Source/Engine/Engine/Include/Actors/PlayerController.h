@@ -27,11 +27,6 @@ public:
 	APlayerController();
 
 	/**
-	 * @brief Destructor
-	 */
-	virtual ~APlayerController();
-
-	/**
 	 * @brief Overridable native event for when play begins for this actor
 	 */
 	virtual void BeginPlay() override;

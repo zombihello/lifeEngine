@@ -17,14 +17,6 @@ CStaticMeshComponent::CStaticMeshComponent()
 
 /*
 ==================
-CStaticMeshComponent::~CStaticMeshComponent
-==================
-*/
-CStaticMeshComponent::~CStaticMeshComponent()
-{}
-
-/*
-==================
 CStaticMeshComponent::StaticInitializeClass
 ==================
 */

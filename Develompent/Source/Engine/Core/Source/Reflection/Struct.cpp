@@ -3,7 +3,18 @@
 #include "Reflection/Property.h"
 
 IMPLEMENT_CLASS( CStruct )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CStruct )
+
+/*
+==================
+CStruct::StaticInitializeClass
+==================
+*/
+void CStruct::StaticInitializeClass()
+{
+	CClass*		theClass = StaticClass();
+	theClass->EmitObjectReference( STRUCT_OFFSET( CStruct, superStruct ) );
+	theClass->EmitObjectArrayReference( STRUCT_OFFSET( CStruct, properties ) );
+}
 
 /*
 ==================

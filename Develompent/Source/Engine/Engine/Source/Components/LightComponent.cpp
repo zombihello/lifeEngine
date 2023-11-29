@@ -19,11 +19,12 @@ CLightComponent::CLightComponent()
 
 /*
 ==================
-CLightComponent::~CLightComponent
+CLightComponent::BeginDestroy
 ==================
 */
-CLightComponent::~CLightComponent()
+void CLightComponent::BeginDestroy()
 {
+	Super::BeginDestroy();
 	if ( scene )
 	{
 		scene->RemoveLight( this );

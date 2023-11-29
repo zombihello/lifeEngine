@@ -17,14 +17,6 @@ CActorComponent::CActorComponent()
 
 /*
 ==================
-CActorComponent::~CActorComponent
-==================
-*/
-CActorComponent::~CActorComponent()
-{}
-
-/*
-==================
 CActorComponent::BeginPlay
 ==================
 */

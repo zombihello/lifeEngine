@@ -49,11 +49,12 @@
 				TForEachEnum( INTERNAL_REGISTER_ENUM ) \
 				s_CEnum = ::new CEnum( TEXT( #TEnum ), enums ); \
 				s_CEnum->SetClass( CEnum::StaticClass() ); \
+				s_CEnum->AddObjectFlag( OBJECT_RootSet | OBJECT_DisregardForGC ); \
+				CObjectGC::Get().AddObject( s_CEnum ); \
 			} \
 			return s_CEnum; \
 		} \
 	} \
-	\
     struct Register##TEnum \
     { \
         Register##TEnum() \

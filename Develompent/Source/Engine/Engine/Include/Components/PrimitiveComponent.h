@@ -37,9 +37,11 @@ public:
 	CPrimitiveComponent();
 
 	/**
-	 * @brief Destructor
+	 * @brief Called before destroying the object
+	 * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+	 * asynchronous cleanup process
 	 */
-	virtual ~CPrimitiveComponent();
+	virtual void BeginDestroy() override;
 
 	/**
 	 * Function called every frame on this ActorComponent. Override this function to implement custom logic to be executed every frame.

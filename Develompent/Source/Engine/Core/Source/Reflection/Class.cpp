@@ -1,8 +1,20 @@
 #include "Reflection/ReflectionEnvironment.h"
 #include "Reflection/Function.h"
+#include "Reflection/Property.h"
 
 IMPLEMENT_CLASS( CClass )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CClass )
+
+/*
+==================
+CClass::StaticInitializeClass
+==================
+*/
+void CClass::StaticInitializeClass()
+{
+	CClass*		theClass = StaticClass();
+	theClass->EmitObjectReference( STRUCT_OFFSET( CClass, withinClass ) );
+	theClass->EmitObjectArrayReference( STRUCT_OFFSET( CClass, functions ) );
+}
 
 /*
 ==================
@@ -54,6 +66,22 @@ void CClass::Bind()
 
 	// If class constructor still isn't valid then its error
 	Assert( ClassConstructor );
+
+	// Assembly the token stream for realtime garbage collection
+	// BS yehor.pohuliaka - Maybe need move to another place
+	if ( !bHasAssembledReferenceTokenStream )
+	{
+		std::vector<CProperty*>		properties;
+		GetProperties( properties, false );
+		for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+		{
+			CProperty*				property = properties[index];
+			property->EmitReferenceInfo( &referenceTokenStream, 0 );
+		}
+
+		AssembleReferenceTokenStream();
+		bHasAssembledReferenceTokenStream = true;
+	}
 }
 
 /*
@@ -108,4 +136,31 @@ CFunction* CClass::FindFunction( const CName& InName, bool InFindInParents /* = 
 		}
 	}
 	return nullptr;
+}
+
+/*
+==================
+CClass::AssembleReferenceTokenStream
+==================
+*/
+void CClass::AssembleReferenceTokenStream()
+{
+	if ( !bHasAssembledReferenceTokenStream )
+	{
+		if ( GetSuperClass() )
+		{
+			// Make sure super class has valid token stream
+			GetSuperClass()->AssembleReferenceTokenStream();
+
+			// Prepend super's stream. This automatically handles removing the EOS token
+			referenceTokenStream.PrependStream( GetSuperClass()->referenceTokenStream );
+		}
+
+		// Emit end of stream token
+		referenceTokenStream.EmitReferenceInfo( GCReferenceInfo::endOfStreamToken );
+
+		// Shrink reference token stream to proper size
+		referenceTokenStream.Shrink();
+		bHasAssembledReferenceTokenStream = true;
+	}
 }

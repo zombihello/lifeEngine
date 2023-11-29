@@ -24,11 +24,12 @@ CAudioComponent::CAudioComponent()
 
 /*
 ==================
-CAudioComponent::~CAudioComponent
+CAudioComponent::BeginDestroy
 ==================
 */
-CAudioComponent::~CAudioComponent()
+void CAudioComponent::BeginDestroy()
 {
+	Super::BeginDestroy();
 	if ( source )
 	{
 		delete source;

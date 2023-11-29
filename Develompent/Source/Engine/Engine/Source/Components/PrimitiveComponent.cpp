@@ -19,11 +19,12 @@ CPrimitiveComponent::CPrimitiveComponent()
 
 /*
 ==================
-CPrimitiveComponent::~CPrimitiveComponent
+CPrimitiveComponent::BeginDestroy
 ==================
 */
-CPrimitiveComponent::~CPrimitiveComponent()
+void CPrimitiveComponent::BeginDestroy()
 {
+	Super::BeginDestroy();
 	if ( scene )
 	{
 		scene->RemovePrimitive( this );

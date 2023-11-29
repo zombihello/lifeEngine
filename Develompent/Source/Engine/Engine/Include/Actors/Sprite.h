@@ -30,11 +30,6 @@ public:
     ASprite();
 
     /**
-     * Destructor
-     */
-    virtual ~ASprite();
-
-    /**
      * Get sprite component
      * @return Return pointer to sprite component
      */

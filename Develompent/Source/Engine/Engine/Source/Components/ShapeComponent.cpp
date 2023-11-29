@@ -16,14 +16,6 @@ CShapeComponent::CShapeComponent()
 
 /*
 ==================
-CShapeComponent::~CShapeComponent
-==================
-*/
-CShapeComponent::~CShapeComponent()
-{}
-
-/*
-==================
 CShapeComponent::StaticInitializeClass
 ==================
 */

@@ -26,14 +26,6 @@ AAudio::AAudio()
 
 /*
 ==================
-AAudio::~AAudio
-==================
-*/
-AAudio::~AAudio()
-{}
-
-/*
-==================
 AAudio::StaticInitializeClass
 ==================
 */

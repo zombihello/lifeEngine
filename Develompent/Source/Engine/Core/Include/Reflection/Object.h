@@ -14,6 +14,10 @@
 #include "Core.h"
 #include "System/Name.h"
 #include "Reflection/ObjectMacros.h"
+#include "Reflection/ObjectGC.h"
+
+// Forward declarations
+void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& InOutObject, bool InIsAllowReferenceElimination );
 
 /**
  * @ingroup Core
@@ -25,8 +29,9 @@ class CObject
     DECLARE_REGISTER_NATIVES() {}
 
 public:
-	template<typename TClass>   friend bool IsA( CObject* InObject );
-    
+    friend bool IsA( CObject* InObject, CClass* InClass );
+    friend class CObjectGC;
+
     /**
      * @brief Default within class type
      */
@@ -48,7 +53,7 @@ public:
     /**
      * @brief Destructor
      */
-    virtual ~CObject() {}
+    virtual ~CObject();
 
     /**
      * @brief Create a new instance of an object
@@ -93,6 +98,53 @@ public:
      */
     virtual bool CanEditProperty( class CProperty* InProperty ) const;
 #endif // WITH_EDITOR
+
+    /**
+     * @brief Called before destroying the object
+     * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+     * asynchronous cleanup process
+     */
+    virtual void BeginDestroy();
+
+    /**
+     * @brief Called to finish destroying the object 
+     * @note After CObject::FinishDestroy is called, the object's memory should no longer be accessed
+     */
+    virtual void FinishDestroy();
+
+    /**
+     * @brief Called to check if the object is ready for FinishDestroy
+     * This is called after BeginDestroy to check the completion of the
+     * potentially asynchronous object cleanup
+     * 
+     * @return Return TRUE if the object's asynchronous cleanup has completed and it is ready for FinishDestroy to be called
+     */
+    virtual bool IsReadyForFinishDestroy() const;
+
+    /**
+	 * @brief Callback used to allow object register its direct object references that are not already covered by
+	 * the token stream
+     * 
+     * @param InOutObjectArray	Array to add referenced objects to via AddReferencedObject
+     */
+    virtual void AddReferencedObjects( std::vector<CObject*>& InOutObjectArray );
+
+    /**
+     * @brief Add an object to the root set
+     * This prevents the object and all its descendants from being deleted during garbage collection
+     */
+    FORCEINLINE void AddToRoot()
+    {
+        AddObjectFlag( OBJECT_RootSet );
+    }
+
+    /**
+     * @brief Remove an object from the root set
+     */
+	FORCEINLINE void RemoveFromRoot()
+    {
+        RemoveObjectFlag( OBJECT_RootSet );
+    }
 
     /**
     * @brief Call function
@@ -240,6 +292,15 @@ public:
     }
 
     /**
+     * @brief Get the object's index into the global objects array
+     * @return Return object's index in the global objects array
+     */
+    FORCEINLINE uint32 GetIndex() const
+    {
+        return index;
+    }
+
+    /**
      * @brief Has any object flags
      *
      * @param InCheckFlags		Object flags to check for
@@ -261,12 +322,115 @@ public:
         return ( flags & InCheckFlags ) == InCheckFlags;
     }
 
+    /**
+     * @brief Is the object unreachable
+     * @return Return TRUE if the object have flag OBJECT_Unreachable and it isn't root set, otherwise returns FALSE
+     */
+    FORCEINLINE bool IsUnreachable() const
+    {
+        return !HasAnyObjectFlags( OBJECT_RootSet ) && HasAnyObjectFlags( OBJECT_Unreachable );
+    }
+
+    /**
+     * @brief Is disregarded for GC
+     * @return Return TRUE if disregarded for GC, otherwise FALSE 
+     */
+    FORCEINLINE bool IsDisregardedForGC() const
+    {
+        return GetIndex() < CObjectGC::Get().firstGCIndex;
+    }
+
+    /**
+     * @brief Is the object pending kill
+     * @return Return TRUE if the object is pending kill, otherwise returns FALSE
+     */
+    FORCEINLINE bool IsPendingKill() const
+    {
+        return HasAnyObjectFlags( OBJECT_PendingKill );
+    }
+
+    /**
+     * @brief Mark this object as pending kill
+     */
+    FORCEINLINE void MarkPendingKill()
+    {
+        AddObjectFlag( OBJECT_PendingKill );
+    }
+
+    /**
+     * @brief Is valid object
+     * @return Return TRUE if the object is valid, otherwise returns FALSE
+     */
+    bool IsValid() const;
+
+protected:
+    /**
+     * @brief Route BeginDestroy() and EndDestroy() on this object if this object is still valid
+     * @warning This method should never be called directly (it is called from the destructor), or the object can be left in a bad state
+     */
+    void ConditionalDestroy();
+
+    /**
+     * @brief Helper function to add a referenced object to the passed in array
+     * The function ensures that the item won't be added twice by checking the OBJECT_Unreachable flag
+     *
+     * @param InOutObjectArray	Array to add object to
+     * @param InObject		    Object to add if it isn't already part of the array (is reachable)
+     */
+    static FORCEINLINE void AddReferencedObject( std::vector<CObject*>& InOutObjectArray, CObject* InObject )
+    {
+        HandleObjectReference( InOutObjectArray, InObject, false );
+    }
+
 private:
     /**
-     * @brief Whether the object is of the specified class
-     * @param[in] InClass Checking class
+     * @brief Called before destroying the object
+     * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+     * asynchronous cleanup process
+     */
+    FORCEINLINE void ConditionalBeginDestroy()
+    {
+        if ( index != INDEX_NONE && !HasAnyObjectFlags( OBJECT_BeginDestroyed ) )
+        {
+            AddObjectFlag( OBJECT_BeginDestroyed );
+            BeginDestroy();
+        }
+    }
+
+    /**
+	 * @brief Called to finish destroying the object
+	 * @note After CObject::FinishDestroy is called, the object's memory should no longer be accessed
      * 
-     * @return Return true if object is a class InClass, else returning false
+     * @return Return TRUE if object was destroyed, otherwise returns FALSE
+     */
+    FORCEINLINE bool ConditionalFinishDestroy()
+    {
+        if ( index != INDEX_NONE && !HasAnyObjectFlags( OBJECT_FinishDestroyed ) )
+        {
+            AddObjectFlag( OBJECT_FinishDestroyed );
+            FinishDestroy();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /**
+     * @brief Override operator delete
+     * Private delete function so only GC can delete objects
+     * 
+     * @param InObject  Pointer to allocated object
+     * @param InSize    Allocated memory size
+     */
+    void operator delete( void* InObject, size_t InSize );
+
+    /**
+     * @brief Whether the object is of the specified class
+     *
+     * @param InClass   Checking class
+     * @return Return TRUE if the object is a class InClass, otherwise returns FALSE
      */
     bool InternalIsA( const CClass* InClass ) const;
 
@@ -277,28 +441,76 @@ private:
      */
     void ExecScriptFunction( class CFunction* InFunction, struct ScriptFrame& InStack );
 
-    CName           name;       /**< Name object */ 
-    CObject*        outer;      /**< Object this object resides in */
-    ObjectFlags_t   flags;      /**< Object flags */ 
-    CClass*         theClass;   /**< Class of this object */
+    uint32          index;          /**< Index of object into global objects array */
+    CName           name;           /**< Name object */ 
+    CObject*        outer;          /**< Object this object resides in */
+    ObjectFlags_t   flags;          /**< Object flags */ 
+    CClass*         theClass;       /**< Class of this object */
 };
+
+/**
+ * @ingroup Core
+ * @brief Handles object reference, potentially NULL'ing
+ * 
+ * @param InOutObjectArray	            Array to add object to
+ * @param InOutObject			        Object pointer passed by reference
+ * @param InIsAllowReferenceElimination Whether to allow NULL'ing the reference if OBJECT_PendingKill is set
+ */
+FORCEINLINE void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& InOutObject, bool InIsAllowReferenceElimination )
+{
+    Assert( !InOutObject || InOutObject->IsValid() );
+    if ( InOutObject )
+    {
+        // Remove references to pending kill objects if we're allowed to do so
+        if ( InOutObject->HasAnyObjectFlags( OBJECT_PendingKill ) && InIsAllowReferenceElimination )
+        {
+            // NULL out reference
+            InOutObject = nullptr;
+        }
+        else
+        {
+            // Add encountered object reference to list of to be serialized objects if it hasn't already been added
+            if ( InOutObject->HasAnyObjectFlags( OBJECT_Unreachable ) )
+            {
+                // Mark it as reachable
+                InOutObject->RemoveObjectFlag( OBJECT_Unreachable );
+
+                // Add it to the list of reachable objects
+                InOutObjectArray.push_back( InOutObject );
+            }
+        }
+    }
+}
+
+/**
+ * @ingroup Core
+ * @brief Is the object a class TClass
+ *
+ * @param InObject  Object
+ * @param InClass   Class
+ * @return Return TRUE if InObject is a class InClass, otherwise returns FALSE
+ */
+FORCEINLINE bool IsA( CObject* InObject, CClass* InClass )
+{
+    if ( InObject )
+    {
+        return InObject->InternalIsA( InClass );
+    }
+
+    return false;
+}
 
 /**
  * @ingroup Core
  * @brief Is the object a class TClass
  * 
  * @param InObject  Object
- * @return Return TRUE if InObject is a class TClass, else returning FALSE
+ * @return Return TRUE if InObject is a class TClass, otherwise returns FALSE
  */
 template<typename TClass>
 FORCEINLINE bool IsA( CObject* InObject )
 {
-    if ( InObject )
-    {
-        return InObject->InternalIsA( TClass::StaticClass() );
-    }
-
-    return false;
+    return IsA( InObject, TClass::StaticClass() );
 }
 
 /**

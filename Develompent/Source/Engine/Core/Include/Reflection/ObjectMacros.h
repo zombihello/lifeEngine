@@ -14,18 +14,24 @@
 
 /**
  * @ingroup Core
- * @brief Macro for declare serializer interface for class
+ * @brief Macro for declare serializer interface and destructor for a class
  *
  * @param TClass            Class
  *
- * Example usage: @code DECLARE_SERIALIZER_CLASS( CClass ) @endcode
+ * Example usage: @code DECLARE_SERIALIZER_AND_DTOR( CClass ) @endcode
  */
-#define DECLARE_SERIALIZER_CLASS( TClass ) \
+#define DECLARE_SERIALIZER_AND_DTOR( TClass ) \
     public: \
 	    friend CArchive& operator<<( CArchive& InArchive, TClass*& InValue ) \
         { \
             return InArchive << *( CObject** )&InValue; \
-        }
+        } \
+    protected: \
+        virtual ~TClass() \
+        { \
+            ConditionalDestroy(); \
+        } \
+    public:
 
 /**
  * @ingroup Core
@@ -40,26 +46,32 @@
  */
 #define DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
     private: \
-        static class CClass*        staticClass; \
+        static class CClass*                    staticClass; \
+        static class CClass*                    GetStaticClass(); \
+        static void                             InternalInitializeClass(); \
     public: \
         enum { StaticClassFlags=TClassFlags | CLASS_Native }; \
         enum { StaticClassCastFlags=TClassCastFlags }; \
-	    typedef TClass		        ThisClass; \
-	    typedef TSuperClass	        Super; \
-        static CObject*             StaticConstructor( void* InPtr ); \
-        static void                 StaticInitializeClass(); \
-        static class CClass*        StaticClass(); \
+	    typedef TClass		                    ThisClass; \
+	    typedef TSuperClass	                    Super; \
+        static CObject*                         StaticConstructor( void* InPtr ); \
+        static void                             StaticInitializeClass(); \
+        static FORCEINLINE class CClass*        StaticClass() \
+        { \
+            if ( !staticClass ) \
+            { \
+                staticClass = GetStaticClass(); \
+                InternalInitializeClass(); \
+            } \
+            return staticClass; \
+        } \
         void* operator new( size_t InSize, CObject* InOuter = nullptr, const CName& InName = NAME_None, ObjectFlags_t InFlags = OBJECT_None ) \
         { \
             return StaticAllocateObject( StaticClass(), InOuter, InName, InFlags ); \
 		} \
         void operator delete( void* InPtr, CObject* InOuter, const CName& InName, ObjectFlags_t InFlags ) \
         { \
-            free( InPtr ); \
-        } \
-        void operator delete( void* InPtr ) \
-        { \
-            ::delete InPtr; \
+            AssertNoEntry(); \
         }
 
 /**
@@ -75,7 +87,7 @@
  */
 #define DECLARE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
     DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
-    DECLARE_SERIALIZER_CLASS( TClass )
+    DECLARE_SERIALIZER_AND_DTOR( TClass )
 
 /**
  * @ingroup Core
@@ -90,7 +102,7 @@
  */
 #define DECLARE_CLASS_INTRINSIC( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
     DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags | CLASS_Intrinsic, TClassCastFlags ) \
-    DECLARE_SERIALIZER_CLASS( TClass )
+    DECLARE_SERIALIZER_AND_DTOR( TClass )
 
 /**
  * @ingroup Core
@@ -144,32 +156,30 @@
     { \
         return ::new( InPtr ) ThisClass(); \
     } \
-    \
-    CClass* TClass::StaticClass() \
+    CClass* TClass::GetStaticClass() \
     { \
-        if ( !staticClass ) \
-        { \
-            bool        bBaseClass = &ThisClass::StaticClass == &Super::StaticClass; \
-            staticClass = ::new CClass \
-            ( \
-                TEXT( #TClass ), \
-                StaticClassFlags, \
-                StaticClassCastFlags, \
-                sizeof( ThisClass ), \
-                alignof( ThisClass ), \
-                &ThisClass::StaticConstructor, \
-                !bBaseClass ? Super::StaticClass() : nullptr \
-            ); \
-            staticClass->SetClass( CClass::StaticClass() ); \
-            staticClass->SetWithinClass( WithinClass::StaticClass() ); \
-            ThisClass::StaticRegisterNatives(); \
-            ThisClass::StaticInitializeClass(); \
-        } \
-        \
-        Assert( staticClass ); \
-        return staticClass; \
+        CClass*     returnClass = ::new CClass \
+        ( \
+            TEXT( #TClass ), \
+            StaticClassFlags, \
+            StaticClassCastFlags, \
+            sizeof( ThisClass ), \
+            alignof( ThisClass ), \
+            &ThisClass::StaticConstructor \
+        ); \
+        Assert( returnClass ); \
+        return returnClass; \
     } \
-    \
+    void TClass::InternalInitializeClass() \
+    { \
+        staticClass->SetSuperClass( Super::StaticClass() != staticClass ? Super::StaticClass() : nullptr ); \
+        staticClass->SetClass( CClass::StaticClass() ); \
+        staticClass->SetWithinClass( WithinClass::StaticClass() ); \
+        staticClass->AddObjectFlag( OBJECT_RootSet | OBJECT_DisregardForGC ); \
+        CObjectGC::Get().AddObject( staticClass ); \
+        ThisClass::StaticRegisterNatives(); \
+        ThisClass::StaticInitializeClass(); \
+    } \
     struct Register##TClass \
     { \
         Register##TClass() \
@@ -239,9 +249,18 @@ enum EClassCastFlags
  */
 enum EObjectFlags
 {
-    OBJECT_None         = 0,        /**< None */
-    OBJECT_NeedSave     = 1 << 1,   /**< Mark a object what need to save it by CObjectPackage */
-    OBJECT_NeedDestroy  = 1 << 2    /**< Mark a object what need to destroy it */
+    OBJECT_None             = 0,        /**< None */
+    OBJECT_Native           = 1 << 0,   /**< Native */
+    OBJECT_RootSet          = 1 << 1,   /**< Object will not be garbage collected, even if unreferenced */
+    OBJECT_DisregardForGC   = 1 << 2,   /**< Object is being disregard for GC */
+    OBJECT_BeginDestroyed   = 1 << 3,   /**< BeginDestroy has been called on the object */
+    OBJECT_FinishDestroyed  = 1 << 4,   /**< FinishDestroy has been called on the object */
+    OBJECT_Unreachable      = 1 << 5,   /**< Object is not reachable on the object graph */
+    OBJECT_PendingKill      = 1 << 6,   /**< Objects that are pending destruction */
+
+    // DEPRECATED
+    OBJECT_NeedSave         = 1 << 7,   /**< DEPRECATED. Mark a object what need to save it by CObjectPackage */
+    OBJECT_NeedDestroy      = 1 << 8    /**< DEPRECATED. Mark a object what need to destroy it */
 };
 
 /**

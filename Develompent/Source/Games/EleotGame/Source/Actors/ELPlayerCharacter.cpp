@@ -24,11 +24,13 @@ AELPlayerCharacter::AELPlayerCharacter()
 
 /*
 ==================
-AELPlayerCharacter::~AELPlayerCharacter
+AELPlayerCharacter::BeginDestroy
 ==================
 */
-AELPlayerCharacter::~AELPlayerCharacter()
+void AELPlayerCharacter::BeginDestroy()
 {
+	Super::BeginDestroy();
+
 	// Deactive player camera if need
 	if ( cameraComponent->IsActive() )
 	{

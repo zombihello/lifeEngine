@@ -28,11 +28,6 @@ public:
 	 */
 	CStaticMeshComponent();
 
-    /**
-     * @brief Destructor
-     */
-    virtual ~CStaticMeshComponent();
-
 	/**
 	 * @brief Serialize component
 	 * @param[in] InArchive Archive for serialize

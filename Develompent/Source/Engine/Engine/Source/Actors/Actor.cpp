@@ -77,11 +77,12 @@ AActor::AActor()
 
 /*
 ==================
-AActor::~AActor
+AActor::BeginDestroy
 ==================
 */
-AActor::~AActor()
+void AActor::BeginDestroy()
 {
+	Super::BeginDestroy();
 	ResetOwnedComponents();
 }
 

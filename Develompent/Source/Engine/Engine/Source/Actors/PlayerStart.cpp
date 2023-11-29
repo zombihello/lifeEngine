@@ -31,14 +31,6 @@ APlayerStart::APlayerStart()
 
 /*
 ==================
-APlayerStart::~APlayerStart
-==================
-*/
-APlayerStart::~APlayerStart()
-{}
-
-/*
-==================
 APlayerStart::BeginPlay
 ==================
 */

@@ -9,6 +9,7 @@
 #ifndef CLASS_H
 #define CLASS_H
 
+#include "Reflection/ObjectGC.h"
 #include "Reflection/Struct.h"
 
 /**
@@ -26,7 +27,8 @@ public:
 	 * @brief Constructor
 	 */
 	FORCEINLINE CClass() 
-		: ClassConstructor( nullptr )
+		: bHasAssembledReferenceTokenStream( false )
+		, ClassConstructor( nullptr )
 		, classFlags( CLASS_None )
 		, classCastFlags( CASTCLASS_None )
 		, withinClass( nullptr )
@@ -46,6 +48,7 @@ public:
 	 */
 	FORCEINLINE CClass( const CName& InClassName, uint32 InClassFlags, uint32 InClassCastFlags, uint32 InPropertiesSize, uint32 InMinAlignment, class CObject*( *InClassConstructor )( void* InPtr ), CClass* InSuperClass = nullptr, CClass* InWithinClass = nullptr )
 		: CStruct( InClassName, InPropertiesSize, InMinAlignment, InSuperClass )
+		, bHasAssembledReferenceTokenStream( false )
 		, ClassConstructor( InClassConstructor )
 		, classFlags( InClassFlags )
 		, classCastFlags( InClassCastFlags )
@@ -65,7 +68,7 @@ public:
 	virtual void AddFunction( class CFunction* InFunction ) override;
 
 	/**
-	 * @brief Find the class's native constructor
+	 * @brief Find the class's native constructor and assembly the token stream for realtime garbage collection
 	 */
 	virtual void Bind() override;
 
@@ -93,6 +96,37 @@ public:
 	 * @return Return pointer to class function. If not found return NULL
 	 */
 	class CFunction* FindFunction( const CName& InName, bool InFindInParents = true ) const;
+
+	/**
+	 * @brief Realtime garbage collection helper function used to emit token containing information about a
+	 * direct CObject reference at the passed in offset
+	 *
+	 * @param InOffset	Offset into object at which object reference is stored
+	 */
+	FORCEINLINE void EmitObjectReference( uint32 InOffset )
+	{
+		referenceTokenStream.EmitReferenceInfo( GCReferenceInfo( GCRT_Object, InOffset ) );
+	}
+
+	/**
+	 * @brief Realtime garbage collection helper function used to emit token containing information about a
+	 * an array of CObject references at the passed in offset
+	 *
+	 * @param InOffset	Offset into object at which array of objects is stored
+	 */
+	FORCEINLINE void EmitObjectArrayReference( uint32 InOffset )
+	{
+		referenceTokenStream.EmitReferenceInfo( GCReferenceInfo( GCRT_ArrayObject, InOffset ) );
+	}
+
+	/**
+	 * @brief Set super class
+	 * @param InSuperClass	Super class
+	 */
+	FORCEINLINE void SetSuperClass( CClass* InSuperClass )
+	{
+		SetSuperStruct( ( CStruct* )InSuperClass );
+	}
 
 	/**
 	 * @brief Get super class
@@ -237,12 +271,40 @@ public:
 		return ( TObject* )CreateObject( InOuter, InName, InFlags );
 	}
 
+	/**
+	 * @brief Assembles the token stream for realtime garbage collection
+	 * Assembles the token stream for realtime garbage collection by combining the per class only
+	 * token stream for each class in the class hierarchy. This is only done once and duplicate
+	 * work is avoided by using an object flag
+	 */
+	void AssembleReferenceTokenStream();
+
+	/**
+	 * @brief Is assembled reference token stream
+	 * @return Return TRUE if the reference token stream of this class has assembled, otherwise returns FALSE
+	 */
+	FORCEINLINE bool IsAssembledReferenceTokenStream() const
+	{
+		return bHasAssembledReferenceTokenStream;
+	}
+
+	/**
+	 * @brief Get reference token stream
+	 * @return Return reference token stream
+	 */
+	FORCEINLINE const CGCReferenceTokenStream& GetReferenceTokenStream() const
+	{
+		return referenceTokenStream;
+	}
+
 private:
-	class CObject*( *ClassConstructor )( void* InPtr );		/**< Pointer to constructor of class */
-	uint32								classFlags;			/**< Class flags */
-	uint32								classCastFlags;		/**< Class cast flags */
-	CClass*								withinClass;		/**< Class within */
-	std::vector<class CFunction*>		functions;			/**< Array of functions */
+	bool								bHasAssembledReferenceTokenStream;		/**< Indicates whether the reference token stream has assembled*/
+	class CObject*( *ClassConstructor )( void* InPtr );							/**< Pointer to constructor of class */
+	uint32								classFlags;								/**< Class flags */
+	uint32								classCastFlags;							/**< Class cast flags */
+	CClass*								withinClass;							/**< Class within */
+	std::vector<class CFunction*>		functions;								/**< Array of functions */	
+	CGCReferenceTokenStream				referenceTokenStream;					/**< Reference token stream used by realtime garbage collector, finalized in AssembleReferenceTokenStream */
 };
 
 #endif // !CLASS_H

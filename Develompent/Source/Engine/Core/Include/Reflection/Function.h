@@ -167,7 +167,7 @@ public:
 private:
 	static void ( CObject::*OpcodeFunctions[OP_Num] )( ScriptFrame& InStack );       /**< Native functions to execute script opcodes */
 	uint32					functionFlags;	/**< Function flags */
-	ScriptFn_t			FunctionFn;		/**< Function to call */
+	ScriptFn_t				FunctionFn;		/**< Function to call */
 	std::vector<byte>		bytecode;		/**< Script bytecode */
 };
 

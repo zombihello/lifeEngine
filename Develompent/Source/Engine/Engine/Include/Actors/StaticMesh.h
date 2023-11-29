@@ -29,11 +29,6 @@ public:
 	AStaticMesh();
 
 	/**
-	 * Destructor
-	 */
-	virtual ~AStaticMesh();
-
-	/**
 	 * Overridable native event for when play begins for this actor
 	 */
 	virtual void BeginPlay() override;

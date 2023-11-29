@@ -17,6 +17,7 @@
 #include "Containers/StringConv.h"
 #include "Reflection/ReflectionEnvironment.h"
 #include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectGC.h"
 #include "Math/Color.h"
 #include "Misc/CommandLine.h"
 #include "Misc/TableOfContents.h"
@@ -169,6 +170,38 @@ void CEngineLoop::InitConfigs()
 #include "Misc/CoreGlobals.h"
 #include "System/BaseFileSystem.h"
 #include "System/Archive.h"
+#include "Reflection/ObjectIterator.h"
+#include "Reflection/Property.h"
+
+struct TestStruct
+{
+	DECLARE_STRUCT( TestStruct, TestStruct )
+
+	class CTestObj* object;
+};
+
+class CTestObj : public CObject
+{
+	DECLARE_CLASS( CTestObj, CObject, 0, 0 )
+
+public:
+	CTestObj() {}
+	std::vector<TestStruct>		structs;
+};
+
+IMPLEMENT_CLASS( CTestObj )
+IMPLEMENT_STRUCT( TestStruct )
+
+void TestStruct::StaticInitializeStruct()
+{
+	new( staticStruct, TEXT( "Object" ) )		CObjectProperty( NAME_None, TEXT( "Test Struct" ), STRUCT_OFFSET( ThisStruct, object ), CPF_Edit, CTestObj::StaticClass() );
+}
+
+void CTestObj::StaticInitializeClass()
+{
+	CProperty* array = new( staticClass, TEXT( "Structs" ) )		CArrayProperty( NAME_None, TEXT( "" ), STRUCT_OFFSET( ThisClass, structs ), CPF_Edit );
+	new( array, TEXT( "AssetProperty0" ) )							CStructProperty( NAME_None, TEXT( "" ), 0, 0, TestStruct::StaticStruct() );
+}
 
 /*
 ==================
@@ -177,6 +210,49 @@ CEngineLoop::LoadScriptPackages
 */
 void CEngineLoop::LoadScriptPackages()
 {
+	for ( CObjectIterator it( CClass::StaticClass() ); it; ++it )
+	{
+		CClass*		theClass = ( CClass* )*it;
+		theClass->Bind();
+	}
+
+	CTestObj*	testObj = new( nullptr, TEXT( "TestObj0" ), OBJECT_RootSet ) CTestObj();
+	{
+		for ( uint32 index = 0; index < 3; ++index )
+		{
+			CTestObj*	obj = new( testObj, CString::Format( TEXT( "SubTestObj_%i" ), index ) ) CTestObj();
+			TestStruct	testStruct;
+			testStruct.object = obj;
+			testObj->structs.push_back( testStruct );
+		}
+	}
+
+	CObjectGC&	gc = CObjectGC::Get();
+	for ( CObjectIterator it; it; ++it )
+	{
+		Logf( TEXT( "%s %s\n" ), it->GetClass()->GetName().c_str(), it->GetName().c_str() );
+	}
+	
+	Logf( TEXT( "\n" ) );
+	gc.CollectGarbage( OBJECT_Native );
+	Logf( TEXT( "\n" ) );
+
+	for ( CObjectIterator it; it; ++it )
+	{
+		Logf( TEXT( "%s %s - %s\n" ), it->GetClass()->GetName().c_str(), it->GetName().c_str(), it->IsUnreachable() ? TEXT( "Unreachable" ) : TEXT( "Reachable" ) );
+	}
+
+	testObj->structs.clear();
+
+	Logf( TEXT( "\n" ) );
+	gc.CollectGarbage( OBJECT_Native );
+	Logf( TEXT( "\n" ) );
+
+	for ( CObjectIterator it; it; ++it )
+	{
+		Logf( TEXT( "%s %s - %s\n" ), it->GetClass()->GetName().c_str(), it->GetName().c_str(), it->IsUnreachable() ? TEXT( "Unreachable" ) : TEXT( "Reachable" ) );
+	}
+
 	// Grab all files from directory
 	std::wstring				scriptDir = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Scripts" ) PATH_SEPARATOR, Sys_GameDir().c_str() );
 	std::vector<std::wstring>	files = g_FileSystem->FindFiles( scriptDir, true, false );
@@ -312,6 +388,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		
 		g_Engine = lclass->CreateObject< CBaseEngine >();
 		Assert( g_Engine );
+		g_Engine->AddToRoot();
 	}
 
 	return result;
@@ -490,7 +567,7 @@ void CEngineLoop::Exit()
 	g_PackageManager->Shutdown();
 
 	g_Engine->Shutdown();
-	delete g_Engine;
+	g_Engine->RemoveFromRoot();
 	g_Engine = nullptr;
 
 	delete g_FullScreenMovie;

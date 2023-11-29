@@ -17,14 +17,6 @@ CSceneComponent::CSceneComponent()
 
 /*
 ==================
-CSceneComponent::~CSceneComponent
-==================
-*/
-CSceneComponent::~CSceneComponent()
-{}
-
-/*
-==================
 CSceneComponent::StaticInitializeClass
 ==================
 */

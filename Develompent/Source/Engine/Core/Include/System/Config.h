@@ -358,13 +358,15 @@ public:
 
 	/**
 	 * @brief Get bool
-	 * @return Value with type bool, if type not correct return false
+	 * 
+	 * @param InDefaultValue	Default value
+	 * @return Value with type bool, if type not correct returns InDefaultValue
 	 */
-	FORCEINLINE bool GetBool() const
+	FORCEINLINE bool GetBool( bool InDefaultValue = false ) const
 	{
 		if ( type != T_Bool || !value )
 		{
-			return false;
+			return InDefaultValue;
 		}
 
 		return *static_cast< bool* >( value );
@@ -372,13 +374,15 @@ public:
 
 	/**
 	 * Get number
-	 * @return Return int type if value is T_Int, return float type if value is T_Float, else return 0.f
+	 * 
+	 * @param InDefaultValue	Default value
+	 * @return Return int type if value is T_Int, return float type if value is T_Float, else returns InDefaultValue
 	 */
-	FORCEINLINE float GetNumber() const
+	FORCEINLINE float GetNumber( float InDefaultValue = 0.f ) const
 	{
 		if ( type != T_Int && type != T_Float || !value )
 		{
-			return 0.f;
+			return InDefaultValue;
 		}
 
 		if ( type == T_Int )
@@ -393,13 +397,15 @@ public:
 
 	/**
 	 * @brief Get int
-	 * @return Value with type integer, if type not correct return 0
+	 * 
+	 * @param InDefaultValue	Default value
+	 * @return Value with type integer, if type not correct returns InDefaultValue
 	 */
-	FORCEINLINE int32 GetInt() const
+	FORCEINLINE int32 GetInt( int32 InDefaultValue = 0 ) const
 	{
 		if ( type != T_Int || !value )
 		{
-			return 0;
+			return InDefaultValue;
 		}
 
 		return *static_cast< int32* >( value );
@@ -407,13 +413,15 @@ public:
 
 	/**
 	 * @brief Get float
-	 * @return Value with type float, if type not correct return 0.f
+	 * 
+	 * @param InDefaultValue	Default value
+	 * @return Value with type float, if type not correct returns InDefaultValue
 	 */
-	FORCEINLINE float GetFloat() const
+	FORCEINLINE float GetFloat( float InDefaultValue = 0.f ) const
 	{
 		if ( type != T_Float || !value )
 		{
-			return 0.f;
+			return InDefaultValue;
 		}
 
 		return *static_cast< float* >( value );
@@ -421,13 +429,15 @@ public:
 
 	/**
 	 * @brief Get string
-	 * @return Value with type string, if type not correct return TEXT( "" )
+	 * 
+	 * @param InDefaultValue	Default value
+	 * @return Value with type string, if type not correct returns InDefaultValue
 	 */
-	FORCEINLINE std::wstring GetString() const
+	FORCEINLINE std::wstring GetString( const std::wstring InDefaultValue = TEXT( "" ) ) const
 	{
 		if ( type != T_String || !value )
 		{
-			return TEXT( "" );
+			return InDefaultValue;
 		}
 
 		return *static_cast< std::wstring* >( value );

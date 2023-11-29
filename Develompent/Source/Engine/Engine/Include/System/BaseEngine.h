@@ -31,11 +31,6 @@ public:
 	CBaseEngine();
 
 	/**
-	 * Destructor
-	 */
-	virtual ~CBaseEngine() {}
-
-	/**
 	 * Initialize engine
 	 */
 	virtual void Init();

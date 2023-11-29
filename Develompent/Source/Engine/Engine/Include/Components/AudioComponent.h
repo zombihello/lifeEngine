@@ -29,9 +29,11 @@ public:
 	CAudioComponent();
 
 	/**
-	 * @brief Destructor
+	 * @brief Called before destroying the object
+	 * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+	 * asynchronous cleanup process
 	 */
-	~CAudioComponent();
+	virtual void BeginDestroy() override;
 
 	/**
 	 * @brief Serialize component

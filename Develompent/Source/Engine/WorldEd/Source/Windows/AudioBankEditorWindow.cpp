@@ -33,6 +33,7 @@ CAudioBankEditorWindow::CAudioBankEditorWindow( const TSharedPtr<CAudioBank>& In
 	audioComponent->SetAudioBank( audioBank->GetAssetHandle() );
 	audioComponent->SetUISound( true );
 	audioComponent->SetStreamable( true );
+	audioComponent->AddToRoot();
 }
 
 /*
@@ -47,7 +48,7 @@ CAudioBankEditorWindow::~CAudioBankEditorWindow()
 	EditorDelegates::onAssetsReloaded.Remove( assetsReloadedHandle );
 
 	// Delete audio component and close handle
-	delete audioComponent;
+	audioComponent->RemoveFromRoot();
 	if ( audioBankHandle )
 	{
 		audioBank->CloseBank( audioBankHandle );

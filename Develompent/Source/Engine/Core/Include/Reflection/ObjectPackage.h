@@ -52,10 +52,7 @@ public:
 		 */
 		FORCEINLINE ~ObjectExport()
 		{
-			if ( object && object->HasAnyObjectFlags( OBJECT_NeedDestroy ) )
-			{
-				delete object;
-			}
+			AssertNoEntry();
 		}
 
 		/**
