@@ -120,7 +120,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CPointLightComponent>>& InLights, const class CLightVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CPointLightComponent*>& InLights, const class CLightVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
 
 	/**
 	 * @brief Set the l2w transform shader
@@ -132,7 +132,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CLightVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CSpotLightComponent*>& InLights, const class CLightVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
 
 	/**
 	 * @brief Set the l2w transform shader
@@ -144,7 +144,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CLightVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CDirectionalLightComponent*>& InLights, const class CLightVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
 };
 
 /**
@@ -195,7 +195,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CPointLightComponent>>& InLights, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+	void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CPointLightComponent*>& InLights, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
 
 	/**
 	 * @brief Setup instancing for spot lights
@@ -206,7 +206,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+	void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CSpotLightComponent*>& InLights, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
 
 	/**
 	 * @brief Setup instancing for directional lights
@@ -217,7 +217,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
+	void SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CDirectionalLightComponent*>& InLights, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const;
 
 	/**
 	 * @brief Get type hash

@@ -932,7 +932,7 @@ public:
 	 * @brief Get list of visible lights on the current frame
 	 * @return Return list of visible lights
 	 */
-	FORCEINLINE const std::list<LightComponentRef_t>& GetVisibleLights() const
+	FORCEINLINE const std::list<CLightComponent*>& GetVisibleLights() const
 	{
 		return frame.visibleLights;
 	}
@@ -956,13 +956,13 @@ private:
 	struct SceneFrame
 	{
 		SceneDepthGroup						SDGs[SDG_Max];		/**< Scene depth groups */
-		std::list<LightComponentRef_t>		visibleLights;		/**< List of visible lights */
+		std::list<CLightComponent*>			visibleLights;		/**< List of visible lights */
 	};
 	
 	float									exposure;			/**< Current exposure of the scene */
 	SceneFrame								frame;				/**< Scene frame */
-	std::list<PrimitiveComponentRef_t>		primitives;			/**< List of primitives on scene */
-	std::list<LightComponentRef_t>			lights;				/**< List of lights on scene */
+	std::list<CPrimitiveComponent*>			primitives;			/**< List of primitives on scene */
+	std::list<CLightComponent*>				lights;				/**< List of lights on scene */
 };
 
 //

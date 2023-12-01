@@ -36,10 +36,10 @@ public:
 	 * @brief Get controlled character
 	 * @return Return controlled character. If not exist return nullptr
 	 */
-	TRefCountPtr<class ACharacter> GetCharacter() const;
+	class ACharacter* GetCharacter() const;
 
 protected:
-	TRefCountPtr<class ACharacter>		character;			/**< Character controlled by this controller */
+	class ACharacter*		character;			/**< Character controlled by this controller */
 };
 
 #endif // !BASECONTROLLER_H

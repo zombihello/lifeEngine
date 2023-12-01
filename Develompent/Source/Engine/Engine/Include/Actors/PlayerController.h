@@ -42,7 +42,7 @@ public:
 	 * @brief Get input component
 	 * @return Return input component
 	 */
-	FORCEINLINE TRefCountPtr< CInputComponent > GetInputComponent() const
+	FORCEINLINE CInputComponent* GetInputComponent() const
 	{
 		return inputComponent;
 	}
@@ -98,10 +98,10 @@ protected:
 	 */
 	virtual void SetupInputComponent();
 
-	bool										bShowMouseCursor;		/**< Show mouse cursor */
-	bool										bConstrainYaw;			/**< Is need constrain yaw */
-	Vector										rotationInput;			/**< Rotation input */
-	TRefCountPtr<CInputComponent>				inputComponent;			/**< Input component */
+	bool				bShowMouseCursor;		/**< Show mouse cursor */
+	bool				bConstrainYaw;			/**< Is need constrain yaw */
+	Vector				rotationInput;			/**< Rotation input */
+	CInputComponent*	inputComponent;			/**< Input component */
 
 private:
 	/**
@@ -110,7 +110,7 @@ private:
 	 */
 	void UpdateRotation( float InDeltaTime );
 
-	Vector										viewRotation;			/**< View rotation in Euler angles */
+	Vector				viewRotation;			/**< View rotation in Euler angles */
 };
 
 

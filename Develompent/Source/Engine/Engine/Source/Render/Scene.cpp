@@ -238,7 +238,7 @@ void CScene::Clear()
 
 	primitives.clear();
 	lights.clear();
-	exposure = g_Engine->GetExposure();
+	exposure = g_Engine ? g_Engine->GetExposure() : 1.f;
 }
 
 /*

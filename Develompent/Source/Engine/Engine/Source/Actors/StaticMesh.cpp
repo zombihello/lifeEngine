@@ -15,7 +15,7 @@ AStaticMesh::AStaticMesh
 */
 AStaticMesh::AStaticMesh()
 {
-	staticMeshComponent = CreateComponent< CStaticMeshComponent >( TEXT( "StaticMeshComponent0" ) );
+	staticMeshComponent = CreateComponent<CStaticMeshComponent>( TEXT( "StaticMeshComponent0" ) );
 }
 
 /*
@@ -25,6 +25,7 @@ AStaticMesh::StaticInitializeClass
 */
 void AStaticMesh::StaticInitializeClass()
 {
+	// Native properties
 	new( staticClass, TEXT( "Static Mesh Component" ) ) CObjectProperty( CPP_PROPERTY( ThisClass, staticMeshComponent ), TEXT( "Drawing" ), TEXT( "Static mesh component" ), CPF_Edit, CStaticMeshComponent::StaticClass() );
 }
 
@@ -44,7 +45,7 @@ void AStaticMesh::BeginPlay()
 AStaticMesh::SpawnActorAsset
 ==================
 */
-ActorRef_t AStaticMesh::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation )
+AActor* AStaticMesh::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation )
 {
 	// If asset is not valid or not static mesh asset, we do nothing
 	if ( !InAsset || InAsset->GetType() != AT_StaticMesh )
@@ -53,7 +54,7 @@ ActorRef_t AStaticMesh::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, cons
 	}
 
 	// Spawn new actor
-	TRefCountPtr<AStaticMesh>		staticMeshActor = g_World->SpawnActor<AStaticMesh>( InLocation, InRotation );
+	AStaticMesh*		staticMeshActor = g_World->SpawnActor<AStaticMesh>( InLocation, InRotation );
 	if ( !staticMeshActor )
 	{
 		return nullptr;

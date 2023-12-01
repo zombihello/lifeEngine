@@ -292,7 +292,7 @@ void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 	}
 
 	// Calculate transform matrix
-	ActorRef_t	owner = GetOwner();
+	AActor*		owner = GetOwner();
 	Matrix		transformMatrix;
 	CalcTransformationMatrix( InSceneView, transformMatrix );
 

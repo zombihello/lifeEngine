@@ -28,6 +28,7 @@ CBoxComponent::StaticInitializeClass
 */
 void CBoxComponent::StaticInitializeClass()
 {
+	// Native properties
 	new( staticClass, TEXT( "Size" ) ) CVectorProperty( CPP_PROPERTY( ThisClass, size ), TEXT( "Primitive" ), TEXT( "Set size of box" ), CPF_Edit, 1 );
 }
 

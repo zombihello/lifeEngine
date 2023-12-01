@@ -40,8 +40,8 @@ public:
 	virtual std::wstring GetActorIcon() const override;
 
 private:
-	TRefCountPtr<CSpriteComponent>		gizmoComponent;				/**< Gizmo component */
-	TRefCountPtr<CArrowComponent>		arrowComponent;				/**< Arrow component */
+	CSpriteComponent*		gizmoComponent;				/**< Gizmo component */
+	CArrowComponent*		arrowComponent;				/**< Arrow component */
 #endif // WITH_EDITOR
 };
 

@@ -4,6 +4,7 @@
 #include "System/BaseFileSystem.h"
 #include "EngineDefines.h"
 #include "Reflection/Class.h"
+#include "Reflection/ObjectGC.h"
 #include "Misc/Misc.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
@@ -298,9 +299,17 @@ void CEditorEngine::NewMap()
 	Logf( TEXT( "Create a new map\n" ) );
 	
 	// Clean up world and call garbage collector of unused packages and assets
-	g_World->CleanupWorld();
+	if ( g_World )
+	{
+		g_World->RemoveFromRoot();
+		g_World = nullptr;
+	}
+
+	g_World = new( nullptr, NAME_None ) CWorld();
+	g_World->AddToRoot();
+	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 	g_PackageManager->GarbageCollector();
-	
+
 	EditorDelegates::onEditorCreatedNewMap.Broadcast();
 }
 
@@ -311,7 +320,11 @@ CEditorEngine::LoadMap
 */
 bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
-	g_World->UnselectAllActors();
+	if ( g_World )
+	{
+		g_World->UnselectAllActors();
+	}
+
 	if ( !Super::LoadMap( InMap, OutError ) )
 	{
 		Warnf( TEXT( "Failed loading map '%s'. Error: %s\n" ), InMap.c_str(), OutError.c_str() );
@@ -332,9 +345,10 @@ CEditorEngine::SaveMap
 */
 bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 {
+	Assert( g_World );
 	Logf( TEXT( "Save map: %s\n" ), InMap.c_str() );
 
-	CArchive*	arWorld = g_FileSystem->CreateFileWriter( InMap );
+	CArchive* arWorld = g_FileSystem->CreateFileWriter( InMap );
 	if ( !arWorld )
 	{
 		OutError = TEXT( "Failed open archive" );

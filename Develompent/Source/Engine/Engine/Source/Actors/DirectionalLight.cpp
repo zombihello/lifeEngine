@@ -29,7 +29,13 @@ ADirectionalLight::StaticInitializeClass
 */
 void ADirectionalLight::StaticInitializeClass()
 {
+	// Native properties
 	new( staticClass, TEXT( "Directional Light Component" ) ) CObjectProperty( CPP_PROPERTY( ThisClass, directionalLightComponent ), TEXT( "Light" ), TEXT( "Directional light component" ), CPF_Edit, CDirectionalLightComponent::StaticClass() );
+
+#if WITH_EDITOR
+	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, gizmoComponent ), NAME_None, TEXT( "" ), CPF_None, CSpriteComponent::StaticClass() );
+	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, arrowComponent ), NAME_None, TEXT( "" ), CPF_None, CActorComponent::StaticClass() );
+#endif // WITH_EDITOR
 }
 
 #if WITH_EDITOR

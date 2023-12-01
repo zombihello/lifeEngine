@@ -31,7 +31,12 @@ AAudio::StaticInitializeClass
 */
 void AAudio::StaticInitializeClass()
 {
+	// Native properties
 	new( staticClass, TEXT( "Audio Component" ) ) CObjectProperty( CPP_PROPERTY( ThisClass, audioComponent ), TEXT( "Audio" ), TEXT( "Audio component" ), CPF_Edit, CAudioComponent::StaticClass() );
+
+#if WITH_EDITOR
+	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, gizmoComponent ), NAME_None, TEXT( "" ), CPF_None, CSpriteComponent::StaticClass() );
+#endif // WITH_EDITOR
 }
 
 #if WITH_EDITOR
@@ -142,7 +147,7 @@ std::wstring AAudio::GetActorIcon() const
 AAudio::SpawnActorAsset
 ==================
 */
-ActorRef_t AAudio::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation )
+AActor* AAudio::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation )
 {
 	// If asset is not valid or not audio bank asset, we do nothing
 	if ( !InAsset || InAsset->GetType() != AT_AudioBank )
@@ -151,7 +156,7 @@ ActorRef_t AAudio::SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vec
 	}
 
 	// Spawn new actor
-	TRefCountPtr<AAudio>		audioActor = g_World->SpawnActor<AAudio>( InLocation, InRotation );
+	AAudio*		audioActor = g_World->SpawnActor<AAudio>( InLocation, InRotation );
 	if ( !audioActor )
 	{
 		return nullptr;

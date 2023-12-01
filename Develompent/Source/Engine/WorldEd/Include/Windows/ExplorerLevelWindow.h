@@ -42,7 +42,7 @@ protected:
 	 * @param InIndex	Item index
 	 * @param InActor	Actor, him is owner events
 	 */
-	void ProcessItemEvents( uint32 InIndex, ActorRef_t InActor );
+	void ProcessItemEvents( uint32 InIndex, AActor* InActor );
 };
 
 #endif // !EXPLORERLEVELWINDOW_H

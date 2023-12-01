@@ -59,13 +59,13 @@ public:
      * @brief Get active camera
      * @return Return active camera. If not seted returing nullptr
      */
-    FORCEINLINE TRefCountPtr< CCameraComponent > GetActiveCamera() const
+    FORCEINLINE CCameraComponent* GetActiveCamera() const
     {
         return activeCamera;
     }
 
 private:
-    TRefCountPtr< CCameraComponent >        activeCamera;       /**< Current active camera */
+    CCameraComponent*        activeCamera;       /**< Current active camera */
 };
 
 #endif // !CAMERAMANAGER_H

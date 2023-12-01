@@ -7,7 +7,6 @@
 #include "Actors/Character.h"
 
 IMPLEMENT_CLASS( APlayerStart )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( APlayerStart )
 
 /*
 ==================
@@ -26,6 +25,22 @@ APlayerStart::APlayerStart()
 	gizmoComponent->SetMaterial( g_PackageManager->FindAsset( TEXT( "Material'EditorMaterials:APlayerStart_Gizmo_Mat" ), AT_Material ) );
 
 	arrowComponent = CreateComponent<CArrowComponent>( TEXT( "ArrowComponent0" ), true );
+#endif // WITH_EDITOR
+}
+
+/*
+==================
+APlayerStart::StaticInitializeClass
+==================
+*/
+void APlayerStart::StaticInitializeClass()
+{
+	// Native properties
+	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, rootComponent ), NAME_None, TEXT( "" ), CPF_None, CSceneComponent::StaticClass() );
+
+#if WITH_EDITOR
+	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, gizmoComponent ), NAME_None, TEXT( "" ), CPF_None, CSpriteComponent::StaticClass() );
+	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, arrowComponent ), NAME_None, TEXT( "" ), CPF_None, CArrowComponent::StaticClass() );
 #endif // WITH_EDITOR
 }
 
@@ -83,8 +98,8 @@ void APlayerStart::BeginPlay()
 	}
 
 	// Spawn player controller and character
-	TRefCountPtr< APlayerController >		playerController = g_World->SpawnActor( classPlayerController, Vector( 0.f, 0.f, 0.f ) );
-	TRefCountPtr< ACharacter >				playerCharacter = g_World->SpawnActor( classPlayerCharacter, GetActorLocation(), GetActorRotation() );
+	APlayerController*		playerController = ( APlayerController* )g_World->SpawnActor( classPlayerController, Vector( 0.f, 0.f, 0.f ) );
+	ACharacter*				playerCharacter = ( ACharacter* )g_World->SpawnActor( classPlayerCharacter, GetActorLocation(), GetActorRotation() );
 	playerController->SetCharacter( playerCharacter );
 }
 

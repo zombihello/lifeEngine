@@ -41,7 +41,7 @@ public:
 	virtual void BeginPlay() override;
 
 private:
-	TRefCountPtr<CCameraComponent>		cameraComponent;				/**< Camera component */
+	CCameraComponent*		cameraComponent;				/**< Camera component */
 };
 
 #endif // !ELPLAYERCHARACTER_H

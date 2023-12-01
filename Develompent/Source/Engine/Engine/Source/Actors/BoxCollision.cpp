@@ -9,8 +9,8 @@ ABoxCollision::ABoxCollision
 */
 ABoxCollision::ABoxCollision()
 {
-	collisionComponent = CreateComponent< CBoxComponent >( TEXT( "BoxComponent0" ) );
-	boxComponent = collisionComponent;
+	boxComponent = CreateComponent<CBoxComponent>( TEXT( "BoxComponent0" ) );
+	collisionComponent = boxComponent;
 	SetStatic( true );
 }
 
@@ -21,6 +21,7 @@ ABoxCollision::StaticInitializeClass
 */
 void ABoxCollision::StaticInitializeClass()
 {
+	// Native properties
 	new( staticClass, TEXT( "Box Component" ) )	CObjectProperty( CPP_PROPERTY( ThisClass, boxComponent ), TEXT( "Collision" ), TEXT( "Box component" ), CPF_Edit, CBoxComponent::StaticClass() );
 }
 

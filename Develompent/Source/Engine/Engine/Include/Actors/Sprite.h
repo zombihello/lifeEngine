@@ -33,7 +33,7 @@ public:
      * Get sprite component
      * @return Return pointer to sprite component
      */
-    FORCEINLINE TRefCountPtr<CSpriteComponent> GetSpriteComponent() const
+    FORCEINLINE CSpriteComponent* GetSpriteComponent() const
     {
         return spriteComponent;
     }
@@ -47,7 +47,7 @@ public:
 #endif // WITH_EDITOR
 
 private:
-    TRefCountPtr<CSpriteComponent>			spriteComponent;		/**< Sprite component */
+    CSpriteComponent*			spriteComponent;		/**< Sprite component */
 };
 
 #endif // !ASPRITE_H

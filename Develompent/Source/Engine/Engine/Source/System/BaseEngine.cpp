@@ -3,6 +3,7 @@
 #include "Misc/PhysicsGlobals.h"
 #include "Logger/LoggerMacros.h"
 #include "Reflection/Class.h"
+#include "Reflection/ObjectGC.h"
 #include "System/Config.h"
 #include "System/World.h"
 #include "System/Package.h"
@@ -216,7 +217,14 @@ void CBaseEngine::Shutdown()
 	// Wait while render thread is rendering of the frame
 	FlushRenderingCommands();
 
-	g_World->CleanupWorld();
+	// End play in the world and shutdown other systems
+	if ( g_World )
+	{
+		g_World->EndPlay();
+		g_World->RemoveFromRoot();
+		g_World = nullptr;
+	}
+
 	g_UIEngine->Shutdown();
 	g_PhysicsEngine.Shutdown();
 }
@@ -228,7 +236,10 @@ CBaseEngine::Tick
 */
 void CBaseEngine::Tick( float InDeltaSeconds )
 {
-	g_World->Tick( InDeltaSeconds );
+	if ( g_World )
+	{
+		g_World->Tick( InDeltaSeconds );
+	}
 	g_UIEngine->Tick( InDeltaSeconds );
 	g_PhysicsEngine.Tick( InDeltaSeconds );
 }
@@ -278,11 +289,20 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 	}
 
 	// Clean up and serialize world
-	g_World->CleanupWorld();
+	if ( g_World )
+	{
+		g_World->EndPlay();
+		g_World->RemoveFromRoot();
+		g_World = nullptr;
+	}
+
+	g_World = new( nullptr, NAME_None ) CWorld();
+	g_World->AddToRoot();
 	archive->SerializeHeader();
 	g_World->Serialize( *archive );
 
 	// Call garbage collector of unused packages and assets for free used memory
+	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 	g_PackageManager->GarbageCollector();
 	return true;
 }

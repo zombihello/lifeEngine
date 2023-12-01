@@ -283,6 +283,14 @@ public:
 	}
 
     /**
+     * @brief Traverses the outer chain searching for the next object of a certain type
+     * 
+     * @param InTargetClass     Target class to search for (must be derived from CObject)
+     * @return Return a pointer to the first object in this object's Outer chain which is of the correct type
+     */
+    CObject* GetTypedOuter( CClass* InTargetClass ) const;
+
+    /**
      * @brief Get object flags
      * @return Return object flags
      */

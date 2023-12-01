@@ -258,7 +258,7 @@ public:
 	 * @brief Get the SceneComponent we are attached to
 	 * @return Return SceneComponent we are attached to, if parent not exist - return nullptr
 	 */
-	FORCEINLINE TRefCountPtr<CSceneComponent> GetAttachParent() const
+	FORCEINLINE CSceneComponent* GetAttachParent() const
 	{
 		return attachParent;
 	}
@@ -267,7 +267,7 @@ public:
 	 * @brief Get the SceneComponents that are attached to this component
 	 * @return Return the SceneComponents that are attached to this component
 	 */
-	FORCEINLINE const std::vector<TRefCountPtr<CSceneComponent>>&GetAttachChildren() const
+	FORCEINLINE const std::vector<CSceneComponent*>&GetAttachChildren() const
 	{
 		return attachChildren;
 	}
@@ -278,15 +278,15 @@ private:
 	 */
 	void UpdateComponentToWorld();
 
-	bool											bDityComponentToWorld;	/**< Is need update ComponentToWorld */
-	TRefCountPtr<CSceneComponent>					attachParent;			/**< What we are currently attached to. If valid, transform are used relative to this object */
-	Vector											relativeLocation;		/**< Location of the component relative to its parent */
-	CRotator										relativeRotation;		/**< Rotation of the component relative to its parent */
-	Vector											relativeScale;			/**< Non-uniform scaling of the component relative to its parent */
-	RotationConversionCache						worldRotationCache;		/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with GetComponentTransform().GetRotation() */	
-	RotationConversionCache						relativeRotationCache;	/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with 'relativeRotation' */
-	CTransform										componentToWorld;		/**< Current transform of the component, relative to the world */
-	std::vector<TRefCountPtr<CSceneComponent>>		attachChildren;			/**< List of child SceneComponents that are attached to us */
+	bool							bDityComponentToWorld;	/**< Is need update ComponentToWorld */
+	CSceneComponent*				attachParent;			/**< What we are currently attached to. If valid, transform are used relative to this object */
+	Vector							relativeLocation;		/**< Location of the component relative to its parent */
+	CRotator						relativeRotation;		/**< Rotation of the component relative to its parent */
+	Vector							relativeScale;			/**< Non-uniform scaling of the component relative to its parent */
+	RotationConversionCache			worldRotationCache;		/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with GetComponentTransform().GetRotation() */	
+	RotationConversionCache			relativeRotationCache;	/**< Cache that avoids Quat<->Rotator conversions if possible. Only to be used with 'relativeRotation' */
+	CTransform						componentToWorld;		/**< Current transform of the component, relative to the world */
+	std::vector<CSceneComponent*>	attachChildren;			/**< List of child SceneComponents that are attached to us */
 };
 
 #endif // !SCENECOMPONENT_H

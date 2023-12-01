@@ -73,6 +73,8 @@ AActor::AActor()
 #if WITH_EDITOR
 	, bSelected( false )
 #endif // WITH_EDITOR
+
+	, worldPrivate( nullptr )
 {}
 
 /*
@@ -93,6 +95,7 @@ AActor::StaticInitializeClass
 */
 void AActor::StaticInitializeClass()
 {
+	// Native properties
 	new( staticClass, TEXT( "bVisibility" ) )	CBoolProperty( CPP_PROPERTY( ThisClass, bVisibility ), TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPF_Edit );
 	new( staticClass, TEXT( "bIsStatic" ) )		CBoolProperty( CPP_PROPERTY( ThisClass, bIsStatic ), TEXT( "Actor" ), TEXT( "Is static actor" ), CPF_Edit );
 }
@@ -167,7 +170,7 @@ void AActor::Serialize( class CArchive& InArchive )
 	for ( uint32 index = 0, count = InArchive.IsSaving() ? ownedComponents.size() : numComponents; index < count; ++index )
 	{
 		uint32					componentSize = 0;
-		ActorComponentRef_t		ownedComponent;
+		CActorComponent*		ownedComponent;
 		std::wstring			name;
 		std::wstring			className;
 
@@ -195,7 +198,7 @@ void AActor::Serialize( class CArchive& InArchive )
 			CClass*		cclass = CReflectionEnvironment::Get().FindClass( className.c_str() );
 			for ( uint32 indexComponent = 0, countComponents = ownedComponents.size(); indexComponent < countComponents; ++indexComponent )
 			{
-				ActorComponentRef_t		component = ownedComponents[indexComponent];
+				CActorComponent*		component = ownedComponents[indexComponent];
 				if ( name == component->GetName() && cclass == component->GetClass() )
 				{
 					ownedComponent = component;
@@ -359,7 +362,7 @@ std::wstring AActor::GetActorIcon() const
 AActor::CreateComponent
 ==================
 */
-ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly /*= false*/ )
+CActorComponent* AActor::CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly /*= false*/ )
 {
 	Assert( InClass );
 
@@ -465,4 +468,14 @@ void AActor::ResetOwnedComponents()
 	ownedComponents.clear();
 	collisionComponent	= nullptr;
 	rootComponent		= nullptr;
+}
+
+/*
+==================
+AActor::GetWorld_Uncached
+==================
+*/
+CWorld* AActor::GetWorld_Uncached() const
+{
+	return ( CWorld* )GetTypedOuter( CWorld::StaticClass() );
 }

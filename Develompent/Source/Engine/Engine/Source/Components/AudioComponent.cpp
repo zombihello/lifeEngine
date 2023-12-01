@@ -43,6 +43,7 @@ CAudioComponent::StaticInitializeClass
 */
 void CAudioComponent::StaticInitializeClass()
 {
+	// Native properties
 	new( staticClass, TEXT( "bIsLoop" ) )		CBoolProperty( CPP_PROPERTY( ThisClass, bIsLoop ), TEXT( "Audio" ), TEXT( "Is looped" ), CPF_Edit );
 	new( staticClass, TEXT( "bIsUISound" ) )	CBoolProperty( CPP_PROPERTY( ThisClass, bIsUISound ), TEXT( "Audio" ), TEXT( "Is UI sound" ), CPF_Edit );
 	new( staticClass, TEXT( "bIsAutoPlay" ) )	CBoolProperty( CPP_PROPERTY( ThisClass, bIsAutoPlay ), TEXT( "Audio" ), TEXT( "Is need auto play on begin play" ), CPF_Edit );

@@ -15,7 +15,7 @@ CShaderManager*												g_ShaderManager = new CShaderManager();
 std::wstring												g_CookedDir = TEXT( "" );
 class CBaseEngine*											g_Engine = nullptr;
 CInputSystem*												g_InputSystem = new CInputSystem();
-CWorld*														g_World = new CWorld();
+CWorld*														g_World = nullptr;
 bool														g_UseMaxTickRate = true;
 CCameraManager*												g_CameraManager = new CCameraManager();
 

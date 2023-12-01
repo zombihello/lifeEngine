@@ -13,6 +13,8 @@
 #include "WorldEd.h"
 #endif // WITH_EDITOR
 
+IMPLEMENT_CLASS( CWorld )
+
 /*
 ==================
 CWorld::CWorld
@@ -28,11 +30,25 @@ CWorld::CWorld()
 
 /*
 ==================
-CWorld::~CWorld
+CWorld::StaticInitializeClass
 ==================
 */
-CWorld::~CWorld()
+void CWorld::StaticInitializeClass()
 {
+	// Native properties
+	CArrayProperty* actorsArray = new( staticClass, NAME_None ) CArrayProperty( CPP_PROPERTY( ThisClass, actors ), NAME_None, TEXT( "" ), CPF_None );
+	new( actorsArray, NAME_None ) CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, AActor::StaticClass() );
+}
+
+/*
+==================
+CWorld::BeginDestroy
+==================
+*/
+void CWorld::BeginDestroy()
+{
+	Super::BeginDestroy();
+
 	CleanupWorld();
 	delete scene;
 }
@@ -82,7 +98,7 @@ void CWorld::EndPlay()
 	// End play and destroy physics for all actors
 	for ( uint32 index = 0; index < ( uint32 ) actors.size(); ++index )
 	{
-		ActorRef_t		actor = actors[ index ];
+		AActor*		actor = actors[ index ];
 		actor->EndPlay();
 		actor->TermPhysics();
 	}
@@ -198,6 +214,7 @@ void CWorld::CleanupWorld()
 	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
 	{
 		actors[ index ]->Destroyed();
+		actors[ index ]->MarkPendingKill();
 	}
 
 	// Broadcast event of destroyed actors
@@ -226,11 +243,11 @@ void CWorld::CleanupWorld()
 CWorld::SpawnActor
 ==================
 */
-ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /* = Math::rotatorZero */, const CName& InName /* = NAME_None */)
+AActor* CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /* = Math::rotatorZero */, const CName& InName /* = NAME_None */)
 {
 	Assert( InClass );
 
-	AActor*		actor = InClass->CreateObject<AActor>( nullptr, InName );
+	AActor*		actor = InClass->CreateObject<AActor>( this, InName );
 	Assert( actor );
 
 	// Set default actor location with rotation
@@ -255,7 +272,7 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
 	
 	// Broadcast event of spawned actor
 #if WITH_EDITOR
-	std::vector<ActorRef_t>		spawnedActors = { actor };
+	std::vector<AActor*>		spawnedActors = { actor };
 	EditorDelegates::onActorsSpawned.Broadcast( spawnedActors );
 	MarkDirty();
 #endif // WITH_EDITOR
@@ -268,7 +285,7 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
 CWorld::DestroyActor
 ==================
 */
-void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
+void CWorld::DestroyActor( AActor* InActor, bool InIsIgnorePlaying )
 {
 	Assert( InActor );
 
@@ -295,13 +312,14 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 		UnselectActor( InActor );
 	}
 
-	std::vector<ActorRef_t>		destroyedActors = { InActor };
+	std::vector<AActor*>		destroyedActors = { InActor };
 	EditorDelegates::onActorsDestroyed.Broadcast( destroyedActors );
 	MarkDirty();
 #endif // WITH_EDITOR
 
 	// Call events of destroyed actor
 	InActor->Destroyed();
+	InActor->MarkPendingKill();
 
 	// Remove actor from array of all actors in world
 	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
@@ -335,7 +353,7 @@ void CWorld::UpdateHitProxiesId()
 CWorld::SelectActor
 ==================
 */
-void CWorld::SelectActor( ActorRef_t InActor )
+void CWorld::SelectActor( AActor* InActor )
 {
 	Assert( InActor );
 	if ( InActor->IsSelected() )
@@ -346,7 +364,7 @@ void CWorld::SelectActor( ActorRef_t InActor )
 	InActor->SetSelected( true );
 	selectedActors.push_back( InActor );
 
-	EditorDelegates::onActorsSelected.Broadcast( std::vector<ActorRef_t>{ InActor } );
+	EditorDelegates::onActorsSelected.Broadcast( std::vector<AActor*>{ InActor } );
 }
 
 /*
@@ -354,7 +372,7 @@ void CWorld::SelectActor( ActorRef_t InActor )
 CWorld::UnselectActor
 ==================
 */
-void CWorld::UnselectActor( ActorRef_t InActor )
+void CWorld::UnselectActor( AActor* InActor )
 {
 	Assert( InActor );
 	if ( !InActor->IsSelected() )
@@ -372,7 +390,7 @@ void CWorld::UnselectActor( ActorRef_t InActor )
 		}
 	}
 
-	EditorDelegates::onActorsUnselected.Broadcast( std::vector<ActorRef_t>{ InActor } );
+	EditorDelegates::onActorsUnselected.Broadcast( std::vector<AActor*>{ InActor } );
 }
 
 /*
@@ -380,12 +398,12 @@ void CWorld::UnselectActor( ActorRef_t InActor )
 CWorld::SelectActors
 ==================
 */
-void CWorld::SelectActors( const std::vector<ActorRef_t>& InActors )
+void CWorld::SelectActors( const std::vector<AActor*>& InActors )
 {
 	bool		bNeedBroadcast = false;
 	for ( uint32 index = 0, count = InActors.size(); index < count; ++index )
 	{
-		ActorRef_t		actor = InActors[index];
+		AActor* actor = InActors[index];
 		if ( !actor->IsSelected() )
 		{
 			bNeedBroadcast = true;
@@ -405,12 +423,12 @@ void CWorld::SelectActors( const std::vector<ActorRef_t>& InActors )
 CWorld::UnselectActors
 ==================
 */
-void CWorld::UnselectActors( const std::vector<ActorRef_t>& InActors )
+void CWorld::UnselectActors( const std::vector<AActor*>& InActors )
 {
-	std::vector<ActorRef_t>		unselectedActors;
+	std::vector<AActor*>		unselectedActors;
 	for ( uint32 index = 0, count = InActors.size(); index < count; ++index )
 	{
-		ActorRef_t		actor = InActors[index];
+		AActor* actor = InActors[index];
 		if ( actor->IsSelected() )
 		{
 			actor->SetSelected( false );
@@ -447,7 +465,7 @@ void CWorld::UnselectAllActors()
 		selectedActors[ index ]->SetSelected( false );
 	}
 
-	std::vector<ActorRef_t>		unselectedActors;
+	std::vector<AActor*>		unselectedActors;
 	std::swap( selectedActors, unselectedActors );
 	EditorDelegates::onActorsUnselected.Broadcast( unselectedActors );
 }

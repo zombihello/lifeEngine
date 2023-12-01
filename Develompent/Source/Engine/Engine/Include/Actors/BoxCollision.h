@@ -48,13 +48,13 @@ public:
 	 * Get box component
 	 * @return Return box component
 	 */
-	FORCEINLINE TRefCountPtr< CBoxComponent > GetBoxComponent() const
+	FORCEINLINE CBoxComponent* GetBoxComponent() const
 	{
 		return boxComponent;
 	}
 
 private:
-	TRefCountPtr<CBoxComponent>			boxComponent;		/**< Box component */
+	CBoxComponent*			boxComponent;		/**< Box component */
 };
 
 #endif // !ABOXCOLLISION_H

@@ -45,7 +45,7 @@ public:
 	 * @param InRotation    Rotation actor on spawn
 	 * @return Return spawned actor. If failed returning NULL
 	 */
-	static ActorRef_t SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
+	static AActor* SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
 
 	/**
 	 * @brief Initialize actor properties
@@ -68,16 +68,16 @@ public:
 	 * Get audio component
 	 * @return Return audio component
 	 */
-	FORCEINLINE TRefCountPtr<CAudioComponent> GetAudioComponent() const
+	FORCEINLINE CAudioComponent* GetAudioComponent() const
 	{
 		return audioComponent;
 	}
 
 private:
-	TRefCountPtr<CAudioComponent>			audioComponent;		/**< Audio component */
+	CAudioComponent*			audioComponent;		/**< Audio component */
 
 #if WITH_EDITOR
-	TRefCountPtr<CSpriteComponent>			gizmoComponent;		/**< Gizmo component */
+	CSpriteComponent*			gizmoComponent;		/**< Gizmo component */
 #endif // WITH_EDITOR
 };
 

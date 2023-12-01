@@ -69,9 +69,9 @@ public:
 	}
 
 private:
-	CScene*								scene;					/**< Scene for preview material */
-	TSharedPtr<CStaticMesh>				staticMesh;				/**< Static mesh */
-	TRefCountPtr<CStaticMeshComponent>	staticMeshComponent;	/**< Static mesh component */
+	CScene*						scene;					/**< Scene for preview material */
+	TSharedPtr<CStaticMesh>		staticMesh;				/**< Static mesh */
+	CStaticMeshComponent*		staticMeshComponent;	/**< Static mesh component */
 };
 
 #endif // !STATICMESHPREVIEWVIEWPORTCLIENT_H

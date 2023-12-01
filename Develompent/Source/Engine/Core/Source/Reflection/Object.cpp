@@ -242,6 +242,25 @@ bool CObject::InternalIsA( const CClass* InClass ) const
 
 /*
 ==================
+CObject::GetTypedOuter
+==================
+*/
+CObject* CObject::GetTypedOuter( CClass* InTargetClass ) const
+{
+	CObject*	result = nullptr;
+	for ( CObject* nextOuter = GetOuter(); !result && nextOuter; nextOuter = nextOuter->GetOuter() )
+	{
+		if ( IsA( nextOuter, InTargetClass ) )
+		{
+			result = nextOuter;
+		}
+	}
+
+	return result;
+}
+
+/*
+==================
 CObject::IsValid
 ==================
 */

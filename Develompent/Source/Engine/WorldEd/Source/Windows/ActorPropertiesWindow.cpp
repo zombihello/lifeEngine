@@ -77,13 +77,13 @@ void CActorPropertiesWindow::OnTick()
 CActorPropertiesWindow::OnActorsUnSelected
 ==================
 */
-void CActorPropertiesWindow::OnActorsUnSelected( const std::vector<ActorRef_t>& InActors )
+void CActorPropertiesWindow::OnActorsUnSelected( const std::vector<AActor*>& InActors )
 {
 	// Destroy the property tree created earlier
 	DestroyPropertyTree();
 
 	// Getting an array of selected actors (we ignore InActors because it may not contain all of the selected actors)
-	const std::vector<ActorRef_t>&		selectedActors = g_World->GetSelectedActors();
+	const std::vector<AActor*>&		selectedActors = g_World->GetSelectedActors();
 	if ( selectedActors.empty() )
 	{
 		return;

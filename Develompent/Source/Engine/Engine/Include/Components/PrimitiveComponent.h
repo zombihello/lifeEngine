@@ -16,12 +16,6 @@
 
 /**
  * @ingroup Engine
- * Typedef of pointer to primitive component
- */
-typedef TRefCountPtr< class CPrimitiveComponent >		PrimitiveComponentRef_t;
-
-/**
- * @ingroup Engine
  * PrimitiveComponents are SceneComponents that contain or generate some sort of geometry, generally to be rendered or used as collision data.
  */
 class CPrimitiveComponent : public CSceneComponent

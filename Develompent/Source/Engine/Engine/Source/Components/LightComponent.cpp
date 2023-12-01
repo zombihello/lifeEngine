@@ -69,7 +69,7 @@ CLightComponent::Spawned
 void CLightComponent::Spawned()
 {
 	Super::Spawned();
-	g_World->GetScene()->AddLight( this );
+	GetWorld()->GetScene()->AddLight( this );
 }
 
 /*
@@ -80,7 +80,7 @@ CLightComponent::Destroyed
 void CLightComponent::Destroyed()
 {
 	Super::Destroyed();
-	g_World->GetScene()->RemoveLight( this );
+	GetWorld()->GetScene()->RemoveLight( this );
 }
 
 /*

@@ -14,8 +14,8 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	: CEditorLevelViewportClient( LVT_Perspective )
 	, scene( new CScene() )
 	, material( InMaterial )
-	, sphereComponent( new CSphereComponent() )
-	, pointLightComponent( new CPointLightComponent() )
+	, sphereComponent( nullptr )
+	, pointLightComponent( nullptr )
 {
 	// Init view
 	bIgnoreInput			= true;
@@ -27,12 +27,16 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	viewRotationQuat		= Math::quaternionZero;
 
 	// Init scene
+	sphereComponent = new( nullptr, NAME_None ) CSphereComponent();
+	sphereComponent->AddToRoot();
 	sphereComponent->SetRadius( 40.f );
 	sphereComponent->SetMaterial( InMaterial->GetAssetHandle() );
 	sphereComponent->SetVisibility( true );
 	sphereComponent->SetRelativeRotation( CRotator( 90.f, 0.f, 0.f ) );
 	scene->AddPrimitive( sphereComponent );
 
+	pointLightComponent = new( nullptr, NAME_None ) CPointLightComponent();
+	pointLightComponent->AddToRoot();
 	pointLightComponent->SetRelativeLocation( Vector( 0.f, 20.f, -80.f ) );
 	scene->AddLight( pointLightComponent );
 }
@@ -45,6 +49,8 @@ CMaterialPreviewViewportClient::~CMaterialPreviewViewportClient
 CMaterialPreviewViewportClient::~CMaterialPreviewViewportClient()
 {
 	FlushRenderingCommands();
+	sphereComponent->RemoveFromRoot();
+	pointLightComponent->RemoveFromRoot();
 	delete scene;
 }
 

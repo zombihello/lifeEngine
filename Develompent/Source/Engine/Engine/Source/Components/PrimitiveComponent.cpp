@@ -49,7 +49,7 @@ CPrimitiveComponent::Spawned
 void CPrimitiveComponent::Spawned()
 {
 	Super::Spawned();
-	g_World->GetScene()->AddPrimitive( this );
+	GetWorld()->GetScene()->AddPrimitive( this );
 }
 
 /*
@@ -60,7 +60,7 @@ CPrimitiveComponent::Destroyed
 void CPrimitiveComponent::Destroyed()
 {
 	Super::Destroyed();
-	g_World->GetScene()->RemovePrimitive( this );
+	GetWorld()->GetScene()->RemovePrimitive( this );
 }
 
 /*

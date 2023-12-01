@@ -64,7 +64,7 @@ public:
 	 * @brief Get controller of character
 	 * @return Return controller of character. If not exist return nullptr
 	 */
-	FORCEINLINE TRefCountPtr<ABaseController> GetController() const
+	FORCEINLINE ABaseController* GetController() const
 	{
 		return controller;
 	}
@@ -73,14 +73,14 @@ public:
 	 * @brief Get character movement component
 	 * @return Return character movement component
 	 */
-	FORCEINLINE TRefCountPtr<CCharacterMovementComponent> GetCharacterMovement() const
+	FORCEINLINE CCharacterMovementComponent* GetCharacterMovement() const
 	{
 		return characterMovement;
 	}
 
 private:
-	TRefCountPtr<ABaseController>						controller;				/**< Controller of this character */
-	TRefCountPtr<CCharacterMovementComponent>			characterMovement;		/**< Character movement component */
+	ABaseController*						controller;				/**< Controller of this character */
+	CCharacterMovementComponent*			characterMovement;		/**< Character movement component */
 };
 
 #endif // !CHARACTER_H

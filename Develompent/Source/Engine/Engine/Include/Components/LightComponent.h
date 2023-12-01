@@ -16,12 +16,6 @@
 
 /**
  * @ingroup Engine
- * Typedef of pointer to light component
- */
-typedef TRefCountPtr<class CLightComponent>		LightComponentRef_t;
-
-/**
- * @ingroup Engine
  * Enumeration of light type
  */
 enum ELightType

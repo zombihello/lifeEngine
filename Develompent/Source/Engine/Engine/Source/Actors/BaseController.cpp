@@ -2,7 +2,6 @@
 #include "Actors/Character.h"
 
 IMPLEMENT_CLASS( ABaseController )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( ABaseController )
 
 /*
 ==================
@@ -11,6 +10,17 @@ ABaseController::ABaseController
 */
 ABaseController::ABaseController()
 {}
+
+/*
+==================
+ABaseController::StaticInitializeClass
+==================
+*/
+void ABaseController::StaticInitializeClass()
+{
+	// Native properties
+	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, character ), NAME_None, TEXT( "" ), CPF_None, ACharacter::StaticClass() );
+}
 
 /*
 ==================
@@ -37,7 +47,7 @@ void ABaseController::SetCharacter( class ACharacter* InCharacter )
 ABaseController::GetCharacter
 ==================
 */
-TRefCountPtr<ACharacter> ABaseController::GetCharacter() const
+ACharacter* ABaseController::GetCharacter() const
 {
 	return character;
 }

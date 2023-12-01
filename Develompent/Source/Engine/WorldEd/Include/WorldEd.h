@@ -98,12 +98,12 @@ struct EditorDelegates
 	/**
 	 * @brief Delegate for called event when actor spawned
 	 */
-	DECLARE_MULTICAST_DELEGATE( COnActorsSpawned, const std::vector<ActorRef_t>& /*InActors*/ );
+	DECLARE_MULTICAST_DELEGATE( COnActorsSpawned, const std::vector<class AActor*>& /*InActors*/ );
 
 	/**
 	 * @brief Delegate for called event when actor destroyed
 	 */
-	DECLARE_MULTICAST_DELEGATE( COnActorsDestroyed, const std::vector<ActorRef_t>& /*InActors*/ );
+	DECLARE_MULTICAST_DELEGATE( COnActorsDestroyed, const std::vector<class AActor*>& /*InActors*/ );
 
 	/**
 	 * @brief Delegate for called event when changed editor mode
@@ -123,12 +123,12 @@ struct EditorDelegates
 	/**
 	 * @brief Delegate for called event when actors selected
 	 */
-	DECLARE_MULTICAST_DELEGATE( COnActorsSelected, const std::vector<ActorRef_t>& /*InActors*/ );
+	DECLARE_MULTICAST_DELEGATE( COnActorsSelected, const std::vector<class AActor*>& /*InActors*/ );
 
 	/**
 	 * @brief Delegate for called event when actors unselected
 	 */
-	DECLARE_MULTICAST_DELEGATE( COnActorsUnselected, const std::vector<ActorRef_t>& /*InActors*/ );
+	DECLARE_MULTICAST_DELEGATE( COnActorsUnselected, const std::vector<class AActor*>& /*InActors*/ );
 
 	/**
 	 * @brief Delegate for called event when map was marked dirty

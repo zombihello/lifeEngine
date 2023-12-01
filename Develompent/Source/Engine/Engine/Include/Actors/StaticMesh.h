@@ -51,7 +51,7 @@ public:
 	 * @param InRotation    Rotation actor on spawn
 	 * @return Return spawned actor. If failed returning NULL
 	 */
-	static ActorRef_t SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
+	static AActor* SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
 
 	/**
 	 * @brief Get path to icon of actor for exploer level in WorldEd
@@ -61,7 +61,7 @@ public:
 #endif // WITH_EDITOR
 
 private:
-	TRefCountPtr<CStaticMeshComponent>			staticMeshComponent;		/**< Static mesh component */
+	CStaticMeshComponent*			staticMeshComponent;		/**< Static mesh component */
 };
 
 #endif // !ASTATICMESH_H

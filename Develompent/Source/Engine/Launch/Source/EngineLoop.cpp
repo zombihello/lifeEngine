@@ -18,6 +18,7 @@
 #include "Reflection/ReflectionEnvironment.h"
 #include "Reflection/ObjectPackage.h"
 #include "Reflection/ObjectGC.h"
+#include "Reflection/ObjectIterator.h"
 #include "Math/Color.h"
 #include "Misc/CommandLine.h"
 #include "Misc/TableOfContents.h"
@@ -212,6 +213,13 @@ void CEngineLoop::LoadScriptPackages()
 				}
 			}
 		}
+	}
+
+	// Bind all classes
+	for ( CObjectIterator it( CClass::StaticClass() ); it; ++it )
+	{
+		CClass*		theClass = ExactCast<CClass>( *it );
+		theClass->Bind();
 	}
 }
 
@@ -503,6 +511,7 @@ void CEngineLoop::Exit()
 	g_RHI->Destroy();
 
 	g_Window->Close();
+	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 	g_Log->TearDown();
 	g_Config.Shutdown();
 	g_CommandLine.Shutdown();

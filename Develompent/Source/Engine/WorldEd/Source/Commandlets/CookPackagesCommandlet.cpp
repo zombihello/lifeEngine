@@ -111,7 +111,14 @@ bool CCookPackagesCommandlet::CookMap( const ResourceInfo& InMapInfo )
 	}
 
 	// Clear world for spawn new actors
-	g_World->CleanupWorld();
+	if ( g_World )
+	{
+		g_World->RemoveFromRoot();
+		g_World = nullptr;
+	}
+
+	g_World = new( nullptr, NAME_None ) CWorld();
+	g_World->AddToRoot();
 
 	// Spawn tiles
 	SpawnTilesInWorld( tmxMap, tilesets );
@@ -425,7 +432,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 						continue;
 					}
 
-					ActorRef_t		actor = g_World->SpawnActor( classActor, tmxObject.transform.GetLocation(), tmxObject.transform.GetRotation() );
+					AActor*		actor = g_World->SpawnActor( classActor, tmxObject.transform.GetLocation(), tmxObject.transform.GetRotation() );
 					actor->SetName( tmxObject.name.c_str() );
 					if ( !actor->InitProperties( tmxObject.actorVars, this ) )
 					{

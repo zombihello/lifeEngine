@@ -40,17 +40,17 @@ public:
 	 * Get directional light component
 	 * @return Return directional light component
 	 */
-	FORCEINLINE TRefCountPtr<CDirectionalLightComponent> GetDirectionalLightComponent() const
+	FORCEINLINE CDirectionalLightComponent* GetDirectionalLightComponent() const
 	{
 		return directionalLightComponent;
 	}
 
 private:
-	TRefCountPtr<CDirectionalLightComponent>			directionalLightComponent;		/**< Directional light component */
+	CDirectionalLightComponent*		directionalLightComponent;		/**< Directional light component */
 
 #if WITH_EDITOR
-	TRefCountPtr<CSpriteComponent>						gizmoComponent;					/**< Gizmo component */
-	TRefCountPtr<CArrowComponent>						arrowComponent;					/**< Arrow component */
+	CSpriteComponent*				gizmoComponent;					/**< Gizmo component */
+	CArrowComponent*				arrowComponent;					/**< Arrow component */
 #endif // WITH_EDITOR
 };
 

@@ -11,8 +11,6 @@
 
 #include <vector>
 
-#include "Misc/RefCounted.h"
-#include "Misc/EngineTypes.h"
 #include "Math/Rect.h"
 #include "Math/Color.h"
 #include "System/Delegate.h"
@@ -544,7 +542,7 @@ DECLARE_MULTICAST_DELEGATE( COnActorDestroyed, class AActor* );
  * @ingroup Engine
  * @brief Base class of all actors in world
  */
-class AActor : public CObject, public CRefCounted
+class AActor : public CObject
 {
 	DECLARE_CLASS( AActor, CObject, 0, 0 )
 
@@ -638,7 +636,7 @@ public:
 	 * @brief Get array of owned components
 	 * @return Return array owned components
 	 */
-	FORCEINLINE const std::vector< ActorComponentRef_t >& GetComponents() const
+	FORCEINLINE const std::vector<CActorComponent*>& GetComponents() const
 	{
 		return ownedComponents;
 	}
@@ -900,7 +898,7 @@ public:
 	 * @brief Get collision component
 	 * @return Return collision component. If not exist return nullptr
 	 */
-	FORCEINLINE TRefCountPtr<CPrimitiveComponent> GetCollisionComponent() const
+	FORCEINLINE CPrimitiveComponent* GetCollisionComponent() const
 	{
 		return collisionComponent;
 	}
@@ -912,15 +910,6 @@ public:
 	FORCEINLINE bool IsStatic() const
 	{
 		return bIsStatic;
-	}
-
-	/**
-	 * @brief Is this actor has begun the destruction process
-	 * @return Return TRUE if this actor has begun destruction, or if this actor has been destroyed already
-	 */
-	FORCEINLINE bool IsPendingKill() const
-	{
-		return bActorIsBeingDestroyed;
 	}
 
 	/**
@@ -942,7 +931,7 @@ protected:
 	 * @param InEditorOnly	Is editor only component
 	 * @return Return pointer to component
 	 */
-	ActorComponentRef_t CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly = false );
+	CActorComponent* CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly = false );
 
 	/**
 	 * @brief Create component and add to array of owned components
@@ -950,10 +939,10 @@ protected:
 	 * @param InName	Name component
 	 * @return Return pointer to component
 	 */
-	template< typename TClass >
-	FORCEINLINE TRefCountPtr< TClass > CreateComponent( const CName& InName, bool InEditorOnly = false )
+	template<typename TClass>
+	FORCEINLINE TClass* CreateComponent( const CName& InName, bool InEditorOnly = false )
 	{
-		CActorComponent*		newComponent = CreateComponent( TClass::StaticClass(), InName, InEditorOnly );
+		CActorComponent*	newComponent = CreateComponent( TClass::StaticClass(), InName, InEditorOnly );
 		return ( TClass* )newComponent;
 	}
 
@@ -983,10 +972,27 @@ protected:
 		return onActorDestroyed;
 	}
 
-	TRefCountPtr<CSceneComponent>				rootComponent;			/**< Root component, default is null */
-	TRefCountPtr<CPrimitiveComponent>			collisionComponent;		/**< Collision component */
+	/**
+	 * @brief Get world where this actor is
+	 * @return Return a pointer to world where this actor is
+	 */
+	FORCEINLINE CWorld* GetWorld() const
+	{
+		return worldPrivate ? worldPrivate : GetWorld_Uncached();
+	}
+
+	CSceneComponent*							rootComponent;			/**< Root component, default is null */
+	CPrimitiveComponent*						collisionComponent;		/**< Collision component */
 
 private:
+	/**
+	 * @brief Get world where this actor is
+	 * This function use for cache pointer to world
+	 * 
+	 * @return Return a pointer to world where this actor is
+	 */
+	CWorld* GetWorld_Uncached() const;
+
 	bool										bIsStatic;				/**< Is static actor */
 	bool										bNeedReinitCollision;	/**< Is need reinit collision component */
 	bool										bActorIsBeingDestroyed;	/**< Actor is being destroyed */
@@ -997,7 +1003,8 @@ private:
 	bool										bSelected;				/**< Is selected this actor */
 #endif // WITH_EDITOR
 
-	std::vector<ActorComponentRef_t>			ownedComponents;		/**< Owned components */
+	class CWorld*								worldPrivate;			/**< Pointer to world where this actor is */
+	std::vector<CActorComponent*>				ownedComponents;		/**< Owned components */
 	mutable COnActorDestroyed					onActorDestroyed;		/**< Called event when actor is destroyed */
 
 #if ENABLE_HITPROXY

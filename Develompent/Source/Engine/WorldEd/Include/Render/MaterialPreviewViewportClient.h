@@ -70,10 +70,10 @@ public:
 	}
 
 private:
-	CScene*								scene;					/**< Scene for preview material */
-	TSharedPtr<CMaterial>				material;				/**< Material */
-	TRefCountPtr<CSphereComponent> 		sphereComponent;		/**< Sphere component */
-	TRefCountPtr<CPointLightComponent>	pointLightComponent;	/**< Point light component */
+	CScene*						scene;					/**< Scene for preview material */
+	TSharedPtr<CMaterial>		material;				/**< Material */
+	CSphereComponent* 			sphereComponent;		/**< Sphere component */
+	CPointLightComponent*		pointLightComponent;	/**< Point light component */
 };
 
 #endif // !MATERIALPREVIEWVIEWPORTCLIENT_H

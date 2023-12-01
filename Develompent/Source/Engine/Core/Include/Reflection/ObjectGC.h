@@ -18,6 +18,12 @@
 
 /**
  * @ingroup Core
+ * @brief Context sensitive keep flags for garbage collection
+ */
+#define GARBAGE_COLLECTION_KEEPFLAGS		OBJECT_Native
+
+/**
+ * @ingroup Core
  * @brief Enum of different supported reference type tokens
  */
 enum EGCReferenceType

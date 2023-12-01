@@ -131,7 +131,7 @@ void CLevelViewportWindow::OnTick()
 	DrawPopupMenu();
 
 	// Draw transform gizmos if has selected actors
-	std::vector<ActorRef_t>		selectedActors = g_World->GetSelectedActors();
+	std::vector<AActor*>		selectedActors = g_World->GetSelectedActors();
 	if ( selectedActors.size() > 0 )
 	{
 		bool			bOrhtoViewportType	= viewportClient.GetViewportType() != LVT_Perspective;
@@ -179,7 +179,7 @@ void CLevelViewportWindow::OnTick()
 		}
 
 		CSceneView*	sceneView				= viewportClient.CalcSceneView( viewportWidget.GetSize().x, viewportWidget.GetSize().y );
-		ActorRef_t	actorCenter				= selectedActors[selectedActors.size() - 1];
+		AActor*		actorCenter				= selectedActors[selectedActors.size() - 1];
 		Matrix		actorTransformMatrix	= actorCenter->GetActorTransform().ToMatrix();
 		Matrix		deltaMatrix;
 
@@ -237,7 +237,7 @@ void CLevelViewportWindow::OnTick()
 			// Apply new transformation to actors
 			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
 			{
-				ActorRef_t		actor = selectedActors[index];
+				AActor*		actor = selectedActors[index];
 				switch ( guizmoOperationType )
 				{
 					// Translate
@@ -380,7 +380,7 @@ void CLevelViewportWindow::ProcessEvent( struct WindowEvent& InWindowEvent )
 				if ( hitProxyId.IsValid() )
 				{
 					uint32			index = hitProxyId.GetIndex();
-					ActorRef_t		actor = g_World->GetActor( index > 0 ? index - 1 : index );
+					AActor*			actor = g_World->GetActor( index > 0 ? index - 1 : index );
 
 					if ( bControlDown && actor->IsSelected() )
 					{

@@ -246,7 +246,7 @@ public:
 	 * @brief Get owner primitive component
 	 * @return Return pointer to owner primitive component, if not exist return NULL
 	 */
-	FORCEINLINE TRefCountPtr< class CPrimitiveComponent > GetOwnerComponent() const
+	FORCEINLINE class CPrimitiveComponent* GetOwnerComponent() const
 	{
 		return ownerComponent;
 	}
@@ -288,16 +288,16 @@ public:
 	}
 
 private:
-	bool											bStatic;			/**< Is static rigid body */
-	bool											bEnableGravity;		/**< Enable gravity */
-	bool											bSimulatePhysics;	/**< Need simulate physics */
-	bool											bStartAwake;		/**< Start awake */
-	bool											bDirty;				/**< Is body is dirty and need reinit hem */
-	uint32											lockFlags;			/**< Lock flags */
-	float											mass;				/**< Mass of body */
-	TRefCountPtr< class CPrimitiveComponent >		ownerComponent;		/**< PrimitiveComponent containing this body */	
-	PhysicsBodySetupRef_t							bodySetup;			/**< Body setup */
-	PhysicsActorHandle_t							handle;				/**< Handle to physics actor */
+	bool						bStatic;			/**< Is static rigid body */
+	bool						bEnableGravity;		/**< Enable gravity */
+	bool						bSimulatePhysics;	/**< Need simulate physics */
+	bool						bStartAwake;		/**< Start awake */
+	bool						bDirty;				/**< Is body is dirty and need reinit hem */
+	uint32						lockFlags;			/**< Lock flags */
+	float						mass;				/**< Mass of body */
+	class CPrimitiveComponent*	ownerComponent;		/**< PrimitiveComponent containing this body */	
+	PhysicsBodySetupRef_t		bodySetup;			/**< Body setup */
+	PhysicsActorHandle_t		handle;				/**< Handle to physics actor */
 };
 
 #endif // !PHYSICSBODYINSTANCE_H

@@ -30,6 +30,7 @@ CCameraComponent::StaticInitializeClass
 */
 void CCameraComponent::StaticInitializeClass()
 {
+	// Native properties
 	new( staticClass, TEXT( "bIsActive" ) )			CBoolProperty( CPP_PROPERTY( ThisClass, bIsActive ), TEXT( "Camera" ), TEXT( "Is active camera. This field setted from CCameraManager::SetActiveCamera" ), CPF_Edit );
 	new( staticClass, TEXT( "bAutoViewData" ) )		CBoolProperty( CPP_PROPERTY( ThisClass, bAutoViewData ), TEXT( "Camera" ), TEXT( "Auto view data. If this flag is true, CCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic)" ), CPF_Edit );
 	new( staticClass, TEXT( "Projection Mode" ) )	CByteProperty( CPP_PROPERTY( ThisClass, projectionMode ), TEXT( "Camera" ), TEXT( "Projection mode" ), CPF_Edit, Enum::GetECameraProjectionMode() );

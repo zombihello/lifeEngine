@@ -22,7 +22,7 @@ public:
 	 * @param InOwner	Owner
 	 * @param InActor	Actor to rename
 	 */
-	CRenameActorRunnable( CExplorerLevelWindow* InOwner, ActorRef_t InActor )
+	CRenameActorRunnable( CExplorerLevelWindow* InOwner, AActor* InActor )
 		: owner( InOwner )
 		, actor( InActor )
 		, eventResponse( nullptr )
@@ -107,7 +107,7 @@ public:
 private:
 	CExplorerLevelWindow*	owner;			/**< Owner */
 	CEvent*					eventResponse;	/**< Event used when opened popup */
-	ActorRef_t				actor;			/**< Actor to rename */
+	AActor*					actor;			/**< Actor to rename */
 };
 
 /*
@@ -142,7 +142,7 @@ void CExplorerLevelWindow::OnTick()
 		// Print info about each actor on level
 		for ( uint32 index = 0; index < g_World->GetNumActors(); ++index )
 		{
-			ActorRef_t		actor = g_World->GetActor( index );
+			AActor*			actor = g_World->GetActor( index );
 			Assert( actor );
 			bool			bNewVisibility = actor->IsVisibility();
 
@@ -189,7 +189,7 @@ void CExplorerLevelWindow::OnTick()
 CExplorerLevelWindow::ProcessItemEvents
 ==================
 */
-void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, ActorRef_t InActor )
+void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, AActor* InActor )
 {
 	ImGui::SameLine();
 	{
@@ -244,24 +244,24 @@ void CExplorerLevelWindow::DrawPopupMenu()
 		// Rename
 		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneActor ) )
 		{
-			const std::vector<ActorRef_t>&		selectedActors = g_World->GetSelectedActors();
+			const std::vector<AActor*>&		selectedActors = g_World->GetSelectedActors();
 			g_ThreadFactory->CreateThread( new CRenameActorRunnable( this, selectedActors[0] ), CString::Format( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
 		}
 
 		// Duplicate
 		if ( ImGui::MenuItem( "Duplicate", "", nullptr, bSelectedActors ) )
 		{
-			std::vector<ActorRef_t>		selectedActors = g_World->GetSelectedActors();
+			std::vector<AActor*>		selectedActors = g_World->GetSelectedActors();
 			std::vector<byte>			memoryData;
 			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
 			{			
 				// Serialize actor to memory		
-				ActorRef_t				actor = selectedActors[index];
+				AActor*					actor = selectedActors[index];
 				CMemoryWriter			memoryWriter( memoryData );
 				actor->Serialize( memoryWriter );
 
 				// Spawn new actor and serialize data from memory
-				ActorRef_t				newActor = g_World->SpawnActor( actor->GetClass(), actor->GetActorLocation(), actor->GetActorRotation() );
+				AActor*					newActor = g_World->SpawnActor( actor->GetClass(), actor->GetActorLocation(), actor->GetActorRotation() );
 				CMemoryReading			memoryReading( memoryData );
 				newActor->Serialize( memoryReading );
 			}
@@ -270,7 +270,7 @@ void CExplorerLevelWindow::DrawPopupMenu()
 		// Delete
 		if ( ImGui::MenuItem( "Delete", "", nullptr, bSelectedActors ) )
 		{
-			std::vector<ActorRef_t>		selectedActors = g_World->GetSelectedActors();
+			std::vector<AActor*>		selectedActors = g_World->GetSelectedActors();
 			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
 			{
 				g_World->DestroyActor( selectedActors[index] );
