@@ -28,7 +28,7 @@ CBoxComponent::StaticInitializeClass
 */
 void CBoxComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Size" ) ) CVectorProperty( TEXT( "Primitive" ), TEXT( "Set size of box" ), STRUCT_OFFSET( ThisClass, size ), CPF_Edit, 1 );
+	new( staticClass, TEXT( "Size" ) ) CVectorProperty( CPP_PROPERTY( ThisClass, size ), TEXT( "Primitive" ), TEXT( "Set size of box" ), CPF_Edit, 1 );
 }
 
 #if WITH_EDITOR

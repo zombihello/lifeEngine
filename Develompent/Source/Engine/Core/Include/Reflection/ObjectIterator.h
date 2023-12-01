@@ -29,7 +29,7 @@ public:
 	FORCEINLINE CObjectIterator( CClass* InClass = CObject::StaticClass(), bool InOnlyGCObjects = false )
 		: theClass( InClass )
 		, currentIndex( InOnlyGCObjects ? GetFirstGCIndex() : INDEX_NONE )
-		, exclusionFlags( /*OBJECT_Unreachable*/ 0 )
+		, exclusionFlags( OBJECT_Unreachable )
 	{
 		Assert( InClass );
 		++*this;

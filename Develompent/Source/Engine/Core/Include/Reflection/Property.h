@@ -20,6 +20,15 @@
 
 /**
  * @ingroup Core
+ * @brief Macro for define Cpp properties
+ * 
+ * @param InClass	Class name
+ * @param InName	Property name
+ */
+#define CPP_PROPERTY( InClass, InName )	CppProperty, STRUCT_OFFSET( InClass, InName )
+
+/**
+ * @ingroup Core
  * @brief Enumeration property flags
  */
 enum EPropertyFlags
@@ -92,13 +101,13 @@ public:
 	/**
 	 * @brief Constructor
 	 * 
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 );
+	CProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 );
 
 	/**
 	 * @brief Get category
@@ -285,15 +294,15 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
-	 * @param InArraySize		Count of persistent variables
 	 * @param InEnum			If InEnum not null then it's mean this property is enum
+	 * @param InArraySize		Count of persistent variables
 	 */
-	CByteProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, CEnum* InEnum = nullptr, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CByteProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, CEnum* InEnum = nullptr, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, cenum( InEnum )
 	{}
 
@@ -357,14 +366,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CIntProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CIntProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -415,14 +424,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CFloatProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CFloatProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -479,8 +488,8 @@ public:
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CBoolProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CBoolProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -531,14 +540,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CColorProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CColorProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -591,15 +600,15 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InPropertyClass	Property class
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CObjectProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, CClass* InPropertyClass, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CObjectProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, CClass* InPropertyClass, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, propertyClass( InPropertyClass )
 	{}
 
@@ -681,15 +690,15 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset					Offset to property
 	 * @param InCategory				Category
 	 * @param InDescription				Description
-	 * @param InOffset					Offset to property
 	 * @param InFlags					Flags (see EPropertyFlags)
 	 * @param InDefaultComponentValue	Default component value
 	 * @param InArraySize				Count of persistent variables
 	 */
-	CVectorProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, float InDefaultComponentValue = 0.f, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CVectorProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, float InDefaultComponentValue = 0.f, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, defaultComponentValue( InDefaultComponentValue )
 	{}
 
@@ -753,14 +762,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CRotatorProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CRotatorProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -813,15 +822,15 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InAssetType		Asset type
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CAssetProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, EAssetType InAssetType, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CAssetProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, EAssetType InAssetType, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, assetType( InAssetType )
 	{}
 
@@ -887,14 +896,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CArrayProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CArrayProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, innerProperty( nullptr )
 	{}
 
@@ -982,15 +991,15 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InPropertyStruct	Property struct
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CStructProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, CStruct* InPropertyStruct, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CStructProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, CStruct* InPropertyStruct, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, propertyStruct( InPropertyStruct )
 	{}
 
@@ -1070,14 +1079,14 @@ public:
 	/**
 	 * @brief Constructor
 	 *
+	 * @param InOffset			Offset to property
 	 * @param InCategory		Category
 	 * @param InDescription		Description
-	 * @param InOffset			Offset to property
 	 * @param InFlags			Flags (see EPropertyFlags)
 	 * @param InArraySize		Count of persistent variables
 	 */
-	CStringProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize = 1 )
-		: CProperty( InCategory, InDescription, InOffset, InFlags, InArraySize )
+	CStringProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**

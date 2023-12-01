@@ -32,8 +32,8 @@ public:
 	 * @param InFieldName	Field name
 	 * @param InFlags		The object flags
 	 */
-	CField( const CName& InFieldName, ObjectFlags_t InFlags = OBJECT_None )
-		: CObject( InFieldName, InFlags )
+	CField( ENativeConstructor, const CName& InFieldName, ObjectFlags_t InFlags = OBJECT_None )
+		: CObject( NativeConstructor, InFieldName, InFlags )
 	{}
 
 	/**

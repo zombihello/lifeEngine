@@ -25,7 +25,7 @@ ASprite::StaticInitializeClass
 */
 void ASprite::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Sprite Component" ) ) CObjectProperty( TEXT( "Drawing" ), TEXT( "Sprite component" ), STRUCT_OFFSET( ThisClass, spriteComponent ), CPF_Edit, CSpriteComponent::StaticClass() );
+	new( staticClass, TEXT( "Sprite Component" ) ) CObjectProperty( CPP_PROPERTY( ThisClass, spriteComponent ), TEXT( "Drawing" ), TEXT( "Sprite component" ), CPF_Edit, CSpriteComponent::StaticClass() );
 }
 
 #if WITH_EDITOR

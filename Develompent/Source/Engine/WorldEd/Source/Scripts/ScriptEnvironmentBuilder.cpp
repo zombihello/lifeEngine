@@ -253,8 +253,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 		propertiesSize = superClass->GetPropertiesSize();
 		minAlignment = superClass->GetMinAlignment();
 
-		theClass = ::new CClass( className, 0, 0, propertiesSize, minAlignment, nullptr, superClass, superClass->GetWithinClass() );
-		theClass->SetClass( CClass::StaticClass() );
+		theClass = new( nullptr, className ) CClass( 0, 0, propertiesSize, minAlignment, superClass, superClass->GetWithinClass() );
 		reflectionEnvironment.AddClass( theClass );
 	}
 

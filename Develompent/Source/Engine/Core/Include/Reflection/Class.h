@@ -46,10 +46,30 @@ public:
 	 * @param InSuperClass			Super class
 	 * @param InWithinClass			Class where this class is within
 	 */
-	FORCEINLINE CClass( const CName& InClassName, uint32 InClassFlags, uint32 InClassCastFlags, uint32 InPropertiesSize, uint32 InMinAlignment, class CObject*( *InClassConstructor )( void* InPtr ), CClass* InSuperClass = nullptr, CClass* InWithinClass = nullptr )
-		: CStruct( InClassName, InPropertiesSize, InMinAlignment, InSuperClass )
+	FORCEINLINE CClass( ENativeConstructor, const CName& InClassName, uint32 InClassFlags, uint32 InClassCastFlags, uint32 InPropertiesSize, uint32 InMinAlignment, class CObject*( *InClassConstructor )( void* InPtr ), CClass* InSuperClass = nullptr, CClass* InWithinClass = nullptr )
+		: CStruct( NativeConstructor, InClassName, InPropertiesSize, InMinAlignment, InSuperClass )
 		, bHasAssembledReferenceTokenStream( false )
 		, ClassConstructor( InClassConstructor )
+		, classFlags( InClassFlags )
+		, classCastFlags( InClassCastFlags )
+		, withinClass( InWithinClass )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InClassFlags			Class flags
+	 * @param InClassCastFlags		Class cast flags
+	 * @param InPropertiesSize		Properties size in bytes
+	 * @param InMinAlignment		Minimum alignment for the class
+	 * @param InClassConstructor	Pointer to class constructor
+	 * @param InSuperClass			Super class
+	 * @param InWithinClass			Class where this class is within
+	 */
+	FORCEINLINE CClass( uint32 InClassFlags, uint32 InClassCastFlags, uint32 InPropertiesSize, uint32 InMinAlignment, CClass* InSuperClass = nullptr, CClass* InWithinClass = nullptr )
+		: CStruct( InPropertiesSize, InMinAlignment, InSuperClass )
+		, bHasAssembledReferenceTokenStream( false )
+		, ClassConstructor( nullptr )
 		, classFlags( InClassFlags )
 		, classCastFlags( InClassCastFlags )
 		, withinClass( InWithinClass )

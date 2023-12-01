@@ -47,9 +47,8 @@
 			{ \
 				std::vector<CName>		enums; \
 				TForEachEnum( INTERNAL_REGISTER_ENUM ) \
-				s_CEnum = ::new CEnum( TEXT( #TEnum ), enums ); \
+				s_CEnum = ::new CEnum( NativeConstructor, TEXT( #TEnum ), enums ); \
 				s_CEnum->SetClass( CEnum::StaticClass() ); \
-				s_CEnum->AddObjectFlag( OBJECT_RootSet | OBJECT_DisregardForGC ); \
 				CObjectGC::Get().AddObject( s_CEnum ); \
 			} \
 			return s_CEnum; \
@@ -94,8 +93,8 @@ public:
 	 * @param InEnumName	Enum name
 	 * @param InEnums		Array of enums
 	 */
-	CEnum( const CName& InEnumName, const std::vector<CName>& InEnums )
-		: CField( InEnumName )
+	CEnum( ENativeConstructor, const CName& InEnumName, const std::vector<CName>& InEnums )
+		: CField( NativeConstructor, InEnumName )
 		, enums( InEnums )
 	{}
 

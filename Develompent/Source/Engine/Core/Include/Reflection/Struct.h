@@ -54,6 +54,7 @@
 	{ \
 		CStruct*	returnStruct = ::new CStruct \
 		( \
+			NativeConstructor, \
 			TEXT( #TStruct ), \
             sizeof( ThisStruct ), \
             alignof( ThisStruct ) \
@@ -65,7 +66,6 @@
 	{ \
 		staticStruct->SetSuperStruct( Super::StaticStruct() != staticStruct ? Super::StaticStruct() : nullptr ); \
 		staticStruct->SetClass( CStruct::StaticClass() ); \
-		staticStruct->AddObjectFlag( OBJECT_RootSet | OBJECT_DisregardForGC ); \
 		CObjectGC::Get().AddObject( staticStruct ); \
         ThisStruct::StaticInitializeStruct(); \
 	} \
@@ -117,9 +117,24 @@ public:
 	 * @param InSuperStruct			Pointer to super struct
 	 * @param InFlags				The object flags
 	 */
-	CStruct( const CName& InStructName, uint32 InPropertiesSize, uint32 InMinAlignment, CStruct* InSuperStruct = nullptr )
-		: CField( InStructName )
+	CStruct( ENativeConstructor, const CName& InStructName, uint32 InPropertiesSize, uint32 InMinAlignment, CStruct* InSuperStruct = nullptr )
+		: CField( NativeConstructor, InStructName )
 		, propertiesSize( InPropertiesSize )
+		, minAlignment( InMinAlignment )
+		, superStruct( InSuperStruct )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InStructName			Struct name
+	 * @param InPropertiesSize		Properties size in bytes
+	 * @param InMinAlignment		Minimum alignment for the struct
+	 * @param InSuperStruct			Pointer to super struct
+	 * @param InFlags				The object flags
+	 */
+	CStruct( uint32 InPropertiesSize, uint32 InMinAlignment, CStruct* InSuperStruct = nullptr )
+		: propertiesSize( InPropertiesSize )
 		, minAlignment( InMinAlignment )
 		, superStruct( InSuperStruct )
 	{}

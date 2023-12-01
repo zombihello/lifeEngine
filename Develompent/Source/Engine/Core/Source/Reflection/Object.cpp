@@ -21,11 +21,11 @@ CObject::CObject()
 CObject::CObject
 ==================
 */
-CObject::CObject( const CName& InName, ObjectFlags_t InFlags /* = OBJECT_None */ )
+CObject::CObject( ENativeConstructor, const CName& InName, ObjectFlags_t InFlags /* = OBJECT_None */ )
 	: index( INDEX_NONE )
 	, name( InName )
 	, outer( nullptr )
-	, flags( InFlags )
+	, flags( InFlags | OBJECT_Native | OBJECT_RootSet | OBJECT_DisregardForGC )
 	, theClass( nullptr )
 {}
 
@@ -39,7 +39,7 @@ CObject::~CObject()
 	if ( index != INDEX_NONE )
 	{
 		// Destroy the object if necessary
-		ConditionalBeginDestroy();
+		ConditionalDestroy();
 
 		// Remove object from the GC
 		CObjectGC::Get().RemoveObject( this );
@@ -151,9 +151,16 @@ CObject::StaticAllocateObject
 CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter /* = nullptr */, CName InName /* = NAME_None */, ObjectFlags_t InFlags /* = OBJECT_None */ )
 {
 	AssertMsg( IsInGameThread(), TEXT( "Can't create %s/%s while outside of game thread" ), InClass->GetName().c_str(), InName.ToString().c_str() );
+
 	if ( !InClass )
 	{
 		Sys_Errorf( TEXT( "Empty class for object %s\n" ), InName.ToString().c_str() );
+		return nullptr;
+	}
+
+	if ( InClass->GetIndex() == INDEX_NONE )
+	{
+		Sys_Errorf( TEXT( "Unregistered class for %s" ), InName.ToString().c_str() );
 		return nullptr;
 	}
 
@@ -161,6 +168,12 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	if ( InClass->HasAnyClassFlags( CLASS_Abstract ) )
 	{
 		Sys_Errorf( TEXT( "Class which was marked abstract was trying to be allocated. %s/%s" ), InClass->GetName().c_str(), InName.ToString().c_str() );
+		return nullptr;
+	}
+
+	if ( InOuter && !IsA( InOuter, InClass->GetWithinClass() ) )
+	{
+		Sys_Errorf( TEXT( "Object %s of class %s not within %s" ), InName.ToString().c_str(), InClass->GetName().c_str(), InClass->GetWithinClass()->GetName().c_str() );
 		return nullptr;
 	}
 

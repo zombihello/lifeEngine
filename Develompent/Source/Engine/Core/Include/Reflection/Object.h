@@ -48,7 +48,7 @@ public:
      * @param InName    Object name
      * @param InFlags   The object flags
      */
-    CObject( const CName& InName, ObjectFlags_t InFlags = OBJECT_None );
+    CObject( ENativeConstructor, const CName& InName, ObjectFlags_t InFlags = OBJECT_None );
 
     /**
      * @brief Destructor

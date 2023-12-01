@@ -25,7 +25,7 @@ AStaticMesh::StaticInitializeClass
 */
 void AStaticMesh::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Static Mesh Component" ) ) CObjectProperty( TEXT( "Drawing" ), TEXT( "Static mesh component" ), STRUCT_OFFSET( ThisClass, staticMeshComponent ), CPF_Edit, CStaticMeshComponent::StaticClass() );
+	new( staticClass, TEXT( "Static Mesh Component" ) ) CObjectProperty( CPP_PROPERTY( ThisClass, staticMeshComponent ), TEXT( "Drawing" ), TEXT( "Static mesh component" ), CPF_Edit, CStaticMeshComponent::StaticClass() );
 }
 
 /*

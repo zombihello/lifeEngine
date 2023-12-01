@@ -160,6 +160,7 @@
     { \
         CClass*     returnClass = ::new CClass \
         ( \
+            NativeConstructor, \
             TEXT( #TClass ), \
             StaticClassFlags, \
             StaticClassCastFlags, \
@@ -175,7 +176,6 @@
         staticClass->SetSuperClass( Super::StaticClass() != staticClass ? Super::StaticClass() : nullptr ); \
         staticClass->SetClass( CClass::StaticClass() ); \
         staticClass->SetWithinClass( WithinClass::StaticClass() ); \
-        staticClass->AddObjectFlag( OBJECT_RootSet | OBJECT_DisregardForGC ); \
         CObjectGC::Get().AddObject( staticClass ); \
         ThisClass::StaticRegisterNatives(); \
         ThisClass::StaticInitializeClass(); \
@@ -261,6 +261,24 @@ enum EObjectFlags
     // DEPRECATED
     OBJECT_NeedSave         = 1 << 7,   /**< DEPRECATED. Mark a object what need to save it by CObjectPackage */
     OBJECT_NeedDestroy      = 1 << 8    /**< DEPRECATED. Mark a object what need to destroy it */
+};
+
+/**
+ * @ingroup Core
+ * @brief Internal enum for native constructors
+ */
+enum ENativeConstructor
+{
+    NativeConstructor
+};
+
+/**
+ * @ingroup Core
+ * @brief Internal enum for C++ properties
+ */
+enum ECppProperty
+{
+    CppProperty
 };
 
 /**

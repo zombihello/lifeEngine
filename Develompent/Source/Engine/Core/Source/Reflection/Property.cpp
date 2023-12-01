@@ -42,7 +42,7 @@ CProperty::CProperty()
 CProperty::CProperty
 ==================
 */
-CProperty::CProperty( const CName& InCategory, const std::wstring& InDescription, uint32 InOffset, uint32 InFlags, uint32 InArraySize /*= 1*/ )
+CProperty::CProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize /*= 1*/ )
 	: category( InCategory )
 	, description( InDescription )
 	, offset( InOffset )
