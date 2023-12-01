@@ -262,12 +262,21 @@ AActor::Destroy
 */
 bool AActor::Destroy()
 {
-	if ( !bActorIsBeingDestroyed )
+	// It's already pending kill or in DestroyActor(), no need to beat the corpse
+	if ( !IsPendingKillPending() )
 	{
-		g_World->DestroyActor( this );
-		bActorIsBeingDestroyed = true;
+		CWorld*		world = GetWorld();
+		if ( world )
+		{
+			world->DestroyActor( this );
+		}
+		else
+		{
+			Warnf( TEXT( "Destroying %s, which doesn't have a valid world pointer" ), GetName().c_str() );
+		}
 	}
-	return bActorIsBeingDestroyed;
+
+	return IsPendingKillPending();
 }
 
 /*

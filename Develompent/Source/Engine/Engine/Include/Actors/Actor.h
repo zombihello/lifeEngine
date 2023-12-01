@@ -547,6 +547,8 @@ class AActor : public CObject
 	DECLARE_CLASS( AActor, CObject, 0, 0 )
 
 public:
+	friend struct MarkActorIsBeingDestroyed;
+
 	/**
 	 * @brief Constructor
 	 */
@@ -639,6 +641,17 @@ public:
 	FORCEINLINE const std::vector<CActorComponent*>& GetComponents() const
 	{
 		return ownedComponents;
+	}
+
+	/**
+	 * @brief Is the actor pending kill
+	 * This is set to TRUE in CWorld::DestroyActor
+	 * 
+	 * @return Return TRUE if this actor has begun the destruction process, otherwise returns FALSE
+	 */
+	FORCEINLINE bool IsPendingKillPending() const
+	{
+		return bActorIsBeingDestroyed || IsPendingKill();
 	}
 
 	/**
@@ -1010,6 +1023,25 @@ private:
 #if ENABLE_HITPROXY
 	CHitProxyId									hitProxyId;				/**< Hit proxy id */
 #endif // ENABLE_HITPROXY
+};
+
+/**
+ * @ingroup Engine
+ * @brief Internal struct used by level code to mark actors as destroyed
+ */
+struct MarkActorIsBeingDestroyed
+{
+private:
+	friend class CWorld;
+
+	/**
+	 * @brief Constructor
+	 * @param InActor	Actor
+	 */
+	MarkActorIsBeingDestroyed( AActor* InActor )
+	{
+		InActor->bActorIsBeingDestroyed = true;
+	}
 };
 
 #endif // !ACTOR_H

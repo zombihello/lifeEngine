@@ -127,7 +127,8 @@ void CWorld::Tick( float InDeltaTime )
 	{
 		for ( uint32 index = 0, count = actorsToDestroy.size(); index < count; ++index )
 		{
-			DestroyActor( actorsToDestroy[ index ], true );
+			// Tell this actor it's about to be destroyed
+			actorsToDestroy[index]->Destroyed();
 		}
 		actorsToDestroy.clear();
 	}
@@ -214,7 +215,6 @@ void CWorld::CleanupWorld()
 	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
 	{
 		actors[ index ]->Destroyed();
-		actors[ index ]->MarkPendingKill();
 	}
 
 	// Broadcast event of destroyed actors
@@ -289,11 +289,15 @@ void CWorld::DestroyActor( AActor* InActor, bool InIsIgnorePlaying )
 {
 	Assert( InActor );
 
-	// If actor allready penging kill, exit from method
-	if ( InActor->IsPendingKill() )
+	// If already on list to be deleted, pretend the call was successful
+	// We don't want recursive calls to trigger destruction notifications multiple times
+	if ( InActor->IsPendingKillPending() )
 	{
 		return;
 	}
+
+	// Prevent recursion
+	MarkActorIsBeingDestroyed	markActorIsBeingDestroyed( InActor );
 
 	// If world in play, put this actor to actorsToDestroy for remove after tick
 	if ( !InIsIgnorePlaying && InActor->IsPlaying() )
@@ -301,8 +305,6 @@ void CWorld::DestroyActor( AActor* InActor, bool InIsIgnorePlaying )
 		actorsToDestroy.push_back( InActor );
 		return;
 	}
-
-	// Destroy actor
 
 	// Broadcast event of destroy actor
 #if WITH_EDITOR
@@ -317,9 +319,8 @@ void CWorld::DestroyActor( AActor* InActor, bool InIsIgnorePlaying )
 	MarkDirty();
 #endif // WITH_EDITOR
 
-	// Call events of destroyed actor
+	// Tell this actor it's about to be destroyed
 	InActor->Destroyed();
-	InActor->MarkPendingKill();
 
 	// Remove actor from array of all actors in world
 	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
