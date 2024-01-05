@@ -89,7 +89,7 @@ union UPropertyValue
  */
 class CProperty : public CField
 {
-	DECLARE_CLASS_INTRINSIC( CProperty, CField, CLASS_Abstract, CASTCLASS_CProperty )
+	DECLARE_CLASS_INTRINSIC( CProperty, CField, CLASS_Abstract, CASTCLASS_CProperty, TEXT( "Core" ) )
 	DECLARE_WITHIN_CLASS( CField )
 
 public:
@@ -108,6 +108,23 @@ public:
 	 * @param InArraySize		Count of persistent variables
 	 */
 	CProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 );
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 );
+
+	/**
+	 * @brief Serialize object
+	 * @param InArchive     Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Get category
@@ -131,7 +148,7 @@ public:
 	 * @brief Set category
 	 * @param InNewCategory		New category
 	 */
-	FORCEINLINE void SetName( const CName& InNewCategory )
+	FORCEINLINE void SetCategory( const CName& InNewCategory )
 	{
 		category = InNewCategory;
 	}
@@ -201,21 +218,21 @@ public:
 	}
 
 	/**
-	 * @brief Get property flags
-	 * @param InFlags	New flags
+	 * @brief Add property flag
+	 * @param InFlag	New flag
 	 */
-	FORCEINLINE void SetFlags( uint32 InFlags )
+	FORCEINLINE void AddFlag( uint32 InFlag )
 	{
-		flags |= InFlags;
+		flags |= InFlag;
 	}
 
 	/**
-	 * @brief Clear flags
-	 * @param InFlags	New flags
+	 * @brief Remove flag
+	 * @param InFlag	New flag
 	 */
-	FORCEINLINE void ClearFlags( uint32 InFlags )
+	FORCEINLINE void RemoveFlag( uint32 InFlag )
 	{
-		flags &= ~InFlags;
+		flags &= ~InFlag;
 	}
 
 	/**
@@ -281,7 +298,7 @@ protected:
  */
 class CByteProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CByteProperty, CProperty, 0, CASTCLASS_CByteProperty )
+	DECLARE_CLASS_INTRINSIC( CByteProperty, CProperty, 0, CASTCLASS_CByteProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -305,6 +322,27 @@ public:
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, cenum( InEnum )
 	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InEnum			If InEnum not null then it's mean this property is enum
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CByteProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, CEnum* InEnum = nullptr, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
+		, cenum( InEnum )
+	{}
+
+	/**
+	 * @brief Serialize object
+	 * @param InArchive     Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Get property value
@@ -355,7 +393,7 @@ private:
  */
 class CIntProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CIntProperty, CProperty, 0, CASTCLASS_CIntProperty )
+	DECLARE_CLASS_INTRINSIC( CIntProperty, CProperty, 0, CASTCLASS_CIntProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -374,6 +412,19 @@ public:
 	 */
 	CIntProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CIntProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -413,7 +464,7 @@ public:
  */
 class CFloatProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CFloatProperty, CProperty, 0, CASTCLASS_CFloatProperty )
+	DECLARE_CLASS_INTRINSIC( CFloatProperty, CProperty, 0, CASTCLASS_CFloatProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -432,6 +483,19 @@ public:
 	 */
 	CFloatProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CFloatProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -471,7 +535,7 @@ public:
  */
 class CBoolProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CBoolProperty, CProperty, 0, CASTCLASS_CBoolProperty )
+	DECLARE_CLASS_INTRINSIC( CBoolProperty, CProperty, 0, CASTCLASS_CBoolProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -490,6 +554,19 @@ public:
 	 */
 	CBoolProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InOffset			Offset to property
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CBoolProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -529,7 +606,7 @@ public:
  */
 class CColorProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CColorProperty, CProperty, 0, CASTCLASS_CColorProperty )
+	DECLARE_CLASS_INTRINSIC( CColorProperty, CProperty, 0, CASTCLASS_CColorProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -548,6 +625,19 @@ public:
 	 */
 	CColorProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CColorProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -587,7 +677,7 @@ public:
  */
 class CObjectProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CObjectProperty, CProperty, 0, CASTCLASS_CObjectProperty )
+	DECLARE_CLASS_INTRINSIC( CObjectProperty, CProperty, 0, CASTCLASS_CObjectProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -611,6 +701,27 @@ public:
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, propertyClass( InPropertyClass )
 	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InPropertyClass	Property class
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CObjectProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, CClass* InPropertyClass, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
+		, propertyClass( InPropertyClass )
+	{}
+
+	/**
+	 * @brief Serialize object
+	 * @param InArchive     Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Get property value
@@ -677,7 +788,7 @@ private:
  */
 class CVectorProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CVectorProperty, CProperty, 0, CASTCLASS_CVectorProperty )
+	DECLARE_CLASS_INTRINSIC( CVectorProperty, CProperty, 0, CASTCLASS_CVectorProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -701,6 +812,27 @@ public:
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, defaultComponentValue( InDefaultComponentValue )
 	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset					Offset to property
+	 * @param InCategory				Category
+	 * @param InDescription				Description
+	 * @param InFlags					Flags (see EPropertyFlags)
+	 * @param InDefaultComponentValue	Default component value
+	 * @param InArraySize				Count of persistent variables
+	 */
+	CVectorProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, float InDefaultComponentValue = 0.f, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
+		, defaultComponentValue( InDefaultComponentValue )
+	{}
+
+	/**
+	 * @brief Serialize object
+	 * @param InArchive     Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Get property value
@@ -751,7 +883,7 @@ private:
  */
 class CRotatorProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CRotatorProperty, CProperty, 0, CASTCLASS_CRotatorProperty )
+	DECLARE_CLASS_INTRINSIC( CRotatorProperty, CProperty, 0, CASTCLASS_CRotatorProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -770,6 +902,19 @@ public:
 	 */
 	CRotatorProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CRotatorProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**
@@ -809,7 +954,7 @@ public:
  */
 class CAssetProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CAssetProperty, CProperty, 0, CASTCLASS_CAssetProperty )
+	DECLARE_CLASS_INTRINSIC( CAssetProperty, CProperty, 0, CASTCLASS_CAssetProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -833,6 +978,27 @@ public:
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, assetType( InAssetType )
 	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InAssetType		Asset type
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CAssetProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, EAssetType InAssetType, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
+		, assetType( InAssetType )
+	{}
+
+	/**
+	 * @brief Serialize object
+	 * @param InArchive     Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Get property value
@@ -883,7 +1049,7 @@ private:
  */
 class CArrayProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CArrayProperty, CProperty, 0, CASTCLASS_CArrayProperty )
+	DECLARE_CLASS_INTRINSIC( CArrayProperty, CProperty, 0, CASTCLASS_CArrayProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -906,6 +1072,26 @@ public:
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, innerProperty( nullptr )
 	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CArrayProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
+		, innerProperty( nullptr )
+	{}
+
+	/**
+	 * @brief Serialize object
+	 * @param InArchive     Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Add class property
@@ -978,7 +1164,7 @@ private:
  */
 class CStructProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CStructProperty, CProperty, 0, CASTCLASS_CStructProperty )
+	DECLARE_CLASS_INTRINSIC( CStructProperty, CProperty, 0, CASTCLASS_CStructProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1002,6 +1188,27 @@ public:
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
 		, propertyStruct( InPropertyStruct )
 	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InPropertyStruct	Property struct
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CStructProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, CStruct* InPropertyStruct, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
+		, propertyStruct( InPropertyStruct )
+	{}
+
+	/**
+	 * @brief Serialize object
+	 * @param InArchive     Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Get property value
@@ -1068,7 +1275,7 @@ private:
  */
 class CStringProperty : public CProperty
 {
-	DECLARE_CLASS_INTRINSIC( CStringProperty, CProperty, 0, CASTCLASS_CStringProperty )
+	DECLARE_CLASS_INTRINSIC( CStringProperty, CProperty, 0, CASTCLASS_CStringProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1087,6 +1294,19 @@ public:
 	 */
 	CStringProperty( ECppProperty, uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
 		: CProperty( CppProperty, InOffset, InCategory, InDescription, InFlags, InArraySize )
+	{}
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InOffset			Offset to property
+	 * @param InCategory		Category
+	 * @param InDescription		Description
+	 * @param InFlags			Flags (see EPropertyFlags)
+	 * @param InArraySize		Count of persistent variables
+	 */
+	CStringProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
+		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
 
 	/**

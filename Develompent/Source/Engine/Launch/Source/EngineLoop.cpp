@@ -16,7 +16,6 @@
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
 #include "Reflection/ReflectionEnvironment.h"
-#include "Reflection/ObjectPackage.h"
 #include "Reflection/ObjectGC.h"
 #include "Reflection/ObjectIterator.h"
 #include "Math/Color.h"
@@ -174,53 +173,31 @@ void CEngineLoop::InitConfigs()
 
 /*
 ==================
-CEngineLoop::LoadScriptPackages
+CEngineLoop::LoadScriptPackage
 ==================
 */
-void CEngineLoop::LoadScriptPackages()
+void CEngineLoop::LoadScriptPackage()
 {
-	// Grab all files from directory
-	std::wstring				scriptDir = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Scripts" ) PATH_SEPARATOR, Sys_GameDir().c_str() );
-	std::vector<std::wstring>	files = g_FileSystem->FindFiles( scriptDir, true, false );
-	for ( uint32 index = 0, count = files.size(); index < count; ++index )
+	// Load script package
+#if 0
+	std::wstring		scriptFile = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR TEXT( "Scripts.classes" ), Sys_GameDir().c_str() );
+	CObjectPackage		objectPackage;
+	if ( !objectPackage.Load( scriptFile ) )
 	{
-		// If the file has 'classes' extension its our LifeScript package and load it
-		CFilename		filename = scriptDir + files[index];
-		if ( filename.GetExtension() == TEXT( "classes" ) )
+		Sys_Errorf( TEXT( "Failed to load script package '%s'\n" ), scriptFile.c_str() );
+		return;
+	}
+	Logf( TEXT( "Script package '%s' loaded\n" ), scriptFile.c_str() );
+
+	for ( uint32 index = 0, numObjects = objectPackage.GetNumObjects(); index < numObjects; ++index )
+	{
+		CObject*	object = objectPackage.GetObject( index );
+		if ( IsA<CEnum>( object ) || IsA<CStruct>( object ) || IsA<CClass>( object ) )
 		{
-			// Load object package and register all classes
-			CObjectPackage		objectPackage;
-			if ( !objectPackage.Load( filename.GetFullPath() ) )
-			{
-				Sys_Errorf( TEXT( "Failed to load script package '%s'\n" ), filename.GetFullPath().c_str() );
-				return;
-			}
-			Logf( TEXT( "Script package '%s' loaded\n" ), filename.GetFullPath().c_str() );
-
-			for ( uint32 index = 0, numObjects = objectPackage.GetNumObjects(); index < numObjects; ++index )
-			{
-				CObject*	object = objectPackage.GetObject( index );
-				object->RemoveObjectFlag( OBJECT_NeedDestroy );
-
-				if ( IsA<CField>( object ) )
-				{
-					Cast<CField>( object )->Bind();
-				}
-
-				if ( IsA<CClass>( object ) )
-				{
-					CReflectionEnvironment::Get().AddClass( ( CClass* )object );
-				}
-			}
+			object->AddToRoot();
 		}
 	}
-
-	// Bind all classes
-	for ( CObjectIterator it( CClass::StaticClass() ); it; ++it )
-	{
-		CClass*		theClass = ExactCast<CClass>( *it );
-		theClass->Bind();
-	}
+#endif // 0
 }
 
 /*
@@ -257,10 +234,21 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	g_Log->Init();
 	int32		result = Sys_PlatformPreInit();
 	
-	// Load script packages
+	// Load script package
 	if ( !g_IsScriptCompiler )
 	{
-		LoadScriptPackages();
+		LoadScriptPackage();
+	}
+
+	// Bind all fields
+	for ( TObjectIterator<CField> it; it; ++it )
+	{
+		it->Bind();
+		CClass*		theClass = Cast<CClass>( *it );
+		if ( theClass && !CReflectionEnvironment::Get().FindClass( theClass->GetName().c_str() ) )
+		{
+			CReflectionEnvironment::Get().AddClass( theClass );
+		}
 	}
 
 	// Loading table of contents

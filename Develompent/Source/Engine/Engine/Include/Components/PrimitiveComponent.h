@@ -20,7 +20,7 @@
  */
 class CPrimitiveComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CPrimitiveComponent, CSceneComponent, 0, 0 )
+	DECLARE_CLASS( CPrimitiveComponent, CSceneComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	friend class CScene;			// For add and remove primitive in scene

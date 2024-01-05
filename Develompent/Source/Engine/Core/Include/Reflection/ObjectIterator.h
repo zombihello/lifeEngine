@@ -136,7 +136,7 @@ public:
 	 * @param InOnlyGCObjects	Is iterate over only GC objects
 	 */
 	FORCEINLINE TObjectIterator( bool InOnlyGCObjects = false )
-		: CObjectIterator( T::StaticClass(), InOnlyGCObjects )
+		: CObjectIterator( TClass::StaticClass(), InOnlyGCObjects )
 	{}
 
 	/**

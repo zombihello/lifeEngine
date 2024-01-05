@@ -18,7 +18,7 @@
   */
 class ABoxCollision : public AActor
 {
-    DECLARE_CLASS( ABoxCollision, AActor, 0, 0 )
+    DECLARE_CLASS( ABoxCollision, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
     /**

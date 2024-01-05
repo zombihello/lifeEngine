@@ -19,7 +19,7 @@
   */
 class AAudio : public AActor
 {
-	DECLARE_CLASS( AAudio, AActor, 0, 0 )
+	DECLARE_CLASS( AAudio, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

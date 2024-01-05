@@ -6,22 +6,20 @@
  * Authors: Yehor Pohuliaka (zombiHello)
  */
 
-#ifndef REFLECTIONPACKAGE_H
-#define REFLECTIONPACKAGE_H
+#ifndef OBJECTPACKAGE_H
+#define OBJECTPACKAGE_H
 
-#include <string>
-#include <vector>
-#include <unordered_map>
-
+#include "Misc/Guid.h"
 #include "Reflection/Object.h"
-#include "System/Archive.h"
 
 /**
  * @ingroup Core
- * @brief Package whom contains CObjects
+ * @brief Package for contains CObjects
  */
-class CObjectPackage : public CArchive
+class CObjectPackage : public CObject
 {
+	DECLARE_CLASS_INTRINSIC( CObjectPackage, CObject, 0, 0, TEXT( "Core" ) )
+
 public:
 	/**
 	 * @brief Constructor
@@ -29,175 +27,75 @@ public:
 	CObjectPackage();
 
 	/**
-	 * @brief Destructor
-	 */
-	~CObjectPackage();
-
-	/**
-	 * @brief Object export
-	 */
-	struct ObjectExport
-	{
-		/**
-		 * @brief Constructor
-		 * @param InObject	Object
-		 */
-		FORCEINLINE ObjectExport( CObject* InObject = nullptr )
-			: dataSize( 0 )
-			, object( InObject )
-		{}
-
-		/**
-		 * @brief Destructor
-		 */
-		FORCEINLINE ~ObjectExport()
-		{
-			AssertNoEntry();
-		}
-
-		/**
-		 * @brief Get object
-		 * @return Return created object. If object in this object export already exist returns it
-		 */
-		CObject* GetObject();
-
-		/**
-		 * @brief Is valid object
-		 * @return Return TRUE if object in the object export is valid, otherwise returns FALSE
-		 */
-		FORCEINLINE bool IsValidObject() const
-		{
-			return object;
-		}
-
-		CName		className;			/**< Class name for this export's CObject. If NAME_None this is CClass */
-		CName		superClassName;		/**< Super class name for this export's CObject. If Name_None this is CObject */
-		CName		objectName;			/**< The object name */
-		uint32		dataSize;			/**< The number of bytes to serialize when saving/loading this export's CObject. If INVALID_ID the object export not saved yet */
-		
-	private:
-		CObject*	object;				/**< The CObject represented by this export */
-	};
-
-	/**
-	 * @brief Add object into the package
-	 *
-	 * @param InObject	Object
-	 * @return Return index of a new object export
-	 */
-	uint32 AddObject( CObject* InObject );
-
-	/**
-	 * @brief Remove objects from the package
-	 */
-	void RemoveAllObjects();
-
-	/**
-	 * @brief Load package
+	 * @brief Find an existing package by name or create it if it doesn't exist
 	 * 
-	 * @param InPath	Path to package
-	 * @return Return TRUE if package has been successfully loaded, otherwise returns FALSE
+	 * @param InOuter			The Outer object to search inside
+	 * @param InPackageName		The name of the package to find
 	 */
-	bool Load( const std::wstring& InPath );
+	static CObjectPackage* CreatePackage( CObject* InOuter, const tchar* InPackageName );
+
+    /**
+     * @brief Loads a package and all contained objects
+     * 
+     * @param InOuter       Package to load new package into, usually NULL
+     * @param InFilename	Name of file on disk
+     * @return Return loaded package if successful, otherwise returns NULL 
+     */
+    static CObjectPackage* LoadPackage( CObjectPackage* InOuter, const tchar* InFilename );
+
+    /**
+     * @brief Save one specific object (along with any objects it references contained within the same Outer) into a LifeEngine package
+     * 
+     * @param InOuter           The outer to use for the new package
+     * @param InBase            The object that should be saved into the package
+	 * @param InTopLevelFlags   For all objects which are not referenced (either directly, or indirectly) through Base, only objects
+	 *							that contain any of these flags will be saved.  If 0 is specified, only objects which are referenced
+	 *							by Base will be saved into the package
+     * @param InFilename        The name to use for the new package file
+     * @return Return TRUE if the package was saved successfully, otherwise returns FALSE
+     */
+    static bool SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename );
 
 	/**
-	 * @brief Save package
-	 *
-	 * @param InPath	Path to package
-	 * @return Return TRUE if package has been successfully saved, otherwise returns FALSE
+	 * @brief Is now saving the package
+	 * @return Return TRUE if now saving the package, otherwise returns FALSE
 	 */
-	bool Save( const std::wstring& InPath );
-
-	/**
-	 * @brief Is empty
-	 * @return Return TRUE if the package is empty, otherwise returns FALSE
-	 */
-	FORCEINLINE bool IsEmpty() const
+	static FORCEINLINE bool IsSavingPackage()
 	{
-		return objectExports.empty();
+		return bIsSavingPackage;
 	}
 
 	/**
-	 * @brief Get number of objects in the package
-	 * @return Return number of objects in the package
+	 * @brief Get GUID of this package
+	 * @return Return GUID of this package. If it wasn't loaded from dist returns invalid GUID
 	 */
-	FORCEINLINE uint32 GetNumObjects() const
+	FORCEINLINE const CGuid& GetGuid() const
 	{
-		return objectExports.size();
+		return guid;
 	}
 
 	/**
-	 * @brief Get object by index
-	 * 
-	 * @param InIndex	Object index
-	 * @return Return object in the package
+	 * @brief Is this package dirty
+	 * @return Return TRUE if this package dirty, otherwise returns FALSE
 	 */
-	FORCEINLINE CObject* GetObject( uint32 InIndex )
+	FORCEINLINE bool IsDirty() const
 	{
-		Assert( InIndex >= 0 && InIndex < objectExports.size() );
-		return objectExports[InIndex]->GetObject();
+		return bDirty;
 	}
 
 	/**
-	 * @brief Override operator << for serialize CObjects
-	 * @return Return reference to self
+	 * @brief Marks/Unmarks the package's bDirty flag
+	 * @param InIsDirty		Is this package dirty
 	 */
-	virtual CArchive& operator<<( class CObject*& InValue ) override;
-
-	/**
-	 * @brief Get current position in archive
-	 * @return Current position in archive
-	 */
-	virtual uint32 Tell() override;
-
-	/**
-	 * @brief Set current position in archive
-	 *
-	 * @param[in] InPosition New position in archive
-	 */
-	virtual void Seek( uint32 InPosition ) override;
-
-	/**
-	 * @brief Flush data
-	 */
-	virtual void Flush() override;
-
-	/**
-	 * @brief Is saving archive
-	 * @return True if archive saving, false if archive loading
-	 */
-	virtual bool IsSaving() const override;
-
-	/**
-	 * @breif Is loading archive
-	 * @return True if archive loading, false if archive saving
-	 */
-	virtual bool IsLoading() const override;
-
-	/**
-	 * Is end of file
-	 * @return Return true if end of file, else return false
-	 */
-	virtual bool IsEndOfFile() override;
-
-	/**
-	 * @brief Get size of archive
-	 * @return Size of archive
-	 */
-	virtual uint32 GetSize() override;
+	FORCEINLINE void SetDirtyFlag( bool InIsDirty )
+	{
+		bDirty = InIsDirty;
+	}
 
 private:
-	/**
-	 * @brief Serialize data
-	 *
-	 * @param InBuffer	Pointer to buffer for serialize
-	 * @param InSize	Size of buffer
-	 */
-	virtual void Serialize( void* InBuffer, uint32 InSize ) override;
-
-	CArchive*								originalArchive;	/**< Original archive to save/load data */
-	std::unordered_map<CObject*, uint32>	objectExportsMap;	/**< Map of objects= exports for contains it's index */
-	std::vector<ObjectExport*>				objectExports;		/**< Array of object exports */
+	static bool		bIsSavingPackage;	/**< Set while in SavePackage() to detect certain operations that are illegal while saving */
+	bool			bDirty;				/**< Is the package dirty and need to save on disk */
+	CGuid			guid;				/**< GUID of package if it was loaded from disk */
 };
 
-#endif // !REFLECTIONPACKAGE_H
+#endif // !OBJECTPACKAGE_H

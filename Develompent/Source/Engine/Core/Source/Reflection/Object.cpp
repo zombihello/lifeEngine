@@ -2,6 +2,7 @@
 #include "Reflection/ReflectionEnvironment.h"
 #include "Reflection/Object.h"
 #include "Reflection/Function.h"
+#include "Reflection/ObjectPackage.h"
 #include "System/ThreadingBase.h"
 #include "System/ScriptFrame.h"
 
@@ -21,13 +22,16 @@ CObject::CObject()
 CObject::CObject
 ==================
 */
-CObject::CObject( ENativeConstructor, const CName& InName, ObjectFlags_t InFlags /* = OBJECT_None */ )
+CObject::CObject( ENativeConstructor, const CName& InName, const tchar* InPackageName, ObjectFlags_t InFlags /* = OBJECT_None */ )
 	: index( INDEX_NONE )
 	, name( InName )
 	, outer( nullptr )
 	, flags( InFlags | OBJECT_Native | OBJECT_RootSet | OBJECT_DisregardForGC )
 	, theClass( nullptr )
-{}
+{
+	Assert( sizeof( outer ) >= sizeof( InPackageName ) );
+	*( const tchar** )&outer = InPackageName;
+}
 
 /*
 ==================
@@ -92,6 +96,14 @@ CObject::AddReferencedObjects
 ==================
 */
 void CObject::AddReferencedObjects( std::vector<CObject*>& InOutObjectArray )
+{}
+
+/*
+==================
+CObject::PreSave
+==================
+*/
+void CObject::PreSave()
 {}
 
 /*
@@ -238,6 +250,72 @@ bool CObject::InternalIsA( const CClass* InClass ) const
 	}
 
 	return false;
+}
+
+/*
+==================
+CObject::InternalIsIn
+==================
+*/
+bool CObject::InternalIsIn( const CObject* InOuter ) const
+{
+	if ( !InOuter )
+	{
+		return true;
+	}
+
+	for ( const CObject* curObject = GetOuter(); curObject; curObject = curObject->GetOuter() )
+	{
+		if ( curObject == InOuter )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/*
+==================
+CObject::InternalIsInA
+==================
+*/
+bool CObject::InternalIsInA( const CClass* InClass ) const
+{
+	if ( !InClass )
+	{
+		return true;
+	}
+
+	for ( const CObject* curObject = this; curObject; curObject = curObject->GetOuter() )
+	{
+		if ( IsA( ( CObject* )curObject, ( CClass* )InClass ) )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/*
+==================
+CObject::GetOutermost
+==================
+*/
+CObjectPackage* CObject::GetOutermost() const
+{
+	CObject*	topObject = nullptr;
+	for ( topObject = ( CObject* )this; topObject && topObject->GetOuter(); topObject = topObject->GetOuter() );
+	
+#if !SHIPPING_BUILD
+	if ( !topObject || !IsA<CObjectPackage>( topObject ) )
+	{
+		Sys_Errorf( TEXT( "Cast ot %s to CObjectPackage failed" ), topObject ? topObject->GetName().c_str() : TEXT( "NULL" ) );
+	}
+#endif // !SHIPPING_BUILD
+
+	return ( CObjectPackage* )topObject;
 }
 
 /*

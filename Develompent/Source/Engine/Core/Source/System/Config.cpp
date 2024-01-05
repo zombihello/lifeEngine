@@ -51,16 +51,12 @@ void CConfigManager::Init()
 				break;
 			}
 
-			// Open file for reading
-			CArchive*				archive = g_FileSystem->CreateFileReader( pathToConfig );
-			if ( !archive )
+			// Load config
+			if ( !config.LoadFile( pathToConfig ) )
 			{
-				Warnf( TEXT( "Config layer '%s' not founded\n" ), pathToConfig.c_str() );
+				Warnf( TEXT( "Config layer '%s' not found or failed in parse\n" ), pathToConfig.c_str() );
 				continue;
 			}
-
-			// Serialize config
-			config.Serialize( *archive );
 
 			Logf( TEXT( "Loaded layer '%s' for config '%s'\n" ), s_ConfigLayerNames[layer], s_ConfigTypeNames[index] );
 			bSuccessed = true;
@@ -77,10 +73,56 @@ void CConfigManager::Init()
 
 /*
 ==================
+CConfig::LoadFile
+==================
+*/
+bool CConfig::LoadFile( const std::wstring& InFile )
+{
+	// Open file for read
+	CArchive*	archive = g_FileSystem->CreateFileReader( InFile );
+	if ( !archive )
+	{
+		Warnf( TEXT( "Config file '%s' not found\n" ), InFile.c_str() );
+		return false;
+	}
+
+	// Serialize data from it
+	bool	bResult = Serialize( *archive );
+
+	// Free allocated memory and exit
+	delete archive;
+	return bResult;
+}
+
+/*
+==================
+CConfig::SaveFile
+==================
+*/
+bool CConfig::SaveFile( const std::wstring& InFile )
+{
+	// Open file for write
+	CArchive*	archive = g_FileSystem->CreateFileWriter( InFile );
+	if ( !archive )
+	{
+		Warnf( TEXT( "Config file '%s' can't create\n" ), InFile.c_str() );
+		return false;
+	}
+
+	// Serialize data from it
+	bool	bResult = Serialize( *archive );
+
+	// Free allocated memory and exit
+	delete archive;
+	return bResult;
+}
+
+/*
+==================
 CConfig::Serialize
 ==================
 */
-void CConfig::Serialize( CArchive& InArchive )
+bool CConfig::Serialize( CArchive& InArchive )
 {
 	if ( InArchive.IsLoading() )
 	{
@@ -99,7 +141,8 @@ void CConfig::Serialize( CArchive& InArchive )
 
 		if ( jsonDocument.HasParseError() )
 		{		
-			Sys_Errorf( TEXT( "Failed parse config, not correct syntax of JSON. RapidJSON code error %i" ), jsonDocument.GetParseError() );
+			Warnf( TEXT( "Failed parse config, not correct syntax of JSON. RapidJSON code error %i\n" ), jsonDocument.GetParseError() );
+			return false;
 		}
 		
 		// Reading all values
@@ -147,6 +190,8 @@ void CConfig::Serialize( CArchive& InArchive )
 		}
 		InArchive << "}";
 	}
+
+	return true;
 }
 
 /*

@@ -17,7 +17,7 @@
  */
 class CCookerSyncCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CCookerSyncCommandlet, CBaseCommandlet, 0, 0 )
+	DECLARE_CLASS( CCookerSyncCommandlet, CBaseCommandlet, 0, 0, TEXT( "WorldEd" ) )
 
 public:
 	/**

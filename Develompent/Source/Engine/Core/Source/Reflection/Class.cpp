@@ -47,6 +47,13 @@ CClass::Bind
 */
 void CClass::Bind()
 {
+	// Do nothing if the class already binded
+	if ( IsBinded() )
+	{
+		return;
+	}
+
+	Super::Bind();
 	CClass*		superClass = GetSuperClass();
 	AssertMsg( superClass || CObject::StaticClass() == this, TEXT( "Unable to bind %s" ), GetName().c_str() );
 	if ( !ClassConstructor && HasAnyClassFlags( CLASS_Native ) )
@@ -66,6 +73,13 @@ void CClass::Bind()
 
 	// If class constructor still isn't valid then its error
 	Assert( ClassConstructor );
+
+	// Propagate inherited flags
+	if ( superClass )
+	{
+		classFlags |= ( superClass->classFlags & CLASS_Inherit );
+		classCastFlags |= superClass->classCastFlags;
+	}
 
 	// Assembly the token stream for realtime garbage collection
 	// BS yehor.pohuliaka - Maybe need move to another place

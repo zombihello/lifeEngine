@@ -446,6 +446,26 @@ public:
 		return allocatedObjects[InIndex];
 	}
 
+	/**
+	 * @brief Get number of allocated objects
+	 * @return Return number of allocated objects
+	 */
+	FORCEINLINE uint32 GetNumAllocatedObjects() const
+	{
+		uint32	numNonGCObjects = lastNonGCIndex != INDEX_NONE ? lastNonGCIndex : 0;
+		uint32	numGCObjects	= allocatedObjects.size() - firstGCIndex;
+		return numNonGCObjects + numGCObjects;
+	}
+
+	/**
+	 * brief Get reserved size of allocated objects array
+	 * @return Return reserved size of allocated objects array
+	 */
+	FORCEINLINE uint32 GetReservedSizeAllocatedObjects() const
+	{
+		return allocatedObjects.size();
+	}
+
 private:
 	/**
 	 * @brief Helper struct for stack based approach

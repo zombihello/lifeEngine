@@ -1,38 +1,91 @@
 #include "Logger/LoggerMacros.h"
+#include "Containers/String.h"
+#include "Misc/Template.h"
 #include "Misc/CoreGlobals.h"
+#include "Reflection/Object.h"
 #include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectIterator.h"
+#include "Reflection/Linker.h"
 #include "Reflection/Class.h"
 #include "Reflection/ReflectionEnvironment.h"
 #include "System/BaseFileSystem.h"
+#include "Components/ActorComponent.h"
 
-/*
-==================
-CObjectPackage::ObjectExport::GetObject
-==================
-*/
-CObject* CObjectPackage::ObjectExport::GetObject()
+IMPLEMENT_CLASS( CObjectPackage )
+IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CObjectPackage )
+
+//
+// GLOBALS
+//
+bool		CObjectPackage::bIsSavingPackage = false;
+
+/**
+ * @ingroup Core
+ * @brief Helper class for clarification, encapsulation, and elimination of duplicate code
+ */
+struct PackageExportTagger
 {
-	// If object is exist return it
-	if ( object )
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InBase			The object that should be saved into the package
+	 * @param InTopLevelFlags	For all objects which are not referenced (either directly, or indirectly) through Base, only objects that contain any of these flags will be saved
+	 * @param InOuter			The outer to use for the new package
+	 */
+	FORCEINLINE PackageExportTagger( CObject* InBase, ObjectFlags_t InTopLevelFlags, CObject* InOuter )
+		: base( InBase )
+		, topLevelFlags( InTopLevelFlags )
+		, outer( InOuter )
+	{}
+
+	/**
+	 * @brief Tag package exports
+	 * 
+	 * @param InExportTagger	Export tagger
+	 * @param InIsRoutePresave	Is need call PreSave()
+	 */
+	void TagPackageExports( CArchiveSaveTagExports& InExportTagger, bool InIsRoutePresave )
 	{
-		return object;
+		// Route PreSave on Base and serialize it for export tagging
+		if ( base )
+		{
+			if ( InIsRoutePresave )
+			{
+				base->PreSave();
+			}
+
+			InExportTagger.ProcessBaseObject( base );
+		}
+
+		// Serialize objects to tag them as OBJECT_TagExp
+		for ( CObjectIterator it; it; ++it )
+		{
+			CObject*	object = *it;
+			if ( object->HasAnyObjectFlags( topLevelFlags ) || IsIn( object, outer ) )
+			{
+				InExportTagger.ProcessBaseObject( object );
+			}
+		}
+
+		if ( InIsRoutePresave )
+		{
+			// Route PreSave
+			for ( CObjectIterator it; it; ++it )
+			{
+				CObject*	object = *it;
+				if ( object->HasAnyObjectFlags( OBJECT_TagExp ) )
+				{
+					object->PreSave();
+				}
+			}
+		}
 	}
 
-	// Get class of the object
-	CReflectionEnvironment&		reflectionEnvironment = CReflectionEnvironment::Get();
-	CClass*						theClass = className == NAME_None ? CClass::StaticClass() : reflectionEnvironment.FindClass( className.ToString().c_str() );
-	if ( theClass == CClass::StaticClass() )
-	{
-		object = reflectionEnvironment.FindClass( objectName.ToString().c_str() );
-	}
+	CObject*		base;			/**< The object that should be saved into the package */
+	ObjectFlags_t	topLevelFlags;	/**< For all objects which are not referenced (either directly, or indirectly) through Base, only objects that contain any of these flags will be saved */
+	CObject*		outer;			/**< The outer to use for the new package */
+};
 
-	// If object isn't valid yet then create a new
-	if ( !object )
-	{
-		object = CObject::StaticConstructObject( theClass, nullptr, objectName, OBJECT_NeedDestroy );
-	}
-	return object;
-}
 
 /*
 ==================
@@ -40,337 +93,361 @@ CObjectPackage::CObjectPackage
 ==================
 */
 CObjectPackage::CObjectPackage()
-	: CArchive( TEXT( "" ) )
-	, originalArchive( nullptr )
-{
-	arType = AT_Scripts;
-}
+	: bDirty( false )
+{}
 
 /*
 ==================
-CObjectPackage::~CObjectPackage
+CObject::CreatePackage
 ==================
 */
-CObjectPackage::~CObjectPackage()
+CObjectPackage* CObjectPackage::CreatePackage( CObject* InOuter, const tchar* InPackageName )
 {
-	RemoveAllObjects();
-	if ( originalArchive )
+	std::wstring	name;
+	if ( InPackageName )
 	{
-		delete originalArchive;
-	}
-}
-
-/*
-==================
-CObjectPackage::AddObject
-==================
-*/
-uint32 CObjectPackage::AddObject( CObject* InObject )
-{
-	// If object export for the object already created then return it's ID
-	auto	it = objectExportsMap.find( InObject );
-	if ( it != objectExportsMap.end() )
-	{
-		return it->second;
+		name = InPackageName;
 	}
 
-	// Look for is need save the object. If not we save only info about class
-	bool	bNeedSaveObject = false;
-	for ( CObject* object = InObject; object; object = object->GetOuter() )
+	// TODO yehor.pohuliaka: Need optimize find a package
+	for ( TObjectIterator<CObjectPackage> it; it; ++it )
 	{
-		if ( object->HasAnyObjectFlags( OBJECT_NeedSave ) )
+		if ( it->GetOuter() == InOuter && it->GetName() == name )
 		{
-			bNeedSaveObject = true;
-			break;
+			return *it;
 		}
 	}
 
-	// Otherwise we create a new object export
-	ObjectExport*	objectExport	= new ObjectExport( bNeedSaveObject ? InObject : nullptr );
-	CClass*			theClass		= InObject->GetClass();
-	CClass*			superClass		= theClass->GetSuperClass();
-	objectExport->className			= theClass == CClass::StaticClass() ? NAME_None : theClass->GetCName();
-	objectExport->superClassName	= superClass == CObject::StaticClass() ? NAME_None : superClass->GetCName();
-	objectExport->objectName		= InObject->GetCName();
-
-	// Add the object export into the package
-	uint32			objectExportId = objectExports.size();
-	objectExports.push_back( objectExport );
-	objectExportsMap[InObject] = objectExportId;
-	return objectExportId;
+	return new( InOuter, name ) CObjectPackage;
 }
 
 /*
 ==================
-CObjectPackage::RemoveAllObjects
+CObject::LoadPackage
 ==================
 */
-void CObjectPackage::RemoveAllObjects()
+CObjectPackage* CObjectPackage::LoadPackage( CObjectPackage* InOuter, const tchar* InFilename )
 {
-	for ( uint32 index = 0, count = objectExports.size(); index < count; ++index )
-	{
-		delete objectExports[index];
-	}
-
-	objectExportsMap.clear();
-	objectExports.clear();
+	AssertNoEntry();
+	return nullptr;
 }
 
 /*
 ==================
-CObjectPackage::Load
+CObject::SavePackage
 ==================
 */
-bool CObjectPackage::Load( const std::wstring& InPath )
+bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename )
 {
-	originalArchive = g_FileSystem->CreateFileReader( InPath );
-	if ( !originalArchive )
+	// Check on recursive call SavePackage, it's error
+	if ( bIsSavingPackage )
 	{
-		Warnf( TEXT( "Failed to load object package in '%s'\n" ), InPath.c_str() );
+		Warnf( TEXT( "Recursive CObjectPackage::SavePackage() is not supported\n" ) );
+		AssertNoEntry();
 		return false;
 	}
-	arPath = InPath;
 
-	// Serialize archive header
-	originalArchive->SerializeHeader();
-	Assert( originalArchive->Type() == AT_Scripts );
+	// Make temp file
+	double			timeStart = Sys_Seconds();
+	std::wstring	baseFilename = CFilename( InFilename ).GetBaseFilename();
+	CFilename		tempFilename = CFilename( InFilename ).GetPath() + PATH_SEPARATOR + baseFilename + TEXT( "_save.tmp" );
+	bool			bSuccess = false;
 
-	// Serialize export map
-	uint32		offsetToExportMap = 0;
-	uint32		numSize = 0;
-	uint32		offsetToPackageStart = originalArchive->Tell();
-	*originalArchive << offsetToExportMap;
-	originalArchive->Seek( offsetToExportMap );
-
-	*originalArchive << numSize;
-	objectExports.resize( numSize );
-	for ( uint32 index = 0; index < numSize; ++index )
+	// Untag all objects
+	for ( CObjectIterator it; it; ++it )
 	{
-		ObjectExport*	objectExport = new ObjectExport();
-		*originalArchive << objectExport->className;
-		*originalArchive << objectExport->superClassName;
-		*originalArchive << objectExport->objectName;
-		*originalArchive << objectExport->dataSize;
-		objectExports[index] = objectExport;
-	}
+		// Clear flags from previous SavePackage calls
+		uint32		clearFlags = OBJECT_TagImp | OBJECT_TagExp;
 
-	// Serialize internal object's data
-	originalArchive->Seek( offsetToPackageStart + sizeof( offsetToExportMap ) );
-	for ( uint32 index = 0; index < numSize; ++index )
-	{
-		ObjectExport*	objectExport = objectExports[index];
-		if ( objectExport->dataSize > 0 )
-		{	
-			bool		bNeedUpdateMap = !objectExport->IsValidObject();
-			CObject*	object = objectExport->GetObject();
-			uint32		dataOffset = originalArchive->Tell();
-			
-			object->Serialize( *this );
-			Assert( originalArchive->Tell() - dataOffset == objectExport->dataSize );
+		// Clear context flags for objects that are going to be saved into package
+		it->RemoveObjectFlag( clearFlags );
 
-			if ( bNeedUpdateMap )
+		// If the object class is abstract or has been marked as deprecated, mark this
+		// object as transient so that it isn't serialized
+		if ( it->GetClass()->HasAnyClassFlags( CLASS_Abstract | CLASS_Deprecated ) )
+		{
+			if ( it->GetClass()->HasAnyClassFlags( CLASS_Deprecated ) )
 			{
-				objectExportsMap[object] = index;
+				it->AddObjectFlag( OBJECT_Transient );
+			}
+
+			if ( it->GetClass()->HasAnyClassFlags( CLASS_HasComponents ) )
+			{
+				std::vector<CActorComponent*>						componentReferences;
+				TArchiveObjectReferenceCollector<CActorComponent>	componentCollector( &componentReferences, *it, false, true );
+				it->Serialize( componentCollector );
+
+				for ( uint32 index = 0, count = componentReferences.size(); index < count; ++index )
+				{
+					componentReferences[index]->AddObjectFlag( OBJECT_Transient );
+				}
 			}
 		}
 	}
 
-	// Delete archive and exit
-	delete originalArchive;
-	originalArchive = nullptr;
-	return true;
-}
+	// Export objects (tags them as OBJECT_TagExp)
+	CArchiveSaveTagExports		exportTaggerArchive( InOuter );
 
-/*
-==================
-CObjectPackage::Save
-==================
-*/
-bool CObjectPackage::Save( const std::wstring& InPath )
-{
-	originalArchive		= g_FileSystem->CreateFileWriter( InPath );
-	if ( !originalArchive )
+	// Tag exports and route PreSave
+	PackageExportTagger			packageExportTagger( InBase, InTopLevelFlags, InOuter );
+	packageExportTagger.TagPackageExports( exportTaggerArchive, true );
+
 	{
-		Warnf( TEXT( "Failed to save object package in '%s'\n" ), InPath.c_str() );
-		return false;
-	}
-	arPath = InPath;
+		// Set CObjectPackage::bIsSavingPackage here as it is now illegal to create any new object references, they potentially wouldn't be saved correctly
+		TGuardValue<bool>	isSavingFlag( bIsSavingPackage, true );
 
-	// Set archive type and serialize it's header
-	originalArchive->SetType( AT_Scripts );
-	originalArchive->SerializeHeader();
-
-	// Rest place for offset to export map in the package
-	uint32		offsetToExportMap = 0;
-	uint32		offsetToPackageStart = originalArchive->Tell();
-	*originalArchive << offsetToExportMap;
-
-	// Serialize all objects
-	for ( uint32 index = 0; index < objectExports.size(); ++index )
-	{
-		// Serialize object export and internal data
-		ObjectExport*		objectExport = objectExports[index];
-		CObject*			object = objectExport->GetObject();
-		if ( object )
+		// Clear OBJECT_TagExp again as we need to redo tagging below
+		for ( CObjectIterator it; it; ++it )
 		{
-			uint32			dataOffset = originalArchive->Tell();
-			object->Serialize( *this );
-			object->RemoveObjectFlag( OBJECT_NeedSave );
-			objectExport->dataSize = originalArchive->Tell() - dataOffset;
-		}	
-	}
+			it->RemoveObjectFlag( OBJECT_TagExp );
+		}
 
-	// Serialize export map
-	offsetToExportMap = originalArchive->Tell();
-	uint32		numSize = objectExports.size();
-	*originalArchive << numSize;
-	for ( uint32 index = 0; index < numSize; ++index )
-	{
-		ObjectExport*	objectExport = objectExports[index];
-		*originalArchive << objectExport->className;
-		*originalArchive << objectExport->superClassName;
-		*originalArchive << objectExport->objectName;
-		*originalArchive << objectExport->dataSize;
-	}
+		// We need to serialize objects yet again to tag objects that were created by PreSave as OBJECT_TagExp
+		packageExportTagger.TagPackageExports( exportTaggerArchive, false );
 
-	// Update offset to export map
-	originalArchive->Seek( offsetToPackageStart );
-	*originalArchive << offsetToExportMap;
+		// Allocate the linker
+		CLinkerSave		linker( InOuter, tempFilename.GetFullPath().c_str() );
 
-	// Delete archive and exit
-	delete originalArchive;
-	originalArchive = nullptr;
-	return true;
-}
-
-/*
-==================
-CObjectPackage::operator<<
-==================
-*/
-CArchive& CObjectPackage::operator<<( class CObject*& InValue )
-{
-	// By default is invalid object export ID
-	uint32		objectExportId = INVALID_ID;
-	CArchive&	archive = *this;
-
-	// If we save the object and it isn't exist a object export in the package
-	// then we create a new and add into package
-	if ( originalArchive->IsSaving() && InValue )
-	{
-		auto	it = objectExportsMap.find( InValue );
-		if ( it != objectExportsMap.end() )
+		// Import objects
+		for ( CObjectIterator it; it; ++it )
 		{
-			objectExportId = it->second;
-		}
-		else
-		{ 
-			objectExportId = AddObject( InValue );
-		}
-	}
+			CObject*	object = *it;
+			if ( object->HasAnyObjectFlags( OBJECT_TagExp ) )
+			{
+				CArchiveSaveTagImports	importTagger( &linker );
+				CClass*					theClass = object->GetClass();
 
-	// Serialize the object export ID
-	archive << objectExportId;
+				object->Serialize( importTagger );
+				importTagger << theClass;
+			}
+		}
 
-	// If we load the object and its NULL in the object export
-	// then we have to create a new object. 
-	// When object export ID is INVALID_ID its mean what CObject was NULL
-	if ( originalArchive->IsLoading() && objectExportId != INVALID_ID )
-	{
-		ObjectExport*	objectExport	= objectExports[objectExportId];
-		bool			bNeedUpdateMap	= !objectExport->IsValidObject();
-		InValue = objectExport->GetObject();
-		if ( bNeedUpdateMap )
+		// Generate a new guid for the package
+		linker.GetSummary().guid = Sys_CreateGuid();
+
+		// Make sure the CPackage's copy of the GUID is up to date
+		InOuter->guid = linker.GetSummary().guid;
+
+		// Rest place for package summary, we update it in the end
+		linker << linker.GetSummary();
+		uint32		offsetAfterPackageFileSummary = linker.Tell();
+
+		// Build import map
+		std::vector<ObjectImport>&	importMap = linker.GetImports();
+		for ( CObjectIterator it; it; ++it )
 		{
-			objectExportsMap[InValue] = objectExportId;
+			if ( it->HasAnyObjectFlags( OBJECT_TagImp ) )
+			{
+				importMap.push_back( *it );
+			}
+		}
+		linker.GetSummary().importCount = importMap.size();
+
+		// Build export map
+		std::vector<ObjectExport>&		exportMap = linker.GetExports();
+		for ( CObjectIterator it; it; ++it )
+		{
+			if ( it->HasAnyObjectFlags( OBJECT_TagExp ) )
+			{
+				exportMap.push_back( *it );
+			}
+		}
+		linker.GetSummary().exportCount = exportMap.size();
+
+		// Set linker reverse mappings
+		// also set required data for any CPackages in the export map
+		std::vector<CPackageIndex>&		objectIndeces = linker.GetObjectIndices();
+		for ( uint32 index = 0, count = exportMap.size(); index < count; ++index )
+		{
+			CObject*	object = exportMap[index].object;
+			if ( object )
+			{
+				objectIndeces[object->GetIndex()] = CPackageIndex::FromExport( index );
+				CObjectPackage*		package = Cast<CObjectPackage>( object );
+				if ( package )
+				{
+					exportMap[index].packageGuid = package->GetGuid();
+				}
+			}
+		}
+
+		for ( uint32 index = 0, count = importMap.size(); index < count; ++index )
+		{
+			CObject*	object = importMap[index].object;
+			if ( object )
+			{
+				objectIndeces[object->GetIndex()] = CPackageIndex::FromImport( index );
+			}
+		}
+
+		// Save dummy import map, overwritten later
+		linker.GetSummary().importOffset = linker.Tell();
+		for ( uint32 index = 0, count = importMap.size(); index < count; ++index )
+		{
+			ObjectImport&	objectImport = importMap[index];
+			linker << objectImport;
+		}
+		uint32		offsetAfterImportMap = linker.Tell();
+
+		// Save dummy export map, overwritten later
+		linker.GetSummary().exportOffset = linker.Tell();
+		for ( uint32 index = 0, count = exportMap.size(); index < count; ++index )
+		{
+			ObjectExport&	objectExport = exportMap[index];
+			linker << objectExport;
+		}
+		uint32		offsetAfterExportMap = linker.Tell();
+
+		// Save exports
+		for ( uint32 index = 0, count = exportMap.size(); index < count; ++index )
+		{
+			ObjectExport&	objectExport = exportMap[index];
+			if ( objectExport.object )
+			{
+				// Set class index
+				if ( !IsA<CClass>( objectExport.object ) )
+				{
+					objectExport.classIndex = objectIndeces[objectExport.object->GetClass()->GetIndex()];
+					AssertMsg( !objectExport.classIndex.IsNull(), TEXT( "Export %s class is not mapped when saving %s" ), *objectExport.object->GetName().c_str(), linker.GetLinkerRoot()->GetName().c_str() );
+				}
+				else
+				{
+					// This is a CClass object
+					objectExport.classIndex = CPackageIndex();
+				}
+
+				// Set the parent index, if this export represents a CStruct-derived object
+				if ( IsA<CStruct>( objectExport.object ) )
+				{
+					CStruct*	theStruct = ( CStruct* )objectExport.object;
+					if ( theStruct->GetSuperStruct() )
+					{
+						objectExport.superIndex = objectIndeces[theStruct->GetSuperStruct()->GetIndex()];
+						AssertMsg( !objectExport.superIndex.IsNull(),
+								   TEXT( "Export Struct (%s) of type (%s) inheriting from (%s) of type (%s) has not mapped super struct" ), 
+								   theStruct->GetName().c_str(),
+								   theStruct->GetClass()->GetName().c_str(),
+								   theStruct->GetSuperStruct()->GetName().c_str(),
+								   theStruct->GetSuperStruct()->GetClass()->GetName().c_str() );
+					}
+					else
+					{
+						objectExport.superIndex = CPackageIndex();
+					}
+				}
+				else
+				{
+					objectExport.superIndex = CPackageIndex();
+				}
+
+				// Set CPackageIndex for this export's Outer. If the export's Outer
+				// is the CPackage corresponding to this package's LinkerRoot
+				if ( objectExport.object->GetOuter() != InOuter )
+				{
+					Assert( objectExport.object->GetOuter() );
+					objectExport.outerIndex = objectIndeces[objectExport.object->GetOuter()->GetIndex()];
+
+					AssertMsg( IsIn( objectExport.object->GetOuter(), InOuter ),
+							   TEXT( "Export Object (%s) Outer (%s) mismatch" ),
+							   objectExport.object->GetName().c_str(),
+							   objectExport.object->GetOuter()->GetName().c_str() );
+					AssertMsg( !objectExport.outerIndex.IsImport(),
+							   TEXT( "Export Object (%s) Outer (%s) is an Import" ),
+							   objectExport.object->GetName().c_str(),
+							   objectExport.object->GetOuter()->GetName().c_str() );
+					AssertMsg( !objectExport.outerIndex.IsNull(),
+							   TEXT( "Export Object (%s) Outer (%s) index is root package" ),
+							   objectExport.object->GetName().c_str(),
+							   objectExport.object->GetOuter()->GetName().c_str() );
+
+				}
+				else
+				{
+					// This export's Outer is the LinkerRoot for this package
+					objectExport.outerIndex = CPackageIndex();
+				}
+
+				// Save the object data
+				objectExport.serialOffset = linker.Tell();
+				objectExport.object->Serialize( linker );
+				objectExport.serialSize = linker.Tell() - objectExport.serialOffset;
+			}
+		}
+
+		// Save the import map
+		linker.Seek( linker.GetSummary().importOffset );
+		for ( uint32 index = 0, count = importMap.size(); index < count; ++index )
+		{
+			ObjectImport&		objectImport = importMap[index];
+			if ( objectImport.object )
+			{
+				// Set the package index
+				if ( objectImport.object->GetOuter() )
+				{
+					if ( IsIn( objectImport.object->GetOuter(), InOuter ) )
+					{
+						if ( !objectImport.object->HasAllObjectFlags( OBJECT_Native | OBJECT_Transient ) )
+						{
+							Warnf( TEXT( "Bad object '%s'\n" ), objectImport.object->GetName().c_str() );
+						}
+						else
+						{
+							// If an object is marked OBJECT_Transient|OBJECT_Native, it is either an intrinsic class or
+							// a property of an intrinsic class. Only properties of intrinsic classes will have
+							// an Outer that passes the check for "IsIn( GetOuter, InOuter )" (thus ending up in this
+							// block of code). Just verify that the Outer for this property is also marked OBJECT_Transient|OBJECT_Native
+							Assert( objectImport.object->GetOuter()->HasAllObjectFlags( OBJECT_Native | OBJECT_Transient ) );
+						}
+					}
+
+					Assert( !IsIn( objectImport.object->GetOuter(), InOuter ) || objectImport.object->HasAllObjectFlags( OBJECT_Native | OBJECT_Transient ) );
+					objectImport.outerIndex = objectIndeces[objectImport.object->GetOuter()->GetIndex()];
+				}
+	
+				// Save it
+				linker << objectImport;
+			}
+		}
+		Assert( linker.Tell() == offsetAfterImportMap );
+
+		// Save the export map
+		linker.Seek( linker.GetSummary().exportOffset );
+		for ( uint32 index = 0, count = exportMap.size(); index < count; ++index )
+		{
+			linker << exportMap[index];
+		}
+		Assert( linker.Tell() == offsetAfterExportMap );
+
+		// Update package summary
+		linker.Seek( 0 );
+		linker << linker.GetSummary();
+		Assert( linker.Tell() == offsetAfterPackageFileSummary );
+		bSuccess = true;
+
+		// Detach saver in the linker
+		linker.Detach();
+
+		Logf( TEXT( "Save package '%s' took %f secs\n" ), InFilename, Sys_Seconds() - timeStart );
+
+		if ( bSuccess )
+		{
+			// Move the temporary file
+			Logf( TEXT( "Moving '%s' to '%s'\n" ), tempFilename.GetFullPath().c_str(), InFilename );
+			bSuccess = g_FileSystem->Move( InFilename, tempFilename.GetFullPath(), true ) == CMR_OK;
+
+			if ( !bSuccess )
+			{
+				Warnf( TEXT( "Failed to save package '%s'\n" ), InFilename );
+			}
+			else
+			{
+				InOuter->SetDirtyFlag( false );
+			}
+
+			// Delete the temporary file
+			g_FileSystem->Delete( tempFilename.GetFullPath() );
 		}
 	}
 
-	return archive;
-}
-
-/*
-==================
-CObjectPackage::Serialize
-==================
-*/
-void CObjectPackage::Serialize( void* InBuffer, uint32 InSize )
-{
-	originalArchive->Serialize( InBuffer, InSize );
-}
-
-/*
-==================
-CObjectPackage::Tell
-==================
-*/
-uint32 CObjectPackage::Tell()
-{
-	return originalArchive ? originalArchive->Tell() : 0;
-}
-
-/*
-==================
-CObjectPackage::Seek
-==================
-*/
-void CObjectPackage::Seek( uint32 InPosition )
-{
-	if ( originalArchive )
-	{
-		originalArchive->Seek( InPosition );
-	}
-}
-
-/*
-==================
-CObjectPackage::Flush
-==================
-*/
-void CObjectPackage::Flush()
-{
-	if ( originalArchive )
-	{
-		originalArchive->Flush();
-	}
-}
-
-/*
-==================
-CObjectPackage::IsSaving
-==================
-*/
-bool CObjectPackage::IsSaving() const
-{
-	return originalArchive ? originalArchive->IsSaving() : false;
-}
-
-/*
-==================
-CObjectPackage::IsLoading
-==================
-*/
-bool CObjectPackage::IsLoading() const
-{
-	return originalArchive ? originalArchive->IsLoading() : false;
-}
-
-/*
-==================
-CObjectPackage::IsEndOfFile
-==================
-*/
-bool CObjectPackage::IsEndOfFile()
-{
-	return originalArchive ? originalArchive->IsEndOfFile() : false;
-}
-
-/*
-==================
-CObjectPackage::GetSize
-==================
-*/
-uint32 CObjectPackage::GetSize()
-{
-	return originalArchive ? originalArchive->GetSize() : 0;
+	return bSuccess;
 }

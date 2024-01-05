@@ -41,10 +41,11 @@
  * @param TSuperClass       Super class
  * @param TClassFlags       Class flags
  * @param TClassCastFlags   Class cast flags
+ * @param TPackage          Package
  * 
- * Example usage: @code DECLARE_BASE_CLASS( CClass, CObject, 0, 0 ) @endcode
+ * Example usage: @code DECLARE_BASE_CLASS( CClass, CObject, 0, 0, TEXT( "Core" ) ) @endcode
  */
-#define DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
+#define DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags, TPackage ) \
     private: \
         static class CClass*                    staticClass; \
         static class CClass*                    GetStaticClass(); \
@@ -56,6 +57,11 @@
 	    typedef TSuperClass	                    Super; \
         static CObject*                         StaticConstructor( void* InPtr ); \
         static void                             StaticInitializeClass(); \
+        static FORCEINLINE const tchar*         StaticPackage() \
+        { \
+            /** Returns the package this class belongs in */ \
+            return TPackage; \
+        } \
         static FORCEINLINE class CClass*        StaticClass() \
         { \
             if ( !staticClass ) \
@@ -82,11 +88,12 @@
  * @param TSuperClass       Super class
  * @param TClassFlags       Class flags
  * @param TClassCastFlags   Class cast flags
+ * @param TPackage          Package
  *
- * Example usage: @code DECLARE_CLASS( CClass, CObject, 0, 0 ) @endcode
+ * Example usage: @code DECLARE_CLASS( CClass, CObject, 0, 0, TEXT( "Core" ) ) @endcode
  */
-#define DECLARE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
-    DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
+#define DECLARE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags, TPackage ) \
+    DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags, TPackage ) \
     DECLARE_SERIALIZER_AND_DTOR( TClass )
 
 /**
@@ -97,11 +104,12 @@
  * @param TSuperClass       Super class
  * @param TClassFlags       Class flags
  * @param TClassCastFlags   Class cast flags
+ * @param TPackage          Package
  *
- * Example usage: @code DECLARE_CLASS_INTRINSIC( CClass, CObject, 0, 0 ) @endcode
+ * Example usage: @code DECLARE_CLASS_INTRINSIC( CClass, CObject, 0, 0, TEXT( "Core" ) ) @endcode
  */
-#define DECLARE_CLASS_INTRINSIC( TClass, TSuperClass, TClassFlags, TClassCastFlags ) \
-    DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags | CLASS_Intrinsic, TClassCastFlags ) \
+#define DECLARE_CLASS_INTRINSIC( TClass, TSuperClass, TClassFlags, TClassCastFlags, TPackage ) \
+    DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags | CLASS_Intrinsic, TClassCastFlags, TPackage ) \
     DECLARE_SERIALIZER_AND_DTOR( TClass )
 
 /**
@@ -154,7 +162,7 @@
     CClass* TClass::staticClass = nullptr; \
     CObject* TClass::StaticConstructor( void* InPtr ) \
     { \
-        return ::new( InPtr ) ThisClass(); \
+        return ::new( InPtr ) ThisClass; \
     } \
     CClass* TClass::GetStaticClass() \
     { \
@@ -162,6 +170,7 @@
         ( \
             NativeConstructor, \
             TEXT( #TClass ), \
+            StaticPackage(), \
             StaticClassFlags, \
             StaticClassCastFlags, \
             sizeof( ThisClass ), \
@@ -212,13 +221,15 @@ typedef uint32          ObjectFlags_t;
  */
 enum EClassFlags
 {
-	CLASS_None			= 0,		/**< None */
-	CLASS_Deprecated	= 1 << 0,	/**< Class is deprecated */
-	CLASS_Abstract		= 1 << 1,	/**< Class is abstract and can't be instantiated directly  */
-    CLASS_Native        = 1 << 2,   /**< Class is native */
-    CLASS_Intrinsic     = 1 << 3,   /**< Class has no LifeScript counter-part */
-    CLASS_Parsed        = 1 << 4,   /**< Script has been successfully parsed */
-    CLASS_Compiled      = 1 << 5    /**< Script has been compiled successfully */
+	CLASS_None			    = 0,		/**< None */
+	CLASS_Deprecated	    = 1 << 0,	/**< Class is deprecated */
+	CLASS_Abstract		    = 1 << 1,	/**< Class is abstract and can't be instantiated directly  */
+    CLASS_Native            = 1 << 2,   /**< Class is native */
+    CLASS_Intrinsic         = 1 << 3,   /**< Class was declared directly in C++ and has no boilerplate in <GameDir>/Content/Scripts/*.class */
+    CLASS_HasComponents     = 1 << 4,   /**< Class has component properties */
+    CLASS_Transient         = 1 << 5,   /**< This object type can't be saved; null it out at save time */
+
+    CLASS_Inherit           = CLASS_Transient | CLASS_HasComponents | CLASS_Deprecated | CLASS_Intrinsic        /**< Flags to inherit from base class */
 };
 
 /**
@@ -257,10 +268,9 @@ enum EObjectFlags
     OBJECT_FinishDestroyed  = 1 << 4,   /**< FinishDestroy has been called on the object */
     OBJECT_Unreachable      = 1 << 5,   /**< Object is not reachable on the object graph */
     OBJECT_PendingKill      = 1 << 6,   /**< Objects that are pending destruction */
-
-    // DEPRECATED
-    OBJECT_NeedSave         = 1 << 7,   /**< DEPRECATED. Mark a object what need to save it by CObjectPackage */
-    OBJECT_NeedDestroy      = 1 << 8    /**< DEPRECATED. Mark a object what need to destroy it */
+    OBJECT_TagImp           = 1 << 7,   /**< Temporary import tag in load/save */
+    OBJECT_TagExp           = 1 << 8,   /**< Temporary export tag in load/save */
+    OBJECT_Transient        = 1 << 9,   /**< Don't save object */
 };
 
 /**

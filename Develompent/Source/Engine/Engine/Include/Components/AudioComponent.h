@@ -20,7 +20,7 @@
  */
 class CAudioComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CAudioComponent, CSceneComponent, 0, 0 )
+	DECLARE_CLASS( CAudioComponent, CSceneComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

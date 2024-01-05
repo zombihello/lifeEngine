@@ -1,4 +1,5 @@
 #include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/ObjectPackage.h"
 
 IMPLEMENT_CLASS( CField )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CField )
@@ -29,7 +30,25 @@ CField::Bind
 ==================
 */
 void CField::Bind()
-{}
+{
+	// Do nothing if the field already binded
+	if ( bBinded )
+	{
+		return;
+	}
+
+	// For native objects (only CClass, CStructs and CEnums) we have to create a package where this filed must be
+	if ( HasAnyObjectFlags( OBJECT_Native ) && ( IsA<CStruct>( this ) || IsA<CEnum>( this ) ) )
+	{
+		CObject* package = CObjectPackage::CreatePackage( nullptr, ( const tchar* )GetOuter() );
+		Assert( package );
+
+		package->AddToRoot();
+		SetOuter( package );
+	}
+
+	bBinded = true;
+}
 
 /*
 ==================

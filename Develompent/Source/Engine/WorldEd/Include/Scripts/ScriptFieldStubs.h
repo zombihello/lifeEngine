@@ -15,28 +15,63 @@
 #include "Core.h"
 #include "Misc/SharedPointer.h"
 #include "Reflection/Class.h"
-#include "Reflection/Function.h"
-#include "Scripts/ScriptFileContext.h"
-#include "Scripts/ScriptTokenStream.h"
+#include "Reflection/Property.h"
+#include "Reflection/ObjectPackage.h"
 
 /**
  * @ingroup WorldEd
- * @brief Enumeration of script stub flags
+ * @brief Script property types
  */
-enum EScriptStubFlags
+enum EScriptPropertyType
 {
-	SSF_Native		= 1 << 0		/**< Is a native stub */
+	SPT_Unknown,	/**< Unknown */
+	SPT_Byte,		/**< Byte */
+	SPT_Enum,		/**< Enum */
+	SPT_Int,		/**< Integer */
+	SPT_Bool,		/**< Boolean */
+	SPT_Float,		/**< Float */
+	SPT_Color,		/**< Color */
+	SPT_Object,		/**< CObject */
+	SPT_Vector,		/**< Vector */
+	SPT_Rotator,	/**< Rotator */
+	SPT_Asset,		/**< Asset */
+	SPT_Array,		/**< Array */
+	SPT_Struct,		/**< CStruct */
+	SPT_String,		/**< String */
+	SPT_Num,		/**< Properties number */
 };
 
 /**
  * @ingroup WorldEd
- * @brief Script scope of a stub
+ * @brief Convert Text to EScriptPropertyType
+ * 
+ * @param InString	String
+ * @return Return converted string into EScriptPropertyType. In fail case returns SPT_Unknown
  */
-struct ScriptScopeStub
+EScriptPropertyType ConvertTextToEScriptPropertyType( const std::wstring& InString );
+
+/**
+ * @ingroup WorldEd
+ * @brief Is property type have sub type
+ * 
+ * @param InPropertyType	Property type
+ * @return Return TRUE if the property type must have sub type, otherwise returns FALSE
+ */
+FORCEINLINE bool IsScriptPropertyTypeHaveSubType( EScriptPropertyType InPropertyType )
 {
-	ScriptFileContext	startContext;	/**< Context of the start context */
-	ScriptFileContext	endContext;		/**< Context of the end context */
-};
+	switch ( InPropertyType )
+	{
+	case SPT_Enum:
+	case SPT_Object:
+	case SPT_Asset:
+	case SPT_Array:
+	case SPT_Struct:
+		return true;
+
+	default:
+		return false;
+	}
+}
 
 /**
  * @ingroup WorldEd
@@ -48,19 +83,9 @@ public:
 	/**
 	 * @brief Constructor
 	 * 
-	 * @param InContext	Stub context
 	 * @param InName	Stub name
 	 */
-	CScriptBaseStub( const ScriptFileContext& InContext, const std::wstring& InName );
-
-	/**
-	 * @brief Get stub context
-	 * @return Return stub context. If isn't exist returns NULL
-	 */
-	FORCEINLINE const ScriptFileContext& GetContext() const
-	{
-		return context;
-	}
+	CScriptBaseStub( const std::wstring& InName );
 
 	/**
 	 * @brief Get stub name
@@ -72,166 +97,142 @@ public:
 	}
 
 protected:
-	ScriptFileContext		context;	/**< Context */
-	std::wstring			name;		/**< Name */
+	std::wstring	name;		/**< Stub name */
 };
 
 /**
  * @ingroup WorldEd
- * @brief Script function parameter stub
+ * @brief Script class property stub
  */
-class CScriptFunctionParamStub : public CScriptBaseStub
+class CScriptPropertyStub : public CScriptBaseStub
 {
 public:
 	/**
 	 * @brief Constructor
-	 *
-	 * @param InContext		Parameter context
-	 * @param InParamName	Parameter name
-	 * @param InTypeContext	Type context
-	 * @param InTypeName	Type name
+	 * 
+	 * @param InPropertyName	Property name
+	 * @param InPropertyType	Property type
+	 * @param InPropertyFlags	Property flags (see EPropertyFlags)
+	 * @param InPropertySubType	Property sub type, using for byte (enum), object, struct, asset and array
 	 */
-	CScriptFunctionParamStub( const ScriptFileContext& InContext, const std::wstring& InParamName, const ScriptFileContext& InTypeContext, const std::wstring& InTypeName );
+	CScriptPropertyStub( const std::wstring& InPropertyName, EScriptPropertyType InPropertyType, uint32 InFlags = CPF_None, const std::wstring& InPropertySubType = TEXT( "" ) );
 
 	/**
-	 * @brief Get parameter type context
-	 * @return Return parameter type context
+	 * @brief Get property type
+	 * @return Return property type
 	 */
-	FORCEINLINE const ScriptFileContext* GetTypeContext() const
+	FORCEINLINE EScriptPropertyType GetType() const
 	{
-		return &typeContext;
+		return type;
 	}
 
 	/**
-	 * @brief Get parameter type name
-	 * @return Return parameter type name
+	 * @brief Get property sub type
+	 * @return Return property sub type. If isn't returns empty string
 	 */
-	FORCEINLINE const std::wstring& GetTypeName() const
+	FORCEINLINE const std::wstring& GetSubType() const
 	{
-		return typeName;
-	}
-
-private:
-	ScriptFileContext		typeContext;		/**< Return type context */
-	std::wstring			typeName;			/**< Return type name */
-};
-
-/**
- * @ingroup WorldEd
- * @brief Script function stub
- */
-class CScriptFunctionStub : public CScriptBaseStub
-{
-public:
-	/**
-	 * @brief Constructor
-	 *
-	 * @param InContext					Function context
-	 * @param InFunctionName			Function name
-	 * @param InReturnTypeContext		Return type context
-	 * @param InReturnTypeName			Return type name
-	 * @param InFlags					Flags (look EScriptStubFlags)
-	 */
-	CScriptFunctionStub( const ScriptFileContext& InContext, const std::wstring& InFunctionName, const ScriptFileContext& InReturnTypeContext, const std::wstring& InReturnTypeName, uint32 InFlags );
-
-	/**
-	 * @brief Add a new function parameter
-	 * @param InFunctionParam	A new function parameter
-	 */
-	FORCEINLINE void AddParam( const TSharedPtr<CScriptFunctionParamStub>& InFunctionParam )
-	{
-		parameters.push_back( InFunctionParam );
+		return subType;
 	}
 
 	/**
-	 * @brief Get the function scope
-	 * @return Return reference to the function scope
+	 * @brief Set created property
+	 * @param InCreatedProperty		Created property for class
 	 */
-	FORCEINLINE ScriptScopeStub& GetScope()
+	FORCEINLINE void SetCreatedProperty( CProperty* InCreatedProperty )
 	{
-		return scope;
+		createdProperty = InCreatedProperty;
 	}
 
 	/**
-	 * @brief Get return type context
-	 * @return Return return type context
+	 * @brief Get created property
+	 * @return Return pointer to created property. If isn't created returns NULL
 	 */
-	FORCEINLINE const ScriptFileContext* GetReturnTypeContext() const
+	FORCEINLINE CProperty* GetCreatedProperty() const
 	{
-		return &returnTypeContext;
+		return createdProperty;
 	}
 
 	/**
-	 * @brief Get return type name
-	 * @return Return return type name
+	 * @brief Set property flags
+	 * @param InFlags	Property flags
 	 */
-	FORCEINLINE const std::wstring& GetReturnTypeName() const
+	FORCEINLINE void SetFlags( uint32 InFlags )
 	{
-		return returnTypeName;
+		flags = InFlags;
 	}
 
 	/**
-	 * @brief Get function code
-	 * @return Return function code
+	 * @brief Get property flags
+	 * @return Return property flags
 	 */
-	FORCEINLINE CScriptTokenStream& GetCode()
+	FORCEINLINE uint32 GetFlags() const
 	{
-		return code;
+		return flags;
 	}
 
 	/**
-	 * @brief Get function code
-	 * @return Return function code
+	 * @brief Set count of persistent variables
+	 * @param InArraySize	Count of persistent variables
 	 */
-	FORCEINLINE const CScriptTokenStream& GetCode() const
+	FORCEINLINE void SetArraySize( uint32 InArraySize )
 	{
-		return code;
+		arraySize = InArraySize;
 	}
 
 	/**
-	 * @brief Get array of function parameters
-	 * @return Return array of function parameters
+	 * @brief Get count of persistent variables
+	 * @return Return count of persistent variables
 	 */
-	FORCEINLINE const std::vector<TSharedPtr<CScriptFunctionParamStub>>& GetParams() const
+	FORCEINLINE uint32 GetArraySize() const
 	{
-		return parameters;
+		return arraySize;
 	}
 
 	/**
-	 * @brief Is the function native
-	 * @return Return TRUE if the function is native
+	 * @brief Set category
+	 * @param InCategory	Category
 	 */
-	FORCEINLINE bool IsNative() const
+	FORCEINLINE void SetCategory( const std::wstring& InCategory )
 	{
-		return bIsNative;
+		category = InCategory;
 	}
 
 	/**
-	 * @brief Set created function
-	 * @param InCreatedFunction		Created function for script environment
+	 * @brief Set description
+	 * @param InDescription		Description
 	 */
-	FORCEINLINE void SetCreatedFunction( CFunction* InCreatedFunction )
+	FORCEINLINE void SetDescription( const std::wstring& InDescription )
 	{
-		createdFunction = InCreatedFunction;
+		description = InDescription;
 	}
 
 	/**
-	 * @brief Get created function
-	 * @return Return pointer to created function. If isn't created returns NULL
+	 * @brief Get category
+	 * @return Return category
 	 */
-	FORCEINLINE CFunction* GetCreatedFunction() const
+	FORCEINLINE const std::wstring& GetCategory() const
 	{
-		return createdFunction;
+		return category;
+	}
+
+	/**
+	 * @brief Get description
+	 * @return Return description
+	 */
+	FORCEINLINE const std::wstring& GetDescription() const
+	{
+		return description;
 	}
 
 private:
-	bool												bIsNative;				/**< Is the function native */
-	ScriptScopeStub										scope;					/**< Scope of the function */
-	CScriptTokenStream									code;					/**< Function code */
-	ScriptFileContext									returnTypeContext;		/**< Return type context */
-	std::wstring										returnTypeName;			/**< Return type name */
-	std::vector<TSharedPtr<CScriptFunctionParamStub>>	parameters;				/**< Array of function parameters */
-	CFunction*											createdFunction;		/**< Created function for script environment */
+	EScriptPropertyType		type;				/**< Property type */
+	std::wstring			subType;			/**< Property sub type, using for byte (enum), object, struct, asset and array */
+	std::wstring			category;			/**< Category */
+	std::wstring			description;		/**< Description */
+	CProperty*				createdProperty;	/**< Created property for class */
+	uint32					flags;				/**< Property flags (see EPropertyFlags) */
+	uint32					arraySize;			/**< Count of persistent variables */
 };
 
 /**
@@ -244,40 +245,11 @@ public:
 	/**
 	 * @brief Constructor
 	 *
-	 * @param InContext				Class context
 	 * @param InClassName			Class name
-	 * @param InSuperClassContext	Super class context
 	 * @param InSuperClassName		Super class name
-	 * @param InFlags				Flags (look EScriptStubFlags)
+	 * @param InFlags				Flags (see EClassFlags)
 	 */
-	CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, const ScriptFileContext& InSuperClassContext, const std::wstring& InSuperClassName, uint32 InFlags );
-
-	/**
-	 * @brief Add a new function
-	 * @param InFunction	A new function
-	 */
-	FORCEINLINE void AddFunction( const TSharedPtr<CScriptFunctionStub>& InFunction )
-	{
-		functions.push_back( InFunction );
-	}
-
-	/**
-	 * @brief Get the class scope
-	 * @return Return reference to the class scope
-	 */
-	FORCEINLINE ScriptScopeStub& GetScope()
-	{
-		return scope;
-	}
-
-	/**
-	 * @brief Get super class context
-	 * @return Return super class context
-	 */
-	FORCEINLINE const ScriptFileContext* GetSuperClassContext() const
-	{
-		return &superClassContext;
-	}
+	CScriptClassStub( const std::wstring& InClassName, const std::wstring& InSuperClassName, uint32 InFlags = CLASS_None );
 
 	/**
 	 * @brief Get super class name
@@ -289,21 +261,21 @@ public:
 	}
 
 	/**
-	 * @brief Get array of functions
-	 * @return Return array of functions
+	 * @brief Set script code
+	 * @param InScriptCode	Script code of the class
 	 */
-	FORCEINLINE const std::vector<TSharedPtr<CScriptFunctionStub>>& GetFunctions() const
+	FORCEINLINE void SetScriptCode( const std::string& InScriptCode )
 	{
-		return functions;
+		scriptCode = InScriptCode;
 	}
 
 	/**
-	 * @brief Is the class native
-	 * @return Return TRUE if the class is native
+	 * @brief Get script code
+	 * @return Return script code. If isn't returns empty string
 	 */
-	FORCEINLINE bool IsNative() const
+	FORCEINLINE const std::string& GetScriptCode() const
 	{
-		return bIsNative;
+		return scriptCode;
 	}
 
 	/**
@@ -324,13 +296,48 @@ public:
 		return createdClass;
 	}
 
+	/**
+	 * @brief Set properties
+	 * @param InProperties	Properties
+	 */
+	FORCEINLINE void SetProperties( const std::vector<TSharedPtr<CScriptPropertyStub>>& InProperties )
+	{
+		properties = InProperties;
+	}
+
+	/**
+	 * @brief Get properties
+	 * @return Return properties
+	 */
+	FORCEINLINE const std::vector<TSharedPtr<CScriptPropertyStub>>& GetProperties() const
+	{
+		return properties;
+	}
+
+	/**
+	 * @brief Set class flags
+	 * @param InFlags	Class flags (see EClassFlags)
+	 */
+	FORCEINLINE void SetFlags( uint32 InFlags )
+	{
+		flags = InFlags;
+	}
+
+	/**
+	 * @brief Get class flags
+	 * @return Return class flags
+	 */
+	FORCEINLINE uint32 GetFlags() const
+	{
+		return flags;
+	}
+
 private:
-	bool											bIsNative;			/**< Is the class native */
-	ScriptScopeStub									scope;				/**< Scope of the class */
-	ScriptFileContext								superClassContext;	/**< Super class context */
-	std::wstring									superClassName;		/**< Super class name */
-	std::vector<TSharedPtr<CScriptFunctionStub>>	functions;			/**< Functions */
-	CClass*											createdClass;		/**< Created class for script environment */
+	std::wstring										superClassName;		/**< Super class name */
+	std::string											scriptCode;			/**< Script code */
+	CClass*												createdClass;		/**< Created class for script environment */
+	uint32												flags;				/**< Class flags (see EClassFlags) */
+	std::vector<TSharedPtr<CScriptPropertyStub>>		properties;			/**< Properties */
 };
 
 /**
@@ -342,8 +349,9 @@ class CScriptSystemStub
 public:
 	/**
 	 * @brief Constructor
+	 * @param InPackage		Package where will be placing CClass, CProperty and etc
 	 */
-	CScriptSystemStub();
+	CScriptSystemStub( CObjectPackage* InPackage );
 
 	/**
 	 * @brief Add a class/structure
@@ -385,13 +393,17 @@ public:
 		return classes;
 	}
 
-private:
 	/**
-	 * @brief Constructor of copy
-	 * @param InOther	Other script system stub
+	 * @brief Get package
+	 * @return Return package
 	 */
-	CScriptSystemStub( const CScriptSystemStub& InOther );
+	FORCEINLINE CObjectPackage* GetPackage() const
+	{
+		return package;
+	}
 
+private:
+	CObjectPackage*														package;	/**< Package where will be placing CClass, CProperty and etc */
 	std::vector<TSharedPtr<CScriptClassStub>>							classes;	/**< Top level classes */
 	std::unordered_map<std::wstring, TSharedPtr<CScriptClassStub>>		classesMap;	/**< Top level classes for find by name */
 };

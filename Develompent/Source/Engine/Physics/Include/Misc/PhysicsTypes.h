@@ -38,7 +38,7 @@ enum ECollisionChannel
 	CC_Max				/**< Count collision channels */
 };
 
-DECLARE_ENUM( ECollisionChannel )
+DECLARE_ENUM( ECollisionChannel, TEXT( "Physics" ) )
 #define FOREACH_ENUM_COLLISIONCHANNEL( X ) \
 	X( CC_WorldStatic ) \
 	X( CC_Visibility ) \
@@ -56,7 +56,7 @@ enum ECollisionResponse
 	CR_Max				/**< Count responses */
 };
 
-DECLARE_ENUM( ECollisionResponse )
+DECLARE_ENUM( ECollisionResponse, TEXT( "Physics" ) )
 #define FOREACH_ENUM_COLLISIONRESPONSE( X ) \
 	X( CR_Ignore ) \
 	X( CR_Overlap ) \
@@ -88,7 +88,7 @@ enum ESurfaceType
  */
 struct CollisionProfile
 {
-	DECLARE_STRUCT( CollisionProfile, CollisionProfile )
+	DECLARE_STRUCT( CollisionProfile, CollisionProfile, TEXT( "Physics" ) )
 
 	/**
 	 * @brief Constructor

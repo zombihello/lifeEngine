@@ -93,6 +93,13 @@ CFunction::Bind
 */
 void CFunction::Bind()
 {
+	// Do nothing if the class already binded
+	if ( IsBinded() )
+	{
+		return;
+	}
+	Super::Bind();
+
 	// If the function isn't native we use CObject's method ExecScript to execute bytecode
 	if ( !HasAnyFunctionFlags( FUNC_Native ) )
 	{

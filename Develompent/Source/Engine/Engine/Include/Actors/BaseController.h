@@ -18,7 +18,7 @@
   */
 class ABaseController : public AActor
 {
-	DECLARE_CLASS( ABaseController, AActor, 0, 0 )
+	DECLARE_CLASS( ABaseController, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

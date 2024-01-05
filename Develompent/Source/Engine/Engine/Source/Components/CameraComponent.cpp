@@ -33,7 +33,7 @@ void CCameraComponent::StaticInitializeClass()
 	// Native properties
 	new( staticClass, TEXT( "bIsActive" ) )			CBoolProperty( CPP_PROPERTY( ThisClass, bIsActive ), TEXT( "Camera" ), TEXT( "Is active camera. This field setted from CCameraManager::SetActiveCamera" ), CPF_Edit );
 	new( staticClass, TEXT( "bAutoViewData" ) )		CBoolProperty( CPP_PROPERTY( ThisClass, bAutoViewData ), TEXT( "Camera" ), TEXT( "Auto view data. If this flag is true, CCameraManager auto set aspect ratio (for CPM_Perspective) or set ortho width/height (for CPM_Orthographic)" ), CPF_Edit );
-	new( staticClass, TEXT( "Projection Mode" ) )	CByteProperty( CPP_PROPERTY( ThisClass, projectionMode ), TEXT( "Camera" ), TEXT( "Projection mode" ), CPF_Edit, Enum::GetECameraProjectionMode() );
+	new( staticClass, TEXT( "Projection Mode" ) )	CByteProperty( CPP_PROPERTY( ThisClass, projectionMode ), TEXT( "Camera" ), TEXT( "Projection mode" ), CPF_Edit, Enum::ECameraProjectionMode::StaticEnum() );
 	new( staticClass, TEXT( "Field Of View" ) )		CFloatProperty( CPP_PROPERTY( ThisClass, fieldOfView ), TEXT( "Camera" ), TEXT( "The horizontal field of view (in degrees) in perspective mode (ignored in Orthographic mode)" ), CPF_Edit );
 	new( staticClass, TEXT( "Ortho Width" ) )		CFloatProperty( CPP_PROPERTY( ThisClass, orthoWidth ), TEXT( "Camera" ), TEXT( "The desired width (in world units) of the orthographic view (ignored in Perspective mode)" ), CPF_Edit );
 	new( staticClass, TEXT( "Ortho Height" ) )		CFloatProperty( CPP_PROPERTY( ThisClass, orthoHeight ), TEXT( "Camera" ), TEXT( "The desired height (in world units) of the orthographic view (ignored in Perspective mode)" ), CPF_Edit );

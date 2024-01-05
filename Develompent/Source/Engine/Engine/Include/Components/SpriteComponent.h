@@ -29,7 +29,7 @@ enum ESpriteType
     ST_RotatingOnlyVertical     /**< Rotating sprite to player camera only by vertical */
 };
 
-DECLARE_ENUM( ESpriteType )
+DECLARE_ENUM( ESpriteType, TEXT( "Engine" ) )
 #define FOREACH_ENUM_SPRITETYPE( X ) \
 	X( ST_Static ) \
 	X( ST_Rotating ) \
@@ -41,7 +41,7 @@ DECLARE_ENUM( ESpriteType )
   */
 class CSpriteComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( CSpriteComponent, CPrimitiveComponent, 0, 0 )
+	DECLARE_CLASS( CSpriteComponent, CPrimitiveComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
     /**

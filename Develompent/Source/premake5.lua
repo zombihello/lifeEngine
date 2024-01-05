@@ -95,10 +95,6 @@ include( extZlib )
 include( extCompressonator )
 include( extHalf )
 
--- Include other Premake scripts
-include( "Premake/RuleFlex.lua" )
-include( "Premake/RuleBison.lua" )
-
 workspace( game )
     location( "../Intermediate/" .. _ACTION .. "/" )
     configurations 	    { "Debug", "DebugWithEditor", "Release", "ReleaseWithEditor", "Shipping" }
@@ -251,7 +247,6 @@ workspace( game )
             }
 
             defines     { "WITH_EDITOR=1", "WITH_IMGUI=1" }
-            rules       { "Flex", "Bison" }
 
         filter "configurations:not *WithEditor"
             -- If we build engine without editor, we will need exclude all of WorldEd source files

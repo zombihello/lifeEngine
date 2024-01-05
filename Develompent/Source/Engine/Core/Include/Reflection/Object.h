@@ -25,11 +25,13 @@ void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& I
  */
 class CObject
 {
-    DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract, 0 )
+    DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract, 0, TEXT( "Core" ) )
     DECLARE_REGISTER_NATIVES() {}
 
 public:
     friend bool IsA( CObject* InObject, CClass* InClass );
+    friend bool IsIn( CObject* InObject, CObject* InOuter );
+    friend bool IsInA( CObject* InObject, CClass* InClass );
     friend class CObjectGC;
 
     /**
@@ -45,10 +47,11 @@ public:
     /**
      * @brief Constructor
      * 
-     * @param InName    Object name
-     * @param InFlags   The object flags
+     * @param InName            Object name
+     * @param InPackageName     Package name
+     * @param InFlags           The object flags
      */
-    CObject( ENativeConstructor, const CName& InName, ObjectFlags_t InFlags = OBJECT_None );
+    CObject( ENativeConstructor, const CName& InName, const tchar* InPackageName, ObjectFlags_t InFlags = OBJECT_None );
 
     /**
      * @brief Destructor
@@ -128,6 +131,15 @@ public:
      * @param InOutObjectArray	Array to add referenced objects to via AddReferencedObject
      */
     virtual void AddReferencedObjects( std::vector<CObject*>& InOutObjectArray );
+
+    /**
+     * @brief Presave function
+     * @warning Objects created from within PreSave won't have PreSave called on them
+     * 
+	 * Gets called once before an object gets serialized for saving. This function is necessary
+	 * for save time computation as Serialize gets called three times per object from within CObject::SavePackage
+     */
+    virtual void PreSave();
 
     /**
      * @brief Add an object to the root set
@@ -281,6 +293,12 @@ public:
 	{
 		return outer;
 	}
+
+    /**
+     * @brief Walks up the list of outers until it finds the highest one
+     * @return Return outermost non NULL outer
+     */
+    class CObjectPackage* GetOutermost() const;
 
     /**
      * @brief Traverses the outer chain searching for the next object of a certain type
@@ -443,17 +461,33 @@ private:
     bool InternalIsA( const CClass* InClass ) const;
 
     /**
+     * @brief Is the object in InOuter
+     * 
+     * @param InOuter   Some outer
+     * @return Return TRUE if the specified object appears somewhere in this object's outer chain
+     */
+    bool InternalIsIn( const CObject* InOuter ) const;
+
+    /**
+     * @brief Find out if this object is inside that is of the specified class
+     * 
+     * @param InClass      The base class to compare against
+     * @return Return TRUE if this object is in an object of the given type
+     */
+    bool InternalIsInA( const CClass* InClass ) const;
+
+    /**
      * @brief Execute a script function
      * @param InFunction    Function to call
      * @param InStack       Script stack
      */
     void ExecScriptFunction( class CFunction* InFunction, struct ScriptFrame& InStack );
 
-    uint32          index;          /**< Index of object into global objects array */
-    CName           name;           /**< Name object */ 
-    CObject*        outer;          /**< Object this object resides in */
-    ObjectFlags_t   flags;          /**< Object flags */ 
-    CClass*         theClass;       /**< Class of this object */
+    uint32          index;              /**< Index of object into global objects array */
+    CName           name;               /**< Name object */ 
+    CObject*        outer;              /**< Object this object resides in */
+    ObjectFlags_t   flags;              /**< Object flags */ 
+    CClass*         theClass;           /**< Class of this object */
 };
 
 /**
@@ -510,6 +544,42 @@ FORCEINLINE bool IsA( CObject* InObject, CClass* InClass )
 
 /**
  * @ingroup Core
+ * @brief Is the object in InOuter
+ *
+ * @param InObject  Object
+ * @param InOuter   Some outer
+ * @return Return TRUE if the specified object appears somewhere in this object's outer chain
+ */
+FORCEINLINE bool IsIn( CObject* InObject, CObject* InOuter )
+{
+    if ( InObject )
+    {
+        return InObject->InternalIsIn( InOuter );
+    }
+
+    return false;
+}
+
+/**
+ * @ingroup Core
+ * @brief Find out if this object is inside that is of the specified class
+ *
+ * @param InObject  Object
+ * @param InClass   The base class to compare against
+ * @return Return TRUE if this object is in an object of the given type
+ */
+FORCEINLINE bool IsInA( CObject* InObject, CClass* InClass )
+{
+    if ( InObject )
+    {
+        return InObject->InternalIsInA( InClass );
+    }
+
+    return false;
+}
+
+/**
+ * @ingroup Core
  * @brief Is the object a class TClass
  * 
  * @param InObject  Object
@@ -519,6 +589,19 @@ template<typename TClass>
 FORCEINLINE bool IsA( CObject* InObject )
 {
     return IsA( InObject, TClass::StaticClass() );
+}
+
+/**
+ * @ingroup Core
+ * @brief Find out if this object is inside that is of the specified class
+ *
+ * @param InObject  Object
+ * @return Return TRUE if this object is in an object of the given type
+ */
+template<typename TClass>
+FORCEINLINE bool IsInA( CObject* InObject )
+{
+    return IsInA( InObject, TClass::StaticClass() );
 }
 
 /**

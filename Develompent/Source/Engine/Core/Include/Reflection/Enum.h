@@ -18,14 +18,23 @@
  * @ingroup Core
  * @brief Macro for declare enum
  *
- * @param TEnum            Enum
+ * @param TEnum         Enum
+ * @param TPackage      Package
  *
- * Example usage: @code DECLARE_ENUM( ESpriteType ) @endcode
+ * Example usage: @code DECLARE_ENUM( ESpriteType, TEXT( "Core" ) ) @endcode
  */
-#define DECLARE_ENUM( TEnum ) \
+#define DECLARE_ENUM( TEnum, TPackage ) \
 	namespace Enum \
 	{ \
-		CEnum* Get##TEnum(); \
+		namespace TEnum \
+		{ \
+			CEnum* StaticEnum(); \
+			FORCEINLINE const tchar* StaticPackage() \
+			{ \
+				/** Returns the package this enum belongs in */ \
+				return TPackage; \
+			} \
+		} \
 	}
 
 /**
@@ -40,25 +49,28 @@
 #define IMPLEMENT_ENUM( TEnum, TForEachEnum ) \
 	namespace Enum \
 	{ \
-		CEnum* Get##TEnum() \
+		namespace TEnum \
 		{ \
-			static CEnum*	s_CEnum = nullptr; \
-			if ( !s_CEnum ) \
+			CEnum* StaticEnum() \
 			{ \
-				std::vector<CName>		enums; \
-				TForEachEnum( INTERNAL_REGISTER_ENUM ) \
-				s_CEnum = ::new CEnum( NativeConstructor, TEXT( #TEnum ), enums ); \
-				s_CEnum->SetClass( CEnum::StaticClass() ); \
-				CObjectGC::Get().AddObject( s_CEnum ); \
+				static CEnum*	s_CEnum = nullptr; \
+				if ( !s_CEnum ) \
+				{ \
+					std::vector<CName>		enums; \
+					TForEachEnum( INTERNAL_REGISTER_ENUM ) \
+					s_CEnum = ::new CEnum( NativeConstructor, TEXT( #TEnum ), StaticPackage(), enums ); \
+					s_CEnum->SetClass( CEnum::StaticClass() ); \
+					CObjectGC::Get().AddObject( s_CEnum ); \
+				} \
+				return s_CEnum; \
 			} \
-			return s_CEnum; \
 		} \
 	} \
     struct Register##TEnum \
     { \
         Register##TEnum() \
         { \
-            CReflectionEnvironment::Get().AddEnum( Enum::Get##TEnum() ); \
+            CReflectionEnvironment::Get().AddEnum( Enum::TEnum::StaticEnum() ); \
         } \
     }; \
 	static Register##TEnum s_Register##TEnum;
@@ -78,7 +90,7 @@
  */
 class CEnum : public CField
 {
-	DECLARE_CLASS_INTRINSIC( CEnum, CField, 0, 0 )
+	DECLARE_CLASS_INTRINSIC( CEnum, CField, 0, 0, TEXT( "Core" ) )
 
 public:
 	/**
@@ -91,10 +103,11 @@ public:
 	 * @brief Constructor
 	 * 
 	 * @param InEnumName	Enum name
+	 * @param InPackageName Package name
 	 * @param InEnums		Array of enums
 	 */
-	CEnum( ENativeConstructor, const CName& InEnumName, const std::vector<CName>& InEnums )
-		: CField( NativeConstructor, InEnumName )
+	CEnum( ENativeConstructor, const CName& InEnumName, const tchar* InPackageName, const std::vector<CName>& InEnums )
+		: CField( NativeConstructor, InEnumName, InPackageName )
 		, enums( InEnums )
 	{}
 

@@ -54,7 +54,7 @@ enum EFunctionFlags
  */
 class CFunction : public CStruct
 {
-	DECLARE_CLASS_INTRINSIC( CFunction, CStruct, 0, 0 )
+	DECLARE_CLASS_INTRINSIC( CFunction, CStruct, 0, 0, TEXT( "Core" ) )
 	DECLARE_WITHIN_CLASS( CClass )
 
 public:

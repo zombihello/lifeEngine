@@ -18,10 +18,11 @@
  * 
  * @param TStruct           Struct
  * @param TSuperStruct      Super struct
+ * @param TPackage          Package
  * 
- * Example usage: @code DECLARE_STRUCT( MyStruct, MyStruc ) @endcode
+ * Example usage: @code DECLARE_STRUCT( MyStruct, MyStruc, TEXT( "Core" ) ) @endcode
  */
-#define DECLARE_STRUCT( TStruct, TSuperStruct ) \
+#define DECLARE_STRUCT( TStruct, TSuperStruct, TPackage ) \
     private: \
         static class CStruct*					staticStruct; \
 		static class CStruct*					GetStaticStruct(); \
@@ -30,6 +31,11 @@
 	    typedef TStruct							ThisStruct; \
 	    typedef TSuperStruct					Super; \
         static void								StaticInitializeStruct(); \
+		static FORCEINLINE const tchar*         StaticPackage() \
+        { \
+            /** Returns the package this struct belongs in */ \
+            return TPackage; \
+        } \
         static FORCEINLINE class CStruct*       StaticStruct() \
 		{ \
 			if ( !staticStruct ) \
@@ -57,7 +63,8 @@
 			NativeConstructor, \
 			TEXT( #TStruct ), \
             sizeof( ThisStruct ), \
-            alignof( ThisStruct ) \
+            alignof( ThisStruct ), \
+			StaticPackage() \
 		); \
 		Assert( returnStruct ); \
 		return returnStruct; \
@@ -95,7 +102,7 @@
  */
 class CStruct : public CField
 {
-	DECLARE_CLASS_INTRINSIC( CStruct, CField, 0, 0 )
+	DECLARE_CLASS_INTRINSIC( CStruct, CField, 0, 0, TEXT( "Core" ) )
 
 public:
 	/**
@@ -115,10 +122,11 @@ public:
 	 * @param InPropertiesSize		Properties size in bytes
 	 * @param InMinAlignment		Minimum alignment for the struct
 	 * @param InSuperStruct			Pointer to super struct
+	 * @param InPackageName			Package name
 	 * @param InFlags				The object flags
 	 */
-	CStruct( ENativeConstructor, const CName& InStructName, uint32 InPropertiesSize, uint32 InMinAlignment, CStruct* InSuperStruct = nullptr )
-		: CField( NativeConstructor, InStructName )
+	CStruct( ENativeConstructor, const CName& InStructName, uint32 InPropertiesSize, uint32 InMinAlignment, const tchar* InPackageName, CStruct* InSuperStruct = nullptr )
+		: CField( NativeConstructor, InStructName, InPackageName )
 		, propertiesSize( InPropertiesSize )
 		, minAlignment( InMinAlignment )
 		, superStruct( InSuperStruct )
@@ -158,12 +166,30 @@ public:
 	}
 
 	/**
+	 * @brief Set properties size in bytes
+	 * @param InPropertiesSize	Properties size in bytes
+	 */
+	FORCEINLINE void SetPropertiesSize( uint32 InPropertiesSize )
+	{
+		propertiesSize = InPropertiesSize;
+	}
+
+	/**
 	 * @brief Get properties size in bytes
 	 * @return Return properties size in bytes
 	 */
 	FORCEINLINE uint32 GetPropertiesSize() const
 	{
 		return propertiesSize;
+	}
+
+	/**
+	 * @brief Set minimum alignment for the struct
+	 * @param InMinAlignment	Minimum alignment for the struct
+	 */
+	FORCEINLINE void SetMinAlignment( uint32 InMinAlignment )
+	{
+		minAlignment = InMinAlignment;
 	}
 
 	/**

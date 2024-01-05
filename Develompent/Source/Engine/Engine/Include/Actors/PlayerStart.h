@@ -19,7 +19,7 @@
  */
 class APlayerStart : public AActor
 {
-	DECLARE_CLASS( APlayerStart, AActor, 0, 0 )
+	DECLARE_CLASS( APlayerStart, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

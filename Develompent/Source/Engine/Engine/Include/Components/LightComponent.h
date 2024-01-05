@@ -33,7 +33,7 @@ enum ELightType
  */
 class CLightComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CLightComponent, CSceneComponent, 0, 0 )
+	DECLARE_CLASS( CLightComponent, CSceneComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	friend class CScene;			// For add and remove lights in scene

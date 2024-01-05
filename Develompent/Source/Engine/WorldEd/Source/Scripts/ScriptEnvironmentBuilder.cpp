@@ -1,6 +1,7 @@
 #include "Logger/LoggerMacros.h"
 #include "Reflection/ReflectionEnvironment.h"
 #include "Scripts/ScriptEnvironmentBuilder.h"
+#include "System/Package.h"
 
 /*
 ==================
@@ -24,21 +25,10 @@ bool CScriptEnvironmentBuilder::Build()
 		return false;
 	}
 
-	// Create function wrappers (no inner properties yet)
-	if ( !CreateFunctions() )
-	{
-		return false;
-	}
-
-	// Bind super functions to finish function graph
-	if ( !BindSuperFunctions() )
-	{
-		return false;
-	}
-
 	// Done
 	return true;
 }
+
 
 /*
 ==================
@@ -50,17 +40,79 @@ bool CScriptEnvironmentBuilder::CreateTypes()
 	// Create hierarchy order
 	bool	bNoErrors = CreateHierarchyOrder();
 	
-	// Create classes
+	// Create classes, properties and bind it
+	if ( bNoErrors )
 	{
 		const std::vector<TSharedPtr<CScriptClassStub>>&	classes = stubs->GetClasses();
+		
+		// Create a class
 		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
 		{
 			bNoErrors &= CreateClass( *classes[index].Get() );
+		}
+
+		// Create properties
+		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
+		{
+			bNoErrors &= CreateClassProperties( *classes[index].Get() );
+		}
+
+		// Bind the class
+		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
+		{
+			bNoErrors &= BindClass( *classes[index].Get() );
 		}
 	}
 
 	// Done
 	return bNoErrors;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::CreateClassProperties
+==================
+*/
+bool CScriptEnvironmentBuilder::CreateClassProperties( CScriptClassStub& InClassStub )
+{
+	CClass*												theClass		= InClassStub.GetCreatedClass();
+	const std::vector<TSharedPtr<CScriptPropertyStub>>&	propertyStubs	= InClassStub.GetProperties();
+
+	// Class failed to compile
+	if ( !theClass )
+	{
+		return false;
+	}
+
+	// Create class properties
+	bool	bNoErrors = true;
+	for ( uint32 index = 0, count = propertyStubs.size(); index < count; ++index )
+	{
+		bNoErrors &= CreateClassProperty( InClassStub, *propertyStubs[index].Get() );
+	}
+
+	// Done, all class properties has been created
+	return bNoErrors;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::BindClass
+==================
+*/
+bool CScriptEnvironmentBuilder::BindClass( CScriptClassStub& InClassStub )
+{
+	CClass*		theClass = InClassStub.GetCreatedClass();
+
+	// Class failed to compile
+	if ( !theClass )
+	{
+		return false;
+	}
+
+	// Bind the class
+	theClass->Bind();
+	return true;
 }
 
 /*
@@ -85,6 +137,7 @@ bool CScriptEnvironmentBuilder::CreateHierarchyOrder()
 		const TSharedPtr<CScriptClassStub>&		theClass = classes[index];
 		if ( !unprocessedClasses.insert( std::make_pair( theClass->GetName(), theClass ) ).second )
 		{
+			Sys_Errorf( TEXT( "Failed to instert a pair<CName, TSharedPtr<CScriptClassStub>> into unprocessedClasses" ) );
 			return false;
 		}
 	}
@@ -114,7 +167,7 @@ bool CScriptEnvironmentBuilder::CreateHierarchyOrder()
 		{
 			if ( foundClass->GetSuperClassName() == theClass->GetName() )
 			{
-				Errorf( TEXT( "%s: Super class '%s' creates cyclic dependency for '%s'\n" ), theClass->GetContext().ToString().c_str(), theClass->GetSuperClassName().c_str(), theClass->GetName().c_str() );
+				Errorf( TEXT( "Super class '%s' creates cyclic dependency for '%s'\n" ), theClass->GetSuperClassName().c_str(), theClass->GetName().c_str() );
 				return false;
 			}
 
@@ -128,60 +181,6 @@ bool CScriptEnvironmentBuilder::CreateHierarchyOrder()
 
 /*
 ==================
-CScriptEnvironmentBuilder::CreateFunctions
-==================
-*/
-bool CScriptEnvironmentBuilder::CreateFunctions()
-{
-	bool	bNoErrors = true;
-	
-	// Create class functions
-	{
-		const std::vector<TSharedPtr<CScriptClassStub>>&			classes = stubs->GetClasses();
-		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
-		{
-			TSharedPtr<CScriptClassStub>							classStub = classes[index];
-			const std::vector<TSharedPtr<CScriptFunctionStub>>&		functions = classStub->GetFunctions();
-			for ( uint32 funcIdx = 0, numFunctions = functions.size(); funcIdx < numFunctions; ++funcIdx )
-			{
-				bNoErrors &= CreateFunction( *classStub.Get(), *functions[funcIdx].Get() );
-			}
-		}
-	}
-
-	// Done
-	return bNoErrors;
-}
-
-/*
-==================
-CScriptEnvironmentBuilder::BindSuperFunctions
-==================
-*/
-bool CScriptEnvironmentBuilder::BindSuperFunctions()
-{
-	bool	bNoErrors = true;
-
-	// Bind super class functions
-	{
-		const std::vector<TSharedPtr<CScriptClassStub>>&	classes = stubs->GetClasses();
-		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
-		{
-			TSharedPtr<CScriptClassStub>							classStub = classes[index];
-			const std::vector<TSharedPtr<CScriptFunctionStub>>&		functions = classStub->GetFunctions();
-			for ( uint32 funcIdx = 0, numFunctions = functions.size(); funcIdx < numFunctions; ++funcIdx )
-			{
-				bNoErrors &= BindSuperFunction( *classStub.Get(), *functions[funcIdx].Get() );
-			}
-		}
-	}
-
-	// Done
-	return bNoErrors;
-}
-
-/*
-==================
 CScriptEnvironmentBuilder::CreateClass
 ==================
 */
@@ -190,20 +189,12 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	CReflectionEnvironment&		reflectionEnvironment = CReflectionEnvironment::Get();
 	const std::wstring&			className = InClassStub.GetName();
 	const std::wstring&			superClassName = InClassStub.GetSuperClassName();
-	const ScriptFileContext&	context = InClassStub.GetContext();
 
-	// If type with same name already defined then its error.
-	// Only one exception: native classes may be already defined in the system by *Classes.h. In this case
-	// we check for missing flags 'CLASS_Parsed' and 'CLASS_Intrinsic'. 
-	// If they aren't then all right. Otherwise this is redefinition and its wrong
-	CClass*		theClass = reflectionEnvironment.FindClass( className.c_str() );
+	// If type with same name already defined then its error
+	if ( reflectionEnvironment.FindClass( className.c_str() ) || reflectionEnvironment.FindStruct( className.c_str() ) || reflectionEnvironment.FindEnum( className.c_str() ) )
 	{
-		bool	bWrongClass = theClass && ( theClass->HasAnyClassFlags( CLASS_Parsed ) || theClass->HasAnyClassFlags( CLASS_Intrinsic ) );
-		if ( bWrongClass || reflectionEnvironment.FindStruct( className.c_str() ) || reflectionEnvironment.FindEnum( className.c_str() ) )
-		{
-			Errorf( TEXT( "%s: Type '%s' is already defined\n" ), context.ToString().c_str(), className.c_str() );
-			return false;
-		}
+		Errorf( TEXT( "Type '%s' is already defined\n" ), className.c_str() );
+		return false;
 	}
 
 	// Find the super class as specified
@@ -212,62 +203,23 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	// All classes must be inherit from CObject
 	if ( superClassName.empty() || superClass && !superClass->IsA( CObject::StaticClass() ) )
 	{
-		Errorf( TEXT( "%s: All classes must be inherit from CObject\n" ), context.ToString().c_str() );
+		Errorf( TEXT( "%s: All classes must be inherit from CObject\n" ), className.c_str() );
 		return false;
 	}
 
-	// If we not found the supper class print error message
+	// If we not found the supper class its error
 	if ( !superClass )
 	{
-		Errorf( TEXT( "%s: Unknown super class '%s'\n" ), context.ToString().c_str(), superClassName.c_str() );
+		Errorf( TEXT( "%s: Unknown super class '%s'\n" ), className.c_str(), superClassName.c_str() );
 		return false;
 	}
 
-	// If this class is native but parent classes are not, it's wrong
-	if ( InClassStub.IsNative() )
-	{
-		bool	bAllClassesNative = true;
-		for ( CClass* tempClass = superClass; tempClass; tempClass = tempClass->GetSuperClass() )
-		{
-			if ( !tempClass->HasAnyClassFlags( CLASS_Native ) )
-			{
-				bAllClassesNative = false;
-				break;
-			}
-		}
+	// Create a new CClass
+	// The class's properties size and min alignment we will recalculate later in CScriptEnvironmentBuilder::CreateClassProperties
+	CClass*		theClass = new( stubs->GetPackage(), className ) CClass( 0, 0, superClass->GetPropertiesSize(), superClass->GetMinAlignment(), superClass, superClass->GetWithinClass() );
+	reflectionEnvironment.AddClass( theClass );
 
-		if ( !bAllClassesNative )
-		{
-			Errorf( TEXT( "%s: Native classes cannot expand non-native classes\n" ), context.ToString().c_str() );
-			return false;
-		}
-	}
-
-	// If its script class, we calculate properties size, min alignment and create a new CClass
-	uint32		propertiesSize	= theClass ? theClass->GetPropertiesSize() : 0;
-	uint32		minAlignment	= theClass ? theClass->GetMinAlignment() : 1;
-	if ( !theClass )
-	{
-		// For script class we manually calculate it	
-		// TODO yehor.pohuliaka - When will be implemented support of properties in classes then need add they here
-		propertiesSize = superClass->GetPropertiesSize();
-		minAlignment = superClass->GetMinAlignment();
-
-		theClass = new( nullptr, className ) CClass( 0, 0, propertiesSize, minAlignment, superClass, superClass->GetWithinClass() );
-		reflectionEnvironment.AddClass( theClass );
-	}
-
-	// Check for cyclic dependencies
-	if ( superClass->IsA( theClass ) )
-	{
-		Errorf( TEXT( "%s: Super class '%s' creates cyclic dependency for '%s'\n" ), context.ToString().c_str(), superClassName.c_str(), className.c_str() );
-		return false;
-	}
-
-	// Find the class's native constructor and remember class in the stub
-	theClass->Bind();
-	theClass->AddClassFlag( CLASS_Parsed | ( InClassStub.IsNative() ? CLASS_Native : 0 ) );
-	theClass->AddObjectFlag( OBJECT_NeedSave );
+	// Remember class in the stub
 	InClassStub.SetCreatedClass( theClass );
 
 	// Class created
@@ -276,15 +228,15 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 
 /*
 ==================
-CScriptEnvironmentBuilder::CreateFunction
+CScriptEnvironmentBuilder::CreateClassProperty
 ==================
 */
-bool CScriptEnvironmentBuilder::CreateFunction( CScriptClassStub& InClassStub, CScriptFunctionStub& InFunctionStub )
+bool CScriptEnvironmentBuilder::CreateClassProperty( CScriptClassStub& InClassStub, CScriptPropertyStub& InPropertyStub )
 {
-	const std::wstring&			className = InClassStub.GetName();
-	const std::wstring&			functionName = InFunctionStub.GetName();
-	const ScriptFileContext&	context = InFunctionStub.GetContext();
-	CClass*						theClass = InClassStub.GetCreatedClass();
+	CReflectionEnvironment& reflectionEnvironment = CReflectionEnvironment::Get();
+	CClass*					theClass = InClassStub.GetCreatedClass();
+	const std::wstring&		className = InClassStub.GetName();
+	const std::wstring&		propertyName = InPropertyStub.GetName();
 
 	// Class failed to compile
 	if ( !theClass )
@@ -292,62 +244,139 @@ bool CScriptEnvironmentBuilder::CreateFunction( CScriptClassStub& InClassStub, C
 		return false;
 	}
 
-	// If function is native but the class isn't then this is error
-	if ( !InClassStub.IsNative() && InFunctionStub.IsNative() )
+	// If property with same name already defined then its error
 	{
-		Errorf( TEXT( "%s: Native function '%s' can be only in a native class\n" ), context.ToString().c_str(), functionName.c_str() );
+		std::vector<CProperty*>		fullClassProperties;
+		theClass->GetProperties( fullClassProperties );
+		for ( uint32 index = 0, count = fullClassProperties.size(); index < count; ++index )
+		{
+			CProperty*	property = fullClassProperties[index];
+			if ( property->GetName() == propertyName )
+			{
+				Errorf( TEXT( "%s: Property with name '%s' is already defined in the class or super class\n" ), className.c_str(), propertyName.c_str() );
+				return false;
+			}
+		}
+	}
+
+	// Create property
+	CProperty*				property			= nullptr;
+	uint32					propertiesSize		= theClass->GetPropertiesSize();
+	const std::wstring&		propertySubType		= InPropertyStub.GetSubType();
+	const std::wstring&		propertyCategory	= InPropertyStub.GetCategory();
+	const std::wstring&		propertyDescription = InPropertyStub.GetDescription();
+	uint32					propertyFlags		= InPropertyStub.GetFlags();
+	uint32					propertyArraySize	= InPropertyStub.GetArraySize();
+	switch ( InPropertyStub.GetType() )
+	{
+		// Byte
+	case SPT_Byte:
+		property = new( theClass, propertyName ) CByteProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, nullptr, propertyArraySize );
+		break;
+
+		// Enum
+	case SPT_Enum:
+	{
+		CEnum*	cenum = reflectionEnvironment.FindEnum( propertySubType.c_str() );
+		if ( !cenum )
+		{
+			Errorf( TEXT( "%s: Unknown property type '%s' in '%s'\n" ), className.c_str(), propertySubType.c_str(), propertyName.c_str() );
+			return false;
+		}
+
+		property = new( theClass, propertyName ) CByteProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, cenum, propertyArraySize );
+		break;
+	}
+
+		// Int
+	case SPT_Int:
+		property = new( theClass, propertyName ) CIntProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, propertyArraySize );
+		break;
+
+		// Bool
+	case SPT_Bool:
+		property = new( theClass, propertyName ) CBoolProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, propertyArraySize );
+		break;
+
+		// Float
+	case SPT_Float:
+		property = new( theClass, propertyName ) CFloatProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, propertyArraySize );
+		break;
+
+		// Color
+	case SPT_Color:
+		property = new( theClass, propertyName ) CColorProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, propertyArraySize );
+		break;
+
+		// Vector
+	case SPT_Vector:
+		property = new( theClass, propertyName ) CVectorProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, 0.f, propertyArraySize );
+		break;
+
+		// Rotator
+	case SPT_Rotator:
+		property = new( theClass, propertyName ) CRotatorProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, propertyArraySize );
+		break;
+
+		// String
+	case SPT_String:
+		property = new( theClass, propertyName ) CStringProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, propertyArraySize );
+		break;
+
+		// Object
+	case SPT_Object:
+	{
+		CClass*		propertyClass = reflectionEnvironment.FindClass( propertySubType.c_str() );
+		if ( !propertyClass )
+		{
+			Errorf( TEXT( "%s: Unknown property type '%s' in '%s'\n" ), className.c_str(), propertySubType.c_str(), propertyName.c_str() );
+			return false;
+		}
+
+		property = new( theClass, propertyName ) CObjectProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, propertyClass, propertyArraySize );
+		break;
+	}
+
+		// Asset
+	case SPT_Asset:
+	{
+		EAssetType		assetType = ConvertTextToAssetType( propertySubType );
+		if ( assetType == AT_Unknown )
+		{
+			Errorf( TEXT( "%s: Unknown asset type '%s' in '%s'\n" ), className.c_str(), propertySubType.c_str(), propertyName.c_str() );
+			return false;
+		}
+
+		property = new( theClass, propertyName ) CAssetProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, assetType, propertyArraySize );
+		break;
+	}
+
+		// Struct
+	case SPT_Struct:
+	{
+		CStruct*	propertyStruct = reflectionEnvironment.FindStruct( propertySubType.c_str() );
+		if ( !propertyStruct )
+		{
+			Errorf( TEXT( "%s: Unknown property type '%s' in '%s'\n" ), className.c_str(), propertySubType.c_str(), propertyName.c_str() );
+			return false;
+		}
+
+		property = new( theClass, propertyName ) CStructProperty( propertiesSize, propertyCategory, propertyDescription, propertyFlags, propertyStruct, propertyArraySize );
+		break;
+	}
+
+		// Unknown and unsupported property types
+	case SPT_Array:
+	default:
+		Errorf( TEXT( "%s: Unsupported property type in '%s'\n" ), className.c_str(), propertyName.c_str() );
 		return false;
 	}
 
-	// Make sure we don't override function in the same class
-	if ( theClass->FindFunction( functionName.c_str(), false ) )
+	// Update the class's properties size and min alignment
+	theClass->SetPropertiesSize( propertiesSize + property->GetElementSize() * propertyArraySize );
+	if ( property->GetMinAlignment() > theClass->GetMinAlignment() )
 	{
-		Errorf( TEXT( "%s: Function '%s' is already defined in class '%s'\n" ), context.ToString().c_str(), functionName.c_str(), className.c_str() );
-		return false;
-	}
-
-	// Create function
-	CFunction*		function = new( theClass, functionName.c_str() ) CFunction( InFunctionStub.IsNative() ? FUNC_Native : 0 );
-	function->Bind();
-	function->AddObjectFlag( OBJECT_NeedSave );
-	InFunctionStub.SetCreatedFunction( function );
-
-	// Done
-	return true;
-}
-
-/*
-==================
-CScriptEnvironmentBuilder::CreateFunction
-==================
-*/
-bool CScriptEnvironmentBuilder::BindSuperFunction( CScriptClassStub& InClassStub, CScriptFunctionStub& InFunctionStub )
-{
-	const std::wstring&			functionName = InFunctionStub.GetName();
-	CClass*						theClass = InClassStub.GetCreatedClass();
-	CFunction*					function = InFunctionStub.GetCreatedFunction();
-
-	// Class failed to compile
-	if ( !theClass || !function )
-	{
-		return false;
-	}
-
-	// Get the super class
-	CClass*		superClass = theClass->GetSuperClass();
-	if ( !superClass )
-	{
-		return true;
-	}
-
-	// Find the function with the same name in the super class
-	CFunction*	superFunction = superClass->FindFunction( functionName.c_str() );
-	if ( superFunction )
-	{
-		// TODO yehor.pohuliaka - Add here checks when will be implemented support of function's arguments and return type
-
-		// Bind as super function
-		function->SetSuperFunction( superFunction );
+		theClass->SetMinAlignment( property->GetMinAlignment() );
 	}
 
 	// Done

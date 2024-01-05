@@ -20,7 +20,7 @@
   */
 class AStaticMesh : public AActor
 {
-	DECLARE_CLASS( AStaticMesh, AActor, 0, 0 )
+	DECLARE_CLASS( AStaticMesh, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

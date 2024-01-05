@@ -18,7 +18,7 @@
  */
 class APlayerController : public ABaseController
 {
-	DECLARE_CLASS( APlayerController, ABaseController, 0, 0 )
+	DECLARE_CLASS( APlayerController, ABaseController, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

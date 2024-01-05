@@ -27,6 +27,7 @@ void CStruct::Serialize( class CArchive& InArchive )
 	InArchive << propertiesSize;
 	InArchive << minAlignment;
 	InArchive << superStruct;
+	InArchive << properties;
 }
 
 /*

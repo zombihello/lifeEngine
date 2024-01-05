@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "Core.h"
 #include "Misc/Types.h"
@@ -158,7 +159,7 @@ public:
 	 */
 	virtual CArchive& operator<<( class CObject*& InValue )
 	{
-		AssertMsg( false, TEXT( "Default CArchive not support serialize CObject. Use CObjectPackage" ) );
+		AssertMsg( false, TEXT( "Default CArchive not support serialize CObject" ) );
 		return *this;
 	}
 
@@ -166,6 +167,148 @@ protected:
 	uint32					arVer;			/**< Archive version (look ELifeEnginePackageVersion) */
 	EArchiveType			arType;			/**< Archive type */
 	std::wstring			arPath;			/**< Path to archive */
+};
+
+/**
+ * @ingroup Core
+ * @brief Archive for tagging objects that must be exported to the file. It tags the objects passed to it, and recursively
+ * tags all of the objects this object references
+ */
+class CArchiveSaveTagExports : public CArchive
+{
+public:
+	/**
+	 * @brief Constructor
+	 * @param InOuter	The package to save
+	 */
+	CArchiveSaveTagExports( class CObject* InOuter );
+
+	/**
+	 * @brief Is saving archive
+	 * @return True if archive saving, false if archive loading
+	 */
+	virtual bool IsSaving() const override;
+
+	/**
+	 * @brief Override operator << for serialize CObjects
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CObject*& InValue ) override;
+
+	/**
+	 * @brief Serializes the specified object, tagging all objects it references
+	 * @param InBaseObject		The object that should be serialized, usually the package root
+	 */
+	void ProcessBaseObject( class CObject* InBaseObject );
+
+private:
+	/**
+	 * @brief Process tagged objects
+	 * 
+	 * Iterates over all objects which were encountered during serialization of the root object, serializing each one in turn.
+	 * Objects encountered during that serialization are then added to the array and iteration continues until no new objects are
+	 * added to the array
+	 */
+	void ProcessTaggedObjects();
+
+	std::vector<class CObject*>		taggedObjects;		/**< Tagged objects */
+	class CObject*					outer;				/**< Package we're currently saving. Only objects contained within this package will be tagged for serialization */
+};
+
+/**
+ * @ingroup Core
+ * @brief Archive for tagging objects and names that must be listed in the file's imports table
+ */
+class CArchiveSaveTagImports : public CArchive
+{
+public:
+	/**
+	 * @brief Constructor
+	 * @param InLinker	The package linker to save
+	 */
+	CArchiveSaveTagImports( class CLinkerSave* InLinker );
+
+	/**
+	 * @brief Is saving archive
+	 * @return True if archive saving, false if archive loading
+	 */
+	virtual bool IsSaving() const override;
+
+	/**
+	 * @brief Override operator << for serialize CObjects
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CObject*& InValue ) override;
+
+private:
+	class CLinkerSave*		linker;		/**< The package linker to save */
+};
+
+/**
+ * @ingroup Core
+ * @brief Archive for collect o object references
+ */
+template<class TClass>
+class TArchiveObjectReferenceCollector : public CArchive
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InObjectArray				Array to add object references to
+	 * @param InOuter					Value for LimitOuter
+	 * @param InIsRequireDirectOuter	Value for bRequireDirectOuter
+	 * @param InIsSerializeRecursively	Only applicable when LimitOuter is valid and bRequireDirectOuter is set.
+	 *									Serializes each object encountered looking for subobjects of referenced
+	 *									objects that have LimitOuter for their Outer (i.e. nested subobjects/components)
+	 * @param InIsShouldIgnoreTransient	TRUE to skip serialization of transient properties
+	 */
+	TArchiveObjectReferenceCollector( std::vector<TClass*>* InObjectArray, CObject* InOuter = nullptr, bool InIsRequireDirectOuter = true, bool InIsSerializeRecursively = false, bool InIsShouldIgnoreTransient = false )
+		: CArchive( TEXT( "TArchiveObjectReferenceCollector" ) )
+		, objectArray( InObjectArray )
+		, limitOuter( InOuter )
+		, bRequireDirectOuter( InIsRequireDirectOuter )
+		, bShouldIgnoreTransient( InIsShouldIgnoreTransient )
+	{
+		bSerializeRecursively = InIsSerializeRecursively && limitOuter;
+	}
+
+protected:
+	/**
+	 * @brief Override operator << for serialize CObjects
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CObject*& InValue ) override
+	{
+		// Avoid duplicate entries and skip serialization of transient properties if it need
+		if ( InValue && ( !bShouldIgnoreTransient || !InValue->HasAnyObjectFlags( OBJECT_Transient ) ) )
+		{
+			if ( !limitOuter || InValue->GetOuter() == limitOuter || ( !bRequireDirectOuter && IsIn( InValue, limitOuter ) ) )
+			{
+				// Do not attempt to serialize objects that have already been
+				if ( IsA( InValue, TClass::StaticClass() ) && std::find( objectArray->begin(), objectArray->end(), ( TClass* )InValue ) == objectArray->end() )
+				{
+					objectArray->push_back( ( TClass* )InValue );
+				}
+
+				// Check this object for any potential object references
+				if ( bSerializeRecursively && serializedObjects.find( InValue ) == serializedObjects.end() )
+				{
+					serializedObjects.insert( InValue );
+					InValue->Serialize( *this );
+				}
+			}
+		}
+
+		return *this;
+	}
+
+	std::vector<TClass*>*			objectArray;			/**< Stored pointer to array of objects we add object references to */
+	std::unordered_set<CObject*>	serializedObjects;		/**< List of objects that have been recursively serialized */
+	CObject*						limitOuter;				/**< Only objects within this outer will be considered, NULL value indicates that outers are disregarded */
+	bool							bRequireDirectOuter;	/**< Determines whether nested objects contained within LimitOuter are considered */
+	bool							bSerializeRecursively;	/**< Determines whether we serialize objects that are encounterd by this archive */
+	bool							bShouldIgnoreTransient;	/**< TRUE to skip serialization of transient properties */
 };
 
 /**

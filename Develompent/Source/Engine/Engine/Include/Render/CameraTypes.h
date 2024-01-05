@@ -22,7 +22,7 @@ enum ECameraProjectionMode
 	CPM_Orthographic		/**< Orthographic mode */
 };
 
-DECLARE_ENUM( ECameraProjectionMode )
+DECLARE_ENUM( ECameraProjectionMode, TEXT( "Engine" ) )
 #define FOREACH_ENUM_CAMERAPROJECTMODE( X ) \
 	X( CPM_Perspective ) \
 	X( CPM_Orthographic )

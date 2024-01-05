@@ -18,7 +18,7 @@
  */
 class CClass : public CStruct
 {
-	DECLARE_CLASS_INTRINSIC( CClass, CStruct, 0, 0 )
+	DECLARE_CLASS_INTRINSIC( CClass, CStruct, 0, 0, TEXT( "Core" ) )
 
 public:
 	friend CObject;
@@ -38,6 +38,7 @@ public:
 	 * @brief Constructor
 	 * 
 	 * @param InClassName			Class name
+	 * @param InPackageName			Package name
 	 * @param InClassFlags			Class flags
 	 * @param InClassCastFlags		Class cast flags
 	 * @param InPropertiesSize		Properties size in bytes
@@ -46,8 +47,8 @@ public:
 	 * @param InSuperClass			Super class
 	 * @param InWithinClass			Class where this class is within
 	 */
-	FORCEINLINE CClass( ENativeConstructor, const CName& InClassName, uint32 InClassFlags, uint32 InClassCastFlags, uint32 InPropertiesSize, uint32 InMinAlignment, class CObject*( *InClassConstructor )( void* InPtr ), CClass* InSuperClass = nullptr, CClass* InWithinClass = nullptr )
-		: CStruct( NativeConstructor, InClassName, InPropertiesSize, InMinAlignment, InSuperClass )
+	FORCEINLINE CClass( ENativeConstructor, const CName& InClassName, const tchar* InPackageName, uint32 InClassFlags, uint32 InClassCastFlags, uint32 InPropertiesSize, uint32 InMinAlignment, class CObject*( *InClassConstructor )( void* InPtr ), CClass* InSuperClass = nullptr, CClass* InWithinClass = nullptr )
+		: CStruct( NativeConstructor, InClassName, InPropertiesSize, InMinAlignment, InPackageName, InSuperClass )
 		, bHasAssembledReferenceTokenStream( false )
 		, ClassConstructor( InClassConstructor )
 		, classFlags( InClassFlags )

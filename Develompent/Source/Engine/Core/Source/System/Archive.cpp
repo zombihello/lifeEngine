@@ -1,5 +1,8 @@
 #include "System/Archive.h"
 #include "Misc/Template.h"
+#include "Reflection/Object.h"
+#include "Reflection/Linker.h"
+#include "Reflection/ObjectPackage.h"
 #include "LEVersion.h"
 
 /*
@@ -161,4 +164,131 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 		// Free intermediate data.
 		delete[] compressionChunks;
 	}
+}
+
+
+/*
+==================
+CArchiveSaveTagExports::CArchiveSaveTagExports
+==================
+*/
+CArchiveSaveTagExports::CArchiveSaveTagExports( CObject* InOuter )
+	: CArchive( InOuter ? CString::Format( TEXT( "SaveTagExports (%s)" ), InOuter->GetName().c_str() ) : TEXT( "SaveTagExports" ) )
+	, outer( InOuter )
+{}
+
+/*
+==================
+CArchiveSaveTagExports::IsSaving
+==================
+*/
+bool CArchiveSaveTagExports::IsSaving() const
+{
+	return true;
+}
+
+/*
+==================
+CArchiveSaveTagExports::operator<<
+==================
+*/
+CArchive& CArchiveSaveTagExports::operator<<( class CObject*& InValue )
+{
+	if ( InValue && IsIn( InValue, outer ) && !InValue->HasAnyObjectFlags( OBJECT_TagExp ) )
+	{
+		// Set flags
+		InValue->AddObjectFlag( OBJECT_TagExp );
+
+		// Recurse with this object's class and package
+		CObject*	theClass = ( CObject* )InValue->GetClass();
+		CObject*	parent = InValue->GetOuter();
+		*this << theClass << parent;
+
+		// Add the object to array with tagged objects
+		taggedObjects.push_back( InValue );
+	}
+
+	return *this;
+}
+
+/*
+==================
+CArchiveSaveTagExports::ProcessBaseObject
+==================
+*/
+void CArchiveSaveTagExports::ProcessBaseObject( class CObject* InBaseObject )
+{
+	( *this ) << InBaseObject;
+	ProcessTaggedObjects();
+}
+
+/*
+==================
+CArchiveSaveTagExports::ProcessTaggedObjects
+==================
+*/
+void CArchiveSaveTagExports::ProcessTaggedObjects()
+{
+	std::vector<CObject*>		currentlyTaggedObjects;
+	while ( !taggedObjects.empty() )
+	{
+		currentlyTaggedObjects.insert( currentlyTaggedObjects.end(), taggedObjects.begin(), taggedObjects.end() );
+		taggedObjects.clear();
+
+		for ( uint32 objIndex = 0, objCount = currentlyTaggedObjects.size(); objIndex < objCount; ++objIndex )
+		{
+			// Recurse with this object's children
+			CObject*	object = currentlyTaggedObjects[objIndex];
+			object->Serialize( *this );
+		}
+
+		currentlyTaggedObjects.clear();
+	}
+}
+
+
+/*
+==================
+CArchiveSaveTagExports::CArchiveSaveTagImports
+==================
+*/
+CArchiveSaveTagImports::CArchiveSaveTagImports( CLinkerSave* InLinker )
+	: CArchive( InLinker && InLinker->GetLinkerRoot() ? CString::Format( TEXT( "SaveTagImports (%s)" ), InLinker->GetLinkerRoot()->GetName().c_str() ) : TEXT( "SaveTagImports" ) )
+	, linker( InLinker )
+{}
+
+/*
+==================
+CArchiveSaveTagImports::IsSaving
+==================
+*/
+bool CArchiveSaveTagImports::IsSaving() const
+{
+	return true;
+}
+
+/*
+==================
+CArchiveSaveTagExports::operator<<
+==================
+*/
+CArchive& CArchiveSaveTagImports::operator<<( class CObject*& InValue )
+{
+	if ( InValue && !InValue->IsPendingKill() && ( !InValue->HasAnyObjectFlags( OBJECT_Transient ) || InValue->HasAnyObjectFlags( OBJECT_Native ) ) )
+	{
+		if ( !InValue->HasAnyObjectFlags( OBJECT_TagExp ) )
+		{
+			// Mark this object as an import
+			InValue->AddObjectFlag( OBJECT_TagImp );
+
+			// Look at parent of this object
+			CObject*	outer = InValue->GetOuter();
+			if ( outer )
+			{
+				*this << outer;
+			}
+		}
+	}
+
+	return *this;
 }

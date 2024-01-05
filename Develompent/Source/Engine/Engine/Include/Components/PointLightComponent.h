@@ -17,7 +17,7 @@
   */
 class CPointLightComponent : public CLightComponent
 {
-	DECLARE_CLASS( CPointLightComponent, CLightComponent, 0, 0 )
+	DECLARE_CLASS( CPointLightComponent, CLightComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

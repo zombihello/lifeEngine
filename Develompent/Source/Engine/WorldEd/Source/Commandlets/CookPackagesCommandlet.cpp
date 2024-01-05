@@ -467,9 +467,8 @@ bool CCookPackagesCommandlet::CookMaterial( const ResourceInfo& InMaterialInfo, 
 	// Parse material in JSON format
 	CConfig		lmtMaterial;
 	{
-		CArchive*		arMaterial = g_FileSystem->CreateFileReader( InMaterialInfo.path, AR_NoFail );
-		lmtMaterial.Serialize( *arMaterial );
-		delete arMaterial;
+		bool	bResult = lmtMaterial.LoadFile( InMaterialInfo.path );
+		Assert( bResult );
 	}
 
 	// Getting general data
@@ -907,9 +906,8 @@ bool CCookPackagesCommandlet::CookPhysMaterial( const ResourceInfo& InPhysMateri
 	// Parse physics material in JSON format
 	CConfig		pmtMaterial;
 	{
-		CArchive*	arMaterial = g_FileSystem->CreateFileReader( InPhysMaterialInfo.path, AR_NoFail );
-		pmtMaterial.Serialize( *arMaterial );
-		delete arMaterial;
+		bool	bResult = pmtMaterial.LoadFile( InPhysMaterialInfo.path );
+		Assert( bResult );
 	}
 
 	// Getting general data

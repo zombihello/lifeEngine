@@ -21,7 +21,7 @@
  */
 class CActorComponent : public CObject 
 {
-	DECLARE_CLASS( CActorComponent, CObject, 0, 0 )
+	DECLARE_CLASS( CActorComponent, CObject, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

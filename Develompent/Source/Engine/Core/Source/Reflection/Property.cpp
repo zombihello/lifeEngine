@@ -55,6 +55,21 @@ CProperty::CProperty( ECppProperty, uint32 InOffset, const CName& InCategory, co
 
 /*
 ==================
+CProperty::CProperty
+==================
+*/
+CProperty::CProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize /* = 1 */ )
+	: category( InCategory )
+	, description( InDescription )
+	, offset( InOffset )
+	, flags( InFlags )
+	, arraySize( InArraySize )
+{
+	GetOuterCField()->AddProperty( this );
+}
+
+/*
+==================
 CProperty::IsContainsObjectReference
 ==================
 */
@@ -70,6 +85,21 @@ CProperty::EmitReferenceInfo
 */
 void CProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTokenStream, uint32 InBaseOffset ) const
 {}
+
+/*
+==================
+CProperty::Serialize
+==================
+*/
+void CProperty::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << category;
+	InArchive << description;
+	InArchive << offset;
+	InArchive << flags;
+	InArchive << arraySize;
+}
 
 
 /*
@@ -134,6 +164,17 @@ bool CByteProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValu
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CByteProperty::Serialize
+==================
+*/
+void CByteProperty::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << cenum;
 }
 
 
@@ -438,6 +479,17 @@ void CObjectProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTok
 	InReferenceTokenStream->EmitReferenceInfo( GCReferenceInfo( GCRT_Object, InBaseOffset + offset ) );
 }
 
+/*
+==================
+CObjectProperty::Serialize
+==================
+*/
+void CObjectProperty::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << propertyClass;
+}
+
 
 /*
 ==================
@@ -490,6 +542,17 @@ bool CVectorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CVectorProperty::Serialize
+==================
+*/
+void CVectorProperty::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << defaultComponentValue;
 }
 
 
@@ -598,6 +661,17 @@ bool CAssetProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CAssetProperty::Serialize
+==================
+*/
+void CAssetProperty::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << assetType;
 }
 
 
@@ -717,6 +791,17 @@ void CArrayProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceToke
 	}
 }
 
+/*
+==================
+CArrayProperty::Serialize
+==================
+*/
+void CArrayProperty::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << innerProperty;
+}
+
 
 /*
 ==================
@@ -824,6 +909,17 @@ void CStructProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTok
 			property->EmitReferenceInfo( InReferenceTokenStream, InBaseOffset + offset );
 		}
 	}
+}
+
+/*
+==================
+CStructProperty::Serialize
+==================
+*/
+void CStructProperty::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << propertyStruct;
 }
 
 

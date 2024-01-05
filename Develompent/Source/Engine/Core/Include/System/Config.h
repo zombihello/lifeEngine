@@ -494,11 +494,20 @@ class CConfig
 {
 public:
 	/**
-	 * @brief Serialize
+	 * @brief Load file
 	 * 
-	 * @param[in] InArchive Archive for serialization
+	 * @param InFile	Path to file
+	 * @return Return TRUE if file has been successful parsed, otherwise returns FALSE
 	 */
-	void Serialize( class CArchive& InArchive );
+	bool LoadFile( const std::wstring& InFile );
+
+	/**
+	 * @brief Save into file
+	 * 
+	 * @param InFile	Path to file
+	 * @return Return TRUE if file has been successful saved, otherwise returns FALSE
+	 */
+	bool SaveFile( const std::wstring& InFile );
 
 	/**
 	 * @brief Set value
@@ -531,8 +540,15 @@ public:
 	}
 
 private:
-	typedef std::unordered_map< std::wstring, CConfigObject >		MapGroups_t;
+	/**
+	 * @brief Serialize
+	 *
+	 * @param InArchive		Archive for serialization
+	 * @return Return TRUE if config has been successful serialized, otherwise returns FALSE
+	 */
+	bool Serialize( class CArchive& InArchive );
 
+	typedef std::unordered_map< std::wstring, CConfigObject >		MapGroups_t;
 	MapGroups_t			groups;			/**< Config values */
 };
 

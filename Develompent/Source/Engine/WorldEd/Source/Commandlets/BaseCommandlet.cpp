@@ -28,25 +28,27 @@ bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 	// Create and execute commandlet
 	if ( lclassCommandlet )
 	{
-		CBaseCommandlet*		commandlet = lclassCommandlet->CreateObject< CBaseCommandlet >();
+		CBaseCommandlet*		commandlet = lclassCommandlet->CreateObject<CBaseCommandlet>();
 		Assert( commandlet );
+		commandlet->AddToRoot();
 
 		bool		oldIsCommandlet = g_IsCommandlet;
 		g_IsCommandlet = true;
+		Logf( TEXT( "\n" ) );
 		Logf( TEXT( "Started commandlet '%s'\n" ), nameCommandlet.c_str() );
 		double		beginCommandletTime = Sys_Seconds();
 		bool		result = commandlet->Main( InCommandLine );
 		double		endCommandletTime = Sys_Seconds();
-		AssertNoEntry();
-		//delete commandlet;
 
 		ELogColor		logColor = result ? LC_Green : LC_Red;
 		g_Log->SetTextColor( logColor );
 		Logf( TEXT( "\n" ) );
 		Logf( TEXT( "----------------------\n" ) );
 		Logf( TEXT( "Result: %s\n" ), result ? TEXT( "seccussed" ) : TEXT( "error" ) );
-		Logf( TEXT( "\n" ) );
 		Logf( TEXT( "Execution of commandlet took: %f seconds\n" ), endCommandletTime - beginCommandletTime );
+		Logf( TEXT( "----------------------\n" ) );
+		Logf( TEXT( "\n" ) );
+		g_Log->ResetTextColor();
 
 		g_IsCommandlet = oldIsCommandlet;
 		g_IsRequestingExit = true;
@@ -55,6 +57,10 @@ bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 		{
 			*OutResultCommand = result;
 		}
+
+		// After commandlet work we collect and purge whole garbage including this commandlet
+		commandlet->RemoveFromRoot();
+		CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 		return true;
 	}
 

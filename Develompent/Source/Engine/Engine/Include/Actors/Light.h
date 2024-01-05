@@ -17,7 +17,7 @@
   */
 class ALight : public AActor
 {
-	DECLARE_CLASS( ALight, AActor, 0, 0 )
+	DECLARE_CLASS( ALight, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 };

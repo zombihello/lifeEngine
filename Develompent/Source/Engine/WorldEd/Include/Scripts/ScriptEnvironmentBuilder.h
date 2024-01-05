@@ -44,12 +44,6 @@ private:
 	bool CreateHierarchyOrder();
 
 	/**
-	 * @brief Create functions in classes
-	 * @return Return TRUE if all functions was successfully created, otherwise returns FALSE
-	 */
-	bool CreateFunctions();
-
-	/**
 	 * @brief Create class from stub
 	 * 
 	 * @param InClassStub	Class stub
@@ -58,30 +52,32 @@ private:
 	bool CreateClass( CScriptClassStub& InClassStub );
 
 	/**
-	 * @brief Create function from stub
+	 * @brief Create class properties from stub
+	 *
+	 * @param InClassStub	Class stub
+	 * @return Return TRUE if class properties were successfully created, otherwise returns FALSE
+	 */
+	bool CreateClassProperties( CScriptClassStub& InClassStub );
+
+	/**
+	 * @brief Create class property from stub
 	 *
 	 * @param InClassStub		Class stub
-	 * @param InFunctionStub	Function stub
-	 * @return Return TRUE if function was successfully created, otherwise returns FALSE
+	 * @param InPropertyStub	Property stub
+	 * @return Return TRUE if class property was successfully created, otherwise returns FALSE
 	 */
-	bool CreateFunction( CScriptClassStub& InClassStub, CScriptFunctionStub& InFunctionStub );
+	bool CreateClassProperty( CScriptClassStub& InClassStub, CScriptPropertyStub& InPropertyStub );
 
 	/**
-	 * @brief Bind supper function connections
-	 * @return Return TRUE if all functions was successfully binded, otherwise returns FALSE
+	 * @brief Bind class
+	 *
+	 * @param InClassStub	Class stub
+	 * @return Return TRUE if class was successfully binded, otherwise returns FALSE
 	 */
-	bool BindSuperFunctions();
-
-	/**
-	 * @brief Bind super function
-	 * 
-	 * @param InClassStub		Class stub
-	 * @param InFunctionStub	Function stub
-	 * @return Return TRUE if function was successfully binded, otherwise returns FALSE
-	 */
-	bool BindSuperFunction( CScriptClassStub& InClassStub, CScriptFunctionStub& InFunctionStub );
+	bool BindClass( CScriptClassStub& InClassStub );
 
 	CScriptSystemStub*	stubs;	/**< Stubs */
+
 };
 
 #endif // !SCRIPTENVIRONMENTBUILDER_H
