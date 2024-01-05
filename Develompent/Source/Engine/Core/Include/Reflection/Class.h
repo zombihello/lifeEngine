@@ -31,6 +31,7 @@ public:
 		, ClassConstructor( nullptr )
 		, classFlags( CLASS_None )
 		, classCastFlags( CASTCLASS_None )
+		, classUnique( 0 )
 		, withinClass( nullptr )
 	{}
 
@@ -53,6 +54,7 @@ public:
 		, ClassConstructor( InClassConstructor )
 		, classFlags( InClassFlags )
 		, classCastFlags( InClassCastFlags )
+		, classUnique( 0 )
 		, withinClass( InWithinClass )
 	{}
 
@@ -73,6 +75,7 @@ public:
 		, ClassConstructor( nullptr )
 		, classFlags( InClassFlags )
 		, classCastFlags( InClassCastFlags )
+		, classUnique( 0 )
 		, withinClass( InWithinClass )
 	{}
 
@@ -323,6 +326,7 @@ private:
 	class CObject*( *ClassConstructor )( void* InPtr );							/**< Pointer to constructor of class */
 	uint32								classFlags;								/**< Class flags */
 	uint32								classCastFlags;							/**< Class cast flags */
+	uint32								classUnique;							/**< Class pseudo-unique counter; used to accelerate unique instance name generation */
 	CClass*								withinClass;							/**< Class within */
 	std::vector<class CFunction*>		functions;								/**< Array of functions */	
 	CGCReferenceTokenStream				referenceTokenStream;					/**< Reference token stream used by realtime garbage collector, finalized in AssembleReferenceTokenStream */

@@ -10,6 +10,7 @@
 #define WINDOWSPLATFORM_H
 
 #include <Windows.h>
+#include <tchar.h>
 #include <stdarg.h>
 
 #include "Misc/Types.h"
@@ -121,5 +122,74 @@
  * @brief Typedef of window handle
  */
 typedef void*           WindowHandle_t;
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Get string length
+ * 
+ * @param InString      String
+ * @return Return string length
+ */
+FORCEINLINE uint32 Sys_Strlen( const achar* InString ) { return strlen( InString ); }
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Get string length
+ *
+ * @param InString      String
+ * @return Return string length
+ */
+FORCEINLINE uint32 Sys_Strlen( const tchar* InString ) { return _tcslen( InString ); }
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Compare strings without case sensitivity
+ * 
+ * @param InString1     String 1 to compare
+ * @param InString2     String 2 to compare
+ * @return Return a value indicating the relationship between the two strings, as follows: Less than 0 - InString1 less than InString2; 0 - InString1 equivalent to InString2; Greater than 0 - InString1 greater than InString2
+ */
+FORCEINLINE uint32 Sys_Stricmp( const achar* InString1, const achar* InString2 ) { return _stricmp( InString1, InString2 ); }
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Compare strings without case sensitivity
+ *
+ * @param InString1     String 1 to compare
+ * @param InString2     String 2 to compare
+ * @return Return a value indicating the relationship between the two strings, as follows: Less than 0 - InString1 less than InString2; 0 - InString1 equivalent to InString2; Greater than 0 - InString1 greater than InString2
+ */
+FORCEINLINE uint32 Sys_Stricmp( const tchar* InString1, const tchar* InString2 ) { return _tcsicmp( InString1, InString2 ); }
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Compares the specified number of characters of two strings without regard to case
+ * 
+ * @param InString1     String 1 to compare
+ * @param InString2     String 2 to compare
+ * @param InCount       Number of characters to compare
+ * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - InString1 less than InString2; 0 - InString1 equivalent to InString2; Greater than 0 - InString1 greater than InString2
+ */
+FORCEINLINE uint32 Sys_Strnicmp( const achar* InString1, const achar* InString2, uint32 InCount ) { return _strnicmp( InString1, InString2, InCount ); }
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Compares the specified number of characters of two strings without regard to case
+ *
+ * @param InString1     String 1 to compare
+ * @param InString2     String 2 to compare
+ * @param InCount       Number of characters to compare
+ * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - InString1 less than InString2; 0 - InString1 equivalent to InString2; Greater than 0 - InString1 greater than InString2
+ */
+FORCEINLINE uint32 Sys_Strnicmp( const tchar* InString1, const tchar* InString2, uint32 InCount ) { return _tcsnicmp( InString1, InString2, InCount ); }
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Convert string to integer
+ * 
+ * @param InString      String to convert
+ * @return Return converted string to integer
+ */
+FORCEINLINE uint32 Sys_Atoi( const tchar* InString ) { return _tstoi( InString ); }
 
 #endif // !WINDOWSPLATFORM_H

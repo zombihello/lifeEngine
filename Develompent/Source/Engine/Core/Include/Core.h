@@ -238,6 +238,18 @@ void Sys_RequestExit( bool InForce );
 
 /**
  * @ingroup Core
+ * @brief Is InC a digit
+ * 
+ * @param InC   Char to check
+ * @return Return TRUE if InC is digit, otherwise returns FALSE
+ */
+FORCEINLINE bool Sys_IsDigit( tchar InC )
+{
+	return InC >= TEXT( '0' ) && InC <= TEXT( '9' );
+}
+
+/**
+ * @ingroup Core
  * @brief Macros for call fail assert
  *
  * @param[in] Expr Condition that was not met

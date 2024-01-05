@@ -108,6 +108,25 @@ void CObject::PreSave()
 
 /*
 ==================
+CObject::MarkPackageDirty
+==================
+*/
+void CObject::MarkPackageDirty() const
+{
+	// Since transient objects will never be saved into a package, there is no need to mark a package dirty
+	// if we're transient
+	if ( !HasAnyObjectFlags( OBJECT_Transient ) )
+	{
+		CObjectPackage*		package = GetOutermost();
+		if ( package )
+		{
+			package->SetDirtyFlag( true );
+		}
+	}
+}
+
+/*
+==================
 CObject::ConditionalDestroy
 ==================
 */
@@ -192,7 +211,7 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	// Compose name, if unnamed
 	if ( InName == NAME_None )
 	{
-		InName = InClass->GetCName();
+		InName = CName( InClass->GetName(), ++InClass->classUnique );
 	}
 
 	// Allocated data for a new object
@@ -296,6 +315,71 @@ bool CObject::InternalIsInA( const CClass* InClass ) const
 	}
 
 	return false;
+}
+
+/*
+==================
+CObject::GetFullName
+==================
+*/
+std::wstring CObject::GetFullName( const CObject* InStopOuter /* = nullptr */ ) const
+{
+	std::wstring	result;
+	if ( this )
+	{
+		result.reserve( 128 );
+		GetClass()->AppendName( result );
+		result += TEXT( " " );
+		GetPathName( InStopOuter, result );
+	}
+	else
+	{
+		result += TEXT( "None" );
+	}
+	return result;
+}
+
+/*
+==================
+CObject::GetPathName
+==================
+*/
+std::wstring CObject::GetPathName( const CObject* InStopOuter /* = nullptr */ ) const
+{
+	std::wstring	result;
+	GetPathName( InStopOuter, result );
+	return result;
+}
+
+/*
+==================
+CObject::GetPathName
+==================
+*/
+void CObject::GetPathName( const CObject* InStopOuter, std::wstring& OutResult ) const
+{
+	if ( this != InStopOuter && this )
+	{
+		if ( outer && outer != InStopOuter )
+		{
+			outer->GetPathName( InStopOuter, OutResult );
+
+			// SUBOBJECT_DELIMITER is used to indicate that this object's outer is not a CPackage
+			if ( outer->GetClass() != CObjectPackage::StaticClass() && outer->GetOuter()->GetClass() == CObjectPackage::StaticClass() )
+			{
+				OutResult += SUBOBJECT_DELIMITER;
+			}
+			else
+			{
+				OutResult += TEXT( "." );
+			}
+		}
+		AppendName( OutResult );
+	}
+	else
+	{
+		OutResult += TEXT( "None" );
+	}
 }
 
 /*

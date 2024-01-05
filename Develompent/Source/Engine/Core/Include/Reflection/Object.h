@@ -142,6 +142,11 @@ public:
     virtual void PreSave();
 
     /**
+     * @brief Marks the package containing this object as needing to be saved
+     */
+    void MarkPackageDirty() const;
+
+    /**
      * @brief Add an object to the root set
      * This prevents the object and all its descendants from being deleted during garbage collection
      */
@@ -242,9 +247,21 @@ public:
      */
     FORCEINLINE std::wstring GetName() const
     {
-        std::wstring	retName;
-        name.ToString( retName );
-        return retName;
+		if ( !this )
+		{
+			return TEXT( "None" );
+		}
+		else
+		{
+			if ( index == INDEX_NONE )
+			{
+				return TEXT( "<uninitialized>" );
+			}
+			else
+			{
+				return name.ToString();
+			}
+		}
     }
 
     /**
@@ -253,17 +270,74 @@ public:
      */
     FORCEINLINE void GetName( std::wstring& OutName ) const
     {
-        name.ToString( OutName );
+		if ( !this )
+		{
+            OutName = TEXT( "None" );
+		}
+		else
+		{
+			if ( index == INDEX_NONE )
+			{
+                OutName = TEXT( "<uninitialized>" );
+			}
+			else
+			{
+				name.ToString( OutName );
+			}
+		}
+    }
+
+    /**
+     * @brief Append the object name into OutResult
+     * @param OutResult	    Output result string with the object name
+     */
+    FORCEINLINE void AppendName( std::wstring& OutResult ) const
+    {
+        if ( !this )
+        {
+            OutResult += TEXT( "None" );
+        }
+        else
+        {
+            if ( index == INDEX_NONE )
+            {
+                OutResult += TEXT( "<uninitialized>" );
+            }
+            else
+            {
+                name.AppendString( OutResult );
+            }
+        }
     }
 
     /**
      * @brief Get object name
      * @return Return object name (CName)
      */
-    FORCEINLINE const CName& GetCName() const
+    FORCEINLINE CName GetCName() const
     {
-        return name;
+        return index != INDEX_NONE ? name : TEXT( "<uninitialized>" );
     }
+
+    /**
+     * @brief Get the fully qualified pathname for this object as well as the name of the class
+     * @note Safe to call on NULL object pointers
+     * 
+     * @param InStopOuter      If specified, indicates that the output string should be relative to this object. if InStopOuter
+     *                         does not exist in this object's Outer chain, the result would be the same as passing NULL
+     * @return Returns the fully qualified pathname for this object as well as the name of the class, in the format 'ClassName Outermost[.Outer].Name'
+     */
+    std::wstring GetFullName( const CObject* InStopOuter = nullptr ) const;
+
+    /**
+     * @brief Get the fully qualified pathname for this object
+     * @note Safe to call on NULL object pointers
+     * 
+	 * @param InStopOuter      If specified, indicates that the output string should be relative to this object. if InStopOuter
+	 *                         does not exist in this object's Outer chain, the result would be the same as passing NULL
+     * @return Returns the fully qualified pathname for this object, in the format 'Outermost[.Outer].Name'
+     */
+    std::wstring GetPathName( const CObject* InStopOuter = nullptr ) const;
 
     /**
      * @brief Set the class for this object
@@ -451,6 +525,11 @@ private:
      * @param InSize    Allocated memory size
      */
     void operator delete( void* InObject, size_t InSize );
+
+    /**
+     * @brief Internal version of GetPathName() that eliminates lots of copies
+     */
+    void GetPathName( const CObject* InStopOuter, std::wstring& OutResult ) const;
 
     /**
      * @brief Whether the object is of the specified class

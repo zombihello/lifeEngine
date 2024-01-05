@@ -50,8 +50,19 @@ void CName::StaticInit()
 CName::Init
 ==================
 */
-void CName::Init( const std::wstring& InString )
+void CName::Init( const std::wstring& InString, uint32 InNumber, EFindName InFindType )
 {
+	// If empty or invalid name was specified, return NAME_None
+	if ( InString.empty() )
+	{
+		index = NAME_None;
+		number = NAME_NO_NUMBER;
+		return;
+	}
+
+	// Set the number
+	number = InNumber;
+
 	// Calculate hash for string
 	uint32				hash = Sys_CalcHash( CString::ToUpper( InString ) );
 
@@ -62,9 +73,18 @@ void CName::Init( const std::wstring& InString )
 		const CName::NameEntry&		nameEntry = globalNameTable[nameEntryId];
 		if ( nameEntry.hash == hash )
 		{
+			// Found it in the cache
 			index = nameEntryId;
 			return;
 		}
+	}
+
+	// Didn't find name
+	if ( InFindType == CNAME_Find )
+	{
+		index = NAME_None;
+		number = NAME_NO_NUMBER;
+		return;
 	}
 
 	// Getting index of name
@@ -76,46 +96,25 @@ void CName::Init( const std::wstring& InString )
 
 /*
 ==================
-CName::ToString
+CName::AppendString
 ==================
 */
-void CName::ToString( std::wstring& OutString ) const
+void CName::AppendString( std::wstring& OutResult ) const
 {
 	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
 	if ( !IsValid() )
 	{
-		OutString = globalNameTable[NAME_None].name;
+		OutResult += globalNameTable[NAME_None].name;
 	}
 	else
 	{
-		OutString = globalNameTable[index].name;
+		OutResult += globalNameTable[index].name;
 	}
-}
 
-/*
-==================
-CName::ToString
-==================
-*/
-std::wstring CName::ToString() const
-{
-	std::wstring	result;
-	ToString( result );
-	return result;
-}
-
-/*
-==================
-CName::operator==
-==================
-*/
-bool CName::operator==( const std::wstring& InOther ) const
-{
-	// Calculate hash for string
-	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
-	uint32								hash = Sys_CalcHash( CString::ToUpper( InOther ) );
-
-	return globalNameTable[IsValid() ? index : NAME_None].hash == hash;
+	if ( number != NAME_NO_NUMBER )
+	{
+		OutResult += CString::Format( TEXT( "_%i" ), number );
+	}
 }
 
 /*
@@ -125,11 +124,34 @@ CName::operator==
 */
 bool CName::operator==( const tchar* InOther ) const
 {
-	// Calculate hash for string
-	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
-	uint32								hash = Sys_CalcHash( CString::ToUpper( InOther ) );
+	const tchar*	tempName = InOther;
+	uint32			tempNumber = NAME_NO_NUMBER;
+	uint32			numCharsToCompare = Sys_Strlen( InOther );
 
-	return globalNameTable[IsValid() ? index : NAME_None].hash == hash;
+	// Find last '_' in InOther
+	uint32			idStartNumber = INDEX_NONE;
+	for ( uint32 index = 0; index < numCharsToCompare; ++index )
+	{
+		if ( InOther[index] == TEXT( '_' ) )
+		{
+			idStartNumber = index;
+		}
+		else if ( idStartNumber != INDEX_NONE && !Sys_IsDigit( InOther[index] ) )
+		{
+			idStartNumber = INDEX_NONE;
+		}
+	}
+
+	// Get number from InOther
+	if ( idStartNumber != INDEX_NONE && idStartNumber + 1 < numCharsToCompare )
+	{
+		tempNumber = Sys_Atoi( InOther + idStartNumber + 1 );
+		numCharsToCompare = idStartNumber - 1;
+	}
+
+	// Compare
+	std::vector<CName::NameEntry>&	globalNameTable = GetGlobalNameTable();
+	return tempNumber == number && !Sys_Strnicmp( tempName, globalNameTable[IsValid() ? index : NAME_None].name.c_str(), numCharsToCompare );
 }
 
 /*
@@ -146,30 +168,38 @@ CArchive& operator<<( CArchive& InArchive, CName& InValue )
 		const CName::NameEntry& nameEntry = globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
 		InArchive << nameEntry.name;
 		InArchive << InValue.index;
+		InArchive << InValue.number;
 	}
 	else
 	{
 		std::wstring	name;
 		uint32			index;
+		uint32			number = NAME_NO_NUMBER;
 		InArchive << name;
 		InArchive << index;
+		if ( InArchive.Ver() >= VER_NumberInCName )
+		{
+			InArchive << number;
+		}
 
 		// Is name is not valid, setting to NAME_None
 		if ( name == TEXT( "" ) || index == INDEX_NONE )
 		{
 			InValue = NAME_None;
+			number = NAME_NO_NUMBER;
 		}
 
-		// Else we init name
+		// Otherwise we init name
 		else
 		{	
 			if ( index < globalNameTable.size() && globalNameTable[index].name == name )
 			{
 				InValue.index = index;
+				InValue.number = number;
 			}
 			else
 			{
-				InValue.Init( name );
+				InValue.Init( name, number, CNAME_Add );
 			}
 		}
 	}
@@ -185,10 +215,11 @@ operator<<
 CArchive& operator<<( CArchive& InArchive, const CName& InValue )
 {
 	std::vector<CName::NameEntry>&	globalNameTable = GetGlobalNameTable();
-	const CName::NameEntry&		nameEntry		= globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
+	const CName::NameEntry&			nameEntry		= globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
 
 	Assert( InArchive.IsSaving() );
 	InArchive << nameEntry.name;
 	InArchive << InValue.index;
+	InArchive << InValue.number;
 	return InArchive;
 }

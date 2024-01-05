@@ -308,7 +308,7 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 				if ( !IsA<CClass>( objectExport.object ) )
 				{
 					objectExport.classIndex = objectIndeces[objectExport.object->GetClass()->GetIndex()];
-					AssertMsg( !objectExport.classIndex.IsNull(), TEXT( "Export %s class is not mapped when saving %s" ), *objectExport.object->GetName().c_str(), linker.GetLinkerRoot()->GetName().c_str() );
+					AssertMsg( !objectExport.classIndex.IsNull(), TEXT( "Export %s class is not mapped when saving %s" ), *objectExport.object->GetFullName().c_str(), linker.GetLinkerRoot()->GetName().c_str() );
 				}
 				else
 				{
@@ -325,10 +325,10 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 						objectExport.superIndex = objectIndeces[theStruct->GetSuperStruct()->GetIndex()];
 						AssertMsg( !objectExport.superIndex.IsNull(),
 								   TEXT( "Export Struct (%s) of type (%s) inheriting from (%s) of type (%s) has not mapped super struct" ), 
-								   theStruct->GetName().c_str(),
-								   theStruct->GetClass()->GetName().c_str(),
-								   theStruct->GetSuperStruct()->GetName().c_str(),
-								   theStruct->GetSuperStruct()->GetClass()->GetName().c_str() );
+								   theStruct->GetPathName().c_str(),
+								   theStruct->GetClass()->GetPathName().c_str(),
+								   theStruct->GetSuperStruct()->GetPathName().c_str(),
+								   theStruct->GetSuperStruct()->GetClass()->GetPathName().c_str() );
 					}
 					else
 					{
@@ -349,16 +349,16 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 
 					AssertMsg( IsIn( objectExport.object->GetOuter(), InOuter ),
 							   TEXT( "Export Object (%s) Outer (%s) mismatch" ),
-							   objectExport.object->GetName().c_str(),
-							   objectExport.object->GetOuter()->GetName().c_str() );
+							   objectExport.object->GetPathName().c_str(),
+							   objectExport.object->GetOuter()->GetPathName().c_str() );
 					AssertMsg( !objectExport.outerIndex.IsImport(),
 							   TEXT( "Export Object (%s) Outer (%s) is an Import" ),
-							   objectExport.object->GetName().c_str(),
-							   objectExport.object->GetOuter()->GetName().c_str() );
+							   objectExport.object->GetPathName().c_str(),
+							   objectExport.object->GetOuter()->GetPathName().c_str() );
 					AssertMsg( !objectExport.outerIndex.IsNull(),
 							   TEXT( "Export Object (%s) Outer (%s) index is root package" ),
-							   objectExport.object->GetName().c_str(),
-							   objectExport.object->GetOuter()->GetName().c_str() );
+							   objectExport.object->GetPathName().c_str(),
+							   objectExport.object->GetOuter()->GetPathName().c_str() );
 
 				}
 				else
@@ -388,7 +388,7 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 					{
 						if ( !objectImport.object->HasAllObjectFlags( OBJECT_Native | OBJECT_Transient ) )
 						{
-							Warnf( TEXT( "Bad object '%s'\n" ), objectImport.object->GetName().c_str() );
+							Warnf( TEXT( "Bad object '%s'\n" ), objectImport.object->GetFullName().c_str() );
 						}
 						else
 						{

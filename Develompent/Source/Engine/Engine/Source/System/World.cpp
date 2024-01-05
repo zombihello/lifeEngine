@@ -251,10 +251,6 @@ AActor* CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, con
 	Assert( actor );
 
 	// Set default actor location with rotation
-	if ( InName == NAME_None )
-	{
-		actor->SetCName( InClass->GetCName() );
-	}
     actor->AddActorLocation( InLocation );
     actor->AddActorRotation( InRotation );
 

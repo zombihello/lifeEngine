@@ -18,6 +18,22 @@
 
 /**
  * @ingroup Core
+ * @brief Special value for an FName with no number
+ */
+#define NAME_NO_NUMBER 0
+
+/**
+ * @ingroup Core
+ * @brief Enumeration for finding name
+ */
+enum EFindName
+{
+	CNAME_Find,		/** Find a name, return 0 if it doesn't exist */
+	CNAME_Add		/** Find a name or add it if it doesn't exist */
+};
+
+/**
+ * @ingroup Core
  * @brief Class for containing IDs in name view.
  * Names are case-insensitive
  */
@@ -77,32 +93,62 @@ public:
 
 	/**
 	 * @brief Constructor
-	 * @param InString		String
+	 * 
+	 * @param InString		Value for the string portion of the name
+	 * @param InFindType	Action to take (see EFindName)
 	 */
-	FORCEINLINE CName( const tchar* InString )
-		: index( INDEX_NONE )
+	FORCEINLINE CName( const tchar* InString, EFindName InFindType = CNAME_Add )
 	{
 		StaticInit();
-		Init( InString );
+		Init( InString, NAME_NO_NUMBER, InFindType );
 	}
 
 	/**
 	 * @brief Constructor
-	 * @param InString		String
+	 * 
+	 * @param InString		Value for the string portion of the name
+	 * @param InFindType	Action to take (see EFindName)
 	 */
-	FORCEINLINE CName( const std::wstring& InString )
-		: index( INDEX_NONE )
+	FORCEINLINE CName( const std::wstring& InString, EFindName InFindType = CNAME_Add )
 	{
 		StaticInit();
-		Init( InString );
+		Init( InString, NAME_NO_NUMBER, InFindType );
 	}
 
 	/**
 	 * @brief Constructor
-	 * @param InNameEnum	Name enum
+	 * 
+	 * @param InString		Value for the string portion of the name
+	 * @param InNumber		Number part of the name/number pair
+	 * @param InFindType	Action to take (see EFindName)
+	 */
+	FORCEINLINE CName( const tchar* InString, uint32 InNumber, EFindName InFindType = CNAME_Add )
+	{
+		StaticInit();
+		Init( InString, InNumber, InFindType );
+	}
+
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InString		Value for the string portion of the name
+	 * @param InNumber		Number part of the name/number pair
+	 * @param InFindType	Action to take (see EFindName)
+	 */
+	FORCEINLINE CName( const std::wstring& InString, uint32 InNumber, EFindName InFindType = CNAME_Add )
+	{
+		StaticInit();
+		Init( InString, InNumber, InFindType );
+	}
+
+	/**
+	 * @brief Create an CName with a hardcoded string index
+	 * 
+	 * @param InNameEnum	The harcdcoded value the string portion of the name will have. The number portion will be NAME_NO_NUMBER
 	 */
 	FORCEINLINE CName( EName InNameEnum )
 		: index( InNameEnum )
+		, number( NAME_NO_NUMBER )
 	{
 		StaticInit();
 	}
@@ -112,6 +158,7 @@ public:
 	 */
 	FORCEINLINE CName()
 		: index( INDEX_NONE )
+		, number( NAME_NO_NUMBER )
 	{
 		StaticInit();
 	}
@@ -120,13 +167,28 @@ public:
 	 * @brief Convert name to string
 	 * @return Return name in string type. If his is not valid returning "NONE"
 	 */
-	std::wstring ToString() const;
+	FORCEINLINE std::wstring ToString() const
+	{
+		std::wstring	result;
+		ToString( result );
+		return result;
+	}
 
 	/**
 	 * @brief Convert name to string
 	 * @param OutString		Output string
 	 */
-	void ToString( std::wstring& OutString ) const;
+	FORCEINLINE void ToString( std::wstring& OutString ) const
+	{
+		OutString.clear();
+		AppendString( OutString );
+	}
+
+	/**
+	 * @brief Converts an CName to a readable format, in place
+	 * @param OutResult		String to fill with the string representation of the name
+	 */
+	void AppendString( std::wstring& OutResult ) const;
 
 	/**
 	 * @brief Get index name in pool
@@ -135,6 +197,15 @@ public:
 	FORCEINLINE uint32 GetIndex() const
 	{
 		return index;
+	}
+
+	/**
+	 * @brief Get number portion of the string/number pair
+	 * @return Return number portion of the string/number pair. If this CName is EName returns NAME_NO_NUMBER
+	 */
+	FORCEINLINE uint32 GetNumber() const
+	{
+		return number;
 	}
 
 	/**
@@ -157,7 +228,7 @@ public:
 	 * 
 	 * @return Return TRUE if engine names is initialized, otherwise returning FALSE
 	 */
-	FORCENOINLINE static bool& GetIsInitialized()
+	FORCEINLINE static bool& GetIsInitialized()
 	{
 		static bool		bIsInit = false;
 		return bIsInit;
@@ -169,7 +240,10 @@ public:
 	 * @param InOther	String to compare
 	 * @return Return TRUE if name matches the string, FALSE otherwise
 	 */
-	bool operator==( const std::wstring& InOther ) const;
+	FORCEINLINE bool operator==( const std::wstring& InOther ) const
+	{
+		*this == InOther.c_str();
+	}
 
 	/**
 	 * @brief Compare operator
@@ -209,7 +283,7 @@ public:
 	 */
 	FORCEINLINE CName& operator=( const std::wstring& InOther )
 	{
-		Init( InOther );
+		Init( InOther, NAME_NO_NUMBER, CNAME_Add );
 		return *this;
 	}
 
@@ -221,7 +295,7 @@ public:
 	 */
 	FORCEINLINE bool operator==( const CName& InOther ) const
 	{
-		return index == InOther.index;
+		return index == InOther.index && number == InOther.number;
 	}
 
 	/**
@@ -266,6 +340,7 @@ public:
 	FORCEINLINE CName& operator=( const CName& InOther )
 	{
 		index = InOther.index;
+		number = InOther.number;
 		return *this;
 	}
 
@@ -277,7 +352,7 @@ public:
 	 */
 	FORCEINLINE CName& operator=( const tchar* InString )
 	{
-		Init( InString );
+		Init( InString, NAME_NO_NUMBER, CNAME_Add );
 		return *this;
 	}
 
@@ -290,17 +365,21 @@ public:
 	FORCEINLINE CName& operator=( EName InOther )
 	{
 		index = InOther;
+		number = NAME_NO_NUMBER;
 		return *this;
 	}
 
 private:
 	/**
 	 * @brief Initialize name
-	 * @param InString		String
+	 * @param InString		String name of the name/number pair
+	 * @param InNumber		Number part of the name/number pair
+	 * @param InFindType	Operation to perform on names
 	 */
-	void Init( const std::wstring& InString );
+	void Init( const std::wstring& InString, uint32 InNumber, EFindName InFindType );
 
-	uint32		index;		/**< Index name */
+	uint32		index;		/**< Index name (used to find String portion of the string/number pair) */
+	uint32		number;		/**< Number portion of the string/number pair */
 };
 
 #endif // !NAME_H

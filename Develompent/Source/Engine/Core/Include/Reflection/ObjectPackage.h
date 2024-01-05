@@ -14,6 +14,18 @@
 
 /**
  * @ingroup Core
+ * @brief the character used to separate a subobject root from its subobjects in a path name
+ */
+#define SUBOBJECT_DELIMITER				TEXT( ":" )
+
+/**
+ * @ingroup Core
+ * @brief the character used to separate a subobject root from its subobjects in a path name. Char version
+ */
+#define SUBOBJECT_DELIMITER_CHAR		':'
+
+/**
+ * @ingroup Core
  * @brief Package for contains CObjects
  */
 class CObjectPackage : public CObject
