@@ -279,6 +279,33 @@ public:
         return false; 
     }
 
+    /**
+	 * @brief Find files in the directory and any directories under it
+	 *
+	 * @param OutResults            The output array that is filled out with a file paths
+	 * @param InRootDirectory       The root of the directory structure to recurse through
+	 * @param InIsFindPackages      Should this function add package files to the OutResults
+	 * @param InIsFindNonPackages   Should this function add non-package files to the OutResults
+	 */
+    void FindFilesInDirectory( std::vector<std::wstring>& OutResults, const tchar* InRootDirectory, bool InIsFindPackages, bool InIsFindNonPackages );
+
+    /**
+     * @brief Convert relative path to full
+     * @param InPath    Relative path to convert
+     */
+    std::wstring ConvertRelativePathToFull( const std::wstring& InPath );
+
+    /**
+     * @brief Collapse relative directories
+     * 
+     * For example, takes the string: 'BaseDir/SomeDir/../SomeDir2/Filename.baz'
+     * and converts it to: 'BaseDir/SomeDir2/Filename.baz'
+     * 
+     * @param InPath   A pathname potentially containing relative pathing
+     * @return Return a path with eliminated relative pathing
+     */
+    std::wstring CollapseRelativeDirectories( const std::wstring& InPath );
+
 protected:
     /**
      * @brief Does Path refer to a drive letter or BNC path

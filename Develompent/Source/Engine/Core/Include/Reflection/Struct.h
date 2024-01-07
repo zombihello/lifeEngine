@@ -10,6 +10,7 @@
 #define STRUCT_H
 
 #include <vector>
+#include "Reflection/ObjectHash.h"
 #include "Reflection/Field.h"
 
 /**
@@ -74,6 +75,7 @@
 		staticStruct->SetSuperStruct( Super::StaticStruct() != staticStruct ? Super::StaticStruct() : nullptr ); \
 		staticStruct->SetClass( CStruct::StaticClass() ); \
 		CObjectGC::Get().AddObject( staticStruct ); \
+		HashObject( staticStruct ); \
         ThisStruct::StaticInitializeStruct(); \
 	} \
 	struct Register##TStruct \

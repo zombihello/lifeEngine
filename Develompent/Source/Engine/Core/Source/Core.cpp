@@ -17,6 +17,7 @@
 
 CConfigManager          g_Config;
 bool	                g_IsRequestingExit           = false;
+bool                    g_IsRunning                  = false;
 uint32			        g_GameThreadId               = 0;
 double                  g_SecondsPerCycle            = 0.0;
 double                  g_StartTime                  = Sys_InitTiming();

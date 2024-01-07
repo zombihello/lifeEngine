@@ -3,6 +3,7 @@
 #include "Reflection/Object.h"
 #include "Reflection/Function.h"
 #include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectHash.h"
 #include "System/ThreadingBase.h"
 #include "System/ScriptFrame.h"
 
@@ -70,7 +71,10 @@ CObject::BeginDestroy
 ==================
 */
 void CObject::BeginDestroy()
-{}
+{
+	// Remove from linker's export table
+	SetLinker( nullptr, INDEX_NONE );
+}
 
 /*
 ==================
@@ -156,21 +160,43 @@ CObject::Serialize
 */
 void CObject::Serialize( CArchive& InArchive )
 {
-	if ( InArchive.IsLoading() && InArchive.Ver() < VER_CObjectHasCName )
+	// Serialize name and outer
+	if ( InArchive.IsLoading() )
 	{
-		std::wstring	tempName;
-		InArchive << tempName;
-		name = tempName;
-		Warnf( TEXT( "Deprecated package version (0x%X). Need to re-save the package '%s', because in the future it may not open\n" ), InArchive.Ver(), InArchive.GetPath().c_str() );
+		CName		loadName = name;
+		CObject*	loadOuter = outer;
+		if ( InArchive.Ver() < VER_CObjectHasCName )
+		{
+			std::wstring	tempName;
+			InArchive << tempName;
+			loadName = tempName;
+			Warnf( TEXT( "Deprecated package version (0x%X). Need to re-save the package '%s', because in the future it may not open\n" ), InArchive.Ver(), InArchive.GetPath().c_str() );
+		}
+		else
+		{
+			InArchive << loadName;
+		}
+
+		if ( InArchive.Ver() >= VER_OuterInCObject )
+		{
+			InArchive << outer;
+		}
+
+		// If the name we loaded is different from the current one,
+		// unhash the object, change the name and hash it again
+		bool	bDifferentName	= name != NAME_None && loadName != name;
+		bool	bDifferentOuter = loadOuter != outer;
+		if ( bDifferentName || bDifferentOuter )
+		{
+			UnhashObject( this );
+			name = loadName;
+			outer = loadOuter;
+			HashObject( this );
+		}
 	}
 	else
 	{
-		InArchive << name;
-	}
-
-	if ( InArchive.Ver() >= VER_OuterInCObject )
-	{
-		InArchive << outer;
+		InArchive << name << outer;
 	}
 }
 
@@ -209,14 +235,21 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	}
 
 	// Compose name, if unnamed
+	CObject*	object = nullptr;
 	if ( InName == NAME_None )
 	{
-		InName = CName( InClass->GetName(), ++InClass->classUnique );
+		InName = MakeUniqueObjectName( InOuter, InClass, InClass->GetCName() );
+	}
+	else
+	{
+		// See if object already exists
+		object = FindObjectFast( InClass, InOuter, InName, true );
+		Assert( !object );		// TODO yehor.pohuliaka: Need implement support of replacing an object
 	}
 
 	// Allocated data for a new object
 	uint32		alignedSize = Align( InClass->GetPropertiesSize(), InClass->GetMinAlignment() );
-	CObject*	object = ( CObject* )malloc( alignedSize );
+	object 		= ( CObject* )malloc( alignedSize );
 	Sys_Memzero( ( void* )object, InClass->GetPropertiesSize() );
 
 	// Init object properties
@@ -226,8 +259,9 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	object->flags		= InFlags;
 	object->theClass	= InClass;
 
-	// Add a new object to the GC
+	// Add a new object to the GC and hash object to table
 	CObjectGC::Get().AddObject( object );
+	HashObject( object );
 	return object;
 }
 
@@ -246,6 +280,25 @@ CObject* CObject::StaticConstructObject( class CClass* InClass, CObject* InOuter
 	}
 
 	return object;
+}
+
+/*
+==================
+CObject::MakeUniqueObjectName
+==================
+*/
+CName CObject::MakeUniqueObjectName( CObject* InOuter, CClass* InClass, CName InBaseName /* = NAME_None */ )
+{
+	Assert( InClass );
+	uint32	baseNameIndex = InBaseName.GetIndex();
+	CName	testName;
+	do
+	{
+		// Create the next name in the sequence for this class
+		testName = CName( ( EName )baseNameIndex, ++InClass->classUnique );
+	}
+	while ( FindObjectFast( nullptr, InOuter, testName, false, InOuter == ANY_PACKAGE ) );
+	return testName;
 }
 
 /*

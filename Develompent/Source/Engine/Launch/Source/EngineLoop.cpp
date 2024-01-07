@@ -35,6 +35,7 @@
 #include "System/BaseEngine.h"
 #include "System/FullScreenMovie.h"
 #include "System/Name.h"
+#include "System/System.h"
 #include "LEBuild.h"
 
 #if USE_THEORA_CODEC
@@ -170,7 +171,8 @@ void CEngineLoop::InitConfigs()
 #include "Misc/CoreGlobals.h"
 #include "System/BaseFileSystem.h"
 #include "System/Archive.h"
-
+#include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectGlobals.h"
 /*
 ==================
 CEngineLoop::LoadScriptPackage
@@ -198,6 +200,9 @@ void CEngineLoop::LoadScriptPackage()
 		}
 	}
 #endif // 0
+
+	std::wstring		scriptFile = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR TEXT( "%s.classes" ), Sys_GameDir().c_str(), g_GameName.c_str() );
+	CObjectPackage*		classesPkg = LoadPackage( nullptr, scriptFile.c_str() );
 }
 
 /*
@@ -205,6 +210,8 @@ void CEngineLoop::LoadScriptPackage()
 CEngineLoop::PreInit
 ==================
 */
+#include "Reflection/ObjectGlobals.h"
+#include "Reflection/Property.h"
 int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 {
 	g_GameThreadId = Sys_GetCurrentThreadId();
@@ -212,7 +219,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 
 	g_CommandLine.Init( InCmdLine );
 	CName::StaticInit();
-	InitConfigs();
+	InitConfigs();	
 
 #if WITH_EDITOR
 	g_IsEditor = g_CommandLine.HasParam( TEXT( "editor" ) );
@@ -234,6 +241,9 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	g_Log->Init();
 	int32		result = Sys_PlatformPreInit();
 	
+	// Initialize the system
+	CSystem::Get().Init();
+
 	// Load script package
 	if ( !g_IsScriptCompiler )
 	{
@@ -398,6 +408,9 @@ int32 CEngineLoop::Init()
 		}
 	}
 
+	// Mark that we start executing in MainLoop()
+	g_IsRunning = true;
+
 	if ( !map.empty() )
 	{
 		Sys_SetSplashText( STT_StartupProgress, CString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
@@ -483,6 +496,7 @@ CEngineLoop::Exit
 */
 void CEngineLoop::Exit()
 {
+	g_IsRunning = false;
 	StopRenderingThread();
 
 	g_PackageManager->Shutdown();
@@ -500,7 +514,9 @@ void CEngineLoop::Exit()
 
 	g_Window->Close();
 	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
+	CObject::CleanupLinkerMap();
 	g_Log->TearDown();
+	CSystem::Get().Shutdown();
 	g_Config.Shutdown();
 	g_CommandLine.Shutdown();
 }

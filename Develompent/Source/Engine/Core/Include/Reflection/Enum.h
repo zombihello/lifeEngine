@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "System/Name.h"
+#include "Reflection/ObjectHash.h"
 #include "Reflection/Field.h"
 
 /**
@@ -61,6 +62,7 @@
 					s_CEnum = ::new CEnum( NativeConstructor, TEXT( #TEnum ), StaticPackage(), enums ); \
 					s_CEnum->SetClass( CEnum::StaticClass() ); \
 					CObjectGC::Get().AddObject( s_CEnum ); \
+					HashObject( s_CEnum ); \
 				} \
 				return s_CEnum; \
 			} \

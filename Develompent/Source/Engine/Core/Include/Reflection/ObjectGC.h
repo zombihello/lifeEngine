@@ -458,12 +458,21 @@ public:
 	}
 
 	/**
-	 * brief Get reserved size of allocated objects array
+	 * @brief Get reserved size of allocated objects array
 	 * @return Return reserved size of allocated objects array
 	 */
 	FORCEINLINE uint32 GetReservedSizeAllocatedObjects() const
 	{
 		return allocatedObjects.size();
+	}
+
+	/**
+	 * @brief Is we are inside garbage collection
+	 * @return Return TRUE if we are inside garbage collection, otherwise retruns FALSE
+	 */
+	FORCEINLINE bool IsGarbageCollecting() const
+	{
+		return bIsGarbageCollecting;
 	}
 
 private:
@@ -520,6 +529,7 @@ private:
 		return Sys_Seconds() - InStartTime > InTimeLimit;
 	}
 
+	bool						bIsGarbageCollecting;							/**< Whether we are inside garbage collection */
 	bool						bPurgeIsRequired;								/**< Whether we need to purge objects or not */
 	bool						bDelayedBeginDestroyHasBeenRoutedToAllObjects;	/**< Whether delayed BeginDestroy has already been routed to all unreachable objects */
 	bool						bFinishDestroyHasBeenRoutedToAllObjects;		/**< Whether FinishDestroy has already been routed to all unreachable objects */

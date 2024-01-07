@@ -127,6 +127,15 @@ public:
 	virtual uint32 GetSize() { return 0; }
 
 	/**
+	 * @brief Set archive version
+	 * @param InVer		New archive version
+	 */
+	FORCEINLINE void SetVer( uint32 InVer )
+	{
+		arVer = InVer;
+	}
+
+	/**
 	 * Get archive version
 	 * @return Return archive version
 	 */

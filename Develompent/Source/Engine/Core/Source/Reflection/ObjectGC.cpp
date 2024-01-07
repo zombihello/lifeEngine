@@ -3,6 +3,7 @@
 #include "Reflection/Object.h"
 #include "Reflection/ObjectGC.h"
 #include "Reflection/Class.h"
+#include "Reflection/LinkerManager.h"
 
 // Maximum count of objects not considered for GC
 #define MAX_OBJECTS_NOT_CONSIDERED_FOR_GC			30000
@@ -70,7 +71,8 @@ CObjectGC::CObjectGC
 ==================
 */
 CObjectGC::CObjectGC()
-	: bPurgeIsRequired( false )
+	: bIsGarbageCollecting( false )
+	, bPurgeIsRequired( false )
 	, bDelayedBeginDestroyHasBeenRoutedToAllObjects( false )
 	, bFinishDestroyHasBeenRoutedToAllObjects( false )
 	, currentPurgeObjectIndex( 0 )
@@ -168,6 +170,7 @@ CObjectGC::CollectGarbage
 */
 void CObjectGC::CollectGarbage( ObjectFlags_t InKeepFlags, bool InIsPerformFullPurge /* = true */ )
 {
+	bIsGarbageCollecting = true;
 	Logf( TEXT( "Collecting garbage\n" ) );
 
 	// Make sure previous incremental purge has finished
@@ -201,7 +204,7 @@ void CObjectGC::CollectGarbage( ObjectFlags_t InKeepFlags, bool InIsPerformFullP
 			}
 		}
 
-		Logf( TEXT( "%f ms for unreachable objects\n" ), ( Sys_Seconds() - startTime ) * 1000.f );
+		Logf( TEXT( "%f ms for unhashing unreachable objects\n" ), ( Sys_Seconds() - startTime ) * 1000.f );
 	}
 
 	// Set flag to indicate that we are relying on a purge to be performed
@@ -212,6 +215,12 @@ void CObjectGC::CollectGarbage( ObjectFlags_t InKeepFlags, bool InIsPerformFullP
 	{
 		IncrementalPurgeGarbage( false );
 	}
+
+	// Destroy all pending delete object loaders
+	CLinkerManager::Get().DeleteLoaders();
+
+	// We're done collecting garbage. Note that IncrementalPurgeGarbage above might already clear it internally
+	bIsGarbageCollecting = false;
 }
 
 /*
@@ -399,6 +408,8 @@ void CObjectGC::IncrementalPurgeGarbage( bool InIsUseTimeLimit, float InTimeLimi
 			unreachableObjectsIndices.clear();
 		}
 	}
+
+	bIsGarbageCollecting = false;
 }
 
 /*

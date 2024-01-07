@@ -143,6 +143,26 @@ FORCEINLINE uint32 Sys_Strlen( const tchar* InString ) { return _tcslen( InStrin
 
 /**
  * @ingroup WindowsPlatform
+ * @brief Find substring in a string
+ *
+ * @param InString     String
+ * @param InFind       Find substring in InString
+ * @return Return a pointer to the first occurrence of the search string in a string. If not found returns NULL
+ */
+FORCEINLINE achar* Sys_Strstr( const achar* InString, const achar* InFind ) { return ( achar* )strstr( InString, InFind ); }
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Find substring in a string
+ *
+ * @param InString     String
+ * @param InFind       Find substring in InString
+ * @return Return a pointer to the first occurrence of the search string in a string. If not found returns NULL
+ */
+FORCEINLINE tchar* Sys_Strstr( const tchar* InString, const tchar* InFind ) { return ( tchar* )_tcsstr( InString, InFind ); }
+
+/**
+ * @ingroup WindowsPlatform
  * @brief Compare strings without case sensitivity
  * 
  * @param InString1     String 1 to compare

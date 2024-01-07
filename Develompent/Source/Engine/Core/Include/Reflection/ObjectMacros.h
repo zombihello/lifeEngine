@@ -186,6 +186,7 @@
         staticClass->SetClass( CClass::StaticClass() ); \
         staticClass->SetWithinClass( WithinClass::StaticClass() ); \
         CObjectGC::Get().AddObject( staticClass ); \
+        HashObject( staticClass ); \
         ThisClass::StaticRegisterNatives(); \
         ThisClass::StaticInitializeClass(); \
     } \
@@ -208,6 +209,12 @@
  */
 #define IMPLEMENT_DEFAULT_INITIALIZE_CLASS( TClass ) \
         void TClass::StaticInitializeClass() {}
+
+/**
+ * @ingroup Core
+ * @brief Special canonical package for FindObject
+ */
+#define ANY_PACKAGE     ( ( CObjectPackage* )-1 )
 
 /**
  * @ingroup Core

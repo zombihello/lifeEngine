@@ -132,6 +132,76 @@ public:
 			return ToUpper( InString ).find( ToUpper( InSubString ) ) != std::wstring::npos;
 		}
 	}
+
+	/**
+	 * @brief Split string by delimiter on left and right part
+	 * 
+	 * @param InString			String to split
+	 * @param InDelimiter		Delimiter
+	 * @param OutLeftPart		Output left part. If the delimiter is not found, return the entire string as the left part
+	 * @param OutRightPart		Output right part
+	 * @return Return Return TRUE if the delimiter was found, otherwise returns FALSE
+	 */
+	static FORCEINLINE bool Split( const std::wstring& InString, const std::wstring& InDelimiter, std::wstring& OutLeftPart, std::wstring& OutRightPart )
+	{
+		std::size_t		idDelimiter = InString.find( InDelimiter );
+		if ( idDelimiter != std::wstring::npos )
+		{
+			OutLeftPart		= InString.substr( 0, idDelimiter );
+			OutRightPart	= InString.substr( idDelimiter + 1 );
+			return true;
+		}
+
+		OutLeftPart = InString;
+		return false;
+	}
+
+	/**
+	 * @brief Split string by delimiter on left and right part
+	 *
+	 * @param InString			String to split
+	 * @param InDelimiter		Delimiter
+	 * @param OutLeftPart		Output left part. If the delimiter is not found, return the entire string as the left part
+	 * @param OutRightPart		Output right part
+	 * @return Return Return TRUE if the delimiter was found, otherwise returns FALSE
+	 */
+	static FORCEINLINE bool Split( const std::string& InString, const std::string& InDelimiter, std::string& OutLeftPart, std::string& OutRightPart )
+	{
+		std::size_t		idDelimiter = InString.find( InDelimiter );
+		if ( idDelimiter != std::string::npos )
+		{
+			OutLeftPart		= InString.substr( 0, idDelimiter );
+			OutRightPart	= InString.substr( idDelimiter + 1 );
+			return true;
+		}
+
+		OutLeftPart = InString;
+		return false;
+	}
+
+	/**
+	 * @brief Is string start with
+	 * 
+	 * @param InString		String to check
+	 * @param InPrefix		Prefix
+	 * @return Return TRUE if InString start with InPrefix, otherwise returns FALSE
+	 */
+	static FORCEINLINE bool StartWith( const std::wstring& InString, const std::wstring& InPrefix )
+	{
+		return InString.compare( 0, InPrefix.size(), InPrefix ) == 0;
+	}
+
+	/**
+	 * @brief Is string start with
+	 *
+	 * @param InString		String to check
+	 * @param InPrefix		Prefix
+	 * @return Return TRUE if InString start with InPrefix, otherwise returns FALSE
+	 */
+	static FORCEINLINE bool StartWith( const std::string& InString, const std::string& InPrefix )
+	{
+		return InString.compare( 0, InPrefix.size(), InPrefix ) == 0;
+	}
 };
 
 #endif // !STRING_H

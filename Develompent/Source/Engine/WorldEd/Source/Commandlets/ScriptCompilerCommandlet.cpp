@@ -7,6 +7,7 @@
 #include "Reflection/ReflectionEnvironment.h"
 #include "Reflection/ObjectPackage.h"
 #include "Reflection/ObjectIterator.h"
+#include "Reflection/ObjectGlobals.h"
 #include "Scripts/ScriptEnvironmentBuilder.h"
 
 IMPLEMENT_CLASS( CScriptCompilerCommandlet )
@@ -31,7 +32,7 @@ CScriptCompilerCommandlet::Main
 bool CScriptCompilerCommandlet::Main( const CCommandLine& InCommandLine )
 {
 	// Path to directory with scripts
-	CObjectPackage*			scriptPackage = CObjectPackage::CreatePackage( nullptr, g_GameName.c_str() );
+	CObjectPackage*			scriptPackage = CreatePackage( nullptr, g_GameName.c_str() );
 	CScriptSystemStub		stubs( scriptPackage );
 	scriptPackage->AddToRoot();
 
@@ -62,7 +63,7 @@ bool CScriptCompilerCommandlet::Main( const CCommandLine& InCommandLine )
 	}
 
 	// Save compiled script classes
-	bResult = CObjectPackage::SavePackage( scriptPackage, nullptr, 0, outputFile.c_str() );
+	bResult = SavePackage( scriptPackage, nullptr, 0, outputFile.c_str() );
 	if ( !bResult )
 	{
 		Errorf( TEXT( "Failed to save script classes '%s'\n" ), outputFile.c_str() );

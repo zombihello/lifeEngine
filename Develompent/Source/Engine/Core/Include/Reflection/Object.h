@@ -11,10 +11,12 @@
 
 #include <string>
 
+#include "Logger/LoggerMacros.h"
 #include "Core.h"
 #include "System/Name.h"
 #include "Reflection/ObjectMacros.h"
 #include "Reflection/ObjectGC.h"
+#include "Reflection/ObjectHash.h"
 
 // Forward declarations
 void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& InOutObject, bool InIsAllowReferenceElimination );
@@ -211,6 +213,7 @@ public:
      */
     FORCEINLINE void SetOuter( CObject* InOuter )
     {
+        Warnf( TEXT( "CObject::SetOuter : Need rehash object!\n" ) );
         outer = InOuter;
     }
 
@@ -220,6 +223,7 @@ public:
      */
     FORCEINLINE void SetCName( const CName& InName )
     {
+        Warnf( TEXT( "CObject::SetCName : Need rehash object!\n" ) );
         name = InName;
     }
 
@@ -229,6 +233,7 @@ public:
      */
     FORCEINLINE void SetName( const tchar* InName )
     {
+        Warnf( TEXT( "CObject::SetName : Need rehash object!\n" ) );
         name = InName;
     }
 
@@ -401,6 +406,35 @@ public:
     }
 
     /**
+     * @brief Set linker
+     * 
+     * Changes the linker and linker index to the passed in one.
+     * A linker of NULL and linker index of INDEX_NONE indicates that the object is without a linker
+     * 
+     * @param InLinkerLoad              New linker load object to set
+     * @param InLinkerIndex             New linker index to set
+     * @param InIsShouldDetachExisting  Is should we detach existing linker
+     */
+    void SetLinker( class CLinkerLoad* InLinkerLoad, uint32 InLinkerIndex, bool InIsShouldDetachExisting = true );
+
+    /**
+     * @brief Get linker
+     * @return Return a pointer to the linker for this object, or NULL if this object has no linker
+     */
+    class CLinkerLoad* GetLinker() const;
+
+    /**
+     * @brief Get linker index
+     * @return Return the index into my linker's ExportMap for the ObjectExport corresponding to this object
+     */
+    uint32 GetLinkerIndex() const;
+
+    /**
+     * @brief Remove all map on exit. This is to prevent issues with the order of static destruction of singletons
+     */
+    static void CleanupLinkerMap();
+
+    /**
      * @brief Has any object flags
      *
      * @param InCheckFlags		Object flags to check for
@@ -487,13 +521,21 @@ private:
      * @brief Called before destroying the object
      * This is called immediately upon deciding to destroy the object, to allow the object to begin an
      * asynchronous cleanup process
+     * 
+     * @param InIsUnhashObject  Is need unhash this object from table
      */
-    FORCEINLINE void ConditionalBeginDestroy()
+    FORCEINLINE void ConditionalBeginDestroy( bool InIsUnhashObject = true )
     {
         if ( index != INDEX_NONE && !HasAnyObjectFlags( OBJECT_BeginDestroyed ) )
         {
             AddObjectFlag( OBJECT_BeginDestroyed );
             BeginDestroy();
+
+            // Unhash object, removing it from object hash so it cannot be found from now on
+            if ( InIsUnhashObject )
+            {
+                UnhashObject( this );
+            }
         }
     }
 
@@ -516,6 +558,17 @@ private:
             return false;
         }
     }
+
+    /**
+     * @brief Create a unique name by combining a base name and an arbitrary number string
+     * The object name returned is guaranteed not to exist
+     * 
+     * @param InOuter       The outer for the object that needs to be named
+     * @param InClass       The class for the object
+     * @param InBaseName    Optional base name to use when generating the unique object name. If not specified, the class's name is used
+     * @return Return name in the form BaseName_##, where ## is the number of objects of this type that have been created since the last time the class was garbage collected
+     */
+    static CName MakeUniqueObjectName( CObject* InOuter, CClass* InClass, CName InBaseName = NAME_None );
 
     /**
      * @brief Override operator delete

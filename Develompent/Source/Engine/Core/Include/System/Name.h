@@ -14,6 +14,7 @@
 #include "Misc/Types.h"
 #include "Misc/SharedPointer.h"
 #include "System/Archive.h"
+#include "System/MemoryBase.h"
 #include "Core.h"
 
 /**
@@ -78,7 +79,7 @@ public:
 		 */
 		FORCEINLINE std::size_t operator()( const CName& InName ) const
 		{
-			return InName.index;
+			return InName.GetHash();
 		}
 	};
 
@@ -144,11 +145,24 @@ public:
 	/**
 	 * @brief Create an CName with a hardcoded string index
 	 * 
-	 * @param InNameEnum	The harcdcoded value the string portion of the name will have. The number portion will be NAME_NO_NUMBER
+	 * @param InNameEnum	The hardcoded value the string portion of the name will have. The number portion will be NAME_NO_NUMBER
 	 */
 	FORCEINLINE CName( EName InNameEnum )
 		: index( InNameEnum )
 		, number( NAME_NO_NUMBER )
+	{
+		StaticInit();
+	}
+
+	/**
+	 * @brief Create an CName with a hardcoded string index
+	 *
+	 * @param InNameEnum	The hardcoded value the string portion of the name will have
+	 * @param InNameNumber	The hardcoded number portion
+	 */
+	FORCEINLINE CName( EName InNameEnum, uint32 InNameNumber )
+		: index( InNameEnum )
+		, number( InNameNumber )
 	{
 		StaticInit();
 	}
@@ -209,6 +223,16 @@ public:
 	}
 
 	/**
+	 * @brief Get hash
+	 * @return Return calculated hash
+	 */
+	FORCEINLINE uint64 GetHash() const
+	{
+		uint64	hash = Sys_MemFastHash( index );
+		return Sys_MemFastHash( number, hash );
+	}
+
+	/**
 	 * @brief Is valid name
 	 * @return Return TRUE if name is valid
 	 */
@@ -233,6 +257,14 @@ public:
 		static bool		bIsInit = false;
 		return bIsInit;
 	}
+
+	/**
+	 * @brief Is name ends with suffix
+	 *
+	 * @param InSuffix	Name suffix in InName
+	 * @return Return TRUE if InName ends with InSuffix, otherwise returns FALSE
+	 */
+	bool EndsWith( const CName& InSuffix ) const;
 
 	/**
 	 * @brief Compare operator

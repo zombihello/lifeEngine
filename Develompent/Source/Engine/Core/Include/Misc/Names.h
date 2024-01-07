@@ -17,6 +17,7 @@
 // Special zero value, meaning no name.
 REGISTER_NAME( 0, None )
 REGISTER_NAME( 1, Engine )
+REGISTER_NAME( 2, Class )
 
 #ifdef REGISTERING_ENUM
 		};

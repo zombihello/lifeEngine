@@ -1,5 +1,6 @@
 #include <list>
 
+#include "Containers/String.h"
 #include "Misc/Misc.h"
 #include "Containers/String.h"
 #include "System/Name.h"
@@ -43,6 +44,29 @@ void CName::StaticInit()
 		AllocateNameEntry( TEXT( #InName ), Sys_CalcHash( CString::ToUpper( TEXT( #InName ) ) ) ); \
 	}
 	#include "Misc/Names.h"
+}
+
+/*
+==================
+CName::EndsWith
+==================
+*/
+bool CName::EndsWith( const CName& InSuffix ) const
+{
+	if ( *this == InSuffix )
+	{
+		return true;
+	}
+
+	if ( number != InSuffix.number )
+	{
+		return false;
+	}
+
+	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
+	std::wstring*						name = IsValid() ? &globalNameTable[index].name : &globalNameTable[NAME_None].name;
+	std::wstring*						suffix = InSuffix.IsValid() ? &globalNameTable[InSuffix.index].name : &globalNameTable[NAME_None].name;
+	return name->size() >= suffix->size() && Sys_Strnicmp( name->data() + name->size() - suffix->size(), suffix->data(), suffix->size() );
 }
 
 /*

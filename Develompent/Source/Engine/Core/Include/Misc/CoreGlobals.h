@@ -41,6 +41,12 @@ extern class CConfigManager			g_Config;
  */
 extern bool							g_IsRequestingExit;
 
+/**
+ * @ingroup Core
+ * @brief Indicated that execution is happening within MainLoop()
+ */
+extern bool							g_IsRunning;
+
 #if WITH_EDITOR
 /**
  * @ingroup Core

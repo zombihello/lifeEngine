@@ -15,6 +15,7 @@
 #include "Misc/Guid.h"
 #include "Reflection/ObjectResource.h"
 #include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectSerializeContext.h"
 #include "System/Archive.h"
 
 /**
@@ -225,7 +226,7 @@ public:
 		return exportMap;
 	}
 
-private:
+protected:
 	std::vector<ObjectImport>	importMap;		/**< The list of ObjectImports found in the package */
 	std::vector<ObjectExport>	exportMap;		/**< The list of ObjectExports found in the package */
 };
@@ -295,6 +296,186 @@ public:
 	 * @param InFilename	The name of the file for this package
 	 */
 	CLinkerLoad( CObjectPackage* InRoot, const tchar* InFilename );
+
+	/**
+	 * @brief Find or create the linker for a package
+	 *
+	 * @param InOuter			Package if known, can be null
+	 * @param InFilename		Package resource to load, must not be empty
+	 * @return Return pointer to the loaded linker or NULL if the file didn't exist
+	 */
+	static CLinkerLoad* GetPackageLinker( CObjectPackage* InOuter, const tchar* InFilename );
+
+	/**
+	 * @brief Create linker
+	 * 
+	 * @param InParent		Parent object to load into, can be NULL (most likely case)
+	 * @param InFilename	Name of file on disk to load
+	 * @return Return a new CLinkerLoad object for InParent/InFilename
+	 */
+	static CLinkerLoad* CreateLinker( CObjectPackage* InParent, const tchar* InFilename );
+
+	/**
+	 * @brief Get the serialization context of objects
+	 * @return Return the serialization context of objects
+	 */
+	static FORCEINLINE ObjectSerializeContext& GetObjectSerializeContext()
+	{
+		static ObjectSerializeContext	s_ObjectSerializeContext;
+		return s_ObjectSerializeContext;
+	}
+
+	/**
+	 * @brief Load all objects in package
+	 * @param InIsForcePreload	Whether to explicitly call Preload (serialize) right away instead of being called from EndLoad()
+	 */
+	void LoadAllObjects( bool InIsForcePreload = false );
+
+	/**
+	 * @brief Detaches file loader and removes itself from array of loaders
+	 */
+	void Detach();
+
+	/**
+	 * @brief Whether linker has finished initialization
+	 * @return Return TRUE if initialized and FALSE if pending
+	 */
+	FORCEINLINE bool HasFinishedInitializtion() const
+	{
+		return bHasFinishedInitialization;
+	}
+
+	/**
+	 * @breif Is loading archive
+	 * @return True if archive loading, false if archive saving
+	 */
+	virtual bool IsLoading() const override;
+
+	/**
+	 * @brief Get current position in archive
+	 * @return Current position in archive
+	 */
+	virtual uint32 Tell() override;
+
+	/**
+	 * @brief Set current position in archive
+	 *
+	 * @param InPosition	New position in archive
+	 */
+	virtual void Seek( uint32 InPosition ) override;
+
+	/**
+	 * @brief Flush data
+	 */
+	virtual void Flush() override;
+
+	/**
+	 * Is end of file
+	 * @return Return true if end of file, else return false
+	 */
+	virtual bool IsEndOfFile() override;
+
+	/**
+	 * @brief Get size of archive
+	 * @return Size of archive
+	 */
+	virtual uint32 GetSize() override;
+
+	/**
+	 * @brief Serialize data
+	 *
+	 * @param InBuffer	Pointer to buffer for serialize
+	 * @param InSize	Size of buffer
+	 */
+	virtual void Serialize( void* InBuffer, uint32 InSize ) override;
+
+	/**
+	 * @brief Override operator << for serialize CObjects
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CObject*& InValue ) override;
+
+	/**
+	 * @brief Get an export's class name
+	 * 
+	 * @param InExportIndex		The index of the export
+	 * @return Return an export's class name if InExportIndex and the export's class index are valid, otherwise returns NAME_Class
+	 */
+	CName GetExportClassName( uint32 InExportIndex ) const;
+
+protected:
+	/**
+	 * @brief Initialize linker
+	 * @return Return TRUE if linker was successful initialized, otherwise returns FALSE
+	 */
+	bool Init();
+
+	/**
+	 * @brief Create loader used to serialize content
+	 * @return Return TRUE if loader was successful created, otherwise returns FALSE
+	 */
+	bool CreateLoader();
+
+	/**
+	 * @brief Serializes the package file summary
+	 * @return Return TRUE if package file summary was successful serialized, otherwise returns FALSE
+	 */
+	bool SerializePackageFileSummary();
+
+	/**
+	 * @brief Serializes the import map
+	 * @return Return TRUE if import map was successful serialized, otherwise returns FALSE
+	 */
+	bool SerializeImportMap();
+
+	/**
+	 * @brief Serializes the export map
+	 * @return Return TRUE if export map was successful serialized, otherwise returns FALSE
+	 */
+	bool SerializeExportMap();
+
+	/**
+	 * @brief Find existing exports in memory and match them up with this linker
+	 * @return Return TRUE if this function was successful done, otherwise returns FALSE
+	 */
+	bool FindExistingExports();
+
+	/**
+	 * @brief Finalize linker creation
+	 * @return Return TRUE if finalize creation was successful, otherwise returns FALSE
+	 */
+	bool FinalizeCreation();
+
+	/**
+	 * @brief Find existing export
+	 * 
+	 * Before loading a persistent object from disk, this function can be used to discover
+	 * the object in memory
+	 * 
+	 * @param InExportIndex		The index of the export to hunt down
+	 * @return Return the object that was found, or NULL if it wasn't found
+	 */
+	CObject* FindExistingExport( uint32 InExportIndex );
+
+	/**
+	 * @brief Find existing import
+	 * 
+	 * @param InImportIndex		The index of the import to hunt down
+	 * @return Return the object that was found, or NULL if it wasn't found
+	 */
+	CObject* FindExistingImport( uint32 InImportIndex );
+
+private:
+	/**
+	 * @brief Detach an export object from the linker
+	 * @param InExportIndex		The index of the export to detach
+	 */
+	void DetachExport( uint32 InExportIndex );
+
+	bool		bHasFinishedInitialization;			/**< Whether we are already fully initialized */
+	bool		bHasSerializedPackageFileSummary;	/**< Whether we already serialized the package file summary */
+	bool		bHasFoundExistingExports;			/**< Whether we already matched up existing exports */
+	CArchive*	loader;								/**< The archive that actually reads the raw data from disk */
 };
 
 /**
