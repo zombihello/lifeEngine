@@ -214,7 +214,9 @@ public:
     FORCEINLINE void SetOuter( CObject* InOuter )
     {
         Warnf( TEXT( "CObject::SetOuter : Need rehash object!\n" ) );
+        UnhashObject( this );
         outer = InOuter;
+        HashObject( this );
     }
 
     /**
@@ -224,7 +226,9 @@ public:
     FORCEINLINE void SetCName( const CName& InName )
     {
         Warnf( TEXT( "CObject::SetCName : Need rehash object!\n" ) );
+        UnhashObject( this );
         name = InName;
+        HashObject( this );
     }
 
     /**
@@ -234,7 +238,9 @@ public:
     FORCEINLINE void SetName( const tchar* InName )
     {
         Warnf( TEXT( "CObject::SetName : Need rehash object!\n" ) );
+        UnhashObject( this );       // TODO yehor.pohuliaka: Need remove methods SetCName, SetName and instead of them make Rename for guarantee the uniqueness of the name
         name = InName;
+        HashObject( this );
     }
 
     /**

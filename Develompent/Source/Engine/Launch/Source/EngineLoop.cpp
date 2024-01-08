@@ -210,8 +210,6 @@ void CEngineLoop::LoadScriptPackage()
 CEngineLoop::PreInit
 ==================
 */
-#include "Reflection/ObjectGlobals.h"
-#include "Reflection/Property.h"
 int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 {
 	g_GameThreadId = Sys_GetCurrentThreadId();
@@ -254,7 +252,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	for ( TObjectIterator<CField> it; it; ++it )
 	{
 		it->Bind();
-		CClass*		theClass = Cast<CClass>( *it );
+		CClass* theClass = Cast<CClass>( *it );
 		if ( theClass && !CReflectionEnvironment::Get().FindClass( theClass->GetName().c_str() ) )
 		{
 			CReflectionEnvironment::Get().AddClass( theClass );
@@ -317,7 +315,8 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		const CClass*		lclass = CReflectionEnvironment::Get().FindClass( classEngineName.c_str() );
 		AssertMsg( lclass, TEXT( "Class engine %s not found" ), classEngineName.c_str() );
 		
-		g_Engine = lclass->CreateObject< CBaseEngine >();
+		CObjectPackage*		enginePackage = CreatePackage( nullptr, TEXT( "Engine" ) );
+		g_Engine			= lclass->CreateObject<CBaseEngine>( enginePackage );
 		Assert( g_Engine );
 		g_Engine->AddToRoot();
 	}

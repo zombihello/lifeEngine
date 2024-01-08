@@ -5,6 +5,8 @@
 #include "EngineDefines.h"
 #include "Reflection/Class.h"
 #include "Reflection/ObjectGC.h"
+#include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectGlobals.h"
 #include "Misc/Misc.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
@@ -305,7 +307,8 @@ void CEditorEngine::NewMap()
 		g_World = nullptr;
 	}
 
-	g_World = new( nullptr, NAME_None ) CWorld();
+	CObjectPackage*		mapPackage = CreatePackage( nullptr, TEXT( "Unknown" ) );
+	g_World				= new( mapPackage, NAME_None ) CWorld();
 	g_World->AddToRoot();
 	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 	g_PackageManager->GarbageCollector();

@@ -472,7 +472,6 @@ CObject* CLinkerLoad::FindExistingExport( uint32 InExportIndex )
 		// If the class exists, try to find the object
 		if ( theClass )
 		{
-			AssertNoEntry();
 			exportObject.object = FindObjectFast( theClass, outerObject, exportObject.objectName, true, false );
 
 			// If we found an object, set it's linker to us

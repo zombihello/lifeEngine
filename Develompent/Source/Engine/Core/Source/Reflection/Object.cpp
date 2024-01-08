@@ -228,6 +228,22 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 		return nullptr;
 	}
 
+	// Only packages can not have an outer, and they must be named explicitly
+	if ( !InOuter )
+	{
+		if ( InClass != CObjectPackage::StaticClass() )
+		{
+			Sys_Errorf( TEXT( "Only packages can not have an outer. %s/%s" ), InClass->GetName().c_str(), InName.ToString().c_str() );
+			return nullptr;
+		}
+		else if ( InName == NAME_None )
+		{
+			Sys_Errorf( TEXT( "Package name must be explicitly" ) );
+			return nullptr;
+		}
+	}
+
+	// InOuter must be in InClass->GetWithinClass class
 	if ( InOuter && !IsA( InOuter, InClass->GetWithinClass() ) )
 	{
 		Sys_Errorf( TEXT( "Object %s of class %s not within %s" ), InName.ToString().c_str(), InClass->GetName().c_str(), InClass->GetWithinClass()->GetName().c_str() );
@@ -512,7 +528,11 @@ CObject::StaticInitializeClass
 ==================
 */
 void CObject::StaticInitializeClass()
-{}
+{
+	CClass*		theClass = StaticClass();
+	theClass->EmitObjectReference( STRUCT_OFFSET( CClass, outer ) );
+	theClass->EmitObjectReference( STRUCT_OFFSET( CClass, theClass ) );
+}
 
 #if WITH_EDITOR
 /*

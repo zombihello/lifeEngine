@@ -4,6 +4,8 @@
 #include "Logger/LoggerMacros.h"
 #include "Reflection/Class.h"
 #include "Reflection/ObjectGC.h"
+#include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectGlobals.h"
 #include "System/Config.h"
 #include "System/World.h"
 #include "System/Package.h"
@@ -296,10 +298,11 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 		g_World = nullptr;
 	}
 
-	g_World = new( nullptr, NAME_None ) CWorld();
-	g_World->AddToRoot();
+	CObjectPackage*		mapPackage = CreatePackage( nullptr, CFilename( InMap ).GetBaseFilename().c_str() );
+	g_World = new( mapPackage, NAME_None ) CWorld();
 	archive->SerializeHeader();
 	g_World->Serialize( *archive );
+	g_World->AddToRoot();
 
 	// Call garbage collector of unused packages and assets for free used memory
 	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );

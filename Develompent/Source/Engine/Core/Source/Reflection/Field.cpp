@@ -41,10 +41,8 @@ void CField::Bind()
 	// For native objects (only CClass, CStructs and CEnums) we have to create a package where this filed must be
 	if ( HasAnyObjectFlags( OBJECT_Native ) && ( IsA<CStruct>( this ) || IsA<CEnum>( this ) ) )
 	{
-		CObject* package = CreatePackage( nullptr, ( const tchar* )GetOuter() );
+		CObject*	package = CreatePackage( nullptr, ( const tchar* )GetOuter() );
 		Assert( package );
-
-		package->AddToRoot();
 		SetOuter( package );
 	}
 

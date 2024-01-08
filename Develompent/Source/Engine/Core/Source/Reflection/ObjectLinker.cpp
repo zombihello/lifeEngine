@@ -93,7 +93,7 @@ void CObject::SetLinker( class CLinkerLoad* InLinkerLoad, uint32 InLinkerIndex, 
 	{
 		Warnf( TEXT( "Detaching from existing linker for '%s' for object '%s'\n" ), existing.linker->GetPath().c_str(), GetFullName().c_str() );
 		Assert( existing.linker->GetExports()[existing.linkerIndex].object != nullptr );
-		Assert( existing.linker->GetExports()[existing.linkerIndex].object != this );
+		Assert( existing.linker->GetExports()[existing.linkerIndex].object == this );
 		existing.linker->GetExports()[existing.linkerIndex].object = nullptr;
 	}
 
