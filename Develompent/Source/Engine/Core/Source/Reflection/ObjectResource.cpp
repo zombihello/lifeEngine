@@ -26,6 +26,7 @@ ObjectExport::ObjectExport
 */
 ObjectExport::ObjectExport()
 	: ObjectResource()
+	, objectFlags( 0 )
 	, serialSize( 0 )
 	, serialOffset( 0 )
 	, object( nullptr )
@@ -38,6 +39,7 @@ ObjectExport::ObjectExport
 */
 ObjectExport::ObjectExport( CObject* InObject )
 	: ObjectResource( InObject )
+	, objectFlags( InObject ? ( InObject->GetObjectFlags() & OBJECT_Mask_Load ) : 0 )
 	, serialSize( 0 )
 	, serialOffset( 0 )
 	, object( InObject )
@@ -54,6 +56,7 @@ CArchive& operator<<( CArchive& InArchive, ObjectExport& InValue )
 	InArchive << InValue.superIndex;
 	InArchive << InValue.outerIndex;
 	InArchive << InValue.objectName;
+	InArchive << InValue.objectFlags;
 	InArchive << InValue.serialSize;
 	InArchive << InValue.serialOffset;
 	InArchive << InValue.packageGuid;

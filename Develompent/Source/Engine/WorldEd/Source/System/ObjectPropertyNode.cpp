@@ -202,7 +202,7 @@ void CObjectPropertyNode::SetBestBaseClass()
 
 		// If we've encountered an object that's not a subclass of the current best baseclass,
 		// climb up a step in the class hierarchy
-		while ( !objectClass->IsA( baseClass ) )
+		while ( !objectClass->IsChildOf( baseClass ) )
 		{
 			baseClass = baseClass->GetSuperClass();
 		}

@@ -232,7 +232,7 @@ enum EClassFlags
 	CLASS_Deprecated	    = 1 << 0,	/**< Class is deprecated */
 	CLASS_Abstract		    = 1 << 1,	/**< Class is abstract and can't be instantiated directly  */
     CLASS_Native            = 1 << 2,   /**< Class is native */
-    CLASS_Intrinsic         = 1 << 3,   /**< Class was declared directly in C++ and has no boilerplate in <GameDir>/Content/Scripts/*.class */
+    CLASS_Intrinsic         = 1 << 3,   /**< Class was declared directly in C++ and has no boilerplate in <GameDir>/Scripts/*.class */
     CLASS_HasComponents     = 1 << 4,   /**< Class has component properties */
     CLASS_Transient         = 1 << 5,   /**< This object type can't be saved; null it out at save time */
 
@@ -267,17 +267,24 @@ enum EClassCastFlags
  */
 enum EObjectFlags
 {
-    OBJECT_None             = 0,        /**< None */
-    OBJECT_Native           = 1 << 0,   /**< Native */
-    OBJECT_RootSet          = 1 << 1,   /**< Object will not be garbage collected, even if unreferenced */
-    OBJECT_DisregardForGC   = 1 << 2,   /**< Object is being disregard for GC */
-    OBJECT_BeginDestroyed   = 1 << 3,   /**< BeginDestroy has been called on the object */
-    OBJECT_FinishDestroyed  = 1 << 4,   /**< FinishDestroy has been called on the object */
-    OBJECT_Unreachable      = 1 << 5,   /**< Object is not reachable on the object graph */
-    OBJECT_PendingKill      = 1 << 6,   /**< Objects that are pending destruction */
-    OBJECT_TagImp           = 1 << 7,   /**< Temporary import tag in load/save */
-    OBJECT_TagExp           = 1 << 8,   /**< Temporary export tag in load/save */
-    OBJECT_Transient        = 1 << 9,   /**< Don't save object */
+    OBJECT_None                     = 0,            /**< None */
+    OBJECT_Native                   = 1 << 0,       /**< Native */
+    OBJECT_RootSet                  = 1 << 1,       /**< Object will not be garbage collected, even if unreferenced */
+    OBJECT_DisregardForGC           = 1 << 2,       /**< Object is being disregard for GC */
+    OBJECT_BeginDestroyed           = 1 << 3,       /**< BeginDestroy has been called on the object */
+    OBJECT_FinishDestroyed          = 1 << 4,       /**< FinishDestroy has been called on the object */
+    OBJECT_Unreachable              = 1 << 5,       /**< Object is not reachable on the object graph */
+    OBJECT_PendingKill              = 1 << 6,       /**< Objects that are pending destruction */
+    OBJECT_TagImp                   = 1 << 7,       /**< Temporary import tag in load/save */
+    OBJECT_TagExp                   = 1 << 8,       /**< Temporary export tag in load/save */
+    OBJECT_Transient                = 1 << 9,       /**< Don't save object */
+    OBJECT_NeedLoad                 = 1 << 10,      /**< During load, indicates object needs loading */
+    OBJECT_NeedPostLoad             = 1 << 11,      /**< Object needs to be postloaded */
+    OBJECT_NeedPostLoadSubobjects   = 1 << 12,      /**< During load, indicates that the object still needs to instance subobjects and fixup serialized component references */
+    OBJECT_WasLoaded                = 1 << 13,      /**< Flagged on CObjects that were loaded */
+
+    // Combination masks and other combinations
+    OBJECT_Mask_Load        = OBJECT_Native         /**< Flags to load from LifeEngine files */
 };
 
 /**

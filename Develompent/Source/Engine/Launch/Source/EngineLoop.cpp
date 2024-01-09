@@ -210,6 +210,8 @@ void CEngineLoop::LoadScriptPackage()
 CEngineLoop::PreInit
 ==================
 */
+#include "Reflection/ObjectGlobals.h"
+#include "Reflection/Property.h"
 int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 {
 	g_GameThreadId = Sys_GetCurrentThreadId();
@@ -242,12 +244,6 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	// Initialize the system
 	CSystem::Get().Init();
 
-	// Load script package
-	if ( !g_IsScriptCompiler )
-	{
-		LoadScriptPackage();
-	}
-
 	// Bind all fields
 	for ( TObjectIterator<CField> it; it; ++it )
 	{
@@ -257,6 +253,12 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		{
 			CReflectionEnvironment::Get().AddClass( theClass );
 		}
+	}
+
+	// Load script package
+	if ( !g_IsScriptCompiler )
+	{
+		LoadScriptPackage();
 	}
 
 	// Loading table of contents

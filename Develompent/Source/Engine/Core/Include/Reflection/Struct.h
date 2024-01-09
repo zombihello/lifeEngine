@@ -206,10 +206,22 @@ public:
 	/**
 	 * @brief Is a struct
 	 *
-	 * @param InStruct	Checking struct
-	 * @return Return TRUE if object is a struct InStruct, otherwise returns FALSE
+	 * @param TClass	Checking struct
+	 * @return Return TRUE if this struct either is InStruct, or is a child of InStruct. This will not crash on null structs
 	 */
-	FORCEINLINE bool IsA( CStruct* InStruct ) const
+	template<class TClass>
+	FORCEINLINE bool IsChildOf() const
+	{
+		return IsChildOf( TClass::StaticClass() );
+	}
+
+	/**
+	 * @brief Is a struct
+	 *
+	 * @param InStruct	Checking struct
+	 * @return Return TRUE if this struct either is InStruct, or is a child of InStruct. This will not crash on null structs
+	 */
+	FORCEINLINE bool IsChildOf( CStruct* InStruct ) const
 	{
 		// If struct is not valid we return false
 		if ( !InStruct )

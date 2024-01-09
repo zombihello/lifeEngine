@@ -66,6 +66,26 @@ public:
 	}
 
 	/**
+	 * @brief Add a new loaded object
+	 * @param InObject	Object
+	 */
+	FORCEINLINE void AddLoadedObject( CObject* InObject )
+	{
+		objectsLoaded.push_back( InObject );
+	}
+
+	/**
+	 * @brief Append loaded objects and empty the one
+	 * 
+	 * @param OutLoadedObject	Output array of loaded objects with appended new data
+	 */
+	void AppendLoadedObjectsAndEmpty( std::vector<CObject*>& OutLoadedObject )
+	{
+		OutLoadedObject.insert( OutLoadedObject.end(), objectsLoaded.begin(), objectsLoaded.end() );
+		objectsLoaded.clear();
+	}
+
+	/**
 	 * @brief Has loaded objects
 	 * @return Return TRUE if has loaded objects, otherwise returns FALSE
 	 */

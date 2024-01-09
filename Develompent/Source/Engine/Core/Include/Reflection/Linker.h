@@ -250,6 +250,233 @@ public:
 	CLinker( CObjectPackage* InRoot, const tchar* InFilename );
 
 	/**
+	 * @brief Get the class name for the specified index in the export map
+	 * 
+	 * @param InExportIndex		Export object index
+	 * @return Return the class name for the specified index in the export map. If either InExportIndex or its class index isn't valid returns NAME_None
+	 */
+	CName GetExportClassName( uint32 InExportIndex ) const;
+
+	/**
+	 * @brief Get the class name for the specified index in the export map
+	 *
+	 * @param InPackageIndex	Package index, must be export
+	 * @return Return the class name for the specified index in the export map. If either InPackageIndex or its class index isn't valid returns NAME_None
+	 */
+	FORCEINLINE CName GetExportClassName( CPackageIndex InPackageIndex ) const
+	{
+		if ( InPackageIndex.IsExport() )
+		{
+			return GetExportClassName( InPackageIndex.ToExport() );
+		}
+		return NAME_None;
+	}
+
+	/**
+	 * @brief Get the class name for the specified index in the import map
+	 *
+	 * @param InImportIndex		Import object index
+	 * @return Return the class name for the specified index in the import map. If InImportIndex isn't valid returns NAME_None
+	 */
+	FORCEINLINE CName GetImportClassName( uint32 InImportIndex ) const
+	{
+		if ( InImportIndex >= 0 && InImportIndex < importMap.size() )
+		{
+			return importMap[InImportIndex].className;
+		}
+		return NAME_None;
+	}
+
+	/**
+	 * @brief Get the class name for the specified index in the import map
+	 *
+	 * @param InPackageIndex		Package index, must be import
+	 * @return Return the class name for the specified index in the import map. If InPackageIndex isn't valid returns NAME_None
+	 */
+	FORCEINLINE CName GetImportClassName( CPackageIndex InPackageIndex ) const
+	{
+		if ( InPackageIndex.IsImport() )
+		{
+			return GetImportClassName( InPackageIndex.ToImport() );
+		}
+		return NAME_None;
+	}
+
+	/**
+	 * @brief Get the class name for the specified package index
+	 * 
+	 * @param InPackageIndex	Package index
+	 * @return Return the class name for the specified package index. If InPackageIndex is null returns NAME_None
+	 */
+	FORCEINLINE CName GetClassName( CPackageIndex InPackageIndex ) const
+	{
+		if ( InPackageIndex.IsImport() )
+		{
+			return GetImportClassName( InPackageIndex );
+		}
+		else if ( InPackageIndex.IsExport() )
+		{
+			return GetExportClassName( InPackageIndex );
+		}
+		return NAME_None;
+	}
+
+	/**
+	 * @brief Get the path name of the CObject represented by the specified import
+	 * @note Can be used with FindObject
+	 * 
+	 * @param InImportIndex		The index into the import map for the resource to get the name for
+	 * @return Return the path of the CObject represented by the resource at InImportIndex
+	 */
+	std::wstring GetImportPathName( uint32 InImportIndex ) const;
+
+	/**
+	 * @brief Get the path name of the CObject represented by the specified import
+	 * @note Can be used with FindObject
+	 * 
+	 * @param InPackageIndex	Package index for the resource to get the name for
+	 * @return Return the path name of the CObject represented by the resource at InPackageIndex, or the empty string if this isn't an import
+	 */
+	FORCEINLINE std::wstring GetImportPathName( CPackageIndex InPackageIndex ) const
+	{
+		if ( InPackageIndex.IsImport() )
+		{
+			return GetImportPathName( InPackageIndex.ToImport() );
+		}
+		return TEXT( "" );
+	}
+
+	/**
+	 * @brief Get the path name of the CObject represented by the specified export
+	 * @note Can be used with FindObject
+	 * 
+	 * @param InExportIndex					Index into the export map for the resource to get the name for
+	 * @param InFakeRoot					Optional name to replace use as the root package of this object instead of the linker
+	 * @return Return the path name of the CObject represented by the resource at InExportIndex
+	 */
+	std::wstring GetExportPathName( uint32 InExportIndex, const tchar* InFakeRoot = nullptr ) const;
+	
+	/**
+	 * @brief Get the path name of the CObject represented by the specified export
+	 * @note Can be used with FindObject
+	 * 
+	 * @param InPackageIndex				Package index for the resource to get the name for
+	 * @param InFakeRoot					Optional name to replace use as the root package of this object instead of the linker
+	 * @return Return the path name of the CObject represented by the resource at InPackageIndex, or the empty string if this isn't an export
+	 */
+	FORCEINLINE std::wstring GetExportPathName( CPackageIndex InPackageIndex, const tchar* InFakeRoot = nullptr ) const
+	{
+		if ( InPackageIndex.IsExport() )
+		{
+			return GetExportPathName( InPackageIndex.ToExport(), InFakeRoot );
+		}
+		return TEXT( "" );
+	}
+
+	/**
+	 * @brief Get the path name of the CObject represented by the specified package index
+	 * @note Can be used with FindObject
+	 * 
+	 * @param InPackageIndex	Package index
+	 * @return Return the path name of the CObject represented by the resource at InPackageIndex, or the empty string if this is null
+	 */
+	FORCEINLINE std::wstring GetPathName( CPackageIndex InPackageIndex ) const
+	{
+		if ( InPackageIndex.IsImport() )
+		{
+			return GetImportPathName( InPackageIndex );
+		}
+		else if ( InPackageIndex.IsExport() )
+		{
+			return GetExportPathName( InPackageIndex );
+		}
+		return TEXT( "" );
+	}
+
+	/**
+	 * @brief Get the full name of the CObject represented by the specified import
+	 * 
+	 * @param InImportIndex		Index into the ImportMap for the resource to get the name for
+	 * @return Return the full name of the CObject represented by the resource at InImportIndex. If InImportIndex isn't valid returns empty string
+	 */
+	FORCEINLINE std::wstring GetImportFullName( uint32 InImportIndex ) const
+	{
+		if ( InImportIndex >= 0 && InImportIndex < importMap.size() )
+		{
+			return importMap[InImportIndex].className.ToString() + TEXT( " " ) + GetImportPathName( InImportIndex );
+		}
+		return TEXT( "" );
+	}
+
+	/**
+	 * @brief Get the full name of the CObject represented by the specified package index
+	 * 
+	 * @param InPackageIndex	Package index for the resource to get the name for
+	 * @return Return the full name of the UObject represented by the resource at InPackageIndex
+	 */
+	FORCEINLINE std::wstring GetImportFullName( CPackageIndex InPackageIndex ) const
+	{
+		if ( InPackageIndex.IsImport() )
+		{
+			return GetImportFullName( InPackageIndex.ToImport() );
+		}
+		return TEXT( "" );
+	}
+
+	/**
+	 * @brief Get the full name of the CObject represented by the specified export
+	 * 
+	 * @param InExportIndex				Index into the ExportMap for the resource to get the name for
+	 * @param InFakeRoot				Optional name to replace use as the root package of this object instead of the linker
+	 * @return Return the full name of the CObject represented by the resource at InExportIndex. If InExportIndex isn't valid returns empty string
+	 */
+	FORCEINLINE std::wstring GetExportFullName( uint32 InExportIndex, const tchar* InFakeRoot = nullptr ) const
+	{
+		if ( InExportIndex >= 0 && InExportIndex < exportMap.size() )
+		{
+			CPackageIndex	classIndex = exportMap[InExportIndex].classIndex;
+			CName			className = classIndex.IsNull() ? NAME_CClass : ImportExport( classIndex ).objectName;
+			return className.ToString() + TEXT( " " ) + GetExportPathName( InExportIndex, InFakeRoot );
+		}
+		return TEXT( " " );
+	}
+
+	/**
+	 * @brief Get the full name of the UObject represented by the specified package index
+	 * 
+	 * @param InPackageIndex			Package index for the resource to get the name for
+	 * @param InFakeRoot				Optional name to replace use as the root package of this object instead of the linker
+	 * @return Return the full name of the CObject represented by the resource at InPackageIndex
+	 */
+	FORCEINLINE std::wstring GetExportFullName( CPackageIndex InPackageIndex, const tchar* InFakeRoot = nullptr ) const
+	{
+		if ( InPackageIndex.IsExport() )
+		{
+			return GetExportFullName( InPackageIndex.ToExport(), InFakeRoot );
+		}
+		return TEXT( "" );
+	}
+
+	/**
+	 * @brief Get the full name of the UObject represented by the specified export
+	 * 
+	 * @param InPackageIndex	Package index
+	 * @return Return the path name of the UObject represented by the resource at PackageIndex, or the empty string if this is null
+	 */
+	FORCEINLINE std::wstring GetFullImportExportName( CPackageIndex InPackageIndex ) const
+	{
+		if ( InPackageIndex.IsImport() )
+		{
+			return GetImportFullName( InPackageIndex );
+		}
+		else if ( InPackageIndex.IsExport() )
+		{
+			return GetExportFullName( InPackageIndex );
+		}
+		return TEXT( "" );
+	}
+
+	/**
 	 * @brief Get the top-level CObjectPackage object for the package associated with this linker
 	 * @return Return the top-level CObjectPackage object for the package associated with this linker
 	 */
@@ -403,6 +630,19 @@ public:
 	 */
 	CName GetExportClassName( uint32 InExportIndex ) const;
 
+	/**
+	 * @brief Serialize the object data for the specified object from the LifeEngine package file
+	 * 
+	 * Serialize the object data for the specified object from the LifeEngine package file. Loads any
+	 * additional resources required for the object to be in a valid state to receive the loaded
+	 * data, such as the object's Outer, Class, etc
+	 * 
+	 * When this function exits, Object is guaranteed to contain the data stored that was stored on disk
+	 * 
+	 * @param InObject	The object to load data for
+	 */
+	void Preload( CObject* InObject );
+
 protected:
 	/**
 	 * @brief Initialize linker
@@ -471,6 +711,33 @@ private:
 	 * @param InExportIndex		The index of the export to detach
 	 */
 	void DetachExport( uint32 InExportIndex );
+
+	/**
+	 * @brief Create export object
+	 * 
+	 * @param InExportIndex		Export object index
+	 * @return Return created export object
+	 */
+	CObject* CreateExport( uint32 InExportIndex );
+
+	/**
+	 * @brief Create import object
+	 * 
+	 * @param InImportIndex		Import object index
+	 * @return Return created import object
+	 */
+	CObject* CreateImport( uint32 InImportIndex );
+
+	/**
+	 * @brief Convert package index to object
+	 * 
+	 * This function create an export or import object if it isn't.
+	 * If the one already was created return it
+	 * 
+	 * @param InIndex	Package index
+	 * @return Return a pointer to object, if InIndex is null returns NULL
+	 */
+	CObject* IndexToObject( CPackageIndex& InIndex );
 
 	bool		bHasFinishedInitialization;			/**< Whether we are already fully initialized */
 	bool		bHasSerializedPackageFileSummary;	/**< Whether we already serialized the package file summary */

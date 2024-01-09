@@ -92,10 +92,28 @@ public:
 		return linkerLoad;
 	}
 
+	/**
+	* @brief Mark this package as being fully loaded
+	*/
+	FORCEINLINE void MarkAsFullyLoaded()
+	{
+		bHasBeenFullyLoaded = true;
+	}
+
+	/**
+	* @brief Whether the package is fully loaded.
+	* @return Return TRUE if fully loaded otherwise FALSE
+	*/
+	FORCEINLINE bool IsFullyLoaded() const
+	{
+		return bHasBeenFullyLoaded;
+	}
+
 private:
-	bool				bDirty;				/**< Is the package dirty and need to save on disk */
-	CGuid				guid;				/**< GUID of package if it was loaded from disk */
-	class CLinkerLoad*	linkerLoad;			/**< Linker load associated with this package */
+	bool				bDirty;					/**< Is the package dirty and need to save on disk */
+	bool				bHasBeenFullyLoaded;	/**< Whether this package has been fully loaded (aka had all it's exports created) at some point */
+	CGuid				guid;					/**< GUID of package if it was loaded from disk */
+	class CLinkerLoad*	linkerLoad;				/**< Linker load associated with this package */
 };
 
 #endif // !OBJECTPACKAGE_H

@@ -66,9 +66,6 @@ void CClass::Bind()
 		// We look for constructor in parent class
 		superClass->Bind();
 		ClassConstructor = superClass->ClassConstructor;
-
-		// Get casting flags from the parent
-		classCastFlags |= superClass->classCastFlags;
 	}
 
 	// If class constructor still isn't valid then its error

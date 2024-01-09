@@ -201,7 +201,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	CClass*		superClass = reflectionEnvironment.FindClass( superClassName.c_str() );	
 
 	// All classes must be inherit from CObject
-	if ( superClassName.empty() || superClass && !superClass->IsA( CObject::StaticClass() ) )
+	if ( superClassName.empty() || superClass && !superClass->IsChildOf<CObject>() )
 	{
 		Errorf( TEXT( "%s: All classes must be inherit from CObject\n" ), className.c_str() );
 		return false;

@@ -1,4 +1,5 @@
 #include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/ObjectGlobals.h"
 #include "Commandlets/BaseCommandlet.h"
 #include "Logger/LoggerMacros.h"
 
@@ -28,7 +29,8 @@ bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 	// Create and execute commandlet
 	if ( lclassCommandlet )
 	{
-		CBaseCommandlet*		commandlet = lclassCommandlet->CreateObject<CBaseCommandlet>();
+		CObjectPackage*			worldEdPackage = CreatePackage( nullptr, TEXT( "WorldEd" ) );
+		CBaseCommandlet*		commandlet = lclassCommandlet->CreateObject<CBaseCommandlet>( worldEdPackage );
 		Assert( commandlet );
 		commandlet->AddToRoot();
 

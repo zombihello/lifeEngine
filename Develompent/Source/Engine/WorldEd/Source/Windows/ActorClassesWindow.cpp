@@ -248,7 +248,7 @@ CActorClassesWindow::CActorClassesWindow( const std::wstring& InName, CClass* In
 		CClass*			lclass = const_cast<CClass*>( itClass->second );
 
 		// If current class isn't child of InBaseClass, we skip it
-		if ( !lclass->IsA( InBaseClass ) )
+		if ( !lclass->IsChildOf( InBaseClass ) )
 		{
 			continue;
 		}

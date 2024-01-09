@@ -249,6 +249,7 @@ struct ObjectExport : public ObjectResource
 
 	CPackageIndex		classIndex;		/**< Location of the resource for this export's class (if non-zero). A value of zero indicates that this export represents a CClass object; there is no resource for this export's class object. Serialized */
 	CPackageIndex		superIndex;		/**< Location of the resource for this export's super field (parent). Only valid if this export represents a CStruct object. A value of zero indicates that the object represented by this export isn't a CStruct-derived object. Serialized */
+	ObjectFlags_t		objectFlags;	/**< The object flags for the CObject represented by this resource. Only flags that match the OBJECT_Mask_Load combination mask will be loaded from disk and applied to the CObject. Serialized */
 	uint64				serialSize;		/**< The number of bytes to serialize when saving/loading this export's CObject. Serialized */
 	uint64				serialOffset;	/**< The location (into the CLinker's underlying file reader archive) of the beginning of the data for this export's CObject. Used for verification only. Serialized */
 	CObject*			object;			/**< The CObject represented by this export. Assigned the first time CreateExport is called for this export. Transient */

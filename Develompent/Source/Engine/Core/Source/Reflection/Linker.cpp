@@ -60,6 +60,103 @@ CLinker::CLinker( CObjectPackage* InRoot, const tchar* InFilename )
 	Assert( InFilename );
 }
 
+/*
+==================
+CLinker::GetExportClassName
+==================
+*/
+CName CLinker::GetExportClassName( uint32 InExportIndex ) const
+{
+	if ( InExportIndex >= 0 && InExportIndex < exportMap.size() )
+	{
+		const ObjectExport&		exportObject = exportMap[InExportIndex];
+		if ( !exportObject.classIndex.IsNull() )
+		{
+			return ImportExport( exportObject.classIndex ).objectName;
+		}
+	}
+	return NAME_CClass;
+}
+
+/*
+==================
+CLinker::GetImportPathName
+==================
+*/
+std::wstring CLinker::GetImportPathName( uint32 InImportIndex ) const
+{
+	std::wstring	result;
+	for ( CPackageIndex linkerIndex = CPackageIndex::FromImport( InImportIndex ); !linkerIndex.IsNull(); linkerIndex = ImportExport( linkerIndex ).outerIndex )
+	{
+		const ObjectResource&	objectResource = ImportExport( linkerIndex );
+		bool					bSubobjectDelimiter = 
+			GetClassName( linkerIndex ) != NAME_CObjectPackage && 
+			( objectResource.outerIndex.IsNull() || GetClassName( objectResource.outerIndex ) == NAME_CObjectPackage );
+
+		// Don't append a dot in the first iteration
+		if ( !result.empty() )
+		{
+			if ( bSubobjectDelimiter )
+			{
+				result = std::wstring( SUBOBJECT_DELIMITER ) + result;
+			}
+			else
+			{
+				result = std::wstring( TEXT( "." ) ) + result;
+			}
+		}
+
+		result = objectResource.objectName.ToString() + result;
+	}
+
+	return result;
+}
+
+/*
+==================
+CLinker::GetExportPathName
+==================
+*/
+std::wstring CLinker::GetExportPathName( uint32 InExportIndex, const tchar* InFakeRoot /* = nullptr */ ) const
+{
+	std::wstring	result;
+	bool			bHasOuterImport = false;
+
+	for ( CPackageIndex linkerIndex = CPackageIndex::FromExport( InExportIndex ); !linkerIndex.IsNull(); linkerIndex = ImportExport( linkerIndex ).outerIndex )
+	{
+		bHasOuterImport |= linkerIndex.IsImport();
+		const ObjectResource&	objectResource = ImportExport( linkerIndex );
+		bool					bSubobjectDelimiter =
+			( objectResource.outerIndex.IsNull() || GetClassName( objectResource.outerIndex ) == NAME_CObjectPackage )
+			&& GetClassName( linkerIndex ) != NAME_CObjectPackage;
+
+		// Don't append a dot in the first iteration
+		if ( !result.empty() )
+		{
+			// If this export is not a CObjectPackage but this export's Outer is a CObjectPackage, we need to use subobject notation
+			if ( bSubobjectDelimiter )
+			{
+				result = std::wstring( SUBOBJECT_DELIMITER ) + result;
+			}
+			else
+			{
+				result = std::wstring( TEXT( "." ) ) + result;
+			}
+		}
+
+		result = objectResource.objectName.ToString() + result;
+	}
+
+	// If the export we are building the path of has an import in its outer chain, no need to append the LinkerRoot path
+	if ( bHasOuterImport )
+	{
+		// Result already contains the correct path name for this export
+		return result;
+	}
+
+	return ( InFakeRoot ? std::wstring( InFakeRoot ) : linkerRoot->GetPathName() ) + TEXT( "." ) + result;
+}
+
 
 /*
 ==================
@@ -523,7 +620,7 @@ CObject* CLinkerLoad::FindExistingImport( uint32 InImportIndex )
 	{
 		// Find the class of this object
 		CClass*		theClass = nullptr;
-		if ( importObject.className == NAME_Class || !importObject.className.IsValid() )
+		if ( importObject.className == NAME_CClass || !importObject.className.IsValid() )
 		{
 			theClass = CClass::StaticClass();
 		}
@@ -569,12 +666,253 @@ bool CLinkerLoad::FinalizeCreation()
 
 /*
 ==================
+CLinkerLoad::CreateExport
+==================
+*/
+CObject* CLinkerLoad::CreateExport( uint32 InExportIndex )
+{
+	// Map the object into our table
+	ObjectExport&		exportObject = exportMap[InExportIndex];
+
+	// Check whether we already loaded the object
+	if ( !exportObject.object )
+	{
+		Assert( exportObject.objectName != NAME_None );
+		Assert( GetObjectSerializeContext().HasStartedLoading() );
+
+		// Get the object's class
+		CClass*		loadClass = ( CClass* )IndexToObject( exportObject.classIndex );
+		if ( !loadClass && !exportObject.classIndex.IsNull() )
+		{
+			Warnf( TEXT( "Unable to load %s because its class doesn't exist\n" ), exportObject.objectName.ToString().c_str() );
+			return nullptr;
+		}
+
+		// If the class wasn't found and ClassIndex is null then its CClass
+		if ( !loadClass )
+		{
+			loadClass = CClass::StaticClass();
+		}
+
+		Assert( loadClass );
+		Assert( loadClass->GetClass() == CClass::StaticClass() );
+
+		// Only CClass objects and CProperty objects of intrinsic classes can have OBJECT_Native set. Those property objects are never
+		// serialized so we only have to worry about classes. If we encounter an object that is not a class and has OBJECT_Native set
+		// we warn about it and remove the flag
+		if ( ( exportObject.objectFlags & OBJECT_Native ) != 0 && !loadClass->IsChildOf<CField>() )
+		{
+			Warnf( TEXT( "%s %s has OBJECT_Native set but isn't a CField derived class\n" ), loadClass->GetName().c_str(), exportObject.objectName.ToString().c_str() );
+
+			// Remove OBJECT_Native flag
+			exportObject.objectFlags = exportObject.objectFlags & ~OBJECT_Native;
+		}
+
+		// We need preload LoadClass if it isn't intrinsic class
+		if ( !loadClass->HasAnyClassFlags( CLASS_Intrinsic ) )
+		{
+			Preload( loadClass );
+		}
+
+		// Find or create the object's outer
+		CObject*	thisParent = nullptr;
+		if ( !exportObject.outerIndex.IsNull() )
+		{
+			thisParent = IndexToObject( exportObject.outerIndex );
+		}
+		else
+		{
+			thisParent = linkerRoot;
+		}
+
+		// If loading the object's Outer caused the object to be loaded or if it was a forced export package created
+		// above, return it
+		if ( exportObject.object )
+		{
+			return exportObject.object;
+		}
+
+		// If an outer that doesn't exist then log a warning
+		if ( !thisParent )
+		{
+			const std::wstring		outerName = exportObject.outerIndex.IsNull() ? linkerRoot->GetFullName() : GetFullImportExportName( exportObject.outerIndex );
+			Warnf( TEXT( "CreateExport: Failed to load Outer for resource '%s': %s\n" ), exportObject.objectName.ToString().c_str(), outerName.c_str() );
+			return nullptr;
+		}
+
+		// Try to find existing object first in case we're a forced export to be able to reconcile
+		CObject*	actualObjectWithTheName	= FindObjectFast( nullptr, thisParent, exportObject.objectName, true );
+
+		// Find object after making sure it isn't already set. This would be bad as the code below NULLs it in a certain
+		// case, which if it had been set would cause a linker detach mismatch
+		Assert( !exportObject.object );
+		if ( actualObjectWithTheName && actualObjectWithTheName->GetClass() == loadClass )
+		{
+			exportObject.object = actualObjectWithTheName;
+		}
+
+		// Object is found in memory
+		if ( exportObject.object )
+		{
+			// Associate linker with object to avoid detachment mismatches
+			exportObject.object->SetLinker( this, InExportIndex );
+
+			// If this object was allocated but never loaded (components created by a constructor) make sure it gets loaded
+			// Don't do this for any packages that have previously fully loaded as they may have in memory changes
+			GetObjectSerializeContext().AddLoadedObject( exportObject.object );
+			if ( !exportObject.object->HasAnyObjectFlags( OBJECT_WasLoaded ) && !linkerRoot->IsFullyLoaded() )
+			{
+				exportObject.object->AddObjectFlag( OBJECT_NeedLoad | OBJECT_NeedPostLoad | OBJECT_NeedPostLoadSubobjects | OBJECT_WasLoaded );
+			}
+
+			return exportObject.object;
+		}
+
+		// If we found an object with the name but it isn't child of LoadClass then this is error
+		if ( actualObjectWithTheName && !actualObjectWithTheName->GetClass()->IsChildOf( loadClass ) )
+		{
+			Errorf( TEXT( "Failed import: class '%s' name '%s' outer '%s'. There is another object (of '%s' class) at the path" ),
+					loadClass->GetName().c_str(), exportObject.objectName.ToString().c_str(), thisParent->GetName().c_str(), actualObjectWithTheName->GetClass()->GetName().c_str() );
+			return nullptr;
+		}
+
+		// Create the export object, marking it with the appropriate flags to
+		// indicate that the object's data still needs to be loaded
+		ObjectFlags_t	objectLoadFlags = ( exportObject.objectFlags & OBJECT_Mask_Load ) | OBJECT_NeedLoad | OBJECT_NeedPostLoad | OBJECT_NeedPostLoadSubobjects | OBJECT_WasLoaded;
+
+		// Otherwise we create a new object
+		exportObject.object = CObject::StaticConstructObject( loadClass, thisParent, exportObject.objectName, objectLoadFlags );
+
+		// Associate linker with object to avoid detachment mismatches
+		if ( exportObject.object )
+		{
+			Logf( TEXT( "Created %s\n" ), exportObject.object->GetFullName().c_str() );
+			exportObject.object->SetLinker( this, InExportIndex );
+
+			// We created the object, but the data stored on disk for this object has not yet been loaded,
+			// so add the object to the list of objects that need to be loadaded, which will be processed
+			// in EndLoad()
+			GetObjectSerializeContext().AddLoadedObject( exportObject.object );
+		}
+		else
+		{
+			Warnf( TEXT( "CreatedExport failed to construct object %s %s\n" ), loadClass->GetName().c_str(), exportObject.objectName.ToString().c_str() );
+		}
+	}
+
+	return exportObject.object;
+}
+
+/*
+==================
+CLinkerLoad::CreateImport
+==================
+*/
+CObject* CLinkerLoad::CreateImport( uint32 InImportIndex )
+{
+	// Map the object into our table
+	ObjectImport&		importObject = importMap[InImportIndex];
+
+	// Print warning if we found unreachable object when creating import
+	if ( importObject.object && importObject.object->IsUnreachable() )
+	{
+		Warnf( TEXT( "Unreachable object found when creating import %s from linker %s\n" ), importObject.object->GetFullName().c_str(), GetPath().c_str() );
+		importObject.object = nullptr;
+	}
+
+	// Check whether we already loaded the object
+	if ( !importObject.object )
+	{
+		// Try to find existing version in memory first
+		if ( !g_IsEditor && !g_IsCommandlet )
+		{
+			if ( CObjectPackage* classPackage = FindObjectFast<CObjectPackage>( nullptr, importObject.classPackage, false, false ) )
+			{
+				if ( CClass* findClass = FindObjectFast<CClass>( classPackage, importObject.className, false, false ) )
+				{
+					// Make sure the class has been loaded
+					Preload( findClass );
+
+					// Import is a toplevel package
+					CObject*	findObject = nullptr;
+					// TODO yehor.pohuliaka: Implement find object
+				}
+			}
+		}
+
+		// TODO yehor.pohuliaka: Implement find object
+	}
+
+	// If failed to resolve import print error message
+	if ( !importObject.object )
+	{
+		const std::wstring		outerName = importObject.outerIndex.IsNull() ? linkerRoot->GetFullName() : GetFullImportExportName( importObject.outerIndex );
+		Errorf( TEXT( "Failed to resolve import '%d' named '%s' in '%s'\n" ), InImportIndex, importObject.objectName.ToString().c_str(), outerName.c_str() );
+	}
+
+	return importObject.object;
+}
+
+/*
+==================
+CLinkerLoad::Preload
+==================
+*/
+void CLinkerLoad::Preload( CObject* InObject )
+{}
+
+/*
+==================
+CLinkerLoad::IndexToObject
+==================
+*/
+CObject* CLinkerLoad::IndexToObject( CPackageIndex& InIndex )
+{
+	if ( InIndex.IsExport() )
+	{
+		uint32		exportIndex = InIndex.ToExport();
+		if ( exportIndex < 0 || exportIndex >= exportMap.size() )
+		{
+			Sys_Errorf( TEXT( "Invalid export object index=%d while reading %s. File is most likely corrupted" ), exportIndex, GetPath().c_str() );
+			return nullptr;
+		}
+
+		return CreateExport( exportIndex );
+	}
+	else if ( InIndex.IsImport() )
+	{
+		uint32		importIndex = InIndex.ToImport();
+		if ( importIndex < 0 || importIndex >= exportMap.size() )
+		{
+			Sys_Errorf( TEXT( "Invalid export object index=%d while reading %s. File is most likely corrupted" ), importIndex, GetPath().c_str() );
+			return nullptr;
+		}
+
+		return CreateImport( importIndex );
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+/*
+==================
 CLinkerLoad::LoadAllObjects
 ==================
 */
 void CLinkerLoad::LoadAllObjects( bool InIsForcePreload /* = false */ )
 {
-	//AssertNoEntry();
+	// Load all export objects
+	for ( uint32 exportObjId = 0, exportObjsCount = exportMap.size(); exportObjId < exportObjsCount; ++exportObjId )
+	{
+		CObject*	object = CreateExport( exportObjId );
+		if ( object )
+		{
+			//AssertNoEntry();
+		}
+	}
+	AssertNoEntry();
 }
 
 /*
@@ -592,7 +930,7 @@ CName CLinkerLoad::GetExportClassName( uint32 InExportIndex ) const
 			return ImportExport( exportObject.classIndex ).objectName;
 		}
 	}
-	return NAME_Class;
+	return NAME_CClass;
 }
 
 /*

@@ -21,5 +21,6 @@ CObjectPackage::CObjectPackage
 */
 CObjectPackage::CObjectPackage()
 	: bDirty( false )
+	, bHasBeenFullyLoaded( false )
 	, linkerLoad( nullptr )
 {}
