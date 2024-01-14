@@ -9,6 +9,7 @@
 #ifndef CLASS_H
 #define CLASS_H
 
+#include "Reflection/ObjectMacros.h"
 #include "Reflection/ObjectGC.h"
 #include "Reflection/Struct.h"
 
@@ -18,7 +19,7 @@
  */
 class CClass : public CStruct
 {
-	DECLARE_CLASS_INTRINSIC( CClass, CStruct, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS( CClass, CStruct, 0, 0, TEXT( "Core" ) )
 
 public:
 	friend CObject;
@@ -86,40 +87,9 @@ public:
 	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
-	 * @brief Add function
-	 * @param InFunction	Function
-	 */
-	virtual void AddFunction( class CFunction* InFunction ) override;
-
-	/**
 	 * @brief Find the class's native constructor and assembly the token stream for realtime garbage collection
 	 */
 	virtual void Bind() override;
-
-	/**
-	 * @brief Get array of class functions
-	 *
-	 * @param OutArrayFunctions			Output array functions
-	 * @param InFunctionsInParents		Take into account functions of the parents
-	 */
-	void GetFunctions( std::vector<class CFunction*>& OutArrayFunctions, bool InFunctionsInParents = true ) const;
-
-	/**
-	 * @brief Get number functions in the class
-	 *
-	 * @param InFunctionsInParents		Take into account functions of the parents
-	 * @return Return number functions in the class
-	 */
-	uint32 GetNumFunctions( bool InFunctionsInParents = true ) const;
-
-	/**
-	 * @brief Find function
-	 *
-	 * @param InName				Function name
-	 * @param InFindInParents		Take into account functions of the parents
-	 * @return Return pointer to class function. If not found return NULL
-	 */
-	class CFunction* FindFunction( const CName& InName, bool InFindInParents = true ) const;
 
 	/**
 	 * @brief Realtime garbage collection helper function used to emit token containing information about a
@@ -328,7 +298,6 @@ private:
 	uint32								classCastFlags;							/**< Class cast flags */
 	uint32								classUnique;							/**< Class pseudo-unique counter; used to accelerate unique instance name generation */
 	CClass*								withinClass;							/**< Class within */
-	std::vector<class CFunction*>		functions;								/**< Array of functions */	
 	CGCReferenceTokenStream				referenceTokenStream;					/**< Reference token stream used by realtime garbage collector, finalized in AssembleReferenceTokenStream */
 };
 

@@ -28,14 +28,13 @@ void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& I
 class CObject
 {
     DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract, 0, TEXT( "Core" ) )
-    DECLARE_REGISTER_NATIVES() {}
 
 public:
     friend bool IsA( CObject* InObject, CClass* InClass );
     friend bool IsIn( CObject* InObject, CObject* InOuter );
     friend bool IsInA( CObject* InObject, CClass* InClass );
     friend class CObjectGC;
-
+    friend class CClass;
     /**
      * @brief Default within class type
      */
@@ -102,6 +101,11 @@ public:
      * @return Return TRUE if the property can be modified in the editor, otherwise FALSE
      */
     virtual bool CanEditProperty( class CProperty* InProperty ) const;
+
+    /**
+     * @brief Called in response to the linker changing, this can only happen in the editor
+     */
+    virtual void PostLinkerChange();
 #endif // WITH_EDITOR
 
     /**
@@ -135,11 +139,28 @@ public:
     virtual void AddReferencedObjects( std::vector<CObject*>& InOutObjectArray );
 
     /**
+     * @brief Called from within CObjectPackage::SavePackage on the passed in base/root object
+     * This is used to allow objects used as a base to perform required actions before saving and cleanup afterwards
+     * 
+     * @param InFilename    Name of the file being saved to (includes path)
+     * @return Return TRUE whether PostSaveRoot needs to perform internal cleanup, otherwise returns FALSE
+     */
+    virtual bool PreSaveRoot( const tchar* InFilename );
+
+    /**
+     * @brief Called from within CObjectPackage::SavePackage on the passed in base/root object
+     * This function is called after the package has been saved and can perform cleanup
+     * 
+     * @param InIsCleanupIsRequired	    Whether PreSaveRoot dirtied state that needs to be cleaned up
+     */
+    virtual void PostSaveRoot( bool InIsCleanupIsRequired );
+
+    /**
      * @brief Presave function
      * @warning Objects created from within PreSave won't have PreSave called on them
-     * 
-	 * Gets called once before an object gets serialized for saving. This function is necessary
-	 * for save time computation as Serialize gets called three times per object from within CObject::SavePackage
+     *
+     * Gets called once before an object gets serialized for saving. This function is necessary
+     * for save time computation as Serialize gets called three times per object from within CObjectPackage::SavePackage
      */
     virtual void PreSave();
 
@@ -164,30 +185,6 @@ public:
     {
         RemoveObjectFlag( OBJECT_RootSet );
     }
-
-    /**
-    * @brief Call function
-    * @param InFunctionName    Function name
-    */
-    void CallFunction( const CName& InFunctionName );
-
-    /**
-     * @brief Execute a script code
-     * @param InStack   Script stack
-     */
-	void ExecScript( struct ScriptFrame& InStack );
-
-    /**
-     * @brief Execute script opcode 'Nop'
-     * @param InStack   Script stack
-     */
-    void scrOpcode_Nop( struct ScriptFrame& InStack );
-
-    /**
-     * @brief Execute script opcode 'Call'
-     * @param InStack   Script stack
-     */
-    void scrOpcode_Call( struct ScriptFrame& InStack );
 
     /**
 	 * @brief Add object flag
@@ -613,13 +610,6 @@ private:
      * @return Return TRUE if this object is in an object of the given type
      */
     bool InternalIsInA( const CClass* InClass ) const;
-
-    /**
-     * @brief Execute a script function
-     * @param InFunction    Function to call
-     * @param InStack       Script stack
-     */
-    void ExecScriptFunction( class CFunction* InFunction, struct ScriptFrame& InStack );
 
     uint32          index;              /**< Index of object into global objects array */
     CName           name;               /**< Name object */ 

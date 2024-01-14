@@ -1,4 +1,4 @@
-#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/Class.h"
 #include "Reflection/Struct.h"
 #include "Reflection/Property.h"
 

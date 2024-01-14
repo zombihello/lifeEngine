@@ -60,7 +60,7 @@ typedef std::unordered_map< uint32, std::vector< AiMesh > >			AiMeshesMap_t;
   */
 class LE_DEPRECATED( 0.4.0, "CImportMeshCommandlet is deprecated, use CStaticMeshImporter." ) CImportMeshCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CImportMeshCommandlet, CBaseCommandlet, CLASS_Deprecated, 0, TEXT( "WorldEd" ) )
+	DECLARE_CLASS( CImportMeshCommandlet, CBaseCommandlet, CLASS_Deprecated | CLASS_Transient, 0, TEXT( "WorldEd" ) )
 
 public:
 	/**

@@ -8,6 +8,7 @@
 #include "Reflection/ObjectHash.h"
 #include "Reflection/ObjectGC.h"
 #include "Reflection/Object.h"
+#include "Reflection/ObjectPackage.h"
 
 /**
  * @ingroup Core
@@ -575,7 +576,7 @@ FindObjectFast
 CObject* FindObjectFast( CClass* InClass, CObject* InOuter, const CName& InName, bool InIsExactClass /* = false */, bool InIsAnyPackage /* = false */, ObjectFlags_t InExclusiveFlags /* = OBJECT_None */ )
 {
 	CObjectGC&		objectGC = CObjectGC::Get();
-	if ( IsSavingPackage() || objectGC.IsGarbageCollecting() )
+	if ( CObjectPackage::IsSavingPackage() || objectGC.IsGarbageCollecting() )
 	{
 		Sys_Errorf( TEXT( "Illegal call to FindObjectFast() while serializing object data or garbage collecting!" ) );
 	}

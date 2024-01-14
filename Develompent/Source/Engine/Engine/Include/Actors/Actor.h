@@ -14,7 +14,7 @@
 #include "Math/Rect.h"
 #include "Math/Color.h"
 #include "System/Delegate.h"
-#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/ObjectMacros.h"
 #include "Reflection/Property.h"
 #include "Render/Material.h"
 #include "Render/HitProxies.h"

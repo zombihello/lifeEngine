@@ -19,7 +19,7 @@ ABaseController::StaticInitializeClass
 void ABaseController::StaticInitializeClass()
 {
 	// Native properties
-	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, character ), NAME_None, TEXT( "" ), CPF_None, ACharacter::StaticClass() );
+	new( staticClass, NAME_None, OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, character ), NAME_None, TEXT( "" ), CPF_None, ACharacter::StaticClass() );
 }
 
 /*

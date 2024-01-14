@@ -92,50 +92,58 @@ CObjectGC::AddObject
 */
 void CObjectGC::AddObject( CObject* InObject )
 {
-	// Do nothing if the object already was added to the GC
-	if ( InObject->index == INDEX_NONE )
-	{
-		uint32	index = INDEX_NONE;
+	// If the object already was added to the GC its error
+	Assert( InObject->index == INDEX_NONE );
+	uint32	index = INDEX_NONE;
 
-		// Special non-garbage collectable range
-		if ( InObject->HasAnyObjectFlags( OBJECT_DisregardForGC ) && ( ++lastNonGCIndex < firstGCIndex ) )
+	// Special non-garbage collectable range
+	if ( InObject->HasAnyObjectFlags( OBJECT_DisregardForGC ) && ( !availableNonGCObjectIndeces.empty() || ( lastNonGCIndex+1 < firstGCIndex ) ) )
+	{
+		// If we have free available indeces then use it
+		if ( !availableNonGCObjectIndeces.empty() )
 		{
-			index = lastNonGCIndex;
+			index = availableNonGCObjectIndeces.front();
+			availableNonGCObjectIndeces.pop_front();
+			Assert( !allocatedObjects[index] );
 		}
-		// Regular pool/range
 		else
 		{
-			// If we have free available indeces then use it
-			if ( !availableObjectIndeces.empty() )
-			{
-				index = availableObjectIndeces.front();
-				availableObjectIndeces.pop_front();
-				Assert( !allocatedObjects[index] );
-			}
-			else
-			{
-				index = allocatedObjects.size();
-				allocatedObjects.push_back( nullptr );
-			}
+			index = ++lastNonGCIndex;
 		}
-
-		// Clear object flag signaling disregard for GC if object was allocated in garbage collectible range
-		if ( index >= firstGCIndex )
-		{
-			// Object is allocated in regular pool so we need to clear OBJECT_DisregardForGC if it was set
-			InObject->RemoveObjectFlag( OBJECT_DisregardForGC );
-		}
-
-		// Make sure only objects in disregarded index range have the object flag set
-		Assert( !InObject->HasAnyObjectFlags( OBJECT_DisregardForGC ) || ( index < firstGCIndex ) );
-
-		// Make sure that objects disregarded for GC are part of root set
-		Assert( !InObject->HasAnyObjectFlags( OBJECT_DisregardForGC ) || InObject->HasAnyObjectFlags( OBJECT_RootSet ) );
-
-		// Add the object to the global table
-		allocatedObjects[index] = InObject;
-		InObject->index = index;
 	}
+	// Regular pool/range
+	else
+	{
+		// If we have free available indeces then use it
+		if ( !availableGCObjectIndeces.empty() )
+		{
+			index = availableGCObjectIndeces.front();
+			availableGCObjectIndeces.pop_front();
+			Assert( !allocatedObjects[index] );
+		}
+		else
+		{
+			index = allocatedObjects.size();
+			allocatedObjects.push_back( nullptr );
+		}
+	}
+
+	// Clear object flag signaling disregard for GC if object was allocated in garbage collectible range
+	if ( index >= firstGCIndex )
+	{
+		// Object is allocated in regular pool so we need to clear OBJECT_DisregardForGC if it was set
+		InObject->RemoveObjectFlag( OBJECT_DisregardForGC );
+	}
+
+	// Make sure only objects in disregarded index range have the object flag set
+	Assert( !InObject->HasAnyObjectFlags( OBJECT_DisregardForGC ) || ( index < firstGCIndex ) );
+
+	// Make sure that objects disregarded for GC are part of root set
+	Assert( !InObject->HasAnyObjectFlags( OBJECT_DisregardForGC ) || InObject->HasAnyObjectFlags( OBJECT_RootSet ) );
+
+	// Add the object to the global table
+	allocatedObjects[index] = InObject;
+	InObject->index = index;
 }
 
 /*
@@ -145,22 +153,22 @@ CObjectGC::RemoveObject
 */
 void CObjectGC::RemoveObject( CObject* InObject )
 {
-	// Do nothing if the object isn't in the GC
-	if ( InObject->index != INDEX_NONE )
+	// If the object isn't in the GC its error
+	Assert( InObject->index != INDEX_NONE );
+	
+	// Special non-garbage collectable range
+	if ( InObject->IsDisregardedForGC() )
 	{
-		// Special non-garbage collectable range
-		if ( InObject->IsDisregardedForGC() )
-		{
-			AssertMsg( false, TEXT( "We can't remove disregard object for GC" ) );
-		}
-		// Regular pool/range
-		else
-		{
-			allocatedObjects[InObject->index] = nullptr;
-			availableObjectIndeces.push_back( InObject->index );
-			InObject->index = INDEX_NONE;
-		}
+		availableNonGCObjectIndeces.push_back( InObject->index );
 	}
+	// Regular pool/range
+	else
+	{		
+		availableGCObjectIndeces.push_back( InObject->index );		
+	}
+
+	allocatedObjects[InObject->index] = nullptr;
+	InObject->index = INDEX_NONE;
 }
 
 /*

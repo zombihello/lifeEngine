@@ -17,7 +17,7 @@
  */
 class CField : public CObject
 {
-	DECLARE_CLASS_INTRINSIC( CField, CObject, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS( CField, CObject, 0, 0, TEXT( "Core" ) )
 
 public:
 	/**
@@ -44,12 +44,6 @@ public:
 	 * @param InProperty	Property
 	 */
 	virtual void AddProperty( class CProperty* InProperty );
-
-	/**
-	 * @brief Add function
-	 * @param InFunction	Function
-	 */
-	virtual void AddFunction( class CFunction* InFunction );
 
 	/**
 	 * @brief Bind field

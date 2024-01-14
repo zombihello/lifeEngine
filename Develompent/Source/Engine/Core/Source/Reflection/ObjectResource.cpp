@@ -1,3 +1,4 @@
+#include "Reflection/ObjectMacros.h"
 #include "Reflection/ObjectResource.h"
 #include "Reflection/Class.h"
 
@@ -7,6 +8,7 @@ ObjectResource::ObjectResource
 ==================
 */
 ObjectResource::ObjectResource()
+	: objectName( NAME_None )
 {}
 
 /*
@@ -25,11 +27,11 @@ ObjectExport::ObjectExport
 ==================
 */
 ObjectExport::ObjectExport()
-	: ObjectResource()
-	, objectFlags( 0 )
+	: objectFlags( 0 )
 	, serialSize( 0 )
 	, serialOffset( 0 )
 	, object( nullptr )
+	, hashNext( INDEX_NONE )
 {}
 
 /*
@@ -39,10 +41,11 @@ ObjectExport::ObjectExport
 */
 ObjectExport::ObjectExport( CObject* InObject )
 	: ObjectResource( InObject )
-	, objectFlags( InObject ? ( InObject->GetObjectFlags() & OBJECT_Mask_Load ) : 0 )
+	, objectFlags( InObject ? ( InObject->GetObjectFlags() & OBJECT_MASK_Load ) : 0 )
 	, serialSize( 0 )
 	, serialOffset( 0 )
 	, object( InObject )
+	, hashNext( INDEX_NONE )
 {}
 
 /*
@@ -59,7 +62,6 @@ CArchive& operator<<( CArchive& InArchive, ObjectExport& InValue )
 	InArchive << InValue.objectFlags;
 	InArchive << InValue.serialSize;
 	InArchive << InValue.serialOffset;
-	InArchive << InValue.packageGuid;
 	return InArchive;
 }
 
@@ -70,8 +72,7 @@ ObjectImport::ObjectImport
 ==================
 */
 ObjectImport::ObjectImport()
-	: ObjectResource()
-	, sourceIndex( INDEX_NONE )
+	: sourceIndex( INDEX_NONE )
 	, object( nullptr )
 	, sourceLinker( nullptr )
 {}
@@ -99,6 +100,7 @@ CArchive& operator<<( CArchive& InArchive, ObjectImport& InValue )
 {
 	InArchive << InValue.classPackage;
 	InArchive << InValue.className;
+	InArchive << InValue.outerIndex;
 	InArchive << InValue.objectName;
 	if ( InArchive.IsLoading() )
 	{

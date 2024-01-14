@@ -307,8 +307,8 @@ void CEditorEngine::NewMap()
 		g_World = nullptr;
 	}
 
-	CObjectPackage*		mapPackage = CreatePackage( nullptr, TEXT( "Unknown" ) );
-	g_World				= new( mapPackage, NAME_None ) CWorld();
+	CObjectPackage*		mapPackage = CObjectPackage::CreatePackage( nullptr, TEXT( "Unknown" ) );
+	g_World				= new( mapPackage, TEXT( "TheWorld" ), OBJECT_Public ) CWorld();
 	g_World->AddToRoot();
 	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 	g_PackageManager->GarbageCollector();

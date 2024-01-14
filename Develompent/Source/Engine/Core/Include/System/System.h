@@ -28,8 +28,8 @@ public:
 	 */
 	static FORCEINLINE CSystem& Get()
 	{
-		static CSystem	system;
-		return system;
+		static CSystem	s_System;
+		return s_System;
 	}
 
 	/**

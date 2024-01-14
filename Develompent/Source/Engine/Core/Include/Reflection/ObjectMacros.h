@@ -10,7 +10,6 @@
 #define OBJECTMACROS_H
 
 #include "Core.h"
-#include "Misc/ScriptOpcodes.h"
 
 /**
  * @ingroup Core
@@ -82,6 +81,63 @@
 
 /**
  * @ingroup Core
+ * @brief Macro for declare enum
+ *
+ * @param TEnum         Enum
+ * @param TPackage      Package
+ *
+ * Example usage: @code DECLARE_ENUM( ESpriteType, TEXT( "Core" ) ) @endcode
+ */
+#define DECLARE_ENUM( TEnum, TPackage ) \
+	namespace Enum \
+	{ \
+		namespace TEnum \
+		{ \
+			CEnum* StaticEnum(); \
+			FORCEINLINE const tchar* StaticPackage() \
+			{ \
+				/** Returns the package this enum belongs in */ \
+				return TPackage; \
+			} \
+		} \
+	}
+
+/**
+ * @ingroup Core
+ * @brief Macro for declare struct
+ * 
+ * @param TStruct           Struct
+ * @param TSuperStruct      Super struct
+ * @param TPackage          Package
+ * 
+ * Example usage: @code DECLARE_STRUCT( MyStruct, MyStruc, TEXT( "Core" ) ) @endcode
+ */
+#define DECLARE_STRUCT( TStruct, TSuperStruct, TPackage ) \
+    private: \
+        static class CStruct*					staticStruct; \
+		static class CStruct*					GetStaticStruct(); \
+        static void								InternalInitializeStruct(); \
+    public: \
+	    typedef TStruct							ThisStruct; \
+	    typedef TSuperStruct					Super; \
+        static void								StaticInitializeStruct(); \
+		static FORCEINLINE const tchar*         StaticPackage() \
+        { \
+            /** Returns the package this struct belongs in */ \
+            return TPackage; \
+        } \
+        static FORCEINLINE class CStruct*       StaticStruct() \
+		{ \
+			if ( !staticStruct ) \
+            { \
+                staticStruct = GetStaticStruct(); \
+                InternalInitializeStruct(); \
+            } \
+            return staticStruct; \
+		}
+
+/**
+ * @ingroup Core
  * @brief Macro for declare class
  *
  * @param TClass            Class
@@ -98,22 +154,6 @@
 
 /**
  * @ingroup Core
- * @brief Macro for declare intrinsic class
- * 
- * @param TClass            Class
- * @param TSuperClass       Super class
- * @param TClassFlags       Class flags
- * @param TClassCastFlags   Class cast flags
- * @param TPackage          Package
- *
- * Example usage: @code DECLARE_CLASS_INTRINSIC( CClass, CObject, 0, 0, TEXT( "Core" ) ) @endcode
- */
-#define DECLARE_CLASS_INTRINSIC( TClass, TSuperClass, TClassFlags, TClassCastFlags, TPackage ) \
-    DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags | CLASS_Intrinsic, TClassCastFlags, TPackage ) \
-    DECLARE_SERIALIZER_AND_DTOR( TClass )
-
-/**
- * @ingroup Core
  * @brief Declare that objects of class being defined reside within objects of the specified class
  * @param TWithinClass    Within class
  */
@@ -123,22 +163,6 @@
     { \
         return ( TWithinClass* )GetOuter(); \
     }
-
-/**
- * @ingroup Core
- * @brief Macro declare function for callable in/from LifeScript
- *
- * @param TFunction     Function
- */
-#define DECLARE_FUNCTION( TFunction ) \
-    void TFunction( ScriptFrame& InStack )
-
-/**
- * @ingroup Core
- * @brief Macro declare function for register native functions
- */
-#define DECLARE_REGISTER_NATIVES() \
-    static void StaticRegisterNatives()
 
 /**
  * @ingroup Core
@@ -187,17 +211,95 @@
         staticClass->SetWithinClass( WithinClass::StaticClass() ); \
         CObjectGC::Get().AddObject( staticClass ); \
         HashObject( staticClass ); \
-        ThisClass::StaticRegisterNatives(); \
         ThisClass::StaticInitializeClass(); \
     } \
     struct Register##TClass \
     { \
         Register##TClass() \
         { \
-            CReflectionEnvironment::Get().AddClass( TClass::StaticClass() ); \
+            TClass::StaticClass(); \
         } \
     }; \
     static Register##TClass s_Register##TClass;
+
+/**
+ * @ingroup Core
+ * @brief Macro for implement enum
+ *
+ * @param TEnum			Enum
+ * @param TForEachEnum	Macro of for each enum
+ *
+ * Example usage: @code IMPLEMENT_ENUM( ESpriteType, FOREACH_ENUM_SPRITETYPE ) @endcode
+ */
+#define IMPLEMENT_ENUM( TEnum, TForEachEnum ) \
+	namespace Enum \
+	{ \
+		namespace TEnum \
+		{ \
+			CEnum* StaticEnum() \
+			{ \
+				static CEnum*	s_CEnum = nullptr; \
+				if ( !s_CEnum ) \
+				{ \
+					std::vector<CName>		enums; \
+					TForEachEnum( INTERNAL_REGISTER_ENUM ) \
+					s_CEnum = ::new CEnum( NativeConstructor, TEXT( #TEnum ), StaticPackage(), enums ); \
+					s_CEnum->SetClass( CEnum::StaticClass() ); \
+					CObjectGC::Get().AddObject( s_CEnum ); \
+					HashObject( s_CEnum ); \
+				} \
+				return s_CEnum; \
+			} \
+		} \
+	} \
+    struct Register##TEnum \
+    { \
+        Register##TEnum() \
+        { \
+            Enum::TEnum::StaticEnum(); \
+        } \
+    }; \
+	static Register##TEnum s_Register##TEnum;
+
+/**
+ * @ingroup Core
+ * @brief Macro for implement struct
+ * 
+ * @param TStruct    Struct
+ * 
+ * Example usage: @code IMPLEMENT_STRUCT( MyStruct ) @endcode
+ */
+#define IMPLEMENT_STRUCT( TStruct ) \
+    CStruct* TStruct::staticStruct = nullptr; \
+	CStruct* TStruct::GetStaticStruct() \
+	{ \
+		CStruct*	returnStruct = ::new CStruct \
+		( \
+			NativeConstructor, \
+            TEXT( #TStruct ), \
+            sizeof( ThisStruct ), \
+            alignof( ThisStruct ), \
+			StaticPackage() \
+		); \
+		Assert( returnStruct ); \
+		return returnStruct; \
+	} \
+	void TStruct::InternalInitializeStruct() \
+	{ \
+		staticStruct->SetSuperStruct( Super::StaticStruct() != staticStruct ? Super::StaticStruct() : nullptr ); \
+		staticStruct->SetClass( CStruct::StaticClass() ); \
+		CObjectGC::Get().AddObject( staticStruct ); \
+		HashObject( staticStruct ); \
+        ThisStruct::StaticInitializeStruct(); \
+	} \
+	struct Register##TStruct \
+    { \
+        Register##TStruct() \
+        { \
+            TStruct::StaticStruct(); \
+        } \
+    }; \
+    static Register##TStruct s_Register##TStruct;
 
 /**
  * @ingroup Core
@@ -209,6 +311,35 @@
  */
 #define IMPLEMENT_DEFAULT_INITIALIZE_CLASS( TClass ) \
         void TClass::StaticInitializeClass() {}
+
+/**
+ * @ingroup Core
+ * @brief Macro for implement default StaticInitializeStruct()
+ *
+ * @param TStruct    Struct
+ *
+ * Example usage: @code IMPLEMENT_DEFAULT_INITIALIZE_STRUCT( MyStruct ) @endcode
+ */
+#define IMPLEMENT_DEFAULT_INITIALIZE_STRUCT( TStruct ) \
+        void TStruct::StaticInitializeStruct() {}
+
+/**
+ * @ingroup Core
+ * @brief Internal register enum
+ * 
+ * @param InName	Name
+ */
+#define INTERNAL_REGISTER_ENUM( InName ) \
+	enums.push_back( CName( TEXT( #InName ) ) );
+
+/**
+ * @ingroup Core
+ * @brief Macro for define Cpp properties
+ * 
+ * @param InClass	Class name
+ * @param InName	Property name
+ */
+#define CPP_PROPERTY( InClass, InName )	        CppProperty, STRUCT_OFFSET( InClass, InName )
 
 /**
  * @ingroup Core
@@ -228,15 +359,15 @@ typedef uint32          ObjectFlags_t;
  */
 enum EClassFlags
 {
-	CLASS_None			    = 0,		/**< None */
-	CLASS_Deprecated	    = 1 << 0,	/**< Class is deprecated */
-	CLASS_Abstract		    = 1 << 1,	/**< Class is abstract and can't be instantiated directly  */
-    CLASS_Native            = 1 << 2,   /**< Class is native */
-    CLASS_Intrinsic         = 1 << 3,   /**< Class was declared directly in C++ and has no boilerplate in <GameDir>/Scripts/*.class */
-    CLASS_HasComponents     = 1 << 4,   /**< Class has component properties */
-    CLASS_Transient         = 1 << 5,   /**< This object type can't be saved; null it out at save time */
+	CLASS_None			    = 0,		                                                    /**< None */
+	CLASS_Deprecated	    = 1 << 0,	                                                    /**< Class is deprecated */
+	CLASS_Abstract		    = 1 << 1,	                                                    /**< Class is abstract and can't be instantiated directly  */
+    CLASS_Native            = 1 << 2,                                                       /**< Class is native */
+    CLASS_Transient         = 1 << 3,                                                       /**< This object type can't be saved; null it out at save time */
+    CLASS_HasComponents     = 1 << 4,                                                       /**< Class has component properties */
 
-    CLASS_Inherit           = CLASS_Transient | CLASS_HasComponents | CLASS_Deprecated | CLASS_Intrinsic        /**< Flags to inherit from base class */
+    // Combination masks and other combinations
+    CLASS_MASK_Inherit      = CLASS_Deprecated | CLASS_Transient | CLASS_HasComponents      /**< Flags to inherit from base class */
 };
 
 /**
@@ -267,24 +398,37 @@ enum EClassCastFlags
  */
 enum EObjectFlags
 {
-    OBJECT_None                     = 0,            /**< None */
-    OBJECT_Native                   = 1 << 0,       /**< Native */
-    OBJECT_RootSet                  = 1 << 1,       /**< Object will not be garbage collected, even if unreferenced */
-    OBJECT_DisregardForGC           = 1 << 2,       /**< Object is being disregard for GC */
-    OBJECT_BeginDestroyed           = 1 << 3,       /**< BeginDestroy has been called on the object */
-    OBJECT_FinishDestroyed          = 1 << 4,       /**< FinishDestroy has been called on the object */
-    OBJECT_Unreachable              = 1 << 5,       /**< Object is not reachable on the object graph */
-    OBJECT_PendingKill              = 1 << 6,       /**< Objects that are pending destruction */
-    OBJECT_TagImp                   = 1 << 7,       /**< Temporary import tag in load/save */
-    OBJECT_TagExp                   = 1 << 8,       /**< Temporary export tag in load/save */
-    OBJECT_Transient                = 1 << 9,       /**< Don't save object */
-    OBJECT_NeedLoad                 = 1 << 10,      /**< During load, indicates object needs loading */
-    OBJECT_NeedPostLoad             = 1 << 11,      /**< Object needs to be postloaded */
-    OBJECT_NeedPostLoadSubobjects   = 1 << 12,      /**< During load, indicates that the object still needs to instance subobjects and fixup serialized component references */
-    OBJECT_WasLoaded                = 1 << 13,      /**< Flagged on CObjects that were loaded */
+    OBJECT_None                     = 0,        /**< None */
+    OBJECT_Native                   = 1 << 0,   /**< Native (CFields only) */
+    OBJECT_RootSet                  = 1 << 1,   /**< Object will not be garbage collected, even if unreferenced */
+    OBJECT_DisregardForGC           = 1 << 2,   /**< Object is being disregard for GC */
+    OBJECT_BeginDestroyed           = 1 << 3,   /**< BeginDestroy has been called on the object */
+    OBJECT_FinishDestroyed          = 1 << 4,   /**< FinishDestroy has been called on the object */
+    OBJECT_Unreachable              = 1 << 5,   /**< Object is not reachable on the object graph */
+    OBJECT_PendingKill              = 1 << 6,   /**< Objects that are pending destruction */
+	OBJECT_TagImp                   = 1 << 7,   /**< Temporary import tag in load/save */
+	OBJECT_TagExp                   = 1 << 8,   /**< Temporary export tag in load/save */
+    OBJECT_Transient                = 1 << 9,   /**< Don't save object */
+    OBJECT_NeedLoad                 = 1 << 10,  /**< During load, indicates object needs loading */
+    OBJECT_NeedPostLoad             = 1 << 11,  /**< Object needs to be postloaded */
+    OBJECT_Public                   = 1 << 12,  /**< Object is visible outside its package */
 
     // Combination masks and other combinations
-    OBJECT_Mask_Load        = OBJECT_Native         /**< Flags to load from LifeEngine files */
+    OBJECT_MASK_Load                 = OBJECT_Public | OBJECT_Native,                           /**< Flags to load from LifeEngine files */
+    OBJECT_MASK_Keep                 = OBJECT_Native | OBJECT_DisregardForGC | OBJECT_RootSet   /**< Flags to persist across loads */
+};
+
+/**
+ * @ingroup Core
+ * @brief Package flags
+ */
+enum EPackageFlags
+{
+    PKG_None                    = 0,                    /**< No flags */
+    PKG_InMemoryOnly            = 1 << 0,               /**< Indicates if this package is a package that exists in memory only */
+
+    // Combination masks and other combinations
+    PKG_MASK_TransientFlags     = PKG_InMemoryOnly,     /**< Transient Flags are cleared when serializing to or from PackageFileSummary */
 };
 
 /**

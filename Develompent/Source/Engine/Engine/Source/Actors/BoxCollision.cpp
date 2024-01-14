@@ -22,7 +22,7 @@ ABoxCollision::StaticInitializeClass
 void ABoxCollision::StaticInitializeClass()
 {
 	// Native properties
-	new( staticClass, TEXT( "Box Component" ) )	CObjectProperty( CPP_PROPERTY( ThisClass, boxComponent ), TEXT( "Collision" ), TEXT( "Box component" ), CPF_Edit, CBoxComponent::StaticClass() );
+	new( staticClass, TEXT( "Box Component" ), OBJECT_Public )	CObjectProperty( CPP_PROPERTY( ThisClass, boxComponent ), TEXT( "Collision" ), TEXT( "Box component" ), CPF_Edit, CBoxComponent::StaticClass() );
 }
 
 #if WITH_EDITOR

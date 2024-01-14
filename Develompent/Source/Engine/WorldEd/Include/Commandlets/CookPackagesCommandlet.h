@@ -43,7 +43,7 @@ struct TMXTileset
   */
 class CCookPackagesCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CCookPackagesCommandlet, CBaseCommandlet, 0, 0, TEXT( "WorldEd" ) )
+	DECLARE_CLASS( CCookPackagesCommandlet, CBaseCommandlet, CLASS_Transient, 0, TEXT( "WorldEd" ) )
 
 public:
 	/**

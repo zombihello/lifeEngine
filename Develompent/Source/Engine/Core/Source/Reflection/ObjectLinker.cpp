@@ -2,7 +2,7 @@
 
 #include "Logger/LoggerMacros.h"
 #include "Reflection/Object.h"
-#include "Reflection/Linker.h"
+#include "Reflection/LinkerLoad.h"
 
 /**
  * @ingroup Core
@@ -78,12 +78,14 @@ CObject::SetLinker
 */
 void CObject::SetLinker( class CLinkerLoad* InLinkerLoad, uint32 InLinkerIndex, bool InIsShouldDetachExisting /* = true */ )
 {
+	bool				bExistPairInTheMap = false;
 	LinkerIndexPair		existing;
 	{
 		auto	itPair = s_LinkerMap.find( this );
 		if ( itPair != s_LinkerMap.end() )
 		{
 			existing = itPair->second;
+			bExistPairInTheMap = true;
 		}
 	}
 	existing.CheckInvariants();
@@ -102,21 +104,23 @@ void CObject::SetLinker( class CLinkerLoad* InLinkerLoad, uint32 InLinkerIndex, 
 	{
 		InIsShouldDetachExisting = false;
 	}
-	// If we have a valid pair and are setting a new valid linker, remove the pair first
-	else  if ( !existing.IsDefault() && InLinkerLoad )
+	
+	// If we have a pair in the map and aren't setting a new valid pair, remove the one
+	if ( bExistPairInTheMap && !InLinkerLoad && InLinkerIndex == INDEX_NONE )
 	{
 		s_LinkerMap.erase( this );
 	}
-
-	// Insert into the map a new pair
-	if ( existing.linker != InLinkerLoad || existing.linkerIndex != InLinkerIndex )
+	// Otherwise insert into the map a new pair if the new one is valid
+	else if ( ( InLinkerLoad || InLinkerIndex != INDEX_NONE ) && ( existing.linker != InLinkerLoad || existing.linkerIndex != InLinkerIndex ) )
 	{
 		s_LinkerMap.insert( std::make_pair( this, LinkerIndexPair( InLinkerLoad, InLinkerIndex ) ) );
 	}
 
 	if ( InIsShouldDetachExisting )
 	{
-#if !WITH_EDITOR
+#if WITH_EDITOR
+		PostLinkerChange();
+#else
 		Warnf( TEXT( "It is only legal to change linkers in the editor. Trying to change linker on '%s' from '%s' (existing->linkerRoot=%s) to '%s' (linkerLoad->linkerRoot=%s)\n" ),
 			   GetFullName().c_str(),
 			   existing.linker->GetPath().c_str(),

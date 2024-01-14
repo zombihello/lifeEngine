@@ -15,9 +15,9 @@
 #include "System/AudioEngine.h"
 #include "Containers/String.h"
 #include "Containers/StringConv.h"
-#include "Reflection/ReflectionEnvironment.h"
 #include "Reflection/ObjectGC.h"
 #include "Reflection/ObjectIterator.h"
+#include "Reflection/ObjectGlobals.h"
 #include "Math/Color.h"
 #include "Misc/CommandLine.h"
 #include "Misc/TableOfContents.h"
@@ -171,47 +171,18 @@ void CEngineLoop::InitConfigs()
 #include "Misc/CoreGlobals.h"
 #include "System/BaseFileSystem.h"
 #include "System/Archive.h"
+
 #include "Reflection/ObjectPackage.h"
-#include "Reflection/ObjectGlobals.h"
-/*
-==================
-CEngineLoop::LoadScriptPackage
-==================
-*/
-void CEngineLoop::LoadScriptPackage()
-{
-	// Load script package
-#if 0
-	std::wstring		scriptFile = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR TEXT( "Scripts.classes" ), Sys_GameDir().c_str() );
-	CObjectPackage		objectPackage;
-	if ( !objectPackage.Load( scriptFile ) )
-	{
-		Sys_Errorf( TEXT( "Failed to load script package '%s'\n" ), scriptFile.c_str() );
-		return;
-	}
-	Logf( TEXT( "Script package '%s' loaded\n" ), scriptFile.c_str() );
-
-	for ( uint32 index = 0, numObjects = objectPackage.GetNumObjects(); index < numObjects; ++index )
-	{
-		CObject*	object = objectPackage.GetObject( index );
-		if ( IsA<CEnum>( object ) || IsA<CStruct>( object ) || IsA<CClass>( object ) )
-		{
-			object->AddToRoot();
-		}
-	}
-#endif // 0
-
-	std::wstring		scriptFile = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR TEXT( "%s.classes" ), Sys_GameDir().c_str(), g_GameName.c_str() );
-	CObjectPackage*		classesPkg = LoadPackage( nullptr, scriptFile.c_str() );
-}
+#include "Reflection/Class.h"
+#include "Reflection/Object.h"
+#include "Reflection/Property.h"
+#include "Actors/StaticMesh.h"
 
 /*
 ==================
 CEngineLoop::PreInit
 ==================
 */
-#include "Reflection/ObjectGlobals.h"
-#include "Reflection/Property.h"
 int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 {
 	g_GameThreadId = Sys_GetCurrentThreadId();
@@ -229,11 +200,10 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	{
 		std::wstring		commandletName = CString::ToUpper( paramValues[0] );
 		g_IsCooker			= commandletName == CString::ToUpper( TEXT( "CookPackages" ) ) || commandletName == CString::ToUpper( TEXT( "CCookPackagesCommandlet" ) );
-		g_IsScriptCompiler	= commandletName == CString::ToUpper( TEXT( "ScriptCompiler" ) ) || commandletName == CString::ToUpper( TEXT( "CScriptCompilerCommandlet" ) );
-		g_IsCommandlet		= !g_IsCooker && !g_IsScriptCompiler;
+		g_IsCommandlet		= !g_IsCooker;
 	}
 
-	g_IsGame = !g_IsEditor && !g_IsCooker && !g_IsCommandlet && !g_IsScriptCompiler;
+	g_IsGame = !g_IsEditor && !g_IsCooker && !g_IsCommandlet;
 #endif // WITH_EDITOR
 
 	Sys_GetCookedContentPath( g_Platform, g_CookedDir );
@@ -248,17 +218,6 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	for ( TObjectIterator<CField> it; it; ++it )
 	{
 		it->Bind();
-		CClass* theClass = Cast<CClass>( *it );
-		if ( theClass && !CReflectionEnvironment::Get().FindClass( theClass->GetName().c_str() ) )
-		{
-			CReflectionEnvironment::Get().AddClass( theClass );
-		}
-	}
-
-	// Load script package
-	if ( !g_IsScriptCompiler )
-	{
-		LoadScriptPackage();
 	}
 
 	// Loading table of contents
@@ -314,11 +273,11 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		}
 #endif // WITH_EDITOR
 
-		const CClass*		lclass = CReflectionEnvironment::Get().FindClass( classEngineName.c_str() );
+		const CClass*		lclass = FindObjectFast<CClass>( nullptr, classEngineName, true, true );
 		AssertMsg( lclass, TEXT( "Class engine %s not found" ), classEngineName.c_str() );
 		
-		CObjectPackage*		enginePackage = CreatePackage( nullptr, TEXT( "Engine" ) );
-		g_Engine			= lclass->CreateObject<CBaseEngine>( enginePackage );
+		CObjectPackage*		enginePackage = CObjectPackage::CreatePackage( nullptr, TEXT( "Engine" ) );
+		g_Engine			= lclass->CreateObject<CBaseEngine>( enginePackage, NAME_None, OBJECT_Public );
 		Assert( g_Engine );
 		g_Engine->AddToRoot();
 	}

@@ -1,5 +1,6 @@
-#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/ObjectHash.h"
 #include "Reflection/ObjectGlobals.h"
+#include "Reflection/Class.h"
 #include "Commandlets/BaseCommandlet.h"
 #include "Logger/LoggerMacros.h"
 
@@ -18,18 +19,18 @@ bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 	{
 		return false;
 	}
-	CClass*				lclassCommandlet = CReflectionEnvironment::Get().FindClass( nameCommandlet.c_str() );
+	CClass*				lclassCommandlet = FindObjectFast<CClass>( nullptr, nameCommandlet, true, true );
 
 	// If class not found try to search by added 'C' in prefix and 'Commandlet' in sufix
 	if ( !lclassCommandlet )
 	{
-		lclassCommandlet = CReflectionEnvironment::Get().FindClass( ( std::wstring( TEXT( "C" ) ) + nameCommandlet + TEXT( "Commandlet" ) ).c_str() );
+		lclassCommandlet = FindObjectFast<CClass>( nullptr, std::wstring( TEXT( "C" ) ) + nameCommandlet + TEXT( "Commandlet" ), true, true );
 	}
 
 	// Create and execute commandlet
 	if ( lclassCommandlet )
 	{
-		CObjectPackage*			worldEdPackage = CreatePackage( nullptr, TEXT( "WorldEd" ) );
+		CObjectPackage*			worldEdPackage = CObjectPackage::CreatePackage( nullptr, TEXT( "WorldEd" ) );
 		CBaseCommandlet*		commandlet = lclassCommandlet->CreateObject<CBaseCommandlet>( worldEdPackage );
 		Assert( commandlet );
 		commandlet->AddToRoot();

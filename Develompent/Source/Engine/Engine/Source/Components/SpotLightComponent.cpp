@@ -27,8 +27,8 @@ CSpotLightComponent::StaticInitializeClass
 */
 void CSpotLightComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Radius" ) ) CFloatProperty( CPP_PROPERTY( ThisClass, radius ), TEXT( "Light" ), TEXT( "Light radius" ), CPF_Edit );
-	new( staticClass, TEXT( "Height" ) ) CFloatProperty( CPP_PROPERTY( ThisClass, height ), TEXT( "Light" ), TEXT( "Light height" ), CPF_Edit );
+	new( staticClass, TEXT( "Radius" ), OBJECT_Public ) CFloatProperty( CPP_PROPERTY( ThisClass, radius ), TEXT( "Light" ), TEXT( "Light radius" ), CPF_Edit );
+	new( staticClass, TEXT( "Height" ), OBJECT_Public ) CFloatProperty( CPP_PROPERTY( ThisClass, height ), TEXT( "Light" ), TEXT( "Light height" ), CPF_Edit );
 }
 
 /*

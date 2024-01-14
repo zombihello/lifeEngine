@@ -298,8 +298,8 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 		g_World = nullptr;
 	}
 
-	CObjectPackage*		mapPackage = CreatePackage( nullptr, CFilename( InMap ).GetBaseFilename().c_str() );
-	g_World = new( mapPackage, NAME_None ) CWorld();
+	CObjectPackage*		mapPackage = CObjectPackage::CreatePackage( nullptr, CFilename( InMap ).GetBaseFilename().c_str() );
+	g_World = new( mapPackage, TEXT( "TheWorld" ), OBJECT_Public ) CWorld();
 	archive->SerializeHeader();
 	g_World->Serialize( *archive );
 	g_World->AddToRoot();

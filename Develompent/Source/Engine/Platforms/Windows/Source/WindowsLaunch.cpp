@@ -37,7 +37,7 @@ Sys_PlatformPreInit
 */
 int32 Sys_PlatformPreInit()
 {
-	if ( g_IsCommandlet || g_IsScriptCompiler || g_IsCooker || g_CommandLine.HasParam( TEXT( "console" ) ) )
+	if ( g_IsCommandlet || g_IsCooker || g_CommandLine.HasParam( TEXT( "console" ) ) )
 	{
 		static_cast< CWindowsLogger* >( g_Log )->Show( true );
 	}

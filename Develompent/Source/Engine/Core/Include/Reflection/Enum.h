@@ -17,82 +17,11 @@
 
 /**
  * @ingroup Core
- * @brief Macro for declare enum
- *
- * @param TEnum         Enum
- * @param TPackage      Package
- *
- * Example usage: @code DECLARE_ENUM( ESpriteType, TEXT( "Core" ) ) @endcode
- */
-#define DECLARE_ENUM( TEnum, TPackage ) \
-	namespace Enum \
-	{ \
-		namespace TEnum \
-		{ \
-			CEnum* StaticEnum(); \
-			FORCEINLINE const tchar* StaticPackage() \
-			{ \
-				/** Returns the package this enum belongs in */ \
-				return TPackage; \
-			} \
-		} \
-	}
-
-/**
- * @ingroup Core
- * @brief Macro for implement enum
- *
- * @param TEnum			Enum
- * @param TForEachEnum	Macro of for each enum
- *
- * Example usage: @code IMPLEMENT_ENUM( ESpriteType, FOREACH_ENUM_SPRITETYPE ) @endcode
- */
-#define IMPLEMENT_ENUM( TEnum, TForEachEnum ) \
-	namespace Enum \
-	{ \
-		namespace TEnum \
-		{ \
-			CEnum* StaticEnum() \
-			{ \
-				static CEnum*	s_CEnum = nullptr; \
-				if ( !s_CEnum ) \
-				{ \
-					std::vector<CName>		enums; \
-					TForEachEnum( INTERNAL_REGISTER_ENUM ) \
-					s_CEnum = ::new CEnum( NativeConstructor, TEXT( #TEnum ), StaticPackage(), enums ); \
-					s_CEnum->SetClass( CEnum::StaticClass() ); \
-					CObjectGC::Get().AddObject( s_CEnum ); \
-					HashObject( s_CEnum ); \
-				} \
-				return s_CEnum; \
-			} \
-		} \
-	} \
-    struct Register##TEnum \
-    { \
-        Register##TEnum() \
-        { \
-            CReflectionEnvironment::Get().AddEnum( Enum::TEnum::StaticEnum() ); \
-        } \
-    }; \
-	static Register##TEnum s_Register##TEnum;
-
-/**
- * @ingroup Core
- * @brief Internal register enum
- * 
- * @param InName	Name
- */
-#define INTERNAL_REGISTER_ENUM( InName ) \
-	enums.push_back( CName( TEXT( #InName ) ) );
-
-/**
- * @ingroup Core
  * @brief Enum description for reflection
  */
 class CEnum : public CField
 {
-	DECLARE_CLASS_INTRINSIC( CEnum, CField, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS( CEnum, CField, 0, 0, TEXT( "Core" ) )
 
 public:
 	/**

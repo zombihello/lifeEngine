@@ -39,10 +39,10 @@ CSpriteComponent::StaticInitializeClass
 */
 void CSpriteComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bFlipVertical" ) )		CBoolProperty( CPP_PROPERTY( ThisClass, bFlipVertical ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by vertical" ), CPF_Edit );
-	new( staticClass, TEXT( "bFlipHorizontal" ) )	CBoolProperty( CPP_PROPERTY( ThisClass, bFlipHorizontal ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPF_Edit );
-	new( staticClass, TEXT( "Material" ) )			CAssetProperty( CPP_PROPERTY( ThisClass, material ), TEXT( "Disaply" ), TEXT( "Sprite material" ), CPF_Edit, AT_Material );
-	new( staticClass, TEXT( "Type" ) )				CByteProperty( CPP_PROPERTY( ThisClass, type ), TEXT( "Sprite" ), TEXT( "Sprite type" ), CPF_Edit, Enum::ESpriteType::StaticEnum() );
+	new( staticClass, TEXT( "bFlipVertical" ), OBJECT_Public )		CBoolProperty( CPP_PROPERTY( ThisClass, bFlipVertical ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by vertical" ), CPF_Edit );
+	new( staticClass, TEXT( "bFlipHorizontal" ), OBJECT_Public )	CBoolProperty( CPP_PROPERTY( ThisClass, bFlipHorizontal ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPF_Edit );
+	new( staticClass, TEXT( "Material" ), OBJECT_Public )			CAssetProperty( CPP_PROPERTY( ThisClass, material ), TEXT( "Disaply" ), TEXT( "Sprite material" ), CPF_Edit, AT_Material );
+	new( staticClass, TEXT( "Type" ), OBJECT_Public )				CByteProperty( CPP_PROPERTY( ThisClass, type ), TEXT( "Sprite" ), TEXT( "Sprite type" ), CPF_Edit, Enum::ESpriteType::StaticEnum() );
 }
 
 /*

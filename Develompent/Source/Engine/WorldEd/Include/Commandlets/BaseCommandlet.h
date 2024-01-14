@@ -21,7 +21,7 @@
  */
 class CBaseCommandlet : public CObject
 {
-	DECLARE_CLASS( CBaseCommandlet, CObject, 0, 0, TEXT( "WorldEd" ) )
+	DECLARE_CLASS( CBaseCommandlet, CObject, CLASS_Transient, 0, TEXT( "WorldEd" ) )
 
 public:
 	/**

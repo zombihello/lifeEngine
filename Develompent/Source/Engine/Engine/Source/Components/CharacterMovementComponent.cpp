@@ -32,10 +32,10 @@ CCharacterMovementComponent::StaticInitializeClass
 void CCharacterMovementComponent::StaticInitializeClass()
 {
 	// Native properties
-	new( staticClass, TEXT( "Walk Speed" ) )		CFloatProperty( CPP_PROPERTY( ThisClass, walkSpeed ), TEXT( "Movement" ), TEXT( "Walk speed" ), CPF_Edit );
-	new( staticClass, TEXT( "Walk Speed In Fly" ) ) CFloatProperty( CPP_PROPERTY( ThisClass, walkSpeedInFly ), TEXT( "Movement" ), TEXT( "Walk speed in fly" ), CPF_Edit );
-	new( staticClass, TEXT( "Jump Speed" ) )		CFloatProperty( CPP_PROPERTY( ThisClass, jumpSpeed ), TEXT( "Movement" ), TEXT( "Jump speed" ), CPF_Edit );
-	new( staticClass, NAME_None )					CObjectProperty( CPP_PROPERTY( ThisClass, ownerCharacter ), NAME_None, TEXT( "" ), CPF_None, ACharacter::StaticClass() );
+	new( staticClass, TEXT( "Walk Speed" ), OBJECT_Public )			CFloatProperty( CPP_PROPERTY( ThisClass, walkSpeed ), TEXT( "Movement" ), TEXT( "Walk speed" ), CPF_Edit );
+	new( staticClass, TEXT( "Walk Speed In Fly" ), OBJECT_Public )	CFloatProperty( CPP_PROPERTY( ThisClass, walkSpeedInFly ), TEXT( "Movement" ), TEXT( "Walk speed in fly" ), CPF_Edit );
+	new( staticClass, TEXT( "Jump Speed" ), OBJECT_Public )			CFloatProperty( CPP_PROPERTY( ThisClass, jumpSpeed ), TEXT( "Movement" ), TEXT( "Jump speed" ), CPF_Edit );
+	new( staticClass, NAME_None )									CObjectProperty( CPP_PROPERTY( ThisClass, ownerCharacter ), NAME_None, TEXT( "" ), CPF_None, ACharacter::StaticClass() );
 }
 
 /*

@@ -68,12 +68,6 @@ extern bool							g_IsCommandlet;
 
 /**
  * @ingroup Core
- * @brief Whether engine was launched for script compiler
- */
-extern bool							g_IsScriptCompiler;
-
-/**
- * @ingroup Core
  * Whether engine was launched for cooked packages
  */
 extern bool							g_IsCooker;
@@ -87,7 +81,6 @@ extern bool							g_ShouldPauseBeforeExit;
 #define								g_IsGame 1
 #define								g_IsEditor 0
 #define								g_IsCommandlet 0
-#define								g_IsScriptCompiler 0
 #define								g_IsCooker 0
 #endif // WITH_EDITOR
 

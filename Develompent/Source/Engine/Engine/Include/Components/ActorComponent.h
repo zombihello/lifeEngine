@@ -10,7 +10,7 @@
 #define ACTORCOMPONENT_H
 
 #include "Misc/RefCounted.h"
-#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/ObjectMacros.h"
 #include "Reflection/Object.h"
 #include "Reflection/Property.h"
 

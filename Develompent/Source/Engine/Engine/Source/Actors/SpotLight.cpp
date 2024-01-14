@@ -30,9 +30,12 @@ ASpotLight::StaticInitializeClass
 void ASpotLight::StaticInitializeClass()
 {
 	// Native properties
-	new( staticClass, TEXT( "Spot Light Component" ) ) CObjectProperty( CPP_PROPERTY( ThisClass, spotLightComponent ), TEXT( "Light" ), TEXT( "Spot light component" ), CPF_Edit, CSpotLightComponent::StaticClass() );
+	new( staticClass, TEXT( "Spot Light Component" ), OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, spotLightComponent ), TEXT( "Light" ), TEXT( "Spot light component" ), CPF_Edit, CSpotLightComponent::StaticClass() );
+	
+#if WITH_EDITOR
 	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, gizmoComponent ), NAME_None, TEXT( "" ), CPF_None, CSpriteComponent::StaticClass() );
 	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, arrowComponent ), NAME_None, TEXT( "" ), CPF_None, CArrowComponent::StaticClass() );
+#endif // WITH_EDITOR
 }
 
 #if WITH_EDITOR

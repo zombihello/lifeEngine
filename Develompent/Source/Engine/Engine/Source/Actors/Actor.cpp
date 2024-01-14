@@ -96,8 +96,8 @@ AActor::StaticInitializeClass
 void AActor::StaticInitializeClass()
 {
 	// Native properties
-	new( staticClass, TEXT( "bVisibility" ) )	CBoolProperty( CPP_PROPERTY( ThisClass, bVisibility ), TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPF_Edit );
-	new( staticClass, TEXT( "bIsStatic" ) )		CBoolProperty( CPP_PROPERTY( ThisClass, bIsStatic ), TEXT( "Actor" ), TEXT( "Is static actor" ), CPF_Edit );
+	new( staticClass, TEXT( "bVisibility" ), OBJECT_Public )	CBoolProperty( CPP_PROPERTY( ThisClass, bVisibility ), TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPF_Edit );
+	new( staticClass, TEXT( "bIsStatic" ), OBJECT_Public )		CBoolProperty( CPP_PROPERTY( ThisClass, bIsStatic ), TEXT( "Actor" ), TEXT( "Is static actor" ), CPF_Edit );
 }
 
 /*
@@ -195,7 +195,7 @@ void AActor::Serialize( class CArchive& InArchive )
 
 		if ( InArchive.IsLoading() )
 		{
-			CClass*		cclass = CReflectionEnvironment::Get().FindClass( className.c_str() );
+			CClass*		cclass = FindObjectFast<CClass>( nullptr, className.c_str(), true, true );
 			for ( uint32 indexComponent = 0, countComponents = ownedComponents.size(); indexComponent < countComponents; ++indexComponent )
 			{
 				CActorComponent*		component = ownedComponents[indexComponent];

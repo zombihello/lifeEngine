@@ -22,7 +22,7 @@ CPointLightComponent::StaticInitializeClass
 */
 void CPointLightComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Radius" ) ) CFloatProperty( CPP_PROPERTY( ThisClass, radius ), TEXT( "Light" ), TEXT( "Light radius" ), CPF_Edit );
+	new( staticClass, TEXT( "Radius" ), OBJECT_Public ) CFloatProperty( CPP_PROPERTY( ThisClass, radius ), TEXT( "Light" ), TEXT( "Light radius" ), CPF_Edit );
 }
 
 /*

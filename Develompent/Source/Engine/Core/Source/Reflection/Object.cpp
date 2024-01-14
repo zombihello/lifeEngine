@@ -1,11 +1,10 @@
 #include "Logger/LoggerMacros.h"
-#include "Reflection/ReflectionEnvironment.h"
 #include "Reflection/Object.h"
-#include "Reflection/Function.h"
 #include "Reflection/ObjectPackage.h"
 #include "Reflection/ObjectHash.h"
+#include "Reflection/LinkerLoad.h"
+#include "Reflection/Class.h"
 #include "System/ThreadingBase.h"
-#include "System/ScriptFrame.h"
 
 IMPLEMENT_CLASS( CObject )
 
@@ -27,7 +26,7 @@ CObject::CObject( ENativeConstructor, const CName& InName, const tchar* InPackag
 	: index( INDEX_NONE )
 	, name( InName )
 	, outer( nullptr )
-	, flags( InFlags | OBJECT_Native | OBJECT_RootSet | OBJECT_DisregardForGC )
+	, flags( InFlags | OBJECT_Public | OBJECT_Native | OBJECT_Transient | OBJECT_RootSet | OBJECT_DisregardForGC )
 	, theClass( nullptr )
 {
 	Assert( sizeof( outer ) >= sizeof( InPackageName ) );
@@ -82,7 +81,15 @@ CObject::FinishDestroy
 ==================
 */
 void CObject::FinishDestroy()
-{}
+{
+	if ( !HasAnyObjectFlags( OBJECT_FinishDestroyed ) )
+	{
+		Sys_Errorf( TEXT( "Trying to call CObject::FinishDestroy from outside of CObject::ConditionalFinishDestroy on object %s. Please fix up the calling code" ), GetFullName().c_str() );
+	}
+
+	Assert( !GetLinker() );
+	Assert( GetLinkerIndex() == INDEX_NONE );
+}
 
 /*
 ==================
@@ -104,6 +111,24 @@ void CObject::AddReferencedObjects( std::vector<CObject*>& InOutObjectArray )
 
 /*
 ==================
+CObject::PreSaveRoot
+==================
+*/
+bool CObject::PreSaveRoot( const tchar* InFilename )
+{
+	return false;
+}
+
+/*
+==================
+CObject::PostSaveRoot
+==================
+*/
+void CObject::PostSaveRoot( bool InIsCleanupIsRequired )
+{}
+
+/*
+==================
 CObject::PreSave
 ==================
 */
@@ -117,8 +142,7 @@ CObject::MarkPackageDirty
 */
 void CObject::MarkPackageDirty() const
 {
-	// Since transient objects will never be saved into a package, there is no need to mark a package dirty
-	// if we're transient
+	// Since transient objects will never be saved into a package, there is no need to mark a package dirty if we're transient
 	if ( !HasAnyObjectFlags( OBJECT_Transient ) )
 	{
 		CObjectPackage*		package = GetOutermost();
@@ -209,12 +233,14 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 {
 	AssertMsg( IsInGameThread(), TEXT( "Can't create %s/%s while outside of game thread" ), InClass->GetName().c_str(), InName.ToString().c_str() );
 
+	// If we try to allocate object without class its error
 	if ( !InClass )
 	{
 		Sys_Errorf( TEXT( "Empty class for object %s\n" ), InName.ToString().c_str() );
 		return nullptr;
 	}
 
+	// If we try to allocate object with unregistered class its error
 	if ( InClass->GetIndex() == INDEX_NONE )
 	{
 		Sys_Errorf( TEXT( "Unregistered class for %s" ), InName.ToString().c_str() );
@@ -260,12 +286,100 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	{
 		// See if object already exists
 		object = FindObjectFast( InClass, InOuter, InName, true );
-		Assert( !object );		// TODO yehor.pohuliaka: Need implement support of replacing an object
 	}
 
-	// Allocated data for a new object
-	uint32		alignedSize = Align( InClass->GetPropertiesSize(), InClass->GetMinAlignment() );
-	object 		= ( CObject* )malloc( alignedSize );
+	CLinkerLoad*	linker						= nullptr;
+	uint32			linkerIndex					= INDEX_NONE;
+	bool			bWasConstructedOnOldObject	= false;
+
+	// Create a new object if we not found exist object
+	if ( !object )
+	{
+		// Figure out size, alignment and aligned size of object
+		uint32		size = InClass->GetPropertiesSize();
+
+		// Enforce 4 byte alignment to ensure ObjectFlags are never accessed misaligned
+		uint32		alignment = Max<uint32>( 4, InClass->GetMinAlignment() );
+		uint32		alignedSize = Align( size, alignment );
+
+		//Allocate new memory of the appropriate size and alignment
+		object = ( CObject* )malloc( alignedSize );
+	}
+	// Otherwise we replace an existing object without affecting the original's address
+	else
+	{
+		// We can't use unreachable objects
+		Assert( !object->IsUnreachable() );
+		Logf( TEXT( "Replacing %s\n" ), object->GetFullName().c_str() );
+
+		// If the object we found is of a different class, can't replace it
+		if ( !object->GetClass()->IsChildOf( InClass ) )
+		{
+			Sys_Errorf( TEXT( "Objects have the same fully qualified name but different paths.\n" )
+						TEXT( "\tNew Object: %s %s.%s\n" ) 
+						TEXT( "\tExisting Object: %s" ), 
+						InClass->GetName().c_str(), InOuter ? InOuter->GetPathName().c_str() : TEXT( "" ), InName.ToString().c_str(),
+						object->GetFullName().c_str() );
+			return nullptr;
+		}
+
+		// Remember linker and flags
+		linker		= object->GetLinker();
+		linkerIndex = object->GetLinkerIndex();
+		InFlags		|= object->GetObjectFlags() & OBJECT_MASK_Keep;
+		
+		// Destroy the object
+		if ( !object->HasAnyObjectFlags( OBJECT_FinishDestroyed ) )
+		{
+			AssertMsg( !object->HasAnyObjectFlags( OBJECT_NeedLoad | OBJECT_NeedPostLoad ), TEXT( "Replacing a loaded object is not supported: %s (Flags=0x%X)" ),
+					   object->GetFullName().c_str(),
+					   object->GetObjectFlags() );
+
+			// Get the name before we start the destroy, as destroy renames it
+			std::wstring	oldName = object->GetFullName();
+
+			// Begin the asynchronous object cleanup
+			object->ConditionalBeginDestroy();
+
+			// Wait for the object's asynchronous cleanup to finish
+			bool	bNeedPrintMsg	= false;
+			double	stallStart		= 0.0;
+			while ( !object->IsReadyForFinishDestroy() )
+			{
+				// If we're not in the editor, this is fatal
+				if ( !bNeedPrintMsg && !g_IsEditor )
+				{
+					stallStart = Sys_Seconds();
+					bNeedPrintMsg = true;
+				}
+				Sys_Sleep( 0.f );
+			}
+
+			// Print warning message if it need
+			if ( bNeedPrintMsg )
+			{
+				double	deltaTime = Sys_Seconds() - stallStart;
+				Warnf( TEXT( "Game Thread hitch waiting for resource cleanup on a CObject (%s) overwrite took %6.2fms. Fix the higher level code so that this does not happen\n" ),
+					   oldName.c_str(),
+					   deltaTime * 1000.f );
+			}
+
+			// Finish destroying the object
+			object->ConditionalFinishDestroy();
+		}
+
+		// Destroy the object
+		object->~CObject();
+		bWasConstructedOnOldObject = true;
+	}
+
+	// If class is transient, objects must be transient
+	if ( InClass->classFlags & CLASS_Transient )
+	{
+		InFlags |= OBJECT_Transient;
+	}
+
+	// Clean the object's memory
 	Sys_Memzero( ( void* )object, InClass->GetPropertiesSize() );
 
 	// Init object properties
@@ -275,9 +389,22 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	object->flags		= InFlags;
 	object->theClass	= InClass;
 
+	// Reassociate the object with it's linker
+	if ( bWasConstructedOnOldObject )
+	{
+		object->SetLinker( linker, linkerIndex, false );
+		if ( linker )
+		{
+			std::vector<ObjectExport>&		exportMap = linker->GetExports();
+			Assert( !exportMap[linkerIndex].object );
+			exportMap[linkerIndex].object = object;
+		}
+	}
+
 	// Add a new object to the GC and hash object to table
 	CObjectGC::Get().AddObject( object );
 	HashObject( object );
+	Assert( object->IsValid() );
 	return object;
 }
 
@@ -530,8 +657,8 @@ CObject::StaticInitializeClass
 void CObject::StaticInitializeClass()
 {
 	CClass*		theClass = StaticClass();
-	theClass->EmitObjectReference( STRUCT_OFFSET( CClass, outer ) );
-	theClass->EmitObjectReference( STRUCT_OFFSET( CClass, theClass ) );
+	theClass->EmitObjectReference( STRUCT_OFFSET( CObject, outer ) );
+	theClass->EmitObjectReference( STRUCT_OFFSET( CObject, theClass ) );
 }
 
 #if WITH_EDITOR
@@ -552,79 +679,12 @@ bool CObject::CanEditProperty( class CProperty* InProperty ) const
 {
 	return true;
 }
+
+/*
+==================
+CObject::PostLinkerChange
+==================
+*/
+void CObject::PostLinkerChange()
+{}
 #endif // WITH_EDITOR
-
-/*
-==================
-CObject::CallFunction
-==================
-*/
-void CObject::CallFunction( const CName& InFunctionName )
-{
-	Assert( theClass );
-	CFunction*		function = theClass->FindFunction( InFunctionName );
-	AssertMsg( function, TEXT( "Failed to find function %s in %s" ), InFunctionName.ToString().c_str(), GetName().c_str() );
-	AssertMsg( IsInGameThread(), TEXT( "Calling %s from outside game thread" ), *function->GetName().c_str() );
-	
-	// Create a local execution stack
-	ScriptFrame		stack( this );
-
-	// Execute script function
-	ExecScriptFunction( function, stack );
-}
-
-/*
-==================
-CObject::ExecScriptFunction
-==================
-*/
-void CObject::ExecScriptFunction( class CFunction* InFunction, struct ScriptFrame& InStack )
-{
-	AssertMsg( InFunction, TEXT( "Invalid function to call in %s" ), GetName().c_str() );
-
-	// Create a new local execution stack
-	ScriptFrame			newStack( InStack.object, InFunction, &InStack );
-
-	// Call native function or CObject::ExecScript
-	ScriptFn_t		FunctionFn = InFunction->GetFunction();
-	( InStack.object->*FunctionFn )( newStack );
-}
-
-/*
-==================
-CObject::ExecScript
-==================
-*/
-void CObject::ExecScript( ScriptFrame& InStack )
-{
-	while ( *InStack.bytecode != OP_Return )
-	{
-		InStack.Step( InStack.object );
-	}
-}
-
-/*
-==================
-CObject::scrOpcode_Nop
-==================
-*/
-void CObject::scrOpcode_Nop( ScriptFrame& InStack )
-{
-	// Do nothing
-}
-
-/*
-==================
-CObject::scrOpcode_Call
-==================
-*/
-void CObject::scrOpcode_Call( ScriptFrame& InStack )
-{
-	// Get pointer to function from bytecode
-	uptrint				tmpCode = *( uptrint* )InStack.bytecode;
-	CFunction*			function = ( CFunction* )tmpCode;
-	InStack.bytecode += sizeof( uptrint );
-
-	// Execute script function
-	ExecScriptFunction( function, InStack );
-}

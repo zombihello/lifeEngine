@@ -34,7 +34,6 @@ CAssetFactory           g_AssetFactory;
 bool					g_IsGame                     = true;
 bool			        g_IsEditor                   = false;
 bool                    g_IsCommandlet               = false;
-bool                    g_IsScriptCompiler           = false;
 bool					g_IsCooker                   = false;
 bool                    g_ShouldPauseBeforeExit      = false;
 #endif // WITH_EDITOR

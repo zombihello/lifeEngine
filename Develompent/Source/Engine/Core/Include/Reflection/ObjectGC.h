@@ -539,7 +539,8 @@ private:
 	uint32						lastNonGCIndex;									/**< Index pointing to last object created in range disregarded for GC */
 	std::vector<class CObject*>	allocatedObjects;								/**< List of all allocated objects */
 	std::vector<uint32>			objectsPendingDestruction;						/**< Array that we'll fill with indices to objects that are still pending destruction after the first GC sweep */
-	std::list<uint32>			availableObjectIndeces;							/**< Available object indices */
+	std::list<uint32>			availableNonGCObjectIndeces;					/**< Available object indices in non-GC range */
+	std::list<uint32>			availableGCObjectIndeces;						/**< Available object indices in GC range */
 	std::vector<uint32>			unreachableObjectsIndices;						/**< Index of objects with the OBJECT_Unreachable flag during garbage collection */
 };
 

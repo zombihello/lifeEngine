@@ -26,7 +26,7 @@ AStaticMesh::StaticInitializeClass
 void AStaticMesh::StaticInitializeClass()
 {
 	// Native properties
-	new( staticClass, TEXT( "Static Mesh Component" ) ) CObjectProperty( CPP_PROPERTY( ThisClass, staticMeshComponent ), TEXT( "Drawing" ), TEXT( "Static mesh component" ), CPF_Edit, CStaticMeshComponent::StaticClass() );
+	new( staticClass, TEXT( "Static Mesh Component" ), OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, staticMeshComponent ), TEXT( "Drawing" ), TEXT( "Static mesh component" ), CPF_Edit, CStaticMeshComponent::StaticClass() );
 }
 
 /*

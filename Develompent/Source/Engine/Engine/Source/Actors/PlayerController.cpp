@@ -28,7 +28,7 @@ APlayerController::StaticInitializeClass
 void APlayerController::StaticInitializeClass()
 {
 	// Native properties
-	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, inputComponent ), NAME_None, TEXT( "" ), CPF_None, CInputComponent::StaticClass() );
+	new( staticClass, NAME_None, OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, inputComponent ), NAME_None, TEXT( "" ), CPF_None, CInputComponent::StaticClass() );
 }
 
 /*

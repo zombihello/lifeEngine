@@ -12,7 +12,7 @@
 #include <unordered_set>
 
 #include "Core.h"
-#include "Reflection/Linker.h"
+#include "Reflection/LinkerLoad.h"
 #include "Reflection/Object.h"
 
 /**
@@ -33,8 +33,8 @@ public:
 	 */
 	static FORCEINLINE CLinkerManager& Get()
 	{
-		static CLinkerManager	linkerManager;
-		return linkerManager;
+		static CLinkerManager	s_LinkerManager;
+		return s_LinkerManager;
 	}
 
 	/**

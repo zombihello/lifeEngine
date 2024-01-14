@@ -13,7 +13,8 @@
 
 #include "Math/Math.h"
 #include "Containers/EnumAsByte.h"
-#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/ObjectMacros.h"
+#include "Reflection/Enum.h"
 #include "System/Package.h"
 #include "System/Archive.h"
 

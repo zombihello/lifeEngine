@@ -26,6 +26,7 @@ public:
 	 */
 	ObjectSerializeContext()
 		: objBeginLoadCount( 0 )
+		, importCount( 0 )
 	{}
 
 	/**
@@ -103,8 +104,26 @@ public:
 		return objectsLoaded.size();
 	}
 
+	/**
+	 * @brief Increment import count
+	 * @return Return new import count
+	 */
+	FORCEINLINE uint32 IncrementImportCount()
+	{
+		return ++importCount;
+	}
+
+	/**
+	 * @brief Reset import count
+	 */
+	FORCEINLINE void ResetImportCount()
+	{
+		importCount = 0;
+	}
+
 private:
 	uint32						objBeginLoadCount;	/**< Count for BeginLoad multiple loads */
+	uint32						importCount;		/**< Imports for EndLoad optimization */
 	std::vector<CObject*>		objectsLoaded;		/**< Objects that might need preloading */
 };
 

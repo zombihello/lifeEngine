@@ -1,7 +1,7 @@
-#include "Reflection/ReflectionEnvironment.h"
+#include "Logger/LoggerMacros.h"
+#include "Reflection/Class.h"
 #include "Reflection/Property.h"
 #include "Reflection/Object.h"
-#include "Logger/LoggerMacros.h"
 
 IMPLEMENT_CLASS( CProperty )
 IMPLEMENT_CLASS( CByteProperty )
@@ -49,8 +49,11 @@ CProperty::CProperty( ECppProperty, uint32 InOffset, const CName& InCategory, co
 	, flags( InFlags )
 	, arraySize( InArraySize )
 {
-	AddObjectFlag( OBJECT_Native );
+	// Properties created in C++ should always be marked OBJECT_Transient so that when the package containing
+	// this property is saved, it doesn't try to save this CProperty into the ExportMap
+	AddObjectFlag( OBJECT_Transient | OBJECT_Native );
 	GetOuterCField()->AddProperty( this );
+	Assert( GetOuterCField()->HasAllObjectFlags( OBJECT_Transient | OBJECT_Native ) );
 }
 
 /*

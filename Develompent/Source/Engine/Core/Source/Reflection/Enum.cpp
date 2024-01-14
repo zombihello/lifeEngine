@@ -1,4 +1,4 @@
-#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/Class.h"
 #include "Reflection/Enum.h"
 
 IMPLEMENT_CLASS( CEnum )

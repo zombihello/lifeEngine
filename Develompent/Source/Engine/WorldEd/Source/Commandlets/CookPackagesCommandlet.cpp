@@ -19,6 +19,7 @@
 #include "System/AudioBuffer.h"
 #include "Logger/LoggerMacros.h"
 #include "Render/Shaders/ShaderCompiler.h"
+#include "Reflection/ObjectPackage.h"
 
 // Actors
 #include "Actors/PlayerStart.h"
@@ -117,7 +118,8 @@ bool CCookPackagesCommandlet::CookMap( const ResourceInfo& InMapInfo )
 		g_World = nullptr;
 	}
 
-	g_World = new( nullptr, NAME_None ) CWorld();
+	CObjectPackage*		mapPackage = CObjectPackage::CreatePackage( nullptr, InMapInfo.filename.c_str() );
+	g_World = new( mapPackage, TEXT( "TheWorld" ), OBJECT_Public ) CWorld();
 	g_World->AddToRoot();
 
 	// Spawn tiles
@@ -425,7 +427,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 				// Spawn actor and init properties if class name is valid
 				if ( !tmxObject.className.empty() )
 				{
-					CClass*		classActor = CReflectionEnvironment::Get().FindClass( tmxObject.className.c_str() );
+					CClass*		classActor = FindObjectFast<CClass>( nullptr, tmxObject.className, true, true );
 					if ( !classActor )
 					{
 						Warnf( TEXT( "Actor '%s' not spanwed because class '%s' not founded\n" ), tmxObject.className.c_str() );

@@ -180,8 +180,8 @@ protected:
 
 /**
  * @ingroup Core
- * @brief Archive for tagging objects that must be exported to the file. It tags the objects passed to it, and recursively
- * tags all of the objects this object references
+ * @brief Archive for tagging objects that must be exported to the file
+ * It tags the objects passed to it, and recursively tags all of the objects this object references
  */
 class CArchiveSaveTagExports : public CArchive
 {
@@ -206,9 +206,9 @@ public:
 
 	/**
 	 * @brief Serializes the specified object, tagging all objects it references
-	 * @param InBaseObject		The object that should be serialized, usually the package root
+	 * @param InObject		The object that should be serialized, usually the package root
 	 */
-	void ProcessBaseObject( class CObject* InBaseObject );
+	void ProcessObject( class CObject* InObject );
 
 private:
 	/**
@@ -255,7 +255,7 @@ private:
 
 /**
  * @ingroup Core
- * @brief Archive for collect o object references
+ * @brief Archive for collect all object references
  */
 template<class TClass>
 class TArchiveObjectReferenceCollector : public CArchive
@@ -265,8 +265,8 @@ public:
 	 * @brief Constructor
 	 * 
 	 * @param InObjectArray				Array to add object references to
-	 * @param InOuter					Value for LimitOuter
-	 * @param InIsRequireDirectOuter	Value for bRequireDirectOuter
+	 * @param InOuter					Limit outer
+	 * @param InIsRequireDirectOuter	TRUE to skip objects whose GetOuter() isn't InOuter
 	 * @param InIsSerializeRecursively	Only applicable when LimitOuter is valid and bRequireDirectOuter is set.
 	 *									Serializes each object encountered looking for subobjects of referenced
 	 *									objects that have LimitOuter for their Outer (i.e. nested subobjects/components)
@@ -277,10 +277,9 @@ public:
 		, objectArray( InObjectArray )
 		, limitOuter( InOuter )
 		, bRequireDirectOuter( InIsRequireDirectOuter )
+		, bSerializeRecursively( InIsSerializeRecursively && InOuter )
 		, bShouldIgnoreTransient( InIsShouldIgnoreTransient )
-	{
-		bSerializeRecursively = InIsSerializeRecursively && limitOuter;
-	}
+	{}
 
 protected:
 	/**

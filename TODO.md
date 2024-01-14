@@ -26,6 +26,12 @@
 - [X] Add possible generate mip levels for textures in WorldEd
 - [X] Need fix speed of the import static meshes
 - [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to LUA)
+	- [ ] Implement linker save and linker load for serialize CObjects
+	- [ ] Implement FindObject, LoadObject and LoadClass functions
+	- [ ] Implement ResolveName for resolve a package and name
+	- [X] Implement replacing existing object in StaticAllocateObject
+	- [ ] Replace CObject::SetName to Rename for guarantee the uniqueness of the name
+	- [ ] Need fix destroying packages in GC whom use by objects not considered for GC 
 - [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)
 - [x] Implemented functions of exploer level
 - [x] Added gizmo render in WorldEd.

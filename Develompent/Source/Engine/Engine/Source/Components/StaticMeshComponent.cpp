@@ -22,10 +22,10 @@ CStaticMeshComponent::StaticInitializeClass
 */
 void CStaticMeshComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Static Mesh" ) )							CAssetProperty( CPP_PROPERTY( ThisClass, staticMesh ), TEXT( "Display" ), TEXT( "Static mesh asset" ), CPF_Edit, AT_StaticMesh );
+	new( staticClass, TEXT( "Static Mesh" ), OBJECT_Public )							CAssetProperty( CPP_PROPERTY( ThisClass, staticMesh ), TEXT( "Display" ), TEXT( "Static mesh asset" ), CPF_Edit, AT_StaticMesh );
 	{
-		CProperty* array = new( staticClass, TEXT( "Materials" ) )		CArrayProperty( CPP_PROPERTY( ThisClass, overrideMaterials ), TEXT( "Display" ), TEXT( "Override materials" ), CPF_Edit | CPF_EditFixedSize );
-		new( array, TEXT( "AssetProperty0" ) )							CAssetProperty( CppProperty, 0, NAME_None, TEXT( "" ), 0, AT_Material );
+		CProperty* array = new( staticClass, TEXT( "Materials" ), OBJECT_Public )		CArrayProperty( CPP_PROPERTY( ThisClass, overrideMaterials ), TEXT( "Display" ), TEXT( "Override materials" ), CPF_Edit | CPF_EditFixedSize );
+		new( array, TEXT( "AssetProperty0" ), OBJECT_Public )							CAssetProperty( CppProperty, 0, NAME_None, TEXT( "" ), 0, AT_Material );
 	}
 }
 

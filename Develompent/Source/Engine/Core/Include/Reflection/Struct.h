@@ -10,93 +10,9 @@
 #define STRUCT_H
 
 #include <vector>
+
 #include "Reflection/ObjectHash.h"
 #include "Reflection/Field.h"
-
-/**
- * @ingroup Core
- * @brief Macro for declare struct
- * 
- * @param TStruct           Struct
- * @param TSuperStruct      Super struct
- * @param TPackage          Package
- * 
- * Example usage: @code DECLARE_STRUCT( MyStruct, MyStruc, TEXT( "Core" ) ) @endcode
- */
-#define DECLARE_STRUCT( TStruct, TSuperStruct, TPackage ) \
-    private: \
-        static class CStruct*					staticStruct; \
-		static class CStruct*					GetStaticStruct(); \
-        static void								InternalInitializeStruct(); \
-    public: \
-	    typedef TStruct							ThisStruct; \
-	    typedef TSuperStruct					Super; \
-        static void								StaticInitializeStruct(); \
-		static FORCEINLINE const tchar*         StaticPackage() \
-        { \
-            /** Returns the package this struct belongs in */ \
-            return TPackage; \
-        } \
-        static FORCEINLINE class CStruct*       StaticStruct() \
-		{ \
-			if ( !staticStruct ) \
-            { \
-                staticStruct = GetStaticStruct(); \
-                InternalInitializeStruct(); \
-            } \
-            return staticStruct; \
-		}
-
-/**
- * @ingroup Core
- * @brief Macro for implement struct
- * 
- * @param TStruct    Struct
- * 
- * Example usage: @code IMPLEMENT_STRUCT( MyStruct ) @endcode
- */
-#define IMPLEMENT_STRUCT( TStruct ) \
-    CStruct* TStruct::staticStruct = nullptr; \
-	CStruct* TStruct::GetStaticStruct() \
-	{ \
-		CStruct*	returnStruct = ::new CStruct \
-		( \
-			NativeConstructor, \
-			TEXT( #TStruct ), \
-            sizeof( ThisStruct ), \
-            alignof( ThisStruct ), \
-			StaticPackage() \
-		); \
-		Assert( returnStruct ); \
-		return returnStruct; \
-	} \
-	void TStruct::InternalInitializeStruct() \
-	{ \
-		staticStruct->SetSuperStruct( Super::StaticStruct() != staticStruct ? Super::StaticStruct() : nullptr ); \
-		staticStruct->SetClass( CStruct::StaticClass() ); \
-		CObjectGC::Get().AddObject( staticStruct ); \
-		HashObject( staticStruct ); \
-        ThisStruct::StaticInitializeStruct(); \
-	} \
-	struct Register##TStruct \
-    { \
-        Register##TStruct() \
-        { \
-            CReflectionEnvironment::Get().AddStruct( TStruct::StaticStruct() ); \
-        } \
-    }; \
-    static Register##TStruct s_Register##TStruct;
-
-/**
- * @ingroup Core
- * @brief Macro for implement default StaticInitializeStruct()
- *
- * @param TStruct    Struct
- *
- * Example usage: @code IMPLEMENT_DEFAULT_INITIALIZE_STRUCT( MyStruct ) @endcode
- */
-#define IMPLEMENT_DEFAULT_INITIALIZE_STRUCT( TStruct ) \
-        void TStruct::StaticInitializeStruct() {}
 
 /**
  * @ingroup Core
@@ -104,7 +20,7 @@
  */
 class CStruct : public CField
 {
-	DECLARE_CLASS_INTRINSIC( CStruct, CField, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS( CStruct, CField, 0, 0, TEXT( "Core" ) )
 
 public:
 	/**

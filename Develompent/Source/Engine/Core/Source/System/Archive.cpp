@@ -1,8 +1,8 @@
 #include "System/Archive.h"
 #include "Misc/Template.h"
 #include "Reflection/Object.h"
-#include "Reflection/Linker.h"
 #include "Reflection/ObjectPackage.h"
+#include "Reflection/LinkerSave.h"
 #include "LEVersion.h"
 
 /*
@@ -194,7 +194,7 @@ CArchiveSaveTagExports::operator<<
 */
 CArchive& CArchiveSaveTagExports::operator<<( class CObject*& InValue )
 {
-	if ( InValue && IsIn( InValue, outer ) && !InValue->HasAnyObjectFlags( OBJECT_TagExp ) )
+	if ( InValue && IsIn( InValue, outer ) && !InValue->HasAnyObjectFlags( OBJECT_Transient | OBJECT_TagExp ) )
 	{
 		// Set flags
 		InValue->AddObjectFlag( OBJECT_TagExp );
@@ -213,10 +213,10 @@ CArchive& CArchiveSaveTagExports::operator<<( class CObject*& InValue )
 
 /*
 ==================
-CArchiveSaveTagExports::ProcessBaseObject
+CArchiveSaveTagExports::ProcessObject
 ==================
 */
-void CArchiveSaveTagExports::ProcessBaseObject( class CObject* InBaseObject )
+void CArchiveSaveTagExports::ProcessObject( class CObject* InBaseObject )
 {
 	( *this ) << InBaseObject;
 	ProcessTaggedObjects();

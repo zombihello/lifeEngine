@@ -36,7 +36,7 @@ CWorld::StaticInitializeClass
 void CWorld::StaticInitializeClass()
 {
 	// Native properties
-	CArrayProperty* actorsArray = new( staticClass, NAME_None ) CArrayProperty( CPP_PROPERTY( ThisClass, actors ), NAME_None, TEXT( "" ), CPF_None );
+	CArrayProperty*		actorsArray = new( staticClass, NAME_None ) CArrayProperty( CPP_PROPERTY( ThisClass, actors ), NAME_None, TEXT( "" ), CPF_None );
 	new( actorsArray, NAME_None ) CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, AActor::StaticClass() );
 }
 
@@ -167,7 +167,7 @@ void CWorld::Serialize( CArchive& InArchive )
 			InArchive << className;
 
 			// Spawn actor, serialize and add to array
-			AActor*			actor = SpawnActor( CReflectionEnvironment::Get().FindClass( className.c_str() ), Math::vectorZero, Math::quaternionZero );
+			AActor*			actor = SpawnActor( FindObjectFast<CClass>( nullptr, className, true, true ), Math::vectorZero, Math::quaternionZero );
 			actor->Serialize( InArchive );
 		}
 	}

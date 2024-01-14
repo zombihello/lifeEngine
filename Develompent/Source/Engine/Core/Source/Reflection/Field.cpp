@@ -1,4 +1,6 @@
-#include "Reflection/ReflectionEnvironment.h"
+#include "Reflection/Class.h"
+#include "Reflection/Field.h"
+#include "Reflection/Enum.h"
 #include "Reflection/ObjectGlobals.h"
 #include "Reflection/ObjectPackage.h"
 
@@ -17,16 +19,6 @@ void CField::AddProperty( class CProperty* InProperty )
 
 /*
 ==================
-CField::AddFunction
-==================
-*/
-void CField::AddFunction( class CFunction* InFunction )
-{
-	Sys_Errorf( TEXT( "CField::AddFunction: Not implemented" ) );
-}
-
-/*
-==================
 CField::Bind
 ==================
 */
@@ -41,8 +33,10 @@ void CField::Bind()
 	// For native objects (only CClass, CStructs and CEnums) we have to create a package where this filed must be
 	if ( HasAnyObjectFlags( OBJECT_Native ) && ( IsA<CStruct>( this ) || IsA<CEnum>( this ) ) )
 	{
-		CObject*	package = CreatePackage( nullptr, ( const tchar* )GetOuter() );
+		CObjectPackage*		package = ( CObjectPackage* )CObjectPackage::CreatePackage( nullptr, ( const tchar* )GetOuter() );
 		Assert( package );
+
+		package->AddPackageFlag( PKG_InMemoryOnly );
 		SetOuter( package );
 	}
 

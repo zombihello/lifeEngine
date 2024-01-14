@@ -23,9 +23,9 @@ CSceneComponent::StaticInitializeClass
 void CSceneComponent::StaticInitializeClass()
 {
 	// Native properties
-	new( staticClass, TEXT( "Location" ) )	CVectorProperty( CPP_PROPERTY( ThisClass, relativeLocation ), TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), CPF_Edit );
-	new( staticClass, TEXT( "Rotation" ) )	CRotatorProperty( CPP_PROPERTY( ThisClass, relativeRotation ), TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), CPF_Edit );
-	new( staticClass, TEXT( "Scale" ) )		CVectorProperty( CPP_PROPERTY( ThisClass, relativeScale ), TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), CPF_Edit, 1.f );
+	new( staticClass, TEXT( "Location" ), OBJECT_Public )	CVectorProperty( CPP_PROPERTY( ThisClass, relativeLocation ), TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), CPF_Edit );
+	new( staticClass, TEXT( "Rotation" ), OBJECT_Public )	CRotatorProperty( CPP_PROPERTY( ThisClass, relativeRotation ), TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), CPF_Edit );
+	new( staticClass, TEXT( "Scale" ), OBJECT_Public )		CVectorProperty( CPP_PROPERTY( ThisClass, relativeScale ), TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), CPF_Edit, 1.f );
 }
 
 #if WITH_EDITOR

@@ -20,8 +20,8 @@ ACharacter::StaticInitializeClass
 void ACharacter::StaticInitializeClass()
 {
 	// Native properties
-	new( staticClass, TEXT( "Character Movement" ) ) CObjectProperty( CPP_PROPERTY( ThisClass, characterMovement ), TEXT( "Character" ), TEXT( "Character movement component" ), CPF_Edit, CCharacterMovementComponent::StaticClass() );
-	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, controller ), NAME_None, TEXT( "" ), CPF_None, ABaseController::StaticClass() );
+	new( staticClass, TEXT( "Character Movement" ), OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, characterMovement ), TEXT( "Character" ), TEXT( "Character movement component" ), CPF_Edit, CCharacterMovementComponent::StaticClass() );
+	new( staticClass, NAME_None, OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, controller ), NAME_None, TEXT( "" ), CPF_None, ABaseController::StaticClass() );
 }
 
 /*
