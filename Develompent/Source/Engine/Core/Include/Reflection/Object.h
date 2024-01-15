@@ -82,6 +82,28 @@ public:
     static CObject* StaticConstructObject( class CClass* InClass, CObject* InOuter = nullptr, CName InName = NAME_None, ObjectFlags_t InFlags = OBJECT_None );
 
     /**
+     * @brief Initialize CObject system
+     */
+    static void StaticInit();
+
+    /**
+     * @brief Shutdown CObject system
+     */
+    static void StaticExit();
+
+    /**
+     * @brief Is CObject system initialized
+     * @return Return TRUE if CObject system is initialized, otherwise returns FALSE
+     */
+    static bool StaticIsCObjectInitialized();
+
+    /**
+     * @brief Add function of static class initialize to auto registrants
+     * @param InStaticInitializeFn      Static class initialize function
+     */
+    static void AddToAutoInitializeRegistrants( CObject* ( *InStaticInitializeFn )() );
+
+    /**
      * @brief Serialize object
      * @param InArchive     Archive for serialize
      */
@@ -165,6 +187,11 @@ public:
     virtual void PreSave();
 
     /**
+     * @brief Registers the native class (constructs a CClass object)
+     */
+    virtual void Register();
+
+    /**
      * @brief Marks the package containing this object as needing to be saved
      */
     void MarkPackageDirty() const;
@@ -184,6 +211,15 @@ public:
 	FORCEINLINE void RemoveFromRoot()
     {
         RemoveObjectFlag( OBJECT_RootSet );
+    }
+
+    /**
+     * @brief Is an object the root set
+     * @return Return TRUE if this object is the root set, otherwise returns FALSE
+     */
+    FORCEINLINE bool IsRootSet() const
+    {
+        return HasAnyObjectFlags( OBJECT_RootSet );
     }
 
     /**

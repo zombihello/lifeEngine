@@ -47,6 +47,12 @@ extern bool							g_IsRequestingExit;
  */
 extern bool							g_IsRunning;
 
+/**
+ * @ingroup Core
+ * @brief Whether we are still in the initial loading process
+ */
+extern bool							g_IsInitialLoad;
+
 #if WITH_EDITOR
 /**
  * @ingroup Core

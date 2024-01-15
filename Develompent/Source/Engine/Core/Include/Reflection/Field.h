@@ -24,7 +24,6 @@ public:
 	 * @brief Constructor
 	 */
 	CField()
-		: bBinded( false )
 	{}
 
 	/**
@@ -36,7 +35,6 @@ public:
 	 */
 	CField( ENativeConstructor, const CName& InFieldName, const tchar* InPackageName, ObjectFlags_t InFlags = OBJECT_None )
 		: CObject( NativeConstructor, InFieldName, InPackageName, InFlags )
-		, bBinded( false )
 	{}
 
 	/**
@@ -55,18 +53,6 @@ public:
 	 * @return Return owner class
 	 */
 	class CClass* GetOwnerClass() const;
-
-	/**
-	 * @brief Is this field was binded
-	 * @return Return TRUE if this field was binded, otherwise returns FALSE
-	 */
-	FORCEINLINE bool IsBinded() const
-	{
-		return bBinded;
-	}
-
-private:
-	bool	bBinded;	/**< Is this field was binded */
 };
 
 #endif // !FIELD_H

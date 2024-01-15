@@ -2,17 +2,9 @@
 #include "System/Config.h"
 #include "Reflection/Object.h"
 #include "Reflection/ObjectGC.h"
+#include "Reflection/ObjectIterator.h"
 #include "Reflection/Class.h"
 #include "Reflection/LinkerManager.h"
-
-// Maximum count of objects not considered for GC
-#define MAX_OBJECTS_NOT_CONSIDERED_FOR_GC			30000
-
-// Maximum number of objects on level
-#define MAX_NUMBER_OF_LEVEL_OBJECTS					400000
-
-// Maximum all allocated objects in the system
-#define MAX_OBJECTS									( MAX_OBJECTS_NOT_CONSIDERED_FOR_GC + MAX_NUMBER_OF_LEVEL_OBJECTS )
 
 // End of token stream token
 const GCReferenceInfo		GCReferenceInfo::endOfStreamToken( GCRT_EndOfStream, 0 );
@@ -75,14 +67,96 @@ CObjectGC::CObjectGC()
 	, bPurgeIsRequired( false )
 	, bDelayedBeginDestroyHasBeenRoutedToAllObjects( false )
 	, bFinishDestroyHasBeenRoutedToAllObjects( false )
+	, bOpenForDisregardForGC( true )
+	, maxObjectsNotConsideredByGC( 0 )
 	, currentPurgeObjectIndex( 0 )
 	, objectsPendingDestructionCount( 0 )
-	, firstGCIndex( MAX_OBJECTS_NOT_CONSIDERED_FOR_GC )
+	, firstGCIndex( 0 )
 	, lastNonGCIndex( INDEX_NONE )
+{}
+
+/*
+==================
+CObjectGC::AllocateObjectPool
+==================
+*/
+void CObjectGC::AllocateObjectPool( uint32 InMaxObjects, uint32 InMaxObjectsNotConsideredByGC )
 {
-	// Reserve space in the allocated objects array for objects which disregard for GC
-	allocatedObjects.reserve( firstGCIndex + MAX_NUMBER_OF_LEVEL_OBJECTS );
-	allocatedObjects.resize( MAX_OBJECTS_NOT_CONSIDERED_FOR_GC );
+	// We can do it only in game thread
+	Assert( IsInGameThread() );
+
+	// Remember maximum number of objects not considered by GC
+	maxObjectsNotConsideredByGC = InMaxObjectsNotConsideredByGC;
+
+	// Set first GC index
+	firstGCIndex = maxObjectsNotConsideredByGC;
+
+	// Reserve space in the allocated objects array for objects
+	Assert( allocatedObjects.empty() );
+	if ( InMaxObjects <= 0 )
+	{
+		Sys_Errorf( TEXT( "Max CObject count is invalid. It must be a number that is greater than 0" ) );
+	}
+	allocatedObjects.reserve( InMaxObjects );
+
+	// Preallocate memory for objects which disregard for GC
+	if ( maxObjectsNotConsideredByGC > 0 )
+	{
+		allocatedObjects.resize( maxObjectsNotConsideredByGC );
+	}
+}
+
+/*
+==================
+CObjectGC::OpenDisregardForGC
+==================
+*/
+void CObjectGC::OpenDisregardForGC()
+{
+	Assert( IsInGameThread() );
+	Assert( !bOpenForDisregardForGC );
+	bOpenForDisregardForGC = true;
+	Logf( TEXT( "OpenDisregardForGC: %d/%d objects in disregard for GC pool\n" ), lastNonGCIndex + 1, maxObjectsNotConsideredByGC );
+}
+
+/*
+==================
+CObjectGC::CloseDisregardForGC
+==================
+*/
+void CObjectGC::CloseDisregardForGC()
+{
+	// Disregard from GC pool is only available from the game thread, at least for now
+	Assert( IsInGameThread() );
+	Assert( bOpenForDisregardForGC );
+
+	if ( !g_IsRequestingExit )
+	{
+		// Iterate over all class objects and force assembles the token reference stream. This is required for class objects that are
+		// not taken into account for garbage collection but have instances that are
+		for ( TObjectIterator<CClass> it; it; ++it )
+		{
+			// Assemble reference token stream for garbage collection
+			CClass*		theClass = *it;
+			theClass->AssembleReferenceTokenStream();
+		}
+
+		// Iterate over all objects and mark them to be part of root set
+		if ( g_IsInitialLoad )
+		{
+			uint32		numAlwaysLoadedObjects = 0;
+			for ( CObjectIterator it; it; ++it )
+			{
+				it->AddToRoot();
+				++numAlwaysLoadedObjects;
+			}
+
+			Logf( TEXT( "%i objects as part of root set at end of initial load\n" ), numAlwaysLoadedObjects );
+		}
+	}
+
+	Logf( TEXT( "CloseDisregardForGC: %d/%d objects in disregard for GC pool\n" ), lastNonGCIndex+1, maxObjectsNotConsideredByGC );
+	bOpenForDisregardForGC = false;
 }
 
 /*
@@ -97,19 +171,25 @@ void CObjectGC::AddObject( CObject* InObject )
 	uint32	index = INDEX_NONE;
 
 	// Special non-garbage collectable range
-	if ( InObject->HasAnyObjectFlags( OBJECT_DisregardForGC ) && ( !availableNonGCObjectIndeces.empty() || ( lastNonGCIndex+1 < firstGCIndex ) ) )
+	if ( bOpenForDisregardForGC && DisregardForGCEnabled() )
 	{
-		// If we have free available indeces then use it
-		if ( !availableNonGCObjectIndeces.empty() )
+		index = ++lastNonGCIndex;
+
+		// Check if we're not out of bounds, unless there hasn't been any GC objects yet
+		if ( lastNonGCIndex >= maxObjectsNotConsideredByGC && allocatedObjects.size() > maxObjectsNotConsideredByGC )
 		{
-			index = availableNonGCObjectIndeces.front();
-			availableNonGCObjectIndeces.pop_front();
-			Assert( !allocatedObjects[index] );
+			Sys_Errorf( TEXT( "Unable to add more objects to disregard for GC pool (Max: %d)" ), maxObjectsNotConsideredByGC );
 		}
-		else
+
+		// If we haven't added any GC objects yet, it's fine to keep growing the disregard pool past its initial size
+		if ( lastNonGCIndex >= maxObjectsNotConsideredByGC )
 		{
-			index = ++lastNonGCIndex;
+			index = allocatedObjects.size();
+			allocatedObjects.push_back( nullptr );
+			Assert( index == lastNonGCIndex );
 		}
+
+		maxObjectsNotConsideredByGC = Max( maxObjectsNotConsideredByGC, lastNonGCIndex+1 );
 	}
 	// Regular pool/range
 	else
@@ -119,27 +199,20 @@ void CObjectGC::AddObject( CObject* InObject )
 		{
 			index = availableGCObjectIndeces.front();
 			availableGCObjectIndeces.pop_front();
-			Assert( !allocatedObjects[index] );
 		}
 		else
 		{
 			index = allocatedObjects.size();
 			allocatedObjects.push_back( nullptr );
 		}
+		Assert( index >= firstGCIndex && index > lastNonGCIndex );
 	}
 
-	// Clear object flag signaling disregard for GC if object was allocated in garbage collectible range
-	if ( index >= firstGCIndex )
+	// We can't place the object at that index where another object is exist
+	if ( allocatedObjects[index] )
 	{
-		// Object is allocated in regular pool so we need to clear OBJECT_DisregardForGC if it was set
-		InObject->RemoveObjectFlag( OBJECT_DisregardForGC );
+		Sys_Errorf( TEXT( "Attempting to add %s at index %d but another object (0x%016llx) exists at that index!" ), InObject->GetFullName().c_str(), index, ( ptrint )allocatedObjects[index] );
 	}
-
-	// Make sure only objects in disregarded index range have the object flag set
-	Assert( !InObject->HasAnyObjectFlags( OBJECT_DisregardForGC ) || ( index < firstGCIndex ) );
-
-	// Make sure that objects disregarded for GC are part of root set
-	Assert( !InObject->HasAnyObjectFlags( OBJECT_DisregardForGC ) || InObject->HasAnyObjectFlags( OBJECT_RootSet ) );
 
 	// Add the object to the global table
 	allocatedObjects[index] = InObject;
@@ -153,18 +226,22 @@ CObjectGC::RemoveObject
 */
 void CObjectGC::RemoveObject( CObject* InObject )
 {
+	// This should only be happening on the game thread (GC runs only on game thread when it's freeing objects)
+	Assert( IsInGameThread() );
+
 	// If the object isn't in the GC its error
 	Assert( InObject->index != INDEX_NONE );
 	
-	// Special non-garbage collectable range
-	if ( InObject->IsDisregardedForGC() )
+	// You cannot safely recycle indicies in the non-GC range
+	if ( !InObject->IsDisregardedForGC() )
 	{
-		availableNonGCObjectIndeces.push_back( InObject->index );
+		availableGCObjectIndeces.push_back( InObject->index );
 	}
-	// Regular pool/range
-	else
-	{		
-		availableGCObjectIndeces.push_back( InObject->index );		
+
+	// We check that our index contains the same object
+	if ( allocatedObjects[InObject->index] != InObject )
+	{
+		Sys_Errorf( TEXT( "Removing object (0x%016llx) at index %d but the index points to a different object (0x%016llx)!" ), ( ptrint )InObject, InObject->index, ( ptrint )allocatedObjects[InObject->index] );
 	}
 
 	allocatedObjects[InObject->index] = nullptr;
@@ -590,6 +667,16 @@ void CObjectGC::ProcessObjectForReferences( class CObject* InCurrentObject, std:
 			HandleObjectReference( InOutNewReachableObjects, object, true );
 		}
 
+		// Persistent CObject (Outer, TheClass)
+		else if ( REFERENCE_INFO.type == GCRT_PersistentObject )
+		{
+			// We're dealing with an object reference
+			CObject**	objectPtr	= ( CObject** )( stackEntryData + REFERENCE_INFO.offset );
+			CObject*&	object		= *objectPtr;
+			tokenReturnCount		= REFERENCE_INFO.returnCount;
+			HandleObjectReference( InOutNewReachableObjects, object, false );
+		}
+
 		// Array of CObject
 		else if ( REFERENCE_INFO.type == GCRT_ArrayObject )
 		{
@@ -650,6 +737,12 @@ void CObjectGC::ProcessObjectForReferences( class CObject* InCurrentObject, std:
 		{
 			// Break out of loop
 			break;
+		}
+
+		// Otherwise this is unknown token
+		else
+		{
+			Sys_Errorf( TEXT( "%s: Unknown token %i" ), InCurrentObject->GetFullName().c_str(), REFERENCE_INFO.type );
 		}
 	}
 

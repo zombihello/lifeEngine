@@ -31,7 +31,7 @@
 	- [ ] Implement ResolveName for resolve a package and name
 	- [X] Implement replacing existing object in StaticAllocateObject
 	- [ ] Replace CObject::SetName to Rename for guarantee the uniqueness of the name
-	- [ ] Need fix destroying packages in GC whom use by objects not considered for GC 
+	- [X] Need fix destroying packages in GC whom use by objects not considered for GC 
 - [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)
 - [x] Implemented functions of exploer level
 - [x] Added gizmo render in WorldEd.

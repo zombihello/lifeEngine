@@ -92,14 +92,20 @@ public:
 	virtual void Bind() override;
 
 	/**
+	 * @brief Registers the native class (constructs a CClass object)
+	 */
+	virtual void Register() override;
+
+	/**
 	 * @brief Realtime garbage collection helper function used to emit token containing information about a
 	 * direct CObject reference at the passed in offset
 	 *
-	 * @param InOffset	Offset into object at which object reference is stored
+	 * @param InOffset				Offset into object at which object reference is stored
+	 * @param InIsPersistentObject	Is this persistent object
 	 */
-	FORCEINLINE void EmitObjectReference( uint32 InOffset )
+	FORCEINLINE void EmitObjectReference( uint32 InOffset, bool InIsPersistentObject = false )
 	{
-		referenceTokenStream.EmitReferenceInfo( GCReferenceInfo( GCRT_Object, InOffset ) );
+		referenceTokenStream.EmitReferenceInfo( GCReferenceInfo( !InIsPersistentObject ? GCRT_Object : GCRT_PersistentObject, InOffset ) );
 	}
 
 	/**

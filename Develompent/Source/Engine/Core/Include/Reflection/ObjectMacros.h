@@ -209,15 +209,13 @@
         staticClass->SetSuperClass( Super::StaticClass() != staticClass ? Super::StaticClass() : nullptr ); \
         staticClass->SetClass( CClass::StaticClass() ); \
         staticClass->SetWithinClass( WithinClass::StaticClass() ); \
-        CObjectGC::Get().AddObject( staticClass ); \
-        HashObject( staticClass ); \
         ThisClass::StaticInitializeClass(); \
     } \
     struct Register##TClass \
     { \
         Register##TClass() \
         { \
-            TClass::StaticClass(); \
+            CObject::AddToAutoInitializeRegistrants( ( CObject* (*)() )&TClass::StaticClass ); \
         } \
     }; \
     static Register##TClass s_Register##TClass;
@@ -245,8 +243,6 @@
 					TForEachEnum( INTERNAL_REGISTER_ENUM ) \
 					s_CEnum = ::new CEnum( NativeConstructor, TEXT( #TEnum ), StaticPackage(), enums ); \
 					s_CEnum->SetClass( CEnum::StaticClass() ); \
-					CObjectGC::Get().AddObject( s_CEnum ); \
-					HashObject( s_CEnum ); \
 				} \
 				return s_CEnum; \
 			} \
@@ -256,7 +252,7 @@
     { \
         Register##TEnum() \
         { \
-            Enum::TEnum::StaticEnum(); \
+            CObject::AddToAutoInitializeRegistrants( ( CObject* (*)() )&Enum::TEnum::StaticEnum ); \
         } \
     }; \
 	static Register##TEnum s_Register##TEnum;
@@ -288,15 +284,13 @@
 	{ \
 		staticStruct->SetSuperStruct( Super::StaticStruct() != staticStruct ? Super::StaticStruct() : nullptr ); \
 		staticStruct->SetClass( CStruct::StaticClass() ); \
-		CObjectGC::Get().AddObject( staticStruct ); \
-		HashObject( staticStruct ); \
         ThisStruct::StaticInitializeStruct(); \
 	} \
 	struct Register##TStruct \
     { \
         Register##TStruct() \
         { \
-            TStruct::StaticStruct(); \
+            CObject::AddToAutoInitializeRegistrants( ( CObject* (*)() )&TStruct::StaticStruct ); \
         } \
     }; \
     static Register##TStruct s_Register##TStruct;
@@ -401,21 +395,20 @@ enum EObjectFlags
     OBJECT_None                     = 0,        /**< None */
     OBJECT_Native                   = 1 << 0,   /**< Native (CFields only) */
     OBJECT_RootSet                  = 1 << 1,   /**< Object will not be garbage collected, even if unreferenced */
-    OBJECT_DisregardForGC           = 1 << 2,   /**< Object is being disregard for GC */
-    OBJECT_BeginDestroyed           = 1 << 3,   /**< BeginDestroy has been called on the object */
-    OBJECT_FinishDestroyed          = 1 << 4,   /**< FinishDestroy has been called on the object */
-    OBJECT_Unreachable              = 1 << 5,   /**< Object is not reachable on the object graph */
-    OBJECT_PendingKill              = 1 << 6,   /**< Objects that are pending destruction */
-	OBJECT_TagImp                   = 1 << 7,   /**< Temporary import tag in load/save */
-	OBJECT_TagExp                   = 1 << 8,   /**< Temporary export tag in load/save */
-    OBJECT_Transient                = 1 << 9,   /**< Don't save object */
-    OBJECT_NeedLoad                 = 1 << 10,  /**< During load, indicates object needs loading */
-    OBJECT_NeedPostLoad             = 1 << 11,  /**< Object needs to be postloaded */
-    OBJECT_Public                   = 1 << 12,  /**< Object is visible outside its package */
+    OBJECT_BeginDestroyed           = 1 << 2,   /**< BeginDestroy has been called on the object */
+    OBJECT_FinishDestroyed          = 1 << 3,   /**< FinishDestroy has been called on the object */
+    OBJECT_Unreachable              = 1 << 4,   /**< Object is not reachable on the object graph */
+    OBJECT_PendingKill              = 1 << 5,   /**< Objects that are pending destruction */
+	OBJECT_TagImp                   = 1 << 6,   /**< Temporary import tag in load/save */
+	OBJECT_TagExp                   = 1 << 7,   /**< Temporary export tag in load/save */
+    OBJECT_Transient                = 1 << 8,   /**< Don't save object */
+    OBJECT_NeedLoad                 = 1 << 9,  /**< During load, indicates object needs loading */
+    OBJECT_NeedPostLoad             = 1 << 10,  /**< Object needs to be postloaded */
+    OBJECT_Public                   = 1 << 11,  /**< Object is visible outside its package */
 
     // Combination masks and other combinations
-    OBJECT_MASK_Load                 = OBJECT_Public | OBJECT_Native,                           /**< Flags to load from LifeEngine files */
-    OBJECT_MASK_Keep                 = OBJECT_Native | OBJECT_DisregardForGC | OBJECT_RootSet   /**< Flags to persist across loads */
+    OBJECT_MASK_Load                 = OBJECT_Public | OBJECT_Native,       /**< Flags to load from LifeEngine files */
+    OBJECT_MASK_Keep                 = OBJECT_Native | OBJECT_RootSet       /**< Flags to persist across loads */
 };
 
 /**
@@ -428,7 +421,7 @@ enum EPackageFlags
     PKG_InMemoryOnly            = 1 << 0,               /**< Indicates if this package is a package that exists in memory only */
 
     // Combination masks and other combinations
-    PKG_MASK_TransientFlags     = PKG_InMemoryOnly,     /**< Transient Flags are cleared when serializing to or from PackageFileSummary */
+    PKG_MASK_TransientFlags     = PKG_InMemoryOnly,     /**< Transient flags are cleared when serializing to or from PackageFileSummary */
 };
 
 /**

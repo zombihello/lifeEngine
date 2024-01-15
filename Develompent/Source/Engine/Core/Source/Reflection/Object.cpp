@@ -1,12 +1,50 @@
+#include <vector>
+
 #include "Logger/LoggerMacros.h"
+#include "Misc/CoreGlobals.h"
 #include "Reflection/Object.h"
 #include "Reflection/ObjectPackage.h"
 #include "Reflection/ObjectHash.h"
 #include "Reflection/LinkerLoad.h"
 #include "Reflection/Class.h"
 #include "System/ThreadingBase.h"
+#include "System/Config.h"
 
 IMPLEMENT_CLASS( CObject )
+
+/*
+==================
+GetCObjectSubsystemInitialised
+==================
+*/
+static FORCEINLINE bool& GetCObjectSubsystemInitialised()
+{
+	static bool		s_ObjInitialized = false;
+	return s_ObjInitialized;
+}
+
+/*
+==================
+GetObjAutoRegisters
+==================
+*/
+static FORCEINLINE std::vector<CObject*>& GetObjAutoRegisters()
+{
+	static std::vector<CObject*>	s_ObjAutoRegisters;
+	return s_ObjAutoRegisters;
+}
+
+/*
+==================
+GetAutoInitializeRegistrants
+==================
+*/
+static FORCEINLINE std::vector<CObject* (*)()>& GetAutoInitializeRegistrants()
+{
+	static std::vector<CObject* (*)()>	s_AutoInitializeRegistrants;
+	return s_AutoInitializeRegistrants;
+}
+
 
 /*
 ==================
@@ -26,11 +64,22 @@ CObject::CObject( ENativeConstructor, const CName& InName, const tchar* InPackag
 	: index( INDEX_NONE )
 	, name( InName )
 	, outer( nullptr )
-	, flags( InFlags | OBJECT_Public | OBJECT_Native | OBJECT_Transient | OBJECT_RootSet | OBJECT_DisregardForGC )
+	, flags( InFlags | OBJECT_Public | OBJECT_Native | OBJECT_Transient | OBJECT_RootSet )
 	, theClass( nullptr )
 {
 	Assert( sizeof( outer ) >= sizeof( InPackageName ) );
 	*( const tchar** )&outer = InPackageName;
+
+	// Call native registration from constructor if CObject system already initialized
+	if ( GetCObjectSubsystemInitialised() )
+	{
+		Register();
+	}
+	// Otherwise do it later in CObject::StaticInit
+	else
+	{
+		GetObjAutoRegisters().push_back( this );
+	}
 }
 
 /*
@@ -241,7 +290,7 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	}
 
 	// If we try to allocate object with unregistered class its error
-	if ( InClass->GetIndex() == INDEX_NONE )
+	if ( InClass->GetIndex() == INDEX_NONE && GetObjAutoRegisters().empty() )
 	{
 		Sys_Errorf( TEXT( "Unregistered class for %s" ), InName.ToString().c_str() );
 		return nullptr;
@@ -423,6 +472,105 @@ CObject* CObject::StaticConstructObject( class CClass* InClass, CObject* InOuter
 	}
 
 	return object;
+}
+
+/*
+==================
+CObject::AddToAutoInitializeRegistrants
+==================
+*/
+void CObject::AddToAutoInitializeRegistrants( CObject* ( *InStaticInitializeFn )() )
+{
+	GetAutoInitializeRegistrants().push_back( InStaticInitializeFn );
+}
+
+/*
+==================
+CObject::StaticInit
+==================
+*/
+void CObject::StaticInit()
+{
+	Assert( !GetCObjectSubsystemInitialised() );
+
+	// Get values from .ini so it is overridable per game/platform and allocate object pool
+	uint32 maxObjectsNotConsideredByGC	= g_Config.GetValue( CT_Engine, TEXT( "Engine.GarbageCollectionSettings" ), TEXT( "MaxObjectsNotConsideredByGC" ) ).GetNumber( 0 );
+	uint32 maxCObjects					= g_Config.GetValue( CT_Engine, TEXT( "Engine.GarbageCollectionSettings" ), TEXT( "MaxObjectsInGame" ) ).GetNumber( 2 * 1024 * 1024 ) ;	// Default to ~2M CObjects
+
+	// Log what we're doing to track down what really happens
+	CObjectGC::Get().AllocateObjectPool( maxCObjects, maxObjectsNotConsideredByGC );
+	Logf( TEXT( "Presizing for max %d objects, including %i objects not considered by GC\n" ), maxCObjects, maxObjectsNotConsideredByGC );
+
+	// If statically linked, initialize registrants
+	std::vector<CObject* (*)()>		autoInitializeRegistrants = GetAutoInitializeRegistrants();
+	for ( uint32 index = 0, count = autoInitializeRegistrants.size(); index < count; ++index )
+	{
+		autoInitializeRegistrants[index]();
+	}
+	autoInitializeRegistrants.clear();
+
+	// Mark CObject system as initialized
+	GetCObjectSubsystemInitialised() = true;
+
+	// Register all native classes
+	std::vector<CObject*>&	objAutoRegisters = GetObjAutoRegisters();
+	for ( uint32 index = 0, count = objAutoRegisters.size(); index < count; ++index )
+	{
+		objAutoRegisters[index]->Register();
+	}
+	objAutoRegisters.clear();
+
+	Logf( TEXT( "Object subsystem initialized\n" ) );
+}
+
+/*
+==================
+CObject::StaticExit
+==================
+*/
+void CObject::StaticExit()
+{
+	Assert( GetCObjectSubsystemInitialised() );
+	CObjectGC::Get().CollectGarbage( OBJECT_None );
+
+	GetCObjectSubsystemInitialised() = false;
+	Logf( TEXT( "Object subsystem successfully closed\n" ) );
+}
+
+/*
+==================
+CObject::StaticIsCObjectInitialized
+==================
+*/
+bool CObject::StaticIsCObjectInitialized()
+{
+	return GetCObjectSubsystemInitialised();
+}
+
+/*
+==================
+CObject::Register
+==================
+*/
+void CObject::Register()
+{
+	Assert( GetCObjectSubsystemInitialised() );
+
+	// Create package
+	CObjectPackage*		package = ( CObjectPackage* )CObjectPackage::CreatePackage( nullptr, ( const tchar* )GetOuter() );
+	Assert( package );
+	package->AddPackageFlag( PKG_InMemoryOnly );
+	outer = package;
+
+	// Add to the global object table
+	CObjectGC::Get().AddObject( this );
+
+	// Hashing the object
+	HashObject( this );
+
+	// Make sure that objects disregarded for GC are part of root set
+	Assert( !IsDisregardedForGC() || IsRootSet() );
+	Logf( TEXT( "Registered %s\n" ), GetFullName().c_str() );
 }
 
 /*
@@ -656,9 +804,12 @@ CObject::StaticInitializeClass
 */
 void CObject::StaticInitializeClass()
 {
+	// Mark CObject class reference as persistent object reference so that it (TheClass) doesn't get nulled when a class
+	// is marked as pending kill. Nulling TheClass may leave the object in a broken state if it doesn't get GC'd in the same
+	// GC call as its class. And even if it gets GC'd in the same call as its class it may break inside of GC
 	CClass*		theClass = StaticClass();
-	theClass->EmitObjectReference( STRUCT_OFFSET( CObject, outer ) );
-	theClass->EmitObjectReference( STRUCT_OFFSET( CObject, theClass ) );
+	theClass->EmitObjectReference( STRUCT_OFFSET( CObject, outer ), true );
+	theClass->EmitObjectReference( STRUCT_OFFSET( CObject, theClass ), true );
 }
 
 #if WITH_EDITOR

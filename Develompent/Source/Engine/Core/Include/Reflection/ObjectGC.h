@@ -28,12 +28,13 @@
  */
 enum EGCReferenceType
 {
-	GCRT_None,			/**< None */
-	GCRT_Object,		/**< CObject */
-	GCRT_ArrayObject,	/**< Array of CObject */
-	GCRT_ArrayStruct,	/**< Array of struct with CObject */
-	GCRT_FixedArray,	/**< Fixed array */
-	GCRT_EndOfStream	/**< End of stream */
+	GCRT_None,				/**< None */
+	GCRT_Object,			/**< CObject */
+	GCRT_PersistentObject,	/**< Persistent CObject (only for Outer and TheClass) */
+	GCRT_ArrayObject,		/**< Array of CObject */
+	GCRT_ArrayStruct,		/**< Array of struct with CObject */
+	GCRT_FixedArray,		/**< Fixed array */
+	GCRT_EndOfStream		/**< End of stream */
 };
 
 /**
@@ -395,6 +396,14 @@ public:
 	}
 
 	/**
+	 * @brief Allocate the object pool
+	 *
+	 * @param InMaxObjects						Maximum number of CObjects that can ever exist in the array
+	 * @param InMaxObjectsNotConsideredByGC		Number of objects in the permanent object pool
+	 */
+	void AllocateObjectPool( uint32 InMaxObjects, uint32 InMaxObjectsNotConsideredByGC );
+
+	/**
 	 * @brief Add the object into GC for it to keep an eye on the one
 	 * After added object into GC, in case when InObject is unreachable garbage collector will delete it
 	 * 
@@ -475,6 +484,34 @@ public:
 		return bIsGarbageCollecting;
 	}
 
+	/**
+	 * @brief If there's enough slack in the disregard pool, we can re-open it and keep adding objects to it
+	 */
+	void OpenDisregardForGC();
+
+	/**
+	 * @brief After the initial load, this closes the disregard pool so that new object are GC-able
+	 */
+	void CloseDisregardForGC();
+
+	/**
+	 * @brief Is the disregard for GC pool open
+	 * @return Return TRUE if the disregard for GC pool is open, otherwise returns FALSE
+	 */
+	FORCEINLINE bool IsOpenForDisregardForGC() const
+	{
+		return bOpenForDisregardForGC;
+	}
+
+	/**
+	 * @brief Indicates if the disregard for GC optimization is active
+	 * @return Return TRUE if MaxObjectsNotConsideredByGC is greater than zero; this indicates that the disregard for GC optimization is enabled
+	 */
+	FORCEINLINE bool DisregardForGCEnabled() const
+	{
+		return maxObjectsNotConsideredByGC > 0;
+	}
+
 private:
 	/**
 	 * @brief Helper struct for stack based approach
@@ -533,13 +570,14 @@ private:
 	bool						bPurgeIsRequired;								/**< Whether we need to purge objects or not */
 	bool						bDelayedBeginDestroyHasBeenRoutedToAllObjects;	/**< Whether delayed BeginDestroy has already been routed to all unreachable objects */
 	bool						bFinishDestroyHasBeenRoutedToAllObjects;		/**< Whether FinishDestroy has already been routed to all unreachable objects */
+	bool						bOpenForDisregardForGC;							/**< If TRUE this is the intial load and we should load objects into the disregarded for GC range */
+	uint32						maxObjectsNotConsideredByGC;					/**< Maximum number of objects in the disregard for GC Pool */
 	uint32						currentPurgeObjectIndex;						/**< Current object index for incremental purge */
 	uint32						objectsPendingDestructionCount;					/**< Number of objects actually still pending destruction */
 	uint32						firstGCIndex;									/**< First index into objects array taken into account for GC */
 	uint32						lastNonGCIndex;									/**< Index pointing to last object created in range disregarded for GC */
 	std::vector<class CObject*>	allocatedObjects;								/**< List of all allocated objects */
 	std::vector<uint32>			objectsPendingDestruction;						/**< Array that we'll fill with indices to objects that are still pending destruction after the first GC sweep */
-	std::list<uint32>			availableNonGCObjectIndeces;					/**< Available object indices in non-GC range */
 	std::list<uint32>			availableGCObjectIndeces;						/**< Available object indices in GC range */
 	std::vector<uint32>			unreachableObjectsIndices;						/**< Index of objects with the OBJECT_Unreachable flag during garbage collection */
 };

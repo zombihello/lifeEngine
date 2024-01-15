@@ -23,25 +23,7 @@ CField::Bind
 ==================
 */
 void CField::Bind()
-{
-	// Do nothing if the field already binded
-	if ( bBinded )
-	{
-		return;
-	}
-
-	// For native objects (only CClass, CStructs and CEnums) we have to create a package where this filed must be
-	if ( HasAnyObjectFlags( OBJECT_Native ) && ( IsA<CStruct>( this ) || IsA<CEnum>( this ) ) )
-	{
-		CObjectPackage*		package = ( CObjectPackage* )CObjectPackage::CreatePackage( nullptr, ( const tchar* )GetOuter() );
-		Assert( package );
-
-		package->AddPackageFlag( PKG_InMemoryOnly );
-		SetOuter( package );
-	}
-
-	bBinded = true;
-}
+{}
 
 /*
 ==================

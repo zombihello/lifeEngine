@@ -702,6 +702,10 @@ CObject* CLinkerLoad::CreateExport( uint32 InExportIndex )
 
 		// Otherwise we create a new object
 		exportObject.object = CObject::StaticConstructObject( loadClass, thisParent, exportObject.objectName, objectLoadFlags );
+		if ( g_IsInitialLoad || CObjectGC::Get().IsOpenForDisregardForGC() )
+		{
+			exportObject.object->AddToRoot();
+		}
 
 		// Associate linker with object to avoid detachment mismatches
 		if ( exportObject.object )

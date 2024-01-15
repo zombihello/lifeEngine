@@ -29,17 +29,22 @@ void CClass::Serialize( class CArchive& InArchive )
 
 /*
 ==================
+CClass::Register
+==================
+*/
+void CClass::Register()
+{
+	Super::Register();
+	Bind();
+}
+
+/*
+==================
 CClass::Bind
 ==================
 */
 void CClass::Bind()
 {
-	// Do nothing if the class already binded
-	if ( IsBinded() )
-	{
-		return;
-	}
-
 	Super::Bind();
 	CClass*		superClass = GetSuperClass();
 	AssertMsg( superClass || CObject::StaticClass() == this, TEXT( "Unable to bind %s" ), GetName().c_str() );

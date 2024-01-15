@@ -214,11 +214,8 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	// Initialize the system
 	CSystem::Get().Init();
 
-	// Bind all fields
-	for ( TObjectIterator<CField> it; it; ++it )
-	{
-		it->Bind();
-	}
+	// Initialize CObject system
+	CObject::StaticInit();
 
 	// Loading table of contents
 	if ( !g_IsEditor && !g_IsCooker )
@@ -279,7 +276,6 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		CObjectPackage*		enginePackage = CObjectPackage::CreatePackage( nullptr, TEXT( "Engine" ) );
 		g_Engine			= lclass->CreateObject<CBaseEngine>( enginePackage, NAME_None, OBJECT_Public );
 		Assert( g_Engine );
-		g_Engine->AddToRoot();
 	}
 
 	return result;
@@ -333,6 +329,10 @@ int32 CEngineLoop::Init()
 		return result;
 	}
 #endif // WITH_EDITOR
+
+	// Setup GC optimizations
+	CObjectGC::Get().CloseDisregardForGC();
+	g_IsInitialLoad = false;
 
 	// Loading map
 	std::wstring		map;
@@ -473,10 +473,10 @@ void CEngineLoop::Exit()
 	g_RHI->Destroy();
 
 	g_Window->Close();
-	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 	CObject::CleanupLinkerMap();
-	g_Log->TearDown();
+	CObject::StaticExit();
 	CSystem::Get().Shutdown();
+	g_Log->TearDown();
 	g_Config.Shutdown();
 	g_CommandLine.Shutdown();
 }
