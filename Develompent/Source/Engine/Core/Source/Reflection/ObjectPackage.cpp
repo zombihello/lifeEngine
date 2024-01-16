@@ -1,3 +1,7 @@
+#include <vector>
+#include <unordered_set>
+#include <algorithm>
+
 #include "Misc/CoreGlobals.h"
 #include "Reflection/ObjectPackage.h"
 #include "Reflection/Class.h"
@@ -106,12 +110,14 @@ CObjectPackage* CObjectPackage::CreatePackage( CObject* InOuter, const tchar* In
 	CObjectPackage*		resultPackage = ( CObjectPackage* )FindObjectFast( CObjectPackage::StaticClass(), InOuter, InPackageName, true, InOuter == ANY_PACKAGE );
 	if ( !resultPackage )
 	{
-		return new( InOuter, InPackageName, OBJECT_Public ) CObjectPackage;
+		// Create a new package
+		resultPackage = new( InOuter, InPackageName, OBJECT_Public ) CObjectPackage;
+		
+		// Mark this package as newly created
+		resultPackage->AddPackageFlag( PKG_NewlyCreated );
 	}
-	else
-	{
-		return resultPackage;
-	}
+
+	return resultPackage;
 }
 
 /*
@@ -126,6 +132,8 @@ CObjectPackage* CObjectPackage::LoadPackage( CObjectPackage* InOuter, const tcha
 
 	// Try to load
 	Logf( TEXT( "Load package '%s'\n" ), InFilename );
+	
+	// We begin loading the package
 	BeginLoadPackage();
 	
 	// Create a new linker object which goes off and tries load the file
@@ -140,14 +148,14 @@ CObjectPackage* CObjectPackage::LoadPackage( CObjectPackage* InOuter, const tcha
 
 	// Load all objects from package
 	linker->LoadAllObjects();
+
+	// Some platforms will run out of file handles. So, this will close the package
+	GetObjectSerializeContext().AddDelayedLinkerClosePackage( linker );
+
+	// We end loading the package
 	EndLoadPackage();
 
-	// We no longer need the linker. Passing in NULL would reset all loaders so we need to check for that
-	if ( resultPackage )
-	{
-		CLinkerManager::Get().ResetLoaders( resultPackage );
-	}
-
+	// Done!
 	Logf( TEXT( "Package '%s' is laoded\n" ), InFilename );
 	return resultPackage;
 }
@@ -174,7 +182,153 @@ CObjectPackage::EndLoadPackage
 */
 void CObjectPackage::EndLoadPackage()
 {
-	GetObjectSerializeContext().DecrementBeginLoadCount();
+	ObjectSerializeContext&		objectSerializeContext = GetObjectSerializeContext();
+	while ( objectSerializeContext.DecrementBeginLoadCount() == 0 && ( objectSerializeContext.HasLoadedObjects() || objectSerializeContext.HasPendingImports() ) )
+	{
+		// Make sure we're not recursively calling EndLoadPackage
+		objectSerializeContext.IncrementBeginLoadCount();
+
+		// Temporary list of loaded objects as ObjectSerializeContext::objectsLoaded might expand during iteration
+		std::vector<CObject*>				objLoaded;
+		std::unordered_set<CLinkerLoad*>	loadedLinkers;
+		while ( objectSerializeContext.HasLoadedObjects() )
+		{
+			// Accumulate till ObjectSerializeContext::objectsLoaded no longer increases
+			objectSerializeContext.AppendLoadedObjectsAndEmpty( objLoaded );
+
+			// Sort by Filename and Offset
+			std::sort( objLoaded.begin(), objLoaded.end(), []( const CObject* InA, const CObject* InB ) -> bool 
+					   { 
+						   CLinker*		linkerA = InA->GetLinker();
+						   CLinker*		linkerB = InB->GetLinker();
+
+						   // Both objects have linkers
+						   if ( linkerA && linkerB )
+						   {
+							   // Identical linkers, sort by offset in file
+							   if ( linkerA == linkerB )
+							   {
+								   ObjectExport&	exportA = linkerA->GetExports()[ InA->GetLinkerIndex() ];
+								   ObjectExport&	exportB = linkerB->GetExports()[ InB->GetLinkerIndex() ];
+								   return exportA.serialOffset < exportB.serialOffset;
+							   }
+							   // Sort by pointer address
+							   else
+							   {
+								   return false;
+							   }
+						   }
+						   // Neither objects have a linker, don't do anything
+						   else if ( linkerA == linkerB )
+						   {
+							   return false;
+						   }
+						   // Sort objects with linkers vs objects without
+						   else
+						   {
+							   return linkerA != nullptr;
+						   }
+					   } );
+
+			// Finish loading everything
+			for ( uint32 index = 0, count = objLoaded.size(); index < count; ++index )
+			{
+				CObject*	object = objLoaded[index];
+				if ( object->HasAnyObjectFlags( OBJECT_NeedLoad ) )
+				{
+					CLinkerLoad*	linker = object->GetLinker();
+					Assert( linker );
+					linker->Preload( object );
+				}
+			}
+
+			// Start over again as new objects have been loaded that need to have "Preload" called on them before
+			// we can safely PostLoad them
+			if ( objectSerializeContext.HasLoadedObjects() )
+			{
+				continue;
+			}
+
+			// Remember linker of objects. Only in the editor
+			if ( g_IsEditor )
+			{
+				for ( uint32 index = 0, count = objLoaded.size(); index < count; ++index )
+				{
+					CObject*		object = objLoaded[index];
+					CLinkerLoad*	linker = object->GetLinker();
+					if ( linker )
+					{
+						loadedLinkers.insert( linker );
+					}
+				}
+			}
+
+			// Call PostLoad of all loaded objects
+			{
+				TGuardValue<bool>	guardIsRoutingPostLoad( objectSerializeContext.bRoutingPostLoad, true );
+				for ( uint32 index = 0, count = objLoaded.size(); index < count; ++index )
+				{
+					CObject*	object = objLoaded[index];
+					Assert( object );
+					object->ConditionalPostLoad();
+				}
+			}
+
+			// Empty array before next iteration as we finished postloading all objects
+			objLoaded.clear();
+		}
+
+		// Mark all loaded package as fully loaded if they all exports were loaded. Only in the editor
+		if ( g_IsEditor && !loadedLinkers.empty() )
+		{
+			for ( auto it = loadedLinkers.begin(), itEnd = loadedLinkers.end(); it != itEnd; ++it )
+			{
+				CLinkerLoad*	linker = *it;
+				Assert( linker );
+
+				CObjectPackage* linkerRoot = linker->GetLinkerRoot();
+				if ( linkerRoot && !linkerRoot->IsFullyLoaded() )
+				{
+					bool								bAllExportsCreated = true;
+					const std::vector<ObjectExport>&	exportMap = linker->GetExports();
+					for ( uint32 exportIndex = 0, exportCount = exportMap.size(); exportIndex < exportCount; ++exportIndex )
+					{
+						const ObjectExport&		exportObject = exportMap[exportIndex];
+						if ( !exportObject.object )
+						{
+							bAllExportsCreated = false;
+							break;
+						}
+					}
+
+					if ( bAllExportsCreated )
+					{
+						linkerRoot->MarkAsFullyLoaded();
+					}
+				}
+			}
+		}
+
+		// Dissociate all linker import, since they may be destroyed, causing their pointers to become invalid
+		CLinkerManager::Get().DissociateImports();
+
+		// Close any linkers' loaders that were requested to be closed once ObjectSerializeContext::objBeginLoadCount goes to 0
+		std::unordered_set<CLinkerLoad*>		packagesToClose;
+		GetObjectSerializeContext().GetDelayedLinkerClosePackagesAndEmpty( packagesToClose );
+		for ( auto it = packagesToClose.begin(), itEnd = packagesToClose.end(); it != itEnd; ++it )
+		{
+			CLinkerLoad*	linker = *it;
+			if ( linker )
+			{
+				CObjectPackage*		linkerRoot = linker->GetLinkerRoot();
+				if ( linker->HasLoader() && linkerRoot )
+				{
+					CLinkerManager::Get().ResetLoaders( linkerRoot );
+				}
+				Assert( !linker->HasLoader() );
+			}
+		}
+	}
 }
 
 /*
@@ -483,6 +637,8 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 			}
 			else
 			{
+				// Package has been save, so unmark NewlyCreated flag and unset dirty flag
+				InOuter->RemovePackageFlag( PKG_NewlyCreated );
 				InOuter->SetDirtyFlag( false );
 			}
 

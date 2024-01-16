@@ -13,6 +13,46 @@ CLinkerManager::CLinkerManager()
 
 /*
 ==================
+CLinkerManager::DissociateImports
+==================
+*/
+void CLinkerManager::DissociateImports()
+{
+	std::unordered_set<CLinkerLoad*>		localLoadersWithNewImports;
+	GetLoadersWithNewImportsAndEmpty( localLoadersWithNewImports );
+	for ( auto it = localLoadersWithNewImports.begin(), itEnd = localLoadersWithNewImports.end(); it != itEnd; ++it )
+	{
+		CLinkerLoad*					linker = *it;
+		std::vector<ObjectImport>&		importMap = linker->GetImports();
+		for ( uint32 importIndex = 0, importCount = importMap.size(); importIndex < importCount; ++importIndex )
+		{
+			ObjectImport&	importObject = importMap[importIndex];
+			bool			bIsStale = false;
+
+			// The import object could be stale if it has been replaced by patching
+			// logic or compile on load
+			if ( importObject.sourceLinker && importObject.sourceIndex != INDEX_NONE )
+			{
+				bIsStale = importObject.sourceLinker->GetExports()[importObject.sourceIndex].object != importObject.object;
+			}
+
+			if ( bIsStale || ( importObject.object && !importObject.object->HasAnyObjectFlags( OBJECT_Native ) ) )
+			{
+				importObject.object = nullptr;
+			}
+
+			// When the SourceLinker is reset, the SourceIndex must also be reset, or recreating
+			// an import that points to a redirector will fail to find the redirector
+			importObject.sourceLinker = nullptr;
+			importObject.sourceIndex = INDEX_NONE;
+		}
+	}
+
+	CObjectPackage::GetObjectSerializeContext().ResetImportCount();
+}
+
+/*
+==================
 CLinkerManager::DeleteLoaders
 ==================
 */

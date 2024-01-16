@@ -101,6 +101,54 @@ CObject::~CObject()
 
 /*
 ==================
+CObject::PostLoad
+==================
+*/
+void CObject::PostLoad()
+{
+	// Note that it has propagated
+#if !SHIPPING_BUILD
+	CObjectPackage::GetObjectSerializeContext().RemoveDebugPostLoad( this );
+#endif // !SHIPPING_BUILD
+}
+
+/*
+==================
+CObject::ConditionalPostLoad
+==================
+*/
+void CObject::ConditionalPostLoad()
+{
+	// PostLoad only if the object needs it and has already been serialized
+	Assert( !HasAnyObjectFlags( OBJECT_NeedLoad ) );
+	if ( HasAnyObjectFlags( OBJECT_NeedPostLoad ) )
+	{
+		Assert( IsInGameThread() );
+
+#if !SHIPPING_BUILD
+		ObjectSerializeContext&		objectSerializeContext = CObjectPackage::GetObjectSerializeContext();
+		Assert( !objectSerializeContext.ContainsDebugPostLoad( this ) );
+		objectSerializeContext.AddDebugPostLoad( this );
+#endif // !SHIPPING_BUILD
+
+		// Remove OBJECT_NeedPostLoad flag
+		RemoveObjectFlag( OBJECT_NeedPostLoad );
+
+		// Call PostLoad
+		PostLoad();
+
+		// Check PostLoad route
+#if !SHIPPING_BUILD
+		if ( objectSerializeContext.ContainsDebugPostLoad( this ) )
+		{
+			Sys_Errorf( TEXT( "%s failed to route PostLoad. Please call Super::PostLoad() in your <ClassName>::PostLoad() function" ), GetFullName().c_str() );
+		}
+#endif // !SHIPPING_BUILD
+	}
+}
+
+/*
+==================
 CObject::operator delete
 ==================
 */
@@ -559,7 +607,7 @@ void CObject::Register()
 	// Create package
 	CObjectPackage*		package = ( CObjectPackage* )CObjectPackage::CreatePackage( nullptr, ( const tchar* )GetOuter() );
 	Assert( package );
-	package->AddPackageFlag( PKG_InMemoryOnly );
+	package->AddPackageFlag( PKG_CompiledIn );
 	outer = package;
 
 	// Add to the global object table

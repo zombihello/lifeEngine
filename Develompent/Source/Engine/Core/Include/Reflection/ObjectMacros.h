@@ -402,7 +402,7 @@ enum EObjectFlags
 	OBJECT_TagImp                   = 1 << 6,   /**< Temporary import tag in load/save */
 	OBJECT_TagExp                   = 1 << 7,   /**< Temporary export tag in load/save */
     OBJECT_Transient                = 1 << 8,   /**< Don't save object */
-    OBJECT_NeedLoad                 = 1 << 9,  /**< During load, indicates object needs loading */
+    OBJECT_NeedLoad                 = 1 << 9,   /**< During load, indicates object needs loading */
     OBJECT_NeedPostLoad             = 1 << 10,  /**< Object needs to be postloaded */
     OBJECT_Public                   = 1 << 11,  /**< Object is visible outside its package */
 
@@ -417,11 +417,13 @@ enum EObjectFlags
  */
 enum EPackageFlags
 {
-    PKG_None                    = 0,                    /**< No flags */
-    PKG_InMemoryOnly            = 1 << 0,               /**< Indicates if this package is a package that exists in memory only */
+    PKG_None                    = 0,                                    /**< No flags */
+    PKG_NewlyCreated            = 1 << 0,                               /**< Newly created package, not saved yet */
+    PKG_CompiledIn              = 1 << 1,                               /**< This package is from "compiled in" classes */
 
     // Combination masks and other combinations
-    PKG_MASK_TransientFlags     = PKG_InMemoryOnly,     /**< Transient flags are cleared when serializing to or from PackageFileSummary */
+    PKG_MASK_TransientFlags     = PKG_NewlyCreated,                     /**< Transient flags are cleared when serializing to or from PackageFileSummary */
+    PKG_MASK_InMemoryOnly       = PKG_NewlyCreated | PKG_CompiledIn     /**< Indicates if this package is a package that exists in memory only */
 };
 
 /**

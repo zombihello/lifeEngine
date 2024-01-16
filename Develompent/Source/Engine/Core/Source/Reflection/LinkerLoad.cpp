@@ -779,6 +779,7 @@ CObject* CLinkerLoad::CreateImport( uint32 InImportIndex )
 			Assert( importObject.sourceLinker );
 			importObject.object = importObject.sourceLinker->CreateExport( importObject.sourceIndex );
 			CObjectPackage::GetObjectSerializeContext().IncrementImportCount();
+			CLinkerManager::Get().AddLoaderWithNewImports( this );
 		}
 
 		// If failed to resolve import print error message
@@ -889,7 +890,7 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 
 				// Assign temp package to resolve the object in memory when there is no source linker available only if the package is PKG_InMemoryOnly
 				CObjectPackage*		topPackage = Cast<CObjectPackage>( topObjectImport->object );
-				if ( topPackage && topPackage->HasAnyPackageFlags( PKG_InMemoryOnly ) )
+				if ( topPackage && topPackage->HasAnyPackageFlags( PKG_MASK_InMemoryOnly ) )
 				{
 					// This is an import to a memory-only package, just search for it in the package
 					tmpPackage = topPackage;
@@ -1009,7 +1010,7 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 
 	// Assign Package to resolve the object in memory when there is no source linker available only if the package is MemoryOnly
 	bool	bCameFromMemoryOnlyPackage = false;
-	if ( !package && tmpPackage && tmpPackage->HasAnyPackageFlags( PKG_InMemoryOnly ) )
+	if ( !package && tmpPackage && tmpPackage->HasAnyPackageFlags( PKG_MASK_InMemoryOnly ) )
 	{
 		// This is an import to a memory-only package, just search for it in the package
 		package = tmpPackage;
@@ -1020,6 +1021,7 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 		{
 			importObject.object = tmpPackage;
 			CObjectPackage::GetObjectSerializeContext().IncrementImportCount();
+			CLinkerManager::Get().AddLoaderWithNewImports( this );
 			return;
 		}
 	}
@@ -1055,6 +1057,7 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 				{
 					importObject.object = findObject;
 					CObjectPackage::GetObjectSerializeContext().IncrementImportCount();
+					CLinkerManager::Get().AddLoaderWithNewImports( this );
 				}
 			}
 		}
@@ -1067,7 +1070,68 @@ CLinkerLoad::Preload
 ==================
 */
 void CLinkerLoad::Preload( CObject* InObject )
-{}
+{
+	Assert( InObject );
+
+	// Preload the object if necessary
+	if ( InObject->HasAnyObjectFlags( OBJECT_NeedLoad ) )
+	{
+		if ( InObject->GetLinker() == this )
+		{
+			// If this is a struct, make sure that its parent struct is completely loaded
+			if ( CStruct* theStruct = Cast<CStruct>( InObject ) )
+			{
+				if ( theStruct->GetSuperStruct() )
+				{
+					Preload( theStruct->GetSuperStruct() );
+				}
+			}
+
+			// Make sure this object didn't get loaded in the above Preload call
+			if ( InObject->HasAnyObjectFlags( OBJECT_NeedLoad ) )
+			{
+				// Grab the resource for this Object
+				const uint32	exportIndex = InObject->GetLinkerIndex();
+				ObjectExport&	exportObject = exportMap[exportIndex];
+				Assert( exportObject.object == InObject );
+
+				// Remember current position in the file
+				const uint32	savedPos = loader->Tell();
+
+				// Move to the position in the file where this object's data is stored
+				Seek( exportObject.serialOffset );
+
+				// Mark the object to indicate that it has been loaded
+				InObject->RemoveObjectFlag( OBJECT_NeedLoad );
+
+				// Serialize object's data
+				InObject->Serialize( *this );
+
+				// Make sure we serialized the right amount of stuff
+				uint32		sizeSerialized = Tell() - exportObject.serialOffset;
+				if ( sizeSerialized != exportObject.serialSize )
+				{
+					if ( InObject->GetClass()->HasAnyClassFlags( CLASS_Deprecated ) )
+					{
+						Warnf( TEXT( "%s: Serial size mismatch: Got %i, Expected %i\n" ), InObject->GetFullName().c_str(), sizeSerialized, exportObject.serialSize );
+					}
+					else
+					{
+						Sys_Errorf( TEXT( "%s: Serial size mismatch: Got %i, Expected %i" ), InObject->GetFullName().c_str(), sizeSerialized, exportObject.serialSize );
+					}
+				}
+
+				// Restore original position in the file
+				Seek( savedPos );
+			}
+		}
+		else if ( CLinkerLoad* linker = InObject->GetLinker() )
+		{
+			// Send to the object's linker
+			linker->Preload( InObject );
+		}
+	}
+}
 
 /*
 ==================
@@ -1128,7 +1192,8 @@ void CLinkerLoad::Detach()
 	}
 
 	// Remove from object manager, if it has been added
-	CLinkerManager::Get().RemoveLoaderFromObjectLoaders( this );
+	CLinkerManager::Get().RemoveLoaderFromObjectLoadersAndLoadersWithNewImports( this );
+	CObjectPackage::GetObjectSerializeContext().RemoveDelayedLinkerClosePackage( this );
 
 	// Empty out no longer used array
 	importMap.clear();
@@ -1226,5 +1291,9 @@ CLinkerSave::operator<<
 */
 CArchive& CLinkerLoad::operator<<( class CObject*& InValue )
 {
+	CPackageIndex	index;
+	*this << index;
+
+	InValue = IndexToObject( index );
 	return *this;
 }

@@ -125,6 +125,15 @@ public:
 	 */
 	CName GetExportClassPackage( uint32 InExportIndex ) const;
 
+	/**
+	 * @brief Is has this linker a loader
+	 * @return Return TRUE if this linker has a loader, otherwise returns FALSE
+	 */
+	FORCEINLINE bool HasLoader() const
+	{
+		return loader != nullptr;
+	}
+
 protected:
 	/**
 	 * @brief Initialize linker

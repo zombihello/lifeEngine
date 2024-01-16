@@ -35,6 +35,8 @@ public:
     friend bool IsInA( CObject* InObject, CClass* InClass );
     friend class CObjectGC;
     friend class CClass;
+    friend class CObjectPackage;
+
     /**
      * @brief Default within class type
      */
@@ -555,6 +557,12 @@ protected:
         HandleObjectReference( InOutObjectArray, InObject, false );
     }
 
+    /**
+     * @brief Do any object-specific cleanup required immediately after loading an object
+     * @note This is not called for newly-created objects, and by default will always execute on the game thread
+     */
+    virtual void PostLoad();
+
 private:
     /**
      * @brief Called before destroying the object
@@ -597,6 +605,11 @@ private:
             return false;
         }
     }
+
+    /**
+     * @brief Call PostLoad if needed
+     */
+    void ConditionalPostLoad();
 
     /**
      * @brief Create a unique name by combining a base name and an arbitrary number string

@@ -179,13 +179,13 @@ void CWorld::Serialize( CArchive& InArchive )
 	{
 		Sys_NormalizePathSeparators( name );
 		std::size_t			pathSeparatorPos = name.find_last_of( PATH_SEPARATOR );
-		if ( pathSeparatorPos != std::string::npos )
+		if ( pathSeparatorPos != std::wstring::npos )
 		{
 			name.erase( 0, pathSeparatorPos + 1 );
 		}
 
 		uint32 dotPos = name.find_last_of( TEXT( "." ) );
-		if ( dotPos != std::string::npos )
+		if ( dotPos != std::wstring::npos )
 		{
 			name.erase( dotPos, name.size() + 1 );
 		}

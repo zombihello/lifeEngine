@@ -57,6 +57,16 @@ public:
 	}
 
 	/**
+	 * @brief Get all object loaders with new imports and empty it
+	 * @param OutLoaders	Output all object loaders with new imports
+	 */
+	FORCEINLINE void GetLoadersWithNewImportsAndEmpty( std::unordered_set<CLinkerLoad*>& OutLoaders )
+	{
+		OutLoaders = std::move( loadersWithNewImports );
+		Assert( loadersWithNewImports.empty() );
+	}
+
+	/**
 	 * @brief Add a new object loader
 	 * @param InLinkerLoad	Object loader
 	 */
@@ -66,12 +76,22 @@ public:
 	}
 
 	/**
-	 * @brief Remove an object loader fomr object loaders array
+	 * @brief Add a new object loader with new imports
 	 * @param InLinkerLoad	Object loader
 	 */
-	FORCEINLINE void RemoveLoaderFromObjectLoaders( CLinkerLoad* InLinkerLoad )
+	FORCEINLINE void AddLoaderWithNewImports( CLinkerLoad* InLinkerLoad )
+	{
+		loadersWithNewImports.insert( InLinkerLoad );
+	}
+
+	/**
+	 * @brief Remove an object loader from object loaders array and loaders with new imports array
+	 * @param InLinkerLoad	Object loader
+	 */
+	FORCEINLINE void RemoveLoaderFromObjectLoadersAndLoadersWithNewImports( CLinkerLoad* InLinkerLoad )
 	{
 		objectLoaders.erase( InLinkerLoad );
+		loadersWithNewImports.erase( InLinkerLoad );
 	}
 
 	/**
@@ -86,6 +106,12 @@ public:
 			bHasPendingCleanup = true;
 		}
 	}
+
+	/**
+	 * @brief Dissociates all linker import This currently needs to happen as the referred 
+	 * objects might be destroyed at any time
+	 */
+	void DissociateImports();
 
 	/**
 	 * @brief Deletes all object loaders that finished loading
@@ -107,9 +133,10 @@ public:
 	void ResetLoaders( const std::unordered_set<CLinkerLoad*>& InLinkerLoadSet );
 
 private:
-	std::unordered_set<CLinkerLoad*>	objectLoaders;		/**< Map of packages to their open linkers */
-	std::unordered_set<CLinkerLoad*>	pendingCleanupList;	/**< List of linkers to delete */
-	bool								bHasPendingCleanup;	/**< Has pending cleanup */
+	std::unordered_set<CLinkerLoad*>	objectLoaders;			/**< Map of packages to their open linkers */
+	std::unordered_set<CLinkerLoad*>	loadersWithNewImports;	/**< List of loaders that have new imports */
+	std::unordered_set<CLinkerLoad*>	pendingCleanupList;		/**< List of linkers to delete */
+	bool								bHasPendingCleanup;		/**< Has pending cleanup */
 };
 
 #endif // !LINKERMANAGER_H
