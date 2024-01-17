@@ -29,7 +29,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	~CLinkerSave();
+	virtual ~CLinkerSave();
 
 	/**
 	 * @brief Detaches file saver and hence file handle

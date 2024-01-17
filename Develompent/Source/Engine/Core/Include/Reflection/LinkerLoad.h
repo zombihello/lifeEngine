@@ -23,26 +23,34 @@ public:
 	 *
 	 * @param InRoot		The top-level CObjectPackage object for the package associated with this linker
 	 * @param InFilename	The name of the file for this package
+	 * @param InLoadFlags	Load flags determining behavior (see ELoadFlags)
 	 */
-	CLinkerLoad( CObjectPackage* InRoot, const tchar* InFilename );
+	CLinkerLoad( CObjectPackage* InRoot, const tchar* InFilename, uint32 InLoadFlags );
+
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~CLinkerLoad();
 
 	/**
 	 * @brief Find or create the linker for a package
 	 *
 	 * @param InOuter			Package if known, can be null
-	 * @param InFilename		Package resource to load, must not be empty
+	 * @param InFilename		Package resource to load, can be empty if InOuter is valid
+	 * @param InLoadFlags		Load flags determining behavior (see ELoadFlags)
 	 * @return Return pointer to the loaded linker or NULL if the file didn't exist
 	 */
-	static CLinkerLoad* GetPackageLinker( CObjectPackage* InOuter, const tchar* InFilename );
+	static CLinkerLoad* GetPackageLinker( CObjectPackage* InOuter, const tchar* InFilename, uint32 InLoadFlags );
 
 	/**
 	 * @brief Create linker
 	 *
 	 * @param InParent		Parent object to load into, can be NULL (most likely case)
 	 * @param InFilename	Name of file on disk to load
+	 * @param InLoadFlags	Load flags determining behavior (see ELoadFlags)
 	 * @return Return a new CLinkerLoad object for InParent/InFilename
 	 */
-	static CLinkerLoad* CreateLinker( CObjectPackage* InParent, const tchar* InFilename );
+	static CLinkerLoad* CreateLinker( CObjectPackage* InParent, const tchar* InFilename, uint32 InLoadFlags );
 
 	/**
 	 * @brief Load all objects in package
@@ -261,6 +269,7 @@ private:
 	bool						bHasFoundExistingExports;			/**< Whether we already matched up existing exports */
 	uint32						exportHashIndex;					/**< Current index into export hash map, used by linker creation for spreading out hashing exports */
 	uint32						exportHash[exportHashCount];		/**< Export hash */
+	uint32						loadFlags;							/**< Flags determining loading behavior */
 	CArchive*					loader;								/**< The archive that actually reads the raw data from disk */
 };
 

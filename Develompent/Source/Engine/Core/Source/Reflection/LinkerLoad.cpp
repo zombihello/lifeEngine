@@ -10,17 +10,39 @@
 CLinkerLoad::CLinkerLoad
 ==================
 */
-CLinkerLoad::CLinkerLoad( CObjectPackage* InRoot, const tchar* InFilename )
+CLinkerLoad::CLinkerLoad( CObjectPackage* InRoot, const tchar* InFilename, uint32 InLoadFlags )
 	: CLinker( InRoot, InFilename )
 	, CArchive( InFilename )
 	, bHasFinishedInitialization( false )
 	, bHasSerializedPackageFileSummary( false )
 	, bHasFoundExistingExports( false )
 	, exportHashIndex( 0 )
+	, loadFlags( InLoadFlags )
 	, loader( nullptr )
 {
+	// We check that ExportHashCount must be power of two
+	static_assert( ( exportHashCount & ( exportHashCount - 1 ) ) == 0, "ExportHashCount must be power of two" );
+
 	// Mark our loader as binary file
 	SetType( AT_BinaryFile );
+}
+
+/*
+==================
+CLinkerLoad::~CLinkerLoad
+==================
+*/
+CLinkerLoad::~CLinkerLoad()
+{
+	// Linkers can only be deleted by CLinkerManager
+	if ( !CLinkerManager::Get().IsDeletingLinkers() )
+	{
+		Sys_Errorf( TEXT( "Linkers can only be deleted by CLinkerManager" ) );
+	}
+
+	// Detaches linker
+	Detach();
+	Assert( !loader );
 }
 
 /*
@@ -28,7 +50,7 @@ CLinkerLoad::CLinkerLoad( CObjectPackage* InRoot, const tchar* InFilename )
 CLinkerLoad::GetPackageLinker
 ==================
 */
-CLinkerLoad* CLinkerLoad::GetPackageLinker( CObjectPackage* InOuter, const tchar* InFilename )
+CLinkerLoad* CLinkerLoad::GetPackageLinker( CObjectPackage* InOuter, const tchar* InFilename, uint32 InLoadFlags )
 {
 	// See if there is already a linker for this package
 	CLinkerLoad*	result = InOuter ? InOuter->GetLinker() : nullptr;
@@ -37,48 +59,24 @@ CLinkerLoad* CLinkerLoad::GetPackageLinker( CObjectPackage* InOuter, const tchar
 		return result;
 	}
 
-	// Try to load the linker
-	std::wstring	newFilename;
-	if ( !InFilename )
+	// Get package name from file name
+	std::wstring	tmpBuffer = InFilename ? InFilename : TEXT( "" );
+	const tchar*	packageName = tmpBuffer.data();
+	if ( !tmpBuffer.empty() )
 	{
-		// Resolve filename from package name
-		if ( !InOuter )
-		{
-			Warnf( TEXT( "Can't resolve package name\n" ) );
-			return nullptr;
-		}
-
-		if ( !CPackageFileCache::Get().FindPackageFile( InOuter->GetName().c_str(), newFilename ) )
-		{
-			Warnf( TEXT( "Package file for '%s' not found\n" ), InOuter->GetFullName().c_str() );
-			return nullptr;
-		}
-	}
-	else
-	{
-		// Verify that the file exists
-		if ( !CPackageFileCache::Get().FindPackageFile( InFilename, newFilename ) )
-		{
-			Warnf( TEXT( "Package file '%s' not found\n" ), InFilename );
-			return nullptr;
-		}
-
-		// Resolve package name from filename
-		std::wstring	tmpBuffer = InFilename;
-		const tchar*	tmpFilename = tmpBuffer.data();
 		while ( true )
 		{
-			if ( Sys_Strstr( tmpFilename, PATH_SEPARATOR ) )
+			if ( Sys_Strstr( packageName, PATH_SEPARATOR ) )
 			{
-				tmpFilename = Sys_Strstr( tmpFilename, PATH_SEPARATOR ) + Sys_Strlen( PATH_SEPARATOR );
+				packageName = Sys_Strstr( packageName, PATH_SEPARATOR ) + Sys_Strlen( PATH_SEPARATOR );
 			}
-			else if ( Sys_Strstr( tmpFilename, TEXT( "/" ) ) )
+			else if ( Sys_Strstr( packageName, TEXT( "/" ) ) )
 			{
-				tmpFilename = Sys_Strstr( tmpFilename, TEXT( "/" ) ) + 1;
+				packageName = Sys_Strstr( packageName, TEXT( "/" ) ) + 1;
 			}
-			else if ( Sys_Strstr( tmpFilename, SUBOBJECT_DELIMITER ) )
+			else if ( Sys_Strstr( packageName, SUBOBJECT_DELIMITER ) )
 			{
-				tmpFilename = Sys_Strstr( tmpFilename, SUBOBJECT_DELIMITER ) + 1;
+				packageName = Sys_Strstr( packageName, SUBOBJECT_DELIMITER ) + 1;
 			}
 			else
 			{
@@ -86,45 +84,79 @@ CLinkerLoad* CLinkerLoad::GetPackageLinker( CObjectPackage* InOuter, const tchar
 			}
 		}
 
-		if ( Sys_Strstr( tmpFilename, TEXT( "." ) ) )
+		if ( Sys_Strstr( packageName, TEXT( "." ) ) )
 		{
-			*Sys_Strstr( tmpFilename, TEXT( "." ) ) = 0;
-		}
-
-		// Create a new package
-		CObjectPackage*		package = CObjectPackage::CreatePackage( nullptr, tmpFilename );
-
-		// If no package specified, use package from file
-		if ( !InOuter )
-		{
-			if ( !package )
-			{
-				Warnf( TEXT( "Can't create a package '%s'\n" ), tmpFilename );
-				return false;
-			}
-
-			InOuter = package;
-			result	= InOuter->GetLinker();
-		}
-		// If we have InOuter and a new package not equal, it's mean what we loading a new file into an existing package, so reset the loader
-		else if ( InOuter != package )
-		{
-			Logf( TEXT( "Loading a new file for existing package (%s, %s)\n" ), InOuter->GetFullName().c_str(), package->GetFullName().c_str() );
-			CLinkerManager::Get().ResetLoaders( InOuter );
+			*Sys_Strstr( packageName, TEXT( "." ) ) = 0;
 		}
 	}
 
-	// Create a new linker
+	// If we no have outer and package name its error and we can't find for this package a linker
+	if ( !InOuter && !packageName )
+	{
+		Warnf( TEXT( "Can't resolve package name\n" ) );
+		return nullptr;
+	}
+
+	// Figure out our target package
+	CObjectPackage*		tagetPackage = nullptr;
+	if ( InOuter )
+	{
+		tagetPackage = InOuter;
+	}
+	else
+	{
+		// If we no have outer or we have a new package name then try find already created package in memory
+		tagetPackage = FindObjectFast<CObjectPackage>( nullptr, packageName );
+		if ( tagetPackage && tagetPackage->GetOuter() )
+		{
+			tagetPackage = nullptr;
+		}
+	}
+
+	// Verify that the file exists
+	std::wstring	newFilename;
+	if ( !CPackageFileCache::Get().FindPackageFile( tagetPackage ? tagetPackage->GetName().c_str() : packageName, newFilename ) )
+	{
+		// This is a memory-only package and so it has no linker and this is ok
+		if ( tagetPackage && tagetPackage->HasAnyPackageFlags( PKG_MASK_InMemoryOnly ) )
+		{
+			return nullptr;
+		}
+		else
+		{
+			Warnf( TEXT( "Package file '%s' not found\n" ), InFilename );
+			return nullptr;
+		}
+	}
+
+	// If we not found target package try create it
+	if ( !tagetPackage )
+	{
+		tagetPackage = CObjectPackage::CreatePackage( nullptr, packageName );
+		if ( !tagetPackage )
+		{
+			Warnf( TEXT( "Can't create a package '%s'\n" ), packageName );
+			return nullptr;
+		}
+	}
+
+	// See if the Linker is already loaded for the TargetPackage we've found
+	if ( InOuter != tagetPackage )
+	{
+		result = tagetPackage->GetLinker();
+	}
+
+	// Create a new linker	
 	if ( !result )
 	{
 		// We will already have found the filename above
 		Assert( !newFilename.empty() );
-		Assert( InOuter );
+		Assert( tagetPackage );
 		Assert( CObjectPackage::GetObjectSerializeContext().HasStartedLoading() );
-		result = CreateLinker( InOuter, newFilename.c_str() );
+		result = CreateLinker( tagetPackage, newFilename.c_str(), InLoadFlags );
 		if ( result )
 		{
-			InOuter->SetLinker( result );
+			tagetPackage->SetLinker( result );
 		}
 	}
 
@@ -137,7 +169,7 @@ CLinkerLoad* CLinkerLoad::GetPackageLinker( CObjectPackage* InOuter, const tchar
 CLinkerLoad::CreateLinker
 ==================
 */
-CLinkerLoad* CLinkerLoad::CreateLinker( CObjectPackage* InParent, const tchar* InFilename )
+CLinkerLoad* CLinkerLoad::CreateLinker( CObjectPackage* InParent, const tchar* InFilename, uint32 InLoadFlags )
 {
 	// See whether there already is a linker for this parent/linker root
 	CLinkerLoad*	linker = InParent ? InParent->GetLinker() : nullptr;
@@ -150,10 +182,12 @@ CLinkerLoad* CLinkerLoad::CreateLinker( CObjectPackage* InParent, const tchar* I
 	if ( !linker )
 	{
 		// If the linker failed on initialize we free allocated memory and return NULL
-		linker = new CLinkerLoad( InParent, InFilename );
+		linker = new CLinkerLoad( InParent, InFilename, InLoadFlags );
 		if ( !linker->Init() )
 		{
-			delete linker;
+			// Detach linker and delete it
+			linker->Detach();
+			CLinkerManager::Get().DeleteLoader( linker );
 			return nullptr;
 		}
 	}
@@ -537,6 +571,9 @@ bool CLinkerLoad::FinalizeCreation()
 		// Add this linker to the object manager's linker array
 		CLinkerManager::Get().AddLoader( this );
 
+		// Some platforms will run out of file handles. So, this will close the package
+		CObjectPackage::GetObjectSerializeContext().AddDelayedLinkerClosePackage( this );
+
 		// Tell the root package flags
 		if ( linkerRoot )
 		{
@@ -835,6 +872,7 @@ CLinkerLoad::VerifyImport
 */
 void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 {
+	Assert( IsLoading() );
 	Assert( CObjectPackage::GetObjectSerializeContext().HasStartedLoading() );
 
 	// Map the object into our table
@@ -869,7 +907,16 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 		// Our outer is a CObjectPackage
 		Assert( importObject.className == NAME_CObjectPackage );
 		tmpPackage = CObjectPackage::CreatePackage( nullptr, importObjectName.c_str() );
-		importObject.sourceLinker = GetPackageLinker( tmpPackage, nullptr );
+		importObject.sourceLinker = GetPackageLinker( tmpPackage, nullptr, loadFlags );
+
+		// If we found source linker then this package is on HDD. Otherwise its may be either memory only package, or the one isn't on HDD
+		if ( importObject.sourceLinker )
+		{
+			importObject.object = tmpPackage;
+			CObjectPackage::GetObjectSerializeContext().IncrementImportCount();
+			CLinkerManager::Get().AddLoaderWithNewImports( this );
+			return;
+		}
 	}
 	else
 	{
@@ -888,7 +935,7 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 					// For loop does what we need
 				}
 
-				// Assign temp package to resolve the object in memory when there is no source linker available only if the package is PKG_InMemoryOnly
+				// Assign temp package to resolve the object in memory when there is no source linker available only if the package is PKG_MASK_InMemoryOnly
 				CObjectPackage*		topPackage = Cast<CObjectPackage>( topObjectImport->object );
 				if ( topPackage && topPackage->HasAnyPackageFlags( PKG_MASK_InMemoryOnly ) )
 				{
@@ -1027,7 +1074,7 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 	}
 
 	// If not found in file, see if it's a public native transient class or field
-	if ( importObject.sourceIndex == INDEX_NONE && package )
+	if ( importObject.sourceIndex == INDEX_NONE && ( package || loadFlags & LOAD_FindIfFail ) )
 	{
 		CObject*		classPackage = FindObjectFast<CObjectPackage>( nullptr, importObject.classPackage );
 		if ( classPackage )
@@ -1053,11 +1100,12 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 
 				// Reference to in memory-only package's object, native transient class
 				bool		bIsInMemoryOnlyOrNativeTransient = bCameFromMemoryOnlyPackage || ( findObject && findObject->HasAllObjectFlags( OBJECT_Public | OBJECT_Native | OBJECT_Transient ) );
-				if ( findObject && bIsInMemoryOnlyOrNativeTransient )
+				if ( findObject && ( loadFlags & LOAD_FindIfFail || bIsInMemoryOnlyOrNativeTransient ) )
 				{
 					importObject.object = findObject;
 					CObjectPackage::GetObjectSerializeContext().IncrementImportCount();
 					CLinkerManager::Get().AddLoaderWithNewImports( this );
+					return;
 				}
 			}
 		}

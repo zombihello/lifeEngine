@@ -9,6 +9,7 @@ CLinkerManager::CLinkerManager
 */
 CLinkerManager::CLinkerManager()
 	: bHasPendingCleanup( false )
+	, bIsDeletingLinkers( false )
 {}
 
 /*
@@ -59,6 +60,8 @@ CLinkerManager::DeleteLoaders
 void CLinkerManager::DeleteLoaders()
 {
 	Assert( IsInGameThread() );
+	TGuardValue<bool>	guard_IsDeletingLinkers( bIsDeletingLinkers, true );
+
 	if ( bHasPendingCleanup )
 	{
 		bHasPendingCleanup = false;

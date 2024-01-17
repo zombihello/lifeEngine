@@ -53,9 +53,10 @@ public:
 	 *
 	 * @param InOuter		Package to load new package into, usually NULL
 	 * @param InFilename	File name on disk
+	 * @param InLoadFlags	Flags controlling loading behavior (see ELoadFlags)
 	 * @return Return loaded package if successful, otherwise returns NULL
 	 */
-	static CObjectPackage* LoadPackage( CObjectPackage* InOuter, const tchar* InFilename );
+	static CObjectPackage* LoadPackage( CObjectPackage* InOuter, const tchar* InFilename, uint32 InLoadFlags );
 
 	/**
 	 * @brief Begin loading packages
@@ -77,9 +78,10 @@ public:
 	 *							that contain any of these flags will be saved. If 0 is specified, only objects which are referenced
 	 *							by InBase will be saved into the package
 	 * @param InFilename        The name to use for the new package file
+	 * @param InSaveFlags		Flags to control saving (see ESaveFlags)
 	 * @return Return TRUE if the package was saved successfully, otherwise returns FALSE
 	 */
-	static bool SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename );
+	static bool SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags );
 
 	/**
 	 * @brief Get the serialization context of objects

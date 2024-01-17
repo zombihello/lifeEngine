@@ -428,6 +428,25 @@ enum EPackageFlags
 
 /**
  * @ingroup Core
+ * @brief Flags for loading objects/packages
+ */
+enum ELoadFlags
+{
+    LOAD_None           = 0,        /**< No flags */
+    LOAD_FindIfFail     = 1 << 0    /**< Tries FindObject if a linker cannot be obtained */
+};
+
+/**
+ * @ingroup Core
+ * @brief Flags for saving objects/packages
+ */
+enum ESaveFlags
+{
+    SAVE_None       = 0,    /**< No flags */
+};
+
+/**
+ * @ingroup Core
  * @brief Internal enum for native constructors
  */
 enum ENativeConstructor

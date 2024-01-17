@@ -125,7 +125,7 @@ CObjectPackage* CObjectPackage::CreatePackage( CObject* InOuter, const tchar* In
 CObjectPackage::LoadPackage
 ==================
 */
-CObjectPackage* CObjectPackage::LoadPackage( CObjectPackage* InOuter, const tchar* InFilename )
+CObjectPackage* CObjectPackage::LoadPackage( CObjectPackage* InOuter, const tchar* InFilename, uint32 InLoadFlags )
 {
 	CObjectPackage*		resultPackage = nullptr;
 	Assert( *InFilename != '\0' );
@@ -137,7 +137,7 @@ CObjectPackage* CObjectPackage::LoadPackage( CObjectPackage* InOuter, const tcha
 	BeginLoadPackage();
 	
 	// Create a new linker object which goes off and tries load the file
-	CLinkerLoad*	linker = CLinkerLoad::GetPackageLinker( InOuter, InFilename );
+	CLinkerLoad*	linker = CLinkerLoad::GetPackageLinker( InOuter, InFilename, InLoadFlags );
 	if ( !linker )
 	{
 		EndLoadPackage();
@@ -149,14 +149,11 @@ CObjectPackage* CObjectPackage::LoadPackage( CObjectPackage* InOuter, const tcha
 	// Load all objects from package
 	linker->LoadAllObjects();
 
-	// Some platforms will run out of file handles. So, this will close the package
-	GetObjectSerializeContext().AddDelayedLinkerClosePackage( linker );
-
 	// We end loading the package
 	EndLoadPackage();
 
 	// Done!
-	Logf( TEXT( "Package '%s' is laoded\n" ), InFilename );
+	Logf( TEXT( "Package '%s' is loaded\n" ), InFilename );
 	return resultPackage;
 }
 
@@ -336,7 +333,7 @@ void CObjectPackage::EndLoadPackage()
 CObjectPackage::SavePackage
 ==================
 */
-bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename )
+bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags )
 {
 	// Check on recursive call SavePackage, it's error
 	if ( bIsSavingPackage )

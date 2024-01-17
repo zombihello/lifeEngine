@@ -132,11 +132,21 @@ public:
 	 */
 	void ResetLoaders( const std::unordered_set<CLinkerLoad*>& InLinkerLoadSet );
 
+	/**
+	 * @brief Is CLinkerManager deleting linkers now
+	 * @return Return TRUE if CLinkerManager deleting linkers now, otherwise returns FALSE
+	 */
+	FORCEINLINE bool IsDeletingLinkers() const
+	{
+		return bIsDeletingLinkers;
+	}
+
 private:
 	std::unordered_set<CLinkerLoad*>	objectLoaders;			/**< Map of packages to their open linkers */
 	std::unordered_set<CLinkerLoad*>	loadersWithNewImports;	/**< List of loaders that have new imports */
 	std::unordered_set<CLinkerLoad*>	pendingCleanupList;		/**< List of linkers to delete */
 	bool								bHasPendingCleanup;		/**< Has pending cleanup */
+	bool								bIsDeletingLinkers;		/**< TRUE when deletes linkers */
 };
 
 #endif // !LINKERMANAGER_H
