@@ -17,6 +17,7 @@
 #include "Core.h"
 #include "Misc/Types.h"
 #include "Misc/Misc.h"
+#include "System/BaseTargetPlatform.h"
 
 /**
  * @ingroup Core
@@ -163,6 +164,113 @@ public:
 	}
 
 	/**
+	 * @brief Indicates whether this archive is filtering editor-only on save or contains data that had editor-only content stripped
+	 * @return Return TRUE if the archive filters editor-only content, otherwise FALSE 
+	 */
+	FORCEINLINE bool IsFilterEditorOnly() const
+	{
+		return arIsFilterEditorOnly;
+	}
+
+	/**
+	 * @brief Sets a flag indicating that this archive needs to filter editor-only content
+	 * @param InFilterEditorOnly	Whether to filter editor-only content
+	 */
+	virtual void SetFilterEditorOnly( bool InFilterEditorOnly )
+	{
+		arIsFilterEditorOnly = InFilterEditorOnly;
+	}
+
+	/**
+	 * @brief Indicates whether this archive is saving or loading game state
+	 * @note This is intended for game-specific archives and is not true for any of the build in save methods
+	 * 
+	 * @return Return TRUE if the archive is dealing with save games, otherwise FALSE
+	 */
+	FORCEINLINE bool IsSaveGame() const
+	{
+		return arIsSaveGame;
+	}
+
+	/**
+	 * @brief Sets a flag indicating that this archive is saving or loading game state
+	 * @param InIsSaveGame		Whether this archive is saving/loading game state
+	 */
+	FORCEINLINE void SetSaveGame( bool InIsSaveGame )
+	{
+		arIsSaveGame = InIsSaveGame;
+	}
+
+	/**
+	 * @brief Checks whether the archive wants to skip the property independent of the other flags
+	 * @return Return TRUE if this property must be skiped, otherwise returns FALSE
+	 */
+	virtual bool ShouldSkipProperty( const class CProperty* InProperty ) const
+	{
+		return false;
+	}
+
+	/**
+	 * @brief Checks is this archive wants properties to be serialized in binary form instead of safer but slower tagged form
+	 * @return Return TRUE if this archive wants properties to be serialized in binary form instead of safer but slower tagged form, otherwise returns FALSE
+	 */
+	FORCEINLINE bool WantBinaryPropertySerialization() const
+	{
+		return arWantBinaryPropertySerialization;
+	}
+
+	/**
+	 * @brief Set is this archive wants properties to be serialized in binary form instead of safer but slower tagged form
+	 * @param InWantBinaryPropertySerialization		TRUE is means what this archive want properties to be serialized in binary form instead of safer but slower tagged form
+	 */
+	virtual void SetWantBinaryPropertySerialization( bool InWantBinaryPropertySerialization )
+	{
+		arWantBinaryPropertySerialization = InWantBinaryPropertySerialization;
+	}
+
+	/**
+	 * @brief Is the archive used for cooking
+	 * @return Return TRUE if the archive is used from cooking, otherwise FALSE. In build without editor always returns FASLE
+	 */
+	FORCEINLINE bool IsCooking() const
+	{
+#if WITH_EDITOR
+		Assert( !cookingTargetPlatform || ( IsSaving() && !IsLoading() ) );
+		return cookingTargetPlatform;
+#else
+		return false;
+#endif // WITH_EDITOR
+	}
+
+	/**
+	 * @brief Get the cooking target platform
+	 * @note In build without editor always returns NULL
+	 * 
+	 * @return Return the cooking target platform. If not set returns NULL
+	 */
+	FORCEINLINE CBaseTargetPlatform* GetCookingTarget() const
+	{
+#if WITH_EDITOR
+		return cookingTargetPlatform;
+#else
+		return nullptr;
+#endif // WITH_EDITOR
+	}
+
+	/**
+	 * @brief Set the cooking target platform
+	 * @note In build without editor do nothing
+	 * 
+	 * @param InCookingTarget	The target platform to set
+	 */
+	virtual void SetCookingTarget( CBaseTargetPlatform* InCookingTarget )
+	{
+#if WITH_EDITOR
+		cookingTargetPlatform = InCookingTarget;
+#endif // WITH_EDITOR
+	}
+
+	/**
 	 * @brief Override operator << for serialize CObjects
 	 * @return Return reference to self
 	 */
@@ -173,9 +281,16 @@ public:
 	}
 
 protected:
-	uint32					arVer;			/**< Archive version (look ELifeEnginePackageVersion) */
-	EArchiveType			arType;			/**< Archive type */
-	std::wstring			arPath;			/**< Path to archive */
+	uint32					arVer;								/**< Archive version (look ELifeEnginePackageVersion) */
+	EArchiveType			arType;								/**< Archive type */
+	std::wstring			arPath;								/**< Path to archive */
+	bool					arIsFilterEditorOnly;				/**< Whether editor only properties are being filtered from the archive (or has been filtered) */
+	bool					arIsSaveGame;						/**< Whether this archive is saving/loading game state */
+	bool					arWantBinaryPropertySerialization;	/**< Whether this archive wants properties to be serialized in binary form instead of tagged */
+
+#if WITH_EDITOR
+	CBaseTargetPlatform*		cookingTargetPlatform;			/**< Holds the cooking target platform */
+#endif // WITH_EDITOR
 };
 
 /**

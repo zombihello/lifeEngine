@@ -172,6 +172,13 @@ public:
 	virtual void AddProperty( class CProperty* InProperty ) override;
 
 	/**
+	 * @brief Serialize struct properties
+	 * @param InArchive     Archive for serialize
+	 * @param InData		Pointer to object
+	 */
+	void SerializeProperties( class CArchive& InArchive, byte* InData );
+
+	/**
 	 * @brief Get array of struct properties
 	 *
 	 * @param OutArrayProperties		Output array properties
@@ -209,6 +216,20 @@ private:
 	 * @return Return pointer to struct property, if not found return NULL
 	 */
 	class CProperty* InternalFindProperty( const CName& InName, bool InFindInParents = true ) const;
+
+	/**
+	 * @brief Serialize struct binary properties
+	 * @param InArchive     Archive for serialize
+	 * @param InData		Pointer to object
+	 */
+	void SerializeBinaryProperties( class CArchive& InArchive, byte* InData );
+
+	/**
+	 * @brief Serialize struct tagged properties
+	 * @param InArchive     Archive for serialize
+	 * @param InData		Pointer to object
+	 */
+	void SerializeTaggedProperties( class CArchive& InArchive, byte* InData );
 
 	uint32								propertiesSize;	/**< Properties size in bytes */
 	uint32								minAlignment;	/**< Minimum alignment for the struct */

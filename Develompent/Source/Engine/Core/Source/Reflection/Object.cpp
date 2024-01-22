@@ -319,6 +319,12 @@ void CObject::Serialize( CArchive& InArchive )
 	{
 		InArchive << name << outer;
 	}
+
+	// Serialize object properties which are defined in the class
+	if ( InArchive.Ver() >= VER_SerializeProperties && theClass != CClass::StaticClass() )
+	{
+		theClass->SerializeProperties( InArchive, ( byte* )this );
+	}
 }
 
 /*

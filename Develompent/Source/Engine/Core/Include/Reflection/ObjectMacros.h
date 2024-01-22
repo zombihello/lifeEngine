@@ -420,6 +420,9 @@ enum EPackageFlags
     PKG_None                    = 0,                                    /**< No flags */
     PKG_NewlyCreated            = 1 << 0,                               /**< Newly created package, not saved yet */
     PKG_CompiledIn              = 1 << 1,                               /**< This package is from "compiled in" classes */
+    PKG_FilterEditorOnly        = 1 << 2,                               /**< Package has editor-only data filtered out */
+    PKG_EditorOnly              = 1 << 3,                               /**< This is editor-only package */
+    PKG_Cooked                  = 1 << 4,                               /**< Package is cooked */
 
     // Combination masks and other combinations
     PKG_MASK_TransientFlags     = PKG_NewlyCreated,                     /**< Transient flags are cleared when serializing to or from PackageFileSummary */

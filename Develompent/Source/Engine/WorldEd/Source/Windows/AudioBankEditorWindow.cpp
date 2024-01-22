@@ -8,6 +8,7 @@
 #include "Windows/DialogWindow.h"
 #include "System/AssetsImport.h"
 #include "System/EditorEngine.h"
+#include "Reflection/ObjectPackage.h"
 
 /** Macro size button in menu bar */
 #define  AUDIOBANKEDITOR_MENUBAR_BUTTONSIZE		ImVec2( 16.f, 16.f )
@@ -29,7 +30,8 @@ CAudioBankEditorWindow::CAudioBankEditorWindow( const TSharedPtr<CAudioBank>& In
 	assetsReloadedHandle = EditorDelegates::onAssetsReloaded.Add(		std::bind(	&CAudioBankEditorWindow::OnAssetsReloaded, this, std::placeholders::_1							) );
 
 	// Create audio component
-	audioComponent = new CAudioComponent();
+	CObjectPackage*		worldEdPackage = CObjectPackage::CreatePackage( nullptr, TEXT( "WorldEd" ) );
+	audioComponent = new( worldEdPackage, NAME_None ) CAudioComponent();
 	audioComponent->SetAudioBank( audioBank->GetAssetHandle() );
 	audioComponent->SetUISound( true );
 	audioComponent->SetStreamable( true );

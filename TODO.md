@@ -1,9 +1,10 @@
 # Version 0.5.0 :: Next
 - [ ] Fix link count for DirectX 11 objects 
 - [ ] Fix depth buffer accuracy
+- [ ] Refactor the engine's architecture separated by modules
 - [ ] Implement material shaders
 - [ ] Need refactor import/reimport assets with the ability to customize
-- [ ] Refactor assets system and remove packages
+- [ ] Improve asset system to use CObject system
 - [ ] Implement shadow maps
 - [ ] Implement skeletal meshes
 - [ ] Implement skeletal animations
@@ -11,8 +12,12 @@
 - [ ] Implement support UI in the game
 - [ ] Implement base AI
 - [ ] Implement rendering translucent geometry
+- [ ] Implement cooking of packages for shipping build
 - [ ] Fix rendering masked materials with prepass
 - [ ] Fix rendering the editor grid without prepass
+- [ ] Implement occlusion culling
+	- [ ] Occlusion Queries
+	- [ ] Octree
 
  # Version 0.4.0 :: Now	
 - [X] Migrate WorldEd's interface from Qt to ImGUI

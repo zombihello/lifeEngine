@@ -113,6 +113,37 @@ uint32 CLinkerSave::GetSize()
 
 /*
 ==================
+CLinkerSave::SetFilterEditorOnly
+==================
+*/
+void CLinkerSave::SetFilterEditorOnly( bool InFilterEditorOnly )
+{
+	saver->SetFilterEditorOnly( InFilterEditorOnly );
+	arIsFilterEditorOnly = InFilterEditorOnly;
+}
+
+/*
+==================
+CLinkerSave::SetCookingTarget
+==================
+*/
+void CLinkerSave::SetCookingTarget( CBaseTargetPlatform* InCookingTarget )
+{
+#if WITH_EDITOR
+	saver->SetCookingTarget( InCookingTarget );
+	cookingTargetPlatform = InCookingTarget;
+
+	// When we do cooking want serialize properties untagged format for faster loading in a shipping build
+	if ( cookingTargetPlatform )
+	{
+		saver->SetWantBinaryPropertySerialization( true );
+		arWantBinaryPropertySerialization = true;
+	}
+#endif // WITH_EDITOR
+}
+
+/*
+==================
 CLinkerSave::Serialize
 ==================
 */

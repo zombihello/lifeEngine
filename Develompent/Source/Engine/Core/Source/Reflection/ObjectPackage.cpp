@@ -333,7 +333,7 @@ void CObjectPackage::EndLoadPackage()
 CObjectPackage::SavePackage
 ==================
 */
-bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags )
+bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags, CBaseTargetPlatform* InCookingTarget /* = nullptr */ )
 {
 	// Check on recursive call SavePackage, it's error
 	if ( bIsSavingPackage )
@@ -344,11 +344,23 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 	}
 
 	// Make temp file
+	Assert( InOuter );
 	double			timeStart = Sys_Seconds();
 	std::wstring	baseFilename = CFilename( InFilename ).GetBaseFilename();
 	CFilename		tempFilename = CFilename( InFilename ).GetPath() + PATH_SEPARATOR + baseFilename + TEXT( "_save.tmp" );
 	bool			bSuccess = false;
 	bool			bCleanupIsRequired = false;
+	bool			bIsCooking = InCookingTarget != nullptr;
+	bool			bFilterEditorOnly = InOuter->HasAnyPackageFlags( PKG_FilterEditorOnly ) || bIsCooking;
+
+	// Don't save packages marked as editor-only in cooking
+#if WITH_EDITOR
+	if ( bIsCooking && InOuter->HasAnyPackageFlags( PKG_EditorOnly ) )
+	{
+		Warnf( TEXT( "Package marked as editor-only: %s. Package will not be saved\n" ), InOuter->GetName().c_str() );
+		return false;
+	}
+#endif // WITH_EDITOR
 
 	// Route CObject::PreSaveRoot to allow e.g. the world to attach components for the persistent level
 	if ( InBase )
@@ -390,6 +402,8 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 
 	// Export objects (tags them as OBJECT_TagExp)
 	CArchiveSaveTagExports		exportTaggerArchive( InOuter );
+	exportTaggerArchive.SetFilterEditorOnly( bFilterEditorOnly );
+	exportTaggerArchive.SetCookingTarget( InCookingTarget );
 
 	// Tag exports and route CObject::PreSave
 	PackageExportTagger			packageExportTagger( InBase, InTopLevelFlags, InOuter );
@@ -410,6 +424,8 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 
 		// Allocate a linker
 		CLinkerSave		linker( InOuter, tempFilename.GetFullPath().c_str() );
+		linker.SetFilterEditorOnly( bFilterEditorOnly );
+		linker.SetCookingTarget( InCookingTarget );
 
 		// Import objects
 		for ( CObjectIterator it; it; ++it )
@@ -420,13 +436,15 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 				CArchiveSaveTagImports	importTagger( &linker );
 				CClass*					theClass = object->GetClass();
 
+				importTagger.SetFilterEditorOnly( bFilterEditorOnly );
+				importTagger.SetCookingTarget( InCookingTarget );
 				object->Serialize( importTagger );
 				importTagger << theClass;
 			}
 		}
 
 		// Save package flags
-		linker.GetSummary().SetPackageFlags( InOuter->GetPackageFlags() );
+		linker.GetSummary().SetPackageFlags( InOuter->GetPackageFlags() | ( bIsCooking ? PKG_Cooked | PKG_FilterEditorOnly : 0 ) );
 
 		// Rest place for package summary, we update it in the end
 		linker << linker.GetSummary();

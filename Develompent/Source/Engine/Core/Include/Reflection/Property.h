@@ -26,10 +26,13 @@ enum EPropertyFlags
 {
 	CPF_None			= 0,		/**< None */
 	CPF_Const			= 1 << 0,	/**< Property is constant */
-	CPF_EditorOnly		= 1 << 1,	/**< Property only for the editor */
+	CPF_EditorOnly		= 1 << 1,	/**< Property should only be loaded in the editor */
 	CPF_Edit			= 1 << 2,	/**< Property is user-settable in the editor */
 	CPF_EditFixedSize	= 1 << 3,	/**< Indicates that elements of an array can be modified, but its size cannot be changed */
 	CPF_EditConst		= 1 << 4,	/**< Property is uneditable in the editor */
+	CPF_Deprecated		= 1 << 5,	/**< Property is deprecated. Read it from an archive, but don't save it */
+	CPF_Transient		= 1 << 6,	/**< Property is transient: shouldn't be saved or loaded */
+	CPF_SaveGame		= 1 << 7	/**< Property should be serialized for save games, this is only checked for game-specific archives with CArchive::arIsSaveGame */
 };
 
 /**
@@ -116,6 +119,37 @@ public:
 	 * @param InArchive     Archive for serialize
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
+
+	/**
+	 * @brief Serialize property's data
+	 * 
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of a object where the value of this property is stored
+	 */
+	FORCEINLINE void SerializeProperty( class CArchive& InArchive, byte* InObjectAddress )
+	{
+		if ( ShouldSerializeValue( InArchive ) )
+		{
+			byte*		data = InObjectAddress + offset;
+			if ( InArchive.WantBinaryPropertySerialization() )
+			{
+				SerializeBinaryProperties( InArchive, data );
+			}
+			else
+			{
+				SerializeTaggedProperties( InArchive, data );
+			}
+		}
+	}
+
+	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const		PURE_VIRTUAL( CProperty::SerializeValue, );
 
 	/**
 	 * @brief Get category
@@ -275,12 +309,211 @@ public:
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue )			PURE_VIRTUAL( CProperty::SetPropertyValue, return false; );
 
+	/**
+	 * @brief Is should serialize this value
+	 * 
+	 * @param InArchive		Archive
+	 * @return Return TRUE if this value shuld serialize, otherwise returns FALSE
+	 */
+	bool ShouldSerializeValue( CArchive& InArchive ) const;
+
 protected:
 	CName			category;		/**< Category */
 	std::wstring	description;	/**< Description */
 	uint32			offset;			/**< Offset */
 	uint32			flags;			/**< Flags */
 	uint32			arraySize;		/**< Count of persistent variables */
+
+private:
+	/**
+	 * @brief Serialize binary property instead of safer but slower tagged form
+	 * @param InArchive     Archive for serialize
+	 * @param InData		Pointer to property data
+	 */
+	FORCEINLINE void SerializeBinaryProperties( class CArchive& InArchive, byte* InData )
+	{
+		for ( uint32 index = 0; index < arraySize; ++index )
+		{
+			SerializeValue( InArchive, InData, index );
+		}
+	}
+
+	/**
+	 * @brief Serialize tagged property instead of unsafer but faster binary form
+	 * @param InArchive     Archive for serialize
+	 * @param InData		Pointer to property data
+	 */
+	FORCEINLINE void SerializeTaggedProperties( class CArchive& InArchive, byte* InData )
+	{
+		// In tagged form we serialize array size because it may was changed in newly classes
+		uint32		serialArraySize = arraySize;
+		InArchive << serialArraySize;
+		for ( uint32 index = 0; index < serialArraySize; ++index )
+		{
+			SerializeValue( InArchive, InData, index );
+		}
+	}
+};
+
+/**
+ * @ingroup Core
+ * @brief Property tag used in serialization of properties
+ */
+class CPropertyTag
+{
+public:
+	/**
+	 * @brief Functions to extract a property tag as a key for std::unordered_map and std::unordered_set
+	 */
+	struct KeyFunc
+	{
+		/**
+		 * @brief Calculate hash of a property tag
+		 *
+		 * @param InPropertyTag		Property tag
+		 * @return Return hash of this property tag
+		 */
+		FORCEINLINE std::size_t operator()( const CPropertyTag& InPropertyTag ) const
+		{
+			return InPropertyTag.GetHash();
+		}
+
+		/**
+		 * @brief Compare property tags
+		 *
+		 * @param InA	First property tag
+		 * @param InB	Second property tag
+		 * @return Return TRUE if InA and InB equal, otherwise returns FALSE
+		 */
+		FORCEINLINE bool operator()( const CPropertyTag& InA, const CPropertyTag& InB ) const
+		{
+			return InA.GetHash() < InB.GetHash();
+		}
+	};
+
+	/**
+	 * @brief Constructor
+	 * @param InProperty	Property
+	 */
+	CPropertyTag( CProperty* InProperty = nullptr )
+		: property( InProperty )
+		, propertyName( InProperty ? InProperty->GetCName() : NAME_None )
+		, className( InProperty ? InProperty->GetClass()->GetCName() : NAME_None )
+		, serialSize( 0 )
+	{}
+
+	/**
+	 * @brief Set property name
+	 * @param InPropertyName	Property name
+	 */
+	FORCEINLINE void SetPropertyName( const CName& InPropertyName )
+	{
+		propertyName = InPropertyName;
+	}
+
+	/**
+	 * @brief Set property class name
+	 * @param InClassName	Class name
+	 */
+	FORCEINLINE void SetClassName( const CName& InClassName )
+	{
+		className = InClassName;
+	}
+
+	/**
+	 * @brief Set size of serialized data in bytes
+	 * @param InSize	Size of serialized data in bytes
+	 */
+	FORCEINLINE void SetSerialSize( uint32 InSize )
+	{
+		serialSize = InSize;
+	}
+
+	/**
+	 * @brief Set associated property with this tag
+	 * @param InProperty	Associated property with this tag
+	 */
+	FORCEINLINE void SetProperty( CProperty* InProperty )
+	{
+		property = InProperty;
+	}
+
+	/**
+	 * @brief Get property name
+	 * @return Return property name
+	 */
+	FORCEINLINE const CName& GetPropertyName() const
+	{
+		return propertyName;
+	}
+
+	/**
+	 * @brief Get property class name
+	 * @return Return property class name
+	 */
+	FORCEINLINE const CName& GetClassName() const
+	{
+		return className;
+	}
+
+	/**
+	 * @brief Calculate and returns hash for this property tag
+	 * @return Return calculated hash for this property tag
+	 */
+	FORCEINLINE uint64 GetHash() const
+	{
+		uint64	hash = propertyName.GetHash();
+		Sys_MemFastHash( className.GetHash(), hash );
+		Sys_MemFastHash( serialSize, hash );
+		return hash;
+	}
+
+	/**
+	 * @brief Get associated property with this tag
+	 * @return Return associated property with this tag. If isn't returns NULL
+	 */
+	FORCEINLINE CProperty* GetProperty() const
+	{
+		return property;
+	}
+
+	/**
+	 * @brief Get size of serialized data in bytes
+	 * @return Return size of serialized data in bytes
+	 */
+	FORCEINLINE uint32 GetSerialSize() const
+	{
+		return serialSize;
+	}
+
+	/**
+	 * @brief Overload operator for serialize
+	 */
+	FORCEINLINE friend CArchive& operator<<( CArchive& InArchive, CPropertyTag& InValue )
+	{
+		InArchive << InValue.propertyName;
+		InArchive << InValue.className;
+		InArchive << InValue.serialSize;
+		return InArchive;
+	}
+
+	/**
+	 * @brief Overload operator for serialize
+	 */
+	FORCEINLINE friend CArchive& operator<<( CArchive& InArchive, const CPropertyTag& InValue )
+	{
+		Assert( InArchive.IsSaving() );
+		InArchive << InValue.propertyName;
+		InArchive << InValue.className;
+		InArchive << InValue.serialSize;
+		return InArchive;
+	}
+
+private:
+	CProperty*	property;		/**< Associated property with this tag. Transient */
+	CName		propertyName;	/**< Property name */
+	CName		className;		/**< Property class name */
+	uint32		serialSize;		/**< Size of serialized data in bytes */
 };
 
 /**
@@ -334,6 +567,15 @@ public:
 	 * @param InArchive     Archive for serialize
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
+
+	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
 	/**
 	 * @brief Get property value
@@ -419,6 +661,15 @@ public:
 	{}
 
 	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+	/**
 	 * @brief Get property value
 	 *
 	 * @param InObjectAddress		The address of a object where the value of this property is stored
@@ -488,6 +739,15 @@ public:
 	CFloatProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
 		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
+
+	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
 	/**
 	 * @brief Get property value
@@ -561,6 +821,15 @@ public:
 	{}
 
 	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+	/**
 	 * @brief Get property value
 	 *
 	 * @param InObjectAddress		The address of a object where the value of this property is stored
@@ -630,6 +899,15 @@ public:
 	CColorProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
 		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
+
+	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
 	/**
 	 * @brief Get property value
@@ -713,6 +991,15 @@ public:
 	 * @param InArchive     Archive for serialize
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
+
+	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
 	/**
 	 * @brief Get property value
@@ -826,6 +1113,15 @@ public:
 	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+	/**
 	 * @brief Get property value
 	 *
 	 * @param InObjectAddress		The address of a object where the value of this property is stored
@@ -909,6 +1205,15 @@ public:
 	{}
 
 	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+	/**
 	 * @brief Get property value
 	 *
 	 * @param InObjectAddress		The address of a object where the value of this property is stored
@@ -990,6 +1295,15 @@ public:
 	 * @param InArchive     Archive for serialize
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
+
+	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
 	/**
 	 * @brief Get property value
@@ -1083,6 +1397,15 @@ public:
 	 * @param InArchive     Archive for serialize
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
+
+	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
 	/**
 	 * @brief Add class property
@@ -1202,6 +1525,15 @@ public:
 	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+	/**
 	 * @brief Get property value
 	 *
 	 * @param InObjectAddress		The address of a object where the value of this property is stored
@@ -1299,6 +1631,15 @@ public:
 	CStringProperty( uint32 InOffset, const CName& InCategory, const std::wstring& InDescription, uint32 InFlags, uint32 InArraySize = 1 )
 		: CProperty( InOffset, InCategory, InDescription, InFlags, InArraySize )
 	{}
+
+	/**
+	 * @brief Serialize property's data
+	 *
+	 * @param InArchive			Archive for serialize
+	 * @param InObjectAddress	The address of property start
+	 * @param InArrayIdx		Array slot of persistent variables
+	 */
+	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
 	/**
 	 * @brief Get property value

@@ -14,6 +14,13 @@ CArchive::CArchive( const std::wstring& InPath )
 	: arVer( VER_PACKAGE_LATEST )
 	, arType( AT_TextFile )
 	, arPath( InPath )
+	, arIsFilterEditorOnly( false )
+	, arIsSaveGame( false )
+	, arWantBinaryPropertySerialization( false )
+
+#if WITH_EDITOR
+	, cookingTargetPlatform( nullptr )
+#endif // WITH_EDITOR
 {}
 
 /*

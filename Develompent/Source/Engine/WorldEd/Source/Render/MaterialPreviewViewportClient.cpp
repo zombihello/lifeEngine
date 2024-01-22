@@ -1,4 +1,5 @@
 #include "Misc/EngineGlobals.h"
+#include "Reflection/ObjectPackage.h"
 #include "System/World.h"
 #include "Render/Scene.h"
 #include "Render/RenderingThread.h"
@@ -27,7 +28,8 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	viewRotationQuat		= Math::quaternionZero;
 
 	// Init scene
-	sphereComponent = new( nullptr, NAME_None ) CSphereComponent();
+	CObjectPackage*		worldEdPackage = CObjectPackage::CreatePackage( nullptr, TEXT( "WorldEd" ) );
+	sphereComponent = new( worldEdPackage, NAME_None ) CSphereComponent();
 	sphereComponent->AddToRoot();
 	sphereComponent->SetRadius( 40.f );
 	sphereComponent->SetMaterial( InMaterial->GetAssetHandle() );
@@ -35,7 +37,7 @@ CMaterialPreviewViewportClient::CMaterialPreviewViewportClient( const TSharedPtr
 	sphereComponent->SetRelativeRotation( CRotator( 90.f, 0.f, 0.f ) );
 	scene->AddPrimitive( sphereComponent );
 
-	pointLightComponent = new( nullptr, NAME_None ) CPointLightComponent();
+	pointLightComponent = new( worldEdPackage, NAME_None ) CPointLightComponent();
 	pointLightComponent->AddToRoot();
 	pointLightComponent->SetRelativeLocation( Vector( 0.f, 20.f, -80.f ) );
 	scene->AddLight( pointLightComponent );

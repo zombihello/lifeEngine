@@ -73,6 +73,20 @@ public:
 	virtual uint32 GetSize() override;
 
 	/**
+	 * @brief Sets a flag indicating that this archive needs to filter editor-only content
+	 * @param InFilterEditorOnly	Whether to filter editor-only content
+	 */
+	virtual void SetFilterEditorOnly( bool InFilterEditorOnly ) override;
+
+	/**
+	 * @brief Set the cooking target platform
+	 * @note In build without editor do nothing
+	 *
+	 * @param InCookingTarget	The target platform to set
+	 */
+	virtual void SetCookingTarget( CBaseTargetPlatform* InCookingTarget ) override;
+
+	/**
 	 * @brief Serialize data
 	 *
 	 * @param InBuffer	Pointer to buffer for serialize

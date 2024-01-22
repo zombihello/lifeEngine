@@ -298,6 +298,20 @@ bool CLinkerLoad::SerializePackageFileSummary()
 		loader->SetVer( summary.fileVersion );
 		SetVer( summary.fileVersion );
 
+		// Loader needs to be the same filter editor only flag
+		if ( summary.GetPackageFlags() & PKG_FilterEditorOnly )
+		{
+			loader->SetFilterEditorOnly( true );
+			SetFilterEditorOnly( true );
+		}
+
+		// In cooked packages we serialize properties in binary form instead of safer but slower tagged form
+		if ( summary.GetPackageFlags() & PKG_Cooked )
+		{
+			loader->SetWantBinaryPropertySerialization( true );
+			SetWantBinaryPropertySerialization( true );
+		}
+
 		// Check tag
 		if ( summary.tag != PACKAGE_FILE_TAG )
 		{

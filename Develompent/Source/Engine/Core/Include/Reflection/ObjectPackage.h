@@ -12,6 +12,7 @@
 #include "Misc/Guid.h"
 #include "Reflection/Object.h"
 #include "Reflection/ObjectSerializeContext.h"
+#include "System/BaseTargetPlatform.h"
 
 /**
  * @ingroup Core
@@ -72,16 +73,17 @@ public:
 	/**
 	 * @brief Save one specific object (along with any objects it references contained within the same Outer) into a LifeEngine package
 	 *
-	 * @param InOuter           The outer to use for the new package
-	 * @param InBase            The object that should be saved into the package
-	 * @param InTopLevelFlags   For all objects which are not referenced (either directly, or indirectly) through InBase, only objects
-	 *							that contain any of these flags will be saved. If 0 is specified, only objects which are referenced
-	 *							by InBase will be saved into the package
-	 * @param InFilename        The name to use for the new package file
-	 * @param InSaveFlags		Flags to control saving (see ESaveFlags)
+	 * @param InOuter					The outer to use for the new package
+	 * @param InBase					The object that should be saved into the package
+	 * @param InTopLevelFlags			For all objects which are not referenced (either directly, or indirectly) through InBase, only objects
+	 *									that contain any of these flags will be saved. If 0 is specified, only objects which are referenced
+	 *									by InBase will be saved into the package
+	 * @param InFilename				The name to use for the new package file
+	 * @param InSaveFlags				Flags to control saving (see ESaveFlags)
+	 * @param InCookingTarget			The platform being saved for when cooking, or NULL if not cooking
 	 * @return Return TRUE if the package was saved successfully, otherwise returns FALSE
 	 */
-	static bool SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags );
+	static bool SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags, CBaseTargetPlatform* InCookingTarget = nullptr );
 
 	/**
 	 * @brief Get the serialization context of objects

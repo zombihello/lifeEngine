@@ -1,4 +1,5 @@
 #include "Misc/EngineGlobals.h"
+#include "Reflection/ObjectPackage.h"
 #include "System/World.h"
 #include "Render/Scene.h"
 #include "Render/RenderingThread.h"
@@ -25,7 +26,8 @@ CStaticMeshPreviewViewportClient::CStaticMeshPreviewViewportClient( const TShare
 	viewRotationQuat		= Math::quaternionZero;
 
 	// Init scene
-	staticMeshComponent = new( nullptr, NAME_None ) CStaticMeshComponent();
+	CObjectPackage*		worldEdPackage = CObjectPackage::CreatePackage( nullptr, TEXT( "WorldEd" ) );
+	staticMeshComponent = new( worldEdPackage, NAME_None ) CStaticMeshComponent();
 	staticMeshComponent->AddToRoot();
 	staticMeshComponent->SetStaticMesh( InStaticMesh->GetAssetHandle() );
 	staticMeshComponent->SetVisibility( true );

@@ -104,6 +104,38 @@ void CProperty::Serialize( class CArchive& InArchive )
 	InArchive << arraySize;
 }
 
+/*
+==================
+CProperty::ShouldSerializeValue
+==================
+*/
+bool CProperty::ShouldSerializeValue( CArchive& InArchive ) const
+{
+	// Archive can override CArchive::ShouldSkipProperty for filter any properties
+	if ( InArchive.ShouldSkipProperty( this ) )
+	{
+		return false;
+	}
+
+	// We shouldn't serialize value if the property hasn't CPF_SaveGame flag, but this archive has
+	if ( !HasAnyFlags( CPF_SaveGame ) && InArchive.IsSaveGame() )
+	{
+		return false;
+	}
+
+	// We must filter properties which have flags either CPF_Transient, or CPF_Deprecated, or CPF_EditorOnly
+	const uint64		skipFlags = CPF_Transient | CPF_Deprecated | CPF_EditorOnly;
+	if ( !HasAnyFlags( skipFlags ) )
+	{
+		return true;
+	}
+
+	bool	bSkip = HasAnyFlags( CPF_Transient ) ||
+					( HasAnyFlags( CPF_Deprecated ) && InArchive.IsSaving() ) ||
+					( HasAnyFlags( CPF_EditorOnly ) && InArchive.IsFilterEditorOnly() );
+	return !bSkip;
+}
+
 
 /*
 ==================
@@ -180,6 +212,16 @@ void CByteProperty::Serialize( class CArchive& InArchive )
 	InArchive << cenum;
 }
 
+/*
+==================
+CByteProperty::SerializeValue
+==================
+*/
+void CByteProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( InData + InArrayIdx * GetElementSize() );
+}
+
 
 /*
 ==================
@@ -232,6 +274,16 @@ bool CIntProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CIntProperty::SerializeValue
+==================
+*/
+void CIntProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( int32* )( InData + InArrayIdx * GetElementSize() );
 }
 
 
@@ -288,6 +340,16 @@ bool CFloatProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 	return bResult;
 }
 
+/*
+==================
+CFloatProperty::SerializeValue
+==================
+*/
+void CFloatProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( float* )( InData + InArrayIdx * GetElementSize() );
+}
+
 
 /*
 ==================
@@ -342,6 +404,16 @@ bool CBoolProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValu
 	return bResult;
 }
 
+/*
+==================
+CBoolProperty::SerializeValue
+==================
+*/
+void CBoolProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( bool* )( InData + InArrayIdx * GetElementSize() );
+}
+
 
 /*
 ==================
@@ -394,6 +466,16 @@ bool CColorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CColorProperty::SerializeValue
+==================
+*/
+void CColorProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( CColor* )( InData + InArrayIdx * GetElementSize() );
 }
 
 
@@ -493,6 +575,16 @@ void CObjectProperty::Serialize( class CArchive& InArchive )
 	InArchive << propertyClass;
 }
 
+/*
+==================
+CObjectProperty::SerializeValue
+==================
+*/
+void CObjectProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( CObject** )( InData + InArrayIdx * GetElementSize() );
+}
+
 
 /*
 ==================
@@ -558,6 +650,16 @@ void CVectorProperty::Serialize( class CArchive& InArchive )
 	InArchive << defaultComponentValue;
 }
 
+/*
+==================
+CVectorProperty::SerializeValue
+==================
+*/
+void CVectorProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( Vector* )( InData + InArrayIdx * GetElementSize() );
+}
+
 
 /*
 ==================
@@ -610,6 +712,16 @@ bool CRotatorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyV
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CRotatorProperty::SerializeValue
+==================
+*/
+void CRotatorProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( CRotator* )( InData + InArrayIdx * GetElementSize() );
 }
 
 
@@ -675,6 +787,16 @@ void CAssetProperty::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << assetType;
+}
+
+/*
+==================
+CAssetProperty::SerializeValue
+==================
+*/
+void CAssetProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( TAssetHandle<CAsset>* )( InData + InArrayIdx * GetElementSize() );
 }
 
 
@@ -805,6 +927,32 @@ void CArrayProperty::Serialize( class CArchive& InArchive )
 	InArchive << innerProperty;
 }
 
+/*
+==================
+CArrayProperty::SerializeValue
+==================
+*/
+void CArrayProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	std::vector<byte>*	arrayItems			= ( std::vector<byte>* )( InData + InArrayIdx * GetElementSize() );
+	uint32				innerPropertySize	= innerProperty->GetElementSize();
+	uint32				numItems			= arrayItems->size() / innerPropertySize;
+	InArchive << numItems;
+
+	// Serialize array size
+	if ( InArchive.IsLoading() )
+	{
+		arrayItems->resize( numItems * innerPropertySize );
+	}
+	
+	// Serialize items
+	byte*	data = arrayItems->data();
+	for ( uint32 index = 0; index < numItems; ++index )
+	{
+		innerProperty->SerializeValue( InArchive, data, index );
+	}
+}
+
 
 /*
 ==================
@@ -925,6 +1073,17 @@ void CStructProperty::Serialize( class CArchive& InArchive )
 	InArchive << propertyStruct;
 }
 
+/*
+==================
+CStructProperty::SerializeValue
+==================
+*/
+void CStructProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	byte*	data = InData + InArrayIdx * GetElementSize();
+	propertyStruct->SerializeProperties( InArchive, data );
+}
+
 
 /*
 ==================
@@ -977,4 +1136,14 @@ bool CStringProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CStringProperty::SerializeValue
+==================
+*/
+void CStringProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const
+{
+	InArchive << *( std::wstring* )( InData + InArrayIdx * GetElementSize() );
 }
