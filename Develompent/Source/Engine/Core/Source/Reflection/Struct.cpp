@@ -101,7 +101,7 @@ CStruct::SerializeProperties
 */
 void CStruct::SerializeProperties( class CArchive& InArchive, byte* InData )
 {
-	if ( !InArchive.WantBinaryPropertySerialization() )
+	if ( !InArchive.WantBinaryPropertySerialization() && !InArchive.IsObjectReferenceCollector() )
 	{
 		SerializeTaggedProperties( InArchive, InData );
 	}

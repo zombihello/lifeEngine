@@ -131,7 +131,7 @@ bool CProperty::ShouldSerializeValue( CArchive& InArchive ) const
 	}
 
 	bool	bSkip = HasAnyFlags( CPF_Transient ) ||
-					( HasAnyFlags( CPF_Deprecated ) && InArchive.IsSaving() ) ||
+					( HasAnyFlags( CPF_Deprecated ) && ( InArchive.IsSaving() || InArchive.WantBinaryPropertySerialization() ) ) ||
 					( HasAnyFlags( CPF_EditorOnly ) && InArchive.IsFilterEditorOnly() );
 	return !bSkip;
 }

@@ -271,6 +271,15 @@ public:
 	}
 
 	/**
+	 * @brief Is this archive only looking for CObject references
+	 * @return Return TRUE if this archive is only looking for CObject references, otherwise returns FALSE
+	 */
+	FORCEINLINE bool IsObjectReferenceCollector() const
+	{
+		return arIsObjectReferenceCollector;
+	}
+
+	/**
 	 * @brief Override operator << for serialize CObjects
 	 * @return Return reference to self
 	 */
@@ -284,6 +293,7 @@ protected:
 	uint32					arVer;								/**< Archive version (look ELifeEnginePackageVersion) */
 	EArchiveType			arType;								/**< Archive type */
 	std::wstring			arPath;								/**< Path to archive */
+	bool					arIsObjectReferenceCollector;		/**< Whether this archive only cares about serializing object references */
 	bool					arIsFilterEditorOnly;				/**< Whether editor only properties are being filtered from the archive (or has been filtered) */
 	bool					arIsSaveGame;						/**< Whether this archive is saving/loading game state */
 	bool					arWantBinaryPropertySerialization;	/**< Whether this archive wants properties to be serialized in binary form instead of tagged */
@@ -394,7 +404,9 @@ public:
 		, bRequireDirectOuter( InIsRequireDirectOuter )
 		, bSerializeRecursively( InIsSerializeRecursively && InOuter )
 		, bShouldIgnoreTransient( InIsShouldIgnoreTransient )
-	{}
+	{
+		arIsObjectReferenceCollector = true;
+	}
 
 protected:
 	/**

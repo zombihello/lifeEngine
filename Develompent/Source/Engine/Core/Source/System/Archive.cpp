@@ -14,6 +14,7 @@ CArchive::CArchive( const std::wstring& InPath )
 	: arVer( VER_PACKAGE_LATEST )
 	, arType( AT_TextFile )
 	, arPath( InPath )
+	, arIsObjectReferenceCollector( false )
 	, arIsFilterEditorOnly( false )
 	, arIsSaveGame( false )
 	, arWantBinaryPropertySerialization( false )
@@ -182,7 +183,9 @@ CArchiveSaveTagExports::CArchiveSaveTagExports
 CArchiveSaveTagExports::CArchiveSaveTagExports( CObject* InOuter )
 	: CArchive( InOuter ? CString::Format( TEXT( "SaveTagExports (%s)" ), InOuter->GetName().c_str() ) : TEXT( "SaveTagExports" ) )
 	, outer( InOuter )
-{}
+{
+	arIsObjectReferenceCollector = true;
+}
 
 /*
 ==================
@@ -262,7 +265,9 @@ CArchiveSaveTagExports::CArchiveSaveTagImports
 CArchiveSaveTagImports::CArchiveSaveTagImports( CLinkerSave* InLinker )
 	: CArchive( InLinker && InLinker->GetLinkerRoot() ? CString::Format( TEXT( "SaveTagImports (%s)" ), InLinker->GetLinkerRoot()->GetName().c_str() ) : TEXT( "SaveTagImports" ) )
 	, linker( InLinker )
-{}
+{
+	arIsObjectReferenceCollector = true;
+}
 
 /*
 ==================
