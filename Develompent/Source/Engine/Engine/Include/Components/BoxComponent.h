@@ -33,12 +33,6 @@ public:
 #endif // WITH_EDITOR
 
 	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
-
-	/**
 	 * @brief Update the body setup parameters based on shape information
 	 */
 	virtual void UpdateBodySetup() override;

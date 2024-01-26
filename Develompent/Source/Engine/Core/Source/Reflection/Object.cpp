@@ -300,7 +300,7 @@ void CObject::Serialize( CArchive& InArchive )
 
 		if ( InArchive.Ver() >= VER_OuterInCObject )
 		{
-			InArchive << outer;
+			InArchive << loadOuter;
 		}
 
 		// If the name we loaded is different from the current one,
@@ -321,7 +321,7 @@ void CObject::Serialize( CArchive& InArchive )
 	}
 
 	// Serialize object properties which are defined in the class
-	if ( InArchive.Ver() >= VER_SerializeProperties && theClass != CClass::StaticClass() )
+	if ( theClass != CClass::StaticClass() )
 	{
 		theClass->SerializeProperties( InArchive, ( byte* )this );
 	}

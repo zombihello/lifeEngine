@@ -66,7 +66,6 @@ public:
 	 * @param InClassCastFlags		Class cast flags
 	 * @param InPropertiesSize		Properties size in bytes
 	 * @param InMinAlignment		Minimum alignment for the class
-	 * @param InClassConstructor	Pointer to class constructor
 	 * @param InSuperClass			Super class
 	 * @param InWithinClass			Class where this class is within
 	 */

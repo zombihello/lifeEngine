@@ -62,6 +62,12 @@ public:
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
 
+	/**
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
+	 */
+	virtual void PostLoad() override;
+
 #if WITH_EDITOR
 	/**
 	 * @brief Function called by the editor when property is changed
@@ -134,6 +140,7 @@ public:
 	FORCEINLINE void SetMaterial( const TAssetHandle<CMaterial> InMaterial )
 	{
 		sprite->SetMaterial( InMaterial );
+		material = InMaterial;
 		bIsDirtyDrawingPolicyLink = true;
 	}
 

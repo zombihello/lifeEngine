@@ -34,6 +34,16 @@
 
 /**
  * @ingroup Core
+ * @brief Macro for private default constructor
+ * @param TClass    Class
+ */
+#define NO_DEFAULT_CONSTRUCTOR( TClass ) \
+	protected: \
+        TClass() {} \
+    public:
+
+/**
+ * @ingroup Core
  * @brief Base macro for declare class
  * 
  * @param TClass            Class
@@ -154,6 +164,23 @@
 
 /**
  * @ingroup Core
+ * @brief Macro for declare class without default constructor
+ *
+ * @param TClass            Class
+ * @param TSuperClass       Super class
+ * @param TClassFlags       Class flags
+ * @param TClassCastFlags   Class cast flags
+ * @param TPackage          Package
+ *
+ * Example usage: @code DECLARE_CLASS_NO_CTOR( CClass, CObject, 0, 0, TEXT( "Core" ) ) @endcode
+ */
+#define DECLARE_CLASS_NO_CTOR( TClass, TSuperClass, TClassFlags, TClassCastFlags, TPackage ) \
+    DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags, TClassCastFlags, TPackage ) \
+    DECLARE_SERIALIZER_AND_DTOR( TClass ) \
+    NO_DEFAULT_CONSTRUCTOR( TClass )
+
+/**
+ * @ingroup Core
  * @brief Declare that objects of class being defined reside within objects of the specified class
  * @param TWithinClass    Within class
  */
@@ -163,16 +190,6 @@
     { \
         return ( TWithinClass* )GetOuter(); \
     }
-
-/**
- * @ingroup Core
- * @brief Macro for private default constructor
- * @param TClass    Class
- */
-#define NO_DEFAULT_CONSTRUCTOR( TClass ) \
-	protected: \
-        TClass() {} \
-    public:
 
 /**
  * @ingroup Core
@@ -405,6 +422,7 @@ enum EObjectFlags
     OBJECT_NeedLoad                 = 1 << 9,   /**< During load, indicates object needs loading */
     OBJECT_NeedPostLoad             = 1 << 10,  /**< Object needs to be postloaded */
     OBJECT_Public                   = 1 << 11,  /**< Object is visible outside its package */
+    OBJECT_WasLoaded                = 1 << 12,  /**< Flagged on CObjects that were loaded */
 
     // Combination masks and other combinations
     OBJECT_MASK_Load                 = OBJECT_Public | OBJECT_Native,       /**< Flags to load from LifeEngine files */
@@ -445,7 +463,8 @@ enum ELoadFlags
  */
 enum ESaveFlags
 {
-    SAVE_None       = 0,    /**< No flags */
+    SAVE_None       = 0,        /**< No flags */
+    SAVE_KeepDirty  = 1 << 0,   /**< Do not clear the dirty flag when saving */
 };
 
 /**

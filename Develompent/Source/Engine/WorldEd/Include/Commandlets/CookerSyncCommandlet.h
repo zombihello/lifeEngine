@@ -17,7 +17,7 @@
  */
 class CCookerSyncCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CCookerSyncCommandlet, CBaseCommandlet, CLASS_Transient, 0, TEXT( "WorldEd" ) )
+	DECLARE_CLASS_NO_CTOR( CCookerSyncCommandlet, CBaseCommandlet, CLASS_Transient, 0, TEXT( "WorldEd" ) )
 
 public:
 	/**

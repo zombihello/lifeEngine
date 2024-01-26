@@ -33,24 +33,13 @@ void CSpotLightComponent::StaticInitializeClass()
 
 /*
 ==================
-CSpotLightComponent::Serialize
+CSpotLightComponent::PostLoad
 ==================
 */
-void CSpotLightComponent::Serialize( class CArchive& InArchive )
+void CSpotLightComponent::PostLoad()
 {
-	Super::Serialize( InArchive );
-	if ( InArchive.Ver() < VER_NewSeriallizeDataInLightComponents )
-	{
-		return;
-	}
-
-	InArchive << radius;
-	InArchive << height;
-	
-	if ( InArchive.IsLoading() )
-	{
-		bNeedUpdateCutoff = true;
-	}
+	Super::PostLoad();
+	bNeedUpdateCutoff = true;
 }
 
 #if WITH_EDITOR

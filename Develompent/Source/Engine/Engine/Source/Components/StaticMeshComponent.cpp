@@ -31,14 +31,13 @@ void CStaticMeshComponent::StaticInitializeClass()
 
 /*
 ==================
-CStaticMeshComponent::Serialize
+CStaticMeshComponent::PostLoad
 ==================
 */
-void CStaticMeshComponent::Serialize( class CArchive& InArchive )
+void CStaticMeshComponent::PostLoad()
 {
-	Super::Serialize( InArchive );
-	InArchive << staticMesh;
-	InArchive << overrideMaterials;
+	Super::PostLoad();
+	bIsDirtyDrawingPolicyLink = true;
 }
 
 #if WITH_EDITOR

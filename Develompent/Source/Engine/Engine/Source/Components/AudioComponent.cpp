@@ -119,43 +119,30 @@ void CAudioComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPro
 
 /*
 ==================
-CAudioComponent::Serialize
+CAudioComponent::PostLoad
 ==================
 */
-void CAudioComponent::Serialize( class CArchive& InArchive )
+void CAudioComponent::PostLoad()
 {
-	Super::Serialize( InArchive );	
-	InArchive << bIsLoop;
-	InArchive << bIsUISound;
-	InArchive << bIsAutoPlay;
-	InArchive << bIsStreamable;
-	InArchive << volume;
-	InArchive << minDistance;
-	InArchive << attenuation;
-	InArchive << pitch;
-	InArchive << bank;
-
-	// If we archive loading - init audio source
-	if ( InArchive.IsLoading() )
+	Super::PostLoad();
+	
+	// Init first location of audio source and update it type
+	if ( !bIsUISound )
 	{
-		// Init first location of audio source and update it type
-		if ( !bIsUISound )
-		{
-			oldSourceLocation = GetComponentLocation();
-		}
-		else
-		{
-			oldSourceLocation = Math::vectorZero;
-		}
-		UpdateAudioSourceType();
+		oldSourceLocation = GetComponentLocation();
+	}
+	else
+	{
+		oldSourceLocation = Math::vectorZero;
+	}
+	UpdateAudioSourceType();
 
 #if WITH_EDITOR
-		if ( g_IsEditor && bIsAutoPlay )
-		{
-			Play();
-		}
-#endif // WITH_EDITOR
+	if ( g_IsEditor && bIsAutoPlay )
+	{
+		Play();
 	}
+#endif // WITH_EDITOR
 }
 
 /*

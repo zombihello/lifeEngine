@@ -35,7 +35,7 @@ void AAudio::StaticInitializeClass()
 	new( staticClass, TEXT( "Audio Component" ), OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, audioComponent ), TEXT( "Audio" ), TEXT( "Audio component" ), CPF_Edit, CAudioComponent::StaticClass() );
 
 #if WITH_EDITOR
-	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, gizmoComponent ), NAME_None, TEXT( "" ), CPF_None, CSpriteComponent::StaticClass() );
+	new( staticClass, NAME_None ) CObjectProperty( CPP_PROPERTY( ThisClass, gizmoComponent ), NAME_None, TEXT( "" ), CPF_EditorOnly, CSpriteComponent::StaticClass() );
 #endif // WITH_EDITOR
 }
 

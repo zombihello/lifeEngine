@@ -2,6 +2,7 @@
 #include "Containers/String.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Misc/UIGlobals.h"
+#include "Reflection/ObjectPackage.h"
 #include "Windows/EditorWindow.h"
 #include "Windows/FileDialog.h"
 #include "Windows/DialogWindow.h"
@@ -77,7 +78,10 @@ CEditorWindow::UpdateWindowTitle
 */
 void CEditorWindow::UpdateWindowTitle()
 {
-	g_Window->SetTitle( CString::Format( TEXT( "%s%s - %s" ), g_World->IsDirty() ? TEXT( "*" ) : TEXT( "" ), g_World->GetName().c_str(), g_EditorEngine->GetEditorName().c_str()).c_str());
+	CObjectPackage*		mapPackage = g_World->GetOutermost();
+	Assert( mapPackage );
+
+	g_Window->SetTitle( CString::Format( TEXT( "%s%s - %s" ), mapPackage->IsDirty() ? TEXT( "*" ) : TEXT( "" ), mapPackage->GetName().c_str(), g_EditorEngine->GetEditorName().c_str()).c_str());
 }
 
 void HY_ImGui_EndMainStatusBar()
@@ -154,7 +158,7 @@ void CEditorWindow::OnTick()
 			if ( ImGui::MenuItem( "New Level" ) )
 			{
 				// If map is dirty we ask user would he sure want to create a new map
-				if ( g_World->IsDirty() )
+				if ( g_World->GetOutermost()->IsDirty() )
 				{
 					CDialogWindow::EButtonType	pressedButton;
 					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to create a new level?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
@@ -178,7 +182,7 @@ void CEditorWindow::OnTick()
 			if ( ImGui::MenuItem( "Open Level" ) )
 			{
 				// If map is dirty we ask user would he sure want to open other map
-				if ( g_World->IsDirty() )
+				if ( g_World->GetOutermost()->IsDirty() )
 				{
 					CDialogWindow::EButtonType	pressedButton;
 					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to open other a level?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
@@ -215,7 +219,7 @@ void CEditorWindow::OnTick()
 			if ( ImGui::MenuItem( "Exit" ) )
 			{
 				// If map is dirty we ask user would he sure want to exit from WorldEd
-				if ( g_World->IsDirty() )
+				if ( g_World->GetOutermost()->IsDirty() )
 				{
 					CDialogWindow::EButtonType	pressedButton;
 					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to exit from WorldEd?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
@@ -452,10 +456,10 @@ void CEditorWindow::SaveLevel( bool InIsSaveAs /* = false */ )
 	fileDialogSetup.AddFormat( TEXT( "*.map" ), TEXT( "lifeEngine Map" ) );
 
 	// Save level, if file path isn't we show save file dialog
-	if ( !InIsSaveAs && !g_World->GetFilePath().empty() || Sys_ShowSaveFileDialog( fileDialogSetup, saveFileDialogResult ) )
+	if ( !InIsSaveAs && !g_World->GetOutermost()->GetPackagePath().empty() || Sys_ShowSaveFileDialog(fileDialogSetup, saveFileDialogResult) )
 	{
 		// Get file path to level file
-		std::wstring		filePath = g_World->GetFilePath();
+		std::wstring		filePath = g_World->GetOutermost()->GetPackagePath();
 		if ( InIsSaveAs || filePath.empty() )
 		{
 			Assert( !saveFileDialogResult.files.empty() );

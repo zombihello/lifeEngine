@@ -36,12 +36,6 @@ public:
 	virtual void BeginDestroy() override;
 
 	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
-
-	/**
 	 * Begins Play for the component.
 	 * Called when the owning Actor begins play or when the component is created if the Actor has already begun play.
 	 */
@@ -61,6 +55,12 @@ public:
 	 */
 	virtual void PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet ) override;
 #endif // WITH_EDITOR
+
+	/**
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
+	 */
+	virtual void PostLoad() override;
 
 	/**
 	 * @brief Play sound

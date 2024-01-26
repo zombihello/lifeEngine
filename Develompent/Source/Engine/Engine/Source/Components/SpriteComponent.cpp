@@ -43,6 +43,10 @@ void CSpriteComponent::StaticInitializeClass()
 	new( staticClass, TEXT( "bFlipHorizontal" ), OBJECT_Public )	CBoolProperty( CPP_PROPERTY( ThisClass, bFlipHorizontal ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPF_Edit );
 	new( staticClass, TEXT( "Material" ), OBJECT_Public )			CAssetProperty( CPP_PROPERTY( ThisClass, material ), TEXT( "Disaply" ), TEXT( "Sprite material" ), CPF_Edit, AT_Material );
 	new( staticClass, TEXT( "Type" ), OBJECT_Public )				CByteProperty( CPP_PROPERTY( ThisClass, type ), TEXT( "Sprite" ), TEXT( "Sprite type" ), CPF_Edit, Enum::ESpriteType::StaticEnum() );
+	
+#if WITH_EDITOR
+	new( staticClass, TEXT( "bGizmo" ), OBJECT_Public )				CBoolProperty( CPP_PROPERTY( ThisClass, bGizmo ), TEXT( "Sprite" ), TEXT( "TRUE if use for gizmos (only for editor)" ), CPF_Edit | CPF_EditorOnly );
+#endif // WITH_EDITOR
 }
 
 /*
@@ -53,26 +57,29 @@ CSpriteComponent::Serialize
 void CSpriteComponent::Serialize( class CArchive& InArchive )
 {
     Super::Serialize( InArchive );
+	RectFloat_t		textureRect = GetTextureRect();
+	Vector2D		spriteSize = GetSpriteSize();
+	InArchive << textureRect;
+	InArchive << spriteSize;
 
-    RectFloat_t				textureRect     = GetTextureRect();
-    Vector2D				spriteSize      = GetSpriteSize();
-	TAssetHandle<CMaterial>	material        = GetMaterial();
+	if ( InArchive.IsLoading() )
+	{
+		SetTextureRect( textureRect );
+		SetSpriteSize( spriteSize );
+	}
+}
 
-    InArchive << type;
-    InArchive << textureRect;
-    InArchive << spriteSize;
-    InArchive << material;
-	InArchive << bFlipVertical;
-	InArchive << bFlipHorizontal;
-
-    if ( InArchive.IsLoading() )
-    {
-        SetTextureRect( textureRect );
-        SetSpriteSize( spriteSize );
-        SetMaterial( material );
-		SetFlipVertical( bFlipVertical );
-		SetFlipHorizontal( bFlipHorizontal );
-    }
+/*
+==================
+CSpriteComponent::PostLoad
+==================
+*/
+void CSpriteComponent::PostLoad()
+{
+	Super::PostLoad();
+	SetMaterial( material );
+	SetFlipVertical( bFlipVertical );
+	SetFlipHorizontal( bFlipHorizontal );
 }
 
 #if WITH_EDITOR

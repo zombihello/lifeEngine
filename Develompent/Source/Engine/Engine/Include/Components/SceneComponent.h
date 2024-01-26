@@ -41,12 +41,6 @@ public:
 	virtual void Destroyed() override;
 
 	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
-
-	/**
 	 * @brief Detach this component from whatever it is attached to
 	 * 
 	 * @param InIsMaintainWorldPosition		Is need save world position

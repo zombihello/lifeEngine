@@ -81,8 +81,8 @@ public:
 		// Add change actor name
 		actor->SetName( newActorName.c_str() );
 
-		// Mark world as dirty
-		g_World->MarkDirty();
+		// Mark the world's package as dirty
+		g_World->MarkPackageDirty();
 		return 0;
 	}
 
@@ -154,7 +154,7 @@ void CExplorerLevelWindow::OnTick()
 			if ( ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##Visibility_ID_%i" ), index ).c_str() ), &bNewVisibility ) )
 			{
 				actor->SetVisibility( bNewVisibility );
-				g_World->MarkDirty();
+				g_World->MarkPackageDirty();
 			}
 			
 			// Label

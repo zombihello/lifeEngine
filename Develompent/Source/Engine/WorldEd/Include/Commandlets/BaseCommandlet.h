@@ -21,7 +21,7 @@
  */
 class CBaseCommandlet : public CObject
 {
-	DECLARE_CLASS( CBaseCommandlet, CObject, CLASS_Transient, 0, TEXT( "WorldEd" ) )
+	DECLARE_CLASS_NO_CTOR( CBaseCommandlet, CObject, CLASS_Transient | CLASS_Abstract, 0, TEXT( "WorldEd" ) )
 
 public:
 	/**

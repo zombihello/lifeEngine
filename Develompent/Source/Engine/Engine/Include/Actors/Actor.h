@@ -577,12 +577,6 @@ public:
 	 * @param InDeltaTime	The time since the last tick.
 	 */
 	virtual void Tick( float InDeltaTime );
-
-	/**
-	 * @brief Serialize actor
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive );
 	
 	/**
 	 * @brief Called when this actor is spawned

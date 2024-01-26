@@ -75,32 +75,6 @@ bool CSceneComponent::IsAttachedTo( CSceneComponent* InTestComp ) const
 
 /*
 ==================
-CSceneComponent::Serialize
-==================
-*/
-void CSceneComponent::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-	if ( InArchive.IsLoading() && InArchive.Ver() < VER_UpdateTrasformSceneComponent )
-	{
-		CTransform		tmpTransform;
-		InArchive << tmpTransform;
-
-		relativeLocation	= tmpTransform.GetLocation();
-		relativeRotation	= relativeRotationCache.QuatToRotator( tmpTransform.GetRotation() );
-		relativeScale		= tmpTransform.GetScale();
-
-		Warnf( TEXT( "Deprecated package version (0x%X). Need to re-save the package '%s', because in the future it may not open\n" ), InArchive.Ver(), InArchive.GetPath().c_str() );
-		return;
-	}
-
-	InArchive << relativeLocation;
-	InArchive << relativeRotation;
-	InArchive << relativeScale;
-}
-
-/*
-==================
 CSceneComponent::SetupAttachment
 ==================
 */

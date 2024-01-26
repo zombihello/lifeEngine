@@ -25,12 +25,6 @@ public:
 	 */
 	CPointLightComponent();
 
-	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
-
 #if WITH_EDITOR
 	/**
 	 * @brief Function called every frame for drawing debug geometry. Override this function to implement custom logic of drawing debug geometry

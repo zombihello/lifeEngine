@@ -59,14 +59,3 @@ void CBoxComponent::UpdateBodySetup()
 	boxGeometry.material			= physicsMaterial;
 	bodySetup->AddBoxGeometry( boxGeometry );
 }
-
-/*
-==================
-CBoxComponent::Serialize
-==================
-*/
-void CBoxComponent::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-	InArchive << size;
-}

@@ -45,24 +45,6 @@ void CLightComponent::StaticInitializeClass()
 
 /*
 ==================
-CLightComponent::Serialize
-==================
-*/
-void CLightComponent::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-	InArchive << bEnabled;
-	if ( InArchive.Ver() < VER_NewSeriallizeDataInLightComponents )
-	{
-		return;
-	}
-
-	InArchive << lightColor;
-	InArchive << intensivity;
-}
-
-/*
-==================
 CLightComponent::Spawned
 ==================
 */

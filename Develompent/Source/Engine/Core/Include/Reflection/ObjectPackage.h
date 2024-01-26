@@ -215,11 +215,30 @@ public:
 		return packageFlags;
 	}
 
+	/**
+	 * @brief Set Path to the file that was associated with this package
+	 * @param InPackagePath		Path to file
+	 */
+	FORCEINLINE void SetPackagePath( const std::wstring& InPackagePath )
+	{
+		packagePath = InPackagePath;
+	}
+
+	/**
+	 * @brief Path to the file that was associated with this package
+	 * @return Return path to the file that was associated with this package
+	 */
+	FORCEINLINE const std::wstring& GetPackagePath() const
+	{
+		return packagePath;
+	}
+
 private:
 	static bool			bIsSavingPackage;		/**< Set while in SavePackage() to detect certain operations that are illegal while saving */
 	bool				bHasBeenFullyLoaded;	/**< Whether this package has been fully loaded (aka had all it's exports created) at some point */
 	bool				bDirty;					/**< Is the package dirty and need to save on disk */
 	uint32				packageFlags;			/**< Package flags */
+	std::wstring		packagePath;			/**< Path to the file for this package */
 	class CLinkerLoad*	linkerLoad;				/**< Linker load associated with this package */
 };
 

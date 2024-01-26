@@ -23,9 +23,6 @@ CWorld::CWorld
 CWorld::CWorld() 
 	: isBeginPlay( false )
 	, scene( new CScene() )
-#if WITH_EDITOR
-	, name( TEXT( "Unknown" ) )
-#endif // WITH_EDITOR
 {}
 
 /*
@@ -36,8 +33,8 @@ CWorld::StaticInitializeClass
 void CWorld::StaticInitializeClass()
 {
 	// Native properties
-	CArrayProperty*		actorsArray = new( staticClass, NAME_None ) CArrayProperty( CPP_PROPERTY( ThisClass, actors ), NAME_None, TEXT( "" ), CPF_None );
-	new( actorsArray, NAME_None ) CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, AActor::StaticClass() );
+	CArrayProperty*		actorsArray = new( staticClass, NAME_None )		CArrayProperty( CPP_PROPERTY( ThisClass, actors ), NAME_None, TEXT( "" ), CPF_None );
+	new( actorsArray, NAME_None )										CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, AActor::StaticClass() );
 }
 
 /*
@@ -141,58 +138,29 @@ CWorld::Serialize
 */
 void CWorld::Serialize( CArchive& InArchive )
 {
-	if ( InArchive.IsSaving() )
+	// Clear the world
+	if ( InArchive.IsLoading() )
 	{
-		InArchive << ( uint32 )actors.size();
-		for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
-		{
-			AActor*			actor = actors[ index ];
-			InArchive << actor->GetClass()->GetName();
-			actor->Serialize( InArchive );
-		}
-	}
-	else
-	{
-		// Clear world
 		CleanupWorld();
-
-		uint32		countActors = 0;
-		InArchive << countActors;
-
-		for ( uint32 index = 0; index < countActors; ++index )
-		{
-			// Serialize class name
-			uint32				classNameSize = 0;
-			std::wstring		className;
-			InArchive << className;
-
-			// Spawn actor, serialize and add to array
-			AActor*			actor = SpawnActor( FindObjectFast<CClass>( nullptr, className, true, true ), Math::vectorZero, Math::quaternionZero );
-			actor->Serialize( InArchive );
-		}
 	}
+	
+	Super::Serialize( InArchive );
+}
 
-#if WITH_EDITOR
-	// Getting path and file name
-	filePath	= InArchive.GetPath();
-	name		= filePath;
+/*
+==================
+CWorld::PostLoad
+==================
+*/
+void CWorld::PostLoad()
+{
+	Super::PostLoad();
+
+	// Call event of spawn for all actors
+	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
 	{
-		Sys_NormalizePathSeparators( name );
-		std::size_t			pathSeparatorPos = name.find_last_of( PATH_SEPARATOR );
-		if ( pathSeparatorPos != std::wstring::npos )
-		{
-			name.erase( 0, pathSeparatorPos + 1 );
-		}
-
-		uint32 dotPos = name.find_last_of( TEXT( "." ) );
-		if ( dotPos != std::wstring::npos )
-		{
-			name.erase( dotPos, name.size() + 1 );
-		}
+		actors[index]->Spawned();
 	}
-
-	bDirty = false;
-#endif // WITH_EDITOR
 }
 
 /*
@@ -231,10 +199,7 @@ void CWorld::CleanupWorld()
 	actorsToDestroy.clear();
 
 #if WITH_EDITOR
-	bDirty		= false;
 	selectedActors.clear();
-	filePath	= TEXT( "" );
-	name		= TEXT( "Unknown" );
 #endif // WITH_EDITOR
 }
 
@@ -270,7 +235,7 @@ AActor* CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, con
 #if WITH_EDITOR
 	std::vector<AActor*>		spawnedActors = { actor };
 	EditorDelegates::onActorsSpawned.Broadcast( spawnedActors );
-	MarkDirty();
+	MarkPackageDirty();
 #endif // WITH_EDITOR
 
 	return actor;
@@ -312,7 +277,7 @@ void CWorld::DestroyActor( AActor* InActor, bool InIsIgnorePlaying )
 
 	std::vector<AActor*>		destroyedActors = { InActor };
 	EditorDelegates::onActorsDestroyed.Broadcast( destroyedActors );
-	MarkDirty();
+	MarkPackageDirty();
 #endif // WITH_EDITOR
 
 	// Tell this actor it's about to be destroyed

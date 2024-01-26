@@ -41,12 +41,6 @@ public:
 	virtual void TickComponent( float InDeltaTime );
 
 	/**
-	 * @brief Serialize object
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
-
-	/**
 	 * @brief Walk
 	 * 
 	 * @param InWorldDirection Direction of move in world space

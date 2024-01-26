@@ -149,6 +149,9 @@ CObjectPackage* CObjectPackage::LoadPackage( CObjectPackage* InOuter, const tcha
 	// Load all objects from package
 	linker->LoadAllObjects();
 
+	// Mark package as loaded
+	resultPackage->AddObjectFlag( OBJECT_WasLoaded );
+
 	// We end loading the package
 	EndLoadPackage();
 
@@ -652,9 +655,32 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 			}
 			else
 			{
+				// Mark exports and the package as OBJECT_WasLoaded after they've been serialized
+				// This is to ensue that newly created packages are properly marked as loaded 
+				// (since they now exist on disk and in memory in the exact same state)
+				for ( uint32 index = 0, count = exportMap.size(); index < count; ++index )
+				{
+					ObjectExport&	objectExport = exportMap[index];
+					if ( objectExport.object )
+					{
+						objectExport.object->AddObjectFlag( OBJECT_WasLoaded );
+					}
+				}
+
+				// And finally set the flag on the package itself
+				InOuter->AddObjectFlag( OBJECT_WasLoaded );
+
 				// Package has been save, so unmark NewlyCreated flag and unset dirty flag
 				InOuter->RemovePackageFlag( PKG_NewlyCreated );
-				InOuter->SetDirtyFlag( false );
+
+				// Remember path to the package file
+				InOuter->SetPackagePath( InFilename );
+
+				// Clear dirty flag if desired
+				if ( !( InSaveFlags & SAVE_KeepDirty ) )
+				{
+					InOuter->SetDirtyFlag( false );
+				}
 			}
 
 			// Delete the temporary file

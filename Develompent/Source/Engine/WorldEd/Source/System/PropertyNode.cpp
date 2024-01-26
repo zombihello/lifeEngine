@@ -151,7 +151,7 @@ void CPropertyNode::NotifyPostChange( const PropertyChangedEvenet& InPropertyCha
 		}
 	}
 
-	g_World->MarkDirty();
+	g_World->MarkPackageDirty();
 }
 
 /*

@@ -156,7 +156,9 @@ CLinkerLoad* CLinkerLoad::GetPackageLinker( CObjectPackage* InOuter, const tchar
 		result = CreateLinker( tagetPackage, newFilename.c_str(), InLoadFlags );
 		if ( result )
 		{
+			// Remember linker and file path
 			tagetPackage->SetLinker( result );
+			tagetPackage->SetPackagePath( InFilename );
 		}
 	}
 
@@ -737,6 +739,15 @@ CObject* CLinkerLoad::CreateExport( uint32 InExportIndex )
 		{
 			// Associate linker with object to avoid detachment mismatches
 			exportObject.object->SetLinker( this, InExportIndex );
+
+			// If this object was allocated but never loaded (components created by a constructor) make sure it gets loaded
+			// Don't do this for any packages that have previously fully loaded as they may have in memory changes
+			CObjectPackage::GetObjectSerializeContext().AddLoadedObject( exportObject.object );
+			if ( !exportObject.object->HasAnyObjectFlags( OBJECT_WasLoaded ) && !linkerRoot->IsFullyLoaded() )
+			{
+				exportObject.object->AddObjectFlag( OBJECT_NeedLoad | OBJECT_NeedPostLoad | OBJECT_WasLoaded );
+			}
+
 			return exportObject.object;
 		}
 
@@ -749,7 +760,7 @@ CObject* CLinkerLoad::CreateExport( uint32 InExportIndex )
 		}
 
 		// Create the export object, marking it with the appropriate flags to indicate that the object's data still needs to be loaded
-		ObjectFlags_t	objectLoadFlags = ( exportObject.objectFlags & OBJECT_MASK_Load ) | OBJECT_NeedLoad | OBJECT_NeedPostLoad;
+		ObjectFlags_t	objectLoadFlags = ( exportObject.objectFlags & OBJECT_MASK_Load ) | OBJECT_NeedLoad | OBJECT_NeedPostLoad | OBJECT_WasLoaded;
 
 		// Otherwise we create a new object
 		exportObject.object = CObject::StaticConstructObject( loadClass, thisParent, exportObject.objectName, objectLoadFlags );

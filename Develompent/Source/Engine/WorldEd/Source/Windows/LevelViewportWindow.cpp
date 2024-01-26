@@ -2,6 +2,7 @@
 #include "Misc/EngineGlobals.h"
 #include "Misc/UIGlobals.h"
 #include "Logger/LoggerMacros.h"
+#include "Reflection/ObjectPackage.h"
 #include "Windows/LevelViewportWindow.h"
 #include "Windows/DialogWindow.h"
 #include "Render/EditorLevelViewportClient.h"
@@ -106,13 +107,13 @@ void CLevelViewportWindow::OnTick()
 		ImGui::Separator();
 		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_PlayStandaloneGame ).ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
-			if ( g_World->IsDirty() )
+			if ( g_World->GetOutermost()->IsDirty() )
 			{
 				OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved.\nFor launch standalone game need it save" ) ), CDialogWindow::BT_Ok );
 			}
 			else
 			{
-				Sys_CreateProc( g_FileSystem->GetExePath().c_str(), CString::Format( TEXT( "-map %s" ), g_World->GetFilePath().c_str() ).c_str(), false, false, false, 0 );
+				Sys_CreateProc( g_FileSystem->GetExePath().c_str(), CString::Format( TEXT( "-map %s" ), g_World->GetOutermost()->GetPackagePath().c_str() ).c_str(), false, false, false, 0 );
 			}
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
@@ -275,8 +276,8 @@ void CLevelViewportWindow::OnTick()
 				}
 			}
 
-			// Mark world as dirty
-			g_World->MarkDirty();
+			// Mark the world's package as dirty
+			g_World->MarkPackageDirty();
 		}
 
 		delete sceneView;

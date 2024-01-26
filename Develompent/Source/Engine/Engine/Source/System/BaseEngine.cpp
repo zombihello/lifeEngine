@@ -6,6 +6,7 @@
 #include "Reflection/ObjectGC.h"
 #include "Reflection/ObjectPackage.h"
 #include "Reflection/ObjectGlobals.h"
+#include "Reflection/ObjectIterator.h"
 #include "System/Config.h"
 #include "System/World.h"
 #include "System/Package.h"
@@ -282,11 +283,10 @@ CBaseEngine::LoadMap
 bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	Logf( TEXT( "Load map: %s\n" ), InMap.c_str() );
-
-	CArchive*		archive = g_FileSystem->CreateFileReader( InMap );
-	if ( !archive )
+	CObjectPackage*		mapPackage = CObjectPackage::LoadPackage( nullptr, InMap.c_str(), LOAD_None );
+	if ( !mapPackage )
 	{
-		OutError = TEXT( "Map not found" );
+		OutError = TEXT( "Failed to load map" );
 		return false;
 	}
 
@@ -298,10 +298,17 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 		g_World = nullptr;
 	}
 
-	CObjectPackage*		mapPackage = CObjectPackage::CreatePackage( nullptr, CFilename( InMap ).GetBaseFilename().c_str() );
-	g_World = new( mapPackage, TEXT( "TheWorld" ), OBJECT_Public ) CWorld();
-	archive->SerializeHeader();
-	g_World->Serialize( *archive );
+	// TODO yehor.pohuliaka - Need to implement method for get from package object of some class
+	for ( TObjectIterator<CWorld> it; it; ++it )
+	{
+		if ( IsIn( *it, mapPackage ) )
+		{
+			g_World = *it;
+			break;
+		}
+	}
+
+	Assert( g_World );
 	g_World->AddToRoot();
 
 	// Call garbage collector of unused packages and assets for free used memory

@@ -23,9 +23,7 @@ CSphereComponent::Serialize
 void CSphereComponent::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
-	InArchive << radius;
 	InArchive << pendingSDGLevel;
-	InArchive << material;
 }
 
 /*

@@ -51,12 +51,6 @@ public:
 	virtual void BeginDestroy() override;
 
 	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
-
-	/**
 	 * @brief Called when the owning Actor is spawned
 	 */
 	virtual void Spawned() override;

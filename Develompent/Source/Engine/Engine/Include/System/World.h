@@ -44,6 +44,12 @@ public:
 	virtual void BeginDestroy() override;
 
 	/**
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
+	 */
+	virtual void PostLoad() override;
+
+	/**
 	 * Start gameplay. This will cause the game mode to transition to the correct state and call BeginPlay on all actors
 	 */
 	void BeginPlay();
@@ -65,7 +71,7 @@ public:
 	 * 
 	 * @param[in] InArchive Archive
 	 */
-	void Serialize( CArchive& InArchive );
+	virtual void Serialize( CArchive& InArchive ) override;
 
 	/**
 	 * Clean up all world
@@ -205,45 +211,6 @@ public:
 	{
 		return selectedActors.size();
 	}
-
-	/**
-	 * @brief Get name
-	 * @return Return name of world
-	 */
-	FORCEINLINE const std::wstring& GetName() const
-	{
-		return name;
-	}
-
-	/**
-	 * @brief Get path to file
-	 * @return Return path to file with world. If not serialized returning empty string
-	 */
-	FORCEINLINE const std::wstring& GetFilePath() const
-	{
-		return filePath;
-	}
-
-	/**
-	 * @brief Mark dirty world
-	 */
-	FORCEINLINE void MarkDirty()
-	{
-		if ( !bDirty )
-		{
-			bDirty = true;
-			EditorDelegates::onEditorMapMarkedDirty.Broadcast();
-		}
-	}
-
-	/**
-	 * @brief Is dirty world
-	 * @return Return TRUE if world is dirty, else returning FALSE
-	 */
-	FORCEINLINE bool IsDirty() const
-	{
-		return bDirty;
-	}
 #endif // WITH_EDITOR
 
 private:
@@ -261,10 +228,7 @@ private:
 	std::vector<AActor*>		actorsToDestroy;	/**< Array actors which need destroy after tick */
 
 #if WITH_EDITOR
-	bool						bDirty;				/**< Is world dirty and need save */
 	std::vector<AActor*>		selectedActors;		/**< Array of selected actors */
-	std::wstring				name;				/**< World name */
-	std::wstring				filePath;			/**< Path to serialized world on HDD */
 #endif // WITH_EDITOR
 };
 

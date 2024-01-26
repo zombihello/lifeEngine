@@ -82,28 +82,6 @@ void CPrimitiveComponent::TickComponent( float InDeltaTime )
 
 /*
 ==================
-CPrimitiveComponent::Serialize
-==================
-*/
-void CPrimitiveComponent::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-
-#if WITH_EDITOR
-	if ( IsEditorOnly() && !g_IsEditor )
-	{
-		bool	tmpVisibility;
-		InArchive << tmpVisibility;
-	}
-	else
-#endif // WITH_EDITOR
-	{
-		InArchive << bVisibility;
-	}
-}
-
-/*
-==================
 CPrimitiveComponent::LinkDrawList
 ==================
 */

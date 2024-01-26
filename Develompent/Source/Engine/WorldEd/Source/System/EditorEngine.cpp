@@ -351,17 +351,12 @@ bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 	Assert( g_World );
 	Logf( TEXT( "Save map: %s\n" ), InMap.c_str() );
 
-	CArchive* arWorld = g_FileSystem->CreateFileWriter( InMap );
-	if ( !arWorld )
+	g_World->GetOutermost()->SetName( CFilename( InMap ).GetBaseFilename().c_str() );
+	if ( !CObjectPackage::SavePackage( g_World->GetOutermost(), g_World, 0, InMap.c_str(), SAVE_None ) )
 	{
-		OutError = TEXT( "Failed open archive" );
+		OutError = TEXT( "Failed to save map" );
 		return false;
 	}
-
-	arWorld->SetType( AT_World );
-	arWorld->SerializeHeader();
-	g_World->Serialize( *arWorld );
-	delete arWorld;
 
 	EditorDelegates::onEditorSavedMap.Broadcast();
 	return true;

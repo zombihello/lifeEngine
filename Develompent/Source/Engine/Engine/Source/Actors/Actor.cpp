@@ -98,6 +98,11 @@ void AActor::StaticInitializeClass()
 	// Native properties
 	new( staticClass, TEXT( "bVisibility" ), OBJECT_Public )	CBoolProperty( CPP_PROPERTY( ThisClass, bVisibility ), TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPF_Edit );
 	new( staticClass, TEXT( "bIsStatic" ), OBJECT_Public )		CBoolProperty( CPP_PROPERTY( ThisClass, bIsStatic ), TEXT( "Actor" ), TEXT( "Is static actor" ), CPF_Edit );
+	new( staticClass, NAME_None )								CObjectProperty( CPP_PROPERTY( ThisClass, rootComponent ), NAME_None, TEXT( "" ), CPF_None, CSceneComponent::StaticClass() );
+	new( staticClass, NAME_None )								CObjectProperty( CPP_PROPERTY( ThisClass, collisionComponent ), NAME_None, TEXT( "" ), CPF_None, CPrimitiveComponent::StaticClass() );
+
+	CArrayProperty*		ownedComponentsProperty = new( staticClass, NAME_None )	CArrayProperty( CPP_PROPERTY( ThisClass, ownedComponents ), NAME_None, TEXT( "" ), CPF_None );
+	new( ownedComponentsProperty, NAME_None ) CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, CActorComponent::StaticClass() );
 }
 
 /*
@@ -148,97 +153,6 @@ void AActor::Tick( float InDeltaTime )
 		TermPhysics();
 		InitPhysics();
 		bNeedReinitCollision = false;
-	}
-}
-
-/*
-==================
-AActor::Serialize
-==================
-*/
-void AActor::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-	InArchive << bIsStatic;
-	InArchive << bVisibility;
-
-	Assert( InArchive.Ver() >= VER_FixedSerializeComponents );
-	uint32		startToNumComponents = InArchive.Tell();
-	uint32		numComponents = 0;
-	InArchive << numComponents;
-
-	for ( uint32 index = 0, count = InArchive.IsSaving() ? ownedComponents.size() : numComponents; index < count; ++index )
-	{
-		uint32					componentSize = 0;
-		CActorComponent*		ownedComponent;
-		std::wstring			name;
-		std::wstring			className;
-
-		if ( InArchive.IsSaving() )
-		{
-			ownedComponent = ownedComponents[index];
-			name = ownedComponent->GetName();
-			className = ownedComponent->GetClass()->GetName();
-
-			// Skip editor only component if we cooking packages
-#if WITH_EDITOR
-			if ( ownedComponent->IsEditorOnly() && g_IsCooker )
-			{
-				continue;
-			}
-#endif // WITH_EDITOR
-		}
-
-		InArchive << name;
-		InArchive << className;
-		InArchive << componentSize;
-
-		if ( InArchive.IsLoading() )
-		{
-			CClass*		cclass = FindObjectFast<CClass>( nullptr, className.c_str(), true, true );
-			for ( uint32 indexComponent = 0, countComponents = ownedComponents.size(); indexComponent < countComponents; ++indexComponent )
-			{
-				CActorComponent*		component = ownedComponents[indexComponent];
-				if ( name == component->GetName() && cclass == component->GetClass() )
-				{
-					ownedComponent = component;
-					break;
-				}
-			}
-
-			if ( !ownedComponent )
-			{
-				Warnf( TEXT( "In actor %s didn't find component %s (%s) for serialize\n" ), GetName(), name.c_str(), className.c_str() );
-				InArchive.Seek( InArchive.Tell() + componentSize );
-				continue;
-			}
-		}
-
-		uint32	startOffset = InArchive.Tell();
-		ownedComponent->Serialize( InArchive );
-
-		if ( InArchive.IsSaving() )
-		{
-			uint32	currentOffset = InArchive.Tell();
-			componentSize = currentOffset - startOffset;
-			++numComponents;
-
-			InArchive.Seek( startOffset - sizeof( componentSize ) );
-			InArchive << componentSize;
-			InArchive.Seek( currentOffset );
-		}
-		else
-		{
-			Assert( InArchive.Tell() - startOffset == componentSize );
-		}
-	}
-
-	if ( InArchive.IsSaving() )
-	{
-		uint32	currentOffset = InArchive.Tell();
-		InArchive.Seek( startToNumComponents );
-		InArchive << numComponents;
-		InArchive.Seek( currentOffset );
 	}
 }
 

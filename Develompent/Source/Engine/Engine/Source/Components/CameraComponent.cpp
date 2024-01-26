@@ -44,23 +44,12 @@ void CCameraComponent::StaticInitializeClass()
 
 /*
 ==================
-CCameraComponent::Serialize
+CCameraComponent::PostLoad
 ==================
 */
-void CCameraComponent::Serialize( class CArchive& InArchive )
+void CCameraComponent::PostLoad()
 {
-	Super::Serialize( InArchive );
-
-	InArchive << bIsActive;
-	InArchive << bAutoViewData;
-	InArchive << projectionMode;
-	InArchive << fieldOfView;
-	InArchive << orthoWidth;
-	InArchive << orthoHeight;
-	InArchive << nearClipPlane;
-	InArchive << farClipPlane;
-	InArchive << aspectRatio;
-
+	Super::PostLoad();
 	if ( nearClipPlane <= 0.f )
 	{
 		nearClipPlane = 0.01f;
