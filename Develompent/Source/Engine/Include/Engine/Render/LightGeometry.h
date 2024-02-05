@@ -1,0 +1,254 @@
+/**
+ * @file
+ * @addtogroup Engine Engine
+ *
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#ifndef LIGHTGEOMETRY_H
+#define LIGHTGEOMETRY_H
+
+#include "Core/Misc/RefCounted.h"
+#include "Engine/Render/RenderResource.h"
+#include "Engine/Render/RenderUtils.h"
+#include "Engine/Render/VertexFactory/LightVertexFactory.h"
+#include "RHI/BaseBufferRHI.h"
+#include "RHI/TypesRHI.h"
+
+/**
+ * @ingroup Engine
+ * @brief Light sphere mesh (only for point lights)
+ */
+class CLightSphereMesh : public CRenderResource
+{
+public:
+	/**
+	 * @brief Constructor
+	 */
+	CLightSphereMesh();
+
+	/**
+	 * @brief Get number primitives
+	 * @return Return number primitives
+	 */
+	FORCEINLINE uint32 GetNumPrimitives() const
+	{
+		return numPrimitives;
+	}
+
+	/**
+	 * @brief Get RHI vertex buffer
+	 * @return Return RHI vertex buffer, if not created then return nullptr
+	 */
+	FORCEINLINE VertexBufferRHIRef_t GetVertexBufferRHI() const
+	{
+		return vertexBufferRHI;
+	}
+
+	/**
+	 * @brief Get RHI index buffer
+	 * @return Return RHI index buffer, if not created then return nullptr
+	 */
+	FORCEINLINE IndexBufferRHIRef_t GetIndexBufferRHI() const
+	{
+		return indexBufferRHI;
+	}
+
+	/**
+	 * @brief Get vertex factory
+	 * @return Return vertex factory, if not created then return nullptr
+	 */
+	FORCEINLINE TRefCountPtr<CLightVertexFactory> GetVertexFactory() const
+	{
+		return vertexFactory;
+	}
+
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
+
+private:
+	uint32									numPrimitives;		/**< Number primitives */
+	VertexBufferRHIRef_t					vertexBufferRHI;	/**< Vertex buffer RHI */
+	IndexBufferRHIRef_t						indexBufferRHI;		/**< Index buffer RHI */
+	TRefCountPtr<CLightVertexFactory>		vertexFactory;		/**< Vertex factory */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Light quad mesh
+ */
+class CLightQuadMesh : public CRenderResource
+{
+public:
+	/**
+	 * @brief Constructor
+	 */
+	CLightQuadMesh();
+
+	/**
+	 * @brief Get number primitives
+	 * @return Return number primitives
+	 */
+	FORCEINLINE uint32 GetNumPrimitives() const
+	{
+		return 2;
+	}
+
+	/**
+	 * @brief Get RHI vertex buffer
+	 * @return Return RHI vertex buffer, if not created then return nullptr
+	 */
+	FORCEINLINE VertexBufferRHIRef_t GetVertexBufferRHI() const
+	{
+		return vertexBufferRHI;
+	}
+
+	/**
+	 * @brief Get RHI index buffer
+	 * @return Return RHI index buffer, if not created then return nullptr
+	 */
+	FORCEINLINE IndexBufferRHIRef_t GetIndexBufferRHI() const
+	{
+		return indexBufferRHI;
+	}
+
+	/**
+	 * @brief Get vertex factory
+	 * @return Return vertex factory, if not created then return NULL
+	 */
+	FORCEINLINE TRefCountPtr<CLightVertexFactory> GetVertexFactory() const
+	{
+		return vertexFactory;
+	}
+
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
+
+private:
+	VertexBufferRHIRef_t					vertexBufferRHI;	/**< Vertex buffer RHI */
+	IndexBufferRHIRef_t						indexBufferRHI;		/**< Index buffer RHI */
+	TRefCountPtr<CLightVertexFactory>		vertexFactory;		/**< Vertex factory */
+};
+
+/**
+ * @ingroup Engine
+ * @brief Light cone mesh
+ */
+class CLightConeMesh : public CRenderResource
+{
+public:
+	/**
+	 * @brief Constructor
+	 */
+	CLightConeMesh();
+
+	/**
+	 * @brief Get number primitives
+	 * @return Return number primitives
+	 */
+	FORCEINLINE uint32 GetNumPrimitives() const
+	{
+		return numPrimitives;
+	}
+
+	/**
+	 * @brief Get RHI vertex buffer
+	 * @return Return RHI vertex buffer, if not created then return nullptr
+	 */
+	FORCEINLINE VertexBufferRHIRef_t GetVertexBufferRHI() const
+	{
+		return vertexBufferRHI;
+	}
+
+	/**
+	 * @brief Get RHI index buffer
+	 * @return Return RHI index buffer, if not created then return nullptr
+	 */
+	FORCEINLINE IndexBufferRHIRef_t GetIndexBufferRHI() const
+	{
+		return indexBufferRHI;
+	}
+
+	/**
+	 * @brief Get vertex factory
+	 * @return Return vertex factory, if not created then return NULL
+	 */
+	FORCEINLINE TRefCountPtr<CLightVertexFactory> GetVertexFactory() const
+	{
+		return vertexFactory;
+	}
+
+protected:
+	/**
+	 * @brief Initializes the RHI resources used by this resource.
+	 * Called when the resource is initialized.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void InitRHI() override;
+
+	/**
+	 * @brief Releases the RHI resources used by this resource.
+	 * Called when the resource is released.
+	 * This is only called by the rendering thread.
+	 */
+	virtual void ReleaseRHI() override;
+
+private:
+	uint32									numPrimitives;		/**< Number primitives */
+	VertexBufferRHIRef_t					vertexBufferRHI;	/**< Vertex buffer RHI */
+	IndexBufferRHIRef_t						indexBufferRHI;		/**< Index buffer RHI */
+	TRefCountPtr<CLightVertexFactory>		vertexFactory;		/**< Vertex factory */
+};
+
+extern TGlobalResource<CLightSphereMesh>	GLightSphereMesh;	/**< The global light sphere mesh data */
+extern TGlobalResource<CLightQuadMesh>		GLightQuadMesh;		/**< The global light quad mesh data */
+extern TGlobalResource<CLightConeMesh>		GLightConeMesh;		/**< The global light cone mesh data */
+
+#endif // !LIGHTGEOMETRY_H

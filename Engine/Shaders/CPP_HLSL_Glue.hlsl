@@ -9,7 +9,7 @@
 	typedef float3		Vector;
 	typedef float2		Vector2D;
 #else
-	#include "Math/Math.h"
+	#include "Core/Math/Math.h"
 #endif // !__cplusplus
 
 #endif // !CPP_HLSL_GLUE_HLSL

@@ -1,0 +1,186 @@
+/**
+ * @file
+ * @addtogroup Core Core
+ *
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#ifndef COMMANDLINE_H
+#define COMMANDLINE_H
+
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+#include "Core/Misc/Types.h"
+#include "Core/Containers/String.h"
+#include "Core/Containers/StringConv.h"
+#include "Core/CoreDefines.h"
+
+/**
+ * @ingroup Core
+ * @brief Holds parsed data from command line like strings, provides access to a single global g_CommandLine object
+ * 
+ * Usage: 
+ * @code
+ *		-<Param>=<Value> 
+ *		/<Param>=<Value> 
+ *		-<Param>="<Value> <Value>"
+ *		/<Param>="<Value> <Value>"
+ *		-<Param> 
+ *		/<Param> 
+ *		-<Param> <Value> 
+ *		/<Param> <Value>
+ *		-<Param> "<Value> <Value>"
+ *		/<Param> "<Value> <Value>"
+ * @endcode
+ */
+class CCommandLine
+{
+public:
+	/**
+	 * @brief Typedef of array values
+	 */
+	typedef std::vector<std::wstring>		Values_t;
+
+	/**
+	 * @brief Init command line
+	 * @param InCommandLine		ANSI command line
+	 */
+	FORCEINLINE void Init( const achar* InCommandLine )
+	{
+		params.clear();
+		Parse( ANSI_TO_TCHAR( InCommandLine ) );
+	}
+
+	/**
+	 * @brief Init command line
+	 * @param InCommandLine		TCHAR command line
+	 */
+	FORCEINLINE void Init( const tchar* InCommandLine )
+	{
+		params.clear();
+		Parse( InCommandLine );
+	}
+
+	/**
+	 * @brief Shutdown command line
+	 */
+	FORCEINLINE void Shutdown()
+	{
+		params.clear();
+	}
+
+	/**
+	 * @brief Is has a param
+	 * 
+	 * @param InParam	Param to find
+	 * @return Return TRUE if command line is containing a param, otherwise will returning FALSE
+	 */
+	FORCEINLINE bool HasParam( const tchar* InParam ) const
+	{
+		return params.find( CString::ToUpper( InParam ) ) != params.end();
+	}
+
+	/**
+	 * @brief Is has a param with value
+	 *
+	 * @param InParam	Param to find
+	 * @param InValue	Value of param
+	 * @return Return TRUE if command line is containing a param with value, otherwise will returning FALSE
+	 */
+	FORCEINLINE bool HasParam( const tchar* InParam, const tchar* InValue ) const
+	{
+		Params_t::const_iterator	itParam = params.find( CString::ToUpper( InParam ) );
+		if ( itParam == params.end() )
+		{
+			return false;
+		}
+
+		bool				bResult = false;
+		std::wstring		cachedValue = CString::ToUpper( InValue );
+		for ( uint32 index = 0, count = itParam->second.size(); index < count; ++index )
+		{
+			if ( itParam->second[index] == cachedValue )
+			{
+				bResult = true;
+				break;
+			}
+		}
+		
+		return bResult;
+	}
+
+	/**
+	 * @brief Get first value from param
+	 *
+	 * @param InParam		Param
+	 * @return Return first value in param. If not exist return empty string
+	 */
+	FORCEINLINE std::wstring GetFirstValue( const tchar* InParam ) const
+	{
+		Params_t::const_iterator	itParam = params.find( CString::ToUpper( InParam ) );
+		if ( itParam == params.end() || itParam->second.empty() )
+		{
+			return TEXT( "" );
+		}
+
+		return itParam->second[0];
+	}
+
+	/**
+	 * @brief Get values from param
+	 * 
+	 * @param InParam		Param
+	 * @return Return array of values by param. If him is not exist in command line will return empty array
+	 */
+	FORCEINLINE Values_t GetValues( const tchar* InParam ) const
+	{
+		Params_t::const_iterator	itParam = params.find( CString::ToUpper( InParam ) );
+		if ( itParam == params.end() )
+		{
+			return Values_t();
+		}
+
+		return itParam->second;
+	}
+
+private:
+	/**
+	 * @brief Typedef of map parameters
+	 */
+	typedef std::unordered_map<std::wstring, Values_t>		Params_t;
+
+	/**
+	 * @brief Parses a string into params (beginning with - or /) from other parameters
+	 * @param InCommandLine		The string to parse
+	 */
+	void Parse( const tchar* InCommandLine );
+
+	Params_t			params;		/**< Map of parameters */
+};
+
+#endif // !COMMANDLINE_H

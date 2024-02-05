@@ -1,0 +1,210 @@
+/**
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "Core/Logger/LoggerMacros.h"
+#include "Engine/Misc/EngineGlobals.h"
+#include "Engine/System/World.h"
+#include "Engine/Actors/Actor.h"
+#include "Engine/Actors/Character.h"
+#include "Engine/Components/PrimitiveComponent.h"
+#include "Engine/Components/CharacterMovementComponent.h"
+
+IMPLEMENT_CLASS( CCharacterMovementComponent )
+
+/*
+==================
+CCharacterMovementComponent::CCharacterMovementComponent
+==================
+*/
+CCharacterMovementComponent::CCharacterMovementComponent()
+	: bOnGround( false )
+	, bJump( false )
+	, bWalk( false )
+	, walkSpeed( 200.f )
+	, walkSpeedInFly( 200.f )
+	, jumpSpeed( 300.f )
+	, bodyInstance( nullptr )
+	, ownerCharacter( nullptr )
+{}
+
+/*
+==================
+CCharacterMovementComponent::StaticInitializeClass
+==================
+*/
+void CCharacterMovementComponent::StaticInitializeClass()
+{
+	new( staticClass, TEXT( "Walk Speed" ) )		CFloatProperty( TEXT( "Movement" ), TEXT( "Walk speed" ), STRUCT_OFFSET( ThisClass, walkSpeed ), CPF_Edit );
+	new( staticClass, TEXT( "Walk Speed In Fly" ) ) CFloatProperty( TEXT( "Movement" ), TEXT( "Walk speed in fly" ), STRUCT_OFFSET( ThisClass, walkSpeedInFly ), CPF_Edit );
+	new( staticClass, TEXT( "Jump Speed" ) )		CFloatProperty( TEXT( "Movement" ), TEXT( "Jump speed" ), STRUCT_OFFSET( ThisClass, jumpSpeed ), CPF_Edit );
+}
+
+/*
+==================
+CCharacterMovementComponent::BeginPlay
+==================
+*/
+void CCharacterMovementComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	ownerCharacter		= Cast<ACharacter>( GetOwner() );
+	Assert( ownerCharacter );
+
+	// TODO BS yehor.pohuliaka - Need add subscribe to event when body instance recreating or changed to other body (in case welding)
+	CPrimitiveComponent*		collisionComponent = ownerCharacter->GetCollisionComponent();
+	if ( collisionComponent )
+	{
+		bodyInstance = &collisionComponent->GetBodyInstance();
+	}
+}
+
+/*
+==================
+CCharacterMovementComponent::TickComponent
+==================
+*/
+void CCharacterMovementComponent::TickComponent( float InDeltaTime )
+{
+	Super::TickComponent( InDeltaTime );
+
+	// Check if character on ground
+	Vector		startRay	= GetOwner()->GetActorLocation();
+	Vector		endRay		= startRay + GetOwner()->GetActorUpVector() * -1.f;
+	HitResult	hitResult;
+	bool		bResult		= g_World->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic );
+	if ( bResult && !bOnGround )
+	{
+		ownerCharacter->Landed();
+	}
+	bOnGround = bResult;
+
+	// Stop moving character on ZX plane if we not walk
+	if ( bodyInstance )
+	{
+		Vector		velocity = bodyInstance->GetLinearVelocity();
+		bool		bMoving = velocity.x != 0.f || velocity.z != 0.f;
+		if ( bMoving && !bWalk && bOnGround )
+		{
+			velocity.x = 0.f;
+			velocity.y = 0.f;
+			bodyInstance->SetLinearVelocity( velocity );
+		}
+	}
+
+	bWalk = false;
+}
+
+/*
+==================
+CCharacterMovementComponent::Serialize
+==================
+*/
+void CCharacterMovementComponent::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << walkSpeed;
+	InArchive << walkSpeedInFly;
+	InArchive << jumpSpeed;
+}
+
+/*
+==================
+CCharacterMovementComponent::IsCanWalk
+==================
+*/
+bool CCharacterMovementComponent::IsCanWalk( const Vector& InWorldDirection, float InScale ) const
+{
+	Vector		startRay = GetOwner()->GetActorLocation();
+	Vector		endRay = startRay + InWorldDirection * InScale;
+	HitResult	hitResult;
+	return !g_World->LineTraceSingleByChannel( hitResult, startRay, endRay, CC_WorldStatic );
+}
+
+/*
+==================
+CCharacterMovementComponent::Walk
+==================
+*/
+void CCharacterMovementComponent::Walk( const Vector& InWorldDirection, float InScale )
+{
+	if ( !bodyInstance )
+	{
+		AActor*		owner = GetOwner();
+		if ( owner )
+		{
+			owner->AddActorLocation( InWorldDirection * InScale );
+		}
+	}
+	else if ( IsCanWalk( InWorldDirection, InScale ) )
+	{
+		float			maxVelocity = !IsFly() ? walkSpeed : walkSpeedInFly;
+		Vector			velocity = bodyInstance->GetLinearVelocity();	
+		velocity.x		= Clamp( velocity.x + InWorldDirection.x * InScale, -maxVelocity, maxVelocity );
+		velocity.z		= Clamp( velocity.z + InWorldDirection.z * InScale, -maxVelocity, maxVelocity );
+	
+		if ( !bJump && bOnGround )
+		{
+			velocity.y	= Clamp( velocity.y + InWorldDirection.y * InScale, -maxVelocity, maxVelocity );
+		}
+
+		bodyInstance->SetLinearVelocity( velocity );	
+	}
+	else
+	{
+		return;
+	}
+
+	bWalk = true;
+}
+
+/*
+==================
+CCharacterMovementComponent::Jump
+==================
+*/
+void CCharacterMovementComponent::Jump()
+{
+	if ( bJump || !bodyInstance || !bOnGround )
+	{
+		return;
+	}
+
+	Vector			velocity = bodyInstance->GetLinearVelocity();
+	velocity.y		+= jumpSpeed;
+	bodyInstance->SetLinearVelocity( velocity );
+	bJump = true;
+}
+
+/*
+==================
+CCharacterMovementComponent::StopJump
+==================
+*/
+void CCharacterMovementComponent::StopJump()
+{
+	bJump = false;
+}

@@ -1,0 +1,184 @@
+/**
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "Engine/Render/Sphere.h"
+#include "Engine/Render/SceneUtils.h"
+#include "Engine/Components/SphereComponent.h"
+
+IMPLEMENT_CLASS( CSphereComponent )
+
+/*
+==================
+CSphereComponent::CSphereComponent
+==================
+*/
+CSphereComponent::CSphereComponent()
+	: radius( 0.f )
+	, SDGLevel( SDG_World )
+	, pendingSDGLevel( SDG_World )
+{}
+
+/*
+==================
+CSphereComponent::Serialize
+==================
+*/
+void CSphereComponent::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << radius;
+	InArchive << pendingSDGLevel;
+	InArchive << material;
+}
+
+/*
+==================
+CSphereComponent::StaticInitializeClass
+==================
+*/
+void CSphereComponent::StaticInitializeClass()
+{
+	new( staticClass, TEXT( "Radius" ) )	CFloatProperty( TEXT( "Primitive" ), TEXT( "Radius of sphere" ), STRUCT_OFFSET( ThisClass, radius ), CPF_Edit );
+	new( staticClass, TEXT( "Material" ) )	CAssetProperty( TEXT( "Display" ), TEXT( "Material" ), STRUCT_OFFSET( ThisClass, material ), CPF_Edit, AT_Material );
+}
+
+#if WITH_EDITOR
+/*
+==================
+CStaticMeshComponent::PostEditChangeProperty
+==================
+*/
+void CSphereComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet )
+{
+	CProperty*	changedProperty = InPropertyChangedEvenet.property;
+	if ( changedProperty->GetCName() == TEXT( "Material" ) )
+	{
+		SetMaterial( material );
+	}
+	Super::PostEditChangeProperty( InPropertyChangedEvenet );
+}
+#endif // WITH_EDITOR
+
+/*
+==================
+CSphereComponent::UpdateBodySetup
+==================
+*/
+void CSphereComponent::UpdateBodySetup()
+{}
+
+/*
+==================
+CSphereComponent::AddToDrawList
+==================
+*/
+void CSphereComponent::AddToDrawList( const class CSceneView& InSceneView )
+{
+	// If primitive is empty - exit from method
+	if ( !bIsDirtyDrawingPolicyLink && meshBatchLinks.empty() )
+	{
+		return;
+	}
+
+	// If drawing policy link is dirty - we update it
+	if ( bIsDirtyDrawingPolicyLink )
+	{
+		bIsDirtyDrawingPolicyLink = false;
+		LinkDrawList();
+	}
+
+	// Add to mesh batch new instance
+	CTransform				transform = GetComponentTransform();
+	transform.SetScale( Vector( radius, radius, radius ) );
+
+	for ( uint32 index = 0, count = meshBatchLinks.size(); index < count; ++index )
+	{
+		const MeshBatch*	meshBatchLink = meshBatchLinks[index];
+		++meshBatchLink->numInstances;
+		meshBatchLink->instances.push_back( MeshInstance{ transform.ToMatrix() } );
+	}
+}
+
+/*
+==================
+CSphereComponent::LinkDrawList
+==================
+*/
+void CSphereComponent::LinkDrawList()
+{
+	Assert( scene );
+
+	// If the primitive already added to scene - remove all draw policy links
+	if ( drawingPolicyLink )
+	{
+		UnlinkDrawList();
+	}
+
+	SDGLevel = pendingSDGLevel;
+	SceneDepthGroup&				SDG = scene->GetSDG( SDGLevel );
+
+	// Generate mesh batch of sprite
+	MeshBatch			            meshBatch;
+	meshBatch.baseVertexIndex		= 0;
+	meshBatch.firstIndex			= 0;
+	meshBatch.numPrimitives			= g_SphereMesh.GetNumPrimitives();
+	meshBatch.indexBufferRHI		= g_SphereMesh.GetIndexBufferRHI();
+	meshBatch.primitiveType			= PT_TriangleList;
+	
+	// Make and add to scene new draw policy link	
+	const MeshBatch*				meshBatchLink = nullptr;
+	drawingPolicyLink				= ::MakeDrawingPolicyLink<DrawingPolicyLink_t>( g_SphereMesh.GetVertexFactory(), material, meshBatch, meshBatchLink, SDG.dynamicMeshElements, DEC_DYNAMICELEMENTS );
+	meshBatchLinks.push_back( meshBatchLink );
+
+	// Make and add to scene new depth draw policy link
+	depthDrawingPolicyLink			= ::MakeDrawingPolicyLink<DepthDrawingPolicyLink_t>( g_SphereMesh.GetVertexFactory(), material, meshBatch, meshBatchLink, SDG.depthDrawList, DEC_DYNAMICELEMENTS );
+	meshBatchLinks.push_back( meshBatchLink );
+}
+
+/*
+==================
+CSphereComponent::UnlinkDrawList
+==================
+*/
+void CSphereComponent::UnlinkDrawList()
+{
+	Assert( scene );
+	SceneDepthGroup&	SDG = scene->GetSDG( SDGLevel );
+
+	// If the primitive already added to scene - remove all draw policy links
+	if ( drawingPolicyLink  )
+	{
+		SDG.dynamicMeshElements.RemoveItem( drawingPolicyLink );		
+	}
+
+	if ( depthDrawingPolicyLink )
+	{
+		SDG.depthDrawList.RemoveItem( depthDrawingPolicyLink );
+	}
+
+	meshBatchLinks.clear();
+}

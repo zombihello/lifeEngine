@@ -1,1 +1,1 @@
-"../Tools/BuildSystem/premake5.exe" vs2019 --engine=2D %*
+"../Tools/BuildSystem/premake5.exe" vs2022 --engine=2D %*

@@ -1,0 +1,110 @@
+/**
+ * @file
+ * @addtogroup Core Core
+ *
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#ifndef LEVERSION_H
+#define LEVERSION_H
+
+#define ENGINE_VERSION					0x040
+#define ENGINE_MAJOR_VERSION			0
+#define ENGINE_MINOR_VERSION			4
+#define ENGINE_PATH_VERSION				0
+
+#define ENGINE_NAME						"lifeEngine"
+#define ENGINE_VERSION_STRING			"0.4.0"
+
+/**
+ * @ingroup Core
+ * Cast to ensure that the construct cannot be used in a #if without compiler error.
+ * This is useful as enum vales cannot be seen by the preprocessor.
+ */
+#define PREPROCESSOR_ENUM_PROTECT( InValue )		( ( unsigned int )( InValue ) )
+
+/**
+ * @ingroup Core
+ * Package file version log
+ */
+enum ELifeEnginePackageVersion
+{
+	VER_PackageBase							= 1,					/**< Min version for serialize content*/
+	VER_Assets								= 2,					/**< Added in archive assets (CTexture2D, CMaterial, etc) */
+	VER_LeftOnlyPixelShaderInMaterial		= 3,					/**< Removed all shaders except pixel shader from CMaterial */
+	VER_VertexFactory						= 4,					/**< Implemented vertex factory */
+	VER_StaticMesh							= 5,					/**< Implemented static mesh */
+	VER_ShaderMap							= 6,					/**< Added in material shader map */
+	VER_AssetName							= 7,					/**< Added asset name in package */
+	VER_RemovedTFC							= 8,					/**< Removed texture file cache */
+	VER_CompressedZlib						= 9,					/**< Added in archive compression ZLIB */
+	VER_AssetName_V2						= 10,					/**< Moved asset name from him to table of info about this asset */
+	VER_GUIDPackages						= 11,					/**< Added GUID in package */
+	VER_NamePackage							= 12,					/**< Added name package */
+	VER_GUIDAssets							= 13,					/**< Added GUID to assets */
+	VER_ShaderParameterMap 					= 14,					/**< Added shader parameter map in shader cache */
+	VER_HashUInt64							= 15,					/**< Changed type of hashes from uint32 to uint64 */
+	VER_AssetSourceFiles					= 16,					/**< Added in assets path to source file for reimport */
+	VER_RemovedShadersTypeFromMaterial		= 17,					/**< Removed shaders type from material asset */
+	VER_AssetName_V3						= 18,					/**< Moved asset name to CAsset */
+	VER_AssetOnlyEditor						= 19,					/**< Added field 'bOnlyEditor' to asset */
+	VER_CName								= 20,					/**< Added CName for IDs in string view */
+	VER_BBoxInStaticMesh					= 21,					/**< Added CBox to a static mesh */
+	VER_Mipmaps								= 22,					/**< Added mipmaps to textures */
+	VER_FixedSerializeComponents			= 23,					/**< Fixed serialization components in actors */
+	VER_NewSeriallizeDataInLightComponents	= 24,					/**< Added some properties to serialize in CLightComponent, CPointLightCompontn and CSpotLightComponent */
+	VER_CObjectHasCName						= 25,					/**< In CObject field 'name' changed to CName type */
+	VER_UpdateTrasformSceneComponent		= 26,					/**< To CSceneComponent added Location, Scale, Rotation (CRotator) and updated method of transformations */
+	VER_AddTranslucencyFlag					= 27,					/**< Added to CMaterial bTranslucency flag */
+	VER_EnumAsByte							= 28,					/**< Added TEnumAsByte */
+
+	//
+	// New versions can be added here
+	//
+
+	VER_AutomaticVersionPlusOne,									/**< This needs for automatic update last version of package */
+	VER_MinVersion							= VER_PackageBase,		/**< This need for Assert min supported version */
+};
+
+/**
+ * @ingroup Core
+ * Latest version of package
+ */
+#define VER_PACKAGE_LATEST					( PREPROCESSOR_ENUM_PROTECT( VER_AutomaticVersionPlusOne )-1 )
+
+/**
+ * @ingroup Core
+ * Archive tag in file
+ */
+#define ARCHIVE_FILE_TAG					0xAFEB3A00
+
+/**
+ * @ingroup Core
+ * Package tag in file
+ */
+#define PACKAGE_FILE_TAG					0x4B50454C
+
+#endif // !LEVERSION_H

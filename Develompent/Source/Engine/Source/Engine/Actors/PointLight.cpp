@@ -1,0 +1,70 @@
+/**
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "Engine/Actors/PointLight.h"
+
+IMPLEMENT_CLASS( APointLight )
+
+/*
+==================
+APointLight::APointLight
+==================
+*/
+APointLight::APointLight()
+{
+	pointLightComponent = CreateComponent<CPointLightComponent>( TEXT( "PointLightComponent0" ) );
+
+#if WITH_EDITOR
+	gizmoComponent		= CreateComponent<CSpriteComponent>( TEXT( "GizmoComponent0" ), true );
+	gizmoComponent->SetGizmo( true );
+	gizmoComponent->SetType( ST_Rotating );
+	gizmoComponent->SetSpriteSize( Vector2D( 64.f, 64.f ) );
+	gizmoComponent->SetMaterial( g_PackageManager->FindAsset( TEXT( "Material'EditorMaterials:APointLight_Gizmo_Mat" ), AT_Material ) );
+#endif // WITH_EDITOR
+}
+
+/*
+==================
+APointLight::StaticInitializeClass
+==================
+*/
+void APointLight::StaticInitializeClass()
+{
+	new( staticClass, TEXT( "Point Light Component" ) ) CObjectProperty( TEXT( "Light" ), TEXT( "Point light component" ), STRUCT_OFFSET( ThisClass, pointLightComponent ), CPF_Edit, CPointLightComponent::StaticClass() );
+}
+
+#if WITH_EDITOR
+/*
+==================
+APointLight::GetActorIcon
+==================
+*/
+std::wstring APointLight::GetActorIcon() const
+{
+	return TEXT( "Engine/Editor/Icons/Actor_PointLight.png" );
+}
+#endif // WITH_EDITOR

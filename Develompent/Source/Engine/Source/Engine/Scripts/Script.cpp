@@ -1,0 +1,149 @@
+/**
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "Core/System/Archive.h"
+#include "Core/Misc/Class.h"
+#include "Engine/Scripts/Script.h"
+
+/*
+==================
+CScript::CScript
+==================
+*/
+CScript::CScript() : 
+	CAsset( AT_Script ),
+	luaVM( luaL_newstate() )
+{
+	Assert( luaVM );
+
+	// Create new Lua VM and open libs
+	luabridge::enableExceptions( luaVM );
+	luaJIT_setmode( luaVM, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_ON );
+	luaL_openlibs( luaVM );
+
+	// Register of classes API in Lua
+	CScriptEngine::StaticRegisterClassAPI( luaVM );
+}
+
+/*
+==================
+CScript::~CScript
+==================
+*/
+CScript::~CScript()
+{
+	if ( luaVM )
+	{
+		lua_close( luaVM );
+		luaVM = nullptr;
+	}
+}
+
+/*
+==================
+CScript::Serialize
+==================
+*/
+void CScript::Serialize( CArchive& InArchive )
+{
+	if ( InArchive.Type() != AT_TextFile )
+	{
+		CAsset::Serialize( InArchive );
+	}
+
+	if ( InArchive.IsLoading() )
+	{
+		if ( InArchive.Type() == AT_TextFile )
+		{
+			// Go to start of file
+			InArchive.Seek( 0 );
+
+			// Create string buffer and fill '\0'
+			uint32				archiveSize = InArchive.GetSize() + 1;
+			byte*				buffer = new byte[ archiveSize ];
+			memset( buffer, '\0', archiveSize );
+
+			// Serialize data to string buffer
+			InArchive.Serialize( buffer, archiveSize );
+
+			// Loading source code of script
+			SetByteCode( buffer, strlen( ( achar* )buffer ) );
+			delete[] buffer;
+		}
+		else
+		{
+			// Read name of script
+			uint32			nameSize = 0;
+			InArchive << nameSize;
+			
+			name.resize( nameSize );
+			InArchive.Serialize( ( byte* )name.data(), nameSize );
+
+			// Read byte code
+			uint32			byteCodeSize = 0;
+			InArchive << byteCodeSize;
+
+			byte*			buffer = new byte[ byteCodeSize ];
+			InArchive.Serialize( buffer, byteCodeSize );
+
+			SetByteCode( buffer, byteCodeSize );
+			delete[] buffer;
+		}
+	}
+	else
+	{
+		// Write name
+		InArchive << ( uint32 )name.size();
+		InArchive.Serialize( ( byte* )name.data(), ( uint32 )name.size() );
+
+		// Write byte code
+		InArchive << ( uint32 )byteCode.size();
+		InArchive.Serialize( byteCode.data(), ( uint32 )byteCode.size() );
+	}
+}
+
+/*
+==================
+CScript::SetByteCode
+==================
+*/
+void CScript::SetByteCode( const byte* InByteCode, uint32 InSize )
+{
+	Assert( InByteCode && InSize > 0 );
+
+	// Loading byte code of script
+	int32		result = luaL_loadbufferx( luaVM, ( achar* )InByteCode, InSize, name.c_str(), "bt" );		// b - binary format, t - text format, bt - all
+	Assert( result == 0 );
+
+	// Initialize script with help first call
+	result = lua_pcall( luaVM, 0, 1, 0 );
+	Assert( result == 0 );
+
+	// Save byte code for serialization
+	byteCode.resize( InSize );
+	memcpy( byteCode.data(), InByteCode, InSize );
+}

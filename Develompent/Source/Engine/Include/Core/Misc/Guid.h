@@ -1,0 +1,250 @@
+/**
+ * @file
+ * @addtogroup Core Core
+ *
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#ifndef GUID_H
+#define GUID_H
+
+#include <string>
+
+#include "Core/Misc/Types.h"
+#include "Core/Containers/String.h"
+#include "Core/System/Archive.h"
+#include "Core/CoreDefines.h"
+
+/**
+ * @ingroup Core
+ * Implementation of GUID
+ */
+class CGuid
+{
+public:
+	/**
+	 * @brief Functions to extract the GUID as a key for std::unordered_map and std::unordered_set
+	 */
+	struct GuidKeyFunc
+	{
+		/**
+		 * @brief Calculate hash of the GUID
+		 *
+		 * @param InGUID GUID
+		 * @return Return hash of this GUID
+		 */
+		FORCEINLINE std::size_t operator()( const CGuid& InGUID ) const
+		{
+			return InGUID.GetTypeHash();
+		}
+
+		/**
+		 * @brief Compare CGuid
+		 *
+		 * @param InA First GUID
+		 * @param InB Second GUID
+		 * @return Return true if InA and InB equal, else returning false
+		 */
+		FORCEINLINE bool operator()( const CGuid& InA, const CGuid& InB ) const
+		{
+			return InA < InB;
+		}
+	};
+
+	/**
+	 * Constructor
+	 */
+	CGuid()
+		: a( 0 ), b( 0 ), c( 0 ), d( 0 )
+	{}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param InA A section in GUID
+	 * @param InB B section in GUID
+	 * @param InC C section in GUID
+	 * @param InD D section in GUID
+	 */
+	CGuid( uint32 InA, uint32 InB, uint32 InC, uint32 InD )
+		: a( InA ), b( InB ), c( InC ), d( InD )
+	{}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param InGUID Other GUID
+	 */
+	CGuid( const CGuid& InGUID )
+		: a( InGUID.a ), b( InGUID.b ), c( InGUID.c ), d( InGUID.d )
+	{}
+
+	/**
+	 * Is valid GUID
+	 * 
+	 * @return Return true if valid, false otherwise
+	 */
+	FORCEINLINE bool IsValid() const
+	{
+		return ( a | b | c | d ) != 0;
+	}
+
+	/**
+	 * Invalidates the GUID
+	 */
+	FORCEINLINE void Invalidate()
+	{
+		a = b = c = d = 0;
+	}
+
+	/**
+	 * Overrload operator ==
+	 */
+	FORCEINLINE friend bool operator==( const CGuid& InX, const CGuid& InY )
+	{
+		return ( ( InX.a ^ InY.a ) | ( InX.b ^ InY.b ) | ( InX.c ^ InY.c ) | ( InX.d ^ InY.d ) ) == 0;
+	}
+
+	/**
+	 * Overrload operator !=
+	 */
+	FORCEINLINE friend bool operator!=( const CGuid& InX, const CGuid& InY )
+	{
+		return ( ( InX.a ^ InY.a ) | ( InX.b ^ InY.b ) | ( InX.c ^ InY.c ) | ( InX.d ^ InY.d ) ) != 0;
+	}
+
+	/**
+	 * Operator <
+	 */
+	FORCEINLINE bool operator<( const CGuid& InOther ) const
+	{
+		if ( a < InOther.a )
+		{
+			return true;
+		}
+		if ( b < InOther.b )
+		{
+			return true;
+		}
+		if ( c < InOther.c )
+		{
+			return true;
+		}
+		if ( d < InOther.d )
+		{
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Set GUID
+	 * 
+	 * @param InA A section in GUID
+	 * @param InB B section in GUID
+	 * @param InC C section in GUID
+	 * @param InD D section in GUID
+	 */
+	FORCEINLINE void Set( uint32 InA, uint32 InB, uint32 InC, uint32 InD )
+	{
+		a = InA;
+		b = InB;
+		c = InC;
+		d = InD;
+	}
+
+	/**
+	 * Overload operator << for serialize
+	 */
+	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, CGuid& InGuid )
+	{
+		return InAr << InGuid.a << InGuid.b << InGuid.c << InGuid.d;
+	}
+
+	/**
+	 * Overload operator << for serialize
+	 */
+	FORCEINLINE friend CArchive& operator<<( CArchive& InAr, const CGuid& InGuid )
+	{
+		return InAr << InGuid.a << InGuid.b << InGuid.c << InGuid.d;
+	}
+
+	/**
+	 * Print to string the GUID
+	 * @return Return GUID in string format
+	 */
+	FORCEINLINE std::wstring String() const
+	{
+		return CString::Format( TEXT( "%08X%08X%08X%08X" ), a, b, c, d );
+	}
+
+	/**
+	 * Init GUID from string
+	 * 
+	 * @param InString String
+	 * @return Return true if GUID is initialized seccussed, else return false
+	 */
+	FORCEINLINE bool InitFromString( const std::wstring& InString )
+	{
+		bool		bSuccessful = false;
+
+		// Size matches, try to parse it
+		if ( InString.size() == 32 )
+		{
+			swscanf( InString.c_str(), TEXT( "%08X%08X%08X%08X" ), &a, &b, &c, &d );
+			bSuccessful = true;
+		}
+		// Size mis-match, invalidate the Guid
+		else
+		{
+			Invalidate();
+		}
+		return bSuccessful;
+	}
+
+	/**
+	 * Get hash of type
+	 * @return Return hash of this GUID
+	 */
+	FORCEINLINE uint64 GetTypeHash() const
+	{
+		return Sys_MemFastHash( *this );
+	}
+
+private:
+	uint32		a;		/**< A section in GUID */
+	uint32		b;		/**< B section in GUID */
+	uint32		c;		/**< C section in GUID */
+	uint32		d;		/**< D section in GUID */
+};
+
+/**
+ * @ingroup Core
+ * @return Return created GUID
+ */
+CGuid Sys_CreateGuid();
+
+#endif // !GUID_H

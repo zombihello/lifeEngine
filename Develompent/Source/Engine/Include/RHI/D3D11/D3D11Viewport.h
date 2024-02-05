@@ -1,0 +1,125 @@
+/**
+ * @file
+ * @addtogroup D3D11RHI D3D11RHI
+ *
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#ifndef D3D11VIEWPORT_H
+#define D3D11VIEWPORT_H
+
+#include <d3d11.h>
+
+#include "Core/Misc/Types.h"
+#include "RHI/BaseViewportRHI.h"
+
+/**
+ * @ingroup D3D11RHI
+ * @brief Class for work with DirectX 11 viewport
+ */
+class CD3D11Viewport : public CBaseViewportRHI
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param[in] InWindowHandle OS handle on window
+	 * @param[in] InWidth Width of viewport
+	 * @param[in] InHeight Height of viewport
+	 */
+	CD3D11Viewport( WindowHandle_t InWindowHandle, uint32 InWidth, uint32 InHeight );
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InTargetSurface	Target surface to render
+	 * @param InWidth			Width of viewport
+	 * @param InHeight			Height of viewport
+	 */
+	CD3D11Viewport( SurfaceRHIParamRef_t InTargetSurface, uint32 InWidth, uint32 InHeight );
+
+	/**
+	 * @brief Destructor
+	 */
+	~CD3D11Viewport();
+
+	/**
+	 * @brief Presents the swap chain
+	 * 
+	 * @param[in] InLockToVsync Is it necessary to block for Vsync
+	 */
+	virtual void Present( bool InLockToVsync ) override;
+
+	/**
+	 * Resize viewport
+	 *
+	 * @param[in] InWidth New width
+	 * @param[in] InHeight New height
+	 * @param[in] InIsFullscreen Is fullscreen
+	 */
+	virtual void Resize( uint32 InWidth, uint32 InHeight ) override;
+
+	/**
+	 * @brief Set surface of viewport
+	 * @note Viewport who created with window handle must be ignore this method
+	 *
+	 * @param InSurfaceRHI		Surface RHI
+	 */
+	virtual void SetSurface( SurfaceRHIParamRef_t InSurfaceRHI ) override;
+
+	/**
+	 * @brief Get width
+	 * @return Width of viewport
+	 */
+	virtual uint32 GetWidth() const override;
+
+	/**
+	 * @brief Get height
+	 * @return Height of viewport
+	 */
+	virtual uint32 GetHeight() const override;
+
+	/**
+	 * @breif Get surface of viewport
+	 * @return Pointer to surface of viewport
+	 */
+	virtual SurfaceRHIRef_t GetSurface() const override;
+
+	/**
+	 * @breif Get window handle
+	 * @return Return pointer to window handle
+	 */
+	virtual WindowHandle_t GetWindowHandle() const override;
+
+private:
+	WindowHandle_t				windowHandle;				/**< Pointer to window handle */
+	SurfaceRHIRef_t				backBuffer;					/**< Pointer to back buffer */
+	IDXGISwapChain*				dxgiSwapChain;				/**< DXGI swap chain */
+	uint32						width;						/**< Width of viewport */
+	uint32						height;						/**< Height of viewport */
+};
+
+#endif // !D3D11VIEWPORT_H

@@ -1,12 +1,35 @@
----
--- Copyright (C) 2022 Broken Singularity
----
+--[[
+************************************************************
+*                     This file is part of:
+*                        LIFEENGINE
+*            https://github.com/zombihello/lifeEngine
+************************************************************
+* Copyright (C) 2024 Yehor Pohuliaka.
+* 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* 
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+]]
 
 newoption {
 	trigger		= "game",
 	value		= "Game",
-	default     = "EleotGame",
-	description = "Choose game for generation (need to exist the folder './Games/<Game>')"
+	default     = "Eleot",
+	description = "Choose game for generation (need to exist next folders: './Game/<Game>Game' and './Game/<Game>Launcher')"
 }
 
 newoption {
@@ -28,20 +51,18 @@ intermediateDir				= "%{wks.location}/"
 -- Path to intermediate directory for externals
 intermediateExternalDir		= intermediateDir .. "External/"
 
--- Path to binaries directory
-binariesDir				    = "%{wks.location}/../../../Binaries/"
-
 -- Output directory name
 outputDir			        = "%{cfg.platform}/"
 
--- Output sufix target name
-sufixOutputName             = "-%{cfg.platform}-%{cfg.buildcfg}"
+-- Path to binaries directory
+binariesDir				    = "%{wks.location}/../../../Binaries/%{cfg.platform}-%{cfg.buildcfg}"
 
 -- Path to external directory
 externalDir			        = "%{wks.location}/../../External/";
 
 -- Init game name
 game			            = _OPTIONS["game"]
+gameModule                  = ""
 print( "Generation project for '" .. game .. "'" )
 
 -- Engine type
@@ -71,7 +92,6 @@ extRapidJSON                    = externalDir .. "rapidjson"
 extSdl2			                = externalDir .. "SDL2-2.0.14"
 extStb                          = externalDir .. "stb"
 extTheora                       = externalDir .. "theora-1.2"
-extTmxlite                      = externalDir .. "tmxlite"
 extZlib                         = externalDir .. "zlib"
 extCompressonator				= externalDir .. "Compressonator_4.3.206"
 extHalf							= externalDir .. "half-2.2.0"
@@ -90,12 +110,57 @@ include( extRapidJSON )
 include( extSdl2 )
 include( extStb )
 include( extTheora )
-include( extTmxlite )
 include( extZlib )
 include( extCompressonator )
 include( extHalf )
 
-workspace( game )
+-- Projects
+projEngine          = "Engine/"
+projGame            = "Game/" .. game .. "Game/"
+projGameLauncher    = "Game/" .. game .. "Launcher/"
+projWorldEd         = "Tools/WorldEd/"
+
+-- Link all external libs for the engine
+function LinkEngineExternals()
+    LinkOgg()
+    LinkVorbis()
+    LinkOpenAL()
+    LinkLuaJIT()
+    LinkLuaBridge()
+    LinkRapidJSON()
+    LinkGLM()
+    LinkZLib()
+    LinkSDL2()
+    LinkTheora()
+	LinkHalf()
+
+    if is2DEngine then
+        LinkBox2D()
+    else
+        LinkPhysX()
+    end
+end
+
+-- Link all external libs for the editor
+function LinkEditorExternals()
+    LinkSTB()
+    LinkAssmip()
+	LinkCompressonator()
+end
+
+-- Link all externals
+function LinkExternals()
+    -- Link the engine externals
+    LinkEngineExternals()
+
+    -- Link the editor externals
+    filter "configurations:*WithEditor"
+        LinkEditorExternals()
+    filter {}
+end
+
+-- Workspace setup
+workspace "LifeEngine"
     location( "../Intermediate/" .. _ACTION .. "/" )
     configurations 	    { "Debug", "DebugWithEditor", "Release", "ReleaseWithEditor", "Shipping" }
     platforms 		    { "Win64" }
@@ -107,11 +172,12 @@ workspace( game )
     floatingpoint 		"Fast"
 	vectorextensions 	"SSE2"	
 
-    targetname( "%{prj.name}-%{cfg.platform}-%{cfg.buildcfg}" )
-    targetdir( binariesDir .. outputDir )
-	objdir( intermediateDir .. outputDir .. "%{prj.name}/%{cfg.buildcfg}/" )
+    targetname( "%{prj.name}" )
+    targetdir( binariesDir  )
+	objdir( intermediateDir .. outputDir .. "%{prj.name}/%{cfg.buildcfg}" )
 
-    flags { "MultiProcessorCompile" }
+    flags       { "MultiProcessorCompile" }
+    defines     { "GAMENAME=" .. "\"" .. game .. "\"" }
 
     --------------- PLATFORM SETTINGS --------------
 
@@ -120,7 +186,7 @@ workspace( game )
         architecture 	"x64"
         cppdialect 		"C++17"
         staticruntime 	"Off"
-        debugdir( binariesDir .. outputDir )
+        debugdir( binariesDir )
 
         defines 		{
             "_WIN64",
@@ -136,13 +202,13 @@ workspace( game )
 
     --------------- CONFIGURATION SETTINGS --------------
 
-	filter "configurations:Debug or DebugWithEditor"
+	filter "configurations:Debug*"
         defines 	        { "DEBUG=1",  "RELEASE=0", "SHIPPING=0" }
         symbols 	        "On"
         inlining            "Disabled"
         runtime 	        "Debug"
 
-    filter "configurations:Release or ReleaseWithEditor"
+    filter "configurations:Release*"
         defines 	        { "NDEBUG", "DEBUG=0", "RELEASE=1", "SHIPPING=0" }
         optimize 	        "Speed"
 		runtime 			"Release"
@@ -155,94 +221,32 @@ workspace( game )
         inlining            "Auto"
     filter {}
 
-    	-------------- BUILD TYPE SETTINGS -------------
+    -- If we build the engine and a game in configuration *WithEditor then need enable macro WITH_EDITOR for specific code only for the editor
+    filter "configurations:*WithEditor"
+        defines     { "WITH_EDITOR=1", "WITH_IMGUI=1" }
+    filter "configurations:not *WithEditor"
+        defines     { "WITH_EDITOR=0", "WITH_IMGUI=0" }
+    filter {}
+
+    -------------- BUILD TYPE SETTINGS -------------
 	
 	-- StaticLib
 	filter "kind:StaticLib"
-        targetdir( intermediateDir .. outputDir .. "%{prj.name}/Lib/" )
+        targetdir( intermediateDir .. outputDir .. "%{prj.name}/%{cfg.buildcfg}/Lib/" )
     filter { "kind:StaticLib", "platforms:Win64" }
-        symbolspath( intermediateDir .. outputDir .. "%{prj.name}/Lib/%{cfg.buildtarget.basename}.pdb" )
+        symbolspath( intermediateDir .. outputDir .. "%{prj.name}/%{cfg.buildcfg}/Lib/%{cfg.buildtarget.basename}.pdb" )
 
     -- SharedLib
     filter "kind:SharedLib"
-        symbolspath( intermediateDir .. outputDir .. "%{prj.name}/Lib/%{cfg.buildtarget.basename}.pdb" )
+        symbolspath( intermediateDir .. outputDir .. "%{prj.name}/%{cfg.buildcfg}/Lib/%{cfg.buildtarget.basename}.pdb" )
     filter {}
 
-    --------------- PROJECT --------------
+    --------------- PROJECTS --------------
 
-    project( game )
-        kind        "WindowedApp"
-        language    "C++"
-        location( intermediateDir )
-
-        ----------- PROJECT SETTINGS --------
-
-        defines				{
-            "GAMENAME=" .. "\"" .. game .. "\"",
-            "ENGINE_2D=" .. tostring( is2DEngine and 1 or 0 ),
-            "USE_THEORA_CODEC=1"
-        }
-
-        includedirs         {
-            "Engine/**/Include/",
-            "Games/" .. game .. "/Include/",
-            "../../Engine/Shaders/"
-        }
-
-        files               {
-            "Engine/**/Include/**.h",
-            "Engine/**/Include/**.inl",
-            "Engine/**/Source/**.cpp",
-            "Games/" .. game .. "/Include/**.h",
-            "Games/" .. game .. "/Include/**.inl",
-            "Games/" .. game .. "/Source/**.cpp",
-        }
-
-        ---------- PLATFORM SPECIFIC SETTINGS ---------
-
-        -- Exclude platform specific for other platforms
-        filter "platforms:not Win64"
-            excludes { "**/Windows/**.*", "**/D3D11RHI/**.*" }
-        filter {}
-
-        -- Platform specific settings
-        filter "platforms:Win64"
-            files { "Games/" .. game .. "/Resources/**.rc", }
-            links { "d3d11", "d3d9", "dxgi", "dxguid", "d3dcompiler" }
-        filter {}
-
-        --------- LINK EXTERNAL LIBS -------
-       
-        LinkOgg()
-        LinkVorbis()
-        LinkOpenAL()
-        LinkLuaJIT()
-        LinkLuaBridge()
-        LinkRapidJSON()
-        LinkGLM()
-        LinkZLib()
-        LinkSDL2()
-        LinkTheora()
-		LinkHalf()
-
-        if is2DEngine then
-            LinkBox2D()
-        else
-            LinkPhysX()
-        end
-
-        ------ EDITOR SETTINGS -----
-
-        filter "configurations:*WithEditor"
-            LinkSTB()
-            LinkAssmip()
-            LinkTmxLite()
-			LinkCompressonator()
-		   
-            defines     { "WITH_EDITOR=1", "WITH_IMGUI=1" }
-
-        filter "configurations:not *WithEditor"
-            -- If we build engine without editor, we will need exclude all of WorldEd source files
-            excludes    { "Engine/WorldEd/**.*" }
-            defines     { "WITH_EDITOR=0", "WITH_IMGUI=0" }
-        filter {}
+    group "Engine/"
+        include( projEngine )
+    group "Game/"
+        include( projGame )
+        include( projGameLauncher )
+    group "Tools/"
+        include( projWorldEd )

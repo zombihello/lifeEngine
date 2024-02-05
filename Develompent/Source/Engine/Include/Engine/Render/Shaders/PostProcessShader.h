@@ -1,0 +1,162 @@
+/**
+ * @file
+ * @addtogroup Engine Engine
+ *
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#ifndef POSTPROCESSHADER_H
+#define POSTPROCESSHADER_H
+
+#include "Engine/Render/Shaders/Shader.h"
+#include "Engine/Render/Shaders/ShaderManager.h"
+#include "Engine/Render/VertexFactory/SimpleElementVertexFactory.h"
+
+/**
+ * @ingroup Engine
+ * @brief Class of pixel shader for post process
+ */
+template<bool InApplyHDR = false, bool InApplyGammaCorrection = false>
+class TPostProcessPixelShader : public CShader
+{
+	DECLARE_SHADER_TYPE( TPostProcessPixelShader )
+
+public:
+	/**
+	 * @brief Initialize shader
+	 * @param[in] InShaderCacheItem Cache of shader
+	 */
+	virtual void Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem ) override
+	{
+		CShader::Init( InShaderCacheItem );
+		sceneColorParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "sceneColor" ) );
+		sceneColorSamplerStateParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "sceneColorSampler" ) );
+		hdrExposureParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "hdrExposure" ), !InApplyHDR );
+		gammaParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "gamma" ), !InApplyGammaCorrection );
+	}
+
+#if WITH_EDITOR
+	/**
+	 * @brief Is need compile shader for platform
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InVFMetaType Vertex factory meta type. If him is nullptr - return general Assert
+	 * @return Return true if need compile shader, else returning false
+	 */
+	static bool ShouldCache( EShaderPlatform InShaderPlatform, class CVertexFactoryMetaType* InVFMetaType = nullptr )
+	{
+		if ( !InVFMetaType )
+		{
+			return true;
+		}
+
+		return InVFMetaType->GetHash() == CSimpleElementVertexFactory::staticType.GetHash();
+	}
+
+	/**
+	 * @brief Modify compilation environment
+	 *
+	 * @param InShaderPlatform Shader platform
+	 * @param InEnvironment Shader compiler environment
+	 */
+	static void ModifyCompilationEnvironment( EShaderPlatform InShaderPlatform, ShaderCompilerEnvironment& InEnvironment )
+	{
+		CShader::ModifyCompilationEnvironment( InShaderPlatform, InEnvironment );
+		InEnvironment.difinitions.insert( std::make_pair( TEXT( "APPLY_HDR" ), InApplyHDR ? TEXT( "1" ) : TEXT( "0" ) ) );
+		InEnvironment.difinitions.insert( std::make_pair( TEXT( "APPLY_GAMMA_CORRECTION" ), InApplyGammaCorrection ? TEXT( "1" ) : TEXT( "0" ) ) );
+	}
+#endif // WITH_EDITOR
+
+	/**
+	 * @brief Set texture parameter
+	 * 
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InTextureRHI			RHI Texture
+	 */
+	FORCEINLINE void SetTexture( class CBaseDeviceContextRHI* InDeviceContextRHI, const Texture2DRHIParamRef_t InTextureRHI )
+	{
+		SetTextureParameter( InDeviceContextRHI, sceneColorParameter, InTextureRHI );
+	}
+
+	/**
+	 * @brief Set sampler state parameter
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InSamplerStateRHI		RHI sampler state
+	 */
+	FORCEINLINE void SetSamplerState( class CBaseDeviceContextRHI* InDeviceContextRHI, const SamplerStateRHIParamRef_t InSamplerStateRHI )
+	{
+		SetSamplerStateParameter( InDeviceContextRHI, sceneColorSamplerStateParameter, InSamplerStateRHI );
+	}
+
+	/**
+	 * @brief Set exposure
+	 * 
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InExposure			New Exposure
+	 */
+	FORCEINLINE void SetExposure( class CBaseDeviceContextRHI* InDeviceContextRHI, float InExposure )
+	{
+		if ( InApplyHDR )
+		{
+			SetPixelShaderValue( InDeviceContextRHI, hdrExposureParameter, InExposure );
+		}
+	}
+
+	/**
+	 * @brief Set gamma
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InGamma				gamma
+	 */
+	FORCEINLINE void SetGamma( class CBaseDeviceContextRHI* InDeviceContextRHI, float InGamma )
+	{
+		if ( InApplyGammaCorrection )
+		{
+			SetPixelShaderValue( InDeviceContextRHI, gammaParameter, InGamma );
+		}
+	}
+
+private:
+	CShaderResourceParameter			sceneColorParameter;					/**< Scene color texture parameter */
+	CShaderResourceParameter			sceneColorSamplerStateParameter;		/**< Scene color sampler sate parameter */
+	CShaderParameter					hdrExposureParameter;					/**< HDR exposure parameter */
+	CShaderParameter					gammaParameter;							/**< Gamma parameter */
+};
+
+// #define avoids a lot of code duplication
+#define VARIATION_PIXEL_SHADER_TYPE( HDRExposure, GammaCorrection ) \
+	typedef TPostProcessPixelShader<HDRExposure, GammaCorrection>	TPostProcessPixelShader_##HDRExposure##GammaCorrection; \
+	IMPLEMENT_SHADER_TYPE( template<>, TPostProcessPixelShader_##HDRExposure##GammaCorrection, TEXT( "PostProcessPixelShader.hlsl" ), TEXT( "MainPS" ), SF_Pixel, true )
+
+VARIATION_PIXEL_SHADER_TYPE( false, false );
+VARIATION_PIXEL_SHADER_TYPE( true, true );
+VARIATION_PIXEL_SHADER_TYPE( true, false );
+VARIATION_PIXEL_SHADER_TYPE( false, true );
+#undef VARIATION_PIXEL_SHADER_TYPE
+
+#endif // !POSTPROCESSHADER_H
+
