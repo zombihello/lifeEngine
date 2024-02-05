@@ -81,7 +81,7 @@ void CTexture2D::InitRHI()
 		LockedData					lockedData;
 		
 		g_RHI->LockTexture2D( deviceContextRHI, texture, index, true, lockedData );
-		memcpy( lockedData.data, mipmap.data.GetData(), mipmap.data.Num() );
+		Memory::Memcpy( lockedData.data, mipmap.data.GetData(), mipmap.data.Num() );
 		g_RHI->UnlockTexture2D( deviceContextRHI, texture, index, lockedData );
 	}
 

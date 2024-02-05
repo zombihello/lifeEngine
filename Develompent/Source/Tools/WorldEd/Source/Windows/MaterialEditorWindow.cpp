@@ -35,18 +35,6 @@
 #include "Windows/TextureEditorWindow.h"
 #include "Render/MaterialPreviewViewportClient.h"
 
-/** Table of texture parameters in material */
-static const CName		s_TextureParameterNames[] =
-{
-	CMaterial::albedoTextureParamName,
-	CMaterial::normalTextureParamName,
-	CMaterial::metallicTextureParamName,
-	CMaterial::roughnessTextureParamName,
-	CMaterial::emissionTextureParamName,
-	CMaterial::aoTextureParamName
-};
-
-
 /*
 ==================
 CMaterialEditorWindow::CMaterialEditorWindow
@@ -94,6 +82,17 @@ void CMaterialEditorWindow::Init()
 {
 	CImGUILayer::Init();
 	SetSize( Vector2D( 700.f, 450.f ) );
+
+	// Table of texture parameters in material
+	static const CName s_TextureParameterNames[] =
+	{
+		CMaterial::albedoTextureParamName,
+		CMaterial::normalTextureParamName,
+		CMaterial::metallicTextureParamName,
+		CMaterial::roughnessTextureParamName,
+		CMaterial::emissionTextureParamName,
+		CMaterial::aoTextureParamName
+	};
 
 	bIsDefaultMaterial = g_PackageManager->IsDefaultAsset( material->GetAssetHandle() );
 	for ( uint32 index = 0; index < ARRAY_COUNT( s_TextureParameterNames ); ++index )

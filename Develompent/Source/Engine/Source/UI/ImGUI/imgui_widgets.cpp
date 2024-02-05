@@ -2010,7 +2010,7 @@ bool ImGui::DataTypeApplyOpFromText(const char* buf, const char* initial_value_b
     // Copy the value in an opaque buffer so we can compare at the end of the function if it changed at all.
     const ImGuiDataTypeInfo* type_info = DataTypeGetInfo(data_type);
     ImGuiDataTypeTempStorage data_backup;
-    memcpy(&data_backup, p_data, type_info->Size);
+    Memory::Memcpy(&data_backup, p_data, type_info->Size);
 
     if (format == NULL)
         format = type_info->ScanFmt;
@@ -2084,7 +2084,7 @@ bool ImGui::DataTypeApplyOpFromText(const char* buf, const char* initial_value_b
             IM_ASSERT(0);
     }
 
-    return memcmp(&data_backup, p_data, type_info->Size) != 0;
+    return Memory::Memcmp(&data_backup, p_data, type_info->Size) != 0;
 }
 
 template<typename T>
@@ -3397,7 +3397,7 @@ bool ImGui::TempInputScalar(const ImRect& bb, ImGuiID id, const char* label, ImG
         // Backup old value
         size_t data_type_size = DataTypeGetInfo(data_type)->Size;
         ImGuiDataTypeTempStorage data_backup;
-        memcpy(&data_backup, p_data, data_type_size);
+        Memory::Memcpy(&data_backup, p_data, data_type_size);
 
         // Apply new value (or operations) then clamp
         DataTypeApplyOpFromText(data_buf, g.InputTextState.InitialTextA.Data, data_type, p_data, NULL);
@@ -3409,7 +3409,7 @@ bool ImGui::TempInputScalar(const ImRect& bb, ImGuiID id, const char* label, ImG
         }
 
         // Only mark as edited if new value is different
-        value_changed = memcmp(&data_backup, p_data, data_type_size) != 0;
+        value_changed = Memory::Memcmp(&data_backup, p_data, data_type_size) != 0;
         if (value_changed)
             MarkItemEdited(id);
     }
@@ -3734,7 +3734,7 @@ static bool STB_TEXTEDIT_INSERTCHARS(ImGuiInputTextState* obj, int pos, const Im
     ImWchar* text = obj->TextW.Data;
     if (pos != text_len)
         memmove(text + pos + new_text_len, text + pos, (size_t)(text_len - pos) * sizeof(ImWchar));
-    memcpy(text + pos, new_text, (size_t)new_text_len * sizeof(ImWchar));
+    Memory::Memcpy(text + pos, new_text, (size_t)new_text_len * sizeof(ImWchar));
 
     obj->Edited = true;
     obj->CurLenW += new_text_len;
@@ -3794,7 +3794,7 @@ void ImGuiInputTextState::OnKeyPressed(int key)
 
 ImGuiInputTextCallbackData::ImGuiInputTextCallbackData()
 {
-    memset(this, 0, sizeof(*this));
+    Memory::Memset(this, 0, sizeof(*this));
 }
 
 // Public API to manipulate UTF-8 text
@@ -3840,7 +3840,7 @@ void ImGuiInputTextCallbackData::InsertChars(int pos, const char* new_text, cons
 
     if (BufTextLen != pos)
         memmove(Buf + pos + new_text_len, Buf + pos, (size_t)(BufTextLen - pos));
-    memcpy(Buf + pos, new_text, (size_t)new_text_len * sizeof(char));
+    Memory::Memcpy(Buf + pos, new_text, (size_t)new_text_len * sizeof(char));
     Buf[BufTextLen + new_text_len] = '\0';
 
     if (CursorPos >= pos)
@@ -3923,7 +3923,7 @@ static bool InputTextFilterCharacter(unsigned int* p_char, ImGuiInputTextFlags f
     if (flags & ImGuiInputTextFlags_CallbackCharFilter)
     {
         ImGuiInputTextCallbackData callback_data;
-        memset(&callback_data, 0, sizeof(ImGuiInputTextCallbackData));
+        Memory::Memset(&callback_data, 0, sizeof(ImGuiInputTextCallbackData));
         callback_data.EventFlag = ImGuiInputTextFlags_CallbackCharFilter;
         callback_data.EventChar = (ImWchar)c;
         callback_data.Flags = flags;
@@ -4054,7 +4054,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
         // From the moment we focused we are ignoring the content of 'buf' (unless we are in read-only mode)
         const int buf_len = (int)strlen(buf);
         state->InitialTextA.resize(buf_len + 1);    // UTF-8. we use +1 to make sure that .Data is always pointing to at least an empty string.
-        memcpy(state->InitialTextA.Data, buf, buf_len + 1);
+        Memory::Memcpy(state->InitialTextA.Data, buf, buf_len + 1);
 
         // Start edition
         const char* buf_end = NULL;
@@ -4440,7 +4440,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
                 if (event_flag)
                 {
                     ImGuiInputTextCallbackData callback_data;
-                    memset(&callback_data, 0, sizeof(ImGuiInputTextCallbackData));
+                    Memory::Memset(&callback_data, 0, sizeof(ImGuiInputTextCallbackData));
                     callback_data.EventFlag = event_flag;
                     callback_data.Flags = flags;
                     callback_data.UserData = callback_user_data;
@@ -4837,7 +4837,7 @@ bool ImGui::ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flag
     {
         // Hue is lost when converting from greyscale rgb (saturation=0). Restore it.
         ColorConvertRGBtoHSV(f[0], f[1], f[2], f[0], f[1], f[2]);
-        if (memcmp(g.ColorEditLastColor, col, sizeof(float) * 3) == 0)
+        if ( Memory::Memcmp(g.ColorEditLastColor, col, sizeof(float) * 3) == 0)
         {
             if (f[1] == 0)
                 f[0] = g.ColorEditLastHue;
@@ -4978,7 +4978,7 @@ bool ImGui::ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flag
             g.ColorEditLastHue = f[0];
             g.ColorEditLastSat = f[1];
             ColorConvertHSVtoRGB(f[0], f[1], f[2], f[0], f[1], f[2]);
-            memcpy(g.ColorEditLastColor, f, sizeof(float) * 3);
+            Memory::Memcpy(g.ColorEditLastColor, f, sizeof(float) * 3);
         }
         if ((flags & ImGuiColorEditFlags_DisplayRGB) && (flags & ImGuiColorEditFlags_InputHSV))
             ColorConvertRGBtoHSV(f[0], f[1], f[2], f[0], f[1], f[2]);
@@ -5000,12 +5000,12 @@ bool ImGui::ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flag
         bool accepted_drag_drop = false;
         if (const ImGuiPayload* payload = AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
         {
-            memcpy((float*)col, payload->Data, sizeof(float) * 3); // Preserve alpha if any //-V512
+            Memory::Memcpy((float*)col, payload->Data, sizeof(float) * 3); // Preserve alpha if any //-V512
             value_changed = accepted_drag_drop = true;
         }
         if (const ImGuiPayload* payload = AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F))
         {
-            memcpy((float*)col, payload->Data, sizeof(float) * components);
+            Memory::Memcpy((float*)col, payload->Data, sizeof(float) * components);
             value_changed = accepted_drag_drop = true;
         }
 
@@ -5094,7 +5094,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     float bars_triangles_half_sz = IM_FLOOR(bars_width * 0.20f);
 
     float backup_initial_col[4];
-    memcpy(backup_initial_col, col, components * sizeof(float));
+    Memory::Memcpy(backup_initial_col, col, components * sizeof(float));
 
     float wheel_thickness = sv_picker_size * 0.08f;
     float wheel_r_outer = sv_picker_size * 0.50f;
@@ -5113,7 +5113,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     {
         // Hue is lost when converting from greyscale rgb (saturation=0). Restore it.
         ColorConvertRGBtoHSV(R, G, B, H, S, V);
-        if (memcmp(g.ColorEditLastColor, col, sizeof(float) * 3) == 0)
+        if ( Memory::Memcmp(g.ColorEditLastColor, col, sizeof(float) * 3) == 0)
         {
             if (S == 0)
                 H = g.ColorEditLastHue;
@@ -5232,7 +5232,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
             ImVec4 ref_col_v4(ref_col[0], ref_col[1], ref_col[2], (flags & ImGuiColorEditFlags_NoAlpha) ? 1.0f : ref_col[3]);
             if (ColorButton("##original", ref_col_v4, (flags & sub_flags_to_forward), ImVec2(square_sz * 3, square_sz * 2)))
             {
-                memcpy(col, ref_col, components * sizeof(float));
+                Memory::Memcpy(col, ref_col, components * sizeof(float));
                 value_changed = true;
             }
         }
@@ -5248,7 +5248,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
             ColorConvertHSVtoRGB(H >= 1.0f ? H - 10 * 1e-6f : H, S > 0.0f ? S : 10 * 1e-6f, V > 0.0f ? V : 1e-6f, col[0], col[1], col[2]);
             g.ColorEditLastHue = H;
             g.ColorEditLastSat = S;
-            memcpy(g.ColorEditLastColor, col, sizeof(float) * 3);
+            Memory::Memcpy(g.ColorEditLastColor, col, sizeof(float) * 3);
         }
         else if (flags & ImGuiColorEditFlags_InputHSV)
         {
@@ -5302,7 +5302,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
             G = col[1];
             B = col[2];
             ColorConvertRGBtoHSV(R, G, B, H, S, V);
-            if (memcmp(g.ColorEditLastColor, col, sizeof(float) * 3) == 0) // Fix local Hue as display below will use it immediately.
+            if ( Memory::Memcmp(g.ColorEditLastColor, col, sizeof(float) * 3) == 0) // Fix local Hue as display below will use it immediately.
             {
                 if (S == 0)
                     H = g.ColorEditLastHue;
@@ -5413,7 +5413,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
 
     EndGroup();
 
-    if (value_changed && memcmp(backup_initial_col, col, components * sizeof(float)) == 0)
+    if (value_changed && Memory::Memcmp(backup_initial_col, col, components * sizeof(float)) == 0)
         value_changed = false;
     if (value_changed)
         MarkItemEdited(g.LastItemData.ID);
@@ -5639,7 +5639,7 @@ void ImGui::ColorPickerOptionsPopup(const float* ref_col, ImGuiColorEditFlags fl
                 g.ColorEditOptions = (g.ColorEditOptions & ~ImGuiColorEditFlags_PickerMask_) | (picker_flags & ImGuiColorEditFlags_PickerMask_);
             SetCursorScreenPos(backup_pos);
             ImVec4 previewing_ref_col;
-            memcpy(&previewing_ref_col, ref_col, sizeof(float) * ((picker_flags & ImGuiColorEditFlags_NoAlpha) ? 3 : 4));
+            Memory::Memcpy(&previewing_ref_col, ref_col, sizeof(float) * ((picker_flags & ImGuiColorEditFlags_NoAlpha) ? 3 : 4));
             ColorPicker4("##previewing_picker", &previewing_ref_col.x, picker_flags);
             PopID();
         }
@@ -6619,10 +6619,10 @@ void ImGui::Value(const char* prefix, float v, const char* float_format)
 void ImGuiMenuColumns::Update(float spacing, bool window_reappearing)
 {
     if (window_reappearing)
-        memset(Widths, 0, sizeof(Widths));
+        Memory::Memset(Widths, 0, sizeof(Widths));
     Spacing = (ImU16)spacing;
     CalcNextTotalWidth(true);
-    memset(Widths, 0, sizeof(Widths));
+    Memory::Memset(Widths, 0, sizeof(Widths));
     TotalWidth = NextTotalWidth;
     NextTotalWidth = 0;
 }
@@ -7104,7 +7104,7 @@ struct ImGuiTabBarSection
     float               Width;                  // Sum of width of tabs in this section (after shrinking down)
     float               Spacing;                // Horizontal spacing at the end of the section.
 
-    ImGuiTabBarSection() { memset(this, 0, sizeof(*this)); }
+    ImGuiTabBarSection() { Memory::Memset(this, 0, sizeof(*this)); }
 };
 
 namespace ImGui
@@ -7120,7 +7120,7 @@ namespace ImGui
 
 ImGuiTabBar::ImGuiTabBar()
 {
-    memset(this, 0, sizeof(*this));
+    Memory::Memset(this, 0, sizeof(*this));
     CurrFrameVisible = PrevFrameVisible = -1;
     LastTabItemIdx = -1;
 }

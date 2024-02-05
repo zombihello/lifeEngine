@@ -65,7 +65,7 @@ CImGUIDrawData::CImGUIDrawData
 CImGUIDrawData::CImGUIDrawData() :
 	isFree( true )
 {
-	Sys_Memzero( &drawData, sizeof( ImDrawData ) );
+	Memory::Memzero( &drawData, sizeof( ImDrawData ) );
 }
 
 /*
@@ -528,7 +528,7 @@ CImGUIEngine::CImGUIEngine
 CImGUIEngine::CImGUIEngine() 
 	: imguiContext( nullptr )
 {
-	Sys_Memzero( &styleColors, sizeof( styleColors ) );
+	Memory::Memzero( &styleColors, sizeof( styleColors ) );
 }
 
 /*
@@ -546,6 +546,17 @@ CImGUIEngine::Init
 */
 void CImGUIEngine::Init()
 {
+	// Set allocator functions for ImGUI
+	ImGui::SetAllocatorFunctions( 
+		[]( size_t InSize, void* InUserData ) -> void* 
+		{ 
+			return Memory::Malloc( InSize ); 
+		}, 
+		[]( void* InPtr, void* InUserData ) 
+		{ 
+			Memory::Free( InPtr ); 
+		} );
+
 	// Create ImGUI context
 	imguiContext = ImGui::CreateContext();
 	Assert( imguiContext );

@@ -376,7 +376,7 @@ CLightVertexFactory::GetTypeHash
 */
 uint64 CLightVertexFactory::GetTypeHash() const
 {
-	return Sys_MemFastHash( lightType, CVertexFactory::GetTypeHash() );
+	return Sys_FastHash( lightType, CVertexFactory::GetTypeHash() );
 }
 
 /*

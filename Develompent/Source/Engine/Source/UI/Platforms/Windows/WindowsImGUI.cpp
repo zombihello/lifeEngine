@@ -95,7 +95,7 @@ struct ImGui_ImplSDL2_Data
     bool        MouseCanUseGlobalState;
     bool        UseVulkan;
 
-    ImGui_ImplSDL2_Data()   { memset(this, 0, sizeof(*this)); }
+    ImGui_ImplSDL2_Data()   { Memory::Memset(this, 0, sizeof(*this)); }
 };
 
 // Backend data stored in io.BackendPlatformUserData to allow support for multiple Dear ImGui contexts
@@ -527,7 +527,7 @@ static void ImGui_ImplSDL2_UpdateMouseCursor()
 static void ImGui_ImplSDL2_UpdateGamepads()
 {
     ImGuiIO& io = ImGui::GetIO();
-    memset(io.NavInputs, 0, sizeof(io.NavInputs));
+    Memory::Memset(io.NavInputs, 0, sizeof(io.NavInputs));
     if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0)
         return;
 

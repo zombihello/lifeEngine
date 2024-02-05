@@ -98,9 +98,8 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	}
 
 	// Allocated data for a new object
-	uint32		alignedSize = Align( InClass->GetPropertiesSize(), InClass->GetMinAlignment() );
-	CObject*	object = ( CObject* )malloc( alignedSize );
-	Sys_Memzero( ( void* )object, InClass->GetPropertiesSize() );
+	CObject*	object = ( CObject* )Memory::Malloc( InClass->GetPropertiesSize(), InClass->GetMinAlignment() );
+	Memory::Memzero( ( void* )object, InClass->GetPropertiesSize() );
 
 	// Init object properties
 	object->outer		= InOuter;

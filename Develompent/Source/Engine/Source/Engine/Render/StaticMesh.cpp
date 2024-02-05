@@ -375,8 +375,8 @@ TSharedPtr<CStaticMesh::ElementDrawingPolicyLink> CStaticMesh::LinkDrawList( Sce
 	// Calculate override hash
 	for ( uint32 index = 0, count = InOverrideMaterials.size(); index < count; ++index )
 	{
-		elementKey.overrideHash = Sys_MemFastHash( index, elementKey.overrideHash );
-		elementKey.overrideHash = Sys_MemFastHash( InOverrideMaterials[ index ].ToSharedPtr(), elementKey.overrideHash );
+		elementKey.overrideHash = Sys_FastHash( index, elementKey.overrideHash );
+		elementKey.overrideHash = Sys_FastHash( InOverrideMaterials[ index ].ToSharedPtr(), elementKey.overrideHash );
 	}
 
 	// If already added drawing policy link for this scene depth group - return exist element

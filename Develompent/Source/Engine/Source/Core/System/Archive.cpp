@@ -25,9 +25,9 @@
  * SOFTWARE.
  */
 
-#include "Core/System/Archive.h"
-#include "Core/Misc/Template.h"
 #include "Core/LEVersion.h"
+#include "Core/System/Archive.h"
+#include "Core/Core.h"
 
 /*
 ==================
@@ -94,7 +94,7 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 
 		// Set up destination pointer and allocate memory for compressed chunk[s] (one at a time).
 		byte*			dest = ( byte* )InBuffer;
-		void*			compressedBuffer = malloc( maxCompressedSize );
+		void*			compressedBuffer = Memory::Malloc( maxCompressedSize );
 
 		// Iterate over all chunks, serialize them into memory and decompress them directly into the destination pointer
 		for ( uint32 chunkIndex = 0; chunkIndex < totalChunkCount; chunkIndex++ )
@@ -113,7 +113,7 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 		}
 
 		// Free up allocated memory.
-		free( compressedBuffer );
+		Memory::Free( compressedBuffer );
 		delete[] compressionChunks;
 	}
 	else if ( IsSaving() )
@@ -140,7 +140,7 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 		int32		bytesRemaining = InSize;		
 		uint32		currentChunkIndex = 1;												// Start at index 1 as first chunk info is summary.
 		uint32		compressedBufferSize = SAVING_COMPRESSION_CHUNK_SIZE * 2;			// 2 times the uncompressed size should be more than enough; the compressed data shouldn't be that much larger
-		void*		compressedBuffer = malloc( compressedBufferSize );
+		void*		compressedBuffer = Memory::Malloc( compressedBufferSize );
 
 		while ( bytesRemaining > 0 )
 		{
@@ -167,7 +167,7 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 		}
 
 		// Free allocated memory.
-		free( compressedBuffer );
+		Memory::Free( compressedBuffer );
 
 		// Overrwrite chunk infos by seeking to the beginning, serializing the data and then
 		// seeking back to the end.

@@ -59,8 +59,8 @@ std::wstring CString::Format( const tchar* InFormat, va_list InArguments )
 
 	while ( result == -1 )
 	{
-		free( buffer );
-		buffer = ( tchar* )malloc( bufferSize * sizeof( tchar ) );
+		Memory::Free( buffer );
+		buffer = ( tchar* )Memory::Malloc( bufferSize * sizeof( tchar ) );
 
 		// Get formated string with args
 		result = Sys_GetVarArgs( buffer, bufferSize, bufferSize - 1, InFormat, InArguments );
@@ -74,6 +74,6 @@ std::wstring CString::Format( const tchar* InFormat, va_list InArguments )
 	buffer[ result ] = 0;
 
 	std::wstring		formatedString = buffer;
-	free( buffer );
+	Memory::Free( buffer );
 	return formatedString;
 }

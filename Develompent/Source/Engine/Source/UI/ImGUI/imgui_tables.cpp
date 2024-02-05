@@ -579,7 +579,7 @@ void ImGui::TableBeginInitMemory(ImGuiTable* table, int columns_count)
     span_allocator.Reserve(1, columns_count * sizeof(ImGuiTableColumnIdx));
     span_allocator.Reserve(2, columns_count * sizeof(ImGuiTableCellData), 4);
     table->RawData = IM_ALLOC(span_allocator.GetArenaSizeInBytes());
-    memset(table->RawData, 0, span_allocator.GetArenaSizeInBytes());
+    Memory::Memset(table->RawData, 0, span_allocator.GetArenaSizeInBytes());
     span_allocator.SetArenaBasePtr(table->RawData);
     span_allocator.GetSpan(0, &table->Columns);
     span_allocator.GetSpan(1, &table->DisplayOrderToIndex);
@@ -2466,13 +2466,13 @@ void ImGui::TableMergeDrawChannels(ImGuiTable* table)
                     ImDrawChannel* channel = &splitter->_Channels[n];
                     IM_ASSERT(channel->_CmdBuffer.Size == 1 && merge_clip_rect.Contains(ImRect(channel->_CmdBuffer[0].ClipRect)));
                     channel->_CmdBuffer[0].ClipRect = merge_clip_rect.ToVec4();
-                    memcpy(dst_tmp++, channel, sizeof(ImDrawChannel));
+                    Memory::Memcpy(dst_tmp++, channel, sizeof(ImDrawChannel));
                 }
             }
 
             // Make sure Bg2DrawChannelUnfrozen appears in the middle of our groups (whereas Bg0/Bg1 and Bg2 frozen are fixed to 0 and 1)
             if (merge_group_n == 1 && has_freeze_v)
-                memcpy(dst_tmp++, &splitter->_Channels[table->Bg2DrawChannelUnfrozen], sizeof(ImDrawChannel));
+                Memory::Memcpy(dst_tmp++, &splitter->_Channels[table->Bg2DrawChannelUnfrozen], sizeof(ImDrawChannel));
         }
 
         // Append unmergeable channels that we didn't reorder at the end of the list
@@ -2481,11 +2481,11 @@ void ImGui::TableMergeDrawChannels(ImGuiTable* table)
             if (!remaining_mask.TestBit(n))
                 continue;
             ImDrawChannel* channel = &splitter->_Channels[n];
-            memcpy(dst_tmp++, channel, sizeof(ImDrawChannel));
+            Memory::Memcpy(dst_tmp++, channel, sizeof(ImDrawChannel));
             remaining_count--;
         }
         IM_ASSERT(dst_tmp == g.DrawChannelsTempMergeBuffer.Data + g.DrawChannelsTempMergeBuffer.Size);
-        memcpy(splitter->_Channels.Data + LEADING_DRAW_CHANNELS, g.DrawChannelsTempMergeBuffer.Data, (splitter->_Count - LEADING_DRAW_CHANNELS) * sizeof(ImDrawChannel));
+        Memory::Memcpy(splitter->_Channels.Data + LEADING_DRAW_CHANNELS, g.DrawChannelsTempMergeBuffer.Data, (splitter->_Count - LEADING_DRAW_CHANNELS) * sizeof(ImDrawChannel));
     }
 }
 
@@ -3496,7 +3496,7 @@ void ImGui::TableGcCompactSettings()
     new_chunk_stream.Buf.reserve(required_memory);
     for (ImGuiTableSettings* settings = g.SettingsTables.begin(); settings != NULL; settings = g.SettingsTables.next_chunk(settings))
         if (settings->ID != 0)
-            memcpy(new_chunk_stream.alloc_chunk(TableSettingsCalcChunkSize(settings->ColumnsCount)), settings, TableSettingsCalcChunkSize(settings->ColumnsCount));
+            Memory::Memcpy(new_chunk_stream.alloc_chunk(TableSettingsCalcChunkSize(settings->ColumnsCount)), settings, TableSettingsCalcChunkSize(settings->ColumnsCount));
     g.SettingsTables.swap(new_chunk_stream);
 }
 

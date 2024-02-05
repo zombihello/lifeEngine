@@ -228,7 +228,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			// Create small font
 			{
 				LOGFONT		myFont;
-				Sys_Memzero( &myFont, sizeof( myFont ) );
+				Memory::Memzero( &myFont, sizeof( myFont ) );
 				GetObjectW( systemFontHandle, sizeof( myFont ), &myFont );
 				myFont.lfHeight = 10;
 
@@ -243,7 +243,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			// Create normal font
 			{
 				LOGFONT			myFont;
-				Sys_Memzero( &myFont, sizeof( myFont ) );
+				Memory::Memzero( &myFont, sizeof( myFont ) );
 				GetObjectW( systemFontHandle, sizeof( myFont ), &myFont );
 				myFont.lfHeight = 12;
 

@@ -38,7 +38,6 @@
 #include "Core/Misc/CoreGlobals.h"
 #include "Core/Containers/StringConv.h"
 #include "Core/System/Application.h"
-#include "Core/System/MemoryBase.h"
 #include "Core/Containers/String.h"
 #include "Core/Core.h"
 
@@ -162,7 +161,7 @@ std::wstring Sys_UserName();
  */
 FORCEINLINE uint64 Sys_CalcHash( const std::wstring& InName, uint64 InHash = 0 )
 {
-	return Sys_MemFastHash( InName.data(), ( uint64 )InName.size() * sizeof( std::wstring::value_type ), InHash );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
+	return Sys_FastHash( InName.data(), ( uint64 )InName.size() * sizeof( std::wstring::value_type ), InHash );		// TODO BG yehor.pohuliaka - Need change to one format without dependency from platform
 }
 
 /**

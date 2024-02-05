@@ -1099,7 +1099,7 @@ void ImGuiStyle::ScaleAllSizes(float scale_factor)
 ImGuiIO::ImGuiIO()
 {
     // Most fields are initialized with zero
-    memset(this, 0, sizeof(*this));
+    Memory::Memset(this, 0, sizeof(*this));
     IM_ASSERT(IM_ARRAYSIZE(ImGuiIO::MouseDown) == ImGuiMouseButton_COUNT && IM_ARRAYSIZE(ImGuiIO::MouseClicked) == ImGuiMouseButton_COUNT); // Our pre-C++11 IM_STATIC_ASSERT() macros triggers warning on modern compilers so we don't use it here.
 
     // Settings
@@ -1226,7 +1226,7 @@ void ImGuiIO::ClearInputCharacters()
 
 void ImGuiIO::ClearInputKeys()
 {
-    memset(KeysDown, 0, sizeof(KeysDown));
+    Memory::Memset(KeysDown, 0, sizeof(KeysDown));
     for (int n = 0; n < IM_ARRAYSIZE(KeysDownDuration); n++)
         KeysDownDuration[n] = KeysDownDurationPrev[n] = -1.0f;
     KeyCtrl = KeyShift = KeyAlt = KeySuper = false;
@@ -1394,7 +1394,7 @@ char* ImStrdup(const char* str)
 {
     size_t len = strlen(str);
     void* buf = IM_ALLOC(len + 1);
-    return (char*)memcpy(buf, (const void*)str, len + 1);
+    return (char*)Memory::Memcpy(buf, (const void*)str, len + 1);
 }
 
 char* ImStrdupcpy(char* dst, size_t* p_dst_size, const char* src)
@@ -1408,7 +1408,7 @@ char* ImStrdupcpy(char* dst, size_t* p_dst_size, const char* src)
         if (p_dst_size)
             *p_dst_size = src_size;
     }
-    return (char*)memcpy(dst, (const void*)src, src_size);
+    return (char*)Memory::Memcpy(dst, (const void*)src, src_size);
 }
 
 const char* ImStrchrRange(const char* str, const char* str_end, char c)
@@ -1670,7 +1670,7 @@ void*   ImFileLoadToMemory(const char* filename, const char* mode, size_t* out_f
         return NULL;
     }
     if (padding_bytes > 0)
-        memset((void*)(((char*)file_data) + file_size), 0, (size_t)padding_bytes);
+        Memory::Memset((void*)(((char*)file_data) + file_size), 0, (size_t)padding_bytes);
 
     ImFileClose(f);
     if (out_file_size)
@@ -2225,7 +2225,7 @@ void ImGuiTextBuffer::append(const char* str, const char* str_end)
     }
 
     Buf.resize(needed_sz);
-    memcpy(&Buf[write_off - 1], str, (size_t)len);
+    Memory::Memcpy(&Buf[write_off - 1], str, (size_t)len);
     Buf[write_off - 1 + len] = 0;
 }
 
@@ -2348,7 +2348,7 @@ static void SetCursorPosYAndSetupForPrevLine(float pos_y, float line_height)
 
 ImGuiListClipper::ImGuiListClipper()
 {
-    memset(this, 0, sizeof(*this));
+    Memory::Memset(this, 0, sizeof(*this));
     ItemsCount = -1;
 }
 
@@ -2980,7 +2980,7 @@ void ImGui::RenderNavHighlight(const ImRect& bb, ImGuiID id, ImGuiNavHighlightFl
 // ImGuiWindow is mostly a dumb struct. It merely has a constructor and a few helper methods
 ImGuiWindow::ImGuiWindow(ImGuiContext* context, const char* name) : DrawListInst(NULL)
 {
-    memset(this, 0, sizeof(*this));
+    Memory::Memset(this, 0, sizeof(*this));
     Name = ImStrdup(name);
     NameBufLen = (int)strlen(name) + 1;
     ID = ImHashStr(name);
@@ -4234,7 +4234,7 @@ void ImGui::NewFrame()
     // Update keyboard input state
     // Synchronize io.KeyMods with individual modifiers io.KeyXXX bools
     g.IO.KeyMods = GetMergedKeyModFlags();
-    memcpy(g.IO.KeysDownDurationPrev, g.IO.KeysDownDuration, sizeof(g.IO.KeysDownDuration));
+    Memory::Memcpy(g.IO.KeysDownDurationPrev, g.IO.KeysDownDuration, sizeof(g.IO.KeysDownDuration));
     for (int i = 0; i < IM_ARRAYSIZE(g.IO.KeysDown); i++)
         g.IO.KeysDownDuration[i] = g.IO.KeysDown[i] ? (g.IO.KeysDownDuration[i] < 0.0f ? 0.0f : g.IO.KeysDownDuration[i] + g.IO.DeltaTime) : -1.0f;
 
@@ -4573,7 +4573,7 @@ void ImDrawDataBuilder::FlattenIntoSingleLayer()
         ImVector<ImDrawList*>& layer = Layers[layer_n];
         if (layer.empty())
             continue;
-        memcpy(&Layers[0][n], &layer[0], layer.Size * sizeof(ImDrawList*));
+        Memory::Memcpy(&Layers[0][n], &layer[0], layer.Size * sizeof(ImDrawList*));
         n += layer.Size;
         layer.resize(0);
     }
@@ -4778,7 +4778,7 @@ void ImGui::EndFrame()
     g.IO.MouseWheel = g.IO.MouseWheelH = 0.0f;
     g.IO.InputQueueCharacters.resize(0);
     g.IO.KeyModsPrev = g.IO.KeyMods; // doing it here is better than in NewFrame() as we'll tolerate backend writing to KeyMods. If we want to firmly disallow it we should detect it.
-    memset(g.IO.NavInputs, 0, sizeof(g.IO.NavInputs));
+    Memory::Memset(g.IO.NavInputs, 0, sizeof(g.IO.NavInputs));
 
     CallContextHooks(&g, ImGuiContextHookType_EndFramePost);
 }
@@ -9843,7 +9843,7 @@ static void ImGui::NavUpdate()
             io.NavInputs[ImGuiNavInput_TweakFast] = 1.0f;
         #undef NAV_MAP_KEY
     }
-    memcpy(io.NavInputsDownDurationPrev, io.NavInputsDownDuration, sizeof(io.NavInputsDownDuration));
+    Memory::Memcpy(io.NavInputsDownDurationPrev, io.NavInputsDownDuration, sizeof(io.NavInputsDownDuration));
     for (int i = 0; i < IM_ARRAYSIZE(io.NavInputs); i++)
         io.NavInputsDownDuration[i] = (io.NavInputs[i] > 0.0f) ? (io.NavInputsDownDuration[i] < 0.0f ? 0.0f : io.NavInputsDownDuration[i] + io.DeltaTime) : -1.0f;
 
@@ -10632,7 +10632,7 @@ void ImGui::ClearDragDrop()
     g.DragDropAcceptFrameCount = -1;
 
     g.DragDropPayloadBufHeap.clear();
-    memset(&g.DragDropPayloadBufLocal, 0, sizeof(g.DragDropPayloadBufLocal));
+    Memory::Memset(&g.DragDropPayloadBufLocal, 0, sizeof(g.DragDropPayloadBufLocal));
 }
 
 // When this returns true you need to: a) call SetDragDropPayload() exactly once, b) you may render the payload visual/description, c) call EndDragDropSource()
@@ -10792,14 +10792,14 @@ bool ImGui::SetDragDropPayload(const char* type, const void* data, size_t data_s
             // Store in heap
             g.DragDropPayloadBufHeap.resize((int)data_size);
             payload.Data = g.DragDropPayloadBufHeap.Data;
-            memcpy(payload.Data, data, data_size);
+            Memory::Memcpy(payload.Data, data, data_size);
         }
         else if (data_size > 0)
         {
             // Store locally
-            memset(&g.DragDropPayloadBufLocal, 0, sizeof(g.DragDropPayloadBufLocal));
+            Memory::Memset(&g.DragDropPayloadBufLocal, 0, sizeof(g.DragDropPayloadBufLocal));
             payload.Data = g.DragDropPayloadBufLocal;
-            memcpy(payload.Data, data, data_size);
+            Memory::Memcpy(payload.Data, data, data_size);
         }
         else
         {
@@ -11248,7 +11248,7 @@ ImGuiWindowSettings* ImGui::CreateNewWindowSettings(const char* name)
     ImGuiWindowSettings* settings = g.SettingsWindows.alloc_chunk(chunk_size);
     IM_PLACEMENT_NEW(settings) ImGuiWindowSettings();
     settings->ID = ImHashStr(name, name_len);
-    memcpy(settings->GetName(), name, name_len + 1);   // Store with zero terminator
+    Memory::Memcpy(settings->GetName(), name, name_len + 1);   // Store with zero terminator
 
     return settings;
 }
@@ -11313,7 +11313,7 @@ void ImGui::LoadIniSettingsFromMemory(const char* ini_data, size_t ini_size)
     g.SettingsIniData.Buf.resize((int)ini_size + 1);
     char* const buf = g.SettingsIniData.Buf.Data;
     char* const buf_end = buf + ini_size;
-    memcpy(buf, ini_data, ini_size);
+    Memory::Memcpy(buf, ini_data, ini_size);
     buf_end[0] = 0;
 
     // Call pre-read handlers
@@ -11361,7 +11361,7 @@ void ImGui::LoadIniSettingsFromMemory(const char* ini_data, size_t ini_size)
     g.SettingsLoaded = true;
 
     // [DEBUG] Restore untouched copy so it can be browsed in Metrics (not strictly necessary)
-    memcpy(buf, ini_data, ini_size);
+    Memory::Memcpy(buf, ini_data, ini_size);
 
     // Call post-read handlers
     for (int handler_n = 0; handler_n < g.SettingsHandlers.Size; handler_n++)
@@ -12139,7 +12139,7 @@ void ImGui::WindowSyncOwnedViewport(ImGuiWindow* window, ImGuiWindow* parent_win
         window->Pos = window->Viewport->Pos;
         MarkIniSettingsDirty(window);
     }
-    else if (memcmp(&window->Viewport->Pos, &window->Pos, sizeof(window->Pos)) != 0)
+    else if ( Memory::Memcmp(&window->Viewport->Pos, &window->Pos, sizeof(window->Pos)) != 0)
     {
         viewport_rect_changed = true;
         window->Viewport->Pos = window->Pos;
@@ -12150,7 +12150,7 @@ void ImGui::WindowSyncOwnedViewport(ImGuiWindow* window, ImGuiWindow* parent_win
         window->Size = window->SizeFull = window->Viewport->Size;
         MarkIniSettingsDirty(window);
     }
-    else if (memcmp(&window->Viewport->Size, &window->Size, sizeof(window->Size)) != 0)
+    else if ( Memory::Memcmp(&window->Viewport->Size, &window->Size, sizeof(window->Size)) != 0)
     {
         viewport_rect_changed = true;
         window->Viewport->Size = window->Size;
@@ -12605,7 +12605,7 @@ struct ImGuiDockNodeSettings
     ImVec2ih            Pos;
     ImVec2ih            Size;
     ImVec2ih            SizeRef;
-    ImGuiDockNodeSettings() { memset(this, 0, sizeof(*this)); SplitAxis = ImGuiAxis_None; }
+    ImGuiDockNodeSettings() { Memory::Memset(this, 0, sizeof(*this)); SplitAxis = ImGuiAxis_None; }
 };
 
 //-----------------------------------------------------------------------------
@@ -16343,7 +16343,7 @@ static void SetClipboardTextFn_DefaultImpl(void*, const char* text)
     g.ClipboardHandlerData.clear();
     const char* text_end = text + strlen(text);
     g.ClipboardHandlerData.resize((int)(text_end - text) + 1);
-    memcpy(&g.ClipboardHandlerData[0], text, (size_t)(text_end - text));
+    Memory::Memcpy(&g.ClipboardHandlerData[0], text, (size_t)(text_end - text));
     g.ClipboardHandlerData[(int)(text_end - text)] = 0;
 }
 
@@ -16645,7 +16645,7 @@ void ImGui::ShowMetricsWindow(bool* p_open)
         {
             static ImVector<ImGuiViewportP*> viewports;
             viewports.resize(g.Viewports.Size);
-            memcpy(viewports.Data, g.Viewports.Data, g.Viewports.size_in_bytes());
+            Memory::Memcpy(viewports.Data, g.Viewports.Data, g.Viewports.size_in_bytes());
             if (viewports.Size > 1)
                 ImQsort(viewports.Data, viewports.Size, sizeof(ImGuiViewport*), ViewportComparerByFrontMostStampCount);
             for (int i = 0; i < viewports.Size; i++)

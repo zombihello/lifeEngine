@@ -383,7 +383,7 @@ void ImGui::StyleColorsLight(ImGuiStyle* dst)
 
 ImDrawListSharedData::ImDrawListSharedData()
 {
-    memset(this, 0, sizeof(*this));
+    Memory::Memset(this, 0, sizeof(*this));
     for (int i = 0; i < IM_ARRAYSIZE(ArcFastVtx); i++)
     {
         const float a = ((float)i * 2 * IM_PI) / (float)IM_ARRAYSIZE(ArcFastVtx);
@@ -420,7 +420,7 @@ void ImDrawList::_ResetForNewFrame()
     IdxBuffer.resize(0);
     VtxBuffer.resize(0);
     Flags = _Data->InitialFlags;
-    memset(&_CmdHeader, 0, sizeof(_CmdHeader));
+    Memory::Memset(&_CmdHeader, 0, sizeof(_CmdHeader));
     _VtxCurrentIdx = 0;
     _VtxWritePtr = NULL;
     _IdxWritePtr = NULL;
@@ -497,8 +497,8 @@ void ImDrawList::AddCallback(ImDrawCallback callback, void* callback_data)
 
 // Compare ClipRect, TextureId and VtxOffset with a single memcmp()
 #define ImDrawCmd_HeaderSize                        (IM_OFFSETOF(ImDrawCmd, VtxOffset) + sizeof(unsigned int))
-#define ImDrawCmd_HeaderCompare(CMD_LHS, CMD_RHS)   (memcmp(CMD_LHS, CMD_RHS, ImDrawCmd_HeaderSize))    // Compare ClipRect, TextureId, VtxOffset
-#define ImDrawCmd_HeaderCopy(CMD_DST, CMD_SRC)      (memcpy(CMD_DST, CMD_SRC, ImDrawCmd_HeaderSize))    // Copy ClipRect, TextureId, VtxOffset
+#define ImDrawCmd_HeaderCompare(CMD_LHS, CMD_RHS)   (Memory::Memcmp(CMD_LHS, CMD_RHS, ImDrawCmd_HeaderSize))    // Compare ClipRect, TextureId, VtxOffset
+#define ImDrawCmd_HeaderCopy(CMD_DST, CMD_SRC)      (Memory::Memcpy(CMD_DST, CMD_SRC, ImDrawCmd_HeaderSize))    // Copy ClipRect, TextureId, VtxOffset
 
 // Try to merge two last draw commands
 void ImDrawList::_TryMergeDrawCmds()
@@ -518,7 +518,7 @@ void ImDrawList::_OnChangedClipRect()
 {
     // If current command is used with different settings we need to add a new command
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
-    if (curr_cmd->ElemCount != 0 && memcmp(&curr_cmd->ClipRect, &_CmdHeader.ClipRect, sizeof(ImVec4)) != 0)
+    if (curr_cmd->ElemCount != 0 && Memory::Memcmp(&curr_cmd->ClipRect, &_CmdHeader.ClipRect, sizeof(ImVec4)) != 0)
     {
         AddDrawCmd();
         return;
@@ -1681,7 +1681,7 @@ void ImDrawListSplitter::ClearFreeMemory()
     for (int i = 0; i < _Channels.Size; i++)
     {
         if (i == _Current)
-            memset(&_Channels[i], 0, sizeof(_Channels[i]));  // Current channel is a copy of CmdBuffer/IdxBuffer, don't destruct again
+            Memory::Memset(&_Channels[i], 0, sizeof(_Channels[i]));  // Current channel is a copy of CmdBuffer/IdxBuffer, don't destruct again
         _Channels[i]._CmdBuffer.clear();
         _Channels[i]._IdxBuffer.clear();
     }
@@ -1705,7 +1705,7 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
     // Channels[] (24/32 bytes each) hold storage that we'll swap with draw_list->_CmdBuffer/_IdxBuffer
     // The content of Channels[0] at this point doesn't matter. We clear it to make state tidy in a debugger but we don't strictly need to.
     // When we switch to the next channel, we'll copy draw_list->_CmdBuffer/_IdxBuffer into Channels[0] and then Channels[1] into draw_list->CmdBuffer/_IdxBuffer
-    memset(&_Channels[0], 0, sizeof(ImDrawChannel));
+    Memory::Memset(&_Channels[0], 0, sizeof(ImDrawChannel));
     for (int i = 1; i < channels_count; i++)
     {
         if (i >= old_channels_count)
@@ -1772,8 +1772,8 @@ void ImDrawListSplitter::Merge(ImDrawList* draw_list)
     for (int i = 1; i < _Count; i++)
     {
         ImDrawChannel& ch = _Channels[i];
-        if (int sz = ch._CmdBuffer.Size) { memcpy(cmd_write, ch._CmdBuffer.Data, sz * sizeof(ImDrawCmd)); cmd_write += sz; }
-        if (int sz = ch._IdxBuffer.Size) { memcpy(idx_write, ch._IdxBuffer.Data, sz * sizeof(ImDrawIdx)); idx_write += sz; }
+        if (int sz = ch._CmdBuffer.Size) { Memory::Memcpy(cmd_write, ch._CmdBuffer.Data, sz * sizeof(ImDrawCmd)); cmd_write += sz; }
+        if (int sz = ch._IdxBuffer.Size) { Memory::Memcpy(idx_write, ch._IdxBuffer.Data, sz * sizeof(ImDrawIdx)); idx_write += sz; }
     }
     draw_list->_IdxWritePtr = idx_write;
 
@@ -1798,11 +1798,11 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
         return;
 
     // Overwrite ImVector (12/16 bytes), four times. This is merely a silly optimization instead of doing .swap()
-    memcpy(&_Channels.Data[_Current]._CmdBuffer, &draw_list->CmdBuffer, sizeof(draw_list->CmdBuffer));
-    memcpy(&_Channels.Data[_Current]._IdxBuffer, &draw_list->IdxBuffer, sizeof(draw_list->IdxBuffer));
+    Memory::Memcpy(&_Channels.Data[_Current]._CmdBuffer, &draw_list->CmdBuffer, sizeof(draw_list->CmdBuffer));
+    Memory::Memcpy(&_Channels.Data[_Current]._IdxBuffer, &draw_list->IdxBuffer, sizeof(draw_list->IdxBuffer));
     _Current = idx;
-    memcpy(&draw_list->CmdBuffer, &_Channels.Data[idx]._CmdBuffer, sizeof(draw_list->CmdBuffer));
-    memcpy(&draw_list->IdxBuffer, &_Channels.Data[idx]._IdxBuffer, sizeof(draw_list->IdxBuffer));
+    Memory::Memcpy(&draw_list->CmdBuffer, &_Channels.Data[idx]._CmdBuffer, sizeof(draw_list->CmdBuffer));
+    Memory::Memcpy(&draw_list->IdxBuffer, &_Channels.Data[idx]._IdxBuffer, sizeof(draw_list->IdxBuffer));
     draw_list->_IdxWritePtr = draw_list->IdxBuffer.Data + draw_list->IdxBuffer.Size;
 
     // If current command is used with different settings we need to add a new command
@@ -1913,7 +1913,7 @@ void ImGui::ShadeVertsLinearUV(ImDrawList* draw_list, int vert_start_idx, int ve
 
 ImFontConfig::ImFontConfig()
 {
-    memset(this, 0, sizeof(*this));
+    Memory::Memset(this, 0, sizeof(*this));
     FontDataOwnedByAtlas = true;
     OversampleH = 3; // FIXME: 2 may be a better default?
     OversampleV = 1;
@@ -1976,7 +1976,7 @@ static const ImVec2 FONT_ATLAS_DEFAULT_TEX_CURSOR_DATA[ImGuiMouseCursor_COUNT][3
 
 ImFontAtlas::ImFontAtlas()
 {
-    memset(this, 0, sizeof(*this));
+    Memory::Memset(this, 0, sizeof(*this));
     TexGlyphPadding = 1;
     PackIdMouseCursors = PackIdLines = -1;
 }
@@ -2093,7 +2093,7 @@ ImFont* ImFontAtlas::AddFont(const ImFontConfig* font_cfg)
     {
         new_font_cfg.FontData = IM_ALLOC(new_font_cfg.FontDataSize);
         new_font_cfg.FontDataOwnedByAtlas = true;
-        memcpy(new_font_cfg.FontData, font_cfg->FontData, (size_t)new_font_cfg.FontDataSize);
+        Memory::Memcpy(new_font_cfg.FontData, font_cfg->FontData, (size_t)new_font_cfg.FontDataSize);
     }
 
     if (new_font_cfg.DstFont->EllipsisChar == (ImWchar)-1)
@@ -2361,8 +2361,8 @@ static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
     ImVector<ImFontBuildDstData> dst_tmp_array;
     src_tmp_array.resize(atlas->ConfigData.Size);
     dst_tmp_array.resize(atlas->Fonts.Size);
-    memset(src_tmp_array.Data, 0, (size_t)src_tmp_array.size_in_bytes());
-    memset(dst_tmp_array.Data, 0, (size_t)dst_tmp_array.size_in_bytes());
+    Memory::Memset(src_tmp_array.Data, 0, (size_t)src_tmp_array.size_in_bytes());
+    Memory::Memset(dst_tmp_array.Data, 0, (size_t)dst_tmp_array.size_in_bytes());
 
     // 1. Initialize font loading structure, Assert font data validity
     for (int src_i = 0; src_i < atlas->ConfigData.Size; src_i++)
@@ -2442,8 +2442,8 @@ static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
     ImVector<stbtt_packedchar> buf_packedchars;
     buf_rects.resize(total_glyphs_count);
     buf_packedchars.resize(total_glyphs_count);
-    memset(buf_rects.Data, 0, (size_t)buf_rects.size_in_bytes());
-    memset(buf_packedchars.Data, 0, (size_t)buf_packedchars.size_in_bytes());
+    Memory::Memset(buf_rects.Data, 0, (size_t)buf_rects.size_in_bytes());
+    Memory::Memset(buf_packedchars.Data, 0, (size_t)buf_packedchars.size_in_bytes());
 
     // 4. Gather glyphs sizes so we can pack them in our virtual canvas.
     int total_surface = 0;
@@ -2522,7 +2522,7 @@ static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
     atlas->TexHeight = (atlas->Flags & ImFontAtlasFlags_NoPowerOfTwoHeight) ? (atlas->TexHeight + 1) : ImUpperPowerOfTwo(atlas->TexHeight);
     atlas->TexUvScale = ImVec2(1.0f / atlas->TexWidth, 1.0f / atlas->TexHeight);
     atlas->TexPixelsAlpha8 = (unsigned char*)IM_ALLOC(atlas->TexWidth * atlas->TexHeight);
-    memset(atlas->TexPixelsAlpha8, 0, atlas->TexWidth * atlas->TexHeight);
+    Memory::Memset(atlas->TexPixelsAlpha8, 0, atlas->TexWidth * atlas->TexHeight);
     spc.pixels = atlas->TexPixelsAlpha8;
     spc.height = atlas->TexHeight;
 
@@ -2629,7 +2629,7 @@ void ImFontAtlasBuildPackCustomRects(ImFontAtlas* atlas, void* stbrp_context_opa
 
     ImVector<stbrp_rect> pack_rects;
     pack_rects.resize(user_rects.Size);
-    memset(pack_rects.Data, 0, (size_t)pack_rects.size_in_bytes());
+    Memory::Memset(pack_rects.Data, 0, (size_t)pack_rects.size_in_bytes());
     for (int i = 0; i < user_rects.Size; i++)
     {
         pack_rects[i].w = user_rects[i].Width;
@@ -2924,7 +2924,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesChineseSimplifiedCommon()
     static ImWchar full_ranges[IM_ARRAYSIZE(base_ranges) + IM_ARRAYSIZE(accumulative_offsets_from_0x4E00) * 2 + 1] = { 0 };
     if (!full_ranges[0])
     {
-        memcpy(full_ranges, base_ranges, sizeof(base_ranges));
+        Memory::Memcpy(full_ranges, base_ranges, sizeof(base_ranges));
         UnpackAccumulativeOffsetsIntoRanges(0x4E00, accumulative_offsets_from_0x4E00, IM_ARRAYSIZE(accumulative_offsets_from_0x4E00), full_ranges + IM_ARRAYSIZE(base_ranges));
     }
     return &full_ranges[0];
@@ -3014,7 +3014,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesJapanese()
     static ImWchar full_ranges[IM_ARRAYSIZE(base_ranges) + IM_ARRAYSIZE(accumulative_offsets_from_0x4E00)*2 + 1] = { 0 };
     if (!full_ranges[0])
     {
-        memcpy(full_ranges, base_ranges, sizeof(base_ranges));
+        Memory::Memcpy(full_ranges, base_ranges, sizeof(base_ranges));
         UnpackAccumulativeOffsetsIntoRanges(0x4E00, accumulative_offsets_from_0x4E00, IM_ARRAYSIZE(accumulative_offsets_from_0x4E00), full_ranges + IM_ARRAYSIZE(base_ranges));
     }
     return &full_ranges[0];
@@ -3119,7 +3119,7 @@ ImFont::ImFont()
     Scale = 1.0f;
     Ascent = Descent = 0.0f;
     MetricsTotalSurface = 0;
-    memset(Used4kPagesMap, 0, sizeof(Used4kPagesMap));
+    Memory::Memset(Used4kPagesMap, 0, sizeof(Used4kPagesMap));
 }
 
 ImFont::~ImFont()
@@ -3160,7 +3160,7 @@ void ImFont::BuildLookupTable()
     IndexAdvanceX.clear();
     IndexLookup.clear();
     DirtyLookupTables = false;
-    memset(Used4kPagesMap, 0, sizeof(Used4kPagesMap));
+    Memory::Memset(Used4kPagesMap, 0, sizeof(Used4kPagesMap));
     GrowIndex(max_codepoint + 1);
     for (int i = 0; i < Glyphs.Size; i++)
     {
@@ -3999,7 +3999,7 @@ static void stb__lit(const unsigned char *data, unsigned int length)
     IM_ASSERT(stb__dout + length <= stb__barrier_out_e);
     if (stb__dout + length > stb__barrier_out_e) { stb__dout += length; return; }
     if (data < stb__barrier_in_b) { stb__dout = stb__barrier_out_e+1; return; }
-    memcpy(stb__dout, data, length);
+    Memory::Memcpy(stb__dout, data, length);
     stb__dout += length;
 }
 

@@ -85,7 +85,7 @@ void CScript::Serialize( CArchive& InArchive )
 			// Create string buffer and fill '\0'
 			uint32				archiveSize = InArchive.GetSize() + 1;
 			byte*				buffer = new byte[ archiveSize ];
-			memset( buffer, '\0', archiveSize );
+			Memory::Memset( buffer, '\0', archiveSize );
 
 			// Serialize data to string buffer
 			InArchive.Serialize( buffer, archiveSize );
@@ -145,5 +145,5 @@ void CScript::SetByteCode( const byte* InByteCode, uint32 InSize )
 
 	// Save byte code for serialization
 	byteCode.resize( InSize );
-	memcpy( byteCode.data(), InByteCode, InSize );
+	Memory::Memcpy( byteCode.data(), InByteCode, InSize );
 }

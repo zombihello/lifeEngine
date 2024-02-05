@@ -79,6 +79,7 @@ Index of this file:
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include "Core/Core.h"
 #include "UI/ImGUI/imgui.h"
 #ifndef IMGUI_DISABLE
 
@@ -1207,7 +1208,7 @@ static void ShowDemoWindowWidgets()
                 if (ImGui::Selectable(buf, selection[n]))
                 {
                     if (!ImGui::GetIO().KeyCtrl)    // Clear selection when CTRL is not held
-                        memset(selection, 0, sizeof(selection));
+                        Memory::Memset(selection, 0, sizeof(selection));
                     selection[n] ^= 1;
                 }
             }
@@ -1788,9 +1789,9 @@ static void ShowDemoWindowWidgets()
                 if (ImGui::BeginDragDropTarget())
                 {
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_3F))
-                        memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 3);
+                        Memory::Memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 3);
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_TYPE_COLOR_4F))
-                        memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 4);
+                        Memory::Memcpy((float*)&saved_palette[n], payload->Data, sizeof(float) * 4);
                     ImGui::EndDragDropTarget();
                 }
 
@@ -6021,7 +6022,7 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
                 {
                     const ImVec4& col = style.Colors[i];
                     const char* name = ImGui::GetStyleColorName(i);
-                    if (!output_only_modified || memcmp(&col, &ref->Colors[i], sizeof(ImVec4)) != 0)
+                    if (!output_only_modified || Memory::Memcmp(&col, &ref->Colors[i], sizeof(ImVec4)) != 0)
                         ImGui::LogText("colors[ImGuiCol_%s]%*s= ImVec4(%.2ff, %.2ff, %.2ff, %.2ff);" IM_NEWLINE,
                             name, 23 - (int)strlen(name), "", col.x, col.y, col.z, col.w);
                 }
@@ -6051,7 +6052,7 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
                     continue;
                 ImGui::PushID(i);
                 ImGui::ColorEdit4("##color", (float*)&style.Colors[i], ImGuiColorEditFlags_AlphaBar | alpha_flags);
-                if (memcmp(&style.Colors[i], &ref->Colors[i], sizeof(ImVec4)) != 0)
+                if ( Memory::Memcmp(&style.Colors[i], &ref->Colors[i], sizeof(ImVec4)) != 0)
                 {
                     // Tips: in a real user application, you may want to merge and use an icon font into the main font,
                     // so instead of "Save"/"Revert" you'd use icons!
@@ -6297,7 +6298,7 @@ struct ExampleAppConsole
     ExampleAppConsole()
     {
         ClearLog();
-        memset(InputBuf, 0, sizeof(InputBuf));
+        Memory::Memset(InputBuf, 0, sizeof(InputBuf));
         HistoryPos = -1;
 
         // "CLASSIFY" is here to provide the test case where "C"+[tab] completes to "CL" and display multiple matches.
@@ -6313,19 +6314,19 @@ struct ExampleAppConsole
     {
         ClearLog();
         for (int i = 0; i < History.Size; i++)
-            free(History[i]);
+            Memory::Free(History[i]);
     }
 
     // Portable helpers
     static int   Stricmp(const char* s1, const char* s2)         { int d; while ((d = toupper(*s2) - toupper(*s1)) == 0 && *s1) { s1++; s2++; } return d; }
     static int   Strnicmp(const char* s1, const char* s2, int n) { int d = 0; while (n > 0 && (d = toupper(*s2) - toupper(*s1)) == 0 && *s1) { s1++; s2++; n--; } return d; }
-    static char* Strdup(const char* s)                           { IM_ASSERT(s); size_t len = strlen(s) + 1; void* buf = malloc(len); IM_ASSERT(buf); return (char*)memcpy(buf, (const void*)s, len); }
+    static char* Strdup(const char* s)                           { IM_ASSERT(s); size_t len = strlen(s) + 1; void* buf = Memory::Malloc(len); IM_ASSERT(buf); return (char*)Memory::Memcpy(buf, (const void*)s, len); }
     static void  Strtrim(char* s)                                { char* str_end = s + strlen(s); while (str_end > s && str_end[-1] == ' ') str_end--; *str_end = 0; }
 
     void    ClearLog()
     {
         for (int i = 0; i < Items.Size; i++)
-            free(Items[i]);
+            Memory::Free(Items[i]);
         Items.clear();
     }
 
@@ -6488,7 +6489,7 @@ struct ExampleAppConsole
         for (int i = History.Size - 1; i >= 0; i--)
             if (Stricmp(History[i], command_line) == 0)
             {
-                free(History[i]);
+                Memory::Free(History[i]);
                 History.erase(History.begin() + i);
                 break;
             }

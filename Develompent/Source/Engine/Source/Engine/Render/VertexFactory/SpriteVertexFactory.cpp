@@ -161,10 +161,10 @@ CSpriteVertexFactory::GetTypeHash
 */
 uint64 CSpriteVertexFactory::GetTypeHash() const
 {
-	uint64		hash = Sys_MemFastHash( bFlipVertical, CVertexFactory::GetTypeHash() );
-	hash = Sys_MemFastHash( bFlipHorizontal, hash );
-	hash = Sys_MemFastHash( textureRect, hash );
-	return Sys_MemFastHash( spriteSize, hash );
+	uint64		hash = Sys_FastHash( bFlipVertical, CVertexFactory::GetTypeHash() );
+	hash = Sys_FastHash( bFlipHorizontal, hash );
+	hash = Sys_FastHash( textureRect, hash );
+	return Sys_FastHash( spriteSize, hash );
 }
 
 /*

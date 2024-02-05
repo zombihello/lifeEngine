@@ -65,7 +65,7 @@
 		} \
         void operator delete( void* InPtr, CObject* InOuter, const CName& InName ) \
         { \
-            free( InPtr ); \
+            Memory::Free( InPtr ); \
         } \
         void operator delete( void* InPtr ) \
         { \

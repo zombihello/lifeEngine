@@ -236,7 +236,7 @@ public:
 	FORCEINLINE SSamplerStateInitializerRHI GetSamplerStateInitialiser() const
 	{
 		SSamplerStateInitializerRHI		samplerStateInitializer;
-		Sys_Memzero( &samplerStateInitializer, sizeof( SSamplerStateInitializerRHI ) );
+		Memory::Memzero( &samplerStateInitializer, sizeof( SSamplerStateInitializerRHI ) );
 
 		samplerStateInitializer.filter = samplerFilter;
 		samplerStateInitializer.addressU = addressU;

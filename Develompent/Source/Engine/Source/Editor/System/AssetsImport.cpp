@@ -108,7 +108,7 @@ bool CTexture2DImporter::Reimport( const TSharedPtr<CAsset>& InTexture2D, std::w
 	// Set new data in texture
 	std::vector<byte>		tempData;
 	tempData.resize( sizeX * sizeY * g_PixelFormats[PF_A8R8G8B8].blockBytes );
-	memcpy( tempData.data(), data, tempData.size() );
+	Memory::Memcpy( tempData.data(), data, tempData.size() );
 	texture2D->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 
 	// Clean up all data
@@ -217,7 +217,7 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 		for ( auto itMaterial = meshesMap.begin(), itMaterialEnd = meshesMap.end(); itMaterial != itMaterialEnd; ++itMaterial )
 		{
 			StaticMeshSurface		surface;
-			Sys_Memzero( &surface, sizeof( StaticMeshSurface ) );
+			Memory::Memzero( &surface, sizeof( StaticMeshSurface ) );
 
 			surface.firstIndex		= indeces.size();
 			surface.materialID		= materials.size();
@@ -229,7 +229,7 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 				// Copy new verteces
 				uint32		offsetVerteces = verteces.size();
 				verteces.resize( verteces.size() + meshData.verteces.size() );
-				memcpy( verteces.data() + offsetVerteces, meshData.verteces.data(), sizeof( StaticMeshVertexType ) * meshData.verteces.size() );
+				Memory::Memcpy( verteces.data() + offsetVerteces, meshData.verteces.data(), sizeof( StaticMeshVertexType ) * meshData.verteces.size() );
 
 				// Copy new indeces
 				uint32		offsetIndeces = indeces.size();
@@ -367,13 +367,13 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<M
 		else
 		{
 			path.resize( separatePos );
-			memcpy( path.data(), InPath.data(), sizeof( std::wstring::value_type ) * path.size() );
+			Memory::Memcpy( path.data(), InPath.data(), sizeof( std::wstring::value_type ) * path.size() );
 
 			++separatePos;
 			if ( !importSettings.bCombineMeshes && separatePos < InPath.size() )
 			{
 				meshName.resize( InPath.size() - separatePos );
-				memcpy( meshName.data(), InPath.data() + separatePos, sizeof( std::wstring::value_type ) * meshName.size() );
+				Memory::Memcpy( meshName.data(), InPath.data() + separatePos, sizeof( std::wstring::value_type ) * meshName.size() );
 			}
 		}
 	}
@@ -410,10 +410,10 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<M
 			}
 
 			StaticMeshVertexType	vertex;
-			Sys_Memzero( &vertex, sizeof( StaticMeshVertexType ) );
+			Memory::Memzero( &vertex, sizeof( StaticMeshVertexType ) );
 
 			MeshData		meshData;
-			Sys_Memzero( &meshData.surface, sizeof( StaticMeshSurface ) );
+			Memory::Memzero( &meshData.surface, sizeof( StaticMeshSurface ) );
 			meshData.name		= aiName;
 			meshData.materialId = itMaterial->first;
 			
@@ -528,7 +528,7 @@ const std::vector<std::wstring>& CStaticMeshImporter::GetSupportedExtensions()
 			{
 				std::string			ANSIString;
 				ANSIString.resize( index - startFormat );
-				memcpy( ANSIString.data(), &extensionList[startFormat], ANSIString.size() );
+				Memory::Memcpy( ANSIString.data(), &extensionList[startFormat], ANSIString.size() );
 				supportedExtensions.push_back( ANSI_TO_TCHAR( ANSIString.c_str() ) );
 			}
 		}

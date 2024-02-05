@@ -199,7 +199,7 @@ public:
 		 */
 		FORCEINLINE std::size_t operator()( const TAssetHandle& InAssetPtr ) const
 		{
-			return Sys_MemFastHash( InAssetPtr.reference.Get(), InAssetPtr.asset.GetTypeHash() );
+			return Sys_FastHash( InAssetPtr.reference.Get(), InAssetPtr.asset.GetTypeHash() );
 		}
 	};
 
@@ -1613,7 +1613,7 @@ private:
 		 */
 		FORCEINLINE uint64 GetTypeHash() const
 		{
-			return Sys_MemFastHash( ( const void* ) path.c_str(), path.size() );
+			return Sys_FastHash( ( const void* ) path.c_str(), path.size() );
 		}
 
 		/**

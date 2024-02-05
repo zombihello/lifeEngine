@@ -152,7 +152,7 @@ CD3D11VertexDeclarationRHI::GetHash
 */
 uint64 CD3D11VertexDeclarationRHI::GetHash( uint64 InHash /*= 0*/ ) const
 {
-	return Sys_MemFastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint64 )vertexElements.size(), InHash );
+	return Sys_FastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint64 )vertexElements.size(), InHash );
 }
 
 

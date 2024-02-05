@@ -139,7 +139,7 @@ private:
 		 */
 		FORCEINLINE std::size_t operator()( const Vector2D& InTexCoord ) const
 		{
-			return Sys_MemFastHash( InTexCoord );
+			return Sys_FastHash( InTexCoord );
 		}
 
 		/**

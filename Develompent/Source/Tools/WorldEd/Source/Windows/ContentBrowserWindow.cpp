@@ -269,7 +269,7 @@ public:
 		// Import all assets
 		std::wstring									errorMessages;
 		CAssetFactory::EResultShowImportSettings		importSettingsModes[AT_Count];
-		Sys_Memzero( importSettingsModes, sizeof( CAssetFactory::EResultShowImportSettings ) * AT_Count );
+		Memory::Memzero( importSettingsModes, sizeof( CAssetFactory::EResultShowImportSettings ) * AT_Count );
 
 		for ( uint32 index = 0, count = filesToImport.size(); index < count; ++index )
 		{

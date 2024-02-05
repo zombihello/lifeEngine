@@ -231,7 +231,7 @@ public:
 	 */
 	FORCEINLINE uint64 GetTypeHash() const
 	{
-		return Sys_MemFastHash( *this );
+		return Sys_FastHash( *this );
 	}
 
 private:

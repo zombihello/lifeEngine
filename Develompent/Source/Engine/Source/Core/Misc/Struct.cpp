@@ -65,7 +65,7 @@ void CStruct::GetProperties( std::vector<class CProperty*>& OutArrayProperties, 
 		{
 			uint32		offset = OutArrayProperties.size();
 			OutArrayProperties.resize( tempStruct->properties.size() + offset );
-			memcpy( OutArrayProperties.data() + offset, tempStruct->properties.data(), tempStruct->properties.size() * sizeof( CProperty* ) );
+			Memory::Memcpy( OutArrayProperties.data() + offset, tempStruct->properties.data(), tempStruct->properties.size() * sizeof( CProperty* ) );
 		}
 	}
 }

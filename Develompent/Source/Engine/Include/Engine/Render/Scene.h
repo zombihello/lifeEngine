@@ -310,11 +310,11 @@ struct MeshBatch
 	 */
 	FORCEINLINE uint64 GetTypeHash() const
 	{
-		uint64		hash = Sys_MemFastHash( indexBufferRHI );
-		hash = Sys_MemFastHash( primitiveType, hash );
-		hash = Sys_MemFastHash( baseVertexIndex, hash );
-		hash = Sys_MemFastHash( firstIndex, hash );
-		hash = Sys_MemFastHash( numPrimitives, hash );
+		uint64		hash = Sys_FastHash( indexBufferRHI );
+		hash = Sys_FastHash( primitiveType, hash );
+		hash = Sys_FastHash( baseVertexIndex, hash );
+		hash = Sys_FastHash( firstIndex, hash );
+		hash = Sys_FastHash( numPrimitives, hash );
 		return hash;
 	}
 

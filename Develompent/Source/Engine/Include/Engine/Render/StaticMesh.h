@@ -335,7 +335,7 @@ private:
 			 */
 			FORCEINLINE std::size_t operator()( const ElementKeyDrawingPolicyLink& InElementKey ) const
 			{
-				return Sys_MemFastHash( &( *InElementKey.SDG ), InElementKey.overrideHash );
+				return Sys_FastHash( &( *InElementKey.SDG ), InElementKey.overrideHash );
 			}
 		};
 

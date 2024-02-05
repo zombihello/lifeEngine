@@ -267,7 +267,7 @@ namespace IMGUIZMO_NAMESPACE
 
       float& operator [] (size_t index) { return ((float*)&x)[index]; }
       const float& operator [] (size_t index) const { return ((float*)&x)[index]; }
-      bool operator!=(const vec_t& other) const { return memcmp(this, &other, sizeof(vec_t)) != 0; }
+      bool operator!=(const vec_t& other) const { return Memory::Memcmp(this, &other, sizeof(vec_t)) != 0; }
    };
 
    vec_t makeVect(float _x, float _y, float _z = 0.f, float _w = 0.f) { vec_t res; res.x = _x; res.y = _y; res.z = _z; res.w = _w; return res; }
@@ -2145,7 +2145,7 @@ namespace IMGUIZMO_NAMESPACE
          deltaMatrixTranslation.Translation(delta);
          if (deltaMatrix)
          {
-            memcpy(deltaMatrix, deltaMatrixTranslation.m16, sizeof(float) * 16);
+             Memory::Memcpy(deltaMatrix, deltaMatrixTranslation.m16, sizeof(float) * 16);
          }
 
          const matrix_t res = gContext.mModelSource * deltaMatrixTranslation;
@@ -2306,7 +2306,7 @@ namespace IMGUIZMO_NAMESPACE
             deltaScale = deltaScale * originalScaleDivider;
 
             deltaMatrixScale.Scale(deltaScale);
-            memcpy(deltaMatrix, deltaMatrixScale.m16, sizeof(float) * 16);
+            Memory::Memcpy(deltaMatrix, deltaMatrixScale.m16, sizeof(float) * 16);
          }
 
          if (!io.MouseDown[0])
