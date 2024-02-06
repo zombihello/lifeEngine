@@ -34,14 +34,14 @@
 
 /*
 ==================
-GetGlobalResourcesCS
+GetGlobalResourcesMutex
 ==================
 */
-FORCEINLINE CCriticalSection& GetGlobalResourcesCS()
+static FORCEINLINE CThreadMutex& GetGlobalResourcesMutex()
 {
 	// Critical section of add/remove in CRenderResource::GetResourceList
-	static CCriticalSection		globalResourcesCS;
-	return globalResourcesCS;
+	static CThreadMutex		globalResourcesMutex;
+	return globalResourcesMutex;
 }
 
 /*
@@ -107,10 +107,10 @@ void CRenderResource::InitResource()
 	// If resource is global - add he to global list of resource
 	if ( IsGlobal() && !bInGlobalList )
 	{
-		CCriticalSection&		criticalSection = GetGlobalResourcesCS();
-		criticalSection.Lock();
+		CThreadMutex&		mutex = GetGlobalResourcesMutex();
+		mutex.Lock();
 		GetResourceList().insert( this );
-		criticalSection.Unlock();
+		mutex.Unlock();
 
 		bInGlobalList = true;
 	}
@@ -138,10 +138,10 @@ void CRenderResource::ReleaseResource()
 	// If resource is global - remove he from global list of resource
 	if ( IsGlobal() && bInGlobalList )
 	{
-		CCriticalSection&		criticalSection = GetGlobalResourcesCS();
-		criticalSection.Lock();
+		CThreadMutex&		mutex = GetGlobalResourcesMutex();
+		mutex.Lock();
 		GetResourceList().erase( this );
-		criticalSection.Unlock();
+		mutex.Unlock();
 
 		bInGlobalList = false;
 	}

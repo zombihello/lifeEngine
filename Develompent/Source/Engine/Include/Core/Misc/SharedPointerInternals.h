@@ -32,7 +32,7 @@
 #define SHAREDPOINTERINTERNALS_H
 
 #include "Core/Misc/Types.h"
-#include "Core/System/ThreadingBase.h"
+#include "Core/System/Threading.h"
 #include "Core/Core.h"
 
 // Forward declarations

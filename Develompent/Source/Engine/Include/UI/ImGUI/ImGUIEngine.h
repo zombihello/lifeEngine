@@ -42,7 +42,7 @@
 #include "Core/Misc/RefCounted.h"
 #include "Core/Misc/RefCountPtr.h"
 #include "Core/Misc/SharedPointer.h"
-#include "Core/System/ThreadingBase.h"
+#include "Core/System/Threading.h"
 #include "Core/System/WindowEvent.h"
 #include "RHI/TypesRHI.h"
 #include "UI/ImGUI/imgui.h"
@@ -571,7 +571,7 @@ private:
 	ImGuiID						viewportID;					/**< Viewport ID */
 	Vector2D					padding;					/**< Layer padding */
 	std::wstring				name;						/**< Layer name */
-	std::stack<WindowEvent>	events;						/**< Stack of ImGUI events who need process */
+	std::stack<WindowEvent>		events;						/**< Stack of ImGUI events who need process */
 	TSharedPtr<CImGUIPopup>		popup;						/**< Current opened popup in layer */
 };
 

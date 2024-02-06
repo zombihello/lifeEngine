@@ -33,7 +33,7 @@
 
 #include "Core/Core.h"
 #include "Core/Misc/Types.h"
-#include "Core/System/ThreadingBase.h"
+#include "Core/System/Threading.h"
 
 /**
  * @ingroup Core

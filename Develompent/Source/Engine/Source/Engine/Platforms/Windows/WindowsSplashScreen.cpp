@@ -42,15 +42,15 @@
 #endif // WITH_EDITOR
 
 static std::wstring			s_SplashScreenFileName;
-static HANDLE				s_SplashScreenThread = nullptr;
-static HBITMAP				s_SplashScreenBitmap = nullptr;
-static HWND					s_SplashScreenWnd = nullptr;
-static std::wstring			s_SplashScreenText[ STT_NumTextTypes ];
-static RECT					s_SplashScreenTextRects[ STT_NumTextTypes ];
-static HFONT				s_SplashScreenSmallTextFontHandle = nullptr;
-static HFONT				s_SplashScreenNormalTextFontHandle = nullptr;
-static CCriticalSection		s_SplashScreenSynchronizationObject;
-static CEvent*				s_ThreadInitSyncEvent = nullptr;
+static HANDLE				s_SplashScreenThread	= nullptr;
+static HBITMAP				s_SplashScreenBitmap	= nullptr;
+static HWND					s_SplashScreenWnd		= nullptr;
+static std::wstring			s_SplashScreenText[STT_NumTextTypes];
+static RECT					s_SplashScreenTextRects[STT_NumTextTypes];
+static HFONT				s_SplashScreenSmallTextFontHandle	= nullptr;
+static HFONT				s_SplashScreenNormalTextFontHandle	= nullptr;
+static CThreadMutex			s_SplashScreenSynchronizationObject;
+static CThreadEvent*		s_ThreadInitSyncEvent				= nullptr;;
 
 /*
 ==================
@@ -343,13 +343,13 @@ void Sys_ShowSplash( const tchar* InSplashName )
 	if ( CApplication::Get().GetType() != AT_Tool )
 #endif // WITH_EDITOR
 	{
-		s_SplashScreenFileName = Sys_GameDir() + CString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
-		s_ThreadInitSyncEvent = g_SynchronizeFactory->CreateSynchEvent( true );
-		s_SplashScreenThread = CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
+		s_SplashScreenFileName	= Sys_GameDir() + CString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
+		s_ThreadInitSyncEvent	= new CThreadEvent( true );
+		s_SplashScreenThread	= CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE )SplashScreenThread, nullptr, 0, nullptr );
 
 		// Wait of open splash screen
 		s_ThreadInitSyncEvent->Wait( INFINITE );
-		g_SynchronizeFactory->Destroy( s_ThreadInitSyncEvent );
+		delete s_ThreadInitSyncEvent;
 		s_ThreadInitSyncEvent = nullptr;
 	}
 }

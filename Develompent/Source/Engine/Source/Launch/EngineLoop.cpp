@@ -36,7 +36,7 @@
 #include "Core/System/BaseFileSystem.h"
 #include "Core/System/BaseWindow.h"
 #include "Core/System/Config.h"
-#include "Core/System/ThreadingBase.h"
+#include "Core/System/Threading.h"
 #include "Core/System/Package.h"
 #include "Core/Containers/String.h"
 #include "Core/Containers/StringConv.h"

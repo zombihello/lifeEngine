@@ -47,7 +47,7 @@ enum
 #endif // PLATFORM_WINDOWS
 
 //
-// C++ style memory allocation.
+// C++ style memory allocation
 //
 FORCEINLINE void* operator new( size_t InSize )
 {

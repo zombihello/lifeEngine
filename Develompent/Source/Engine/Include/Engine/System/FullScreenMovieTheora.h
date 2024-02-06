@@ -39,7 +39,7 @@
 #include <theora/theora.h>
 #include <theora/theoradec.h>
 
-#include "Core/System/ThreadingBase.h"
+#include "Core/System/Threading.h"
 #include "Engine/System/FullScreenMovie.h"
 #include "Audio/System/AudioBank.h"
 #include "Audio/System/AudioStreamSource.h"
@@ -309,7 +309,7 @@ private:
 	TSharedPtr<CAudioBank>			audioBank;				/**< Audio bank for streamed source */
 	CAudioStreamSource*				audioStreamSource;		/**< Audio stream source */
 	class CArchive*					arMovie;				/**< File of movie */
-	CEvent*							movieFinishEvent;		/**< Synchronization object for game to wait for movie to finish */
+	CThreadEvent					movieFinishEvent;		/**< Synchronization object for game to wait for movie to finish */
 	CTheoraMovieRenderClient*		theoraRender;			/**< Theora rendering */
 	std::vector<std::wstring>		startupMovies;			/**< Startup movies */
 };

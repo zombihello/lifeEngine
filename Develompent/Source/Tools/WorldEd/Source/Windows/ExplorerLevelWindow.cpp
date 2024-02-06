@@ -52,7 +52,6 @@ public:
 	CRenameActorRunnable( CExplorerLevelWindow* InOwner, ActorRef_t InActor )
 		: owner( InOwner )
 		, actor( InActor )
-		, eventResponse( nullptr )
 	{}
 
 	/**
@@ -67,7 +66,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && actor );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -90,15 +88,15 @@ public:
 										{
 											bIsOk = true;
 											newActorName = ANSI_TO_TCHAR( InText.c_str() );
-											eventResponse->Trigger();
+											eventResponse.Trigger();
 										} );
 
 			popup->OnCenceled().Add( [&]()
 									 {
 										 bIsOk = false;
-										 eventResponse->Trigger();
+										 eventResponse.Trigger();
 									 } );
-			eventResponse->Wait();
+			eventResponse.Wait();
 			if ( !bIsOk )
 			{
 				return 0;
@@ -119,9 +117,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -133,7 +129,7 @@ public:
 
 private:
 	CExplorerLevelWindow*	owner;			/**< Owner */
-	CEvent*					eventResponse;	/**< Event used when opened popup */
+	CThreadEvent			eventResponse;	/**< Event used when opened popup */
 	ActorRef_t				actor;			/**< Actor to rename */
 };
 
@@ -272,7 +268,8 @@ void CExplorerLevelWindow::DrawPopupMenu()
 		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneActor ) )
 		{
 			const std::vector<ActorRef_t>&		selectedActors = g_World->GetSelectedActors();
-			g_ThreadFactory->CreateThread( new CRenameActorRunnable( this, selectedActors[0] ), CString::Format( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
+			CThread*							renameActorThread = new CThread();
+			renameActorThread->Create( new CRenameActorRunnable( this, selectedActors[0] ), CString::Format( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
 		}
 
 		// Duplicate

@@ -34,7 +34,7 @@
 #include <vector>
 
 #include "Audio/System/AudioSource.h"
-#include "Core/System/ThreadingBase.h"
+#include "Core/System/Threading.h"
 
 /**
  * @ingroup Audio
@@ -221,9 +221,9 @@ private:
 	EAudioSourceStatus			status;					/**< Source audio status */
 	AudioBankHandle_t			audioBankHandle;		/**< Handle to opened bank for streamed audio */
 	AudioBankInfo				audioBankInfo;			/**< Info about opened bank */
-	mutable CCriticalSection	csStreamData;			/**< Critical section of stream data */
+	mutable CThreadMutex		mutexStreamData;		/**< Critical section of stream data */
 	CAudioStreamRunnable*		audioStreamRunnable;	/**< Audio stream runnable */
-	CRunnableThread*			threadStreamData;		/**< Thread for streaming audio */
+	CThread*					threadStreamData;		/**< Thread for streaming audio */
 };
 
 #endif // !AUDIOSTREAMSOURCE_H
