@@ -31,13 +31,13 @@ function LinkCompressonator()
     }
 
     filter "platforms:Win64"
-        filter "configurations:Debug*"
+        filter "configurations:DebugWithEditor"
             links       {
                 extCompressonator .. "/lib/VS2019/x64/Compressonator_MDd.lib",
 				extCompressonator .. "/lib/VS2019/x64/CMP_Framework_MDd.lib"
             }
 
-        filter "configurations:Release*"
+        filter "configurations:ReleaseWithEditor"
             links       {
                 extCompressonator .. "/lib/VS2019/x64/Compressonator_MD.lib",
 				extCompressonator .. "/lib/VS2019/x64/CMP_Framework_MD.lib"

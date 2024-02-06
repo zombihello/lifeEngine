@@ -40,106 +40,16 @@
 struct WindowsPlatformMemory : public GenericPlatformMemory
 {
 	/**
-	 * @brief Allocates InSize bytes of uninitialized storage
-	 *
-	 * @param InSize		Number of bytes to allocate. An integral multiple of InAlignment
-	 * @param InAlignment	Specifies the alignment. Must be a valid alignment supported by the implementation
-	 * @return On success, returns the pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with Free() or Realloc(). On failure, returns a NULL pointer
+	 * @brief Get the default allocator for platform
+	 * @return Return the default allocator for platform
 	 */
-	static FORCEINLINE void* Malloc( size_t InSize, uint32 InAlignment = DEFAULT_ALIGNMENT )
-	{
-		void*	result = TryMalloc( InSize, InAlignment );
-		if ( !result && InSize )
-		{
-			OutOfMemory( InSize, InAlignment );
-			return nullptr;
-		}
-
-		return result;
-	}
-
-	/**
-	 * @brief Reallocates the given area of memory. It must be previously allocated by Malloc or MallocZeroed and not yet freed with Free, otherwise, the results are undefined
-	 *
-	 * @param InOriginal	Pointer to the memory area to be reallocated
-	 * @param InSize		New size of the array
-	 * @param InAlignment	Alignment
-	 * @return On success, returns a pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with Free or Realloc. The original pointer InOriginal is invalidated and any access to it is undefined behavior (even if reallocation was in-place). On failure, returns a null pointer. The original pointer InOriginal remains valid and may need to be deallocated with Free
-	 */
-	static FORCEINLINE void* Realloc( void* InOriginal, size_t InSize, uint32 InAlignment = DEFAULT_ALIGNMENT )
-	{
-		void* result = TryRealloc( InOriginal, InSize, InAlignment );
-		if ( !result && InSize )
-		{
-			OutOfMemory( InSize, InAlignment );
-			return nullptr;
-		}
-
-		return result;
-	}
-
-	/**
-	 * @brief Deallocates the space previously allocated by Malloc or Realloc
-	 * @param InOriginal	Pointer to the memory to deallocate
-	 */
-	static FORCEINLINE void Free( void* InOriginal )
-	{
-		_aligned_free( InOriginal );
-	}
-
-private:
-	/**
-	 * @brief Try allocates InSize bytes of uninitialized storage
-	 * 
-	 * @param InSize		Number of bytes to allocate. An integral multiple of InAlignment
-	 * @param InAlignment	Specifies the alignment. Must be a valid alignment supported by the implementation
-	 * @return On success, returns the pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with Free() or Realloc(). On failure, returns a NULL pointer
-	 */
-	static FORCEINLINE void* TryMalloc( size_t InSize, uint32 InAlignment )
-	{
-		void*	result = nullptr;
-		if ( InAlignment != DEFAULT_ALIGNMENT )
-		{
-			InAlignment = Max<uint32>( InSize >= 16 ? 16 : 8, InAlignment );
-			result = _aligned_malloc( InSize, InAlignment );
-		}
-		else
-		{
-			result = _aligned_malloc( InSize, InSize >= 16 ? 16 : 8 );
-		}
-
-		return result;
-	}
-
-	/**
-	 * @brief Try reallocates the given area of memory. It must be previously allocated by Malloc or MallocZeroed and not yet freed with Free, otherwise, the results are undefined
-	 *
-	 * @param InOriginal	Pointer to the memory area to be reallocated
-	 * @param InSize		New size of the array
-	 * @param InAlignment	Alignment
-	 * @return On success, returns a pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with Free or Realloc. The original pointer InOriginal is invalidated and any access to it is undefined behavior (even if reallocation was in-place). On failure, returns a null pointer. The original pointer InOriginal remains valid and may need to be deallocated with Free
-	 */
-	static FORCEINLINE void* TryRealloc( void* InOriginal, size_t InSize, uint32 InAlignment )
-	{
-		void*	result = nullptr;
-		if ( InAlignment != DEFAULT_ALIGNMENT )
-		{
-			InAlignment = Max<uint32>( InSize >= 16 ? 16 : 8, InAlignment );
-			result = _aligned_realloc( InOriginal, InSize, InAlignment );
-		}
-		else
-		{
-			result = _aligned_realloc( InOriginal, InSize, InSize >= 16 ? 16 : 8 );
-		}
-
-		return result;
-	}
+	static CBaseMalloc* BaseAllocator();
 };
 
 /**
  * @ingroup WindowsPlatform
  * @brief Typedef of Windows platform memory
  */
-typedef WindowsPlatformMemory		Memory;
+typedef WindowsPlatformMemory		PlatformMemory;
 
 #endif // !WINDOWSMEMORY_H

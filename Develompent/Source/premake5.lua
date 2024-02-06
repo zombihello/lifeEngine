@@ -95,6 +95,7 @@ extTheora                       = externalDir .. "theora-1.2"
 extZlib                         = externalDir .. "zlib"
 extCompressonator				= externalDir .. "Compressonator_4.3.206"
 extHalf							= externalDir .. "half-2.2.0"
+extMimalloc                     = externalDir .. "mimalloc-2.1.2"
 
 -- Include modules of external libs
 include( extAssimp )
@@ -113,6 +114,7 @@ include( extTheora )
 include( extZlib )
 include( extCompressonator )
 include( extHalf )
+include( extMimalloc )
 
 -- Projects
 projEngine          = "Engine/"
@@ -133,6 +135,7 @@ function LinkEngineExternals()
     LinkSDL2()
     LinkTheora()
 	LinkHalf()
+    LinkMimalloc()
 
     if is2DEngine then
         LinkBox2D()

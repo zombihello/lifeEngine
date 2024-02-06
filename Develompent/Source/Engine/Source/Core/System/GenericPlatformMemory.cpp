@@ -27,6 +27,22 @@
 
 #include "Core/Core.h"
 #include "Core/System/GenericPlatformMemory.h"
+#include "Core/System/MallocAnsi.h"
+
+//
+// GLOBALS
+//
+GenericPlatformMemory::EMemoryAllocatorToUse	GenericPlatformMemory::allocatorToUse = GenericPlatformMemory::MAU_Ansi;
+
+/*
+==================
+GenericPlatformMemory::BaseAllocator
+==================
+*/
+CBaseMalloc* GenericPlatformMemory::BaseAllocator()
+{
+	return new CMallocAnsi();
+}
 
 /*
 ==================

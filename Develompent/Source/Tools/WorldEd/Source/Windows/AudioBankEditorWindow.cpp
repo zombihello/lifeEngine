@@ -60,6 +60,7 @@ CAudioBankEditorWindow::CAudioBankEditorWindow( const TSharedPtr<CAudioBank>& In
 	audioComponent->SetAudioBank( audioBank->GetAssetHandle() );
 	audioComponent->SetUISound( true );
 	audioComponent->SetStreamable( true );
+	audioComponent->SetAutoPlay( false );
 }
 
 /*

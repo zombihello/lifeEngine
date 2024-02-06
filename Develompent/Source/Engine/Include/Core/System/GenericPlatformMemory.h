@@ -38,6 +38,16 @@
 struct GenericPlatformMemory
 {
 	/**
+	 * @brief Enumeration current is being used allocator
+	 */
+	enum EMemoryAllocatorToUse
+	{
+		MAU_Ansi,		/**< Default C allocator */
+		MAU_Mimalloc,	/**< Mimalloc */
+		MAU_Platform	/**< Custom platform specific allocator */ 
+	};
+
+	/**
 	 * @brief Copies count characters from the object pointed to by InSrc to the object pointed to by InDest
 	 * 
 	 * @param InDest	Pointer to the memory location to copy to
@@ -102,75 +112,20 @@ struct GenericPlatformMemory
 	}
 
 	/**
-	 * @brief Allocates InSize bytes of uninitialized storage
-	 * 
-	 * @param InSize		Number of bytes to allocate. An integral multiple of InAlignment
-	 * @param InAlignment	Specifies the alignment. Must be a valid alignment supported by the implementation
-	 * @return On success, returns the pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with Free() or Realloc(). On failure, returns a NULL pointer
-	 */
-	static FORCEINLINE void* Malloc( size_t InSize, uint32 InAlignment = DEFAULT_ALIGNMENT )
-	{
-		void*	result = malloc( InSize );
-		if ( !result && InSize )
-		{
-			OutOfMemory( InSize, InAlignment );
-			return nullptr;
-		}
-
-		return result;
-	}
-
-	/**
-	 * @brief Allocates InSize bytes of uninitialized storage filed by zero
-	 * 
-	 * @param InSize		Number of bytes to allocate. An integral multiple of InAlignment
-	 * @param InAlignment	Specifies the alignment. Must be a valid alignment supported by the implementation
-	 * @return On success, returns the pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with Free() or Realloc(). On failure, returns a NULL pointer
-	 */
-	static FORCEINLINE void* MallocZeroed( size_t InSize, uint32 InAlignment = DEFAULT_ALIGNMENT )
-	{
-		void*	data = Malloc( InSize, InAlignment );
-		Memzero( data, InSize );
-		return data;
-	}
-
-	/**
-	 * @brief Reallocates the given area of memory. It must be previously allocated by Malloc or MallocZeroed and not yet freed with Free, otherwise, the results are undefined
-	 * 
-	 * @param InOriginal	Pointer to the memory area to be reallocated
-	 * @param InSize		New size of the array
-	 * @param InAlignment	Alignment
-	 * @return On success, returns a pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with Free or Realloc. The original pointer InOriginal is invalidated and any access to it is undefined behavior (even if reallocation was in-place). On failure, returns a null pointer. The original pointer InOriginal remains valid and may need to be deallocated with Free
-	 */
-	static FORCEINLINE void* Realloc( void* InOriginal, size_t InSize, uint32 InAlignment = DEFAULT_ALIGNMENT )
-	{
-		void*	result = realloc( InOriginal, InSize );
-		if ( !result && InSize )
-		{
-			OutOfMemory( InSize, InAlignment );
-			return nullptr;
-		}
-		
-		return result;
-	}
-
-	/**
-	 * @brief Deallocates the space previously allocated by Malloc or Realloc
-	 * @param InOriginal	Pointer to the memory to deallocate
-	 */
-	static FORCEINLINE void Free( void* InOriginal )
-	{
-		free( InOriginal );
-	}
-
-protected:
-	/**
 	 * @brief Handle out of memory
 	 * 
 	 * @param InSize		OOM allocation size
 	 * @param InAlignment	OOM	allocation alignment
 	 */
 	static void OutOfMemory( size_t InSize, uint32 InAlignment );
+
+	/**
+	 * @brief Get the default allocator for platform
+	 * @return Return the default allocator for platform
+	 */
+	static CBaseMalloc* BaseAllocator();
+
+	static EMemoryAllocatorToUse	allocatorToUse;	/**< Current allocator */
 };
 
 #endif // !GENERICPLATFORMMEMORY_H
