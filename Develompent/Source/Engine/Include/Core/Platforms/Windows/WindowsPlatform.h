@@ -34,7 +34,7 @@
 #include <Windows.h>
 #include <stdarg.h>
 
-#include "COre/Misc/Types.h"
+#include "Core/Misc/Types.h"
 
 // Mark what we on Windows
 #undef PLATFORM_WINDOWS

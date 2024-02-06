@@ -130,7 +130,9 @@ void* CMallocAnsi::TryRealloc( void* InOriginal, size_t InSize, uint32 InAlignme
 	{
 		// Can't use realloc as it might screw with alignment
 		result = TryMalloc( InSize, InAlignment );
-		size_t	ptrSize = GetAllocationSize( InOriginal );
+		size_t	ptrSize = 0;
+		bool	bResult = GetAllocationSize( InOriginal, ptrSize );
+		Assert( ptrSize );
 		Memory::Memcpy( result, InOriginal, Min( InSize, ptrSize ) );
 		Free( InOriginal );
 	}
