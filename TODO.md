@@ -1,18 +1,23 @@
 # Version 0.5.0 :: Next
+- [ ] Improve asset system
+- [ ] Improve WorldEd's UI
+- [ ] Implement skeletal meshes
+- [ ] Implement skeletal animations
+- [ ] Implement occlusion culling
+	- [ ] Occlusion Queries
+	- [ ] Octree
+- [ ] Implement rendering translucent geometry
+- [ ] Fix rendering masked materials with prepass
+- [ ] Fix rendering the editor grid without prepass
+- [ ] Implement cooking packages for shipping build
 - [ ] Fix link count for DirectX 11 objects 
 - [ ] Fix depth buffer accuracy
 - [ ] Implement material shaders
 - [ ] Need refactor import/reimport assets with the ability to customize
-- [ ] Refactor assets system and remove packages
 - [ ] Implement shadow maps
-- [ ] Implement skeletal meshes
-- [ ] Implement skeletal animations
 - [ ] Implement particle system
 - [ ] Implement support UI in the game
 - [ ] Implement base AI
-- [ ] Implement rendering translucent geometry
-- [ ] Fix rendering masked materials with prepass
-- [ ] Fix rendering the editor grid without prepass
 
  # Version 0.4.0 :: Now	
 - [X] Migrate WorldEd's interface from Qt to ImGUI
@@ -25,7 +30,8 @@
 - [X] Add supported mip levels in textures
 - [X] Add possible generate mip levels for textures in WorldEd
 - [X] Need fix speed of the import static meshes
-- [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to LUA)
+- [ ] Rework the engine architecture
+- [ ] Implement script system on AngelScript
 - [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)
 - [x] Implemented functions of exploer level
 - [x] Added gizmo render in WorldEd.

@@ -1,1 +1,0 @@
-"../Tools/BuildSystem/premake5.exe" vs2019 --engine=2D %*
