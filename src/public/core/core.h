@@ -238,4 +238,11 @@ CORE_INTERFACE const achar* Sys_GetUserName();
  */
 CORE_INTERFACE double Sys_Seconds();
 
+/**
+ * @ingroup core
+ * @brief Engine build number
+ * @return Engine build number
+ */
+CORE_INTERFACE uint32 Sys_BuildNumber();
+
 #endif // !CORE_H

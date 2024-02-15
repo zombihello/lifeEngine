@@ -27,7 +27,6 @@
 
 #include "core/debug.h"
 #include "core/coreprivate.h"
-#include "core/version.h"
 #include "stdlib/strtools.h"
 
 /*
@@ -176,7 +175,7 @@ LogOutputFn_t Sys_GetDefaultLogOutput()
 		{
 			Sys_DebugBreak();
 		}
-		Sys_ShowMessageBox( ENGINE_NAME " Error", finalMessage.c_str(), MESSAGE_BOX_ERROR );
+		Sys_ShowMessageBox( "Engine Error", finalMessage.c_str(), MESSAGE_BOX_ERROR );
 
 		// Shutdown application
 		Sys_RequestExit( true );

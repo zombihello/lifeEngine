@@ -57,6 +57,8 @@
 	- [ ] Directional light
 - [ ] Implement HDR and gamma correct support
 - [ ] Implement eye adaptation (auto exposure)
+- [ ] Add support cube maps
+- [ ] Implement sky box
 - [ ] Implement occlusion culling
 	- [ ] Implement frustum culling
 	- [ ] Add support of occlusion queries
@@ -72,8 +74,10 @@
 - [ ] Implement dynamic shadows
 	- [ ] Shadow map
 	- [ ] Cascade shadow map
+- [ ] Implement decals
 - [ ] Implement particle system
 - [ ] Implement support UI in the game
+- [ ] Implement fog
 - [ ] Implement base AI
 - [ ] Implement post processing
 - [ ] Implement light maps (maybe optional)

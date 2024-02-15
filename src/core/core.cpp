@@ -28,8 +28,72 @@
 #include "core/globals.h"
 #include "core/coreprivate.h"
 #include "core/debug.h"
-#include "core/version.h"
 #include "stdlib/strtools.h"
+
+/**
+ * @ingroup core
+ * @brief Build number counter
+ */
+class CBuildNumber
+{
+public:
+	/**
+	 * @brief Constructor
+	 */
+	CBuildNumber()
+		: buildNumber( 0 )
+	{
+		ComputeBuildNumber();
+	}
+
+	/**
+	 * @brief Get build number
+	 * @return Return build number
+	 */
+	FORCEINLINE uint32 GetBuildNumber() const
+	{
+		return buildNumber;
+	}
+
+private:
+	/**
+	 * @brief Compute build number
+	 */
+	void ComputeBuildNumber()
+	{
+		const char* pDate			= __DATE__;
+		const char* month[12]		= { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+		const char	month_days[12]	= { 31,    28,    31,    30,    31,    30,    31,    31,    30,    31,    30,    31 };
+
+		buildNumber		= 0;
+		uint32	months	= 0;
+		uint32	days	= 0;
+		uint32	years	= 0;
+
+		// Compute count days and years
+		for ( months = 0; months < 11; ++months )
+		{
+			if ( strncmp( &pDate[0], month[months], 3 ) == 0 )
+			{
+				break;
+			}
+			days += month_days[months];
+		}
+		days		+= atoi( &pDate[4] ) - 1;
+		years		= atoi( &pDate[7] ) - 1900;
+		
+		// Compute build number
+		buildNumber = days + ( uint32 )( ( years - 1 ) * 365.25f );
+		if ( ( years % 4 == 0 ) && months > 1 )
+		{
+			++buildNumber;
+		}
+
+		buildNumber -= 44964; // Feb 09 2024 (lifeEngine development start)
+	}
+
+	uint32		buildNumber;	/**< Build number */
+};
 
 /*
 ==================
@@ -46,7 +110,7 @@ void Sys_Error( const achar* pFormat, ... )
 
 	// Print message and show message box
 	Error( message.c_str() );
-	Sys_ShowMessageBox( ENGINE_NAME " Error", message.c_str(), MESSAGE_BOX_ERROR );
+	Sys_ShowMessageBox( "Engine Error", message.c_str(), MESSAGE_BOX_ERROR );
 
 	// Shutdown application
 	Sys_RequestExit( true );
@@ -60,4 +124,15 @@ Sys_IsRequestingExit
 bool Sys_IsRequestingExit()
 {
 	return g_bRequestingExit;
+}
+
+/*
+==================
+Sys_BuildNumber
+==================
+*/
+uint32 Sys_BuildNumber()
+{
+	static CBuildNumber		s_BuildNumber;
+	return s_BuildNumber.GetBuildNumber();
 }
