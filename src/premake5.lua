@@ -32,6 +32,11 @@ newoption {
 	description = "Choose game for generation (need to exist the folder './game/<game>')"
 }
 
+newoption {
+    trigger     = "build-monolithic",
+    description = "Assemble the engine monolithically"       
+}
+
 --------- GLOBAL VARIABLES -----------------
 
 -- Path to src folder
@@ -62,8 +67,17 @@ thirdPartyDir			    = root .. "/thirdparty/";
 game			            = _OPTIONS["game"]
 print( "Generation project for '" .. game .. "'" )
 
+-- Is need assemble the engine monolithically
+if _OPTIONS["build-monolithic"] then
+    buildMonolithic = true
+else
+    buildMonolithic = false
+end
+
 --------------- MODULES ---------------
 launcher                    = "launcher/"
+core                        = "core/"
+stdlib                      = "libs/stdlib/"
 
 workspace( game )
     location( root )
@@ -84,11 +98,13 @@ workspace( game )
 
     includedirs         {
         "public/",
+        "public/libs/",
         "./"
     }
 
     defines 		    {
-        "PLATFORM_SUBDIR=\"%{string.lower(cfg.platform)}\""
+        "PLATFORM_SUBDIR=\"%{string.lower(cfg.platform)}\"",
+        "BUILD_MONOLITHIC=" .. tostring( buildMonolithic and 1 or 0 )
     }
 
     --------------- PLATFORM SETTINGS --------------
@@ -149,3 +165,6 @@ workspace( game )
 
     group "/Engine"
         include( launcher )
+		include( core )
+		group "/Engine/Libraries"
+			include( stdlib )

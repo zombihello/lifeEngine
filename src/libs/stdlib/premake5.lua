@@ -25,29 +25,26 @@
 * SOFTWARE.
 ]]
 
-project "launcher"
-    kind        "WindowedApp"
+project "stdlib"
+    kind        "StaticLib"
     language    "C++"
     location( intermediateDir )
-    targetname( game )
 
 	----------- PROJECT SETTINGS --------
 
-    files       {
+    files       { 
         "**.h", 
         "**.inl", 
-        "**.cpp"
+        "**.cpp",
+        "../../public/libs/stdlib/**.h",
+        "../../public/libs/stdlib/**.inl",
     }
 
     vpaths      {
-        ["src/*"]       = { "**.h", "**.inl", "**.cpp" }
+        ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
+        ["public/*"]    = { "../../public/libs/stdlib/**.h", "../../public/libs/stdlib/**.inl" }
     }
-
-    links       {
-        "core",
-        "stdlib"
-    }
-
+	
 	---------- PLATFORM SPECIFIC SETTINGS ---------
 	
 	-- Exclude platform specific for other platforms

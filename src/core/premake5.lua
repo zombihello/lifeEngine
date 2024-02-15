@@ -25,29 +25,39 @@
 * SOFTWARE.
 ]]
 
-project "launcher"
-    kind        "WindowedApp"
+project "core"
+    if not buildMonolithic then
+        kind "SharedLib"
+    else
+        kind "StaticLib"
+    end
+    
     language    "C++"
     location( intermediateDir )
-    targetname( game )
 
 	----------- PROJECT SETTINGS --------
 
-    files       {
+    if not buildMonolithic then
+        defines { "CORE_DLL_EXPORT" }
+    end
+
+    files       { 
         "**.h", 
         "**.inl", 
-        "**.cpp"
+        "**.cpp",
+        "../public/core/**.h",
+        "../public/core/**.inl"
     }
 
     vpaths      {
-        ["src/*"]       = { "**.h", "**.inl", "**.cpp" }
+        ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
+        ["public/*"]    = { "../public/core/**.h", "../public/core/**.inl" }
     }
 
     links       {
-        "core",
         "stdlib"
     }
-
+	
 	---------- PLATFORM SPECIFIC SETTINGS ---------
 	
 	-- Exclude platform specific for other platforms
