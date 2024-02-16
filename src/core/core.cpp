@@ -73,14 +73,14 @@ private:
 		// Compute count days and years
 		for ( months = 0; months < 11; ++months )
 		{
-			if ( strncmp( &pDate[0], month[months], 3 ) == 0 )
+			if ( L_strncmp( &pDate[0], month[months], 3 ) == 0 )
 			{
 				break;
 			}
 			days += month_days[months];
 		}
-		days		+= atoi( &pDate[4] ) - 1;
-		years		= atoi( &pDate[7] ) - 1900;
+		days		+= L_atoi( &pDate[4] ) - 1;
+		years		= L_atoi( &pDate[7] ) - 1900;
 		
 		// Compute build number
 		buildNumber = days + ( uint32 )( ( years - 1 ) * 365.25f );
@@ -110,6 +110,10 @@ void Sys_Error( const achar* pFormat, ... )
 
 	// Print message and show message box
 	Error( message.c_str() );
+	if ( Sys_IsDebuggerPresent() )
+	{
+		Sys_DebugBreak();
+	}
 	Sys_ShowMessageBox( "Engine Error", message.c_str(), MESSAGE_BOX_ERROR );
 
 	// Shutdown application
