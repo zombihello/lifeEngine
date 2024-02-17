@@ -133,13 +133,13 @@
  * @ingroup core
  * @brief Export in DLL
  */
-#define DLLEXPORT			            extern "C" __declspec( dllexport )
+#define DLLEXPORT			            __declspec( dllexport )
 
 /**
  * @ingroup core
  * @brief Import from DLL
  */
-#define DLLIMPORT			            extern "C" __declspec( dllimport )
+#define DLLIMPORT			            __declspec( dllimport )
 
 /**
  * @ingroup core
@@ -189,6 +189,12 @@
 
 /**
  * @ingroup core
+ * @brief Invalid thread handle
+ */
+#define INVALID_THREAD_HANDLE           nullptr
+
+/**
+ * @ingroup core
  * @brief DLL handle
  */
 typedef	HMODULE	                        dllHandle_t;
@@ -198,5 +204,11 @@ typedef	HMODULE	                        dllHandle_t;
  * @brief Window handle
  */
 typedef HANDLE                          windowHandle_t;
+
+/**
+ * @ingroup core
+ * @brief Thread handle
+ */
+typedef HANDLE                          threadHandle_t;
 
 #endif // !WIN_PLATFORM_H

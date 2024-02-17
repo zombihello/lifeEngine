@@ -26,7 +26,7 @@
  */
 
 #include "core/debug.h"
-#include "core/coreprivate.h"
+#include "core/core_private.h"
 #include "stdlib/strtools.h"
 
 /*

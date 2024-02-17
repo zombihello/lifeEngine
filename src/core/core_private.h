@@ -1,4 +1,7 @@
 /**
+ * @file
+ * @addtogroup core core
+ *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -25,8 +28,27 @@
  * SOFTWARE.
  */
 
-#include "core/globals.h"
-#include "core/core_private.h"
+#ifndef CORE_PRIVATE_H
+#define CORE_PRIVATE_H
 
-bool	g_bRequestingExit = false;
-double	g_SecondsPerCycle = Sys_GetSecondsPerCycle();
+#include <string>
+#include "core/core.h"
+
+/**
+ * @ingroup core
+ * @brief Dump call stack
+ * @note Need implement on each platform
+ * @return Return string with dump call stack
+ */
+std::string Sys_DumpCallStack();
+
+/**
+ * @ingroup core
+ * @brief Get seconds per CPU cycle for this PC
+ * @note Need implement on each platform
+ * 
+ * @return Return seconds per CPU cycle for this PC
+ */
+double Sys_GetSecondsPerCycle();
+
+#endif // !CORE_PRIVATE_H

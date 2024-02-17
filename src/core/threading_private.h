@@ -1,4 +1,7 @@
 /**
+ * @file
+ * @addtogroup core core
+ *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -25,8 +28,38 @@
  * SOFTWARE.
  */
 
-#include "core/globals.h"
-#include "core/core_private.h"
+#ifndef THREADING_PRIVATE_H
+#define THREADING_PRIVATE_H
 
-bool	g_bRequestingExit = false;
-double	g_SecondsPerCycle = Sys_GetSecondsPerCycle();
+#include "core/threading.h"
+
+/**
+ * @ingroup core
+ * @brief Get current thread handle
+ * @note Need implement on each platform
+ *
+ * @return Return OS handle of current thread
+ */
+threadHandle_t Sys_GetCurrentThreadHandle();
+
+/**
+ * @ingroup core
+ * @brief Set thread priority
+ * @note Need implement on each platform
+ * 
+ * @param threadHandle		OS thread handle
+ * @param threadPriority	Thread priority
+ */
+void Sys_SetThreadPriority( threadHandle_t threadHandle, EThreadPriority threadPriority );
+
+/**
+ * @ingroup core
+ * @brief Set thread name
+ * @note Need implement on each platform
+ * 
+ * @param threadHandle		OS thread handle
+ * @param pThreadName		Thread name
+ */
+void Sys_SetThreadName( threadHandle_t threadHandle, const achar* pThreadName );
+
+#endif // !THREADING_PRIVATE_H

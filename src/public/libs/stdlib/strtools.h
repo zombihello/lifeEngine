@@ -97,6 +97,56 @@ FORCEINLINE uint32 L_wcslen( const wchar* pString )
 
 /**
  * @ingroup stdlib
+ * @brief Copy characters from string (for ANSI strings)
+ *
+ * @param pDest     Pointer to the destination array where the content is to be copied
+ * @param pSrc      C string to be copied
+ */
+FORCEINLINE void L_strcpy( achar* pDest, const achar* pSrc )
+{
+	strcpy( pDest, pSrc );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Copy characters from string (for Unicode strings)
+ *
+ * @param pDest     Pointer to the destination array where the content is to be copied
+ * @param pSrc      C string to be copied
+ */
+FORCEINLINE void L_wcscpy( wchar* pDest, const wchar* pSrc )
+{
+	wcscpy( pDest, pSrc );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Copy characters from string (for ANSI strings)
+ *
+ * @param pDest     Pointer to the destination array where the content is to be copied
+ * @param pSrc      C string to be copied
+ * @param maxLen	Maximum number of characters to be copied from pSrc
+ */
+FORCEINLINE void L_strncpy( achar* pDest, const achar* pSrc, uint32 maxLen )
+{
+	strncpy( pDest, pSrc, maxLen );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Copy characters from string (for Unicode strings)
+ *
+ * @param pDest     Pointer to the destination array where the content is to be copied
+ * @param pSrc      C string to be copied
+ * @param maxLen	Maximum number of characters to be copied from pSrc
+ */
+FORCEINLINE void L_wcsncpy( wchar* pDest, const wchar* pSrc, uint32 maxLen )
+{
+	wcsncpy( pDest, pSrc, maxLen );
+}
+
+/**
+ * @ingroup stdlib
  * @brief Find substring in a string (for ANSI strings)
  *
  * @param pString     String

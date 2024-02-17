@@ -1,7 +1,4 @@
 /**
- * @file
- * @addtogroup core core
- *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -28,27 +25,29 @@
  * SOFTWARE.
  */
 
-#ifndef COREPRIVATE_H
-#define COREPRIVATE_H
+#include "core/threading_private.h"
 
-#include <string>
-#include "core/core.h"
-
-/**
- * @ingroup core
- * @brief Dump call stack
- * @note Need implement on each platform
- * @return Return string with dump call stack
+/*
+ ==================
+ InitMainThread
+ ==================
  */
-std::string Sys_DumpCallStack();
+static threadHandle_t InitMainThread()
+{
+	threadHandle_t		mainThreadHandle = Sys_GetCurrentThreadHandle();
+	Sys_SetThreadName( mainThreadHandle, "Main Thread" );
+	return mainThreadHandle;
+}
 
-/**
- * @ingroup core
- * @brief Get seconds per CPU cycle for this PC
- * @note Need implement on each platform
- * 
- * @return Return seconds per CPU cycle for this PC
+// Main thread ID
+static threadHandle_t		s_MainThreadHandle = InitMainThread();
+
+/*
+ ==================
+ Sys_IsInMainThread
+ ==================
  */
-double Sys_GetSecondsPerCycle();
-
-#endif // !COREPRIVATE_H
+bool Sys_IsInMainThread()
+{
+	return s_MainThreadHandle == INVALID_THREAD_HANDLE || s_MainThreadHandle == Sys_GetCurrentThreadHandle();
+}

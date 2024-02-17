@@ -4,7 +4,7 @@
 - [ ] Create class for work with command line
 - [ ] Create console system
 - [ ] Create config system
-- [ ] Create classes for work with threads and synchronization mechanisms (mutex, semaphore, etc)
+- [X] Create classes for work with threads and synchronization mechanisms (mutex, semaphore, etc)
 - [ ] Basic functionality for working with a window
 - [ ] Create input system
 - [ ] Implement support compression with ZLIB
