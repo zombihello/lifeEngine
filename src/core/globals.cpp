@@ -25,8 +25,7 @@
  * SOFTWARE.
  */
 
-#include "core/globals.h"
-#include "core/core_private.h"
+#include "pch_core.h"
 
-bool	g_bRequestingExit = false;
-double	g_SecondsPerCycle = Sys_GetSecondsPerCycle();
+bool		g_bRequestingExit = false;
+double		g_SecondsPerCycle = Sys_GetSecondsPerCycle();

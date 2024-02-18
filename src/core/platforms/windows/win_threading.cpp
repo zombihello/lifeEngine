@@ -25,8 +25,7 @@
  * SOFTWARE.
  */
 
-#include "stdlib/strtools.h"
-#include "core/threading_private.h"
+#include "pch_core.h"
 
 /**
 * Code setting the thread name for use in the debugger

@@ -33,8 +33,10 @@
 
 #include "core/build.h"
 #include "core/coreapi.h"
-#include "core/platform.h"
 #include "core/types.h"
+#include "core/platform.h"
+#include "core/memory.h"
+#include "stdlib/stdlib.h"
 
 /**
  * @ingroup core

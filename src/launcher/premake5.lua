@@ -36,11 +36,13 @@ project "launcher"
     files       {
         "**.h", 
         "**.inl", 
-        "**.cpp"
+        "**.cpp",
+        "../public/core/**.cpp"
     }
 
     vpaths      {
-        ["src/*"]       = { "**.h", "**.inl", "**.cpp" }
+        ["src/*"]           = { "**.h", "**.inl", "**.cpp" },
+        ["public/*"]        = { "../public/**.cpp" }
     }
 
     links       {
@@ -53,4 +55,10 @@ project "launcher"
 	-- Exclude platform specific for other platforms
 	filter "platforms:not Win64"
         excludes { "**/platforms/windows/**.*" }
+    filter {}
+
+    -- Windows
+    filter "platforms:Win64"
+        files   { "**.rc" }
+        vpaths  { ["src/*"] = { "**.rc" } }
     filter {}

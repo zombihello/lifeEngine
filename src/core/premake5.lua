@@ -45,22 +45,41 @@ project "core"
         "**.h", 
         "**.inl", 
         "**.cpp",
+        "../public/core/**.cpp",
         "../public/core/**.h",
         "../public/core/**.inl"
     }
 
+    -- Enable PCH file but disable it for public CPPs
+    pchheader       "pch_core.h"
+    pchsource       "pch_core.cpp"
+    includedirs     { "./" }
+    filter { "files:platforms/windows/win_stackwalker.cpp" }
+        flags       { "NoPCH" }
+    filter {}
+
     vpaths      {
         ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]    = { "../public/core/**.h", "../public/core/**.inl" }
+        ["public/*"]    = { "../public/**.h", "../public/**.inl", "../public/**.cpp" }
     }
 
     links       {
         "stdlib"
     }
 	
+    ----------- LINK THIRD PARTIES -----------------
+
+    Mimalloc.Link()
+
 	---------- PLATFORM SPECIFIC SETTINGS ---------
 	
 	-- Exclude platform specific for other platforms
 	filter "platforms:not Win64"
         excludes { "**/platforms/windows/**.*" }
+    filter {}
+
+    -- Windows
+    filter "platforms:Win64"
+        files   { "**.rc" }
+        vpaths  { ["src/*"] = { "**.rc" } }
     filter {}

@@ -31,7 +31,6 @@
 #ifndef CORE_PRIVATE_H
 #define CORE_PRIVATE_H
 
-#include <string>
 #include "core/core.h"
 
 /**

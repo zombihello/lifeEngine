@@ -25,10 +25,8 @@
  * SOFTWARE.
  */
 
-#include "core/globals.h"
+#include "pch_core.h"
 #include "core/core_private.h"
-#include "core/debug.h"
-#include "stdlib/strtools.h"
 
 /**
  * @ingroup core

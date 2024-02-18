@@ -25,9 +25,8 @@
  * SOFTWARE.
  */
 
+#include "pch_core.h"
 #include "core/debug.h"
-#include "core/core_private.h"
-#include "stdlib/strtools.h"
 
 /*
  ==================

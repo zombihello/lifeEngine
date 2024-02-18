@@ -70,14 +70,21 @@ print( "Generation project for '" .. game .. "'" )
 -- Is need assemble the engine monolithically
 if _OPTIONS["build-monolithic"] then
     buildMonolithic = true
+    print( "Assemble the engine monolithically" )
 else
     buildMonolithic = false
+    print( "Assemble the engine modular" )
 end
 
 --------------- MODULES ---------------
 launcher                    = "launcher/"
 core                        = "core/"
 stdlib                      = "libs/stdlib/"
+
+--------------- THIRD PARTIES ---------
+thirdParty_Mimalloc         = thirdPartyDir .. "mimalloc-2.1.2"
+
+include( thirdParty_Mimalloc )
 
 workspace( game )
     location( root )
@@ -94,7 +101,10 @@ workspace( game )
     targetdir( buildDir .. binariesDir .. outputDir )
 	objdir( intermediateDir .. intermediateOutputDir .. "%{prj.name}/" )
 
-    flags { "MultiProcessorCompile" }
+    flags           { "MultiProcessorCompile" }
+    filter { "files:public/**.cpp" }
+        flags       { "NoPCH" }
+    filter {}
 
     includedirs         {
         "public/",

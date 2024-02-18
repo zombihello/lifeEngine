@@ -35,6 +35,7 @@
 
 // Undo any defines
 #undef ARRAYSIZE
+#undef offsetof
 
 /**
  * @ingroup stdlib
@@ -51,7 +52,7 @@
  * @param Struc		Struct name
  * @param Member	Member name
  */
-#define STRUCT_OFFSET( Struc, Member )		( ( ptrint ) &( ( Struc* )0 )->Member )
+#define offsetof( Struc, Member )			( ( ptrint )&( ( Struc* )0 )->Member )
 
 /**
  * @ingroup stdlib

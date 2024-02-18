@@ -25,6 +25,7 @@
  * SOFTWARE.
  */
 
+#include "pch_core.h"
 #include "core/threading_private.h"
 
 /*
