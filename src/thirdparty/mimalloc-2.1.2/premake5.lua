@@ -35,7 +35,7 @@ function Mimalloc.Link()
 
     -- Set library name
     local   libName
-    if buildMonolithic then
+    if buildMonolithicEngine then
         libName = "mimalloc-static"
     else
         libName = "mimalloc"
@@ -49,7 +49,7 @@ function Mimalloc.Link()
                 thirdParty_Mimalloc .. "/lib/win64/debug/" .. libName .. ".lib" 
             }
 
-            if not buildMonolithic then
+            if not buildMonolithicEngine then
                 postbuildcommands { 
                     "{COPY} " .. thirdParty_Mimalloc .. "/bin/win64/debug/" .. libName .. ".dll " .. buildDir .. binariesDir .. outputDir .. "/" 
                 }
@@ -61,7 +61,7 @@ function Mimalloc.Link()
                 thirdParty_Mimalloc .. "/lib/win64/release/" .. libName .. ".lib" 
             }
 
-            if not buildMonolithic then
+            if not buildMonolithicEngine then
                 postbuildcommands { 
                     "{COPY} " .. thirdParty_Mimalloc .. "/bin/win64/release/" .. libName .. ".dll " .. buildDir .. binariesDir .. outputDir .. "/" 
                 }

@@ -165,7 +165,7 @@ LogOutputFn_t Sys_GetDefaultLogOutput()
 		// Get final message
 		va_list			params;
 		va_start( params, pFormat );
-		std::string		finalMessage = L_sprintf( "Assertion failed: %s [File: %s] [Line: %i]\n\n%s\n\nStack:\n%s", pExpr, pFile, line, L_vsprintf( pFormat, params ).c_str(), Sys_DumpCallStack().c_str() );
+		std::string		finalMessage = L_sprintf( "Assertion failed: %s [File: %s] [Line: %i]\nMessage: %s\n\nStack:\n%s", pExpr, pFile, line, L_vsprintf( pFormat, params ).c_str(), Sys_DumpCallStack().c_str());
 		va_end( params );
 
 		// Print message and show message box

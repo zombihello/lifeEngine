@@ -175,7 +175,7 @@ CORE_INTERFACE bool Sys_IsInMainThread();
  * @ingroup core
  * @brief Thread mutex interface
  */
-class CORE_INTERFACE IThreadMutex
+class CORE_CLASS IThreadMutex
 {
 public:
 	/**
@@ -208,7 +208,7 @@ public:
  * @ingroup core
  * @brief Thread event interface
  */
-class CORE_INTERFACE IThreadEvent
+class CORE_CLASS IThreadEvent
 {
 public:
 	/**
@@ -244,7 +244,7 @@ public:
  * @ingroup core
  * @brief Thread semaphore interface
  */
-class CORE_INTERFACE IThreadSemaphore
+class CORE_CLASS IThreadSemaphore
 {
 public:
 	/**
@@ -290,7 +290,7 @@ public:
  * @ingroup core
  * @brief Thread interface
  */
-class CORE_INTERFACE IThread
+class CORE_CLASS IThread
 {
 public:
 	/**
@@ -455,7 +455,7 @@ protected:
  *	}
  * @endcode
  */
-class CORE_INTERFACE CScopeLock
+class CScopeLock
 {
 public:
 	/**

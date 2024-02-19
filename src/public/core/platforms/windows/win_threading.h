@@ -35,7 +35,7 @@
  * @ingroup core
  * @brief Windows version of a thread mutex
  */
-class CORE_INTERFACE CWindowsThreadMutex : public IThreadMutex
+class CORE_CLASS CWindowsThreadMutex : public IThreadMutex
 {
 public:
 	/**
@@ -76,7 +76,7 @@ private:
  * @ingroup core
  * @brief Windows version of a thread event
  */
-class CORE_INTERFACE CWindowsThreadEvent : public IThreadEvent
+class CORE_CLASS CWindowsThreadEvent : public IThreadEvent
 {
 public:
 	/**
@@ -123,7 +123,7 @@ private:
  * @ingroup core
  * @brief Windows version of a thread semaphore
  */
-class CORE_INTERFACE CWindowsThreadSemaphore : public IThreadSemaphore
+class CORE_CLASS CWindowsThreadSemaphore : public IThreadSemaphore
 {
 public:
 	/**
@@ -181,7 +181,7 @@ private:
  * @ingroup core
  * @brief Windows version of a base thread class
  */
-class CORE_INTERFACE CWindowsThread : public IThread
+class CORE_CLASS CWindowsThread : public IThread
 {
 public:
 	/**

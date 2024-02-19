@@ -119,6 +119,6 @@ public:
  * @ingroup core
  * @brief The global memory allocator
  */
-extern CORE_INTERFACE IMemAlloc*		g_pMemAlloc;
+CORE_GLOBAL IMemAlloc*		g_pMemAlloc;
 
 #endif // !IMEMALLOC_H

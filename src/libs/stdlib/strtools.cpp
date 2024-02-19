@@ -25,6 +25,7 @@
  * SOFTWARE.
  */
 
+#include "pch_stdlib.h"
 #include "stdlib/strtools.h"
 
 /*

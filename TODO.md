@@ -9,7 +9,7 @@
 - [ ] Create input system
 - [ ] Implement support compression with ZLIB
 - [ ] Implement support TSharedPtr and TWeakPtr
-- [ ] Implement support delegates
+- [X] Implement support delegates
 - [ ] Create DirectX 11 RHI
 - [ ] Create shader system
 	- [ ] Shader compiler

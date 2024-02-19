@@ -40,6 +40,11 @@ project "stdlib"
         "../../public/libs/stdlib/**.inl",
     }
 
+    -- Enable PCH file
+    pchheader       "pch_stdlib.h"
+    pchsource       "pch_stdlib.cpp"
+    includedirs     { "./" }
+
     vpaths      {
         ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
         ["public/*"]    = { "../../public/libs/stdlib/**.h", "../../public/libs/stdlib/**.inl" }

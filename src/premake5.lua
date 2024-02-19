@@ -33,7 +33,7 @@ newoption {
 }
 
 newoption {
-    trigger     = "build-monolithic",
+    trigger     = "build-monolithic-engine",
     description = "Assemble the engine monolithically"       
 }
 
@@ -68,11 +68,11 @@ game			            = _OPTIONS["game"]
 print( "Generation project for '" .. game .. "'" )
 
 -- Is need assemble the engine monolithically
-if _OPTIONS["build-monolithic"] then
-    buildMonolithic = true
+if _OPTIONS["build-monolithic-engine"] then
+    buildMonolithicEngine = true
     print( "Assemble the engine monolithically" )
 else
-    buildMonolithic = false
+    buildMonolithicEngine = false
     print( "Assemble the engine modular" )
 end
 
@@ -113,9 +113,14 @@ workspace( game )
     }
 
     defines 		    {
-        "PLATFORM_SUBDIR=\"%{string.lower(cfg.platform)}\"",
-        "BUILD_MONOLITHIC=" .. tostring( buildMonolithic and 1 or 0 )
+        "PLATFORM_SUBDIR=\"%{string.lower(cfg.platform)}\""
     }
+
+    if buildMonolithicEngine then
+        defines {
+            "BUILD_MONOLITHIC_ENGINE"
+        }
+    end
 
     --------------- PLATFORM SETTINGS --------------
 
@@ -164,6 +169,7 @@ workspace( game )
 	-- StaticLib
 	filter "kind:StaticLib"
         targetdir( intermediateDir .. intermediateOutputDir .. "%{prj.name}/lib/" )
+        defines { "BUILD_STATIC_LIB" }
     filter { "kind:StaticLib", "platforms:Win64" }
         symbolspath( intermediateDir .. intermediateOutputDir .. "%{prj.name}/lib/%{cfg.buildtarget.basename}.pdb" )
 

@@ -132,15 +132,39 @@
 
 /**
  * @ingroup core
- * @brief Export in DLL
+ * @brief Used for DLL exporting
  */
-#define DLLEXPORT			            __declspec( dllexport )
+#define DLL_EXPORT				        extern "C" __declspec( dllexport )
 
 /**
  * @ingroup core
- * @brief Import from DLL
+ * @brief Used for DLL importing
  */
-#define DLLIMPORT			            __declspec( dllimport )
+#define DLL_IMPORT				        extern "C" __declspec( dllimport )
+
+/**
+ * @ingroup core
+ * @brief Used for DLL class exporting (Can't use extern "C" when DLL exporting a class)
+ */
+#define DLL_CLASS_EXPORT				__declspec( dllexport )
+
+/**
+ * @ingroup core
+ * @brief Used for DLL class importing (Can't use extern "C" when DLL importing a class)
+ */
+#define DLL_CLASS_IMPORT				__declspec( dllimport )
+
+/**
+ * @ingroup core
+ * @brief Used for DLL global exporting (Can't use extern "C" when DLL exporting a global)
+ */
+#define DLL_GLOBAL_EXPORT				extern __declspec( dllexport )
+
+/**
+ * @ingroup core
+ * @brief Used for DLL global importing (Can't use extern "C" when DLL importing a global)
+ */
+#define DLL_GLOBAL_IMPORT				extern __declspec( dllimport )
 
 /**
  * @ingroup core

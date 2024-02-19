@@ -40,11 +40,6 @@
 	#define PLATFORM_64BIT 0
 #endif // !PLATFORM_64BIT
 
-// If we don't build the engine as monolithic then have to define BUILD_MONOLITHIC as 0
-#ifndef BUILD_MONOLITHIC
-	#define BUILD_MONOLITHIC 0
-#endif // !BUILD_MONOLITHIC
-
 // Enable or disable asserts in a build
 #ifndef ENABLE_ASSERT
 	#define ENABLE_ASSERT !RETAIL

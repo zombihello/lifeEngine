@@ -26,7 +26,7 @@
 ]]
 
 project "core"
-    if not buildMonolithic then
+    if not buildMonolithicEngine then
         kind "SharedLib"
     else
         kind "StaticLib"
@@ -37,7 +37,7 @@ project "core"
 
 	----------- PROJECT SETTINGS --------
 
-    if not buildMonolithic then
+    if not buildMonolithicEngine then
         defines { "CORE_DLL_EXPORT" }
     end
 
