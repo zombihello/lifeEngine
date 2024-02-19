@@ -32,7 +32,9 @@
 #define STRTOOLS_H
 
 #include <string>
-#include "stdlib/stdlib.h"
+
+#include "core/types.h"
+#include "core/platform.h"
 
 // Include platform specific inline functions
 #if PLATFORM_WINDOWS
@@ -69,6 +71,70 @@ FORCEINLINE int32 L_vsnwprintf( wchar* pDest, uint32 maxLen, const wchar* pForma
 FORCEINLINE int32 L_vsnprintf( achar* pDest, uint32 maxLen, const achar* pFormat, va_list params )
 {
 	return vsnprintf( pDest, maxLen, pFormat, params );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Reads data from string and stores them according to parameters (for Unicode strings)
+ * 
+ * @param pString	C string that the function processes as its source to retrieve the data
+ * @param pFormat	C string that contains a format string
+ * @param params	Parameters list
+ * @return On success, the function returns the number of items in the argument list successfully filled. This count can match the expected number of items or be less (even zero) in the case of a matching failure. n the case of an input failure before any data could be successfully interpreted, EOF is returned
+ */
+FORCEINLINE int32 L_vswscanf( const wchar* pString, const wchar* pFormat, va_list params )
+{
+	return vswscanf( pString, pFormat, params );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Reads data from string and stores them according to parameters (for Unicode strings)
+ * 
+ * @param pString	C string that the function processes as its source to retrieve the data
+ * @param pFormat	C string that contains a format string
+ * @param ...		Depending on the pFormat string, the function may expect a sequence of additional arguments, each containing a pointer to allocated storage where the interpretation of the extracted characters is stored with the appropriate type
+ * @return On success, the function returns the number of items in the argument list successfully filled. This count can match the expected number of items or be less (even zero) in the case of a matching failure. n the case of an input failure before any data could be successfully interpreted, EOF is returned
+ */
+FORCEINLINE int32 L_swscanf( const wchar* pString, const wchar* pFormat, ... )
+{
+	va_list		params;
+	va_start( params, pFormat );
+	int32		result = L_vswscanf( pString, pFormat, params );
+	va_end( params );
+	return result;
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Reads data from string and stores them according to parameters (for ANSI strings)
+ * 
+ * @param pString	C string that the function processes as its source to retrieve the data
+ * @param pFormat	C string that contains a format string
+ * @param params	Parameters list
+ * @return On success, the function returns the number of items in the argument list successfully filled. This count can match the expected number of items or be less (even zero) in the case of a matching failure. n the case of an input failure before any data could be successfully interpreted, EOF is returned
+ */
+FORCEINLINE int32 L_vsscanf( const achar* pString, const achar* pFormat, va_list params )
+{
+	return vsscanf( pString, pFormat, params );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Reads data from string and stores them according to parameters (for ANSI strings)
+ * 
+ * @param pString	C string that the function processes as its source to retrieve the data
+ * @param pFormat	C string that contains a format string
+ * @param ...		Depending on the pFormat string, the function may expect a sequence of additional arguments, each containing a pointer to allocated storage where the interpretation of the extracted characters is stored with the appropriate type
+ * @return On success, the function returns the number of items in the argument list successfully filled. This count can match the expected number of items or be less (even zero) in the case of a matching failure. n the case of an input failure before any data could be successfully interpreted, EOF is returned
+ */
+FORCEINLINE int32 L_sscanf( const achar* pString, const achar* pFormat, ... )
+{
+	va_list		params;
+	va_start( params, pFormat );
+	int32		result = L_vsscanf( pString, pFormat, params );
+	va_end( params );
+	return result;
 }
 
 /**

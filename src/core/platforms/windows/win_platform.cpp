@@ -26,6 +26,8 @@
  */
 
 #include "pch_core.h"
+#include <combaseapi.h>
+
 #include "core/core_private.h"
 #include "core/platforms/windows/win_stackwalker.h"
 
@@ -363,4 +365,15 @@ void Sys_SetupConsoleIO()
 		bConsoleInited = true;
 	}
 #endif // !RETAIL
+}
+
+/*
+==================
+Sys_InitGuid
+==================
+*/
+void Sys_InitGuid( CGuid& guid )
+{
+	HRESULT		result = CoCreateGuid( ( GUID* )&guid );
+	Assert( result == S_OK );
 }

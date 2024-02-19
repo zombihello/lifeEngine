@@ -8,7 +8,7 @@
 - [ ] Basic functionality for working with a window
 - [ ] Create input system
 - [ ] Implement support compression with ZLIB
-- [ ] Implement support TSharedPtr and TWeakPtr
+- [X] Implement support TSharedPtr and TWeakPtr
 - [X] Implement support delegates
 - [ ] Create DirectX 11 RHI
 - [ ] Create shader system

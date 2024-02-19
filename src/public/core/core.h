@@ -36,7 +36,9 @@
 #include "core/types.h"
 #include "core/platform.h"
 #include "core/memory.h"
-#include "stdlib/stdlib.h"
+#include "stdlib/template.h"
+#include "stdlib/strtools.h"
+#include "stdlib/guid.h"
 
 /**
  * @ingroup core
@@ -246,5 +248,14 @@ CORE_INTERFACE double Sys_Seconds();
  * @return Engine build number
  */
 CORE_INTERFACE uint32 Sys_BuildNumber();
+
+/**
+ * @ingroup core
+ * @brief Initialize a guid
+ * @note Need implement on each platform
+ * 
+ * @param guid  Guid to initialize
+ */
+CORE_INTERFACE void Sys_InitGuid( CGuid& guid );
 
 #endif // !CORE_H

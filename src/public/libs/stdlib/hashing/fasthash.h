@@ -31,8 +31,8 @@
 #ifndef FASTHASH_H
 #define FASTHASH_H
 
-#include "core/platform.h"
 #include "core/types.h"
+#include "core/platform.h"
 
 /**
  * @ingroup stdlib
@@ -43,7 +43,7 @@
  * @param hash		Start hash
  * @return Return calculated hash
  */
-FORCEINLINE hash_t Sys_FastHash( const void* pData, uint64 size, hash_t hash = 0 )
+FORCEINLINE hash_t FastHash( const void* pData, uint64 size, hash_t hash = 0 )
 {
 	byte*	pLocalData = ( byte* )pData;
 	for ( uint64 index = 0; index < size; ++index )
@@ -63,9 +63,9 @@ FORCEINLINE hash_t Sys_FastHash( const void* pData, uint64 size, hash_t hash = 0
  * @return Return calculated hash
  */
 template<typename TType>
-FORCEINLINE hash_t Sys_FastHash( const TType& value, hash_t hash = 0 )
+FORCEINLINE hash_t FastHash( const TType& value, hash_t hash = 0 )
 {
-	return Sys_FastHash( &value, sizeof( value ), hash );
+	return FastHash( &value, sizeof( value ), hash );
 }
 
 #endif // !FASTHASH_H
