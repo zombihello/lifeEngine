@@ -7,7 +7,7 @@
 - [X] Create classes for work with threads and synchronization mechanisms (mutex, semaphore, etc)
 - [ ] Basic functionality for working with a window
 - [ ] Create input system
-- [ ] Implement support compression with ZLIB
+- [X] Implement support compression with ZLIB
 - [X] Implement support TSharedPtr and TWeakPtr
 - [X] Implement support delegates
 - [ ] Create DirectX 11 RHI

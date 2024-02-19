@@ -70,6 +70,7 @@ project "core"
     ----------- LINK THIRD PARTIES -----------------
 
     Mimalloc.Link()
+    ZLib.Link()
 
 	---------- PLATFORM SPECIFIC SETTINGS ---------
 	
