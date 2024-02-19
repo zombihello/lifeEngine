@@ -50,6 +50,10 @@ project "stdlib"
         ["public/*"]    = { "../../public/libs/stdlib/**.h", "../../public/libs/stdlib/**.inl" }
     }
 	
+    ----------- LINK THIRD PARTIES -----------------
+
+    GLM.Link()
+
 	---------- PLATFORM SPECIFIC SETTINGS ---------
 	
 	-- Exclude platform specific for other platforms

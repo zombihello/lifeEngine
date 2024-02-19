@@ -84,9 +84,11 @@ stdlib                      = "libs/stdlib/"
 --------------- THIRD PARTIES ---------
 thirdParty_Mimalloc         = thirdPartyDir .. "mimalloc-2.1.2"
 thirdParty_ZLib             = thirdPartyDir .. "zlib-1.2.13"
+thirdParty_GLM              = thirdPartyDir .. "glm-1.0.0"
 
 include( thirdParty_Mimalloc )
 include( thirdParty_ZLib )
+include( thirdParty_GLM )
 
 workspace( game )
     location( root )
