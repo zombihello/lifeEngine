@@ -189,9 +189,9 @@ workspace( game )
     ----------------- MODULES ------------------
 
     group "/Engine"
-        group "/Engine/Libraries"
-            include( stdlib )
-            include( appframework )
         include( launcher )
 		include( core )
         include( inputsystem )
+        group "/Engine/Libraries"
+            include( stdlib )
+            include( appframework )

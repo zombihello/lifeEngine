@@ -565,11 +565,11 @@ void CAppSystemGroup::ReportFailure( int32 errorStage, int32 sysIndex /* = -1 */
 			systemName = "(Unknown)";
 		}
 
-		Warning( "AppFramework: System (%s) failed during stage '%s'", systemName.c_str(), pStageDesc );
+		Sys_Error( "AppFramework: System (%s) failed during stage '%s'", systemName.c_str(), pStageDesc );
 	}
 	// Failure happened in application
 	else
 	{
-		Warning( "AppFramework: Failed during stage '%s'", pStageDesc );
+		Sys_Error( "AppFramework: Application failed during stage '%s'", pStageDesc );
 	}
 }
