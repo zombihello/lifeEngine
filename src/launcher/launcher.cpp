@@ -1,32 +1,106 @@
-#include <Windows.h>
-#include "core/core.h"
-#include "core/debug.h"
-#include "stdlib/strtools.h"
-#include "core/threading.h"
+/**
+ * ************************************************************
+ *                  This file is part of:
+ *                      LIFEENGINE
+ *          https://github.com/zombihello/lifeEngine
+ * ************************************************************
+ * Copyright (C) 2024 Yehor Pohuliaka.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nCmdShow )
+#include "pch_launcher.h"
+#include "appframework/iwindowmgr.h"
+#include "inputsystem/iinputsystem.h"
+#include "launcher/launcher.h"
+
+/**
+ * @ingroup launcher
+ * @brief Macro for set full name module
+ */
+#define LAUNCHER_APPSYSTEM( Name )		Name DLL_EXT_STRING
+
+/*
+==================
+CLifeEngineApp::CLifeEngineApp
+==================
+*/
+CLifeEngineApp::CLifeEngineApp( appInstanceHandle_t hInstance /* = nullptr */ )
+	: hInstance( hInstance )
+	, pWindowMgr( nullptr )
+{}
+
+/*
+==================
+CLifeEngineApp::Create
+==================
+*/
+bool CLifeEngineApp::Create()
 {
-	std::string	a = "hello";
-	L_strupper( (achar*)a.c_str() );
+	// Load application systems
+	AppSystemInfo		appSystemInfos[] =
+	{
+		{ LAUNCHER_APPSYSTEM( "inputsystem" ),		INPUTSYSTEM_INTERFACE_VERSION		},
+		{ "", "" }																		// Required to terminate the list
+	};
 
-	std::wstring	z = L"hello";
-	L_wstrupper( (wchar*)z.c_str() );
+	// Add window manager to the app systems list
+	pWindowMgr = CreateWindowMgr();
+	AddSystem( pWindowMgr, WINDOWMGR_INTERFACE_VERSION );
 
-	CThreadMutex qq;
-	qq.Lock();
-	qq.Unlock();
+	// Add all systems from array
+	if ( !AddSystems( appSystemInfos ) )
+	{
+		return false;
+	}
 
-	int32 q = 0;
-	Sys_InterlockedIncrement( &q );
-	Assert( Sys_IsInMainThread() );
+	// Create the window
+	if ( !pWindowMgr->Create( "LifeEngine", 1280, 720 ) )
+	{
+		return false;
+	}
 
-	achar* pStr = ( achar* )malloc( 10 * sizeof( achar ) );
-	achar* pSrt2 = new achar[10];
+	// Get the input system and attach it to the window manager
+	IInputSystem*	pInputSystem = ( IInputSystem* )FindSystem( INPUTSYSTEM_INTERFACE_VERSION );
+	pInputSystem->AttachToWindow( pWindowMgr );
+	
+	// Subscribe on close window event
+	pWindowMgr->OnProcessWindowEvent()->AddFunc( []( void* pUserData, const WindowEvent& windowEvent ) 
+												 {
+													 if ( windowEvent.type == WindowEvent::EVENT_WINDOW_CLOSE )
+													 {
+														 Sys_RequestExit( false );
+													 }
+												 }, nullptr );
+	return true;
+}
 
-	Msg( "Hello Msg %i %s", Sys_BuildNumber(), a.c_str() );
-	Warning( "Hello Warning" );
-	Error( "Hello Error" );
-	Assert( false );
-	Sys_Error( "Hello Sys_Error" );
+/*
+==================
+CLifeEngineApp::Main
+==================
+*/
+int32 CLifeEngineApp::Main()
+{
+	while ( !Sys_IsRequestingExit() )
+	{
+		pWindowMgr->ProcessEvents();
+	}
 	return 0;
 }

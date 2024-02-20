@@ -80,15 +80,19 @@ end
 launcher                    = "launcher/"
 core                        = "core/"
 stdlib                      = "libs/stdlib/"
+appframework                = "libs/appframework/"
+inputsystem                 = "inputsystem/"
 
 --------------- THIRD PARTIES ---------
 thirdParty_Mimalloc         = thirdPartyDir .. "mimalloc-2.1.2"
 thirdParty_ZLib             = thirdPartyDir .. "zlib-1.2.13"
 thirdParty_GLM              = thirdPartyDir .. "glm-1.0.0"
+thirdParty_SDL2             = thirdPartyDir .. "SDL2-2.30.0"
 
 include( thirdParty_Mimalloc )
 include( thirdParty_ZLib )
 include( thirdParty_GLM )
+include( thirdParty_SDL2 )
 
 workspace( game )
     location( root )
@@ -185,7 +189,9 @@ workspace( game )
     ----------------- MODULES ------------------
 
     group "/Engine"
+        group "/Engine/Libraries"
+            include( stdlib )
+            include( appframework )
         include( launcher )
 		include( core )
-		group "/Engine/Libraries"
-			include( stdlib )
+        include( inputsystem )

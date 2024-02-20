@@ -50,7 +50,7 @@ project "core"
         "../public/core/**.inl"
     }
 
-    -- Enable PCH file but disable it for public CPPs
+    -- Enable PCH file
     pchheader       "pch_core.h"
     pchsource       "pch_core.cpp"
     includedirs     { "./" }

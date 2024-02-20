@@ -33,6 +33,7 @@
 
 #include "core/types.h"
 #include "core/platform.h"
+#include "stdlib/strtools.h"
 
 /**
  * @ingroup stdlib
@@ -66,6 +67,58 @@ template<typename TType>
 FORCEINLINE hash_t FastHash( const TType& value, hash_t hash = 0 )
 {
 	return FastHash( &value, sizeof( value ), hash );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Fast hashing function from string that doesn't require a table lookup for each element
+ *
+ * @param pString	The string for which is considered hash
+ * @param hash		Start hash
+ * @return Return calculated hash
+ */
+FORCEINLINE hash_t FastHashFromString( const wchar* pString, hash_t hash )
+{
+	return FastHash( pString, L_wcslen( pString ) * sizeof( wchar ), hash );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Fast hashing function from string that doesn't require a table lookup for each element
+ *
+ * @param string	The string for which is considered hash
+ * @param hash		Start hash
+ * @return Return calculated hash
+ */
+FORCEINLINE hash_t FastHashFromString( const std::wstring& string, hash_t hash )
+{
+	return FastHash( string.data(), ( uint64 )string.size() * sizeof( wchar ), hash );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Fast hashing function from string that doesn't require a table lookup for each element
+ *
+ * @param pString	The string for which is considered hash
+ * @param hash		Start hash
+ * @return Return calculated hash
+ */
+FORCEINLINE hash_t FastHashFromString( const achar* pString, hash_t hash )
+{
+	return FastHash( pString, L_strlen( pString ) * sizeof( achar ), hash );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Fast hashing function from string that doesn't require a table lookup for each element
+ *
+ * @param string	The string for which is considered hash
+ * @param hash		Start hash
+ * @return Return calculated hash
+ */
+FORCEINLINE hash_t FastHashFromString( const std::string& string, hash_t hash )
+{
+	return FastHash( string.data(), ( uint64 )string.size() * sizeof( achar ), hash );
 }
 
 #endif // !FASTHASH_H

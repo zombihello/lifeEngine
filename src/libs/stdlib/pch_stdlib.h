@@ -36,8 +36,5 @@
 #include "stdlib/strtools.h"
 
 // Core
-#include "core/build.h"
-#include "core/platform.h"
-#include "core/types.h"
+#include "core/core.h"
 #include "core/threading.h"
-#include "core/memory.h"

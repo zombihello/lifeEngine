@@ -40,6 +40,11 @@ project "launcher"
         "../public/core/**.cpp"
     }
 
+    -- Enable PCH file
+    pchheader       "pch_launcher.h"
+    pchsource       "pch_launcher.cpp"
+    includedirs     { "./" }
+
     vpaths      {
         ["src/*"]           = { "**.h", "**.inl", "**.cpp" },
         ["public/*"]        = { "../public/**.cpp" }
@@ -47,8 +52,17 @@ project "launcher"
 
     links       {
         "core",
-        "stdlib"
+        "stdlib",
+        "appframework"
     }
+
+    dependson   {
+        "inputsystem"
+    }
+
+    ----------- LINK THIRD PARTIES -----------------
+
+    GLM.Link()
 
 	---------- PLATFORM SPECIFIC SETTINGS ---------
 	

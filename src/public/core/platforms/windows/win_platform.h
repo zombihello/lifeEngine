@@ -208,6 +208,12 @@ typedef HANDLE                          windowHandle_t;
 
 /**
  * @ingroup core
+ * @brief Application instance handle
+ */
+typedef HINSTANCE                       appInstanceHandle_t;
+
+/**
+ * @ingroup core
  * @brief Thread handle
  */
 typedef HANDLE                          threadHandle_t;
