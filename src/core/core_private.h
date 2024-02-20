@@ -35,14 +35,6 @@
 
 /**
  * @ingroup core
- * @brief Dump call stack
- * @note Need implement on each platform
- * @return Return string with dump call stack
- */
-std::string Sys_DumpCallStack();
-
-/**
- * @ingroup core
  * @brief Get seconds per CPU cycle for this PC
  * @note Need implement on each platform
  * 

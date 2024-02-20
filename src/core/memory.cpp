@@ -35,7 +35,7 @@
 AllocateMemAlloc
 ==================
 */
-FORCEINLINE CMemAllocBase* AllocateMemAlloc()
+static CMemAllocBase* AllocateMemAlloc()
 {
 #if PLATFORM_SUPPORTS_MIMALLOC
 	// Mimalloc default allocator because it has great performance
@@ -48,27 +48,31 @@ FORCEINLINE CMemAllocBase* AllocateMemAlloc()
 
 /*
 ==================
-InitMemAlloc
+MemAlloc
 ==================
 */
-static IMemAlloc* InitMemAlloc()
+IMemAlloc* MemAlloc()
 {
-	Assert( !g_pMemAlloc );
-	CMemAllocBase*	pMemAlloc = AllocateMemAlloc();
-
-	// If the allocator is already thread safe, there is no need for the thread safe proxy
-	if ( !pMemAlloc->IsInternallyThreadSafe() )
+	static IMemAlloc*	s_pMemAlloc = nullptr;
+	
+	// If the global memory allocator not created yet then do it now!
+	if ( !s_pMemAlloc )
 	{
-		pMemAlloc = new CMemAllocThreadSafeProxy( pMemAlloc );
+		// Allocate a new memory allocator
+		CMemAllocBase*	pMemAlloc = AllocateMemAlloc();
+
+		// If the allocator is already thread safe, there is no need for the thread safe proxy
+		if ( !pMemAlloc->IsInternallyThreadSafe() )
+		{
+			pMemAlloc = new CMemAllocThreadSafeProxy( pMemAlloc );
+		}
+
+		// Remember our the global memory allocator
+		s_pMemAlloc = pMemAlloc;
 	}
 
-	// Remember our the global memory allocator
-	g_pMemAlloc = pMemAlloc;
-	return g_pMemAlloc;
+	return s_pMemAlloc;
 }
-
-// The global memory allocator
-IMemAlloc*	g_pMemAlloc = InitMemAlloc();
 
 /*
 ==================

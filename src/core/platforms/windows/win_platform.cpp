@@ -29,48 +29,6 @@
 #include <combaseapi.h>
 
 #include "core/core_private.h"
-#include "core/platforms/windows/win_stackwalker.h"
-
-/**
- * @ingroup core
- * @brief Stack walker for Windows
- */
-class CWindowsStackWalker : public StackWalker
-{
-public:
-	/**
-	 * @brief Constructor
-	 */
-	CWindowsStackWalker() : StackWalker()
-	{}
-
-	/**
-	 * @brief Get buffer
-	 * @return Return call stack buffer
-	 */
-	FORCEINLINE const std::string& GetBuffer() const
-	{
-		return buffer;
-	}
-
-protected:
-	virtual void OnOutput( LPCSTR text ) override
-	{
-		buffer += text;
-	}
-
-	virtual void OnSymInit( LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName )  override
-	{}
-
-	virtual void OnLoadModule( LPCSTR img, LPCSTR mod, DWORD64 baseAddr, DWORD size, DWORD result, LPCSTR symType, LPCSTR pdbName, ULONGLONG fileVersion ) override
-	{}
-
-	virtual void OnDbgHelpErr( LPCSTR szFuncName, DWORD gle, DWORD64 addr ) override
-	{}
-
-private:
-	std::string			buffer;		/**< Output buffer for call stack */
-};
 
 /*
 ==================
@@ -319,18 +277,6 @@ double Sys_Seconds()
 
 	// Add big number to make bugs apparent where return value is being passed to FLOAT
 	return cycles.QuadPart * g_SecondsPerCycle + 16777216.0;
-}
-
-/*
-==================
-Sys_DumpCallStack
-==================
-*/
-std::string Sys_DumpCallStack()
-{
-	CWindowsStackWalker		stackWalker;
-	stackWalker.ShowCallstack();
-	return stackWalker.GetBuffer();
 }
 
 /*

@@ -1,7 +1,7 @@
 # Version 0.1.0 :: Now
 - [ ] Implement AppFramework and interface system
 - [ ] Create file system
-- [ ] Create class for work with command line
+- [X] Create class for work with command line
 - [ ] Create console system
 - [ ] Create config system
 - [X] Create classes for work with threads and synchronization mechanisms (mutex, semaphore, etc)

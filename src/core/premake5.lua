@@ -54,9 +54,6 @@ project "core"
     pchheader       "pch_core.h"
     pchsource       "pch_core.cpp"
     includedirs     { "./" }
-    filter { "files:platforms/windows/win_stackwalker.cpp" }
-        flags       { "NoPCH" }
-    filter {}
 
     vpaths      {
         ["src/*"]       = { "**.h", "**.inl", "**.cpp" },

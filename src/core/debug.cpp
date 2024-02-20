@@ -165,16 +165,18 @@ LogOutputFn_t Sys_GetDefaultLogOutput()
 		// Get final message
 		va_list			params;
 		va_start( params, pFormat );
-		std::string		finalMessage = L_sprintf( "Assertion failed: %s [File: %s] [Line: %i]\nMessage: %s\n\nStack:\n%s", pExpr, pFile, line, L_vsprintf( pFormat, params ).c_str(), Sys_DumpCallStack().c_str());
+		std::string		message = L_sprintf( "Assertion failed: %s\nMessage: %s\n\nFile: %s\nLine: %i", pExpr, L_strlen( pFormat ) > 0 ? L_vsprintf( pFormat, params ).c_str() : "<None>", pFile, line);
 		va_end( params );
 
 		// Print message and show message box
-		s_LogOutputFn( finalMessage.c_str() );
+		s_LogOutputFn( "\n------------ ASSERTION FAILED --------------\n" );
+		s_LogOutputFn( message.c_str() );
+		s_LogOutputFn( "\n--------------------------------------------\n\n" );
 		if ( Sys_IsDebuggerPresent() )
 		{
 			Sys_DebugBreak();
 		}
-		Sys_ShowMessageBox( "Engine Error", finalMessage.c_str(), MESSAGE_BOX_ERROR );
+		Sys_ShowMessageBox( "Engine Error", message.c_str(), MESSAGE_BOX_ERROR );
 
 		// Shutdown application
 		Sys_RequestExit( true );

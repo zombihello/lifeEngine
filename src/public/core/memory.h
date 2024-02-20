@@ -101,7 +101,7 @@ FORCEINLINE void* L_memcpy( void* pDest, const void* pSrc, size_t numBytes );
  */
 FORCEINLINE void* L_malloc( size_t numBytes, uint32 alignment = DEFAULT_ALIGNMENT )
 {
-	return g_pMemAlloc->Malloc( numBytes, alignment );
+	return MemAlloc()->Malloc(numBytes, alignment);
 }
 
 /**
@@ -130,7 +130,7 @@ FORCEINLINE void* L_malloc_zeroed( size_t numBytes, uint32 alignment = DEFAULT_A
  */
 FORCEINLINE void* L_realloc( void* pOriginal, size_t numBytes, uint32 alignment = DEFAULT_ALIGNMENT )
 {
-	return g_pMemAlloc->Realloc( pOriginal, numBytes, alignment );
+	return MemAlloc()->Realloc( pOriginal, numBytes, alignment );
 }
 
 /**
@@ -140,7 +140,7 @@ FORCEINLINE void* L_realloc( void* pOriginal, size_t numBytes, uint32 alignment 
  */
 FORCEINLINE void L_free( void* pOriginal )
 {
-	return g_pMemAlloc->Free( pOriginal );
+	return MemAlloc()->Free( pOriginal );
 }
 
 /**
@@ -153,7 +153,7 @@ FORCEINLINE void L_free( void* pOriginal )
 FORCEINLINE size_t L_allocsize( void* pOriginal )
 {
 	size_t	numBytes = 0;
-	return g_pMemAlloc->GetAllocationSize( pOriginal, numBytes ) ? numBytes : 0;
+	return MemAlloc()->GetAllocationSize( pOriginal, numBytes ) ? numBytes : 0;
 }
 
 /**

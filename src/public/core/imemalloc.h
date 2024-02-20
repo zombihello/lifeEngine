@@ -117,8 +117,9 @@ public:
 
 /**
  * @ingroup core
- * @brief The global memory allocator
+ * @brief Get the global memory allocator
+ * @return Return the global memory allocator
  */
-CORE_GLOBAL IMemAlloc*		g_pMemAlloc;
+CORE_INTERFACE IMemAlloc* MemAlloc();
 
 #endif // !IMEMALLOC_H
