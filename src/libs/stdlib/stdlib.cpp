@@ -1,7 +1,4 @@
 /**
- * @file
- * @addtogroup core core
- *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -28,20 +25,43 @@
  * SOFTWARE.
  */
 
-#ifndef MEMOVERRIDE_H
-#define MEMOVERRIDE_H
+#include "pch_stdlib.h"
+#include "stdlib/stdlib.h"
 
-// Override the global memory allocator
-// 
-// For override new and delete just add the file memoverride.cpp 
-// into your project and all this will automatically be used
-#undef malloc
-#define malloc( NumBytes )			Mem_Malloc( NumBytes )
+// Is StdLib already connected
+static bool		s_bConnected = false;
 
-#undef realloc
-#define realloc( Ptr, NumBytes )	Mem_Realloc( Ptr, NumBytes )
+/*
+==================
+ConnectStdLib
+==================
+*/
+bool ConnectStdLib( CreateInterfaceFn_t pFactory )
+{
+	// Do nothing if StdLib already is connected
+	if ( s_bConnected )
+	{
+		return true;
+	}
 
-#undef free
-#define free( Ptr )					Mem_Free( Ptr )
+	// StdLib was successfully connected!
+	s_bConnected = true;
+	return true;
+}
 
-#endif // !MEMOVERRIDE_H
+/*
+==================
+DisconnectStdLib
+==================
+*/
+void DisconnectStdLib()
+{
+	// Do nothing if StdLib already is disconnected
+	if ( !s_bConnected )
+	{
+		return;
+	}
+
+	// Reset all app systems and variables
+	s_bConnected = false;
+}

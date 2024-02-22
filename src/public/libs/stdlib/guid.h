@@ -176,7 +176,7 @@ public:
 	 */
 	FORCEINLINE std::string String() const
 	{
-		return L_sprintf( "%08X%08X%08X%08X", a, b, c, d );
+		return L_Sprintf( "%08X%08X%08X%08X", a, b, c, d );
 	}
 
 	/**
@@ -192,7 +192,7 @@ public:
 		// Size matches, try to parse it
 		if ( string.size() == 32 )
 		{
-			L_sscanf( string.c_str(), "%08X%08X%08X%08X", &a, &b, &c, &d );
+			L_Sscanf( string.c_str(), "%08X%08X%08X%08X", &a, &b, &c, &d );
 			bSuccessful = true;
 		}
 		// Size mis-match, invalidate the Guid

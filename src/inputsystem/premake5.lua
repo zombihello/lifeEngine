@@ -41,7 +41,8 @@ project "inputsystem"
         "**.inl", 
         "**.cpp",
         "../public/inputsystem/**.h",
-        "../public/inputsystem/**.inl"
+        "../public/inputsystem/**.inl",
+        "../public/core/**.cpp"
     }
 
     -- Enable PCH file

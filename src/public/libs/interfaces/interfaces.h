@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup core core
+ * @addtogroup interfaces interfaces
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,20 +28,23 @@
  * SOFTWARE.
  */
 
-#ifndef MEMOVERRIDE_H
-#define MEMOVERRIDE_H
+#ifndef INTERFACES_H
+#define INTERFACES_H
 
-// Override the global memory allocator
-// 
-// For override new and delete just add the file memoverride.cpp 
-// into your project and all this will automatically be used
-#undef malloc
-#define malloc( NumBytes )			Mem_Malloc( NumBytes )
+// Forward declarations
+class IWindowMgr;
+class IInputSystem;
 
-#undef realloc
-#define realloc( Ptr, NumBytes )	Mem_Realloc( Ptr, NumBytes )
+/**
+ * @ingroup interfaces
+ * @brief Window manager
+ */
+extern IWindowMgr* g_pWindowMgr;
 
-#undef free
-#define free( Ptr )					Mem_Free( Ptr )
+/**
+ * @ingroup interfaces
+ * @brief Input system
+ */
+extern IInputSystem* g_pInputSystem;
 
-#endif // !MEMOVERRIDE_H
+#endif // !INTERFACES_H

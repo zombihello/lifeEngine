@@ -33,6 +33,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <direct.h>
 
 // Undo any defines
 #undef PLATFORM_WINDOWS
@@ -164,13 +165,13 @@
  * @ingroup core
  * @brief Line terminator
  */
-#define LINE_TERMINATOR                 "\n"
+#define LINE_TERMINATOR                 '\n'
 
 /**
  * @ingroup core
  * @brief Path separator
  */
-#define PATH_SEPARATOR                  "\\"
+#define PATH_SEPARATOR                  '\\'
  
 /**
  * @ingroup core

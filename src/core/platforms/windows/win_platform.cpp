@@ -37,7 +37,7 @@ Sys_CreateProc
 */
 void* Sys_CreateProc( const achar* pPathToProcess, const achar* pParams, bool bLaunchDetached, bool bLaunchHidden, int32 priorityModifier, uint64* pProcessId /* = nullptr */ )
 {
-	std::string						commandLine = L_sprintf( "%s %s", pPathToProcess, pParams );
+	std::string						commandLine = L_Sprintf( "%s %s", pPathToProcess, pParams );
 	PROCESS_INFORMATION				procInfo;
 	SECURITY_ATTRIBUTES				attributes;
 	attributes.nLength				= sizeof( SECURITY_ATTRIBUTES );

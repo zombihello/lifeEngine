@@ -36,12 +36,13 @@
 #include "core/types.h"
 #include "core/platform.h"
 
-// Include platform specific inline functions
-#if PLATFORM_WINDOWS
-	#include "stdlib/platforms/windows/win_strtools.inl"
-#else
-	#error Unknown platform
-#endif // PLATFORM_WINDOWS
+/**
+ * @ingroup stdlib
+ */
+enum
+{
+	COPY_ALL_CHARACTERS = -1		/**< Used in L_Strncat for copy all characters from source string */
+};
 
 /**
  * @ingroup stdlib
@@ -53,7 +54,7 @@
  * @param params		Parameters list
  * @return Return number of characters written or -1 if truncated
  */
-FORCEINLINE int32 L_vsnwprintf( wchar* pDest, uint32 maxLen, const wchar* pFormat, va_list params )
+FORCEINLINE int32 L_Vsnprintf( wchar* pDest, uint32 maxLen, const wchar* pFormat, va_list params )
 {
 	return vswprintf( pDest, maxLen, pFormat, params );
 }
@@ -68,7 +69,7 @@ FORCEINLINE int32 L_vsnwprintf( wchar* pDest, uint32 maxLen, const wchar* pForma
  * @param params		Parameters list
  * @return Return number of characters written or -1 if truncated
  */
-FORCEINLINE int32 L_vsnprintf( achar* pDest, uint32 maxLen, const achar* pFormat, va_list params )
+FORCEINLINE int32 L_Vsnprintf( achar* pDest, uint32 maxLen, const achar* pFormat, va_list params )
 {
 	return vsnprintf( pDest, maxLen, pFormat, params );
 }
@@ -82,7 +83,7 @@ FORCEINLINE int32 L_vsnprintf( achar* pDest, uint32 maxLen, const achar* pFormat
  * @param params	Parameters list
  * @return On success, the function returns the number of items in the argument list successfully filled. This count can match the expected number of items or be less (even zero) in the case of a matching failure. n the case of an input failure before any data could be successfully interpreted, EOF is returned
  */
-FORCEINLINE int32 L_vswscanf( const wchar* pString, const wchar* pFormat, va_list params )
+FORCEINLINE int32 L_Vsscanf( const wchar* pString, const wchar* pFormat, va_list params )
 {
 	return vswscanf( pString, pFormat, params );
 }
@@ -96,11 +97,11 @@ FORCEINLINE int32 L_vswscanf( const wchar* pString, const wchar* pFormat, va_lis
  * @param ...		Depending on the pFormat string, the function may expect a sequence of additional arguments, each containing a pointer to allocated storage where the interpretation of the extracted characters is stored with the appropriate type
  * @return On success, the function returns the number of items in the argument list successfully filled. This count can match the expected number of items or be less (even zero) in the case of a matching failure. n the case of an input failure before any data could be successfully interpreted, EOF is returned
  */
-FORCEINLINE int32 L_swscanf( const wchar* pString, const wchar* pFormat, ... )
+FORCEINLINE int32 L_Sscanf( const wchar* pString, const wchar* pFormat, ... )
 {
 	va_list		params;
 	va_start( params, pFormat );
-	int32		result = L_vswscanf( pString, pFormat, params );
+	int32		result = L_Vsscanf( pString, pFormat, params );
 	va_end( params );
 	return result;
 }
@@ -114,7 +115,7 @@ FORCEINLINE int32 L_swscanf( const wchar* pString, const wchar* pFormat, ... )
  * @param params	Parameters list
  * @return On success, the function returns the number of items in the argument list successfully filled. This count can match the expected number of items or be less (even zero) in the case of a matching failure. n the case of an input failure before any data could be successfully interpreted, EOF is returned
  */
-FORCEINLINE int32 L_vsscanf( const achar* pString, const achar* pFormat, va_list params )
+FORCEINLINE int32 L_Vsscanf( const achar* pString, const achar* pFormat, va_list params )
 {
 	return vsscanf( pString, pFormat, params );
 }
@@ -128,11 +129,11 @@ FORCEINLINE int32 L_vsscanf( const achar* pString, const achar* pFormat, va_list
  * @param ...		Depending on the pFormat string, the function may expect a sequence of additional arguments, each containing a pointer to allocated storage where the interpretation of the extracted characters is stored with the appropriate type
  * @return On success, the function returns the number of items in the argument list successfully filled. This count can match the expected number of items or be less (even zero) in the case of a matching failure. n the case of an input failure before any data could be successfully interpreted, EOF is returned
  */
-FORCEINLINE int32 L_sscanf( const achar* pString, const achar* pFormat, ... )
+FORCEINLINE int32 L_Sscanf( const achar* pString, const achar* pFormat, ... )
 {
 	va_list		params;
 	va_start( params, pFormat );
-	int32		result = L_vsscanf( pString, pFormat, params );
+	int32		result = L_Vsscanf( pString, pFormat, params );
 	va_end( params );
 	return result;
 }
@@ -144,7 +145,7 @@ FORCEINLINE int32 L_sscanf( const achar* pString, const achar* pFormat, ... )
  * @param pString	String
  * @return Return string length
  */
-FORCEINLINE uint32 L_strlen( const achar* pString )
+FORCEINLINE uint32 L_Strlen( const achar* pString )
 { 
 	return ( uint32 )strlen( pString );
 }
@@ -156,7 +157,7 @@ FORCEINLINE uint32 L_strlen( const achar* pString )
  * @param pString	String
  * @return Return string length
  */
-FORCEINLINE uint32 L_wcslen( const wchar* pString )
+FORCEINLINE uint32 L_Strlen( const wchar* pString )
 { 
 	return ( uint32 )wcslen( pString );
 }
@@ -168,7 +169,7 @@ FORCEINLINE uint32 L_wcslen( const wchar* pString )
  * @param pDest     Pointer to the destination array where the content is to be copied
  * @param pSrc      C string to be copied
  */
-FORCEINLINE void L_strcpy( achar* pDest, const achar* pSrc )
+FORCEINLINE void L_Strcpy( achar* pDest, const achar* pSrc )
 {
 	strcpy( pDest, pSrc );
 }
@@ -180,7 +181,7 @@ FORCEINLINE void L_strcpy( achar* pDest, const achar* pSrc )
  * @param pDest     Pointer to the destination array where the content is to be copied
  * @param pSrc      C string to be copied
  */
-FORCEINLINE void L_wcscpy( wchar* pDest, const wchar* pSrc )
+FORCEINLINE void L_Strcpy( wchar* pDest, const wchar* pSrc )
 {
 	wcscpy( pDest, pSrc );
 }
@@ -193,7 +194,7 @@ FORCEINLINE void L_wcscpy( wchar* pDest, const wchar* pSrc )
  * @param pSrc      C string to be copied
  * @param maxLen	Maximum number of characters to be copied from pSrc
  */
-FORCEINLINE void L_strncpy( achar* pDest, const achar* pSrc, uint32 maxLen )
+FORCEINLINE void L_Strncpy( achar* pDest, const achar* pSrc, uint32 maxLen )
 {
 	strncpy( pDest, pSrc, maxLen );
 }
@@ -206,7 +207,7 @@ FORCEINLINE void L_strncpy( achar* pDest, const achar* pSrc, uint32 maxLen )
  * @param pSrc      C string to be copied
  * @param maxLen	Maximum number of characters to be copied from pSrc
  */
-FORCEINLINE void L_wcsncpy( wchar* pDest, const wchar* pSrc, uint32 maxLen )
+FORCEINLINE void L_Strncpy( wchar* pDest, const wchar* pSrc, uint32 maxLen )
 {
 	wcsncpy( pDest, pSrc, maxLen );
 }
@@ -219,7 +220,7 @@ FORCEINLINE void L_wcsncpy( wchar* pDest, const wchar* pSrc, uint32 maxLen )
  * @param pFind       Find substring in pString
  * @return Return a pointer to the first occurrence of the search string in a string. If not found returns NULL
  */
-FORCEINLINE achar* L_strstr( const achar* pString, const achar* pFind ) 
+FORCEINLINE achar* L_Strstr( const achar* pString, const achar* pFind ) 
 { 
 	return ( achar* )strstr( pString, pFind ); 
 }
@@ -232,7 +233,7 @@ FORCEINLINE achar* L_strstr( const achar* pString, const achar* pFind )
  * @param pFind       Find substring in pString
  * @return Return a pointer to the first occurrence of the search string in a string. If not found returns NULL
  */
-FORCEINLINE wchar* L_wcsstr( const wchar* pString, const wchar* pFind )
+FORCEINLINE wchar* L_Strstr( const wchar* pString, const wchar* pFind )
 { 
 	return ( wchar* )wcsstr( pString, pFind ); 
 }
@@ -245,7 +246,7 @@ FORCEINLINE wchar* L_wcsstr( const wchar* pString, const wchar* pFind )
  * @param pString2    String 2 to compare
  * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
  */
-FORCEINLINE uint32 L_strcmp( const achar* pString1, const achar* pString2 )
+FORCEINLINE uint32 L_Strcmp( const achar* pString1, const achar* pString2 )
 {
 	return strcmp( pString1, pString2 );
 }
@@ -258,7 +259,7 @@ FORCEINLINE uint32 L_strcmp( const achar* pString1, const achar* pString2 )
  * @param pString2    String 2 to compare
  * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
  */
-FORCEINLINE uint32 L_wcscmp( const wchar* pString1, const wchar* pString2 )
+FORCEINLINE uint32 L_Strcmp( const wchar* pString1, const wchar* pString2 )
 {
 	return wcscmp( pString1, pString2 );
 }
@@ -272,7 +273,7 @@ FORCEINLINE uint32 L_wcscmp( const wchar* pString1, const wchar* pString2 )
  * @param count       Number of characters to compare
  * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
  */
-FORCEINLINE uint32 L_strncmp( const achar* pString1, const achar* pString2, uint32 count )
+FORCEINLINE uint32 L_Strncmp( const achar* pString1, const achar* pString2, uint32 count )
 {
 	return strncmp( pString1, pString2, count );
 }
@@ -286,10 +287,86 @@ FORCEINLINE uint32 L_strncmp( const achar* pString1, const achar* pString2, uint
  * @param count       Number of characters to compare
  * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
  */
-FORCEINLINE uint32 L_wcsncmp( const wchar* pString1, const wchar* pString2, uint32 count )
+FORCEINLINE uint32 L_Strncmp( const wchar* pString1, const wchar* pString2, uint32 count )
 {
 	return wcsncmp( pString1, pString2, count );
 }
+
+/**
+ * @ingroup stdlib
+ * @brief Compare strings without case sensitivity (for ANSI strings)
+ * @note Need implement on each platform
+ * 
+ * @param pString1     String 1 to compare
+ * @param pString2     String 2 to compare
+ * @return Return a value indicating the relationship between the two strings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
+ */
+FORCEINLINE uint32 L_Stricmp( const achar* pString1, const achar* pString2 );
+
+/**
+ * @ingroup stdlib
+ * @brief Compare strings without case sensitivity (for Unicode strings)
+ * @note Need implement on each platform
+ * 
+ * @param pString1     String 1 to compare
+ * @param pString2     String 2 to compare
+ * @return Return a value indicating the relationship between the two strings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
+ */
+FORCEINLINE uint32 L_Stricmp( const wchar* pString1, const wchar* pString2 );
+
+/**
+ * @ingroup stdlib
+ * @brief Compares the specified number of characters of two strings without regard to case (for ANSI strings)
+ * @note Need implement on each platform
+ * 
+ * @param pString1    String 1 to compare
+ * @param pString2    String 2 to compare
+ * @param count       Number of characters to compare
+ * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
+ */
+FORCEINLINE uint32 L_Strnicmp( const achar* pString1, const achar* pString2, uint32 count );
+
+/**
+ * @ingroup stdlib
+ * @brief Compares the specified number of characters of two strings without regard to case (for Unicode strings)
+ * @note Need implement on each platform
+ * 
+ * @param pString1    String 1 to compare
+ * @param pString2    String 2 to compare
+ * @param count       Number of characters to compare
+ * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
+ */
+FORCEINLINE uint32 L_Strnicmp( const wchar* pString1, const wchar* pString2, uint32 count );
+
+/**
+ * @ingroup stdlib
+ * @brief Appends the first maxCharsToCopy characters of pSrc to pDest, plus a terminating null-character (ANSI)
+ * 
+ * Appends the first maxCharsToCopy characters of pSrc to pDest, plus a terminating null-character.
+ * If count of characters to copy more then destBufferSize then we copy as we can
+ * 
+ * @param pDest				Destination buffer
+ * @param pSrc				String to append
+ * @param destBufferSize	Size of the buffer pointed to by pDest
+ * @param maxCharsToCopy	Max characters to copy from pSrc. If is COPY_ALL_CHARACTERS will copy whole pSrc
+ * @return Return pointer to pDest
+ */
+achar* L_Strncat( achar* pDest, const achar* pSrc, uint32 destBufferSize, int32 maxCharsToCopy = COPY_ALL_CHARACTERS );
+
+/**
+ * @ingroup stdlib
+ * @brief Appends the first maxCharsToCopy characters of pSrc to pDest, plus a terminating null-character (Unicode)
+ * 
+ * Appends the first maxCharsToCopy characters of pSrc to pDest, plus a terminating null-character.
+ * If count of characters to copy more then destBufferSize then we copy as we can
+ *
+ * @param pDest				Destination buffer
+ * @param pSrc				String to append
+ * @param destBufferSize	Size of the buffer pointed to by pDest
+ * @param maxCharsToCopy	Max characters to copy from pSrc. If is COPY_ALL_CHARACTERS will copy whole pSrc
+ * @return Return pointer to pDest
+ */
+wchar* L_Strncat( wchar* pDest, const wchar* pSrc, uint32 destBufferSize, int32 maxCharsToCopy = COPY_ALL_CHARACTERS );
 
 /**
  * @ingroup stdlib
@@ -298,7 +375,7 @@ FORCEINLINE uint32 L_wcsncmp( const wchar* pString1, const wchar* pString2, uint
  * @param InString      String to convert
  * @return Return converted string to integer
  */
-FORCEINLINE int32 L_atoi( const achar* pString )
+FORCEINLINE int32 L_Atoi( const achar* pString )
 {
 	return atoi( pString );
 }
@@ -310,7 +387,7 @@ FORCEINLINE int32 L_atoi( const achar* pString )
  * @param InString      String to convert
  * @return Return converted string to integer
  */
-FORCEINLINE int32 L_wtoi( const wchar* pString )
+FORCEINLINE int32 L_Atoi( const wchar* pString )
 {
 	return ( int32 )wcstoul( pString, 0, 10 );
 }
@@ -325,11 +402,11 @@ FORCEINLINE int32 L_wtoi( const wchar* pString )
  * @param ...			Parameters
  * @return Return number of characters written or -1 if truncated
  */
-FORCEINLINE int32 L_snwprintf( wchar* pDest, uint32 maxLen, const wchar* pFormat, ... )
+FORCEINLINE int32 L_Snprintf( wchar* pDest, uint32 maxLen, const wchar* pFormat, ... )
 {
 	va_list		params;
 	va_start( params, pFormat );
-	int32		result = L_vsnwprintf( pDest, maxLen, pFormat, params );
+	int32		result = L_Vsnprintf( pDest, maxLen, pFormat, params );
 	va_end( params );
 	return result;
 }
@@ -345,11 +422,11 @@ FORCEINLINE int32 L_snwprintf( wchar* pDest, uint32 maxLen, const wchar* pFormat
  * @param ...			Parameters
  * @return Return number of characters written or -1 if truncated
  */
-FORCEINLINE int32 L_snprintf( achar* pDest, uint32 maxLen, const achar* pFormat, ... )
+FORCEINLINE int32 L_Snprintf( achar* pDest, uint32 maxLen, const achar* pFormat, ... )
 {
 	va_list		params;
 	va_start( params, pFormat );
-	int32		result = L_vsnprintf( pDest, maxLen, pFormat, params );
+	int32		result = L_Vsnprintf( pDest, maxLen, pFormat, params );
 	va_end( params );
 	return result;
 }
@@ -362,7 +439,7 @@ FORCEINLINE int32 L_snprintf( achar* pDest, uint32 maxLen, const achar* pFormat,
  * @param params	Parameters list
  * @return Return formatted string
  */
-std::string L_vsprintf( const achar* pFormat, va_list params );
+std::string L_Vsprintf( const achar* pFormat, va_list params );
 
 /**
  * @ingroup stdlib
@@ -372,11 +449,11 @@ std::string L_vsprintf( const achar* pFormat, va_list params );
  * @param ...       String parameters
  * @return Return formatted string
  */
-FORCEINLINE std::string L_sprintf( const achar* pFormat, ... )
+FORCEINLINE std::string L_Sprintf( const achar* pFormat, ... )
 {
 	va_list			params;
 	va_start( params, pFormat );
-	std::string		result = L_vsprintf( pFormat, params );
+	std::string		result = L_Vsprintf( pFormat, params );
 	va_end( params );
 	return result;
 }
@@ -389,7 +466,7 @@ FORCEINLINE std::string L_sprintf( const achar* pFormat, ... )
  * @param params	Parameters list
  * @return Return formatted string
  */
-std::wstring L_vswprintf( const wchar* pFormat, va_list params );
+std::wstring L_Vsprintf( const wchar* pFormat, va_list params );
 
 /**
  * @ingroup stdlib
@@ -399,13 +476,37 @@ std::wstring L_vswprintf( const wchar* pFormat, va_list params );
  * @param ...       String parameters
  * @return Return formatted string
  */
-FORCEINLINE std::wstring L_swprintf( const wchar* pFormat, ... )
+FORCEINLINE std::wstring L_Sprintf( const wchar* pFormat, ... )
 {
 	va_list			params;
 	va_start( params, pFormat );
-	std::wstring	result = L_vswprintf( pFormat, params );
+	std::wstring	result = L_Vsprintf( pFormat, params );
 	va_end( params );
 	return result;
+}
+
+/**
+ * @ingroup stdlib
+ * brief Convert the character to uppercase
+ *
+ * @param ch	Character to be converted
+ * @return Return uppercase version of ch or unmodified ch if no uppercase version
+ */
+FORCEINLINE int32 L_ToUpper( int32 ch )
+{
+	return toupper( ch );
+}
+
+/**
+ * @ingroup stdlib
+ * brief Convert the character to lowercase
+ * 
+ * @param ch	Character to be converted
+ * @return Return lowercase version of ch or unmodified ch if no lowercase version
+ */
+FORCEINLINE int32 L_ToLower( int32 ch )
+{
+	return tolower( ch );
 }
 
 /**
@@ -415,12 +516,12 @@ FORCEINLINE std::wstring L_swprintf( const wchar* pFormat, ... )
  * @param pString	String to convert letters
  * @return Return pointer to pString
  */
-FORCEINLINE achar* L_strupper( achar* pString )
+FORCEINLINE achar* L_Strupr( achar* pString )
 {
 	achar*	pStr = pString;
 	while ( *pStr )
 	{
-		*pStr = toupper( *pStr );
+		*pStr = L_ToUpper( *pStr );
 		++pStr;
 	}
 
@@ -434,12 +535,12 @@ FORCEINLINE achar* L_strupper( achar* pString )
  * @param pString	String to convert letters
  * @return Return pointer to pString
  */
-FORCEINLINE achar* L_strlower( achar* pString )
+FORCEINLINE achar* L_Strlwr( achar* pString )
 {
 	achar*	pStr = pString;
 	while ( *pStr )
 	{
-		*pStr = tolower( *pStr );
+		*pStr = L_ToLower( *pStr );
 		++pStr;
 	}
 
@@ -453,12 +554,12 @@ FORCEINLINE achar* L_strlower( achar* pString )
  * @param pString	String to convert letters
  * @return Return pointer to pString
  */
-FORCEINLINE wchar* L_wstrupper( wchar* pString )
+FORCEINLINE wchar* L_Strupr( wchar* pString )
 {
 	wchar*	pStr = pString;
 	while ( *pStr )
 	{
-		*pStr = toupper( *pStr );
+		*pStr = L_ToUpper( *pStr );
 		++pStr;
 	}
 
@@ -472,12 +573,12 @@ FORCEINLINE wchar* L_wstrupper( wchar* pString )
  * @param pString	String to convert letters
  * @return Return pointer to pString
  */
-FORCEINLINE wchar* L_wstrlower( wchar* pString )
+FORCEINLINE wchar* L_Strlwr( wchar* pString )
 {
 	wchar*	pStr = pString;
 	while ( *pStr )
 	{
-		*pStr = tolower( *pStr );
+		*pStr = L_ToLower( *pStr );
 		++pStr;
 	}
 
@@ -500,7 +601,7 @@ FORCEINLINE wchar* L_wstrlower( wchar* pString )
  * @param c	Character to classify
  * @return Return TRUE if the character is a whitespace character, FALSE otherwise
  */
-FORCEINLINE bool L_isspace( achar c )
+FORCEINLINE bool L_IsSpace( achar c )
 {
 	return isspace( c );
 }
@@ -521,10 +622,17 @@ FORCEINLINE bool L_isspace( achar c )
  * @param c	Character to classify
  * @return Return TRUE if the character is a whitespace character, FALSE otherwise
  */
-FORCEINLINE bool L_iswspace( wchar c )
+FORCEINLINE bool L_IsSpace( wchar c )
 {
 	return iswspace( c );
 }
+
+// Include implementation of platform specific inline functions
+#if PLATFORM_WINDOWS
+	#include "stdlib/platforms/windows/win_strtools.inl"
+#else
+	#error Unknown platform
+#endif // PLATFORM_WINDOWS
 
 /**
  * @ingroup stdlib
@@ -547,7 +655,7 @@ public:
 	FORCEINLINE wchar* Convert( const achar* pSrcData, wchar* pDstData, uint32 size ) const
 	{
 		// Determine whether we need to allocate memory or not
-		uint32		length = ( uint32 )L_strlen( pSrcData ) + 1;
+		uint32		length = ( uint32 )L_Strlen( pSrcData ) + 1;
 		if ( length > size )
 		{
 			// Need to allocate memory because the string is too big
@@ -572,7 +680,7 @@ public:
 	 */
 	FORCEINLINE uint32 GetLength( wchar* pData ) const
 	{
-		return ( uint32 )L_wcslen( pData );
+		return ( uint32 )L_Strlen( pData );
 	}
 };
 
@@ -597,7 +705,7 @@ public:
 	FORCEINLINE achar* Convert( const wchar* pSrcData, achar* pDstData, uint32 size )
 	{
 		// Determine whether we need to allocate memory or not
-		uint32	lengthW = ( uint32 )L_wcslen( pSrcData );
+		uint32	lengthW = ( uint32 )L_Strlen( pSrcData );
 
 		// Needs to be multiply by sizeof( wchar ) the wide in case each converted char is multibyte
 		uint32	lengthA = lengthW * sizeof( wchar );
@@ -625,7 +733,7 @@ public:
 	 */
 	FORCEINLINE uint32 GetLength( achar* pData )
 	{
-		return ( uint32 )L_strlen( pData );
+		return ( uint32 )L_Strlen( pData );
 	}
 };
 

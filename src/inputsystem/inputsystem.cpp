@@ -394,7 +394,7 @@ CInputSystem::CInputSystem()
 	, mouseLocation( Math::vectorZero )
 	, mouseOffset( Math::vectorZero )
 {
-	L_memset( &buttonEvents, BUTTON_EVENT_NONE, sizeof( EButtonEvent ) * BUTTON_CODE_COUNT );
+	Mem_Memset( &buttonEvents, BUTTON_EVENT_NONE, sizeof( EButtonEvent ) * BUTTON_CODE_COUNT );
 }
 
 /*
@@ -756,7 +756,7 @@ EButtonCode CInputSystem::GetButtonCodeByName( const achar* pButtonName ) const
 	Assert( pButtonName );
 	for ( uint32 index = 0; index < BUTTON_CODE_COUNT; ++index )
 	{
-		if ( !L_strcmp( s_pButtonNames[index], pButtonName ) )
+		if ( !L_Strcmp( s_pButtonNames[index], pButtonName ) )
 		{
 			return ( EButtonCode )index;
 		}

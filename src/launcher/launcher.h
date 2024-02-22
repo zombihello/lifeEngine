@@ -56,9 +56,24 @@ public:
 	virtual bool Create() override;
 
 	/**
+	 * @brief Allow the application to do some work after AppSystems are connected
+	 *
+	 * Allow the application to do some work after AppSystems are connected but
+	 * they aren't all Initialized
+	 *
+	 * @return Return FALSE if there's any problems and the app will abort
+	 */
+	virtual bool PreInit() override;
+
+	/**
 	 * @brief Main loop implemented by the application
 	 */
 	virtual int32 Main() override;
+
+	/**
+	 * @brief Allow the application to do some work after all AppSystems are shut down
+	 */
+	virtual void PostShutdown() override;
 
 private:
 	appInstanceHandle_t		hInstance;		/**< Application instance handle */

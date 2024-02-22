@@ -150,7 +150,7 @@ static bool ParseToken( const achar*& pStr, std::string& result, bool bUseEscape
 	result.clear();
 
 	// Skip preceeding spaces and tabs.
-	while ( L_isspace( *pStr ) || *pStr == '=' )
+	while ( L_IsSpace( *pStr ) || *pStr == '=' )
 	{
 		pStr++;
 	}
@@ -190,7 +190,7 @@ static bool ParseToken( const achar*& pStr, std::string& result, bool bUseEscape
 		while ( true )
 		{
 			achar		character = *pStr;
-			if ( character == 0 || ( ( L_isspace( character ) || character == '=' ) && !bInQuote ) )
+			if ( character == 0 || ( ( L_IsSpace( character ) || character == '=' ) && !bInQuote ) )
 			{
 				break;
 			}
@@ -274,7 +274,7 @@ void CCommandLine::Parse( const achar* pCommandLine )
 
 	while ( ParseToken( pCommandLine, nextToken, false ) )
 	{
-		L_strlower( nextToken.data() );
+		L_Strlwr( nextToken.data() );
 		if ( nextToken[0] == '-' || nextToken[0] == '/' )
 		{
 			std::string		token( &nextToken[1], nextToken.size() - 1 );
@@ -288,7 +288,7 @@ void CCommandLine::Parse( const achar* pCommandLine )
 		{
 			uint32		size = ( uint32 )nextToken.size();
 			achar*		pData = ( achar* )malloc( ( size + 1 ) * sizeof( achar ) );
-			L_strcpy( pData, nextToken.data() );
+			L_Strcpy( pData, nextToken.data() );
 			pData[size]	= '\0';
 			itCurrentParam->second.push_back( pData );
 		}
@@ -303,7 +303,7 @@ CCommandLine::HasParam
 bool CCommandLine::HasParam( const achar* pParam ) const
 {
 	std::string		param = pParam;
-	L_strlower( param.data() );
+	L_Strlwr( param.data() );
 	return paramsDict.find( param ) != paramsDict.end();
 }
 
@@ -315,7 +315,7 @@ CCommandLine::HasParam
 bool CCommandLine::HasParam( const achar* pParam, const achar* pValue ) const
 {
 	std::string		param = pParam;
-	L_strlower( param.data() );
+	L_Strlwr( param.data() );
 	paramDict_t::const_iterator		itParam = paramsDict.find( param );
 	if ( itParam == paramsDict.end() )
 	{
@@ -323,12 +323,12 @@ bool CCommandLine::HasParam( const achar* pParam, const achar* pValue ) const
 	}
 
 	std::string			value = pValue;
-	L_strlower( value.data() );
+	L_Strlwr( value.data() );
 	bool				bResult = false;
 	const values_t&		valueArray = itParam->second;
 	for ( uint32 index = 0, count = ( uint32 )valueArray.size(); index < count; ++index )
 	{
-		if ( !L_strcmp( valueArray[index], value.c_str() ) )
+		if ( !L_Strcmp( valueArray[index], value.c_str() ) )
 		{
 			bResult = true;
 			break;
@@ -346,7 +346,7 @@ CCommandLine::GetFirstValue
 const achar* CCommandLine::GetFirstValue( const achar* pParam ) const
 {
 	std::string		param = pParam;
-	L_strlower( param.data() );
+	L_Strlwr( param.data() );
 	paramDict_t::const_iterator		itParam = paramsDict.find( param );
 	if ( itParam == paramsDict.end() || itParam->second.empty() )
 	{
@@ -364,7 +364,7 @@ CCommandLine::GetValues
 const achar** CCommandLine::GetValues( const achar* pParam, uint32& size ) const
 {
 	std::string		param = pParam;
-	L_strlower( param.data() );
+	L_Strlwr( param.data() );
 	paramDict_t::const_iterator		itParam = paramsDict.find( param );
 	if ( itParam == paramsDict.end() )
 	{

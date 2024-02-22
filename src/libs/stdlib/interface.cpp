@@ -57,7 +57,7 @@ void* CreateInterface( const achar* pName )
 {
 	for ( InterfaceReg* pInterfaceReg = s_pInterfaceRegs; pInterfaceReg; pInterfaceReg = pInterfaceReg->pNext )
 	{
-		if ( !L_strcmp( pInterfaceReg->pName, pName ) )
+		if ( !L_Strcmp( pInterfaceReg->pName, pName ) )
 		{
 			return pInterfaceReg->pCreateFn();
 		}

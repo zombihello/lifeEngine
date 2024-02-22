@@ -28,65 +28,47 @@
  * SOFTWARE.
  */
 
-#ifndef WIN_STRTOOLS_INL
-#define WIN_STRTOOLS_INL
+#ifndef WIN_STRTOOLS_H
+#define WIN_STRTOOLS_H
 
-/**
- * @ingroup stdlib
- * @brief Compare strings without case sensitivity (for ANSI strings)
- * @note Need implement on each platform
- * 
- * @param pString1     String 1 to compare
- * @param pString2     String 2 to compare
- * @return Return a value indicating the relationship between the two strings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
- */
-FORCEINLINE uint32 L_stricmp( const achar* pString1, const achar* pString2 ) 
+/*
+==================
+L_Stricmp
+==================
+*/
+FORCEINLINE uint32 L_Stricmp( const achar* pString1, const achar* pString2 ) 
 { 
 	return stricmp( pString1, pString2 ); 
 }
 
-/**
- * @ingroup stdlib
- * @brief Compare strings without case sensitivity (for Unicode strings)
- * @note Need implement on each platform
- * 
- * @param pString1     String 1 to compare
- * @param pString2     String 2 to compare
- * @return Return a value indicating the relationship between the two strings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
- */
-FORCEINLINE uint32 L_wcsicmp( const wchar* pString1, const wchar* pString2 )
+/*
+==================
+L_Stricmp
+==================
+*/
+FORCEINLINE uint32 L_Stricmp( const wchar* pString1, const wchar* pString2 )
 { 
 	return wcsicmp( pString1, pString2 ); 
 }
 
-/**
- * @ingroup stdlib
- * @brief Compares the specified number of characters of two strings without regard to case (for ANSI strings)
- * @note Need implement on each platform
- * 
- * @param pString1    String 1 to compare
- * @param pString2    String 2 to compare
- * @param count       Number of characters to compare
- * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
- */
-FORCEINLINE uint32 L_strnicmp( const achar* pString1, const achar* pString2, uint32 count ) 
+/*
+==================
+L_Strnicmp
+==================
+*/
+FORCEINLINE uint32 L_Strnicmp( const achar* pString1, const achar* pString2, uint32 count ) 
 { 
 	return strnicmp( pString1, pString2, count ); 
 }
 
-/**
- * @ingroup stdlib
- * @brief Compares the specified number of characters of two strings without regard to case (for Unicode strings)
- *@note Need implement on each platform
- * 
- * @param pString1    String 1 to compare
- * @param pString2    String 2 to compare
- * @param count       Number of characters to compare
- * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - pString1 less than pString2; 0 - pString1 equivalent to pString2; Greater than 0 - pString1 greater than pString2
- */
-FORCEINLINE uint32 L_wcsnicmp( const wchar* pString1, const wchar* pString2, uint32 count )
+/*
+==================
+L_Strnicmp
+==================
+*/
+FORCEINLINE uint32 L_Strnicmp( const wchar* pString1, const wchar* pString2, uint32 count )
 {
 	return wcsnicmp( pString1, pString2, count );
 }
 
-#endif // !WIN_STRTOOLS_INL
+#endif // !WIN_STRTOOLS_H

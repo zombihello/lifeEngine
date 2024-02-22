@@ -71,14 +71,14 @@ private:
 		// Compute count days and years
 		for ( months = 0; months < 11; ++months )
 		{
-			if ( L_strncmp( &pDate[0], month[months], 3 ) == 0 )
+			if ( L_Strncmp( &pDate[0], month[months], 3 ) == 0 )
 			{
 				break;
 			}
 			days += month_days[months];
 		}
-		days		+= L_atoi( &pDate[4] ) - 1;
-		years		= L_atoi( &pDate[7] ) - 1900;
+		days		+= L_Atoi( &pDate[4] ) - 1;
+		years		= L_Atoi( &pDate[7] ) - 1900;
 		
 		// Compute build number
 		buildNumber = days + ( uint32 )( ( years - 1 ) * 365.25f );
@@ -103,7 +103,7 @@ void Sys_Error( const achar* pFormat, ... )
 	// Get formated string
 	va_list			params;
 	va_start( params, pFormat );
-	std::string		message = L_vsprintf( pFormat, params );
+	std::string		message = L_Vsprintf( pFormat, params );
 	va_end( params );
 
 	// Print message and show message box

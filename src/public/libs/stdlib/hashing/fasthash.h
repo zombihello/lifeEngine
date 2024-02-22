@@ -79,7 +79,7 @@ FORCEINLINE hash_t FastHash( const TType& value, hash_t hash = 0 )
  */
 FORCEINLINE hash_t FastHashFromString( const wchar* pString, hash_t hash )
 {
-	return FastHash( pString, L_wcslen( pString ) * sizeof( wchar ), hash );
+	return FastHash( pString, L_Strlen( pString ) * sizeof( wchar ), hash );
 }
 
 /**
@@ -105,7 +105,7 @@ FORCEINLINE hash_t FastHashFromString( const std::wstring& string, hash_t hash )
  */
 FORCEINLINE hash_t FastHashFromString( const achar* pString, hash_t hash )
 {
-	return FastHash( pString, L_strlen( pString ) * sizeof( achar ), hash );
+	return FastHash( pString, L_Strlen( pString ) * sizeof( achar ), hash );
 }
 
 /**

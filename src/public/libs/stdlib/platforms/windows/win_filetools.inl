@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup core core
+ * @addtogroup stdlib stdlib
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,20 +28,44 @@
  * SOFTWARE.
  */
 
-#ifndef MEMOVERRIDE_H
-#define MEMOVERRIDE_H
+#ifndef WIN_FILETOOLS_H
+#define WIN_FILETOOLS_H
 
-// Override the global memory allocator
-// 
-// For override new and delete just add the file memoverride.cpp 
-// into your project and all this will automatically be used
-#undef malloc
-#define malloc( NumBytes )			Mem_Malloc( NumBytes )
+/*
+==================
+L_SetCurrentDirectory
+==================
+*/
+FORCEINLINE bool L_SetCurrentDirectory( const achar* pDirName )
+{ 
+	return _chdir( pDirName ) == 0;
+}
 
-#undef realloc
-#define realloc( Ptr, NumBytes )	Mem_Realloc( Ptr, NumBytes )
+/*
+==================
+L_GetCurrentDirectory
+==================
+*/
+FORCEINLINE bool L_GetCurrentDirectory( achar* pDestStr, uint32 maxLen )
+{
+	Assert( maxLen >= 1 );
+	Assert( pDestStr );
+	if ( !pDestStr || maxLen < 1 )
+	{
+		return false;
+	}
 
-#undef free
-#define free( Ptr )					Mem_Free( Ptr )
+	return _getcwd( pDestStr, maxLen ) == pDestStr;
+}
 
-#endif // !MEMOVERRIDE_H
+/*
+==================
+L_IsAbsolutePath
+==================
+*/
+FORCEINLINE bool L_IsAbsolutePath( const achar* pPath )
+{
+	return ( pPath[0] && pPath[1] == ':' ) || pPath[0] == '/' || pPath[0] == '\\';
+}
+
+#endif // !WIN_FILETOOLS_H

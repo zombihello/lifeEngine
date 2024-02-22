@@ -46,7 +46,7 @@
  * @param numBytes	Number of bytes to copy
  * @return Returns pointer to the memory location to copy to (pDest)
  */
-FORCEINLINE void* L_memmove( void* pDest, const void* pSrc, size_t numBytes );
+FORCEINLINE void* Mem_Memmove( void* pDest, const void* pSrc, size_t numBytes );
 
 /**
  * @ingroup core
@@ -57,7 +57,7 @@ FORCEINLINE void* L_memmove( void* pDest, const void* pSrc, size_t numBytes );
  * @param numBytes	Number of bytes to examine
  * @return Return negative value if the first differing byte in pBuf1 is less than the corresponding byte in pBuf2. 0 if all numBytes bytes of pBuf1 and pBuf2 are equal. Positive value if the first differing byte in pBuf1 is greater than the corresponding byte in pBuf2
  */
-FORCEINLINE int32 L_memcmp( const void* pBuf1, const void* pBuf2, size_t numBytes );
+FORCEINLINE int32 Mem_Memcmp( const void* pBuf1, const void* pBuf2, size_t numBytes );
 
 /**
  * @ingroup core
@@ -68,7 +68,7 @@ FORCEINLINE int32 L_memcmp( const void* pBuf1, const void* pBuf2, size_t numByte
  * @param numBytes	Number of bytes to fill
  * @return Return pointer to the object to fill (pDest)
  */
-FORCEINLINE void* L_memset( void* pDest, uint8 c, size_t numBytes );
+FORCEINLINE void* Mem_Memset( void* pDest, uint8 c, size_t numBytes );
 
 /**
  * @ingroup core 
@@ -78,7 +78,7 @@ FORCEINLINE void* L_memset( void* pDest, uint8 c, size_t numBytes );
  * @param numBytes	Number of bytes to fill
  * @return Return pointer to the object to fill (pDest)
  */
-FORCEINLINE void* L_memzero( void* pDest, size_t numBytes );
+FORCEINLINE void* Mem_Memzero( void* pDest, size_t numBytes );
 
 /**
  * @ingroup core 
@@ -89,7 +89,7 @@ FORCEINLINE void* L_memzero( void* pDest, size_t numBytes );
  * @param numBytes	Number of bytes to copy
  * @return Return pointer to the memory location to copy to (pDest)
  */
-FORCEINLINE void* L_memcpy( void* pDest, const void* pSrc, size_t numBytes );
+FORCEINLINE void* Mem_Memcpy( void* pDest, const void* pSrc, size_t numBytes );
 
 /**
  * @ingroup core 
@@ -99,7 +99,7 @@ FORCEINLINE void* L_memcpy( void* pDest, const void* pSrc, size_t numBytes );
  * @param alignment		Specifies the alignment. Must be a valid alignment supported by the implementation
  * @return On success, returns the pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with L_free() or L_realloc(). On failure, returns a NULL pointer
  */
-FORCEINLINE void* L_malloc( size_t numBytes, uint32 alignment = DEFAULT_ALIGNMENT )
+FORCEINLINE void* Mem_Malloc( size_t numBytes, uint32 alignment = DEFAULT_ALIGNMENT )
 {
 	return MemAlloc()->Malloc(numBytes, alignment);
 }
@@ -112,10 +112,10 @@ FORCEINLINE void* L_malloc( size_t numBytes, uint32 alignment = DEFAULT_ALIGNMEN
  * @param alignment		Specifies the alignment. Must be a valid alignment supported by the implementation
  * @return On success, returns the pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with L_free() or L_realloc(). On failure, returns a NULL pointer
  */
-FORCEINLINE void* L_malloc_zeroed( size_t numBytes, uint32 alignment = DEFAULT_ALIGNMENT )
+FORCEINLINE void* Mem_MallocZero( size_t numBytes, uint32 alignment = DEFAULT_ALIGNMENT )
 {
-	void*	pData = L_malloc( numBytes, alignment );
-	L_memzero( pData, numBytes );
+	void*	pData = Mem_Malloc( numBytes, alignment );
+	Mem_Memzero( pData, numBytes );
 	return pData;
 }
 
@@ -128,7 +128,7 @@ FORCEINLINE void* L_malloc_zeroed( size_t numBytes, uint32 alignment = DEFAULT_A
  * @param alignment		Alignment
  * @return On success, returns a pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with L_free or L_realloc. The original pointer pOriginal is invalidated and any access to it is undefined behavior (even if reallocation was in-place). On failure, returns a null pointer. The original pointer pOriginal remains valid and may need to be deallocated with L_free
  */
-FORCEINLINE void* L_realloc( void* pOriginal, size_t numBytes, uint32 alignment = DEFAULT_ALIGNMENT )
+FORCEINLINE void* Mem_Realloc( void* pOriginal, size_t numBytes, uint32 alignment = DEFAULT_ALIGNMENT )
 {
 	return MemAlloc()->Realloc( pOriginal, numBytes, alignment );
 }
@@ -138,7 +138,7 @@ FORCEINLINE void* L_realloc( void* pOriginal, size_t numBytes, uint32 alignment 
  * @brief Deallocates the space previously allocated by L_malloc or L_realloc
  * @param pOriginal		Pointer to the memory to deallocate
  */
-FORCEINLINE void L_free( void* pOriginal )
+FORCEINLINE void Mem_Free( void* pOriginal )
 {
 	return MemAlloc()->Free( pOriginal );
 }
@@ -150,7 +150,7 @@ FORCEINLINE void L_free( void* pOriginal )
 * @param InOriginal		Pointer to memory we are checking the size of
 * @return If possible, returns the size of the passed in pointer, otherwise return 0
 */
-FORCEINLINE size_t L_allocsize( void* pOriginal )
+FORCEINLINE size_t Mem_AllocSize( void* pOriginal )
 {
 	size_t	numBytes = 0;
 	return MemAlloc()->GetAllocationSize( pOriginal, numBytes ) ? numBytes : 0;
@@ -163,7 +163,7 @@ FORCEINLINE size_t L_allocsize( void* pOriginal )
  * @param numBytes		Number of bytes to allocate
  * @return On success, returns the pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with L_free_system() or L_realloc_system(). On failure, returns a NULL pointer
  */
-FORCEINLINE void* L_malloc_system( size_t numBytes )
+FORCEINLINE void* Mem_MallocSystem( size_t numBytes )
 {
 	return malloc( numBytes );
 }
@@ -176,7 +176,7 @@ FORCEINLINE void* L_malloc_system( size_t numBytes )
  * @param numBytes		New size of the array
  * @return On success, returns a pointer to the beginning of newly allocated memory. To avoid a memory leak, the returned pointer must be deallocated with L_free_system or L_realloc_system. The original pointer pOriginal is invalidated and any access to it is undefined behavior (even if reallocation was in-place). On failure, returns a null pointer. The original pointer pOriginal remains valid and may need to be deallocated with L_free_system
  */
-FORCEINLINE void* L_realloc_system( void* pOriginal, size_t numBytes )
+FORCEINLINE void* Mem_ReallocSystem( void* pOriginal, size_t numBytes )
 {
 	return realloc( pOriginal, numBytes );
 }
@@ -186,7 +186,7 @@ FORCEINLINE void* L_realloc_system( void* pOriginal, size_t numBytes )
  * @brief C style memory deallocation that fall back to C runtime
  * @param pOriginal		Pointer to the memory to deallocate
  */
-FORCEINLINE void L_free_system( void* pOriginal )
+FORCEINLINE void Mem_FreeSystem( void* pOriginal )
 {
 	free( pOriginal );
 }
@@ -207,7 +207,7 @@ public:
 	 */
 	void* operator new( size_t numBytes )
 	{
-		return L_malloc_system( numBytes );
+		return Mem_MallocSystem( numBytes );
 	}
 
 	/**
@@ -217,7 +217,7 @@ public:
 	 */
 	void operator delete( void* pPtr )
 	{
-		L_free_system( pPtr );
+		Mem_FreeSystem( pPtr );
 	}
 
 	/**
@@ -228,7 +228,7 @@ public:
 	 */
 	void* operator new[]( size_t numBytes )
 	{
-		return L_malloc_system( numBytes );
+		return Mem_MallocSystem( numBytes );
 	}
 
 	/**
@@ -238,7 +238,7 @@ public:
 	 */
 	void operator delete[]( void* pPtr )
 	{
-		L_free_system( pPtr );
+		Mem_FreeSystem( pPtr );
 	}
 };
 

@@ -462,7 +462,7 @@ CWindowsThread::SetName
 */
 void CWindowsThread::SetName( const achar* pName )
 {
-	L_strncpy( name, pName, sizeof( name ) - 1 );
+	L_Strncpy( name, pName, sizeof( name ) - 1 );
 	name[sizeof( name ) - 1] = '\0';
 }
 
@@ -476,7 +476,7 @@ const achar* CWindowsThread::GetName() const
 	if ( !name[0] )
 	{
 		achar*	pName = const_cast<achar*>( name );
-		L_snprintf( pName, sizeof( name ) - 1, "Thread(%p/%p)", this, handle );
+		L_Snprintf( pName, sizeof( name ) - 1, "Thread(%p/%p)", this, handle );
 		pName[sizeof( name ) - 1] = '\0';
 	}
 	return name;

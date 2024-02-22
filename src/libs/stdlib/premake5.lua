@@ -47,7 +47,7 @@ project "stdlib"
 
     vpaths      {
         ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]    = { "../../public/libs/stdlib/**.h", "../../public/libs/stdlib/**.inl" }
+        ["public/*"]    = { "../../public/**.h", "../../public/**.inl", "../../public/**.cpp" }
     }
 	
     ----------- LINK THIRD PARTIES -----------------

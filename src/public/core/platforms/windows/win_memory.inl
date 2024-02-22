@@ -33,50 +33,50 @@
 
 /*
  ==================
- L_memmove
+ Mem_Memmove
  ==================
  */
-FORCEINLINE void* L_memmove( void* pDest, const void* pSrc, size_t numBytes )
+FORCEINLINE void* Mem_Memmove( void* pDest, const void* pSrc, size_t numBytes )
 {
 	return memmove( pDest, pSrc, numBytes );
 }
 
 /*
  ==================
- L_memcmp
+ Mem_Memcmp
  ==================
  */
-FORCEINLINE int32 L_memcmp( const void* pBuf1, const void* pBuf2, size_t numBytes )
+FORCEINLINE int32 Mem_Memcmp( const void* pBuf1, const void* pBuf2, size_t numBytes )
 {
 	return memcmp( pBuf1, pBuf2, numBytes );
 }
 
 /*
  ==================
- L_memset
+ Mem_Memset
  ==================
  */
-FORCEINLINE void* L_memset( void* pDest, uint8 c, size_t numBytes )
+FORCEINLINE void* Mem_Memset( void* pDest, uint8 c, size_t numBytes )
 {
 	return memset( pDest, c, numBytes );
 }
 
 /*
  ==================
- L_memzero
+ Mem_Memzero
  ==================
  */
-FORCEINLINE void* L_memzero( void* pDest, size_t numBytes )
+FORCEINLINE void* Mem_Memzero( void* pDest, size_t numBytes )
 {
 	return memset( pDest, 0, numBytes );
 }
 
 /*
  ==================
- L_memcpy
+ Mem_Memcpy
  ==================
  */
-FORCEINLINE void* L_memcpy( void* pDest, const void* pSrc, size_t numBytes )
+FORCEINLINE void* Mem_Memcpy( void* pDest, const void* pSrc, size_t numBytes )
 {
 	return memcpy( pDest, pSrc, numBytes );
 }

@@ -93,6 +93,21 @@ bool CLifeEngineApp::Create()
 
 /*
 ==================
+CLifeEngineApp::PreInit
+==================
+*/
+bool CLifeEngineApp::PreInit()
+{
+	if ( !ConnectStdLib( GetFactory() ) )
+	{
+		return false;
+	}
+
+	return true;
+}
+
+/*
+==================
 CLifeEngineApp::Main
 ==================
 */
@@ -103,4 +118,14 @@ int32 CLifeEngineApp::Main()
 		pWindowMgr->ProcessEvents();
 	}
 	return 0;
+}
+
+/*
+==================
+CLifeEngineApp::PostShutdown
+==================
+*/
+void CLifeEngineApp::PostShutdown()
+{
+	DisconnectStdLib();
 }

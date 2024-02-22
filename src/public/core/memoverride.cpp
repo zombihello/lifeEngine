@@ -38,7 +38,7 @@ operator new
 */
 void* operator new( size_t numBytes )
 {
-	return L_malloc( numBytes );
+	return Mem_Malloc( numBytes );
 }
 
 /*
@@ -48,7 +48,7 @@ operator delete
 */
 void operator delete( void* pPtr ) noexcept
 {
-	L_free( pPtr );
+	Mem_Free( pPtr );
 }
 
 /*
@@ -58,7 +58,7 @@ operator new[]
 */
 void* operator new[]( size_t numBytes )
 {
-	return L_malloc( numBytes );
+	return Mem_Malloc( numBytes );
 }
 
 /*
@@ -68,5 +68,5 @@ operator delete[]
 */
 void operator delete[]( void* pPtr ) noexcept
 {
-	L_free( pPtr );
+	Mem_Free( pPtr );
 }

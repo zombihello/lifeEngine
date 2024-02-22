@@ -104,7 +104,7 @@ LogOutputFn_t Sys_GetDefaultLogOutput()
 	*/
 	void VMsg( const achar* pFormat, va_list params )
 	{
-		s_LogOutputFn( L_sprintf( "Msg: %s\n", L_vsprintf( pFormat, params ).c_str() ).c_str() );
+		s_LogOutputFn( L_Sprintf( "Msg: %s\n", L_Vsprintf( pFormat, params ).c_str() ).c_str() );
 	}
 
 	/*
@@ -127,7 +127,7 @@ LogOutputFn_t Sys_GetDefaultLogOutput()
 	*/
 	void VWarning( const achar* pFormat, va_list params )
 	{
-		s_LogOutputFn( L_sprintf( "Warning: %s\n", L_vsprintf( pFormat, params ).c_str() ).c_str() );
+		s_LogOutputFn( L_Sprintf( "Warning: %s\n", L_Vsprintf( pFormat, params ).c_str() ).c_str() );
 	}
 
 	/*
@@ -150,7 +150,7 @@ LogOutputFn_t Sys_GetDefaultLogOutput()
 	*/
 	void VError( const achar* pFormat, va_list params )
 	{
-		s_LogOutputFn( L_sprintf( "Error: %s\n", L_vsprintf( pFormat, params ).c_str() ).c_str() );
+		s_LogOutputFn( L_Sprintf( "Error: %s\n", L_Vsprintf( pFormat, params ).c_str() ).c_str() );
 	}
 #endif // ENABLE_LOGGING
 
@@ -165,7 +165,7 @@ LogOutputFn_t Sys_GetDefaultLogOutput()
 		// Get final message
 		va_list			params;
 		va_start( params, pFormat );
-		std::string		message = L_sprintf( "Assertion failed: %s\nMessage: %s\n\nFile: %s\nLine: %i", pExpr, L_strlen( pFormat ) > 0 ? L_vsprintf( pFormat, params ).c_str() : "<None>", pFile, line);
+		std::string		message = L_Sprintf( "Assertion failed: %s\nMessage: %s\n\nFile: %s\nLine: %i", pExpr, L_Strlen( pFormat ) > 0 ? L_Vsprintf( pFormat, params ).c_str() : "<None>", pFile, line);
 		va_end( params );
 
 		// Print message and show message box
