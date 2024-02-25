@@ -82,6 +82,7 @@ core                        = "core/"
 stdlib                      = "libs/stdlib/"
 appframework                = "libs/appframework/"
 inputsystem                 = "inputsystem/"
+filesystem                  = "filesystem/"
 interfaces                  = "libs/interfaces/"
 
 --------------- THIRD PARTIES ---------
@@ -193,6 +194,7 @@ workspace( game )
         include( launcher )
 		include( core )
         include( inputsystem )
+        include( filesystem )
         group "/Engine/Libraries"
             include( stdlib )
             include( appframework )

@@ -267,6 +267,21 @@ const achar* Sys_GetUserName()
 
 /*
 ==================
+Sys_GetExecutablePath
+==================
+*/
+const achar* Sys_GetExecutablePath()
+{
+	static achar	path[MAX_PATH] = "";
+	if ( !path[0] )
+	{
+		GetModuleFileNameA( nullptr, path, MAX_PATH );
+	}
+	return path;
+}
+
+/*
+==================
 Sys_Seconds
 ==================
 */

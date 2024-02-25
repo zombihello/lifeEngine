@@ -1,7 +1,4 @@
 /**
- * @file
- * @addtogroup stdlib stdlib
- *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -28,46 +25,4 @@
  * SOFTWARE.
  */
 
-#ifndef WIN_FILETOOLS_H
-#define WIN_FILETOOLS_H
-
-#include "core/debug.h"
-
-/*
-==================
-L_SetCurrentDirectory
-==================
-*/
-FORCEINLINE bool L_SetCurrentDirectory( const achar* pDirName )
-{ 
-	return _chdir( pDirName ) == 0;
-}
-
-/*
-==================
-L_GetCurrentDirectory
-==================
-*/
-FORCEINLINE bool L_GetCurrentDirectory( achar* pDestStr, uint32 maxLen )
-{
-	Assert( maxLen >= 1 );
-	Assert( pDestStr );
-	if ( !pDestStr || maxLen < 1 )
-	{
-		return false;
-	}
-
-	return _getcwd( pDestStr, maxLen ) == pDestStr;
-}
-
-/*
-==================
-L_IsAbsolutePath
-==================
-*/
-FORCEINLINE bool L_IsAbsolutePath( const achar* pPath )
-{
-	return ( pPath[0] && pPath[1] == ':' ) || pPath[0] == '/' || pPath[0] == '\\';
-}
-
-#endif // !WIN_FILETOOLS_H
+#include "pch_filesystem.h"

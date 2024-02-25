@@ -375,6 +375,19 @@ bool L_AppendPathSeparator( achar* pStr, uint32 strSize )
 
 /*
 ==================
+L_AppendPathSeparator
+==================
+*/
+void L_AppendPathSeparator( std::string& str )
+{
+	if ( str.empty() || !L_IsPathSeparator( str[str.size() - 1] ) )
+	{
+		str += PATH_SEPARATOR;
+	}
+}
+
+/*
+==================
 L_FixPathSeparators
 ==================
 */

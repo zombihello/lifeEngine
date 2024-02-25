@@ -149,6 +149,18 @@ FORCEINLINE bool L_IsAbsolutePath( const achar* pPath );
 
 /**
  * @ingroup stdlib
+ * @brief Is absolute path
+ *
+ * @param path		Path to check
+ * @return Return TRUE if the path is an absolute path, otherwise FALSE
+ */
+FORCEINLINE bool L_IsAbsolutePath( const std::string& path )
+{
+    return L_IsAbsolutePath( path.c_str() );
+}
+
+/**
+ * @ingroup stdlib
  * @brief Adds a path separator to the end of the string if there isn't one already
 
  * @param pStr      String
@@ -156,6 +168,13 @@ FORCEINLINE bool L_IsAbsolutePath( const achar* pPath );
  * @return Return TRUE if a path separator was added successfully to the end of the string or it's already here, FALSE if run out of space
  */
 bool L_AppendPathSeparator( achar* pStr, uint32 strSize );
+
+/**
+ * @ingroup stdlib
+ * @brief Adds a path separator to the end of the string if there isn't one already
+ * @param str  String
+ */
+void L_AppendPathSeparator( std::string& str );
 
 /**
  * @ingroup stdlib

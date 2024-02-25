@@ -32,8 +32,15 @@
 #define INTERFACES_H
 
 // Forward declarations
+class IFileSystem;
 class IWindowMgr;
 class IInputSystem;
+
+/**
+ * @ingroup interfaces
+ * @brief File system
+ */
+extern IFileSystem* g_pFileSystem;
 
 /**
  * @ingroup interfaces

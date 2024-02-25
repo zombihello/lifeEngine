@@ -28,6 +28,7 @@
 #include "pch_launcher.h"
 #include "appframework/iwindowmgr.h"
 #include "inputsystem/iinputsystem.h"
+#include "filesystem/ifilesystem.h"
 #include "launcher/launcher.h"
 
 /**
@@ -57,6 +58,7 @@ bool CLifeEngineApp::Create()
 	AppSystemInfo		appSystemInfos[] =
 	{
 		{ LAUNCHER_APPSYSTEM( "inputsystem" ),		INPUTSYSTEM_INTERFACE_VERSION		},
+		{ LAUNCHER_APPSYSTEM( "filesystem" ),		FILESYSTEM_INTERFACE_VERSION		},
 		{ "", "" }																		// Required to terminate the list
 	};
 

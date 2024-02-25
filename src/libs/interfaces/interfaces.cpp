@@ -27,5 +27,6 @@
 
 #include "interfaces/interfaces.h"
 
+IFileSystem*		g_pFileSystem = nullptr;
 IWindowMgr*			g_pWindowMgr = nullptr;
 IInputSystem*		g_pInputSystem = nullptr;

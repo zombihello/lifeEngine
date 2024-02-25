@@ -1,6 +1,6 @@
 # Version 0.1.0 :: Now
 - [X] Implement AppFramework and interface system
-- [ ] Create file system
+- [X] Create file system
 - [X] Create class for work with command line
 - [ ] Create console system
 - [ ] Create config system

@@ -235,6 +235,18 @@ CORE_INTERFACE const achar* Sys_GetUserName();
 
 /**
  * @ingroup core
+ * @brief Get absolute path to the current executable module
+ * @note Need implement on each platform
+ *
+ * This function returns absolute path to the current executable module. 
+ * For example: C:/game/bin/win64/episodic.exe
+ * 
+ * @return Return absolute path to the current executable module
+ */
+CORE_INTERFACE const achar* Sys_GetExecutablePath();
+
+/**
+ * @ingroup core
  * @brief Get time in seconds
  * @note Need implement on each platform
  * 

@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup stdlib stdlib
+ * @addtogroup filesystem filesystem
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,46 +28,51 @@
  * SOFTWARE.
  */
 
-#ifndef WIN_FILETOOLS_H
-#define WIN_FILETOOLS_H
+#ifndef PATHARRAYRESULT_H
+#define PATHARRAYRESULT_H
 
-#include "core/debug.h"
+#include <vector>
+#include <string>
 
-/*
-==================
-L_SetCurrentDirectory
-==================
-*/
-FORCEINLINE bool L_SetCurrentDirectory( const achar* pDirName )
-{ 
-	return _chdir( pDirName ) == 0;
-}
+#include "filesystem/ifilesystem.h"
 
-/*
-==================
-L_GetCurrentDirectory
-==================
-*/
-FORCEINLINE bool L_GetCurrentDirectory( achar* pDestStr, uint32 maxLen )
+/**
+ * @ingroup filesystem
+ * @brief Path array result
+ * 
+ * This is simple array who contains path elements
+ */
+class CPathArrayResult : public TRefCounted<IPathArrayResult>
 {
-	Assert( maxLen >= 1 );
-	Assert( pDestStr );
-	if ( !pDestStr || maxLen < 1 )
-	{
-		return false;
-	}
+public:
+    /**
+     * @brief Constructor
+     * @param pathArray     Array with paths
+     */
+    CPathArrayResult( const std::vector<std::string>& pathArray );
 
-	return _getcwd( pDestStr, maxLen ) == pDestStr;
-}
+    /**
+     * @brief Get path by index
+     *
+     * @param index     Item index
+     * @return Return path at index
+     */
+    virtual const achar* GetPath( uint32 index ) const override;
 
-/*
-==================
-L_IsAbsolutePath
-==================
-*/
-FORCEINLINE bool L_IsAbsolutePath( const achar* pPath )
-{
-	return ( pPath[0] && pPath[1] == ':' ) || pPath[0] == '/' || pPath[0] == '\\';
-}
+    /**
+     * @brief Get path count in array
+     * @return Return path count in array
+     */
+    virtual uint32 GetNum() const override;
 
-#endif // !WIN_FILETOOLS_H
+    /**
+     * @brief Is empty array
+     * @return Return TRUE if array is empty, otherwise returns FALSE
+     */
+    virtual bool IsEmpty() const override;
+
+private:
+	std::vector<std::string>	pathArray;	/**< Array with paths */
+};
+
+#endif // !PATHARRAYRESULT_H

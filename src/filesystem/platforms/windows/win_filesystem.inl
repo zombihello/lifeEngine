@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup stdlib stdlib
+ * @addtogroup filesystem filesystem
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,46 +28,69 @@
  * SOFTWARE.
  */
 
-#ifndef WIN_FILETOOLS_H
-#define WIN_FILETOOLS_H
-
-#include "core/debug.h"
+#ifndef WIN_FILESYSTEM_INL
+#define WIN_FILESYSTEM_INL
 
 /*
 ==================
-L_SetCurrentDirectory
+Plat_MakeDirectory
 ==================
 */
-FORCEINLINE bool L_SetCurrentDirectory( const achar* pDirName )
+FORCEINLINE bool Plat_MakeDirectory( const achar* pPath )
 { 
-	return _chdir( pDirName ) == 0;
+	return CreateDirectoryA( pPath, nullptr ) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
 }
 
 /*
 ==================
-L_GetCurrentDirectory
+Plat_DeleteDirectory
 ==================
 */
-FORCEINLINE bool L_GetCurrentDirectory( achar* pDestStr, uint32 maxLen )
+FORCEINLINE bool Plat_DeleteDirectory( const achar* pPath, bool bEvenReadOnly /*= false*/ )
 {
-	Assert( maxLen >= 1 );
-	Assert( pDestStr );
-	if ( !pDestStr || maxLen < 1 )
+	return RemoveDirectoryA( pPath );
+}
+
+/*
+==================
+Plat_IsFileExists
+==================
+*/
+FORCEINLINE bool Plat_IsFileExists( const achar* pPath )
+{
+	// Get file attributes at the path
+	DWORD	fileAttributes = GetFileAttributesA( pPath );
+	
+	// If it was not possible to get the file attributes, then the file does not exist
+	if ( fileAttributes == INVALID_FILE_ATTRIBUTES )
 	{
 		return false;
 	}
 
-	return _getcwd( pDestStr, maxLen ) == pDestStr;
+	// Otherwise all ok
+	return true;
 }
 
 /*
 ==================
-L_IsAbsolutePath
+Plat_IsFileDirectory
 ==================
 */
-FORCEINLINE bool L_IsAbsolutePath( const achar* pPath )
+FORCEINLINE bool Plat_IsFileDirectory( const achar* pPath )
 {
-	return ( pPath[0] && pPath[1] == ':' ) || pPath[0] == '/' || pPath[0] == '\\';
+	DWORD	fileAttributes = GetFileAttributesA( pPath );
+	return fileAttributes != INVALID_FILE_ATTRIBUTES && fileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 }
 
-#endif // !WIN_FILETOOLS_H
+/*
+==================
+Plat_MoveFile
+==================
+*/
+FORCEINLINE ECopyMoveResult Plat_MoveFile( const achar* pSrcPath, const achar* pDestPath, bool bReplaceExisting /*= false*/, bool bEvenReadOnly /*= false*/ )
+{
+	DWORD	moveFlags = ( bReplaceExisting ? MOVEFILE_REPLACE_EXISTING : 0x0 ) | MOVEFILE_WRITE_THROUGH;
+	return MoveFileExA( pSrcPath, pDestPath, moveFlags ) != 0 ? COPYMOVE_RESULT_OK : COPYMOVE_RESULT_MISC_FAIL;
+}
+
+#endif // !WIN_FILESYSTEM_INL

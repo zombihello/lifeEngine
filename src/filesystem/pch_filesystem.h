@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup stdlib stdlib
+ * @addtogroup filesystem filesystem
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,46 +28,21 @@
  * SOFTWARE.
  */
 
-#ifndef WIN_FILETOOLS_H
-#define WIN_FILETOOLS_H
+ // STL
+#include <cstdlib>
+#include <string>
+#include <vector>
 
+// Interfaces
+#include "interfaces/interfaces.h"
+
+// StdLib
+#include "stdlib/stdlib.h"
+#include "stdlib/filetools.h"
+
+// Core
 #include "core/debug.h"
 
-/*
-==================
-L_SetCurrentDirectory
-==================
-*/
-FORCEINLINE bool L_SetCurrentDirectory( const achar* pDirName )
-{ 
-	return _chdir( pDirName ) == 0;
-}
-
-/*
-==================
-L_GetCurrentDirectory
-==================
-*/
-FORCEINLINE bool L_GetCurrentDirectory( achar* pDestStr, uint32 maxLen )
-{
-	Assert( maxLen >= 1 );
-	Assert( pDestStr );
-	if ( !pDestStr || maxLen < 1 )
-	{
-		return false;
-	}
-
-	return _getcwd( pDestStr, maxLen ) == pDestStr;
-}
-
-/*
-==================
-L_IsAbsolutePath
-==================
-*/
-FORCEINLINE bool L_IsAbsolutePath( const achar* pPath )
-{
-	return ( pPath[0] && pPath[1] == ':' ) || pPath[0] == '/' || pPath[0] == '\\';
-}
-
-#endif // !WIN_FILETOOLS_H
+// File System
+#include "filesystem/ifile.h"
+#include "filesystem/ifilesystem.h"

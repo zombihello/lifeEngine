@@ -1,7 +1,4 @@
 /**
- * @file
- * @addtogroup stdlib stdlib
- *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -28,46 +25,45 @@
  * SOFTWARE.
  */
 
-#ifndef WIN_FILETOOLS_H
-#define WIN_FILETOOLS_H
-
-#include "core/debug.h"
+#include "pch_filesystem.h"
+#include "filesystem/patharrayresult.h"
 
 /*
 ==================
-L_SetCurrentDirectory
+CPathArrayResult::CPathArrayResult
 ==================
 */
-FORCEINLINE bool L_SetCurrentDirectory( const achar* pDirName )
-{ 
-	return _chdir( pDirName ) == 0;
-}
+CPathArrayResult::CPathArrayResult( const std::vector<std::string>& pathArray )
+	: pathArray( pathArray )
+{}
 
 /*
 ==================
-L_GetCurrentDirectory
+CPathArrayResult::GetItem
 ==================
 */
-FORCEINLINE bool L_GetCurrentDirectory( achar* pDestStr, uint32 maxLen )
+const achar* CPathArrayResult::GetPath( uint32 index ) const
 {
-	Assert( maxLen >= 1 );
-	Assert( pDestStr );
-	if ( !pDestStr || maxLen < 1 )
-	{
-		return false;
-	}
-
-	return _getcwd( pDestStr, maxLen ) == pDestStr;
+	Assert( index >= 0 && index < pathArray.size() );
+	return pathArray[index].c_str();
 }
 
 /*
 ==================
-L_IsAbsolutePath
+CPathArrayResult::GetNum
 ==================
 */
-FORCEINLINE bool L_IsAbsolutePath( const achar* pPath )
+uint32 CPathArrayResult::GetNum() const
 {
-	return ( pPath[0] && pPath[1] == ':' ) || pPath[0] == '/' || pPath[0] == '\\';
+	return ( uint32 )pathArray.size();
 }
 
-#endif // !WIN_FILETOOLS_H
+/*
+==================
+CPathArrayResult::IsEmpty
+==================
+*/
+bool CPathArrayResult::IsEmpty() const
+{
+	return pathArray.empty();
+}
