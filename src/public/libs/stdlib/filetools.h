@@ -281,6 +281,27 @@ void L_GetFilePath( const std::string& srcPath, std::string& destPath, bool bShr
 
 /**
  * @ingroup stdlib
+ * @brief Removes "./" and "../" from the path
+ * 
+ * @param pPath                     Path to fix, should be a full path
+ * @param bRemoveDoubleSeparators   Is need remove double separators
+ */
+void L_RemoveDotPathSeparators( achar* pPath, bool bRemoveDoubleSeparators = true );
+
+/**
+ * @ingroup stdlib
+ * @brief Removes "./" and "../" from the path
+ *
+ * @param path                      Path to fix, should be a full path
+ * @param bRemoveDoubleSeparators   Is need remove double separators
+ */
+FORCEINLINE void L_RemoveDotPathSeparators( std::string& path, bool bRemoveDoubleSeparators = true )
+{
+    L_RemoveDotPathSeparators( path.data(), bRemoveDoubleSeparators );
+}
+
+/**
+ * @ingroup stdlib
  * @brief Utility class for quick inquiries against filenames
  */
 class CFilename

@@ -85,7 +85,7 @@ bool L_MakeAbsolutePath( const achar* pSrcPath, achar* pDestPath, uint32 maxLen,
 
 		// Otherwise copy pSrcPath to pDestPath and fix path separators
 		L_Strncpy( pDestPath, pSrcPath, length );
-		L_FixPathSeparators( pDestPath );
+		L_RemoveDotPathSeparators( pDestPath );
 		return true;
 	}
 	else
@@ -162,7 +162,7 @@ bool L_MakeAbsolutePath( const achar* pSrcPath, achar* pDestPath, uint32 maxLen,
 
 		// Copy pSrcPath and fix path separators
 		L_Strncat( pDestPath, pSrcPath, maxLen, COPY_ALL_CHARACTERS );
-		L_FixPathSeparators( pDestPath );
+		L_RemoveDotPathSeparators( pDestPath );
 		return true;
 	}
 }
@@ -616,6 +616,92 @@ void L_GetFilePath( const std::string& srcPath, std::string& destPath, bool bShr
 		destPath = destPath.c_str();
 		destPath.shrink_to_fit();
 	}
+}
+
+/*
+==================
+L_RemoveDotPathSeparators
+==================
+*/
+void L_RemoveDotPathSeparators( achar* pPath, bool bRemoveDoubleSeparators /*= true*/ )
+{
+	// Read and write position in the string
+	achar*		pRead = pPath;
+	achar*		pWrite = pPath;
+	bool		bBoundary = true;
+
+	// Remove all dot path separators ("./", "../")
+	while ( *pRead )
+	{
+		// Get rid of /../ or trailing /.. by backing pWrite up to previous separator
+		if ( bBoundary && pRead[0] == '.' && pRead[1] == '.' && ( L_IsPathSeparator( pRead[2] ) || !pRead[2] ) )
+		{
+			// Eat the last separator (or repeated separators) we wrote out
+			while ( pWrite != pPath && pWrite[-1] == PATH_SEPARATOR )
+			{
+				--pWrite;
+			}
+
+			while ( true )
+			{
+				if ( pWrite == pPath )
+				{
+					break;
+				}
+				--pWrite;
+				if ( *pWrite == PATH_SEPARATOR )
+				{
+					break;
+				}
+			}
+
+			// Skip the '..' but not the slash, next loop iteration will handle separator
+			pRead		+= 2;
+			bBoundary	= ( pWrite == pPath );
+		}
+		// Handle "./" by simply skipping this sequence. bBoundary is unchanged
+		else if ( bBoundary && pRead[0] == '.' && ( L_IsPathSeparator( pRead[1] ) || !pRead[1] ) )
+		{
+			if ( L_IsPathSeparator( pRead[1] ) )
+			{
+				pRead += 2;
+			}
+			else
+			{
+				// Special case: if trailing "." is preceded by separator, eg "path/.",
+				// then the final separator should also be stripped. bBoundary may then
+				// be in an incorrect state, but we are at the end of processing anyway
+				// so we don't really care (the processing loop is about to terminate)
+				if ( pWrite != pPath && pWrite[-1] == PATH_SEPARATOR )
+				{
+					--pWrite;
+				}
+				pRead += 1;
+			}
+		}
+		// Handle "/"
+		else if ( L_IsPathSeparator( pRead[0] ) )
+		{
+			*pWrite		= PATH_SEPARATOR;
+			pWrite		+= 1 - ( bBoundary & bRemoveDoubleSeparators & ( pWrite != pPath ) );
+			pRead		+= 1;
+			bBoundary	= true;
+		}
+		// Otherwise iterate over the path
+		else
+		{
+			if ( pWrite != pRead )
+			{
+				*pWrite = *pRead;
+			}
+			pWrite		+= 1;
+			pRead		+= 1;
+			bBoundary	= false;
+		}
+	}
+
+	// We are done!
+	*pWrite = 0;
 }
 
 

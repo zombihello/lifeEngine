@@ -114,7 +114,6 @@ bool CFileSystem::Init()
 	// Add a search path to folder with engine binary files
 	{
 		std::string		relativeExePath;
-		L_GetCurrentDirectory( baseDir, false );	// TODO yehor.pohuliaka: Need implement L_RemoveDotSeparator to remove "../" in a path
 		L_MakeRelativePath( exePath, baseDir, relativeExePath, false );
 		AddSearchPath( relativeExePath.c_str(), "ENGINEBIN" );
 	}
