@@ -28,10 +28,12 @@
 GLM = {}
 
 function GLM.Link()
-    includedirs     {
+	-- Set include dirs
+    externalincludedirs {
         thirdParty_GLM .. "/src/glm/"
     }
 
+	-- Copy license
     GLM.CopyLicense()
 end
 

@@ -53,6 +53,7 @@ project "stdlib"
     ----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
+	RapidJson.Link()
 
 	---------- PLATFORM SPECIFIC SETTINGS ---------
 	

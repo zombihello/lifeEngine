@@ -42,7 +42,6 @@ CFileSystem::CFileSystem
 */
 CFileSystem::CFileSystem()
 {
-	Assert( !g_pFileSystem );
 	g_pFileSystem = this;
 }
 
@@ -53,7 +52,6 @@ CFileSystem::~CFileSystem
 */
 CFileSystem::~CFileSystem()
 {
-	Assert( g_pFileSystem == this );
 	g_pFileSystem = nullptr;
 }
 

@@ -29,7 +29,7 @@ ZLib = {}
 
 function ZLib.Link()
     -- Set include dirs
-    includedirs     {
+    externalincludedirs {
         thirdParty_ZLib .. "/include/"
     }
 

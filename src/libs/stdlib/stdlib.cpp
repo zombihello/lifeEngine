@@ -26,6 +26,8 @@
  */
 
 #include "pch_stdlib.h"
+#include "interfaces/interfaces.h"
+#include "filesystem/ifilesystem.h"
 #include "stdlib/stdlib.h"
 
 // Is StdLib already connected
@@ -42,6 +44,16 @@ bool ConnectStdLib( CreateInterfaceFn_t pFactory )
 	if ( s_bConnected )
 	{
 		return true;
+	}
+
+	// Try connect file system
+	if ( !g_pFileSystem )
+	{
+		g_pFileSystem = ( IFileSystem* )pFactory( FILESYSTEM_INTERFACE_VERSION );
+		if ( !g_pFileSystem )
+		{
+			return false;
+		}
 	}
 
 	// StdLib was successfully connected!
@@ -64,4 +76,5 @@ void DisconnectStdLib()
 
 	// Reset all app systems and variables
 	s_bConnected = false;
+	g_pFileSystem = nullptr;
 }

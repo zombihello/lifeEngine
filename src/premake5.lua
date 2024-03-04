@@ -90,11 +90,13 @@ thirdParty_Mimalloc         = thirdPartyDir .. "mimalloc-2.1.2"
 thirdParty_ZLib             = thirdPartyDir .. "zlib-1.2.13"
 thirdParty_GLM              = thirdPartyDir .. "glm-1.0.0"
 thirdParty_SDL2             = thirdPartyDir .. "SDL2-2.30.0"
+thirdParty_RapidJson		= thirdPartyDir .. "rapidjson-1.1.0"
 
 include( thirdParty_Mimalloc )
 include( thirdParty_ZLib )
 include( thirdParty_GLM )
 include( thirdParty_SDL2 )
+include( thirdParty_RapidJson )
 
 workspace( game )
     location( root )
@@ -107,7 +109,8 @@ workspace( game )
     characterset 		"Unicode"
     floatingpoint 		"Fast"
 	vectorextensions 	"SSE2"	
-
+	externalwarnings 	"Off"
+	
     targetdir( buildDir .. binariesDir .. outputDir )
 	objdir( intermediateDir .. intermediateOutputDir .. "%{prj.name}/" )
 

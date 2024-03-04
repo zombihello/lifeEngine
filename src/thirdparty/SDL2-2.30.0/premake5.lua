@@ -29,7 +29,7 @@ SDL2 = {}
 
 function SDL2.Link()
     -- Set include dirs
-    includedirs     {
+    externalincludedirs {
         thirdParty_SDL2 .. "/include/"
     }
 

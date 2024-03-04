@@ -29,7 +29,7 @@ Mimalloc = {}
 
 function Mimalloc.Link()
     -- Set include dirs
-    includedirs     {
+    externalincludedirs {
         thirdParty_Mimalloc .. "/include/"
     }
 
