@@ -36,7 +36,8 @@ WinMain
 */
 int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nCmdShow )
 {
-	// Init command line
+	// Init of launcher's log output and command line
+	Launcher_InitLogOutput();
 	CommandLine()->Init( GetCommandLineA() );
 
 	// Run application

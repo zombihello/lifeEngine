@@ -75,6 +75,7 @@ int32 CAppSystemGroup::Run()
 {
 	// The factory now uses this app system group
 	s_pCurrentAppSystem = this;
+	Msg( "AppFramework: Engine build: %i (" __DATE__ " " __TIME__ ")", Sys_BuildNumber() );
 	Msg( "AppFramework: user %s//%s", Sys_GetComputerName(), Sys_GetUserName() );
 
 	// Load, connect, init

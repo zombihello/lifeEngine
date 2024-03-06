@@ -34,6 +34,7 @@
 #include <string>
 
 #include "interfaces/interfaces.h"
+#include "core/debug.h"
 #include "engine/icvar.h"
 
 /**

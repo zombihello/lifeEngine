@@ -29,3 +29,4 @@
 
 bool		g_bRequestingExit = false;
 double		g_SecondsPerCycle = Sys_GetSecondsPerCycle();
+bool		g_bConsoleIOInited = false;

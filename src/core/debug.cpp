@@ -36,8 +36,11 @@
 static void DefaultLogOutput( const achar* pMsg )
 {
 #if ENABLE_LOGGING
-	// Print message to console
-	printf( pMsg );
+	// Print message to OS console
+	if ( Sys_IsInitedConsoleIO() )
+	{
+		printf( pMsg );
+	}
 
 	// Print message to debug output
 	if ( Sys_IsDebuggerPresent() )

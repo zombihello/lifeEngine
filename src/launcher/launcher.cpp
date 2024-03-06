@@ -25,11 +25,13 @@
  * SOFTWARE.
  */
 
+
 #include "pch_launcher.h"
+#include <filesystem>
+
 #include "appframework/iwindowmgr.h"
 #include "inputsystem/iinputsystem.h"
 #include "filesystem/ifilesystem.h"
-#include "stdlib/convar.h"
 #include "launcher/launcher.h"
 
 /**
@@ -37,6 +39,62 @@
  * @brief Macro for set full name module
  */
 #define LAUNCHER_APPSYSTEM( Name )		Name DLL_EXT_STRING
+
+#if ENABLE_LOGGING
+static FILE*		s_pLogFile = nullptr;		// Launcher's log file
+
+/*
+==================
+Launcher_LogOutput
+==================
+*/
+static void Launcher_LogOutput( const achar* pMsg )
+{
+	// Print message to OS console
+	if ( Sys_IsInitedConsoleIO() )
+	{
+		printf( pMsg );
+	}
+
+	// Print message to the log file
+	if ( s_pLogFile )
+	{
+		fprintf( s_pLogFile, pMsg );
+		fflush( s_pLogFile );
+	}
+
+	// Print message to debug output
+	if ( Sys_IsDebuggerPresent() )
+	{
+		Sys_DebugMessage( pMsg );
+	}
+
+	// Print message to the engine's console
+	if ( g_pCvar )
+	{
+		g_pCvar->ConsolePrintf( pMsg );
+	}
+}
+#endif // ENABLE_LOGGING
+
+/*
+==================
+Launcher_InitLogOutput
+==================
+*/
+void Launcher_InitLogOutput()
+{
+#if ENABLE_LOGGING
+	// Create directory for logs
+	std::filesystem::create_directory( "../../logs" );
+	
+	// Open a log file
+	s_pLogFile = fopen( "../../logs/launcher.log", "w" );
+	
+	// Set our log output function
+	Sys_SetLogOutputFunc( Launcher_LogOutput );
+#endif // ENABLE_LOGGING
+}
 
 /*
 ==================

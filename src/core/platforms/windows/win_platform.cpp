@@ -315,17 +315,14 @@ Sys_SetupConsoleIO
 */
 void Sys_SetupConsoleIO()
 {
-#if !RETAIL
-	static bool		bConsoleInited = false;
-	if ( !bConsoleInited )
+	if ( !g_bConsoleIOInited )
 	{
 		AllocConsole();
 		freopen( "conin$", "r", stdin );
 		freopen( "conout$", "w", stdout );
 		freopen( "conout$", "w", stderr );
-		bConsoleInited = true;
+		g_bConsoleIOInited = true;
 	}
-#endif // !RETAIL
 }
 
 /*

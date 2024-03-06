@@ -859,13 +859,13 @@ CON_COMMAND( bind, "Bind a key", FCVAR_NONE )
 	// Do nothing if button isn't valid
 	if ( buttonCode == BUTTON_CODE_NONE )
 	{
-		Msg( "\"%s\" isn't a valid key", argv[0] );
+		Warning( "bind: \"%s\" isn't a valid key", argv[0] );
 		return;
 	}
 
 	// Set binding
 	s_InputSystem.SetBinding( buttonCode, argv[1] );
-	Msg( "\"%s\" = \"%s\"", argv[0], argv[1] );
+	Msg( "bind: \"%s\" = \"%s\"", argv[0], argv[1] );
 }
 
 /*
@@ -887,13 +887,13 @@ CON_COMMAND( unbind, "Unbind a key", FCVAR_NONE )
 	// Do nothing if button isn't valid
 	if ( buttonCode == BUTTON_CODE_NONE )
 	{
-		Msg( "\"%s\" isn't a valid key", argv[0] );
+		Warning( "unbind: \"%s\" isn't a valid key", argv[0] );
 		return;
 	}
 
 	// Unbind a key
 	s_InputSystem.SetBinding( buttonCode, "" );
-	Msg( "\"%s\" is unbind", argv[0] );
+	Msg( "unbind: \"%s\" is unbind", argv[0] );
 }
 
 /*
@@ -904,5 +904,5 @@ UnbindAll command
 CON_COMMAND( unbindall, "Unbind all keys", FCVAR_NONE )
 {
 	s_InputSystem.UnbindAll();
-	Msg( "All keys has been unbind" );
+	Msg( "unbindall: All keys has been unbind" );
 }

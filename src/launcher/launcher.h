@@ -36,6 +36,12 @@
 
 /**
  * @ingroup launcher
+ * @brief Initialize of launcher's log output
+ */
+void Launcher_InitLogOutput();
+
+/**
+ * @ingroup launcher
  * @brief LifeEngine application
  */
 class CLifeEngineApp : public CDefaultAppSystemGroup<CAppSystemGroup>

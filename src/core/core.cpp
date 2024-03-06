@@ -138,3 +138,13 @@ uint32 Sys_BuildNumber()
 	static CBuildNumber		s_BuildNumber;
 	return s_BuildNumber.GetBuildNumber();
 }
+
+/*
+==================
+Sys_IsInitedConsoleIO
+==================
+*/
+bool Sys_IsInitedConsoleIO()
+{
+	return g_bConsoleIOInited;
+}

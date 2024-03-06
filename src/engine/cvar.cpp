@@ -26,7 +26,10 @@
  */
 
 #include "pch_engine.h"
+#include <sstream>
+
 #include "engine/icvar.h"
+#include "filesystem/ifilesystem.h"
 #include "stdlib/convar.h"
 
 /*
@@ -744,9 +747,6 @@ bool CCvar::Exec( const achar* pCommand )
 		return false;
 	}
 
-	// Print command to log
-	Msg( "Cvar: Execute command \"%s\"", pCommand );
-
 	// Execute the command
 	bool	bResult = false;
 	while ( pCommand && *pCommand != '\0' )
@@ -959,4 +959,54 @@ CCvar::SetCVarQuery
 void CCvar::SetCVarQuery( ICvarQuery* pCvarQuery )
 {
 	CCvar::pCvarQuery = pCvarQuery ? pCvarQuery : &s_CvarQuery;
+}
+
+
+/*
+==================
+Exec command
+==================
+*/
+CON_COMMAND( exec, "Execute a command file", FCVAR_NONE )
+{
+	if ( argc < 1 || !argv )
+	{
+		Msg( "exec <path> : Execute a command file" );
+		return;
+	}
+
+	// Open a command file
+	TRefPtr<IFileReader>	file = g_pFileSystem->CreateFileReader( argv[0] );
+	if ( file )
+	{
+		// Read whole file into buffer
+		std::string		buffer;
+		buffer.resize( file->GetSize() / sizeof( achar ) );
+		file->Read( buffer.data(), file->GetSize() );
+
+		// Executing a file
+		Msg( "exec %s: Executing", argv[0] );
+		std::stringstream	sstream( buffer );
+		std::string			line;
+		while ( std::getline( sstream, line ) )
+		{
+			// We throw away \r
+			if ( !line.empty() && line.back() == '\r' )
+			{
+				line.pop_back();
+			}
+
+			// We ignore line if it starts with C++ comment (//)
+			if ( line.rfind( "//", 0 ) == std::string::npos )
+			{
+				g_pCvar->Exec( line.c_str() );
+			}
+		}
+
+		// We are done!
+		return;
+	}
+
+	// We failed to open file, it is bad
+	Warning( "exec %s: Failed to open file", argv[0] );
 }

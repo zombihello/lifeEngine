@@ -43,4 +43,10 @@ extern bool							g_bRequestingExit;
  */
 extern double						g_SecondsPerCycle;
 
+/**
+ * @ingroup core
+ * @brief Is console IO was initialized for logs
+ */
+extern bool							g_bConsoleIOInited;
+
 #endif // !GLOBALS_H

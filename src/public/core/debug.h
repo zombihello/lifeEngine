@@ -68,6 +68,13 @@ CORE_INTERFACE LogOutputFn_t Sys_GetDefaultLogOutput();
  */
 CORE_INTERFACE void Sys_SetupConsoleIO();
 
+/**
+ * @ingroup core
+ * @brief Is console IO was initialized for logs
+ * @return Return TRUE if console IO was initialized for logs, otherwise returns FALSE
+ */
+CORE_INTERFACE bool Sys_IsInitedConsoleIO();
+
 #if ENABLE_LOGGING
     /**
      * @ingroup core
