@@ -25,9 +25,4 @@
  * SOFTWARE.
  */
 
-#include "interfaces/interfaces.h"
-
-IFileSystem*		g_pFileSystem = nullptr;
-IWindowMgr*			g_pWindowMgr = nullptr;
-IInputSystem*		g_pInputSystem = nullptr;
-ICvar*				g_pCvar = nullptr;
+#include "pch_engine.h"

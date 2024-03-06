@@ -1,4 +1,7 @@
 /**
+ * @file
+ * @addtogroup inputsystem inputsystem
+ *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -25,9 +28,13 @@
  * SOFTWARE.
  */
 
-#include "interfaces/interfaces.h"
+// STL
+#include <cstdlib>
+#include <string>
+#include <vector>
 
-IFileSystem*		g_pFileSystem = nullptr;
-IWindowMgr*			g_pWindowMgr = nullptr;
-IInputSystem*		g_pInputSystem = nullptr;
-ICvar*				g_pCvar = nullptr;
+// StdLib
+#include "stdlib/stdlib.h"
+
+// Core
+#include "core/debug.h"

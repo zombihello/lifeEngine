@@ -2,7 +2,7 @@
 - [X] Implement AppFramework and interface system
 - [X] Create file system
 - [X] Create class for work with command line
-- [ ] Create console system
+- [X] Create console system
 - [ ] Create config system
 - [X] Create classes for work with threads and synchronization mechanisms (mutex, semaphore, etc)
 - [X] Basic functionality for working with a window

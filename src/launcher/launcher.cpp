@@ -29,6 +29,7 @@
 #include "appframework/iwindowmgr.h"
 #include "inputsystem/iinputsystem.h"
 #include "filesystem/ifilesystem.h"
+#include "stdlib/convar.h"
 #include "launcher/launcher.h"
 
 /**
@@ -57,9 +58,11 @@ bool CLifeEngineApp::Create()
 	// Load application systems
 	AppSystemInfo		appSystemInfos[] =
 	{
+		{ LAUNCHER_APPSYSTEM( "engine" ),			CVAR_QUERY_INTERFACE_VERSION		},	// This one must be first
 		{ LAUNCHER_APPSYSTEM( "inputsystem" ),		INPUTSYSTEM_INTERFACE_VERSION		},
 		{ LAUNCHER_APPSYSTEM( "filesystem" ),		FILESYSTEM_INTERFACE_VERSION		},
-		{ "", "" }																		// Required to terminate the list
+		{ LAUNCHER_APPSYSTEM( "engine" ),			CVAR_INTERFACE_VERSION				},
+		{ "", "" }																			// Required to terminate the list
 	};
 
 	// Add window manager to the app systems list
@@ -105,6 +108,7 @@ bool CLifeEngineApp::PreInit()
 		return false;
 	}
 
+	ConVar_Register();
 	return true;
 }
 
@@ -129,5 +133,6 @@ CLifeEngineApp::PostShutdown
 */
 void CLifeEngineApp::PostShutdown()
 {
+	ConVar_Unregister();
 	DisconnectStdLib();
 }

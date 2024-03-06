@@ -25,51 +25,49 @@
 * SOFTWARE.
 ]]
 
-project "launcher"
-    kind        "WindowedApp"
+project "engine"
+    if not buildMonolithicEngine then
+        kind "SharedLib"
+    else
+        kind "StaticLib"
+    end
     language    "C++"
     location( intermediateDir )
-    targetname( game )
 
-	----------- PROJECT SETTINGS --------
+    ----------- PROJECT SETTINGS --------
 
-    files       {
+    files       { 
         "**.h", 
         "**.inl", 
         "**.cpp",
+        "../public/engine/**.h",
+        "../public/engine/**.inl",
         "../public/core/**.cpp"
     }
 
     -- Enable PCH file
-    pchheader       "pch_launcher.h"
-    pchsource       "pch_launcher.cpp"
+    pchheader       "pch_engine.h"
+    pchsource       "pch_engine.cpp"
     includedirs     { "./" }
 
     vpaths      {
-        ["src/*"]           = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]        = { "../public/**.cpp" }
+        ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
+        ["public/*"]    = { "../public/**.h", "../public/**.inl", "../public/**.cpp" }
     }
 
     links       {
         "core",
         "stdlib",
-        "appframework",
-        "interfaces"
+		"interfaces"
     }
 
-    dependson   {
-        "inputsystem",
-        "filesystem",
-		"engine"
-    }
-
-    ----------- LINK THIRD PARTIES -----------------
+	----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
 
-	---------- PLATFORM SPECIFIC SETTINGS ---------
-	
-	-- Exclude platform specific for other platforms
+    ---------- PLATFORM SPECIFIC SETTINGS ---------
+
+    -- Exclude platform specific for other platforms
 	filter "platforms:not Win64"
         excludes { "**/platforms/windows/**.*" }
     filter {}

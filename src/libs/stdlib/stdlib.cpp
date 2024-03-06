@@ -28,6 +28,7 @@
 #include "pch_stdlib.h"
 #include "interfaces/interfaces.h"
 #include "filesystem/ifilesystem.h"
+#include "engine/icvar.h"
 #include "stdlib/stdlib.h"
 
 // Is StdLib already connected
@@ -51,6 +52,16 @@ bool ConnectStdLib( CreateInterfaceFn_t pFactory )
 	{
 		g_pFileSystem = ( IFileSystem* )pFactory( FILESYSTEM_INTERFACE_VERSION );
 		if ( !g_pFileSystem )
+		{
+			return false;
+		}
+	}
+
+	// Try connect cvar system
+	if ( !g_pCvar )
+	{
+		g_pCvar = ( ICvar* )pFactory( CVAR_INTERFACE_VERSION );
+		if ( !g_pCvar )
 		{
 			return false;
 		}

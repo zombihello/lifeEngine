@@ -394,6 +394,30 @@ FORCEINLINE int32 L_Atoi( const wchar* pString )
 
 /**
  * @ingroup stdlib
+ * @brief Convert string to float (for ANSI strings)
+ *
+ * @param InString      String to convert
+ * @return Return converted string to float
+ */
+FORCEINLINE float L_Atof( const achar* pString )
+{
+	return ( float )atof( pString );
+}
+
+/**
+ * @ingroup stdlib
+ * @brief Convert string to float (for Unicode strings)
+ *
+ * @param InString      String to convert
+ * @return Return converted string to float
+ */
+FORCEINLINE float L_Atof( const wchar* pString )
+{
+	return wcstof( pString, 0 );
+}
+
+/**
+ * @ingroup stdlib
  * @brief Get formatted string (for Unicode strings)
  *
  * @param pDest			Pointer to destination buffer

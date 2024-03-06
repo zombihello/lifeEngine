@@ -35,6 +35,7 @@
 class IFileSystem;
 class IWindowMgr;
 class IInputSystem;
+class ICvar;
 
 /**
  * @ingroup interfaces
@@ -53,5 +54,11 @@ extern IWindowMgr* g_pWindowMgr;
  * @brief Input system
  */
 extern IInputSystem* g_pInputSystem;
+
+/**
+ * @ingroup interfaces
+ * @brief Console system
+ */
+extern ICvar* g_pCvar;
 
 #endif // !INTERFACES_H
