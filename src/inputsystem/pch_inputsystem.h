@@ -33,6 +33,9 @@
 #include <string>
 #include <vector>
 
+// Interfaces
+#include "interfaces/interfaces.h"
+
 // StdLib
 #include "stdlib/stdlib.h"
 

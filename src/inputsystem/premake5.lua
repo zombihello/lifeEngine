@@ -57,7 +57,8 @@ project "inputsystem"
 
     links       {
         "core",
-        "stdlib"
+        "stdlib",
+		"interfaces"
     }
 
     ----------- LINK THIRD PARTIES -----------------

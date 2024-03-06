@@ -614,11 +614,22 @@ bool CCvar::ParseCommand( const achar*& pCommand, const achar separator /*= '$'*
 
 	// Find the end of the command
 	const achar*	pEndCommand	= pCommand;
-	for ( ; *pEndCommand; ++pEndCommand )
 	{
-		if ( *pEndCommand == separator )
+		bool	bFoundQuote = false;
+		for ( ; *pEndCommand; ++pEndCommand )
 		{
-			break;
+			// We must ignore a separator in quotes
+			if ( *pEndCommand == '\"' )
+			{
+				bFoundQuote = !bFoundQuote;
+				continue;
+			}
+
+			// We found a separator, it is the end
+			if ( !bFoundQuote && *pEndCommand == separator )
+			{
+				break;
+			}
 		}
 	}
 
@@ -734,7 +745,7 @@ bool CCvar::Exec( const achar* pCommand )
 	}
 
 	// Print command to log
-	Msg( "Cvar: %s", pCommand );
+	Msg( "Cvar: Execute command \"%s\"", pCommand );
 
 	// Execute the command
 	bool	bResult = false;

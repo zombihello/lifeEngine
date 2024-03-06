@@ -79,22 +79,17 @@ public:
 	virtual void ClearInputState() = 0;
 
 	/**
-	 * @brief Update the input system logic
-	 */
-	virtual void Update() = 0;
-
-	/**
-	 * @brief Bind call of a console command by press/release a button
+	 * @brief Set binding a key
 	 * 
 	 * @param button	Button code
 	 * @param pCommand	Console command will be executed when the button is triggered
 	 */
-	virtual void Bind( EButtonCode button, const achar* pCommand ) = 0;
+	virtual void SetBinding( EButtonCode button, const achar* pCommand ) = 0;
 
 	/**
-	 * @brief Unbind all button bindings
+	 * @brief Unbind all keys
 	 */
-	virtual void UnBindAll() = 0;
+	virtual void UnbindAll() = 0;
 
 	/**
 	 * @brief Set relative mouse mode

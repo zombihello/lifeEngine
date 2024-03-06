@@ -26,8 +26,16 @@
  */
 
 #include "pch_inputsystem.h"
+#include "stdlib/convar.h"
+#include "engine/icvar.h"
 #include "inputsystem/inputsystem_private.h"
 #include "inputsystem/iinputsystem.h"
+
+/**
+ * @ingroup inputsystem
+ * @brief Cvar mouse sensitivity
+ */
+CConVar		mouse_sensitivity( "mouse_sensitivity", "0.5", "Mouse sensitivity" );
 
 // Table of button names
 static const achar* s_pButtonNames[] =
@@ -153,32 +161,6 @@ static const achar* s_pButtonNames[] =
 
 /**
  * @ingroup inputsystem
- * @brief Bind descriptor
- */
-struct BindDescriptor
-{
-	/**
-	 * @brief Constructor
-	 */
-	BindDescriptor() {}
-
-	/**
-	 * @brief Constructor
-	 * 
-	 * @param button	Button code
-	 * @param pCommand	Console command to execute by trigger the button
-	 */
-	BindDescriptor( EButtonCode button, const achar* pCommand )
-		: button( button )
-		, command( pCommand )
-	{}
-
-	EButtonCode		button;		/**< Button code to trigger */
-	std::string		command;	/**< Console command to execute by trigger the button */
-};
-
-/**
- * @ingroup inputsystem
  * @brief Input system
  */
 class CInputSystem : public CBaseAppSystem<IInputSystem>
@@ -195,9 +177,28 @@ public:
 	~CInputSystem();
 
 	/**
+	 * @brief Connect application system
+	 *
+	 * @param pFactory		Pointer to interface factory
+	 * @return Return TRUE if successes application system is connected, otherwise return FALSE
+	 */
+	virtual bool Connect( CreateInterfaceFn_t pFactory ) override;
+
+	/**
 	 * @brief Disconnect application system
 	 */
 	virtual void Disconnect() override;
+
+	/**
+	 * @brief Init application system
+	 * @return Return TRUE if application system is inited
+	 */
+	virtual bool Init() override;
+
+	/**
+	 * @brief Shutdown application system
+	 */
+	virtual void Shutdown() override;
 
 	/**
 	 * @brief Attach the input system to a window
@@ -216,22 +217,23 @@ public:
 	virtual void ClearInputState() override;
 
 	/**
-	 * @brief Update the input system logic
-	 */
-	virtual void Update() override;
-
-	/**
-	 * @brief Bind call of a console's command by press/release a button
+	 * @brief Set binding a key
 	 *
 	 * @param button	Button code
 	 * @param pCommand	Console command will be executed when the button is triggered
 	 */
-	virtual void Bind( EButtonCode button, const achar* pCommand ) override;
+	virtual void SetBinding( EButtonCode button, const achar* pCommand ) override;
 
 	/**
-	 * @brief Unbind all button bindings
+	 * @brief Unbind all keys
 	 */
-	virtual void UnBindAll() override;
+	virtual void UnbindAll() override;
+
+	/**
+	 * @brief Execute command of a key
+	 * @param button	Button code
+	 */
+	void ExecCommand( EButtonCode button );
 
 	/**
 	 * @brief Set relative mouse mode
@@ -373,7 +375,7 @@ private:
 	EButtonEvent							buttonEvents[BUTTON_CODE_COUNT];	/**< Events button */
 	Vector2D								mouseLocation;						/**< Location mouse on screen */
 	Vector2D								mouseOffset;						/**< Offset mouse on current frame */
-	std::vector<BindDescriptor>				binds;								/**< Button binds */
+	std::string								binds[BUTTON_CODE_COUNT];			/**< Button binds */
 };
 
 // Input system singleton
@@ -409,12 +411,43 @@ CInputSystem::~CInputSystem()
 
 /*
 ==================
+CInputSystem::Connect
+==================
+*/
+bool CInputSystem::Connect( CreateInterfaceFn_t pFactory )
+{
+	return ConnectStdLib( pFactory );
+}
+
+/*
+==================
 CInputSystem::Disconnect
 ==================
 */
 void CInputSystem::Disconnect()
 {
 	DetachFromWindow();
+}
+
+/*
+==================
+CInputSystem::Init
+==================
+*/
+bool CInputSystem::Init()
+{
+	ConVar_Register();
+	return true;
+}
+
+/*
+==================
+CInputSystem::Shutdown
+==================
+*/
+void CInputSystem::Shutdown()
+{
+	ConVar_Unregister();
 }
 
 /*
@@ -487,16 +520,35 @@ CInputSystem::ProcessInputEvent
 void CInputSystem::ProcessInputEvent( void* pUserData, const InputEvent& inputEvent )
 {
 	Assert( pUserData );
-	CInputSystem*	pInputSystem = ( CInputSystem* )pUserData;
-	
+	CInputSystem*		pInputSystem = ( CInputSystem* )pUserData;
+
 	switch ( inputEvent.type )
 	{
-	case InputEvent::EVENT_KEY_PRESSED:			pInputSystem->buttonEvents[inputEvent.events.key.code] = BUTTON_EVENT_PRESSED;				break;
-	case InputEvent::EVENT_KEY_RELEASED:		pInputSystem->buttonEvents[inputEvent.events.key.code] = BUTTON_EVENT_RELEASED;				break;
+		// Key pressed
+	case InputEvent::EVENT_KEY_PRESSED:			
+		pInputSystem->buttonEvents[inputEvent.events.key.code] = BUTTON_EVENT_PRESSED;
+		pInputSystem->ExecCommand( inputEvent.events.key.code );
+		break;
 
-	case InputEvent::EVENT_MOUSE_PRESSED:		pInputSystem->buttonEvents[inputEvent.events.mouseButton.code] = BUTTON_EVENT_PRESSED;		break;
-	case InputEvent::EVENT_MOUSE_RELEASED:		pInputSystem->buttonEvents[inputEvent.events.mouseButton.code] = BUTTON_EVENT_RELEASED;		break;
+		// Key released
+	case InputEvent::EVENT_KEY_RELEASED:
+		pInputSystem->buttonEvents[inputEvent.events.key.code] = BUTTON_EVENT_RELEASED;
+		pInputSystem->ExecCommand( inputEvent.events.key.code );
+		break;
 
+		// Mouse pressed
+	case InputEvent::EVENT_MOUSE_PRESSED:
+		pInputSystem->buttonEvents[inputEvent.events.mouseButton.code] = BUTTON_EVENT_PRESSED;
+		pInputSystem->ExecCommand( inputEvent.events.mouseButton.code );
+		break;
+
+		// Mouse released
+	case InputEvent::EVENT_MOUSE_RELEASED:
+		pInputSystem->buttonEvents[inputEvent.events.mouseButton.code] = BUTTON_EVENT_RELEASED;
+		pInputSystem->ExecCommand( inputEvent.events.mouseButton.code );
+		break;
+
+		// Mouse move
 	case InputEvent::EVENT_MOUSE_MOVE:
 		pInputSystem->mouseOffset.x		+= ( float )inputEvent.events.mouseMove.xDirection;
 		pInputSystem->mouseOffset.y		+= ( float )inputEvent.events.mouseMove.yDirection;
@@ -506,18 +558,26 @@ void CInputSystem::ProcessInputEvent( void* pUserData, const InputEvent& inputEv
 		if ( pInputSystem->mouseOffset.x != 0.f )
 		{
 			pInputSystem->buttonEvents[MOUSE_X] = BUTTON_EVENT_MOVED;
+			pInputSystem->ExecCommand( MOUSE_X );
 		}
 
 		if ( pInputSystem->mouseOffset.y != 0.f )
 		{
 			pInputSystem->buttonEvents[MOUSE_Y] = BUTTON_EVENT_MOVED;
+			pInputSystem->ExecCommand( MOUSE_Y );
 		}
 		break;
 
+		// Mouse wheel move
 	case InputEvent::EVENT_MOUSE_WHEEL:
-		pInputSystem->buttonEvents[inputEvent.events.mouseWheel.y > 0 ? MOUSE_WHEELUP : MOUSE_WHEELDOWN] = BUTTON_EVENT_SCROLLED;
+	{
+		EButtonCode		button = inputEvent.events.mouseWheel.y > 0 ? MOUSE_WHEELUP : MOUSE_WHEELDOWN;
+		pInputSystem->buttonEvents[button] = BUTTON_EVENT_SCROLLED;
+		pInputSystem->ExecCommand( button );
 		break;
+	}
 
+		// Text input
 	case InputEvent::EVENT_TEXT_INPUT:
 		break;
 	}
@@ -543,22 +603,40 @@ void CInputSystem::ClearInputState()
 
 /*
 ==================
-CInputSystem::Bind
+CInputSystem::SetBinding
 ==================
 */
-void CInputSystem::Bind( EButtonCode button, const achar* pCommand )
+void CInputSystem::SetBinding( EButtonCode button, const achar* pCommand )
 {
-	binds.push_back( BindDescriptor( button, pCommand ) );
+	Assert( button < BUTTON_CODE_COUNT );
+	binds[button] = pCommand;
 }
 
 /*
 ==================
-CInputSystem::UnBindAll
+CInputSystem::UnbindAll
 ==================
 */
-void CInputSystem::UnBindAll()
+void CInputSystem::UnbindAll()
 {
-	binds.clear();
+	for ( uint32 index = 0; index < BUTTON_CODE_COUNT; ++index )
+	{
+		binds[index].clear();
+	}
+}
+
+/*
+==================
+CInputSystem::ExecCommand
+==================
+*/
+void CInputSystem::ExecCommand( EButtonCode button )
+{
+	Assert( button < BUTTON_CODE_COUNT );
+	if ( !binds[button].empty() )
+	{
+		g_pCvar->Exec( binds[button].c_str() );
+	}
 }
 
 /*
@@ -570,25 +648,6 @@ void CInputSystem::SetRelativeMouseMode( bool bEnabled )
 {
 	bRelativeMouseMode = bEnabled;
 	Sys_SetRelativeMouseMode( bEnabled );
-}
-
-/*
-==================
-CInputSystem::Update
-==================
-*/
-void CInputSystem::Update()
-{
-	for ( uint32 index = 0, count = ( uint32 )binds.size(); index < count; ++index )
-	{
-		const BindDescriptor&		bindDesc = binds[index];
-		if ( buttonEvents[bindDesc.button] == BUTTON_CODE_NONE )
-		{
-			continue;
-		}
-
-		// TODO yehor.pohuliaka: Here need place execute a console command
-	}
 }
 
 /*
@@ -733,7 +792,7 @@ CInputSystem::GetMouseSensitivity
 */
 float CInputSystem::GetMouseSensitivity() const
 {
-	return 0.f;
+	return mouse_sensitivity.GetFloat();
 }
 
 /*
@@ -756,7 +815,7 @@ EButtonCode CInputSystem::GetButtonCodeByName( const achar* pButtonName ) const
 	Assert( pButtonName );
 	for ( uint32 index = 0; index < BUTTON_CODE_COUNT; ++index )
 	{
-		if ( !L_Strcmp( s_pButtonNames[index], pButtonName ) )
+		if ( !L_Stricmp( s_pButtonNames[index], pButtonName ) )
 		{
 			return ( EButtonCode )index;
 		}
@@ -778,4 +837,72 @@ const achar* CInputSystem::GetButtonName( EButtonCode buttonCode ) const
 	}
 
 	return s_pButtonNames[( uint32 )buttonCode];
+}
+
+
+/*
+==================
+Bind command
+==================
+*/
+CON_COMMAND( bind, "Bind a key", FCVAR_NONE )
+{
+	if ( argc < 2 || !argv )
+	{
+		Msg( "bind <key> <command> : Attach a command to a key" );
+		return;
+	}
+
+	// Get button code by name
+	EButtonCode		buttonCode = s_InputSystem.GetButtonCodeByName( argv[0] );
+	
+	// Do nothing if button isn't valid
+	if ( buttonCode == BUTTON_CODE_NONE )
+	{
+		Msg( "\"%s\" isn't a valid key", argv[0] );
+		return;
+	}
+
+	// Set binding
+	s_InputSystem.SetBinding( buttonCode, argv[1] );
+	Msg( "\"%s\" = \"%s\"", argv[0], argv[1] );
+}
+
+/*
+==================
+Unbind command
+==================
+*/
+CON_COMMAND( unbind, "Unbind a key", FCVAR_NONE )
+{
+	if ( argc < 1 || !argv )
+	{
+		Msg( "unbind <key> : Remove commands from a key" );
+		return;
+	}
+
+	// Get button code by name
+	EButtonCode		buttonCode = s_InputSystem.GetButtonCodeByName( argv[0] );
+
+	// Do nothing if button isn't valid
+	if ( buttonCode == BUTTON_CODE_NONE )
+	{
+		Msg( "\"%s\" isn't a valid key", argv[0] );
+		return;
+	}
+
+	// Unbind a key
+	s_InputSystem.SetBinding( buttonCode, "" );
+	Msg( "\"%s\" is unbind", argv[0] );
+}
+
+/*
+==================
+UnbindAll command
+==================
+*/
+CON_COMMAND( unbindall, "Unbind all keys", FCVAR_NONE )
+{
+	s_InputSystem.UnbindAll();
+	Msg( "All keys has been unbind" );
 }
