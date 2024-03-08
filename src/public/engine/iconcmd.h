@@ -47,6 +47,8 @@ enum ECVarFlags
 {
 	FCVAR_NONE		= 0,		/**< No flags */
 	FCVAR_CHEAT		= 1 << 0,	/**< This cvar is a cheat */
+	FCVAR_GAMEDLL	= 1 << 1,	/**< Defined by the game DLL */
+	FCVAR_ARCHIVE	= 1 << 2	/**< Set to cause it to be saved to a file */
 };
 
 /**

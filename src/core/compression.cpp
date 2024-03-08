@@ -28,7 +28,6 @@
 #include "pch_core.h"
 #include <zlib.h>
 
-#include "core/globals.h"
 #include "core/debug.h"
 #include "core/compression.h"
 

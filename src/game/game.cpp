@@ -25,10 +25,74 @@
  * SOFTWARE.
  */
 
-#include "interfaces/interfaces.h"
+#include "pch_game.h"
+#include "game/game.h"
 
-IFileSystem*		g_pFileSystem = nullptr;
-IWindowMgr*			g_pWindowMgr = nullptr;
-IInputSystem*		g_pInputSystem = nullptr;
-ICvar*				g_pCvar = nullptr;
-IGame*				g_pGame = nullptr;
+/*
+==================
+CGame::Init
+==================
+*/
+bool CGame::Init( CreateInterfaceFn_t pFactory )
+{
+	// Connect StdLib
+	if ( !ConnectStdLib( pFactory ) )
+	{
+		return false;
+	}
+
+	// Register cvars in the system
+	ConVar_Register( FCVAR_GAMEDLL );
+	return true;
+}
+
+/*
+==================
+CGame::Shutdown
+==================
+*/
+void CGame::Shutdown()
+{
+	// Unregister cvars and disconnect StdLib
+	ConVar_Unregister();
+	DisconnectStdLib();
+}
+
+/*
+==================
+CGame::FrameUpdate
+==================
+*/
+void CGame::FrameUpdate()
+{}
+
+
+/*
+==================
+CGameAppSystems::GetNum
+==================
+*/
+uint32 CGameAppSystems::GetNum() const
+{
+	return ( uint32 )appSystems.size();
+}
+
+/*
+==================
+CGameAppSystems::GetModuleName
+==================
+*/
+const achar* CGameAppSystems::GetModuleName( uint32 index ) const
+{
+	return appSystems[index].pModuleName;
+}
+
+/*
+==================
+CGameAppSystems::GetInterfaceName
+==================
+*/
+const achar* CGameAppSystems::GetInterfaceName( uint32 index ) const
+{
+	return appSystems[index].pInterfaceName;
+}

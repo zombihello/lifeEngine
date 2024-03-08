@@ -541,7 +541,7 @@ void CCvar::UnregisterCommand( IConCmdBase* pCommand )
 	pCommand->SetRegistered( false );
 
 	// Remove command
-	for ( IConCmdBase* pCurCommand = pConCmdList, *pPrevCommand = nullptr; pCurCommand; pCurCommand = pConCmdList->GetNext() )
+	for ( IConCmdBase* pCurCommand = pConCmdList, *pPrevCommand = nullptr; pCurCommand; pCurCommand = pCurCommand->GetNext() )
 	{
 		if ( pCurCommand != pCommand )
 		{

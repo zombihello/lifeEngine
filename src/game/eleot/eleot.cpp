@@ -25,10 +25,33 @@
  * SOFTWARE.
  */
 
-#include "interfaces/interfaces.h"
+#include "pch_game.h"
+#include "game/game.h"
 
-IFileSystem*		g_pFileSystem = nullptr;
-IWindowMgr*			g_pWindowMgr = nullptr;
-IInputSystem*		g_pInputSystem = nullptr;
-ICvar*				g_pCvar = nullptr;
-IGame*				g_pGame = nullptr;
+/**
+ * @ingroup game
+ * @brief Eleot game
+ */
+class CEleotGame : public CGame
+{
+public:
+	/**
+	 * @brief Get game description
+	 * @return Return string describing current module. For example: Eleot: Episodic, Nuclear Frost, etc
+	 */
+	virtual const achar* GetGameDescription() const override;
+};
+
+EXPOSE_SINGLE_INTERFACE( CEleotGame, IGame, GAME_INTERFACE_VERSION );
+EXPOSE_SINGLE_INTERFACE( CGameAppSystems, IGameAppSystems, GAME_APPSYSTEMS_INTERFACE_VERSION );
+
+
+/*
+==================
+CEleotGame::GetGameDescription
+==================
+*/
+const achar* CEleotGame::GetGameDescription() const
+{
+	return "Eleot";
+}

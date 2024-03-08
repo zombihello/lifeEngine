@@ -25,7 +25,7 @@
 * SOFTWARE.
 ]]
 
-project "engine"
+project "eleot"
     if not buildMonolithicEngine then
         kind "SharedLib"
     else
@@ -33,44 +33,50 @@ project "engine"
     end
     language    "C++"
     location( intermediateDir )
-
+	targetname	"game"
+	targetdir( buildDir .. "eleot/" .. binariesDir .. outputDir )
+	
     ----------- PROJECT SETTINGS --------
 
-    files       { 
-        "**.h", 
-        "**.inl", 
+	defines { "ELEOT_GAME_DLL" }
+
+    files       {
+		-- Shared game code
+		"../*.inl", 
+        "../*.cpp",
+        "../*.h",
+		
+		-- Eleot game code
+		"**.inl", 
         "**.cpp",
-        "../public/engine/**.h",
-        "../public/engine/**.inl",
-        "../public/core/**.cpp"
+        "**.h",
+		
+		-- Public interfaces and shared code
+        "../../public/game/**.h",
+        "../../public/game/**.inl",
+        "../../public/core/**.cpp"
     }
 
     -- Enable PCH file
-    pchheader       "pch_engine.h"
-    pchsource       "pch_engine.cpp"
-    includedirs     { "./" }
+    pchheader       "pch_game.h"
+    pchsource       "../pch_game.cpp"
+    includedirs     { "./", "../" }
 
     vpaths      {
-        ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]    = { "../public/**.h", "../public/**.inl", "../public/**.cpp" }
+        ["src/*"]       = { "../*.h", "../*.inl", "../*.cpp" },
+        ["src/eleot/*"]	= { "**.h", "**.inl", "**.cpp" },
+		["public/*"]    = { "../public/**.h", "../public/**.inl", "../public/**.cpp" }
     }
 
     links       {
         "core",
         "stdlib",
-		"interfaces",
-		"gameinfo",
-        "appframework"
-    }
-
-	dependson   {
-		game
+		"interfaces"
     }
 
 	----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
-	RapidJson.Link()
 
     ---------- PLATFORM SPECIFIC SETTINGS ---------
 
@@ -82,5 +88,5 @@ project "engine"
     -- Windows
     filter "platforms:Win64"
         files   { "**.rc" }
-        vpaths  { ["src/*"] = { "**.rc" } }
+        vpaths  { ["src/eleot/*"] = { "**.rc" } }
     filter {}

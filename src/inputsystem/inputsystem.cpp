@@ -225,15 +225,23 @@ public:
 	virtual void SetBinding( EButtonCode button, const achar* pCommand ) override;
 
 	/**
+	 * @brief Get binding for a key
+	 *
+	 * @param button	Button code
+	 * @return Return console command for a key. If not set returns empty string
+	 */
+	virtual const achar* GetBindingCommand( EButtonCode button ) const override;
+
+	/**
 	 * @brief Unbind all keys
 	 */
 	virtual void UnbindAll() override;
 
 	/**
-	 * @brief Execute command of a key
+	 * @brief Execute binding command of a key
 	 * @param button	Button code
 	 */
-	void ExecCommand( EButtonCode button );
+	void ExecBindingCommand( EButtonCode button );
 
 	/**
 	 * @brief Set relative mouse mode
@@ -527,25 +535,25 @@ void CInputSystem::ProcessInputEvent( void* pUserData, const InputEvent& inputEv
 		// Key pressed
 	case InputEvent::EVENT_KEY_PRESSED:			
 		pInputSystem->buttonEvents[inputEvent.events.key.code] = BUTTON_EVENT_PRESSED;
-		pInputSystem->ExecCommand( inputEvent.events.key.code );
+		pInputSystem->ExecBindingCommand( inputEvent.events.key.code );
 		break;
 
 		// Key released
 	case InputEvent::EVENT_KEY_RELEASED:
 		pInputSystem->buttonEvents[inputEvent.events.key.code] = BUTTON_EVENT_RELEASED;
-		pInputSystem->ExecCommand( inputEvent.events.key.code );
+		pInputSystem->ExecBindingCommand( inputEvent.events.key.code );
 		break;
 
 		// Mouse pressed
 	case InputEvent::EVENT_MOUSE_PRESSED:
 		pInputSystem->buttonEvents[inputEvent.events.mouseButton.code] = BUTTON_EVENT_PRESSED;
-		pInputSystem->ExecCommand( inputEvent.events.mouseButton.code );
+		pInputSystem->ExecBindingCommand( inputEvent.events.mouseButton.code );
 		break;
 
 		// Mouse released
 	case InputEvent::EVENT_MOUSE_RELEASED:
 		pInputSystem->buttonEvents[inputEvent.events.mouseButton.code] = BUTTON_EVENT_RELEASED;
-		pInputSystem->ExecCommand( inputEvent.events.mouseButton.code );
+		pInputSystem->ExecBindingCommand( inputEvent.events.mouseButton.code );
 		break;
 
 		// Mouse move
@@ -558,13 +566,13 @@ void CInputSystem::ProcessInputEvent( void* pUserData, const InputEvent& inputEv
 		if ( pInputSystem->mouseOffset.x != 0.f )
 		{
 			pInputSystem->buttonEvents[MOUSE_X] = BUTTON_EVENT_MOVED;
-			pInputSystem->ExecCommand( MOUSE_X );
+			pInputSystem->ExecBindingCommand( MOUSE_X );
 		}
 
 		if ( pInputSystem->mouseOffset.y != 0.f )
 		{
 			pInputSystem->buttonEvents[MOUSE_Y] = BUTTON_EVENT_MOVED;
-			pInputSystem->ExecCommand( MOUSE_Y );
+			pInputSystem->ExecBindingCommand( MOUSE_Y );
 		}
 		break;
 
@@ -573,7 +581,7 @@ void CInputSystem::ProcessInputEvent( void* pUserData, const InputEvent& inputEv
 	{
 		EButtonCode		button = inputEvent.events.mouseWheel.y > 0 ? MOUSE_WHEELUP : MOUSE_WHEELDOWN;
 		pInputSystem->buttonEvents[button] = BUTTON_EVENT_SCROLLED;
-		pInputSystem->ExecCommand( button );
+		pInputSystem->ExecBindingCommand( button );
 		break;
 	}
 
@@ -627,10 +635,21 @@ void CInputSystem::UnbindAll()
 
 /*
 ==================
+CInputSystem::GetBindingCommand
+==================
+*/
+const achar* CInputSystem::GetBindingCommand( EButtonCode button ) const
+{
+	Assert( button < BUTTON_CODE_COUNT );
+	return binds[button].c_str();
+}
+
+/*
+==================
 CInputSystem::ExecCommand
 ==================
 */
-void CInputSystem::ExecCommand( EButtonCode button )
+void CInputSystem::ExecBindingCommand( EButtonCode button )
 {
 	Assert( button < BUTTON_CODE_COUNT );
 	if ( !binds[button].empty() )

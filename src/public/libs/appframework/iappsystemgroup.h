@@ -60,8 +60,8 @@ enum
  */
 struct AppSystemInfo
 {
-	std::string		moduleName;		/**< Module name */
-	std::string		interfaceName;	/**< Inteface name */
+	const achar*	pModuleName;		/**< Module name */
+	const achar*	pInterfaceName;		/**< Interface name */
 };
 
 /**
@@ -103,6 +103,7 @@ public:
 
 	/**
 	 * @brief Main loop implemented by the application
+	 * @return Return exit code. If all ok returns zero
 	 */
 	virtual int32 Main() = 0;
 
@@ -165,7 +166,7 @@ public:
 	 * First, modules are loaded, next they are connected, followed by initialization
 	 * then Main() is run, then modules are shut down, disconnected, and unloaded
 	 * 
-	 * @return Return exit code
+	 * @return Return exit code. If all ok returns zero
 	 */
 	int32 Run();
 
@@ -183,7 +184,7 @@ public:
 	}
 
 	/**
-	 * @brief Allow the application to do some work after all AppSystems are shut down
+	 * @brief Allow the application to do some work before all AppSystems are shut down
 	 */
 	virtual void PreShutdown() override
 	{}
@@ -265,7 +266,7 @@ private:
 
 	/**
 	 * @brief Startup
-	 * @return Return exit code
+	 * @return Return exit code. If all ok returns zero
 	 */
 	int32 Startup();
 

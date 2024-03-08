@@ -36,6 +36,7 @@ class IFileSystem;
 class IWindowMgr;
 class IInputSystem;
 class ICvar;
+class IGame;
 
 /**
  * @ingroup interfaces
@@ -60,5 +61,11 @@ extern IInputSystem* g_pInputSystem;
  * @brief Console system
  */
 extern ICvar* g_pCvar;
+
+/**
+ * @ingroup interfaces
+ * @brief Game
+ */
+extern IGame* g_pGame;
 
 #endif // !INTERFACES_H

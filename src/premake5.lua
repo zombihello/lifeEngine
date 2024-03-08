@@ -85,6 +85,8 @@ inputsystem                 = "inputsystem/"
 filesystem                  = "filesystem/"
 interfaces                  = "libs/interfaces/"
 engine						= "engine/"
+gameDLL						= "game/" .. game
+gameinfo					= "libs/gameinfo"
 
 --------------- THIRD PARTIES ---------
 thirdParty_Mimalloc         = thirdPartyDir .. "mimalloc-2.1.2"
@@ -204,3 +206,6 @@ workspace( game )
             include( stdlib )
             include( appframework )
             include( interfaces )
+			include( gameinfo )
+	group "/Game"
+		include( gameDLL )

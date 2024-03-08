@@ -298,6 +298,7 @@ void L_RemoveDotPathSeparators( achar* pPath, bool bRemoveDoubleSeparators = tru
 FORCEINLINE void L_RemoveDotPathSeparators( std::string& path, bool bRemoveDoubleSeparators = true )
 {
     L_RemoveDotPathSeparators( path.data(), bRemoveDoubleSeparators );
+    path.resize( L_Strlen( path.c_str() ) );
 }
 
 /**

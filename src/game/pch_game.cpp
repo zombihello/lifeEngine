@@ -1,7 +1,4 @@
 /**
- * @file
- * @addtogroup core core
- *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -28,25 +25,4 @@
  * SOFTWARE.
  */
 
-#ifndef GLOBALS_H
-#define GLOBALS_H
-
-/**
- * @ingroup core
- * @brief Indicates that MainLoop should be exited at the end of the current iteration
- */
-extern bool							g_bRequestingExit;
-
-/**
- * @ingroup core
- * @brief Seconds per CPU cycle for this PC
- */
-extern double						g_SecondsPerCycle;
-
-/**
- * @ingroup core
- * @brief Is console IO was initialized for logs
- */
-extern bool							g_bConsoleIOInited;
-
-#endif // !GLOBALS_H
+#include "pch_game.h"

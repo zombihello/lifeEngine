@@ -1,4 +1,7 @@
 /**
+ * @file
+ * @addtogroup engine engine
+ *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -25,10 +28,15 @@
  * SOFTWARE.
  */
 
-#include "interfaces/interfaces.h"
+#ifndef SYS_DLL_H
+#define SYS_DLL_H
 
-IFileSystem*		g_pFileSystem = nullptr;
-IWindowMgr*			g_pWindowMgr = nullptr;
-IInputSystem*		g_pInputSystem = nullptr;
-ICvar*				g_pCvar = nullptr;
-IGame*				g_pGame = nullptr;
+#include "stdlib/interface.h"
+
+/**
+ * @ingroup engine
+ * @brief This factory gets to many of the major app-single systems
+ */
+extern CreateInterfaceFn_t		g_pAppSystemFactory;
+
+#endif // !SYS_DLL_H

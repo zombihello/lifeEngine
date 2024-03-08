@@ -37,6 +37,7 @@
 
 #include "core/types.h"
 #include "core/platform.h"
+#include "stdlib/filetools.h"
 
 /**
  * @ingroup filesystem
@@ -59,7 +60,13 @@ public:
     CSearchPath( const achar* pNewPathID, const achar* pNewPath )
         : pathID( pNewPathID )
         , path( pNewPath )
-    {}
+    {
+        if ( !L_IsAbsolutePath( pNewPath ) )
+        {
+            L_MakeAbsolutePath( pNewPath, path );
+        }
+        L_RemoveDotPathSeparators( path );
+    }
 
     /**
      * @brief Set path ID

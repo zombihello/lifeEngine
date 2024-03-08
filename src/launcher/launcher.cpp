@@ -30,15 +30,22 @@
 #include <filesystem>
 
 #include "appframework/iwindowmgr.h"
+#include "core/icommandline.h"
 #include "inputsystem/iinputsystem.h"
 #include "filesystem/ifilesystem.h"
 #include "launcher/launcher.h"
 
 /**
  * @ingroup launcher
- * @brief Macro for set full name module
+ * @brief Macros for set full name module
  */
 #define LAUNCHER_APPSYSTEM( Name )		Name DLL_EXT_STRING
+
+/**
+ * @ingroup launcher
+ * @brief Macros default game directory
+ */
+#define DEFAULT_GAMEDIR					"eleot"
 
 #if ENABLE_LOGGING
 static FILE*		s_pLogFile = nullptr;		// Launcher's log file
@@ -104,6 +111,7 @@ CLifeEngineApp::CLifeEngineApp
 CLifeEngineApp::CLifeEngineApp( appInstanceHandle_t hInstance /* = nullptr */ )
 	: hInstance( hInstance )
 	, pWindowMgr( nullptr )
+	, pEngineLauncher( nullptr )
 {}
 
 /*
@@ -113,6 +121,10 @@ CLifeEngineApp::Create
 */
 bool CLifeEngineApp::Create()
 {
+	// Print some info about this engine build and user
+	Msg( "Engine build: %i (" __DATE__ " " __TIME__ ")", Sys_BuildNumber() );
+	Msg( "User %s//%s", Sys_GetComputerName(), Sys_GetUserName() );
+
 	// Load application systems
 	AppSystemInfo		appSystemInfos[] =
 	{
@@ -120,10 +132,11 @@ bool CLifeEngineApp::Create()
 		{ LAUNCHER_APPSYSTEM( "inputsystem" ),		INPUTSYSTEM_INTERFACE_VERSION		},
 		{ LAUNCHER_APPSYSTEM( "filesystem" ),		FILESYSTEM_INTERFACE_VERSION		},
 		{ LAUNCHER_APPSYSTEM( "engine" ),			CVAR_INTERFACE_VERSION				},
+		{ LAUNCHER_APPSYSTEM( "engine" ),			ENGINE_LAUNCHER_INTERFACE_VERSION	},
 		{ "", "" }																			// Required to terminate the list
 	};
 
-	// Add window manager to the app systems list
+	// Add the window manager to app systems list
 	pWindowMgr = CreateWindowMgr();
 	AddSystem( pWindowMgr, WINDOWMGR_INTERFACE_VERSION );
 
@@ -133,24 +146,8 @@ bool CLifeEngineApp::Create()
 		return false;
 	}
 
-	// Create the window
-	if ( !pWindowMgr->Create( "LifeEngine", 1280, 720 ) )
-	{
-		return false;
-	}
-
-	// Get the input system and attach it to the window manager
-	IInputSystem*	pInputSystem = ( IInputSystem* )FindSystem( INPUTSYSTEM_INTERFACE_VERSION );
-	pInputSystem->AttachToWindow( pWindowMgr );
-	
-	// Subscribe on close window event
-	pWindowMgr->OnProcessWindowEvent()->AddFunc( []( void* pUserData, const WindowEvent& windowEvent ) 
-												 {
-													 if ( windowEvent.type == WindowEvent::EVENT_WINDOW_CLOSE )
-													 {
-														 Sys_RequestExit( false );
-													 }
-												 }, nullptr );
+	// Get the engine launcher
+	pEngineLauncher = ( IEngineLauncher* )FindSystem( ENGINE_LAUNCHER_INTERFACE_VERSION );
 	return true;
 }
 
@@ -161,12 +158,26 @@ CLifeEngineApp::PreInit
 */
 bool CLifeEngineApp::PreInit()
 {
+	// Connect StdLib and register cvars
 	if ( !ConnectStdLib( GetFactory() ) )
 	{
 		return false;
 	}
-
 	ConVar_Register();
+
+	// Create a hidden window for we can init render context and other things links with the one
+	if ( !pWindowMgr->Create( "LifeEngine", 1, 1, WINDOW_STYLE_DEFAULT | WINDOW_STYLE_HIDDEN ) )
+	{
+		Sys_Error( "Launcher: Failed to create window" );
+		return false;
+	}
+
+	// Set startup info
+	StartupInfo							startupInfo;
+	startupInfo.pAppInstance			= hInstance;
+	startupInfo.pGame					= CommandLine()->HasParam( "game" ) ? CommandLine()->GetFirstValue( "game" ) : DEFAULT_GAMEDIR;
+	startupInfo.pParentAppSystemGroup	= this;
+	pEngineLauncher->SetStartupInfo( startupInfo );
 	return true;
 }
 
@@ -177,11 +188,7 @@ CLifeEngineApp::Main
 */
 int32 CLifeEngineApp::Main()
 {
-	while ( !Sys_IsRequestingExit() )
-	{
-		pWindowMgr->ProcessEvents();
-	}
-	return 0;
+	return pEngineLauncher->Run();
 }
 
 /*
@@ -193,4 +200,8 @@ void CLifeEngineApp::PostShutdown()
 {
 	ConVar_Unregister();
 	DisconnectStdLib();
+	pWindowMgr->Close();
+
+	pWindowMgr = nullptr;
+	pEngineLauncher = nullptr;
 }

@@ -506,7 +506,7 @@ public:
 	 * @brief Load from buffer
 	 * 
 	 * @param pBuffer	Buffer. The buffer must be null terminated
-	 * @return Return TRUE if file successfully loaded, otherwise returns FALSE
+	 * @return Return TRUE if buffer successfully loaded, otherwise returns FALSE
 	 */
 	bool LoadFromBuffer( const achar* pBuffer );
 

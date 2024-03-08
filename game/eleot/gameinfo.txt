@@ -1,0 +1,13 @@
+{
+	"game":		"Eleot",
+	"search_paths": [
+		{
+			"id": 	"GAMEBIN", 
+			"path":	"|gameinfo_path|/bin/|platform_subdir|"
+		},
+		{
+			"id":	"GAME", 
+			"path":	"|gameinfo_path|"
+		}
+	]
+}

@@ -28,6 +28,10 @@
 #include "pch_core.h"
 #include "core/core_private.h"
 
+bool		g_bRequestingExit = false;
+double		g_SecondsPerCycle = Sys_GetSecondsPerCycle();
+bool		g_bConsoleIOInited = false;
+
 /**
  * @ingroup core
  * @brief Build number counter

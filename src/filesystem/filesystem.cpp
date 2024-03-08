@@ -109,12 +109,11 @@ bool CFileSystem::Init()
 	// Set our base directory
 	L_SetCurrentDirectory( baseDir );
 
+	// Add a search path to base directory
+	AddSearchPath( baseDir.c_str(), "BASE_PATH");
+
 	// Add a search path to folder with engine binary files
-	{
-		std::string		relativeExePath;
-		L_MakeRelativePath( exePath, baseDir, relativeExePath, false );
-		AddSearchPath( relativeExePath.c_str(), "ENGINEBIN" );
-	}
+	AddSearchPath( exePath.c_str(), "ENGINEBIN" );
 
 	// Add search path to folder with engine resources
 	AddSearchPath( "engine", "ENGINE" );
@@ -767,21 +766,19 @@ bool CFileSystem::MakeDirectoryInternal( const achar* pPath )
 	fullPath.resize( L_Strlen( pPath ) );
 
 	// Try make directory tree
-	uint32			createCount = 0;
 	for ( uint32 index = 0, count = ( uint32 )fullPath.size(); index < count; ++index )
 	{
 		fullPath[index] = pPath[index];
-		if ( L_IsPathSeparator( pPath[index] ) || index + 1 == count )
+		if ( ( L_IsPathSeparator( pPath[index] ) || index + 1 == count ) && !Plat_IsFileExists( fullPath.c_str() ) )
 		{
 			if ( !Plat_MakeDirectory( fullPath.c_str() ) )
 			{
 				return false;
 			}
-			++createCount;
 		}
 	}
 
-	return createCount > 0;
+	return true;
 }
 
 /*
@@ -941,8 +938,8 @@ CFileSystem::AddSearchPath
 */
 void CFileSystem::AddSearchPath( const achar* pSearchPath, const achar* pPathID )
 {
-	searchPaths.push_back( CSearchPath( pPathID, pSearchPath ) );
-	Msg( "FileSystem: Added search path '%s' with ID '%s'", pSearchPath, pPathID );
+	const CSearchPath&	searchPath = searchPaths.emplace_back( pPathID, pSearchPath );
+	Msg( "FileSystem: Added search path '%s' with ID '%s'", searchPath.GetPath().c_str(), searchPath.GetPathID().c_str() );
 }
 
 /*
@@ -968,8 +965,8 @@ void CFileSystem::RemoveSearchPath( const achar* pPathID )
 		const CSearchPath&		searchPath = searchPaths[index];
 		if ( searchPath.GetPathID() == pPathID )
 		{
-			searchPaths.erase( searchPaths.begin() + index );
 			Msg( "FileSystem: Removed search path '%s' with ID '%s'", searchPath.GetPath().c_str(), pPathID );
+			searchPaths.erase( searchPaths.begin() + index );
 		}
 		else
 		{

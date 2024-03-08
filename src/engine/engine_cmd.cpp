@@ -25,10 +25,24 @@
  * SOFTWARE.
  */
 
-#include "interfaces/interfaces.h"
+#include "pch_engine.h"
 
-IFileSystem*		g_pFileSystem = nullptr;
-IWindowMgr*			g_pWindowMgr = nullptr;
-IInputSystem*		g_pInputSystem = nullptr;
-ICvar*				g_pCvar = nullptr;
-IGame*				g_pGame = nullptr;
+/*
+==================
+Version command
+==================
+*/
+CON_COMMAND( version, "Print version info string", FCVAR_NONE )
+{
+	Msg( "Engine build: %i (" __DATE__ " " __TIME__ ")", Sys_BuildNumber() );
+}
+
+/*
+==================
+Quit command
+==================
+*/
+CON_COMMAND( quit, "Quit from the game", FCVAR_NONE )
+{
+	Sys_RequestExit( false );
+}

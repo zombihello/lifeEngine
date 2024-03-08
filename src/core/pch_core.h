@@ -39,7 +39,6 @@
 // Core
 #include "core/build.h"
 #include "core/types.h"
-#include "core/globals.h"
 #include "core/core_private.h"
 #include "core/platform_private.h"
 #include "core/threading_private.h"

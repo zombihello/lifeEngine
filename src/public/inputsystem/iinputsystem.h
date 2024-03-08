@@ -87,6 +87,14 @@ public:
 	virtual void SetBinding( EButtonCode button, const achar* pCommand ) = 0;
 
 	/**
+	 * @brief Get binding for a key
+	 * 
+	 * @param button	Button code
+	 * @return Return console command for a key. If not set returns empty string
+	 */
+	virtual const achar* GetBindingCommand( EButtonCode button ) const = 0;
+
+	/**
 	 * @brief Unbind all keys
 	 */
 	virtual void UnbindAll() = 0;

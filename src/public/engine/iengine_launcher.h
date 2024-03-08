@@ -1,4 +1,7 @@
 /**
+ * @file
+ * @addtogroup engine engine
+ *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -25,10 +28,51 @@
  * SOFTWARE.
  */
 
-#include "interfaces/interfaces.h"
+#ifndef IENGINE_LAUNCHER_H
+#define IENGINE_LAUNCHER_H
 
-IFileSystem*		g_pFileSystem = nullptr;
-IWindowMgr*			g_pWindowMgr = nullptr;
-IInputSystem*		g_pInputSystem = nullptr;
-ICvar*				g_pCvar = nullptr;
-IGame*				g_pGame = nullptr;
+#include "appframework/iappsystem.h"
+
+// Forward declarations
+class CAppSystemGroup;
+
+/**
+ * @ingroup engine
+ * @brief Main engine interface version to launcher 
+ */
+#define ENGINE_LAUNCHER_INTERFACE_VERSION "LEngineLauncher001"
+
+/**
+ * @ingroup engine
+ * @brief Startup info
+ */
+struct StartupInfo
+{
+	void*				pAppInstance;				/**< OS application instance */
+	const achar*		pGame;						/**< Root game name ("eleot", for example) */
+	CAppSystemGroup*	pParentAppSystemGroup;		/**< Parent application system group */
+};
+
+/**
+ * @ingroup engine
+ * @brief Main engine interface to launcher
+ */
+class IEngineLauncher : public IAppSystem
+{
+public:
+	/**
+	 * @brief Set startup info
+	 * @note This function must be called before Init()
+	 *
+	 * @param info	Startup info
+	 */
+	virtual void SetStartupInfo( const StartupInfo& info ) = 0;
+
+	/**
+	 * @brief Run the engine
+	 * @return Return exit code. If all ok returns zero
+	 */
+	virtual int32 Run() = 0;
+};
+
+#endif // !IENGINE_LAUNCHER_H

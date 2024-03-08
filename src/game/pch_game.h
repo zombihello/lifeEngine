@@ -1,4 +1,7 @@
 /**
+ * @file
+ * @addtogroup game game
+ *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -25,8 +28,17 @@
  * SOFTWARE.
  */
 
-#include "pch_core.h"
+// STL
+#include <cstdlib>
+#include <string>
+#include <vector>
 
-bool		g_bRequestingExit = false;
-double		g_SecondsPerCycle = Sys_GetSecondsPerCycle();
-bool		g_bConsoleIOInited = false;
+// Interfaces
+#include "interfaces/interfaces.h"
+
+// StdLib
+#include "stdlib/stdlib.h"
+#include "stdlib/convar.h"
+
+// Core
+#include "core/debug.h"

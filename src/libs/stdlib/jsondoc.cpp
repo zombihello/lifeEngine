@@ -248,7 +248,7 @@ void CJsonValue::Set( const rapidjson::Value& value )
 CJsonDoc::LoadFromFile
 ==================
 */
-bool CJsonDoc::LoadFromFile( const achar* path )
+bool CJsonDoc::LoadFromFile( const achar* pPath )
 {
 	// Do nothing if file system isn't valid
 	Assert( g_pFileSystem );
@@ -258,12 +258,12 @@ bool CJsonDoc::LoadFromFile( const achar* path )
 	}
 
 	// Try open file
-	TRefPtr<IFileReader>	file = g_pFileSystem->CreateFileReader( path );
+	TRefPtr<IFileReader>	file = g_pFileSystem->CreateFileReader( pPath );
 	if ( !file )
 	{
 		return false;
 	}
-
+	
 	// Allocate memory for buffer
 	uint64	fileSize = file->GetSize() + 1;
 	byte*	pBuffer = ( byte* )Mem_MallocZero( fileSize );

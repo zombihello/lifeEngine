@@ -45,10 +45,12 @@ void L_GetCurrentDirectory( std::string& destStr, bool bShrinkToFit /*= true*/ )
 		destStr.resize( destStr.size() * 2 );
 	}
 
-	// Remove all extra null terminator characters (if it need)
+	// Remove all extra null terminator characters
+	destStr = destStr.c_str();
+
+	// Shrink to fit if it need
 	if ( bShrinkToFit )
 	{
-		destStr = destStr.c_str();
 		destStr.shrink_to_fit();
 	}
 }
@@ -183,10 +185,12 @@ void L_MakeAbsolutePath( const std::string& srcPath, std::string& destPath, cons
 		destPath.resize( destPath.size() * 2 );
 	}
 
-	// Remove all extra null terminator characters (if it need)
+	// Remove all extra null terminator characters
+	destPath = destPath.c_str();
+
+	// Shrink to fit if it need
 	if ( bShrinkToFit )
 	{
-		destPath = destPath.c_str();
 		destPath.shrink_to_fit();
 	}
 }
@@ -333,11 +337,16 @@ bool L_MakeRelativePath( const std::string& fullPath, const std::string& dirPath
 		}
 	}
 
-	// Remove all extra null terminator characters (if it need)
-	if ( result == 0 && bShrinkToFit )
+	// Remove all extra null terminator characters
+	if ( result == 0 )
 	{
 		relativePath = relativePath.c_str();
-		relativePath.shrink_to_fit();
+
+		// Shrink to fit if it need
+		if ( bShrinkToFit )
+		{
+			relativePath.shrink_to_fit();
+		}
 	}
 
 	return result == 0;
@@ -526,10 +535,12 @@ void L_GetFileBaseName( const std::string& path, std::string& fileName, bool bSh
 		fileName.resize( fileName.size() * 2 );
 	}
 
-	// Remove all extra null terminator characters (if it need)
+	// Remove all extra null terminator characters
+	fileName = fileName.c_str();
+
+	// Shrink to fit if it need
 	if ( bShrinkToFit )
 	{
-		fileName = fileName.c_str();
 		fileName.shrink_to_fit();
 	}
 }
@@ -610,10 +621,12 @@ void L_GetFilePath( const std::string& srcPath, std::string& destPath, bool bShr
 		destPath.resize( destPath.size() * 2 );
 	}
 
-	// Remove all extra null terminator characters (if it need)
+	// Remove all extra null terminator characters
+	destPath = destPath.c_str();
+
+	// Shrink to fit if it need
 	if ( bShrinkToFit )
 	{
-		destPath = destPath.c_str();
 		destPath.shrink_to_fit();
 	}
 }

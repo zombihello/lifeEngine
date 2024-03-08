@@ -75,8 +75,6 @@ int32 CAppSystemGroup::Run()
 {
 	// The factory now uses this app system group
 	s_pCurrentAppSystem = this;
-	Msg( "AppFramework: Engine build: %i (" __DATE__ " " __TIME__ ")", Sys_BuildNumber() );
-	Msg( "AppFramework: user %s//%s", Sys_GetComputerName(), Sys_GetUserName() );
 
 	// Load, connect, init
 	int32	retVal = Startup();
@@ -346,13 +344,13 @@ CAppSystemGroup::AddSystems
 */
 bool CAppSystemGroup::AddSystems( AppSystemInfo* pAppSystems )
 {
-	while ( !pAppSystems->moduleName.empty() )
+	while ( pAppSystems->pModuleName[0] )
 	{
-		appModule_t		module = LoadModule( pAppSystems->moduleName.c_str() );
-		IAppSystem*		pSystem = AddSystem( module, pAppSystems->interfaceName.c_str() );
+		appModule_t		module = LoadModule( pAppSystems->pModuleName );
+		IAppSystem*		pSystem = AddSystem( module, pAppSystems->pInterfaceName );
 		if ( !pSystem )
 		{
-			Warning( "AppFramework: Unable to load interface '%s' from '%s'", pAppSystems->interfaceName.c_str(), pAppSystems->moduleName.c_str() );
+			Warning( "AppFramework: Unable to load interface '%s' from '%s'", pAppSystems->pInterfaceName, pAppSystems->pModuleName );
 			return false;
 		}
 

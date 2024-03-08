@@ -33,6 +33,7 @@
 
 #include "appframework/iappsystemgroup.h"
 #include "appframework/iwindowmgr.h"
+#include "engine/iengine_launcher.h"
 
 /**
  * @ingroup launcher
@@ -73,6 +74,7 @@ public:
 
 	/**
 	 * @brief Main loop implemented by the application
+	 * @return Return exit code. If all ok returns zero
 	 */
 	virtual int32 Main() override;
 
@@ -82,8 +84,9 @@ public:
 	virtual void PostShutdown() override;
 
 private:
-	appInstanceHandle_t		hInstance;		/**< Application instance handle */
-	IWindowMgr*				pWindowMgr;		/**< The window manager */
+	appInstanceHandle_t		hInstance;			/**< Application instance handle */
+	IWindowMgr*				pWindowMgr;			/**< Window manager */
+	IEngineLauncher*		pEngineLauncher;	/**< Engine launcher */
 };
 
 #endif // !LAUNCHER_H
