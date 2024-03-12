@@ -25,7 +25,7 @@
 * SOFTWARE.
 ]]
 
-project "eleot"
+project "studiorender"
     if not buildMonolithicEngine then
         kind "SharedLib"
     else
@@ -33,39 +33,26 @@ project "eleot"
     end
     language    "C++"
     location( intermediateDir )
-	targetname	"game"
-	targetdir( buildDir .. "eleot/" .. binariesDir .. outputDir )
 	
     ----------- PROJECT SETTINGS --------
 
-	defines { "ELEOT_GAME_DLL" }
-
     files       {
-		-- Shared game code
-		"../*.inl", 
-        "../*.cpp",
-        "../*.h",
-		
-		-- Eleot game code
 		"**.inl", 
         "**.cpp",
         "**.h",
-		
-		-- Public interfaces and shared code
-        "../../public/game/**.h",
-        "../../public/game/**.inl",
-        "../../public/core/**.cpp"
+        "../public/studiorender/**.h",
+        "../public/studiorender/**.inl",
+        "../public/core/**.cpp"
     }
 
     -- Enable PCH file
-    pchheader       "pch_game.h"
-    pchsource       "../pch_game.cpp"
-    includedirs     { "./", "../" }
+    pchheader       "pch_studiorender.h"
+    pchsource       "pch_studiorender.cpp"
+    includedirs     { "./" }
 
     vpaths      {
-        ["src/*"]       = { "../*.h", "../*.inl", "../*.cpp" },
-        ["src/eleot/*"]	= { "**.h", "**.inl", "**.cpp" },
-		["public/*"]    = { "../../public/**.h", "../../public/**.inl", "../../public/**.cpp" }
+        ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
+        ["public/*"]    = { "../public/**.h", "../public/**.inl", "../public/**.cpp" }
     }
 
     links       {
@@ -87,6 +74,14 @@ project "eleot"
 
     -- Windows
     filter "platforms:Win64"
-        files   { "**.rc" }
-        vpaths  { ["src/eleot/*"] = { "**.rc" } }
+        files       { "**.rc" }
+        vpaths      { ["src/*"] = { "**.rc" } }
+        dependson   { "studioapi_dx11" }
     filter {}
+
+    ---------- EXCLUDES SUBPROJECT'S FILES ---------
+
+    excludes        { 
+        "studioapi/**", 
+        "../public/studiorender/studioapi/**" 
+    }

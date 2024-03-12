@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup interfaces interfaces
+ * @addtogroup studiorender studiorender
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,58 +28,45 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
+#ifndef ISTUDIORENDER_H
+#define ISTUDIORENDER_H
 
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
+#include "studiorender/studioapi/istudioviewport.h"
+#include "appframework/iappsystem.h"
 
 /**
- * @ingroup interfaces
- * @brief File system
+ * @ingroup studiorender
+ * @brief Studio render interface version
  */
-extern IFileSystem* g_pFileSystem;
+#define STUDIORENDER_INTERFACE_VERSION "LStudioRender001"
 
 /**
- * @ingroup interfaces
- * @brief Window manager
+ * @ingroup studiorender
+ * @brief Studio render interface
  */
-extern IWindowMgr* g_pWindowMgr;
+class IStudioRender : public IAppSystem
+{
+public:
+	/**
+	 * @brief Set Studio API
+	 * Sets which API we should be using. Has to be done before connect
+	 * 
+	 * @param pStudioAPIDLL		Studio API module name (e.g studioapi_dx11.dll)
+	 * @return Return TRUE if Studio API successfully set, otherwise returns FALSE
+	 */
+	virtual void SetStudioAPI( const achar* pStudioAPIDLL ) = 0;
 
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
+	/**
+	 * @brief Begin render frame
+	 * @param pStudioViewport	Studio viewport
+	 */
+	virtual void BeginFrame( IStudioViewport* pStudioViewport ) = 0;
 
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
+	/**
+	 * @brief End render frame
+	 * @param pStudioViewport	Studio viewport
+	 */
+	virtual void EndFrame( IStudioViewport* pStudioViewport ) = 0;
+};
 
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
-
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
-
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
-
-#endif // !INTERFACES_H
+#endif // !ISTUDIORENDER_H

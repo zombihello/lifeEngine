@@ -25,7 +25,7 @@
 * SOFTWARE.
 ]]
 
-project "eleot"
+project "studioapi_dx11"
     if not buildMonolithicEngine then
         kind "SharedLib"
     else
@@ -33,60 +33,50 @@ project "eleot"
     end
     language    "C++"
     location( intermediateDir )
-	targetname	"game"
-	targetdir( buildDir .. "eleot/" .. binariesDir .. outputDir )
 	
     ----------- PROJECT SETTINGS --------
 
-	defines { "ELEOT_GAME_DLL" }
+    defines     { "STUDIOAPI_DX11" }
 
     files       {
-		-- Shared game code
-		"../*.inl", 
+        -- Shared studioapi code
+        "../*.inl", 
         "../*.cpp",
         "../*.h",
-		
-		-- Eleot game code
+
+        -- DirectX 11 code
 		"**.inl", 
         "**.cpp",
         "**.h",
-		
-		-- Public interfaces and shared code
-        "../../public/game/**.h",
-        "../../public/game/**.inl",
-        "../../public/core/**.cpp"
+        "**.rc",
+
+        -- Public interfaces and shared code
+        "../../../public/studiorender/studioapi/**.h",
+        "../../../public/studiorender/studioapi/**.inl",
+        "../../../public/core/**.cpp"
     }
 
     -- Enable PCH file
-    pchheader       "pch_game.h"
-    pchsource       "../pch_game.cpp"
+    pchheader       "pch_studioapi.h"
+    pchsource       "../pch_studioapi.cpp"
     includedirs     { "./", "../" }
 
     vpaths      {
         ["src/*"]       = { "../*.h", "../*.inl", "../*.cpp" },
-        ["src/eleot/*"]	= { "**.h", "**.inl", "**.cpp" },
-		["public/*"]    = { "../../public/**.h", "../../public/**.inl", "../../public/**.cpp" }
+        ["src/dx11/*"]	= { "**.h", "**.inl", "**.cpp", "**.rc" },
+		["public/*"]    = { "../../../public/**.h", "../../../public/**.inl", "../../../public/**.cpp" }
     }
 
     links       {
         "core",
         "stdlib",
-		"interfaces"
+		"interfaces",
+        "d3d11", 
+        "d3d9", 
+        "dxgi", 
+        "dxguid"
     }
 
 	----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
-
-    ---------- PLATFORM SPECIFIC SETTINGS ---------
-
-    -- Exclude platform specific for other platforms
-	filter "platforms:not Win64"
-        excludes { "**/platforms/windows/**.*" }
-    filter {}
-
-    -- Windows
-    filter "platforms:Win64"
-        files   { "**.rc" }
-        vpaths  { ["src/eleot/*"] = { "**.rc" } }
-    filter {}

@@ -295,6 +295,11 @@ IAppSystem* CAppSystemGroup::AddSystem( appModule_t module, const achar* pInterf
 
 	Assert( module >= 0 && module < modules.size() );
 	CreateInterfaceFn_t		pFactoryFn = modules[module].handle ? Sys_GetFactory( modules[module].handle ) : modules[module].pFactoryFn;
+	if ( !pFactoryFn )
+	{
+		Warning( "AppFramework: Failed to get interface factory from '%s'", modules[module].name.c_str() );
+		return nullptr;
+	}
 
 	void*	pSystem = pFactoryFn( pInterfaceName );
 	if ( !pSystem )

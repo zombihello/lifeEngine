@@ -60,7 +60,8 @@ project "launcher"
     dependson   {
         "inputsystem",
         "filesystem",
-		"engine"
+		"engine",
+        "studiorender"
     }
 
     ----------- LINK THIRD PARTIES -----------------

@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup interfaces interfaces
+ * @addtogroup studioapi studioapi
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,58 +28,24 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
+// STL
+#include <string>
 
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
+// Interfaces
+#include "interfaces/interfaces.h"
 
-/**
- * @ingroup interfaces
- * @brief File system
- */
-extern IFileSystem* g_pFileSystem;
+// StdLib
+#include "stdlib/stdlib.h"
+#include "stdlib/convar.h"
 
-/**
- * @ingroup interfaces
- * @brief Window manager
- */
-extern IWindowMgr* g_pWindowMgr;
+// Core
+#include "core/core.h"
+#include "core/debug.h"
 
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
+// Studio API
+#include "studiorender/studioapi/istudioapi.h"
 
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
-
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
-
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
-
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
-
-#endif // !INTERFACES_H
+// DirectX 11
+#if defined( STUDIOAPI_DX11 )
+	#include "studiorender/studioapi/dx11/pch_studioapi_dx11.h"
+#endif // STUDIOAPI_DX11

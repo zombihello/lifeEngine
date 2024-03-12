@@ -88,7 +88,7 @@ bool CEngine::Init()
 		return false;
 	}
 
-	// Read file configuration and override from command line
+	// Read file configuration and override it from command line
 	ReadConfiguration( "//GAME/cfg/config.cfg" );
 	OverrideConfigurationFromCommandLine();
 

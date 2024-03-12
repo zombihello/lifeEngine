@@ -435,6 +435,7 @@ CInputSystem::Disconnect
 void CInputSystem::Disconnect()
 {
 	DetachFromWindow();
+	DisconnectStdLib();
 }
 
 /*

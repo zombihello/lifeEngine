@@ -86,7 +86,9 @@ filesystem                  = "filesystem/"
 interfaces                  = "libs/interfaces/"
 engine						= "engine/"
 gameDLL						= "game/" .. game
-gameinfo					= "libs/gameinfo"
+gameinfo					= "libs/gameinfo/"
+studiorender                = "studiorender/"
+studioapi_dx11              = "studiorender/studioapi/dx11/"
 
 --------------- THIRD PARTIES ---------
 thirdParty_Mimalloc         = thirdPartyDir .. "mimalloc-2.1.2"
@@ -202,6 +204,10 @@ workspace( game )
         include( inputsystem )
         include( filesystem )
 		include( engine )
+        include( studiorender )
+        filter "platforms:Win64"
+            include( studioapi_dx11 )
+        filter {}
         group "/Engine/Libraries"
             include( stdlib )
             include( appframework )

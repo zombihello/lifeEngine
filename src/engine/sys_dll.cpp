@@ -228,6 +228,7 @@ bool CGameAppSystemGroup::Create()
 	// Load game dll
 	if ( !GameDLL_Load() )
 	{
+		Sys_Error( "Failed to load game" DLL_EXT_STRING );
 		return false;
 	}
 

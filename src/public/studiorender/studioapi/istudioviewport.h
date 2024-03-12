@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup interfaces interfaces
+ * @addtogroup studioapi studioapi
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,58 +28,57 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
+#ifndef ISTUDIOVIEWPORT_H
+#define ISTUDIOVIEWPORT_H
 
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
+#include "studiorender/studioapi/istudiosurface.h"
 
 /**
- * @ingroup interfaces
- * @brief File system
+ * @ingroup studioapi
+ * @brief Studio viewport interface
  */
-extern IFileSystem* g_pFileSystem;
+class IStudioViewport : public IRefCounted
+{
+public:
+	/**
+	 * @brief Resize viewport
+	 *
+	 * @param width			New width
+	 * @param height		New height
+	 */
+	virtual void Resize( uint32 width, uint32 height ) = 0;
 
-/**
- * @ingroup interfaces
- * @brief Window manager
- */
-extern IWindowMgr* g_pWindowMgr;
+	/**
+	 * @brief Set surface of viewport
+	 * @note Viewport who created with window handle must be ignore this method
+	 *
+	 * @param pSurface		Studio surface
+	 */
+	virtual void SetSurface( IStudioSurface* pSurface ) = 0;
 
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
+	/**
+	 * @brief Get width
+	 * @return Return viewport width
+	 */
+	virtual uint32 GetWidth() const = 0;
 
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
+	/**
+	 * @brief Get height
+	 * @return Return viewport height
+	 */
+	virtual uint32 GetHeight() const = 0;
 
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
+	/**
+	 * @breif Get surface of viewport
+	 * @return Return pointer to surface of viewport. Returns NULL if this viewport was created with window handle
+	 */
+	virtual TRefPtr<IStudioSurface> GetSurface() const = 0;
 
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
+	/**
+	 * @breif Get window handle
+	 * @return Return pointer to window handle. Returns NULL if this viewport was created with surface
+	 */
+	virtual windowHandle_t GetWindowHandle() const = 0;
+};
 
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
-
-#endif // !INTERFACES_H
+#endif // !ISTUDIOVIEWPORT_H

@@ -32,3 +32,5 @@ IWindowMgr*			g_pWindowMgr = nullptr;
 IInputSystem*		g_pInputSystem = nullptr;
 ICvar*				g_pCvar = nullptr;
 IGame*				g_pGame = nullptr;
+IStudioRender*		g_pStudioRender = nullptr;
+IStudioAPI*			g_pStudioAPI = nullptr;

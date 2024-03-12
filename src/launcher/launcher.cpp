@@ -33,6 +33,7 @@
 #include "core/icommandline.h"
 #include "inputsystem/iinputsystem.h"
 #include "filesystem/ifilesystem.h"
+#include "studiorender/istudiorender.h"
 #include "launcher/launcher.h"
 
 /**
@@ -129,9 +130,10 @@ bool CLifeEngineApp::Create()
 	AppSystemInfo		appSystemInfos[] =
 	{
 		{ LAUNCHER_APPSYSTEM( "engine" ),			CVAR_QUERY_INTERFACE_VERSION		},	// This one must be first
-		{ LAUNCHER_APPSYSTEM( "inputsystem" ),		INPUTSYSTEM_INTERFACE_VERSION		},
 		{ LAUNCHER_APPSYSTEM( "filesystem" ),		FILESYSTEM_INTERFACE_VERSION		},
 		{ LAUNCHER_APPSYSTEM( "engine" ),			CVAR_INTERFACE_VERSION				},
+		{ LAUNCHER_APPSYSTEM( "inputsystem" ),		INPUTSYSTEM_INTERFACE_VERSION		},
+		{ LAUNCHER_APPSYSTEM( "studiorender" ),		STUDIORENDER_INTERFACE_VERSION		},
 		{ LAUNCHER_APPSYSTEM( "engine" ),			ENGINE_LAUNCHER_INTERFACE_VERSION	},
 		{ "", "" }																			// Required to terminate the list
 	};
@@ -145,6 +147,18 @@ bool CLifeEngineApp::Create()
 	{
 		return false;
 	}
+
+	// Load up the appropriate Studio API DLL
+	// This has to be done before connection 
+	const achar*	pStudioAPIDLL = nullptr;
+#if PLATFORM_WINDOWS
+	pStudioAPIDLL = "studioapi_dx11" DLL_EXT_STRING;
+#else
+	#error Unknown platform
+#endif // PLATFORM_WINDOWS
+
+	IStudioRender*		pStudioRender = ( IStudioRender* )FindSystem( STUDIORENDER_INTERFACE_VERSION );
+	pStudioRender->SetStudioAPI( pStudioAPIDLL );
 
 	// Get the engine launcher
 	pEngineLauncher = ( IEngineLauncher* )FindSystem( ENGINE_LAUNCHER_INTERFACE_VERSION );

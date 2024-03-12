@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup interfaces interfaces
+ * @addtogroup studioapi studioapi
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,58 +28,35 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
+#ifndef ISTUDIOSURFACE_H
+#define ISTUDIOSURFACE_H
 
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
+#include "stdlib/refcount.h"
+#include "stdlib/math/color.h"
 
 /**
- * @ingroup interfaces
- * @brief File system
+ * @ingroup studioapi
+ * @brief Studio surface interface
  */
-extern IFileSystem* g_pFileSystem;
+class IStudioSurface : public IRefCounted
+{
+public:
+	/**
+	 * @brief Clear surface
+	 * @param color		Color for clearing render target
+	 */
+	virtual void ClearSurface( const CColor& color ) = 0;
 
-/**
- * @ingroup interfaces
- * @brief Window manager
- */
-extern IWindowMgr* g_pWindowMgr;
+	/**
+	 * @brief Clear depth stencil
+	 * This method clear depth stencil surface. If it isn't the depth stencil must be ignored
+	 *
+	 * @param bClearDepth		Is need clear depth buffer
+	 * @param bClearStencil		Is need clear stencil buffer
+	 * @param depthValue		Clear the depth buffer with this value
+	 * @param stencilValue		Clear the stencil buffer with this value
+	 */
+	virtual void ClearDepthStencil( bool bClearDepth = true, bool bClearStencil = true, float depthValue = 1.f, uint8 stencilValue = 0 ) = 0;
+};
 
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
-
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
-
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
-
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
-
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
-
-#endif // !INTERFACES_H
+#endif // !ISTUDIOSURFACE_H
