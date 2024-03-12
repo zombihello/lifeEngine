@@ -123,6 +123,16 @@ FORCEINLINE int32 Sys_InterlockedOr( volatile int32* pDest, int32 value )
 
 /*
 ==================
+Sys_GetCurrentThreadHandle
+==================
+*/
+threadHandle_t Sys_GetCurrentThreadHandle()
+{
+	return GetCurrentThread();
+}
+
+/*
+==================
 Sys_Yield
 ==================
 */

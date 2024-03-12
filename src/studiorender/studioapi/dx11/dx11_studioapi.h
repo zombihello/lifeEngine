@@ -59,6 +59,16 @@ public:
 	virtual void Shutdown() override;
 
 	/**
+	 * @brief Acquire thread ownership
+	 */
+	virtual void AcquireThreadOwnership() override;
+
+	/**
+	 * @brief Release thread ownership
+	 */
+	virtual void ReleaseThreadOwnership() override;
+
+	/**
 	 * @brief Create viewport
 	 *
 	 * @param windowHandle	OS window handle

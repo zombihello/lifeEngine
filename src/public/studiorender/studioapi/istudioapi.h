@@ -61,6 +61,16 @@ public:
 	virtual void Shutdown() = 0;
 
 	/**
+	 * @brief Acquire thread ownership
+	 */
+	virtual void AcquireThreadOwnership() = 0;
+
+	/**
+	 * @brief Release thread ownership
+	 */
+	virtual void ReleaseThreadOwnership() = 0;
+
+	/**
 	 * @brief Create viewport
 	 *
 	 * @param windowHandle	OS window handle 

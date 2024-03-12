@@ -28,58 +28,51 @@
  * SOFTWARE.
  */
 
-#ifndef ISTUDIORENDER_H
-#define ISTUDIORENDER_H
+#ifndef ISTUDIOCMDBUFFER_H
+#define ISTUDIOCMDBUFFER_H
 
-#include "appframework/iappsystem.h"
-#include "studiorender/studioapi/istudioviewport.h"
-#include "studiorender/istudiocmdbuffer.h"
+#include "core/types.h"
+#include "core/platform.h"
 
-/**
- * @ingroup studiorender
- * @brief Studio render interface version
- */
-#define STUDIORENDER_INTERFACE_VERSION "LStudioRender001"
+// Forward declarations
+class IStudioCmdBuffer;
 
 /**
  * @ingroup studiorender
- * @brief Studio render interface
+ * @brief A reference to an allocated chunk of IStudioCmdBuffer
  */
-class IStudioRender : public IAppSystem
+struct StudioCmdAlloc
+{
+	byte*	pAllocation;	/**< Pointer to the begin allocation data */
+	uint32	allocatedSize;	/**< Allocated size */
+};
+
+/**
+ * @ingroup studiorender
+ * @brief Studio render command buffer interface
+ */
+class IStudioCmdBuffer
 {
 public:
 	/**
-	 * @brief Set Studio API
-	 * Sets which API we should be using. Has to be done before connect
+	 * @brief Allocate a chunk
+	 * @warning After filling in the allocated chunk you have to call CommitAllocation
 	 * 
-	 * @param pStudioAPIDLL		Studio API module name (e.g studioapi_dx11.dll)
-	 * @return Return TRUE if Studio API successfully set, otherwise returns FALSE
+	 * @param allocationSize	The size of the allocation to make.
+	 * @return Return context of allocated chunk
 	 */
-	virtual void SetStudioAPI( const achar* pStudioAPIDLL ) = 0;
+	virtual StudioCmdAlloc GetAllocation( uint32 allocationSize ) = 0;
 
 	/**
-	 * @brief Begin render frame
-	 * @param pStudioViewport	Studio viewport
+	 * @brief Commit the allocated chunk
+	 * @param allocContext	Allocated chunk context
 	 */
-	virtual void BeginFrame( IStudioViewport* pStudioViewport ) = 0;
+	virtual void CommitAllocation( StudioCmdAlloc& allocContext ) = 0;
 
 	/**
-	 * @brief End render frame
-	 * @param pStudioViewport	Studio viewport
+	 * @brief Flush render commands
 	 */
-	virtual void EndFrame( IStudioViewport* pStudioViewport ) = 0;
-
-	/**
-	 * @brief Get command buffer of the render thread
-	 * @return Return pointer to command buffer of render thread. If return NULL it's mean what StudioRender don't use render thread
-	 */
-	virtual IStudioCmdBuffer* GetCommandBuffer() const = 0;
-
-	/**
-	 * @brief Is current thread is the render
-	 * @return Return TRUE if it called from the render thread or render thread isn't use, otherwise returns FALSE
-	 */
-	virtual bool IsInRenderThread() const = 0;
+	virtual void Flush() = 0;
 };
 
-#endif // !ISTUDIORENDER_H
+#endif // !ISTUDIOCMDBUFFER_H

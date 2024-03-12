@@ -45,16 +45,6 @@ typedef struct tagTHREADNAME_INFO
 
 /*
 ==================
-Sys_GetCurrentThreadHandle
-==================
-*/
-threadHandle_t Sys_GetCurrentThreadHandle()
-{
-	return GetCurrentThread();
-}
-
-/*
-==================
 Sys_SetThreadPriority
 ==================
 */
@@ -464,6 +454,10 @@ void CWindowsThread::SetName( const achar* pName )
 {
 	L_Strncpy( name, pName, sizeof( name ) - 1 );
 	name[sizeof( name ) - 1] = '\0';
+	if ( IsAlive() )
+	{
+		Sys_SetThreadName( handle, name );
+	}
 }
 
 /*

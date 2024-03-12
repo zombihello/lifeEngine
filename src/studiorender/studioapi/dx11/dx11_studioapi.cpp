@@ -154,6 +154,22 @@ void CStudioAPIDx11::Shutdown()
 
 /*
 ==================
+CStudioAPIDx11::AcquireThreadOwnership
+==================
+*/
+void CStudioAPIDx11::AcquireThreadOwnership()
+{}
+
+/*
+==================
+CStudioAPIDx11::ReleaseThreadOwnership
+==================
+*/
+void CStudioAPIDx11::ReleaseThreadOwnership()
+{}
+
+/*
+==================
 CStudioAPIDx11::CreateViewport
 ==================
 */

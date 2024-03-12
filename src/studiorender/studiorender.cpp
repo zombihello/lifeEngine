@@ -28,6 +28,7 @@
 #include "pch_studiorender.h"
 #include "filesystem/ifilesystem.h"
 #include "studiorender/istudiorender.h"
+#include "studiorender/renderthread.h"
 
 /**
  * @ingroup studiorender
@@ -95,6 +96,18 @@ public:
 	 * @param pStudioViewport	Studio viewport
 	 */
 	virtual void EndFrame( IStudioViewport* pStudioViewport ) override;
+
+	/**
+	 * @brief Get command buffer of the render thread
+	 * @return Return pointer to command buffer of render thread. If return NULL it's mean what StudioRender don't use render thread
+	 */
+	virtual IStudioCmdBuffer* GetCommandBuffer() const override;
+
+	/**
+	 * @brief Is current thread is the render
+	 * @return Return TRUE if it called from the render thread or render thread isn't use, otherwise returns FALSE
+	 */
+	virtual bool IsInRenderThread() const override;
 
 private:
 	/**
@@ -216,6 +229,9 @@ bool CStudioRender::Init()
 		return false;
 	}
 
+	// Start the render thread
+	R_StartRenderThread();
+
 	// We are done!
 	return true;
 }
@@ -227,6 +243,9 @@ CStudioRender::Shutdown
 */
 void CStudioRender::Shutdown()
 {
+	// Stop the render thread
+	R_StopRenderThread();
+
 	// Destroy Studio API and unregister cvars
 	DestroyStudioAPI();
 	ConVar_Unregister();
@@ -283,6 +302,26 @@ CStudioRender::EndFrame
 void CStudioRender::EndFrame( IStudioViewport* pStudioViewport )
 {
 	g_pStudioAPI->EndDrawingViewport( pStudioViewport, true, false );
+}
+
+/*
+==================
+CStudioRender::GetCommandBuffer
+==================
+*/
+IStudioCmdBuffer* CStudioRender::GetCommandBuffer() const
+{
+	return &g_StudioCmdBuffer;
+}
+
+/*
+==================
+CStudioRender::IsInRenderThreads
+==================
+*/
+bool CStudioRender::IsInRenderThread() const
+{
+	return ( g_RenderThreadHandle == INVALID_THREAD_HANDLE ) || ( Sys_GetCurrentThreadHandle() == g_RenderThreadHandle );
 }
 
 /*

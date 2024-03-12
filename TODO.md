@@ -10,13 +10,13 @@
 - [X] Implement support compression with ZLIB
 - [X] Implement support TSharedPtr and TWeakPtr
 - [X] Implement support delegates
-- [ ] Create DirectX 11 RHI
+- [ ] Create DirectX 11 StudioAPI
 - [ ] Create shader system
 	- [ ] Shader compiler
 	- [ ] Vertex factory
 	- [ ] Shader manager
 - [ ] Implement render triangle
-- [ ] Create render thread
+- [X] Create render thread
 - [ ] Create resource system
 - [ ] Create material system
 - [ ] Render triangle with textures

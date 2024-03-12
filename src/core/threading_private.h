@@ -35,15 +35,6 @@
 
 /**
  * @ingroup core
- * @brief Get current thread handle
- * @note Need implement on each platform
- *
- * @return Return OS handle of current thread
- */
-threadHandle_t Sys_GetCurrentThreadHandle();
-
-/**
- * @ingroup core
  * @brief Set thread priority
  * @note Need implement on each platform
  * 
