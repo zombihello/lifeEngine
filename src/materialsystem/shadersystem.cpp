@@ -259,7 +259,7 @@ bool CShaderSystem::LoadShaderLib( const achar* pPath, bool bGameShaderLib /* = 
 	}
 	else
 	{
-		shaderLibIndex = shaderLibs.size();
+		shaderLibIndex = ( uint32 )shaderLibs.size();
 		pShaderLibInfo = &shaderLibs.emplace_back();
 	}
 
