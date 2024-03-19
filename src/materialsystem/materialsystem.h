@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup interfaces interfaces
+ * @addtogroup materialsystem materialsystem
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,72 +28,57 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
+#ifndef MATERIALSYSTEM_H
+#define MATERIALSYSTEM_H
 
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
-class IShaderSystem;
-class IMaterialSystem;
+#include "materialsystem/imaterialsystem.h"
 
 /**
- * @ingroup interfaces
- * @brief File system
+ * @ingroup materialsystem
+ * @brief Application systems factory. It used for connect materialsystem's submodules (e.g: stdshaders)
  */
-extern IFileSystem* g_pFileSystem;
+extern CreateInterfaceFn_t	g_pAppSystemFactory;
 
 /**
- * @ingroup interfaces
- * @brief Window manager
- */
-extern IWindowMgr* g_pWindowMgr;
-
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
-
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
-
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
-
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
-
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
-
-/**
- * @ingroup interfaces
- * @brief Shader system
- */
-extern IShaderSystem* g_pShaderSystem;
-
-/**
- * @ingroup interfaces
+ * @ingroup materialsystem
  * @brief Material system
  */
-extern IMaterialSystem* g_pMaterialSystem;
+class CMaterialSystem : public CBaseAppSystem<IMaterialSystem>
+{
+public:
+	/**
+	 * @brief Connect application system
+	 *
+	 * @param pFactory		Pointer to interface factory
+	 * @return Return TRUE if successes application system is connected, otherwise return FALSE
+	 */
+	virtual bool Connect( CreateInterfaceFn_t pFactory ) override;
 
-#endif // !INTERFACES_H
+	/**
+	 * @brief Disconnect application system
+	 */
+	virtual void Disconnect() override;
+
+	/**
+	 * @brief Query interface
+	 *
+	 * Here's where systems can access other interfaces implemented by this object
+	 *
+	 * @param pInterfaceName	Interface name
+	 * @return Return pointer to interface, if doesn't implement the requested interface return NULL
+	 */
+	virtual void* QueryInterface( const achar* pInterfaceName ) override;
+
+	/**
+	 * @brief Init application system
+	 * @return Return TRUE if application system is inited
+	 */
+	virtual bool Init() override;
+
+	/**
+	 * @brief Shutdown application system
+	 */
+	virtual void Shutdown() override;
+};
+
+#endif // !MATERIALSYSTEM_H

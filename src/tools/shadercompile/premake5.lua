@@ -25,11 +25,10 @@
 * SOFTWARE.
 ]]
 
-project "launcher"
-    kind        "WindowedApp"
+project "shadercompile"
+    kind        "ConsoleApp"
     language    "C++"
     location( intermediateDir )
-    targetname( game )
 
 	----------- PROJECT SETTINGS --------
 
@@ -37,17 +36,17 @@ project "launcher"
         "**.h", 
         "**.inl", 
         "**.cpp",
-        "../public/core/**.cpp"
+        "../../public/core/**.cpp"
     }
 
     -- Enable PCH file
-    pchheader       "pch_launcher.h"
-    pchsource       "pch_launcher.cpp"
+    pchheader       "pch_shadercompile.h"
+    pchsource       "pch_shadercompile.cpp"
     includedirs     { "./" }
 
     vpaths      {
         ["src/*"]           = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]        = { "../public/**.cpp" }
+        ["public/*"]        = { "../../public/**.cpp" }
     }
 
     links       {
@@ -58,16 +57,14 @@ project "launcher"
     }
 
     dependson   {
-        "inputsystem",
         "filesystem",
-		"engine",
-        "studiorender",
-        "materialsystem"
+		"engine"
     }
 
     ----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
+    RapidJson.Link()
 
 	---------- PLATFORM SPECIFIC SETTINGS ---------
 	

@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup interfaces interfaces
+ * @addtogroup studioapi studioapi
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,72 +28,23 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
-
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
-class IShaderSystem;
-class IMaterialSystem;
+#ifndef ISTUDIOSHADER_H
+#define ISTUDIOSHADER_H
 
 /**
- * @ingroup interfaces
- * @brief File system
+ * @ingroup rhi
+ * @brief Enumeration shader type
  */
-extern IFileSystem* g_pFileSystem;
+enum EStudioShaderType
+{
+	STUDIO_SHADER_VERTEX,										/**< Vertex shader */
+	STUDIO_SHADER_HULL,											/**< Hull shader */
+	STUDIO_SHADER_DOMAIN,										/**< Domain shader */
+	STUDIO_SHADER_GEOMETRY,										/**< Geometry shader */
+	STUDIO_SHADER_PIXEL,										/**< Pixel shader */
+	STUDIO_SHADER_COMPUTE,										/**< Compute shader */
+	STUDIO_SHADER_NUM_TYPES,									/**< Number of shader types */
+	STUDIO_SHADER_NUM_DRAW_TYPES = STUDIO_SHADER_NUM_TYPES - 1	/**< Number of shader types that are part of pipeline (without compute shader) */
+};
 
-/**
- * @ingroup interfaces
- * @brief Window manager
- */
-extern IWindowMgr* g_pWindowMgr;
-
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
-
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
-
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
-
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
-
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
-
-/**
- * @ingroup interfaces
- * @brief Shader system
- */
-extern IShaderSystem* g_pShaderSystem;
-
-/**
- * @ingroup interfaces
- * @brief Material system
- */
-extern IMaterialSystem* g_pMaterialSystem;
-
-#endif // !INTERFACES_H
+#endif // !ISTUDIOSHADER_H

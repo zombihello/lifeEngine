@@ -25,59 +25,38 @@
 * SOFTWARE.
 ]]
 
-project "launcher"
-    kind        "WindowedApp"
+project "shaderlib"
+    kind        "StaticLib"
     language    "C++"
     location( intermediateDir )
-    targetname( game )
 
 	----------- PROJECT SETTINGS --------
 
-    files       {
+    files       { 
         "**.h", 
         "**.inl", 
         "**.cpp",
-        "../public/core/**.cpp"
+        "../../public/libs/shaderlib/**.h",
+        "../../public/libs/shaderlib/**.inl",
     }
 
     -- Enable PCH file
-    pchheader       "pch_launcher.h"
-    pchsource       "pch_launcher.cpp"
+    pchheader       "pch_shaderlib.h"
+    pchsource       "pch_shaderlib.cpp"
     includedirs     { "./" }
 
     vpaths      {
-        ["src/*"]           = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]        = { "../public/**.cpp" }
+        ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
+        ["public/*"]    = { "../../public/**.h", "../../public/**.inl", "../../public/**.cpp" }
     }
-
-    links       {
-        "core",
-        "stdlib",
-        "appframework",
-        "interfaces"
-    }
-
-    dependson   {
-        "inputsystem",
-        "filesystem",
-		"engine",
-        "studiorender",
-        "materialsystem"
-    }
-
+	
     ----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
-
+    
 	---------- PLATFORM SPECIFIC SETTINGS ---------
 	
 	-- Exclude platform specific for other platforms
 	filter "platforms:not Win64"
         excludes { "**/platforms/windows/**.*" }
-    filter {}
-
-    -- Windows
-    filter "platforms:Win64"
-        files   { "**.rc" }
-        vpaths  { ["src/*"] = { "**.rc" } }
     filter {}

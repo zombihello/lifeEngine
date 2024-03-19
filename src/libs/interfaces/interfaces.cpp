@@ -34,3 +34,5 @@ ICvar*				g_pCvar = nullptr;
 IGame*				g_pGame = nullptr;
 IStudioRender*		g_pStudioRender = nullptr;
 IStudioAPI*			g_pStudioAPI = nullptr;
+IShaderSystem*		g_pShaderSystem = nullptr;
+IMaterialSystem*	g_pMaterialSystem = nullptr;

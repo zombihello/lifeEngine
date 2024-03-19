@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup interfaces interfaces
+ * @addtogroup shadercompile shadercompile
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,72 +28,45 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
+#ifndef VF_CPPCLASS_GENERATOR_H
+#define VF_CPPCLASS_GENERATOR_H
 
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
-class IShaderSystem;
-class IMaterialSystem;
+#include "tools/shadercompile/shadercompile.h"
 
 /**
- * @ingroup interfaces
- * @brief File system
+ * @ingroup shadercompile
+ * @brief Generator of a helper C++ class for vertex factory
  */
-extern IFileSystem* g_pFileSystem;
+class CVFCppClassGenerator
+{
+public:
+	/**
+	 * @brief Generate a helper C++ class for vertex factory
+	 * 
+	 * @param vertexFactory		Vertex factory
+	 * @param vfType			Vertex factory type
+	 */
+	void Generate( const VertexFactory& vertexFactory, EVertexFactoryType vfType );
 
-/**
- * @ingroup interfaces
- * @brief Window manager
- */
-extern IWindowMgr* g_pWindowMgr;
+	/**
+	 * @brief Reset generator
+	 */
+	FORCEINLINE void Reset()
+	{
+		buffer.clear();
+	}
 
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
+	/**
+	 * @brief Get generated C++ class
+	 * @return Return generated C++ class. Returns an empty string if Generate() was not called or Reset() was called
+	 */
+	FORCEINLINE const std::string& GetBuffer() const
+	{
+		return buffer;
+	}
 
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
+private:
+	std::string		buffer;		/**< Buffer of generated C++ class */
+};
 
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
-
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
-
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
-
-/**
- * @ingroup interfaces
- * @brief Shader system
- */
-extern IShaderSystem* g_pShaderSystem;
-
-/**
- * @ingroup interfaces
- * @brief Material system
- */
-extern IMaterialSystem* g_pMaterialSystem;
-
-#endif // !INTERFACES_H
+#endif // !VF_CPPCLASS_GENERATOR_H

@@ -25,53 +25,69 @@
 * SOFTWARE.
 ]]
 
-project "launcher"
-    kind        "WindowedApp"
+project "stdshaders"
+    if not buildMonolithicEngine then
+        kind "SharedLib"
+    else
+        kind "StaticLib"
+    end
     language    "C++"
     location( intermediateDir )
-    targetname( game )
-
-	----------- PROJECT SETTINGS --------
+	
+    ----------- PROJECT SETTINGS --------
 
     files       {
-        "**.h", 
-        "**.inl", 
+		"**.inl", 
         "**.cpp",
-        "../public/core/**.cpp"
+        "**.h",
+        "**.hlsl",
+        "shaderlist.makefile",
+        "../../public/materialsystem/**.h",
+        "../../public/materialsystem/**.inl",
+        "../../public/core/**.cpp"
     }
 
     -- Enable PCH file
-    pchheader       "pch_launcher.h"
-    pchsource       "pch_launcher.cpp"
-    includedirs     { "./" }
+    pchheader       "pch_stdshaders.h"
+    pchsource       "pch_stdshaders.cpp"
+    includedirs     { "./", intermediateDir .. "/generated/" }
 
     vpaths      {
-        ["src/*"]           = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]        = { "../public/**.cpp" }
+        ["src/*"]       = { "**.h", "**.inl", "**.cpp", "shaderlist.makefile", "**.hlsl" },
+        ["public/*"]    = { "../../public/**.h", "../../public/**.inl", "../../public/**.cpp" }
     }
+
+    -- Build commands for specific files
+    filter { "files:shaderlist.makefile" }
+        buildmessage    "Generate helper C++ classes for shaders"  
+        buildcommands   {
+            buildDir .. binariesDir .. outputDir .. "/shadercompile " .. "-makefile \"%{file.abspath}\" -gencpp-shaders -outcpp-shaders \"" .. intermediateDir .. "/generated/materialsystem/stdshaders/\" -skipcompilation"
+        }  
+        buildoutputs    {
+            intermediateDir .. "/generated/materialsystem/stdshaders/"
+        }
+    filter { "files:**.hlsl" }
+        buildaction "None" 
+    filter {}
 
     links       {
         "core",
         "stdlib",
-        "appframework",
-        "interfaces"
+		"interfaces",
+        "shaderlib"
     }
 
-    dependson   {
-        "inputsystem",
-        "filesystem",
-		"engine",
-        "studiorender",
-        "materialsystem"
+    dependson   { 
+        "shadercompile" 
     }
 
-    ----------- LINK THIRD PARTIES -----------------
+	----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
 
-	---------- PLATFORM SPECIFIC SETTINGS ---------
-	
-	-- Exclude platform specific for other platforms
+    ---------- PLATFORM SPECIFIC SETTINGS ---------
+
+    -- Exclude platform specific for other platforms
 	filter "platforms:not Win64"
         excludes { "**/platforms/windows/**.*" }
     filter {}

@@ -40,7 +40,7 @@ newoption {
 --------- GLOBAL VARIABLES -----------------
 
 -- Path to src folder
-root                        = _MAIN_SCRIPT_DIR
+root                        = _MAIN_SCRIPT_DIR .. "/"
 
 -- Path to intermediate directory for the engine and a game
 intermediateDir				= root .. "/intermediate/" .. _ACTION .. "/"
@@ -89,6 +89,10 @@ gameDLL						= "game/" .. game
 gameinfo					= "libs/gameinfo/"
 studiorender                = "studiorender/"
 studioapi_dx11              = "studiorender/studioapi/dx11/"
+shaderlib                   = "libs/shaderlib/"
+stdshaders                  = "materialsystem/stdshaders/"
+materialsystem              = "materialsystem/"
+shadercompile               = "tools/shadercompile/"
 
 --------------- THIRD PARTIES ---------
 thirdParty_Mimalloc         = thirdPartyDir .. "mimalloc-2.1.2"
@@ -205,13 +209,19 @@ workspace( game )
         include( filesystem )
 		include( engine )
         include( studiorender )
+        include( materialsystem )
         filter "platforms:Win64"
             include( studioapi_dx11 )
         filter {}
+        group "/Engine/Shaders"
+            include( stdshaders )
         group "/Engine/Libraries"
             include( stdlib )
             include( appframework )
             include( interfaces )
 			include( gameinfo )
+            include( shaderlib )
+    group "/Tools"
+        include( shadercompile )
 	group "/Game"
 		include( gameDLL )

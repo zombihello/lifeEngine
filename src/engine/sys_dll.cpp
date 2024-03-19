@@ -31,6 +31,8 @@
 #include "gameinfo/gameinfo.h"
 #include "inputsystem/iinputsystem.h"
 #include "filesystem/ifilesystem.h"
+#include "studiorender/studioapi/istudioapi.h"
+#include "studiorender/istudiorender.h"
 #include "game/igame.h"
 #include "engine/iengine_launcher.h"
 #include "engine/sys_dll.h"
@@ -365,14 +367,14 @@ bool CGameAppSystemGroup::GameDLL_Load()
 		g_pGame = ( IGame* )pGameFactory( GAME_INTERFACE_VERSION );
 		if ( !g_pGame )
 		{
-			Warning( "GameDLL_Load: Could not get IGame interface from library '//GAMEBIN/game" DLL_EXT_STRING "'" );
+			Warning( "GameDLL_Load: Could not get IGame interface from '//GAMEBIN/game" DLL_EXT_STRING "'" );
 			GameDLL_Unload();
 			return false;
 		}
 	}
 	else
 	{
-		Warning( "GameDLL_Load: Could not find factory interface in library '//GAMEBIN/game" DLL_EXT_STRING "'" );
+		Warning( "GameDLL_Load: Could not find factory interface in '//GAMEBIN/game" DLL_EXT_STRING "'" );
 		GameDLL_Unload();
 		return false;
 	}
@@ -400,7 +402,6 @@ void CGameAppSystemGroup::GameDLL_Unload()
 	}
 }
 
-
 /*
 ==================
 CEngineLauncher::Connect
@@ -424,6 +425,20 @@ bool CEngineLauncher::Connect( CreateInterfaceFn_t pFactory )
 	// Get the input system
 	g_pInputSystem = ( IInputSystem* )pFactory( INPUTSYSTEM_INTERFACE_VERSION );
 	if ( !g_pInputSystem )
+	{
+		return false;
+	}
+
+	// Get the Studio API
+	g_pStudioAPI = ( IStudioAPI* )pFactory( STUDIOAPI_INTERFACE_VERSION );
+	if ( !g_pStudioAPI )
+	{
+		return false;
+	}
+
+	// Get the studiorender
+	g_pStudioRender = ( IStudioRender* )pFactory( STUDIORENDER_INTERFACE_VERSION );
+	if ( !g_pStudioRender )
 	{
 		return false;
 	}

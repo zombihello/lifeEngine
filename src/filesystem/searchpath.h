@@ -125,11 +125,12 @@ public:
      * If pPathID isn't valid (pPathID is NULL or pPathID is empty, or lengthPathID is zero)
      * iterate over all search paths in the file system
      * 
+     * @param pFilePath     Path to file (without path ID)
      * @param bForWrite     Is should be this path used for writing
 	 * @param pPathID       Path ID
 	 * @param lengthPathID  Length of pPathID
      */
-    CSearchPathIterator( bool bForWrite, const achar* pPathID = nullptr, uint32 lengthPathID = 0 );
+    CSearchPathIterator( const achar* pFilePath, bool bForWrite, const achar* pPathID = nullptr, uint32 lengthPathID = 0 );
 
     /**
      * @brief Override operator ++
@@ -220,12 +221,13 @@ public:
      * If pPathID isn't valid (pPathID is NULL or pPathID is empty, or lengthPathID is zero)
      * iterate over all search paths in the file system
      *
+     * @param pFilePath     Path to file (without path ID)
      * @param bForWrite     Is should be this path used for writing
      * @param pPathID       Path ID
      * @param lengthPathID  Length of pPathID
      */
-    CSearchPathReverseIterator( bool bForWrite, const achar* pPathID = nullptr, uint32 lengthPathID = 0 )
-        : CSearchPathIterator( bForWrite, pPathID, lengthPathID )
+    CSearchPathReverseIterator( const achar* pFilePath, bool bForWrite, const achar* pPathID = nullptr, uint32 lengthPathID = 0 )
+        : CSearchPathIterator( pFilePath, bForWrite, pPathID, lengthPathID )
     {
         std::reverse( std::begin( searchPaths ), std::end( searchPaths ) );
     }

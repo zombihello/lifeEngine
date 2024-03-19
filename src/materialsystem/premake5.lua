@@ -25,53 +25,69 @@
 * SOFTWARE.
 ]]
 
-project "launcher"
-    kind        "WindowedApp"
+project "materialsystem"
+    if not buildMonolithicEngine then
+        kind "SharedLib"
+    else
+        kind "StaticLib"
+    end
     language    "C++"
     location( intermediateDir )
-    targetname( game )
-
-	----------- PROJECT SETTINGS --------
+	
+    ----------- PROJECT SETTINGS --------
 
     files       {
-        "**.h", 
-        "**.inl", 
+		"**.inl", 
         "**.cpp",
+        "**.h",
+        "**.hlsl",
+        "vertexfactory.makefile",
+        "../public/materialsystem/**.h",
+        "../public/materialsystem/**.inl",
         "../public/core/**.cpp"
     }
 
     -- Enable PCH file
-    pchheader       "pch_launcher.h"
-    pchsource       "pch_launcher.cpp"
-    includedirs     { "./" }
+    pchheader       "pch_materialsystem.h"
+    pchsource       "pch_materialsystem.cpp"
+    includedirs     { "./", intermediateDir .. "/generated/" }
 
     vpaths      {
-        ["src/*"]           = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]        = { "../public/**.cpp" }
+        ["src/*"]       = { "**.h", "**.inl", "**.cpp", "vertexfactory.makefile", "**.hlsl" },
+        ["public/*"]    = { "../public/**.h", "../public/**.inl", "../public/**.cpp" }
     }
+
+    -- Build commands for specific files
+    filter { "files:vertexfactory.makefile" }
+        buildmessage    "Generate C++ meta types for vertex factories"
+        buildcommands   {
+            buildDir .. binariesDir .. outputDir .. "/shadercompile " .. "-makefile \"%{file.abspath}\" -gencpp-vfs -outcpp-vfs \"" .. intermediateDir .. "/generated/materialsystem/\" -skipcompilation"
+        }  
+        buildoutputs    {
+            intermediateDir .. "/generated/materialsystem/"
+        }
+    filter { "files:**.hlsl" }
+        buildaction "None" 
+    filter {}
 
     links       {
         "core",
         "stdlib",
-        "appframework",
-        "interfaces"
+		"interfaces"
     }
 
-    dependson   {
-        "inputsystem",
-        "filesystem",
-		"engine",
-        "studiorender",
-        "materialsystem"
+    dependson   { 
+        "stdshaders",
+        "shadercompile" 
     }
 
-    ----------- LINK THIRD PARTIES -----------------
+	----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
 
-	---------- PLATFORM SPECIFIC SETTINGS ---------
-	
-	-- Exclude platform specific for other platforms
+    ---------- PLATFORM SPECIFIC SETTINGS ---------
+
+    -- Exclude platform specific for other platforms
 	filter "platforms:not Win64"
         excludes { "**/platforms/windows/**.*" }
     filter {}
@@ -81,3 +97,7 @@ project "launcher"
         files   { "**.rc" }
         vpaths  { ["src/*"] = { "**.rc" } }
     filter {}
+
+    ---------- EXCLUDES SUBPROJECT'S FILES ---------
+
+    excludes { "stdshaders/**" }

@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup interfaces interfaces
+ * @addtogroup studiorender studiorender
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,72 +28,34 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
+#ifndef VERTEXTYPES_H
+#define VERTEXTYPES_H
 
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
-class IShaderSystem;
-class IMaterialSystem;
+#include "core/types.h"
+#include "core/platform.h"
+#include "stdlib/math/math.h"
+#include "stdlib/math/color.h"
 
 /**
- * @ingroup interfaces
- * @brief File system
+ * @ingroup studiorender
+ * @brief Simple element vertex
  */
-extern IFileSystem* g_pFileSystem;
+struct SimpleElementVertex
+{
+	Vector4D	position;		/**< Position vertex */
+	Vector2D	texCoord;		/**< Texture coords */
+	CColor		color;			/**< Color */
 
-/**
- * @ingroup interfaces
- * @brief Window manager
- */
-extern IWindowMgr* g_pWindowMgr;
+	/**
+	 * @brief Overload operator ==
+	 * 
+	 * @param other		Other simple element to compare
+	 * @return Return TRUE if both elements is equal, otherwise returns FALSE
+	 */
+	bool FORCEINLINE operator==( const SimpleElementVertex& other ) const
+	{
+		return position == other.position && texCoord == other.texCoord && color == other.color;
+	}
+};
 
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
-
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
-
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
-
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
-
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
-
-/**
- * @ingroup interfaces
- * @brief Shader system
- */
-extern IShaderSystem* g_pShaderSystem;
-
-/**
- * @ingroup interfaces
- * @brief Material system
- */
-extern IMaterialSystem* g_pMaterialSystem;
-
-#endif // !INTERFACES_H
+#endif // !VERTEXTYPES_H

@@ -376,12 +376,16 @@ public:
 	 */
 	FORCEINLINE float GetNumber( float defaultValue = 0.f ) const
 	{
-		if ( type != JSONVALUE_TYPE_INT && type != JSONVALUE_TYPE_FLOAT || !pValue )
+		if ( type != JSONVALUE_TYPE_BOOL && type != JSONVALUE_TYPE_INT && type != JSONVALUE_TYPE_FLOAT || !pValue )
 		{
 			return defaultValue;
 		}
 
-		if ( type == JSONVALUE_TYPE_INT )
+		if ( type == JSONVALUE_TYPE_BOOL )
+		{
+			return ( float )GetBool();
+		}
+		else if ( type == JSONVALUE_TYPE_INT )
 		{
 			return ( float )GetInt();
 		}

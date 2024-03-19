@@ -1,7 +1,4 @@
 /**
- * @file
- * @addtogroup interfaces interfaces
- *
  * ************************************************************
  *                  This file is part of:
  *                      LIFEENGINE
@@ -28,72 +25,79 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
+#include "pch_shaderlib.h"
+#include "studiorender/studioapi/istudioapi.h"
+#include "shaderlib/shaderlib.h"
 
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
-class IShaderSystem;
-class IMaterialSystem;
+/*
+==================
+CShaderLib::Connect
+==================
+*/
+bool CShaderLib::Connect( CreateInterfaceFn_t pFactory )
+{
+	// Connect StdLib
+	if ( !ConnectStdLib( pFactory ) )
+	{
+		return false;
+	}
 
-/**
- * @ingroup interfaces
- * @brief File system
- */
-extern IFileSystem* g_pFileSystem;
+	// Get StudioAPI
+	g_pStudioAPI = ( IStudioAPI* )pFactory( STUDIOAPI_INTERFACE_VERSION );
+	if ( !g_pStudioAPI )
+	{
+		return false;
+	}
 
-/**
- * @ingroup interfaces
- * @brief Window manager
- */
-extern IWindowMgr* g_pWindowMgr;
+	return true;
+}
 
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
+/*
+==================
+CShaderLib::Disconnect
+==================
+*/
+void CShaderLib::Disconnect()
+{
+	// Disconnect StdLib
+	DisconnectStdLib();
+	g_pStudioAPI = nullptr;
+}
 
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
+/*
+==================
+CShaderLib::GetNumShaders
+==================
+*/
+uint32 CShaderLib::GetNumShaders() const
+{
+	return ( uint32 )shaders.size();
+}
 
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
+/*
+==================
+CShaderLib::GetShader
+==================
+*/
+IShader* CShaderLib::GetShader( uint32 index ) const
+{
+	Assert( index < ( uint32 )shaders.size() );
+	return shaders[index];
+}
 
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
 
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
+/*
+==================
+GetShaderLib
+==================
+*/
+CShaderLib* GetShaderLib()
+{
+	static CShaderLib*		s_pShaderLib = nullptr;
+	if ( !s_pShaderLib )
+	{
+		s_pShaderLib = new CShaderLib();
+	}
 
-/**
- * @ingroup interfaces
- * @brief Shader system
- */
-extern IShaderSystem* g_pShaderSystem;
-
-/**
- * @ingroup interfaces
- * @brief Material system
- */
-extern IMaterialSystem* g_pMaterialSystem;
-
-#endif // !INTERFACES_H
+	return s_pShaderLib;
+}

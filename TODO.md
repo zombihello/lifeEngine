@@ -15,6 +15,7 @@
 	- [ ] Shader compiler
 	- [ ] Vertex factory
 	- [ ] Shader manager
+	- [ ] Implement caching of generated C++ classes by shader compiler (for optimize build time of project)
 - [ ] Implement render triangle
 - [X] Create render thread
 - [ ] Create resource system

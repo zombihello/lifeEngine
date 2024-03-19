@@ -1,6 +1,6 @@
 /**
  * @file
- * @addtogroup interfaces interfaces
+ * @addtogroup materialsystem materialsystem
  *
  * ************************************************************
  *                  This file is part of:
@@ -28,72 +28,57 @@
  * SOFTWARE.
  */
 
-#ifndef INTERFACES_H
-#define INTERFACES_H
+#ifndef IVERTEXFACTORY_H
+#define IVERTEXFACTORY_H
 
-// Forward declarations
-class IFileSystem;
-class IWindowMgr;
-class IInputSystem;
-class ICvar;
-class IGame;
-class IStudioRender;
-class IStudioAPI;
-class IShaderSystem;
-class IMaterialSystem;
+#include "core/types.h"
+#include "stdlib/refcount.h"
+#include "studiorender/istudiorenderresource.h"
 
 /**
- * @ingroup interfaces
- * @brief File system
+ * @ingroup materialsystem
+ * @brief Enumeration of all vertex factory types
  */
-extern IFileSystem* g_pFileSystem;
+enum EVertexFactoryType
+{
+	VERTEXFACTORY_TYPE_SIMPLEELEMENT,	/**< Vertex factory for simple elements */
+	VERTEXFACTORY_NUM_TYPES				/**< Number of vertex factory types */
+};
 
 /**
- * @ingroup interfaces
- * @brief Window manager
+ * @ingroup materialsystem
+ * @brief Vertex factory interface
  */
-extern IWindowMgr* g_pWindowMgr;
+class IVertexFactory : public IStudioRenderResource, public IRefCounted
+{
+public:
+	/**
+	 * @brief Initialize vertex factory
+	 */
+	virtual void Init() = 0;
 
-/**
- * @ingroup interfaces
- * @brief Input system
- */
-extern IInputSystem* g_pInputSystem;
+	/**
+	 * @brief Shutdown vertex factory
+	 */
+	virtual void Shutdown() = 0;
 
-/**
- * @ingroup interfaces
- * @brief Console system
- */
-extern ICvar* g_pCvar;
+	/**
+	 * @brief Get vertex factory type
+	 * @return Return vertex factory type
+	 */
+	virtual EVertexFactoryType GetType() const = 0;
 
-/**
- * @ingroup interfaces
- * @brief Game
- */
-extern IGame* g_pGame;
+	/**
+	 * @brief Is supports instancing
+	 * @return Return TRUE if this vertex factory is supported instancing, otherwise returns FALSE
+	 */
+	virtual bool SupportsInstancing() const = 0;
 
-/**
- * @ingroup interfaces
- * @brief Studio render
- */
-extern IStudioRender* g_pStudioRender;
+	/**
+	 * @brief Get instance stream index
+	 * @return Return instance stream index
+	 */
+	virtual uint32 GetInstanceStreamIndex() const = 0;
+};
 
-/**
- * @ingroup interfaces
- * @brief Studio API
- */
-extern IStudioAPI* g_pStudioAPI;
-
-/**
- * @ingroup interfaces
- * @brief Shader system
- */
-extern IShaderSystem* g_pShaderSystem;
-
-/**
- * @ingroup interfaces
- * @brief Material system
- */
-extern IMaterialSystem* g_pMaterialSystem;
-
-#endif // !INTERFACES_H
+#endif // !IVERTEXFACTORY_H
