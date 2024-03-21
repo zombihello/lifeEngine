@@ -8,7 +8,7 @@ struct VertexFactoryInput
 	float4 		position		: POSITION;
 	float2 		texCoord0		: TEXCOORD0;
 	float4		color			: COLOR;
-}
+};
 
 float4 VertexFactory_GetLocalPosition( VertexFactoryInput input )
 {

@@ -1,6 +1,6 @@
 #include "common.hlsl"
 
-void MainPS() : SV_Target
+float4 MainPS() : SV_Target
 {
 #if FILL_RED_COLOR
 	#if !USE_GREEN_CHANNEL

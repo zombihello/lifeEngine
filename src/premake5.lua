@@ -93,6 +93,7 @@ shaderlib                   = "libs/shaderlib/"
 stdshaders                  = "materialsystem/stdshaders/"
 materialsystem              = "materialsystem/"
 shadercompile               = "tools/shadercompile/"
+shadercompile_dx11          = "tools/shadercompile/dx11/"
 
 --------------- THIRD PARTIES ---------
 thirdParty_Mimalloc         = thirdPartyDir .. "mimalloc-2.1.2"
@@ -222,6 +223,8 @@ workspace( game )
 			include( gameinfo )
             include( shaderlib )
     group "/Tools"
-        include( shadercompile )
+        group "/Tools/Shader Compile"
+            include( shadercompile )
+            include( shadercompile_dx11 )
 	group "/Game"
 		include( gameDLL )

@@ -54,10 +54,10 @@ struct ShaderFlag
 	{}
 
 	std::string		name;			/**< Flag name */
-	uint32			min;			/**< Minimum value */
-	uint32			max;			/**< Maximum value */
+	int32			min;			/**< Minimum value */
+	int32			max;			/**< Maximum value */
 	bool			bSetDefault;	/**< Is default value set */
-	uint32			defaultValue;	/**< Default value */
+	int32			defaultValue;	/**< Default value */
 };
 
 /**
@@ -100,6 +100,7 @@ struct Shader
 	 * @brief Constructor
 	 */
 	Shader()
+		: numFlagCombos( 1 )
 	{
 		// By default we don't use any vertex factory
 		ResetUseVFs();
@@ -121,7 +122,13 @@ struct Shader
 		Mem_Memset( &bUseVertexFactory[0], 1, VERTEXFACTORY_NUM_TYPES * sizeof( bool ) );
 	}
 
+	/**
+	 * @brief Calculate maximum number of flag combinations
+	 */
+	void CalcNumFlagCombos();
+
 	bool						bUseVertexFactory[VERTEXFACTORY_NUM_TYPES];		/**< Vertex factories used in this shader */
+	uint32						numFlagCombos;									/**< Maximum number of flag combinations */
 	EStudioShaderType			type;											/**< Shader type */
 	std::string					source;											/**< Path to shader source file */
 	std::string					mainFunc;										/**< Main function */
@@ -144,9 +151,9 @@ bool ConvStringToVFType( const achar* pVFTypeName, EVertexFactoryType& vfType );
  * @brief Convert vertex factory type to string
  * 
  * @param vfType		Vertex factory type
- * @param vfTypeName	Converted vertex factory type into string view
+ * @param pVFTypeName	Converted vertex factory type into string view (DO NOT edit!)
  */
-void ConvVFTypeToString( EVertexFactoryType vfType, std::string& vfTypeName );
+void ConvVFTypeToString( EVertexFactoryType vfType, const achar*& pVFTypeName );
 
 /**
  * @ingroup shadercompile
@@ -163,8 +170,8 @@ bool ConvStringToShaderType( const achar* pShaderTypeName, EStudioShaderType& sh
  * @brief Convert shader type to string
  *
  * @param shaderType		Shader type
- * @param shaderTypeName	Converted shader type into string view
+ * @param pShaderTypeName	Converted shader type into string view (DO NOT edit!)
  */
-void ConvShaderTypeToString( EStudioShaderType shaderType, std::string& shaderTypeName );
+void ConvShaderTypeToString( EStudioShaderType shaderType, const achar*& pShaderTypeName );
 
 #endif // !SHADERCOMPILE_H

@@ -349,6 +349,9 @@ bool CMakeFile::LoadShaderMakeFile( const CJsonDoc& jsonDoc, const std::string& 
 					std::string		tmpBuffer = shader.source;
 					L_MakeAbsolutePath( tmpBuffer, shader.source, makeFileDir );
 
+					// Calculate maximum number of flag combinations
+					shader.CalcNumFlagCombos();
+
 					// Add a new shader into array
 					shaders.emplace_back( shader );
 				}

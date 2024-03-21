@@ -25,62 +25,39 @@
 * SOFTWARE.
 ]]
 
-project "shadercompile"
-    kind        "ConsoleApp"
+project "shadercompile_dx11"
+    if not buildMonolithicEngine then
+        kind "SharedLib"
+    else
+        kind "StaticLib"
+    end
     language    "C++"
     location( intermediateDir )
-
-	----------- PROJECT SETTINGS --------
+	
+    ----------- PROJECT SETTINGS --------
 
     files       {
-        "**.h", 
-        "**.inl", 
+		"**.inl", 
         "**.cpp",
-        "../../public/tools/shadercompile/**.h",
-        "../../public/core/**.cpp"
+        "**.h",
+        "**.rc",
+        "../../../public/tools/shadercompile/**.h",
+        "../../../public/core/**.cpp"
     }
 
-    -- Enable PCH file
-    pchheader       "pch_shadercompile.h"
-    pchsource       "pch_shadercompile.cpp"
-    includedirs     { "./" }
-
     vpaths      {
-        ["src/*"]           = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]        = { "../../public/**.cpp" }
+        ["src/*"]       = { "**.h", "**.inl", "**.cpp", "**.rc" },
+		["public/*"]    = { "../../../public/**.h", "../../../public/**.inl", "../../../public/**.cpp" }
     }
 
     links       {
         "core",
         "stdlib",
-        "appframework",
-        "interfaces"
+		"interfaces",
+		"dxguid",
+        "d3dcompiler"
     }
 
-    dependson   {
-        "filesystem",
-		"engine"
-    }
-
-    ----------- LINK THIRD PARTIES -----------------
+	----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
-    RapidJson.Link()
-
-	---------- PLATFORM SPECIFIC SETTINGS ---------
-	
-	-- Exclude platform specific for other platforms
-	filter "platforms:not Win64"
-        excludes { "**/platforms/windows/**.*" }
-    filter {}
-
-    -- Windows
-    filter "platforms:Win64"
-        files       { "**.rc" }
-        vpaths      { ["src/*"] = { "**.rc" } }
-        dependson   { "shadercompile_dx11" }
-    filter {}
-
-    ---------- EXCLUDES SUBPROJECT'S FILES ---------
-
-    excludes { "dx11/**" }

@@ -34,6 +34,9 @@
 #include "tools/shadercompile/vf_cppclass_generator.h"
 #include "tools/shadercompile/shader_cppclass_generator.h"
 #include "tools/shadercompile/shadercompile.h"
+#include "tools/shadercompile/ishadercompile_backend.h"
+#include "tools/shadercompile/shadercompile_environment.h"
+#include "tools/shadercompile/shadercompile_output.h"
 
 // Table of vertex factory type names
 static const achar* s_pVFTypeNames[] =
@@ -64,11 +67,12 @@ static void PrintShaderCompileHelp()
 {
 	Msg( "" );
 	Msg( "Shader compile" );
-	Msg( "Usage: shadercompile -makefile <path> [-game <path>]" );
-	Msg( "Ex: shadercompile -makefile C:/lifeEngine/src/materialsystem/stdshaders/shaderlist.makefile" );
-	Msg( "Ex: shadercompile -makefile ../src/materialsystem/gameshaders/shaderlist.makefile -game eleot" );
+	Msg( "Usage: shadercompile -makefile <path> -backend <name> [-game <path>]" );
+	Msg( "Ex: shadercompile -makefile C:/lifeEngine/src/materialsystem/stdshaders/shaderlist.makefile -backend shadercompile_dx11" );
+	Msg( "Ex: shadercompile -makefile ../src/materialsystem/gameshaders/shaderlist.makefile -game eleot -backend shadercompile_dx11" );
 	Msg( "" );
 	Msg( "makefile\t\tPath to a shader make file. For syntax example see src/materialsystem/stdshaders/shaderlist.makefile" );
+	Msg( "backend\t\tShader compile backend. When command line has skipcompilation then this is ignoring (Backend examples: shadercompile_dx11, shadercompile_vulkan, etc)" );
 	Msg( "gencpp-vfs\t\tIs need generate C++ meta types for vertex factories" );
 	Msg( "gencpp-shaders\t\tIs need generate C++ helper classes for shaders" );
 	Msg( "outcpp-vfs\t\tOverride output path for generated vertex factory C++ meta types (Relative path from makefile)" );
@@ -105,10 +109,10 @@ bool ConvStringToVFType( const achar* pVFTypeName, EVertexFactoryType& vfType )
 ConvVFTypeToString
 ==================
 */
-void ConvVFTypeToString( EVertexFactoryType vfType, std::string& vfTypeName )
+void ConvVFTypeToString( EVertexFactoryType vfType, const achar*& pVFTypeName )
 {
 	Assert( vfType < VERTEXFACTORY_NUM_TYPES );
-	vfTypeName = s_pVFTypeNames[( uint32 )vfType];
+	pVFTypeName = s_pVFTypeNames[( uint32 )vfType];
 }
 
 /*
@@ -138,10 +142,10 @@ bool ConvStringToShaderType( const achar* pShaderTypeName, EStudioShaderType& sh
 ConvShaderTypeToString
 ==================
 */
-void ConvShaderTypeToString( EStudioShaderType shaderType, std::string& shaderTypeName )
+void ConvShaderTypeToString( EStudioShaderType shaderType, const achar*& pShaderTypeName )
 {
 	Assert( shaderType < STUDIO_SHADER_NUM_TYPES );
-	shaderTypeName = s_pShaderTypeNames[( uint32 )shaderType];
+	pShaderTypeName = s_pShaderTypeNames[( uint32 )shaderType];
 }
 
 
@@ -152,6 +156,11 @@ void ConvShaderTypeToString( EStudioShaderType shaderType, std::string& shaderTy
 class CShaderCompileApp : public CDefaultAppSystemGroup<CAppSystemGroup>
 {
 public:
+	/**
+	 * @brief Constructor
+	 */
+	CShaderCompileApp();
+
 	/**
 	 * @brief An installed application creation function, you should tell the group
 	 * the DLLs and the singleton interfaces you want to instantiate.
@@ -184,19 +193,57 @@ public:
 private:
 	/**
 	 * @brief Generate C++ meta types for vertex factories
-	 * @return Return Return TRUE if all C++ meta type for vertex factories are generated, otherwise returns FALSE
+	 * @return Return TRUE if all C++ meta type for vertex factories are generated, otherwise returns FALSE
 	 */
 	bool GenerateVFsCppMetaTypes();
 
 	/**
 	 * @brief Generate helper C++ classes for shaders
-	 * @return Return Return TRUE if all C++ shader classes are generated, otherwise returns FALSE
+	 * @return Return TRUE if all C++ shader classes are generated, otherwise returns FALSE
 	 */
 	bool GenerateShaderCppClass();
 
-	CMakeFile	makefile;	/**< Shader makefile */
+	/**
+	 * @brief Compile shaders
+	 * @return Return TRUE if all shaders were compiled, otherwise returns FALSE
+	 */
+	bool CompileShaders();
+
+	/**
+	 * @brief Compile shader
+	 * 
+	 * @param shader			Shader to compile
+	 * @param pVertexFactory	Vertex factory. NULL means what we don't use any vertex factory
+	 * @return Return TRUE if all shaders were compiled, otherwise returns FALSE
+	 */
+	bool CompileShader( const Shader& shader, VertexFactory* pVertexFactory = nullptr );
+
+	/**
+	 * @brief Load backend
+	 * @return Return TRUE if backend was loaded, otherwise returns FALSE
+	 */
+	bool LoadBackend();
+
+	/**
+	 * @brief Unload backend
+	 */
+	void UnloadBackend();
+
+	CMakeFile				makefile;				/**< Shader makefile */
+	dllHandle_t				backendHandle;			/**< Backend module handle */
+	IShaderCompileBackend*	pShaderCompileBackend;	/**< Shader compile backend */
 };
 
+
+/*
+==================
+CShaderCompileApp::CShaderCompileApp
+==================
+*/
+CShaderCompileApp::CShaderCompileApp()
+	: backendHandle( nullptr )
+	, pShaderCompileBackend( nullptr )
+{}
 
 /*
 ==================
@@ -208,10 +255,10 @@ bool CShaderCompileApp::Create()
 	// Load application systems
 	AppSystemInfo		appSystemInfos[] =
 	{
-		{ "engine" DLL_EXT_STRING,			CVAR_QUERY_INTERFACE_VERSION		},	// This one must be first
-		{ "filesystem" DLL_EXT_STRING,		FILESYSTEM_INTERFACE_VERSION		},
-		{ "engine" DLL_EXT_STRING,			CVAR_INTERFACE_VERSION				},
-		{ "", "" }																	// Required to terminate the list
+		{ "engine"		DLL_EXT_STRING,			CVAR_QUERY_INTERFACE_VERSION		},	// This one must be first
+		{ "filesystem"	DLL_EXT_STRING,			FILESYSTEM_INTERFACE_VERSION		},
+		{ "engine"		DLL_EXT_STRING,			CVAR_INTERFACE_VERSION				},
+		{ "", "" }																		// Required to terminate the list
 	};
 
 	// Add all systems from array
@@ -253,8 +300,12 @@ int32 CShaderCompileApp::Main()
 		return 1;
 	}
 
+	// Make sure what we have valid the backend (if we haven't 'skipcompilation')
+	const achar*	pBackendName = CommandLine()->GetFirstValue( "backend" );
+	bool			bInvalidBackend = !CommandLine()->HasParam( "skipcompilation" ) && ( !pBackendName || pBackendName[0] == '\0' );
+
 	// Print help of usage if it need or some parameters aren't set
-	if ( bPrintHelpUsage || bInvalidMakeFilePath )
+	if ( bPrintHelpUsage || bInvalidMakeFilePath || bInvalidBackend )
 	{
 		PrintShaderCompileHelp();
 		return 0;
@@ -302,7 +353,20 @@ int32 CShaderCompileApp::Main()
 		return 0;
 	}
 
+	// Now load backend for compilation
+	if ( !LoadBackend() )
+	{
+		return 1;
+	}
+
+	// Compile shaders
+	if ( !CompileShaders() )
+	{
+		return 1;
+	}
+
 	// We are done
+	UnloadBackend();
 	return 0;
 }
 
@@ -328,14 +392,14 @@ bool CShaderCompileApp::GenerateVFsCppMetaTypes()
 			const std::string&		buffer = vfCppClassGenerator.GetBuffer();
 
 			// Generate file path from vertex factory type
-			std::string		vfTypeName;
+			const achar*	pVFTypeName;
 			std::string		filePath;
 			{
 				// Convert vertex factory type to string
-				ConvVFTypeToString( ( EVertexFactoryType )index, vfTypeName );
+				ConvVFTypeToString( ( EVertexFactoryType )index, pVFTypeName );
 
 				// Get file path
-				filePath = L_Sprintf( "%s/vf_%s.gen.h", makefile.GetCppGenOutput( MAKEFILE_VERTEXFACTORY ).c_str(), vfTypeName.c_str() );
+				filePath = L_Sprintf( "%s/vf_%s.gen.h", makefile.GetCppGenOutput( MAKEFILE_VERTEXFACTORY ).c_str(), pVFTypeName );
 				L_FixPathSeparators( filePath );
 			}
 
@@ -344,11 +408,11 @@ bool CShaderCompileApp::GenerateVFsCppMetaTypes()
 			if ( file )
 			{
 				file->Write( ( void* )buffer.data(), buffer.size() * sizeof( achar ) );
-				Msg( "ShaderCompile: C++ meta type for '%s' saved to '%s'", vfTypeName.c_str(), filePath.c_str() );
+				Msg( "ShaderCompile: C++ meta type for '%s' saved to '%s'", pVFTypeName, filePath.c_str() );
 			}
 			else
 			{
-				Error( "ShaderCompile: Failed to save C++ meta type for '%s' to '%s'", vfTypeName.c_str(), filePath.c_str() );
+				Error( "ShaderCompile: Failed to save C++ meta type for '%s' to '%s'", pVFTypeName, filePath.c_str() );
 				bResult = false;
 			}
 		}
@@ -382,14 +446,14 @@ bool CShaderCompileApp::GenerateShaderCppClass()
 		std::string		filePath;
 		{
 			// Convert shader type to string
-			std::string		shaderTypeName;
-			ConvShaderTypeToString( shader.type, shaderTypeName );
+			const achar*	pShaderTypeName;
+			ConvShaderTypeToString( shader.type, pShaderTypeName );
 
 			// Get shader name from source file name
 			L_GetFileBaseName( shader.source, shaderName, false );
 
 			// Get file path
-			filePath = L_Sprintf( "%s/%s_%s.gen.h", makefile.GetCppGenOutput( MAKEFILE_SHADER ).c_str(), shaderName.c_str(), shaderTypeName.c_str() );
+			filePath = L_Sprintf( "%s/%s_%s.gen.h", makefile.GetCppGenOutput( MAKEFILE_SHADER ).c_str(), shaderName.c_str(), pShaderTypeName );
 			L_FixPathSeparators( filePath );
 		}
 
@@ -412,12 +476,290 @@ bool CShaderCompileApp::GenerateShaderCppClass()
 
 /*
 ==================
+CShaderCompileApp::CompileShaders
+==================
+*/
+bool CShaderCompileApp::CompileShaders()
+{
+	// Iterate over shaders and each the one compile for all flag combination
+	bool						bResult = true;
+	const std::vector<Shader>&	shaders = makefile.GetShaders();
+	for ( uint32 index = 0, count = ( uint32 )shaders.size(); index < count; ++index )
+	{
+		const Shader&		shader = shaders[index];
+
+		// Compile the shader for each vertex factories (which set for this shader in makefile) if the one use VFs
+		bool			bUseVertexFactory = false;
+		for ( uint32 vfIdx = 0; vfIdx < VERTEXFACTORY_NUM_TYPES; ++vfIdx )
+		{
+			if ( shader.bUseVertexFactory[vfIdx] )
+			{
+				bUseVertexFactory		= true;
+				const VertexFactory&	vertexFactory		= makefile.GetVertexFactory( ( EVertexFactoryType )vfIdx );
+				const achar*			pVertexFactoryName	= "";
+				ConvVFTypeToString( ( EVertexFactoryType )vfIdx, pVertexFactoryName );
+				Msg( "ShaderCompile: Compile shader '%s' for vertex factory '%s' (%i combos)", shader.source.c_str(), pVertexFactoryName, shader.numFlagCombos );		
+				
+				if ( !CompileShader( shader, ( VertexFactory* )&vertexFactory ) )
+				{
+					bResult = false;
+					continue;
+				}
+			}
+		}
+
+		// Otherwise we simple compile shader without any vertex factories
+		if ( !bUseVertexFactory )
+		{
+			Msg( "ShaderCompile: Compile shader '%s' (%i combos)", shader.source.c_str(), shader.numFlagCombos );
+			if ( !CompileShader( shader ) )
+			{
+				bResult = false;
+				continue;
+			}
+		}
+
+		// TODO yehor.pohuliaka: Here must be save of compiled shader cache
+	}
+
+	return bResult;
+}
+
+/*
+==================
+CShaderCompileApp::CompileShader
+==================
+*/
+bool CShaderCompileApp::CompileShader( const Shader& shader, VertexFactory* pVertexFactory /* = nullptr */ )
+{
+	std::vector<int32>				flagVarSlots( shader.flags.size() );
+
+	// Set all the variables to max values
+    int32*		pFlagVarSlotBegin   = flagVarSlots.data();
+    int32*		pFlagVarSlotEnd     = pFlagVarSlotBegin + ( uint32 )flagVarSlots.size();
+    int32*		pSetFlagVar         = nullptr;
+	ShaderFlag*	pSetFlag			= nullptr;
+
+	for ( pSetFlagVar = pFlagVarSlotBegin, pSetFlag = ( ShaderFlag* )shader.flags.data(); pSetFlagVar < pFlagVarSlotEnd; ++pSetFlagVar, ++pSetFlag )
+	{
+		*pSetFlagVar = pSetFlag->max;
+	}
+
+	bool							bResult		= true;
+	const std::vector<std::string>&	includeDirs = makefile.GetShaderIncludeDirs();
+	uint32							currentCombo = shader.numFlagCombos;
+	while ( currentCombo > 0 )
+	{
+		--currentCombo;
+
+		// Compile shader
+		CShaderCompileOutput		shaderCompileOutput;
+		CShaderCompileEnvironment	shaderCompileEnvironment( shader.type );
+
+		// Add to the environment all include directories
+		for ( uint32 includeDirIdx = 0, numIncludeDirs = ( uint32 )includeDirs.size(); includeDirIdx < numIncludeDirs; ++includeDirIdx )
+		{
+			shaderCompileEnvironment.AddIncludeDir( includeDirs[includeDirIdx].c_str() );
+		}
+
+		// Add to the environment all defines
+		for ( uint32 defineIdx = 0, numDefines = ( uint32 )shader.defines.size(); defineIdx < numDefines; ++defineIdx )
+		{
+			const ShaderDefine&		shaderDefine = shader.defines[defineIdx];
+			shaderCompileEnvironment.AddDefine( shaderDefine.name.c_str(), shaderDefine.value.c_str() );
+		}
+
+		// Add to the environment current flags
+		for ( pSetFlagVar = pFlagVarSlotBegin, pSetFlag = ( ShaderFlag* )shader.flags.data(); pSetFlagVar < pFlagVarSlotEnd; ++pSetFlagVar, ++pSetFlag )
+		{
+			shaderCompileEnvironment.AddDefine( pSetFlag->name.c_str(), L_Sprintf( "%i", *pSetFlagVar ).c_str() );
+		}
+
+		// If we have a vertex factory then setup the environment for it
+		if ( pVertexFactory )
+		{
+			shaderCompileEnvironment.SetVertexFactoryFileName( pVertexFactory->source.c_str() );
+			for ( uint32 index = 0, count = ( uint32 )pVertexFactory->defines.size(); index < count; ++index )
+			{
+				const ShaderDefine&		shaderDefine = pVertexFactory->defines[index];
+				shaderCompileEnvironment.AddDefine( shaderDefine.name.c_str(), shaderDefine.value.c_str() );
+			}
+		}
+
+		// Compile shader
+		bool	bCompileResult = pShaderCompileBackend->CompileShader( shader.source.c_str(), shader.mainFunc.c_str(), shader.type, &shaderCompileEnvironment, &shaderCompileOutput );
+		if ( !bCompileResult )
+		{
+			Error( "ShaderCompile: Failed to compile shader '%s' at %i combo", shader.source.c_str(), shader.numFlagCombos - currentCombo );
+			if ( !shaderCompileOutput.GetErrorMsg().empty() )
+			{
+				Error( "ShaderCompile: Message:\n%s", shaderCompileOutput.GetErrorMsg().c_str() );
+			}
+			else
+			{
+				Error( "ShaderCompile: Message: <None>" );
+			}
+			Error( "ShaderCompile: ------------ ENVIRONMENT INFO --------------" );
+
+			// Print includes
+			Error( "ShaderCompile: Includes:" );
+			for ( uint32 includeIdx = 0, numIncludes = shaderCompileEnvironment.GetNumIncludeDirs(); includeIdx < numIncludes; ++includeIdx )
+			{
+				Error( "ShaderCompile:\t %s", shaderCompileEnvironment.GetIncludeDir( includeIdx ) );
+			}
+			Error( "ShaderCompile:" );
+
+			// Print defines
+			Error( "ShaderCompile: Defines:" );
+			for ( uint32 defineIdx = 0, numDefines = shaderCompileEnvironment.GetNumDefines(); defineIdx < numDefines; ++defineIdx )
+			{
+				const achar*	pDefineName = nullptr;
+				const achar*	pDefineValue = nullptr;
+				shaderCompileEnvironment.GetDefine( defineIdx, pDefineName, pDefineValue );
+				Error( "ShaderCompile:\t %s: %s", pDefineName, pDefineValue );
+			}
+
+			// Print combinations
+			if ( shader.numFlagCombos > 1 )
+			{
+				Error( "ShaderCompile:" );
+				Error( "ShaderCompile: Current combo:" );
+				for ( pSetFlagVar = pFlagVarSlotBegin, pSetFlag = ( ShaderFlag* )shader.flags.data(); pSetFlagVar < pFlagVarSlotEnd; ++pSetFlagVar, ++pSetFlag )
+				{
+					Error( "ShaderCompile:\t %s: %i", pSetFlag->name.c_str(), *pSetFlagVar );
+				}
+			}
+
+			Error( "ShaderCompile: --------------------------------------------" );
+			bResult = false;
+		}
+
+		// If shader was compiled add output data into shader cache
+		if ( bCompileResult )
+		{
+			// TODO yehor.pohuliaka: Implement shader cache
+		}
+
+		// Do a next iteration
+		for ( pSetFlagVar = pFlagVarSlotBegin, pSetFlag = ( ShaderFlag* )shader.flags.data(); pSetFlagVar < pFlagVarSlotEnd; ++pSetFlagVar, ++pSetFlag )
+		{
+			if ( --*pSetFlagVar >= pSetFlag->min )
+			{
+				break;
+			}
+
+			*pSetFlagVar = pSetFlag->max;
+		}
+	}
+
+	return bResult;
+}
+
+/*
+==================
+CShaderCompileApp::LoadBackend
+==================
+*/
+bool CShaderCompileApp::LoadBackend()
+{
+	// Unload old backend
+	UnloadBackend();
+
+	// Get path to backend
+	std::string		backendPath = L_Sprintf( "//ENGINEBIN/%s" DLL_EXT_STRING, CommandLine()->GetFirstValue( "backend" ) );
+
+	// Load module
+	dllHandle_t		backendHandle = g_pFileSystem->LoadModule( backendPath.c_str() );
+	if ( !backendHandle )
+	{
+		Warning( "ShaderCompile: Failed to load backend '%s'", backendPath.c_str() );
+		return false;
+	}
+
+	// Get at the backend interface
+	CreateInterfaceFn_t		pFactory = Sys_GetFactory( backendHandle );
+	if ( !pFactory )
+	{
+		Warning( "ShaderCompile: Could not find factory interface in '%s'", backendPath.c_str() );
+		g_pFileSystem->UnloadModule( backendHandle );
+		return false;
+	}
+
+	IShaderCompileBackend*	pShaderCompileBackend = ( IShaderCompileBackend* )pFactory( SHADERCOMPILEBACKEND_INTERFACE_VERSION );
+	if ( !pShaderCompileBackend )
+	{
+		Warning( "ShaderCompile: Could not get IShaderCompileBackend interface from '%s'", backendPath.c_str() );
+		g_pFileSystem->UnloadModule( backendHandle );
+		return false;
+	}
+
+	// Allow the backend to try to connect to interfaces it needs
+	if ( !pShaderCompileBackend->Connect( GetFactory() ) )
+	{
+		Warning( "ShaderCompile: Failed to init backend '%s'", backendPath.c_str() );
+		g_pFileSystem->UnloadModule( backendHandle );
+		return false;
+	}
+
+	// We are done
+	Msg( "ShaderCompile: Backend '%s' loaded", backendPath.c_str() );
+	CShaderCompileApp::backendHandle			= backendHandle;
+	CShaderCompileApp::pShaderCompileBackend	= pShaderCompileBackend;
+	return true;
+}
+
+/*
+==================
+CShaderCompileApp::UnloadBackend
+==================
+*/
+void CShaderCompileApp::UnloadBackend()
+{
+	if ( backendHandle || pShaderCompileBackend )
+	{
+		// Shutdown the backend
+		if ( pShaderCompileBackend )
+		{
+			pShaderCompileBackend->Disconnect();
+		}
+
+		// Unload shader module
+		if ( backendHandle )
+		{
+			g_pFileSystem->UnloadModule( backendHandle );
+		}
+
+		Msg( "ShaderCompile: Backend unloaded" );
+		backendHandle = nullptr;
+		pShaderCompileBackend = nullptr;
+	}
+}
+
+/*
+==================
 CShaderCompileApp::PostShutdown
 ==================
 */
 void CShaderCompileApp::PostShutdown()
 {
+	UnloadBackend();
 	DisconnectStdLib();
+}
+
+
+/*
+==================
+Shader::CalcNumFlagCombos
+==================
+*/
+void Shader::CalcNumFlagCombos()
+{
+	numFlagCombos = 1;
+	for ( uint32 index = 0, count = ( uint32 )flags.size(); index < count; ++index )
+	{
+		const ShaderFlag&		flag = flags[index];
+		numFlagCombos *= flag.max - flag.min + 1;
+	}
 }
 
 

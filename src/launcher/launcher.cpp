@@ -124,14 +124,14 @@ bool CLifeEngineApp::Create()
 	// Load application systems
 	AppSystemInfo		appSystemInfos[] =
 	{
-		{ "engine" DLL_EXT_STRING,			CVAR_QUERY_INTERFACE_VERSION		},	// This one must be first
-		{ "filesystem" DLL_EXT_STRING,		FILESYSTEM_INTERFACE_VERSION		},
-		{ "engine" DLL_EXT_STRING,			CVAR_INTERFACE_VERSION				},
-		{ "inputsystem" DLL_EXT_STRING,		INPUTSYSTEM_INTERFACE_VERSION		},
-		{ "studiorender" DLL_EXT_STRING,	STUDIORENDER_INTERFACE_VERSION		},
-		{ "materialsystem" DLL_EXT_STRING,	MATERIALSYSTEM_INTERFACE_VERSION	},
-		{ "engine" DLL_EXT_STRING,			ENGINE_LAUNCHER_INTERFACE_VERSION	},
-		{ "", "" }																	// Required to terminate the list
+		{ "engine"			DLL_EXT_STRING,		CVAR_QUERY_INTERFACE_VERSION		},	// This one must be first
+		{ "filesystem"		DLL_EXT_STRING,		FILESYSTEM_INTERFACE_VERSION		},
+		{ "engine"			DLL_EXT_STRING,		CVAR_INTERFACE_VERSION				},
+		{ "inputsystem"		DLL_EXT_STRING,		INPUTSYSTEM_INTERFACE_VERSION		},
+		{ "studiorender"	DLL_EXT_STRING,		STUDIORENDER_INTERFACE_VERSION		},
+		{ "materialsystem"	DLL_EXT_STRING,		MATERIALSYSTEM_INTERFACE_VERSION	},
+		{ "engine"			DLL_EXT_STRING,		ENGINE_LAUNCHER_INTERFACE_VERSION	},
+		{ "", "" }																		// Required to terminate the list
 	};
 
 	// Add the window manager to app systems list

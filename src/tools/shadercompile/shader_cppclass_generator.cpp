@@ -46,15 +46,15 @@ void CShaderCppClassGenerator::Generate( const Shader& shader )
 	std::string		className;
 	{
 		// Convert shader type to string
-		std::string		shaderTypeName;
-		ConvShaderTypeToString( shader.type, shaderTypeName );
+		const achar*	pShaderTypeName = "";
+		ConvShaderTypeToString( shader.type, pShaderTypeName );
 
 		// Get base name from shader source file
 		std::string		fileBaseName;
 		L_GetFileBaseName( shader.source, fileBaseName, false );
 
 		// Get class name
-		className = L_Sprintf( "C_%s_%s_Index", fileBaseName.c_str(), shaderTypeName.c_str() );
+		className = L_Sprintf( "C_%s_%s_Index", fileBaseName.c_str(), pShaderTypeName );
 	}
 
 	// Generate C++ class header	
