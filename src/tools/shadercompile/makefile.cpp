@@ -448,13 +448,12 @@ bool CMakeFile::LoadVertexFactory( const CJsonObject& jsonObject )
 {
 	bool				bResult = true;
 	VertexFactory		vertexFactory;
-	EVertexFactoryType	vfType;
 
 	// Get vertex factory type
 	CJsonValue	jsonType = jsonObject.GetValue( "type" );
 	if ( jsonType.IsValid() )
 	{
-		if ( !LoadVertexFactoryType( jsonType, vfType ) )
+		if ( !LoadVertexFactoryType( jsonType, vertexFactory.type ) )
 		{
 			Warning( "CMakeFile: Failed to load vertex factory type from field 'type'" );
 			return false;
@@ -533,7 +532,7 @@ bool CMakeFile::LoadVertexFactory( const CJsonObject& jsonObject )
 	}
 
 	// Add a new vertex factory
-	vertexFactories[( uint32 )vfType] = std::move( vertexFactory );
+	vertexFactories[( uint32 )vertexFactory.type] = std::move( vertexFactory );
 	return bResult;
 }
 

@@ -86,6 +86,7 @@ struct VertexFactory
 
 	bool						bSupportsInstancing;	/**< Is supports instancing */
 	uint32						instanceStreamIndex;	/**< Instance stream index */
+	EVertexFactoryType			type;					/**< Vertex factory type */
 	std::string					source;					/**< Path to shader source file */
 	std::vector<ShaderDefine>	defines;				/**< Vertex factory defines */
 };

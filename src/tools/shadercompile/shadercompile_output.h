@@ -35,6 +35,7 @@
 #include <vector>
 
 #include "tools/shadercompile/ishadercompile_backend.h"
+#include "libs/shadercache/shadercache.h"
 
 /**
  * @ingroup shadercompile
@@ -43,11 +44,6 @@
 class CShaderCompileOutput : public IShaderCompileOutput
 {
 public:
-	/**
-	 * @brief Constructor
-	 */
-	CShaderCompileOutput();
-
 	/**
 	 * @brief Set compiled bytecode of the shader
 	 * 
@@ -80,15 +76,6 @@ public:
 	virtual void AddParameterAllocation( const achar* pParameterName, uint32 bufferIndex, uint32 baseIndex, uint32 size, uint32 samplerIndex ) override;
 
 	/**
-	 * @brief Get bytecode
-	 * @return Return bytecode
-	 */
-	FORCEINLINE const std::vector<byte>& GetBytecode() const
-	{
-		return bytecode;
-	}
-
-	/**
 	 * @brief Get error message
 	 * @return Return error message. If not exist returns empty string
 	 */
@@ -98,17 +85,16 @@ public:
 	}
 
 	/**
-	 * @brief Get number of instructions
-	 * @return Return number of instructions
+	 * @brief Get shader cache
+	 * @return Return shader cache
 	 */
-	FORCEINLINE uint32 GetNumInstructions() const
+	FORCEINLINE const ShaderCacheElement& GetShaderCache() const
 	{
-		return numInstructions;
+		return shaderCache;
 	}
 
 private:
-	std::vector<byte>	bytecode;			/**< Output compiled code of shader */
-	uint32				numInstructions;	/**< Number of instructions in shader */
+	ShaderCacheElement	shaderCache;		/**< Shader cache */
 	std::string			errorMsg;			/**< Error message. Compile putting to this field message when shader compiled is fail */
 };
 

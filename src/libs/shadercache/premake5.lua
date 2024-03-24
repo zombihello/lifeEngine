@@ -25,63 +25,26 @@
 * SOFTWARE.
 ]]
 
-project "shadercompile"
-    kind        "ConsoleApp"
+project "shadercache"
+    kind        "StaticLib"
     language    "C++"
     location( intermediateDir )
 
-	----------- PROJECT SETTINGS --------
+    ----------- PROJECT SETTINGS --------
 
-    files       {
+    files       { 
         "**.h", 
         "**.inl", 
         "**.cpp",
-        "../../public/tools/shadercompile/**.h",
-        "../../public/core/**.cpp"
+        "../../public/libs/shadercache/**.h",
+        "../../public/libs/shadercache/**.inl",
     }
-
-    -- Enable PCH file
-    pchheader       "pch_shadercompile.h"
-    pchsource       "pch_shadercompile.cpp"
-    includedirs     { "./" }
 
     vpaths      {
-        ["src/*"]           = { "**.h", "**.inl", "**.cpp" },
-        ["public/*"]        = { "../../public/**.cpp" }
+        ["src/*"]       = { "**.h", "**.inl", "**.cpp" },
+        ["public/*"]    = { "../../public/**.h", "../../public/**.inl", "../../public/**.cpp" }
     }
-
-    links       {
-        "core",
-        "stdlib",
-        "appframework",
-        "interfaces",
-		"shadercache"
-    }
-
-    dependson   {
-        "filesystem",
-		"engine"
-    }
-
-    ----------- LINK THIRD PARTIES -----------------
+	
+	----------- LINK THIRD PARTIES -----------------
 
     GLM.Link()
-    RapidJson.Link()
-
-	---------- PLATFORM SPECIFIC SETTINGS ---------
-	
-	-- Exclude platform specific for other platforms
-	filter "platforms:not Win64"
-        excludes { "**/platforms/windows/**.*" }
-    filter {}
-
-    -- Windows
-    filter "platforms:Win64"
-        files       { "**.rc" }
-        vpaths      { ["src/*"] = { "**.rc" } }
-        dependson   { "shadercompile_dx11" }
-    filter {}
-
-    ---------- EXCLUDES SUBPROJECT'S FILES ---------
-
-    excludes { "dx11/**" }

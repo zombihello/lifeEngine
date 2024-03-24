@@ -30,6 +30,7 @@
 #include "core/icommandline.h"
 #include "engine/icvar.h"
 #include "appframework/iappsystemgroup.h"
+#include "libs/shadercache/shadercache.h"
 #include "tools/shadercompile/makefile.h"
 #include "tools/shadercompile/vf_cppclass_generator.h"
 #include "tools/shadercompile/shader_cppclass_generator.h"
@@ -212,11 +213,12 @@ private:
 	/**
 	 * @brief Compile shader
 	 * 
+	 * @param shaderCacheDoc	Shader cache document
 	 * @param shader			Shader to compile
 	 * @param pVertexFactory	Vertex factory. NULL means what we don't use any vertex factory
 	 * @return Return TRUE if all shaders were compiled, otherwise returns FALSE
 	 */
-	bool CompileShader( const Shader& shader, VertexFactory* pVertexFactory = nullptr );
+	bool CompileShader( CShaderCacheDoc& shaderCacheDoc, const Shader& shader, VertexFactory* pVertexFactory = nullptr );
 
 	/**
 	 * @brief Load backend
@@ -309,6 +311,12 @@ int32 CShaderCompileApp::Main()
 	{
 		PrintShaderCompileHelp();
 		return 0;
+	}
+
+	// Set path to game directory if -game is set
+	if ( CommandLine()->HasParam( "game" ) )
+	{
+		g_pFileSystem->AddSearchPath( CommandLine()->GetFirstValue( "game" ), "GAME" );
 	}
 
 	// Override output path for generated vertex factory C++ meta types
@@ -484,23 +492,25 @@ bool CShaderCompileApp::CompileShaders()
 	// Iterate over shaders and each the one compile for all flag combination
 	bool						bResult = true;
 	const std::vector<Shader>&	shaders = makefile.GetShaders();
+	const achar*				pOutputShaderCacheDir = CommandLine()->HasParam( "game" ) ? "//GAME/shaders/" : "//ENGINE/shaders";
 	for ( uint32 index = 0, count = ( uint32 )shaders.size(); index < count; ++index )
 	{
 		const Shader&		shader = shaders[index];
+		CShaderCacheDoc		shaderCacheDoc;
+		shaderCacheDoc.SetShaderType( shader.type );
 
 		// Compile the shader for each vertex factories (which set for this shader in makefile) if the one use VFs
-		bool			bUseVertexFactory = false;
 		for ( uint32 vfIdx = 0; vfIdx < VERTEXFACTORY_NUM_TYPES; ++vfIdx )
 		{
 			if ( shader.bUseVertexFactory[vfIdx] )
 			{
-				bUseVertexFactory		= true;
+				shaderCacheDoc.SetUseVertexFactory( true );
 				const VertexFactory&	vertexFactory		= makefile.GetVertexFactory( ( EVertexFactoryType )vfIdx );
 				const achar*			pVertexFactoryName	= "";
 				ConvVFTypeToString( ( EVertexFactoryType )vfIdx, pVertexFactoryName );
 				Msg( "ShaderCompile: Compile shader '%s' for vertex factory '%s' (%i combos)", shader.source.c_str(), pVertexFactoryName, shader.numFlagCombos );		
 				
-				if ( !CompileShader( shader, ( VertexFactory* )&vertexFactory ) )
+				if ( !CompileShader( shaderCacheDoc, shader, ( VertexFactory* )&vertexFactory ) )
 				{
 					bResult = false;
 					continue;
@@ -509,17 +519,26 @@ bool CShaderCompileApp::CompileShaders()
 		}
 
 		// Otherwise we simple compile shader without any vertex factories
-		if ( !bUseVertexFactory )
+		if ( !shaderCacheDoc.IsUseVertexFactory() )
 		{
 			Msg( "ShaderCompile: Compile shader '%s' (%i combos)", shader.source.c_str(), shader.numFlagCombos );
-			if ( !CompileShader( shader ) )
+			if ( !CompileShader( shaderCacheDoc, shader ) )
 			{
 				bResult = false;
 				continue;
 			}
 		}
 
-		// TODO yehor.pohuliaka: Here must be save of compiled shader cache
+		// Save shader cache document	
+		std::string		baseShaderName;
+		L_GetFileBaseName( shader.source, baseShaderName, false );
+		std::string		fullPath = L_Sprintf( "%s/%s.ssc", pOutputShaderCacheDir, baseShaderName.c_str() );
+		if ( !shaderCacheDoc.Save( fullPath.c_str() ) )
+		{
+			bResult = false;
+			Error( "ShaderCompile: Failed to save shader cache to '%s'", fullPath.c_str() );
+			continue;
+		}
 	}
 
 	return bResult;
@@ -530,11 +549,11 @@ bool CShaderCompileApp::CompileShaders()
 CShaderCompileApp::CompileShader
 ==================
 */
-bool CShaderCompileApp::CompileShader( const Shader& shader, VertexFactory* pVertexFactory /* = nullptr */ )
+bool CShaderCompileApp::CompileShader( CShaderCacheDoc& shaderCacheDoc, const Shader& shader, VertexFactory* pVertexFactory /* = nullptr */ )
 {
 	std::vector<int32>				flagVarSlots( shader.flags.size() );
 
-	// Set all the variables to max values
+	// Set all the variables to min values
     int32*		pFlagVarSlotBegin   = flagVarSlots.data();
     int32*		pFlagVarSlotEnd     = pFlagVarSlotBegin + ( uint32 )flagVarSlots.size();
     int32*		pSetFlagVar         = nullptr;
@@ -542,15 +561,15 @@ bool CShaderCompileApp::CompileShader( const Shader& shader, VertexFactory* pVer
 
 	for ( pSetFlagVar = pFlagVarSlotBegin, pSetFlag = ( ShaderFlag* )shader.flags.data(); pSetFlagVar < pFlagVarSlotEnd; ++pSetFlagVar, ++pSetFlag )
 	{
-		*pSetFlagVar = pSetFlag->max;
+		*pSetFlagVar = pSetFlag->min;
 	}
 
 	bool							bResult		= true;
 	const std::vector<std::string>&	includeDirs = makefile.GetShaderIncludeDirs();
-	uint32							currentCombo = shader.numFlagCombos;
-	while ( currentCombo > 0 )
+	uint32							currentCombo = 0;
+	while ( currentCombo < shader.numFlagCombos )
 	{
-		--currentCombo;
+		++currentCombo;
 
 		// Compile shader
 		CShaderCompileOutput		shaderCompileOutput;
@@ -590,7 +609,7 @@ bool CShaderCompileApp::CompileShader( const Shader& shader, VertexFactory* pVer
 		bool	bCompileResult = pShaderCompileBackend->CompileShader( shader.source.c_str(), shader.mainFunc.c_str(), shader.type, &shaderCompileEnvironment, &shaderCompileOutput );
 		if ( !bCompileResult )
 		{
-			Error( "ShaderCompile: Failed to compile shader '%s' at %i combo", shader.source.c_str(), shader.numFlagCombos - currentCombo );
+			Error( "ShaderCompile: Failed to compile shader '%s' at %i combo", shader.source.c_str(), currentCombo );
 			if ( !shaderCompileOutput.GetErrorMsg().empty() )
 			{
 				Error( "ShaderCompile: Message:\n%s", shaderCompileOutput.GetErrorMsg().c_str() );
@@ -637,18 +656,18 @@ bool CShaderCompileApp::CompileShader( const Shader& shader, VertexFactory* pVer
 		// If shader was compiled add output data into shader cache
 		if ( bCompileResult )
 		{
-			// TODO yehor.pohuliaka: Implement shader cache
+			shaderCacheDoc.AddShaderCache( shaderCompileOutput.GetShaderCache(), pVertexFactory ? pVertexFactory->type : ( EVertexFactoryType )-1 );
 		}
 
 		// Do a next iteration
 		for ( pSetFlagVar = pFlagVarSlotBegin, pSetFlag = ( ShaderFlag* )shader.flags.data(); pSetFlagVar < pFlagVarSlotEnd; ++pSetFlagVar, ++pSetFlag )
 		{
-			if ( --*pSetFlagVar >= pSetFlag->min )
+			if ( ++*pSetFlagVar <= pSetFlag->max )
 			{
 				break;
 			}
 
-			*pSetFlagVar = pSetFlag->max;
+			*pSetFlagVar = pSetFlag->min;
 		}
 	}
 

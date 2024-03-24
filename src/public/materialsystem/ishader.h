@@ -85,6 +85,26 @@ struct ShaderParam
 
 /**
  * @ingroup materialsystem
+ * @brief Interface a map of shader parameter names to registers allocated in GPU to that parameter
+ */
+class IShaderParameterMap
+{
+public:
+	/**
+	 * @brief Find parameter allocation
+	 *
+	 * @param pParameterName	Parameter name
+	 * @param bufferIndex		Output buffer index
+	 * @param baseIndex			Output base index
+	 * @param size				Output size
+	 * @param samplerIndex		Output sampler index
+	 * @return Return TRUE if parameter is found, otherwise FALSE
+	 */
+	virtual bool FindParameterAllocation( const achar* pParameterName, uint32& bufferIndex, uint32& baseIndex, uint32& size, uint32& samplerIndex ) const = 0;
+};
+
+/**
+ * @ingroup materialsystem
  * @brief Shader interface
  */
 class IShader

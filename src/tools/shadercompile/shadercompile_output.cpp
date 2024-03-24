@@ -30,25 +30,16 @@
 
 /*
 ==================
-CShaderCompileOutput::CShaderCompileOutput
-==================
-*/
-CShaderCompileOutput::CShaderCompileOutput()
-	: numInstructions( 0 )
-{}
-
-/*
-==================
 CShaderCompileOutput::SetBytecode
 ==================
 */
 void CShaderCompileOutput::SetBytecode( const byte* pData, uint64 size )
 {
-	bytecode.resize( size );
+	shaderCache.bytecode.resize( size );
 	if ( size > 0 )
 	{
 		Assert( pData );
-		Mem_Memcpy( bytecode.data(), pData, size );
+		Mem_Memcpy( shaderCache.bytecode.data(), pData, size );
 	}
 }
 
@@ -59,7 +50,7 @@ CShaderCompileOutput::SetNumInstructions
 */
 void CShaderCompileOutput::SetNumInstructions( uint32 numInstructions )
 {
-	CShaderCompileOutput::numInstructions = numInstructions;
+	shaderCache.numInstructions = numInstructions;
 }
 
 /*
@@ -78,4 +69,6 @@ CShaderCompileOutput::AddParameterAllocation
 ==================
 */
 void CShaderCompileOutput::AddParameterAllocation( const achar* pParameterName, uint32 bufferIndex, uint32 baseIndex, uint32 size, uint32 samplerIndex )
-{}
+{
+	shaderCache.parameterMap.AddParameterAllocation( pParameterName, bufferIndex, baseIndex, size, samplerIndex );
+}
