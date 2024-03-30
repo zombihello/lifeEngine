@@ -32,7 +32,7 @@
 - [X] Add possible generate mip levels for textures in WorldEd
 - [X] Need fix speed of the import static meshes
 - [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to LUA)
-	- [ ] Implement linker save and linker load for serialize CObjects
+	- [X] Implement linker save and linker load for serialize CObjects
 	- [ ] Implement FindObject, LoadObject and LoadClass functions
 	- [ ] Implement ResolveName for resolve a package and name
 	- [X] Implement replacing existing object in StaticAllocateObject

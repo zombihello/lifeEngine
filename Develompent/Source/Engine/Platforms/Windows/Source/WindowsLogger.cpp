@@ -190,7 +190,7 @@ void CWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType )
 	// Serialize log to file
 	if ( archiveLogs )
 	{
-		*archiveLogs << finalMessage;
+		*archiveLogs << TCHAR_TO_ANSI( finalMessage.c_str() );
 		archiveLogs->Flush();
 	}
 

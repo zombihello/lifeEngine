@@ -26,6 +26,22 @@
 CConVar		CVarImGUIDebug( TEXT( "imgui.debug" ), TEXT( "0" ), CVT_Bool, TEXT( "Enable/Disable debug mode of the ImGUI" ) );
 #endif // !SHIPPING_BUILD
 
+// Colors of ImGUI theme
+namespace ImGui::Colors
+{
+	constexpr uint32 highlight            = IM_COL32( 39, 185, 242, 255 );
+	constexpr uint32 background           = IM_COL32( 36, 36, 36, 255 );
+	constexpr uint32 backgroundDark       = IM_COL32( 24, 24, 24, 255 );
+	constexpr uint32 titlebar             = IM_COL32( 21, 21, 21, 255 );
+	constexpr uint32 propertyField        = IM_COL32( 15, 15, 15, 255 );
+	constexpr uint32 text                 = IM_COL32( 192, 192, 192, 255 );
+	constexpr uint32 muted                = IM_COL32( 77, 77, 77, 255 );
+	constexpr uint32 groupHeader          = IM_COL32( 47, 47, 47, 255 );
+	constexpr uint32 selection            = IM_COL32( 237, 192, 119, 255 );
+	constexpr uint32 selectionMuted       = IM_COL32( 237, 201, 142, 23 );
+	constexpr uint32 backgroundPopup      = IM_COL32( 70, 70, 70, 255 );
+}
+
 //
 // IMGUI DRAW DATA
 //
@@ -578,35 +594,81 @@ void CImGUIEngine::InitTheme()
 
 	// Set colors
 	{
-		auto&		colors					= style.Colors;
-		colors[ImGuiCol_WindowBg]			= ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };
-
+		auto& colors = style.Colors;
+		
+		// *************************
+		//			COLORS
+		// *************************	
 		// Headers
-		colors[ImGuiCol_Header]				= ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-		colors[ImGuiCol_HeaderHovered]		= ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-		colors[ImGuiCol_HeaderActive]		= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+		colors[ImGuiCol_Header]					= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::groupHeader );
+		colors[ImGuiCol_HeaderHovered]			= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::groupHeader );
+		colors[ImGuiCol_HeaderActive]			= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::groupHeader );
 
 		// Buttons
-		colors[ImGuiCol_Button]				= ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-		colors[ImGuiCol_ButtonHovered]		= ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-		colors[ImGuiCol_ButtonActive]		= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+		colors[ImGuiCol_Button]					= ImColor( 56, 56, 56, 200 );
+		colors[ImGuiCol_ButtonHovered]			= ImColor( 70, 70, 70, 255 );
+		colors[ImGuiCol_ButtonActive]			= ImColor( 56, 56, 56, 150 );
 
 		// Frame BG
-		colors[ImGuiCol_FrameBg]			= ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-		colors[ImGuiCol_FrameBgHovered]		= ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-		colors[ImGuiCol_FrameBgActive]		= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+		colors[ImGuiCol_FrameBg]				= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::propertyField );
+		colors[ImGuiCol_FrameBgHovered]			= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::propertyField );
+		colors[ImGuiCol_FrameBgActive]			= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::propertyField );
 
 		// Tabs
-		colors[ImGuiCol_Tab]				= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-		colors[ImGuiCol_TabHovered]			= ImVec4{ 0.38f, 0.3805f, 0.381f, 1.0f };
-		colors[ImGuiCol_TabActive]			= ImVec4{ 0.28f, 0.2805f, 0.281f, 1.0f };
-		colors[ImGuiCol_TabUnfocused]		= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-		colors[ImGuiCol_TabUnfocusedActive] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+		colors[ImGuiCol_Tab]					= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::titlebar );
+		colors[ImGuiCol_TabHovered]				= ImColor( 135, 135, 135, 30 );
+		colors[ImGuiCol_TabActive]				= ImColor( 135, 135, 135, 60 );
+		colors[ImGuiCol_TabUnfocused]			= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::titlebar );
+		colors[ImGuiCol_TabUnfocusedActive]		= colors[ImGuiCol_TabHovered];
 
 		// Title
-		colors[ImGuiCol_TitleBg]			= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-		colors[ImGuiCol_TitleBgActive]		= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-		colors[ImGuiCol_TitleBgCollapsed]	= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+		colors[ImGuiCol_TitleBg]				= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::titlebar );
+		colors[ImGuiCol_TitleBgActive]			= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::titlebar );
+		colors[ImGuiCol_TitleBgCollapsed]		= ImVec4( 0.15f, 0.1505f, 0.151f, 1.0f );
+
+		// Resize Grip
+		colors[ImGuiCol_ResizeGrip]				= ImVec4( 0.91f, 0.91f, 0.91f, 0.25f );
+		colors[ImGuiCol_ResizeGripHovered]		= ImVec4( 0.81f, 0.81f, 0.81f, 0.67f );
+		colors[ImGuiCol_ResizeGripActive]		= ImVec4( 0.46f, 0.46f, 0.46f, 0.95f );
+
+		// Scrollbar
+		colors[ImGuiCol_ScrollbarBg]			= ImVec4( 0.02f, 0.02f, 0.02f, 0.53f );
+		colors[ImGuiCol_ScrollbarGrab]			= ImVec4( 0.31f, 0.31f, 0.31f, 1.0f );
+		colors[ImGuiCol_ScrollbarGrabHovered]	= ImVec4( 0.41f, 0.41f, 0.41f, 1.0f );
+		colors[ImGuiCol_ScrollbarGrabActive]	= ImVec4( 0.51f, 0.51f, 0.51f, 1.0f );
+
+		// Slider
+		colors[ImGuiCol_SliderGrab]				= ImVec4( 0.51f, 0.51f, 0.51f, 0.7f	);
+		colors[ImGuiCol_SliderGrabActive]		= ImVec4( 0.66f, 0.66f, 0.66f, 1.0f	);
+
+		// Text
+		colors[ImGuiCol_Text]					= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::text );
+
+		// Checkbox
+		colors[ImGuiCol_CheckMark]				= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::text );
+
+		// Separator
+		colors[ImGuiCol_Separator]				= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::backgroundDark );
+		colors[ImGuiCol_SeparatorActive]		= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::highlight );
+		colors[ImGuiCol_SeparatorHovered]		= ImColor( 39, 185, 242, 150 );
+
+		// Window Background
+		colors[ImGuiCol_WindowBg]				= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::background );
+		colors[ImGuiCol_ChildBg]				= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::background );
+		colors[ImGuiCol_PopupBg]				= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::backgroundPopup );
+		colors[ImGuiCol_Border]					= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::backgroundDark );
+
+		// Tables
+		colors[ImGuiCol_TableHeaderBg]			= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::groupHeader );
+		colors[ImGuiCol_TableBorderLight]		= ImGui::ColorConvertU32ToFloat4( ImGui::Colors::backgroundDark );
+
+		// *************************
+		//			STYLE
+		// *************************
+		style.FrameRounding		= 2.5f;
+		style.FrameBorderSize	= 1.0f;
+		style.IndentSpacing		= 11.0f;
+
 	}
 
 	styleColors[IGC_Selection]				= ImVec4{ 0.f, 0.43f, 0.87f, 1.f };
