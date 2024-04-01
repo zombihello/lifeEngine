@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "System/AudioSource.h"
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 
 /**
  * @ingroup Audio
@@ -199,7 +199,7 @@ private:
 	EAudioSourceStatus			status;					/**< Source audio status */
 	AudioBankHandle_t			audioBankHandle;		/**< Handle to opened bank for streamed audio */
 	AudioBankInfo				audioBankInfo;			/**< Info about opened bank */
-	mutable CCriticalSection	csStreamData;			/**< Critical section of stream data */
+	mutable CThreadMutex		mutexStreamData;		/**< Critical section of stream data */
 	CAudioStreamRunnable*		audioStreamRunnable;	/**< Audio stream runnable */
 	CRunnableThread*			threadStreamData;		/**< Thread for streaming audio */
 };

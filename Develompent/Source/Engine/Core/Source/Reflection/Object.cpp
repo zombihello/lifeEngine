@@ -7,7 +7,7 @@
 #include "Reflection/ObjectHash.h"
 #include "Reflection/LinkerLoad.h"
 #include "Reflection/Class.h"
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 #include "System/Config.h"
 
 IMPLEMENT_CLASS( CObject )

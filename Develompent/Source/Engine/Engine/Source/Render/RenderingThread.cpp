@@ -9,7 +9,7 @@
 // Definitions
 //
 
-/* The size of the rendering command buffer, in bytes. */
+/* The size of the rendering command buffer, in bytes */
 #define RENDERING_COMMAND_BUFFER_SIZE			( 1024 * 1024 )
 
 //
@@ -26,7 +26,7 @@ uint32			g_RenderingThreadId = 0;
 CRingBuffer		g_RenderCommandBuffer( RENDERING_COMMAND_BUFFER_SIZE, 16 );
 
 /* Event of finished rendering frame */
-CEvent*			g_RenderFrameFinished = nullptr;
+CThreadEvent*	g_RenderFrameFinished = nullptr;
 
 /*
 ==================
@@ -197,10 +197,12 @@ void StartRenderingThread()
 		// Release rendering context ownership on the current thread
 		g_RHI->ReleaseThreadOwnership();
 
-		const uint32		stackSize = 0;
-		s_RenderingThread = g_ThreadFactory->CreateThread( s_RenderingThreadRunnable, TEXT( "RenderingThread" ), 0, 0, stackSize, TP_Realtime );
-		g_RenderFrameFinished = g_SynchronizeFactory->CreateSynchEvent( false, TEXT( "RenderFrameFinished" ) );
-		Assert( s_RenderingThread && g_RenderFrameFinished );
+		// Create a render thread
+		s_RenderingThread = CRunnableThread::Create( s_RenderingThreadRunnable, TEXT( "RenderingThread" ), true, true, 0, TP_Normal );
+		Assert( s_RenderingThread );
+
+		// Create a synchronize mechanism for FlushRenderingCommands()
+		g_RenderFrameFinished = new CThreadEvent( false, TEXT( "RenderFrameFinished" ) );
 	}
 }
 
@@ -214,42 +216,36 @@ void StopRenderingThread()
 	// This function is not thread-safe. Ensure it is only called by the main game thread.
 	Assert( IsInGameThread() );
 
-	static bool			GIsRenderThreadStopping = false;
-	if ( g_IsThreadedRendering && !GIsRenderThreadStopping )
+	static bool			s_IsRenderThreadStopping = false;
+	if ( g_IsThreadedRendering && !s_IsRenderThreadStopping )
 	{
-		GIsRenderThreadStopping = true;
+		s_IsRenderThreadStopping = true;
 
 		// The rendering thread may have already been stopped
 		if ( g_IsThreadedRendering )
 		{
+			// Rendering thread must be valid
 			Assert( s_RenderingThread );
 
-			// Turn off the threaded rendering flag.
+			// Turn off the threaded rendering flag
 			g_IsThreadedRendering = false;
 
 			//Reset the rendering thread id
 			g_RenderingThreadId = 0;
 
-			// Wait for the rendering thread to return.
+			// Wait for the rendering thread to return
 			s_RenderingThread->WaitForCompletion();
 
-			// We must kill the thread here, so that it correctly frees up the rendering thread handle
-			// without this we get thread leaks when the device is lost TTP 14738, TTP 22274
-			s_RenderingThread->Kill();
-
-			// Destroy the rendering thread objects.
-			g_ThreadFactory->Destroy( s_RenderingThread );
-			g_SynchronizeFactory->Destroy( g_RenderFrameFinished );
-			delete s_RenderingThreadRunnable;
-
-			s_RenderingThread = nullptr;
-			s_RenderingThreadRunnable = nullptr;
-			g_RenderFrameFinished = nullptr;
+			// Destroy the rendering thread objects
+			delete g_RenderFrameFinished;
+			s_RenderingThread			= nullptr;
+			s_RenderingThreadRunnable	= nullptr;
+			g_RenderFrameFinished		= nullptr;
 
 			// Acquire rendering context ownership on the current thread
 			g_RHI->AcquireThreadOwnership();
 		}
 	}
 
-	GIsRenderThreadStopping = false;
+	s_IsRenderThreadStopping = false;
 }

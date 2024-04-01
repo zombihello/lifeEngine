@@ -32,7 +32,7 @@ uint32 CAudioStreamRunnable::Run()
 
 	{
 		// Check if the thread was launched is stopped
-		CScopeLock		scopeLock( &streamSource->csStreamData );
+		CScopeLock		scopeLock( &streamSource->mutexStreamData );
 		if ( streamSource->status == ASS_Stoped )
 		{
 			streamSource->bIsStreaming = false;
@@ -54,7 +54,7 @@ uint32 CAudioStreamRunnable::Run()
 
 	{
 		// Check if the thread was launched is paused
-		CScopeLock		scopeLock( &streamSource->csStreamData );	
+		CScopeLock		scopeLock( &streamSource->mutexStreamData );
 		if ( streamSource->status == ASS_Paused )
 		{
 			alSourcePause( streamSource->GetALHandle() );
@@ -65,7 +65,7 @@ uint32 CAudioStreamRunnable::Run()
 	{
 		TSharedPtr<CAudioBank>		audioBankRef = streamSource->audioBank.ToSharedPtr();		// Lock audio bank for him not unloaded ahead of time
 		{
-			CScopeLock		scopeLock( &streamSource->csStreamData );
+			CScopeLock		scopeLock( &streamSource->mutexStreamData );
 			if ( !streamSource->bIsStreaming || !audioBankRef )
 			{
 				break;
@@ -83,7 +83,7 @@ uint32 CAudioStreamRunnable::Run()
 			else
 			{
 				// End streaming
-				CScopeLock		scopeLock( &streamSource->csStreamData );
+				CScopeLock		scopeLock( &streamSource->mutexStreamData );
 				streamSource->bIsStreaming = false;
 			}
 		}
@@ -241,7 +241,7 @@ CAudioStreamRunnable::GetData
 */
 bool CAudioStreamRunnable::GetData( Chunk& OutData )
 {
-	CScopeLock	scopeLock( &streamSource->csStreamData );
+	CScopeLock	scopeLock( &streamSource->mutexStreamData );
 	TSharedPtr<CAudioBank>		audioBankRef	= streamSource->audioBank.ToSharedPtr();
 	uint32						toFill			= samples.size();
 	uint64						currentOffset	= audioBankRef->GetOffsetBankPCM( streamSource->audioBankHandle );
@@ -308,7 +308,7 @@ void CAudioStreamSource::Play()
 
 	// Getting values state
 	{
-		CScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &mutexStreamData );
 		isStreaming		= bIsStreaming;
 		status			= this->status;
 	}
@@ -317,7 +317,7 @@ void CAudioStreamSource::Play()
 	// If sound is streaming and thread state is ASS_Playing - do nothing
 	if ( isStreaming && status == ASS_Paused )
 	{
-		CScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &mutexStreamData );
 		this->status = ASS_Playing;
 		alSourcePlay( GetALHandle() );
 		return;
@@ -331,7 +331,7 @@ void CAudioStreamSource::Play()
 	bIsStreaming		= true;
 	this->status		= ASS_Playing;
 	audioStreamRunnable = new CAudioStreamRunnable( this );
-	threadStreamData	= g_ThreadFactory->CreateThread( audioStreamRunnable, TEXT( "AudioStream" ), true, true, 0, TP_Normal );
+	threadStreamData	= CRunnableThread::Create( audioStreamRunnable, TEXT( "AudioStream" ), true, true, 0, TP_Normal );
 }
 
 /*
@@ -349,7 +349,7 @@ void CAudioStreamSource::Pause()
 
 	// Set state to ASS_Paused
 	{
-		CScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &mutexStreamData );
 		if ( !bIsStreaming )
 		{
 			return;
@@ -375,7 +375,7 @@ void CAudioStreamSource::Stop()
 
 	// Request the thread to terminate
 	{
-		CScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &mutexStreamData );
 		bIsStreaming	= false;
 	}
 
@@ -542,7 +542,7 @@ EAudioSourceStatus CAudioStreamSource::GetStatus() const
 	case AL_STOPPED:
 	default:
 	{
-		CScopeLock		scopeLock( &csStreamData );
+		CScopeLock		scopeLock( &mutexStreamData );
 		if ( bIsStreaming )
 		{
 			return status;

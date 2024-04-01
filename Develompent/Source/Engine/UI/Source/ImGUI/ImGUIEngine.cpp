@@ -668,7 +668,6 @@ void CImGUIEngine::InitTheme()
 		style.FrameRounding		= 2.5f;
 		style.FrameBorderSize	= 1.0f;
 		style.IndentSpacing		= 11.0f;
-
 	}
 
 	styleColors[IGC_Selection]				= ImVec4{ 0.f, 0.43f, 0.87f, 1.f };

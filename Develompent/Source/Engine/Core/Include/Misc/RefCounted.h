@@ -11,7 +11,7 @@
 
 #include "Core.h"
 #include "Misc/Types.h"
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 
 /**
  * @ingroup Core

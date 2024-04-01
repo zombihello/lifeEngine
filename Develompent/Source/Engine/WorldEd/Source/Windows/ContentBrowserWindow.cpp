@@ -8,7 +8,7 @@
 #include "System/BaseFileSystem.h"
 #include "System/AssetsImport.h"
 #include "System/EditorEngine.h"
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 #include "System/DragNDrop.h"
 #include "Windows/ContentBrowserWindow.h"
 #include "Windows/DialogWindow.h"
@@ -209,7 +209,6 @@ public:
 	CImportAssetsRunnable( CContentBrowserWindow* InOwner, const std::vector<std::wstring>& InFilesToImport )
 		: importMode( IM_Default )
 		, owner( InOwner )
-		, eventResponse( nullptr )
 		, filesToImport( InFilesToImport )
 	{}
 
@@ -225,7 +224,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && owner->package );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -261,9 +259,9 @@ public:
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  pressedButton = InButtonType;
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
-					eventResponse->Wait();
+					eventResponse.Wait();
 					switch ( pressedButton )
 					{
 					case CDialogWindow::BT_Yes:
@@ -322,9 +320,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -347,7 +343,7 @@ private:
 
 	EImportMode					importMode;		/**< Import mode */
 	CContentBrowserWindow*		owner;			/**< Owner */
-	CEvent*						eventResponse;	/**< Event used when opened popup of change exist assets */
+	CThreadEvent				eventResponse;	/**< Event used when opened popup of change exist assets */
 	std::vector<std::wstring>	filesToImport;	/**< Array of files to import */
 };
 
@@ -370,7 +366,6 @@ public:
 	 */
 	CRenameAssetRunnable( CContentBrowserWindow* InOwner, CContentBrowserWindow::CAssetNode InAssetNode )
 		: owner( InOwner )
-		, eventResponse( nullptr )
 		, assetNode( InAssetNode )
 	{}
 
@@ -386,7 +381,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && owner->package );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -412,15 +406,15 @@ public:
 											{
 												bIsOk = true;
 												newAssetName = ANSI_TO_TCHAR( InText.c_str() );
-												eventResponse->Trigger();
+												eventResponse.Trigger();
 											} );
 
 				popup->OnCenceled().Add(	[&]()
 											{
 												 bIsOk = false;
-												 eventResponse->Trigger();
+												 eventResponse.Trigger();
 											} );
-				eventResponse->Wait();
+				eventResponse.Wait();
 				if ( !bIsOk )
 				{
 					return 0;
@@ -433,10 +427,10 @@ public:
 				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Name '%s' already exist in package" ), newAssetName.c_str() ), CDialogWindow::BT_Ok );
 				popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 											  {
-												  eventResponse->Trigger();
+												  eventResponse.Trigger();
 											  } );
 				bIsOk = false;
-				eventResponse->Wait();
+				eventResponse.Wait();
 			}
 		}
 
@@ -458,9 +452,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -472,7 +464,7 @@ public:
 
 private:
 	CContentBrowserWindow*				owner;			/**< Owner */
-	CEvent*								eventResponse;	/**< Event used when opened popup of change exist assets */
+	CThreadEvent						eventResponse;	/**< Event used when opened popup of change exist assets */
 	CContentBrowserWindow::CAssetNode	assetNode;		/**< Asset node to rename */
 };
 
@@ -495,7 +487,6 @@ public:
 	 */
 	TCreateAssetRunnable( CContentBrowserWindow* InOwner )
 		: owner( InOwner )
-		, eventResponse( nullptr )
 	{
 		package = owner->GetCurrentPackage();
 	}
@@ -512,7 +503,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && package );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -538,15 +528,15 @@ public:
 											{
 												bIsOk = true;
 												assetName = ANSI_TO_TCHAR( InText.c_str() );
-												eventResponse->Trigger();
+												eventResponse.Trigger();
 											} );
 
 				popup->OnCenceled().Add( [&]()
 										 {
 											 bIsOk = false;
-											 eventResponse->Trigger();
+											 eventResponse.Trigger();
 										 } );
-				eventResponse->Wait();
+				eventResponse.Wait();
 				if ( !bIsOk )
 				{
 					return 0;
@@ -559,10 +549,10 @@ public:
 				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Name '%s' already exist in package" ), assetName.c_str() ), CDialogWindow::BT_Ok );
 				popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 											  {
-												  eventResponse->Trigger();
+												  eventResponse.Trigger();
 											  } );
 				bIsOk = false;
-				eventResponse->Wait();
+				eventResponse.Wait();
 			}
 		}
 
@@ -581,9 +571,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -596,7 +584,7 @@ public:
 private:
 	PackageRef_t			package;		/**< Package */
 	CContentBrowserWindow*	owner;			/**< Owner */
-	CEvent*					eventResponse;	/**< Event used when opened popup of change exist assets */
+	CThreadEvent			eventResponse;	/**< Event used when opened popup of change exist assets */
 };
 
 //
@@ -630,7 +618,6 @@ public:
 		: bMove( true )
 		, mode( CMM_Default )
 		, owner( InOwner )
-		, eventResponse( nullptr )
 		, filesToMoveCopy( InFilesToMoveCopy )
 	{}
 
@@ -646,7 +633,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 
 		// Expanding all folders. It need for we contain in array only files
 		std::vector<FileInfo>		oldFilesToMoveCopy = filesToMoveCopy;
@@ -701,9 +687,9 @@ public:
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  pressedButton = InButtonType;
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
-					eventResponse->Wait();
+					eventResponse.Wait();
 					switch ( pressedButton )
 					{
 					case CDialogWindow::BT_Yes:
@@ -812,9 +798,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -875,7 +859,7 @@ private:
 	bool						bMove;				/**< Is need move files? If FALSE we will copy they */
 	ECopyMoveMode				mode;				/**< Copy/move mode */
 	CContentBrowserWindow*		owner;				/**< Owner */
-	CEvent*						eventResponse;		/**< Event used when opened popup of change exist files */
+	CThreadEvent				eventResponse;		/**< Event used when opened popup of change exist files */
 	std::vector<FileInfo>		filesToMoveCopy;	/**< Array of files to move/copy */
 	std::vector<CFilename>		directorisToDelete;	/**< Array of directories who need delete after move */
 };
@@ -910,7 +894,6 @@ public:
 	CCreateFileRunnable( CContentBrowserWindow* InOwner, const TSharedPtr<CContentBrowserWindow::CFileTreeNode>& InRootNode, ECreateMode InCreateMode )
 		: mode( InCreateMode )
 		, owner( InOwner )
-		, eventResponse( nullptr )
 		, rootNode( InRootNode )
 	{}
 
@@ -926,7 +909,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && rootNode );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -953,15 +935,15 @@ public:
 											{
 												bIsOk = true;
 												fileName = ANSI_TO_TCHAR( InText.c_str() );
-												eventResponse->Trigger();
+												eventResponse.Trigger();
 											} );
 
 				popup->OnCenceled().Add( [&]()
 										 {
 											 bIsOk = false;
-											 eventResponse->Trigger();
+											 eventResponse.Trigger();
 										 } );
-				eventResponse->Wait();
+				eventResponse.Wait();
 				if ( !bIsOk )
 				{
 					return 0;
@@ -977,10 +959,10 @@ public:
 					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Folder '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
 					bIsOk = false;
-					eventResponse->Wait();
+					eventResponse.Wait();
 				}
 				break;
 
@@ -991,10 +973,10 @@ public:
 					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
 					bIsOk = false;
-					eventResponse->Wait();
+					eventResponse.Wait();
 				}
 				break;
 
@@ -1043,9 +1025,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -1058,7 +1038,7 @@ public:
 private:
 	ECreateMode											mode;			/**< Create mode */
 	CContentBrowserWindow*								owner;			/**< Owner */
-	CEvent*												eventResponse;	/**< Event used when opened popup */
+	CThreadEvent										eventResponse;	/**< Event used when opened popup */
 	TSharedPtr<CContentBrowserWindow::CFileTreeNode>	rootNode;		/**< Root node where we create package */
 };
 
@@ -1092,7 +1072,6 @@ public:
 	CRenameFileRunnable( CContentBrowserWindow* InOwner, const TSharedPtr<CContentBrowserWindow::CFileTreeNode>& InNodeToRename, ERenameMode InRenameMode )
 		: mode( InRenameMode )
 		, owner( InOwner )
-		, eventResponse( nullptr )
 		, nodeToRename( InNodeToRename )
 	{}
 
@@ -1108,7 +1087,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && nodeToRename );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -1139,15 +1117,15 @@ public:
 											{
 												bIsOk = true;
 												newFileName = ANSI_TO_TCHAR( InText.c_str() );
-												eventResponse->Trigger();
+												eventResponse.Trigger();
 											} );
 
 				popup->OnCenceled().Add( [&]()
 										 {
 											 bIsOk = false;
-											 eventResponse->Trigger();
+											 eventResponse.Trigger();
 										 } );
-				eventResponse->Wait();
+				eventResponse.Wait();
 				if ( !bIsOk )
 				{
 					return 0;
@@ -1163,10 +1141,10 @@ public:
 					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Folder '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
 					bIsOk = false;
-					eventResponse->Wait();
+					eventResponse.Wait();
 				}
 				break;
 
@@ -1177,10 +1155,10 @@ public:
 					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
 					bIsOk = false;
-					eventResponse->Wait();
+					eventResponse.Wait();
 				}
 				break;
 
@@ -1302,9 +1280,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -1317,7 +1293,7 @@ public:
 private:
 	ERenameMode											mode;			/**< Rename mode */
 	CContentBrowserWindow*								owner;			/**< Owner */
-	CEvent*												eventResponse;	/**< Event used when opened popup */
+	CThreadEvent										eventResponse;	/**< Event used when opened popup */
 	TSharedPtr<CContentBrowserWindow::CFileTreeNode>	nodeToRename;	/**< Node to rename */
 };
 
@@ -1642,7 +1618,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 			// Create material
 			if ( ImGui::MenuItem( "Material" ) )
 			{
-				g_ThreadFactory->CreateThread( new TCreateAssetRunnable<CMaterial>( this ), TEXT( "CreateAsset" ), true, true );
+				CRunnableThread::Create( new TCreateAssetRunnable<CMaterial>( this ), TEXT( "CreateAsset" ), true, true );
 			}
 			
 			if ( ImGui::BeginMenu( "Physics" ) )
@@ -1650,7 +1626,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 				// Create physics material
 				if ( ImGui::MenuItem( "Physics Material" ) )
 				{
-					g_ThreadFactory->CreateThread( new TCreateAssetRunnable<CPhysicsMaterial>( this ), TEXT( "CreateAsset" ), true, true );
+					CRunnableThread::Create( new TCreateAssetRunnable<CPhysicsMaterial>( this ), TEXT( "CreateAsset" ), true, true );
 				}
 				ImGui::EndMenu();
 			}		
@@ -1709,7 +1685,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 		// Rename an asset
 		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneAsset ) )
 		{
-			g_ThreadFactory->CreateThread( new CRenameAssetRunnable( this, selectedAssets[0] ), CString::Format( TEXT( "RenameAsset_%s" ), selectedAssets[0].GetName().c_str() ).c_str(), true, true );
+			CRunnableThread::Create( new CRenameAssetRunnable( this, selectedAssets[0] ), CString::Format( TEXT( "RenameAsset_%s" ), selectedAssets[0].GetName().c_str() ).c_str(), true, true );
 		}
 
 		// Copy reference to asset
@@ -1808,13 +1784,13 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 			// Create a folder
 			if ( ImGui::MenuItem( "Folder" ) && hoveredNode )
 			{
-				g_ThreadFactory->CreateThread( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreateFolder ), TEXT( "CreateDirectoryThread" ), true, true );
+				CRunnableThread::Create( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreateFolder ), TEXT( "CreateDirectoryThread" ), true, true );
 			}
 
 			// Create a package
 			if ( ImGui::MenuItem( "Package" ) && hoveredNode )
 			{
-				g_ThreadFactory->CreateThread( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreatePackage ), TEXT( "CreatePackageThread" ), true, true );
+				CRunnableThread::Create( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreatePackage ), TEXT( "CreatePackageThread" ), true, true );
 			}
 			ImGui::EndMenu();
 		}
@@ -1856,7 +1832,7 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 				}
 			}
 
-			g_ThreadFactory->CreateThread( new CRenameFileRunnable( this, node, node->GetType() == FNT_Folder ? CRenameFileRunnable::RM_RenameFolder : CRenameFileRunnable::RM_RenamePackage ), TEXT( "RenameFileThread" ), true, true );
+			CRunnableThread::Create( new CRenameFileRunnable( this, node, node->GetType() == FNT_Folder ? CRenameFileRunnable::RM_RenameFolder : CRenameFileRunnable::RM_RenamePackage ), TEXT( "RenameFileThread" ), true, true );
 		}
 		ImGui::EndPopup();
 	}
@@ -2132,7 +2108,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Import()
 	// Show open file dialog
 	if ( Sys_ShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) )
 	{
-		g_ThreadFactory->CreateThread( new CImportAssetsRunnable( this, openFileDialogResult.files ), TEXT( "ImportAssets" ), true, true );
+		CRunnableThread::Create( new CImportAssetsRunnable( this, openFileDialogResult.files ), TEXT( "ImportAssets" ), true, true );
 	}
 }
 
@@ -2554,7 +2530,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			}
 
 			// Create and start thread for copy/move files
-			g_ThreadFactory->CreateThread( new CMoveCopyFilesRunnable( owner, filesToMoveCopy ), TEXT( "MoveCopyFilesThread" ), true, true );
+			CRunnableThread::Create( new CMoveCopyFilesRunnable( owner, filesToMoveCopy ), TEXT( "MoveCopyFilesThread" ), true, true );
 
 			// Allow drop targets for all nodes
 			owner->engineRoot->SetAllowDropTarget( true );

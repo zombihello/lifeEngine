@@ -14,7 +14,7 @@
 
 #include "Core.h"
 #include "Reflection/Object.h"
-#include "ThreadingBase.h"
+#include "Threading.h"
 
 /**
  * @ingroup Core
@@ -35,7 +35,7 @@ public:
 	 */
 	FORCEINLINE DelegateType_t* Add( const DelegateType_t& InDelegate )
 	{
-		CScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( mutex );
 		delegates.push_back( InDelegate );
 		return &delegates.back();
 	}
@@ -51,7 +51,7 @@ public:
 			return;
 		}
 
-		CScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( mutex );
 		for ( auto itDelegate = delegates.begin(), itDelegateEnd = delegates.end(); itDelegate != itDelegateEnd; ++itDelegate )
 		{
 			if ( &( *itDelegate ) == InDelegate )
@@ -70,7 +70,7 @@ public:
 	FORCEINLINE void Broadcast( TParamTypes... InParams ) const
 	{
 		// Call delegates
-		CScopeLock		scopeLock( criticalSection );	
+		CScopeLock		scopeLock( mutex );
 		for ( auto itDelegate = delegates.begin(), itDelegateEnd = delegates.end(); itDelegate != itDelegateEnd; ++itDelegate )
 		{
 			( *itDelegate )( InParams... );
@@ -78,8 +78,8 @@ public:
 	}
 
 private:
-	std::list< DelegateType_t >		delegates;				/**< List of delegates */
-	mutable CCriticalSection		criticalSection;		/**< Critical section for thread safe broadcast */
+	std::list< DelegateType_t >		delegates;	/**< List of delegates */
+	mutable CThreadMutex			mutex;		/**< Critical section for thread safe broadcast */
 };
 
 /**
@@ -102,7 +102,7 @@ public:
 	 */
 	FORCEINLINE void Bind( const DelegateType_t& InDelegate )
 	{
-		CScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( mutex );
 		delegate = InDelegate;
 	}
 
@@ -111,7 +111,7 @@ public:
 	 */
 	FORCEINLINE void Unbind()
 	{
-		CScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( mutex );
 		delegate = nullptr;
 	}
 
@@ -127,13 +127,13 @@ public:
 			return;
 		}
 
-		CScopeLock		scopeLock( criticalSection );
+		CScopeLock		scopeLock( mutex );
 		delegate( InParams... );
 	}
 
 private:
-	DelegateType_t				delegate;				/**< Delegate */
-	mutable CCriticalSection	criticalSection;		/**< Critical section for thread safe execute */
+	DelegateType_t			delegate;				/**< Delegate */
+	mutable CThreadMutex	mutex;		/**< Critical section for thread safe execute */
 };
 
 /**

@@ -659,7 +659,7 @@ public:
 	/**
 	 * @brief Pointer to function for show import asset settings
 	 */
-	typedef void( *ShowImportSettingsAssetFn_t )( class CImGUILayer* InOwner, class CEvent* InEvent, EResultShowImportSettings& OutResult );
+	typedef void( *ShowImportSettingsAssetFn_t )( class CImGUILayer* InOwner, CThreadEvent& InEvent, EResultShowImportSettings& OutResult );
 
 	/**
 	 * @brief Struct info about asset's importer
@@ -796,7 +796,7 @@ public:
 	 * @param OutResult			Result
 	 * @return Return TRUE if dialog is showed, otherwise will return FALSE
 	 */
-	bool ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, class CEvent* InEvent, EResultShowImportSettings& OutResult ) const;
+	bool ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, CThreadEvent& InEvent, EResultShowImportSettings& OutResult ) const;
 
 	/**
 	 * @brief Import asset

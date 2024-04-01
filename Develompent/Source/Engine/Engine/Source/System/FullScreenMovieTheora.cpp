@@ -223,7 +223,7 @@ CFullScreenMovieTheora::CFullScreenMovieTheora()
 	, startupSequenceStep( -1 )
 	, audioStreamSource( nullptr )
 	, arMovie( nullptr )
-	, movieFinishEvent( nullptr )
+	, movieFinishEvent( true )
 	, theoraRender( nullptr )
 {
 	// Get list of startup movies
@@ -238,12 +238,8 @@ CFullScreenMovieTheora::CFullScreenMovieTheora()
 		startupMovies.push_back( configValue.GetString() );
 	}
 
-	// Init synchronization objects (a manual reset Event)
-	Assert( g_SynchronizeFactory );
-	movieFinishEvent = g_SynchronizeFactory->CreateSynchEvent( true );
-
 	// By default, we are "done" playing a movie
-	movieFinishEvent->Trigger();
+	movieFinishEvent.Trigger();
 }
 
 /*
@@ -254,10 +250,7 @@ CFullScreenMovieTheora::~CFullScreenMovieTheora
 CFullScreenMovieTheora::~CFullScreenMovieTheora()
 {
 	// Stop movie
-	GameThreadStopMovie( false, true );
-
-	// Free allocated memory
-	g_SynchronizeFactory->Destroy( movieFinishEvent );
+	GameThreadStopMovie( false, true );;
 }
 
 /*
@@ -339,7 +332,7 @@ void CFullScreenMovieTheora::StopCurrentAndPlayNext( bool InIsPlayNext /*= true*
 	if ( !InIsPlayNext || !ProcessNextStartupSequence() )
 	{
 		// Trigger of finished movie playing
-		movieFinishEvent->Trigger();
+		movieFinishEvent.Trigger();
 	}
 }
 
@@ -429,7 +422,7 @@ CFullScreenMovieTheora::GameThreadPlayMovie
 void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFilename, bool InIsSkippable /*= false */, uint32 InStartFrame /*= 0*/ )
 {
 	// Check for movie already playing and exit out if so
-	if ( !movieFinishEvent->Wait( 0 ) )
+	if ( !movieFinishEvent.Wait( 0 ) )
 	{
 		Logf( TEXT( "Attempting to start already playing movie '%s', aborting\n" ), currentMovieName.c_str() );
 		return;
@@ -459,7 +452,7 @@ void CFullScreenMovieTheora::GameThreadPlayMovie( const std::wstring& InMovieFil
 	}
 
 	// Reset synchronization to untriggered state
-	movieFinishEvent->Reset();
+	movieFinishEvent.Reset();
 
 	// Play movie
 	UNIQUE_RENDER_COMMAND_TWOPARAMETER( CPlayMovieCommand,
@@ -533,7 +526,7 @@ CFullScreenMovieTheora::GameThreadWaitForMovie
 void CFullScreenMovieTheora::GameThreadWaitForMovie()
 {
 	// Wait for the event
-	bool		bIsFinished = movieFinishEvent->Wait( 1 );
+	bool		bIsFinished = movieFinishEvent.Wait( 1 );
 	while ( !bIsFinished && !g_IsRequestingExit )
 	{
 		// Compute the time since the last tick
@@ -554,7 +547,7 @@ void CFullScreenMovieTheora::GameThreadWaitForMovie()
 		}
 
 		// Wait movie finish event
-		bIsFinished = movieFinishEvent->Wait( 1 );
+		bIsFinished = movieFinishEvent.Wait( 1 );
 	}
 }
 

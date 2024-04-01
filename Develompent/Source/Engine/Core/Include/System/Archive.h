@@ -299,7 +299,7 @@ protected:
 	bool					arWantBinaryPropertySerialization;	/**< Whether this archive wants properties to be serialized in binary form instead of tagged */
 
 #if WITH_EDITOR
-	CBaseTargetPlatform*		cookingTargetPlatform;			/**< Holds the cooking target platform */
+	CBaseTargetPlatform*	cookingTargetPlatform;				/**< Holds the cooking target platform */
 #endif // WITH_EDITOR
 };
 

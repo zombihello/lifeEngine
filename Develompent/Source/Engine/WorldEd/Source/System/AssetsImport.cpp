@@ -253,21 +253,21 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 CStaticMeshImporter::ShowImportSettings
 ==================
 */
-void CStaticMeshImporter::ShowImportSettings( class CImGUILayer* InOwner, class CEvent* InEvent, CAssetFactory::EResultShowImportSettings& OutResult )
+void CStaticMeshImporter::ShowImportSettings( class CImGUILayer* InOwner, CThreadEvent& InEvent, CAssetFactory::EResultShowImportSettings& OutResult )
 {
-	Assert( InOwner && InEvent );
+	Assert( InOwner );
 	TSharedPtr<CStaticMeshImportSettingsDialog>			popup = InOwner->OpenPopup<CStaticMeshImportSettingsDialog>();
 	popup->OnResume().Add( [&]( CAssetFactory::EResultShowImportSettings InResult, const CStaticMeshImportSettingsDialog::ImportSettings& InImportSettings )
-						   {					   
+						   {
 							   if ( InResult != CAssetFactory::RSIS_Cancel )
 							   {
 								   importSettings = InImportSettings;
 							   }
 
 							   OutResult = InResult;
-							   InEvent->Trigger();
+							   InEvent.Trigger();
 						   } );
-	InEvent->Wait();
+	InEvent.Wait();
 }
 
 /*

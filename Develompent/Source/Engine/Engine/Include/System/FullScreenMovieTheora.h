@@ -17,7 +17,7 @@
 #include <theora/theora.h>
 #include <theora/theoradec.h>
 
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 #include "System/FullScreenMovie.h"
 #include "System/AudioBank.h"
 #include "System/AudioStreamSource.h"
@@ -287,7 +287,7 @@ private:
 	TSharedPtr<CAudioBank>			audioBank;				/**< Audio bank for streamed source */
 	CAudioStreamSource*				audioStreamSource;		/**< Audio stream source */
 	class CArchive*					arMovie;				/**< File of movie */
-	CEvent*							movieFinishEvent;		/**< Synchronization object for game to wait for movie to finish */
+	CThreadEvent					movieFinishEvent;		/**< Synchronization object for game to wait for movie to finish */
 	CTheoraMovieRenderClient*		theoraRender;			/**< Theora rendering */
 	std::vector<std::wstring>		startupMovies;			/**< Startup movies */
 };

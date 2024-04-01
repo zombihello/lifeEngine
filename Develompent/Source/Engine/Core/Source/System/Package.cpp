@@ -193,7 +193,7 @@ CAssetFactory::CAssetFactory()
 CAssetFactory::ShowImportSettings
 ==================
 */
-bool CAssetFactory::ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, class CEvent* InEvent, EResultShowImportSettings& OutResult ) const
+bool CAssetFactory::ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, CThreadEvent& InEvent, EResultShowImportSettings& OutResult ) const
 {
 	Assert( InOwner );
 	const AssetImporterInfo&	importerInfo = importersInfo[InAssetType];
