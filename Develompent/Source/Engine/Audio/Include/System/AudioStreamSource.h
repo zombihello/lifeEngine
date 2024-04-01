@@ -199,7 +199,7 @@ private:
 	EAudioSourceStatus			status;					/**< Source audio status */
 	AudioBankHandle_t			audioBankHandle;		/**< Handle to opened bank for streamed audio */
 	AudioBankInfo				audioBankInfo;			/**< Info about opened bank */
-	mutable CMutex		mutexStreamData;		/**< Critical section of stream data */
+	mutable CMutex				mutexStreamData;		/**< Critical section of stream data */
 	CAudioStreamRunnable*		audioStreamRunnable;	/**< Audio stream runnable */
 	CRunnableThread*			threadStreamData;		/**< Thread for streaming audio */
 };

@@ -213,6 +213,15 @@ public:
 	}
 #endif // WITH_EDITOR
 
+	/**
+	 * @brief Has begun gameplay
+	 * @return Return TRUE if gameplay has begun, otherwise returns FALSE
+	 */
+	FORCEINLINE bool HasBegunPlay() const
+	{
+		return isBeginPlay;
+	}
+
 private:
 	/**
 	 * Destroy actor in world

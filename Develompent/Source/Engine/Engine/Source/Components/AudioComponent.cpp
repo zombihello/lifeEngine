@@ -74,8 +74,13 @@ void CAudioComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPro
 		static const CName		property_attenuation( TEXT( "Attenuation" ) );
 		static const CName		property_audioBank( TEXT( "Audio Bank" ) );
 		static const CName		property_bIsStreamable( TEXT( "bIsStreamable" ) );
+		static const CName		property_bIsAutoPlay( TEXT( "bIsAutoPlay" ) );
 
-		if ( changedProperty->GetCName() == property_bIsLoop )
+		if ( changedProperty->GetCName() == property_bIsAutoPlay )
+		{
+			SetAutoPlay( bIsAutoPlay );
+		}
+		else if ( changedProperty->GetCName() == property_bIsLoop )
 		{
 			SetLoop( bIsLoop );
 		}
@@ -102,10 +107,6 @@ void CAudioComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPro
 		else if ( changedProperty->GetCName() == property_audioBank )
 		{
 			SetAudioBank( bank );
-			if ( bank.IsAssetValid() && GetStatus() != ASS_Playing && bIsAutoPlay )
-			{
-				Play();
-			}
 		}
 		else if ( changedProperty->GetCName() == property_bIsStreamable )
 		{
@@ -216,7 +217,7 @@ void CAudioComponent::UpdateAudioSourceType()
 	source->SetMinDistance( minDistance );
 	source->SetAttenuation( attenuation );
 	source->SetAudioBank( bank );
-	source->SetLocation( oldSourceLocation );
+	source->SetLocation( !bIsUISound ? oldSourceLocation : Math::vectorZero );
 
 	if ( status == ASS_Playing )
 	{
