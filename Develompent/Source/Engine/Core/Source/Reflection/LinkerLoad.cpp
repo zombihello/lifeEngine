@@ -158,7 +158,7 @@ CLinkerLoad* CLinkerLoad::GetPackageLinker( CObjectPackage* InOuter, const tchar
 		{
 			// Remember linker and file path
 			tagetPackage->SetLinker( result );
-			tagetPackage->SetPackagePath( InFilename );
+			tagetPackage->SetPackagePath( newFilename );
 		}
 	}
 

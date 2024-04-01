@@ -5,9 +5,9 @@
 operator new
 ==================
 */
-void* operator new( size_t numBytes )
+void* operator new( size_t InNumBytes )
 {
-	return Memory::Malloc( numBytes );
+	return Memory::Malloc( InNumBytes );
 }
 
 /*
@@ -15,9 +15,9 @@ void* operator new( size_t numBytes )
 operator delete
 ==================
 */
-void operator delete( void* pPtr ) noexcept
+void operator delete( void* InPtr ) noexcept
 {
-	Memory::Free( pPtr );
+	Memory::Free( InPtr );
 }
 
 /*
@@ -25,9 +25,9 @@ void operator delete( void* pPtr ) noexcept
 operator new[]
 ==================
 */
-void* operator new[]( size_t numBytes )
+void* operator new[]( size_t InNumBytes )
 {
-	return Memory::Malloc( numBytes );
+	return Memory::Malloc( InNumBytes );
 }
 
 /*
@@ -35,7 +35,7 @@ void* operator new[]( size_t numBytes )
 operator delete[]
 ==================
 */
-void operator delete[]( void* pPtr ) noexcept
+void operator delete[]( void* InPtr ) noexcept
 {
-	Memory::Free( pPtr );
+	Memory::Free( InPtr );
 }
