@@ -483,7 +483,7 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	}
 
 	// Clean the object's memory
-	Sys_Memzero( ( void* )object, InClass->GetPropertiesSize() );
+	Memory::Memzero( ( void* )object, InClass->GetPropertiesSize() );
 
 	// Init object properties
 	object->index		= INDEX_NONE;

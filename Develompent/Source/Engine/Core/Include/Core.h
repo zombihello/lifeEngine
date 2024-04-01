@@ -12,7 +12,7 @@
 #include "LEVersion.h"
 #include "LEBuild.h"
 #include "CoreDefines.h"
-#include "System/MemoryBase.h"
+#include "System/Memory.h"
 #include "Misc/Template.h"
 #include "Misc/Types.h"
 #include "Misc/Names.h"

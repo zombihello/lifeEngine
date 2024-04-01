@@ -276,7 +276,7 @@ void ResolveSurfaceUsingShader( CD3D11DeviceContext* InDeviceContextRHI, CD3D11S
 
 	// Generate the vertices used
 	SimpleElementVertexType	vertices[4];
-	Sys_Memzero( vertices, sizeof( SimpleElementVertexType ) * 4 );
+	Memory::Memzero( vertices, sizeof( SimpleElementVertexType ) * 4 );
 
 	vertices[0].position.x = maxX;
 	vertices[0].position.y = minY;
@@ -339,7 +339,7 @@ CD3D11RHI::CD3D11RHI()
 	, psConstantBuffer( nullptr )
 	, d3d11Device( nullptr )
 {
-	Sys_Memzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
+	Memory::Memzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
 }
 
 /*
@@ -530,7 +530,7 @@ void CD3D11RHI::Destroy()
 	dxgiFactory = nullptr;
 
 	stateCache.Reset();
-	Sys_Memzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
+	Memory::Memzero( vsConstantBuffers, sizeof( vsConstantBuffers ) );
 }
 
 /*
@@ -761,7 +761,7 @@ void CD3D11RHI::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContext, u
 	{
 		LockedData		lockedData;
 		LockVertexBuffer( InDeviceContext, instanceBuffer, InInstanceSize, 0, lockedData );
-		memcpy( lockedData.data, InInstanceData, InInstanceSize );
+		Memory::Memcpy( lockedData.data, InInstanceData, InInstanceSize );
 		UnlockVertexBuffer( InDeviceContext, instanceBuffer, lockedData );
 	}
 
@@ -980,10 +980,10 @@ void CD3D11RHI::SetDepthState( class CBaseDeviceContextRHI* InDeviceContext, Dep
 	}
 	else
 	{
-		Sys_Memzero( &d3d11DepthStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+		Memory::Memzero( &d3d11DepthStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	}
 
-	if ( memcmp( &d3d11DepthStateDesc, &stateCache.depthState, sizeof( D3D11_DEPTH_STENCIL_DESC ) ) )
+	if ( Memory::Memcmp( &d3d11DepthStateDesc, &stateCache.depthState, sizeof( D3D11_DEPTH_STENCIL_DESC ) ) )
 	{
 		d3d11DeviceContext->OMSetDepthStencilState( GetCachedDepthStencilState( d3d11DepthStateDesc, stateCache.stencilState ), stateCache.stencilRef );
 		stateCache.depthState = d3d11DepthStateDesc;
@@ -1006,10 +1006,10 @@ void CD3D11RHI::SetBlendState( class CBaseDeviceContextRHI* InDeviceContext, Ble
 	}
 	else
 	{
-		Sys_Memzero( &d3d11BlendStateDesc, sizeof( D3D11_BLEND_DESC ) );
+		Memory::Memzero( &d3d11BlendStateDesc, sizeof( D3D11_BLEND_DESC ) );
 	}
 
-	if ( memcmp( &d3d11BlendStateDesc, &stateCache.blendState, sizeof( D3D11_BLEND_DESC ) ) )
+	if ( Memory::Memcmp( &d3d11BlendStateDesc, &stateCache.blendState, sizeof( D3D11_BLEND_DESC ) ) )
 	{
 		float blendFactor[4]	= { 0.f, 0.f, 0.f, 0.f };
 		d3d11DeviceContext->OMSetBlendState( GetCachedBlendState( d3d11BlendStateDesc, stateCache.colorWriteMasks ), blendFactor, 0xFFFFFFFF );
@@ -1121,10 +1121,10 @@ void CD3D11RHI::SetStencilState( class CBaseDeviceContextRHI* InDeviceContext, S
 	}
 	else
 	{
-		Sys_Memzero( &d3d1StencilStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+		Memory::Memzero( &d3d1StencilStateDesc, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	}
 
-	if ( memcmp( &d3d1StencilStateDesc, &stateCache.stencilState, sizeof( D3D11_DEPTH_STENCIL_DESC ) ) || stencilRef != stateCache.stencilRef )
+	if ( Memory::Memcmp( &d3d1StencilStateDesc, &stateCache.stencilState, sizeof( D3D11_DEPTH_STENCIL_DESC ) ) || stencilRef != stateCache.stencilRef )
 	{
 		d3d11DeviceContext->OMSetDepthStencilState( GetCachedDepthStencilState( stateCache.depthState, d3d1StencilStateDesc ), stencilRef );	
 		stateCache.stencilState = d3d1StencilStateDesc;
@@ -1571,7 +1571,7 @@ public:
 		// Create data buffer and fill '\0'
 		*OutBytes = archive->GetSize() + 1;
 		byte*		data = new byte[ *OutBytes ];
-		Sys_Memzero( data, *OutBytes );
+		Memory::Memzero( data, *OutBytes );
 
 		// Serialize data to buffer
 		archive->Serialize( data, *OutBytes );
@@ -1628,7 +1628,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 	// Create string buffer and fill '\0'
 	uint32				archiveSize = shaderArchive->GetSize() + 1;
 	byte*				buffer = new byte[ archiveSize ];
-	memset( buffer, '\0', archiveSize );
+	Memory::Memzero( buffer, archiveSize );
 
 	// Serialize data to string buffer
 	shaderArchive->Serialize( buffer, archiveSize );
@@ -1730,7 +1730,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 	// Save code of shader and getting reflector of shader
 	uint32		numShaderBytes = ( uint32 )shaderBlob->GetBufferSize();
 	OutOutput.code.resize( numShaderBytes );
-	memcpy( OutOutput.code.data(), shaderBlob->GetBufferPointer(), numShaderBytes );
+	Memory::Memcpy( OutOutput.code.data(), shaderBlob->GetBufferPointer(), numShaderBytes );
 
 	ID3D11ShaderReflection*				reflector = nullptr;
 	result = D3DReflect( OutOutput.code.data(), OutOutput.code.size(), IID_ID3D11ShaderReflection, ( void** ) &reflector );
@@ -1898,7 +1898,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 			uint32		numShaderBytes = strippedShader->GetBufferSize();
 
 			OutOutput.code.resize( numShaderBytes );
-			memcpy( OutOutput.code.data(), strippedShader->GetBufferPointer(), numShaderBytes );
+			Memory::Memcpy( OutOutput.code.data(), strippedShader->GetBufferPointer(), numShaderBytes );
 			strippedShader->Release();
 		}
 	}
@@ -2005,8 +2005,8 @@ CD3D11RHI::GetCachedBlendState
 ID3D11BlendState* CD3D11RHI::GetCachedBlendState( const D3D11_BLEND_DESC& InBlendState, uint8* InColorWriteMasks )
 {
 	// Calculate hash
-	uint64		hash = Sys_MemFastHash( InBlendState );
-	hash = Sys_MemFastHash( InColorWriteMasks, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT * sizeof( uint8 ), hash );
+	uint64		hash = FastHash( InBlendState );
+	hash = FastHash( InColorWriteMasks, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT * sizeof( uint8 ), hash );
 
 	// Try find cached blend state
 	auto		it = cachedBlendStates.find( hash );
@@ -2018,7 +2018,7 @@ ID3D11BlendState* CD3D11RHI::GetCachedBlendState( const D3D11_BLEND_DESC& InBlen
 	// If we not found then will create new blend state
 	ID3D11BlendState*	d3d11BlendState = nullptr;
 	D3D11_BLEND_DESC	d3d11BlendStateDesc;
-	memcpy( &d3d11BlendStateDesc, &InBlendState, sizeof( D3D11_BLEND_DESC ) );
+	Memory::Memcpy( &d3d11BlendStateDesc, &InBlendState, sizeof( D3D11_BLEND_DESC ) );
 
 	for ( uint32 renderTargetIndex = 0; renderTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT; ++renderTargetIndex )
 	{
@@ -2045,8 +2045,8 @@ CD3D11RHI::GetCachedDepthStencilState
 ID3D11DepthStencilState* CD3D11RHI::GetCachedDepthStencilState( const D3D11_DEPTH_STENCIL_DESC& InDepthStateInfo, const D3D11_DEPTH_STENCIL_DESC& InStencilStateInfo )
 {
 	// Calculate hash
-	uint64		hash = Sys_MemFastHash( InDepthStateInfo );
-	hash = Sys_MemFastHash( InStencilStateInfo, hash );
+	uint64		hash = FastHash( InDepthStateInfo );
+	hash = FastHash( InStencilStateInfo, hash );
 
 	// Try find cached depth stencil state
 	auto	it = cachedDepthStencilStates.find( hash );
@@ -2058,7 +2058,7 @@ ID3D11DepthStencilState* CD3D11RHI::GetCachedDepthStencilState( const D3D11_DEPT
 	// If we not found then will create new depth stencil state
 	ID3D11DepthStencilState*		d3d11DepthStencilState = nullptr;
 	D3D11_DEPTH_STENCIL_DESC		d3d11DepthStencilDesc;
-	memcpy( &d3d11DepthStencilDesc, &InStencilStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	Memory::Memcpy( &d3d11DepthStencilDesc, &InStencilStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	d3d11DepthStencilDesc.DepthEnable		= InDepthStateInfo.DepthEnable;
 	d3d11DepthStencilDesc.DepthWriteMask	= InDepthStateInfo.DepthWriteMask;
 	d3d11DepthStencilDesc.DepthFunc			= InDepthStateInfo.DepthFunc;

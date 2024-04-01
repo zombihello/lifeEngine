@@ -128,10 +128,10 @@ CVertexFactory::GetTypeHash
 */
 uint64 CVertexFactory::GetTypeHash() const
 {
-	uint64		hash = Sys_MemFastHash( declaration, GetType()->GetHash() );
+	uint64		hash = FastHash( declaration, GetType()->GetHash() );
 	for ( uint32 index = 0, count = streams.size(); index < count; ++index )
 	{
-		hash = Sys_MemFastHash( streams[index], hash );
+		hash = FastHash( streams[index], hash );
 	}
 
 	return hash;

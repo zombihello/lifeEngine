@@ -15,7 +15,25 @@
 
 #include "Misc/Types.h"
 
+// Undef some defines
+#undef GetObject
+#undef CDECL
+
+// Mark what we on Windows
+#undef PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS					        1
+
+// Windows support _aligned_malloc
+#undef PLATFORM_USE__ALIGNED_MALLOC
+#define PLATFORM_USE__ALIGNED_MALLOC                1
+
+// On Windows Std malloc is thread safe
+#undef PLATFORM_IS_STD_MALLOC_THREADSAFE
+#define PLATFORM_IS_STD_MALLOC_THREADSAFE           1
+
+// If we on 64 bit platform then it is supports mimalloc
+#undef PLATFORM_SUPPORTS_MIMALLOC
+#define PLATFORM_SUPPORTS_MIMALLOC                  PLATFORM_64BIT
 
 #if SHIPPING_BUILD && !PLATFORM_DOXYGEN
     #define Sys_IsDebuggerPresent()	                false
@@ -36,8 +54,6 @@
     #define Sys_DebugBreak()			             ( Sys_IsDebuggerPresent() ? ( DebugBreak(), 1 ) : 1 )
 #endif // SHIPPING_BUILD
 
-#undef GetObject
-
 /**
  * @ingroup WindowsPlatform
  * @brief Calling convention. Functions with variable arguments
@@ -48,7 +64,6 @@
  * @ingroup WindowsPlatform
  * @brief Calling convention. Standard C function
  */
-#undef  CDECL
 #define CDECL				__cdecl
 
 /**

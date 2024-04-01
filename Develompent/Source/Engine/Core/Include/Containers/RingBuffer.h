@@ -119,7 +119,7 @@ private:
 	bool				isWriting;				/**< TRUE if there is an AllocationContext outstanding for this ring buffer */
 	byte* volatile		readPointer;			/**< The next byte to be read from */
 	uint32				alignment;				/**< Alignment of each allocation unit (in bytes) */
-	CThreadEvent		dataWrittenEvent;		/**< The event used to signal the reader thread when the ring buffer has data to read */
+	CEvent		dataWrittenEvent;		/**< The event used to signal the reader thread when the ring buffer has data to read */
 };
 
 #endif // !RINGBUFFER_H

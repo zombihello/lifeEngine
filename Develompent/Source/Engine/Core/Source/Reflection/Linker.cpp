@@ -8,7 +8,7 @@ PackageFileSummary::PackageFileSummary
 */
 PackageFileSummary::PackageFileSummary()
 {
-	Sys_Memzero( this, sizeof( *this ) );
+	Memory::Memzero( this, sizeof( *this ) );
 }
 
 /*

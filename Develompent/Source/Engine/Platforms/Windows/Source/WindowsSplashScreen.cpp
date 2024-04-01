@@ -18,8 +18,8 @@ static std::wstring			s_SplashScreenText[ STT_NumTextTypes ];
 static RECT					s_SplashScreenTextRects[ STT_NumTextTypes ];
 static HFONT				s_SplashScreenSmallTextFontHandle = nullptr;
 static HFONT				s_SplashScreenNormalTextFontHandle = nullptr;
-static CThreadMutex			s_SplashScreenSynchronizationObject;
-static CThreadEvent*		s_ThreadInitSyncEvent = nullptr;
+static CMutex			s_SplashScreenSynchronizationObject;
+static CEvent*		s_ThreadInitSyncEvent = nullptr;
 
 /*
 ==================
@@ -194,7 +194,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			// Create small font
 			{
 				LOGFONT		myFont;
-				Sys_Memzero( &myFont, sizeof( myFont ) );
+				Memory::Memzero( &myFont, sizeof( myFont ) );
 				GetObjectW( systemFontHandle, sizeof( myFont ), &myFont );
 				myFont.lfHeight = 10;
 
@@ -209,7 +209,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			// Create normal font
 			{
 				LOGFONT			myFont;
-				Sys_Memzero( &myFont, sizeof( myFont ) );
+				Memory::Memzero( &myFont, sizeof( myFont ) );
 				GetObjectW( systemFontHandle, sizeof( myFont ), &myFont );
 				myFont.lfHeight = 12;
 
@@ -304,7 +304,7 @@ void Sys_ShowSplash( const tchar* InSplashName )
 	if ( !g_IsCommandlet )
 	{
 		s_SplashScreenFileName	= Sys_GameDir() + CString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
-		s_ThreadInitSyncEvent	= new CThreadEvent( true );
+		s_ThreadInitSyncEvent	= new CEvent( true );
 		s_SplashScreenThread	= CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
 
 		// Wait of open splash screen

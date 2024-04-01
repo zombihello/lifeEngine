@@ -72,9 +72,9 @@ FORCEINLINE TType Min( const TType InA, const TType InB )
  * @return Aligned value
  */
 template< typename TType > 
-FORCEINLINE TType Align( const TType InPtr, uint32 InAlignment )
+FORCEINLINE TType Align( const TType InPtr, uint64 InAlignment )
 {
-	return ( TType )( ( ( int32 )InPtr + InAlignment - 1 ) & ~( InAlignment - 1 ) );
+	return ( TType )( ( ( ptrint )InPtr + InAlignment - 1 ) & ~( ( ptrint )InAlignment - 1 ) );
 }
 
 /**

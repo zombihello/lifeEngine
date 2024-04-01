@@ -150,12 +150,12 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 							}
 							else
 							{
-								Sys_Memzero( vectorData->data(), vectorData->size() );
+								Memory::Memzero( vectorData->data(), vectorData->size() );
 							}
 						}
 						else
 						{
-							Sys_Memzero( addresses[index], innerProperty->GetArraySize() * innerProperty->GetElementSize() );
+							Memory::Memzero( addresses[index], innerProperty->GetArraySize() * innerProperty->GetElementSize() );
 						}
 					}
 					// Clear/Remove only one array's element
@@ -170,12 +170,12 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 							}
 							else
 							{
-								Sys_Memzero( vectorData->data() + dataOffset, innerProperty->GetElementSize() );
+								Memory::Memzero( vectorData->data() + dataOffset, innerProperty->GetElementSize() );
 							}
 						}
 						else
 						{
-							Sys_Memzero( addresses[index] + dataOffset, innerProperty->GetElementSize() );
+							Memory::Memzero( addresses[index] + dataOffset, innerProperty->GetElementSize() );
 						}
 					}
 				}
@@ -323,7 +323,7 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				// Copy the new value to all objects. We start at first index because the zero element was changed early
 				for ( uint32 index = 1, count = addresses.size(); index < count; ++index )
 				{
-					memcpy( addresses[index], valueData, property->GetElementSize() );
+					Memory::Memcpy( addresses[index], valueData, property->GetElementSize() );
 				}
 
 				// Notify all object if property was changed

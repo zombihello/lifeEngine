@@ -463,8 +463,8 @@ public:
 	FORCEINLINE uint64 GetHash() const
 	{
 		uint64	hash = propertyName.GetHash();
-		Sys_MemFastHash( className.GetHash(), hash );
-		Sys_MemFastHash( serialSize, hash );
+		FastHash( className.GetHash(), hash );
+		FastHash( serialSize, hash );
 		return hash;
 	}
 

@@ -178,7 +178,7 @@ CAssetFactory::CAssetFactory
 */
 CAssetFactory::CAssetFactory()
 {
-	Sys_Memzero( constructAssetFns, AT_Count * sizeof( CAssetFactory::ConstructAssetFn_t ) );
+	Memory::Memzero( constructAssetFns, AT_Count * sizeof( CAssetFactory::ConstructAssetFn_t ) );
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CTexture2D>(); },			AT_Texture2D );
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CMaterial>(); },			AT_Material );
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CScript>(); },				AT_Script );
@@ -193,7 +193,7 @@ CAssetFactory::CAssetFactory()
 CAssetFactory::ShowImportSettings
 ==================
 */
-bool CAssetFactory::ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, CThreadEvent& InEvent, EResultShowImportSettings& OutResult ) const
+bool CAssetFactory::ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, CEvent& InEvent, EResultShowImportSettings& OutResult ) const
 {
 	Assert( InOwner );
 	const AssetImporterInfo&	importerInfo = importersInfo[InAssetType];
@@ -530,7 +530,7 @@ void CPackage::Serialize( CArchive& InArchive )
 			// Serialize asset header and add to table
 			AssetInfo			localAssetInfo;
 			CGuid				assetGUID;
-			Sys_Memzero( &localAssetInfo, sizeof( AssetInfo ) );
+			Memory::Memzero( &localAssetInfo, sizeof( AssetInfo ) );
 
 			// Serialize hash with size data
 			InArchive << localAssetInfo.type;
@@ -1208,18 +1208,18 @@ bool ParseReferenceToAsset( const std::wstring& InString, std::wstring& OutPacka
 	// Getting asset type
 	std::wstring		assetType;
 	assetType.resize( posSpliterType );
-	memcpy( assetType.data(), &InString[ 0 ], sizeof( std::wstring::value_type ) * assetType.size() );
+	Memory::Memcpy( assetType.data(), &InString[ 0 ], sizeof( std::wstring::value_type ) * assetType.size() );
 	offset = assetType.size() + 1;				// +1 for skip splitter of type asset
 	OutAssetType = ConvertTextToAssetType( assetType );
 
 	// Getting package name
 	OutPackageName.resize( packageNameSize );
-	memcpy( OutPackageName.data(), &InString[ offset ], sizeof( std::wstring::value_type ) * packageNameSize );
+	Memory::Memcpy( OutPackageName.data(), &InString[ offset ], sizeof( std::wstring::value_type ) * packageNameSize );
 	offset += packageNameSize + 1;				// +1 for skip splitter of asset and package
 
 	// Getting asset name
 	OutAssetName.resize( assetNameSize );
-	memcpy( OutAssetName.data(), &InString[ offset ], sizeof( std::wstring::value_type ) * assetNameSize );
+	Memory::Memcpy( OutAssetName.data(), &InString[ offset ], sizeof( std::wstring::value_type ) * assetNameSize );
 
 	return true;
 }

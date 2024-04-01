@@ -240,7 +240,7 @@ public:
 		// Import all assets
 		std::wstring									errorMessages;
 		CAssetFactory::EResultShowImportSettings		importSettingsModes[AT_Count];
-		Sys_Memzero( importSettingsModes, sizeof( CAssetFactory::EResultShowImportSettings ) * AT_Count );
+		Memory::Memzero( importSettingsModes, sizeof( CAssetFactory::EResultShowImportSettings ) * AT_Count );
 
 		for ( uint32 index = 0, count = filesToImport.size(); index < count; ++index )
 		{
@@ -343,7 +343,7 @@ private:
 
 	EImportMode					importMode;		/**< Import mode */
 	CContentBrowserWindow*		owner;			/**< Owner */
-	CThreadEvent				eventResponse;	/**< Event used when opened popup of change exist assets */
+	CEvent				eventResponse;	/**< Event used when opened popup of change exist assets */
 	std::vector<std::wstring>	filesToImport;	/**< Array of files to import */
 };
 
@@ -464,7 +464,7 @@ public:
 
 private:
 	CContentBrowserWindow*				owner;			/**< Owner */
-	CThreadEvent						eventResponse;	/**< Event used when opened popup of change exist assets */
+	CEvent						eventResponse;	/**< Event used when opened popup of change exist assets */
 	CContentBrowserWindow::CAssetNode	assetNode;		/**< Asset node to rename */
 };
 
@@ -584,7 +584,7 @@ public:
 private:
 	PackageRef_t			package;		/**< Package */
 	CContentBrowserWindow*	owner;			/**< Owner */
-	CThreadEvent			eventResponse;	/**< Event used when opened popup of change exist assets */
+	CEvent			eventResponse;	/**< Event used when opened popup of change exist assets */
 };
 
 //
@@ -859,7 +859,7 @@ private:
 	bool						bMove;				/**< Is need move files? If FALSE we will copy they */
 	ECopyMoveMode				mode;				/**< Copy/move mode */
 	CContentBrowserWindow*		owner;				/**< Owner */
-	CThreadEvent				eventResponse;		/**< Event used when opened popup of change exist files */
+	CEvent				eventResponse;		/**< Event used when opened popup of change exist files */
 	std::vector<FileInfo>		filesToMoveCopy;	/**< Array of files to move/copy */
 	std::vector<CFilename>		directorisToDelete;	/**< Array of directories who need delete after move */
 };
@@ -1038,7 +1038,7 @@ public:
 private:
 	ECreateMode											mode;			/**< Create mode */
 	CContentBrowserWindow*								owner;			/**< Owner */
-	CThreadEvent										eventResponse;	/**< Event used when opened popup */
+	CEvent										eventResponse;	/**< Event used when opened popup */
 	TSharedPtr<CContentBrowserWindow::CFileTreeNode>	rootNode;		/**< Root node where we create package */
 };
 
@@ -1293,7 +1293,7 @@ public:
 private:
 	ERenameMode											mode;			/**< Rename mode */
 	CContentBrowserWindow*								owner;			/**< Owner */
-	CThreadEvent										eventResponse;	/**< Event used when opened popup */
+	CEvent										eventResponse;	/**< Event used when opened popup */
 	TSharedPtr<CContentBrowserWindow::CFileTreeNode>	nodeToRename;	/**< Node to rename */
 };
 

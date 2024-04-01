@@ -14,7 +14,7 @@
 #include "Misc/Types.h"
 #include "Misc/SharedPointer.h"
 #include "System/Archive.h"
-#include "System/MemoryBase.h"
+#include "Hashing/FastHash.h"
 #include "Core.h"
 
 /**
@@ -228,8 +228,8 @@ public:
 	 */
 	FORCEINLINE uint64 GetHash() const
 	{
-		uint64	hash = Sys_MemFastHash( index );
-		return Sys_MemFastHash( number, hash );
+		uint64	hash = FastHash( index );
+		return FastHash( number, hash );
 	}
 
 	/**

@@ -18,9 +18,9 @@ CBoundShaderStateKey::CBoundShaderStateKey( VertexDeclarationRHIParamRef_t InVer
 	Assert( vertexDeclaration );
 
 	hash = vertexDeclaration->GetHash( hash );
-	hash = Sys_MemFastHash( vertexShader, hash );
-	hash = Sys_MemFastHash( pixelShader, hash );
-	hash = Sys_MemFastHash( hullShader, hash );
-	hash = Sys_MemFastHash( domainShader, hash );
-	hash = Sys_MemFastHash( geometryShader, hash );
+	hash = FastHash( vertexShader, hash );
+	hash = FastHash( pixelShader, hash );
+	hash = FastHash( hullShader, hash );
+	hash = FastHash( domainShader, hash );
+	hash = FastHash( geometryShader, hash );
 }

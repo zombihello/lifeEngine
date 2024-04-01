@@ -95,7 +95,7 @@ TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wst
 	for ( auto itRoot = meshes.begin(), itRootEnd = meshes.end(); itRoot != itRootEnd; ++itRoot )
 	{
 		StaticMeshSurface							surface;
-		Sys_Memzero( &surface, sizeof( StaticMeshSurface ) );
+		Memory::Memzero( &surface, sizeof( StaticMeshSurface ) );
 
 		surface.firstIndex = indeces.size();
 		surface.materialID = materials.size();
@@ -105,7 +105,7 @@ TSharedPtr<CStaticMesh> CImportMeshCommandlet::ConvertStaticMesh( const std::wst
 			std::vector< StaticMeshVertexType >	vertexBuffer;
 			StaticMeshVertexType					vertex;
 			aiMesh*									mesh = ( *itMesh ).mesh;
-			Sys_Memzero( &vertex, sizeof( StaticMeshVertexType ) );
+			Memory::Memzero( &vertex, sizeof( StaticMeshVertexType ) );
 
 			// Prepare the vertex buffer.
 			// If the vertices of the mesh do not fit into the buffer, then

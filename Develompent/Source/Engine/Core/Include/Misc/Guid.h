@@ -209,7 +209,7 @@ public:
 	 */
 	FORCEINLINE uint64 GetTypeHash() const
 	{
-		return Sys_MemFastHash( *this );
+		return FastHash( *this );
 	}
 
 private:

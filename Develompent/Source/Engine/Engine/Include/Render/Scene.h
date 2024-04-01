@@ -288,11 +288,11 @@ struct MeshBatch
 	 */
 	FORCEINLINE uint64 GetTypeHash() const
 	{
-		uint64		hash = Sys_MemFastHash( indexBufferRHI );
-		hash = Sys_MemFastHash( primitiveType, hash );
-		hash = Sys_MemFastHash( baseVertexIndex, hash );
-		hash = Sys_MemFastHash( firstIndex, hash );
-		hash = Sys_MemFastHash( numPrimitives, hash );
+		uint64		hash = FastHash( indexBufferRHI );
+		hash = FastHash( primitiveType, hash );
+		hash = FastHash( baseVertexIndex, hash );
+		hash = FastHash( firstIndex, hash );
+		hash = FastHash( numPrimitives, hash );
 		return hash;
 	}
 

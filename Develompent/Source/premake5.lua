@@ -75,6 +75,7 @@ extTmxlite                      = externalDir .. "tmxlite"
 extZlib                         = externalDir .. "zlib"
 extCompressonator				= externalDir .. "Compressonator_4.3.206"
 extHalf							= externalDir .. "half-2.2.0"
+extMimalloc                     = externalDir .. "mimalloc-2.1.2"
 
 -- Include modules of external libs
 include( extAssimp )
@@ -94,6 +95,7 @@ include( extTmxlite )
 include( extZlib )
 include( extCompressonator )
 include( extHalf )
+include( extMimalloc )
 
 workspace( game )
     location( "../Intermediate/" .. _ACTION .. "/" )
@@ -226,7 +228,8 @@ workspace( game )
         LinkSDL2()
         LinkTheora()
 		LinkHalf()
-
+		LinkMimalloc()
+		
         if is2DEngine then
             LinkBox2D()
         else

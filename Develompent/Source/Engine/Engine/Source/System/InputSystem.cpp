@@ -14,7 +14,7 @@ CInputSystem::CInputSystem() :
 	mouseOffset( Math::vectorZero ),
 	mouseSensitivity( 0.5f )
 {
-	memset( &buttonEvents, BE_None, BC_Count * sizeof( EButtonEvent ) );
+	Memory::Memset( &buttonEvents, BE_None, BC_Count * sizeof( EButtonEvent ) );
 }
 
 /*

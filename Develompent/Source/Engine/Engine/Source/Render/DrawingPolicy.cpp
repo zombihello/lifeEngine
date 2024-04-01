@@ -47,7 +47,7 @@ void CMeshDrawingPolicy::InitInternal( class CVertexFactory* InVertexFactory, co
 	vertexShader	= materialRef->GetShader( vertexFactoryHash, SF_Vertex );
 	pixelShader		= materialRef->GetShader( vertexFactoryHash, SF_Pixel );
 
-	hash			= Sys_MemFastHash( materialRef, InVertexFactory->GetTypeHash() );
+	hash			= FastHash( materialRef, InVertexFactory->GetTypeHash() );
 	vertexFactory	= InVertexFactory;
 	material		= materialRef->GetAssetHandle();
 	depthBias		= InDepthBias;

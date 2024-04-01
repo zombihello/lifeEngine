@@ -9,11 +9,16 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// Override malloc/realloc/free for RapidJSON
+#define RAPIDJSON_MALLOC( Size )			Memory::Malloc( Size )
+#define RAPIDJSON_REALLOC( Ptr, NewSize )	Memory::Realloc( Ptr, NewSize )
+#define RAPIDJSON_FREE( Ptr )				Memory::Free( Ptr );
+
 #include <string>
 #include <unordered_map>
-#include <rapidjson/document.h>
 
 #include "Core.h"
+#include <rapidjson/document.h>
 
 #undef GetObject
 

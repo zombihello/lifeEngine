@@ -3,7 +3,7 @@
 #include "Misc/Template.h"
 
 /* Critical section of ring buffer */
-static CThreadMutex			s_RingBufferMutex;
+static CMutex			s_RingBufferMutex;
 
 /*
 ==================

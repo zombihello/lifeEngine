@@ -224,7 +224,7 @@ CD3D11ConstantBuffer::Update
 */
 void CD3D11ConstantBuffer::Update( const byte* InData, uint32 InOffset, uint32 InSize )
 {
-	memcpy( shadowData + InOffset, InData, InSize );
+	Memory::Memcpy( shadowData + InOffset, InData, InSize );
 	currentUpdateSize = Max( currentUpdateSize, ( uint32 )InOffset + InSize );
 	isNeedCommit = true;
 }
@@ -248,9 +248,9 @@ void CD3D11ConstantBuffer::CommitConstantsToDevice( class CD3D11DeviceContext* I
 	d3d11DeviceContext->Map( d3d11Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3d11Mapped );
 
 #if !D3D11_FILLFULL_CONSTANTBUFFER
-	memcpy( ( byte* )d3d11Mapped.pData, shadowData, currentUpdateSize );
+	Memory::Memcpy( ( byte* )d3d11Mapped.pData, shadowData, currentUpdateSize );
 #else
-	memcpy( ( byte* )d3d11Mapped.pData, shadowData, size );
+	Memory::Memcpy( ( byte* )d3d11Mapped.pData, shadowData, size );
 #endif // !D3D11_FILLFULL_CONSTANTBUFFER
 
 	d3d11DeviceContext->Unmap( d3d11Buffer, 0 );
@@ -268,7 +268,7 @@ void CD3D11ConstantBuffer::Clear()
 {
 	if ( !shadowData )		return;
 
-	Sys_Memzero( shadowData, size );
+	Memory::Memzero( shadowData, size );
 	isNeedCommit = true;
 	currentUpdateSize = size;
 }

@@ -63,7 +63,7 @@ void CStruct::GetProperties( std::vector<class CProperty*>& OutArrayProperties, 
 		{
 			uint32		offset = OutArrayProperties.size();
 			OutArrayProperties.resize( tempStruct->properties.size() + offset );
-			memcpy( OutArrayProperties.data() + offset, tempStruct->properties.data(), tempStruct->properties.size() * sizeof( CProperty* ) );
+			Memory::Memcpy( OutArrayProperties.data() + offset, tempStruct->properties.data(), tempStruct->properties.size() * sizeof( CProperty* ) );
 		}
 	}
 }
@@ -154,7 +154,7 @@ void CStruct::SerializeTaggedProperties( class CArchive& InArchive, byte* InData
 		{
 			CPropertyTag*	propertyTag = &serializedProperties[index];
 			uint64			hash = propertyTag->GetPropertyName().GetHash();
-			Sys_MemFastHash( propertyTag->GetClassName().GetHash(), hash );
+			FastHash( propertyTag->GetClassName().GetHash(), hash );
 			tagsMap.insert( std::make_pair( hash, propertyTag ) );
 		}
 
@@ -167,7 +167,7 @@ void CStruct::SerializeTaggedProperties( class CArchive& InArchive, byte* InData
 				{
 					CProperty*	property = currentStruct->properties[propertyId];
 					uint64		hash = property->GetCName().GetHash();
-					Sys_MemFastHash( property->GetClass()->GetCName().GetHash(), hash );
+					FastHash( property->GetClass()->GetCName().GetHash(), hash );
 
 					// Try find tag for the property
 					auto	itTag = tagsMap.find( hash );

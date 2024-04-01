@@ -318,7 +318,7 @@ Sys_ShowOpenFileDialog
 bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, OpenFileDialogResult& OutResult )
 {
 	OPENFILENAME		fileDialogSettings;
-	Sys_Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
+	Memory::Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
 	fileDialogSettings.lStructSize = sizeof( OPENFILENAME );
 
 	// Flags
@@ -452,7 +452,7 @@ Sys_ShowSaveFileDialog
 bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SaveFileDialogResult& OutResult )
 {
 	OPENFILENAME		fileDialogSettings;
-	Sys_Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
+	Memory::Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
 	fileDialogSettings.lStructSize = sizeof( OPENFILENAME );
 
 	// Flags

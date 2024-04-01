@@ -97,7 +97,7 @@ public:
 	 */
 	virtual uint64 GetTypeHash() const override
 	{
-		return Sys_MemFastHash( wireframeColor, TBaseMeshDrawingPolicy::GetTypeHash() );
+		return FastHash( wireframeColor, TBaseMeshDrawingPolicy::GetTypeHash() );
 	}
 
 private:

@@ -146,7 +146,7 @@ public:
 	 * @param OutResult			Result
 	 * @param OutResult			Him is TRUE when user pressed okay
 	 */
-	static void ShowImportSettings( class CImGUILayer* InOwner, CThreadEvent& InEvent, CAssetFactory::EResultShowImportSettings& OutResult );
+	static void ShowImportSettings( class CImGUILayer* InOwner, CEvent& InEvent, CAssetFactory::EResultShowImportSettings& OutResult );
 
 	/**
 	 * @brief Get supported static mesh extensions

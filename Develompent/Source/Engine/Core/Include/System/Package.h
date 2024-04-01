@@ -193,7 +193,7 @@ public:
 		 */
 		FORCEINLINE std::size_t operator()( const TAssetHandle& InAssetPtr ) const
 		{
-			return Sys_MemFastHash( InAssetPtr.reference.Get(), InAssetPtr.asset.GetTypeHash() );
+			return FastHash( InAssetPtr.reference.Get(), InAssetPtr.asset.GetTypeHash() );
 		}
 	};
 
@@ -659,7 +659,7 @@ public:
 	/**
 	 * @brief Pointer to function for show import asset settings
 	 */
-	typedef void( *ShowImportSettingsAssetFn_t )( class CImGUILayer* InOwner, CThreadEvent& InEvent, EResultShowImportSettings& OutResult );
+	typedef void( *ShowImportSettingsAssetFn_t )( class CImGUILayer* InOwner, CEvent& InEvent, EResultShowImportSettings& OutResult );
 
 	/**
 	 * @brief Struct info about asset's importer
@@ -796,7 +796,7 @@ public:
 	 * @param OutResult			Result
 	 * @return Return TRUE if dialog is showed, otherwise will return FALSE
 	 */
-	bool ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, CThreadEvent& InEvent, EResultShowImportSettings& OutResult ) const;
+	bool ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, CEvent& InEvent, EResultShowImportSettings& OutResult ) const;
 
 	/**
 	 * @brief Import asset
@@ -1622,7 +1622,7 @@ private:
 		 */
 		FORCEINLINE uint64 GetTypeHash() const
 		{
-			return Sys_MemFastHash( ( const void* ) path.c_str(), path.size() );
+			return FastHash( ( const void* ) path.c_str(), path.size() );
 		}
 
 		/**

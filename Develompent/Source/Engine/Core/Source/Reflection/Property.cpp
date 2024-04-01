@@ -870,7 +870,7 @@ bool CArrayProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 	{
 		std::vector<byte>*		dstArray = ( std::vector<byte>* )( InObjectAddress + offset );
 		dstArray->resize( InPropertyValue.arrayValue->size() );
-		memcpy( dstArray->data(), InPropertyValue.arrayValue->data(), dstArray->size() );
+		Memory::Memcpy( dstArray->data(), InPropertyValue.arrayValue->data(), dstArray->size() );
 		bResult = true;
 	}
 	return bResult;

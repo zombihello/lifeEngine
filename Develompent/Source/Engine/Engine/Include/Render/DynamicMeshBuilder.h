@@ -173,7 +173,7 @@ private:
 	virtual void ReleaseRHI() override;
 
 	uint32										numPrimitives;		/**< Number primitives in builded mesh */
-	CThreadMutex								readWriteMutex;		/**< Read and write critical section */
+	CMutex								readWriteMutex;		/**< Read and write critical section */
 	std::vector< DynamicMeshVertexType >		verteces;			/**< Array of verteces */
 	std::vector< uint32 >						indeces;			/**< Array of indeces */
 	VertexBufferRHIRef_t						vertexBufferRHI;	/**< Vertex buffer RHI */

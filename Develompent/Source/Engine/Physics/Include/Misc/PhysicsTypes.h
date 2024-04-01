@@ -98,7 +98,7 @@ struct CollisionProfile
 		: name( TEXT( "Unknown" ) )
 		, objectType( CC_WorldStatic )
 	{
-		Sys_Memzero( responses, sizeof( TEnumAsByte<ECollisionResponse> ) * CC_Max );
+		Memory::Memzero( responses, sizeof( TEnumAsByte<ECollisionResponse> ) * CC_Max );
 	}
 
 	/**

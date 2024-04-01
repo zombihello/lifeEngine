@@ -26,7 +26,7 @@ uint32			g_RenderingThreadId = 0;
 CRingBuffer		g_RenderCommandBuffer( RENDERING_COMMAND_BUFFER_SIZE, 16 );
 
 /* Event of finished rendering frame */
-CThreadEvent*	g_RenderFrameFinished = nullptr;
+CEvent*	g_RenderFrameFinished = nullptr;
 
 /*
 ==================
@@ -202,7 +202,7 @@ void StartRenderingThread()
 		Assert( s_RenderingThread );
 
 		// Create a synchronize mechanism for FlushRenderingCommands()
-		g_RenderFrameFinished = new CThreadEvent( false, TEXT( "RenderFrameFinished" ) );
+		g_RenderFrameFinished = new CEvent( false, TEXT( "RenderFrameFinished" ) );
 	}
 }
 

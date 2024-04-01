@@ -10,10 +10,10 @@
 GetGlobalResourcesCS
 ==================
 */
-FORCEINLINE CThreadMutex& GetGlobalResourcesMutex()
+FORCEINLINE CMutex& GetGlobalResourcesMutex()
 {
 	// Critical section of add/remove in CRenderResource::GetResourceList
-	static CThreadMutex		globalResourcesMutex;
+	static CMutex		globalResourcesMutex;
 	return globalResourcesMutex;
 }
 
@@ -80,7 +80,7 @@ void CRenderResource::InitResource()
 	// If resource is global - add he to global list of resource
 	if ( IsGlobal() && !bInGlobalList )
 	{
-		CThreadMutex&		threadMutex = GetGlobalResourcesMutex();
+		CMutex&		threadMutex = GetGlobalResourcesMutex();
 		threadMutex.Lock();
 		GetResourceList().insert( this );
 		threadMutex.Unlock();
@@ -111,7 +111,7 @@ void CRenderResource::ReleaseResource()
 	// If resource is global - remove he from global list of resource
 	if ( IsGlobal() && bInGlobalList )
 	{
-		CThreadMutex&		threadMutex = GetGlobalResourcesMutex();
+		CMutex&		threadMutex = GetGlobalResourcesMutex();
 		threadMutex.Lock();
 		GetResourceList().erase( this );
 		threadMutex.Unlock();

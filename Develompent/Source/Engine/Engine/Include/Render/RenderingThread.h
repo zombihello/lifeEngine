@@ -35,7 +35,7 @@ extern CRingBuffer		g_RenderCommandBuffer;
  * @ingroup Engine
  * @brief Event of finished rendering frame
  */
-extern CThreadEvent*	g_RenderFrameFinished;
+extern CEvent*	g_RenderFrameFinished;
 
 /**
  * @ingroup Engine

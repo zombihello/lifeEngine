@@ -51,12 +51,12 @@ GenerateMipmapsMemory
 static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const Texture2DMipMap& InZeroMip, std::vector<Texture2DMipMap>& OutMipmaps, uint32 InRequestMips = 10 )
 {
 	CMP_MipSet cmp_MipSet;
-	Sys_Memzero( &cmp_MipSet, sizeof( CMP_MipSet ) );
+	Memory::Memzero( &cmp_MipSet, sizeof( CMP_MipSet ) );
 	CMP_ERROR	result = CMP_CreateMipSet( &cmp_MipSet, InZeroMip.sizeX, InZeroMip.sizeY, 1, CF_8bit, TT_2D );
 	Assert( result == CMP_OK && ( *cmp_MipSet.m_pMipLevelTable )->m_dwLinearSize == InZeroMip.data.Num() );
 
 	// Copy data to mipmap0
-	memcpy( ( *cmp_MipSet.m_pMipLevelTable )->m_pbData, ( CMP_BYTE* )InZeroMip.data.GetData(), InZeroMip.data.Num() );
+	Memory::Memcpy( ( *cmp_MipSet.m_pMipLevelTable )->m_pbData, ( CMP_BYTE* )InZeroMip.data.GetData(), InZeroMip.data.Num() );
 
 	// Generate mip levels and copy him to OutMipmaps
 	CMP_GenerateMIPLevels( &cmp_MipSet, CMP_CalcMinMipSize( InZeroMip.sizeY, InZeroMip.sizeX, InRequestMips ) );
@@ -69,7 +69,7 @@ static void GenerateMipmapsMemory( EPixelFormat InPixelFormat, const Texture2DMi
 		mipmap.sizeX		= cmp_mipLevel->m_nWidth;
 		mipmap.sizeY		= cmp_mipLevel->m_nWidth;
 		mipmap.data.Resize( cmp_mipLevel->m_dwLinearSize );
-		memcpy( mipmap.data.GetData(), cmp_mipLevel->m_pbData, cmp_mipLevel->m_dwLinearSize );
+		Memory::Memcpy( mipmap.data.GetData(), cmp_mipLevel->m_pbData, cmp_mipLevel->m_dwLinearSize );
 		OutMipmaps.push_back( mipmap );
 	}
 
@@ -117,7 +117,7 @@ void CTexture2D::InitRHI()
 		LockedData					lockedData;
 		
 		g_RHI->LockTexture2D( deviceContextRHI, texture, index, true, lockedData );
-		memcpy( lockedData.data, mipmap.data.GetData(), mipmap.data.Num() );
+		Memory::Memcpy( lockedData.data, mipmap.data.GetData(), mipmap.data.Num() );
 		g_RHI->UnlockTexture2D( deviceContextRHI, texture, index, lockedData );
 	}
 

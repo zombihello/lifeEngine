@@ -100,7 +100,7 @@ public:
 	FORCEINLINE void SetElements( const TType* InData, uint32 InSize )
 	{
 		data.resize( InSize );
-		memcpy( data.data(), InData, sizeof( TType ) * InSize );
+		Memory::Memcpy( data.data(), InData, sizeof( TType ) * InSize );
 	}
 
 	/**

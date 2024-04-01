@@ -102,7 +102,7 @@ public:
 
 private:
 	CExplorerLevelWindow*	owner;			/**< Owner */
-	CThreadEvent			eventResponse;	/**< Event used when opened popup */
+	CEvent					eventResponse;	/**< Event used when opened popup */
 	AActor*					actor;			/**< Actor to rename */
 };
 

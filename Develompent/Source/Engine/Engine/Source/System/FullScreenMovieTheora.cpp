@@ -732,7 +732,7 @@ bool CFullScreenMovieTheora::OpenStreamedMovie( const std::wstring& InMovieFilen
 			if ( !theoraPacketsFound && theora_decode_header( &theoraInfo, &theoraComment, &oggPacket ) >= 0 )
 			{
 				// Theora found ! Let's copy the stream
-				memcpy( &videoStream, &oggStreamState, sizeof( oggStreamState ) );
+				Memory::Memcpy( &videoStream, &oggStreamState, sizeof( oggStreamState ) );
 				++theoraPacketsFound;
 			}
 			else

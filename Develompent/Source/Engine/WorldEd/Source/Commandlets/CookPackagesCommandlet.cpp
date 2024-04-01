@@ -704,7 +704,7 @@ TSharedPtr<CTexture2D> CCookPackagesCommandlet::ConvertTexture2D( const std::wst
 	{
 		std::vector< byte >		tempData;
 		tempData.resize( sizeX * sizeY * g_PixelFormats[ PF_A8R8G8B8 ].blockBytes );
-		memcpy( tempData.data(), data, tempData.size() );
+		Memory::Memcpy( tempData.data(), data, tempData.size() );
 		texture2DRef->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 	}
 

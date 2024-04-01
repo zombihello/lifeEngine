@@ -319,19 +319,19 @@ protected:
 	 * @ingroup Core
 	 * @brief Cross-platform type of mutex thread
 	 */
-	typedef CWindowsMutex				CThreadMutex;
+	typedef CWindowsMutex				CMutex;
 
 	/**
 	 * @ingroup Core
 	 * @brief Cross-platform type of event thread
 	 */
-	typedef CWindowsEvent				CThreadEvent;
+	typedef CWindowsEvent				CEvent;
 
 	/**
 	 * @ingroup Core
 	 * @brief Cross-platform type of semaphore thread
 	 */
-	typedef CWindowsSemaphore			CThreadSemaphore;
+	typedef CWindowsSemaphore			CSemaphore;
 
 	/**
 	 * @ingroup Core
@@ -363,7 +363,7 @@ public:
 	 * @brief Constructor that performs a lock on the mutex
 	 * @param InMutex	Mutex
 	 */
-	CScopeLock( CThreadMutex* InMutex )
+	CScopeLock( CMutex* InMutex )
 		: syncObject( InMutex )
 	{
 		Assert( syncObject );
@@ -374,7 +374,7 @@ public:
 	 * @brief Constructor that performs a lock on the mutex
 	 * @param InMutex	Mutex
 	 */
-	CScopeLock( CThreadMutex& InMutex )
+	CScopeLock( CMutex& InMutex )
 		: syncObject( &InMutex )
 	{
 		Assert( syncObject );
@@ -415,7 +415,7 @@ private:
 		return *this;
 	}
 
-	CThreadMutex*	syncObject;		/**< The mutex to aggregate and scope manage */
+	CMutex*		syncObject;		/**< The mutex to aggregate and scope manage */
 };
 
 // Include implementation of platform specific inline functions
