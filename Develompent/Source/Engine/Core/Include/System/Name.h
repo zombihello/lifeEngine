@@ -58,13 +58,13 @@ public:
 		 * @param InName	Name
 		 * @param InHash	Hash
 		 */
-		FORCEINLINE NameEntry( const std::wstring& InName, uint32 InHash = INVALID_HASH )
+		FORCEINLINE NameEntry( const std::wstring& InName, uint64 InHash = INVALID_HASH )
 			: name( InName )
 			, hash( InHash )
 		{}
 
 		std::wstring	name;		/**< Name in string */
-		uint32			hash;		/**< Hash name */
+		uint64			hash;		/**< Hash name */
 	};
 
 	/**
@@ -101,7 +101,15 @@ public:
 	FORCEINLINE CName( const tchar* InString, EFindName InFindType = CNAME_Add )
 	{
 		StaticInit();
-		Init( InString, NAME_NO_NUMBER, InFindType );
+		uint32		idStartNumber	= INDEX_NONE;
+		uint32		strLength		= Sys_Strlen( InString );
+		uint32		number			= ParseNumber( InString, idStartNumber );
+		if ( idStartNumber != INDEX_NONE )
+		{
+			strLength = idStartNumber;
+		}
+
+		Init( InString, strLength, number, InFindType );
 	}
 
 	/**
@@ -113,7 +121,15 @@ public:
 	FORCEINLINE CName( const std::wstring& InString, EFindName InFindType = CNAME_Add )
 	{
 		StaticInit();
-		Init( InString, NAME_NO_NUMBER, InFindType );
+		uint32		idStartNumber	= INDEX_NONE;
+		uint32		strLength		= InString.size();
+		uint32		number			= ParseNumber( InString.c_str(), idStartNumber );
+		if ( idStartNumber != INDEX_NONE )
+		{
+			strLength = idStartNumber;
+		}
+
+		Init( InString, strLength, number, InFindType );
 	}
 
 	/**
@@ -126,7 +142,7 @@ public:
 	FORCEINLINE CName( const tchar* InString, uint32 InNumber, EFindName InFindType = CNAME_Add )
 	{
 		StaticInit();
-		Init( InString, InNumber, InFindType );
+		Init( InString, Sys_Strlen( InString ), InNumber, InFindType );
 	}
 
 	/**
@@ -139,7 +155,7 @@ public:
 	FORCEINLINE CName( const std::wstring& InString, uint32 InNumber, EFindName InFindType = CNAME_Add )
 	{
 		StaticInit();
-		Init( InString, InNumber, InFindType );
+		Init( InString, InString.size(), InNumber, InFindType );
 	}
 
 	/**
@@ -179,30 +195,36 @@ public:
 
 	/**
 	 * @brief Convert name to string
+	 * 
+	 * @param InIsWithoutNumber		Is need ignore number
 	 * @return Return name in string type. If his is not valid returning "NONE"
 	 */
-	FORCEINLINE std::wstring ToString() const
+	FORCEINLINE std::wstring ToString( bool InIsWithoutNumber = false ) const
 	{
 		std::wstring	result;
-		ToString( result );
+		ToString( result, InIsWithoutNumber );
 		return result;
 	}
 
 	/**
 	 * @brief Convert name to string
-	 * @param OutString		Output string
+	 * 
+	 * @param InIsWithoutNumber		Is need ignore number
+	 * @param OutString				Output string
 	 */
-	FORCEINLINE void ToString( std::wstring& OutString ) const
+	FORCEINLINE void ToString( std::wstring& OutString, bool InIsWithoutNumber = false ) const
 	{
 		OutString.clear();
-		AppendString( OutString );
+		AppendString( OutString, InIsWithoutNumber );
 	}
 
 	/**
 	 * @brief Converts an CName to a readable format, in place
-	 * @param OutResult		String to fill with the string representation of the name
+	 * 
+	 * @param InIsWithoutNumber		Is need ignore number
+	 * @param OutResult				String to fill with the string representation of the name
 	 */
-	void AppendString( std::wstring& OutResult ) const;
+	void AppendString( std::wstring& OutResult, bool InIsWithoutNumber = false ) const;
 
 	/**
 	 * @brief Get index name in pool
@@ -315,7 +337,15 @@ public:
 	 */
 	FORCEINLINE CName& operator=( const std::wstring& InOther )
 	{
-		Init( InOther, NAME_NO_NUMBER, CNAME_Add );
+		uint32	idStartNumber	= INDEX_NONE;
+		uint32	strLength		= InOther.size();
+		uint32	number			= ParseNumber( InOther.c_str(), idStartNumber );
+		if ( idStartNumber != INDEX_NONE )
+		{
+			strLength = idStartNumber;
+		}
+
+		Init( InOther, strLength, number, CNAME_Add );
 		return *this;
 	}
 
@@ -384,7 +414,15 @@ public:
 	 */
 	FORCEINLINE CName& operator=( const tchar* InString )
 	{
-		Init( InString, NAME_NO_NUMBER, CNAME_Add );
+		uint32	idStartNumber	= INDEX_NONE;
+		uint32	strLength		= Sys_Strlen( InString );
+		uint32	number			= ParseNumber( InString, idStartNumber );
+		if ( idStartNumber != INDEX_NONE )
+		{
+			strLength = idStartNumber;
+		}
+
+		Init( InString, strLength, number, CNAME_Add );
 		return *this;
 	}
 
@@ -405,10 +443,23 @@ private:
 	/**
 	 * @brief Initialize name
 	 * @param InString		String name of the name/number pair
+	 * @param InStringSize	Size of InString
 	 * @param InNumber		Number part of the name/number pair
 	 * @param InFindType	Operation to perform on names
 	 */
-	void Init( const std::wstring& InString, uint32 InNumber, EFindName InFindType );
+	void Init( const std::wstring& InString, uint32 InStringSize, uint32 InNumber, EFindName InFindType );
+
+	/**
+	 * @brief Parse number in a string
+	 * 
+	 * This function parse number from string and return it
+	 * Syntax: <String>_<Number>
+	 * 
+	 * @param InString			String
+	 * @param OutIdStartNumber	Position in InString where beginning section of number (include '_'). INDEX_NONE when string not have number
+	 * @return Return parsed number in InString. If InString not have number after '_' returns NAME_NO_NUMBER
+	 */
+	static uint32 ParseNumber( const tchar* InString, uint32& OutIdStartNumber );
 
 	uint32		index;		/**< Index name (used to find String portion of the string/number pair) */
 	uint32		number;		/**< Number portion of the string/number pair */

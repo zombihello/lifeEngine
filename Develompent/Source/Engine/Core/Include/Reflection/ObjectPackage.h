@@ -16,13 +16,13 @@
 
 /**
  * @ingroup Core
- * @brief the character used to separate a subobject root from its subobjects in a path name
+ * @brief The character used to separate a subobject root from its subobjects in a path name
  */
 #define SUBOBJECT_DELIMITER				TEXT( ":" )
 
 /**
  * @ingroup Core
- * @brief the character used to separate a subobject root from its subobjects in a path name. Char version
+ * @brief The character used to separate a subobject root from its subobjects in a path name. Char version
  */
 #define SUBOBJECT_DELIMITER_CHAR		':'
 

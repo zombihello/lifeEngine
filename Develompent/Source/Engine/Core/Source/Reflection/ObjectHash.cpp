@@ -487,7 +487,7 @@ struct ObjectSearchPath
 	{
 		std::wstring	path;
 		std::wstring	delimiters = TEXT( "." ) SUBOBJECT_DELIMITER;
-		InPath.ToString( path );
+		InPath.ToString( path, true );
 
 		std::size_t		idStart = 0;
 		std::size_t		idCurrent = 0;

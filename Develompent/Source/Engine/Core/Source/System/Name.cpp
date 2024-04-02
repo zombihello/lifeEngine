@@ -16,7 +16,7 @@ static std::vector<CName::NameEntry>& GetGlobalNameTable()
 AllocateNameEntry
 ==================
 */
-static FORCEINLINE void AllocateNameEntry( const std::wstring& InName, uint32 InHash )
+static FORCEINLINE void AllocateNameEntry( const std::wstring& InName, uint64 InHash )
 {
 	GetGlobalNameTable().push_back( CName::NameEntry( InName, InHash ) );
 }
@@ -74,7 +74,7 @@ bool CName::EndsWith( const CName& InSuffix ) const
 CName::Init
 ==================
 */
-void CName::Init( const std::wstring& InString, uint32 InNumber, EFindName InFindType )
+void CName::Init( const std::wstring& InString, uint32 InStringSize, uint32 InNumber, EFindName InFindType )
 {
 	// If empty or invalid name was specified, return NAME_None
 	if ( InString.empty() )
@@ -88,8 +88,9 @@ void CName::Init( const std::wstring& InString, uint32 InNumber, EFindName InFin
 	number = InNumber;
 
 	// Calculate hash for string
-	uint32				hash = Sys_CalcHash( CString::ToUpper( InString ) );
-
+	Assert( InStringSize <= InString.size() );
+	uint64	hash = FastHash( CString::ToUpper( InString ).data(), ( uint64 )InStringSize * sizeof( std::wstring::value_type ), 0 );
+	
 	// Try find already exist name in global table
 	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
 	for ( uint32 nameEntryId = 0, numNameEntries = globalNameTable.size(); nameEntryId < numNameEntries; ++nameEntryId )
@@ -115,7 +116,41 @@ void CName::Init( const std::wstring& InString, uint32 InNumber, EFindName InFin
 	index = globalNameTable.size();
 
 	// Allocate new name entry
-	AllocateNameEntry( InString, hash );
+	AllocateNameEntry( std::wstring( InString.data(), InString.data() + InStringSize ), hash);
+}
+
+/*
+==================
+CName::ParseNumber
+==================
+*/
+uint32 CName::ParseNumber( const tchar* InString, uint32& OutIdStartNumber )
+{
+	uint32		result = NAME_NO_NUMBER;
+	uint32		strLength = Sys_Strlen( InString );
+
+	// Find the last '_' in InOther
+	OutIdStartNumber = INDEX_NONE;
+	for ( uint32 index = 0; index < strLength; ++index )
+	{
+		if ( InString[index] == TEXT( '_' ) )
+		{
+			OutIdStartNumber = index;
+		}
+		else if ( OutIdStartNumber != INDEX_NONE && !Sys_IsDigit( InString[index] ) )
+		{
+			OutIdStartNumber = INDEX_NONE;
+		}
+	}
+
+	// Get number from InOther
+	if ( OutIdStartNumber != INDEX_NONE && OutIdStartNumber + 1 < strLength )
+	{
+		result = Sys_Atoi( InString + OutIdStartNumber + 1 );
+	}
+
+	// We are done
+	return result;
 }
 
 /*
@@ -123,7 +158,7 @@ void CName::Init( const std::wstring& InString, uint32 InNumber, EFindName InFin
 CName::AppendString
 ==================
 */
-void CName::AppendString( std::wstring& OutResult ) const
+void CName::AppendString( std::wstring& OutResult, bool InIsWithoutNumber /* = false */ ) const
 {
 	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
 	if ( !IsValid() )
@@ -135,7 +170,7 @@ void CName::AppendString( std::wstring& OutResult ) const
 		OutResult += globalNameTable[index].name;
 	}
 
-	if ( number != NAME_NO_NUMBER )
+	if ( !InIsWithoutNumber && number != NAME_NO_NUMBER )
 	{
 		OutResult += CString::Format( TEXT( "_%i" ), number );
 	}
@@ -148,29 +183,13 @@ CName::operator==
 */
 bool CName::operator==( const tchar* InOther ) const
 {
-	const tchar*	tempName = InOther;
-	uint32			tempNumber = NAME_NO_NUMBER;
-	uint32			numCharsToCompare = Sys_Strlen( InOther );
-
-	// Find last '_' in InOther
-	uint32			idStartNumber = INDEX_NONE;
-	for ( uint32 index = 0; index < numCharsToCompare; ++index )
+	const tchar*	tempName			= InOther;
+	uint32			idStartNumber		= INDEX_NONE;
+	uint32			tempNumber			= ParseNumber( InOther, idStartNumber );
+	uint32			numCharsToCompare	= Sys_Strlen( InOther );
+	if ( idStartNumber != INDEX_NONE )
 	{
-		if ( InOther[index] == TEXT( '_' ) )
-		{
-			idStartNumber = index;
-		}
-		else if ( idStartNumber != INDEX_NONE && !Sys_IsDigit( InOther[index] ) )
-		{
-			idStartNumber = INDEX_NONE;
-		}
-	}
-
-	// Get number from InOther
-	if ( idStartNumber != INDEX_NONE && idStartNumber + 1 < numCharsToCompare )
-	{
-		tempNumber = Sys_Atoi( InOther + idStartNumber + 1 );
-		numCharsToCompare = idStartNumber - 1;
+		numCharsToCompare = idStartNumber;
 	}
 
 	// Compare
@@ -223,7 +242,7 @@ CArchive& operator<<( CArchive& InArchive, CName& InValue )
 			}
 			else
 			{
-				InValue.Init( name, number, CNAME_Add );
+				InValue.Init( name, name.size(), number, CNAME_Add );
 			}
 		}
 	}
