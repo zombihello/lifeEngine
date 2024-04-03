@@ -349,7 +349,7 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 	// Make temp file
 	Assert( InOuter );
 	double			timeStart = Sys_Seconds();
-	std::wstring	baseFilename = CFilename( InFilename ).GetBaseFilename();
+	std::wstring	baseFilename = CFilename( InFilename ).GetBaseFileName();
 	CFilename		tempFilename = CFilename( InFilename ).GetPath() + PATH_SEPARATOR + baseFilename + TEXT( "_save.tmp" );
 	bool			bSuccess = false;
 	bool			bCleanupIsRequired = false;

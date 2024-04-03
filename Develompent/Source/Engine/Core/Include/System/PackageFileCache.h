@@ -12,7 +12,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "Containers/String.h"
 #include "System/BaseFileSystem.h"
 #include "Core.h"
 
@@ -63,7 +62,7 @@ public:
 	FORCEINLINE bool FindPackageFile( const tchar* InPackageName, std::wstring& OutFileName )
 	{
 		bool	bFoundFile		= false;
-		auto	existingEntry	= fileLookup.find( CString::ToLower( CFilename( InPackageName ).GetBaseFilename() ) );
+		auto	existingEntry	= fileLookup.find( L_Strlwr( CFilename( InPackageName ).GetBaseFileName() ) );
 		if ( existingEntry != fileLookup.end() )
 		{
 			OutFileName = existingEntry->second;

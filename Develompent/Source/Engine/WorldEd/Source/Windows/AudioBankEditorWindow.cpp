@@ -1,5 +1,4 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Misc/UIGlobals.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Windows/AudioBankEditorWindow.h"
@@ -19,7 +18,7 @@ CAudioBankEditorWindow::CAudioBankEditorWindow
 ==================
 */
 CAudioBankEditorWindow::CAudioBankEditorWindow( const TSharedPtr<CAudioBank>& InAudioBank )
-	: CImGUILayer( CString::Format( TEXT( "Audio Bank Editor - %s" ), InAudioBank->GetAssetName().c_str() ) )
+	: CImGUILayer( L_Sprintf( TEXT( "Audio Bank Editor - %s" ), InAudioBank->GetAssetName().c_str() ) )
 	, audioBank( InAudioBank )
 	, audioBankHandle( nullptr )
 {
@@ -105,7 +104,7 @@ void CAudioBankEditorWindow::OnTick()
 				std::wstring		errorMsg;
 				if ( !g_AssetFactory.Reimport( audioBank, errorMsg ) )
 				{
-					OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The audio bank not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
+					OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The audio bank not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
 				}
 			}
 			if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
@@ -141,7 +140,7 @@ void CAudioBankEditorWindow::OnTick()
 		// Draw resource size
 		ImGui::Text( "Resource Size:" );
 		ImGui::TableNextColumn();
-		ImGui::Text( audioBankHandle ? TCHAR_TO_ANSI( CString::Format( TEXT( "%.2f Kb" ), ( Sys_GetNumSampleBytes( audioBankInfo.format ) * audioBankInfo.numSamples ) / 1024.f ).c_str() ) : "0 Kb" );
+		ImGui::Text( audioBankHandle ? TCHAR_TO_ANSI( L_Sprintf( TEXT( "%.2f Kb" ), ( Sys_GetNumSampleBytes( audioBankInfo.format ) * audioBankInfo.numSamples ) / 1024.f ).c_str() ) : "0 Kb" );
 		ImGui::EndTable();
 	}
 

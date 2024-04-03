@@ -2,7 +2,6 @@
 #include "Misc/EngineGlobals.h"
 #include "Logger/BaseLogger.h"
 #include "Logger/LoggerMacros.h"
-#include "Containers/String.h"
 #include "System/Archive.h"
 #include "System/BaseFileSystem.h"
 #include "RHI/BaseRHI.h"
@@ -161,7 +160,7 @@ bool CShaderManager::LoadShaders( const tchar* InPathShaderCache )
 #if WITH_EDITOR
 		if ( g_IsEditor )
 		{
-			Sys_SetSplashText( STT_StartupProgress, CString::Format( TEXT( "Loading shader %s for %s..." ), item.name.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
+			Sys_SetSplashText( STT_StartupProgress, L_Sprintf( TEXT( "Loading shader %s for %s..." ), item.name.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
 			Sys_Sleep( 0.01f );
 		}
 #endif // WITH_EDITOR
@@ -215,7 +214,7 @@ CShaderManager::GetShaderCacheFilename
 */
 std::wstring CShaderManager::GetShaderCacheFilename( EShaderPlatform InShaderPlatform )
 {
-	return CString::Format( TEXT( "GlobalShaderCache-%s.bin" ), ShaderPlatformToText( InShaderPlatform ) );
+	return L_Sprintf( TEXT( "GlobalShaderCache-%s.bin" ), ShaderPlatformToText( InShaderPlatform ) );
 }
 
 

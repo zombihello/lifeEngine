@@ -12,9 +12,9 @@
 #include <string>
 
 #include "Misc/Types.h"
-#include "Containers/String.h"
 #include "System/Archive.h"
-#include "CoreDefines.h"
+#include "Hashing/FastHash.h"
+#include "Misc/Platform.h"
 
 /**
  * @ingroup Core
@@ -176,7 +176,7 @@ public:
 	 */
 	FORCEINLINE std::wstring String() const
 	{
-		return CString::Format( TEXT( "%08X%08X%08X%08X" ), a, b, c, d );
+		return L_Sprintf( TEXT( "%08X%08X%08X%08X" ), a, b, c, d );
 	}
 
 	/**
@@ -192,7 +192,7 @@ public:
 		// Size matches, try to parse it
 		if ( InString.size() == 32 )
 		{
-			swscanf( InString.c_str(), TEXT( "%08X%08X%08X%08X" ), &a, &b, &c, &d );
+			L_Sscanf( InString.c_str(), TEXT( "%08X%08X%08X%08X" ), &a, &b, &c, &d );
 			bSuccessful = true;
 		}
 		// Size mis-match, invalidate the Guid

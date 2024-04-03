@@ -1,12 +1,9 @@
 #include <d3dcompiler.h>
 
-#include "Containers/StringConv.h"
-#include "Containers/String.h"
-
 #include "Core.h"
 #include "D3D11RHI.h"
 #include "D3D11Shader.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
 
@@ -182,7 +179,7 @@ CD3D11BoundShaderStateRHI::CD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 #endif // ENABLED_ASSERT
 	
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
+	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( L_Sprintf( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 

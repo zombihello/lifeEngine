@@ -1,5 +1,4 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Windows/PhysicsMaterialEditorWindow.h"
 #include "ImGUI/imgui_internal.h"
 
@@ -9,7 +8,7 @@ CPhysicsMaterialEditorWindow::CPhysicsMaterialEditorWindow
 ==================
 */
 CPhysicsMaterialEditorWindow::CPhysicsMaterialEditorWindow( const TSharedPtr<CPhysicsMaterial>& InPhysMaterial )
-	: CImGUILayer( CString::Format( TEXT( "Physics Material Editor - %s" ), InPhysMaterial->GetAssetName().c_str() ) )
+	: CImGUILayer( L_Sprintf( TEXT( "Physics Material Editor - %s" ), InPhysMaterial->GetAssetName().c_str() ) )
 	, physMaterial( InPhysMaterial )
 {
 	flags |= LF_DestroyOnHide;

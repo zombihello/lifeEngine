@@ -181,7 +181,7 @@ CArchiveSaveTagExports::CArchiveSaveTagExports
 ==================
 */
 CArchiveSaveTagExports::CArchiveSaveTagExports( CObject* InOuter )
-	: CArchive( InOuter ? CString::Format( TEXT( "SaveTagExports (%s)" ), InOuter->GetName().c_str() ) : TEXT( "SaveTagExports" ) )
+	: CArchive( InOuter ? L_Sprintf( TEXT( "SaveTagExports (%s)" ), InOuter->GetName().c_str() ) : TEXT( "SaveTagExports" ) )
 	, outer( InOuter )
 {
 	arIsObjectReferenceCollector = true;
@@ -263,7 +263,7 @@ CArchiveSaveTagExports::CArchiveSaveTagImports
 ==================
 */
 CArchiveSaveTagImports::CArchiveSaveTagImports( CLinkerSave* InLinker )
-	: CArchive( InLinker && InLinker->GetLinkerRoot() ? CString::Format( TEXT( "SaveTagImports (%s)" ), InLinker->GetLinkerRoot()->GetName().c_str() ) : TEXT( "SaveTagImports" ) )
+	: CArchive( InLinker && InLinker->GetLinkerRoot() ? L_Sprintf( TEXT( "SaveTagImports (%s)" ), InLinker->GetLinkerRoot()->GetName().c_str() ) : TEXT( "SaveTagImports" ) )
 	, linker( InLinker )
 {
 	arIsObjectReferenceCollector = true;

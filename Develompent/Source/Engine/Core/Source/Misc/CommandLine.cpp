@@ -17,7 +17,7 @@ bool ParseToken( const tchar*& InOutStr, std::wstring& OutResult, bool InIsUseEs
 	OutResult.clear();
 
 	// Skip preceeding spaces and tabs.
-	while ( Sys_IsWhitespace( *InOutStr ) || *InOutStr == TEXT( '=' ) )
+	while ( L_IsSpace( *InOutStr ) || *InOutStr == TEXT( '=' ) )
 	{
 		InOutStr++;
 	}
@@ -57,7 +57,7 @@ bool ParseToken( const tchar*& InOutStr, std::wstring& OutResult, bool InIsUseEs
 		while ( true )
 		{
 			tchar		character = *InOutStr;
-			if ( character == 0 || ( ( Sys_IsWhitespace( character ) || character == TEXT( '=' ) ) && !isInQuote ) )
+			if ( character == 0 || ( ( L_IsSpace( character ) || character == TEXT( '=' ) ) && !isInQuote ) )
 			{
 				break;
 			}
@@ -101,7 +101,7 @@ void CCommandLine::Parse( const tchar* InCommandLine )
 	{
 		if ( nextToken[0] == TEXT( '-' ) || nextToken[0] == TEXT( '/' ) )
 		{
-			nextToken = CString::ToUpper( nextToken );
+			nextToken = L_Strupr( nextToken );
 			std::wstring		token( &nextToken[1], nextToken.size()-1 );
 			itCurrentParam = params.find( token );
 			

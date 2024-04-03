@@ -5,8 +5,7 @@
 #include <vector>
 
 #include "Commandlets/CookPackagesCommandlet.h"
-#include "Containers/StringConv.h"
-#include "Containers/String.h"
+#include "Misc/StringConv.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/TableOfContents.h"
@@ -129,7 +128,7 @@ bool CCookPackagesCommandlet::CookMap( const ResourceInfo& InMapInfo )
 	SpawnActorsInWorld( tmxMap, tilesets );
 
 	// Serialize world to HDD
-	CArchive*		archive = g_FileSystem->CreateFileWriter( CString::Format( TEXT( "%s") PATH_SEPARATOR TEXT( "%s.%s" ), g_CookedDir.c_str(), InMapInfo.filename.c_str(), extensionInfo.map.c_str() ), AW_NoFail );
+	CArchive*		archive = g_FileSystem->CreateFileWriter( L_Sprintf( TEXT( "%s") PATH_SEPARATOR TEXT( "%s.%s" ), g_CookedDir.c_str(), InMapInfo.filename.c_str(), extensionInfo.map.c_str() ), AW_NoFail );
 	archive->SetType( AT_World );
 	archive->SerializeHeader();
 	g_World->Serialize( *archive );
@@ -683,7 +682,7 @@ TSharedPtr<CTexture2D> CCookPackagesCommandlet::ConvertTexture2D( const std::wst
 	{
 		filename = InPath;
 
-		Sys_NormalizePathSeparators( filename );
+		L_FixPathSeparators( filename );
 		std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 		if ( pathSeparatorPos != std::string::npos )
 		{
@@ -856,7 +855,7 @@ TSharedPtr<CAudioBank> CCookPackagesCommandlet::ConvertAudioBank( const std::wst
 	{
 		filename = InPath;
 
-		Sys_NormalizePathSeparators( filename );
+		L_FixPathSeparators( filename );
 		std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 		if ( pathSeparatorPos != std::string::npos )
 		{
@@ -946,7 +945,7 @@ bool CCookPackagesCommandlet::CookPhysMaterial( const ResourceInfo& InPhysMateri
  */
 bool CCookPackagesCommandlet::SaveToPackage( const ResourceInfo& InResourceInfo, const TAssetHandle<CAsset>& InAsset )
 {
-	std::wstring		outputPackage = CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), g_CookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
+	std::wstring		outputPackage = L_Sprintf( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.%s" ), g_CookedDir.c_str(), InResourceInfo.packageName.c_str(), extensionInfo.package.c_str() );
 	PackageRef_t			package = g_PackageManager->LoadPackage( outputPackage, true );
 	package->Add( InAsset );
 
@@ -994,7 +993,7 @@ void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 	if ( !InIsRootDir )
 	{
 		packageName = InRootDir;
-		Sys_NormalizePathSeparators( packageName );
+		L_FixPathSeparators( packageName );
 		std::size_t			pathSeparatorPos = packageName.find_last_of( PATH_SEPARATOR );
 		if ( pathSeparatorPos != std::string::npos )
 		{
@@ -1028,7 +1027,7 @@ void CCookPackagesCommandlet::IndexingResources( const std::wstring& InRootDir, 
 		// Getting filename
 		std::wstring		filename = file;
 		{
-			Sys_NormalizePathSeparators( filename );
+			L_FixPathSeparators( filename );
 			std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 			if ( pathSeparatorPos != std::string::npos )
 			{

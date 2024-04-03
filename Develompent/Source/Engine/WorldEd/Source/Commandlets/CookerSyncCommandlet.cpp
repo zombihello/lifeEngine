@@ -7,7 +7,7 @@
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
 #include "System/Package.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Render/StaticMesh.h"
 #include "Commandlets/CookerSyncCommandlet.h"
 

@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 
-#include "Containers/String.h"
 #include "Core.h"
 
 /**
@@ -50,7 +49,7 @@ public:
 	 */
 	FORCEINLINE bool IsPackageExtension( const std::wstring& InExtension ) const
 	{
-		std::wstring	extension = CString::ToLower( InExtension );
+		std::wstring	extension = L_Strlwr( InExtension );
 		for ( uint32 index = 0, count = packageExtensions.size(); index < count; ++index )
 		{
 			if ( packageExtensions[index] == extension )

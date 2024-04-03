@@ -1,5 +1,4 @@
-#include "Containers/StringConv.h"
-#include "Containers/String.h"
+#include "Misc/StringConv.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Misc/UIGlobals.h"
 #include "Reflection/ObjectPackage.h"
@@ -81,7 +80,7 @@ void CEditorWindow::UpdateWindowTitle()
 	CObjectPackage*		mapPackage = g_World->GetOutermost();
 	Assert( mapPackage );
 
-	g_Window->SetTitle( CString::Format( TEXT( "%s%s - %s" ), mapPackage->IsDirty() ? TEXT( "*" ) : TEXT( "" ), mapPackage->GetName().c_str(), g_EditorEngine->GetEditorName().c_str()).c_str());
+	g_Window->SetTitle( L_Sprintf( TEXT( "%s%s - %s" ), mapPackage->IsDirty() ? TEXT( "*" ) : TEXT( "" ), mapPackage->GetName().c_str(), g_EditorEngine->GetEditorName().c_str()).c_str());
 }
 
 void HY_ImGui_EndMainStatusBar()
@@ -161,7 +160,7 @@ void CEditorWindow::OnTick()
 				if ( g_World->GetOutermost()->IsDirty() )
 				{
 					CDialogWindow::EButtonType	pressedButton;
-					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to create a new level?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
+					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to create a new level?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  if ( InButtonType == CDialogWindow::BT_Ok )
@@ -185,7 +184,7 @@ void CEditorWindow::OnTick()
 				if ( g_World->GetOutermost()->IsDirty() )
 				{
 					CDialogWindow::EButtonType	pressedButton;
-					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to open other a level?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
+					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to open other a level?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  if ( InButtonType == CDialogWindow::BT_Ok )
@@ -222,7 +221,7 @@ void CEditorWindow::OnTick()
 				if ( g_World->GetOutermost()->IsDirty() )
 				{
 					CDialogWindow::EButtonType	pressedButton;
-					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to exit from WorldEd?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
+					TSharedPtr<CDialogWindow>	popup = OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "Map not saved, all changes will be lost.\nAre you sure you want to exit from WorldEd?" ) ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  if ( InButtonType == CDialogWindow::BT_Ok )
@@ -434,7 +433,7 @@ void CEditorWindow::OpenLevel()
 		std::wstring		error;
 		if ( !g_EditorEngine->LoadMap( openFileDialogResult.files[0], error ) )
 		{
-			OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The level %s wasn't open.\n\nError: %s" ), openFileDialogResult.files[0].c_str(), error.c_str() ), CDialogWindow::BT_Ok );
+			OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The level %s wasn't open.\n\nError: %s" ), openFileDialogResult.files[0].c_str(), error.c_str() ), CDialogWindow::BT_Ok );
 		}
 	}
 }
@@ -474,7 +473,7 @@ void CEditorWindow::SaveLevel( bool InIsSaveAs /* = false */ )
 		std::wstring		error;
 		if ( !g_EditorEngine->SaveMap( filePath, error ) )
 		{
-			OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The level %s wasn't save.\n\nError: %s" ), filePath.c_str(), error.c_str() ), CDialogWindow::BT_Ok );
+			OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The level %s wasn't save.\n\nError: %s" ), filePath.c_str(), error.c_str() ), CDialogWindow::BT_Ok );
 		}
 	}
 }

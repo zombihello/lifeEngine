@@ -13,7 +13,7 @@
 #if WITH_IMGUI
 
 #include "RHI/TypesRHI.h"
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 
 /**
  * @ingroup UI

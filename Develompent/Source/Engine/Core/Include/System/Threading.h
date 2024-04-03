@@ -10,7 +10,7 @@
 #define THREADING_H
 
 #include "Core.h"
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 #include "Misc/Types.h"
 
 /**

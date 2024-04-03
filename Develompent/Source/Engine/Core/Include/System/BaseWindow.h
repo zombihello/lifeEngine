@@ -11,7 +11,7 @@
 
 #include "Misc/Types.h"
 #include "System/WindowEvent.h"
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 
 /**
  * @ingroup Core

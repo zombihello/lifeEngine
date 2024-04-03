@@ -21,6 +21,7 @@
 #include "Misc/Misc.h"
 #include "Misc/Guid.h"
 #include "Misc/TableOfContents.h"
+#include "Misc/FileTools.h"
 #include "Misc/CoreGlobals.h"
 #include "Reflection/Object.h"
 #include "System/Delegate.h"
@@ -1593,7 +1594,7 @@ private:
 		FORCEINLINE NormalizedPath( const std::wstring& InPath )
 			: path( InPath )
 		{
-			Sys_NormalizePathSeparators( path );
+			L_FixPathSeparators( path );
 		}
 
 		/**
@@ -1604,7 +1605,7 @@ private:
 		FORCEINLINE void Set( const std::wstring& InPath )
 		{
 			path = InPath;
-			Sys_NormalizePathSeparators( path );
+			L_FixPathSeparators( path );
 		}
 
 		/**

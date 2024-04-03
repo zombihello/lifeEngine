@@ -16,7 +16,7 @@
 
 #include "Core.h"
 #include "Misc/Types.h"
-#include "Misc/Misc.h"
+#include "Misc/Compression.h"
 #include "System/BaseTargetPlatform.h"
 
 /**
@@ -444,17 +444,6 @@ protected:
 	bool							bRequireDirectOuter;	/**< Determines whether nested objects contained within LimitOuter are considered */
 	bool							bSerializeRecursively;	/**< Determines whether we serialize objects that are encounterd by this archive */
 	bool							bShouldIgnoreTransient;	/**< TRUE to skip serialization of transient properties */
-};
-
-/**
- * @ingroup Core
- * Helper structure for compression support, containing information on compressed
- * and uncompressed size of a chunk of data.
- */
-struct CompressedChunkInfo
-{
-	uint32		compressedSize;			/**< Compressed size of data */
-	uint32		uncompressedSize;		/**< Uncompresses size of data */
 };
 
 //

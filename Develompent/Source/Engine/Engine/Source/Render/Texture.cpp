@@ -1,5 +1,4 @@
-#include "Containers/StringConv.h"
-#include "Containers/String.h"
+#include "Misc/StringConv.h"
 #include "Misc/CoreGlobals.h"
 #include "System/Archive.h"
 #include "System/BaseFileSystem.h"
@@ -107,7 +106,7 @@ CTexture2D::InitRHI
 void CTexture2D::InitRHI()
 {
 	Assert( mipmaps.size() > 0 );
-	texture = g_RHI->CreateTexture2D( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), GetSizeX(), GetSizeY(), pixelFormat, mipmaps.size(), 0, nullptr );
+	texture = g_RHI->CreateTexture2D( L_Sprintf( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), GetSizeX(), GetSizeY(), pixelFormat, mipmaps.size(), 0, nullptr );
 
 	// Load all mip-levels to GPU
 	for ( uint32 index = 0, count = mipmaps.size(); index < count; ++index )

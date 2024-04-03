@@ -1,4 +1,3 @@
-#include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 #include "System/Archive.h"
 #include "Render/Scene.h"
@@ -62,7 +61,7 @@ void CStaticMesh::InitRHI()
 	uint32			numVerteces = ( uint32 )verteces.Num();
 	if ( numVerteces > 0 )
 	{
-		vertexBufferRHI = g_RHI->CreateVertexBuffer( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( StaticMeshVertexType ) * numVerteces, ( byte* )verteces.GetData(), RUF_Static );
+		vertexBufferRHI = g_RHI->CreateVertexBuffer( L_Sprintf( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( StaticMeshVertexType ) * numVerteces, ( byte* )verteces.GetData(), RUF_Static );
 
 		// Initialize vertex factory
 		vertexFactory->AddVertexStream( VertexStream{ vertexBufferRHI, sizeof( StaticMeshVertexType ) } );		// 0 stream slot
@@ -73,7 +72,7 @@ void CStaticMesh::InitRHI()
 	uint32			numIndeces = ( uint32 )indeces.Num();
 	if ( numIndeces > 0 )
 	{
-		indexBufferRHI = g_RHI->CreateIndexBuffer( CString::Format( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.GetData(), RUF_Static );
+		indexBufferRHI = g_RHI->CreateIndexBuffer( L_Sprintf( TEXT( "%s" ), GetAssetName().c_str() ).c_str(), sizeof( uint32 ), sizeof( uint32 ) * numIndeces, ( byte* )indeces.GetData(), RUF_Static );
 	}
 
 	if ( !g_IsEditor && !g_IsCommandlet )

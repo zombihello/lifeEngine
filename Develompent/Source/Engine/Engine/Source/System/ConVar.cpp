@@ -1,5 +1,4 @@
 #include "Logger/LoggerMacros.h"
-#include "Containers/String.h"
 #include "Misc/EngineGlobals.h"
 #include "System/ConVar.h"
 #include "System/ConsoleSystem.h"
@@ -90,7 +89,7 @@ void CConVar::SetValue( const std::wstring& InValue, EConVarType InVarType )
 
 	case CVT_Bool:
 	{
-		std::wstring	valueLower = CString::ToLower( InValue );
+		std::wstring	valueLower = L_Strlwr( InValue );
 		SetValueBool( valueLower == TEXT( "true" ) || stoi( valueLower ) ? true : false );
 		break;
 	}

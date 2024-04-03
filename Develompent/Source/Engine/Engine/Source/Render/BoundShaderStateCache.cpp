@@ -1,4 +1,5 @@
 #include "Render/BoundShaderStateCache.h"
+#include "Hashing/FastHash.h"
 #include "RHI/BaseShaderRHI.h"
 
 /*

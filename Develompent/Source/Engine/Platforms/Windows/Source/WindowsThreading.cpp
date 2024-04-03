@@ -1,7 +1,7 @@
 #include "Core.h"
 #include "System/Threading.h"
 #include "WindowsThreading.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 
 /**
  * Code setting the thread name for use in the debugger.

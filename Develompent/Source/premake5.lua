@@ -127,6 +127,7 @@ workspace( game )
         defines 		{
             "_WIN64",
             "_CRT_SECURE_NO_WARNINGS",		-- For remove on unsafe C functions
+            "_CRT_NONSTDC_NO_DEPRECATE",
             "PLATFORM_64BIT=1"
         }
 

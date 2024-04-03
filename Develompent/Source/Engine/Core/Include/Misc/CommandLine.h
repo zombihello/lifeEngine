@@ -14,9 +14,8 @@
 #include <unordered_map>
 
 #include "Misc/Types.h"
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
-#include "CoreDefines.h"
+#include "Misc/StringConv.h"
+#include "Misc/Platform.h"
 
 /**
  * @ingroup Core
@@ -80,7 +79,7 @@ public:
 	 */
 	FORCEINLINE bool HasParam( const tchar* InParam ) const
 	{
-		return params.find( CString::ToUpper( InParam ) ) != params.end();
+		return params.find( L_Strupr( InParam ) ) != params.end();
 	}
 
 	/**
@@ -92,14 +91,14 @@ public:
 	 */
 	FORCEINLINE bool HasParam( const tchar* InParam, const tchar* InValue ) const
 	{
-		Params_t::const_iterator	itParam = params.find( CString::ToUpper( InParam ) );
+		Params_t::const_iterator	itParam = params.find( L_Strupr( InParam ) );
 		if ( itParam == params.end() )
 		{
 			return false;
 		}
 
 		bool				bResult = false;
-		std::wstring		cachedValue = CString::ToUpper( InValue );
+		std::wstring		cachedValue = L_Strupr( InValue );
 		for ( uint32 index = 0, count = itParam->second.size(); index < count; ++index )
 		{
 			if ( itParam->second[index] == cachedValue )
@@ -120,7 +119,7 @@ public:
 	 */
 	FORCEINLINE std::wstring GetFirstValue( const tchar* InParam ) const
 	{
-		Params_t::const_iterator	itParam = params.find( CString::ToUpper( InParam ) );
+		Params_t::const_iterator	itParam = params.find( L_Strupr( InParam ) );
 		if ( itParam == params.end() || itParam->second.empty() )
 		{
 			return TEXT( "" );
@@ -137,7 +136,7 @@ public:
 	 */
 	FORCEINLINE Values_t GetValues( const tchar* InParam ) const
 	{
-		Params_t::const_iterator	itParam = params.find( CString::ToUpper( InParam ) );
+		Params_t::const_iterator	itParam = params.find( L_Strupr( InParam ) );
 		if ( itParam == params.end() )
 		{
 			return Values_t();

@@ -2,8 +2,7 @@
 #include <vector>
 #include <sstream>
 
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "System/Config.h"
 #include "System/SplashScreen.h"
@@ -16,14 +15,14 @@
 #include "EngineLoop.h"
 #include "WorldEd.h"
 
-EditorDelegates::COnAssetsCanDelete		EditorDelegates::onAssetsCanDelete;
+EditorDelegates::COnAssetsCanDelete			EditorDelegates::onAssetsCanDelete;
 EditorDelegates::COnAssetsDeleted			EditorDelegates::onAssetsDeleted;
 EditorDelegates::COnAssetsReloaded			EditorDelegates::onAssetsReloaded;
 EditorDelegates::COnActorsSpawned			EditorDelegates::onActorsSpawned;
-EditorDelegates::COnActorsDestroyed		EditorDelegates::onActorsDestroyed;
+EditorDelegates::COnActorsDestroyed			EditorDelegates::onActorsDestroyed;
 EditorDelegates::COnEditorModeChanged		EditorDelegates::onEditorModeChanged;
-EditorDelegates::COnEditorCreatedNewMap	EditorDelegates::onEditorCreatedNewMap;
-EditorDelegates::COnEditorLoadedMap		EditorDelegates::onEditorLoadedMap;
+EditorDelegates::COnEditorCreatedNewMap		EditorDelegates::onEditorCreatedNewMap;
+EditorDelegates::COnEditorLoadedMap			EditorDelegates::onEditorLoadedMap;
 EditorDelegates::COnEditorSavedMap			EditorDelegates::onEditorSavedMap;
 EditorDelegates::COnActorsSelected			EditorDelegates::onActorsSelected;
 EditorDelegates::COnActorsUnselected		EditorDelegates::onActorsUnselected;
@@ -46,5 +45,5 @@ std::wstring Sys_GetWorldEdName()
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
 
-	return CString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString.c_str(), g_RHI->GetRHIName() );
+	return L_Sprintf( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString.c_str(), g_RHI->GetRHIName() );
 }

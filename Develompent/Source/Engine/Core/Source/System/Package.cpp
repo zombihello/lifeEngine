@@ -216,7 +216,7 @@ bool CAssetFactory::Import( const std::wstring& InPath, std::vector<TSharedPtr<C
 	EAssetType		assetType = GetAssetTypeByPath( InPath );
 	if ( assetType == AT_Unknown )
 	{
-		OutError = CString::Format( TEXT( "Not exist importer for extension '%s'" ), CFilename( InPath ).GetExtension().c_str() );
+		OutError = L_Sprintf( TEXT( "Not exist importer for extension '%s'" ), CFilename( InPath ).GetExtension().c_str() );
 		return nullptr;
 	}
 
@@ -237,7 +237,7 @@ bool CAssetFactory::Reimport( const TSharedPtr<CAsset>& InAsset, std::wstring& O
 	
 	if ( !importerInfo.bValid )
 	{
-		OutError = CString::Format( TEXT( "Not exist importer for asset type 0x%X" ), InAsset->GetType() );
+		OutError = L_Sprintf( TEXT( "Not exist importer for asset type 0x%X" ), InAsset->GetType() );
 		return false;
 	}
 
@@ -252,7 +252,7 @@ CAssetFactory::GetAssetTypeByPath
 EAssetType CAssetFactory::GetAssetTypeByPath( const std::wstring& InPath ) const
 {
 	std::wstring		fileExtension = CFilename( InPath ).GetExtension();
-	CString::ToUpper( fileExtension, fileExtension );
+	L_Strupr( fileExtension, fileExtension );
 
 	for ( uint32 index = 0; index < AT_Count; ++index )
 	{
@@ -262,7 +262,7 @@ EAssetType CAssetFactory::GetAssetTypeByPath( const std::wstring& InPath ) const
 			bool	bSupportedFile = false;
 			for ( uint32 extensionId = 0, countExtensions = importerInfo.supportedExtensions.size(); extensionId < countExtensions; ++extensionId )
 			{
-				if ( CString::ToUpper( importerInfo.supportedExtensions[extensionId] ) == fileExtension )
+				if ( L_Strupr( importerInfo.supportedExtensions[extensionId] ) == fileExtension )
 				{
 					bSupportedFile = true;
 					break;

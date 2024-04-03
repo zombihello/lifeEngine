@@ -17,7 +17,8 @@
 - [ ] Need refactor import/reimport assets with the ability to customize
 - [ ] Implement shadow maps
 - [ ] Implement particle system
-- [ ] Implement support UI in the game
+- [ ] Implement decals
+- [ ] Implement support UI in the game (RmlUi)
 - [ ] Implement base AI
 
  # Version 0.4.0 :: Now	

@@ -17,7 +17,7 @@ CVertexFactoryMetaType::CVertexFactoryMetaType( const std::wstring& InFactoryNam
 #endif // WITH_EDITOR
 )
 	: factoryName( InFactoryName )
-	, hash( Sys_CalcHash( InFactoryName ) )
+	, hash( FastHash( InFactoryName ) )
 	, ConstructParameters( InConstructParameters )
 #if USE_INSTANCING
 	, bSupportsInstancing( InSupportsInstancing )

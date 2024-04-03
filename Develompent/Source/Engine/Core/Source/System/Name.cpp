@@ -1,8 +1,6 @@
 #include <list>
 
-#include "Containers/String.h"
 #include "Misc/Misc.h"
-#include "Containers/String.h"
 #include "System/Name.h"
 
 static std::vector<CName::NameEntry>& GetGlobalNameTable()
@@ -38,10 +36,12 @@ void CName::StaticInit()
 	GetIsInitialized() = true;
 
 	// Register all hardcoded names
+	std::wstring		tmpBuffer;
 	#define REGISTER_NAME( InNum, InName )	\
 	{ \
 		Assert( InNum == GetGlobalNameTable().size() ); \
-		AllocateNameEntry( TEXT( #InName ), Sys_CalcHash( CString::ToUpper( TEXT( #InName ) ) ) ); \
+		L_Strupr( TEXT( #InName ), tmpBuffer ); \
+		AllocateNameEntry( TEXT( #InName ), FastHash( tmpBuffer ) ); \
 	}
 	#include "Misc/Names.h"
 }
@@ -66,7 +66,7 @@ bool CName::EndsWith( const CName& InSuffix ) const
 	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
 	std::wstring*						name = IsValid() ? &globalNameTable[index].name : &globalNameTable[NAME_None].name;
 	std::wstring*						suffix = InSuffix.IsValid() ? &globalNameTable[InSuffix.index].name : &globalNameTable[NAME_None].name;
-	return name->size() >= suffix->size() && Sys_Strnicmp( name->data() + name->size() - suffix->size(), suffix->data(), suffix->size() );
+	return name->size() >= suffix->size() && L_Strnicmp( name->data() + name->size() - suffix->size(), suffix->data(), suffix->size() );
 }
 
 /*
@@ -89,7 +89,7 @@ void CName::Init( const std::wstring& InString, uint32 InStringSize, uint32 InNu
 
 	// Calculate hash for string
 	Assert( InStringSize <= InString.size() );
-	uint64	hash = FastHash( CString::ToUpper( InString ).data(), ( uint64 )InStringSize * sizeof( std::wstring::value_type ), 0 );
+	uint64	hash = FastHash( L_Strupr( InString ).data(), ( uint64 )InStringSize * sizeof( std::wstring::value_type ), 0 );
 	
 	// Try find already exist name in global table
 	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
@@ -127,7 +127,7 @@ CName::ParseNumber
 uint32 CName::ParseNumber( const tchar* InString, uint32& OutIdStartNumber )
 {
 	uint32		result = NAME_NO_NUMBER;
-	uint32		strLength = Sys_Strlen( InString );
+	uint32		strLength = L_Strlen( InString );
 
 	// Find the last '_' in InOther
 	OutIdStartNumber = INDEX_NONE;
@@ -137,7 +137,7 @@ uint32 CName::ParseNumber( const tchar* InString, uint32& OutIdStartNumber )
 		{
 			OutIdStartNumber = index;
 		}
-		else if ( OutIdStartNumber != INDEX_NONE && !Sys_IsDigit( InString[index] ) )
+		else if ( OutIdStartNumber != INDEX_NONE && !L_IsDigit( InString[index] ) )
 		{
 			OutIdStartNumber = INDEX_NONE;
 		}
@@ -146,7 +146,7 @@ uint32 CName::ParseNumber( const tchar* InString, uint32& OutIdStartNumber )
 	// Get number from InOther
 	if ( OutIdStartNumber != INDEX_NONE && OutIdStartNumber + 1 < strLength )
 	{
-		result = Sys_Atoi( InString + OutIdStartNumber + 1 );
+		result = L_Atoi( InString + OutIdStartNumber + 1 );
 	}
 
 	// We are done
@@ -172,7 +172,7 @@ void CName::AppendString( std::wstring& OutResult, bool InIsWithoutNumber /* = f
 
 	if ( !InIsWithoutNumber && number != NAME_NO_NUMBER )
 	{
-		OutResult += CString::Format( TEXT( "_%i" ), number );
+		OutResult += L_Sprintf( TEXT( "_%i" ), number );
 	}
 }
 
@@ -186,7 +186,7 @@ bool CName::operator==( const tchar* InOther ) const
 	const tchar*	tempName			= InOther;
 	uint32			idStartNumber		= INDEX_NONE;
 	uint32			tempNumber			= ParseNumber( InOther, idStartNumber );
-	uint32			numCharsToCompare	= Sys_Strlen( InOther );
+	uint32			numCharsToCompare	= L_Strlen( InOther );
 	if ( idStartNumber != INDEX_NONE )
 	{
 		numCharsToCompare = idStartNumber;
@@ -194,7 +194,7 @@ bool CName::operator==( const tchar* InOther ) const
 
 	// Compare
 	std::vector<CName::NameEntry>&	globalNameTable = GetGlobalNameTable();
-	return tempNumber == number && !Sys_Strnicmp( tempName, globalNameTable[IsValid() ? index : NAME_None].name.c_str(), numCharsToCompare );
+	return tempNumber == number && !L_Strnicmp( tempName, globalNameTable[IsValid() ? index : NAME_None].name.c_str(), numCharsToCompare );
 }
 
 /*

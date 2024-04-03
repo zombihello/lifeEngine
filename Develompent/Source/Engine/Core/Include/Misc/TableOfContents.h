@@ -14,7 +14,7 @@
 #include "Misc/Types.h"
 #include "Misc/Guid.h"
 #include "System/Archive.h"
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 
 /**
  * @ingroup Core

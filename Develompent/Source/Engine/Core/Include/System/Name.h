@@ -102,7 +102,7 @@ public:
 	{
 		StaticInit();
 		uint32		idStartNumber	= INDEX_NONE;
-		uint32		strLength		= Sys_Strlen( InString );
+		uint32		strLength		= L_Strlen( InString );
 		uint32		number			= ParseNumber( InString, idStartNumber );
 		if ( idStartNumber != INDEX_NONE )
 		{
@@ -142,7 +142,7 @@ public:
 	FORCEINLINE CName( const tchar* InString, uint32 InNumber, EFindName InFindType = CNAME_Add )
 	{
 		StaticInit();
-		Init( InString, Sys_Strlen( InString ), InNumber, InFindType );
+		Init( InString, L_Strlen( InString ), InNumber, InFindType );
 	}
 
 	/**
@@ -415,7 +415,7 @@ public:
 	FORCEINLINE CName& operator=( const tchar* InString )
 	{
 		uint32	idStartNumber	= INDEX_NONE;
-		uint32	strLength		= Sys_Strlen( InString );
+		uint32	strLength		= L_Strlen( InString );
 		uint32	number			= ParseNumber( InString, idStartNumber );
 		if ( idStartNumber != INDEX_NONE )
 		{

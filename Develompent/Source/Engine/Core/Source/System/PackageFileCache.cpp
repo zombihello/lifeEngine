@@ -47,15 +47,18 @@ CPackageFileCache::CachePackage
 bool CPackageFileCache::CachePackage( const tchar* InFilename, bool InIsAllowOverride /* = false */ )
 {
 	CFilename		packageFile( InFilename );
-	std::wstring	packageName		= CString::ToLower( packageFile.GetBaseFilename() );
+	std::wstring	packageName		= L_Strlwr( packageFile.GetBaseFileName() );
 	auto			existingEntry	= fileLookup.find( packageName );
 	if ( !InIsAllowOverride && existingEntry != fileLookup.end() )
 	{
-		const CFilename		fullExistingEntry	= g_FileSystem->ConvertRelativePathToFull( existingEntry->second );
-		const CFilename		fullNewPackageFile	= g_FileSystem->ConvertRelativePathToFull( packageFile.GetFullPath() );
+		std::wstring	tmpBuffer;
+		L_MakeAbsolutePath( existingEntry->second, tmpBuffer, TEXT( "" ), false );
+		const CFilename	fullExistingEntry	= tmpBuffer;
+		L_MakeAbsolutePath( packageFile.GetFullPath(), tmpBuffer, TEXT( "" ), false );
+		const CFilename	fullNewPackageFile	= tmpBuffer;
 		
 		// If the expanded existing entry is the same as the old, ignore the cache request
-		if ( fullNewPackageFile.GetBaseFilename() == fullExistingEntry.GetBaseFilename() )
+		if ( fullNewPackageFile.GetBaseFileName() == fullExistingEntry.GetBaseFileName() )
 		{
 			return true;
 		}

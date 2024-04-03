@@ -1,5 +1,4 @@
-#include "Containers/StringConv.h"
-#include "Containers/String.h"
+#include "Misc/StringConv.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/UIGlobals.h"
 #include "System/MemoryArchive.h"
@@ -147,7 +146,7 @@ void CExplorerLevelWindow::OnTick()
 			
 			// Visibility flag
 			ImGui::TableNextColumn();
-			if ( ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##Visibility_ID_%i" ), index ).c_str() ), &bNewVisibility ) )
+			if ( ImGui::Checkbox( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##Visibility_ID_%i" ), index ).c_str() ), &bNewVisibility ) )
 			{
 				actor->SetVisibility( bNewVisibility );
 				g_World->MarkPackageDirty();
@@ -199,7 +198,7 @@ void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, AActor* InActor )
 			ImGui::PushStyleColor( ImGuiCol_HeaderHovered, g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
 			bNeedPopStyleColor = true;
 		}
-		if ( ImGui::Selectable( TCHAR_TO_ANSI( CString::Format( TEXT( "##Selectable_ID_%i" ), InIndex ).c_str() ), &bSelected, ImGuiSelectableFlags_SpanAllColumns ) ||
+		if ( ImGui::Selectable( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##Selectable_ID_%i" ), InIndex ).c_str() ), &bSelected, ImGuiSelectableFlags_SpanAllColumns ) ||
 			 ImGui::IsItemHovered() && bRMBDown )
 		{
 			bool	bUnselectedAllActors = false;
@@ -241,7 +240,7 @@ void CExplorerLevelWindow::DrawPopupMenu()
 		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneActor ) )
 		{
 			const std::vector<AActor*>&		selectedActors = g_World->GetSelectedActors();
-			CRunnableThread::Create( new CRenameActorRunnable( this, selectedActors[0] ), CString::Format( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
+			CRunnableThread::Create( new CRenameActorRunnable( this, selectedActors[0] ), L_Sprintf( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
 		}
 
 		// Duplicate

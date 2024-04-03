@@ -1,5 +1,4 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Misc/UIGlobals.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Windows/StaticMeshEditorWindow.h"
@@ -19,7 +18,7 @@ CStaticMeshEditorWindow::CStaticMeshEditorWindow
 ==================
 */
 CStaticMeshEditorWindow::CStaticMeshEditorWindow( const TSharedPtr<CStaticMesh>& InStaticMesh )
-	: CImGUILayer( CString::Format( TEXT( "Static Mesh Editor - %s" ), InStaticMesh->GetAssetName().c_str() ) )
+	: CImGUILayer( L_Sprintf( TEXT( "Static Mesh Editor - %s" ), InStaticMesh->GetAssetName().c_str() ) )
 	, staticMesh( InStaticMesh )
 	, viewportClient( new CStaticMeshPreviewViewportClient( InStaticMesh ) )
 {
@@ -66,7 +65,7 @@ void CStaticMeshEditorWindow::Init()
 		TSharedPtr<CSelectAssetWidget>	selectAssetWidget = MakeSharedPtr<CSelectAssetWidget>( index );
 
 		selectAssetWidget->Init();
-		selectAssetWidget->SetLabel( CString::Format( TEXT( "Slot %i" ), index ) );
+		selectAssetWidget->SetLabel( L_Sprintf( TEXT( "Slot %i" ), index ) );
 		selectAssetWidget->OnSelectedAsset().Add(	std::bind( &CStaticMeshEditorWindow::OnSelectedAsset,	this, std::placeholders::_1, std::placeholders::_2	) );
 		selectAssetWidget->OnOpenAssetEditor().Add( std::bind( &CStaticMeshEditorWindow::OnOpenAssetEditor, this, std::placeholders::_1							) );
 		selectAssetWidgets.push_back( SelectAssetHandle{ index, nullptr, selectAssetWidget } );
@@ -118,7 +117,7 @@ void CStaticMeshEditorWindow::OnTick()
 				std::wstring		errorMsg;
 				if ( !g_AssetFactory.Reimport( staticMesh, errorMsg ) )
 				{
-					OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The static mesh not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
+					OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The static mesh not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
 				}
 			}
 			if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
@@ -154,7 +153,7 @@ void CStaticMeshEditorWindow::OnTick()
 		// Resource size
 		ImGui::Text( "Resource Size:" );
 		ImGui::TableNextColumn();
-		ImGui::Text( TCHAR_TO_ANSI( CString::Format( TEXT( "%.2f Kb" ), ( staticMesh->GetVerteces().Num() * sizeof( StaticMeshVertexType ) + staticMesh->GetIndeces().Num() * sizeof( uint32 ) ) / 1024.f ).c_str() ) );
+		ImGui::Text( TCHAR_TO_ANSI( L_Sprintf( TEXT( "%.2f Kb" ), ( staticMesh->GetVerteces().Num() * sizeof( StaticMeshVertexType ) + staticMesh->GetIndeces().Num() * sizeof( uint32 ) ) / 1024.f ).c_str() ) );
 		ImGui::EndTable();
 	}
 

@@ -1,5 +1,4 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
 #include "EngineDefines.h"
@@ -144,7 +143,7 @@ void CEditorEngine::Init()
 
 		for ( uint32 index = 0; index < IT_Num; ++index )
 		{
-			const std::wstring				assetName = CString::Format( TEXT( "EditorIcon_%X" ), index );
+			const std::wstring				assetName = L_Sprintf( TEXT( "EditorIcon_%X" ), index );
 			TAssetHandle<CTexture2D>&		assetHandle = icons[index];
 			assetHandle = package->Find( assetName );
 			if ( !assetHandle.IsAssetValid() )
@@ -170,31 +169,31 @@ void CEditorEngine::Init()
 	editorWindow						= MakeSharedPtr<CEditorWindow>();
 	editorWindow->Init();
 
-	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( CString::Format( TEXT( "%s Classes" ), ANSI_TO_TCHAR( IMGUI_ICON_CODE ) ), AActor::StaticClass() );
+	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( L_Sprintf( TEXT( "%s Classes" ), ANSI_TO_TCHAR( IMGUI_ICON_CODE ) ), AActor::StaticClass() );
 	actorClassesWindow->Init();
 	
-	actorPropertiesWindow				= MakeSharedPtr<CActorPropertiesWindow>( CString::Format( TEXT( "%s Properties" ), ANSI_TO_TCHAR( IMGUI_ICON_MENU ) ) );
+	actorPropertiesWindow				= MakeSharedPtr<CActorPropertiesWindow>( L_Sprintf( TEXT( "%s Properties" ), ANSI_TO_TCHAR( IMGUI_ICON_MENU ) ) );
 	actorPropertiesWindow->Init();
 
-	contentBrowserWindow				= MakeSharedPtr<CContentBrowserWindow>( CString::Format( TEXT( "%s Content" ), ANSI_TO_TCHAR( IMGUI_ICON_DATABASE ) ) );
+	contentBrowserWindow				= MakeSharedPtr<CContentBrowserWindow>( L_Sprintf( TEXT( "%s Content" ), ANSI_TO_TCHAR( IMGUI_ICON_DATABASE ) ) );
 	contentBrowserWindow->Init();
 
-	explorerLevelWindow					= MakeSharedPtr<CExplorerLevelWindow>( CString::Format( TEXT( "%s Explorer Level" ), ANSI_TO_TCHAR( IMGUI_ICON_GLOBE ) ) );
+	explorerLevelWindow					= MakeSharedPtr<CExplorerLevelWindow>( L_Sprintf( TEXT( "%s Explorer Level" ), ANSI_TO_TCHAR( IMGUI_ICON_GLOBE ) ) );
 	explorerLevelWindow->Init();
 
-	logsWindow							= MakeSharedPtr<CLogsWindow>( CString::Format( TEXT( "%s Logs" ), ANSI_TO_TCHAR( IMGUI_ICON_FILETEXT ) ) );
+	logsWindow							= MakeSharedPtr<CLogsWindow>( L_Sprintf( TEXT( "%s Logs" ), ANSI_TO_TCHAR( IMGUI_ICON_FILETEXT ) ) );
 	logsWindow->Init();
 
-	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho XY" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXY );
+	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CLevelViewportWindow>( L_Sprintf( TEXT( "%s Ortho XY" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXY );
 	viewportWindows[LVT_OrthoXY]->Init();
 
-	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho XZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXZ );
+	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CLevelViewportWindow>( L_Sprintf( TEXT( "%s Ortho XZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXZ );
 	viewportWindows[LVT_OrthoXZ]->Init();
 
-	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho YZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoYZ );
+	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CLevelViewportWindow>( L_Sprintf( TEXT( "%s Ortho YZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoYZ );
 	viewportWindows[LVT_OrthoYZ]->Init();
 
-	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Perspective" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), true, LVT_Perspective );
+	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CLevelViewportWindow>( L_Sprintf( TEXT( "%s Perspective" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), true, LVT_Perspective );
 	viewportWindows[LVT_Perspective]->Init();
 }
 
@@ -351,7 +350,7 @@ bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 	Assert( g_World );
 	Logf( TEXT( "Save map: %s\n" ), InMap.c_str() );
 
-	g_World->GetOutermost()->SetName( CFilename( InMap ).GetBaseFilename().c_str() );
+	g_World->GetOutermost()->SetName( CFilename( InMap ).GetBaseFileName().c_str() );
 	if ( !CObjectPackage::SavePackage( g_World->GetOutermost(), g_World, 0, InMap.c_str(), SAVE_None ) )
 	{
 		OutError = TEXT( "Failed to save map" );
@@ -430,5 +429,5 @@ std::wstring CEditorEngine::GetEditorName() const
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
 	
-	return CString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString.c_str(), g_RHI->GetRHIName() );
+	return L_Sprintf( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString.c_str(), g_RHI->GetRHIName() );
 }

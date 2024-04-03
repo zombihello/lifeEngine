@@ -1,4 +1,3 @@
-#include "Containers/String.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/PhysicsGlobals.h"
 #include "Logger/LoggerMacros.h"

@@ -1,4 +1,3 @@
-#include "Containers/String.h"
 #include "Windows/FileDialog.h"
 
 /*
@@ -15,7 +14,7 @@ void CFileDialogSetup::AddFormat( const CAssetFactory::AssetImporterInfo& InImpo
 		{
 			filter += TEXT( ";" );
 		}
-		filter += CString::Format( TEXT( "*.%s" ), InImporterInfo.supportedExtensions[index].c_str() );
+		filter += L_Sprintf( TEXT( "*.%s" ), InImporterInfo.supportedExtensions[index].c_str() );
 	}
 
 	AddFormat( filter, InDescription );

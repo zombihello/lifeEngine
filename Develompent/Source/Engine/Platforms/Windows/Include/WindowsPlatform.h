@@ -9,30 +9,45 @@
 #ifndef WINDOWSPLATFORM_H
 #define WINDOWSPLATFORM_H
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <tchar.h>
 #include <stdarg.h>
+#include <direct.h>
+#include <shellapi.h>
 
 #include "Misc/Types.h"
 
 // Undef some defines
-#undef GetObject
+#undef PLATFORM_WINDOWS
+#undef PLATFORM_USE__ALIGNED_MALLOC
+#undef PLATFORM_IS_STD_MALLOC_THREADSAFE
+#undef PLATFORM_SUPPORTS_MIMALLOC
+#undef VARARGS
 #undef CDECL
+#undef STDCALL
+#undef FORCEINLINE
+#undef FORCENOINLINE
+#undef DLLEXPORT
+#undef DLLIMPORT
+#undef FALSE
+#undef TRUE
+#undef NULL
+#undef GetObject
+
+/** Enable warning C4996 on 1 level (for deprecated messages) */
+#pragma warning( 1: 4996 )
 
 // Mark what we on Windows
-#undef PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS					        1
 
 // Windows support _aligned_malloc
-#undef PLATFORM_USE__ALIGNED_MALLOC
 #define PLATFORM_USE__ALIGNED_MALLOC                1
 
 // On Windows Std malloc is thread safe
-#undef PLATFORM_IS_STD_MALLOC_THREADSAFE
 #define PLATFORM_IS_STD_MALLOC_THREADSAFE           1
 
 // If we on 64 bit platform then it is supports mimalloc
-#undef PLATFORM_SUPPORTS_MIMALLOC
 #define PLATFORM_SUPPORTS_MIMALLOC                  PLATFORM_64BIT
 
 #if SHIPPING_BUILD && !PLATFORM_DOXYGEN
@@ -98,6 +113,24 @@
 
 /**
  * @ingroup WindowsPlatform
+ * @brief True macro
+ */
+#define TRUE				1
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief False macro
+ */
+#define FALSE				0
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Null macro
+ */
+#define NULL				0
+
+/**
+ * @ingroup WindowsPlatform
  * @brief Line terminator
  */
 #define LINE_TERMINATOR     TEXT( "\n" )
@@ -111,120 +144,28 @@
 /**
  * @ingroup WindowsPlatform
  * @brief Macro for Assert on char is path separator
- * 
- * @param InCh Char
+ * @param InCh      Char
  */
-#define Sys_IsPathSeparator( InCh )	( ( InCh ) == PATH_SEPARATOR[ 0 ] )
+#define Sys_IsPathSeparator( InCh )	    ( ( InCh ) == PATH_SEPARATOR[ 0 ] )
  
 /**
  * @ingroup WindowsPlatform
  * @brief Align for GCC
- *
- * @param[in] InAlignment Alignment
+ * @param InAlignment   Alignment
  */
 #define GCC_ALIGN( InAlignment )
 
 /**
  * @ingroup WindowsPlatform
  * @brief Align for Microsoft
- * 
- * @param[in] InAlignment Alignment
+ * @param InAlignment   Alignment
  */
-#define MS_ALIGN( InAlignment ) __declspec( align( InAlignment ) )
+#define MS_ALIGN( InAlignment )         __declspec( align( InAlignment ) )
 
 /**
  * @ingroup WindowsPlatform
  * @brief Typedef of window handle
  */
 typedef void*           WindowHandle_t;
-
-/**
- * @ingroup WindowsPlatform
- * @brief Get string length
- * 
- * @param InString      String
- * @return Return string length
- */
-FORCEINLINE uint32 Sys_Strlen( const achar* InString ) { return strlen( InString ); }
-
-/**
- * @ingroup WindowsPlatform
- * @brief Get string length
- *
- * @param InString      String
- * @return Return string length
- */
-FORCEINLINE uint32 Sys_Strlen( const tchar* InString ) { return _tcslen( InString ); }
-
-/**
- * @ingroup WindowsPlatform
- * @brief Find substring in a string
- *
- * @param InString     String
- * @param InFind       Find substring in InString
- * @return Return a pointer to the first occurrence of the search string in a string. If not found returns NULL
- */
-FORCEINLINE achar* Sys_Strstr( const achar* InString, const achar* InFind ) { return ( achar* )strstr( InString, InFind ); }
-
-/**
- * @ingroup WindowsPlatform
- * @brief Find substring in a string
- *
- * @param InString     String
- * @param InFind       Find substring in InString
- * @return Return a pointer to the first occurrence of the search string in a string. If not found returns NULL
- */
-FORCEINLINE tchar* Sys_Strstr( const tchar* InString, const tchar* InFind ) { return ( tchar* )_tcsstr( InString, InFind ); }
-
-/**
- * @ingroup WindowsPlatform
- * @brief Compare strings without case sensitivity
- * 
- * @param InString1     String 1 to compare
- * @param InString2     String 2 to compare
- * @return Return a value indicating the relationship between the two strings, as follows: Less than 0 - InString1 less than InString2; 0 - InString1 equivalent to InString2; Greater than 0 - InString1 greater than InString2
- */
-FORCEINLINE uint32 Sys_Stricmp( const achar* InString1, const achar* InString2 ) { return _stricmp( InString1, InString2 ); }
-
-/**
- * @ingroup WindowsPlatform
- * @brief Compare strings without case sensitivity
- *
- * @param InString1     String 1 to compare
- * @param InString2     String 2 to compare
- * @return Return a value indicating the relationship between the two strings, as follows: Less than 0 - InString1 less than InString2; 0 - InString1 equivalent to InString2; Greater than 0 - InString1 greater than InString2
- */
-FORCEINLINE uint32 Sys_Stricmp( const tchar* InString1, const tchar* InString2 ) { return _tcsicmp( InString1, InString2 ); }
-
-/**
- * @ingroup WindowsPlatform
- * @brief Compares the specified number of characters of two strings without regard to case
- * 
- * @param InString1     String 1 to compare
- * @param InString2     String 2 to compare
- * @param InCount       Number of characters to compare
- * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - InString1 less than InString2; 0 - InString1 equivalent to InString2; Greater than 0 - InString1 greater than InString2
- */
-FORCEINLINE uint32 Sys_Strnicmp( const achar* InString1, const achar* InString2, uint32 InCount ) { return _strnicmp( InString1, InString2, InCount ); }
-
-/**
- * @ingroup WindowsPlatform
- * @brief Compares the specified number of characters of two strings without regard to case
- *
- * @param InString1     String 1 to compare
- * @param InString2     String 2 to compare
- * @param InCount       Number of characters to compare
- * @return Return a value indicating the relationship between the substrings, as follows: Less than 0 - InString1 less than InString2; 0 - InString1 equivalent to InString2; Greater than 0 - InString1 greater than InString2
- */
-FORCEINLINE uint32 Sys_Strnicmp( const tchar* InString1, const tchar* InString2, uint32 InCount ) { return _tcsnicmp( InString1, InString2, InCount ); }
-
-/**
- * @ingroup WindowsPlatform
- * @brief Convert string to integer
- * 
- * @param InString      String to convert
- * @return Return converted string to integer
- */
-FORCEINLINE uint32 Sys_Atoi( const tchar* InString ) { return _tstoi( InString ); }
 
 #endif // !WINDOWSPLATFORM_H

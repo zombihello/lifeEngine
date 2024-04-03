@@ -1,5 +1,4 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Misc/UIGlobals.h"
 #include "Windows/MaterialEditorWindow.h"
@@ -26,7 +25,7 @@ CMaterialEditorWindow::CMaterialEditorWindow
 ==================
 */
 CMaterialEditorWindow::CMaterialEditorWindow( const TSharedPtr<CMaterial>& InMaterial )
-	: CImGUILayer( CString::Format( TEXT( "Material Editor - %s" ), InMaterial->GetAssetName().c_str() ) )
+	: CImGUILayer( L_Sprintf( TEXT( "Material Editor - %s" ), InMaterial->GetAssetName().c_str() ) )
 	, bIsDefaultMaterial( false )
 	, material( InMaterial )
 	, viewportClient( new CMaterialPreviewViewportClient( InMaterial ) )

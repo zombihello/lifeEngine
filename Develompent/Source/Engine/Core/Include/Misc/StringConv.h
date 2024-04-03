@@ -13,6 +13,7 @@
 
 #include "Core.h"
 #include "Misc/Types.h"
+#include "Misc/StringTools.h"
 
 /**
  * @ingroup Core
@@ -27,39 +28,40 @@ public:
 	 * Converts the string to the desired format. Allocates memory if the
 	 * specified destination buffer isn't large enough
 	 * 
-	 * @param[in] InSource The source string to convert
-	 * @param[in] InDest The destination buffer that holds the converted data
-	 * @param[in] InSize The size of the dest buffer in bytes
+	 * @param InSource	The source string to convert
+	 * @param InOutDest The destination buffer that holds the converted data
+	 * @param InSize	The size of the dest buffer in bytes
 	 * @return Return converted string
 	 */
-	FORCEINLINE tchar* Convert( const achar* InSource, tchar* InDest, uint32 InSize )
+	FORCEINLINE tchar* Convert( const achar* InSource, tchar* InOutDest, uint32 InSize )
 	{
 		// Determine whether we need to allocate memory or not
-		uint32		length = ( uint32 )strlen( InSource ) + 1;
-
+		uint32		length = ( uint32 )L_Strlen( InSource ) + 1;
 		if ( length > InSize )
 		{
 			// Need to allocate memory because the string is too big
-			InDest = new tchar[ length * sizeof( tchar ) ];
+			InOutDest = new tchar[length * sizeof( tchar )];
 		}
 
 		// Now do the conversion
 		for ( uint32 index = 0; index < length; ++index )
 		{
-			InDest[ index ] = ( byte )InSource[ index ];
+			InOutDest[index] = ( byte )InSource[index];
 		}
 
-		InDest[ length ] = '\0';
-		return InDest;
+		InOutDest[length] = '\0';
+		return InOutDest;
 	}
 
 	/**
 	 * @brief Get length of string
+	 * 
+	 * @param InString	String
 	 * @return Return the string length without the null terminator
 	 */
-	FORCEINLINE uint32 GetLength( tchar* InDest )
+	FORCEINLINE uint32 GetLength( const tchar* InString )
 	{
-		return ( uint32 )wcslen( InDest );
+		return ( uint32 )L_Strlen( InString );
 	}
 };
 
@@ -76,68 +78,64 @@ public:
 	  * Converts the string to the desired format. Allocates memory if the
 	  * specified destination buffer isn't large enough
 	  *
-	  * @param[in] InSource The source string to convert
-	  * @param[in] InDest The destination buffer that holds the converted data
-	  * @param[in] InSize The size of the dest buffer in bytes
+	  * @param InSource		The source string to convert
+	  * @param InOutDest	The destination buffer that holds the converted data
+	  * @param InSize		The size of the dest buffer in bytes
 	  * @return Return converted string
 	  */
-	FORCEINLINE achar* Convert( const tchar* InSource, achar* InDest, uint32 InSize )
+	FORCEINLINE achar* Convert( const tchar* InSource, achar* InOutDest, uint32 InSize )
 	{
 		// Determine whether we need to allocate memory or not
-		uint32		lengthW = ( uint32 )wcslen( InSource );
+		uint32		lengthW = ( uint32 )L_Strlen( InSource );
 
-		// Needs to be 2x the wide in case each converted char is multibyte
-		uint32		lengthA = lengthW * 2;
+		// Needs to be multiply by sizeof( tchar ) the wide in case each converted char is multibyte
+		uint32		lengthA = lengthW * sizeof( tchar );
 		if ( lengthA > InSize )
 		{
 			// Need to allocate memory because the string is too big
-			InDest = new char[ lengthA * sizeof( achar ) ];
+			InOutDest = new achar[lengthA * sizeof( achar )];
 		}
 
 		// Now do the conversion
 		for ( uint32 index = 0; index < lengthW; ++index )
 		{
-			InDest[ index ] = InSource[ index ] & 0xFF;
+			InOutDest[index] = InSource[index] & 0xFF;
 		}
 
-		InDest[ lengthW ] = '\0';
-		return InDest;
+		InOutDest[lengthW] = '\0';
+		return InOutDest;
 	}
 
 	/**
 	 * @brief Get length of string
+	 * 
+	 * @param InString	String
 	 * @return Return the string length without the null terminator
 	 */
-	FORCEINLINE uint32 GetLength( achar* InDest )
+	FORCEINLINE uint32 GetLength( const achar* InString )
 	{
-		return ( uint32 )strlen( InDest );
+		return ( uint32 )L_Strlen( InString );
 	}
 };
 
 /**
  * @ingroup Core
  * @brief Class takes one type of string and converts it to another
- * 
- * Class takes one type of string and converts it to another. The class includes a
- * chunk of presized memory of the destination type. If the presized array is
- * too small, it mallocs the memory needed and frees on the class going out of
- * scope. Uses the overloaded cast operator to return the converted data.
  */
-template< typename ConverTo, typename ConvertFrom, typename BaseConverter, uint32 defaultConversionSize = 128 >
-class TStringConversion : public BaseConverter
+template<typename TConverTo, typename TConvertFrom, typename TBaseConverter, uint32 defaultConversionSize = 128>
+class TStringConversion : public TBaseConverter
 {
 public:
 	/**
 	 * @brief Converts the data by using the Convert() method on the base class
-	 * 
-	 * @param[in] InSource Input data
+	 * @param InSource		Input data
 	 */
-	explicit FORCEINLINE TStringConversion( const ConvertFrom* InSource )
+	explicit FORCEINLINE TStringConversion( const TConvertFrom* InSource )
 	{
 		if ( InSource )
 		{
 			// Use base class convert method
-			convertedString = BaseConverter::Convert( InSource, buffer, defaultConversionSize );
+			convertedString = TBaseConverter::Convert( InSource, buffer, defaultConversionSize );
 		}
 		else
 		{
@@ -150,7 +148,10 @@ public:
 	 */
 	FORCEINLINE ~TStringConversion()
 	{
-		if ( !convertedString )		return;
+		if ( !convertedString )
+		{
+			return;
+		}
 
 		// Make the string empty so people don't hold onto pointers
 		*convertedString = 0;
@@ -165,19 +166,18 @@ public:
 	/**
 	 * @brief Operator to get access to the converted string
 	 */
-	FORCEINLINE operator ConverTo* ( void ) const
+	FORCEINLINE operator TConverTo*() const
 	{
 		return convertedString;
 	}
 
 	/**
 	 * @brief Get length of string
-	 * 
-	 * @return returns the length of the string in number of CONVERT_TO units, excluding the NULL terminator
+	 * @return Returns the length of the string in number of CONVERT_TO units, excluding the NULL terminator
 	 */
 	FORCEINLINE uint32 GetLength() const
 	{
-		return convertedString ? BaseConverter::GetLength( convertedString ) : nullptr;
+		return convertedString ? TBaseConverter::GetLength( convertedString ) : 0;
 	}
 
 private:
@@ -188,8 +188,8 @@ private:
 		: convertedString( nullptr ) 
 	{};
 
-	ConverTo			buffer[ defaultConversionSize ];			/**< Holds the converted data if the size is large enough */
-	ConverTo*			convertedString;							/**< Points to the converted data. If this pointer doesn't match Buffer, then memory was allocated and needs to be freed */
+	TConverTo	buffer[defaultConversionSize];			/**< Holds the converted data if the size is large enough */
+	TConverTo*	convertedString;						/**< Points to the converted data. If this pointer doesn't match Buffer, then memory was allocated and needs to be freed */
 
 };
 
@@ -197,13 +197,13 @@ private:
  * @ingroup Core
  * @brief Typedef for conversion from ANSI to TCHAR
  */
-typedef TStringConversion< tchar, achar, CANSIToTCHAR_Convert >			ANSIToTCHAR;
+typedef TStringConversion<tchar, achar, CANSIToTCHAR_Convert>			ANSIToTCHAR;
 
 /**
  * @ingroup Core
  * @brief Typedef for conversion from TCHAR to ANSI
  */
-typedef TStringConversion< achar, tchar, CTCHARToANSI_Convert >			TCHARToANSI;
+typedef TStringConversion<achar, tchar, CTCHARToANSI_Convert>			TCHARToANSI;
 
 /**
  * @ingroup Core

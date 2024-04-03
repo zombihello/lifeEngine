@@ -10,14 +10,13 @@ extern "C"
 
 #include <LuaBridge/LuaBridge.h>
 
-#include "Containers/String.h"
 #include "Reflection/Class.h"
 #include "Logger/BaseLogger.h"
 
 #include <string>
 #include "Misc/CoreGlobals.h"
 #include "Logger/LoggerMacros.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 
 /*
 ==================
@@ -47,7 +46,7 @@ void CBaseLogger::Printf( ELogType InLogType, const tchar* InMessage, ... )
 #if !NO_LOGGING
 	va_list			arguments;
 	va_start( arguments, InMessage );
-    Serialize( CString::Format( InMessage, arguments ).c_str(), InLogType );  
+    Serialize( L_Vsprintf( InMessage, arguments ).c_str(), InLogType );  
 	va_end( arguments );
 #endif // !NO_LOGGING
 }

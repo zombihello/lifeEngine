@@ -9,12 +9,11 @@
 #include "System/BaseFileSystem.h"
 #include "System/BaseWindow.h"
 #include "System/Config.h"
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 #include "System/InputSystem.h"
 #include "System/Package.h"
 #include "System/AudioEngine.h"
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Reflection/ObjectGC.h"
 #include "Reflection/ObjectIterator.h"
 #include "Reflection/ObjectGlobals.h"
@@ -198,8 +197,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	CCommandLine::Values_t	paramValues = g_CommandLine.GetValues( TEXT( "commandlet" ) );
 	if ( !paramValues.empty() )
 	{
-		std::wstring		commandletName = CString::ToUpper( paramValues[0] );
-		g_IsCooker			= commandletName == CString::ToUpper( TEXT( "CookPackages" ) ) || commandletName == CString::ToUpper( TEXT( "CCookPackagesCommandlet" ) );
+		g_IsCooker			= !L_Stricmp( paramValues[0].c_str(), TEXT( "CookPackages" ) ) || !L_Stricmp( paramValues[0].c_str(), TEXT( "CCookPackagesCommandlet" ) );
 		g_IsCommandlet		= !g_IsCooker;
 	}
 
@@ -253,7 +251,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	g_ScriptEngine->Init();
 	g_RHI->Init( g_IsEditor );
 
-	Logf( TEXT( "User: %s//%s\n" ), Sys_ComputerName().c_str(), Sys_UserName().c_str() );
+	Logf( TEXT( "User: %s//%s\n" ), Sys_GetComputerName().c_str(), Sys_GetUserName().c_str() );
 	Logf( TEXT( "Started with arguments: %s\n" ), InCmdLine );
 
 	// Creating engine from config
@@ -373,11 +371,11 @@ int32 CEngineLoop::Init()
 
 	if ( !map.empty() )
 	{
-		Sys_SetSplashText( STT_StartupProgress, CString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
+		Sys_SetSplashText( STT_StartupProgress, L_Sprintf( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
 
 		std::wstring		error;
-		bool				bAbsolutePath = g_FileSystem->IsAbsolutePath( map );
-		bool				successed = g_Engine->LoadMap( !bAbsolutePath ? CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), g_CookedDir.c_str(), map.c_str() ) : map, error );
+		bool				bAbsolutePath = L_IsAbsolutePath( map );
+		bool				successed = g_Engine->LoadMap( !bAbsolutePath ? L_Sprintf( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), g_CookedDir.c_str(), map.c_str() ) : map, error );
 		if ( !successed )
 		{
 			Sys_Errorf( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );

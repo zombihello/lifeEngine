@@ -9,7 +9,7 @@
 #ifndef TEMPLATE_H
 #define TEMPLATE_H
 
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 #include "Misc/Types.h"
 
 /**

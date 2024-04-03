@@ -1,4 +1,3 @@
-#include "Containers/String.h"
 #include "Render/SceneRendering.h"
 #include "Render/Scene.h"
 #include "Misc/EngineGlobals.h"
@@ -238,7 +237,7 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 		return false;
 	}
 
-	SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, CString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )InSDGIndex ) ).c_str() );
+	SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, L_Sprintf( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )InSDGIndex ) ).c_str() );
 
 #if WITH_EDITOR
 	// Draw simple elements

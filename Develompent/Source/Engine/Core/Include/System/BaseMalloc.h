@@ -9,7 +9,7 @@
 #ifndef BASEMALLOC_H
 #define BASEMALLOC_H
 
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 
 enum
 {

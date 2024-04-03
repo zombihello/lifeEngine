@@ -66,17 +66,17 @@ CLinkerLoad* CLinkerLoad::GetPackageLinker( CObjectPackage* InOuter, const tchar
 	{
 		while ( true )
 		{
-			if ( Sys_Strstr( packageName, PATH_SEPARATOR ) )
+			if ( L_Strstr( packageName, PATH_SEPARATOR ) )
 			{
-				packageName = Sys_Strstr( packageName, PATH_SEPARATOR ) + Sys_Strlen( PATH_SEPARATOR );
+				packageName = L_Strstr( packageName, PATH_SEPARATOR ) + L_Strlen( PATH_SEPARATOR );
 			}
-			else if ( Sys_Strstr( packageName, TEXT( "/" ) ) )
+			else if ( L_Strstr( packageName, TEXT( "/" ) ) )
 			{
-				packageName = Sys_Strstr( packageName, TEXT( "/" ) ) + 1;
+				packageName = L_Strstr( packageName, TEXT( "/" ) ) + 1;
 			}
-			else if ( Sys_Strstr( packageName, SUBOBJECT_DELIMITER ) )
+			else if ( L_Strstr( packageName, SUBOBJECT_DELIMITER ) )
 			{
-				packageName = Sys_Strstr( packageName, SUBOBJECT_DELIMITER ) + 1;
+				packageName = L_Strstr( packageName, SUBOBJECT_DELIMITER ) + 1;
 			}
 			else
 			{
@@ -84,9 +84,9 @@ CLinkerLoad* CLinkerLoad::GetPackageLinker( CObjectPackage* InOuter, const tchar
 			}
 		}
 
-		if ( Sys_Strstr( packageName, TEXT( "." ) ) )
+		if ( L_Strstr( packageName, TEXT( "." ) ) )
 		{
-			*Sys_Strstr( packageName, TEXT( "." ) ) = 0;
+			*L_Strstr( packageName, TEXT( "." ) ) = 0;
 		}
 	}
 

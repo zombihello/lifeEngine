@@ -1,9 +1,9 @@
 #include <sstream>
 
 #include "Logger/LoggerMacros.h"
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Misc/CoreGlobals.h"
+#include "Misc/Misc.h"
 #include "System/Archive.h"
 #include "System/Config.h"
 #include "System/BaseFileSystem.h"
@@ -290,7 +290,7 @@ void CConfigValue::Set( const rapidjson::Value& InValue, const tchar* InName /* 
 		for ( uint32 index = 0, count = array.Size(); index < count; ++index )
 		{
 			CConfigValue		configValue;
-			configValue.Set( array[ index ], CString::Format( TEXT( "%s[%i]" ), InName, index ).c_str() );
+			configValue.Set( array[ index ], L_Sprintf( TEXT( "%s[%i]" ), InName, index ).c_str() );
 			configValues.push_back( configValue );
 		}
 

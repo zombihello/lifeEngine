@@ -109,11 +109,11 @@ void CLevelViewportWindow::OnTick()
 		{
 			if ( g_World->GetOutermost()->IsDirty() )
 			{
-				OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved.\nFor launch standalone game need it save" ) ), CDialogWindow::BT_Ok );
+				OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "Map not saved.\nFor launch standalone game need it save" ) ), CDialogWindow::BT_Ok );
 			}
 			else
 			{
-				Sys_CreateProc( g_FileSystem->GetExePath().c_str(), CString::Format( TEXT( "-map %s" ), g_World->GetOutermost()->GetPackagePath().c_str() ).c_str(), false, false, false, 0 );
+				Sys_CreateProc( L_GetExecutablePath(), L_Sprintf( TEXT( "-map %s" ), g_World->GetOutermost()->GetPackagePath().c_str() ).c_str(), false, false, false, 0 );
 			}
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
@@ -302,7 +302,7 @@ void CLevelViewportWindow::DrawPopupMenu()
 
 		// Spawn actor by class
 		CClass*			actorClass = g_EditorEngine->GetActorClassesWindow()->GetCurrentClass();
-		if ( ImGui::MenuItem( TCHAR_TO_ANSI( CString::Format( TEXT( "Spawn %s" ), actorClass->GetName().c_str() ).c_str() ) ) )
+		if ( ImGui::MenuItem( TCHAR_TO_ANSI( L_Sprintf( TEXT( "Spawn %s" ), actorClass->GetName().c_str() ).c_str() ) ) )
 		{
 			// Spawn new actor
 			g_World->SpawnActor( actorClass, location );
@@ -314,7 +314,7 @@ void CLevelViewportWindow::DrawPopupMenu()
 		{
 			std::wstring		dummy;
 			EAssetType			assetType;
-			if ( ParseReferenceToAsset( assetReference, dummy, dummy, assetType ) && g_ActorFactory.IsRegistered( assetType ) && ImGui::MenuItem( TCHAR_TO_ANSI( CString::Format( TEXT( "Spawn %s" ), assetReference.c_str() ).c_str() ) ) )
+			if ( ParseReferenceToAsset( assetReference, dummy, dummy, assetType ) && g_ActorFactory.IsRegistered( assetType ) && ImGui::MenuItem( TCHAR_TO_ANSI( L_Sprintf( TEXT( "Spawn %s" ), assetReference.c_str() ).c_str() ) ) )
 			{
 				// Spawn new actor
 				TAssetHandle<CAsset>		asset = g_PackageManager->FindAsset( assetReference, assetType );

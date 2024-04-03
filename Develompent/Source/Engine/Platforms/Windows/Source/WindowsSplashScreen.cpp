@@ -1,4 +1,3 @@
-#include "Containers/String.h"
 #include "Misc/Misc.h"
 #include "System/SplashScreen.h"
 #include "Misc/EngineGlobals.h"
@@ -10,16 +9,16 @@
 #include "WorldEd.h"
 #endif // WITH_EDITOR
 
-static std::wstring			s_SplashScreenFileName;
-static HANDLE				s_SplashScreenThread = nullptr;
-static HBITMAP				s_SplashScreenBitmap = nullptr;
-static HWND					s_SplashScreenWnd = nullptr;
-static std::wstring			s_SplashScreenText[ STT_NumTextTypes ];
-static RECT					s_SplashScreenTextRects[ STT_NumTextTypes ];
-static HFONT				s_SplashScreenSmallTextFontHandle = nullptr;
-static HFONT				s_SplashScreenNormalTextFontHandle = nullptr;
+static std::wstring		s_SplashScreenFileName;
+static HANDLE			s_SplashScreenThread = nullptr;
+static HBITMAP			s_SplashScreenBitmap = nullptr;
+static HWND				s_SplashScreenWnd = nullptr;
+static std::wstring		s_SplashScreenText[STT_NumTextTypes];
+static RECT				s_SplashScreenTextRects[STT_NumTextTypes];
+static HFONT			s_SplashScreenSmallTextFontHandle = nullptr;
+static HFONT			s_SplashScreenNormalTextFontHandle = nullptr;
 static CMutex			s_SplashScreenSynchronizationObject;
-static CEvent*		s_ThreadInitSyncEvent = nullptr;
+static CEvent*			s_ThreadInitSyncEvent = nullptr;
 
 /*
 ==================
@@ -303,7 +302,7 @@ void Sys_ShowSplash( const tchar* InSplashName )
 {
 	if ( !g_IsCommandlet )
 	{
-		s_SplashScreenFileName	= Sys_GameDir() + CString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
+		s_SplashScreenFileName	= Sys_GameDir() + L_Sprintf( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
 		s_ThreadInitSyncEvent	= new CEvent( true );
 		s_SplashScreenThread	= CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
 

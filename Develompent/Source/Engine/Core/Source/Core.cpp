@@ -1,8 +1,7 @@
 #include "Core.h"
 #include "Reflection/Class.h"
 #include "Misc/Misc.h"
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
 #include "System/Config.h"
@@ -51,11 +50,11 @@ void VARARGS Sys_FailAssertFunc( const achar* InExpr, const achar* InFile, int I
 
 	va_list             arguments;
 	va_start( arguments, InFormat );
-	std::wstring        message = CString::Format( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str(), callStack.c_str() );
+	std::wstring        message = L_Sprintf( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, L_Vsprintf( InFormat, arguments ).c_str(), callStack.c_str() );
 	va_end( arguments );
 
 	Errorf( TEXT( "%s\n" ), message.c_str());
-	Sys_ShowMessageBox( CString::Format( TEXT( "%s Error" ), g_GameName.c_str() ).c_str(), message.c_str(), MB_Error );
+	Sys_ShowMessageBox( L_Sprintf( TEXT( "%s Error" ), g_GameName.c_str() ).c_str(), message.c_str(), MB_Error );
     Sys_RequestExit( true );
 }
 
@@ -71,7 +70,7 @@ void VARARGS Sys_FailAssertFuncDebug( const achar* InExpr, const achar* InFile, 
 
 	va_list             arguments;
 	va_start( arguments, InFormat );
-	std::wstring        message = CString::Format( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str(), callStack.c_str() );
+	std::wstring        message = L_Sprintf( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, L_Vsprintf( InFormat, arguments ).c_str(), callStack.c_str() );
 	va_end( arguments );
 
 	Errorf( TEXT( "%s\n" ), message.c_str());

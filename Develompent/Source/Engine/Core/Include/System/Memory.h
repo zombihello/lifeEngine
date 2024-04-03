@@ -9,7 +9,9 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include "CoreDefines.h"
+#include <cstdlib>
+
+#include "Misc/Platform.h"
 #include "System/BaseMalloc.h"
 
 /**
