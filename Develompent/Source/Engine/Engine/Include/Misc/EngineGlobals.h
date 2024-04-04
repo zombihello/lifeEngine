@@ -98,6 +98,6 @@ extern class CFullScreenMovieSupport*		g_FullScreenMovie;
  * @ingroup Engine
  * @brief Console system
  */
-extern class CConsoleSystem					g_ConsoleSystem;
+extern class CCvar							g_Cvar;
 
 #endif // !ENGINEGLOBALS_H

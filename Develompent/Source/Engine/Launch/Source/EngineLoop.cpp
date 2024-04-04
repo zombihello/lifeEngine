@@ -33,6 +33,7 @@
 #include "System/SplashScreen.h"
 #include "System/BaseEngine.h"
 #include "System/FullScreenMovie.h"
+#include "System/Cvar.h"
 #include "System/Name.h"
 #include "System/System.h"
 #include "LEBuild.h"
@@ -477,4 +478,5 @@ void CEngineLoop::Exit()
 	g_Log->TearDown();
 	g_Config.Shutdown();
 	g_CommandLine.Shutdown();
+	g_Cvar.UnregisterAllCommands();
 }

@@ -6,24 +6,24 @@
 #if WITH_EDITOR
 /**
  * @ingroup Engine
- * @brief CVar enable/disable wireframe mode
+ * @brief Cvar enable/disable wireframe mode
  * @note This console variable is exist only with editor
  */
-CConVar		CVarRWireframe( TEXT( "r.wireframe" ), TEXT( "0" ), CVT_Bool, TEXT( "Enable/Disable wireframe mode" ) );
+CConVar		CVarRWireframe( TEXT( "r_wireframe" ), TEXT( "0" ), TEXT( "Enable wireframe mode" ), FCVAR_Cheat );
 
 /**
  * @ingroup Engine
- * @brief CVar enable/disable light pass
+ * @brief Cvar enable/disable light pass
  * @note This console variable is exist only with editor
  */
-CConVar		CVarRLight( TEXT( "r.light" ), TEXT( "1" ), CVT_Bool, TEXT( "Enable/Disable light pass" ) );
+CConVar		CVarRLight( TEXT( "r_light" ), TEXT( "1" ), TEXT( "Enable light pass" ), FCVAR_Cheat );
 
 /**
  * @ingroup Engine
- * @brief CVar freeze rendering
+ * @brief Cvar freeze rendering
  * @note This console variable is exist only with editor
  */
-CConVar		CVarRFreezeRendering( TEXT( "r.freeze_rendering" ), TEXT( "0" ), CVT_Bool, TEXT( "Freeze rendering" ) );
+CConVar		CVarRFreezeRendering( TEXT( "r_freezerendering" ), TEXT( "0" ), TEXT( "Freeze rendering, useful for debug occlusion" ), FCVAR_Cheat );
 #endif // WITH_EDITOR
 
 /*
@@ -43,11 +43,11 @@ CSceneView::CSceneView( const Vector& InPosition, const Matrix& InProjectionMatr
 	, sizeY( InSizeY )
 {
 #if WITH_EDITOR
-	if ( CVarRWireframe.GetValueBool() )
+	if ( CVarRWireframe.GetBool() )
 	{
 		showFlags |= SHOW_Wireframe;
 	}
-	if ( !CVarRLight.GetValueBool() )
+	if ( !CVarRLight.GetBool() )
 	{
 		showFlags &= ~SHOW_Lights;
 	}
@@ -250,7 +250,7 @@ void CScene::BuildView( const CSceneView& InSceneView )
 {
 	// We do nothing if r.freeze_rendering is true
 #if WITH_EDITOR
-	if ( CVarRFreezeRendering.GetValueBool() )
+	if ( CVarRFreezeRendering.GetBool() )
 	{
 		return;
 	}
@@ -300,7 +300,7 @@ void CScene::ClearView()
 {
 	// We do nothing if r.freeze_rendering is true
 #if WITH_EDITOR
-	if ( CVarRFreezeRendering.GetValueBool() )
+	if ( CVarRFreezeRendering.GetBool() )
 	{
 		return;
 	}

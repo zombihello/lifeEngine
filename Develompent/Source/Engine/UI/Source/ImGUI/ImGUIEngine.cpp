@@ -15,15 +15,15 @@
 #include "ImGUI/ImGUIEngine.h"
 #include "ImGUI/ImGuizmo.h"
 #include "Misc/UIGlobals.h"
-#include "System/ConsoleSystem.h"
+#include "System/Cvar.h"
 
 #if !SHIPPING_BUILD
 /**
  * @ingroup UI
- * @brief CVar enable/disable debug mode of the ImGUI
+ * @brief Cvar enable ImGUI debug mode
  * @note This console variable is exist when SHIPPING_BUILD is disabled
  */
-CConVar		CVarImGUIDebug( TEXT( "imgui.debug" ), TEXT( "0" ), CVT_Bool, TEXT( "Enable/Disable debug mode of the ImGUI" ) );
+CConVar		CVarImGUIDebug( TEXT( "imgui_debug" ), TEXT( "0" ), TEXT( "Enable ImGUI debug mode" ) );
 #endif // !SHIPPING_BUILD
 
 // Colors of ImGUI theme
@@ -835,7 +835,7 @@ void CImGUIEngine::EndDraw()
 
 	// Draw debug window of the ImGUI if it need
 #if !SHIPPING_BUILD
-	if ( CVarImGUIDebug.GetValueBool() )
+	if ( CVarImGUIDebug.GetBool() )
 	{
 		ImGui::ShowMetricsWindow();
 	}

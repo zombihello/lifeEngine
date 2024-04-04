@@ -1,291 +1,253 @@
-#include "Logger/LoggerMacros.h"
 #include "Misc/EngineGlobals.h"
 #include "System/ConVar.h"
-#include "System/ConsoleSystem.h"
+#include "System/Cvar.h"
 
 /*
 ==================
-CConVar::CConVar
+CConCmdBase::CConCmdBase
 ==================
 */
-CConVar::CConVar( const std::wstring& InName, const std::wstring& InDefaultValue, EConVarType InType, const std::wstring& InHelpText, bool InHasMin, float InMin, bool InHasMax, float InMax, bool InIsReadOnly /* = false */ )
-	: bHasMin( InHasMin )
-	, bHasMax( InHasMax )
-	, bReadOnly( InIsReadOnly )
+CConCmdBase::CConCmdBase( const tchar* InName, const tchar* InHelpText /* = TEXT( "" ) */, uint32 InFlags /* = FCVAR_None */ )
+	: bRegistered( false )
+	, flags( InFlags )
 	, name( InName )
 	, helpText( InHelpText )
-	, defaultValue( InDefaultValue )
-	, type( CVT_None )
-	, data( nullptr )
-	, minVar( InMin )
-	, maxVar( InMax )
+	, next( nullptr )
 {
-	GetGlobalConVars().push_back( this );
-	SetValue( InDefaultValue, InType );
+	Assert( name );
+	g_Cvar.RegisterCommand( this );
 }
 
 /*
 ==================
-CConVar::CConVar
+CConCmdBase::~CConCmdBase
 ==================
 */
-CConVar::CConVar( const std::wstring& InName, const std::wstring& InDefaultValue, EConVarType InType, const std::wstring& InHelpText, bool InIsReadOnly /* = false */ )
-	: bHasMin( false )
-	, bHasMax( false )
-	, bReadOnly( InIsReadOnly )
-	, name( InName )
-	, helpText( InHelpText )
-	, defaultValue( InDefaultValue )
-	, type( CVT_None )
-	, data( nullptr )
-	, minVar( 0.f )
-	, maxVar( 0.f )
+CConCmdBase::~CConCmdBase()
 {
-	GetGlobalConVars().push_back( this );
-	SetValue( InDefaultValue, InType );
-}
-
-/*
-==================
-CConVar::~CConVar
-==================
-*/
-CConVar::~CConVar()
-{
-	std::vector<CConVar*>&	vars = GetGlobalConVars();
-	for ( uint32 index = 0, count = vars.size(); index < count; ++index )
+	if ( bRegistered )
 	{
-		if ( vars[index] == this )
+		g_Cvar.UnregisterCommand( this );
+	}
+}
+
+
+/*
+==================
+CConCmd::CConCmd
+==================
+*/
+CConCmd::CConCmd( const tchar* InName, ConCmdExecFn_t InExecFn, const tchar* InHelpText /* = TEXT( "" ) */, uint32 InFlags /* = FCVAR_None */ )
+	: CConCmdBase( InName, InHelpText, InFlags )
+	, ExecFn( InExecFn )
+{}
+
+
+/*
+==================
+CConCmd::IsCommand
+==================
+*/
+bool CConCmd::IsCommand() const
+{
+	return true;
+}
+
+
+/*
+==================
+CConVar::CConVar
+==================
+*/
+CConVar::CConVar( const tchar* InName, const tchar* InDefaultValue, const tchar* InHelpText /* = TEXT( "" ) */, uint32 InFlags /* = FCVAR_None */, ConVarChangeCallbackFn_t InChangeCallbackFn /* = nullptr */ )
+	: CConCmdBase( InName, InHelpText, InFlags )
+	, bHasMin( false )
+	, bHasMax( false )
+	, minValue( 0.f )
+	, maxValue( 0.f )
+	, intValue( 0 )
+	, floatValue( 0.f )
+	, defaultValue( InDefaultValue )
+{
+	SetString( defaultValue );
+	if ( InChangeCallbackFn )
+	{
+		onChangeVar.Add( InChangeCallbackFn );
+	}
+}
+
+/*
+==================
+CConVar::CConVar
+==================
+*/
+CConVar::CConVar( const tchar* InName, const tchar* InDefaultValue, bool InHasMin, float InMin, bool InHasMax, float InMax, const tchar* InHelpText /* = TEXT( "" ) */, uint32 InFlags /* = FCVAR_None */, ConVarChangeCallbackFn_t InChangeCallbackFn /* = nullptr */ )
+	: CConCmdBase( InName, InHelpText, InFlags )
+	, bHasMin( bHasMin )
+	, bHasMax( bHasMax )
+	, minValue( InMin )
+	, maxValue( InMax )
+	, intValue( 0 )
+	, floatValue( 0.f )
+	, defaultValue( InDefaultValue )
+{
+	SetString( defaultValue );
+	if ( InChangeCallbackFn )
+	{
+		onChangeVar.Add( InChangeCallbackFn );
+	}
+}
+
+/*
+==================
+CConVar::IsCommand
+==================
+*/
+bool CConVar::IsCommand() const
+{
+	return false;
+}
+
+/*
+==================
+CConVar::Reset
+==================
+*/
+void CConVar::Reset()
+{
+	SetString( defaultValue );
+}
+
+/*
+==================
+CConVar::SetInt
+==================
+*/
+void CConVar::SetInt( int32 InValue )
+{
+	if ( intValue != InValue )
+	{
+		floatValue = ( float )InValue;
+		if ( ClampValue( floatValue ) )
 		{
-			vars.erase( vars.begin() + index );
-			break;
+			intValue = ( int32 )floatValue;
+		}
+		else
+		{
+			intValue = InValue;
+		}
+		stringValue = L_Sprintf( TEXT( "%i" ), intValue );
+		OnChangeValue();
+	}
+}
+
+/*
+==================
+CConVar::SetFloat
+==================
+*/
+void CConVar::SetFloat( float InValue )
+{
+	if ( floatValue != InValue )
+	{
+		floatValue	= InValue;
+		ClampValue( floatValue );
+		intValue	= ( int32 )floatValue;
+		stringValue = L_Sprintf( TEXT( "%f" ), floatValue );
+		OnChangeValue();
+	}
+}
+
+/*
+==================
+CConVar::SetBool
+==================
+*/
+void CConVar::SetBool( bool InValue )
+{
+	SetInt( InValue ? 1 : 0 );
+}
+
+/*
+==================
+CConVar::SetString
+==================
+*/
+void CConVar::SetString( const tchar* InValue )
+{
+	if ( InValue != stringValue )
+	{
+		stringValue = InValue;
+		if ( !InValue )
+		{
+			floatValue = 0.f;
+		}
+		else
+		{
+			floatValue = L_Atof( InValue );
+		}
+
+		if ( ClampValue( floatValue ) )
+		{
+			stringValue = L_Sprintf( TEXT( "%f" ), floatValue );
+		}
+		intValue = ( int32 )floatValue;
+		OnChangeValue();
+	}
+}
+
+/*
+==================
+CConVar::ClampValue
+==================
+*/
+bool CConVar::ClampValue( float& InOutValue )
+{
+	if ( bHasMin && InOutValue < minValue )
+	{
+		InOutValue = minValue;
+		return true;
+	}
+
+	if ( bHasMax && InOutValue > maxValue )
+	{
+		InOutValue = maxValue;
+		return true;
+	}
+
+	return false;
+}
+
+/*
+==================
+CConVar::OnChangeValue
+==================
+*/
+void CConVar::OnChangeValue()
+{
+	// Invoke callback function
+	onChangeVar.Broadcast( this );
+}
+
+
+/*
+==================
+CConVarRef::Init
+==================
+*/
+void CConVarRef::Init( const tchar* InName, bool InIsIgnoreMissing /* = false */ )
+{
+	// Try find cvar in the system
+	conVar = g_Cvar.FindVar( InName );
+
+	// If conVar isn't found print warning
+	if ( !IsValid() && !InIsIgnoreMissing )
+	{
+		static bool		s_bFirst = true;
+		if ( s_bFirst )
+		{
+			Warnf( TEXT( "CConVarRef '%s' doesn't point to an existing CConVar\n" ), InName );
+			s_bFirst = false;
 		}
 	}
-
-	DeleteValue();
-}
-
-/*
-==================
-CConVar::SetValue
-==================
-*/
-void CConVar::SetValue( const std::wstring& InValue, EConVarType InVarType )
-{
-	if ( bReadOnly )
-	{
-		return;
-	}
-
-	switch ( InVarType )
-	{
-	case CVT_Int:
-		SetValueInt( stoi( InValue ) );
-		break;
-
-	case CVT_Float:
-		SetValueFloat( stof( InValue ) );
-		break;
-
-	case CVT_Bool:
-	{
-		std::wstring	valueLower = L_Strlwr( InValue );
-		SetValueBool( valueLower == TEXT( "true" ) || stoi( valueLower ) ? true : false );
-		break;
-	}
-
-	case CVT_String:
-		SetValueString( InValue );
-		break;
-
-	default:
-		AssertMsg( false, TEXT( "Unknown ConVar type 0x%X" ), InVarType );
-	}
-}
-
-/*
-==================
-CConVar::SetValueInt
-==================
-*/
-void CConVar::SetValueInt( int32 InValue )
-{
-	if ( bReadOnly )
-	{
-		return;
-	}
-
-	if ( type != CVT_None && type != CVT_Int )
-	{
-		DeleteValue();
-	}
-
-	if ( type == CVT_None )
-	{
-		data = new int32;
-	}
-
-	int32*	intData = ( int32* )data;
-	if ( bHasMin && InValue < minVar )
-	{
-		*intData = minVar;
-	}
-	else if ( bHasMax && InValue > maxVar )
-	{
-		*intData = maxVar;
-	}
-	else
-	{
-		*intData = InValue;
-	}
-
-	type = CVT_Int;
-	onChangeVar.Broadcast( this );
-}
-
-/*
-==================
-CConVar::SetValueFloat
-==================
-*/
-void CConVar::SetValueFloat( float InValue )
-{
-	if ( bReadOnly )
-	{
-		return;
-	}
-
-	if ( type != CVT_None && type != CVT_Float )
-	{
-		DeleteValue();
-	}
-
-	if ( type == CVT_None )
-	{
-		data = new float;
-	}
-
-	float*		floatData = ( float* )data;
-	if ( bHasMin && InValue < minVar )
-	{
-		*floatData = minVar;
-	}
-	else if ( bHasMax && InValue > maxVar )
-	{
-		*floatData = maxVar;
-	}
-	else
-	{
-		*floatData = InValue;
-	}
-
-	type = CVT_Float;
-	onChangeVar.Broadcast( this );
-}
-
-/*
-==================
-CConVar::SetValueBool
-==================
-*/
-void CConVar::SetValueBool( bool InValue )
-{
-	if ( bReadOnly )
-	{
-		return;
-	}
-
-	if ( type != CVT_None && type != CVT_Bool )
-	{
-		DeleteValue();
-	}
-
-	if ( type == CVT_None )
-	{
-		data = new bool;
-	}
-
-	bool*	boolData = ( bool* )data;
-	SetMin( true, 0.f );
-	SetMax( true, 1.f );
-
-	if ( bHasMin && ( float )InValue < minVar )
-	{
-		*boolData = minVar;
-	}
-	else if ( bHasMax && ( float )InValue > maxVar )
-	{
-		*boolData = maxVar;
-	}
-	else
-	{
-		*boolData = InValue;
-	}
-
-	type = CVT_Bool;
-	onChangeVar.Broadcast( this );
-}
-
-/*
-==================
-CConVar::SetValueString
-==================
-*/
-void CConVar::SetValueString( const std::wstring& InValue )
-{
-	if ( bReadOnly )
-	{
-		return;
-	}
-
-	if ( type != CVT_None && type != CVT_String )
-	{
-		DeleteValue();
-	}
-
-	if ( type == CVT_None )
-	{
-		data = new std::wstring();
-	}
-
-	std::wstring*	stringData = ( std::wstring* )data;
-	if ( bHasMin && InValue.size() < minVar )
-	{
-		*stringData = InValue;
-		stringData->append( minVar - InValue.size(), TEXT( ' ' ) );
-	}
-	else if ( bHasMax && InValue.size() > maxVar )
-	{
-		*stringData = InValue.substr( 0, maxVar );
-	}
-	else
-	{
-		*stringData = InValue;
-	}
-
-	type = CVT_String;
-	onChangeVar.Broadcast( this );
-}
-
-/*
-==================
-CConVar::DeleteValue
-==================
-*/
-void CConVar::DeleteValue()
-{
-	if ( type == CVT_None )
-	{
-		return;
-	}
-
-	switch ( type )
-	{
-	case CVT_Int:       delete static_cast<int32*>( data );				break;
-	case CVT_Bool:      delete static_cast<bool*>( data );				break;
-	case CVT_Float:     delete static_cast<float*>( data );				break;
-	case CVT_String:    delete static_cast<std::wstring*>( data );		break;
-	}
-
-	type = CVT_None;
 }

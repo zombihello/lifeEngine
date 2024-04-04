@@ -2,7 +2,7 @@
 #include "Misc/EngineGlobals.h"
 #include "Misc/UIGlobals.h"
 #include "ImGUI/ImGUIEngine.h"
-#include "System/ConsoleSystem.h"
+#include "System/Cvar.h"
 #include "Windows/LogsWindow.h"
 #include "ImGUI/imgui_stdlib.h"
 
@@ -104,6 +104,8 @@ void CLogsWindow::ExecCommand( const std::string& InCommand )
 {
 	if ( !InCommand.empty() )
 	{
-		g_ConsoleSystem.Exec( ANSI_TO_TCHAR( InCommand.c_str() ) );
+		std::wstring	command = ANSI_TO_TCHAR( InCommand.c_str() );
+		Logf( TEXT( "Cmd: %s\n" ), command.c_str() );
+		g_Cvar.Exec( command.c_str() );
 	}
 }
