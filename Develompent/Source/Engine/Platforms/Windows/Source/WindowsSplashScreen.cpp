@@ -1,9 +1,10 @@
-#include "Misc/Misc.h"
-#include "System/SplashScreen.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/Misc.h"
+#include "Misc/FileTools.h"
+#include "System/SplashScreen.h"
+#include "System/Config.h"
 #include "RHI/BaseRHI.h"
 #include "WindowsThreading.h"
-#include "System/Config.h"
 
 #if WITH_EDITOR
 #include "WorldEd.h"
@@ -130,18 +131,21 @@ SplashScreenThread
 */
 DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 {
-	HINSTANCE		hInstance = GetModuleHandle( nullptr );
-	WNDCLASS		wndClass;
+	bool					bNeedDestroyIcon = true;
+	HINSTANCE				hInstance = GetModuleHandle( nullptr );
+	WNDCLASS				wndClass;
 	wndClass.style			= CS_HREDRAW | CS_VREDRAW;
 	wndClass.lpfnWndProc	= ( WNDPROC )SplashScreenWindowProc;
 	wndClass.cbClsExtra		= 0;
 	wndClass.cbWndExtra		= 0;
 	wndClass.hInstance		= hInstance;
 
-	//wndClass.hIcon = LoadIcon( hInstance, MAKEINTRESOURCE( g_IsEditor ? GEditorIcon : GGameIcon ) );
-	//if ( wndClass.hIcon == NULL )
+	const uint32			defaultExeIcon = 0;		// In EXE default icon its 0
+	wndClass.hIcon			= ExtractIcon( hInstance, L_GetExecutablePath(), defaultExeIcon );
+	if (! wndClass.hIcon )
 	{
 		wndClass.hIcon		= LoadIcon( ( HINSTANCE )NULL, IDI_APPLICATION );
+		bNeedDestroyIcon	= false;
 	}
 
 	wndClass.hCursor		= LoadCursor( ( HINSTANCE )NULL, IDC_ARROW );
@@ -287,6 +291,10 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 
 		DeleteObject( s_SplashScreenBitmap );
 		s_SplashScreenBitmap = nullptr;
+		if ( bNeedDestroyIcon )
+		{
+			DestroyIcon( wndClass.hIcon );
+		}
 	}
 
 	UnregisterClass( wndClass.lpszClassName, hInstance );

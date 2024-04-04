@@ -35,15 +35,13 @@ Sys_GetWorldEdName
 */
 std::wstring Sys_GetWorldEdName()
 {
-#if PLATFORM_WINDOWS
-#if _WIN64
-	const std::wstring				platformBitsString( TEXT( "64" ) );
-#else
-	const std::wstring				platformBitsString( TEXT( "32" ) );
-#endif // _WIN64
+#if PLATFORM_64BIT
+	const tchar*		platformBitsString = TEXT( "64" );
+#elif PLATFORM_32BIT
+	const tchar*		platformBitsString = TEXT( "32" );
 #else
 #error Insert court bitness of your platform
-#endif // PLATFORM_WINDOWS
+#endif // PLATFORM_64BIT || PLATFORM_32BIT
 
-	return L_Sprintf( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString.c_str(), g_RHI->GetRHIName() );
+	return L_Sprintf( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString, g_RHI->GetRHIName() );
 }

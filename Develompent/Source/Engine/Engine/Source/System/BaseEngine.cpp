@@ -296,17 +296,8 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 		g_World->RemoveFromRoot();
 		g_World = nullptr;
 	}
-
-	// TODO yehor.pohuliaka - Need to implement method for get from package object of some class
-	for ( TObjectIterator<CWorld> it; it; ++it )
-	{
-		if ( IsIn( *it, mapPackage ) )
-		{
-			g_World = *it;
-			break;
-		}
-	}
-
+	
+	g_World = FindObjectFast<CWorld>( mapPackage, TEXT( "TheWorld" ), true );
 	Assert( g_World );
 	g_World->AddToRoot();
 
