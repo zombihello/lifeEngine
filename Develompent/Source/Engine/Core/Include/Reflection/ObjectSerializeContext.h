@@ -153,11 +153,20 @@ public:
 
 	/**
 	 * @brief Has pending imports
-	 * @Return TRUE if has pending imports, otherwise returns FALSE
+	 * @Return Return TRUE if has pending imports, otherwise returns FALSE
 	 */
 	FORCEINLINE bool HasPendingImports() const
 	{
 		return importCount > 0;
+	}
+
+	/**
+	 * @brief Has delayed linkers to close packages
+	 * @return Return TRUE if has delayed linkers to close packages, otherwise returns FALSE
+	 */
+	FORCEINLINE bool HasDelayedLinkerClosePackages() const
+	{
+		return !delayedLinkerClosePackages.empty();
 	}
 
 	/**

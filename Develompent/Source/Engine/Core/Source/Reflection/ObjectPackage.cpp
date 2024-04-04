@@ -183,7 +183,7 @@ CObjectPackage::EndLoadPackage
 void CObjectPackage::EndLoadPackage()
 {
 	ObjectSerializeContext&		objectSerializeContext = GetObjectSerializeContext();
-	while ( objectSerializeContext.DecrementBeginLoadCount() == 0 && ( objectSerializeContext.HasLoadedObjects() || objectSerializeContext.HasPendingImports() ) )
+	while ( objectSerializeContext.DecrementBeginLoadCount() == 0 && ( objectSerializeContext.HasLoadedObjects() || objectSerializeContext.HasPendingImports() || objectSerializeContext.HasDelayedLinkerClosePackages() ) )
 	{
 		// Make sure we're not recursively calling EndLoadPackage
 		objectSerializeContext.IncrementBeginLoadCount();

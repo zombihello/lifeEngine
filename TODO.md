@@ -32,7 +32,7 @@
 - [X] Add supported mip levels in textures
 - [X] Add possible generate mip levels for textures in WorldEd
 - [X] Need fix speed of the import static meshes
-- [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to LUA)
+- [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to AngelScript)
 	- [X] Implement linker save and linker load for serialize CObjects
 	- [ ] Implement FindObject, LoadObject and LoadClass functions
 	- [ ] Implement ResolveName for resolve a package and name
