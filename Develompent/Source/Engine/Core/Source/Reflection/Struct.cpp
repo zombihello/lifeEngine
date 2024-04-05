@@ -225,7 +225,7 @@ void CStruct::SerializeTaggedProperties( class CArchive& InArchive, byte* InData
 			uint32		sizeSerialized = InArchive.Tell() - currentOffset;
 			if ( sizeSerialized != propertyTag.GetSerialSize() )
 			{
-				Sys_Errorf( TEXT( "%s %s: Serial size mismatch: Got %i, Expected %i" ), propertyTag.GetClassName().ToString().c_str(), propertyTag.GetPropertyName().ToString().c_str(), sizeSerialized, propertyTag.GetSerialSize() );
+				Sys_Error( TEXT( "%s %s: Serial size mismatch: Got %i, Expected %i" ), propertyTag.GetClassName().ToString().c_str(), propertyTag.GetPropertyName().ToString().c_str(), sizeSerialized, propertyTag.GetSerialSize() );
 			}
 		}
 	}

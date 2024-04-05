@@ -166,7 +166,7 @@ CLightVertexShaderParameters::SetMesh
 */
 void CLightVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	Sys_Errorf( TEXT( "CLightVertexShaderParameters::SetMesh( MeshBatch ) Not supported" ) );
+	Sys_Error( TEXT( "CLightVertexShaderParameters::SetMesh( MeshBatch ) Not supported" ) );
 }
 
 /*
@@ -178,7 +178,7 @@ void CLightVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDevic
 {
 	if ( !bSupportsInstancing )
 	{
-		Sys_Errorf( TEXT( "Not implemented, need add it in future" ) );
+		Sys_Error( TEXT( "Not implemented, need add it in future" ) );
 	}
 	else
 	{
@@ -196,7 +196,7 @@ void CLightVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDevic
 {
 	if ( !bSupportsInstancing )
 	{
-		Sys_Errorf( TEXT( "Not implemented, need add it in future" ) );
+		Sys_Error( TEXT( "Not implemented, need add it in future" ) );
 	}
 	else
 	{
@@ -214,7 +214,7 @@ void CLightVertexShaderParameters::SetMesh( class CBaseDeviceContextRHI* InDevic
 {
 	if ( !bSupportsInstancing )
 	{
-		Sys_Errorf( TEXT( "Not implemented, need add it in future" ) );
+		Sys_Error( TEXT( "Not implemented, need add it in future" ) );
 	}
 	else
 	{
@@ -250,7 +250,7 @@ CLightVertexFactory::SetupInstancing
 */
 void CLightVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	Sys_Errorf( TEXT( "CLightVertexFactory::SetupInstancing( MeshBatch ) :: Not supported" ) );
+	Sys_Error( TEXT( "CLightVertexFactory::SetupInstancing( MeshBatch ) :: Not supported" ) );
 }
 
 /*

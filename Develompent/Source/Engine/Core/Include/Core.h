@@ -119,34 +119,6 @@ EPlatformType Sys_PlatformStringToType( const std::wstring& InPlatformStr );
  */
 #define DEPRECATED( Version, Message )			        [ [ deprecated( Message " Please update your code to the new API before upgrading to the next release, otherwise your project will no longer compile." ) ] ]
 
- /**
-  * @ingroup Core
-  * @brief Failed assertion handler
-  *
-  * @param InExpr   Condition that was not met
-  * @param InFile   File path with error
-  * @param InLine   Error line
-  * @param InFormat Displayed message format
-  * @param ...      Message parameters
-  *
-  * Example usage: @code Sys_FailAssertFunc( "Value != 0", __FILE__, __LINE__, TEXT( "Value = %i" ), Value ); @endcode
-  */
-void VARARGS Sys_FailAssertFunc( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
-
-/**
- * @ingroup Core
- * @brief Failed assertion handler debug version
- *
- * @param InExpr    Condition that was not met
- * @param InFile    File path with error
- * @param InLine    Error line
- * @param InFormat  Displayed message format
- * @param ...       Message parameters
- *
- * Example usage: @code Sys_FailAssertFuncDebug( "Value != 0", __FILE__, __LINE__, TEXT( "Value = %i" ), Value ); @endcode
- */
-void VARARGS Sys_FailAssertFuncDebug( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
-
 /**
  * @ingroup Core
  * @brief Pre-Initialize platform
@@ -285,33 +257,30 @@ double Sys_Seconds();
 
 /**
  * @ingroup Core
- * @brief Macros for call fail assert
+ * @brief Print critical error and shutdown application
  *
- * @param Expr  Condition that was not met
- * @param File  File path with error
- * @param Line  Error line
- * @param ...   Message parameters
+ * @param InFormat	Display message format
+ * @param ...		Message parameters
  *
- * Example usage: @code Sys_FailAssert( Value != 0, __FILE__, __LINE__, TEXT( "Value = %i" ), Value ) @endcode
+ * Example usage: @code Sys_Error( TEXT( "Hello Error %i" ), 43 ); @endcode
  */
-#define Sys_FailAssert( Expr, File, Line, ... )				{ if ( Sys_IsDebuggerPresent() )  { Sys_FailAssertFuncDebug( Expr, File, Line, ##__VA_ARGS__ ); } Sys_DebugBreak(); Sys_FailAssertFunc( Expr, File, Line, ##__VA_ARGS__ ); }
-
-#if SHIPPING_BUILD && !PLATFORM_DOXYGEN
-    #define Sys_Errorf( ... )
-#else
-    /**
-    * @ingroup Core
-    * @brief Macro for calling and exiting a program error
-    * @warning With enabled define SHIPPING_BUILD this macro is empty
-    *
-    * @param ...    Message parameters
-    *
-    * Example usage: @code Sys_Errorf( TEXT( "Failed :(" ) ) @endcode
-    */
-    #define Sys_Errorf( ... )				                ( ( Sys_IsDebuggerPresent() ? Sys_FailAssertFuncDebug( "Sys_Errorf", __FILE__, __LINE__, ##__VA_ARGS__ ), 1 : 1 ), Sys_DebugBreak(), 1 )
-#endif // SHIPPING_BUILD
+void Sys_Error( const tchar* InFormat, ... );
 
 #if ENABLED_ASSERT || PLATFORM_DOXYGEN
+    /**
+     * @ingroup Core
+     * @brief Failed assertion handler
+     *
+     * @param InExpr   Condition that was not met
+     * @param InFile   File path with error
+     * @param InLine   Error line
+     * @param InFormat Displayed message format
+     * @param ...      Message parameters
+     *
+     * Example usage: @code Sys_FailAssertFunc( TEXT( "Value != 0" ), __FILE__, __LINE__, TEXT( "Value = %i" ), Value ); @endcode
+     */
+    void Sys_FailAssertFunc( const tchar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... );
+
     /**
     * @ingroup Core
     * @brief Macro for checking the condition with your code
@@ -319,21 +288,14 @@ double Sys_Seconds();
     *
     * @param Code   Verification code
     *
-    * Example usage: @code AssertCode( if( !isValid ) Sys_Errorf( TEXT( "Value not valid" ) ) ) @endcode
+    * Example usage: @code AssertCode( if( !isValid ) Sys_Error( TEXT( "Value not valid" ) ) ) @endcode
     */
-    #define AssertCode( Code )		            do { Code } while ( false );
-
-    /**
-    * @ingroup Core
-    * @brief Macro for checking the condition and in case of failure, display your message
-    * @warning With enabled define ENABLED_ASSERT this macro is empty
-    *
-    * @param Expr   Checkable condition
-    * @param Msg    Message
-    *
-    * Example usage: @code Assertf( Value == 0, TEXT( "Value = %i" ), Value ) @endcode
-    */
-    #define Assertf( Expr, Msg, ... )		    { if ( !( Expr ) ) { Sys_FailAssert( #Expr, __FILE__, __LINE__, Msg, __VA_ARGS__ ); } }
+    #define AssertCode( Code ) \
+        do \
+        { \
+            Code \
+        } \
+        while ( false );
 
     /**
     * @ingroup Core
@@ -345,7 +307,13 @@ double Sys_Seconds();
     *
     * Example usage: @code AssertMsg( Value == 0, TEXT( "Value = %i" ), Value ) @endcode
     */
-    #define AssertMsg( Expr, Msg, ... )		    { if ( !( Expr ) ) { Sys_FailAssert( #Expr, __FILE__, __LINE__, Msg, __VA_ARGS__ ); } }
+    #define AssertMsg( Expr, Msg, ... ) \
+    { \
+        if ( !( Expr ) ) \
+        { \
+            Sys_FailAssertFunc( TEXT( #Expr ), __FILE__, __LINE__, Msg, __VA_ARGS__ ); \
+        } \
+    }
 
     /**
     * @ingroup Core
@@ -357,7 +325,14 @@ double Sys_Seconds();
     *
     * Example usage: @code AssertFunc( Value == 0, MyFunction() ) @endcode
     */
-    #define AssertFunc( Expr, Func )	        { if ( !( Expr ) ) { Func; Sys_FailAssert( #Expr, __FILE__, __LINE__ ); } }
+    #define AssertFunc( Expr, Func ) \
+    { \
+        if ( !( Expr ) ) \
+        { \
+            Func; \
+            Sys_FailAssertFunc( TEXT( #Expr ), __FILE__, __LINE__ ); \
+        } \
+    }
 
     /**
     * @ingroup Core
@@ -368,7 +343,13 @@ double Sys_Seconds();
     *
     * Example usage: @code Assert( Value == 0 ) @endcode
     */
-    #define Assert( Expr )				        { if ( !( Expr ) ) { Sys_FailAssert( #Expr, __FILE__, __LINE__ ); } }
+    #define Assert( Expr ) \
+    { \
+        if ( !( Expr ) ) \
+        { \
+            Sys_FailAssertFunc( TEXT( #Expr ), __FILE__, __LINE__ ); \
+        } \
+    }
 
     /**
     * @ingroup Core
@@ -388,7 +369,7 @@ double Sys_Seconds();
      * }
      * @endcode
     */
-    #define AssertNoEntry()                     { Sys_FailAssert( "Enclosing block should never be called", __FILE__, __LINE__ ); }
+    #define AssertNoEntry()                     Sys_FailAssertFunc( TEXT( "Enclosing block should never be called" ), __FILE__, __LINE__ );
 
     /**
     * @ingroup Core
@@ -409,14 +390,17 @@ double Sys_Seconds();
     * }
     * @endcode
     */
-    #define AssertNoReentry()                {  static bool s_beenHere##__LINE__ = false;                                       \
-                                                AssertMsg( !s_beenHere##__LINE__, "Enclosing block was called more than once" );  \
-                                                s_beenHere##__LINE__ = true; }
+#define AssertNoReentry() \
+    { \
+        static bool s_bBeenHere##__LINE__ = false; \
+        AssertMsg( !s_bBeenHere##__LINE__, TEXT( "Enclosing block was called more than once" ) ); \
+        s_bBeenHere##__LINE__ = true; \
+    }
 #else
+    FORCEINLINE void Sys_FailAssertFunc( const tchar* InExpr, const achar* InFile, int InLine, const tchar* InFormat = TEXT( "" ), ... ) {}
     #define AssertCode( Code )		        {}
-    #define Assertf( Expr, Msg, ... )       {}
     #define AssertMsg( Expr, Msg, ... )		{}
-    #define AssertFunc( Expr, Func )        {}
+    #define AssertFunc( Expr, Func )	    {}
     #define Assert( Expr )				    {}
     #define AssertNoEntry()                 {}
     #define AssertNoReentry()               {}
@@ -426,7 +410,7 @@ double Sys_Seconds();
 #if CHECK_PUREVIRTUALS
     #define PURE_VIRTUAL( InFunc, InExtra ) =0;
 #else
-    #define PURE_VIRTUAL( InFunc, InExtra ) { Sys_Errorf( TEXT( "Pure virtual not implemented (%s)" ), TEXT( #InFunc ) ); InExtra }
+    #define PURE_VIRTUAL( InFunc, InExtra ) { Sys_Error( TEXT( "Pure virtual not implemented (%s)" ), TEXT( #InFunc ) ); InExtra }
 #endif
 
 #endif //CORE_H

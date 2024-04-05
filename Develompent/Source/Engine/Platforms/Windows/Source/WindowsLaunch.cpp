@@ -172,12 +172,12 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 	}
 	catch ( std::exception InException )
 	{
-		Sys_Errorf( ANSI_TO_TCHAR( InException.what() ) );
+		Sys_Error( ANSI_TO_TCHAR( InException.what() ) );
 		return 1;
 	}
 	catch ( ... )
 	{
-		Sys_Errorf( TEXT( "Unknown exception" ) );
+		Sys_Error( TEXT( "Unknown exception" ) );
 		return 1;
 	}
 

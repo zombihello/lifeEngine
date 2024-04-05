@@ -50,7 +50,7 @@ void CClass::Bind()
 	AssertMsg( superClass || CObject::StaticClass() == this, TEXT( "Unable to bind %s" ), GetName().c_str() );
 	if ( !ClassConstructor && HasAnyClassFlags( CLASS_Native ) )
 	{
-		Sys_Errorf( TEXT( "Can't bind to native class %s" ), GetName().c_str() );
+		Sys_Error( TEXT( "Can't bind to native class %s" ), GetName().c_str() );
 	}
 
 	if ( !ClassConstructor && superClass )

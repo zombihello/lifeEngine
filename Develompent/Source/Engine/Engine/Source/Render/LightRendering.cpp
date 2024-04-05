@@ -41,7 +41,7 @@ public:
 		// If vertex factory not support instancig - draw without it
 		if ( !InVertexFactory->SupportsInstancing() )
 		{
-			Sys_Errorf( TEXT( "Not implemented" ) );
+			Sys_Error( TEXT( "Not implemented" ) );
 		}
 		// Else we draw geometry with help instancing
 		else
@@ -76,7 +76,7 @@ public:
 		// If vertex factory not support instancig - draw without it
 		if ( !InVertexFactory->SupportsInstancing() )
 		{
-			Sys_Errorf( TEXT( "Not implemented" ) );
+			Sys_Error( TEXT( "Not implemented" ) );
 		}
 		// Else we draw geometry with help instancing
 		else
@@ -111,7 +111,7 @@ public:
 		// If vertex factory not support instancig - draw without it
 		if ( !InVertexFactory->SupportsInstancing() )
 		{
-			Sys_Errorf( TEXT( "Not implemented" ) );
+			Sys_Error( TEXT( "Not implemented" ) );
 		}
 		// Else we draw geometry with help instancing
 		else

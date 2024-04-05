@@ -981,7 +981,7 @@ public:
 				break;
 
 			default: 
-				Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
+				Sys_Error( TEXT( "Unknown mode 0x%X" ), mode );
 				return 1;
 			}
 		}
@@ -1012,7 +1012,7 @@ public:
 		}
 
 		default:
-			Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
+			Sys_Error( TEXT( "Unknown mode 0x%X" ), mode );
 			return 1;
 		}
 
@@ -1163,7 +1163,7 @@ public:
 				break;
 
 			default:
-				Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
+				Sys_Error( TEXT( "Unknown mode 0x%X" ), mode );
 				return 1;
 			}
 		}
@@ -1261,7 +1261,7 @@ public:
 		}
 
 		default:
-			Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
+			Sys_Error( TEXT( "Unknown mode 0x%X" ), mode );
 			return 1;
 		}
 
@@ -2472,7 +2472,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			}
 
 			default:
-				Sys_Errorf( TEXT( "Unknown node type 0x%X" ), GetType() );
+				Sys_Error( TEXT( "Unknown node type 0x%X" ), GetType() );
 				break;
 			}
 		}
@@ -2810,7 +2810,7 @@ void CContentBrowserWindow::CAssetNode::ProcessEvents()
 			case AT_AudioBank:			MakeSharedPtr<CAudioBankEditorWindow>( asset )->Init();			break;
 			case AT_PhysicsMaterial:	MakeSharedPtr<CPhysicsMaterialEditorWindow>( asset )->Init();	break;
 			default:
-				Sys_Errorf( TEXT( "Unsupported asset type 0x%X" ), info->type );
+				Sys_Error( TEXT( "Unsupported asset type 0x%X" ), info->type );
 				break;
 			}
 		}

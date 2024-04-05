@@ -14,7 +14,7 @@ CField::AddProperty
 */
 void CField::AddProperty( class CProperty* InProperty )
 {
-	Sys_Errorf( TEXT( "CField::AddProperty: Not implemented" ) );
+	Sys_Error( TEXT( "CField::AddProperty: Not implemented" ) );
 }
 
 /*

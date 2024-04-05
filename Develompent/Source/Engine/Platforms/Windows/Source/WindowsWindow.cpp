@@ -354,7 +354,7 @@ void CWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
 	sdlWindow = SDL_CreateWindow( TCHAR_TO_ANSI( InTitle ), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, InWidth, InHeight, flags );
 	if ( !sdlWindow )
 	{
-		Sys_Errorf( TEXT( "Failed created window (%ix%i) with title '%s' and flags 0x%X. SDL error: %s" ), InWidth, InHeight, InTitle, InFlags, SDL_GetError() );
+		Sys_Error( TEXT( "Failed created window (%ix%i) with title '%s' and flags 0x%X. SDL error: %s" ), InWidth, InHeight, InTitle, InFlags, SDL_GetError() );
 	}
 
 	id = SDL_GetWindowID( sdlWindow );

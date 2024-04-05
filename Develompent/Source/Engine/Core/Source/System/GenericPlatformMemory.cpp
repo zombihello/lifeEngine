@@ -24,5 +24,5 @@ GenericPlatformMemory::OutOfMemory
 */
 void GenericPlatformMemory::OutOfMemory( size_t InSize, uint32 InAlignment )
 {
-	Sys_Errorf( TEXT( "Ran out of memory allocating %llu bytes with alignment %u" ), InSize, InAlignment );
+	Sys_Error( TEXT( "Ran out of memory allocating %llu bytes with alignment %u" ), InSize, InAlignment );
 }

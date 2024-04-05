@@ -98,7 +98,7 @@ void CShaderCache::Serialize( CArchive& InArchive )
 		InArchive << shaderCacheVersion;
 		if ( shaderCacheVersion != SHADER_CACHE_VERSION )
 		{
-			Sys_Errorf( TEXT( "Not supported version of shader cache. In archive version %i, need %i" ), shaderCacheVersion, SHADER_CACHE_VERSION );
+			Sys_Error( TEXT( "Not supported version of shader cache. In archive version %i, need %i" ), shaderCacheVersion, SHADER_CACHE_VERSION );
 			return;
 		}
 

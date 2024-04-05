@@ -64,7 +64,7 @@ void CConfigManager::Init()
 
 		if ( !bSuccessed )
 		{
-			Sys_Errorf( TEXT( "Config type '%s' not loaded" ), s_ConfigTypeNames[index] );
+			Sys_Error( TEXT( "Config type '%s' not loaded" ), s_ConfigTypeNames[index] );
 		}
 
 		configs[( EConfigType )index] = config;

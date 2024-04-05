@@ -37,7 +37,7 @@ static CMP_FORMAT ConvertEPixelFormatToCmpFormat( EPixelFormat InPixelFormat )
 	case PF_FilteredShadowDepth:
 	case PF_D32:
 	default:
-		Sys_Errorf( TEXT( "Unsupported EPixelFormat %i" ), ( uint32 )InPixelFormat );
+		Sys_Error( TEXT( "Unsupported EPixelFormat %i" ), ( uint32 )InPixelFormat );
 		return CMP_FORMAT_Unknown;
 	}
 }

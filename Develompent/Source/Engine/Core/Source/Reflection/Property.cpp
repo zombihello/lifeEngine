@@ -911,7 +911,7 @@ void CArrayProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceToke
 		}
 		else
 		{
-			Sys_Errorf( TEXT( "Encountered unknown property containing object or name reference: %s in %s" ), innerProperty->GetName().c_str(), GetName().c_str() );
+			Sys_Error( TEXT( "Encountered unknown property containing object or name reference: %s in %s" ), innerProperty->GetName().c_str(), GetName().c_str() );
 		}
 	}
 }

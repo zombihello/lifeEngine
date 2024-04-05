@@ -141,7 +141,7 @@ void CObject::ConditionalPostLoad()
 #if !SHIPPING_BUILD
 		if ( objectSerializeContext.ContainsDebugPostLoad( this ) )
 		{
-			Sys_Errorf( TEXT( "%s failed to route PostLoad. Please call Super::PostLoad() in your <ClassName>::PostLoad() function" ), GetFullName().c_str() );
+			Sys_Error( TEXT( "%s failed to route PostLoad. Please call Super::PostLoad() in your <ClassName>::PostLoad() function" ), GetFullName().c_str() );
 		}
 #endif // !SHIPPING_BUILD
 	}
@@ -181,7 +181,7 @@ void CObject::FinishDestroy()
 {
 	if ( !HasAnyObjectFlags( OBJECT_FinishDestroyed ) )
 	{
-		Sys_Errorf( TEXT( "Trying to call CObject::FinishDestroy from outside of CObject::ConditionalFinishDestroy on object %s. Please fix up the calling code" ), GetFullName().c_str() );
+		Sys_Error( TEXT( "Trying to call CObject::FinishDestroy from outside of CObject::ConditionalFinishDestroy on object %s. Please fix up the calling code" ), GetFullName().c_str() );
 	}
 
 	Assert( !GetLinker() );
@@ -339,21 +339,21 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	// If we try to allocate object without class its error
 	if ( !InClass )
 	{
-		Sys_Errorf( TEXT( "Empty class for object %s\n" ), InName.ToString().c_str() );
+		Sys_Error( TEXT( "Empty class for object %s\n" ), InName.ToString().c_str() );
 		return nullptr;
 	}
 
 	// If we try to allocate object with unregistered class its error
 	if ( InClass->GetIndex() == INDEX_NONE && GetObjAutoRegisters().empty() )
 	{
-		Sys_Errorf( TEXT( "Unregistered class for %s" ), InName.ToString().c_str() );
+		Sys_Error( TEXT( "Unregistered class for %s" ), InName.ToString().c_str() );
 		return nullptr;
 	}
 
 	// If we try to create abstract object it's wrong and we call error
 	if ( InClass->HasAnyClassFlags( CLASS_Abstract ) )
 	{
-		Sys_Errorf( TEXT( "Class which was marked abstract was trying to be allocated. %s/%s" ), InClass->GetName().c_str(), InName.ToString().c_str() );
+		Sys_Error( TEXT( "Class which was marked abstract was trying to be allocated. %s/%s" ), InClass->GetName().c_str(), InName.ToString().c_str() );
 		return nullptr;
 	}
 
@@ -362,12 +362,12 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	{
 		if ( InClass != CObjectPackage::StaticClass() )
 		{
-			Sys_Errorf( TEXT( "Only packages can not have an outer. %s/%s" ), InClass->GetName().c_str(), InName.ToString().c_str() );
+			Sys_Error( TEXT( "Only packages can not have an outer. %s/%s" ), InClass->GetName().c_str(), InName.ToString().c_str() );
 			return nullptr;
 		}
 		else if ( InName == NAME_None )
 		{
-			Sys_Errorf( TEXT( "Package name must be explicitly" ) );
+			Sys_Error( TEXT( "Package name must be explicitly" ) );
 			return nullptr;
 		}
 	}
@@ -375,7 +375,7 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 	// InOuter must be in InClass->GetWithinClass class
 	if ( InOuter && !IsA( InOuter, InClass->GetWithinClass() ) )
 	{
-		Sys_Errorf( TEXT( "Object %s of class %s not within %s" ), InName.ToString().c_str(), InClass->GetName().c_str(), InClass->GetWithinClass()->GetName().c_str() );
+		Sys_Error( TEXT( "Object %s of class %s not within %s" ), InName.ToString().c_str(), InClass->GetName().c_str(), InClass->GetWithinClass()->GetName().c_str() );
 		return nullptr;
 	}
 
@@ -418,7 +418,7 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 		// If the object we found is of a different class, can't replace it
 		if ( !object->GetClass()->IsChildOf( InClass ) )
 		{
-			Sys_Errorf( TEXT( "Objects have the same fully qualified name but different paths.\n" )
+			Sys_Error( TEXT( "Objects have the same fully qualified name but different paths.\n" )
 						TEXT( "\tNew Object: %s %s.%s\n" ) 
 						TEXT( "\tExisting Object: %s" ), 
 						InClass->GetName().c_str(), InOuter ? InOuter->GetPathName().c_str() : TEXT( "" ), InName.ToString().c_str(),
@@ -793,7 +793,7 @@ CObjectPackage* CObject::GetOutermost() const
 #if !SHIPPING_BUILD
 	if ( !topObject || !IsA<CObjectPackage>( topObject ) )
 	{
-		Sys_Errorf( TEXT( "Cast ot %s to CObjectPackage failed" ), topObject ? topObject->GetName().c_str() : TEXT( "NULL" ) );
+		Sys_Error( TEXT( "Cast ot %s to CObjectPackage failed" ), topObject ? topObject->GetName().c_str() : TEXT( "NULL" ) );
 	}
 #endif // !SHIPPING_BUILD
 

@@ -79,7 +79,7 @@ CVertexFactory::SetupInstancing
 */
 void CVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	Sys_Errorf( TEXT( "CVertexFactory::SetupInstancing :: Not implemented" ) );
+	Sys_Error( TEXT( "CVertexFactory::SetupInstancing :: Not implemented" ) );
 }
 
 /*

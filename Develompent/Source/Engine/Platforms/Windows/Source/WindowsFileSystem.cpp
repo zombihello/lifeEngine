@@ -37,7 +37,7 @@ class CArchive* CWindowsFileSystem::CreateFileReader( const std::wstring& InFile
 	{
 		if ( InFlags & AR_NoFail )
 		{
-			Sys_Errorf( TEXT( "Failed to create file: %s, InFlags = 0x%X" ), InFileName.c_str(), InFlags );
+			Sys_Error( TEXT( "Failed to create file: %s, InFlags = 0x%X" ), InFileName.c_str(), InFlags );
 		}
 
 		delete inputFile;
@@ -84,7 +84,7 @@ class CArchive* CWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 	{
 		if ( InFlags & AW_NoFail )
 		{
-			Sys_Errorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName.c_str(), InFlags );
+			Sys_Error( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName.c_str(), InFlags );
 		}
 
 		delete outputFile;
@@ -150,7 +150,7 @@ bool CWindowsFileSystem::Delete( const std::wstring& InPath, bool InIsEvenReadOn
 		}
 		else
 		{
-			Sys_Errorf( TEXT( "Error deleting file '%s' (GetLastError: %d)" ), InPath.c_str(), error );
+			Sys_Error( TEXT( "Error deleting file '%s' (GetLastError: %d)" ), InPath.c_str(), error );
 		}
 	}
 

@@ -23,7 +23,7 @@ uint32 Sys_SampleFormatToEngine( ESampleFormat InSampleFormat )
 	case SF_Stereo16:	return AL_FORMAT_STEREO16;
 	case SF_Unknown:
 	default:
-		Sys_Errorf( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
+		Sys_Error( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
 		return 0;
 	}
 }
@@ -43,7 +43,7 @@ std::wstring Sys_SampleFormatToText( ESampleFormat InSampleFormat )
 	case SF_Stereo16:	return TEXT( "16 bit (Stereo)" );
 	case SF_Unknown:
 	default:
-		Sys_Errorf( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
+		Sys_Error( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
 		return TEXT( "Unknown");
 	}
 }
@@ -63,7 +63,7 @@ uint32 Sys_GetNumSampleBytes( ESampleFormat InSampleFormat )
 	case SF_Stereo16:	return 32;
 	case SF_Unknown:
 	default:
-		Sys_Errorf( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
+		Sys_Error( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
 		return 0;
 	}
 }

@@ -47,7 +47,7 @@ CD3D11ShaderRHI::CD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InDa
 		break;
 
 	default:
-		Sys_Errorf( TEXT( "Unsupported shader frequency %i" ), InFrequency );
+		Sys_Error( TEXT( "Unsupported shader frequency %i" ), InFrequency );
 		break;
 	}
 
@@ -90,7 +90,7 @@ CD3D11VertexDeclarationRHI::CD3D11VertexDeclarationRHI( const VertexDeclarationE
 		case VET_UByte4:		d3dElement.Format = DXGI_FORMAT_R8G8B8A8_UINT;													break;
 		case VET_UByte4N:		d3dElement.Format = DXGI_FORMAT_R8G8B8A8_UNORM;													break;
 		case VET_Color:			d3dElement.Format = DXGI_FORMAT_R8G8B8A8_UNORM;													break;
-		default:				Sys_Errorf( TEXT( "Unknown RHI vertex element type %u" ), InElementList[ elementIndex ].type );	break;
+		default:				Sys_Error( TEXT( "Unknown RHI vertex element type %u" ), InElementList[ elementIndex ].type );	break;
 		}
 
 		switch ( element.usage )

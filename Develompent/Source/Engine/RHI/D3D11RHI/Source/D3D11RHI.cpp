@@ -36,7 +36,7 @@ static FORCEINLINE uint32 GetVertexCountForPrimitiveCount( uint32 InNumPrimitive
 	case PT_LineList:			vertexCount = InNumPrimitives * 2;	break;
 
 	default:
-		Sys_Errorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
+		Sys_Error( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
 	}
 
 	return vertexCount;
@@ -58,7 +58,7 @@ static FORCEINLINE D3D11_PRIMITIVE_TOPOLOGY GetD3D11PrimitiveType( uint32 InPrim
 	case PT_LineList:			return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 
 	default: 
-		Sys_Errorf( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
+		Sys_Error( TEXT( "Unknown primitive type: %u" ), ( uint32 )InPrimitiveType );
 	};
 
 	return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -1662,7 +1662,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 		break;
 
 	default:
-		Sys_Errorf( TEXT( "Unknown shader frequency %i" ), InFrequency );
+		Sys_Error( TEXT( "Unknown shader frequency %i" ), InFrequency );
 		return false;
 	}
 
@@ -1755,7 +1755,7 @@ bool CD3D11RHI::CompileShader( const tchar* InSourceFileName, const tchar* InFun
 
 			if ( cbDesc.Size > GConstantBufferSizes[ cbIndex ] )
 			{
-				Sys_Errorf( TEXT( "Set GConstantBufferSizes[%d] to >= %d" ), cbIndex, cbDesc.Size) ;
+				Sys_Error( TEXT( "Set GConstantBufferSizes[%d] to >= %d" ), cbIndex, cbDesc.Size) ;
 			}
 
 			// Track all of the variables in this constant buffer

@@ -51,7 +51,7 @@ public:
 			break;
 
 		default:
-			Sys_Errorf( TEXT( "Unknown light type 0x%X" ), InLightType );
+			Sys_Error( TEXT( "Unknown light type 0x%X" ), InLightType );
 			return;
 		}
 

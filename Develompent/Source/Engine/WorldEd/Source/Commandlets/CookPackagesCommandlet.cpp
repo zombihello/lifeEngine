@@ -98,7 +98,7 @@ bool CCookPackagesCommandlet::CookMap( const ResourceInfo& InMapInfo )
 	tmx::Map		tmxMap;
 	if ( !tmxMap.load( TCHAR_TO_ANSI( InMapInfo.path.c_str() ) ) )
 	{
-		Sys_Errorf( TEXT( "Map '%s' not found" ), InMapInfo.path.c_str() );
+		Sys_Error( TEXT( "Map '%s' not found" ), InMapInfo.path.c_str() );
 		return false;
 	}
 
@@ -106,7 +106,7 @@ bool CCookPackagesCommandlet::CookMap( const ResourceInfo& InMapInfo )
 	std::vector< TMXTileset >			tilesets;
 	if ( !LoadTMXTilests( tmxMap, tilesets ) )
 	{
-		Sys_Errorf( TEXT( "Failed loading TMX tilesets" ) );
+		Sys_Error( TEXT( "Failed loading TMX tilesets" ) );
 		return false;
 	}
 
@@ -164,20 +164,20 @@ bool CCookPackagesCommandlet::LoadTMXTilests( const tmx::Map& InTMXMap, std::vec
 			ParseReferenceToAsset( tmxTilesetName, packageName, assetName, assetType );
 			if ( assetType != AT_Material )
 			{
-				Sys_Errorf( TEXT( "Asset '%s' is not material" ), tmxTilesetName.c_str() );
+				Sys_Error( TEXT( "Asset '%s' is not material" ), tmxTilesetName.c_str() );
 				return false;
 			}
 
 			if ( !FindResource( materialsMap, packageName, assetName, resourceInfo ) )
 			{
-				Sys_Errorf( TEXT( "Material '%s' not founded" ), tmxTilesetName.c_str() );
+				Sys_Error( TEXT( "Material '%s' not founded" ), tmxTilesetName.c_str() );
 				return false;
 			}
 
 			bool	result = CookMaterial( resourceInfo, tilesetMaterial );
 			if ( !result )
 			{
-				Sys_Errorf( TEXT( "Failed cooking material '%s'" ), tmxTilesetName.c_str() );
+				Sys_Error( TEXT( "Failed cooking material '%s'" ), tmxTilesetName.c_str() );
 				return false;
 			}
 		}
@@ -437,7 +437,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					actor->SetName( tmxObject.name.c_str() );
 					if ( !actor->InitProperties( tmxObject.actorVars, this ) )
 					{
-						Sys_Errorf( TEXT( "Failed init properties in actor '%s'" ), tmxObject.name.c_str() );
+						Sys_Error( TEXT( "Failed init properties in actor '%s'" ), tmxObject.name.c_str() );
 						return;
 					}
 				}
@@ -534,7 +534,7 @@ bool CCookPackagesCommandlet::CookMaterial( const ResourceInfo& InMaterialInfo, 
 			CShaderMetaType*	shaderMetaType		= g_ShaderManager->FindShaderType( shaderMetaTypeName );
 			if ( !shaderMetaType )
 			{
-				Sys_Errorf( TEXT( "Shader '%s' not found in engine" ), shaderMetaTypeName.c_str() );
+				Sys_Error( TEXT( "Shader '%s' not found in engine" ), shaderMetaTypeName.c_str() );
 				return false;
 			}
 
@@ -552,7 +552,7 @@ bool CCookPackagesCommandlet::CookMaterial( const ResourceInfo& InMaterialInfo, 
 				bool						result = shaderCompiler.CompileShader( shaderMetaType, cookedShaderPlatform, shaderCache, errorMsg, vfType );
 				if ( !result )
 				{
-					Sys_Errorf( TEXT( "Failed cached shader '%s' for vertex factory '%s'\n\n%s" ), shaderMetaTypeName.c_str(), vfType->GetName().c_str(), errorMsg.c_str() );
+					Sys_Error( TEXT( "Failed cached shader '%s' for vertex factory '%s'\n\n%s" ), shaderMetaTypeName.c_str(), vfType->GetName().c_str(), errorMsg.c_str() );
 					return false;
 				}
 			}
@@ -605,20 +605,20 @@ bool CCookPackagesCommandlet::CookMaterial( const ResourceInfo& InMaterialInfo, 
 					ParseReferenceToAsset( assetReference, packageName, assetName, assetType );
 					if ( assetType != AT_Texture2D )
 					{
-						Sys_Errorf( TEXT( "Asset '%s' is not texture" ), assetReference.c_str() );
+						Sys_Error( TEXT( "Asset '%s' is not texture" ), assetReference.c_str() );
 						return false;
 					}
 
 					if ( !FindResource( texturesMap, packageName, assetName, resourceInfo ) )
 					{
-						Sys_Errorf( TEXT( "Texture '%s' not founded" ), assetReference.c_str() );
+						Sys_Error( TEXT( "Texture '%s' not founded" ), assetReference.c_str() );
 						return false;
 					}
 
 					bool	result = CookTexture2D( resourceInfo, texture );
 					if ( !result )
 					{
-						Sys_Errorf( TEXT( "Failed cooking texture '%s'" ), assetReference.c_str() );
+						Sys_Error( TEXT( "Failed cooking texture '%s'" ), assetReference.c_str() );
 						return false;
 					}
 				}
@@ -747,7 +747,7 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 		bool		result = shaderCompiler.CompileAll( shaderCache, cookedShaderPlatform, true );
 		if ( !result )
 		{
-			Sys_Errorf( TEXT( "Failed compiling global shaders" ) );
+			Sys_Error( TEXT( "Failed compiling global shaders" ) );
 			return;
 		}
 	}
@@ -766,7 +766,7 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			bool	result = CookTexture2D( itAsset->second, texture2D );
 			if ( !result )
 			{
-				Sys_Errorf( TEXT( "Failed cooking texture 2D '%s'" ), itAsset->second.filename.c_str() );
+				Sys_Error( TEXT( "Failed cooking texture 2D '%s'" ), itAsset->second.filename.c_str() );
 				return;
 			}
 		}
@@ -786,7 +786,7 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			bool	result = CookMaterial( itAsset->second, material );
 			if ( !result )
 			{
-				Sys_Errorf( TEXT( "Failed cooking material '%s'" ), itAsset->second.filename.c_str() );
+				Sys_Error( TEXT( "Failed cooking material '%s'" ), itAsset->second.filename.c_str() );
 				return;
 			}
 		}
@@ -806,7 +806,7 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			bool	result = CookAudioBank( itAsset->second, audioBank );
 			if ( !result )
 			{
-				Sys_Errorf( TEXT( "Failed cooking audio bank '%s'" ), itAsset->second.filename.c_str() );
+				Sys_Error( TEXT( "Failed cooking audio bank '%s'" ), itAsset->second.filename.c_str() );
 				return;
 			}
 		}
@@ -826,7 +826,7 @@ void CCookPackagesCommandlet::CookAllResources( bool InIsOnlyAlwaysCook /* = fal
 			bool					result = CookPhysMaterial( itAsset->second, physMaterial );
 			if ( !result )
 			{
-				Sys_Errorf( TEXT( "Failed cooking physics material '%s'" ), itAsset->second.filename.c_str() );
+				Sys_Error( TEXT( "Failed cooking physics material '%s'" ), itAsset->second.filename.c_str() );
 				return;
 			}
 		}
@@ -952,7 +952,7 @@ bool CCookPackagesCommandlet::SaveToPackage( const ResourceInfo& InResourceInfo,
 	bool	result = package->Save( outputPackage );
 	if ( !result )
 	{
-		Sys_Errorf( TEXT( "Failed saving package '%s'" ), InResourceInfo.packageName.c_str() );
+		Sys_Error( TEXT( "Failed saving package '%s'" ), InResourceInfo.packageName.c_str() );
 		return false;
 	}
 
@@ -1099,7 +1099,7 @@ bool CCookPackagesCommandlet::Main( const CCommandLine& InCommandLine )
 	switch ( cookedPlatform )
 	{
 	case PLATFORM_Windows:		cookedShaderPlatform = SP_PCD3D_SM5;			break;
-	default:					Sys_Errorf( TEXT( "Unknown platform" ) );		break;
+	default:					Sys_Error( TEXT( "Unknown platform" ) );		break;
 	}
 
 	// Indexing resources in content dirs
@@ -1177,7 +1177,7 @@ bool CCookPackagesCommandlet::Main( const CCommandLine& InCommandLine )
 		bool	result = CookMap( itResource->second );
 		if ( !result )
 		{
-			Sys_Errorf( TEXT( "Failed cooking map '%s'" ), mapName.c_str() );
+			Sys_Error( TEXT( "Failed cooking map '%s'" ), mapName.c_str() );
 			return false;
 		}
 	}

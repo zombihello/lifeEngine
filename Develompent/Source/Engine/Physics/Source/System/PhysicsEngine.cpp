@@ -26,7 +26,7 @@ FORCEINLINE ECollisionChannel TextToECollisionChannel( const std::wstring& InStr
 		return CC_Character;
 	}
 	
-	Sys_Errorf( TEXT( "Unknown collision channel %s" ), InStr.c_str() );
+	Sys_Error( TEXT( "Unknown collision channel %s" ), InStr.c_str() );
 	return CC_Max;
 }
 
@@ -50,7 +50,7 @@ FORCEINLINE ECollisionResponse TextToECollisionResponse( const std::wstring& InS
 		return CR_Ignore;
 	}
 
-	Sys_Errorf( TEXT( "Unknown collision response %s" ), InStr.c_str() );
+	Sys_Error( TEXT( "Unknown collision response %s" ), InStr.c_str() );
 	return CR_Max;
 }
 

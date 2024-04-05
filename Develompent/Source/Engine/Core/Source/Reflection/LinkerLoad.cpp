@@ -37,7 +37,7 @@ CLinkerLoad::~CLinkerLoad()
 	// Linkers can only be deleted by CLinkerManager
 	if ( !CLinkerManager::Get().IsDeletingLinkers() )
 	{
-		Sys_Errorf( TEXT( "Linkers can only be deleted by CLinkerManager" ) );
+		Sys_Error( TEXT( "Linkers can only be deleted by CLinkerManager" ) );
 	}
 
 	// Detaches linker
@@ -867,7 +867,7 @@ CObject* CLinkerLoad::IndexToObject( CPackageIndex& InIndex )
 		uint32		exportIndex = InIndex.ToExport();
 		if ( exportIndex < 0 || exportIndex >= exportMap.size() )
 		{
-			Sys_Errorf( TEXT( "Invalid export object index=%d while reading %s. File is most likely corrupted" ), exportIndex, GetPath().c_str() );
+			Sys_Error( TEXT( "Invalid export object index=%d while reading %s. File is most likely corrupted" ), exportIndex, GetPath().c_str() );
 			return nullptr;
 		}
 
@@ -878,7 +878,7 @@ CObject* CLinkerLoad::IndexToObject( CPackageIndex& InIndex )
 		uint32		importIndex = InIndex.ToImport();
 		if ( importIndex < 0 || importIndex >= importMap.size() )
 		{
-			Sys_Errorf( TEXT( "Invalid export object index=%d while reading %s. File is most likely corrupted" ), importIndex, GetPath().c_str() );
+			Sys_Error( TEXT( "Invalid export object index=%d while reading %s. File is most likely corrupted" ), importIndex, GetPath().c_str() );
 			return nullptr;
 		}
 
@@ -1190,7 +1190,7 @@ void CLinkerLoad::Preload( CObject* InObject )
 					}
 					else
 					{
-						Sys_Errorf( TEXT( "%s: Serial size mismatch: Got %i, Expected %i" ), InObject->GetFullName().c_str(), sizeSerialized, exportObject.serialSize );
+						Sys_Error( TEXT( "%s: Serial size mismatch: Got %i, Expected %i" ), InObject->GetFullName().c_str(), sizeSerialized, exportObject.serialSize );
 					}
 				}
 
@@ -1219,7 +1219,7 @@ void CLinkerLoad::DetachExport( uint32 InExportIndex )
 
 	if ( !exportObject.object->IsValid() )
 	{
-		Sys_Errorf( TEXT( "Linker object %s %s.%s is invalid" ), GetExportClassName( InExportIndex ).ToString().c_str(), linkerRoot->GetName().c_str(), exportObject.objectName.ToString().c_str() );
+		Sys_Error( TEXT( "Linker object %s %s.%s is invalid" ), GetExportClassName( InExportIndex ).ToString().c_str(), linkerRoot->GetName().c_str(), exportObject.objectName.ToString().c_str() );
 	}
 
 	const CLinkerLoad*	actualLinker = exportObject.object->GetLinker();

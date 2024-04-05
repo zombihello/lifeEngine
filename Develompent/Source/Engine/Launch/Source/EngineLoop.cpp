@@ -244,7 +244,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 
 	if ( !g_IsCooker && !g_IsEditor && !g_FileSystem->IsExistFile( g_CookedDir, true ) )
 	{
-		Sys_Errorf( TEXT( "Cooked directory '%s' not exist. For work need cook packages" ), g_CookedDir.c_str() );
+		Sys_Error( TEXT( "Cooked directory '%s' not exist. For work need cook packages" ), g_CookedDir.c_str() );
 		return -1;
 	}
 
@@ -379,13 +379,13 @@ int32 CEngineLoop::Init()
 		bool				successed = g_Engine->LoadMap( !bAbsolutePath ? L_Sprintf( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), g_CookedDir.c_str(), map.c_str() ) : map, error );
 		if ( !successed )
 		{
-			Sys_Errorf( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
+			Sys_Error( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
 			result = 2;
 		}
 	}
 	else if ( !g_IsEditor )
 	{
-		Sys_Errorf( TEXT( "In game config not setted or not valid default map (parameter 'GameDefaultMap')" ) );
+		Sys_Error( TEXT( "In game config not setted or not valid default map (parameter 'GameDefaultMap')" ) );
 		result = 1;
 	}
 

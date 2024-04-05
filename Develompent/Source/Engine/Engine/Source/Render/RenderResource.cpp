@@ -40,7 +40,7 @@ CRenderResource::~CRenderResource()
 	}
 
 	// Deleting an initialized CRenderResource will result in a crash later since it is still linked
-	//Sys_Errorf( TEXT( "An CRenderResource was deleted without being released first!" ) );
+	//Sys_Error( TEXT( "An CRenderResource was deleted without being released first!" ) );
 }
 
 /*

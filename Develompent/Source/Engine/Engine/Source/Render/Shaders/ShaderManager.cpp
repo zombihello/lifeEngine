@@ -250,14 +250,14 @@ void CShaderManager::Init()
 			result = LoadShaders( pathShaderCache.c_str() );
 			if ( !result )
 			{
-				Sys_Errorf( TEXT( "Failed loading shader cache [%s]" ), pathShaderCache.c_str() );
+				Sys_Error( TEXT( "Failed loading shader cache [%s]" ), pathShaderCache.c_str() );
 				return;
 			}
 		}
 		else
 #endif // WITH_EDITOR
 		{
-			Sys_Errorf( TEXT( "Shader cache [%s] not found" ), pathShaderCache.c_str() );
+			Sys_Error( TEXT( "Shader cache [%s] not found" ), pathShaderCache.c_str() );
 			return;
 		}
 	}

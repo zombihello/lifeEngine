@@ -578,7 +578,7 @@ CObject* FindObjectFast( CClass* InClass, CObject* InOuter, const CName& InName,
 	CObjectGC&		objectGC = CObjectGC::Get();
 	if ( CObjectPackage::IsSavingPackage() || objectGC.IsGarbageCollecting() )
 	{
-		Sys_Errorf( TEXT( "Illegal call to FindObjectFast() while serializing object data or garbage collecting!" ) );
+		Sys_Error( TEXT( "Illegal call to FindObjectFast() while serializing object data or garbage collecting!" ) );
 	}
 
 	// If they specified an outer use that during the hashing

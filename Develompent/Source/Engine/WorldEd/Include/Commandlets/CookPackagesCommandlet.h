@@ -94,20 +94,20 @@ public:
 		ParseReferenceToAsset( InAssetRef, packageName, assetName, assetType );
 		if ( assetType != AT_AudioBank )
 		{
-			Sys_Errorf( TEXT( "Asset '%s' is not audio bank" ), InAssetRef.c_str() );
+			Sys_Error( TEXT( "Asset '%s' is not audio bank" ), InAssetRef.c_str() );
 			return false;
 		}
 
 		if ( !FindResource( audiosMap, packageName, assetName, resourceInfo ) )
 		{
-			Sys_Errorf( TEXT( "Audio bank '%s' not founded" ), InAssetRef.c_str() );
+			Sys_Error( TEXT( "Audio bank '%s' not founded" ), InAssetRef.c_str() );
 			return false;
 		}
 
 		bool	result = CookAudioBank( resourceInfo, OutAudioBank );
 		if ( !result )
 		{
-			Sys_Errorf( TEXT( "Failed cooking audio bank '%s'" ), InAssetRef.c_str() );
+			Sys_Error( TEXT( "Failed cooking audio bank '%s'" ), InAssetRef.c_str() );
 			return false;
 		}
 
@@ -131,20 +131,20 @@ public:
 		ParseReferenceToAsset( InAssetRef, packageName, assetName, assetType );
 		if ( assetType != AT_PhysicsMaterial )
 		{
-			Sys_Errorf( TEXT( "Asset '%s' is not physics material" ), InAssetRef.c_str() );
+			Sys_Error( TEXT( "Asset '%s' is not physics material" ), InAssetRef.c_str() );
 			return false;
 		}
 
 		if ( !FindResource( physMaterialsMap, packageName, assetName, resourceInfo ) )
 		{
-			Sys_Errorf( TEXT( "Physics material '%s' not founded" ), InAssetRef.c_str() );
+			Sys_Error( TEXT( "Physics material '%s' not founded" ), InAssetRef.c_str() );
 			return false;
 		}
 
 		bool	result = CookPhysMaterial( resourceInfo, OutPhysMaterial );
 		if ( !result )
 		{
-			Sys_Errorf( TEXT( "Failed cooking physics material '%s'" ), InAssetRef.c_str() );
+			Sys_Error( TEXT( "Failed cooking physics material '%s'" ), InAssetRef.c_str() );
 			return false;
 		}
 

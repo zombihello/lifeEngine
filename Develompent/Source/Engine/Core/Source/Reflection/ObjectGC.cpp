@@ -95,7 +95,7 @@ void CObjectGC::AllocateObjectPool( uint32 InMaxObjects, uint32 InMaxObjectsNotC
 	Assert( allocatedObjects.empty() );
 	if ( InMaxObjects <= 0 )
 	{
-		Sys_Errorf( TEXT( "Max CObject count is invalid. It must be a number that is greater than 0" ) );
+		Sys_Error( TEXT( "Max CObject count is invalid. It must be a number that is greater than 0" ) );
 	}
 	allocatedObjects.reserve( InMaxObjects );
 
@@ -178,7 +178,7 @@ void CObjectGC::AddObject( CObject* InObject )
 		// Check if we're not out of bounds, unless there hasn't been any GC objects yet
 		if ( lastNonGCIndex >= maxObjectsNotConsideredByGC && allocatedObjects.size() > maxObjectsNotConsideredByGC )
 		{
-			Sys_Errorf( TEXT( "Unable to add more objects to disregard for GC pool (Max: %d)" ), maxObjectsNotConsideredByGC );
+			Sys_Error( TEXT( "Unable to add more objects to disregard for GC pool (Max: %d)" ), maxObjectsNotConsideredByGC );
 		}
 
 		// If we haven't added any GC objects yet, it's fine to keep growing the disregard pool past its initial size
@@ -211,7 +211,7 @@ void CObjectGC::AddObject( CObject* InObject )
 	// We can't place the object at that index where another object is exist
 	if ( allocatedObjects[index] )
 	{
-		Sys_Errorf( TEXT( "Attempting to add %s at index %d but another object (0x%016llx) exists at that index!" ), InObject->GetFullName().c_str(), index, ( ptrint )allocatedObjects[index] );
+		Sys_Error( TEXT( "Attempting to add %s at index %d but another object (0x%016llx) exists at that index!" ), InObject->GetFullName().c_str(), index, ( ptrint )allocatedObjects[index] );
 	}
 
 	// Add the object to the global table
@@ -241,7 +241,7 @@ void CObjectGC::RemoveObject( CObject* InObject )
 	// We check that our index contains the same object
 	if ( allocatedObjects[InObject->index] != InObject )
 	{
-		Sys_Errorf( TEXT( "Removing object (0x%016llx) at index %d but the index points to a different object (0x%016llx)!" ), ( ptrint )InObject, InObject->index, ( ptrint )allocatedObjects[InObject->index] );
+		Sys_Error( TEXT( "Removing object (0x%016llx) at index %d but the index points to a different object (0x%016llx)!" ), ( ptrint )InObject, InObject->index, ( ptrint )allocatedObjects[InObject->index] );
 	}
 
 	allocatedObjects[InObject->index] = nullptr;
@@ -742,7 +742,7 @@ void CObjectGC::ProcessObjectForReferences( class CObject* InCurrentObject, std:
 		// Otherwise this is unknown token
 		else
 		{
-			Sys_Errorf( TEXT( "%s: Unknown token %i" ), InCurrentObject->GetFullName().c_str(), REFERENCE_INFO.type );
+			Sys_Error( TEXT( "%s: Unknown token %i" ), InCurrentObject->GetFullName().c_str(), REFERENCE_INFO.type );
 		}
 	}
 

@@ -46,7 +46,7 @@ void CShader::Init( const CShaderCache::ShaderCacheItem& InShaderCacheItem )
 		break;
 
 	default:
-		Sys_Errorf( TEXT( "Unsupported shader frequency %i" ), frequency );
+		Sys_Error( TEXT( "Unsupported shader frequency %i" ), frequency );
 		break;
 	}
 }
