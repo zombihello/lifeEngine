@@ -123,8 +123,10 @@ void CEditorEngine::Init()
 	g_AssetFactory.RegisterImporter( &CStaticMeshImporter::Import, &CStaticMeshImporter::Reimport, &CStaticMeshImporter::ShowImportSettings, CStaticMeshImporter::GetSupportedExtensions(), AT_StaticMesh );
 
 	// Create window and main viewport
-	uint32						windowWidth		= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
-	uint32						windowHeight	= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
+	uint32	windowWidth			= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
+	uint32	windowHeight		= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
+	bool	bDummyFullscreen	= false;
+	OverrideConfigurationFromCommandLine( windowWidth, windowHeight, bDummyFullscreen );
 
 	g_Window->SetTitle( GetEditorName().c_str() );
 	g_Window->SetSize( windowWidth, windowHeight );

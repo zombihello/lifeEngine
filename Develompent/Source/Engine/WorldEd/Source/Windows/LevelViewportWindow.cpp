@@ -113,7 +113,7 @@ void CLevelViewportWindow::OnTick()
 			}
 			else
 			{
-				Sys_CreateProc( L_GetExecutablePath(), L_Sprintf( TEXT( "-map %s" ), g_World->GetOutermost()->GetPackagePath().c_str() ).c_str(), false, false, false, 0 );
+				Sys_CreateProc( L_GetExecutablePath(), L_Sprintf( TEXT( "-map %s -window -w 1280 -h 720" ), g_World->GetOutermost()->GetPackagePath().c_str() ).c_str(), false, false, false, 0 );
 			}
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )

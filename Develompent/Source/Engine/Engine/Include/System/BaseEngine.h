@@ -153,6 +153,15 @@ public:
 	}
 
 protected:
+	/**
+	 * @brief Override configuration with command line params
+	 *
+	 * @param InOutWindowWidth		Window width
+	 * @param InOutWindowHeight		Window height
+	 * @param InOutFullscreen		Is need to enable fullscreen mode
+	 */
+	void OverrideConfigurationFromCommandLine( uint32& InOutWindowWidth, uint32& InOutWindowHeight, bool& InOutFullscreen );
+
 	TAssetHandle<CTexture2D>		defaultTexture;					/**< Default texture */
 	TAssetHandle<CMaterial>			defaultMaterial;				/**< Default material */
 

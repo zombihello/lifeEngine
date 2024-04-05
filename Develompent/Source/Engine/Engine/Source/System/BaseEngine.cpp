@@ -1,5 +1,6 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/PhysicsGlobals.h"
+#include "Misc/CommandLine.h"
 #include "Logger/LoggerMacros.h"
 #include "Reflection/Class.h"
 #include "Reflection/ObjectGC.h"
@@ -305,4 +306,57 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 	g_PackageManager->GarbageCollector();
 	return true;
+}
+
+/*
+==================
+CBaseEngine::OverrideConfigurationFromCommandLine
+==================
+*/
+void CBaseEngine::OverrideConfigurationFromCommandLine( uint32& InOutWindowWidth, uint32& InOutWindowHeight, bool& InOutFullscreen )
+{
+	// Check for windowed mode command line override
+	if ( g_CommandLine.HasParam( TEXT( "windowed" ) ) || g_CommandLine.HasParam( TEXT( "window" ) ) )
+	{
+		InOutFullscreen = false;
+	}
+	// Check for fullscreen override
+	else if ( g_CommandLine.HasParam( TEXT( "full" ) ) || g_CommandLine.HasParam( TEXT( "fullscreen" ) ) )
+	{
+		InOutFullscreen = true;
+	}
+
+	// Get width
+	const tchar*	widthParam = nullptr;
+	if ( g_CommandLine.HasParam( TEXT( "width" ) ) )
+	{
+		widthParam = TEXT( "width" );
+	}
+	else if ( g_CommandLine.HasParam( TEXT( "w" ) ) )
+	{
+		widthParam = TEXT( "w" );
+	}
+
+	// Override width
+	if ( widthParam )
+	{
+		InOutWindowWidth = L_Atoi( g_CommandLine.GetFirstValue( widthParam ).c_str() );
+	}
+
+	// Get height
+	const tchar*	heightParam = nullptr;
+	if ( g_CommandLine.HasParam( TEXT( "height" ) ) )
+	{
+		heightParam = TEXT( "height" );
+	}
+	else if ( g_CommandLine.HasParam( TEXT( "h" ) ) )
+	{
+		heightParam = TEXT( "h" );
+	}
+
+	// Override height
+	if ( heightParam )
+	{
+		InOutWindowHeight = L_Atoi( g_CommandLine.GetFirstValue( heightParam ).c_str() );
+	}
 }

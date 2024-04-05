@@ -38,9 +38,12 @@ void CGameEngine::Init()
 	std::wstring				gameName		= g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();;
 	uint32						windowWidth		= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
 	uint32						windowHeight	= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
-	
+	bool						bFullscreen		= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Fullscreen" ) ).GetBool();
+	OverrideConfigurationFromCommandLine( windowWidth, windowHeight, bFullscreen );
+
 	g_Window->SetTitle( gameName.c_str() );
 	g_Window->SetSize( windowWidth, windowHeight );
+	g_Window->SetFullscreen( bFullscreen );
 	viewport.SetViewportClient( &viewportClient );
 	viewport.Update( false, windowWidth, windowHeight, g_Window->GetHandle() );
 }
