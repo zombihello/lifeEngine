@@ -34,7 +34,7 @@
 - [X] Need fix speed of the import static meshes
 - [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to AngelScript)
 	- [X] Implement linker save and linker load for serialize CObjects
-	- [ ] Implement FindObject, LoadObject and LoadClass functions
+	- [X] Implement FindObject, LoadObject and LoadClass functions
 	- [ ] Implement ResolveName for resolve a package and name
 	- [X] Implement replacing existing object in StaticAllocateObject
 	- [ ] Replace CObject::SetName to Rename for guarantee the uniqueness of the name

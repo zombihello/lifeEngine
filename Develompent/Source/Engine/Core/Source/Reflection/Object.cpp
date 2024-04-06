@@ -762,7 +762,7 @@ void CObject::GetPathName( const CObject* InStopOuter, std::wstring& OutResult )
 		{
 			outer->GetPathName( InStopOuter, OutResult );
 
-			// SUBOBJECT_DELIMITER is used to indicate that this object's outer is not a CPackage
+			// SUBOBJECT_DELIMITER is used to indicate that this object's outer is not a CObjectPackage
 			if ( outer->GetClass() != CObjectPackage::StaticClass() && outer->GetOuter()->GetClass() == CObjectPackage::StaticClass() )
 			{
 				OutResult += SUBOBJECT_DELIMITER;

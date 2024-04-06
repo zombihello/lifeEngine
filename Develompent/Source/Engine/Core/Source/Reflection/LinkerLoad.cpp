@@ -656,6 +656,37 @@ void CLinkerLoad::LoadAllObjects( bool InIsForcePreload /* = false */ )
 
 /*
 ==================
+CLinkerLoad::CreateObject
+==================
+*/
+CObject* CLinkerLoad::CreateObject( CClass* InClass, const CName& InName, CObject* InOuter )
+{
+	Assert( InOuter );
+	CPackageIndex		outerIndex;
+	
+	// If the outer isn't the outermost of the package, then we get the linker index of the outer as the outer index that we look in
+	if ( InOuter != InOuter->GetOutermost() )
+	{
+		// We need the linker index of the outer to look in, which means that the outer must have been actually 
+		// loaded off disk, and not just CreatePackage
+		uint32			linkerIndex = InOuter->GetLinkerIndex();
+		Assert( linkerIndex != INDEX_NONE );
+		outerIndex		= CPackageIndex::FromExport( InOuter->GetLinkerIndex() );
+	}
+
+	// Find and create the export object
+	uint32	index = FindExportIndex( InClass->GetCName(), InClass->GetOuter()->GetCName(), InName, !outerIndex.IsNull() ? outerIndex.ToExport() : INDEX_NONE );
+	if ( index != INDEX_NONE )
+	{
+		return CreateExport( index );
+	}
+
+	// Otherwise we not found the object :(
+	return nullptr;
+}
+
+/*
+==================
 CLinkerLoad::CreateExport
 ==================
 */
@@ -853,6 +884,56 @@ CObject* CLinkerLoad::CreateImport( uint32 InImportIndex )
 	}
 
 	return importObject.object;
+}
+
+/*
+==================
+CLinkerLoad::CreateImport
+==================
+*/
+uint32 CLinkerLoad::FindExportIndex( const CName& InClassName, const CName& InClassPackage, const CName& InObjectName, uint32 InExportOuterIndex )
+{
+	// Find the object's export index
+	uint32		hash = GetHashBucket( InObjectName );
+	for ( uint32 index = exportHash[hash]; index != INDEX_NONE; index = exportMap[index].hashNext )
+	{
+		// Make sure what index is valid
+		if ( index < 0 || index >= exportMap.size() )
+		{
+			Warnf( TEXT( "FindExportIndex: Invalid index [%d/%d] while attempting to find the object's export index '%s' with LinkerRoot '%s'\n" ),
+				   index, exportMap.size(), InObjectName.ToString().c_str(), linkerRoot->GetName().c_str() );
+			break;
+		}
+
+		// If we have same class name, class package, object name and outer index then we found it!
+		if ( exportMap[index].objectName == InObjectName && 
+			 ( ( exportMap[index].outerIndex.IsNull() && InExportOuterIndex == INDEX_NONE ) || exportMap[index].outerIndex.ToExport() == InExportOuterIndex ) &&
+			 GetExportClassPackage( index ) == InClassPackage &&
+			 GetExportClassName( index ) == InClassName )
+		{
+			return index;
+		}
+	}
+
+	// If an object with the exact class wasn't found, look for objects with a subclass of the requested class 
+	for ( uint32 exportIndex = 0, numExports = exportMap.size(); exportIndex < numExports; ++exportIndex )
+	{
+		ObjectExport&		exportObject = exportMap[exportIndex];
+		if ( exportObject.objectName == InObjectName && ( ( exportObject.outerIndex.IsNull() && InExportOuterIndex == INDEX_NONE ) || exportObject.outerIndex.ToExport() == InExportOuterIndex ) )
+		{
+			// See if this export's class inherits from the requested class
+			CClass*		exportClass = Cast<CClass>( IndexToObject( exportObject.classIndex ) );
+			for ( CClass* parentClass = exportClass; parentClass; parentClass = parentClass->GetSuperClass() )
+			{
+				if ( parentClass->GetCName() == InClassName )
+				{
+					return exportIndex;
+				}
+			}
+		}
+	}
+
+	return INDEX_NONE;
 }
 
 /*

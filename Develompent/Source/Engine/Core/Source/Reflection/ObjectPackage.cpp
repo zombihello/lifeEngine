@@ -9,6 +9,7 @@
 #include "Reflection/LinkerLoad.h"
 #include "Reflection/LinkerManager.h"
 #include "Reflection/ObjectIterator.h"
+#include "Reflection/ObjectGlobals.h"
 #include "System/BaseFileSystem.h"
 #include "Components/ActorComponent.h"
 
@@ -107,17 +108,50 @@ CObjectPackage::CreatePackage
 */
 CObjectPackage* CObjectPackage::CreatePackage( CObject* InOuter, const tchar* InPackageName )
 {
-	CObjectPackage*		resultPackage = ( CObjectPackage* )FindObjectFast( CObjectPackage::StaticClass(), InOuter, InPackageName, true, InOuter == ANY_PACKAGE );
-	if ( !resultPackage )
+	std::wstring	finalName = InPackageName;
+	
+	// Make sure what package name is valid
+	if ( !finalName.empty() && finalName[finalName.size()-1] == TEXT( '.' ) )
 	{
-		// Create a new package
-		resultPackage = new( InOuter, InPackageName, OBJECT_Public ) CObjectPackage;
-		
-		// Mark this package as newly created
-		resultPackage->AddPackageFlag( PKG_NewlyCreated );
+		std::wstring	newName = finalName.substr( 0, finalName.size()-1 );
+		Warnf( TEXT( "Invalid package name '%s', renamed to '%s'" ), finalName.c_str(), newName.c_str() );
+		finalName = newName;
 	}
 
-	return resultPackage;
+	// If final name is empty make unique name
+	if ( finalName.empty() )
+	{
+		finalName = CObject::MakeUniqueObjectName( InOuter, CObjectPackage::StaticClass() ).ToString();
+	}
+
+	// Resolve a package and name
+	ResolvePackageAndName( InOuter, finalName, true );
+	if ( finalName.empty() )
+	{
+		Sys_Error( TEXT( "CreatePackage: Can't create a package without name" ) );
+	}
+
+	// Find or create a package if finalName isn't None
+	CObjectPackage*		result = nullptr;
+	if ( finalName != TEXT( "None" ) )
+	{
+		result = FindObject<CObjectPackage>( InOuter, finalName.c_str() );
+		if ( !result )
+		{
+			// Create a new package
+			result = new( InOuter, finalName, OBJECT_Public ) CObjectPackage;
+		
+			// Mark this package as newly created
+			result->AddPackageFlag( PKG_NewlyCreated );
+		}
+	}
+	// Otherwise it's critical error
+	else
+	{
+		Sys_Error( TEXT( "CreatePackage: Can't create a package with name 'None'" ) );
+	}
+
+	return result;
 }
 
 /*

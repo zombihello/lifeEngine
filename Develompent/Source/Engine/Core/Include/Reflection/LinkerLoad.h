@@ -53,6 +53,16 @@ public:
 	static CLinkerLoad* CreateLinker( CObjectPackage* InParent, const tchar* InFilename, uint32 InLoadFlags );
 
 	/**
+	 * @brief Create the instance of an object as found in this linker
+	 * 
+	 * @param InClass		The class of the object
+	 * @param InName		The name of the object
+	 * @param InOuter		The outer that this object must be in (for finding objects in a specific group when there are multiple groups with the same name)
+	 * @param Return the created object. If failed returns NULL
+	 */
+	CObject* CreateObject( CClass* InClass, const CName& InName, CObject* InOuter );
+
+	/**
 	 * @brief Load all objects in package
 	 * @param InIsForcePreload		Whether to explicitly call Preload (serialize) right away instead of being called from EndLoadPackage()
 	 */
@@ -234,6 +244,17 @@ private:
 	 * @return Return created import object
 	 */
 	CObject* CreateImport( uint32 InImportIndex );
+
+	/**
+	 * @brief Find export index of the object
+	 * 
+	 * @param InClassName			The name of the class for the CObject
+	 * @param InClassPackage		The name of the package that contains the class of the CObject
+	 * @param InObjectName			The name of the CObject
+	 * @param InExportOuterIndex	Export index of the outer of the CObject
+	 * @return Return export index of the Object. If not found returns INDEX_NONE
+	 */
+	uint32 FindExportIndex( const CName& InClassName, const CName& InClassPackage, const CName& InObjectName, uint32 InExportOuterIndex );
 
 	/**
 	 * @brief Convert package index to object

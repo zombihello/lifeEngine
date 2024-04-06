@@ -46,6 +46,9 @@ void UnhashObject( class CObject* InObject );
  * @ingroup Core
  * @brief Find an object, fast version
  * 
+ * Fast version of FindObject that relies on the passed in CName being the object name without any group/package qualifiers.
+ * This will only find top level packages or subobjects nested directly within a passed in outer
+ * 
  * @param InOuter			Outer object to look inside, if NULL this will only look for top level packages
  * @param InName			Object name to look for relative to InOuter
  * @param InIsExactClass	Whether to require an exact match with the passed in class
