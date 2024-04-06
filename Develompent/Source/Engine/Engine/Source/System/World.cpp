@@ -155,11 +155,31 @@ CWorld::PostLoad
 void CWorld::PostLoad()
 {
 	Super::PostLoad();
+	bool	bDirtyPackage = false;
 
 	// Call event of spawn for all actors
-	for ( uint32 index = 0, count = actors.size(); index < count; ++index )
+	for ( uint32 index = 0, count = actors.size(); index < count; )
 	{
-		actors[index]->Spawned();
+		// Make sure that the actor was loaded
+		AActor*		actor = actors[index];
+		if ( actor )
+		{
+			actor->Spawned();
+			++index;
+		}
+		// Otherwise remove the one from array
+		else
+		{
+			actors.erase( actors.begin() + index );
+			count			= actors.size();
+			bDirtyPackage	= true;
+		}
+	}
+
+	// Mark the package as dirty if it need
+	if ( bDirtyPackage )
+	{
+		MarkPackageDirty();
 	}
 }
 

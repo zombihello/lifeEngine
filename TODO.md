@@ -35,7 +35,7 @@
 - [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to AngelScript)
 	- [X] Implement linker save and linker load for serialize CObjects
 	- [X] Implement FindObject, LoadObject and LoadClass functions
-	- [ ] Implement ResolveName for resolve a package and name
+	- [X] Implement ResolveName for resolve a package and name
 	- [X] Implement replacing existing object in StaticAllocateObject
 	- [ ] Replace CObject::SetName to Rename for guarantee the uniqueness of the name
 	- [X] Need fix destroying packages in GC whom use by objects not considered for GC
