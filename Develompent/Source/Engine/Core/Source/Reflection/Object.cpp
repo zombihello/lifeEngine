@@ -5,7 +5,10 @@
 #include "Reflection/Object.h"
 #include "Reflection/ObjectPackage.h"
 #include "Reflection/ObjectHash.h"
+#include "Reflection/ObjectGlobals.h"
+#include "Reflection/ObjectRedirector.h"
 #include "Reflection/LinkerLoad.h"
+#include "Reflection/LinkerManager.h"
 #include "Reflection/Class.h"
 #include "System/Threading.h"
 #include "System/Config.h"
@@ -248,6 +251,132 @@ void CObject::MarkPackageDirty() const
 			package->SetDirtyFlag( true );
 		}
 	}
+}
+
+/*
+==================
+CObject::Rename
+==================
+*/
+bool CObject::Rename( const tchar* InNewName /* = nullptr */, CObject* InNewOuter /* = nullptr */, uint32 InFlags /* = REN_None */ )
+{
+	// Check that we are not renaming a within object into an Outer of the wrong type
+	if ( InNewOuter && !InNewOuter->InternalIsA( GetClass()->GetWithinClass() ) )
+	{
+		if ( InFlags & REN_Test )
+		{
+			return false;
+		}
+
+		Sys_Error( TEXT( "Cannot rename '%s' into outer '%s' as it is not of type '%s'" ), GetFullName().c_str(), InNewOuter->GetFullName().c_str(), GetClass()->GetWithinClass()->GetName().c_str() );
+	}
+
+	// Find an object with the same name and same class in the new outer
+	if ( InNewName )
+	{
+		CObject*	existingObject = FindObject( GetClass(), InNewOuter ? InNewOuter : outer, InNewName, true );
+		if ( existingObject == this )
+		{
+			// The name is exactly the same, there's nothing to change 
+			return true;
+		}
+		else if ( existingObject )
+		{
+			if ( InFlags & REN_Test )
+			{
+				return false;
+			}
+			else
+			{
+				Sys_Error( TEXT( "Renaming an object '%s' on top of an existing object '%s' is not allowed" ), GetFullName().c_str(), existingObject->GetFullName().c_str() );
+			}
+		}
+	}
+
+	// If we are just testing, and there was no conflict, then return a success
+	if ( InFlags & REN_Test )
+	{
+		return true;
+	}
+
+	// Reset loaders if it need
+	if ( !( InFlags & REN_ForceNoResetLoaders ) )
+	{
+		CLinkerManager::Get().ResetLoaders( outer );
+	}
+
+	// Get a new object name
+	CName		oldName = GetCName();
+	CObject*	oldOuter = outer;
+	CName		newName;
+	bool		bCreateRedirector = false;
+	if ( !InNewName )
+	{
+		// If NULL is passed in, then we are deliberately trying to get a new name
+		// Otherwise if the outer is changing, try and maintain the name
+		if ( InNewOuter && !FindObjectFast( GetClass(), InNewOuter, oldName ) )
+		{
+			newName = oldName;
+		}
+		else
+		{
+			newName = MakeUniqueObjectName( InNewOuter ? InNewOuter : oldOuter, GetClass() );
+		}
+	}
+	else
+	{
+		newName = InNewName;
+	}
+
+	// Mark touched packages as dirty
+	if ( !( InFlags & REN_DoNotDirty ) )
+	{
+		MarkPackageDirty();
+		if ( InNewOuter )
+		{
+			InNewOuter->MarkPackageDirty();
+		}
+	}
+
+	// Check if it is necessary create the object redirector
+	if ( HasAnyObjectFlags( OBJECT_Public ) )
+	{
+		const bool	bUniquePathChanged	= ( InNewOuter && oldOuter != InNewOuter ) || oldName != InNewName;
+		const bool	bRootPackage		= GetClass() == CObjectPackage::StaticClass() && !oldOuter;
+		const bool	bRedirectionAllowed	= !g_IsGame && !( InFlags & REN_DontCreateRedirectors );
+
+		// We need to create a redirector if we changed the outer or name of an object that can be referenced from other packages
+		// so that references to this object are not broken
+		bCreateRedirector = !bRootPackage && bUniquePathChanged && bRedirectionAllowed;
+	}
+
+	// Change the name and outer and rehash into name hash tables
+	UnhashObject( this );
+	name = newName;
+	if ( InNewOuter )
+	{
+		outer = InNewOuter;
+	}
+	HashObject( this );
+
+	// Create the redirector AFTER renaming the object. Two objects of different classes may not have the same fully qualified name
+	if ( bCreateRedirector )
+	{
+		// Look for an existing redirector with the same name/class/outer in the old package
+		CObjectRedirector*		objectRedirector = FindObject<CObjectRedirector>( oldOuter, oldName.ToString().c_str(), true );
+
+		// If it does not exist, create it
+		if ( !objectRedirector )
+		{
+			// Create a CObjectRedirector with the same name as the old object we are redirecting
+			objectRedirector = NewObject<CObjectRedirector>( oldOuter, oldName, OBJECT_Public );
+		}
+
+		// Point the redirector object to this object
+		objectRedirector->SetDestinationObject( this );
+	}
+
+	return true;
 }
 
 /*

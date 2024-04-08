@@ -2,6 +2,7 @@
 #include "Reflection/LinkerLoad.h"
 #include "Reflection/LinkerManager.h"
 #include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectRedirector.h"
 #include "Reflection/Class.h"
 #include "System/PackageFileCache.h"
 
@@ -681,6 +682,28 @@ CObject* CLinkerLoad::CreateObject( CClass* InClass, const CName& InName, CObjec
 		return CreateExport( index );
 	}
 
+	// Since we didn't find it, see if we can find an object redirector with the same name
+	index = FindExportIndex( NAME_CObjectRedirector, NAME_Core, InName, !outerIndex.IsNull() ? outerIndex.ToExport() : INDEX_NONE );
+
+	// If we found a redirector, create it, and move on down the line
+	if ( index != INDEX_NONE )
+	{
+		// Create the redirector and load it
+		CObjectRedirector*		objectRedirector = ( CObjectRedirector* )CreateExport( index );
+		Preload( objectRedirector );
+
+		// If we found what it was point to, then return it
+		CObject*				destinationObject = objectRedirector->GetDestinationObject();
+		if ( destinationObject && destinationObject->GetClass() == InClass )
+		{
+			// Broadcast that we followed a redirector successfully
+			CObjectRedirector::onObjectRedirectorFollowed.Broadcast( filename, objectRedirector );
+
+			// Return the object we are being redirected to
+			return destinationObject;
+		}
+	}
+
 	// Otherwise we not found the object :(
 	return nullptr;
 }
@@ -861,16 +884,22 @@ CObject* CLinkerLoad::CreateImport( uint32 InImportIndex )
 	if ( !importObject.object )
 	{
 		// Try to load the object if we no have source linker
+		EVerifyResult		verifyImportResult = VERIFY_Success;
 		if ( !importObject.sourceLinker )
 		{
-			VerifyImport( InImportIndex );
+			verifyImportResult = VerifyImport( InImportIndex );
 		}
 
 		// If we have source index then create export for this import
 		if ( importObject.sourceIndex != INDEX_NONE )
 		{
 			Assert( importObject.sourceLinker );
-			importObject.object = importObject.sourceLinker->CreateExport( importObject.sourceIndex );
+			
+			// VerifyImport may have already created the import and SourceIndex has changed to point to the actual redirected object
+			if ( !importObject.object || verifyImportResult != VERIFY_Redirected )
+			{
+				importObject.object = importObject.sourceLinker->CreateExport( importObject.sourceIndex );
+			}
 			CObjectPackage::GetObjectSerializeContext().IncrementImportCount();
 			CLinkerManager::Get().AddLoaderWithNewImports( this );
 		}
@@ -973,10 +1002,10 @@ CObject* CLinkerLoad::IndexToObject( CPackageIndex& InIndex )
 
 /*
 ==================
-CLinkerLoad::VerifyImport
+CLinkerLoad::VerifyImportInner
 ==================
 */
-void CLinkerLoad::VerifyImport( uint32 InImportIndex )
+void CLinkerLoad::VerifyImportInner( uint32 InImportIndex )
 {
 	Assert( IsLoading() );
 	Assert( CObjectPackage::GetObjectSerializeContext().HasStartedLoading() );
@@ -1003,7 +1032,7 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 	// Find or load the linker load that contains the ObjectExport for this import
 	if ( importObject.outerIndex.IsNull() && importObject.className != NAME_CObjectPackage )
 	{
-		Errorf( TEXT( "VerifyImport: %s has an inappropriate outermost, it was probably saved with a deprecated outer (file: %s)\n" ), importObjectName.c_str(), GetPath().c_str() );
+		Errorf( TEXT( "VerifyImportInner: %s has an inappropriate outermost, it was probably saved with a deprecated outer (file: %s)\n" ), importObjectName.c_str(), GetPath().c_str() );
 		importObject.sourceLinker = nullptr;
 		return;
 	}
@@ -1076,14 +1105,16 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 			{
 				if ( index < 0 || index >= importObject.sourceLinker->exportMap.size() )
 				{
-					Warnf( TEXT( "VerifyImport: Invalid index [%d/%d] while attempting to import '%s' with LinkerRoot '%s'\n" ),
+					Warnf( TEXT( "VerifyImportInner: Invalid index [%d/%d] while attempting to import '%s' with LinkerRoot '%s'\n" ),
 						   index, importObject.sourceLinker->exportMap.size(), importObjectName.c_str(), importObject.sourceLinker->linkerRoot->GetName().c_str() );
 					break;
 				}
 				else
 				{
 					ObjectExport&		sourceExport = importObject.sourceLinker->exportMap[index];
-					if ( sourceExport.objectName == importObject.objectName )
+					if ( sourceExport.objectName == importObject.objectName &&
+						 // If we are not explicitly looking for a redirector, skip for now as it will be properly handled in CreateImport 
+						 ( importObject.className == NAME_CObjectRedirector ) == ( importObject.sourceLinker->GetExportClassName( index ) == NAME_CObjectRedirector ) )
 					{
 						// At this point, SourceExport is an ObjectExport in another linker that looks like it
 						// matches the ObjectImport we're trying to load - double check that we have the correct one
@@ -1128,7 +1159,7 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 									{
 										if ( sourceExportOuter.className != outerImport.className || sourceExportOuter.classPackage != outerImport.classPackage )
 										{
-											Warnf( TEXT( "VerifyImport: Resolved outer import with a different class: import class '%s.%s', package class '%s.%s'. Resave %s to fix\n" ),
+											Warnf( TEXT( "VerifyImportInner: Resolved outer import with a different class: import class '%s.%s', package class '%s.%s'. Resave %s to fix\n" ),
 												   outerImport.classPackage.ToString().c_str(), outerImport.className.ToString().c_str(), sourceExportOuter.classPackage.ToString(), sourceExportOuter.className.ToString().c_str(), linkerRoot->GetName().c_str() );
 										}
 									}
@@ -1138,14 +1169,14 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 
 						if ( !( sourceExport.objectFlags & OBJECT_Public ) )
 						{
-							Warnf( TEXT( "VerifyImport: Can't import private object %s %s\n" ), importObject.className.ToString().c_str(), GetImportFullName( index ).c_str() );
+							Warnf( TEXT( "VerifyImportInner: Can't import private object %s %s\n" ), importObject.className.ToString().c_str(), GetImportFullName( index ).c_str() );
 							return;
 						}
 
 						// Found the ObjectExport for this import
 						if ( ( importObject.className != importObject.sourceLinker->GetExportClassName( index ) ) || ( importObject.classPackage != importObject.sourceLinker->GetExportClassPackage( index ) ) )
 						{
-							Warnf( TEXT( "VerifyImport: Resolved import with a different class: import class '%s.%s', package class '%s.%s'. Resave %s to fix\n" ),
+							Warnf( TEXT( "VerifyImportInner: Resolved import with a different class: import class '%s.%s', package class '%s.%s'. Resave %s to fix\n" ),
 								   importObject.classPackage.ToString().c_str(), 
 								   importObject.className.ToString().c_str(), 
 								   importObject.sourceLinker->GetExportClassPackage( index ).ToString().c_str(), 
@@ -1216,6 +1247,120 @@ void CLinkerLoad::VerifyImport( uint32 InImportIndex )
 			}
 		}
 	}
+}
+
+/*
+==================
+CLinkerLoad::VerifyImport
+==================
+*/
+CLinkerLoad::EVerifyResult CLinkerLoad::VerifyImport( uint32 InImportIndex )
+{
+	// Map the object into our table
+	ObjectImport&	importObject = importMap[InImportIndex];
+
+	// Try to load the object
+	VerifyImportInner( InImportIndex );
+
+	// By default, we haven't failed yet
+	EVerifyResult	result = VERIFY_Success;
+
+	// Checks find out if the VerifyImportInner was successful or not 
+	if ( importObject.sourceLinker && importObject.sourceIndex == INDEX_NONE && !importObject.object && !importObject.outerIndex.IsNull() && importObject.objectName != NAME_CObjectPackage )
+	{
+		// If we found the package, but not the object, look for a redirector
+		ObjectImport	originalImport	= importObject;
+		importObject.className			= NAME_CObjectRedirector;
+		importObject.classPackage		= NAME_Core;
+
+		// Try again for the redirector
+		VerifyImportInner( InImportIndex );
+
+		// If the redirector wasn't found, then it truly doesn't exist
+		if ( importObject.sourceIndex == INDEX_NONE )
+		{
+			result = VERIFY_Failed;
+		}
+		// Otherwise we found that the redirector exists
+		else
+		{
+			// Create the redirector (no serialization yet)
+			CObjectRedirector*		objectRedirector = Cast<CObjectRedirector>( importObject.sourceLinker->CreateExport( importObject.sourceIndex ) );
+			if ( !objectRedirector )
+			{
+				result = VERIFY_Failed;
+			}
+			else
+			{
+				// Serialize in the properties of the redirector (to get the object the redirector point to)
+				Preload( objectRedirector );
+				CObject*	destinationObject = objectRedirector->GetDestinationObject();
+
+				// Check to make sure the destination object was loaded
+				if ( !destinationObject )
+				{
+					result = VERIFY_Failed;
+				}
+				else
+				{
+					// Check that in fact it was the type we thought it should be
+					bool	bValidClass = false;
+					CClass*	checkClass = destinationObject->GetClass();
+					while ( !bValidClass && checkClass )
+					{
+						if ( checkClass->GetCName() == originalImport.className )
+						{
+							bValidClass = true;
+							break;
+						}
+						checkClass = checkClass->GetSuperClass();
+					}
+
+					if ( !bValidClass )
+					{
+						// If the destination is a CObjectRedirector you've most likely made a nasty circular loop
+						if ( destinationObject->GetClass() == CObjectRedirector::StaticClass() )
+						{
+							const std::wstring		outerName = importObject.outerIndex.IsNull() ? linkerRoot->GetFullName() : GetFullImportExportName( importObject.outerIndex );
+							Warnf( TEXT( "VerifyImport: Import '%d' named '%s' in '%s' has circular loop of object redirection\n" ), InImportIndex, originalImport.objectName.ToString().c_str(), outerName.c_str() );
+						}
+
+						result = VERIFY_Failed;
+					}
+					else
+					{
+						// Broadcast that we followed a redirector successfully
+						CObjectRedirector::onObjectRedirectorFollowed.Broadcast( filename, objectRedirector );
+
+						// Now, fake our Import to be what the redirector pointed to
+						result				= VERIFY_Redirected;
+						importObject.object = destinationObject;
+						CObjectPackage::GetObjectSerializeContext().IncrementImportCount();
+						CLinkerManager::Get().AddLoaderWithNewImports( this );
+					}
+				}
+			}
+		}
+
+		// Fix up the import. We put the original data back for the ClassName and ClassPackage (which are read off disk, and are expected not to change)
+		importObject.className		= originalImport.className;
+		importObject.classPackage	= originalImport.classPackage;
+
+		// If nothing above failed, then we are good to go
+		if ( result != VERIFY_Failed )
+		{
+			// We update the runtime information (SourceIndex, SourceLinker) to point to the object the redirector pointed to
+			importObject.sourceIndex	= importObject.object->GetLinkerIndex();
+			importObject.sourceLinker	= importObject.object->GetLinker();
+		}
+		else
+		{
+			// Put us back the way we were and peace out
+			importObject = originalImport;
+		}
+	}
+
+	return result;
 }
 
 /*

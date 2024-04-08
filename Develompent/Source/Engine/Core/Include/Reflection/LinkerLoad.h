@@ -224,6 +224,16 @@ private:
 	static constexpr uint32		exportHashCount = 256;				/**< Export hash count */
 
 	/**
+	 * @brief Verify results
+	 */
+	enum EVerifyResult
+	{
+		VERIFY_Failed,		/**< Error occurred when verifying import */
+		VERIFY_Success,		/**< Verify completed successfully */
+		VERIFY_Redirected	/**< Verify completed successfully and followed a redirector */
+	};
+
+	/**
 	 * @brief Detach an export object from the linker
 	 * @param InExportIndex		The index of the export to detach
 	 */
@@ -269,10 +279,19 @@ private:
 
 	/**
 	 * @brief Safely verify that an import in the ImportMap points to a good object
-	 *
 	 * @param InImportIndex		The index into this packages ImportMap to verify
 	 */
-	void VerifyImport( uint32 InImportIndex );
+	void VerifyImportInner( uint32 InImportIndex );
+
+	/**
+	 * @brief A wrapper around VerifyImportInner
+	 * A wrapper around VerifyImportInner. If the VerifyImportInner fails, this function
+	 * will look for a CObjectRedirector that will point to the real location of the object
+	 * 
+	 * @param InImportIndex		The index into this packages ImportMap to verify
+	 * @return Return verify import result
+	 */
+	EVerifyResult VerifyImport( uint32 InImportIndex );
 
 	/**
 	 * @brief Calculate hash for an export hash

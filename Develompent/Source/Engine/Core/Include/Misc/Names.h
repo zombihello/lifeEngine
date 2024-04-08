@@ -44,6 +44,7 @@ REGISTER_NAME( 21, CStruct )
 REGISTER_NAME( 22, CClass )
 REGISTER_NAME( 23, CFunction )
 REGISTER_NAME( 24, CObjectPackage )
+REGISTER_NAME( 25, CObjectRedirector )
 
 #ifdef REGISTERING_ENUM
 		};

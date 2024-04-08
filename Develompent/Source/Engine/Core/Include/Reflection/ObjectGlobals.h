@@ -67,6 +67,36 @@ CClass* LoadClass( CClass* InBaseClass, CObject* InOuter, const tchar* InName, c
 
 /**
  * @ingroup Core
+ * @brief Create a new instance of an object
+ *
+ * @param InClass	The class of the object to create
+ * @param InOuter   The object to create this object within
+ * @param InName	The name to give the new object
+ * @param InFlags   The object flags
+ * @return Return allocated object, it will be fully initialized
+ */
+FORCEINLINE CObject* NewObject( CClass* InClass, CObject* InOuter = nullptr, CName InName = NAME_None, ObjectFlags_t InFlags = OBJECT_None )
+{
+	return CObject::StaticConstructObject( InClass, InOuter, InName, InFlags );
+}
+
+/**
+ * @ingroup Core
+ * @brief Create a new instance of an object
+ *
+ * @param InOuter   The object to create this object within
+ * @param InName	The name to give the new object
+ * @param InFlags   The object flags
+ * @return Return allocated object, it will be fully initialized
+ */
+template<class TClass>
+FORCEINLINE TClass* NewObject( CObject* InOuter = nullptr, CName InName = NAME_None, ObjectFlags_t InFlags = OBJECT_None )
+{
+	return ( TClass* )CObject::StaticConstructObject( TClass::StaticClass(), InOuter, InName, InFlags );
+}
+
+/**
+ * @ingroup Core
  * @brief Find an object
  *
  * Tries to find an object in memory. This will handle fully qualified paths of the form packagename.object:subobject and resolve references for you.

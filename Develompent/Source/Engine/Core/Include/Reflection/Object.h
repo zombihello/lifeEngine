@@ -64,7 +64,7 @@ public:
     /**
      * @brief Create a new instance of an object
      *
-     * @param Class		The class of the object to create
+     * @param InClass	The class of the object to create
      * @param InOuter   The object to create this object within
      * @param InName	The name to give the new object
      * @param InFlags   The object flags
@@ -75,7 +75,7 @@ public:
     /**
      * @brief Create a new instance of an object
      *
-     * @param Class		The class of the object to create
+     * @param InClass	The class of the object to create
      * @param InOuter   The object to create this object within
      * @param InName	The name to give the new object
      * @param InFlags   The object flags
@@ -277,6 +277,16 @@ public:
         name = InName;
         HashObject( this );
     }
+
+    /**
+     * @brief Rename object or change outer
+     * 
+     * @param InNewName     The new name of the object, if NULL then InNewOuter should be set
+     * @param InNewOuter    New outer this object will be placed within, if NULL it will use the current outer
+     * @param InFlags       Flags to specify what happens during the rename (see ERenameFlags)
+     * @return Return TRUE if object has been renamed/changed outer, otherwise returns FALSE
+     */
+    virtual bool Rename( const tchar* InNewName = nullptr, CObject* InNewOuter = nullptr, uint32 InFlags = REN_None );
 
     /**
      * @brief Set object flags

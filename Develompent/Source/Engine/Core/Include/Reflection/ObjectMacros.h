@@ -469,6 +469,19 @@ enum ESaveFlags
 
 /**
  * @ingroup Core
+ * @brief Flags for rename object
+ */
+enum ERenameFlags
+{
+    REN_None                    = 0,        /**< No flags */
+    REN_Test                    = 1 << 0,   /**< Just test to make sure that the rename is guaranteed to succeed if an non test rename immediately follows */
+    REN_ForceNoResetLoaders     = 1 << 1,   /**< Rename won't call ResetLoaders. You should pass this if you are renaming a deep subobject and do not need to reset loading for the outer package */
+    REN_DoNotDirty              = 1 << 2,   /**< Indicates that the object (and new outer) should not be dirtied */
+    REN_DontCreateRedirectors   = 1 << 3    /**< Don't create an object redirector, even if the class is marked OBJECT_Public */
+};
+
+/**
+ * @ingroup Core
  * @brief Internal enum for native constructors
  */
 enum ENativeConstructor
