@@ -98,10 +98,10 @@ void AActor::StaticInitializeClass()
 	// Native properties
 	new( staticClass, TEXT( "bVisibility" ), OBJECT_Public )	CBoolProperty( CPP_PROPERTY( ThisClass, bVisibility ), TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPF_Edit );
 	new( staticClass, TEXT( "bIsStatic" ), OBJECT_Public )		CBoolProperty( CPP_PROPERTY( ThisClass, bIsStatic ), TEXT( "Actor" ), TEXT( "Is static actor" ), CPF_Edit );
-	new( staticClass, NAME_None )								CObjectProperty( CPP_PROPERTY( ThisClass, rootComponent ), NAME_None, TEXT( "" ), CPF_None, CSceneComponent::StaticClass() );
-	new( staticClass, NAME_None )								CObjectProperty( CPP_PROPERTY( ThisClass, collisionComponent ), NAME_None, TEXT( "" ), CPF_None, CPrimitiveComponent::StaticClass() );
+	new( staticClass, TEXT( "Root Component" ) )				CObjectProperty( CPP_PROPERTY( ThisClass, rootComponent ), NAME_None, TEXT( "" ), CPF_None, CSceneComponent::StaticClass() );
+	new( staticClass, TEXT( "Collision Component" ) )			CObjectProperty( CPP_PROPERTY( ThisClass, collisionComponent ), NAME_None, TEXT( "" ), CPF_None, CPrimitiveComponent::StaticClass() );
 
-	CArrayProperty*		ownedComponentsProperty = new( staticClass, NAME_None )	CArrayProperty( CPP_PROPERTY( ThisClass, ownedComponents ), NAME_None, TEXT( "" ), CPF_None );
+	CArrayProperty*		ownedComponentsProperty = new( staticClass, TEXT( "Owned Components" ) )	CArrayProperty( CPP_PROPERTY( ThisClass, ownedComponents ), NAME_None, TEXT( "" ), CPF_None );
 	new( ownedComponentsProperty, NAME_None ) CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, CActorComponent::StaticClass() );
 }
 
@@ -314,7 +314,6 @@ CActorComponent* AActor::CreateComponent( CClass* InClass, const CName& InName, 
 	}
 #endif // WITH_EDITOR
 
-	component->SetCName( InName );
 	ownedComponents.push_back( component );
 	return component;
 }
@@ -338,7 +337,7 @@ void AActor::AddOwnedComponent( class CActorComponent* InComponent )
 	}
 
 	// Add component
-	InComponent->SetOuter( this );
+	InComponent->Rename( nullptr, this );
 	ownedComponents.push_back( InComponent );
 }
 
@@ -365,7 +364,7 @@ void AActor::RemoveOwnedComponent( class CActorComponent* InComponent )
 				Assert( false && "Need implement change root component" );
 			}
 
-			InComponent->SetOuter( nullptr );
+			InComponent->MarkPendingKill();
 			ownedComponents.erase( ownedComponents.begin() + index );
 			return;
 		}
@@ -385,7 +384,7 @@ void AActor::ResetOwnedComponents()
 		{
 			collisionComponent->TermPrimitivePhysics();
 		}
-		ownedComponents[index]->SetOuter( nullptr );
+		ownedComponents[index]->MarkPendingKill();
 	}
 
 	ownedComponents.clear();

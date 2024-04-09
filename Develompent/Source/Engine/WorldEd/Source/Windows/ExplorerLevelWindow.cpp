@@ -6,6 +6,7 @@
 #include "System/InputSystem.h"
 #include "Windows/ExplorerLevelWindow.h"
 #include "Windows/InputTextDialog.h"
+#include "Windows/DialogWindow.h"
 #include "ImGUI/ImGUIEngine.h"
 
 /**
@@ -51,32 +52,48 @@ public:
 	 */
 	virtual uint32 Run() override
 	{
-		// Get new actor name. If we not press 'ok' nothing apply and exit from method
+		// Get new actor name and Assert on exist another actor with this name
 		bool			bIsOk = false;
 		std::wstring	newActorName;
+		while ( !bIsOk )
 		{
-			TSharedPtr<CInputTextDialog>	popup = owner->OpenPopup<CInputTextDialog>( TEXT( "Enter" ), TEXT( "New Actor Name" ), actor->GetName() );
-			popup->OnTextEntered().Add( [&]( const std::string& InText )
-										{
-											bIsOk = true;
-											newActorName = ANSI_TO_TCHAR( InText.c_str() );
-											eventResponse.Trigger();
-										} );
-
-			popup->OnCenceled().Add( [&]()
-									 {
-										 bIsOk = false;
-										 eventResponse.Trigger();
-									 } );
-			eventResponse.Wait();
-			if ( !bIsOk )
+			// Get new actor name. If we not press 'ok' nothing apply and exit from method
 			{
-				return 0;
+				TSharedPtr<CInputTextDialog>	popup = owner->OpenPopup<CInputTextDialog>( TEXT( "Enter" ), TEXT( "New Actor Name" ), actor->GetName() );
+				popup->OnTextEntered().Add( [&]( const std::string& InText )
+											{
+												bIsOk = true;
+												newActorName = ANSI_TO_TCHAR( InText.c_str() );
+												eventResponse.Trigger();
+											} );
+
+				popup->OnCenceled().Add( [&]()
+										 {
+											 bIsOk = false;
+											 eventResponse.Trigger();
+										 } );
+				eventResponse.Wait();
+				if ( !bIsOk )
+				{
+					return 0;
+				}
+			}
+
+			// If actor with new name already exist - try enter another name 
+			if ( !actor->Rename( newActorName.c_str(), nullptr, REN_Test ) )
+			{
+				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "Name '%s' already exist in the world" ), newActorName.c_str() ), CDialogWindow::BT_Ok );
+				popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
+											  {
+												  eventResponse.Trigger();
+											  } );
+				bIsOk = false;
+				eventResponse.Wait();
 			}
 		}
 
 		// Add change actor name
-		actor->SetName( newActorName.c_str() );
+		actor->Rename( newActorName.c_str() );
 
 		// Mark the world's package as dirty
 		g_World->MarkPackageDirty();

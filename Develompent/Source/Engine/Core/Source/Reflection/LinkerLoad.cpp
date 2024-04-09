@@ -690,6 +690,7 @@ CObject* CLinkerLoad::CreateObject( CClass* InClass, const CName& InName, CObjec
 	{
 		// Create the redirector and load it
 		CObjectRedirector*		objectRedirector = ( CObjectRedirector* )CreateExport( index );
+		objectRedirector->AddObjectFlag( OBJECT_NeedLoad );
 		Preload( objectRedirector );
 
 		// If we found what it was point to, then return it
@@ -1295,7 +1296,7 @@ CLinkerLoad::EVerifyResult CLinkerLoad::VerifyImport( uint32 InImportIndex )
 				// Serialize in the properties of the redirector (to get the object the redirector point to)
 				// Always load redirectors. This will allow inner redirector references to always serialize fully here before accessing the GetDestinationObject()
 				// and will be right linker with linker index
-				objectRedirector->SetObjectFlags( OBJECT_NeedLoad );
+				objectRedirector->AddObjectFlag( OBJECT_NeedLoad );
 				Preload( objectRedirector );
 				CObject*	destinationObject = objectRedirector->GetDestinationObject();
 

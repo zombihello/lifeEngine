@@ -276,7 +276,6 @@ void CCookPackagesCommandlet::SpawnTilesInWorld( const tmx::Map& InTMXMap, const
 					spriteComponent->SetMaterial( tileset.material );
 					spriteComponent->SetSpriteSize( Vector2D( tileset.tileSize.x, tileset.tileSize.y ) );
 					spriteComponent->SetTextureRect( textureRect );
-					sprite->SetName( TEXT( "ASprite_Tile" ) );
 					sprite->SetStatic( true );
 				}
 
@@ -434,7 +433,7 @@ void CCookPackagesCommandlet::SpawnActorsInWorld( const tmx::Map& InTMXMap, cons
 					}
 
 					AActor*		actor = g_World->SpawnActor( classActor, tmxObject.transform.GetLocation(), tmxObject.transform.GetRotation() );
-					actor->SetName( tmxObject.name.c_str() );
+					actor->Rename( tmxObject.name.c_str() );
 					if ( !actor->InitProperties( tmxObject.actorVars, this ) )
 					{
 						Sys_Error( TEXT( "Failed init properties in actor '%s'" ), tmxObject.name.c_str() );

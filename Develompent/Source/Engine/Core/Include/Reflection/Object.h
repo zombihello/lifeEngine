@@ -243,42 +243,6 @@ public:
     }
 
     /**
-     * @brief Set the object this object is in
-     * @param InOuter   The object this object is in (can be NULL)
-     */
-    FORCEINLINE void SetOuter( CObject* InOuter )
-    {
-        Warnf( TEXT( "CObject::SetOuter : Need rehash object!\n" ) );
-        UnhashObject( this );
-        outer = InOuter;
-        HashObject( this );
-    }
-
-    /**
-     * @brief Set name object
-     * @param InName    Name object (CName)
-     */
-    FORCEINLINE void SetCName( const CName& InName )
-    {
-        Warnf( TEXT( "CObject::SetCName : Need rehash object!\n" ) );
-        UnhashObject( this );
-        name = InName;
-        HashObject( this );
-    }
-
-    /**
-     * @brief Set name object
-     * @param InName    Name object
-     */
-    FORCEINLINE void SetName( const tchar* InName )
-    {
-        Warnf( TEXT( "CObject::SetName : Need rehash object!\n" ) );
-        UnhashObject( this );       // TODO yehor.pohuliaka: Need remove methods SetCName, SetName and instead of them make Rename for guarantee the uniqueness of the name
-        name = InName;
-        HashObject( this );
-    }
-
-    /**
      * @brief Rename object or change outer
      * 
      * @param InNewName     The new name of the object, if NULL then InNewOuter should be set

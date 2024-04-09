@@ -467,6 +467,15 @@ public:
 		return summary;
 	}
 
+	/**
+	 * @brief Get file name
+	 * @return Return file name
+	 */
+	FORCEINLINE const std::wstring& GetFileName() const
+	{
+		return filename;
+	}
+
 protected:
 	CObjectPackage*		linkerRoot;		/**< The top-level CObjectPackage object for the package associated with this linker */
 	PackageFileSummary	summary;		/**< Table of contents for this package's file */

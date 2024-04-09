@@ -80,6 +80,12 @@ public:
 		fileLookup.clear();
 	}
 
+	/**
+	 * @brief Get package file list
+	 * @return Return the list of fully qualified or relative path names for all registered packages
+	 */
+	std::vector<std::wstring> GetPackageFileList() const;
+
 private:
 	std::unordered_map<std::wstring, std::wstring>		fileLookup;	/**< Map of package files */
 };

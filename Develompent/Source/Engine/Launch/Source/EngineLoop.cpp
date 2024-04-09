@@ -321,6 +321,10 @@ int32 CEngineLoop::Init()
 		g_FullScreenMovie->GameThreadInitiateStartupSequence();
 	}
 
+	// Setup GC optimizations
+	CObjectGC::Get().CloseDisregardForGC();
+	g_IsInitialLoad = false;
+
 	// Parse cmd line for start commandlets
 #if WITH_EDITOR
 	if ( CBaseCommandlet::ExecCommandlet( g_CommandLine ) )
@@ -328,10 +332,6 @@ int32 CEngineLoop::Init()
 		return result;
 	}
 #endif // WITH_EDITOR
-
-	// Setup GC optimizations
-	CObjectGC::Get().CloseDisregardForGC();
-	g_IsInitialLoad = false;
 
 	// Loading map
 	std::wstring		map;

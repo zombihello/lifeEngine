@@ -352,7 +352,7 @@ bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 	Assert( g_World );
 	Logf( TEXT( "Save map: %s\n" ), InMap.c_str() );
 
-	g_World->GetOutermost()->SetName( CFilename( InMap ).GetBaseFileName().c_str() );
+	g_World->GetOutermost()->Rename( CFilename( InMap ).GetBaseFileName().c_str() );
 	if ( !CObjectPackage::SavePackage( g_World->GetOutermost(), g_World, 0, InMap.c_str(), SAVE_None ) )
 	{
 		OutError = TEXT( "Failed to save map" );

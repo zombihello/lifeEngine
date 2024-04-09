@@ -288,3 +288,22 @@ bool CWindowsFileSystem::IsDirectory( const std::wstring& InPath ) const
 	DWORD		fileAttributes = GetFileAttributesW( InPath.c_str() );
 	return fileAttributes != INVALID_FILE_ATTRIBUTES && fileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 }
+
+/*
+==================
+CWindowsFileSystem::IsReadOnly
+==================
+*/
+bool CWindowsFileSystem::IsReadOnly( const std::wstring& InPath ) const
+{
+	DWORD		fileAttributes = GetFileAttributesW( InPath.c_str() );
+	if ( fileAttributes != INVALID_FILE_ATTRIBUTES )
+	{
+		return fileAttributes & FILE_ATTRIBUTE_READONLY;
+	}
+	else
+	{
+		Errorf( TEXT( "Error reading attributes for '%s'\n" ), InPath.c_str() );
+		return false;
+	}
+}

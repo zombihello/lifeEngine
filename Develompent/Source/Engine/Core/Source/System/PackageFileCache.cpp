@@ -69,3 +69,19 @@ bool CPackageFileCache::CachePackage( const tchar* InFilename, bool InIsAllowOve
 	fileLookup.insert( std::make_pair( packageName, packageFile.GetFullPath() ) );
 	return true;
 }
+
+/*
+==================
+CPackageFileCache::GetPackageFileList
+==================
+*/
+std::vector<std::wstring> CPackageFileCache::GetPackageFileList() const
+{
+	std::vector<std::wstring>	result;
+	for ( auto it = fileLookup.begin(), itEnd = fileLookup.end(); it != itEnd; ++it )
+	{
+		result.emplace_back( it->second );
+	}
+
+	return result;
+}

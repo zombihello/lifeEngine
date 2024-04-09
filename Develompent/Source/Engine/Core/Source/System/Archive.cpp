@@ -204,7 +204,7 @@ CArchiveSaveTagExports::operator<<
 */
 CArchive& CArchiveSaveTagExports::operator<<( class CObject*& InValue )
 {
-	if ( InValue && IsIn( InValue, outer ) && !InValue->HasAnyObjectFlags( OBJECT_Transient | OBJECT_TagExp ) )
+	if ( InValue && !InValue->IsPendingKill() && IsIn( InValue, outer ) && !InValue->HasAnyObjectFlags( OBJECT_Transient | OBJECT_TagExp ) )
 	{
 		// Set flags
 		InValue->AddObjectFlag( OBJECT_TagExp );

@@ -11,6 +11,7 @@
 #include "Reflection/ObjectIterator.h"
 #include "Reflection/ObjectGlobals.h"
 #include "System/BaseFileSystem.h"
+#include "System/PackageFileCache.h"
 #include "Components/ActorComponent.h"
 
 IMPLEMENT_CLASS( CObjectPackage )
@@ -481,7 +482,21 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 		}
 
 		// Save package flags
-		linker.GetSummary().SetPackageFlags( InOuter->GetPackageFlags() | ( bIsCooking ? PKG_Cooked | PKG_FilterEditorOnly : 0 ) );
+		{
+			uint32		packageFlags = InOuter->GetPackageFlags();
+			// Set flags PKG_Cooked | PKG_FilterEditorOnly if we save the package as cooked
+			if ( bIsCooking )
+			{
+				packageFlags |= PKG_Cooked | PKG_FilterEditorOnly;
+			}
+			// Otherwise remove PKG_Cooked for make sure what this package will be right loaded
+			// (because we can load a cooked package and save it without InCookingTarget)
+			else
+			{
+				packageFlags &= ~PKG_Cooked;
+			}
+			linker.GetSummary().SetPackageFlags( packageFlags );
+		}
 
 		// Rest place for package summary, we update it in the end
 		linker << linker.GetSummary();
@@ -715,6 +730,9 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 				{
 					InOuter->SetDirtyFlag( false );
 				}
+
+				// Update package file cache
+				CPackageFileCache::Get().CachePackage( InFilename );
 			}
 
 			// Delete the temporary file

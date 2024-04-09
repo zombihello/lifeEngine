@@ -163,6 +163,13 @@ public:
     virtual bool IsDirectory( const std::wstring& InPath ) const { return false; }
 
     /**
+     * @brief Is file or directory read only
+     * @param InPath      Path to file or directory
+     * @return Return TRUE if the file is read only, otherwise returns FALSE
+     */
+    virtual bool IsReadOnly( const std::wstring& InPath ) const { return false; }
+
+    /**
 	 * @brief Find files in the directory and any directories under it
 	 *
 	 * @param OutResults            The output array that is filled out with a file paths

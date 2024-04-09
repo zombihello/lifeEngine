@@ -125,6 +125,13 @@ public:
 	 * @return Return TRUE if file is directory, otherwise will return FALSE
 	 */
     virtual bool IsDirectory( const std::wstring& InPath ) const override;
+
+    /**
+     * @brief Is file or directory read only
+     * @param InPath      Path to file or directory
+     * @return Return TRUE if the file is read only, otherwise returns FALSE
+     */
+    virtual bool IsReadOnly( const std::wstring& InPath ) const override;
 };
 
 #endif

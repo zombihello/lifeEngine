@@ -33,8 +33,8 @@ CWorld::StaticInitializeClass
 void CWorld::StaticInitializeClass()
 {
 	// Native properties
-	CArrayProperty*		actorsArray = new( staticClass, NAME_None )		CArrayProperty( CPP_PROPERTY( ThisClass, actors ), NAME_None, TEXT( "" ), CPF_None );
-	new( actorsArray, NAME_None )										CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, AActor::StaticClass() );
+	CArrayProperty*		actorsArray = new( staticClass, TEXT( "Actors" ) )		CArrayProperty( CPP_PROPERTY( ThisClass, actors ), NAME_None, TEXT( "" ), CPF_None );
+	new( actorsArray, NAME_None )												CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, AActor::StaticClass() );
 }
 
 /*
