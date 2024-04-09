@@ -1293,6 +1293,9 @@ CLinkerLoad::EVerifyResult CLinkerLoad::VerifyImport( uint32 InImportIndex )
 			else
 			{
 				// Serialize in the properties of the redirector (to get the object the redirector point to)
+				// Always load redirectors. This will allow inner redirector references to always serialize fully here before accessing the GetDestinationObject()
+				// and will be right linker with linker index
+				objectRedirector->SetObjectFlags( OBJECT_NeedLoad );
 				Preload( objectRedirector );
 				CObject*	destinationObject = objectRedirector->GetDestinationObject();
 
