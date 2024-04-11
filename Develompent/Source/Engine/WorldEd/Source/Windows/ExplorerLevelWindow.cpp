@@ -4,6 +4,7 @@
 #include "System/MemoryArchive.h"
 #include "System/World.h"
 #include "System/InputSystem.h"
+#include "System/ObjectExporter.h"
 #include "Windows/ExplorerLevelWindow.h"
 #include "Windows/InputTextDialog.h"
 #include "Windows/DialogWindow.h"
@@ -253,30 +254,27 @@ void CExplorerLevelWindow::DrawPopupMenu()
 		bool	bSelectedActors			= g_World->GetNumSelectedActors() > 0;
 		bool	bSelectedOnlyOneActor	= g_World->GetNumSelectedActors() == 1;
 
-		// Rename
-		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneActor ) )
+		// Copy
+		if ( ImGui::MenuItem( "Copy", "", nullptr, bSelectedActors ) )
 		{
-			const std::vector<AActor*>&		selectedActors = g_World->GetSelectedActors();
-			CRunnableThread::Create( new CRenameActorRunnable( this, selectedActors[0] ), L_Sprintf( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
+			std::wstring		buffer;
+			CObjectExporter		objectExporter;
+			objectExporter.Export( ( const std::vector<CObject*>& )g_World->GetSelectedActors(), buffer );
+			Sys_SetClipboardText( buffer );
+		}
+
+		// Paste
+		if ( ImGui::MenuItem( "Paste", "", nullptr, bSelectedActors && !Sys_GetClipboardText().empty() ) )
+		{
 		}
 
 		// Duplicate
 		if ( ImGui::MenuItem( "Duplicate", "", nullptr, bSelectedActors ) )
-		{
-			std::vector<AActor*>		selectedActors = g_World->GetSelectedActors();
-			std::vector<byte>			memoryData;
-			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
-			{			
-				// Serialize actor to memory		
-				AActor*					actor = selectedActors[index];
-				CMemoryWriter			memoryWriter( memoryData );
-				actor->Serialize( memoryWriter );
-
-				// Spawn new actor and serialize data from memory
-				AActor*					newActor = g_World->SpawnActor( actor->GetClass(), actor->GetActorLocation(), actor->GetActorRotation() );
-				CMemoryReading			memoryReading( memoryData );
-				newActor->Serialize( memoryReading );
-			}
+		{		
+			// Copy actor
+			std::wstring		buffer;
+			CObjectExporter		objectExporter;
+			objectExporter.Export( ( const std::vector<CObject*>& )g_World->GetSelectedActors(), buffer );
 		}
 
 		// Delete
@@ -287,6 +285,13 @@ void CExplorerLevelWindow::DrawPopupMenu()
 			{
 				g_World->DestroyActor( selectedActors[index] );
 			}
+		}
+
+		// Rename
+		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneActor ) )
+		{
+			const std::vector<AActor*>&		selectedActors = g_World->GetSelectedActors();
+			CRunnableThread::Create( new CRenameActorRunnable( this, selectedActors[0] ), L_Sprintf( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
 		}
 
 		ImGui::EndPopup();

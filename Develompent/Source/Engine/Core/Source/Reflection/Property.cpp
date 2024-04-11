@@ -136,6 +136,73 @@ bool CProperty::ShouldSerializeValue( CArchive& InArchive ) const
 	return !bSkip;
 }
 
+#if WITH_EDITOR
+/*
+==================
+CProperty::ShouldPort
+==================
+*/
+bool CProperty::ShouldPort( uint32 InPortFlags /* = PPF_None */ ) const
+{
+	// Don't export/import deprecated properties if we needn't it
+	if ( HasAnyFlags( CPF_Deprecated ) && !( InPortFlags & PPF_UseDeprecatedProperties ) )
+	{
+		return false;
+	}
+
+	// Don't export/import transient properties if the user doesn't want it
+	if ( HasAnyFlags( CPF_Transient ) && !( InPortFlags & PPF_IncludeTransient ) )
+	{
+		return false;
+	}
+
+	// Hide non-Edit properties when we're exporting for the property window
+	if ( ( InPortFlags & PPF_PropertyWindow ) && !HasAnyFlags( CPF_Edit ) )
+	{
+		return false;
+	}
+
+	return true;
+}
+
+/*
+==================
+CProperty::ExportProperty
+==================
+*/
+void CProperty::ExportProperty( std::wstring& OutValueString, byte* InObjectAddress, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	OutValueString.clear();
+	if ( ShouldPort( InPortFlags ) )
+	{
+		// Get the begin of property data and open array scope if arraySize > 1
+		byte*	data = InObjectAddress + offset;
+		if ( arraySize > 1 )
+		{
+			OutValueString = TEXT( "[ " );
+		}
+
+		// Export values
+		for ( uint32 index = 0; index < arraySize; ++index )
+		{
+			std::wstring	valueString;
+			ExportValue( valueString, data, index, InExportRootScope, InPortFlags );
+			OutValueString += valueString;
+			if ( arraySize > 1 && index + 1 < arraySize )
+			{
+				OutValueString += TEXT( ", " );
+			}
+		}
+
+		// Close array scope if it need
+		if ( arraySize > 1 )
+		{
+			OutValueString += TEXT( " ]" );
+		}
+	}
+}
+#endif // WITH_EDITOR
+
 
 /*
 ==================
@@ -222,6 +289,18 @@ void CByteProperty::SerializeValue( class CArchive& InArchive, byte* InData, uin
 	InArchive << *( InData + InArrayIdx * GetElementSize() );
 }
 
+#if WITH_EDITOR
+/*
+==================
+CByteProperty::ExportValue
+==================
+*/
+void CByteProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	OutValueString = L_Sprintf( TEXT( "%i" ), *( InData + InArrayIdx * GetElementSize() ) );
+}
+#endif // WITH_EDITOR
+
 
 /*
 ==================
@@ -285,6 +364,18 @@ void CIntProperty::SerializeValue( class CArchive& InArchive, byte* InData, uint
 {
 	InArchive << *( int32* )( InData + InArrayIdx * GetElementSize() );
 }
+
+#if WITH_EDITOR
+/*
+==================
+CIntProperty::ExportValue
+==================
+*/
+void CIntProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	OutValueString = L_Sprintf( TEXT( "%i" ), *( int32* )( InData + InArrayIdx * GetElementSize() ) );
+}
+#endif // WITH_EDITOR
 
 
 /*
@@ -350,6 +441,18 @@ void CFloatProperty::SerializeValue( class CArchive& InArchive, byte* InData, ui
 	InArchive << *( float* )( InData + InArrayIdx * GetElementSize() );
 }
 
+#if WITH_EDITOR
+/*
+==================
+CFloatProperty::ExportValue
+==================
+*/
+void CFloatProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	OutValueString = L_Sprintf( TEXT( "%f" ), *( float* )( InData + InArrayIdx * GetElementSize() ) );
+}
+#endif // WITH_EDITOR
+
 
 /*
 ==================
@@ -414,6 +517,19 @@ void CBoolProperty::SerializeValue( class CArchive& InArchive, byte* InData, uin
 	InArchive << *( bool* )( InData + InArrayIdx * GetElementSize() );
 }
 
+#if WITH_EDITOR
+/*
+==================
+CBoolProperty::ExportValue
+==================
+*/
+void CBoolProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	bool	bValue = *( bool* )( InData + InArrayIdx * GetElementSize() );
+	OutValueString = L_Sprintf( TEXT( "%s" ), bValue ? TEXT( "true" ) : TEXT( "false" ) );
+}
+#endif // WITH_EDITOR
+
 
 /*
 ==================
@@ -477,6 +593,19 @@ void CColorProperty::SerializeValue( class CArchive& InArchive, byte* InData, ui
 {
 	InArchive << *( CColor* )( InData + InArrayIdx * GetElementSize() );
 }
+
+#if WITH_EDITOR
+/*
+==================
+CColorProperty::ExportValue
+==================
+*/
+void CColorProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	CColor*		color = ( CColor* )( InData + InArrayIdx * GetElementSize() );
+	OutValueString = L_Sprintf( TEXT( "{ \"R\": %i, \"G\": %i, \"B\": %i }" ), color->r, color->g, color->b );
+}
+#endif // WITH_EDITOR
 
 
 /*
@@ -585,6 +714,19 @@ void CObjectProperty::SerializeValue( class CArchive& InArchive, byte* InData, u
 	InArchive << *( CObject** )( InData + InArrayIdx * GetElementSize() );
 }
 
+#if WITH_EDITOR
+/*
+==================
+CObjectProperty::ExportValue
+==================
+*/
+void CObjectProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	CObject*		object = *( CObject** )( InData + InArrayIdx * GetElementSize() );
+	OutValueString = L_Sprintf( TEXT( "\"%s\"" ), object->GetPathName( InExportRootScope ).c_str() );
+}
+#endif // WITH_EDITOR
+
 
 /*
 ==================
@@ -660,6 +802,19 @@ void CVectorProperty::SerializeValue( class CArchive& InArchive, byte* InData, u
 	InArchive << *( Vector* )( InData + InArrayIdx * GetElementSize() );
 }
 
+#if WITH_EDITOR
+/*
+==================
+CVectorProperty::ExportValue
+==================
+*/
+void CVectorProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Vector*		vector = ( Vector* )( InData + InArrayIdx * GetElementSize() );
+	OutValueString = L_Sprintf( TEXT( "{ \"X\": %f, \"Y\": %f, \"Z\": %f }" ), vector->x, vector->y, vector->z );
+}
+#endif // WITH_EDITOR
+
 
 /*
 ==================
@@ -723,6 +878,19 @@ void CRotatorProperty::SerializeValue( class CArchive& InArchive, byte* InData, 
 {
 	InArchive << *( CRotator* )( InData + InArrayIdx * GetElementSize() );
 }
+
+#if WITH_EDITOR
+/*
+==================
+CRotatorProperty::ExportValue
+==================
+*/
+void CRotatorProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	CRotator*		rotator = ( CRotator* )( InData + InArrayIdx * GetElementSize() );
+	OutValueString = L_Sprintf( TEXT( "{ \"Pitch\": %f, \"Yaw\": %f, \"Roll\": %f }" ), rotator->pitch, rotator->yaw, rotator->roll );
+}
+#endif // WITH_EDITOR
 
 
 /*
@@ -798,6 +966,21 @@ void CAssetProperty::SerializeValue( class CArchive& InArchive, byte* InData, ui
 {
 	InArchive << *( TAssetHandle<CAsset>* )( InData + InArrayIdx * GetElementSize() );
 }
+
+#if WITH_EDITOR
+/*
+==================
+CAssetProperty::ExportValue
+==================
+*/
+void CAssetProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	TAssetHandle<CAsset>*		asset = ( TAssetHandle<CAsset>* )( InData + InArrayIdx * GetElementSize() );
+	std::wstring				assetReference;
+	MakeReferenceToAsset( *asset, assetReference );
+	OutValueString = L_Sprintf( TEXT( "\"%s\"" ), assetReference.c_str() );
+}
+#endif // WITH_EDITOR
 
 
 /*
@@ -953,6 +1136,39 @@ void CArrayProperty::SerializeValue( class CArchive& InArchive, byte* InData, ui
 	}
 }
 
+#if WITH_EDITOR
+/*
+==================
+CArrayProperty::ExportValue
+==================
+*/
+void CArrayProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	std::vector<byte>*	arrayItems			= ( std::vector<byte>* )( InData + InArrayIdx * GetElementSize() );
+	uint32				innerPropertySize	= innerProperty->GetElementSize();
+	uint32				numItems			= arrayItems->size() / innerPropertySize;
+	
+	// Open array scope
+	OutValueString = TEXT( "[ " );
+	
+	// Export array items
+	byte*		data = arrayItems->data();
+	for ( uint32 index = 0; index < numItems; ++index )
+	{
+		std::wstring		valueString;
+		innerProperty->ExportValue( valueString, data, index, InExportRootScope, InPortFlags );
+		OutValueString += valueString;
+		if ( index + 1 < numItems )
+		{
+			OutValueString += TEXT( ", " );
+		}
+	}
+
+	// Close array scope
+	OutValueString += TEXT( " ]" );
+}
+#endif // WITH_EDITOR
+
 
 /*
 ==================
@@ -1084,6 +1300,20 @@ void CStructProperty::SerializeValue( class CArchive& InArchive, byte* InData, u
 	propertyStruct->SerializeProperties( InArchive, data );
 }
 
+#if WITH_EDITOR
+/*
+==================
+CStructProperty::ExportValue
+==================
+*/
+void CStructProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	OutValueString.clear();
+	byte*		data = InData + InArrayIdx * GetElementSize();
+	propertyStruct->ExportProperties( OutValueString, data, InExportRootScope, InPortFlags );
+}
+#endif // WITH_EDITOR
+
 
 /*
 ==================
@@ -1147,3 +1377,16 @@ void CStringProperty::SerializeValue( class CArchive& InArchive, byte* InData, u
 {
 	InArchive << *( std::wstring* )( InData + InArrayIdx * GetElementSize() );
 }
+
+#if WITH_EDITOR
+/*
+==================
+CStringProperty::ExportValue
+==================
+*/
+void CStringProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	std::wstring*	string = ( std::wstring* )( InData + InArrayIdx * GetElementSize() );
+	OutValueString = L_Sprintf( TEXT( "\"%s\"" ), string->c_str() );
+}
+#endif // WITH_EDITOR

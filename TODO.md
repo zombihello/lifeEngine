@@ -37,7 +37,7 @@
 	- [X] Implement FindObject, LoadObject and LoadClass functions
 	- [X] Implement ResolveName for resolve a package and name
 	- [X] Implement replacing existing object in StaticAllocateObject
-	- [ ] Replace CObject::SetName to Rename for guarantee the uniqueness of the name
+	- [X] Replace CObject::SetName to Rename for guarantee the uniqueness of the name
 	- [X] Need fix destroying packages in GC whom use by objects not considered for GC
 	- [ ] Need fix in the WorldEd duplicate actors and other actions due to was implemented serialization CObjects
 - [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)

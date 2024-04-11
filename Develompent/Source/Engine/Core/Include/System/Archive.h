@@ -408,6 +408,15 @@ public:
 		arIsObjectReferenceCollector = true;
 	}
 
+	/**
+	 * @brief Is saving archive
+	 * @return True if archive saving, false if archive loading
+	 */
+	virtual bool IsSaving() const 
+	{ 
+		return true; 
+	}
+
 protected:
 	/**
 	 * @brief Override operator << for serialize CObjects

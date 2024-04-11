@@ -491,6 +491,37 @@ enum ENativeConstructor
 
 /**
  * @ingroup Core
+ * @brief Enumeration property flags
+ */
+enum EPropertyFlags
+{
+	CPF_None			= 0,		/**< None */
+	CPF_Const			= 1 << 0,	/**< Property is constant */
+	CPF_EditorOnly		= 1 << 1,	/**< Property should only be loaded in the editor */
+	CPF_Edit			= 1 << 2,	/**< Property is user-settable in the editor */
+	CPF_EditFixedSize	= 1 << 3,	/**< Indicates that elements of an array can be modified, but its size cannot be changed */
+	CPF_EditConst		= 1 << 4,	/**< Property is uneditable in the editor */
+	CPF_Deprecated		= 1 << 5,	/**< Property is deprecated. Read it from an archive, but don't save it */
+	CPF_Transient		= 1 << 6,	/**< Property is transient: shouldn't be saved or loaded */
+	CPF_SaveGame		= 1 << 7	/**< Property should be serialized for save games, this is only checked for game-specific archives with CArchive::arIsSaveGame */
+};
+
+#if WITH_EDITOR
+/**
+ * @ingroup Core
+ * @brief Enumeration property exporting flags
+ */
+enum EPropertyPortFlags
+{
+	PPF_None					= 0,		/**< No special property exporting flags */
+	PPF_IncludeTransient		= 1 << 0,	/**< Indicates that non-categorized transient properties should be exported (by default, they would not be) */
+	PPF_UseDeprecatedProperties	= 1 << 1,	/**< Ignores CPF_Deprecated flag */
+	PPF_PropertyWindow			= 1 << 2	/**< Indicates that we're exporting properties for display in the property window */
+};
+#endif // WITH_EDITOR
+
+/**
+ * @ingroup Core
  * @brief Internal enum for C++ properties
  */
 enum ECppProperty

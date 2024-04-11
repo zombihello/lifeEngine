@@ -304,6 +304,29 @@ std::wstring Sys_GetUserName()
 
 /*
 ==================
+Sys_SetClipboardText
+==================
+*/
+void Sys_SetClipboardText( const std::wstring& InText )
+{
+	if ( SDL_SetClipboardText( TCHAR_TO_ANSI( InText.c_str() ) ) )
+	{
+		Warnf( TEXT( "Sys_SetClipboardText: Failed to set clipboard text. SDL message: %s\n" ), ANSI_TO_TCHAR( SDL_GetError() ) );
+	}
+}
+
+/*
+==================
+Sys_GetClipboardText
+==================
+*/
+std::wstring Sys_GetClipboardText()
+{
+	return ANSI_TO_TCHAR( SDL_GetClipboardText() );
+}
+
+/*
+==================
 L_GetExecutablePath
 ==================
 */

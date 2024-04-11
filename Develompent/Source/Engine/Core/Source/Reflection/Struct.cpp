@@ -250,3 +250,43 @@ void CStruct::SerializeBinaryProperties( class CArchive& InArchive, byte* InData
 		}
 	}
 }
+
+#if WITH_EDITOR
+/*
+==================
+CStruct::ExportProperties
+==================
+*/
+void CStruct::ExportProperties( std::wstring& OutValueString, byte* InData, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	// Open struct scope
+	OutValueString = TEXT( "{ " );
+
+	// Export properties
+	bool	bMoreThanOneProperty = false;
+	for ( const CStruct* currentStruct = this; currentStruct; currentStruct = currentStruct->superStruct )
+	{
+		if ( !currentStruct->properties.empty() )
+		{
+			for ( uint32 propertyId = 0, propertyCount = currentStruct->properties.size(); propertyId < propertyCount; ++propertyId )
+			{
+				CProperty*		property = currentStruct->properties[propertyId];
+				std::wstring	valueString;
+				property->ExportProperty( valueString, InData, InExportRootScope, InPortFlags );
+				if ( !valueString.empty() )
+				{
+					if ( bMoreThanOneProperty )
+					{
+						OutValueString += TEXT( ", " );
+					}
+					OutValueString += L_Sprintf( TEXT( "\"%s\": %s" ), property->GetName().c_str(), valueString.c_str() );
+					bMoreThanOneProperty = true;
+				}
+			}
+		}
+	}
+
+	// Close struct scope
+	OutValueString += TEXT( " }" );
+}
+#endif // WITH_EDITOR

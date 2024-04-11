@@ -266,6 +266,22 @@ double Sys_Seconds();
  */
 void Sys_Error( const tchar* InFormat, ... );
 
+/**
+ * @ingroup Core
+ * @brief Set clipboard text
+ * @note Need implement on each platform
+ * @param InText    The text to clipboard
+ */
+void Sys_SetClipboardText( const std::wstring& InText );
+
+/**
+ * @ingroup Core
+ * @brief Get clipboard text
+ * @note Need implement on each platform
+ * @return Return text from clipboard
+ */
+std::wstring Sys_GetClipboardText();
+
 #if ENABLED_ASSERT || PLATFORM_DOXYGEN
     /**
      * @ingroup Core

@@ -20,23 +20,6 @@
 
 /**
  * @ingroup Core
- * @brief Enumeration property flags
- */
-enum EPropertyFlags
-{
-	CPF_None			= 0,		/**< None */
-	CPF_Const			= 1 << 0,	/**< Property is constant */
-	CPF_EditorOnly		= 1 << 1,	/**< Property should only be loaded in the editor */
-	CPF_Edit			= 1 << 2,	/**< Property is user-settable in the editor */
-	CPF_EditFixedSize	= 1 << 3,	/**< Indicates that elements of an array can be modified, but its size cannot be changed */
-	CPF_EditConst		= 1 << 4,	/**< Property is uneditable in the editor */
-	CPF_Deprecated		= 1 << 5,	/**< Property is deprecated. Read it from an archive, but don't save it */
-	CPF_Transient		= 1 << 6,	/**< Property is transient: shouldn't be saved or loaded */
-	CPF_SaveGame		= 1 << 7	/**< Property should be serialized for save games, this is only checked for game-specific archives with CArchive::arIsSaveGame */
-};
-
-/**
- * @ingroup Core
  * @brief Union property value
  */
 union UPropertyValue
@@ -145,11 +128,34 @@ public:
 	/**
 	 * @brief Serialize property's data
 	 *
-	 * @param InArchive			Archive for serialize
-	 * @param InObjectAddress	The address of property start
-	 * @param InArrayIdx		Array slot of persistent variables
+	 * @param InArchive		Archive for serialize
+	 * @param InData		The address of property start
+	 * @param InArrayIdx	Array slot of persistent variables
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const		PURE_VIRTUAL( CProperty::SerializeValue, );
+
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 * 
+	 * @param OutValueString		Output string with the property value
+	 * @param InObjectAddress		Address of a object where the value of this property is stored
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	void ExportProperty( std::wstring& OutValueString, byte* InObjectAddress, CObject* InExportRootScope, uint32 InPortFlags = PPF_None );
+
+	/**
+	 * @brief Export property's data to JSON
+	 * 
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) PURE_VIRTUAL( CProperty::ExportValueJSON, );
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Get category
@@ -313,9 +319,19 @@ public:
 	 * @brief Is should serialize this value
 	 * 
 	 * @param InArchive		Archive
-	 * @return Return TRUE if this value shuld serialize, otherwise returns FALSE
+	 * @return Return TRUE if this value should serialize, otherwise returns FALSE
 	 */
 	bool ShouldSerializeValue( CArchive& InArchive ) const;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Is should export/import this value
+	 * 
+	 * @param InPortFlags		Export/import flags (see EPropertyPortFlags)
+	 * @return Return TRUE if this value should export/import, otherwise returns FALSE
+	 */
+	bool ShouldPort( uint32 InPortFlags = PPF_None ) const;
+#endif // WITH_EDITOR
 
 protected:
 	CName			category;		/**< Category */
@@ -577,6 +593,19 @@ public:
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Get property value
 	 *
@@ -669,6 +698,19 @@ public:
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Get property value
 	 *
@@ -748,6 +790,19 @@ public:
 	 * @param InArrayIdx		Array slot of persistent variables
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Get property value
@@ -829,6 +884,19 @@ public:
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Get property value
 	 *
@@ -908,6 +976,19 @@ public:
 	 * @param InArrayIdx		Array slot of persistent variables
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Get property value
@@ -1000,6 +1081,19 @@ public:
 	 * @param InArrayIdx		Array slot of persistent variables
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Get property value
@@ -1121,6 +1215,19 @@ public:
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Get property value
 	 *
@@ -1213,6 +1320,19 @@ public:
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Get property value
 	 *
@@ -1304,6 +1424,19 @@ public:
 	 * @param InArrayIdx		Array slot of persistent variables
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Get property value
@@ -1406,6 +1539,19 @@ public:
 	 * @param InArrayIdx		Array slot of persistent variables
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Add class property
@@ -1533,6 +1679,19 @@ public:
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
 
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Get property value
 	 *
@@ -1640,6 +1799,19 @@ public:
 	 * @param InArrayIdx		Array slot of persistent variables
 	 */
 	virtual void SerializeValue( class CArchive& InArchive, byte* InData, uint32 InArrayIdx ) const override;
+
+#if WITH_EDITOR
+	/**
+	 * @brief Export property's data to JSON
+	 *
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+#endif // WITH_EDITOR
 
 	/**
 	 * @brief Get property value

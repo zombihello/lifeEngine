@@ -178,6 +178,18 @@ public:
 	 */
 	void SerializeProperties( class CArchive& InArchive, byte* InData );
 
+#if WITH_EDITOR
+	/**
+	 * @brief Export struct properties to JSON
+	 * 
+	 * @param OutValueString		Output string with the property value
+	 * @param InData				Pointer to object
+	 * @param InExportRootScope		Export root scope
+	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
+	 */
+	void ExportProperties( std::wstring& OutValueString, byte* InData, CObject* InExportRootScope, uint32 InPortFlags = PPF_None );
+#endif // WITH_EDITOR
+
 	/**
 	 * @brief Get array of struct properties
 	 *
