@@ -227,15 +227,16 @@ CFullScreenMovieTheora::CFullScreenMovieTheora()
 	, theoraRender( nullptr )
 {
 	// Get list of startup movies
-	CConfigValue					confStartupMovies = g_Config.GetValue( CT_Game, TEXT( "Game.FullScreenMovie" ), TEXT( "StartupMovies" ) );
-	Assert( confStartupMovies.IsA( CConfigValue::T_Array ) );
-	std::vector<CConfigValue>		confArrayStartupMovies = confStartupMovies.GetArray();
-
-	for ( uint32 index = 0, count = confArrayStartupMovies.size(); index < count; ++index )
+	const CJsonValue*				configStartupMovies = CConfig::Get().GetValue( CT_Game, TEXT( "Game.FullScreenMovie" ), TEXT( "StartupMovies" ) );
+	const std::vector<CJsonValue>*	confArrayStartupMovies = configStartupMovies ? configStartupMovies->GetArray() : nullptr;
+	if ( confArrayStartupMovies )
 	{
-		const CConfigValue&		configValue = confArrayStartupMovies[ index ];
-		Assert( configValue.IsA( CConfigValue::T_String ) );
-		startupMovies.push_back( configValue.GetString() );
+		for ( uint32 index = 0, count = confArrayStartupMovies->size(); index < count; ++index )
+		{
+			const CJsonValue&		configValue = confArrayStartupMovies->at( index );
+			Assert( configValue.IsA( JVT_String ) );
+			startupMovies.push_back( configValue.GetString() );
+		}
 	}
 
 	// By default, we are "done" playing a movie

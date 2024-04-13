@@ -51,10 +51,10 @@ void CBaseEngine::Init()
 		// Loading default texture from packages only when we in game
 		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultTexture = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
-			if ( configDefaultTexture.IsValid() )
+			const CJsonValue*		configDefaultTexture = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
+			if ( configDefaultTexture && configDefaultTexture->IsValid() )
 			{
-				std::wstring			pathAsset = configDefaultTexture.GetString();
+				std::wstring			pathAsset = configDefaultTexture->GetString();
 				TAssetHandle<CAsset>	asset = g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
@@ -90,10 +90,10 @@ void CBaseEngine::Init()
 		// Loading default material from packages only when we in game
 		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultMaterial = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
-			if ( configDefaultMaterial.IsValid() )
+			const CJsonValue*		configDefaultMaterial = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
+			if ( configDefaultMaterial && configDefaultMaterial->IsValid() )
 			{
-				std::wstring			pathAsset = configDefaultMaterial.GetString();
+				std::wstring			pathAsset = configDefaultMaterial->GetString();
 				TAssetHandle<CAsset>	asset = g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
@@ -128,10 +128,10 @@ void CBaseEngine::Init()
 		// Loading default wireframe material from packages only when we in game
 		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultWireframeMaterial = g_Config.GetValue( CT_Engine, TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
-			if ( configDefaultWireframeMaterial.IsValid() )
+			const CJsonValue*		configDefaultWireframeMaterial = CConfig::Get().GetValue( CT_Engine, TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
+			if ( configDefaultWireframeMaterial && configDefaultWireframeMaterial->IsValid() )
 			{
-				std::wstring			pathAsset	= configDefaultWireframeMaterial.GetString();
+				std::wstring			pathAsset	= configDefaultWireframeMaterial->GetString();
 				TAssetHandle<CAsset>	asset		= g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
@@ -164,40 +164,40 @@ void CBaseEngine::Init()
 
 	// Get from configs PrePass, HDRExposure, etc values
 	{
-		CConfigValue	configPrePass = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "PrePass" ) );
-		if ( configPrePass.IsValid() )
+		const CJsonValue*	configPrePass = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "PrePass" ) );
+		if ( configPrePass && configPrePass->IsValid() )
 		{
-			bPrePass = configPrePass.GetBool();
+			bPrePass = configPrePass->GetBool();
 		}
 
-		CConfigValue	configExposure = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Exposure" ) );
-		if ( configExposure.IsValid() )
+		const CJsonValue*	configExposure = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Exposure" ) );
+		if ( configExposure && configExposure->IsValid() )
 		{
-			exposure = configExposure.GetNumber();
+			exposure = configExposure->GetNumber();
 		}
 
-		CConfigValue	configAutoExposure = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "AutoExposure" ) );
-		if ( configAutoExposure.IsValid() )
+		const CJsonValue*	configAutoExposure = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "AutoExposure" ) );
+		if ( configAutoExposure && configAutoExposure->IsValid() )
 		{
-			bAutoExposure = configAutoExposure.GetBool();
+			bAutoExposure = configAutoExposure->GetBool();
 		}
 
-		CConfigValue	configExposureMin = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMin" ) );
-		if ( configExposureMin.IsValid() )
+		const CJsonValue*	configExposureMin = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMin" ) );
+		if ( configExposureMin && configExposureMin->IsValid() )
 		{
-			exposureMin = configExposureMin.GetNumber();
+			exposureMin = configExposureMin->GetNumber();
 		}
 
-		CConfigValue	configExposureMax = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMax" ) );
-		if ( configExposureMax.IsValid() )
+		const CJsonValue*	configExposureMax = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMax" ) );
+		if ( configExposureMax && configExposureMax->IsValid() )
 		{
-			exposureMax = configExposureMax.GetNumber();
+			exposureMax = configExposureMax->GetNumber();
 		}
 
-		CConfigValue	configGamma = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Gamma" ) );
-		if ( configGamma.IsValid() )
+		const CJsonValue*	configGamma = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Gamma" ) );
+		if ( configGamma && configGamma->IsValid() )
 		{
-			gamma = configGamma.GetNumber();
+			gamma = configGamma->GetNumber();
 		}
 	}
 
@@ -266,10 +266,10 @@ CBaseEngine::GetMaxTickRate
 */
 float CBaseEngine::GetMaxTickRate() const
 {
-	CConfigValue		configMaxTickRate = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
-	if ( configMaxTickRate.IsValid() )
+	const CJsonValue*	configMaxTickRate = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
+	if ( configMaxTickRate && configMaxTickRate->IsValid() )
 	{
-		return configMaxTickRate.GetNumber();
+		return configMaxTickRate->GetNumber();
 	}
 
 	return 0.f;

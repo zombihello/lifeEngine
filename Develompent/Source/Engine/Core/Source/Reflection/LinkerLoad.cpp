@@ -1201,7 +1201,7 @@ void CLinkerLoad::VerifyImportInner( uint32 InImportIndex )
 		package = tmpPackage;
 		bCameFromMemoryOnlyPackage = true;
 
-		// Except if we are looking for _the_ package.. in which case we are looking for TmpPakage, so we are done
+		// Except if we are looking for the package in which case we are looking for TmpPakage, so we are done
 		if ( importObject.classPackage == NAME_Core && importObject.className == NAME_CObjectPackage && !tmpPackage->GetOuter() && importObject.objectName == tmpPackage->GetCName() )
 		{
 			importObject.object = tmpPackage;

@@ -123,8 +123,10 @@ void CEditorEngine::Init()
 	g_AssetFactory.RegisterImporter( &CStaticMeshImporter::Import, &CStaticMeshImporter::Reimport, &CStaticMeshImporter::ShowImportSettings, CStaticMeshImporter::GetSupportedExtensions(), AT_StaticMesh );
 
 	// Create window and main viewport
-	uint32	windowWidth			= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
-	uint32	windowHeight		= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
+	const CJsonValue*			configWindowWidth = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) );
+	const CJsonValue*			configWindowHeight = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) );
+	uint32	windowWidth			= configWindowWidth ? configWindowWidth->GetInt( 800 ) : 800;
+	uint32	windowHeight		= configWindowHeight ? configWindowHeight->GetInt( 600 ) : 600;
 	bool	bDummyFullscreen	= false;
 	OverrideConfigurationFromCommandLine( windowWidth, windowHeight, bDummyFullscreen );
 

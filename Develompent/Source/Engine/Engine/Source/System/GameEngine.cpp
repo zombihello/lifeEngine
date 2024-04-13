@@ -35,10 +35,14 @@ void CGameEngine::Init()
 	Super::Init();
 
 	// Create window and viewport
-	std::wstring				gameName		= g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Name" ) ).GetString();;
-	uint32						windowWidth		= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
-	uint32						windowHeight	= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
-	bool						bFullscreen		= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Fullscreen" ) ).GetBool();
+	const CJsonValue*	configGameName = CConfig::Get().GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Name" ) );
+	const CJsonValue*	configWindowWidth = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) );
+	const CJsonValue*	configWindowHeight = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) );
+	const CJsonValue*	configFullscreen = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Fullscreen" ) );
+	std::wstring		gameName		= configGameName ? configGameName->GetString( TEXT( "LifeEngine" ) ) : TEXT( "LifeEngine" );
+	uint32				windowWidth		= configWindowWidth ? configWindowWidth->GetInt( 800 ) : 800;
+	uint32				windowHeight	= configWindowHeight ? configWindowHeight->GetInt( 600 ) : 600;
+	bool				bFullscreen		= configFullscreen ? configFullscreen->GetBool() : false;
 	OverrideConfigurationFromCommandLine( windowWidth, windowHeight, bFullscreen );
 
 	g_Window->SetTitle( gameName.c_str() );

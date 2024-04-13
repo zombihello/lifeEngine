@@ -124,11 +124,13 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 		{
 			if ( g_IsEditor )
 			{
-				Sys_ShowSplash( g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Splash" ) ).GetString().c_str() );
+				const CJsonValue*	configSplash = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Splash" ) );
+				Sys_ShowSplash( configSplash ? configSplash->GetString().c_str() : TEXT( "" ) );
 			}
 			else if ( g_IsGame )
 			{
-				Sys_ShowSplash( g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );
+				const CJsonValue*	configSplash = CConfig::Get().GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Splash" ) );
+				Sys_ShowSplash( configSplash ? configSplash->GetString().c_str() : TEXT( "" ) );
 			}
 		}
 

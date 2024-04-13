@@ -1,5 +1,6 @@
 #include "Misc/EngineGlobals.h"
 #include "Logger/LoggerMacros.h"
+#include "Reflection/ObjectGlobals.h"
 #include "System/Config.h"
 #include "System/World.h"
 #include "Actors/PlayerStart.h"
@@ -54,46 +55,46 @@ void APlayerStart::BeginPlay()
 	Super::BeginPlay();
 
 	// Find class of default player controller
-	CConfigValue			configPlayerController = g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerController" ) );
-	CClass*					classPlayerController = nullptr;
-	if ( configPlayerController.IsA( CConfigValue::T_String ) )
+	const CJsonValue*	configPlayerController = CConfig::Get().GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerController" ) );
+	CClass*				classPlayerController = nullptr;
+	if ( configPlayerController && configPlayerController->IsA( JVT_String ) )
 	{
-		classPlayerController = FindObjectFast<CClass>( nullptr, configPlayerController.GetString(), true, true );
+		classPlayerController = FindObject<CClass>( ANY_PACKAGE, configPlayerController->GetString().c_str(), true );
 	}
 
 	// If not found - use APlayerController
 	if ( !classPlayerController )
 	{
 		classPlayerController = APlayerController::StaticClass();
-		if ( configPlayerController.IsValid() )
+		if ( configPlayerController && configPlayerController->IsValid() )
 		{
-			Warnf( TEXT( "Not found default player controller '%s', used APlayerController\n" ), configPlayerController.GetString().c_str() );
+			Warnf( TEXT( "Not found default player controller '%s', will be use Engine.APlayerController\n" ), configPlayerController->GetString().c_str() );
 		}
 		else
 		{
-			Warnf( TEXT( "Not setted default player controller in game config (parameter 'Game.GameInfo:DefaultPlayerController'), used APlayerController\n" ) );
+			Warnf( TEXT( "Not set default player controller in game config (parameter 'Game.GameInfo:DefaultPlayerController'), will be use Engine.APlayerController\n" ) );
 		}
 	}
 
 	// Find class of default player character
-	CConfigValue		configPlayerCharacter = g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerCharacter" ) );
+	const CJsonValue*	configPlayerCharacter = CConfig::Get().GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "DefaultPlayerCharacter" ) );
 	CClass*				classPlayerCharacter = nullptr;
-	if ( configPlayerCharacter.IsA( CConfigValue::T_String ) )
+	if ( configPlayerCharacter && configPlayerCharacter->IsA( JVT_String ) )
 	{
-		classPlayerCharacter = FindObjectFast<CClass>( nullptr, configPlayerCharacter.GetString(), true, true );
+		classPlayerCharacter = FindObject<CClass>( ANY_PACKAGE, configPlayerCharacter->GetString().c_str(), true );
 	}
 
 	// If not found - use ACharacter
 	if ( !classPlayerCharacter )
 	{
 		classPlayerCharacter = ACharacter::StaticClass();
-		if ( configPlayerCharacter.IsValid() )
+		if ( configPlayerCharacter && configPlayerCharacter->IsValid() )
 		{
-			Warnf( TEXT( "Not found default player character '%s', used ACharacter\n" ), configPlayerCharacter.GetString().c_str() );
+			Warnf( TEXT( "Not found default player character '%s', will be use Engine.ACharacter\n" ), configPlayerCharacter->GetString().c_str() );
 		}
 		else
 		{
-			Warnf( TEXT( "Not setted default player character in game config (parameter 'Game.GameInfo:DefaultPlayerCharacter'), used ACharacter\n" ) );
+			Warnf( TEXT( "Not set default player character in game config (parameter 'Game.GameInfo:DefaultPlayerCharacter'), will be use Engine.ACharacter\n" ) );
 		}
 	}
 

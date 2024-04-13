@@ -14,13 +14,17 @@ void CSystem::Init()
 {
 	// Get from config all package extensions
 	Assert( packageExtensions.empty() );
-	std::vector<CConfigValue>	configPackageExtensions = g_Config.GetValue( CT_Engine, TEXT( "Core.System" ), TEXT( "PackageExtensions" ) ).GetArray();
-	for ( uint32 index = 0, count = configPackageExtensions.size(); index < count; ++index )
+	const CJsonValue*				configPackageExtensionsValue	= CConfig::Get().GetValue( CT_Engine, TEXT( "Core.System" ), TEXT( "PackageExtensions" ) );
+	const std::vector<CJsonValue>*	configPackageExtensions			= configPackageExtensionsValue ? configPackageExtensionsValue->GetArray() : nullptr;
+	if ( configPackageExtensions )
 	{
-		const CConfigValue&		configPackageExtension = configPackageExtensions[index];
-		if ( configPackageExtension.IsA( CConfigValue::T_String ) )
+		for ( uint32 index = 0, count = configPackageExtensions->size(); index < count; ++index )
 		{
-			packageExtensions.push_back( configPackageExtension.GetString() );
+			const CJsonValue&		configPackageExtension = configPackageExtensions->at( index );
+			if ( configPackageExtension.IsA( JVT_String ) )
+			{
+				packageExtensions.push_back( configPackageExtension.GetString() );
+			}
 		}
 	}
 
@@ -31,21 +35,25 @@ void CSystem::Init()
 
 	// Get from config all directories with packages
 	Assert( packagePaths.empty() );
-	std::vector<CConfigValue>	configPackagePaths = g_Config.GetValue( CT_Engine, TEXT( "Core.System" ), TEXT( "PackagePaths" ) ).GetArray();
-	for ( uint32 index = 0, count = configPackagePaths.size(); index < count; ++index )
+	const CJsonValue*				configPackagePathsValue = CConfig::Get().GetValue( CT_Engine, TEXT( "Core.System" ), TEXT( "PackagePaths" ) );
+	const std::vector<CJsonValue>*	configPackagePaths = configPackagePathsValue? configPackagePathsValue->GetArray() : nullptr;
+	if ( configPackagePaths )
 	{
-		std::wstring	path = configPackagePaths[index].GetString();
-		if ( !path.empty() )
+		for ( uint32 index = 0, count = configPackagePaths->size(); index < count; ++index )
 		{
-			// If we have in the path placeholder %Game% then we replace it to g_GameName
-			std::size_t		idGameDirPlaceHolder = path.find( TEXT( "%Game%" ) );
-			while ( idGameDirPlaceHolder != std::wstring::npos )
+			std::wstring	path = configPackagePaths->at( index ).GetString();
+			if ( !path.empty() )
 			{
-				path.replace( idGameDirPlaceHolder, 6, g_GameName );	// 6 is the length of "%Game%"
-				idGameDirPlaceHolder = path.find( TEXT( "%Game%" ) );
-			}
+				// If we have in the path placeholder %Game% then we replace it to g_GameName
+				std::size_t		idGameDirPlaceHolder = path.find( TEXT( "%Game%" ) );
+				while ( idGameDirPlaceHolder != std::wstring::npos )
+				{
+					path.replace( idGameDirPlaceHolder, 6, g_GameName );	// 6 is the length of "%Game%"
+					idGameDirPlaceHolder = path.find( TEXT( "%Game%" ) );
+				}
 
-			packagePaths.push_back( Sys_BaseDir() + path );
+				packagePaths.push_back( Sys_BaseDir() + path );
+			}
 		}
 	}
 

@@ -677,8 +677,12 @@ void CObject::StaticInit()
 	Assert( !GetCObjectSubsystemInitialised() );
 
 	// Get values from .ini so it is overridable per game/platform and allocate object pool
-	uint32 maxObjectsNotConsideredByGC	= g_Config.GetValue( CT_Engine, TEXT( "Engine.GarbageCollectionSettings" ), TEXT( "MaxObjectsNotConsideredByGC" ) ).GetNumber( 0 );
-	uint32 maxCObjects					= g_Config.GetValue( CT_Engine, TEXT( "Engine.GarbageCollectionSettings" ), TEXT( "MaxObjectsInGame" ) ).GetNumber( 2 * 1024 * 1024 ) ;	// Default to ~2M CObjects
+	const CJsonValue*	configMaxObjectsNotConsideredByGC	= CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.GarbageCollectionSettings" ), TEXT( "MaxObjectsNotConsideredByGC" ) );
+	const CJsonValue*	configMaxObjectsInGame				= CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.GarbageCollectionSettings" ), TEXT( "MaxObjectsInGame" ) );
+	const uint32		defaultMaxObjectsNotConsideredByGC	= 0;
+	const uint32		defaultMaxCObjects					= 2 * 1024 * 1024;
+	uint32 maxObjectsNotConsideredByGC						= configMaxObjectsNotConsideredByGC ? configMaxObjectsNotConsideredByGC->GetNumber( defaultMaxObjectsNotConsideredByGC ) : defaultMaxObjectsNotConsideredByGC;
+	uint32 maxCObjects										= configMaxObjectsInGame ? configMaxObjectsInGame->GetNumber( defaultMaxCObjects ) : defaultMaxCObjects;	// Default to ~2M CObjects
 
 	// Log what we're doing to track down what really happens
 	CObjectGC::Get().AllocateObjectPool( maxCObjects, maxObjectsNotConsideredByGC );

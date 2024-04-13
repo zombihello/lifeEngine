@@ -91,10 +91,10 @@ void CPhysicsEngine::Init()
 		// Loading default material from packages only when we in game
 		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultPhysMaterial = g_Config.GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
-			if ( configDefaultPhysMaterial.IsValid() )
+			const CJsonValue*		configDefaultPhysMaterial = CConfig::Get().GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "DefaultPhysMaterial" ) );
+			if ( configDefaultPhysMaterial && configDefaultPhysMaterial->IsValid() )
 			{
-				std::wstring			pathAsset = configDefaultPhysMaterial.GetString();
+				std::wstring			pathAsset = configDefaultPhysMaterial->GetString();
 				TAssetHandle<CAsset>	asset = g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
@@ -124,37 +124,70 @@ void CPhysicsEngine::Init()
 
 	// Load collision profiles
 	{
-		CConfigValue		configCollisionProfiles = g_Config.GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "CollisionProfiles" ) );
-		if ( configCollisionProfiles.IsValid() )
+		const CJsonValue*		configCollisionProfiles = CConfig::Get().GetValue( CT_Engine, TEXT( "Physics.Physics" ), TEXT( "CollisionProfiles" ) );
+		if ( configCollisionProfiles && configCollisionProfiles->IsValid() )
 		{
-			Assert( configCollisionProfiles.GetType() == CConfigValue::T_Array );
-			std::vector< CConfigValue >		arrayCollisionProfiles = configCollisionProfiles.GetArray();
-
-			for ( uint32 index = 0, count = arrayCollisionProfiles.size(); index < count; ++index )
+			Assert( configCollisionProfiles->GetType() == JVT_Array );
+			const std::vector<CJsonValue>*	arrayCollisionProfiles = configCollisionProfiles->GetArray();
+			if ( arrayCollisionProfiles )
 			{
-				const CConfigValue&		configCollisionProfile = arrayCollisionProfiles[ index ];
-				Assert( configCollisionProfile.GetType() == CConfigValue::T_Object );
-				CConfigObject			objectCollisionProfile = configCollisionProfile.GetObject();
-
-				CollisionProfile		collisionProfile;
-				collisionProfile.name = objectCollisionProfile.GetValue( TEXT( "Name" ) ).GetString();
-
-				std::wstring		objectType = objectCollisionProfile.GetValue( TEXT( "ObjectType" ) ).GetString();
-				collisionProfile.objectType = TextToECollisionChannel( objectType );
-
-				std::vector< CConfigValue >		arrayCollisionResponses = objectCollisionProfile.GetValue( TEXT( "CollisionResponses" ) ).GetArray();
-				for ( uint32 indexResponse = 0, countResponse = arrayCollisionResponses.size(); indexResponse < countResponse; ++indexResponse )
+				for ( uint32 index = 0, count = arrayCollisionProfiles->size(); index < count; ++index )
 				{
-					const CConfigValue&		configCollisionResponse = arrayCollisionResponses[ indexResponse ];
-					Assert( configCollisionResponse.GetType() == CConfigValue::T_Object );
-					CConfigObject			objectCollisionResponse = configCollisionResponse.GetObject();
+					const CJsonValue&		configCollisionProfile = arrayCollisionProfiles->at( index );
+					const CJsonObject*		objectCollisionProfile = configCollisionProfile.GetObject();
+					if ( !objectCollisionProfile )
+					{
+						Warnf( TEXT( "Invalid 'Physics.Physics:CollisionProfiles[%i]\n" ), index );
+						continue;
+					}
 
-					std::wstring			name = objectCollisionResponse.GetValue( TEXT( "Name" ) ).GetString();
-					std::wstring			value = objectCollisionResponse.GetValue( TEXT( "Value" ) ).GetString();
-					collisionProfile.responses[ TextToECollisionChannel( name ) ] = TextToECollisionResponse( value );
+					CollisionProfile		collisionProfile;
+					const CJsonValue*		collisionProfileName = objectCollisionProfile->GetValue( TEXT( "Name" ) );
+					collisionProfile.name = collisionProfileName ? collisionProfileName->GetString() : TEXT( "" );
+					if ( collisionProfile.name.empty() )
+					{
+						Warnf( TEXT( "Invalid 'Physics.Physics:CollisionProfiles[%i]\n" ), index );
+						continue;
+					}
+
+					const CJsonValue*	collisionProfileObjectType = objectCollisionProfile->GetValue( TEXT( "ObjectType" ) );
+					if ( !collisionProfileObjectType )
+					{
+						Warnf( TEXT( "Invalid 'Physics.Physics:CollisionProfiles[%i]\n" ), index );
+						continue;
+					}
+
+					std::wstring						objectType = collisionProfileObjectType->GetString();
+					collisionProfile.objectType = TextToECollisionChannel( objectType );
+					const CJsonValue*					collisionProfileArray = objectCollisionProfile->GetValue( TEXT( "CollisionResponses" ) );
+					const std::vector<CJsonValue>*		arrayCollisionResponses = collisionProfileArray ? collisionProfileArray->GetArray() : nullptr;
+					if ( arrayCollisionResponses )
+					{
+						for ( uint32 indexResponse = 0, countResponse = arrayCollisionResponses->size(); indexResponse < countResponse; ++indexResponse )
+						{
+							const CJsonValue&		configCollisionResponse = arrayCollisionResponses->at( indexResponse );
+							const CJsonObject*		objectCollisionResponse = configCollisionResponse.GetObject();
+							if ( !objectCollisionResponse )
+							{
+								Warnf( TEXT( "Invalid collision response %i at 'Physics.Physics:CollisionProfiles[%i]\n" ), indexResponse, index );
+								continue;
+							}
+
+							const CJsonValue*		responseName = objectCollisionResponse->GetValue( TEXT( "Name" ) );
+							const CJsonValue*		responseValue = objectCollisionResponse->GetValue( TEXT( "Value" ) );
+							std::wstring			name = responseName ? responseName->GetString() : TEXT( "" );
+							std::wstring			value = responseValue ? responseValue->GetString() : TEXT( "" );
+							if ( name.empty() || value.empty() )
+							{
+								Warnf( TEXT( "Invalid collision response %i at 'Physics.Physics:CollisionProfiles[%i]\n" ), indexResponse, index );
+								continue;
+							}
+							collisionProfile.responses[TextToECollisionChannel( name )] = TextToECollisionResponse( value );
+						}
+					}
+
+					collisionProfiles.insert( std::make_pair( collisionProfile.name, collisionProfile ) );
 				}
-
-				collisionProfiles.insert( std::make_pair( collisionProfile.name, collisionProfile ) );
 			}
 		}
 		else

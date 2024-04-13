@@ -5,59 +5,6 @@
 
 IMPLEMENT_CLASS( AActor )
 
-#if WITH_EDITOR
-/*
-==================
-CActorVar::CActorVar
-==================
-*/
-CActorVar::CActorVar()
-	: type( AVT_Unknown )
-	, value( nullptr )
-{}
-
-/*
-==================
-CActorVar::CActorVar
-==================
-*/
-CActorVar::CActorVar( const CActorVar& InCopy )
-{
-	*this = InCopy;
-}
-
-/*
-==================
-CActorVar::Clear
-==================
-*/
-void CActorVar::Clear()
-{
-	if ( !value )
-	{
-		return;
-	}
-
-	switch ( type )
-	{
-	case AVT_Int:		delete static_cast< int32* >( value );						break;
-	case AVT_Float:		delete static_cast< float* >( value );						break;
-	case AVT_Bool:		delete static_cast< bool* >( value );						break;
-	case AVT_Vector2D:	delete static_cast< Vector2D* >( value );					break;
-	case AVT_Vector3D:	delete static_cast< Vector* >( value );					break;
-	case AVT_Vector4D:	delete static_cast< Vector4D* >( value );					break;
-	case AVT_RectInt:	delete static_cast< RectInt32_t* >( value );					break;
-	case AVT_RectFloat:	delete static_cast< RectFloat_t* >( value );					break;
-	case AVT_Color:		delete static_cast< CColor* >( value );						break;
-	case AVT_String:	delete static_cast< std::wstring* >( value );				break;
-	case AVT_Material:	delete static_cast< TAssetHandle<CMaterial>* >( value );	break;
-	}
-
-	value = nullptr;
-	type = AVT_Unknown;
-}
-#endif // WITH_EDITOR
-
 /*
 ==================
 AActor::AActor
@@ -259,15 +206,6 @@ void AActor::SyncPhysics()
 }
 
 #if WITH_EDITOR
-/*
-==================
-AActor::InitProperties
-==================
-*/
-bool AActor::InitProperties( const std::vector<CActorVar>& InActorVars, class CCookPackagesCommandlet* InCooker )
-{
-	return true;
-}
 
 /*
 ==================

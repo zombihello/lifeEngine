@@ -134,37 +134,56 @@ CEngineLoop::InitConfigs
 void CEngineLoop::InitConfigs()
 {
 	// Init configs
-	g_Config.Init();
+	CConfig::Get().Init();
 
 	// Set from config max tick rate
-	g_UseMaxTickRate			= g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
+	const CJsonValue*			configUseMaxTickRate = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) );
+	g_UseMaxTickRate			= configUseMaxTickRate ? configUseMaxTickRate->GetBool() : false;
 
 #if WITH_EDITOR
 	// Fill table for convert from text to ESurfaceType
 	{
-		std::vector< CConfigValue >		configSurfaceNames	= g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) ).GetArray();
-		for ( uint32 index = 0, count = configSurfaceNames.size(); index < count; ++index )
+		const CJsonValue*				configSurfaceNamesValue = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) );
+		const std::vector<CJsonValue>*	configSurfaceNames = configSurfaceNamesValue ? configSurfaceNamesValue->GetArray() : nullptr;
+		if ( configSurfaceNames )
 		{
-			const CConfigValue&		configSurface			= configSurfaceNames[ index ];
-			Assert( configSurface.GetType() == CConfigValue::T_Object );
-			CConfigObject			objectSurface = configSurface.GetObject();
+			for ( uint32 index = 0, count = configSurfaceNames->size(); index < count; ++index )
+			{
+				const CJsonValue&		configSurface = configSurfaceNames->at( index );
+				const CJsonObject*		objectSurface = configSurface.GetObject();
+				if ( !objectSurface )
+				{
+					Warnf( TEXT( "Invalid 'Editor.Editor:Surfaces[%i]'\n" ), index );
+					continue;
+				}
 
-			std::wstring		name		= objectSurface.GetValue( TEXT( "Name" ) ).GetString();
-			int32				surfaceID	= objectSurface.GetValue( TEXT( "ID" ) ).GetInt();
-			Assert( surfaceID < ST_Max );
-			g_SurfaceTypeNames.push_back( std::make_pair( name, ( ESurfaceType )surfaceID ) );
+				const CJsonValue*	configName = objectSurface->GetValue( TEXT( "Name" ) );
+				const CJsonValue*	configID = objectSurface->GetValue( TEXT( "ID" ) );
+				if ( !configName || !configID )
+				{
+					Warnf( TEXT( "Invalid 'Editor.Editor:Surfaces[%i]'\n" ), index );
+					continue;
+				}
+
+				std::wstring name		= configName->GetString();
+				int32		 surfaceID	= configID->GetInt();
+				Assert( surfaceID < ST_Max );
+				g_SurfaceTypeNames.push_back( std::make_pair( name, ( ESurfaceType )surfaceID ) );
+			}
 		}
 	}
 
 	// Is need cook editor content (include dev content)
-	g_IsCookEditorContent			= g_Config.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) ).GetBool();
+	const CJsonValue*		configCookEditorContent = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) );
+	g_IsCookEditorContent	= configCookEditorContent ? configCookEditorContent->GetBool() : nullptr;
 	if ( g_IsCookEditorContent )
 	{
 		Warnf( TEXT( "Enabled cook editor content\n" ) );
 	}
 
 	// Is allow shader debug dump
-	g_AllowDebugShaderDump			= g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) ).GetBool() || g_CommandLine.HasParam( TEXT( "-shaderdump" ) );
+	const CJsonValue*		configAllowShaderDebugDump = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) );
+	g_AllowDebugShaderDump	= ( configAllowShaderDebugDump ? configAllowShaderDebugDump->GetBool() : false ) || g_CommandLine.HasParam( TEXT( "-shaderdump" ) );
 #endif // WITH_EDITOR
 }
 
@@ -220,16 +239,6 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	if ( !g_IsEditor && !g_IsCooker )
 	{
 		std::wstring	tocPath = g_CookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC();
-
-#if WITH_EDITOR
-		if ( !g_FileSystem->IsExistFile( tocPath ) )
-		{
-			CCommandLine		commandLine;
-			commandLine.Init( TEXT( "-commandlet=CookerSync" ) );
-			CBaseCommandlet::ExecCommandlet( commandLine );
-		}
-#endif // WITH_EDITOR
-		
 		CArchive*		archiveTOC	= g_FileSystem->CreateFileReader( tocPath );
 		if ( archiveTOC )
 		{
@@ -260,12 +269,14 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		std::wstring		classEngineName = TEXT( "CBaseEngine" );
 		if ( !g_IsEditor )
 		{
-			classEngineName = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "Class" ) ).GetString().c_str();
+			const CJsonValue*	configEngineClass = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "Class" ) );
+			classEngineName		= configEngineClass ? configEngineClass->GetString() : TEXT( "" );
 		}
 #if WITH_EDITOR
 		else
 		{
-			classEngineName = g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Class" ) ).GetString().c_str();
+			const CJsonValue*	configEngineClass = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Class" ) );
+			classEngineName		= configEngineClass ? configEngineClass->GetString() : TEXT( "" );
 		}
 #endif // WITH_EDITOR
 
@@ -340,20 +351,20 @@ int32 CEngineLoop::Init()
 	if ( g_IsEditor )
 	{
 		// Get map for loading in editor
-		CConfigValue		configEditorStartupMap = g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
-		if ( configEditorStartupMap.IsA( CConfigValue::T_String ) )
+		const CJsonValue*		configEditorStartupMap = CConfig::Get().GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
+		if ( configEditorStartupMap && configEditorStartupMap->IsA( JVT_String ) )
 		{
-			map = configEditorStartupMap.GetString();
+			map = configEditorStartupMap->GetString();
 		}
 	}
 	else
 #endif // WITH_EDITOR
 	{
 		// Get map for loading in game
-		CConfigValue		configGameDefaultMap = g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
-		if ( configGameDefaultMap.IsA( CConfigValue::T_String ) )
+		const CJsonValue*		configGameDefaultMap = CConfig::Get().GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
+		if ( configGameDefaultMap && configGameDefaultMap->IsA( JVT_String ) )
 		{
-			map = configGameDefaultMap.GetString();
+			map = configGameDefaultMap->GetString();
 		}
 	}
 
@@ -476,7 +487,7 @@ void CEngineLoop::Exit()
 	CObject::StaticExit();
 	CSystem::Get().Shutdown();
 	g_Log->TearDown();
-	g_Config.Shutdown();
+	CConfig::Get().Shutdown();
 	g_CommandLine.Shutdown();
 	g_Cvar.UnregisterAllCommands();
 }

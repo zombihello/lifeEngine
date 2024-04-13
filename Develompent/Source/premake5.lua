@@ -71,7 +71,6 @@ extRapidJSON                    = externalDir .. "rapidjson"
 extSdl2			                = externalDir .. "SDL2-2.0.14"
 extStb                          = externalDir .. "stb"
 extTheora                       = externalDir .. "theora-1.2"
-extTmxlite                      = externalDir .. "tmxlite"
 extZlib                         = externalDir .. "zlib"
 extCompressonator				= externalDir .. "Compressonator_4.3.206"
 extHalf							= externalDir .. "half-2.2.0"
@@ -91,7 +90,6 @@ include( extRapidJSON )
 include( extSdl2 )
 include( extStb )
 include( extTheora )
-include( extTmxlite )
 include( extZlib )
 include( extCompressonator )
 include( extHalf )
@@ -242,7 +240,6 @@ workspace( game )
         filter "configurations:*WithEditor"
             LinkSTB()
             LinkAssmip()
-            LinkTmxLite()
 			LinkCompressonator()
 		   
             includedirs {

@@ -14,7 +14,6 @@
 // GLOBALS
 // ----------------
 
-CConfigManager          g_Config;
 bool	                g_IsRequestingExit           = false;
 bool                    g_IsRunning                  = false;
 bool                    g_IsInitialLoad              = true;

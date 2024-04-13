@@ -9,14 +9,12 @@
 #ifndef OBJECTEXPORTER_H
 #define OBJECTEXPORTER_H
 
-#include <string>
-
 #include "Misc/Platform.h"
 #include "Reflection/Object.h"
 
 /**
  * @ingroup WorldEd
- * @brief Object exporter used for copy/past/duplicate CObject
+ * @brief Object exporter
  */
 class CObjectExporter
 {

@@ -25,10 +25,10 @@ CInputSystem::Init
 void CInputSystem::Init()
 {
 	// Get mouse sensitivity
-	CConfigValue		configSensitivity = g_Config.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Sensitivity" ) );
-	if ( configSensitivity.IsValid() )
+	const CJsonValue*		configSensitivity = CConfig::Get().GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Sensitivity" ) );
+	if ( configSensitivity && configSensitivity->IsValid() )
 	{
-		mouseSensitivity = configSensitivity.GetNumber();
+		mouseSensitivity = configSensitivity->GetNumber();
 	}
 }
 
@@ -41,31 +41,31 @@ void CInputSystem::ProcessEvent( struct WindowEvent& InWindowEvent )
 {
 	switch ( InWindowEvent.type )
 	{
-	case WindowEvent::T_KeyPressed:		buttonEvents[ InWindowEvent.events.key.code ] = BE_Pressed;				break;
+	case WindowEvent::T_KeyPressed:			buttonEvents[ InWindowEvent.events.key.code ] = BE_Pressed;				break;
 	case WindowEvent::T_KeyReleased:		buttonEvents[ InWindowEvent.events.key.code ] = BE_Released;			break;
 
 	case WindowEvent::T_MousePressed:		buttonEvents[ InWindowEvent.events.mouseButton.code ] = BE_Pressed;		break;
 	case WindowEvent::T_MouseReleased:		buttonEvents[ InWindowEvent.events.mouseButton.code ] = BE_Released;	break;
 
 	case WindowEvent::T_MouseMove:
-		mouseOffset.x += InWindowEvent.events.mouseMove.xDirection;
-		mouseOffset.y += InWindowEvent.events.mouseMove.yDirection;
+		mouseOffset.x	+= InWindowEvent.events.mouseMove.xDirection;
+		mouseOffset.y	+= InWindowEvent.events.mouseMove.yDirection;
 		mouseLocation.x = InWindowEvent.events.mouseMove.x;
 		mouseLocation.y = InWindowEvent.events.mouseMove.y;
 
 		if ( mouseOffset.x != 0.f )
 		{
-			buttonEvents[ BC_MouseX ] = BE_Moved;
+			buttonEvents[BC_MouseX] = BE_Moved;
 		}
 
 		if ( mouseOffset.y != 0.f )
 		{
-			buttonEvents[ BC_MouseY ] = BE_Moved;
+			buttonEvents[BC_MouseY] = BE_Moved;
 		}
 		break;
 
 	case WindowEvent::T_MouseWheel:
-		buttonEvents[ InWindowEvent.events.mouseWheel.y > 0 ? BC_MouseWheelUp : BC_MouseWheelDown ] = BE_Scrolled;
+		buttonEvents[InWindowEvent.events.mouseWheel.y > 0 ? BC_MouseWheelUp : BC_MouseWheelDown] = BE_Scrolled;
 		break;
 
 	case WindowEvent::T_TextInput:
@@ -82,9 +82,9 @@ void CInputSystem::ResetEvents()
 {
 	for ( uint32 index = 0; index < BC_Count; ++index )
 	{
-		if ( buttonEvents[ index ] == BE_Released || buttonEvents[ index ] == BE_Scrolled || buttonEvents[ index ] == BE_Moved )
+		if ( buttonEvents[index] == BE_Released || buttonEvents[index] == BE_Scrolled || buttonEvents[index] == BE_Moved )
 		{
-			buttonEvents[ index ] = BE_None;
+			buttonEvents[index] = BE_None;
 		}
 	}
 
