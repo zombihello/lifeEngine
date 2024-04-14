@@ -2,6 +2,7 @@
 #include "Reflection/Class.h"
 #include "Reflection/Property.h"
 #include "Reflection/Object.h"
+#include "Reflection/ObjectGlobals.h"
 
 IMPLEMENT_CLASS( CProperty )
 IMPLEMENT_CLASS( CByteProperty )
@@ -201,6 +202,43 @@ void CProperty::ExportProperty( std::wstring& OutValueString, byte* InObjectAddr
 		}
 	}
 }
+
+/*
+==================
+CProperty::ImportProperty
+==================
+*/
+void CProperty::ImportProperty( const CJsonValue* InJsonValue, byte* InObjectAddress, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	if ( ShouldPort( InPortFlags ) )
+	{
+		Assert( InJsonValue );
+		const std::vector<CJsonValue>*	values = InJsonValue->GetArray();
+		bool							bIsArray = arraySize > 1;
+		if ( bIsArray && !values )
+		{
+			Warnf( TEXT( "Invalid JSON data in property '%s'\n" ), GetName().c_str() );
+			return;
+		}
+
+		// Get the begin of property data
+		byte*		data = InObjectAddress + offset;
+
+		// Import values
+		if ( bIsArray )
+		{
+			for ( uint32 index = 0, count = values->size(); index < count && index < arraySize; ++index )
+			{
+				const CJsonValue&	jsonValue = values->at( index );
+				ImportValue( &jsonValue, data, index, InImportRootScope, InPortFlags );
+			}
+		}
+		else
+		{
+			ImportValue( InJsonValue, data, 0, InImportRootScope, InPortFlags );
+		}
+	}
+}
 #endif // WITH_EDITOR
 
 
@@ -299,6 +337,24 @@ void CByteProperty::ExportValue( std::wstring& OutValueString, byte* InData, uin
 {
 	OutValueString = L_Sprintf( TEXT( "%i" ), *( InData + InArrayIdx * GetElementSize() ) );
 }
+
+/*
+==================
+CByteProperty::ImportValue
+==================
+*/
+void CByteProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	if ( !InJsonValue->IsA( JVT_Int ) && !InJsonValue->IsA( JVT_Float ) )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	byte*	value = InData + InArrayIdx * GetElementSize();
+	*value = ( byte )InJsonValue->GetNumber();
+}
 #endif // WITH_EDITOR
 
 
@@ -375,6 +431,24 @@ void CIntProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint
 {
 	OutValueString = L_Sprintf( TEXT( "%i" ), *( int32* )( InData + InArrayIdx * GetElementSize() ) );
 }
+
+/*
+==================
+CIntProperty::ImportValue
+==================
+*/
+void CIntProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	if ( !InJsonValue->IsA( JVT_Bool ) &&  !InJsonValue->IsA( JVT_Int ) && !InJsonValue->IsA( JVT_Float ) )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	int32*	value = ( int32* )( InData + InArrayIdx * GetElementSize() );
+	*value	= ( int32 )InJsonValue->GetNumber();
+}
 #endif // WITH_EDITOR
 
 
@@ -450,6 +524,24 @@ CFloatProperty::ExportValue
 void CFloatProperty::ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags /* = PPF_None */ )
 {
 	OutValueString = L_Sprintf( TEXT( "%f" ), *( float* )( InData + InArrayIdx * GetElementSize() ) );
+}
+
+/*
+==================
+CFloatProperty::ImportValue
+==================
+*/
+void CFloatProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	if ( !InJsonValue->IsA( JVT_Bool ) &&  !InJsonValue->IsA( JVT_Int ) && !InJsonValue->IsA( JVT_Float ) )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	float*	value = ( float* )( InData + InArrayIdx * GetElementSize() );
+	*value	= InJsonValue->GetNumber();
 }
 #endif // WITH_EDITOR
 
@@ -528,6 +620,24 @@ void CBoolProperty::ExportValue( std::wstring& OutValueString, byte* InData, uin
 	bool	bValue = *( bool* )( InData + InArrayIdx * GetElementSize() );
 	OutValueString = L_Sprintf( TEXT( "%s" ), bValue ? TEXT( "true" ) : TEXT( "false" ) );
 }
+
+/*
+==================
+CBoolProperty::ImportValue
+==================
+*/
+void CBoolProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	if ( !InJsonValue->IsA( JVT_Bool ) &&  !InJsonValue->IsA( JVT_Int ) && !InJsonValue->IsA( JVT_Float ) )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	bool*	value = ( bool* )( InData + InArrayIdx * GetElementSize() );
+	*value	= ( bool )InJsonValue->GetNumber();
+}
 #endif // WITH_EDITOR
 
 
@@ -604,6 +714,30 @@ void CColorProperty::ExportValue( std::wstring& OutValueString, byte* InData, ui
 {
 	CColor*		color = ( CColor* )( InData + InArrayIdx * GetElementSize() );
 	OutValueString = L_Sprintf( TEXT( "{ \"R\": %i, \"G\": %i, \"B\": %i }" ), color->r, color->g, color->b );
+}
+
+/*
+==================
+CColorProperty::ImportValue
+==================
+*/
+void CColorProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	const CJsonObject*		jsonColorObject = InJsonValue->GetObject();
+	if ( !jsonColorObject )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	const CJsonValue*	jsonColorR = jsonColorObject->GetValue( TEXT( "R" ) );
+	const CJsonValue*	jsonColorG = jsonColorObject->GetValue( TEXT( "G" ) );
+	const CJsonValue*	jsonColorB = jsonColorObject->GetValue( TEXT( "B" ) );
+	CColor*				color = ( CColor* )( InData + InArrayIdx * GetElementSize() );
+	color->r = jsonColorR ? ( uint8 )jsonColorR->GetNumber() : 0;
+	color->g = jsonColorG ? ( uint8 )jsonColorG->GetNumber() : 0;
+	color->b = jsonColorB ? ( uint8 )jsonColorB->GetNumber() : 0;
 }
 #endif // WITH_EDITOR
 
@@ -725,6 +859,33 @@ void CObjectProperty::ExportValue( std::wstring& OutValueString, byte* InData, u
 	CObject*		object = *( CObject** )( InData + InArrayIdx * GetElementSize() );
 	OutValueString = L_Sprintf( TEXT( "\"%s\"" ), object->GetPathName( InExportRootScope ).c_str() );
 }
+
+/*
+==================
+CObjectProperty::ImportValue
+==================
+*/
+void CObjectProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	if ( !InJsonValue->IsA( JVT_String ) )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	CObject**		object = ( CObject** )( InData + InArrayIdx * GetElementSize() );
+	std::wstring	objectPathName = InJsonValue->GetString();
+
+	// Firstly we try find the object in our import root scope
+	*object = FindObject<CObject>( InImportRootScope, objectPathName.c_str() );
+
+	// Otherwise find the object in global scope
+	if ( !*object )
+	{
+		*object = FindObject<CObject>( ANY_PACKAGE, objectPathName.c_str() );
+	}
+}
 #endif // WITH_EDITOR
 
 
@@ -813,6 +974,30 @@ void CVectorProperty::ExportValue( std::wstring& OutValueString, byte* InData, u
 	Vector*		vector = ( Vector* )( InData + InArrayIdx * GetElementSize() );
 	OutValueString = L_Sprintf( TEXT( "{ \"X\": %f, \"Y\": %f, \"Z\": %f }" ), vector->x, vector->y, vector->z );
 }
+
+/*
+==================
+CVectorProperty::ImportValue
+==================
+*/
+void CVectorProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	const CJsonObject*		jsonVectorObject = InJsonValue->GetObject();
+	if ( !jsonVectorObject )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	const CJsonValue*	jsonVectorX = jsonVectorObject->GetValue( TEXT( "X" ) );
+	const CJsonValue*	jsonVectorY = jsonVectorObject->GetValue( TEXT( "Y" ) );
+	const CJsonValue*	jsonVectorZ = jsonVectorObject->GetValue( TEXT( "Z" ) );
+	Vector*				vector = ( Vector* )( InData + InArrayIdx * GetElementSize() );
+	vector->x			= jsonVectorX ? jsonVectorX->GetNumber() : 0.f;
+	vector->y			= jsonVectorY ? jsonVectorY->GetNumber() : 0.f;
+	vector->z			= jsonVectorZ ? jsonVectorZ->GetNumber() : 0.f;
+}
 #endif // WITH_EDITOR
 
 
@@ -889,6 +1074,30 @@ void CRotatorProperty::ExportValue( std::wstring& OutValueString, byte* InData, 
 {
 	CRotator*		rotator = ( CRotator* )( InData + InArrayIdx * GetElementSize() );
 	OutValueString = L_Sprintf( TEXT( "{ \"Pitch\": %f, \"Yaw\": %f, \"Roll\": %f }" ), rotator->pitch, rotator->yaw, rotator->roll );
+}
+
+/*
+==================
+CRotatorProperty::ImportValue
+==================
+*/
+void CRotatorProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	const CJsonObject*		jsonRotatorObject = InJsonValue->GetObject();
+	if ( !jsonRotatorObject )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	const CJsonValue*	jsonRotatorPitch = jsonRotatorObject->GetValue( TEXT( "Pitch" ) );
+	const CJsonValue*	jsonRotatorYaw = jsonRotatorObject->GetValue( TEXT( "Yaw" ) );
+	const CJsonValue*	jsonRotatorRoll = jsonRotatorObject->GetValue( TEXT( "Roll" ) );
+	CRotator*			rotator = ( CRotator* )( InData + InArrayIdx * GetElementSize() );
+	rotator->pitch		= jsonRotatorPitch ? jsonRotatorPitch->GetNumber() : 0.f;
+	rotator->yaw		= jsonRotatorYaw ? jsonRotatorYaw->GetNumber() : 0.f;
+	rotator->roll		= jsonRotatorRoll ? jsonRotatorRoll->GetNumber() : 0.f;
 }
 #endif // WITH_EDITOR
 
@@ -979,6 +1188,25 @@ void CAssetProperty::ExportValue( std::wstring& OutValueString, byte* InData, ui
 	std::wstring				assetReference;
 	MakeReferenceToAsset( *asset, assetReference );
 	OutValueString = L_Sprintf( TEXT( "\"%s\"" ), assetReference.c_str() );
+}
+
+/*
+==================
+CAssetProperty::ImportValue
+==================
+*/
+void CAssetProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	if ( !InJsonValue->IsA( JVT_String ) )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	TAssetHandle<CAsset>*	asset = ( TAssetHandle<CAsset>* )( InData + InArrayIdx * GetElementSize() );
+	std::wstring			assetReference = InJsonValue->GetString();
+	*asset = g_PackageManager->FindAsset( assetReference );
 }
 #endif // WITH_EDITOR
 
@@ -1167,6 +1395,34 @@ void CArrayProperty::ExportValue( std::wstring& OutValueString, byte* InData, ui
 	// Close array scope
 	OutValueString += TEXT( " ]" );
 }
+
+/*
+==================
+CArrayProperty::ImportValue
+==================
+*/
+void CArrayProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	if ( !InJsonValue->IsA( JVT_Array ) )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	const std::vector<CJsonValue>*	jsonValues			= InJsonValue->GetArray();
+	std::vector<byte>*				arrayItems			= ( std::vector<byte>* )( InData + InArrayIdx * GetElementSize() );
+	uint32							innerPropertySize	= innerProperty->GetElementSize();
+
+	// Resize array and import items
+	arrayItems->resize( jsonValues->size() * innerPropertySize );
+	byte*	data = arrayItems->data();
+	for ( uint32 index = 0, count = jsonValues->size(); index < count; ++index )
+	{
+		const CJsonValue&	jsonValue = jsonValues->at( index );
+		innerProperty->ImportValue( &jsonValue, data, index, InImportRootScope, InPortFlags );
+	}
+}
 #endif // WITH_EDITOR
 
 
@@ -1312,6 +1568,17 @@ void CStructProperty::ExportValue( std::wstring& OutValueString, byte* InData, u
 	byte*		data = InData + InArrayIdx * GetElementSize();
 	propertyStruct->ExportProperties( OutValueString, data, InExportRootScope, InPortFlags );
 }
+
+/*
+==================
+CStructProperty::ImportValue
+==================
+*/
+void CStructProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	byte*	data = InData + InArrayIdx * GetElementSize();
+	propertyStruct->ImportProperty( InJsonValue, data, InImportRootScope, InPortFlags );
+}
 #endif // WITH_EDITOR
 
 
@@ -1388,5 +1655,23 @@ void CStringProperty::ExportValue( std::wstring& OutValueString, byte* InData, u
 {
 	std::wstring*	string = ( std::wstring* )( InData + InArrayIdx * GetElementSize() );
 	OutValueString = L_Sprintf( TEXT( "\"%s\"" ), string->c_str() );
+}
+
+/*
+==================
+CStringProperty::ImportValue
+==================
+*/
+void CStringProperty::ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	Assert( InJsonValue );
+	if ( !InJsonValue->IsA( JVT_String ) )
+	{
+		Warnf( TEXT( "Invalid JSON property data for '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	std::wstring*	string = ( std::wstring* )( InData + InArrayIdx * GetElementSize() );
+	*string = InJsonValue->GetString();
 }
 #endif // WITH_EDITOR

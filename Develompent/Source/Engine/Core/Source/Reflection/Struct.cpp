@@ -289,4 +289,41 @@ void CStruct::ExportProperties( std::wstring& OutValueString, byte* InData, CObj
 	// Close struct scope
 	OutValueString += TEXT( " }" );
 }
+
+/*
+==================
+CStruct::ImportProperty
+==================
+*/
+void CStruct::ImportProperty( const CJsonValue* InJsonValue, byte* InData, CObject* InImportRootScope, uint32 InPortFlags /* = PPF_None */ )
+{
+	// Get JSON struct object
+	Assert( InJsonValue );
+	const CJsonObject*		jsonStructObject = InJsonValue->GetObject();
+	if ( !jsonStructObject )
+	{
+		Warnf( TEXT( "Invalid JSON data in struct '%s'\n" ), GetName().c_str() );
+		return;
+	}
+
+	// Import properties
+	for ( const CStruct* currentStruct = this; currentStruct; currentStruct = currentStruct->superStruct )
+	{
+		if ( !currentStruct->properties.empty() )
+		{
+			for ( uint32 propertyId = 0, propertyCount = currentStruct->properties.size(); propertyId < propertyCount; ++propertyId )
+			{
+				CProperty*			property = currentStruct->properties[propertyId];
+				const CJsonValue*	jsonStructProperty = jsonStructObject->GetValue( property->GetName().c_str() );
+				if ( !jsonStructProperty )
+				{
+					Warnf( TEXT( "Property '%s' not found in the JSON data of '%s'\n" ), property->GetName().c_str(), GetName().c_str() );
+					continue;
+				}
+
+				property->ImportProperty( jsonStructProperty, ( byte* )InData, InImportRootScope, InPortFlags );
+			}
+		}
+	}
+}
 #endif // WITH_EDITOR

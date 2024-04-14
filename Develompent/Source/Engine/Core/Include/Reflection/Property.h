@@ -18,6 +18,10 @@
 #include "Reflection/Class.h"
 #include "Reflection/Enum.h"
 
+#if WITH_EDITOR
+#include "Misc/JsonDocument.h"
+#endif // WITH_EDITOR
+
 /**
  * @ingroup Core
  * @brief Union property value
@@ -154,7 +158,28 @@ public:
 	 * @param InExportRootScope		Export root scope
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
-	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) PURE_VIRTUAL( CProperty::ExportValueJSON, );
+	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) PURE_VIRTUAL( CProperty::ExportValue, );
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InObjectAddress		Address of a object where the value of this property is stored
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	void ImportProperty( const CJsonValue* InJsonValue, byte* InObjectAddress, CObject* InImportRootScope, uint32 InPortFlags = PPF_None );
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) PURE_VIRTUAL( CProperty::ImportValue, );
 #endif // WITH_EDITOR
 
 	/**
@@ -604,6 +629,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -709,6 +745,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -802,6 +849,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -895,6 +953,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -988,6 +1057,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -1093,6 +1173,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -1226,6 +1317,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -1331,6 +1433,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -1436,6 +1549,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -1551,6 +1675,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -1690,6 +1825,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**
@@ -1811,6 +1957,17 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	virtual void ExportValue( std::wstring& OutValueString, byte* InData, uint32 InArrayIdx, CObject* InExportRootScope, uint32 InPortFlags = PPF_None ) override;
+
+	/**
+	 * @brief Import property's data from JSON
+	 *
+	 * @param InJsonValue			Json property value
+	 * @param InData				The address of property start
+	 * @param InArrayIdx			Array slot of persistent variables
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	virtual void ImportValue( const CJsonValue* InJsonValue, byte* InData, uint32 InArrayIdx, CObject* InImportRootScope, uint32 InPortFlags = PPF_None ) override;
 #endif // WITH_EDITOR
 
 	/**

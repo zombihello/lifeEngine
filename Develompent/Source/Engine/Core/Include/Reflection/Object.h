@@ -100,6 +100,17 @@ public:
     static bool StaticIsCObjectInitialized();
 
     /**
+     * @brief Create a unique name by combining a base name and an arbitrary number string
+     * The object name returned is guaranteed not to exist
+     * 
+     * @param InOuter       The outer for the object that needs to be named
+     * @param InClass       The class for the object
+     * @param InBaseName    Optional base name to use when generating the unique object name. If not specified, the class's name is used
+     * @return Return name in the form BaseName_##, where ## is the number of objects of this type that have been created since the last time the class was garbage collected
+     */
+    static CName MakeUniqueObjectName( CObject* InOuter, CClass* InClass, CName InBaseName = NAME_None );
+
+    /**
      * @brief Add function of static class initialize to auto registrants
      * @param InStaticInitializeFn      Static class initialize function
      */
@@ -584,17 +595,6 @@ private:
      * @brief Call PostLoad if needed
      */
     void ConditionalPostLoad();
-
-    /**
-     * @brief Create a unique name by combining a base name and an arbitrary number string
-     * The object name returned is guaranteed not to exist
-     * 
-     * @param InOuter       The outer for the object that needs to be named
-     * @param InClass       The class for the object
-     * @param InBaseName    Optional base name to use when generating the unique object name. If not specified, the class's name is used
-     * @return Return name in the form BaseName_##, where ## is the number of objects of this type that have been created since the last time the class was garbage collected
-     */
-    static CName MakeUniqueObjectName( CObject* InOuter, CClass* InClass, CName InBaseName = NAME_None );
 
     /**
      * @brief Override operator delete

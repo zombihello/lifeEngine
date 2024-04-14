@@ -28,7 +28,7 @@ void CObjectExporter::Export( CObject* InObject, std::wstring& OutString, uint32
 		return;
 	}
 
-	// Reset text indent and OutString
+	// Set export parameters
 	textIndent = 0;
 	exportRootScope = InObject;
 	portFlags = InPortFlags;
@@ -145,7 +145,7 @@ void CObjectExporter::ExportObjectInner( CObject* InObject, std::wstring& OutStr
 	InObject->Serialize( objectReferenceCollector );
 
 	// Export all subobjects
-	OutString	+= L_Sprintf( TEXT( ",\n%s\"Objects\": [" ), GetNumSpaces( textIndent ).c_str() );
+	OutString	+= L_Sprintf( TEXT( ",\n%s\"SubObjects\": [" ), GetNumSpaces( textIndent ).c_str() );
 	textIndent	+= 3;
 	{
 		for ( uint32 index = 0, count = subObjects.size(); index < count; ++index )
@@ -162,7 +162,7 @@ void CObjectExporter::ExportObjectInner( CObject* InObject, std::wstring& OutStr
 	OutString += L_Sprintf( TEXT( "\n%s],\n" ), GetNumSpaces( textIndent ).c_str() );
 
 	// Export data properties
-	OutString	+= L_Sprintf( TEXT( "%s\"Data\": [" ), GetNumSpaces( textIndent ).c_str() );
+	OutString	+= L_Sprintf( TEXT( "%s\"Data\": {" ), GetNumSpaces( textIndent ).c_str() );
 	textIndent	+= 3;
 	{
 		bool						bMoreThanOneProperty = false;
@@ -186,5 +186,5 @@ void CObjectExporter::ExportObjectInner( CObject* InObject, std::wstring& OutStr
 		}
 	}
 	textIndent	-= 3;
-	OutString	+= L_Sprintf( TEXT( "\n%s]" ), GetNumSpaces( textIndent ).c_str() );
+	OutString	+= L_Sprintf( TEXT( "\n%s}" ), GetNumSpaces( textIndent ).c_str() );
 }

@@ -293,6 +293,7 @@ bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 	// Clean up and serialize world
 	if ( g_World )
 	{
+		FlushRenderingCommands();
 		g_World->EndPlay();
 		g_World->RemoveFromRoot();
 		g_World = nullptr;

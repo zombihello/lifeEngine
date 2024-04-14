@@ -306,6 +306,7 @@ void CEditorEngine::NewMap()
 	// Clean up world and call garbage collector of unused packages and assets
 	if ( g_World )
 	{
+		FlushRenderingCommands();
 		g_World->RemoveFromRoot();
 		g_World = nullptr;
 	}

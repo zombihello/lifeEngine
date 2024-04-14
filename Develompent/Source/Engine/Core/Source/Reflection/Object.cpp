@@ -768,14 +768,14 @@ CObject::MakeUniqueObjectName
 CName CObject::MakeUniqueObjectName( CObject* InOuter, CClass* InClass, CName InBaseName /* = NAME_None */ )
 {
 	Assert( InClass );
-	uint32	baseNameIndex = InBaseName.GetIndex();
-	CName	testName;
-	do
+	uint32	baseNameIndex	= InBaseName.GetIndex();
+	CName	testName		= InBaseName;
+	while ( FindObjectFast( nullptr, InOuter, testName, false, InOuter == ANY_PACKAGE ) )
 	{
 		// Create the next name in the sequence for this class
 		testName = CName( ( EName )baseNameIndex, ++InClass->classUnique );
 	}
-	while ( FindObjectFast( nullptr, InOuter, testName, false, InOuter == ANY_PACKAGE ) );
+
 	return testName;
 }
 

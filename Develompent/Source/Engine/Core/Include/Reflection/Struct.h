@@ -14,6 +14,10 @@
 #include "Reflection/ObjectHash.h"
 #include "Reflection/Field.h"
 
+#if WITH_EDITOR
+#include "Misc/JsonDocument.h"
+#endif // WITH_EDITOR
+
 /**
  * @ingroup Core
  * @brief Structure description for reflection
@@ -188,6 +192,16 @@ public:
 	 * @param InPortFlags			Export flags (see EPropertyPortFlags)
 	 */
 	void ExportProperties( std::wstring& OutValueString, byte* InData, CObject* InExportRootScope, uint32 InPortFlags = PPF_None );
+
+	/**
+	 * @brief Import struct properties from JSON
+	 *
+	 * @param InJsonValue			Json struct
+	 * @param InData				Pointer to object
+	 * @param InImportRootScope		Import root scope
+	 * @param InPortFlags			Import flags (see EPropertyPortFlags)
+	 */
+	void ImportProperty( const CJsonValue* InJsonValue, byte* InData, CObject* InImportRootScope, uint32 InPortFlags = PPF_None );
 #endif // WITH_EDITOR
 
 	/**

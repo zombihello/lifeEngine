@@ -5,6 +5,7 @@
 #include "System/World.h"
 #include "System/InputSystem.h"
 #include "System/ObjectExporter.h"
+#include "System/ObjectImporter.h"
 #include "Windows/ExplorerLevelWindow.h"
 #include "Windows/InputTextDialog.h"
 #include "Windows/DialogWindow.h"
@@ -264,17 +265,67 @@ void CExplorerLevelWindow::DrawPopupMenu()
 		}
 
 		// Paste
-		if ( ImGui::MenuItem( "Paste", "", nullptr, bSelectedActors && !Sys_GetClipboardText().empty() ) )
+		if ( ImGui::MenuItem( "Paste", "", nullptr, !Sys_GetClipboardText().empty() ) )
 		{
+			std::wstring		buffer = Sys_GetClipboardText();
+			if ( !buffer.empty() )
+			{
+				CObjectImporter			objectImporter;
+				std::vector<CObject*>	importedObjects;
+				objectImporter.Import( buffer, importedObjects, g_World );
+
+				// Select imported objects (if they are actors)
+				std::vector<AActor*>	actorsToSelect;
+				for ( uint32 index = 0, count = importedObjects.size(); index < count; ++index )
+				{
+					CObject*	object = importedObjects[index];
+					if ( !IsA<AActor>( object ) )
+					{
+						continue;
+					}
+
+					actorsToSelect.push_back( ( AActor* )object );
+				}
+
+				if ( !actorsToSelect.empty() )
+				{
+					g_World->UnselectAllActors();
+					g_World->SelectActors( actorsToSelect );
+				}
+			}
 		}
 
 		// Duplicate
 		if ( ImGui::MenuItem( "Duplicate", "", nullptr, bSelectedActors ) )
 		{		
-			// Copy actor
-			std::wstring		buffer;
-			CObjectExporter		objectExporter;
+			// Copy actors
+			std::wstring			buffer;
+			CObjectExporter			objectExporter;
+			std::vector<CObject*>	duplicatedObjects;
 			objectExporter.Export( ( const std::vector<CObject*>& )g_World->GetSelectedActors(), buffer );
+
+			// Past actors
+			CObjectImporter			objectImporter;
+			objectImporter.Import( buffer, duplicatedObjects, g_World );
+
+			// Select duplicated objects (if they are actors)
+			std::vector<AActor*>	actorsToSelect;
+			for ( uint32 index = 0, count = duplicatedObjects.size(); index < count; ++index )
+			{
+				CObject*	object = duplicatedObjects[index];
+				if ( !IsA<AActor>( object ) )
+				{
+					continue;
+				}
+
+				actorsToSelect.push_back( ( AActor* )object );
+			}
+
+			if ( !actorsToSelect.empty() )
+			{
+				g_World->UnselectAllActors();
+				g_World->SelectActors( actorsToSelect );
+			}
 		}
 
 		// Delete
