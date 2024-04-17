@@ -142,6 +142,7 @@ void CObjectImporter::ImportObject( const CJsonObject* InJsonObject, CObject*& O
 	std::vector<CObject*>							subObjects;
 	TArchiveObjectReferenceCollector<CObject>		objectReferenceCollector( &subObjects, OutObject );
 	OutObject->Serialize( objectReferenceCollector );
+	objectDict.insert( std::make_pair( OutObject->GetCName(), OutObject ) );
 	for ( uint32 index = 0, count = subObjects.size(); index < count; ++index )
 	{
 		CObject*	subObject = subObjects[index];
