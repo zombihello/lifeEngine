@@ -207,4 +207,8 @@ void CObjectImporter::ImportObject( const CJsonObject* InJsonObject, CObject*& O
 	{
 		Warnf( TEXT( "ImportObject: Object '%s' has invalid JSON section 'Data'\n" ), OutObject->GetFullName().c_str() );
 	}
+
+	// We call PostLoad to any object may handle event when it was imported from JSON
+	OutObject->AddObjectFlag( OBJECT_NeedPostLoad );
+	OutObject->ConditionalPostLoad();
 }

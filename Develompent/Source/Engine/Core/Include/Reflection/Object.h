@@ -523,6 +523,11 @@ public:
      */
     bool IsValid() const;
 
+    /**
+     * @brief Call PostLoad if needed
+     */
+    void ConditionalPostLoad();
+
 protected:
     /**
      * @brief Route BeginDestroy() and EndDestroy() on this object if this object is still valid
@@ -590,11 +595,6 @@ private:
             return false;
         }
     }
-
-    /**
-     * @brief Call PostLoad if needed
-     */
-    void ConditionalPostLoad();
 
     /**
      * @brief Override operator delete
