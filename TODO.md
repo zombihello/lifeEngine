@@ -39,7 +39,9 @@
 	- [X] Implement replacing existing object in StaticAllocateObject
 	- [X] Replace CObject::SetName to Rename for guarantee the uniqueness of the name
 	- [X] Need fix destroying packages in GC whom use by objects not considered for GC
-	- [ ] Need fix in the WorldEd duplicate actors and other actions due to was implemented serialization CObjects
+	- [X] Need fix in the WorldEd duplicate actors and other actions due to was implemented serialization CObjects
+	- [ ] Improve size of packages
+	- [ ] Integrate AngelScript into the engine
 - [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)
 - [x] Implemented functions of exploer level
 - [x] Added gizmo render in WorldEd.

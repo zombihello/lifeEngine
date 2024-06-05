@@ -73,6 +73,8 @@ CObjectGC::CObjectGC()
 	, objectsPendingDestructionCount( 0 )
 	, firstGCIndex( 0 )
 	, lastNonGCIndex( INDEX_NONE )
+	, timeBetweenPurgingGarbage( 60.f )
+	, timeLimitPerIncrementalPurgeGarbageCall( 0.005f )
 {}
 
 /*
@@ -313,12 +315,18 @@ void CObjectGC::CollectGarbage( ObjectFlags_t InKeepFlags, bool InIsPerformFullP
 CObjectGC::IncrementalPurgeGarbage
 ==================
 */
-void CObjectGC::IncrementalPurgeGarbage( bool InIsUseTimeLimit, float InTimeLimit /* = 0.005f */ )
+void CObjectGC::IncrementalPurgeGarbage( bool InIsUseTimeLimit, float InTimeLimit /* = 0.f */ )
 {
 	// Early out if there is nothing to do
 	if ( !bPurgeIsRequired )
 	{
 		return;
+	}
+
+	// Set to default time limit if InTimeLimit is less or equal to zero
+	if ( InTimeLimit <= 0.f )
+	{
+		InTimeLimit = timeLimitPerIncrementalPurgeGarbageCall;
 	}
 
 	// Keep track of start time to enforce time limit unless InIsUseTimeLimit is TRUE
@@ -493,8 +501,6 @@ void CObjectGC::IncrementalPurgeGarbage( bool InIsUseTimeLimit, float InTimeLimi
 			unreachableObjectsIndices.clear();
 		}
 	}
-
-	bIsGarbageCollecting = false;
 }
 
 /*

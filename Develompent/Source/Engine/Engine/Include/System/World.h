@@ -231,13 +231,14 @@ private:
 	 */
 	void DestroyActor( AActor* InActor, bool InIsIgnorePlaying );
 
-	bool						isBeginPlay;		/**< Is started gameplay */
-	class CBaseScene*			scene;				/**< Scene manager */
-	std::vector<AActor*>		actors;				/**< Array actors in world */
-	std::vector<AActor*>		actorsToDestroy;	/**< Array actors which need destroy after tick */
+	bool						isBeginPlay;					/**< Is started gameplay */
+	float						timeSinceLastPendingKillPurge;	/**< Time since last pending kill purge (in seconds) */
+	class CBaseScene*			scene;							/**< Scene manager */
+	std::vector<AActor*>		actors;							/**< Array actors in world */
+	std::vector<AActor*>		actorsToDestroy;				/**< Array actors which need destroy after tick */
 
 #if WITH_EDITOR
-	std::vector<AActor*>		selectedActors;		/**< Array of selected actors */
+	std::vector<AActor*>		selectedActors;					/**< Array of selected actors */
 #endif // WITH_EDITOR
 };
 

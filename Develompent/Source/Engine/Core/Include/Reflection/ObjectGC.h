@@ -429,9 +429,9 @@ public:
 	 * @brief Incrementally purge garbage by deleting all unreferenced objects after routing destroy
 	 *
 	 * @param InIsUseTimeLimit	Whether the time limit parameter should be used
-	 * @param InTimeLimit		Soft time limit for this function call
+	 * @param InTimeLimit		Soft time limit for this function call (if 0 uses default time limit)
 	 */
-	void IncrementalPurgeGarbage( bool InIsUseTimeLimit, float InTimeLimit = 0.005f );
+	void IncrementalPurgeGarbage( bool InIsUseTimeLimit, float InTimeLimit = 0.f );
 
 	/**
 	 * @brief Is valid object index
@@ -512,6 +512,51 @@ public:
 		return maxObjectsNotConsideredByGC > 0;
 	}
 
+	/**
+	 * @brief Is incremental purge pending still pending or in progress
+	 * @return Return TRUE if incremental purge pending is still pending or in progress, otherwise FALSE
+	 */
+	FORCEINLINE bool IsIncrementalPurgePending() const
+	{
+		return bPurgeIsRequired;
+	}
+
+	/**
+	 * @brief Set time between purging garbage
+	 * @param InTime	New time between purging garbage (in seconds)
+	 */
+	FORCEINLINE void SetTimeBetweenPurgingGarbage( float InTime )
+	{
+		timeBetweenPurgingGarbage = InTime;
+	}
+
+	/**
+	 * @brief Get time between purging garbage
+	 * @return Return time between purging garbage (in seconds)
+	 */
+	FORCEINLINE float GetTimeBetweenPurgingGarbage() const
+	{
+		return timeBetweenPurgingGarbage;
+	}
+
+	/**
+	 * @brief Set time limit per incremental purge garbage call
+	 * @param InTimeLimit	New time limit (in seconds)
+	 */
+	FORCEINLINE void SetTimeLimitPerIncrementalPurgeGarbageCall( float InTimeLimit )
+	{
+		timeLimitPerIncrementalPurgeGarbageCall = InTimeLimit;
+	}
+
+	/**
+	 * @brief Get time limit per incremental purge garbage call
+	 * @return Return time limit per incremental purge garbage call (in seconds)
+	 */
+	FORCEINLINE float GetTimeLimitPerIncrementalPurgeGarbageCall() const
+	{
+		return timeLimitPerIncrementalPurgeGarbageCall;
+	}
+
 private:
 	/**
 	 * @brief Helper struct for stack based approach
@@ -576,6 +621,8 @@ private:
 	uint32						objectsPendingDestructionCount;					/**< Number of objects actually still pending destruction */
 	uint32						firstGCIndex;									/**< First index into objects array taken into account for GC */
 	uint32						lastNonGCIndex;									/**< Index pointing to last object created in range disregarded for GC */
+	float						timeBetweenPurgingGarbage;						/**< Time between purging garbage (in seconds) */
+	float						timeLimitPerIncrementalPurgeGarbageCall;		/**< Time limit per incremental purge garbage call (in seconds) */
 	std::vector<class CObject*>	allocatedObjects;								/**< List of all allocated objects */
 	std::vector<uint32>			objectsPendingDestruction;						/**< Array that we'll fill with indices to objects that are still pending destruction after the first GC sweep */
 	std::list<uint32>			availableGCObjectIndeces;						/**< Available object indices in GC range */

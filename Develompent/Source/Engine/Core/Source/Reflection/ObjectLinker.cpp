@@ -2,6 +2,7 @@
 
 #include "Logger/LoggerMacros.h"
 #include "Reflection/Object.h"
+#include "Reflection/ObjectPackage.h"
 #include "Reflection/LinkerLoad.h"
 
 /**

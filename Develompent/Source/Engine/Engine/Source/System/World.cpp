@@ -8,6 +8,7 @@
 #include "System/World.h"
 #include "Logger/LoggerMacros.h"
 #include "Render/Scene.h"
+#include "Reflection/ObjectPackage.h"
 
 #if WITH_EDITOR
 #include "WorldEd.h"
@@ -22,6 +23,7 @@ CWorld::CWorld
 */
 CWorld::CWorld() 
 	: isBeginPlay( false )
+	, timeSinceLastPendingKillPurge( 0.f )
 	, scene( new CScene() )
 {}
 
@@ -111,12 +113,15 @@ CWorld::Tick
 */
 void CWorld::Tick( float InDeltaTime )
 {
-	// Tick all actors
-	for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
+	// Tick all actors (only if play is begin)
+	if ( HasBegunPlay() )
 	{
-		AActor*		actor = actors[ index ];
-		actor->Tick( InDeltaTime );
-		actor->SyncPhysics();
+		for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
+		{
+			AActor* actor = actors[index];
+			actor->Tick( InDeltaTime );
+			actor->SyncPhysics();
+		}
 	}
 
 	// Destroy actors if need
@@ -128,6 +133,23 @@ void CWorld::Tick( float InDeltaTime )
 			actorsToDestroy[index]->Destroyed();
 		}
 		actorsToDestroy.clear();
+	}
+
+	// Collect and purge garbage
+	CObjectGC&		objectGC = CObjectGC::Get();
+	timeSinceLastPendingKillPurge += InDeltaTime;
+	if ( !objectGC.IsIncrementalPurgePending() && ( timeSinceLastPendingKillPurge > objectGC.GetTimeBetweenPurgingGarbage() ) && objectGC.GetTimeBetweenPurgingGarbage() > 0.f )
+	{
+		// We don't collect garbage while any packages are saving
+		if ( !CObjectPackage::IsSavingPackage() )
+		{
+			objectGC.CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS, false );
+			timeSinceLastPendingKillPurge = 0.f;
+		}
+	}
+	else
+	{
+		objectGC.IncrementalPurgeGarbage( true );
 	}
 }
 
