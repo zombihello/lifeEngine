@@ -33,6 +33,7 @@ CBaseEngine::CBaseEngine
 CBaseEngine::CBaseEngine()
 	: bPrePass( true )
 	, bAutoExposure( true )
+	, bBloom( true )
 	, exposure( 1.f )
 	, exposureMin( 0.2f )
 	, exposureMax( 2.f )
@@ -198,6 +199,12 @@ void CBaseEngine::Init()
 		if ( configGamma && configGamma->IsValid() )
 		{
 			gamma = configGamma->GetNumber();
+		}
+
+		const CJsonValue*	configBloom = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Bloom" ) );
+		if ( configBloom && configBloom->IsValid() )
+		{
+			bBloom = configBloom->GetBool();
 		}
 	}
 

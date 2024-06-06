@@ -46,6 +46,7 @@ void CSceneRenderer::RenderPostProcess( class CBaseDeviceContextRHI* InDeviceCon
 		Assert( screenVertexShader );
 
 		// Bloom
+		if ( g_Engine->IsBloom() )
 		{
 			// TODO BS yehor.pohuliaka - Need refactor and optimize it
 			SCOPED_DRAW_EVENT( EventBloom, DEC_LIGHT, TEXT( "Bloom" ) );	
@@ -135,7 +136,7 @@ void CSceneRenderer::RenderPostProcess( class CBaseDeviceContextRHI* InDeviceCon
 		
 		// Tone mapping and gamma correction
 		{
-			SCOPED_DRAW_EVENT( EventBloom, DEC_LIGHT, TEXT( "Tone Mapping + Gamma Correction" ) );		
+			SCOPED_DRAW_EVENT( EventToneMappingAndGammaCorrection, DEC_LIGHT, TEXT( "Tone Mapping + Gamma Correction" ) );		
 			TPostProcessPixelShader<true, true>*	postProcessPixelShader = g_ShaderManager->FindInstance<TPostProcessPixelShader<true, true>, CSimpleElementVertexFactory>();
 			Assert( postProcessPixelShader );
 
@@ -145,7 +146,7 @@ void CSceneRenderer::RenderPostProcess( class CBaseDeviceContextRHI* InDeviceCon
 
 			postProcessPixelShader->SetTexture( InDeviceContext, sceneColorHDRTexture );
 			postProcessPixelShader->SetSamplerState( InDeviceContext, TStaticSamplerStateRHI<>::GetRHI() );
-			postProcessPixelShader->SetBloomTexture( InDeviceContext, finalBloomTexture );
+			postProcessPixelShader->SetBloomTexture( InDeviceContext, g_Engine->IsBloom() ? finalBloomTexture : g_BlackTexture.GetTexture2DRHI() );
 			postProcessPixelShader->SetBloomSamplerState( InDeviceContext, TStaticSamplerStateRHI<>::GetRHI() );
 			postProcessPixelShader->SetExposure( InDeviceContext, scene->GetExposure() );
 			postProcessPixelShader->SetGamma( InDeviceContext, g_Engine->GetGamma() );

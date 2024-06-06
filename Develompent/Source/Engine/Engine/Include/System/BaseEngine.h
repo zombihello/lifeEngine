@@ -152,6 +152,15 @@ public:
 		return gamma;
 	}
 
+	/**
+	 * @brief Is enabled bloom
+	 * @return Return TRUE if bloom is enabled
+	 */
+	FORCEINLINE bool IsBloom() const
+	{
+		return bBloom;
+	}
+
 protected:
 	/**
 	 * @brief Override configuration with command line params
@@ -171,6 +180,7 @@ protected:
 
 	bool							bPrePass;						/**< Is enabled pre-pass render */
 	bool							bAutoExposure;					/**< Is enabled auto exposure */
+	bool							bBloom;							/**< Is enabled bloom */
 	float							exposure;						/**< Exposure */
 	float							exposureMin;					/**< Exposure min */
 	float							exposureMax;					/**< Exposure max */
