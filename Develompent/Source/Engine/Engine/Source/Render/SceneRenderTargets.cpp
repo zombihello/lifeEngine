@@ -43,6 +43,9 @@ void CSceneRenderTargets::InitRHI()
 		// Scene depth Z
 		renderTargets[SRTT_SceneDepthZ].Update( false, bufferSizeX, bufferSizeY, PF_DepthStencil, TCF_DepthStencil, TEXT( "SceneDepthZ" ) );
 
+		// Bloom
+		renderTargets[SRTT_Bloom].Update( false, bufferSizeX, bufferSizeY, PF_FloatRGB, 0, TEXT( "Bloom" ) );
+
 		// Light pass depth Z
 		renderTargets[SRTT_LightPassDepthZ].Update( false, bufferSizeX, bufferSizeY, PF_DepthStencil, TCF_DepthStencil, TEXT( "LightPassDepthZ" ) );
 
@@ -153,6 +156,25 @@ void CSceneRenderTargets::FinishRenderingGBuffer( class CBaseDeviceContextRHI* I
 	g_RHI->SetMRTRenderTarget( InDeviceContextRHI, nullptr, 1 );
 	g_RHI->SetMRTRenderTarget( InDeviceContextRHI, nullptr, 2 );
 }
+
+/*
+==================
+CSceneRenderTargets::BeginRenderingBloom
+==================
+*/
+void CSceneRenderTargets::BeginRenderingBloom( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
+{
+	Assert( InDeviceContextRHI );
+	g_RHI->SetRenderTarget( InDeviceContextRHI, renderTargets[SRTT_Bloom].GetSurfaceRHI(), nullptr );
+}
+
+/*
+==================
+CSceneRenderTargets::FinishRenderingBloom
+==================
+*/
+void CSceneRenderTargets::FinishRenderingBloom( class CBaseDeviceContextRHI* InDeviceContextRHI ) const
+{}
 
 /*
 ==================

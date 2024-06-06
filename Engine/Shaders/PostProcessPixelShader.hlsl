@@ -9,6 +9,8 @@
 
 Texture2D		sceneColor			: register( t0 );
 SamplerState	sceneColorSampler	: register( s0 );
+Texture2D		bloom				: register( t1 );
+SamplerState	bloomSampler		: register( s1 );
 
 #if APPLY_HDR
 float			hdrExposure;
@@ -45,7 +47,7 @@ float			gamma;
 
 float4 MainPS( float2 InUV : TEXCOORD0 ) : SV_Target
 {
-	float4		color = sceneColor.Sample( sceneColorSampler, InUV );
+	float4		color = sceneColor.Sample( sceneColorSampler, InUV ) + bloom.Sample( bloomSampler, InUV );
 
 	// Apply HDR tonemapping and gamma correction if it need
 #if APPLY_HDR
