@@ -16,6 +16,26 @@
 
 /**
  * @ingroup Core
+ * @brief Information about a compressed chunk in a file
+ */
+struct CompressedChunk
+{
+	// I/O function
+	friend CArchive& operator<<( CArchive& InArchive, CompressedChunk& InChunk );
+
+	/**
+	 * @brief Constructor
+	 */
+	CompressedChunk();
+
+	uint32		uncompressedOffset;		/**< Original offset in uncompressed file */
+	uint32		uncompressedSize;		/**< Uncompressed size in bytes */
+	uint32		compressedOffset;		/**< Offset in compressed file */
+	uint32		compressedSize;			/**< Compressed size in bytes */
+};
+
+/**
+ * @ingroup Core
  * @brief A table of contents for a LifeEngine package file. Stored at the top of the file
  */
 struct PackageFileSummary
@@ -49,18 +69,21 @@ struct PackageFileSummary
 	void SetPackageFlags( uint32 InPackageFlags );
 
 private:
-	uint32		packageFlags;	/**< The flags for the package */
+	uint32							packageFlags;		/**< The flags for the package */
 
 public:
-	uint32		tag;			/**< Magic tag compared against PACKAGE_FILE_TAG to ensure that package is a LifeEngine package */
-	uint32		engineVersion;	/**< Engine version this package was saved with */
-	uint32		fileVersion;	/**< The package file version number when this package was saved */
-	uint32		nameCount;		/**< Number of names used in this package */
-	uint32		nameOffset;		/**< Location into the file on disk for the name data */
-	uint32		exportCount;	/**< Number of exports contained in this package */
-	uint32		exportOffset;	/**< Location into the file on disk for the ExportMap data */
-	uint32		importCount;	/**< Number of imports contained in this package */
-	uint32		importOffset;	/**< Location into the file on disk for the ImportMap data */
+	uint32							tag;				/**< Magic tag compared against PACKAGE_FILE_TAG to ensure that package is a LifeEngine package */
+	uint32							engineVersion;		/**< Engine version this package was saved with */
+	uint32							fileVersion;		/**< The package file version number when this package was saved */
+	uint32							totalHeaderSize;	/**< Total size of all information that needs to be read in to create a CLinkerLoad (This includes the package file summary, name, import and export tables) */
+	uint32							compressionFlags;	/**< Flags used to compress the file on save and uncompress on load */
+	std::vector<CompressedChunk>	compressedChunks;	/**< Array of compressed chunks in case this package was stored compressed */
+	uint32							nameCount;			/**< Number of names used in this package */
+	uint32							nameOffset;			/**< Location into the file on disk for the name data */
+	uint32							exportCount;		/**< Number of exports contained in this package */
+	uint32							exportOffset;		/**< Location into the file on disk for the ExportMap data */
+	uint32							importCount;		/**< Number of imports contained in this package */
+	uint32							importOffset;		/**< Location into the file on disk for the ImportMap data */
 };
 
 /**

@@ -441,6 +441,7 @@ enum EPackageFlags
     PKG_FilterEditorOnly        = 1 << 2,                               /**< Package has editor-only data filtered out */
     PKG_EditorOnly              = 1 << 3,                               /**< This is editor-only package */
     PKG_Cooked                  = 1 << 4,                               /**< Package is cooked */
+    PKG_StoreCompressed         = 1 << 5,                               /**< Package is being stored compressed, requires archive support for compression */
 
     // Combination masks and other combinations
     PKG_MASK_TransientFlags     = PKG_NewlyCreated,                     /**< Transient flags are cleared when serializing to or from PackageFileSummary */

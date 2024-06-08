@@ -3,6 +3,33 @@
 
 /*
 ==================
+CompressedChunk::CompressedChunk
+==================
+*/
+CompressedChunk::CompressedChunk()
+	: uncompressedOffset( 0 )
+	, uncompressedSize( 0 )
+	, compressedOffset( 0 )
+	, compressedSize( 0 )
+{}
+
+/*
+==================
+operator<<
+==================
+*/
+CArchive& operator<<( CArchive& InArchive, CompressedChunk& InChunk )
+{
+	InArchive << InChunk.uncompressedOffset;
+	InArchive << InChunk.uncompressedSize;
+	InArchive << InChunk.compressedOffset;
+	InArchive << InChunk.compressedSize;
+	return InArchive;
+}
+
+
+/*
+==================
 PackageFileSummary::PackageFileSummary
 ==================
 */
@@ -36,6 +63,12 @@ CArchive& operator<<( CArchive& InArchive, PackageFileSummary& InValue )
 	{
 		InArchive << InValue.engineVersion;
 		InArchive << InValue.fileVersion;
+		if ( InValue.fileVersion >= VER_CompressedPackage )
+		{
+			InArchive << InValue.totalHeaderSize;
+			InArchive << InValue.compressionFlags;
+			InArchive << InValue.compressedChunks;
+		}
 		InArchive << InValue.packageFlags;
 		if ( InValue.fileVersion >= VER_NewSerializeName )
 		{

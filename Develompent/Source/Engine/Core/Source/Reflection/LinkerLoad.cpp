@@ -321,6 +321,13 @@ bool CLinkerLoad::SerializePackageFileSummary()
 			SetWantBinaryPropertySerialization( true );
 		}
 
+		// Package has been stored compressed
+		if ( summary.GetPackageFlags() & PKG_StoreCompressed )
+		{
+			Warnf( TEXT( "Compressed packages aren't support\n" ) );
+			return false;
+		}
+
 		// Check tag
 		if ( summary.tag != PACKAGE_FILE_TAG )
 		{

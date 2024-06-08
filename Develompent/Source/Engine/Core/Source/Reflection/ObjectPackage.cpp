@@ -17,6 +17,12 @@
 IMPLEMENT_CLASS( CObjectPackage )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CObjectPackage )
 
+// Max merged compression chunk size (used by CFileCompressionHelper)
+#define MAX_MERGED_COMPRESSION_CHUNKSIZE		1024 * 1024
+
+// Min merged compression chunk size (used by CFileCompressionHelper)
+#define MIN_MERGED_COMPRESSION_CHUNKSIZE		384 * 1024
+
 //
 // GLOBALS
 //
@@ -303,6 +309,189 @@ struct PackageExportTagger
 	CObject*		outer;			/**< The outer to use for the new package */
 };
 
+/**
+ * @ingroup Core
+ * @brief Helper class for package compression
+ */
+class CFileCompressionHelper
+{
+public:
+	/**
+	 * @brief Constructor
+	 * @param InCompressionFlags	Flags to control compression (see ECompressionFlags)
+	 */
+	CFileCompressionHelper( uint32 InCompressionFlags )
+		: compressionFlags( InCompressionFlags )
+	{}
+
+	/**
+	 * @brief Compresses the passed in src file and writes it to destination
+	 * 
+	 * @param InSrcFilename		Filename to compress
+	 * @param InDestFilename	Output name of compressed file, cannot be the same as InSrcFilename
+	 * @param InSrcLinker		CLinkerSave object used to save src file
+	 * @return Return TRUE if successful, otherwise FALSE
+	 */
+	bool CompressFile( const tchar* InSrcFilename, const tchar* InDestFilename, CLinkerSave& InSrcLinker )
+	{
+		Logf( TEXT( "Compressing package '%s'" ), InDestFilename );
+		CFilename		tmpFilename = CFilename( InDestFilename ).GetPath() + CFilename( InDestFilename ).GetBaseFileName() + TEXT( "_Compressed.tmp" );
+
+		// Create file reader and writer
+		CArchive*		fileReader = g_FileSystem->CreateFileReader( InSrcFilename );
+		CArchive*		fileWriter = g_FileSystem->CreateFileWriter( tmpFilename.GetFullPath().c_str() );
+
+		// Abort if either operation wasn't successful
+		if ( !fileReader || !fileWriter )
+		{
+			// Delete potentially created reader or writer
+			delete fileReader;
+			delete fileWriter;
+
+			// Delete temporary file
+			g_FileSystem->Delete( tmpFilename.GetFullPath().c_str() );
+			return false;
+		}
+
+		// Compress archive
+		CompressArchive( fileReader, fileWriter, InSrcLinker );
+
+		// Delete file reader and writer
+		delete fileReader;
+		delete fileWriter;
+
+		// Compression was successful, now move file
+		bool bMoveSucceded = g_FileSystem->Move( InDestFilename, tmpFilename.GetFullPath().c_str(), true ) == CMR_OK;
+
+		// Delete temporary file
+		g_FileSystem->Delete( tmpFilename.GetFullPath().c_str() );
+		return bMoveSucceded;
+	}
+
+private:
+	/**
+	 * @brief Compresses the passed in src archive and writes it to destination archive
+	 * 
+	 * @param InFileReader		Archive to read from
+	 * @param InFileWriter		Archive to write to
+	 * @param InSrcLinker		CLinkerSave object used to save src file
+	 */
+	void CompressArchive( CArchive* InFileReader, CArchive* InFileWriter, CLinkerSave& InSrcLinker )
+	{
+		// Read package file summary from source file
+		PackageFileSummary		fileSummary;
+		*InFileReader << fileSummary;
+
+		// We don't compress the package file summary but treat everything afterwards
+		// till the first export as a single chunk. This basically lumps name and import 
+		// tables into one compressed block
+		uint32		startOffset				= InFileReader->Tell();
+		uint32		remainingHeaderSize		= InSrcLinker.GetSummary().totalHeaderSize - startOffset;
+		currentChunk.uncompressedSize		= remainingHeaderSize;
+		currentChunk.uncompressedOffset		= startOffset;
+
+		// Iterate over all exports and add them separately. The underlying code will take
+		// care of merging small blocks
+		const std::vector<ObjectExport>&	exportMap = InSrcLinker.GetExports();
+		for ( uint32 index = 0, count = exportMap.size(); index < count; ++index )
+		{
+			const ObjectExport&		exportObject = exportMap[index];
+			AddToChunk( exportObject.serialSize );
+		}
+
+		// Finish chunk in flight and reset current chunk with size 0
+		FinishCurrentAndCreateNewChunk( 0 );
+
+		// Write base version of package file summary after updating compressed chunks array and compression flags
+		fileSummary.compressionFlags = compressionFlags;
+		fileSummary.compressedChunks = compressedChunks;
+		*InFileWriter << fileSummary;
+
+		// Reset internal state so subsequent calls will work
+		compressedChunks.clear();
+		currentChunk = CompressedChunk();
+
+		// Allocate temporary buffers for reading and compression
+		uint32		srcBufferSize	= remainingHeaderSize;
+		void*		srcBuffer		= Memory::Malloc( srcBufferSize );
+
+		// Iterate over all chunks, read the data, compress and write it out to destination file
+		for ( uint32 chunkIndex = 0, numChunks = fileSummary.compressedChunks.size(); chunkIndex < numChunks; ++chunkIndex )
+		{
+			CompressedChunk&	chunk = fileSummary.compressedChunks[chunkIndex];
+
+			// Increase temporary buffer sizes if they are too small
+			if ( srcBufferSize < chunk.uncompressedSize )
+			{
+				srcBufferSize	= chunk.uncompressedSize;
+				srcBuffer		= Memory::Realloc( srcBuffer, srcBufferSize );
+			}
+
+			// Verify that we're not skipping any data
+			Assert( chunk.uncompressedOffset == InFileReader->Tell() );
+
+			// Read src uncompressed data
+			InFileReader->Serialize( srcBuffer, chunk.uncompressedSize );
+
+			// Keep track of offset
+			chunk.compressedOffset = InFileWriter->Tell();
+
+			// Serialize compressed
+			InFileWriter->SerializeCompressed( srcBuffer, chunk.uncompressedSize, ( ECompressionFlags )fileSummary.compressionFlags );
+
+			// Keep track of compressed size
+			chunk.compressedSize = InFileWriter->Tell() - chunk.compressedOffset;
+		}
+
+		// Verify that we've compressed everything
+		Assert( InFileReader->IsEndOfFile() );
+
+		// Serialize file summary again. At this time CompressedChunks array is going to contain compressed size and offsets
+		InFileWriter->Seek( 0 );
+		*InFileWriter << fileSummary;
+
+		// Free intermediate buffers
+		Memory::Free( srcBuffer );
+	}
+
+	/**
+	 * @brief Tries to add bytes to current chunk and creates a new one if there is not enough space
+	 * @param InSize	Number of bytes to try to add to current chunk
+	 */
+	void AddToChunk( uint32 InSize )
+	{
+		// Resulting chunk would be too big
+		if ( currentChunk.uncompressedSize + InSize > MAX_MERGED_COMPRESSION_CHUNKSIZE && currentChunk.uncompressedSize > MIN_MERGED_COMPRESSION_CHUNKSIZE )
+		{
+			// Finish up current chunk and create a new one of passed in size
+			FinishCurrentAndCreateNewChunk( InSize );
+		}
+		// Add bytes to existing chunk
+		else
+		{
+			currentChunk.uncompressedSize += InSize;
+		}
+	}
+
+	/**
+	 * @brief Finish current chunk and add it to the CompressedChunks array. This also creates a new chunk with a base size passed in
+	 * @param InSize	Size in bytes of new chunk to create
+	 */
+	void FinishCurrentAndCreateNewChunk( uint32 InSize )
+	{
+		if ( currentChunk.uncompressedSize > 0 )
+		{
+			compressedChunks.push_back( currentChunk );
+			currentChunk					= CompressedChunk();
+			currentChunk.uncompressedOffset = currentChunk.uncompressedOffset + currentChunk.uncompressedSize;
+			currentChunk.uncompressedSize	= InSize;
+		}
+	}
+
+	uint32								compressionFlags;		/**< Flags to control compression (see ECompressionFlags) */
+	std::vector<CompressedChunk>		compressedChunks;		/**< Compressed chunks, populated by AddToChunk and FinishCurrentAndCreateNewChunk */
+	CompressedChunk						currentChunk;			/**< Current chunk, used by merging code */
+};
 
 /*
 ==================
@@ -585,7 +774,7 @@ void CObjectPackage::EndLoadPackage()
 CObjectPackage::SavePackage
 ==================
 */
-bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags, CBaseTargetPlatform* InCookingTarget /* = nullptr */ )
+bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags, uint32 InCompressionFlags /* = CF_None */, CBaseTargetPlatform* InCookingTarget /* = nullptr */ )
 {
 	// Check on recursive call SavePackage, it's error
 	if ( bIsSavingPackage )
@@ -743,6 +932,14 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 			{
 				packageFlags &= ~PKG_Cooked;
 			}
+
+			// Set flag PKG_StoreCompressed if the package will be compressed
+			if ( InCompressionFlags != CF_None )
+			{
+				packageFlags |= PKG_StoreCompressed;
+			}
+
+			// Save package flags
 			linker.GetSummary().SetPackageFlags( packageFlags );
 		}
 
@@ -812,6 +1009,9 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 			linker << objectExport;
 		}
 		uint32		offsetAfterExportMap = linker.Tell();
+
+		// Save total the package's header size
+		linker.GetSummary().totalHeaderSize = linker.Tell();
 
 		// Save exports
 		for ( uint32 index = 0, count = exportMap.size(); index < count; ++index )
@@ -945,9 +1145,19 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 
 		if ( bSuccess )
 		{
+			// Compress the temporarily file to destination
+			if ( linker.GetSummary().GetPackageFlags() & PKG_StoreCompressed )
+			{
+				Logf( TEXT( "Compressing '%s' to '%s'\n" ), tempFilename.GetFullPath().c_str(), InFilename );
+				CFileCompressionHelper		compressionHelper( InCompressionFlags );
+				bSuccess = compressionHelper.CompressFile( tempFilename.GetFullPath().c_str(), InFilename, linker );
+			}
 			// Move the temporary file
-			Logf( TEXT( "Moving '%s' to '%s'\n" ), tempFilename.GetFullPath().c_str(), InFilename );
-			bSuccess = g_FileSystem->Move( InFilename, tempFilename.GetFullPath(), true ) == CMR_OK;
+			else
+			{
+				Logf( TEXT( "Moving '%s' to '%s'\n" ), tempFilename.GetFullPath().c_str(), InFilename );
+				bSuccess = g_FileSystem->Move( InFilename, tempFilename.GetFullPath(), true ) == CMR_OK;
+			}
 
 			if ( !bSuccess )
 			{

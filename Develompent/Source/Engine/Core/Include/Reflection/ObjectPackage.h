@@ -80,10 +80,11 @@ public:
 	 *									by InBase will be saved into the package
 	 * @param InFilename				The name to use for the new package file
 	 * @param InSaveFlags				Flags to control saving (see ESaveFlags)
+	 * @param InCompressionFlags		Flags to control compression of package (see ECompressionFlags)
 	 * @param InCookingTarget			The platform being saved for when cooking, or NULL if not cooking
 	 * @return Return TRUE if the package was saved successfully, otherwise returns FALSE
 	 */
-	static bool SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags, CBaseTargetPlatform* InCookingTarget = nullptr );
+	static bool SavePackage( CObjectPackage* InOuter, CObject* InBase, ObjectFlags_t InTopLevelFlags, const tchar* InFilename, uint32 InSaveFlags, uint32 InCompressionFlags = CF_None, CBaseTargetPlatform* InCookingTarget = nullptr );
 
 	/**
 	 * @brief Get the serialization context of objects

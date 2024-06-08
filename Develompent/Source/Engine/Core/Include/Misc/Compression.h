@@ -35,8 +35,7 @@ enum ECompressionFlags
 
 /**
  * @ingroup Core
- * @brief Helper structure for compression support, containing information on compressed
- * and uncompressed size of a chunk of data.
+ * @brief Helper structure for compression support, containing information on compressed and uncompressed size of a chunk of data
  */
 struct CompressedChunkInfo
 {
