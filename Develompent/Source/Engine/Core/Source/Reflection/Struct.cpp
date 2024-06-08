@@ -28,6 +28,18 @@ void CStruct::Serialize( class CArchive& InArchive )
 	InArchive << minAlignment;
 	InArchive << superStruct;
 	InArchive << properties;
+
+	// Preload the super struct
+	if ( superStruct )
+	{
+		InArchive.Preload( superStruct );
+	}
+
+	// Preload all properties
+	for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+	{
+		InArchive.Preload( properties[index] );
+	}
 }
 
 /*
@@ -101,7 +113,7 @@ CStruct::SerializeProperties
 */
 void CStruct::SerializeProperties( class CArchive& InArchive, byte* InData )
 {
-	if ( !InArchive.WantBinaryPropertySerialization() && !InArchive.IsObjectReferenceCollector() )
+	if ( !InArchive.WantBinaryPropertySerialization() )
 	{
 		SerializeTaggedProperties( InArchive, InData );
 	}

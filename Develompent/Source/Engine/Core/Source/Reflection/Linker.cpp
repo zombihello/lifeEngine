@@ -37,6 +37,11 @@ CArchive& operator<<( CArchive& InArchive, PackageFileSummary& InValue )
 		InArchive << InValue.engineVersion;
 		InArchive << InValue.fileVersion;
 		InArchive << InValue.packageFlags;
+		if ( InValue.fileVersion >= VER_NewSerializeName )
+		{
+			InArchive << InValue.nameCount;
+			InArchive << InValue.nameOffset;
+		}
 		InArchive << InValue.exportCount;
 		InArchive << InValue.exportOffset;
 		InArchive << InValue.importCount;

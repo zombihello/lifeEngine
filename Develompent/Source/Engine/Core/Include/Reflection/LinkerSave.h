@@ -101,6 +101,18 @@ public:
 	virtual CArchive& operator<<( class CObject*& InValue ) override;
 
 	/**
+	 * @brief Override operator << for serialize CNames
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CName& InValue ) override;
+
+	/**
+	 * @brief Override operator << for serialize CNames
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( const class CName& InValue ) override;
+
+	/**
 	 * @brief Get object indeces
 	 * Location of the resource for a CObject is stored in the ObjectIndices array using the CObject's Index
 	 * 
@@ -111,9 +123,21 @@ public:
 		return objectIndices;
 	}
 
+	/**
+	 * @brief Get name indeces
+	 * Location of the name in the NameMap array for each CName is stored in the NameIndices array using the CName's Index
+	 *
+	 * @return Return name indeces
+	 */
+	FORCEINLINE std::vector<uint32>& GetNameIndices()
+	{
+		return nameIndices;
+	}
+
 private:
 	CArchive*						saver;			/**< The archive that actually writes the data to disk */
 	std::vector<CPackageIndex>		objectIndices;	/**< Index array. Location of the resource for a CObject is stored in the ObjectIndices array using the CObject's Index */
+	std::vector<uint32>				nameIndices;	/**< Index array. Location of the name in the NameMap array for each CName is stored in the NameIndices array using the CName's Index */
 };
 
 #endif // !LINKERSAVE_H

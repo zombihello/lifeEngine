@@ -118,7 +118,7 @@ public:
 		if ( ShouldSerializeValue( InArchive ) )
 		{
 			byte*		data = InObjectAddress + offset;
-			if ( InArchive.WantBinaryPropertySerialization() || InArchive.IsObjectReferenceCollector() )
+			if ( InArchive.WantBinaryPropertySerialization() )
 			{
 				SerializeBinaryProperties( InArchive, data );
 			}

@@ -61,6 +61,7 @@ enum ELifeEnginePackageVersion
 	VER_OuterInCObject						= 29,					/**< Added serialize CObject::outer */
 	VER_NumberInCName						= 30,					/**< Added number field into CName */
 	VER_SerializeProperties					= 31,					/**< Implemented serialize properties by CObject */
+	VER_NewSerializeName					= 32,					/**< New CName serialization */
 
 	//
 	// New versions can be added here

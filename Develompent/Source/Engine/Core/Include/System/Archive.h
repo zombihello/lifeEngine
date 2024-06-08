@@ -94,6 +94,12 @@ public:
 	virtual void Flush() {}
 
 	/**
+	 * @brief Tells the archive to attempt to preload the specified object so data can be loaded out of it
+	 * @param InObject	The object to load data for
+	 */
+	virtual void Preload( class CObject* InObject ) {}
+
+	/**
 	 * Set archive type
 	 * 
 	 * @param[in] InType Archive type
@@ -289,6 +295,18 @@ public:
 		return *this;
 	}
 
+	/**
+	 * @brief Override operator << for serialize CNames
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CName& InValue );
+
+	/**
+	 * @brief Override operator << for serialize CNames
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( const class CName& InValue );
+
 protected:
 	uint32					arVer;								/**< Archive version (look ELifeEnginePackageVersion) */
 	EArchiveType			arType;								/**< Archive type */
@@ -301,81 +319,6 @@ protected:
 #if WITH_EDITOR
 	CBaseTargetPlatform*	cookingTargetPlatform;				/**< Holds the cooking target platform */
 #endif // WITH_EDITOR
-};
-
-/**
- * @ingroup Core
- * @brief Archive for tagging objects that must be exported to the file
- * It tags the objects passed to it, and recursively tags all of the objects this object references
- */
-class CArchiveSaveTagExports : public CArchive
-{
-public:
-	/**
-	 * @brief Constructor
-	 * @param InOuter	The package to save
-	 */
-	CArchiveSaveTagExports( class CObject* InOuter );
-
-	/**
-	 * @brief Is saving archive
-	 * @return True if archive saving, false if archive loading
-	 */
-	virtual bool IsSaving() const override;
-
-	/**
-	 * @brief Override operator << for serialize CObjects
-	 * @return Return reference to self
-	 */
-	virtual CArchive& operator<<( class CObject*& InValue ) override;
-
-	/**
-	 * @brief Serializes the specified object, tagging all objects it references
-	 * @param InObject		The object that should be serialized, usually the package root
-	 */
-	void ProcessObject( class CObject* InObject );
-
-private:
-	/**
-	 * @brief Process tagged objects
-	 * 
-	 * Iterates over all objects which were encountered during serialization of the root object, serializing each one in turn.
-	 * Objects encountered during that serialization are then added to the array and iteration continues until no new objects are
-	 * added to the array
-	 */
-	void ProcessTaggedObjects();
-
-	std::vector<class CObject*>		taggedObjects;		/**< Tagged objects */
-	class CObject*					outer;				/**< Package we're currently saving. Only objects contained within this package will be tagged for serialization */
-};
-
-/**
- * @ingroup Core
- * @brief Archive for tagging objects and names that must be listed in the file's imports table
- */
-class CArchiveSaveTagImports : public CArchive
-{
-public:
-	/**
-	 * @brief Constructor
-	 * @param InLinker	The package linker to save
-	 */
-	CArchiveSaveTagImports( class CLinkerSave* InLinker );
-
-	/**
-	 * @brief Is saving archive
-	 * @return True if archive saving, false if archive loading
-	 */
-	virtual bool IsSaving() const override;
-
-	/**
-	 * @brief Override operator << for serialize CObjects
-	 * @return Return reference to self
-	 */
-	virtual CArchive& operator<<( class CObject*& InValue ) override;
-
-private:
-	class CLinkerSave*		linker;		/**< The package linker to save */
 };
 
 /**

@@ -174,48 +174,51 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 	}
 }
 
-
 /*
 ==================
-CArchiveSaveTagExports::CArchiveSaveTagExports
+CArchive::operator<<
 ==================
 */
-CArchiveSaveTagExports::CArchiveSaveTagExports( CObject* InOuter )
-	: CArchive( InOuter ? L_Sprintf( TEXT( "SaveTagExports (%s)" ), InOuter->GetName().c_str() ) : TEXT( "SaveTagExports" ) )
-	, outer( InOuter )
+CArchive& CArchive::operator<<( class CName& InValue )
 {
-	arIsObjectReferenceCollector = true;
-}
-
-/*
-==================
-CArchiveSaveTagExports::IsSaving
-==================
-*/
-bool CArchiveSaveTagExports::IsSaving() const
-{
-	return true;
-}
-
-/*
-==================
-CArchiveSaveTagExports::operator<<
-==================
-*/
-CArchive& CArchiveSaveTagExports::operator<<( class CObject*& InValue )
-{
-	if ( InValue && !InValue->IsPendingKill() && IsIn( InValue, outer ) && !InValue->HasAnyObjectFlags( OBJECT_Transient | OBJECT_TagExp ) )
+	if ( IsSaving() )
 	{
-		// Set flags
-		InValue->AddObjectFlag( OBJECT_TagExp );
+		const CName::NameEntry*		nameEntry = CName::GetEntry( InValue.IsValid() ? InValue.GetIndex() : NAME_None );
+		*this << nameEntry->name;
+		*this << InValue.GetIndex();
+		*this << InValue.GetNumber();
+	}
+	else
+	{
+		std::wstring	name;
+		uint32			index;
+		uint32			number = NAME_NO_NUMBER;
+		*this << name;
+		*this << index;
+		if ( Ver() >= VER_NumberInCName )
+		{
+			*this << number;
+		}
 
-		// Recurse with this object's class and package
-		CObject*	theClass = ( CObject* )InValue->GetClass();
-		CObject*	parent = InValue->GetOuter();
-		*this << theClass << parent;
+		// Is name is not valid, setting to NAME_None
+		if ( name == TEXT( "" ) || index == INDEX_NONE )
+		{
+			InValue = NAME_None;
+			number = NAME_NO_NUMBER;
+		}
 
-		// Add the object to array with tagged objects
-		taggedObjects.push_back( InValue );
+		// Otherwise we init name
+		else
+		{
+			if ( index < CName::GetMaxNames() && CName::GetEntry( index )->name == name )
+			{
+				InValue = CName( ( EName )index, number );
+			}
+			else
+			{
+				InValue = CName( name, number, CNAME_Add );
+			}
+		}
 	}
 
 	return *this;
@@ -223,84 +226,16 @@ CArchive& CArchiveSaveTagExports::operator<<( class CObject*& InValue )
 
 /*
 ==================
-CArchiveSaveTagExports::ProcessObject
+CArchive::operator<<
 ==================
 */
-void CArchiveSaveTagExports::ProcessObject( class CObject* InBaseObject )
+CArchive& CArchive::operator<<( const class CName& InValue )
 {
-	( *this ) << InBaseObject;
-	ProcessTaggedObjects();
-}
+	const CName::NameEntry*		nameEntry = CName::GetEntry( InValue.IsValid() ? InValue.GetIndex() : NAME_None );
+	Assert( IsSaving() );
 
-/*
-==================
-CArchiveSaveTagExports::ProcessTaggedObjects
-==================
-*/
-void CArchiveSaveTagExports::ProcessTaggedObjects()
-{
-	std::vector<CObject*>		currentlyTaggedObjects;
-	while ( !taggedObjects.empty() )
-	{
-		currentlyTaggedObjects.insert( currentlyTaggedObjects.end(), taggedObjects.begin(), taggedObjects.end() );
-		taggedObjects.clear();
-
-		for ( uint32 objIndex = 0, objCount = currentlyTaggedObjects.size(); objIndex < objCount; ++objIndex )
-		{
-			// Recurse with this object's children
-			CObject*	object = currentlyTaggedObjects[objIndex];
-			object->Serialize( *this );
-		}
-
-		currentlyTaggedObjects.clear();
-	}
-}
-
-
-/*
-==================
-CArchiveSaveTagExports::CArchiveSaveTagImports
-==================
-*/
-CArchiveSaveTagImports::CArchiveSaveTagImports( CLinkerSave* InLinker )
-	: CArchive( InLinker && InLinker->GetLinkerRoot() ? L_Sprintf( TEXT( "SaveTagImports (%s)" ), InLinker->GetLinkerRoot()->GetName().c_str() ) : TEXT( "SaveTagImports" ) )
-	, linker( InLinker )
-{
-	arIsObjectReferenceCollector = true;
-}
-
-/*
-==================
-CArchiveSaveTagImports::IsSaving
-==================
-*/
-bool CArchiveSaveTagImports::IsSaving() const
-{
-	return true;
-}
-
-/*
-==================
-CArchiveSaveTagExports::operator<<
-==================
-*/
-CArchive& CArchiveSaveTagImports::operator<<( class CObject*& InValue )
-{
-	if ( InValue && !InValue->IsPendingKill() && ( !InValue->HasAnyObjectFlags( OBJECT_Transient ) || InValue->HasAnyObjectFlags( OBJECT_Native ) ) )
-	{
-		if ( !InValue->HasAnyObjectFlags( OBJECT_TagExp ) )
-		{
-			// Mark this object as an import
-			InValue->AddObjectFlag( OBJECT_TagImp );
-
-			// Look at parent of this object
-			CObject*	outer = InValue->GetOuter();
-			if ( outer )
-			{
-				*this << outer;
-			}
-		}
-	}
-
+	*this << nameEntry->name;
+	*this << InValue.GetIndex();
+	*this << InValue.GetNumber();
 	return *this;
 }

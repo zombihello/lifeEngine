@@ -165,3 +165,32 @@ CArchive& CLinkerSave::operator<<( class CObject*& InValue )
 	}
 	return *this << objectIndices[InValue->GetIndex()];
 }
+
+/*
+==================
+CLinkerSave::operator<<
+==================
+*/
+CArchive& CLinkerSave::operator<<( class CName& InValue )
+{
+	uint32	nameIndex = nameIndices[InValue.GetIndex()];
+	if ( nameIndex == INDEX_NONE )
+	{
+		Sys_Error( TEXT( "Name \"%s\" is not mapped when saving %s (object: %s, property: %s)" ), InValue.ToString().c_str(), arPath.c_str() );
+	}
+
+	uint32	number = InValue.GetNumber();
+	*this << nameIndex << number;
+	return *this;
+}
+
+/*
+==================
+CLinkerSave::operator<<
+==================
+*/
+CArchive& CLinkerSave::operator<<( const class CName& InValue )
+{
+	*this << const_cast<CName*>( &InValue );
+	return *this;
+}

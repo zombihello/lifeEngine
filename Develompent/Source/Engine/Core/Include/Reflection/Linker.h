@@ -55,6 +55,8 @@ public:
 	uint32		tag;			/**< Magic tag compared against PACKAGE_FILE_TAG to ensure that package is a LifeEngine package */
 	uint32		engineVersion;	/**< Engine version this package was saved with */
 	uint32		fileVersion;	/**< The package file version number when this package was saved */
+	uint32		nameCount;		/**< Number of names used in this package */
+	uint32		nameOffset;		/**< Location into the file on disk for the name data */
 	uint32		exportCount;	/**< Number of exports contained in this package */
 	uint32		exportOffset;	/**< Location into the file on disk for the ExportMap data */
 	uint32		importCount;	/**< Number of imports contained in this package */
@@ -190,7 +192,26 @@ public:
 		return exportMap;
 	}
 
+	/**
+	 * @brief Get name map
+	 * @return Return name map
+	 */
+	FORCEINLINE const std::vector<CName>& GetNames() const
+	{
+		return nameMap;
+	}
+
+	/**
+	 * @brief Get name map
+	 * @return Return name map
+	 */
+	FORCEINLINE std::vector<CName>& GetNames()
+	{
+		return nameMap;
+	}
+
 protected:
+	std::vector<CName>			nameMap;		/**< Names used by objects contained within this package */
 	std::vector<ObjectImport>	importMap;		/**< The list of ObjectImports found in the package */
 	std::vector<ObjectExport>	exportMap;		/**< The list of ObjectExports found in the package */
 };

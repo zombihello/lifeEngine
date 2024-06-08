@@ -24,6 +24,220 @@ bool		CObjectPackage::bIsSavingPackage = false;
 
 /**
  * @ingroup Core
+ * @brief Helper class for mark referenced names to save
+ */
+class CPackageNameMapSaver
+{
+public:
+	/**
+	 * @brief Mark name as references
+	 * @param InName	Name to mark
+	 */
+	FORCEINLINE void MarkNameAsReferenced( const CName& InName )
+	{
+		referencedNames.insert( InName.GetIndex() );
+	}
+
+	/**
+	 * @brief Update a linker's NamesMap and serialize it
+	 * @param InLinker		Linker
+	 */
+	void UpdateLinker( CLinkerSave& InLinker )
+	{
+		std::vector<CName>&		nameMap = InLinker.GetNames();
+		std::vector<uint32>&	nameIndices = InLinker.GetNameIndices();
+		nameIndices.resize( CName::GetMaxNames() );
+
+		InLinker.GetSummary().nameOffset = InLinker.Tell();
+		for ( auto it = referencedNames.begin(), itEnd = referencedNames.end(); it != itEnd; ++it )
+		{
+			CName::NameEntry*	nameEntry = CName::GetEntry( *it );
+			nameIndices[*it]	= nameMap.size();
+
+			Assert( nameEntry );
+			nameMap.push_back( CName( ( EName )*it ) );
+			InLinker << *nameEntry;
+		}
+		InLinker.GetSummary().nameCount = nameMap.size();
+	}
+
+private:
+	std::unordered_set<uint32>		referencedNames;	/**< Set of references names */
+};
+
+/**
+ * @ingroup Core
+ * @brief Archive for tagging objects that must be exported to the file
+ * It tags the objects passed to it, and recursively tags all of the objects this object references
+ */
+class CArchiveSaveTagExports : public CArchive
+{
+public:
+	/**
+	 * @brief Constructor
+	 * @param InOuter	The package to save
+	 */
+	CArchiveSaveTagExports( class CObject* InOuter )
+		: CArchive( InOuter ? L_Sprintf( TEXT( "SaveTagExports (%s)" ), InOuter->GetName().c_str() ) : TEXT( "SaveTagExports" ) )
+		, outer( InOuter )
+	{
+		arIsObjectReferenceCollector = true;
+	}
+
+	/**
+	 * @brief Is saving archive
+	 * @return True if archive saving, false if archive loading
+	 */
+	virtual bool IsSaving() const override
+	{
+		return true;
+	}
+
+	/**
+	 * @brief Override operator << for serialize CObjects
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CObject*& InValue ) override
+	{
+		if ( InValue && !InValue->IsPendingKill() && IsIn( InValue, outer ) && !InValue->HasAnyObjectFlags( OBJECT_Transient | OBJECT_TagExp ) )
+		{
+			// Set flags
+			InValue->AddObjectFlag( OBJECT_TagExp );
+
+			// Recurse with this object's class and package
+			CObject*	theClass = ( CObject* )InValue->GetClass();
+			CObject*	parent = InValue->GetOuter();
+			*this << theClass << parent;
+
+			// Add the object to array with tagged objects
+			taggedObjects.push_back( InValue );
+		}
+
+		return *this;
+	}
+
+	/**
+	 * @brief Serializes the specified object, tagging all objects it references
+	 * @param InObject		The object that should be serialized, usually the package root
+	 */
+	void ProcessObject( class CObject* InObject )
+	{
+		*this << InObject;
+		ProcessTaggedObjects();
+	}
+
+private:
+	/**
+	 * @brief Process tagged objects
+	 * 
+	 * Iterates over all objects which were encountered during serialization of the root object, serializing each one in turn.
+	 * Objects encountered during that serialization are then added to the array and iteration continues until no new objects are
+	 * added to the array
+	 */
+	void ProcessTaggedObjects()
+	{
+		std::vector<CObject*>		currentlyTaggedObjects;
+		while ( !taggedObjects.empty() )
+		{
+			currentlyTaggedObjects.insert( currentlyTaggedObjects.end(), taggedObjects.begin(), taggedObjects.end() );
+			taggedObjects.clear();
+
+			for ( uint32 objIndex = 0, objCount = currentlyTaggedObjects.size(); objIndex < objCount; ++objIndex )
+			{
+				// Recurse with this object's children
+				CObject* object = currentlyTaggedObjects[objIndex];
+				object->Serialize( *this );
+			}
+
+			currentlyTaggedObjects.clear();
+		}
+	}
+
+	std::vector<class CObject*>		taggedObjects;		/**< Tagged objects */
+	class CObject*					outer;				/**< Package we're currently saving. Only objects contained within this package will be tagged for serialization */
+};
+
+/**
+ * @ingroup Core
+ * @brief Archive for tagging objects and names that must be listed in the file's imports table
+ */
+class CArchiveSaveTagImports : public CArchive
+{
+public:
+	/**
+	 * @brief Constructor
+	 * @param InLinker			The package linker to save
+	 * @param InNameMapSaver	NameMap saver
+	 */
+	CArchiveSaveTagImports( class CLinkerSave* InLinker, CPackageNameMapSaver& InNameMapSaver )
+		: CArchive( InLinker&& InLinker->GetLinkerRoot() ? L_Sprintf( TEXT( "SaveTagImports (%s)" ), InLinker->GetLinkerRoot()->GetName().c_str() ) : TEXT( "SaveTagImports" ) )
+		, linker( InLinker )
+		, nameMapSaver( InNameMapSaver )
+	{
+		arIsObjectReferenceCollector = true;
+	}
+
+	/**
+	 * @brief Is saving archive
+	 * @return True if archive saving, false if archive loading
+	 */
+	virtual bool IsSaving() const override
+	{
+		return true;
+	}
+
+	/**
+	 * @brief Override operator << for serialize CObjects
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CObject*& InValue ) override
+	{
+		if ( InValue && !InValue->IsPendingKill() && ( !InValue->HasAnyObjectFlags( OBJECT_Transient ) || InValue->HasAnyObjectFlags( OBJECT_Native ) ) )
+		{
+			if ( !InValue->HasAnyObjectFlags( OBJECT_TagExp ) )
+			{
+				// Mark this object as an import
+				InValue->AddObjectFlag( OBJECT_TagImp );
+
+				// Look at parent of this object
+				CObject*	outer = InValue->GetOuter();
+				if ( outer )
+				{
+					*this << outer;
+				}
+			}
+		}
+
+		return *this;
+	}
+
+	/**
+	 * @brief Override operator << for serialize CNames
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CName& InValue ) override
+	{
+		nameMapSaver.MarkNameAsReferenced( InValue );
+		return *this;
+	}
+
+	/**
+	 * @brief Override operator << for serialize CNames
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( const class CName& InValue ) override
+	{
+		nameMapSaver.MarkNameAsReferenced( InValue );
+		return *this;
+	}
+
+private:
+	class CLinkerSave*		linker;			/**< The package linker to save */
+	CPackageNameMapSaver&	nameMapSaver;	/**< Name map saver */
+};
+
+/**
+ * @ingroup Core
  * @brief Helper class for clarification, encapsulation, and elimination of duplicate code
  */
 struct PackageExportTagger
@@ -461,23 +675,57 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 		packageExportTagger.TagPackageExports( exportTaggerArchive, false );
 
 		// Allocate a linker
-		CLinkerSave		linker( InOuter, tempFilename.GetFullPath().c_str() );
+		CLinkerSave				linker( InOuter, tempFilename.GetFullPath().c_str() );
+		CPackageNameMapSaver	nameMapSaver;
 		linker.SetFilterEditorOnly( bFilterEditorOnly );
 		linker.SetCookingTarget( InCookingTarget );
 
-		// Import objects
+		// Import objects and names
 		for ( CObjectIterator it; it; ++it )
 		{
 			CObject*	object = *it;
 			if ( object->HasAnyObjectFlags( OBJECT_TagExp ) )
 			{
-				CArchiveSaveTagImports	importTagger( &linker );
-				CClass*					theClass = object->GetClass();
-
+				CArchiveSaveTagImports	importTagger( &linker, nameMapSaver );
 				importTagger.SetFilterEditorOnly( bFilterEditorOnly );
 				importTagger.SetCookingTarget( InCookingTarget );
+
+				CClass*		theClass = object->GetClass();
 				object->Serialize( importTagger );
 				importTagger << theClass;
+
+				// Object can be saved in package different than their outer, if our outer isn't the package being saved check if we need to tag it as import
+				CObject*	outer = object->GetOuter();
+				if ( outer->GetOutermost() != InOuter )
+				{
+					importTagger << outer;
+				}
+			}
+		}
+
+		// Tag the names for all relevant object, classes, and packages
+		for ( CObjectIterator it; it; ++it )
+		{
+			CObject*	object = *it;
+			if ( object->HasAnyObjectFlags( OBJECT_TagExp | OBJECT_TagImp ) )
+			{
+				nameMapSaver.MarkNameAsReferenced( object->GetCName() );
+				if ( object->GetOuter() )
+				{
+					nameMapSaver.MarkNameAsReferenced( object->GetOuter()->GetCName() );
+				}
+
+				if ( object->HasAnyObjectFlags( OBJECT_TagImp ) )
+				{
+					// Make sure the package name of an import is referenced as it might be different than its outer
+					CObjectPackage*		objectPackage = object->GetOutermost();
+					Assert( objectPackage );
+
+					nameMapSaver.MarkNameAsReferenced( objectPackage->GetCName() );
+					nameMapSaver.MarkNameAsReferenced( object->GetClass()->GetCName() );
+					Assert( object->GetClass()->GetOuter() );
+					nameMapSaver.MarkNameAsReferenced( object->GetClass()->GetOuter()->GetCName() );
+				}
 			}
 		}
 
@@ -501,6 +749,9 @@ bool CObjectPackage::SavePackage( CObjectPackage* InOuter, CObject* InBase, Obje
 		// Rest place for package summary, we update it in the end
 		linker << linker.GetSummary();
 		uint32		offsetAfterPackageFileSummary = linker.Tell();
+
+		// Build and serialize name map
+		nameMapSaver.UpdateLinker( linker );
 
 		// Build import map
 		std::vector<ObjectImport>&		importMap = linker.GetImports();

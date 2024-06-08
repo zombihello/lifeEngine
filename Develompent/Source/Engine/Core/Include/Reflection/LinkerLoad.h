@@ -124,6 +124,18 @@ public:
 	virtual CArchive& operator<<( class CObject*& InValue ) override;
 
 	/**
+	 * @brief Override operator << for serialize CNames
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( class CName& InValue ) override;
+
+	/**
+	 * @brief Override operator << for serialize CNames
+	 * @return Return reference to self
+	 */
+	virtual CArchive& operator<<( const class CName& InValue ) override;
+
+	/**
 	 * @brief Serialize the object data for the specified object from the LifeEngine package file
 	 * @note When this function exits, Object is guaranteed to contain the data stored that was stored on disk
 	 * 
@@ -133,7 +145,7 @@ public:
 	 *
 	 * @param InObject	The object to load data for
 	 */
-	void Preload( CObject* InObject );
+	virtual void Preload( CObject* InObject ) override;
 
 	/**
 	 * @brief Get the class package name for the specified index in the export map
@@ -170,6 +182,12 @@ protected:
 	 * @return Return TRUE if package file summary was successful serialized, otherwise returns FALSE
 	 */
 	bool SerializePackageFileSummary();
+
+	/**
+	 * @brief Serializes the name map
+	 * @return Return TRUE if name map was successful serialized, otherwise returns FALSE
+	 */
+	bool SerializeNameMap();
 
 	/**
 	 * @brief Serializes the import map

@@ -21,6 +21,18 @@ static FORCEINLINE void AllocateNameEntry( const std::wstring& InName, uint64 In
 
 /*
 ==================
+operator<<
+==================
+*/
+CArchive& operator<<( CArchive& InArchive, CName::NameEntry& InValue )
+{
+	InArchive << InValue.name;
+	return InArchive;
+}
+
+
+/*
+==================
 CName::StaticInit
 ==================
 */
@@ -44,6 +56,28 @@ void CName::StaticInit()
 		AllocateNameEntry( TEXT( #InName ), FastHash( tmpBuffer ) ); \
 	}
 	#include "Misc/Names.h"
+}
+
+/*
+==================
+CName::GetMaxNames
+==================
+*/
+uint32 CName::GetMaxNames()
+{
+	std::vector<CName::NameEntry>&	globalNameTable = GetGlobalNameTable();
+	return ( uint32 )globalNameTable.size();
+}
+
+/*
+==================
+CName::GetEntry
+==================
+*/
+CName::NameEntry* CName::GetEntry( uint32 InIndex )
+{
+	std::vector<CName::NameEntry>&	globalNameTable = GetGlobalNameTable();
+	return InIndex != INDEX_NONE && InIndex < globalNameTable.size() ? &globalNameTable[InIndex] : nullptr;
 }
 
 /*
@@ -195,74 +229,4 @@ bool CName::operator==( const tchar* InOther ) const
 	// Compare
 	std::vector<CName::NameEntry>&	globalNameTable = GetGlobalNameTable();
 	return tempNumber == number && !L_Strnicmp( tempName, globalNameTable[IsValid() ? index : NAME_None].name.c_str(), numCharsToCompare );
-}
-
-/*
-==================
-CName::operator<<
-==================
-*/
-CArchive& operator<<( CArchive& InArchive, CName& InValue )
-{
-	std::vector<CName::NameEntry>&		globalNameTable = GetGlobalNameTable();
-
-	if ( InArchive.IsSaving() )
-	{
-		const CName::NameEntry& nameEntry = globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
-		InArchive << nameEntry.name;
-		InArchive << InValue.index;
-		InArchive << InValue.number;
-	}
-	else
-	{
-		std::wstring	name;
-		uint32			index;
-		uint32			number = NAME_NO_NUMBER;
-		InArchive << name;
-		InArchive << index;
-		if ( InArchive.Ver() >= VER_NumberInCName )
-		{
-			InArchive << number;
-		}
-
-		// Is name is not valid, setting to NAME_None
-		if ( name == TEXT( "" ) || index == INDEX_NONE )
-		{
-			InValue = NAME_None;
-			number = NAME_NO_NUMBER;
-		}
-
-		// Otherwise we init name
-		else
-		{	
-			if ( index < globalNameTable.size() && globalNameTable[index].name == name )
-			{
-				InValue.index = index;
-				InValue.number = number;
-			}
-			else
-			{
-				InValue.Init( name, name.size(), number, CNAME_Add );
-			}
-		}
-	}
-
-	return InArchive;
-}
-
-/*
-==================
-operator<<
-==================
-*/
-CArchive& operator<<( CArchive& InArchive, const CName& InValue )
-{
-	std::vector<CName::NameEntry>&	globalNameTable = GetGlobalNameTable();
-	const CName::NameEntry&			nameEntry		= globalNameTable[InValue.IsValid() ? InValue.index : NAME_None];
-
-	Assert( InArchive.IsSaving() );
-	InArchive << nameEntry.name;
-	InArchive << InValue.index;
-	InArchive << InValue.number;
-	return InArchive;
 }

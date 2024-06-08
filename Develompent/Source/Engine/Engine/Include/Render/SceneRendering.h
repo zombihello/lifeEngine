@@ -210,6 +210,13 @@ private:
 
 #if WITH_EDITOR
 	/**
+	 * Render WorldEd background
+	 *
+	 * @param InDeviceContext	RHI device context
+	 */
+	void RenderWorldEdBackground( class CBaseDeviceContextRHI* InDeviceContext );
+
+	/**
 	 * Render WorldEd foreground
 	 * 
 	 * @param InDeviceContext	RHI device context

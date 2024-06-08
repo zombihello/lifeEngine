@@ -219,6 +219,12 @@ bool CLinkerLoad::Init()
 			return false;
 		}
 
+		// Serialize the name map
+		if ( !SerializeNameMap() )
+		{
+			return false;
+		}
+
 		// Serialize the import map
 		if ( !SerializeImportMap() )
 		{
@@ -335,7 +341,8 @@ bool CLinkerLoad::SerializePackageFileSummary()
 			Warnf( TEXT( "Package '%s' isn't savable because it has been saved in the newly engine. Engine Version: 0x%X  Package's Engine Version: 0x%X\n" ), arPath.c_str(), ENGINE_VERSION, summary.engineVersion );
 		}
 
-		// Presize memory for import and export maps
+		// Presize memory for name, import and export maps
+		nameMap.resize( summary.nameCount );
 		importMap.resize( summary.importCount );
 		exportMap.resize( summary.exportCount );
 
@@ -343,6 +350,31 @@ bool CLinkerLoad::SerializePackageFileSummary()
 		bHasSerializedPackageFileSummary = true;
 	}
 
+	return true;
+}
+
+/*
+==================
+CLinkerLoad::SerializeNameMap
+==================
+*/
+bool CLinkerLoad::SerializeNameMap()
+{
+	// Seek to the start of name map in a file
+	if ( summary.nameCount > 0 )
+	{
+		Seek( summary.nameOffset );
+	}
+
+	// Serialize the name map
+	for ( uint32 nameObjIndex = 0; nameObjIndex < summary.nameCount; ++nameObjIndex )
+	{
+		CName::NameEntry	nameEntry;
+		*this << nameEntry;
+		nameMap[nameObjIndex] = CName( nameEntry.name );
+	}
+
+	// We done
 	return true;
 }
 
@@ -1499,6 +1531,7 @@ void CLinkerLoad::Detach()
 	CObjectPackage::GetObjectSerializeContext().RemoveDelayedLinkerClosePackage( this );
 
 	// Empty out no longer used array
+	nameMap.clear();
 	importMap.clear();
 	exportMap.clear();
 
@@ -1519,7 +1552,7 @@ void CLinkerLoad::Detach()
 
 /*
 ==================
-CLinkerSave::IsLoading
+CLinkerLoad::IsLoading
 ==================
 */
 bool CLinkerLoad::IsLoading() const
@@ -1529,7 +1562,7 @@ bool CLinkerLoad::IsLoading() const
 
 /*
 ==================
-CLinkerSave::Tell
+CLinkerLoad::Tell
 ==================
 */
 uint32 CLinkerLoad::Tell()
@@ -1539,7 +1572,7 @@ uint32 CLinkerLoad::Tell()
 
 /*
 ==================
-CLinkerSave::Seek
+CLinkerLoad::Seek
 ==================
 */
 void CLinkerLoad::Seek( uint32 InPosition )
@@ -1549,7 +1582,7 @@ void CLinkerLoad::Seek( uint32 InPosition )
 
 /*
 ==================
-CLinkerSave::Flush
+CLinkerLoad::Flush
 ==================
 */
 void CLinkerLoad::Flush()
@@ -1559,7 +1592,7 @@ void CLinkerLoad::Flush()
 
 /*
 ==================
-CLinkerSave::IsEndOfFile
+CLinkerLoad::IsEndOfFile
 ==================
 */
 bool CLinkerLoad::IsEndOfFile()
@@ -1569,7 +1602,7 @@ bool CLinkerLoad::IsEndOfFile()
 
 /*
 ==================
-CLinkerSave::GetSize
+CLinkerLoad::GetSize
 ==================
 */
 uint32 CLinkerLoad::GetSize()
@@ -1579,7 +1612,7 @@ uint32 CLinkerLoad::GetSize()
 
 /*
 ==================
-CLinkerSave::Serialize
+CLinkerLoad::Serialize
 ==================
 */
 void CLinkerLoad::Serialize( void* InBuffer, uint32 InSize )
@@ -1589,7 +1622,7 @@ void CLinkerLoad::Serialize( void* InBuffer, uint32 InSize )
 
 /*
 ==================
-CLinkerSave::operator<<
+CLinkerLoad::operator<<
 ==================
 */
 CArchive& CLinkerLoad::operator<<( class CObject*& InValue )
@@ -1598,5 +1631,39 @@ CArchive& CLinkerLoad::operator<<( class CObject*& InValue )
 	*this << index;
 
 	InValue = IndexToObject( index );
+	return *this;
+}
+
+/*
+==================
+CLinkerLoad::operator<<
+==================
+*/
+CArchive& CLinkerLoad::operator<<( class CName& InValue )
+{
+	if ( Ver() < VER_NewSerializeName )
+	{
+		return CArchive::operator<<( InValue );
+	}
+	else
+	{
+		uint32	nameIndex = 0;
+		uint32	number = 0;
+		*this << nameIndex << number;
+
+		Assert( nameIndex < nameMap.size() );
+		InValue = CName( ( EName )nameMap[nameIndex].GetIndex(), number );
+		return *this;
+	}
+}
+
+/*
+==================
+CLinkerLoad::operator<<
+==================
+*/
+CArchive& CLinkerLoad::operator<<( const class CName& InValue )
+{
+	*this << const_cast<CName*>( &InValue );
 	return *this;
 }

@@ -46,6 +46,8 @@ public:
 	 */
 	struct NameEntry
 	{
+		friend CArchive& operator<<( CArchive& InArchive, NameEntry& InValue );
+
 		/**
 		 * @brief Constructor
 		 */
@@ -82,9 +84,6 @@ public:
 			return InName.GetHash();
 		}
 	};
-
-	friend CArchive& operator<<( CArchive& InArchive, CName& InValue );
-	friend CArchive& operator<<( CArchive& InArchive, const CName& InValue );
 
 	/**
 	 * @brief Constructor with leaving uninitialized memory
@@ -253,6 +252,20 @@ public:
 		uint64	hash = FastHash( index );
 		return FastHash( number, hash );
 	}
+
+	/**
+	 * @brief Get maximum number of names
+	 * @return Return maximum number of names
+	 */
+	static uint32 GetMaxNames();
+
+	/**
+	 * @brief Get a name entry at index
+	 * 
+	 * @param InIndex	Index
+	 * @return Return a name entry at index, if InIndex isn't valid returns NULL
+	 */
+	static NameEntry* GetEntry( uint32 InIndex );
 
 	/**
 	 * @brief Is valid name
