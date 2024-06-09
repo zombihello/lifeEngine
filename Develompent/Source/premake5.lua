@@ -63,8 +63,6 @@ extBox2d                        = externalDir .. "box2d-2.4.1"
 extGlm                          = externalDir .. "glm-0.9.9.8"
 extOgg                          = externalDir .. "libogg-1.3.5"
 extVorbis                       = externalDir .. "libvorbis-1.3.7"
-extLuaBridge                    = externalDir .. "LuaBridge-2.6"
-extLuaJIT                       = externalDir .. "LuaJIT-2.1"
 extOpenAL                       = externalDir .. "openal-soft-1.21.1"
 extPhysX                        = externalDir .. "PhysX-4.1"
 extRapidJSON                    = externalDir .. "rapidjson"
@@ -82,8 +80,6 @@ include( extBox2d )
 include( extGlm )
 include( extOgg )
 include( extVorbis )
-include( extLuaBridge )
-include( extLuaJIT )
 include( extOpenAL )
 include( extPhysX )
 include( extRapidJSON )
@@ -219,8 +215,6 @@ workspace( game )
         LinkOgg()
         LinkVorbis()
         LinkOpenAL()
-        LinkLuaJIT()
-        LinkLuaBridge()
         LinkRapidJSON()
         LinkGLM()
         LinkZLib()

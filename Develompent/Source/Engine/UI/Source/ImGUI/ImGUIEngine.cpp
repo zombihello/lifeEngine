@@ -685,7 +685,6 @@ void CImGUIEngine::InitTheme()
 	styleColors[IGC_Asset_Unknown]			= ImVec4( 1.f, 1.f, 1.f, 1.f );
 	styleColors[IGC_Asset_Texture2D]		= ImVec4( 0.75f, 0.25f, 0.25f, 1.f );
 	styleColors[IGC_Asset_Material]			= ImVec4( 0.25f, 0.75f, 0.25f, 1.f );
-	styleColors[IGC_Asset_Script]			= ImVec4( 0.f, 0.f, 0.f, 0.f );
 	styleColors[IGC_Asset_StaticMesh]		= ImVec4( 0.f, 1.f, 1.f, 1.f );
 	styleColors[IGC_Asset_AudioBank]		= ImVec4( 0.38f, 0.33f, 0.83f, 1.f );
 	styleColors[IGC_Asset_PhysicsMaterial]	= ImVec4( 0.78f, 0.75f, 0.5f, 1.f );

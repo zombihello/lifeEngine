@@ -10,7 +10,6 @@
 #define BASELOGGER_H
 
 #include "Core.h"
-#include "Scripts/ScriptEngine.h"
 
 /**
  * @ingroup Core
@@ -41,8 +40,6 @@ enum ELogColor
  */
 class CBaseLogger
 {
-    DECLARE_SCRIPT_API()
-
 public:
     /**
      * @brief Constructor

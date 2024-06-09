@@ -54,7 +54,6 @@ static const tchar*	s_IconPaths[] =
 	TEXT( "Thumbnails/Unknown.png" ),		// IT_Thumbnail_Asset_Unknown
 	TEXT( "Thumbnails/Texture.png" ),		// IT_Thumbnail_Asset_Texture2D
 	TEXT( "Thumbnails/Material.png" ),		// IT_Thumbnail_Asset_Material
-	TEXT( "Thumbnails/Script.png" ),		// IT_Thumbnail_Asset_Script
 	TEXT( "Thumbnails/StaticMesh.png" ),	// IT_Thumbnail_Asset_StaticMesh
 	TEXT( "Thumbnails/Audio.png" ),			// IT_Thumbnail_Asset_AudioBank
 	TEXT( "Thumbnails/PhysMaterial.png" )	// IT_Thumbnail_Asset_PhysicsMaterial

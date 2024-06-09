@@ -1,5 +1,4 @@
 #include "Misc/EngineGlobals.h"
-#include "Scripts/ScriptEngine.h"
 #include "Render/Shaders/ShaderManager.h"
 #include "System/InputSystem.h"
 #include "System/World.h"
@@ -10,7 +9,6 @@
 // GLOBALS
 // -------------
 
-CScriptEngine*												g_ScriptEngine = new CScriptEngine();
 CShaderManager*												g_ShaderManager = new CShaderManager();
 std::wstring												g_CookedDir = TEXT( "" );
 class CBaseEngine*											g_Engine = nullptr;

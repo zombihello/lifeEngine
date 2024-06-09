@@ -22,12 +22,6 @@ extern class CBaseRHI*					g_RHI;
 
 /**
  * @ingroup Engine
- * @brief Script engine
- */
-extern class CScriptEngine*				g_ScriptEngine;
-
-/**
- * @ingroup Engine
  * @brief Shader manager
  */
 extern class CShaderManager*			g_ShaderManager;

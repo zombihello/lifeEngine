@@ -45,13 +45,14 @@ enum EAssetType
 
 	AT_Texture2D = AT_FirstType,			/**< Texture 2D */
 	AT_Material,							/**< Material */
-	AT_Script,								/**< Script */
+	AT_Unused0,								/**< Unused 0 */
 	AT_StaticMesh,							/**< Static mesh */
 	AT_AudioBank,							/**< Audio bank */
 	AT_PhysicsMaterial,						/**< Physics material */
 	
-	AT_LastType = AT_PhysicsMaterial,		/**< Last asset type for calculate count */
-	AT_Count	= AT_LastType+1,			/**< Count asset types */
+	AT_LastType		= AT_PhysicsMaterial,	/**< Last asset type for calculate count */
+	AT_Count		= AT_LastType+1,		/**< Count asset types */
+	AT_NumUnused	= 1						/**< Count unused types */
 };
 
 /**
@@ -70,10 +71,6 @@ FORCEINLINE EAssetType ConvertTextToAssetType( const std::wstring& InText )
 	else if ( InText == TEXT( "Material" ) )
 	{
 		return AT_Material;
-	}
-	else if ( InText == TEXT( "Script" ) )
-	{
-		return AT_Script;
 	}
 	else if ( InText == TEXT( "StaticMesh" ) )
 	{
@@ -103,7 +100,6 @@ FORCEINLINE std::wstring ConvertAssetTypeToText( EAssetType InAssetType )
 	{
 	case AT_Texture2D:			return TEXT( "Texture2D" );
 	case AT_Material:			return TEXT( "Material" );
-	case AT_Script:				return TEXT( "Script" );
 	case AT_StaticMesh:			return TEXT( "StaticMesh" );
 	case AT_AudioBank:			return TEXT( "AudioBank" );
 	case AT_PhysicsMaterial:	return TEXT( "PhysicsMaterial" );

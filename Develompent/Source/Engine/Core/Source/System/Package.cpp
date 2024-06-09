@@ -9,7 +9,6 @@
 #include "Render/Texture.h"
 #include "Render/Material.h"
 #include "Render/StaticMesh.h"
-#include "Scripts/Script.h"
 #include "System/AudioBank.h"
 #include "System/PhysicsMaterial.h"
 #include "System/PhysicsEngine.h"
@@ -181,7 +180,6 @@ CAssetFactory::CAssetFactory()
 	Memory::Memzero( constructAssetFns, AT_Count * sizeof( CAssetFactory::ConstructAssetFn_t ) );
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CTexture2D>(); },			AT_Texture2D );
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CMaterial>(); },			AT_Material );
-	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CScript>(); },				AT_Script );
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CStaticMesh>(); },			AT_StaticMesh );
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CAudioBank>(); },			AT_AudioBank );
 	Register( []() -> TSharedPtr<CAsset> { return MakeSharedPtr<CPhysicsMaterial>(); },		AT_PhysicsMaterial );

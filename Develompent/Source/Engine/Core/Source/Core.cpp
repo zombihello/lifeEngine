@@ -5,7 +5,6 @@
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
 #include "System/Config.h"
-#include "Scripts/ScriptEngine.h"
 #include "System/Package.h"
 #include "Misc/TableOfContents.h"
 #include "Misc/CommandLine.h"

@@ -20,7 +20,6 @@
 #include "Math/Color.h"
 #include "Misc/CommandLine.h"
 #include "Misc/TableOfContents.h"
-#include "Scripts/ScriptEngine.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseViewportRHI.h"
 #include "RHI/BaseDeviceContextRHI.h"
@@ -258,7 +257,6 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	}
 
 	g_Window->Create( ANSI_TO_TCHAR( ENGINE_NAME " " ENGINE_VERSION_STRING ), 1, 1, SW_Default );
-	g_ScriptEngine->Init();
 	g_RHI->Init( g_IsEditor );
 
 	Logf( TEXT( "User: %s//%s\n" ), Sys_GetComputerName().c_str(), Sys_GetUserName().c_str() );

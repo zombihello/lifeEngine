@@ -57,12 +57,11 @@ static EImGuiColors		s_AssetBorderColors[] =
 	IGC_Asset_Unknown,				// AT_Unknown
 	IGC_Asset_Texture2D,			// AT_Texture2D
 	IGC_Asset_Material,				// AT_Material
-	IGC_Asset_Script,				// AT_Script
 	IGC_Asset_StaticMesh,			// AT_StaticMesh
 	IGC_Asset_AudioBank,			// AT_AudioBank
 	IGC_Asset_PhysicsMaterial		// AT_PhysicsMaterial
 };
-static_assert( ARRAY_COUNT( s_AssetBorderColors ) == AT_Count, "Need full init s_AssetBorderColors array" );
+static_assert( ARRAY_COUNT( s_AssetBorderColors ) == AT_Count - AT_NumUnused, "Need full init s_AssetBorderColors array" );
 
 /** Table of asset icons */
 static EIconType		s_AssetIcons[] =
@@ -70,12 +69,11 @@ static EIconType		s_AssetIcons[] =
 	IT_Thumbnail_Asset_Unknown,				// AT_Unknown
 	IT_Thumbnail_Asset_Texture2D,			// AT_Texture2D
 	IT_Thumbnail_Asset_Material,			// AT_Material
-	IT_Thumbnail_Asset_Script,				// AT_Script
 	IT_Thumbnail_Asset_StaticMesh,			// AT_StaticMesh
 	IT_Thumbnail_Asset_AudioBank,			// AT_AudioBank
 	IT_Thumbnail_Asset_PhysicsMaterial		// AT_PhysicsMaterial
 };
-static_assert( ARRAY_COUNT( s_AssetIcons ) == AT_Count, "Need full init s_AssetIcons array" );
+static_assert( ARRAY_COUNT( s_AssetIcons ) == AT_Count - AT_NumUnused, "Need full init s_AssetIcons array" );
 
 /*
 ==================
