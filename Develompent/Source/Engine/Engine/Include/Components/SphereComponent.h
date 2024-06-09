@@ -19,7 +19,7 @@
   */
 class CSphereComponent : public CShapeComponent
 {
-	DECLARE_CLASS( CSphereComponent, CShapeComponent, 0, 0 )
+	DECLARE_CLASS( CSphereComponent, CShapeComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

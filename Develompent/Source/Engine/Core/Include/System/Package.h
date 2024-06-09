@@ -21,9 +21,12 @@
 #include "Misc/Misc.h"
 #include "Misc/Guid.h"
 #include "Misc/TableOfContents.h"
+#include "Misc/FileTools.h"
 #include "Misc/CoreGlobals.h"
+#include "Reflection/Object.h"
 #include "System/Delegate.h"
 #include "System/Archive.h"
+#include "System/Name.h"
 
 /**
  * @ingroup Core
@@ -157,6 +160,20 @@ struct AssetInfo
 
 /**
  * @ingroup Core
+ * @brief Object info in package
+ */
+struct ObjectInfo
+{
+	CName		className;		/**< Class name of this CObject. If NAME_None this is CClass */
+	CName		superClassName;	/**< Super class name of this CObject. If Name_None this is CObject */
+	CName		objectName;		/**< The object name */
+	uint32		offset;			/**< Offset in the archive to CObject. If INVALID_ID the object not saved yet */
+	uint32		size;			/**< Size data in the archive. If INVALID_ID the object export not saved yet */
+	CObject*	object;			/**< Pointer to CObject */
+};
+
+/**
+ * @ingroup Core
  * Asset handle for containing in TSharedPtr and TWeakPtr reference to asset and him pointer
  */
 template<class ObjectType>
@@ -177,7 +194,7 @@ public:
 		 */
 		FORCEINLINE std::size_t operator()( const TAssetHandle& InAssetPtr ) const
 		{
-			return Sys_MemFastHash( InAssetPtr.reference.Get(), InAssetPtr.asset.GetTypeHash() );
+			return FastHash( InAssetPtr.reference.Get(), InAssetPtr.asset.GetTypeHash() );
 		}
 	};
 
@@ -643,7 +660,7 @@ public:
 	/**
 	 * @brief Pointer to function for show import asset settings
 	 */
-	typedef void( *ShowImportSettingsAssetFn_t )( class CImGUILayer* InOwner, class CEvent* InEvent, EResultShowImportSettings& OutResult );
+	typedef void( *ShowImportSettingsAssetFn_t )( class CImGUILayer* InOwner, CEvent& InEvent, EResultShowImportSettings& OutResult );
 
 	/**
 	 * @brief Struct info about asset's importer
@@ -780,7 +797,7 @@ public:
 	 * @param OutResult			Result
 	 * @return Return TRUE if dialog is showed, otherwise will return FALSE
 	 */
-	bool ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, class CEvent* InEvent, EResultShowImportSettings& OutResult ) const;
+	bool ShowImportSettings( EAssetType InAssetType, class CImGUILayer* InOwner, CEvent& InEvent, EResultShowImportSettings& OutResult ) const;
 
 	/**
 	 * @brief Import asset
@@ -872,6 +889,14 @@ public:
 	 * @param[in] OutAssetInfo	Optional. Output to this parameter asset's info if pointer is not NULL
 	 */
 	void Add( const TAssetHandle<CAsset>& InAsset, AssetInfo* OutAssetInfo = nullptr );
+
+	/**
+	 * @brief Add object to package
+	 *
+	 * @param InObject		Object
+	 * @param OutObjectInfo	Optional. Output to this parameter object's info if pointer is not NULL
+	 */
+	void Add( CObject* InObject, ObjectInfo* OutObjectInfo = nullptr );
 
 	/**
 	 * Remove asset from package
@@ -1223,12 +1248,17 @@ private:
 	/**
 	 * Typedef map of asset name to GUID
 	 */
-	typedef std::unordered_map< std::wstring, CGuid >								AssetNameToGUID_t;
+	typedef std::unordered_map< std::wstring, CGuid >							AssetNameToGUID_t;
 
 	/**
 	 * Typedef map of assets table
 	 */
 	typedef std::unordered_map< CGuid, AssetInfo, CGuid::GuidKeyFunc >			AssetTable_t;
+
+	/**
+	 * @brief Typedef map of object table
+	 */
+	typedef std::unordered_map<CObject*, ObjectInfo*>							ObjectTable_t;
 
 	/**
 	 * Constructor
@@ -1321,14 +1351,16 @@ private:
 	 */
 	void MarkAssetDirty( const CGuid& InGUID );
 
-	bool				bIsDirty;			/**< Is dirty package */
-	CGuid				guid;				/**< GUID of package */
-	std::wstring		filename;			/**< Path to the package from which data was last loaded */
-	std::wstring		name;				/**< Package name */
-	uint32				numLoadedAssets;	/**< Number loaded assets */
-	uint32				numDirtyAssets;		/**< Number dirty assets in package */
-	AssetNameToGUID_t	assetGUIDTable;		/**< Table for converting asset GUID to name */
-	AssetTable_t		assetsTable;		/**< Table of assets in package */
+	bool						bIsDirty;			/**< Is dirty package */
+	CGuid						guid;				/**< GUID of package */
+	std::wstring				filename;			/**< Path to the package from which data was last loaded */
+	std::wstring				name;				/**< Package name */
+	uint32						numLoadedAssets;	/**< Number loaded assets */
+	uint32						numDirtyAssets;		/**< Number dirty assets in package */
+	AssetNameToGUID_t			assetGUIDTable;		/**< Table for converting asset GUID to name */
+	AssetTable_t				assetsTable;		/**< Table of assets in package */
+	ObjectTable_t				objectTable;		/**< Table of objects in the package */
+	std::vector<ObjectInfo*>	objects;			/**< Array of objects in the package */
 };
 
 /**
@@ -1562,7 +1594,7 @@ private:
 		FORCEINLINE NormalizedPath( const std::wstring& InPath )
 			: path( InPath )
 		{
-			Sys_NormalizePathSeparators( path );
+			L_FixPathSeparators( path );
 		}
 
 		/**
@@ -1573,7 +1605,7 @@ private:
 		FORCEINLINE void Set( const std::wstring& InPath )
 		{
 			path = InPath;
-			Sys_NormalizePathSeparators( path );
+			L_FixPathSeparators( path );
 		}
 
 		/**
@@ -1591,7 +1623,7 @@ private:
 		 */
 		FORCEINLINE uint64 GetTypeHash() const
 		{
-			return Sys_MemFastHash( ( const void* ) path.c_str(), path.size() );
+			return FastHash( ( const void* ) path.c_str(), path.size() );
 		}
 
 		/**

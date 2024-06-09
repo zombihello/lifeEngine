@@ -67,7 +67,7 @@ void CMaterial::Serialize( class CArchive& InArchive )
 	if ( InArchive.Ver() < VER_RemovedShadersTypeFromMaterial )
 	{
 		class CShaderMetaType*		shadersType[ SF_NumDrawFrequencies ];
-		Sys_Memzero( shadersType, sizeof( shadersType ) );
+		Memory::Memzero( shadersType, sizeof( shadersType ) );
 
 		for ( uint32 index = 0; index < SF_NumDrawFrequencies; ++index )
 		{

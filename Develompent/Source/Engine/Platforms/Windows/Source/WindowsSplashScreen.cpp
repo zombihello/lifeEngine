@@ -1,25 +1,25 @@
-#include "Containers/String.h"
-#include "Misc/Misc.h"
-#include "System/SplashScreen.h"
 #include "Misc/EngineGlobals.h"
+#include "Misc/Misc.h"
+#include "Misc/FileTools.h"
+#include "System/SplashScreen.h"
+#include "System/Config.h"
 #include "RHI/BaseRHI.h"
 #include "WindowsThreading.h"
-#include "System/Config.h"
 
 #if WITH_EDITOR
 #include "WorldEd.h"
 #endif // WITH_EDITOR
 
-static std::wstring			s_SplashScreenFileName;
-static HANDLE				s_SplashScreenThread = nullptr;
-static HBITMAP				s_SplashScreenBitmap = nullptr;
-static HWND					s_SplashScreenWnd = nullptr;
-static std::wstring			s_SplashScreenText[ STT_NumTextTypes ];
-static RECT					s_SplashScreenTextRects[ STT_NumTextTypes ];
-static HFONT				s_SplashScreenSmallTextFontHandle = nullptr;
-static HFONT				s_SplashScreenNormalTextFontHandle = nullptr;
-static CCriticalSection		s_SplashScreenSynchronizationObject;
-static CEvent*				s_ThreadInitSyncEvent = nullptr;
+static std::wstring		s_SplashScreenFileName;
+static HANDLE			s_SplashScreenThread = nullptr;
+static HBITMAP			s_SplashScreenBitmap = nullptr;
+static HWND				s_SplashScreenWnd = nullptr;
+static std::wstring		s_SplashScreenText[STT_NumTextTypes];
+static RECT				s_SplashScreenTextRects[STT_NumTextTypes];
+static HFONT			s_SplashScreenSmallTextFontHandle = nullptr;
+static HFONT			s_SplashScreenNormalTextFontHandle = nullptr;
+static CMutex			s_SplashScreenSynchronizationObject;
+static CEvent*			s_ThreadInitSyncEvent = nullptr;
 
 /*
 ==================
@@ -131,18 +131,21 @@ SplashScreenThread
 */
 DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 {
-	HINSTANCE		hInstance = GetModuleHandle( nullptr );
-	WNDCLASS		wndClass;
+	bool					bNeedDestroyIcon = true;
+	HINSTANCE				hInstance = GetModuleHandle( nullptr );
+	WNDCLASS				wndClass;
 	wndClass.style			= CS_HREDRAW | CS_VREDRAW;
 	wndClass.lpfnWndProc	= ( WNDPROC )SplashScreenWindowProc;
 	wndClass.cbClsExtra		= 0;
 	wndClass.cbWndExtra		= 0;
 	wndClass.hInstance		= hInstance;
 
-	//wndClass.hIcon = LoadIcon( hInstance, MAKEINTRESOURCE( g_IsEditor ? GEditorIcon : GGameIcon ) );
-	//if ( wndClass.hIcon == NULL )
+	const uint32			defaultExeIcon = 0;		// In EXE default icon its 0
+	wndClass.hIcon			= ExtractIcon( hInstance, L_GetExecutablePath(), defaultExeIcon );
+	if (! wndClass.hIcon )
 	{
 		wndClass.hIcon		= LoadIcon( ( HINSTANCE )NULL, IDI_APPLICATION );
+		bNeedDestroyIcon	= false;
 	}
 
 	wndClass.hCursor		= LoadCursor( ( HINSTANCE )NULL, IDC_ARROW );
@@ -194,7 +197,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			// Create small font
 			{
 				LOGFONT		myFont;
-				Sys_Memzero( &myFont, sizeof( myFont ) );
+				Memory::Memzero( &myFont, sizeof( myFont ) );
 				GetObjectW( systemFontHandle, sizeof( myFont ), &myFont );
 				myFont.lfHeight = 10;
 
@@ -209,7 +212,7 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 			// Create normal font
 			{
 				LOGFONT			myFont;
-				Sys_Memzero( &myFont, sizeof( myFont ) );
+				Memory::Memzero( &myFont, sizeof( myFont ) );
 				GetObjectW( systemFontHandle, sizeof( myFont ), &myFont );
 				myFont.lfHeight = 12;
 
@@ -288,6 +291,10 @@ DWORD WINAPI SplashScreenThread( LPVOID InUnused )
 
 		DeleteObject( s_SplashScreenBitmap );
 		s_SplashScreenBitmap = nullptr;
+		if ( bNeedDestroyIcon )
+		{
+			DestroyIcon( wndClass.hIcon );
+		}
 	}
 
 	UnregisterClass( wndClass.lpszClassName, hInstance );
@@ -303,13 +310,13 @@ void Sys_ShowSplash( const tchar* InSplashName )
 {
 	if ( !g_IsCommandlet )
 	{
-		s_SplashScreenFileName = Sys_GameDir() + CString::Format( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
-		s_ThreadInitSyncEvent = g_SynchronizeFactory->CreateSynchEvent( true );
-		s_SplashScreenThread = CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
+		s_SplashScreenFileName	= Sys_GameDir() + L_Sprintf( PATH_SEPARATOR TEXT( "Splash" ) PATH_SEPARATOR TEXT( "%s" ), InSplashName );
+		s_ThreadInitSyncEvent	= new CEvent( true );
+		s_SplashScreenThread	= CreateThread( nullptr, 0, ( LPTHREAD_START_ROUTINE ) SplashScreenThread, nullptr, 0, nullptr );
 
 		// Wait of open splash screen
 		s_ThreadInitSyncEvent->Wait( INFINITE );
-		g_SynchronizeFactory->Destroy( s_ThreadInitSyncEvent );
+		delete s_ThreadInitSyncEvent;
 		s_ThreadInitSyncEvent = nullptr;
 	}
 }

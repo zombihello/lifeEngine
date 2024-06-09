@@ -16,12 +16,6 @@
 
 /**
  * @ingroup Engine
- * Typedef of pointer to light component
- */
-typedef TRefCountPtr<class CLightComponent>		LightComponentRef_t;
-
-/**
- * @ingroup Engine
  * Enumeration of light type
  */
 enum ELightType
@@ -39,7 +33,7 @@ enum ELightType
  */
 class CLightComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CLightComponent, CSceneComponent, 0, 0 )
+	DECLARE_CLASS( CLightComponent, CSceneComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	friend class CScene;			// For add and remove lights in scene
@@ -50,15 +44,11 @@ public:
 	CLightComponent();
 
 	/**
-	 * @brief Destructor
+	 * @brief Called before destroying the object
+	 * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+	 * asynchronous cleanup process
 	 */
-	virtual ~CLightComponent();
-
-	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
+	virtual void BeginDestroy() override;
 
 	/**
 	 * @brief Called when the owning Actor is spawned

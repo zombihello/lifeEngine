@@ -1,7 +1,7 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
-#include <Containers/StringConv.h>
+#include <Misc/StringConv.h>
 #include <Logger/BaseLogger.h>
 #include <Logger/LoggerMacros.h>
 #include "WindowsWindow.h"
@@ -127,10 +127,12 @@ Sys_ScanCodeToButtonCode
 EButtonCode Sys_ScanCodeToButtonCode( uint32 InScancode )
 {
 	for ( uint32 index = 0; index < BC_KeyCount; ++index )
-		if ( s_ScanCodeToButtonCode[ index ] == ( SDL_Scancode )InScancode )
+	{
+		if ( s_ScanCodeToButtonCode[index] == ( SDL_Scancode )InScancode )
 		{
 			return ( EButtonCode )index;
 		}
+	}
 
 	return BC_None;
 }
@@ -143,7 +145,7 @@ Sys_ButtonCodeToScanCode
 uint32 Sys_ButtonCodeToScanCode( EButtonCode InButtonCode )
 {
 	Assert( InButtonCode >= BC_KeyFirst && InButtonCode <= BC_KeyLast );
-	return s_ScanCodeToButtonCode[ ( uint32 )InButtonCode ];
+	return s_ScanCodeToButtonCode[( uint32 )InButtonCode];
 }
 
 /*
@@ -172,13 +174,13 @@ EButtonCode Sys_MouseButtonToButtonCode( uint8 InButtonIndex )
 CWindowsWindow::CWindowsWindow
 ==================
 */
-CWindowsWindow::CWindowsWindow() :
-	isShowCursor( false ),
-	isFullscreen( false ),
-	id( ( uint32 )-1 ),
-    sdlWindow( nullptr ),
-    sdlWindowInfo( nullptr ),
-    handle( nullptr )
+CWindowsWindow::CWindowsWindow()
+	: isShowCursor( false )
+	, isFullscreen( false )
+	, id( ( uint32 )-1 )
+    , sdlWindow( nullptr )
+    , sdlWindowInfo( nullptr )
+    , handle( nullptr )
 {}
 
 /*
@@ -352,7 +354,7 @@ void CWindowsWindow::Create( const tchar* InTitle, uint32 InWidth, uint32 InHeig
 	sdlWindow = SDL_CreateWindow( TCHAR_TO_ANSI( InTitle ), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, InWidth, InHeight, flags );
 	if ( !sdlWindow )
 	{
-		Sys_Errorf( TEXT( "Failed created window (%ix%i) with title '%s' and flags 0x%X. SDL error: %s" ), InWidth, InHeight, InTitle, InFlags, SDL_GetError() );
+		Sys_Error( TEXT( "Failed created window (%ix%i) with title '%s' and flags 0x%X. SDL error: %s" ), InWidth, InHeight, InTitle, InFlags, SDL_GetError() );
 	}
 
 	id = SDL_GetWindowID( sdlWindow );

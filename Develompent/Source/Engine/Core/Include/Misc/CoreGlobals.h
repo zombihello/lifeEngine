@@ -31,15 +31,21 @@ extern class CBaseWindow*			g_Window;
 
 /**
  * @ingroup Core
- * @brief Config manager
- */
-extern class CConfigManager			g_Config;
-
-/**
- * @ingroup Core
  * @brief Indicates that MainLoop() should be exited at the end of the current iteration
  */
 extern bool							g_IsRequestingExit;
+
+/**
+ * @ingroup Core
+ * @brief Indicated that execution is happening within MainLoop()
+ */
+extern bool							g_IsRunning;
+
+/**
+ * @ingroup Core
+ * @brief Whether we are still in the initial loading process
+ */
+extern bool							g_IsInitialLoad;
 
 #if WITH_EDITOR
 /**

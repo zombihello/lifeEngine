@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "Math/Math.h"
-#include "Misc/EngineTypes.h"
 #include "Misc/PhysicsGlobals.h"
 #include "System/Archive.h"
 #include "Actors/Actor.h"
@@ -27,8 +26,10 @@
  * @ingroup Engine
  * The World is the top level object representing a map or a sandbox in which Actors and Components will exist and be rendered.
  */
-class CWorld
+class CWorld : public CObject
 {
+	DECLARE_CLASS( CWorld, CObject, 0, 0, TEXT( "Engine" ) )
+
 public:
 	/**
 	 * Constructor
@@ -36,9 +37,17 @@ public:
 	CWorld();
 
 	/**
-	 * Destructor
+	 * @brief Called before destroying the object
+	 * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+	 * asynchronous cleanup process
 	 */
-	~CWorld();
+	virtual void BeginDestroy() override;
+
+	/**
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
+	 */
+	virtual void PostLoad() override;
 
 	/**
 	 * Start gameplay. This will cause the game mode to transition to the correct state and call BeginPlay on all actors
@@ -62,7 +71,7 @@ public:
 	 * 
 	 * @param[in] InArchive Archive
 	 */
-	void Serialize( CArchive& InArchive );
+	virtual void Serialize( CArchive& InArchive ) override;
 
 	/**
 	 * Clean up all world
@@ -77,13 +86,13 @@ public:
 	 * @param InRotation	Rotation actor on spawn
 	 * @param InName		Actor name
 	 */
-	ActorRef_t SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero, const CName& InName = NAME_None );
+	AActor* SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero, const CName& InName = NAME_None );
 
 	/**
 	 * Destroy actor in world
 	 * @param InActor	Actor
 	 */
-	FORCEINLINE void DestroyActor( ActorRef_t InActor )
+	FORCEINLINE void DestroyActor( AActor* InActor )
 	{
 		DestroyActor( InActor, false );
 	}
@@ -96,9 +105,9 @@ public:
 	 * @param InName		Actor name
 	 */
 	template< typename TClass >
-	FORCEINLINE TRefCountPtr< TClass > SpawnActor( const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero, const CName& InName = NAME_None )
+	FORCEINLINE TClass* SpawnActor( const Vector& InLocation, const CRotator& InRotation = Math::rotatorZero, const CName& InName = NAME_None )
 	{
-		return SpawnActor( TClass::StaticClass(), InLocation, InRotation, InName );
+		return ( TClass* )SpawnActor( TClass::StaticClass(), InLocation, InRotation, InName );
 	}
 
 	/**
@@ -128,25 +137,25 @@ public:
 	 * Select actor
 	 * @param InActor	Actor
 	 */
-	void SelectActor( ActorRef_t InActor );
+	void SelectActor( AActor* InActor );
 
 	/**
 	 * Unselect actor
 	 * @param InActor	Actor
 	 */
-	void UnselectActor( ActorRef_t InActor );
+	void UnselectActor( AActor* InActor );
 
 	/**
 	 * Select actors
 	 * @param InActors	Array of actors
 	 */
-	void SelectActors( const std::vector<ActorRef_t>& InActors );
+	void SelectActors( const std::vector<AActor*>& InActors );
 
 	/**
 	 * Unselect actors
 	 * @param InActors	Array of actors
 	 */
-	void UnselectActors( const std::vector<ActorRef_t>& InActors );
+	void UnselectActors( const std::vector<AActor*>& InActors );
 
 	/**
 	 * Unselect all actors
@@ -178,7 +187,7 @@ public:
 	 * @param InIndex	Index
 	 * @return Return actor
 	 */
-	FORCEINLINE ActorRef_t GetActor( uint32 InIndex ) const
+	FORCEINLINE AActor* GetActor( uint32 InIndex ) const
 	{
 		Assert( InIndex >= 0 && InIndex < actors.size() );
 		return actors[ InIndex ];
@@ -189,7 +198,7 @@ public:
 	 * @brief Get selected actors
 	 * @return Return selected actors
 	 */
-	FORCEINLINE const std::vector<ActorRef_t>& GetSelectedActors() const
+	FORCEINLINE const std::vector<AActor*>& GetSelectedActors() const
 	{
 		return selectedActors;
 	}
@@ -202,46 +211,16 @@ public:
 	{
 		return selectedActors.size();
 	}
-
-	/**
-	 * @brief Get name
-	 * @return Return name of world
-	 */
-	FORCEINLINE const std::wstring& GetName() const
-	{
-		return name;
-	}
-
-	/**
-	 * @brief Get path to file
-	 * @return Return path to file with world. If not serialized returning empty string
-	 */
-	FORCEINLINE const std::wstring& GetFilePath() const
-	{
-		return filePath;
-	}
-
-	/**
-	 * @brief Mark dirty world
-	 */
-	FORCEINLINE void MarkDirty()
-	{
-		if ( !bDirty )
-		{
-			bDirty = true;
-			EditorDelegates::onEditorMapMarkedDirty.Broadcast();
-		}
-	}
-
-	/**
-	 * @brief Is dirty world
-	 * @return Return TRUE if world is dirty, else returning FALSE
-	 */
-	FORCEINLINE bool IsDirty() const
-	{
-		return bDirty;
-	}
 #endif // WITH_EDITOR
+
+	/**
+	 * @brief Has begun gameplay
+	 * @return Return TRUE if gameplay has begun, otherwise returns FALSE
+	 */
+	FORCEINLINE bool HasBegunPlay() const
+	{
+		return isBeginPlay;
+	}
 
 private:
 	/**
@@ -250,18 +229,16 @@ private:
 	 * @param InActor				Actor
 	 * @param InIsIgnorePlaying		Is need ignore playing flag in actor
 	 */
-	void DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying );
+	void DestroyActor( AActor* InActor, bool InIsIgnorePlaying );
 
-	bool						isBeginPlay;		/**< Is started gameplay */
-	class CBaseScene*			scene;				/**< Scene manager */
-	std::vector<ActorRef_t>		actors;				/**< Array actors in world */
-	std::vector<ActorRef_t>		actorsToDestroy;	/**< Array actors which need destroy after tick */
+	bool						isBeginPlay;					/**< Is started gameplay */
+	float						timeSinceLastPendingKillPurge;	/**< Time since last pending kill purge (in seconds) */
+	class CBaseScene*			scene;							/**< Scene manager */
+	std::vector<AActor*>		actors;							/**< Array actors in world */
+	std::vector<AActor*>		actorsToDestroy;				/**< Array actors which need destroy after tick */
 
 #if WITH_EDITOR
-	bool						bDirty;				/**< Is world dirty and need save */
-	std::vector<ActorRef_t>		selectedActors;		/**< Array of selected actors */
-	std::wstring				name;				/**< World name */
-	std::wstring				filePath;			/**< Path to serialized world on HDD */
+	std::vector<AActor*>		selectedActors;					/**< Array of selected actors */
 #endif // WITH_EDITOR
 };
 

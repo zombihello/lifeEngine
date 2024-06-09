@@ -9,31 +9,25 @@
 #ifndef ACTORCOMPONENT_H
 #define ACTORCOMPONENT_H
 
-#include "Misc/Object.h"
-#include "Misc/Class.h"
 #include "Misc/RefCounted.h"
-#include "Misc/EngineTypes.h"
-#include "Misc/Property.h"
+#include "Reflection/ObjectMacros.h"
+#include "Reflection/Object.h"
+#include "Reflection/Property.h"
 
 /**
  * @ingroup Engine
  * ActorComponent is the base class for components that define reusable behavior that can be added to different types of Actors.
  * ActorComponents that have a transform are known as SceneComponents and those that can be rendered are PrimitiveComponents.
  */
-class CActorComponent : public CObject, public CRefCounted
+class CActorComponent : public CObject 
 {
-	DECLARE_CLASS( CActorComponent, CObject, 0, 0 )
+	DECLARE_CLASS( CActorComponent, CObject, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
 	 * Constructor
 	 */
 	CActorComponent();
-
-	/**
-	 * Destructor
-	 */
-	virtual ~CActorComponent();
 
 	/**
 	 * Begins Play for the component.
@@ -90,10 +84,29 @@ public:
 	}
 #endif // WITH_EDITOR
 
+	/**
+	 * @brief Get world where this component is
+	 * @return Return a pointer to world where this component is
+	 */
+	FORCEINLINE class CWorld* GetWorld() const
+	{
+		return worldPrivate ? worldPrivate : GetWorld_Uncached();
+	}
+
 private:
+	/**
+	 * @brief Get world where this component is
+	 * This function use for cache pointer to world
+	 *
+	 * @return Return a pointer to world where this component is
+	 */
+	class CWorld* GetWorld_Uncached() const;
+
 #if WITH_EDITOR
 	bool					bEditorOnly;	/**< Is component only for editor */
 #endif // WITH_EDITOR
+
+	class CWorld*			worldPrivate;	/**< Pointer to world where this component is */
 };
 
 #endif // !ACTORCOMPONENT_H

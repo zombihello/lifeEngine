@@ -17,7 +17,7 @@
   */
 class CSpotLightComponent : public CLightComponent
 {
-	DECLARE_CLASS( CSpotLightComponent, CLightComponent, 0, 0 )
+	DECLARE_CLASS( CSpotLightComponent, CLightComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
@@ -26,10 +26,10 @@ public:
 	CSpotLightComponent();
 
 	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
 	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
+	virtual void PostLoad() override;
 
 #if WITH_EDITOR
 	/**

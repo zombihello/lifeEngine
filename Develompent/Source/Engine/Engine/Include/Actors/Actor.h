@@ -11,529 +11,15 @@
 
 #include <vector>
 
-#include "Misc/Object.h"
-#include "Misc/Class.h"
-#include "Misc/RefCounted.h"
-#include "Misc/EngineTypes.h"
-#include "Misc/Property.h"
 #include "Math/Rect.h"
 #include "Math/Color.h"
+#include "System/Delegate.h"
+#include "Reflection/ObjectMacros.h"
+#include "Reflection/Property.h"
 #include "Render/Material.h"
 #include "Render/HitProxies.h"
-#include "System/Delegate.h"
 #include "Components/SceneComponent.h"
 #include "Components/PrimitiveComponent.h"
-
-#if WITH_EDITOR
-/**
- * @ingroup Engine
- * Enumeration of actor var type
- */
-enum EActorVarType
-{
-	AVT_Unknown,	/**< Unknown type */
-	AVT_Int,		/**< Int */
-	AVT_Float,		/**< Float */
-	AVT_Bool,		/**< Bool */
-	AVT_Vector2D,	/**< Vector 2D */
-	AVT_Vector3D,	/**< Vector 3D */
-	AVT_Vector4D,	/**< Vector 4D */
-	AVT_RectInt,	/**< Rectangle int */
-	AVT_RectFloat,	/**< Rectangle float */
-	AVT_Color,		/**< Color */
-	AVT_String,		/**< String */
-	AVT_Material	/**< Material */
-};
-
-/**
- * @ingroup Engine
- * Class for contain actor variable for initialize him when cooked map. Available only when WITH_EDITOR is 1
- */
-class CActorVar
-{
-public:
-	/**
-	 * Constructor
-	 */
-	CActorVar();
-
-	/**
-	 * Constructor of copy
-	 *
-	 * @param InCopy Copy
-	 */
-	CActorVar( const CActorVar& InCopy );
-
-	/**
-	 * Destructor
-	 */
-	FORCEINLINE ~CActorVar()
-	{
-		Clear();
-	}
-
-	/**
-	 * Clear value
-	 */
-	void Clear();
-
-	/**
-	 * Set name
-	 *
-	 * @param InName Name
-	 */
-	FORCEINLINE void SetName( const std::wstring& InName )
-	{
-		name = InName;
-	}
-
-	/**
-	 * Set value int
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueInt( int32 InValue )
-	{
-		if ( value && type != AVT_Int )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new int32;
-		}
-
-		*static_cast< int32* >( value ) = InValue;
-		type = AVT_Int;
-	}
-
-	/**
-	 * Set value float
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueFloat( float InValue )
-	{
-		if ( value && type != AVT_Float )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new float;
-		}
-
-		*static_cast< float* >( value ) = InValue;
-		type = AVT_Float;
-	}
-
-	/**
-	 * Set value bool
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueBool( bool InValue )
-	{
-		if ( value && type != AVT_Bool )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new bool;
-		}
-
-		*static_cast< bool* >( value ) = InValue;
-		type = AVT_Bool;
-	}
-
-	/**
-	 * Set value vector 2D
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueVector2D( const Vector2D& InValue )
-	{
-		if ( value && type != AVT_Vector2D )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new Vector2D();
-		}
-
-		*static_cast< Vector2D* >( value ) = InValue;
-		type = AVT_Vector2D;
-	}
-
-	/**
-	 * Set value vector 3D
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueVector3D( const Vector& InValue )
-	{
-		if ( value && type != AVT_Vector3D )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new Vector();
-		}
-
-		*static_cast< Vector* >( value ) = InValue;
-		type = AVT_Vector3D;
-	}
-
-	/**
-	 * Set value vector 4D
-	 */
-	FORCEINLINE void SetValueVector4D( const Vector4D& InValue )
-	{
-		if ( value && type != AVT_Vector4D )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new Vector4D();
-		}
-
-		*static_cast< Vector4D* >( value ) = InValue;
-		type = AVT_Vector4D;
-	}
-
-	/**
-	 * Set value rect int32
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueRectInt( const RectInt32_t& InValue )
-	{
-		if ( value && type != AVT_RectInt )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new RectInt32_t();
-		}
-
-		*static_cast< RectInt32_t* >( value ) = InValue;
-		type = AVT_RectInt;
-	}
-
-	/**
-	 * Set value rect float
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueRectFloat( const RectFloat_t& InValue )
-	{
-		if ( value && type != AVT_RectFloat )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new RectFloat_t();
-		}
-
-		*static_cast< RectFloat_t* >( value ) = InValue;
-		type = AVT_RectFloat;
-	}
-
-	/**
-	 * Set value color
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueColor( const CColor& InValue )
-	{
-		if ( value && type != AVT_Color )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new CColor();
-		}
-
-		*static_cast< CColor* >( value ) = InValue;
-		type = AVT_Color;
-	}
-
-	/**
-	 * Set value string
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueString( const std::wstring& InValue )
-	{
-		if ( value && type != AVT_String )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new std::wstring();
-		}
-
-		*static_cast< std::wstring* >( value ) = InValue;
-		type = AVT_String;
-	}
-
-	/**
-	 * Set value material
-	 *
-	 * @param InValue Value
-	 */
-	FORCEINLINE void SetValueMaterial( const TAssetHandle<CMaterial>& InValue )
-	{
-		if ( value && type != AVT_Material )
-		{
-			Clear();
-		}
-
-		if ( !value )
-		{
-			value = new TAssetHandle<CMaterial>();
-		}
-
-		*static_cast< TAssetHandle<CMaterial>* >( value ) = InValue;
-		type = AVT_Material;
-	}
-
-	/**
-	 * Is valid
-	 * @return Return true if var is valid, else return false
-	 */
-	FORCEINLINE bool IsValid() const
-	{
-		return type != AVT_Unknown && value;
-	}
-
-	/**
-	 * Get name
-	 * @return Return name
-	 */
-	FORCEINLINE const std::wstring& GetName() const
-	{
-		return name;
-	}
-
-	/**
-	 * Get type
-	 * @return Return type
-	 */
-	FORCEINLINE EActorVarType GetType() const
-	{
-		return type;
-	}
-
-	/**
-	 * Get value int
-	 * @return Return value int
-	 */
-	FORCEINLINE int32 GetValueInt() const
-	{
-		if ( type != AVT_Int )
-		{
-			return 0;
-		}
-		return *static_cast< int32* >( value );
-	}
-
-	/**
-	 * Get value float
-	 * @return Return value float
-	 */
-	FORCEINLINE float GetValueFloat() const
-	{
-		if ( type != AVT_Float )
-		{
-			return 0.f;
-		}
-		return *static_cast< float* >( value );
-	}
-
-	/**
-	 * Get value number
-	 * @return Return value number
-	 */
-	FORCEINLINE float GetValueNumber() const
-	{
-		if ( type != AVT_Float && type != AVT_Int )
-		{
-			return 0.f;
-		}
-		return *static_cast< float* >( value );
-	}
-
-	/**
-	 * Get value bools
-	 * @return Return value bool
-	 */
-	FORCEINLINE bool GetValueBool() const
-	{
-		if ( type != AVT_Bool )
-		{
-			return false;
-		}
-		return *static_cast< bool* >( value );
-	}
-
-	/**
-	 * Get value vector 2D
-	 * @return Return value vector 2D
-	 */
-	FORCEINLINE Vector2D GetValueVector2D() const
-	{
-		if ( type != AVT_Vector2D )
-		{
-			return Vector2D();
-		}
-		return *static_cast< Vector2D* >( value );
-	}
-
-	/**
-	 * Get value vector 3D
-	 * @return Return value vector 3D
-	 */
-	FORCEINLINE Vector GetValueVector3D() const
-	{
-		if ( type != AVT_Vector3D )
-		{
-			return Vector();
-		}
-		return *static_cast< Vector* >( value );
-	}
-
-	/**
-	 * Get value vector 4D
-	 * @return Return value vector 4D
-	 */
-	FORCEINLINE Vector4D GetValueVector4D() const
-	{
-		if ( type != AVT_Vector4D )
-		{
-			return Vector4D();
-		}
-		return *static_cast< Vector4D* >( value );
-	}
-
-	/**
-	 * Get value rect int
-	 * @return Return value rect int
-	 */
-	FORCEINLINE RectInt32_t GetValueRectInt() const
-	{
-		if ( type != AVT_RectInt )
-		{
-			return RectInt32_t();
-		}
-		return *static_cast< RectInt32_t* >( value );
-	}
-
-	/**
-	 * Get value rect float
-	 * @return Return value rect float
-	 */
-	FORCEINLINE RectFloat_t GetValueRectFloat() const
-	{
-		if ( type != AVT_RectFloat )
-		{
-			return RectFloat_t();
-		}
-		return *static_cast< RectFloat_t* >( value );
-	}
-
-	/**
-	 * Get value color
-	 * @return Return value color
-	 */
-	FORCEINLINE CColor GetValueColor() const
-	{
-		if ( type != AVT_Color )
-		{
-			return CColor();
-		}
-		return *static_cast< CColor* >( value );
-	}
-
-	/**
-	 * Get value string
-	 * @return Return value string
-	 */
-	FORCEINLINE std::wstring GetValueString() const
-	{
-		if ( type != AVT_String )
-		{
-			return TEXT( "" );
-		}
-		return *static_cast< std::wstring* >( value );
-	}
-
-	/**
-	 * Get value material
-	 * @return Return value material
-	 */
-	FORCEINLINE TAssetHandle<CMaterial> GetValueMaterial() const
-	{
-		if ( type != AVT_Material )
-		{
-			return nullptr;
-		}
-		return *static_cast< TAssetHandle<CMaterial>* >( value );
-	}
-
-	/**
-	 * Overload operator =
-	 */
-	FORCEINLINE CActorVar& operator=( const CActorVar& InRight )
-	{
-		name = InRight.name;
-		switch ( InRight.type )
-		{
-		case AVT_Int:		SetValueInt( InRight.GetValueInt() );				break;
-		case AVT_Float:		SetValueFloat( InRight.GetValueFloat() );			break;
-		case AVT_Bool:		SetValueBool( InRight.GetValueBool() );				break;
-		case AVT_Vector2D:	SetValueVector2D( InRight.GetValueVector2D() );		break;
-		case AVT_Vector3D:	SetValueVector3D( InRight.GetValueVector3D() );		break;
-		case AVT_Vector4D:	SetValueVector4D( InRight.GetValueVector4D() );		break;
-		case AVT_RectInt:	SetValueRectInt( InRight.GetValueRectInt() );		break;
-		case AVT_RectFloat:	SetValueRectFloat( InRight.GetValueRectFloat() );	break;
-		case AVT_Color:		SetValueColor( InRight.GetValueColor() );			break;
-		case AVT_String:	SetValueString( InRight.GetValueString() );			break;
-		case AVT_Material:	SetValueMaterial( InRight.GetValueMaterial() );		break;
-
-		default:
-			type = AVT_Unknown;
-			value = nullptr;
-			break;
-		}
-
-		return *this;
-	}
-
-private:
-	std::wstring		name;		/**< Name */
-	EActorVarType		type;		/**< Type */
-	void*				value;		/**< Value */
-};
-#endif // WITH_EDITOR
 
 /**
  * @ingroup Engine
@@ -545,20 +31,24 @@ DECLARE_MULTICAST_DELEGATE( COnActorDestroyed, class AActor* );
  * @ingroup Engine
  * @brief Base class of all actors in world
  */
-class AActor : public CObject, public CRefCounted
+class AActor : public CObject
 {
-	DECLARE_CLASS( AActor, CObject, 0, 0 )
+	DECLARE_CLASS( AActor, CObject, CLASS_HasComponents, 0, TEXT( "Engine" ) )
 
 public:
+	friend struct MarkActorIsBeingDestroyed;
+
 	/**
 	 * @brief Constructor
 	 */
 	AActor();
 
 	/**
-	 * @brief Destructor
+	 * @brief Called before destroying the object
+	 * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+	 * asynchronous cleanup process
 	 */
-	virtual ~AActor();
+	virtual void BeginDestroy() override;
 
 	/**
 	 * @brief Overridable native event for when play begins for this actor
@@ -576,12 +66,6 @@ public:
 	 * @param InDeltaTime	The time since the last tick.
 	 */
 	virtual void Tick( float InDeltaTime );
-
-	/**
-	 * @brief Serialize actor
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive );
 	
 	/**
 	 * @brief Called when this actor is spawned
@@ -617,16 +101,6 @@ public:
 
 #if WITH_EDITOR
 	/**
-	 * @brief Initialize actor properties
-	 * This method called only when actor spawned on cooking of map. Available only when WITH_EDITOR is 1
-	 * 
-	 * @param InActorVars Array of actor properties to init
-	 * @param InCooker Pointer to cooker for cook any resources if need
-	 * @return Return if properties inited succeed and all resources cooked is succeed, else return false
-	 */
-	virtual bool InitProperties( const std::vector< CActorVar >& InActorVars, class CCookPackagesCommandlet* InCooker );
-
-	/**
 	 * @brief Get path to icon of actor for exploer level in WorldEd
 	 * @return Return path to actor icon from Sys_BaseDir()
 	 */
@@ -637,9 +111,20 @@ public:
 	 * @brief Get array of owned components
 	 * @return Return array owned components
 	 */
-	FORCEINLINE const std::vector< ActorComponentRef_t >& GetComponents() const
+	FORCEINLINE const std::vector<CActorComponent*>& GetComponents() const
 	{
 		return ownedComponents;
+	}
+
+	/**
+	 * @brief Is the actor pending kill
+	 * This is set to TRUE in CWorld::DestroyActor
+	 * 
+	 * @return Return TRUE if this actor has begun the destruction process, otherwise returns FALSE
+	 */
+	FORCEINLINE bool IsPendingKillPending() const
+	{
+		return bActorIsBeingDestroyed || IsPendingKill();
 	}
 
 	/**
@@ -899,7 +384,7 @@ public:
 	 * @brief Get collision component
 	 * @return Return collision component. If not exist return nullptr
 	 */
-	FORCEINLINE TRefCountPtr<CPrimitiveComponent> GetCollisionComponent() const
+	FORCEINLINE CPrimitiveComponent* GetCollisionComponent() const
 	{
 		return collisionComponent;
 	}
@@ -911,15 +396,6 @@ public:
 	FORCEINLINE bool IsStatic() const
 	{
 		return bIsStatic;
-	}
-
-	/**
-	 * @brief Is this actor has begun the destruction process
-	 * @return Return TRUE if this actor has begun destruction, or if this actor has been destroyed already
-	 */
-	FORCEINLINE bool IsPendingKill() const
-	{
-		return bActorIsBeingDestroyed;
 	}
 
 	/**
@@ -941,7 +417,7 @@ protected:
 	 * @param InEditorOnly	Is editor only component
 	 * @return Return pointer to component
 	 */
-	ActorComponentRef_t CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly = false );
+	CActorComponent* CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly = false );
 
 	/**
 	 * @brief Create component and add to array of owned components
@@ -949,10 +425,10 @@ protected:
 	 * @param InName	Name component
 	 * @return Return pointer to component
 	 */
-	template< typename TClass >
-	FORCEINLINE TRefCountPtr< TClass > CreateComponent( const CName& InName, bool InEditorOnly = false )
+	template<typename TClass>
+	FORCEINLINE TClass* CreateComponent( const CName& InName, bool InEditorOnly = false )
 	{
-		CActorComponent*		newComponent = CreateComponent( TClass::StaticClass(), InName, InEditorOnly );
+		CActorComponent*	newComponent = CreateComponent( TClass::StaticClass(), InName, InEditorOnly );
 		return ( TClass* )newComponent;
 	}
 
@@ -982,10 +458,27 @@ protected:
 		return onActorDestroyed;
 	}
 
-	TRefCountPtr<CSceneComponent>				rootComponent;			/**< Root component, default is null */
-	TRefCountPtr<CPrimitiveComponent>			collisionComponent;		/**< Collision component */
+	/**
+	 * @brief Get world where this actor is
+	 * @return Return a pointer to world where this actor is
+	 */
+	FORCEINLINE CWorld* GetWorld() const
+	{
+		return worldPrivate ? worldPrivate : GetWorld_Uncached();
+	}
+
+	CSceneComponent*							rootComponent;			/**< Root component, default is null */
+	CPrimitiveComponent*						collisionComponent;		/**< Collision component */
 
 private:
+	/**
+	 * @brief Get world where this actor is
+	 * This function use for cache pointer to world
+	 * 
+	 * @return Return a pointer to world where this actor is
+	 */
+	CWorld* GetWorld_Uncached() const;
+
 	bool										bIsStatic;				/**< Is static actor */
 	bool										bNeedReinitCollision;	/**< Is need reinit collision component */
 	bool										bActorIsBeingDestroyed;	/**< Actor is being destroyed */
@@ -996,12 +489,32 @@ private:
 	bool										bSelected;				/**< Is selected this actor */
 #endif // WITH_EDITOR
 
-	std::vector<ActorComponentRef_t>			ownedComponents;		/**< Owned components */
+	class CWorld*								worldPrivate;			/**< Pointer to world where this actor is */
+	std::vector<CActorComponent*>				ownedComponents;		/**< Owned components */
 	mutable COnActorDestroyed					onActorDestroyed;		/**< Called event when actor is destroyed */
 
 #if ENABLE_HITPROXY
 	CHitProxyId									hitProxyId;				/**< Hit proxy id */
 #endif // ENABLE_HITPROXY
+};
+
+/**
+ * @ingroup Engine
+ * @brief Internal struct used by level code to mark actors as destroyed
+ */
+struct MarkActorIsBeingDestroyed
+{
+private:
+	friend class CWorld;
+
+	/**
+	 * @brief Constructor
+	 * @param InActor	Actor
+	 */
+	MarkActorIsBeingDestroyed( AActor* InActor )
+	{
+		InActor->bActorIsBeingDestroyed = true;
+	}
 };
 
 #endif // !ACTOR_H

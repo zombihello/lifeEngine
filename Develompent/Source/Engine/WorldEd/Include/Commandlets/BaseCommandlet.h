@@ -11,8 +11,8 @@
 
 #include <string>
 
-#include "Misc/Object.h"
 #include "Misc/CommandLine.h"
+#include "Reflection/Object.h"
 #include "Core.h"
 
 /**
@@ -21,14 +21,9 @@
  */
 class CBaseCommandlet : public CObject
 {
-	DECLARE_CLASS( CBaseCommandlet, CObject, 0, 0 )
+	DECLARE_CLASS_NO_CTOR( CBaseCommandlet, CObject, CLASS_Transient | CLASS_Abstract, 0, TEXT( "WorldEd" ) )
 
 public:
-	/**
-	 * Destructor
-	 */
-	virtual ~CBaseCommandlet() {}
-
 	/**
 	 * Main method of execute commandlet
 	 * 

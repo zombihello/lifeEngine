@@ -19,7 +19,7 @@
   */
 class APointLight : public ALight
 {
-	DECLARE_CLASS( APointLight, ALight, 0, 0 )
+	DECLARE_CLASS( APointLight, ALight, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
@@ -39,16 +39,16 @@ public:
 	 * Get point light component
 	 * @return Return point light component
 	 */
-	FORCEINLINE TRefCountPtr<CPointLightComponent> GetPointLightComponent() const
+	FORCEINLINE CPointLightComponent* GetPointLightComponent() const
 	{
 		return pointLightComponent;
 	}
 
 private:
-	TRefCountPtr<CPointLightComponent>			pointLightComponent;		/**< Point light component */
+	CPointLightComponent*		pointLightComponent;		/**< Point light component */
 
 #if WITH_EDITOR
-	TRefCountPtr<CSpriteComponent>				gizmoComponent;				/**< Gizmo component */
+	CSpriteComponent*			gizmoComponent;				/**< Gizmo component */
 #endif // WITH_EDITOR
 };
 

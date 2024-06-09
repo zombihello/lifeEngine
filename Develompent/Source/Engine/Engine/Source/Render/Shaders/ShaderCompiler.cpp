@@ -1,7 +1,6 @@
 #include "LEBuild.h"
 
 #if WITH_EDITOR
-#include "Containers/String.h"
 #include "Logger/LoggerMacros.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
@@ -70,7 +69,7 @@ bool CShaderCompiler::CompileAll( CShaderCache& InOutShaderCache, EShaderPlatfor
 				continue;
 			}
 
-			Sys_SetSplashText( STT_StartupProgress, CString::Format( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
+			Sys_SetSplashText( STT_StartupProgress, L_Sprintf( TEXT( "Compiling shader %s for %s..." ), shaderName.c_str(), vertexFactoryType->GetName().c_str() ).c_str() );
 			bool		result = CompileShader( metaType, InShaderPlatform, InOutShaderCache, errorMsg, vertexFactoryType );
 			AssertMsg( result, errorMsg.c_str() );
 		}

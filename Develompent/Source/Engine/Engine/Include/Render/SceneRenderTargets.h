@@ -25,6 +25,7 @@ enum ESceneRenderTargetTypes
 	SRTT_SceneColorHDR,						/**< Render target for scene colors in HDR mode */
 	SRTT_SceneColorLDR,						/**< Render target for scene colors in LDR mode */
 	SRTT_SceneDepthZ,						/**< Render target for scene depths */
+	SRTT_Bloom,								/**< Render target for bloom */
 
 #if ENABLE_HITPROXY
 	SRTT_HitProxies,						/**< Render target for hitProxiesy */
@@ -105,6 +106,18 @@ public:
 	 * @param InDeviceContextRHI	Device context RHI
 	 */
 	void FinishRenderingGBuffer( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Begin rendering bloom
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void BeginRenderingBloom( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
+
+	/**
+	 * @brief Finish rendering bloom
+	 * @param InDeviceContextRHI	Device context RHI
+	 */
+	void FinishRenderingBloom( class CBaseDeviceContextRHI* InDeviceContextRHI ) const;
 
 	/**
 	 * @brief Clear rendering GBuffer
@@ -261,6 +274,24 @@ public:
 	FORCEINLINE SurfaceRHIRef_t GetLightPassDepthZSurface() const
 	{
 		return renderTargets[SRTT_LightPassDepthZ].GetSurfaceRHI();
+	}
+
+	/**
+	 * @brief Get texture of bloom
+	 * @return Return texture of bloom
+	 */
+	FORCEINLINE Texture2DRHIRef_t GetBloomTexture() const
+	{
+		return renderTargets[SRTT_Bloom].GetTexture2DRHI();
+	}
+
+	/**
+	 * @brief Get surface of bloom
+	 * @return Return surface of bloom
+	 */
+	FORCEINLINE SurfaceRHIRef_t GetBloomSurface() const
+	{
+		return renderTargets[SRTT_Bloom].GetSurfaceRHI();
 	}
 
 	/**

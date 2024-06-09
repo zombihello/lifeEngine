@@ -68,7 +68,7 @@ public:
 		CD3D11ShaderRHI( SF_Vertex, InData, InSize, InShaderName )
 	{
 		code.resize( InSize );
-		memcpy( code.data(), InData, InSize );
+		Memory::Memcpy( code.data(), InData, InSize );
 	}
 
 	/**

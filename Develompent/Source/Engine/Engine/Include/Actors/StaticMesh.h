@@ -20,18 +20,13 @@
   */
 class AStaticMesh : public AActor
 {
-	DECLARE_CLASS( AStaticMesh, AActor, 0, 0 )
+	DECLARE_CLASS( AStaticMesh, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
 	 * Constructor
 	 */
 	AStaticMesh();
-
-	/**
-	 * Destructor
-	 */
-	virtual ~AStaticMesh();
 
 	/**
 	 * Overridable native event for when play begins for this actor
@@ -56,7 +51,7 @@ public:
 	 * @param InRotation    Rotation actor on spawn
 	 * @return Return spawned actor. If failed returning NULL
 	 */
-	static ActorRef_t SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
+	static AActor* SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
 
 	/**
 	 * @brief Get path to icon of actor for exploer level in WorldEd
@@ -66,7 +61,7 @@ public:
 #endif // WITH_EDITOR
 
 private:
-	TRefCountPtr<CStaticMeshComponent>			staticMeshComponent;		/**< Static mesh component */
+	CStaticMeshComponent*			staticMeshComponent;		/**< Static mesh component */
 };
 
 #endif // !ASTATICMESH_H

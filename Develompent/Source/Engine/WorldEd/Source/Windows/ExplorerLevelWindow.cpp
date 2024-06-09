@@ -1,12 +1,14 @@
-#include "Containers/StringConv.h"
-#include "Containers/String.h"
+#include "Misc/StringConv.h"
 #include "Misc/EngineGlobals.h"
 #include "Misc/UIGlobals.h"
 #include "System/MemoryArchive.h"
 #include "System/World.h"
 #include "System/InputSystem.h"
+#include "System/ObjectExporter.h"
+#include "System/ObjectImporter.h"
 #include "Windows/ExplorerLevelWindow.h"
 #include "Windows/InputTextDialog.h"
+#include "Windows/DialogWindow.h"
 #include "ImGUI/ImGUIEngine.h"
 
 /**
@@ -22,10 +24,9 @@ public:
 	 * @param InOwner	Owner
 	 * @param InActor	Actor to rename
 	 */
-	CRenameActorRunnable( CExplorerLevelWindow* InOwner, ActorRef_t InActor )
+	CRenameActorRunnable( CExplorerLevelWindow* InOwner, AActor* InActor )
 		: owner( InOwner )
 		, actor( InActor )
-		, eventResponse( nullptr )
 	{}
 
 	/**
@@ -40,7 +41,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && actor );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -54,35 +54,51 @@ public:
 	 */
 	virtual uint32 Run() override
 	{
-		// Get new actor name. If we not press 'ok' nothing apply and exit from method
+		// Get new actor name and Assert on exist another actor with this name
 		bool			bIsOk = false;
 		std::wstring	newActorName;
+		while ( !bIsOk )
 		{
-			TSharedPtr<CInputTextDialog>	popup = owner->OpenPopup<CInputTextDialog>( TEXT( "Enter" ), TEXT( "New Actor Name" ), actor->GetName() );
-			popup->OnTextEntered().Add( [&]( const std::string& InText )
-										{
-											bIsOk = true;
-											newActorName = ANSI_TO_TCHAR( InText.c_str() );
-											eventResponse->Trigger();
-										} );
-
-			popup->OnCenceled().Add( [&]()
-									 {
-										 bIsOk = false;
-										 eventResponse->Trigger();
-									 } );
-			eventResponse->Wait();
-			if ( !bIsOk )
+			// Get new actor name. If we not press 'ok' nothing apply and exit from method
 			{
-				return 0;
+				TSharedPtr<CInputTextDialog>	popup = owner->OpenPopup<CInputTextDialog>( TEXT( "Enter" ), TEXT( "New Actor Name" ), actor->GetName() );
+				popup->OnTextEntered().Add( [&]( const std::string& InText )
+											{
+												bIsOk = true;
+												newActorName = ANSI_TO_TCHAR( InText.c_str() );
+												eventResponse.Trigger();
+											} );
+
+				popup->OnCenceled().Add( [&]()
+										 {
+											 bIsOk = false;
+											 eventResponse.Trigger();
+										 } );
+				eventResponse.Wait();
+				if ( !bIsOk )
+				{
+					return 0;
+				}
+			}
+
+			// If actor with new name already exist - try enter another name 
+			if ( !actor->Rename( newActorName.c_str(), nullptr, REN_Test ) )
+			{
+				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "Name '%s' already exist in the world" ), newActorName.c_str() ), CDialogWindow::BT_Ok );
+				popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
+											  {
+												  eventResponse.Trigger();
+											  } );
+				bIsOk = false;
+				eventResponse.Wait();
 			}
 		}
 
 		// Add change actor name
-		actor->SetName( newActorName.c_str() );
+		actor->Rename( newActorName.c_str() );
 
-		// Mark world as dirty
-		g_World->MarkDirty();
+		// Mark the world's package as dirty
+		g_World->MarkPackageDirty();
 		return 0;
 	}
 
@@ -92,9 +108,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -106,8 +120,8 @@ public:
 
 private:
 	CExplorerLevelWindow*	owner;			/**< Owner */
-	CEvent*					eventResponse;	/**< Event used when opened popup */
-	ActorRef_t				actor;			/**< Actor to rename */
+	CEvent					eventResponse;	/**< Event used when opened popup */
+	AActor*					actor;			/**< Actor to rename */
 };
 
 /*
@@ -142,7 +156,7 @@ void CExplorerLevelWindow::OnTick()
 		// Print info about each actor on level
 		for ( uint32 index = 0; index < g_World->GetNumActors(); ++index )
 		{
-			ActorRef_t		actor = g_World->GetActor( index );
+			AActor*			actor = g_World->GetActor( index );
 			Assert( actor );
 			bool			bNewVisibility = actor->IsVisibility();
 
@@ -151,10 +165,10 @@ void CExplorerLevelWindow::OnTick()
 			
 			// Visibility flag
 			ImGui::TableNextColumn();
-			if ( ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##Visibility_ID_%i" ), index ).c_str() ), &bNewVisibility ) )
+			if ( ImGui::Checkbox( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##Visibility_ID_%i" ), index ).c_str() ), &bNewVisibility ) )
 			{
 				actor->SetVisibility( bNewVisibility );
-				g_World->MarkDirty();
+				g_World->MarkPackageDirty();
 			}
 			
 			// Label
@@ -189,7 +203,7 @@ void CExplorerLevelWindow::OnTick()
 CExplorerLevelWindow::ProcessItemEvents
 ==================
 */
-void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, ActorRef_t InActor )
+void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, AActor* InActor )
 {
 	ImGui::SameLine();
 	{
@@ -203,7 +217,7 @@ void CExplorerLevelWindow::ProcessItemEvents( uint32 InIndex, ActorRef_t InActor
 			ImGui::PushStyleColor( ImGuiCol_HeaderHovered, g_ImGUIEngine->GetStyleColor( IGC_Selection ) );
 			bNeedPopStyleColor = true;
 		}
-		if ( ImGui::Selectable( TCHAR_TO_ANSI( CString::Format( TEXT( "##Selectable_ID_%i" ), InIndex ).c_str() ), &bSelected, ImGuiSelectableFlags_SpanAllColumns ) ||
+		if ( ImGui::Selectable( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##Selectable_ID_%i" ), InIndex ).c_str() ), &bSelected, ImGuiSelectableFlags_SpanAllColumns ) ||
 			 ImGui::IsItemHovered() && bRMBDown )
 		{
 			bool	bUnselectedAllActors = false;
@@ -241,40 +255,94 @@ void CExplorerLevelWindow::DrawPopupMenu()
 		bool	bSelectedActors			= g_World->GetNumSelectedActors() > 0;
 		bool	bSelectedOnlyOneActor	= g_World->GetNumSelectedActors() == 1;
 
-		// Rename
-		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneActor ) )
+		// Copy
+		if ( ImGui::MenuItem( "Copy", "", nullptr, bSelectedActors ) )
 		{
-			const std::vector<ActorRef_t>&		selectedActors = g_World->GetSelectedActors();
-			g_ThreadFactory->CreateThread( new CRenameActorRunnable( this, selectedActors[0] ), CString::Format( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
+			std::wstring		buffer;
+			CObjectExporter		objectExporter;
+			objectExporter.Export( ( const std::vector<CObject*>& )g_World->GetSelectedActors(), buffer );
+			Sys_SetClipboardText( buffer );
+		}
+
+		// Paste
+		if ( ImGui::MenuItem( "Paste", "", nullptr, !Sys_GetClipboardText().empty() ) )
+		{
+			std::wstring		buffer = Sys_GetClipboardText();
+			if ( !buffer.empty() )
+			{
+				CObjectImporter			objectImporter;
+				std::vector<CObject*>	importedObjects;
+				objectImporter.Import( buffer, importedObjects, g_World );
+
+				// Select imported objects (if they are actors)
+				std::vector<AActor*>	actorsToSelect;
+				for ( uint32 index = 0, count = importedObjects.size(); index < count; ++index )
+				{
+					CObject*	object = importedObjects[index];
+					if ( !IsA<AActor>( object ) )
+					{
+						continue;
+					}
+
+					actorsToSelect.push_back( ( AActor* )object );
+				}
+
+				if ( !actorsToSelect.empty() )
+				{
+					g_World->UnselectAllActors();
+					g_World->SelectActors( actorsToSelect );
+				}
+			}
 		}
 
 		// Duplicate
 		if ( ImGui::MenuItem( "Duplicate", "", nullptr, bSelectedActors ) )
-		{
-			std::vector<ActorRef_t>		selectedActors = g_World->GetSelectedActors();
-			std::vector<byte>			memoryData;
-			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
-			{			
-				// Serialize actor to memory		
-				ActorRef_t				actor = selectedActors[index];
-				CMemoryWriter			memoryWriter( memoryData );
-				actor->Serialize( memoryWriter );
+		{		
+			// Copy actors
+			std::wstring			buffer;
+			CObjectExporter			objectExporter;
+			std::vector<CObject*>	duplicatedObjects;
+			objectExporter.Export( ( const std::vector<CObject*>& )g_World->GetSelectedActors(), buffer );
 
-				// Spawn new actor and serialize data from memory
-				ActorRef_t				newActor = g_World->SpawnActor( actor->GetClass(), actor->GetActorLocation(), actor->GetActorRotation() );
-				CMemoryReading			memoryReading( memoryData );
-				newActor->Serialize( memoryReading );
+			// Past actors
+			CObjectImporter			objectImporter;
+			objectImporter.Import( buffer, duplicatedObjects, g_World );
+
+			// Select duplicated objects (if they are actors)
+			std::vector<AActor*>	actorsToSelect;
+			for ( uint32 index = 0, count = duplicatedObjects.size(); index < count; ++index )
+			{
+				CObject*	object = duplicatedObjects[index];
+				if ( !IsA<AActor>( object ) )
+				{
+					continue;
+				}
+
+				actorsToSelect.push_back( ( AActor* )object );
+			}
+
+			if ( !actorsToSelect.empty() )
+			{
+				g_World->UnselectAllActors();
+				g_World->SelectActors( actorsToSelect );
 			}
 		}
 
 		// Delete
 		if ( ImGui::MenuItem( "Delete", "", nullptr, bSelectedActors ) )
 		{
-			std::vector<ActorRef_t>		selectedActors = g_World->GetSelectedActors();
+			std::vector<AActor*>		selectedActors = g_World->GetSelectedActors();
 			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
 			{
 				g_World->DestroyActor( selectedActors[index] );
 			}
+		}
+
+		// Rename
+		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneActor ) )
+		{
+			const std::vector<AActor*>&		selectedActors = g_World->GetSelectedActors();
+			CRunnableThread::Create( new CRenameActorRunnable( this, selectedActors[0] ), L_Sprintf( TEXT( "RenameActor_%s" ), selectedActors[0]->GetName() ).c_str(), true, true );
 		}
 
 		ImGui::EndPopup();

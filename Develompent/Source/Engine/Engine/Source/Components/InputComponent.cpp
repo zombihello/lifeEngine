@@ -20,91 +20,134 @@ void CInputComponent::BeginPlay()
 
 	// Get mapping of buttons
 	// Actions
-	std::vector< CConfigValue >		configActions = g_Config.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Actions" ) ).GetArray();
-	for ( uint32 indexAction = 0, countActions = configActions.size(); indexAction < countActions; ++indexAction )
+	const CJsonValue*				configActionsValue	= CConfig::Get().GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Actions" ) );
+	const std::vector<CJsonValue>*	configActions		= configActionsValue ? configActionsValue->GetArray() : nullptr;
+	if ( configActions )
 	{
-		// Get JSON object of action item
-		const CConfigValue&		configAction = configActions[ indexAction ];
-		Assert( configAction.GetType() == CConfigValue::T_Object );
-		CConfigObject			configObject = configAction.GetObject();
-
-		// Get name of action
-		InputAction			inputAction;
-		inputAction.name = configObject.GetValue( TEXT( "Name" ) ).GetString();
-		if ( inputAction.name.empty() )
+		for ( uint32 indexAction = 0, countActions = configActions->size(); indexAction < countActions; ++indexAction )
 		{
-			continue;
-		}
-
-		// Get buttons
-		std::vector< CConfigValue >		configButtons = configObject.GetValue( TEXT( "Buttons" ) ).GetArray();
-		for ( uint32 indexButton = 0, countButtons = configButtons.size(); indexButton < countButtons; ++indexButton )
-		{
-			// Get JSON item
-			const CConfigValue& configButton = configButtons[ indexButton ];
-			Assert( configButton.GetType() == CConfigValue::T_String );
-			std::wstring		buttonName = configButton.GetString();
-
-			// Get button code from name of button
-			EButtonCode			buttonCode = Sys_GetButtonCodeByName( buttonName.c_str() );
-			if ( buttonCode == BC_None )
+			// Get JSON object of action item
+			const CJsonValue&		configAction = configActions->at( indexAction );
+			const CJsonObject*		configObject = configAction.GetObject();
+			if ( !configObject )
 			{
-				Warnf( TEXT( "Action '%s': unknown button name '%s'\n" ), inputAction.name.c_str(), buttonName.c_str() );
+				Warnf( TEXT( "Invalid input %i action\n" ), indexAction );
 				continue;
 			}
-			inputAction.buttons.push_back( buttonCode );
-		}
 
-		// If array of buttons not empty - add to input action map
-		if ( !inputAction.buttons.empty() )
-		{
-			inputActionMap.insert( std::make_pair( inputAction.name, inputAction ) );
-		}	
+			// Get name of action
+			InputAction			inputAction;
+			const CJsonValue*	inputActionName = configObject->GetValue( TEXT( "Name" ) );
+			inputAction.name	= inputActionName ? inputActionName->GetString() : TEXT( "" );
+			if ( inputAction.name.empty() )
+			{
+				Warnf( TEXT( "Invalid input %i action\n" ), indexAction );
+				continue;
+			}
+
+			// Get buttons
+			const CJsonValue*					inputActionButtons = configObject->GetValue( TEXT( "Buttons" ) );
+			const std::vector<CJsonValue>*		configButtons = inputActionButtons ? inputActionButtons->GetArray() : nullptr;
+			if ( configButtons )
+			{
+				for ( uint32 indexButton = 0, countButtons = configButtons->size(); indexButton < countButtons; ++indexButton )
+				{
+					// Get JSON item
+					const CJsonValue&	configButton = configButtons->at( indexButton );
+					std::wstring		buttonName = configButton.GetString();
+					if ( buttonName.empty() )
+					{
+						Warnf( TEXT( "Invalid button name %i at input action '%s'\n" ), indexButton, inputAction.name.c_str() );
+						continue;
+					}
+
+					// Get button code from name of button
+					EButtonCode			buttonCode = Sys_GetButtonCodeByName( buttonName.c_str() );
+					if ( buttonCode == BC_None )
+					{
+						Warnf( TEXT( "Action '%s': unknown button name '%s'\n" ), inputAction.name.c_str(), buttonName.c_str() );
+						continue;
+					}
+					inputAction.buttons.push_back( buttonCode );
+				}
+			}
+
+			// If array of buttons not empty - add to input action map
+			if ( !inputAction.buttons.empty() )
+			{
+				inputActionMap.insert( std::make_pair( inputAction.name, inputAction ) );
+			}	
+		}
 	}
 
 	// Axis
-	std::vector< CConfigValue >		configArrayAxis = g_Config.GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Axis" ) ).GetArray();
-	for ( uint32 indexAxis = 0, countAxis = configArrayAxis.size(); indexAxis < countAxis; ++indexAxis )
+	const CJsonValue*				configAxisValue = CConfig::Get().GetValue( CT_Input, TEXT( "InputSystem.InputSettings" ), TEXT( "Axis" ) );
+	const std::vector<CJsonValue>*	configArrayAxis = configAxisValue ? configAxisValue->GetArray() : nullptr;
+	if ( configArrayAxis )
 	{
-		// Get JSON object of action item
-		const CConfigValue&		configAxis = configArrayAxis[ indexAxis ];
-		Assert( configAxis.GetType() == CConfigValue::T_Object );
-		CConfigObject			configObject = configAxis.GetObject();
-
-		// Get name of axis
-		InputAxis			inputAxis;
-		inputAxis.name = configObject.GetValue( TEXT( "Name" ) ).GetString();
-		if ( inputAxis.name.empty() )
+		for ( uint32 indexAxis = 0, countAxis = configArrayAxis->size(); indexAxis < countAxis; ++indexAxis )
 		{
-			continue;
-		}
-
-		// Get buttons
-		std::vector< CConfigValue >		configButtons = configObject.GetValue( TEXT( "Buttons" ) ).GetArray();
-		for ( uint32 indexButton = 0, countButtons = configButtons.size(); indexButton < countButtons; ++indexButton )
-		{
-			// Get JSON item
-			const CConfigValue&		configButton = configButtons[ indexButton ];
-			Assert( configAxis.GetType() == CConfigValue::T_Object );
-			CConfigObject			configButtonObject = configButton.GetObject();
-			
-			std::wstring			buttonName = configButtonObject.GetValue( TEXT( "Name" ) ).GetString();
-			float					scale = configButtonObject.GetValue( TEXT( "Scale" ) ).GetNumber();
-
-			// Get button code from name of button
-			EButtonCode			buttonCode = Sys_GetButtonCodeByName( buttonName.c_str() );
-			if ( buttonCode == BC_None )
+			// Get JSON object of action item
+			const CJsonValue&		configAxis = configArrayAxis->at( indexAxis );
+			const CJsonObject*		configObject = configAxis.GetObject();
+			if ( !configObject )
 			{
-				Warnf( TEXT( "Axis '%s' with scale %f: unknown button name '%s'\n" ), inputAxis.name.c_str(), scale, buttonName.c_str() );
+				Warnf( TEXT( "Invalid input %i axis\n" ), indexAxis );
 				continue;
 			}
-			inputAxis.buttons.push_back( std::make_pair( buttonCode, scale ) );
-		}
 
-		// If array of buttons not empty - add to input axis map
-		if ( !inputAxis.buttons.empty() )
-		{
-			inputAxisMap.insert( std::make_pair( inputAxis.name, inputAxis ) );
+			// Get name of axis
+			InputAxis			inputAxis;
+			const CJsonValue*	inputAxisName = configObject->GetValue( TEXT( "Name" ) );
+			inputAxis.name		= inputAxisName ? inputAxisName->GetString() : TEXT( "" );
+			if ( inputAxis.name.empty() )
+			{
+				Warnf( TEXT( "Invalid input %i axis\n" ), indexAxis );
+				continue;
+			}
+
+			// Get buttons
+			const CJsonValue*					inputAxisButtons = configObject->GetValue( TEXT( "Buttons" ) );
+			const std::vector<CJsonValue>*		configButtons = inputAxisButtons ? inputAxisButtons->GetArray() : nullptr;
+			if ( configButtons )
+			{
+				for ( uint32 indexButton = 0, countButtons = configButtons->size(); indexButton < countButtons; ++indexButton )
+				{
+					// Get JSON item
+					const CJsonValue&		configButton = configButtons->at( indexButton );
+					const CJsonObject*		configButtonObject = configButton.GetObject();
+					if ( !configButtonObject )
+					{
+						Warnf( TEXT( "Invalid %i button at input axis '%s'\n" ), indexButton, inputAxis.name.c_str() );
+						continue;
+					}
+			
+					const CJsonValue*	axisButtonName = configButtonObject->GetValue( TEXT( "Name" ) );
+					const CJsonValue*	axisButtonScale = configButtonObject->GetValue( TEXT( "Scale" ) );
+					if ( !axisButtonName || !axisButtonScale )
+					{
+						Warnf( TEXT( "Invalid %i button at input axis '%s'\n" ), indexButton, inputAxis.name.c_str() );
+						continue;
+					}
+
+					// Get button code from name of button
+					std::wstring		buttonName = axisButtonName->GetString();
+					float				scale = axisButtonScale->GetNumber();
+					EButtonCode			buttonCode = Sys_GetButtonCodeByName( buttonName.c_str() );
+					if ( buttonCode == BC_None )
+					{
+						Warnf( TEXT( "Axis '%s' with scale %f: unknown button name '%s'\n" ), inputAxis.name.c_str(), scale, buttonName.c_str() );
+						continue;
+					}
+					inputAxis.buttons.push_back( std::make_pair( buttonCode, scale ) );
+				}
+			}
+
+			// If array of buttons not empty - add to input axis map
+			if ( !inputAxis.buttons.empty() )
+			{
+				inputAxisMap.insert( std::make_pair( inputAxis.name, inputAxis ) );
+			}
 		}
 	}
 }

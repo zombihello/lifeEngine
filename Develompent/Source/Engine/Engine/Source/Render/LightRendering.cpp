@@ -36,12 +36,12 @@ public:
 	 * @param InSceneView				Scene view
 	 */
 	template<class TShaderClass>
-	static void DrawPointLights( class CBaseDeviceContextRHI* InDeviceContextRHI, CVertexFactory* InVertexFactory, TShaderClass* InLightingVertexShader, const std::list<TRefCountPtr<CPointLightComponent>>* InLights, const class CSceneView& InSceneView )
+	static void DrawPointLights( class CBaseDeviceContextRHI* InDeviceContextRHI, CVertexFactory* InVertexFactory, TShaderClass* InLightingVertexShader, const std::list<CPointLightComponent*>* InLights, const class CSceneView& InSceneView )
 	{
 		// If vertex factory not support instancig - draw without it
 		if ( !InVertexFactory->SupportsInstancing() )
 		{
-			Sys_Errorf( TEXT( "Not implemented" ) );
+			Sys_Error( TEXT( "Not implemented" ) );
 		}
 		// Else we draw geometry with help instancing
 		else
@@ -71,12 +71,12 @@ public:
 	 * @param InSceneView				Scene view
 	 */
 	template<class TShaderClass>
-	static void DrawSpotLights( class CBaseDeviceContextRHI* InDeviceContextRHI, CVertexFactory* InVertexFactory, TShaderClass* InLightingVertexShader, const std::list<TRefCountPtr<CSpotLightComponent>>* InLights, const class CSceneView& InSceneView )
+	static void DrawSpotLights( class CBaseDeviceContextRHI* InDeviceContextRHI, CVertexFactory* InVertexFactory, TShaderClass* InLightingVertexShader, const std::list<CSpotLightComponent*>* InLights, const class CSceneView& InSceneView )
 	{
 		// If vertex factory not support instancig - draw without it
 		if ( !InVertexFactory->SupportsInstancing() )
 		{
-			Sys_Errorf( TEXT( "Not implemented" ) );
+			Sys_Error( TEXT( "Not implemented" ) );
 		}
 		// Else we draw geometry with help instancing
 		else
@@ -106,12 +106,12 @@ public:
 	 * @param InSceneView				Scene view
 	 */
 	template<class TShaderClass>
-	static void DrawDirectionalLights( class CBaseDeviceContextRHI* InDeviceContextRHI, CVertexFactory* InVertexFactory, TShaderClass* InLightingVertexShader, const std::list<TRefCountPtr<CDirectionalLightComponent>>* InLights, const class CSceneView& InSceneView )
+	static void DrawDirectionalLights( class CBaseDeviceContextRHI* InDeviceContextRHI, CVertexFactory* InVertexFactory, TShaderClass* InLightingVertexShader, const std::list<CDirectionalLightComponent*>* InLights, const class CSceneView& InSceneView )
 	{
 		// If vertex factory not support instancig - draw without it
 		if ( !InVertexFactory->SupportsInstancing() )
 		{
-			Sys_Errorf( TEXT( "Not implemented" ) );
+			Sys_Error( TEXT( "Not implemented" ) );
 		}
 		// Else we draw geometry with help instancing
 		else
@@ -305,7 +305,7 @@ public:
 	 * @param InLights			List of point lights
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( const std::list<TRefCountPtr<CPointLightComponent>>* InLights, float InDepthBias = 0.f )
+	FORCEINLINE void Init( const std::list<CPointLightComponent*>* InLights, float InDepthBias = 0.f )
 	{
 		CBaseLightingDrawingPolicy::Init( GLightSphereMesh.GetVertexFactory(), InDepthBias );
 
@@ -328,9 +328,9 @@ public:
 	}
 
 private:
-	TLightingVertexShader<LT_Point>*						lightingVertexShader;		/**< Point light vertex shader */
-	TLightingPixelShader<LT_Point>*							lightingPixelShader;		/**< Point light pixel shader */
-	const std::list<TRefCountPtr<CPointLightComponent>>*	pointLightComponents;		/**< List of point light components */
+	TLightingVertexShader<LT_Point>*				lightingVertexShader;		/**< Point light vertex shader */
+	TLightingPixelShader<LT_Point>*					lightingPixelShader;		/**< Point light pixel shader */
+	const std::list<CPointLightComponent*>*			pointLightComponents;		/**< List of point light components */
 };
 
 /**
@@ -347,7 +347,7 @@ public:
 	 * @param InLights			List of spot lights
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( const std::list<TRefCountPtr<CSpotLightComponent>>* InLights, float InDepthBias = 0.f )
+	FORCEINLINE void Init( const std::list<CSpotLightComponent*>* InLights, float InDepthBias = 0.f )
 	{
 		CBaseLightingDrawingPolicy::Init( GLightConeMesh.GetVertexFactory(), InDepthBias );
 
@@ -370,9 +370,9 @@ public:
 	}
 
 private:
-	TLightingVertexShader<LT_Spot>*							lightingVertexShader;		/**< Spot light vertex shader */
-	TLightingPixelShader<LT_Spot>*							lightingPixelShader;		/**< Spot light pixel shader */
-	const std::list<TRefCountPtr<CSpotLightComponent>>*		spotLightComponents;		/**< List of spot light components */
+	TLightingVertexShader<LT_Spot>*				lightingVertexShader;		/**< Spot light vertex shader */
+	TLightingPixelShader<LT_Spot>*				lightingPixelShader;		/**< Spot light pixel shader */
+	const std::list<CSpotLightComponent*>*		spotLightComponents;		/**< List of spot light components */
 };
 
 /**
@@ -389,7 +389,7 @@ public:
 	 * @param InLights			List of directional lights
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( const std::list<TRefCountPtr<CDirectionalLightComponent>>* InLights, float InDepthBias = 0.f )
+	FORCEINLINE void Init( const std::list<CDirectionalLightComponent*>* InLights, float InDepthBias = 0.f )
 	{
 		CBaseLightingDrawingPolicy::Init( GLightQuadMesh.GetVertexFactory(), InDepthBias );
 
@@ -440,9 +440,9 @@ public:
 	}
 
 private:
-	TLightingVertexShader<LT_Directional>*							lightingVertexShader;			/**< Directional light vertex shader */
-	TLightingPixelShader<LT_Directional>*							lightingPixelShader;			/**< Directional light pixel shader */
-	const std::list<TRefCountPtr<CDirectionalLightComponent>>*		directionalLightComponents;		/**< List of directional light components */
+	TLightingVertexShader<LT_Directional>*				lightingVertexShader;			/**< Directional light vertex shader */
+	TLightingPixelShader<LT_Directional>*				lightingPixelShader;			/**< Directional light pixel shader */
+	const std::list<CDirectionalLightComponent*>*		directionalLightComponents;		/**< List of directional light components */
 };
 
 /**
@@ -469,7 +469,7 @@ public:
 	 * @param InLights			List of point lights
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( const std::list<TRefCountPtr<CPointLightComponent>>* InLights, float InDepthBias = 0.f )
+	FORCEINLINE void Init( const std::list<CPointLightComponent*>* InLights, float InDepthBias = 0.f )
 	{
 		CBaseStencilLightingDrawingPolicy::Init( GLightSphereMesh.GetVertexFactory(), InDepthBias );
 
@@ -492,8 +492,8 @@ public:
 	}
 
 private:
-	TDepthOnlyLightingVertexShader<LT_Point>*				lightingVertexShader;		/**< Depth only point light vertex shader */
-	const std::list<TRefCountPtr<CPointLightComponent>>*	pointLightComponents;		/**< List of point light components */
+	TDepthOnlyLightingVertexShader<LT_Point>*		lightingVertexShader;		/**< Depth only point light vertex shader */
+	const std::list<CPointLightComponent*>*			pointLightComponents;		/**< List of point light components */
 };
 
 /**
@@ -510,7 +510,7 @@ public:
 	 * @param InLights			List of spot lights
 	 * @param InDepthBias		Depth bias
 	 */
-	FORCEINLINE void Init( const std::list<TRefCountPtr<CSpotLightComponent>>* InLights, float InDepthBias = 0.f )
+	FORCEINLINE void Init( const std::list<CSpotLightComponent*>* InLights, float InDepthBias = 0.f )
 	{
 		CBaseStencilLightingDrawingPolicy::Init( GLightConeMesh.GetVertexFactory(), InDepthBias );
 
@@ -533,8 +533,8 @@ public:
 	}
 
 private:
-	TDepthOnlyLightingVertexShader<LT_Spot>*			lightingVertexShader;		/**< Depth only spot light vertex shader */
-	const std::list<TRefCountPtr<CSpotLightComponent>>*	spotLightComponents;		/**< List of spot light components */
+	TDepthOnlyLightingVertexShader<LT_Spot>*	lightingVertexShader;		/**< Depth only spot light vertex shader */
+	const std::list<CSpotLightComponent*>*		spotLightComponents;		/**< List of spot light components */
 };
 
 
@@ -559,21 +559,21 @@ void CSceneRenderer::RenderLights( class CBaseDeviceContextRHI* InDeviceContext 
 	g_SceneRenderTargets.BeginRenderingSceneColorHDR( InDeviceContext );
 	InDeviceContext->ClearSurface( g_SceneRenderTargets.GetSceneColorHDRSurface(), sceneView->GetBackgroundColor() );
 
-	std::list<TRefCountPtr<CPointLightComponent>>			pointLightComponents;
-	std::list<TRefCountPtr<CSpotLightComponent>>			spotLightComponents;
-	std::list<TRefCountPtr<CDirectionalLightComponent>>		directionalLightComponents;
+	std::list<CPointLightComponent*>			pointLightComponents;
+	std::list<CSpotLightComponent*>			spotLightComponents;
+	std::list<CDirectionalLightComponent*>		directionalLightComponents;
 
 	// Separating light components by type
 	{
-		const std::list<LightComponentRef_t>&				lightComponents = scene->GetVisibleLights();
+		const std::list<CLightComponent*>&				lightComponents = scene->GetVisibleLights();
 		for ( auto it = lightComponents.begin(), itEnd = lightComponents.end(); it != itEnd; ++it )
 		{
-			LightComponentRef_t		lightComponent = *it;
+			CLightComponent*		lightComponent = *it;
 			switch ( lightComponent->GetLightType() )
 			{
-			case LT_Point:			pointLightComponents.push_back( lightComponent );		break;
-			case LT_Spot:			spotLightComponents.push_back( lightComponent );		break;
-			case LT_Directional:	directionalLightComponents.push_back( lightComponent );	break;
+			case LT_Point:			pointLightComponents.push_back( ( CPointLightComponent* )lightComponent );		break;
+			case LT_Spot:			spotLightComponents.push_back( ( CSpotLightComponent* )lightComponent );		break;
+			case LT_Directional:	directionalLightComponents.push_back( ( CDirectionalLightComponent* )lightComponent );	break;
 			default:
 				Warnf( TEXT( "Unknown light type in '%s'\n" ), lightComponent->GetName() );
 				break;

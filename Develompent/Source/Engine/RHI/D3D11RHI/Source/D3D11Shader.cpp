@@ -1,12 +1,9 @@
 #include <d3dcompiler.h>
 
-#include "Containers/StringConv.h"
-#include "Containers/String.h"
-
 #include "Core.h"
 #include "D3D11RHI.h"
 #include "D3D11Shader.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
 
@@ -50,7 +47,7 @@ CD3D11ShaderRHI::CD3D11ShaderRHI( EShaderFrequency InFrequency, const byte* InDa
 		break;
 
 	default:
-		Sys_Errorf( TEXT( "Unsupported shader frequency %i" ), InFrequency );
+		Sys_Error( TEXT( "Unsupported shader frequency %i" ), InFrequency );
 		break;
 	}
 
@@ -93,7 +90,7 @@ CD3D11VertexDeclarationRHI::CD3D11VertexDeclarationRHI( const VertexDeclarationE
 		case VET_UByte4:		d3dElement.Format = DXGI_FORMAT_R8G8B8A8_UINT;													break;
 		case VET_UByte4N:		d3dElement.Format = DXGI_FORMAT_R8G8B8A8_UNORM;													break;
 		case VET_Color:			d3dElement.Format = DXGI_FORMAT_R8G8B8A8_UNORM;													break;
-		default:				Sys_Errorf( TEXT( "Unknown RHI vertex element type %u" ), InElementList[ elementIndex ].type );	break;
+		default:				Sys_Error( TEXT( "Unknown RHI vertex element type %u" ), InElementList[ elementIndex ].type );	break;
 		}
 
 		switch ( element.usage )
@@ -127,7 +124,7 @@ CD3D11VertexDeclarationRHI::GetHash
 */
 uint64 CD3D11VertexDeclarationRHI::GetHash( uint64 InHash /*= 0*/ ) const
 {
-	return Sys_MemFastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint64 )vertexElements.size(), InHash );
+	return FastHash( vertexElements.data(), sizeof( D3D11_INPUT_ELEMENT_DESC ) * ( uint64 )vertexElements.size(), InHash );
 }
 
 
@@ -182,7 +179,7 @@ CD3D11BoundShaderStateRHI::CD3D11BoundShaderStateRHI( const tchar* InDebugName, 
 #endif // ENABLED_ASSERT
 	
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
+	D3D11SetDebugName( d3d11InputLayout, TCHAR_TO_ANSI( L_Sprintf( TEXT( "%s[BOUND_SHADER_STATE]" ), InDebugName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 

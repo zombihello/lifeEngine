@@ -6,8 +6,7 @@
 #include "Misc/Types.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/Guid.h"
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "EngineLoop.h"
 #include "D3D11RHI.h"
@@ -80,42 +79,21 @@ private:
 
 /*
 ==================
-Sys_GetVarArgs
-==================
-*/
-int Sys_GetVarArgs( tchar* InOutDest, uint32 InDestSize, uint32 InCount, const tchar*& InFormat, va_list InArgPtr )
-{
-    return vswprintf( InOutDest, InCount, InFormat, InArgPtr );
-}
-
-/*
-==================
-Sys_GetVarArgsAnsi
-==================
-*/
-int Sys_GetVarArgsAnsi( achar* InOutDest, uint32 InDestSize, uint32 InCount, const achar*& InFormat, va_list InArgPtr )
-{
-    return vsnprintf( InOutDest, InCount, InFormat, InArgPtr );
-}
-
-/*
-==================
 Sys_CreateProc
 ==================
 */
-void* Sys_CreateProc( const tchar* InPathToProcess, const tchar* InParams, bool InLaunchDetached, bool InLaunchHidden, bool InLaunchReallyHidden, int32 InPriorityModifier, uint64* OutProcessId /* = nullptr */ )
+void* Sys_CreateProc( const tchar* InPathToProcess, const tchar* InParams, bool InLaunchDetached, bool InLaunchHidden, int32 InPriorityModifier, uint64* OutProcessId /*= nullptr*/ )
 {
     Logf( TEXT( "CreateProc %s %s\n" ), InPathToProcess, InParams );
 
-	std::wstring				commandLine = CString::Format( TEXT( "%s %s" ), InPathToProcess, InParams );
+	std::wstring					commandLine = L_Sprintf( TEXT( "%s %s" ), InPathToProcess, InParams );
+	PROCESS_INFORMATION				procInfo;
+	SECURITY_ATTRIBUTES				attributes;
+	attributes.nLength				= sizeof( SECURITY_ATTRIBUTES );
+	attributes.lpSecurityDescriptor	= nullptr;
+	attributes.bInheritHandle		= true;
 
-	PROCESS_INFORMATION			procInfo;
-	SECURITY_ATTRIBUTES			attributes;
-	attributes.nLength					= sizeof( SECURITY_ATTRIBUTES );
-	attributes.lpSecurityDescriptor		= nullptr;
-	attributes.bInheritHandle			= true;
-
-	uint64						createFlags = NORMAL_PRIORITY_CLASS;
+	uint64	createFlags = NORMAL_PRIORITY_CLASS;
 	if ( InPriorityModifier < 0 )
 	{
 		if ( InPriorityModifier == -1 )
@@ -138,27 +116,22 @@ void* Sys_CreateProc( const tchar* InPathToProcess, const tchar* InParams, bool 
 			createFlags = HIGH_PRIORITY_CLASS;
 		}
 	}
+	
 	if ( InLaunchDetached )
 	{
 		createFlags |= DETACHED_PROCESS;
 	}
 
-	uint64			flags = 0;
-	uint32			showWindowFlags = SW_HIDE;
-	if ( InLaunchReallyHidden )
+	uint64	flags = 0;
+	uint32	showWindowFlags = SW_HIDE;
+	if ( InLaunchHidden )
 	{
 		flags = STARTF_USESHOWWINDOW;
-
-		showWindowFlags = SW_HIDE;			// Epic's code doesn't properly hide the window, so let's do that
-		if ( InLaunchDetached )				// if really hiding the window, and running detached, create a new console
+		showWindowFlags = SW_HIDE;
+		if ( InLaunchDetached )				// If hiding the window, and running detached, create a new console
 		{
 			createFlags = CREATE_NEW_CONSOLE;
 		}
-	}
-	else if ( InLaunchHidden )
-	{
-		flags = STARTF_USESHOWWINDOW;
-		showWindowFlags = SW_SHOWMINNOACTIVE;
 	}
 
 	STARTUPINFO		startupInfo = 
@@ -170,7 +143,10 @@ void* Sys_CreateProc( const tchar* InPathToProcess, const tchar* InParams, bool 
 		NULL,								NULL
 	};
 
-	if ( !CreateProcessW( NULL, ( LPWSTR )commandLine.c_str(), &attributes, &attributes, TRUE, ( DWORD )createFlags, NULL, ( LPCWSTR )g_FileSystem->GetCurrentDirectory().c_str(), ( LPSTARTUPINFOW ) &startupInfo, &procInfo ) )
+	tchar		path[MAX_PATH];
+	GetCurrentDirectoryW( MAX_PATH, path );
+
+	if ( !CreateProcessW( NULL, ( LPWSTR )commandLine.c_str(), &attributes, &attributes, TRUE, ( DWORD )createFlags, NULL, ( LPCWSTR )path, ( LPSTARTUPINFOW ) &startupInfo, &procInfo ) )
 	{
 		if ( OutProcessId )
 		{
@@ -184,7 +160,6 @@ void* Sys_CreateProc( const tchar* InPathToProcess, const tchar* InParams, bool 
 	{
 		*OutProcessId = procInfo.dwProcessId;
 	}
-
 	return ( void* )procInfo.hProcess;
 }
 
@@ -196,6 +171,37 @@ Sys_GetProcReturnCode
 bool Sys_GetProcReturnCode( void* InProcHandle, int32* OutReturnCode )
 {
     return GetExitCodeProcess( ( HANDLE )InProcHandle, ( DWORD* )OutReturnCode ) && *( ( DWORD* )OutReturnCode ) != STILL_ACTIVE;
+}
+
+/*
+==================
+Sys_IsProcRunning
+==================
+*/
+bool Sys_IsProcRunning( void* InProcHandle )
+{
+	DWORD	waitResult = WaitForSingleObject( ( HANDLE )InProcHandle, 0 );
+	return waitResult != WAIT_TIMEOUT ? false : true;
+}
+
+/*
+==================
+Sys_WaitForProc
+==================
+*/
+void Sys_WaitForProc( void* InProcHandle )
+{
+	WaitForSingleObject( ( HANDLE )InProcHandle, INFINITE );
+}
+
+/*
+==================
+Sys_TerminateProc
+==================
+*/
+void Sys_TerminateProc( void* InProcHandle )
+{
+	TerminateProcess( ( HANDLE )InProcHandle, 0 );
 }
 
 /*
@@ -266,10 +272,10 @@ CGuid Sys_CreateGuid()
 
 /*
 ==================
-Sys_ComputerName
+Sys_GetComputerName
 ==================
 */
-std::wstring Sys_ComputerName()
+std::wstring Sys_GetComputerName()
 {
 	static tchar	result[256] = TEXT( "" );
 	if ( !result[0] )
@@ -282,10 +288,10 @@ std::wstring Sys_ComputerName()
 
 /*
 ==================
-Sys_UserName
+Sys_GetUserName
 ==================
 */
-std::wstring Sys_UserName()
+std::wstring Sys_GetUserName()
 {
 	static tchar	result[256] = TEXT( "" );
 	if ( !result[0] )
@@ -296,7 +302,75 @@ std::wstring Sys_UserName()
 	return result;
 }
 
+/*
+==================
+Sys_SetClipboardText
+==================
+*/
+void Sys_SetClipboardText( const std::wstring& InText )
+{
+	if ( SDL_SetClipboardText( TCHAR_TO_ANSI( InText.c_str() ) ) )
+	{
+		Warnf( TEXT( "Sys_SetClipboardText: Failed to set clipboard text. SDL message: %s\n" ), ANSI_TO_TCHAR( SDL_GetError() ) );
+	}
+}
+
+/*
+==================
+Sys_GetClipboardText
+==================
+*/
+std::wstring Sys_GetClipboardText()
+{
+	return ANSI_TO_TCHAR( SDL_GetClipboardText() );
+}
+
+/*
+==================
+L_GetExecutablePath
+==================
+*/
+const tchar* L_GetExecutablePath()
+{
+	static tchar	result[MAX_PATH] = TEXT( "" );
+	if ( !result[0] )
+	{
+		GetModuleFileNameW( nullptr, result, MAX_PATH );
+	}
+	return result;
+}
+
+/*
+==================
+Sys_InitTiming
+==================
+*/
+double Sys_InitTiming()
+{
+	LARGE_INTEGER	frequency;
+	bool			bResult = QueryPerformanceFrequency( &frequency );
+	Assert( bResult );
+
+	g_SecondsPerCycle = 1.0 / frequency.QuadPart;
+	return Sys_Seconds();
+}
+
+/*
+==================
+Sys_Seconds
+==================
+*/
+double Sys_Seconds()
+{
+	LARGE_INTEGER		cycles;
+	QueryPerformanceCounter( &cycles );
+
+	// Add big number to make bugs apparent where return value is being passed to FLOAT
+	return cycles.QuadPart * g_SecondsPerCycle + 16777216.0;
+}
+
 #if WITH_EDITOR
+#include <commdlg.h>
 #include "Windows/FileDialog.h"
 
 /*
@@ -306,8 +380,19 @@ Sys_ShowFileInExplorer
 */
 void Sys_ShowFileInExplorer( const std::wstring& InPath )
 {
-	CFilename		filename( g_FileSystem->ConvertToAbsolutePath( InPath ) );
-	Sys_CreateProc( TEXT( "explorer.exe" ), g_FileSystem->IsDirectory( filename.GetFullPath() ) ? filename.GetFullPath().c_str() : filename.GetPath().c_str(), true, false, false, 0 );
+	// Make absolute path to file
+	std::wstring	absolutePath;
+	L_MakeAbsolutePath( InPath, absolutePath, TEXT( "" ), false );
+
+	// If this is a file we open only folder where is
+	if ( !g_FileSystem->IsDirectory( absolutePath ) )
+	{
+		std::wstring	tmpBuffer = absolutePath;
+		L_GetFilePath( tmpBuffer, absolutePath, false );
+	}
+
+	// Open explorer
+	Sys_CreateProc( TEXT( "explorer.exe" ), absolutePath.c_str(), true, false, 0, 0 );
 }
 
 /*
@@ -318,7 +403,7 @@ Sys_ShowOpenFileDialog
 bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, OpenFileDialogResult& OutResult )
 {
 	OPENFILENAME		fileDialogSettings;
-	Sys_Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
+	Memory::Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
 	fileDialogSettings.lStructSize = sizeof( OPENFILENAME );
 
 	// Flags
@@ -352,12 +437,12 @@ bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, OpenFileDialogResu
 			}
 			allSupportedFormats += fileNameFilter.filter;
 			
-			filterBuffer		+= CString::Format( TEXT( "%s (%s)" ), fileNameFilter.description.c_str(), fileNameFilter.filter.c_str() );
+			filterBuffer		+= L_Sprintf( TEXT( "%s (%s)" ), fileNameFilter.description.c_str(), fileNameFilter.filter.c_str() );
 			filterBuffer.push_back( TEXT( '\0' ) );
 			filterBuffer		+= fileNameFilter.filter;
 			filterBuffer.push_back( TEXT( '\0' ) );
 		}
-		filterBuffer			+= CString::Format( TEXT( "All Supported Formats (%s)" ), allSupportedFormats.c_str() );
+		filterBuffer			+= L_Sprintf( TEXT( "All Supported Formats (%s)" ), allSupportedFormats.c_str() );
 		filterBuffer.push_back( TEXT( '\0' ) );
 		filterBuffer			+= allSupportedFormats;
 		filterBuffer.push_back( TEXT( '\0' ) );
@@ -385,11 +470,13 @@ bool Sys_ShowOpenFileDialog( const CFileDialogSetup& InSetup, OpenFileDialogResu
 	}
 
 	// Preserve the directory around the calls
-	std::wstring		absolutePathToDirectory = g_FileSystem->ConvertToAbsolutePath( InSetup.GetDirectory() );
+	std::wstring		absolutePathToDirectory;
+	L_MakeAbsolutePath( InSetup.GetDirectory(), absolutePathToDirectory, TEXT( "" ), false );
 	fileDialogSettings.lpstrInitialDir	= absolutePathToDirectory.data();
 
 	// Open file dialog
-	std::wstring		originalCurrentDir = g_FileSystem->GetCurrentDirectory();
+	std::wstring		originalCurrentDir;
+	L_GetCurrentDirectory( originalCurrentDir, false );
 	if ( !GetOpenFileNameW( &fileDialogSettings ) )
 	{
 		return false;
@@ -452,7 +539,7 @@ Sys_ShowSaveFileDialog
 bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SaveFileDialogResult& OutResult )
 {
 	OPENFILENAME		fileDialogSettings;
-	Sys_Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
+	Memory::Memzero( &fileDialogSettings, sizeof( OPENFILENAME ) );
 	fileDialogSettings.lStructSize = sizeof( OPENFILENAME );
 
 	// Flags
@@ -485,12 +572,12 @@ bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SaveFileDialogResu
 			}
 			allSupportedFormats += fileNameFilter.filter;
 			
-			filterBuffer		+= CString::Format( TEXT( "%s (%s)" ), fileNameFilter.description.c_str(), fileNameFilter.filter.c_str() );
+			filterBuffer		+= L_Sprintf( TEXT( "%s (%s)" ), fileNameFilter.description.c_str(), fileNameFilter.filter.c_str() );
 			filterBuffer.push_back( TEXT( '\0' ) );
 			filterBuffer		+= fileNameFilter.filter;
 			filterBuffer.push_back( TEXT( '\0' ) );
 		}
-		filterBuffer			+= CString::Format( TEXT( "All Supported Formats (%s)" ), allSupportedFormats.c_str() );
+		filterBuffer			+= L_Sprintf( TEXT( "All Supported Formats (%s)" ), allSupportedFormats.c_str() );
 		filterBuffer.push_back( TEXT( '\0' ) );
 		filterBuffer			+= allSupportedFormats;
 		filterBuffer.push_back( TEXT( '\0' ) );
@@ -518,11 +605,13 @@ bool Sys_ShowSaveFileDialog( const CFileDialogSetup& InSetup, SaveFileDialogResu
 	}
 
 	// Preserve the directory around the calls
-	std::wstring		absolutePathToDirectory = g_FileSystem->ConvertToAbsolutePath( InSetup.GetDirectory() );
+	std::wstring		absolutePathToDirectory;
+	L_MakeAbsolutePath( InSetup.GetDirectory(), absolutePathToDirectory, TEXT( "" ), false );
 	fileDialogSettings.lpstrInitialDir	= absolutePathToDirectory.data();
 
 	// Open file dialog
-	std::wstring		originalCurrentDir = g_FileSystem->GetCurrentDirectory();
+	std::wstring		originalCurrentDir;
+	L_GetCurrentDirectory( originalCurrentDir, false );
 	if ( !GetSaveFileNameW( &fileDialogSettings ) )
 	{
 		return false;

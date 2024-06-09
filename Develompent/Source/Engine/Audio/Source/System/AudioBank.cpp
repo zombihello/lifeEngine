@@ -355,7 +355,7 @@ uint64 CAudioBank::ReadBankPCM( AudioBankHandle_t InBankHandle, byte* InSamples,
 			// If less 0 - this is error
 			if ( bytesToRead < 0 )
 			{
-				Sys_Errorf( TEXT( "Failed read from bank. Vorbisfile error code: 0x%X" ), bytesToRead );
+				Sys_Error( TEXT( "Failed read from bank. Vorbisfile error code: 0x%X" ), bytesToRead );
 			}
 			break;
 		}

@@ -51,7 +51,7 @@ public:
 			break;
 
 		default:
-			Sys_Errorf( TEXT( "Unknown light type 0x%X" ), InLightType );
+			Sys_Error( TEXT( "Unknown light type 0x%X" ), InLightType );
 			return;
 		}
 
@@ -159,7 +159,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CPointLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CPointLightComponent*>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
 		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
@@ -212,7 +212,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CSpotLightComponent*>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
 		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
@@ -265,7 +265,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CDirectionalLightComponent*>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
 		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
@@ -328,7 +328,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CPointLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CPointLightComponent*>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
 		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
@@ -382,7 +382,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CSpotLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CSpotLightComponent*>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
 		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );
@@ -436,7 +436,7 @@ public:
 	 * @param InNumInstances		Number instances
 	 * @param InStartInstanceID		ID of first instance
 	 */
-	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<TRefCountPtr<CDirectionalLightComponent>>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
+	void SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const std::list<CDirectionalLightComponent*>& InLights, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances = 1, uint32 InStartInstanceID = 0 ) const
 	{
 		Assert( vertexFactoryParameters && InVertexFactory && InVertexFactory->GetType()->GetHash() == CLightVertexFactory::staticType.GetHash() );
 		vertexFactoryParameters->SetMesh( InDeviceContextRHI, InLights, ( CLightVertexFactory* )InVertexFactory, InView, InNumInstances, InStartInstanceID );

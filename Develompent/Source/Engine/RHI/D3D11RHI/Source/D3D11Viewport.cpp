@@ -55,7 +55,7 @@ CD3D11Viewport::CD3D11Viewport( WindowHandle_t InWindowHandle, uint32 InWidth, u
 
 	// Create the swapchain
 	DXGI_SWAP_CHAIN_DESC			swapChainDesc;
-	memset( &swapChainDesc, 0, sizeof( DXGI_SWAP_CHAIN_DESC ) );
+	Memory::Memzero( &swapChainDesc, sizeof( DXGI_SWAP_CHAIN_DESC ) );
 	
 	swapChainDesc.BufferCount = 1;
 	swapChainDesc.BufferDesc.Width = InWidth;

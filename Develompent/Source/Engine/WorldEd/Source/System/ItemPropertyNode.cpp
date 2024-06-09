@@ -1,5 +1,4 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Misc/UIGlobals.h"
 #include "Misc/WorldEdGlobals.h"
 #include "System/ItemPropertyNode.h"
@@ -61,7 +60,7 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
 				ImGui::SameLine();
 			}
-			if ( bPropertyInArray || ImGui::CollapsingHeader( CString::Format( TEXT( "%s##%p" ), property->GetName().c_str(), this ), true ) )
+			if ( bPropertyInArray || ImGui::CollapsingHeader( L_Sprintf( TEXT( "%s##%p" ), property->GetName().c_str(), this ), true ) )
 			{
 				TickChildren( InItemWidthSpacing + ImGui::GetStyle().ItemSpacing.x );
 			}
@@ -82,11 +81,11 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 			}
 
 			ImGui::CollapsingArrayHeaderResult	arrayCollapseResult = ImGui::CollapsingArrayHeader( 
-																						CString::Format( TEXT( "##%p" ), this ),																			// InStrId
+																						L_Sprintf( TEXT( "##%p" ), this ),																			// InStrId
 																						property->GetCName().ToString(),																					// InLabel
 																						!bFixedArraySize ? ImGuiCollapsingArrayHeaderFlags_AllButtons : ImGuiCollapsingArrayHeaderFlags_RemoveButton,		// InFlags
 																						InItemWidthSpacing,																									// InItemWidthSpacing
-																						CString::Format( TEXT( "%i elements" ), childNodes.size() ),														// InMessage
+																						L_Sprintf( TEXT( "%i elements" ), childNodes.size() ),														// InMessage
 																						property->GetDescription(),																							// InLabelToolTip
 																						TEXT( "Add a new element to array" ),																				// InAddButtonToolTip
 																						!bFixedArraySize ? TEXT( "Remove all elements from array" ) : TEXT( "Clear all elements in the array" ),			// InRemoveButtonToolTip
@@ -99,8 +98,8 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				{
 					CPropertyNode*		childNode = childNodes[index];
 					ImGui::CollapsingArrayHeaderResult	elementCollapseResult = ImGui::CollapsingArrayHeader(
-																						CString::Format( TEXT( "##%p_%i" ), this, index ),												// InStrId
-																						CString::Format( TEXT( "%i" ), index ),															// InLabel
+																						L_Sprintf( TEXT( "##%p_%i" ), this, index ),												// InStrId
+																						L_Sprintf( TEXT( "%i" ), index ),															// InLabel
 																						ImGuiCollapsingArrayHeaderFlags_RemoveButton,													// InFlags
 																						innerArrayItemSpacing,																			// InItemWidthSpacing
 																						TEXT( "" ),																						// InMessage
@@ -150,12 +149,12 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 							}
 							else
 							{
-								Sys_Memzero( vectorData->data(), vectorData->size() );
+								Memory::Memzero( vectorData->data(), vectorData->size() );
 							}
 						}
 						else
 						{
-							Sys_Memzero( addresses[index], innerProperty->GetArraySize() * innerProperty->GetElementSize() );
+							Memory::Memzero( addresses[index], innerProperty->GetArraySize() * innerProperty->GetElementSize() );
 						}
 					}
 					// Clear/Remove only one array's element
@@ -170,12 +169,12 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 							}
 							else
 							{
-								Sys_Memzero( vectorData->data() + dataOffset, innerProperty->GetElementSize() );
+								Memory::Memzero( vectorData->data() + dataOffset, innerProperty->GetElementSize() );
 							}
 						}
 						else
 						{
-							Sys_Memzero( addresses[index] + dataOffset, innerProperty->GetElementSize() );
+							Memory::Memzero( addresses[index] + dataOffset, innerProperty->GetElementSize() );
 						}
 					}
 				}
@@ -221,7 +220,7 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 			// Bool property
 			if ( theClass->HasAnyCastFlags( CASTCLASS_CBoolProperty ) )
 			{
-				bPropertyIsChanged |= ImGui::Checkbox( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), ( bool* )valueData );
+				bPropertyIsChanged |= ImGui::Checkbox( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), ( bool* )valueData );
 			}
 
 			// Byte property
@@ -233,7 +232,7 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				if ( !cenum )
 				{
 					int32	intValue = *( int32* )valueData;
-					bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), &intValue, 1.f, 0, 255 );
+					bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), &intValue, 1.f, 0, 255 );
 					if ( bPropertyIsChanged )
 					{
 						*valueData = intValue;
@@ -242,27 +241,27 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				// Otherwise it's enum
 				else
 				{
-					bPropertyIsChanged = ImGui::SelectEnum( CString::Format( TEXT( "##%s_%p" ), property->GetName().c_str(), this ), cenum, *valueData );
+					bPropertyIsChanged = ImGui::SelectEnum( L_Sprintf( TEXT( "##%s_%p" ), property->GetName().c_str(), this ), cenum, *valueData );
 				}
 			}
 
 			// Int property
 			else if ( theClass->HasAnyCastFlags( CASTCLASS_CIntProperty ) )
 			{
-				bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), ( int32* )valueData );
+				bPropertyIsChanged = ImGui::DragInt( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), ( int32* )valueData );
 			}
 
 			// Float property
 			else if ( theClass->HasAnyCastFlags( CASTCLASS_CFloatProperty ) )
 			{
-				bPropertyIsChanged = ImGui::DragFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), ( float* )valueData );
+				bPropertyIsChanged = ImGui::DragFloat( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), ( float* )valueData );
 			}
 
 			// Color property
 			else if ( theClass->HasAnyCastFlags( CASTCLASS_CColorProperty ) )
 			{
 				Vector4D	color = ( ( CColor* )valueData )->ToNormalizedVector4D();
-				if ( ImGui::ColorEdit4( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), ( float* )&color, ImGuiColorEditFlags_NoInputs ) )
+				if ( ImGui::ColorEdit4( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%s_%p" ), property->GetName().c_str(), this ).c_str() ), ( float* )&color, ImGuiColorEditFlags_NoInputs ) )
 				{
 					*( CColor* )valueData = color;
 					bPropertyIsChanged = true;
@@ -273,14 +272,14 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 			else if ( theClass->HasAnyCastFlags( CASTCLASS_CVectorProperty ) )
 			{
 				CVectorProperty*	vectorProperty = ExactCast<CVectorProperty>( property );
-				bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), property->GetName().c_str(), this ), *( Vector* )valueData, vectorProperty->GetDefaultComponentValue(), 0.1f );
+				bPropertyIsChanged |= ImGui::DragVectorFloat( L_Sprintf( TEXT( "%s_%p" ), property->GetName().c_str(), this ), *( Vector* )valueData, vectorProperty->GetDefaultComponentValue(), 0.1f );
 			}
 
 			// Rotator property
 			else if ( theClass->HasAnyCastFlags( CASTCLASS_CRotatorProperty ) )
 			{
 				Vector		rotation = ( ( CRotator* )valueData )->ToEuler();
-				bPropertyIsChanged |= ImGui::DragVectorFloat( CString::Format( TEXT( "%s_%p" ), property->GetName().c_str(), this ), rotation, 0.f, 0.1f );
+				bPropertyIsChanged |= ImGui::DragVectorFloat( L_Sprintf( TEXT( "%s_%p" ), property->GetName().c_str(), this ), rotation, 0.f, 0.1f );
 				if ( bPropertyIsChanged )
 				{
 					*( CRotator* )valueData = CRotator::MakeFromEuler( rotation );
@@ -294,7 +293,7 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				std::wstring		assetReference;
 				MakeReferenceToAsset( *( TAssetHandle<CAsset>* )valueData, assetReference );
 
-				bPropertyIsChanged |= ImGui::SelectAsset( CString::Format( TEXT( "%s_%p" ), property->GetName().c_str(), this ), TEXT( "" ), assetReference );
+				bPropertyIsChanged |= ImGui::SelectAsset( L_Sprintf( TEXT( "%s_%p" ), property->GetName().c_str(), this ), TEXT( "" ), assetReference );
 				if ( bPropertyIsChanged )
 				{
 					*( TAssetHandle<CAsset>* )valueData = g_PackageManager->FindAsset( assetReference, assetProperty->GetAssetType() );
@@ -305,7 +304,7 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 			else if ( theClass->HasAnyCastFlags( CASTCLASS_CStringProperty ) )
 			{
 				std::string			ansiString = TCHAR_TO_ANSI( ( ( std::wstring* )valueData )->c_str() );
-				bPropertyIsChanged |= ImGui::InputText( TCHAR_TO_ANSI( CString::Format( TEXT( "##%p" ), this ).c_str() ), &ansiString );
+				bPropertyIsChanged |= ImGui::InputText( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%p" ), this ).c_str() ), &ansiString );
 				if ( bPropertyIsChanged )
 				{
 					*( std::wstring* )valueData = ANSI_TO_TCHAR( ansiString.c_str() );
@@ -323,7 +322,7 @@ void CItemPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 				// Copy the new value to all objects. We start at first index because the zero element was changed early
 				for ( uint32 index = 1, count = addresses.size(); index < count; ++index )
 				{
-					memcpy( addresses[index], valueData, property->GetElementSize() );
+					Memory::Memcpy( addresses[index], valueData, property->GetElementSize() );
 				}
 
 				// Notify all object if property was changed

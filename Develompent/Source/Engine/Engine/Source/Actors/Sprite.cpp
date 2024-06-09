@@ -15,16 +15,8 @@ ASprite::ASprite
 */
 ASprite::ASprite()
 {
-    spriteComponent     = CreateComponent< CSpriteComponent >( TEXT( "SpriteComponent0" ) );   
+    spriteComponent     = CreateComponent<CSpriteComponent>( TEXT( "SpriteComponent0" ) );   
 }
-
-/*
-==================
-ASprite::~ASprite
-==================
-*/
-ASprite::~ASprite()
-{}
 
 /*
 ==================
@@ -33,7 +25,8 @@ ASprite::StaticInitializeClass
 */
 void ASprite::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Sprite Component" ) ) CObjectProperty( TEXT( "Drawing" ), TEXT( "Sprite component" ), STRUCT_OFFSET( ThisClass, spriteComponent ), CPF_Edit, CSpriteComponent::StaticClass() );
+    // Native properties
+	new( staticClass, TEXT( "Sprite Component" ), OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, spriteComponent ), TEXT( "Drawing" ), TEXT( "Sprite component" ), CPF_Edit, CSpriteComponent::StaticClass() );
 }
 
 #if WITH_EDITOR

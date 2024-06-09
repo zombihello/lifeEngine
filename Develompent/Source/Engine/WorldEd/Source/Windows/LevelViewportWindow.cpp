@@ -2,6 +2,7 @@
 #include "Misc/EngineGlobals.h"
 #include "Misc/UIGlobals.h"
 #include "Logger/LoggerMacros.h"
+#include "Reflection/ObjectPackage.h"
 #include "Windows/LevelViewportWindow.h"
 #include "Windows/DialogWindow.h"
 #include "Render/EditorLevelViewportClient.h"
@@ -106,13 +107,13 @@ void CLevelViewportWindow::OnTick()
 		ImGui::Separator();
 		if ( ImGui::ImageButton( g_ImGUIEngine->LockTexture( g_EditorEngine->GetIcon( IT_PlayStandaloneGame ).ToSharedPtr()->GetTexture2DRHI() ), LEVELVIEWPORT_MENUBAR_BUTTONSIZE ) )
 		{
-			if ( g_World->IsDirty() )
+			if ( g_World->GetOutermost()->IsDirty() )
 			{
-				OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "Map not saved.\nFor launch standalone game need it save" ) ), CDialogWindow::BT_Ok );
+				OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "Map not saved.\nFor launch standalone game need it save" ) ), CDialogWindow::BT_Ok );
 			}
 			else
 			{
-				Sys_CreateProc( g_FileSystem->GetExePath().c_str(), CString::Format( TEXT( "-map %s" ), g_World->GetFilePath().c_str() ).c_str(), false, false, false, 0 );
+				Sys_CreateProc( L_GetExecutablePath(), L_Sprintf( TEXT( "-map %s -window -w 1280 -h 720" ), g_World->GetOutermost()->GetPackagePath().c_str() ).c_str(), false, false, false, 0 );
 			}
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
@@ -131,7 +132,7 @@ void CLevelViewportWindow::OnTick()
 	DrawPopupMenu();
 
 	// Draw transform gizmos if has selected actors
-	std::vector<ActorRef_t>		selectedActors = g_World->GetSelectedActors();
+	std::vector<AActor*>		selectedActors = g_World->GetSelectedActors();
 	if ( selectedActors.size() > 0 )
 	{
 		bool			bOrhtoViewportType	= viewportClient.GetViewportType() != LVT_Perspective;
@@ -179,7 +180,7 @@ void CLevelViewportWindow::OnTick()
 		}
 
 		CSceneView*	sceneView				= viewportClient.CalcSceneView( viewportWidget.GetSize().x, viewportWidget.GetSize().y );
-		ActorRef_t	actorCenter				= selectedActors[selectedActors.size() - 1];
+		AActor*		actorCenter				= selectedActors[selectedActors.size() - 1];
 		Matrix		actorTransformMatrix	= actorCenter->GetActorTransform().ToMatrix();
 		Matrix		deltaMatrix;
 
@@ -237,7 +238,7 @@ void CLevelViewportWindow::OnTick()
 			// Apply new transformation to actors
 			for ( uint32 index = 0, count = selectedActors.size(); index < count; ++index )
 			{
-				ActorRef_t		actor = selectedActors[index];
+				AActor*		actor = selectedActors[index];
 				switch ( guizmoOperationType )
 				{
 					// Translate
@@ -275,8 +276,8 @@ void CLevelViewportWindow::OnTick()
 				}
 			}
 
-			// Mark world as dirty
-			g_World->MarkDirty();
+			// Mark the world's package as dirty
+			g_World->MarkPackageDirty();
 		}
 
 		delete sceneView;
@@ -301,7 +302,7 @@ void CLevelViewportWindow::DrawPopupMenu()
 
 		// Spawn actor by class
 		CClass*			actorClass = g_EditorEngine->GetActorClassesWindow()->GetCurrentClass();
-		if ( ImGui::MenuItem( TCHAR_TO_ANSI( CString::Format( TEXT( "Spawn %s" ), actorClass->GetName().c_str() ).c_str() ) ) )
+		if ( ImGui::MenuItem( TCHAR_TO_ANSI( L_Sprintf( TEXT( "Spawn %s" ), actorClass->GetName().c_str() ).c_str() ) ) )
 		{
 			// Spawn new actor
 			g_World->SpawnActor( actorClass, location );
@@ -313,7 +314,7 @@ void CLevelViewportWindow::DrawPopupMenu()
 		{
 			std::wstring		dummy;
 			EAssetType			assetType;
-			if ( ParseReferenceToAsset( assetReference, dummy, dummy, assetType ) && g_ActorFactory.IsRegistered( assetType ) && ImGui::MenuItem( TCHAR_TO_ANSI( CString::Format( TEXT( "Spawn %s" ), assetReference.c_str() ).c_str() ) ) )
+			if ( ParseReferenceToAsset( assetReference, dummy, dummy, assetType ) && g_ActorFactory.IsRegistered( assetType ) && ImGui::MenuItem( TCHAR_TO_ANSI( L_Sprintf( TEXT( "Spawn %s" ), assetReference.c_str() ).c_str() ) ) )
 			{
 				// Spawn new actor
 				TAssetHandle<CAsset>		asset = g_PackageManager->FindAsset( assetReference, assetType );
@@ -380,7 +381,7 @@ void CLevelViewportWindow::ProcessEvent( struct WindowEvent& InWindowEvent )
 				if ( hitProxyId.IsValid() )
 				{
 					uint32			index = hitProxyId.GetIndex();
-					ActorRef_t		actor = g_World->GetActor( index > 0 ? index - 1 : index );
+					AActor*			actor = g_World->GetActor( index > 0 ? index - 1 : index );
 
 					if ( bControlDown && actor->IsSelected() )
 					{

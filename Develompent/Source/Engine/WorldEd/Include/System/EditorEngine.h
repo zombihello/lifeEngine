@@ -64,18 +64,13 @@ enum EIconType
  */
 class CEditorEngine : public CBaseEngine
 {
-	DECLARE_CLASS( CEditorEngine, CBaseEngine, 0, 0 )
+	DECLARE_CLASS( CEditorEngine, CBaseEngine, 0, 0, TEXT( "WorldEd" ) )
 
 public:
 	/**
 	 * Constructor
 	 */
 	CEditorEngine();
-
-	/**
-	 * Destructor
-	 */
-	virtual ~CEditorEngine();
 
 	/**
 	 * Initialize engine
@@ -199,7 +194,7 @@ public:
 	 */
 	FORCEINLINE std::wstring GetGameContentDir() const
 	{
-		return CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, Sys_GameDir().c_str() );
+		return L_Sprintf( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, Sys_GameDir().c_str() );
 	}
 
 	/**
@@ -208,7 +203,7 @@ public:
 	 */
 	FORCEINLINE std::wstring GetEngineContentDir() const
 	{
-		return CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, Sys_BaseDir().c_str() );
+		return L_Sprintf( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Engine" ) PATH_SEPARATOR TEXT( "Content" ) PATH_SEPARATOR, Sys_BaseDir().c_str() );
 	}
 
 	/**

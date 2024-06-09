@@ -5,8 +5,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/material.h>
 
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "System/AssetsImport.h"
 #include "System/BaseFileSystem.h"
 #include "Render/RenderUtils.h"
@@ -24,7 +23,7 @@ bool CTexture2DImporter::Import( const std::wstring& InPath, std::vector<TShared
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
 
-	Sys_NormalizePathSeparators( filename );
+	L_FixPathSeparators( filename );
 	std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 	if ( pathSeparatorPos != std::string::npos )
 	{
@@ -75,14 +74,14 @@ bool CTexture2DImporter::Reimport( const TSharedPtr<CAsset>& InTexture2D, std::w
 	void*	data	= stbi_load( TCHAR_TO_ANSI( sourceFile.c_str() ), ( int* )&sizeX, ( int* )&sizeY, &numComponents, 4 );
 	if ( !data )
 	{
-		OutError = CString::Format( TEXT( "Failed open file '%s'" ), sourceFile.c_str() );
+		OutError = L_Sprintf( TEXT( "Failed open file '%s'" ), sourceFile.c_str() );
 		return false;
 	}
 
 	// Set new data in texture
 	std::vector<byte>		tempData;
 	tempData.resize( sizeX * sizeY * g_PixelFormats[PF_A8R8G8B8].blockBytes );
-	memcpy( tempData.data(), data, tempData.size() );
+	Memory::Memcpy( tempData.data(), data, tempData.size() );
 	texture2D->SetData( PF_A8R8G8B8, sizeX, sizeY, tempData );
 
 	// Clean up all data
@@ -109,7 +108,7 @@ bool CAudioBankImporter::Import( const std::wstring& InPath, std::vector<TShared
 	// Getting file name from path if InName is empty
 	std::wstring		filename = InPath;
 
-	Sys_NormalizePathSeparators( filename );
+	L_FixPathSeparators( filename );
 	std::size_t			pathSeparatorPos = filename.find_last_of( PATH_SEPARATOR );
 	if ( pathSeparatorPos != std::string::npos )
 	{
@@ -191,7 +190,7 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 		for ( auto itMaterial = meshesMap.begin(), itMaterialEnd = meshesMap.end(); itMaterial != itMaterialEnd; ++itMaterial )
 		{
 			StaticMeshSurface		surface;
-			Sys_Memzero( &surface, sizeof( StaticMeshSurface ) );
+			Memory::Memzero( &surface, sizeof( StaticMeshSurface ) );
 
 			surface.firstIndex		= indeces.size();
 			surface.materialID		= materials.size();
@@ -203,7 +202,7 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 				// Copy new verteces
 				uint32		offsetVerteces = verteces.size();
 				verteces.resize( verteces.size() + meshData.verteces.size() );
-				memcpy( verteces.data() + offsetVerteces, meshData.verteces.data(), sizeof( StaticMeshVertexType ) * meshData.verteces.size() );
+				Memory::Memcpy( verteces.data() + offsetVerteces, meshData.verteces.data(), sizeof( StaticMeshVertexType ) * meshData.verteces.size() );
 
 				// Copy new indeces
 				uint32		offsetIndeces = indeces.size();
@@ -221,7 +220,7 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 		}
 
 		TSharedPtr<CStaticMesh>		staticMesh = MakeSharedPtr<CStaticMesh>();
-		staticMesh->SetAssetName( CFilename( InPath ).GetBaseFilename() );
+		staticMesh->SetAssetName( CFilename( InPath ).GetBaseFileName() );
 		staticMesh->SetAssetSourceFile( InPath );
 		staticMesh->SetData( verteces, indeces, surfaces, materials );
 		OutResult.push_back( staticMesh );
@@ -253,21 +252,21 @@ bool CStaticMeshImporter::Import( const std::wstring& InPath, std::vector<TShare
 CStaticMeshImporter::ShowImportSettings
 ==================
 */
-void CStaticMeshImporter::ShowImportSettings( class CImGUILayer* InOwner, class CEvent* InEvent, CAssetFactory::EResultShowImportSettings& OutResult )
+void CStaticMeshImporter::ShowImportSettings( class CImGUILayer* InOwner, CEvent& InEvent, CAssetFactory::EResultShowImportSettings& OutResult )
 {
-	Assert( InOwner && InEvent );
+	Assert( InOwner );
 	TSharedPtr<CStaticMeshImportSettingsDialog>			popup = InOwner->OpenPopup<CStaticMeshImportSettingsDialog>();
 	popup->OnResume().Add( [&]( CAssetFactory::EResultShowImportSettings InResult, const CStaticMeshImportSettingsDialog::ImportSettings& InImportSettings )
-						   {					   
+						   {
 							   if ( InResult != CAssetFactory::RSIS_Cancel )
 							   {
 								   importSettings = InImportSettings;
 							   }
 
 							   OutResult = InResult;
-							   InEvent->Trigger();
+							   InEvent.Trigger();
 						   } );
-	InEvent->Wait();
+	InEvent.Wait();
 }
 
 /*
@@ -341,13 +340,13 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<M
 		else
 		{
 			path.resize( separatePos );
-			memcpy( path.data(), InPath.data(), sizeof( std::wstring::value_type ) * path.size() );
+			Memory::Memcpy( path.data(), InPath.data(), sizeof( std::wstring::value_type ) * path.size() );
 
 			++separatePos;
 			if ( !importSettings.bCombineMeshes && separatePos < InPath.size() )
 			{
 				meshName.resize( InPath.size() - separatePos );
-				memcpy( meshName.data(), InPath.data() + separatePos, sizeof( std::wstring::value_type ) * meshName.size() );
+				Memory::Memcpy( meshName.data(), InPath.data() + separatePos, sizeof( std::wstring::value_type ) * meshName.size() );
 			}
 		}
 	}
@@ -357,7 +356,7 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<M
 	const aiScene*			aiScene = aiImport.ReadFile( TCHAR_TO_ANSI( path.c_str() ), aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals | aiProcess_LimitBoneWeights | aiProcess_JoinIdenticalVertices );
 	if ( !aiScene )
 	{
-		OutError = CString::Format( TEXT( "Failed open static mesh file. Error: %s" ), ANSI_TO_TCHAR( aiImport.GetErrorString() ) );
+		OutError = L_Sprintf( TEXT( "Failed open static mesh file. Error: %s" ), ANSI_TO_TCHAR( aiImport.GetErrorString() ) );
 		return false;
 	}
 
@@ -366,7 +365,7 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<M
 	ProcessNode( aiScene->mRootNode, aiScene, aiMeshes );
 	if ( aiMeshes.empty() )
 	{
-		OutError = CString::Format( TEXT( "In file '%s' not found meshes" ), path.c_str() );
+		OutError = L_Sprintf( TEXT( "In file '%s' not found meshes" ), path.c_str() );
 		aiImport.FreeScene();
 		return false;
 	}
@@ -384,10 +383,10 @@ bool CStaticMeshImporter::ParseMeshes( const std::wstring& InPath, std::vector<M
 			}
 
 			StaticMeshVertexType	vertex;
-			Sys_Memzero( &vertex, sizeof( StaticMeshVertexType ) );
+			Memory::Memzero( &vertex, sizeof( StaticMeshVertexType ) );
 
 			MeshData		meshData;
-			Sys_Memzero( &meshData.surface, sizeof( StaticMeshSurface ) );
+			Memory::Memzero( &meshData.surface, sizeof( StaticMeshSurface ) );
 			meshData.name		= aiName;
 			meshData.materialId = itMaterial->first;
 			
@@ -502,7 +501,7 @@ const std::vector<std::wstring>& CStaticMeshImporter::GetSupportedExtensions()
 			{
 				std::string			ANSIString;
 				ANSIString.resize( index - startFormat );
-				memcpy( ANSIString.data(), &extensionList[startFormat], ANSIString.size() );
+				Memory::Memcpy( ANSIString.data(), &extensionList[startFormat], ANSIString.size() );
 				supportedExtensions.push_back( ANSI_TO_TCHAR( ANSIString.c_str() ) );
 			}
 		}

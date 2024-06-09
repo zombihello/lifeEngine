@@ -14,6 +14,7 @@
 
 #include "Core.h"
 #include "Misc/Types.h"
+#include "Misc/FileTools.h"
 
 /**
  * @ingroup Core
@@ -47,83 +48,6 @@ enum ECopyMoveResult
 	CMR_ReadFail,    /**< Read fail */
 	CMR_WriteFail,   /**< Write fail */
 	CMR_Canceled,    /**< Canceled */
-};
-
-/**
- * @ingroup Core
- * @brief Utility class for quick inquiries against filenames
- */
-class CFilename
-{
-public:
-    /**
-     * @brief Constructor
-     */
-    CFilename();
-
-    /**
-     * @brief Constructor
-     * 
-     * @param InPath    Path to file
-     */
-    CFilename( const std::wstring& InPath );
-
-    /**
-     * @brief Get file's extension
-     * 
-     * @param InIsIncludeDot        If TRUE, includes the leading dot in the result
-     * @return Return the extension of this filename, or an empty string if the filename doesn't have an extension
-     */
-    std::wstring GetExtension( bool InIsIncludeDot = false ) const;
-
-    /**
-     * @brief Get full path
-     * @return Return full path with extension
-     */
-    FORCEINLINE const std::wstring& GetFullPath() const
-    {
-        return path;
-    }
-
-    /**
-     * @brief Get base filename
-     * @return Return filename (without extension and any path information)
-     */
-    std::wstring GetBaseFilename() const;
-
-    /**
-     * @brief Get filename with extension
-     * @return Return filename with extension
-     */
-    FORCEINLINE std::wstring GetFilename() const
-    {
-        return GetBaseFilename() + GetExtension( true );
-    }
-
-    /**
-     * @brief Get path to the file
-     * @return Return path to the file
-     */
-    std::wstring GetPath() const;
-
-    /**
-     * @brief Get localized filename by appending the language suffix before the extension
-     * 
-     * @param InLanguage    Language to use
-     * @return Return localized filename
-     */
-    std::wstring GetLocalizedFilename( const std::wstring& InLanguage = TEXT( "" ) ) const;
-
-    /**
-     * @brief Is in directory
-     * 
-     * @param InPath    Path to directory
-     * @return Return TRUE if that filename containing in InPath, otherwise will return FALSE
-     */
-    bool IsInDirectory( const std::wstring& InPath ) const;
-
-private:
-    std::wstring        path;       /**< Path to file */
 };
 
 /**
@@ -239,45 +163,21 @@ public:
     virtual bool IsDirectory( const std::wstring& InPath ) const { return false; }
 
     /**
-     * @brief Convert to absolute path
-     * 
-     * @param[in] InPath Path
-     * @return Absolute path
+     * @brief Is file or directory read only
+     * @param InPath      Path to file or directory
+     * @return Return TRUE if the file is read only, otherwise returns FALSE
      */
-    virtual std::wstring ConvertToAbsolutePath( const std::wstring& InPath ) const { return TEXT( "" ); }
+    virtual bool IsReadOnly( const std::wstring& InPath ) const { return false; }
 
     /**
-     * @brief Set current directory
-     * 
-     * @param[in] InDirectory Path to directory
-     */
-    virtual void SetCurrentDirectory( const std::wstring& InDirectory ) {}
-
-    /**
-     * @brief Get current directory
-     * @return Return current directory
-     */
-    virtual std::wstring GetCurrentDirectory() const { return TEXT( "" ); }
-
-    /**
-     * @brief Get path to current exe
-     * @return Return path to current exe
-     */
-    virtual std::wstring GetExePath() const
-    {
-        return TEXT( "" );
-    }
-
-    /**
-	 * @brief Is absolute path
-     * 
-     * @param InPath    Path
-     * @return Return TRUE if InPath is absolute path, otherwise will return FALSE
+	 * @brief Find files in the directory and any directories under it
+	 *
+	 * @param OutResults            The output array that is filled out with a file paths
+	 * @param InRootDirectory       The root of the directory structure to recurse through
+	 * @param InIsFindPackages      Should this function add package files to the OutResults
+	 * @param InIsFindNonPackages   Should this function add non-package files to the OutResults
 	 */
-    virtual bool IsAbsolutePath( const std::wstring& InPath ) const 
-    { 
-        return false; 
-    }
+    void FindFilesInDirectory( std::vector<std::wstring>& OutResults, const tchar* InRootDirectory, bool InIsFindPackages, bool InIsFindNonPackages );
 
 protected:
     /**

@@ -5,59 +5,6 @@
 
 IMPLEMENT_CLASS( AActor )
 
-#if WITH_EDITOR
-/*
-==================
-CActorVar::CActorVar
-==================
-*/
-CActorVar::CActorVar()
-	: type( AVT_Unknown )
-	, value( nullptr )
-{}
-
-/*
-==================
-CActorVar::CActorVar
-==================
-*/
-CActorVar::CActorVar( const CActorVar& InCopy )
-{
-	*this = InCopy;
-}
-
-/*
-==================
-CActorVar::Clear
-==================
-*/
-void CActorVar::Clear()
-{
-	if ( !value )
-	{
-		return;
-	}
-
-	switch ( type )
-	{
-	case AVT_Int:		delete static_cast< int32* >( value );						break;
-	case AVT_Float:		delete static_cast< float* >( value );						break;
-	case AVT_Bool:		delete static_cast< bool* >( value );						break;
-	case AVT_Vector2D:	delete static_cast< Vector2D* >( value );					break;
-	case AVT_Vector3D:	delete static_cast< Vector* >( value );					break;
-	case AVT_Vector4D:	delete static_cast< Vector4D* >( value );					break;
-	case AVT_RectInt:	delete static_cast< RectInt32_t* >( value );					break;
-	case AVT_RectFloat:	delete static_cast< RectFloat_t* >( value );					break;
-	case AVT_Color:		delete static_cast< CColor* >( value );						break;
-	case AVT_String:	delete static_cast< std::wstring* >( value );				break;
-	case AVT_Material:	delete static_cast< TAssetHandle<CMaterial>* >( value );	break;
-	}
-
-	value = nullptr;
-	type = AVT_Unknown;
-}
-#endif // WITH_EDITOR
-
 /*
 ==================
 AActor::AActor
@@ -73,15 +20,18 @@ AActor::AActor()
 #if WITH_EDITOR
 	, bSelected( false )
 #endif // WITH_EDITOR
+
+	, worldPrivate( nullptr )
 {}
 
 /*
 ==================
-AActor::~AActor
+AActor::BeginDestroy
 ==================
 */
-AActor::~AActor()
+void AActor::BeginDestroy()
 {
+	Super::BeginDestroy();
 	ResetOwnedComponents();
 }
 
@@ -92,8 +42,14 @@ AActor::StaticInitializeClass
 */
 void AActor::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bVisibility" ) )	CBoolProperty( TEXT( "Drawing" ), TEXT( "Is actor visibility" ), STRUCT_OFFSET( ThisClass, bVisibility ), CPF_Edit );
-	new( staticClass, TEXT( "bIsStatic" ) )		CBoolProperty( TEXT( "Actor" ), TEXT( "Is static actor" ), STRUCT_OFFSET( ThisClass, bIsStatic ), CPF_Edit );
+	// Native properties
+	new( staticClass, TEXT( "bVisibility" ), OBJECT_Public )	CBoolProperty( CPP_PROPERTY( ThisClass, bVisibility ), TEXT( "Drawing" ), TEXT( "Is actor visibility" ), CPF_Edit );
+	new( staticClass, TEXT( "bIsStatic" ), OBJECT_Public )		CBoolProperty( CPP_PROPERTY( ThisClass, bIsStatic ), TEXT( "Actor" ), TEXT( "Is static actor" ), CPF_Edit );
+	new( staticClass, TEXT( "Root Component" ) )				CObjectProperty( CPP_PROPERTY( ThisClass, rootComponent ), NAME_None, TEXT( "" ), CPF_None, CSceneComponent::StaticClass() );
+	new( staticClass, TEXT( "Collision Component" ) )			CObjectProperty( CPP_PROPERTY( ThisClass, collisionComponent ), NAME_None, TEXT( "" ), CPF_None, CPrimitiveComponent::StaticClass() );
+
+	CArrayProperty*		ownedComponentsProperty = new( staticClass, TEXT( "Owned Components" ) )	CArrayProperty( CPP_PROPERTY( ThisClass, ownedComponents ), NAME_None, TEXT( "" ), CPF_None );
+	new( ownedComponentsProperty, NAME_None ) CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, CActorComponent::StaticClass() );
 }
 
 /*
@@ -149,97 +105,6 @@ void AActor::Tick( float InDeltaTime )
 
 /*
 ==================
-AActor::Serialize
-==================
-*/
-void AActor::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-	InArchive << bIsStatic;
-	InArchive << bVisibility;
-
-	Assert( InArchive.Ver() >= VER_FixedSerializeComponents );
-	uint32		startToNumComponents = InArchive.Tell();
-	uint32		numComponents = 0;
-	InArchive << numComponents;
-
-	for ( uint32 index = 0, count = InArchive.IsSaving() ? ownedComponents.size() : numComponents; index < count; ++index )
-	{
-		uint32					componentSize = 0;
-		ActorComponentRef_t		ownedComponent;
-		std::wstring			name;
-		std::wstring			className;
-
-		if ( InArchive.IsSaving() )
-		{
-			ownedComponent = ownedComponents[index];
-			name = ownedComponent->GetName();
-			className = ownedComponent->GetClass()->GetName();
-
-			// Skip editor only component if we cooking packages
-#if WITH_EDITOR
-			if ( ownedComponent->IsEditorOnly() && g_IsCooker )
-			{
-				continue;
-			}
-#endif // WITH_EDITOR
-		}
-
-		InArchive << name;
-		InArchive << className;
-		InArchive << componentSize;
-
-		if ( InArchive.IsLoading() )
-		{
-			CClass*		cclass = CClass::StaticFindClass( className.c_str() );
-			for ( uint32 indexComponent = 0, countComponents = ownedComponents.size(); indexComponent < countComponents; ++indexComponent )
-			{
-				ActorComponentRef_t		component = ownedComponents[indexComponent];
-				if ( name == component->GetName() && cclass == component->GetClass() )
-				{
-					ownedComponent = component;
-					break;
-				}
-			}
-
-			if ( !ownedComponent )
-			{
-				Warnf( TEXT( "In actor %s didn't find component %s (%s) for serialize\n" ), GetName(), name.c_str(), className.c_str() );
-				InArchive.Seek( InArchive.Tell() + componentSize );
-				continue;
-			}
-		}
-
-		uint32	startOffset = InArchive.Tell();
-		ownedComponent->Serialize( InArchive );
-
-		if ( InArchive.IsSaving() )
-		{
-			uint32	currentOffset = InArchive.Tell();
-			componentSize = currentOffset - startOffset;
-			++numComponents;
-
-			InArchive.Seek( startOffset - sizeof( componentSize ) );
-			InArchive << componentSize;
-			InArchive.Seek( currentOffset );
-		}
-		else
-		{
-			Assert( InArchive.Tell() - startOffset == componentSize );
-		}
-	}
-
-	if ( InArchive.IsSaving() )
-	{
-		uint32	currentOffset = InArchive.Tell();
-		InArchive.Seek( startToNumComponents );
-		InArchive << numComponents;
-		InArchive.Seek( currentOffset );
-	}
-}
-
-/*
-==================
 AActor::Spawned
 ==================
 */
@@ -258,12 +123,21 @@ AActor::Destroy
 */
 bool AActor::Destroy()
 {
-	if ( !bActorIsBeingDestroyed )
+	// It's already pending kill or in DestroyActor(), no need to beat the corpse
+	if ( !IsPendingKillPending() )
 	{
-		g_World->DestroyActor( this );
-		bActorIsBeingDestroyed = true;
+		CWorld*		world = GetWorld();
+		if ( world )
+		{
+			world->DestroyActor( this );
+		}
+		else
+		{
+			Warnf( TEXT( "Destroying %s, which doesn't have a valid world pointer" ), GetName().c_str() );
+		}
 	}
-	return bActorIsBeingDestroyed;
+
+	return IsPendingKillPending();
 }
 
 /*
@@ -332,15 +206,6 @@ void AActor::SyncPhysics()
 }
 
 #if WITH_EDITOR
-/*
-==================
-AActor::InitProperties
-==================
-*/
-bool AActor::InitProperties( const std::vector<CActorVar>& InActorVars, class CCookPackagesCommandlet* InCooker )
-{
-	return true;
-}
 
 /*
 ==================
@@ -358,7 +223,7 @@ std::wstring AActor::GetActorIcon() const
 AActor::CreateComponent
 ==================
 */
-ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly /*= false*/ )
+CActorComponent* AActor::CreateComponent( CClass* InClass, const CName& InName, bool InEditorOnly /*= false*/ )
 {
 	Assert( InClass );
 
@@ -387,7 +252,6 @@ ActorComponentRef_t AActor::CreateComponent( CClass* InClass, const CName& InNam
 	}
 #endif // WITH_EDITOR
 
-	component->SetCName( InName );
 	ownedComponents.push_back( component );
 	return component;
 }
@@ -411,7 +275,7 @@ void AActor::AddOwnedComponent( class CActorComponent* InComponent )
 	}
 
 	// Add component
-	InComponent->SetOuter( this );
+	InComponent->Rename( nullptr, this );
 	ownedComponents.push_back( InComponent );
 }
 
@@ -438,7 +302,7 @@ void AActor::RemoveOwnedComponent( class CActorComponent* InComponent )
 				Assert( false && "Need implement change root component" );
 			}
 
-			InComponent->SetOuter( nullptr );
+			InComponent->MarkPendingKill();
 			ownedComponents.erase( ownedComponents.begin() + index );
 			return;
 		}
@@ -458,10 +322,20 @@ void AActor::ResetOwnedComponents()
 		{
 			collisionComponent->TermPrimitivePhysics();
 		}
-		ownedComponents[index]->SetOuter( nullptr );
+		ownedComponents[index]->MarkPendingKill();
 	}
 
 	ownedComponents.clear();
 	collisionComponent	= nullptr;
 	rootComponent		= nullptr;
+}
+
+/*
+==================
+AActor::GetWorld_Uncached
+==================
+*/
+CWorld* AActor::GetWorld_Uncached() const
+{
+	return ( CWorld* )GetTypedOuter( CWorld::StaticClass() );
 }

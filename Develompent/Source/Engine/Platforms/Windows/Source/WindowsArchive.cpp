@@ -3,7 +3,7 @@
 
 #include "Core.h"
 #include "Misc/Template.h"
-#include "Misc/Class.h"
+#include "Reflection/Class.h"
 #include "WindowsArchive.h"
 
 // ====================================

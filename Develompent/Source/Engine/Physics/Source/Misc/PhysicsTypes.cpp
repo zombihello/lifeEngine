@@ -1,6 +1,6 @@
 #include "Misc/PhysicsTypes.h"
 #include "Misc/PhysicsGlobals.h"
-#include "Misc/Property.h"
+#include "Reflection/Property.h"
 #include "System/PhysicsEngine.h"
 
 IMPLEMENT_STRUCT( CollisionProfile )
@@ -18,8 +18,8 @@ StaticInitializeStruct
 */
 void CollisionProfile::StaticInitializeStruct()
 {
-	new( staticStruct, TEXT( "Object Type" ) )		CByteProperty( NAME_None, TEXT( "Object type" ), STRUCT_OFFSET( ThisStruct, objectType ), CPF_Edit, Enum::GetECollisionChannel() );
-	new( staticStruct, TEXT( "Responses" ) )		CByteProperty( NAME_None, TEXT( "Map of responses each collision channel" ), STRUCT_OFFSET( ThisStruct, responses ), CPF_Edit, Enum::GetECollisionResponse(), CC_Max );
+	new( staticStruct, TEXT( "Object Type" ), OBJECT_Public )	CByteProperty( CPP_PROPERTY( ThisStruct, objectType ), NAME_None, TEXT( "Object type" ), CPF_Edit, Enum::ECollisionChannel::StaticEnum() );
+	new( staticStruct, TEXT( "Responses" ), OBJECT_Public )		CByteProperty( CPP_PROPERTY( ThisStruct, responses ), NAME_None, TEXT( "Map of responses each collision channel" ), CPF_Edit, Enum::ECollisionResponse::StaticEnum(), CC_Max );
 }
 
 /*

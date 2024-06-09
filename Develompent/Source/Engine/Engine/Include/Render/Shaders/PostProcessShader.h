@@ -32,6 +32,8 @@ public:
 		CShader::Init( InShaderCacheItem );
 		sceneColorParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "sceneColor" ) );
 		sceneColorSamplerStateParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "sceneColorSampler" ) );
+		bloomParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "bloom" ) );
+		bloomSamplerStateParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "bloomSampler" ) );
 		hdrExposureParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "hdrExposure" ), !InApplyHDR );
 		gammaParameter.Bind( InShaderCacheItem.parameterMap, TEXT( "gamma" ), !InApplyGammaCorrection );
 	}
@@ -91,6 +93,28 @@ public:
 	}
 
 	/**
+	 * @brief Set bloom texture parameter
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InTextureRHI			RHI Texture
+	 */
+	FORCEINLINE void SetBloomTexture( class CBaseDeviceContextRHI* InDeviceContextRHI, const Texture2DRHIParamRef_t InTextureRHI )
+	{
+		SetTextureParameter( InDeviceContextRHI, bloomParameter, InTextureRHI );
+	}
+
+	/**
+	 * @brief Set bloom sampler state parameter
+	 *
+	 * @param InDeviceContextRHI	RHI device context
+	 * @param InSamplerStateRHI		RHI sampler state
+	 */
+	FORCEINLINE void SetBloomSamplerState( class CBaseDeviceContextRHI* InDeviceContextRHI, const SamplerStateRHIParamRef_t InSamplerStateRHI )
+	{
+		SetSamplerStateParameter( InDeviceContextRHI, bloomSamplerStateParameter, InSamplerStateRHI );
+	}
+
+	/**
 	 * @brief Set exposure
 	 * 
 	 * @param InDeviceContextRHI	RHI device context
@@ -121,6 +145,8 @@ public:
 private:
 	CShaderResourceParameter			sceneColorParameter;					/**< Scene color texture parameter */
 	CShaderResourceParameter			sceneColorSamplerStateParameter;		/**< Scene color sampler sate parameter */
+	CShaderResourceParameter			bloomParameter;							/**< Bloom texture parameter */
+	CShaderResourceParameter			bloomSamplerStateParameter;				/**< Bloom sampler sate parameter */
 	CShaderParameter					hdrExposureParameter;					/**< HDR exposure parameter */
 	CShaderParameter					gammaParameter;							/**< Gamma parameter */
 };

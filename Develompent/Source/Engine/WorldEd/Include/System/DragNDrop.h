@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "Misc/Types.h"
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 
 /**
  * @ingroup WorldEd

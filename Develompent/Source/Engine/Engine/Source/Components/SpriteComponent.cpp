@@ -39,10 +39,14 @@ CSpriteComponent::StaticInitializeClass
 */
 void CSpriteComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bFlipVertical" ) )		CBoolProperty( TEXT( "Sprite" ), TEXT( "Is need flip sprite by vertical" ), STRUCT_OFFSET( ThisClass, bFlipVertical ), CPF_Edit );
-	new( staticClass, TEXT( "bFlipHorizontal" ) )	CBoolProperty( TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), STRUCT_OFFSET( ThisClass, bFlipHorizontal ), CPF_Edit );
-	new( staticClass, TEXT( "Material" ) )			CAssetProperty( TEXT( "Disaply" ), TEXT( "Sprite material" ), STRUCT_OFFSET( ThisClass, material ), CPF_Edit, AT_Material );
-	new( staticClass, TEXT( "Type" ) )				CByteProperty( TEXT( "Sprite" ), TEXT( "Sprite type" ), STRUCT_OFFSET( ThisClass, type ), CPF_Edit, Enum::GetESpriteType() );
+	new( staticClass, TEXT( "bFlipVertical" ), OBJECT_Public )		CBoolProperty( CPP_PROPERTY( ThisClass, bFlipVertical ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by vertical" ), CPF_Edit );
+	new( staticClass, TEXT( "bFlipHorizontal" ), OBJECT_Public )	CBoolProperty( CPP_PROPERTY( ThisClass, bFlipHorizontal ), TEXT( "Sprite" ), TEXT( "Is need flip sprite by horizontal" ), CPF_Edit );
+	new( staticClass, TEXT( "Material" ), OBJECT_Public )			CAssetProperty( CPP_PROPERTY( ThisClass, material ), TEXT( "Disaply" ), TEXT( "Sprite material" ), CPF_Edit, AT_Material );
+	new( staticClass, TEXT( "Type" ), OBJECT_Public )				CByteProperty( CPP_PROPERTY( ThisClass, type ), TEXT( "Sprite" ), TEXT( "Sprite type" ), CPF_Edit, Enum::ESpriteType::StaticEnum() );
+	
+#if WITH_EDITOR
+	new( staticClass, TEXT( "bGizmo" ), OBJECT_Public )				CBoolProperty( CPP_PROPERTY( ThisClass, bGizmo ), TEXT( "Sprite" ), TEXT( "TRUE if use for gizmos (only for editor)" ), CPF_Edit | CPF_EditorOnly );
+#endif // WITH_EDITOR
 }
 
 /*
@@ -53,26 +57,29 @@ CSpriteComponent::Serialize
 void CSpriteComponent::Serialize( class CArchive& InArchive )
 {
     Super::Serialize( InArchive );
+	RectFloat_t		textureRect = GetTextureRect();
+	Vector2D		spriteSize = GetSpriteSize();
+	InArchive << textureRect;
+	InArchive << spriteSize;
 
-    RectFloat_t				textureRect     = GetTextureRect();
-    Vector2D				spriteSize      = GetSpriteSize();
-	TAssetHandle<CMaterial>	material        = GetMaterial();
+	if ( InArchive.IsLoading() )
+	{
+		SetTextureRect( textureRect );
+		SetSpriteSize( spriteSize );
+	}
+}
 
-    InArchive << type;
-    InArchive << textureRect;
-    InArchive << spriteSize;
-    InArchive << material;
-	InArchive << bFlipVertical;
-	InArchive << bFlipHorizontal;
-
-    if ( InArchive.IsLoading() )
-    {
-        SetTextureRect( textureRect );
-        SetSpriteSize( spriteSize );
-        SetMaterial( material );
-		SetFlipVertical( bFlipVertical );
-		SetFlipHorizontal( bFlipHorizontal );
-    }
+/*
+==================
+CSpriteComponent::PostLoad
+==================
+*/
+void CSpriteComponent::PostLoad()
+{
+	Super::PostLoad();
+	SetMaterial( material );
+	SetFlipVertical( bFlipVertical );
+	SetFlipHorizontal( bFlipHorizontal );
 }
 
 #if WITH_EDITOR
@@ -292,7 +299,7 @@ void CSpriteComponent::AddToDrawList( const class CSceneView& InSceneView )
 	}
 
 	// Calculate transform matrix
-	ActorRef_t	owner = GetOwner();
+	AActor*		owner = GetOwner();
 	Matrix		transformMatrix;
 	CalcTransformationMatrix( InSceneView, transformMatrix );
 

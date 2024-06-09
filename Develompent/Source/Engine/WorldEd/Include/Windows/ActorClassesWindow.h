@@ -11,7 +11,7 @@
 
 #include <list>
 
-#include "Misc/Class.h"
+#include "Reflection/Class.h"
 #include "ImGUI/ImGUIEngine.h"
 
 /**

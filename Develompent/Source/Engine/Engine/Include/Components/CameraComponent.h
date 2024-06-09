@@ -9,9 +9,9 @@
 #ifndef CAMERACOMPONENT_H
 #define CAMERACOMPONENT_H
 
+#include "Containers/EnumAsByte.h"
 #include "Render/CameraTypes.h"
 #include "Components/SceneComponent.h"
-#include "Misc/EnumAsByte.h"
 
  /**
   * @ingroup Engine
@@ -19,7 +19,7 @@
   */
 class CCameraComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CCameraComponent, CSceneComponent, 0, 0 )
+	DECLARE_CLASS( CCameraComponent, CSceneComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
     friend class CCameraManager;
@@ -30,10 +30,10 @@ public:
 	CCameraComponent();
 
 	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
 	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
+	virtual void PostLoad() override;
 
 	/**
 	 * Set projection mode

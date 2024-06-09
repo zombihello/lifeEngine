@@ -1,18 +1,25 @@
 # Version 0.5.0 :: Next
+- [ ] Refactor the engine (improve architecture and remove legacy code)
+- [ ] Improve asset system to use CObject system
+- [ ] Improve UI of WorldEd
+- [ ] Implement skeletal meshes
+- [ ] Implement skeletal animations
+- [ ] Implement occlusion culling
+	- [ ] Occlusion Queries
+	- [ ] Octree
+- [ ] Implement rendering translucent geometry
+- [ ] Fix rendering masked materials with prepass
+- [ ] Fix rendering the editor grid without prepass
+- [ ] Implement cooking of packages for shipping build
 - [ ] Fix link count for DirectX 11 objects 
 - [ ] Fix depth buffer accuracy
 - [ ] Implement material shaders
 - [ ] Need refactor import/reimport assets with the ability to customize
-- [ ] Refactor assets system and remove packages
 - [ ] Implement shadow maps
-- [ ] Implement skeletal meshes
-- [ ] Implement skeletal animations
 - [ ] Implement particle system
-- [ ] Implement support UI in the game
+- [ ] Implement decals
+- [ ] Implement support UI in the game (RmlUi)
 - [ ] Implement base AI
-- [ ] Implement rendering translucent geometry
-- [ ] Fix rendering masked materials with prepass
-- [ ] Fix rendering the editor grid without prepass
 
  # Version 0.4.0 :: Now	
 - [X] Migrate WorldEd's interface from Qt to ImGUI
@@ -25,7 +32,16 @@
 - [X] Add supported mip levels in textures
 - [X] Add possible generate mip levels for textures in WorldEd
 - [X] Need fix speed of the import static meshes
-- [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to LUA)
+- [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to AngelScript)
+	- [X] Implement linker save and linker load for serialize CObjects
+	- [X] Implement FindObject, LoadObject and LoadClass functions
+	- [X] Implement ResolveName for resolve a package and name
+	- [X] Implement replacing existing object in StaticAllocateObject
+	- [X] Replace CObject::SetName to Rename for guarantee the uniqueness of the name
+	- [X] Need fix destroying packages in GC whom use by objects not considered for GC
+	- [X] Need fix in the WorldEd duplicate actors and other actions due to was implemented serialization CObjects
+	- [X] Improve size of packages
+	- [ ] Integrate AngelScript into the engine
 - [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)
 - [x] Implemented functions of exploer level
 - [x] Added gizmo render in WorldEd.

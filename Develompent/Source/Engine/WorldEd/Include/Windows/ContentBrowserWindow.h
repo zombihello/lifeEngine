@@ -425,7 +425,7 @@ private:
 		 */
 		FORCEINLINE void SetShowAllAssetTypes( bool InIsShow )
 		{
-			memset( assetTypes, InIsShow, ARRAY_COUNT( assetTypes ) * sizeof( bool ) );
+			Memory::Memset( assetTypes, InIsShow, ARRAY_COUNT( assetTypes ) * sizeof( bool ) );
 		}
 
 		/**
@@ -435,8 +435,8 @@ private:
 		FORCEINLINE bool IsShowAllAssetTypes() const
 		{
 			bool		bNeedForAll[AT_Count];
-			memset( bNeedForAll, 1, ARRAY_COUNT( bNeedForAll ) * sizeof( bool ) );
-			return !memcmp( assetTypes, bNeedForAll, ARRAY_COUNT( bNeedForAll ) * sizeof( bool ) );
+			Memory::Memset( bNeedForAll, 1, ARRAY_COUNT( bNeedForAll ) * sizeof( bool ) );
+			return !Memory::Memcmp( assetTypes, bNeedForAll, ARRAY_COUNT( bNeedForAll ) * sizeof( bool ) );
 		}
 
 		/**

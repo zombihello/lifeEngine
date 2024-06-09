@@ -20,7 +20,7 @@
   */
 class ASpotLight : public ALight
 {
-	DECLARE_CLASS( ASpotLight, ALight, 0, 0 )
+	DECLARE_CLASS( ASpotLight, ALight, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
@@ -40,17 +40,17 @@ public:
 	 * Get spot light component
 	 * @return Return spot light component
 	 */
-	FORCEINLINE TRefCountPtr<CSpotLightComponent> GetSpotLightComponent() const
+	FORCEINLINE CSpotLightComponent* GetSpotLightComponent() const
 	{
 		return spotLightComponent;
 	}
 
 private:
-	TRefCountPtr<CSpotLightComponent>			spotLightComponent;		/**< Spot light component */
+	CSpotLightComponent*	spotLightComponent;		/**< Spot light component */
 
 #if WITH_EDITOR
-	TRefCountPtr<CSpriteComponent>				gizmoComponent;			/**< Gizmo component */
-	TRefCountPtr<CArrowComponent>				arrowComponent;			/**< Arrow component */
+	CSpriteComponent*		gizmoComponent;			/**< Gizmo component */
+	CArrowComponent*		arrowComponent;			/**< Arrow component */
 #endif // WITH_EDITOR
 };
 

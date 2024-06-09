@@ -24,11 +24,12 @@ CAudioComponent::CAudioComponent()
 
 /*
 ==================
-CAudioComponent::~CAudioComponent
+CAudioComponent::BeginDestroy
 ==================
 */
-CAudioComponent::~CAudioComponent()
+void CAudioComponent::BeginDestroy()
 {
+	Super::BeginDestroy();
 	if ( source )
 	{
 		delete source;
@@ -42,15 +43,16 @@ CAudioComponent::StaticInitializeClass
 */
 void CAudioComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bIsLoop" ) )		CBoolProperty( TEXT( "Audio" ), TEXT( "Is looped" ), STRUCT_OFFSET( ThisClass, bIsLoop ), CPF_Edit );
-	new( staticClass, TEXT( "bIsUISound" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is UI sound" ), STRUCT_OFFSET( ThisClass, bIsUISound ), CPF_Edit );
-	new( staticClass, TEXT( "bIsAutoPlay" ) )	CBoolProperty( TEXT( "Audio" ), TEXT( "Is need auto play on begin play" ), STRUCT_OFFSET( ThisClass, bIsAutoPlay ), CPF_Edit );
-	new( staticClass, TEXT( "bIsStreamable" ) ) CBoolProperty( TEXT( "Audio" ), TEXT( "Is streamable" ), STRUCT_OFFSET( ThisClass, bIsStreamable ), CPF_Edit );
-	new( staticClass, TEXT( "Volume" ) )		CFloatProperty( TEXT( "Audio" ), TEXT( "Volume of sound" ), STRUCT_OFFSET( ThisClass, volume ), CPF_Edit );
-	new( staticClass, TEXT( "Pitch" ) )			CFloatProperty( TEXT( "Audio" ), TEXT( "Pitch" ), STRUCT_OFFSET( ThisClass, pitch ), CPF_Edit );
-	new( staticClass, TEXT( "Min Distance" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Min distance" ), STRUCT_OFFSET( ThisClass, minDistance ), CPF_Edit );
-	new( staticClass, TEXT( "Attenuation" ) )	CFloatProperty( TEXT( "Audio" ), TEXT( "Attenuation" ), STRUCT_OFFSET( ThisClass, attenuation ), CPF_Edit );
-	new( staticClass, TEXT( "Audio Bank" ) )	CAssetProperty( TEXT( "Audio" ), TEXT( "Audio bank" ), STRUCT_OFFSET( ThisClass, bank ), CPF_Edit, AT_AudioBank );
+	// Native properties
+	new( staticClass, TEXT( "bIsLoop" ), OBJECT_Public )		CBoolProperty( CPP_PROPERTY( ThisClass, bIsLoop ), TEXT( "Audio" ), TEXT( "Is looped" ), CPF_Edit );
+	new( staticClass, TEXT( "bIsUISound" ), OBJECT_Public )		CBoolProperty( CPP_PROPERTY( ThisClass, bIsUISound ), TEXT( "Audio" ), TEXT( "Is UI sound" ), CPF_Edit );
+	new( staticClass, TEXT( "bIsAutoPlay" ), OBJECT_Public )	CBoolProperty( CPP_PROPERTY( ThisClass, bIsAutoPlay ), TEXT( "Audio" ), TEXT( "Is need auto play on begin play" ), CPF_Edit );
+	new( staticClass, TEXT( "bIsStreamable" ), OBJECT_Public )	CBoolProperty( CPP_PROPERTY( ThisClass, bIsStreamable ), TEXT( "Audio" ), TEXT( "Is streamable" ), CPF_Edit );
+	new( staticClass, TEXT( "Volume" ), OBJECT_Public )			CFloatProperty( CPP_PROPERTY( ThisClass, volume ), TEXT( "Audio" ), TEXT( "Volume of sound" ), CPF_Edit );
+	new( staticClass, TEXT( "Pitch" ), OBJECT_Public )			CFloatProperty( CPP_PROPERTY( ThisClass, pitch ), TEXT( "Audio" ), TEXT( "Pitch" ), CPF_Edit );
+	new( staticClass, TEXT( "Min Distance" ), OBJECT_Public )	CFloatProperty( CPP_PROPERTY( ThisClass, minDistance ), TEXT( "Audio" ), TEXT( "Min distance" ), CPF_Edit );
+	new( staticClass, TEXT( "Attenuation" ), OBJECT_Public )	CFloatProperty( CPP_PROPERTY( ThisClass, attenuation ), TEXT( "Audio" ), TEXT( "Attenuation" ), CPF_Edit );
+	new( staticClass, TEXT( "Audio Bank" ), OBJECT_Public )		CAssetProperty( CPP_PROPERTY( ThisClass, bank ), TEXT( "Audio" ), TEXT( "Audio bank" ), CPF_Edit, AT_AudioBank );
 }
 
 #if WITH_EDITOR
@@ -72,8 +74,13 @@ void CAudioComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPro
 		static const CName		property_attenuation( TEXT( "Attenuation" ) );
 		static const CName		property_audioBank( TEXT( "Audio Bank" ) );
 		static const CName		property_bIsStreamable( TEXT( "bIsStreamable" ) );
+		static const CName		property_bIsAutoPlay( TEXT( "bIsAutoPlay" ) );
 
-		if ( changedProperty->GetCName() == property_bIsLoop )
+		if ( changedProperty->GetCName() == property_bIsAutoPlay )
+		{
+			SetAutoPlay( bIsAutoPlay );
+		}
+		else if ( changedProperty->GetCName() == property_bIsLoop )
 		{
 			SetLoop( bIsLoop );
 		}
@@ -100,10 +107,6 @@ void CAudioComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPro
 		else if ( changedProperty->GetCName() == property_audioBank )
 		{
 			SetAudioBank( bank );
-			if ( bank.IsAssetValid() && GetStatus() != ASS_Playing && bIsAutoPlay )
-			{
-				Play();
-			}
 		}
 		else if ( changedProperty->GetCName() == property_bIsStreamable )
 		{
@@ -117,43 +120,30 @@ void CAudioComponent::PostEditChangeProperty( const PropertyChangedEvenet& InPro
 
 /*
 ==================
-CAudioComponent::Serialize
+CAudioComponent::PostLoad
 ==================
 */
-void CAudioComponent::Serialize( class CArchive& InArchive )
+void CAudioComponent::PostLoad()
 {
-	Super::Serialize( InArchive );	
-	InArchive << bIsLoop;
-	InArchive << bIsUISound;
-	InArchive << bIsAutoPlay;
-	InArchive << bIsStreamable;
-	InArchive << volume;
-	InArchive << minDistance;
-	InArchive << attenuation;
-	InArchive << pitch;
-	InArchive << bank;
-
-	// If we archive loading - init audio source
-	if ( InArchive.IsLoading() )
+	Super::PostLoad();
+	
+	// Init first location of audio source and update it type
+	if ( !bIsUISound )
 	{
-		// Init first location of audio source and update it type
-		if ( !bIsUISound )
-		{
-			oldSourceLocation = GetComponentLocation();
-		}
-		else
-		{
-			oldSourceLocation = Math::vectorZero;
-		}
-		UpdateAudioSourceType();
+		oldSourceLocation = GetComponentLocation();
+	}
+	else
+	{
+		oldSourceLocation = Math::vectorZero;
+	}
+	UpdateAudioSourceType();
 
 #if WITH_EDITOR
-		if ( g_IsEditor && bIsAutoPlay )
-		{
-			Play();
-		}
-#endif // WITH_EDITOR
+	if ( g_IsEditor && bIsAutoPlay )
+	{
+		Play();
 	}
+#endif // WITH_EDITOR
 }
 
 /*
@@ -227,7 +217,7 @@ void CAudioComponent::UpdateAudioSourceType()
 	source->SetMinDistance( minDistance );
 	source->SetAttenuation( attenuation );
 	source->SetAudioBank( bank );
-	source->SetLocation( oldSourceLocation );
+	source->SetLocation( !bIsUISound ? oldSourceLocation : Math::vectorZero );
 
 	if ( status == ASS_Playing )
 	{

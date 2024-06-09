@@ -19,7 +19,7 @@
  */
 class CCharacterMovementComponent : public CActorComponent
 {
-	DECLARE_CLASS( CCharacterMovementComponent, CActorComponent, 0, 0 )
+	DECLARE_CLASS( CCharacterMovementComponent, CActorComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
@@ -39,12 +39,6 @@ public:
 	 * @param[in] InDeltaTime The time since the last tick.
 	 */
 	virtual void TickComponent( float InDeltaTime );
-
-	/**
-	 * @brief Serialize object
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Walk

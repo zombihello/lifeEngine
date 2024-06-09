@@ -6,9 +6,8 @@
 #endif
 
 #include "Misc/UIGlobals.h"
-#include "Containers/StringConv.h"
-#include "Containers/String.h"
-#include "Misc/Enum.h"
+#include "Misc/StringConv.h"
+#include "Reflection/Enum.h"
 #include "ImGUI/ImGUIExtension.h"
 #include "ImGUI/ImGUIEngine.h"
 #include "ImGUI/imgui_internal.h"
@@ -79,7 +78,7 @@ bool ImGui::DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float
 	ImGui::PushStyleColor( ImGuiCol_Button, g_ImGUIEngine->GetStyleColor( IGC_AxisXColor ) );
 	ImGui::PushStyleColor( ImGuiCol_ButtonHovered, g_ImGUIEngine->GetStyleColor( IGC_AxisXColor_Hovered ) );
 	ImGui::PushStyleColor( ImGuiCol_ButtonActive, g_ImGUIEngine->GetStyleColor( IGC_AxisXColor_Active ) );
-	if ( ImGui::Button( TCHAR_TO_ANSI( CString::Format( TEXT( "X##%s" ), InStrId.c_str() ).c_str() ) ) )
+	if ( ImGui::Button( TCHAR_TO_ANSI( L_Sprintf( TEXT( "X##%s" ), InStrId.c_str() ).c_str() ) ) )
 	{
 		InValue.x = InResetValue;
 		bValueChanged = true;
@@ -91,7 +90,7 @@ bool ImGui::DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float
 	ImGui::PopStyleColor( 3 );
 
 	ImGui::SameLine();
-	bValueChanged |= ImGui::DragFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_X" ), InStrId.c_str() ).c_str() ), &InValue.x, InSpeed, InMin, InMax, InFormat, InFlags );
+	bValueChanged |= ImGui::DragFloat( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%s_X" ), InStrId.c_str() ).c_str() ), &InValue.x, InSpeed, InMin, InMax, InFormat, InFlags );
 	ImGui::PopItemWidth();
 
 	// Y axis
@@ -99,7 +98,7 @@ bool ImGui::DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float
 	ImGui::PushStyleColor( ImGuiCol_Button, g_ImGUIEngine->GetStyleColor( IGC_AxisYColor ) );
 	ImGui::PushStyleColor( ImGuiCol_ButtonHovered, g_ImGUIEngine->GetStyleColor( IGC_AxisYColor_Hovered ) );
 	ImGui::PushStyleColor( ImGuiCol_ButtonActive, g_ImGUIEngine->GetStyleColor( IGC_AxisYColor_Active ) );
-	if ( ImGui::Button( TCHAR_TO_ANSI( CString::Format( TEXT( "Y##%s" ), InStrId.c_str() ).c_str() ) ) )
+	if ( ImGui::Button( TCHAR_TO_ANSI( L_Sprintf( TEXT( "Y##%s" ), InStrId.c_str() ).c_str() ) ) )
 	{
 		InValue.y = InResetValue;
 		bValueChanged = true;
@@ -111,7 +110,7 @@ bool ImGui::DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float
 	ImGui::PopStyleColor( 3 );
 
 	ImGui::SameLine();
-	bValueChanged |= ImGui::DragFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_Y" ), InStrId.c_str() ).c_str() ), &InValue.y, InSpeed, InMin, InMax, InFormat, InFlags );
+	bValueChanged |= ImGui::DragFloat( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%s_Y" ), InStrId.c_str() ).c_str() ), &InValue.y, InSpeed, InMin, InMax, InFormat, InFlags );
 	ImGui::PopItemWidth();
 
 	// Z axis
@@ -119,7 +118,7 @@ bool ImGui::DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float
 	ImGui::PushStyleColor( ImGuiCol_Button, g_ImGUIEngine->GetStyleColor( IGC_AxisZColor ) );
 	ImGui::PushStyleColor( ImGuiCol_ButtonHovered, g_ImGUIEngine->GetStyleColor( IGC_AxisZColor_Hovered ) );
 	ImGui::PushStyleColor( ImGuiCol_ButtonActive, g_ImGUIEngine->GetStyleColor( IGC_AxisZColor_Active ) );
-	if ( ImGui::Button( TCHAR_TO_ANSI( CString::Format( TEXT( "Z##%s" ), InStrId.c_str() ).c_str() ) ) )
+	if ( ImGui::Button( TCHAR_TO_ANSI( L_Sprintf( TEXT( "Z##%s" ), InStrId.c_str() ).c_str() ) ) )
 	{
 		InValue.z = InResetValue;
 		bValueChanged = true;
@@ -131,7 +130,7 @@ bool ImGui::DragVectorFloat( const std::wstring& InStrId, Vector& InValue, float
 	ImGui::PopStyleColor( 3 );
 
 	ImGui::SameLine();
-	bValueChanged |= ImGui::DragFloat( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s_Z" ), InStrId.c_str() ).c_str() ), &InValue.z, InSpeed, InMin, InMax, InFormat, InFlags );
+	bValueChanged |= ImGui::DragFloat( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%s_Z" ), InStrId.c_str() ).c_str() ), &InValue.z, InSpeed, InMin, InMax, InFormat, InFlags );
 	ImGui::PopItemWidth();
 
 	ImGui::PopStyleVar();
@@ -187,7 +186,7 @@ bool ImGui::SelectAsset( const std::wstring& InStrId, const std::wstring& InLabe
 
 		// Input asset reference
 		ImGui::PushItemWidth( -10 );
-		if ( ImGui::InputTextWithHint( TCHAR_TO_ANSI( CString::Format( TEXT( "##%s" ), InStrId.c_str() ).c_str() ), "None", &assetReference, ImGuiInputTextFlags_EnterReturnsTrue) )
+		if ( ImGui::InputTextWithHint( TCHAR_TO_ANSI( L_Sprintf( TEXT( "##%s" ), InStrId.c_str() ).c_str() ), "None", &assetReference, ImGuiInputTextFlags_EnterReturnsTrue) )
 		{
 			InOutAssetReference = ANSI_TO_TCHAR( assetReference.c_str() );
 			bSelectedAsset		= true;
@@ -274,7 +273,7 @@ bool ImGui::SelectEnum( const std::wstring& InStrId, class CEnum* InEnum, byte& 
 		const std::vector<CName>&	enums = InEnum->GetEnums();
 		for ( uint32 index = 0, count = enums.size(); index < count; ++index )
 		{
-			if ( ImGui::Selectable( TCHAR_TO_ANSI( CString::Format( TEXT( "%s" ), enums[index].ToString().c_str() ).c_str() ), index == InOutEnumIndex, ImGuiSelectableFlags_DontClosePopups ) )
+			if ( ImGui::Selectable( TCHAR_TO_ANSI( L_Sprintf( TEXT( "%s" ), enums[index].ToString().c_str() ).c_str() ), index == InOutEnumIndex, ImGuiSelectableFlags_DontClosePopups ) )
 			{
 				bSelectedEnum	= true;
 				InOutEnumIndex	= index;

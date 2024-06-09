@@ -9,12 +9,46 @@
 #ifndef WINDOWSPLATFORM_H
 #define WINDOWSPLATFORM_H
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <tchar.h>
 #include <stdarg.h>
+#include <direct.h>
+#include <shellapi.h>
 
 #include "Misc/Types.h"
 
+// Undef some defines
+#undef PLATFORM_WINDOWS
+#undef PLATFORM_USE__ALIGNED_MALLOC
+#undef PLATFORM_IS_STD_MALLOC_THREADSAFE
+#undef PLATFORM_SUPPORTS_MIMALLOC
+#undef VARARGS
+#undef CDECL
+#undef STDCALL
+#undef FORCEINLINE
+#undef FORCENOINLINE
+#undef DLLEXPORT
+#undef DLLIMPORT
+#undef FALSE
+#undef TRUE
+#undef NULL
+#undef GetObject
+
+/** Enable warning C4996 on 1 level (for deprecated messages) */
+#pragma warning( 1: 4996 )
+
+// Mark what we on Windows
 #define PLATFORM_WINDOWS					        1
+
+// Windows support _aligned_malloc
+#define PLATFORM_USE__ALIGNED_MALLOC                1
+
+// On Windows Std malloc is thread safe
+#define PLATFORM_IS_STD_MALLOC_THREADSAFE           1
+
+// If we on 64 bit platform then it is supports mimalloc
+#define PLATFORM_SUPPORTS_MIMALLOC                  PLATFORM_64BIT
 
 #if SHIPPING_BUILD && !PLATFORM_DOXYGEN
     #define Sys_IsDebuggerPresent()	                false
@@ -45,7 +79,6 @@
  * @ingroup WindowsPlatform
  * @brief Calling convention. Standard C function
  */
-#undef  CDECL
 #define CDECL				__cdecl
 
 /**
@@ -80,6 +113,24 @@
 
 /**
  * @ingroup WindowsPlatform
+ * @brief True macro
+ */
+#define TRUE				1
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief False macro
+ */
+#define FALSE				0
+
+/**
+ * @ingroup WindowsPlatform
+ * @brief Null macro
+ */
+#define NULL				0
+
+/**
+ * @ingroup WindowsPlatform
  * @brief Line terminator
  */
 #define LINE_TERMINATOR     TEXT( "\n" )
@@ -93,26 +144,23 @@
 /**
  * @ingroup WindowsPlatform
  * @brief Macro for Assert on char is path separator
- * 
- * @param InCh Char
+ * @param InCh      Char
  */
-#define Sys_IsPathSeparator( InCh )	( ( InCh ) == PATH_SEPARATOR[ 0 ] )
+#define Sys_IsPathSeparator( InCh )	    ( ( InCh ) == PATH_SEPARATOR[ 0 ] )
  
 /**
  * @ingroup WindowsPlatform
  * @brief Align for GCC
- *
- * @param[in] InAlignment Alignment
+ * @param InAlignment   Alignment
  */
 #define GCC_ALIGN( InAlignment )
 
 /**
  * @ingroup WindowsPlatform
  * @brief Align for Microsoft
- * 
- * @param[in] InAlignment Alignment
+ * @param InAlignment   Alignment
  */
-#define MS_ALIGN( InAlignment ) __declspec( align( InAlignment ) )
+#define MS_ALIGN( InAlignment )         __declspec( align( InAlignment ) )
 
 /**
  * @ingroup WindowsPlatform

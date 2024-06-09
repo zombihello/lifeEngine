@@ -1,8 +1,12 @@
-#include "Misc/Class.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/PhysicsGlobals.h"
+#include "Misc/CommandLine.h"
 #include "Logger/LoggerMacros.h"
-#include "Containers/String.h"
+#include "Reflection/Class.h"
+#include "Reflection/ObjectGC.h"
+#include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectGlobals.h"
+#include "Reflection/ObjectIterator.h"
 #include "System/Config.h"
 #include "System/World.h"
 #include "System/Package.h"
@@ -29,6 +33,7 @@ CBaseEngine::CBaseEngine
 CBaseEngine::CBaseEngine()
 	: bPrePass( true )
 	, bAutoExposure( true )
+	, bBloom( true )
 	, exposure( 1.f )
 	, exposureMin( 0.2f )
 	, exposureMax( 2.f )
@@ -47,10 +52,10 @@ void CBaseEngine::Init()
 		// Loading default texture from packages only when we in game
 		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultTexture = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
-			if ( configDefaultTexture.IsValid() )
+			const CJsonValue*		configDefaultTexture = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultTexture" ) );
+			if ( configDefaultTexture && configDefaultTexture->IsValid() )
 			{
-				std::wstring			pathAsset = configDefaultTexture.GetString();
+				std::wstring			pathAsset = configDefaultTexture->GetString();
 				TAssetHandle<CAsset>	asset = g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
@@ -86,10 +91,10 @@ void CBaseEngine::Init()
 		// Loading default material from packages only when we in game
 		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultMaterial = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
-			if ( configDefaultMaterial.IsValid() )
+			const CJsonValue*		configDefaultMaterial = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "DefaultMaterial" ) );
+			if ( configDefaultMaterial && configDefaultMaterial->IsValid() )
 			{
-				std::wstring			pathAsset = configDefaultMaterial.GetString();
+				std::wstring			pathAsset = configDefaultMaterial->GetString();
 				TAssetHandle<CAsset>	asset = g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
@@ -124,10 +129,10 @@ void CBaseEngine::Init()
 		// Loading default wireframe material from packages only when we in game
 		if ( !g_IsCooker && !g_IsCommandlet )
 		{
-			CConfigValue		configDefaultWireframeMaterial = g_Config.GetValue( CT_Engine, TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
-			if ( configDefaultWireframeMaterial.IsValid() )
+			const CJsonValue*		configDefaultWireframeMaterial = CConfig::Get().GetValue( CT_Engine, TEXT( "Editor.Editor" ), TEXT( "DefaultWireframeMaterial" ) );
+			if ( configDefaultWireframeMaterial && configDefaultWireframeMaterial->IsValid() )
 			{
-				std::wstring			pathAsset	= configDefaultWireframeMaterial.GetString();
+				std::wstring			pathAsset	= configDefaultWireframeMaterial->GetString();
 				TAssetHandle<CAsset>	asset		= g_PackageManager->FindAsset( pathAsset );
 				if ( asset.IsAssetValid() )
 				{
@@ -160,40 +165,46 @@ void CBaseEngine::Init()
 
 	// Get from configs PrePass, HDRExposure, etc values
 	{
-		CConfigValue	configPrePass = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "PrePass" ) );
-		if ( configPrePass.IsValid() )
+		const CJsonValue*	configPrePass = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "PrePass" ) );
+		if ( configPrePass && configPrePass->IsValid() )
 		{
-			bPrePass = configPrePass.GetBool();
+			bPrePass = configPrePass->GetBool();
 		}
 
-		CConfigValue	configExposure = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Exposure" ) );
-		if ( configExposure.IsValid() )
+		const CJsonValue*	configExposure = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Exposure" ) );
+		if ( configExposure && configExposure->IsValid() )
 		{
-			exposure = configExposure.GetNumber();
+			exposure = configExposure->GetNumber();
 		}
 
-		CConfigValue	configAutoExposure = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "AutoExposure" ) );
-		if ( configAutoExposure.IsValid() )
+		const CJsonValue*	configAutoExposure = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "AutoExposure" ) );
+		if ( configAutoExposure && configAutoExposure->IsValid() )
 		{
-			bAutoExposure = configAutoExposure.GetBool();
+			bAutoExposure = configAutoExposure->GetBool();
 		}
 
-		CConfigValue	configExposureMin = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMin" ) );
-		if ( configExposureMin.IsValid() )
+		const CJsonValue*	configExposureMin = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMin" ) );
+		if ( configExposureMin && configExposureMin->IsValid() )
 		{
-			exposureMin = configExposureMin.GetNumber();
+			exposureMin = configExposureMin->GetNumber();
 		}
 
-		CConfigValue	configExposureMax = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMax" ) );
-		if ( configExposureMax.IsValid() )
+		const CJsonValue*	configExposureMax = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "ExposureMax" ) );
+		if ( configExposureMax && configExposureMax->IsValid() )
 		{
-			exposureMax = configExposureMax.GetNumber();
+			exposureMax = configExposureMax->GetNumber();
 		}
 
-		CConfigValue	configGamma = g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Gamma" ) );
-		if ( configGamma.IsValid() )
+		const CJsonValue*	configGamma = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Gamma" ) );
+		if ( configGamma && configGamma->IsValid() )
 		{
-			gamma = configGamma.GetNumber();
+			gamma = configGamma->GetNumber();
+		}
+
+		const CJsonValue*	configBloom = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "Bloom" ) );
+		if ( configBloom && configBloom->IsValid() )
+		{
+			bBloom = configBloom->GetBool();
 		}
 	}
 
@@ -216,7 +227,14 @@ void CBaseEngine::Shutdown()
 	// Wait while render thread is rendering of the frame
 	FlushRenderingCommands();
 
-	g_World->CleanupWorld();
+	// End play in the world and shutdown other systems
+	if ( g_World )
+	{
+		g_World->EndPlay();
+		g_World->RemoveFromRoot();
+		g_World = nullptr;
+	}
+
 	g_UIEngine->Shutdown();
 	g_PhysicsEngine.Shutdown();
 }
@@ -228,7 +246,10 @@ CBaseEngine::Tick
 */
 void CBaseEngine::Tick( float InDeltaSeconds )
 {
-	g_World->Tick( InDeltaSeconds );
+	if ( g_World )
+	{
+		g_World->Tick( InDeltaSeconds );
+	}
 	g_UIEngine->Tick( InDeltaSeconds );
 	g_PhysicsEngine.Tick( InDeltaSeconds );
 }
@@ -252,10 +273,10 @@ CBaseEngine::GetMaxTickRate
 */
 float CBaseEngine::GetMaxTickRate() const
 {
-	CConfigValue		configMaxTickRate = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
-	if ( configMaxTickRate.IsValid() )
+	const CJsonValue*	configMaxTickRate = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "MaxTickRate" ) );
+	if ( configMaxTickRate && configMaxTickRate->IsValid() )
 	{
-		return configMaxTickRate.GetNumber();
+		return configMaxTickRate->GetNumber();
 	}
 
 	return 0.f;
@@ -269,20 +290,81 @@ CBaseEngine::LoadMap
 bool CBaseEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
 	Logf( TEXT( "Load map: %s\n" ), InMap.c_str() );
-
-	CArchive*		archive = g_FileSystem->CreateFileReader( InMap );
-	if ( !archive )
+	CObjectPackage*		mapPackage = CObjectPackage::LoadPackage( nullptr, InMap.c_str(), LOAD_None );
+	if ( !mapPackage )
 	{
-		OutError = TEXT( "Map not found" );
+		OutError = TEXT( "Failed to load map" );
 		return false;
 	}
 
 	// Clean up and serialize world
-	g_World->CleanupWorld();
-	archive->SerializeHeader();
-	g_World->Serialize( *archive );
+	if ( g_World )
+	{
+		FlushRenderingCommands();
+		g_World->EndPlay();
+		g_World->RemoveFromRoot();
+		g_World = nullptr;
+	}
+	
+	g_World = FindObjectFast<CWorld>( mapPackage, TEXT( "TheWorld" ), true );
+	Assert( g_World );
+	g_World->AddToRoot();
 
 	// Call garbage collector of unused packages and assets for free used memory
+	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 	g_PackageManager->GarbageCollector();
 	return true;
+}
+
+/*
+==================
+CBaseEngine::OverrideConfigurationFromCommandLine
+==================
+*/
+void CBaseEngine::OverrideConfigurationFromCommandLine( uint32& InOutWindowWidth, uint32& InOutWindowHeight, bool& InOutFullscreen )
+{
+	// Check for windowed mode command line override
+	if ( g_CommandLine.HasParam( TEXT( "windowed" ) ) || g_CommandLine.HasParam( TEXT( "window" ) ) )
+	{
+		InOutFullscreen = false;
+	}
+	// Check for fullscreen override
+	else if ( g_CommandLine.HasParam( TEXT( "full" ) ) || g_CommandLine.HasParam( TEXT( "fullscreen" ) ) )
+	{
+		InOutFullscreen = true;
+	}
+
+	// Get width
+	const tchar*	widthParam = nullptr;
+	if ( g_CommandLine.HasParam( TEXT( "width" ) ) )
+	{
+		widthParam = TEXT( "width" );
+	}
+	else if ( g_CommandLine.HasParam( TEXT( "w" ) ) )
+	{
+		widthParam = TEXT( "w" );
+	}
+
+	// Override width
+	if ( widthParam )
+	{
+		InOutWindowWidth = L_Atoi( g_CommandLine.GetFirstValue( widthParam ).c_str() );
+	}
+
+	// Get height
+	const tchar*	heightParam = nullptr;
+	if ( g_CommandLine.HasParam( TEXT( "height" ) ) )
+	{
+		heightParam = TEXT( "height" );
+	}
+	else if ( g_CommandLine.HasParam( TEXT( "h" ) ) )
+	{
+		heightParam = TEXT( "h" );
+	}
+
+	// Override height
+	if ( heightParam )
+	{
+		InOutWindowHeight = L_Atoi( g_CommandLine.GetFirstValue( heightParam ).c_str() );
+	}
 }

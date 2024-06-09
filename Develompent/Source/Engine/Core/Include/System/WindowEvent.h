@@ -12,7 +12,7 @@
 #include "Misc/Types.h"
 #include "Misc/SharedPointer.h"
 #include "System/ButtonCode.h"
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 
 /**
  * @ingroup Core

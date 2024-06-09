@@ -58,6 +58,11 @@ enum ELifeEnginePackageVersion
 	VER_UpdateTrasformSceneComponent		= 26,					/**< To CSceneComponent added Location, Scale, Rotation (CRotator) and updated method of transformations */
 	VER_AddTranslucencyFlag					= 27,					/**< Added to CMaterial bTranslucency flag */
 	VER_EnumAsByte							= 28,					/**< Added TEnumAsByte */
+	VER_OuterInCObject						= 29,					/**< Added serialize CObject::outer */
+	VER_NumberInCName						= 30,					/**< Added number field into CName */
+	VER_SerializeProperties					= 31,					/**< Implemented serialize properties by CObject */
+	VER_NewSerializeName					= 32,					/**< New CName serialization */
+	VER_CompressedPackage					= 33,					/**< Implemented compression of CObjectPackage */
 
 	//
 	// New versions can be added here

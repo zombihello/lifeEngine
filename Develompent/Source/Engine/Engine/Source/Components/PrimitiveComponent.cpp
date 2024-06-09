@@ -19,11 +19,12 @@ CPrimitiveComponent::CPrimitiveComponent()
 
 /*
 ==================
-CPrimitiveComponent::~CPrimitiveComponent
+CPrimitiveComponent::BeginDestroy
 ==================
 */
-CPrimitiveComponent::~CPrimitiveComponent()
+void CPrimitiveComponent::BeginDestroy()
 {
+	Super::BeginDestroy();
 	if ( scene )
 	{
 		scene->RemovePrimitive( this );
@@ -37,7 +38,7 @@ CPrimitiveComponent::StaticInitializeClass
 */
 void CPrimitiveComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bVisibility" ) ) CBoolProperty( TEXT( "Drawing" ), TEXT( "Is primitive visibility" ), STRUCT_OFFSET( ThisClass, bVisibility ), CPF_Edit );
+	new( staticClass, TEXT( "bVisibility" ), OBJECT_Public ) CBoolProperty( CPP_PROPERTY( ThisClass, bVisibility ), TEXT( "Drawing" ), TEXT( "Is primitive visibility" ), CPF_Edit );
 }
 
 /*
@@ -48,7 +49,7 @@ CPrimitiveComponent::Spawned
 void CPrimitiveComponent::Spawned()
 {
 	Super::Spawned();
-	g_World->GetScene()->AddPrimitive( this );
+	GetWorld()->GetScene()->AddPrimitive( this );
 }
 
 /*
@@ -59,7 +60,7 @@ CPrimitiveComponent::Destroyed
 void CPrimitiveComponent::Destroyed()
 {
 	Super::Destroyed();
-	g_World->GetScene()->RemovePrimitive( this );
+	GetWorld()->GetScene()->RemovePrimitive( this );
 }
 
 /*
@@ -76,28 +77,6 @@ void CPrimitiveComponent::TickComponent( float InDeltaTime )
 	{
 		TermPrimitivePhysics();
 		InitPrimitivePhysics();
-	}
-}
-
-/*
-==================
-CPrimitiveComponent::Serialize
-==================
-*/
-void CPrimitiveComponent::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-
-#if WITH_EDITOR
-	if ( IsEditorOnly() && !g_IsEditor )
-	{
-		bool	tmpVisibility;
-		InArchive << tmpVisibility;
-	}
-	else
-#endif // WITH_EDITOR
-	{
-		InArchive << bVisibility;
 	}
 }
 

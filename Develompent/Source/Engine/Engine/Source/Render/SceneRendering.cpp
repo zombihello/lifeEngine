@@ -1,4 +1,3 @@
-#include "Containers/String.h"
 #include "Render/SceneRendering.h"
 #include "Render/Scene.h"
 #include "Misc/EngineGlobals.h"
@@ -97,9 +96,10 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 	}
 
 #if WITH_EDITOR
-	// If we in editor draw WorldEd foreground layer (gizmo and etc)
+	// If we in editor draw WorldEd background and foreground layer (gizmo and etc)
 	if ( g_IsEditor )
 	{
+		RenderWorldEdBackground( immediateContext );
 		RenderWorldEdForeground( immediateContext );
 	}
 #endif // WITH_EDITOR
@@ -111,12 +111,28 @@ void CSceneRenderer::Render( ViewportRHIParamRef_t InViewportRHI )
 #if WITH_EDITOR
 /*
 ==================
+CSceneRenderer::RenderWorldEdBackground
+==================
+*/
+void CSceneRenderer::RenderWorldEdBackground( class CBaseDeviceContextRHI* InDeviceContext )
+{
+	SCOPED_DRAW_EVENT( EventWorldEdBackground, DEC_SCENE_ITEMS, TEXT( "WorldEdBackground" ) );
+
+	g_SceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
+	g_RHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<false, CF_Less>::GetRHI() );
+	RenderSDG( InDeviceContext, SDG_WorldEdBackground );
+	g_RHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
+	g_SceneRenderTargets.FinishRenderingSceneColorLDR( InDeviceContext );
+}
+
+/*
+==================
 CSceneRenderer::RenderWorldEdForeground
 ==================
 */
 void CSceneRenderer::RenderWorldEdForeground( class CBaseDeviceContextRHI* InDeviceContext )
 {
-	SCOPED_DRAW_EVENT( EventUI, DEC_SCENE_ITEMS, TEXT( "WorldEdForeground" ) );
+	SCOPED_DRAW_EVENT( EventWorldEdForeground, DEC_SCENE_ITEMS, TEXT( "WorldEdForeground" ) );
 	
 	g_SceneRenderTargets.BeginRenderingSceneColorLDR( InDeviceContext );
 	g_RHI->SetDepthState( InDeviceContext, TStaticDepthStateRHI<true>::GetRHI() );
@@ -159,11 +175,7 @@ CSceneRenderer::RenderBasePass
 bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContext )
 {
 	// Do nothing if SDG_World layer is empty
-	if ( scene->GetSDG( SDG_World ).IsEmpty()
-#if WITH_EDITOR
-		 && scene->GetSDG( SDG_WorldEdBackground ).IsEmpty()
-#endif // WITH_EDITOR
-		 )
+	if ( scene->GetSDG( SDG_World ).IsEmpty() )
 	{
 		return false;
 	}
@@ -199,18 +211,6 @@ bool CSceneRenderer::RenderBasePass( class CBaseDeviceContextRHI* InDeviceContex
 	// Render SDG_World layer
 	bDirty = RenderSDG( InDeviceContext, SDG_World );
 
-	// Render WorldEd background
-#if WITH_EDITOR
-	if ( g_IsEditor )
-	{
-		g_SceneRenderTargets.BeginRenderingSceneColorLDR( immediateContext );
-		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<false, CF_Less>::GetRHI() );
-		bDirty = RenderSDG( immediateContext, SDG_WorldEdBackground );
-		g_RHI->SetDepthState( immediateContext, TStaticDepthStateRHI<true>::GetRHI() );
-		g_SceneRenderTargets.FinishRenderingSceneColorLDR( immediateContext );
-	}
-#endif // WITH_EDITOR
-
 	// Finish rendering to GBuffer (only when we used him)
 	if ( bGBuffer )
 	{
@@ -238,7 +238,7 @@ bool CSceneRenderer::RenderSDG( class CBaseDeviceContextRHI* InDeviceContext, ui
 		return false;
 	}
 
-	SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, CString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )InSDGIndex ) ).c_str() );
+	SCOPED_DRAW_EVENT( EventSDG, DEC_SCENE_ITEMS, L_Sprintf( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )InSDGIndex ) ).c_str() );
 
 #if WITH_EDITOR
 	// Draw simple elements

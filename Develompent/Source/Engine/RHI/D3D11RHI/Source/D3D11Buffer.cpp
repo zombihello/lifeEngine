@@ -1,6 +1,4 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
-
+#include "Misc/StringConv.h"
 #include "CPP_GlobalConstantBuffers.hlsl"
 #include "D3D11RHI.h"
 #include "D3D11Buffer.h"
@@ -66,7 +64,7 @@ CD3D11VertexBufferRHI::CD3D11VertexBufferRHI( uint32 InUsage, uint32 InSize, con
 #endif // ENABLED_ASSERT
 
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[VERTEX_BUFFER]" ), InBufferName ).c_str() ) );
+	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( L_Sprintf( TEXT( "%s[VERTEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
@@ -129,7 +127,7 @@ CD3D11IndexBufferRHI::CD3D11IndexBufferRHI( uint32 InUsage, uint32 InStride, uin
 #endif // ENABLED_ASSERT
 
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[INDEX_BUFFER]" ), InBufferName ).c_str() ) );
+	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( L_Sprintf( TEXT( "%s[INDEX_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
@@ -193,7 +191,7 @@ CD3D11ConstantBuffer::CD3D11ConstantBuffer( uint32 InSize, const tchar* InBuffer
 #endif // ENABLED_ASSERT
 
 #if !SHIPPING_BUILD
-	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( CString::Format( TEXT( "%s[CONSTANT_BUFFER]" ), InBufferName ).c_str() ) );
+	D3D11SetDebugName( d3d11Buffer, TCHAR_TO_ANSI( L_Sprintf( TEXT( "%s[CONSTANT_BUFFER]" ), InBufferName ).c_str() ) );
 #endif // !SHIPPING_BUILD
 }
 
@@ -224,7 +222,7 @@ CD3D11ConstantBuffer::Update
 */
 void CD3D11ConstantBuffer::Update( const byte* InData, uint32 InOffset, uint32 InSize )
 {
-	memcpy( shadowData + InOffset, InData, InSize );
+	Memory::Memcpy( shadowData + InOffset, InData, InSize );
 	currentUpdateSize = Max( currentUpdateSize, ( uint32 )InOffset + InSize );
 	isNeedCommit = true;
 }
@@ -248,9 +246,9 @@ void CD3D11ConstantBuffer::CommitConstantsToDevice( class CD3D11DeviceContext* I
 	d3d11DeviceContext->Map( d3d11Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &d3d11Mapped );
 
 #if !D3D11_FILLFULL_CONSTANTBUFFER
-	memcpy( ( byte* )d3d11Mapped.pData, shadowData, currentUpdateSize );
+	Memory::Memcpy( ( byte* )d3d11Mapped.pData, shadowData, currentUpdateSize );
 #else
-	memcpy( ( byte* )d3d11Mapped.pData, shadowData, size );
+	Memory::Memcpy( ( byte* )d3d11Mapped.pData, shadowData, size );
 #endif // !D3D11_FILLFULL_CONSTANTBUFFER
 
 	d3d11DeviceContext->Unmap( d3d11Buffer, 0 );
@@ -268,7 +266,7 @@ void CD3D11ConstantBuffer::Clear()
 {
 	if ( !shadowData )		return;
 
-	Sys_Memzero( shadowData, size );
+	Memory::Memzero( shadowData, size );
 	isNeedCommit = true;
 	currentUpdateSize = size;
 }

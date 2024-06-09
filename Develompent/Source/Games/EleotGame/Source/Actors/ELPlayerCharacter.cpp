@@ -24,11 +24,13 @@ AELPlayerCharacter::AELPlayerCharacter()
 
 /*
 ==================
-AELPlayerCharacter::~AELPlayerCharacter
+AELPlayerCharacter::BeginDestroy
 ==================
 */
-AELPlayerCharacter::~AELPlayerCharacter()
+void AELPlayerCharacter::BeginDestroy()
 {
+	Super::BeginDestroy();
+
 	// Deactive player camera if need
 	if ( cameraComponent->IsActive() )
 	{
@@ -43,7 +45,7 @@ AELPlayerCharacter::StaticInitializeClass
 */
 void AELPlayerCharacter::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Camera Component" ) ) CObjectProperty( TEXT( "Camera" ), TEXT( "Camera component" ), STRUCT_OFFSET( ThisClass, cameraComponent ), CPF_Edit, CCameraComponent::StaticClass() );
+	new( staticClass, TEXT( "Camera Component" ), OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, cameraComponent ), TEXT( "Camera" ), TEXT( "Camera component" ), CPF_Edit, CCameraComponent::StaticClass() );
 }
 
 /*

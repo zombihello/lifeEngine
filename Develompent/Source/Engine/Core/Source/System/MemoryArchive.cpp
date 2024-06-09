@@ -80,7 +80,7 @@ CMemoryReading::Serialize
 void CMemoryReading::Serialize( void* InBuffer, uint32 InSize )
 {
 	Assert( offset <= GetSize() - InSize );
-	memcpy( InBuffer, data.data() + offset, InSize );
+	Memory::Memcpy( InBuffer, data.data() + offset, InSize );
 	offset += InSize;
 }
 
@@ -115,7 +115,7 @@ void CMemoryWriter::Serialize( void* InBuffer, uint32 InSize )
 		data.resize( GetSize() + InSize );
 	}
 
-	memcpy( data.data() + offset, InBuffer, InSize );
+	Memory::Memcpy( data.data() + offset, InBuffer, InSize );
 	offset += InSize;
 }
 

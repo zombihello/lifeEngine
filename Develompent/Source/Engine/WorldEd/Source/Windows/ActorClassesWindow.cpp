@@ -1,4 +1,7 @@
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
+#include "Reflection/Object.h"
+#include "Reflection/Class.h"
+#include "Reflection/ObjectIterator.h"
 #include "Windows/ActorClassesWindow.h"
 
 /*
@@ -241,13 +244,12 @@ CActorClassesWindow::CActorClassesWindow( const std::wstring& InName, CClass* In
 	root = new CClassNode( this, InBaseClass );
 
 	// Build tree of child classes of InBaseClass
-	const std::unordered_map<CName, const CClass*, CName::HashFunction>&		classesTable = CClass::StaticRegisteredClasses();
-	for ( auto itClass = classesTable.begin(), itClassEnd = classesTable.end(); itClass != itClassEnd; ++itClass )
+	for ( TObjectIterator<CClass> it; it; ++it )
 	{
-		CClass*			lclass = const_cast<CClass*>( itClass->second );
+		CClass*			lclass = *it;
 
 		// If current class isn't child of InBaseClass, we skip it
-		if ( !lclass->IsA( InBaseClass ) )
+		if ( !lclass->IsChildOf( InBaseClass ) )
 		{
 			continue;
 		}

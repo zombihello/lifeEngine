@@ -17,7 +17,7 @@
   */
 class CBoxComponent : public CShapeComponent
 {
-	DECLARE_CLASS( CBoxComponent, CShapeComponent, 0, 0 )
+	DECLARE_CLASS( CBoxComponent, CShapeComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
@@ -31,12 +31,6 @@ public:
 	 */
 	virtual void DrawDebugComponent() override;
 #endif // WITH_EDITOR
-
-	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Update the body setup parameters based on shape information

@@ -18,18 +18,13 @@
   */
 class ABaseController : public AActor
 {
-	DECLARE_CLASS( ABaseController, AActor, 0, 0 )
+	DECLARE_CLASS( ABaseController, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
 	ABaseController();
-
-	/**
-	 * @brief Destructor
-	 */
-	virtual ~ABaseController();
 
 	/**
 	 * @brief Set controlled character
@@ -41,10 +36,10 @@ public:
 	 * @brief Get controlled character
 	 * @return Return controlled character. If not exist return nullptr
 	 */
-	TRefCountPtr<class ACharacter> GetCharacter() const;
+	class ACharacter* GetCharacter() const;
 
 protected:
-	TRefCountPtr<class ACharacter>		character;			/**< Character controlled by this controller */
+	class ACharacter*		character;			/**< Character controlled by this controller */
 };
 
 #endif // !BASECONTROLLER_H

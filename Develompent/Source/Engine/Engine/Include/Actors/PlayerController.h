@@ -18,18 +18,13 @@
  */
 class APlayerController : public ABaseController
 {
-	DECLARE_CLASS( APlayerController, ABaseController, 0, 0 )
+	DECLARE_CLASS( APlayerController, ABaseController, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
 	APlayerController();
-
-	/**
-	 * @brief Destructor
-	 */
-	virtual ~APlayerController();
 
 	/**
 	 * @brief Overridable native event for when play begins for this actor
@@ -47,7 +42,7 @@ public:
 	 * @brief Get input component
 	 * @return Return input component
 	 */
-	FORCEINLINE TRefCountPtr< CInputComponent > GetInputComponent() const
+	FORCEINLINE CInputComponent* GetInputComponent() const
 	{
 		return inputComponent;
 	}
@@ -103,10 +98,10 @@ protected:
 	 */
 	virtual void SetupInputComponent();
 
-	bool										bShowMouseCursor;		/**< Show mouse cursor */
-	bool										bConstrainYaw;			/**< Is need constrain yaw */
-	Vector										rotationInput;			/**< Rotation input */
-	TRefCountPtr<CInputComponent>				inputComponent;			/**< Input component */
+	bool				bShowMouseCursor;		/**< Show mouse cursor */
+	bool				bConstrainYaw;			/**< Is need constrain yaw */
+	Vector				rotationInput;			/**< Rotation input */
+	CInputComponent*	inputComponent;			/**< Input component */
 
 private:
 	/**
@@ -115,7 +110,7 @@ private:
 	 */
 	void UpdateRotation( float InDeltaTime );
 
-	Vector										viewRotation;			/**< View rotation in Euler angles */
+	Vector				viewRotation;			/**< View rotation in Euler angles */
 };
 
 

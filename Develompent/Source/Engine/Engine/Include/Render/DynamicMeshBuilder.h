@@ -13,7 +13,7 @@
 
 #include "Misc/RefCounted.h"
 #include "Misc/RefCountPtr.h"
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 #include "Render/Material.h"
 #include "Render/VertexFactory/DynamicMeshVertexFactory.h"
 #include "Render/RenderResource.h"
@@ -47,7 +47,7 @@ public:
 	 */
 	FORCEINLINE uint32 AddVertex( const DynamicMeshVertexType& InVertex )
 	{
-		CScopeLock	scopeLock( &readWriteCS );
+		CScopeLock	scopeLock( &readWriteMutex );
 		uint32		idVertex = verteces.size();
 		verteces.push_back( InVertex );
 		return idVertex;
@@ -61,7 +61,7 @@ public:
 	 */
 	FORCEINLINE void AddTriangle( uint32 InVerId0, uint32 InVerId1, uint32 InVerId2 )
 	{
-		CScopeLock	scopeLock( &readWriteCS );
+		CScopeLock	scopeLock( &readWriteMutex );
 		indeces.push_back( InVerId0 );
 		indeces.push_back( InVerId1 );
 		indeces.push_back( InVerId2 );
@@ -173,7 +173,7 @@ private:
 	virtual void ReleaseRHI() override;
 
 	uint32										numPrimitives;		/**< Number primitives in builded mesh */
-	CCriticalSection							readWriteCS;		/**< Read and write critical section */
+	CMutex								readWriteMutex;		/**< Read and write critical section */
 	std::vector< DynamicMeshVertexType >		verteces;			/**< Array of verteces */
 	std::vector< uint32 >						indeces;			/**< Array of indeces */
 	VertexBufferRHIRef_t						vertexBufferRHI;	/**< Vertex buffer RHI */

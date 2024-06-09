@@ -12,9 +12,9 @@
 #include <string>
 
 #include "Math/Math.h"
-#include "Misc/Struct.h"
-#include "Misc/Enum.h"
-#include "Misc/EnumAsByte.h"
+#include "Containers/EnumAsByte.h"
+#include "Reflection/ObjectMacros.h"
+#include "Reflection/Enum.h"
 #include "System/Package.h"
 #include "System/Archive.h"
 
@@ -39,7 +39,7 @@ enum ECollisionChannel
 	CC_Max				/**< Count collision channels */
 };
 
-DECLARE_ENUM( ECollisionChannel )
+DECLARE_ENUM( ECollisionChannel, TEXT( "Physics" ) )
 #define FOREACH_ENUM_COLLISIONCHANNEL( X ) \
 	X( CC_WorldStatic ) \
 	X( CC_Visibility ) \
@@ -57,7 +57,7 @@ enum ECollisionResponse
 	CR_Max				/**< Count responses */
 };
 
-DECLARE_ENUM( ECollisionResponse )
+DECLARE_ENUM( ECollisionResponse, TEXT( "Physics" ) )
 #define FOREACH_ENUM_COLLISIONRESPONSE( X ) \
 	X( CR_Ignore ) \
 	X( CR_Overlap ) \
@@ -89,7 +89,7 @@ enum ESurfaceType
  */
 struct CollisionProfile
 {
-	DECLARE_STRUCT( CollisionProfile, CollisionProfile )
+	DECLARE_STRUCT( CollisionProfile, CollisionProfile, TEXT( "Physics" ) )
 
 	/**
 	 * @brief Constructor
@@ -98,7 +98,7 @@ struct CollisionProfile
 		: name( TEXT( "Unknown" ) )
 		, objectType( CC_WorldStatic )
 	{
-		Sys_Memzero( responses, sizeof( TEnumAsByte<ECollisionResponse> ) * CC_Max );
+		Memory::Memzero( responses, sizeof( TEnumAsByte<ECollisionResponse> ) * CC_Max );
 	}
 
 	/**

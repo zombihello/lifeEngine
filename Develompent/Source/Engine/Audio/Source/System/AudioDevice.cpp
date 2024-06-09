@@ -5,7 +5,7 @@
 #include "System/AudioDevice.h"
 #include "Logger/LoggerMacros.h"
 #include "System/Config.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Core.h"
 
 /*
@@ -23,7 +23,7 @@ uint32 Sys_SampleFormatToEngine( ESampleFormat InSampleFormat )
 	case SF_Stereo16:	return AL_FORMAT_STEREO16;
 	case SF_Unknown:
 	default:
-		Sys_Errorf( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
+		Sys_Error( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
 		return 0;
 	}
 }
@@ -43,7 +43,7 @@ std::wstring Sys_SampleFormatToText( ESampleFormat InSampleFormat )
 	case SF_Stereo16:	return TEXT( "16 bit (Stereo)" );
 	case SF_Unknown:
 	default:
-		Sys_Errorf( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
+		Sys_Error( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
 		return TEXT( "Unknown");
 	}
 }
@@ -63,7 +63,7 @@ uint32 Sys_GetNumSampleBytes( ESampleFormat InSampleFormat )
 	case SF_Stereo16:	return 32;
 	case SF_Unknown:
 	default:
-		Sys_Errorf( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
+		Sys_Error( TEXT( "Unknown sample format 0x%X" ), InSampleFormat );
 		return 0;
 	}
 }
@@ -137,7 +137,8 @@ void CAudioDevice::Init()
 	Logf( TEXT( "OpenAL extensions: %s\n" ),				ANSI_TO_TCHAR( alGetString( AL_EXTENSIONS ) ) );
 
 	// Init platform audio headroom
-	float		headroom = g_Config.GetValue( CT_Engine, TEXT( "Audio.Audio" ), TEXT( "PlatformHeadroomDB" ) ).GetNumber();
+	const CJsonValue*	configHeadroom = CConfig::Get().GetValue( CT_Engine, TEXT( "Audio.Audio" ), TEXT( "PlatformHeadroomDB" ) );
+	float				headroom = configHeadroom ? configHeadroom->GetNumber() : 0.f;
 	if ( headroom != 0.f )
 	{
 		// Convert dB to linear volume
@@ -149,14 +150,8 @@ void CAudioDevice::Init()
 	}
 
 	// Getting global volume from config
-	float		globalVolume = 1.f;
-	{
-		CConfigValue		configGlobalVolume = g_Config.GetValue( CT_Engine, TEXT( "Audio.Audio" ), TEXT( "GlobalVolume" ) );
-		if ( configGlobalVolume.IsValid() && ( configGlobalVolume.GetType() == CConfigValue::T_Int || configGlobalVolume.GetType() == CConfigValue::T_Float ) )
-		{
-			globalVolume = configGlobalVolume.GetNumber();
-		}
-	}
+	const CJsonValue*	configGlobalVolume = CConfig::Get().GetValue( CT_Engine, TEXT( "Audio.Audio" ), TEXT( "GlobalVolume" ) );
+	float				globalVolume = configGlobalVolume ? configGlobalVolume->GetNumber( 1.f ) : 1.f;
 
 	// Initialize listener spatial
 	SetListenerSpatial( Math::vectorZero, Math::vectorForward, Math::vectorUp );

@@ -19,11 +19,12 @@ CLightComponent::CLightComponent()
 
 /*
 ==================
-CLightComponent::~CLightComponent
+CLightComponent::BeginDestroy
 ==================
 */
-CLightComponent::~CLightComponent()
+void CLightComponent::BeginDestroy()
 {
+	Super::BeginDestroy();
 	if ( scene )
 	{
 		scene->RemoveLight( this );
@@ -37,27 +38,9 @@ CLightComponent::StaticInitializeClass
 */
 void CLightComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "bEnabled" ) )		CBoolProperty( TEXT( "Light" ), TEXT( "Is enabled light" ), STRUCT_OFFSET( ThisClass, bEnabled ), CPF_Edit );
-	new( staticClass, TEXT( "Color" ) )			CColorProperty( TEXT( "Light" ), TEXT( "Light color" ), STRUCT_OFFSET( ThisClass, lightColor ), CPF_Edit );
-	new( staticClass, TEXT( "Intensivity" ) )	CFloatProperty( TEXT( "Light" ), TEXT( "Light intensivity" ), STRUCT_OFFSET( ThisClass, intensivity ), CPF_Edit );
-}
-
-/*
-==================
-CLightComponent::Serialize
-==================
-*/
-void CLightComponent::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-	InArchive << bEnabled;
-	if ( InArchive.Ver() < VER_NewSeriallizeDataInLightComponents )
-	{
-		return;
-	}
-
-	InArchive << lightColor;
-	InArchive << intensivity;
+	new( staticClass, TEXT( "bEnabled" ), OBJECT_Public )		CBoolProperty( CPP_PROPERTY( ThisClass, bEnabled ), TEXT( "Light" ), TEXT( "Is enabled light" ), CPF_Edit );
+	new( staticClass, TEXT( "Color" ), OBJECT_Public )			CColorProperty( CPP_PROPERTY( ThisClass, lightColor ), TEXT( "Light" ), TEXT( "Light color" ), CPF_Edit );
+	new( staticClass, TEXT( "Intensivity" ), OBJECT_Public )	CFloatProperty( CPP_PROPERTY( ThisClass, intensivity ), TEXT( "Light" ), TEXT( "Light intensivity" ), CPF_Edit );
 }
 
 /*
@@ -68,7 +51,7 @@ CLightComponent::Spawned
 void CLightComponent::Spawned()
 {
 	Super::Spawned();
-	g_World->GetScene()->AddLight( this );
+	GetWorld()->GetScene()->AddLight( this );
 }
 
 /*
@@ -79,7 +62,7 @@ CLightComponent::Destroyed
 void CLightComponent::Destroyed()
 {
 	Super::Destroyed();
-	g_World->GetScene()->RemoveLight( this );
+	GetWorld()->GetScene()->RemoveLight( this );
 }
 
 /*

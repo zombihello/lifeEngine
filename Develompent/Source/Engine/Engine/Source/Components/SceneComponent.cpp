@@ -17,22 +17,15 @@ CSceneComponent::CSceneComponent()
 
 /*
 ==================
-CSceneComponent::~CSceneComponent
-==================
-*/
-CSceneComponent::~CSceneComponent()
-{}
-
-/*
-==================
 CSceneComponent::StaticInitializeClass
 ==================
 */
 void CSceneComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Location" ) )	CVectorProperty( TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), STRUCT_OFFSET( ThisClass, relativeLocation ), CPF_Edit );
-	new( staticClass, TEXT( "Rotation" ) )	CRotatorProperty( TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), STRUCT_OFFSET( ThisClass, relativeRotation ), CPF_Edit );
-	new( staticClass, TEXT( "Scale" ) )		CVectorProperty( TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), STRUCT_OFFSET( ThisClass, relativeScale ), CPF_Edit, 1.f );
+	// Native properties
+	new( staticClass, TEXT( "Location" ), OBJECT_Public )	CVectorProperty( CPP_PROPERTY( ThisClass, relativeLocation ), TEXT( "Transform" ), TEXT( "Location of the component relative to its parent" ), CPF_Edit );
+	new( staticClass, TEXT( "Rotation" ), OBJECT_Public )	CRotatorProperty( CPP_PROPERTY( ThisClass, relativeRotation ), TEXT( "Transform" ), TEXT( "Rotation of the component relative to its parent" ), CPF_Edit );
+	new( staticClass, TEXT( "Scale" ), OBJECT_Public )		CVectorProperty( CPP_PROPERTY( ThisClass, relativeScale ), TEXT( "Transform" ), TEXT( "Non-uniform scaling of the component relative to its parent" ), CPF_Edit, 1.f );
 }
 
 #if WITH_EDITOR
@@ -78,32 +71,6 @@ bool CSceneComponent::IsAttachedTo( CSceneComponent* InTestComp ) const
 		}
 	}
 	return false;
-}
-
-/*
-==================
-CSceneComponent::Serialize
-==================
-*/
-void CSceneComponent::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-	if ( InArchive.IsLoading() && InArchive.Ver() < VER_UpdateTrasformSceneComponent )
-	{
-		CTransform		tmpTransform;
-		InArchive << tmpTransform;
-
-		relativeLocation	= tmpTransform.GetLocation();
-		relativeRotation	= relativeRotationCache.QuatToRotator( tmpTransform.GetRotation() );
-		relativeScale		= tmpTransform.GetScale();
-
-		Warnf( TEXT( "Deprecated package version (0x%X). Need to re-save the package '%s', because in the future it may not open\n" ), InArchive.Ver(), InArchive.GetPath().c_str() );
-		return;
-	}
-
-	InArchive << relativeLocation;
-	InArchive << relativeRotation;
-	InArchive << relativeScale;
 }
 
 /*

@@ -56,7 +56,7 @@ void CSelectAssetWidget::Tick()
 	Assert( bInit );
 	
 	bool			bNeedOpenAssetEditor = false;
-	bSelectedAsset = ImGui::SelectAsset( CString::Format( TEXT( "SelectAsset_%i" ), assetSlot ), label, assetReference, &bNeedOpenAssetEditor, previewTexture );
+	bSelectedAsset = ImGui::SelectAsset( L_Sprintf( TEXT( "SelectAsset_%i" ), assetSlot ), label, assetReference, &bNeedOpenAssetEditor, previewTexture );
 	
 	// If was selected new asset reference then we broadcast event about it
 	if ( bSelectedAsset )

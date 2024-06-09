@@ -8,7 +8,7 @@
 #include "WindowsGlobals.h"
 #include "Misc/Guid.h"
 #include "Misc/CommandLine.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "EngineLoop.h"
 #include "D3D11RHI.h"
 #include "D3D11Viewport.h"
@@ -124,11 +124,13 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 		{
 			if ( g_IsEditor )
 			{
-				Sys_ShowSplash( g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Splash" ) ).GetString().c_str() );
+				const CJsonValue*	configSplash = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Splash" ) );
+				Sys_ShowSplash( configSplash ? configSplash->GetString().c_str() : TEXT( "" ) );
 			}
 			else if ( g_IsGame )
 			{
-				Sys_ShowSplash( g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Splash" ) ).GetString().c_str() );
+				const CJsonValue*	configSplash = CConfig::Get().GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "Splash" ) );
+				Sys_ShowSplash( configSplash ? configSplash->GetString().c_str() : TEXT( "" ) );
 			}
 		}
 
@@ -172,12 +174,12 @@ int WINAPI WinMain( HINSTANCE hInst, HINSTANCE hPreInst, LPSTR lpCmdLine, int nC
 	}
 	catch ( std::exception InException )
 	{
-		Sys_Errorf( ANSI_TO_TCHAR( InException.what() ) );
+		Sys_Error( ANSI_TO_TCHAR( InException.what() ) );
 		return 1;
 	}
 	catch ( ... )
 	{
-		Sys_Errorf( TEXT( "Unknown exception" ) );
+		Sys_Error( TEXT( "Unknown exception" ) );
 		return 1;
 	}
 

@@ -3,7 +3,7 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/TableOfContents.h"
 #include "Logger/LoggerMacros.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "System/Package.h"
 
 /*
@@ -18,7 +18,7 @@ void CTableOfContets::Serialize( CArchive& InArchive )
 		// Create string buffer and fill '\0'
 		uint32				archiveSize = InArchive.GetSize() + 1;
 		byte* buffer = new byte[ archiveSize ];
-		memset( buffer, '\0', archiveSize );
+		Memory::Memzero( buffer, archiveSize );
 
 		// Serialize data to string buffer
 		InArchive.Serialize( buffer, archiveSize );

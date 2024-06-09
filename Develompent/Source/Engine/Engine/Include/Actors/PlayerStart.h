@@ -19,18 +19,13 @@
  */
 class APlayerStart : public AActor
 {
-	DECLARE_CLASS( APlayerStart, AActor, 0, 0 )
+	DECLARE_CLASS( APlayerStart, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
 	 * Constructor
 	 */
 	APlayerStart();
-
-	/**
-	 * Destructor
-	 */
-	virtual ~APlayerStart();
 
 	/**
 	 * Overridable native event for when play begins for this actor
@@ -45,8 +40,8 @@ public:
 	virtual std::wstring GetActorIcon() const override;
 
 private:
-	TRefCountPtr<CSpriteComponent>		gizmoComponent;				/**< Gizmo component */
-	TRefCountPtr<CArrowComponent>		arrowComponent;				/**< Arrow component */
+	CSpriteComponent*		gizmoComponent;				/**< Gizmo component */
+	CArrowComponent*		arrowComponent;				/**< Arrow component */
 #endif // WITH_EDITOR
 };
 

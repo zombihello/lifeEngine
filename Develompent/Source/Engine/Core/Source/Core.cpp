@@ -1,8 +1,7 @@
 #include "Core.h"
-#include "Misc/Class.h"
+#include "Reflection/Class.h"
 #include "Misc/Misc.h"
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Logger/BaseLogger.h"
 #include "System/Config.h"
@@ -15,8 +14,9 @@
 // GLOBALS
 // ----------------
 
-CConfigManager          g_Config;
 bool	                g_IsRequestingExit           = false;
+bool                    g_IsRunning                  = false;
+bool                    g_IsInitialLoad              = true;
 uint32			        g_GameThreadId               = 0;
 double                  g_SecondsPerCycle            = 0.0;
 double                  g_StartTime                  = Sys_InitTiming();
@@ -39,41 +39,72 @@ bool                    g_ShouldPauseBeforeExit      = false;
 
 /*
 ==================
-Sys_FailAssertFunc
+Sys_Error
 ==================
 */
-void VARARGS Sys_FailAssertFunc( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat, ... )
+void Sys_Error( const tchar* InFormat, ... )
 {
+	// Dump call stack
 	std::wstring        callStack;
 	Sys_DumpCallStack( callStack );
 
-	va_list             arguments;
-	va_start( arguments, InFormat );
-	std::wstring        message = CString::Format( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str(), callStack.c_str() );
-	va_end( arguments );
+	// Get formated string
+	va_list			params;
+	va_start( params, InFormat );
+	std::wstring	message = L_Vsprintf( InFormat, params );
+	message += L_Sprintf( TEXT( "\n\nStack:\n%s" ), callStack.c_str() );
+	va_end( params );
 
-	Errorf( TEXT( "%s\n" ), message.c_str());
-	Sys_ShowMessageBox( CString::Format( TEXT( "%s Error" ), g_GameName.c_str() ).c_str(), message.c_str(), MB_Error );
-    Sys_RequestExit( true );
+	// Print message and show message box
+	Errorf( TEXT( "\n" ) );
+	Errorf( TEXT( "--------------- FATAL ERROR ----------------\n" ) );
+	Errorf( TEXT( "%s\n" ), message.c_str() );
+	Errorf( TEXT( "--------------------------------------------\n" ) );
+	Errorf( TEXT( "\n" ) );
+	if ( Sys_IsDebuggerPresent() )
+	{
+		Sys_DebugBreak();
+	}
+	Sys_ShowMessageBox( TEXT( "LifeEngine Error" ), message.c_str(), MB_Error );
+
+	// Shutdown application
+	Sys_RequestExit( true );
 }
 
+#if ENABLED_ASSERT
 /*
 ==================
-Sys_FailAssertFuncDebug
+Sys_FailAssertFunc
 ==================
 */
-void VARARGS Sys_FailAssertFuncDebug( const achar* InExpr, const achar* InFile, int InLine, const tchar* InFormat, ... )
+void Sys_FailAssertFunc( const tchar* InExpr, const achar* InFile, int InLine, const tchar* InFormat, ... )
 {
-    std::wstring        callStack;
-    Sys_DumpCallStack( callStack );
+	// Dump call stack
+	std::wstring        callStack;
+	Sys_DumpCallStack( callStack );
 
-	va_list             arguments;
-	va_start( arguments, InFormat );
-	std::wstring        message = CString::Format( TEXT( "Assertion failed: %s [File:%s] [Line: %i]\n%s\nStack:\n%s" ), ANSI_TO_TCHAR( InExpr ), ANSI_TO_TCHAR( InFile ), InLine, CString::Format( InFormat, arguments ).c_str(), callStack.c_str() );
-	va_end( arguments );
+	// Get final message
+	va_list			params;
+	va_start( params, InFormat );
+	std::wstring	message = L_Sprintf( TEXT( "Assertion failed: %s\nMessage: %s\n\nFile: %s\nLine: %i\nStack:\n%s" ), InExpr, L_Strlen( InFormat ) > 0 ? L_Vsprintf( InFormat, params ).c_str() : TEXT( "<None>" ), ANSI_TO_TCHAR( InFile ), InLine, callStack.c_str() );
+	va_end( params );
 
-	Errorf( TEXT( "%s\n" ), message.c_str());
+	// Print message and show message box
+	Errorf( TEXT( "\n" ) );
+	Errorf( TEXT( "------------ ASSERTION FAILED --------------\n" ) );
+	Errorf( TEXT( "%s\n" ), message.c_str() );
+	Errorf( TEXT( "--------------------------------------------\n" ) );
+	Errorf( TEXT( "\n" ) );
+	if ( Sys_IsDebuggerPresent() )
+	{
+		Sys_DebugBreak();
+	}
+	Sys_ShowMessageBox( TEXT( "LifeEngine Error" ), message.c_str(), MB_Error );
+
+	// Shutdown application
+	Sys_RequestExit( true );
 }
+#endif // ENABLED_ASSERT
 
 /*
 ==================

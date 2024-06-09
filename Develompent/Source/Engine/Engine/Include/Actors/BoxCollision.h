@@ -18,7 +18,7 @@
   */
 class ABoxCollision : public AActor
 {
-    DECLARE_CLASS( ABoxCollision, AActor, 0, 0 )
+    DECLARE_CLASS( ABoxCollision, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
     /**
@@ -27,16 +27,6 @@ public:
     ABoxCollision();
 
 #if WITH_EDITOR
-	/**
-	 * @brief Initialize actor properties
-	 * This method called only when actor spawned on cooking of map. Available only when WITH_EDITOR is 1
-	 *
-	 * @param InActorVars Array of actor properties to init
-	 * @param InCooker Pointer to cooker for cook any resources if need
-	 * @return Return if properties inited succeed and all resources cooked is succeed, else return false
-	 */
-	virtual bool InitProperties( const std::vector< CActorVar >& InActorVars, class CCookPackagesCommandlet* InCooker ) override;
-
 	/**
 	 * @brief Get path to icon of actor for exploer level in WorldEd
 	 * @return Return path to actor icon from Sys_BaseDir()
@@ -48,13 +38,13 @@ public:
 	 * Get box component
 	 * @return Return box component
 	 */
-	FORCEINLINE TRefCountPtr< CBoxComponent > GetBoxComponent() const
+	FORCEINLINE CBoxComponent* GetBoxComponent() const
 	{
 		return boxComponent;
 	}
 
 private:
-	TRefCountPtr<CBoxComponent>			boxComponent;		/**< Box component */
+	CBoxComponent*			boxComponent;		/**< Box component */
 };
 
 #endif // !ABOXCOLLISION_H

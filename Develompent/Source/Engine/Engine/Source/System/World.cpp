@@ -8,10 +8,13 @@
 #include "System/World.h"
 #include "Logger/LoggerMacros.h"
 #include "Render/Scene.h"
+#include "Reflection/ObjectPackage.h"
 
 #if WITH_EDITOR
 #include "WorldEd.h"
 #endif // WITH_EDITOR
+
+IMPLEMENT_CLASS( CWorld )
 
 /*
 ==================
@@ -20,19 +23,31 @@ CWorld::CWorld
 */
 CWorld::CWorld() 
 	: isBeginPlay( false )
+	, timeSinceLastPendingKillPurge( 0.f )
 	, scene( new CScene() )
-#if WITH_EDITOR
-	, name( TEXT( "Unknown" ) )
-#endif // WITH_EDITOR
 {}
 
 /*
 ==================
-CWorld::~CWorld
+CWorld::StaticInitializeClass
 ==================
 */
-CWorld::~CWorld()
+void CWorld::StaticInitializeClass()
 {
+	// Native properties
+	CArrayProperty*		actorsArray = new( staticClass, TEXT( "Actors" ) )		CArrayProperty( CPP_PROPERTY( ThisClass, actors ), NAME_None, TEXT( "" ), CPF_None );
+	new( actorsArray, NAME_None )												CObjectProperty( CppProperty, 0, NAME_None, TEXT( "" ), CPF_None, AActor::StaticClass() );
+}
+
+/*
+==================
+CWorld::BeginDestroy
+==================
+*/
+void CWorld::BeginDestroy()
+{
+	Super::BeginDestroy();
+
 	CleanupWorld();
 	delete scene;
 }
@@ -82,7 +97,7 @@ void CWorld::EndPlay()
 	// End play and destroy physics for all actors
 	for ( uint32 index = 0; index < ( uint32 ) actors.size(); ++index )
 	{
-		ActorRef_t		actor = actors[ index ];
+		AActor*		actor = actors[ index ];
 		actor->EndPlay();
 		actor->TermPhysics();
 	}
@@ -98,12 +113,15 @@ CWorld::Tick
 */
 void CWorld::Tick( float InDeltaTime )
 {
-	// Tick all actors
-	for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
+	// Tick all actors (only if play is begin)
+	if ( HasBegunPlay() )
 	{
-		AActor*		actor = actors[ index ];
-		actor->Tick( InDeltaTime );
-		actor->SyncPhysics();
+		for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
+		{
+			AActor* actor = actors[index];
+			actor->Tick( InDeltaTime );
+			actor->SyncPhysics();
+		}
 	}
 
 	// Destroy actors if need
@@ -111,9 +129,27 @@ void CWorld::Tick( float InDeltaTime )
 	{
 		for ( uint32 index = 0, count = actorsToDestroy.size(); index < count; ++index )
 		{
-			DestroyActor( actorsToDestroy[ index ], true );
+			// Tell this actor it's about to be destroyed
+			actorsToDestroy[index]->Destroyed();
 		}
 		actorsToDestroy.clear();
+	}
+
+	// Collect and purge garbage
+	CObjectGC&		objectGC = CObjectGC::Get();
+	timeSinceLastPendingKillPurge += InDeltaTime;
+	if ( !objectGC.IsIncrementalPurgePending() && ( timeSinceLastPendingKillPurge > objectGC.GetTimeBetweenPurgingGarbage() ) && objectGC.GetTimeBetweenPurgingGarbage() > 0.f )
+	{
+		// We don't collect garbage while any packages are saving
+		if ( !CObjectPackage::IsSavingPackage() )
+		{
+			objectGC.CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS, false );
+			timeSinceLastPendingKillPurge = 0.f;
+		}
+	}
+	else
+	{
+		objectGC.IncrementalPurgeGarbage( true );
 	}
 }
 
@@ -124,58 +160,49 @@ CWorld::Serialize
 */
 void CWorld::Serialize( CArchive& InArchive )
 {
-	if ( InArchive.IsSaving() )
+	// Clear the world
+	if ( InArchive.IsLoading() )
 	{
-		InArchive << ( uint32 )actors.size();
-		for ( uint32 index = 0, count = ( uint32 )actors.size(); index < count; ++index )
-		{
-			AActor*			actor = actors[ index ];
-			InArchive << actor->GetClass()->GetName();
-			actor->Serialize( InArchive );
-		}
-	}
-	else
-	{
-		// Clear world
 		CleanupWorld();
-
-		uint32		countActors = 0;
-		InArchive << countActors;
-
-		for ( uint32 index = 0; index < countActors; ++index )
-		{
-			// Serialize class name
-			uint32				classNameSize = 0;
-			std::wstring		className;
-			InArchive << className;
-
-			// Spawn actor, serialize and add to array
-			AActor*			actor = SpawnActor( CClass::StaticFindClass( className.c_str() ), Math::vectorZero, Math::quaternionZero );
-			actor->Serialize( InArchive );
-		}
 	}
+	
+	Super::Serialize( InArchive );
+}
 
-#if WITH_EDITOR
-	// Getting path and file name
-	filePath	= InArchive.GetPath();
-	name		= filePath;
+/*
+==================
+CWorld::PostLoad
+==================
+*/
+void CWorld::PostLoad()
+{
+	Super::PostLoad();
+	bool	bDirtyPackage = false;
+
+	// Call event of spawn for all actors
+	for ( uint32 index = 0, count = actors.size(); index < count; )
 	{
-		Sys_NormalizePathSeparators( name );
-		std::size_t			pathSeparatorPos = name.find_last_of( PATH_SEPARATOR );
-		if ( pathSeparatorPos != std::string::npos )
+		// Make sure that the actor was loaded
+		AActor*		actor = actors[index];
+		if ( actor )
 		{
-			name.erase( 0, pathSeparatorPos + 1 );
+			actor->Spawned();
+			++index;
 		}
-
-		uint32 dotPos = name.find_last_of( TEXT( "." ) );
-		if ( dotPos != std::string::npos )
+		// Otherwise remove the one from array
+		else
 		{
-			name.erase( dotPos, name.size() + 1 );
+			actors.erase( actors.begin() + index );
+			count			= actors.size();
+			bDirtyPackage	= true;
 		}
 	}
 
-	bDirty = false;
-#endif // WITH_EDITOR
+	// Mark the package as dirty if it need
+	if ( bDirtyPackage )
+	{
+		MarkPackageDirty();
+	}
 }
 
 /*
@@ -214,10 +241,7 @@ void CWorld::CleanupWorld()
 	actorsToDestroy.clear();
 
 #if WITH_EDITOR
-	bDirty		= false;
 	selectedActors.clear();
-	filePath	= TEXT( "" );
-	name		= TEXT( "Unknown" );
 #endif // WITH_EDITOR
 }
 
@@ -226,18 +250,14 @@ void CWorld::CleanupWorld()
 CWorld::SpawnActor
 ==================
 */
-ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /* = Math::rotatorZero */, const CName& InName /* = NAME_None */)
+AActor* CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, const CRotator& InRotation /* = Math::rotatorZero */, const CName& InName /* = NAME_None */)
 {
 	Assert( InClass );
 
-	AActor*		actor = InClass->CreateObject<AActor>( nullptr, InName );
+	AActor*		actor = InClass->CreateObject<AActor>( this, InName );
 	Assert( actor );
 
 	// Set default actor location with rotation
-	if ( InName == NAME_None )
-	{
-		actor->SetCName( InClass->GetCName() );
-	}
     actor->AddActorLocation( InLocation );
     actor->AddActorRotation( InRotation );
 
@@ -255,9 +275,9 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
 	
 	// Broadcast event of spawned actor
 #if WITH_EDITOR
-	std::vector<ActorRef_t>		spawnedActors = { actor };
+	std::vector<AActor*>		spawnedActors = { actor };
 	EditorDelegates::onActorsSpawned.Broadcast( spawnedActors );
-	MarkDirty();
+	MarkPackageDirty();
 #endif // WITH_EDITOR
 
 	return actor;
@@ -268,15 +288,19 @@ ActorRef_t CWorld::SpawnActor( class CClass* InClass, const Vector& InLocation, 
 CWorld::DestroyActor
 ==================
 */
-void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
+void CWorld::DestroyActor( AActor* InActor, bool InIsIgnorePlaying )
 {
 	Assert( InActor );
 
-	// If actor allready penging kill, exit from method
-	if ( InActor->IsPendingKill() )
+	// If already on list to be deleted, pretend the call was successful
+	// We don't want recursive calls to trigger destruction notifications multiple times
+	if ( InActor->IsPendingKillPending() )
 	{
 		return;
 	}
+
+	// Prevent recursion
+	MarkActorIsBeingDestroyed	markActorIsBeingDestroyed( InActor );
 
 	// If world in play, put this actor to actorsToDestroy for remove after tick
 	if ( !InIsIgnorePlaying && InActor->IsPlaying() )
@@ -284,8 +308,6 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 		actorsToDestroy.push_back( InActor );
 		return;
 	}
-
-	// Destroy actor
 
 	// Broadcast event of destroy actor
 #if WITH_EDITOR
@@ -295,12 +317,12 @@ void CWorld::DestroyActor( ActorRef_t InActor, bool InIsIgnorePlaying )
 		UnselectActor( InActor );
 	}
 
-	std::vector<ActorRef_t>		destroyedActors = { InActor };
+	std::vector<AActor*>		destroyedActors = { InActor };
 	EditorDelegates::onActorsDestroyed.Broadcast( destroyedActors );
-	MarkDirty();
+	MarkPackageDirty();
 #endif // WITH_EDITOR
 
-	// Call events of destroyed actor
+	// Tell this actor it's about to be destroyed
 	InActor->Destroyed();
 
 	// Remove actor from array of all actors in world
@@ -335,7 +357,7 @@ void CWorld::UpdateHitProxiesId()
 CWorld::SelectActor
 ==================
 */
-void CWorld::SelectActor( ActorRef_t InActor )
+void CWorld::SelectActor( AActor* InActor )
 {
 	Assert( InActor );
 	if ( InActor->IsSelected() )
@@ -346,7 +368,7 @@ void CWorld::SelectActor( ActorRef_t InActor )
 	InActor->SetSelected( true );
 	selectedActors.push_back( InActor );
 
-	EditorDelegates::onActorsSelected.Broadcast( std::vector<ActorRef_t>{ InActor } );
+	EditorDelegates::onActorsSelected.Broadcast( std::vector<AActor*>{ InActor } );
 }
 
 /*
@@ -354,7 +376,7 @@ void CWorld::SelectActor( ActorRef_t InActor )
 CWorld::UnselectActor
 ==================
 */
-void CWorld::UnselectActor( ActorRef_t InActor )
+void CWorld::UnselectActor( AActor* InActor )
 {
 	Assert( InActor );
 	if ( !InActor->IsSelected() )
@@ -372,7 +394,7 @@ void CWorld::UnselectActor( ActorRef_t InActor )
 		}
 	}
 
-	EditorDelegates::onActorsUnselected.Broadcast( std::vector<ActorRef_t>{ InActor } );
+	EditorDelegates::onActorsUnselected.Broadcast( std::vector<AActor*>{ InActor } );
 }
 
 /*
@@ -380,12 +402,12 @@ void CWorld::UnselectActor( ActorRef_t InActor )
 CWorld::SelectActors
 ==================
 */
-void CWorld::SelectActors( const std::vector<ActorRef_t>& InActors )
+void CWorld::SelectActors( const std::vector<AActor*>& InActors )
 {
 	bool		bNeedBroadcast = false;
 	for ( uint32 index = 0, count = InActors.size(); index < count; ++index )
 	{
-		ActorRef_t		actor = InActors[index];
+		AActor* actor = InActors[index];
 		if ( !actor->IsSelected() )
 		{
 			bNeedBroadcast = true;
@@ -405,12 +427,12 @@ void CWorld::SelectActors( const std::vector<ActorRef_t>& InActors )
 CWorld::UnselectActors
 ==================
 */
-void CWorld::UnselectActors( const std::vector<ActorRef_t>& InActors )
+void CWorld::UnselectActors( const std::vector<AActor*>& InActors )
 {
-	std::vector<ActorRef_t>		unselectedActors;
+	std::vector<AActor*>		unselectedActors;
 	for ( uint32 index = 0, count = InActors.size(); index < count; ++index )
 	{
-		ActorRef_t		actor = InActors[index];
+		AActor* actor = InActors[index];
 		if ( actor->IsSelected() )
 		{
 			actor->SetSelected( false );
@@ -447,7 +469,7 @@ void CWorld::UnselectAllActors()
 		selectedActors[ index ]->SetSelected( false );
 	}
 
-	std::vector<ActorRef_t>		unselectedActors;
+	std::vector<AActor*>		unselectedActors;
 	std::swap( selectedActors, unselectedActors );
 	EditorDelegates::onActorsUnselected.Broadcast( unselectedActors );
 }

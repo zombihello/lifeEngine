@@ -17,7 +17,7 @@ CVertexFactoryMetaType::CVertexFactoryMetaType( const std::wstring& InFactoryNam
 #endif // WITH_EDITOR
 )
 	: factoryName( InFactoryName )
-	, hash( Sys_CalcHash( InFactoryName ) )
+	, hash( FastHash( InFactoryName ) )
 	, ConstructParameters( InConstructParameters )
 #if USE_INSTANCING
 	, bSupportsInstancing( InSupportsInstancing )
@@ -79,7 +79,7 @@ CVertexFactory::SetupInstancing
 */
 void CVertexFactory::SetupInstancing( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	Sys_Errorf( TEXT( "CVertexFactory::SetupInstancing :: Not implemented" ) );
+	Sys_Error( TEXT( "CVertexFactory::SetupInstancing :: Not implemented" ) );
 }
 
 /*
@@ -128,10 +128,10 @@ CVertexFactory::GetTypeHash
 */
 uint64 CVertexFactory::GetTypeHash() const
 {
-	uint64		hash = Sys_MemFastHash( declaration, GetType()->GetHash() );
+	uint64		hash = FastHash( declaration, GetType()->GetHash() );
 	for ( uint32 index = 0, count = streams.size(); index < count; ++index )
 	{
-		hash = Sys_MemFastHash( streams[index], hash );
+		hash = FastHash( streams[index], hash );
 	}
 
 	return hash;

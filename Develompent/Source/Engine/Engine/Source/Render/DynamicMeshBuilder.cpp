@@ -24,7 +24,7 @@ CDynamicMeshBuilder::InitRHI
 */
 void CDynamicMeshBuilder::InitRHI()
 {
-	CScopeLock		scopeLock( &readWriteCS );
+	CScopeLock		scopeLock( &readWriteMutex );
 
 	// Create vertex buffer
 	uint32			numVerteces = verteces.size();

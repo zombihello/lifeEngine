@@ -13,7 +13,7 @@
 
 #include "Misc/Types.h"
 #include "System/Package.h"
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 
 /**
  * @ingroup WorldEd

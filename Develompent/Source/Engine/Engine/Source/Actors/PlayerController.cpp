@@ -5,7 +5,6 @@
 #include "Components/CameraComponent.h"
 
 IMPLEMENT_CLASS( APlayerController )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( APlayerController )
 
 /*
 ==================
@@ -18,16 +17,19 @@ APlayerController::APlayerController()
 	, rotationInput( Math::vectorZero )
 	, viewRotation( Math::vectorZero )
 {
-	inputComponent = CreateComponent< CInputComponent >( TEXT( "InputComponent0" ) );
+	inputComponent = CreateComponent<CInputComponent>( TEXT( "InputComponent0" ) );
 }
 
 /*
 ==================
-APlayerController::~APlayerController
+APlayerController::StaticInitializeClass
 ==================
 */
-APlayerController::~APlayerController()
-{}
+void APlayerController::StaticInitializeClass()
+{
+	// Native properties
+	new( staticClass, NAME_None, OBJECT_Public ) CObjectProperty( CPP_PROPERTY( ThisClass, inputComponent ), NAME_None, TEXT( "" ), CPF_None, CInputComponent::StaticClass() );
+}
 
 /*
 ==================

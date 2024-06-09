@@ -17,19 +17,13 @@
   */
 class CPointLightComponent : public CLightComponent
 {
-	DECLARE_CLASS( CPointLightComponent, CLightComponent, 0, 0 )
+	DECLARE_CLASS( CPointLightComponent, CLightComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
 	CPointLightComponent();
-
-	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
 
 #if WITH_EDITOR
 	/**

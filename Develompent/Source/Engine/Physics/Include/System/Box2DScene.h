@@ -15,7 +15,7 @@
 
 #include "Math/Math.h"
 #include "Misc/PhysicsTypes.h"
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 
 /**
  * @ingroup Physics

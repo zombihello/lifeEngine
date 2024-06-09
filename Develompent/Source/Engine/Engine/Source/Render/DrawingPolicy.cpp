@@ -1,5 +1,4 @@
 #include "Misc/EngineGlobals.h"
-#include "Containers/String.h"
 #include "RHI/BaseRHI.h"
 #include "RHI/BaseStateRHI.h"
 #include "RHI/TypesRHI.h"
@@ -47,7 +46,7 @@ void CMeshDrawingPolicy::InitInternal( class CVertexFactory* InVertexFactory, co
 	vertexShader	= materialRef->GetShader( vertexFactoryHash, SF_Vertex );
 	pixelShader		= materialRef->GetShader( vertexFactoryHash, SF_Pixel );
 
-	hash			= Sys_MemFastHash( materialRef, InVertexFactory->GetTypeHash() );
+	hash			= FastHash( materialRef, InVertexFactory->GetTypeHash() );
 	vertexFactory	= InVertexFactory;
 	material		= materialRef->GetAssetHandle();
 	depthBias		= InDepthBias;
@@ -99,7 +98,7 @@ CMeshDrawingPolicy::Draw
 void CMeshDrawingPolicy::Draw( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMeshBatch, const class CSceneView& InSceneView )
 {
 	TSharedPtr<CMaterial>		materialRef = material.ToSharedPtr();
-	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, CString::Format( TEXT( "Material %s" ), materialRef ? materialRef->GetAssetName().c_str() : TEXT( "Unloaded" ) ).c_str());
+	SCOPED_DRAW_EVENT( EventDraw, DEC_MATERIAL, L_Sprintf( TEXT( "Material %s" ), materialRef ? materialRef->GetAssetName().c_str() : TEXT( "Unloaded" ) ).c_str());
 
 	// If vertex factory not support instancig - draw without it
 	if ( !vertexFactory->SupportsInstancing() )

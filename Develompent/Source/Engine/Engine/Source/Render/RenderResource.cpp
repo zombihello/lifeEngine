@@ -10,11 +10,11 @@
 GetGlobalResourcesCS
 ==================
 */
-FORCEINLINE CCriticalSection& GetGlobalResourcesCS()
+FORCEINLINE CMutex& GetGlobalResourcesMutex()
 {
 	// Critical section of add/remove in CRenderResource::GetResourceList
-	static CCriticalSection		globalResourcesCS;
-	return globalResourcesCS;
+	static CMutex		globalResourcesMutex;
+	return globalResourcesMutex;
 }
 
 /*
@@ -40,7 +40,7 @@ CRenderResource::~CRenderResource()
 	}
 
 	// Deleting an initialized CRenderResource will result in a crash later since it is still linked
-	//Sys_Errorf( TEXT( "An CRenderResource was deleted without being released first!" ) );
+	//Sys_Error( TEXT( "An CRenderResource was deleted without being released first!" ) );
 }
 
 /*
@@ -80,10 +80,10 @@ void CRenderResource::InitResource()
 	// If resource is global - add he to global list of resource
 	if ( IsGlobal() && !bInGlobalList )
 	{
-		CCriticalSection&		criticalSection = GetGlobalResourcesCS();
-		criticalSection.Lock();
+		CMutex&		threadMutex = GetGlobalResourcesMutex();
+		threadMutex.Lock();
 		GetResourceList().insert( this );
-		criticalSection.Unlock();
+		threadMutex.Unlock();
 
 		bInGlobalList = true;
 	}
@@ -111,10 +111,10 @@ void CRenderResource::ReleaseResource()
 	// If resource is global - remove he from global list of resource
 	if ( IsGlobal() && bInGlobalList )
 	{
-		CCriticalSection&		criticalSection = GetGlobalResourcesCS();
-		criticalSection.Lock();
+		CMutex&		threadMutex = GetGlobalResourcesMutex();
+		threadMutex.Lock();
 		GetResourceList().erase( this );
-		criticalSection.Unlock();
+		threadMutex.Unlock();
 
 		bInGlobalList = false;
 	}

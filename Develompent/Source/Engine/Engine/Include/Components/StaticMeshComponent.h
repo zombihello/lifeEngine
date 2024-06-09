@@ -20,24 +20,13 @@
   */
 class CStaticMeshComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( CStaticMeshComponent, CPrimitiveComponent, 0, 0 )
+	DECLARE_CLASS( CStaticMeshComponent, CPrimitiveComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
 	CStaticMeshComponent();
-
-    /**
-     * @brief Destructor
-     */
-    virtual ~CStaticMeshComponent();
-
-	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
 
 #if WITH_EDITOR
 	/**
@@ -46,6 +35,12 @@ public:
 	 */
 	virtual void PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet ) override;
 #endif // WITH_EDITOR
+
+	/**
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
+	 */
+	virtual void PostLoad() override;
 
 	/**
 	 * @brief Adds mesh batches for draw in scene

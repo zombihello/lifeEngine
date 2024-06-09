@@ -71,10 +71,10 @@ extRapidJSON                    = externalDir .. "rapidjson"
 extSdl2			                = externalDir .. "SDL2-2.0.14"
 extStb                          = externalDir .. "stb"
 extTheora                       = externalDir .. "theora-1.2"
-extTmxlite                      = externalDir .. "tmxlite"
 extZlib                         = externalDir .. "zlib"
 extCompressonator				= externalDir .. "Compressonator_4.3.206"
 extHalf							= externalDir .. "half-2.2.0"
+extMimalloc                     = externalDir .. "mimalloc-2.1.2"
 
 -- Include modules of external libs
 include( extAssimp )
@@ -90,10 +90,10 @@ include( extRapidJSON )
 include( extSdl2 )
 include( extStb )
 include( extTheora )
-include( extTmxlite )
 include( extZlib )
 include( extCompressonator )
 include( extHalf )
+include( extMimalloc )
 
 workspace( game )
     location( "../Intermediate/" .. _ACTION .. "/" )
@@ -125,6 +125,7 @@ workspace( game )
         defines 		{
             "_WIN64",
             "_CRT_SECURE_NO_WARNINGS",		-- For remove on unsafe C functions
+            "_CRT_NONSTDC_NO_DEPRECATE",
             "PLATFORM_64BIT=1"
         }
 
@@ -193,6 +194,8 @@ workspace( game )
             "Engine/**/Include/**.h",
             "Engine/**/Include/**.inl",
             "Engine/**/Source/**.cpp",
+            "Engine/**/Source/**.flex",
+            "Engine/**/Source/**.bison",
             "Games/" .. game .. "/Include/**.h",
             "Games/" .. game .. "/Include/**.inl",
             "Games/" .. game .. "/Source/**.cpp",
@@ -224,7 +227,8 @@ workspace( game )
         LinkSDL2()
         LinkTheora()
 		LinkHalf()
-
+		LinkMimalloc()
+		
         if is2DEngine then
             LinkBox2D()
         else
@@ -236,9 +240,13 @@ workspace( game )
         filter "configurations:*WithEditor"
             LinkSTB()
             LinkAssmip()
-            LinkTmxLite()
 			LinkCompressonator()
 		   
+            includedirs {
+                flexOutputDir,
+                bisonOutputDir
+            }
+
             defines     { "WITH_EDITOR=1", "WITH_IMGUI=1" }
 
         filter "configurations:not *WithEditor"

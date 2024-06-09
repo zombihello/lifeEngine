@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include "Misc/Object.h"
+#include "Reflection/Object.h"
 #include "Render/Texture.h"
 #include "Render/Material.h"
 #include "Core.h"
@@ -22,18 +22,13 @@
  */
 class CBaseEngine : public CObject
 {
-	DECLARE_CLASS( CBaseEngine, CObject, 0, 0 )
+	DECLARE_CLASS( CBaseEngine, CObject, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
 	 * Constructor
 	 */
 	CBaseEngine();
-
-	/**
-	 * Destructor
-	 */
-	virtual ~CBaseEngine() {}
 
 	/**
 	 * Initialize engine
@@ -157,7 +152,25 @@ public:
 		return gamma;
 	}
 
+	/**
+	 * @brief Is enabled bloom
+	 * @return Return TRUE if bloom is enabled
+	 */
+	FORCEINLINE bool IsBloom() const
+	{
+		return bBloom;
+	}
+
 protected:
+	/**
+	 * @brief Override configuration with command line params
+	 *
+	 * @param InOutWindowWidth		Window width
+	 * @param InOutWindowHeight		Window height
+	 * @param InOutFullscreen		Is need to enable fullscreen mode
+	 */
+	void OverrideConfigurationFromCommandLine( uint32& InOutWindowWidth, uint32& InOutWindowHeight, bool& InOutFullscreen );
+
 	TAssetHandle<CTexture2D>		defaultTexture;					/**< Default texture */
 	TAssetHandle<CMaterial>			defaultMaterial;				/**< Default material */
 
@@ -167,6 +180,7 @@ protected:
 
 	bool							bPrePass;						/**< Is enabled pre-pass render */
 	bool							bAutoExposure;					/**< Is enabled auto exposure */
+	bool							bBloom;							/**< Is enabled bloom */
 	float							exposure;						/**< Exposure */
 	float							exposureMin;					/**< Exposure min */
 	float							exposureMax;					/**< Exposure max */

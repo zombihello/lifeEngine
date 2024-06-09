@@ -86,7 +86,7 @@ public:
 		 */
 		FORCEINLINE std::size_t operator()( const TRefCountPtr& InRefPtr ) const
 		{
-			return Sys_MemFastHash( InRefPtr );
+			return FastHash( InRefPtr );
 		}
 	};
 

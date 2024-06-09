@@ -1,4 +1,5 @@
 #include "Misc/EngineGlobals.h"
+#include "Reflection/ObjectPackage.h"
 #include "System/World.h"
 #include "Render/Scene.h"
 #include "Render/RenderingThread.h"
@@ -14,7 +15,7 @@ CStaticMeshPreviewViewportClient::CStaticMeshPreviewViewportClient( const TShare
 	: CEditorLevelViewportClient( LVT_Perspective )
 	, scene( new CScene() )
 	, staticMesh( InStaticMesh )
-	, staticMeshComponent( new CStaticMeshComponent() )
+	, staticMeshComponent( nullptr )
 {
 	// Init view
 	bSetListenerPosition	= false;
@@ -25,6 +26,9 @@ CStaticMeshPreviewViewportClient::CStaticMeshPreviewViewportClient( const TShare
 	viewRotationQuat		= Math::quaternionZero;
 
 	// Init scene
+	CObjectPackage*		worldEdPackage = CObjectPackage::CreatePackage( nullptr, TEXT( "WorldEd" ) );
+	staticMeshComponent = new( worldEdPackage, NAME_None ) CStaticMeshComponent();
+	staticMeshComponent->AddToRoot();
 	staticMeshComponent->SetStaticMesh( InStaticMesh->GetAssetHandle() );
 	staticMeshComponent->SetVisibility( true );
 	scene->AddPrimitive( staticMeshComponent );
@@ -38,6 +42,7 @@ CStaticMeshPreviewViewportClient::~CStaticMeshPreviewViewportClient
 CStaticMeshPreviewViewportClient::~CStaticMeshPreviewViewportClient()
 {
 	FlushRenderingCommands();
+	staticMeshComponent->RemoveFromRoot();
 	delete scene;
 }
 

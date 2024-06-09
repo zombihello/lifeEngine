@@ -63,7 +63,7 @@ void CSceneRenderer::RenderHitProxies( ViewportRHIParamRef_t InViewportRHI, EHit
 				continue;
 			}
 
-			SCOPED_DRAW_EVENT( EventHitProxiesSDG, DEC_SCENE_ITEMS, CString::Format( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str() );			
+			SCOPED_DRAW_EVENT( EventHitProxiesSDG, DEC_SCENE_ITEMS, L_Sprintf( TEXT( "SDG %s" ), GetSceneSDGName( ( ESceneDepthGroup )SDGIndex ) ).c_str() );			
 
 #if WITH_EDITOR
 			// Draw simple elements

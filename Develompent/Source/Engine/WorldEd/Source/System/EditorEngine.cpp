@@ -1,9 +1,11 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseFileSystem.h"
 #include "EngineDefines.h"
-#include "Misc/Class.h"
+#include "Reflection/Class.h"
+#include "Reflection/ObjectGC.h"
+#include "Reflection/ObjectPackage.h"
+#include "Reflection/ObjectGlobals.h"
 #include "Misc/Misc.h"
 #include "Misc/CoreGlobals.h"
 #include "Misc/EngineGlobals.h"
@@ -90,14 +92,6 @@ CEditorEngine::CEditorEngine()
 
 /*
 ==================
-CEditorEngine::~CEditorEngine
-==================
-*/
-CEditorEngine::~CEditorEngine()
-{}
-
-/*
-==================
 CEditorEngine::Init
 ==================
 */
@@ -129,8 +123,12 @@ void CEditorEngine::Init()
 	g_AssetFactory.RegisterImporter( &CStaticMeshImporter::Import, &CStaticMeshImporter::Reimport, &CStaticMeshImporter::ShowImportSettings, CStaticMeshImporter::GetSupportedExtensions(), AT_StaticMesh );
 
 	// Create window and main viewport
-	uint32						windowWidth		= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) ).GetInt();
-	uint32						windowHeight	= g_Config.GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) ).GetInt();
+	const CJsonValue*			configWindowWidth = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowWidth" ) );
+	const CJsonValue*			configWindowHeight = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.SystemSettings" ), TEXT( "WindowHeight" ) );
+	uint32	windowWidth			= configWindowWidth ? configWindowWidth->GetInt( 800 ) : 800;
+	uint32	windowHeight		= configWindowHeight ? configWindowHeight->GetInt( 600 ) : 600;
+	bool	bDummyFullscreen	= false;
+	OverrideConfigurationFromCommandLine( windowWidth, windowHeight, bDummyFullscreen );
 
 	g_Window->SetTitle( GetEditorName().c_str() );
 	g_Window->SetSize( windowWidth, windowHeight );
@@ -149,7 +147,7 @@ void CEditorEngine::Init()
 
 		for ( uint32 index = 0; index < IT_Num; ++index )
 		{
-			const std::wstring				assetName = CString::Format( TEXT( "EditorIcon_%X" ), index );
+			const std::wstring				assetName = L_Sprintf( TEXT( "EditorIcon_%X" ), index );
 			TAssetHandle<CTexture2D>&		assetHandle = icons[index];
 			assetHandle = package->Find( assetName );
 			if ( !assetHandle.IsAssetValid() )
@@ -175,31 +173,31 @@ void CEditorEngine::Init()
 	editorWindow						= MakeSharedPtr<CEditorWindow>();
 	editorWindow->Init();
 
-	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( CString::Format( TEXT( "%s Classes" ), ANSI_TO_TCHAR( IMGUI_ICON_CODE ) ), AActor::StaticClass() );
+	actorClassesWindow					= MakeSharedPtr<CActorClassesWindow>( L_Sprintf( TEXT( "%s Classes" ), ANSI_TO_TCHAR( IMGUI_ICON_CODE ) ), AActor::StaticClass() );
 	actorClassesWindow->Init();
 	
-	actorPropertiesWindow				= MakeSharedPtr<CActorPropertiesWindow>( CString::Format( TEXT( "%s Properties" ), ANSI_TO_TCHAR( IMGUI_ICON_MENU ) ) );
+	actorPropertiesWindow				= MakeSharedPtr<CActorPropertiesWindow>( L_Sprintf( TEXT( "%s Properties" ), ANSI_TO_TCHAR( IMGUI_ICON_MENU ) ) );
 	actorPropertiesWindow->Init();
 
-	contentBrowserWindow				= MakeSharedPtr<CContentBrowserWindow>( CString::Format( TEXT( "%s Content" ), ANSI_TO_TCHAR( IMGUI_ICON_DATABASE ) ) );
+	contentBrowserWindow				= MakeSharedPtr<CContentBrowserWindow>( L_Sprintf( TEXT( "%s Content" ), ANSI_TO_TCHAR( IMGUI_ICON_DATABASE ) ) );
 	contentBrowserWindow->Init();
 
-	explorerLevelWindow					= MakeSharedPtr<CExplorerLevelWindow>( CString::Format( TEXT( "%s Explorer Level" ), ANSI_TO_TCHAR( IMGUI_ICON_GLOBE ) ) );
+	explorerLevelWindow					= MakeSharedPtr<CExplorerLevelWindow>( L_Sprintf( TEXT( "%s Explorer Level" ), ANSI_TO_TCHAR( IMGUI_ICON_GLOBE ) ) );
 	explorerLevelWindow->Init();
 
-	logsWindow							= MakeSharedPtr<CLogsWindow>( CString::Format( TEXT( "%s Logs" ), ANSI_TO_TCHAR( IMGUI_ICON_FILETEXT ) ) );
+	logsWindow							= MakeSharedPtr<CLogsWindow>( L_Sprintf( TEXT( "%s Logs" ), ANSI_TO_TCHAR( IMGUI_ICON_FILETEXT ) ) );
 	logsWindow->Init();
 
-	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho XY" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXY );
+	viewportWindows[LVT_OrthoXY]		= MakeSharedPtr<CLevelViewportWindow>( L_Sprintf( TEXT( "%s Ortho XY" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXY );
 	viewportWindows[LVT_OrthoXY]->Init();
 
-	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho XZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXZ );
+	viewportWindows[LVT_OrthoXZ]		= MakeSharedPtr<CLevelViewportWindow>( L_Sprintf( TEXT( "%s Ortho XZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoXZ );
 	viewportWindows[LVT_OrthoXZ]->Init();
 
-	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Ortho YZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoYZ );
+	viewportWindows[LVT_OrthoYZ]		= MakeSharedPtr<CLevelViewportWindow>( L_Sprintf( TEXT( "%s Ortho YZ" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), false, LVT_OrthoYZ );
 	viewportWindows[LVT_OrthoYZ]->Init();
 
-	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CLevelViewportWindow>( CString::Format( TEXT( "%s Perspective" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), true, LVT_Perspective );
+	viewportWindows[LVT_Perspective]	= MakeSharedPtr<CLevelViewportWindow>( L_Sprintf( TEXT( "%s Perspective" ), ANSI_TO_TCHAR( IMGUI_ICON_CAMERA ) ), true, LVT_Perspective );
 	viewportWindows[LVT_Perspective]->Init();
 }
 
@@ -306,9 +304,19 @@ void CEditorEngine::NewMap()
 	Logf( TEXT( "Create a new map\n" ) );
 	
 	// Clean up world and call garbage collector of unused packages and assets
-	g_World->CleanupWorld();
+	if ( g_World )
+	{
+		FlushRenderingCommands();
+		g_World->RemoveFromRoot();
+		g_World = nullptr;
+	}
+
+	CObjectPackage*		mapPackage = CObjectPackage::CreatePackage( nullptr, TEXT( "Unknown" ) );
+	g_World				= new( mapPackage, TEXT( "TheWorld" ), OBJECT_Public ) CWorld();
+	g_World->AddToRoot();
+	CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 	g_PackageManager->GarbageCollector();
-	
+
 	EditorDelegates::onEditorCreatedNewMap.Broadcast();
 }
 
@@ -319,11 +327,20 @@ CEditorEngine::LoadMap
 */
 bool CEditorEngine::LoadMap( const std::wstring& InMap, std::wstring& OutError )
 {
-	g_World->UnselectAllActors();
+	if ( g_World )
+	{
+		g_World->UnselectAllActors();
+	}
+
 	if ( !Super::LoadMap( InMap, OutError ) )
 	{
 		Warnf( TEXT( "Failed loading map '%s'. Error: %s\n" ), InMap.c_str(), OutError.c_str() );
-		NewMap();
+		
+		// Only create a new map if g_World isn't valid
+		if ( !g_World )
+		{
+			NewMap();
+		}
 	}
 	else
 	{
@@ -340,19 +357,15 @@ CEditorEngine::SaveMap
 */
 bool CEditorEngine::SaveMap( const std::wstring& InMap, std::wstring& OutError )
 {
+	Assert( g_World );
 	Logf( TEXT( "Save map: %s\n" ), InMap.c_str() );
 
-	CArchive*	arWorld = g_FileSystem->CreateFileWriter( InMap );
-	if ( !arWorld )
+	g_World->GetOutermost()->Rename( CFilename( InMap ).GetBaseFileName().c_str() );
+	if ( !CObjectPackage::SavePackage( g_World->GetOutermost(), g_World, 0, InMap.c_str(), SAVE_None ) )
 	{
-		OutError = TEXT( "Failed open archive" );
+		OutError = TEXT( "Failed to save map" );
 		return false;
 	}
-
-	arWorld->SetType( AT_World );
-	arWorld->SerializeHeader();
-	g_World->Serialize( *arWorld );
-	delete arWorld;
 
 	EditorDelegates::onEditorSavedMap.Broadcast();
 	return true;
@@ -426,5 +439,5 @@ std::wstring CEditorEngine::GetEditorName() const
 #error Insert court bitness of your platform
 #endif // PLATFORM_WINDOWS
 	
-	return CString::Format( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString.c_str(), g_RHI->GetRHIName() );
+	return L_Sprintf( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString.c_str(), g_RHI->GetRHIName() );
 }

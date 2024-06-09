@@ -288,11 +288,11 @@ struct MeshBatch
 	 */
 	FORCEINLINE uint64 GetTypeHash() const
 	{
-		uint64		hash = Sys_MemFastHash( indexBufferRHI );
-		hash = Sys_MemFastHash( primitiveType, hash );
-		hash = Sys_MemFastHash( baseVertexIndex, hash );
-		hash = Sys_MemFastHash( firstIndex, hash );
-		hash = Sys_MemFastHash( numPrimitives, hash );
+		uint64		hash = FastHash( indexBufferRHI );
+		hash = FastHash( primitiveType, hash );
+		hash = FastHash( baseVertexIndex, hash );
+		hash = FastHash( firstIndex, hash );
+		hash = FastHash( numPrimitives, hash );
 		return hash;
 	}
 
@@ -932,7 +932,7 @@ public:
 	 * @brief Get list of visible lights on the current frame
 	 * @return Return list of visible lights
 	 */
-	FORCEINLINE const std::list<LightComponentRef_t>& GetVisibleLights() const
+	FORCEINLINE const std::list<CLightComponent*>& GetVisibleLights() const
 	{
 		return frame.visibleLights;
 	}
@@ -956,13 +956,13 @@ private:
 	struct SceneFrame
 	{
 		SceneDepthGroup						SDGs[SDG_Max];		/**< Scene depth groups */
-		std::list<LightComponentRef_t>		visibleLights;		/**< List of visible lights */
+		std::list<CLightComponent*>			visibleLights;		/**< List of visible lights */
 	};
 	
 	float									exposure;			/**< Current exposure of the scene */
 	SceneFrame								frame;				/**< Scene frame */
-	std::list<PrimitiveComponentRef_t>		primitives;			/**< List of primitives on scene */
-	std::list<LightComponentRef_t>			lights;				/**< List of lights on scene */
+	std::list<CPrimitiveComponent*>			primitives;			/**< List of primitives on scene */
+	std::list<CLightComponent*>				lights;				/**< List of lights on scene */
 };
 
 //

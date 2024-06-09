@@ -40,7 +40,7 @@ FORCEINLINE const tchar* ShaderPlatformToText( EShaderPlatform InShaderPlatform 
 	{
 	case SP_PCD3D_SM5:		return TEXT( "PC-D3D-SM5" );
 	default:
-		Sys_Errorf( TEXT( "Unknown shader platform 0x%X" ), InShaderPlatform );
+		Sys_Error( TEXT( "Unknown shader platform 0x%X" ), InShaderPlatform );
 		return TEXT( "UNKNOWN" );
 	}
 }

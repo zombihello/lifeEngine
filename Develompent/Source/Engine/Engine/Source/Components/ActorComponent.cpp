@@ -1,5 +1,6 @@
 #include "Actors/Actor.h"
 #include "Components/ActorComponent.h"
+#include "System/World.h"
 
 IMPLEMENT_CLASS( CActorComponent )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CActorComponent )
@@ -11,16 +12,12 @@ CActorComponent::CActorComponent
 */
 CActorComponent::CActorComponent() 
 #if WITH_EDITOR
-	: bEditorOnly( false )
+	: bEditorOnly( false ) ,
+#else
+	:
 #endif // WITH_EDITOR
-{}
 
-/*
-==================
-CActorComponent::~CActorComponent
-==================
-*/
-CActorComponent::~CActorComponent()
+	worldPrivate( nullptr )
 {}
 
 /*
@@ -71,4 +68,14 @@ CActorComponent::GetOwner
 AActor* CActorComponent::GetOwner() const
 {
 	return Cast<AActor>( GetOuter() );
+}
+
+/*
+==================
+CActorComponent::GetWorld_Uncached
+==================
+*/
+CWorld* CActorComponent::GetWorld_Uncached() const
+{
+	return ( CWorld* )GetTypedOuter( CWorld::StaticClass() );
 }

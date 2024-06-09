@@ -1,7 +1,7 @@
 #include <vector>
 
 #include "Misc/EngineGlobals.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Render/RenderUtils.h"
 #include "D3D11RHI.h"
 #include "D3D11Surface.h"
@@ -287,7 +287,7 @@ CD3D11Texture2DRHI::CD3D11Texture2DRHI( const tchar* InDebugName, uint32 InSizeX
 		{
 			// Create a depth-stencil-view for the texture if it is resolve targetable
 			D3D11_DEPTH_STENCIL_VIEW_DESC			d3d11DepthStencilViewDesc;
-			memset( &d3d11DepthStencilViewDesc, 0, sizeof( D3D11_DEPTH_STENCIL_VIEW_DESC ) );
+			Memory::Memzero( &d3d11DepthStencilViewDesc, sizeof( D3D11_DEPTH_STENCIL_VIEW_DESC ) );
 			d3d11DepthStencilViewDesc.Flags = 0;
 
 			if ( d3d11Texture2DDesc.Format == DXGI_FORMAT_R32_TYPELESS )

@@ -16,17 +16,11 @@
 
 /**
  * @ingroup Engine
- * Typedef of pointer to primitive component
- */
-typedef TRefCountPtr< class CPrimitiveComponent >		PrimitiveComponentRef_t;
-
-/**
- * @ingroup Engine
  * PrimitiveComponents are SceneComponents that contain or generate some sort of geometry, generally to be rendered or used as collision data.
  */
 class CPrimitiveComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CPrimitiveComponent, CSceneComponent, 0, 0 )
+	DECLARE_CLASS( CPrimitiveComponent, CSceneComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	friend class CScene;			// For add and remove primitive in scene
@@ -37,9 +31,11 @@ public:
 	CPrimitiveComponent();
 
 	/**
-	 * @brief Destructor
+	 * @brief Called before destroying the object
+	 * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+	 * asynchronous cleanup process
 	 */
-	virtual ~CPrimitiveComponent();
+	virtual void BeginDestroy() override;
 
 	/**
 	 * Function called every frame on this ActorComponent. Override this function to implement custom logic to be executed every frame.
@@ -47,12 +43,6 @@ public:
 	 * @param[in] InDeltaTime The time since the last tick.
 	 */
 	virtual void TickComponent( float InDeltaTime );
-
-	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Adds mesh batches for draw in scene

@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "WindowsFileSystem.h"
 #include "WindowsArchive.h"
-#include "Containers/String.h"
+#include "Misc/Misc.h"
 #include "Logger/LoggerMacros.h"
 
 /*
@@ -37,7 +37,7 @@ class CArchive* CWindowsFileSystem::CreateFileReader( const std::wstring& InFile
 	{
 		if ( InFlags & AR_NoFail )
 		{
-			Sys_Errorf( TEXT( "Failed to create file: %s, InFlags = 0x%X" ), InFileName.c_str(), InFlags );
+			Sys_Error( TEXT( "Failed to create file: %s, InFlags = 0x%X" ), InFileName.c_str(), InFlags );
 		}
 
 		delete inputFile;
@@ -84,7 +84,7 @@ class CArchive* CWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 	{
 		if ( InFlags & AW_NoFail )
 		{
-			Sys_Errorf( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName.c_str(), InFlags );
+			Sys_Error( TEXT( "Failed to create file: %s, InFlags = %X" ), InFileName.c_str(), InFlags );
 		}
 
 		delete outputFile;
@@ -105,7 +105,7 @@ std::vector< std::wstring > CWindowsFileSystem::FindFiles( const std::wstring& I
 	WIN32_FIND_DATAW					data;
 	std::vector< std::wstring >			result;
 
-	handle = FindFirstFileW( CString::Format( TEXT( "%s/*" ), InDirectory.c_str() ).c_str(), &data );
+	handle = FindFirstFileW( L_Sprintf( TEXT( "%s/*" ), InDirectory.c_str() ).c_str(), &data );
 	if ( handle != INVALID_HANDLE_VALUE )
 	{
 		do
@@ -150,7 +150,7 @@ bool CWindowsFileSystem::Delete( const std::wstring& InPath, bool InIsEvenReadOn
 		}
 		else
 		{
-			Sys_Errorf( TEXT( "Error deleting file '%s' (GetLastError: %d)" ), InPath.c_str(), error );
+			Sys_Error( TEXT( "Error deleting file '%s' (GetLastError: %d)" ), InPath.c_str(), error );
 		}
 	}
 
@@ -291,61 +291,19 @@ bool CWindowsFileSystem::IsDirectory( const std::wstring& InPath ) const
 
 /*
 ==================
-CWindowsFileSystem::ConvertToAbsolutePath
+CWindowsFileSystem::IsReadOnly
 ==================
 */
-std::wstring CWindowsFileSystem::ConvertToAbsolutePath( const std::wstring& InPath ) const
+bool CWindowsFileSystem::IsReadOnly( const std::wstring& InPath ) const
 {
-	std::wstring		path = InPath;
-	if ( path.find( TEXT( ".." ) ) != std::wstring::npos )
+	DWORD		fileAttributes = GetFileAttributesW( InPath.c_str() );
+	if ( fileAttributes != INVALID_FILE_ATTRIBUTES )
 	{
-		path = GetCurrentDirectory() + PATH_SEPARATOR + path;
-		Sys_NormalizePathSeparators( path );
+		return fileAttributes & FILE_ATTRIBUTE_READONLY;
 	}
-
-	return path;
-}
-
-/*
-==================
-CWindowsFileSystem::SetCurrentDirectory
-==================
-*/
-void CWindowsFileSystem::SetCurrentDirectory( const std::wstring& InDirectory )
-{
-	SetCurrentDirectoryW( InDirectory.c_str() );
-}
-
-/*
-==================
-CWindowsFileSystem::GetCurrentDirectory
-==================
-*/
-std::wstring CWindowsFileSystem::GetCurrentDirectory() const
-{
-	tchar		path[ MAX_PATH ];
-	::GetCurrentDirectoryW( MAX_PATH, path );
-	return path;
-}
-
-/*
-==================
-CWindowsFileSystem::GetExePath
-==================
-*/
-std::wstring CWindowsFileSystem::GetExePath() const
-{
-	TCHAR		path[MAX_PATH];
-	GetModuleFileName( NULL, path, MAX_PATH );
-	return path;
-}
-
-/*
-==================
-CWindowsFileSystem::IsAbsolutePath
-==================
-*/
-bool CWindowsFileSystem::IsAbsolutePath( const std::wstring& InPath ) const
-{
-	return InPath.find_first_of( TEXT( ":" ) ) != std::wstring::npos;
+	else
+	{
+		Errorf( TEXT( "Error reading attributes for '%s'\n" ), InPath.c_str() );
+		return false;
+	}
 }

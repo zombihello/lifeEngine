@@ -28,7 +28,8 @@ CBoxComponent::StaticInitializeClass
 */
 void CBoxComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Size" ) ) CVectorProperty( TEXT( "Primitive" ), TEXT( "Set size of box" ), STRUCT_OFFSET( ThisClass, size ), CPF_Edit, 1 );
+	// Native properties
+	new( staticClass, TEXT( "Size" ), OBJECT_Public ) CVectorProperty( CPP_PROPERTY( ThisClass, size ), TEXT( "Primitive" ), TEXT( "Set size of box" ), CPF_Edit, 1 );
 }
 
 #if WITH_EDITOR
@@ -57,15 +58,4 @@ void CBoxComponent::UpdateBodySetup()
 	boxGeometry.collisionProfile	= collisionProfile;
 	boxGeometry.material			= physicsMaterial;
 	bodySetup->AddBoxGeometry( boxGeometry );
-}
-
-/*
-==================
-CBoxComponent::Serialize
-==================
-*/
-void CBoxComponent::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-	InArchive << size;
 }

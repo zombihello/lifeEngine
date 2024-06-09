@@ -9,13 +9,14 @@
 #include "System/BaseFileSystem.h"
 #include "System/BaseWindow.h"
 #include "System/Config.h"
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 #include "System/InputSystem.h"
 #include "System/Package.h"
 #include "System/AudioEngine.h"
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
-#include "Misc/Class.h"
+#include "Misc/StringConv.h"
+#include "Reflection/ObjectGC.h"
+#include "Reflection/ObjectIterator.h"
+#include "Reflection/ObjectGlobals.h"
 #include "Math/Color.h"
 #include "Misc/CommandLine.h"
 #include "Misc/TableOfContents.h"
@@ -32,7 +33,9 @@
 #include "System/SplashScreen.h"
 #include "System/BaseEngine.h"
 #include "System/FullScreenMovie.h"
+#include "System/Cvar.h"
 #include "System/Name.h"
+#include "System/System.h"
 #include "LEBuild.h"
 
 #if USE_THEORA_CODEC
@@ -131,43 +134,68 @@ CEngineLoop::InitConfigs
 void CEngineLoop::InitConfigs()
 {
 	// Init configs
-	g_Config.Init();
+	CConfig::Get().Init();
 
 	// Set from config max tick rate
-	g_UseMaxTickRate			= g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) ).GetBool();
+	const CJsonValue*			configUseMaxTickRate = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "UseMaxTickRate" ) );
+	g_UseMaxTickRate			= configUseMaxTickRate ? configUseMaxTickRate->GetBool() : false;
 
 #if WITH_EDITOR
 	// Fill table for convert from text to ESurfaceType
 	{
-		std::vector< CConfigValue >		configSurfaceNames	= g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) ).GetArray();
-		for ( uint32 index = 0, count = configSurfaceNames.size(); index < count; ++index )
+		const CJsonValue*				configSurfaceNamesValue = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Surfaces" ) );
+		const std::vector<CJsonValue>*	configSurfaceNames = configSurfaceNamesValue ? configSurfaceNamesValue->GetArray() : nullptr;
+		if ( configSurfaceNames )
 		{
-			const CConfigValue&		configSurface			= configSurfaceNames[ index ];
-			Assert( configSurface.GetType() == CConfigValue::T_Object );
-			CConfigObject			objectSurface = configSurface.GetObject();
+			for ( uint32 index = 0, count = configSurfaceNames->size(); index < count; ++index )
+			{
+				const CJsonValue&		configSurface = configSurfaceNames->at( index );
+				const CJsonObject*		objectSurface = configSurface.GetObject();
+				if ( !objectSurface )
+				{
+					Warnf( TEXT( "Invalid 'Editor.Editor:Surfaces[%i]'\n" ), index );
+					continue;
+				}
 
-			std::wstring		name		= objectSurface.GetValue( TEXT( "Name" ) ).GetString();
-			int32				surfaceID	= objectSurface.GetValue( TEXT( "ID" ) ).GetInt();
-			Assert( surfaceID < ST_Max );
-			g_SurfaceTypeNames.push_back( std::make_pair( name, ( ESurfaceType )surfaceID ) );
+				const CJsonValue*	configName = objectSurface->GetValue( TEXT( "Name" ) );
+				const CJsonValue*	configID = objectSurface->GetValue( TEXT( "ID" ) );
+				if ( !configName || !configID )
+				{
+					Warnf( TEXT( "Invalid 'Editor.Editor:Surfaces[%i]'\n" ), index );
+					continue;
+				}
+
+				std::wstring name		= configName->GetString();
+				int32		 surfaceID	= configID->GetInt();
+				Assert( surfaceID < ST_Max );
+				g_SurfaceTypeNames.push_back( std::make_pair( name, ( ESurfaceType )surfaceID ) );
+			}
 		}
 	}
 
 	// Is need cook editor content (include dev content)
-	g_IsCookEditorContent			= g_Config.GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) ).GetBool();
+	const CJsonValue*		configCookEditorContent = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.CookPackages" ), TEXT( "CookEditorContent" ) );
+	g_IsCookEditorContent	= configCookEditorContent ? configCookEditorContent->GetBool() : nullptr;
 	if ( g_IsCookEditorContent )
 	{
 		Warnf( TEXT( "Enabled cook editor content\n" ) );
 	}
 
 	// Is allow shader debug dump
-	g_AllowDebugShaderDump			= g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) ).GetBool() || g_CommandLine.HasParam( TEXT( "-shaderdump" ) );
+	const CJsonValue*		configAllowShaderDebugDump = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "AllowShaderDebugDump" ) );
+	g_AllowDebugShaderDump	= ( configAllowShaderDebugDump ? configAllowShaderDebugDump->GetBool() : false ) || g_CommandLine.HasParam( TEXT( "-shaderdump" ) );
 #endif // WITH_EDITOR
 }
 
 #include "Misc/CoreGlobals.h"
 #include "System/BaseFileSystem.h"
 #include "System/Archive.h"
+
+#include "Reflection/ObjectPackage.h"
+#include "Reflection/Class.h"
+#include "Reflection/Object.h"
+#include "Reflection/Property.h"
+#include "Actors/StaticMesh.h"
 
 /*
 ==================
@@ -181,7 +209,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 
 	g_CommandLine.Init( InCmdLine );
 	CName::StaticInit();
-	InitConfigs();
+	InitConfigs();	
 
 #if WITH_EDITOR
 	g_IsEditor = g_CommandLine.HasParam( TEXT( "editor" ) );
@@ -189,8 +217,8 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	CCommandLine::Values_t	paramValues = g_CommandLine.GetValues( TEXT( "commandlet" ) );
 	if ( !paramValues.empty() )
 	{
-		g_IsCooker		= paramValues[0] == TEXT( "CookPackages" ) || paramValues[0] == TEXT( "CCookPackagesCommandlet" );
-		g_IsCommandlet	= !g_IsCooker;
+		g_IsCooker			= !L_Stricmp( paramValues[0].c_str(), TEXT( "CookPackages" ) ) || !L_Stricmp( paramValues[0].c_str(), TEXT( "CCookPackagesCommandlet" ) );
+		g_IsCommandlet		= !g_IsCooker;
 	}
 
 	g_IsGame = !g_IsEditor && !g_IsCooker && !g_IsCommandlet;
@@ -201,20 +229,16 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	g_Log->Init();
 	int32		result = Sys_PlatformPreInit();
 	
+	// Initialize the system
+	CSystem::Get().Init();
+
+	// Initialize CObject system
+	CObject::StaticInit();
+
 	// Loading table of contents
 	if ( !g_IsEditor && !g_IsCooker )
 	{
 		std::wstring	tocPath = g_CookedDir + PATH_SEPARATOR + CTableOfContets::GetNameTOC();
-
-#if WITH_EDITOR
-		if ( !g_FileSystem->IsExistFile( tocPath ) )
-		{
-			CCommandLine		commandLine;
-			commandLine.Init( TEXT( "-commandlet=CookerSync" ) );
-			CBaseCommandlet::ExecCommandlet( commandLine );
-		}
-#endif // WITH_EDITOR
-		
 		CArchive*		archiveTOC	= g_FileSystem->CreateFileReader( tocPath );
 		if ( archiveTOC )
 		{
@@ -229,7 +253,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 
 	if ( !g_IsCooker && !g_IsEditor && !g_FileSystem->IsExistFile( g_CookedDir, true ) )
 	{
-		Sys_Errorf( TEXT( "Cooked directory '%s' not exist. For work need cook packages" ), g_CookedDir.c_str() );
+		Sys_Error( TEXT( "Cooked directory '%s' not exist. For work need cook packages" ), g_CookedDir.c_str() );
 		return -1;
 	}
 
@@ -237,7 +261,7 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	g_ScriptEngine->Init();
 	g_RHI->Init( g_IsEditor );
 
-	Logf( TEXT( "User: %s//%s\n" ), Sys_ComputerName().c_str(), Sys_UserName().c_str() );
+	Logf( TEXT( "User: %s//%s\n" ), Sys_GetComputerName().c_str(), Sys_GetUserName().c_str() );
 	Logf( TEXT( "Started with arguments: %s\n" ), InCmdLine );
 
 	// Creating engine from config
@@ -245,19 +269,22 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 		std::wstring		classEngineName = TEXT( "CBaseEngine" );
 		if ( !g_IsEditor )
 		{
-			classEngineName = g_Config.GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "Class" ) ).GetString().c_str();
+			const CJsonValue*	configEngineClass = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "Class" ) );
+			classEngineName		= configEngineClass ? configEngineClass->GetString() : TEXT( "" );
 		}
 #if WITH_EDITOR
 		else
 		{
-			classEngineName = g_Config.GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Class" ) ).GetString().c_str();
+			const CJsonValue*	configEngineClass = CConfig::Get().GetValue( CT_Editor, TEXT( "Editor.Editor" ), TEXT( "Class" ) );
+			classEngineName		= configEngineClass ? configEngineClass->GetString() : TEXT( "" );
 		}
 #endif // WITH_EDITOR
 
-		const CClass*		lclass = CClass::StaticFindClass( classEngineName.c_str() );
+		const CClass*		lclass = FindObjectFast<CClass>( nullptr, classEngineName, true, true );
 		AssertMsg( lclass, TEXT( "Class engine %s not found" ), classEngineName.c_str() );
 		
-		g_Engine = lclass->CreateObject< CBaseEngine >();
+		CObjectPackage*		enginePackage = CObjectPackage::CreatePackage( nullptr, TEXT( "Engine" ) );
+		g_Engine			= lclass->CreateObject<CBaseEngine>( enginePackage, NAME_None, OBJECT_Public );
 		Assert( g_Engine );
 	}
 
@@ -305,6 +332,10 @@ int32 CEngineLoop::Init()
 		g_FullScreenMovie->GameThreadInitiateStartupSequence();
 	}
 
+	// Setup GC optimizations
+	CObjectGC::Get().CloseDisregardForGC();
+	g_IsInitialLoad = false;
+
 	// Parse cmd line for start commandlets
 #if WITH_EDITOR
 	if ( CBaseCommandlet::ExecCommandlet( g_CommandLine ) )
@@ -320,20 +351,20 @@ int32 CEngineLoop::Init()
 	if ( g_IsEditor )
 	{
 		// Get map for loading in editor
-		CConfigValue		configEditorStartupMap = g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
-		if ( configEditorStartupMap.IsA( CConfigValue::T_String ) )
+		const CJsonValue*		configEditorStartupMap = CConfig::Get().GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "EditorStartupMap" ) );
+		if ( configEditorStartupMap && configEditorStartupMap->IsA( JVT_String ) )
 		{
-			map = configEditorStartupMap.GetString();
+			map = configEditorStartupMap->GetString();
 		}
 	}
 	else
 #endif // WITH_EDITOR
 	{
 		// Get map for loading in game
-		CConfigValue		configGameDefaultMap = g_Config.GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
-		if ( configGameDefaultMap.IsA( CConfigValue::T_String ) )
+		const CJsonValue*		configGameDefaultMap = CConfig::Get().GetValue( CT_Game, TEXT( "Game.GameInfo" ), TEXT( "GameDefaultMap" ) );
+		if ( configGameDefaultMap && configGameDefaultMap->IsA( JVT_String ) )
 		{
-			map = configGameDefaultMap.GetString();
+			map = configGameDefaultMap->GetString();
 		}
 	}
 
@@ -347,22 +378,25 @@ int32 CEngineLoop::Init()
 		}
 	}
 
+	// Mark that we start executing in MainLoop()
+	g_IsRunning = true;
+
 	if ( !map.empty() )
 	{
-		Sys_SetSplashText( STT_StartupProgress, CString::Format( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
+		Sys_SetSplashText( STT_StartupProgress, L_Sprintf( TEXT( "Loading map '%s'..." ), map.c_str() ).c_str() );
 
 		std::wstring		error;
-		bool				bAbsolutePath = g_FileSystem->IsAbsolutePath( map );
-		bool				successed = g_Engine->LoadMap( !bAbsolutePath ? CString::Format( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), g_CookedDir.c_str(), map.c_str() ) : map, error );
+		bool				bAbsolutePath = L_IsAbsolutePath( map );
+		bool				successed = g_Engine->LoadMap( !bAbsolutePath ? L_Sprintf( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s" ), g_CookedDir.c_str(), map.c_str() ) : map, error );
 		if ( !successed )
 		{
-			Sys_Errorf( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
+			Sys_Error( TEXT( "Failed loading map '%s'. Error: %s" ), map.c_str(), error.c_str() );
 			result = 2;
 		}
 	}
 	else if ( !g_IsEditor )
 	{
-		Sys_Errorf( TEXT( "In game config not setted or not valid default map (parameter 'GameDefaultMap')" ) );
+		Sys_Error( TEXT( "In game config not setted or not valid default map (parameter 'GameDefaultMap')" ) );
 		result = 1;
 	}
 
@@ -432,12 +466,13 @@ CEngineLoop::Exit
 */
 void CEngineLoop::Exit()
 {
+	g_IsRunning = false;
 	StopRenderingThread();
 
 	g_PackageManager->Shutdown();
 
 	g_Engine->Shutdown();
-	delete g_Engine;
+	g_Engine->RemoveFromRoot();
 	g_Engine = nullptr;
 
 	delete g_FullScreenMovie;
@@ -448,7 +483,11 @@ void CEngineLoop::Exit()
 	g_RHI->Destroy();
 
 	g_Window->Close();
+	CObject::CleanupLinkerMap();
+	CObject::StaticExit();
+	CSystem::Get().Shutdown();
 	g_Log->TearDown();
-	g_Config.Shutdown();
+	CConfig::Get().Shutdown();
 	g_CommandLine.Shutdown();
+	g_Cvar.UnregisterAllCommands();
 }

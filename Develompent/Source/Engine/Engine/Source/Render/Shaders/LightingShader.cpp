@@ -73,7 +73,7 @@ CBaseLightingVertexShader::SetMesh
 */
 void CBaseLightingVertexShader::SetMesh( class CBaseDeviceContextRHI* InDeviceContextRHI, const struct MeshBatch& InMesh, const class CVertexFactory* InVertexFactory, const class CSceneView* InView, uint32 InNumInstances /* = 1 */, uint32 InStartInstanceID /* = 0 */ ) const
 {
-	Sys_Errorf( TEXT( "CBaseLightingVertexShader::SetMesh( MeshBatch ) Not supported" ) );
+	Sys_Error( TEXT( "CBaseLightingVertexShader::SetMesh( MeshBatch ) Not supported" ) );
 }
 
 

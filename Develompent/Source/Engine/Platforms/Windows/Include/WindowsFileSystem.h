@@ -127,39 +127,11 @@ public:
     virtual bool IsDirectory( const std::wstring& InPath ) const override;
 
     /**
-     * @brief Convert to absolute path
-     *
-     * @param[in] InPath Path
-     * @return Absolute path
+     * @brief Is file or directory read only
+     * @param InPath      Path to file or directory
+     * @return Return TRUE if the file is read only, otherwise returns FALSE
      */
-    virtual std::wstring ConvertToAbsolutePath( const std::wstring& InPath ) const override;
-
-    /**
-     * @brief Set current directory
-     *
-     * @param[in] InDirectory Path to directory
-     */
-    virtual void SetCurrentDirectory( const std::wstring& InDirectory ) override;
-
-    /**
-     * @brief Get current directory
-     * @return Return current directory
-     */
-    virtual std::wstring GetCurrentDirectory() const override;
-
-    /**
-     * @brief Get path to current exe
-     * @return Return path to current exe
-     */
-    virtual std::wstring GetExePath() const override;
-
-    /**
-    * @brief Is absolute path
-    *
-    * @param InPath    Path
-    * @return Return TRUE if InPath is absolute path, otherwise will return FALSE
-    */
-    virtual bool IsAbsolutePath( const std::wstring& InPath ) const override;
+    virtual bool IsReadOnly( const std::wstring& InPath ) const override;
 };
 
 #endif

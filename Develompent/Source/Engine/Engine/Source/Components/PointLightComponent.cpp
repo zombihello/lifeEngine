@@ -22,23 +22,7 @@ CPointLightComponent::StaticInitializeClass
 */
 void CPointLightComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Radius" ) ) CFloatProperty( TEXT( "Light" ), TEXT( "Light radius" ), STRUCT_OFFSET( ThisClass, radius ), CPF_Edit );
-}
-
-/*
-==================
-CPointLightComponent::Serialize
-==================
-*/
-void CPointLightComponent::Serialize( class CArchive& InArchive )
-{
-	Super::Serialize( InArchive );
-	if ( InArchive.Ver() < VER_NewSeriallizeDataInLightComponents )
-	{
-		return;
-	}
-
-	InArchive << radius;
+	new( staticClass, TEXT( "Radius" ), OBJECT_Public ) CFloatProperty( CPP_PROPERTY( ThisClass, radius ), TEXT( "Light" ), TEXT( "Light radius" ), CPF_Edit );
 }
 
 #if WITH_EDITOR

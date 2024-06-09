@@ -1,5 +1,4 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "System/CategoryPropertyNode.h"
 #include "System/ObjectPropertyNode.h"
 #include "System/ItemPropertyNode.h"
@@ -62,7 +61,7 @@ void CCategoryPropertyNode::Tick( float InItemWidthSpacing /* = 0.f */ )
 {
 	ImGui::Dummy( ImVec2( InItemWidthSpacing, 0.f ) );
 	ImGui::SameLine();
-	if ( categoryName == NAME_None || ImGui::CollapsingHeader( CString::Format( TEXT( "%s##%p" ), categoryName.ToString().c_str(), this ), true, ImGuiTreeNodeFlags_DefaultOpen ) )
+	if ( categoryName == NAME_None || ImGui::CollapsingHeader( L_Sprintf( TEXT( "%s##%p" ), categoryName.ToString().c_str(), this ), true, ImGuiTreeNodeFlags_DefaultOpen ) )
 	{
 		TickChildren( InItemWidthSpacing + ImGui::GetStyle().ItemSpacing.x );
 	}

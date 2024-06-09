@@ -27,30 +27,19 @@ CSpotLightComponent::StaticInitializeClass
 */
 void CSpotLightComponent::StaticInitializeClass()
 {
-	new( staticClass, TEXT( "Radius" ) ) CFloatProperty( TEXT( "Light" ), TEXT( "Light radius" ), STRUCT_OFFSET( ThisClass, radius ), CPF_Edit );
-	new( staticClass, TEXT( "Height" ) ) CFloatProperty( TEXT( "Light" ), TEXT( "Light height" ), STRUCT_OFFSET( ThisClass, height ), CPF_Edit );
+	new( staticClass, TEXT( "Radius" ), OBJECT_Public ) CFloatProperty( CPP_PROPERTY( ThisClass, radius ), TEXT( "Light" ), TEXT( "Light radius" ), CPF_Edit );
+	new( staticClass, TEXT( "Height" ), OBJECT_Public ) CFloatProperty( CPP_PROPERTY( ThisClass, height ), TEXT( "Light" ), TEXT( "Light height" ), CPF_Edit );
 }
 
 /*
 ==================
-CSpotLightComponent::Serialize
+CSpotLightComponent::PostLoad
 ==================
 */
-void CSpotLightComponent::Serialize( class CArchive& InArchive )
+void CSpotLightComponent::PostLoad()
 {
-	Super::Serialize( InArchive );
-	if ( InArchive.Ver() < VER_NewSeriallizeDataInLightComponents )
-	{
-		return;
-	}
-
-	InArchive << radius;
-	InArchive << height;
-	
-	if ( InArchive.IsLoading() )
-	{
-		bNeedUpdateCutoff = true;
-	}
+	Super::PostLoad();
+	bNeedUpdateCutoff = true;
 }
 
 #if WITH_EDITOR

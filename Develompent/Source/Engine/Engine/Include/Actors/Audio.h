@@ -19,18 +19,13 @@
   */
 class AAudio : public AActor
 {
-	DECLARE_CLASS( AAudio, AActor, 0, 0 )
+	DECLARE_CLASS( AAudio, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
 	 * Constructor
 	 */
 	AAudio();
-
-	/**
-	 * Destructor
-	 */
-	virtual ~AAudio();
 
 	/**
 	 * @brief Set audio bank
@@ -50,17 +45,7 @@ public:
 	 * @param InRotation    Rotation actor on spawn
 	 * @return Return spawned actor. If failed returning NULL
 	 */
-	static ActorRef_t SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
-
-	/**
-	 * @brief Initialize actor properties
-	 * This method called only when actor spawned on cooking of map. Available only when WITH_EDITOR is 1
-	 *
-	 * @param InActorVars Array of actor properties to init
-	 * @param InCooker Pointer to cooker for cook any resources if need
-	 * @return Return if properties inited succeed and all resources cooked is succeed, else return false
-	 */
-	virtual bool InitProperties( const std::vector< CActorVar >& InActorVars, class CCookPackagesCommandlet* InCooker ) override;
+	static AActor* SpawnActorAsset( const TSharedPtr<CAsset>& InAsset, const Vector& InLocation, const Quaternion& InRotation );
 
 	/**
 	 * @brief Get path to icon of actor for exploer level in WorldEd
@@ -73,16 +58,16 @@ public:
 	 * Get audio component
 	 * @return Return audio component
 	 */
-	FORCEINLINE TRefCountPtr<CAudioComponent> GetAudioComponent() const
+	FORCEINLINE CAudioComponent* GetAudioComponent() const
 	{
 		return audioComponent;
 	}
 
 private:
-	TRefCountPtr<CAudioComponent>			audioComponent;		/**< Audio component */
+	CAudioComponent*			audioComponent;		/**< Audio component */
 
 #if WITH_EDITOR
-	TRefCountPtr<CSpriteComponent>			gizmoComponent;		/**< Gizmo component */
+	CSpriteComponent*			gizmoComponent;		/**< Gizmo component */
 #endif // WITH_EDITOR
 };
 

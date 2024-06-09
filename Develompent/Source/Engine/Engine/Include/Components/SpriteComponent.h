@@ -9,10 +9,10 @@
 #ifndef SPRITECOMPONENT_H
 #define SPRITECOMPONENT_H
 
+#include "Containers/EnumAsByte.h"
 #include "Components/PrimitiveComponent.h"
 #include "Render/Scene.h"
 #include "Render/Sprite.h"
-#include "Misc/EnumAsByte.h"
 
 #if ENABLE_HITPROXY
 #include "Render/SceneHitProxyRendering.h"
@@ -29,7 +29,7 @@ enum ESpriteType
     ST_RotatingOnlyVertical     /**< Rotating sprite to player camera only by vertical */
 };
 
-DECLARE_ENUM( ESpriteType )
+DECLARE_ENUM( ESpriteType, TEXT( "Engine" ) )
 #define FOREACH_ENUM_SPRITETYPE( X ) \
 	X( ST_Static ) \
 	X( ST_Rotating ) \
@@ -41,7 +41,7 @@ DECLARE_ENUM( ESpriteType )
   */
 class CSpriteComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( CSpriteComponent, CPrimitiveComponent, 0, 0 )
+	DECLARE_CLASS( CSpriteComponent, CPrimitiveComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
     /**
@@ -61,6 +61,12 @@ public:
 	 * @param[in] InArchive Archive for serialize
 	 */
 	virtual void Serialize( class CArchive& InArchive ) override;
+
+	/**
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
+	 */
+	virtual void PostLoad() override;
 
 #if WITH_EDITOR
 	/**
@@ -134,6 +140,7 @@ public:
 	FORCEINLINE void SetMaterial( const TAssetHandle<CMaterial> InMaterial )
 	{
 		sprite->SetMaterial( InMaterial );
+		material = InMaterial;
 		bIsDirtyDrawingPolicyLink = true;
 	}
 

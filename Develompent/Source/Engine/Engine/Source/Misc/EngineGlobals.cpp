@@ -4,7 +4,7 @@
 #include "System/InputSystem.h"
 #include "System/World.h"
 #include "System/CameraManager.h"
-#include "System/ConsoleSystem.h"
+#include "System/Cvar.h"
 
 // -------------
 // GLOBALS
@@ -15,7 +15,7 @@ CShaderManager*												g_ShaderManager = new CShaderManager();
 std::wstring												g_CookedDir = TEXT( "" );
 class CBaseEngine*											g_Engine = nullptr;
 CInputSystem*												g_InputSystem = new CInputSystem();
-CWorld*														g_World = new CWorld();
+CWorld*														g_World = nullptr;
 bool														g_UseMaxTickRate = true;
 CCameraManager*												g_CameraManager = new CCameraManager();
 
@@ -26,4 +26,4 @@ bool														g_AllowDebugShaderDump = false;
 #endif // WITH_EDITOR
 
 class CFullScreenMovieSupport*								g_FullScreenMovie = nullptr;
-CConsoleSystem												g_ConsoleSystem;
+CCvar														g_Cvar;

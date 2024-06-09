@@ -6,7 +6,6 @@
 #include "Misc/EngineGlobals.h"
 #include "Misc/Misc.h"
 #include "Logger/LoggerMacros.h"
-#include "Containers/String.h"
 #include "System/BaseFileSystem.h"
 #include "WindowsLogger.h"
 
@@ -87,7 +86,7 @@ void CWindowsLogger::Init()
 	time_t		timeNow = time( nullptr );
 	tm*			tmTimeNow = localtime( &timeNow );
 
-	std::wstring		logFile = CString::Format( TEXT( "%s/Logs/%s-%i.%02i.%02i-%02i.%02i.%02i.log" ), Sys_GameDir().c_str(), !g_IsEditor ? g_GameName.c_str() : TEXT( "WorldEd" ), 1900 + tmTimeNow->tm_year, 1 + tmTimeNow->tm_mon, tmTimeNow->tm_mday, tmTimeNow->tm_hour, tmTimeNow->tm_min, tmTimeNow->tm_sec );
+	std::wstring		logFile = L_Sprintf( TEXT( "%s/Logs/%s-%i.%02i.%02i-%02i.%02i.%02i.log" ), Sys_GameDir().c_str(), !g_IsEditor ? g_GameName.c_str() : TEXT( "WorldEd" ), 1900 + tmTimeNow->tm_year, 1 + tmTimeNow->tm_mon, tmTimeNow->tm_mday, tmTimeNow->tm_hour, tmTimeNow->tm_min, tmTimeNow->tm_sec );
 	archiveLogs = g_FileSystem->CreateFileWriter( logFile.c_str(), AW_None );
 	if ( archiveLogs )
 	{
@@ -176,7 +175,7 @@ void CWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType )
 		}
 	}
 	
-	std::wstring			finalMessage = CString::Format( TEXT( "%s: %s" ), s_LogTypeNames[ ( uint32 ) InLogType ], InMessage );
+	std::wstring			finalMessage = L_Sprintf( TEXT( "%s: %s" ), s_LogTypeNames[ ( uint32 ) InLogType ], InMessage );
 	wprintf( finalMessage.c_str() );
 
 	// Print to log widget in WorldEd
@@ -190,7 +189,7 @@ void CWindowsLogger::Serialize( const tchar* InMessage, ELogType InLogType )
 	// Serialize log to file
 	if ( archiveLogs )
 	{
-		*archiveLogs << finalMessage;
+		*archiveLogs << TCHAR_TO_ANSI( finalMessage.c_str() );
 		archiveLogs->Flush();
 	}
 

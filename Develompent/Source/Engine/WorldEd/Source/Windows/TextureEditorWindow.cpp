@@ -1,5 +1,4 @@
-#include "Containers/String.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "Misc/UIGlobals.h"
 #include "Misc/WorldEdGlobals.h"
@@ -41,7 +40,7 @@ CTextureEditorWindow::CTextureEditorWindow
 ==================
 */
 CTextureEditorWindow::CTextureEditorWindow( const TSharedPtr<CTexture2D>& InTexture2D )
-	: CImGUILayer( CString::Format( TEXT( "Texture Editor - %s" ), InTexture2D->GetAssetName().c_str() ) )
+	: CImGUILayer( L_Sprintf( TEXT( "Texture Editor - %s" ), InTexture2D->GetAssetName().c_str() ) )
 	, texture2D( InTexture2D )
 	, viewportClient( new CTexturePreviewViewportClient( InTexture2D ) )
 	, currentMipmap( 0 )
@@ -98,7 +97,7 @@ void CTextureEditorWindow::OnTick()
 			std::wstring		errorMsg;
 			if ( !g_AssetFactory.Reimport( texture2D, errorMsg ) )
 			{
-				OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The texture 2D not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
+				OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The texture 2D not reimported.\n\nMessage: %s" ), errorMsg.c_str() ), CDialogWindow::BT_Ok );
 			}
 		}
 		if ( ImGui::IsItemHovered( ImGuiHoveredFlags_AllowWhenDisabled ) )
@@ -150,11 +149,11 @@ void CTextureEditorWindow::OnTick()
 		ImGui::PushItemWidth( 50 );
 		ImGui::Text( "Mipmap: " );
 		ImGui::SameLine();
-		if ( ImGui::BeginCombo( "##MipmapCombo", TCHAR_TO_ANSI( CString::Format( TEXT( "%i" ), currentMipmap ).c_str() ) ) )
+		if ( ImGui::BeginCombo( "##MipmapCombo", TCHAR_TO_ANSI( L_Sprintf( TEXT( "%i" ), currentMipmap ).c_str() ) ) )
 		{
 			for ( uint32 index = 0, count = texture2D->GetNumMips(); index < count; ++index )
 			{
-				if ( ImGui::Selectable( TCHAR_TO_ANSI( CString::Format( TEXT( "%i" ), index ).c_str() ), currentMipmap == index, ImGuiSelectableFlags_DontClosePopups ) )
+				if ( ImGui::Selectable( TCHAR_TO_ANSI( L_Sprintf( TEXT( "%i" ), index ).c_str() ), currentMipmap == index, ImGuiSelectableFlags_DontClosePopups ) )
 				{
 					currentMipmap = index;
 					viewportClient->SetMipmap( index );
@@ -180,7 +179,7 @@ void CTextureEditorWindow::OnTick()
 		ImGui::TableNextColumn();
 		ImGui::Text( "Imported:" );
 		ImGui::TableNextColumn();
-		ImGui::Text( TCHAR_TO_ANSI( CString::Format( TEXT( "%ix%i" ), sizeX, sizeY ).c_str() ) );
+		ImGui::Text( TCHAR_TO_ANSI( L_Sprintf( TEXT( "%ix%i" ), sizeX, sizeY ).c_str() ) );
 		ImGui::TableNextColumn();
 
 		// Draw texture format
@@ -192,13 +191,13 @@ void CTextureEditorWindow::OnTick()
 		// Number of mip levels
 		ImGui::Text( "Num Mips:" );
 		ImGui::TableNextColumn();
-		ImGui::Text( TCHAR_TO_ANSI( CString::Format( TEXT( "%i" ), numMips ).c_str() ) );
+		ImGui::Text( TCHAR_TO_ANSI( L_Sprintf( TEXT( "%i" ), numMips ).c_str() ) );
 		ImGui::TableNextColumn();
 
 		// Resource size
 		ImGui::Text( "Resource Size:" );
 		ImGui::TableNextColumn();
-		ImGui::Text( TCHAR_TO_ANSI( CString::Format( TEXT( "%.2f Kb" ), texture2D->GetMemorySize() / 1024.f ).c_str() ) );
+		ImGui::Text( TCHAR_TO_ANSI( L_Sprintf( TEXT( "%.2f Kb" ), texture2D->GetMemorySize() / 1024.f ).c_str() ) );
 		ImGui::EndTable();
 	}
 

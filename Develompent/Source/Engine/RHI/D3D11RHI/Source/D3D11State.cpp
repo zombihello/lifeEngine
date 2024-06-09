@@ -202,15 +202,15 @@ void D3D11StateCache::Reset()
 	depthStencilView = nullptr;
 	stencilRef = 0;
 
-	Sys_Memzero( &vertexBuffers, sizeof( vertexBuffers ) );
-	Sys_Memzero( &psSamplerStates, sizeof( psSamplerStates ) );
-	Sys_Memzero( &psShaderResourceViews, sizeof( psShaderResourceViews ) );
-	Sys_Memzero( &indexBuffer, sizeof( CD3D11StateIndexBuffer ) );
-	Sys_Memzero( &renderTargetViews, sizeof( renderTargetViews ) );
-	Sys_Memzero( &depthState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
-	Sys_Memzero( &stencilState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
-	Sys_Memzero( &blendState, sizeof( D3D11_BLEND_DESC ) );
-	memset( &colorWriteMasks, CW_RGBA, sizeof( colorWriteMasks ) );
+	Memory::Memzero( &vertexBuffers, sizeof( vertexBuffers ) );
+	Memory::Memzero( &psSamplerStates, sizeof( psSamplerStates ) );
+	Memory::Memzero( &psShaderResourceViews, sizeof( psShaderResourceViews ) );
+	Memory::Memzero( &indexBuffer, sizeof( CD3D11StateIndexBuffer ) );
+	Memory::Memzero( &renderTargetViews, sizeof( renderTargetViews ) );
+	Memory::Memzero( &depthState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	Memory::Memzero( &stencilState, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	Memory::Memzero( &blendState, sizeof( D3D11_BLEND_DESC ) );
+	Memory::Memset( &colorWriteMasks, CW_RGBA, sizeof( colorWriteMasks ) );
 }
 
 
@@ -224,7 +224,7 @@ CD3D11RasterizerStateRHI::CD3D11RasterizerStateRHI( const RasterizerStateInitial
 	, d3d11RasterizerState( nullptr )
 {
 	D3D11_RASTERIZER_DESC			d3d11RasterizerDesc;
-	Sys_Memzero( &d3d11RasterizerDesc, sizeof( D3D11_RASTERIZER_DESC ) );
+	Memory::Memzero( &d3d11RasterizerDesc, sizeof( D3D11_RASTERIZER_DESC ) );
 
 	d3d11RasterizerDesc.CullMode					= TranslateCullMode( InInitializer.cullMode );
 	d3d11RasterizerDesc.FillMode					= TranslateFillMode( InInitializer.fillMode );
@@ -272,7 +272,7 @@ CD3D11SamplerStateRHI::CD3D11SamplerStateRHI( const SSamplerStateInitializerRHI&
 	d3d11SamplerState( nullptr )
 {
 	D3D11_SAMPLER_DESC			d3d11SamplerDesc;
-	Sys_Memzero( &d3d11SamplerDesc, sizeof( D3D11_SAMPLER_DESC ) );
+	Memory::Memzero( &d3d11SamplerDesc, sizeof( D3D11_SAMPLER_DESC ) );
 
 	d3d11SamplerDesc.AddressU		= TranslateAddressMode( InInitializer.addressU );
 	d3d11SamplerDesc.AddressV		= TranslateAddressMode( InInitializer.addressV );
@@ -339,7 +339,7 @@ CD3D11DepthStateRHI::CD3D11DepthStateRHI
 */
 CD3D11DepthStateRHI::CD3D11DepthStateRHI( const DepthStateInitializerRHI& InInitializer )
 {
-	Sys_Memzero( &d3d11DepthStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	Memory::Memzero( &d3d11DepthStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	d3d11DepthStateInfo.DepthEnable		= InInitializer.depthTest != CF_Always || InInitializer.bEnableDepthWrite;
 	d3d11DepthStateInfo.DepthWriteMask	= InInitializer.bEnableDepthWrite ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
 	d3d11DepthStateInfo.DepthFunc		= TranslateCompareFunction( InInitializer.depthTest );
@@ -354,7 +354,7 @@ CD3D11StencilStateRHI::CD3D11StencilStateRHI
 CD3D11StencilStateRHI::CD3D11StencilStateRHI( const StencilStateInitializerRHI& InInitializer )
 	: stencilRef( InInitializer.stencilRef )
 {
-	Sys_Memzero( &d3d11StencilStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
+	Memory::Memzero( &d3d11StencilStateInfo, sizeof( D3D11_DEPTH_STENCIL_DESC ) );
 	d3d11StencilStateInfo.StencilEnable						= InInitializer.bEnableFrontFaceStencil || InInitializer.bEnableBackFaceStencil;
 	d3d11StencilStateInfo.StencilReadMask					= InInitializer.stencilReadMask;
 	d3d11StencilStateInfo.StencilWriteMask					= InInitializer.stencilWriteMask;
@@ -386,7 +386,7 @@ CD3D11BlendStateRHI::CD3D11BlendStateRHI( const BlendStateInitializerRHI& InInit
 	: bColorWrite( InIsColorWriteEnable )
 {
 	// Init descriptor
-	Sys_Memzero( &d3d11blendStateInfo, sizeof( D3D11_BLEND_DESC ) );
+	Memory::Memzero( &d3d11blendStateInfo, sizeof( D3D11_BLEND_DESC ) );
 	d3d11blendStateInfo.AlphaToCoverageEnable					= false;
 	d3d11blendStateInfo.IndependentBlendEnable					= true;
 	d3d11blendStateInfo.RenderTarget[0].BlendEnable				= InInitializer.colorBlendOperation != BO_Add || InInitializer.colorDestBlendFactor != BF_Zero || InInitializer.colorSourceBlendFactor != BF_One || InInitializer.alphaBlendOperation != BO_Add || InInitializer.alphaDestBlendFactor != BF_Zero || InInitializer.alphaSourceBlendFactor != BF_One;
@@ -400,6 +400,6 @@ CD3D11BlendStateRHI::CD3D11BlendStateRHI( const BlendStateInitializerRHI& InInit
 
 	for ( uint32 renderTargetIndex = 1; renderTargetIndex < D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT; ++renderTargetIndex )
 	{
-		memcpy( &d3d11blendStateInfo.RenderTarget[renderTargetIndex], &d3d11blendStateInfo.RenderTarget[0], sizeof( d3d11blendStateInfo.RenderTarget[0] ) );
+		Memory::Memcpy( &d3d11blendStateInfo.RenderTarget[renderTargetIndex], &d3d11blendStateInfo.RenderTarget[0], sizeof( d3d11blendStateInfo.RenderTarget[0] ) );
 	}
 }

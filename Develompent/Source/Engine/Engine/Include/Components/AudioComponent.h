@@ -9,6 +9,8 @@
 #ifndef AUDIOCOMPONENT_H
 #define AUDIOCOMPONENT_H
 
+#include "Misc/EngineGlobals.h"
+#include "System/World.h"
 #include "System/AudioBank.h"
 #include "System/AudioSource.h"
 #include "System/AudioStreamSource.h"
@@ -20,7 +22,7 @@
  */
 class CAudioComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CAudioComponent, CSceneComponent, 0, 0 )
+	DECLARE_CLASS( CAudioComponent, CSceneComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**
@@ -29,15 +31,11 @@ public:
 	CAudioComponent();
 
 	/**
-	 * @brief Destructor
+	 * @brief Called before destroying the object
+	 * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+	 * asynchronous cleanup process
 	 */
-	~CAudioComponent();
-
-	/**
-	 * @brief Serialize component
-	 * @param[in] InArchive Archive for serialize
-	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
+	virtual void BeginDestroy() override;
 
 	/**
 	 * Begins Play for the component.
@@ -59,6 +57,12 @@ public:
 	 */
 	virtual void PostEditChangeProperty( const PropertyChangedEvenet& InPropertyChangedEvenet ) override;
 #endif // WITH_EDITOR
+
+	/**
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
+	 */
+	virtual void PostLoad() override;
 
 	/**
 	 * @brief Play sound
@@ -102,6 +106,16 @@ public:
 	{
 		source->SetRelativeToListener( InIsUISound );
 		bIsUISound = InIsUISound;
+
+		// For UI sound we reset audio location at (0,0,0)
+		if ( InIsUISound )
+		{
+			source->SetLocation( Math::vectorZero );
+		}
+		else
+		{
+			source->SetLocation( GetComponentLocation() );
+		}
 	}
 
 	/**
@@ -152,6 +166,15 @@ public:
 	{
 		bank = InAudioBank;
 		source->SetAudioBank( bank );
+
+		// Start play audio with bIsAutoPlay only if we has begun gameplay or we in the editor
+		if ( g_World->HasBegunPlay() || g_IsEditor )
+		{
+			if ( bank.IsAssetValid() && GetStatus() != ASS_Playing && bIsAutoPlay )
+			{
+				Play();
+			}
+		}
 	}
 
 	/**
@@ -161,6 +184,19 @@ public:
 	FORCEINLINE void SetAutoPlay( bool InIsAutoPlay )
 	{
 		bIsAutoPlay = InIsAutoPlay;
+
+		// Play/Stop audio only if we has begun gameplay or we in the editor
+		if ( g_World->HasBegunPlay() || g_IsEditor )
+		{
+			if ( InIsAutoPlay && GetStatus() != ASS_Playing )
+			{
+				Play();
+			}
+			else if ( !InIsAutoPlay && GetStatus() == ASS_Playing )
+			{
+				Stop();
+			}
+		}
 	}
 
 	/**

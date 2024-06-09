@@ -9,7 +9,7 @@
 #ifndef TEMPLATE_H
 #define TEMPLATE_H
 
-#include "CoreDefines.h"
+#include "Misc/Platform.h"
 #include "Misc/Types.h"
 
 /**
@@ -72,9 +72,9 @@ FORCEINLINE TType Min( const TType InA, const TType InB )
  * @return Aligned value
  */
 template< typename TType > 
-FORCEINLINE TType Align( const TType InPtr, uint32 InAlignment )
+FORCEINLINE TType Align( const TType InPtr, uint64 InAlignment )
 {
-	return ( TType )( ( ( int32 )InPtr + InAlignment - 1 ) & ~( InAlignment - 1 ) );
+	return ( TType )( ( ( ptrint )InPtr + InAlignment - 1 ) & ~( ( ptrint )InAlignment - 1 ) );
 }
 
 /**
@@ -106,6 +106,99 @@ FORCEINLINE void Swap( TType& InOutA, TType& InOutB )
 	InOutA = InOutB;
 	InOutB = temp;
 }
+
+/**
+ * @ingroup Core
+ * @brief Inherit from this class to prevent your class from being copied
+ */
+class CNonCopyable
+{
+protected:
+	/**
+	 * @brief Constructor
+	 */
+	CNonCopyable() {}
+
+	/**
+	 * @brief Constructor of move
+	 * @param InOther	Other object
+	 */
+	CNonCopyable( CNonCopyable&& InOther ) {}
+
+	/**
+	 * @brief Destructor
+	 */
+	~CNonCopyable() {}
+
+	/**
+	 * @brief Override operator = for move
+	 * @param InOther	Other object
+	 */
+	CNonCopyable& operator=( CNonCopyable&& InOther ) { return *this; }
+
+private:
+	/**
+	 * @brief Constructor of copy
+	 * @param InOther	Other object
+	 */
+	CNonCopyable( const CNonCopyable& InOther ) {}
+
+	/**
+	 * @brief Override operator =
+	 * @param InOther	Other object
+	 */
+	CNonCopyable& operator=( const CNonCopyable& InOther ) { return *this; }
+};
+
+/**
+ * @ingroup Core
+ * @brief Exception-safe guard around saving/restoring a value
+ */
+template<typename TType>
+struct TGuardValue : private CNonCopyable
+{
+	/**
+	 * @brief Constructor
+	 * @param InValue		Value to change
+	 * @param InNewValue	New value to change
+	 */
+	TGuardValue( TType& InValue, const TType& InNewValue )
+		: value( InValue )
+		, oldValue( InValue )
+	{
+		value = InNewValue;
+	}
+
+	/**
+	 * @brief Constructor
+	 * @param InValue	Value to change
+	 */
+	TGuardValue( TType& InValue )
+		: value( InValue )
+		, oldValue( InValue )
+	{}
+
+	/**
+	 * @brief Destructor
+	 */
+	~TGuardValue()
+	{
+		value = oldValue;
+	}
+
+	/**
+	 * @brief Override dereference operator
+	 * @return Return a const reference to the original data value
+	 */
+	FORCEINLINE const TType& operator*() const
+	{
+		return oldValue;
+	}
+
+private:
+	TType&	value;		/**< Value to change */
+	TType	oldValue;	/**< Backup of the value */
+};
 
 /**
  * @ingroup Core

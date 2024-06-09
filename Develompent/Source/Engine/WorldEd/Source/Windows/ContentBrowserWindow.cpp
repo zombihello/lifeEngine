@@ -2,13 +2,13 @@
 #include "Misc/WorldEdGlobals.h"
 #include "Misc/UIGlobals.h"
 #include "Misc/Misc.h"
-#include "Containers/StringConv.h"
+#include "Misc/StringConv.h"
 #include "Logger/LoggerMacros.h"
 #include "System/BaseEngine.h"
 #include "System/BaseFileSystem.h"
 #include "System/AssetsImport.h"
 #include "System/EditorEngine.h"
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 #include "System/DragNDrop.h"
 #include "Windows/ContentBrowserWindow.h"
 #include "Windows/DialogWindow.h"
@@ -87,7 +87,7 @@ static FORCEINLINE std::wstring ArrayFilenamesToString( const std::vector<CFilen
 	std::wstring	result;
 	for ( uint32 index = 0, count = InArray.size(); index < count; ++index )
 	{
-		result += InArray[index].GetBaseFilename();
+		result += InArray[index].GetBaseFileName();
 		if ( count > InMaxSize && index + 1 == InMaxSize )
 		{
 			result += TEXT( "\n...\n" );
@@ -209,7 +209,6 @@ public:
 	CImportAssetsRunnable( CContentBrowserWindow* InOwner, const std::vector<std::wstring>& InFilesToImport )
 		: importMode( IM_Default )
 		, owner( InOwner )
-		, eventResponse( nullptr )
 		, filesToImport( InFilesToImport )
 	{}
 
@@ -225,7 +224,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && owner->package );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -242,12 +240,12 @@ public:
 		// Import all assets
 		std::wstring									errorMessages;
 		CAssetFactory::EResultShowImportSettings		importSettingsModes[AT_Count];
-		Sys_Memzero( importSettingsModes, sizeof( CAssetFactory::EResultShowImportSettings ) * AT_Count );
+		Memory::Memzero( importSettingsModes, sizeof( CAssetFactory::EResultShowImportSettings ) * AT_Count );
 
 		for ( uint32 index = 0, count = filesToImport.size(); index < count; ++index )
 		{
 			CFilename		filename( filesToImport[index] );
-			bool			bExist	= owner->package->IsExist( filename.GetBaseFilename() );
+			bool			bExist	= owner->package->IsExist( filename.GetBaseFileName() );
 			if ( bExist )
 			{
 				if ( importMode == IM_SkipConflicts )
@@ -257,13 +255,13 @@ public:
 				else if ( importMode != IM_Force )
 				{
 					CDialogWindow::EButtonType	pressedButton;
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "Asset '%s' already exist in package.\nDo you want change him?" ), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Yes | CDialogWindow::BT_YesToAll | CDialogWindow::BT_No | CDialogWindow::BT_NoToAll );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Question" ), L_Sprintf( TEXT( "Asset '%s' already exist in package.\nDo you want change him?" ), filename.GetBaseFileName().c_str() ), CDialogWindow::BT_Yes | CDialogWindow::BT_YesToAll | CDialogWindow::BT_No | CDialogWindow::BT_NoToAll );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  pressedButton = InButtonType;
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
-					eventResponse->Wait();
+					eventResponse.Wait();
 					switch ( pressedButton )
 					{
 					case CDialogWindow::BT_Yes:
@@ -296,7 +294,7 @@ public:
 			// Import asset
 			if ( !g_AssetFactory.Import( filename.GetFullPath(), result, errorMsg ) )
 			{
-				errorMessages += CString::Format( TEXT( "\n%s: %s" ), filename.GetBaseFilename().c_str(), errorMsg.c_str() );
+				errorMessages += L_Sprintf( TEXT( "\n%s: %s" ), filename.GetBaseFileName().c_str(), errorMsg.c_str() );
 			}
 			else
 			{
@@ -311,7 +309,7 @@ public:
 		// If exist errors, show popup window
 		if ( !errorMessages.empty() )
 		{
-			owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The following assets not imported with following errors\n\nAssets:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
+			owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The following assets not imported with following errors\n\nAssets:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
 		}
 		return 0;
 	}
@@ -322,9 +320,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -347,7 +343,7 @@ private:
 
 	EImportMode					importMode;		/**< Import mode */
 	CContentBrowserWindow*		owner;			/**< Owner */
-	CEvent*						eventResponse;	/**< Event used when opened popup of change exist assets */
+	CEvent				eventResponse;	/**< Event used when opened popup of change exist assets */
 	std::vector<std::wstring>	filesToImport;	/**< Array of files to import */
 };
 
@@ -370,7 +366,6 @@ public:
 	 */
 	CRenameAssetRunnable( CContentBrowserWindow* InOwner, CContentBrowserWindow::CAssetNode InAssetNode )
 		: owner( InOwner )
-		, eventResponse( nullptr )
 		, assetNode( InAssetNode )
 	{}
 
@@ -386,7 +381,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && owner->package );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -412,15 +406,15 @@ public:
 											{
 												bIsOk = true;
 												newAssetName = ANSI_TO_TCHAR( InText.c_str() );
-												eventResponse->Trigger();
+												eventResponse.Trigger();
 											} );
 
 				popup->OnCenceled().Add(	[&]()
 											{
 												 bIsOk = false;
-												 eventResponse->Trigger();
+												 eventResponse.Trigger();
 											} );
-				eventResponse->Wait();
+				eventResponse.Wait();
 				if ( !bIsOk )
 				{
 					return 0;
@@ -430,13 +424,13 @@ public:
 			// If asset with new name already exist - try enter other name 
 			if ( owner->package->IsExist( newAssetName ) )
 			{
-				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Name '%s' already exist in package" ), newAssetName.c_str() ), CDialogWindow::BT_Ok );
+				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "Name '%s' already exist in package" ), newAssetName.c_str() ), CDialogWindow::BT_Ok );
 				popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 											  {
-												  eventResponse->Trigger();
+												  eventResponse.Trigger();
 											  } );
 				bIsOk = false;
-				eventResponse->Wait();
+				eventResponse.Wait();
 			}
 		}
 
@@ -458,9 +452,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -472,7 +464,7 @@ public:
 
 private:
 	CContentBrowserWindow*				owner;			/**< Owner */
-	CEvent*								eventResponse;	/**< Event used when opened popup of change exist assets */
+	CEvent						eventResponse;	/**< Event used when opened popup of change exist assets */
 	CContentBrowserWindow::CAssetNode	assetNode;		/**< Asset node to rename */
 };
 
@@ -495,7 +487,6 @@ public:
 	 */
 	TCreateAssetRunnable( CContentBrowserWindow* InOwner )
 		: owner( InOwner )
-		, eventResponse( nullptr )
 	{
 		package = owner->GetCurrentPackage();
 	}
@@ -512,7 +503,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && package );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -538,15 +528,15 @@ public:
 											{
 												bIsOk = true;
 												assetName = ANSI_TO_TCHAR( InText.c_str() );
-												eventResponse->Trigger();
+												eventResponse.Trigger();
 											} );
 
 				popup->OnCenceled().Add( [&]()
 										 {
 											 bIsOk = false;
-											 eventResponse->Trigger();
+											 eventResponse.Trigger();
 										 } );
-				eventResponse->Wait();
+				eventResponse.Wait();
 				if ( !bIsOk )
 				{
 					return 0;
@@ -556,13 +546,13 @@ public:
 			// If asset with new name already exist - try enter other name 
 			if ( package->IsExist( assetName ) )
 			{
-				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Name '%s' already exist in package" ), assetName.c_str() ), CDialogWindow::BT_Ok );
+				TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "Name '%s' already exist in package" ), assetName.c_str() ), CDialogWindow::BT_Ok );
 				popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 											  {
-												  eventResponse->Trigger();
+												  eventResponse.Trigger();
 											  } );
 				bIsOk = false;
-				eventResponse->Wait();
+				eventResponse.Wait();
 			}
 		}
 
@@ -581,9 +571,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -596,7 +584,7 @@ public:
 private:
 	PackageRef_t			package;		/**< Package */
 	CContentBrowserWindow*	owner;			/**< Owner */
-	CEvent*					eventResponse;	/**< Event used when opened popup of change exist assets */
+	CEvent			eventResponse;	/**< Event used when opened popup of change exist assets */
 };
 
 //
@@ -630,7 +618,6 @@ public:
 		: bMove( true )
 		, mode( CMM_Default )
 		, owner( InOwner )
-		, eventResponse( nullptr )
 		, filesToMoveCopy( InFilesToMoveCopy )
 	{}
 
@@ -646,7 +633,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 
 		// Expanding all folders. It need for we contain in array only files
 		std::vector<FileInfo>		oldFilesToMoveCopy = filesToMoveCopy;
@@ -697,13 +683,13 @@ public:
 				else if ( mode != CMM_Force )
 				{
 					CDialogWindow::EButtonType	pressedButton;
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "File '%s' already exist in folder '%s'.\n\nDo you want replace him?" ), fileInfo.srcPath.GetFullPath().c_str(), fileInfo.dstPath.GetPath().c_str() ), CDialogWindow::BT_Yes | CDialogWindow::BT_YesToAll | CDialogWindow::BT_No | CDialogWindow::BT_NoToAll );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Question" ), L_Sprintf( TEXT( "File '%s' already exist in folder '%s'.\n\nDo you want replace him?" ), fileInfo.srcPath.GetFullPath().c_str(), fileInfo.dstPath.GetPath().c_str() ), CDialogWindow::BT_Yes | CDialogWindow::BT_YesToAll | CDialogWindow::BT_No | CDialogWindow::BT_NoToAll );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
 													  pressedButton = InButtonType;
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
-					eventResponse->Wait();
+					eventResponse.Wait();
 					switch ( pressedButton )
 					{
 					case CDialogWindow::BT_Yes:
@@ -730,7 +716,7 @@ public:
 				// If package still used, we skip him
 				if ( !g_PackageManager->UnloadPackage( fileInfo.srcPath.GetFullPath() ) )
 				{
-					errorMessages += CString::Format( TEXT( "\n%s: Package in using or modifided and cannot be moved" ), fileInfo.srcPath.GetBaseFilename().c_str() );
+					errorMessages += L_Sprintf( TEXT( "\n%s: Package in using or modifided and cannot be moved" ), fileInfo.srcPath.GetBaseFileName().c_str() );
 					continue;
 				}
 
@@ -762,7 +748,7 @@ public:
 				default:				errorMsg = TEXT( "Unknown Error" );	break;
 				}
 
-				errorMessages += CString::Format( TEXT( "\n%s: %s" ), fileInfo.srcPath.GetFullPath().c_str(), errorMsg );
+				errorMessages += L_Sprintf( TEXT( "\n%s: %s" ), fileInfo.srcPath.GetFullPath().c_str(), errorMsg );
 				if ( bMove && bPackage )		// We must restore entry in TOC file if this is package
 				{
 					g_TableOfContents.AddEntry( fileInfo.srcPath.GetFullPath() );
@@ -801,7 +787,7 @@ public:
 		// If exist errors, show popup window
 		if ( !errorMessages.empty() )
 		{
-			owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The following files not copy/moved with following errors\n\nFiles:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
+			owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The following files not copy/moved with following errors\n\nFiles:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
 		}
 		return 0;
 	}
@@ -812,9 +798,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -850,8 +834,8 @@ private:
 		}
 
 		// Find all files in directory
-		std::wstring				srcDirectory		= InFileInfo.srcPath.GetPath() + InFileInfo.srcPath.GetBaseFilename() + PATH_SEPARATOR;
-		std::wstring				dstDirectory		= InFileInfo.dstPath.GetPath() + InFileInfo.dstPath.GetBaseFilename() + PATH_SEPARATOR;
+		std::wstring				srcDirectory		= InFileInfo.srcPath.GetPath() + InFileInfo.srcPath.GetBaseFileName() + PATH_SEPARATOR;
+		std::wstring				dstDirectory		= InFileInfo.dstPath.GetPath() + InFileInfo.dstPath.GetBaseFileName() + PATH_SEPARATOR;
 		std::vector<std::wstring>	files				= g_FileSystem->FindFiles( srcDirectory, true, true );
 		for ( uint32 index = 0, count = files.size(); index < count; ++index )
 		{
@@ -875,7 +859,7 @@ private:
 	bool						bMove;				/**< Is need move files? If FALSE we will copy they */
 	ECopyMoveMode				mode;				/**< Copy/move mode */
 	CContentBrowserWindow*		owner;				/**< Owner */
-	CEvent*						eventResponse;		/**< Event used when opened popup of change exist files */
+	CEvent				eventResponse;		/**< Event used when opened popup of change exist files */
 	std::vector<FileInfo>		filesToMoveCopy;	/**< Array of files to move/copy */
 	std::vector<CFilename>		directorisToDelete;	/**< Array of directories who need delete after move */
 };
@@ -910,7 +894,6 @@ public:
 	CCreateFileRunnable( CContentBrowserWindow* InOwner, const TSharedPtr<CContentBrowserWindow::CFileTreeNode>& InRootNode, ECreateMode InCreateMode )
 		: mode( InCreateMode )
 		, owner( InOwner )
-		, eventResponse( nullptr )
 		, rootNode( InRootNode )
 	{}
 
@@ -926,7 +909,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && rootNode );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -953,15 +935,15 @@ public:
 											{
 												bIsOk = true;
 												fileName = ANSI_TO_TCHAR( InText.c_str() );
-												eventResponse->Trigger();
+												eventResponse.Trigger();
 											} );
 
 				popup->OnCenceled().Add( [&]()
 										 {
 											 bIsOk = false;
-											 eventResponse->Trigger();
+											 eventResponse.Trigger();
 										 } );
-				eventResponse->Wait();
+				eventResponse.Wait();
 				if ( !bIsOk )
 				{
 					return 0;
@@ -974,13 +956,13 @@ public:
 			case CM_CreateFolder:			
 				if ( g_FileSystem->IsExistFile( rootDir + fileName ) )
 				{
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Folder '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "Folder '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
 					bIsOk = false;
-					eventResponse->Wait();
+					eventResponse.Wait();
 				}
 				break;
 
@@ -988,18 +970,18 @@ public:
 			case CM_CreatePackage:
 				if ( g_FileSystem->IsExistFile( rootDir + fileName + TEXT( ".pak" ) ) || !g_TableOfContents.GetPackagePath( fileName ).empty() )
 				{
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "Package '%s' already exist" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
 					bIsOk = false;
-					eventResponse->Wait();
+					eventResponse.Wait();
 				}
 				break;
 
 			default: 
-				Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
+				Sys_Error( TEXT( "Unknown mode 0x%X" ), mode );
 				return 1;
 			}
 		}
@@ -1019,7 +1001,7 @@ public:
 			if ( !package->Save( fullPath ) )
 			{
 				g_PackageManager->UnloadPackage( fullPath, true );
-				owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Failed save package '%s'" ), fileName.c_str() ), CDialogWindow::BT_Ok );
+				owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "Failed save package '%s'" ), fileName.c_str() ), CDialogWindow::BT_Ok );
 				return 0;
 			}
 
@@ -1030,7 +1012,7 @@ public:
 		}
 
 		default:
-			Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
+			Sys_Error( TEXT( "Unknown mode 0x%X" ), mode );
 			return 1;
 		}
 
@@ -1043,9 +1025,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -1058,7 +1038,7 @@ public:
 private:
 	ECreateMode											mode;			/**< Create mode */
 	CContentBrowserWindow*								owner;			/**< Owner */
-	CEvent*												eventResponse;	/**< Event used when opened popup */
+	CEvent										eventResponse;	/**< Event used when opened popup */
 	TSharedPtr<CContentBrowserWindow::CFileTreeNode>	rootNode;		/**< Root node where we create package */
 };
 
@@ -1092,7 +1072,6 @@ public:
 	CRenameFileRunnable( CContentBrowserWindow* InOwner, const TSharedPtr<CContentBrowserWindow::CFileTreeNode>& InNodeToRename, ERenameMode InRenameMode )
 		: mode( InRenameMode )
 		, owner( InOwner )
-		, eventResponse( nullptr )
 		, nodeToRename( InNodeToRename )
 	{}
 
@@ -1108,7 +1087,6 @@ public:
 	virtual bool Init() override
 	{
 		Assert( owner && nodeToRename );
-		eventResponse = g_SynchronizeFactory->CreateSynchEvent();
 		return true;
 	}
 
@@ -1134,20 +1112,20 @@ public:
 		{
 			// Get file name. If we not press 'ok' nothing apply and exit from method
 			{
-				TSharedPtr<CInputTextDialog>	popup = owner->OpenPopup<CInputTextDialog>( TEXT( "Enter" ), mode == RM_RenameFolder ? TEXT( "New Directory Name" ) : TEXT( "New Package Name" ), mode == RM_RenameFolder ? nodeToRename->GetName() : CFilename( nodeToRename->GetName() ).GetBaseFilename() );
+				TSharedPtr<CInputTextDialog>	popup = owner->OpenPopup<CInputTextDialog>( TEXT( "Enter" ), mode == RM_RenameFolder ? TEXT( "New Directory Name" ) : TEXT( "New Package Name" ), mode == RM_RenameFolder ? nodeToRename->GetName() : CFilename( nodeToRename->GetName() ).GetBaseFileName() );
 				popup->OnTextEntered().Add( [&]( const std::string& InText )
 											{
 												bIsOk = true;
 												newFileName = ANSI_TO_TCHAR( InText.c_str() );
-												eventResponse->Trigger();
+												eventResponse.Trigger();
 											} );
 
 				popup->OnCenceled().Add( [&]()
 										 {
 											 bIsOk = false;
-											 eventResponse->Trigger();
+											 eventResponse.Trigger();
 										 } );
-				eventResponse->Wait();
+				eventResponse.Wait();
 				if ( !bIsOk )
 				{
 					return 0;
@@ -1160,13 +1138,13 @@ public:
 			case RM_RenameFolder:
 				if ( g_FileSystem->IsExistFile( filename.GetPath() + newFileName ) )
 				{
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Folder '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "Folder '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
 					bIsOk = false;
-					eventResponse->Wait();
+					eventResponse.Wait();
 				}
 				break;
 
@@ -1174,18 +1152,18 @@ public:
 			case RM_RenamePackage:
 				if ( g_FileSystem->IsExistFile( filename.GetPath() + newFileName + TEXT( ".pak" ) ) || !g_TableOfContents.GetPackagePath( newFileName ).empty() )
 				{
-					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "Package '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
+					TSharedPtr<CDialogWindow>	popup = owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "Package '%s' already exist" ), newFileName.c_str() ), CDialogWindow::BT_Ok );
 					popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 												  {
-													  eventResponse->Trigger();
+													  eventResponse.Trigger();
 												  } );
 					bIsOk = false;
-					eventResponse->Wait();
+					eventResponse.Wait();
 				}
 				break;
 
 			default:
-				Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
+				Sys_Error( TEXT( "Unknown mode 0x%X" ), mode );
 				return 1;
 			}
 		}
@@ -1205,7 +1183,7 @@ public:
 				const PackageInfo&		packageInfo = updateTOCPackages[index];
 				if ( !g_PackageManager->UnloadPackage( packageInfo.oldPath.GetFullPath() ) )
 				{
-					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The package '%s' in using or modifided and folder '%s' cannot be renamed. Close all assets from this package or save him for will allow rename folder" ), packageInfo.oldPath.GetBaseFilename().c_str(), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Ok );
+					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "The package '%s' in using or modifided and folder '%s' cannot be renamed. Close all assets from this package or save him for will allow rename folder" ), packageInfo.oldPath.GetBaseFileName().c_str(), filename.GetBaseFileName().c_str() ), CDialogWindow::BT_Ok );
 					return 2;
 				}
 			}
@@ -1242,7 +1220,7 @@ public:
 				// If package still used, we skip him
 				if ( !g_PackageManager->UnloadPackage( filename.GetFullPath() ) )
 				{
-					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The package '%s' in using or modifided and cannot be renamed. Close all assets from this package or save him for will allow them to be rename" ), filename.GetBaseFilename().c_str() ), CDialogWindow::BT_Ok );
+					owner->OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "The package '%s' in using or modifided and cannot be renamed. Close all assets from this package or save him for will allow them to be rename" ), filename.GetBaseFileName().c_str() ), CDialogWindow::BT_Ok );
 					return 2;
 				}
 
@@ -1252,7 +1230,7 @@ public:
 				// If package failed loaded - we not change him name
 				if ( !package )
 				{
-					owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "File '%s' not renamed because failed loading package for change him name" ), filename.GetFullPath().c_str() ), CDialogWindow::BT_Ok );
+					owner->OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "File '%s' not renamed because failed loading package for change him name" ), filename.GetFullPath().c_str() ), CDialogWindow::BT_Ok );
 					return 2;
 				}
 
@@ -1283,7 +1261,7 @@ public:
 		}
 
 		default:
-			Sys_Errorf( TEXT( "Unknown mode 0x%X" ), mode );
+			Sys_Error( TEXT( "Unknown mode 0x%X" ), mode );
 			return 1;
 		}
 
@@ -1302,9 +1280,7 @@ public:
 	 * This is called if a thread is requested to terminate early
 	 */
 	virtual void Stop() override
-	{
-		g_SynchronizeFactory->Destroy( eventResponse );
-	}
+	{}
 
 	/**
 	 * @brief Exit
@@ -1317,7 +1293,7 @@ public:
 private:
 	ERenameMode											mode;			/**< Rename mode */
 	CContentBrowserWindow*								owner;			/**< Owner */
-	CEvent*												eventResponse;	/**< Event used when opened popup */
+	CEvent										eventResponse;	/**< Event used when opened popup */
 	TSharedPtr<CContentBrowserWindow::CFileTreeNode>	nodeToRename;	/**< Node to rename */
 };
 
@@ -1445,7 +1421,7 @@ void CContentBrowserWindow::OnTick()
 			for ( uint32 index = 0, count = assets.size(); index < count; ++index )
 			{
 				CAssetNode&		assetNode = assets[index];
-				if ( filterInfo.assetTypes[assetNode.GetType() - 1] && CString::InString( assetNode.GetName(), ANSI_TO_TCHAR( filterInfo.assetName.c_str() ), true ) )
+				if ( filterInfo.assetTypes[assetNode.GetType() - 1] && !!L_Strstr( L_Strupr( assetNode.GetName() ).c_str(), L_Strupr( ANSI_TO_TCHAR( filterInfo.assetName.c_str() ) ) ) )
 				{
 					assetNode.Tick();
 					ImGui::NextColumn();
@@ -1642,7 +1618,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 			// Create material
 			if ( ImGui::MenuItem( "Material" ) )
 			{
-				g_ThreadFactory->CreateThread( new TCreateAssetRunnable<CMaterial>( this ), TEXT( "CreateAsset" ), true, true );
+				CRunnableThread::Create( new TCreateAssetRunnable<CMaterial>( this ), TEXT( "CreateAsset" ), true, true );
 			}
 			
 			if ( ImGui::BeginMenu( "Physics" ) )
@@ -1650,7 +1626,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 				// Create physics material
 				if ( ImGui::MenuItem( "Physics Material" ) )
 				{
-					g_ThreadFactory->CreateThread( new TCreateAssetRunnable<CPhysicsMaterial>( this ), TEXT( "CreateAsset" ), true, true );
+					CRunnableThread::Create( new TCreateAssetRunnable<CPhysicsMaterial>( this ), TEXT( "CreateAsset" ), true, true );
 				}
 				ImGui::EndMenu();
 			}		
@@ -1692,10 +1668,10 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 			std::wstring				selectedAssetNames;
 			for ( uint32 index = 0, count = selectedAssets.size(); index < count; ++index )
 			{
-				selectedAssetNames += CString::Format( TEXT( "\n%s" ), selectedAssets[index].GetAssetInfo()->name.c_str() );
+				selectedAssetNames += L_Sprintf( TEXT( "\n%s" ), selectedAssets[index].GetAssetInfo()->name.c_str() );
 			}
 
-			TSharedPtr<CDialogWindow>		popup = OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "Is need delete selected assets?\n\nAssets:%s" ), selectedAssetNames.c_str() ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
+			TSharedPtr<CDialogWindow>		popup = OpenPopup<CDialogWindow>( TEXT( "Question" ), L_Sprintf( TEXT( "Is need delete selected assets?\n\nAssets:%s" ), selectedAssetNames.c_str() ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
 			popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType )
 										  {
 											  // We pressed 'Ok', delete selected folders
@@ -1709,7 +1685,7 @@ void CContentBrowserWindow::DrawAssetsPopupMenu()
 		// Rename an asset
 		if ( ImGui::MenuItem( "Rename", "", nullptr, bSelectedOnlyOneAsset ) )
 		{
-			g_ThreadFactory->CreateThread( new CRenameAssetRunnable( this, selectedAssets[0] ), CString::Format( TEXT( "RenameAsset_%s" ), selectedAssets[0].GetName().c_str() ).c_str(), true, true );
+			CRunnableThread::Create( new CRenameAssetRunnable( this, selectedAssets[0] ), L_Sprintf( TEXT( "RenameAsset_%s" ), selectedAssets[0].GetName().c_str() ).c_str(), true, true );
 		}
 
 		// Copy reference to asset
@@ -1808,13 +1784,13 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 			// Create a folder
 			if ( ImGui::MenuItem( "Folder" ) && hoveredNode )
 			{
-				g_ThreadFactory->CreateThread( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreateFolder ), TEXT( "CreateDirectoryThread" ), true, true );
+				CRunnableThread::Create( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreateFolder ), TEXT( "CreateDirectoryThread" ), true, true );
 			}
 
 			// Create a package
 			if ( ImGui::MenuItem( "Package" ) && hoveredNode )
 			{
-				g_ThreadFactory->CreateThread( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreatePackage ), TEXT( "CreatePackageThread" ), true, true );
+				CRunnableThread::Create( new CCreateFileRunnable( this, hoveredNode, CCreateFileRunnable::CM_CreatePackage ), TEXT( "CreatePackageThread" ), true, true );
 			}
 			ImGui::EndMenu();
 		}
@@ -1829,7 +1805,7 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 				selectedFiles.push_back( selectedNode[index]->GetPath() );
 			}
 
-			TSharedPtr<CDialogWindow>		popup = OpenPopup<CDialogWindow>( TEXT( "Question" ), CString::Format( TEXT( "Is need delete selected files?\n\nFiles:\n%s" ), ArrayFilenamesToString( selectedFiles ).c_str() ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
+			TSharedPtr<CDialogWindow>		popup = OpenPopup<CDialogWindow>( TEXT( "Question" ), L_Sprintf( TEXT( "Is need delete selected files?\n\nFiles:\n%s" ), ArrayFilenamesToString( selectedFiles ).c_str() ), CDialogWindow::BT_Ok | CDialogWindow::BT_Cancel );
 			popup->OnButtonPressed().Add( [&]( CDialogWindow::EButtonType InButtonType ) 
 										{ 
 											// We pressed 'Ok', delete selected folders
@@ -1856,7 +1832,7 @@ void CContentBrowserWindow::DrawPackagesPopupMenu()
 				}
 			}
 
-			g_ThreadFactory->CreateThread( new CRenameFileRunnable( this, node, node->GetType() == FNT_Folder ? CRenameFileRunnable::RM_RenameFolder : CRenameFileRunnable::RM_RenamePackage ), TEXT( "RenameFileThread" ), true, true );
+			CRunnableThread::Create( new CRenameFileRunnable( this, node, node->GetType() == FNT_Folder ? CRenameFileRunnable::RM_RenameFolder : CRenameFileRunnable::RM_RenamePackage ), TEXT( "RenameFileThread" ), true, true );
 		}
 		ImGui::EndPopup();
 	}
@@ -1959,7 +1935,7 @@ void CContentBrowserWindow::PopupMenu_Package_Unload( const std::vector<TSharedP
 	// If we have dirty package - print message
 	if ( !dirtyPackages.empty() )
 	{
-		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following packages have been modified and cannot be unloaded. Saving these packages will allow them to be unloaded\n\nPackages:\n%s\n" ), ArrayFilenamesToString( dirtyPackages ).c_str() ), CDialogWindow::BT_Ok );
+		OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "The following packages have been modified and cannot be unloaded. Saving these packages will allow them to be unloaded\n\nPackages:\n%s\n" ), ArrayFilenamesToString( dirtyPackages ).c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 
@@ -2021,7 +1997,7 @@ void CContentBrowserWindow::PopupMenu_Package_Delete()
 			// If package still used, we skip him
 			if ( !g_PackageManager->UnloadPackage( filename.GetFullPath() ) )
 			{
-				usedPackages.push_back( filename.GetBaseFilename() );
+				usedPackages.push_back( filename.GetBaseFileName() );
 				continue;
 			}
 
@@ -2058,7 +2034,7 @@ void CContentBrowserWindow::PopupMenu_Package_Delete()
 	// If we have used package - print message
 	if ( !usedPackages.empty() )
 	{
-		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following packages in using or modifided and cannot be delete. Close all assets from this package or save him for will allow them to be deleted\n\nPackages:\n%s" ), ArrayFilenamesToString( usedPackages ).c_str() ), CDialogWindow::BT_Ok );
+		OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "The following packages in using or modifided and cannot be delete. Close all assets from this package or save him for will allow them to be deleted\n\nPackages:\n%s" ), ArrayFilenamesToString( usedPackages ).c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 
@@ -2095,14 +2071,14 @@ void CContentBrowserWindow::PopupMenu_Asset_Reload( const std::vector<CAssetNode
 		TAssetHandle<CAsset>	asset		= package->Find( assetInfo->name );
 		if ( !package->ReloadAsset( asset ) )
 		{
-			errorMessages += CString::Format( TEXT( "\n%s : Failed reload" ), assetInfo->name.c_str() );
+			errorMessages += L_Sprintf( TEXT( "\n%s : Failed reload" ), assetInfo->name.c_str() );
 		}
 	}
 
 	// If exist errors, show popup window
 	if ( !errorMessages.empty() )
 	{
-		OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The following assets not reloaded with following errors\n\nAssets:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
+		OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The following assets not reloaded with following errors\n\nAssets:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 
@@ -2132,7 +2108,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Import()
 	// Show open file dialog
 	if ( Sys_ShowOpenFileDialog( fileDialogSetup, openFileDialogResult ) )
 	{
-		g_ThreadFactory->CreateThread( new CImportAssetsRunnable( this, openFileDialogResult.files ), TEXT( "ImportAssets" ), true, true );
+		CRunnableThread::Create( new CImportAssetsRunnable( this, openFileDialogResult.files ), TEXT( "ImportAssets" ), true, true );
 	}
 }
 
@@ -2154,7 +2130,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Reimport( const std::vector<CAssetNo
 			TSharedPtr<CAsset>	assetPtr = asset.ToSharedPtr();
 			if ( !g_AssetFactory.Reimport( assetPtr, errorMsg ) )
 			{
-				errorMessages += CString::Format( TEXT( "\n%s : %s" ), assetPtr->GetAssetName().c_str(), errorMsg.c_str() );
+				errorMessages += L_Sprintf( TEXT( "\n%s : %s" ), assetPtr->GetAssetName().c_str(), errorMsg.c_str() );
 			}
 		}
 	}
@@ -2162,7 +2138,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Reimport( const std::vector<CAssetNo
 	// If exist errors, show popup window
 	if ( !errorMessages.empty() )
 	{
-		OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The following assets not reimported with following errors\n\nAssets:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
+		OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The following assets not reimported with following errors\n\nAssets:%s" ), errorMessages.c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 
@@ -2203,13 +2179,13 @@ void CContentBrowserWindow::PopupMenu_Asset_ReimportWithNewFile( const CAssetNod
 	}
 	else
 	{
-		errorMessage = CString::Format( TEXT( "Not found asset in package '%s'" ), assetInfo->name.c_str(), package->GetName().c_str() );
+		errorMessage = L_Sprintf( TEXT( "Not found asset in package '%s'" ), assetInfo->name.c_str(), package->GetName().c_str() );
 	}
 
 	// If exist error, show popup window
 	if ( !errorMessage.empty() )
 	{
-		OpenPopup<CDialogWindow>( TEXT( "Error" ), CString::Format( TEXT( "The asset '%s' not reimported.\n\nError: %s" ), errorMessage.c_str() ), CDialogWindow::BT_Ok );
+		OpenPopup<CDialogWindow>( TEXT( "Error" ), L_Sprintf( TEXT( "The asset '%s' not reimported.\n\nError: %s" ), errorMessage.c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 
@@ -2230,7 +2206,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Delete()
 			const AssetInfo*	assetInfo = assetNode.GetAssetInfo();
 			if ( !package->Remove( assetInfo->name, false, true ) )
 			{
-				usedAssets += CString::Format( TEXT( "\n%s" ), assetInfo->name.c_str() );
+				usedAssets += L_Sprintf( TEXT( "\n%s" ), assetInfo->name.c_str() );
 			}
 			else
 			{
@@ -2242,7 +2218,7 @@ void CContentBrowserWindow::PopupMenu_Asset_Delete()
 	// If we have used assets - print message
 	if ( !usedAssets.empty() )
 	{
-		OpenPopup<CDialogWindow>( TEXT( "Warning" ), CString::Format( TEXT( "The following assets in using and cannot be delete. Close all assets will allow them to be deleted\n\nAssets:%s" ), usedAssets.c_str() ), CDialogWindow::BT_Ok );
+		OpenPopup<CDialogWindow>( TEXT( "Warning" ), L_Sprintf( TEXT( "The following assets in using and cannot be delete. Close all assets will allow them to be deleted\n\nAssets:%s" ), usedAssets.c_str() ), CDialogWindow::BT_Ok );
 	}
 }
 
@@ -2281,7 +2257,7 @@ std::string CContentBrowserWindow::FilterInfo::GetPreviewFilterAssetType() const
 	{
 		if ( assetTypes[index - 1] )
 		{
-			result += CString::Format( TEXT( "%s%s" ), result.empty() ? TEXT( "" ) : TEXT( ", " ), ConvertAssetTypeToText( ( EAssetType )index ).c_str() );
+			result += L_Sprintf( TEXT( "%s%s" ), result.empty() ? TEXT( "" ) : TEXT( ", " ), ConvertAssetTypeToText( ( EAssetType )index ).c_str() );
 		}
 	}
 
@@ -2344,7 +2320,7 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 		{
 			imguiFlags |= ImGuiTreeNodeFlags_Selected;
 		}
-		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( CString::Format( TEXT( "%s %s" ), ANSI_TO_TCHAR( IMGUI_ICON_FOLDER ), name.c_str() ).c_str() ), imguiFlags );
+		bool bTreeNode = ImGui::TreeNodeEx( TCHAR_TO_ANSI( L_Sprintf( TEXT( "%s %s" ), ANSI_TO_TCHAR( IMGUI_ICON_FOLDER ), name.c_str() ).c_str() ), imguiFlags );
 
 		// Drag n drop handle
 		DragNDropHandle();
@@ -2376,7 +2352,7 @@ void CContentBrowserWindow::CFileTreeNode::Tick()
 			packageName = ( package->IsDirty() ? TEXT("*") : TEXT("") ) + packageName;
 		}
 		
-		packageName = CString::Format( TEXT( "%s %s" ), ANSI_TO_TCHAR( IMGUI_ICON_PACKAGE ), packageName.c_str() );
+		packageName = L_Sprintf( TEXT( "%s %s" ), ANSI_TO_TCHAR( IMGUI_ICON_PACKAGE ), packageName.c_str() );
 		ImGui::Selectable( TCHAR_TO_ANSI( packageName.c_str() ), &bSelected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick );
 	
 		// Drag n drop handle
@@ -2496,7 +2472,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			}
 
 			default:
-				Sys_Errorf( TEXT( "Unknown node type 0x%X" ), GetType() );
+				Sys_Error( TEXT( "Unknown node type 0x%X" ), GetType() );
 				break;
 			}
 		}
@@ -2522,7 +2498,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			std::wstring	dstDirectory	= nodeFilename.GetPath() + PATH_SEPARATOR;
 			if ( type == FNT_Folder )
 			{
-				dstDirectory += nodeFilename.GetBaseFilename() + PATH_SEPARATOR;
+				dstDirectory += nodeFilename.GetBaseFileName() + PATH_SEPARATOR;
 			}
 
 			// Make array of files to copy/move
@@ -2533,7 +2509,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 				CMoveCopyFilesRunnable::FileInfo	fileInfo;
 				fileInfo.bDirectory					= pData[index]->GetType() == FNT_Folder;
 				fileInfo.srcPath					= pData[index]->path;
-				fileInfo.dstPath					= dstDirectory + fileInfo.srcPath.GetFilename();
+				fileInfo.dstPath					= dstDirectory + fileInfo.srcPath.GetFileName();
 				if ( !bNeedResetCurrentPackage && currentPackage )
 				{
 					if ( ( fileInfo.bDirectory && filenamePackage.IsInDirectory( fileInfo.srcPath.GetFullPath() ) ) ||
@@ -2554,7 +2530,7 @@ void CContentBrowserWindow::CFileTreeNode::DragNDropHandle()
 			}
 
 			// Create and start thread for copy/move files
-			g_ThreadFactory->CreateThread( new CMoveCopyFilesRunnable( owner, filesToMoveCopy ), TEXT( "MoveCopyFilesThread" ), true, true );
+			CRunnableThread::Create( new CMoveCopyFilesRunnable( owner, filesToMoveCopy ), TEXT( "MoveCopyFilesThread" ), true, true );
 
 			// Allow drop targets for all nodes
 			owner->engineRoot->SetAllowDropTarget( true );
@@ -2581,7 +2557,7 @@ CContentBrowserWindow::CFileTreeNode::Refresh
 void CContentBrowserWindow::CFileTreeNode::Refresh()
 {
 	// If node not exist in file system or need filter him, we mark him not freshed
-	if ( ( type == FNT_File && !CString::InString( name, ANSI_TO_TCHAR( owner->filterInfo.fileName.c_str() ), true ) ) || !g_FileSystem->IsExistFile( path, type == FNT_Folder ? true : false ) )
+	if ( ( type == FNT_File && !L_Strstr( L_Strupr( name ).c_str(), L_Strupr( ANSI_TO_TCHAR( owner->filterInfo.fileName.c_str() ) ) ) ) || !g_FileSystem->IsExistFile( path, type == FNT_Folder ? true : false ) )
 	{
 		bFreshed = false;
 		return;
@@ -2834,7 +2810,7 @@ void CContentBrowserWindow::CAssetNode::ProcessEvents()
 			case AT_AudioBank:			MakeSharedPtr<CAudioBankEditorWindow>( asset )->Init();			break;
 			case AT_PhysicsMaterial:	MakeSharedPtr<CPhysicsMaterialEditorWindow>( asset )->Init();	break;
 			default:
-				Sys_Errorf( TEXT( "Unsupported asset type 0x%X" ), info->type );
+				Sys_Error( TEXT( "Unsupported asset type 0x%X" ), info->type );
 				break;
 			}
 		}

@@ -1,5 +1,8 @@
 #include "System/Archive.h"
 #include "Misc/Template.h"
+#include "Reflection/Object.h"
+#include "Reflection/ObjectPackage.h"
+#include "Reflection/LinkerSave.h"
 #include "LEVersion.h"
 
 /*
@@ -11,6 +14,14 @@ CArchive::CArchive( const std::wstring& InPath )
 	: arVer( VER_PACKAGE_LATEST )
 	, arType( AT_TextFile )
 	, arPath( InPath )
+	, arIsObjectReferenceCollector( false )
+	, arIsFilterEditorOnly( false )
+	, arIsSaveGame( false )
+	, arWantBinaryPropertySerialization( false )
+
+#if WITH_EDITOR
+	, cookingTargetPlatform( nullptr )
+#endif // WITH_EDITOR
 {}
 
 /*
@@ -161,4 +172,70 @@ void CArchive::SerializeCompressed( void* InBuffer, uint32 InSize, ECompressionF
 		// Free intermediate data.
 		delete[] compressionChunks;
 	}
+}
+
+/*
+==================
+CArchive::operator<<
+==================
+*/
+CArchive& CArchive::operator<<( class CName& InValue )
+{
+	if ( IsSaving() )
+	{
+		const CName::NameEntry*		nameEntry = CName::GetEntry( InValue.IsValid() ? InValue.GetIndex() : NAME_None );
+		*this << nameEntry->name;
+		*this << InValue.GetIndex();
+		*this << InValue.GetNumber();
+	}
+	else
+	{
+		std::wstring	name;
+		uint32			index;
+		uint32			number = NAME_NO_NUMBER;
+		*this << name;
+		*this << index;
+		if ( Ver() >= VER_NumberInCName )
+		{
+			*this << number;
+		}
+
+		// Is name is not valid, setting to NAME_None
+		if ( name == TEXT( "" ) || index == INDEX_NONE )
+		{
+			InValue = NAME_None;
+			number = NAME_NO_NUMBER;
+		}
+
+		// Otherwise we init name
+		else
+		{
+			if ( index < CName::GetMaxNames() && CName::GetEntry( index )->name == name )
+			{
+				InValue = CName( ( EName )index, number );
+			}
+			else
+			{
+				InValue = CName( name, number, CNAME_Add );
+			}
+		}
+	}
+
+	return *this;
+}
+
+/*
+==================
+CArchive::operator<<
+==================
+*/
+CArchive& CArchive::operator<<( const class CName& InValue )
+{
+	const CName::NameEntry*		nameEntry = CName::GetEntry( InValue.IsValid() ? InValue.GetIndex() : NAME_None );
+	Assert( IsSaving() );
+
+	*this << nameEntry->name;
+	*this << InValue.GetIndex();
+	*this << InValue.GetNumber();
+	return *this;
 }

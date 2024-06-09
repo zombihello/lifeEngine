@@ -1,3 +1,4 @@
+#include "System/Memory.h"
 #include "System/DragNDrop.h"
 
 /*
@@ -13,7 +14,7 @@ void DND_MakeAssetReferenceData( const std::vector<std::wstring>& InAssetReferen
 		uint32					oldSize = OutResult.size();
 		uint32					newSize = oldSize + assetRef.size() + 1;				// +1 for terminate of string
 		OutResult.resize( newSize, TEXT( '\0' ) );
-		memcpy( OutResult.data() + oldSize, assetRef.data(), sizeof( tchar ) * assetRef.size() );
+		Memory::Memcpy( OutResult.data() + oldSize, assetRef.data(), sizeof( tchar ) * assetRef.size() );
 	}
 	OutResult.push_back( TEXT( '\0' ) );	// Terminate element
 }

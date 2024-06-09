@@ -20,7 +20,7 @@
   */
 class AELPlayerCharacter : public ACharacter
 {
-	DECLARE_CLASS( AELPlayerCharacter, ACharacter, 0, 0 )
+	DECLARE_CLASS( AELPlayerCharacter, ACharacter, 0, 0, TEXT( "EleotGame" ) )
 
 public:
 	/**
@@ -29,9 +29,11 @@ public:
 	AELPlayerCharacter();
 
 	/**
-	 * @brief Destructor
+	 * @brief Called before destroying the object
+	 * This is called immediately upon deciding to destroy the object, to allow the object to begin an
+	 * asynchronous cleanup process
 	 */
-	~AELPlayerCharacter();
+	virtual void BeginDestroy() override;
 
 	/**
 	 * Overridable native event for when play begins for this actor
@@ -39,7 +41,7 @@ public:
 	virtual void BeginPlay() override;
 
 private:
-	TRefCountPtr<CCameraComponent>		cameraComponent;				/**< Camera component */
+	CCameraComponent*		cameraComponent;				/**< Camera component */
 };
 
 #endif // !ELPLAYERCHARACTER_H

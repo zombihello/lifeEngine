@@ -10,7 +10,7 @@
 #define RENDERINGTHREAD_H
 
 #include "Containers/RingBuffer.h"
-#include "System/ThreadingBase.h"
+#include "System/Threading.h"
 
 /**
  * @ingroup Engine
@@ -35,7 +35,7 @@ extern CRingBuffer		g_RenderCommandBuffer;
  * @ingroup Engine
  * @brief Event of finished rendering frame
  */
-extern CEvent*			g_RenderFrameFinished;
+extern CEvent*	g_RenderFrameFinished;
 
 /**
  * @ingroup Engine
@@ -446,13 +446,13 @@ public:
  * @ingroup Engine
  * Starts the rendering thread
  */
-extern void StartRenderingThread();
+void StartRenderingThread();
 
 /** 
  * @ingroup Engine
  * Stops the rendering thread
  */
-extern void StopRenderingThread();
+void StopRenderingThread();
 
 /**
  * @ingroup Engine

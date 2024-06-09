@@ -97,7 +97,7 @@ public:
 	 */
 	virtual uint64 GetTypeHash() const override
 	{
-		return Sys_MemFastHash( wireframeColor, TBaseMeshDrawingPolicy::GetTypeHash() );
+		return FastHash( wireframeColor, TBaseMeshDrawingPolicy::GetTypeHash() );
 	}
 
 private:
@@ -209,6 +209,13 @@ private:
 	void RenderUI( class CBaseDeviceContextRHI* InDeviceContext );
 
 #if WITH_EDITOR
+	/**
+	 * Render WorldEd background
+	 *
+	 * @param InDeviceContext	RHI device context
+	 */
+	void RenderWorldEdBackground( class CBaseDeviceContextRHI* InDeviceContext );
+
 	/**
 	 * Render WorldEd foreground
 	 * 
