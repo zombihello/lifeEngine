@@ -353,13 +353,29 @@ std::wstring Sys_GetClipboardText();
     /**
     * @ingroup Core
     * @brief Macro for checking the condition
-    * @warning With enabled define ENABLED_ASSERT this macro is empty
+    * @warning With disabled define ENABLED_ASSERT this macro is empty
     *
     * @param Expr   Checkable condition
     *
     * Example usage: @code Assert( Value == 0 ) @endcode
     */
     #define Assert( Expr ) \
+    { \
+        if ( !( Expr ) ) \
+        { \
+            Sys_FailAssertFunc( TEXT( #Expr ), __FILE__, __LINE__ ); \
+        } \
+    }
+
+    /**
+     * @ingroup Core
+     * @brief Macro for checking the condition
+     * @note With disabled define ENABLED_ASSERT Expr in code will be
+     * 
+     * @param Expr   Checkable condition
+     * Example usage: @code Verify( Value == 0 ) @endcode
+     */
+    #define Verify( Expr ) \
     { \
         if ( !( Expr ) ) \
         { \
@@ -406,7 +422,7 @@ std::wstring Sys_GetClipboardText();
     * }
     * @endcode
     */
-#define AssertNoReentry() \
+    #define AssertNoReentry() \
     { \
         static bool s_bBeenHere##__LINE__ = false; \
         AssertMsg( !s_bBeenHere##__LINE__, TEXT( "Enclosing block was called more than once" ) ); \
@@ -418,6 +434,7 @@ std::wstring Sys_GetClipboardText();
     #define AssertMsg( Expr, Msg, ... )		{}
     #define AssertFunc( Expr, Func )	    {}
     #define Assert( Expr )				    {}
+    #define Verify( Expr )                  { if ( !( Expr ) ) {} }
     #define AssertNoEntry()                 {}
     #define AssertNoReentry()               {}
 #endif // ENABLED_ASSERT

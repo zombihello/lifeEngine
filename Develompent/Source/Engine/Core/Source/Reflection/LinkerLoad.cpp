@@ -8,6 +8,222 @@
 
 /*
 ==================
+CCompressedPackageReader::CCompressedPackageReader
+==================
+*/
+CCompressedPackageReader::CCompressedPackageReader( const std::wstring& InPath, std::vector<CompressedChunk>* InCompressedChunks, ECompressionFlags InCompressionFlags )
+	: CArchive( InPath )
+	, fileSize( 0 )
+	, uncompressedFileSize( 0 )
+	, currentPos( 0 )
+	, fileReader( nullptr )
+	, compressedChunks( nullptr )
+	, compressionFlags( CF_None )
+{
+	// Create file reader
+	fileReader = g_FileSystem->CreateFileReader( InPath );
+	if ( fileReader )
+	{
+		// Init file reader
+		fileReader->SetType( AT_BinaryFile );
+		fileSize = fileReader->GetSize();
+
+		// Set compression map
+		Assert( InCompressedChunks );
+		SetCompressionMap( InCompressedChunks, InCompressionFlags );
+	}
+}
+
+/*
+==================
+CCompressedPackageReader::~CCompressedPackageReader
+==================
+*/
+CCompressedPackageReader::~CCompressedPackageReader()
+{
+	FlushCache();
+	if ( fileReader )
+	{
+		delete fileReader;
+	}
+}
+
+/*
+==================
+CCompressedPackageReader::Serialize
+==================
+*/
+void CCompressedPackageReader::Serialize( void* InBuffer, uint32 InSize )
+{
+	// Ensure we aren't reading beyond the end of the file
+	AssertMsg( currentPos + InSize <= GetSize(), TEXT( "Seeked past end of file %s (%d/%d)" ), arPath.c_str(), currentPos + InSize, GetSize(), uncompressedFileSize );
+
+	// Make sure serialization request fits entirely in already precached region
+	if ( !PrecacheBufferContainsRequest( currentPos, InSize ) )
+	{
+		// Precache region
+		Precache( currentPos, InSize );
+	}
+
+	// Copy memory to destination
+	Memory::Memcpy( InBuffer, precacheChunk.buffer + ( currentPos - precacheChunk.startPos ), InSize );
+
+	// Serialization implicitly increases position in file
+	currentPos += InSize;
+}
+
+/*
+==================
+CCompressedPackageReader::FindCompressedChunkIndex
+==================
+*/
+uint32 CCompressedPackageReader::FindCompressedChunkIndex( uint32 InRequestOffset ) const
+{
+	// Find base start point and size
+	uint32		chunkIndex = 0;
+	while ( chunkIndex < compressedChunks->size() )
+	{
+		// Check whether request offset is encompassed by this chunk
+		const CompressedChunk&		chunk = compressedChunks->at( chunkIndex );
+		if ( chunk.uncompressedOffset <= InRequestOffset && chunk.uncompressedOffset + chunk.uncompressedSize > InRequestOffset )
+		{
+			break;
+		}
+
+		++chunkIndex;
+	}
+
+	Assert( chunkIndex < compressedChunks->size() );
+	return chunkIndex;
+}
+
+/*
+==================
+CCompressedPackageReader::PrecacheCompressedChunk
+==================
+*/
+void CCompressedPackageReader::PrecacheCompressedChunk( uint32 InChunkIndex )
+{
+	// Compressed chunk to request
+	CompressedChunk			chunkToRead = compressedChunks->at( InChunkIndex );
+
+	// Update start/end position and current chunk index
+	precacheChunk.startPos	= chunkToRead.uncompressedOffset;
+	precacheChunk.endPos	= chunkToRead.uncompressedOffset + chunkToRead.uncompressedSize;
+
+	// Allocate new buffer
+	Memory::Free( precacheChunk.buffer );
+	precacheChunk.buffer = ( byte* )Memory::Malloc( chunkToRead.uncompressedSize );
+
+	// Serialize compressed data
+	fileReader->Seek( chunkToRead.compressedOffset );
+	fileReader->SerializeCompressed( precacheChunk.buffer, chunkToRead.uncompressedSize, compressionFlags );
+}
+
+/*
+==================
+CCompressedPackageReader::Precache
+==================
+*/
+void CCompressedPackageReader::Precache( uint32 InPrecacheOffset, uint32 InPrecacheSize )
+{
+	// Precache chunk if it isn't already
+	Assert( compressedChunks );
+	if ( !PrecacheBufferContainsRequest( InPrecacheOffset, InPrecacheSize ) )
+	{
+		PrecacheCompressedChunk( FindCompressedChunkIndex( InPrecacheOffset ) );
+	}
+}
+
+/*
+==================
+CCompressedPackageReader::FlushCache
+==================
+*/
+void CCompressedPackageReader::FlushCache()
+{
+	// Invalidate any precached data and free memory
+	Memory::Free( precacheChunk.buffer );
+	Memory::Memzero( &precacheChunk, sizeof( PrecacheChunk ) );
+}
+
+/*
+==================
+CCompressedPackageReader::SetCompressionMap
+==================
+*/
+bool CCompressedPackageReader::SetCompressionMap( std::vector<CompressedChunk>* InCompressedChunks, ECompressionFlags InCompressionFlags )
+{
+	// Set chunks
+	compressedChunks	= InCompressedChunks;
+	compressionFlags	= InCompressionFlags;
+
+	// Invalidate any precached data and free memory
+	FlushCache();
+	Assert( !compressedChunks->empty() );
+
+	// Update the uncompressed file size
+	CompressedChunk&		lastChunk =  compressedChunks->at( compressedChunks->size() - 1 );
+	uncompressedFileSize	= lastChunk.uncompressedOffset + lastChunk.uncompressedSize;
+
+	// We support translation as requested
+	return true;
+}
+
+/*
+==================
+CCompressedPackageReader::Tell
+==================
+*/
+uint32 CCompressedPackageReader::Tell()
+{
+	return currentPos;
+}
+
+/*
+==================
+CCompressedPackageReader::Seek
+==================
+*/
+void CCompressedPackageReader::Seek( uint32 InPosition )
+{
+	Assert( InPosition >= 0 && InPosition <= GetSize() );
+	currentPos = InPosition;
+}
+
+/*
+==================
+CCompressedPackageReader::IsLoading
+==================
+*/
+bool CCompressedPackageReader::IsLoading() const
+{
+	return true;
+}
+
+/*
+==================
+CCompressedPackageReader::IsEndOfFile
+==================
+*/
+bool CCompressedPackageReader::IsEndOfFile()
+{
+	return fileReader ? fileReader->IsEndOfFile() : true;
+}
+
+/*
+==================
+CCompressedPackageReader::GetSize
+==================
+*/
+uint32 CCompressedPackageReader::GetSize()
+{
+	return uncompressedFileSize;
+}
+
+
+/*
+==================
 CLinkerLoad::CLinkerLoad
 ==================
 */
@@ -288,6 +504,10 @@ bool CLinkerLoad::CreateLoader()
 		return false;
 	}
 
+	// Precache up to 128KB before serializing package file summary
+	uint32		precacheSize = Min<uint32>( 128 * 1024, loader->GetSize() );
+	Assert( precacheSize > 0 );
+	loader->Precache( 0, precacheSize );
 	return true;
 }
 
@@ -324,8 +544,28 @@ bool CLinkerLoad::SerializePackageFileSummary()
 		// Package has been stored compressed
 		if ( summary.GetPackageFlags() & PKG_StoreCompressed )
 		{
-			Warnf( TEXT( "Compressed packages aren't support\n" ) );
-			return false;
+			// Set compression mapping. Failure means Loader doesn't support package compression
+			Assert( !summary.compressedChunks.empty() );
+			if ( !loader->SetCompressionMap( &summary.compressedChunks, ( ECompressionFlags )summary.compressionFlags ) )
+			{
+				// Current loader doesn't support it, so we need to switch to one known to support it
+				// We need keep track of current position as we already serialized the package file summary
+				uint32		currentPos = loader->Tell();
+
+				// Delete old loader
+				delete loader;
+
+				// Create new one using CCompressedPackageReader as it supports package compression
+				loader = new CCompressedPackageReader( arPath, &summary.compressedChunks, ( ECompressionFlags )summary.compressionFlags );
+				if ( loader->GetSize() == 0 )
+				{
+					Warnf( TEXT( "Failed to create archive that support package compression\n" ) );
+					return false;
+				}
+
+				// Seek to current position as package file summary doesn't need to be serialized again
+				loader->Seek( currentPos );
+			}
 		}
 
 		// Check tag
@@ -370,7 +610,9 @@ bool CLinkerLoad::SerializeNameMap()
 	// Seek to the start of name map in a file
 	if ( summary.nameCount > 0 )
 	{
+		// Precache name, import and export table
 		Seek( summary.nameOffset );
+		loader->Precache( summary.nameOffset, summary.totalHeaderSize - summary.nameOffset );
 	}
 
 	// Serialize the name map
@@ -1443,6 +1685,9 @@ void CLinkerLoad::Preload( CObject* InObject )
 				// Move to the position in the file where this object's data is stored
 				Seek( exportObject.serialOffset );
 
+				// Tell the file reader to read the raw data from disk
+				loader->Precache( exportObject.serialOffset, exportObject.serialSize );
+
 				// Mark the object to indicate that it has been loaded
 				InObject->RemoveObjectFlag( OBJECT_NeedLoad );
 
@@ -1625,6 +1870,16 @@ CLinkerLoad::Serialize
 void CLinkerLoad::Serialize( void* InBuffer, uint32 InSize )
 {
 	loader->Serialize( InBuffer, InSize );
+}
+
+/*
+==================
+CLinkerLoad::Precache
+==================
+*/
+void CLinkerLoad::Precache( uint32 InPrecacheOffset, uint32 InPrecacheSize )
+{
+	loader->Precache( InPrecacheOffset, InPrecacheSize );
 }
 
 /*

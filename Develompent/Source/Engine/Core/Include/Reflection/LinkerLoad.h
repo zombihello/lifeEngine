@@ -13,6 +13,142 @@
 
 /**
  * @ingroup Core
+ * @brief Archive that can reading compressed package
+ */
+class CCompressedPackageReader : public CArchive
+{
+public:
+	/**
+	 * @brief Constructor
+	 * @param InPath				Path to archive
+	 * @param InCompressedChunks	Pointer to array containing information about (un)compressed chunks
+	 * @param InCompressionFlags	Flags determining compression format associated with mapping
+	 */
+	CCompressedPackageReader( const std::wstring& InPath, std::vector<CompressedChunk>* InCompressedChunks, ECompressionFlags InCompressionFlags );
+
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~CCompressedPackageReader();
+
+	/**
+	 * @brief Serialize data
+	 * @param InBuffer	Pointer to buffer for serialize
+	 * @param InSize	Size of buffer
+	 */
+	virtual void Serialize( void* InBuffer, uint32 InSize ) override;
+
+	/**
+	 * @brief Precache the region that to be read soon
+	 * This function will not change the current archive position
+	 *
+	 * @param InPrecacheOffset		Offset at which to begin precaching
+	 * @param InPrecacheSize		Number of bytes to precache
+	 */
+	virtual void Precache( uint32 InPrecacheOffset, uint32 InPrecacheSize ) override;
+
+	/**
+	 * @brief Flushes cache and frees internal data
+	 */
+	virtual void FlushCache() override;
+
+	/**
+	 * @brief Set mapping from offsets/size that are going to be used for seeking and serialization to what
+	 * is actually stored on disk
+	 *
+	 * @param InCompressedChunks	Pointer to array containing information about (un)compressed chunks
+	 * @param InCompressionFlags	Flags determining compression format associated with mapping
+	 * @return Return TRUE if archive supports translating offsets and uncompressing on read, otherwise FALSE
+	 */
+	virtual bool SetCompressionMap( std::vector<CompressedChunk>* InCompressedChunks, ECompressionFlags InCompressionFlags ) override;
+
+	/**
+	 * @brief Get current position in archive
+	 * @return Current position in archive
+	 */
+	virtual uint32 Tell() override;
+
+	/**
+	 * @brief Set current position in archive
+	 * @param InPosition	New position in archive
+	 */
+	virtual void Seek( uint32 InPosition ) override;
+
+	/**
+	 * @breif Is loading archive
+	 * @return Return TRUE if archive loading, FALSE if archive saving
+	 */
+	virtual bool IsLoading() const override;
+
+	/**
+	 * Is end of file
+	 * @return Return TRUE if end of file, otherwise FALSE
+	 */
+	virtual bool IsEndOfFile() override;
+
+	/**
+	 * @brief Get size of archive
+	 * @return Return size of archive
+	 */
+	virtual uint32 GetSize() override;
+
+private:
+	/**
+	 * @brief Precache chunk
+	 */
+	struct PrecacheChunk
+	{
+		/**
+		 * @brie Constructor
+		 */
+		PrecacheChunk()
+			: startPos( 0 )
+			, endPos( 0 )
+			, buffer( nullptr )
+		{}
+
+		uint32		startPos;	/**< Start position of current precache request */
+		uint32		endPos;		/**< End position of current precache request */
+		byte*		buffer;		/**< Buffer containing precached data */
+	};
+
+	/**
+	 * @brief Whether the current precache buffer contains the passed in request
+	 * 
+	 * @param InRequestOffset	Offset in bytes from start of file
+	 * @param InRequestSize		Size in bytes requested
+	 * @return Return TRUE if buffer contains request, othwerise FALSE 
+	 */
+	FORCEINLINE bool PrecacheBufferContainsRequest( uint32 InRequestOffset, uint32 InRequestSize )
+	{
+		return InRequestOffset >= precacheChunk.startPos && ( InRequestOffset + InRequestSize <= precacheChunk.endPos );
+	}
+
+	/**
+	 * @brief Find the compressed chunk index associated with the passed in offset
+	 * 
+	 * @param InRequestOffset	Offset in file to find associated chunk index for
+	 * @return Return index into CompressedChunks array matching this offset
+	 */
+	uint32 FindCompressedChunkIndex( uint32 InRequestOffset ) const;
+
+	/**
+	 * @brief Precache compressed chunk
+	 * @param InChunkIndex		Index of compressed chunk
+	 */
+	void PrecacheCompressedChunk( uint32 InChunkIndex );
+
+	uint32								fileSize;				/**< Cached file size */
+	uint32								uncompressedFileSize;	/**< Cached uncompressed file size */
+	uint32								currentPos;				/**< Current position of archive */
+	CArchive*							fileReader;				/**< File reader */
+	std::vector<CompressedChunk>*		compressedChunks;		/**< Mapping of compressed/uncompresses sizes and offsets */
+	ECompressionFlags					compressionFlags;		/**< Compression flags determining compression of compressedChunks */ 
+	PrecacheChunk						precacheChunk;			/**< Precache chunk */
+};
+
+/**
+ * @ingroup Core
  * @brief Handles loading LifeEngine package files, including reading CObject data from disk
  */
 class CLinkerLoad : public CLinker, public CArchive
@@ -116,6 +252,15 @@ public:
 	 * @param InSize	Size of buffer
 	 */
 	virtual void Serialize( void* InBuffer, uint32 InSize ) override;
+
+	/**
+	 * @brief Precache the region that to be read soon
+	 * This function will not change the current archive position
+	 *
+	 * @param InPrecacheOffset		Offset at which to begin precaching
+	 * @param InPrecacheSize		Number of bytes to precache
+	 */
+	virtual void Precache( uint32 InPrecacheOffset, uint32 InPrecacheSize ) override;
 
 	/**
 	 * @brief Override operator << for serialize CObjects

@@ -100,6 +100,30 @@ public:
 	virtual void Preload( class CObject* InObject ) {}
 
 	/**
+	 * @brief Precache the region that to be read soon
+	 * This function will not change the current archive position
+	 * 
+	 * @param InPrecacheOffset		Offset at which to begin precaching
+	 * @param InPrecacheSize		Number of bytes to precache
+	 */
+	virtual void Precache( uint32 InPrecacheOffset, uint32 InPrecacheSize ) {}
+
+	/**
+	 * @brief Flushes cache and frees internal data
+	 */
+	virtual void FlushCache() {}
+
+	/**
+	 * @brief Set mapping from offsets/size that are going to be used for seeking and serialization to what
+	 * is actually stored on disk
+	 * 
+	 * @param InCompressedChunks	Pointer to array containing information about (un)compressed chunks
+	 * @param InCompressionFlags	Flags determining compression format associated with mapping
+	 * @return Return TRUE if archive supports translating offsets and uncompressing on read, otherwise FALSE 
+	 */
+	virtual bool SetCompressionMap( std::vector<struct CompressedChunk>* InCompressedChunks, ECompressionFlags InCompressionFlags ) { return false; }
+
+	/**
 	 * Set archive type
 	 * 
 	 * @param[in] InType Archive type
