@@ -10,6 +10,7 @@
 #define SCRIPTTOKENEATER_H
 
 #include "Scripts/ScriptTokenStream.h"
+#include "Scripts/ScriptStringBuffer.h"
 
 /**
  * @ingroup WorldEd
@@ -60,8 +61,8 @@ public:
 	virtual void OnEmitError( uint32 InLine, const achar* InMessage );
 
 protected:
-	std::wstring_view		fileName;	/**< File name for context */
-	CScriptTokenStream&		tokens;		/**< Stream tokens. Here will be places all of parsed tokens */
+	std::wstring				fileName;	/**< File name for context */
+	CScriptTokenStream&			tokens;		/**< Stream tokens. Here will be places all of parsed tokens */
 };
 
 #endif // !SCRIPTTOKENEATER_H

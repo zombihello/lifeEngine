@@ -18,6 +18,12 @@
 
 /**
  * @ingroup WorldEd
+ * @brief Shared pointer of CScriptClassStub
+ */
+typedef TSharedPtr<class CScriptClassStub>		ScriptClassStubPtr_t;
+
+/**
+ * @ingroup WorldEd
  * @brief Script scope of a stub
  */
 struct ScriptScopeStub
@@ -182,7 +188,7 @@ public:
 	 * @brief Add a class
 	 * @param InClassStub	Class stub
 	 */
-	FORCEINLINE void AddClass( const TSharedPtr<CScriptClassStub>& InClassStub )
+	FORCEINLINE void AddClass( const ScriptClassStubPtr_t& InClassStub )
 	{
 		classes.push_back( InClassStub );
 		classesMap.insert( std::make_pair( InClassStub->GetName(), InClassStub ) );
@@ -194,7 +200,7 @@ public:
 	 * @param InClassName	Class name
 	 * @return Return found class stub. If not found returns NULL
 	 */
-	FORCEINLINE TSharedPtr<CScriptClassStub> FindClass( const std::wstring& InClassName ) const
+	FORCEINLINE ScriptClassStubPtr_t FindClass( const std::wstring& InClassName ) const
 	{
 		auto	it = classesMap.find( InClassName );
 		return it != classesMap.end() ? it->second : nullptr;
@@ -204,7 +210,7 @@ public:
 	 * @brief Get array of all classes
 	 * @return Return array of all classes
 	 */
-	FORCEINLINE const std::vector<TSharedPtr<CScriptClassStub>>& GetClasses() const
+	FORCEINLINE const std::vector<ScriptClassStubPtr_t>& GetClasses() const
 	{
 		return classes;
 	}
@@ -213,7 +219,7 @@ public:
 	 * @brief Get array of all classes
 	 * @return Return array of all classes
 	 */
-	FORCEINLINE std::vector<TSharedPtr<CScriptClassStub>>& GetClasses()
+	FORCEINLINE std::vector<ScriptClassStubPtr_t>& GetClasses()
 	{
 		return classes;
 	}
@@ -225,8 +231,8 @@ private:
 	 */
 	CScriptSystemStub( const CScriptSystemStub& InOther );
 
-	std::vector<TSharedPtr<CScriptClassStub>>							classes;	/**< Top level classes */
-	std::unordered_map<std::wstring, TSharedPtr<CScriptClassStub>>		classesMap;	/**< Top level classes for find by name */
+	std::vector<ScriptClassStubPtr_t>							classes;	/**< Top level classes */
+	std::unordered_map<std::wstring, ScriptClassStubPtr_t>		classesMap;	/**< Top level classes for find by name */
 };
 
 #endif // !SCRIPTFIELDSTUBS_H

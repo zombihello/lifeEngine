@@ -10,6 +10,7 @@
 #define SCRIPTFILECONTEXT_H
 
 #include "Misc/StringTools.h"
+#include "Scripts/ScriptStringBuffer.h"
 
 /**
  * @ingroup WorldEd
@@ -36,7 +37,7 @@ struct ScriptFileContext
 	 * @param InCharPosition		Character position this context begins at
 	 * @param InCharEndPosition		Character position at the end of the context
 	 */
-	FORCEINLINE ScriptFileContext( const std::wstring& InFile, int32 InLine, int32 InCharLineStart, int32 InCharPosition, int32 InCharEndPosition )
+	FORCEINLINE ScriptFileContext( const ScriptStringBufferTCHAR_t& InFile, int32 InLine, int32 InCharLineStart, int32 InCharPosition, int32 InCharEndPosition )
 		: file( InFile )
 		, line( InLine )
 		, charLineStart( InCharLineStart )
@@ -50,7 +51,7 @@ struct ScriptFileContext
 	 * @param InFile		Referenced file
 	 * @param InLine		Line this context starts on
 	 */
-	FORCEINLINE ScriptFileContext( const std::wstring& InFile, int32 InLine )
+	FORCEINLINE ScriptFileContext( const ScriptStringBufferTCHAR_t& InFile, int32 InLine )
 		: ScriptFileContext( InFile, InLine, 0, 0, 0 )
 	{}
 
@@ -122,9 +123,13 @@ struct ScriptFileContext
 	 */
 	FORCEINLINE std::wstring ToString() const
 	{
-		if ( !file.empty() )
+		if ( line != -1 )
 		{
-			return L_Sprintf( TEXT( "%s[%i]" ), file.data(), line );
+			return L_Sprintf( TEXT( "%s[%i]" ), file.AsChar(), line );
+		}
+		else if ( !file.IsEmpty() )
+		{
+			return L_Sprintf( TEXT( "%s[]" ), file.AsChar() );
 		}
 		else
 		{
@@ -132,11 +137,11 @@ struct ScriptFileContext
 		}
 	}
 
-	std::wstring			file;				/**< Referenced file */
-	int32					line;				/**< Line this context starts on */
-	int32					charLineStart;		/**< Character position at the start of the line */
-	int32					charPosition;		/**< Character position this context begins at */
-	int32					charEndPosition;	/**< Character position at the end of the context */
+	ScriptStringBufferTCHAR_t		file;				/**< Referenced file */
+	int32							line;				/**< Line this context starts on */
+	int32							charLineStart;		/**< Character position at the start of the line */
+	int32							charPosition;		/**< Character position this context begins at */
+	int32							charEndPosition;	/**< Character position at the end of the context */
 };
 
 #endif // !SCRIPTFILECONTEXT_H

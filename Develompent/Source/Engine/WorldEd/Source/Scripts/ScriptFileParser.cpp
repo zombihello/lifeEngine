@@ -37,10 +37,7 @@ bool CScriptFileParser::ParseFile( const std::wstring& InFileName, const std::st
 	}
 
 	// Initialize file parser
-	int32	result = -1;
-	{
-		result = LifeScript_GrammarFile( tokens, *this );
-	}
+	int32	result = LifeScript_GrammarFile( tokens, *this );
 
 	// Did we parse stuff correctly?
 	return result == 0 && !bHasError;
@@ -62,11 +59,13 @@ void CScriptFileParser::EmitError( const ScriptFileContext* InContext, const std
 CScriptFileParser::StartClass
 ==================
 */
-void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const std::string& InClassName, const std::string& InClassSuperName, uint32 InFlags )
+void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, uint32 InFlags )
 {
 	AssertMsg( InContext, TEXT( "Invalid context for class" ) );
-	AssertMsg( InSuperClassContext, TEXT( "Invalid context for super class" ) );	
-	currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, ANSI_TO_TCHAR( InClassName.c_str() ), *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.c_str() ), InFlags );
+	AssertMsg( InSuperClassContext, TEXT( "Invalid context for super class" ) );
+	AssertMsg( !InClassName.empty() && !InClassSuperName.empty(), TEXT( "Class name or super class name isn't valid" ) );
+
+	currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, ANSI_TO_TCHAR( InClassName.data() ), *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ), InFlags );
 	stubs.AddClass( currentClass );
 }
 
@@ -96,7 +95,7 @@ void CScriptFileParser::EndDefinition( int32 InLine, const ScriptFileContext* In
 CScriptFileParser::StartFunction
 ==================
 */
-void CScriptFileParser::StartFunction( const ScriptFileContext* InContext, const ScriptFileContext* InReturnTypeContext, const std::string& InFunctionName, const std::string& InReturnTypeName, uint32 InFlags )
+void CScriptFileParser::StartFunction( const ScriptFileContext* InContext, const ScriptFileContext* InReturnTypeContext, const std::string_view& InFunctionName, const std::string_view& InReturnTypeName, uint32 InFlags )
 {}
 
 /*
@@ -115,7 +114,7 @@ CScriptTokenStream& CScriptFileParser::GetFunctionCodeTokens()
 CScriptFileParser::AddProperty
 ==================
 */
-void CScriptFileParser::AddProperty( const ScriptFileContext* InContext, const ScriptFileContext* InTypeContext, const std::string& InPropertyName, const std::string& InTypeName, bool InIsFunctionParam )
+void CScriptFileParser::AddProperty( const ScriptFileContext* InContext, const ScriptFileContext* InTypeContext, const std::string_view& InPropertyName, const std::string_view& InTypeName, bool InIsFunctionParam )
 {
 	AssertMsg( InContext, TEXT( "Invalid context for property" ) );
 	AssertMsg( InTypeContext, TEXT( "Invalid context for property type" ) );

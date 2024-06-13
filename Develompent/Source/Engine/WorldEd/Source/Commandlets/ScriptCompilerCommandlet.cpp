@@ -42,7 +42,7 @@ bool CScriptCompilerCommandlet::Main( const CCommandLine& InCommandLine )
 				const CJsonValue&		jsonScriptSrcDir = srcDirsJsonArray->at( indexSrcDir );
 				if ( !jsonScriptSrcDir.IsA( JVT_String ) )
 				{
-					Warnf( TEXT( "Invalid module name at %i, must be string type\n" ), indexSrcDir );
+					Warnf( TEXT( "Invalid script source directory at %i, must be string type\n" ), indexSrcDir );
 					continue;
 				}
 
@@ -75,7 +75,7 @@ bool CScriptCompilerCommandlet::Main( const CCommandLine& InCommandLine )
 	for ( uint32 index = 0, count = scriptPackageInfos.size(); index < count; ++index )
 	{	
 		CScriptSystemStub			stubs;
-		const ScriptPackageInfo&	scriptPackageInfo = scriptPackageInfos[index];
+		const ScriptPackageInfo&	scriptPackageInfo	= scriptPackageInfos[index];
 		const std::wstring			packageName			= scriptPackageInfo.package->GetName();
 		const std::wstring			scriptDir			= L_Sprintf(
 			TEXT( "%s" ) PATH_SEPARATOR

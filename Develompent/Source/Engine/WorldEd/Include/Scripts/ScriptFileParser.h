@@ -52,7 +52,7 @@ public:
 	 * @param InClassSuperName		Super class name
 	 * @param InFlags				Flags (see EScriptStubFlags)
 	 */
-	void StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const std::string& InClassName, const std::string& InClassSuperName, uint32 InFlags );
+	void StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, uint32 InFlags );
 
 	/**
 	 * @brief End definition of current class/enum/struct
@@ -72,7 +72,7 @@ public:
 	 * @param InReturnTypeName		Return type name
 	 * @param InFlags				Flags (see EScriptStubFlags)
 	 */
-	void StartFunction( const ScriptFileContext* InContext, const ScriptFileContext* InReturnTypeContext, const std::string& InFunctionName, const std::string& InReturnTypeName, uint32 InFlags );
+	void StartFunction( const ScriptFileContext* InContext, const ScriptFileContext* InReturnTypeContext, const std::string_view& InFunctionName, const std::string_view& InReturnTypeName, uint32 InFlags );
 
 	/**
 	 * @brief Get function code tokens
@@ -89,7 +89,7 @@ public:
 	 * @param InTypeName		Type name
 	 * @param InIsFunctionParam	Is this property function parameter
 	 */
-	void AddProperty( const ScriptFileContext* InContext, const ScriptFileContext* InTypeContext, const std::string& InPropertyName, const std::string& InTypeName, bool InIsFunctionParam );
+	void AddProperty( const ScriptFileContext* InContext, const ScriptFileContext* InTypeContext, const std::string_view& InPropertyName, const std::string_view& InTypeName, bool InIsFunctionParam );
 
 	/**
 	 * @brief Pop context
@@ -97,9 +97,9 @@ public:
 	void PopContext();
 
 private:
-	bool							bHasError;		/**< There were a parsing errors */
-	CScriptSystemStub&				stubs;			/**< Output stubs */
-	TSharedPtr<CScriptClassStub>	currentClass;	/**< Opened class */
+	bool					bHasError;		/**< There were a parsing errors */
+	CScriptSystemStub&		stubs;			/**< Output stubs */
+	ScriptClassStubPtr_t	currentClass;	/**< Opened class */
 };
 
 #endif // !SCRIPTFILEPARSER_H

@@ -1,5 +1,7 @@
 #include "Logger/LoggerMacros.h"
+#include "Reflection/Enum.h"
 #include "Reflection/ObjectIterator.h"
+#include "Reflection/ObjectGlobals.h"
 #include "Scripts/ScriptEnvironmentBuilder.h"
 
 /*
@@ -41,7 +43,7 @@ bool CScriptEnvironmentBuilder::CreateTypes()
 	
 	// Create classes
 	{
-		const std::vector<TSharedPtr<CScriptClassStub>>&	classes = stubs.GetClasses();
+		const std::vector<ScriptClassStubPtr_t>&	classes = stubs.GetClasses();
 		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
 		{
 			bNoErrors &= CreateClass( *classes[index].Get() );
@@ -59,19 +61,19 @@ CScriptEnvironmentBuilder::CreateHierarchyOrder
 */
 bool CScriptEnvironmentBuilder::CreateHierarchyOrder()
 {
-	uint32										reservedInheritanceLevel = 32;
-	std::vector<TSharedPtr<CScriptClassStub>>	stack;
-	std::vector<TSharedPtr<CScriptClassStub>>	orderedClasses;
-	std::vector<TSharedPtr<CScriptClassStub>>&	classes = stubs.GetClasses();
-	uint32										numClasses = classes.size();
+	uint32								reservedInheritanceLevel = 32;
+	std::vector<ScriptClassStubPtr_t>	stack;
+	std::vector<ScriptClassStubPtr_t>	orderedClasses;
+	std::vector<ScriptClassStubPtr_t>&	classes		= stubs.GetClasses();
+	uint32								numClasses	= classes.size();
 	orderedClasses.reserve( numClasses );
 	stack.reserve( reservedInheritanceLevel );
 
 	// Fill map of unprocessed classes
-	std::unordered_map<CName, TSharedPtr<CScriptClassStub>, CName::HashFunction>	unprocessedClasses;
+	std::unordered_map<CName, ScriptClassStubPtr_t, CName::HashFunction>	unprocessedClasses;
 	for ( uint32 index = 0; index < numClasses; ++index )
 	{
-		const TSharedPtr<CScriptClassStub>&		theClass = classes[index];
+		const ScriptClassStubPtr_t&		theClass = classes[index];
 		if ( !unprocessedClasses.insert( std::make_pair( theClass->GetName(), theClass ) ).second )
 		{
 			return false;
@@ -81,11 +83,11 @@ bool CScriptEnvironmentBuilder::CreateHierarchyOrder()
 	// Sort classes
 	for ( uint32 index = 0; index < numClasses; ++index )
 	{
-		const TSharedPtr<CScriptClassStub>&			theClass = classes[index];
-		auto										it = unprocessedClasses.find( theClass->GetName() );
+		const ScriptClassStubPtr_t&			theClass = classes[index];
+		auto								it = unprocessedClasses.find( theClass->GetName() );
 		while ( it != unprocessedClasses.end() )
 		{
-			TSharedPtr<CScriptClassStub>			foundClass = it->second;
+			ScriptClassStubPtr_t			foundClass = it->second;
 			unprocessedClasses.erase( it );
 			stack.push_back( foundClass );
 			it = unprocessedClasses.find( foundClass->GetSuperClassName() );
@@ -98,7 +100,7 @@ bool CScriptEnvironmentBuilder::CreateHierarchyOrder()
 		stack.clear();
 
 		// Check for cyclic dependencies
-		TSharedPtr<CScriptClassStub>		foundClass = stubs.FindClass( theClass->GetSuperClassName() );
+		ScriptClassStubPtr_t		foundClass = stubs.FindClass( theClass->GetSuperClassName() );
 		while ( foundClass )
 		{
 			if ( foundClass->GetSuperClassName() == theClass->GetName() )
@@ -132,27 +134,9 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	// If they aren't then all right. Otherwise this is redefinition and its wrong
 	CClass*		theClass = nullptr;
 	{
-		// Find existing CClass, CStruct or CEnum with same name in script package
-		bool	bExistingStructOrEnum = false;
-		for ( TObjectIterator<CField> it; it; ++it )
-		{
-			CField*		curField = *it;
-			if ( IsIn( curField, scriptPackage ) && curField->GetName() == className )
-			{
-				if ( curField->GetClass()->HasAnyCastFlags( CASTCLASS_CStruct | CASTCLASS_CEnum ) )
-				{
-					bExistingStructOrEnum = true;
-					break;
-				}
-				else if ( curField->GetClass()->HasAnyCastFlags( CASTCLASS_CClass ) )
-				{
-					theClass = ( CClass* )curField;
-					break;
-				}
-			}
-		}
-
-		if ( ( theClass && theClass->HasAnyClassFlags( CLASS_Parsed | CLASS_Intrinsic ) ) || bExistingStructOrEnum )
+		// If we find existing CClass, CStruct or CEnum with same name in script package then it is compile error
+		theClass = FindObjectFast<CClass>( scriptPackage, className.c_str(), true );
+		if ( ( theClass && theClass->HasAnyClassFlags( CLASS_Parsed | CLASS_Intrinsic ) ) || FindObjectFast<CStruct>( scriptPackage, className.c_str(), true ) || FindObjectFast<CEnum>( scriptPackage, className.c_str(), true ) )
 		{
 			Errorf( TEXT( "%s: Type '%s' is already defined\n" ), context.ToString().c_str(), className.c_str() );
 			return false;
@@ -160,16 +144,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	}
 
 	// Find the super class as specified
-	CClass*		superClass = nullptr;
-	for ( TObjectIterator<CClass> it; it; ++it )
-	{
-		CClass*		curClass = *it;
-		if ( curClass->GetName() == superClassName )
-		{
-			superClass = ( CClass* )curClass;
-			break;
-		}
-	}
+	CClass*		superClass = FindObjectFast<CClass>( nullptr, superClassName.c_str(), true, true );
 
 	// All classes must be inherit from CObject
 	if ( superClassName.empty() || superClass && !IsA<CObject>( superClass ) )

@@ -61,7 +61,7 @@ public:
 	 */
 	FORCEINLINE void PushToken( const achar* InTokenString, int32 InTokenID, int32 InScopeLevel, const ScriptFileContext& InContext )
 	{
-		tokens.push_back( ScriptToken( InTokenString, InTokenID, InScopeLevel, InContext ) );
+		tokens.emplace_back( InTokenString, InTokenID, InScopeLevel, InContext );
 	}
 
 	/**
@@ -70,7 +70,7 @@ public:
 	 */
 	FORCEINLINE void PushToken( ScriptToken&& InToken )
 	{
-		tokens.push_back( std::move( InToken ) );
+		tokens.emplace_back( std::move( InToken ) );
 	}
 
 	/**

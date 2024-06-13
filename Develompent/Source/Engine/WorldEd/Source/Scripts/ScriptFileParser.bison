@@ -93,7 +93,7 @@
 	    }
 
         uint32                  flags;          /**< Flags (look EScriptStubFlags) */
-        std::string             string;         /**< String value */
+        std::string_view        string;         /**< String value */
         ScriptFileContext*      context;        /**< Script file context */
         std::string_view        token;          /**< Token in string format */
     };

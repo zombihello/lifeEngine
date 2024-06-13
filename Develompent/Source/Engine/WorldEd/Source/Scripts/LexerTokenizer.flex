@@ -248,7 +248,7 @@
 <*>\n                                           yyextra->NextLine();
 
     /* Default Rule */
-.|\n                                            EMIT_ERROR( "Unknown" );
+.|\n                                            EMIT_ERROR( "Unknown token" );
 %%
 
 /**
