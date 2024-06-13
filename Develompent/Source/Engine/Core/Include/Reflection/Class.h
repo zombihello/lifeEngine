@@ -19,7 +19,7 @@
  */
 class CClass : public CStruct
 {
-	DECLARE_CLASS( CClass, CStruct, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CClass, CStruct, 0, CASTCLASS_CClass, TEXT( "Core" ) )
 
 public:
 	friend CObject;

@@ -21,7 +21,7 @@
  */
 class CEnum : public CField
 {
-	DECLARE_CLASS( CEnum, CField, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CEnum, CField, 0, CASTCLASS_CEnum, TEXT( "Core" ) )
 
 public:
 	/**

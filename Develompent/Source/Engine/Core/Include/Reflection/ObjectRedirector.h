@@ -31,7 +31,7 @@ DECLARE_MULTICAST_DELEGATE( COnObjectRedirectorFollowed, const std::wstring& /*I
 class CObjectRedirector : public CObject
 {
 public:
-	DECLARE_CLASS( CObjectRedirector, CObject, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CObjectRedirector, CObject, 0, 0, TEXT( "Core" ) )
 
     /**
      * @brief Constructor

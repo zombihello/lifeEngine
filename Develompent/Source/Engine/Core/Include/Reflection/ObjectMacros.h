@@ -181,6 +181,21 @@
 
 /**
  * @ingroup Core
+ * @brief Macro for declare intrinsic class
+ * 
+ * @param TClass            Class
+ * @param TSuperClass       Super class
+ * @param TClassFlags       Class flags
+ * @param TClassCastFlags   Class cast flags
+ *
+ * Example usage: @code DECLARE_CLASS_INTRINSIC( CClass, CObject, 0, 0, TEXT( "Core" ) ) @endcode
+ */
+#define DECLARE_CLASS_INTRINSIC( TClass, TSuperClass, TClassFlags, TClassCastFlags, TPackage ) \
+    DECLARE_BASE_CLASS( TClass, TSuperClass, TClassFlags | CLASS_Intrinsic, TClassCastFlags, TPackage ) \
+    DECLARE_SERIALIZER_AND_DTOR( TClass )
+
+/**
+ * @ingroup Core
  * @brief Declare that objects of class being defined reside within objects of the specified class
  * @param TWithinClass    Within class
  */
@@ -376,9 +391,12 @@ enum EClassFlags
     CLASS_Native            = 1 << 2,                                                       /**< Class is native */
     CLASS_Transient         = 1 << 3,                                                       /**< This object type can't be saved; null it out at save time */
     CLASS_HasComponents     = 1 << 4,                                                       /**< Class has component properties */
+    CLASS_Intrinsic         = 1 << 5,                                                       /**< Class has no LifeScript counter-part */
+    CLASS_Parsed             = 1 << 6,                                                      /**< Class script has been successfully parsed */
+    CLASS_Exported          = 1 << 7,                                                       /**< Class has been exported to a header file */
 
     // Combination masks and other combinations
-    CLASS_MASK_Inherit      = CLASS_Deprecated | CLASS_Transient | CLASS_HasComponents      /**< Flags to inherit from base class */
+    CLASS_MASK_Inherit      = CLASS_Deprecated | CLASS_Transient | CLASS_HasComponents | CLASS_Intrinsic      /**< Flags to inherit from base class */
 };
 
 /**
@@ -388,19 +406,22 @@ enum EClassFlags
 enum EClassCastFlags
 {
 	CASTCLASS_None					= 0,		/**< None */
-	CASTCLASS_CProperty				= 1 << 0,	/**< Cast to CProperty */
-	CASTCLASS_CByteProperty			= 1 << 1,	/**< Cast to CByteProperty */
-	CASTCLASS_CIntProperty			= 1 << 2,	/**< Cast to CIntProperty */
-	CASTCLASS_CFloatProperty		= 1 << 3,	/**< Cast to CFloatProperty */
-	CASTCLASS_CBoolProperty			= 1 << 4,	/**< Cast to CBoolProperty */
-	CASTCLASS_CColorProperty		= 1 << 5,	/**< Cast to CColorProperty */
-	CASTCLASS_CObjectProperty		= 1 << 6,	/**< Cast to CObjectProperty */
-	CASTCLASS_CVectorProperty		= 1 << 7,	/**< Cast to CVectorProperty */
-	CASTCLASS_CRotatorProperty		= 1 << 8,	/**< Cast to CRotatorProperty */
-	CASTCLASS_CAssetProperty		= 1 << 9,	/**< Cast to CAssetProperty */
-	CASTCLASS_CArrayProperty		= 1 << 10,	/**< Cast to CArrayProperty */
-    CASTCLASS_CStructProperty       = 1 << 11,	/**< Cast to CStructProperty */
-    CASTCLASS_CStringProperty       = 1 << 12,	/**< Cast to CStringProperty */
+    CASTCLASS_CEnum                 = 1 << 0,   /**< Cast to CEnum */
+    CASTCLASS_CStruct               = 1 << 1,   /**< Cast to CStruct */
+    CASTCLASS_CClass                = 1 << 2,   /**< Cast to CClass */
+	CASTCLASS_CProperty				= 1 << 3,	/**< Cast to CProperty */
+	CASTCLASS_CByteProperty			= 1 << 4,	/**< Cast to CByteProperty */
+	CASTCLASS_CIntProperty			= 1 << 5,	/**< Cast to CIntProperty */
+	CASTCLASS_CFloatProperty		= 1 << 6,	/**< Cast to CFloatProperty */
+	CASTCLASS_CBoolProperty			= 1 << 7,	/**< Cast to CBoolProperty */
+	CASTCLASS_CColorProperty		= 1 << 8,	/**< Cast to CColorProperty */
+	CASTCLASS_CObjectProperty		= 1 << 9,	/**< Cast to CObjectProperty */
+	CASTCLASS_CVectorProperty		= 1 << 10,	/**< Cast to CVectorProperty */
+	CASTCLASS_CRotatorProperty		= 1 << 11,	/**< Cast to CRotatorProperty */
+	CASTCLASS_CAssetProperty		= 1 << 12,	/**< Cast to CAssetProperty */
+	CASTCLASS_CArrayProperty		= 1 << 13,	/**< Cast to CArrayProperty */
+    CASTCLASS_CStructProperty       = 1 << 14,	/**< Cast to CStructProperty */
+    CASTCLASS_CStringProperty       = 1 << 15,	/**< Cast to CStringProperty */
 };
 
 /**

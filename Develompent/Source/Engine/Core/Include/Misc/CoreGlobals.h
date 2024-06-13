@@ -74,6 +74,12 @@ extern bool							g_IsCooker;
 
 /**
  * @ingroup Core
+ * @brief Whether engine was launched for script compiler
+ */
+extern bool							g_IsScriptCompiler;
+
+/**
+ * @ingroup Core
  * Whether we should pause before exiting. Used by commandlets
  */
 extern bool							g_ShouldPauseBeforeExit;
@@ -82,6 +88,7 @@ extern bool							g_ShouldPauseBeforeExit;
 #define								g_IsEditor 0
 #define								g_IsCommandlet 0
 #define								g_IsCooker 0
+#define								g_IsScriptCompiler 0
 #endif // WITH_EDITOR
 
 /**

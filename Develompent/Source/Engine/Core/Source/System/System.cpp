@@ -45,11 +45,9 @@ void CSystem::Init()
 			if ( !path.empty() )
 			{
 				// If we have in the path placeholder %Game% then we replace it to g_GameName
-				std::size_t		idGameDirPlaceHolder = path.find( TEXT( "%Game%" ) );
-				while ( idGameDirPlaceHolder != std::wstring::npos )
+				if ( path.find( TEXT( "%Game%" ) ) != std::wstring::npos )
 				{
-					path.replace( idGameDirPlaceHolder, 6, g_GameName );	// 6 is the length of "%Game%"
-					idGameDirPlaceHolder = path.find( TEXT( "%Game%" ) );
+					path = L_ReplaceSubString( path, TEXT( "%Game%" ), g_GameName );
 				}
 
 				packagePaths.push_back( Sys_BaseDir() + path );

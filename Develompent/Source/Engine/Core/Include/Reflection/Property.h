@@ -70,7 +70,7 @@ union UPropertyValue
  */
 class CProperty : public CField
 {
-	DECLARE_CLASS( CProperty, CField, CLASS_Abstract, CASTCLASS_CProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CProperty, CField, CLASS_Abstract, CASTCLASS_CProperty, TEXT( "Core" ) )
 	DECLARE_WITHIN_CLASS( CField )
 
 public:
@@ -563,7 +563,7 @@ private:
  */
 class CByteProperty : public CProperty
 {
-	DECLARE_CLASS( CByteProperty, CProperty, 0, CASTCLASS_CByteProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CByteProperty, CProperty, 0, CASTCLASS_CByteProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -691,7 +691,7 @@ private:
  */
 class CIntProperty : public CProperty
 {
-	DECLARE_CLASS( CIntProperty, CProperty, 0, CASTCLASS_CIntProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CIntProperty, CProperty, 0, CASTCLASS_CIntProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -795,7 +795,7 @@ public:
  */
 class CFloatProperty : public CProperty
 {
-	DECLARE_CLASS( CFloatProperty, CProperty, 0, CASTCLASS_CFloatProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CFloatProperty, CProperty, 0, CASTCLASS_CFloatProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -899,7 +899,7 @@ public:
  */
 class CBoolProperty : public CProperty
 {
-	DECLARE_CLASS( CBoolProperty, CProperty, 0, CASTCLASS_CBoolProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CBoolProperty, CProperty, 0, CASTCLASS_CBoolProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1003,7 +1003,7 @@ public:
  */
 class CColorProperty : public CProperty
 {
-	DECLARE_CLASS( CColorProperty, CProperty, 0, CASTCLASS_CColorProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CColorProperty, CProperty, 0, CASTCLASS_CColorProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1107,7 +1107,7 @@ public:
  */
 class CObjectProperty : public CProperty
 {
-	DECLARE_CLASS( CObjectProperty, CProperty, 0, CASTCLASS_CObjectProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CObjectProperty, CProperty, 0, CASTCLASS_CObjectProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1251,7 +1251,7 @@ private:
  */
 class CVectorProperty : public CProperty
 {
-	DECLARE_CLASS( CVectorProperty, CProperty, 0, CASTCLASS_CVectorProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CVectorProperty, CProperty, 0, CASTCLASS_CVectorProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1379,7 +1379,7 @@ private:
  */
 class CRotatorProperty : public CProperty
 {
-	DECLARE_CLASS( CRotatorProperty, CProperty, 0, CASTCLASS_CRotatorProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CRotatorProperty, CProperty, 0, CASTCLASS_CRotatorProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1483,7 +1483,7 @@ public:
  */
 class CAssetProperty : public CProperty
 {
-	DECLARE_CLASS( CAssetProperty, CProperty, 0, CASTCLASS_CAssetProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CAssetProperty, CProperty, 0, CASTCLASS_CAssetProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1611,7 +1611,7 @@ private:
  */
 class CArrayProperty : public CProperty
 {
-	DECLARE_CLASS( CArrayProperty, CProperty, 0, CASTCLASS_CArrayProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CArrayProperty, CProperty, 0, CASTCLASS_CArrayProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1759,7 +1759,7 @@ private:
  */
 class CStructProperty : public CProperty
 {
-	DECLARE_CLASS( CStructProperty, CProperty, 0, CASTCLASS_CStructProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CStructProperty, CProperty, 0, CASTCLASS_CStructProperty, TEXT( "Core" ) )
 
 public:
 	/**
@@ -1903,7 +1903,7 @@ private:
  */
 class CStringProperty : public CProperty
 {
-	DECLARE_CLASS( CStringProperty, CProperty, 0, CASTCLASS_CStringProperty, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CStringProperty, CProperty, 0, CASTCLASS_CStringProperty, TEXT( "Core" ) )
 
 public:
 	/**

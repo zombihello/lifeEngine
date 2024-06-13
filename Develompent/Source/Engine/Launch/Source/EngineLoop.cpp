@@ -198,6 +198,39 @@ void CEngineLoop::InitConfigs()
 
 /*
 ==================
+CEngineLoop::LoadScriptPackages
+==================
+*/
+void CEngineLoop::LoadScriptPackages()
+{
+	const CJsonValue*				configScriptPackagesValue = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "ScriptPackages" ) );
+	const std::vector<CJsonValue>*	configScriptPackages = configScriptPackagesValue ? configScriptPackagesValue->GetArray() : nullptr;
+	if ( configScriptPackages )
+	{
+		for ( uint32 index = 0, count = configScriptPackages->size(); index < count; ++index )
+		{
+			const CJsonValue&	configScriptPackage = configScriptPackages->at( index );
+			if ( !configScriptPackage.IsA( JVT_String ) )
+			{
+				Warnf( TEXT( "Invalid 'Engine.Engine:ScriptPackages[%i]', must be string type\n" ), index );
+				continue;
+			}
+
+			// If we have place holder %Game% replace it by g_GameName
+			std::wstring	packageName = configScriptPackage.GetString();
+			if ( packageName.find( TEXT( "%Game%" ) ) != std::wstring::npos )
+			{
+				packageName = L_ReplaceSubString( packageName, TEXT( "%Game%" ), g_GameName );
+			}
+
+			// Load script package
+			CObjectPackage::LoadPackage( nullptr, L_Sprintf( TEXT( "%s" ) PATH_SEPARATOR TEXT( "Scripts" ) PATH_SEPARATOR TEXT( "%s.classes" ), Sys_GameDir().c_str(), packageName.c_str() ).c_str(), LOAD_None );
+		}
+	}
+}
+
+/*
+==================
 CEngineLoop::PreInit
 ==================
 */
@@ -217,10 +250,11 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	if ( !paramValues.empty() )
 	{
 		g_IsCooker			= !L_Stricmp( paramValues[0].c_str(), TEXT( "CookPackages" ) ) || !L_Stricmp( paramValues[0].c_str(), TEXT( "CCookPackagesCommandlet" ) );
-		g_IsCommandlet		= !g_IsCooker;
+		g_IsScriptCompiler	= !L_Stricmp( paramValues[0].c_str(), TEXT( "ScriptCompiler" ) ) || !L_Stricmp( paramValues[0].c_str(), TEXT( "CScriptCompilerCommandlet" ) );
+		g_IsCommandlet		= !g_IsCooker && !g_IsScriptCompiler;
 	}
 
-	g_IsGame = !g_IsEditor && !g_IsCooker && !g_IsCommandlet;
+	g_IsGame = !g_IsEditor && !g_IsCooker && !g_IsCommandlet && !g_IsScriptCompiler;
 #endif // WITH_EDITOR
 
 	Sys_GetCookedContentPath( g_Platform, g_CookedDir );
@@ -233,6 +267,12 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 
 	// Initialize CObject system
 	CObject::StaticInit();
+
+	// Load script packages
+	if ( !g_IsScriptCompiler )
+	{
+		LoadScriptPackages();
+	}
 
 	// Loading table of contents
 	if ( !g_IsEditor && !g_IsCooker )

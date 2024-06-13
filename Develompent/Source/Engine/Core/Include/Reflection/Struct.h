@@ -24,7 +24,7 @@
  */
 class CStruct : public CField
 {
-	DECLARE_CLASS( CStruct, CField, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CStruct, CField, 0, CASTCLASS_CStruct, TEXT( "Core" ) )
 
 public:
 	/**

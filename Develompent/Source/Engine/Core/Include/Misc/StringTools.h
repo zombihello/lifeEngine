@@ -697,6 +697,50 @@ FORCEINLINE std::wstring L_Strlwr( const std::wstring& InString )
 
 /**
  * @ingroup Core
+ * @brief Replace substring in string (for Unicode strings)
+ * 
+ * @param InSrcString			Source string
+ * @param InSubStringToReplace	Substring to replace
+ * @param InNewSubString		New substring
+ * @return Return new string with replaced substring
+ */
+FORCEINLINE std::wstring L_ReplaceSubString( const std::wstring& InSrcString, const std::wstring& InSubStringToReplace, const std::wstring& InNewSubString )
+{
+	std::wstring	newString		= InSrcString;
+	std::size_t		idPlaceHolder	= newString.find( InSubStringToReplace );
+	while ( idPlaceHolder != std::wstring::npos )
+	{
+		newString.replace( idPlaceHolder, InSubStringToReplace.size(), InNewSubString );
+		idPlaceHolder = newString.find( InSubStringToReplace );
+	}
+
+	return newString;
+}
+
+/**
+ * @ingroup Core
+ * @brief Replace substring in string (for ANSI strings)
+ *
+ * @param InSrcString			Source string
+ * @param InSubStringToReplace	Substring to replace
+ * @param InNewSubString		New substring
+ * @return Return new string with replaced substring
+ */
+FORCEINLINE std::string L_ReplaceSubString( const std::string& InSrcString, const std::string& InSubStringToReplace, const std::string& InNewSubString )
+{
+	std::string		newString		= InSrcString;
+	std::size_t		idPlaceHolder	= newString.find( InSubStringToReplace );
+	while ( idPlaceHolder != std::string::npos )
+	{
+		newString.replace( idPlaceHolder, InSubStringToReplace.size(), InNewSubString );
+		idPlaceHolder = newString.find( InSubStringToReplace );
+	}
+
+	return newString;
+}
+
+/**
+ * @ingroup Core
  * @brief Is char is a space (for ANSI chars)
  * 
  * Checks if the given character is whitespace character as classified by the currently installed C locale. 

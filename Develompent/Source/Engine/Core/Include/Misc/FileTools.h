@@ -216,7 +216,8 @@ const tchar* L_GetFileExtension( const tchar* InPath, bool InIsIncludeDot = fals
  */
 FORCEINLINE void L_GetFileExtension( const std::wstring& InPath, std::wstring& OutExtension, bool InIsIncludeDot = false )
 {
-    OutExtension = L_GetFileExtension( InPath.c_str(), InIsIncludeDot );
+    const tchar*    fileExtension = L_GetFileExtension( InPath.c_str(), InIsIncludeDot );
+    OutExtension = fileExtension ? fileExtension : TEXT( "" );
 }
 
 /**
@@ -330,7 +331,8 @@ public:
      */
     FORCEINLINE std::wstring GetExtension( bool InIsIncludeDot = false ) const
     {
-        return L_GetFileExtension( path.c_str(), InIsIncludeDot );
+        const tchar*    fileExtension = L_GetFileExtension( path.c_str(), InIsIncludeDot );
+        return fileExtension ? fileExtension : TEXT( "" );
     }
 
     /**

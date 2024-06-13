@@ -22,7 +22,7 @@
  */
 class CBaseEngine : public CObject
 {
-	DECLARE_CLASS( CBaseEngine, CObject, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS( CBaseEngine, CObject, CLASS_Transient, 0, TEXT( "Engine" ) )
 
 public:
 	/**

@@ -17,7 +17,7 @@
  */
 class CField : public CObject
 {
-	DECLARE_CLASS( CField, CObject, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CField, CObject, 0, 0, TEXT( "Core" ) )
 
 public:
 	/**

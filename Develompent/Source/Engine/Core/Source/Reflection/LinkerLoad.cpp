@@ -1033,8 +1033,15 @@ CObject* CLinkerLoad::CreateExport( uint32 InExportIndex )
 			exportObject.objectFlags = exportObject.objectFlags & ~OBJECT_Native;
 		}
 
-		// We need preload LoadClass
-		Preload( loadClass );
+		// We need preload LoadClass (only if this class isn't CLASS_Intrinsic)
+		if ( !loadClass->HasAnyClassFlags( CLASS_Intrinsic ) )
+		{
+			Preload( loadClass );
+			if ( loadClass->HasAnyClassFlags( CLASS_Deprecated ) )
+			{
+				Warnf( TEXT( "CreateExport: %s %s uses deprecated class\n" ), loadClass->GetName().c_str(), exportObject.objectName.ToString().c_str() );
+			}
+		}
 
 		// Find or create the object's outer
 		CObject*	thisParent = nullptr;
