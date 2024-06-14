@@ -7,6 +7,7 @@
 #include "Reflection/ObjectPackage.h"
 #include "Scripts/ScriptFileParser.h"
 #include "Scripts/ScriptEnvironmentBuilder.h"
+#include "Scripts/NativeClassExporter.h"
 #include "Commandlets/ScriptCompilerCommandlet.h"
 
 IMPLEMENT_CLASS( CScriptCompilerCommandlet )
@@ -104,6 +105,24 @@ bool CScriptCompilerCommandlet::Main( const CCommandLine& InCommandLine )
 		bResult = scriptEnvironmentBuilder.Build();
 		if ( !bResult )
 		{
+			return false;
+		}
+
+		// Generate header files for native classes
+		const std::wstring			nativeClassIncludeDir = L_Sprintf(
+			TEXT( "%s" ) PATH_SEPARATOR
+			TEXT( "Develompent" ) PATH_SEPARATOR
+			TEXT( "Source" ) PATH_SEPARATOR
+			TEXT( "%s" ) PATH_SEPARATOR
+			TEXT( "Include" ) PATH_SEPARATOR
+			TEXT( "Classes" ) PATH_SEPARATOR,
+			Sys_BaseDir().c_str(), scriptPackageInfo.srcPath.c_str() );
+
+		CNativeClassExporter		nativeClassExporter( nativeClassIncludeDir, packageName, stubs );
+		nativeClassExporter.ExportClasses();
+		if ( nativeClassExporter.IsNativeClassesChanged() )
+		{
+			Errorf( TEXT( "C++ headers for native classes has been generated. Recompile the build and restart script compiler to continue\n" ) );
 			return false;
 		}
 

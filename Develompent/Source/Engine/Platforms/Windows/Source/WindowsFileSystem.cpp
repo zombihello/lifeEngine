@@ -65,6 +65,7 @@ class CArchive* CWindowsFileSystem::CreateFileWriter( const std::wstring& InFile
 	// Create directory for file
 	{
 		std::wstring			path = InFileName;
+		L_FixPathSeparators( path );
 		std::size_t				slashIndex = path.find_last_of( TEXT( "/" ) );
 		if ( slashIndex == std::wstring::npos )
 		{
