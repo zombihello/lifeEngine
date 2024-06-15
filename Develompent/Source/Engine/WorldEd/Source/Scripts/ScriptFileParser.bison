@@ -258,6 +258,11 @@
 %token TOKEN_CLASS
 %token TOKEN_EXTENDS
 %token TOKEN_NATIVE
+%token TOKEN_TRANSIENT
+%token TOKEN_ABSTRACT
+%token TOKEN_DEPRECATED
+%token TOKEN_CPPTEXT
+%token TOKEN_CPPTEXT_BODY
 
 %%
 
@@ -279,11 +284,28 @@ class_extends
 
 class_flags
     : TOKEN_NATIVE class_flags                                              { $<flags>$ = CLASS_Native | $<flags>2; }
+    | TOKEN_TRANSIENT class_flags                                           { $<flags>$ = CLASS_Transient | $<flags>2 }
+    | TOKEN_ABSTRACT class_flags                                            { $<flags>$ = CLASS_Abstract | $<flags>2 }
+    | TOKEN_DEPRECATED class_flags                                          { $<flags>$ = CLASS_Deprecated | $<flags>2 }
     | /* empty */                                                           { $<flags>$ = 0; }
     ;
 
 class_body
-    : /* empty */                                                           
+    : class_body cpptext                                                    { g_FileParser->AddCppText( $<context>2, $<string>2 ); }
+    | /* empty */                                                           
+    ;
+
+////////////////////////////////
+// CPP TEXT
+////////////////////////////////
+
+cpptext
+    : TOKEN_CPPTEXT '{' cpptext_body '}'                                    { $<string>$ = $<token>3; }
+    ;
+
+cpptext_body
+    : TOKEN_CPPTEXT_BODY
+    | /* empty */
     ;
 
 ////////////////////////////////

@@ -48,6 +48,23 @@ private:
 	 */
 	void ExportClass( const ScriptClassStubPtr_t& InClassStub );
 
+	/**
+	 * @brief Generate C++ body for header
+	 * 
+	 * @param InClassStub	Class stub
+	 * @return Return final C++ text for past into header
+	 */
+	std::wstring GenerateCppTextBody( const ScriptClassStubPtr_t& InClassStub );
+
+	/**
+	 * @brief Generate a string in the format CLASS_Something|CLASS_Something which represents all class flags that are set for the specified
+	 * class which need to be exported as part of the DECLARE_CLASS macro
+	 * 
+	 * @param InClassStub	Class stub
+	 * @return Return a class flags in a string in the format CLASS_Something|CLASS_Something which represents all class flags
+	 */
+	std::wstring GenerateClassFlags( const ScriptClassStubPtr_t& InClassStub );
+
 	bool							bNativeClassesChanged;	/**< Is have been changed native classes */
 	std::wstring					includeDir;				/**< Directory with includes where will be saved new headers */
 	std::wstring					packageName;			/**< Script package name */

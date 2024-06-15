@@ -164,11 +164,27 @@ public:
 		return createdClass;
 	}
 
+	/**
+	 * @brief Add C++ text that will be placed into header (only for native classes)
+	 * @param InCppText		++ code that will be placed into header
+	 */
+	void AddCppText( const std::wstring& InCppText );
+
+	/**
+	 * @brief Get C++ text that will be placed into header
+	 * @return Return C++ text that will be placed into header
+	 */
+	FORCEINLINE const std::wstring& GetCppText() const
+	{
+		return cppText;
+	}
+
 private:
 	uint32				flags;				/**< Class flags (see EClassFlags) */
 	ScriptScopeStub		scope;				/**< Scope of the class */
 	ScriptFileContext	superClassContext;	/**< Super class context */
 	std::wstring		superClassName;		/**< Super class name */
+	std::wstring		cppText;			/**< C++ code that will be placed into header (only for native classes) */
 	CClass*				createdClass;		/**< Created class for script environment */
 };
 

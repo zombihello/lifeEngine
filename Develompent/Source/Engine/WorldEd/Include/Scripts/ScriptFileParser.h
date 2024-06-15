@@ -55,6 +55,14 @@ public:
 	void StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, uint32 InFlags );
 
 	/**
+	 * @brief Add C++ text that will be placed into header (only for native classes)
+	 * 
+	 * @param InContext		C++ code context
+	 * @param InCppText		C++ code that will be placed into header
+	 */
+	void AddCppText( const ScriptFileContext* InContext, const std::string_view& InCppText );
+
+	/**
 	 * @brief End definition of current class/enum/struct
 	 *
 	 * @param InLine			Number of line where is the end of definition

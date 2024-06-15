@@ -71,6 +71,27 @@ void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const Sc
 
 /*
 ==================
+CScriptFileParser::AddCppText
+==================
+*/
+void CScriptFileParser::AddCppText( const ScriptFileContext* InContext, const std::string_view& InCppText )
+{
+	AssertMsg( InContext, TEXT( "Invalid context for C++ text" ) );
+	AssertMsg( currentClass, TEXT( "C++ text must be in class" ) );
+	if ( !currentClass->HasAnyFlags( CLASS_Native ) )
+	{
+		Warnf( TEXT( "%s: In script class exist 'cpptext' but this is class isn't native and C++ code will be ignored\n" ), InContext->ToString().c_str() );
+		return;
+	}
+
+	if ( !InCppText.empty() )
+	{
+		currentClass->AddCppText( ANSI_TO_TCHAR( InCppText.data() ) );
+	}
+}
+
+/*
+==================
 CScriptFileParser::EndDefinition
 ==================
 */

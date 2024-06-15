@@ -188,6 +188,7 @@
 
     /* Lexer states */
 %x MultiLineComment
+%x CppText
 
 %%
     /* Rules */
@@ -198,6 +199,41 @@
 "class"                                         EMIT_TOKEN( TOKEN_CLASS );
 "extends"                                       EMIT_TOKEN( TOKEN_EXTENDS );
 "native"                                        EMIT_TOKEN( TOKEN_NATIVE );
+"cpptext"                                       { 
+                                                    if ( yyextra->scopeLevel == 0 )
+                                                    {
+                                                        EMIT_TOKEN( TOKEN_CPPTEXT ); 
+                                                        BEGIN( CppText );
+                                                    }
+                                                    else
+                                                    {
+                                                        EMIT_ERROR( "'cpptext' must be out of any body" );
+                                                    }
+                                                }
+<CppText>
+{
+    [^{}]*
+    "{"                                         { 
+                                                    if ( yyextra->scopeLevel == 0 ) 
+                                                    { 
+                                                        EMIT_TOKEN( '{' );
+                                                        yyextra->StoreSequenceStart(); 
+                                                    } 
+                                                    ++yyextra->scopeLevel;
+                                                }
+	"}"										    { 
+                                                    --yyextra->scopeLevel; 
+                                                    if ( yyextra->scopeLevel == 0 ) 
+                                                    { 
+                                                        EMIT_SEQUENCE( TOKEN_CPPTEXT_BODY ); 
+                                                        EMIT_TOKEN( '}' );
+                                                        BEGIN( INITIAL ); 
+                                                    } 
+                                                }
+}
+"transient"                                     EMIT_TOKEN( TOKEN_TRANSIENT );
+"abstract"                                      EMIT_TOKEN( TOKEN_ABSTRACT );
+"deprecated"                                    EMIT_TOKEN( TOKEN_DEPRECATED );
 
     /* Syntax */
 "("												EMIT_TOKEN( '(' ); 
