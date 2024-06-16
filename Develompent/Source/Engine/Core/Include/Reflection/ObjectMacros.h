@@ -392,7 +392,7 @@ enum EClassFlags
     CLASS_Transient         = 1 << 3,                                                       /**< This object type can't be saved; null it out at save time */
     CLASS_HasComponents     = 1 << 4,                                                       /**< Class has component properties */
     CLASS_Intrinsic         = 1 << 5,                                                       /**< Class has no LifeScript counter-part */
-    CLASS_Parsed             = 1 << 6,                                                      /**< Class script has been successfully parsed */
+    CLASS_Parsed            = 1 << 6,                                                       /**< Class script has been successfully parsed */
     CLASS_Exported          = 1 << 7,                                                       /**< Class has been exported to a header file */
 
     // Combination masks and other combinations

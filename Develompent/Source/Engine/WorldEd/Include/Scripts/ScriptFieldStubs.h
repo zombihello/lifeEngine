@@ -89,6 +89,19 @@ public:
 	CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, const ScriptFileContext& InSuperClassContext, const std::wstring& InSuperClassName, uint32 InFlags );
 
 	/**
+	 * @brief Constructor
+	 *
+	 * @param InContext				Class context
+	 * @param InClassName			Class name
+	 * @param InSuperClassContext	Super class context
+	 * @param InSuperClassName		Super class name
+	 * @param InWithinClassContext	Within class context
+	 * @param InWithinClassName		Within class name
+	 * @param InFlags				Flags (see EClassFlags)
+	 */
+	CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, const ScriptFileContext& InSuperClassContext, const std::wstring& InSuperClassName, const ScriptFileContext& InWithinClassContext, const std::wstring& InWithinClassName, uint32 InFlags );
+
+	/**
 	 * @brief Get the class scope
 	 * @return Return reference to the class scope
 	 */
@@ -179,11 +192,31 @@ public:
 		return cppText;
 	}
 
+	/**
+	 * @brief Get within class context
+	 * @return Return within class context
+	 */
+	FORCEINLINE const ScriptFileContext* GetWithinClassContext() const
+	{
+		return &withinClassContext;
+	}
+
+	/**
+	 * @brief Get within class name
+	 * @return Return within class name
+	 */
+	FORCEINLINE const std::wstring& GetWithinClassName() const
+	{
+		return withinClassName;
+	}
+
 private:
 	uint32				flags;				/**< Class flags (see EClassFlags) */
 	ScriptScopeStub		scope;				/**< Scope of the class */
 	ScriptFileContext	superClassContext;	/**< Super class context */
 	std::wstring		superClassName;		/**< Super class name */
+	ScriptFileContext	withinClassContext;	/**< Within class context */
+	std::wstring		withinClassName;	/**< Within class name */
 	std::wstring		cppText;			/**< C++ code that will be placed into header (only for native classes) */
 	CClass*				createdClass;		/**< Created class for script environment */
 };

@@ -64,8 +64,22 @@ void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const Sc
 	AssertMsg( InContext, TEXT( "Invalid context for class" ) );
 	AssertMsg( InSuperClassContext, TEXT( "Invalid context for super class" ) );
 	AssertMsg( !InClassName.empty() && !InClassSuperName.empty(), TEXT( "Class name or super class name isn't valid" ) );
-
 	currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, ANSI_TO_TCHAR( InClassName.data() ), *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ), InFlags );
+	stubs.AddClass( currentClass );
+}
+
+/*
+==================
+CScriptFileParser::StartClass
+==================
+*/
+void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const ScriptFileContext* InWithinClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, const std::string_view& InWithinClassName, uint32 InFlags )
+{
+	AssertMsg( InContext, TEXT( "Invalid context for class" ) );
+	AssertMsg( InSuperClassContext, TEXT( "Invalid context for super class" ) );
+	AssertMsg( InWithinClassContext, TEXT( "Invalid context for within class" ) );
+	AssertMsg( !InClassName.empty() && !InClassSuperName.empty() && !InWithinClassName.empty(), TEXT( "Class name or super class name or within class name isn't valid" ) );
+	currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, ANSI_TO_TCHAR( InClassName.data() ), *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ), *InWithinClassContext, ANSI_TO_TCHAR( InWithinClassName.data() ), InFlags );
 	stubs.AddClass( currentClass );
 }
 

@@ -44,7 +44,7 @@ public:
 	void EmitError( const ScriptFileContext* InContext, const std::wstring& InMessage );
 
 	/**
-	 * @brief Start class definition
+	 * @brief Start class definition with default within class
 	 *
 	 * @param InContext				Class context
 	 * @param InSuperClassContext	Context of a super class type
@@ -53,6 +53,19 @@ public:
 	 * @param InFlags				Flags (see EScriptStubFlags)
 	 */
 	void StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, uint32 InFlags );
+
+	/**
+	 * @brief Start class definition with custom within class
+	 *
+	 * @param InContext				Class context
+	 * @param InSuperClassContext	Context of a super class type
+	 * @param InWithinClassContext	Within class context
+	 * @param InClassName			Class name
+	 * @param InClassSuperName		Super class name
+	 * @param InWithinClassName		Within class name
+	 * @param InFlags				Flags (see EScriptStubFlags)
+	 */
+	void StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const ScriptFileContext* InWithinClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, const std::string_view& InWithinClassName, uint32 InFlags );
 
 	/**
 	 * @brief Add C++ text that will be placed into header (only for native classes)

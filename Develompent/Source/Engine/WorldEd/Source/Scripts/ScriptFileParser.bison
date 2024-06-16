@@ -34,6 +34,7 @@
          */
         FORCEINLINE YYSTYPE_File( const YYSTYPE_File& InOther )
             : flags( InOther.flags )
+            , withinClass( InOther.withinClass )
             , string( InOther.string )
             , context( InOther.context )
             , token( InOther.token )
@@ -45,6 +46,7 @@
          */
         FORCEINLINE YYSTYPE_File( YYSTYPE_File&& InOther )
             : flags( std::move( InOther.flags ) )
+            , withinClass( std::move( InOther.withinClass ) )
             , string( std::move( InOther.string ) )
             , context( std::move( InOther.context ) )
             , token( std::move( InOther.token ) )
@@ -67,6 +69,7 @@
 	    	if ( this != &InOther )
 	    	{
                 flags = InOther.flags;
+                withinClass = InOther.withinClass;
                 string = InOther.string;
 	    		context = InOther.context;
 	    		token = InOther.token;
@@ -85,6 +88,7 @@
 	    	if ( this != &InOther )
 	    	{
                 flags = std::move( InOther.flags );
+                withinClass = std::move( InOther.withinClass );
                 string = std::move( InOther.string );
 	    		context = std::move( InOther.context );
 	    		token = std::move( InOther.token );
@@ -92,7 +96,8 @@
 	    	return *this;
 	    }
 
-        uint32                  flags;          /**< Flags (look EScriptStubFlags) */
+        uint32                  flags;          /**< Flags (look EClassFlags) */
+        std::string_view        withinClass;    /**< Within class name */
         std::string_view        string;         /**< String value */
         ScriptFileContext*      context;        /**< Script file context */
         std::string_view        token;          /**< Token in string format */
@@ -263,6 +268,7 @@
 %token TOKEN_DEPRECATED
 %token TOKEN_CPPTEXT
 %token TOKEN_CPPTEXT_BODY
+%token TOKEN_WITHIN
 
 %%
 
@@ -275,7 +281,18 @@ class
     ;
 
 class_header
-    : TOKEN_CLASS ident class_extends class_flags semicolon                 { g_FileParser->StartClass( $<context>2, $<context>3, $<string>2, $<string>3, $<flags>4 ); }
+    : TOKEN_CLASS ident class_extends class_flags semicolon                 { 
+                                                                                if ( !$<withinClass>4.empty() )
+                                                                                {
+                                                                                    // Start class with custom within class
+                                                                                    g_FileParser->StartClass( $<context>2, $<context>3, $<context>4, $<string>2, $<string>3, $<withinClass>4, $<flags>4 );
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    // Start class with default within class
+                                                                                    g_FileParser->StartClass( $<context>2, $<context>3, $<string>2, $<string>3, $<flags>4 );
+                                                                                }
+                                                                            }
     ;
 
 class_extends
@@ -283,10 +300,11 @@ class_extends
     ;
 
 class_flags
-    : TOKEN_NATIVE class_flags                                              { $<flags>$ = CLASS_Native | $<flags>2; }
-    | TOKEN_TRANSIENT class_flags                                           { $<flags>$ = CLASS_Transient | $<flags>2 }
-    | TOKEN_ABSTRACT class_flags                                            { $<flags>$ = CLASS_Abstract | $<flags>2 }
-    | TOKEN_DEPRECATED class_flags                                          { $<flags>$ = CLASS_Deprecated | $<flags>2 }
+    : TOKEN_NATIVE class_flags                                              { $<flags>$ = CLASS_Native | $<flags>2;     $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
+    | TOKEN_TRANSIENT class_flags                                           { $<flags>$ = CLASS_Transient | $<flags>2;  $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
+    | TOKEN_ABSTRACT class_flags                                            { $<flags>$ = CLASS_Abstract | $<flags>2;   $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
+    | TOKEN_DEPRECATED class_flags                                          { $<flags>$ = CLASS_Deprecated | $<flags>2; $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
+    | TOKEN_WITHIN '(' ident ')' class_flags                                { $<flags>$ = $<flags>5;                    $<withinClass>$ = $<string>3;       $<context>$ = $<context>3;  }
     | /* empty */                                                           { $<flags>$ = 0; }
     ;
 

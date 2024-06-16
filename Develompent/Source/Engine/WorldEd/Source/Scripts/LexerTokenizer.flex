@@ -234,6 +234,7 @@
 "transient"                                     EMIT_TOKEN( TOKEN_TRANSIENT );
 "abstract"                                      EMIT_TOKEN( TOKEN_ABSTRACT );
 "deprecated"                                    EMIT_TOKEN( TOKEN_DEPRECATED );
+"within"                                        EMIT_TOKEN( TOKEN_WITHIN );
 
     /* Syntax */
 "("												EMIT_TOKEN( '(' ); 

@@ -65,6 +65,14 @@ private:
 	 */
 	std::wstring GenerateClassFlags( const ScriptClassStubPtr_t& InClassStub );
 
+	/**
+	 * @brief Generate within class macro
+	 * 
+	 * @param InClassStub	Class stub
+	 * @return Return a string with within class macro
+	 */
+	std::wstring GenerateWithinClass( const ScriptClassStubPtr_t& InClassStub );
+
 	bool							bNativeClassesChanged;	/**< Is have been changed native classes */
 	std::wstring					includeDir;				/**< Directory with includes where will be saved new headers */
 	std::wstring					packageName;			/**< Script package name */

@@ -605,8 +605,8 @@ CObject* CObject::StaticAllocateObject( class CClass* InClass, CObject* InOuter 
 		bWasConstructedOnOldObject = true;
 	}
 
-	// If class is transient, objects must be transient
-	if ( InClass->classFlags & CLASS_Transient )
+	// If the class or the outer is either transient or deprecated, objects must be transient
+	if ( InClass->classFlags & CLASS_Transient || InClass->classFlags & CLASS_Deprecated || ( InOuter && InOuter->HasAnyObjectFlags( OBJECT_Transient ) ) )
 	{
 		InFlags |= OBJECT_Transient;
 	}

@@ -47,6 +47,9 @@ void CNativeClassExporter::ExportClass( const ScriptClassStubPtr_t& InClassStub 
 	// Generate C++ body for header
 	std::wstring			cppTextBuffer	= GenerateCppTextBody( InClassStub );
 
+	// Generate within class macro
+	std::wstring			withinClassMacro = GenerateWithinClass( InClassStub );
+
 	// Generate C++ class flags
 	std::wstring			cppClassFlags	= GenerateClassFlags( InClassStub );
 
@@ -60,11 +63,12 @@ void CNativeClassExporter::ExportClass( const ScriptClassStubPtr_t& InClassStub 
 		TEXT( "class %s : public %s\n" )
 		TEXT( "{\n" )
 		TEXT( "\tDECLARE_CLASS( %s, %s, %s, 0, TEXT( \"%s\" ) )\n" )
-		TEXT( "\tNO_DEFAULT_CONSTRUCTOR( %s )\n\n" )
+		TEXT( "\tNO_DEFAULT_CONSTRUCTOR( %s )\n" )
+		TEXT( "%s\n" )
 		TEXT( "public:\n" )
 		TEXT( "%s" )
 		TEXT( "};" ),
-		className.c_str(), superClassName.c_str(), className.c_str(), superClassName.c_str(), cppClassFlags.c_str(), packageName.c_str(), className.c_str(), cppTextBuffer.c_str() );
+		className.c_str(), superClassName.c_str(), className.c_str(), superClassName.c_str(), cppClassFlags.c_str(), packageName.c_str(), className.c_str(), withinClassMacro.c_str(), cppTextBuffer.c_str() );
 
 	// Read original header to compare with the new one later
 	std::wstring	pathToHeader = L_Sprintf( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.h" ), includeDir.c_str(), className.c_str() );
@@ -131,6 +135,29 @@ std::wstring CNativeClassExporter::GenerateClassFlags( const ScriptClassStubPtr_
 	{
 		resultClassFlags += TEXT( "|CLASS_Deprecated" );
 	}
-	
+	if ( InClassStub->HasAnyFlags( CLASS_Abstract ) )
+	{
+		resultClassFlags += TEXT( "|CLASS_Abstract" );
+	}
+
 	return resultClassFlags;
+}
+
+/*
+==================
+CNativeClassExporter::GenerateWithinClass
+==================
+*/
+std::wstring CNativeClassExporter::GenerateWithinClass( const ScriptClassStubPtr_t& InClassStub )
+{
+	Assert( InClassStub );
+	std::wstring	withinClassName = InClassStub->GetWithinClassName();
+	if ( !withinClassName.empty() )
+	{
+		return L_Sprintf( TEXT( "\tDECLARE_WITHIN_CLASS( %s )\n" ), withinClassName.c_str() );
+	}
+	else
+	{
+		return TEXT( "\n" );
+	}
 }

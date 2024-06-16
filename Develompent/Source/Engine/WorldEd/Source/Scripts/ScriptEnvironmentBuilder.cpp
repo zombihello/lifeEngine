@@ -180,6 +180,31 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 		}
 	}
 
+	// Find the within class as specified
+	CClass*		withinClass = nullptr;
+	{
+		std::wstring	withinClassName = InClassStub.GetWithinClassName();
+		if ( !withinClassName.empty() )
+		{
+			withinClass = FindObjectFast<CClass>( nullptr, withinClassName.c_str(), true, true );
+			if ( !withinClass )
+			{
+				Errorf( TEXT( "%s: Within class '%s' not found\n" ), context.ToString().c_str(), withinClassName.c_str() );
+				return false;
+			}
+		}
+		else
+		{
+			withinClass = superClass->GetWithinClass();
+			if ( !withinClass )
+			{
+				Errorf( TEXT( "%s; Invalid within class in super class '%s'\n" ), context.ToString().c_str(), superClassName.c_str() );
+				return false;
+			}
+		}
+
+	}
+
 	// If its script class, we calculate properties size, min alignment and create a new CClass
 	uint32		propertiesSize = theClass ? theClass->GetPropertiesSize() : 0;
 	uint32		minAlignment = theClass ? theClass->GetMinAlignment() : 1;
@@ -189,7 +214,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 		// TODO yehor.pohuliaka - When will be implemented support of properties in classes then need add they here
 		propertiesSize	= superClass->GetPropertiesSize();
 		minAlignment	= superClass->GetMinAlignment();
-		theClass		= new( scriptPackage, className, OBJECT_Public ) CClass( InClassStub.GetFlags(), 0, propertiesSize, minAlignment, superClass, superClass->GetWithinClass() );
+		theClass		= new( scriptPackage, className, OBJECT_Public ) CClass( InClassStub.GetFlags(), 0, propertiesSize, minAlignment, superClass, withinClass );
 	}
 
 	// Check for cyclic dependencies
