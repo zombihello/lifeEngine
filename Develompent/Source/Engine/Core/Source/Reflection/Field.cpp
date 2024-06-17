@@ -19,6 +19,16 @@ void CField::AddProperty( class CProperty* InProperty )
 
 /*
 ==================
+CField::AddFunction
+==================
+*/
+void CField::AddFunction( class CFunction* InFunction )
+{
+	Sys_Error( TEXT( "CField::AddFunction: Not implemented" ) );
+}
+
+/*
+==================
 CField::Bind
 ==================
 */

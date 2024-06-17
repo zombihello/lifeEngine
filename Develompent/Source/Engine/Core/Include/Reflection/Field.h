@@ -44,6 +44,12 @@ public:
 	virtual void AddProperty( class CProperty* InProperty );
 
 	/**
+	 * @brief Add function
+	 * @param InFunction	Function
+	 */
+	virtual void AddFunction( class CFunction* InFunction );
+
+	/**
 	 * @brief Bind field
 	 */
 	virtual void Bind();

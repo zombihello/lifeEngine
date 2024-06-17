@@ -513,6 +513,16 @@ enum ENativeConstructor
 
 /**
  * @ingroup Core
+ * @brief Enumeration function flags
+ */
+enum EFunctionFlags
+{
+    FUNC_None   = 0,        /**< None */
+	FUNC_Native = 1 << 0	/**< Native function */
+};
+
+/**
+ * @ingroup Core
  * @brief Enumeration property flags
  */
 enum EPropertyFlags

@@ -86,6 +86,12 @@ public:
 	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
+	 * @brief Add function
+	 * @param InFunction	Function
+	 */
+	virtual void AddFunction( class CFunction* InFunction ) override;
+
+	/**
 	 * @brief Find the class's native constructor and assembly the token stream for realtime garbage collection
 	 */
 	virtual void Bind() override;
@@ -117,6 +123,31 @@ public:
 	{
 		referenceTokenStream.EmitReferenceInfo( GCReferenceInfo( GCRT_ArrayObject, InOffset ) );
 	}
+
+	/**
+	 * @brief Get array of class functions
+	 *
+	 * @param OutArrayFunctions			Output array functions
+	 * @param InFunctionsInParents		Take into account functions of the parents
+	 */
+	void GetFunctions( std::vector<class CFunction*>& OutArrayFunctions, bool InFunctionsInParents = true ) const;
+
+	/**
+	 * @brief Get number functions in the class
+	 *
+	 * @param InFunctionsInParents		Take into account functions of the parents
+	 * @return Return number functions in the class
+	 */
+	uint32 GetNumFunctions( bool InFunctionsInParents = true ) const;
+
+	/**
+	 * @brief Find function
+	 *
+	 * @param InName				Function name
+	 * @param InFindInParents		Take into account functions of the parents
+	 * @return Return pointer to class function. If not found return NULL
+	 */
+	class CFunction* FindFunction( const CName& InName, bool InFindInParents = true ) const;
 
 	/**
 	 * @brief Set super class
@@ -304,6 +335,7 @@ private:
 	uint32								classUnique;							/**< Class pseudo-unique counter; used to accelerate unique instance name generation */
 	CClass*								withinClass;							/**< Class within */
 	CGCReferenceTokenStream				referenceTokenStream;					/**< Reference token stream used by realtime garbage collector, finalized in AssembleReferenceTokenStream */
+	std::vector<class CFunction*>		functions;								/**< Array of functions */
 };
 
 #endif // !CLASS_H

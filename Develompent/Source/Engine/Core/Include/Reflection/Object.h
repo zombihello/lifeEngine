@@ -17,6 +17,7 @@
 #include "Reflection/ObjectMacros.h"
 #include "Reflection/ObjectGC.h"
 #include "Reflection/ObjectHash.h"
+#include "Scripts/ScriptVM.h"
 
 // Forward declarations
 void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& InOutObject, bool InIsAllowReferenceElimination );
@@ -25,7 +26,7 @@ void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& I
  * @ingroup Core
  * @brief The base class of all objects
  */
-class CObject
+class CObject : public CScriptVM
 {
     DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract, 0, TEXT( "Core" ) )
 
