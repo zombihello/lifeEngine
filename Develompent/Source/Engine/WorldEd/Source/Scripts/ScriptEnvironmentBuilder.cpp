@@ -27,6 +27,18 @@ bool CScriptEnvironmentBuilder::Build()
 		return false;
 	}
 
+	// Create function wrappers (no inner properties yet)
+	if ( !CreateFunctions() )
+	{
+		return false;
+	}
+
+	// Bind super functions to finish function graph
+	if ( !BindSuperFunctions() )
+	{
+		return false;
+	}
+
 	// Done
 	return true;
 }
@@ -230,5 +242,139 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	InClassStub.SetCreatedClass( theClass );
 
 	// Class created
+	return true;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::CreateFunctions
+==================
+*/
+bool CScriptEnvironmentBuilder::CreateFunctions()
+{
+	bool	bNoErrors = true;
+	
+	// Create class functions
+	{
+		const std::vector<ScriptClassStubPtr_t>&			classes = stubs.GetClasses();
+		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
+		{
+			ScriptClassStubPtr_t							classStub = classes[index];
+			const std::vector<ScriptFunctionStubPtr_t>&		functions = classStub->GetFunctions();
+			for ( uint32 funcIdx = 0, numFunctions = functions.size(); funcIdx < numFunctions; ++funcIdx )
+			{
+				bNoErrors &= CreateFunction( *classStub.Get(), *functions[funcIdx].Get() );
+			}
+		}
+	}
+
+	// Done
+	return bNoErrors;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::BindSuperFunctions
+==================
+*/
+bool CScriptEnvironmentBuilder::BindSuperFunctions()
+{
+	bool	bNoErrors = true;
+
+	// Bind super class functions
+	{
+		const std::vector<ScriptClassStubPtr_t>&	classes = stubs.GetClasses();
+		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
+		{
+			ScriptClassStubPtr_t							classStub = classes[index];
+			const std::vector<ScriptFunctionStubPtr_t>&		functions = classStub->GetFunctions();
+			for ( uint32 funcIdx = 0, numFunctions = functions.size(); funcIdx < numFunctions; ++funcIdx )
+			{
+				bNoErrors &= BindSuperFunction( *classStub.Get(), *functions[funcIdx].Get() );
+			}
+		}
+	}
+
+	// Done
+	return bNoErrors;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::CreateFunction
+==================
+*/
+bool CScriptEnvironmentBuilder::CreateFunction( CScriptClassStub& InClassStub, CScriptFunctionStub& InFunctionStub )
+{
+	const std::wstring&			className = InClassStub.GetName();
+	const std::wstring&			functionName = InFunctionStub.GetName();
+	const ScriptFileContext&	context = InFunctionStub.GetContext();
+	CClass*						theClass = InClassStub.GetCreatedClass();
+
+	// Class failed to compile
+	if ( !theClass )
+	{
+		return false;
+	}
+
+	// If function is native but the class isn't then this is error
+	//if ( !InClassStub.IsNative() && InFunctionStub.IsNative() )
+	if ( !InClassStub.HasAnyFlags( CLASS_Native ) && InFunctionStub.HasAnyFlags( FUNC_Native ) )
+	{
+		Errorf( TEXT( "%s: Native function '%s' can be only in a native class\n" ), context.ToString().c_str(), functionName.c_str() );
+		return false;
+	}
+
+	// Make sure we don't override function in the same class
+	if ( theClass->FindFunction( functionName.c_str(), false ) )
+	{
+		Errorf( TEXT( "%s: Function '%s' is already defined in class '%s'\n" ), context.ToString().c_str(), functionName.c_str(), className.c_str() );
+		return false;
+	}
+
+	// Create function
+	CFunction*		function = new( theClass, functionName.c_str(), OBJECT_Public ) CFunction( InFunctionStub.GetFlags() );
+	function->Bind();
+	InFunctionStub.SetCreatedFunction( function );
+
+	// Done
+	return true;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::CreateFunction
+==================
+*/
+bool CScriptEnvironmentBuilder::BindSuperFunction( CScriptClassStub& InClassStub, CScriptFunctionStub& InFunctionStub )
+{
+	const std::wstring&		functionName = InFunctionStub.GetName();
+	CClass*					theClass = InClassStub.GetCreatedClass();
+	CFunction*				function = InFunctionStub.GetCreatedFunction();
+
+	// Class failed to compile
+	if ( !theClass || !function )
+	{
+		return false;
+	}
+
+	// Get the super class
+	CClass* superClass = theClass->GetSuperClass();
+	if ( !superClass )
+	{
+		return true;
+	}
+
+	// Find the function with the same name in the super class
+	CFunction*		superFunction = superClass->FindFunction( functionName.c_str() );
+	if ( superFunction )
+	{
+		// TODO yehor.pohuliaka - Add here checks when will be implemented support of function's arguments and return type
+
+		// Bind as super function
+		function->SetSuperFunction( superFunction );
+	}
+
+	// Done
 	return true;
 }

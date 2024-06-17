@@ -54,6 +54,36 @@ private:
 	 */
 	bool CreateClass( CScriptClassStub& InClassStub );
 
+	/**
+	 * @brief Create functions in classes
+	 * @return Return TRUE if all functions was successfully created, otherwise FALSE
+	 */
+	bool CreateFunctions();
+
+	/**
+	 * @brief Create function from stub
+	 *
+	 * @param InClassStub		Class stub
+	 * @param InFunctionStub	Function stub
+	 * @return Return TRUE if function was successfully created, otherwise FALSE
+	 */
+	bool CreateFunction( CScriptClassStub& InClassStub, CScriptFunctionStub& InFunctionStub );
+
+	/**
+	 * @brief Bind supper function connections
+	 * @return Return TRUE if all functions was successfully binded, otherwise FALSE
+	 */
+	bool BindSuperFunctions();
+
+	/**
+	 * @brief Bind super function
+	 *
+	 * @param InClassStub		Class stub
+	 * @param InFunctionStub	Function stub
+	 * @return Return TRUE if function was successfully binded, otherwise FALSE
+	 */
+	bool BindSuperFunction( CScriptClassStub& InClassStub, CScriptFunctionStub& InFunctionStub );
+
 	CScriptSystemStub&	stubs;			/**< Stubs */
 	CObjectPackage*		scriptPackage;	/**< Script package */
 };

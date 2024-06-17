@@ -29,6 +29,7 @@ void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& I
 class CObject : public CScriptVM
 {
     DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract, 0, TEXT( "Core" ) )
+    DECLARE_REGISTER_NATIVE_FUNCS() {}
 
 public:
     friend bool IsA( CObject* InObject, CClass* InClass );

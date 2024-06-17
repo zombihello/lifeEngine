@@ -259,6 +259,9 @@
 /* Data tokens */
 %token TOKEN_IDENT
 
+/* Type names */
+%token TOKEN_VOID_TYPE
+
 /* Keywords */
 %token TOKEN_CLASS
 %token TOKEN_EXTENDS
@@ -269,6 +272,7 @@
 %token TOKEN_CPPTEXT
 %token TOKEN_CPPTEXT_BODY
 %token TOKEN_WITHIN
+%token TOKEN_FUNCTION
 
 %%
 
@@ -310,6 +314,7 @@ class_flags
 
 class_body
     : class_body cpptext                                                    { g_FileParser->AddCppText( $<context>2, $<string>2 ); }
+    | class_body function
     | /* empty */                                                           
     ;
 
@@ -327,8 +332,43 @@ cpptext_body
     ;
 
 ////////////////////////////////
+// FUNCTION
+////////////////////////////////
+
+function
+    : function_header function_tail                                         { $<context>$ = $<context>2; }
+    ;
+
+function_header
+    : function_flags TOKEN_FUNCTION function_return_value ident '(' ')'     { g_FileParser->StartFunction( $<context>4, $<context>3, $<string>4, $<string>3, $<flags>1 ); }
+    ;
+
+function_return_value
+    : all_types
+    ;
+
+function_flags
+    : TOKEN_NATIVE function_flags                                           { $<flags>$ = FUNC_Native | $<flags>2; }
+    | /* empty */                                                           { $<flags>$ = 0; }
+    ;
+
+function_tail
+    : '{' function_body '}'                                                 { g_FileParser->EndDefinition( g_FileContext->GetCurrentTokenLine(), $<context>1, $<context>3 ); $<context>$ = $<context>3; g_FileParser->PopContext(); }
+    | semicolon                                                             { g_FileParser->PopContext(); }
+    ;
+
+function_body
+    : /* empty */                                                           { g_FileContext->ExtractFunctionCode(); yyclearin; }
+    ;
+
+////////////////////////////////
 // TERMINALS
 ////////////////////////////////
+
+all_types
+    : TOKEN_VOID_TYPE                                                       { $<string>$ = $<token>1; $<context>$ = $<context>1; }
+    | ident                                         
+    ;
 
 ident
 	: TOKEN_IDENT		                                                    { $<string>$ = $<token>1; $<context>$ = $<context>1; }

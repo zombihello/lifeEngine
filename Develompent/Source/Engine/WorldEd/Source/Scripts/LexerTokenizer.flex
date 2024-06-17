@@ -195,6 +195,9 @@
     /* UTF-8 Byte Order Mark */
 \xef\xbb\xbf									yyextra->currentContext.charOffset = 0;
 
+    /* Type names */
+"void"                                          EMIT_TOKEN( TOKEN_VOID_TYPE );
+
     /* Keywords */
 "class"                                         EMIT_TOKEN( TOKEN_CLASS );
 "extends"                                       EMIT_TOKEN( TOKEN_EXTENDS );
@@ -235,6 +238,7 @@
 "abstract"                                      EMIT_TOKEN( TOKEN_ABSTRACT );
 "deprecated"                                    EMIT_TOKEN( TOKEN_DEPRECATED );
 "within"                                        EMIT_TOKEN( TOKEN_WITHIN );
+"function"                                      EMIT_TOKEN( TOKEN_FUNCTION );
 
     /* Syntax */
 "("												EMIT_TOKEN( '(' ); 

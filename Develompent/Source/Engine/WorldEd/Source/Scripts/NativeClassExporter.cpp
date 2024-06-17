@@ -50,8 +50,18 @@ void CNativeClassExporter::ExportClass( const ScriptClassStubPtr_t& InClassStub 
 	// Generate within class macro
 	std::wstring			withinClassMacro = GenerateWithinClass( InClassStub );
 
+	// Generate register of native functions
+	std::wstring			registerNativeFunctions = GenerateRegisterNativeFunctions( InClassStub );
+
 	// Generate C++ class flags
 	std::wstring			cppClassFlags	= GenerateClassFlags( InClassStub );
+
+	// Generate native functions
+	std::wstring			nativeFunctions = GenerateNativeFunctions( InClassStub );
+	if ( !nativeFunctions.empty() && !cppTextBuffer.empty() )
+	{
+		cppTextBuffer += TEXT( "\n" );
+	}
 
 	// Generate full header
 	std::wstring			buffer			= L_Sprintf( 
@@ -64,11 +74,11 @@ void CNativeClassExporter::ExportClass( const ScriptClassStubPtr_t& InClassStub 
 		TEXT( "{\n" )
 		TEXT( "\tDECLARE_CLASS( %s, %s, %s, 0, TEXT( \"%s\" ) )\n" )
 		TEXT( "\tNO_DEFAULT_CONSTRUCTOR( %s )\n" )
-		TEXT( "%s\n" )
+		TEXT( "%s%s\n" )
 		TEXT( "public:\n" )
-		TEXT( "%s" )
+		TEXT( "%s%s" )
 		TEXT( "};" ),
-		className.c_str(), superClassName.c_str(), className.c_str(), superClassName.c_str(), cppClassFlags.c_str(), packageName.c_str(), className.c_str(), withinClassMacro.c_str(), cppTextBuffer.c_str() );
+		className.c_str(), superClassName.c_str(), className.c_str(), superClassName.c_str(), cppClassFlags.c_str(), packageName.c_str(), className.c_str(), withinClassMacro.c_str(), registerNativeFunctions.c_str(), cppTextBuffer.c_str(), nativeFunctions.c_str() );
 
 	// Read original header to compare with the new one later
 	std::wstring	pathToHeader = L_Sprintf( TEXT( "%s" ) PATH_SEPARATOR TEXT( "%s.h" ), includeDir.c_str(), className.c_str() );
@@ -158,6 +168,85 @@ std::wstring CNativeClassExporter::GenerateWithinClass( const ScriptClassStubPtr
 	}
 	else
 	{
-		return TEXT( "\n" );
+		return TEXT( "" );
 	}
+}
+
+/*
+==================
+CNativeClassExporter::GenerateNativeFunctions
+==================
+*/
+std::wstring CNativeClassExporter::GenerateNativeFunctions( const ScriptClassStubPtr_t& InClassStub )
+{
+	const std::vector<ScriptFunctionStubPtr_t>&		functions = InClassStub->GetFunctions();
+	if ( !functions.empty() )
+	{
+		std::wstring	result;
+		bool			bHasAnyNativeFunction = false;
+		for ( uint32 index = 0, count = functions.size(); index < count; ++index )
+		{
+			ScriptFunctionStubPtr_t		function		= functions[index];
+			if ( function->HasAnyFlags( FUNC_Native ) )
+			{
+				std::wstring				functionName = function->GetName();
+				bHasAnyNativeFunction		= true;
+				result += L_Sprintf( TEXT( "\tvirtual %s %s();\n" )
+									 TEXT( "\tDECLARE_FUNCTION( %s )\n" )
+									 TEXT( "\t{\n" )
+									 TEXT( "\t\tthis->%s();\n" )
+									 TEXT( "\t}\n" ),
+									 function->GetReturnTypeName().c_str(), functionName.c_str(), functionName.c_str(), functionName.c_str() );
+			}
+		}
+
+		if ( bHasAnyNativeFunction )
+		{
+			return TEXT( "\t// BEGIN NATIVE FUNCTIONS\n" ) + result + TEXT( "\t// END NATIVE FUNCTIONS\n" );
+		}
+	}
+	
+	return TEXT( "" );
+}
+
+/*
+==================
+CNativeClassExporter::GenerateRegisterNativeFunctions
+==================
+*/
+std::wstring CNativeClassExporter::GenerateRegisterNativeFunctions( const ScriptClassStubPtr_t& InClassStub )
+{
+	const std::wstring&								className = InClassStub->GetName();
+	const std::vector<ScriptFunctionStubPtr_t>&		functions = InClassStub->GetFunctions();
+	if ( !functions.empty() )
+	{
+		std::wstring	result;
+		bool			bHasAnyNativeFunction = false;
+		for ( uint32 index = 0, count = functions.size(); index < count; ++index )
+		{
+			ScriptFunctionStubPtr_t		function		= functions[index];
+			if ( function->HasAnyFlags( FUNC_Native ) )
+			{
+				std::wstring				functionName = function->GetName();
+				bHasAnyNativeFunction		= true;
+				result += L_Sprintf( TEXT( "\t\t\tMAP_NATIVE_FUNC( %s, %s )\n" ), className.c_str(), functionName.c_str() );
+			}
+		}
+
+		if ( bHasAnyNativeFunction )
+		{
+			return L_Sprintf( TEXT( "\tDECLARE_REGISTER_NATIVE_FUNCS()\n" )
+							  TEXT( "\t{\n" )
+							  TEXT( "\t\tstatic ScriptNativeFunctionLookup s_NativeFunctions[] =\n" )
+							  TEXT( "\t\t{\n" )
+							  TEXT( "%s" )
+							  TEXT( "\t\t\t{ nullptr, nullptr }\n" ) 
+							  TEXT( "\t\t};\n" )
+							  TEXT( "\t\tCScriptVM::StaticAddNativeFunctions( TEXT( \"%s\" ), s_NativeFunctions );\n" )
+							  TEXT( "\t}\n" ),
+							  result.c_str(), className.c_str() );
+		}
+	}
+	
+	return TEXT( "" );
 }

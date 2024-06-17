@@ -73,6 +73,22 @@ private:
 	 */
 	std::wstring GenerateWithinClass( const ScriptClassStubPtr_t& InClassStub );
 
+	/**
+	 * @brief Generate native functions
+	 *
+	 * @param InClassStub	Class stub
+	 * @return Return a string with native functions
+	 */
+	std::wstring GenerateNativeFunctions( const ScriptClassStubPtr_t& InClassStub );
+
+	/**
+	 * @brief Generate register of native functions
+	 *
+	 * @param InClassStub	Class stub
+	 * @return Return a string with register of native functions
+	 */
+	std::wstring GenerateRegisterNativeFunctions( const ScriptClassStubPtr_t& InClassStub );
+
 	bool							bNativeClassesChanged;	/**< Is have been changed native classes */
 	std::wstring					includeDir;				/**< Directory with includes where will be saved new headers */
 	std::wstring					packageName;			/**< Script package name */

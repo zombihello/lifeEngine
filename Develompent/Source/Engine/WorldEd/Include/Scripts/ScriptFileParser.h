@@ -118,9 +118,10 @@ public:
 	void PopContext();
 
 private:
-	bool					bHasError;		/**< There were a parsing errors */
-	CScriptSystemStub&		stubs;			/**< Output stubs */
-	ScriptClassStubPtr_t	currentClass;	/**< Opened class */
+	bool					bHasError;			/**< There were a parsing errors */
+	CScriptSystemStub&		stubs;				/**< Output stubs */
+	ScriptClassStubPtr_t	currentClass;		/**< Opened class */
+	ScriptFunctionStubPtr_t	currentFunction;	/**< Opened function */
 };
 
 #endif // !SCRIPTFILEPARSER_H

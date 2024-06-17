@@ -115,9 +115,14 @@ void CScriptFileParser::EndDefinition( int32 InLine, const ScriptFileContext* In
 	
 	// Exit context
 	ScriptScopeStub*	scope = nullptr;
-	if ( currentClass )
+	if ( currentFunction )
+	{
+		scope = &currentFunction->GetScope();
+	}
+	else if ( currentClass )
 	{
 		scope = &currentClass->GetScope();
+
 	}
 
 	AssertMsg( scope, TEXT( "No stub to end" ) );
@@ -131,7 +136,22 @@ CScriptFileParser::StartFunction
 ==================
 */
 void CScriptFileParser::StartFunction( const ScriptFileContext* InContext, const ScriptFileContext* InReturnTypeContext, const std::string_view& InFunctionName, const std::string_view& InReturnTypeName, uint32 InFlags )
-{}
+{
+	AssertMsg( InContext, TEXT( "Invalid context for function" ) );
+	AssertMsg( InReturnTypeContext, TEXT( "Invalid context for return type" ) );
+	AssertMsg( !InFunctionName.empty() && !InReturnTypeName.empty(), TEXT( "Function name or return type name isn't valid" ) );
+
+	// Create function
+	if ( currentClass )
+	{
+		currentFunction = MakeSharedPtr<CScriptFunctionStub>( *InContext, ANSI_TO_TCHAR( InFunctionName.data() ), *InReturnTypeContext, ANSI_TO_TCHAR( InReturnTypeName.data() ), InFlags );
+		currentClass->AddFunction( currentFunction );
+	}
+	else
+	{
+		EmitError( InContext, TEXT( "The Function must be in a class" ) );
+	}
+}
 
 /*
 ==================
@@ -140,8 +160,9 @@ CScriptFileParser::GetFunctionCodeTokens
 */
 CScriptTokenStream& CScriptFileParser::GetFunctionCodeTokens()
 {
-	static CScriptTokenStream dummy;
-	return dummy;
+	AssertMsg( currentFunction, TEXT( "No function defined" ) );
+	AssertMsg( !currentFunction->HasAnyFlags( FUNC_Native ), TEXT( "Native function cannot have a code" ) );
+	return currentFunction->GetCode();
 }
 
 /*
@@ -153,6 +174,7 @@ void CScriptFileParser::AddProperty( const ScriptFileContext* InContext, const S
 {
 	AssertMsg( InContext, TEXT( "Invalid context for property" ) );
 	AssertMsg( InTypeContext, TEXT( "Invalid context for property type" ) );
+	AssertMsg( false, TEXT( "Need implement" ) );
 }
 
 /*
@@ -163,7 +185,11 @@ CScriptFileParser::PopContext
 void CScriptFileParser::PopContext()
 {
 	// Exit context
-	if ( currentClass )
+	if ( currentFunction )
+	{
+		currentFunction = nullptr;
+	}
+	else if ( currentClass )
 	{
 		currentClass = nullptr;
 	}
