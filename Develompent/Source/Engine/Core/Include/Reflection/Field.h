@@ -59,6 +59,13 @@ public:
 	 * @return Return owner class
 	 */
 	class CClass* GetOwnerClass() const;
+
+protected:
+	/**
+	 * @brief Do any object-specific cleanup required immediately after loading an object
+	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
+	 */
+	virtual void PostLoad() override;
 };
 
 #endif // !FIELD_H

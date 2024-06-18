@@ -43,7 +43,18 @@ void CNativeClassExporter::ExportClass( const ScriptClassStubPtr_t& InClassStub 
 {
 	const std::wstring&		className		= InClassStub->GetName();
 	const std::wstring&		superClassName	= InClassStub->GetSuperClassName();
-	
+	CClass*					theClass		= InClassStub->GetCreatedClass();
+	Assert( theClass );
+
+	// Do nothing if class has already been exported
+	if ( theClass->HasAnyClassFlags( CLASS_Exported ) )
+	{
+		return;
+	}
+
+	// Mark class as exported
+	theClass->AddClassFlag( CLASS_Exported );
+
 	// Generate C++ body for header
 	std::wstring			cppTextBuffer	= GenerateCppTextBody( InClassStub );
 

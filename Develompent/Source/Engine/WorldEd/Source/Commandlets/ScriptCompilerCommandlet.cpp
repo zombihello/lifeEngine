@@ -1,6 +1,7 @@
 #include "Misc/CoreGlobals.h"
 #include "Misc/FileTools.h"
 #include "Misc/StringConv.h"
+#include "Misc/CommandLine.h"
 #include "System/Config.h"
 #include "System/BaseFileSystem.h"
 #include "Reflection/Class.h"
@@ -8,6 +9,7 @@
 #include "Scripts/ScriptFileParser.h"
 #include "Scripts/ScriptEnvironmentBuilder.h"
 #include "Scripts/NativeClassExporter.h"
+#include "Scripts/ScriptFunctionCompiler.h"
 #include "Commandlets/ScriptCompilerCommandlet.h"
 
 IMPLEMENT_CLASS( CScriptCompilerCommandlet )
@@ -126,6 +128,13 @@ bool CScriptCompilerCommandlet::Main( const CCommandLine& InCommandLine )
 			return false;
 		}
 
+		// Compile scripts
+		bResult = CompileScripts( stubs );
+		if ( !bResult )
+		{
+			return false;
+		}
+
 		// Save compiled script package
 		bResult = CObjectPackage::SavePackage( scriptPackageInfo.package, nullptr, OBJECT_None, outputPackage.c_str(), SAVE_None );
 		if ( !bResult )
@@ -188,4 +197,59 @@ bool CScriptCompilerCommandlet::ParseScripts( const std::wstring& InScriptDir, C
 	}
 
 	return !bHasErrors;
+}
+
+/*
+==================
+CScriptCompilerCommandlet::CompileScripts
+==================
+*/
+bool CScriptCompilerCommandlet::CompileScripts( CScriptSystemStub& InStubs )
+{
+	// Compile functions in classes
+	bool										bHasError = false;
+	CScriptFunctionCompiler						functionCompiler( InStubs, g_CommandLine.HasParam( TEXT( "showdump" ) ) );
+	const std::vector<ScriptClassStubPtr_t>		classes = InStubs.GetClasses();
+	for ( uint32 classIdx = 0, numClasses = classes.size(); classIdx < numClasses; ++classIdx )
+	{
+		const ScriptClassStubPtr_t&						classStub = classes[classIdx];
+		CClass*											theClass = classStub->GetCreatedClass();
+		const std::vector<ScriptFunctionStubPtr_t>		functions = classStub->GetFunctions();
+		Assert( theClass );
+
+		// Skip the class if has been already compiled
+		if ( theClass->HasAnyClassFlags( CLASS_Compiled ) )
+		{
+			continue;
+		}
+
+		for ( uint32 funcIdx = 0, numFunctions = functions.size(); funcIdx < numFunctions; ++funcIdx )
+		{
+			// We compile only script functions
+			const ScriptFunctionStubPtr_t&		function = functions[funcIdx];
+			if ( !function->HasAnyFlags( FUNC_Native ) )
+			{
+				// If function has not body it is error
+				if ( !function->HasBody() )
+				{
+					Errorf( TEXT( "%s: Function '%s' has not body\n" ), function->GetContext().ToString().c_str(), function->GetName().c_str() );
+					bHasError = true;
+					continue;
+				}
+
+				if ( !functionCompiler.Compile( *classStub.Get(), *function.Get() ) )
+				{
+					bHasError = true;
+				}
+			}
+		}
+
+		// If we have not any errors then alright and we mark class by CLASS_Compiled flag
+		if ( !bHasError )
+		{
+			theClass->AddClassFlag( CLASS_Compiled );
+		}
+	}
+
+	return !bHasError;
 }

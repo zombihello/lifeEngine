@@ -117,6 +117,11 @@ public:
 	 */
 	void PopContext();
 
+	/**
+	 * @brief Mark a function has no body
+	 */
+	void SetFunctionUndefined();
+
 private:
 	bool					bHasError;			/**< There were a parsing errors */
 	CScriptSystemStub&		stubs;				/**< Output stubs */

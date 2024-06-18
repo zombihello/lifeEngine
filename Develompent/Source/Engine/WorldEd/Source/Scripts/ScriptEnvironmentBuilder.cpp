@@ -141,7 +141,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	const ScriptFileContext&	context			= InClassStub.GetContext();
 
 	// If type with same name already defined then its error.
-	// Only one exception: native classes may be already defined in the system by *Classes.h. In this case
+	// Only one exception: native classes may be already defined in the system by Classes/*.h. In this case
 	// we check for missing flags 'CLASS_Parsed' and 'CLASS_Intrinsic'. 
 	// If they aren't then all right. Otherwise this is redefinition and its wrong
 	CClass*		theClass = nullptr;
@@ -238,9 +238,13 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 
 	// Find the class's native constructor and remember class in the stub
 	theClass->Bind();
-	theClass->AddClassFlag( CLASS_Parsed );
 	InClassStub.SetCreatedClass( theClass );
 
+	// Remove 'OBJECT_Transient' flag so that native classes can be stored in a package
+	// and mark the one as parsed
+	theClass->RemoveObjectFlag( OBJECT_Transient );
+	theClass->AddClassFlag( CLASS_Parsed );
+	
 	// Class created
 	return true;
 }

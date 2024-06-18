@@ -50,3 +50,14 @@ CClass* CField::GetOwnerClass() const
 
 	return ( CClass* )result;
 }
+
+/*
+==================
+CField::PostLoad
+==================
+*/
+void CField::PostLoad()
+{
+	Super::PostLoad();
+	Bind();
+}

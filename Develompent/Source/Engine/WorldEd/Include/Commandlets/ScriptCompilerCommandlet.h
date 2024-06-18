@@ -39,6 +39,13 @@ private:
 	 * @return Return TRUE if all scripts has been successfully parsed, otherwise FALSE
 	 */
 	bool ParseScripts( const std::wstring& InScriptDir, CScriptSystemStub& InOutStubs, const std::wstring& InRootDir );
+
+	/**
+	 * @brief Compile all scripts in the script system stubs
+	 * @param InStubs		Script system stubs to compile
+	 * @return Return TRUE if all scripts has been successfully compiled, otherwise FALSE
+	 */
+	bool CompileScripts( CScriptSystemStub& InStubs );
 };
 
 #endif // !SCRIPTCOMPILERCOMMANDLET_H

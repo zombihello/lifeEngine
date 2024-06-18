@@ -190,7 +190,26 @@ public:
 		return createdFunction;
 	}
 
+	/**
+	 * @brief Set has function body or not
+	 * @param InHasBody		Has function body or not
+	 */
+	FORCEINLINE void SetHasBody( bool InHasBody )
+	{
+		bHasBody = InHasBody;
+	}
+
+	/**
+	 * @brief Has function body or not
+	 * @return Return TRUE if function has body, otherwise FALSE
+	 */
+	FORCEINLINE bool HasBody() const
+	{
+		return bHasBody;
+	}
+
 private:
+	bool				bHasBody;				/**< Has function body */
 	uint32				flags;					/**< Function flags (see EFunctionFlags) */
 	ScriptScopeStub		scope;					/**< Scope of the function */
 	CScriptTokenStream	code;					/**< Function code */

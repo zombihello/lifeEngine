@@ -256,6 +256,11 @@
 /* Expect 0 shift/reduce conflicts */
 %expect 0
 
+/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFunctionParser.bison */
+/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFunctionParser.bison */
+/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFunctionParser.bison */
+/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFunctionParser.bison */
+
 /* Data tokens */
 %token TOKEN_IDENT
 
@@ -354,7 +359,7 @@ function_flags
 
 function_tail
     : '{' function_body '}'                                                 { g_FileParser->EndDefinition( g_FileContext->GetCurrentTokenLine(), $<context>1, $<context>3 ); $<context>$ = $<context>3; g_FileParser->PopContext(); }
-    | semicolon                                                             { g_FileParser->PopContext(); }
+    | semicolon                                                             { g_FileParser->SetFunctionUndefined(); g_FileParser->PopContext(); }
     ;
 
 function_body

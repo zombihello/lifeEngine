@@ -19,7 +19,8 @@
 - [ ] Implement particle system
 - [ ] Implement decals
 - [ ] Implement support UI in the game (RmlUi)
-- [ ] Implement base AI
+- [ ] Implement base AI with navigation system
+- [ ] Migrate on Vulkan
 
  # Version 0.4.0 :: Now	
 - [X] Migrate WorldEd's interface from Qt to ImGUI
@@ -32,7 +33,7 @@
 - [X] Add supported mip levels in textures
 - [X] Add possible generate mip levels for textures in WorldEd
 - [X] Need fix speed of the import static meshes
-- [ ] Implement reflection C++ code (for actor properties in WorldEd and bindings to AngelScript)
+- [X] Implement reflection C++ code
 	- [X] Implement linker save and linker load for serialize CObjects
 	- [X] Implement FindObject, LoadObject and LoadClass functions
 	- [X] Implement ResolveName for resolve a package and name
@@ -41,7 +42,23 @@
 	- [X] Need fix destroying packages in GC whom use by objects not considered for GC
 	- [X] Need fix in the WorldEd duplicate actors and other actions due to was implemented serialization CObjects
 	- [X] Improve size of packages
-	- [ ] Integrate AngelScript into the engine
+- [ ] Implement own script language like UnrealScript
+	- [X] Implement call native and scripts functions
+	- [ ] Implement function parameters (main params, optional and ref)
+	- [ ] Implement return values from function (by return and output function params)
+	- [ ] Implement possible to create local variables in function
+	- [ ] Implement possible to asign some value to local variable
+	- [ ] Implement support class parameters
+	- [ ] Implement support class constructor
+	- [ ] Implement operators (+, -, *, /, ++, --, +=, -= and etc)
+	- [ ] Implement branch operators (if, switch)
+	- [ ] Implement loop operators (for, while)
+	- [ ] Implement support of operators this and super
+	- [ ] Implement operator new for construct a new CObject
+	- [ ] Implement support to call methods of another objects
+	- [ ] Implement possible create structs, enums and use it in code
+	- [ ] Implement support of work with arrays and strings
+	- [ ] Implement support of cast variables and values
 - [x] Added gizmos to WorldEd (icon of audio source, collisions, etc)
 - [x] Implemented functions of exploer level
 - [x] Added gizmo render in WorldEd.

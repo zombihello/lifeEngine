@@ -162,6 +162,9 @@ CScriptTokenStream& CScriptFileParser::GetFunctionCodeTokens()
 {
 	AssertMsg( currentFunction, TEXT( "No function defined" ) );
 	AssertMsg( !currentFunction->HasAnyFlags( FUNC_Native ), TEXT( "Native function cannot have a code" ) );
+
+	// Mark that the function has body and return reference to token stream of function code
+	currentFunction->SetHasBody( true );
 	return currentFunction->GetCode();
 }
 
@@ -193,4 +196,15 @@ void CScriptFileParser::PopContext()
 	{
 		currentClass = nullptr;
 	}
+}
+
+/*
+==================
+CScriptFileParser::SetFunctionUndefined
+==================
+*/
+void CScriptFileParser::SetFunctionUndefined()
+{
+	AssertMsg( currentFunction, TEXT( "This function cannot be called if a function is not being declared" ) );
+	currentFunction->SetHasBody( false );
 }

@@ -215,7 +215,8 @@
                                                 }
 <CppText>
 {
-    [^{}]*
+    [^{}\n]*
+    <*>\n                                       yyextra->NextLine();
     "{"                                         { 
                                                     if ( yyextra->scopeLevel == 0 ) 
                                                     { 
