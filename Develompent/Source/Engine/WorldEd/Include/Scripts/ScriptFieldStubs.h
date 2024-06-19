@@ -230,6 +230,15 @@ public:
 	 *
 	 * @param InContext				Class context
 	 * @param InClassName			Class name
+	 * @param InFlags				Flags (see EClassFlags)
+	 */
+	CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, uint32 InFlags );
+
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InContext				Class context
+	 * @param InClassName			Class name
 	 * @param InSuperClassContext	Super class context
 	 * @param InSuperClassName		Super class name
 	 * @param InFlags				Flags (see EClassFlags)

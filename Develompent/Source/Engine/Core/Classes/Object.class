@@ -1,0 +1,9 @@
+class CObject 
+	abstract
+	native
+	noexport;
+
+/**
+ * Dump the current script function stack to log (for debugging)
+ */
+native function void StackTrace();

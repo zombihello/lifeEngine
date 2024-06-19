@@ -46,8 +46,8 @@ void CNativeClassExporter::ExportClass( const ScriptClassStubPtr_t& InClassStub 
 	CClass*					theClass		= InClassStub->GetCreatedClass();
 	Assert( theClass );
 
-	// Do nothing if class has already been exported
-	if ( theClass->HasAnyClassFlags( CLASS_Exported ) )
+	// Do nothing if class has already been exported or has CLASS_NoExport
+	if ( theClass->HasAnyClassFlags( CLASS_Exported | CLASS_NoExport ) )
 	{
 		return;
 	}
@@ -253,7 +253,7 @@ std::wstring CNativeClassExporter::GenerateRegisterNativeFunctions( const Script
 							  TEXT( "%s" )
 							  TEXT( "\t\t\t{ nullptr, nullptr }\n" ) 
 							  TEXT( "\t\t};\n" )
-							  TEXT( "\t\tCScriptVM::StaticAddNativeFunctions( TEXT( \"%s\" ), s_NativeFunctions );\n" )
+							  TEXT( "\t\tCObject::StaticAddNativeFunctions( TEXT( \"%s\" ), s_NativeFunctions );\n" )
 							  TEXT( "\t}\n" ),
 							  result.c_str(), className.c_str() );
 		}

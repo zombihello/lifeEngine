@@ -44,18 +44,7 @@ public:
 	void EmitError( const ScriptFileContext* InContext, const std::wstring& InMessage );
 
 	/**
-	 * @brief Start class definition with default within class
-	 *
-	 * @param InContext				Class context
-	 * @param InSuperClassContext	Context of a super class type
-	 * @param InClassName			Class name
-	 * @param InClassSuperName		Super class name
-	 * @param InFlags				Flags (see EScriptStubFlags)
-	 */
-	void StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, uint32 InFlags );
-
-	/**
-	 * @brief Start class definition with custom within class
+	 * @brief Start class definition
 	 *
 	 * @param InContext				Class context
 	 * @param InSuperClassContext	Context of a super class type

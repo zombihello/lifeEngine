@@ -396,6 +396,7 @@ enum EClassFlags
     CLASS_Parsed            = 1 << 6,                                                       /**< Class script has been successfully parsed */
     CLASS_Exported          = 1 << 7,                                                       /**< Class has been exported to a header file */
     CLASS_Compiled          = 1 << 8,                                                       /**< Class script has been successfully compiled */
+    CLASS_NoExport          = 1 << 9,                                                       /**< Don't export class to C++ header */
 
     // Combination masks and other combinations
     CLASS_MASK_Inherit      = CLASS_Deprecated | CLASS_Transient | CLASS_HasComponents | CLASS_Intrinsic      /**< Flags to inherit from base class */

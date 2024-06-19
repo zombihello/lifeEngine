@@ -48,11 +48,10 @@ std::wstring ScriptFrame::GetStackTrace() const
 	}
 
 	// Dump the stack trace to a string
-	stackTrace += TEXT( "Script call stack:\n" );
 	for ( uint32 index = 0, count = frameStack.size(); index < count; ++index )
 	{
 		const ScriptFrame*	currentFrame = frameStack[index];
-		stackTrace += L_Sprintf( TEXT( "\t%s (%s)" ), currentFrame->node->GetName().c_str(), currentFrame->object->GetName().c_str() );
+		stackTrace += L_Sprintf( TEXT( "\t%s (Obj: %s)" ), currentFrame->node->GetName().c_str(), currentFrame->object->GetName().c_str() );
 		if ( index + 1 < count )
 		{
 			stackTrace += TEXT( "\n" );

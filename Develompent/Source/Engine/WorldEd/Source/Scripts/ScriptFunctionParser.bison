@@ -257,6 +257,7 @@
 %token TOKEN_CPPTEXT_BODY
 %token TOKEN_WITHIN
 %token TOKEN_FUNCTION
+%token TOKEN_NOEXPORT
 
 %%
 

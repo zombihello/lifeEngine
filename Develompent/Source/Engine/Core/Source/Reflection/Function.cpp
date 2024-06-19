@@ -1,7 +1,6 @@
 #include "Misc/StringConv.h"
 #include "Reflection/Class.h"
 #include "Reflection/Function.h"
-#include "Scripts/ScriptVM.h"
 #include "System/MemoryArchive.h"
 
 IMPLEMENT_CLASS( CFunction )
@@ -98,12 +97,12 @@ void CFunction::Bind()
 	if ( !HasAnyFunctionFlags( FUNC_Native ) )
 	{
 		// Use LifeScript processing function
-		FunctionFn = &CScriptVM::ProcessInternal;
+		FunctionFn = &CObject::ProcessInternal;
 	}
 	// Otherwise we use native function
 	else
 	{
 		CClass*		ownerClass = GetOwnerClass();
-		FunctionFn	= CScriptVM::StaticFindNativeFunction( ownerClass->GetCName(), L_Sprintf( "%sexec%s", TCHAR_TO_ANSI( ownerClass->GetName().c_str() ), TCHAR_TO_ANSI( GetName().c_str() ) ).c_str() );
+		FunctionFn	= CObject::StaticFindNativeFunction( ownerClass->GetCName(), L_Sprintf( "%sexec%s", TCHAR_TO_ANSI( ownerClass->GetName().c_str() ), TCHAR_TO_ANSI( GetName().c_str() ) ).c_str() );
 	}
 }

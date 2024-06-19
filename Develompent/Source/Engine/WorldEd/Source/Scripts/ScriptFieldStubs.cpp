@@ -31,6 +31,18 @@ CScriptFunctionStub::CScriptFunctionStub( const ScriptFileContext& InContext, co
 CScriptClassStub::CScriptClassStub
 ==================
 */
+CScriptClassStub::CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, uint32 InFlags )
+	: CScriptBaseStub( InContext, InClassName )
+	, flags( InFlags )
+	, withinClassContext( InContext )
+	, createdClass( nullptr )
+{}
+
+/*
+==================
+CScriptClassStub::CScriptClassStub
+==================
+*/
 CScriptClassStub::CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, const ScriptFileContext& InSuperClassContext, const std::wstring& InSuperClassName, uint32 InFlags )
 	: CScriptBaseStub( InContext, InClassName )
 	, flags( InFlags )

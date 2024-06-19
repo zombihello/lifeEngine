@@ -17,7 +17,7 @@
 #include "Reflection/ObjectMacros.h"
 #include "Reflection/ObjectGC.h"
 #include "Reflection/ObjectHash.h"
-#include "Scripts/ScriptVM.h"
+#include "Scripts/ScriptMacros.h"
 
 // Forward declarations
 void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& InOutObject, bool InIsAllowReferenceElimination );
@@ -26,10 +26,18 @@ void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& I
  * @ingroup Core
  * @brief The base class of all objects
  */
-class CObject : public CScriptVM
+class CObject
 {
-    DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract, 0, TEXT( "Core" ) )
-    DECLARE_REGISTER_NATIVE_FUNCS() {}
+    DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract | CLASS_NoExport, 0, TEXT( "Core" ) )
+    DECLARE_REGISTER_NATIVE_FUNCS()
+    {
+		static ScriptNativeFunctionLookup s_NativeFunctions[] =
+		{
+			MAP_NATIVE_FUNC( CObject, StackTrace )
+			{ nullptr, nullptr }
+		};
+		CObject::StaticAddNativeFunctions( TEXT( "CObject" ), s_NativeFunctions );
+    }
 
 public:
     friend bool IsA( CObject* InObject, CClass* InClass );
@@ -530,6 +538,81 @@ public:
      */
     void ConditionalPostLoad();
 
+    //
+    // LifeScript virtual machine
+    //
+
+    /**
+	 * @brief Add a new native functions into the virtual machine
+	 * @warning The native functions table must have NULL item for terminate array
+	 *
+	 * @param InClassName		Class name of owner the native function table
+	 * @param InNativeFuncTable	The native function table
+	 */
+	static FORCEINLINE void StaticAddNativeFunctions( const CName& InClassName, ScriptNativeFunctionLookup* InNativeFuncTable )
+	{
+		Assert( InClassName != NAME_None && InNativeFuncTable );
+		nativeFunctionsMap.insert( std::make_pair( InClassName, InNativeFuncTable ) );
+	}
+
+	/**
+	 * @brief Find native function by name
+	 *
+	 * @param InClassName		Class name
+	 * @param InFunctionName	Function name
+	 * @return Return found native function. If not returns NULL
+	 */
+	static FORCEINLINE ScriptFn_t StaticFindNativeFunction( const CName& InClassName, const achar* InFunctionName )
+	{
+		// If the class has a native function table, loop over the table and find the function
+		auto	itNativeFuncTable = nativeFunctionsMap.find( InClassName );
+		if ( itNativeFuncTable != nativeFunctionsMap.end() )
+		{
+			uint32	functionIndex = 0;
+			while ( itNativeFuncTable->second[functionIndex].name )
+			{
+				if ( !L_Strcmp( InFunctionName, itNativeFuncTable->second[functionIndex].name ) )
+				{
+					return itNativeFuncTable->second[functionIndex].FunctionFn;
+				}
+				++functionIndex;
+			}
+		}
+
+		// We nothing to found, return NULL
+		return nullptr;
+	}
+
+	/**
+	 * @brief Get function to execute script opcode
+	 *
+	 * @param InOpcode  Opcode to execute
+	 * @return Return function to execute script opcode
+	 */
+	static FORCEINLINE ScriptFn_t StaticGetOpcodeFunc( uint32 InOpcode )
+	{
+		return OpcodeFunctions[InOpcode];
+	}
+
+	/**
+	 * @brief Process script function
+	 * @param InFunction    Function to call
+	 */
+	void ProcessFunction( class CFunction* InFunction );
+
+	/**
+	 * @brief Internal function call processing
+	 * @param InStack   Script stack
+	 */
+	void ProcessInternal( struct ScriptFrame& InStack );
+
+	// LifeScript opcodes
+    DECLARE_FUNCTION( Nop );     // OP_Nop
+    DECLARE_FUNCTION( Call );    // Op_Call
+
+	// LifeScript native functions
+	DECLARE_FUNCTION( StackTrace );
+
 protected:
     /**
      * @brief Route BeginDestroy() and EndDestroy() on this object if this object is still valid
@@ -641,6 +724,18 @@ private:
     CObject*        outer;              /**< Object this object resides in */
     ObjectFlags_t   flags;              /**< Object flags */ 
     CClass*         theClass;           /**< Class of this object */
+
+    //
+    // LifeScript virtual machine stuff
+    //
+
+    /**
+     * @brief Typedef map of registered native functions
+     */
+    typedef std::unordered_map<CName, ScriptNativeFunctionLookup*, CName::HashFunction>		ScriptNativeFunctionsMap_t;
+
+	static ScriptNativeFunctionsMap_t		nativeFunctionsMap;			/**< Map of registered native functions */
+	static ScriptFn_t						OpcodeFunctions[OP_Count];	/**< Native functions to execute script opcodes */
 };
 
 /**

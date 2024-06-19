@@ -240,6 +240,7 @@
 "deprecated"                                    EMIT_TOKEN( TOKEN_DEPRECATED );
 "within"                                        EMIT_TOKEN( TOKEN_WITHIN );
 "function"                                      EMIT_TOKEN( TOKEN_FUNCTION );
+"noexport"                                      EMIT_TOKEN( TOKEN_NOEXPORT );
 
     /* Syntax */
 "("												EMIT_TOKEN( '(' ); 

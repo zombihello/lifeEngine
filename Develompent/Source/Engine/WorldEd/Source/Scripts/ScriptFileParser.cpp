@@ -1,4 +1,5 @@
 #include "Logger/LoggerMacros.h"
+#include "Reflection/Object.h"
 #include "Scripts/LexerEmitter.h"
 #include "Scripts/ScriptTokenStream.h"
 #include "Scripts/ScriptFileParser.h"
@@ -59,27 +60,55 @@ void CScriptFileParser::EmitError( const ScriptFileContext* InContext, const std
 CScriptFileParser::StartClass
 ==================
 */
-void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, uint32 InFlags )
-{
-	AssertMsg( InContext, TEXT( "Invalid context for class" ) );
-	AssertMsg( InSuperClassContext, TEXT( "Invalid context for super class" ) );
-	AssertMsg( !InClassName.empty() && !InClassSuperName.empty(), TEXT( "Class name or super class name isn't valid" ) );
-	currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, ANSI_TO_TCHAR( InClassName.data() ), *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ), InFlags );
-	stubs.AddClass( currentClass );
-}
-
-/*
-==================
-CScriptFileParser::StartClass
-==================
-*/
 void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const ScriptFileContext* InWithinClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, const std::string_view& InWithinClassName, uint32 InFlags )
 {
 	AssertMsg( InContext, TEXT( "Invalid context for class" ) );
-	AssertMsg( InSuperClassContext, TEXT( "Invalid context for super class" ) );
-	AssertMsg( InWithinClassContext, TEXT( "Invalid context for within class" ) );
-	AssertMsg( !InClassName.empty() && !InClassSuperName.empty() && !InWithinClassName.empty(), TEXT( "Class name or super class name or within class name isn't valid" ) );
-	currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, ANSI_TO_TCHAR( InClassName.data() ), *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ), *InWithinClassContext, ANSI_TO_TCHAR( InWithinClassName.data() ), InFlags );
+	AssertMsg( !InClassName.empty(), TEXT( "Class name isn't valid" ) );
+
+	// Create a class without super class (ONLY for CObject)
+	std::wstring		className = ANSI_TO_TCHAR( InClassName.data() );
+	if ( !InSuperClassContext )
+	{
+		// Only CObject class can not have a super class
+		if ( className != CObject::StaticClass()->GetName() )
+		{
+			EmitError( InContext, TEXT( "Only CObject class can not have a super class" ) );
+		}
+
+		// Using 'within' with CObject class not allowed
+		if ( InWithinClassContext )
+		{
+			EmitError( InWithinClassContext, TEXT( "Using 'within' with CObject class not allowed" ) );
+		}
+
+		// Create CObject class
+		currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, className, InFlags );
+	}
+	// Otherwise we create a class with super class (other classes)
+	else
+	{
+		AssertMsg( !InClassSuperName.empty(), TEXT( "Super class name isn't valid" ) );
+
+		// CObject should not have a super class, because it is the root class in the hierarchy
+		if ( className == CObject::StaticClass()->GetName() )
+		{
+			EmitError( InSuperClassContext, TEXT( "CObject should not have a super class, because it is the root class in the hierarchy" ) );
+		}
+
+		// Create a class with 'within'
+		if ( InWithinClassContext )
+		{
+			AssertMsg( !InWithinClassName.empty(), TEXT( "Within class name isn't valid" ) );
+			currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, className, *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ), *InWithinClassContext, ANSI_TO_TCHAR( InWithinClassName.data() ), InFlags );
+		}
+		// Otherwise we create a class without 'within'
+		else
+		{
+			currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, className, *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ), InFlags );
+		}
+	}
+
+	// Add a new class in the stubs system
 	stubs.AddClass( currentClass );
 }
 
@@ -91,7 +120,15 @@ CScriptFileParser::AddCppText
 void CScriptFileParser::AddCppText( const ScriptFileContext* InContext, const std::string_view& InCppText )
 {
 	AssertMsg( InContext, TEXT( "Invalid context for C++ text" ) );
-	AssertMsg( currentClass, TEXT( "C++ text must be in class" ) );
+
+	// C++ text must be in class body
+	if ( !currentClass )
+	{
+		EmitError( InContext, TEXT( "'cpptext' must be in class body" ) );
+		return;
+	}
+
+	// Print warning if 'cpptext' was used in script class
 	if ( !currentClass->HasAnyFlags( CLASS_Native ) )
 	{
 		Warnf( TEXT( "%s: In script class exist 'cpptext' but this is class isn't native and C++ code will be ignored\n" ), InContext->ToString().c_str() );
@@ -118,6 +155,12 @@ void CScriptFileParser::EndDefinition( int32 InLine, const ScriptFileContext* In
 	if ( currentFunction )
 	{
 		scope = &currentFunction->GetScope();
+
+		// We check that the native function doesn't have a body
+		if ( currentFunction->HasAnyFlags( FUNC_Native ) && currentFunction->HasBody() )
+		{
+			EmitError( InScopeStart, TEXT( "Native function cannot have a code" ) );
+		}
 	}
 	else if ( currentClass )
 	{
@@ -139,7 +182,7 @@ void CScriptFileParser::StartFunction( const ScriptFileContext* InContext, const
 {
 	AssertMsg( InContext, TEXT( "Invalid context for function" ) );
 	AssertMsg( InReturnTypeContext, TEXT( "Invalid context for return type" ) );
-	AssertMsg( !InFunctionName.empty() && !InReturnTypeName.empty(), TEXT( "Function name or return type name isn't valid" ) );
+	AssertMsg( !InFunctionName.empty() && !InReturnTypeName.empty(), TEXT( "Function or return type name isn't valid" ) );
 
 	// Create function
 	if ( currentClass )
@@ -161,7 +204,6 @@ CScriptFileParser::GetFunctionCodeTokens
 CScriptTokenStream& CScriptFileParser::GetFunctionCodeTokens()
 {
 	AssertMsg( currentFunction, TEXT( "No function defined" ) );
-	AssertMsg( !currentFunction->HasAnyFlags( FUNC_Native ), TEXT( "Native function cannot have a code" ) );
 
 	// Mark that the function has body and return reference to token stream of function code
 	currentFunction->SetHasBody( true );

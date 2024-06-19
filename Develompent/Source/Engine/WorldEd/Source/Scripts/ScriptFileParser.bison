@@ -278,6 +278,7 @@
 %token TOKEN_CPPTEXT_BODY
 %token TOKEN_WITHIN
 %token TOKEN_FUNCTION
+%token TOKEN_NOEXPORT
 
 %%
 
@@ -290,22 +291,12 @@ class
     ;
 
 class_header
-    : TOKEN_CLASS ident class_extends class_flags semicolon                 { 
-                                                                                if ( !$<withinClass>4.empty() )
-                                                                                {
-                                                                                    // Start class with custom within class
-                                                                                    g_FileParser->StartClass( $<context>2, $<context>3, $<context>4, $<string>2, $<string>3, $<withinClass>4, $<flags>4 );
-                                                                                }
-                                                                                else
-                                                                                {
-                                                                                    // Start class with default within class
-                                                                                    g_FileParser->StartClass( $<context>2, $<context>3, $<string>2, $<string>3, $<flags>4 );
-                                                                                }
-                                                                            }
+    : TOKEN_CLASS ident class_extends class_flags semicolon                 { g_FileParser->StartClass( $<context>2, $<context>3, $<context>4, $<string>2, $<string>3, $<withinClass>4, $<flags>4 ); }
     ;
 
 class_extends
-    : TOKEN_EXTENDS ident                                                   { $<string>$ = $<string>2; $<context>$ = $<context>2; }                
+    : TOKEN_EXTENDS ident                                                   { $<string>$ = $<string>2; $<context>$ = $<context>2; }
+    | /* empty */            
     ;
 
 class_flags
@@ -313,8 +304,14 @@ class_flags
     | TOKEN_TRANSIENT class_flags                                           { $<flags>$ = CLASS_Transient | $<flags>2;  $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
     | TOKEN_ABSTRACT class_flags                                            { $<flags>$ = CLASS_Abstract | $<flags>2;   $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
     | TOKEN_DEPRECATED class_flags                                          { $<flags>$ = CLASS_Deprecated | $<flags>2; $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
-    | TOKEN_WITHIN '(' ident ')' class_flags                                { $<flags>$ = $<flags>5;                    $<withinClass>$ = $<string>3;       $<context>$ = $<context>3;  }
-    | /* empty */                                                           { $<flags>$ = 0; }
+    | TOKEN_NOEXPORT class_flags                                            { $<flags>$ = CLASS_NoExport | $<flags>2;   $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
+    | class_within_flag class_flags                                         { $<flags>$ = $<flags>2;                    $<withinClass>$ = $<withinClass>1;  $<context>$ = $<context>1;  }
+    | /* empty */                                                           { $<flags>$ = 0;                            $<withinClass>$ = "";               $<context>$ = nullptr;      }
+    ;
+
+class_within_flag
+    : TOKEN_WITHIN '(' ident ')'                                            { $<withinClass>$ = $<string>3;       $<context>$ = $<context>3;  }
+    | TOKEN_WITHIN ident                                                    { $<withinClass>$ = $<string>2;       $<context>$ = $<context>2;  }
     ;
 
 class_body

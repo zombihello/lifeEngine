@@ -39,7 +39,7 @@ struct ScriptFrame
 	FORCEINLINE void Step( CObject* InContext )
 	{
 		uint32	opcode = *bytecode++;
-		( InContext->*( CScriptVM::StaticGetOpcodeFunc( opcode ) ) )( *this );
+		( InContext->*( CObject::StaticGetOpcodeFunc( opcode ) ) )( *this );
 	}
 
 	/**

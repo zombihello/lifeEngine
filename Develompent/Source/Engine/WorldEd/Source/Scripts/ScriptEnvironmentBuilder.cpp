@@ -2,6 +2,7 @@
 #include "Reflection/Enum.h"
 #include "Reflection/ObjectIterator.h"
 #include "Reflection/ObjectGlobals.h"
+#include "Reflection/Object.h"
 #include "Scripts/ScriptEnvironmentBuilder.h"
 
 /*
@@ -139,6 +140,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	const std::wstring&			className		= InClassStub.GetName();
 	const std::wstring&			superClassName	= InClassStub.GetSuperClassName();
 	const ScriptFileContext&	context			= InClassStub.GetContext();
+	bool						bIsCObjectClass	= className == CObject::StaticClass()->GetName();
 
 	// If type with same name already defined then its error.
 	// Only one exception: native classes may be already defined in the system by Classes/*.h. In this case
@@ -155,21 +157,32 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 		}
 	}
 
-	// Find the super class as specified
-	CClass*		superClass = FindObjectFast<CClass>( nullptr, superClassName.c_str(), true, true );
-
-	// All classes must be inherit from CObject
-	if ( superClassName.empty() || superClass && !IsA<CObject>( superClass ) )
+	// If our class is a CObject, it must already exist in the system
+	if ( bIsCObjectClass && !theClass )
 	{
-		Errorf( TEXT( "%s: All classes must be inherit from CObject\n" ), context.ToString().c_str() );
+		Errorf( TEXT( "%s: In the system not found CObject class, something went wrong\n" ), context.ToString().c_str() );
 		return false;
 	}
 
-	// If we not found the supper class print error message
-	if ( !superClass )
+	// Find the super class as specified (only for CObject class we set in to NULL)
+	CClass*		superClass = !bIsCObjectClass ? FindObjectFast<CClass>( nullptr, superClassName.c_str(), true, true ) : nullptr;
+
+	// Check a few expression if the class isn't CObject
+	if ( !bIsCObjectClass )
 	{
-		Errorf( TEXT( "%s: Unknown super class '%s'\n" ), context.ToString().c_str(), superClassName.c_str() );
-		return false;
+		// All classes must be inherit from CObject
+		if ( superClassName.empty() || ( superClass && !IsA<CObject>( superClass ) ) )
+		{
+			Errorf( TEXT( "%s: All classes must be inherit from CObject\n" ), context.ToString().c_str() );
+			return false;
+		}
+
+		// If we not found the supper class print error message
+		if ( !superClass )
+		{
+			Errorf( TEXT( "%s: Unknown super class '%s'\n" ), context.ToString().c_str(), superClassName.c_str() );
+			return false;
+		}
 	}
 
 	// If this class is native but parent classes are not, it's wrong
@@ -198,6 +211,13 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 		std::wstring	withinClassName = InClassStub.GetWithinClassName();
 		if ( !withinClassName.empty() )
 		{
+			// CObject class can not have a within class
+			if ( bIsCObjectClass )
+			{
+				Errorf( TEXT( "%s: CObject class can not have a within class\n" ), context.ToString().c_str() );
+				return false;
+			}
+
 			withinClass = FindObjectFast<CClass>( nullptr, withinClassName.c_str(), true, true );
 			if ( !withinClass )
 			{
@@ -207,26 +227,35 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 		}
 		else
 		{
-			withinClass = superClass->GetWithinClass();
-			if ( !withinClass )
+			// For usual classes without a within class we take it from the super
+			if ( !bIsCObjectClass )
 			{
-				Errorf( TEXT( "%s; Invalid within class in super class '%s'\n" ), context.ToString().c_str(), superClassName.c_str() );
-				return false;
+				withinClass = superClass->GetWithinClass();
+				if ( !withinClass )
+				{
+					Errorf( TEXT( "%s; Invalid within class in super class '%s'\n" ), context.ToString().c_str(), superClassName.c_str() );
+					return false;
+				}
+			}
+			// For CObject we use CObject::WithinClass class
+			else
+			{
+				withinClass = CObject::WithinClass::StaticClass();
 			}
 		}
 
 	}
 
-	// If its script class, we calculate properties size, min alignment and create a new CClass
-	uint32		propertiesSize = theClass ? theClass->GetPropertiesSize() : 0;
-	uint32		minAlignment = theClass ? theClass->GetMinAlignment() : 1;
+	// If it is script class, we calculate properties size, min alignment and create a new CClass
+	uint32		propertiesSize	= theClass ? theClass->GetPropertiesSize() : 0;
+	uint32		minAlignment	= theClass ? theClass->GetMinAlignment() : 1;
 	if ( !theClass )
 	{
 		// For script class we manually calculate it	
 		// TODO yehor.pohuliaka - When will be implemented support of properties in classes then need add they here
 		propertiesSize	= superClass->GetPropertiesSize();
 		minAlignment	= superClass->GetMinAlignment();
-		theClass		= new( scriptPackage, className, OBJECT_Public ) CClass( InClassStub.GetFlags(), 0, propertiesSize, minAlignment, superClass, withinClass );
+		theClass		= new( scriptPackage, className, OBJECT_Public ) CClass();
 	}
 
 	// Check for cyclic dependencies
@@ -236,7 +265,14 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 		return false;
 	}
 
-	// Find the class's native constructor and remember class in the stub
+	// Update data in the class
+	theClass->SetClassFlags( InClassStub.GetFlags() );
+	theClass->SetPropertiesSize( propertiesSize );
+	theClass->SetMinAlignment( minAlignment );
+	theClass->SetSuperClass( superClass );
+	theClass->SetWithinClass( withinClass );
+
+	// Bind the class and remember one in the stub
 	theClass->Bind();
 	InClassStub.SetCreatedClass( theClass );
 
