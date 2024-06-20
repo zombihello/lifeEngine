@@ -106,6 +106,17 @@ void Sys_InitFullScreenMoviePlayer()
 	Assert( g_FullScreenMovie );
 }
 
+/*
+==================
+Sys_InitRegistrants
+==================
+*/
+void Sys_InitRegistrants()
+{
+	// Initialize the engine modules
+	extern void InitRegistrantsModule_Core();
+	InitRegistrantsModule_Core();
+}
 
 /*
 ==================
@@ -262,6 +273,9 @@ int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 	g_Log->Init();
 	int32		result = Sys_PlatformPreInit();
 	
+	// Initialize registrants in the system (e.g: native functions)
+	Sys_InitRegistrants();
+
 	// Initialize the system
 	CSystem::Get().Init();
 

@@ -35,13 +35,6 @@ class CObject;
 
 /**
  * @ingroup Core
- * @brief Macro declare function for register native functions
- */
-#define DECLARE_REGISTER_NATIVE_FUNCS() \
-    static void StaticRegisterNativeFuncs()
-
-/**
- * @ingroup Core
  * @brief The type of a function callable by script
  */
 typedef void ( CObject::*ScriptFn_t )( struct ScriptFrame& InStack );

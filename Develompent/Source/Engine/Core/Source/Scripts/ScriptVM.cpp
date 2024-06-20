@@ -14,7 +14,7 @@ ScriptFn_t								CObject::OpcodeFunctions[OP_Count] =
 
 /*
 ==================
-CObject::StaticProcessFunction
+CObject::ProcessFunction
 ==================
 */
 void CObject::ProcessFunction( class CFunction* InFunction )

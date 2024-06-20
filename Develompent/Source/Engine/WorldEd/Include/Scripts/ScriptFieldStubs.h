@@ -235,30 +235,6 @@ public:
 	CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, uint32 InFlags );
 
 	/**
-	 * @brief Constructor
-	 *
-	 * @param InContext				Class context
-	 * @param InClassName			Class name
-	 * @param InSuperClassContext	Super class context
-	 * @param InSuperClassName		Super class name
-	 * @param InFlags				Flags (see EClassFlags)
-	 */
-	CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, const ScriptFileContext& InSuperClassContext, const std::wstring& InSuperClassName, uint32 InFlags );
-
-	/**
-	 * @brief Constructor
-	 *
-	 * @param InContext				Class context
-	 * @param InClassName			Class name
-	 * @param InSuperClassContext	Super class context
-	 * @param InSuperClassName		Super class name
-	 * @param InWithinClassContext	Within class context
-	 * @param InWithinClassName		Within class name
-	 * @param InFlags				Flags (see EClassFlags)
-	 */
-	CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, const ScriptFileContext& InSuperClassContext, const std::wstring& InSuperClassName, const ScriptFileContext& InWithinClassContext, const std::wstring& InWithinClassName, uint32 InFlags );
-
-	/**
 	 * @brief Add a new function
 	 * @param InFunction	A new function
 	 */
@@ -274,6 +250,18 @@ public:
 	FORCEINLINE ScriptScopeStub& GetScope()
 	{
 		return scope;
+	}
+
+	/**
+	 * @brief Set super class
+	 * 
+	 * @param InSuperClassContext	Super class context
+	 * @param InSuperClassName		Super class name
+	 */
+	FORCEINLINE void SetSuperClass( const ScriptFileContext& InSuperClassContext, const std::wstring& InSuperClassName )
+	{
+		superClassContext	= InSuperClassContext;
+		superClassName		= InSuperClassName;
 	}
 
 	/**
@@ -368,6 +356,18 @@ public:
 	}
 
 	/**
+	 * @brief Set within class
+	 *
+	 * @param InWithinClassContext	Within class context
+	 * @param InWithinClassName		Within class name
+	 */
+	FORCEINLINE void SetWithinClass( const ScriptFileContext& InWithinClassContext, const std::wstring& InWithinClassName )
+	{
+		withinClassContext	= InWithinClassContext;
+		withinClassName		= InWithinClassName;
+	}
+
+	/**
 	 * @brief Get within class context
 	 * @return Return within class context
 	 */
@@ -385,16 +385,48 @@ public:
 		return withinClassName;
 	}
 
+	/**
+	 * @brief Set native class group
+	 *
+	 * @param InNativeClassGroupContext		Native class group context
+	 * @param InNativeClassGroup			Native class group
+	 */
+	FORCEINLINE void SetNativeClassGroup( const ScriptFileContext& InNativeClassGroupContext, const std::wstring& InNativeClassGroup )
+	{
+		nativeClassGroupContext = InNativeClassGroupContext;
+		nativeClassGroup		= InNativeClassGroup;
+	}
+
+	/**
+	 * @brief Get native class group context
+	 * @return Return native class group context
+	 */
+	FORCEINLINE const ScriptFileContext* GetNativeClassGroupContext() const
+	{
+		return &nativeClassGroupContext;
+	}
+
+	/**
+	 * @brief Get native class group
+	 * @return Return native class group
+	 */
+	FORCEINLINE const std::wstring& GetNativeClassGroup() const
+	{
+		return nativeClassGroup;
+	}
+
 private:
-	uint32									flags;				/**< Class flags (see EClassFlags) */
-	ScriptScopeStub							scope;				/**< Scope of the class */
-	ScriptFileContext						superClassContext;	/**< Super class context */
-	std::wstring							superClassName;		/**< Super class name */
-	ScriptFileContext						withinClassContext;	/**< Within class context */
-	std::wstring							withinClassName;	/**< Within class name */
-	std::wstring							cppText;			/**< C++ code that will be placed into header (only for native classes) */
-	CClass*									createdClass;		/**< Created class for script environment */
-	std::vector<ScriptFunctionStubPtr_t>	functions;			/**< Functions */
+	uint32									flags;						/**< Class flags (see EClassFlags) */
+	ScriptScopeStub							scope;						/**< Scope of the class */
+	ScriptFileContext						superClassContext;			/**< Super class context */
+	std::wstring							superClassName;				/**< Super class name */
+	ScriptFileContext						withinClassContext;			/**< Within class context */
+	std::wstring							withinClassName;			/**< Within class name */
+	std::wstring							cppText;					/**< C++ code that will be placed into header (only for native classes) */
+	ScriptFileContext						nativeClassGroupContext;	/**< Native class group context (only for native classes) */
+	std::wstring							nativeClassGroup;			/**< Native class group (only for native classes) */
+	CClass*									createdClass;				/**< Created class for script environment */
+	std::vector<ScriptFunctionStubPtr_t>	functions;					/**< Functions */
 };
 
 /**

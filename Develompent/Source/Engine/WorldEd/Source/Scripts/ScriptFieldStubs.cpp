@@ -40,35 +40,6 @@ CScriptClassStub::CScriptClassStub( const ScriptFileContext& InContext, const st
 
 /*
 ==================
-CScriptClassStub::CScriptClassStub
-==================
-*/
-CScriptClassStub::CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, const ScriptFileContext& InSuperClassContext, const std::wstring& InSuperClassName, uint32 InFlags )
-	: CScriptBaseStub( InContext, InClassName )
-	, flags( InFlags )
-	, superClassContext( InSuperClassContext )
-	, superClassName( InSuperClassName )
-	, withinClassContext( InContext )
-	, createdClass( nullptr )
-{}
-
-/*
-==================
-CScriptClassStub::CScriptClassStub
-==================
-*/
-CScriptClassStub::CScriptClassStub( const ScriptFileContext& InContext, const std::wstring& InClassName, const ScriptFileContext& InSuperClassContext, const std::wstring& InSuperClassName, const ScriptFileContext& InWithinClassContext, const std::wstring& InWithinClassName, uint32 InFlags )
-	: CScriptBaseStub( InContext, InClassName )
-	, flags( InFlags )
-	, superClassContext( InSuperClassContext )
-	, superClassName( InSuperClassName )
-	, withinClassContext( InWithinClassContext )
-	, withinClassName( InWithinClassName )
-	, createdClass( nullptr )
-{}
-
-/*
-==================
 CScriptClassStub::AddCppText
 ==================
 */

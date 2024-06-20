@@ -143,7 +143,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	bool						bIsCObjectClass	= className == CObject::StaticClass()->GetName();
 
 	// If type with same name already defined then its error.
-	// Only one exception: native classes may be already defined in the system by Classes/*.h. In this case
+	// Only one exception: native classes may be already defined in the system by *Classes.h. In this case
 	// we check for missing flags 'CLASS_Parsed' and 'CLASS_Intrinsic'. 
 	// If they aren't then all right. Otherwise this is redefinition and its wrong
 	CClass*		theClass = nullptr;

@@ -29,15 +29,6 @@ void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& I
 class CObject
 {
     DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract | CLASS_NoExport, 0, TEXT( "Core" ) )
-    DECLARE_REGISTER_NATIVE_FUNCS()
-    {
-		static ScriptNativeFunctionLookup s_NativeFunctions[] =
-		{
-			MAP_NATIVE_FUNC( CObject, StackTrace )
-			{ nullptr, nullptr }
-		};
-		CObject::StaticAddNativeFunctions( TEXT( "CObject" ), s_NativeFunctions );
-    }
 
 public:
     friend bool IsA( CObject* InObject, CClass* InClass );

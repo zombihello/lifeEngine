@@ -44,9 +44,21 @@ public:
 private:
 	/**
 	 * @brief Export native class
-	 * @param InClassStub	Class stub
+	 * 
+	 * @param InClassStub					Class stub
+	 * @param OutExportedClass				Output exported class into C++ code
+	 * @param OutNativeFuncsTable			Output table with all native functions in the class
+	 * @param OutRegisterNativeFuncsTable	Output code to register native functions in the system
 	 */
-	void ExportClass( const ScriptClassStubPtr_t& InClassStub );
+	void ExportClass( const ScriptClassStubPtr_t& InClassStub, std::wstring& OutExportedClass, std::wstring& OutNativeFuncsTable, std::wstring& OutRegisterNativeFuncsTable );
+
+	/**
+	 * @brief Save C++ header to file
+	 * 
+	 * @param InBuffer	Buffer to save
+	 * @param InPath	Path to file
+	 */
+	void SaveCppHeader( const std::wstring& InBuffer, const std::wstring& InPath );
 
 	/**
 	 * @brief Generate C++ body for header
@@ -76,18 +88,12 @@ private:
 	/**
 	 * @brief Generate native functions
 	 *
-	 * @param InClassStub	Class stub
+	 * @param InClassStub					Class stub
+	 * @param OutNativeFuncsTable			Output table with all native functions in the class
+	 * @param OutRegisterNativeFuncsTable	Output code to register native functions in the system
 	 * @return Return a string with native functions
 	 */
-	std::wstring GenerateNativeFunctions( const ScriptClassStubPtr_t& InClassStub );
-
-	/**
-	 * @brief Generate register of native functions
-	 *
-	 * @param InClassStub	Class stub
-	 * @return Return a string with register of native functions
-	 */
-	std::wstring GenerateRegisterNativeFunctions( const ScriptClassStubPtr_t& InClassStub );
+	std::wstring GenerateNativeFunctions( const ScriptClassStubPtr_t& InClassStub, std::wstring& OutNativeFuncsTable, std::wstring& OutRegisterNativeFuncsTable );
 
 	bool							bNativeClassesChanged;	/**< Is have been changed native classes */
 	std::wstring					includeDir;				/**< Directory with includes where will be saved new headers */

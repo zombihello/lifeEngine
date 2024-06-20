@@ -241,7 +241,6 @@
         staticClass->SetSuperClass( Super::StaticClass() != staticClass ? Super::StaticClass() : nullptr ); \
         staticClass->SetClass( CClass::StaticClass() ); \
         staticClass->SetWithinClass( WithinClass::StaticClass() ); \
-        ThisClass::StaticRegisterNativeFuncs(); \
         ThisClass::StaticInitializeClass(); \
     } \
     struct Register##TClass \

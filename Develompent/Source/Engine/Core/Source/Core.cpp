@@ -9,6 +9,11 @@
 #include "Misc/TableOfContents.h"
 #include "Misc/CommandLine.h"
 
+// Native classes
+#define WITH_REGISTRANTS
+#include "Classes/CoreClasses.h"
+#undef WITH_REGISTRANTS
+
 // ----------------
 // GLOBALS
 // ----------------
@@ -135,4 +140,15 @@ EPlatformType Sys_PlatformStringToType( const std::wstring& InPlatformStr )
     {
         return PLATFORM_Unknown;
     }
+}
+
+/*
+==================
+InitRegistrantsModule_Core
+Register all native classes in the system
+==================
+*/
+void InitRegistrantsModule_Core()
+{
+	InitRegistrants_Core();
 }

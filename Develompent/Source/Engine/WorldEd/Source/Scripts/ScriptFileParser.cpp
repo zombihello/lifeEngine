@@ -60,19 +60,23 @@ void CScriptFileParser::EmitError( const ScriptFileContext* InContext, const std
 CScriptFileParser::StartClass
 ==================
 */
-void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const ScriptFileContext* InWithinClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, const std::string_view& InWithinClassName, uint32 InFlags )
+void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const ScriptFileContext* InWithinClassContext, const ScriptFileContext* InNativeClassGroupContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, const std::string_view& InWithinClassName, const std::string_view& InNativeClassGroup, uint32 InFlags )
 {
 	AssertMsg( InContext, TEXT( "Invalid context for class" ) );
 	AssertMsg( !InClassName.empty(), TEXT( "Class name isn't valid" ) );
 
-	// Create a class without super class (ONLY for CObject)
-	std::wstring		className = ANSI_TO_TCHAR( InClassName.data() );
-	if ( !InSuperClassContext )
+	// Create a new class
+	std::wstring	className		= ANSI_TO_TCHAR( InClassName.data() );
+	bool			bIsCObjectClass = className == CObject::StaticClass()->GetName();
+	currentClass	= MakeSharedPtr<CScriptClassStub>( *InContext, className, InFlags );
+
+	// Make sure that CObject don't have a super class and within class
+	if ( bIsCObjectClass )
 	{
-		// Only CObject class can not have a super class
-		if ( className != CObject::StaticClass()->GetName() )
+		// CObject should not have a super class, because it is the root class in the hierarchy
+		if ( InSuperClassContext )
 		{
-			EmitError( InContext, TEXT( "Only CObject class can not have a super class" ) );
+			EmitError( InSuperClassContext, TEXT( "CObject should not have a super class, because it is the root class in the hierarchy" ) );
 		}
 
 		// Using 'within' with CObject class not allowed
@@ -80,32 +84,35 @@ void CScriptFileParser::StartClass( const ScriptFileContext* InContext, const Sc
 		{
 			EmitError( InWithinClassContext, TEXT( "Using 'within' with CObject class not allowed" ) );
 		}
-
-		// Create CObject class
-		currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, className, InFlags );
 	}
-	// Otherwise we create a class with super class (other classes)
-	else
+
+	// Make sure that all classes have a super class (of course except CObject)
+	if ( !bIsCObjectClass && !InSuperClassContext )
+	{
+		// Only CObject class can not have a super class
+		EmitError( InContext, TEXT( "Only CObject class can not have a super class, other classes must inherit by the one" ) );
+	}
+
+	// Set a super class if it we have
+	if ( InSuperClassContext )
 	{
 		AssertMsg( !InClassSuperName.empty(), TEXT( "Super class name isn't valid" ) );
+		currentClass->SetSuperClass( *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ) );
+	}
 
-		// CObject should not have a super class, because it is the root class in the hierarchy
-		if ( className == CObject::StaticClass()->GetName() )
-		{
-			EmitError( InSuperClassContext, TEXT( "CObject should not have a super class, because it is the root class in the hierarchy" ) );
-		}
+	// Set a within class if it we have
+	if ( InWithinClassContext )
+	{
+		AssertMsg( !InWithinClassName.empty(), TEXT( "Within class name isn't valid" ) );
+		currentClass->SetWithinClass( *InWithinClassContext, ANSI_TO_TCHAR( InWithinClassName.data() ) );
+	}
 
-		// Create a class with 'within'
-		if ( InWithinClassContext )
-		{
-			AssertMsg( !InWithinClassName.empty(), TEXT( "Within class name isn't valid" ) );
-			currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, className, *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ), *InWithinClassContext, ANSI_TO_TCHAR( InWithinClassName.data() ), InFlags );
-		}
-		// Otherwise we create a class without 'within'
-		else
-		{
-			currentClass = MakeSharedPtr<CScriptClassStub>( *InContext, className, *InSuperClassContext, ANSI_TO_TCHAR( InClassSuperName.data() ), InFlags );
-		}
+	// Set a native class group if it we have
+	if ( InNativeClassGroupContext )
+	{
+		AssertMsg( !InNativeClassGroup.empty(), TEXT( "Native class group isn't valid" ) );
+		AssertMsg( currentClass->HasAnyFlags( CLASS_Native ), TEXT( "Invalid class flags. If was used 'native( .. )' must be set CLASS_Native" ) );
+		currentClass->SetNativeClassGroup( *InNativeClassGroupContext, ANSI_TO_TCHAR( InNativeClassGroup.data() ) );
 	}
 
 	// Add a new class in the stubs system

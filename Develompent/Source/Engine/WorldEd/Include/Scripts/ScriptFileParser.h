@@ -46,15 +46,17 @@ public:
 	/**
 	 * @brief Start class definition
 	 *
-	 * @param InContext				Class context
-	 * @param InSuperClassContext	Context of a super class type
-	 * @param InWithinClassContext	Within class context
-	 * @param InClassName			Class name
-	 * @param InClassSuperName		Super class name
-	 * @param InWithinClassName		Within class name
-	 * @param InFlags				Flags (see EScriptStubFlags)
+	 * @param InContext						Class context
+	 * @param InSuperClassContext			Context of a super class type
+	 * @param InWithinClassContext			Within class context
+	 * @param InNativeClassGroupContext		Native class group context
+	 * @param InClassName					Class name
+	 * @param InClassSuperName				Super class name
+	 * @param InWithinClassName				Within class name
+	 * @param InNativeClassGroup			Native class group
+	 * @param InFlags						Flags (see EScriptStubFlags)
 	 */
-	void StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const ScriptFileContext* InWithinClassContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, const std::string_view& InWithinClassName, uint32 InFlags );
+	void StartClass( const ScriptFileContext* InContext, const ScriptFileContext* InSuperClassContext, const ScriptFileContext* InWithinClassContext, const ScriptFileContext* InNativeClassGroupContext, const std::string_view& InClassName, const std::string_view& InClassSuperName, const std::string_view& InWithinClassName, const std::string_view& InNativeClassGroup, uint32 InFlags );
 
 	/**
 	 * @brief Add C++ text that will be placed into header (only for native classes)

@@ -26,6 +26,8 @@
         FORCEINLINE YYSTYPE_File()
             : flags( 0 )
             , context( nullptr )
+            , withinClassContext( nullptr )
+            , nativeClassGroupContext( nullptr )
         {}
 
         /**
@@ -35,8 +37,11 @@
         FORCEINLINE YYSTYPE_File( const YYSTYPE_File& InOther )
             : flags( InOther.flags )
             , withinClass( InOther.withinClass )
+            , nativeClassGroup( InOther.nativeClassGroup )
             , string( InOther.string )
             , context( InOther.context )
+            , withinClassContext( InOther.withinClassContext )
+            , nativeClassGroupContext( InOther.nativeClassGroupContext )
             , token( InOther.token )
         {}
 
@@ -47,8 +52,11 @@
         FORCEINLINE YYSTYPE_File( YYSTYPE_File&& InOther )
             : flags( std::move( InOther.flags ) )
             , withinClass( std::move( InOther.withinClass ) )
+            , nativeClassGroup( std::move( InOther.nativeClassGroup ) )
             , string( std::move( InOther.string ) )
             , context( std::move( InOther.context ) )
+            , withinClassContext( std::move( InOther.withinClassContext ) )
+            , nativeClassGroupContext( std::move( InOther.nativeClassGroupContext ) )
             , token( std::move( InOther.token ) )
         {}
 
@@ -68,11 +76,14 @@
 	    {
 	    	if ( this != &InOther )
 	    	{
-                flags = InOther.flags;
-                withinClass = InOther.withinClass;
-                string = InOther.string;
-	    		context = InOther.context;
-	    		token = InOther.token;
+                flags                       = InOther.flags;
+                withinClass                 = InOther.withinClass;
+                nativeClassGroup            = InOther.nativeClassGroup;
+                string                      = InOther.string;
+	    		context                     = InOther.context;
+                withinClassContext          = InOther.withinClassContext;
+                nativeClassGroupContext     = InOther.nativeClassGroupContext;
+	    		token                       = InOther.token;
 	    	}
 	    	return *this;
 	    }
@@ -87,20 +98,26 @@
 	    {
 	    	if ( this != &InOther )
 	    	{
-                flags = std::move( InOther.flags );
-                withinClass = std::move( InOther.withinClass );
-                string = std::move( InOther.string );
-	    		context = std::move( InOther.context );
-	    		token = std::move( InOther.token );
+                flags                       = std::move( InOther.flags );
+                withinClass                 = std::move( InOther.withinClass );
+                nativeClassGroup            = std::move( InOther.nativeClassGroup );
+                string                      = std::move( InOther.string );
+	    		context                     = std::move( InOther.context );
+                withinClassContext          = std::move( InOther.withinClassContext );
+                nativeClassGroupContext     = std::move( InOther.nativeClassGroupContext );
+	    		token                       = std::move( InOther.token );
 	    	}
 	    	return *this;
 	    }
 
-        uint32                  flags;          /**< Flags (look EClassFlags) */
-        std::string_view        withinClass;    /**< Within class name */
-        std::string_view        string;         /**< String value */
-        ScriptFileContext*      context;        /**< Script file context */
-        std::string_view        token;          /**< Token in string format */
+        uint32                  flags;                      /**< Flags (look EClassFlags) */
+        std::string_view        withinClass;                /**< Within class name */
+        std::string_view        nativeClassGroup;           /**< Native class group */
+        std::string_view        string;                     /**< String value */
+        ScriptFileContext*      context;                    /**< Script file context */
+        ScriptFileContext*      withinClassContext;         /**< Within class context */
+        ScriptFileContext*      nativeClassGroupContext;    /**< Native class group context*/
+        std::string_view        token;                      /**< Token in string format */
     };
 
     /**
@@ -291,27 +308,34 @@ class
     ;
 
 class_header
-    : TOKEN_CLASS ident class_extends class_flags semicolon                 { g_FileParser->StartClass( $<context>2, $<context>3, $<context>4, $<string>2, $<string>3, $<withinClass>4, $<flags>4 ); }
+    : TOKEN_CLASS ident class_extends class_flags semicolon                 { g_FileParser->StartClass( $<context>2, $<context>3, $<withinClassContext>4, $<nativeClassGroupContext>4, $<string>2, $<string>3, $<withinClass>4, $<nativeClassGroup>4, $<flags>4 ); }
     ;
 
 class_extends
     : TOKEN_EXTENDS ident                                                   { $<string>$ = $<string>2; $<context>$ = $<context>2; }
+    | TOKEN_EXTENDS '(' ident ')'                                           { $<string>$ = $<string>3; $<context>$ = $<context>3; }
     | /* empty */            
     ;
 
 class_flags
-    : TOKEN_NATIVE class_flags                                              { $<flags>$ = CLASS_Native | $<flags>2;     $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
-    | TOKEN_TRANSIENT class_flags                                           { $<flags>$ = CLASS_Transient | $<flags>2;  $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
-    | TOKEN_ABSTRACT class_flags                                            { $<flags>$ = CLASS_Abstract | $<flags>2;   $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
-    | TOKEN_DEPRECATED class_flags                                          { $<flags>$ = CLASS_Deprecated | $<flags>2; $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
-    | TOKEN_NOEXPORT class_flags                                            { $<flags>$ = CLASS_NoExport | $<flags>2;   $<withinClass>$ = $<withinClass>2;  $<context>$ = $<context>2;  }
-    | class_within_flag class_flags                                         { $<flags>$ = $<flags>2;                    $<withinClass>$ = $<withinClass>1;  $<context>$ = $<context>1;  }
-    | /* empty */                                                           { $<flags>$ = 0;                            $<withinClass>$ = "";               $<context>$ = nullptr;      }
+    : class_native_flag class_flags                                         { $<flags>$ = $<flags>1 | $<flags>2;        $<withinClass>$ = $<withinClass>2;  $<withinClassContext>$ = $<withinClassContext>2;    $<nativeClassGroup>$ = $<nativeClassGroup>1;    $<nativeClassGroupContext>$ = $<nativeClassGroupContext>1;      }
+    | TOKEN_TRANSIENT class_flags                                           { $<flags>$ = CLASS_Transient | $<flags>2;  $<withinClass>$ = $<withinClass>2;  $<withinClassContext>$ = $<withinClassContext>2;    $<nativeClassGroup>$ = $<nativeClassGroup>2;    $<nativeClassGroupContext>$ = $<nativeClassGroupContext>2;      }
+    | TOKEN_ABSTRACT class_flags                                            { $<flags>$ = CLASS_Abstract | $<flags>2;   $<withinClass>$ = $<withinClass>2;  $<withinClassContext>$ = $<withinClassContext>2;    $<nativeClassGroup>$ = $<nativeClassGroup>2;    $<nativeClassGroupContext>$ = $<nativeClassGroupContext>2;      }
+    | TOKEN_DEPRECATED class_flags                                          { $<flags>$ = CLASS_Deprecated | $<flags>2; $<withinClass>$ = $<withinClass>2;  $<withinClassContext>$ = $<withinClassContext>2;    $<nativeClassGroup>$ = $<nativeClassGroup>2;    $<nativeClassGroupContext>$ = $<nativeClassGroupContext>2;      }
+    | TOKEN_NOEXPORT class_flags                                            { $<flags>$ = CLASS_NoExport | $<flags>2;   $<withinClass>$ = $<withinClass>2;  $<withinClassContext>$ = $<withinClassContext>2;    $<nativeClassGroup>$ = $<nativeClassGroup>2;    $<nativeClassGroupContext>$ = $<nativeClassGroupContext>2;      }
+    | class_within_flag class_flags                                         { $<flags>$ = $<flags>2;                    $<withinClass>$ = $<withinClass>1;  $<withinClassContext>$ = $<withinClassContext>1;    $<nativeClassGroup>$ = $<nativeClassGroup>2;    $<nativeClassGroupContext>$ = $<nativeClassGroupContext>2;      }
+    | /* empty */                                                           { $<flags>$ = 0;                            $<withinClass>$ = "";               $<withinClassContext>$ = nullptr;                   $<nativeClassGroup>$ = "";                      $<nativeClassGroupContext>$ = nullptr;                          }
+    ;
+
+class_native_flag
+    : TOKEN_NATIVE                                                          { $<flags>$ = CLASS_Native;             $<nativeClassGroup>$ = "";          $<nativeClassGroupContext>$ = nullptr;      }
+    | TOKEN_NATIVE '(' ident ')'                                            { $<flags>$ = CLASS_Native;             $<nativeClassGroup>$ = $<string>3;  $<nativeClassGroupContext>$ = $<context>3;  }
+    | TOKEN_NATIVE ident                                                    { $<flags>$ = CLASS_Native;             $<nativeClassGroup>$ = $<string>2;  $<nativeClassGroupContext>$ = $<context>2;  }
     ;
 
 class_within_flag
-    : TOKEN_WITHIN '(' ident ')'                                            { $<withinClass>$ = $<string>3;       $<context>$ = $<context>3;  }
-    | TOKEN_WITHIN ident                                                    { $<withinClass>$ = $<string>2;       $<context>$ = $<context>2;  }
+    : TOKEN_WITHIN '(' ident ')'                                            { $<withinClass>$ = $<string>3;       $<withinClassContext>$ = $<context>3;  }
+    | TOKEN_WITHIN ident                                                    { $<withinClass>$ = $<string>2;       $<withinClassContext>$ = $<context>2;  }
     ;
 
 class_body
