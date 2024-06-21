@@ -18,7 +18,7 @@
   */
 class ABaseController : public AActor
 {
-	DECLARE_CLASS( ABaseController, AActor, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( ABaseController, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

@@ -17,7 +17,7 @@
   */
 class ALight : public AActor
 {
-	DECLARE_CLASS_NO_CTOR( ALight, AActor, CLASS_Abstract, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_NO_CTOR( ALight, AActor, CLASS_Intrinsic | CLASS_Abstract, 0, TEXT( "Engine" ) )
 };
 
 #endif // !ALIGHT_H

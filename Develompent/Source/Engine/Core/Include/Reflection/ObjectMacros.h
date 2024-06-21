@@ -242,15 +242,7 @@
         staticClass->SetClass( CClass::StaticClass() ); \
         staticClass->SetWithinClass( WithinClass::StaticClass() ); \
         ThisClass::StaticInitializeClass(); \
-    } \
-    struct Register##TClass \
-    { \
-        Register##TClass() \
-        { \
-            CObject::AddToAutoInitializeRegistrants( ( CObject* (*)() )&TClass::StaticClass ); \
-        } \
-    }; \
-    static Register##TClass s_Register##TClass;
+    }
 
 /**
  * @ingroup Core
@@ -279,15 +271,7 @@
 				return s_CEnum; \
 			} \
 		} \
-	} \
-    struct Register##TEnum \
-    { \
-        Register##TEnum() \
-        { \
-            CObject::AddToAutoInitializeRegistrants( ( CObject* (*)() )&Enum::TEnum::StaticEnum ); \
-        } \
-    }; \
-	static Register##TEnum s_Register##TEnum;
+	}
 
 /**
  * @ingroup Core
@@ -317,15 +301,7 @@
 		staticStruct->SetSuperStruct( Super::StaticStruct() != staticStruct ? Super::StaticStruct() : nullptr ); \
 		staticStruct->SetClass( CStruct::StaticClass() ); \
         ThisStruct::StaticInitializeStruct(); \
-	} \
-	struct Register##TStruct \
-    { \
-        Register##TStruct() \
-        { \
-            CObject::AddToAutoInitializeRegistrants( ( CObject* (*)() )&TStruct::StaticStruct ); \
-        } \
-    }; \
-    static Register##TStruct s_Register##TStruct;
+	}
 
 /**
  * @ingroup Core
@@ -398,7 +374,8 @@ enum EClassFlags
     CLASS_NoExport          = 1 << 9,                                                       /**< Don't export class to C++ header */
 
     // Combination masks and other combinations
-    CLASS_MASK_Inherit      = CLASS_Deprecated | CLASS_Transient | CLASS_HasComponents | CLASS_Intrinsic      /**< Flags to inherit from base class */
+    CLASS_MASK_Inherit                  = CLASS_Deprecated | CLASS_Transient | CLASS_HasComponents | CLASS_Intrinsic,       /**< Flags to inherit from base class */
+    CLASS_MASK_CompilerTransientFlags   = CLASS_Parsed | CLASS_Exported | CLASS_Compiled | CLASS_NoExport                   /**< Script compiler transient flags are cleared */
 };
 
 /**

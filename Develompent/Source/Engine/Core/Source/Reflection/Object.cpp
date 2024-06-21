@@ -659,10 +659,10 @@ CObject* CObject::StaticConstructObject( class CClass* InClass, CObject* InOuter
 
 /*
 ==================
-CObject::AddToAutoInitializeRegistrants
+CObject::StaticAddToAutoInitializeRegistrants
 ==================
 */
-void CObject::AddToAutoInitializeRegistrants( CObject* ( *InStaticInitializeFn )() )
+void CObject::StaticAddToAutoInitializeRegistrants( CObject* ( *InStaticInitializeFn )() )
 {
 	GetAutoInitializeRegistrants().push_back( InStaticInitializeFn );
 }
@@ -767,7 +767,7 @@ void CObject::Register()
 
 	// Make sure that objects disregarded for GC are part of root set
 	Assert( !IsDisregardedForGC() || IsRootSet() );
-	Logf( TEXT( "Registered %s\n" ), GetFullName().c_str() );
+	Logf( TEXT( "Registered %s\n" ), GetPathName().c_str() );
 }
 
 /*

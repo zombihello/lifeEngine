@@ -35,6 +35,7 @@
 #include "System/Cvar.h"
 #include "System/Name.h"
 #include "System/System.h"
+#include "LaunchGames.h"
 #include "LEBuild.h"
 
 #if USE_THEORA_CODEC
@@ -115,7 +116,25 @@ void Sys_InitRegistrants()
 {
 	// Initialize the engine modules
 	extern void InitRegistrantsModule_Core();
+	extern void InitRegistrantsModule_Engine();
+	extern void InitRegistrantsModule_Physics();
 	InitRegistrantsModule_Core();
+	InitRegistrantsModule_Engine();
+	InitRegistrantsModule_Physics();
+
+	// Initialize WorldEd module
+#if WITH_EDITOR
+	extern void InitRegistrantsModule_WorldEd();
+	InitRegistrantsModule_WorldEd();
+#endif // WITH_EDITOR
+
+	// Initialize the game module
+#if GAMENAME == ELEOTGAME
+	extern void InitRegistrantsModule_EleotGame();
+	InitRegistrantsModule_EleotGame();
+#else
+	#error Unknown game ID
+#endif // ELEOTGAME == GAMENAME
 }
 
 /*
@@ -212,9 +231,9 @@ void CEngineLoop::InitConfigs()
 CEngineLoop::LoadScriptPackages
 ==================
 */
-void CEngineLoop::LoadScriptPackages()
+void CEngineLoop::LoadScriptPackages( EConfigType InType, const std::wstring& InGroup, const std::wstring& InName )
 {
-	const CJsonValue*				configScriptPackagesValue = CConfig::Get().GetValue( CT_Engine, TEXT( "Engine.Engine" ), TEXT( "ScriptPackages" ) );
+	const CJsonValue*				configScriptPackagesValue = CConfig::Get().GetValue( InType, InGroup.c_str(), InName.c_str() );
 	const std::vector<CJsonValue>*	configScriptPackages = configScriptPackagesValue ? configScriptPackagesValue->GetArray() : nullptr;
 	if ( configScriptPackages )
 	{
@@ -223,7 +242,7 @@ void CEngineLoop::LoadScriptPackages()
 			const CJsonValue&	configScriptPackage = configScriptPackages->at( index );
 			if ( !configScriptPackage.IsA( JVT_String ) )
 			{
-				Warnf( TEXT( "Invalid 'Engine.Engine:ScriptPackages[%i]', must be string type\n" ), index );
+				Warnf( TEXT( "Invalid '%s:%s[%i]', must be string type\n" ), InGroup.c_str(), InName.c_str(), index );
 				continue;
 			}
 
@@ -242,13 +261,27 @@ void CEngineLoop::LoadScriptPackages()
 
 /*
 ==================
+CEngineLoop::LoadScriptPackages
+==================
+*/
+void CEngineLoop::LoadScriptPackages()
+{
+	LoadScriptPackages( CT_Engine,	TEXT( "Engine.Engine" ), TEXT( "ScriptPackages" ) );
+	LoadScriptPackages( CT_Game,	TEXT( "Game.GameInfo" ), TEXT( "ScriptPackages" ) );
+#if WITH_EDITOR
+	LoadScriptPackages( CT_Editor,	TEXT( "Editor.Editor" ), TEXT( "ScriptPackages" ) );
+#endif // WITH_EDITOR
+}
+
+/*
+==================
 CEngineLoop::PreInit
 ==================
 */
 int32 CEngineLoop::PreInit( const tchar* InCmdLine )
 {
 	g_GameThreadId = Sys_GetCurrentThreadId();
-	g_GameName = ANSI_TO_TCHAR( GAMENAME );
+	g_GameName = ANSI_TO_TCHAR( GAMENAME_STRING );
 
 	g_CommandLine.Init( InCmdLine );
 	CName::StaticInit();
@@ -390,8 +423,9 @@ int32 CEngineLoop::Init()
 
 	// Parse cmd line for start commandlets
 #if WITH_EDITOR
-	if ( CBaseCommandlet::ExecCommandlet( g_CommandLine ) )
+	if ( g_IsCommandlet || g_IsCooker || g_IsScriptCompiler )
 	{
+		CBaseCommandlet::ExecCommandlet( g_CommandLine );
 		return result;
 	}
 #endif // WITH_EDITOR
@@ -535,7 +569,7 @@ void CEngineLoop::Exit()
 	g_RHI->Destroy();
 
 	g_Window->Close();
-	CObject::CleanupLinkerMap();
+	CObject::StaticCleanupLinkerMap();
 	CObject::StaticExit();
 	CSystem::Get().Shutdown();
 	g_Log->TearDown();

@@ -17,7 +17,7 @@
   */
 class CDirectionalLightComponent : public CLightComponent
 {
-	DECLARE_CLASS( CDirectionalLightComponent, CLightComponent, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( CDirectionalLightComponent, CLightComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

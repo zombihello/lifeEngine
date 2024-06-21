@@ -212,17 +212,15 @@ bool CScriptCompilerCommandlet::CompileScripts( CScriptSystemStub& InStubs )
 	const std::vector<ScriptClassStubPtr_t>		classes = InStubs.GetClasses();
 	for ( uint32 classIdx = 0, numClasses = classes.size(); classIdx < numClasses; ++classIdx )
 	{
+		// Skip the class if has been already compiled or it is intrinsic
 		const ScriptClassStubPtr_t&						classStub = classes[classIdx];
-		CClass*											theClass = classStub->GetCreatedClass();
 		const std::vector<ScriptFunctionStubPtr_t>		functions = classStub->GetFunctions();
-		Assert( theClass );
-
-		// Skip the class if has been already compiled
-		if ( theClass->HasAnyClassFlags( CLASS_Compiled ) )
+		if ( classStub->HasAnyFlags( CLASS_Compiled | CLASS_Intrinsic ) )
 		{
 			continue;
 		}
 
+		// Compile script functions
 		for ( uint32 funcIdx = 0, numFunctions = functions.size(); funcIdx < numFunctions; ++funcIdx )
 		{
 			// We compile only script functions
@@ -247,7 +245,7 @@ bool CScriptCompilerCommandlet::CompileScripts( CScriptSystemStub& InStubs )
 		// If we have not any errors then alright and we mark class by CLASS_Compiled flag
 		if ( !bHasError )
 		{
-			theClass->AddClassFlag( CLASS_Compiled );
+			classStub->AddFlag( CLASS_Compiled );
 		}
 	}
 

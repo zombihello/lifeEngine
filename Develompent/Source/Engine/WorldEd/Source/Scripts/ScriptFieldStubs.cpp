@@ -28,6 +28,28 @@ CScriptFunctionStub::CScriptFunctionStub( const ScriptFileContext& InContext, co
 
 /*
 ==================
+CScriptEnumStub::CScriptEnumStub
+==================
+*/
+CScriptEnumStub::CScriptEnumStub( const ScriptFileContext& InContext, const std::wstring& InEnumName, bool InIsIntrinsic /* = false */ )
+	: CScriptBaseStub( InContext, InEnumName )
+	, bIntrinsic( InIsIntrinsic )
+{}
+
+
+/*
+==================
+CScriptStructStub::CScriptStructStub
+==================
+*/
+CScriptStructStub::CScriptStructStub( const ScriptFileContext& InContext, const std::wstring& InStructName, bool InIsIntrinsic /* = false */ )
+	: CScriptBaseStub( InContext, InStructName )
+	, bIntrinsic( InIsIntrinsic )
+{}
+
+
+/*
+==================
 CScriptClassStub::CScriptClassStub
 ==================
 */
@@ -101,4 +123,8 @@ CScriptSystemStub::CScriptSystemStub
 CScriptSystemStub::CScriptSystemStub( const CScriptSystemStub& InOther )
 	: classes( InOther.classes )
 	, classesMap( InOther.classesMap )
+	, structs( InOther.structs )
+	, structsMap( InOther.structsMap )
+	, enums( InOther.enums )
+	, enumsMap( InOther.enumsMap )
 {}

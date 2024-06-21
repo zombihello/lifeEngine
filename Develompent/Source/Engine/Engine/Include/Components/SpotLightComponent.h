@@ -17,7 +17,7 @@
   */
 class CSpotLightComponent : public CLightComponent
 {
-	DECLARE_CLASS( CSpotLightComponent, CLightComponent, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( CSpotLightComponent, CLightComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

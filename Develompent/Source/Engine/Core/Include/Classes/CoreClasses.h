@@ -10,17 +10,35 @@
 #define INCLUDED_REGISTRANTS_CORE
 static void InitRegistrants_Core()
 {
-	// BEGIN TABLE OF NATIVE FUNCTIONS
 	static ScriptNativeFunctionLookup s_CObjectNativeFunctions[] =
 	{
 		MAP_NATIVE_FUNC( CObject, StackTrace )
 		{ nullptr, nullptr }
 	};
-	// END TABLE OF NATIVE FUNCTIONS
 
-	// BEGIN REGISTER NATIVE FUNCTIONS
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CObject::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CField::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CStruct::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CClass::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CEnum::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CFunction::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CObjectPackage::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CObjectRedirector::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CByteProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CIntProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CBoolProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CFloatProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CColorProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CObjectProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CVectorProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CRotatorProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CAssetProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CArrayProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CStructProperty::StaticClass );
+	CObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&CStringProperty::StaticClass );
+
 	CObject::StaticAddNativeFunctions( TEXT( "CObject" ), s_CObjectNativeFunctions );
-	// END REGISTER NATIVE FUNCTIONS
 }
 #endif // !INCLUDED_REGISTRANTS_CORE
 #endif // WITH_REGISTRANTS

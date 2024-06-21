@@ -28,7 +28,7 @@
  */
 class CWorld : public CObject
 {
-	DECLARE_CLASS( CWorld, CObject, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( CWorld, CObject, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

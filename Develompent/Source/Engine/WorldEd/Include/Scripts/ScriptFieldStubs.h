@@ -15,6 +15,8 @@
 #include "Misc/SharedPointer.h"
 #include "Reflection/Class.h"
 #include "Reflection/Function.h"
+#include "Reflection/Struct.h"
+#include "Reflection/Enum.h"
 #include "Scripts/ScriptFileContext.h"
 #include "Scripts/ScriptTokenStream.h"
 
@@ -29,6 +31,18 @@ typedef TSharedPtr<class CScriptClassStub>		ScriptClassStubPtr_t;
  * @brief Shared pointer of CScriptFunctionStub
  */
 typedef TSharedPtr<class CScriptFunctionStub>	ScriptFunctionStubPtr_t;
+
+/**
+ * @ingroup WorldEd
+ * @brief Shared pointer of CScriptStructStub
+ */
+typedef TSharedPtr<class CScriptStructStub>		ScriptStructStubPtr_t;
+
+/**
+ * @ingroup WorldEd
+ * @brief Shared pointer of CScriptEnumStub
+ */
+typedef TSharedPtr<class CScriptEnumStub>		ScriptEnumStubPtr_t;
 
 /**
  * @ingroup WorldEd
@@ -220,6 +234,102 @@ private:
 
 /**
  * @ingroup WorldEd
+ * @brief Script enum stub
+ */
+class CScriptEnumStub : public CScriptBaseStub
+{
+public:
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InContext			Enum context
+	 * @param InEnumName		Enum name
+	 * @param InIsIntrinsic		Has LifeScript counter-part or not
+	 */
+	CScriptEnumStub( const ScriptFileContext& InContext, const std::wstring& InEnumName, bool InIsIntrinsic = false );
+
+	/**
+	 * @brief Has LifeScript counter-part or not
+	 * @return Return TRUE if the enum has LifeScript counter-part, otherwise FALSE
+	 */
+	FORCEINLINE bool IsIntrinsic() const
+	{
+		return bIntrinsic;
+	}
+
+	/**
+	 * @brief Set created enum
+	 * @param InCreatedEnum		Created CEnum
+	 */
+	FORCEINLINE void SetCreatedEnum( CEnum* InCreatedEnum )
+	{
+		createdEnum = InCreatedEnum;
+	}
+
+	/**
+	 * @brief Get created enum
+	 * @return Return pointer to created enum. If isn't created returns NULL
+	 */
+	FORCEINLINE CEnum* GetCreatedEnum() const
+	{
+		return createdEnum;
+	}
+
+private:
+	bool		bIntrinsic;		/**< Has no LifeScript counter-part */
+	CEnum*		createdEnum;		/**< Created enum for script environment */
+};
+
+/**
+ * @ingroup WorldEd
+ * @brief Script struct stub
+ */
+class CScriptStructStub : public CScriptBaseStub
+{
+public:
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InContext			Struct context
+	 * @param InStructName		Struct name
+	 * @param InIsIntrinsic		Has LifeScript counter-part or not
+	 */
+	CScriptStructStub( const ScriptFileContext& InContext, const std::wstring& InStructName, bool InIsIntrinsic = false );
+
+	/**
+	 * @brief Has LifeScript counter-part or not
+	 * @return Return TRUE if the struct has LifeScript counter-part, otherwise FALSE
+	 */
+	FORCEINLINE bool IsIntrinsic() const
+	{
+		return bIntrinsic;
+	}
+
+	/**
+	 * @brief Set created struct
+	 * @param InCreatedStruct	Created CStruct
+	 */
+	FORCEINLINE void SetCreatedStruct( CStruct* InCreatedStruct )
+	{
+		createdStruct = InCreatedStruct;
+	}
+
+	/**
+	 * @brief Get created struct
+	 * @return Return pointer to created struct. If isn't created returns NULL
+	 */
+	FORCEINLINE CStruct* GetCreatedStruct() const
+	{
+		return createdStruct;
+	}
+
+private:
+	bool		bIntrinsic;			/**< Has no LifeScript counter-part */
+	CStruct*	createdStruct;		/**< Created struct for script environment */
+};
+
+/**
+ * @ingroup WorldEd
  * @brief Script class stub
  */
 class CScriptClassStub : public CScriptBaseStub
@@ -280,6 +390,24 @@ public:
 	FORCEINLINE const std::wstring& GetSuperClassName() const
 	{
 		return superClassName;
+	}
+
+	/**
+	 * @brief Add class flag
+	 * @param InNewFlag		New flag (see EClassFlags)
+	 */
+	FORCEINLINE void AddFlag( uint32 InNewFlag )
+	{
+		flags |= InNewFlag;
+	}
+
+	/**
+	 * @brief Remove class flag
+	 * @param InFlag	Flag to remove (see EClassFlags)
+	 */
+	FORCEINLINE void RemoveFlag( uint32 InFlag )
+	{
+		flags &= ~InFlag;
 	}
 
 	/**
@@ -464,6 +592,50 @@ public:
 	}
 
 	/**
+	 * @brief Add a struct
+	 * @param InStructStub	Struct stub
+	 */
+	FORCEINLINE void AddStruct( const ScriptStructStubPtr_t& InStructStub )
+	{
+		structs.push_back( InStructStub );
+		structsMap.insert( std::make_pair( InStructStub->GetName(), InStructStub ) );
+	}
+
+	/**
+	 * @brief Find struct stub by name
+	 *
+	 * @param InStructName	Struct name
+	 * @return Return found struct stub. If not found returns NULL
+	 */
+	FORCEINLINE ScriptStructStubPtr_t FindStruct( const std::wstring& InStructName ) const
+	{
+		auto	it = structsMap.find( InStructName );
+		return it != structsMap.end() ? it->second : nullptr;
+	}
+
+	/**
+	 * @brief Add a enum
+	 * @param InEnumStub	Enum stub
+	 */
+	FORCEINLINE void AddEnum( const ScriptEnumStubPtr_t& InEnumStub )
+	{
+		enums.push_back( InEnumStub );
+		enumsMap.insert( std::make_pair( InEnumStub->GetName(), InEnumStub ) );
+	}
+
+	/**
+	 * @brief Find enum stub by name
+	 *
+	 * @param InEnumName	Enum name
+	 * @return Return found enum stub. If not found returns NULL
+	 */
+	FORCEINLINE ScriptEnumStubPtr_t FindEnum( const std::wstring& InEnumName ) const
+	{
+		auto	it = enumsMap.find( InEnumName );
+		return it != enumsMap.end() ? it->second : nullptr;
+	}
+
+	/**
 	 * @brief Get array of all classes
 	 * @return Return array of all classes
 	 */
@@ -481,6 +653,42 @@ public:
 		return classes;
 	}
 
+	/**
+	 * @brief Get array of all structs
+	 * @return Return array of all structs
+	 */
+	FORCEINLINE const std::vector<ScriptStructStubPtr_t>& GetStructs() const
+	{
+		return structs;
+	}
+
+	/**
+	 * @brief Get array of all structs
+	 * @return Return array of all structs
+	 */
+	FORCEINLINE std::vector<ScriptStructStubPtr_t>& GetStructs()
+	{
+		return structs;
+	}
+
+	/**
+	 * @brief Get array of all enums
+	 * @return Return array of all enums
+	 */
+	FORCEINLINE const std::vector<ScriptEnumStubPtr_t>& GetEnums() const
+	{
+		return enums;
+	}
+
+	/**
+	 * @brief Get array of all enums
+	 * @return Return array of all enums
+	 */
+	FORCEINLINE std::vector<ScriptEnumStubPtr_t>& GetEnums()
+	{
+		return enums;
+	}
+
 private:
 	/**
 	 * @brief Constructor of copy
@@ -488,8 +696,12 @@ private:
 	 */
 	CScriptSystemStub( const CScriptSystemStub& InOther );
 
-	std::vector<ScriptClassStubPtr_t>							classes;	/**< Top level classes */
-	std::unordered_map<std::wstring, ScriptClassStubPtr_t>		classesMap;	/**< Top level classes for find by name */
+	std::vector<ScriptClassStubPtr_t>							classes;	/**< Classes */
+	std::unordered_map<std::wstring, ScriptClassStubPtr_t>		classesMap;	/**< Classes for find by name */
+	std::vector<ScriptStructStubPtr_t>							structs;	/**< Structs */
+	std::unordered_map<std::wstring, ScriptStructStubPtr_t>		structsMap;	/**< Structs for find by name */
+	std::vector<ScriptEnumStubPtr_t>							enums;		/**< Enums */
+	std::unordered_map<std::wstring, ScriptEnumStubPtr_t>		enumsMap;	/**< Enums for find by name */
 };
 
 #endif // !SCRIPTFIELDSTUBS_H

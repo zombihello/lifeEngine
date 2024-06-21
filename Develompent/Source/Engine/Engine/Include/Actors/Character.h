@@ -20,7 +20,7 @@
   */
 class ACharacter : public AActor
 {
-	DECLARE_CLASS( ACharacter, AActor, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( ACharacter, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

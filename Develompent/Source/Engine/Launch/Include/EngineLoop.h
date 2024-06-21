@@ -10,6 +10,7 @@
 #define ENGINELOOP_H
 
 #include "Misc/Types.h"
+#include "System/Config.h"
 
 /**
  * @ingroup Launch
@@ -70,6 +71,15 @@ private:
 	 * @brief Load script packages
 	 */
 	void LoadScriptPackages();
+
+	/**
+	 * @brief Load script packages for specific config group
+	 * 
+	 * @param InType	Config type
+	 * @param InGroup	Name of group in config
+	 * @param InName	Name of value in config group
+	 */
+	void LoadScriptPackages( EConfigType InType, const std::wstring& InGroup, const std::wstring& InName );
 
 	bool				isInitialize;		/**< Is initialized engine */
 	bool				bIsFocus;			/**< Is focus on window */

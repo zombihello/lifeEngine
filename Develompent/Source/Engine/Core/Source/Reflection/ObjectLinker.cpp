@@ -64,10 +64,10 @@ static std::unordered_map<const CObject*, LinkerIndexPair>		s_LinkerMap;
 
 /*
 ==================
-CObject::CleanupLinkerMap
+CObject::StaticCleanupLinkerMap
 ==================
 */
-void CObject::CleanupLinkerMap()
+void CObject::StaticCleanupLinkerMap()
 {
 	s_LinkerMap.clear();
 }

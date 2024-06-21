@@ -305,6 +305,7 @@
 
 class
     : class_header class_body                                               { g_FileParser->EndDefinition( g_FileContext->GetCurrentTokenLine(), $<context>1, $<context>2 ); g_FileParser->PopContext(); }
+    | /* empty */
     ;
 
 class_header

@@ -33,7 +33,7 @@ DECLARE_MULTICAST_DELEGATE( COnActorDestroyed, class AActor* );
  */
 class AActor : public CObject
 {
-	DECLARE_CLASS( AActor, CObject, CLASS_HasComponents, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( AActor, CObject, CLASS_HasComponents, 0, TEXT( "Engine" ) )
 
 public:
 	friend struct MarkActorIsBeingDestroyed;

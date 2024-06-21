@@ -20,7 +20,7 @@
   */
 class AELPlayerCharacter : public ACharacter
 {
-	DECLARE_CLASS( AELPlayerCharacter, ACharacter, 0, 0, TEXT( "EleotGame" ) )
+	DECLARE_CLASS_INTRINSIC( AELPlayerCharacter, ACharacter, 0, 0, TEXT( "EleotGame" ) )
 
 public:
 	/**

@@ -46,11 +46,28 @@ private:
 	 * @brief Export native class
 	 * 
 	 * @param InClassStub					Class stub
+	 * @param OutRegistrarClass				Output code to register the class in the system
 	 * @param OutExportedClass				Output exported class into C++ code
 	 * @param OutNativeFuncsTable			Output table with all native functions in the class
 	 * @param OutRegisterNativeFuncsTable	Output code to register native functions in the system
 	 */
-	void ExportClass( const ScriptClassStubPtr_t& InClassStub, std::wstring& OutExportedClass, std::wstring& OutNativeFuncsTable, std::wstring& OutRegisterNativeFuncsTable );
+	void ExportClass( const ScriptClassStubPtr_t& InClassStub, std::wstring& OutRegistrarClass, std::wstring& OutExportedClass, std::wstring& OutNativeFuncsTable, std::wstring& OutRegisterNativeFuncsTable );
+
+	/**
+	 * @brief Export native struct
+	 *
+	 * @param InStructStub			Struct stub
+	 * @param OutRegistrarStruct	Output code to register the struct in the system
+	 */
+	void ExportStruct( const ScriptStructStubPtr_t& InStructStub, std::wstring& OutRegistrarStruct );
+
+	/**
+	 * @brief Export native enum
+	 *
+	 * @param InEnumStub			Enum stub
+	 * @param OutRegistrarEnum		Output code to register the enum in the system
+	 */
+	void ExportEnum( const ScriptEnumStubPtr_t& InEnumStub, std::wstring& OutRegistrarEnum );
 
 	/**
 	 * @brief Save C++ header to file
@@ -94,6 +111,39 @@ private:
 	 * @return Return a string with native functions
 	 */
 	std::wstring GenerateNativeFunctions( const ScriptClassStubPtr_t& InClassStub, std::wstring& OutNativeFuncsTable, std::wstring& OutRegisterNativeFuncsTable );
+
+	/**
+	 * @brief Generate code to register a class in the system
+	 * 
+	 * @param InClassStub		Class stub
+	 * @return Return a string with code to register a class in the system
+	 */
+	FORCEINLINE std::wstring GenerateRegistrarClass( const ScriptClassStubPtr_t& InClassStub )
+	{
+		return L_Sprintf( TEXT( "\tCObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&%s::StaticClass );" ), InClassStub->GetName().c_str() );
+	}
+
+	/**
+	 * @brief Generate code to register a struct in the system
+	 *
+	 * @param InStructStub		Struct stub
+	 * @return Return a string with code to register a struct in the system
+	 */
+	FORCEINLINE std::wstring GenerateRegistrarStruct( const ScriptStructStubPtr_t& InStructStub )
+	{
+		return L_Sprintf( TEXT( "\tCObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&%s::StaticStruct );" ), InStructStub->GetName().c_str() );
+	}
+
+	/**
+	 * @brief Generate code to register a enum in the system
+	 *
+	 * @param InEnumStub		Enum stub
+	 * @return Return a string with code to register a enum in the system
+	 */
+	FORCEINLINE std::wstring GenerateRegistrarEnum( const ScriptEnumStubPtr_t& InEnumStub )
+	{
+		return L_Sprintf( TEXT( "\tCObject::StaticAddToAutoInitializeRegistrants( ( CObject* (*)() )&Enum::%s::StaticEnum );" ), InEnumStub->GetName().c_str() );
+	}
 
 	bool							bNativeClassesChanged;	/**< Is have been changed native classes */
 	std::wstring					includeDir;				/**< Directory with includes where will be saved new headers */

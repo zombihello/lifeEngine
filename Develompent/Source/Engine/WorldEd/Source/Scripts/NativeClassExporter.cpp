@@ -3,6 +3,17 @@
 #include "System/BaseFileSystem.h"
 #include "Scripts/NativeClassExporter.h"
 
+/**
+ * @ingroup WorldEd
+ * @brief Native group of stubs
+ */
+struct NativeGroupStubs
+{
+	std::vector<ScriptClassStubPtr_t>		classes;	/**< Native classes */
+	std::vector<ScriptStructStubPtr_t>		structs;	/**< Native structs */
+	std::vector<ScriptEnumStubPtr_t>		enums;		/**< Native enums */
+};
+
 /*
 ==================
 CNativeClassExporter::CNativeClassExporter
@@ -23,63 +34,103 @@ CNativeClassExporter::ExportClasses
 void CNativeClassExporter::ExportClasses()
 {
 	// Grouping native classes by native groups
-	std::unordered_map<std::wstring, std::vector<ScriptClassStubPtr_t>>		nativeGroups;
+	std::unordered_map<std::wstring, NativeGroupStubs>		nativeGroups;
 	{
+		// Grab all native classes
 		const std::vector<ScriptClassStubPtr_t>&	classes = stubs.GetClasses();
 		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
 		{
 			// We add into map only native class
-			const ScriptClassStubPtr_t& theClass = classes[index];
+			const ScriptClassStubPtr_t&		theClass = classes[index];
 			if ( theClass->HasAnyFlags( CLASS_Native ) )
 			{
 				// If the class is native but don't have specified group then we add it into main group
 				const std::wstring&		nativeGroup = theClass->GetNativeClassGroup();
 				if ( nativeGroup.empty() )
 				{
-					nativeGroups[packageName].push_back( theClass );
+					nativeGroups[packageName].classes.push_back( theClass );
 				}
 				// Otherwise we add into specified group
 				else
 				{
-					nativeGroups[packageName + nativeGroup].push_back( theClass );
+					nativeGroups[packageName + nativeGroup].classes.push_back( theClass );
 				}
 			}
 		}
+
+		// Grab all native structs
+		// NOTE yehor.pohuliaka - We use it only for generate registrants, because currently we not support structs in LifeScript
+		nativeGroups[packageName].structs = stubs.GetStructs();
+
+		// Grab all native enums
+		// NOTE yehor.pohuliaka - We use it only for generate registrants, because currently we not support enums in LifeScript
+		nativeGroups[packageName].enums = stubs.GetEnums();
 	}
 
 	// Export classes for each group
 	for ( auto it = nativeGroups.begin(), itEnd = nativeGroups.end(); it != itEnd; ++it )
 	{
-		bool										bNeedPlaceOnNewLine = false;
 		std::wstring								nativeClasses;
 		std::wstring								nativeFuncsTables;
 		std::wstring								registerNativeFuncsTables;
-		const std::vector<ScriptClassStubPtr_t>&	classes = it->second;
-		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
-		{
-			// Export a class into C++
+		std::wstring								registerNativeTypes;
+		const NativeGroupStubs&						nativeGroupStubs = it->second;
+
+		// Export classes into C++
+		for ( uint32 index = 0, count = nativeGroupStubs.classes.size(); index < count; ++index )
+		{			
 			std::wstring					nativeClass;
 			std::wstring					nativeFuncsTable;
 			std::wstring					registerNativeFuncsTable;
-			ExportClass( classes[index], nativeClass, nativeFuncsTable, registerNativeFuncsTable );
+			std::wstring					registerNativeClass;
+			ExportClass( nativeGroupStubs.classes[index], registerNativeClass, nativeClass, nativeFuncsTable, registerNativeFuncsTable );
 
 			// If generated code is valid we add it to our header
+			if ( !registerNativeClass.empty() )
+			{
+				registerNativeTypes += L_Sprintf( TEXT( "%s%s" ), !registerNativeTypes.empty() ? TEXT( "\n" ) : TEXT( "" ), registerNativeClass.c_str() );
+			}
+
 			if ( !nativeClass.empty() )
 			{
-				nativeClasses += L_Sprintf( TEXT( "%s%s" ), bNeedPlaceOnNewLine ? TEXT( "\n\n" ) : TEXT( "" ), nativeClass.c_str() );
+				nativeClasses += L_Sprintf( TEXT( "%s%s" ), !nativeClasses.empty() ? TEXT( "\n\n" ) : TEXT( "" ), nativeClass.c_str() );
 			}
 
 			if ( !nativeFuncsTable.empty() )
 			{
-				nativeFuncsTables += L_Sprintf( TEXT( "%s%s" ), bNeedPlaceOnNewLine ? TEXT( "\n" ) : TEXT( "" ), nativeFuncsTable.c_str() );
+				nativeFuncsTables += L_Sprintf( TEXT( "%s%s" ), !nativeFuncsTables.empty() ? TEXT( "\n" ) : TEXT( "" ), nativeFuncsTable.c_str() );
 			}
 
 			if ( !registerNativeFuncsTable.empty() )
 			{
-				registerNativeFuncsTables += L_Sprintf( TEXT( "%s%s" ), bNeedPlaceOnNewLine ? TEXT( "\n" ) : TEXT( "" ), registerNativeFuncsTable.c_str() );
+				registerNativeFuncsTables += L_Sprintf( TEXT( "%s%s" ), !registerNativeFuncsTables.empty() ? TEXT( "\n" ) : TEXT( "" ), registerNativeFuncsTable.c_str() );
 			}
+		}
 
-			bNeedPlaceOnNewLine = true;
+		// Export structs into C++
+		for ( uint32 index = 0, count = nativeGroupStubs.structs.size(); index < count; ++index )
+		{
+			std::wstring	registerNativeStruct;
+			ExportStruct( nativeGroupStubs.structs[index], registerNativeStruct );
+
+			// If generated code is valid we add it to our header
+			if ( !registerNativeStruct.empty() )
+			{
+				registerNativeTypes += L_Sprintf( TEXT( "%s%s" ), !registerNativeTypes.empty() ? TEXT( "\n" ) : TEXT( "" ), registerNativeStruct.c_str() );
+			}
+		}
+
+		// Export enums into C++
+		for ( uint32 index = 0, count = nativeGroupStubs.enums.size(); index < count; ++index )
+		{
+			std::wstring	registerNativeEnum;
+			ExportEnum( nativeGroupStubs.enums[index], registerNativeEnum );
+
+			// If generated code is valid we add it to our header
+			if ( !registerNativeEnum.empty() )
+			{
+				registerNativeTypes += L_Sprintf( TEXT( "%s%s" ), !registerNativeTypes.empty() ? TEXT( "\n" ) : TEXT( "" ), registerNativeEnum.c_str() );
+			}
 		}
 
 		const std::wstring&	nativeGroup				= it->first;
@@ -103,21 +154,17 @@ void CNativeClassExporter::ExportClasses()
 
 		// Generate body of registrants function
 		std::wstring		bodyRegistrantsFunction;
-		if ( !nativeFuncsTables.empty() )
+		if ( !nativeFuncsTables.empty() || !registerNativeTypes.empty() || !registerNativeFuncsTables.empty() )
 		{
-			Assert( !registerNativeFuncsTables.empty() );
 			bodyRegistrantsFunction = L_Sprintf( TEXT( "// BEGIN REGISTRANTS\n" )
 												 TEXT( "#ifdef WITH_REGISTRANTS\n" )
 												 TEXT( "#ifndef INCLUDED_REGISTRANTS_%s\n" )
 												 TEXT( "#define INCLUDED_REGISTRANTS_%s\n" )
 												 TEXT( "static void InitRegistrants_%s()\n" )
 												 TEXT( "{\n" )
-												 TEXT( "\t// BEGIN TABLE OF NATIVE FUNCTIONS\n" )
+												 TEXT( "%s%s" )
+												 TEXT( "%s%s" )
 												 TEXT( "%s\n" )
-												 TEXT( "\t// END TABLE OF NATIVE FUNCTIONS\n\n" )
-												 TEXT( "\t// BEGIN REGISTER NATIVE FUNCTIONS\n" )
-												 TEXT( "%s\n" )
-												 TEXT( "\t// END REGISTER NATIVE FUNCTIONS\n" )
 												 TEXT( "}\n" )
 												 TEXT( "#endif // !INCLUDED_REGISTRANTS_%s\n" )
 												 TEXT( "#endif // WITH_REGISTRANTS\n" )
@@ -125,8 +172,9 @@ void CNativeClassExporter::ExportClasses()
 												 nativeGroupUpperCase.c_str(), 
 												 nativeGroupUpperCase.c_str(), 
 												 nativeGroup.c_str(), 
-												 nativeFuncsTables.c_str(), 
-												 registerNativeFuncsTables.c_str(), 
+												 nativeFuncsTables.c_str(), ( !nativeFuncsTables.empty() && !registerNativeTypes.empty() ) ? TEXT( "\n\n" ) : TEXT( "" ),
+												 registerNativeTypes.c_str(), ( !registerNativeTypes.empty() && !registerNativeFuncsTables.empty() ) ? TEXT( "\n\n" ) : TEXT( "" ),
+												 registerNativeFuncsTables.c_str(),
 												 nativeGroupUpperCase.c_str() );
 		}
 
@@ -152,28 +200,29 @@ void CNativeClassExporter::ExportClasses()
 CNativeClassExporter::ExportClass
 ==================
 */
-void CNativeClassExporter::ExportClass( const ScriptClassStubPtr_t& InClassStub, std::wstring& OutExportedClass, std::wstring& OutNativeFuncsTable, std::wstring& OutRegisterNativeFuncsTable )
+void CNativeClassExporter::ExportClass( const ScriptClassStubPtr_t& InClassStub, std::wstring& OutRegistrarClass, std::wstring& OutExportedClass, std::wstring& OutNativeFuncsTable, std::wstring& OutRegisterNativeFuncsTable )
 {
 	const std::wstring&		className		= InClassStub->GetName();
 	const std::wstring&		superClassName	= InClassStub->GetSuperClassName();
-	CClass*					theClass		= InClassStub->GetCreatedClass();
-	Assert( theClass );
 
-	// Do nothing if class has already been exported
-	if ( theClass->HasAnyClassFlags( CLASS_Exported ) )
+	// Generate registrar for the class
+	OutRegistrarClass = GenerateRegistrarClass( InClassStub );
+
+	// Do nothing if class has already been exported or it is intrinsic
+	if ( InClassStub->HasAnyFlags( CLASS_Exported | CLASS_Intrinsic ) )
 	{
 		return;
 	}
 
 	// If the class has CLASS_NoExport we generate only registers of native functions
-	if ( theClass->HasAnyClassFlags( CLASS_NoExport ) )
+	if ( InClassStub->HasAnyFlags( CLASS_NoExport ) )
 	{
 		GenerateNativeFunctions( InClassStub, OutNativeFuncsTable, OutRegisterNativeFuncsTable );
 		return;
 	}
 
 	// Mark class as exported
-	theClass->AddClassFlag( CLASS_Exported );
+	InClassStub->AddFlag( CLASS_Exported );
 
 	// Generate C++ body for header
 	std::wstring			cppTextBuffer	= GenerateCppTextBody( InClassStub );
@@ -206,6 +255,32 @@ void CNativeClassExporter::ExportClass( const ScriptClassStubPtr_t& InClassStub,
 								  withinClassMacro.c_str(), 
 								  cppTextBuffer.c_str(), 
 								  nativeFunctions.c_str() );
+}
+
+/*
+==================
+CNativeClassExporter::ExportStruct
+==================
+*/
+void CNativeClassExporter::ExportStruct( const ScriptStructStubPtr_t& InStructStub, std::wstring& OutRegistrarStruct )
+{
+	AssertMsg( InStructStub->IsIntrinsic(), TEXT( "Currently LifeScript don't support structs" ) );
+
+	// Generate registrar for the struct
+	OutRegistrarStruct = GenerateRegistrarStruct( InStructStub );
+}
+
+/*
+==================
+CNativeClassExporter::ExportClass
+==================
+*/
+void CNativeClassExporter::ExportEnum( const ScriptEnumStubPtr_t& InEnumStub, std::wstring& OutRegistrarEnum )
+{
+	AssertMsg( InEnumStub->IsIntrinsic(), TEXT( "Currently LifeScript don't support enums" ) );
+
+	// Generate registrar for the enum
+	OutRegistrarEnum = GenerateRegistrarEnum( InEnumStub );
 }
 
 /*

@@ -35,6 +35,11 @@ public:
 
 private:
 	/**
+	 * @brief Add to the system stubs intrinsic types
+	 */
+	void AddIntrinsicTypes();
+
+	/**
 	 * @brief Create type definitions
 	 * @return Return TRUE if all types was successfully created, otherwise FALSE
 	 */

@@ -63,7 +63,7 @@ enum EIconType
  */
 class CEditorEngine : public CBaseEngine
 {
-	DECLARE_CLASS( CEditorEngine, CBaseEngine, 0, 0, TEXT( "WorldEd" ) )
+	DECLARE_CLASS_INTRINSIC( CEditorEngine, CBaseEngine, 0, 0, TEXT( "WorldEd" ) )
 
 public:
 	/**

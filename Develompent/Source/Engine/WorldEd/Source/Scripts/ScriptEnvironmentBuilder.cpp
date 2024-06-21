@@ -1,5 +1,6 @@
 #include "Logger/LoggerMacros.h"
 #include "Reflection/Enum.h"
+#include "Reflection/Struct.h"
 #include "Reflection/ObjectIterator.h"
 #include "Reflection/ObjectGlobals.h"
 #include "Reflection/Object.h"
@@ -51,6 +52,9 @@ CScriptEnvironmentBuilder::CreateTypes
 */
 bool CScriptEnvironmentBuilder::CreateTypes()
 {
+	// Add intrinsic types into the system stubs (e.g: CClass, CStruct, CIntProperty, etc)
+	AddIntrinsicTypes();
+
 	// Create hierarchy order
 	bool	bNoErrors = CreateHierarchyOrder();
 	
@@ -59,12 +63,63 @@ bool CScriptEnvironmentBuilder::CreateTypes()
 		const std::vector<ScriptClassStubPtr_t>&	classes = stubs.GetClasses();
 		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
 		{
-			bNoErrors &= CreateClass( *classes[index].Get() );
+			// Create class if the one isn't intrinsic
+			ScriptClassStubPtr_t					theClass = classes[index];
+			if ( !theClass->HasAnyFlags( CLASS_Intrinsic ) )
+			{
+				bNoErrors &= CreateClass( *classes[index].Get() );
+			}
 		}
 	}
 
 	// Done
 	return bNoErrors;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::AddIntrinsicTypes
+==================
+*/
+void CScriptEnvironmentBuilder::AddIntrinsicTypes()
+{
+	// We add all intrinsic types that not exists in the system stubs
+	// Thereby CNativeClassExporter will be able to generate code for register all types in the CObject system
+	for ( TObjectIterator<CField> it; it; ++it )
+	{
+		CField*		field = *it;
+		if ( IsIn( field, scriptPackage ) )
+		{		
+			std::wstring q = field->GetName();
+			CClass*		fieldClass = field->GetClass();
+			if ( fieldClass == CEnum::StaticClass() && !stubs.FindEnum( field->GetName() ) )
+			{
+				// Add intrinsic enum if in the system isn't
+				ScriptEnumStubPtr_t		enumStub = MakeSharedPtr<CScriptEnumStub>( ScriptFileContext(), field->GetName(), true );
+				enumStub->SetCreatedEnum( ( CEnum* )field );
+				stubs.AddEnum( enumStub );
+			}				
+			else if ( fieldClass == CStruct::StaticClass() && !stubs.FindStruct( field->GetName() ) )
+			{
+				// Add intrinsic struct if in the system isn't
+				ScriptStructStubPtr_t		structStub = MakeSharedPtr<CScriptStructStub>( ScriptFileContext(), field->GetName(), true );
+				structStub->SetCreatedStruct( ( CStruct* )field );
+				stubs.AddStruct( MakeSharedPtr<CScriptStructStub>( ScriptFileContext(), field->GetName(), true ) );
+			}
+			else if ( fieldClass == CClass::StaticClass() && ( ( CClass* )field )->HasAnyClassFlags( CLASS_Intrinsic ) && !stubs.FindClass( field->GetName() ) )
+			{
+				// Add intrinsic class if in the system isn't
+				CClass*						superClass	= ( ( CClass* )field )->GetSuperClass();
+				ScriptClassStubPtr_t		classStub	= MakeSharedPtr<CScriptClassStub>( ScriptFileContext(), field->GetName(), CLASS_Native | CLASS_Intrinsic );
+				classStub->SetCreatedClass( ( CClass* )field );
+				if ( superClass )
+				{
+					classStub->SetSuperClass( ScriptFileContext(), superClass->GetName() );
+				}
+				stubs.AddClass( classStub );
+			}
+		}
+	}
 }
 
 /*
@@ -89,6 +144,7 @@ bool CScriptEnvironmentBuilder::CreateHierarchyOrder()
 		const ScriptClassStubPtr_t&		theClass = classes[index];
 		if ( !unprocessedClasses.insert( std::make_pair( theClass->GetName(), theClass ) ).second )
 		{
+			Errorf( TEXT( "Failed to insert a class into map to sort by hierarchy order. Check maybe in the stubs are repetitions\n" ) );
 			return false;
 		}
 	}
@@ -150,7 +206,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	{
 		// If we find existing CClass, CStruct or CEnum with same name in script package then it is compile error
 		theClass = FindObjectFast<CClass>( scriptPackage, className.c_str(), true );
-		if ( ( theClass && theClass->HasAnyClassFlags( CLASS_Parsed | CLASS_Intrinsic ) ) || FindObjectFast<CStruct>( scriptPackage, className.c_str(), true ) || FindObjectFast<CEnum>( scriptPackage, className.c_str(), true ) )
+		if ( ( theClass && InClassStub.HasAnyFlags( CLASS_Parsed | CLASS_Intrinsic ) ) || FindObjectFast<CStruct>( scriptPackage, className.c_str(), true ) || FindObjectFast<CEnum>( scriptPackage, className.c_str(), true ) )
 		{
 			Errorf( TEXT( "%s: Type '%s' is already defined\n" ), context.ToString().c_str(), className.c_str() );
 			return false;
@@ -266,7 +322,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	}
 
 	// Update data in the class
-	theClass->SetClassFlags( InClassStub.GetFlags() );
+	theClass->SetClassFlags( InClassStub.GetFlags() & ~( CLASS_MASK_CompilerTransientFlags ) );
 	theClass->SetPropertiesSize( propertiesSize );
 	theClass->SetMinAlignment( minAlignment );
 	theClass->SetSuperClass( superClass );
@@ -279,7 +335,7 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	// Remove 'OBJECT_Transient' flag so that native classes can be stored in a package
 	// and mark the one as parsed
 	theClass->RemoveObjectFlag( OBJECT_Transient );
-	theClass->AddClassFlag( CLASS_Parsed );
+	InClassStub.AddFlag( CLASS_Parsed );
 	
 	// Class created
 	return true;
@@ -358,7 +414,6 @@ bool CScriptEnvironmentBuilder::CreateFunction( CScriptClassStub& InClassStub, C
 	}
 
 	// If function is native but the class isn't then this is error
-	//if ( !InClassStub.IsNative() && InFunctionStub.IsNative() )
 	if ( !InClassStub.HasAnyFlags( CLASS_Native ) && InFunctionStub.HasAnyFlags( FUNC_Native ) )
 	{
 		Errorf( TEXT( "%s: Native function '%s' can be only in a native class\n" ), context.ToString().c_str(), functionName.c_str() );

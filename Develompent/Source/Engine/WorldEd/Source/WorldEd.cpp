@@ -11,9 +11,17 @@
 #include "Misc/LaunchGlobals.h"
 #include "Misc/WorldEdGlobals.h"
 #include "Misc/Misc.h"
+#include "Commandlets/CookPackagesCommandlet.h"
+#include "Commandlets/FixupRedirectsCommandlet.h"
+#include "Commandlets/ScriptCompilerCommandlet.h"
 #include "RHI/BaseRHI.h"
 #include "EngineLoop.h"
 #include "WorldEd.h"
+
+// Native classes
+#define WITH_REGISTRANTS
+#include "Classes/WorldEdClasses.h"
+#undef WITH_REGISTRANTS
 
 EditorDelegates::COnAssetsCanDelete			EditorDelegates::onAssetsCanDelete;
 EditorDelegates::COnAssetsDeleted			EditorDelegates::onAssetsDeleted;
@@ -44,4 +52,15 @@ std::wstring Sys_GetWorldEdName()
 #endif // PLATFORM_64BIT || PLATFORM_32BIT
 
 	return L_Sprintf( TEXT( "WorldEd for %s (%s-bit, %s)" ), g_GameName.c_str(), platformBitsString, g_RHI->GetRHIName() );
+}
+
+/*
+==================
+InitRegistrantsModule_WorldEd
+Register all native classes in the system
+==================
+*/
+void InitRegistrantsModule_WorldEd()
+{
+	InitRegistrants_WorldEd();
 }

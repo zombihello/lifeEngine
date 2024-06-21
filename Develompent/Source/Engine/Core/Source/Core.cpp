@@ -8,6 +8,11 @@
 #include "System/Package.h"
 #include "Misc/TableOfContents.h"
 #include "Misc/CommandLine.h"
+#include "Reflection/Enum.h"
+#include "Reflection/Function.h"
+#include "Reflection/ObjectPackage.h"
+#include "Reflection/Property.h"
+#include "Reflection/ObjectRedirector.h"
 
 // Native classes
 #define WITH_REGISTRANTS

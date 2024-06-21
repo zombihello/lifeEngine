@@ -17,7 +17,7 @@
   */
 class CCookPackagesCommandlet : public CBaseCommandlet
 {
-	DECLARE_CLASS( CCookPackagesCommandlet, CBaseCommandlet, CLASS_Transient, 0, TEXT( "WorldEd" ) )
+	DECLARE_CLASS_INTRINSIC( CCookPackagesCommandlet, CBaseCommandlet, CLASS_Intrinsic | CLASS_Transient, 0, TEXT( "WorldEd" ) )
 
 public:
 	/**

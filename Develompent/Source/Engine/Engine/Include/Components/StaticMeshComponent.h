@@ -20,7 +20,7 @@
   */
 class CStaticMeshComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( CStaticMeshComponent, CPrimitiveComponent, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( CStaticMeshComponent, CPrimitiveComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

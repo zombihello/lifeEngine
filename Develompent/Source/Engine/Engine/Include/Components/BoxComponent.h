@@ -17,7 +17,7 @@
   */
 class CBoxComponent : public CShapeComponent
 {
-	DECLARE_CLASS( CBoxComponent, CShapeComponent, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( CBoxComponent, CShapeComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

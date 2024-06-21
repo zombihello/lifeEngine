@@ -28,7 +28,7 @@ void HandleObjectReference( std::vector<CObject*>& InOutObjectArray, CObject*& I
  */
 class CObject
 {
-    DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract | CLASS_NoExport, 0, TEXT( "Core" ) )
+    DECLARE_BASE_CLASS( CObject, CObject, CLASS_Abstract, 0, TEXT( "Core" ) )
 
 public:
     friend bool IsA( CObject* InObject, CClass* InClass );
@@ -115,7 +115,7 @@ public:
      * @brief Add function of static class initialize to auto registrants
      * @param InStaticInitializeFn      Static class initialize function
      */
-    static void AddToAutoInitializeRegistrants( CObject* ( *InStaticInitializeFn )() );
+    static void StaticAddToAutoInitializeRegistrants( CObject* ( *InStaticInitializeFn )() );
 
     /**
      * @brief Serialize object
@@ -459,7 +459,7 @@ public:
     /**
      * @brief Remove all map on exit. This is to prevent issues with the order of static destruction of singletons
      */
-    static void CleanupLinkerMap();
+    static void StaticCleanupLinkerMap();
 
     /**
      * @brief Has any object flags

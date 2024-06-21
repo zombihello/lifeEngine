@@ -66,6 +66,10 @@ bool CBaseCommandlet::ExecCommandlet( const CCommandLine& InCommandLine, bool* O
 		CObjectGC::Get().CollectGarbage( GARBAGE_COLLECTION_KEEPFLAGS );
 		return true;
 	}
+	else
+	{
+		Warnf( TEXT( "Commandlet with name '%s' not found\n" ), nameCommandlet.c_str() );
+	}
 
 	return false;
 }

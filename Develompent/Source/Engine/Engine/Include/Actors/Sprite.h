@@ -21,7 +21,7 @@
   */
 class ASprite : public AActor
 {
-    DECLARE_CLASS( ASprite, AActor, 0, 0, TEXT( "Engine" ) )
+    DECLARE_CLASS_INTRINSIC( ASprite, AActor, 0, 0, TEXT( "Engine" ) )
 
 public:
     /**

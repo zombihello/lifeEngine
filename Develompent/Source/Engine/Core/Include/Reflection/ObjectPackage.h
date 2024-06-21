@@ -32,7 +32,7 @@
  */
 class CObjectPackage : public CObject
 {
-	DECLARE_CLASS( CObjectPackage, CObject, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CObjectPackage, CObject, 0, 0, TEXT( "Core" ) )
 
 public:
 	/**

@@ -19,7 +19,7 @@
   */
 class CCameraComponent : public CSceneComponent
 {
-	DECLARE_CLASS( CCameraComponent, CSceneComponent, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( CCameraComponent, CSceneComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
     friend class CCameraManager;

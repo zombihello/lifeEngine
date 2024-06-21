@@ -19,7 +19,7 @@
   */
 class APointLight : public ALight
 {
-	DECLARE_CLASS( APointLight, ALight, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( APointLight, ALight, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

@@ -41,7 +41,7 @@ DECLARE_ENUM( ESpriteType, TEXT( "Engine" ) )
   */
 class CSpriteComponent : public CPrimitiveComponent
 {
-	DECLARE_CLASS( CSpriteComponent, CPrimitiveComponent, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( CSpriteComponent, CPrimitiveComponent, 0, 0, TEXT( "Engine" ) )
 
 public:
     /**

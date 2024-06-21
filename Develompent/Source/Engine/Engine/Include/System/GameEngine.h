@@ -19,7 +19,7 @@
  */
 class CGameEngine : public CBaseEngine
 {
-	DECLARE_CLASS( CGameEngine, CBaseEngine, 0, 0, TEXT( "Engine" ) )
+	DECLARE_CLASS_INTRINSIC( CGameEngine, CBaseEngine, 0, 0, TEXT( "Engine" ) )
 
 public:
 	/**

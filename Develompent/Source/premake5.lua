@@ -179,7 +179,8 @@ workspace( game )
         ----------- PROJECT SETTINGS --------
 
         defines				{
-            "GAMENAME=" .. "\"" .. game .. "\"",
+            "GAMENAME=" .. 0,
+			"GAMENAME_STRING=" .. "\"" .. game .. "\"",
             "ENGINE_2D=" .. tostring( is2DEngine and 1 or 0 ),
             "USE_THEORA_CODEC=1"
         }
