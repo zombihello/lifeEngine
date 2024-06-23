@@ -235,16 +235,14 @@
 /* Expect 0 shift/reduce conflicts */
 %expect 0
 
-/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFunctionParser.bison */
-/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFunctionParser.bison */
-/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFunctionParser.bison */
-/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFunctionParser.bison */
+/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFileParser.bison */
+/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFileParser.bison */
+/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFileParser.bison */
+/* THIS LIST SHOLD MATCH EXACTLY THE OTHER LIST IN THE ScriptFileParser.bison */
 
 /* Data tokens */
 %token TOKEN_IDENT
-
-/* Type names */
-%token TOKEN_VOID_TYPE
+%token TOKEN_INTEGER
 
 /* Keywords */
 %token TOKEN_CLASS
@@ -258,6 +256,8 @@
 %token TOKEN_WITHIN
 %token TOKEN_FUNCTION
 %token TOKEN_NOEXPORT
+%token TOKEN_VOID
+%token TOKEN_RETURN
 
 %%
 
@@ -266,7 +266,7 @@
 ////////////////////////////////
 
 function_code
-    : statement_list                                        { $<node>$ = new CScriptSyntaxNode_ListItem( yylval.context, $<node>1 ); g_FunctionParser->SetRootSyntaxNode( $<node>$ ); }
+    : statement_list                                        { $<node>$ = new CScriptSyntaxNode_Code( yylval.context, $<node>1 ); g_FunctionParser->SetRootSyntaxNode( $<node>$ ); }
     ;
 
 ////////////////////////////////
@@ -274,13 +274,14 @@ function_code
 ////////////////////////////////
 
 statement_list
-    : statement statement_list                              { $<node>$ = new CScriptSyntaxNode_ListItem( yylval.context, $<node>1 ); ( ( CScriptSyntaxNode_ListItem* )$<node>$ )->AddNode( $<node>2 ); }
+    : statement statement_list                              { $<node>$ = new CScriptSyntaxNode_Code( yylval.context, $<node>1 ); ( ( CScriptSyntaxNode_Code* )$<node>$ )->AddNode( $<node>2 ); }
     | /* empty */                                           { $<node>$ = new CScriptSyntaxNode_Nop( yylval.context ); }
     ;
 
 statement
     : empty_statement ';'                                   { $<node>$ = $<node>1; }
     | expression_statement ';'                              { $<node>$ = $<node>1; }
+    | jump_statement ';'                                    { $<node>$ = $<node>1; }
     ;
 
 empty_statement
@@ -289,6 +290,10 @@ empty_statement
 
 expression_statement
     : postfix_expression                                    { $<node>$ = $<node>1; }    
+    ;
+
+jump_statement
+    : TOKEN_RETURN                                          { $<node>$ = new CScriptSyntaxNode_Return( $<context>1 ); }
     ;
 
 ////////////////////////////////

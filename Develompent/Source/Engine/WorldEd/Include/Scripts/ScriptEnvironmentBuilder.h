@@ -89,6 +89,35 @@ private:
 	 */
 	bool BindSuperFunction( CScriptClassStub& InClassStub, CScriptFunctionStub& InFunctionStub );
 
+	/**
+	 * @brief Create properties
+	 * @return Return TRUE if all properties was successfully created, otherwise FALSE
+	 */
+	bool CreateProperties();
+
+	/**
+	 * @brief Create class properties
+	 * @param InClassStub		Class stub
+	 * @return Return TRUE if class properties was successfully created, otherwise FALSE
+	 */
+	bool CreateClassProperties( CScriptClassStub& InClassStub );
+
+	/**
+	 * @brief Create function properties
+	 * @param InFunctionStub	Function stub
+	 * @return Return TRUE if function properties was successfully created, otherwise FALSE
+	 */
+	bool CreateFunctionProperties( CScriptFunctionStub& InFunctionStub );
+
+	/**
+	 * @brief Check if function headers matches
+	 * 
+	 * @param InFunctionStub	Function stub
+	 * @param InSuperFunction	Super function
+	 * @return Return TRUE if two function headers matches, otherwise FALSE
+	 */
+	bool MatchFunctionHeader( const CScriptFunctionStub& InFunctionStub, CFunction* InSuperFunction );
+
 	CScriptSystemStub&	stubs;			/**< Stubs */
 	CObjectPackage*		scriptPackage;	/**< Script package */
 };

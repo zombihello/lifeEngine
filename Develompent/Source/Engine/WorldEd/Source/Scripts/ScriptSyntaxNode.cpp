@@ -1,6 +1,7 @@
 #include "Logger/LoggerMacros.h"
 #include "System/MemoryArchive.h"
 #include "Scripts/ScriptSyntaxNode.h"
+#include "Scripts/ScriptSyntaxVisitor.h"
 
 /*
 ==================
@@ -24,15 +25,12 @@ CScriptSyntaxNode_Base::~CScriptSyntaxNode_Base()
 
 /*
 ==================
-CScriptSyntaxNode_Nop::Print
+CScriptSyntaxNode_Nop::AcceptVisitor
 ==================
 */
-void CScriptSyntaxNode_Nop::Print( uint32 InPrintLevel /* = 0 */ )
+void CScriptSyntaxNode_Nop::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 {
-	// Show node info
-	std::wstring	trailingSpace;
-	GetTrailingSpace( InPrintLevel, trailingSpace );
-	Logf( TEXT( "%p(%4i):%s Nop\n" ), this, GetContext().line, trailingSpace.c_str());
+	InVisitor.VisitSyntaxNode_Nop( this );
 }
 
 /*
@@ -51,21 +49,21 @@ CScriptCodeBlock* CScriptSyntaxNode_Nop::GenerateCode( CScriptClassStub*& InCurr
 
 /*
 ==================
-CScriptSyntaxNode_ListItem::CScriptSyntaxNode_ListItem
+CScriptSyntaxNode_Code::CScriptSyntaxNode_Code
 ==================
 */
-CScriptSyntaxNode_ListItem::CScriptSyntaxNode_ListItem( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InListRoot /* = nullptr */ )
-	: CScriptSyntaxNode_Base( SSNT_ListItem, InContext )
+CScriptSyntaxNode_Code::CScriptSyntaxNode_Code( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InCodeRoot /* = nullptr */ )
+	: CScriptSyntaxNode_Base( SSNT_Code, InContext )
 {
-	MergeNode( InListRoot );
+	MergeNode( InCodeRoot );
 }
 
 /*
 ==================
-CScriptSyntaxNode_ListItem::~CScriptSyntaxNode_ListItem
+CScriptSyntaxNode_Code::~CScriptSyntaxNode_Code
 ==================
 */
-CScriptSyntaxNode_ListItem::~CScriptSyntaxNode_ListItem()
+CScriptSyntaxNode_Code::~CScriptSyntaxNode_Code()
 {
 	for ( uint32 index = 0, count = nodes.size(); index < count; ++index )
 	{
@@ -75,31 +73,23 @@ CScriptSyntaxNode_ListItem::~CScriptSyntaxNode_ListItem()
 
 /*
 ==================
-CScriptSyntaxNode_ListItem::Print
+CScriptSyntaxNode_Code::AcceptVisitor
 ==================
 */
-void CScriptSyntaxNode_ListItem::Print( uint32 InPrintLevel /* = 0 */ )
+void CScriptSyntaxNode_Code::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 {
-	// Show node info
-	std::wstring	trailingSpace;
-	GetTrailingSpace( InPrintLevel, trailingSpace );
-
-	Logf( TEXT( "%p(%4i):%s ListItem (Count: %i)\n" ), this, GetContext().line, trailingSpace.c_str(), nodes.size() );
-	for ( uint32 index = 0, count = nodes.size(); index < count; ++index )
-	{
-		nodes[index]->Print( InPrintLevel + 2 );
-	}
+	InVisitor.VisitSyntaxNode_Code( this );
 }
 
 /*
 ==================
-CScriptSyntaxNode_ListItem::GenerateCode
+CScriptSyntaxNode_Code::GenerateCode
 ==================
 */
-CScriptCodeBlock* CScriptSyntaxNode_ListItem::GenerateCode( CScriptClassStub*& InCurrentContext )
+CScriptCodeBlock* CScriptSyntaxNode_Code::GenerateCode( CScriptClassStub*& InCurrentContext )
 {
 	// For list node we generate code for each item and glue together
-	CScriptCodeBlock*	codeBlock = new CScriptCodeBlock( GetContext(), TEXT( "ListItem" ) );
+	CScriptCodeBlock*	codeBlock = new CScriptCodeBlock( GetContext(), TEXT( "Code" ) );
 	for ( uint32 index = 0, count = nodes.size(); index < count; ++index )
 	{
 		CScriptCodeBlock*		subCodeBlock = nodes[index]->GenerateCode( InCurrentContext );
@@ -111,17 +101,17 @@ CScriptCodeBlock* CScriptSyntaxNode_ListItem::GenerateCode( CScriptClassStub*& I
 
 /*
 ==================
-CScriptSyntaxNode_ListItem::MergeNode
+CScriptSyntaxNode_Code::MergeNode
 ==================
 */
-void CScriptSyntaxNode_ListItem::MergeNode( CScriptSyntaxNode_Base* InNode )
+void CScriptSyntaxNode_Code::MergeNode( CScriptSyntaxNode_Base* InNode )
 {
 	// If node is valid we add it to the list
 	if ( InNode )
 	{
-		if ( InNode->GetType() == SSNT_ListItem )
+		if ( InNode->GetType() == SSNT_Code )
 		{
-			CScriptSyntaxNode_ListItem*		listNode = ( CScriptSyntaxNode_ListItem* )InNode;
+			CScriptSyntaxNode_Code*			listNode = ( CScriptSyntaxNode_Code* )InNode;
 			nodes.reserve( listNode->GetNumNodes() );
 			for ( uint32 index = 0, count = listNode->GetNumNodes(); index < count; ++index )
 			{
@@ -142,15 +132,12 @@ void CScriptSyntaxNode_ListItem::MergeNode( CScriptSyntaxNode_Base* InNode )
 
 /*
 ==================
-CScriptSyntaxNode_Ident::Print
+CScriptSyntaxNode_Ident::AcceptVisitor
 ==================
 */
-void CScriptSyntaxNode_Ident::Print( uint32 InPrintLevel /* = 0 */ )
+void CScriptSyntaxNode_Ident::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 {
-	// Show node info
-	std::wstring	trailingSpace;
-	GetTrailingSpace( InPrintLevel, trailingSpace );
-	Logf( TEXT( "%p(%4i):%s Ident (Name: %s)\n" ), this, GetContext().line, trailingSpace.c_str(), ANSI_TO_TCHAR( name.c_str() ) );
+	InVisitor.VisitSyntaxNode_Ident( this );
 }
 
 /*
@@ -209,20 +196,12 @@ CScriptSyntaxNode_FuncCall::~CScriptSyntaxNode_FuncCall()
 
 /*
 ==================
-CScriptSyntaxNode_FuncCall::Print
+CScriptSyntaxNode_FuncCall::AcceptVisitor
 ==================
 */
-void CScriptSyntaxNode_FuncCall::Print( uint32 InPrintLevel /* = 0 */ )
+void CScriptSyntaxNode_FuncCall::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 {
-	// Show node info
-	std::wstring	trailingSpace;
-	GetTrailingSpace( InPrintLevel, trailingSpace );
-
-	Logf( TEXT( "%p(%4i):%s FuncCall\n" ), this, GetContext().line, trailingSpace.c_str() );
-	if ( nameNode )
-	{
-		nameNode->Print( InPrintLevel + 2 );
-	}
+	InVisitor.VisitSyntaxNode_FuncCall( this );
 }
 
 /*
@@ -242,5 +221,29 @@ CScriptCodeBlock* CScriptSyntaxNode_FuncCall::GenerateCode( CScriptClassStub*& I
 	CScriptCodeBlock::Glue( codeBlock, codeBlockFuncIdent );
 
 	// We are done
+	return codeBlock;
+}
+
+
+/*
+==================
+CScriptSyntaxNode_Return::AcceptVisitor
+==================
+*/
+void CScriptSyntaxNode_Return::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
+{
+	InVisitor.VisitSyntaxNode_Return( this );
+}
+
+/*
+==================
+CScriptSyntaxNode_Return::GenerateCode
+==================
+*/
+CScriptCodeBlock* CScriptSyntaxNode_Return::GenerateCode( CScriptClassStub*& InCurrentContext )
+{
+	// For OP_Nop operator we generate empty code
+	CScriptCodeBlock*	codeBlock = new CScriptCodeBlock( GetContext(), TEXT( "Return" ) );
+	codeBlock->GetBytecode().push_back( OP_Return );
 	return codeBlock;
 }

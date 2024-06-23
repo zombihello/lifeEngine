@@ -17,32 +17,40 @@
 #include "Reflection/Function.h"
 #include "Reflection/Struct.h"
 #include "Reflection/Enum.h"
+#include "Reflection/Property.h"
 #include "Scripts/ScriptFileContext.h"
 #include "Scripts/ScriptTokenStream.h"
+#include "Scripts/ScriptTypeDummy.h"
 
 /**
  * @ingroup WorldEd
  * @brief Shared pointer of CScriptClassStub
  */
-typedef TSharedPtr<class CScriptClassStub>		ScriptClassStubPtr_t;
+typedef TSharedPtr<class CScriptClassStub>				ScriptClassStubPtr_t;
 
 /**
  * @ingroup WorldEd
  * @brief Shared pointer of CScriptFunctionStub
  */
-typedef TSharedPtr<class CScriptFunctionStub>	ScriptFunctionStubPtr_t;
+typedef TSharedPtr<class CScriptFunctionStub>			ScriptFunctionStubPtr_t;
 
 /**
  * @ingroup WorldEd
  * @brief Shared pointer of CScriptStructStub
  */
-typedef TSharedPtr<class CScriptStructStub>		ScriptStructStubPtr_t;
+typedef TSharedPtr<class CScriptStructStub>				ScriptStructStubPtr_t;
 
 /**
  * @ingroup WorldEd
  * @brief Shared pointer of CScriptEnumStub
  */
-typedef TSharedPtr<class CScriptEnumStub>		ScriptEnumStubPtr_t;
+typedef TSharedPtr<class CScriptEnumStub>				ScriptEnumStubPtr_t;
+
+/**
+ * @ingroup WorldEd
+ * @brief Shared pointer of CScriptFunctionParamStub
+ */
+typedef TSharedPtr<class CScriptFunctionParamStub>		ScriptFunctionParamStubPtr_t;
 
 /**
  * @ingroup WorldEd
@@ -94,6 +102,65 @@ protected:
 
 /**
  * @ingroup WorldEd
+ * @brief Script function parameter stub
+ */
+class CScriptFunctionParamStub : public CScriptBaseStub
+{
+public:
+	/**
+	 * @brief Constructor
+	 *
+	 * @param InContext		Parameter context
+	 * @param InParamName	Parameter name
+	 * @param InTypeContext	Type context
+	 * @param InType		Type
+	 */
+	CScriptFunctionParamStub( const ScriptFileContext& InContext, const std::wstring& InParamName, const ScriptFileContext& InTypeContext, const CScriptTypeDummy& InType );
+
+	/**
+	 * @brief Get parameter type context
+	 * @return Return parameter type context
+	 */
+	FORCEINLINE const ScriptFileContext* GetTypeContext() const
+	{
+		return &typeContext;
+	}
+
+	/**
+	 * @brief Get parameter type
+	 * @return Return parameter type
+	 */
+	FORCEINLINE const CScriptTypeDummy& GetType() const
+	{
+		return type;
+	}
+
+	/**
+	 * @brief Set created function parameter
+	 * @param InCreatedFuncParam		Created function parameter for script environment
+	 */
+	FORCEINLINE void SetCreatedFuncParam( CProperty* InCreatedFuncParam )
+	{
+		createdFuncParam = InCreatedFuncParam;
+	}
+
+	/**
+	 * @brief Get created function parameter
+	 * @return Return pointer to created function parameter. If isn't created returns NULL
+	 */
+	FORCEINLINE CProperty* GetCreatedFuncParam() const
+	{
+		return createdFuncParam;
+	}
+
+private:
+	ScriptFileContext		typeContext;		/**< Parameter type context */
+	CScriptTypeDummy		type;				/**< Parameter type */
+	CProperty*				createdFuncParam;	/**< Created function parameter for script environment */
+};
+
+/**
+ * @ingroup WorldEd
  * @brief Script function stub
  */
 class CScriptFunctionStub : public CScriptBaseStub
@@ -105,10 +172,19 @@ public:
 	 * @param InContext					Function context
 	 * @param InFunctionName			Function name
 	 * @param InReturnTypeContext		Return type context
-	 * @param InReturnTypeName			Return type name
-	 * @param InFlags					Flags (look EFunctionFlags)
+	 * @param InReturnType				Return type
+	 * @param InFlags					Flags (see EFunctionFlags)
 	 */
-	CScriptFunctionStub( const ScriptFileContext& InContext, const std::wstring& InFunctionName, const ScriptFileContext& InReturnTypeContext, const std::wstring& InReturnTypeName, uint32 InFlags );
+	CScriptFunctionStub( const ScriptFileContext& InContext, const std::wstring& InFunctionName, const ScriptFileContext& InReturnTypeContext, const CScriptTypeDummy& InReturnType, uint32 InFlags );
+
+	/**
+	 * @brief Add a new function parameter
+	 * @param InFunctionParam	A new function parameter
+	 */
+	FORCEINLINE void AddParam( const ScriptFunctionParamStubPtr_t& InFunctionParam )
+	{
+		parameters.push_back( InFunctionParam );
+	}
 
 	/**
 	 * @brief Get function flags
@@ -160,12 +236,12 @@ public:
 	}
 
 	/**
-	 * @brief Get return type name
-	 * @return Return return type name
+	 * @brief Get return type
+	 * @return Return return type
 	 */
-	FORCEINLINE const std::wstring& GetReturnTypeName() const
+	FORCEINLINE const CScriptTypeDummy& GetReturnType() const
 	{
-		return returnTypeName;
+		return returnType;
 	}
 
 	/**
@@ -222,14 +298,24 @@ public:
 		return bHasBody;
 	}
 
+	/**
+	 * @brief Get array of function parameters
+	 * @return Return array of function parameters
+	 */
+	FORCEINLINE const std::vector<ScriptFunctionParamStubPtr_t>& GetParams() const
+	{
+		return parameters;
+	}
+
 private:
-	bool				bHasBody;				/**< Has function body */
-	uint32				flags;					/**< Function flags (see EFunctionFlags) */
-	ScriptScopeStub		scope;					/**< Scope of the function */
-	CScriptTokenStream	code;					/**< Function code */
-	ScriptFileContext	returnTypeContext;		/**< Return type context */
-	std::wstring		returnTypeName;			/**< Return type name */
-	CFunction*			createdFunction;		/**< Created function for script environment */
+	bool										bHasBody;				/**< Has function body */
+	uint32										flags;					/**< Function flags (see EFunctionFlags) */
+	ScriptScopeStub								scope;					/**< Scope of the function */
+	CScriptTokenStream							code;					/**< Function code */
+	ScriptFileContext							returnTypeContext;		/**< Return type context */
+	CScriptTypeDummy							returnType;				/**< Return type */
+	CFunction*									createdFunction;		/**< Created function for script environment */
+	std::vector<ScriptFunctionParamStubPtr_t>	parameters;				/**< Array of function parameters */
 };
 
 /**

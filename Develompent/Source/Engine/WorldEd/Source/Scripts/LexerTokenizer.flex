@@ -195,9 +195,6 @@
     /* UTF-8 Byte Order Mark */
 \xef\xbb\xbf									yyextra->currentContext.charOffset = 0;
 
-    /* Type names */
-"void"                                          EMIT_TOKEN( TOKEN_VOID_TYPE );
-
     /* Keywords */
 "class"                                         EMIT_TOKEN( TOKEN_CLASS );
 "extends"                                       EMIT_TOKEN( TOKEN_EXTENDS );
@@ -241,6 +238,8 @@
 "within"                                        EMIT_TOKEN( TOKEN_WITHIN );
 "function"                                      EMIT_TOKEN( TOKEN_FUNCTION );
 "noexport"                                      EMIT_TOKEN( TOKEN_NOEXPORT );
+"void"                                          EMIT_TOKEN( TOKEN_VOID );
+"return"                                        EMIT_TOKEN( TOKEN_RETURN );
 
     /* Syntax */
 "("												EMIT_TOKEN( '(' ); 
@@ -276,6 +275,12 @@
 
     /* Whitespace */
 [ \t\r]
+
+    /* Integer */
+[0-9]+											EMIT_TOKEN( TOKEN_INTEGER );
+
+	/* Hexadecimal Integer */
+"0"[Xx][0-9a-fA-F]+								EMIT_TOKEN( TOKEN_INTEGER );
 
     /* Comments */
 "//"[^\r\n]*									{ yyextra->StoreSequenceStart(); EMIT_COMMENT(); }

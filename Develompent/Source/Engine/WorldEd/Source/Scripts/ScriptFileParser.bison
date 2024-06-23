@@ -39,6 +39,7 @@
             , withinClass( InOther.withinClass )
             , nativeClassGroup( InOther.nativeClassGroup )
             , string( InOther.string )
+            , typeName( InOther.typeName )
             , context( InOther.context )
             , withinClassContext( InOther.withinClassContext )
             , nativeClassGroupContext( InOther.nativeClassGroupContext )
@@ -54,6 +55,7 @@
             , withinClass( std::move( InOther.withinClass ) )
             , nativeClassGroup( std::move( InOther.nativeClassGroup ) )
             , string( std::move( InOther.string ) )
+            , typeName( std::move( InOther.typeName ) )
             , context( std::move( InOther.context ) )
             , withinClassContext( std::move( InOther.withinClassContext ) )
             , nativeClassGroupContext( std::move( InOther.nativeClassGroupContext ) )
@@ -80,6 +82,7 @@
                 withinClass                 = InOther.withinClass;
                 nativeClassGroup            = InOther.nativeClassGroup;
                 string                      = InOther.string;
+                typeName                    = InOther.typeName;
 	    		context                     = InOther.context;
                 withinClassContext          = InOther.withinClassContext;
                 nativeClassGroupContext     = InOther.nativeClassGroupContext;
@@ -102,6 +105,7 @@
                 withinClass                 = std::move( InOther.withinClass );
                 nativeClassGroup            = std::move( InOther.nativeClassGroup );
                 string                      = std::move( InOther.string );
+                typeName                    = std::move( InOther.typeName );
 	    		context                     = std::move( InOther.context );
                 withinClassContext          = std::move( InOther.withinClassContext );
                 nativeClassGroupContext     = std::move( InOther.nativeClassGroupContext );
@@ -114,6 +118,7 @@
         std::string_view        withinClass;                /**< Within class name */
         std::string_view        nativeClassGroup;           /**< Native class group */
         std::string_view        string;                     /**< String value */
+        CScriptTypeDummy        typeName;                   /**< Type name */
         ScriptFileContext*      context;                    /**< Script file context */
         ScriptFileContext*      withinClassContext;         /**< Within class context */
         ScriptFileContext*      nativeClassGroupContext;    /**< Native class group context*/
@@ -280,9 +285,7 @@
 
 /* Data tokens */
 %token TOKEN_IDENT
-
-/* Type names */
-%token TOKEN_VOID_TYPE
+%token TOKEN_INTEGER
 
 /* Keywords */
 %token TOKEN_CLASS
@@ -296,6 +299,8 @@
 %token TOKEN_WITHIN
 %token TOKEN_FUNCTION
 %token TOKEN_NOEXPORT
+%token TOKEN_VOID
+%token TOKEN_RETURN
 
 %%
 
@@ -367,16 +372,35 @@ function
     ;
 
 function_header
-    : function_flags TOKEN_FUNCTION function_return_value ident '(' ')'     { g_FileParser->StartFunction( $<context>4, $<context>3, $<string>4, $<string>3, $<flags>1 ); }
+    : function_header_inner '(' function_params ')'     
+    ;
+
+function_header_inner
+    : function_flags TOKEN_FUNCTION function_return_value ident             { g_FileParser->StartFunction( $<context>4, $<context>3, $<string>4, $<typeName>3, $<flags>1 ); }
     ;
 
 function_return_value
-    : all_types
+    : TOKEN_VOID                                                            { $<typeName>$ = CScriptTypeDummy::MakeVoid(); $<context>$ = $<context>1; }
+    /*: all_types | NOTE yehor.pohuliaka - Currently we don't support return types in functions */
     ;
 
 function_flags
     : TOKEN_NATIVE function_flags                                           { $<flags>$ = FUNC_Native | $<flags>2; }
     | /* empty */                                                           { $<flags>$ = 0; }
+    ;
+
+function_params
+    : function_param_list
+    | /* empty */
+    ;
+
+function_param_list
+    : function_param ',' function_param_list
+    | function_param
+    ;
+
+function_param
+    : all_types ident                                                       { g_FileParser->AddProperty( $<context>2, $<context>1, $<string>2, $<typeName>1, true ); }
     ;
 
 function_tail
@@ -393,8 +417,7 @@ function_body
 ////////////////////////////////
 
 all_types
-    : TOKEN_VOID_TYPE                                                       { $<string>$ = $<token>1; $<context>$ = $<context>1; }
-    | ident                                         
+    : ident                                                                 { $<typeName>$ = CScriptTypeDummy::MakeSimple( $<string>1 ); $<context>$ = $<context>1; }                                       
     ;
 
 ident

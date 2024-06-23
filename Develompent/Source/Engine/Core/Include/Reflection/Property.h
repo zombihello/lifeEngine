@@ -231,13 +231,22 @@ public:
 	 * @brief Get property's one element size
 	 * @return Return property's one element size
 	 */
-	virtual uint32 GetElementSize() const		PURE_VIRTUAL( CProperty::GetElementSize, return 0; );
+	virtual uint32 GetElementSize() const						PURE_VIRTUAL( CProperty::GetElementSize, return 0; );
 
 	/**
 	 * @brief Get minimal alignment for property
 	 * @return Return minimal alignment for property
 	 */
-	virtual uint32 GetMinAlignment() const		PURE_VIRTUAL( CProperty::GetMinAlignment, return 1; );
+	virtual uint32 GetMinAlignment() const						PURE_VIRTUAL( CProperty::GetMinAlignment, return 1; );
+
+	/**
+	 * @brief Determines whether properties are identical
+	 * @note This function take count only the property class, array size, flags and other foundation elements such inner type in arrays
+	 *
+	 * @param InProperty		Property to compare
+	 * @return Return TRUE if property is identical, otherwise FALSE
+	 */
+	virtual bool IsIdentical( CProperty* InProperty ) const;
 
 	/**
 	 * @brief Is the property contains object reference
@@ -262,6 +271,15 @@ public:
 	FORCEINLINE uint32 GetFlags() const
 	{
 		return flags;
+	}
+
+	/**
+	 * @brief Get property size taking into account count of persistent variables
+	 * @return Return property size taking into account count of persistent variables
+	 */
+	FORCEINLINE uint32 GetSize() const
+	{
+		return GetElementSize() * GetArraySize();
 	}
 
 	/**
@@ -671,6 +689,15 @@ public:
 	 * @return Return minimal alignment for property
 	 */
 	virtual uint32 GetMinAlignment() const override;
+
+	/**
+	 * @brief Determines whether properties are identical
+	 * @note This function take count only the property class, array size, flags and other foundation elements such inner type in arrays
+	 *
+	 * @param InProperty		Property to compare
+	 * @return Return TRUE if property is identical, otherwise FALSE
+	 */
+	virtual bool IsIdentical( CProperty* InProperty ) const override;
 
 	/**
 	 * @brief Get enum
@@ -1217,6 +1244,15 @@ public:
 	virtual uint32 GetMinAlignment() const override;
 
 	/**
+	 * @brief Determines whether properties are identical
+	 * @note This function take count only the property class, array size, flags and other foundation elements such inner type in arrays
+	 *
+	 * @param InProperty		Property to compare
+	 * @return Return TRUE if property is identical, otherwise FALSE
+	 */
+	virtual bool IsIdentical( CProperty* InProperty ) const override;
+
+	/**
 	 * @brief Is the property contains object reference
 	 * @retrun Return TRUE if property (or sub-properties) contain  a CObject reference, otherwise returns FALSE
 	 */
@@ -1593,6 +1629,15 @@ public:
 	virtual uint32 GetMinAlignment() const override;
 
 	/**
+	 * @brief Determines whether properties are identical
+	 * @note This function take count only the property class, array size, flags and other foundation elements such inner type in arrays
+	 *
+	 * @param InProperty		Property to compare
+	 * @return Return TRUE if property is identical, otherwise FALSE
+	 */
+	virtual bool IsIdentical( CProperty* InProperty ) const override;
+
+	/**
 	 * @brief Get asset type
 	 * @return Return asset type
 	 */
@@ -1723,6 +1768,15 @@ public:
 	 * @return Return minimal alignment for property
 	 */
 	virtual uint32 GetMinAlignment() const override;
+
+	/**
+	 * @brief Determines whether properties are identical
+	 * @note This function take count only the property class, array size, flags and other foundation elements such inner type in arrays
+	 * 
+	 * @param InProperty		Property to compare
+	 * @return Return TRUE if property is identical, otherwise FALSE
+	 */
+	virtual bool IsIdentical( CProperty* InProperty ) const override;
 
 	/**
 	 * @brief Is the property contains object reference
@@ -1867,6 +1921,15 @@ public:
 	 * @return Return minimal alignment for property
 	 */
 	virtual uint32 GetMinAlignment() const override;
+
+	/**
+	 * @brief Determines whether properties are identical
+	 * @note This function take count only the property class, array size, flags and other foundation elements such inner type in arrays
+	 *
+	 * @param InProperty		Property to compare
+	 * @return Return TRUE if property is identical, otherwise FALSE
+	 */
+	virtual bool IsIdentical( CProperty* InProperty ) const override;
 
 	/**
 	 * @brief Is the property contains object reference

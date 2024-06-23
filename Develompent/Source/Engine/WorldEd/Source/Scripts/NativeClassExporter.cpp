@@ -2,6 +2,7 @@
 #include "Misc/StringConv.h"
 #include "System/BaseFileSystem.h"
 #include "Scripts/NativeClassExporter.h"
+#include "Scripts/ScriptTypeResolver.h"
 
 /**
  * @ingroup WorldEd
@@ -407,12 +408,14 @@ std::wstring CNativeClassExporter::GenerateNativeFunctions( const ScriptClassStu
 				// We export native functions only if the class hasn't CLASS_NoExport
 				if ( !bNoExport )
 				{
-					nativeFunctions += L_Sprintf( TEXT( "\tvirtual %s %s();\n" )
-												  TEXT( "\tDECLARE_FUNCTION( %s )\n" )
-												  TEXT( "\t{\n" )
-												  TEXT( "\t\tthis->%s();\n" )
-												  TEXT( "\t}\n" ),
-												  function->GetReturnTypeName().c_str(), functionName.c_str(), functionName.c_str(), functionName.c_str() );
+					std::wstring		functionReturnType = CScriptTypeResolver::Resolve( function->GetReturnType() );
+					AssertMsg( !functionReturnType.empty(), TEXT( "Invalid return type in the function" ) );
+					nativeFunctions		+= L_Sprintf( TEXT( "\tvirtual %s %s();\n" )
+													  TEXT( "\tDECLARE_FUNCTION( %s )\n" )
+													  TEXT( "\t{\n" )
+													  TEXT( "\t\tthis->%s();\n" )
+													  TEXT( "\t}\n" ),
+													  functionReturnType.c_str(), functionName.c_str(), functionName.c_str(), functionName.c_str() );
 				}
 			}
 		}

@@ -12,6 +12,7 @@
 #include "Scripts/ScriptFileContext.h"
 #include "Scripts/ScriptCodeBlock.h"
 #include "Scripts/ScriptFieldStubs.h"
+#include "Scripts/ScriptSyntaxVisitor.h"
 
 /**
  * @ingroup WorldEd
@@ -20,9 +21,10 @@
 enum EScriptSyntaxNodeType
 {
 	SSNT_Nop,			/**< No operation */
-	SSNT_ListItem,		/**< List of other nodes */
+	SSNT_Code,			/**< Code */
 	SSNT_Ident,			/**< Identifier */
-	SSNT_FuncCall		/**< Function call */
+	SSNT_FuncCall,		/**< Function call */
+	SSNT_Return			/**< Return */
 
 	//
 	// Add here your a new syntax node type
@@ -48,12 +50,12 @@ public:
 	 * @brief Destructor
 	 */
 	virtual ~CScriptSyntaxNode_Base();
-
+	
 	/**
-	 * @brief Write syntax tree to log
-	 * @param InPrintLevel		Print level
+	 * @brief Accept visitor
+	 * @param InVisitor		Visitor
 	 */
-	virtual void Print( uint32 InPrintLevel = 0 ) = 0;
+	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) = 0;
 
 	/**
 	 * @brief Generate code blocks from this syntax node
@@ -109,21 +111,6 @@ public:
 		return type;
 	}
 
-protected:
-	/**
-	 * @brief Get trailing space for print node
-	 *
-	 * @param InPrintLevel		Print level
-	 * @param OutString			Output string with trailing spaces
-	 */
-	FORCEINLINE void GetTrailingSpace( uint32 InPrintLevel, std::wstring& OutString )
-	{
-		for ( uint32 index = 0; index < InPrintLevel; ++index )
-		{
-			OutString += TEXT( " " );
-		}
-	}
-
 private:
 	EScriptSyntaxNodeType		type;		/**< Syntax node type */
 	ScriptFileContext			context;	/**< Related place in the source code */
@@ -146,10 +133,10 @@ public:
 	{}
 
 	/**
-	 * @brief Write syntax tree to log
-	 * @param InPrintLevel		Print level
+	 * @brief Accept visitor
+	 * @param InVisitor		Visitor
 	 */
-	virtual void Print( uint32 InPrintLevel = 0 ) override;
+	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
 
 	/**
 	 * @brief Generate code blocks from this syntax node
@@ -163,29 +150,29 @@ public:
 
 /**
  * @ingroup WorldEd
- * @brief Syntax node of list items
+ * @brief Syntax node of code
  */
-class CScriptSyntaxNode_ListItem : public CScriptSyntaxNode_Base
+class CScriptSyntaxNode_Code : public CScriptSyntaxNode_Base
 {
 public:
 	/**
 	 * @brief Constructor
 	 *
 	 * @param InContext		Related place in the source code
-	 * @param InListRoot	Root of the list
+	 * @param InCodeRoot	Root of the code
 	 */
-	CScriptSyntaxNode_ListItem( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InListRoot = nullptr );
+	CScriptSyntaxNode_Code( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InCodeRoot = nullptr );
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~CScriptSyntaxNode_ListItem();
+	virtual ~CScriptSyntaxNode_Code();
 
 	/**
-	 * @brief Write syntax tree to log
-	 * @param InPrintLevel		Print level
+	 * @brief Accept visitor
+	 * @param InVisitor		Visitor
 	 */
-	virtual void Print( uint32 InPrintLevel = 0 ) override;
+	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
 
 	/**
 	 * @brief Generate code blocks from this syntax node
@@ -197,7 +184,7 @@ public:
 	virtual CScriptCodeBlock* GenerateCode( CScriptClassStub*& InCurrentContext ) override;
 
 	/**
-	 * @brief Add node to list
+	 * @brief Add node to code
 	 * @param InNode	A new node
 	 */
 	FORCEINLINE void AddNode( CScriptSyntaxNode_Base* InNode )
@@ -207,8 +194,8 @@ public:
 	}
 
 	/**
-	 * @brief Get nodes list
-	 * @return Return nodes list
+	 * @brief Get code nodes
+	 * @return Return code list
 	 */
 	FORCEINLINE const std::vector<CScriptSyntaxNode_Base*>& GetNodes() const
 	{
@@ -216,8 +203,8 @@ public:
 	}
 
 	/**
-	 * @brief Get number of nodes in the list
-	 * @return Return number of nodes in the list
+	 * @brief Get number of nodes in the code
+	 * @return Return number of nodes in the code
 	 */
 	FORCEINLINE uint32 GetNumNodes() const
 	{
@@ -253,10 +240,10 @@ public:
 	{}
 
 	/**
-	 * @brief Write syntax tree to log
-	 * @param InPrintLevel		Print level
+	 * @brief Accept visitor
+	 * @param InVisitor		Visitor
 	 */
-	virtual void Print( uint32 InPrintLevel = 0 ) override;
+	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
 
 	/**
 	 * @brief Generate code blocks from this syntax node
@@ -325,10 +312,10 @@ public:
 	}
 
 	/**
-	 * @brief Write syntax tree to log
-	 * @param InPrintLevel		Print level
+	 * @brief Accept visitor
+	 * @param InVisitor		Visitor
 	 */
-	virtual void Print( uint32 InPrintLevel = 0 ) override;
+	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
 
 	/**
 	 * @brief Generate code blocks from this syntax node
@@ -350,6 +337,37 @@ public:
 
 private:
 	CScriptSyntaxNode_Base*		nameNode;		/**< Function name */
+};
+
+/**
+ * @ingroup WorldEd
+ * @brief Syntax node of return
+ */
+class CScriptSyntaxNode_Return : public CScriptSyntaxNode_Base
+{
+public:
+	/**
+	 * @brief Constructor
+	 * @param InContext		Related place in the source code
+	 */
+	CScriptSyntaxNode_Return( const ScriptFileContext& InContext )
+		: CScriptSyntaxNode_Base( SSNT_Return, InContext )
+	{}
+
+	/**
+	 * @brief Accept visitor
+	 * @param InVisitor		Visitor
+	 */
+	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
+
+	/**
+	 * @brief Generate code blocks from this syntax node
+	 * @note You need to free allocated memory after use
+	 *
+	 * @param InCurrentContext	Current context. Function may change it
+	 * @return Return generated code blocks
+	 */
+	virtual CScriptCodeBlock* GenerateCode( CScriptClassStub*& InCurrentContext ) override;
 };
 
 #endif // !SCRIPTSYNTAXNODE_H

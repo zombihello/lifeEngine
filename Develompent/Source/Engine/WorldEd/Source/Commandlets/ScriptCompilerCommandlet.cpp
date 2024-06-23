@@ -187,10 +187,7 @@ bool CScriptCompilerCommandlet::ParseScripts( const std::wstring& InScriptDir, C
 			CScriptFileParser		parser( InOutStubs );
 			if ( !parser.ParseFile( filename.GetFullPath(), buffer ) )
 			{
-				bHasErrors			= true;
-				std::wstring		relativeFilePath;
-				L_MakeRelativePath( filename.GetFullPath(), InRootDir, relativeFilePath, false );
-				Errorf( TEXT( "Failed to parse '%s'\n" ), relativeFilePath.c_str() );
+				bHasErrors = true;
 				continue;
 			}
 		}
@@ -238,6 +235,7 @@ bool CScriptCompilerCommandlet::CompileScripts( CScriptSystemStub& InStubs )
 				if ( !functionCompiler.Compile( *classStub.Get(), *function.Get() ) )
 				{
 					bHasError = true;
+					continue;
 				}
 			}
 		}

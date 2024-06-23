@@ -309,7 +309,7 @@ public:
 	 */
 	FORCEINLINE bool operator==( const std::wstring& InOther ) const
 	{
-		*this == InOther.c_str();
+		return *this == InOther.c_str();
 	}
 
 	/**

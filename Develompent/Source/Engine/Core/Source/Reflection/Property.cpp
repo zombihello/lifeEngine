@@ -241,6 +241,36 @@ void CProperty::ImportProperty( const CJsonValue* InJsonValue, byte* InObjectAdd
 }
 #endif // WITH_EDITOR
 
+/*
+==================
+CProperty::IsIdentical
+==================
+*/
+bool CProperty::IsIdentical( CProperty* InProperty ) const
+{
+	// Check on identical class
+	Assert( InProperty );
+	if ( GetClass() != InProperty->GetClass() )
+	{
+		return false;
+	}
+
+	// Check on identical array size
+	if ( arraySize != InProperty->GetArraySize() )
+	{
+		return false;
+	}
+
+	// Check on identical flags
+	if ( flags != InProperty->GetFlags() )
+	{
+		return false;
+	}
+
+	// All ok
+	return true;
+}
+
 
 /*
 ==================
@@ -271,6 +301,22 @@ CByteProperty::GetPropertyValue
 uint32 CByteProperty::GetMinAlignment() const
 {
 	return alignof( byte );
+}
+
+/*
+==================
+CByteProperty::IsIdentical
+==================
+*/
+bool CByteProperty::IsIdentical( CProperty* InProperty ) const
+{
+	bool	bResult = Super::IsIdentical( InProperty );
+	if ( cenum != ( ( CByteProperty* )InProperty )->cenum )
+	{
+		bResult = false;
+	}
+
+	return bResult;
 }
 
 /*
@@ -775,6 +821,22 @@ uint32 CObjectProperty::GetMinAlignment() const
 
 /*
 ==================
+CObjectProperty::IsIdentical
+==================
+*/
+bool CObjectProperty::IsIdentical( CProperty* InProperty ) const
+{
+	bool	bResult = Super::IsIdentical( InProperty );
+	if ( propertyClass != ( ( CObjectProperty* )InProperty )->propertyClass )
+	{
+		bResult = false;
+	}
+
+	return bResult;
+}
+
+/*
+==================
 CObjectProperty::GetPropertyValue
 ==================
 */
@@ -1124,6 +1186,22 @@ uint32 CAssetProperty::GetMinAlignment() const
 
 /*
 ==================
+CAssetProperty::IsIdentical
+==================
+*/
+bool CAssetProperty::IsIdentical( CProperty* InProperty ) const
+{
+	bool	bResult = Super::IsIdentical( InProperty );
+	if ( assetType != ( ( CAssetProperty* )InProperty )->assetType )
+	{
+		bResult = false;
+	}
+
+	return bResult;
+}
+
+/*
+==================
 CAssetProperty::GetPropertyValue
 ==================
 */
@@ -1250,6 +1328,22 @@ CArrayProperty::GetPropertyValue
 uint32 CArrayProperty::GetMinAlignment() const
 {
 	return alignof( std::vector<byte> );
+}
+
+/*
+==================
+CArrayProperty::IsIdentical
+==================
+*/
+bool CArrayProperty::IsIdentical( CProperty* InProperty ) const
+{
+	bool	bResult = Super::IsIdentical( InProperty );
+	if ( !innerProperty->IsIdentical( ( ( CArrayProperty* )InProperty )->innerProperty ) )
+	{
+		bResult = false;
+	}
+
+	return bResult;
 }
 
 /*
@@ -1455,6 +1549,22 @@ CStructProperty::GetPropertyValue
 uint32 CStructProperty::GetMinAlignment() const
 {
 	return propertyStruct->GetMinAlignment();
+}
+
+/*
+==================
+CStructProperty::IsIdentical
+==================
+*/
+bool CStructProperty::IsIdentical( CProperty* InProperty ) const
+{
+	bool	bResult = Super::IsIdentical( InProperty );
+	if ( propertyStruct != ( ( CStructProperty* )InProperty )->propertyStruct )
+	{
+		bResult = false;
+	}
+
+	return bResult;
 }
 
 /*

@@ -4,6 +4,7 @@
 #include "Reflection/ObjectIterator.h"
 #include "Reflection/ObjectGlobals.h"
 #include "Reflection/Object.h"
+#include "Scripts/ScriptTypeResolver.h"
 #include "Scripts/ScriptEnvironmentBuilder.h"
 
 /*
@@ -31,6 +32,12 @@ bool CScriptEnvironmentBuilder::Build()
 
 	// Create function wrappers (no inner properties yet)
 	if ( !CreateFunctions() )
+	{
+		return false;
+	}
+
+	// Create properties (class's and function's)
+	if ( !CreateProperties() )
 	{
 		return false;
 	}
@@ -90,7 +97,6 @@ void CScriptEnvironmentBuilder::AddIntrinsicTypes()
 		CField*		field = *it;
 		if ( IsIn( field, scriptPackage ) )
 		{		
-			std::wstring q = field->GetName();
 			CClass*		fieldClass = field->GetClass();
 			if ( fieldClass == CEnum::StaticClass() && !stubs.FindEnum( field->GetName() ) )
 			{
@@ -197,6 +203,13 @@ bool CScriptEnvironmentBuilder::CreateClass( CScriptClassStub& InClassStub )
 	const std::wstring&			superClassName	= InClassStub.GetSuperClassName();
 	const ScriptFileContext&	context			= InClassStub.GetContext();
 	bool						bIsCObjectClass	= className == CObject::StaticClass()->GetName();
+
+	// Make sure that class name isn't built-in type name
+	if ( CScriptTypeResolver::IsBuiltInType( CScriptTypeResolver::TranslateBuiltInTypes( className ) ) )
+	{
+		Errorf( TEXT( "%s: Class have same name as built-in type\n" ), context.ToString().c_str() );
+		return false;
+	}
 
 	// If type with same name already defined then its error.
 	// Only one exception: native classes may be already defined in the system by *Classes.h. In this case
@@ -413,6 +426,13 @@ bool CScriptEnvironmentBuilder::CreateFunction( CScriptClassStub& InClassStub, C
 		return false;
 	}
 
+	// Make sure that function name isn't built-in type name
+	if ( CScriptTypeResolver::IsBuiltInType( CScriptTypeResolver::TranslateBuiltInTypes( functionName ) ) )
+	{
+		Errorf( TEXT( "%s: Function have same name as built-in type\n" ), context.ToString().c_str() );
+		return false;
+	}
+
 	// If function is native but the class isn't then this is error
 	if ( !InClassStub.HasAnyFlags( CLASS_Native ) && InFunctionStub.HasAnyFlags( FUNC_Native ) )
 	{
@@ -447,14 +467,14 @@ bool CScriptEnvironmentBuilder::BindSuperFunction( CScriptClassStub& InClassStub
 	CClass*					theClass = InClassStub.GetCreatedClass();
 	CFunction*				function = InFunctionStub.GetCreatedFunction();
 
-	// Class failed to compile
+	// Class or function failed to compile
 	if ( !theClass || !function )
 	{
 		return false;
 	}
 
 	// Get the super class
-	CClass* superClass = theClass->GetSuperClass();
+	CClass*		superClass = theClass->GetSuperClass();
 	if ( !superClass )
 	{
 		return true;
@@ -464,7 +484,11 @@ bool CScriptEnvironmentBuilder::BindSuperFunction( CScriptClassStub& InClassStub
 	CFunction*		superFunction = superClass->FindFunction( functionName.c_str() );
 	if ( superFunction )
 	{
-		// TODO yehor.pohuliaka - Add here checks when will be implemented support of function's arguments and return type
+		// Headers must match
+		if ( !MatchFunctionHeader( InFunctionStub, superFunction ) )
+		{
+			return false;
+		}
 
 		// Bind as super function
 		function->SetSuperFunction( superFunction );
@@ -472,4 +496,164 @@ bool CScriptEnvironmentBuilder::BindSuperFunction( CScriptClassStub& InClassStub
 
 	// Done
 	return true;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::MatchFunctionHeader
+==================
+*/
+bool CScriptEnvironmentBuilder::MatchFunctionHeader( const CScriptFunctionStub& InFunctionStub, CFunction* InSuperFunction )
+{
+	CFunction*					baseFunction = InFunctionStub.GetCreatedFunction();
+	Assert( baseFunction && InSuperFunction );
+	const ScriptFileContext&	baseFunctionContext = InFunctionStub.GetContext();
+	const std::wstring			baseFunctionName	= InFunctionStub.GetName();
+
+	// Check parameter count
+	if ( baseFunction->GetNumProperties( false ) != InSuperFunction->GetNumProperties( false ) )
+	{
+		Errorf( TEXT( "%s: Function '%s' takes %i parameter(s) which is inconsistent with base function (%i)\n" ), 
+				baseFunctionContext.ToString().c_str(), baseFunctionName.c_str(), baseFunction->GetNumProperties( false ), InSuperFunction->GetNumProperties( false ) );
+		return false;
+	}
+
+	// Check parameter types
+	bool bMatching = true;
+	{
+		std::vector<CProperty*>		baseProperties;
+		std::vector<CProperty*>		superProperties;
+		baseFunction->GetProperties( baseProperties, false );
+		InSuperFunction->GetProperties( superProperties, false );
+		for ( uint32 index = 0, count = baseProperties.size(); index < count; ++index )
+		{
+			CProperty*	baseProperty	= baseProperties[index];
+			CProperty*	superProperty	= superProperties[index];
+			if ( !baseProperty->IsIdentical( superProperty ) )
+			{
+				Errorf( TEXT( "%s: Function '%s' parameter '%s' has different type than in super function\n" ),
+						baseFunctionContext.ToString().c_str(), baseFunctionName.c_str(), baseProperty->GetName().c_str() );
+				bMatching = false;
+				continue;
+			}
+		}
+	}
+
+	// We are done
+	return bMatching;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::CreateProperties
+==================
+*/
+bool CScriptEnvironmentBuilder::CreateProperties()
+{
+	bool	bNoErrors = true;
+
+	// Create class properties
+	{
+		const std::vector<ScriptClassStubPtr_t>&	classes = stubs.GetClasses();
+		for ( uint32 index = 0, count = classes.size(); index < count; ++index )
+		{
+			bNoErrors &= CreateClassProperties( *classes[index].Get() );
+		}
+	}
+
+	// Done
+	return bNoErrors;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::CreateClassProperties
+==================
+*/
+bool CScriptEnvironmentBuilder::CreateClassProperties( CScriptClassStub& InClassStub )
+{
+	CClass*		theClass	= InClassStub.GetCreatedClass();
+	bool		bNoErrors	= true;
+
+	// Class failed to compile
+	if ( !theClass )
+	{
+		return false;
+	}
+
+	// Create properties in functions
+	{
+		const std::vector<ScriptFunctionStubPtr_t>&		functions = InClassStub.GetFunctions();
+		for ( uint32 index = 0, count = functions.size(); index < count; ++index )
+		{
+			bNoErrors &= CreateFunctionProperties( *functions[index].Get() );
+		}
+	}
+
+	// We are done
+	return bNoErrors;
+}
+
+/*
+==================
+CScriptEnvironmentBuilder::CreateFunctionProperties
+==================
+*/
+bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& InFunctionStub )
+{
+	bool						bNoErrors		= true;
+	const std::wstring&			functionName	= InFunctionStub.GetName();
+	const ScriptFileContext&	context			= InFunctionStub.GetContext();
+	CFunction*					function		= InFunctionStub.GetCreatedFunction();
+
+	// Function failed to compile
+	if ( !function )
+	{
+		return false;
+	}
+
+	// Create parameters
+	uint32		offset			= 0;		// Offset in local data of script frame
+	uint32		minAlignment	= 1;
+	{
+		const std::vector<ScriptFunctionParamStubPtr_t>&		funcParamStubs = InFunctionStub.GetParams();
+		for ( uint32 index = 0, count = funcParamStubs.size(); index < count; ++index )
+		{
+			CScriptFunctionParamStub&		funcParamStub		= *funcParamStubs[index].Get();
+			const std::wstring&				funcParamName		= funcParamStub.GetName();
+			const ScriptFileContext&		funcParamContext	= funcParamStub.GetContext();
+
+			// Make sure that parameter name isn't built-in type name
+			if ( CScriptTypeResolver::IsBuiltInType( CScriptTypeResolver::TranslateBuiltInTypes( funcParamName ) ) )
+			{
+				Errorf( TEXT( "%s: Function parameter #%i have same name as built-in type\n" ), context.ToString().c_str(), index + 1 );
+				bNoErrors = false;
+				continue;
+			}
+
+			// Make sure it's not duplicated
+			if ( function->FindProperty<CProperty>( funcParamName, false ) )
+			{
+				Errorf( TEXT( "%s: Parameter '%s' is already defined\n" ), funcParamName.c_str() );
+				bNoErrors = false;
+				continue;
+			}
+
+			// Create function parameter
+			CProperty*		funcParam = CScriptTypeResolver::Resolve( ScriptTypeResolveParams( function, funcParamName, OBJECT_Public, funcParamStub.GetType(), offset, CPF_None ) );
+			Assert( funcParam );
+			funcParamStub.SetCreatedFuncParam( funcParam );
+
+			// Advance the offset
+			minAlignment	= Max( minAlignment, funcParam->GetMinAlignment() );
+			offset			+= funcParam->GetSize();
+		}
+	}
+
+	// Update properties size and min alignment in the function
+	function->SetPropertiesSize( offset );
+	function->SetMinAlignment( minAlignment );
+
+	// We are done
+	return bNoErrors;
 }

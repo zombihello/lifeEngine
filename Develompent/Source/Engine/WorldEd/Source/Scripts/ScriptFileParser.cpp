@@ -185,16 +185,16 @@ void CScriptFileParser::EndDefinition( int32 InLine, const ScriptFileContext* In
 CScriptFileParser::StartFunction
 ==================
 */
-void CScriptFileParser::StartFunction( const ScriptFileContext* InContext, const ScriptFileContext* InReturnTypeContext, const std::string_view& InFunctionName, const std::string_view& InReturnTypeName, uint32 InFlags )
+void CScriptFileParser::StartFunction( const ScriptFileContext* InContext, const ScriptFileContext* InReturnTypeContext, const std::string_view& InFunctionName, const CScriptTypeDummy& InReturnType, uint32 InFlags )
 {
 	AssertMsg( InContext, TEXT( "Invalid context for function" ) );
 	AssertMsg( InReturnTypeContext, TEXT( "Invalid context for return type" ) );
-	AssertMsg( !InFunctionName.empty() && !InReturnTypeName.empty(), TEXT( "Function or return type name isn't valid" ) );
+	AssertMsg( !InFunctionName.empty(), TEXT( "Function name isn't valid" ) );
 
 	// Create function
 	if ( currentClass )
 	{
-		currentFunction = MakeSharedPtr<CScriptFunctionStub>( *InContext, ANSI_TO_TCHAR( InFunctionName.data() ), *InReturnTypeContext, ANSI_TO_TCHAR( InReturnTypeName.data() ), InFlags );
+		currentFunction = MakeSharedPtr<CScriptFunctionStub>( *InContext, ANSI_TO_TCHAR( InFunctionName.data() ), *InReturnTypeContext, InReturnType, InFlags );
 		currentClass->AddFunction( currentFunction );
 	}
 	else
@@ -222,11 +222,35 @@ CScriptTokenStream& CScriptFileParser::GetFunctionCodeTokens()
 CScriptFileParser::AddProperty
 ==================
 */
-void CScriptFileParser::AddProperty( const ScriptFileContext* InContext, const ScriptFileContext* InTypeContext, const std::string_view& InPropertyName, const std::string_view& InTypeName, bool InIsFunctionParam )
+void CScriptFileParser::AddProperty( const ScriptFileContext* InContext, const ScriptFileContext* InTypeContext, const std::string_view& InPropertyName, const CScriptTypeDummy& InPropertyType, bool InIsFunctionParam )
 {
 	AssertMsg( InContext, TEXT( "Invalid context for property" ) );
 	AssertMsg( InTypeContext, TEXT( "Invalid context for property type" ) );
-	AssertMsg( false, TEXT( "Need implement" ) );
+	AssertMsg( !InPropertyName.empty(), TEXT( "Property name isn't valid" ) );
+
+	// Add the property to current function
+	if ( currentFunction )
+	{
+		// If our property is function parameter we add the one as parameter
+		if ( InIsFunctionParam )
+		{
+			currentFunction->AddParam( MakeSharedPtr<CScriptFunctionParamStub>( *InContext, ANSI_TO_TCHAR( InPropertyName.data() ), *InTypeContext, InPropertyType ) );
+		}
+		// Otherwise is local function parameter
+		else
+		{
+			AssertMsg( false, TEXT( "Need implement" ) );
+		}
+	}
+	// Otherwise we add to current class
+	else if ( currentClass )
+	{
+		AssertMsg( false, TEXT( "Need implement" ) );
+	}
+	else
+	{
+		EmitError( InContext, TEXT( "Properties can be only in functions or classes" ) );
+	}
 }
 
 /*

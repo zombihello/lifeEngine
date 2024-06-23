@@ -81,10 +81,10 @@ public:
 	 * @param InContext				Function context
 	 * @param InReturnTypeContext	Context of a return type
 	 * @param InFunctionName		Function name
-	 * @param InReturnTypeName		Return type name
+	 * @param InReturnType			Return type
 	 * @param InFlags				Flags (see EScriptStubFlags)
 	 */
-	void StartFunction( const ScriptFileContext* InContext, const ScriptFileContext* InReturnTypeContext, const std::string_view& InFunctionName, const std::string_view& InReturnTypeName, uint32 InFlags );
+	void StartFunction( const ScriptFileContext* InContext, const ScriptFileContext* InReturnTypeContext, const std::string_view& InFunctionName, const CScriptTypeDummy& InReturnType, uint32 InFlags );
 
 	/**
 	 * @brief Get function code tokens
@@ -98,10 +98,10 @@ public:
 	 * @param InContext			Property context
 	 * @param InTypeContext		Type context
 	 * @param InPropertyName	Property name
-	 * @param InTypeName		Type name
+	 * @param InPropertyType	Property type
 	 * @param InIsFunctionParam	Is this property function parameter
 	 */
-	void AddProperty( const ScriptFileContext* InContext, const ScriptFileContext* InTypeContext, const std::string_view& InPropertyName, const std::string_view& InTypeName, bool InIsFunctionParam );
+	void AddProperty( const ScriptFileContext* InContext, const ScriptFileContext* InTypeContext, const std::string_view& InPropertyName, const CScriptTypeDummy& InPropertyType, bool InIsFunctionParam );
 
 	/**
 	 * @brief Pop context

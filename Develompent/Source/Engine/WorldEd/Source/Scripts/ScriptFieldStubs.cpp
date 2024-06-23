@@ -13,15 +13,28 @@ CScriptBaseStub::CScriptBaseStub( const ScriptFileContext& InContext, const std:
 
 /*
 ==================
-CScriptBaseStub::CScriptBaseStub
+CScriptFunctionStub::CScriptFunctionStub
 ==================
 */
-CScriptFunctionStub::CScriptFunctionStub( const ScriptFileContext& InContext, const std::wstring& InFunctionName, const ScriptFileContext& InReturnTypeContext, const std::wstring& InReturnTypeName, uint32 InFlags )
+CScriptFunctionParamStub::CScriptFunctionParamStub( const ScriptFileContext& InContext, const std::wstring& InParamName, const ScriptFileContext& InTypeContext, const CScriptTypeDummy& InType )
+	: CScriptBaseStub( InContext, InParamName )
+	, typeContext( InTypeContext )
+	, type( InType )
+	, createdFuncParam( nullptr )
+{}
+
+
+/*
+==================
+CScriptFunctionStub::CScriptFunctionStub
+==================
+*/
+CScriptFunctionStub::CScriptFunctionStub( const ScriptFileContext& InContext, const std::wstring& InFunctionName, const ScriptFileContext& InReturnTypeContext, const CScriptTypeDummy& InReturnType, uint32 InFlags )
 	: CScriptBaseStub( InContext, InFunctionName )
 	, bHasBody( false )
 	, flags( InFlags )
 	, returnTypeContext( InReturnTypeContext )
-	, returnTypeName( InReturnTypeName )
+	, returnType( InReturnType )
 	, createdFunction( nullptr )
 {}
 
