@@ -58,15 +58,6 @@ public:
 	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) = 0;
 
 	/**
-	 * @brief Generate code blocks from this syntax node
-	 * @note You need to free allocated memory after use
-	 *
-	 * @param InCurrentContext		Current context. Function may change it
-	 * @return Return generated code blocks
-	 */
-	virtual CScriptCodeBlock* GenerateCode( CScriptClassStub*& InCurrentContext ) = 0;
-
-	/**
 	 * @brief Set parent node
 	 * @param InParentNode		A new parent node
 	 */
@@ -137,15 +128,6 @@ public:
 	 * @param InVisitor		Visitor
 	 */
 	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
-
-	/**
-	 * @brief Generate code blocks from this syntax node
-	 * @note You need to free allocated memory after use
-	 *
-	 * @param InCurrentContext	Current context. Function may change it
-	 * @return Return generated code blocks
-	 */
-	virtual CScriptCodeBlock* GenerateCode( CScriptClassStub*& InCurrentContext ) override;
 };
 
 /**
@@ -173,15 +155,6 @@ public:
 	 * @param InVisitor		Visitor
 	 */
 	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
-
-	/**
-	 * @brief Generate code blocks from this syntax node
-	 * @note You need to free allocated memory after use
-	 *
-	 * @param InCurrentContext	Current context. Function may change it
-	 * @return Return generated code blocks
-	 */
-	virtual CScriptCodeBlock* GenerateCode( CScriptClassStub*& InCurrentContext ) override;
 
 	/**
 	 * @brief Add node to code
@@ -244,15 +217,6 @@ public:
 	 * @param InVisitor		Visitor
 	 */
 	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
-
-	/**
-	 * @brief Generate code blocks from this syntax node
-	 * @note You need to free allocated memory after use
-	 *
-	 * @param InCurrentContext	Current context. Function may change it
-	 * @return Return generated code blocks
-	 */
-	virtual CScriptCodeBlock* GenerateCode( CScriptClassStub*& InCurrentContext ) override;
 
 	/**
 	 * @brief Get identifier name
@@ -318,15 +282,6 @@ public:
 	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
 
 	/**
-	 * @brief Generate code blocks from this syntax node
-	 * @note You need to free allocated memory after use
-	 *
-	 * @param InCurrentContext	Current context. Function may change it
-	 * @return Return generated code blocks
-	 */
-	virtual CScriptCodeBlock* GenerateCode( CScriptClassStub*& InCurrentContext ) override;
-
-	/**
 	 * @brief Get function name
 	 * @return Return function name
 	 */
@@ -359,15 +314,6 @@ public:
 	 * @param InVisitor		Visitor
 	 */
 	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
-
-	/**
-	 * @brief Generate code blocks from this syntax node
-	 * @note You need to free allocated memory after use
-	 *
-	 * @param InCurrentContext	Current context. Function may change it
-	 * @return Return generated code blocks
-	 */
-	virtual CScriptCodeBlock* GenerateCode( CScriptClassStub*& InCurrentContext ) override;
 };
 
 #endif // !SCRIPTSYNTAXNODE_H

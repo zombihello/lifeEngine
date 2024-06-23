@@ -33,19 +33,6 @@ void CScriptSyntaxNode_Nop::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 	InVisitor.VisitSyntaxNode_Nop( this );
 }
 
-/*
-==================
-CScriptSyntaxNode_Nop::GenerateCode
-==================
-*/
-CScriptCodeBlock* CScriptSyntaxNode_Nop::GenerateCode( CScriptClassStub*& InCurrentContext )
-{
-	// For OP_Nop operator we generate empty code
-	CScriptCodeBlock*		codeBlock = new CScriptCodeBlock( GetContext(), TEXT( "Nop" ) );
-	codeBlock->GetBytecode().push_back( OP_Nop );
-	return codeBlock;
-}
-
 
 /*
 ==================
@@ -79,24 +66,6 @@ CScriptSyntaxNode_Code::AcceptVisitor
 void CScriptSyntaxNode_Code::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 {
 	InVisitor.VisitSyntaxNode_Code( this );
-}
-
-/*
-==================
-CScriptSyntaxNode_Code::GenerateCode
-==================
-*/
-CScriptCodeBlock* CScriptSyntaxNode_Code::GenerateCode( CScriptClassStub*& InCurrentContext )
-{
-	// For list node we generate code for each item and glue together
-	CScriptCodeBlock*	codeBlock = new CScriptCodeBlock( GetContext(), TEXT( "Code" ) );
-	for ( uint32 index = 0, count = nodes.size(); index < count; ++index )
-	{
-		CScriptCodeBlock*		subCodeBlock = nodes[index]->GenerateCode( InCurrentContext );
-		CScriptCodeBlock::Glue( codeBlock, subCodeBlock );
-	}
-
-	return codeBlock;
 }
 
 /*
@@ -140,46 +109,6 @@ void CScriptSyntaxNode_Ident::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 	InVisitor.VisitSyntaxNode_Ident( this );
 }
 
-/*
-==================
-CScriptSyntaxNode_Ident::GenerateCode
-==================
-*/
-CScriptCodeBlock* CScriptSyntaxNode_Ident::GenerateCode( CScriptClassStub*& InCurrentContext )
-{
-	bool						bHasError = false;
-	CScriptSyntaxNode_Base*		parentNode = GetParentNode();
-	CScriptCodeBlock*			codeBlock = new CScriptCodeBlock( GetContext(), TEXT( "Ident" ) );
-	CMemoryWriter				codeWriter( codeBlock->GetBytecode() );
-	if ( parentNode )
-	{
-		switch ( parentNode->GetType() )
-		{
-			// Generate code block for function call
-		case SSNT_FuncCall:
-		{
-			CClass*			theClass = InCurrentContext->GetCreatedClass();
-			Assert( theClass );
-			CFunction*		function = theClass->FindFunction( ANSI_TO_TCHAR( name.c_str() ) );
-			Assert( function );
-			codeWriter << ( uptrint )function;
-			break;
-		}
-
-		default:
-			bHasError = true;
-			break;
-		}
-	}
-	else
-	{
-		bHasError = true;
-	}
-
-	Assert( !bHasError );
-	return codeBlock;
-}
-
 
 /*
 ==================
@@ -204,26 +133,6 @@ void CScriptSyntaxNode_FuncCall::AcceptVisitor( CScriptSyntaxVisitor& InVisitor 
 	InVisitor.VisitSyntaxNode_FuncCall( this );
 }
 
-/*
-==================
-CScriptSyntaxNode_FuncCall::GenerateCode
-==================
-*/
-CScriptCodeBlock* CScriptSyntaxNode_FuncCall::GenerateCode( CScriptClassStub*& InCurrentContext )
-{
-	// Generate code for call a function
-	TGuardValue<CScriptClassStub*>		currentContextGuard( InCurrentContext );
-	CScriptCodeBlock*					codeBlock = new CScriptCodeBlock( GetContext(), TEXT( "FuncCall" ) );
-	codeBlock->GetBytecode().push_back( OP_Call );
-
-	// Generate code for function name and glue it	
-	CScriptCodeBlock*					codeBlockFuncIdent = nameNode->GenerateCode( InCurrentContext );
-	CScriptCodeBlock::Glue( codeBlock, codeBlockFuncIdent );
-
-	// We are done
-	return codeBlock;
-}
-
 
 /*
 ==================
@@ -233,17 +142,4 @@ CScriptSyntaxNode_Return::AcceptVisitor
 void CScriptSyntaxNode_Return::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 {
 	InVisitor.VisitSyntaxNode_Return( this );
-}
-
-/*
-==================
-CScriptSyntaxNode_Return::GenerateCode
-==================
-*/
-CScriptCodeBlock* CScriptSyntaxNode_Return::GenerateCode( CScriptClassStub*& InCurrentContext )
-{
-	// For OP_Nop operator we generate empty code
-	CScriptCodeBlock*	codeBlock = new CScriptCodeBlock( GetContext(), TEXT( "Return" ) );
-	codeBlock->GetBytecode().push_back( OP_Return );
-	return codeBlock;
 }
