@@ -115,14 +115,38 @@ CScriptCodeGeneratorVisitor::VisitSyntaxNode_FuncCall
 void CScriptCodeGeneratorVisitor::VisitSyntaxNode_FuncCall( class CScriptSyntaxNode_FuncCall* InNode )
 {
 	// Generate code for function name
-	CScriptSyntaxNode_Base*		syntaxNameNode = InNode->GetNameNode();
+	CScriptSyntaxNode_Base*		syntaxNameNode		= InNode->GetNameNode();
 	syntaxNameNode->AcceptVisitor( *this );
-	CScriptCodeBlock*			codeBlockFuncIdent = codeBlocks;
+	Assert( codeBlocks );
+	CScriptCodeBlock*			codeBlockFuncIdent	= codeBlocks;
 
-	// Generate code for function call and glue it
+	// Generate code for mark of end function parameters
+	CScriptCodeBlock*			codeBlockEndFuncParams = new CScriptCodeBlock( InNode->GetContext(), TEXT( "EndFuncParams" ) );
+	codeBlockEndFuncParams->GetBytecode().push_back( OP_EndFunctionParms );
+
+	// Generate code for function parameters
+	CScriptSyntaxNode_Base*		syntaxParamsNode	= InNode->GetParametersNode();
+	CScriptCodeBlock*			codeBlockFuncParams = nullptr;
+
+	// If we have parameters we generate the one's code and glue it with EndFuncParams block
+	if ( syntaxParamsNode )
+	{
+		syntaxParamsNode->AcceptVisitor( *this );
+		Assert( codeBlocks );
+		codeBlockFuncParams = codeBlocks;
+		CScriptCodeBlock::Glue( codeBlockFuncParams, codeBlockEndFuncParams );
+	}
+	// Otherwise we have only EndFuncParams block
+	else
+	{
+		codeBlockFuncParams = codeBlockEndFuncParams;
+	}
+
+	// Generate code for function call and glue together all blocks 
 	codeBlocks = new CScriptCodeBlock( InNode->GetContext(), TEXT( "FuncCall" ) );
 	codeBlocks->GetBytecode().push_back( OP_Call );
 	CScriptCodeBlock::Glue( codeBlocks, codeBlockFuncIdent );
+	CScriptCodeBlock::Glue( codeBlocks, codeBlockFuncParams );
 }
 
 /*
@@ -144,5 +168,9 @@ CScriptCodeGeneratorVisitor::VisitSyntaxNode_IntConst
 */
 void CScriptCodeGeneratorVisitor::VisitSyntaxNode_IntConst( class CScriptSyntaxNode_IntConst* InNode )
 {
-	AssertMsg( false, TEXT( "Need implement" ) );
+	// Generate code with integer const
+	codeBlocks = new CScriptCodeBlock( InNode->GetContext(), TEXT( "IntConst" ) );
+	CMemoryWriter		codeWriter( codeBlocks->GetBytecode() );
+	codeWriter << ( byte )OP_IntConst;
+	codeWriter << InNode->GetValue();
 }

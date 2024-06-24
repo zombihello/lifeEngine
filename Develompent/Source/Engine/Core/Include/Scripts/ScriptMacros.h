@@ -55,10 +55,12 @@ struct ScriptNativeFunctionLookup
  */
 enum EScriptOpcode
 {
-	OP_Nop,		/**< No operation */
-	OP_Call,	/**< Call script or native function */
-	OP_Return,	/**< Return from function */
-	OP_Count	/**< Count opcodes */
+	OP_Nop,					/**< No operation */
+	OP_Call,				/**< Call script or native function */
+	OP_Return,				/**< Return from function */
+	OP_IntConst,			/**< Integer constant */
+	OP_EndFunctionParms,	/**< End of function call parameters */
+	OP_Count				/**< Count opcodes */
 };
 
 #endif // !SCRIPTMACROS_H
