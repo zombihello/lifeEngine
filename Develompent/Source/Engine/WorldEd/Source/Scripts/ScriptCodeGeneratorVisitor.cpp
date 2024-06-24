@@ -38,10 +38,10 @@ void CScriptCodeGeneratorVisitor::VisitSyntaxNode_Nop( class CScriptSyntaxNode_N
 
 /*
 ==================
-CScriptCodeGeneratorVisitor::VisitSyntaxNode_Code
+CScriptCodeGeneratorVisitor::VisitSyntaxNode_ListItem
 ==================
 */
-void CScriptCodeGeneratorVisitor::VisitSyntaxNode_Code( class CScriptSyntaxNode_Code* InNode )
+void CScriptCodeGeneratorVisitor::VisitSyntaxNode_ListItem( class CScriptSyntaxNode_ListItem* InNode )
 {
 	// To code generate this is node useless, but the one have child nodes that we need to concern ourselves with
 	const std::vector<CScriptSyntaxNode_Base*>&	children		= InNode->GetNodes();
@@ -87,7 +87,7 @@ void CScriptCodeGeneratorVisitor::VisitSyntaxNode_Ident( class CScriptSyntaxNode
 	CMemoryWriter				codeWriter( codeBlocks->GetBytecode() );
 	AssertMsg( parentSyntaxNode, TEXT( "Missing parent syntax node" ) );
 
-	switch ( parentSyntaxNode->GetType() )
+	switch ( parentSyntaxNode->GetNodeType() )
 	{
 		// Generate code block for function call
 	case SSNT_FuncCall:
@@ -135,4 +135,14 @@ void CScriptCodeGeneratorVisitor::VisitSyntaxNode_Return( class CScriptSyntaxNod
 	// Generate return code
 	codeBlocks = new CScriptCodeBlock( InNode->GetContext(), TEXT( "Return" ) );
 	codeBlocks->GetBytecode().push_back( OP_Return );
+}
+
+/*
+==================
+CScriptCodeGeneratorVisitor::VisitSyntaxNode_IntConst
+==================
+*/
+void CScriptCodeGeneratorVisitor::VisitSyntaxNode_IntConst( class CScriptSyntaxNode_IntConst* InNode )
+{
+	AssertMsg( false, TEXT( "Need implement" ) );
 }

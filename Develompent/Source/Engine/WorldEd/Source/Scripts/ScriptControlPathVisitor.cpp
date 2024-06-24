@@ -45,7 +45,7 @@ bool CScriptControlPathVisitor::ControlPathNode::CheckControlPaths( bool InIsReq
 
 	do
 	{
-		if ( currentPathNode->syntaxNode->GetType() == SSNT_Return )
+		if ( currentPathNode->syntaxNode->GetNodeType() == SSNT_Return )
 		{
 			if ( linesAfterReturn > 0 )
 			{
@@ -102,10 +102,10 @@ void CScriptControlPathVisitor::VisitSyntaxNode_Nop( class CScriptSyntaxNode_Nop
 
 /*
 ==================
-CScriptControlPathVisitor::VisitSyntaxNode_Code
+CScriptControlPathVisitor::VisitSyntaxNode_ListItem
 ==================
 */
-void CScriptControlPathVisitor::VisitSyntaxNode_Code( class CScriptSyntaxNode_Code* InNode )
+void CScriptControlPathVisitor::VisitSyntaxNode_ListItem( class CScriptSyntaxNode_ListItem* InNode )
 {
 	// To check control paths this is node useless, but the one have child nodes that we need to concern ourselves with
 	ControlPathNode*								firstPathNode	= nullptr;
@@ -148,6 +148,16 @@ CScriptControlPathVisitor::VisitSyntaxNode_Return
 ==================
 */
 void CScriptControlPathVisitor::VisitSyntaxNode_Return( class CScriptSyntaxNode_Return* InNode )
+{
+	MapControlPath( InNode, previousControlPathNode );
+}
+
+/*
+==================
+CScriptControlPathVisitor::VisitSyntaxNode_IntConst
+==================
+*/
+void CScriptControlPathVisitor::VisitSyntaxNode_IntConst( class CScriptSyntaxNode_IntConst* InNode )
 {
 	MapControlPath( InNode, previousControlPathNode );
 }

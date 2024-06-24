@@ -26,6 +26,7 @@
          */
         FORCEINLINE YYSTYPE_Function()
             : node( nullptr )
+            , integer( 0 )
         {}
 
         /**
@@ -37,6 +38,7 @@
             , token( InOther.token )
             , node( InOther.node )
             , string( InOther.string )
+            , integer( InOther.integer )
         {}
 
         /**
@@ -48,6 +50,7 @@
             , token( std::move( InOther.token ) )
             , node( std::move( InOther.node ) )
             , string( std::move( InOther.string ) )
+            , integer( std::move( InOther.integer ) )
         {}
 
         /**
@@ -66,10 +69,11 @@
 	    {
 	    	if ( this != &InOther )
 	    	{
-	    		context = InOther.context;
-	    		token = InOther.token;
-                node = InOther.node;
-                string = InOther.string;
+	    		context     = InOther.context;
+	    		token       = InOther.token;
+                node        = InOther.node;
+                string      = InOther.string;
+                integer     = InOther.integer;
 	    	}
 	    	return *this;
 	    }
@@ -84,10 +88,11 @@
 	    {
 	    	if ( this != &InOther )
 	    	{
-	    		context = std::move( InOther.context );
-	    		token = std::move( InOther.token );
-                node = std::move( InOther.node );
-                string = std::move( InOther.string );
+	    		context     = std::move( InOther.context );
+	    		token       = std::move( InOther.token );
+                node        = std::move( InOther.node );
+                string      = std::move( InOther.string );
+                integer     = std::move( InOther.integer );
 	    	}
 	    	return *this;
 	    }
@@ -96,6 +101,7 @@
         std::string_view            token;      /**< Token in string format */
         CScriptSyntaxNode_Base*		node;       /**< Script syntax node */
         std::string_view            string;     /**< String value */
+        uint32                      integer;    /**< Integer value */
     };
 
     /**
@@ -266,7 +272,7 @@
 ////////////////////////////////
 
 function_code
-    : statement_list                                        { $<node>$ = new CScriptSyntaxNode_Code( yylval.context, $<node>1 ); g_FunctionParser->SetRootSyntaxNode( $<node>$ ); }
+    : statement_list                                        { $<node>$ = new CScriptSyntaxNode_ListItem( yylval.context, $<node>1 ); g_FunctionParser->SetRootSyntaxNode( $<node>$ ); }
     ;
 
 ////////////////////////////////
@@ -274,43 +280,98 @@ function_code
 ////////////////////////////////
 
 statement_list
-    : statement statement_list                              { $<node>$ = new CScriptSyntaxNode_Code( yylval.context, $<node>1 ); ( ( CScriptSyntaxNode_Code* )$<node>$ )->AddNode( $<node>2 ); }
+    : statement statement_list                              { $<node>$ = new CScriptSyntaxNode_ListItem( yylval.context, $<node>1 ); ( ( CScriptSyntaxNode_ListItem* )$<node>$ )->AddNode( $<node>2 ); }
     | /* empty */                                           { $<node>$ = new CScriptSyntaxNode_Nop( yylval.context ); }
     ;
 
 statement
-    : empty_statement ';'                                   { $<node>$ = $<node>1; }
-    | expression_statement ';'                              { $<node>$ = $<node>1; }
-    | jump_statement ';'                                    { $<node>$ = $<node>1; }
+    : empty_statement                                       { $<node>$ = $<node>1; }
+    | expression_statement                                  { $<node>$ = $<node>1; }
+    | jump_statement                                        { $<node>$ = $<node>1; }
     ;
 
 empty_statement
-    : ';'                                                   { $<node>$ = nullptr; }
+    : /* empty */ ';'                                       { $<node>$ = nullptr; }
     ;
 
 expression_statement
-    : postfix_expression                                    { $<node>$ = $<node>1; }    
+    : expression ';'                                        { $<node>$ = $<node>1; }    
     ;
 
 jump_statement
-    : TOKEN_RETURN                                          { $<node>$ = new CScriptSyntaxNode_Return( $<context>1 ); }
+    : TOKEN_RETURN ';'                                      { $<node>$ = new CScriptSyntaxNode_Return( $<context>1 ); }
     ;
 
 ////////////////////////////////
 // EXPRESSIONS
 ////////////////////////////////
 
+expression
+    : primary_expression                                    { $<node>$ = $<node>1; }
+    ;
+
+primary_expression
+    : postfix_expression                                    { $<node>$ = $<node>1; }
+    | base_const                                            { $<node>$ = $<node>1; }
+    ;
+
 postfix_expression
     : prefix_expression                                     { $<node>$ = $<node>1; }
-    | postfix_expression '(' ')'                            { $<node>$ = new CScriptSyntaxNode_FuncCall( MergeContext( $<context>1, $<context>3 ), $<node>1 ); }
+    | postfix_expression '(' func_param_list ')'            { $<node>$ = new CScriptSyntaxNode_FuncCall( MergeContext( $<context>1, $<context>4 ), $<node>1, $<node>3 ); }
 
 prefix_expression
+    : base_ident                                            { $<node>$ = $<node>1; }
+    ;
+
+func_param_list
+    : func_expression_list                                  { $<node>$ = $<node>1; }
+    ;
+
+func_expression_list
+    : func_expression                                       { $<node>$ = $<node>1; }
+    | func_expression ',' func_expression_list              { $<node>$ = new CScriptSyntaxNode_ListItem( yylval.context, $<node>1 ); ( ( CScriptSyntaxNode_ListItem* )$<node>$ )->AddNode( $<node>3 ); }
+    ;
+
+func_expression
+    : expression                                            { $<node>$ = $<node>1; }
+    | /* empty */                                           { $<node>$ = nullptr; }
+    ;
+
+base_ident
     : ident                                                 { $<node>$ = new CScriptSyntaxNode_Ident( yylval.context, $<string>1 ); }
+    ;
+
+base_const
+    : integer_const                                         { $<node>$ = $<node>1; }
+    ;
+
+integer_const
+    : integer                                               { $<node>$ = new CScriptSyntaxNode_IntConst( $<context>1, $<integer>1 ); }
     ;
 
 ////////////////////////////////
 // TERMINALS
 //////////////////////////////// 
+
+integer
+    : TOKEN_INTEGER                                         {
+                                                                Assert( !$<token>1.empty() );
+                                                                if ( !L_Strtoi( ( int32& )$<integer>$, $<token>1.data(), nullptr, NUMBER_BASE_AUTO ) )
+                                                                {
+                                                                    if ( errno == ERANGE )
+                                                                    {
+                                                                        yyerror( "Integer overflow" );
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        yyerror( "Token is not a number" );
+                                                                    }
+                                                                    YYERROR;
+                                                                }
+
+                                                                $<string>$ = $<token>1; $<context>$ = $<context>1;
+                                                            }
+    ;
 
 ident
 	: TOKEN_IDENT                                           { $<string>$ = $<token>1; }

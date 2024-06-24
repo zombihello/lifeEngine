@@ -44,10 +44,10 @@ protected:
 	virtual void VisitSyntaxNode_Nop( class CScriptSyntaxNode_Nop* InNode ) override;
 
 	/**
-	 * @brief Visit syntax node 'code'
+	 * @brief Visit syntax node 'list item'
 	 * @param InNode	Node to visit
 	 */
-	virtual void VisitSyntaxNode_Code( class CScriptSyntaxNode_Code* InNode ) override;
+	virtual void VisitSyntaxNode_ListItem( class CScriptSyntaxNode_ListItem* InNode ) override;
 
 	/**
 	 * @brief Visit syntax node 'ident'
@@ -67,10 +67,55 @@ protected:
 	 */
 	virtual void VisitSyntaxNode_Return( class CScriptSyntaxNode_Return* InNode ) override;
 
+	/**
+	 * @brief Visit syntax node 'integer constant'
+	 * @param InNode	Node to visit
+	 */
+	virtual void VisitSyntaxNode_IntConst( class CScriptSyntaxNode_IntConst* InNode ) override;
+
 private:
-	bool						bHasError;		/**< There were syntax errors */
-	const CScriptClassStub&		classStub;		/**< Class stub where functionStub is */
-	const CScriptFunctionStub&	functionStub;	/**< Function stub where checkable code is */
+	/**
+	 * @brief Expression value type
+	 */
+	enum EExpressionValueType
+	{
+		EVT_Void,		/**< Void */
+		EVT_Int			/**< Integer */
+
+		//
+		// Add here your a new expression value type
+		//
+	};
+
+	/**
+	 * @brief Last visited node data
+	 */
+	struct LastVisitedNodeData
+	{
+		/**
+		 * @brief Constructor
+		 */
+		LastVisitedNodeData()
+			: expressionValueType( EVT_Void )
+			, function( nullptr )
+		{}
+
+		EExpressionValueType	expressionValueType;	/**< Expression value type */
+		CFunction*				function;				/**< Cached CFunction */
+	};
+
+	/**
+	 * @brief Check expression value type
+	 * @param InExpressionValueType		Expression value type to check
+	 * @param InProperty				Expected type
+	 * @return Return TRUE if expression value type is valid, otherwise FALSE
+	 */
+	bool CheckExpressionValueType( EExpressionValueType InExpressionValueType, CProperty* InProperty );
+
+	bool						bHasError;				/**< There were syntax errors */
+	const CScriptClassStub&		classStub;				/**< Class stub where functionStub is */
+	const CScriptFunctionStub&	functionStub;			/**< Function stub where checkable code is */
+	LastVisitedNodeData			lastVisitedNodeData;	/**< Data of last visited node */
 };
 
 #endif // !SCRIPTSYNTAXCHECKERVISITOR_H

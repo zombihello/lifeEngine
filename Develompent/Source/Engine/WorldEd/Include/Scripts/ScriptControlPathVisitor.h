@@ -89,10 +89,10 @@ protected:
 	virtual void VisitSyntaxNode_Nop( class CScriptSyntaxNode_Nop* InNode ) override;
 
 	/**
-	 * @brief Visit syntax node 'code'
+	 * @brief Visit syntax node 'list item'
 	 * @param InNode	Node to visit
 	 */
-	virtual void VisitSyntaxNode_Code( class CScriptSyntaxNode_Code* InNode ) override;
+	virtual void VisitSyntaxNode_ListItem( class CScriptSyntaxNode_ListItem* InNode ) override;
 
 	/**
 	 * @brief Visit syntax node 'ident'
@@ -111,6 +111,12 @@ protected:
 	 * @param InNode	Node to visit
 	 */
 	virtual void VisitSyntaxNode_Return( class CScriptSyntaxNode_Return* InNode ) override;
+
+	/**
+	 * @brief Visit syntax node 'integer constant'
+	 * @param InNode	Node to visit
+	 */
+	virtual void VisitSyntaxNode_IntConst( class CScriptSyntaxNode_IntConst* InNode ) override;
 
 private:
 	/**

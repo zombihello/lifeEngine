@@ -21,10 +21,11 @@
 enum EScriptSyntaxNodeType
 {
 	SSNT_Nop,			/**< No operation */
-	SSNT_Code,			/**< Code */
+	SSNT_ListItem,		/**< List of items */
 	SSNT_Ident,			/**< Identifier */
 	SSNT_FuncCall,		/**< Function call */
-	SSNT_Return			/**< Return */
+	SSNT_Return,		/**< Return */
+	SSNT_IntConst		/**< Integer constant */
 
 	//
 	// Add here your a new syntax node type
@@ -41,10 +42,10 @@ public:
 	/**
 	 * @brief Constructor
 	 * 
-	 * @param InType		Syntax node type
+	 * @param InNodeType	Syntax node type
 	 * @param InContext		Related place in the source code
 	 */
-	CScriptSyntaxNode_Base( EScriptSyntaxNodeType InType, const ScriptFileContext& InContext );
+	CScriptSyntaxNode_Base( EScriptSyntaxNodeType InNodeType, const ScriptFileContext& InContext );
 
 	/**
 	 * @brief Destructor
@@ -97,13 +98,13 @@ public:
 	 * @brief Get node type
 	 * @return Return node type
 	 */
-	FORCEINLINE EScriptSyntaxNodeType GetType() const
+	FORCEINLINE EScriptSyntaxNodeType GetNodeType() const
 	{
-		return type;
+		return nodeType;
 	}
 
 private:
-	EScriptSyntaxNodeType		type;		/**< Syntax node type */
+	EScriptSyntaxNodeType		nodeType;	/**< Syntax node type */
 	ScriptFileContext			context;	/**< Related place in the source code */
 	CScriptSyntaxNode_Base*		parentNode;	/**< Parent syntax node */
 };
@@ -132,9 +133,9 @@ public:
 
 /**
  * @ingroup WorldEd
- * @brief Syntax node of code
+ * @brief Syntax node list of items
  */
-class CScriptSyntaxNode_Code : public CScriptSyntaxNode_Base
+class CScriptSyntaxNode_ListItem : public CScriptSyntaxNode_Base
 {
 public:
 	/**
@@ -143,12 +144,12 @@ public:
 	 * @param InContext		Related place in the source code
 	 * @param InCodeRoot	Root of the code
 	 */
-	CScriptSyntaxNode_Code( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InCodeRoot = nullptr );
+	CScriptSyntaxNode_ListItem( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InCodeRoot = nullptr );
 
 	/**
 	 * @brief Destructor
 	 */
-	virtual ~CScriptSyntaxNode_Code();
+	virtual ~CScriptSyntaxNode_ListItem();
 
 	/**
 	 * @brief Accept visitor
@@ -243,12 +244,15 @@ public:
 	 *
 	 * @param InContext			Related place in the source code
 	 * @param InFunctionName	Function name
+	 * @param InFunctionParams	Function parameters
 	 */
-	CScriptSyntaxNode_FuncCall( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InFunctionName )
+	CScriptSyntaxNode_FuncCall( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InFunctionName, CScriptSyntaxNode_Base* InFunctionParams )
 		: CScriptSyntaxNode_Base( SSNT_FuncCall, InContext )
 		, nameNode( nullptr )
+		, parametersNode( nullptr )
 	{
 		SetNameNode( InFunctionName );
+		SetParametersNode( InFunctionParams );
 	}
 
 	/**
@@ -276,6 +280,20 @@ public:
 	}
 
 	/**
+	 * @brief Set function parameters node
+	 * @param InFunctonParams	A new function parameters node
+	 */
+	FORCEINLINE void SetParametersNode( CScriptSyntaxNode_Base* InFunctonParams )
+	{
+		if ( parametersNode )
+		{
+			delete parametersNode;
+			parametersNode = nullptr;
+		}
+		parametersNode = InFunctonParams;
+	}
+
+	/**
 	 * @brief Accept visitor
 	 * @param InVisitor		Visitor
 	 */
@@ -290,8 +308,18 @@ public:
 		return nameNode;
 	}
 
+	/**
+	 * @brief Get function parameters
+	 * @return Return function parameters
+	 */
+	FORCEINLINE CScriptSyntaxNode_Base* GetParametersNode() const
+	{
+		return parametersNode;
+	}
+
 private:
 	CScriptSyntaxNode_Base*		nameNode;		/**< Function name */
+	CScriptSyntaxNode_Base*		parametersNode;	/**< Function parameters */
 };
 
 /**
@@ -314,6 +342,52 @@ public:
 	 * @param InVisitor		Visitor
 	 */
 	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
+};
+
+/**
+ * @ingroup WorldEd
+ * @brief Syntax node of integer constant
+ */
+class CScriptSyntaxNode_IntConst : public CScriptSyntaxNode_Base
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InContext		Related place in the source code
+	 * @param InValue		Integer value
+	 */
+	CScriptSyntaxNode_IntConst( const ScriptFileContext& InContext, uint32 InValue )
+		: CScriptSyntaxNode_Base( SSNT_IntConst, InContext )
+		, value( InValue )
+	{}
+
+	/**
+	 * @brief Accept visitor
+	 * @param InVisitor		Visitor
+	 */
+	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
+
+	/**
+	 * @brief Set integer value
+	 * @param InValue	A new value
+	 */
+	FORCEINLINE void SetValue( uint32 InValue )
+	{
+		value = InValue;
+	}
+
+	/**
+	 * @brief Get integer value
+	 * @return Return integer value
+	 */
+	FORCEINLINE uint32 GetValue() const
+	{
+		return value;
+	}
+
+private:
+	uint32		value;		/**< Integer value */
 };
 
 #endif // !SCRIPTSYNTAXNODE_H

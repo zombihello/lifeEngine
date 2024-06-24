@@ -19,7 +19,11 @@
  */
 enum
 {
-	COPY_ALL_CHARACTERS = -1		/**< Used in L_Strncat for copy all characters from source string */
+	COPY_ALL_CHARACTERS		= -1,		/**< Used in L_Strncat for copy all characters from source string */
+	NUMBER_BASE_AUTO		= 0,		/**< Used in L_Strtoi to auto detect based on format of number */
+	NUMBER_BASE_OCTAL		= 8,		/**< Used in L_Strtoi to use number base is eight */
+	NUMBER_BASE_DECIMAL		= 10,		/**< Used in L_Strtoi to use number base is ten */
+	NUMBER_BASE_HEX			= 16,		/**< Used in L_Strtoi to use number base is sixteen */
 };
 
 /**
@@ -392,6 +396,46 @@ FORCEINLINE float L_Atof( const achar* InString )
 FORCEINLINE float L_Atof( const tchar* InString )
 {
 	return wcstof( InString, 0 );
+}
+
+/**
+ * @ingroup Core
+ * @brief Convert string to integer (for ANSI strings)
+ *
+ * If the converted value falls out of range of corresponding return type, a range error occurs 
+ * (setting errno to ERANGE) and LONG_MAX, LONG_MIN, LLONG_MAX or LLONG_MIN is returned
+ * 
+ * @param OutValue			Converted string to integer
+ * @param InString			Pointer to the null-terminated byte string to be interpreted
+ * @param OutStringEnd		Pointer to a pointer to character
+ * @param InBase			Base of the interpreted integer value (see NUMBER_BASE_AUTO, NUMBER_BASE_OCTAL, NUMBER_BASE_DECIMAL, NUMBER_BASE_HEX)
+ * @return Return TRUE if no errors, otherwise FALSE
+ */
+FORCEINLINE bool L_Strtoi( int32& OutValue, const achar* InString, achar** OutStringEnd, uint32 InBase )
+{
+	errno = 0;
+	OutValue = ( int32 )strtol( InString, OutStringEnd, InBase );
+	return errno == 0;
+}
+
+/**
+ * @ingroup Core
+ * @brief Convert string to integer (for Unicode strings)
+ *
+ * If the converted value falls out of range of corresponding return type, a range error occurs
+ * (setting errno to ERANGE) and LONG_MAX, LONG_MIN, LLONG_MAX or LLONG_MIN is returned
+ *
+ * @param OutValue			Converted string to integer
+ * @param InString			Pointer to the null-terminated byte string to be interpreted
+ * @param OutStringEnd		Pointer to a pointer to character
+ * @param InBase			Base of the interpreted integer value (see NUMBER_BASE_AUTO, NUMBER_BASE_OCTAL, NUMBER_BASE_DECIMAL, NUMBER_BASE_HEX)
+ * @return Return TRUE if no errors, otherwise FALSE
+ */
+FORCEINLINE bool L_Strtoi( int32& OutValue, const tchar* InString, tchar** OutStringEnd, uint32 InBase )
+{
+	errno = 0;
+	OutValue = ( int32 )wcstol( InString, OutStringEnd, InBase );
+	return errno == 0;
 }
 
 /**

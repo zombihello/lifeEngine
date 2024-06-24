@@ -23,16 +23,16 @@ void CScriptSyntaxPrintVisitor::VisitSyntaxNode_Nop( class CScriptSyntaxNode_Nop
 
 /*
 ==================
-CScriptSyntaxPrintVisitor::VisitSyntaxNode_Code
+CScriptSyntaxPrintVisitor::VisitSyntaxNode_ListItem
 ==================
 */
-void CScriptSyntaxPrintVisitor::VisitSyntaxNode_Code( class CScriptSyntaxNode_Code* InNode )
+void CScriptSyntaxPrintVisitor::VisitSyntaxNode_ListItem( class CScriptSyntaxNode_ListItem* InNode )
 {
 	std::wstring									trailingSpace;
 	const std::vector<CScriptSyntaxNode_Base*>&		children = InNode->GetNodes();
 	GetTrailingSpace( printLevel, trailingSpace );
 
-	Logf( TEXT( "%p(%4i):%s Code (Count: %i)\n" ), InNode, InNode->GetContext().line, trailingSpace.c_str(), children.size() );
+	Logf( TEXT( "%p(%4i):%s ListItem (Count: %i)\n" ), InNode, InNode->GetContext().line, trailingSpace.c_str(), children.size() );
 	for ( uint32 index = 0, count = children.size(); index < count; ++index )
 	{
 		TGuardValue<uint32>		printLevelGuard( printLevel, printLevel + 2 );
@@ -61,13 +61,23 @@ void CScriptSyntaxPrintVisitor::VisitSyntaxNode_FuncCall( class CScriptSyntaxNod
 {
 	std::wstring				trailingSpace;
 	CScriptSyntaxNode_Base*		syntaxNameNode = InNode->GetNameNode();
+	CScriptSyntaxNode_Base*		syntaxParamsNode = InNode->GetParametersNode();
 	GetTrailingSpace( printLevel, trailingSpace );
 
 	Logf( TEXT( "%p(%4i):%s FuncCall\n" ), InNode, InNode->GetContext().line, trailingSpace.c_str() );
+	
+	// Print function name
 	if ( syntaxNameNode )
 	{
 		TGuardValue<uint32>		printLevelGuard( printLevel, printLevel + 2 );
 		syntaxNameNode->AcceptVisitor( *this );
+	}
+
+	// Print function parameters
+	if ( syntaxParamsNode )
+	{
+		TGuardValue<uint32>		printLevelGuard( printLevel, printLevel + 2 );
+		syntaxParamsNode->AcceptVisitor( *this );
 	}
 }
 
@@ -81,4 +91,16 @@ void CScriptSyntaxPrintVisitor::VisitSyntaxNode_Return( class CScriptSyntaxNode_
 	std::wstring	trailingSpace;
 	GetTrailingSpace( printLevel, trailingSpace );
 	Logf( TEXT( "%p(%4i):%s Return\n" ), InNode, InNode->GetContext().line, trailingSpace.c_str() );
+}
+
+/*
+==================
+CScriptSyntaxPrintVisitor::VisitSyntaxNode_IntConst
+==================
+*/
+void CScriptSyntaxPrintVisitor::VisitSyntaxNode_IntConst( class CScriptSyntaxNode_IntConst* InNode )
+{
+	std::wstring	trailingSpace;
+	GetTrailingSpace( printLevel, trailingSpace );
+	Logf( TEXT( "%p(%4i):%s IntConst (Value: %i)\n" ), InNode, InNode->GetContext().line, trailingSpace.c_str(), InNode->GetValue() );
 }

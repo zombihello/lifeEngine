@@ -8,8 +8,8 @@
 CScriptSyntaxNode_Base::CScriptSyntaxNode_Base
 ==================
 */
-CScriptSyntaxNode_Base::CScriptSyntaxNode_Base( EScriptSyntaxNodeType InType, const ScriptFileContext& InContext )
-	: type( InType )
+CScriptSyntaxNode_Base::CScriptSyntaxNode_Base( EScriptSyntaxNodeType InNodeType, const ScriptFileContext& InContext )
+	: nodeType( InNodeType )
 	, context( InContext )
 	, parentNode( nullptr )
 {}
@@ -36,21 +36,21 @@ void CScriptSyntaxNode_Nop::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 
 /*
 ==================
-CScriptSyntaxNode_Code::CScriptSyntaxNode_Code
+CScriptSyntaxNode_ListItem::CScriptSyntaxNode_ListItem
 ==================
 */
-CScriptSyntaxNode_Code::CScriptSyntaxNode_Code( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InCodeRoot /* = nullptr */ )
-	: CScriptSyntaxNode_Base( SSNT_Code, InContext )
+CScriptSyntaxNode_ListItem::CScriptSyntaxNode_ListItem( const ScriptFileContext& InContext, CScriptSyntaxNode_Base* InCodeRoot /* = nullptr */ )
+	: CScriptSyntaxNode_Base( SSNT_ListItem, InContext )
 {
 	MergeNode( InCodeRoot );
 }
 
 /*
 ==================
-CScriptSyntaxNode_Code::~CScriptSyntaxNode_Code
+CScriptSyntaxNode_ListItem::~CScriptSyntaxNode_ListItem
 ==================
 */
-CScriptSyntaxNode_Code::~CScriptSyntaxNode_Code()
+CScriptSyntaxNode_ListItem::~CScriptSyntaxNode_ListItem()
 {
 	for ( uint32 index = 0, count = nodes.size(); index < count; ++index )
 	{
@@ -60,27 +60,27 @@ CScriptSyntaxNode_Code::~CScriptSyntaxNode_Code()
 
 /*
 ==================
-CScriptSyntaxNode_Code::AcceptVisitor
+CScriptSyntaxNode_ListItem::AcceptVisitor
 ==================
 */
-void CScriptSyntaxNode_Code::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
+void CScriptSyntaxNode_ListItem::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 {
-	InVisitor.VisitSyntaxNode_Code( this );
+	InVisitor.VisitSyntaxNode_ListItem( this );
 }
 
 /*
 ==================
-CScriptSyntaxNode_Code::MergeNode
+CScriptSyntaxNode_ListItem::MergeNode
 ==================
 */
-void CScriptSyntaxNode_Code::MergeNode( CScriptSyntaxNode_Base* InNode )
+void CScriptSyntaxNode_ListItem::MergeNode( CScriptSyntaxNode_Base* InNode )
 {
 	// If node is valid we add it to the list
 	if ( InNode )
 	{
-		if ( InNode->GetType() == SSNT_Code )
+		if ( InNode->GetNodeType() == SSNT_ListItem )
 		{
-			CScriptSyntaxNode_Code*			listNode = ( CScriptSyntaxNode_Code* )InNode;
+			CScriptSyntaxNode_ListItem*			listNode = ( CScriptSyntaxNode_ListItem* )InNode;
 			nodes.reserve( listNode->GetNumNodes() );
 			for ( uint32 index = 0, count = listNode->GetNumNodes(); index < count; ++index )
 			{
@@ -142,4 +142,15 @@ CScriptSyntaxNode_Return::AcceptVisitor
 void CScriptSyntaxNode_Return::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 {
 	InVisitor.VisitSyntaxNode_Return( this );
+}
+
+
+/*
+==================
+CScriptSyntaxNode_IntConst::AcceptVisitor
+==================
+*/
+void CScriptSyntaxNode_IntConst::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
+{
+	InVisitor.VisitSyntaxNode_IntConst( this );
 }
