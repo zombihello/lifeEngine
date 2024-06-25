@@ -79,6 +79,24 @@ void CFunction::Serialize( class CArchive& InArchive )
 			offset += sizeof( uptrint );
 			break;
 		}
+
+		case OP_IntConst:
+		{
+			int32	value = 0;
+			if ( InArchive.IsSaving() )
+			{
+				Memory::Memcpy( &value, &bytecode[index + 1], sizeof( int32 ) );
+			}
+			InArchive << value;
+			if ( InArchive.IsLoading() )
+			{
+				bytecodeProxy << value;
+			}
+
+			offset += sizeof( int32 );
+			break;
+		}
+
 		}
 
 		index += offset;

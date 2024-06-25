@@ -29,6 +29,25 @@ extern CBaseMalloc*		g_Malloc;
 
 /**
  * @ingroup Core
+ * @brief Allocate memory at stack
+ * @note This can't be a function, even FORCEINLINE'd because there's no guarantee that the memory returned in a function will stick around for the caller to use
+ * 
+ * @param InSize	Size memory to allocate at stack
+ */
+#define Memory_Alloca( InSize )								( InSize > 0 ? ( void* )( ( ( ptrint )alloca( InSize + 15 ) + 15 ) & ~15 ) : 0 )
+
+/**
+ * @ingroup Core
+ * @brief Allocate memory at stack with specific alignment
+ * @note This can't be a function, even FORCEINLINE'd because there's no guarantee that the memory returned in a function will stick around for the caller to use
+ *
+ * @param InSize		Size memory to allocate at stack
+ * @param InAlignment	Required alignment
+ */
+#define Memory_AllocaAligned( InSize, InAlignment )			( InSize > 0 ? ( InAlignment <= 16 ? Memory_Alloca( InSize ) : ( void* )( ( ( ptrint )alloca( InSize + InAlignment-1 ) + InAlignment-1 ) & ~( InAlignment-1 ) ) ) : 0 )
+
+/**
+ * @ingroup Core
  * @brief Memory
  */
 struct Memory

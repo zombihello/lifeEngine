@@ -11,6 +11,7 @@ ScriptFrame::ScriptFrame( CObject* InObject )
 	, node( nullptr )
 	, bytecode( nullptr )
 	, previousFrame( nullptr )
+	, localData( nullptr )
 {}
 
 /*
@@ -18,15 +19,13 @@ ScriptFrame::ScriptFrame( CObject* InObject )
 ScriptFrame::ScriptFrame
 ==================
 */
-ScriptFrame::ScriptFrame( CObject* InObject, CFunction* InFunction, ScriptFrame* InPreviousFrame /* = nullptr */ )
+ScriptFrame::ScriptFrame( CObject* InObject, CFunction* InFunction, uint32 InByteCodeOffset, byte* InLocalData, ScriptFrame* InPreviousFrame /* = nullptr */ )
 	: object( InObject )
 	, node( InFunction )
-	, bytecode( nullptr )
+	, bytecode( node->GetBytecode().data() + InByteCodeOffset )
 	, previousFrame( InPreviousFrame )
-{
-	Assert( node );
-	bytecode = node->GetBytecode().data();
-}
+	, localData( InLocalData )
+{}
 
 /*
 ==================

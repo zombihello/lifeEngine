@@ -1,3 +1,4 @@
+#include "Scripts/ScriptFrame.h"
 #include "Actors/StaticMesh.h"
 #include "Actors/Audio.h"
 #include "Actors/BoxCollision.h"

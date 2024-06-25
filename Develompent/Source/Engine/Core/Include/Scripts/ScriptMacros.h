@@ -14,6 +14,8 @@
 // Forward declarations
 class CObject;
 
+#define RESULT_DECLARE		void* const InResult
+
 /**
  * @ingroup Core
  * @brief Macro declare function for callable in/from LifeScript
@@ -21,7 +23,7 @@ class CObject;
  * @param TFunction     Function
  */
 #define DECLARE_FUNCTION( TFunction ) \
-    void exec##TFunction( ScriptFrame& InStack )
+    void exec##TFunction( ScriptFrame& InStack, RESULT_DECLARE )
 
 /**
  * @ingroup Core
@@ -35,9 +37,22 @@ class CObject;
 
 /**
  * @ingroup Core
+ * @brief Get 32bit integer parameter at current executing bytecode for native function
+ * @param InVariable	Variable name
+ */
+#define STACKFRAME_GET_INT32( InVariable )		int32 InVariable = 0; InStack.Step( InStack.object, &InVariable );
+
+/**
+ * @ingroup Core
+ * @brief End of function parameters (it need for skip opcode 'OP_EndFunctionParams')
+ */
+#define STACKFRAME_GET_FINISH					++InStack.bytecode;
+
+/**
+ * @ingroup Core
  * @brief The type of a function callable by script
  */
-typedef void ( CObject::*ScriptFn_t )( struct ScriptFrame& InStack );
+typedef void ( CObject::*ScriptFn_t )( struct ScriptFrame& InStack, RESULT_DECLARE );
 
 /**
  * @ingroup Core
@@ -47,6 +62,15 @@ struct ScriptNativeFunctionLookup
 {
 	const achar*	name;		/**< Function name */
 	ScriptFn_t		FunctionFn;	/**< Pointer to function */
+};
+
+/**
+ * @ingroup Core
+ * @brief Size of the buffer used by LifeScript virtual machine for unused simple return values
+ */
+enum
+{
+	MAX_SIMPLE_RETURN_VALUE_SIZE = 64
 };
 
 /**

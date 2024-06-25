@@ -141,7 +141,7 @@ void CScriptTypeResolver::InitBuiltInTypes()
 	}
 
 	// Int type
-	AddBuiltInType( TEXT( "int" ), TEXT( "int" ), 
+	AddBuiltInType( TEXT( "int32" ), TEXT( "int" ), 
 					[]( const ScriptTypeResolveParams& InParams ) -> CProperty* 
 					{
 						return new( InParams.outer, InParams.name, InParams.objectFlags ) CIntProperty( InParams.offset, InParams.category, InParams.description, InParams.propertyFlags );

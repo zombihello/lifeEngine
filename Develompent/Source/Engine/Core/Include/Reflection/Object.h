@@ -588,18 +588,23 @@ public:
 	/**
 	 * @brief Process script function
 	 * @param InFunction    Function to call
+     * @param InParams      Function parameters
+     * @param OutResult     Output result from function
 	 */
-	void ProcessFunction( class CFunction* InFunction );
+	void ProcessFunction( class CFunction* InFunction, void* InParams, void* OutResult = nullptr );
 
 	/**
 	 * @brief Internal function call processing
-	 * @param InStack   Script stack
+	 * @param InStack       Script stack
+     * @param InResult		Output result of operations
 	 */
-	void ProcessInternal( struct ScriptFrame& InStack );
+	void ProcessInternal( struct ScriptFrame& InStack, RESULT_DECLARE );
 
 	// LifeScript opcodes
-    DECLARE_FUNCTION( Nop );     // OP_Nop
-    DECLARE_FUNCTION( Call );    // Op_Call
+    DECLARE_FUNCTION( Nop );        // OP_Nop
+    DECLARE_FUNCTION( Call );       // Op_Call
+    DECLARE_FUNCTION( Return );     // OP_Return
+    DECLARE_FUNCTION( IntConst );   // OP_IntConst
 
 	// LifeScript native functions
 	DECLARE_FUNCTION( StackTrace );
@@ -719,6 +724,14 @@ private:
     //
     // LifeScript virtual machine stuff
     //
+
+    /**
+     * @brief Call a function
+     * @param InStack       Script stack
+     * @param InResult		Output result of operations
+     * @param InFunction    Function to call
+     */
+    void CallFunction( struct ScriptFrame& InStack, RESULT_DECLARE, CFunction* InFunction );
 
     /**
      * @brief Typedef map of registered native functions
