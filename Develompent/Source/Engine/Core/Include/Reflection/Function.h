@@ -11,6 +11,7 @@
 
 #include "Reflection/Struct.h"
 #include "Scripts/ScriptMacros.h"
+#include "System/MemoryArchive.h"
 
 /**
  * @ingroup Core
@@ -39,7 +40,7 @@ public:
 	 * @brief Serialize object
 	 * @param InArchive     Archive for serialize
 	 */
-	virtual void Serialize( class CArchive& InArchive ) override;
+	virtual void Serialize( CArchive& InArchive ) override;
 
 	/**
 	 * @brief Bind function
@@ -114,6 +115,57 @@ public:
 	}
 
 private:
+	/**
+	 * @brief Serialize opcode
+	 * @param InOutByteCodeIndex	Bytecode index. After serialization will be shifted on size of a type
+	 * @param InArchive				Archive
+	 */
+	void SerializeOpcode( uint32& InOutByteCodeIndex, CArchive& InArchive );
+
+	/**
+	 * @brief Serialize opcode parameter
+	 * @param InOutByteCodeIndex		Bytecode index. After serialization will be shifted on size of a type
+	 * @param InArchive					Archive
+	 */
+	template<typename TType>
+	FORCEINLINE void SerializeOpcodeParam( uint32& InOutByteCodeIndex, CArchive& InArchive )
+	{
+		TType		value;
+		if ( InArchive.IsSaving() )
+		{
+			Memory::Memcpy( &value, &bytecode[InOutByteCodeIndex], sizeof( TType ) );
+		}
+		InArchive << value;
+		if ( InArchive.IsLoading() )
+		{
+			Memory::Memcpy( &bytecode[InOutByteCodeIndex], &value, sizeof( TType ) );
+		}
+
+		InOutByteCodeIndex += sizeof( TType );
+	}
+
+	/**
+	 * @brief Serialize opcode parameter (for pointer types, e.g: CFunction*, CClass*)
+	 * @param InOutByteCodeIndex		Bytecode index. After serialization will be shifted on size of a type
+	 * @param InArchive					Archive
+	 */
+	template<typename TType>
+	FORCEINLINE void SerializeOpcodeParamPtr( uint32& InOutByteCodeIndex, CArchive& InArchive )
+	{
+		TType*		value;
+		if ( InArchive.IsSaving() )
+		{
+			Memory::Memcpy( &value, &bytecode[InOutByteCodeIndex], sizeof( uptrint ) );
+		}
+		InArchive << value;
+		if ( InArchive.IsLoading() )
+		{
+			Memory::Memcpy( &bytecode[InOutByteCodeIndex], &value, sizeof( uptrint ) );
+		}
+
+		InOutByteCodeIndex += sizeof( uptrint );
+	}
+
 	uint32				functionFlags;	/**< Function flags */
 	ScriptFn_t			FunctionFn;		/**< Function to call */
 	std::vector<byte>	bytecode;		/**< Script bytecode */

@@ -246,6 +246,12 @@ public:
 	virtual uint32 GetSize() override;
 
 	/**
+	 * @brief Get linker
+	 * @return Return pointer to linker if this archive is a CLinkerLoad or CLinkerSave, otherwise NULL
+	 */
+	virtual CLinker* GetLinker() const override;
+
+	/**
 	 * @brief Serialize data
 	 *
 	 * @param InBuffer	Pointer to buffer for serialize
@@ -307,6 +313,24 @@ public:
 	FORCEINLINE bool HasLoader() const
 	{
 		return loader != nullptr;
+	}
+
+	/**
+	 * @brief Set a new loader archive (used by CFunction to serialize bytecode)
+	 * @param InNewLoader		A new loader
+	 */
+	FORCEINLINE void SetLoader( CArchive* InNewLoader )
+	{
+		loader = InNewLoader;
+	}
+
+	/**
+	 * @brief Get loader archive
+	 * @return Return loader archive if it opened, otherwise NULL
+	 */
+	FORCEINLINE CArchive* GetLoader() const
+	{
+		return loader;
 	}
 
 protected:

@@ -158,6 +158,15 @@ public:
 	virtual uint32 GetSize() { return 0; }
 
 	/**
+	 * @brief Get linker
+	 * @return Return pointer to linker if this archive is a CLinkerLoad or CLinkerSave, otherwise NULL
+	 */
+	virtual class CLinker* GetLinker() const 
+	{ 
+		return nullptr; 
+	}
+
+	/**
 	 * @brief Set archive version
 	 * @param InVer		New archive version
 	 */

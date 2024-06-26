@@ -1,7 +1,8 @@
 #include "Misc/StringConv.h"
 #include "Reflection/Class.h"
 #include "Reflection/Function.h"
-#include "System/MemoryArchive.h"
+#include "Reflection/LinkerLoad.h"
+#include "Reflection/LinkerSave.h"
 
 IMPLEMENT_CLASS( CFunction )
 IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CFunction )
@@ -39,67 +40,138 @@ void CFunction::Serialize( class CArchive& InArchive )
 	Super::Serialize( InArchive );
 	InArchive << functionFlags;
 
-	// Serialize bytecode
-	CMemoryWriter	bytecodeProxy( bytecode );
-	uint32			bytecodeSize = bytecode.size();
+	// Serialize bytecode size
+	uint32		bytecodeSize				= bytecode.size();
 	InArchive << bytecodeSize;
-	for ( uint32 index = 0; index < bytecodeSize; ++index )
+	uint32		storageBytecodeSize			= 0;
+	uint32		storageBytecodeSizeOffset	= InArchive.Tell();
+	InArchive << storageBytecodeSize;
+
+	// Serialize bytecode
+	uint32		currentByteCodeIndex		= 0;
+	uint32		bytecodeStartOffset			= InArchive.Tell();
+	if ( bytecodeSize > 0 )
 	{
-		// Serialize opcode
-		byte	code = OP_Nop;
-		uint32	offset = 0;
-		if ( InArchive.IsSaving() )
+		// Serialize bytecode with linker
+		if ( InArchive.GetLinker() )
 		{
-			code = bytecode[index];
-		}
-		InArchive << code;
-		if ( InArchive.IsLoading() )
-		{
-			bytecodeProxy << code;
-		}
-
-		// Serialize parameters of opcode
-		switch ( code )
-		{
-			// Call a function
-		case OP_Call:
-		{
-			CFunction*	function = nullptr;
-			if ( InArchive.IsSaving() )
-			{
-				Memory::Memcpy( &function, &bytecode[index + 1], sizeof( uptrint ) );
-			}
-			InArchive << function;
+			// Load bytecode
 			if ( InArchive.IsLoading() )
 			{
-				bytecodeProxy << ( uptrint )function;
+				// Preallocate size of bytecode array
+				bytecode.resize( bytecodeSize );
+
+				// Get linker to use it to load the byte code
+				CLinkerLoad*		linkerLoad = ( CLinkerLoad* )InArchive.GetLinker();
+				Assert( linkerLoad );
+
+				// Remember original loader archive
+				CArchive*			originalLoader = linkerLoad->GetLoader();
+			 
+				// Preload the bytecode
+				std::vector<byte>	tmpBytecode;
+				tmpBytecode.resize( storageBytecodeSize );
+				InArchive.Serialize( tmpBytecode.data(), tmpBytecode.size() );
+
+				// Force reading from the pre-serialized buffer
+				CMemoryReading		memReader( tmpBytecode );
+				linkerLoad->SetLoader( &memReader );
+
+				// Serialize bytecode into memory
+				while ( currentByteCodeIndex < bytecodeSize )
+				{
+					SerializeOpcode( currentByteCodeIndex, InArchive );
+				}
+
+				// Restore original loader
+				linkerLoad->SetLoader( originalLoader );
 			}
+			// Save bytecode
+			else
+			{
+				// Get linker to use it to save the byte code
+				CLinkerSave*		linkerSave = ( CLinkerSave* )InArchive.GetLinker();
+				Assert( linkerSave );
 
-			Assert( function );
-			offset += sizeof( uptrint );
-			break;
+				// Remember original saver archive
+				CArchive*			originalSaver = linkerSave->GetSaver();
+
+				// Force writing to a buffer
+				std::vector<byte>	tmpBytecode;
+				CMemoryWriter		memWriter( tmpBytecode );
+				linkerSave->SetSaver( &memWriter );
+
+				// Serialize bytecode into memory
+				while ( currentByteCodeIndex < bytecodeSize )
+				{
+					SerializeOpcode( currentByteCodeIndex, InArchive );
+				}
+
+				// Restore original saver
+				linkerSave->SetSaver( originalSaver );
+
+				// Serialize on HDD the memory bytes
+				InArchive.Serialize( tmpBytecode.data(), tmpBytecode.size() );
+
+				// Update storage bytecode size
+				uint32			bytecodeEndOffset = InArchive.Tell();
+				storageBytecodeSize = bytecodeEndOffset - bytecodeStartOffset;
+				InArchive.Seek( storageBytecodeSizeOffset );
+				InArchive << storageBytecodeSize;
+				InArchive.Seek( bytecodeEndOffset );
+			}
 		}
-
-		case OP_IntConst:
+		// Serialize bytecode for other things
+		else
 		{
-			int32	value = 0;
-			if ( InArchive.IsSaving() )
+			while ( currentByteCodeIndex < bytecodeSize )
 			{
-				Memory::Memcpy( &value, &bytecode[index + 1], sizeof( int32 ) );
+				SerializeOpcode( currentByteCodeIndex, InArchive );
 			}
-			InArchive << value;
-			if ( InArchive.IsLoading() )
-			{
-				bytecodeProxy << value;
-			}
-
-			offset += sizeof( int32 );
-			break;
 		}
+	}
 
-		}
+	// Check on valid bytecode size
+	if ( currentByteCodeIndex != bytecodeSize )
+	{
+		Sys_Error( TEXT( "Script serialization mismatch: got %i, expected %i" ), currentByteCodeIndex, bytecodeSize );
+	}
+}
 
-		index += offset;
+/*
+==================
+CFunction::SerializeOpcode
+==================
+*/
+void CFunction::SerializeOpcode( uint32& InOutByteCodeIndex, CArchive& InArchive )
+{
+	// Serialize opcode
+	SerializeOpcodeParam<byte>( InOutByteCodeIndex, InArchive );
+	byte	opcode = bytecode[InOutByteCodeIndex-1];
+
+	// Serialize parameters of opcode
+	switch ( opcode )
+	{
+		// Call a function
+	case OP_Call:
+		SerializeOpcodeParamPtr<CFunction>( InOutByteCodeIndex, InArchive );	// Function to call
+		break;
+
+		// Integer constant
+	case OP_IntConst:
+		SerializeOpcodeParam<int32>( InOutByteCodeIndex, InArchive );			// Integer value
+		break;
+
+		// This parameters no have any arguments
+	case OP_Nop:
+	case OP_Return:
+	case OP_EndFunctionParms:
+		break;
+
+		// In default case we raise a critical error
+	default:
+		Sys_Error( TEXT( "Unknown opcode '0x%X' in function '%s'" ), opcode, GetPathName().c_str() );
+		break;
 	}
 }
 

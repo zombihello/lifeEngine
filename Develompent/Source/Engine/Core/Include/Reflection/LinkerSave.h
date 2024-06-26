@@ -73,6 +73,12 @@ public:
 	virtual uint32 GetSize() override;
 
 	/**
+	 * @brief Get linker
+	 * @return Return pointer to linker if this archive is a CLinkerLoad or CLinkerSave, otherwise NULL
+	 */
+	virtual CLinker* GetLinker() const override;
+
+	/**
 	 * @brief Sets a flag indicating that this archive needs to filter editor-only content
 	 * @param InFilterEditorOnly	Whether to filter editor-only content
 	 */
@@ -132,6 +138,24 @@ public:
 	FORCEINLINE std::vector<uint32>& GetNameIndices()
 	{
 		return nameIndices;
+	}
+
+	/**
+	 * @brief Set a new saver archive (used by CFunction to serialize bytecode)
+	 * @param InNewSaver		A new saver
+	 */
+	FORCEINLINE void SetSaver( CArchive* InNewSaver )
+	{
+		saver = InNewSaver;
+	}
+
+	/**
+	 * @brief Get saver archive
+	 * @return Return saver archive if it opened, otherwise NULL
+	 */
+	FORCEINLINE CArchive* GetSaver() const
+	{
+		return saver;
 	}
 
 private:

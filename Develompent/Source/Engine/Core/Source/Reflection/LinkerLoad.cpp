@@ -1871,6 +1871,16 @@ uint32 CLinkerLoad::GetSize()
 
 /*
 ==================
+CLinkerLoad::GetLinker
+==================
+*/
+CLinker* CLinkerLoad::GetLinker() const
+{
+	return ( CLinker* )this;
+}
+
+/*
+==================
 CLinkerLoad::Serialize
 ==================
 */

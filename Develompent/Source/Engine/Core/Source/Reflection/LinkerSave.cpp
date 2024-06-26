@@ -113,6 +113,16 @@ uint32 CLinkerSave::GetSize()
 
 /*
 ==================
+CLinkerSave::GetLinker
+==================
+*/
+CLinker* CLinkerSave::GetLinker() const
+{
+	return ( CLinker* )this;
+}
+
+/*
+==================
 CLinkerSave::SetFilterEditorOnly
 ==================
 */
