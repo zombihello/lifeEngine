@@ -51,6 +51,7 @@ enum EIconType
 	IT_Thumbnail_Asset_Unknown,						/**< Unknown asset */
 	IT_Thumbnail_Asset_Texture2D,					/**< Texture2D asset */
 	IT_Thumbnail_Asset_Material,					/**< Material asset */
+	IT_Thumbnail_Asset_Unused0,						/**< Unused 0 asset */
 	IT_Thumbnail_Asset_StaticMesh,					/**< StaticMesh asset */
 	IT_Thumbnail_Asset_AudioBank,					/**< AudioBank asset */
 	IT_Thumbnail_Asset_PhysicsMaterial,				/**< PhysicsMaterial asset */

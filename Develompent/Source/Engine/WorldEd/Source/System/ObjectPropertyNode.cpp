@@ -2,6 +2,7 @@
 #include "System/CategoryPropertyNode.h"
 #include "ImGUI/imgui.h"
 #include "ImGUI/ImGUIExtension.h"
+#include "Reflection/FieldIterator.h"
 
 /*
 ==================
@@ -155,16 +156,13 @@ void CObjectPropertyNode::InitChildNodes()
 
 	// Assemble a list of category names by iterating over all properties of baseClass
 	std::unordered_set<CName, CName::HashFunction>	categories;
-	std::vector<CProperty*>							baseClassProperties; 	
-	baseClass->GetProperties( baseClassProperties );
-	
-	for ( uint32 index = 0, count = baseClassProperties.size(); index < count; ++index )
+	for ( TFieldIterator<CProperty> it( baseClass ); it; ++it )
 	{
 		// We ignore property if it not have neither CPF_Edit nor CPF_EditConst
-		CProperty*		property = baseClassProperties[index];
+		CProperty*		property = *it;
 		if ( property->HasAnyFlags( CPF_Edit ) || property->HasAnyFlags( CPF_EditConst ) )
 		{
-			categories.insert( baseClassProperties[index]->GetCategory() );
+			categories.insert( property->GetCategory() );
 		}
 	}
 

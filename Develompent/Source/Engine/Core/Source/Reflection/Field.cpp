@@ -5,7 +5,28 @@
 #include "Reflection/ObjectPackage.h"
 
 IMPLEMENT_CLASS( CField )
-IMPLEMENT_DEFAULT_INITIALIZE_CLASS( CField )
+
+/*
+==================
+CField::StaticInitializeClass
+==================
+*/
+void CField::StaticInitializeClass()
+{
+	CClass*		theClass = StaticClass();
+	theClass->EmitObjectReference( STRUCT_OFFSET( CField, nextField ) );
+}
+
+/*
+==================
+CField::Serialize
+==================
+*/
+void CField::Serialize( class CArchive& InArchive )
+{
+	Super::Serialize( InArchive );
+	InArchive << nextField;
+}
 
 /*
 ==================

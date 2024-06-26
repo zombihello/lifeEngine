@@ -1,6 +1,7 @@
 #include "Reflection/Class.h"
 #include "Reflection/Struct.h"
 #include "Reflection/Property.h"
+#include "Reflection/FieldIterator.h"
 
 IMPLEMENT_CLASS( CStruct )
 
@@ -12,8 +13,8 @@ CStruct::StaticInitializeClass
 void CStruct::StaticInitializeClass()
 {
 	CClass*		theClass = StaticClass();
+	theClass->EmitObjectReference( STRUCT_OFFSET( CStruct, childrenField ) );
 	theClass->EmitObjectReference( STRUCT_OFFSET( CStruct, superStruct ) );
-	theClass->EmitObjectArrayReference( STRUCT_OFFSET( CStruct, properties ) );
 }
 
 /*
@@ -27,7 +28,7 @@ void CStruct::Serialize( class CArchive& InArchive )
 	InArchive << propertiesSize;
 	InArchive << minAlignment;
 	InArchive << superStruct;
-	InArchive << properties;
+	InArchive << childrenField;
 
 	// Preload the super struct
 	if ( superStruct )
@@ -35,65 +36,11 @@ void CStruct::Serialize( class CArchive& InArchive )
 		InArchive.Preload( superStruct );
 	}
 
-	// Preload all properties
-	for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+	// Preload all fields
+	for ( TFieldIterator<CField> it( this, false ); it; ++it )
 	{
-		InArchive.Preload( properties[index] );
+		InArchive.Preload( *it );
 	}
-}
-
-/*
-==================
-CStruct::InternalFindProperty
-==================
-*/
-CProperty* CStruct::InternalFindProperty( const CName& InName, bool InFindInParents /* = true */ ) const
-{
-	for ( const CStruct* tempStruct = this; tempStruct; tempStruct = InFindInParents ? tempStruct->superStruct : nullptr )
-	{
-		for ( uint32 index = 0, count = tempStruct->properties.size(); index < count; ++index )
-		{
-			if ( tempStruct->properties[index]->GetCName() == InName )
-			{
-				return tempStruct->properties[index];
-			}
-		}
-	}
-	return nullptr;
-}
-
-/*
-==================
-CStruct::GetProperties
-==================
-*/
-void CStruct::GetProperties( std::vector<class CProperty*>& OutArrayProperties, bool InPropertiesInParents /* = true */ ) const
-{
-	for ( const CStruct* tempStruct = this; tempStruct; tempStruct = InPropertiesInParents ? tempStruct->superStruct : nullptr )
-	{
-		if ( !tempStruct->properties.empty() )
-		{
-			uint32		offset = OutArrayProperties.size();
-			OutArrayProperties.resize( tempStruct->properties.size() + offset );
-			Memory::Memcpy( OutArrayProperties.data() + offset, tempStruct->properties.data(), tempStruct->properties.size() * sizeof( CProperty* ) );
-		}
-	}
-}
-
-/*
-==================
-CStruct::GetNumProperties
-==================
-*/
-uint32 CStruct::GetNumProperties( bool InPropertiesInParents /* = true */ ) const
-{
-	uint32		numProps = 0;
-	for ( const CStruct* tempStruct = this; tempStruct; tempStruct = InPropertiesInParents ? tempStruct->superStruct : nullptr )
-	{
-		numProps += tempStruct->properties.size();
-	}
-
-	return numProps;
 }
 
 /*
@@ -103,7 +50,8 @@ CStruct::AddProperty
 */
 void CStruct::AddProperty( CProperty* InProperty )
 {
-	properties.push_back( InProperty );
+	InProperty->SetNextField( childrenField );
+	childrenField = InProperty;
 }
 
 /*
@@ -135,18 +83,12 @@ void CStruct::SerializeTaggedProperties( class CArchive& InArchive, byte* InData
 	// If we saving archive then need fill the array
 	if ( InArchive.IsSaving() )
 	{
-		for ( const CStruct* currentStruct = this; currentStruct; currentStruct = currentStruct->superStruct )
+		for ( TFieldIterator<CProperty> it( this ); it; ++it )
 		{
-			if ( !currentStruct->properties.empty() )
+			CProperty*		property = *it;
+			if ( property->ShouldSerializeValue( InArchive ) )
 			{
-				for ( uint32 propertyId = 0, propertyCount = currentStruct->properties.size(); propertyId < propertyCount; ++propertyId )
-				{
-					CProperty*		property = currentStruct->properties[propertyId];
-					if ( property->ShouldSerializeValue( InArchive ) )
-					{
-						serializedProperties.push_back( CPropertyTag( property ) );
-					}
-				}
+				serializedProperties.push_back( CPropertyTag( property ) );
 			}
 		}
 	}
@@ -171,23 +113,17 @@ void CStruct::SerializeTaggedProperties( class CArchive& InArchive, byte* InData
 		}
 
 		// Associate tags with out properties in the struct
-		for ( const CStruct* currentStruct = this; currentStruct; currentStruct = currentStruct->superStruct )
+		for ( TFieldIterator<CProperty> it( this ); it; ++it )
 		{
-			if ( !currentStruct->properties.empty() )
-			{
-				for ( uint32 propertyId = 0, propertyCount = currentStruct->properties.size(); propertyId < propertyCount; ++propertyId )
-				{
-					CProperty*	property = currentStruct->properties[propertyId];
-					uint64		hash = property->GetCName().GetHash();
-					FastHash( property->GetClass()->GetCName().GetHash(), hash );
+			CProperty*	property	= *it;
+			uint64		hash		= property->GetCName().GetHash();
+			FastHash( property->GetClass()->GetCName().GetHash(), hash );
 
-					// Try find tag for the property
-					auto	itTag = tagsMap.find( hash );
-					if ( itTag != tagsMap.end() )
-					{
-						itTag->second->SetProperty( property );
-					}
-				}
+			// Try find tag for the property
+			auto	itTag = tagsMap.find( hash );
+			if ( itTag != tagsMap.end() )
+			{
+				itTag->second->SetProperty( property );
 			}
 		}
 	}
@@ -250,16 +186,9 @@ CStruct::SerializeBinaryProperties
 */
 void CStruct::SerializeBinaryProperties( class CArchive& InArchive, byte* InData )
 {
-	for ( const CStruct* currentStruct = this; currentStruct; currentStruct = currentStruct->superStruct )
+	for ( TFieldIterator<CProperty> it( this ); it; ++it )
 	{
-		if ( !currentStruct->properties.empty() )
-		{
-			for ( uint32 propertyId = 0, propertyCount = currentStruct->properties.size(); propertyId < propertyCount; ++propertyId )
-			{
-				CProperty*		property = currentStruct->properties[propertyId];
-				property->SerializeProperty( InArchive, InData );
-			}
-		}
+		it->SerializeProperty( InArchive, InData );
 	}
 }
 
@@ -276,25 +205,19 @@ void CStruct::ExportProperties( std::wstring& OutValueString, byte* InData, CObj
 
 	// Export properties
 	bool	bMoreThanOneProperty = false;
-	for ( const CStruct* currentStruct = this; currentStruct; currentStruct = currentStruct->superStruct )
+	for ( TFieldIterator<CProperty> it( this ); it; ++it )
 	{
-		if ( !currentStruct->properties.empty() )
+		CProperty*		property = *it;
+		std::wstring	valueString;
+		property->ExportProperty( valueString, InData, InExportRootScope, InPortFlags );
+		if ( !valueString.empty() )
 		{
-			for ( uint32 propertyId = 0, propertyCount = currentStruct->properties.size(); propertyId < propertyCount; ++propertyId )
+			if ( bMoreThanOneProperty )
 			{
-				CProperty*		property = currentStruct->properties[propertyId];
-				std::wstring	valueString;
-				property->ExportProperty( valueString, InData, InExportRootScope, InPortFlags );
-				if ( !valueString.empty() )
-				{
-					if ( bMoreThanOneProperty )
-					{
-						OutValueString += TEXT( ", " );
-					}
-					OutValueString += L_Sprintf( TEXT( "\"%s\": %s" ), property->GetName().c_str(), valueString.c_str() );
-					bMoreThanOneProperty = true;
-				}
+				OutValueString += TEXT( ", " );
 			}
+			OutValueString += L_Sprintf( TEXT( "\"%s\": %s" ), property->GetName().c_str(), valueString.c_str() );
+			bMoreThanOneProperty = true;
 		}
 	}
 
@@ -319,23 +242,17 @@ void CStruct::ImportProperty( const CJsonValue* InJsonValue, byte* InData, CObje
 	}
 
 	// Import properties
-	for ( const CStruct* currentStruct = this; currentStruct; currentStruct = currentStruct->superStruct )
+	for ( TFieldIterator<CProperty> it( this ); it; ++it )
 	{
-		if ( !currentStruct->properties.empty() )
+		CProperty*			property = *it;
+		const CJsonValue*	jsonStructProperty = jsonStructObject->GetValue( property->GetName().c_str() );
+		if ( !jsonStructProperty )
 		{
-			for ( uint32 propertyId = 0, propertyCount = currentStruct->properties.size(); propertyId < propertyCount; ++propertyId )
-			{
-				CProperty*			property = currentStruct->properties[propertyId];
-				const CJsonValue*	jsonStructProperty = jsonStructObject->GetValue( property->GetName().c_str() );
-				if ( !jsonStructProperty )
-				{
-					Warnf( TEXT( "Property '%s' not found in the JSON data of '%s'\n" ), property->GetName().c_str(), GetName().c_str() );
-					continue;
-				}
-
-				property->ImportProperty( jsonStructProperty, ( byte* )InData, InImportRootScope, InPortFlags );
-			}
+			Warnf( TEXT( "Property '%s' not found in the JSON data of '%s'\n" ), property->GetName().c_str(), GetName().c_str() );
+			continue;
 		}
+
+		property->ImportProperty( jsonStructProperty, ( byte* )InData, InImportRootScope, InPortFlags );
 	}
 }
 #endif // WITH_EDITOR

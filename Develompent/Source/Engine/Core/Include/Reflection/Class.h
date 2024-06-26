@@ -125,22 +125,6 @@ public:
 	}
 
 	/**
-	 * @brief Get array of class functions
-	 *
-	 * @param OutArrayFunctions			Output array functions
-	 * @param InFunctionsInParents		Take into account functions of the parents
-	 */
-	void GetFunctions( std::vector<class CFunction*>& OutArrayFunctions, bool InFunctionsInParents = true ) const;
-
-	/**
-	 * @brief Get number functions in the class
-	 *
-	 * @param InFunctionsInParents		Take into account functions of the parents
-	 * @return Return number functions in the class
-	 */
-	uint32 GetNumFunctions( bool InFunctionsInParents = true ) const;
-
-	/**
 	 * @brief Find function
 	 *
 	 * @param InName				Function name
@@ -328,14 +312,14 @@ public:
 	}
 
 private:
-	bool								bHasAssembledReferenceTokenStream;		/**< Indicates whether the reference token stream has assembled*/
-	class CObject*( *ClassConstructor )( void* InPtr );							/**< Pointer to constructor of class */
-	uint32								classFlags;								/**< Class flags */
-	uint32								classCastFlags;							/**< Class cast flags */
-	uint32								classUnique;							/**< Class pseudo-unique counter; used to accelerate unique instance name generation */
-	CClass*								withinClass;							/**< Class within */
-	CGCReferenceTokenStream				referenceTokenStream;					/**< Reference token stream used by realtime garbage collector, finalized in AssembleReferenceTokenStream */
-	std::vector<class CFunction*>		functions;								/**< Array of functions */
+	bool																	bHasAssembledReferenceTokenStream;		/**< Indicates whether the reference token stream has assembled*/
+	class CObject*( *ClassConstructor )( void* InPtr );																/**< Pointer to constructor of class */
+	uint32																	classFlags;								/**< Class flags */
+	uint32																	classCastFlags;							/**< Class cast flags */
+	uint32																	classUnique;							/**< Class pseudo-unique counter; used to accelerate unique instance name generation */
+	CClass*																	withinClass;							/**< Class within */
+	CGCReferenceTokenStream													referenceTokenStream;					/**< Reference token stream used by realtime garbage collector, finalized in AssembleReferenceTokenStream */
+	std::unordered_map<CName, class CFunction*, CName::HashFunction>		functionsMap;							/**< Map of functions */
 };
 
 #endif // !CLASS_H

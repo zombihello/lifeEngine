@@ -4,6 +4,7 @@
 #include "System/ItemPropertyNode.h"
 #include "ImGUI/imgui.h"
 #include "ImGUI/ImGUIExtension.h"
+#include "Reflection/FieldIterator.h"
 
 /*
 ==================
@@ -34,12 +35,10 @@ void CCategoryPropertyNode::InitChildNodes()
 	CClass*						objectBaseClass = objectNode->GetObjectBaseClass();
 	Assert( objectBaseClass );
 
-	std::vector<CProperty*>		properties;
-	objectBaseClass->GetProperties( properties );
-	for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+	for ( TFieldIterator<CProperty> it( objectBaseClass ); it; ++it )
 	{
 		// We ignore property if it not have neither CPF_Edit nor CPF_EditConst
-		CProperty*				property = properties[index];
+		CProperty*				property = *it;
 		if ( property->HasAnyFlags( CPF_Edit ) || property->HasAnyFlags( CPF_EditConst ) )
 		{
 			if ( property->GetCategory() == categoryName )

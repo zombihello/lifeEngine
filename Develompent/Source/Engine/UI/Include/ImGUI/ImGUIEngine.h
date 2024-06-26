@@ -75,6 +75,7 @@ enum EImGuiColors
 	IGC_Asset_Unknown,				/**< Unknown asset */
 	IGC_Asset_Texture2D,			/**< Texture2D asset */
 	IGC_Asset_Material,				/**< Material asset */
+	IGC_Asset_Unused0,				/**< Unused 0 asset */
 	IGC_Asset_StaticMesh,			/**< StaticMesh asset */
 	IGC_Asset_AudioBank,			/**< AudioBank asset */
 	IGC_Asset_PhysicsMaterial,		/**< PhysicsMaterial asset */

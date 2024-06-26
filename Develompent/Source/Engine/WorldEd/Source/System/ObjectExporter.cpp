@@ -2,6 +2,7 @@
 #include "System/Archive.h"
 #include "Reflection/Class.h"
 #include "Reflection/Property.h"
+#include "Reflection/FieldIterator.h"
 
 /*
 ==================
@@ -165,12 +166,10 @@ void CObjectExporter::ExportObjectInner( CObject* InObject, std::wstring& OutStr
 	OutString	+= L_Sprintf( TEXT( "%s\"Data\": {" ), GetNumSpaces( textIndent ).c_str() );
 	textIndent	+= 3;
 	{
-		bool						bMoreThanOneProperty = false;
-		std::vector<CProperty*>		properties;
-		InObject->GetClass()->GetProperties( properties );
-		for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+		bool	bMoreThanOneProperty = false;
+		for ( TFieldIterator<CProperty> it( InObject->GetClass() ); it; ++it )
 		{
-			CProperty*		property = properties[index];
+			CProperty*		property = *it;
 			std::wstring	valueString;
 			
 			property->ExportProperty( valueString, ( byte* )InObject, exportRootScope, portFlags );

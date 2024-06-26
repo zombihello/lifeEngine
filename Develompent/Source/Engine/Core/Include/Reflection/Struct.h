@@ -34,6 +34,7 @@ public:
 	CStruct( CStruct* InSuperStruct = nullptr )
 		: propertiesSize( 0 )
 		, minAlignment( 1 )
+		, childrenField( nullptr )
 		, superStruct( InSuperStruct )
 	{}
 
@@ -51,6 +52,7 @@ public:
 		: CField( NativeConstructor, InStructName, InPackageName )
 		, propertiesSize( InPropertiesSize )
 		, minAlignment( InMinAlignment )
+		, childrenField( nullptr )
 		, superStruct( InSuperStruct )
 	{}
 
@@ -66,6 +68,7 @@ public:
 	CStruct( uint32 InPropertiesSize, uint32 InMinAlignment, CStruct* InSuperStruct = nullptr )
 		: propertiesSize( InPropertiesSize )
 		, minAlignment( InMinAlignment )
+		, childrenField( nullptr )
 		, superStruct( InSuperStruct )
 	{}
 
@@ -205,44 +208,24 @@ public:
 #endif // WITH_EDITOR
 
 	/**
-	 * @brief Get array of struct properties
-	 *
-	 * @param OutArrayProperties		Output array properties
-	 * @param InPropertiesInParents		Take into account the properties of the parents
+	 * @brief Set children field
+	 * @param InChildrenField		New children field
 	 */
-	void GetProperties( std::vector<class CProperty*>& OutArrayProperties, bool InPropertiesInParents = true ) const;
-
-	/**
-	 * @brief Get number properties in the struct
-	 *
-	 * @param InPropertiesInParents		Take into account the properties of the parents
-	 * @return Return number properties in the struct
-	 */
-	uint32 GetNumProperties( bool InPropertiesInParents = true ) const;
-
-	/**
-	 * @brief Find property
-	 *
-	 * @param InName				Property name
-	 * @param InFindInParents		Take into account properties of the parents
-	 * @return Return pointer to struct property. If not found return NULL
-	 */
-	template<typename TPropertyClass>
-	FORCEINLINE TPropertyClass* FindProperty( const CName& InName, bool InFindInParents = true ) const
+	FORCEINLINE void SetChildrenField( CField* InChildrenField )
 	{
-		return Cast<TPropertyClass>( InternalFindProperty( InName, InFindInParents ) );
+		childrenField = InChildrenField;
+	}
+
+	/**
+	 * @brief Get children field
+	 * @return Return pointer to children field, if not exist returns NULL
+	 */
+	FORCEINLINE CField* GetChildrenField() const
+	{
+		return childrenField;
 	}
 
 private:
-	/**
-	 * @brief Find property
-	 *
-	 * @param InName				Property name
-	 * @param InFindInParents		Take into account properties of the parents
-	 * @return Return pointer to struct property, if not found return NULL
-	 */
-	class CProperty* InternalFindProperty( const CName& InName, bool InFindInParents = true ) const;
-
 	/**
 	 * @brief Serialize struct binary properties
 	 * @param InArchive     Archive for serialize
@@ -259,8 +242,8 @@ private:
 
 	uint32								propertiesSize;	/**< Properties size in bytes */
 	uint32								minAlignment;	/**< Minimum alignment for the struct */
+	CField*								childrenField;	/**< Children field */
 	CStruct*							superStruct;	/**< Pointer to super struct */
-	std::vector<class CProperty*>		properties;		/**< Struct properties */
 };
 
 #endif // !STRUCT_H

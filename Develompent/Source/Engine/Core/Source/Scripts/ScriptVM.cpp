@@ -2,6 +2,7 @@
 #include "Reflection/Function.h"
 #include "Reflection/Property.h"
 #include "Reflection/ObjectPackage.h"
+#include "Reflection/FieldIterator.h"
 #include "Scripts/ScriptFrame.h"
 
 //
@@ -67,13 +68,11 @@ void CObject::CallFunction( struct ScriptFrame& InStack, RESULT_DECLARE, CFuncti
 		ScriptFrame		newStack( this, InFunction, 0, ( byte* )Memory_Alloca( InFunction->GetPropertiesSize() ), &InStack );
 		Memory::Memzero( newStack.localData, InFunction->GetPropertiesSize() );
 
-		std::vector<CProperty*>		functionParams;
-		InFunction->GetProperties( functionParams, false );
-		for ( uint32 index = 0, count = functionParams.size(); index < count && *InStack.bytecode != OP_EndFunctionParms; ++index )
+		// Copy function parameters from bytecode
+		for ( TFieldIterator<CProperty> it( InFunction, false ); it && *InStack.bytecode != OP_EndFunctionParms; ++it )
 		{
 			// Copy the result of the expression for this parameter into the appropriate part of the local variable space
-			CProperty*		functionParam	= functionParams[index];
-			byte*			paramData		= newStack.localData + functionParam->GetOffset();
+			byte*			paramData		= newStack.localData + it->GetOffset();
 			Assert( paramData );
 			InStack.Step( InStack.object, paramData );
 		}

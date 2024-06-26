@@ -2,6 +2,7 @@
 #include "Misc/StringConv.h"
 #include "Reflection/Class.h"
 #include "Reflection/ObjectGlobals.h"
+#include "Reflection/FieldIterator.h"
 #include "System/ObjectImporter.h"
 #include "System/World.h"
 #include "Actors/Actor.h"
@@ -188,12 +189,10 @@ void CObjectImporter::ImportObject( const CJsonObject* InJsonObject, CObject*& O
 	const CJsonObject*		jsonData = jsonDataValue ? jsonDataValue->GetObject() : nullptr;
 	if ( jsonData )
 	{
-		std::vector<CProperty*>		properties;
-		OutObject->GetClass()->GetProperties( properties );
-		for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+		for ( TFieldIterator<CProperty> it( OutObject->GetClass() ); it; ++it )
 		{
-			CProperty*			property = properties[index];
-			const CJsonValue*	jsonProperty = jsonData->GetValue( property->GetName().c_str() );
+			CProperty*			property		= *it;
+			const CJsonValue*	jsonProperty	= jsonData->GetValue( property->GetName().c_str() );
 			if ( !jsonProperty )
 			{
 				Warnf( TEXT( "ImportObject: Property '%s' not found in the JSON section 'Data' of '%s'\n" ), property->GetName().c_str(), OutObject->GetFullName().c_str() );

@@ -385,22 +385,24 @@ enum EClassFlags
 enum EClassCastFlags
 {
 	CASTCLASS_None					= 0,		/**< None */
-    CASTCLASS_CEnum                 = 1 << 0,   /**< Cast to CEnum */
-    CASTCLASS_CStruct               = 1 << 1,   /**< Cast to CStruct */
-    CASTCLASS_CClass                = 1 << 2,   /**< Cast to CClass */
-	CASTCLASS_CProperty				= 1 << 3,	/**< Cast to CProperty */
-	CASTCLASS_CByteProperty			= 1 << 4,	/**< Cast to CByteProperty */
-	CASTCLASS_CIntProperty			= 1 << 5,	/**< Cast to CIntProperty */
-	CASTCLASS_CFloatProperty		= 1 << 6,	/**< Cast to CFloatProperty */
-	CASTCLASS_CBoolProperty			= 1 << 7,	/**< Cast to CBoolProperty */
-	CASTCLASS_CColorProperty		= 1 << 8,	/**< Cast to CColorProperty */
-	CASTCLASS_CObjectProperty		= 1 << 9,	/**< Cast to CObjectProperty */
-	CASTCLASS_CVectorProperty		= 1 << 10,	/**< Cast to CVectorProperty */
-	CASTCLASS_CRotatorProperty		= 1 << 11,	/**< Cast to CRotatorProperty */
-	CASTCLASS_CAssetProperty		= 1 << 12,	/**< Cast to CAssetProperty */
-	CASTCLASS_CArrayProperty		= 1 << 13,	/**< Cast to CArrayProperty */
-    CASTCLASS_CStructProperty       = 1 << 14,	/**< Cast to CStructProperty */
-    CASTCLASS_CStringProperty       = 1 << 15,	/**< Cast to CStringProperty */
+    CASTCLASS_CField                = 1 << 1,   /**< Cast to CField */
+    CASTCLASS_CEnum                 = 1 << 2,   /**< Cast to CEnum */
+    CASTCLASS_CStruct               = 1 << 3,   /**< Cast to CStruct */
+    CASTCLASS_CClass                = 1 << 4,   /**< Cast to CClass */
+	CASTCLASS_CProperty				= 1 << 5,	/**< Cast to CProperty */
+	CASTCLASS_CByteProperty			= 1 << 6,	/**< Cast to CByteProperty */
+	CASTCLASS_CIntProperty			= 1 << 7,	/**< Cast to CIntProperty */
+	CASTCLASS_CFloatProperty		= 1 << 8,	/**< Cast to CFloatProperty */
+	CASTCLASS_CBoolProperty			= 1 << 9,	/**< Cast to CBoolProperty */
+	CASTCLASS_CColorProperty		= 1 << 10,	/**< Cast to CColorProperty */
+	CASTCLASS_CObjectProperty		= 1 << 11,	/**< Cast to CObjectProperty */
+	CASTCLASS_CVectorProperty		= 1 << 12,	/**< Cast to CVectorProperty */
+	CASTCLASS_CRotatorProperty		= 1 << 13,	/**< Cast to CRotatorProperty */
+	CASTCLASS_CAssetProperty		= 1 << 14,	/**< Cast to CAssetProperty */
+	CASTCLASS_CArrayProperty		= 1 << 15,	/**< Cast to CArrayProperty */
+    CASTCLASS_CStructProperty       = 1 << 16,	/**< Cast to CStructProperty */
+    CASTCLASS_CStringProperty       = 1 << 17,	/**< Cast to CStringProperty */
+    CASTCLASS_CFunction             = 1 << 18   /**< Cast to CFunction */
 };
 
 /**

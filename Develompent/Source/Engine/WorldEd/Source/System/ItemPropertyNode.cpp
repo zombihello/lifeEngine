@@ -9,6 +9,7 @@
 #include "ImGUI/imgui.h"
 #include "ImGUI/imgui_stdlib.h"
 #include "ImGUI/ImGUIExtension.h"
+#include "Reflection/FieldIterator.h"
 
 /*
 ==================
@@ -411,14 +412,11 @@ void CItemPropertyNode::InitChildNodes()
 	// Struct property
 	else if ( propertyClass->HasAnyCastFlags( CASTCLASS_CStructProperty ) )
 	{ 
-		CStructProperty*								structProperty = ExactCast<CStructProperty>( property );
-		std::vector<CProperty*>							properties;
-		structProperty->GetPropertyStruct()->GetProperties( properties );
-		
-		for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+		CStructProperty*	structProperty = ExactCast<CStructProperty>( property );
+		for ( TFieldIterator<CProperty> it( structProperty->GetPropertyStruct() ); it; ++it )
 		{
 			// We ignore property if it not have neither CPF_Edit nor CPF_EditConst
-			CProperty*		property = properties[index];
+			CProperty*		property = *it;
 			if ( property->HasAnyFlags( CPF_Edit ) || property->HasAnyFlags( CPF_EditConst ) )
 			{
 				CItemPropertyNode*		itemNode = new CItemPropertyNode();

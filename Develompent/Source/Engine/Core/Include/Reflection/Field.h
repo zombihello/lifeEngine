@@ -17,13 +17,14 @@
  */
 class CField : public CObject
 {
-	DECLARE_CLASS_INTRINSIC( CField, CObject, 0, 0, TEXT( "Core" ) )
+	DECLARE_CLASS_INTRINSIC( CField, CObject, 0, CASTCLASS_CField, TEXT( "Core" ) )
 
 public:
 	/**
 	 * @brief Constructor
 	 */
 	CField()
+		: nextField( nullptr )
 	{}
 
 	/**
@@ -35,7 +36,14 @@ public:
 	 */
 	CField( ENativeConstructor, const CName& InFieldName, const tchar* InPackageName, ObjectFlags_t InFlags = OBJECT_None )
 		: CObject( NativeConstructor, InFieldName, InPackageName, InFlags )
+		, nextField( nullptr )
 	{}
+
+	/**
+	 * @brief Serialize object
+	 * @param InArchive     Archive for serialize
+	 */
+	virtual void Serialize( class CArchive& InArchive ) override;
 
 	/**
 	 * @brief Add property
@@ -60,12 +68,33 @@ public:
 	 */
 	class CClass* GetOwnerClass() const;
 
+	/**
+	 * @brief Set next field
+	 * @param InNextField	Next field
+	 */
+	FORCEINLINE void SetNextField( CField* InNextField )
+	{
+		nextField = InNextField;
+	}
+
+	/**
+	 * @brief Get next field
+	 * @return Return pointer to next field, if not exist returns NULL
+	 */
+	FORCEINLINE CField* GetNextField() const
+	{
+		return nextField;
+	}
+
 protected:
 	/**
 	 * @brief Do any object-specific cleanup required immediately after loading an object
 	 * @note This is not called for newly-created objects, and by default will always execute on the game thread
 	 */
 	virtual void PostLoad() override;
+
+private:
+	CField*			nextField;		/**< Next field */
 };
 
 #endif // !FIELD_H

@@ -4,6 +4,7 @@
 #include "Reflection/ObjectIterator.h"
 #include "Reflection/ObjectGlobals.h"
 #include "Reflection/Object.h"
+#include "Reflection/FieldIterator.h"
 #include "Scripts/ScriptTypeResolver.h"
 #include "Scripts/ScriptEnvironmentBuilder.h"
 
@@ -449,6 +450,7 @@ bool CScriptEnvironmentBuilder::CreateFunction( CScriptClassStub& InClassStub, C
 
 	// Create function
 	CFunction*		function = new( theClass, functionName.c_str(), OBJECT_Public ) CFunction( InFunctionStub.GetFlags() );
+	theClass->AddFunction( function );
 	function->Bind();
 	InFunctionStub.SetCreatedFunction( function );
 
@@ -511,24 +513,24 @@ bool CScriptEnvironmentBuilder::MatchFunctionHeader( const CScriptFunctionStub& 
 	const std::wstring			baseFunctionName	= InFunctionStub.GetName();
 
 	// Check parameter count
-	if ( baseFunction->GetNumProperties( false ) != InSuperFunction->GetNumProperties( false ) )
+	uint32		numParamsBaseFunc	= 0;
+	uint32		numParamsSuperFunc	= 0;
+	for ( TFieldIterator<CProperty> it( baseFunction, false );		it; ++it, ++numParamsBaseFunc );
+	for ( TFieldIterator<CProperty> it( InSuperFunction, false );	it; ++it, ++numParamsSuperFunc );
+	if ( numParamsBaseFunc != numParamsSuperFunc )
 	{
 		Errorf( TEXT( "%s: Function '%s' takes %i parameter(s) which is inconsistent with base function (%i)\n" ), 
-				baseFunctionContext.ToString().c_str(), baseFunctionName.c_str(), baseFunction->GetNumProperties( false ), InSuperFunction->GetNumProperties( false ) );
+				baseFunctionContext.ToString().c_str(), baseFunctionName.c_str(), numParamsBaseFunc, numParamsSuperFunc );
 		return false;
 	}
 
 	// Check parameter types
 	bool bMatching = true;
 	{
-		std::vector<CProperty*>		baseProperties;
-		std::vector<CProperty*>		superProperties;
-		baseFunction->GetProperties( baseProperties, false );
-		InSuperFunction->GetProperties( superProperties, false );
-		for ( uint32 index = 0, count = baseProperties.size(); index < count; ++index )
+		for ( TFieldIterator<CProperty> baseIt( baseFunction, false ), superIt( InSuperFunction, false ); baseIt && superIt; ++baseIt, ++superIt )
 		{
-			CProperty*	baseProperty	= baseProperties[index];
-			CProperty*	superProperty	= superProperties[index];
+			CProperty*	baseProperty	= *baseIt;
+			CProperty*	superProperty	= *superIt;
 			if ( !baseProperty->IsIdentical( superProperty ) )
 			{
 				Errorf( TEXT( "%s: Function '%s' parameter '%s' has different type than in super function\n" ),
@@ -616,6 +618,7 @@ bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& I
 	uint32		offset			= 0;		// Offset in local data of script frame
 	uint32		minAlignment	= 1;
 	{
+		CProperty*												lastFuncParam = nullptr;
 		const std::vector<ScriptFunctionParamStubPtr_t>&		funcParamStubs = InFunctionStub.GetParams();
 		for ( uint32 index = 0, count = funcParamStubs.size(); index < count; ++index )
 		{
@@ -632,7 +635,17 @@ bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& I
 			}
 
 			// Make sure it's not duplicated
-			if ( function->FindProperty<CProperty>( funcParamName, false ) )
+			bool	bParamFound = false;
+			for ( TFieldIterator<CProperty> it( function, false ); it; ++it )
+			{
+				if ( it->GetName() == funcParamName )
+				{
+					bParamFound = true;
+					break;
+				}
+			}
+
+			if ( bParamFound )
 			{
 				Errorf( TEXT( "%s: Parameter '%s' is already defined\n" ), funcParamName.c_str() );
 				bNoErrors = false;
@@ -643,6 +656,17 @@ bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& I
 			CProperty*		funcParam = CScriptTypeResolver::Resolve( ScriptTypeResolveParams( function, funcParamName, OBJECT_Public, funcParamStub.GetType(), offset, CPF_None ) );
 			Assert( funcParam );
 			funcParamStub.SetCreatedFuncParam( funcParam );
+
+			// Add the parameter into list of fields
+			if ( !lastFuncParam )
+			{
+				function->SetChildrenField( funcParam );
+			}
+			else
+			{
+				lastFuncParam->SetNextField( funcParam );
+			}
+			lastFuncParam = funcParam;
 
 			// Advance the offset
 			minAlignment	= Max( minAlignment, funcParam->GetMinAlignment() );

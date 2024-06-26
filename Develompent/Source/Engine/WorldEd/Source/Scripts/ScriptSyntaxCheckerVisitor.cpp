@@ -1,4 +1,5 @@
 #include "Scripts/ScriptSyntaxCheckerVisitor.h"
+#include "Reflection/FieldIterator.h"
 
 /*
 ==================
@@ -89,7 +90,6 @@ void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_FuncCall( class CScriptSyntaxN
 
 	// Check function parameters
 	CScriptSyntaxNode_Base*					syntaxParamsNode		= InNode->GetParametersNode();
-	uint32									expectedNumParameters	= function->GetNumProperties( false );
 	std::vector<CScriptSyntaxNode_Base*>	parameters;
 	if ( syntaxParamsNode )
 	{
@@ -106,7 +106,9 @@ void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_FuncCall( class CScriptSyntaxN
 	}
 
 	// Check on too many parameters are specified
-	uint32		numParameters = parameters.size();
+	uint32		expectedNumParameters	= 0;
+	uint32		numParameters			= parameters.size();
+	for ( TFieldIterator<CProperty> it( function, false ); it; ++it, ++expectedNumParameters );
 	if ( numParameters > expectedNumParameters )
 	{
 		Errorf( TEXT( "%s: Function '%s' does not take %i param(s) but only %i\n" ), InNode->GetContext().ToString().c_str(), function->GetName().c_str(), numParameters, expectedNumParameters );
@@ -115,30 +117,29 @@ void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_FuncCall( class CScriptSyntaxN
 	}
 
 	// Check parameter types
-	std::vector<CProperty*>					expectedParameters;
-	function->GetProperties( expectedParameters, false );
-	for ( uint32 index = 0; index < expectedNumParameters; ++index )
+	uint32			paramIdx = 0;
+	for ( TFieldIterator<CProperty> it( function, false ); it; ++it, ++paramIdx )
 	{
 		// We may have less parameters specified in the function call than the expected number
-		CProperty*					currentExpectedParam = expectedParameters[index];
-		if ( index >= numParameters )
+		CProperty*		currentExpectedParam = *it;
+		if ( paramIdx >= numParameters )
 		{
 			Errorf( TEXT( "%s: Too few parameters in call to function '%s'\n" ), InNode->GetContext().ToString().c_str(), function->GetName().c_str() );
 			bHasError = true;
 			return;
 		}
-		CScriptSyntaxNode_Base*		currentSyntaxParamNode = parameters[index];
+		CScriptSyntaxNode_Base*		currentSyntaxParamNode = parameters[paramIdx];
 
 		// Check on valid a node
 		if ( !currentSyntaxParamNode )
 		{
-			Errorf( TEXT( "%s: Required parameter %i (%s) was omitted\n" ), InNode->GetContext().ToString().c_str(), index, currentExpectedParam->GetName().c_str() );
+			Errorf( TEXT( "%s: Required parameter %i (%s) was omitted\n" ), InNode->GetContext().ToString().c_str(), paramIdx, currentExpectedParam->GetName().c_str() );
 			bHasError = true;
 			return;
 		}
 
 		// Check only existing parameters on value type
-		if ( index < numParameters && currentSyntaxParamNode )
+		if ( paramIdx < numParameters && currentSyntaxParamNode )
 		{
 			// Reset expression value type because after previous call may have in there a data,
 			// but for make sure what all okay with parameter type it need to reset

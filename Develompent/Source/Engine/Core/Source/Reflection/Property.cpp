@@ -3,6 +3,7 @@
 #include "Reflection/Property.h"
 #include "Reflection/Object.h"
 #include "Reflection/ObjectGlobals.h"
+#include "Reflection/FieldIterator.h"
 
 IMPLEMENT_CLASS( CProperty )
 IMPLEMENT_CLASS( CByteProperty )
@@ -68,9 +69,7 @@ CProperty::CProperty( uint32 InOffset, const CName& InCategory, const std::wstri
 	, offset( InOffset )
 	, flags( InFlags )
 	, arraySize( InArraySize )
-{
-	GetOuterCField()->AddProperty( this );
-}
+{}
 
 /*
 ==================
@@ -1604,13 +1603,9 @@ bool CStructProperty::IsContainsObjectReference() const
 	{
 		Assert( propertyStruct );
 		encounteredStructProps.push_back( this );
-
-		std::vector<CProperty*>		properties;
-		propertyStruct->GetProperties( properties );
-		for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+		for ( TFieldIterator<CProperty> it( propertyStruct ); it; ++it )
 		{
-			CProperty*	property = properties[index];
-			if ( property->IsContainsObjectReference() )
+			if ( it->IsContainsObjectReference() )
 			{
 				encounteredStructProps.erase( std::find( encounteredStructProps.begin(), encounteredStructProps.end(), this ) );
 				return true;
@@ -1633,13 +1628,9 @@ void CStructProperty::EmitReferenceInfo( CGCReferenceTokenStream* InReferenceTok
 	if ( IsContainsObjectReference() )
 	{
 		GCReferenceFixedArrayTokenHelper	fixedArrayHelper( InReferenceTokenStream, InBaseOffset + offset, arraySize, GetElementSize() );
-		std::vector<CProperty*>				properties;
-		
-		propertyStruct->GetProperties( properties );
-		for ( uint32 index = 0, count = properties.size(); index < count; ++index )
+		for ( TFieldIterator<CProperty> it( propertyStruct ); it; ++it )
 		{
-			CProperty*	property = properties[index];
-			property->EmitReferenceInfo( InReferenceTokenStream, InBaseOffset + offset );
+			it->EmitReferenceInfo( InReferenceTokenStream, InBaseOffset + offset );
 		}
 	}
 }

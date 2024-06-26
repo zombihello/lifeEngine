@@ -26,9 +26,7 @@ CFunction::CFunction( uint32 InFunctionFlags, CFunction* InSuperFunction /* = nu
 	: CStruct( InSuperFunction )
 	, functionFlags( InFunctionFlags )
 	, FunctionFn( nullptr )
-{
-	GetOuterCClass()->AddFunction( this );
-}
+{}
 
 /*
 ==================
