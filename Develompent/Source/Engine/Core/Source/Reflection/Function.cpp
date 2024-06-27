@@ -14,6 +14,8 @@ CFunction::CFunction
 */
 CFunction::CFunction()
 	: functionFlags( FUNC_None )
+	, paramsSize( 0 )
+	, numParams( 0 )
 	, FunctionFn( nullptr )
 {}
 
@@ -25,6 +27,8 @@ CFunction::CFunction
 CFunction::CFunction( uint32 InFunctionFlags, CFunction* InSuperFunction /* = nullptr */ )
 	: CStruct( InSuperFunction )
 	, functionFlags( InFunctionFlags )
+	, paramsSize( 0 )
+	, numParams( 0 )
 	, FunctionFn( nullptr )
 {}
 
@@ -37,6 +41,8 @@ void CFunction::Serialize( class CArchive& InArchive )
 {
 	Super::Serialize( InArchive );
 	InArchive << functionFlags;
+	InArchive << paramsSize;
+	InArchive << numParams;
 
 	// Serialize bytecode size
 	uint32		bytecodeSize				= bytecode.size();

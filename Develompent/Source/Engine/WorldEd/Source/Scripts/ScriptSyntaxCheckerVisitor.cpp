@@ -106,9 +106,8 @@ void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_FuncCall( class CScriptSyntaxN
 	}
 
 	// Check on too many parameters are specified
-	uint32		expectedNumParameters	= 0;
+	uint32		expectedNumParameters	= function->GetNumParams();
 	uint32		numParameters			= parameters.size();
-	for ( TFieldIterator<CProperty> it( function, false ); it; ++it, ++expectedNumParameters );
 	if ( numParameters > expectedNumParameters )
 	{
 		Errorf( TEXT( "%s: Function '%s' does not take %i param(s) but only %i\n" ), InNode->GetContext().ToString().c_str(), function->GetName().c_str(), numParameters, expectedNumParameters );

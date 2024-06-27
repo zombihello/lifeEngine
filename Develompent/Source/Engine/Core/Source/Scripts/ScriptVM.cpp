@@ -35,14 +35,14 @@ void CObject::ProcessFunction( class CFunction* InFunction, void* InParams, void
 	}
 
 	// Check on we got all parameters for function
-	Assert( InFunction->GetPropertiesSize() == 0 || InParams );
+	Assert( InFunction->GetParamsSize() == 0 || InParams );
 
 	// Create a new local execution stack
 	ScriptFrame		newStack( this, InFunction, 0, ( byte* )Memory_Alloca( InFunction->GetPropertiesSize() ) );
-	Assert( newStack.localData || InFunction->GetPropertiesSize() == 0 );
+	Assert( newStack.localData || InFunction->GetParamsSize() == 0 );
 
 	// Initialize function parameters
-	Memory::Memcpy( newStack.localData, InParams, InFunction->GetPropertiesSize() );
+	Memory::Memcpy( newStack.localData, InParams, InFunction->GetParamsSize() );
 
 	// Call native function or CObject::ProcessInternal
 	ScriptFn_t		FunctionFn = InFunction->GetFunction();

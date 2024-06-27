@@ -75,6 +75,24 @@ public:
 	}
 
 	/**
+	 * @brief Set function parameters size
+	 * @param InParamsSize		Function parameters size
+	 */
+	FORCEINLINE void SetParamsSize( uint32 InParamsSize )
+	{
+		paramsSize = InParamsSize;
+	}
+
+	/**
+	 * @brief Set number of function parameters
+	 * @param InNumParams	Number of function parameters
+	 */
+	FORCEINLINE void SetNumParams( uint32 InNumParams )
+	{
+		numParams = InNumParams;
+	}
+
+	/**
 	 * @brief Get super function
 	 * @return Return pointer to super function. If it is not return NULL
 	 */
@@ -112,6 +130,24 @@ public:
 	FORCEINLINE ScriptFn_t GetFunction() const
 	{
 		return FunctionFn;
+	}
+
+	/**
+	 * @brief Get function parameters size
+	 * @return Return function parameters size
+	 */
+	FORCEINLINE uint32 GetParamsSize() const
+	{
+		return paramsSize;
+	}
+
+	/**
+	 * @brief Get number of function parameters
+	 * @return Return number of function parameters
+	 */
+	FORCEINLINE uint32 GetNumParams() const
+	{
+		return numParams;
 	}
 
 private:
@@ -167,6 +203,8 @@ private:
 	}
 
 	uint32				functionFlags;	/**< Function flags */
+	uint32				paramsSize;		/**< Function parameters size in bytes */
+	uint32				numParams;		/**< Number of function parameters */
 	ScriptFn_t			FunctionFn;		/**< Function to call */
 	std::vector<byte>	bytecode;		/**< Script bytecode */
 };

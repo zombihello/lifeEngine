@@ -513,10 +513,8 @@ bool CScriptEnvironmentBuilder::MatchFunctionHeader( const CScriptFunctionStub& 
 	const std::wstring			baseFunctionName	= InFunctionStub.GetName();
 
 	// Check parameter count
-	uint32		numParamsBaseFunc	= 0;
-	uint32		numParamsSuperFunc	= 0;
-	for ( TFieldIterator<CProperty> it( baseFunction, false );		it; ++it, ++numParamsBaseFunc );
-	for ( TFieldIterator<CProperty> it( InSuperFunction, false );	it; ++it, ++numParamsSuperFunc );
+	uint32		numParamsBaseFunc	= baseFunction->GetNumParams();
+	uint32		numParamsSuperFunc	= InSuperFunction->GetNumParams();
 	if ( numParamsBaseFunc != numParamsSuperFunc )
 	{
 		Errorf( TEXT( "%s: Function '%s' takes %i parameter(s) which is inconsistent with base function (%i)\n" ), 
@@ -617,6 +615,8 @@ bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& I
 	// Create parameters
 	uint32		offset			= 0;		// Offset in local data of script frame
 	uint32		minAlignment	= 1;
+	uint32		paramsSize		= 0;
+	uint32		numParams		= 0;
 	{
 		CProperty*												lastFuncParam = nullptr;
 		const std::vector<ScriptFunctionParamStubPtr_t>&		funcParamStubs = InFunctionStub.GetParams();
@@ -668,14 +668,20 @@ bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& I
 			}
 			lastFuncParam = funcParam;
 
+			// Update information about function properties (e.g: size/number of function parameters, size/number of local function properties and etc)
+			paramsSize		+= funcParam->GetSize();
+			++numParams;
+
 			// Advance the offset
 			minAlignment	= Max( minAlignment, funcParam->GetMinAlignment() );
 			offset			+= funcParam->GetSize();
 		}
 	}
 
-	// Update properties size and min alignment in the function
+	// Update properties size, min alignment and other data in the function
 	function->SetPropertiesSize( offset );
+	function->SetParamsSize( paramsSize );
+	function->SetNumParams( numParams );
 	function->SetMinAlignment( minAlignment );
 
 	// We are done
