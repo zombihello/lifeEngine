@@ -516,7 +516,8 @@ enum EPropertyFlags
 	CPF_EditConst		= 1 << 4,	/**< Property is uneditable in the editor */
 	CPF_Deprecated		= 1 << 5,	/**< Property is deprecated. Read it from an archive, but don't save it */
 	CPF_Transient		= 1 << 6,	/**< Property is transient: shouldn't be saved or loaded */
-	CPF_SaveGame		= 1 << 7	/**< Property should be serialized for save games, this is only checked for game-specific archives with CArchive::arIsSaveGame */
+	CPF_SaveGame		= 1 << 7,	/**< Property should be serialized for save games, this is only checked for game-specific archives with CArchive::arIsSaveGame */
+    CPF_Parmeter        = 1 << 8    /**< Function parameter */
 };
 
 #if WITH_EDITOR

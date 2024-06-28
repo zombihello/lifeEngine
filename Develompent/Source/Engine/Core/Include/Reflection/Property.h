@@ -359,6 +359,13 @@ public:
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue )			PURE_VIRTUAL( CProperty::SetPropertyValue, return false; );
 
 	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to	
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const							PURE_VIRTUAL( CProperty::CopyPropertyValue, );
+
+	/**
 	 * @brief Is should serialize this value
 	 * 
 	 * @param InArchive		Archive
@@ -679,6 +686,13 @@ public:
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
 
 	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
+
+	/**
 	 * @brief Get property's one element size
 	 * @return Return property's one element size
 	 */
@@ -804,6 +818,13 @@ public:
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
 
 	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
+
+	/**
 	 * @brief Get property's one element size
 	 * @return Return property's one element size
 	 */
@@ -906,6 +927,13 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
+
+	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
 
 	/**
 	 * @brief Get property's one element size
@@ -1012,6 +1040,13 @@ public:
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
 
 	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
+
+	/**
 	 * @brief Get property's one element size
 	 * @return Return property's one element size
 	 */
@@ -1114,6 +1149,13 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
 
 	/**
 	 * @brief Get property's one element size
@@ -1230,6 +1272,13 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
 
 	/**
 	 * @brief Get property's one element size
@@ -1385,6 +1434,13 @@ public:
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
 
 	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
+
+	/**
 	 * @brief Get property's one element size
 	 * @return Return property's one element size
 	 */
@@ -1501,6 +1557,13 @@ public:
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
 
 	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
+
+	/**
 	 * @brief Get property's one element size
 	 * @return Return property's one element size
 	 */
@@ -1615,6 +1678,13 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
 
 	/**
 	 * @brief Get property's one element size
@@ -1756,6 +1826,13 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
+
+	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
 
 	/**
 	 * @brief Get property's one element size
@@ -1911,6 +1988,13 @@ public:
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue& InPropertyValue ) override;
 
 	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
+
+	/**
 	 * @brief Get property's one element size
 	 * @return Return property's one element size
 	 */
@@ -2050,6 +2134,13 @@ public:
 	 * @return Return TRUE if InPropertyValue was copied successfully into property value. FALSE if this CProperty type doesn't support the union (structs and maps) or the address is invalid
 	 */
 	virtual bool SetPropertyValue( byte* InObjectAddress, const UPropertyValue & InPropertyValue ) override;
+
+	/**
+	 * @brief Copy property value
+	 * @param InDestAddress		Pointer to the memory location to copy to
+	 * @param InSrcAddress		Pointer to the memory location to copy from
+	 */
+	virtual void CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const override;
 
 	/**
 	 * @brief Get property's one element size

@@ -42,30 +42,40 @@ CScriptSyntaxCheckerVisitor::VisitSyntaxNode_Ident
 */
 void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_Ident( class CScriptSyntaxNode_Ident* InNode )
 {
-	CScriptSyntaxNode_Base*		parentNode = InNode->GetParentNode();
+	CScriptSyntaxNode_Base*		parentNode	= InNode->GetParentNode();
+	std::wstring				identName	= ANSI_TO_TCHAR( InNode->GetName().c_str() );
 
 	// Is this identifier its function call
 	if ( parentNode && parentNode->GetNodeType() == SSNT_FuncCall )
 	{
 		// Try find this function in the class
 		CClass*		theClass = classStub.GetCreatedClass();
-		CFunction*	function = theClass->FindFunction( ANSI_TO_TCHAR( InNode->GetName().c_str() ) );
+		CFunction*	function = theClass->FindFunction( identName.c_str() );
 		if ( !function )
 		{
-			Errorf( TEXT( "%s: Could not find function '%s'\n" ), InNode->GetContext().ToString().c_str(), ANSI_TO_TCHAR( InNode->GetName().c_str() ) );
+			Errorf( TEXT( "%s: Could not find function '%s'\n" ), InNode->GetContext().ToString().c_str(), identName.c_str() );
 			bHasError = true;
 		}
 
-		// Save the function for FuncCall node
-		lastVisitedNodeData.function = function;
+		// Save resolved the function
+		InNode->SetCFunction( function );
 
 		// For function call we are done
 		return;
 	}
 
-	// Anything else we don't currently support
-	Errorf( TEXT( "%s: Identifiers can currently only be used to call a function\n" ), InNode->GetContext().ToString().c_str() );
-	bHasError = true;
+	// Find property in the function (function parameters and local properties) and in the class
+	CProperty*		property = FindPropertyInScopes( identName.c_str() );
+	if ( !property )
+	{
+		Errorf( TEXT( "%s: Invalid identifier '%s'\n" ), InNode->GetContext().ToString().c_str(), identName.c_str() );
+		bHasError = true;
+		return;
+	}
+
+	// Save resolved property and convert property into expression value type
+	InNode->SetCProperty( property );
+	lastVisitedNodeData.expressionValueType = ConvertPropertyToExpressionValueType( property );
 }
 
 /*
@@ -82,7 +92,7 @@ void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_FuncCall( class CScriptSyntaxN
 	syntaxNameNode->AcceptVisitor( *this );
 
 	// Get function from function identifier
-	CFunction*		function = lastVisitedNodeData.function;
+	CFunction*		function = ( ( CScriptSyntaxNode_Ident* )syntaxNameNode )->GetCFunction();
 	if ( !function )
 	{
 		return;
@@ -179,19 +189,63 @@ void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_IntConst( class CScriptSyntaxN
 
 /*
 ==================
-CScriptSyntaxCheckerVisitor::CheckExpressionValueType
+CScriptSyntaxCheckerVisitor::ConvertPropertyToExpressionValueType
 ==================
 */
-bool CScriptSyntaxCheckerVisitor::CheckExpressionValueType( EExpressionValueType InExpressionValueType, CProperty* InProperty )
+CScriptSyntaxCheckerVisitor::EExpressionValueType CScriptSyntaxCheckerVisitor::ConvertPropertyToExpressionValueType( CProperty* InProperty ) const
 {
 	Assert( InProperty );
 	CClass*		propertyClass = InProperty->GetClass();
-	switch ( InExpressionValueType )
+
+	// Is this integer type
+	if ( propertyClass->HasAnyCastFlags( CASTCLASS_CIntProperty ) )
 	{
-		// Check on integer type
-	case EVT_Int:
-		return propertyClass->HasAnyCastFlags( CASTCLASS_CIntProperty );
+		return EVT_Int;
 	}
 
-	return false;
+	// Unknown type
+	return EVT_Void;
+}
+
+/*
+==================
+CScriptSyntaxCheckerVisitor::FindPropertyInScopes
+==================
+*/
+CProperty* CScriptSyntaxCheckerVisitor::FindPropertyInScopes( const CName& InName ) const
+{
+	// Find property in the function (function parameters and local properties)
+	// Local function properties
+	CFunction*	function	= functionStub.GetCreatedFunction();
+	for ( TFieldIterator<CProperty> it( function, false ); it; ++it )
+	{
+		CProperty*		currentProperty = *it;
+		if ( !currentProperty->HasAnyFlags( CPF_Parmeter ) && currentProperty->GetCName() == InName )
+		{
+			return *it;
+		}
+	}
+
+	// Function parameters
+	for ( TFieldIterator<CProperty> it( function, false ); it; ++it )
+	{
+		CProperty*		currentProperty = *it;
+		if ( currentProperty->HasAnyFlags( CPF_Parmeter ) && currentProperty->GetCName() == InName )
+		{
+			return *it;
+		}
+	}
+
+	// Find property in the class
+	CClass*		theClass = classStub.GetCreatedClass();
+	for ( TFieldIterator<CProperty> it( theClass ); it; ++it )
+	{
+		if ( it->GetCName() == InName )
+		{
+			return *it;
+		}
+	}
+
+	// We nothing found
+	return nullptr;
 }

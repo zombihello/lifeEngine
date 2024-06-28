@@ -653,7 +653,7 @@ bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& I
 			}
 
 			// Create function parameter
-			CProperty*		funcParam = CScriptTypeResolver::Resolve( ScriptTypeResolveParams( function, funcParamName, OBJECT_Public, funcParamStub.GetType(), offset, CPF_None ) );
+			CProperty*		funcParam = CScriptTypeResolver::Resolve( ScriptTypeResolveParams( function, funcParamName, OBJECT_Public, funcParamStub.GetType(), offset, CPF_Parmeter ) );
 			Assert( funcParam );
 			funcParamStub.SetCreatedFuncParam( funcParam );
 

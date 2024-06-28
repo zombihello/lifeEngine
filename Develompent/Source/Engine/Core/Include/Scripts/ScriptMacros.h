@@ -84,6 +84,8 @@ enum EScriptOpcode
 	OP_Return,				/**< Return from function */
 	OP_IntConst,			/**< Integer constant */
 	OP_EndFunctionParms,	/**< End of function call parameters */
+	OP_LocalVariable,		/**< Local variable (function parameter or local function variable) */
+	OP_ObjectVariable,		/**< Object variable */
 	OP_Count				/**< Count opcodes */
 };
 

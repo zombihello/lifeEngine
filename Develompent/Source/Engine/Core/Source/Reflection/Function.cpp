@@ -1,6 +1,7 @@
 #include "Misc/StringConv.h"
 #include "Reflection/Class.h"
 #include "Reflection/Function.h"
+#include "Reflection/Property.h"
 #include "Reflection/LinkerLoad.h"
 #include "Reflection/LinkerSave.h"
 
@@ -164,6 +165,13 @@ void CFunction::SerializeOpcode( uint32& InOutByteCodeIndex, CArchive& InArchive
 		// Integer constant
 	case OP_IntConst:
 		SerializeOpcodeParam<int32>( InOutByteCodeIndex, InArchive );			// Integer value
+		break;
+
+		// Local variable
+		// Object variable
+	case OP_LocalVariable:
+	case OP_ObjectVariable:
+		SerializeOpcodeParamPtr<CProperty>( InOutByteCodeIndex, InArchive );	// Property
 		break;
 
 		// This parameters no have any arguments

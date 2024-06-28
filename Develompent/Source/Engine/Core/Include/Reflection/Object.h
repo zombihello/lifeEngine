@@ -601,10 +601,12 @@ public:
 	void ProcessInternal( struct ScriptFrame& InStack, RESULT_DECLARE );
 
 	// LifeScript opcodes
-    DECLARE_FUNCTION( Nop );        // OP_Nop
-    DECLARE_FUNCTION( Call );       // Op_Call
-    DECLARE_FUNCTION( Return );     // OP_Return
-    DECLARE_FUNCTION( IntConst );   // OP_IntConst
+    DECLARE_FUNCTION( Nop );            // OP_Nop
+    DECLARE_FUNCTION( Call );           // Op_Call
+    DECLARE_FUNCTION( Return );         // OP_Return
+    DECLARE_FUNCTION( IntConst );       // OP_IntConst
+    DECLARE_FUNCTION( LocalVariable );  // OP_LocalVariable
+    DECLARE_FUNCTION( ObjectVariable ); // OP_ObjectVariable
 
 	// LifeScript native functions
 	DECLARE_FUNCTION( StackTrace );

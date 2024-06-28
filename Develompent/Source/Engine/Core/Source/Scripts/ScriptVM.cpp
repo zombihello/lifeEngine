@@ -11,10 +11,13 @@
 CObject::ScriptNativeFunctionsMap_t		CObject::nativeFunctionsMap;
 ScriptFn_t								CObject::OpcodeFunctions[OP_Count] =
 {
-	&CObject::execNop,		// OP_Nop
-	&CObject::execCall,		// OP_Call
-	&CObject::execReturn,	// OP_Return
-	&CObject::execIntConst	// OP_IntConst
+	&CObject::execNop,				// OP_Nop
+	&CObject::execCall,				// OP_Call
+	&CObject::execReturn,			// OP_Return
+	&CObject::execIntConst,			// OP_IntConst
+	nullptr,						// OP_EndFunctionParms
+	&CObject::execLocalVariable,	// OP_LocalVariable
+	&CObject::execObjectVariable	// OP_ObjectVariable
 };
 
 /*
@@ -143,6 +146,34 @@ Opcode OP_IntConst
 IMPLEMENT_FUNCTION( IntConst )
 {
 	*( uint32* )InResult = InStack.ReadInt32();
+}
+
+/*
+==================
+Opcode OP_LocalVariable
+==================
+*/
+IMPLEMENT_FUNCTION( LocalVariable )
+{
+	CProperty*		property = ( CProperty* )InStack.ReadObject();
+	if ( InResult )
+	{
+		property->CopyPropertyValue( ( byte* )InResult, InStack.localData + property->GetOffset() );
+	}
+}
+
+/*
+==================
+Opcode OP_ObjectVariable
+==================
+*/
+IMPLEMENT_FUNCTION( ObjectVariable )
+{
+	CProperty*		property = ( CProperty* )InStack.ReadObject();
+	if ( InResult )
+	{
+		property->CopyPropertyValue( ( byte* )this, InStack.localData + property->GetOffset() );
+	}
 }
 
 //

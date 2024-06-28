@@ -353,6 +353,16 @@ bool CByteProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValu
 
 /*
 ==================
+CByteProperty::CopyPropertyValue
+==================
+*/
+void CByteProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
+}
+
+/*
+==================
 CByteProperty::Serialize
 ==================
 */
@@ -458,6 +468,16 @@ bool CIntProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValue
 
 /*
 ==================
+CIntProperty::CopyPropertyValue
+==================
+*/
+void CIntProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
+}
+
+/*
+==================
 CIntProperty::SerializeValue
 ==================
 */
@@ -548,6 +568,16 @@ bool CFloatProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CFloatProperty::CopyPropertyValue
+==================
+*/
+void CFloatProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
 }
 
 /*
@@ -646,6 +676,16 @@ bool CBoolProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyValu
 
 /*
 ==================
+CBoolProperty::CopyPropertyValue
+==================
+*/
+void CBoolProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
+}
+
+/*
+==================
 CBoolProperty::SerializeValue
 ==================
 */
@@ -737,6 +777,16 @@ bool CColorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CColorProperty::CopyPropertyValue
+==================
+*/
+void CColorProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
 }
 
 /*
@@ -865,6 +915,17 @@ bool CObjectProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CObjectProperty::CopyPropertyValue
+==================
+*/
+void CObjectProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	// TODO yehor.pohuliaka - Implement construct a new object (if it need)
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
 }
 
 /*
@@ -1005,6 +1066,16 @@ bool CVectorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 
 /*
 ==================
+CVectorProperty::CopyPropertyValue
+==================
+*/
+void CVectorProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
+}
+
+/*
+==================
 CVectorProperty::Serialize
 ==================
 */
@@ -1113,6 +1184,16 @@ bool CRotatorProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyV
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CRotatorProperty::CopyPropertyValue
+==================
+*/
+void CRotatorProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
 }
 
 /*
@@ -1230,6 +1311,16 @@ bool CAssetProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CAssetProperty::CopyPropertyValue
+==================
+*/
+void CAssetProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
 }
 
 /*
@@ -1378,6 +1469,29 @@ bool CArrayProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVal
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CArrayProperty::CopyPropertyValue
+==================
+*/
+void CArrayProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	// Do nothing if the pointers are the same
+	if ( InDestAddress == InSrcAddress )
+	{
+		return;
+	}
+
+	// TODO yehor.pohuliaka - When was implement construct a new object (if it need) here should call innerProperty->CopyPropertyValue
+	for ( uint32 index = 0; index < arraySize; ++index )
+	{
+		std::vector<byte>*		destArray	= ( ( std::vector<byte>* )InDestAddress ) + index;
+		std::vector<byte>*		srcArray	= ( ( std::vector<byte>* )InSrcAddress ) + index;
+		destArray->resize( srcArray->size() );
+		Memory::Memcpy( destArray->data(), srcArray->data(), destArray->size() );
+	}
 }
 
 /*
@@ -1588,6 +1702,17 @@ bool CStructProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 
 /*
 ==================
+CStructProperty::CopyPropertyValue
+==================
+*/
+void CStructProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	// TODO yehor.pohuliaka - When was implement construct a new object (if it need) here should call CopyPropertyValue for each struct's property
+	Memory::Memcpy( InDestAddress, InSrcAddress, GetSize() );
+}
+
+/*
+==================
 CStructProperty::IsContainsObjectReference
 ==================
 */
@@ -1734,6 +1859,19 @@ bool CStringProperty::SetPropertyValue( byte* InObjectAddress, const UPropertyVa
 		bResult = true;
 	}
 	return bResult;
+}
+
+/*
+==================
+CStringProperty::CopyPropertyValue
+==================
+*/
+void CStringProperty::CopyPropertyValue( byte* InDestAddress, byte* InSrcAddress ) const
+{
+	for ( uint32 index = 0; index < arraySize; ++index )
+	{
+		( ( std::wstring* )InDestAddress )[index] = ( ( std::wstring* )InSrcAddress)[index];
+	}
 }
 
 /*

@@ -211,6 +211,8 @@ public:
 	CScriptSyntaxNode_Ident( const ScriptFileContext& InContext, const std::string_view& InIdentName )
 		: CScriptSyntaxNode_Base( SSNT_Ident, InContext )
 		, name( InIdentName )
+		, function( nullptr )
+		, property( nullptr )
 	{}
 
 	/**
@@ -228,8 +230,46 @@ public:
 		return name;
 	}
 
+	/**
+	 * @brief Set resolved function identifier
+	 * @param InFunction	Resolved function identifier
+	 */
+	FORCEINLINE void SetCFunction( CFunction* InFunction )
+	{
+		function = InFunction;
+	}
+
+	/**
+	 * @brief Set resolved property identifier
+	 * @param InProperty	Resolved property identifier
+	 */
+	FORCEINLINE void SetCProperty( CProperty* InProperty )
+	{
+		property = InProperty;
+	}
+
+	/**
+	 * @brief Get resolved function identifier
+	 * @return Return resolved function identifier of this identifier is function, otherwise NULL
+	 */
+	FORCEINLINE CFunction* GetCFunction() const
+	{
+		return function;
+	}
+
+	/**
+	 * @brief Get resolved property identifier
+	 * @return Return resolved property identifier of this identifier is property, otherwise NULL
+	 */
+	FORCEINLINE CProperty* GetCProperty() const
+	{
+		return property;
+	}
+
 private:
-	std::string		name;	/**< Identifier name */
+	std::string		name;		/**< Identifier name */
+	CFunction*		function;	/**< Resolved identifier. After syntax check must be valid if this identifier is a function */
+	CProperty*		property;	/**< Resolved identifier. After syntax check must be valid if this identifier is a property */
 };
 
 /**

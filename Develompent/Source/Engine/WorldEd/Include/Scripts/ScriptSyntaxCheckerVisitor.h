@@ -97,11 +97,9 @@ private:
 		 */
 		LastVisitedNodeData()
 			: expressionValueType( EVT_Void )
-			, function( nullptr )
 		{}
 
 		EExpressionValueType	expressionValueType;	/**< Expression value type */
-		CFunction*				function;				/**< Cached CFunction */
 	};
 
 	/**
@@ -110,7 +108,24 @@ private:
 	 * @param InProperty				Expected type
 	 * @return Return TRUE if expression value type is valid, otherwise FALSE
 	 */
-	bool CheckExpressionValueType( EExpressionValueType InExpressionValueType, CProperty* InProperty );
+	FORCEINLINE bool CheckExpressionValueType( EExpressionValueType InExpressionValueType, CProperty* InProperty ) const
+	{
+		return ConvertPropertyToExpressionValueType( InProperty ) == InExpressionValueType;
+	}
+
+	/**
+	 * @brief Find property in scopes
+	 * @param InName	Property name
+	 * @return Return found property, if not found returns NULL
+	 */
+	CProperty* FindPropertyInScopes( const CName& InName ) const;
+
+	/**
+	 * @brief Convert property type into expression value type
+	 * @param InProperty		Property to convert
+	 * @return Return convert property type into expression value type
+	 */
+	EExpressionValueType ConvertPropertyToExpressionValueType( CProperty* InProperty ) const;
 
 	bool						bHasError;				/**< There were syntax errors */
 	const CScriptClassStub&		classStub;				/**< Class stub where functionStub is */

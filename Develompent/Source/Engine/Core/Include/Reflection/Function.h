@@ -188,7 +188,7 @@ private:
 	template<typename TType>
 	FORCEINLINE void SerializeOpcodeParamPtr( uint32& InOutByteCodeIndex, CArchive& InArchive )
 	{
-		TType*		value;
+		TType*		value = nullptr;
 		if ( InArchive.IsSaving() )
 		{
 			Memory::Memcpy( &value, &bytecode[InOutByteCodeIndex], sizeof( uptrint ) );

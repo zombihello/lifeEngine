@@ -1,5 +1,6 @@
 #include "System/MemoryArchive.h"
 #include "Scripts/ScriptCodeGeneratorVisitor.h"
+#include "Reflection/FieldIterator.h"
 
 /*
 ==================
@@ -85,26 +86,39 @@ void CScriptCodeGeneratorVisitor::VisitSyntaxNode_Ident( class CScriptSyntaxNode
 	codeBlocks = new CScriptCodeBlock( InNode->GetContext(), TEXT( "Ident" ) );
 	CScriptSyntaxNode_Base*		parentSyntaxNode = InNode->GetParentNode();
 	CMemoryWriter				codeWriter( codeBlocks->GetBytecode() );
-	AssertMsg( parentSyntaxNode, TEXT( "Missing parent syntax node" ) );
-
-	switch ( parentSyntaxNode->GetNodeType() )
+	
+	// Generate code block for function call
+	if ( parentSyntaxNode && parentSyntaxNode->GetNodeType() == SSNT_FuncCall )
 	{
-		// Generate code block for function call
-	case SSNT_FuncCall:
-	{
-		CClass*		theClass = classStub.GetCreatedClass();
-		Assert( theClass );
-		CFunction*	function = theClass->FindFunction( ANSI_TO_TCHAR( InNode->GetName().c_str() ) );
+		CFunction*	function = InNode->GetCFunction();
 		Assert( function );
 		codeWriter << ( uptrint )function;
-		break;
+		
+		// For function we are done
+		return;
 	}
 
-		// Unknown parent, it is error
-	default:
-		AssertMsg( false, TEXT( "Unknown parent node" ) );
-		break;
+	// Otherwise it is property and generate code for it
+	CProperty*		property = InNode->GetCProperty();
+	Assert( property );
+
+	// Is this property in the function
+	if ( property->GetOuter() == functionStub.GetCreatedFunction() )
+	{
+		codeWriter << ( byte )OP_LocalVariable;
 	}
+	// Is this property in the class
+	else if ( property->GetOuter() == classStub.GetCreatedClass() )
+	{
+		codeWriter << ( byte )OP_ObjectVariable;
+	}
+	// Otherwise it is unknown scope and here we never must be
+	else
+	{
+		AssertMsg( false, TEXT( "Unknown scope of property '%s'" ), property->GetFullName().c_str() );
+	}
+
+	codeWriter << ( uptrint )property;
 }
 
 /*
