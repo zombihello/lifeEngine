@@ -73,6 +73,12 @@ protected:
 	 */
 	virtual void VisitSyntaxNode_IntConst( class CScriptSyntaxNode_IntConst* InNode ) override;
 
+	/**
+	 * @brief Visit syntax node 'float constant'
+	 * @param InNode	Node to visit
+	 */
+	virtual void VisitSyntaxNode_FloatConst( class CScriptSyntaxNode_FloatConst* InNode ) override;
+
 private:
 	/**
 	 * @brief Expression value type
@@ -80,7 +86,8 @@ private:
 	enum EExpressionValueType
 	{
 		EVT_Void,		/**< Void */
-		EVT_Int			/**< Integer */
+		EVT_Int,		/**< Integer */
+		EVT_Float		/**< Float */
 
 		//
 		// Add here your a new expression value type

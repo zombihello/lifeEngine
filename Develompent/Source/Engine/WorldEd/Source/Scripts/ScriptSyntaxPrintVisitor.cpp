@@ -104,3 +104,15 @@ void CScriptSyntaxPrintVisitor::VisitSyntaxNode_IntConst( class CScriptSyntaxNod
 	GetTrailingSpace( printLevel, trailingSpace );
 	Logf( TEXT( "%p(%4i):%s IntConst (Value: %i)\n" ), InNode, InNode->GetContext().line, trailingSpace.c_str(), InNode->GetValue() );
 }
+
+/*
+==================
+CScriptSyntaxPrintVisitor::VisitSyntaxNode_FloatConst
+==================
+*/
+void CScriptSyntaxPrintVisitor::VisitSyntaxNode_FloatConst( class CScriptSyntaxNode_FloatConst* InNode )
+{
+	std::wstring	trailingSpace;
+	GetTrailingSpace( printLevel, trailingSpace );
+	Logf( TEXT( "%p(%4i):%s FloatConst (Value: %f)\n" ), InNode, InNode->GetContext().line, trailingSpace.c_str(), InNode->GetValue() );
+}

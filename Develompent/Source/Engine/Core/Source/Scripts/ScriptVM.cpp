@@ -15,6 +15,7 @@ ScriptFn_t								CObject::OpcodeFunctions[OP_Count] =
 	&CObject::execCall,				// OP_Call
 	&CObject::execReturn,			// OP_Return
 	&CObject::execIntConst,			// OP_IntConst
+	&CObject::execFloatConst,		// OP_FloatConst
 	nullptr,						// OP_EndFunctionParms
 	&CObject::execLocalVariable,	// OP_LocalVariable
 	&CObject::execObjectVariable	// OP_ObjectVariable
@@ -146,6 +147,16 @@ Opcode OP_IntConst
 IMPLEMENT_FUNCTION( IntConst )
 {
 	*( uint32* )InResult = InStack.ReadInt32();
+}
+
+/*
+==================
+Opcode OP_FloatConst
+==================
+*/
+IMPLEMENT_FUNCTION( FloatConst )
+{
+	*( float* )InResult = InStack.ReadFloat();
 }
 
 /*

@@ -189,6 +189,17 @@ void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_IntConst( class CScriptSyntaxN
 
 /*
 ==================
+CScriptSyntaxCheckerVisitor::VisitSyntaxNode_FloatConst
+==================
+*/
+void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_FloatConst( class CScriptSyntaxNode_FloatConst* InNode )
+{
+	// Mark expression value type of the node as 'float'
+	lastVisitedNodeData.expressionValueType = EVT_Float;
+}
+
+/*
+==================
 CScriptSyntaxCheckerVisitor::ConvertPropertyToExpressionValueType
 ==================
 */
@@ -197,10 +208,17 @@ CScriptSyntaxCheckerVisitor::EExpressionValueType CScriptSyntaxCheckerVisitor::C
 	Assert( InProperty );
 	CClass*		propertyClass = InProperty->GetClass();
 
+	// TODO yehor.pohuliaka - Need add cast types (e.g int -> float, float -> int and etc)
 	// Is this integer type
 	if ( propertyClass->HasAnyCastFlags( CASTCLASS_CIntProperty ) )
 	{
 		return EVT_Int;
+	}
+
+	// Is this float type
+	else if ( propertyClass->HasAnyCastFlags( CASTCLASS_CFloatProperty ) )
+	{
+		return EVT_Float;
 	}
 
 	// Unknown type

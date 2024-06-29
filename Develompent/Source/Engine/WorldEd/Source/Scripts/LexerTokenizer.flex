@@ -186,6 +186,16 @@
     #endif // PLATFORM_WINDOWS
 }
 
+    /* https://westes.github.io/flex/manual/Numbers.html#Numbers */
+dseq                            ([[:digit:]]+)
+dseq_opt                        ([[:digit:]]*)
+frac                            (({dseq_opt}"."{dseq})|{dseq}".")
+fsuff                           [fF]
+fsuff_opt                       ({fsuff}?)
+
+	/* Decimal floating const */
+decimal_floating_const          (({frac}{fsuff_opt})|({dseq}{fsuff_opt}))
+
     /* Lexer states */
 %x MultiLineComment
 %x CppText
@@ -281,6 +291,9 @@
 
 	/* Hexadecimal Integer */
 "0"[Xx][0-9a-fA-F]+								EMIT_TOKEN( TOKEN_INTEGER );
+
+    /* Float */
+{decimal_floating_const}						EMIT_TOKEN( TOKEN_FLOAT );
 
     /* Comments */
 "//"[^\r\n]*									{ yyextra->StoreSequenceStart(); EMIT_COMMENT(); }

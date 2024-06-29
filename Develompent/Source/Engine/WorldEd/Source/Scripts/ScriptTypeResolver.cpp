@@ -146,5 +146,14 @@ void CScriptTypeResolver::InitBuiltInTypes()
 					{
 						return new( InParams.outer, InParams.name, InParams.objectFlags ) CIntProperty( InParams.offset, InParams.category, InParams.description, InParams.propertyFlags );
 					} );
+
+	// Float type
+	AddBuiltInType( TEXT( "float" ), TEXT( "float" ),
+					[]( const ScriptTypeResolveParams& InParams ) -> CProperty*
+					{
+						return new( InParams.outer, InParams.name, InParams.objectFlags ) CFloatProperty( InParams.offset, InParams.category, InParams.description, InParams.propertyFlags );
+					} );
+
+	// We are done
 	bBuiltInTypesInited = true;
 }

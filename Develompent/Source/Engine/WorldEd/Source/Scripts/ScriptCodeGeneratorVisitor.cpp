@@ -188,3 +188,17 @@ void CScriptCodeGeneratorVisitor::VisitSyntaxNode_IntConst( class CScriptSyntaxN
 	codeWriter << ( byte )OP_IntConst;
 	codeWriter << InNode->GetValue();
 }
+
+/*
+==================
+CScriptCodeGeneratorVisitor::VisitSyntaxNode_FloatConst
+==================
+*/
+void CScriptCodeGeneratorVisitor::VisitSyntaxNode_FloatConst( class CScriptSyntaxNode_FloatConst* InNode )
+{
+	// Generate code with integer const
+	codeBlocks = new CScriptCodeBlock( InNode->GetContext(), TEXT( "FloatConst" ) );
+	CMemoryWriter		codeWriter( codeBlocks->GetBytecode() );
+	codeWriter << ( byte )OP_FloatConst;
+	codeWriter << InNode->GetValue();
+}

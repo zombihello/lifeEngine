@@ -44,6 +44,13 @@ class CObject;
 
 /**
  * @ingroup Core
+ * @brief Get float parameter at current executing bytecode for native function
+ * @param InVariable	Variable name
+ */
+#define STACKFRAME_GET_FLOAT( InVariable )		float InVariable = 0.f; InStack.Step( InStack.object, &InVariable );
+
+/**
+ * @ingroup Core
  * @brief End of function parameters (it need for skip opcode 'OP_EndFunctionParams')
  */
 #define STACKFRAME_GET_FINISH					++InStack.bytecode;
@@ -83,6 +90,7 @@ enum EScriptOpcode
 	OP_Call,				/**< Call script or native function */
 	OP_Return,				/**< Return from function */
 	OP_IntConst,			/**< Integer constant */
+	OP_FloatConst,			/**< Float constant */
 	OP_EndFunctionParms,	/**< End of function call parameters */
 	OP_LocalVariable,		/**< Local variable (function parameter or local function variable) */
 	OP_ObjectVariable,		/**< Object variable */

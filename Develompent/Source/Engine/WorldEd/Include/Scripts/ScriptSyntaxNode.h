@@ -25,7 +25,8 @@ enum EScriptSyntaxNodeType
 	SSNT_Ident,			/**< Identifier */
 	SSNT_FuncCall,		/**< Function call */
 	SSNT_Return,		/**< Return */
-	SSNT_IntConst		/**< Integer constant */
+	SSNT_IntConst,		/**< Integer constant */
+	SSNT_FloatConst		/**< Float constant */
 
 	//
 	// Add here your a new syntax node type
@@ -428,6 +429,52 @@ public:
 
 private:
 	uint32		value;		/**< Integer value */
+};
+
+/**
+ * @ingroup WorldEd
+ * @brief Syntax node of float constant
+ */
+class CScriptSyntaxNode_FloatConst : public CScriptSyntaxNode_Base
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InContext		Related place in the source code
+	 * @param InValue		Float value
+	 */
+	CScriptSyntaxNode_FloatConst( const ScriptFileContext& InContext, float InValue )
+		: CScriptSyntaxNode_Base( SSNT_FloatConst, InContext )
+		, value( InValue )
+	{}
+
+	/**
+	 * @brief Accept visitor
+	 * @param InVisitor		Visitor
+	 */
+	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
+
+	/**
+	 * @brief Set float value
+	 * @param InValue	A new value
+	 */
+	FORCEINLINE void SetValue( float InValue )
+	{
+		value = InValue;
+	}
+
+	/**
+	 * @brief Get float value
+	 * @return Return float value
+	 */
+	FORCEINLINE float GetValue() const
+	{
+		return value;
+	}
+
+private:
+	float		value;		/**< Float value */
 };
 
 #endif // !SCRIPTSYNTAXNODE_H

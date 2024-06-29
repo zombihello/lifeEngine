@@ -27,6 +27,7 @@
         FORCEINLINE YYSTYPE_Function()
             : node( nullptr )
             , integer( 0 )
+            , floating( 0.f )
         {}
 
         /**
@@ -39,6 +40,7 @@
             , node( InOther.node )
             , string( InOther.string )
             , integer( InOther.integer )
+            , floating( InOther.floating )
         {}
 
         /**
@@ -51,6 +53,7 @@
             , node( std::move( InOther.node ) )
             , string( std::move( InOther.string ) )
             , integer( std::move( InOther.integer ) )
+            , floating( std::move( InOther.floating ) )
         {}
 
         /**
@@ -74,6 +77,7 @@
                 node        = InOther.node;
                 string      = InOther.string;
                 integer     = InOther.integer;
+                floating    = InOther.floating;
 	    	}
 	    	return *this;
 	    }
@@ -93,6 +97,7 @@
                 node        = std::move( InOther.node );
                 string      = std::move( InOther.string );
                 integer     = std::move( InOther.integer );
+                floating    = std::move( InOther.floating );
 	    	}
 	    	return *this;
 	    }
@@ -102,6 +107,7 @@
         CScriptSyntaxNode_Base*		node;       /**< Script syntax node */
         std::string_view            string;     /**< String value */
         uint32                      integer;    /**< Integer value */
+        float                       floating;   /**< Float value */
     };
 
     /**
@@ -249,6 +255,7 @@
 /* Data tokens */
 %token TOKEN_IDENT
 %token TOKEN_INTEGER
+%token TOKEN_FLOAT
 
 /* Keywords */
 %token TOKEN_CLASS
@@ -343,10 +350,15 @@ base_ident
 
 base_const
     : integer_const                                         { $<node>$ = $<node>1; }
+    | float_const                                           { $<node>$ = $<node>1; }
     ;
 
 integer_const
     : integer                                               { $<node>$ = new CScriptSyntaxNode_IntConst( $<context>1, $<integer>1 ); }
+    ;
+
+float_const
+    : float                                                 { $<node>$ = new CScriptSyntaxNode_FloatConst( $<context>1, $<floating>1 ); }
     ;
 
 ////////////////////////////////
@@ -371,6 +383,10 @@ integer
 
                                                                 $<string>$ = $<token>1; $<context>$ = $<context>1;
                                                             }
+    ;
+
+float
+    : TOKEN_FLOAT                                           { Assert( !$<token>1.empty() ); $<floating>$ = L_Atof( $<token>1.data() ); $<string>$ = $<token>1; $<context>$ = $<context>1; }
     ;
 
 ident
