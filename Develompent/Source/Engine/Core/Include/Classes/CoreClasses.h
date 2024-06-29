@@ -12,6 +12,9 @@ static void InitRegistrants_Core()
 {
 	static ScriptNativeFunctionLookup s_CObjectNativeFunctions[] =
 	{
+		MAP_NATIVE_FUNC( CObject, Log )
+		MAP_NATIVE_FUNC( CObject, Warn )
+		MAP_NATIVE_FUNC( CObject, Error )
 		MAP_NATIVE_FUNC( CObject, StackTrace )
 		{ nullptr, nullptr }
 	};

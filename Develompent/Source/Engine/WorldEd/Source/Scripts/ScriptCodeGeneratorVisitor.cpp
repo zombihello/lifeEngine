@@ -202,3 +202,23 @@ void CScriptCodeGeneratorVisitor::VisitSyntaxNode_FloatConst( class CScriptSynta
 	codeWriter << ( byte )OP_FloatConst;
 	codeWriter << InNode->GetValue();
 }
+
+/*
+==================
+CScriptCodeGeneratorVisitor::VisitSyntaxNode_StringConst
+==================
+*/
+void CScriptCodeGeneratorVisitor::VisitSyntaxNode_StringConst( class CScriptSyntaxNode_StringConst* InNode )
+{
+	// Generate code with integer const
+	codeBlocks = new CScriptCodeBlock( InNode->GetContext(), TEXT( "StringConst" ) );
+	const std::string&	value = InNode->GetValue();
+	CMemoryWriter		codeWriter( codeBlocks->GetBytecode() );
+
+	codeWriter << ( byte )OP_StringConst;
+	if ( !value.empty() )
+	{
+		codeWriter << value.data();
+	}
+	codeWriter << '\0';
+}

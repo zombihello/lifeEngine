@@ -172,6 +172,11 @@ void CFunction::SerializeOpcode( uint32& InOutByteCodeIndex, CArchive& InArchive
 		SerializeOpcodeParam<float>( InOutByteCodeIndex, InArchive );			// Float value
 		break;
 
+		// String constant
+	case OP_StringConst:
+		SerializeOpcodeParamStr( InOutByteCodeIndex, InArchive );				// String value
+		break;
+
 		// Local variable
 		// Object variable
 	case OP_LocalVariable:

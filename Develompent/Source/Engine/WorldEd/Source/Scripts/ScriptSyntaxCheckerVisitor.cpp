@@ -200,6 +200,17 @@ void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_FloatConst( class CScriptSynta
 
 /*
 ==================
+CScriptSyntaxCheckerVisitor::VisitSyntaxNode_StringConst
+==================
+*/
+void CScriptSyntaxCheckerVisitor::VisitSyntaxNode_StringConst( class CScriptSyntaxNode_StringConst* InNode )
+{
+	// Mark expression value type of the node as 'string'
+	lastVisitedNodeData.expressionValueType = EVT_String;
+}
+
+/*
+==================
 CScriptSyntaxCheckerVisitor::ConvertPropertyToExpressionValueType
 ==================
 */
@@ -219,6 +230,12 @@ CScriptSyntaxCheckerVisitor::EExpressionValueType CScriptSyntaxCheckerVisitor::C
 	else if ( propertyClass->HasAnyCastFlags( CASTCLASS_CFloatProperty ) )
 	{
 		return EVT_Float;
+	}
+
+	// Is this string type
+	else if ( propertyClass->HasAnyCastFlags( CASTCLASS_CStringProperty ) )
+	{
+		return EVT_String;
 	}
 
 	// Unknown type

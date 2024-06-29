@@ -606,10 +606,14 @@ public:
     DECLARE_FUNCTION( Return );         // OP_Return
     DECLARE_FUNCTION( IntConst );       // OP_IntConst
     DECLARE_FUNCTION( FloatConst );     // OP_FloatConst
+    DECLARE_FUNCTION( StringConst );    // OP_StringConst
     DECLARE_FUNCTION( LocalVariable );  // OP_LocalVariable
     DECLARE_FUNCTION( ObjectVariable ); // OP_ObjectVariable
 
 	// LifeScript native functions
+    DECLARE_FUNCTION( Log );
+    DECLARE_FUNCTION( Warn );
+    DECLARE_FUNCTION( Error );
 	DECLARE_FUNCTION( StackTrace );
 
 protected:

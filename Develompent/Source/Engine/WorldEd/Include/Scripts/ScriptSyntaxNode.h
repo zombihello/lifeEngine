@@ -26,7 +26,8 @@ enum EScriptSyntaxNodeType
 	SSNT_FuncCall,		/**< Function call */
 	SSNT_Return,		/**< Return */
 	SSNT_IntConst,		/**< Integer constant */
-	SSNT_FloatConst		/**< Float constant */
+	SSNT_FloatConst,	/**< Float constant */
+	SSNT_StringConst	/**< String constant */
 
 	//
 	// Add here your a new syntax node type
@@ -475,6 +476,52 @@ public:
 
 private:
 	float		value;		/**< Float value */
+};
+
+/**
+ * @ingroup WorldEd
+ * @brief Syntax node of string constant
+ */
+class CScriptSyntaxNode_StringConst : public CScriptSyntaxNode_Base
+{
+public:
+	/**
+	 * @brief Constructor
+	 * 
+	 * @param InContext		Related place in the source code
+	 * @param InValue		String value
+	 */
+	CScriptSyntaxNode_StringConst( const ScriptFileContext& InContext, const std::string_view& InValue )
+		: CScriptSyntaxNode_Base( SSNT_StringConst, InContext )
+		, value( InValue.empty() ? "" : InValue.data() )
+	{}
+
+	/**
+	 * @brief Accept visitor
+	 * @param InVisitor		Visitor
+	 */
+	virtual void AcceptVisitor( CScriptSyntaxVisitor& InVisitor ) override;
+
+	/**
+	 * @brief Set string value
+	 * @param InValue	A new value
+	 */
+	FORCEINLINE void SetValue( const std::string& InValue )
+	{
+		value = InValue;
+	}
+
+	/**
+	 * @brief Get string value
+	 * @return Return string value
+	 */
+	FORCEINLINE const std::string& GetValue() const
+	{
+		return value;
+	}
+
+private:
+	std::string		value;		/**< String value */
 };
 
 #endif // !SCRIPTSYNTAXNODE_H

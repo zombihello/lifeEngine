@@ -57,9 +57,10 @@ struct ScriptTypeResolveParams
  */
 struct ScriptBuiltInType
 {
-	CName					name;				/**< Real name */
-	CName					scriptName;			/**< Name in script */
-	CreatePropertyFn_t		CreatePropertyFn;	/**< Function to create CProperty */
+	CName					name;					/**< Real name */
+	CName					scriptName;				/**< Name in script */
+	CName					stackFrameGetPostfix;	/**< Postfix of macro STACKFRAME_GET */
+	CreatePropertyFn_t		CreatePropertyFn;		/**< Function to create CProperty */
 };
 
 /**
@@ -82,6 +83,13 @@ public:
 	 * @return Return real type if was found, otherwise returns empty string
 	 */
 	static std::wstring Resolve( const CScriptTypeDummy& InDummyType );
+
+	/**
+	 * @brief Convert script type into STACKFRAME_GET_<ParamType>
+	 * @param InDummyType	Dummy type
+	 * @return Return type name of STACKFRAME_GET_<ParamType> if was found, otherwise returns empty string
+	 */
+	static std::wstring ResolveStackFrameGetMacro( const CScriptTypeDummy& InDummyType );
 
 	/**
 	 * @brief Translate built-in type into real C++ types
@@ -110,13 +118,14 @@ private:
 
 	/**
 	 * @brief Add built-in type into map
-	 * @param InName				Real name
-	 * @param InScriptName			Name in script
-	 * @param InCreatePropertyFn	Function to create CProperty
+	 * @param InName					Real name
+	 * @param InScriptName				Name in script
+	 * @param InStackFrameGetPostfix	Postfix of macro STACKFRAME_GET
+	 * @param InCreatePropertyFn		Function to create CProperty
 	 */
-	static FORCEINLINE void AddBuiltInType( const std::wstring& InName, const std::wstring& InScriptName, CreatePropertyFn_t InCreatePropertyFn )
+	static FORCEINLINE void AddBuiltInType( const std::wstring& InName, const std::wstring& InScriptName, const std::wstring& InStackFrameGetPostfix, CreatePropertyFn_t InCreatePropertyFn )
 	{
-		builtInTypes.insert( std::make_pair( InName, ScriptBuiltInType{ InName, InScriptName, InCreatePropertyFn } ) );
+		builtInTypes.insert( std::make_pair( InName, ScriptBuiltInType{ InName, InScriptName, InStackFrameGetPostfix, InCreatePropertyFn } ) );
 	}
 
 	static bool																	bBuiltInTypesInited;	/**< Is initialized built-in types */

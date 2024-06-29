@@ -4,6 +4,21 @@ class CObject
 	noexport;
 
 /**
+ * Print message to log
+ */
+native function void Log( string InMessage );
+
+/**
+ * Print warning to log
+ */
+native function void Warn( string InMessage );
+
+/**
+ * Print error to log
+ */
+native function void Error( string InMessage );
+
+/**
  * Dump the current script function stack to log (for debugging)
  */
 native function void StackTrace();

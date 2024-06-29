@@ -109,6 +109,51 @@ std::wstring CScriptTypeResolver::Resolve( const CScriptTypeDummy& InDummyType )
 
 /*
 ==================
+CScriptTypeResolver::ResolveStackFrameGetMacro
+==================
+*/
+std::wstring CScriptTypeResolver::ResolveStackFrameGetMacro( const CScriptTypeDummy& InDummyType )
+{
+	// Type given by name
+	if ( InDummyType.IsSimple() )
+	{
+		const std::wstring&		typeName = InDummyType.GetIdentName();
+		AssertMsg( !typeName.empty(), TEXT( "Type name should not be empty for simple types" ) );
+
+		// Is this a class
+		if ( FindObjectFast<CClass>( nullptr, typeName.c_str(), true, true ) )
+		{
+			AssertMsg( false, TEXT( "Need implement" ) );
+			return TEXT( "" );
+		}
+
+		// Is this a struct
+		if ( FindObjectFast<CStruct>( nullptr, typeName.c_str(), true, true ) )
+		{
+			AssertMsg( false, TEXT( "Need implement" ) );
+			return TEXT( "" );
+		}
+
+		// Is this an enum
+		if ( FindObjectFast<CEnum>( nullptr, typeName.c_str(), true, true ) )
+		{
+			AssertMsg( false, TEXT( "Need implement" ) );
+			return TEXT( "" );
+		}
+
+		// Is this a built-in type
+		if ( IsBuiltInType( typeName ) )
+		{
+			return builtInTypes[typeName].stackFrameGetPostfix.ToString();
+		}
+	}
+
+	// Unresolvable type
+	return TEXT( "" );
+}
+
+/*
+==================
 CScriptTypeResolver::TranslateBuiltInTypes
 ==================
 */
@@ -141,17 +186,24 @@ void CScriptTypeResolver::InitBuiltInTypes()
 	}
 
 	// Int type
-	AddBuiltInType( TEXT( "int32" ), TEXT( "int" ), 
+	AddBuiltInType( TEXT( "int32" ), TEXT( "int" ), TEXT( "INT32" ),
 					[]( const ScriptTypeResolveParams& InParams ) -> CProperty* 
 					{
 						return new( InParams.outer, InParams.name, InParams.objectFlags ) CIntProperty( InParams.offset, InParams.category, InParams.description, InParams.propertyFlags );
 					} );
 
 	// Float type
-	AddBuiltInType( TEXT( "float" ), TEXT( "float" ),
+	AddBuiltInType( TEXT( "float" ), TEXT( "float" ), TEXT( "FLOAT" ),
 					[]( const ScriptTypeResolveParams& InParams ) -> CProperty*
 					{
 						return new( InParams.outer, InParams.name, InParams.objectFlags ) CFloatProperty( InParams.offset, InParams.category, InParams.description, InParams.propertyFlags );
+					} );
+
+	// String type
+	AddBuiltInType( TEXT( "const std::wstring&" ), TEXT( "string" ), TEXT( "STRING" ),
+					[]( const ScriptTypeResolveParams& InParams ) -> CProperty*
+					{
+						return new( InParams.outer, InParams.name, InParams.objectFlags ) CStringProperty( InParams.offset, InParams.category, InParams.description, InParams.propertyFlags );
 					} );
 
 	// We are done

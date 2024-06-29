@@ -633,7 +633,7 @@ FORCEINLINE CArchive& operator<<( CArchive& InArchive, const tchar& InValue )
 FORCEINLINE CArchive& operator<<( CArchive& InArchive, const tchar* InStringC )
 {
 	Assert( InArchive.IsSaving() );
-	InArchive.Serialize( ( void* )InStringC, ( uint32 )wcslen( InStringC ) * 2 );
+	InArchive.Serialize( ( void* )InStringC, ( uint32 )wcslen( InStringC ) * sizeof( tchar ) );
 	return InArchive;
 }
 

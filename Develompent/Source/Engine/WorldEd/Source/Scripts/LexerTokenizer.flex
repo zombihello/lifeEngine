@@ -199,6 +199,7 @@ decimal_floating_const          (({frac}{fsuff_opt})|({dseq}{fsuff_opt}))
     /* Lexer states */
 %x MultiLineComment
 %x CppText
+%x StringLiteral
 
 %%
     /* Rules */
@@ -294,6 +295,14 @@ decimal_floating_const          (({frac}{fsuff_opt})|({dseq}{fsuff_opt}))
 
     /* Float */
 {decimal_floating_const}						EMIT_TOKEN( TOKEN_FLOAT );
+
+    /* String */
+\"                                              { yyextra->StoreSequenceStart(); BEGIN( StringLiteral ); }
+<StringLiteral>
+{
+    [^"]*
+	\"											{ EMIT_SEQUENCE( TOKEN_STRING ), BEGIN( INITIAL ); }
+}
 
     /* Comments */
 "//"[^\r\n]*									{ yyextra->StoreSequenceStart(); EMIT_COMMENT(); }

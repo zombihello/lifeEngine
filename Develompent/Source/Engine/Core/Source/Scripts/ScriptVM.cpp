@@ -1,3 +1,4 @@
+#include "Misc/StringConv.h"
 #include "Reflection/Object.h"
 #include "Reflection/Function.h"
 #include "Reflection/Property.h"
@@ -16,6 +17,7 @@ ScriptFn_t								CObject::OpcodeFunctions[OP_Count] =
 	&CObject::execReturn,			// OP_Return
 	&CObject::execIntConst,			// OP_IntConst
 	&CObject::execFloatConst,		// OP_FloatConst
+	&CObject::execStringConst,		// OP_StringConst
 	nullptr,						// OP_EndFunctionParms
 	&CObject::execLocalVariable,	// OP_LocalVariable
 	&CObject::execObjectVariable	// OP_ObjectVariable
@@ -161,6 +163,17 @@ IMPLEMENT_FUNCTION( FloatConst )
 
 /*
 ==================
+Opcode OP_StringConst
+==================
+*/
+IMPLEMENT_FUNCTION( StringConst )
+{
+	*( std::wstring* )InResult = ANSI_TO_TCHAR( ( achar* )InStack.bytecode );
+	InStack.bytecode += ( ( std::wstring* )InResult )->size() + 1;
+}
+
+/*
+==================
 Opcode OP_LocalVariable
 ==================
 */
@@ -190,6 +203,48 @@ IMPLEMENT_FUNCTION( ObjectVariable )
 //
 // LifeScript native functions
 //
+
+/*
+==================
+Log
+==================
+*/
+IMPLEMENT_FUNCTION( Log )
+{
+#if !NO_LOGGING
+	STACKFRAME_GET_STRING( message );
+	STACKFRAME_GET_FINISH;
+	Logf( TEXT( "%s\n" ), message.c_str());
+#endif // !NO_LOGGING
+}
+
+/*
+==================
+Warn
+==================
+*/
+IMPLEMENT_FUNCTION( Warn )
+{
+#if !NO_LOGGING
+	STACKFRAME_GET_STRING( message );
+	STACKFRAME_GET_FINISH;
+	Warnf( TEXT( "%s\n" ), message.c_str() );
+#endif // !NO_LOGGING
+}
+
+/*
+==================
+Error
+==================
+*/
+IMPLEMENT_FUNCTION( Error )
+{
+#if !NO_LOGGING
+	STACKFRAME_GET_STRING( message );
+	STACKFRAME_GET_FINISH;
+	Errorf( TEXT( "%s\n" ), message.c_str() );
+#endif // !NO_LOGGING
+}
 
 /*
 ==================

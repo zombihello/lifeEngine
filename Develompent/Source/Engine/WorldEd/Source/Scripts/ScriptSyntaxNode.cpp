@@ -155,6 +155,7 @@ void CScriptSyntaxNode_IntConst::AcceptVisitor( CScriptSyntaxVisitor& InVisitor 
 	InVisitor.VisitSyntaxNode_IntConst( this );
 }
 
+
 /*
 ==================
 CScriptSyntaxNode_FloatConst::AcceptVisitor
@@ -163,4 +164,15 @@ CScriptSyntaxNode_FloatConst::AcceptVisitor
 void CScriptSyntaxNode_FloatConst::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
 {
 	InVisitor.VisitSyntaxNode_FloatConst( this );
+}
+
+
+/*
+==================
+CScriptSyntaxNode_StringConst::AcceptVisitor
+==================
+*/
+void CScriptSyntaxNode_StringConst::AcceptVisitor( CScriptSyntaxVisitor& InVisitor )
+{
+	InVisitor.VisitSyntaxNode_StringConst( this );
 }

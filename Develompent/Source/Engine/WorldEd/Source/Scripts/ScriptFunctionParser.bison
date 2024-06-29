@@ -256,6 +256,7 @@
 %token TOKEN_IDENT
 %token TOKEN_INTEGER
 %token TOKEN_FLOAT
+%token TOKEN_STRING
 
 /* Keywords */
 %token TOKEN_CLASS
@@ -351,6 +352,7 @@ base_ident
 base_const
     : integer_const                                         { $<node>$ = $<node>1; }
     | float_const                                           { $<node>$ = $<node>1; }
+    | string_const                                          { $<node>$ = $<node>1; }
     ;
 
 integer_const
@@ -359,6 +361,10 @@ integer_const
 
 float_const
     : float                                                 { $<node>$ = new CScriptSyntaxNode_FloatConst( $<context>1, $<floating>1 ); }
+    ;
+
+string_const
+    : string                                                { $<node>$ = new CScriptSyntaxNode_StringConst( $<context>1, $<string>1 ); }
     ;
 
 ////////////////////////////////
@@ -387,6 +393,10 @@ integer
 
 float
     : TOKEN_FLOAT                                           { Assert( !$<token>1.empty() ); $<floating>$ = L_Atof( $<token>1.data() ); $<string>$ = $<token>1; $<context>$ = $<context>1; }
+    ;
+
+string
+    : TOKEN_STRING                                          { $<string>$ = $<token>1; $<context>$ = $<context>1; }
     ;
 
 ident

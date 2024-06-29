@@ -418,9 +418,11 @@ std::wstring CNativeClassExporter::GenerateNativeFunctions( const ScriptClassStu
 					for ( uint32 funcParamIdx = 0, numFuncParams = functionParams.size(); funcParamIdx < numFuncParams; ++funcParamIdx )
 					{
 						// Generate function parameters for header
-						ScriptFunctionParamStubPtr_t		functionParam		= functionParams[funcParamIdx];
-						std::wstring						functionParamType	= CScriptTypeResolver::Resolve( functionParam->GetType() );
+						ScriptFunctionParamStubPtr_t		functionParam			= functionParams[funcParamIdx];
+						std::wstring						functionParamType		= CScriptTypeResolver::Resolve( functionParam->GetType() );
+						std::wstring						stackFrameGetPostfix	= CScriptTypeResolver::ResolveStackFrameGetMacro( functionParam->GetType() );
 						AssertMsg( !functionParamType.empty(), TEXT( "Invalid function parameter type in the function" ) );
+						AssertMsg( !stackFrameGetPostfix.empty(), TEXT( "Invalid STACKFRAME_GET postfix in the function" ) );
 						functionParamsDecl += L_Sprintf( TEXT( "%s%s %s%s" ),
 														 bFirstParam ? TEXT( " ") : TEXT( "" ),
 														 functionParamType.c_str(),
@@ -428,7 +430,7 @@ std::wstring CNativeClassExporter::GenerateNativeFunctions( const ScriptClassStu
 														 funcParamIdx + 1 < numFuncParams ? TEXT( ", " ) : TEXT( " " ) );
 
 						// Generate code for get parameters from bytecode
-						functionNativeGetParams += L_Sprintf( TEXT( "\t\tSTACKFRAME_GET_%s( %s )\n" ), L_Strupr( functionParamType ).c_str(), functionParam->GetName().c_str() );
+						functionNativeGetParams += L_Sprintf( TEXT( "\t\tSTACKFRAME_GET_%s( %s )\n" ), L_Strupr( stackFrameGetPostfix ).c_str(), functionParam->GetName().c_str() );
 
 						// Generate code to send parameters to native function
 						functionNativeSendParams += L_Sprintf( TEXT( "%s%s%s" ),

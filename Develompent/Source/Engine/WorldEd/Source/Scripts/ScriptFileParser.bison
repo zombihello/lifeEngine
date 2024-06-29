@@ -287,6 +287,7 @@
 %token TOKEN_IDENT
 %token TOKEN_INTEGER
 %token TOKEN_FLOAT
+%token TOKEN_STRING
 
 /* Keywords */
 %token TOKEN_CLASS

@@ -67,6 +67,12 @@ protected:
 	 */
 	virtual void VisitSyntaxNode_FloatConst( class CScriptSyntaxNode_FloatConst* InNode ) override;
 
+	/**
+	 * @brief Visit syntax node 'string constant'
+	 * @param InNode	Node to visit
+	 */
+	virtual void VisitSyntaxNode_StringConst( class CScriptSyntaxNode_StringConst* InNode )	override;
+
 private:
 	/**
 	 * @brief Get trailing space for print node

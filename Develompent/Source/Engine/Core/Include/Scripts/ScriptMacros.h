@@ -51,6 +51,13 @@ class CObject;
 
 /**
  * @ingroup Core
+ * @brief Get string parameter at current executing bytecode for native function
+ * @param InVariable	Variable name
+ */
+#define STACKFRAME_GET_STRING( InVariable )		std::wstring InVariable; InStack.Step( InStack.object, &InVariable );
+
+/**
+ * @ingroup Core
  * @brief End of function parameters (it need for skip opcode 'OP_EndFunctionParams')
  */
 #define STACKFRAME_GET_FINISH					++InStack.bytecode;
@@ -91,6 +98,7 @@ enum EScriptOpcode
 	OP_Return,				/**< Return from function */
 	OP_IntConst,			/**< Integer constant */
 	OP_FloatConst,			/**< Float constant */
+	OP_StringConst,			/**< String constant */
 	OP_EndFunctionParms,	/**< End of function call parameters */
 	OP_LocalVariable,		/**< Local variable (function parameter or local function variable) */
 	OP_ObjectVariable,		/**< Object variable */

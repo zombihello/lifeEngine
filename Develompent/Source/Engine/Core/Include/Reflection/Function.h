@@ -181,6 +181,20 @@ private:
 	}
 
 	/**
+	 * @brief Serialize opcode parameter (for string constants)
+	 * @param InOutByteCodeIndex		Bytecode index. After serialization will be shifted on size of a type
+	 * @param InArchive					Archive
+	 */
+	FORCEINLINE void SerializeOpcodeParamStr( uint32& InOutByteCodeIndex, CArchive& InArchive )
+	{
+		do
+		{
+			SerializeOpcodeParam<achar>( InOutByteCodeIndex, InArchive );
+		}
+		while ( bytecode[InOutByteCodeIndex-1] );
+	}
+
+	/**
 	 * @brief Serialize opcode parameter (for pointer types, e.g: CFunction*, CClass*)
 	 * @param InOutByteCodeIndex		Bytecode index. After serialization will be shifted on size of a type
 	 * @param InArchive					Archive

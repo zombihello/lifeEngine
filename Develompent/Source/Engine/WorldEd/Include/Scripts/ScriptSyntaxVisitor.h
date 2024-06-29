@@ -24,6 +24,7 @@ class CScriptSyntaxVisitor
 	friend class CScriptSyntaxNode_Return;
 	friend class CScriptSyntaxNode_IntConst;
 	friend class CScriptSyntaxNode_FloatConst;
+	friend class CScriptSyntaxNode_StringConst;
 
 protected:
 	/**
@@ -67,6 +68,12 @@ protected:
 	 * @param InNode	Node to visit
 	 */
 	virtual void VisitSyntaxNode_FloatConst( class CScriptSyntaxNode_FloatConst* InNode )			PURE_VIRTUAL( CScriptSyntaxVisitor::CScriptSyntaxNode_FloatConst, );
+
+	/**
+	 * @brief Visit syntax node 'string constant'
+	 * @param InNode	Node to visit
+	 */
+	virtual void VisitSyntaxNode_StringConst( class CScriptSyntaxNode_StringConst* InNode )			PURE_VIRTUAL( CScriptSyntaxVisitor::CScriptSyntaxNode_StringConst, );
 };
 
 #endif // !SCRIPTSYNTAXVISITOR_H
