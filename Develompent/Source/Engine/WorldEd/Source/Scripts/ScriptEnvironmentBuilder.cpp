@@ -613,9 +613,7 @@ bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& I
 	}
 
 	// Create parameters
-	uint32		offset			= 0;		// Offset in local data of script frame
-	uint32		minAlignment	= 1;
-	uint32		paramsSize		= 0;
+	uint32		minAlignment	= 1;	
 	uint32		numParams		= 0;
 	{
 		CProperty*												lastFuncParam = nullptr;
@@ -653,7 +651,7 @@ bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& I
 			}
 
 			// Create function parameter
-			CProperty*		funcParam = CScriptTypeResolver::Resolve( ScriptTypeResolveParams( function, funcParamName, OBJECT_Public, funcParamStub.GetType(), offset, CPF_Parmeter ) );
+			CProperty*		funcParam = CScriptTypeResolver::Resolve( ScriptTypeResolveParams( function, funcParamName, OBJECT_Public, funcParamStub.GetType(), 0, CPF_Parmeter ) );
 			Assert( funcParam );
 			funcParamStub.SetCreatedFuncParam( funcParam );
 
@@ -668,21 +666,29 @@ bool CScriptEnvironmentBuilder::CreateFunctionProperties( CScriptFunctionStub& I
 			}
 			lastFuncParam = funcParam;
 
-			// Update information about function properties (e.g: size/number of function parameters, size/number of local function properties and etc)
-			paramsSize		+= funcParam->GetSize();
+			// Update information about number of function properties and remember min alignment to later fix offsets
+			minAlignment = Max( minAlignment, funcParam->GetMinAlignment() );
 			++numParams;
-
-			// Advance the offset
-			minAlignment	= Max( minAlignment, funcParam->GetMinAlignment() );
-			offset			+= funcParam->GetSize();
 		}
 	}
 
-	// Update properties size, min alignment and other data in the function
+	// Fixup property offsets and update information about total size of function properties (e.g: size of function parameters, size of local function properties)
+	uint32		offset = 0;		// Offset in local data of script frame
+	uint32		paramsSize = 0;
+	for ( TFieldIterator<CProperty> it( function, false ); it; ++it )
+	{
+		CProperty*	property		= *it;
+		uint32		propertySize	= Align( property->GetSize(), minAlignment );
+		property->SetOffset( offset );
+		
+		offset		+= propertySize;
+		paramsSize	+= propertySize;
+	}
+
+	// Update properties size, params size and other data in the function
 	function->SetPropertiesSize( offset );
 	function->SetParamsSize( paramsSize );
 	function->SetNumParams( numParams );
-	function->SetMinAlignment( minAlignment );
 
 	// We are done
 	return bNoErrors;

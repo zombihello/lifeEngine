@@ -219,6 +219,15 @@ public:
 	}
 
 	/**
+	 * @brief Set offset to property
+	 * @param InOffset	Offset to property
+	 */
+	FORCEINLINE void SetOffset( uint32 InOffset )
+	{
+		offset = InOffset;
+	}
+
+	/**
 	 * @brief Get offset to property
 	 * @return Return offset to property
 	 */
